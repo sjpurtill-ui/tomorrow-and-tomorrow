@@ -266,3 +266,14 @@ func test_the_war_screen_can_shortlist_and_commission_generals()->void:
 	assert_bool(bool(named.ok)).is_true()
 	assert_bool(bool(named.new)).is_false()
 	MilitaryCampaign.field_armies.clear()
+
+
+func test_the_war_leaders_facts_carry_each_generals_record_and_hand()->void:
+	HistoricalFigures.ensure()
+	HistoricalFigures._create("General",int(GameState.elapsed_days))
+	var facts:=preload("res://scripts/court_facts.gd")
+	var said:Array=facts.generals()
+	assert_bool(said.is_empty()).is_false()
+	for line:String in said:
+		assert_bool(line.contains("Fought") or line.contains("Has not led a fight yet")).override_failure_message(line).is_true()
+		assert_str(line).contains("than under an ordinary general")

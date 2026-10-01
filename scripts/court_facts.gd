@@ -320,6 +320,9 @@ static func _war(out:Dictionary)->void:
 		bands.append({"name":String(army.get("name","")),"fighters":int(army.troops),"where":where,"leader":String(commander.get("name","")),"doing":doing if doing!="" else String(army.get("status","")),
 			"fed":fed_facts(Supply.of_force(army))})
 	out["bands"]=bands
+	# Our generals as their records stand, and what each changes in the
+	# engine's numbers (general_record.gd): the war leader knows them all.
+	out["generals"]=generals()
 	var garrisons:Array=[]
 	for f in mc.occupation_forces:
 		var force:Dictionary=f
@@ -641,6 +644,21 @@ static func people_text(p:Dictionary)->String:
 # --------------------------------------------------------------------------
 
 ## The sheet as plain lines, exact figures, for the voice's prompt.
+## Each living general: "Tesk Ford: Fought 4 · won 3 · ... Under Tesk bands
+## fight 9% harder, ... than under an ordinary general." (leader_commands,
+## general_record.gd).
+static func generals()->Array:
+	var out:Array=[]
+	var mc:Variant=_mc()
+	if mc==null: return out
+	var Commands:=preload("res://scripts/leader_commands.gd")
+	var Record:=preload("res://scripts/general_record.gd")
+	for leader:Dictionary in Commands.leaders(mc):
+		if String(leader.id)==Commands.WAR_LEADER: continue
+		var record:=Commands.record(leader)
+		out.append("%s: %s. %s" % [String(leader.name),Record.words(record),Record.lever_line(leader.get("commander",{}),String(leader.name))])
+	return out
+
 ## What each office's holder changes, against an ordinary holder, in the
 ## engine's numbers: ["Iska, Keeper of Stores: saves 12% of what would rot
 ## (an ordinary one 0%)", ...] (office_levers.gd).
@@ -682,6 +700,8 @@ static func text(s:Dictionary)->String:
 		var bands:PackedStringArray=PackedStringArray()
 		for b:Dictionary in s.get("bands",[]): bands.append("%s, %d fighters, %s%s (%s)%s" % [String(b.name),int(b.fighters),String(b.where),(", led by "+String(b.leader)) if String(b.leader)!="" else "",String(b.doing),fed_line(b.get("fed",{}))])
 		lines.append("Bands out: %s." % ("; ".join(bands) if not bands.is_empty() else "none"))
+		var generals_said:Array=s.get("generals",[])
+		if not generals_said.is_empty(): lines.append("Our generals: %s" % " ".join(PackedStringArray(generals_said)))
 		var gar:PackedStringArray=PackedStringArray()
 		for g:Dictionary in s.get("garrisons",[]): gar.append("%s: %d fighters%s%s%s" % [String(g.town),int(g.fighters),(", %d wounded" % int(g.wounded)) if int(g.wounded)>0 else "",(" under "+String(g.commander)) if String(g.commander)!="" else "",fed_line(g.get("fed",{}))])
 		lines.append("Garrisons: %s." % ("; ".join(gar) if not gar.is_empty() else "none"))
