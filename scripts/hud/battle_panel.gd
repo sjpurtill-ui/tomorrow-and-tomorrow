@@ -1,41 +1,52 @@
 extends Control
-## THE BATTLE PANEL: one battle, read at a glance, at any size.
+## THE BATTLE SCREEN: one battle as a picture of the fight, read at a glance.
 ##
-## Who is winning and by how much (a bar in the two sides' inks and a plain
-## sentence); each side's general, how he is fighting this phase and whether
-## the enemy has undone it; what each side took into the fight and what it has
-## lost; the line where the two sides meet, block by block, and the reserve
-## waiting behind it; why one side has the better of it; what changed; and
-## the battle phase by phase. A battle being fought updates as the days pass;
-## a finished one opens on its result and can be stepped back through, phase
-## by phase. Nothing here fights a battle (battle_record.gd reads the record).
-## A skirmish (one block a side, or a fight over at the first blow) is a
-## small card instead.
+## Across the top, who is winning (a bar in the two sides' colours, and the
+## odds by the engine's own measure of it) and each side: its general and the
+## way he chose to fight (marked when the enemy has undone it), its strength
+## as a bar that shrinks day by day, split into the men still standing and
+## those killed, wounded, fled and taken, and its heart. In the middle, the
+## field (hud/battle_field.gd): the ground, the engine's blocks drawn as their
+## own kit, where the lines meet and the day's attacks as arrows. Below, the
+## battle's days as a track to scrub or play, why one side has the better of
+## it, and what changed. A battle being fought follows the days; a finished
+## one opens on its result and plays back day by day. Nothing here fights a
+## battle (battle_record.gd reads the record; battle_field_model.gd lays it
+## out). A skirmish (one block a side, or a fight over at the first blow) is
+## a small drawn card instead (hud/skirmish_scene.gd).
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Record:=preload("res://scripts/battle_record.gd")
-const Icons:=preload("res://scripts/resource_icons.gd")
 const Account:=preload("res://scripts/battle_account.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const SimulationPause:=preload("res://scripts/hud/simulation_pause.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
+const Model:=preload("res://scripts/hud/battle_field_model.gd")
+const FieldScript:=preload("res://scripts/hud/battle_field.gd")
+const TimelineScript:=preload("res://scripts/hud/battle_timeline.gd")
+const BattleMarks:=preload("res://scripts/hud/battle_marks.gd")
+const Icons:=preload("res://scripts/resource_icons.gd")
 const VIEW_PATH:="res://scripts/hud/battle_view.gd"
 
-## The widest the sheet grows, and the plate sizes it chooses between.
-const SHEET_MAX:=1360.0
-const PLATE_MAX:=112.0
-const PLATE_MIN:=66.0
-const PLATE_HEIGHT:=62.0
-## Waiting blocks shown before the rest are summed up in words.
-const RESERVE_SHOWN:=10
+## The widest the sheet grows.
+const SHEET_MAX:=1800.0
+## Seconds each day is shown while the battle plays.
+const PLAY_SECONDS:=1.4
+## Reasons and changes shown at most.
+const WHY_SHOWN:=5
+const CHANGES_SHOWN:=3
+## The weapons each age's battles cross, as the war chart marks them.
+const ERA_MARK_WORDS:=["Crossed spears","Crossed swords","Crossed muskets","Crossed rifles","The armour sign","The lattice sign"]
 
 var host:Node
 var record:Dictionary={}
 var live:=false
 var view:Dictionary={}
-## 0 is the two sides drawn up; k is the end of phase k.
+## 0 is the two sides drawn up; k is the end of day k.
 var step:=-1
 var following:=true
+var playing:=false
+var play_clock:=0.0
 var pause:=SimulationPause.new()
 var paused_here:=false
 var signature:=""
@@ -49,7 +60,12 @@ var battle_seed:=-1
 var scene_shown:=""
 var skirmish_scene:Control
 var sheet:PanelContainer
+var built:=""
+var field:Control
+var timeline:Control
 var buttons:Dictionary={}
+## The controls a new day updates in place.
+var parts:Dictionary={}
 var left_colour:=Color()
 var right_colour:=Color()
 var left_text:=Color()
@@ -79,13 +95,20 @@ func _unhandled_input(event:InputEvent)->void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		match (event as InputEventKey).keycode:
 			KEY_ESCAPE: get_viewport().set_input_as_handled(); close()
-			KEY_LEFT: get_viewport().set_input_as_handled(); _step_by(-1)
-			KEY_RIGHT: get_viewport().set_input_as_handled(); _step_by(1)
+			KEY_LEFT: get_viewport().set_input_as_handled(); _stop_playing(); _step_by(-1)
+			KEY_RIGHT: get_viewport().set_input_as_handled(); _stop_playing(); _step_by(1)
+			KEY_SPACE: get_viewport().set_input_as_handled(); _act("play")
 
 
-## A live battle is read again as the days pass; when it ends, the panel
-## shows how it ended.
+## Plays the days while asked; a live battle is read again as the days pass,
+## and when it ends the screen shows how it ended.
 func _process(delta:float)->void:
+	if playing:
+		play_clock+=delta
+		if play_clock>=PLAY_SECONDS:
+			play_clock=0.0
+			if step>=_count(): _stop_playing()
+			else: _select(step+1,true)
 	if not live: return
 	poll+=delta
 	if poll<0.4: return
@@ -110,6 +133,10 @@ func _signature(source:Dictionary)->String:
 	return "%s|%d|%d|%d|%s" % [String(source.get("id","")),int(source.get("round",(source.get("rounds",[]) as Array).size())),int(battle.get("exchange",0)),(battle.get("phases",[]) as Array).size(),str(host.get("game_speed")) if is_instance_valid(host) else ""]
 
 
+func _count()->int:
+	return (view.get("phases",[]) as Array).size()
+
+
 # --- Building ---------------------------------------------------------------------------
 
 func _refresh()->void:
@@ -123,12 +150,24 @@ func _refresh()->void:
 	right_colour=T.RED if player else T.BLUE
 	left_text=T.TEAL_TEXT if player else T.AMBER_TEXT
 	right_text=T.RED_TEXT if player else T.BLUE_TEXT
-	var count:=(view.phases as Array).size()
+	var count:=_count()
 	if following or step<0 or step>count: step=count
+	var kind:="card" if bool(view.skirmish) else "sheet"
+	if kind=="sheet" and built=="sheet" and is_instance_valid(sheet):
+		_update_static()
+		_show_step(true)
+		return
+	_rebuild()
+
+
+func _rebuild()->void:
 	if is_instance_valid(sheet): sheet.get_parent().queue_free()
-	buttons.clear()
-	if bool(view.skirmish): _build_card()
-	else: _build_panel()
+	buttons.clear(); parts.clear()
+	field=null; timeline=null
+	if bool(view.skirmish):
+		built="card"; _build_card()
+	else:
+		built="sheet"; _build_panel()
 
 
 func _build_card()->void:
@@ -186,273 +225,260 @@ func _build_panel()->void:
 	var shell:=MarginContainer.new(); shell.set_anchors_and_offsets_preset(PRESET_FULL_RECT)
 	for edge in ["left","right","top","bottom"]: shell.add_theme_constant_override("margin_"+edge,20)
 	add_child(shell)
-	# One tall sheet, centred: the header and footer stay put, the body scrolls.
 	var row:=HBoxContainer.new(); row.alignment=BoxContainer.ALIGNMENT_CENTER; shell.add_child(row)
 	sheet=PanelContainer.new(); sheet.name="Sheet"
-	sheet.add_theme_stylebox_override("panel",T.paper_panel_style(true,T.RADIUS_CARD,24.0))
-	var viewport_size:=get_viewport_rect().size
-	var width:=minf(SHEET_MAX,viewport_size.x-40.0)
+	sheet.add_theme_stylebox_override("panel",T.paper_panel_style(true,T.RADIUS_CARD,22.0))
+	var width:=minf(SHEET_MAX,get_viewport_rect().size.x-40.0)
 	sheet.custom_minimum_size=Vector2(width,0)
 	sheet.size_flags_vertical=SIZE_EXPAND_FILL
 	row.add_child(sheet)
 	var outer:=VBoxContainer.new(); outer.add_theme_constant_override("separation",10); sheet.add_child(outer)
 	_build_header(outer)
+	_build_balance(outer)
+	_build_sides(outer)
+	field=FieldScript.new(); field.name="Field"
+	outer.add_child(field)
 	_build_timeline(outer)
-	var scroll:=ScrollContainer.new(); scroll.name="Body"; scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
-	scroll.size_flags_vertical=SIZE_EXPAND_FILL
-	outer.add_child(scroll)
-	var inset:=MarginContainer.new(); inset.add_theme_constant_override("margin_right",16); inset.size_flags_horizontal=SIZE_EXPAND_FILL; scroll.add_child(inset)
-	var body:=VBoxContainer.new(); body.size_flags_horizontal=SIZE_EXPAND_FILL; body.add_theme_constant_override("separation",18); inset.add_child(body)
-	var inner:=width-48.0-16.0
-	body.custom_minimum_size.x=inner
-	_build_sides(body,inner)
-	_build_line(body,inner)
-	_build_reasons(body,inner)
-	_build_phase_summary(body)
-	outer.add_child(_rule())
-	_build_footer(outer)
+	_build_reasons(outer)
+	_update_static()
+	_show_step(false)
 
 
 func _build_header(parent:Node)->void:
-	var head:=VBoxContainer.new(); head.name="Header"; head.add_theme_constant_override("separation",6); parent.add_child(head)
-	var top:=HBoxContainer.new(); head.add_child(top)
-	var kicker:=_label(top,"THE FIGHT %s · %s" % [_where_words().to_upper(),_when_words().to_upper()] if _when_words()!="" else "THE FIGHT %s" % _where_words().to_upper(),"kicker",T.INK_MUTED)
-	kicker.name="Kicker"; kicker.size_flags_horizontal=SIZE_EXPAND_FILL
-	var shown:Dictionary=_shown_phase()
-	var phrase:=String(view.phrase)
-	if step<(view.phases as Array).size() or (live and step==0):
-		phrase=Record.phrase(float(shown.get("progress",0.0)),0.0,bool(view.player),String(view.names.left),String(view.names.right))
-	var headline:=_label(head,phrase,"title",T.INK); headline.name="Headline"
+	var head:=HBoxContainer.new(); head.name="Header"; head.add_theme_constant_override("separation",16); parent.add_child(head)
+	var words:=VBoxContainer.new(); words.add_theme_constant_override("separation",2); words.size_flags_horizontal=SIZE_EXPAND_FILL; head.add_child(words)
+	parts.kicker=_label(words,"","kicker",T.INK_MUTED); parts.kicker.name="Kicker"
+	var headline:=_label(words,"","title",T.INK); headline.name="Headline"
 	headline.add_theme_font_override("font",T.voice_font()); headline.add_theme_font_size_override("font_size",30)
-	var sub:=[_cap(String(view.ground.words))]
-	sub.append(String(view.status))
-	if String(record.get("id",""))!="" and live: sub.append(_battle_day_words())
-	var subline:=_label(head,"  ·  ".join(PackedStringArray(sub)),"small",T.INK_MUTED); subline.name="Where"
-	if not live and String(view.one_line)!="" and String(view.one_line)!=String(view.phrase)+".":
-		_label(head,String(view.one_line),"body",T.BODY).name="Account"
+	parts.headline=headline
+	parts.where=_label(words,"","small",T.INK_MUTED); parts.where.name="Where"
+	parts.account=_label(words,"","body",T.BODY); parts.account.name="Account"
+	var mark:=EraMark.new(); mark.name="EraMark"; mark.custom_minimum_size=Vector2(72,72)
+	head.add_child(mark); parts.era=mark
+
+
+func _build_balance(parent:Node)->void:
+	var box:=VBoxContainer.new(); box.name="Balance"; box.add_theme_constant_override("separation",3); parent.add_child(box)
 	var bar:=ProgressStrip.new(); bar.name="Progress"
-	bar.value=float(shown.get("progress",view.progress)) if not shown.is_empty() else float(view.progress)
-	var previous:Dictionary=_phase_at(step-1)
-	bar.ghost=float(previous.get("progress",bar.value)) if not previous.is_empty() else bar.value
-	bar.left_colour=left_colour; bar.right_colour=right_colour
-	bar.custom_minimum_size=Vector2(0,22)
-	bar.tooltip_text="Who has the better of the fight: the further the bar reaches toward a side's end, the more that side is winning."
-	head.add_child(bar)
-	var ends:=HBoxContainer.new(); head.add_child(ends)
-	var left_name:=_label(ends,_cap(String(view.names.left)),"small",left_text); left_name.size_flags_horizontal=SIZE_EXPAND_FILL
-	left_name.add_theme_font_override("font",T.font("ui_strong"))
-	var right_name:=_label(ends,_cap(String(view.names.right)),"small",right_text); right_name.size_flags_horizontal=SIZE_EXPAND_FILL
-	right_name.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT; right_name.add_theme_font_override("font",T.font("ui_strong"))
+	bar.custom_minimum_size=Vector2(0,20)
+	bar.tooltip_text="Who has the better of the fight, by the engine's measure: men and heart in the line in full, the reserve in part."
+	box.add_child(bar); parts.progress=bar
+	var ends:=HBoxContainer.new(); box.add_child(ends)
+	var left_name:=_label(ends,"","small",left_text); left_name.size_flags_horizontal=SIZE_EXPAND_FILL
+	left_name.add_theme_font_override("font",T.font("ui_strong")); left_name.autowrap_mode=TextServer.AUTOWRAP_OFF
+	var odds:=_label(ends,"","body",T.INK); odds.name="Odds"; odds.size_flags_horizontal=SIZE_EXPAND_FILL
+	odds.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER; odds.add_theme_font_override("font",T.font("ui_strong")); odds.autowrap_mode=TextServer.AUTOWRAP_OFF
+	var right_name:=_label(ends,"","small",right_text); right_name.size_flags_horizontal=SIZE_EXPAND_FILL
+	right_name.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT; right_name.add_theme_font_override("font",T.font("ui_strong")); right_name.autowrap_mode=TextServer.AUTOWRAP_OFF
+	parts.left_name=left_name; parts.right_name=right_name; parts.odds=odds
 
 
-func _build_sides(parent:Node,width:float)->void:
-	var row:=HBoxContainer.new(); row.name="Sides"; row.add_theme_constant_override("separation",32); parent.add_child(row)
-	var shown:Dictionary=_shown_phase()
+func _build_sides(parent:Node)->void:
+	var row:=HBoxContainer.new(); row.name="Sides"; row.add_theme_constant_override("separation",40); parent.add_child(row)
 	for key in ["left","right"]:
-		var side:Dictionary=view.sides[key]
-		var box:=VBoxContainer.new(); box.name="Side"+key.capitalize(); box.size_flags_horizontal=SIZE_EXPAND_FILL; box.add_theme_constant_override("separation",4)
-		box.custom_minimum_size.x=(width-32.0)*0.5
+		var box:=VBoxContainer.new(); box.name="Side"+key.capitalize(); box.size_flags_horizontal=SIZE_EXPAND_FILL; box.add_theme_constant_override("separation",5)
 		row.add_child(box)
-		_label(box,_side_kicker(key),"kicker",left_text if key=="left" else right_text)
-		_label(box,_cap(String(view.names[key])),"value",T.INK)
-		var general:Dictionary=side.general
-		var who:=String(general.name)
-		var about:=String(general.line)
-		if who!="" or about!="": _label(box,(who+("  ·  " if who!="" and about!="" else "")+about).strip_edges(),"small",T.BODY)
-		var tactic:Dictionary=(shown.get("tactics",{}) as Dictionary).get(key,{}) if not shown.is_empty() else {}
-		if String(tactic.get("words",""))!="":
-			var how:=_label(box,"This phase: %s%s" % [String(tactic.words).substr(0,1).to_lower()+String(tactic.words).substr(1),"  (a new way of fighting)" if bool(tactic.get("changed",false)) else ""],"body",T.BODY)
-			how.name="Tactic"
-			if bool(tactic.get("countered",false)):
-				var by:=String(tactic.get("by","")).to_lower()
-				_label(box,"Undone by %s %s" % ["their" if key=="left" and bool(view.player) else ("our" if bool(view.player) else "the other side's"),by.trim_prefix("a ").trim_prefix("an ")],"small",T.RED_TEXT).name="Countered"
-		box.add_child(_totals(side,key))
+		var top:=HBoxContainer.new(); top.add_theme_constant_override("separation",10); box.add_child(top)
+		var kicker:=_label(top,_side_kicker(key),"kicker",left_text if key=="left" else right_text); kicker.autowrap_mode=TextServer.AUTOWRAP_OFF
+		kicker.size_flags_vertical=SIZE_SHRINK_CENTER
+		var name:=_label(top,"","value",T.INK); name.name="Name"; name.autowrap_mode=TextServer.AUTOWRAP_OFF
+		var general:=_label(top,"","small",T.BODY); general.name="General"; general.size_flags_horizontal=SIZE_EXPAND_FILL
+		general.autowrap_mode=TextServer.AUTOWRAP_OFF; general.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS; general.size_flags_vertical=SIZE_SHRINK_CENTER
+		parts[key+"_name"]=name; parts[key+"_general"]=general
+		var how:=HBoxContainer.new(); how.add_theme_constant_override("separation",8); box.add_child(how)
+		var chip:=_label(how,"","small",T.INK); chip.name="Tactic"; chip.autowrap_mode=TextServer.AUTOWRAP_OFF
+		chip.add_theme_stylebox_override("normal",T.chip_style())
+		var undone:=_label(how,"","small",T.RED_TEXT); undone.name="Countered"; undone.autowrap_mode=TextServer.AUTOWRAP_OFF
+		undone.size_flags_vertical=SIZE_SHRINK_CENTER
+		parts[key+"_tactic"]=chip; parts[key+"_undone"]=undone
+		var strength:=HBoxContainer.new(); strength.add_theme_constant_override("separation",12); box.add_child(strength)
+		var bar:=StrengthBar.new(); bar.name="Strength"; bar.size_flags_horizontal=SIZE_EXPAND_FILL; bar.custom_minimum_size=Vector2(160,20)
+		bar.size_flags_vertical=SIZE_SHRINK_CENTER
+		bar.colour=left_colour if key=="left" else right_colour
+		strength.add_child(bar)
+		var standing:=_label(strength,"","body",T.INK); standing.name="Standing"; standing.autowrap_mode=TextServer.AUTOWRAP_OFF
+		standing.add_theme_font_override("font",T.font("ui_strong")); standing.custom_minimum_size.x=190
+		parts[key+"_bar"]=bar; parts[key+"_standing"]=standing
+		var heart_row:=HBoxContainer.new(); heart_row.add_theme_constant_override("separation",12); box.add_child(heart_row)
+		var heart:=HeartBar.new(); heart.name="Heart"; heart.size_flags_horizontal=SIZE_EXPAND_FILL; heart.custom_minimum_size=Vector2(160,8)
+		heart.size_flags_vertical=SIZE_SHRINK_CENTER
+		heart.tooltip_text="Heart: the will to keep fighting of those still standing, weighed by their men."
+		heart_row.add_child(heart)
+		var heart_words:=_label(heart_row,"","small",T.BODY); heart_words.name="HeartWords"; heart_words.autowrap_mode=TextServer.AUTOWRAP_OFF; heart_words.custom_minimum_size.x=190
+		parts[key+"_heart"]=heart; parts[key+"_heart_words"]=heart_words
+		var totals:=HBoxContainer.new(); totals.name="Totals"; totals.add_theme_constant_override("separation",20); box.add_child(totals)
+		for pair in [["killed","Killed"],["wounded","Wounded"],["fled","Fled"],["captured","Taken"]]:
+			var item:=HBoxContainer.new(); item.name=String(pair[1]); item.add_theme_constant_override("separation",5); totals.add_child(item)
+			var mark:=CasualtyMark.new(); mark.kind=String(pair[0]); mark.custom_minimum_size=Vector2(20,20); mark.size_flags_vertical=SIZE_SHRINK_CENTER
+			item.add_child(mark)
+			var value:=_label(item,"","body",T.INK); value.name="Value"; value.autowrap_mode=TextServer.AUTOWRAP_OFF
+			value.add_theme_font_override("font",T.font("ui_strong"))
+			var word:=_label(item,String(pair[1]).to_lower(),"small",T.INK_MUTED); word.name="Word"; word.autowrap_mode=TextServer.AUTOWRAP_OFF
+			word.size_flags_vertical=SIZE_SHRINK_CENTER
+			parts[key+"_"+String(pair[0])]=value
 
 
-func _totals(side:Dictionary,key:String)->Control:
-	var totals:=_totals_at(side,key)
-	var exact:=bool(side.exact)
-	var grid:=GridContainer.new(); grid.name="Totals"; grid.columns=6
-	grid.add_theme_constant_override("h_separation",10); grid.add_theme_constant_override("v_separation",2)
-	for pair in [["Went in",int(totals.went_in)],["Still standing",int(totals.standing)],["Killed",int(totals.killed)],["Wounded",int(totals.wounded)],["Fled",int(totals.fled)],["Taken",int(totals.captured)]]:
-		var name:=_label(grid,String(pair[0]),"small",T.INK_MUTED); name.autowrap_mode=TextServer.AUTOWRAP_OFF
-		# Their men we took are ours to count: said exactly, as the report does.
-		var counted:=exact or (String(pair[0])=="Taken" and bool(view.player) and key=="right")
-		var value:=_label(grid,"none" if int(pair[1])<=0 and String(pair[0]) not in ["Went in","Still standing"] else _n(int(pair[1]),counted),"body",T.INK)
-		value.autowrap_mode=TextServer.AUTOWRAP_OFF
-		value.add_theme_font_override("font",T.font("ui_strong"))
-	return grid
+func _build_timeline(parent:Node)->void:
+	var row:=HBoxContainer.new(); row.name="Timeline"; row.add_theme_constant_override("separation",12); parent.add_child(row)
+	var back:=_button(row,"Earlier","earlier",false); back.tooltip_text="The day before."
+	var play:=_button(row,"Play","play",true); play.tooltip_text="Play the battle day by day."
+	play.icon=Icons.command_texture("resume",T.INK,24); play.custom_minimum_size.x=104
+	var forward:=_button(row,"Later","later",false); forward.tooltip_text="The day after."
+	for b:Button in [back,play,forward]: b.size_flags_vertical=SIZE_SHRINK_CENTER
+	timeline=TimelineScript.new(); timeline.name="Days"
+	timeline.chosen.connect(_on_day_chosen)
+	row.add_child(timeline)
+	_time_button(row)
+	var close_button:=_button(row,"Close","close",true)
+	close_button.size_flags_vertical=SIZE_SHRINK_CENTER
+	if buttons.has("time"): (buttons.time as Button).size_flags_vertical=SIZE_SHRINK_CENTER
 
 
-func _build_line(parent:Node,width:float)->void:
-	var box:=VBoxContainer.new(); box.name="Line"; box.add_theme_constant_override("separation",6); parent.add_child(box)
-	var top:=HBoxContainer.new(); top.add_theme_constant_override("separation",16); box.add_child(top)
-	var kicker:=_label(top,"THE LINE","kicker",T.INK_MUTED); kicker.autowrap_mode=TextServer.AUTOWRAP_OFF
-	var plates:Dictionary=_plates_shown()
-	var note:=_frontage_note(plates)
-	var legend:=_label(top,note,"small",T.INK_MUTED); legend.horizontal_alignment=HORIZONTAL_ALIGNMENT_RIGHT; legend.size_flags_horizontal=SIZE_EXPAND_FILL
-	var label_width:=132.0
-	var most:=maxi(1,maxi((plates.left.front as Array).size(),(plates.right.front as Array).size()))
-	var room:=width-label_width-8.0
-	var plate_width:=clampf(floorf(room/float(most))-6.0,PLATE_MIN,PLATE_MAX)
-	var player:=bool(view.player)
-	var fit:=maxi(3,floori((room-200.0)/(plate_width+6.0)))
-	_plate_row(box,"Their reserve" if player else "%s waiting" % _cap(_strip(String(view.names.right))),plates.right.rear,"right",plate_width,label_width,true,fit)
-	_plate_row(box,"Their line" if player else "%s line" % _cap(_possessive(String(view.names.right))),plates.right.front,"right",plate_width,label_width,false)
-	var contact:=HBoxContainer.new(); contact.add_theme_constant_override("separation",8); box.add_child(contact)
-	var spacer:=Control.new(); spacer.custom_minimum_size.x=label_width; contact.add_child(spacer)
-	var rule:=ContactRule.new(); rule.size_flags_horizontal=SIZE_EXPAND_FILL; rule.custom_minimum_size.y=14; rule.colour=T.RULE_STRONG; contact.add_child(rule)
-	_plate_row(box,"Our line" if player else "%s line" % _cap(_possessive(String(view.names.left))),plates.left.front,"left",plate_width,label_width,false)
-	_plate_row(box,"Our reserve" if player else "%s waiting" % _cap(_strip(String(view.names.left))),plates.left.rear,"left",plate_width,label_width,true,fit)
-	_label(box,"On each block: its arm and how many are still with it; the upper bar is the men left of those it started with, the lower bar is their heart.","small",T.INK_MUTED)
-
-
-func _plate_row(parent:Node,title:String,plates:Array,key:String,plate_width:float,label_width:float,rear:bool,fit:int=RESERVE_SHOWN)->void:
-	var row:=HBoxContainer.new(); row.add_theme_constant_override("separation",8); parent.add_child(row)
-	# Behind the line with nobody waiting, only blocks that broke or fled:
-	# said as that, not as a reserve.
-	if rear and not plates.is_empty() and plates.all(func(p:Dictionary)->bool: return String(p.get("state",""))!="reserve"):
-		title=("Ours who broke or fled" if key=="left" else "Theirs who broke or fled") if bool(view.player) else "%s who broke or fled" % _cap(_strip(String(view.names[key])))
-	var name:=_label(row,title,"small",left_text if key=="left" else right_text)
-	name.custom_minimum_size.x=label_width; name.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	name.add_theme_font_override("font",T.font("ui_strong"))
-	var flow:=HFlowContainer.new(); flow.size_flags_horizontal=SIZE_EXPAND_FILL
-	flow.add_theme_constant_override("h_separation",6); flow.add_theme_constant_override("v_separation",6)
-	row.add_child(flow)
-	var shown:=plates
-	var waiting:Array=[]; var broken:=0; var fled:=0
-	for plate in plates:
-		match String(plate.state):
-			"reserve": waiting.append(plate)
-			"broken": broken+=1
-			"fled": fled+=1
-	var room:=mini(fit,RESERVE_SHOWN)
-	if rear:
-		shown=waiting.slice(0,room)
-		if broken+fled>0 and waiting.size()<room:
-			for plate in plates:
-				if String(plate.state)!="reserve" and shown.size()<room: shown.append(plate)
-	for plate in shown:
-		var card:=Plate.new()
-		card.data=plate; card.accent=left_colour if key=="left" else right_colour
-		card.custom_minimum_size=Vector2(plate_width,PLATE_HEIGHT)
-		card.tooltip_text=_plate_words(plate)
-		flow.add_child(card)
-	var gone_shown:=0
-	for plate in shown:
-		if String(plate.state)!="reserve": gone_shown+=1
-	var summary:=_rear_summary(waiting.size()-mini(waiting.size(),room),broken,fled,broken+fled>gone_shown,key) if rear else ""
-	if rear and plates.is_empty(): summary="Nobody waiting."
-	if not rear and plates.is_empty(): summary="Nobody in the line."
-	if summary!="":
-		var words:=_label(flow,summary,"small",T.INK_MUTED); words.custom_minimum_size=Vector2(0,PLATE_HEIGHT); words.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
-		words.autowrap_mode=TextServer.AUTOWRAP_OFF
-
-
-func _rear_summary(more:int,broken:int,fled:int,summed:bool,key:String)->String:
-	var word:=String(view.sides[key].word)
-	var parts:Array[String]=[]
-	if more>0: parts.append("and %s more %s waiting" % [_count(more),word if more==1 else _plural(word)])
-	if broken>0 and summed: parts.append("%s broke and ran" % _count(broken))
-	if fled>0 and summed: parts.append("%s fled" % _count(fled))
-	return ", ".join(parts)
-
-
-func _frontage_note(plates:Dictionary)->String:
-	var shown:Dictionary=_shown_phase()
-	var capacity:=int(shown.get("capacity",0))
-	var fighting:=(plates.left.front as Array).size()
-	var total:=fighting+(plates.left.rear as Array).size()
-	var word:=String(view.sides.left.word)
-	if capacity<=0 or total<=fighting: return "Every %s is in the line." % word if total>1 else ""
-	return "The ground lets about %s a side fight at once: %s of %s %s here." % [Marks.about(capacity).trim_prefix("about "),_count(fighting),_count(total),_plural(word)]
-
-
-func _build_reasons(parent:Node,width:float)->void:
-	var row:=HBoxContainer.new(); row.name="Reasons"; row.add_theme_constant_override("separation",32); parent.add_child(row)
-	var shown:Dictionary=_shown_phase()
-	var why:=VBoxContainer.new(); why.name="Why"; why.size_flags_horizontal=SIZE_EXPAND_FILL; why.add_theme_constant_override("separation",4)
-	why.custom_minimum_size.x=(width-32.0)*0.56
+func _build_reasons(parent:Node)->void:
+	var row:=HBoxContainer.new(); row.name="Reasons"; row.add_theme_constant_override("separation",40); parent.add_child(row)
+	var why:=VBoxContainer.new(); why.name="Why"; why.size_flags_horizontal=SIZE_EXPAND_FILL; why.size_flags_stretch_ratio=1.2; why.add_theme_constant_override("separation",4)
 	row.add_child(why)
-	var player:=bool(view.player)
-	_label(why,"WHY","kicker",T.INK_MUTED)
-	var items:Array=shown.get("why",[]) if not shown.is_empty() else []
-	if items.is_empty(): _label(why,"Nothing has been fought yet." if step==0 else "Too little is known to say.","small",T.INK_MUTED)
-	else: _label(why,("How much each thing adds to our strength (+) or to theirs (−)." if player else "How much each thing adds to %s strength (+) or to %s (−)." % [_possessive(String(view.names.left)),_possessive(String(view.names.right))]),"small",T.INK_MUTED).name="WhyLegend"
-	var grid:=GridContainer.new(); grid.columns=3; grid.add_theme_constant_override("h_separation",12); grid.add_theme_constant_override("v_separation",4)
-	why.add_child(grid)
-	for item in items.slice(0,7):
-		var pct:=int(item.pct)
-		var ours:=String(item.favours)=="left"
-		var tag:=_label(grid,"%s%d%%" % ["+" if pct>=0 else "−",absi(pct)],"body",left_text if ours else right_text)
-		tag.add_theme_font_override("font",T.font("ui_strong")); tag.autowrap_mode=TextServer.AUTOWRAP_OFF
-		tag.tooltip_text="How much this adds to %s strength against the other side." % ("our" if ours and player else ("their" if player else _possessive(String(view.names.left if ours else view.names.right))))
-		var name:=_label(grid,String(item.label),"body",T.INK); name.autowrap_mode=TextServer.AUTOWRAP_OFF
-		var text:=_label(grid,String(item.text)+".","small",T.BODY)
-		text.size_flags_horizontal=SIZE_EXPAND_FILL
+	var top:=HBoxContainer.new(); top.add_theme_constant_override("separation",12); why.add_child(top)
+	_label(top,"WHY","kicker",T.INK_MUTED).autowrap_mode=TextServer.AUTOWRAP_OFF
+	var legend:=_label(top,"","small",T.INK_MUTED); legend.name="WhyLegend"; legend.autowrap_mode=TextServer.AUTOWRAP_OFF
+	parts.why_legend=legend
+	var bars:=WhyBars.new(); bars.name="WhyBars"; bars.size_flags_horizontal=SIZE_EXPAND_FILL; bars.custom_minimum_size=Vector2(300,float(WHY_SHOWN)*19.0)
+	why.add_child(bars); parts.why=bars
 	var changes:=VBoxContainer.new(); changes.name="Changes"; changes.size_flags_horizontal=SIZE_EXPAND_FILL; changes.add_theme_constant_override("separation",4)
 	row.add_child(changes)
 	_label(changes,"WHAT CHANGED","kicker",T.INK_MUTED)
-	var events:Array=shown.get("events",[]) if not shown.is_empty() else []
-	if events.is_empty(): _label(changes,"The two sides are drawn up, facing each other." if step==0 else "Nothing changed but the slow wearing down of both lines.","small",T.INK_MUTED)
-	for line in events.slice(0,6):
-		_label(changes,"•  %s." % String(line),"body",T.BODY)
+	var lines:=VBoxContainer.new(); lines.name="Lines"; lines.add_theme_constant_override("separation",3); changes.add_child(lines)
+	parts.changes=lines
 
 
-## The battle's phases as a row of steps, with the men each side lost in
-## each phase beside them; picking a step shows the field as it was then.
-func _build_timeline(parent:Node)->void:
-	var phases:Array=view.phases
-	var row:=HBoxContainer.new(); row.name="Timeline"; row.add_theme_constant_override("separation",16); parent.add_child(row)
-	var steps:=HFlowContainer.new(); steps.name="Steps"; steps.size_flags_horizontal=SIZE_EXPAND_FILL
-	steps.add_theme_constant_override("h_separation",6); steps.add_theme_constant_override("v_separation",6); row.add_child(steps)
-	var labels:Array=["Drawn up"]
-	for phase in phases: labels.append(String(phase.when)+(" (now)" if bool(phase.get("current",false)) else ""))
-	for index in labels.size():
-		var tab:=Button.new(); tab.text=String(labels[index]); tab.toggle_mode=true; tab.button_pressed=index==step
-		tab.focus_mode=Control.FOCUS_NONE
-		T.text(tab,"small",T.INK)
-		tab.custom_minimum_size=Vector2(0,30)
-		tab.add_theme_stylebox_override("normal",T.action_button_style(false))
-		tab.add_theme_stylebox_override("pressed",T.gold_outline_style() if index==step else T.button_pressed_style())
-		tab.add_theme_stylebox_override("hover_pressed",T.gold_outline_style())
-		tab.tooltip_text="The two sides as they stood before the first blow." if index==0 else "The field at the end of these hours of fighting."
-		tab.pressed.connect(_select.bind(index))
-		steps.add_child(tab)
-	if phases.is_empty(): return
-	var losses:=VBoxContainer.new(); losses.add_theme_constant_override("separation",0); row.add_child(losses)
-	var strip:=LossStrip.new(); strip.name="Losses"
-	strip.values=view.losses_by_phase; strip.selected=step-1
-	strip.left_colour=left_colour; strip.right_colour=right_colour
-	strip.custom_minimum_size=Vector2(clampf(float(phases.size())*44.0,120.0,300.0),40)
-	strip.tooltip_text="Men lost in each phase: %s on the left of each pair, %s on the right." % [String(view.names.left),String(view.names.right)]
-	losses.add_child(strip)
-	var legend:=_label(losses,"Men lost in each phase","small",T.INK_MUTED); legend.name="LossLegend"; legend.autowrap_mode=TextServer.AUTOWRAP_OFF
+# --- What a new reading or a new day changes ----------------------------------------------
+
+## What stays the same from day to day: names, place, generals, the era's
+## mark, the days on the track (a live battle adds one each day).
+func _update_static()->void:
+	parts.kicker.text="THE FIGHT %s · %s" % [_where_words().to_upper(),_when_words().to_upper()] if _when_words()!="" else "THE FIGHT %s" % _where_words().to_upper()
+	var account:=String(view.one_line)
+	(parts.account as Label).text=account if not live and account!="" and account!=String(view.phrase)+"." else ""
+	(parts.account as Label).visible=(parts.account as Label).text!=""
+	(parts.left_name as Label).text=_cap(String(view.names.left))
+	(parts.right_name as Label).text=_cap(String(view.names.right))
+	var era:=Model.era_of(record,String(view.get("stage","hearth")))
+	(parts.era as Control).set("era",era)
+	(parts.era as Control).tooltip_text="%s, as the war chart marks this battle." % String(ERA_MARK_WORDS[clampi(era,0,ERA_MARK_WORDS.size()-1)])
+	(parts.era as Control).queue_redraw()
+	for key in ["left","right"]:
+		(parts[key+"_name"] as Label).text=_cap(String(view.names[key]))
+		var general:Dictionary=view.sides[key].general
+		var who:=String(general.name); var about:=String(general.line).trim_suffix(".")
+		(parts[key+"_general"] as Label).text=(who+(", " if who!="" and about!="" else "")+(about.substr(0,1).to_lower()+about.substr(1) if who!="" else about)).strip_edges()
+	field.set("left_colour",left_colour); field.set("right_colour",right_colour)
+	field.set("names",{"left":String(view.names.left),"right":String(view.names.right)})
+	var labels:Array=[]; var tips:Array=[]
+	for index in _count()+1:
+		labels.append(Model.day_label(view,index))
+		tips.append(_day_tip(index))
+	timeline.set("left_colour",left_colour); timeline.set("right_colour",right_colour)
+	timeline.configure(labels,view.losses_by_phase,tips,step,_count() if live else -1)
 
 
-func _build_phase_summary(parent:Node)->void:
-	var shown:Dictionary=_shown_phase()
-	if shown.is_empty() or step<=0: return
-	var losses:Dictionary=shown.losses
-	var summary:="%s: %s lost %s; %s lost %s." % [String(shown.when),_cap(String(view.names.left)),_n(int(losses.left.total),true),String(view.names.right),_n(int(losses.right.total),bool(view.sides.right.exact))]
-	var box:=VBoxContainer.new(); box.name="Phase"; box.add_theme_constant_override("separation",4); parent.add_child(box)
-	_label(box,"THIS PHASE","kicker",T.INK_MUTED)
-	_label(box,summary,"body",T.BODY).name="PhaseSummary"
+## Everything that belongs to the day shown.
+func _show_step(animate:bool)->void:
+	var count:=_count()
+	step=clampi(step,0,count)
+	var shown:=Model.phase_at(view,step)
+	var player:=bool(view.player)
+	var progress:=float(shown.get("progress",0.0)) if step>0 else 0.0
+	var phrase:=String(view.phrase)
+	if step<count or (live and step==0):
+		phrase=Record.phrase(progress,0.0,player,String(view.names.left),String(view.names.right))
+	if step==0: phrase="The two sides are drawn up"
+	(parts.headline as Label).text=phrase
+	var sub:=[_cap(String(view.ground.words)),String(view.status)]
+	if live and String(record.get("id",""))!="": sub.append(_battle_day_words())
+	(parts.where as Label).text="  ·  ".join(PackedStringArray(sub))
+	# The balance, and the odds it makes.
+	var bar:ProgressStrip=parts.progress
+	bar.value=progress
+	var previous:=Model.phase_at(view,step-1)
+	bar.ghost=float(previous.get("progress",0.0)) if step>1 else 0.0
+	bar.left_colour=left_colour; bar.right_colour=right_colour
+	bar.queue_redraw()
+	var odds:=Model.odds_words(progress,player,_cap(_strip(String(view.names.left))),_cap(_strip(String(view.names.right))))
+	if step==0: (parts.odds as Label).text="Before the first blow"
+	elif odds=="": (parts.odds as Label).text=""
+	else: (parts.odds as Label).text="Odds now: %s" % odds
+	(parts.odds as Label).tooltip_text="The engine's measure of who has the better of it, said as odds."
+	# Each side: its tactic, its strength and losses, its heart.
+	for key in ["left","right"]:
+		var side:Dictionary=view.sides[key]
+		var totals:=Model.totals_at(view,step,key)
+		var before:=Model.totals_at(view,maxi(0,step-1),key)
+		var exact:=bool(side.exact)
+		var strip:StrengthBar=parts[key+"_bar"]
+		strip.colour=left_colour if key=="left" else right_colour
+		strip.totals=totals; strip.ghost=int(before.get("standing",totals.standing)) if step>0 else int(totals.standing)
+		strip.tooltip_text=_strength_words(totals,exact,key)
+		strip.queue_redraw()
+		(parts[key+"_standing"] as Label).text="%s of %s standing" % [_n(int(totals.standing),exact),_n(int(totals.went_in),exact)]
+		for kind in ["killed","wounded","fled","captured"]:
+			# Their men we took are ours to count: said exactly, as the report does.
+			var counted:bool=exact or (String(kind)=="captured" and player and key=="right")
+			(parts[key+"_"+kind] as Label).text="none" if int(totals[kind])<=0 else _n(int(totals[kind]),counted)
+		var heart:=Model.heart_at(view,step,key)
+		var heart_bar:HeartBar=parts[key+"_heart"]
+		heart_bar.value=heart; heart_bar.queue_redraw()
+		(parts[key+"_heart_words"] as Label).text="Heart: %s" % (Account.morale_words(heart) if heart>=0.0 else "none left standing")
+		var tactic:Dictionary=((shown if step>0 else Model.phase_at(view,1)).get("tactics",{}) as Dictionary).get(key,{})
+		var chip:Label=parts[key+"_tactic"]
+		var words:=String(tactic.get("words",""))
+		chip.text=_cap(words)
+		chip.visible=chip.text!=""
+		chip.tooltip_text="How %s general is fighting%s." % [("our" if key=="left" else "their") if player else _possessive(String(view.names[key])),(" this day" if step>0 else "")] if words!="" else ""
+		var undone:Label=parts[key+"_undone"]
+		undone.text=""
+		if step>0 and bool(tactic.get("countered",false)):
+			var by:=String(tactic.get("by","")).to_lower().trim_prefix("a ").trim_prefix("an ")
+			undone.text="Undone by %s %s" % ["their" if key=="left" and player else ("our" if player else "the other side's"),by]
+		elif step>0 and bool(tactic.get("changed",false)): undone.text="A new way of fighting"
+		undone.add_theme_color_override("font_color",T.RED_TEXT if bool(tactic.get("countered",false)) else T.INK_MUTED)
+	# The field, the days, the reasons.
+	field.call("show_step",view,record,step,animate)
+	timeline.select(step)
+	_show_reasons(shown)
+	(buttons.earlier as Button).disabled=step<=0
+	(buttons.later as Button).disabled=step>=count
+	_update_play()
 
 
-func _build_footer(parent:Node)->void:
-	var row:=HBoxContainer.new(); row.name="Footer"; row.add_theme_constant_override("separation",12); parent.add_child(row)
-	var back:=_button(row,"Earlier","earlier",false); back.disabled=step<=0
-	var forward:=_button(row,"Later","later",false); forward.disabled=step>=(view.phases as Array).size()
-	var gap:=Control.new(); gap.size_flags_horizontal=SIZE_EXPAND_FILL; row.add_child(gap)
-	_time_button(row)
-	_button(row,"Close","close",true)
+func _show_reasons(shown:Dictionary)->void:
+	var player:=bool(view.player)
+	var items:Array=shown.get("why",[]) if step>0 else []
+	var bars:WhyBars=parts.why
+	bars.items=items.slice(0,WHY_SHOWN); bars.left_colour=left_colour; bars.right_colour=right_colour
+	bars.left_text=left_text; bars.right_text=right_text
+	bars.empty_words="Nothing has been fought yet." if step==0 else "Too little is known to say."
+	bars.queue_redraw()
+	(parts.why_legend as Label).text=("Bars toward us help us; toward them, help them." if player else "Each bar leans to the side it helps.") if not items.is_empty() else ""
+	var lines:VBoxContainer=parts.changes
+	for child in lines.get_children(): child.queue_free()
+	var events:Array=shown.get("events",[]) if step>0 else []
+	if events.is_empty():
+		_label(lines,"The two sides stand facing each other." if step==0 else "Nothing changed but the slow wearing down of both lines.","small",T.INK_MUTED)
+	for line in events.slice(0,CHANGES_SHOWN):
+		var label:=_label(lines,"•  %s." % String(line),"body",T.BODY)
+		label.autowrap_mode=TextServer.AUTOWRAP_OFF; label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		label.tooltip_text=String(line)+"."
+	if events.size()>CHANGES_SHOWN:
+		var more:=_label(lines,"and %s more" % _count_word(events.size()-CHANGES_SHOWN),"small",T.INK_MUTED)
+		more.tooltip_text=". ".join(PackedStringArray(events.slice(CHANGES_SHOWN)))+"."
 
 
-func _time_button(row:Node)->void:
-	if not live or not is_instance_valid(host) or not ("game_speed" in host) or not host.has_method("_set_game_speed"): return
-	var held:=float(host.get("game_speed"))<=0.0
-	_button(row,"Let the fight go on" if held else "Hold time","time",held)
+func _update_play()->void:
+	if not buttons.has("play"): return
+	var play:Button=buttons.play
+	play.text="Pause" if playing else "Play"
+	play.icon=Icons.command_texture("pause" if playing else "resume",T.INK,24)
+	play.disabled=_count()<=0
 
 
 # --- Acting -------------------------------------------------------------------------------
@@ -460,29 +486,40 @@ func _time_button(row:Node)->void:
 func _act(id:String)->void:
 	match id:
 		"close": close()
-		"earlier": _step_by(-1)
-		"later": _step_by(1)
+		"earlier": _stop_playing(); _step_by(-1)
+		"later": _stop_playing(); _step_by(1)
+		"play":
+			if built!="sheet": return
+			if playing: _stop_playing(); return
+			if step>=_count(): _select(0,false)
+			playing=true; play_clock=0.0
+			_update_play()
 		"time":
 			if is_instance_valid(host) and host.has_method("_set_game_speed"):
 				host.call("_set_game_speed",1.0 if float(host.get("game_speed"))<=0.0 else 0.0)
-			_refresh()
+			_rebuild()
 
 
-func _select(index:int)->void:
-	step=clampi(index,0,(view.phases as Array).size())
-	following=step>=(view.phases as Array).size()
-	_rebuild_only()
+func _on_day_chosen(index:int)->void:
+	_stop_playing()
+	_select(index,true)
+
+
+func _stop_playing()->void:
+	if not playing: return
+	playing=false
+	_update_play()
+
+
+func _select(index:int,animate:bool=true)->void:
+	step=clampi(index,0,_count())
+	following=step>=_count()
+	if built=="sheet" and is_instance_valid(sheet): _show_step(animate)
+	else: _rebuild()
 
 
 func _step_by(delta:int)->void:
 	_select(step+delta)
-
-
-func _rebuild_only()->void:
-	if is_instance_valid(sheet): sheet.get_parent().queue_free()
-	buttons.clear()
-	if bool(view.skirmish): _build_card()
-	else: _build_panel()
 
 
 func close()->void:
@@ -494,34 +531,13 @@ func close()->void:
 
 # --- What is shown ---------------------------------------------------------------------------
 
-func _phase_at(index:int)->Dictionary:
-	if index<=0 or index>(view.phases as Array).size(): return {}
-	return view.phases[index-1]
-
-
-func _shown_phase()->Dictionary:
-	if step<=0:
-		var first:Dictionary=_phase_at(1)
-		return {"tactics":first.get("tactics",{}),"progress":0.0,"why":[],"events":[],"capacity":int(first.get("capacity",0)),"losses":{"left":{"total":0},"right":{"total":0}},"when":"Drawn up"} if not first.is_empty() else {}
-	return _phase_at(step)
+## Losses so far at the step shown; the finished battle's own totals at its end.
+func _totals_at(side:Dictionary,key:String)->Dictionary:
+	return Model.totals_at(view,step,key)
 
 
 func _plates_shown()->Dictionary:
-	if step<=0: return view.start
-	return _phase_at(step).plates
-
-
-## Losses so far at the step shown; the finished battle's own totals at its end.
-func _totals_at(side:Dictionary,key:String)->Dictionary:
-	var totals:Dictionary=side.totals
-	var count:=(view.phases as Array).size()
-	if step>=count: return totals
-	var out:={"went_in":int(totals.went_in),"killed":0,"wounded":0,"fled":0,"captured":0}
-	for index in range(1,step+1):
-		var losses:Dictionary=(_phase_at(index).losses as Dictionary)[key]
-		for kind in ["killed","wounded","fled","captured"]: out[kind]=int(out[kind])+int(losses[kind])
-	out["standing"]=maxi(0,int(out.went_in)-int(out.killed)-int(out.wounded)-int(out.fled)-int(out.captured))
-	return out
+	return Model.plates_at(view,step)
 
 
 # --- Words -----------------------------------------------------------------------------------
@@ -549,7 +565,26 @@ func _when_words()->String:
 func _battle_day_words()->String:
 	var today:=int(WorldSimulation.state.elapsed_days) if WorldSimulation!=null else int(view.started)
 	var day:=int(preload("res://scripts/hud/battle_marker_source.gd").day_of(record,today))
-	return "Day %s of the battle" % _count(day)
+	return "Day %s of the battle" % _count_word(day)
+
+
+## A stop on the track, pointed at: the day, its hours and what each side lost.
+func _day_tip(index:int)->String:
+	if index<=0: return "The two sides drawn up, before the first blow."
+	var phase:=Model.phase_at(view,index)
+	var losses:Dictionary=phase.get("losses",{})
+	var ours:=int((losses.get("left",{}) as Dictionary).get("total",0))
+	var theirs:=int((losses.get("right",{}) as Dictionary).get("total",0))
+	var when:=String(phase.get("when","")).to_lower()
+	var head:="%s (%s)" % [Model.day_label(view,index),when] if when!="" and not when.begins_with("drawn") else Model.day_label(view,index)
+	if bool(view.player): return "%s: we lost %s, they lost %s." % [head,_n(ours,true),_n(theirs,bool(view.sides.right.exact))]
+	return "%s: %s lost %s, %s lost %s." % [head,_cap(String(view.names.left)),_n(ours,bool(view.sides.left.exact)),String(view.names.right),_n(theirs,bool(view.sides.right.exact))]
+
+
+func _strength_words(totals:Dictionary,exact:bool,key:String)->String:
+	var who:=("Ours" if key=="left" else "Theirs") if bool(view.player) else _cap(_strip(String(view.names[key])))
+	var lost:=_lost_words(totals,exact,bool(view.player) and key=="right")
+	return "%s: %s went in, %s still standing.\n%s" % [who,_n(int(totals.went_in),exact),_n(int(totals.standing),exact),lost]
 
 
 func _side_kicker(key:String)->String:
@@ -558,21 +593,12 @@ func _side_kicker(key:String)->String:
 	return "ATTACKING" if role=="attacker" else "DEFENDING"
 
 
-func _plate_words(plate:Dictionary)->String:
-	var arm:=Record.arm_words(String(plate.arm),int(plate.men))
-	var state:=String(plate.state)
-	var heart:=Account.morale_words(float(plate.cohesion))
-	var where:=String({"front":"in the line","reserve":"waiting in reserve","broken":"broke and ran","fled":"left the field"}.get(state,""))
-	if state in ["broken","fled"] and int(plate.men)<=0: return "%s: %s. It started with %s." % [_cap(Record.arm_words(String(plate.arm),2)),where,_grouped(int(plate.men0))]
-	return "%s: %s of %s still with it, %s, %s." % [_cap(Record.arm_words(String(plate.arm),2)),_grouped(int(plate.men)),_grouped(int(plate.men0)),heart,where]
-
-
 ## captives_counted: their men we took, ours to count exactly.
 func _lost_words(totals:Dictionary,exact:bool,captives_counted:bool=false)->String:
-	var parts:Array[String]=[]
+	var parts_said:Array[String]=[]
 	for pair in [["killed","killed"],["wounded","wounded"],["fled","ran"],["captured","taken"]]:
-		if int(totals[pair[0]])>0: parts.append("%s %s" % [_n(int(totals[pair[0]]),exact or (captives_counted and pair[0]=="captured")),String(pair[1])])
-	return _cap(", ".join(parts)+".") if not parts.is_empty() else "Nobody lost."
+		if int(totals[pair[0]])>0: parts_said.append("%s %s" % [_n(int(totals[pair[0]]),exact or (captives_counted and pair[0]=="captured")),String(pair[1])])
+	return _cap(", ".join(parts_said)+".") if not parts_said.is_empty() else "Nobody lost."
 
 
 func _n(value:int,exact:bool)->String:
@@ -583,13 +609,9 @@ func _grouped(value:int)->String:
 	return preload("res://scripts/hud/era_words.gd").grouped(value)
 
 
-func _count(n:int)->String:
+func _count_word(n:int)->String:
 	var words:=["no","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve"]
 	return words[n] if n>=0 and n<words.size() else _grouped(n)
-
-
-func _plural(word:String)->String:
-	return preload("res://scripts/battle_blocks.gd").plural(word)
 
 
 func _possessive(name:String)->String:
@@ -617,11 +639,20 @@ func _button(parent:Node,text:String,id:String,primary:bool)->Button:
 	var button:=Button.new(); button.name=id.capitalize().replace(" ",""); button.text=text
 	T.text(button,"body",T.INK)
 	button.custom_minimum_size=Vector2(0,40)
+	button.focus_mode=Control.FOCUS_NONE
 	button.add_theme_stylebox_override("normal",T.action_button_style(primary))
 	button.add_theme_stylebox_override("hover",T.action_button_style(primary,true))
+	button.add_theme_stylebox_override("disabled",T.button_disabled_style())
+	button.add_theme_color_override("font_disabled_color",T.DISABLED)
 	button.pressed.connect(_act.bind(id))
 	parent.add_child(button); buttons[id]=button
 	return button
+
+
+func _time_button(row:Node)->void:
+	if not live or not is_instance_valid(host) or not ("game_speed" in host) or not host.has_method("_set_game_speed"): return
+	var held:=float(host.get("game_speed"))<=0.0
+	_button(row,"Let the fight go on" if held else "Hold time","time",held)
 
 
 func _rule()->Control:
@@ -629,66 +660,8 @@ func _rule()->Control:
 	return rule
 
 
-## One block: its arm, how many are still with it, a bar for the men left of
-## those it started with and one for its heart; worn, broken or gone at a glance.
-class Plate extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	const Icons:=preload("res://scripts/resource_icons.gd")
-	const Record:=preload("res://scripts/battle_record.gd")
-	var data:Dictionary={}
-	var accent:=Color.WHITE
-
-	func _ready()->void:
-		mouse_filter=MOUSE_FILTER_PASS
-
-	func _draw()->void:
-		var w:=size.x; var h:=size.y
-		var state:=String(data.get("state","front"))
-		var faded:=state=="fled"
-		var ground:=T.PAPER_RAISED if state=="front" else T.PAPER_SUNK
-		if faded: ground=T.PAPER
-		draw_rect(Rect2(Vector2.ZERO,size),ground)
-		if state=="broken":
-			var hatch:=Color(T.RED,0.18)
-			var x:=-h
-			while x<w:
-				draw_line(Vector2(x,h),Vector2(x+h,0),hatch,1.0)
-				x+=7.0
-		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)
-		if state=="front": draw_rect(Rect2(0,0,w,3),accent)
-		var ink:=T.INK if not faded else Color(T.INK_MUTED,0.8)
-		# Drawn as its own kit (a howitzer, a light tank, a combat frame); named by its arm.
-		var icon:=Icons.arm_texture(String(data.get("glyph",data.get("arm","spear"))),T.INK if not faded else T.INK_MUTED,accent)
-		var strong:=T.font("ui_strong"); var plain:=T.font("ui")
-		var men:=int(data.get("men",0))
-		var number:=preload("res://scripts/hud/era_words.gd").grouped(men) if men>0 else ("broke" if state=="broken" else "gone")
-		# The whole number always shows ("1,830", never a clipped "1,83"): on a
-		# narrow plate the icon draws smaller and the number steps down a size.
-		var icon_rect:=Rect2(5,7,26,26)
-		var room:=w-38.0
-		var font_size:=15
-		if strong.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>room:
-			icon_rect=Rect2(4,6,17,17); room=w-27.0
-			while font_size>10 and strong.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x>room: font_size-=1
-		draw_texture_rect(icon,icon_rect,false,Color(1,1,1,0.55 if faded else 1.0))
-		draw_string(strong,Vector2(w-4.0-room,22),number,HORIZONTAL_ALIGNMENT_RIGHT,room,font_size,ink if men>0 else (T.RED_TEXT if state=="broken" else T.INK_MUTED))
-		if w>=86.0:
-			var word:=Record.arm_words(String(data.get("arm","spear")),maxi(2,men))
-			draw_string(plain,Vector2(33,37),word,HORIZONTAL_ALIGNMENT_RIGHT,w-38,12,T.INK_MUTED)
-		elif state=="reserve" or faded:
-			pass
-		# Men left, then heart.
-		var bar_w:=w-12.0
-		var strength:=clampf(float(data.get("strength",1.0)),0.0,1.0)
-		var heart:=clampf(float(data.get("cohesion",1.0)),0.0,1.0)
-		draw_rect(Rect2(6,h-17,bar_w,4),T.TRACK)
-		draw_rect(Rect2(6,h-17,bar_w*strength,4),Color(T.INK,0.72 if not faded else 0.35))
-		draw_rect(Rect2(6,h-10,bar_w,4),T.TRACK)
-		var heart_colour:=T.GREEN if heart>=0.5 else (T.AMBER if heart>=0.25 else T.RED)
-		draw_rect(Rect2(6,h-10,bar_w*heart,4),Color(heart_colour,0.9 if not faded else 0.4))
-
-
-## Who is winning: the bar reaches toward the side that has the better of it.
+## Who is winning: the bar reaches toward the side that has the better of it;
+## a fine mark shows where it stood the day before.
 class ProgressStrip extends Control:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
 	var value:=0.0
@@ -710,49 +683,173 @@ class ProgressStrip extends Control:
 		draw_colored_polygon(PackedVector2Array([Vector2(split-6,-8),Vector2(split+6,-8),Vector2(split,-2)]),T.INK)
 
 
-## The line where the two sides meet.
-class ContactRule extends Control:
+## A side's strength: one bar the length of all who went in, the men still
+## standing in the side's colour, then the killed, the wounded, the fled and
+## the taken; a fine mark where the standing stood the day before.
+class StrengthBar extends Control:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	var colour:=Color.BLACK
+	var totals:Dictionary={}
+	var ghost:=0
+	var colour:=Color.WHITE
 
 	func _draw()->void:
-		var y:=size.y*0.5
+		var w:=size.x; var h:=size.y
+		draw_rect(Rect2(0,0,w,h),T.TRACK)
+		var went:=float(maxi(1,int(totals.get("went_in",0))))
 		var x:=0.0
-		while x<size.x:
-			draw_line(Vector2(x,y),Vector2(minf(size.x,x+10.0),y),colour,2.0)
-			x+=16.0
-		var text:="where the lines meet"
-		var font:=T.font("ui")
-		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-		var at:=Vector2((size.x-width)*0.5,y+4)
-		draw_rect(Rect2(at.x-8,0,width+16,size.y),T.PAPER_RAISED)
-		draw_string(font,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
+		for kind in ["standing","killed","wounded","fled","captured"]:
+			var n:=float(maxi(0,int(totals.get(kind,0))))
+			if n<=0.0: continue
+			var span:=w*n/went
+			var rect:=Rect2(x,0,minf(span,w-x),h)
+			CasualtyMark.fill(self,rect,kind,colour)
+			x+=span
+		draw_rect(Rect2(Vector2.ZERO,size),T.RULE_STRONG,false,1.0)
+		var before:=w*float(ghost)/went
+		var now:=w*float(int(totals.get("standing",0)))/went
+		if absf(before-now)>2.0: draw_line(Vector2(before,-3),Vector2(before,h+3),T.INK,1.5)
 
 
-## Men lost in each phase, the two sides side by side; the phase shown is marked.
-class LossStrip extends Control:
+## Heart: the standing men's will to fight, coloured by how much is left.
+class HeartBar extends Control:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	var values:Array=[]
-	var selected:=-1
+	var value:=-1.0
+
+	func _draw()->void:
+		draw_rect(Rect2(Vector2.ZERO,size),T.TRACK)
+		if value>0.0:
+			var c:=T.GREEN if value>=0.5 else (T.AMBER if value>=0.25 else T.RED)
+			draw_rect(Rect2(0,0,size.x*clampf(value,0.0,1.0),size.y),Color(c,0.9))
+		draw_rect(Rect2(Vector2.ZERO,size),T.RULE_STRONG,false,1.0)
+
+
+## The marks of a battle's losses, drawn as small ink figures in the colour
+## of their part of the strength bar: the killed lie down, the wounded kneel,
+## the fled run, the taken are bound.
+class CasualtyMark extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var kind:="killed"
+
+	static func colour_of(kind:String,side:Color)->Color:
+		match kind:
+			"standing": return Color(side,0.9)
+			"killed": return Color(T.INK,0.88)
+			"wounded": return Color(T.INK,0.45)
+			"fled": return Color(T.INK_MUTED,0.7)
+			"captured": return Color(T.VIOLET,0.8)
+		return T.INK
+
+	## A part of a strength bar in its mark's manner (the fled hatched).
+	static func fill(canvas:CanvasItem,rect:Rect2,kind:String,side:Color)->void:
+		if rect.size.x<=0.0: return
+		if kind=="fled":
+			canvas.draw_rect(rect,Color(T.PAPER,0.6))
+			var x:=rect.position.x-rect.size.y
+			while x<rect.end.x:
+				var a:=Vector2(maxf(x,rect.position.x),rect.end.y-maxf(0.0,rect.position.x-x))
+				var b:=Vector2(minf(x+rect.size.y,rect.end.x),rect.position.y+maxf(0.0,x+rect.size.y-rect.end.x))
+				if a.x<b.x: canvas.draw_line(a,b,colour_of(kind,side),1.2,true)
+				x+=4.0
+			return
+		canvas.draw_rect(rect,colour_of(kind,side))
+
+	func _draw()->void:
+		var c:=colour_of(kind,Color.WHITE)
+		var s:=minf(size.x,size.y)
+		var o:=(size-Vector2(s,s))*0.5
+		var p:=func(x:float,y:float)->Vector2: return o+Vector2(x,y)*s/20.0
+		match kind:
+			"killed":
+				draw_circle(p.call(4,14),2.4*s/20.0,c)
+				draw_line(p.call(6.5,14),p.call(15,14),c,2.0*s/20.0,true)
+				draw_line(p.call(15,14),p.call(19,16),c,1.6*s/20.0,true)
+				draw_line(p.call(15,14),p.call(19,12.5),c,1.6*s/20.0,true)
+				draw_line(p.call(1,17.5),p.call(19,17.5),Color(c,0.5),1.0,true)
+			"wounded":
+				draw_circle(p.call(9,4),2.4*s/20.0,c)
+				draw_line(p.call(9,6.5),p.call(8,12),c,2.0*s/20.0,true)
+				draw_line(p.call(8,12),p.call(13,13),c,1.6*s/20.0,true)
+				draw_line(p.call(13,13),p.call(13,18),c,1.6*s/20.0,true)
+				draw_line(p.call(8,12),p.call(5,18),c,1.6*s/20.0,true)
+				draw_line(p.call(9,8),p.call(15,7),c,1.4*s/20.0,true)
+				draw_line(p.call(15,4),p.call(15,18),Color(c,0.8),1.2*s/20.0,true)
+			"fled":
+				draw_circle(p.call(13,4),2.4*s/20.0,c)
+				draw_line(p.call(12,6.5),p.call(9,11.5),c,2.0*s/20.0,true)
+				draw_line(p.call(9,11.5),p.call(12,15),c,1.6*s/20.0,true)
+				draw_line(p.call(12,15),p.call(10,19),c,1.6*s/20.0,true)
+				draw_line(p.call(9,11.5),p.call(5,16),c,1.6*s/20.0,true)
+				draw_line(p.call(11,8),p.call(16,10),c,1.4*s/20.0,true)
+				draw_line(p.call(1,8),p.call(5,8),Color(c,0.7),1.2*s/20.0,true)
+				draw_line(p.call(0,12),p.call(4,12),Color(c,0.7),1.2*s/20.0,true)
+			"captured":
+				draw_circle(p.call(10,4),2.4*s/20.0,c)
+				draw_line(p.call(10,6.5),p.call(10,13),c,2.0*s/20.0,true)
+				draw_line(p.call(10,13),p.call(8,19),c,1.6*s/20.0,true)
+				draw_line(p.call(10,13),p.call(12,19),c,1.6*s/20.0,true)
+				draw_arc(p.call(10,10),3.6*s/20.0,0.0,TAU,14,c,1.3*s/20.0,true)
+				draw_line(p.call(13.5,10),p.call(19,13),Color(c,0.8),1.0,true)
+
+
+## Why one side has the better of it: each of the engine's reasons as a bar
+## from the middle toward the side it helps, its size in percent; pointing
+## at one says it in words.
+class WhyBars extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	const ROW:=19.0
+	const LABEL_W:=150.0
+	var items:Array=[]
 	var left_colour:=Color.WHITE
 	var right_colour:=Color.WHITE
+	var left_text:=Color.WHITE
+	var right_text:=Color.WHITE
+	var empty_words:=""
+
+	func _init()->void:
+		mouse_filter=Control.MOUSE_FILTER_PASS
+
+	func _get_tooltip(at:Vector2)->String:
+		var row:=int(at.y/ROW)
+		if row>=0 and row<items.size(): return String((items[row] as Dictionary).get("text",""))+"."
+		return ""
 
 	func _draw()->void:
-		if values.is_empty(): return
-		var most:=1
-		for pair in values: most=maxi(most,maxi(int(pair.left),int(pair.right)))
-		var n:=values.size()
-		var slot:=minf(size.x/float(n),120.0)
-		var bar:=minf(22.0,slot*0.3)
-		var font:=T.font("ui")
-		var base:=size.y-16.0
-		draw_line(Vector2(0,base),Vector2(slot*float(n),base),T.RULE,1.0)
-		for i in n:
-			var pair:Dictionary=values[i]
-			var x:=float(i)*slot+slot*0.5
-			var lh:=(base-4.0)*float(pair.left)/float(most)
-			var rh:=(base-4.0)*float(pair.right)/float(most)
-			draw_rect(Rect2(x-bar-1,base-lh,bar,lh),Color(left_colour,0.85))
-			draw_rect(Rect2(x+1,base-rh,bar,rh),Color(right_colour,0.85))
-			if i==selected: draw_rect(Rect2(x-bar-5,base+2,bar*2+10,3),T.GOLD)
-			draw_string(font,Vector2(x-bar-4,size.y-2),str(i+1),HORIZONTAL_ALIGNMENT_CENTER,bar*2+8,12,T.INK_MUTED)
+		var font:=T.font("ui"); var strong:=T.font("ui_strong")
+		if items.is_empty():
+			draw_string(font,Vector2(0,14),empty_words,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.INK_MUTED)
+			return
+		var most:=100
+		for item in items: most=maxi(most,absi(int(item.pct)))
+		var area:=minf(size.x-LABEL_W-8.0,600.0)
+		var mid:=LABEL_W+8.0+area*0.5
+		draw_line(Vector2(mid,0),Vector2(mid,ROW*float(items.size())),T.RULE_STRONG,1.0)
+		for i in items.size():
+			var item:Dictionary=items[i]
+			var y:=float(i)*ROW
+			var ours:=String(item.get("favours","left"))=="left"
+			draw_string(font,Vector2(0,y+14.0),String(item.get("label","")),HORIZONTAL_ALIGNMENT_LEFT,LABEL_W,14,T.INK)
+			var reach:=(area*0.5-48.0)*float(absi(int(item.pct)))/float(most)
+			var rect:=Rect2(mid-reach if ours else mid,y+4.0,reach,ROW-8.0)
+			draw_rect(rect,Color(left_colour if ours else right_colour,0.85))
+			var words:="%s%d%%" % ["+" if int(item.pct)>=0 else "−",absi(int(item.pct))]
+			var ww:=strong.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,13).x
+			var tx:=rect.position.x-ww-5.0 if ours else rect.end.x+5.0
+			draw_string(strong,Vector2(tx,y+14.0),words,HORIZONTAL_ALIGNMENT_LEFT,-1,13,left_text if ours else right_text)
+
+
+## The battle's mark as the war chart inks it: crossed spears, swords,
+## muskets or rifles, the armour sign or the lattice.
+class EraMark extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	const BattleMarks:=preload("res://scripts/hud/battle_marks.gd")
+	var era:=0
+
+	func _init()->void:
+		mouse_filter=Control.MOUSE_FILTER_PASS
+
+	func _draw()->void:
+		var at:=size*0.5
+		var r:=minf(size.x,size.y)*0.42
+		draw_circle(at,r+4.0,Color(T.PAPER_SUNK,0.9))
+		draw_arc(at,r+4.0,0.0,TAU,40,T.RULE_STRONG,1.2,true)
+		BattleMarks.draw_weapons(self,at,r*0.78,era,T.INK,Color(T.PAPER_SUNK,0.0))

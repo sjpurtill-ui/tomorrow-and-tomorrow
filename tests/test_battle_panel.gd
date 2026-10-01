@@ -91,9 +91,12 @@ func test_a_big_finished_battle_opens_on_its_result_and_steps_back()->void:
 	assert_bool(bool(panel.view.skirmish)).is_false()
 	var headline:Label=panel.find_child("Headline",true,false)
 	assert_str(headline.text).is_equal(String(panel.view.phrase))
-	# The line and the reserve: regiments in the line, the rest summed up.
-	var plates:=panel.find_children("*","Control",true,false).filter(func(n:Node)->bool: return n.get_script()!=null and "data" in n)
-	assert_int(plates.size()).is_greater(4)
+	# The line and the reserve: the engine's blocks, drawn on the field.
+	var field:Control=panel.find_child("Field",true,false)
+	assert_object(field).is_not_null()
+	var blocks:Array=(field.layout as Dictionary).get("blocks",[])
+	assert_int(blocks.size()).is_greater(4)
+	for block in blocks: assert_bool((block as Dictionary).has("data")).is_true()
 	_assert_readable(panel)
 	# Step back to the start and forward again: the campaign is untouched.
 	panel._select(0)
