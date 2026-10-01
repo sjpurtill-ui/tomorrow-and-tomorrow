@@ -67,14 +67,14 @@ const LEVERS:={
 ## Each lever in words: what it does for the better and for the worse, and
 ## the short form for "Iska would ..." ({n} is the size in the lever's unit).
 const WORDS:={
-	"labour":{"up":"Gets {n}% more work done","down":"Gets {n}% less work done","would_up":"would get {n}% more","would_down":"would get {n}% less","unit":"%"},
-	"spoilage":{"up":"Saves {n}% of what would rot","down":"Lets {n}% more of the stores rot","would_up":"would save {n}%","would_down":"would let {n}% more rot","unit":"%"},
-	"forgetting":{"up":"Unused ways are forgotten {n}% slower","down":"Unused ways are forgotten {n}% faster","would_up":"would slow it {n}%","would_down":"would speed it {n}%","unit":"%"},
-	"scout_cover":{"up":"Scouts are caught {n}% less often","down":"Scouts are caught {n}% more often","would_up":"would make it {n}% less","would_down":"would make it {n}% more","unit":"%"},
-	"envoy_sway":{"up":"Envoys win {n} points more favour (25 makes a yes)","down":"Envoys lose {n} points of favour (25 makes a yes)","would_up":"would win {n} more","would_down":"would lose {n}","unit":" points"},
-	"resistance":{"up":"Standing orders meet {n}% less resistance","down":"Standing orders meet {n}% more resistance","would_up":"would ease it {n}%","would_down":"would stiffen it {n}%","unit":"%"},
-	"devotion":{"up":"The people's love of the god +{n} points","down":"The people's love of the god -{n} points","would_up":"would raise it {n}","would_down":"would lower it {n}","unit":" points"},
-	"compliance":{"up":"{n} more in 100 pay what they owe","down":"{n} fewer in 100 pay what they owe","would_up":"would bring {n} more","would_down":"would bring {n} fewer","unit":" in 100"},
+	"labour":{"up":"Gets {n}% more work done","down":"Gets {n}% less work done","zero":"Gets as much work done as an ordinary one","would_up":"would get {n}% more","would_down":"would get {n}% less","unit":"%"},
+	"spoilage":{"up":"Saves {n}% of what would rot","down":"Lets {n}% more of the stores rot","zero":"As much rots as under an ordinary one","would_up":"would save {n}%","would_down":"would let {n}% more rot","unit":"%"},
+	"forgetting":{"up":"Unused ways are forgotten {n}% slower","down":"Unused ways are forgotten {n}% faster","zero":"Unused ways are forgotten as under an ordinary one","would_up":"would slow it {n}%","would_down":"would speed it {n}%","unit":"%"},
+	"scout_cover":{"up":"Scouts are caught {n}% less often","down":"Scouts are caught {n}% more often","zero":"Scouts are caught as often as under an ordinary one","would_up":"would make it {n}% less","would_down":"would make it {n}% more","unit":"%"},
+	"envoy_sway":{"up":"Envoys win {n} points more favour (25 makes a yes)","down":"Envoys lose {n} points of favour (25 makes a yes)","zero":"Envoys win as much favour as an ordinary one's","would_up":"would win {n} more","would_down":"would lose {n}","unit":" points"},
+	"resistance":{"up":"Standing orders meet {n}% less resistance","down":"Standing orders meet {n}% more resistance","zero":"Standing orders meet as much resistance as under an ordinary one","would_up":"would ease it {n}%","would_down":"would stiffen it {n}%","unit":"%"},
+	"devotion":{"up":"The people's love of the god +{n} points","down":"The people's love of the god -{n} points","zero":"The people's love of the god as under an ordinary one","would_up":"would raise it {n}","would_down":"would lower it {n}","unit":" points"},
+	"compliance":{"up":"{n} more in 100 pay what they owe","down":"{n} fewer in 100 pay what they owe","zero":"As many pay what they owe as under an ordinary one","would_up":"would bring {n} more","would_down":"would bring {n} fewer","unit":" in 100"},
 }
 
 ## How a lever's applied value shows as a size: percent off neutral for
@@ -517,7 +517,7 @@ static func _lever_sentence(office:String,lever:float)->String:
 	var id:=String(spec.id)
 	var words:Dictionary=WORDS.get(id,{})
 	var n:=size_of(id,lever)
-	if n==0: return _fill(String(words.get("up","")),0)
+	if n==0: return String(words.get("zero",""))
 	return _fill(String(words.get("up" if is_better(id,lever) else "down","")),n)
 
 static func _would(office:String,lever:float)->String:
@@ -585,7 +585,8 @@ static func card(office:String)->Dictionary:
 	var unit:=String((WORDS.get(id,{}) as Dictionary).get("unit","%"))
 	parts.append("an ordinary %s %s" % [title,"0%" if unit=="%" else "0"+unit])
 	var best:Dictionary={}
-	var list:=shortlist(office,1)
+	# Nobody can be named to an office not yet open: only the stand-in counts.
+	var list:Array=shortlist(office,1) if not bool(who.acting) else []
 	if not list.is_empty():
 		var cand:Dictionary=list[0]
 		var est:Dictionary=cand.estimate
@@ -597,10 +598,17 @@ static func card(office:String)->Dictionary:
 	if bool(who.acting): tip+=" No %s sits yet: %s stands in and carries half of it." % [title,String((who.person as Dictionary).get("name","the headman"))]
 	if r<0.995: tip+=" With %s people, our clerks carry %d in 100 of an official's hand to them." % [_count(float(WorldSimulation.state.population_exact)),roundi(r*100.0)]
 	if not best.is_empty() and float(best.sure)<0.95:
-		tip+=" %s is a guess from their record: somewhere between %s and %s." % [String(best.name).get_slice(" ",0),_range_word(office,float(best.low)),_range_word(office,float(best.high))]
+		tip+=" %s is a guess from their record: somewhere between %s." % [String(best.name).get_slice(" ",0),_range_words(office,float(best.low),float(best.high))]
 	var notes:=trait_notes(who.person,id) if not (who.person as Dictionary).is_empty() else []
 	if not notes.is_empty(): tip+=" Their nature counts too: %s." % ", ".join(PackedStringArray(notes)).to_lower()
 	return {"lever_id":id,"text":" · ".join(parts),"tip":tip,"holder":lever,"ordinary":applied(office,at(office,0.0)),"best":best,"acting":bool(who.acting),"vacant":bool(who.vacant)}
+
+## Two ends of a guess, the smaller first: "+14% and +20%".
+static func _range_words(office:String,a:float,b:float)->String:
+	var id:=String((LEVERS.get(office,{}) as Dictionary).get("id",""))
+	var sa:=float(size_of(id,a))*(1.0 if is_better(id,a) else -1.0)
+	var sb:=float(size_of(id,b))*(1.0 if is_better(id,b) else -1.0)
+	return "%s and %s" % [_range_word(office,a),_range_word(office,b)] if sa<=sb else "%s and %s" % [_range_word(office,b),_range_word(office,a)]
 
 static func _range_word(office:String,lever:float)->String:
 	var id:=String((LEVERS.get(office,{}) as Dictionary).get("id",""))
@@ -765,7 +773,7 @@ static func compare_line(office:String,candidate:Dictionary,dead:Dictionary)->St
 	var est:=estimate(candidate,office)
 	var guess:=applied(office,float(est.value))
 	var line3:=_would(office,guess)
-	if float(est.sure)<0.9: line3+=", a guess between %s and %s" % [_range_word(office,applied(office,float(est.low))),_range_word(office,applied(office,float(est.high)))]
+	if float(est.sure)<0.9: line3+=", a guess between %s" % _range_words(office,applied(office,float(est.low)),applied(office,float(est.high)))
 	if not dead.is_empty(): line3+=" (%s's: %s)" % [dead_given,_lever_sentence(office,applied(office,person_lever(dead,office))).to_lower()]
 	return line3
 
@@ -788,14 +796,14 @@ static func shortlist_rows(office:String,limit:int=3)->Array[Dictionary]:
 			out.append({"person_id":int(row.person_id),"name":String(row.name),"text":"%s: the home band %+d%%" % [String(row.name).get_slice(" ",0),roundi(guess*100.0)],
 				"tip":"A guess from their record: the home band would fight between %+d%% and %+d%% under them. Summon them to the court and say \"make %s our %s\" to appoint them." % [roundi((guess-spread)*100.0),roundi((guess+spread)*100.0),String(row.name).get_slice(" ",0),office_title(office).to_lower()]})
 		return out
-	if not LEVERS.has(office): return out
+	if not LEVERS.has(office) or bool(holder_of(office).acting): return out
 	for cand:Dictionary in shortlist(office,limit):
 		var person:Dictionary=cand.person
 		var est:Dictionary=cand.estimate
 		var guess:=applied(office,float(est.value))
 		var given:=String(person.get("name","")).get_slice(" ",0)
 		var tip:="%s %s." % [given,_would(office,guess)]
-		if float(est.sure)<0.9: tip+=" A guess from their record: between %s and %s; the longer they serve, the surer it gets." % [_range_word(office,applied(office,float(est.low))),_range_word(office,applied(office,float(est.high)))]
+		if float(est.sure)<0.9: tip+=" A guess from their record: between %s; the longer they serve, the surer it gets." % _range_words(office,applied(office,float(est.low)),applied(office,float(est.high)))
 		tip+=" Summon them to the court and say \"make %s our %s\" to appoint them." % [given,office_title(office).to_lower()]
 		out.append({"person_id":int(person.get("person_id",0)),"name":String(person.get("name","")),"text":"%s %s" % [given,_would(office,guess)],"tip":tip})
 	return out

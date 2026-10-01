@@ -242,3 +242,16 @@ func test_the_research_atlas_names_the_leaders_own_skills_and_the_pace()->void:
 	var line:String=preload("res://scripts/hud/research_atlas.gd")._leader_line({"office":"Steward","requested_office":"Steward","person_id":int(holder.person_id),"vacant":false,"skills":["Administration","Construction"]})
 	assert_str(line).contains("administration %d" % roundi(GovernmentPeopleSystem.skill_value(holder,"Administration")))
 	assert_str(line).contains("than under an ordinary leader")
+
+
+func test_plain_words_for_no_change_and_no_candidates_for_an_office_not_yet_open()->void:
+	assert_str(Levers._lever_sentence("Envoy",0.0)).is_equal("Envoys win as much favour as an ordinary one's")
+	assert_str(Levers._lever_sentence("Quartermaster",1.0)).is_equal("As much rots as under an ordinary one")
+	# A guess's range reads smaller to larger whichever way the lever runs.
+	assert_str(Levers._range_words("Quartermaster",0.80,0.86)).is_equal("+14% and +20%")
+	# Before the keeper's office opens only the headman can stand in: no one else is offered.
+	GovernmentPeopleSystem.government_stage=0
+	_seat("Steward",_person(913,{"Provisioning":80}))
+	GameState.leadership_positions.erase("Quartermaster")
+	assert_array(Levers.shortlist_rows("Quartermaster",3)).is_empty()
+	assert_bool((Levers.card("Quartermaster").best as Dictionary).is_empty()).is_true()
