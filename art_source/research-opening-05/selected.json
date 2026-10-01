@@ -1,0 +1,51 @@
+[
+  {
+    "id": "drainage",
+    "line": "infrastructure",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f4c73635-bee3-42ec-9dad-3e27c9718a3e.png",
+    "prompt": "Create a replacement research banner for Tomorrow and Tomorrow, matching the supplied CURRENT GAME banner's wide canvas proportions (approximately 2057 x 765, 2.7:1 landscape), flat matte casein-gouache treatment, adult figure drawing, mineral blue/cool ivory/limestone/slate palette, hand-brushed planar forms and restrained grain. This is an infrastructure illustration titled internally drainage; NO visible text. Change the subject completely to earliest-stage runoff drainage: two adults wearing crude ragged untreated hide wraps use crooked wooden digging sticks to scrape a shallow narrow surface channel that diverts rainwater downhill AWAY from a dry sleeping hide underneath one low irregular hide-and-branch windbreak. A little water follows the channel toward lower ground; dry sleeping area remains clearly visible beside it. Portable camp only, no house, wall, thatched hut, ceramic pot, basket, woven cloth, metal spade, boots, domestic chickens, farm or finished infrastructure. Match the reference's flat two-dimensional depiction: simplified dignified adult faces, painted silhouettes, broad opaque planes, no photographic skin or water reflections, no cinematic sunset, no 3D or impasto relief. Keep both faces, digging hands, channel and dry sleeping hide in a tight central horizontal band suitable for a 3.37:1 card crop. Full-bleed WIDE banner, retain supplied reference's width-to-height proportions; not square or 3:2. No decorative frame, writing, labels or watermark.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/hazard_landmark_memory-v1.png",
+    "mode": "built-in image_gen / reference-guided new subject",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "review": "Full original 2055x765 inspected. Flat mineral blue casein gouache matches actual 2057x765 current infrastructure reference. Two rough-hide adults scrape shallow runoff away from dry hide sleeping shelter using crooked raw sticks. No ceramic pots, baskets, permanent hut, shovels, boots or photography. User rejected the old photographic source and incorrect 3:2 starting format; this source uses current wide banner proportions."
+  },
+  {
+    "id": "aptitude_trials",
+    "line": "labor",
+    "game_year": 4,
+    "version": 3,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8574c506-52e9-4036-b403-fa0a1582d158.png",
+    "prompt": "Correct only the framing of this current-game wide charcoal/ochre painting. Keep the SAME approximately 2058x764 canvas, flat expressive charcoal marks over ochre wash, three adult hide-clad characters, mentor pointing to flint handling, other adult sorting raw stems, no basket. Recompose the three foreground people SMALLER within the wide canvas: show every complete head with at least 90 pixels of breathing room above, and keep their faces, mentor's pointing hand, stem-sorting hands, flint-holding hands and stones all inside the central horizontal 70 percent of image height. Reduce oversized close-up figures to achieve this; add only simple ochre camp/sky space above and below. No new tools, no containers, no written text, no photography, no 3D, no thick oil-paint treatment. Preserve wide banner proportions; don't make square or 3:2.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/aptitude_trials-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full wide original inspected: reduced figures preserve complete heads and all aptitude hands across central band, basket absent, charcoal/ochre rendering and current 2058x764 format retained. Framing corrected after actual GPU card showed heads cut off.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3397fe25-1df6-408d-b8d8-2e9ae97a1e82.png",
+    "initial_prompt": "Edit this CURRENT GAME wide charcoal-over-ochre research banner with minimal changes. Preserve its approximately 2059x764 wide canvas proportions, adult figures, expressive flat charcoal drawing, ochre wash, silhouettes, rough-hide clothing and hand/tool composition. It depicts an older adult comparing aptitude of two new adult workers sorting wild stems and flint. Remove the woven basket at far left entirely; replace it with a loose open scrap of raw hide holding a few wild stems, no container. Remove any shaped refined tool shafts or neat prepared poles in background; keep crude crooked branch supports and ragged hides. Preserve central mentor pointing at young adult's flint handling, and adult on left separating raw stems. Do not convert style to photography, CGI, oil impasto, glossy relief, cinematic lighting or cartoon. Keep current wide format, no 3:2 or square canvas. No text, labels or decorative border."
+  },
+  {
+    "id": "controlled_flaking",
+    "line": "production",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3b4968de-d65c-4758-8c2d-fff176e2fee7.png",
+    "prompt": "Make exactly one tiny correction to this image: extend or move the narrow tip of the pale raw antler tine a few pixels left so it visibly touches and presses the gray flint edge at the flake-removal point. There must be NO GAP between antler tip and stone edge. Preserve EVERYTHING ELSE: the wide approximately 2056x765 canvas, current game flat angular impasto-painted hands and limited ochre/umber/copper palette, all hand positions, rough hide, background and loose chips. No added text or objects, no photographic detail. This is pressure flaking, the contact is the whole mechanism.",
+    "initial_prompt": "Make a new CURRENT GAME production research banner using the supplied actual production banner as a strict visual style and canvas reference. Preserve its approximately 2057x765 WIDE 2.7:1 format, flat angular hand shapes, simplified finger planes, copper/ember/soot/umber pigment and palette-knife marks. Change the action to PRESSURE FLAKING: one adult hand supports a small thin flint point on raw hide, the other hand grips a short irregular raw antler tine whose narrow tip presses directly against the stone's edge; a tiny narrow flake breaks away at this contact, other small flakes below. Keep whole hands and contact centered across the wide frame, no faces needed. Match reference's visibly painted simplified hands, no photographic anatomy, nails, lifelike skin, cinematic light, glossy digital relief or 3D. No hammerstone, metal, pot, textile, refined tool or writing. Full-bleed wide banner, don't change to 3:2 or square. All key action inside central horizontal band suitable for 3.37:1 card crop. No borders or labels.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7519b464-9dd1-4d98-a34f-7794f0ab265b.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/edge_testing_by_feel-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "review": "Wide 2055x765 source inspected. Actual current production reference anchors simplified angular copper/umber painted hands and wide canvas. Raw antler tine directly contacts flint edge, narrow released chip visible. One targeted contact correction retained all other composition. Prior unreferenced 3:2 result held and unbound after user aesthetic/width correction."
+  }
+]
