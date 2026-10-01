@@ -48,3 +48,18 @@ func test_supply_shortfall_slows_real_march_and_resupply_restores_pace()->void:
 	assert_str(String(order.message)).contains("march is slowed")
 	for day in 25:MilitaryCampaign.record_daily_provisions(100,100)
 	assert_float(MilitaryCampaign._field_army_speed(MilitaryCampaign.field_armies[0])).is_greater(slow)
+
+func test_a_band_leaves_a_lakeside_town_whose_road_begins_off_the_shore()->void:
+	# The town sits a little off the sampled shore: the first stretch of its
+	# road is water until dry ground. The band walks it as its road out of
+	# town; it used to re-plan the same road every day and never leave.
+	CivilizationSystem.set_scout_geography_authority(func(point:Vector2)->bool:return point.x>=0.6)
+	MilitaryCampaign.field_armies[0].position={"x":0.0,"z":0.0}
+	var order:=MilitaryCampaign.move_field_army_to_position(1,30,0)
+	assert_bool(order.has("ok")).override_failure_message(str(order)).is_true()
+	var total:=float(MilitaryCampaign.field_armies[0].distance_total_km)
+	for day in 3:MilitaryCampaign._process_field_army_movement_day()
+	var army:Dictionary=MilitaryCampaign.field_armies[0]
+	assert_float(float(army.position.x)).is_greater(0.6)
+	assert_float(float(army.get("distance_remaining_km",total))).is_less(total)
+	assert_str(String(army.get("movement_block_reason",""))).is_empty()

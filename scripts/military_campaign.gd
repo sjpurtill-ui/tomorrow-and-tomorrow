@@ -1187,6 +1187,18 @@ func field_route_availability(start:Vector2,target:Vector2)->Dictionary:
 			return {"error":"Water lies on the straight line between them."}
 	return {"ok":true}
 
+## How far along a road the first dry ground lies when the road begins off
+## the sampled shore (a lakeside or coastal town): 0 when it begins on land.
+## At most ten km: further water is water.
+static func _shore_start_km(origin:Vector2,legs:Array,land:Callable)->float:
+	if not land.is_valid() or bool(land.call(origin)): return 0.0
+	var km:=0.0
+	while km<10.0:
+		km+=ArmyLandRoute.SAMPLE_KM
+		if bool(land.call(ArmyLandRoute.point_along(origin,legs,km))): return km
+	return 0.0
+
+
 func field_route(start:Vector2,target:Vector2,force:Dictionary={})->Dictionary:
 	## The general's road for this force (march_terrain.gd weighs the ground:
 	## round mountains, through passes, to fords, along our roads; round
@@ -1807,8 +1819,15 @@ func _process_field_army_movement_day()->void:
 		var wet:=0.0
 		var dry:=true
 		var probe:=walked_before
+		# A road out of a lakeside or coastal town begins a little off the
+		# sampled shore: the planner runs it from the town to the nearest dry
+		# ground (army_land_route nearest_land). That stretch is the road out
+		# of town, not new water; counted as water, the band re-planned the
+		# same road every day and never left home.
+		var shore:=_shore_start_km(origin,legs,land)
 		while probe<walked and dry:
 			probe=minf(walked,probe+ArmyLandRoute.SAMPLE_KM)
+			if probe<=shore: continue
 			if bool(land.call(ArmyLandRoute.point_along(origin,legs,probe))): wet=0.0
 			else:
 				wet+=ArmyLandRoute.SAMPLE_KM
@@ -1816,18 +1835,22 @@ func _process_field_army_movement_day()->void:
 		if not dry:
 			ArmyLandRoute.clear_cache()
 			var detour:=field_route(previous_point,destination,army)
-			army["distance_remaining_km"]=remaining+traveled
-			if detour.has("error"):
-				army["status"]="stationed";army["location_id"]="field_position";army["location_name"]="Halted: no road on";army["destination_id"]=""
-				army["movement_block_reason"]=String(detour.error)
-				army=_dispatch_army_runner(army,int(WorldSimulation.state.elapsed_days));field_armies[index]=army
+			# The same road again: the general keeps to it and walks on, never
+			# re-planning it day after day where he stands.
+			var same_road:=not detour.has("error") and absf(float(detour.get("length_km",0.0))-(float(army.get("distance_total_km",0.0))-walked_before))<0.5
+			if not same_road:
+				army["distance_remaining_km"]=remaining+traveled
+				if detour.has("error"):
+					army["status"]="stationed";army["location_id"]="field_position";army["location_name"]="Halted: no road on";army["destination_id"]=""
+					army["movement_block_reason"]=String(detour.error)
+					army=_dispatch_army_runner(army,int(WorldSimulation.state.elapsed_days));field_armies[index]=army
+					continue
+				army["origin_position"]={"x":previous_point.x,"z":previous_point.y}
+				_set_march_route(army,detour)
+				army["distance_total_km"]=float(detour.length_km)
+				army["distance_remaining_km"]=float(detour.length_km)
+				field_armies[index]=army
 				continue
-			army["origin_position"]={"x":previous_point.x,"z":previous_point.y}
-			_set_march_route(army,detour)
-			army["distance_total_km"]=float(detour.length_km)
-			army["distance_remaining_km"]=float(detour.length_km)
-			field_armies[index]=army
-			continue
 		army["march_travelled_km"]=walked
 		army["march_effort_done"]=done
 		var current:=ArmyLandRoute.point_along(origin,legs,walked) if not arrived else destination
