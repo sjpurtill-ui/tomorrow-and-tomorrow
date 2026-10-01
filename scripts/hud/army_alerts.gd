@@ -123,6 +123,11 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 		for band:Dictionary in council.call("incoming"): coming.append(threat_line(band,today))
 		for engagement_variant in mc.own_engagements.values():
 			if engagement_variant is Dictionary and not (engagement_variant as Dictionary).is_empty(): fighting.append(battle_line(engagement_variant))
+		# Our home besieged: told while it lasts (it is lost only if the ruler yields it).
+		var siege:Dictionary=mc.active_siege
+		if String(siege.get("mode",""))=="defensive":
+			var home:=String((siege.get("home_city",{}) as Dictionary).get("name","our home"))
+			fighting.append("%s besieged · day %d · yours unless you yield it" % [home,maxi(1,today-int(siege.get("start_day",today)))])
 		for record_variant in mc.battle_history:
 			if not record_variant is Dictionary: continue
 			if today-int((record_variant as Dictionary).get("day",-100000))>RECENT_DAYS: break

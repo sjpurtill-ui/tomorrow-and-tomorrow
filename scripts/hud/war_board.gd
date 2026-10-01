@@ -203,7 +203,38 @@ Worn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("o
 		pay.pressed.connect(func()->void:_stance(civ_id,"pay","war_price"))
 		stances.add_child(pay)
 	column.add_child(_led_by(civ_id))
+	var besieged:=_yield_home(civ_id)
+	if besieged!=null:column.add_child(besieged)
 	return panel
+
+
+## When this people besieges our home, the one way to give it up. Home is
+## never lost by pulling back or by a lost fight (field_sustainment,
+## civilization_siege): only by the ruler's word. Two presses, the second
+## within a few seconds, because it cannot be undone.
+func _yield_home(civ_id:String)->Control:
+	var siege:Dictionary=MilitaryCampaign.active_siege
+	if String(siege.get("mode",""))!="defensive":return null
+	var by:=String(siege.get("attacker_id",""))
+	if by!=civ_id and String((siege.get("threat",{}) as Dictionary).get("source_civ_id",""))!=civ_id:return null
+	var home:=String((siege.get("home_city",{}) as Dictionary).get("name",WorldSimulation.state.settlement_name))
+	var days:=maxi(1,int(WorldSimulation.state.elapsed_days)-int(siege.get("start_day",WorldSimulation.state.elapsed_days)))
+	var row:=HBoxContainer.new();row.name="Besieged";row.add_theme_constant_override("separation",10)
+	var said:=_line("They besiege %s: day %d. It is lost only if you yield it." % [home,days],14,T.RED_TEXT,true);said.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	row.add_child(said)
+	var give:=Button.new();give.name="YieldHome";give.text="Yield %s" % home;give.focus_mode=Control.FOCUS_NONE
+	give.tooltip_text="Give %s up to them. Our people there live on under their rule. It cannot be undone." % home
+	give.pressed.connect(func()->void:
+		if not give.has_meta("armed"):
+			give.set_meta("armed",true);give.text="Press again to yield %s" % home
+			get_tree().create_timer(4.0).timeout.connect(func()->void:
+				if is_instance_valid(give) and give.has_meta("armed"):give.remove_meta("armed");give.text="Yield %s" % home)
+			return
+		var result:Dictionary=MilitaryCampaign.siege_order(String(siege.get("id","")),"surrender")
+		_say(String(result.get("message",result.get("error","%s is yielded." % home))))
+		refresh(true))
+	row.add_child(give)
+	return row
 
 
 ## Who leads against this people: the war leader's choice, or a general the

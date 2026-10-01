@@ -166,3 +166,21 @@ func test_an_open_menu_is_never_rebuilt_under_the_rulers_hand()->void:
 	take.get_popup().visible=false
 	board.refresh()
 	assert_object(board.find_child("Enemy_%s" % civ_id,true,false)).is_not_same(row)
+
+func test_a_besieged_home_is_yielded_only_by_the_rulers_second_press()->void:
+	WAR.blood_feud(civ_id,10,"the killing of their envoy Qira")
+	MilitaryCampaign.active_siege={"id":"s1","mode":"defensive","attacker_id":civ_id,"start_day":2,"home_city":{"id":"home","name":"Ashford"},"threat":{"source_civ_id":civ_id}}
+	var board:VBoxContainer=auto_free(Board.new())
+	add_child(board)
+	board.setup({})
+	var give:Button=board.find_child("YieldHome",true,false)
+	assert_object(give).is_not_null()
+	assert_str(give.text).is_equal("Yield Ashford")
+	# The first press only asks again; the siege stands.
+	give.pressed.emit()
+	assert_str(give.text).is_equal("Press again to yield Ashford")
+	assert_str(String(MilitaryCampaign.active_siege.get("id",""))).is_equal("s1")
+	# The alerts under the clock tell it while it lasts.
+	var fighting:=preload("res://scripts/hud/army_alerts.gd").alerts().filter(func(a:Dictionary)->bool:return String(a.id)=="battle")
+	assert_str(String((fighting[0].lines as PackedStringArray)[0])).starts_with("Ashford besieged · day ")
+	MilitaryCampaign.active_siege={}
