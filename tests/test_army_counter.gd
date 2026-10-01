@@ -172,6 +172,18 @@ func test_alerts_say_what_is_wrong_with_our_fighters()->void:
 	assert_str(String(shown[ids.find("men")].page)).is_equal("recruitment")
 	WorldSimulation.clear()
 
+func test_a_resting_band_reads_resting_and_near_break_is_one_line()->void:
+	var Marks:=preload("res://scripts/hud/battle_marks.gd")
+	assert_str(Marks.state_of({"resting":true,"hungry":true})).is_equal("resting")
+	assert_str(Marks.state_words("resting")).is_equal("resting and refilling")
+	assert_str(Marks.state_of({"resting":true,"fighting":true})).is_equal("fighting")
+	# Close to breaking is a tenth above the one break line (army_lines.gd).
+	var Lines:=preload("res://scripts/army_lines.gd")
+	assert_float(preload("res://scripts/hud/army_bar_model.gd").NEAR_BREAK).is_equal_approx(Lines.BREAK+0.1,0.0001)
+	assert_float(preload("res://scripts/hud/army_alerts.gd").LOW_WILL).is_equal_approx(Lines.BREAK+0.1,0.0001)
+	assert_float(preload("res://scripts/hud/battle_marker_source.gd").MORALE_BREAK).is_equal(Lines.BREAK)
+	assert_str(preload("res://scripts/hud/army_marks.gd")._plain_status("withdrawing to rest")).is_equal("falling back to rest")
+
 func test_their_band_on_the_march_is_told_under_the_clock()->void:
 	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
 	var Council:=preload("res://scripts/war_council.gd")

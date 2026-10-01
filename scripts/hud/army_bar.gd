@@ -350,7 +350,7 @@ class ArmyCard extends Control:
 			if rect.has_point(at):
 				match row:
 					0:return Model.gear_words(card.get("gear_detail",{}))
-					1:return Model.will_words(float(card.will))+"\nBelow a quarter they break."
+					1:return Model.will_words(float(card.will))+"\nA band %s." % preload("res://scripts/army_lines.gd").BREAK_WORDS
 					2:return Model.supply_line(card)
 		return Model.tooltip(card)
 

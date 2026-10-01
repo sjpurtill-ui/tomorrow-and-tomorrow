@@ -400,7 +400,7 @@ func _refresh_force_card()->void:
 	var gear:Dictionary=card.get("gear_detail",{})
 	force_meters[0].clickable=not (gear.get("missing",{}) as Dictionary).is_empty()
 	force_meters[0].set_reading(float(card.get("gear",1.0)),"%d%%" % roundi(float(card.get("gear",1.0))*100),BarModel.gear_color(float(card.get("gear",1.0))),BarModel.gear_words(gear))
-	force_meters[1].set_reading(float(card.get("will",0.6)),"%d%%" % roundi(float(card.get("will",0.6))*100),BarModel.will_color(float(card.get("will",0.6))),BarModel.will_words(float(card.get("will",0.6)))+"\nBelow a quarter they break.")
+	force_meters[1].set_reading(float(card.get("will",0.6)),"%d%%" % roundi(float(card.get("will",0.6))*100),BarModel.will_color(float(card.get("will",0.6))),BarModel.will_words(float(card.get("will",0.6)))+"\nA band %s." % preload("res://scripts/army_lines.gd").BREAK_WORDS)
 	force_meters[2].set_reading(float(card.get("supply",1.0)),"%d%%" % roundi(float(card.get("supply",1.0))*100),BarModel.supply_color(String(card.get("supply_state","well"))),BarModel.supply_line(card))
 
 func _refresh_where()->void:

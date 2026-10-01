@@ -629,7 +629,7 @@ func collect()->Dictionary:
 				"location_name":String(army.get("location_name","")),"command_status":String(army.get("command_status","")),"at_home":at_home,
 				"home_km":ArmyMarks.home_km(shown if shown.has("position") else army,home),
 				"delta":(objective-pos) if objective.is_finite() else Vector2.ZERO,"days_left":int(entry.get("days_left",0)),"pursuit":Pursuit.doing_words(army),
-				"hungry":preload("res://scripts/field_rations.gd").is_hungry(army),"broken":morale<ArmyMarks.BROKEN_MORALE or condition=="shattered"}})
+				"hungry":preload("res://scripts/field_rations.gd").is_hungry(army),"broken":morale<ArmyMarks.BROKEN_MORALE or condition=="shattered","resting":bool(army.get("resting",false))}})
 		if army.get("pursuit") is Dictionary:
 			entry["detachment_of"]=String((army.pursuit as Dictionary).get("town",""))
 			entry["chasing"]=String((army.pursuit as Dictionary).get("state",""))=="chasing"
@@ -2304,12 +2304,12 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 		hits.append({"kind":"sighting","centre":rect.get_center(),"radius":reach,"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"mark":true})
 
 
-## The drafts drilling at home for a band (training_queue field drafts).
+## The drafts coming to a band: on the road and still in drill at home
+## (field_sustainment.gd drafts_for, the one record of them).
 static func drafts_for(army_id:int)->int:
-	var count:=0
-	for o in MilitaryCampaign.training_queue:
-		if o is Dictionary and String((o as Dictionary).get("mode",""))=="field_draft" and int((o as Dictionary).get("army_id",0))==army_id: count+=maxi(0,int((o as Dictionary).get("count",0)))
-	return count
+	if army_id<=0:return 0
+	var drafts:Dictionary=MilitaryCampaign.sustainment.drafts_for(army_id)
+	return maxi(0,int(drafts.get("on_road",0)))+maxi(0,int(drafts.get("in_training",0)))
 
 
 ## A mark whose card on the army bar is under the pointer (army_bar

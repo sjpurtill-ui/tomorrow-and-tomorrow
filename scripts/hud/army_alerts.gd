@@ -19,8 +19,9 @@ const Rations:=preload("res://scripts/field_rations.gd")
 const REFRESH_SECONDS:=1.0
 ## A band under this share of its full strength is under strength.
 const UNDER_STRENGTH:=0.5
-## A band's will under this is ready to break.
-const LOW_WILL:=0.3
+## A band's will under this is ready to break: within a tenth of the one
+## break line (army_lines.gd).
+const LOW_WILL:=preload("res://scripts/hud/army_bar_model.gd").NEAR_BREAK
 ## A battle stays under the clock this many days after it is fought.
 const RECENT_DAYS:=10
 const RED:=Color("#a8463a")

@@ -198,8 +198,11 @@ static func draw_bar(canvas:CanvasItem,rect:Rect2,share:float,fill:Color)->void:
 ## One colour per bar, so gear, will and supply read apart at a glance:
 ## gear steel blue (amber when short), will violet (red when they are
 ## close to breaking), supply by its state (green, amber, red).
+## Within a tenth of the break line (army_lines.gd): close to breaking.
+const NEAR_BREAK:=preload("res://scripts/army_lines.gd").BREAK+0.1
+
 static func will_color(will:float)->Color:
-	return T.RED if will<0.3 else T.VIOLET
+	return T.RED if will<NEAR_BREAK else T.VIOLET
 
 
 static func gear_color(share:float)->Color:
@@ -207,7 +210,7 @@ static func gear_color(share:float)->Color:
 
 
 static func will_words(will:float)->String:
-	return "Will to fight %d%%%s." % [roundi(will*100.0)," · close to breaking" if will<0.3 else ""]
+	return "Will to fight %d%%%s." % [roundi(will*100.0)," · close to breaking" if will<NEAR_BREAK else ""]
 
 
 ## "Supply 82%: fed" and the supply reading's own words.
@@ -273,7 +276,7 @@ static func army_card(mc:Node,army:Dictionary)->Dictionary:
 		besieging=String((mc.active_siege.get("threat",{}) as Dictionary).get("target_region_name","the town"))
 	var status:=String(shown.get("status",army.get("status","stationed")))
 	var hungry:=Rations.is_hungry(army)
-	var context:={"status":status,"fighting":fighting,"hungry":hungry,"broken":will<ArmyMarks.BROKEN_MORALE,"besieging":besieging}
+	var context:={"status":status,"fighting":fighting,"hungry":hungry,"broken":will<ArmyMarks.BROKEN_MORALE,"besieging":besieging,"resting":bool(army.get("resting",false))}
 	var state:=BattleMarks.state_of(context)
 	var position:=_v2(shown.get("position",army.get("position",{})))
 	var destination:=String(army.get("destination_name",""))
@@ -323,7 +326,7 @@ static func _garrison_card(mc:Node,force:Dictionary)->Dictionary:
 	var state:="broken" if will<ArmyMarks.BROKEN_MORALE else ("hungry" if hungry else "holding")
 	return {"id":"garrison:%s/%s" % [String(force.get("civ_id","")),String(force.get("region_id",""))],"kind":"garrison","army_id":-1,"members":[],
 		"civ_id":String(force.get("civ_id","")),"region_id":String(force.get("region_id","")),"title":"Garrison of %s" % town,"short":town,"general":general,
-		"noun":"garrison","men":men,"full":maxi(men,ceili(float(force.get("required",men)))),"gear":gear.share,"gear_detail":gear,"will":will,
+		"noun":"garrison","men":men,"full":maxi(men,ceili(float(force.get("need",force.get("required",men))))),"gear":gear.share,"gear_detail":gear,"will":will,
 		"supply":float(supply.ratio),"supply_state":String(supply.state),"supply_words":String(supply.words),"state":state,"doing":"holding %s" % town,
 		"position":Pursuit.town_position(String(force.get("region_id",""))),"report_age":0,"unknown":false,"home":false,"live":true,
 		"name":town,"drill":make.drill,"seen":make.seen,"kinds":make.kinds}

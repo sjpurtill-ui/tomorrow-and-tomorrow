@@ -260,6 +260,7 @@ static func cluster(entries:Array,radius:float)->Array:
 static func state_of(context:Dictionary)->String:
 	if bool(context.get("broken",false)): return "broken"
 	if bool(context.get("fighting",false)): return "fighting"
+	if bool(context.get("resting",false)): return "resting"
 	if bool(context.get("hungry",false)): return "hungry"
 	if String(context.get("besieging",""))!="": return "besieging"
 	if String(context.get("status",""))=="moving" or bool(context.get("withdrawing",false)): return "marching"
@@ -267,7 +268,7 @@ static func state_of(context:Dictionary)->String:
 
 
 static func state_words(state:String)->String:
-	return String({"marching":"on the march","holding":"holding","besieging":"besieging","fighting":"in battle","broken":"broken","hungry":"short of food"}.get(state,""))
+	return String({"marching":"on the march","holding":"holding","besieging":"besieging","fighting":"in battle","broken":"broken","hungry":"short of food","resting":"resting and refilling"}.get(state,""))
 
 
 # --- Drawing (on the overlay's own canvas) -------------------------------------------------

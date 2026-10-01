@@ -263,7 +263,7 @@ static func tile_specs(sums_now:Dictionary,cards:Array,logistics:float,war_leade
 	var ceiling:=(0.55+0.45*supply)*100.0
 	out.append({"key":"will","title":"Organization","value":"%d%%" % roundi(will*100.0) if bands>0 else "—","share":will,"color":BarModel.will_color(will),
 		"line":("%d ready to break" % int(sums_now.breaking)) if int(sums_now.breaking)>0 else ("+%.1f a day in camp, up to %d%%" % [regain,roundi(ceiling)] if bands>0 else "no bands"),
-		"tip":"Their will to fight, by their men. At rest a band regains up to %.0f points a day in full supply (a third of it on the march), less when short of food, and more under a leader with good logistics (x0.9 to x1.1); a hungry band loses heart instead. Below a quarter they break." % (Sustain.MORALE_REST*100.0)})
+		"tip":"Their will to fight, by their men. At rest a band regains up to %.0f points a day in full supply (a third of it on the march), less when short of food, and more under a leader with good logistics (x0.9 to x1.1); a hungry band loses heart instead. A band %s." % [Sustain.MORALE_REST*100.0,preload("res://scripts/army_lines.gd").BREAK_WORDS]})
 	var marching:=int(sums_now.marching)
 	var foraging:=0
 	for card:Dictionary in cards:
