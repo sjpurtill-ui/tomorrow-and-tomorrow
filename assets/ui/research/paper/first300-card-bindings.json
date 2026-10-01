@@ -141,5 +141,7 @@
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
   "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
   "drainage": "res://assets/ui/research/subjects/drainage-v2.png",
-  "controlled_flaking": "res://assets/ui/research/subjects/controlled_flaking-v2.png"
+  "controlled_flaking": "res://assets/ui/research/subjects/controlled_flaking-v2.png",
+  "fiber_grading": "res://assets/ui/research/subjects/fiber_grading-v2.png",
+  "hearth_heat_retention": "res://assets/ui/research/subjects/hearth_heat_retention-v1.png"
 }

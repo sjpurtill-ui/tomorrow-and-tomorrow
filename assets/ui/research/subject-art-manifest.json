@@ -246,13 +246,7 @@
       0.5
     ]
   },
-  "fiber_grading": {
-    "path": "res://assets/ui/research/subjects/fiber_grading-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "fiber_grading": {"path": "res://assets/ui/research/subjects/fiber_grading-v2.png", "focus": [0.5, 0.45], "opening_focus": [0.5, 0.45]},
   "woven_carriers": {
     "path": "res://assets/ui/research/subjects/woven_carriers-v1.png",
     "focus": [
@@ -3671,7 +3665,7 @@
   "dawn_readiness_drill": {"path": "res://assets/ui/research/subjects/dawn_readiness_drill-v2.png", "focus": [0.5, 0.5]},
   "dissenting_voice_custom": {"path": "res://assets/ui/research/subjects/dissenting_voice_custom-v1.png", "focus": [0.5, 0.5]},
   "fever_watch_customs": {"path": "res://assets/ui/research/subjects/fever_watch_customs-v2.png", "focus": [0.5, 0.4]},
-  "paired_carrier_balancing": {"path": "res://assets/ui/research/subjects/paired_carrier_balancing-v1.png", "focus": [0.5, 0.4]},
+  "paired_carrier_balancing": {"path": "res://assets/ui/research/subjects/paired_carrier_balancing-v2.png", "focus": [0.5, 0.45]},
   "sleeping_area_rotation": {"path": "res://assets/ui/research/subjects/sleeping_area_rotation-v2.png", "focus": [0.5, 0.5]},
   "symptom_sharing_customs": {"path": "res://assets/ui/research/subjects/symptom_sharing_customs-v1.png", "focus": [0.5, 0.4]},
   "tool_hazard_awareness": {"path": "res://assets/ui/research/subjects/tool_hazard_awareness-v1.png", "focus": [0.5, 0.5]},
@@ -4227,5 +4221,7 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "hearth_heat_retention": {"path": "res://assets/ui/research/subjects/hearth_heat_retention-v1.png", "focus": [0.5, 0.45], "opening_focus": [0.5, 0.45]},
+  "genealogical_recitation": {"path": "res://assets/ui/research/subjects/genealogical_recitation-v1.png", "focus": [0.5, 0.5]}
 }

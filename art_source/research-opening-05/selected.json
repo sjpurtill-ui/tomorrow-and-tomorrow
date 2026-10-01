@@ -91,5 +91,73 @@
       0.5
     ],
     "review": "Full 2157x729 original inspected: three flat carved woodblock adults rehearse dawn readiness, raised hand/weapon cue, raw wooden/flint spears. Hut, baskets, pottery and canoe removed, one ragged hide windbreak retained. Complete adult faces and spear grips inside wide central band. Existing vermilion/charcoal/parchment medium retained."
+  },
+  {
+    "id": "fiber_grading",
+    "line": "ecology",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-67ebe986-c884-40a2-9af9-5f0adac3a4fa.png",
+    "prompt": "New ecology research banner strictly matching the supplied CURRENT GAME wide ecology painting's approximately 2060x763 canvas, flat naturalist plant-pigment rendering, moss/fern/earth/muted sky palette, detailed botanical foreground and flat landscape bands. New subject FIBER GRADING: two dignified adults in rough untreated hide wraps seated at a natural flat rock compare loose wild bast strips: one tests a long supple strand between hands; other compares coarse brittle short strips and separates them into distinct loose groups on raw hide. Wild stem/bark remnants beside them, no woven cloth, prepared baskets, machinery, polished workbench or cultivated field. The whole two heads, hands stretching strands and three fiber groups are kept close together inside central 70 percent height, generous breathing room at top/bottom for 3.37:1 crop. Mature flat clearly painted silhouettes and plant shapes, no photographic skin, depth blur, cinematic light, CGI or relief. Full bleed wide banner; no square or 3:2, no labels or border. The reference supplies rendering and width only, do not copy riverbank erosion subject.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/streambank_vegetation_watch-v1.png",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "replace_first300": true,
+    "review": "Full 2060x763 original inspected: two rough-hide adults test long supple strand and compare coarse brittle strips, three loose fiber groups on raw hide, wild stem remnants. Current naturalist plant pigments/detail against flat landscape bands retained. Replaces photo rendering, no basket or manufactured workbench."
+  },
+  {
+    "id": "hearth_heat_retention",
+    "line": "nutrition",
+    "game_year": 4,
+    "version": 1,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f76ca987-48a3-45c1-9e41-3774694a2a3e.png",
+    "prompt": "New nutrition research banner strictly matching supplied CURRENT GAME wide egg-tempera painting's approximately 2048x768 canvas, opaque flat pigment, olive/deep green/wheat gold/cream/earth palette, visible thin brush marks and mature simplified adult silhouettes. New subject HEARTH HEAT RETENTION: two adults in rough untreated hide wraps kneel beside low ember hearth. One uses crooked raw twig to bank pale ash over glowing coals; other positions one coarse natural stone beside hearth, irregular retained stone ring holds warmth. Clearly show exposed glowing coals adjacent to banked ash and stone placement, no big flames. Hide sleeping camp in distance with one low rough hide windbreak. No pottery, woven baskets, woven robes, farming, architecture, metal or refined tools. Reference supplies only paint medium/palette and wide format, none of its later costumes or baskets. Complete heads, twig-working hand, stone-placement hands, coals and ash fit central 70 percent height for 3.37:1 crop. No photographic light or skin, CGI, thick relief or text. Wide full bleed approximately 2.7:1 banner; not square or 3:2.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/seasonal_protein_sourcing-v1.png",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "replace_first300": true,
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/hearth_heat_retention.png",
+      "focus": [
+        0.5,
+        0.73
+      ],
+      "resolver": "EARLY_SUBJECTS"
+    },
+    "review": "Full 2054x766 original inspected: two rough-hide adults bank ash with crooked twig and position coarse stone beside glowing embers, exposed/banked coals and stone-placement hands visible. Current opaque earth/olive tempera retained with no reference baskets/costumes copied. Low portable hide windbreak only, no pottery or built structure."
+  },
+  {
+    "id": "genealogical_recitation",
+    "line": "culture",
+    "game_year": 4,
+    "version": 1,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2fbaceea-168e-4351-b011-480676d432cb.png",
+    "prompt": "New genealogical-recitation research banner matching supplied WIDE culture painting's approximately 2170x725 proportions and current game mature flat tapestry-inspired painted treatment: indigo, dusty rose, warm gold, dusk violet; angular interlocking pigment planes and coarse matte grain. Change scene to an elder reciting each household's lineage. Seated gray-haired elder at left speaks with one open hand directed toward a nearby three-generation household: gray-haired adult, adult parent, and child together. Another adult listener repeats the account with a small hand gesture toward their own household. Two distinct family groups, respectful listening, not a generic epic performance or mystical symbols. All wear rough ragged untreated hide wraps; natural rocks and small raw-hide windbreak only. No writing, record tablets, emblems, pottery, basket, woven costumes or finished buildings. Complete heads and elder's family-pointing hand/repeater gesture in the middle 70 percent of image height with clear margins above/below, suitable for 3.37:1 crop. Full-bleed wide banner matches reference shape, no 3:2 or square. No photography, CGI, cartoon, heavy raised oil relief or text.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/oral_epics-v3.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_art600": true,
+    "binding_style": "culture: tapestry-inspired painting",
+    "review": "Full 2170x725 banner inspected. Culture palette/angular interlocking pigment matches wide painted reference. Seated elder directs open hand to gray-haired adult, parent and child household; second adult repeater gestures toward another household. Two family groupings, raw hides, no physical tapestry, symbols, record tablet or refined camp. Replaces small silhouette tile with dedicated wide subject."
+  },
+  {
+    "id": "paired_carrier_balancing",
+    "line": "logistics",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bc6222f4-1941-4b29-8487-153c1bd0c502.png",
+    "prompt": "Edit this CURRENT GAME wide logistics watercolor banner, retain approximately 2059x764 proportions, mature flat moving indigo silhouettes, sand/slate/indigo watercolor washes and simple hide clothing. Keep two adults shouldering ONE crooked natural wooden pole with a heavy shared load suspended between them. Replace the woven/netted basket shape entirely with ONE irregular RAW HIDE sling hanging from four crude raw cord loops, containing loose wild roots and broken branch pieces. No basket weave or net grid. Keep load visibly balanced between shoulders. Reduce whole carriers slightly vertically, enough to show complete heads and both shoulder grips inside central 70 percent height; bring feet up slightly if needed for full-width composition. No refined yoke, metal, pottery, finished clothes or boats. Preserve reference's flat travel watercolor, no photography, CGI or thick oil relief. Wide banner unchanged, no square, no 3:2, no labels or border.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/paired_carrier_balancing-v1.png",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "review": "Full 2059x764 wide original inspected: two indigo adult silhouettes shoulder same crooked pole, four crude cord loops suspend one raw-hide sling containing wild roots/branch fragments. Woven/net basket removed. Current panoramic watercolor retained, faces/grips/load inside central band."
   }
 ]

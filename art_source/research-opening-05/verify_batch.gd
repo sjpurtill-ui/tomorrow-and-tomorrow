@@ -8,6 +8,7 @@ func _ready()->void:
 	assert(Art.focus_for({"id":"agreed_signal_codes"}).is_equal_approx(Vector2(.5,.5)))
 	assert(Art.focus_for({"id":"nut_kernel_shelling"}).is_equal_approx(Vector2(.5,.72)))
 	var rows:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-opening-05/selected.json"))
+	rows.append_array(JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-opening-05/retained.json")))
 	assert(not rows.is_empty())
 	var grid:=GridContainer.new();grid.columns=3;grid.position=Vector2(18,18);add_child(grid)
 	get_window().size=Vector2i(1440,1100)

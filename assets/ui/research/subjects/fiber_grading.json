@@ -1,9 +1,18 @@
 {
   "id": "fiber_grading",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Fiber Grading. Close still life of separate bundles of long bark fibers, fine grass fibers and coarse stems, hands testing the tensile strength of one strand; grading raw fiber, no finished rope or basket.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-47c0da5e-a795-4508-917f-56182e69bee5.png",
-  "asset": "res://assets/ui/research/subjects/fiber_grading-v1.png",
-  "sha256": "af1feacf2633058be7352632605e19a190f2cb0586fff3a36dfd97f6e9125a09",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "ecology",
+  "game_year": 4,
+  "version": 2,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-67ebe986-c884-40a2-9af9-5f0adac3a4fa.png",
+  "prompt": "New ecology research banner strictly matching the supplied CURRENT GAME wide ecology painting's approximately 2060x763 canvas, flat naturalist plant-pigment rendering, moss/fern/earth/muted sky palette, detailed botanical foreground and flat landscape bands. New subject FIBER GRADING: two dignified adults in rough untreated hide wraps seated at a natural flat rock compare loose wild bast strips: one tests a long supple strand between hands; other compares coarse brittle short strips and separates them into distinct loose groups on raw hide. Wild stem/bark remnants beside them, no woven cloth, prepared baskets, machinery, polished workbench or cultivated field. The whole two heads, hands stretching strands and three fiber groups are kept close together inside central 70 percent height, generous breathing room at top/bottom for 3.37:1 crop. Mature flat clearly painted silhouettes and plant shapes, no photographic skin, depth blur, cinematic light, CGI or relief. Full bleed wide banner; no square or 3:2, no labels or border. The reference supplies rendering and width only, do not copy riverbank erosion subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/streambank_vegetation_watch-v1.png",
+  "focus": [
+    0.5,
+    0.45
+  ],
+  "replace_first300": true,
+  "review": "Full 2060x763 original inspected: two rough-hide adults test long supple strand and compare coarse brittle strips, three loose fiber groups on raw hide, wild stem remnants. Current naturalist plant pigments/detail against flat landscape bands retained. Replaces photo rendering, no basket or manufactured workbench.",
+  "asset": "res://assets/ui/research/subjects/fiber_grading-v2.png",
+  "sha256": "dccf0849be34c2976bdc1ab7e5ded70ce406e816bff21d6a16f3299842c4d772",
+  "mode": "built-in image_gen / edit"
 }
