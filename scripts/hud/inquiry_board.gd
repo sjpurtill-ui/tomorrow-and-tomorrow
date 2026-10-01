@@ -84,7 +84,9 @@ func update_block(block:Dictionary)->bool:
 		var card:Dictionary=_cards[index]
 		(card.meter as ProgressBar).value=float(words.progress)*100
 		_put(card.line,String(words.evidence))
+		_put(card.step,String(words.step))
 		_put(card.phase,String(words.phase))
+		(card.phase as Label).visible=String(words.phase)!=""
 		if card.why!=null:_put(card.why,String(words.why))
 		if card.would!=null:_put(card.would,String(words.would))
 		(card.panel as Control).tooltip_text=String(words.tooltip)
@@ -159,16 +161,19 @@ static func field_name(record:Dictionary)->String:
 static func _card_words(record:Dictionary)->Dictionary:
 	var progress:=clampf(float(record.get("progress",0)),0,1);var researchers:=float(record.get("research_workforce",0))
 	var bottleneck:=String(record.get("bottleneck","Gathering evidence"))
-	var phase:=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":researchers}}})
-	if phase.is_empty():
-		var reason:=bottleneck.split(" — ",true,1);phase=reason[0].left(1)+reason[0].substr(1).to_lower()
-	var why:=Visuals.plain_bottleneck(bottleneck)
-	# Its step to proof, unless something holds it back.
-	if bottleneck.begins_with("EARLY EVIDENCE") or bottleneck.begins_with("REPLICATION") or bottleneck.begins_with("VALIDATION"):
-		var step:=Words.step(int(record.get("stage",preload("res://scripts/research_600_catalog.gd").stage(progress))),float(record.get("trial_share",preload("res://scripts/research_600_catalog.gd").trial_share(progress))))
-		why=step.left(1).to_upper()+step.substr(1)+"."
-	var restated:=why.trim_suffix(".").to_lower()==phase.to_lower()
-	var holdup:=why if restated else "%s: %s" % [phase,why.left(1).to_lower()+why.substr(1)]
+	# Its step to proof, always: first cases, repeated, and the households trying it.
+	var step:=Words.step(int(record.get("stage",preload("res://scripts/research_600_catalog.gd").stage(progress))),float(record.get("trial_share",preload("res://scripts/research_600_catalog.gd").trial_share(progress))))
+	step=step.left(1).to_upper()+step.substr(1)
+	# What holds it back, if anything: a short name, and its sentence once a board.
+	var phase:=""
+	var why:=""
+	if not (bottleneck.begins_with("EARLY EVIDENCE") or bottleneck.begins_with("REPLICATION") or bottleneck.begins_with("VALIDATION")):
+		phase=Visuals.phase({"assignment":{"bottleneck":bottleneck,"active":true,"capacity":{"researchers":researchers}}})
+		if phase.is_empty():
+			var reason:=bottleneck.split(" — ",true,1);phase=reason[0].left(1)+reason[0].substr(1).to_lower()
+		why=Visuals.plain_bottleneck(bottleneck)
+	var restated:=why.is_empty() or why.trim_suffix(".").to_lower()==phase.to_lower()
+	var holdup:=(step+".") if why.is_empty() else (why if restated else "%s: %s" % [phase,why.left(1).to_lower()+why.substr(1)])
 	# What answering it would do in the game, from the engine's own readings.
 	var effects:Dictionary=record.get("effects",{})
 	var would:=""
@@ -182,7 +187,7 @@ static func _card_words(record:Dictionary)->Dictionary:
 	# Who works it and its clock: "A team of about 3 people; about 1½ years to proof".
 	var team:=Words.team(researchers,int(record.get("teams_on",1)))
 	var clock:=Words.clock(float(record.get("estimated_days",0.0)))
-	return {"progress":progress,"evidence":team+("; "+clock if not clock.is_empty() else ""),"phase":phase,"why":why,"restated":restated,"would":would,
+	return {"progress":progress,"evidence":team+("; "+clock if not clock.is_empty() else ""),"step":step,"phase":phase,"why":why,"restated":restated,"would":would,
 		"tooltip":(goal+"\n\n" if not goal.is_empty() else "")+holdup+brings+"\n\nClick to review this field, its current investigations and what they would do."}
 
 ## The price of the furthest lead among the questions under way, once teams
@@ -287,7 +292,9 @@ func _question(parent:Node,record:Dictionary,lead:bool)->void:
 	var refs:={"panel":panel,"why":null,"would":null}
 	refs.meter=_meter(text,float(words.progress),accent)
 	refs.line=_line(text,String(words.evidence),14 if lead else 13,T.BODY)
-	refs.phase=_line(text,String(words.phase),14 if lead else 13,T.INK)
+	refs.step=_line(text,String(words.step),14 if lead else 13,T.INK);refs.step.name="Step"
+	refs.phase=_line(text,String(words.phase),13 if lead else 12,T.AMBER_TEXT);refs.phase.name="Holdup"
+	refs.phase.visible=String(words.phase)!=""
 	if not bool(words.restated) and not explained.has(words.why):
 		explained[words.why]=true;refs.why=_line(text,String(words.why),13 if lead else 12,T.TEXT_SOFT)
 	if String(words.would)!="":
