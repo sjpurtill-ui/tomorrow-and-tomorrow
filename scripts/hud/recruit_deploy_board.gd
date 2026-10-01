@@ -17,6 +17,7 @@ extends VBoxContainer
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Model:=preload("res://scripts/hud/deployment_model.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
+const Orders:=preload("res://scripts/army_orders.gd")
 const Art:=preload("res://scripts/hud/military_roster_visuals.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const LINES_PER_PAGE:=4
@@ -38,6 +39,10 @@ var page:=0
 var slot_pages:Dictionary={}
 ## Live controls updated in place: {id, slot?, meters?, date?, deploy?, head?}.
 var live:Array[Dictionary]=[]
+## Those drilling outside the recruiting lines (a levy the court raised,
+## drafts for the bands, men retraining): one row each, HOI4's queue.
+var drill_box:VBoxContainer
+var drill_live:Array[Dictionary]=[]
 
 
 func setup(block:Dictionary)->void:
@@ -51,6 +56,7 @@ func setup(block:Dictionary)->void:
 	var queue_head:=HBoxContainer.new();queue_head.add_theme_constant_override("separation",10);queue_column.add_child(queue_head)
 	var kicker:=_kicker(queue_head,"In training");kicker.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	queue_counts=T.make_label("",13,T.MUTED);queue_head.add_child(queue_counts)
+	drill_box=VBoxContainer.new();drill_box.name="DrillingNow";drill_box.add_theme_constant_override("separation",6);queue_column.add_child(drill_box)
 	rows=VBoxContainer.new();rows.add_theme_constant_override("separation",8);queue_column.add_child(rows)
 	templates_column=VBoxContainer.new();templates_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;templates_column.add_theme_constant_override("separation",8);columns.add_child(templates_column)
 	var head:=HBoxContainer.new();templates_column.add_child(head)
@@ -194,14 +200,91 @@ func _fact(parent:Node,icon:String,value:String,color:Color,tip:String)->void:
 func rebuild()->void:
 	for child in rows.get_children():rows.remove_child(child);child.queue_free()
 	live.clear()
+	_rebuild_drilling()
 	var lines:=Model.lines()
-	if lines.is_empty():_empty_queue()
+	if lines.is_empty() and drill_live.is_empty():_empty_queue()
 	page=clampi(page,0,maxi(0,(lines.size()-1)/LINES_PER_PAGE))
 	for item:Dictionary in lines.slice(page*LINES_PER_PAGE,page*LINES_PER_PAGE+LINES_PER_PAGE):_line_card(item)
 	if lines.size()>LINES_PER_PAGE:_pager(rows,page,ceili(lines.size()/float(LINES_PER_PAGE)),func(step:int):page+=step;rebuild())
 	signature=shape()
 	update_values()
 
+
+## Orders in drill that no recruiting line holds.
+static func drilling_orders()->Array:
+	var out:=[]
+	for o in MilitaryCampaign.training_queue:
+		if o is Dictionary and not (o as Dictionary).has("deployment_line") and int((o as Dictionary).get("count",0))>0: out.append(o)
+	return out
+
+## Those orders gathered by what they are (the same men for the same end):
+## [{key, mode, unit, weapon, army_id, count, done_min, done_max, done_mean, need}].
+static func drilling_groups()->Array:
+	var by:={}
+	var order_keys:=[]
+	for o in drilling_orders():
+		var order:Dictionary=o
+		var key:="%s|%s|%s|%d" % [String(order.get("mode","")),String(order.get("unit","levy")),String(order.get("weapon","")),int(order.get("army_id",0))]
+		var done:=float(order.get("progress_days",0.0)); var need:=maxf(1.0,float(order.get("required_days",1.0)))
+		var count:=int(order.get("count",0))
+		if not by.has(key):
+			by[key]={"key":key,"mode":String(order.get("mode","")),"unit":String(order.get("unit","levy")),"weapon":String(order.get("weapon","")),"army_id":int(order.get("army_id",0)),
+				"count":0,"done_min":done,"done_max":done,"weighted":0.0,"need":need}
+			order_keys.append(key)
+		var g:Dictionary=by[key]
+		g.count=int(g.count)+count
+		g.done_min=minf(float(g.done_min),done); g.done_max=maxf(float(g.done_max),done)
+		g.weighted=float(g.weighted)+done/need*float(count)
+		g.need=maxf(float(g.need),need)
+	var out:=[]
+	for key in order_keys:
+		var g:Dictionary=by[key]
+		g["done_mean"]=float(g.weighted)/maxf(1.0,float(g.count))
+		out.append(g)
+	return out
+
+## What a drilling group is for, in a few words.
+static func drilling_words(group:Dictionary)->String:
+	var units:=preload("res://scripts/military_unit_catalog.gd")
+	var unit:=String(group.get("unit","levy"))
+	var label:=String(units.archetype(unit).get("label",unit.replace("_"," ").capitalize()))
+	var count:=int(group.get("count",0))
+	match String(group.get("mode","")):
+		"field_draft":
+			var band:=Orders.army(int(group.get("army_id",0)))
+			return "%d drafts for %s" % [count,String(band.get("name","a band"))]
+		"reinforce": return "%d replacements · %s" % [count,label]
+		"retrain": return "%d retraining · %s" % [count,label]
+	return "%d %s" % [count,label]
+
+func _rebuild_drilling()->void:
+	for child in drill_box.get_children():drill_box.remove_child(child);child.queue_free()
+	drill_live.clear()
+	var groups:=drilling_groups()
+	if groups.is_empty():return
+	_kicker(drill_box,"Drilling now")
+	for g in groups.slice(0,6):
+		var group:Dictionary=g
+		var panel:=PanelContainer.new();panel.name="Drill_"+String(group.key).replace("|","_");panel.add_theme_stylebox_override("panel",_skin(T.PAPER_RAISED,T.RULE,8));drill_box.add_child(panel)
+		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);panel.add_child(row)
+		var glyph:=TextureRect.new();glyph.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;glyph.custom_minimum_size=Vector2(30,30);glyph.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		glyph.texture=Icons.arm_texture(preload("res://scripts/battle_blocks.gd").glyph_of(String(group.unit),String(group.weapon)),T.INK,T.GOLD,48);row.add_child(glyph)
+		var what:=T.make_label(drilling_words(group),14,T.INK);what.custom_minimum_size.x=200;what.clip_text=true;what.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;row.add_child(what)
+		var meter:=Meter.new();meter.kind="drill";meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;meter.custom_minimum_size=Vector2(160,22);row.add_child(meter)
+		drill_live.append({"key":String(group.key),"meter":meter,"what":what})
+	if groups.size()>6:drill_box.add_child(T.make_label("and %d more in drill" % (groups.size()-6),13,T.INK_MUTED))
+
+func _update_drilling()->void:
+	if drill_live.is_empty():return
+	var by:={}
+	for g in drilling_groups():by[String(g.key)]=g
+	for control:Dictionary in drill_live:
+		var group:Dictionary=by.get(String(control.key),{})
+		if group.is_empty():continue
+		var low:=roundi(float(group.done_min)); var high:=roundi(float(group.done_max)); var need:=roundi(float(group.need))
+		var days:="%d/%d d" % [high,need] if low==high else "%d–%d/%d d" % [low,high,need]
+		(control.meter as Meter).set_reading(clampf(float(group.done_mean),0.0,1.0),days,T.TEAL,"Drill: %s of %d days done. They join %s when it is done." % ["%d" % high if low==high else "%d to %d" % [low,high],need,"their band" if String(group.mode)=="field_draft" else "the levy at home"])
+		(control.what as Label).text=drilling_words(group)
 
 func _empty_queue()->void:
 	var panel:=PanelContainer.new();panel.name="EmptyQueue";panel.add_theme_stylebox_override("panel",_skin(T.PAPER_SUNK,T.RULE,14));rows.add_child(panel)
@@ -284,11 +367,13 @@ func shape()->String:
 	var parts:Array=[page]
 	for item:Dictionary in MilitaryCampaign.recruit_deploy.data.lines:parts.append([item.id,item.slots,item.deployed,item.get("target_army",0),slot_pages.get(int(item.id),0)])
 	parts.append(MilitaryCampaign.field_armies.map(func(a:Dictionary)->int:return int(a.get("army_id",0))))
+	parts.append(drilling_groups().map(func(g:Dictionary)->String:return String(g.key)))
 	return str(parts)
 
 
 func update_values()->void:
 	_update_strip()
+	_update_drilling()
 	var lines:=Model.lines()
 	var by_id:={}
 	var bands:=0;var sent:=0

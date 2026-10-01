@@ -108,3 +108,20 @@ func test_a_force_shows_who_carries_what_and_the_odds_as_a_bar()->void:
 	bar.set_odds({},"")
 	assert_bool(bar.visible).is_false()
 	bar.queue_free()
+
+func test_drilling_outside_the_lines_is_listed_and_grouped()->void:
+	var Board:=preload("res://scripts/hud/recruit_deploy_board.gd")
+	WorldSimulation.clear();GameState.reset_for_new_world(616);MilitaryCampaign.reset_for_new_world()
+	MilitaryCampaign.training_queue.assign([
+		{"id":1,"unit":"levy","weapon":"improvised","count":1,"progress_days":10.0,"required_days":45.0},
+		{"id":2,"unit":"levy","weapon":"improvised","count":1,"progress_days":15.0,"required_days":45.0},
+		{"id":3,"unit":"spearman","weapon":"spear","count":20,"progress_days":5.0,"required_days":45.0,"deployment_line":4},
+		{"id":4,"mode":"field_draft","army_id":9,"unit":"spearman","weapon":"spear","count":3,"progress_days":2.0,"required_days":17.0}])
+	var groups:=Board.drilling_groups()
+	assert_int(groups.size()).is_equal(2)
+	assert_int(int(groups[0].count)).is_equal(2)
+	assert_float(float(groups[0].done_min)).is_equal(10.0)
+	assert_float(float(groups[0].done_max)).is_equal(15.0)
+	assert_str(Board.drilling_words(groups[0])).is_equal("2 Levy")
+	assert_str(Board.drilling_words(groups[1])).contains("3 drafts for")
+	WorldSimulation.clear()
