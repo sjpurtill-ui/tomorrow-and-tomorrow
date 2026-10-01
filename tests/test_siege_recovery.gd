@@ -155,7 +155,10 @@ func test_supplied_survivors_can_hold_home_but_no_force_cannot()->void:
 	assert_bool(model().home_unavailable()).is_true()
 func test_explicit_yield_is_distinct_from_forced_capture()->void:
 	var id:=String(MilitaryCampaign.active_siege.id)
-	assert_bool(MilitaryCampaign.siege_order(id,"withdraw").has("ok")).is_true()
+	# Pulling back never gives home away; only the ruler's surrender yields it.
+	assert_bool(MilitaryCampaign.siege_order(id,"withdraw").has("error")).is_true()
+	assert_bool(model().home_unavailable()).is_false()
+	assert_bool(MilitaryCampaign.siege_order(id,"surrender").has("ok")).is_true()
 	assert_bool(model().home_unavailable()).is_true()
 
 func test_actual_home_battle_uses_survivors_for_capture()->void:

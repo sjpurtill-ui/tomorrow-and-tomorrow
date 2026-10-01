@@ -27,8 +27,9 @@ const RUNNER_INTERVAL_DAYS:=5
 const RUNNER_SPEED_KM_DAY:=30.0
 const RUNNERS_PER_ARMY:=2
 const MAP_ENGAGEMENT_RANGE_KM:=6.0
-## Morale at or below which a side is broken (combat_simulator.gd _outcome).
-const MORALE_BREAK:=0.15
+## The one break line (army_lines.gd): a side breaks when its will falls
+## below a quarter (combat_simulator.gd _outcome reads the same).
+const MORALE_BREAK:=preload("res://scripts/army_lines.gd").BREAK
 const ABSOLUTE_MAX_PRODUCTION_LINES:=12
 const FIELD_FORTIFICATION_MAX_BONUS:=0.22
 const FORTIFIED_STORES_MAX_PROTECTION:=0.60
@@ -43,6 +44,8 @@ const ArmyLandRoute:=preload("res://scripts/army_land_route.gd")
 const MarchTerrain:=preload("res://scripts/march_terrain.gd")
 const FieldRations:=preload("res://scripts/field_rations.gd")
 const SupplyState:=preload("res://scripts/supply_state.gd")
+const ArmyLines:=preload("res://scripts/army_lines.gd")
+const TownHold:=preload("res://scripts/town_hold.gd")
 const BattleBlocks:=preload("res://scripts/battle_blocks.gd")
 const BattleGround:=preload("res://scripts/battle_ground.gd")
 const EQUIPMENT_KNOWLEDGE:Dictionary=UnitCatalog.EQUIPMENT_GATES
@@ -136,6 +139,9 @@ var field_armies:Array[Dictionary]=[]
 ## Replacement drafts walking out to their bands (field_sustainment.gd).
 var field_drafts:Array[Dictionary]=[]
 var sustainment=preload("res://scripts/field_sustainment.gd").new(self)
+## The war leader's daily upkeep of bands: worn ones come back to rest and
+## refill, weak ones in one place join (band_upkeep.gd).
+var upkeep=preload("res://scripts/band_upkeep.gd").new(self)
 ## Depots our bands have laid in the field (field_depots.gd); supply relays.
 var field_depots:Array=[]
 ## Weapon sets sent out of the stores to bands and their drafts since the
@@ -791,7 +797,14 @@ func establish_occupation_force(civ_id:String,region:Dictionary,required:float,s
 	var source:Dictionary=field_armies[source_index] if source_index>=0 else home_army
 	var readiness:=clampf(float(source.get("readiness",.45))*.90,.15,1)
 	var supply:=clampf(float(source.get("supply_level",1)),0,1)
-	var requested:=mini(fielded,maxi(1,ceili(ceilf(required)/maxf(.05,supply*(.5+.5*readiness)))))
+	var fed:=TownHold.fed(source)
+	# A garrison takes only what its town needs (the one rule, town_hold.gd);
+	# the rest stay a field army under their general.
+	var requested:=mini(fielded,maxi(1,TownHold.need(required,fed,readiness)))
+	var whole:=source_index>=0 and requested>=fielded
+	var pools:Dictionary={}
+	if whole:
+		for pool in ["wounded_pool","disabled_pool","severe_disabled_pool","scattered_pool","captured_pool","hunger_sick"]: pools[pool]=int(source.get(pool,0))
 	var detached:=_detach_field_army_formations(source_field_army_id,requested) if source_index>=0 else _detach_occupation_formations(requested)
 	var committed:=0
 	for formation in detached: committed+=int(formation.get("count",0))
@@ -802,12 +815,36 @@ func establish_occupation_force(civ_id:String,region:Dictionary,required:float,s
 	force["region_name"]=String(region.get("name","STRATEGIC REGION"))
 	force["required"]=required
 	force["supply_level"]=supply
+	force["provision_ratio"]=fed
 	force["committed_day"]=int(WorldSimulation.state.elapsed_days)
-	force["commander"]=source_commander
+	if whole:
+		# Every man stays to hold the town: the band becomes its garrison, its
+		# general with it, its hurt and its taken too. No band of nobody is
+		# left behind under a second copy of the general.
+		force["commander"]=source_commander
+		for pool in pools: force[pool]=int(pools[pool])
+		var gone:=_field_army_index(source_field_army_id)
+		if gone>=0: field_armies.remove_at(gone)
+		if WorldSimulation.figures!=null:
+			WorldSimulation.figures.release_assignment("army_%d" % source_field_army_id)
+			var figure:=String(source_commander.get("figure_id",""))
+			if figure!="" and WorldSimulation.figures.get("assignments") is Dictionary: WorldSimulation.figures.assignments["occupation_%s" % region_id]=figure
+		force["from_army_id"]=source_field_army_id
+	else:
+		force["commander"]=_garrison_captain() if source_index>=0 else source_commander
 	occupation_forces.append(force)
 	_refresh_readiness()
 	army_changed.emit(home_army.duplicate(true))
 	return force.duplicate(true)
+
+
+## Who leads the men a general leaves to hold a town: the war leader, as for
+## every force of ours without a named general (a new band serves under him
+## the same way). The general stays with his band: one man is not in two
+## places.
+func _garrison_captain()->Dictionary:
+	var leader:Dictionary=home_army.get("commander",{}) if home_army.get("commander") is Dictionary else {}
+	return leader.duplicate(true) if not leader.is_empty() else _marshal_commander()
 
 
 func _detach_field_army_formations(army_id:int,requested:int)->Array[Dictionary]:
@@ -904,8 +941,8 @@ func occupation_action_availability(civ_id:String,region_id:String,action:String
 			if available<=0: return {"error":"March a field army to this region first. Reinforcements must arrive before joining its garrison."}
 			var required:=WorldSimulation.world.occupation_requirement(WorldSimulation.world.civilizations[WorldSimulation.world._civilization_index(civ_id)],region)
 			if action=="reinforce_control":required=float(WorldSimulation.world.occupation_control(civ_id,region_id,true).get("required",required))
-			var effectiveness:=clampf(float(force.get("supply_level",1.0)),.05,1.0)*(.5+.5*clampf(float(force.get("readiness",1.0)),0,1))
-			var gap:=maxi(1,ceili(required/effectiveness)-int(force.get("troops",0)))
+			# The one rule for holding a town (town_hold.gd).
+			var gap:=maxi(1,TownHold.force_need(force,required)-int(force.get("troops",0)) if not force.is_empty() else TownHold.need(required,1.0,1.0))
 			return {"ok":true,"amount":mini(gap,available),"required":required,"source_army_id":source_id}
 		"evacuate_occupation":
 			if force.is_empty() or int(force.get("troops",0))<=0: return {"error":"No occupation force is stationed here."}
@@ -1169,14 +1206,71 @@ func field_route(start:Vector2,target:Vector2,force:Dictionary={})->Dictionary:
 ## THE ONE MARCH ESTIMATE: days for this force to walk this road (a
 ## field_route result) from today, day by day as the daily march spends it
 ## (march_terrain.days / walk_day). A road profiled for another force is
-## re-weighed for this one first.
+## re-weighed for this one first. Where the carriers cannot feed the band it
+## lives off the land at half pace (field_rations.gd FORAGE_PACE), and the
+## days count that too (_forage_slowing).
 func march_days(force:Dictionary,route:Dictionary)->int:
 	if float(route.get("length_km",0.0))<0.5 and not route.has("e"): return 0
 	var mix:=MarchTerrain.mix_of(force)
 	var packed:=_march_packed(route,mix)
 	if packed.is_empty(): return 0
 	var origin:Vector2=route.get("origin",ArmyLandRoute.unpack(packed)[0])
-	return MarchTerrain.days(origin,packed,_field_army_speed(force),int(WorldSimulation.state.elapsed_days),mix)
+	return MarchTerrain.days(origin,packed,_field_army_speed(force)/_forage_slowing(force,origin,packed),int(WorldSimulation.state.elapsed_days),mix)
+
+
+## Points of a road where the march estimate asks whether the band would
+## live off the land.
+const MARCH_SAMPLES:=5
+
+## What a march would cost in food, for the war leader deciding whether to
+## go at all (feed the army, or don't go; the war council reads it):
+## {days (the one estimate, half pace counted), half_pace (share of the
+## road lived off the land), fed_on_road (the leanest share of a ration on
+## the way), fed_there (camped at the end), hungry (a stretch, or the camp,
+## below a fed day)}. The supply model's own reading (supply_state.gd
+## at_point), with the carriers as they are today.
+func march_supply(force:Dictionary,route:Dictionary)->Dictionary:
+	var mix:=MarchTerrain.mix_of(force)
+	var packed:=_march_packed(route,mix)
+	if packed.is_empty(): return {"days":0,"half_pace":0.0,"fed_on_road":1.0,"fed_there":SupplyState.fed(force),"hungry":SupplyState.fed(force)<FieldRations.HUNGRY_BELOW}
+	var origin:Vector2=route.get("origin",ArmyLandRoute.unpack(packed)[0])
+	var slowing:=_forage_slowing(force,origin,packed)
+	var troops:=maxi(1,int(force.get("troops",0)))
+	var total:=MarchTerrain.total_effort(packed)
+	var lean:=1.0
+	for k in MARCH_SAMPLES:
+		var at:Vector2=MarchTerrain.at_effort(origin,packed,total*(float(k)+0.5)/float(MARCH_SAMPLES)).position
+		lean=minf(lean,float(SupplyState.at_point(at,troops,true,false).get("ratio",1.0)))
+	var there:=float(SupplyState.at_point(MarchTerrain.at_effort(origin,packed,total).position,troops,false,false).get("ratio",1.0))
+	return {"days":MarchTerrain.days(origin,packed,_field_army_speed(force)/slowing,int(WorldSimulation.state.elapsed_days),mix),"half_pace":clampf((slowing-1.0)/(1.0/FieldRations.FORAGE_PACE-1.0),0.0,1.0),
+		"fed_on_road":lean,"fed_there":there,"hungry":minf(lean,there)<FieldRations.HUNGRY_BELOW}
+
+## How much living off the land slows a march on this road (from `done`
+## level km on): 1 where the carriers feed the band all the way, up to
+## 1/FORAGE_PACE (twice the days) where they reach it nowhere. The same
+## daily choice the march makes (_lives_off_land), asked at a few points of
+## the road still ahead, as a share of the time. A chase keeps pace.
+func _forage_slowing(force:Dictionary,origin:Vector2,packed:Array,done:float=0.0)->float:
+	if packed.is_empty() or not String(force.get("target_formation_id","")).is_empty(): return 1.0
+	var total:=MarchTerrain.total_effort(packed)
+	if total-done<=0.001: return 1.0
+	var probe:=force.duplicate(false)
+	probe["status"]="moving"
+	probe["forage_eaten"]=0.0
+	var living:=0
+	for k in MARCH_SAMPLES:
+		var at:Vector2=MarchTerrain.at_effort(origin,packed,lerpf(done,total,(float(k)+0.5)/float(MARCH_SAMPLES))).position
+		probe["position"]={"x":at.x,"z":at.y}
+		if _lives_off_land(probe): living+=1
+	var share:=float(living)/float(MARCH_SAMPLES)
+	return (1.0-share)+share/FieldRations.FORAGE_PACE
+
+
+## Where the carriers cannot feed a band on the march, its general lives off
+## the land (half pace, foraging and hunting as they go) when that feeds the
+## men better than the full march (field_rations.gd).
+func _lives_off_land(force:Dictionary)->bool:
+	return FieldRations.should_live_off_land(_force_provision_access(force),SupplyState.forage_factor(force))
 
 
 func _march_packed(route:Dictionary,mix:Dictionary)->Array:
@@ -1194,8 +1288,11 @@ static func _march_ground_words(route:Dictionary)->String:
 	return " "+words if words!="" else ""
 
 func _field_supply_advice(army:Dictionary)->String:
-	var supply:=clampf(float(army.get("supply_level",1)),0,1)
-	return " Supply %d%%: the march is slowed. Return home or improve food and carrying capacity in Military > Supply."%roundi(supply*100) if supply<.5 else ""
+	var fed:=SupplyState.fed(army)
+	var words:=""
+	if fed<FieldRations.HUNGRY_BELOW: words+=" They eat %d%% of a ration: the march is slowed." % roundi(fed*100.0)
+	if float(army.get("march_slowing",1.0))>1.01: words+=" Where the carriers cannot reach them they live off the land at half pace; the days count it."
+	return words
 
 func move_field_army(army_id:int,destination_id:String)->Dictionary:
 	if command_hierarchy.battle.engaged(army_id):return {"error":"This command is in battle. Its commander will act on a new objective after disengaging."}
@@ -1248,13 +1345,15 @@ func _set_march_route(army:Dictionary,route:Dictionary)->void:
 	army["march_travelled_km"]=0.0
 	army["march_effort_done"]=0.0
 	army["march_direct"]=bool(route.get("direct",true))
+	# Half pace where it must live off the land, reckoned once for this road.
+	army["march_slowing"]=_forage_slowing(army,route.get("origin",Vector2.ZERO),army.march_route)
 
 
 ## Days left on the army's own road from where it set out (the one estimate).
 func _march_days_left(army:Dictionary,origin:Vector2)->int:
 	var packed:Array=army.get("march_route",[]) if army.get("march_route") is Array else []
 	if packed.is_empty(): return 0
-	return MarchTerrain.days(origin,packed,_field_army_speed(army),int(WorldSimulation.state.elapsed_days),MarchTerrain.mix_of(army),float(army.get("march_effort_done",0.0)))
+	return MarchTerrain.days(origin,packed,_field_army_speed(army)/float(army.get("march_slowing",1.0)),int(WorldSimulation.state.elapsed_days),MarchTerrain.mix_of(army),float(army.get("march_effort_done",0.0)))
 
 
 func move_field_army_to_position(army_id:int,x:float,z:float,label:String="FIELD POSITION")->Dictionary:
@@ -1686,7 +1785,7 @@ func _process_field_army_movement_day()->void:
 		# Where the carriers cannot feed the band, the general lives off the
 		# land: half pace, foraging and hunting as they go, when that feeds the
 		# men better than the full march (field_rations.gd). A chase keeps pace.
-		army["living_off_land"]=intercept_target_id.is_empty() and FieldRations.should_live_off_land(_force_provision_access(army),SupplyState.forage_factor(army))
+		army["living_off_land"]=intercept_target_id.is_empty() and _lives_off_land(army)
 		var speed:=_field_army_speed(army)*(FieldRations.FORAGE_PACE if bool(army.living_off_land) else 1.0)
 		var today:=int(WorldSimulation.state.elapsed_days)
 		var done_before:=float(army.get("march_effort_done",0.0))
@@ -1729,9 +1828,11 @@ func _process_field_army_movement_day()->void:
 		army["march_travelled_km"]=walked
 		army["march_effort_done"]=done
 		var current:=ArmyLandRoute.point_along(origin,legs,walked) if not arrived else destination
-		if not arrived: army["arrival_day"]=today+MarchTerrain.days(origin,packed,speed,today,mix,done)
+		if not arrived: army["arrival_day"]=today+MarchTerrain.days(origin,packed,_field_army_speed(army)/float(army.get("march_slowing",1.0)),today,mix,done)
 		army["position"]={"x":current.x,"z":current.y}
-		army["supply_level"]=clampf(move_toward(float(army.get("supply_level",0.75)),field_provision_delivery_ratio(),0.025)-0.0008*traveled,0.05,1.0)
+		# The band's food on the march is the day's rations (record_daily_provisions):
+		# one supply number, provision_ratio. Its stores' condition (supply_level)
+		# follows that, not the whole army's delivery.
 		if arrived:
 			remaining=0.0
 			army["status"]="stationed"
@@ -1741,7 +1842,7 @@ func _process_field_army_movement_day()->void:
 			army["arrival_day"]=int(WorldSimulation.state.elapsed_days)
 			army.erase("march_route"); army.erase("march_travelled_km"); army.erase("march_effort_done")
 			if _army_is_home(army) or _live_army_reporting():
-				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Army arrived","description":"%s reached %s with %d personnel and %d%% supply." % [String(army.name),String(army.location_name),int(army.troops),roundi(float(army.supply_level)*100.0)],"domain":"security","severity":"notice"})
+				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Army arrived","description":"%s reached %s with %d men, fed %d%%." % [String(army.name),String(army.location_name),int(army.troops),roundi(SupplyState.fed(army)*100.0)],"domain":"security","severity":"notice"})
 			else:
 				# Arrival is itself only known at home once a runner delivers it.
 				army=_dispatch_army_runner(army,int(WorldSimulation.state.elapsed_days))
@@ -1778,7 +1879,11 @@ func _army_report_snapshot(army:Dictionary)->Dictionary:
 		"location_name":String(army.get("location_name","")),
 		"destination_name":String(army.get("destination_name","")),
 		"troops":int(army.get("troops",0)),
-		"supply_level":float(army.get("supply_level",1.0)),
+		# The one supply number (supply_state.gd fed): what they ate that day.
+		"provision_ratio":SupplyState.fed(army),
+		"supply_level":SupplyState.fed(army),
+		"hungry":FieldRations.is_hungry(army),
+		"resting":bool(army.get("resting",false)),
 		"morale":float(army.get("morale",0.5)),
 		"readiness":float(army.get("readiness",0.5)),
 		"distance_remaining_km":float(army.get("distance_remaining_km",0.0)),
@@ -1840,7 +1945,7 @@ func _process_army_runners_day()->void:
 				var report_day:=int(snapshot.get("day",day))
 				var status_text:="held position at %s" % String(snapshot.get("location_name","the field")) if String(snapshot.get("status","stationed"))=="stationed" else "was marching on %s with %.0f km remaining" % [String(snapshot.get("destination_name","its objective")),float(snapshot.get("distance_remaining_km",0.0))]
 				if not String(snapshot.get("movement_block_reason","")).is_empty():status_text+=". "+String(snapshot.movement_block_reason)
-				WorldSimulation.state.simulation_events.push_front({"day":day,"title":"Runner arrives","description":"A runner from %s reports: as of day %d the army %s with %d personnel and %d%% supply." % [String(message.get("army_name","the field army")),report_day,status_text,int(snapshot.get("troops",0)),roundi(float(snapshot.get("supply_level",1.0))*100.0)],"domain":"security","severity":"notice"})
+				WorldSimulation.state.simulation_events.push_front({"day":day,"title":"Runner arrives","description":"A runner from %s reports: as of day %d the army %s with %d men, fed %d%%." % [String(message.get("army_name","the field army")),report_day,status_text,int(snapshot.get("troops",0)),roundi(SupplyState.fed(snapshot)*100.0)],"domain":"security","severity":"notice"})
 	runner_messages=remaining_messages
 
 
@@ -2028,6 +2133,8 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 		_apply_occupation_result(String(result.get("home_force_civ_id","")),String(result.get("home_force_region_id","")),home_result,result.rounds,int(result.seed),home_side)
 	elif home_force_kind=="field_army":
 		_apply_field_army_result(int(result.get("home_force_id",0)),home_result,result.rounds,int(result.seed),home_side)
+	elif home_force_kind=="town":
+		_apply_town_watch_result(String(result.get("home_force_city_id","")),home_result,result.rounds,home_side)
 	else:
 		_apply_home_result(home_result,result.rounds,int(result.seed),home_side)
 		home_army["recent_combat_days"]=7
@@ -2647,9 +2754,25 @@ func _fight_own_battles_day()->void:
 		var engagement:Dictionary=own_engagements.get(id,{})
 		if engagement.is_empty() or bool(engagement.get("awaiting_player_view",false)): continue
 		active_engagement=engagement
-		fight_engagement_day(command_hierarchy.land.battle_order() if bool(engagement.get("commander_managed",false)) else "hold")
+		fight_engagement_day(command_hierarchy.land.battle_order() if bool(engagement.get("commander_managed",false)) else _our_battle_order(engagement))
 	active_engagement=focus if not focus.is_empty() else {}
 	_prune_engagements()
+
+
+## How our side fights a battle the general's staff does not run (the
+## court's, a band's own, a garrison's, home's): it pulls out once it breaks
+## (will below a quarter) or a band or garrison has lost half the men it took
+## in (army_lines.gd); otherwise it fights on. At home our people do not pull
+## out for numbers, only when they break, and pulling back there never gives
+## home away (_finish_active_engagement).
+func _our_battle_order(engagement:Dictionary)->String:
+	if engagement.is_empty(): return "hold"
+	var side:=_engagement_home_side(engagement)
+	var ours:Dictionary=engagement.get(side,{})
+	if ArmyLines.broken(float(ours.get("morale",1.0))): return "retreat"
+	if String(engagement.get("home_force_kind","field"))=="field": return "hold"
+	if ArmyLines.weak(int(ours.get("troops",0)),int(engagement.get(side+"_initial",ours.get("troops",0)))): return "retreat"
+	return "hold"
 
 
 ## Which of our forces fights a battle: the home army, a field army or a
@@ -2763,9 +2886,15 @@ func begin_threat_engagement(settle_overrun:bool=true)->Dictionary:
 	# victory with nothing lost, day after day, against the same beaten band.
 	# Field contacts only: an undefended town still falls through its battle.
 	var foe:Dictionary=threat.get("enemy_force",{})
-	if offensive and bool(threat.get("field_encounter",false)) and (int(foe.get("troops",0))<=0 or float(foe.get("morale",1.0))<=MORALE_BREAK):
+	if offensive and bool(threat.get("field_encounter",false)) and (int(foe.get("troops",0))<=0 or float(foe.get("morale",1.0))<MORALE_BREAK):
 		active_threat.clear(); threat_changed.emit({})
 		return {"error":"Their band is already broken and scattering; there is nobody left there to fight.","nobody_to_fight":true}
+	# A broken or weak band of ours is not sent in: the war leader brings it
+	# back to rest and refill instead (army_lines.gd, band_upkeep.gd).
+	if offensive and field_army_index>=0 and ArmyLines.unfit(field_armies[field_army_index]):
+		var band:Dictionary=field_armies[field_army_index]
+		active_threat.clear(); threat_changed.emit({})
+		return {"error":"%s is not fit to attack: %s. The war leader brings it back to rest and refill." % [upkeep._band_words(band),ArmyLines.why_unfit(band)],"unfit":true}
 	var attacker:Dictionary=home_force if offensive else threat.enemy_force.duplicate(true)
 	var defender:Dictionary=threat.enemy_force.duplicate(true) if offensive else home_force
 	var battle_ground:=float(threat.get("terrain_defense",1.0)) if offensive or defending_occupation else _terrain_defense()
@@ -3015,12 +3144,17 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 			command_hierarchy.battle.reinforce_occupation(source_civ_id,String(strategic_outcome.get("region",{}).get("id","")),final_result.get("command_participants",[]))
 			strategic_outcome["occupation_force"]=garrison
 		elif bool(strategic_outcome.get("region_recaptured",false)):
-			strategic_outcome["occupation_force_loss"]=remove_occupation_force(source_civ_id,String(strategic_outcome.get("target_region_id",final_result.target_region_id)),false)
+			# The garrison's survivors fall back home as a column; they are
+			# not lost with the town.
+			strategic_outcome["occupation_force_loss"]=_garrison_falls_back(source_civ_id,String(strategic_outcome.get("target_region_id",final_result.target_region_id)))
 		if bool(strategic_outcome.get("decisive",false)) and not bool(strategic_outcome.get("player_won",false)) and String(final_result.campaign_mode)=="defensive" and String(final_result.target_region_id).is_empty() and not bool(final_result.field_encounter) and String(threat.get("incident_kind","campaign"))!="raid":
-			var occupation:=recovery.capture(source_civ_id,final_result[enemy_side])
+			var occupation:=_home_after_defeat(source_civ_id,final_result[enemy_side],retreated)
 			strategic_outcome["player_occupation"]=occupation
 			if occupation.has("error"):
 				strategic_outcome["message"]=String(occupation.error)
+				# Kept out of home, the victors carry off what they can.
+				if bool(occupation.get("surrender_only",false)) and not strategic_outcome.has("raid_losses"):
+					strategic_outcome["raid_losses"]=_apply_raid_store_losses(threat,0.65,int((final_result[enemy_side] as Dictionary).get("remaining_troops",0)))
 				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"Defeat without occupation","description":String(occupation.error),"domain":"security","severity":"notice"})
 		committed["strategic_outcome"]=strategic_outcome
 	_record_battle_consequences(final_result,committed.get("strategic_outcome",{}),troops_after_fight)
@@ -3033,6 +3167,63 @@ func _finish_active_engagement(retreated:bool,last_result:Dictionary)->Dictionar
 	# The next battle of ours still being fought comes into focus.
 	if ours: _refocus()
 	return committed
+
+
+## Home after a lost fight there. A people's home is given up only by its
+## ruler's word: ours only when the ruler yields it (surrender_home), never
+## taken by a fight nor given away by our pulling back. Another people's
+## ruler yields theirs when the victors could hold it (siege_recovery.gd
+## capture_capacity, the one rule of town_hold.gd), never because their own
+## fighters pulled back. Kept out, the victors carry off what they can
+## (the caller). The occupation, or {error, surrender_only}.
+func _home_after_defeat(civ_id:String,victors:Dictionary,retreated:bool)->Dictionary:
+	if WorldSimulation.actor_id!="player" and not retreated: return recovery.capture(civ_id,victors)
+	var home:=String(WorldSimulation.state.settlement_name) if String(WorldSimulation.state.settlement_name)!="" else "home"
+	return {"error":"They broke through, but %s is still ours: home is lost only if its ruler yields it. It remains independent despite the defeat." % home,"surrender_only":true}
+
+
+## The ruler yields our home to the people at its gates: the one way home is
+## lost. Everyone of ours there passes into their hands (siege_recovery.gd
+## capture). {ok, message} or {error}.
+func surrender_home(civ_id:String="")->Dictionary:
+	if recovery.home_unavailable(): return {"error":"Home is not ours to yield."}
+	var besieged:=String(active_siege.get("mode",""))=="defensive"
+	if civ_id=="" and besieged: civ_id=String(active_siege.get("attacker_id",""))
+	if civ_id=="" and not active_threat.is_empty() and String(active_threat.get("campaign_mode",""))=="defensive": civ_id=String(active_threat.get("source_civ_id",""))
+	if civ_id=="": return {"error":"Nobody is at our gates to yield home to."}
+	var victors:Dictionary={}
+	if besieged and String(active_siege.get("attacker_id",""))==civ_id:
+		victors=((active_siege.get("threat",{}) as Dictionary).get("enemy_force",{}) as Dictionary).duplicate(true)
+		_end_siege("The ruler yields %s to the besiegers." % String(WorldSimulation.state.settlement_name),true,false)
+	elif not active_threat.is_empty() and String(active_threat.get("source_civ_id",""))==civ_id:
+		victors=(active_threat.get("enemy_force",{}) as Dictionary).duplicate(true)
+		active_threat.clear(); threat_changed.emit({})
+	threats_resolved+=1
+	return recovery.capture(civ_id,victors,true)
+
+
+## A garrison whose town is taken back falls back home as a column with
+## everyone of it, its hurt and its gear (evacuate_occupation's march); it is
+## not lost with the town. With nobody left, or no road home, it is struck
+## off as before.
+func _garrison_falls_back(civ_id:String,region_id:String)->Dictionary:
+	var index:=_occupation_force_index(civ_id,region_id)
+	if index<0: return {"removed":0}
+	var force:Dictionary=occupation_forces[index].duplicate(true)
+	var position:Dictionary=(WorldSimulation.world.city_intelligence.known("player",region_id).get("position",{}) as Dictionary).duplicate(true)
+	if not WorldSimulation.world.city_intelligence.valid_point(position): position=WorldSimulation.world.city_intelligence.site(region_id).get("position",{})
+	if int(force.get("troops",0))<=0 or field_armies.size()>=ABSOLUTE_MAX_FIELD_ARMIES or _movement_destination("player_home").is_empty() or not WorldSimulation.world.city_intelligence.valid_point(position):
+		return remove_occupation_force(civ_id,region_id,false)
+	var army_id:=next_field_army_id
+	var town:=String(force.get("region_name","the town"))
+	force.merge({"army_id":army_id,"name":"Withdrawal from %s" % town,"status":"stationed","location_id":region_id,"location_name":town,"position":position,"destination_id":"","distance_total_km":0.0,"distance_remaining_km":0.0,"runner_count":RUNNERS_PER_ARMY,"last_runner_departure_day":int(WorldSimulation.state.elapsed_days)},true)
+	force.erase("civ_id"); force.erase("region_id")
+	force["last_report"]=_army_report_snapshot(force)
+	field_armies.append(force)
+	next_field_army_id+=1
+	occupation_forces.remove_at(index)
+	var march:=return_field_army(army_id)
+	return {"removed":0,"withdrawn":int(force.get("troops",0)),"army_id":army_id,"marching":not march.has("error")}
 
 
 ## What raiders who break in (or whom we let in) carry off: a share of the
@@ -3084,8 +3275,8 @@ func _retreat_termination(attacker:Dictionary,defender:Dictionary,battle_seed:in
 		commander_fate="wounded, but escaped"
 	var spoils:Dictionary=simulator._battle_spoils(attacker,defender,"withdrawal",rng) if pursuit_pressure>0.02 else {}
 	var summary:="%s breaks contact under pursuit" % String(attacker.get("name","The withdrawing army"))
-	if prisoners>0: summary+=", leaving %d stragglers captive" % prisoners
-	summary+=". %s is %s." % [String(commander.get("name","The commander")),commander_fate]
+	if prisoners>0: summary+=", leaving %s behind" % CombatSimulator.captive_words(prisoners)
+	summary+=". %s %s." % [String(commander.get("name","The commander")),CombatSimulator.fate_words(commander_fate)]
 	return {"type":"withdrawal","summary":summary,"defeated":String(attacker.get("name","Attacker")),"captor":String(defender.get("name","Defender")),"prisoners":prisoners,"spoils":spoils,"captured_general":captured_general,"commander":String(commander.get("name","The commander")),"commander_record":commander.duplicate(true),"commander_fate":commander_fate,"pursuit_pressure":pursuit_pressure}
 
 
@@ -3296,7 +3487,7 @@ func _process_threat_day()->void:
 			respond_to_threat("defend" if int(settlement_defense_snapshot().get("garrison_personnel",0))>0 or int(occupation_defense.get("troops",0))>0 else "withdraw")
 			# That battle is fought out now; others go on a day at a time.
 			var fight:=begun_since(before)
-			while not fight.is_empty() and not bool(fight.get("awaiting_player_view",false)): advance_engagement("hold",1,false)
+			while not fight.is_empty() and not bool(fight.get("awaiting_player_view",false)): advance_engagement(_our_battle_order(fight),1,false)
 		return
 	if not WorldSimulation.state.settlement_site_committed or int(WorldSimulation.state.elapsed_days)<90 or not pending_aftermath.is_empty(): return
 	# A new raid on home waits while our home fighters are in a fight.
@@ -3495,6 +3686,8 @@ func _record_daily_provisions(required:float,delivered:float,air_delivery:Dictio
 		var foraged:=0.0
 		if not _army_is_home(force):foraged=maxf(0.0,need*share-field_received)*FieldRations.forage_share(force)
 		provision_ratio=clampf((field_received+foraged)/maxf(.01,need*share),0,1) if need*share>0 else 1.0
+		# What they foraged eats out the country round their camp (supply_state.gd).
+		SupplyState.eat_camp(force,(foraged/maxf(.01,need*share))*float(maxi(0,int(force.get("troops",0))))*float(WorldSimulation.span) if need*share>0 else 0.0,float(WorldSimulation.span))
 		force["provisions_required_today"]=need*share
 		force["provisions_delivered_today"]=field_received
 		force["provisions_foraged_today"]=foraged
@@ -3891,7 +4084,7 @@ func validate_state()->Array[String]:
 		if training.has("build_batch") and int(training.build_batch)<=0:errors.append("Invalid training batch identity.")
 		if training.has("soldier_ids"): errors.append("Training order contains forbidden individual soldier records.")
 		if training_mode not in ["new","reinforce","retrain","field_draft"]: errors.append("Training order has an unknown mode.")
-		if training_mode=="field_draft" and int(training.get("field_army_id",0))<=0: errors.append("A replacement draft must name its band.")
+		if training_mode=="field_draft" and int(training.get("field_army_id",0))<=0 and String(training.get("garrison",""))=="": errors.append("A replacement draft must name its band or garrison.")
 		if not simulator.UNIT_TYPES.has(training_unit): errors.append("Training order references an unknown unit type.")
 		if not simulator.WEAPONS.has(training_weapon) or training_weapon not in UnitCatalog.equipment_for(training_unit): errors.append("Training order uses incompatible equipment.")
 		if training_count<=0: errors.append("Training order headcount must be positive.")
@@ -4735,6 +4928,21 @@ func _apply_home_result(side:Dictionary,rounds:Array,_battle_seed:int,home_side:
 	home_army["campaign_day"]=int(WorldSimulation.state.elapsed_days)
 
 
+## A town's own watch after a fight (civilization_combat.gd town_watch):
+## its dead are the town's dead; its hurt and scattered go back to their work;
+## those taken in the fight are held by the enemy as any of ours. Nothing of
+## it stays under arms: it is not the army.
+func _apply_town_watch_result(city_id:String,side:Dictionary,rounds:Array,home_side:String)->void:
+	var killed:=0
+	for round_data in rounds: killed+=int(((round_data as Dictionary).get("%s_casualties" % home_side,{}) as Dictionary).get("killed",0))
+	if killed>0 and city_id!="":
+		WorldSimulation.settlements.with_city_resources(city_id,func()->int:
+			return WorldSimulation.settlements.with_local_population(func()->int:return int(WorldSimulation.state.register_population_deaths(killed,"Killed defending the town").get("count",0)),true)
+		)
+	var taken:=maxi(0,int(side.get("captured_in_battle",0)))
+	if taken>0: home_army["captured_pool"]=int(home_army.get("captured_pool",0))+taken
+
+
 func _apply_occupation_result(civ_id:String,region_id:String,side:Dictionary,rounds:Array,battle_seed:int,home_side:String)->void:
 	var index:=_occupation_force_index(civ_id,region_id)
 	if index<0: return
@@ -4773,6 +4981,7 @@ func _process_military_day()->void:
 	joint_operations.advance(last_processed_day)
 	recovery.advance(last_processed_day)
 	if recovery.home_unavailable():
+		upkeep.day()
 		_process_field_army_movement_day()
 		sustainment.arrivals_day()
 		depots.day()
@@ -4791,8 +5000,12 @@ func _process_military_day()->void:
 	workshop.advance(last_processed_day)
 	_process_equipment_production_day()
 	_process_training_injuries_day()
-	recruit_deploy.prepare()
+	# The war leader sees to the bands first: worn ones come back to rest,
+	# weak ones in one place join, and drafts fill the empty places before a
+	# new line takes the people (band_upkeep.gd, field_sustainment.gd).
+	upkeep.day()
 	sustainment.draft_day()
+	recruit_deploy.prepare()
 	_process_requested_templates()
 	_ensure_automatic_basic_training()
 	# The war leader keeps the army at the share the ruler chose.
@@ -5844,6 +6057,10 @@ func _mark_home_prisoners(count:int,refresh:bool=true)->void:
 func _mark_engaged_force_prisoners(force_kind:String,force_id:int,civ_id:String,region_id:String,count:int)->void:
 	var requested:=maxi(0,count)
 	if requested<=0: return
+	if force_kind=="town":
+		# A town's watch taken: held by the enemy as any of ours.
+		home_army["captured_pool"]=int(home_army.get("captured_pool",0))+requested
+		return
 	if force_kind=="field_army":
 		var army_index:=_field_army_index(force_id)
 		if army_index<0: return
@@ -6158,6 +6375,8 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 		var busy:=_army_in_battle(int(saved.army_id)) if String(saved.mode)=="offensive" else _home_battle_running()
 		_settle_waiting()
 		if troops<=0 or busy: return {"error":"No available local force can enter battle; the siege orders remain in place."}
+		# A broken or weak band does not storm: the siege goes on (army_lines.gd).
+		if String(saved.mode)=="offensive" and field_index>=0 and ArmyLines.unfit(field_armies[field_index]): return {"error":"%s is not fit to storm the town: %s. The siege goes on." % [upkeep._band_words(field_armies[field_index]),ArmyLines.why_unfit(field_armies[field_index])],"unfit":true}
 		_end_siege("The forces leave siege positions for battle.",false,false)
 		active_threat=(saved.threat as Dictionary).duplicate(true)
 		var result:=begin_threat_engagement(false)
@@ -6170,11 +6389,13 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 			return settled
 		return {"ok":true,"message":"The assault or sortie begins from current siege conditions.","engagement":engagement_snapshot()}
 	if order=="withdraw":
-		_end_siege("The player orders withdrawal from the siege.",true,String(saved.mode)=="offensive")
-		if String(saved.mode)=="defensive":
-			threats_resolved+=1
-			return recovery.capture(String(saved.attacker_id),saved.get("threat",{}).get("enemy_force",{}),true)
+		# Pulling back never gives home away: only the ruler's surrender does.
+		if String(saved.mode)=="defensive": return {"error":"We cannot pull back from our own home: %s is lost only if you yield it. Order surrender to give it up." % String(WorldSimulation.state.settlement_name),"surrender_only":true}
+		_end_siege("The player orders withdrawal from the siege.",true,true)
 		return {"ok":true,"message":"The siege is lifted; the field army begins its physical return route if available."}
+	if order=="surrender":
+		if String(saved.mode)!="defensive": return {"error":"Only a besieged home can be yielded; to leave a siege we lay, withdraw."}
+		return surrender_home(String(saved.attacker_id))
 	return {"error":"Unknown siege order."}
 
 func _end_siege(reason:String,return_army:bool=true,count_resolved:bool=true)->void:
