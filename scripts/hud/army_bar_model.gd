@@ -476,7 +476,7 @@ static func make_of(formations:Array)->Dictionary:
 		drill+=clampf(float(formation.get("training",0.0)),0.0,1.0)*float(count)
 		seen+=clampf(float(formation.get("experience",0.0)),0.0,1.0)*float(count)
 		var unit:=String(formation.get("unit","levy"))
-		var kind:Dictionary=by_unit.get(unit,{"unit":unit,"label":String(units.archetype(unit).get("label",unit.replace("_"," ").capitalize())),"count":0})
+		var kind:Dictionary=by_unit.get(unit,{"unit":unit,"weapon":String(formation.get("weapon","")),"label":String(units.archetype(unit).get("label",unit.replace("_"," ").capitalize())),"count":0})
 		kind.count=int(kind.count)+count;by_unit[unit]=kind
 	var weight:=maxf(1.0,float(men))
 	return {"drill":drill/weight,"seen":seen/weight,"kinds":_largest_first(by_unit.values())}

@@ -286,6 +286,11 @@ func _row(row:Dictionary,depth:int)->void:
 	var frame:=Panel.new();frame.clip_contents=true;frame.custom_minimum_size=Vector2(30,36) if depth>0 else Vector2(36,44);frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER;frame.add_theme_stylebox_override("panel",T.flat(T.PAPER_SUNK));top.add_child(frame)
 	var face:=TextureRect.new();face.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;face.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);face.mouse_filter=Control.MOUSE_FILTER_IGNORE;frame.add_child(face)
+	# The kit most of them carry, on the face's corner (HOI4's division icon).
+	var plate:=Panel.new();plate.name="KitPlate";plate.mouse_filter=Control.MOUSE_FILTER_IGNORE;plate.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.INK,1,2))
+	plate.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT);plate.offset_left=-21.0;plate.offset_top=-21.0;plate.offset_right=0.0;plate.offset_bottom=0.0;frame.add_child(plate)
+	var badge:=TextureRect.new();badge.name="Kit";badge.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);badge.offset_left=1.0;badge.offset_top=1.0;badge.offset_right=-1.0;badge.offset_bottom=-1.0;plate.add_child(badge)
 	# Wide, the columns line up down the list: the name cell gives back what
 	# a band's indent and smaller face take.
 	var who:=_cell(top,(WHO_WIDTH-20.0*depth) if wide else 110.0,true)
@@ -324,7 +329,7 @@ func _row(row:Dictionary,depth:int)->void:
 	var orders:=_button(top,"Orders",func():open_orders(String(row.id)),Icons.command_texture("arrow",T.INK,40))
 	orders.name="Orders";orders.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	live.append({"id":String(row.id),"depth":depth,"panel":panel,"state":state,"face":face,"face_key":"","who":who,"title":title,"template":template,"men_cell":men_cell,"men":men,
-		"call_up":call_up,"meters":meters,"drill_cell":drill_cell,"drill":drill,"seen_mark":seen_mark,"seen":seen,"place":place,"doing":doing,"where":where,"find":find,"talk":talk,"orders":orders})
+		"call_up":call_up,"badge":badge,"badge_key":"","meters":meters,"drill_cell":drill_cell,"drill":drill,"seen_mark":seen_mark,"seen":seen,"place":place,"doing":doing,"where":where,"find":find,"talk":talk,"orders":orders})
 
 
 func _update_row(control:Dictionary,row:Dictionary)->void:
@@ -387,6 +392,13 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 
 
 func _face(control:Dictionary,row:Dictionary)->void:
+	var kinds:Array=row.get("kinds",[])
+	var glyph:=preload("res://scripts/battle_blocks.gd").glyph_of(String((kinds[0] as Dictionary).get("unit","levy")),String((kinds[0] as Dictionary).get("weapon",""))) if not kinds.is_empty() else ""
+	if control.has("badge") and glyph!=String(control.get("badge_key","")):
+		control.badge_key=glyph
+		(control.badge as TextureRect).texture=Icons.arm_texture(glyph,T.INK,T.GOLD,48) if glyph!="" else null
+		(control.badge as TextureRect).get_parent().visible=glyph!=""
+		(control.badge as TextureRect).tooltip_text=String((kinds[0] as Dictionary).get("label","")) if not kinds.is_empty() else ""
 	var general:Dictionary=row.get("general",{})
 	var key:="%s|%s|%s" % [String(row.kind),String(general.get("figure_id","")),String(general.get("name",""))]
 	if key==String(control.face_key):return
