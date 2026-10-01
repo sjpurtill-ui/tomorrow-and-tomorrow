@@ -699,11 +699,16 @@ static func _settlement_glyph(index:int)->Array:
 				siege.append(_s(28+cos(a)*20.0,28+sin(a)*20.0,28+cos(a)*25.0,28+sin(a)*25.0,2.4,Color("#8e3b2e")))
 			return siege
 		SETTLEMENT_GLYPH_RUINED:
-			# Broken walls in faded ink, with the scorch of a fire across them.
+			# A burned town: the stranger's diamond in faded ink, its wall broken
+			# in two places, a heap of rubble, and one small flame. No crossed or
+			# turning strokes: a ruin must never read as any sign or emblem.
 			var faded:=Color("#6b5e4e")
+			var fire:=Color("#8e3b2e")
 			return [_d(28,28,22,halo),_d(28,28,19,Color(paper,0.8)),
-				_s(28,11,36,19,2.6,faded),_s(45,28,37,36,2.6,faded),_s(28,45,20,37,2.6,faded),_s(11,28,19,20,2.6,faded),
-				_s(19,19,37,37,2.2,Color("#8e3b2e")),_s(37,19,19,37,2.2,Color("#8e3b2e"))]
+				_s(28,11,34,17,2.6,faded),_s(40,23,45,28,2.6,faded),_s(45,28,28,45,2.6,faded),
+				_s(28,45,22,39,2.6,faded),_s(16,33,11,28,2.6,faded),_s(11,28,28,11,2.6,faded),
+				_rr(22,36,3.2,2.2,0.8,faded),_rr(28.5,37,3.6,2.4,0.8,faded),_rr(34.5,35.5,2.6,2.0,0.8,faded),
+				_t(28,15,23.2,28,32.8,28,fire),_c(28,28,4.8,fire)]
 	# Cities: a walled ring with towers, then outer rings for greater cities.
 	var parts:Array=[_c(28,28,22,halo),_c(28,28,19,paper)]
 	for tower in 8:

@@ -81,8 +81,10 @@ const FALLBACK_FACTOR:=1.25
 ## Foraging: the typical richness of the land, the band size that forages
 ## at field_rations' stated rate, and the cap on the share.
 const FORAGE_TYPICAL:=0.42
-const SIZE_REF:=60.0
-const FORAGE_SHARE_MAX:=0.6
+## The men the land round a camp feeds in full in ordinary country; a bigger
+## force finds less each, by the square root (field_rations.gd).
+const FORAGE_FEEDS:=150.0
+const FORAGE_SHARE_MAX:=1.0
 ## Ground weight when nothing is surveyed (tests, headless): open land.
 const NEUTRAL_RICH:=FORAGE_TYPICAL
 const NEUTRAL_SWING:=12.0
@@ -1064,8 +1066,8 @@ static func reach_effort(who:String,share:float=REACH_HAUL,endurance:float=0.0)-
 static func forage_factor_from(rich:float,chill:float,troops:int)->float:
 	var area:=clampf(rich/FORAGE_TYPICAL,0.3,1.5)
 	var season:=1.0-0.7*chill
-	var size:=clampf(pow(SIZE_REF/float(maxi(1,troops)),0.25),0.6,1.1)
-	return clampf(area*season*size,0.2,1.5)
+	var size:=clampf(sqrt(FORAGE_FEEDS/float(maxi(1,troops))),0.05,4.0)
+	return clampf(area*season*size,0.02,6.0)
 
 ## The land at a point: {rich, t, swing, cold}. From the field; off it, from
 ## the marching ground (main thread) or open land.
@@ -1116,10 +1118,14 @@ static func terms(field:Dictionary,p:Vector2,day:int,troops:int,moving:bool,tran
 	var hub:Dictionary=(sources[source] as Dictionary) if source>=0 and source<sources.size() else {}
 	if not hub.is_empty() and (String(hub.kind)=="home" or is_relay(String(hub.kind))): haul*=siege
 	var carried:=clampf(transport*haul*stores,0.0,1.0)
-	var base:=FieldRations.FORAGE_MOVING if moving else FieldRations.FORAGE_STATIONED
-	var share:=minf(FORAGE_SHARE_MAX,base*forage_factor_from(float(land.rich),chill,troops))
+	# On the march the general lives off the land where the carriers cannot
+	# feed the band (field_rations.should_live_off_land), as the march does.
+	var factor:=forage_factor_from(float(land.rich),chill,troops)
+	var living:=moving and FieldRations.should_live_off_land(carried,factor)
+	var base:=FieldRations.FORAGE_STATIONED if not moving else (FieldRations.FORAGE_FORAGING if living else FieldRations.FORAGE_MOVING)
+	var share:=minf(FORAGE_SHARE_MAX,base*factor)
 	var foraged:=(1.0-carried)*share
-	return {"ratio":clampf(carried+foraged,0.0,1.0),"carried":carried,"foraged":foraged,"local":0.0,"air":0.0,"haul":haul,"transport":transport,"stores":stores,
+	return {"ratio":clampf(carried+foraged,0.0,1.0),"carried":carried,"foraged":foraged,"local":0.0,"air":0.0,"haul":haul,"transport":transport,"stores":stores,"living_off_land":living,
 		"effort":float(e.effort),"trip_effort":trip,"days":days,"cold":chill,"sources":e.sources,"rich":float(land.rich),"forage_share":share,"hub":hub,"carrier":who,"fallback":bool(e.fallback)}
 
 ## A node's place on the land.
@@ -1338,7 +1344,7 @@ static func _report_from_terms(f:Dictionary,t:Dictionary,p:Vector2)->Dictionary:
 		"km":km,"road":ROAD_WORDS[int(roads.tier)] if int(roads.tier)>=0 and float(roads.road)>=0.5 else "","road_share":float(roads.road),
 		"hub":hub_name,"hub_kind":hub_kind,"hub_position":hub.get("pos",Vector2.INF),"depot_name":depot,
 		"season":"winter" if float(t.cold)>=0.3 else "","cold":float(t.cold),"rich":float(t.rich),"carrier":String(t.carrier),
-		"route":route,"position":p,"siege":"","blockade":"","hungry_days":0.0,"hungry":false,"supply_level":ratio,"fallback":bool(t.fallback)}
+		"route":route,"position":p,"siege":"","blockade":"","hungry_days":0.0,"hungry":false,"supply_level":ratio,"fallback":bool(t.fallback),"living_off_land":bool(t.get("living_off_land",false))}
 	report["why"]=why(report)
 	return report
 
@@ -1404,6 +1410,7 @@ static func of_force(force:Dictionary)->Dictionary:
 	var hunger_recent:=today()-int(force.get("hunger_last_day",-100000))<=30
 	report["hunger_losses"]=(force.get("hunger_losses",{}) as Dictionary).duplicate() if force.get("hunger_losses") is Dictionary and hunger_recent else {}
 	report["stores_share"]=clampf(float(force.get("stores_share",1.0)),0.0,1.0)
+	report["living_off_land"]=bool(force.get("living_off_land",false)) and String(force.get("status",""))=="moving"
 	_siege_and_blockade(report,force)
 	report["why"]=why(report)
 	report["words"]=words(report)
@@ -1524,6 +1531,7 @@ static func why(report:Dictionary)->PackedStringArray:
 	var rich:=float(report.get("rich",NEUTRAL_RICH))
 	if rich<FORAGE_TYPICAL*0.7: out.append("poor country to forage")
 	elif rich>FORAGE_TYPICAL*1.25: out.append("rich country to forage")
+	if bool(report.get("living_off_land",false)): out.append("living off the land: half pace, foraging and hunting as they go")
 	if String(report.get("siege",""))!="": out.append(String(report.siege))
 	if String(report.get("blockade",""))!="": out.append(String(report.blockade))
 	return out

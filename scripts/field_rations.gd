@@ -8,16 +8,37 @@ extends RefCounted
 ## trouble, never as hunger at home.
 
 ## Share of a day's ration a band away from home finds for itself by hunting,
-## gathering and taking from the country it stands in. Camped bands forage
-## better than bands on the march; neither lives well off the land alone.
-const FORAGE_STATIONED:=0.35
-const FORAGE_MOVING:=0.18
+## gathering and taking from the country, by how it spends the day: camped,
+## marching at FORAGE_PACE while it forages as it goes (the general's choice
+## when the carriers cannot feed it: "living off the land"), or marching hard.
+## The country, the season and the band's size set the rest
+## (supply_state.forage_factor): the land round a camp feeds about
+## FORAGE_FEEDS men in full in ordinary country, so a band of twenty can live
+## off it and a host of thousands cannot.
+const FORAGE_STATIONED:=1.0
+const FORAGE_FORAGING:=0.6
+const FORAGE_MOVING:=0.25
+## Living off the land, a band marches at this share of its pace.
+const FORAGE_PACE:=0.5
 ## A ration below this share counts as a hungry day for the soldiers.
 const HUNGRY_BELOW:=0.75
 
 
+static func forage_base(force:Dictionary)->float:
+	if String(force.get("status","stationed"))!="moving": return FORAGE_STATIONED
+	return FORAGE_FORAGING if bool(force.get("living_off_land",false)) else FORAGE_MOVING
+
+## Whether a band on the march should live off the land today: its full
+## march would leave it hungry (below HUNGRY_BELOW) and the slower one feeds
+## it better. `carried` is the share of its bread the carriers bring.
+static func should_live_off_land(carried:float,factor:float)->bool:
+	var c:=clampf(carried,0.0,1.0)
+	var full:=c+(1.0-c)*minf(1.0,FORAGE_MOVING*factor)
+	var slow:=c+(1.0-c)*minf(1.0,FORAGE_FORAGING*factor)
+	return full<HUNGRY_BELOW and slow>full+0.02
+
 static func forage_share(force:Dictionary)->float:
-	var base:=FORAGE_MOVING if String(force.get("status","stationed"))=="moving" else FORAGE_STATIONED
+	var base:=forage_base(force)
 	# The country, the season and the band's size (supply_state.gd): rich green
 	# land in summer feeds a small band better than a host in winter.
 	var supply=load("res://scripts/supply_state.gd")

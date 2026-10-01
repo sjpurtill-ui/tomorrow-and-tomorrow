@@ -679,6 +679,18 @@ with machine accounting; (7) recruitment fixes and template numbers.
 
   `test_military_development` keeps its 8 failures, which are the same on
   `main`.
+- **Playtest fix, living off the land.** A 20-man band sent beyond the carts
+  starved at once: foraging was capped at 60% of a day's food. Even camped,
+  a small band found about 38%, and only 20% on the march. Now:
+  - The land round a camp feeds about 150 men in full in ordinary country.
+    A bigger force finds less each, by the square root, so 20 men live off
+    it and a host of thousands cannot.
+  - Camped, a band forages at 1.0 of that. Marching hard it manages 0.25.
+  - Where the carts cannot feed a band, its general lives off the land:
+    half pace, foraging and hunting as it goes (0.6), when that feeds the
+    men better (`field_rations.should_live_off_land`). A chase keeps full
+    pace. The map, the order preview and the band's supply note make the
+    same choice and say "living off the land: half pace".
 
 ## Next steps (not built)
 

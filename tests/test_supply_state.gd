@@ -121,14 +121,16 @@ func test_a_band_reads_the_engines_own_rations_and_the_projection_agrees()->void
 	assert_float(float(far.provisions_delivered_today)).is_less(float(near.provisions_delivered_today))
 
 func test_forage_share_is_the_models_and_the_country_matters()->void:
-	var band:=_band(7,Vector2(60,0))
+	# A company of 400: too many to live off a camp's country alone.
+	var band:=_band(7,Vector2(60,0),400)
 	var share:=Rations.forage_share(band)
 	assert_float(share).is_equal_approx(minf(Supply.FORAGE_SHARE_MAX,Rations.FORAGE_STATIONED*Supply.forage_factor(band)),0.00001)
+	assert_float(share).is_less(1.0)
 	# A host strips the country a small band lives off.
 	var host:=_band(8,Vector2(60,0),900)
 	assert_float(Rations.forage_share(host)).is_less(share)
 	# Wooded hills feed a forager better than the open grass (game and cover).
-	assert_float(Rations.forage_share(_band(9,Vector2(-60,0)))).is_greater(share)
+	assert_float(Rations.forage_share(_band(9,Vector2(-60,0),400))).is_greater(share)
 	# Hard winter leaves little to find.
 	warmth=0.22
 	Supply.reset()
@@ -152,8 +154,9 @@ func _coldest_day(at:Vector2)->int:
 func test_farther_out_is_worse()->void:
 	var ratios:Array=[]
 	var carried:Array=[]
+	# A company of 400: too many to live off the land, so the line matters.
 	for km in [30.0,90.0,160.0,230.0]:
-		var r:=Supply.at_point(home+Vector2(km,0),30)
+		var r:=Supply.at_point(home+Vector2(km,0),400)
 		ratios.append(float(r.ratio)); carried.append(float(r.carried))
 		assert_str(String(r.hub)).is_equal("Seanstone")
 	for k in range(1,ratios.size()):
@@ -405,3 +408,24 @@ func test_plain_words_add_up()->void:
 	assert_str(Supply.state_of(0.3)).is_equal("starving")
 	var at_home:=Supply.of_force(MilitaryCampaign.home_army)
 	assert_str(String(at_home.words)).starts_with("At home")
+
+func test_a_small_band_lives_off_the_land_and_a_host_cannot()->void:
+	# Beyond the carriers (nothing carried), in ordinary open country: twenty
+	# men camped feed themselves; on the march the general slows to forage
+	# and hunt, and they stay fed. A host of thousands cannot.
+	var few:=_band(21,Vector2(60,0),20)
+	assert_float(Rations.forage_share(few)).is_equal_approx(1.0,0.0001)
+	few["status"]="moving"
+	var factor:=Supply.forage_factor(few)
+	assert_bool(Rations.should_live_off_land(0.0,factor)).is_true()
+	assert_float(Rations.forage_share(few)).is_less(Rations.HUNGRY_BELOW)
+	few["living_off_land"]=true
+	assert_float(Rations.forage_share(few)).is_greater_equal(Rations.HUNGRY_BELOW)
+	# Fed by the carriers, nobody slows down.
+	assert_bool(Rations.should_live_off_land(0.9,factor)).is_false()
+	var host:=_band(22,Vector2(60,0),3000)
+	assert_float(Rations.forage_share(host)).is_less(0.3)
+	# The map and the preview make the same choice for a band on the march.
+	var point:=Supply.at_point(home+Vector2(250,0),20,true,false)
+	assert_bool(bool(point.living_off_land)).is_true()
+	assert_float(float(point.ratio)).is_greater_equal(Rations.HUNGRY_BELOW)
