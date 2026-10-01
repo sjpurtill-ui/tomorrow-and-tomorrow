@@ -15,6 +15,8 @@ func _activate_project(discovery_id:String,observers:int=2)->Dictionary:
 	allocations[subcategory]=observers
 	GameState.research_subcategory_allocations[dynamic_id]=allocations
 	GameState.active_investigations["%s::%s" % [dynamic_id,subcategory]]=discovery_id
+	# The player's choice: its team keeps it until it is proven.
+	GameState.research_targets["%s::%s" % [dynamic_id,subcategory]]=discovery_id
 	GameState.discovery_progress[discovery_id]=0.24
 	return discovery
 
@@ -94,19 +96,27 @@ func test_billion_population_does_not_create_additional_research_records()->void
 	assert_int(int(DiscoverySystem.research_program_summary().researchers)).is_greater(10_000_000)
 
 
-func test_research_priority_divides_the_aggregate_workforce_and_shapes_throughput()->void:
+func test_research_priority_sets_turns_and_every_team_works_alike()->void:
 	for dynamic_id in GameState.research_subcategory_allocations:
 		for subcategory in (GameState.research_subcategory_allocations[dynamic_id] as Dictionary):
 			GameState.research_subcategory_allocations[dynamic_id][subcategory]=0
 	GameState.research_subcategory_allocations.knowledge["Preserved knowledge"]=3
 	GameState.research_subcategory_allocations.security["Military readiness"]=1
 	GameState.ensure_population_total(100_000)
+	GameState.active_investigations.clear()
 	var records_capacity:=DiscoverySystem.research_capacity_for("knowledge","Preserved knowledge")
 	var military_capacity:=DiscoverySystem.research_capacity_for("security","Military readiness")
+	# The people following each line keep to its share of attention...
 	assert_float(float(records_capacity.workforce_share)).is_equal_approx(0.75,0.0001)
 	assert_float(float(military_capacity.workforce_share)).is_equal_approx(0.25,0.0001)
 	assert_float(float(records_capacity.researchers)).is_equal_approx(float(military_capacity.researchers)*3.0,0.1)
-	assert_float(float(records_capacity.progress_multiplier)).is_greater(float(military_capacity.progress_multiplier))
+	# ...but a share sets how often a line's questions get a team, never the team:
+	# every team does an equal part of the community's whole work.
+	assert_float(float(records_capacity.progress_multiplier)).is_equal_approx(float(military_capacity.progress_multiplier),0.000001)
+	assert_float(float(records_capacity.team_people)).is_equal_approx(float(military_capacity.team_people),0.000001)
+	var teams:=DiscoverySystem.research_teams()
+	assert_int(int(teams.count)).is_greater(4)
+	assert_float(float(records_capacity.team_scale)*float(teams.count)).is_equal_approx(float(teams.work),0.0001)
 	var summary:=DiscoverySystem.research_program_summary()
 	assert_int(int(summary.active_lines)).is_equal(2)
 	assert_int(int(summary.emphasis_total)).is_equal(4)
@@ -189,16 +199,18 @@ func test_emphasis_selects_the_live_frontier_without_exposing_hidden_catalog()->
 			GameState.research_subcategory_allocations[dynamic_id][subcategory]=0
 	GameState.research_subcategory_allocations.knowledge["Preserved knowledge"]=3
 	DiscoverySystem.refresh_investigations()
-	assert_int(GameState.active_investigations.size()).is_equal(1)
-	assert_bool(GameState.active_investigations.has("knowledge::Preserved knowledge")).is_true()
+	# Only the followed field's teams work, at its desks (its own questions or
+	# their foundations), at most one team for each the researchers field.
+	assert_int(GameState.active_investigations.size()).is_between(1,int(DiscoverySystem.research_teams().count))
+	for channel:Variant in GameState.active_investigations:assert_bool(String(channel).begins_with("knowledge::")).is_true()
 	var snapshot:=DiscoverySystem.frontier_snapshot("knowledge")
 	assert_bool(bool(snapshot.catalog_hidden)).is_true()
 	assert_bool(snapshot.has("total_count")).is_false()
-	assert_int(int(snapshot.active.size())).is_equal(1)
+	assert_int(int(snapshot.active.size())).is_between(1,GameState.active_investigations.size())
 	assert_str(String(snapshot.opportunity_signal)).is_not_empty()
 
 
-func test_completed_line_redirects_observers_without_player_micromanagement()->void:
+func test_a_finished_line_keeps_its_emphasis_and_its_teams_move_on()->void:
 	for dynamic_id in GameState.research_subcategory_allocations:
 		for subcategory in (GameState.research_subcategory_allocations[dynamic_id] as Dictionary):
 			GameState.research_subcategory_allocations[dynamic_id][subcategory]=0
@@ -211,11 +223,13 @@ func test_completed_line_redirects_observers_without_player_micromanagement()->v
 		var id:=String(definition.get("id",""))
 		if id!="" and id not in GameState.known_discoveries: GameState.known_discoveries.append(id)
 	DiscoverySystem.refresh_investigations()
-	assert_int(int(GameState.research_subcategory_allocations.knowledge["Preserved knowledge"])).is_equal(0)
-	var redirected_total:=0
-	for value in (GameState.research_subcategory_allocations.knowledge as Dictionary).values(): redirected_total+=int(value)
-	assert_int(redirected_total).is_equal(3)
+	# The emphasis stays where the player put it; nobody moves it by hand or behind
+	# the player's back. The field's teams take up its other questions.
+	assert_int(int(GameState.research_subcategory_allocations.knowledge["Preserved knowledge"])).is_equal(3)
+	assert_int(int(GameState.research_allocations.knowledge)).is_equal(3)
 	for dynamic_id in GameState.research_subcategory_allocations:
 		if String(dynamic_id)=="knowledge": continue
 		for value in (GameState.research_subcategory_allocations[dynamic_id] as Dictionary).values(): assert_int(int(value)).is_equal(0)
 	assert_int(GameState.active_investigations.size()).is_greater(0)
+	assert_bool(GameState.active_investigations.has(exhausted_channel)).is_false()
+	for channel:Variant in GameState.active_investigations:assert_bool(String(channel).begins_with("knowledge::")).is_true()

@@ -23,13 +23,14 @@ func _lay_out(steps_by_line:Dictionary)->void:
 		for i in int(steps_by_line.get(line,0)):subs[keys[i%keys.size()]]=int(subs[keys[i%keys.size()]])+1
 	WorldSimulation.discovery._rebuild_research_domain_totals()
 
-## Every staffed line's part of the work (before food, tools and schooling).
+## The whole work of the teams at work (before food, tools and schooling):
+## teams carry questions, one each, and share the community's work equally.
 func _work()->float:
+	WorldSimulation.discovery.refresh_investigations()
 	var work:=0.0
-	var allocations:Dictionary=WorldSimulation.state.research_subcategory_allocations
-	for line:String in allocations:
-		for sub:String in allocations[line]:
-			if int(allocations[line][sub])>0:work+=float(WorldSimulation.discovery.research_capacity_for(line,sub).team_scale)
+	for channel:String in WorldSimulation.state.active_investigations:
+		var home:=channel.split("::")
+		work+=float(WorldSimulation.discovery.research_capacity_for(home[0],home[1]).team_scale)
 	return work
 
 func test_the_same_researchers_make_the_same_progress_under_any_emphasis()->void:
@@ -48,22 +49,24 @@ func test_the_same_researchers_make_the_same_progress_under_any_emphasis()->void
 		for value in totals:assert_float(value).is_equal_approx(R.team_capacity(researchers),.0001)
 	)
 
-func test_piling_people_onto_one_line_has_diminishing_returns()->void:
+func test_piling_attention_onto_one_line_gives_it_turns_never_a_bigger_team()->void:
 	WorldSimulation.scoped("parity",func()->void:
 		WorldSimulation.state.population_allocations.Knowledge=60
 		var allocations:Dictionary=WorldSimulation.state.research_subcategory_allocations
 		_lay_out({})
 		var knowledge:String=allocations.knowledge.keys()[0];var culture:String=allocations.culture.keys()[0]
 		allocations.knowledge[knowledge]=4;allocations.culture[culture]=1
+		WorldSimulation.state.active_investigations.clear()
 		var heavy:=float(WorldSimulation.discovery.research_capacity_for("knowledge",knowledge).team_scale)
 		var light:=float(WorldSimulation.discovery.research_capacity_for("culture",culture).team_scale)
-		assert_float(heavy).is_greater(light)
-		assert_float(heavy).is_less(light*4.0)
-		# A small band has too few people for returns to diminish: work follows emphasis.
-		WorldSimulation.state.population_allocations.Knowledge=1
-		heavy=float(WorldSimulation.discovery.research_capacity_for("knowledge",knowledge).team_scale)
-		light=float(WorldSimulation.discovery.research_capacity_for("culture",culture).team_scale)
-		assert_float(heavy).is_equal_approx(light*4.0,.0001)
+		assert_float(heavy).is_equal_approx(light,.000001)
+		# More researchers field more teams, each doing an equal part of more work,
+		# with returns that diminish (Research600.team_capacity).
+		var many:=float(WorldSimulation.discovery.research_teams().work)
+		WorldSimulation.state.population_allocations.Knowledge=6
+		var few:=float(WorldSimulation.discovery.research_teams().work)
+		assert_float(many).is_greater(few)
+		assert_float(many).is_less(few*10.0)
 	)
 
 func test_steps_of_attention_are_read_as_shares()->void:

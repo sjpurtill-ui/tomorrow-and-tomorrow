@@ -34,7 +34,8 @@ func test_atlas_reports_current_leader_and_real_fractional_workforce_without_rea
 	assert_int(view.records.size()).is_greater(0)
 	for item:Dictionary in view.records:
 		assert_bool(item.assignment.active).is_true()
-		assert_float(Art.team(item)).is_equal_approx(DiscoverySystem.research_capacity_for(item.domain,item.subcategory).researchers,.00001)
+		# The team on it: teams carry questions, one each, sharing the work equally.
+		assert_float(Art.team(item)).is_equal_approx(DiscoverySystem.research_capacity_for(item.domain,item.subcategory).team_people,.00001)
 		assert_bool(view.bindings.has(item.id)).is_true()
 		assert_str(view.bindings[item.id].lead.text).contains(item.assignment.leader.name)
 	assert_dict(GameState.active_investigations).is_equal(before)
@@ -226,7 +227,8 @@ func test_tree_text_never_draws_below_twelve_pixels()->void:
 
 func test_team_and_evidence_read_as_words()->void:
 	assert_str(Art.workforce(0.5)).is_equal("One person, part of the time")
-	assert_str(Art.plain_bottleneck("RESEARCH WORKFORCE — this emphasis receives less than one full-time-equivalent researcher")).contains("Fewer than one person's full time")
+	# A thin team is told in the engine's own numbers.
+	assert_str(Art.plain_bottleneck("RESEARCH WORKFORCE — a thin team: less than one person at it, where a people of our size would put about 3 on one question")).is_equal("A thin team: less than one person at it, where a people of our size would put about 3 on one question.")
 	assert_str(Art.effect_sentence("food_storage",0.03)).ends_with("up about 3%")
 	assert_bool(Art.effect_is_cost("pollution",0.02)).is_true()
 	assert_bool(Art.effect_is_cost("food_storage",0.02)).is_false()

@@ -196,6 +196,36 @@ static func researchers(amount:float)->String:
 	if amount<9.5:return "About %d people" % roundi(amount)
 	return "About %d people" % (roundi(amount/5.0)*5)
 
+## The team on a question, as the people would say it: "A team of about 3
+## people", "Two teams, about 6 people", "One person, part of the time".
+static func team(people:float,teams:int=1)->String:
+	if people<=0.05:return "No one is working on it yet"
+	if teams>=2:return "%s teams, %s" % ["Two" if teams==2 else str(teams),researchers(people).to_lower()]
+	if people<1.5:return researchers(people)
+	return "A team of "+researchers(people).to_lower()
+
+## A question's clock: "about 1½ years to proof"; "" when nobody works it.
+static func clock(days:float)->String:
+	if days<=0.0 or not is_finite(days):return ""
+	if days>365.0*150.0:return "no end in sight at this pace"
+	return Plain.duration_text(days)+" to proof"
+
+## A question's step to proof, with its trial use: "gathering the first
+## cases", "first cases hold: 5 in 100 households try it", "repeated with the
+## same result: 15 in 100 households use it".
+static func step(stage:int,share:float)->String:
+	var households:=roundi(clampf(share,0.0,1.0)*100.0)
+	match stage:
+		0:return "gathering the first cases"
+		1:return "first cases hold: %d in 100 households try it" % households
+	return "repeated with the same result: %d in 100 households use it" % households
+
+## The price of working ahead of the age: "25 years ahead: six times the work".
+static func lead_price(years:float,factor:float)->String:
+	var whole:=roundi(factor)
+	var times:="twice" if whole<=2 else ("%s times" % (["","","","three","four","five","six","seven","eight","nine","ten"][whole] if whole<=10 else str(whole)))
+	return "%d years ahead: %s the work" % [roundi(years),times]
+
 ## Evidence gathered (0..1) as words.
 static func evidence(progress:float)->String:
 	var p:=clampf(progress,0.0,1.0)
