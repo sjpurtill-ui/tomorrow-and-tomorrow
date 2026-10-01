@@ -96,5 +96,70 @@
     "initial_prompt": "Create a completely NEW game research painting for Ember Tending, year 3: carrying and banking fire before pottery. Reference supplies ONLY mature opaque botanical egg-tempera medium, olive/deep-green/wheat-gold/cream/earth palette, crisp flat pigment shapes and brushed grain. Copy NONE of its greenhouse, crop rows, modern sleeve or cultivated grain. Scene: two adults in ragged unstitched hide wraps kneel beside a low hearth of rough stones. Left adult uses a rough twig to draw pale ash gently over a small living red coal; right adult prepares to carry a tiny ash-covered ember in an irregular naturally curled bark fragment resting on a forked crooked branch, holding the branch well away from the hot coal. Clearly depict conservation and transfer of an existing ember, no ignition apparatus. Small dry natural tinder fibers, irregular loose twigs and wild sparse plants, flat olive landscape bands. No ceramic vessel, bowl, jar, lid, woven basket, polished tray, wood carpentry, metal, writing, refined clothing or buildings. Wide panorama approximately 3:1; both adult faces, twig banking action, coal glow and bark supported by forked branch together across central horizontal band for 3.77:1 card crop. Flat opaque egg-tempera planes, dignified adults, visibly hand-painted, no photographic shading, CGI, cinematic light, cute illustration, borders, symbols or captions.",
     "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-419059c6-01e9-423f-8cf4-67e138d355a0.png",
     "initial_reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/gene_edited_crops-v1.png"
+  },
+  {
+    "id": "oral_epics",
+    "line": "culture",
+    "game_year": 3,
+    "version": 3,
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "replace_art600": true,
+    "binding_style": "culture: tapestry-inspired painting",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9ce0a96c-71f3-4bbe-a625-b7c12351881e.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/shared_hearth_gatherings-v1.png",
+    "prompt": "Create a completely NEW game year-3 research painting for Oral Epics: trained reciters keep long accounts. Reference supplies ONLY mature tapestry-inspired painted medium, interlocking flat angular forms, coarse fiber-like paint grain, indigo/dusty-rose/warm-gold/dusk-violet palette. Copy none of its seated hearth circle composition. New scene: a standing elder reciter at center-left tells a long remembered account, mouth open and one open hand held horizontally at shoulder level toward an attentive group of five adults seated at right. Another adult quietly repeats the account with a smaller remembering gesture. All wear ragged unstitched animal-hide wraps. An unobtrusive small fire toward left lights the gathering without cinematic glow, open prehistoric dusk landscape. Scene emphasizes trained memory and sustained recitation, no gods, fantasy apparition, floating illustrations, written text or music notation. Very wide panoramic painting approx 3:1, faces, open mouth, reciting and repeating hands all in compact central horizontal band for 3.77:1 crop. Deliberate flat pigment shapes, angular mature adults, no photographic skin or digital volume. Tapestry means rendering only: no physical tapestry, woven clothes, baskets, rugs, pottery, sewn garments, furniture, buildings, metal, captions, border or watermark.",
+    "mode": "built-in image_gen / new image with medium reference",
+    "review": "Full original inspected: standing elder with open mouth and shoulder-level recitation gesture, five attentive adults and one repeating listener beside small fire. All hide-clad, flat interlocking indigo/rose/gold/violet pigment with coarse fiber-like paint grain. No written records, physical weaving or fantasy overlay. Full original and 3.77:1 crop inspected; reciter mouth and outstretched hand, repeating listener and all attentive faces remain visible."
+  },
+  {
+    "id": "relay_call_stations",
+    "line": "knowledge",
+    "game_year": 3,
+    "version": 1,
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "replace_art600": true,
+    "binding_style": "knowledge: blue-black ink and lapis wash",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-25ff54eb-e6a1-42ee-b385-d55fca370afe.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/stored_program_computer-v1.png",
+    "prompt": "Create a completely NEW year-3 research painting for Relay Calls Between Camps. Reference supplies ONLY mature blue-black contour drawing and crosshatching with lapis wash on parchment ivory; copy NONE of its computers, furniture, modern clothing or indoor setting. Scene: three adults in ragged unstitched hide wraps stand on separate natural rocky rises at different distances across open terrain. Nearest adult at left cups both hands to mouth and calls toward middle caller, middle caller turns toward right distant caller to relay the message. Third caller at right cups hands to mouth, visibly human and clear. A continuous sequence of directed attention, no soundwave symbols or arrows. Sparse wild scrub and flat distant hill bands, no huts or constructed stations. All three heads and cupped-hand gestures inside the compact middle horizontal band for 3.77:1 crop; wide panoramic painting approximately 3:1. Precise expressive ink contour/hatching, limited flat lapis wash, open paper texture, mature restrained adult proportions. No photographic rendering, digital volume, cinematic lighting, baskets, pottery, woven garments, refined tools, metal, formal architecture, diagrams, writing, labels, borders or watermark. Different composition and medium from security alarm woodblock.",
+    "mode": "built-in image_gen / new image with medium reference",
+    "review": "Full original inspected: three hide-clad adult callers occupy successive natural rocky rises, with cupped-hand call gestures and directed attention. Blue-black ink contour/crosshatching and flat lapis wash on open parchment; no constructed stations, sound symbols, modern objects or photographic rendering. Full original and 3.77:1 crop inspected; all three callers, faces and cupped hands remain visible at their respective distances."
+  },
+  {
+    "id": "timber_grading",
+    "line": "ecology",
+    "game_year": 3,
+    "version": 3,
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "replace_first300": true,
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/timber_grading.png",
+      "source": "EARLY_SUBJECTS",
+      "focus": [
+        0.5,
+        0.6
+      ],
+      "later_fallback": {
+        "path": "res://assets/ui/research/subjects/timber_grading-v2.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-340b27cc-8a1d-4e97-9e04-056e2e054fc1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/seasonal_patterns-v2.png",
+    "prompt": "Create a completely NEW year-3 game research painting for Timber Grading: choosing wood by straightness, knots and soundness. Reference supplies ONLY mature naturalist field painting in layered plant pigments, botanical foreground detail, flat moss/fern/earth/muted-sky landscape bands, visible dry-brush grain. Copy none of its seasonal comparison composition or migrating birds. New scene: two adult gatherers wearing ragged unstitched hide wraps compare three natural fallen branch lengths resting on rough earth: one relatively straight sound young branch with bark, one crooked knotty limb, and one rotten broken branch showing crumbly decayed fibers. An adult sight-lines along the sound branch held horizontally at chest height; the other points directly to knots and rot in the rejected branches. Ends MUST be irregular naturally broken fractures, no saw-cut discs, uniform beams or planed surfaces. Wild woodland edge with recognizable living leaves and coarse bark, no planted forest rows. Wide panorama approx 3:1; adult faces, horizontal sighting branch, pointing hand and all three contrasting wood types tightly grouped in middle horizontal band for 3.77:1 crop. Flat botanical field pigment painting, dignified adults, no photographic skin or digital volume. No metal, axe, saw, mallet, standardized carpentry, vessel, basket, woven cloth, writing, ruler, labels, frame or watermark. Selection before woodworking, not a workshop.",
+    "mode": "built-in image_gen / new image with medium reference",
+    "review": "Full original inspected: adult sights along sound natural branch; second points at knots and crumbly rotten fibers in rejected lengths. Ragged hides, irregular broken branch ends, detailed wild plants and coarse bark against flat landscape bands in layered field pigments. No saw-cut stock, refined tool, modern clothing or copied seasonal-comparison subject. Wood-property comparison is artistic interpretation informed by primary raw-material selection research, not specific-site reconstruction. Full original and 3.77:1 crop inspected; sighting branch, both faces, pointing fingers, knots and rotten fibers remain visible."
   }
 ]

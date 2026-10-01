@@ -140,5 +140,6 @@
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
   "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
-  "ember_tending": "res://assets/ui/research/subjects/ember_tending-v1.png"
+  "ember_tending": "res://assets/ui/research/subjects/ember_tending-v1.png",
+  "timber_grading": "res://assets/ui/research/subjects/timber_grading-v3.png"
 }

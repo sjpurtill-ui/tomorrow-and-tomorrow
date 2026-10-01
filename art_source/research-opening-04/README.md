@@ -76,3 +76,15 @@ Shared research_visuals.gd focus support matches the pending PR #25 changes:
 optional art_600 focus, and opening_focus only for identical assigned paths.
 Integration should preserve that identical behavior and PR #25's separate
 ecology-overview change. Probe checks legacy art600 and first300 defaults.
+
+Final year-three checkpoint adds Oral Epics, Relay Calls and Timber Grading.
+All nine replacements passed full-original and 3.77:1 crop review. Clean
+import, headless runtime and private GPU PASS count=9, exit 0, no logged
+errors; final game-card capture inspected. Effective-source review for all
+thirteen year-three subjects is recorded in year3-review.json: nine reviewed
+replacements and four retained paintings. No pending year-three subject.
+This covers worker art review; pending PRs are not yet player integration.
+
+Prior sidecar archive names now reflect the actual source version, including
+Oral Epics v2 and Timber Grading v2. All previous PNGs stay intact. Source
+invocation prompts, references and hashes accompany every accepted original.

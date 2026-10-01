@@ -237,13 +237,7 @@
       0.5
     ]
   },
-  "timber_grading": {
-    "path": "res://assets/ui/research/subjects/timber_grading-v2.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "timber_grading": {"path": "res://assets/ui/research/subjects/timber_grading-v3.png", "focus": [0.5, 0.45], "opening_focus": [0.5, 0.45]},
   "timber_seasoning": {
     "path": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
     "focus": [
@@ -1182,13 +1176,7 @@
       0.5
     ]
   },
-  "oral_epics": {
-    "path": "res://assets/ui/research/subjects/oral_epics-v2.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "oral_epics": {"path": "res://assets/ui/research/subjects/oral_epics-v3.png", "focus": [0.5, 0.45]},
   "public_theatre": {
     "path": "res://assets/ui/research/subjects/public_theatre-v1.png",
     "focus": [
@@ -4240,5 +4228,6 @@
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
   "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
-  "ember_tending": {"path": "res://assets/ui/research/subjects/ember_tending-v1.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]}
+  "ember_tending": {"path": "res://assets/ui/research/subjects/ember_tending-v1.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
+  "relay_call_stations": {"path": "res://assets/ui/research/subjects/relay_call_stations-v1.png", "focus": [0.5, 0.45]}
 }

@@ -37,7 +37,13 @@ for row in rows:
     else:
         shutil.copy2(source, destination)
     sidecar = destination.with_name(key + '.json')
-    prior = HERE / 'prior' / (key + '-v1.json')
+    prior_version = '1'
+    if sidecar.exists():
+        old_asset = str(json.loads(sidecar.read_text()).get('asset', ''))
+        old_version = re.search(r'-v(\d+)\.png$', old_asset)
+        if old_version:
+            prior_version = old_version.group(1)
+    prior = HERE / 'prior' / (key + '-v' + prior_version + '.json')
     prior.parent.mkdir(exist_ok=True)
     resource_path = 'res://' + destination.relative_to(ROOT).as_posix()
     if sidecar.exists() and not prior.exists() and json.loads(sidecar.read_text()).get('asset') != resource_path:
