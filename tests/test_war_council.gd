@@ -780,3 +780,119 @@ func test_a_band_left_at_their_town_takes_up_the_raid()->void:
 	assert_int(Council.bands_against(civ_id).size()).is_equal(1)
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(home_before)
 	assert_int(_told("takes up the raid on Tsaren")).is_equal(1)
+
+# ---------------------------------------------------------------------------
+# The war leader's upkeep: resting bands, the chain of command, the march
+# ---------------------------------------------------------------------------
+
+## A band the war leader's upkeep took out of the fighting (broken, under
+## strength, resting: band_upkeep.gd) is neither sent nor counted: a band of
+## the council's that goes to rest ends its errand there (the stance sends
+## fresh men after the usual rest), and a broken band left in the field does
+## not take up the raid.
+func test_a_resting_or_broken_band_is_not_sent()->void:
+	_their_men(8.0)
+	_counted(10.0)
+	_train(160)
+	# A broken band of the old orders, left at their town.
+	var broken:=_old_band(30,"Host marching on Tsaren",city_id,city)
+	_army(broken)["morale"]=0.15
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	_place_town(CivilizationSystem.player_world_origin+Vector2(-60.0,8.0))
+	_army(broken)["position"]={"x":city.x,"z":city.y}
+	Council.order(civ_id,"take",{"place":{"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}}})
+	var band:=_band("take")
+	assert_dict(band).override_failure_message(str(Council.peek(civ_id))).is_not_empty()
+	var army_id:=int(band.army_id)
+	_days(1)
+	band=_army(army_id)
+	# The upkeep takes it out of the fighting: broken, it pulls back to rest.
+	band["morale"]=0.2
+	band["resting"]=true;band["rest_reason"]="broken";band["rest_place"]="player_home"
+	assert_bool(MilitaryCampaign.return_field_army(army_id).has("error")).is_false()
+	var today:=int(GameState.elapsed_days)
+	Council.sit(today)
+	var resting:=_army(army_id)
+	assert_str(String((resting.council as Dictionary).get("phase",""))).is_equal("home")
+	# The council leaves its road to the upkeep.
+	assert_str(String(resting.status)).is_equal("moving")
+	assert_str(String(resting.destination_id)).is_equal("player_home")
+	assert_str(String(Council.peek(civ_id).get("verdict",""))).is_equal("rest")
+	assert_str(Council.operation_words(civ_id)).contains("rest")
+	# No fresh band goes before the rest after a failed attempt.
+	for a in MilitaryCampaign.field_armies:
+		var c:Variant=(a as Dictionary).get("council")
+		if c is Dictionary and String((c as Dictionary).get("act",""))=="take" and String((c as Dictionary).get("phase",""))!="home": fail("a second band went while the first rests")
+	# The broken band at their town does not take up the raid.
+	WAR.front(civ_id)["stance"]="punish"
+	Council.sit(today+1)
+	assert_bool(_army(broken).has("council")).is_false()
+	# The god's own pick of a broken band is refused, with the reason.
+	var refused:Dictionary=Council._launch_ours(civ_id,{"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}},"punish",false,10,true,{"context":{"army_id":broken}})
+	assert_str(String(refused.get("verdict",""))).override_failure_message(str(refused)).is_equal("impossible")
+	assert_str(String(refused.get("says",""))).contains("not fit to go")
+
+## The council's bands answer to it, not to a standing order up the chain
+## (a whole-army objective): the war leader's upkeep sees to them (rest and
+## refill) and the zone staff leave them be.
+func test_council_bands_are_free_of_a_whole_army_order()->void:
+	_their_men(8.0)
+	_counted(10.0)
+	_train(120)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	var command:RefCounted=MilitaryCampaign.command_hierarchy
+	command.sync()
+	command.node("army")["order"]={"mission":"defend","zone_id":"old_zone"}
+	Council.order(civ_id,"take",{"place":{"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}}})
+	var band:=_band("take")
+	assert_dict(band).is_not_empty()
+	assert_bool(command.controls_army(int(band.army_id))).is_false()
+	assert_bool(MilitaryCampaign.upkeep.free_to_see_to(band)).is_true()
+	# Still on its road: freeing it did not stop the march.
+	assert_str(String(band.status)).is_equal("moving")
+
+## The feed-the-march check is the march's own reckoning (military_campaign
+## march_supply): days, the share lived off the land at half pace, fed on
+## the road and camped at the end, the leaner of the two deciding.
+func test_the_march_is_fed_by_the_marchs_own_reckoning()->void:
+	_train(60)
+	var town:={"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}}
+	var fed:Dictionary=Council._fed_at(town,40)
+	assert_dict(fed).is_not_empty()
+	for key in ["ratio","on_road","there","days","half_pace"]: assert_bool(fed.has(key)).override_failure_message(str(fed)).is_true()
+	assert_float(float(fed.ratio)).is_equal(minf(float(fed.on_road),float(fed.there)))
+	var home:Vector2=CivilizationSystem.player_world_origin
+	var probe:Dictionary=(MilitaryCampaign.home_army as Dictionary).duplicate(false)
+	probe["troops"]=40;probe["position"]={"x":home.x,"z":home.y};probe["status"]="moving"
+	var march:Dictionary=MilitaryCampaign.march_supply(probe,MilitaryCampaign.field_route(home,city,probe))
+	assert_int(int(fed.days)).is_equal(int(march.days))
+	# Its words when it would starve them.
+	var said:=Council._hungry_road_words(town,{"ratio":0.3,"on_road":0.3,"there":0.8,"days":9.0,"half_pace":0.5,"season":""})
+	assert_str(said).contains("on the road to Tsaren")
+	assert_str(said).contains("30% of a ration")
+	assert_str(said).contains("living off the land at half pace")
+
+## The zone staff (land_command.gd) read the one break and strength lines
+## (army_lines.gd) and the one supply number (supply_state.gd fed), and no
+## longer wear a band's supply down by the distance it marched.
+func test_the_zone_staff_read_the_one_lines_and_the_one_supply_number()->void:
+	var land:RefCounted=MilitaryCampaign.command_hierarchy.land
+	var ours:={"troops":60,"morale":0.6,"provision_ratio":0.9,"supply_level":0.1,"formations":[{"unit":"levy","count":60,"equipment":60,"equipment_required":60,"training":0.6}]}
+	var theirs:={"troops":60,"morale":0.6,"supply_level":0.9,"formations":[{"unit":"levy","count":60,"equipment":60,"equipment_required":60,"training":0.6}]}
+	MilitaryCampaign.active_engagement={"home_side":"attacker","attacker":ours,"defender":theirs,"attacker_initial":100}
+	# Fed (the one number is the ration eaten, not the old store level).
+	assert_str(land.battle_order()).is_not_equal("retreat")
+	ours["morale"]=0.24
+	assert_str(land.battle_order()).is_equal("retreat")
+	ours["morale"]=0.6;ours["troops"]=48
+	assert_str(land.battle_order()).is_equal("retreat")
+	ours["troops"]=60;ours["provision_ratio"]=0.4
+	assert_str(land.battle_order()).is_equal("retreat")
+	MilitaryCampaign.active_engagement={}
+	# A march no longer wears the stores down by the distance.
+	_train(20)
+	var made:Dictionary=MilitaryCampaign.create_field_army(20,"Zone band")
+	var actual:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(int((made.army as Dictionary).army_id))]
+	actual["supply_level"]=0.9
+	land._move(actual,CivilizationSystem.player_world_origin+Vector2(12.0,0.0),{"mission":"defend"},int(GameState.elapsed_days))
+	assert_float(float(actual.supply_level)).is_equal(0.9)

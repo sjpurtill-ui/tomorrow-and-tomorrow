@@ -42,6 +42,8 @@ const CONTROLLER_PATH:="res://scripts/civilization_controller.gd"
 const TRACKER_PATH:="res://scripts/order_tracker.gd"
 const COMMANDS_PATH:="res://scripts/leader_commands.gd"
 const LAW:=preload("res://scripts/army_levy_law.gd")
+const Lines:=preload("res://scripts/army_lines.gd")
+const Supply:=preload("res://scripts/supply_state.gd")
 const Logistics:=preload("res://scripts/equipment_logistics.gd")
 const DEPOTS:=preload("res://scripts/field_depots.gd")
 
@@ -65,7 +67,8 @@ const RAID_CALL_DAYS:=30
 ## Messengers for peace go again after this many days while refused.
 const PARLEY_GAP:=120
 ## A march the carriers would feed worse than this waits (supply_state.gd).
-const FED_MIN:=0.45
+## A march that would leave the band going hungry (below the supply model's
+## own starving line, supply_state.gd STARVING_BELOW) does not set out.
 ## Their band seen this close to a town of ours is met by ours (km).
 const INTERCEPT_KM:=45.0
 ## At most this many of their towns are weighed when the council picks one.
@@ -250,6 +253,7 @@ static func sit(today:int)->void:
 	# A band with nobody left standing never stays on the field (after the
 	# acts: the council has read how its errand ended).
 	_strike_off_empty()
+	for band in _council_bands(): _free_of_chain(int(band.get("army_id",0)))
 	_tidy_home()
 	s["live"]=live or _any_out()
 	s["waiting"]=waiting
@@ -473,7 +477,7 @@ static func _take(civ_id:String,today:int,options:Dictionary)->Dictionary:
 		if need>0 and free<need:
 			return _record(civ_id,"wait","%s waits: holding %s after the fight would take about %d of ours, by our scouts' count of its people, and we can send %d. About %d more would do it." % [_who(),String(town.name),need,free,need-free],{"need":need})
 		var fed:=_fed_at(town,free)
-		if not fed.is_empty() and float(fed.ratio)<FED_MIN:
+		if not fed.is_empty() and float(fed.ratio)<Supply.STARVING_BELOW:
 			return _record(civ_id,"wait",_hungry_road_words(town,fed),{"fed":float(fed.ratio)})
 	return _launch(civ_id,town,"take",insist,options)
 
@@ -541,7 +545,7 @@ static func _punish(civ_id:String,today:int,options:Dictionary)->Dictionary:
 		return _find_them(civ_id,today,String(options.get("asked","")))
 	if not insist:
 		var fed:=_fed_at(town,_raid_size(town))
-		if not fed.is_empty() and float(fed.ratio)<FED_MIN:
+		if not fed.is_empty() and float(fed.ratio)<Supply.STARVING_BELOW:
 			if called: _raid_sent(f)
 			return _record(civ_id,"wait",_hungry_road_words(town,fed),{"fed":float(fed.ratio)})
 	var done:=_launch(civ_id,town,"punish",insist,options)
@@ -803,6 +807,7 @@ static func _tag(army_id:int,civ_id:String,act:String,town:Dictionary,odds:Dicti
 	if not odds.is_empty(): tag["odds"]=snappedf(float(odds.get("raw",1.0)),0.01)
 	if String(town.get("formation_id",""))!="": tag["formation"]=String(town.formation_id)
 	mc.field_armies[index]["council"]=tag
+	_free_of_chain(army_id)
 	var lead:=_leader_for(civ_id)
 	if lead!="": (load(COMMANDS_PATH) as GDScript).call("assign",mc,army_id,lead)
 
@@ -847,6 +852,16 @@ static func _follow(civ_id:String,band:Dictionary,today:int)->Dictionary:
 	var ids:={"live":true,"army_id":army_id,"following":true}
 	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id):
 		return _record(civ_id,"act","%s is fighting at %s with %s." % [who,name if name!="" else "them",_fighters(int(band.troops))],ids)
+	if bool(band.get("resting",false)):
+		# The war leader took it out of the fighting to rest and refill
+		# (band_upkeep.gd: broken, under strength or hungry). Its errand ends
+		# here; upkeep brings it to its rest, and the stance sends fresh men
+		# after the usual rest.
+		c["phase"]="home"
+		match act:
+			"take": _front(civ_id)["take_failed"]=today
+			"punish": _front(civ_id)["raided"]=today
+		return _record(civ_id,"rest","%s is out of the fighting to rest and refill (%s)." % [who,_unfit_words(band)],ids)
 	if mc._besieging(army_id):
 		# The general storms when the walls are worn (military_campaign:
 		# a commander's siege assaults at pressure 0.72).
@@ -898,6 +913,8 @@ static func _send_home(band:Dictionary)->bool:
 	if index<0: return false
 	var live:Dictionary=mc.field_armies[index]
 	if live.get("council") is Dictionary: (live.council as Dictionary)["phase"]="home"
+	# Resting: the war leader's upkeep brings it to its rest (band_upkeep.gd).
+	if bool(live.get("resting",false)): return true
 	if _at_home(live): return true
 	if String(live.get("status",""))=="moving" and String(live.get("destination_id",""))=="player_home": return true
 	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): return false
@@ -932,6 +949,8 @@ static func _idle(army:Dictionary)->bool:
 	var army_id:=int(army.get("army_id",0))
 	if int(army.get("troops",0))<=0 or bool(army.get("embarked",false)): return false
 	if army.get("pursuit") is Dictionary or bool(army.get("relief_assignment",false)): return false
+	# Broken, under strength or resting: the war leader's upkeep has it.
+	if not _fit(army): return false
 	var c:Variant=army.get("council")
 	if c is Dictionary and not String((c as Dictionary).get("phase","")) in ["home","done"]: return false
 	if String(army.get("status",""))=="moving" and String(army.get("destination_id",""))!="player_home": return false
@@ -983,7 +1002,7 @@ static func _gather_strays(stances:Dictionary,today:int)->void:
 				if today-int(band.get("idle_since",today))<FORMED_GRACE_DAYS: continue
 			if not mc.disband_field_army(army_id).has("error"): called.append(name)
 			continue
-		var errand:=_take_up(band,stances,today)
+		var errand:=_take_up(band,stances,today) if _fit(band) else ""
 		if errand!="":
 			taken.append(errand)
 			continue
@@ -1046,6 +1065,33 @@ static func _band_odds(band:Dictionary,town:Dictionary,kind:String)->Dictionary:
 	var mid:=float(enemy.get("mid",0.0))*(0.72 if kind=="raid" else 1.0)
 	return Odds.of(band,formations,going,mid,float(enemy.get("fortification",0.25)),Odds.their_arms(String(town.civ_id),int(enemy.get("age",-1))),String(town.civ_id))
 
+## Fit to be sent: not resting, nor broken or under strength (army_lines.gd,
+## band_upkeep.gd).
+static func _fit(band:Dictionary)->bool:
+	return not bool(band.get("resting",false)) and not Lines.unfit(band)
+
+## Why a band is out of the fighting, in plain words.
+static func _unfit_words(band:Dictionary)->String:
+	var why:=Lines.why_unfit(band)
+	if why!="": return why
+	return String({"hungry":"hungry too long","broken":"its will broken","weak":"too few men"}.get(String(band.get("rest_reason","")),"resting and refilling"))
+
+## A band on the council's errand answers to the council, not to a standing
+## order up the chain of command (a whole-army or a general's objective):
+## its own place in the chain is marked free of it (the order itself is not
+## cancelled, and the band keeps its march), so the war leader's upkeep sees
+## to it (band_upkeep.gd free_to_see_to) and the zone staff leave it be
+## (land_command.gd).
+static func _free_of_chain(army_id:int)->void:
+	var command:RefCounted=_mc().command_hierarchy
+	if not command.controls_army(army_id): return
+	command.sync()
+	for entry in command.data.nodes.values():
+		var node:Dictionary=entry
+		if String(node.get("service",""))=="army" and int(node.get("force_id",-1))==army_id:
+			node["order"]={"mission":"cancelled","by":"war council"}
+			return
+
 ## A band standing in a town of ours other than the home (one of our own
 ## settlements, or a town of another people we hold): it is its guard.
 static func _guards_ours(band:Dictionary)->bool:
@@ -1092,8 +1138,12 @@ static func _tidy_home()->void:
 	var mc:=_mc()
 	for band in _council_bands():
 		var c:Dictionary=band.council
-		if not _at_home(band): continue
-		if String(c.get("phase",""))!="home": continue
+		if String(c.get("phase",""))!="home" or bool(band.get("resting",false)): continue
+		if not _at_home(band):
+			# Rested and ready somewhere else (a town we hold): home now.
+			var id:=int(band.get("army_id",0))
+			if String(band.get("status",""))!="moving" and not mc.command_hierarchy.battle.engaged(id) and not mc._army_in_battle(id) and not mc._besieging(id): _send_home(band)
+			continue
 		var army_id:=int(band.get("army_id",0))
 		if bool(c.get("formed",false)) and int(band.get("troops",0))>0:
 			if not mc.disband_field_army(army_id).has("error"): continue
@@ -1192,9 +1242,23 @@ static func _fed_at(town:Dictionary,troops:int)->Dictionary:
 	var at:=_v2(town.get("position",{}))
 	if not at.is_finite() or troops<=0: return {}
 	if _player():
-		var report:Dictionary=(load(SUPPLY_PATH) as GDScript).call("at_point",at,troops,true,true)
-		if not report.has("ratio"): return {}
-		return {"ratio":float(report.ratio),"season":String(report.get("season","")),"km":float(report.get("km",0.0)),"days":float(report.get("days",0.0))}
+		# The march's own reckoning (military_campaign march_supply): its
+		# days, the share of the road lived off the land at half pace, and how
+		# the band would be fed on the road and camped at the end, with the
+		# carriers as they are today. The leaner of the two decides.
+		var mc:=_mc()
+		var home:Vector2=WorldSimulation.world.player_world_origin
+		var probe:Dictionary=(mc.home_army as Dictionary).duplicate(false)
+		probe["troops"]=troops
+		probe["position"]={"x":home.x,"z":home.y}
+		probe["status"]="moving"
+		var route:Dictionary=mc.field_route(home,at,probe)
+		if route.has("error"): return {}
+		var march:Dictionary=mc.march_supply(probe,route)
+		var road:=float(march.get("fed_on_road",1.0))
+		var there:=float(march.get("fed_there",1.0))
+		var land:Dictionary=Supply.land_at(Supply.rations_field(),at,_today())
+		return {"ratio":minf(road,there),"on_road":road,"there":there,"days":float(march.get("days",0)),"half_pace":float(march.get("half_pace",0.0)),"km":float(route.get("length_km",0.0)),"season":"winter" if float(land.get("cold",0.0))>=0.3 else ""}
 	var km:float=WorldSimulation.world.player_world_origin.distance_to(at)
 	var food_days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0.0))
 	var road_days:=km/18.0
@@ -1204,7 +1268,11 @@ static func _fed_at(town:Dictionary,troops:int)->Dictionary:
 static func _hungry_road_words(town:Dictionary,fed:Dictionary)->String:
 	var share:=roundi(float(fed.ratio)*100.0)
 	var winter:=" in this cold" if String(fed.get("season",""))=="winter" else ""
-	return "%s waits: at %s the carriers would bring about %d%% of what the band eats%s. He will not march them out to go hungry." % [_who(),String(town.name),share,winter]
+	var where:=("camped at %s" if float(fed.get("there",1.0))<float(fed.get("on_road",1.0)) else "on the road to %s") % String(town.name)
+	var how:=PackedStringArray()
+	if float(fed.get("days",0.0))>=1.0: how.append("about %s on the road" % _span(roundi(float(fed.days))))
+	if float(fed.get("half_pace",0.0))>=0.2: how.append("%s of it living off the land at half pace" % ("most" if float(fed.half_pace)>=0.6 else "part"))
+	return "%s waits: %s the band would eat about %d%% of a ration%s%s. He will not march them out to go hungry." % [_who(),where,share,winter,(" ("+", ".join(how)+")") if not how.is_empty() else ""]
 
 # --------------------------------------------------------------------------
 # Sending a band
@@ -1240,6 +1308,11 @@ static func _launch_ours(civ_id:String,town:Dictionary,act:String,besiege:bool,c
 		reading["insist"]=insist or bool(given.get("insist",false))
 	if count>0 and int(reading.get("count",0))<=0 and String(reading.get("kind",""))=="raid": reading["count"]=count
 	var context:Dictionary=(options.get("context",{}) as Dictionary).duplicate() if options.get("context") is Dictionary else {}
+	# A band the god picked that is broken, under strength or resting is not
+	# sent: the war leader is resting and refilling it (band_upkeep.gd).
+	var picked:=_army(int(context.get("army_id",0))) if int(context.get("army_id",0))>0 else {}
+	if not picked.is_empty() and not _fit(picked):
+		return _record(civ_id,"impossible","%s is not fit to go: %s. It rests and refills first." % [Logistics.force_name(picked),_unfit_words(picked)])
 	# The general the god named to lead against them speaks and leads.
 	if not context.has("general"):
 		var lead:=_leader_ref(civ_id)
@@ -1324,6 +1397,8 @@ static func band_words(band:Dictionary)->String:
 	var mc:=_mc()
 	var c:Dictionary=band.council
 	var who:=_who(band)
+	if bool(band.get("resting",false)):
+		return "%s's band, %d of %d men, %s" % [who,int(band.get("troops",0)),Lines.full_strength(band),"pulls back to rest and refill" if String(band.get("status",""))=="moving" else "rests and refills"]
 	var army_id:=int(band.get("army_id",0))
 	var name:=String(c.get("name",""))
 	var men:=int(band.get("troops",0))
