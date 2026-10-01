@@ -67,6 +67,10 @@ class Sheet extends Control:
 			["Combat frames",{"side":"ours","glyph":"combat_frame","troops":120,"strength":1.0,"will":1.0,"supply":"well","state":"holding","accent":ours}],
 		]
 		var font:=preload("res://scripts/hud/hud_tokens.gd").font("ui")
+		# The feud's card as the map's pointer shows it (war_ledger_marks.gd).
+		var feud:={"civ_id":"","name":"Ildor","kind":"feud","our_dead":3,"their_dead":7,"our_worn":0.12,"their_worn":0.45,"quiet":40,"days":200,"cause":"our attack on them"}
+		var Ledger:=preload("res://scripts/hud/war_ledger_model.gd")
+		preload("res://scripts/hud/war_ledger_marks.gd").draw_card(self,Vector2(1220,330),feud,360.0,"Hot",Ledger.subtitle(feud))
 		for i in rows.size():
 			var col:=i%3; var row:=i/3
 			var centre:=Vector2(170+col*520,90+row*170)

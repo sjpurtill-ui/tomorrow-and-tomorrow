@@ -12,6 +12,10 @@ const Icons=preload("res://scripts/resource_icons.gd")
 const CityLabels=preload("res://scripts/hud/city_labels.gd")
 const WarLoop=preload("res://scripts/war_loop.gd")
 const EraNames=preload("res://scripts/era_names.gd")
+const Ledger=preload("res://scripts/hud/war_ledger_model.gd")
+const LedgerMarks=preload("res://scripts/hud/war_ledger_marks.gd")
+## The feud's card under the pointer is this wide.
+const CARD_WIDTH:=360.0
 
 const TAG_SIZE:=13
 const TIP_SIZE:=13
@@ -184,7 +188,7 @@ func collect()->Array[Dictionary]:
 		var tag:=Marks.war_tag(enemy,stage,days) if not feud else "Feud with %s" % enemy
 		var segment:=Marks.border_segment(home,there)
 		out.append({"id":"border:"+civ_id,"kind":"border","points":[_v3(segment[0]),_v3(segment[1])],"tip":"The border with %s. Their men cross here." % enemy,"color":WAR_COLOR,"alpha":1.0})
-		out.append({"id":"war:"+civ_id,"kind":"war","points":[_v3(Marks.border_point(home,there))],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
+		out.append({"id":"war:"+civ_id,"kind":"war","civ_id":civ_id,"points":[_v3(Marks.border_point(home,there))],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
 	# Before writing, strangers under arms are a handful of men, not a counter.
 	if stage=="hearth":
 		for sighting:Dictionary in CivilizationSystem.local_observation_snapshot().get("visible",[]):
@@ -318,7 +322,30 @@ func _draw()->void:
 		if String(entry.id)==open: _draw_tip(entry); return
 
 
+## The ledger's entry for a feud or war, read once a day while pointed at.
+var _card_entry:Dictionary={}
+var _card_key:=""
+
+func _ledger_entry(civ_id:String)->Dictionary:
+	var key:="%s:%d" % [civ_id,int(GameState.elapsed_days)]
+	if key!=_card_key:
+		_card_key=key;_card_entry={}
+		for e:Dictionary in Ledger.entries():
+			if String(e.civ_id)==civ_id and String(e.kind)!="ended": _card_entry=e;break
+	return _card_entry
+
 func _draw_tip(entry:Dictionary)->void:
+	# A feud or war under the pointer: its card from the war ledger (the dead,
+	# how worn each side is, the quiet clock), as on the Feuds page.
+	if String(entry.kind)=="war" and entry.has("civ_id"):
+		var e:=_ledger_entry(String(entry.civ_id))
+		if not e.is_empty():
+			var card:=LedgerMarks.card_size(e,CARD_WIDTH)
+			var at:Vector2=(entry.screen[0] as Vector2)+Vector2(18,18)
+			at.x=clampf(at.x,8,maxf(8,size.x-card.x-8))
+			at.y=clampf(at.y,8,maxf(8,size.y-card.y-8))
+			LedgerMarks.draw_card(self,at,e,CARD_WIDTH,Ledger.state_word(e),Ledger.subtitle(e))
+			return
 	var font:=ThemeDB.fallback_font
 	var text:=String(entry.get("tip",""))
 	if text=="": return

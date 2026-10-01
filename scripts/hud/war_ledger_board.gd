@@ -214,148 +214,66 @@ static func _skin(bg:Color,border:Color,margin:int,top:int=0)->StyleBoxFlat:
 
 ## "HOT" in oxblood, "SIMMERING" in ochre, "WAR" in oxblood, "ENDED" in ink.
 class StateChip extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	const Marks:=preload("res://scripts/hud/war_ledger_marks.gd")
 	var word:=""
-	var tone:=Color("#a8463a")
 	func _ready()->void: mouse_filter=Control.MOUSE_FILTER_PASS
-	func set_state(next:String,kind:String,hot:bool)->void:
+	func set_state(next:String,_kind:String,_hot:bool)->void:
 		word=next.to_upper()
-		tone=Color("#a8463a") if hot or kind=="war" else (Color("#a8782a") if kind=="feud" else T.INK_MUTED)
 		tooltip_text={"HOT":"Blood was spilled within the year: no envoys come from them, and their raiders may.","SIMMERING":"No blood for a year: envoys can come again, but nobody has made peace.","WAR":"A war: their host may march.","ENDED":"Over."}.get(word,"")
-		var font:=T.font("ui_strong")
-		custom_minimum_size=Vector2(font.get_string_size(word,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x+24.0,28.0)
+		custom_minimum_size=Vector2(Marks.chip_width(word),28.0)
 		queue_redraw()
 	func _draw()->void:
-		var box:=Rect2(Vector2(0,(size.y-28.0)*0.5),Vector2(size.x,28.0))
-		draw_rect(box,tone)
-		var font:=T.font("ui_strong")
-		var w:=font.get_string_size(word,HORIZONTAL_ALIGNMENT_LEFT,-1,14).x
-		draw_string(font,Vector2((size.x-w)*0.5,box.position.y+19.0),word,HORIZONTAL_ALIGNMENT_LEFT,-1,14,Color("#f6efe1"))
+		Marks.draw_chip(self,Rect2(Vector2(0,(size.y-28.0)*0.5),Vector2(size.x,28.0)),word)
 
 
-## The dead of both sides: two bars meeting at a middle line, ours to the
-## left in our blue and theirs to the right in their red, on one scale.
+## The dead of both sides (war_ledger_marks.draw_dead).
 class DeadBars extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	const Marks:=preload("res://scripts/hud/war_ledger_marks.gd")
 	const EraWords:=preload("res://scripts/hud/era_words.gd")
-	const OURS:=Color("#3d7f9c")
-	const THEIRS:=Color("#a8463a")
 	var ours:=0
 	var theirs:=0
 	var compact:=false
 	func _ready()->void:
 		mouse_filter=Control.MOUSE_FILTER_PASS
-		if custom_minimum_size.y<=0.0: custom_minimum_size=Vector2(0,36)
-	## The scale's top: 10, 20, 50, 100, 200, 500 ... at or above the most dead.
-	static func _nice(most:int)->int:
-		var step:=10
-		while step<most:
-			if step*2>=most: return step*2
-			if step*5>=most: return step*5
-			step*=10
-		return step
+		if custom_minimum_size.y<=0.0: custom_minimum_size=Vector2(0,Marks.DEAD_H)
 	func set_dead(our_dead:int,their_dead:int,name:String)->void:
 		ours=maxi(0,our_dead);theirs=maxi(0,their_dead)
 		tooltip_text="The dead of it all told: %s of ours, %s of %s." % [EraWords.grouped(ours),EraWords.grouped(theirs),name]
 		queue_redraw()
 	func _draw()->void:
-		var font:=T.font("ui_strong")
-		var fs:=13 if compact else 16
-		var bar_h:=10.0 if compact else 14.0
-		var y:=(size.y-bar_h)*0.5 if compact else 3.0
-		var mid:=size.x*0.5
-		var room:=font.get_string_size("0000",HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x+8.0
-		var half:=maxf(10.0,mid-room)
-		# One scale for both, never finer than ten: a single death is a sliver.
-		var top:=float(_nice(maxi(ours,theirs)))
-		var lw:=half*float(ours)/top; var rw:=half*float(theirs)/top
-		draw_rect(Rect2(Vector2(mid-half,y),Vector2(half*2.0,bar_h)),Color(T.INK,0.07))
-		if ours>0: draw_rect(Rect2(Vector2(mid-lw,y),Vector2(lw,bar_h)),OURS)
-		if theirs>0: draw_rect(Rect2(Vector2(mid,y),Vector2(rw,bar_h)),THEIRS)
-		draw_line(Vector2(mid,y-3.0),Vector2(mid,y+bar_h+3.0),T.INK,1.5)
-		var lt:=EraWords.grouped(ours); var rt:=EraWords.grouped(theirs)
-		var base:=y+bar_h*0.5+float(fs)*0.36
-		draw_string(font,Vector2(mid-lw-6.0-font.get_string_size(lt,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x,base),lt,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,OURS.darkened(0.35))
-		draw_string(font,Vector2(mid+rw+6.0,base),rt,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,THEIRS.darkened(0.25))
-		if compact: return
-		var small:=T.font("ui")
-		draw_string(small,Vector2(mid-half,y+bar_h+16.0),"ours",HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
-		var tw:=small.get_string_size("theirs",HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-		draw_string(small,Vector2(mid+half-tw,y+bar_h+16.0),"theirs",HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
+		Marks.draw_dead(self,Rect2(Vector2.ZERO,size),ours,theirs,compact)
 
 
-## How worn each people is, 0 to 100%. On theirs, the engine's turning
-## points: from PEACE_WORN they may send someone to end a feud, and from
-## ENEMY_SPENT they keep their raiders home.
+## How worn each people is, with the engine's turning points on theirs
+## (war_ledger_marks.draw_worn).
 class WornBars extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	const Marks:=preload("res://scripts/hud/war_ledger_marks.gd")
 	const WarLoop:=preload("res://scripts/war_loop.gd")
-	const OURS:=Color("#3d7f9c")
-	const THEIRS:=Color("#a8463a")
-	const LABEL_W:=56.0
 	var ours:=0.0
 	var theirs:=0.0
 	var marks:=true
 	func _ready()->void:
 		mouse_filter=Control.MOUSE_FILTER_PASS
-		custom_minimum_size=Vector2(0,50)
+		custom_minimum_size=Vector2(0,Marks.WORN_H)
 	func set_worn(our_worn:float,their_worn:float,feud:bool,name:String)->void:
 		ours=clampf(our_worn,0.0,1.0);theirs=clampf(their_worn,0.0,1.0);marks=feud
 		tooltip_text="How worn each people is by it: the dead against their numbers, and every exchange. %s is %d%% worn and we are %d%%." % [name,roundi(theirs*100.0),roundi(ours*100.0)]
 		if feud: tooltip_text+=" From %d%% they may send someone to end the feud; from %d%% they keep their raiders home." % [roundi(WarLoop.PEACE_WORN*100.0),roundi(WarLoop.ENEMY_SPENT*100.0)]
 		queue_redraw()
 	func _draw()->void:
-		var font:=T.font("ui"); var strong:=T.font("ui_strong")
-		var x0:=LABEL_W; var w:=maxf(20.0,size.x-LABEL_W-48.0)
-		var rows:=[["theirs",theirs,THEIRS,22.0],["ours",ours,OURS,38.0]]
-		for row:Array in rows:
-			var y:=float(row[3])
-			draw_string(font,Vector2(0,y+9.0),String(row[0]),HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
-			draw_rect(Rect2(Vector2(x0,y),Vector2(w,10.0)),Color(T.INK,0.08))
-			if float(row[1])>0.0: draw_rect(Rect2(Vector2(x0,y),Vector2(w*float(row[1]),10.0)),row[2])
-			draw_rect(Rect2(Vector2(x0,y),Vector2(w,10.0)),Color(T.INK,0.45),false,1.0)
-			draw_string(strong,Vector2(x0+w+8.0,y+10.0),"%d%%" % roundi(float(row[1])*100.0),HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.INK)
-		if not marks: return
-		# The turning points on theirs, each word on the far side of its mark.
-		var peace:=x0+w*WarLoop.PEACE_WORN; var spent:=x0+w*WarLoop.ENEMY_SPENT
-		for at:float in [peace,spent]: draw_line(Vector2(at,16.0),Vector2(at,33.0),T.INK,1.5)
-		var said:="may seek peace"; var sw:=font.get_string_size(said,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-		draw_string(font,Vector2(peace-sw-3.0,13.0),said,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK if theirs>=WarLoop.PEACE_WORN else T.INK_MUTED)
-		draw_string(font,Vector2(spent+3.0,13.0),"raiders stay home",HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK if theirs>=WarLoop.ENEMY_SPENT else T.INK_MUTED)
+		Marks.draw_worn(self,Rect2(Vector2.ZERO,size),ours,theirs,marks)
 
 
-## The quiet since blood was last spilled, on the engine's own clock: hot
-## until FEUD_HOT_DAYS (no envoys come from them), simmering until
-## FEUD_COLD_DAYS, then cold. The pointer stands at today.
+## The quiet since blood was last spilled (war_ledger_marks.draw_quiet).
 class QuietClock extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	const WarLoop:=preload("res://scripts/war_loop.gd")
-	const THEIRS:=Color("#a8463a")
-	const OCHRE:=Color("#a8782a")
+	const Marks:=preload("res://scripts/hud/war_ledger_marks.gd")
 	var quiet:=0
 	func _ready()->void:
 		mouse_filter=Control.MOUSE_FILTER_PASS
-		custom_minimum_size=Vector2(0,50)
+		custom_minimum_size=Vector2(0,Marks.QUIET_H)
 	func set_quiet(days:int,words:String)->void:
 		quiet=maxi(0,days)
 		tooltip_text=words+" A killing on either side starts the clock again."
 		queue_redraw()
 	func _draw()->void:
-		var font:=T.font("ui"); var strong:=T.font("ui_strong")
-		var span:=float(WarLoop.FEUD_COLD_DAYS)
-		var x0:=0.0; var w:=maxf(40.0,size.x-70.0); var y:=20.0; var h:=10.0
-		var hot_x:=x0+w*float(WarLoop.FEUD_HOT_DAYS)/span
-		draw_rect(Rect2(Vector2(x0,y),Vector2(hot_x-x0,h)),Color(THEIRS,0.30))
-		draw_rect(Rect2(Vector2(hot_x,y),Vector2(x0+w-hot_x,h)),Color(OCHRE,0.22))
-		var now:=x0+w*clampf(float(quiet)/span,0.0,1.0)
-		draw_rect(Rect2(Vector2(x0,y),Vector2(now-x0,h)),Color(T.INK,0.55))
-		draw_rect(Rect2(Vector2(x0,y),Vector2(w,h)),Color(T.INK,0.45),false,1.0)
-		draw_line(Vector2(hot_x,y-3.0),Vector2(hot_x,y+h+3.0),T.INK,1.5)
-		# Today's pointer, with the days above it.
-		draw_colored_polygon(PackedVector2Array([Vector2(now,y-1.0),Vector2(now-5.0,y-8.0),Vector2(now+5.0,y-8.0)]),T.INK)
-		var days:=("today" if quiet<=0 else "%d days" % quiet) if quiet<99999 else "never"
-		var dw:=strong.get_string_size(days,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-		draw_string(strong,Vector2(clampf(now-dw*0.5,0.0,w-dw),y-10.0),days,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK)
-		draw_string(font,Vector2(x0,y+h+15.0),"hot",HORIZONTAL_ALIGNMENT_LEFT,-1,12,THEIRS.darkened(0.2))
-		draw_string(font,Vector2(hot_x+4.0,y+h+15.0),"simmering",HORIZONTAL_ALIGNMENT_LEFT,-1,12,OCHRE.darkened(0.3))
-		draw_string(strong,Vector2(x0+w+8.0,y+h-1.0),"cold",HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.INK_MUTED)
+		Marks.draw_quiet(self,Rect2(Vector2.ZERO,size),quiet)
