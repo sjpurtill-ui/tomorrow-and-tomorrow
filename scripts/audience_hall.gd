@@ -643,12 +643,18 @@ static func _prune_matters(day:int)->void:
 	## Matters lapse quietly: no one is slighted by what the ruler never heard.
 	var list:Array=state().matters
 	var gwa:=_great_works()
+	# Who holds office, read once: pruning changes no office.
+	var serving:Variant=null
 	for m in list.duplicate():
 		if m is Dictionary and int(m.get("expires",0))<=day: _note_lapse(m,day)
 		if not m is Dictionary or int(m.get("expires",0))<=day: list.erase(m); continue
 		var audience:Dictionary=m.get("audience",{}) if m.get("audience") is Dictionary else {}
 		if String(audience.get("kind",""))=="great_work" and gwa!=null and bool(gwa.call("stale",audience)): list.erase(m)
-		elif String(audience.get("kind",""))=="petition" and _official(int((m.get("holder",{}) as Dictionary).get("person_id",0))).is_empty(): list.erase(m)
+		elif String(audience.get("kind",""))=="petition":
+			if serving==null:
+				serving={}
+				for person:Dictionary in _officials():serving[int(person.person_id)]=true
+			if not (serving as Dictionary).has(int((m.get("holder",{}) as Dictionary).get("person_id",0))): list.erase(m)
 
 ## A matter the ruler never heard lapses. The same ask is not filed again for
 ## LAPSE_SPACING days; after LAPSE_LIMIT lapses its holder stops asking (and
@@ -2114,6 +2120,13 @@ static func _officials()->Array[Dictionary]:
 	var result:Array[Dictionary]=[]
 	var seen:Dictionary={}
 	if WorldSimulation.actor_id!="player": return result
+	# The roll is reconciled once for the whole list, as GovernmentPeopleSystem's
+	# own day does for its lookups; each officeholder lookup below would
+	# otherwise reconcile it again (a few ms each, many times a day).
+	var settling:=not GovernmentPeopleSystem.initializing
+	if settling:
+		GovernmentPeopleSystem.initialize()
+		GovernmentPeopleSystem.initializing=true
 	for office in GovernmentPeopleSystem.active_offices():
 		var person:=GovernmentPeopleSystem.officeholder(String(office.key))
 		if person.is_empty() or seen.has(int(person.person_id)): continue
@@ -2129,6 +2142,7 @@ static func _officials()->Array[Dictionary]:
 		leader["settlement_id"]=String(settlement.get("id",""))
 		seen[int(leader.person_id)]=true
 		result.append(leader)
+	if settling:GovernmentPeopleSystem.initializing=false
 	return result
 
 static func _official(person_id:int)->Dictionary:

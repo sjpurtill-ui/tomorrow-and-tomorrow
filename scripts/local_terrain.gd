@@ -61,7 +61,7 @@ const MAIN_RIVER_WATER_HALF_WIDTH_KM := 0.125
 const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
 const MAIN_RIVER_SETTLEMENT_CLEARANCE_KM := 0.25
 const TRIBUTARY_SETTLEMENT_CLEARANCE_KM := 0.10
-const SPEED_HOURS_PER_REAL_SECOND := {1:0.5,2:2.0,3:8.0,4:24.0,5:72.0}
+const SPEED_HOURS_PER_REAL_SECOND := {1:0.5,2:2.0,3:8.0,4:24.0,5:144.0}
 ## A new people's story starts at one day per second: the first real hour is
 ## about the first ten years, with a real turning point every few minutes.
 const DEFAULT_PLAY_SPEED := 4.0
@@ -72,10 +72,15 @@ const DAY_STEP_BUDGET_NAVIGATING_USEC := 4000
 ## When the calendar has run ahead of the day being computed at the fast
 ## speeds, the day takes what the frame has to spare: the frame aims at
 ## DAY_FRAME_TARGET_USEC in all (about 30 a second), never giving the day less
-## than DAY_STEP_BUDGET_FAST_USEC nor more than DAY_STEP_BUDGET_MAX_USEC. The
-## world is the same; only how many of its steps share a frame changes.
+## than DAY_STEP_BUDGET_FAST_USEC nor leaving the rest of the frame less than
+## DAY_FRAME_RESERVE_USEC. When the pace asked for needs more simulation a
+## second than 30 such frames give, the frame grows as far as that pace needs
+## (_catch_up_frame_usec), never past DAY_FRAME_LONGEST_USEC (20 a second).
+## The world is the same; only how many of its steps share a frame changes.
 const DAY_FRAME_TARGET_USEC := 33000
-const DAY_STEP_BUDGET_MAX_USEC := 24000
+const DAY_FRAME_LONGEST_USEC := 50000
+const DAY_FRAME_RESERVE_USEC := 9000
+const DAY_STEP_BUDGET_MAX_USEC := DAY_FRAME_TARGET_USEC-DAY_FRAME_RESERVE_USEC
 ## Even pacing (_paced_day_budget_usec): a day aims to be done this far
 ## through its calendar span, planned for this much more than a day has
 ## lately cost, and never with less than this share of a frame.
@@ -1049,8 +1054,21 @@ func _day_step_budget_usec()->int:
 	if _camera_in_motion():return DAY_STEP_BUDGET_NAVIGATING_USEC
 	if _speed_hours_per_second()<24.0:return DAY_STEP_BUDGET_USEC
 	if catch_up_budget and _world_day_behind():
-		return clampi(DAY_FRAME_TARGET_USEC-roundi(_frame_other_usec)-_frame_sim_usec,DAY_STEP_BUDGET_FAST_USEC,DAY_STEP_BUDGET_MAX_USEC)
+		var frame:=_catch_up_frame_usec()
+		return clampi(frame-roundi(_frame_other_usec)-_frame_sim_usec,DAY_STEP_BUDGET_FAST_USEC,frame-DAY_FRAME_RESERVE_USEC)
 	return _paced_day_budget_usec() if even_pacing else DAY_STEP_BUDGET_FAST_USEC
+
+## The frame a day running behind the calendar aims at: as short as the pace
+## asked for allows. A second of the calendar's days costs `needed` of a
+## second of simulation (what a day has lately cost); the rest of each frame
+## (the map, the HUD, drawing) must fit in what is left: frame = rest / (1 -
+## needed), between 30 and 20 frames a second.
+func _catch_up_frame_usec()->int:
+	return catch_up_frame_usec(_day_cost_usec,_speed_hours_per_second()/24.0,_frame_other_usec)
+
+static func catch_up_frame_usec(day_cost:float,days_per_second:float,frame_other:float)->int:
+	var needed:=clampf(maxf(0.0,day_cost)*maxf(0.0,days_per_second)/1000000.0,0.0,0.95)
+	return clampi(roundi(maxf(0.0,frame_other)/(1.0-needed)),DAY_FRAME_TARGET_USEC,DAY_FRAME_LONGEST_USEC)
 
 ## Keeping up at the fast speeds: the rest of the day's expected work shared
 ## over the frames left before its calendar span is PACING_SPAN_SHARE through,

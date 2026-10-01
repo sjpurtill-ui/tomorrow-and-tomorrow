@@ -2,15 +2,29 @@ extends Node
 ## PACE BENCHMARK: what a world day costs, by owner and by step, from a copied
 ## save. Headless and opt-in; never reads or writes the player's save slots.
 ##   <godot> --headless --path <worktree> res://tests/pace_benchmark.tscn -- --pace-benchmark
-##       --save=<absolute path to a COPY of a .save> [--days=30] [--warm=2]
-##       [--span=N] [--trace] [--save-out=NAME] [--compare=NAME] [--json=PATH]
-##       [--ignore-keys=a,b] [--tolerance=1e-9]
+##       --save=<path to a COPY of a .save> [--days=30] [--warm=2] [--trace]
 ## Days run as the frame loop runs them: begin_day, then one scheduled step at
 ## a time, so the longest single steps (which set the worst frames) show too.
-## --save-out writes the world after the run to res://artifacts/pace_NAME.save
-## and reports its size; --compare=NAME compares the world after the run with
-## an earlier --save-out (the same world must come out of the same days).
-## --frames runs the game's own scene and frame loop instead (see _frames).
+## Reports ms a day by owner (player, each rival), by step label and by system
+## timing, the steps each owner took, and the slowest steps.
+##   --save-out=NAME   write the world afterwards to res://artifacts/pace_NAME.save
+##                     and report its size
+##   --compare=NAME    compare the world afterwards with an earlier --save-out
+##                     (the same world must come out of the same days);
+##                     --ignore-keys=a,b and --ignore-paths=a,b set aside fields a
+##                     change deliberately adds or reshapes; floats within
+##                     --tolerance (relative, 1e-9) are counted as rounding
+##   --compare-only=A,B  compare two earlier --save-out worlds and stop
+##   --span=N, --unmet-span=N  rival step limits (world_simulation.gd)
+##   --census          why each rival steps as often as it does
+##   --outcomes        each owner's state in aggregate at the end
+##   --explain-over=MS list the heavy steps of any day over MS
+##   --slowest=N       how many of the slowest steps to keep
+## --frames runs the game's own scene and frame loop instead, at --speed=5 for
+## --seconds=60 after the map settles, with --render-cost=14 ms standing in for
+## drawing; it prints the player's PERF line and lists long frames by traced
+## phase. --quiet=name, --quiet-children, --quiet-range=A,B, --list-children
+## and --list-under=N stop or list scene children to find what makes frames long.
 class Snapshot extends "res://scripts/save_system.gd":
 	var fixture:=""
 	func slot_path(slot:String)->String:
@@ -28,6 +42,7 @@ func _arg(name:String,fallback:String)->String:
 
 func run()->void:
 	var args:=OS.get_cmdline_user_args()
+	_ignored_paths=_arg("ignore-paths","").split(",",false)
 	if DisplayServer.get_name()!="headless" or "--pace-benchmark" not in args:get_tree().quit(2);return
 	var saves:=Snapshot.new();saves.fixture=_arg("save","res://artifacts/pace_fixture.save");add_child(saves)
 	if _arg("compare-only","")!="":
@@ -47,6 +62,7 @@ func run()->void:
 	GameState.civic_api_enabled=false
 	for id in WorldSimulation.actors:WorldSimulation.actors[id].systems.GameState.civic_api_enabled=false
 	if _arg("span","")!="":WorldSimulation.span_limit=maxi(1,int(_arg("span","3")))
+	if _arg("unmet-span","")!="":WorldSimulation.set("uncontacted_span_limit",maxi(1,int(_arg("unmet-span","10"))))
 	if "--frames" in args:
 		await _frames(load_ms)
 		return
@@ -75,6 +91,7 @@ func run()->void:
 	var labels:Dictionary={}
 	var warm_steps:PackedInt32Array=PackedInt32Array()
 	var slowest:Array=[]
+	var advanced:Dictionary={}
 	var day_ms:Array=[]
 	for i in days:
 		var day:=start_day+i+1
@@ -104,6 +121,7 @@ func run()->void:
 			var owner:=String(record.owner)
 			var usec:=int(record.usec)
 			owners[owner]=int(owners.get(owner,0))+usec
+			if String(record.label)=="arrivals":advanced[owner]=int(advanced.get(owner,0))+1
 			var kind:="player" if owner=="player" else "rival"
 			var key:="%s:%s" % [kind,String(record.label)]
 			labels[key]=int(labels.get(key,0))+usec
@@ -126,6 +144,8 @@ func run()->void:
 	var by_owner:Dictionary={}
 	for owner:String in owners:by_owner[owner]=snappedf(float(owners[owner])/1000.0/warm_days,.01)
 	report["owner_ms_per_day"]=by_owner
+	# Steps each owner took (a rival covers several days in one when calm).
+	report["owner_steps"]=advanced
 	report["label_ms_per_day"]=_per_day(labels,warm_days)
 	report["timings_ms_per_day"]=_timing_table(totals,warm_days)
 	warm_steps.sort()
@@ -158,6 +178,9 @@ func run()->void:
 		report["state_mismatch_count"]=diff.mismatch_count
 		report["float_rounding_diffs"]=diff.rounding
 		report["float_rounding_count"]=diff.rounding_count
+	if "--outcomes" in args:
+		report["outcomes"]=_outcomes()
+		print("PACE_OUTCOMES ",JSON.stringify(report.outcomes))
 	print("PACE_SUMMARY ",JSON.stringify({"year":snappedf(report.year,.1),"mean_ms_per_day":snappedf(report.mean_ms_per_day,.1),"player_ms_per_day":snappedf(report.player_ms_per_day,.1),"rivals_ms_per_day":snappedf(report.rivals_ms_per_day,.1),"steps":report.get("steps",{}),"saved_bytes":report.get("saved_bytes",-1),"state_mismatch_count":report.get("state_mismatch_count",null),"float_rounding_count":report.get("float_rounding_count",null),"state_mismatches":report.get("state_mismatches",null)}))
 	var json_path:=_arg("json","res://artifacts/pace_benchmark.json")
 	var out:=FileAccess.open(json_path,FileAccess.WRITE)
@@ -181,6 +204,24 @@ func _frames(load_ms:float)->void:
 		await get_tree().process_frame
 		idle=idle+1 if terrain.terrain_patch_job==null else 0
 	print("PACE_SCENE_READY_MS ",(Time.get_ticks_usec()-began)/1000," load_ms ",roundi(load_ms))
+	# --quiet=a,b: diagnostics only; stops those children of the scene from
+	# processing (e.g. hud) to find what makes a frame long.
+	if "--quiet-children" in OS.get_cmdline_user_args():
+		for child:Node in terrain.get_children():child.process_mode=Node.PROCESS_MODE_DISABLED
+	var quiet_from:=int(_arg("quiet-range","-1,-1").split(",")[0]);var quiet_to:=int(_arg("quiet-range","-1,-1").split(",")[1])
+	var listed:=0
+	for child:Node in terrain.get_children():
+		var script:Script=child.get_script()
+		var path:String=script.resource_path if script else ""
+		var processing:=child.is_processing() or child.is_physics_processing()
+		if listed>=quiet_from and listed<=quiet_to:child.process_mode=Node.PROCESS_MODE_DISABLED
+		if "--list-children" in OS.get_cmdline_user_args():
+			print("PACE_CHILD ",listed," ",child.name," ",child.get_class()," ",path," processing=",processing," descendants=",_count_processing(child))
+			if _arg("list-under","")==str(listed):_list_processing(child,"  ")
+		listed+=1
+	for name:String in _arg("quiet","").split(",",false):
+		var node:Node=terrain.get(name) if name in terrain else terrain.get_node_or_null(name)
+		if node!=null:node.process_mode=Node.PROCESS_MODE_DISABLED;print("PACE_QUIET ",name)
 	var render_usec:=int(float(_arg("render-cost","14"))*1000.0)
 	var seconds:=float(_arg("seconds","60"))
 	var trace=preload("res://scripts/performance_trace.gd")
@@ -193,11 +234,25 @@ func _frames(load_ms:float)->void:
 	var start:=Time.get_ticks_usec()
 	var frames:=PackedFloat32Array()
 	var last:=start
+	var long_frames:Array=[]
+	var before:Dictionary={}
+	var jobs:=preload("res://scripts/day_job.gd")
 	while Time.get_ticks_usec()-start<int(seconds*1000000.0):
+		for key:String in trace.totals:before[key]=int(trace.totals[key].microseconds)
+		var steps_before:=jobs.slow_steps.size()
 		await get_tree().process_frame
 		if render_usec>0:OS.delay_usec(render_usec)
 		var now:=Time.get_ticks_usec()
 		frames.append((now-last)/1000.0)
+		if now-last>100000 and long_frames.size()<40:
+			# What a long frame spent its time on (traced phases over 5 ms).
+			var spent:Dictionary={}
+			for key:String in trace.totals:
+				var delta:=int(trace.totals[key].microseconds)-int(before.get(key,0))
+				if delta>5000:spent[key]=delta/1000
+			long_frames.append({"ms":(now-last)/1000,"day":int(GameState.elapsed_days),"spent":spent,"slow_steps":jobs.slow_steps.slice(steps_before),
+				"process_ms":snappedf(Performance.get_monitor(Performance.TIME_PROCESS)*1000.0,.1),"physics_ms":snappedf(Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)*1000.0,.1),
+				"nodes":Performance.get_monitor(Performance.OBJECT_NODE_COUNT),"objects":Performance.get_monitor(Performance.OBJECT_COUNT)})
 		last=now
 	var elapsed:=(last-start)/1000000.0
 	print("PACE_PERF ",meter.line(last))
@@ -208,6 +263,7 @@ func _frames(load_ms:float)->void:
 	var slow:Array=preload("res://scripts/day_job.gd").slow_steps.duplicate()
 	slow.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.usec)>int(b.usec))
 	report["slow_steps"]=slow.slice(0,30)
+	report["long_frames"]=long_frames
 	report["slow_step_count"]=slow.size()
 	print("PACE_FRAMES ",JSON.stringify(report))
 	var out:=FileAccess.open(_arg("json","res://artifacts/pace_frames.json"),FileAccess.WRITE)
@@ -215,6 +271,37 @@ func _frames(load_ms:float)->void:
 	terrain._set_game_speed(0)
 	WorldSimulation.flush_day()
 	terrain.queue_free();WorldSimulation.clear();await get_tree().process_frame;get_tree().quit(0)
+
+## Each owner's state in aggregate, for comparing step lengths (day_span.gd).
+func _outcomes()->Dictionary:
+	var result:Dictionary={}
+	var ids:Array=WorldSimulation.actors.keys();ids.append("player")
+	for id:String in ids:
+		result[id]=WorldSimulation.scoped(id,func()->Dictionary:
+			var state=WorldSimulation.state
+			var m:Dictionary=state.simulation_metrics
+			var stock:=0.0
+			for key in state.resource_stockpiles:
+				if String(key)!="Freshwater" and String(key)!="Food":stock+=maxf(0,float(state.resource_stockpiles[key]))
+			var food:=0.0
+			for key in state.food_stocks:food+=maxf(0,float(state.food_stocks[key]))
+			return {"day":int(state.elapsed_days),"population":snappedf(state.population_exact,.01),"food":snappedf(food,.1),"stock":snappedf(stock,.1),"health":snappedf(state.population_health,.001),
+				"cohesion":snappedf(float(m.get("cohesion",0)),.001),"knowledge":snappedf(float(m.get("knowledge",0)),.001),"discoveries":state.known_discoveries.size(),"cities":state.player_settlements.size(),
+				"housing":state.housing_capacity,"troops":int(WorldSimulation.military.home_army.get("troops",0)),"projects":state.settlement_completed.size()}
+		)
+	return result
+
+func _list_processing(node:Node,indent:String)->void:
+	for child:Node in node.get_children():
+		if _count_processing(child)>0:
+			var script:Script=child.get_script()
+			print("PACE_UNDER ",indent,child.name," ",script.resource_path if script else child.get_class()," processing=",child.is_processing())
+			_list_processing(child,indent+"  ")
+
+func _count_processing(node:Node)->int:
+	var n:=1 if node.is_processing() else 0
+	for child:Node in node.get_children():n+=_count_processing(child)
+	return n
 
 ## Why each rival steps as often as it does (world_simulation.gd _span_waits).
 func _census()->void:
@@ -241,6 +328,8 @@ func _census()->void:
 ## only by the order of their additions and are counted apart.
 func _compare(before:Variant,after:Variant,path:String,diff:Dictionary,ignored:PackedStringArray,tolerance:float)->void:
 	if before==after:return
+	for part:String in _ignored_paths:
+		if part in path:return
 	if before is Dictionary and after is Dictionary:
 		for key:Variant in before:
 			if not after.has(key):
@@ -258,6 +347,10 @@ func _compare(before:Variant,after:Variant,path:String,diff:Dictionary,ignored:P
 		else:_mismatch(diff,"%s %s -> %s" % [path,str(before),str(after)])
 	else:_mismatch(diff,path+(" size %d -> %d" % [before.size(),after.size()] if before is Array and after is Array else ""))
 
+## --ignore-paths=a,b: parts of the world a change deliberately reshapes
+## (e.g. economy_history after its old entries are slimmed).
+var _ignored_paths:PackedStringArray=PackedStringArray()
+
 func _mismatch(diff:Dictionary,text:String)->void:
 	diff.mismatch_count+=1
 	if diff.mismatches.size()<40:diff.mismatches.append(text)
@@ -271,7 +364,7 @@ func _accumulate(totals:Dictionary,timings:Dictionary)->void:
 		if (value as Dictionary).has("microseconds"):
 			totals["world/"+key]=int(totals.get("world/"+key,0))+int(value.microseconds)
 			continue
-		var owner:="player" if key=="player_phases" else "rival"
+		var owner:="player" if key=="player_phases" else "player/secondary" if key=="player_secondary" else "rival"
 		_fold(totals,owner,value)
 
 func _fold(totals:Dictionary,prefix:String,table:Dictionary)->void:

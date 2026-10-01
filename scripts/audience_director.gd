@@ -62,18 +62,26 @@ func _process(delta:float)->void:
 	if day!=last_day and _world_ready():
 		var start:=last_day+1 if last_day>=0 and day>last_day else day
 		last_day=day
+		var trace=preload("res://scripts/performance_trace.gd")
+		var stamp:int=trace.start()
+		var began:=Time.get_ticks_usec()
 		for step_day in range(maxi(start,day-30),day+1):
 			var arrivals:Array=Hall.daily(step_day)
+			stamp=trace.mark("court_daily_hall",stamp)
 			# With a live model, the envoy's business is settled before they are shown in.
 			for arrival in arrivals:
 				if String((arrival as Dictionary).get("origin",""))=="foreign" and voice.has_method("pick_request"): voice.pick_request(String((arrival as Dictionary).get("id","")))
 			# The Opening Arc marks the first years' real turning points as beats.
 			OpeningArc.daily(step_day,terrain)
+			stamp=trace.mark("court_daily_opening_arc",stamp)
 			# War orders given at court: the war leader's report comes back.
 			preload("res://scripts/court_war_orders.gd").daily(step_day)
+			stamp=trace.mark("court_daily_war_orders",stamp)
 			if not arrivals.is_empty() and pending_summon.is_empty():pending_summon=String((arrivals[0] as Dictionary).get("id",""))
 		# Great works: stage gates, hard news, pitches, outcomes, forecasts.
 		var works:Array=Works.daily(day)
+		trace.mark("court_daily_works",stamp)
+		preload("res://scripts/perf_meter.gd").court(Time.get_ticks_usec()-began)
 		if not works.is_empty() and pending_summon.is_empty():pending_summon=String((works[0] as Dictionary).get("id",""))
 
 	elif day!=last_day:
