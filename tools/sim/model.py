@@ -172,6 +172,13 @@ TEAM_MODE = TEAMS["TEAMS_MAX"] > 0
 STAGES = [float(x) for x in g.const("scripts/research_600_catalog.gd", "STAGES", default=[], optional=True)]
 TRIAL_SHARE = [float(x) for x in g.const("scripts/research_600_catalog.gd", "TRIAL_SHARE", default=[], optional=True)]
 AGE_BUCKET_SCORE = float(g.const("scripts/discovery_system.gd", "AGE_BUCKET_SCORE", default=0.0, optional=True))
+# DiscoverySystem.FAR_BANDS: work further ahead than NEAR_AGE_YEARS is taken band
+# by band (years ahead), the nearest band any line offers first; a line that has
+# waited TEAM_MAX_WAIT_YEARS counts its far work one band nearer (_team_rank);
+# monthly, a team more than a band ahead moves to the work a free team would
+# take when that stands two bands nearer and is SWITCH_MARGIN less work.
+FAR_BANDS = [float(x) for x in g.const("scripts/discovery_system.gd", "FAR_BANDS", default=[], optional=True)]
+TIER_LAST = 2 + len(FAR_BANDS)
 
 
 def team_count(researchers: float) -> int:
@@ -1552,6 +1559,19 @@ class Surrogate:
         ahead = float(self.open_year[item]) - year
         return 0 if ahead <= 0.0 else (1 if ahead < NEAR_AGE_YEARS else 2)
 
+    def _team_tier(self, items, year: float):
+        """DiscoverySystem.team_tier: 0 of its age, 1 within NEAR_AGE_YEARS, then
+        2.. by FAR_BANDS (the age bucket when there are no bands)."""
+        bucket = self._team_bucket(items, year)
+        if not FAR_BANDS:
+            return bucket
+        band = np.searchsorted(np.array(FAR_BANDS), self.open_year[items] - year, side="left")
+        return np.where(bucket < 2, bucket, 2 + band)
+
+    def _team_tier_of(self, item: int, year: float) -> int:
+        """_team_tier for one question."""
+        return int(self._team_tier(np.array([item]), year)[0])
+
     def _team_due(self, month: dict, ch: int, busy: set):
         """The channel's best open question of its age no team holds (the month's
         look reads only these): (item, score, 0) or None."""
@@ -1573,16 +1593,21 @@ class Surrogate:
         return None
 
     def _team_channel(self, month: dict, ch: int):
-        """A channel's open questions this month, best first (_candidate_score with
-        its age bucket, so a question of its age comes first), with their buckets."""
+        """A channel's open questions this month, best first: the nearest band first
+        (DiscoverySystem._score_best_candidate; a question the player chose before
+        any), then _candidate_score; with their bands (team_tier)."""
         got = month["chan"].get(ch)
         if got is None:
             items = self.chan_items[ch]
             cand = items[month["open_mask"][items]]
             if len(cand):
                 score = self._team_scores(cand, float(month["units_ch"][ch]), month["year"])
-                order = np.argsort(-score, kind="stable")
-                got = (cand[order], score[order], self._team_bucket(cand[order], month["year"]))
+                tier = self._team_tier(cand, month["year"])
+                if FAR_BANDS:
+                    order = np.lexsort((-score, np.where(self.targets[cand] > 0, -1, tier)))
+                else:
+                    order = np.argsort(-score, kind="stable")
+                got = (cand[order], score[order], tier[order])
             else:
                 got = (cand, np.zeros(0), np.zeros(0, dtype=np.int64))
             month["chan"][ch] = got
@@ -1596,8 +1621,9 @@ class Surrogate:
                 return int(cand[k]), float(score[k]), int(bucket[k])
         return None
 
-    def _team_placements(self, month: dict, followed, busy: set, also: tuple = (), max_bucket: int = 2) -> list:
-        """DiscoverySystem._line_placements over every followed line and bucket:
+    def _team_placements(self, month: dict, followed, busy: set, also: tuple = (), max_bucket: int | None = None) -> list:
+        """DiscoverySystem._line_placements over every followed line and band (no
+        further than ``max_bucket``, a band: team_tier):
         each line's best question on each of its channels without a team (and the
         channels in ``also``); a deferred best (dead end or leftover) yields to the
         line's foundation work when that is at least as near its age; and the
@@ -1605,6 +1631,8 @@ class Surrogate:
         at least that near its age. A line lends one team to foundations at a
         time. Rows: (bucket, score, line, channel, item)."""
         cat = self.cat
+        if max_bucket is None:
+            max_bucket = TIER_LAST
         year, open_mask, units_ch = month["year"], month["open_mask"], month["units_ch"]
         out = []
         lending = set()
@@ -1616,7 +1644,7 @@ class Surrogate:
             if not free:
                 continue
             lends = li in lending
-            own_min = 3
+            own_min = TIER_LAST + 1
             for ch in free:
                 best = self._team_due(month, ch, busy) if max_bucket == 0 else self._team_best(month, ch, busy)
                 if best is None:
@@ -1629,7 +1657,7 @@ class Surrogate:
                     rel_i = self.relevance[item]
                     if rel_i >= 0 and (rel_i <= cat.design_year[item] + 0.5 or self.ceiling_era - rel_i > self.stale_k["STALE_GRACE"]):
                         found_ids = self._team_foundations(li, year, open_mask, busy)
-                        if found_ids and self._team_bucket_of(found_ids[0], year) <= b:
+                        if found_ids and self._team_tier_of(found_ids[0], year) <= b:
                             f = found_ids[0]
                             out.append((b, float(self._team_scores(np.array([f]), float(units_ch[int(cat.channel[f])]), year)[0]), li, ch, f))
                             lends = True
@@ -1639,7 +1667,7 @@ class Surrogate:
                 found_ids = self._team_foundations(li, year, open_mask, busy)
                 if found_ids:
                     f = found_ids[0]
-                    bf = self._team_bucket_of(f, year)
+                    bf = self._team_tier_of(f, year)
                     if bf < own_min and bf <= max_bucket:
                         out.append((bf, float(self._team_scores(np.array([f]), float(units_ch[int(cat.channel[f])]), year)[0]), li, free[0], f))
         return out
@@ -1664,16 +1692,18 @@ class Surrogate:
         return turns, last
 
     def _team_pick(self, placements: list, shares, turns, last, held, followed, year: float):
-        """DiscoverySystem._pick_team_placement: the best age bucket first; then a
-        line that has waited TEAM_MAX_WAIT_YEARS (longest first); then the line
-        furthest below its share of recent turns; then the question's score."""
+        """DiscoverySystem._pick_team_placement: the nearest band first (a line that
+        has waited TEAM_MAX_WAIT_YEARS counts its far work one band nearer); then a
+        waiting line (longest first); then the line furthest below its share of
+        recent turns; then the question's score."""
         total = float(turns[followed].sum())
         wait = TEAMS["TEAM_MAX_WAIT_YEARS"]
 
         def key(pl):
             b, score, li, ch, item = pl
             waited = held[li] == 0 and year - last[li] >= wait
-            return (b, 0 if waited else 1, -(year - last[li]) if waited else 0.0, -(shares[li] * total - turns[li]), -score, ch)
+            rank = b - 1 if (FAR_BANDS and waited and b > 2) else b
+            return (rank, 0 if waited else 1, -(year - last[li]) if waited else 0.0, -(shares[li] * total - turns[li]), -score, ch)
         return min(placements, key=key)
 
     def _research_teams(self, days: float, year: float, open_mask, researchers_total: float) -> list:
@@ -1725,7 +1755,9 @@ class Surrogate:
             busy.add(item)
             free -= 1
         # 4. Monthly, a team working ahead of its age moves to a question of its age
-        # (any followed line) or, in its own channel, to a much quicker one.
+        # (any followed line); one more than a band ahead, to the work a free team
+        # would take when that stands two bands nearer and is SWITCH_MARGIN less
+        # work; or, in its own channel, to a much quicker one.
         if SWITCH_CHECK_DAYS > 0:
             due_free = None
             for ch in np.where(self.active >= 0)[0].tolist():
@@ -1747,7 +1779,18 @@ class Surrogate:
                     best = self._team_pick(due, shares, turns, last, held, followed, year)
                     held[li] += 1
                     turns[li] += 1
-                elif int(cat.channel[item]) == ch:
+                tier = self._team_tier_of(item, year) if FAR_BANDS else 0
+                if best is None and tier >= 3:
+                    li = ch_line[ch]
+                    held[li] -= 1
+                    turns[li] -= 1
+                    rows = self._team_placements(month, followed, busy, (ch,), tier - 1)
+                    near = self._team_pick(rows, shares, turns, last, held, followed, year) if rows else None
+                    held[li] += 1
+                    turns[li] += 1
+                    if near is not None and near[0] <= tier - 2 and near[4] != item and self._expected_work(near[4], year) * SWITCH_MARGIN < self._expected_work(item, year):
+                        best = near
+                if best is None and int(cat.channel[item]) == ch:
                     # In its own channel, a much quicker question (SWITCH_MARGIN less work).
                     own = self._team_best(month, ch, busy)
                     if own is not None and own[0] != item and self._expected_work(own[0], year) * SWITCH_MARGIN < self._expected_work(item, year):

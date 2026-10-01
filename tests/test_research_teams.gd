@@ -113,7 +113,7 @@ func test_a_question_of_its_age_outranks_any_ahead_of_it()->void:
 	var lines:={"nutrition":8,"culture":1}
 	var held:={}
 	var turns:=DiscoverySystem._team_turns(lines,held,int(GameState.elapsed_days))
-	var rows:=[{"line":"nutrition","channel":"nutrition::Daily supply","id":"ahead","bucket":2,"score":500.0},{"line":"culture","channel":"culture::Social cohesion","id":"of_age","bucket":0,"score":-500.0}]
+	var rows:=[{"line":"nutrition","channel":"nutrition::Daily supply","id":"ahead","tier":2,"score":500.0},{"line":"culture","channel":"culture::Social cohesion","id":"of_age","tier":0,"score":-500.0}]
 	assert_str(String(DiscoverySystem._pick_team_placement(rows,lines,turns,held,int(GameState.elapsed_days)).id)).is_equal("of_age")
 
 func test_a_team_working_ahead_moves_to_a_question_of_its_age_within_a_month()->void:
@@ -127,10 +127,11 @@ func test_a_team_working_ahead_moves_to_a_question_of_its_age_within_a_month()->
 		state.active_investigations.clear();state.research_targets.clear()
 		state.research_subcategory_allocations={"culture":{"Social cohesion":6},"nutrition":{"Daily supply":1}}
 		state.research_allocations={"culture":6,"nutrition":1}
-		var ahead:={"id":"teams_far_ahead","name":"Far Ahead","dynamic":"culture","subcategory":"Social cohesion","earliest_year":40.0,"day":0,"requires":[],"signals":[]}
-		var of_age:={"id":"teams_of_age","name":"Of Its Age","dynamic":"nutrition","subcategory":"Daily supply","earliest_year":0.0,"day":0,"requires":["teams_gate"],"signals":[]}
+		var ahead:={"id":"teams_far_ahead","name":"Far Ahead","dynamic":"culture","subcategory":"Social cohesion","earliest_year":40.0,"day":0,"requires":[],"signals":[],"observation":""}
+		var of_age:={"id":"teams_of_age","name":"Of Its Age","dynamic":"nutrition","subcategory":"Daily supply","earliest_year":0.0,"day":0,"requires":["teams_gate"],"signals":[],"observation":""}
 		state.known_discoveries.erase("teams_gate")
 		research.catalog_by_channel={"culture::Social cohesion":[ahead],"nutrition::Daily supply":[of_age]}
+		research.catalog_by_id[String(ahead.id)]=ahead;research.catalog_by_id[String(of_age.id)]=of_age
 		# Only these two questions exist here: no foundation work elsewhere.
 		research.technology_catalog.clear()
 		research.refresh_investigations()
@@ -152,7 +153,7 @@ func test_a_team_working_ahead_moves_to_a_question_of_its_age_within_a_month()->
 
 func test_a_line_share_sets_how_often_it_gets_a_team_and_none_waits_past_five_years()->void:
 	var lines:={"knowledge":4,"culture":1}
-	var rows:=[{"line":"knowledge","channel":"knowledge::Observers","id":"k","bucket":0,"score":0.0},{"line":"culture","channel":"culture::Social cohesion","id":"c","bucket":0,"score":0.0}]
+	var rows:=[{"line":"knowledge","channel":"knowledge::Observers","id":"k","tier":0,"score":0.0},{"line":"culture","channel":"culture::Social cohesion","id":"c","tier":0,"score":0.0}]
 	GameState.discovery_log.clear()
 	var today:=int(GameState.elapsed_days)
 	var picks:={"knowledge":0,"culture":0}
@@ -177,7 +178,7 @@ func test_a_line_share_sets_how_often_it_gets_a_team_and_none_waits_past_five_ye
 	GameState.discovery_log.clear()
 
 func test_the_quick_pick_matches_a_pick_from_every_row()->void:
-	for year:float in [12.0,60.0,150.0]:
+	for year:float in [12.0,60.0,150.0,186.0]:
 		var day:=int(year*365.0)
 		GameState.elapsed_days=float(day)
 		var known:Array[String]=[]
@@ -196,7 +197,7 @@ func test_the_quick_pick_matches_a_pick_from_every_row()->void:
 			var every:Array=[]
 			var lending:=DiscoverySystem._lending_lines()
 			for line:String in lines:
-				for bucket in 3:every.append_array(DiscoverySystem._line_placements(line,day,busy,bucket,lending))
+				for tier in DiscoverySystem.TEAM_TIER_LAST+1:every.append_array(DiscoverySystem._line_placements(line,day,busy,tier,lending))
 			var reference:=DiscoverySystem._pick_team_placement(every,lines,turns,held,day)
 			var quick:=DiscoverySystem._next_team_placement(lines,turns,held,day,busy)
 			assert_str(String(quick.get("id",""))).is_equal(String(reference.get("id","")))
@@ -206,6 +207,109 @@ func test_the_quick_pick_matches_a_pick_from_every_row()->void:
 			busy[String(quick.id)]=true
 			DiscoverySystem._count_turn(held,turns,String(quick.line),1)
 		DiscoverySystem.end_research_scan()
+
+# --- Far work comes band by band --------------------------------------------------------
+
+func test_far_work_is_taken_band_by_band_before_a_line_s_long_leap()->void:
+	var year:=float(GameState.elapsed_days)/365.0
+	# Bands of years ahead: within 5, 10, 20, 35, 60, then beyond.
+	var tiers:={0.0:0,3.0:1,8.0:2,10.0:2,15.0:3,30.0:4,50.0:5,61.0:6,79.5:6}
+	DiscoverySystem.research_open_year({"id":"band_test_sync","earliest_year":0.0})
+	for ahead:float in tiers:
+		var question:={"id":"band_test_%d" % roundi(ahead*10.0),"dynamic":"culture","subcategory":"Social cohesion","earliest_year":0.0}
+		DiscoverySystem._open_year_cache[String(question.id)]=year+ahead
+		assert_int(DiscoverySystem.team_tier(question)).is_equal(int(tiers[ahead]))
+		DiscoverySystem._open_year_cache.erase(String(question.id))
+	assert_int(DiscoverySystem.TEAM_TIER_LAST).is_equal(2+DiscoverySystem.FAR_BANDS.size())
+	# Nutrition has the turn by a wide margin (eight times culture's share, no
+	# turns yet), but its only open work is a 60-year leap; culture offers work 8
+	# years ahead. The free team takes the cheaper lead in culture.
+	var lines:={"nutrition":8,"culture":1}
+	var today:=int(GameState.elapsed_days)
+	GameState.discovery_log.clear()
+	for index in 3:GameState.discovery_log.push_front({"day":today-index*90,"id":"n%d" % index,"dynamic":"nutrition","team_line":"nutrition"})
+	GameState.discovery_log.push_front({"day":today-60,"id":"c0","dynamic":"culture","team_line":"culture"})
+	var held:={}
+	var turns:=DiscoverySystem._team_turns(lines,held,today)
+	var leap:={"line":"nutrition","channel":"nutrition::Daily supply","id":"leap","tier":5,"score":400.0}
+	var near:={"line":"culture","channel":"culture::Social cohesion","id":"near","tier":2,"score":-400.0}
+	assert_str(String(DiscoverySystem._pick_team_placement([leap,near],lines,turns,held,today).id)).is_equal("near")
+	# In the same band the line's turn decides.
+	var level:={"line":"nutrition","channel":"nutrition::Daily supply","id":"level","tier":2,"score":-900.0}
+	assert_str(String(DiscoverySystem._pick_team_placement([level,near],lines,turns,held,today).id)).is_equal("level")
+	GameState.discovery_log.clear()
+
+func test_a_line_waiting_five_years_still_gets_its_turn_unless_it_would_leap_bands_ahead()->void:
+	var lines:={"nutrition":8,"culture":1}
+	var today:=int(GameState.elapsed_days)
+	GameState.discovery_log.clear()
+	for index in 3:GameState.discovery_log.push_front({"day":today-index*90,"id":"n%d" % index,"dynamic":"nutrition","team_line":"nutrition"})
+	# Culture has held no team and proved nothing for six years: it is waiting.
+	GameState.discovery_log.push_back({"day":today-int(6.0*365.0),"id":"c_old","dynamic":"culture","team_line":"culture"})
+	var turns:=DiscoverySystem._team_turns(lines,{},today)
+	assert_float(DiscoverySystem._line_wait_years(turns,"culture",today)).is_greater(R.TEAM_MAX_WAIT_YEARS)
+	var nutrition:={"line":"nutrition","channel":"nutrition::Daily supply","id":"nutrition_near","tier":2,"score":300.0}
+	# Its next question one band further than nutrition's: culture takes its turn.
+	var one_band:={"line":"culture","channel":"culture::Social cohesion","id":"culture_one_band","tier":3,"score":-300.0}
+	assert_str(String(DiscoverySystem._pick_team_placement([nutrition,one_band],lines,turns,{},today).id)).is_equal("culture_one_band")
+	# A 40-year leap stands three bands further: the cheaper work goes first, and
+	# culture's turn comes as its questions draw nearer their age.
+	var leap:={"line":"culture","channel":"culture::Social cohesion","id":"culture_leap","tier":5,"score":300.0}
+	assert_str(String(DiscoverySystem._pick_team_placement([nutrition,leap],lines,turns,{},today).id)).is_equal("nutrition_near")
+	# Questions of their age always come first, waiting or not.
+	var of_age:={"line":"nutrition","channel":"nutrition::Daily supply","id":"nutrition_of_age","tier":0,"score":-900.0}
+	assert_str(String(DiscoverySystem._pick_team_placement([of_age,one_band],lines,turns,{},today).id)).is_equal("nutrition_of_age")
+	GameState.discovery_log.clear()
+
+func test_a_team_on_a_long_leap_moves_two_bands_nearer_within_a_month()->void:
+	WorldSimulation.create_actor("teams_leap",516)
+	WorldSimulation.scoped("teams_leap",func()->void:
+		var state:=WorldSimulation.state
+		var research:=WorldSimulation.discovery
+		state.elapsed_days=float(10*365)
+		# No one at learning: one team, so it has to choose.
+		state.population_allocations.Knowledge=0
+		state.active_investigations.clear();state.research_targets.clear();state.discovery_log.clear()
+		state.research_subcategory_allocations={"culture":{"Social cohesion":6},"nutrition":{"Daily supply":1}}
+		state.research_allocations={"culture":6,"nutrition":1}
+		# A 60-to-70-year leap in culture, and work 5 to 9 years ahead in nutrition
+		# that opens once its foundation is known.
+		var leap:={"id":"teams_long_leap","name":"Long Leap","dynamic":"culture","subcategory":"Social cohesion","earliest_year":80.0,"day":0,"requires":[],"signals":[],"observation":""}
+		var near:={"id":"teams_near_lead","name":"Near Lead","dynamic":"nutrition","subcategory":"Daily supply","earliest_year":17.0,"day":0,"requires":["teams_leap_gate"],"signals":[],"observation":""}
+		state.known_discoveries.erase("teams_leap_gate")
+		research.catalog_by_channel={"culture::Social cohesion":[leap],"nutrition::Daily supply":[near]}
+		research.catalog_by_id[String(leap.id)]=leap;research.catalog_by_id[String(near.id)]=near
+		research.technology_catalog.clear()
+		research.refresh_investigations()
+		assert_int(int(research.research_teams().count)).is_equal(1)
+		assert_str(String(state.active_investigations.get("culture::Social cohesion",""))).is_equal("teams_long_leap")
+		assert_int(research.team_tier(leap)).is_equal(research.TEAM_TIER_LAST)
+		assert_int(research.team_tier(near)).is_equal(2)
+		state.discovery_progress["teams_long_leap"]=0.2
+		# The nearer work opens: within a month the team takes it up, and the
+		# work done on the long leap stays with it.
+		state.known_discoveries.append("teams_leap_gate")
+		var moved:=-1
+		for day in 31:
+			state.elapsed_days+=1.0
+			research.refresh_investigations()
+			if String(state.active_investigations.get("nutrition::Daily supply",""))=="teams_near_lead":moved=day;break
+		assert_int(moved).is_between(0,30)
+		assert_bool(state.active_investigations.has("culture::Social cohesion")).is_false()
+		assert_float(float(state.discovery_progress.get("teams_long_leap",0.0))).is_equal(0.2)
+		# A lead one band nearer is not worth a move: the team stays.
+		state.active_investigations.clear()
+		state.active_investigations["culture::Social cohesion"]="teams_long_leap"
+		state.research_subcategory_allocations={"culture":{"Social cohesion":6},"nutrition":{"Daily supply":1}}
+		var far:={"id":"teams_far_lead","name":"Far Lead","dynamic":"nutrition","subcategory":"Daily supply","earliest_year":64.0,"day":0,"requires":[],"signals":[],"observation":""}
+		research.catalog_by_channel["nutrition::Daily supply"]=[far]
+		research.catalog_by_id[String(far.id)]=far
+		assert_int(research.team_tier(far)).is_equal(5)
+		for day in 31:
+			state.elapsed_days+=1.0
+			research.refresh_investigations()
+		assert_str(String(state.active_investigations.get("culture::Social cohesion",""))).is_equal("teams_long_leap")
+	)
 
 # --- Foundation work keeps near its age ------------------------------------------------
 
