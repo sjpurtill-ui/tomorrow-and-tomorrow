@@ -14,6 +14,7 @@ scenario knobs, the civic court and decrees.
 """
 from __future__ import annotations
 
+import hashlib
 import math
 from dataclasses import dataclass, field
 
@@ -236,6 +237,25 @@ FOUNDATION_WORK = "_research_600_foundation_candidate" in g.source("scripts/disc
 ART_ERA_BONUS_SHARE = float(g.const("scripts/artifact_collection.gd", "ERA_BONUS_SHARE", default=-1.0, optional=True))
 
 
+_ID_DRAWS: dict = {}
+
+
+def id_draws(ids: list, seed: int, purpose: str) -> np.ndarray:
+    """This world's fixed 0..1 draw for every question, keyed by its id, seed and
+    purpose as DiscoverySystem._research_draw is (a hash, not a position in a
+    stream): adding questions to the catalog never reshuffles another
+    question's cost, affinity, opening year or dead-end draw."""
+    key = (id(ids), len(ids), ids[0] if ids else "", ids[-1] if ids else "", seed, purpose)
+    got = _ID_DRAWS.get(key)
+    if got is None:
+        got = np.array([int.from_bytes(hashlib.blake2b(f"{seed}:{rid}:{purpose}".encode("utf-8"), digest_size=8).digest(), "little")
+                        for rid in ids], dtype=np.float64) / 2.0 ** 64
+        if len(_ID_DRAWS) > 64:
+            _ID_DRAWS.clear()
+        _ID_DRAWS[key] = got
+    return got
+
+
 def lerp(a, b, t):
     return a + (b - a) * t
 
@@ -293,7 +313,8 @@ class Surrogate:
         c, cat = self.c, self.cat
         n = cat.n
         # --- per-item static draws (discovery_system.gd _research_draw) -----------
-        self.cost_draw = 0.85 + self.rng.random(n) * 0.30
+        # Keyed by question id, as the engine's are (id_draws).
+        self.cost_draw = 0.85 + id_draws(cat.ids, seed, "cost") * 0.30
         # --- tuning knobs (tune.py): game-side changes expressed as multipliers ----
         self.tune_pace = float(params.get("tune_research_pace", 1.0))          # x on daily progress (discovery_system 0.12 / research_years)
         self.tune_doubling = float(params.get("tune_era_doubling", c.era_doubling))
@@ -319,18 +340,18 @@ class Surrogate:
         self.offered = np.ones(n, dtype=bool)
         if self.stale_k.get("DEAD_END_VIABLE"):
             dead = cat.registry & (cat.relevance_year >= 0) & (cat.relevance_year <= cat.design_year + 0.5) & ~cat.key_threshold
-            draw = np.random.default_rng((seed * 2654435761 + 97) & 0xFFFFFFFF).random(n)
+            draw = id_draws(cat.ids, seed, "dead_end")
             self.offered = ~dead | (draw < self.stale_k["DEAD_END_VIABLE"])
         # Research600.open_year: this world's opening years (a seeded draw per
         # question, as dead ends use). Early work is only slower (_early_doublings).
         earliest = cat.earliest
-        open_draw = np.random.default_rng((seed * 2654435761 + 131) & 0xFFFFFFFF).random(n)
+        open_draw = id_draws(cat.ids, seed, "open_year")
         self.open_year = np.where(earliest > 0, np.maximum(0.0, earliest + (open_draw * 2.0 - 1.0) * np.minimum(EARLY["OPEN_JITTER_MAX"], earliest * EARLY["OPEN_JITTER"])), 0.0)
         if line_scale:
             scale = np.array([float(line_scale.get(line, 1.0)) for line in gd.LINES])[cat.line]
             self.E = cat.E * scale[:, None]
         # research_affinity: seeded draw x100 + resource potential x15 per requirement.
-        self.affinity = self.rng.random(n) * 100.0 + np.array([len(r) for r in cat.resource_requirements]) * 15.0 * float(params.get("resource_potential", 0.5))
+        self.affinity = id_draws(cat.ids, seed, "affinity") * 100.0 + np.array([len(r) for r in cat.resource_requirements]) * 15.0 * float(params.get("resource_potential", 0.5))
         ctx = dict(params["context"])
         self.ctx = ctx
         self._activity(ctx, hearth=False)

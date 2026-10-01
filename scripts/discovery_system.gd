@@ -254,6 +254,7 @@ func initialize() -> void:
 	catalog.append_array(preload("res://scripts/metallurgy_process_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/settlement_fabric_knowledge.gd").entries())
 	catalog.append_array(preload("res://scripts/early_practice_knowledge.gd").entries())
+	catalog.append_array(preload("res://scripts/town_practice_knowledge.gd").entries())
 	# --- research_600 (begin): register design discoveries the catalog lacks ---
 	var authored_ids:Dictionary={}
 	for authored:Dictionary in catalog: authored_ids[String(authored.get("id",""))]=true
