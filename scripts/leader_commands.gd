@@ -24,6 +24,30 @@ const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 
 const WAR_LEADER:="war_leader"
+## Each command's colour on the map and the army bar. The war leader's is our
+## own blue; each general's comes from PALETTE by the order the generals came
+## forward, so a general keeps their colour for life. No red: red is theirs.
+const WAR_LEADER_COLOR:=Color("#4f9bb8")
+const PALETTE:=[Color("#2f7f6f"),Color("#6b5b95"),Color("#8a6a2f"),Color("#3f5f8f"),Color("#7a4f6d"),Color("#4f7a3a"),Color("#5f6f7f"),Color("#3a4a8a")]
+
+
+## The colour of a command (a leader key: a figure id or WAR_LEADER).
+static func color(leader_id:String)->Color:
+	if leader_id=="" or leader_id==WAR_LEADER:return WAR_LEADER_COLOR
+	var parts:=leader_id.split("_")
+	var serial:=int(parts[parts.size()-1]) if parts.size()>1 and String(parts[parts.size()-1]).is_valid_int() else absi(leader_id.hash())
+	return PALETTE[posmod(serial,PALETTE.size())]
+
+
+## The leader key of an army bar card: its general, its command's key, or
+## WAR_LEADER.
+static func leader_of_card(card:Dictionary,mc:Variant=null)->String:
+	var id:=String(card.get("id",""))
+	if id.begins_with("general:"):
+		var key:=id.trim_prefix("general:")
+		return WAR_LEADER if key=="war_leader" or key==war_leader_figure(mc) else key
+	var figure:=String((card.get("general",{}) as Dictionary).get("figure_id","")) if card.get("general") is Dictionary else ""
+	return WAR_LEADER if figure=="" or figure==war_leader_figure(mc) else figure
 
 
 static func _mc(mc:Variant)->Node:

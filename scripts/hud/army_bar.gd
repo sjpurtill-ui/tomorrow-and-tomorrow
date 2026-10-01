@@ -365,6 +365,10 @@ class ArmyCard extends Control:
 		if chosen:style.border_width_top=3
 		style.shadow_color=Color(0,0,0,0.16 if T.is_light() else 0.4);style.shadow_size=4;style.shadow_offset=Vector2(0,2)
 		draw_style_box(style,box)
+		# The command's colour down the left edge, as its counters wear it.
+		if String(card.get("kind","")) in ["army","group"]:
+			var Commands:=preload("res://scripts/leader_commands.gd")
+			draw_rect(Rect2(Vector2(0,4),Vector2(4,size.y-8)),Commands.color(Commands.leader_of_card(card)))
 		var fade:=0.55 if bool(card.get("unknown",false)) else 1.0
 		var strong:=T.font("ui_strong")
 		var left:=_body_left()

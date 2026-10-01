@@ -157,6 +157,8 @@ func _row(e:Dictionary)->Control:
 		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
 			chosen=id;show_each=false;refresh(true))
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_IGNORE;panel.add_child(row)
+	# The command's colour, as its counters and army bar card wear it.
+	var stripe:=ColorRect.new();stripe.color=Commands.color(String(e.id));stripe.custom_minimum_size=Vector2(4,52);stripe.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(stripe)
 	row.add_child(_face(leader,Vector2(44,52)))
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",1);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(words)
 	var name_line:=HBoxContainer.new();name_line.add_theme_constant_override("separation",6);name_line.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(name_line)

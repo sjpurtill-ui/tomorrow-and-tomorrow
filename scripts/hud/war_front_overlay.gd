@@ -617,6 +617,8 @@ func collect()->Dictionary:
 		entry["foraging"]=moving_now and bool(army.get("living_off_land",false))
 		# Drafts in drill for this band (known at home, where they drill).
 		entry["drafts"]=drafts_for(id)
+		# Its command, for the counter's colour (leader_commands.gd).
+		entry["leader"]=preload("res://scripts/leader_commands.gd").leader_of(army)
 		if moving_now:
 			var total:=float(army.get("distance_total_km",0.0))
 			entry["march_done"]=clampf(1.0-float(army.get("distance_remaining_km",total))/total,0.0,1.0) if total>0.0 else 0.0
@@ -1315,7 +1317,7 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 			"report_age":int(f.get("report_age",0)),"selected":bool(f.get("selected",false)),"condition":String(f.get("condition","intact")),"moving":String(context.get("status",""))=="moving",
 			"full":full,"will":clampf(float(f.get("morale",0.6)),0.0,1.0),"state":BattleMarks.state_of(context),"heading":context.get("delta",Vector2.ZERO),
 			"glyph":String(f.get("glyph","")),"supply":String(f.get("supply","")),"foraging":bool(f.get("foraging",false)),
-			"days_left":int(f.get("days_left",0)),"march_done":float(f.get("march_done",-1.0)),"drafts":int(f.get("drafts",0))})
+			"days_left":int(f.get("days_left",0)),"march_done":float(f.get("march_done",-1.0)),"drafts":int(f.get("drafts",0)),"leader":String(f.get("leader",""))})
 	# Towns we hold: the garrison's mark stands on the town.
 	for g in (inputs.get("garrisons",[]) as Array):
 		var held:=int(g.get("troops",0))
@@ -2262,7 +2264,9 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 	var at:Vector2=entry.at
 	var age:=int(entry.get("report_age",0)) if ours else int(entry.get("age_days",0))
 	var alpha:=1.0 if ours else ArmyMarks.fade(age)
-	var accent:=OURS_WASH if ours else THEIRS_WASH
+	# Ours wear their command's colour (leader_commands.gd): many bands read
+	# as a few armies.
+	var accent:=preload("res://scripts/leader_commands.gd").color(String(entry.get("leader",""))) if ours and String(entry.get("leader",""))!="" else (OURS_WASH if ours else THEIRS_WASH)
 	if not ours and not bool(entry.get("hostile",true)): accent=Color("#b89a5a")
 	elif not ours and CivilizationSystem._civilization_index(String(entry.get("owner","")))>=0: accent=preload("res://scripts/city_map_identity.gd").foreign(String(entry.owner)).accent
 	var scale:=_counter_scale(band)

@@ -116,3 +116,17 @@ func test_the_leaders_screen_lists_commands_and_moves_bands()->void:
 	var tiles:=Board.tile_specs({"bands":2,"men":20,"full":24,"issued":20,"required":24,"will":0.5,"supply":1.0,"hungry":0,"breaking":0,"marching":1,"missing":{"spear":4},"worst":"well"},[],0.5,false)
 	assert_str(String(tiles[2].line)).contains("a day in camp")
 	assert_str(String(tiles[1].line)).contains("short 4")
+
+
+func test_each_command_wears_its_own_colour()->void:
+	assert_bool(Commands.color(Commands.WAR_LEADER)==Commands.WAR_LEADER_COLOR).is_true()
+	assert_bool(Commands.color("")==Commands.WAR_LEADER_COLOR).is_true()
+	var a:=Commands.color("figure_5151_3");var b:=Commands.color("figure_5151_4")
+	assert_bool(a==b).is_false()
+	assert_bool(Commands.color("figure_5151_3")==a).is_true()
+	# No command is red: red is theirs.
+	for c:Color in Commands.PALETTE:assert_bool(c.r>c.g+0.15 and c.r>c.b+0.15).is_false()
+	# An army bar card's command: its general, its group's key, or the war leader.
+	assert_str(Commands.leader_of_card({"id":"general:figure_5151_3"})).is_equal("figure_5151_3")
+	assert_str(Commands.leader_of_card({"id":"general:war_leader"})).is_equal(Commands.WAR_LEADER)
+	assert_str(Commands.leader_of_card({"id":"army:2","general":{"figure_id":""}})).is_equal(Commands.WAR_LEADER)
