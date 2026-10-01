@@ -335,10 +335,13 @@ func draft_block(force:Dictionary)->String:
 	if not host.at_home_point(force) and access<=CUT_OFF: return "cut_off"
 	return ""
 
-## Plain words for why no drafts come, for the screens and the war leader.
+## Plain words for why no drafts come, for the screens and the war leader
+## (drafts_for gives them as block_words). The old "no_people" block, told
+## as "+0 coming" and as advice to raise the Defense share, is gone: drafts
+## come from the army's size now.
 const BLOCK_WORDS:={
 	"at_level":"No more are called up: the army already stands at the size you set. Raise how many serve to fill the empty places.",
-	"no_people":"Nobody free to call up: every able adult is already serving or away.",
+	"nobody_free":"Nobody free to call up: every able adult is already serving or away.",
 	"hungry":"No drafts while the band is starving: they would starve too.",
 	"cut_off":"No drafts: no road our carriers use reaches them.",
 	"last":"No drafts for a band reinforced last.",
@@ -350,7 +353,7 @@ static func block_words(block:String)->String:
 
 ## The same reason in a few words: "the army stands at the size you set".
 static func block_reason(block:String)->String:
-	return String({"at_level":"the army stands at the size you set","no_people":"nobody is free to call up","hungry":"they are starving","cut_off":"no road our carriers use reaches them","last":"it is reinforced last","campaign":"the general's campaign keeps its own ranks"}.get(block,"no drafts can reach them"))
+	return String({"at_level":"the army stands at the size you set","nobody_free":"nobody is free to call up","hungry":"they are starving","cut_off":"no road our carriers use reaches them","last":"it is reinforced last","campaign":"the general's campaign keeps its own ranks"}.get(block,"no drafts can reach them"))
 
 ## How many more the war leader may call up for the army today: the gap to
 ## the size the ruler chose (army_levy_law.gd, a share of the people), or,
@@ -439,7 +442,7 @@ func draft_day()->Array:
 		# Places left open with nobody to fill them: why, in one word. The
 		# size the ruler set stops it while free hands remain; else nobody is
 		# free.
-		if short: force["draft_block"]="at_level" if levy_room()<maxi(0,int(host.recruitment_capacity())-int(host._mobilized_count())) else "no_people"
+		if short: force["draft_block"]="at_level" if levy_room()<maxi(0,int(host.recruitment_capacity())-int(host._mobilized_count())) else "nobody_free"
 	return started
 
 static func _has_gap(force:Dictionary)->bool:

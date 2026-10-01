@@ -136,6 +136,11 @@ func test_drafts_stop_at_the_size_the_ruler_set_and_say_so()->void:
 	# open, and the block says why in words the ruler can act on.
 	assert_str(String(MilitaryCampaign.field_armies[0].get("draft_block",""))).is_equal("at_level")
 	assert_str(Sustainment.block_words("at_level")).contains("Raise how many serve")
+	# Never "+0 coming": nothing is coming, and the screens get the reason.
+	var coming:Dictionary=MilitaryCampaign.sustainment.drafts_for(7)
+	assert_int(int(coming.on_road)+int(coming.in_training)).is_equal(0)
+	assert_str(String(coming.block)).is_not_equal("no_people")
+	assert_str(String(coming.block_words)).contains("the size you set")
 	# The ruler raises the share: the drafts come.
 	MilitaryCampaign.army_levy_level="war"
 	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(1)
