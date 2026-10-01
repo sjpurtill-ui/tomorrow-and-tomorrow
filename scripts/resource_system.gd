@@ -741,10 +741,10 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		# Loads on the road are kept in order of arrival (_add_shipment), so the
 		# loads due today are the first ones; the rest are not touched.
 		var moving:=_normalized_shipments(deposit)
-		if moving.is_empty() or int((moving[0] as Dictionary).arrival_day)>today:continue
+		if moving.is_empty() or int((moving[0] as Array)[0])>today:continue
 		var resource_name:=String(deposit.resource)
-		while not moving.is_empty() and int((moving[0] as Dictionary).arrival_day)<=today:
-			var quantity:=float((moving.pop_front() as Dictionary).quantity)
+		while not moving.is_empty() and int((moving[0] as Array)[0])<=today:
+			var quantity:=float((moving.pop_front() as Array)[1])
 			stockpiles[resource_name]=float(stockpiles.get(resource_name,0.0))+quantity
 			deposit.delivered_today=float(deposit.delivered_today)+quantity
 			deposit.lifetime_delivered=float(deposit.lifetime_delivered)+quantity
@@ -781,7 +781,7 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			deposit.stock_at_source=waiting-dispatched
 			var speed_km_day:=maxf(1.0,8.0*route_factor*travel_effect)
 			deposit.travel_days=maxi(1,ceili(float(deposit.distance_km)/speed_km_day))
-			_add_shipment(deposit,{"quantity":dispatched,"departure_day":today,"arrival_day":today+int(deposit.travel_days)})
+			_add_shipment(deposit,today+int(deposit.travel_days),dispatched)
 		_update_deposit_bottleneck(deposit,carriers,events)
 	stamp=trace.mark("flow_hauling",stamp)
 	var loss_report:=_apply_material_storage_losses(events)
@@ -814,39 +814,48 @@ func _ensure_deposit_fields(deposit:Dictionary)->void:
 	for key in DEPOSIT_FIELD_DEFAULTS:
 		if not deposit.has(key): deposit[key]=DEPOSIT_FIELD_DEFAULTS[key].duplicate() if DEPOSIT_FIELD_DEFAULTS[key] is Array else DEPOSIT_FIELD_DEFAULTS[key]
 
-## A deposit's loads on the road, in order of arrival, with their total in
-## `in_transit`. A deposit without that total (an older save, or one made
-## before its first haul) has its loads put in order of arrival once, keeping
-## the order they were sent for loads due the same day.
+## A deposit's loads on the road: [arrival day, quantity] in order of
+## arrival, with their total in `in_transit`. A deposit without that total
+## (an older save, or one made before its first haul) has its loads put in
+## that form and order once (normalize_shipments).
 func _normalized_shipments(deposit:Dictionary)->Array:
 	var moving:Array=deposit.shipments
-	if deposit.has("in_transit"):return moving
+	if not deposit.has("in_transit") or (not moving.is_empty() and moving[0] is Dictionary):
+		normalize_shipments(deposit)
+		return deposit.shipments
+	return moving
+
+## Older saves kept each load as {quantity, departure_day, arrival_day}, in the
+## order sent (the day it left is never read). Loads due the same day keep the
+## order they were sent.
+static func normalize_shipments(deposit:Dictionary)->void:
+	var moving:Array=deposit.get("shipments",[])
+	var loads:Array=[]
 	var ordered:=true
-	for index in range(1,moving.size()):
-		if int((moving[index] as Dictionary).arrival_day)<int((moving[index-1] as Dictionary).arrival_day):
-			ordered=false
-			break
+	for index in moving.size():
+		var item:Variant=moving[index]
+		var entry:Array=[int(item.get("arrival_day",0)),float(item.get("quantity",0.0))] if item is Dictionary else [int(item[0]),float(item[1])]
+		if not loads.is_empty() and int(entry[0])<int((loads[-1] as Array)[0]):ordered=false
+		loads.append(entry)
 	if not ordered:
 		var keyed:Array=[]
-		for index in moving.size():keyed.append([int((moving[index] as Dictionary).arrival_day),index,moving[index]])
+		for index in loads.size():keyed.append([int((loads[index] as Array)[0]),index,loads[index]])
 		keyed.sort_custom(func(a:Array,b:Array)->bool:return int(a[0])<int(b[0]) or (int(a[0])==int(b[0]) and int(a[1])<int(b[1])))
-		moving=keyed.map(func(entry:Array)->Dictionary:return entry[2])
-		deposit.shipments=moving
+		loads=keyed.map(func(entry:Array)->Array:return entry[2])
 	var total:=0.0
-	for shipment:Dictionary in moving:total+=float(shipment.quantity)
+	for entry:Array in loads:total+=float(entry[1])
+	deposit["shipments"]=loads
 	deposit["in_transit"]=total
-	return moving
 
 ## Puts a load on the road in order of arrival (after any load due the same
 ## day) and adds it to the deposit's `in_transit`.
-func _add_shipment(deposit:Dictionary,shipment:Dictionary)->void:
+func _add_shipment(deposit:Dictionary,arrival:int,quantity:float)->void:
 	var moving:=_normalized_shipments(deposit)
-	var arrival:=int(shipment.arrival_day)
 	var at:=moving.size()
-	while at>0 and int((moving[at-1] as Dictionary).arrival_day)>arrival:at-=1
-	if at==moving.size():moving.append(shipment)
-	else:moving.insert(at,shipment)
-	deposit.in_transit=float(deposit.in_transit)+float(shipment.quantity)
+	while at>0 and int((moving[at-1] as Array)[0])>arrival:at-=1
+	if at==moving.size():moving.append([arrival,quantity])
+	else:moving.insert(at,[arrival,quantity])
+	deposit.in_transit=float(deposit.in_transit)+quantity
 
 func _is_material_resource(resource_name:String)->bool:
 	# Civilian Goods are maintained household things in use. CivilianGoods applies
@@ -910,7 +919,7 @@ func resource_workforce_snapshot()->Dictionary:
 
 func in_transit_for(deposit:Dictionary)->float:
 	var total:=0.0
-	for shipment_variant in deposit.get("shipments",[]): total+=float((shipment_variant as Dictionary).get("quantity",0.0))
+	for shipment_variant in deposit.get("shipments",[]): total+=float(shipment_variant.get("quantity",0.0)) if shipment_variant is Dictionary else float(shipment_variant[1])
 	return total
 
 func deposit_exhausted(deposit:Dictionary)->bool:

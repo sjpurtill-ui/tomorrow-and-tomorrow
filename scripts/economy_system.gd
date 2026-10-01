@@ -147,6 +147,9 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	if not bool(audit.ok): _threshold_event(events,"accounting_invariant","Economic Accounts Diverge","The economy detected an internal conservation failure: %s" % "; ".join(audit.violations),1)
 	WorldSimulation.state.economy_history.append({"day":day,"stage":WorldSimulation.state.economy_stage,"price_index":price_index,"trade_volume":trade_volume,"metal_circulation":WorldSimulation.state.weighed_metal_circulation,"metal_turnover":metal_exchange.turnover,"external_exports":external_trade.exports,"external_imports":external_trade.imports,"trade_credit":WorldSimulation.state.external_trade_credit,"treasury":WorldSimulation.state.public_treasury,"money_supply":WorldSimulation.state.currency_supply,"currency_hoards":WorldSimulation.state.currency_hoards,"currency_confidence":currency_liquidity.confidence,"credit":WorldSimulation.state.credit_outstanding,"inequality":inequality,"inflation":inflation,"essential_coverage":real_accounts.essential_coverage,"household_hardship_share":household_welfare.hardship_share,"lower_household_access":household_welfare.lower_access,"household_access_gap":household_welfare.access_gap,"output_per_capita":real_accounts.output_per_capita,"obligation_regime":public_obligations.regime,"labor_obligation_coverage":public_obligations.labor_coverage,"material_obligation_coverage":public_obligations.material_coverage,"tax_compliance":tax_capacity.compliance,"effective_tax_rate":tax_capacity.effective_rate,"spending_priority":finance.spending_priority,"civil_payment_coverage":finance.civil_coverage,"military_payment_coverage":finance.military_coverage,"fiscal_status":fiscal_outlook.status,"fiscal_coverage":fiscal_outlook.coverage_ratio,"fiscal_headroom":fiscal_outlook.discretionary_headroom,"prices":WorldSimulation.state.market_prices.duplicate(true)})
 	if WorldSimulation.state.economy_history.size()>730: WorldSimulation.state.economy_history.pop_front()
+	# An entry older than HISTORY_DETAIL_ENTRIES keeps only what screens chart.
+	var aged:=WorldSimulation.state.economy_history.size()-1-HISTORY_DETAIL_ENTRIES
+	if aged>=0:WorldSimulation.state.economy_history[aged]=slim_history_entry(WorldSimulation.state.economy_history[aged])
 	if absf(inflation)>=0.035:
 		_threshold_event(events,"price_shock","Prices Shift",("Exchange values rose" if inflation>0.0 else "Exchange values fell")+" %d%% as stocks, demand, and monetary circulation changed." % roundi(absf(inflation)*100.0),30)
 	if market_volatility>=0.025: _threshold_event(events,"market_volatility","Unstable Terms of Exchange","Daily comparison values have moved an average of %.1f%% across the recent market window, weakening confidence in deferred exchange." % (market_volatility*100.0),30)
@@ -813,6 +816,26 @@ func _exchange_reliability(market_access:float,market_volatility:float=-1.0)->fl
 	var backing:=clampf(_monetary_reserve_value()/maxf(1.0,WorldSimulation.state.currency_supply*0.40),0.0,1.0) if WorldSimulation.state.economy_stage==STAGE_CURRENCY else 0.5
 	var volatility:=float(WorldSimulation.state.economy_metrics.get("market_volatility",0.0)) if market_volatility<0.0 else market_volatility
 	return clampf(legitimacy*0.36+institutions*0.30+market_access*0.18+backing*0.16-clampf(volatility*1.8,0.0,0.14),0.0,1.0)
+
+## The rules read the last 30 entries of economy_history (_market_volatility,
+## market_trend) and the Wealth page the last 12. Past this many entries, only
+## the fields the finance chart (strategic_history.gd) and the output trend
+## (hud/home_plain.gd) read are kept: the day's prices and accounts go, so two
+## years of records stay small in saves.
+const HISTORY_DETAIL_ENTRIES:=60
+const HISTORY_KEPT_FIELDS:=["day","stage","price_index","treasury","currency_hoards","metal_circulation","output_per_capita"]
+
+static func slim_history_entry(entry:Dictionary)->Dictionary:
+	if entry.size()<=HISTORY_KEPT_FIELDS.size():return entry
+	var kept:Dictionary={}
+	for field:String in HISTORY_KEPT_FIELDS:
+		if entry.has(field):kept[field]=entry[field]
+	return kept
+
+## Slims every entry already past the detail window (an older save's history).
+static func slim_history(history:Array)->void:
+	for index in maxi(0,history.size()-HISTORY_DETAIL_ENTRIES):
+		if history[index] is Dictionary:history[index]=slim_history_entry(history[index])
 
 func _market_volatility(current_index:float,lookback_days:int=30)->float:
 	var samples:Array[float]=[]
