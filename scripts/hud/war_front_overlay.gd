@@ -142,6 +142,8 @@ var drawn_marks:Array=[]
 ## The counters drawn this pass, and the town cards they keep clear of.
 var counter_rects:Array[Rect2]=[]
 var counter_obstacles:Array[Rect2]=[]
+## Where counters may stand: inside the chart, clear of the HUD's bars.
+var counter_bounds:=Rect2()
 ## Captions requested by the last drawing, and their placement memory.
 var caption_requests:Array=[]
 var caption_memory:Dictionary={}
@@ -2067,8 +2069,12 @@ func _draw_marks(band:String,echelons_drawn:Array,battles:Array)->void:
 	counter_rects.clear()
 	counter_obstacles.clear()
 	if _counters(band):
+		counter_bounds=Rect2(Vector2(90,100),(size-Vector2(110,170)).max(Vector2(100,100)))
 		var cities:=_city_labels()
-		if cities!=null and cities.has_method("chart_obstacles"): counter_obstacles.append_array((cities.chart_obstacles() as Dictionary).get("rects",[]))
+		if cities!=null and cities.has_method("chart_obstacles"):
+			var chart:Dictionary=cities.chart_obstacles()
+			counter_obstacles.append_array(chart.get("rects",[]))
+			if (chart.get("bounds",Rect2()) as Rect2).has_area(): counter_bounds=chart.bounds
 	var marks:Array=scene.get("marks",[])
 	if marks.is_empty(): return
 	var candidates:Array=[]
@@ -2206,23 +2212,27 @@ func _draw_mark(entry:Dictionary,band:String)->void:
 		hits.append({"kind":"sighting","centre":at,"radius":maxf(12.0,px*0.6),"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"mark":true})
 
 
-## Where a counter's plate stands: just below its spot, or above, beside or
-## further off, whichever first keeps clear of the town cards and of the
-## counters already drawn.
+## Where a counter's plate stands: just below its spot, or above, beside,
+## aslant or further off, whichever first keeps clear of the town cards and
+## the counters already drawn and stays on the chart; when none is clear, the
+## one that covers least.
 func _counter_spot(at:Vector2,plate:Vector2,scale:float)->Vector2:
 	var gap:=7.0*scale
-	var tries:=[Vector2(0.0,plate.y*0.5+gap),Vector2(0.0,-(plate.y*0.5+gap)),Vector2(plate.x*0.5+gap*1.6,0.0),Vector2(-(plate.x*0.5+gap*1.6),0.0),
-		Vector2(0.0,plate.y*1.5+gap*2.0),Vector2(0.0,-(plate.y*1.5+gap*2.0))]
+	var dx:=plate.x*0.5+gap*1.6; var dy:=plate.y*0.5+gap
+	var tries:=[Vector2(0.0,dy),Vector2(0.0,-dy),Vector2(dx,0.0),Vector2(-dx,0.0),Vector2(dx,dy),Vector2(-dx,dy),Vector2(dx,-dy),Vector2(-dx,-dy),
+		Vector2(0.0,plate.y*1.5+gap*2.0),Vector2(0.0,-(plate.y*1.5+gap*2.0)),Vector2(dx*1.6,0.0),Vector2(-dx*1.6,0.0)]
+	var best:Vector2=at+(tries[0] as Vector2); var least:=INF
 	for offset:Vector2 in tries:
 		var box:=Rect2(at+offset-plate*0.5,plate).grow(3.0)
-		var clear:=true
+		var cover:=0.0
+		if counter_bounds.has_area() and not counter_bounds.encloses(box): cover+=1e6
 		for r:Rect2 in counter_obstacles:
-			if box.intersects(r): clear=false; break
-		if clear:
-			for r:Rect2 in counter_rects:
-				if box.intersects(r): clear=false; break
-		if clear: return at+offset
-	return at+tries[0]
+			if box.intersects(r): cover+=box.intersection(r).get_area()
+		for r:Rect2 in counter_rects:
+			if box.intersects(r): cover+=box.intersection(r).get_area()*2.0
+		if cover<=0.0: return at+offset
+		if cover<least: least=cover; best=at+offset
+	return best
 
 ## The point on a plate's edge nearest a spot (where its tie line meets it).
 static func _edge_toward(rect:Rect2,spot:Vector2)->Vector2:
