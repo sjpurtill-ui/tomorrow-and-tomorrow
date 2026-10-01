@@ -32,14 +32,13 @@ const Kit:=preload("res://scripts/armor_equipment.gd")
 ## best of them our people can train and arm.
 const LINE_BRANCHES:=["force_generation","heavy_infantry","missile_infantry"]
 
-## The levels, smallest first: {id, share, early (words before numbers were
-## kept), modern}.
+## The levels, smallest first: {id, share}. Said as plain shares ("3%").
 const LEVELS:=[
-	{"id":"few","share":0.01,"early":"A few of the young","modern":"Volunteers only"},
-	{"id":"some","share":0.03,"early":"Some from every hearth","modern":"Limited service"},
-	{"id":"many","share":0.05,"early":"A levy from every hearth","modern":"Conscription"},
-	{"id":"war","share":0.10,"early":"Every hand that can be spared","modern":"War footing"},
-	{"id":"all","share":0.20,"early":"All who can fight","modern":"Total war"},
+	{"id":"few","share":0.01},
+	{"id":"some","share":0.03},
+	{"id":"many","share":0.05},
+	{"id":"war","share":0.10},
+	{"id":"all","share":0.20},
 ]
 ## The war leader looks at the army's size this often (days).
 const KEEP_EVERY:=5
@@ -56,12 +55,11 @@ static func level(id:String)->Dictionary:
 	return {}
 
 
-## The level's name in the people's words: older words before they keep
-## numbers (EraWords.reckoned), the modern law's name after.
+## The level as a plain share: "3%".
 static func level_name(id:String)->String:
 	var entry:=level(id)
 	if entry.is_empty():return "Not set"
-	return String(entry.modern) if EraWords.stage()=="reckoned" else String(entry.early)
+	return "%d%%" % roundi(float(entry.share)*100.0)
 
 
 ## The people the army is kept to at this level, of `population` people.
@@ -127,7 +125,7 @@ static func keep(mc:Node,day:int,now:=false)->Dictionary:
 		var pick:=kit(mc)
 		var result:Dictionary=HomeOrders.perform({"kind":"levy","count":asked,"recruit":true,"fill":false,"arm_said":true,"unit":String(pick.unit),"item":String(pick.item),"by_law":true})
 		var raised:=int(result.get("raised",0))
-		return {"raised":raised,"released":0,"said":("%d called up to keep %s: they begin their drill." % [raised,level_name(id).to_lower()]) if raised>0 else "Nobody free to call up: every able adult is already serving or away."}
+		return {"raised":raised,"released":0,"said":("%d called up to bring the army to %s of the people. They begin their drill." % [raised,level_name(id)]) if raised>0 else "Nobody free to call up: every able adult is already serving or away."}
 	if have-target>maxi(0,ceili(float(target)*RELEASE_SLACK)):
 		var surplus:=have-target
 		# Those still in drill go home first, the newest orders first: their
@@ -149,7 +147,7 @@ static func keep(mc:Node,day:int,now:=false)->Dictionary:
 		if surplus<=0:return {}
 		var result:Dictionary=mc.demobilize(surplus)
 		var released:=int(result.get("released",0))
-		if released>0:return {"raised":0,"released":released,"said":"%d sent home to their work: the army stood above %s." % [released,level_name(id).to_lower()]}
+		if released>0:return {"raised":0,"released":released,"said":"%d sent home to their work: the army was above %s of the people." % [released,level_name(id)]}
 	return {}
 
 
@@ -183,7 +181,7 @@ static func cover(mc:Node)->String:
 	for entry:Dictionary in LEVELS:
 		if target_men(String(entry.id),population)>=now:
 			mc.set("army_levy_level",String(entry.id))
-			return "The war leader now keeps the army at %s." % level_name(String(entry.id)).to_lower()
+			return "The army is now kept at %s of the people." % level_name(String(entry.id))
 	mc.set("army_levy_level","")
 	return "That is more than any share the war leader keeps: none is kept now, and nobody is sent home on its account."
 

@@ -32,6 +32,7 @@ const Icons:=preload("res://scripts/resource_icons.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Strips:=preload("res://scripts/hud/force_strips.gd")
 const GeneralRecord:=preload("res://scripts/general_record.gd")
+const Forces:=preload("res://scripts/hud/war_forces_model.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -119,12 +120,14 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	_clear(army_box)
 	var panel:=_panel(army_box,"Army")
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",18);column.add_child(head)
-	var serving:=_number(head,EraWords.grouped(int(reading.now)),"under arms")
-	serving.tooltip_text="Everyone under arms: fighters, those in drill, recruits waiting and the hurt."
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",22);column.add_child(head)
+	var serving:=_number(head,EraWords.grouped(int(reading.now)),"soldiers")
+	serving.tooltip_text="Everyone in the army: ready, in drill, waiting or hurt. The watch at home is apart."
 	if int(reading.target)>=0:
-		var gap:=int(reading.gap)
-		_number(head,EraWords.grouped(int(reading.target)),"to keep"+((" · %s more to call up" % EraWords.grouped(gap)) if gap>0 else (" · %s too many" % EraWords.grouped(-gap) if gap<0 else "")))
+		_number(head,EraWords.grouped(int(reading.target)),"target · %s of %s people" % [Law.level_name(String(reading.level)),EraWords.grouped(int(reading.population))])
+	if int(glance.get("watch",0))>0:
+		var watch:=_number(head,EraWords.grouped(int(glance.watch)),"on the watch at home");watch.name="Watch"
+		watch.tooltip_text="Those set to defence work guard the towns. They are not the army: the army size never calls them up or sends them home."
 	if float(glance.armed)<0.999 and int(reading.now)>0:_number(head,"%d%%" % roundi(float(glance.armed)*100.0),"armed")
 	if float(glance.fed)>=0.0:_number(head,"%d%%" % roundi(float(glance.fed)*100.0),"fed in the field")
 	# HOI4's manpower bar: those ready, in drill and waiting, against the
@@ -133,28 +136,62 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	var words:=strength_words(glance,int(reading.now),int(reading.target))
 	bar.tooltip_text=words;column.add_child(bar)
 	column.add_child(_line(words,13,T.INK_MUTED,true))
-	if int(glance.get("watch",0))>0:
-		var watch:=_line("Apart from the army, %s keep the watch at home." % EraWords.grouped(int(glance.watch)),13,T.INK_MUTED,true);watch.name="Watch"
-		watch.tooltip_text="Home defence is not the army: it is kept by those set to defence work, and no share counts it, calls it up or sends it home."
-		column.add_child(watch)
+	# The army's size: a plain share of the people.
 	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",6);column.add_child(pick)
+	var size_word:=_line("Army size",13,T.INK_MUTED);size_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER;pick.add_child(size_word)
 	for entry:Dictionary in Law.LEVELS:
 		var id:=String(entry.id)
 		var button:=Button.new();button.name="Level_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
-		button.text="%s · %d%%" % [Law.level_name(id),roundi(float(entry.share)*100.0)]
+		button.text=Law.level_name(id);button.custom_minimum_size=Vector2(52,0)
 		button.set_pressed_no_signal(id==String(reading.level))
-		button.tooltip_text=Law.cost_words(id,int(reading.population),int(reading.able))+".\nThe war leader calls up, drills and arms them, and sends home any more than that. Every person serving is one fewer at work."
+		button.tooltip_text=Law.cost_words(id,int(reading.population),int(reading.able))
 		button.pressed.connect(func()->void:_choose_level(id))
 		pick.add_child(button)
-	var said:=("Choose how many of our people serve." if String(reading.level)=="" else
-		"%s: %s" % [Law.level_name(String(reading.level)),Law.cost_words(String(reading.level),int(reading.population),int(reading.able))])
-	var line:=_line(said,14,T.INK_MUTED,true);line.tooltip_text="The war leader keeps the army at the share you choose: calling up, drilling and arming, and sending home any surplus."
-	column.add_child(line)
+	if String(reading.level)=="":pick.add_child(_line("Not set: choose one",13,T.INK_MUTED))
+	# Where they come from: every soldier is one fewer at work.
+	var from:=Forces.drawn_from(MilitaryCampaign)
+	if int(from.soldiers)>0:
+		var drawn:=_line("Taken from work: %s of %s workers (1 in %d)." % [EraWords.grouped(int(from.soldiers)),EraWords.grouped(int(from.workers)),int(from.one_in)],13,T.INK_MUTED,true)
+		drawn.name="DrawnFrom";drawn.tooltip_text="Calling people up takes them from every kind of work alike: fields, crafts, building."
+		column.add_child(drawn)
+	column.add_child(_forces_list())
+
+
+## Every soldier where they are: one row per place (Forces.rows).
+func _forces_list()->Control:
+	var box:=VBoxContainer.new();box.name="Forces";box.add_theme_constant_override("separation",4)
+	var rows:=Forces.rows(MilitaryCampaign)
+	if rows.is_empty():
+		box.add_child(_line("No soldiers yet.",13,T.INK_MUTED))
+		return box
+	for row:Dictionary in rows:box.add_child(_force_row(row))
+	return box
+
+
+func _force_row(row:Dictionary)->Control:
+	var panel:=PanelContainer.new();panel.name="Force_%s" % String(row.id).replace(":","_")
+	panel.add_theme_stylebox_override("panel",_skin(T.PAPER,T.RULE,8,0))
+	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",14);panel.add_child(line)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",1);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;line.add_child(words)
+	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",10);words.add_child(top)
+	var title:=_line(String(row.title),14,T.INK);title.add_theme_font_override("font",T.font("ui_strong"));top.add_child(title)
+	var men:=_line(("%s of %s" % [EraWords.grouped(int(row.men)),EraWords.grouped(int(row.full))]) if int(row.full)>int(row.men) else EraWords.grouped(int(row.men)),14,T.INK);top.add_child(men)
+	if String(row.leader)!="":top.add_child(_line("led by %s" % String(row.leader).get_slice(" ",0),13,T.INK_MUTED))
+	var under:=HBoxContainer.new();under.add_theme_constant_override("separation",12);words.add_child(under)
+	if String(row.kit)!="":
+		var kit:=_line(String(row.kit),13,T.INK);kit.name="Kit";under.add_child(kit)
+	if String(row.doing)!="":under.add_child(_line(String(row.doing),13,T.INK_MUTED))
+	if float(row.will)>=0.0 or float(row.fed)>=0.0:
+		var bars:=CommandBars.new();bars.men=int(row.men);bars.full=maxi(int(row.full),int(row.men));bars.will=maxf(0.0,float(row.will));bars.fed=float(row.fed) if float(row.fed)>=0.0 else 1.0
+		bars.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		bars.tooltip_text="Men %d of %d%s%s" % [int(row.men),maxi(int(row.full),int(row.men)),(" · will %d%%" % roundi(float(row.will)*100.0)) if float(row.will)>=0.0 else "",(" · fed %d%%" % roundi(float(row.fed)*100.0)) if float(row.fed)>=0.0 else ""]
+		line.add_child(bars)
+	return panel
 
 
 func _choose_level(id:String)->void:
 	var result:=Law.choose(MilitaryCampaign,id)
-	_say(String(result.get("said",result.get("error",""))) if String(result.get("said",""))!="" else "%s. The war leader will keep the army at that size." % Law.level_name(id))
+	_say(String(result.get("said",result.get("error",""))) if String(result.get("said",""))!="" else "The army is kept at %s of the people." % Law.level_name(id))
 	refresh(true)
 
 
