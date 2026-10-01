@@ -1,5 +1,5 @@
-extends SceneTree
-func _initialize()->void:
+extends Node
+func _ready()->void:
 	call_deferred("verify")
 func verify()->void:
 	assert(OS.get_user_data_dir().ends_with("TomorrowAndTomorrow_ArtifactRecovery_Test"))
@@ -7,8 +7,8 @@ func verify()->void:
 	var rows:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/artifact-recovery-02/reviewed.json"))
 	var manifest:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/prehistoric-art/manifest.json"))
 	var hashes:Dictionary={}
-	var grid:=GridContainer.new();grid.columns=3;grid.position=Vector2(16,16);root.add_child(grid)
-	root.size=Vector2i(1040,740)
+	var grid:=GridContainer.new();grid.columns=3;grid.position=Vector2(16,16);add_child(grid)
+	get_window().size=Vector2i(1040,360*ceili(rows.size()/3.0)+20)
 	for row:Dictionary in rows:
 		var id:=int(row.id)
 		var record:Dictionary=load("res://scripts/prehistoric_artifacts.gd").definition(id)
@@ -26,9 +26,9 @@ func verify()->void:
 		var label:=Label.new();label.text="%04d — %s" % [id,String(record.name).left(36)];column.add_child(label)
 		record["source_id"]="living-maker"
 		assert(art.image_path(record).is_empty())
-	for frame in 4:await process_frame
+	for frame in 4:await get_tree().process_frame
 	if DisplayServer.get_name()!="headless":
 		await RenderingServer.frame_post_draw
-		root.get_texture().get_image().save_png("res://artifacts/artifact-recovery02-in-game.png")
+		get_viewport().get_texture().get_image().save_png("res://artifacts/artifact-recovery02-in-game.png")
 	print("ARTIFACT_RECOVERY02_PASS count=",rows.size()," exact approved textures, distinct provenance, import limits, origin separation")
-	quit()
+	get_tree().quit()

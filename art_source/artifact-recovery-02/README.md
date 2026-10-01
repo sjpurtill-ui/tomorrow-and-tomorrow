@@ -34,6 +34,17 @@ shared-attempt trace, and 1091 does not clearly show the hide-burnishing surface
 Preserve them for specific revisions rather than approving a plausible generic
 object. Other old pending images still need individual review.
 
+Second checkpoint adds 1318 (a crude bent-branch tension experiment) and 1319
+(a leaf impression interrupted by a clay ridge). Headless runtime and actual
+private GPU texture review both PASS count=7. The first GPU startup failed with
+native exit 3221226505 before renderer initialization; a separate retry exited
+0 with no logged errors and the resulting capture was inspected. Capture stays
+local at `artifacts/artifact-recovery02-in-game.png`.
+
+Additional old-image holds: 1129 reads as a pointed hafted implement, with no
+clear reversed scraper edge or travel wrapping; 1131 shows a drilled-looking
+stone hole instead of the required loose root cradle. Neither was approved.
+
 Keep generation in the built-in tool, one image per specimen, with the supplied
 paper/gouache reference as medium only. Every result must depict its specified
 prehistoric material and mechanism. The bank is incomplete. Only the designated
