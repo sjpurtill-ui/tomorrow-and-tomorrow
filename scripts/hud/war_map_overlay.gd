@@ -188,7 +188,7 @@ func collect()->Array[Dictionary]:
 		var tag:=Marks.war_tag(enemy,stage,days) if not feud else "Feud with %s" % enemy
 		var segment:=Marks.border_segment(home,there)
 		out.append({"id":"border:"+civ_id,"kind":"border","points":[_v3(segment[0]),_v3(segment[1])],"tip":"The border with %s. Their men cross here." % enemy,"color":WAR_COLOR,"alpha":1.0})
-		out.append({"id":"war:"+civ_id,"kind":"war","civ_id":civ_id,"points":[_v3(Marks.border_point(home,there))],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
+		out.append({"id":"war:"+civ_id,"kind":"war","points":[_v3(Marks.border_point(home,there))],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
 	# Before writing, strangers under arms are a handful of men, not a counter.
 	if stage=="hearth":
 		for sighting:Dictionary in CivilizationSystem.local_observation_snapshot().get("visible",[]):
@@ -337,8 +337,8 @@ func _ledger_entry(civ_id:String)->Dictionary:
 func _draw_tip(entry:Dictionary)->void:
 	# A feud or war under the pointer: its card from the war ledger (the dead,
 	# how worn each side is, the quiet clock), as on the Feuds page.
-	if String(entry.kind)=="war" and entry.has("civ_id"):
-		var e:=_ledger_entry(String(entry.civ_id))
+	if String(entry.kind)=="war" and String(entry.id).begins_with("war:"):
+		var e:=_ledger_entry(String(entry.id).trim_prefix("war:"))
 		if not e.is_empty():
 			var card:=LedgerMarks.card_size(e,CARD_WIDTH)
 			var at:Vector2=(entry.screen[0] as Vector2)+Vector2(18,18)
