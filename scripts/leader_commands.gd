@@ -233,3 +233,46 @@ static func record(leader:Dictionary)->Dictionary:
 		"men_lost":roundi(float(kept.get("men_lost",0.0))),"enemy_lost":roundi(float(kept.get("enemy_lost",0.0))),
 		"km_day":float(kept.get("march_km",0.0))/march_days if march_days>=1.0 else 0.0,"march_days":roundi(march_days),
 		"hungry_days":roundi(float(kept.get("hungry_days",0.0))),"deserted":roundi(float(kept.get("deserted",0.0))),"field_days":roundi(float(kept.get("field_days",0.0)))}
+
+
+## The generals free to take a band, best first for a band of `men`: each
+## {figure_id, name, commander, levers (general_record.levers against an
+## ordinary general), line (general_record.lever_line), record (words)}.
+## Ranked by battle power, then march pace. For the War screen's shortlist.
+static func shortlist_generals(mc:Variant=null,men:float=0.0,limit:int=3)->Array[Dictionary]:
+	var host:=_mc(mc)
+	var Record:=preload("res://scripts/general_record.gd")
+	var busy:={}
+	for army_variant in host.field_armies:
+		var commander:Dictionary=(army_variant as Dictionary).get("commander",{}) if (army_variant as Dictionary).get("commander") is Dictionary else {}
+		if String(commander.get("figure_id",""))!="": busy[String(commander.figure_id)]=true
+	var out:Array[Dictionary]=[]
+	for leader:Dictionary in leaders(host):
+		if String(leader.id)==WAR_LEADER or String(leader.get("status",""))!="living" or busy.has(String(leader.id)): continue
+		var commander:Dictionary=leader.get("commander",{})
+		var levers:=Record.levers(commander,Record.ORDINARY,men)
+		out.append({"figure_id":String(leader.id),"name":String(leader.name),"commander":commander,"levers":levers,
+			"line":Record.lever_line(commander,String(leader.name),men),"record":Record.words(record(leader))})
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+		var fa:=float(a.levers.fight); var fb:=float(b.levers.fight)
+		if absf(fa-fb)>0.0001: return fa>fb
+		return float(a.levers.pace)>float(b.levers.pace))
+	if out.size()>limit: out.resize(limit)
+	return out
+
+
+## Brings a general forward when none is free to lead (HistoricalFigures:
+## their own skills, drawn from their own seed), within the roster's limit
+## of living figures. {ok, figure_id, name, line} or {error}. A free general
+## already waiting is named instead of a new one.
+static func commission_general(mc:Variant=null)->Dictionary:
+	var host:=_mc(mc)
+	var figures:=_figures()
+	if figures==null: return {"error":"No leaders are known yet."}
+	var free:=shortlist_generals(host,0.0,1)
+	if not free.is_empty(): return {"ok":true,"figure_id":String(free[0].figure_id),"name":String(free[0].name),"line":String(free[0].line),"new":false}
+	figures.ensure()
+	var made:Dictionary=figures._create("General",int(WorldSimulation.state.elapsed_days))
+	if made.is_empty(): return {"error":"Our people can raise no more leaders of renown now: %d of them live already." % figures.MAX_LIVING}
+	var commander:Dictionary=_commander_of(host,String(made.id))
+	return {"ok":true,"figure_id":String(made.id),"name":String(made.name),"line":preload("res://scripts/general_record.gd").lever_line(commander,String(made.name)),"new":true}

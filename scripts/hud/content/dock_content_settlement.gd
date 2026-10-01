@@ -171,6 +171,12 @@ func _overview_blocks(settlement:Dictionary)->Array:
 	else:
 		direction="You asked %s for more hands on %s." % [leader_name if not leader_name.is_empty() else "the local leader",String(FOCUS_WORDS.get(focus,focus))]
 		direction_tip=String(management.get("focus_effect",""))
+	# The leader's own hand on the town's work, in the engine's numbers
+	# (office_levers.gd town_labour: the labour lever, x0.95 to x1.06).
+	if not leader.is_empty() and not occupied:
+		var hand:=preload("res://scripts/office_levers.gd").town_labour(GovernmentPeopleSystem.person_snapshot(int(leader.get("person_id",0))))
+		var size:=roundi(absf(hand-1.0)*100.0)
+		direction_tip=(direction_tip+"\n" if direction_tip!="" else "")+("Under %s this town gets %d%% %s work done than under an ordinary leader." % [leader_name,size,"more" if hand>=1.0 else "less"] if size>0 else "%s runs the town's work as an ordinary leader would." % leader_name)
 	var choices:Array=[]
 	for key:String in ASKABLE:
 		choices.append({"id":key,"label":String(FOCUS_WORDS[key]).capitalize(),"tip":String(GovernmentPeopleSystem.FOCUS_EFFECTS.get(key,""))+" Other work slows.","on_press":_ask_for_hands.bind(id,key)})

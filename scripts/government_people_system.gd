@@ -136,6 +136,10 @@ var last_processed_month:=-1
 var government_stage:=0
 var revision:=0
 var initializing:=false
+## True while a new world's first council is seated (initialize with no
+## people yet): the founders take their places as the hearth chose them;
+## every later succession follows the stated rule (succession_rule).
+var _founding:=false
 
 
 func reset_for_new_world()->void:
@@ -156,6 +160,7 @@ func initialize(reconcile_stage:bool=true)->void:
 	# begins. Earlier builds allowed abstract institutional capacity to create a
 	# modern-sized cabinet in a settlement of 120 people; this also migrates those
 	# worlds back to a government their actual civic scale can support.
+	_founding=people.is_empty()
 	if people.is_empty():
 		_update_government_stage(false)
 	elif reconcile_stage and _stage_from_conditions()<government_stage:
@@ -164,6 +169,7 @@ func initialize(reconcile_stage:bool=true)->void:
 		_update_government_stage(false)
 	_ensure_pool()
 	_synchronize_office_holders()
+	_founding=false
 	_ensure_local_leaders()
 	_sync_advisor_roster()
 	initializing=false
@@ -1010,7 +1016,19 @@ func _synchronize_office_holders(events:Array[Dictionary]=[],record_events:bool=
 ## and central duty may overlap in a small polity, as the founding Steward
 ## shows. The candidate carries "succession_rule" ("kin" or "ablest").
 func _automatic_successor(office_key:String,excluded_person_id:int=0,predecessor_id:int=0)->Dictionary:
+	# Read the candidates without reconciling the government first: that would
+	# fill the very office being decided here by a second, nested choice.
+	var was:=initializing
+	initializing=true
 	var candidates:=candidates_for_office(office_key,"",MAX_GOVERNMENT_PEOPLE,false)
+	initializing=was
+	if _founding:
+		# The founders' places, as the hearth chose them (a stable seed order).
+		for candidate in candidates:
+			if int(candidate.get("person_id",0))!=excluded_person_id and String(candidate.get("office_key",""))=="": return candidate.merged({"succession_rule":"founding"})
+		for candidate in candidates:
+			if int(candidate.get("person_id",0))!=excluded_person_id: return candidate.merged({"succession_rule":"founding"})
+		return {}
 	if succession_rule()=="kin" and predecessor_id>0:
 		var heir:=_eldest_able_kin(predecessor_id,office_key,candidates,excluded_person_id)
 		if not heir.is_empty():

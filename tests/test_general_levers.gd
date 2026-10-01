@@ -245,3 +245,22 @@ func test_generals_differ_from_one_another()->void:
 			if best=="" or float(skills[key])>float(skills[best]): best=String(key)
 		seen["%s:%d" % [best,roundi(float(skills[best])*20.0)]]=true
 	assert_int(seen.size()).is_greater(1)
+
+
+func test_the_war_screen_can_shortlist_and_commission_generals()->void:
+	HistoricalFigures.ensure()
+	var free:=Commands.shortlist_generals(MilitaryCampaign,300.0,5)
+	assert_bool(free.is_empty()).is_false()
+	for i in range(1,free.size()): assert_float(float(free[i-1].levers.fight)).is_greater_equal(float(free[i].levers.fight))
+	for row:Dictionary in free:
+		assert_str(String(row.line)).contains("than under an ordinary general")
+		assert_str(String(row.record)).is_not_empty()
+	# A general leading a band is not free.
+	var first:Dictionary=free[0]
+	MilitaryCampaign.field_armies.append(_band(9,200,HistoricalFigures.commander_record(HistoricalFigures.by_id(String(first.figure_id)),MilitaryCampaign._acting_field_commander(false))))
+	for row:Dictionary in Commands.shortlist_generals(MilitaryCampaign,300.0,5): assert_str(String(row.figure_id)).is_not_equal(String(first.figure_id))
+	# Commissioning names a free general first, and brings one forward only when none is free.
+	var named:=Commands.commission_general(MilitaryCampaign)
+	assert_bool(bool(named.ok)).is_true()
+	assert_bool(bool(named.new)).is_false()
+	MilitaryCampaign.field_armies.clear()
