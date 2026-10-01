@@ -251,13 +251,18 @@ func test_army_bar_has_one_card_per_force_with_the_ledgers_numbers()->void:
 	var army_b:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(b)]
 	army_b["morale"]=0.2
 	army_b["hungry_days"]=5.0;army_b["provision_ratio"]=0.4
+	# One card per command: both new bands serve under the war leader at home
+	# until put under a general (leader_commands.gd), each band's numbers
+	# inside the command's card.
 	var cards:=BarModel.cards()
-	assert_int(cards.size()).is_equal(3)
+	assert_int(cards.size()).is_equal(2)
 	assert_str(String(cards[0].kind)).is_equal("home")
 	assert_int(int(cards[0].men)).is_equal(int(MilitaryCampaign.home_army.troops))
 	var by_army:={}
 	for card:Dictionary in cards:
 		if String(card.kind)=="army":by_army[int(card.army_id)]=card
+		elif String(card.kind)=="group":
+			for member:Dictionary in card.member_cards:by_army[int(member.army_id)]=member
 	assert_int(int(by_army[a].men)).is_equal(30)
 	assert_int(int(by_army[b].men)).is_equal(20)
 	assert_float(float(by_army[b].will)).is_equal_approx(0.2,0.001)

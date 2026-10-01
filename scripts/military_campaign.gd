@@ -1083,7 +1083,10 @@ func _assemble_field_army(detached:Array[Dictionary],custom_name:String="")->Dic
 	force["departure_day"]=-1
 	force["arrival_day"]=-1
 	force["supply_level"]=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
-	force["commander"]=WorldSimulation.figures.commander(_acting_field_commander(false),"army_%d" % army_id)
+	# A new band serves under the war leader at home until the ruler puts it
+	# under a general (leader_commands.gd): generals are few, and each leads a
+	# command of bands, not one band apiece.
+	force["commander"]=(home_army.get("commander",{}) as Dictionary).duplicate(true) if home_army.get("commander") is Dictionary and not (home_army.commander as Dictionary).is_empty() else _marshal_commander()
 	force["visual_theme"]=String(home_army.get("visual_theme","equipment"))
 	# Runners carry the army's reports home; without them (and before signal-era
 	# development) the government would know nothing of a distant force.

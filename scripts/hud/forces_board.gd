@@ -250,8 +250,16 @@ func _shape(shown:Array)->String:
 	var parts:Array=[wide,filter]
 	for row:Dictionary in shown:
 		parts.append([row.id,row.kind,row.get("unknown",false)])
-		for band:Dictionary in row.get("bands",[]):parts.append(band.id)
+		for band:Dictionary in _bands_shown(row):parts.append(band.id)
 	return str(parts)
+
+
+## A command's bands under its row: all of them, or under a filter only the
+## bands it picks (the command's row stands over them).
+func _bands_shown(row:Dictionary)->Array:
+	var bands:Array=row.get("bands",[])
+	if filter=="all":return bands
+	return bands.filter(func(band:Dictionary)->bool:return Model.passes(band,filter))
 
 
 func _rebuild(shown:Array)->void:
@@ -265,7 +273,7 @@ func _rebuild(shown:Array)->void:
 		return
 	for row:Dictionary in shown:
 		_row(row,0)
-		for band:Dictionary in row.get("bands",[]):_row(band,1)
+		for band:Dictionary in _bands_shown(row):_row(band,1)
 	_update_values(shown)
 
 
