@@ -222,13 +222,16 @@ func test_train_ten_levies_drills_those_waiting_and_calls_up_the_rest()->void:
 
 
 ## The days said are the drill's real pace: the instructors' pace for all in
-## drill, and a quarter of it for a spear levy with no spears in hand.
+## drill with their weapons in hand, and a quarter of it for a spear levy
+## whose spears cannot be made.
 func test_the_court_says_how_long_the_drill_really_takes()->void:
+	# Their weapons in store: the armed pace from the first day.
+	for item in ["spear","improvised"]:MilitaryCampaign.military_inventory[item]=40
 	var armed:=HomeOrders.perform(HomeOrders.read("Recruit 4 levies"))
 	var order:Dictionary=MilitaryCampaign.training_queue.back()
 	var pace:=HomeOrders._drill_pace(MilitaryCampaign,String(order.weapon),1.0)
 	assert_float(pace).is_greater(0.0)
-	assert_str(String(armed.says)).contains("about %d days before they are fit to fight" % ceili(float(order.required_days)/pace))
+	assert_str(String(armed.says)).contains("about %d days before they are fit to fight." % ceili(float(order.required_days)/pace))
 	# No spears, and none can be made: the slower drill, said plainly.
 	MilitaryCampaign.training_queue.clear();MilitaryCampaign.equipment_queue.clear()
 	GameState.resource_stockpiles["Timber"]=0.0;GameState.resource_stockpiles["Stone"]=0.0
@@ -395,20 +398,143 @@ func test_nobody_free_is_said_with_the_numbers()->void:
 	assert_str(String(done.outcome)).starts_with("Nothing is set in motion")
 
 
-## Too little wood for all their spears at once is no reason to make none: a
-## workshop line makes them as the stores fill, and the court says so.
-func test_weapons_short_of_wood_go_to_a_line_not_nowhere()->void:
+## The days the court says are the engine's own (levy_forecast.gd). In year
+## 183 the court said the drill took 468 days (as if no spear would ever be
+## made) and that the spears could not be made, though the workshops made all
+## 20 within 9 days and the drill ended in about 120. Here the engine's own
+## daily workshop and drill steps run until the levy is fit to fight: the day
+## the last weapon is in hand and the day the drill ends must be the days the
+## court said.
+const WEAPONS_SAID:="All (\\d+) are in hand in about (\\d+) days?"
+const DRILL_SAID:="about (\\d+) days? before they are fit to fight"
+
+func _said(says:String,pattern:String,group:int)->int:
+	var m:=RegEx.create_from_string(pattern).search(says)
+	return int(m.get_string(group)) if m!=null else -1
+
+## The engine's own days for the levy `training_id`: each day the town's own
+## deliveries (the deposits' delivered_today), then the workshops and the
+## drill exactly as the military day runs them. {weapons_day, drill_day}.
+func _run_days(training_id:int,weapon:String,need:int,limit:int=400,trade:bool=false)->Dictionary:
+	var out:={"weapons_day":-1,"drill_day":-1}
+	if int(MilitaryCampaign.military_inventory.get(weapon,0))>=need:out.weapons_day=0
+	for day in range(1,limit+1):
+		GameState.elapsed_days+=1
+		for deposit in GameState.resource_deposits:
+			var m:=String((deposit as Dictionary).get("resource",""))
+			GameState.resource_stockpiles[m]=float(GameState.resource_stockpiles.get(m,0.0))+float((deposit as Dictionary).get("delivered_today",0.0))
+		# Our other towns' deliveries, by the engine's own city trade.
+		if trade:SettlementModel.process_city_trade()
+		MilitaryCampaign._process_equipment_production_day()
+		MilitaryCampaign._process_training_day()
+		if int(out.weapons_day)<0 and int(MilitaryCampaign.military_inventory.get(weapon,0))>=need:out.weapons_day=day
+		var drilling:=false
+		for order:Dictionary in MilitaryCampaign.training_queue:
+			if int(order.get("id",-1))==training_id:drilling=true
+		if not drilling:
+			out.drill_day=day
+			return out
+	return out
+
+func _levy_world(timber:float)->void:
 	MilitaryCampaign.equipment_queue.clear()
+	MilitaryCampaign.training_queue.clear();MilitaryCampaign.aggregate_recruits=0
 	for item in ["spear","improvised"]:MilitaryCampaign.military_inventory[item]=0
-	GameState.resource_stockpiles["Timber"]=3.0
+	GameState.resource_stockpiles["Timber"]=timber
+	for deposit in GameState.resource_deposits:(deposit as Dictionary)["delivered_today"]=0.0
+
+## Wood enough: the workshops make the weapons in a batch, and the court's days
+## are the days the engine takes.
+func test_the_courts_days_are_the_engines_days_when_the_workshops_make_them()->void:
+	_levy_world(300.0)
 	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
 	assert_bool(bool(done.ok)).is_true()
-	var weapon:=String(MilitaryCampaign.training_queue.back().weapon)
-	var line:={}
-	for job:Dictionary in MilitaryCampaign.equipment_queue:
-		if String(job.get("item",""))==weapon and bool(job.get("persistent",false)):line=job
-	assert_bool(line.is_empty()).override_failure_message("no workshop line makes their %s: %s" % [weapon,String(done.says)]).is_false()
-	var timber:=ceili(float((MilitaryCampaign._equipment_recipe(weapon).materials as Dictionary).get("Timber",0.0))*20)
-	assert_str(String(done.says)).contains("a workshop line is set to make them one by one as the stores fill")
-	assert_str(String(done.says)).contains("only 3 of the %d Timber" % timber)
-	assert_str(String(done.says)).contains("once their %s are in hand" % String(HomeOrders.ITEM_NAMES.get(weapon,weapon)))
+	var says:=String(done.says)
+	assert_str(says).not_contains("cannot make")
+	var order:Dictionary=MilitaryCampaign.training_queue.back()
+	var weapon:=String(order.weapon)
+	var need:int=MilitaryCampaign._equipment_required_for(String(order.unit),int(order.count))
+	var weapons_said:=_said(says,WEAPONS_SAID,2)
+	var drill_said:=_said(says,DRILL_SAID,1)
+	assert_int(weapons_said).override_failure_message("no day for the weapons in: "+says).is_greater(0)
+	assert_int(drill_said).override_failure_message("no drill days in: "+says).is_greater(0)
+	assert_int(int(done.weapons_day)).is_equal(weapons_said)
+	assert_int(int(done.drill_days)).is_equal(drill_said)
+	var real:=_run_days(int(order.id),weapon,need)
+	assert_int(int(real.weapons_day)).override_failure_message("the court said %d days for the %s, the engine took %d" % [weapons_said,weapon,int(real.weapons_day)]).is_equal(weapons_said)
+	assert_int(int(real.drill_day)).override_failure_message("the court said %d days of drill, the engine took %d" % [drill_said,int(real.drill_day)]).is_equal(drill_said)
+
+## Too little wood for all of them at once, as in year 183: a workshop line
+## makes them as the wood comes in, at the rate the engine makes them, never
+## "cannot be made"; and the drill counts the weapons as they come.
+func test_short_of_wood_the_line_makes_them_at_the_engines_rate()->void:
+	_levy_world(3.0)
+	var stand:Dictionary={}
+	for deposit in GameState.resource_deposits:
+		if String((deposit as Dictionary).get("resource",""))=="Timber":stand=deposit;break
+	if stand.is_empty():
+		stand={"id":"test_stand","resource":"Timber","stage":"developed","remaining":500.0,"initial_amount":800.0,"position":Vector3(2.0,0.0,1.0),"quality":0.8,"shipments":[],"stock_at_source":0.0}
+		GameState.resource_deposits.append(stand)
+	# Our own cutters bring in one load of wood a day.
+	stand["delivered_today"]=1.0
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	assert_bool(bool(done.ok)).is_true()
+	var says:=String(done.says)
+	assert_str(says).not_contains("cannot make")
+	assert_str(says).contains("a workshop line is set to make them")
+	assert_str(says).contains("It makes them as the timber comes in")
+	assert_str(says).contains("slower at first until their")
+	var order:Dictionary=MilitaryCampaign.training_queue.back()
+	var weapon:=String(order.weapon)
+	var need:int=MilitaryCampaign._equipment_required_for(String(order.unit),int(order.count))
+	var weapons_said:=_said(says,WEAPONS_SAID,2)
+	var drill_said:=_said(says,DRILL_SAID,1)
+	assert_int(weapons_said).override_failure_message("no day for the weapons in: "+says).is_greater(1)
+	var per:=float((MilitaryCampaign._equipment_recipe(weapon).materials as Dictionary).get("Timber",1.0))
+	assert_str(says).contains("the store holds timber for %d of them now" % floori(3.0/per+0.000001))
+	var real:=_run_days(int(order.id),weapon,need)
+	assert_int(int(real.weapons_day)).override_failure_message("the court said %d days for the %s, the engine took %d" % [weapons_said,weapon,int(real.weapons_day)]).is_equal(weapons_said)
+	assert_int(int(real.drill_day)).override_failure_message("the court said %d days of drill, the engine took %d" % [drill_said,int(real.drill_day)]).is_equal(drill_said)
+	# Counting the weapons as they come: no shorter than the armed pace, far
+	# shorter than a drill that never gets them.
+	var full:=HomeOrders._drill_pace(MilitaryCampaign,weapon,1.0)
+	var bare:=HomeOrders._drill_pace(MilitaryCampaign,weapon,0.0)
+	assert_int(drill_said).is_greater_equal(ceili(float(order.required_days)/full))
+	assert_int(drill_said).is_less(ceili(float(order.required_days)/bare))
+
+## The order's card says the same days as the court, from the same forecast.
+func test_the_card_says_the_courts_days()->void:
+	_levy_world(300.0)
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	var card:=preload("res://scripts/order_probes.gd").read({"kind":"levy","refs":{"training_id":int(done.training_id),"asked":20,"raised":20}})
+	assert_str(String(card.line)).contains("fit in about %d days" % int(done.drill_days))
+
+
+## Short of wood with another town that has plenty, as in year 183 (Sean
+## Springs held 2 timber, Dawngate 393): our other town sends wood when the
+## store runs short, the line makes the weapons as it comes, and the court's
+## days are the days the engine takes, its own city trade included.
+func test_short_of_wood_our_other_towns_send_it_at_the_engines_pace()->void:
+	_levy_world(3.0)
+	var home:Vector2=CivilizationSystem.player_world_origin
+	var there:=home+Vector2(24.0,0.0)
+	GameState.player_settlements.append({"id":"dawngate","name":"Dawngate","primary":false,"position":there,"population_share":0.25,"founded_day":0})
+	CivilizationSystem.record_player_travel(there)
+	SettlementModel.with_city_resources("dawngate",func()->void:GameState.resource_stockpiles["Timber"]=300.0)
+	GameState.society_capacities["logistics"]=0.8
+	GameState.society_capacities["institutions"]=0.8
+	GameState.last_city_trade_day=int(GameState.elapsed_days)
+	var done:=HomeOrders.perform(HomeOrders.read(PLAYER_SOLDIERS))
+	assert_bool(bool(done.ok)).is_true()
+	var says:=String(done.says)
+	assert_str(says).not_contains("cannot make")
+	assert_str(says).contains("our other towns send more when it runs short")
+	var order:Dictionary=MilitaryCampaign.training_queue.back()
+	var weapon:=String(order.weapon)
+	var need:int=MilitaryCampaign._equipment_required_for(String(order.unit),int(order.count))
+	var weapons_said:=_said(says,WEAPONS_SAID,2)
+	var drill_said:=_said(says,DRILL_SAID,1)
+	assert_int(weapons_said).override_failure_message("no day for the weapons in: "+says).is_greater(1)
+	var real:=_run_days(int(order.id),weapon,need,400,true)
+	assert_int(int(real.weapons_day)).override_failure_message("the court said %d days for the %s, the engine took %d: %s" % [weapons_said,weapon,int(real.weapons_day),says]).is_equal(weapons_said)
+	assert_int(int(real.drill_day)).override_failure_message("the court said %d days of drill, the engine took %d" % [drill_said,int(real.drill_day)]).is_equal(drill_said)

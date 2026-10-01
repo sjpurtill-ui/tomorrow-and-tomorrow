@@ -188,7 +188,7 @@ func test_a_levy_card_goes_called_up_then_drilling_then_done()->void:
 	var card:=Tracker.find(id)
 	assert_str(String(card.kind)).is_equal("levy")
 	assert_str(String(card.state)).is_equal("accepted")
-	assert_str(String(card.line)).starts_with("20 in drill · 0 of")
+	assert_str(String(card.line)).starts_with("20 in drill · fit in about")
 	assert_int(int(card.total)).is_greater(0)
 	_advance(2)
 	Tracker.update()

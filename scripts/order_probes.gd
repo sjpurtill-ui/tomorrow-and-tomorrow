@@ -82,10 +82,15 @@ static func _levy(refs:Dictionary)->Dictionary:
 	var weapon:=String(order.get("weapon","improvised"))
 	var need:int=mc._equipment_required_for(String(order.get("unit","levy")),count)
 	var have:=mini(need,int(order.get("reserved_equipment",0))+int((mc.military_inventory as Dictionary).get(weapon,0)))
-	var line:="%d in drill · %d of %d days" % [count,floori(days),ceili(required)]
+	# The days left, as the court said them: the engine's own days run
+	# forward with the weapons the workshops will make (levy_forecast.gd).
+	var plan:=preload("res://scripts/levy_forecast.gd").levy(tid)
+	var left:=int(plan.get("days",-1))
+	var when:=("fit in about %d days" % left) if left>1 else ("fit tomorrow" if left==1 else "drill stands still")
+	var line:="%d in drill · %s" % [count,when]
 	if have<need:line+=" · %s %d of %d" % [_arms(weapon),have,need]
 	# Fewer could be called up than were asked for: said first, compactly.
-	if asked>0 and raised>0 and raised<asked:line="%d of %d called up · drill %d/%d days%s" % [raised,asked,floori(days),ceili(required)," · %s %d/%d" % [_arms(weapon),have,need] if have<need else ""]
+	if asked>0 and raised>0 and raised<asked:line="%d of %d called up · %s%s" % [raised,asked,when," · %s %d/%d" % [_arms(weapon),have,need] if have<need else ""]
 	var reason:=_drill_halt(mc)
 	if reason=="" and days<=0.0:reason="their drill has not begun"
 	var state:="under_way" if days>0.0 else "accepted"

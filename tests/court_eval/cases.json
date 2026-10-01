@@ -686,7 +686,7 @@
    "note": "Year 183: the player typed 'raise 20 soldiers' and saw nothing happen. Every plain way of asking for soldiers calls them up and starts their drill; none is a standing order, a march or talk.",
    "say": "raise 20 soldiers",
    "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 20}, "confidence": 0.9},
-   "expect": {"handled": true, "state": {"training": ">before", "modifiers": "==before"}},
+   "expect": {"handled": true, "state": {"training": ">before", "modifiers": "==before"}, "says_has": ["before they are fit to fight", "are in hand in about"], "says_lacks": ["cannot make"]},
    "variants": ["I want 20 soldiers", "Give me 20 warriors", "I need 20 fighters", "Train 20 soldiers", "We need twenty soldiers", "Give me 20 men"]},
 
   {"id": "home.rations", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
