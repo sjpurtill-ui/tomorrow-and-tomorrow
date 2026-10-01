@@ -178,7 +178,7 @@ func test_a_garrison_is_refilled()->void:
 	MilitaryCampaign.army_levy_level="war"
 	var garrison:Dictionary=MilitaryCampaign.simulator.create_formation_force("OCCUPATION • Tsaren",[_formation(21,"levy","improvised",10,20)],0.8,0.8)
 	var town:=_home()+Vector2(20.0,0.0)
-	garrison.merge({"civ_id":"rival","region_id":"tsaren","region_name":"Tsaren","required":4.0,"supply_level":1.0,"provision_ratio":1.0,"position":{"x":town.x,"z":town.y},"commander":MilitaryCampaign._garrison_captain(MilitaryCampaign.simulator.create_commander("Rovik",0.6,0.5,0.5,0.5))},true)
+	garrison.merge({"civ_id":"rival","region_id":"tsaren","region_name":"Tsaren","required":4.0,"supply_level":1.0,"provision_ratio":1.0,"position":{"x":town.x,"z":town.y},"commander":MilitaryCampaign._garrison_captain()},true)
 	MilitaryCampaign.occupation_forces.assign([garrison])
 	var started:Array=MilitaryCampaign.sustainment.draft_day()
 	assert_int(started.size()).is_equal(1)
@@ -376,12 +376,13 @@ func test_a_garrison_takes_only_what_its_town_needs_and_leaves_no_army_of_nobody
 	var need:=Hold.need(10.0,1.0,0.9)
 	assert_int(int(garrison.troops)).is_equal(need)
 	assert_bool(need<40).is_true()
-	# The rest stay a band under their general; the garrison's captain is not
-	# a second copy of him.
+	# The rest stay a band under their general; the garrison serves under the
+	# war leader, not under a second copy of the general.
 	var left:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(8)]
 	assert_int(int(left.troops)).is_equal(40-need)
 	assert_str(String((left.commander as Dictionary).get("figure_id",""))).is_equal("figure_3")
-	assert_str(String((garrison.commander as Dictionary).get("figure_id",""))).is_equal("")
+	assert_str(String((garrison.commander as Dictionary).get("figure_id",""))).is_not_equal("figure_3")
+	assert_str(String((garrison.commander as Dictionary).get("name",""))).is_equal(String((MilitaryCampaign.home_army.commander as Dictionary).get("name","")))
 	assert_bool(Hold.holds(MilitaryCampaign.occupation_forces[0],10.0)).is_true()
 	# A town that needs every man: the band becomes its garrison, general and
 	# all, and no band of nobody is left behind.

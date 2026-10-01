@@ -831,21 +831,20 @@ func establish_occupation_force(civ_id:String,region:Dictionary,required:float,s
 			if figure!="" and WorldSimulation.figures.get("assignments") is Dictionary: WorldSimulation.figures.assignments["occupation_%s" % region_id]=figure
 		force["from_army_id"]=source_field_army_id
 	else:
-		force["commander"]=_garrison_captain(source_commander) if source_index>=0 else source_commander
+		force["commander"]=_garrison_captain() if source_index>=0 else source_commander
 	occupation_forces.append(force)
 	_refresh_readiness()
 	army_changed.emit(home_army.duplicate(true))
 	return force.duplicate(true)
 
 
-## The captain a general leaves to hold a town: their skills, not their
-## name nor their place. The general stays with the band.
-static func _garrison_captain(general:Dictionary)->Dictionary:
-	var captain:=general.duplicate(true)
-	captain.erase("figure_id")
-	captain["name"]="GARRISON CAPTAIN"
-	captain["institutional"]=true
-	return captain
+## Who leads the men a general leaves to hold a town: the war leader, as for
+## every force of ours without a named general (a new band serves under him
+## the same way). The general stays with his band: one man is not in two
+## places.
+func _garrison_captain()->Dictionary:
+	var leader:Dictionary=home_army.get("commander",{}) if home_army.get("commander") is Dictionary else {}
+	return leader.duplicate(true) if not leader.is_empty() else _marshal_commander()
 
 
 func _detach_field_army_formations(army_id:int,requested:int)->Array[Dictionary]:
