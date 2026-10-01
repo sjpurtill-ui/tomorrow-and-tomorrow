@@ -12,7 +12,11 @@ extends RefCounted
 ##   record     the battle record steps through without being fought again
 ##              and says what the report says
 ##   panel      the battle panel's view model (hud/battle_view.gd list_now,
-##              battle_record.gd view) agrees with the engine each day
+##              battle_record.gd view) agrees with the engine each day; the
+##              battle screen draws the engine's own blocks day by day (men,
+##              where they stand, broken, fled), and its strength bars,
+##              balance, days, arrows and era mark agree with the engine and
+##              the map
 ##   marker     the map's battle marks (hud/battle_marker_source.gd through
 ##              the war chart's own collect) agree with the engine and panel
 ##   aftermath  captives and spoils are settled by the general and never
@@ -41,6 +45,7 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const Ledger:=preload("res://scripts/town_ledger.gd")
 const FieldRations:=preload("res://scripts/field_rations.gd")
+const BattleMarks:=preload("res://scripts/hud/battle_marks.gd")
 
 const WORLD_SEED:=74017
 const DAY0:=88*365
@@ -587,6 +592,7 @@ func _observe_one(e:Dictionary,listed:Array,marks:Array,clashes:Array,view:Dicti
 				var words:=String(panel.call("_battle_day_words"))
 				var said:=words.trim_prefix("Day ").trim_suffix(" of the battle")
 				_check(said==_number_word(int(m.get("day",0))) or said==str(int(m.get("day",0))),"timing","battle %s: the panel says '%s', the map day %d" % [id,words,int(m.get("day",0))])
+				_check_live_screen(panel,e,m,ours,progress)
 				View.close_open(suite)
 	# Its clash on the war chart (the worm and arrows): once.
 	var seed:=int(e.get("seed",0))
@@ -844,7 +850,7 @@ func check_finished(record:Dictionary,trace:Dictionary={},opts:Dictionary={})->D
 	for pair in [["killed","killed"],["wounded","wounded"],["fled","fled"],["captured","captured"]]:
 		_check(int(left.get(pair[0],-1))==int(a.get(pair[1],0)),"record","%s: the battle view says %d of ours %s, the report %d" % [label,int(left.get(pair[0],-1)),String(pair[0]),int(a.get(pair[1],0))])
 	_check(int(right.get("captured",-1))==int((account.theirs as Dictionary).taken),"record","%s: the battle view says %d of theirs taken, the report %d" % [label,int(right.get("captured",-1)),int((account.theirs as Dictionary).taken)])
-	_check_panel_captives(id,int((account.theirs as Dictionary).taken),label)
+	_check_screen(id,record,account,label)
 	var phases:Array=view.get("phases",[])
 	if not phases.is_empty() and not rounds.is_empty():
 		# The phases cover the fight from the first exchange to the last.
@@ -908,27 +914,157 @@ func _war_matters()->Array:
 	return out
 
 
-## The battle panel opened on the finished battle: the captives we took are
-## ours to count, so it says their number exactly, as the report does.
-func _check_panel_captives(id:String,taken:int,label:String)->void:
-	if taken<=0 or id=="" or not is_instance_valid(suite): return
+## The battle screen on a battle being fought, against the engine and the
+## map: the field draws the engine's blocks as they stand (each block's men
+## and whether it is in the line, waiting, broken or fled), our strength bar
+## counts the engine's men, the balance is the engine's progress, and the
+## battle's mark is the one the map crosses over it.
+func _check_live_screen(panel:Control,e:Dictionary,m:Dictionary,ours:int,progress:float)->void:
+	var id:=String(e.get("id",""))
+	if bool((panel.get("view") as Dictionary).get("skirmish",false)): return
+	var field:Control=panel.find_child("Field",true,false)
+	if not _check(field!=null,"panel","battle %s: the battle screen has no field" % id): return
+	var battle:Dictionary=e.get("battle",{})
+	var home_side:=String(e.get("home_side","attacker"))
+	var enemy_side:="defender" if home_side=="attacker" else "attacker"
+	for role in [home_side,enemy_side]:
+		var key:="left" if role==home_side else "right"
+		var defs:Array=((battle.get("sides",{}) as Dictionary).get(role,{}) as Dictionary).get("blocks",[])
+		var rows:Array=[]
+		for b in ((battle.get("live",{}) as Dictionary).get(role,[]) as Array): rows.append([int(b.men),0,int(Blocks.STATE_CODE.get(String(b.st),1)),int(b.slot)])
+		_check_field_blocks(field,defs,rows,key,"battle %s now" % id)
+	var strip:Control=panel.find_child("SideLeft",true,false).find_child("Strength",true,false)
+	var standing:=int((strip.get("totals") as Dictionary).get("standing",-1))
+	_check(standing==ours,"panel","battle %s: the screen's strength bar has %d of ours standing, the engine %d" % [id,standing,ours])
+	var balance:Control=panel.find_child("Progress",true,false)
+	_check(absf(float(balance.get("value"))-progress)<0.001,"panel","battle %s: the screen's balance %.2f is not the engine's progress %.2f" % [id,float(balance.get("value")),progress])
+	var year:=BattleMarks.battle_year(m)
+	if year>=0.0:
+		var mark:Control=panel.find_child("EraMark",true,false)
+		_check(int(mark.get("era"))==BattleMarks.weapons_era(year),"marker","battle %s: the battle screen crosses era %d weapons, the map era %d" % [id,int(mark.get("era")),BattleMarks.weapons_era(year)])
+
+
+## The field's blocks for one side against the engine's blocks at one moment
+## (battle_blocks snapshot rows [men, heart, state code, slot]): every block
+## drawn once, with its men and its state.
+func _check_field_blocks(field:Control,defs:Array,rows:Array,key:String,label:String)->void:
+	var drawn:Array=((field.get("layout") as Dictionary).get("blocks",[]) as Array).filter(func(b:Dictionary)->bool: return String(b.key)==key)
+	var expected:=mini(defs.size(),rows.size())
+	if not _check(drawn.size()==expected,"panel","%s: the field draws %d %s blocks, the engine has %d" % [label,drawn.size(),key,expected]): return
+	var by_id:={}
+	for b in drawn: by_id[String(b.id)]=b
+	for i in expected:
+		var bid:=String((defs[i] as Dictionary).get("id",""))
+		var block:Dictionary=by_id.get(bid,{})
+		if not _check(not block.is_empty(),"panel","%s: block %s is not on the field" % [label,bid]): return
+		var row:Array=rows[i]
+		var state:=String(Blocks.CODE_STATE[clampi(int(row[2]),0,3)])
+		if not _check(int(block.men)==maxi(0,int(row[0])) and String(block.state)==state,"panel","%s: block %s is drawn with %d men, %s; the engine has %d, %s" % [label,bid,int(block.men),String(block.state),int(row[0]),state]): return
+
+
+## The battle screen opened on the finished battle and played back day by
+## day against the engine. Each day the field draws the engine's blocks as
+## its record holds them; the strength bars count the men those blocks hold;
+## the balance is the engine's progress; the track has a stop for every day;
+## every rout arrow is a block that broke that day and every reserve arrow a
+## slot the record says a reserve went into. At the end the strips say what
+## the report says, and the captives we took are ours to count, so the
+## screen says their number exactly.
+func _check_screen(id:String,record:Dictionary,account:Dictionary,label:String)->void:
+	if id=="" or not is_instance_valid(suite): return
 	var panel:Control=View.open(id,suite)
 	if not _check(panel!=null,"panel","%s cannot be opened in the battle panel once it is over" % label): return
-	var side:Node=panel.find_child("SideRight",true,false)
-	var grid:Node=side.find_child("Totals",true,false) if side!=null else null
-	var shown:=""
-	if grid!=null:
-		var cells:=grid.get_children()
-		for i in range(0,cells.size()-1,2):
-			if cells[i] is Label and (cells[i] as Label).text=="Taken" and cells[i+1] is Label: shown=(cells[i+1] as Label).text
-	elif side!=null:
-		# A skirmish's card: "... 12 taken."
-		var lost:=side.find_child("Lost",true,false) as Label
+	var taken:=int((account.theirs as Dictionary).taken)
+	var view:Dictionary=panel.get("view")
+	if bool(view.get("skirmish",false)):
+		var side:Node=panel.find_child("SideRight",true,false)
+		var shown:=""
+		var lost:Label=side.find_child("Lost",true,false) as Label if side!=null else null
 		if lost!=null:
 			for part in lost.text.trim_suffix(".").split(", "):
 				if part.ends_with(" taken"): shown=part.trim_suffix(" taken")
+		if taken>0: _check(shown==EraWords.grouped(taken),"panel","%s: the battle card says '%s' of theirs taken, the report %d" % [label,shown,taken])
+		View.close_open(suite)
+		return
+	var home_side:=String(record.get("home_side","attacker"))
+	var enemy_side:="defender" if home_side=="attacker" else "attacker"
+	var battle:Dictionary=record.get("battle",{}) if record.get("battle") is Dictionary else {}
+	var phases:Array=battle.get("phases",[])
+	var count:=(view.get("phases",[]) as Array).size()
+	var field:Control=panel.find_child("Field",true,false)
+	var days:Control=panel.find_child("Days",true,false)
+	if not _check(field!=null and days!=null,"panel","%s: the battle screen has no field or no days" % label):
+		View.close_open(suite)
+		return
+	if battle.has("sides"):
+		_check(count==phases.size(),"panel","%s: the screen has %d days, the engine fought %d phases" % [label,count,phases.size()])
+		_check((days.get("labels") as Array).size()==phases.size()+1,"panel","%s: the track has %d stops for %d days" % [label,(days.get("labels") as Array).size(),phases.size()])
+	for k in count+1:
+		panel.call("_select",k,false)
+		if not battle.has("sides"): continue
+		var snap:Dictionary={}
+		if k==0: snap=battle.get("start",{})
+		elif k-1<phases.size(): snap=(phases[k-1] as Dictionary).get("snap",{})
+		if snap.is_empty(): continue
+		for role in [home_side,enemy_side]:
+			var key:="left" if role==home_side else "right"
+			var defs:Array=((battle.sides as Dictionary).get(role,{}) as Dictionary).get("blocks",[])
+			var rows:Array=snap.get(role,[])
+			_check_field_blocks(field,defs,rows,key,"%s day %d" % [label,k])
+			# The strength bar counts the men the field's blocks hold (in the
+			# line or waiting); at the end, the battle's own count.
+			var on_field:=0
+			for row in rows:
+				if int((row as Array)[2])<=1: on_field+=maxi(0,int((row as Array)[0]))
+			var strip:Control=panel.find_child("Side"+key.capitalize(),true,false).find_child("Strength",true,false)
+			var standing:=int((strip.get("totals") as Dictionary).get("standing",-1))
+			if k<count: _check(standing==on_field,"panel","%s day %d: the %s strength bar has %d standing, its blocks hold %d" % [label,k,key,standing,on_field])
+		if k>0 and k-1<phases.size():
+			var p:=float((phases[k-1] as Dictionary).get("progress",0.0))*(1.0 if home_side=="attacker" else -1.0)
+			var balance:Control=panel.find_child("Progress",true,false)
+			_check(absf(float(balance.get("value"))-p)<0.001,"panel","%s day %d: the screen's balance %.2f is not the engine's %.2f" % [label,k,float(balance.get("value")),p])
+			_check_arrows(field,battle,k,home_side,label)
+	# At the end: what the report says.
+	var a:Dictionary=account.ours
+	var left:Node=panel.find_child("SideLeft",true,false)
+	for pair in [["Killed","killed"],["Wounded","wounded"],["Fled","fled"],["Taken","captured"]]:
+		var value:Label=left.find_child(String(pair[0]),true,false).find_child("Value",true,false) as Label
+		var n:=int(a.get(String(pair[1]),0))
+		_check(value.text==("none" if n<=0 else EraWords.grouped(n)),"panel","%s: the screen says '%s' of ours %s, the report %d" % [label,value.text,String(pair[1]),n])
+	var item:Node=panel.find_child("SideRight",true,false).find_child("Taken",true,false)
+	var shown_taken:=(item.find_child("Value",true,false) as Label).text if item!=null else ""
+	_check(shown_taken==("none" if taken<=0 else EraWords.grouped(taken)),"panel","%s: the battle screen says '%s' of theirs taken, the report %d" % [label,shown_taken,taken])
 	View.close_open(suite)
-	_check(shown==EraWords.grouped(taken),"panel","%s: the battle panel says '%s' of theirs taken, the report %d" % [label,shown,taken])
+
+
+## The day's arrows against the engine's record of it: one rout arrow for
+## each block that broke that day (six a side at most), and no more reserve
+## arrows than the slots the record says reserves went into.
+func _check_arrows(field:Control,battle:Dictionary,k:int,home_side:String,label:String)->void:
+	var phases:Array=battle.get("phases",[])
+	var now:Dictionary=(phases[k-1] as Dictionary).get("snap",{})
+	var then:Dictionary=battle.get("start",{}) if k==1 else (phases[k-2] as Dictionary).get("snap",{})
+	var slots:={"left":0,"right":0}
+	for event in ((phases[k-1] as Dictionary).get("events",[]) as Array):
+		if String((event as Dictionary).get("k",""))=="reserve_in":
+			var side_key:="left" if String((event as Dictionary).get("side",""))==home_side else "right"
+			slots[side_key]=int(slots[side_key])+((event as Dictionary).get("slots",[]) as Array).size()
+	var broke:={"left":0,"right":0}
+	for role in ["attacker","defender"]:
+		var key:="left" if role==home_side else "right"
+		var a:Array=then.get(role,[]); var b:Array=now.get(role,[])
+		for i in mini(a.size(),b.size()):
+			if int((b[i] as Array)[2])==2 and int((a[i] as Array)[2])<=1: broke[key]=int(broke[key])+1
+	var routs:={"left":0,"right":0}
+	var reserves:={"left":0,"right":0}
+	for arrow in ((field.get("layout") as Dictionary).get("arrows",[]) as Array):
+		var arrow_key:=String((arrow as Dictionary).key)
+		match String((arrow as Dictionary).kind):
+			"rout": routs[arrow_key]=int(routs[arrow_key])+1
+			"reserve": reserves[arrow_key]=int(reserves[arrow_key])+1
+	for key in ["left","right"]:
+		_check(int(routs[key])==mini(6,int(broke[key])),"panel","%s day %d: %d %s rout arrows for %d blocks that broke" % [label,k,int(routs[key]),key,int(broke[key])])
+		_check(int(reserves[key])<=int(slots[key]),"panel","%s day %d: %d %s reserve arrows, the record has %d going in" % [label,k,int(reserves[key]),key,int(slots[key])])
 
 
 func _check_ranges(record:Dictionary,kind:String,label:String)->void:

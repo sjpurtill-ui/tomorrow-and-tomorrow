@@ -91,9 +91,12 @@ func test_a_big_finished_battle_opens_on_its_result_and_steps_back()->void:
 	assert_bool(bool(panel.view.skirmish)).is_false()
 	var headline:Label=panel.find_child("Headline",true,false)
 	assert_str(headline.text).is_equal(String(panel.view.phrase))
-	# The line and the reserve: regiments in the line, the rest summed up.
-	var plates:=panel.find_children("*","Control",true,false).filter(func(n:Node)->bool: return n.get_script()!=null and "data" in n)
-	assert_int(plates.size()).is_greater(4)
+	# The line and the reserve: the engine's blocks, drawn on the field.
+	var field:Control=panel.find_child("Field",true,false)
+	assert_object(field).is_not_null()
+	var blocks:Array=(field.layout as Dictionary).get("blocks",[])
+	assert_int(blocks.size()).is_greater(4)
+	for block in blocks: assert_bool((block as Dictionary).has("data")).is_true()
 	_assert_readable(panel)
 	# Step back to the start and forward again: the campaign is untouched.
 	panel._select(0)
@@ -227,3 +230,100 @@ func test_every_way_in_lands_on_the_panel()->void:
 	await get_tree().process_frame
 	# Nothing to show: nothing opens.
 	assert_object(View.open("no such battle",_host())).is_null()
+
+
+## The user: "The battle screen is still literally just text." The screen
+## is a war map of the engine's own blocks, day by day: every block drawn
+## once with its men and its state as the record holds them at that day,
+## the strength bars counting the men those blocks hold, the balance the
+## engine's progress, a stop on the track for every day, and the battle's
+## mark the weapons its armies carry (crossed rifles here).
+func test_the_battle_screen_draws_the_engine_blocks_day_by_day()->void:
+	var record:=_big_record()
+	MilitaryCampaign.battle_history.push_front(record.duplicate(true))
+	var host:=_host()
+	var panel:Control=View.open(int(record.seed),host)
+	await get_tree().process_frame
+	var battle:Dictionary=record.battle
+	var phases:Array=battle.phases
+	var field:Control=panel.find_child("Field",true,false)
+	var days:Control=panel.find_child("Days",true,false)
+	assert_int((days.labels as Array).size()).is_equal(phases.size()+1)
+	assert_int(int(panel.find_child("EraMark",true,false).era)).override_failure_message("rifle armies cross rifles").is_equal(3)
+	for k in phases.size()+1:
+		panel._select(k,false)
+		var snap:Dictionary=battle.start if k==0 else (phases[k-1] as Dictionary).snap
+		for role in ["attacker","defender"]:
+			var key:="left" if role=="attacker" else "right"
+			var defs:Array=(battle.sides[role] as Dictionary).blocks
+			var rows:Array=snap[role]
+			var drawn:Array=(field.layout.blocks as Array).filter(func(b:Dictionary)->bool: return String(b.key)==key)
+			assert_int(drawn.size()).is_equal(defs.size())
+			var standing:=0
+			for i in defs.size():
+				var block:Dictionary=drawn.filter(func(b:Dictionary)->bool: return String(b.id)==String(defs[i].id))[0]
+				assert_int(int(block.men)).is_equal(int(rows[i][0]))
+				assert_str(String(block.state)).is_equal(String(preload("res://scripts/battle_blocks.gd").CODE_STATE[int(rows[i][2])]))
+				if int(rows[i][2])<=1: standing+=int(rows[i][0])
+			if k<phases.size():
+				var strip:Control=panel.find_child("Side"+key.capitalize(),true,false).find_child("Strength",true,false)
+				assert_int(int(strip.totals.standing)).is_equal(standing)
+		if k>0:
+			assert_float(float(panel.find_child("Progress",true,false).value)).is_equal_approx(float((phases[k-1] as Dictionary).progress),0.001)
+			# The attacker's thrusts are drawn on every day fought.
+			assert_bool((field.layout.arrows as Array).any(func(a:Dictionary)->bool: return String(a.kind)=="thrust")).is_true()
+	panel.close()
+	host.queue_free()
+
+
+## The ground and the age show: a ford, a pass and a gate narrow the
+## opening the lines fight in and lay their water, cliffs and walls under
+## them; the battle's mark crosses spears, muskets or the armour sign by
+## the kits its armies carry.
+func test_the_field_reads_the_ground_and_the_age()->void:
+	var sim:=Sim.new()
+	var widths:={}
+	for kind in ["open","ford","pass","gate"]:
+		var result:=sim.simulate(_force(sim,"Ours",[["spearman","shield_spear",900]]),_force(sim,"Theirs",[["spearman","shield_spear",800]]),{"seed":4,"ground":{"kind":kind}})
+		result["home_side"]="attacker"; result["threat"]={"source_name":"Esurai"}
+		var host:=_host()
+		var panel:Control=View.open(result,host)
+		await get_tree().process_frame
+		var layout:Dictionary=panel.find_child("Field",true,false).layout
+		assert_str(String(layout.ground)).is_equal(kind)
+		widths[kind]=float(layout.opening[1])-float(layout.opening[0])
+		panel.close(); host.queue_free()
+	for kind in ["ford","pass","gate"]: assert_float(float(widths[kind])).override_failure_message(kind).is_less(float(widths.open))
+	var eras:={}
+	for kit in [["levy","spear",0],["musketeer","musket",2],["armored_formation","armored_vehicle",4]]:
+		var result:=sim.simulate(_force(sim,"Ours",[[kit[0],kit[1],600]]),_force(sim,"Theirs",[[kit[0],kit[1],550]]),{"seed":6})
+		result["home_side"]="attacker"; result["threat"]={"source_name":"Esurai"}
+		eras[String(kit[1])]=preload("res://scripts/hud/battle_field_model.gd").era_of(result,"reckoned")
+		assert_int(int(eras[String(kit[1])])).override_failure_message(String(kit[1])).is_equal(int(kit[2]))
+
+
+## Plain and short: every line the screen shows keeps to about twelve
+## words (the rest is said when pointed at), and the battle plays itself
+## day by day when asked.
+func test_the_screen_speaks_briefly_and_plays_the_days()->void:
+	var record:=_big_record()
+	MilitaryCampaign.battle_history.push_front(record.duplicate(true))
+	var host:=_host()
+	var panel:Control=View.open(int(record.seed),host)
+	await get_tree().process_frame
+	for k in (panel.view.phases as Array).size()+1:
+		panel._select(k,false)
+		for label:Label in _labels(panel):
+			if not label.is_visible_in_tree(): continue
+			var words:=label.text.trim_prefix("•").strip_edges().split(" ",false).size()
+			assert_int(words).override_failure_message("%d words: %s" % [words,label.text]).is_less_equal(12)
+	_assert_readable(panel)
+	panel._select(0,false)
+	panel._act("play")
+	assert_bool(bool(panel.playing)).is_true()
+	panel._process(panel.PLAY_SECONDS+0.01)
+	assert_int(int(panel.step)).is_equal(1)
+	panel._act("play")
+	assert_bool(bool(panel.playing)).is_false()
+	panel.close()
+	host.queue_free()

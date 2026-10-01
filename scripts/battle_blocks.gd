@@ -215,6 +215,8 @@ static func block_word(size:int,tier:int)->String:
 
 static func plural(word:String)->String:
 	if word=="war party": return "war parties"
+	# "company": companies, not "companys".
+	if word.ends_with("y") and word.length()>1 and not "aeiou".contains(word[word.length()-2]): return word.left(word.length()-1)+"ies"
 	return word+"es" if word.ends_with("s") or word.ends_with("h") else word+"s"
 
 
