@@ -83,8 +83,11 @@ static func day_news(progression:Array,discoveries:Array,resources:Array,events:
 	if not discoveries.is_empty():
 		return "Our people have worked out %s." % String((discoveries[0] as Dictionary).get("name","something new")).to_lower()
 	for source in [resources,events]:
-		if not source.is_empty():
-			var entry:Dictionary=source[0]
+		for item in source:
+			var entry:Dictionary=item
+			# Sickness and disasters are kept in their own log (hardship_log.gd),
+			# not told over the map.
+			if bool(entry.get("hardship",false)):continue
 			var text:=String(entry.get("description","")).strip_edges()
 			return text if text!="" else Kit.sentence(String(entry.get("title","")))+"."
 	return ""

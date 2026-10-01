@@ -8,7 +8,8 @@ extends GdUnitTestSuite
 ## - years named before this rule for a harmless trouble ("the eighth Dry
 ##   Year") are shown unnamed, with the trouble's small mark kept;
 ## - a shallow dry spell is carried by the people's custom (no court matter,
-##   no card) and told in one line of its year; a deep one still comes to court;
+##   no card) and kept in the sickness & disaster log, not told in its year;
+##   a deep one still comes to court;
 ## - the page draws a mark for every year, opens the newest, opens any year
 ##   chosen, and keeps the chosen year across a live refresh.
 ## Offline; never calls a real API.
@@ -98,7 +99,7 @@ func _day_with_depth(low:float,high:float)->int:
 	return -1
 
 
-func test_a_shallow_dry_spell_is_carried_by_custom_and_told_in_one_line()->void:
+func test_a_shallow_dry_spell_is_carried_by_custom_and_kept_in_the_log()->void:
 	GameState.settlement_founded_day=0
 	Crisis.onsets_enabled=false
 	var day:=_day_with_depth(0.0,0.17)
@@ -118,10 +119,17 @@ func test_a_shallow_dry_spell_is_carried_by_custom_and_told_in_one_line()->void:
 	for d in range(day+1,int(c.end_day)+2):
 		GameState.elapsed_days=float(d)
 		if (Crisis.state().active as Dictionary).has(String(c.id)): Crisis._advance(c,d,Crisis.inputs(d))
-	var dry:Array=(Annals.acc(Chronicle.data(),int(GameState.elapsed_days)) as Dictionary).get("dry",[])
-	assert_int(dry.size()).is_equal(1)
-	var line:=preload("res://scripts/chronicle_years.gd").dry_line(dry,{"seed":1,"recent":{},"used":[]},false)
-	assert_str(line).contains("parts in ten")
+	# Not told in its year; the year's telling reads the log only to know the
+	# year was not free of trouble.
+	var year:Dictionary=Annals.acc(Chronicle.data(),int(GameState.elapsed_days))
+	assert_array(year.get("dry",[])).is_empty()
+	assert_int(Annals.routine_troubles(int(c.start)/365)).is_equal(1)
+	# Its line in the sickness & disaster log, with how far the gathering fell.
+	var line:Dictionary=preload("res://scripts/hardship_log.gd").entries()[0]
+	assert_str(String(line.crisis)).is_equal(String(c.id))
+	assert_str(String(line.by)).is_equal("custom")
+	assert_bool(line.has("end")).is_true()
+	assert_str(preload("res://scripts/hardship_log.gd").numbers(line).to_lower()).contains("the gathering fell by about ").contains(" in 10")
 	Crisis.onsets_enabled=true
 
 

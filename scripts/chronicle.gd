@@ -490,6 +490,9 @@ static func _scan_ledger(c:Dictionary)->void:
 		if not event_variant is Dictionary:continue
 		var ev:Dictionary=event_variant
 		if bool(ev.get("chronicle",false)):continue
+		# Sickness and disasters are kept in their own log (hardship_log.gd);
+		# the rare extreme one is told by the system that keeps that log.
+		if bool(ev.get("hardship",false)):continue
 		# The court tells a death in office itself, as a mourning moment
 		# (court_lives.gd), and removes this clerk's line; never tell it twice.
 		if String(ev.get("title",""))=="Officeholder Died":continue

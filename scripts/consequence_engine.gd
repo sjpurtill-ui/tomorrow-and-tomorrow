@@ -7,6 +7,8 @@ const CUSTOM:=preload("res://scripts/custom_directive.gd")
 ## The town hall, shrines and yard (civic_building_effects.gd).
 const CIVIC:=preload("res://scripts/civic_building_effects.gd")
 const HearthCount:=preload("res://scripts/hearth_count.gd")
+## The sickness & disaster log (hardship_log.gd): words only.
+const HARDSHIPS:=preload("res://scripts/hardship_log.gd")
 
 # One bounded causal model drives the early civilization. Narrative systems may
 # choose from these pressures, but only this file turns them into numbers.
@@ -891,7 +893,11 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		if ordinary_deaths:
 			HearthCount.tally("buried",deaths_today)
 			HearthCount.tally_ages(deaths_today)
-		else:events.append(death_record)
+		else:
+			# Deaths of sickness while health is failing go to the sickness &
+			# disaster log rather than the Chronicle (hardship_log.gd).
+			if dominant_cause=="Illness": HARDSHIPS.illness_deaths(death_record,deaths_today)
+			events.append(death_record)
 	var maternal_deaths:=int(reproduction.get("maternal_deaths_count",0))
 	if maternal_deaths>0:
 		_record_demographic_change("death",maternal_deaths,"Complications of childbirth",food_days,production_ratio,housing_ratio,{"reproductive_age":maternal_deaths},false)
@@ -960,7 +966,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var water_severity:="critical" if water_intake<0.65 or (water_intake<0.82 and WorldSimulation.state.consecutive_water_shortage_days>=2.0) else "warning"
 		var water_remedy:="River access remains intact; increase collection or distribution capacity." if String(WorldSimulation.state.water_metrics.get("source_origin",""))=="mapped_hydrology" and source_distance<=1.5 else "Increase Food or Logistics work, or move closer to visible water."
 		_threshold_event(events,"water_shortfall","Drinking Water Is Short","Collection supplied only %d%% of today's need. %s %s" % [roundi(water_intake*100.0),water_place,water_remedy],"health",water_severity,2)
-	if WorldSimulation.state.population_health < 0.46: _threshold_event(events,"ill_health","Widespread Illness","Poor nutrition, exposure, and water conditions are reducing effective labor.","health","danger",45)
+	if WorldSimulation.state.population_health < 0.46:
+		# Widespread sickness is written in the sickness & disaster log, not
+		# raised as a council decision or told in the Chronicle (hardship_log.gd).
+		HARDSHIPS.illness_warning(_threshold_event(events,"ill_health","Widespread Illness","Poor nutrition, exposure, and water conditions are reducing effective labor.","health","danger",45),WorldSimulation.state.population_health)
 	if ecology < 0.55: _threshold_event(events,"ecology_strain","The Land Is Thinning","Gatherers report longer journeys and diminishing returns near the settlement.","ecology","warning",120)
 	if legitimacy < 0.42: _threshold_event(events,"authority_strain","Directives Meet Resistance","Hardship and weak administration are eroding compliance with sovereign priorities.","legitimacy","warning",60)
 	return events
@@ -1110,14 +1119,16 @@ func survey_factor() -> float:
 	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))*(1.0+modifier_strength("mineral_signs")),0.25,1.45)*(1.0+WorldSimulation.state.founding_effect("survey_output"))
 
 
-func _threshold_event(events: Array[Dictionary],id: String,title: String,description: String,domain: String,severity: String,cooldown: int) -> void:
+## Returns the event raised, or {} while the condition's cooldown runs.
+func _threshold_event(events: Array[Dictionary],id: String,title: String,description: String,domain: String,severity: String,cooldown: int) -> Dictionary:
 	var last_day := int(WorldSimulation.state.last_simulation_event_days.get(id,-100000))
-	if int(WorldSimulation.state.elapsed_days)-last_day<cooldown: return
+	if int(WorldSimulation.state.elapsed_days)-last_day<cooldown: return {}
 	WorldSimulation.state.last_simulation_event_days[id]=int(WorldSimulation.state.elapsed_days)
 	var event := _add_event(title,description,domain,severity)
 	event["condition_id"]=id
 	event["recurring_condition"]=true
 	events.append(event)
+	return event
 
 func _add_event(title: String,description: String,domain: String,severity: String) -> Dictionary:
 	var event := {"day":int(WorldSimulation.state.elapsed_days),"title":title,"description":description,"domain":domain,"severity":severity}
