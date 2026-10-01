@@ -298,4 +298,3 @@ static func source_path(texture:Texture2D)->String:
 	if texture==null:return ""
 	if texture.has_meta("source_path"):return String(texture.get_meta("source_path"))
 	return source_texture(texture).resource_path
-

@@ -39,4 +39,3 @@ func _ready()->void:
 		get_viewport().get_texture().get_image().save_png("res://artifacts/opening06-research-in-game-crops.png")
 	print("OPENING06_ART_PASS count=",rows.size()," live IDs, effective sources, focus, hashes, hidden gating, crop bounds")
 	get_tree().quit()
-
