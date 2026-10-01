@@ -31,6 +31,7 @@ const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
+const Strips:=preload("res://scripts/hud/force_strips.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -71,29 +72,36 @@ func refresh(force:=false)->void:
 	var reading:=Law.reading(MilitaryCampaign)
 	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
 	var commands:=Commands.commands(MilitaryCampaign)
-	var next:=str([reading,entries.map(func(e:Dictionary)->Array:return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),WarLoop.front(String(e.civ_id)).get("stance",""),e.get("band",{})]),
+	var glance:=strength(MilitaryCampaign)
+	var next:=str([reading,glance,entries.map(func(e:Dictionary)->Array:return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),WarLoop.front(String(e.civ_id)).get("stance",""),e.get("band",{})]),
 		commands.map(func(c:Dictionary)->Array:return [c.id,c.bands,c.men,c.hungry])])
 	if not force and next==signature:return
 	signature=next
-	_build_army(reading)
+	_build_army(reading,glance)
 	_build_enemies(entries)
 	_build_leaders(commands)
 
 
 # --- The army -------------------------------------------------------------
 
-func _build_army(reading:Dictionary)->void:
+func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	_clear(army_box)
 	var panel:=_panel(army_box,"Army")
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",18);column.add_child(head)
-	var serving:=_number(head,EraWords.grouped(int(reading.now)),"serving now")
+	var serving:=_number(head,EraWords.grouped(int(reading.now)),"under arms")
 	serving.tooltip_text="Everyone under arms: fighters, those in drill, recruits waiting and the hurt."
-	var drill:=BarModel.drill_card(MilitaryCampaign)
-	if not drill.is_empty():_number(head,EraWords.grouped(int(drill.men)+int(drill.get("drafts",0))),"in drill · about %d days" % int(drill.get("days",0)))
 	if int(reading.target)>=0:
 		var gap:=int(reading.gap)
 		_number(head,EraWords.grouped(int(reading.target)),"to keep"+((" · %s more to call up" % EraWords.grouped(gap)) if gap>0 else (" · %s too many" % EraWords.grouped(-gap) if gap<0 else "")))
+	if float(glance.armed)<0.999 and int(reading.now)>0:_number(head,"%d%%" % roundi(float(glance.armed)*100.0),"armed")
+	if float(glance.fed)>=0.0:_number(head,"%d%%" % roundi(float(glance.fed)*100.0),"fed in the field")
+	# HOI4's manpower bar: those ready, in drill and waiting, against the
+	# share the war leader keeps (the tick).
+	var bar:=StrengthBar.new();bar.name="Strength";bar.parts=glance;bar.target=int(reading.target);bar.custom_minimum_size=Vector2(0,16)
+	var words:=strength_words(glance,int(reading.now),int(reading.target))
+	bar.tooltip_text=words;column.add_child(bar)
+	column.add_child(_line(words,13,T.INK_MUTED,true))
 	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",6);column.add_child(pick)
 	for entry:Dictionary in Law.LEVELS:
 		var id:=String(entry.id)
@@ -155,6 +163,38 @@ func _enemy_row(e:Dictionary)->Control:
 		pay.pressed.connect(func()->void:_stance(civ_id,"pay","war_price"))
 		stances.add_child(pay)
 	return panel
+
+
+## The army at a glance: {ready (fighters at home, in the field and holding
+## towns), drill, drill_days, waiting (recruits waiting and the hurt), armed
+## (0..1: gear issued of gear wanted), fed (0..1 of those out by the bars'
+## own measure; -1 when nobody is out)}.
+static func strength(mc:Node)->Dictionary:
+	var ledger:Dictionary=mc.personnel_ledger()
+	var formations:Array=(mc.home_army.get("formations",[]) as Array).duplicate()
+	var out:=0
+	var fed:=0.0
+	for army_variant in mc.field_armies:
+		if not army_variant is Dictionary or int((army_variant as Dictionary).get("troops",0))<=0:continue
+		var army:Dictionary=army_variant
+		formations.append_array(army.get("formations",[]))
+		var card:=BarModel.army_card(mc,army)
+		if bool(card.get("unknown",false)):continue
+		out+=int(card.men);fed+=float(card.men)*clampf(float(card.get("supply",1.0)),0.0,1.0)
+	var drill:=BarModel.drill_card(mc)
+	return {"ready":int(ledger.home)+int(ledger.field)+int(ledger.occupation),"drill":int(ledger.training),"drill_days":int(drill.get("days",0)),
+		"waiting":int(ledger.recruits)+int(ledger.recovering),"armed":float(BarModel.gear_of(formations,mc).share),"fed":snappedf(fed/float(out),0.01) if out>0 else -1.0}
+
+
+## The bar in words: "327 ready · 85 in drill, about 40 days · 12 waiting or
+## hurt · 188 to call up".
+static func strength_words(glance:Dictionary,now:int,target:int)->String:
+	var parts:=PackedStringArray(["%s ready" % EraWords.grouped(int(glance.ready))])
+	if int(glance.drill)>0:parts.append("%s in drill%s" % [EraWords.grouped(int(glance.drill)),(", about %d days" % int(glance.drill_days)) if int(glance.drill_days)>0 else ""])
+	if int(glance.waiting)>0:parts.append("%s waiting or hurt" % EraWords.grouped(int(glance.waiting)))
+	if target>now:parts.append("%s to call up" % EraWords.grouped(target-now))
+	elif target>=0 and now>target:parts.append("%s above the share" % EraWords.grouped(now-target))
+	return " · ".join(parts)
 
 
 ## What is happening with this people now, in a few words (the details in
@@ -243,6 +283,9 @@ func _leader_row(c:Dictionary)->Control:
 	var name_label:=_line("%s · %s" % [String(leader.name),String(leader.title).to_lower()],15,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"));words.add_child(name_label)
 	var rated:=Record.general_line(leader.get("commander",{}),EraWords.stage())
 	if rated!="":words.add_child(_line(rated,13,T.INK_MUTED))
+	if not (leader.get("commander",{}) as Dictionary).is_empty():
+		var pips:=Strips.GeneralPips.new();pips.name="Pips";words.add_child(pips)
+		pips.set_commander(leader.get("commander",{}),String(leader.name),String(c.id)==Commands.WAR_LEADER)
 	words.add_child(_line(leader_doing(c),13,T.INK))
 	return panel
 
@@ -298,6 +341,31 @@ static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	label.add_theme_font_override("font",T.font("ui"));label.add_theme_font_size_override("font_size",maxi(T.MIN_FONT_SIZE,size));label.add_theme_color_override("font_color",color)
 	if wrap:label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	return label
+
+
+## HOI4's manpower bar: ready (green), in drill (amber), waiting or hurt
+## (rule), against the share kept (the ink tick); over the share, the tick
+## falls inside the bar.
+class StrengthBar extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var parts:Dictionary={}
+	var target:=-1
+	func _ready()->void:mouse_filter=Control.MOUSE_FILTER_PASS
+	func _draw()->void:
+		var whole:=Rect2(Vector2.ZERO,size)
+		draw_rect(whole,T.PAPER_SUNK)
+		var segments:=[[int(parts.get("ready",0)),T.GREEN],[int(parts.get("drill",0)),T.AMBER],[int(parts.get("waiting",0)),T.RULE_STRONG]]
+		var total:=0
+		for segment:Array in segments:total+=int(segment[0])
+		var scale:=float(maxi(1,maxi(total,target)))
+		var x:=0.0
+		for segment:Array in segments:
+			var width:=size.x*float(segment[0])/scale
+			if width>0.0:draw_rect(Rect2(x,0.0,width,size.y),segment[1]);x+=width
+		draw_rect(whole,T.RULE,false,1.0)
+		if target>0:
+			var tick:=clampf(size.x*float(target)/scale,1.0,size.x-1.0)
+			draw_line(Vector2(tick,-3.0),Vector2(tick,size.y+3.0),T.INK,2.0)
 
 
 ## The dead on each side, compact (war_ledger_marks.draw_dead).

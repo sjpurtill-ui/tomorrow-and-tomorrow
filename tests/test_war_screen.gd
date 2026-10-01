@@ -66,6 +66,7 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	add_child(board)
 	board.setup({})
 	for id in ["few","some","many","war","all"]:assert_object(board.find_child("Level_%s" % id,true,false)).is_not_null()
+	assert_object(board.find_child("Strength",true,false)).is_not_null()
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
 	assert_object(row).is_not_null()
 	for id in ["leave","defend","punish","take","peace","pay"]:assert_object(row.find_child("Stance_%s" % id,true,false)).is_not_null()
@@ -77,3 +78,10 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	assert_str(board.feedback.text).is_not_empty()
 	# Nothing on the page orders a band by hand.
 	for name in ["MoveTo","PutUnder","WholeCommand","Verbs"]:assert_object(board.find_child(name,true,false)).is_null()
+
+func test_the_army_bar_reads_ready_drill_and_waiting_against_the_share()->void:
+	assert_str(Board.strength_words({"ready":327,"drill":85,"drill_days":40,"waiting":12},424,612)).is_equal("327 ready · 85 in drill, about 40 days · 12 waiting or hurt · 188 to call up")
+	assert_str(Board.strength_words({"ready":30,"drill":0,"drill_days":0,"waiting":0},30,20)).is_equal("30 ready · 10 above the share")
+	assert_str(Board.strength_words({"ready":4,"drill":0,"drill_days":0,"waiting":0},4,-1)).is_equal("4 ready")
+	# Nobody out: no fed share to show.
+	assert_float(float(Board.strength(MilitaryCampaign).fed)).is_equal(-1.0)

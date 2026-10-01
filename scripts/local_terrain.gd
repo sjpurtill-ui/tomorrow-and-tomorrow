@@ -13513,8 +13513,8 @@ func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
 			best_distance=distance
 			best=sighting
 	if best.is_empty(): return false
+	# A card of what we see and who to ask; it orders nothing.
 	if hud:
-		_on_hud_section_requested("military",0)
 		hud.open_detail(preload("res://scripts/hud/content/dock_detail_map_contact.gd").new(self,hud,String(best.get("id",""))))
 	if travel_status_label:
 		travel_status_label.text="Strangers in sight. The card on the left says what we see and who to ask."
