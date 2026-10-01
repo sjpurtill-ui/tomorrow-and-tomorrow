@@ -429,7 +429,14 @@ static func levy_reading(text:String)->Dictionary:
 # Carrying them out
 # --------------------------------------------------------------------------
 
+## The order carried out, at the pace and yield of the official whose office
+## carries it, and the report says so (office_levers.gd with_holder).
 static func perform(reading:Dictionary)->Dictionary:
+	var mc:Variant=WorldSimulation.military
+	var job_from:=int(mc.next_equipment_job_id) if mc!=null else -1
+	return preload("res://scripts/office_levers.gd").with_holder(_carry_out(reading),job_from)
+
+static func _carry_out(reading:Dictionary)->Dictionary:
 	match String(reading.get("kind","")):
 		"levy": return _levy(reading)
 		"stand_down": return _stand_down(reading)
@@ -547,6 +554,11 @@ static func _levy(reading:Dictionary)->Dictionary:
 			var making_up:=(" with the %d already waiting that makes the %d you asked for" % [waiting_before,asked]) if filling and waiting_before>0 else ""
 			says.append("%d are called up and leave their work in the fields and workshops%s.%s%s" % [raised,making_up,short,unnamed])
 			done.append("%d called up from our own people" % raised)
+			# The ruler's own levy stands against the share the war leader
+			# keeps (army_levy_law.gd): the share rises to hold them.
+			if not bool(reading.get("by_law",false)):
+				var kept:=preload("res://scripts/army_levy_law.gd").cover(mc)
+				if kept!="":says.append(kept)
 		elif int(mc.aggregate_recruits)<=0:
 			out.says=_nobody_free_says(mc,n)
 			out.outcome=_nobody_free_outcome(mc,n)

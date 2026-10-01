@@ -329,7 +329,8 @@ static func people_regard(officials:Array)->Dictionary:
 	# Offerings at the shrines draw the people to the god and ease their fear
 	# (civic_building_effects.gd: Hearth Shrine and Shrine House).
 	var civic:=preload("res://scripts/civic_building_effects.gd")
-	love=clampf(love+clampf(warmth,-0.2,0.15)+civic.effect("devotion"),0.0,1.0)
+	# The priest who keeps the god's rites (office_levers.gd: -2 to +6 points).
+	love=clampf(love+clampf(warmth,-0.2,0.15)+civic.effect("devotion")+preload("res://scripts/office_levers.gd").value("HighPriest"),0.0,1.0)
 	var dread:=clampf((dread_sum/n if n>0 else 0.1)*0.75+minf(0.3,echo)-civic.effect("dread_eased"),0.0,1.0)
 	var resentment:=res_sum/n if n>0 else 0.0
 	var out:=read(clampf(love,0.0,1.0),dread,resentment)

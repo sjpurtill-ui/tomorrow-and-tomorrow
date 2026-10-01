@@ -151,7 +151,8 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 		# Terms common to every practice, read once (same arithmetic, same order).
 		var adoption_table:Dictionary=WorldSimulation.state.discovery_adoption
 		var common_spread:=0.00035+teaching
-		var idle_loss:=maxf(0.0,0.00018-preserved*0.00015)*ADOPTION_PACE
+		# The lore keeper's hand on what is forgotten (office_levers.gd: x1.20 to x0.60).
+		var idle_loss:=maxf(0.0,0.00018-preserved*0.00015)*ADOPTION_PACE*preload("res://scripts/office_levers.gd").value("Scholar")
 		for id in WorldSimulation.state.known_discoveries:
 			var discovery:Dictionary=definitions_by_id.get(id,{})
 			if discovery.is_empty(): continue
@@ -195,7 +196,8 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 
 func register_discovery(discovery:Dictionary,catalog:Array[Dictionary])->void:
 	var id:=String(discovery.get("id",""))
-	WorldSimulation.state.discovery_adoption[id]=maxf(0.025,float(WorldSimulation.state.discovery_adoption.get(id,0.0)))
+	# Tried in households before proof (trial use), it starts in more of them.
+	WorldSimulation.state.discovery_adoption[id]=maxf(Research600.PROOF_ADOPTION,float(WorldSimulation.state.discovery_adoption.get(id,0.0)))
 	_rebuild_effect_totals(catalog)
 	WorldSimulation.state.societal_values=SOCIETAL_VALUES_MODEL.advance(
 		WorldSimulation.state.societal_values,WorldSimulation.state.known_discoveries,WorldSimulation.state.discovery_adoption,
@@ -261,6 +263,14 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 	_refresh_line_focus() # research_600: specialization amplifies the focused line
 	var neglect:=neglect_for(line_focus)
 	var adoption:Dictionary=WorldSimulation.state.discovery_adoption
+	# Research pacing: questions past their first cases are tried in a share of
+	# households before proof; they count like practices at that share.
+	var practices:Array=WorldSimulation.state.known_discoveries
+	var trials:=Research600.trial_levels(WorldSimulation.state.discovery_progress,practices)
+	if not trials.is_empty():
+		adoption=adoption.merged(trials,true)
+		practices=practices.duplicate()
+		practices.append_array(trials.keys())
 	# Each line's practice_scale is read once; scaled_effect is applied inline.
 	var scales:Dictionary={}
 	if _lower_keys.is_empty(): _build_key_sets()
@@ -272,7 +282,7 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 	var seen:=PackedByteArray()
 	seen.resize(_effect_slots.size())
 	var order:PackedInt32Array=PackedInt32Array()
-	for id in WorldSimulation.state.known_discoveries:
+	for id in practices:
 		var row:Variant=_effect_rows.get(id)
 		if row==null or (row as Array).is_empty():
 			var discovery:Dictionary=definitions_by_id.get(id,{})

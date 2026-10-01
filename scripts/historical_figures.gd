@@ -14,6 +14,42 @@ const MOTIVES:=["make useful knowledge available beyond a privileged few","prove
 const COMMISSIONED_ROLES:=["Architect","Admiral","Air Commander"]
 ## Living admirals or air commanders at most; more forces share them.
 const BRANCH_COMMANDERS:=2
+## A commander's own skills (0..1): command (battle power), tactics (the plans
+## they can use, withdrawals), logistics (march pace, hunger in the field) and
+## resolve (holding men together: desertion). Drawn once per figure from its
+## own seed (never from the figure's creation draws, so older worlds keep
+## their figures), each within SKILL_MIN..SKILL_MAX with one clear strength
+## and one weakness, and grown by battles and days in the field.
+const COMMAND_ROLES:=["General","Admiral","Air Commander"]
+const COMMAND_SKILLS:=["command","tactics","logistics","resolve"]
+const SKILL_MIN:=0.25
+const SKILL_MAX:=0.85
+## Growth: each battle fought, and each GROWTH_FIELD_DAYS in the field, up to
+## GROWTH_CAP; old age (past AGE_DECLINE years) takes it back a little a year.
+const GROWTH_PER_BATTLE:=0.015
+const GROWTH_FIELD_DAYS:=90
+const GROWTH_PER_SEASON:=0.01
+const GROWTH_CAP:=0.92
+const AGE_DECLINE:=62
+## How much of a commander's skill is their own, and how much the realm's
+## army as a whole lends them (its drill, doctrine, staff).
+const OWN_WEIGHT:=0.75
+## The record a general keeps (all counts): men lost and theirs, the march,
+## hunger and desertion under them, and how they grew.
+const RECORD_KEYS:=["men_lost","enemy_lost","march_km","march_days","hungry_days","deserted","field_days","grown_battles","grown_seasons","aged_years"]
+## What a commander's temperament does to their skills, each a trade-off:
+## the label stays hidden (docs/GENERAL_CAMPAIGN_DESIGN.md); the player sees
+## only the numbers it moves.
+const TEMPERAMENT_SKILLS:={
+	"patient and exacting":{"logistics":0.05,"command":-0.03},
+	"bold and impatient":{"command":0.05,"logistics":-0.05},
+	"generous but proud":{"resolve":0.04,"tactics":-0.03},
+	"skeptical and persistent":{"tactics":0.03,"logistics":0.02,"command":-0.04},
+	"eloquent but restless":{"resolve":0.05,"logistics":-0.04},
+	"quiet and uncompromising":{"command":0.03,"resolve":0.02,"tactics":-0.04},
+	"inventive and stubborn":{"tactics":0.05,"resolve":-0.04},
+	"disciplined but suspicious":{"resolve":0.05,"tactics":-0.03},
+}
 var people:Array[Dictionary]=[]
 var used:Dictionary={}
 var assignments:Dictionary={}
@@ -33,7 +69,7 @@ func ensure()->void:
 		if role not in COMMISSIONED_ROLES: _create(String(role),last_day)
 
 func reset_for_new_world()->void:
-	people.clear(); used.clear(); assignments.clear(); serial=0; initialized=false; last_day=0; last_emergence=0
+	people.clear(); used.clear(); assignments.clear(); serial=0; initialized=false; last_day=0; last_emergence=0; _ids.map={}
 	if is_instance_valid(panel): panel.queue_free()
 
 func _create(role:String,day:int)->Dictionary:
@@ -53,6 +89,8 @@ func _create(role:String,day:int)->Dictionary:
 	var age:=rng.randi_range(24,42)
 	var p:Dictionary={"id":"figure_%d_%d" % [seed_value,serial],"name":identity.name,"tradition":tradition,"gender":"woman" if (serial-1)%2==0 else "man","role":role,"domain":ROLES[role],"born":day-age*365,"emerged":day,"death_day":-1,"natural_death":day+(rng.randi_range(58,86)-age)*365,"status":"living","talent":rng.randf_range(.65,.98),"temperament":TEMPERAMENTS[rng.randi_range(0,TEMPERAMENTS.size()-1)],"motive":MOTIVES[rng.randi_range(0,MOTIVES.size()-1)],"origin":NAMES.ORIGINS[rng.randi_range(0,NAMES.ORIGINS.size()-1)],"upbringing":UPBRINGINGS[rng.randi_range(0,UPBRINGINGS.size()-1)],"turning_point":TURNING_POINTS[role][rng.randi_range(0,1)],"supported":false,"work_days":0,"renown":0,"legacy":0.0,"events":[],"battle_keys":[],"recover_day":-1}
 	people.append(p)
+	_ids.map={}
+	skills_of(p)
 	_event(p,day,"Entered public life as a %s." % role.to_lower())
 	return p
 
@@ -62,10 +100,93 @@ func living_count()->int:
 		if p.status!="dead": count+=1
 	return count
 
+## An id index over the roster, held in an object so the save's reflection
+## of this node's variables never carries it (save_system._capture_reflected
+## skips objects); it is rebuilt from the roster whenever it misses.
+class IdIndex:
+	var map:Dictionary={}
+var _ids:=IdIndex.new()
+
 func by_id(id:String)->Dictionary:
-	for p in people:
-		if p.id==id: return p
-	return {}
+	# Read many times a day (each band's general, each day).
+	var at:Variant=_ids.map.get(id)
+	if at!=null and int(at)<people.size() and String(people[int(at)].id)==id: return people[int(at)]
+	_ids.map={}
+	for i in people.size(): _ids.map[String(people[i].id)]=i
+	at=_ids.map.get(id)
+	return people[int(at)] if at!=null else {}
+
+## A commander figure's own skills, drawn on first need from the figure's own
+## seed (see COMMAND_SKILLS); {} for figures who command nothing.
+func skills_of(p:Dictionary)->Dictionary:
+	if p.is_empty() or not String(p.get("role","")) in COMMAND_ROLES: return {}
+	# A record begins now: age's toll counts from today, never backwards.
+	if not p.get("record") is Dictionary: p["record"]={"aged_years":float(maxi(0,(int(WorldSimulation.state.elapsed_days)-int(p.get("born",0)))/365-AGE_DECLINE))}
+	if p.get("skills") is Dictionary and (p.skills as Dictionary).size()==COMMAND_SKILLS.size(): return p.skills
+	var rng:=RandomNumberGenerator.new(); rng.seed=hash("%d:figure_skills:%s" % [seed_value,String(p.get("id",""))])
+	var mean:=0.40+(clampf(float(p.get("talent",0.8)),0.65,0.98)-0.65)*0.6
+	var skills:={}
+	for key in COMMAND_SKILLS: skills[key]=clampf(rng.randfn(mean,0.10),SKILL_MIN,SKILL_MAX)
+	var strong:=rng.randi_range(0,COMMAND_SKILLS.size()-1)
+	var weak:=posmod(strong+1+rng.randi_range(0,COMMAND_SKILLS.size()-2),COMMAND_SKILLS.size())
+	skills[COMMAND_SKILLS[strong]]=rng.randf_range(0.66,SKILL_MAX)
+	skills[COMMAND_SKILLS[weak]]=rng.randf_range(SKILL_MIN,0.38)
+	var shaped:Dictionary=TEMPERAMENT_SKILLS.get(String(p.get("temperament","")),{})
+	for key in shaped: skills[key]=clampf(float(skills[key])+float(shaped[key]),SKILL_MIN,SKILL_MAX)
+	p["skills"]=skills
+	return skills
+
+## One of a commander's skills as the bands under them get it: their own,
+## with what the realm's army lends (`base`, the acting staff's), patronage
+## and the realm's renowned soldiers.
+func general_skill(p:Dictionary,skill:String,base:Dictionary)->float:
+	var own:=float(skills_of(p).get(skill,float(p.get("talent",.8))*0.6))
+	return clampf(own*OWN_WEIGHT+float(base.get(skill,.5))*(1.0-OWN_WEIGHT)+living_bonus(p)*.2+(multiplier("security")-1.0)*.1,0,1)
+
+## Adds to a general's record (RECORD_KEYS).
+func note_record(id:String,key:String,amount:float)->void:
+	if amount==0.0 or not key in RECORD_KEYS: return
+	var p:=by_id(id)
+	if p.is_empty(): return
+	if not p.get("record") is Dictionary: p["record"]={}
+	var record:Dictionary=p.record
+	record[key]=float(record.get(key,0.0))+amount
+
+## A day in the field for the general of a band (field_sustainment.gd): the
+## days, the march and its pace, hunger; a season in the field grows them.
+func note_field_day(id:String,span:float,marching:bool,km_day:float,hungry:bool)->void:
+	var p:=by_id(id)
+	if p.is_empty() or String(p.get("status",""))=="dead": return
+	if not p.get("record") is Dictionary: p["record"]={}
+	var record:Dictionary=p.record
+	var before:=int(float(record.get("field_days",0.0)))/GROWTH_FIELD_DAYS
+	record["field_days"]=float(record.get("field_days",0.0))+span
+	if marching and km_day>0.0:
+		record["march_days"]=float(record.get("march_days",0.0))+span
+		record["march_km"]=float(record.get("march_km",0.0))+km_day*span
+	if hungry: record["hungry_days"]=float(record.get("hungry_days",0.0))+span
+	var seasons:=int(float(record.field_days))/GROWTH_FIELD_DAYS-before
+	if seasons>0: _grow(p,["logistics","resolve"],GROWTH_PER_SEASON*seasons,"grown_seasons",seasons)
+
+func _grow(p:Dictionary,keys:Array,amount:float,record_key:String,count:int)->void:
+	var skills:=skills_of(p)
+	if skills.is_empty(): return
+	for key in keys:
+		var was:=float(skills.get(key,0.5))
+		skills[key]=maxf(was,minf(GROWTH_CAP,was+amount))
+	var record:Dictionary=p.record
+	record[record_key]=float(record.get(record_key,0.0))+count
+
+## Old age takes a little back each year past AGE_DECLINE (advance()).
+func _age(p:Dictionary,day:int)->void:
+	var skills:=skills_of(p)
+	if skills.is_empty(): return
+	var years:=(day-int(p.born))/365-AGE_DECLINE
+	var record:Dictionary=p.record
+	var done:=int(float(record.get("aged_years",0.0)))
+	if years<=done: return
+	for key in COMMAND_SKILLS: skills[key]=maxf(SKILL_MIN*0.8,float(skills[key])-0.01*(years-done))
+	record["aged_years"]=float(years)
 
 func _event(p:Dictionary,day:int,text:String)->void:
 	p.events.append({"day":day,"text":text})
@@ -89,6 +210,7 @@ func advance(day:int)->void:
 			if years>0:
 				p.renown+=years*2
 				_event(p,end,"Completed %d additional years of supported work: %s." % [years,CALLINGS[p.role]])
+		if String(p.role) in COMMAND_ROLES: _age(p,end)
 		if day>=int(p.natural_death): record_death(String(p.id),int(p.natural_death),"old age")
 	last_day=day
 	if day-last_emergence>=365*5:
@@ -182,11 +304,40 @@ func commander(base:Dictionary,slot:String)->Dictionary:
 		if p.is_empty(): p=_create("General",int(WorldSimulation.state.elapsed_days))
 		if p.is_empty(): return base.duplicate(true)
 		assignments[slot]=p.id
+	return commander_record(p,base)
+
+## The commander record a figure makes (their own skills, general_skill):
+## what commander() puts on a band and leader_commands reads for a general.
+func commander_record(p:Dictionary,base:Dictionary)->Dictionary:
 	var result:=base.duplicate(true)
 	result.name=p.name; result["figure_id"]=p.id; result["institutional"]=false
-	for skill in ["command","tactics","logistics","resolve"]:
-		result[skill]=clampf(float(base.get(skill,.5))*.75+float(p.talent)*.25+living_bonus(p)*.2+(multiplier("security")-1.0)*.1,0,1)
+	result.erase("acting")
+	for skill in COMMAND_SKILLS: result[skill]=general_skill(p,skill,base)
+	# The own skills this record was drawn from: a band's record is drawn again
+	# when they change (leader_commands.sync_commanders).
+	result["own_skills"]=skills_of(p).duplicate()
 	return result
+
+## A force's general's record drawn again when stale: their own skills have
+## changed since it was drawn (they grew, or the save is older than generals'
+## own skills). `host` is the force's MilitaryCampaign; `base` caches its
+## acting staff's record across calls. True when redrawn.
+func sync_force(host:Node,force:Dictionary,base:Variant=null)->bool:
+	var commander:Dictionary=force.get("commander",{}) if force.get("commander") is Dictionary else {}
+	var id:=String(commander.get("figure_id",""))
+	if id=="": return false
+	var person:=by_id(id)
+	if person.is_empty() or String(person.get("status",""))=="dead": return false
+	var own:=skills_of(person)
+	if own.is_empty() or (commander.get("own_skills") is Dictionary and (commander.own_skills as Dictionary)==own): return false
+	var lent:Dictionary=base if base is Dictionary else {}
+	if lent.is_empty(): lent.merge(host._acting_field_commander(false))
+	var fresh:=commander_record(person,lent)
+	# Keep what the record says about the force's own standing.
+	for key in ["office","institutional"]:
+		if commander.has(key) and not fresh.has(key): fresh[key]=commander[key]
+	force["commander"]=fresh
+	return true
 
 ## The named commander of a fleet or air wing (role "Admiral" or "Air
 ## Commander"): the living holder of `slot`, or a new figure from the realm's
@@ -226,6 +377,12 @@ func record_battle(result:Dictionary)->void:
 		p.battle_keys.append(key)
 		if p.battle_keys.size()>64: p.battle_keys.pop_front()
 		p.renown+=3
+		# Their record: our men lost under them and theirs, and a battle's
+		# lessons in command and tactics.
+		var other:Dictionary=result.get("defender" if side=="attacker" else "attacker",{})
+		note_record(String(p.id),"men_lost",float(maxi(0,int(force.get("casualties",0)))))
+		note_record(String(p.id),"enemy_lost",float(maxi(0,int(other.get("casualties",0)))))
+		_grow(p,["command","tactics"],GROWTH_PER_BATTLE,"grown_battles",1)
 		# Won or lost, by who broke (a fight nobody broke is neither).
 		var defeated:=String(term.get("defeated",""))
 		if defeated!="":
@@ -267,6 +424,17 @@ func import_state(state:Dictionary)->Dictionary:
 		if p.domain!=ROLES[p.role] or float(p.talent)<0 or float(p.talent)>1 or float(p.legacy)<0 or float(p.legacy)>.12 or int(p.work_days)<0 or int(p.renown)<0: return {"error":"Invalid figure contribution."}
 		for event in p.events:
 			if not event is Dictionary or not event.has_all(["day","text"]): return {"error":"Invalid figure event."}
+		# A commander's own skills and record (optional: older saves draw them on load).
+		if p.has("skills"):
+			if not p.skills is Dictionary or p.skills.size()>COMMAND_SKILLS.size(): return {"error":"Invalid figure skills."}
+			for skill in p.skills:
+				if not String(skill) in COMMAND_SKILLS or not (p.skills[skill] is float or p.skills[skill] is int) or not is_finite(float(p.skills[skill])) or float(p.skills[skill])<0.0 or float(p.skills[skill])>1.0: return {"error":"Invalid figure skill."}
+		if p.has("record"):
+			if not p.record is Dictionary or p.record.size()>RECORD_KEYS.size(): return {"error":"Invalid figure record."}
+			for key in p.record:
+				if not String(key) in RECORD_KEYS or not (p.record[key] is float or p.record[key] is int) or not is_finite(float(p.record[key])) or float(p.record[key])<0.0: return {"error":"Invalid figure record entry."}
+		for count_key in ["battles_won","battles_lost"]:
+			if p.has(count_key) and (not (p[count_key] is int or p[count_key] is float) or int(p[count_key])<0): return {"error":"Invalid figure battle count."}
 		if p.status!="dead": alive+=1
 		ids[p.id]=true; names[p.name]=true
 	if alive>MAX_LIVING or int(state.get("serial",0))<state.people.size(): return {"error":"Invalid figure count."}
@@ -275,6 +443,12 @@ func import_state(state:Dictionary)->Dictionary:
 		if not ids.has(id): return {"error":"Unknown assigned figure."}
 	people.assign(state.people.duplicate(true)); used=names; assignments=state.get("assignments",{}).duplicate(true)
 	serial=int(state.get("serial",people.size())); last_day=int(state.get("last_day",0)); last_emergence=int(state.get("last_emergence",0)); seed_value=WorldSimulation.state.world_seed; initialized=true
+	_ids.map={}
+	# Commanders saved before they had skills of their own draw them now, from
+	# their own seed, the same as they would have been drawn.
+	for p in people:
+		if not (p.get("skills") is Dictionary and (p.skills as Dictionary).size()==COMMAND_SKILLS.size()): p.erase("skills")
+		skills_of(p)
 	return {"ok":true}
 
 func _unhandled_key_input(event:InputEvent)->void:

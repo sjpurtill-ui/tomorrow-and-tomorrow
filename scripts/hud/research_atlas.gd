@@ -336,7 +336,7 @@ func select(id:String,open_detail:bool=false)->void:
 			var who:=VBoxContainer.new();who.size_flags_horizontal=Control.SIZE_EXPAND_FILL;who.alignment=BoxContainer.ALIGNMENT_CENTER;row.add_child(who)
 			Art.label(who,"WHO LEADS IT",12,T.MUTED);Art.label(who,leader.name,18,T.INK,true).add_theme_font_override("font",Art.voice_font())
 			Art.label(who,String(leader.office)+(" · acting for "+String(leader.requested_office) if leader.acting else ""),12,T.TEXT_SOFT,true)
-			Art.label(detail_body,"Good at: "+", ".join(leader.skills).to_lower(),12,T.TEXT_SOFT,true)
+			Art.label(detail_body,_leader_line(leader),12,T.TEXT_SOFT,true)
 			if assignment.active:
 				Art.label(detail_body,Art.team_sentence(item),18,T.INK,true).add_theme_font_override("font",Art.voice_font())
 				Art.label(detail_body,"About %d in every 100 hours our people spend on learning go to this." % maxi(1,roundi(float(assignment.capacity.workforce_share)*100)),12,T.MUTED,true)
@@ -387,7 +387,7 @@ func select(id:String,open_detail:bool=false)->void:
 			Art.label(detail_body,"WHAT IT DOES" if item.known else "WHAT IT WOULD DO",12,T.GOLD_TEXT)
 			var ledger:VBoxContainer=Ledger.new();detail_body.add_child(ledger)
 			ledger.setup({"state":effect_state,"rows":Explainer.discovery_rows(String(item.id),bool(item.known)),
-				"intro":"Open an effect to see everywhere it acts." if item.known else "At full use. A new practice starts with about 3 in 100 households and spreads over years. Open an effect to see everywhere it would act."})
+				"intro":"Open an effect to see everywhere it acts." if item.known else "At full use. Tried in a few households before it is proven, a new practice starts with about 15 in 100 households and spreads over years. Open an effect to see everywhere it would act."})
 		if not item.requires.is_empty():
 			Art.label(detail_body,"BUILDS ON",12,T.MUTED)
 			for req:String in item.requires:
@@ -492,6 +492,25 @@ func _discovery_date(item:Dictionary)->String:
 	return "LEARNED · "+EraWords.when(absolute_day).to_upper()
 static func _first_upper(text:String)->String:
 	return text.left(1).to_upper()+text.substr(1)
+
+## The leader's own skills in what this line needs, and how much faster (or
+## slower) it goes under them than under an ordinary holder of the office
+## (office_levers.research_pace: the engine's own execution).
+static func _leader_line(leader:Dictionary)->String:
+	var needs:Array=leader.get("skills",[])
+	var office:=String(leader.get("office",""))
+	if bool(leader.get("vacant",false)):
+		var empty:=preload("res://scripts/office_levers.gd").research_pace({},office,needs)
+		return "Needs %s. With nobody to lead it, it goes %d%% slower than under an ordinary %s." % [", ".join(PackedStringArray(needs)).to_lower(),roundi(absf(1.0-empty)*100.0),String(leader.get("requested_office",office)).to_lower()]
+	var person:Dictionary=GovernmentPeopleSystem.person_snapshot(int(leader.get("person_id",0)))
+	if person.is_empty(): return "Needs %s." % ", ".join(PackedStringArray(needs)).to_lower()
+	var theirs:PackedStringArray=PackedStringArray()
+	for skill in needs: theirs.append("%s %d" % [String(skill).to_lower(),roundi(GovernmentPeopleSystem.skill_value(person,String(skill)))])
+	var pace:=preload("res://scripts/office_levers.gd").research_pace(person,office,needs)
+	var pct:=roundi(absf(pace-1.0)*100.0)
+	var given:=String(person.get("name","")).get_slice(" ",0)
+	var speed:="as fast as under an ordinary leader" if pct==0 else "%d%% %s than under an ordinary leader (skills 47)" % [pct,"faster" if pace>=1.0 else "slower"]
+	return "%s's %s: this line goes %s." % [given,", ".join(theirs),speed]
 func _discovery_sentence(item:Dictionary)->String:
 	var absolute_day:=int(item.get("discovered_day",-1))
 	if absolute_day<0:return "Known since before we set out."

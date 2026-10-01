@@ -380,7 +380,8 @@ static func player_marker(army:Dictionary,camera_size:float,selected:bool=false)
 	var band:=scale_band(camera_size)
 	var troops:=maxi(0,int(army.get("troops",0)))
 	var readiness:=clampf(float(army.get("readiness",0.0)),0.0,1.25)
-	var supply:=clampf(float(army.get("supply_level",0.0)),0.0,1.0)
+	# The one supply number (supply_state.gd fed): what the band ate that day.
+	var supply:=clampf(float(army.get("provision_ratio",army.get("supply_level",0.0))),0.0,1.0)
 	var moving:=String(army.get("status","stationed"))=="moving"
 	var destination:=String(army.get("destination_name",army.get("location_name","HOME"))) if moving else String(army.get("location_name","HOME"))
 	var readiness_text:=readiness_band(readiness)

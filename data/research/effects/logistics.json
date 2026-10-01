@@ -959,6 +959,63 @@
     "cohesion": 0.0027,
     "route_speed": 0.0103
    }
+  },
+  "relay_trade_gemstones": {
+   "art": "res://assets/ui/research/subjects/long_distance_axe_trade-v1.png"
+  },
+  "one_measure_sacks": {
+   "art": "res://assets/ui/research/subjects/load_bundling_by_weight-v1.png"
+  },
+  "hired_local_guides": {
+   "art": "res://assets/ui/research/subjects/alternate_route_scouting-v1.png"
+  },
+  "storerooms_by_kind": {
+   "art": "res://assets/ui/research/subjects/stock_layering_method-v1.png"
+  },
+  "village_track_upkeep": {
+   "art": "res://assets/ui/research/subjects/communal_upkeep_scheduling-v1.png"
+  },
+  "chiefs_gift_trade_paths": {
+   "art": "res://assets/ui/research/subjects/trade_colonies-v1.png"
+  },
+  "granaries_on_high_ground": {
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png"
+  },
+  "jars_bedded_in_floor": {
+   "art": "res://assets/ui/research/subjects/layered_pit_storage-v1.png"
+  },
+  "island_market_trade": {
+   "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png"
+  },
+  "grain_rated_boats": {
+   "art": "res://assets/ui/research/subjects/towpaths-v1.png"
+  },
+  "keeper_liability_stores": {
+   "art": "res://assets/ui/research/subjects/cache_capacity_accounting-v1.png"
+  },
+  "funded_trade_journeys": {
+   "art": "res://assets/ui/research/subjects/market_timing_knowledge-v1.png"
+  },
+  "itinerary_stop_lists": {
+   "art": "res://assets/ui/research/subjects/waystation_spacing_judgment-v1.png"
+  },
+  "rented_store_space": {
+   "art": "res://assets/ui/research/subjects/storage_humidity_judging-v1.png"
+  },
+  "ice_pit_house": {
+   "art": "res://assets/ui/research/subjects/layered_pit_storage-v1.png"
+  },
+  "standard_pack_loads": {
+   "art": "res://assets/ui/research/subjects/convoy_load_distribution-v1.png"
+  },
+  "return_loads": {
+   "art": "res://assets/ui/research/subjects/towpaths-v1.png"
+  },
+  "agent_sale_accounts": {
+   "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"
+  },
+  "cool_jar_magazines": {
+   "art": "res://assets/ui/research/subjects/marked_wine_jars-v1.png"
   }
  },
  "art_proposals": {

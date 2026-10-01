@@ -6,8 +6,8 @@ extends Control
 ## band, army or garrison, or the levy is fighting at home (shown_cards), and
 ## laid from the left edge so it never sits over the middle of the map. A card shows the general's
 ## face and name, the men, three bars (gear, will to fight, supply) and one
-## state glyph. Click finds the army and selects it; double-click opens its
-## orders (the army command panel, or a held town's own view). An army of
+## state glyph. Click finds the army and selects it; double-click opens the
+## War screen (or a held town's own view): bands are not ordered by hand. An army of
 ## several bands lists them in a small row above the bar when selected.
 ## Hovering a bar says what it means and what holds it back; clicking a short
 ## gear bar opens production. Numbers only; the sentences live in tooltips.
@@ -246,11 +246,10 @@ func open_card(card:Dictionary)->void:
 	if String(card.kind)=="garrison":
 		preload("res://scripts/hud/occupation_view.gd").open(String(card.civ_id),String(card.region_id))
 	else:
-		var screen:Variant=MilitaryCampaign.joint_operations.screen
-		if not (is_instance_valid(screen) and String(screen.get("domain"))=="army"):
-			MilitaryCampaign.joint_operations.open_hierarchy("army")
-			screen=MilitaryCampaign.joint_operations.screen
-		if is_instance_valid(screen) and screen.has_method("choose_force"):screen.choose_force(int(card.get("army_id",0)))
+		# Grand strategy: a band is not ordered by hand. A double-click opens
+		# the War screen, where the ruler sets how many serve and what to do
+		# about each enemy; the generals do the rest.
+		MilitaryCampaign.open_roster("army")
 	army_opened.emit(card)
 
 
@@ -351,7 +350,7 @@ class ArmyCard extends Control:
 			if rect.has_point(at):
 				match row:
 					0:return Model.gear_words(card.get("gear_detail",{}))
-					1:return Model.will_words(float(card.will))+"\nBelow a quarter they break."
+					1:return Model.will_words(float(card.will))+"\nA band %s." % preload("res://scripts/army_lines.gd").BREAK_WORDS
 					2:return Model.supply_line(card)
 		return Model.tooltip(card)
 

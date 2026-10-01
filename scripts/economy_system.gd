@@ -624,7 +624,8 @@ func _tax_capacity_for(rate:float,trade_volume:float,monetization:float,private_
 	var inequality:=clampf(float(WorldSimulation.state.economy_metrics.get("inequality",0.32)),0.0,1.0)
 	var arrears_ratio:=clampf((WorldSimulation.state.civil_arrears+WorldSimulation.state.military_arrears)/maxf(1.0,WorldSimulation.state.population_exact*0.15),0.0,1.0)
 	var rate_strain:=maxf(0.0,statutory_rate-0.10)*1.80+maxf(0.0,statutory_rate-0.18)*1.50
-	var compliance:=clampf(0.38+admin_coverage*0.20+legitimacy*0.18+institutions*0.12+records*0.10-inequality*0.08-arrears_ratio*0.15-rate_strain,0.18,0.98)
+	# The treasurer's hand on who pays (office_levers.gd: -4 to +6 in 100).
+	var compliance:=clampf(0.38+admin_coverage*0.20+legitimacy*0.18+institutions*0.12+records*0.10-inequality*0.08-arrears_ratio*0.15-rate_strain+preload("res://scripts/office_levers.gd").value("Treasurer"),0.18,0.98)
 	var taxable_exchange:=maxf(0.0,trade_volume)*clampf(monetization,0.0,1.0)
 	var statutory_assessment:=taxable_exchange*statutory_rate
 	var administratively_assessed:=statutory_assessment*admin_coverage

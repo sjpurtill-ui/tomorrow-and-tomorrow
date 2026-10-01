@@ -243,6 +243,14 @@
     {"say": "Let the women go", "ideal": {"kind": "order", "action": "town_measure", "type": "group", "ref": "$tsaren", "details": {"measures": ["release"]}, "confidence": 0.85},
      "expect": {"verb": "war", "verdict": "fate", "state": {"bound_women": "==0", "bound_men": "==before", "m_bind_men": "==1"}}}]},
 
+  {"id": "measure.punish_them.held", "domain": "town_measure", "fixture": "tsaren_captured", "speaker": "suri", "source": "design",
+   "note": "'Punish them' said of the people of a town we hold is the garrison's business, not a raid (punish is also the war council's raid word): the war leader asks once which punishment, with choices, and nothing is done yet.",
+   "steps": [
+    {"say": "How many people are in Tsaren now?", "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
+     "expect": {"handled": false, "known": true}},
+    {"say": "Punish them", "ideal": {"kind": "order", "action": "town_measure", "type": "town", "ref": "$tsaren", "details": {"measures": ["execute_ringleaders"]}, "confidence": 0.5},
+     "expect": {"asks": true, "state": {"killed": "==before", "bound": "==before", "moving": "==before", "stance_esurai": "==before"}, "offline": {"verb": "war", "kind": "town_word", "verdict": "ask"}}}]},
+
   {"id": "grave.kill_men_enslave_women", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design", "sloppy": true,
    "note": "Enslaving the women is the captives' road home in bonds; they are never killed with the men.",
    "say": "Kill the men and enslave the women",
@@ -337,9 +345,10 @@
    "expect": {"handled": false, "known": true, "reply_any": ["nobody", "no one", "ruin"], "prompt_has": ["nobody of ours holds it"]}},
 
   {"id": "facts.who_holds.headman", "domain": "town_facts", "fixture": "tsaren_captured", "speaker": "headman", "source": "user",
+   "note": "The garrison Rovik's band left serves under the war leader at home (Suri); Rovik stays with his band.",
    "say": "Who holds Tsaren?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false, "known": true, "reply_any": ["Rovik", "{garrison}"], "prompt_has": ["our garrison {garrison} under Rovik Longstride"]}},
+   "expect": {"handled": false, "known": true, "reply_any": ["Suri", "{garrison}"], "prompt_has": ["our garrison {garrison} under Suri Ashvale"]}},
 
   {"id": "war.full_forces.suri", "domain": "war_march", "fixture": "war_not_held", "speaker": "suri", "source": "user",
    "say": "send our full forces into battle on Tsaren",
@@ -407,6 +416,11 @@
    "say": "Raid their fields",
    "ideal": {"kind": "order", "action": "raid", "type": "people", "ref": "$esurai", "confidence": 0.9},
    "expect": {"verb": "war", "kind": "raid", "verdict": ["act", "object"]}},
+
+  {"id": "war.punish_town.suri", "domain": "war_march", "fixture": "war_not_held", "speaker": "suri", "source": "design",
+   "note": "'Punish' at a town of theirs is a raid, the stance Punish toward its people (war_council.gd), never a measure on a town we hold.",
+   "say": "Punish Stonefield", "ideal": {"kind": "order", "action": "raid", "type": "town", "ref": "$stonefield", "confidence": 0.9},
+   "expect": {"verb": "war", "kind": "raid", "verdict": ["act", "object"], "state": {"stance_esurai": "=='punish'"}}},
 
   {"id": "war.conquer_now.suri", "domain": "war_march", "fixture": "war_not_held", "speaker": "suri", "source": "user",
    "say": "Go and conquer Tsaren right now",
@@ -992,9 +1006,10 @@
    "expect": {"handled": false, "known": true, "reply_any": ["Tsaren"], "prompt_has": ["ROVIK'S BAND"]}},
 
   {"id": "q.who_holds.suri", "domain": "office_questions", "fixture": "tsaren_captured", "speaker": "suri", "source": "user",
+   "note": "The garrison Rovik's band left serves under the war leader at home (Suri); Rovik stays with his band.",
    "say": "Who holds Tsaren?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false, "known": true, "reply_any": ["Rovik", "{garrison}"], "prompt_has": ["our garrison {garrison} under Rovik Longstride"]}},
+   "expect": {"handled": false, "known": true, "reply_any": ["Suri", "{garrison}"], "prompt_has": ["our garrison {garrison} under Suri Ashvale"]}},
 
   {"id": "q.ford.suri", "domain": "office_questions", "fixture": "battle_won", "speaker": "suri", "source": "user",
    "say": "What happened at the ford?",
@@ -1190,7 +1205,7 @@
 
   {"id": "off.exile.family", "domain": "officials", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "Exile Kavu and his whole family", "ideal": {"kind": "order", "action": "exile", "type": "person", "ref": "$kavu", "confidence": 0.92}, "expect": {"harm_ok": ["kavu"], "verb": "exile", "target": "kavu", "state": {"status_kavu": "=='exiled'"}}},
 
-  {"id": "off.dismiss.who_now", "domain": "officials", "fixture": "home_peace", "speaker": "suri", "source": "design", "note": "The council as it stands is common knowledge: the new keeper is named.", "steps": [{"say": "Dismiss Kavu", "ideal": {"kind": "order", "action": "demote", "type": "person", "ref": "$kavu", "confidence": 0.92}, "expect": {"harm_ok": ["kavu"], "state": {"office_kavu": "==''"}}}, {"say": "Who keeps the stores now?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_any": ["Emmet"], "prompt_has": ["Council:"]}}]},
+  {"id": "off.dismiss.who_now", "domain": "officials", "fixture": "home_peace", "speaker": "suri", "source": "design", "note": "The council as it stands is common knowledge: the new keeper (the ablest the council knows, by the stated succession rule) is named.", "steps": [{"say": "Dismiss Kavu", "ideal": {"kind": "order", "action": "demote", "type": "person", "ref": "$kavu", "confidence": 0.92}, "expect": {"harm_ok": ["kavu"], "state": {"office_kavu": "==''"}}}, {"say": "Who keeps the stores now?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"handled": false, "known": true, "reply_any": ["Iwen"], "prompt_has": ["Council:"]}}]},
 
   {"id": "sum.best_hunter", "domain": "summon", "fixture": "home_peace", "speaker": "headman", "source": "design", "say": "Who is the best hunter?", "ideal": {"kind": "question", "action": "none", "type": "none"}, "expect": {"state": {"known": ">before", "waiting": "==before"}, "reply_has": ["hunter"]}, "variants": ["who's the best hunter here", "Who is our finest hunter?"]},
 
@@ -1498,6 +1513,12 @@
    "say": "Go to war with the Neyali", "ideal": {"kind": "order", "action": "attack", "type": "people", "ref": "$neyali", "confidence": 0.9},
    "expect": {"verb": "war", "kind": "track", "verdict": "act", "state": {"trackers": ">before", "at_war": "==before", "moving": "==before"}, "says_lacks": ["declare", "too few", "cannot", "No scout has brought back"]},
    "variants": ["Declare war on them", "Attack them", "declare war on the neyali!"]},
+
+  {"id": "feud.punish.suri", "domain": "feud", "fixture": "feud_unfound", "speaker": "suri", "source": "design",
+   "note": "'Punish' at a people we feud with is the feud's strike, the stance Punish (war_council.gd), never a measure on a town of ours: nobody knows where the Neyali live, so a few trackers go first, said once in plain words, and the stance stands so the band goes when the way is found.",
+   "say": "Punish the Neyali", "ideal": {"kind": "order", "action": "raid", "type": "people", "ref": "$neyali", "confidence": 0.9},
+   "expect": {"verb": "war", "kind": "track", "verdict": "act", "state": {"trackers": ">before", "stance": "=='punish'", "at_war": "==before", "moving": "==before"}, "says_has": ["Nobody here knows where the Neyali live", "raiders' trail", "When the way is found, the war band goes"], "says_lacks": ["No one here knows", "cannot", "Suri takes"]},
+   "variants": ["Punish their raiders", "punish the neyali for the raid"]},
 
   {"id": "fn.deploy_band", "domain": "functions", "fixture": "home_peace", "speaker": "suri", "source": "design",
    "say": "Form a war band of 8 of the fighters at home",

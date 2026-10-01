@@ -809,6 +809,48 @@
     "trade_capacity": 0.0003
    },
    "observation": "A row of timber columns on stone bases carries a shady roof along the court, where people meet, wait and trade."
+  },
+  "seasonal_wall_replastering": {
+   "art": "res://assets/ui/research/subjects/bracing_inspection_rounds-v1.png"
+  },
+  "raised_wet_causeways": {
+   "art": "res://assets/ui/research/subjects/flood_levees-v1.png"
+  },
+  "stone_pivot_doors": {
+   "art": "res://assets/ui/research/subjects/dwelling_site_orientation-v1.png"
+  },
+  "gravelled_main_streets": {
+   "art": "res://assets/ui/research/subjects/graded_roads-v1.png"
+  },
+  "street_corner_wells": {
+   "art": "res://assets/ui/research/subjects/protected_wellheads-v1.png"
+  },
+  "bank_breach_closing": {
+   "art": "res://assets/ui/research/subjects/flood_levees-v1.png"
+  },
+  "spare_rebuilding_timber": {
+   "art": "res://assets/ui/research/subjects/distant_timber_reserves-v1.png"
+  },
+  "building_plan_tablets": {
+   "art": "res://assets/ui/research/discovery-600/geometric_survey.png"
+  },
+  "sand_bed_foundations": {
+   "art": "res://assets/ui/research/subjects/ground_bearing_assessment-v1.png"
+  },
+  "dyke_high_water_watch": {
+   "art": "res://assets/ui/research/subjects/storm_response_drill-v1.png"
+  },
+  "dyke_stretch_duty": {
+   "art": "res://assets/ui/research/subjects/communal_upkeep_scheduling-v1.png"
+  },
+  "brick_count_reckoning": {
+   "art": "res://assets/ui/research/subjects/corbelled_vaults-v1.png"
+  },
+  "fallen_brick_reuse": {
+   "art": "res://assets/ui/research/subjects/post_disaster_damage_survey-v1.png"
+  },
+  "window_grilles": {
+   "art": "res://assets/ui/research/subjects/courtyard_houses-v1.png"
   }
  },
  "balance_600": {

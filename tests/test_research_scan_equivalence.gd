@@ -234,7 +234,9 @@ func _foundation_reference(discovery:Node,dynamic_id:String,current_day:int)->Ar
 			visited[id]=true
 			var foundation:Dictionary=discovery.discovery_definition(id)
 			if foundation.is_empty() or not discovery.research_600_open(foundation,{},current_day):continue
-			if discovery._discovery_is_eligible(foundation,current_day,known):found[id]=discovery.research_open_year(foundation)
+			if discovery._discovery_is_eligible(foundation,current_day,known):
+				# Foundation work keeps near its age (DiscoverySystem.NEAR_AGE_YEARS).
+				if discovery.research_years_ahead(foundation,float(current_day)/365.0)<discovery.NEAR_AGE_YEARS:found[id]=discovery.research_open_year(foundation)
 			else:next.append_array(discovery._research_600_missing_parents(foundation,known))
 		frontier=next
 		depth+=1
@@ -272,6 +274,7 @@ func test_research_bookkeeping_never_enters_saves()->void:
 		discovery.refresh_investigations()
 		var captured:=SaveSystem._capture_reflected(discovery,SaveSystem.REFLECT_SKIP.get("DiscoverySystem",[]))
 		assert_bool(captured.has("_scan")).is_false()
+		assert_bool(captured.has("_team_memo")).is_false()
 		var society:=SaveSystem._capture_reflected(discovery.society_model,SaveSystem.SOCIETY_REFLECT_SKIP)
 		for name:String in ["_today","_lower_keys","_tech_keys","_early_keys"]:assert_bool(society.has(name)).is_false()
 	)

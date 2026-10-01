@@ -90,22 +90,34 @@ static func _war()->Array:
 	out.append(_menu("Raise a levy","RaiseLevy",levy))
 	out.append(_menu("Drill","Drill",[_item("Hard","Drill the army hard"),_item("As before","Train the army as before"),_item("Lightly","Train the fighters lightly"),_item("Stop","Stop all training")]))
 	out.append(_one("Camp drill","CampDrill","Hold a camp drill for the fighters at home"))
-	var band:Array=[]
-	for n in [5,10]: band.append(_item("%d fighters" % n,"Form a war band of %d of the fighters at home" % n))
-	band.append(_item("Everyone at home","Form a war band of all the fighters at home"))
-	out.append(_menu("Form a band","FormBand",band))
-	var home:Array=[]
-	for n in [3,5,10]: home.append(_item("%d fighters" % n,"Send %d of the soldiers home" % n))
-	out.append(_menu("Send home","SendHome",home))
-	out.append(_one("Guard the camp","GuardCamp","Guard the camp"))
+	# The stance toward each people we fight, as the War screen gives it: the
+	# war council carries it out with the real army (war_council.gd). The war
+	# leader sees to who goes, the road and the fight.
+	var toward:Array=[]
+	var war_loop:GDScript=load("res://scripts/war_loop.gd")
+	if WorldSimulation.world!=null:
+		for c in WorldSimulation.world.civilizations:
+			if not c is Dictionary or String((c as Dictionary).get("id",""))=="player" or not bool((c as Dictionary).get("alive",true)): continue
+			var id:=String((c as Dictionary).get("id",""))
+			var rel:Dictionary=(c as Dictionary).get("player_relation",{}) if (c as Dictionary).get("player_relation") is Dictionary else {}
+			if not bool(rel.get("at_war",false)) and not bool(war_loop.call("feuding",id)): continue
+			var people:=String((c as Dictionary).get("name",""))
+			if people=="": continue
+			var the:="the "+people.trim_prefix("The ").trim_prefix("the ")
+			toward.append(_item("%s: defend" % people,"Defend us against %s" % the))
+			toward.append(_item("%s: punish" % people,"Punish %s" % the))
+			toward.append(_item("%s: seek peace" % people,"Make peace with %s" % the))
+			if toward.size()>=12: break
+	if not toward.is_empty(): out.append(_menu("Toward them","Toward",toward))
 	var strike:Array=[]
 	for town in WarOrders.known_places():
-		var name:=String((town as Dictionary).get("name",""))
+		var name:=String((town as Dictionary).get("name","")).trim_prefix("Reported home of ")
 		if name=="": continue
-		strike.append(_item("Attack %s" % name,"Attack %s" % name))
+		strike.append(_item("Take %s" % name,"Take %s" % name))
 		strike.append(_item("Raid %s's fields" % name,"Raid the fields of %s" % name))
 		if strike.size()>=10: break
 	if not strike.is_empty(): out.append(_menu("Strike","Strike",strike))
+	out.append(_one("Keep the soldiers home","GuardCamp","Defend our home with the soldiers"))
 	if WorldSimulation.military!=null and not (WorldSimulation.military.field_armies as Array).is_empty():
 		out.append(_one("Bring the bands home","BandsHome","Bring all the bands home"))
 	return out

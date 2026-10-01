@@ -44,6 +44,10 @@ func _relation()->Dictionary:
 	return (CivilizationSystem.civilizations[0].relations as Dictionary).get(second_id,{})
 
 func test_a_raid_between_simulated_peoples_costs_both_real_ledgers()->void:
+	# Peoples of 400, so the raid is fought by bands of a dozen or more: a
+	# raid of five against three now ends when one band breaks at a quarter
+	# of its will (army_lines.gd), often with nobody killed.
+	for index in 2: CivilizationSystem.civilizations[index].population=400.0
 	var before_a:=_population(first_id)
 	var before_d:=_population(second_id)
 	var regard_before:=_their_opinion_of_raiders()

@@ -2869,6 +2869,7 @@ func _war_leader_entry()->Dictionary:
 	var general:=WarOrders.war_leader()
 	for entry in Roster.people():
 		if int((entry.get("person",{}) as Dictionary).get("person_id",0))>0 and int(entry.person.person_id)==int(general.get("person_id",-1)): return entry
+		if String(general.get("figure_id",""))!="" and String((entry.get("target",{}) as Dictionary).get("figure_id",""))==String(general.figure_id): return entry
 	for entry in Roster.people():
 		if String(entry.get("group",""))=="generals": return entry
 	return {}

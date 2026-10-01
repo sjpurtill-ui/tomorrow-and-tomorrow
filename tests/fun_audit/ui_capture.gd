@@ -80,7 +80,6 @@ func _measure(label:String)->void:
 
 func _clear()->void:
 	if terrain.game_speed<=0.0:
-		if terrain.military_attention_dialog and is_instance_valid(terrain.military_attention_dialog):terrain.military_attention_dialog.queue_free()
 		preload("res://scripts/hud/simulation_pause.gd").owners.erase(terrain.get_instance_id())
 		terrain._set_game_speed(5)
 	_close_modals()

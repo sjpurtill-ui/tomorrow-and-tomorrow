@@ -363,6 +363,8 @@ static func ingest_day(day_result:Dictionary)->void:
 	_flush_learned(c,int(GameState.elapsed_days))
 	for discovery in day_result.get("discoveries",[]):
 		if discovery is Dictionary:_discovery(discovery)
+	# Steps to proof (first cases, repeated) are lines in the season's tally.
+	for step in DiscoverySystem.take_research_steps():_research_step(step)
 	for progress in day_result.get("progression",[]):
 		if not progress is Dictionary:continue
 		var p:Dictionary=progress
@@ -401,6 +403,10 @@ static func _discovery(event:Dictionary)->void:
 	if id.is_empty() or id not in GameState.known_discoveries:return
 	var c:=data()
 	if (c.keys as Dictionary).has("discovery:"+id):return
+	# Proven: its steps this season are told by its proof.
+	var pending:Array=(c.get("learned",{}) as Dictionary).get("steps",[])
+	for step:Variant in pending.duplicate():
+		if step is Dictionary and String((step as Dictionary).get("id",""))==id:pending.erase(step)
 	var shown:Dictionary=DiscoverySystem.player_facing_discovery_event(event)
 	var dynamic:=String(shown.get("dynamic",_dynamic_of(id)))
 	var firsts:Dictionary=c.firsts
@@ -433,6 +439,46 @@ static func _discovery(event:Dictionary)->void:
 	if String(entry.get("tier",""))=="moment":(c.moment_ids as Dictionary)[id]=true
 
 
+## A question under way reached a step to proof: kept for the season's tally
+## (_flush_learned), never told on its own.
+static func _research_step(step:Dictionary)->void:
+	var id:=String(step.get("id",""))
+	if id.is_empty() or id in GameState.known_discoveries:return
+	var c:=data()
+	var learned:Dictionary=c.get("learned",{})
+	var season:=season_of(int(step.get("day",int(GameState.elapsed_days))))
+	if learned.is_empty() or int(learned.get("season",season))!=season:
+		_flush_learned(c)
+		learned={"season":season,"ids":[],"names":[],"fields":[]}
+	var steps:Array=learned.get("steps",[])
+	for kept:Variant in steps:
+		# A question that went on to its next step this season is told once, at it.
+		if kept is Dictionary and String((kept as Dictionary).get("id",""))==id:steps.erase(kept);break
+	steps.append({"id":id,"name":String(step.get("name",id)),"stage":int(step.get("stage",1)),"share":float(step.get("share",0.0)),"dynamic":String(step.get("dynamic",""))})
+	learned["steps"]=steps
+	c["learned"]=learned
+
+
+## The season's steps to proof in plain words: "First cases held for clay
+## tempering: 5 in 100 households try it. Ox yokes held up when repeated: 15 in
+## 100 households use them."
+static func _steps_text(steps:Array)->String:
+	var parts:PackedStringArray=[]
+	for stage in [1,2]:
+		var names:Array=[]
+		var share:=0.0
+		for step:Variant in steps:
+			if not step is Dictionary or int((step as Dictionary).get("stage",1))!=stage:continue
+			names.append(String((step as Dictionary).get("name","")).to_lower())
+			share=maxf(share,float((step as Dictionary).get("share",0.0)))
+		if names.is_empty():continue
+		var households:=roundi(share*100.0)
+		var many:=names.size()>1
+		if stage==1:parts.append("First cases held for %s: %d in 100 households try %s." % [_list(names),households,"them" if many else "it"])
+		else:parts.append("%s held up when repeated: %d in 100 households use %s." % [_list(names).left(1).to_upper()+_list(names).substr(1),households,"them" if many else "it"])
+	return " ".join(parts)
+
+
 ## A field of knowledge in the people's words ("food & foraging" before farming).
 static func field_name(dynamic:String)->String:
 	if dynamic=="nutrition" and not preload("res://scripts/character_voice.gd").era_tags("player").has("farming"):return "food & foraging"
@@ -450,23 +496,29 @@ static func season_of(day:int)->int:
 ## its own moment.
 static func _flush_learned(c:Dictionary,today:int=-1)->Dictionary:
 	var learned:Dictionary=c.get("learned",{})
-	if learned.is_empty() or (learned.get("ids",[]) as Array).is_empty():
+	var steps:Array=learned.get("steps",[])
+	if learned.is_empty() or ((learned.get("ids",[]) as Array).is_empty() and steps.is_empty()):
 		c.erase("learned");return {}
 	var season:=int(learned.season)
 	if today>=0 and season_of(today)==season:return {}
 	c.erase("learned")
-	var names:Array=learned.names
+	var names:Array=learned.get("names",[])
 	var hemisphere:=float((GameState.hearth_season as Dictionary).get("hemisphere",1.0))
 	var season_name:String=["spring","summer","autumn","winter"][posmod(season+(0 if hemisphere>=0.0 else 2),4)]
 	var annals:=String(voice().era)=="annals"
-	var listed:=_list(names.map(func(n:Variant)->String:return String(n).to_lower()))
-	var fields:PackedStringArray=[]
-	for f in learned.fields:fields.append(field_name(String(f)))
-	var text:=("This season the keepers recorded new learning: %s." if annals else "This season the people learned: %s.") % listed
-	if fields.size()>1:text+=" Their knowing grew in %s." % _list(Array(fields))
+	var text:=""
+	if not names.is_empty():
+		var listed:=_list(names.map(func(n:Variant)->String:return String(n).to_lower()))
+		var fields:PackedStringArray=[]
+		for f in learned.fields:fields.append(field_name(String(f)))
+		text=("This season the keepers recorded new learning: %s." if annals else "This season the people learned: %s.") % listed
+		if fields.size()>1:text+=" Their knowing grew in %s." % _list(Array(fields))
+	var stepped:=_steps_text(steps)
+	if not stepped.is_empty():text=(text+" "+stepped).strip_edges()
 	var day:=int(season*91.25+45.625)-1 if today<0 else today
-	var first_id:=String((learned.ids as Array)[0])
-	return record({"key":"learned:%d" % season,"day":mini(day,int(GameState.elapsed_days)),"title":"What the %s taught" % season_name,"text":text,"kind":"discovery","tier":"notice","art":{"discovery_id":first_id,"domain":String((learned.fields as Array)[0])},"action":{"kind":"section","section":"inquiry","sub":0},"domain":"knowledge","ledger":false,"learned":(learned.ids as Array).duplicate()})
+	var first_id:=String((learned.ids as Array)[0]) if not (learned.ids as Array).is_empty() else String((steps[0] as Dictionary).get("id",""))
+	var first_field:=String((learned.fields as Array)[0]) if not (learned.fields as Array).is_empty() else String((steps[0] as Dictionary).get("dynamic","knowledge"))
+	return record({"key":"learned:%d" % season,"day":mini(day,int(GameState.elapsed_days)),"title":"What the %s taught" % season_name,"text":text,"kind":"discovery","tier":"notice","art":{"discovery_id":first_id,"domain":first_field},"action":{"kind":"section","section":"inquiry","sub":0},"domain":"knowledge","ledger":false,"learned":(learned.ids as Array).duplicate()})
 
 
 static func _list(items:Array)->String:

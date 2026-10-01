@@ -19,14 +19,13 @@ func test_only_outmatched_small_home_raids_are_routine() -> void:
 	threat.campaign_mode="defensive";threat.target_region_id="occupied_city"
 	assert_bool(POLICY.routine(threat,{"troops":30,"readiness":.6})).is_false()
 
-func test_routine_notifications_do_not_pause_or_request_battle_view() -> void:
+func test_no_war_news_stops_time_or_opens_a_panel() -> void:
+	# Grand strategy: threats, battles and their ends are told under the clock
+	# (hud/army_alerts.gd) and on the War screen; the map has nothing that
+	# pauses for them.
 	var renderer:Node3D=auto_free(MAP.new())
-	renderer.game_speed=3.0
-	var threat:Dictionary={"routine_raid":true,"incident_kind":"raid"}
-	renderer._on_military_threat_attention(threat)
-	renderer._on_city_battle_started({"threat":threat})
-	renderer._on_battle_attention({"threat":threat})
-	assert_float(renderer.game_speed).is_equal(3.0)
+	for handler in ["_on_military_threat_attention","_on_city_battle_started","_on_battle_attention","_pause_for_military_attention","_show_military_attention"]:
+		assert_bool(renderer.has_method(handler)).override_failure_message(handler).is_false()
 	assert_bool(MilitaryCampaign.active_engagement.get("awaiting_player_view",false)).is_false()
 
 func test_routine_raid_starts_without_visual_gate_and_advances_in_the_calendar() -> void:
@@ -34,7 +33,6 @@ func test_routine_raid_starts_without_visual_gate_and_advances_in_the_calendar()
 	MilitaryCampaign.reset_for_new_world()
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("Local watch",[{"id":1,"unit":"line_infantry","weapon":"spear","count":60,"equipment":60,"training":.8}],1,1)
 	var renderer:Node3D=auto_free(MAP.new());renderer.game_speed=3.0
-	MilitaryCampaign.battle_started.connect(renderer._on_city_battle_started)
 	MilitaryCampaign._create_civilization_threat({"id":"routine_test","incident_kind":"raid","strength":6,"source_name":"Raiders","readiness":.4},"defensive")
 	assert_bool(MilitaryCampaign.active_threat.get("routine_raid",false)).is_true()
 	# Sixty drilled spears against six raiders is hopeless for the raiders: it is
@@ -50,5 +48,4 @@ func test_routine_raid_starts_without_visual_gate_and_advances_in_the_calendar()
 	assert_bool(MilitaryCampaign.active_engagement.is_empty()).is_true()
 	assert_int(MilitaryCampaign.battle_history.size()).is_greater(before)
 	assert_float(renderer.game_speed).is_equal(3.0)
-	MilitaryCampaign.battle_started.disconnect(renderer._on_city_battle_started)
 	MilitaryCampaign.reset_for_new_world()

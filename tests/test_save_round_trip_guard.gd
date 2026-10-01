@@ -17,6 +17,7 @@ const Route:=preload("res://scripts/army_land_route.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Verify:=preload("res://tools/verify_campaign_save.gd")
 const Legacy:=preload("res://tests/legacy_save_fixture.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 const BIND:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
 
 var home:=Vector2.ZERO
@@ -103,9 +104,19 @@ func _band(count:int,name:String)->int:
 	assert_bool(made.has("error")).override_failure_message(str(made)).is_false()
 	return int((made.army as Dictionary).army_id)
 
+## The ruler puts a band under a general of renown, as the War screen and the
+## Military Leaders screen do (leader_commands.gd). A new band serves under
+## the war leader at home until then.
+func _under_a_general(army_id:int)->void:
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(general.has("error")).override_failure_message(str(general)).is_false()
+	var put:=Leaders.assign(MilitaryCampaign,army_id,String(general.get("figure_id","")))
+	assert_bool(put.has("error")).override_failure_message(str(put)).is_false()
+
 ## Tsaren taken; 17 of an 18-strong band hold it.
 func _captured_tsaren()->Dictionary:
 	var army_id:=_band(18,"LEVY BAND 1")
+	_under_a_general(army_id)
 	var index:=MilitaryCampaign._field_army_index(army_id)
 	var army:Dictionary=MilitaryCampaign.field_armies[index]
 	army["supply_level"]=1.0; army["readiness"]=1.0
@@ -117,8 +128,13 @@ func _captured_tsaren()->Dictionary:
 	civ.strategic_regions[ri]["resistance"]=0.6
 	var garrison:=MilitaryCampaign.establish_occupation_force(civ_id,civ.strategic_regions[ri],17.0,army_id)
 	assert_int(int(garrison.get("troops",0))).override_failure_message(str(garrison)).is_greater(0)
-	return MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
+	# Every man stayed to hold the town: the band is its garrison now, its
+	# general with it (no band of nobody is left behind).
+	var at:=MilitaryCampaign._field_army_index(army_id)
+	return MilitaryCampaign.field_armies[at] if at>=0 else MilitaryCampaign.occupation_force_for_region(civ_id,city_id)
 
+## The war leader of renown who leads the band (a general: the
+## HistoricalFigures record its commander carries).
 func _war_leader(band:Dictionary)->String:
 	var audience:=Hall.summon({"figure_id":String((band.commander as Dictionary).get("figure_id",""))})
 	assert_dict(audience).is_not_empty()

@@ -6,10 +6,10 @@
 "registry_source": "origin/codex/research-plausibility:docs/research/registry.json",
 "source_commit": "2ffd5b734a2f9a69ce9c7025ffc429ccb660fbd9",
 "year_adjustments": "applied (proposed_year; band shifted by the same amount)",
-"node_count": 1122,
+"node_count": 1336,
 "design_node_count": 1101,
 "amendments": "tools/research/design_amendments_600.json",
-"adopted_count": 21
+"adopted_count": 235
 },
 "lines": [
 "knowledge",
@@ -15612,6 +15612,51 @@
 "shared_with": []
 },
 {
+"id": "seasonal_wall_replastering",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Mud Plaster Renewed on Walls After the Rains",
+"one_liner": "Mud Plaster Renewed on Walls After the Rains",
+"observation": "Mud Plaster Renewed on Walls After the Rains.",
+"key_threshold": false,
+"target_year": 217,
+"proposed_year": 217,
+"band_low": 182.0,
+"band_high": 252.0,
+"min_year": 182.0,
+"research_years": 2.0,
+"requires_all": [
+"adobe_wall_construction"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "blank_outer_walls",
+"line": "security",
+"status": "adopted",
+"name": "Outer Houses Built Wall to Wall with No Doors Outward",
+"one_liner": "Outer Houses Built Wall to Wall with No Doors Outward",
+"observation": "Outer Houses Built Wall to Wall with No Doors Outward.",
+"key_threshold": false,
+"target_year": 219,
+"proposed_year": 219,
+"band_low": 184.0,
+"band_high": 254.0,
+"min_year": 184.0,
+"research_years": 2.0,
+"requires_all": [
+"barred_palisade_gates",
+"defensive_ditch_siting"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "tens_sixties_bundling",
 "line": "knowledge",
 "status": "new",
@@ -15641,6 +15686,51 @@
 "information",
 "research"
 ]
+},
+{
+"id": "chosen_village_headman",
+"line": "institutions",
+"status": "adopted",
+"name": "Household Heads Choose the Village Headman",
+"one_liner": "Household Heads Choose the Village Headman",
+"observation": "Household Heads Choose the Village Headman.",
+"key_threshold": false,
+"target_year": 220,
+"proposed_year": 220,
+"band_low": 185.0,
+"band_high": 255.0,
+"min_year": 185.0,
+"research_years": 2.0,
+"requires_all": [
+"elder_council_assent",
+"probationary_appointment_custom"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "heirloom_stories",
+"line": "culture",
+"status": "adopted",
+"name": "Heirlooms Kept with Their Stories",
+"one_liner": "Heirlooms Kept with Their Stories",
+"observation": "Heirlooms Kept with Their Stories.",
+"key_threshold": false,
+"target_year": 220,
+"proposed_year": 220,
+"band_low": 185.0,
+"band_high": 255.0,
+"min_year": 185.0,
+"research_years": 2.0,
+"requires_all": [
+"genealogical_recitation"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "wedge_and_fire_quarrying",
@@ -15760,6 +15850,29 @@
 "nature",
 "survey"
 ]
+},
+{
+"id": "first_furrow_rite",
+"line": "culture",
+"status": "adopted",
+"name": "First Furrow Opened with a Public Rite",
+"one_liner": "First Furrow Opened with a Public Rite",
+"observation": "First Furrow Opened with a Public Rite.",
+"key_threshold": false,
+"target_year": 221,
+"proposed_year": 221,
+"band_low": 186.0,
+"band_high": 256.0,
+"min_year": 186.0,
+"research_years": 2.0,
+"requires_all": [
+"ox_drawn_ard",
+"festival_calendar"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "outbreak_burial_protocols",
@@ -15887,6 +16000,28 @@
 "requires_all": [
 "public_dispute_airing",
 "standing_arbiter_appointment"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "imported_vessel_copies",
+"line": "culture",
+"status": "adopted",
+"name": "Imported Vessels Copied in Local Clay",
+"one_liner": "Imported Vessels Copied in Local Clay",
+"observation": "Imported Vessels Copied in Local Clay.",
+"key_threshold": false,
+"target_year": 225,
+"proposed_year": 225,
+"band_low": 190.0,
+"band_high": 260.0,
+"min_year": 190.0,
+"research_years": 2.0,
+"requires_all": [
+"long_distance_axe_trade"
 ],
 "requires_any": [],
 "precedents": [],
@@ -16128,6 +16263,29 @@
 ]
 },
 {
+"id": "raised_wet_causeways",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Raised Earth Causeways Across Wet Ground",
+"one_liner": "Raised Earth Causeways Across Wet Ground",
+"observation": "Raised Earth Causeways Across Wet Ground.",
+"key_threshold": false,
+"target_year": 227,
+"proposed_year": 227,
+"band_low": 192.0,
+"band_high": 262.0,
+"min_year": 192.0,
+"research_years": 2.0,
+"requires_all": [
+"flood_levees",
+"plank_trackways"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "layered_pit_storage",
 "line": "nutrition",
 "status": "era",
@@ -16331,6 +16489,74 @@
 ]
 },
 {
+"id": "knucklebone_games",
+"line": "culture",
+"status": "adopted",
+"name": "Knucklebones Thrown as Dice and Counters",
+"one_liner": "Knucklebones Thrown as Dice and Counters",
+"observation": "Knucklebones Thrown as Dice and Counters.",
+"key_threshold": false,
+"target_year": 231,
+"proposed_year": 231,
+"band_low": 196.0,
+"band_high": 266.0,
+"min_year": 196.0,
+"research_years": 2.0,
+"requires_all": [
+"pit_pebble_game",
+"animal_taming"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "scrap_fed_pigs",
+"line": "nutrition",
+"status": "adopted",
+"name": "Pigs Fattened on Household Scraps",
+"one_liner": "Pigs Fattened on Household Scraps",
+"observation": "Pigs Fattened on Household Scraps.",
+"key_threshold": false,
+"target_year": 231,
+"proposed_year": 231,
+"band_low": 196.0,
+"band_high": 266.0,
+"min_year": 196.0,
+"research_years": 2.0,
+"requires_all": [
+"animal_taming"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "threshing_floor_guard",
+"line": "security",
+"status": "adopted",
+"name": "Threshing Floors Guarded Through the Night",
+"one_liner": "Threshing Floors Guarded Through the Night",
+"observation": "Threshing Floors Guarded Through the Night.",
+"key_threshold": false,
+"target_year": 231,
+"proposed_year": 231,
+"band_low": 196.0,
+"band_high": 266.0,
+"min_year": 196.0,
+"research_years": 2.0,
+"requires_all": [
+"watch_rotation",
+"threshing_frames"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "field_rest_scheduling",
 "line": "nutrition",
 "status": "era",
@@ -16430,6 +16656,29 @@
 "shared_with": []
 },
 {
+"id": "bride_service",
+"line": "demography",
+"status": "adopted",
+"name": "A Groom Works for His Bride's Father",
+"one_liner": "A Groom Works for His Bride's Father",
+"observation": "A Groom Works for His Bride's Father.",
+"key_threshold": false,
+"target_year": 233,
+"proposed_year": 233,
+"band_low": 198.0,
+"band_high": 268.0,
+"min_year": 198.0,
+"research_years": 2.0,
+"requires_all": [
+"lineage_exogamy",
+"patrilocal_residence"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "specialist_rotation_ladders",
 "line": "labor",
 "status": "era",
@@ -16511,6 +16760,51 @@
 "shared_with": []
 },
 {
+"id": "raised_sleeping_benches",
+"line": "health",
+"status": "adopted",
+"name": "Sleeping Benches Raised Off the Damp Floor",
+"one_liner": "Sleeping Benches Raised Off the Damp Floor",
+"observation": "Sleeping Benches Raised Off the Damp Floor.",
+"key_threshold": false,
+"target_year": 235,
+"proposed_year": 235,
+"band_low": 200.0,
+"band_high": 270.0,
+"min_year": 200.0,
+"research_years": 2.0,
+"requires_all": [
+"household_space_planning",
+"adobe_wall_construction"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "relay_trade_gemstones",
+"line": "logistics",
+"status": "adopted",
+"name": "Precious Stones Passed Along from Far Mountains",
+"one_liner": "Precious Stones Passed Along from Far Mountains",
+"observation": "Precious Stones Passed Along from Far Mountains.",
+"key_threshold": false,
+"target_year": 235,
+"proposed_year": 235,
+"band_low": 200.0,
+"band_high": 270.0,
+"min_year": 200.0,
+"research_years": 3.0,
+"requires_all": [
+"long_distance_axe_trade"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "trade_colonies",
 "line": "logistics",
 "status": "new",
@@ -16545,6 +16839,29 @@
 ]
 },
 {
+"id": "stocked_refuge",
+"line": "security",
+"status": "adopted",
+"name": "The Hilltop Refuge Kept Stocked with Water and Grain",
+"one_liner": "The Hilltop Refuge Kept Stocked with Water and Grain",
+"observation": "The Hilltop Refuge Kept Stocked with Water and Grain.",
+"key_threshold": false,
+"target_year": 235,
+"proposed_year": 235,
+"band_low": 200.0,
+"band_high": 270.0,
+"min_year": 200.0,
+"research_years": 2.0,
+"requires_all": [
+"hilltop_refuges",
+"sealed_vessels"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "kiln_smoke_venting_customs",
 "line": "ecology",
 "status": "era",
@@ -16561,6 +16878,29 @@
 "requires_all": [
 "kiln_control",
 "downwind_workshop_placement"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "named_four_winds",
+"line": "knowledge",
+"status": "adopted",
+"name": "The Four Winds Named by Their Quarters",
+"one_liner": "The Four Winds Named by Their Quarters",
+"observation": "The Four Winds Named by Their Quarters.",
+"key_threshold": false,
+"target_year": 240,
+"proposed_year": 240,
+"band_low": 205.0,
+"band_high": 275.0,
+"min_year": 205.0,
+"research_years": 2.0,
+"requires_all": [
+"seasonal_patterns",
+"star_rise_markers"
 ],
 "requires_any": [],
 "precedents": [],
@@ -16717,6 +17057,29 @@
 "shared_with": []
 },
 {
+"id": "fruit_trees_left_standing",
+"line": "ecology",
+"status": "adopted",
+"name": "Fruit and Shade Trees Left Standing When Land Is Cleared",
+"one_liner": "Fruit and Shade Trees Left Standing When Land Is Cleared",
+"observation": "Fruit and Shade Trees Left Standing When Land Is Cleared.",
+"key_threshold": false,
+"target_year": 240,
+"proposed_year": 240,
+"band_low": 205.0,
+"band_high": 275.0,
+"min_year": 205.0,
+"research_years": 2.0,
+"requires_all": [
+"windbreak_hedgerow_siting",
+"selective_deadwood_gathering"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "alarm_relay_customs",
 "line": "security",
 "status": "era",
@@ -16738,6 +17101,29 @@
 "precedents": [
 "drum_relay_signals"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "armed_herd_guards",
+"line": "security",
+"status": "adopted",
+"name": "Flocks Grazed Under Armed Guard Near Hostile Land",
+"one_liner": "Flocks Grazed Under Armed Guard Near Hostile Land",
+"observation": "Flocks Grazed Under Armed Guard Near Hostile Land.",
+"key_threshold": false,
+"target_year": 240,
+"proposed_year": 240,
+"band_low": 205.0,
+"band_high": 275.0,
+"min_year": 205.0,
+"research_years": 2.0,
+"requires_all": [
+"herding_rotas",
+"rotating_watch_captaincy"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -16789,6 +17175,29 @@
 "pack_saddles"
 ]
 ],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "ash_mixed_grain_stores",
+"line": "nutrition",
+"status": "adopted",
+"name": "Wood Ash Mixed into Stored Grain",
+"one_liner": "Wood Ash Mixed into Stored Grain",
+"observation": "Wood Ash Mixed into Stored Grain.",
+"key_threshold": false,
+"target_year": 243,
+"proposed_year": 243,
+"band_low": 208.0,
+"band_high": 278.0,
+"min_year": 208.0,
+"research_years": 2.0,
+"requires_all": [
+"reserve_moisture_barrier_layering",
+"hermetic_grain_storage"
+],
+"requires_any": [],
 "precedents": [],
 "conditions": {},
 "shared_with": []
@@ -16966,6 +17375,29 @@
 ]
 },
 {
+"id": "reed_bundle_houses",
+"line": "demography",
+"status": "adopted",
+"name": "Reed Bundle Houses for Quick Shelter",
+"one_liner": "Reed Bundle Houses for Quick Shelter",
+"observation": "Reed Bundle Houses for Quick Shelter.",
+"key_threshold": false,
+"target_year": 245,
+"proposed_year": 245,
+"band_low": 210.0,
+"band_high": 280.0,
+"min_year": 210.0,
+"research_years": 2.0,
+"requires_all": [
+"reed_bed_rotation",
+"newcomer_host_season"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "storage_humidity_judging",
 "line": "logistics",
 "status": "era",
@@ -16982,6 +17414,52 @@
 "requires_all": [
 "stock_layering_method",
 "grain_moisture_watch"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "brush_fired_kilns",
+"line": "ecology",
+"status": "adopted",
+"name": "Kilns Fired with Brush and Reeds to Spare the Woods",
+"one_liner": "Kilns Fired with Brush and Reeds to Spare the Woods",
+"observation": "Kilns Fired with Brush and Reeds to Spare the Woods.",
+"key_threshold": false,
+"target_year": 245,
+"proposed_year": 245,
+"band_low": 210.0,
+"band_high": 280.0,
+"min_year": 210.0,
+"research_years": 2.0,
+"requires_all": [
+"selective_deadwood_gathering",
+"pit_firing"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "door_smoke_fires",
+"line": "health",
+"status": "adopted",
+"name": "Smoky Fires at the Door Against Biting Flies",
+"one_liner": "Smoky Fires at the Door Against Biting Flies",
+"observation": "Smoky Fires at the Door Against Biting Flies.",
+"key_threshold": false,
+"target_year": 247,
+"proposed_year": 247,
+"band_low": 212.0,
+"band_high": 282.0,
+"min_year": 212.0,
+"research_years": 2.0,
+"requires_all": [
+"cookfire_smoke_venting_habit",
+"drainage"
 ],
 "requires_any": [],
 "precedents": [],
@@ -17069,6 +17547,29 @@
 "shared_with": []
 },
 {
+"id": "ore_hand_sorting",
+"line": "production",
+"status": "adopted",
+"name": "Ore Broken and Hand-Sorted Before Smelting",
+"one_liner": "Ore Broken and Hand-Sorted Before Smelting",
+"observation": "Ore Broken and Hand-Sorted Before Smelting.",
+"key_threshold": false,
+"target_year": 249,
+"proposed_year": 249,
+"band_low": 214.0,
+"band_high": 284.0,
+"min_year": 214.0,
+"research_years": 2.0,
+"requires_all": [
+"fire_setting_mining",
+"arsenical_copper"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "public_debate_custom",
 "line": "culture",
 "status": "era",
@@ -17119,6 +17620,29 @@
 "Lead Ore"
 ]
 },
+"shared_with": []
+},
+{
+"id": "district_sowing_day",
+"line": "nutrition",
+"status": "adopted",
+"name": "Sowing Day Proclaimed for the Whole District",
+"one_liner": "Sowing Day Proclaimed for the Whole District",
+"observation": "Sowing Day Proclaimed for the Whole District.",
+"key_threshold": false,
+"target_year": 250,
+"proposed_year": 250,
+"band_low": 215.0,
+"band_high": 285.0,
+"min_year": 215.0,
+"research_years": 2.0,
+"requires_all": [
+"first_furrow_rite",
+"irrigation_schedules"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
 "shared_with": []
 },
 {
@@ -17211,6 +17735,28 @@
 "defense",
 "warfare"
 ]
+},
+{
+"id": "rooms_added_as_family_grows",
+"line": "demography",
+"status": "adopted",
+"name": "Rooms Added to a House as the Family Grows",
+"one_liner": "Rooms Added to a House as the Family Grows",
+"observation": "Rooms Added to a House as the Family Grows.",
+"key_threshold": false,
+"target_year": 251,
+"proposed_year": 251,
+"band_low": 216.0,
+"band_high": 286.0,
+"min_year": 216.0,
+"research_years": 2.0,
+"requires_all": [
+"room_allocation_by_size"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "tool_reach_zoning",
@@ -17355,6 +17901,29 @@
 ]
 },
 {
+"id": "recited_leader_names",
+"line": "culture",
+"status": "adopted",
+"name": "Former Leaders' Names Recited at the Shrine",
+"one_liner": "Former Leaders' Names Recited at the Shrine",
+"observation": "Former Leaders' Names Recited at the Shrine.",
+"key_threshold": false,
+"target_year": 255,
+"proposed_year": 255,
+"band_low": 220.0,
+"band_high": 290.0,
+"min_year": 220.0,
+"research_years": 2.0,
+"requires_all": [
+"genealogical_recitation",
+"first_shrine_house"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "craft_order_queuing",
 "line": "production",
 "status": "era",
@@ -17399,6 +17968,74 @@
 "requires_all": [
 "clay_pipe_forming",
 "output_quality_sorting"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "one_measure_sacks",
+"line": "logistics",
+"status": "adopted",
+"name": "Grain Carried in Sacks of One Measure",
+"one_liner": "Grain Carried in Sacks of One Measure",
+"observation": "Grain Carried in Sacks of One Measure.",
+"key_threshold": false,
+"target_year": 255,
+"proposed_year": 255,
+"band_low": 220.0,
+"band_high": 290.0,
+"min_year": 220.0,
+"research_years": 2.0,
+"requires_all": [
+"load_bundling_by_weight"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "staged_grain_watering",
+"line": "nutrition",
+"status": "adopted",
+"name": "Grain Watered at Set Stages of Its Growth",
+"one_liner": "Grain Watered at Set Stages of Its Growth",
+"observation": "Grain Watered at Set Stages of Its Growth.",
+"key_threshold": false,
+"target_year": 257,
+"proposed_year": 257,
+"band_low": 222.0,
+"band_high": 292.0,
+"min_year": 222.0,
+"research_years": 3.0,
+"requires_all": [
+"irrigation_schedules",
+"planting_density_adjustment"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "found_goods_declared",
+"line": "security",
+"status": "adopted",
+"name": "Found Animals and Goods Declared to the Elders",
+"one_liner": "Found Animals and Goods Declared to the Elders",
+"observation": "Found Animals and Goods Declared to the Elders.",
+"key_threshold": false,
+"target_year": 259,
+"proposed_year": 259,
+"band_low": 224.0,
+"band_high": 294.0,
+"min_year": 224.0,
+"research_years": 2.0,
+"requires_all": [
+"customary_law",
+"standing_arbiter_appointment"
 ],
 "requires_any": [],
 "precedents": [],
@@ -17620,6 +18257,29 @@
 ]
 },
 {
+"id": "flock_evening_count",
+"line": "knowledge",
+"status": "adopted",
+"name": "Flock Counted Each Evening by the Herd Boy",
+"one_liner": "Flock Counted Each Evening by the Herd Boy",
+"observation": "Flock Counted Each Evening by the Herd Boy.",
+"key_threshold": false,
+"target_year": 261,
+"proposed_year": 261,
+"band_low": 226.0,
+"band_high": 296.0,
+"min_year": 226.0,
+"research_years": 2.0,
+"requires_all": [
+"tallies",
+"grazing_rotation_customs"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "craft_lineage_naming",
 "line": "culture",
 "status": "era",
@@ -17699,6 +18359,98 @@
 "population",
 "society"
 ]
+},
+{
+"id": "temple_flock_herders",
+"line": "institutions",
+"status": "adopted",
+"name": "Temple Flocks Given to Herders for Set Returns",
+"one_liner": "Temple Flocks Given to Herders for Set Returns",
+"observation": "Temple Flocks Given to Herders for Set Returns.",
+"key_threshold": false,
+"target_year": 263,
+"proposed_year": 263,
+"band_low": 228.0,
+"band_high": 298.0,
+"min_year": 228.0,
+"research_years": 3.0,
+"requires_all": [
+"temple_common_storehouse",
+"grazing_rotation_customs"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "kinswoman_wet_nurse",
+"line": "demography",
+"status": "adopted",
+"name": "A Kinswoman Nurses a Motherless Infant",
+"one_liner": "A Kinswoman Nurses a Motherless Infant",
+"observation": "A Kinswoman Nurses a Motherless Infant.",
+"key_threshold": false,
+"target_year": 263,
+"proposed_year": 263,
+"band_low": 228.0,
+"band_high": 298.0,
+"min_year": 228.0,
+"research_years": 2.0,
+"requires_all": [
+"interval_weaning_practice",
+"shared_childcare"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "hired_local_guides",
+"line": "logistics",
+"status": "adopted",
+"name": "Local Guides Hired to Lead Through Strange Country",
+"one_liner": "Local Guides Hired to Lead Through Strange Country",
+"observation": "Local Guides Hired to Lead Through Strange Country.",
+"key_threshold": false,
+"target_year": 263,
+"proposed_year": 263,
+"band_low": 228.0,
+"band_high": 298.0,
+"min_year": 228.0,
+"research_years": 2.0,
+"requires_all": [
+"route_memory",
+"guest_host_reciprocity"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "mock_fight_training",
+"line": "security",
+"status": "adopted",
+"name": "Boys Trained in Mock Fights with Wooden Staves",
+"one_liner": "Boys Trained in Mock Fights with Wooden Staves",
+"observation": "Boys Trained in Mock Fights with Wooden Staves.",
+"key_threshold": false,
+"target_year": 263,
+"proposed_year": 263,
+"band_low": 228.0,
+"band_high": 298.0,
+"min_year": 228.0,
+"research_years": 2.0,
+"requires_all": [
+"paired_veteran_mentoring",
+"festival_wrestling_races"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "cross_household_grain_audits",
@@ -17784,6 +18536,52 @@
 ]
 },
 {
+"id": "roped_well_diggers",
+"line": "health",
+"status": "adopted",
+"name": "Well Diggers Work on a Rope Held from Above",
+"one_liner": "Well Diggers Work on a Rope Held from Above",
+"observation": "Well Diggers Work on a Rope Held from Above.",
+"key_threshold": false,
+"target_year": 265,
+"proposed_year": 265,
+"band_low": 230.0,
+"band_high": 300.0,
+"min_year": 230.0,
+"research_years": 2.0,
+"requires_all": [
+"lined_well_shafts",
+"workplace_hazard_awareness"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "festival_courtship",
+"line": "demography",
+"status": "adopted",
+"name": "Young People Pair Off at the Harvest Festival",
+"one_liner": "Young People Pair Off at the Harvest Festival",
+"observation": "Young People Pair Off at the Harvest Festival.",
+"key_threshold": false,
+"target_year": 265,
+"proposed_year": 265,
+"band_low": 230.0,
+"band_high": 300.0,
+"min_year": 230.0,
+"research_years": 2.0,
+"requires_all": [
+"festival_wrestling_races",
+"temple_festival_meals"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "riparian_tree_belts",
 "line": "ecology",
 "status": "new",
@@ -17816,6 +18614,51 @@
 "nature",
 "survey"
 ]
+},
+{
+"id": "dig_carry_turns",
+"line": "labor",
+"status": "adopted",
+"name": "Diggers and Carriers Change Places at Midday",
+"one_liner": "Diggers and Carriers Change Places at Midday",
+"observation": "Diggers and Carriers Change Places at Midday.",
+"key_threshold": false,
+"target_year": 267,
+"proposed_year": 267,
+"band_low": 232.0,
+"band_high": 302.0,
+"min_year": 232.0,
+"research_years": 2.0,
+"requires_all": [
+"batch_sizing_by_fatigue",
+"cross_party_scheduling"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "fat_tailed_sheep",
+"line": "nutrition",
+"status": "adopted",
+"name": "Fat-Tailed Sheep Kept for Cooking Fat",
+"one_liner": "Fat-Tailed Sheep Kept for Cooking Fat",
+"observation": "Fat-Tailed Sheep Kept for Cooking Fat.",
+"key_threshold": false,
+"target_year": 267,
+"proposed_year": 267,
+"band_low": 232.0,
+"band_high": 302.0,
+"min_year": 232.0,
+"research_years": 3.0,
+"requires_all": [
+"grazing_rotation_customs"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "oath_witness_registers",
@@ -17970,6 +18813,28 @@
 "shared_with": []
 },
 {
+"id": "shared_jar_straws",
+"line": "culture",
+"status": "adopted",
+"name": "Beer Shared from One Jar Through Reed Straws",
+"one_liner": "Beer Shared from One Jar Through Reed Straws",
+"observation": "Beer Shared from One Jar Through Reed Straws.",
+"key_threshold": false,
+"target_year": 269,
+"proposed_year": 269,
+"band_low": 234.0,
+"band_high": 304.0,
+"min_year": 234.0,
+"research_years": 2.0,
+"requires_all": [
+"barley_beer"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "clay_record_tablets",
 "line": "knowledge",
 "status": "catalog",
@@ -18086,6 +18951,52 @@
 "requires_all": [
 "alarm_relay_customs",
 "rotating_command_practice"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "clay_goods_labels",
+"line": "knowledge",
+"status": "adopted",
+"name": "Small Labels Tied to Goods Naming Their Source",
+"one_liner": "Small Labels Tied to Goods Naming Their Source",
+"observation": "Small Labels Tied to Goods Naming Their Source.",
+"key_threshold": false,
+"target_year": 271,
+"proposed_year": 271,
+"band_low": 236.0,
+"band_high": 306.0,
+"min_year": 236.0,
+"research_years": 2.0,
+"requires_all": [
+"stamp_seals",
+"marked_storage_registers"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "storerooms_by_kind",
+"line": "logistics",
+"status": "adopted",
+"name": "Storerooms Kept Each for One Kind of Goods",
+"one_liner": "Storerooms Kept Each for One Kind of Goods",
+"observation": "Storerooms Kept Each for One Kind of Goods.",
+"key_threshold": false,
+"target_year": 271,
+"proposed_year": 271,
+"band_low": 236.0,
+"band_high": 306.0,
+"min_year": 236.0,
+"research_years": 2.0,
+"requires_all": [
+"stock_layering_method",
+"marked_storage_registers"
 ],
 "requires_any": [],
 "precedents": [],
@@ -18220,6 +19131,29 @@
 "shared_with": []
 },
 {
+"id": "canal_strip_fields",
+"line": "nutrition",
+"status": "adopted",
+"name": "Fields Laid Out in Long Strips Fronting the Canal",
+"one_liner": "Fields Laid Out in Long Strips Fronting the Canal",
+"observation": "Fields Laid Out in Long Strips Fronting the Canal.",
+"key_threshold": false,
+"target_year": 273,
+"proposed_year": 273,
+"band_low": 238.0,
+"band_high": 308.0,
+"min_year": 238.0,
+"research_years": 3.0,
+"requires_all": [
+"irrigation_schedules",
+"field_boundary_markers"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "elder_quarters_customs",
 "line": "demography",
 "status": "era",
@@ -18235,6 +19169,29 @@
 "research_years": 3.0,
 "requires_all": [
 "multigenerational_household_norms"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "year_end_stocktaking",
+"line": "institutions",
+"status": "adopted",
+"name": "Stores Counted and Balanced at the Year's End",
+"one_liner": "Stores Counted and Balanced at the Year's End",
+"observation": "Stores Counted and Balanced at the Year's End.",
+"key_threshold": false,
+"target_year": 275,
+"proposed_year": 275,
+"band_low": 240.0,
+"band_high": 310.0,
+"min_year": 240.0,
+"research_years": 3.0,
+"requires_all": [
+"material_accounting",
+"marked_storage_registers"
 ],
 "requires_any": [],
 "precedents": [],
@@ -18274,6 +19231,52 @@
 "society",
 "information"
 ]
+},
+{
+"id": "strangers_seed_trials",
+"line": "culture",
+"status": "adopted",
+"name": "New Seed Tried from Distant Traders",
+"one_liner": "New Seed Tried from Distant Traders",
+"observation": "New Seed Tried from Distant Traders.",
+"key_threshold": false,
+"target_year": 275,
+"proposed_year": 275,
+"band_low": 240.0,
+"band_high": 310.0,
+"min_year": 240.0,
+"research_years": 2.0,
+"requires_all": [
+"long_distance_axe_trade",
+"seed_selection"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "pulled_flax",
+"line": "production",
+"status": "adopted",
+"name": "Flax Pulled by the Root for Long Fibre",
+"one_liner": "Flax Pulled by the Root for Long Fibre",
+"observation": "Flax Pulled by the Root for Long Fibre.",
+"key_threshold": false,
+"target_year": 275,
+"proposed_year": 275,
+"band_low": 240.0,
+"band_high": 310.0,
+"min_year": 240.0,
+"research_years": 2.0,
+"requires_all": [
+"fiber_retting",
+"plain_weaving"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "standard_unit_naming",
@@ -18386,6 +19389,75 @@
 ]
 },
 {
+"id": "retting_pools_apart",
+"line": "ecology",
+"status": "adopted",
+"name": "Flax Retting Pools Kept Apart from Drinking Water",
+"one_liner": "Flax Retting Pools Kept Apart from Drinking Water",
+"observation": "Flax Retting Pools Kept Apart from Drinking Water.",
+"key_threshold": false,
+"target_year": 275,
+"proposed_year": 275,
+"band_low": 240.0,
+"band_high": 310.0,
+"min_year": 240.0,
+"research_years": 2.0,
+"requires_all": [
+"fiber_retting",
+"water_container_cleaning_customs"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "feud_ending_marriage",
+"line": "security",
+"status": "adopted",
+"name": "Feuds Ended by a Marriage Between the Two Sides",
+"one_liner": "Feuds Ended by a Marriage Between the Two Sides",
+"observation": "Feuds Ended by a Marriage Between the Two Sides.",
+"key_threshold": false,
+"target_year": 275,
+"proposed_year": 275,
+"band_low": 240.0,
+"band_high": 310.0,
+"min_year": 240.0,
+"research_years": 2.0,
+"requires_all": [
+"blood_price",
+"lineage_exogamy"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "oiled_labour_massage",
+"line": "demography",
+"status": "adopted",
+"name": "Oiled Massage to Ease a Slow Labour",
+"one_liner": "Oiled Massage to Ease a Slow Labour",
+"observation": "Oiled Massage to Ease a Slow Labour.",
+"key_threshold": false,
+"target_year": 277,
+"proposed_year": 277,
+"band_low": 242.0,
+"band_high": 312.0,
+"min_year": 242.0,
+"research_years": 2.0,
+"requires_all": [
+"obstructed_labor_recognition",
+"seed_oil_pressing"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "communal_washing_rotas",
 "line": "health",
 "status": "era",
@@ -18461,6 +19533,52 @@
 "information",
 "research"
 ]
+},
+{
+"id": "thirty_day_account_months",
+"line": "knowledge",
+"status": "adopted",
+"name": "Thirty-Day Months for Accounts and Rations",
+"one_liner": "Thirty-Day Months for Accounts and Rations",
+"observation": "Thirty-Day Months for Accounts and Rations.",
+"key_threshold": false,
+"target_year": 280,
+"proposed_year": 280,
+"band_low": 245.0,
+"band_high": 315.0,
+"min_year": 245.0,
+"research_years": 2.0,
+"requires_all": [
+"solar_year_reckoning",
+"impressed_number_tablets"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "gate_court_hearings",
+"line": "institutions",
+"status": "adopted",
+"name": "Disputes Heard by the Elders at the Gate",
+"one_liner": "Disputes Heard by the Elders at the Gate",
+"observation": "Disputes Heard by the Elders at the Gate.",
+"key_threshold": false,
+"target_year": 280,
+"proposed_year": 280,
+"band_low": 245.0,
+"band_high": 315.0,
+"min_year": 245.0,
+"research_years": 2.0,
+"requires_all": [
+"public_dispute_airing",
+"barred_palisade_gates"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "worker_ration_lists",
@@ -18639,6 +19757,29 @@
 ]
 },
 {
+"id": "reed_mat_weaving",
+"line": "production",
+"status": "adopted",
+"name": "Reed Mats Woven in Bulk for Roofs and Floors",
+"one_liner": "Reed Mats Woven in Bulk for Roofs and Floors",
+"observation": "Reed Mats Woven in Bulk for Roofs and Floors.",
+"key_threshold": false,
+"target_year": 281,
+"proposed_year": 281,
+"band_low": 246.0,
+"band_high": 316.0,
+"min_year": 246.0,
+"research_years": 2.0,
+"requires_all": [
+"reed_bundle_houses",
+"basketry"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "alternate_route_scouting",
 "line": "logistics",
 "status": "era",
@@ -18683,6 +19824,29 @@
 "precedents": [
 "regional_arbitration_circuits"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "spoils_shared_assembly",
+"line": "institutions",
+"status": "adopted",
+"name": "Spoils Shared Out Before the Assembly",
+"one_liner": "Spoils Shared Out Before the Assembly",
+"observation": "Spoils Shared Out Before the Assembly.",
+"key_threshold": false,
+"target_year": 285,
+"proposed_year": 285,
+"band_low": 250.0,
+"band_high": 320.0,
+"min_year": 250.0,
+"research_years": 2.0,
+"requires_all": [
+"free_adult_assembly",
+"ambush_raids"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -18741,6 +19905,29 @@
 "shared_with": []
 },
 {
+"id": "river_sand_gold",
+"line": "production",
+"status": "adopted",
+"name": "Gold Washed from River Sand",
+"one_liner": "Gold Washed from River Sand",
+"observation": "Gold Washed from River Sand.",
+"key_threshold": false,
+"target_year": 285,
+"proposed_year": 285,
+"band_low": 250.0,
+"band_high": 320.0,
+"min_year": 250.0,
+"research_years": 2.0,
+"requires_all": [
+"native_copper_working",
+"ore_assaying"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "post_storm_resource_pooling",
 "line": "infrastructure",
 "status": "era",
@@ -18762,6 +19949,50 @@
 "precedents": [
 "mutual_aid_customs"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "stone_pivot_doors",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Doors Hung on Stone Pivot Sockets",
+"one_liner": "Doors Hung on Stone Pivot Sockets",
+"observation": "Doors Hung on Stone Pivot Sockets.",
+"key_threshold": false,
+"target_year": 285,
+"proposed_year": 285,
+"band_low": 250.0,
+"band_high": 320.0,
+"min_year": 250.0,
+"research_years": 2.0,
+"requires_all": [
+"timber_post_beam_connections"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "chewed_twig_toothcare",
+"line": "health",
+"status": "adopted",
+"name": "Chewed Twigs and Ash Powder for Cleaning Teeth",
+"one_liner": "Chewed Twigs and Ash Powder for Cleaning Teeth",
+"observation": "Chewed Twigs and Ash Powder for Cleaning Teeth.",
+"key_threshold": false,
+"target_year": 285,
+"proposed_year": 285,
+"band_low": 250.0,
+"band_high": 320.0,
+"min_year": 250.0,
+"research_years": 2.0,
+"requires_all": [
+"herbal_classification"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -18812,6 +20043,29 @@
 "precedents": [
 "regional_levy_coordination"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "village_track_upkeep",
+"line": "logistics",
+"status": "adopted",
+"name": "Villages Keep Up the Track Along Their Own Land",
+"one_liner": "Villages Keep Up the Track Along Their Own Land",
+"observation": "Villages Keep Up the Track Along Their Own Land.",
+"key_threshold": false,
+"target_year": 287,
+"proposed_year": 287,
+"band_low": 252.0,
+"band_high": 322.0,
+"min_year": 252.0,
+"research_years": 2.0,
+"requires_all": [
+"plank_trackways",
+"communal_upkeep_scheduling"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -18887,6 +20141,29 @@
 "precedents": [
 "mentored_task_learning"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "paced_field_allotments",
+"line": "institutions",
+"status": "adopted",
+"name": "Allotted Fields Paced and Recorded",
+"one_liner": "Allotted Fields Paced and Recorded",
+"observation": "Allotted Fields Paced and Recorded.",
+"key_threshold": false,
+"target_year": 290,
+"proposed_year": 290,
+"band_low": 255.0,
+"band_high": 325.0,
+"min_year": 255.0,
+"research_years": 3.0,
+"requires_all": [
+"boundary_marker_surveys",
+"impressed_number_tablets"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -19102,6 +20379,51 @@
 ]
 },
 {
+"id": "raised_grinding_querns",
+"line": "labor",
+"status": "adopted",
+"name": "Querns Set on Raised Benches for Grinding",
+"one_liner": "Querns Set on Raised Benches for Grinding",
+"observation": "Querns Set on Raised Benches for Grinding.",
+"key_threshold": false,
+"target_year": 293,
+"proposed_year": 293,
+"band_low": 258.0,
+"band_high": 328.0,
+"min_year": 258.0,
+"research_years": 2.0,
+"requires_all": [
+"flour_sifting"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "parched_green_ears",
+"line": "nutrition",
+"status": "adopted",
+"name": "Green Ears Parched in the Fire",
+"one_liner": "Green Ears Parched in the Fire",
+"observation": "Green Ears Parched in the Fire.",
+"key_threshold": false,
+"target_year": 293,
+"proposed_year": 293,
+"band_low": 258.0,
+"band_high": 328.0,
+"min_year": 258.0,
+"research_years": 2.0,
+"requires_all": [
+"hearth_roasting_control",
+"crop_calendars"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "census_rolls",
 "line": "institutions",
 "status": "catalog",
@@ -19193,6 +20515,74 @@
 "requires_all": [
 "signal_command_drill",
 "combined_drill_musters"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "shared_lane_oven",
+"line": "culture",
+"status": "adopted",
+"name": "Neighbours Bake by Turns in a Shared Oven",
+"one_liner": "Neighbours Bake by Turns in a Shared Oven",
+"observation": "Neighbours Bake by Turns in a Shared Oven.",
+"key_threshold": false,
+"target_year": 297,
+"proposed_year": 297,
+"band_low": 262.0,
+"band_high": 332.0,
+"min_year": 262.0,
+"research_years": 2.0,
+"requires_all": [
+"clay_dome_ovens",
+"kin_wards"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "fieldworker_water_carriers",
+"line": "labor",
+"status": "adopted",
+"name": "Water Carried to Workers in the Fields",
+"one_liner": "Water Carried to Workers in the Fields",
+"observation": "Water Carried to Workers in the Fields.",
+"key_threshold": false,
+"target_year": 297,
+"proposed_year": 297,
+"band_low": 262.0,
+"band_high": 332.0,
+"min_year": 262.0,
+"research_years": 2.0,
+"requires_all": [
+"seasonal_labor_pooling"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "late_pregnancy_light_work",
+"line": "demography",
+"status": "adopted",
+"name": "Women Near Their Time Spared Heavy Loads",
+"one_liner": "Women Near Their Time Spared Heavy Loads",
+"observation": "Women Near Their Time Spared Heavy Loads.",
+"key_threshold": false,
+"target_year": 297,
+"proposed_year": 297,
+"band_low": 262.0,
+"band_high": 332.0,
+"min_year": 262.0,
+"research_years": 2.0,
+"requires_all": [
+"obstructed_labor_recognition",
+"household_task_division"
 ],
 "requires_any": [],
 "precedents": [],
@@ -19586,6 +20976,29 @@
 "shared_with": []
 },
 {
+"id": "totals_checked_before_sealing",
+"line": "knowledge",
+"status": "adopted",
+"name": "Totals Checked Against Their Parts Before Sealing",
+"one_liner": "Totals Checked Against Their Parts Before Sealing",
+"observation": "Totals Checked Against Their Parts Before Sealing.",
+"key_threshold": false,
+"target_year": 310,
+"proposed_year": 310,
+"band_low": 275.0,
+"band_high": 345.0,
+"min_year": 275.0,
+"research_years": 2.0,
+"requires_all": [
+"impressed_number_tablets",
+"thirty_day_account_months"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "titled_estate_overseers",
 "line": "institutions",
 "status": "new",
@@ -19706,6 +21119,29 @@
 ]
 },
 {
+"id": "chiefs_gift_trade_paths",
+"line": "logistics",
+"status": "adopted",
+"name": "Gifts to a Chief Open a Path for Traders",
+"one_liner": "Gifts to a Chief Open a Path for Traders",
+"observation": "Gifts to a Chief Open a Path for Traders.",
+"key_threshold": false,
+"target_year": 310,
+"proposed_year": 310,
+"band_low": 275.0,
+"band_high": 345.0,
+"min_year": 275.0,
+"research_years": 2.0,
+"requires_all": [
+"trade_partner_tokens",
+"relay_trade_gemstones"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "coastal_watercraft",
 "line": "logistics",
 "status": "catalog",
@@ -19811,6 +21247,98 @@
 "shared_with": []
 },
 {
+"id": "verbatim_messages",
+"line": "knowledge",
+"status": "adopted",
+"name": "Messengers Learn Their Message Word for Word",
+"one_liner": "Messengers Learn Their Message Word for Word",
+"observation": "Messengers Learn Their Message Word for Word.",
+"key_threshold": false,
+"target_year": 315,
+"proposed_year": 315,
+"band_low": 280.0,
+"band_high": 350.0,
+"min_year": 280.0,
+"research_years": 2.0,
+"requires_all": [
+"runner_relays_between_work_sites",
+"mnemonic_verse_encoding"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "graded_grinding_sand",
+"line": "production",
+"status": "adopted",
+"name": "Grinding Sand Graded from Coarse to Fine",
+"one_liner": "Grinding Sand Graded from Coarse to Fine",
+"observation": "Grinding Sand Graded from Coarse to Fine.",
+"key_threshold": false,
+"target_year": 315,
+"proposed_year": 315,
+"band_low": 280.0,
+"band_high": 350.0,
+"min_year": 280.0,
+"research_years": 2.0,
+"requires_all": [
+"tube_drilled_stone_vessels",
+"ground_stone_axes"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "graded_wool_weighing",
+"line": "production",
+"status": "adopted",
+"name": "Wool Weighed Out by Grade for Spinning",
+"one_liner": "Wool Weighed Out by Grade for Spinning",
+"observation": "Wool Weighed Out by Grade for Spinning.",
+"key_threshold": false,
+"target_year": 315,
+"proposed_year": 315,
+"band_low": 280.0,
+"band_high": 350.0,
+"min_year": 280.0,
+"research_years": 2.0,
+"requires_all": [
+"wool_spinning",
+"balance_beam_weights"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "winter_felled_timber",
+"line": "production",
+"status": "adopted",
+"name": "Timber Felled in Winter When the Sap Is Low",
+"one_liner": "Timber Felled in Winter When the Sap Is Low",
+"observation": "Timber Felled in Winter When the Sap Is Low.",
+"key_threshold": false,
+"target_year": 315,
+"proposed_year": 315,
+"band_low": 280.0,
+"band_high": 350.0,
+"min_year": 280.0,
+"research_years": 2.0,
+"requires_all": [
+"timber_seasoning",
+"timber_stand_reserves"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "herringbone_plano_convex_brick",
 "line": "infrastructure",
 "status": "new",
@@ -19862,6 +21390,29 @@
 "shared_with": []
 },
 {
+"id": "boiled_herb_decoctions",
+"line": "health",
+"status": "adopted",
+"name": "Remedies Boiled into Decoctions",
+"one_liner": "Remedies Boiled into Decoctions",
+"observation": "Remedies Boiled into Decoctions.",
+"key_threshold": false,
+"target_year": 315,
+"proposed_year": 315,
+"band_low": 280.0,
+"band_high": 350.0,
+"min_year": 280.0,
+"research_years": 2.0,
+"requires_all": [
+"herbal_classification",
+"clay_dome_ovens"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "timber_bridges",
 "line": "logistics",
 "status": "catalog",
@@ -19887,6 +21438,29 @@
 "shared_with": [
 "infrastructure"
 ]
+},
+{
+"id": "town_refuse_to_fields",
+"line": "ecology",
+"status": "adopted",
+"name": "Town Refuse Carted Out to the Fields",
+"one_liner": "Town Refuse Carted Out to the Fields",
+"observation": "Town Refuse Carted Out to the Fields.",
+"key_threshold": false,
+"target_year": 315,
+"proposed_year": 315,
+"band_low": 280.0,
+"band_high": 350.0,
+"min_year": 280.0,
+"research_years": 2.0,
+"requires_all": [
+"refuse_pit_rotation",
+"manure_field_spreading"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "woven_dressings",
@@ -20089,6 +21663,29 @@
 ]
 },
 {
+"id": "exile_readmission",
+"line": "institutions",
+"status": "adopted",
+"name": "Exiles Readmitted Once Compensation Is Paid",
+"one_liner": "Exiles Readmitted Once Compensation Is Paid",
+"observation": "Exiles Readmitted Once Compensation Is Paid.",
+"key_threshold": false,
+"target_year": 325,
+"proposed_year": 325,
+"band_low": 290.0,
+"band_high": 360.0,
+"min_year": 290.0,
+"research_years": 2.0,
+"requires_all": [
+"banishment_sentence",
+"mediated_restitution_custom"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "spoilage_inspection",
 "line": "nutrition",
 "status": "new",
@@ -20142,6 +21739,29 @@
 ]
 },
 {
+"id": "back_to_back_house_lanes",
+"line": "demography",
+"status": "adopted",
+"name": "Lanes of Houses Built Back to Back",
+"one_liner": "Lanes of Houses Built Back to Back",
+"observation": "Lanes of Houses Built Back to Back.",
+"key_threshold": false,
+"target_year": 325,
+"proposed_year": 325,
+"band_low": 290.0,
+"band_high": 360.0,
+"min_year": 290.0,
+"research_years": 2.0,
+"requires_all": [
+"rooms_added_as_family_grows",
+"public_space_allocation"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "caulking_fiber_preparation",
 "line": "logistics",
 "status": "catalog",
@@ -20187,6 +21807,29 @@
 "requires_all": [
 "joinery",
 "rope_laying"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "granaries_on_high_ground",
+"line": "logistics",
+"status": "adopted",
+"name": "Granaries Built on the Highest Ground",
+"one_liner": "Granaries Built on the Highest Ground",
+"observation": "Granaries Built on the Highest Ground.",
+"key_threshold": false,
+"target_year": 325,
+"proposed_year": 325,
+"band_low": 290.0,
+"band_high": 360.0,
+"min_year": 290.0,
+"research_years": 2.0,
+"requires_all": [
+"storerooms_by_kind",
+"dwelling_site_orientation"
 ],
 "requires_any": [],
 "precedents": [],
@@ -20432,6 +22075,52 @@
 ]
 },
 {
+"id": "canal_wardens",
+"line": "institutions",
+"status": "adopted",
+"name": "A Warden for Each Main Canal",
+"one_liner": "A Warden for Each Main Canal",
+"observation": "A Warden for Each Main Canal.",
+"key_threshold": false,
+"target_year": 335,
+"proposed_year": 335,
+"band_low": 300.0,
+"band_high": 370.0,
+"min_year": 300.0,
+"research_years": 3.0,
+"requires_all": [
+"district_sowing_day",
+"standing_arbiter_appointment"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "gravelled_main_streets",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Main Streets Surfaced with Gravel and Broken Pottery",
+"one_liner": "Main Streets Surfaced with Gravel and Broken Pottery",
+"observation": "Main Streets Surfaced with Gravel and Broken Pottery.",
+"key_threshold": false,
+"target_year": 335,
+"proposed_year": 335,
+"band_low": 300.0,
+"band_high": 370.0,
+"min_year": 300.0,
+"research_years": 2.0,
+"requires_all": [
+"public_space_allocation",
+"stone_lined_drains"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "regional_granaries",
 "line": "nutrition",
 "status": "catalog",
@@ -20458,6 +22147,29 @@
 ]
 },
 {
+"id": "roof_edge_walls",
+"line": "health",
+"status": "adopted",
+"name": "Low Walls Around Roofs Where People Sleep",
+"one_liner": "Low Walls Around Roofs Where People Sleep",
+"observation": "Low Walls Around Roofs Where People Sleep.",
+"key_threshold": false,
+"target_year": 335,
+"proposed_year": 335,
+"band_low": 300.0,
+"band_high": 370.0,
+"min_year": 300.0,
+"research_years": 2.0,
+"requires_all": [
+"flat_clay_roofs",
+"workplace_hazard_awareness"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "separate_clean_water_storage",
 "line": "health",
 "status": "catalog",
@@ -20474,6 +22186,52 @@
 "requires_all": [
 "water_container_cleaning_customs",
 "water_settling_basins"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "children_kept_from_water",
+"line": "demography",
+"status": "adopted",
+"name": "Small Children Kept from Canals and Wells",
+"one_liner": "Small Children Kept from Canals and Wells",
+"observation": "Small Children Kept from Canals and Wells.",
+"key_threshold": false,
+"target_year": 335,
+"proposed_year": 335,
+"band_low": 300.0,
+"band_high": 370.0,
+"min_year": 300.0,
+"research_years": 2.0,
+"requires_all": [
+"hearth_hazard_proofing",
+"irrigation_schedules"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "prepared_birth_room",
+"line": "demography",
+"status": "adopted",
+"name": "A Warm, Clean Room Readied for the Birth",
+"one_liner": "A Warm, Clean Room Readied for the Birth",
+"observation": "A Warm, Clean Room Readied for the Birth.",
+"key_threshold": false,
+"target_year": 335,
+"proposed_year": 335,
+"band_low": 300.0,
+"band_high": 370.0,
+"min_year": 300.0,
+"research_years": 2.0,
+"requires_all": [
+"late_pregnancy_light_work",
+"seasonal_sleeping_arrangements"
 ],
 "requires_any": [],
 "precedents": [],
@@ -20503,6 +22261,29 @@
 "bow_drill_drive",
 "copper_carpentry_tools"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "herds_restocked_after_murrain",
+"line": "security",
+"status": "adopted",
+"name": "Herds Restocked from the Temple Flock After a Murrain",
+"one_liner": "Herds Restocked from the Temple Flock After a Murrain",
+"observation": "Herds Restocked from the Temple Flock After a Murrain.",
+"key_threshold": false,
+"target_year": 335,
+"proposed_year": 335,
+"band_low": 300.0,
+"band_high": 370.0,
+"min_year": 300.0,
+"research_years": 2.0,
+"requires_all": [
+"temple_flock_herders",
+"mutual_aid_customs"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -20687,6 +22468,29 @@
 ]
 },
 {
+"id": "office_seals",
+"line": "institutions",
+"status": "adopted",
+"name": "Each Office Keeps Its Own Seal",
+"one_liner": "Each Office Keeps Its Own Seal",
+"observation": "Each Office Keeps Its Own Seal.",
+"key_threshold": false,
+"target_year": 345,
+"proposed_year": 345,
+"band_low": 310.0,
+"band_high": 380.0,
+"min_year": 310.0,
+"research_years": 2.0,
+"requires_all": [
+"cylinder_seals",
+"temple_high_steward"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "separate_temple_palace_stores",
 "line": "institutions",
 "status": "new",
@@ -20847,6 +22651,29 @@
 "precedents": [
 "treenail_fastening"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "carcass_burial_away",
+"line": "ecology",
+"status": "adopted",
+"name": "Carcasses Buried Away from Water and Houses",
+"one_liner": "Carcasses Buried Away from Water and Houses",
+"observation": "Carcasses Buried Away from Water and Houses.",
+"key_threshold": false,
+"target_year": 345,
+"proposed_year": 345,
+"band_low": 310.0,
+"band_high": 380.0,
+"min_year": 310.0,
+"research_years": 2.0,
+"requires_all": [
+"refuse_removal",
+"midden_siting_away_from_water"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -21088,6 +22915,52 @@
 ]
 },
 {
+"id": "foundation_deposits",
+"line": "culture",
+"status": "adopted",
+"name": "Foundation Deposits Buried Under New Walls",
+"one_liner": "Foundation Deposits Buried Under New Walls",
+"observation": "Foundation Deposits Buried Under New Walls.",
+"key_threshold": false,
+"target_year": 353,
+"proposed_year": 353,
+"band_low": 318.0,
+"band_high": 388.0,
+"min_year": 318.0,
+"research_years": 3.0,
+"requires_all": [
+"first_shrine_house",
+"recited_leader_names"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "visiting_master_craftsmen",
+"line": "culture",
+"status": "adopted",
+"name": "Foreign Craftsmen Invited to Teach",
+"one_liner": "Foreign Craftsmen Invited to Teach",
+"observation": "Foreign Craftsmen Invited to Teach.",
+"key_threshold": false,
+"target_year": 353,
+"proposed_year": 353,
+"band_low": 318.0,
+"band_high": 388.0,
+"min_year": 318.0,
+"research_years": 3.0,
+"requires_all": [
+"imported_vessel_copies",
+"full_time_specialists"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "cross_settlement_registries",
 "line": "institutions",
 "status": "era",
@@ -21145,6 +23018,52 @@
 "administration",
 "training"
 ]
+},
+{
+"id": "hand_to_hand_lines",
+"line": "labor",
+"status": "adopted",
+"name": "Baskets Passed Hand to Hand Along a Line",
+"one_liner": "Baskets Passed Hand to Hand Along a Line",
+"observation": "Baskets Passed Hand to Hand Along a Line.",
+"key_threshold": false,
+"target_year": 355,
+"proposed_year": 355,
+"band_low": 320.0,
+"band_high": 390.0,
+"min_year": 320.0,
+"research_years": 2.0,
+"requires_all": [
+"dig_carry_turns",
+"load_bundling_by_weight"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "standard_reed_bundles",
+"line": "production",
+"status": "adopted",
+"name": "Reeds Sold in Bundles of One Girth",
+"one_liner": "Reeds Sold in Bundles of One Girth",
+"observation": "Reeds Sold in Bundles of One Girth.",
+"key_threshold": false,
+"target_year": 355,
+"proposed_year": 355,
+"band_low": 320.0,
+"band_high": 390.0,
+"min_year": 320.0,
+"research_years": 2.0,
+"requires_all": [
+"reed_mat_weaving",
+"standard_unit_naming"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "legume_field_interplanting",
@@ -21563,6 +23482,28 @@
 ]
 },
 {
+"id": "captive_field_labour",
+"line": "labor",
+"status": "adopted",
+"name": "War Captives Set to Grinding and Weaving",
+"one_liner": "War Captives Set to Grinding and Weaving",
+"observation": "War Captives Set to Grinding and Weaving.",
+"key_threshold": false,
+"target_year": 365,
+"proposed_year": 365,
+"band_low": 330.0,
+"band_high": 400.0,
+"min_year": 330.0,
+"research_years": 2.0,
+"requires_all": [
+"captive_adoption"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "certified_craft_competence",
 "line": "labor",
 "status": "era",
@@ -21613,6 +23554,29 @@
 "shared_with": []
 },
 {
+"id": "flood_pool_fishing",
+"line": "nutrition",
+"status": "adopted",
+"name": "Fish Taken from Pools Left by the Falling Flood",
+"one_liner": "Fish Taken from Pools Left by the Falling Flood",
+"observation": "Fish Taken from Pools Left by the Falling Flood.",
+"key_threshold": false,
+"target_year": 365,
+"proposed_year": 365,
+"band_low": 330.0,
+"band_high": 400.0,
+"min_year": 330.0,
+"research_years": 2.0,
+"requires_all": [
+"fish_weirs_and_traps",
+"flood_silt_fields"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "weaning_food_customs",
 "line": "nutrition",
 "status": "era",
@@ -21629,6 +23593,52 @@
 "requires_all": [
 "weaning_food_softening",
 "interval_weaning_practice"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "hand_washing_ewer",
+"line": "health",
+"status": "adopted",
+"name": "Hands Washed from Ewer and Basin Before Meals",
+"one_liner": "Hands Washed from Ewer and Basin Before Meals",
+"observation": "Hands Washed from Ewer and Basin Before Meals.",
+"key_threshold": false,
+"target_year": 365,
+"proposed_year": 365,
+"band_low": 330.0,
+"band_high": 400.0,
+"min_year": 330.0,
+"research_years": 2.0,
+"requires_all": [
+"water_container_cleaning_customs",
+"sheet_copper_riveting"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "sick_animal_separation",
+"line": "health",
+"status": "adopted",
+"name": "Diseased Animals Separated from the Flock",
+"one_liner": "Diseased Animals Separated from the Flock",
+"observation": "Diseased Animals Separated from the Flock.",
+"key_threshold": false,
+"target_year": 365,
+"proposed_year": 365,
+"band_low": 330.0,
+"band_high": 400.0,
+"min_year": 330.0,
+"research_years": 2.0,
+"requires_all": [
+"sickbed_distance_norms",
+"scrap_fed_pigs"
 ],
 "requires_any": [],
 "precedents": [],
@@ -21767,6 +23777,29 @@
 ]
 },
 {
+"id": "third_party_border_judgment",
+"line": "institutions",
+"status": "adopted",
+"name": "Border Quarrels Between Towns Judged by a Third Ruler",
+"one_liner": "Border Quarrels Between Towns Judged by a Third Ruler",
+"observation": "Border Quarrels Between Towns Judged by a Third Ruler.",
+"key_threshold": false,
+"target_year": 370,
+"proposed_year": 370,
+"band_low": 335.0,
+"band_high": 405.0,
+"min_year": 335.0,
+"research_years": 3.0,
+"requires_all": [
+"standing_arbiter_appointment",
+"boundary_marker_surveys"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "cross_settlement_measure_agreement",
 "line": "production",
 "status": "era",
@@ -21887,6 +23920,29 @@
 ]
 },
 {
+"id": "mortise_joined_furniture",
+"line": "production",
+"status": "adopted",
+"name": "Beds and Stools Joined with Mortise and Tenon",
+"one_liner": "Beds and Stools Joined with Mortise and Tenon",
+"observation": "Beds and Stools Joined with Mortise and Tenon.",
+"key_threshold": false,
+"target_year": 371,
+"proposed_year": 371,
+"band_low": 336.0,
+"band_high": 406.0,
+"min_year": 336.0,
+"research_years": 2.0,
+"requires_all": [
+"timber_post_beam_connections",
+"copper_carpentry_tools"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "ceremonial_investiture",
 "line": "institutions",
 "status": "era",
@@ -21908,6 +23964,29 @@
 "precedents": [
 "kingship"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "elders_then_fighters_councils",
+"line": "institutions",
+"status": "adopted",
+"name": "War Put to the Elders and Then to the Fighting Men",
+"one_liner": "War Put to the Elders and Then to the Fighting Men",
+"observation": "War Put to the Elders and Then to the Fighting Men.",
+"key_threshold": false,
+"target_year": 375,
+"proposed_year": 375,
+"band_low": 340.0,
+"band_high": 410.0,
+"min_year": 340.0,
+"research_years": 2.0,
+"requires_all": [
+"free_adult_assembly",
+"chosen_village_headman"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -21941,6 +24020,29 @@
 "society",
 "information"
 ]
+},
+{
+"id": "levy_service_turns",
+"line": "labor",
+"status": "adopted",
+"name": "Levy Duty Taken in Turns So No Household Serves Twice",
+"one_liner": "Levy Duty Taken in Turns So No Household Serves Twice",
+"observation": "Levy Duty Taken in Turns So No Household Serves Twice.",
+"key_threshold": false,
+"target_year": 375,
+"proposed_year": 375,
+"band_low": 340.0,
+"band_high": 410.0,
+"min_year": 340.0,
+"research_years": 2.0,
+"requires_all": [
+"census_rolls",
+"grain_levy_accounting"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "leather_goods_patterning",
@@ -22015,6 +24117,52 @@
 "precedents": [
 "raised_granaries"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "topsoil_saved_on_terraces",
+"line": "ecology",
+"status": "adopted",
+"name": "Topsoil Set Aside and Spread Back on New Terraces",
+"one_liner": "Topsoil Set Aside and Spread Back on New Terraces",
+"observation": "Topsoil Set Aside and Spread Back on New Terraces.",
+"key_threshold": false,
+"target_year": 375,
+"proposed_year": 375,
+"band_low": 340.0,
+"band_high": 410.0,
+"min_year": 340.0,
+"research_years": 2.0,
+"requires_all": [
+"topsoil_depth_reading",
+"dry_stone_walls"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "ward_wall_stretches",
+"line": "security",
+"status": "adopted",
+"name": "Each Ward Holds Its Own Stretch of the Town Wall",
+"one_liner": "Each Ward Holds Its Own Stretch of the Town Wall",
+"observation": "Each Ward Holds Its Own Stretch of the Town Wall.",
+"key_threshold": false,
+"target_year": 375,
+"proposed_year": 375,
+"band_low": 340.0,
+"band_high": 410.0,
+"min_year": 340.0,
+"research_years": 2.0,
+"requires_all": [
+"town_enclosure_walls",
+"blank_outer_walls"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -22533,6 +24681,29 @@
 "shared_with": []
 },
 {
+"id": "street_corner_wells",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Public Wells at Street Crossings",
+"one_liner": "Public Wells at Street Crossings",
+"observation": "Public Wells at Street Crossings.",
+"key_threshold": false,
+"target_year": 385,
+"proposed_year": 385,
+"band_low": 350.0,
+"band_high": 420.0,
+"min_year": 350.0,
+"research_years": 2.0,
+"requires_all": [
+"protected_wellheads",
+"roped_well_diggers"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "marked_wine_jars",
 "line": "nutrition",
 "status": "new",
@@ -22563,6 +24734,52 @@
 "food",
 "storage"
 ]
+},
+{
+"id": "spring_weeding_gangs",
+"line": "nutrition",
+"status": "adopted",
+"name": "Weeding Gangs Sent Through the Fields in Spring",
+"one_liner": "Weeding Gangs Sent Through the Fields in Spring",
+"observation": "Weeding Gangs Sent Through the Fields in Spring.",
+"key_threshold": false,
+"target_year": 385,
+"proposed_year": 385,
+"band_low": 350.0,
+"band_high": 420.0,
+"min_year": 350.0,
+"research_years": 2.0,
+"requires_all": [
+"planting_density_adjustment",
+"seasonal_labor_pooling"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "embedded_point_removal",
+"line": "health",
+"status": "adopted",
+"name": "Embedded Points and Splinters Cut Out of Wounds",
+"one_liner": "Embedded Points and Splinters Cut Out of Wounds",
+"observation": "Embedded Points and Splinters Cut Out of Wounds.",
+"key_threshold": false,
+"target_year": 385,
+"proposed_year": 385,
+"band_low": 350.0,
+"band_high": 420.0,
+"min_year": 350.0,
+"research_years": 2.0,
+"requires_all": [
+"wound_cleaning",
+"wound_packing"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "waystation_spacing_judgment",
@@ -22672,6 +24889,29 @@
 "information",
 "research"
 ]
+},
+{
+"id": "first_basket_founding",
+"line": "institutions",
+"status": "adopted",
+"name": "The Leader Carries the First Basket at a Founding",
+"one_liner": "The Leader Carries the First Basket at a Founding",
+"observation": "The Leader Carries the First Basket at a Founding.",
+"key_threshold": false,
+"target_year": 390,
+"proposed_year": 390,
+"band_low": 355.0,
+"band_high": 425.0,
+"min_year": 355.0,
+"research_years": 2.0,
+"requires_all": [
+"foundation_deposits",
+"temple_high_steward"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "public_heralds",
@@ -22861,6 +25101,52 @@
 ]
 },
 {
+"id": "foreman_daily_logs",
+"line": "knowledge",
+"status": "adopted",
+"name": "Foremen Keep a Daily Log of the Work",
+"one_liner": "Foremen Keep a Daily Log of the Work",
+"observation": "Foremen Keep a Daily Log of the Work.",
+"key_threshold": false,
+"target_year": 391,
+"proposed_year": 391,
+"band_low": 356.0,
+"band_high": 426.0,
+"min_year": 356.0,
+"research_years": 3.0,
+"requires_all": [
+"crew_count_scribes",
+"flock_evening_count"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "year_round_skilled_core",
+"line": "labor",
+"status": "adopted",
+"name": "A Core of Year-Round Skilled Workers at the Great Works",
+"one_liner": "A Core of Year-Round Skilled Workers at the Great Works",
+"observation": "A Core of Year-Round Skilled Workers at the Great Works.",
+"key_threshold": false,
+"target_year": 391,
+"proposed_year": 391,
+"band_low": 356.0,
+"band_high": 426.0,
+"min_year": 356.0,
+"research_years": 3.0,
+"requires_all": [
+"great_work_parties",
+"full_time_specialists"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "written_apprentice_instructions",
 "line": "knowledge",
 "status": "new",
@@ -22978,6 +25264,29 @@
 "food",
 "storage"
 ]
+},
+{
+"id": "houses_on_town_wall",
+"line": "demography",
+"status": "adopted",
+"name": "Houses Built Against the Inside of the Town Wall",
+"one_liner": "Houses Built Against the Inside of the Town Wall",
+"observation": "Houses Built Against the Inside of the Town Wall.",
+"key_threshold": false,
+"target_year": 395,
+"proposed_year": 395,
+"band_low": 360.0,
+"band_high": 430.0,
+"min_year": 360.0,
+"research_years": 2.0,
+"requires_all": [
+"town_enclosure_walls",
+"back_to_back_house_lanes"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "paved_haul_roads",
@@ -23665,6 +25974,29 @@
 "shared_with": []
 },
 {
+"id": "two_road_runners",
+"line": "knowledge",
+"status": "adopted",
+"name": "Urgent Messages Sent with Two Runners by Different Roads",
+"one_liner": "Urgent Messages Sent with Two Runners by Different Roads",
+"observation": "Urgent Messages Sent with Two Runners by Different Roads.",
+"key_threshold": false,
+"target_year": 410,
+"proposed_year": 410,
+"band_low": 375.0,
+"band_high": 445.0,
+"min_year": 375.0,
+"research_years": 2.0,
+"requires_all": [
+"runner_relays_between_work_sites",
+"verbatim_messages"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "boundary_treaties",
 "line": "institutions",
 "status": "new",
@@ -23695,6 +26027,29 @@
 "administration",
 "society"
 ]
+},
+{
+"id": "gang_marks_on_blocks",
+"line": "labor",
+"status": "adopted",
+"name": "Each Gang's Mark Painted on Its Blocks",
+"one_liner": "Each Gang's Mark Painted on Its Blocks",
+"observation": "Each Gang's Mark Painted on Its Blocks.",
+"key_threshold": false,
+"target_year": 410,
+"proposed_year": 410,
+"band_low": 375.0,
+"band_high": 445.0,
+"min_year": 375.0,
+"research_years": 2.0,
+"requires_all": [
+"gangs_of_ten",
+"crew_count_scribes"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "bronze_work_hardening",
@@ -23881,6 +26236,29 @@
 ]
 },
 {
+"id": "statue_daily_care",
+"line": "culture",
+"status": "adopted",
+"name": "The God's Statue Fed and Clothed Each Day",
+"one_liner": "The God's Statue Fed and Clothed Each Day",
+"observation": "The God's Statue Fed and Clothed Each Day.",
+"key_threshold": false,
+"target_year": 415,
+"proposed_year": 415,
+"band_low": 380.0,
+"band_high": 450.0,
+"min_year": 380.0,
+"research_years": 3.0,
+"requires_all": [
+"first_shrine_house",
+"offering_keepers"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "hive_beekeeping",
 "line": "nutrition",
 "status": "new",
@@ -23911,6 +26289,29 @@
 "food",
 "storage"
 ]
+},
+{
+"id": "house_bathing_floors",
+"line": "health",
+"status": "adopted",
+"name": "House Bathing Floors Drained to the Street",
+"one_liner": "House Bathing Floors Drained to the Street",
+"observation": "House Bathing Floors Drained to the Street.",
+"key_threshold": false,
+"target_year": 415,
+"proposed_year": 415,
+"band_low": 380.0,
+"band_high": 450.0,
+"min_year": 380.0,
+"research_years": 2.0,
+"requires_all": [
+"hand_washing_ewer",
+"stone_lined_drains"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "hogging_truss_hulls",
@@ -24009,6 +26410,29 @@
 "defense",
 "warfare"
 ]
+},
+{
+"id": "stores_in_several_places",
+"line": "security",
+"status": "adopted",
+"name": "Grain Kept in Several Stores Across the Town",
+"one_liner": "Grain Kept in Several Stores Across the Town",
+"observation": "Grain Kept in Several Stores Across the Town.",
+"key_threshold": false,
+"target_year": 415,
+"proposed_year": 415,
+"band_low": 380.0,
+"band_high": 450.0,
+"min_year": 380.0,
+"research_years": 2.0,
+"requires_all": [
+"central_storehouses",
+"stocked_refuge"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "public_schools",
@@ -24394,6 +26818,29 @@
 "shared_with": []
 },
 {
+"id": "level_struck_measures",
+"line": "production",
+"status": "adopted",
+"name": "Grain Measures Struck Level with a Rod",
+"one_liner": "Grain Measures Struck Level with a Rod",
+"observation": "Grain Measures Struck Level with a Rod.",
+"key_threshold": false,
+"target_year": 425,
+"proposed_year": 425,
+"band_low": 390.0,
+"band_high": 460.0,
+"min_year": 390.0,
+"research_years": 2.0,
+"requires_all": [
+"standard_unit_naming",
+"public_grain_weighing"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "rigid_pipe_bedding",
 "line": "infrastructure",
 "status": "catalog",
@@ -24416,6 +26863,29 @@
 "covered_sewers",
 "water_trough_leveling"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "clap_net_fowling",
+"line": "nutrition",
+"status": "adopted",
+"name": "Waterfowl Taken with Clap Nets",
+"one_liner": "Waterfowl Taken with Clap Nets",
+"observation": "Waterfowl Taken with Clap Nets.",
+"key_threshold": false,
+"target_year": 425,
+"proposed_year": 425,
+"band_low": 390.0,
+"band_high": 460.0,
+"min_year": 390.0,
+"research_years": 3.0,
+"requires_all": [
+"reed_bed_rotation",
+"flood_pool_fishing"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -24685,6 +27155,29 @@
 ]
 },
 {
+"id": "reaped_before_shedding",
+"line": "nutrition",
+"status": "adopted",
+"name": "Grain Reaped Before It Drops from the Ear",
+"one_liner": "Grain Reaped Before It Drops from the Ear",
+"observation": "Grain Reaped Before It Drops from the Ear.",
+"key_threshold": false,
+"target_year": 430,
+"proposed_year": 430,
+"band_low": 395.0,
+"band_high": 465.0,
+"min_year": 395.0,
+"research_years": 2.0,
+"requires_all": [
+"crop_calendars",
+"spring_weeding_gangs"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "stall_fattened_cattle",
 "line": "nutrition",
 "status": "new",
@@ -24747,6 +27240,76 @@
 ]
 },
 {
+"id": "shepherd_ruler_ideal",
+"line": "institutions",
+"status": "adopted",
+"name": "The Leader Called the Shepherd of His People",
+"one_liner": "The Leader Called the Shepherd of His People",
+"observation": "The Leader Called the Shepherd of His People.",
+"key_threshold": false,
+"target_year": 435,
+"proposed_year": 435,
+"band_low": 400.0,
+"band_high": 470.0,
+"min_year": 400.0,
+"research_years": 2.0,
+"requires_all": [
+"temple_high_steward",
+"praise_songs"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "hard_stone_bead_batches",
+"line": "production",
+"status": "adopted",
+"name": "Hard Stone Beads Bored in Workshop Batches",
+"one_liner": "Hard Stone Beads Bored in Workshop Batches",
+"observation": "Hard Stone Beads Bored in Workshop Batches.",
+"key_threshold": false,
+"target_year": 435,
+"proposed_year": 435,
+"band_low": 400.0,
+"band_high": 470.0,
+"min_year": 400.0,
+"research_years": 3.0,
+"requires_all": [
+"graded_grinding_sand",
+"relay_trade_gemstones",
+"visiting_master_craftsmen"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "bank_breach_closing",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Breaks in the River Bank Closed with Reed Bundles",
+"one_liner": "Breaks in the River Bank Closed with Reed Bundles",
+"observation": "Breaks in the River Bank Closed with Reed Bundles.",
+"key_threshold": false,
+"target_year": 435,
+"proposed_year": 435,
+"band_low": 400.0,
+"band_high": 470.0,
+"min_year": 400.0,
+"research_years": 2.0,
+"requires_all": [
+"flood_levees",
+"storm_response_drill"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "masonry_bond_patterns",
 "line": "infrastructure",
 "status": "catalog",
@@ -24763,6 +27326,29 @@
 "requires_all": [
 "standard_brick_proportions",
 "course_leveling_practice"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "meat_sealed_in_fat",
+"line": "nutrition",
+"status": "adopted",
+"name": "Meat Cooked and Sealed Under Fat",
+"one_liner": "Meat Cooked and Sealed Under Fat",
+"observation": "Meat Cooked and Sealed Under Fat.",
+"key_threshold": false,
+"target_year": 435,
+"proposed_year": 435,
+"band_low": 400.0,
+"band_high": 470.0,
+"min_year": 400.0,
+"research_years": 3.0,
+"requires_all": [
+"fat_tailed_sheep",
+"sealed_vessels"
 ],
 "requires_any": [],
 "precedents": [],
@@ -24799,6 +27385,98 @@
 "travel",
 "logistics"
 ]
+},
+{
+"id": "jars_bedded_in_floor",
+"line": "logistics",
+"status": "adopted",
+"name": "Store Jars Bedded in the Storeroom Floor",
+"one_liner": "Store Jars Bedded in the Storeroom Floor",
+"observation": "Store Jars Bedded in the Storeroom Floor.",
+"key_threshold": false,
+"target_year": 435,
+"proposed_year": 435,
+"band_low": 400.0,
+"band_high": 470.0,
+"min_year": 400.0,
+"research_years": 2.0,
+"requires_all": [
+"hermetic_grain_storage",
+"storerooms_by_kind"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "leveled_basin_fields",
+"line": "ecology",
+"status": "adopted",
+"name": "Fields Levelled So Water Spreads Evenly",
+"one_liner": "Fields Levelled So Water Spreads Evenly",
+"observation": "Fields Levelled So Water Spreads Evenly.",
+"key_threshold": false,
+"target_year": 435,
+"proposed_year": 435,
+"band_low": 400.0,
+"band_high": 470.0,
+"min_year": 400.0,
+"research_years": 2.0,
+"requires_all": [
+"rod_and_cord_leveling",
+"canal_strip_fields"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "slaughter_waste_removal",
+"line": "ecology",
+"status": "adopted",
+"name": "Slaughter Waste Carried Out Past the Houses",
+"one_liner": "Slaughter Waste Carried Out Past the Houses",
+"observation": "Slaughter Waste Carried Out Past the Houses.",
+"key_threshold": false,
+"target_year": 435,
+"proposed_year": 435,
+"band_low": 400.0,
+"band_high": 470.0,
+"min_year": 400.0,
+"research_years": 2.0,
+"requires_all": [
+"refuse_pit_rotation",
+"carcass_burial_away"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "temple_orphan_care",
+"line": "demography",
+"status": "adopted",
+"name": "Orphans Taken into the God's Household",
+"one_liner": "Orphans Taken into the God's Household",
+"observation": "Orphans Taken into the God's Household.",
+"key_threshold": false,
+"target_year": 436,
+"proposed_year": 436,
+"band_low": 401.0,
+"band_high": 471.0,
+"min_year": 401.0,
+"research_years": 3.0,
+"requires_all": [
+"kinswoman_wet_nurse",
+"temple_high_steward"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "jarred_salt_fish",
@@ -25247,6 +27925,52 @@
 ]
 },
 {
+"id": "traders_children_tongues",
+"line": "culture",
+"status": "adopted",
+"name": "Traders' Sons Taught the Neighbours' Tongue",
+"one_liner": "Traders' Sons Taught the Neighbours' Tongue",
+"observation": "Traders' Sons Taught the Neighbours' Tongue.",
+"key_threshold": false,
+"target_year": 445,
+"proposed_year": 445,
+"band_low": 410.0,
+"band_high": 480.0,
+"min_year": 410.0,
+"research_years": 2.0,
+"requires_all": [
+"long_distance_axe_trade",
+"market_timing_knowledge"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "work_site_supply_rounds",
+"line": "labor",
+"status": "adopted",
+"name": "Supplies Brought to the Great Work on a Fixed Round",
+"one_liner": "Supplies Brought to the Great Work on a Fixed Round",
+"observation": "Supplies Brought to the Great Work on a Fixed Round.",
+"key_threshold": false,
+"target_year": 445,
+"proposed_year": 445,
+"band_low": 410.0,
+"band_high": 480.0,
+"min_year": 410.0,
+"research_years": 2.0,
+"requires_all": [
+"rotating_named_gangs",
+"fixed_worker_rations"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "building_drainage_coordination",
 "line": "infrastructure",
 "status": "catalog",
@@ -25565,6 +28289,52 @@
 ]
 },
 {
+"id": "scaffold_lashing",
+"line": "health",
+"status": "adopted",
+"name": "Scaffolds Lashed for Work on High Walls",
+"one_liner": "Scaffolds Lashed for Work on High Walls",
+"observation": "Scaffolds Lashed for Work on High Walls.",
+"key_threshold": false,
+"target_year": 451,
+"proposed_year": 451,
+"band_low": 416.0,
+"band_high": 486.0,
+"min_year": 416.0,
+"research_years": 2.0,
+"requires_all": [
+"rope_laying",
+"course_leveling_practice"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "shared_party_walls",
+"line": "demography",
+"status": "adopted",
+"name": "Shared Walls Agreed Between Neighbours",
+"one_liner": "Shared Walls Agreed Between Neighbours",
+"observation": "Shared Walls Agreed Between Neighbours.",
+"key_threshold": false,
+"target_year": 451,
+"proposed_year": 451,
+"band_low": 416.0,
+"band_high": 486.0,
+"min_year": 416.0,
+"research_years": 2.0,
+"requires_all": [
+"houses_on_town_wall",
+"witnessed_land_sales"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "birth_stool_bricks",
 "line": "demography",
 "status": "new",
@@ -25591,6 +28361,29 @@
 "population",
 "society"
 ]
+},
+{
+"id": "offices_father_to_son",
+"line": "institutions",
+"status": "adopted",
+"name": "Offices Handed from Father to Son",
+"one_liner": "Offices Handed from Father to Son",
+"observation": "Offices Handed from Father to Son.",
+"key_threshold": false,
+"target_year": 455,
+"proposed_year": 455,
+"band_low": 420.0,
+"band_high": 490.0,
+"min_year": 420.0,
+"research_years": 3.0,
+"requires_all": [
+"titled_estate_overseers",
+"ceremonial_investiture"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "temple_estates",
@@ -25654,6 +28447,29 @@
 ]
 },
 {
+"id": "hide_bone_glue",
+"line": "production",
+"status": "adopted",
+"name": "Glue Boiled from Hide and Bone",
+"one_liner": "Glue Boiled from Hide and Bone",
+"observation": "Glue Boiled from Hide and Bone.",
+"key_threshold": false,
+"target_year": 455,
+"proposed_year": 455,
+"band_low": 420.0,
+"band_high": 490.0,
+"min_year": 420.0,
+"research_years": 2.0,
+"requires_all": [
+"hide_tanning",
+"mortise_joined_furniture"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "pitched_brick_vaults",
 "line": "infrastructure",
 "status": "new",
@@ -25683,6 +28499,30 @@
 "construction",
 "materials"
 ]
+},
+{
+"id": "island_market_trade",
+"line": "logistics",
+"status": "adopted",
+"name": "Ships of Many Coasts Meet at an Island Market",
+"one_liner": "Ships of Many Coasts Meet at an Island Market",
+"observation": "Ships of Many Coasts Meet at an Island Market.",
+"key_threshold": false,
+"target_year": 455,
+"proposed_year": 455,
+"band_low": 420.0,
+"band_high": 490.0,
+"min_year": 420.0,
+"research_years": 3.0,
+"requires_all": [
+"coastal_watercraft",
+"chiefs_gift_trade_paths",
+"named_four_winds"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "road_stations",
@@ -25716,6 +28556,29 @@
 "travel",
 "logistics"
 ]
+},
+{
+"id": "fallen_warrior_mounds",
+"line": "culture",
+"status": "adopted",
+"name": "Mounds Raised Over the Fallen of a Battle",
+"one_liner": "Mounds Raised Over the Fallen of a Battle",
+"observation": "Mounds Raised Over the Fallen of a Battle.",
+"key_threshold": false,
+"target_year": 459,
+"proposed_year": 459,
+"band_low": 424.0,
+"band_high": 494.0,
+"min_year": 424.0,
+"research_years": 2.0,
+"requires_all": [
+"graveside_libations",
+"common_armory"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "water_trough_leveling",
@@ -25841,6 +28704,29 @@
 ]
 },
 {
+"id": "soaked_trodden_fields",
+"line": "nutrition",
+"status": "adopted",
+"name": "Fields Soaked and Trodden Before Ploughing",
+"one_liner": "Fields Soaked and Trodden Before Ploughing",
+"observation": "Fields Soaked and Trodden Before Ploughing.",
+"key_threshold": false,
+"target_year": 460,
+"proposed_year": 460,
+"band_low": 425.0,
+"band_high": 495.0,
+"min_year": 425.0,
+"research_years": 3.0,
+"requires_all": [
+"ox_drawn_ard",
+"staged_grain_watering"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "seasonal_herd_matching",
 "line": "ecology",
 "status": "new",
@@ -25927,6 +28813,29 @@
 ]
 },
 {
+"id": "duplicate_contract_copies",
+"line": "knowledge",
+"status": "adopted",
+"name": "Each Party Keeps a Copy of the Contract",
+"one_liner": "Each Party Keeps a Copy of the Contract",
+"observation": "Each Party Keeps a Copy of the Contract.",
+"key_threshold": false,
+"target_year": 465,
+"proposed_year": 465,
+"band_low": 430.0,
+"band_high": 500.0,
+"min_year": 430.0,
+"research_years": 2.0,
+"requires_all": [
+"clay_goods_labels",
+"sealed_tablet_contracts"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "scribal_specialties",
 "line": "knowledge",
 "status": "new",
@@ -25993,6 +28902,29 @@
 ]
 },
 {
+"id": "extra_day_rations",
+"line": "labor",
+"status": "adopted",
+"name": "Extra Rations for Extra Days Worked",
+"one_liner": "Extra Rations for Extra Days Worked",
+"observation": "Extra Rations for Extra Days Worked.",
+"key_threshold": false,
+"target_year": 465,
+"proposed_year": 465,
+"band_low": 430.0,
+"band_high": 500.0,
+"min_year": 430.0,
+"research_years": 2.0,
+"requires_all": [
+"levy_service_turns",
+"worker_ration_lists"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "graded_rations",
 "line": "nutrition",
 "status": "new",
@@ -26021,6 +28953,52 @@
 "food",
 "storage"
 ]
+},
+{
+"id": "purification_washing",
+"line": "health",
+"status": "adopted",
+"name": "The Sick Washed with Water and Herbs in Purification Rites",
+"one_liner": "The Sick Washed with Water and Herbs in Purification Rites",
+"observation": "The Sick Washed with Water and Herbs in Purification Rites.",
+"key_threshold": false,
+"target_year": 465,
+"proposed_year": 465,
+"band_low": 430.0,
+"band_high": 500.0,
+"min_year": 430.0,
+"research_years": 2.0,
+"requires_all": [
+"sickroom_fumigation",
+"boiled_herb_decoctions"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "grain_rated_boats",
+"line": "logistics",
+"status": "adopted",
+"name": "Boats Rated by How Much Grain They Carry",
+"one_liner": "Boats Rated by How Much Grain They Carry",
+"observation": "Boats Rated by How Much Grain They Carry.",
+"key_threshold": false,
+"target_year": 465,
+"proposed_year": 465,
+"band_low": 430.0,
+"band_high": 500.0,
+"min_year": 430.0,
+"research_years": 3.0,
+"requires_all": [
+"navigation_canals",
+"one_measure_sacks"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "area_volume_rules",
@@ -26360,6 +29338,121 @@
 "shared_with": []
 },
 {
+"id": "staged_pupil_lessons",
+"line": "knowledge",
+"status": "adopted",
+"name": "Pupils Taught in Fixed Stages from Signs to Texts",
+"one_liner": "Pupils Taught in Fixed Stages from Signs to Texts",
+"observation": "Pupils Taught in Fixed Stages from Signs to Texts.",
+"key_threshold": false,
+"target_year": 475,
+"proposed_year": 475,
+"band_low": 440.0,
+"band_high": 510.0,
+"min_year": 440.0,
+"research_years": 3.0,
+"requires_all": [
+"scribal_apprenticeship",
+"public_schools"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "regency_for_child_heir",
+"line": "institutions",
+"status": "adopted",
+"name": "A Regent Rules for a Child Heir",
+"one_liner": "A Regent Rules for a Child Heir",
+"observation": "A Regent Rules for a Child Heir.",
+"key_threshold": false,
+"target_year": 475,
+"proposed_year": 475,
+"band_low": 440.0,
+"band_high": 510.0,
+"min_year": 440.0,
+"research_years": 2.0,
+"requires_all": [
+"offices_father_to_son",
+"ceremonial_investiture"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "widow_orphan_protection",
+"line": "institutions",
+"status": "adopted",
+"name": "Protection of Widows and Orphans Proclaimed",
+"one_liner": "Protection of Widows and Orphans Proclaimed",
+"observation": "Protection of Widows and Orphans Proclaimed.",
+"key_threshold": false,
+"target_year": 475,
+"proposed_year": 475,
+"band_low": 440.0,
+"band_high": 510.0,
+"min_year": 440.0,
+"research_years": 3.0,
+"requires_all": [
+"shepherd_ruler_ideal",
+"temple_orphan_care"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "sacred_marriage_rite",
+"line": "culture",
+"status": "adopted",
+"name": "The God's Marriage Enacted at the New Year",
+"one_liner": "The God's Marriage Enacted at the New Year",
+"observation": "The God's Marriage Enacted at the New Year.",
+"key_threshold": false,
+"target_year": 475,
+"proposed_year": 475,
+"band_low": 440.0,
+"band_high": 510.0,
+"min_year": 440.0,
+"research_years": 3.0,
+"requires_all": [
+"new_year_festival",
+"statue_daily_care"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "spare_rebuilding_timber",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Spare Timber Stored for Rebuilding After Fire",
+"one_liner": "Spare Timber Stored for Rebuilding After Fire",
+"observation": "Spare Timber Stored for Rebuilding After Fire.",
+"key_threshold": false,
+"target_year": 475,
+"proposed_year": 475,
+"band_low": 440.0,
+"band_high": 510.0,
+"min_year": 440.0,
+"research_years": 2.0,
+"requires_all": [
+"distant_timber_reserves",
+"winter_felled_timber"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "beam_olive_press",
 "line": "nutrition",
 "status": "new",
@@ -26391,6 +29484,52 @@
 ]
 },
 {
+"id": "latrine_seats_over_drains",
+"line": "health",
+"status": "adopted",
+"name": "Brick Latrine Seats over Drains",
+"one_liner": "Brick Latrine Seats over Drains",
+"observation": "Brick Latrine Seats over Drains.",
+"key_threshold": false,
+"target_year": 475,
+"proposed_year": 475,
+"band_low": 440.0,
+"band_high": 510.0,
+"min_year": 440.0,
+"research_years": 2.0,
+"requires_all": [
+"house_bathing_floors",
+"latrine_siting"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "work_crew_healer",
+"line": "health",
+"status": "adopted",
+"name": "A Healer Posted with the Work Crews",
+"one_liner": "A Healer Posted with the Work Crews",
+"observation": "A Healer Posted with the Work Crews.",
+"key_threshold": false,
+"target_year": 475,
+"proposed_year": 475,
+"band_low": 440.0,
+"band_high": 510.0,
+"min_year": 440.0,
+"research_years": 2.0,
+"requires_all": [
+"healer_titles",
+"year_round_skilled_core"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "domesticated_mounts",
 "line": "logistics",
 "status": "catalog",
@@ -26415,6 +29554,52 @@
 "conditions": {
 "contact_required": true
 },
+"shared_with": []
+},
+{
+"id": "flocks_inside_walls",
+"line": "security",
+"status": "adopted",
+"name": "Flocks Brought Inside the Walls When Raiders Are Near",
+"one_liner": "Flocks Brought Inside the Walls When Raiders Are Near",
+"observation": "Flocks Brought Inside the Walls When Raiders Are Near.",
+"key_threshold": false,
+"target_year": 475,
+"proposed_year": 475,
+"band_low": 440.0,
+"band_high": 510.0,
+"min_year": 440.0,
+"research_years": 2.0,
+"requires_all": [
+"town_enclosure_walls",
+"armed_herd_guards"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "letter_greeting_formula",
+"line": "knowledge",
+"status": "adopted",
+"name": "Letters Open with a Set Greeting Naming Sender and Receiver",
+"one_liner": "Letters Open with a Set Greeting Naming Sender and Receiver",
+"observation": "Letters Open with a Set Greeting Naming Sender and Receiver.",
+"key_threshold": false,
+"target_year": 480,
+"proposed_year": 480,
+"band_low": 445.0,
+"band_high": 515.0,
+"min_year": 445.0,
+"research_years": 2.0,
+"requires_all": [
+"sealed_tablet_letters",
+"verbatim_messages"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
 "shared_with": []
 },
 {
@@ -26571,6 +29756,29 @@
 ]
 },
 {
+"id": "building_plan_tablets",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Builders Work from a Plan Drawn on a Tablet",
+"one_liner": "Builders Work from a Plan Drawn on a Tablet",
+"observation": "Builders Work from a Plan Drawn on a Tablet.",
+"key_threshold": false,
+"target_year": 480,
+"proposed_year": 480,
+"band_low": 445.0,
+"band_high": 515.0,
+"min_year": 445.0,
+"research_years": 2.0,
+"requires_all": [
+"geometric_survey",
+"corner_squaring_method"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "stepped_temple_towers",
 "line": "infrastructure",
 "status": "new",
@@ -26602,6 +29810,29 @@
 "construction",
 "materials"
 ]
+},
+{
+"id": "grain_kept_in_ear",
+"line": "nutrition",
+"status": "adopted",
+"name": "Grain Kept in the Ear Until It Is Needed",
+"one_liner": "Grain Kept in the Ear Until It Is Needed",
+"observation": "Grain Kept in the Ear Until It Is Needed.",
+"key_threshold": false,
+"target_year": 480,
+"proposed_year": 480,
+"band_low": 445.0,
+"band_high": 515.0,
+"min_year": 445.0,
+"research_years": 2.0,
+"requires_all": [
+"ash_mixed_grain_stores",
+"reaped_before_shedding"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "named_year_ages",
@@ -26692,6 +29923,29 @@
 ]
 },
 {
+"id": "trodden_brick_clay",
+"line": "labor",
+"status": "adopted",
+"name": "Brick Clay Trodden by Teams Before Moulding",
+"one_liner": "Brick Clay Trodden by Teams Before Moulding",
+"observation": "Brick Clay Trodden by Teams Before Moulding.",
+"key_threshold": false,
+"target_year": 481,
+"proposed_year": 481,
+"band_low": 446.0,
+"band_high": 516.0,
+"min_year": 446.0,
+"research_years": 2.0,
+"requires_all": [
+"brick_quotas",
+"hand_to_hand_lines"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "remedy_tablets",
 "line": "health",
 "status": "new",
@@ -26720,6 +29974,52 @@
 "health",
 "illness"
 ]
+},
+{
+"id": "pregnant_harm_compensation",
+"line": "demography",
+"status": "adopted",
+"name": "Compensation Owed for Harming a Pregnant Woman",
+"one_liner": "Compensation Owed for Harming a Pregnant Woman",
+"observation": "Compensation Owed for Harming a Pregnant Woman.",
+"key_threshold": false,
+"target_year": 484,
+"proposed_year": 484,
+"band_low": 449.0,
+"band_high": 519.0,
+"min_year": 449.0,
+"research_years": 2.0,
+"requires_all": [
+"customary_law",
+"mediated_restitution_custom"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "outgoing_letter_copies",
+"line": "knowledge",
+"status": "adopted",
+"name": "Copies Kept of Every Letter Sent",
+"one_liner": "Copies Kept of Every Letter Sent",
+"observation": "Copies Kept of Every Letter Sent.",
+"key_threshold": false,
+"target_year": 485,
+"proposed_year": 485,
+"band_low": 450.0,
+"band_high": 520.0,
+"min_year": 450.0,
+"research_years": 2.0,
+"requires_all": [
+"sealed_tablet_letters",
+"formal_archives"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "reciprocal_tables",
@@ -26808,6 +30108,29 @@
 ]
 },
 {
+"id": "stamped_bricks",
+"line": "production",
+"status": "adopted",
+"name": "Bricks Stamped with the Ruler's Name",
+"one_liner": "Bricks Stamped with the Ruler's Name",
+"observation": "Bricks Stamped with the Ruler's Name.",
+"key_threshold": false,
+"target_year": 485,
+"proposed_year": 485,
+"band_low": 450.0,
+"band_high": 520.0,
+"min_year": 450.0,
+"research_years": 2.0,
+"requires_all": [
+"standard_brick_proportions",
+"first_basket_founding"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "flavouring_herbs",
 "line": "nutrition",
 "status": "new",
@@ -26892,6 +30215,29 @@
 ]
 },
 {
+"id": "vacant_lot_allotment",
+"line": "demography",
+"status": "adopted",
+"name": "Vacant Town Lots Allotted for New Houses",
+"one_liner": "Vacant Town Lots Allotted for New Houses",
+"observation": "Vacant Town Lots Allotted for New Houses.",
+"key_threshold": false,
+"target_year": 488,
+"proposed_year": 488,
+"band_low": 453.0,
+"band_high": 523.0,
+"min_year": 453.0,
+"research_years": 2.0,
+"requires_all": [
+"shared_party_walls",
+"public_space_allocation"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "tablet_colophons",
 "line": "knowledge",
 "status": "new",
@@ -26920,6 +30266,29 @@
 "information",
 "research"
 ]
+},
+{
+"id": "local_custom_elders",
+"line": "institutions",
+"status": "adopted",
+"name": "Ward Elders Consulted on Their Own Customs",
+"one_liner": "Ward Elders Consulted on Their Own Customs",
+"observation": "Ward Elders Consulted on Their Own Customs.",
+"key_threshold": false,
+"target_year": 490,
+"proposed_year": 490,
+"band_low": 455.0,
+"band_high": 525.0,
+"min_year": 455.0,
+"research_years": 2.0,
+"requires_all": [
+"third_party_border_judgment",
+"gate_court_hearings"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "sworn_trial_testimony",
@@ -27147,6 +30516,29 @@
 "nature",
 "survey"
 ]
+},
+{
+"id": "wooden_mallet_carving",
+"line": "production",
+"status": "adopted",
+"name": "Chisels Struck with Wooden Mallets",
+"one_liner": "Chisels Struck with Wooden Mallets",
+"observation": "Chisels Struck with Wooden Mallets.",
+"key_threshold": false,
+"target_year": 495,
+"proposed_year": 495,
+"band_low": 460.0,
+"band_high": 530.0,
+"min_year": 460.0,
+"research_years": 2.0,
+"requires_all": [
+"copper_carpentry_tools",
+"dressed_stone_masonry"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "named_breads",
@@ -27405,6 +30797,29 @@
 "shared_with": []
 },
 {
+"id": "keeper_liability_stores",
+"line": "logistics",
+"status": "adopted",
+"name": "Keepers Repay What Is Lost from Stores in Their Care",
+"one_liner": "Keepers Repay What Is Lost from Stores in Their Care",
+"observation": "Keepers Repay What Is Lost from Stores in Their Care.",
+"key_threshold": false,
+"target_year": 500,
+"proposed_year": 500,
+"band_low": 465.0,
+"band_high": 535.0,
+"min_year": 465.0,
+"research_years": 3.0,
+"requires_all": [
+"year_end_stocktaking",
+"sealed_tablet_contracts"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "spoked_wheel_assembly",
 "line": "logistics",
 "status": "catalog",
@@ -27426,6 +30841,29 @@
 "domesticated_mounts",
 "hide_tanning"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "drain_settling_sumps",
+"line": "ecology",
+"status": "adopted",
+"name": "Sump Pits Settle Drain Water Before It Flows Away",
+"one_liner": "Sump Pits Settle Drain Water Before It Flows Away",
+"observation": "Sump Pits Settle Drain Water Before It Flows Away.",
+"key_threshold": false,
+"target_year": 500,
+"proposed_year": 500,
+"band_low": 465.0,
+"band_high": 535.0,
+"min_year": 465.0,
+"research_years": 2.0,
+"requires_all": [
+"covered_sewers",
+"latrine_seats_over_drains"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -27486,6 +30924,144 @@
 "shared_with": []
 },
 {
+"id": "pleated_linen",
+"line": "production",
+"status": "adopted",
+"name": "Linen Pleated on Grooved Boards",
+"one_liner": "Linen Pleated on Grooved Boards",
+"observation": "Linen Pleated on Grooved Boards.",
+"key_threshold": false,
+"target_year": 501,
+"proposed_year": 501,
+"band_low": 466.0,
+"band_high": 536.0,
+"min_year": 466.0,
+"research_years": 2.0,
+"requires_all": [
+"temple_workshops",
+"pulled_flax"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "ruler_year_lists",
+"line": "culture",
+"status": "adopted",
+"name": "Lists of Past Rulers and Their Years",
+"one_liner": "Lists of Past Rulers and Their Years",
+"observation": "Lists of Past Rulers and Their Years.",
+"key_threshold": false,
+"target_year": 503,
+"proposed_year": 503,
+"band_low": 468.0,
+"band_high": 538.0,
+"min_year": 468.0,
+"research_years": 3.0,
+"requires_all": [
+"recited_leader_names",
+"formal_chronicle_keeping"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "model_contract_lessons",
+"line": "knowledge",
+"status": "adopted",
+"name": "Model Contracts Copied as Lessons",
+"one_liner": "Model Contracts Copied as Lessons",
+"observation": "Model Contracts Copied as Lessons.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 3.0,
+"requires_all": [
+"staged_pupil_lessons",
+"sealed_tablet_contracts"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "river_boat_letters",
+"line": "knowledge",
+"status": "adopted",
+"name": "Letters Sent by Fast Boat Along the River",
+"one_liner": "Letters Sent by Fast Boat Along the River",
+"observation": "Letters Sent by Fast Boat Along the River.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"letter_greeting_formula",
+"hide_covered_boats"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "servant_seals_name_master",
+"line": "institutions",
+"status": "adopted",
+"name": "Officials' Seals Name the Master They Serve",
+"one_liner": "Officials' Seals Name the Master They Serve",
+"observation": "Officials' Seals Name the Master They Serve.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"office_seals",
+"offices_father_to_son"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "juggling_ball_games",
+"line": "culture",
+"status": "adopted",
+"name": "Ball Games and Juggling in the Courtyard",
+"one_liner": "Ball Games and Juggling in the Courtyard",
+"observation": "Ball Games and Juggling in the Courtyard.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"festival_wrestling_races",
+"knucklebone_games"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "love_wedding_songs",
 "line": "culture",
 "status": "new",
@@ -27516,6 +31092,121 @@
 ]
 },
 {
+"id": "written_travel_tales",
+"line": "culture",
+"status": "adopted",
+"name": "Tales of Journeys to Far Lands Written Down",
+"one_liner": "Tales of Journeys to Far Lands Written Down",
+"observation": "Tales of Journeys to Far Lands Written Down.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"written_lore_tablets",
+"traders_children_tongues"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "scented_oils",
+"line": "production",
+"status": "adopted",
+"name": "Scented Oils Made by Steeping Plants in Oil",
+"one_liner": "Scented Oils Made by Steeping Plants in Oil",
+"observation": "Scented Oils Made by Steeping Plants in Oil.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 3.0,
+"requires_all": [
+"seed_oil_pressing",
+"skin_oiling"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "standard_cloth_lengths",
+"line": "production",
+"status": "adopted",
+"name": "Cloth Woven to Standard Lengths for Trade",
+"one_liner": "Cloth Woven to Standard Lengths for Trade",
+"observation": "Cloth Woven to Standard Lengths for Trade.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"graded_wool_weighing",
+"temple_workshops"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "sand_bed_foundations",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Foundation Trenches Filled with Clean Sand",
+"one_liner": "Foundation Trenches Filled with Clean Sand",
+"observation": "Foundation Trenches Filled with Clean Sand.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"ground_bearing_assessment",
+"course_leveling_practice"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "riverbank_melon_plots",
+"line": "nutrition",
+"status": "adopted",
+"name": "Melons and Cucumbers Sown on the Falling Riverbank",
+"one_liner": "Melons and Cucumbers Sown on the Falling Riverbank",
+"observation": "Melons and Cucumbers Sown on the Falling Riverbank.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"strangers_seed_trials",
+"flood_silt_fields"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "vinegar_pickling",
 "line": "nutrition",
 "status": "catalog",
@@ -27538,6 +31229,98 @@
 "barley_beer"
 ]
 ],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "strained_drinking_water",
+"line": "health",
+"status": "adopted",
+"name": "Drinking Water Strained Through Cloth",
+"one_liner": "Drinking Water Strained Through Cloth",
+"observation": "Drinking Water Strained Through Cloth.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"water_settling_basins",
+"water_container_cleaning_customs"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "childless_wife_servant",
+"line": "demography",
+"status": "adopted",
+"name": "A Servant Bears Children for a Childless Wife",
+"one_liner": "A Servant Bears Children for a Childless Wife",
+"observation": "A Servant Bears Children for a Childless Wife.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"customary_inheritance_shares",
+"patrilocal_residence"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "children_taught_swimming",
+"line": "demography",
+"status": "adopted",
+"name": "Children of River Towns Taught to Swim",
+"one_liner": "Children of River Towns Taught to Swim",
+"observation": "Children of River Towns Taught to Swim.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"children_kept_from_water",
+"navigation_canals"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "canal_silt_on_fields",
+"line": "ecology",
+"status": "adopted",
+"name": "Canal Silt Spread Back on Worn Fields",
+"one_liner": "Canal Silt Spread Back on Worn Fields",
+"observation": "Canal Silt Spread Back on Worn Fields.",
+"key_threshold": false,
+"target_year": 505,
+"proposed_year": 505,
+"band_low": 470.0,
+"band_high": 540.0,
+"min_year": 470.0,
+"research_years": 2.0,
+"requires_all": [
+"flood_silt_fields",
+"town_refuse_to_fields"
+],
+"requires_any": [],
 "precedents": [],
 "conditions": {},
 "shared_with": []
@@ -27805,6 +31588,52 @@
 ]
 },
 {
+"id": "neighbourhood_taverns",
+"line": "culture",
+"status": "adopted",
+"name": "Taverns Where Neighbours Gather to Drink",
+"one_liner": "Taverns Where Neighbours Gather to Drink",
+"observation": "Taverns Where Neighbours Gather to Drink.",
+"key_threshold": false,
+"target_year": 515,
+"proposed_year": 515,
+"band_low": 480.0,
+"band_high": 550.0,
+"min_year": 480.0,
+"research_years": 2.0,
+"requires_all": [
+"shared_jar_straws",
+"named_beers"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "clod_breaking_harrow",
+"line": "nutrition",
+"status": "adopted",
+"name": "Clods Broken with a Drag Harrow After Ploughing",
+"one_liner": "Clods Broken with a Drag Harrow After Ploughing",
+"observation": "Clods Broken with a Drag Harrow After Ploughing.",
+"key_threshold": false,
+"target_year": 515,
+"proposed_year": 515,
+"band_low": 480.0,
+"band_high": 550.0,
+"min_year": 480.0,
+"research_years": 3.0,
+"requires_all": [
+"ox_drawn_ard",
+"soaked_trodden_fields"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "date_palm_pollination",
 "line": "nutrition",
 "status": "new",
@@ -27834,6 +31663,29 @@
 "food",
 "storage"
 ]
+},
+{
+"id": "sickbed_linen_cleansing",
+"line": "health",
+"status": "adopted",
+"name": "Clothes and Bedding of the Sick Scrubbed or Burned",
+"one_liner": "Clothes and Bedding of the Sick Scrubbed or Burned",
+"observation": "Clothes and Bedding of the Sick Scrubbed or Burned.",
+"key_threshold": false,
+"target_year": 515,
+"proposed_year": 515,
+"band_low": 480.0,
+"band_high": 550.0,
+"min_year": 480.0,
+"research_years": 2.0,
+"requires_all": [
+"isolation_practice",
+"sickroom_fumigation"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "skin_disease_exclusion",
@@ -27892,6 +31744,52 @@
 "nature",
 "survey"
 ]
+},
+{
+"id": "famine_grain_purchase",
+"line": "security",
+"status": "adopted",
+"name": "Grain Bought from Far Places When the Harvest Fails",
+"one_liner": "Grain Bought from Far Places When the Harvest Fails",
+"observation": "Grain Bought from Far Places When the Harvest Fails.",
+"key_threshold": false,
+"target_year": 515,
+"proposed_year": 515,
+"band_low": 480.0,
+"band_high": 550.0,
+"min_year": 480.0,
+"research_years": 3.0,
+"requires_all": [
+"stores_in_several_places",
+"grain_rated_boats"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "balanced_foreman_accounts",
+"line": "institutions",
+"status": "adopted",
+"name": "Foremen's Accounts Balanced with Debts Carried Over",
+"one_liner": "Foremen's Accounts Balanced with Debts Carried Over",
+"observation": "Foremen's Accounts Balanced with Debts Carried Over.",
+"key_threshold": false,
+"target_year": 517,
+"proposed_year": 517,
+"band_low": 482.0,
+"band_high": 552.0,
+"min_year": 482.0,
+"research_years": 3.0,
+"requires_all": [
+"totals_checked_before_sealing",
+"foreman_daily_logs"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "mountain_pack_trains",
@@ -28033,6 +31931,30 @@
 "shared_with": []
 },
 {
+"id": "pregnancy_signs_tests",
+"line": "demography",
+"status": "adopted",
+"name": "Pregnancy Recognised by Tests and Signs",
+"one_liner": "Pregnancy Recognised by Tests and Signs",
+"observation": "Pregnancy Recognised by Tests and Signs.",
+"key_threshold": false,
+"target_year": 520,
+"proposed_year": 520,
+"band_low": 485.0,
+"band_high": 555.0,
+"min_year": 485.0,
+"research_years": 3.0,
+"requires_all": [
+"oiled_labour_massage",
+"prepared_birth_room",
+"midwife_apprenticeship_lines"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "shared_woodland_boundaries",
 "line": "ecology",
 "status": "new",
@@ -28098,6 +32020,29 @@
 ]
 },
 {
+"id": "dyke_high_water_watch",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Dyke Watch Kept Day and Night at High Water",
+"one_liner": "Dyke Watch Kept Day and Night at High Water",
+"observation": "Dyke Watch Kept Day and Night at High Water.",
+"key_threshold": false,
+"target_year": 523,
+"proposed_year": 523,
+"band_low": 488.0,
+"band_high": 558.0,
+"min_year": 488.0,
+"research_years": 2.0,
+"requires_all": [
+"bank_breach_closing",
+"flood_levees"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "property_registers",
 "line": "institutions",
 "status": "catalog",
@@ -28156,6 +32101,29 @@
 "food",
 "storage"
 ]
+},
+{
+"id": "funded_trade_journeys",
+"line": "logistics",
+"status": "adopted",
+"name": "Investors Fund a Trader's Journey for a Share",
+"one_liner": "Investors Fund a Trader's Journey for a Share",
+"observation": "Investors Fund a Trader's Journey for a Share.",
+"key_threshold": false,
+"target_year": 525,
+"proposed_year": 525,
+"band_low": 490.0,
+"band_high": 560.0,
+"min_year": 490.0,
+"research_years": 3.0,
+"requires_all": [
+"sealed_tablet_contracts",
+"traders_children_tongues"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "merchant_quarters_abroad",
@@ -28497,6 +32465,29 @@
 ]
 },
 {
+"id": "heir_raised_to_corule",
+"line": "institutions",
+"status": "adopted",
+"name": "The Heir Raised to Rule Beside His Aging Father",
+"one_liner": "The Heir Raised to Rule Beside His Aging Father",
+"observation": "The Heir Raised to Rule Beside His Aging Father.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 2.0,
+"requires_all": [
+"regency_for_child_heir",
+"ceremonial_investiture"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "royal_appeal_court",
 "line": "institutions",
 "status": "new",
@@ -28525,6 +32516,214 @@
 "administration",
 "society"
 ]
+},
+{
+"id": "household_papers_jar",
+"line": "culture",
+"status": "adopted",
+"name": "Family Contracts and Letters Kept in a Sealed Jar",
+"one_liner": "Family Contracts and Letters Kept in a Sealed Jar",
+"observation": "Family Contracts and Letters Kept in a Sealed Jar.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 2.0,
+"requires_all": [
+"sealed_tablet_contracts",
+"sealed_tablet_letters",
+"heirloom_stories"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "old_tongue_studied",
+"line": "culture",
+"status": "adopted",
+"name": "An Old Tongue Kept Alive in the Tablet-House",
+"one_liner": "An Old Tongue Kept Alive in the Tablet-House",
+"observation": "An Old Tongue Kept Alive in the Tablet-House.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 3.0,
+"requires_all": [
+"bilingual_sign_lists",
+"public_schools"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "two_spindle_spinning",
+"line": "labor",
+"status": "adopted",
+"name": "Spinners Working Two Spindles at Once",
+"one_liner": "Spinners Working Two Spindles at Once",
+"observation": "Spinners Working Two Spindles at Once.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 2.0,
+"requires_all": [
+"drop_spindles",
+"temple_workshops"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "fine_wood_facings",
+"line": "production",
+"status": "adopted",
+"name": "Thin Sheets of Fine Wood Laid over Plain Timber",
+"one_liner": "Thin Sheets of Fine Wood Laid over Plain Timber",
+"observation": "Thin Sheets of Fine Wood Laid over Plain Timber.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 2.0,
+"requires_all": [
+"hide_bone_glue",
+"copper_carpentry_tools"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "dyke_stretch_duty",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Field Owners Keep Their Stretch of the Dyke",
+"one_liner": "Field Owners Keep Their Stretch of the Dyke",
+"observation": "Field Owners Keep Their Stretch of the Dyke.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 2.0,
+"requires_all": [
+"raised_wet_causeways",
+"village_track_upkeep"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "stoppered_oil_jars",
+"line": "nutrition",
+"status": "adopted",
+"name": "Oil Kept Through the Year in Stoppered Jars",
+"one_liner": "Oil Kept Through the Year in Stoppered Jars",
+"observation": "Oil Kept Through the Year in Stoppered Jars.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 2.0,
+"requires_all": [
+"seed_oil_pressing",
+"sealed_vessels"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "itinerary_stop_lists",
+"line": "logistics",
+"status": "adopted",
+"name": "Routes Learned as Lists of Stopping Places",
+"one_liner": "Routes Learned as Lists of Stopping Places",
+"observation": "Routes Learned as Lists of Stopping Places.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 3.0,
+"requires_all": [
+"road_stations",
+"hired_local_guides"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "canal_refuse_ban",
+"line": "ecology",
+"status": "adopted",
+"name": "Refuse and Carcasses Barred from the Canals",
+"one_liner": "Refuse and Carcasses Barred from the Canals",
+"observation": "Refuse and Carcasses Barred from the Canals.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 2.0,
+"requires_all": [
+"canal_wardens",
+"slaughter_waste_removal"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "battlefield_arms_gathered",
+"line": "security",
+"status": "adopted",
+"name": "Arms Gathered from the Field After a Battle",
+"one_liner": "Arms Gathered from the Field After a Battle",
+"observation": "Arms Gathered from the Field After a Battle.",
+"key_threshold": false,
+"target_year": 535,
+"proposed_year": 535,
+"band_low": 500.0,
+"band_high": 570.0,
+"min_year": 500.0,
+"research_years": 2.0,
+"requires_all": [
+"common_armory",
+"bronze_weaponry"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "regional_maps",
@@ -28846,6 +33045,29 @@
 ]
 },
 {
+"id": "broken_source_marking",
+"line": "knowledge",
+"status": "adopted",
+"name": "Copyists Mark Where Their Source Was Broken",
+"one_liner": "Copyists Mark Where Their Source Was Broken",
+"observation": "Copyists Mark Where Their Source Was Broken.",
+"key_threshold": false,
+"target_year": 545,
+"proposed_year": 545,
+"band_low": 510.0,
+"band_high": 580.0,
+"min_year": 510.0,
+"research_years": 2.0,
+"requires_all": [
+"tablet_colophons",
+"written_lore_tablets"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "square_root_tables",
 "line": "knowledge",
 "status": "new",
@@ -28873,6 +33095,29 @@
 "information",
 "research"
 ]
+},
+{
+"id": "failed_harvest_interest_waiver",
+"line": "institutions",
+"status": "adopted",
+"name": "Interest Waived in a Year of Failed Harvest",
+"one_liner": "Interest Waived in a Year of Failed Harvest",
+"observation": "Interest Waived in a Year of Failed Harvest.",
+"key_threshold": false,
+"target_year": 545,
+"proposed_year": 545,
+"band_low": 510.0,
+"band_high": 580.0,
+"min_year": 510.0,
+"research_years": 3.0,
+"requires_all": [
+"fixed_interest_loans",
+"post_disaster_damage_survey"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "licensed_merchant_houses",
@@ -29059,6 +33304,29 @@
 ]
 },
 {
+"id": "measured_canal_stretches",
+"line": "labor",
+"status": "adopted",
+"name": "Canal Clearing Shared by Measured Stretches",
+"one_liner": "Canal Clearing Shared by Measured Stretches",
+"observation": "Canal Clearing Shared by Measured Stretches.",
+"key_threshold": false,
+"target_year": 550,
+"proposed_year": 550,
+"band_low": 515.0,
+"band_high": 585.0,
+"min_year": 515.0,
+"research_years": 2.0,
+"requires_all": [
+"canal_wardens",
+"daily_task_norms"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "ceramic_pipe_fit_gauges",
 "line": "infrastructure",
 "status": "catalog",
@@ -29110,6 +33378,29 @@
 "health",
 "illness"
 ]
+},
+{
+"id": "rented_store_space",
+"line": "logistics",
+"status": "adopted",
+"name": "Storage Space Let for a Yearly Fee",
+"one_liner": "Storage Space Let for a Yearly Fee",
+"observation": "Storage Space Let for a Yearly Fee.",
+"key_threshold": false,
+"target_year": 550,
+"proposed_year": 550,
+"band_low": 515.0,
+"band_high": 585.0,
+"min_year": 515.0,
+"research_years": 2.0,
+"requires_all": [
+"keeper_liability_stores",
+"granaries_on_high_ground"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "sailing_calendar",
@@ -29213,6 +33504,52 @@
 ]
 },
 {
+"id": "kin_ransom_customs",
+"line": "security",
+"status": "adopted",
+"name": "Captured Kin Ransomed by the Family or the Temple",
+"one_liner": "Captured Kin Ransomed by the Family or the Temple",
+"observation": "Captured Kin Ransomed by the Family or the Temple.",
+"key_threshold": false,
+"target_year": 550,
+"proposed_year": 550,
+"band_low": 515.0,
+"band_high": 585.0,
+"min_year": 515.0,
+"research_years": 2.0,
+"requires_all": [
+"temple_common_storehouse",
+"spoils_shared_assembly"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "mill_house_grinding",
+"line": "labor",
+"status": "adopted",
+"name": "Grain Ground in Mill-Houses by Many Hands",
+"one_liner": "Grain Ground in Mill-Houses by Many Hands",
+"observation": "Grain Ground in Mill-Houses by Many Hands.",
+"key_threshold": false,
+"target_year": 551,
+"proposed_year": 551,
+"band_low": 516.0,
+"band_high": 586.0,
+"min_year": 516.0,
+"research_years": 2.0,
+"requires_all": [
+"raised_grinding_querns",
+"captive_field_labour"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "service_land_grants",
 "line": "institutions",
 "status": "new",
@@ -29247,6 +33584,29 @@
 "administration",
 "society"
 ]
+},
+{
+"id": "infant_lullabies",
+"line": "culture",
+"status": "adopted",
+"name": "Lullabies Sung to Quiet Infants",
+"one_liner": "Lullabies Sung to Quiet Infants",
+"observation": "Lullabies Sung to Quiet Infants.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 2.0,
+"requires_all": [
+"rattles_drums_pipes",
+"interval_weaning_practice"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "scribal_songs_satires",
@@ -29312,6 +33672,52 @@
 ]
 },
 {
+"id": "worst_tasks_by_lot",
+"line": "labor",
+"status": "adopted",
+"name": "The Worst Tasks Given Out by Lot",
+"one_liner": "The Worst Tasks Given Out by Lot",
+"observation": "The Worst Tasks Given Out by Lot.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 2.0,
+"requires_all": [
+"levy_service_turns",
+"daily_task_norms"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "cast_on_tool_repair",
+"line": "production",
+"status": "adopted",
+"name": "Broken Bronze Tools Mended by Casting On",
+"one_liner": "Broken Bronze Tools Mended by Casting On",
+"observation": "Broken Bronze Tools Mended by Casting On.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 2.0,
+"requires_all": [
+"closed_moulds",
+"cored_socket_casting"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "ceramic_glaze_formulation",
 "line": "production",
 "status": "catalog",
@@ -29333,6 +33739,121 @@
 "faience",
 "wheel_thrown_pottery"
 ],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "brick_count_reckoning",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Bricks for a Wall Reckoned in Advance",
+"one_liner": "Bricks for a Wall Reckoned in Advance",
+"observation": "Bricks for a Wall Reckoned in Advance.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 2.0,
+"requires_all": [
+"building_plan_tablets",
+"trodden_brick_clay"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "rented_rooms",
+"line": "demography",
+"status": "adopted",
+"name": "Houses and Rooms Rented by Agreement",
+"one_liner": "Houses and Rooms Rented by Agreement",
+"observation": "Houses and Rooms Rented by Agreement.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 2.0,
+"requires_all": [
+"vacant_lot_allotment",
+"sealed_tablet_contracts"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "ice_pit_house",
+"line": "logistics",
+"status": "adopted",
+"name": "Winter Ice Packed into a Pit-House",
+"one_liner": "Winter Ice Packed into a Pit-House",
+"observation": "Winter Ice Packed into a Pit-House.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 3.0,
+"requires_all": [
+"hermetic_grain_storage",
+"storage_humidity_judging"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "slope_bush_planting",
+"line": "ecology",
+"status": "adopted",
+"name": "Bushes Planted on Stripped Slopes to Hold the Soil",
+"one_liner": "Bushes Planted on Stripped Slopes to Hold the Soil",
+"observation": "Bushes Planted on Stripped Slopes to Hold the Soil.",
+"key_threshold": false,
+"target_year": 555,
+"proposed_year": 555,
+"band_low": 520.0,
+"band_high": 590.0,
+"min_year": 520.0,
+"research_years": 2.0,
+"requires_all": [
+"slope_erosion_watch",
+"topsoil_saved_on_terraces"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "silver_rated_dues",
+"line": "institutions",
+"status": "adopted",
+"name": "Dues Converted to Silver at Set Rates",
+"one_liner": "Dues Converted to Silver at Set Rates",
+"observation": "Dues Converted to Silver at Set Rates.",
+"key_threshold": false,
+"target_year": 556,
+"proposed_year": 556,
+"band_low": 521.0,
+"band_high": 591.0,
+"min_year": 521.0,
+"research_years": 3.0,
+"requires_all": [
+"balanced_foreman_accounts",
+"fixed_interest_loans"
+],
+"requires_any": [],
+"precedents": [],
 "conditions": {},
 "shared_with": []
 },
@@ -29365,6 +33886,29 @@
 "population",
 "society"
 ]
+},
+{
+"id": "merchant_partner_letters",
+"line": "knowledge",
+"status": "adopted",
+"name": "Merchants' Letters Between Home and Partners Abroad",
+"one_liner": "Merchants' Letters Between Home and Partners Abroad",
+"observation": "Merchants' Letters Between Home and Partners Abroad.",
+"key_threshold": false,
+"target_year": 559,
+"proposed_year": 559,
+"band_low": 524.0,
+"band_high": 594.0,
+"min_year": 524.0,
+"research_years": 2.0,
+"requires_all": [
+"letter_greeting_formula",
+"funded_trade_journeys"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "consonantal_alphabet",
@@ -29654,6 +34198,29 @@
 ]
 },
 {
+"id": "scribe_final_examination",
+"line": "knowledge",
+"status": "adopted",
+"name": "Pupils Questioned in a Final Examination",
+"one_liner": "Pupils Questioned in a Final Examination",
+"observation": "Pupils Questioned in a Final Examination.",
+"key_threshold": false,
+"target_year": 565,
+"proposed_year": 565,
+"band_low": 530.0,
+"band_high": 600.0,
+"min_year": 530.0,
+"research_years": 2.0,
+"requires_all": [
+"model_contract_lessons",
+"scribal_copying_tests"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "refractory_body_trials",
 "line": "production",
 "status": "catalog",
@@ -29703,6 +34270,29 @@
 "health",
 "illness"
 ]
+},
+{
+"id": "standard_pack_loads",
+"line": "logistics",
+"status": "adopted",
+"name": "Pack Loads Made Up to One Standard Weight",
+"one_liner": "Pack Loads Made Up to One Standard Weight",
+"observation": "Pack Loads Made Up to One Standard Weight.",
+"key_threshold": false,
+"target_year": 565,
+"proposed_year": 565,
+"band_low": 530.0,
+"band_high": 600.0,
+"min_year": 530.0,
+"research_years": 2.0,
+"requires_all": [
+"one_measure_sacks",
+"load_bundling_by_weight"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "three_year_nursing",
@@ -29938,6 +34528,146 @@
 "food",
 "storage"
 ]
+},
+{
+"id": "first_line_catalogues",
+"line": "knowledge",
+"status": "adopted",
+"name": "Lists of Works by Their First Lines",
+"one_liner": "Lists of Works by Their First Lines",
+"observation": "Lists of Works by Their First Lines.",
+"key_threshold": false,
+"target_year": 575,
+"proposed_year": 575,
+"band_low": 540.0,
+"band_high": 610.0,
+"min_year": 540.0,
+"research_years": 2.0,
+"requires_all": [
+"duplicate_contract_copies",
+"outgoing_letter_copies",
+"written_lore_tablets"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "accession_letters",
+"line": "institutions",
+"status": "adopted",
+"name": "A New Ruler's Accession Announced by Letter",
+"one_liner": "A New Ruler's Accession Announced by Letter",
+"observation": "A New Ruler's Accession Announced by Letter.",
+"key_threshold": false,
+"target_year": 575,
+"proposed_year": 575,
+"band_low": 540.0,
+"band_high": 610.0,
+"min_year": 540.0,
+"research_years": 2.0,
+"requires_all": [
+"sealed_tablet_letters",
+"servant_seals_name_master",
+"heir_raised_to_corule"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "lyre_tuning_lessons",
+"line": "culture",
+"status": "adopted",
+"name": "Lyre Tunings Taught by Named Intervals",
+"one_liner": "Lyre Tunings Taught by Named Intervals",
+"observation": "Lyre Tunings Taught by Named Intervals.",
+"key_threshold": false,
+"target_year": 575,
+"proposed_year": 575,
+"band_low": 540.0,
+"band_high": 610.0,
+"min_year": 540.0,
+"research_years": 3.0,
+"requires_all": [
+"harps_and_lyres",
+"public_schools"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "fallen_brick_reuse",
+"line": "infrastructure",
+"status": "adopted",
+"name": "Bricks from Fallen Walls Cleaned and Reused",
+"one_liner": "Bricks from Fallen Walls Cleaned and Reused",
+"observation": "Bricks from Fallen Walls Cleaned and Reused.",
+"key_threshold": false,
+"target_year": 575,
+"proposed_year": 575,
+"band_low": 540.0,
+"band_high": 610.0,
+"min_year": 540.0,
+"research_years": 2.0,
+"requires_all": [
+"spare_rebuilding_timber",
+"seasonal_wall_replastering"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "written_cooking_steps",
+"line": "nutrition",
+"status": "adopted",
+"name": "Cooking Steps Kept on Tablets",
+"one_liner": "Cooking Steps Kept on Tablets",
+"observation": "Cooking Steps Kept on Tablets.",
+"key_threshold": false,
+"target_year": 575,
+"proposed_year": 575,
+"band_low": 540.0,
+"band_high": 610.0,
+"min_year": 540.0,
+"research_years": 3.0,
+"requires_all": [
+"named_breads",
+"written_lore_tablets"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "return_loads",
+"line": "logistics",
+"status": "adopted",
+"name": "Return Loads Arranged So Boats Never Go Back Empty",
+"one_liner": "Return Loads Arranged So Boats Never Go Back Empty",
+"observation": "Return Loads Arranged So Boats Never Go Back Empty.",
+"key_threshold": false,
+"target_year": 575,
+"proposed_year": 575,
+"band_low": 540.0,
+"band_high": 610.0,
+"min_year": 540.0,
+"research_years": 2.0,
+"requires_all": [
+"grain_rated_boats",
+"navigation_canals"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "planted_timber_groves",
@@ -30231,6 +34961,99 @@
 "construction",
 "materials"
 ]
+},
+{
+"id": "window_grilles",
+"line": "infrastructure",
+"status": "adopted",
+"name": "High Windows Closed with Grilles",
+"one_liner": "High Windows Closed with Grilles",
+"observation": "High Windows Closed with Grilles.",
+"key_threshold": false,
+"target_year": 580,
+"proposed_year": 580,
+"band_low": 545.0,
+"band_high": 615.0,
+"min_year": 545.0,
+"research_years": 2.0,
+"requires_all": [
+"stone_pivot_doors",
+"upper_storeys"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "shrine_entry_washing",
+"line": "health",
+"status": "adopted",
+"name": "Hands and Feet Washed Before Entering the Shrine",
+"one_liner": "Hands and Feet Washed Before Entering the Shrine",
+"observation": "Hands and Feet Washed Before Entering the Shrine.",
+"key_threshold": false,
+"target_year": 580,
+"proposed_year": 580,
+"band_low": 545.0,
+"band_high": 615.0,
+"min_year": 545.0,
+"research_years": 2.0,
+"requires_all": [
+"hand_washing_ewer",
+"first_shrine_house"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "salt_land_survey_notes",
+"line": "ecology",
+"status": "adopted",
+"name": "Salt-Damaged Fields Recorded in the Survey",
+"one_liner": "Salt-Damaged Fields Recorded in the Survey",
+"observation": "Salt-Damaged Fields Recorded in the Survey.",
+"key_threshold": false,
+"target_year": 580,
+"proposed_year": 580,
+"band_low": 545.0,
+"band_high": 615.0,
+"min_year": 545.0,
+"research_years": 2.0,
+"requires_all": [
+"leveled_basin_fields",
+"salinity_recognition",
+"paced_field_allotments"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "garrison_relief_turns",
+"line": "security",
+"status": "adopted",
+"name": "Border Forts Relieved by Fresh Men in Turn",
+"one_liner": "Border Forts Relieved by Fresh Men in Turn",
+"observation": "Border Forts Relieved by Fresh Men in Turn.",
+"key_threshold": false,
+"target_year": 583,
+"proposed_year": 583,
+"band_low": 548.0,
+"band_high": 618.0,
+"min_year": 548.0,
+"research_years": 2.0,
+"requires_all": [
+"border_fortress_chains",
+"rotating_watch_captaincy"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "fruit_tree_grafting",
@@ -30609,6 +35432,76 @@
 "shared_with": []
 },
 {
+"id": "old_inscription_copies",
+"line": "culture",
+"status": "adopted",
+"name": "Old Inscriptions Copied for the Archive",
+"one_liner": "Old Inscriptions Copied for the Archive",
+"observation": "Old Inscriptions Copied for the Archive.",
+"key_threshold": false,
+"target_year": 591,
+"proposed_year": 591,
+"band_low": 556.0,
+"band_high": 626.0,
+"min_year": 556.0,
+"research_years": 3.0,
+"requires_all": [
+"foundation_deposits",
+"ruler_year_lists",
+"broken_source_marking"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "agent_sale_accounts",
+"line": "logistics",
+"status": "adopted",
+"name": "Merchants' Agents Account for Every Sale",
+"one_liner": "Merchants' Agents Account for Every Sale",
+"observation": "Merchants' Agents Account for Every Sale.",
+"key_threshold": false,
+"target_year": 591,
+"proposed_year": 591,
+"band_low": 556.0,
+"band_high": 626.0,
+"min_year": 556.0,
+"research_years": 2.0,
+"requires_all": [
+"funded_trade_journeys",
+"merchant_partner_letters"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
+"id": "cool_jar_magazines",
+"line": "logistics",
+"status": "adopted",
+"name": "Great Storage Jars Set in Rows in Cool Rooms",
+"one_liner": "Great Storage Jars Set in Rows in Cool Rooms",
+"observation": "Great Storage Jars Set in Rows in Cool Rooms.",
+"key_threshold": false,
+"target_year": 591,
+"proposed_year": 591,
+"band_low": 556.0,
+"band_high": 626.0,
+"min_year": 556.0,
+"research_years": 3.0,
+"requires_all": [
+"storerooms_by_kind",
+"stoppered_oil_jars"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
+},
+{
 "id": "tapestry_weaving",
 "line": "production",
 "status": "new",
@@ -30667,6 +35560,29 @@
 "health",
 "illness"
 ]
+},
+{
+"id": "lean_year_seed_loans",
+"line": "security",
+"status": "adopted",
+"name": "Seed Grain Lent After a Ruined Harvest",
+"one_liner": "Seed Grain Lent After a Ruined Harvest",
+"observation": "Seed Grain Lent After a Ruined Harvest.",
+"key_threshold": false,
+"target_year": 595,
+"proposed_year": 595,
+"band_low": 560.0,
+"band_high": 630.0,
+"min_year": 560.0,
+"research_years": 2.0,
+"requires_all": [
+"famine_grain_purchase",
+"herds_restocked_after_murrain"
+],
+"requires_any": [],
+"precedents": [],
+"conditions": {},
+"shared_with": []
 },
 {
 "id": "checked_master_copies",

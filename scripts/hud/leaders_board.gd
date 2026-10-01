@@ -29,6 +29,7 @@ const Record:=preload("res://scripts/battle_record.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
 const Sustain:=preload("res://scripts/field_sustainment.gd")
 const Story:=preload("res://scripts/hud/military_force_story.gd")
+const GeneralRecord:=preload("res://scripts/general_record.gd")
 const REFRESH_SECONDS:=0.5
 ## Past this many bands a command's bands are shown by kit and place.
 const GROUP_FROM:=12
@@ -205,8 +206,13 @@ func _build_dossier(e:Dictionary,entries:Array)->void:
 	if rated!="":who.add_child(_line(rated,14,T.INK))
 	var record:=Commands.record(leader)
 	if not record.is_empty():
-		var fought:=int(record.battles)
-		who.add_child(_line(("Fought %d · won %d · lost %d" % [fought,int(record.won),int(record.lost)] if fought>0 else "Has not led a fight yet")+(" · %d %s in public life" % [int(record.years),"year" if int(record.years)==1 else "years"]),13,T.INK_MUTED))
+		var record_line:=_line(GeneralRecord.words(record),13,T.INK_MUTED);record_line.name="GeneralRecord";record_line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+		record_line.tooltip_text="Kept from their own battles and days in the field: our men lost and theirs, the march, hunger and desertion under them.";record_line.mouse_filter=Control.MOUSE_FILTER_PASS;who.add_child(record_line)
+	# What they change, in the engine's numbers, against an ordinary general.
+	var band_men:=float(sums_now.get("men",0))/float(maxi(1,int(sums_now.get("bands",0))))
+	var levers_line:=_line(GeneralRecord.lever_line(commander,String(leader.name),band_men),13,T.INK);levers_line.name="GeneralLevers";levers_line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	levers_line.tooltip_text="Battle power x0.85 to x1.15 by command; march pace x0.9 to x1.1 and hunger's cost x1.2 to x0.8 by logistics; desertion under hardship by command and resolve. An ordinary general (every skill half way) changes nothing.";levers_line.mouse_filter=Control.MOUSE_FILTER_PASS
+	who.add_child(levers_line)
 	# What they see to.
 	dossier.add_child(_kicker("What %s sees to" % String(leader.name).get_slice(" ",0)))
 	var tiles:=GridContainer.new();tiles.columns=4;tiles.add_theme_constant_override("h_separation",10);tiles.add_theme_constant_override("v_separation",10);dossier.add_child(tiles)
@@ -257,7 +263,7 @@ static func tile_specs(sums_now:Dictionary,cards:Array,logistics:float,war_leade
 	var ceiling:=(0.55+0.45*supply)*100.0
 	out.append({"key":"will","title":"Organization","value":"%d%%" % roundi(will*100.0) if bands>0 else "—","share":will,"color":BarModel.will_color(will),
 		"line":("%d ready to break" % int(sums_now.breaking)) if int(sums_now.breaking)>0 else ("+%.1f a day in camp, up to %d%%" % [regain,roundi(ceiling)] if bands>0 else "no bands"),
-		"tip":"Their will to fight, by their men. At rest a band regains up to %.0f points a day in full supply (a third of it on the march), less when short of food, and more under a leader with good logistics (x0.9 to x1.1); a hungry band loses heart instead. Below a quarter they break." % (Sustain.MORALE_REST*100.0)})
+		"tip":"Their will to fight, by their men. At rest a band regains up to %.0f points a day in full supply (a third of it on the march), less when short of food, and more under a leader with good logistics (x0.9 to x1.1); a hungry band loses heart instead. A band %s." % [Sustain.MORALE_REST*100.0,preload("res://scripts/army_lines.gd").BREAK_WORDS]})
 	var marching:=int(sums_now.marching)
 	var foraging:=0
 	for card:Dictionary in cards:
@@ -318,11 +324,20 @@ func _band_row(card:Dictionary,entries:Array,leader_id:String)->Control:
 	var move:=OptionButton.new();move.name="MoveTo";move.tooltip_text="Put this band under another leader. It fights, camps and recovers with that leader's skills.";move.fit_to_longest_item=false;move.custom_minimum_size.x=150
 	move.add_item("Move to…",0);move.set_item_disabled(0,true)
 	var ids:=[""]
+	# Each choice says what the band would gain or lose under that leader
+	# against the one leading it now (general_record.gd).
+	var now:Dictionary={}
+	for entry:Dictionary in entries:
+		if String(entry.id)==leader_id: now=(entry.leader as Dictionary).get("commander",{})
 	for other:Dictionary in entries:
 		if String(other.id)==leader_id:continue
 		var leader:Dictionary=other.leader
 		if String(leader.get("status","living"))!="living":continue
-		move.add_item(String(leader.name).get_slice(" ",0)+(" (war leader)" if String(other.id)==Commands.WAR_LEADER else ""),ids.size());ids.append(String(other.id))
+		var theirs:Dictionary=leader.get("commander",{})
+		var power:=roundi(float(GeneralRecord.levers(theirs,now if not now.is_empty() else GeneralRecord.ORDINARY,float(card.get("men",0))).fight)*100.0) if not theirs.is_empty() else 0
+		move.add_item(String(leader.name).get_slice(" ",0)+(" (war leader)" if String(other.id)==Commands.WAR_LEADER else "")+(" · power %+d%%" % power if not theirs.is_empty() else ""),ids.size())
+		if not theirs.is_empty(): move.set_item_tooltip(move.item_count-1,GeneralRecord.if_led(now,theirs,String(leader.name),float(card.get("men",0))))
+		ids.append(String(other.id))
 	var army_id:=int(card.get("army_id",0))
 	move.item_selected.connect(func(index:int)->void:
 		var target:=String(ids[move.get_item_id(index)])

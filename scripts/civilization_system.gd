@@ -1487,7 +1487,8 @@ func scout_mission_quote(duration_days:int,target_id:String="open_world",heading
 			if allowance>=duration_days:break
 			if scout_one_way_range(allowance)>=distance*1.25:duration_days=allowance;break
 		provisions=float(personnel)*float(duration_days)*.55
-	var planning_mission:={"duration_days":duration_days,"concealment":clampf(0.72+clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93),"evasion":clampf(0.76+logistics*0.14+clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)*0.08,0.74,0.95)}
+	var pathfinder_cover:float=preload("res://scripts/office_levers.gd").value("ChiefScout")
+	var planning_mission:={"duration_days":duration_days,"concealment":clampf(clampf(0.72+clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93)+pathfinder_cover,0.60,0.98),"evasion":clampf(clampf(0.76+logistics*0.14+clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)*0.08,0.74,0.95)+pathfinder_cover,0.66,0.99)}
 	var risk:=_player_scout_risk_snapshot(planning_mission)
 	var quoted_route:Array=route_plan.get("route",[]) if bool(route_plan.get("ok",false)) else []
 	var field_risk:=ScoutSurvival.assess({"duration_days":duration_days,"one_way_km":float(route_plan.get("distance_km",target_distance)) if bool(route_plan.get("ok",false)) else target_distance,"personnel":personnel,"terrain_danger":_scout_terrain_danger(quoted_route),"start_day":int(WorldSimulation.state.elapsed_days),"veterancy":scouting_staff.veterancy(),"reckless":reckless})
@@ -1533,8 +1534,10 @@ func dispatch_scouts(duration_days:int,target_id:String="open_world",heading:Str
 	if issued_provisions+0.0001<provisions: return {"error":"Food stores changed before the scout party could be provisioned."}
 	var logistics:=clampf(float(WorldSimulation.state.simulation_metrics.get("logistics",0.16)),0.0,1.0)
 	var field_knowledge:=clampf(float(WorldSimulation.state.combined_intelligence),0.0,1.0)
-	var concealment:=clampf(0.72+field_knowledge*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93)
-	var evasion:=clampf(0.76+logistics*0.14+field_knowledge*0.08,0.74,0.95)
+	# The pathfinder's hand on how the parties go unseen (office_levers.gd: -0.02 to +0.08).
+	var cover:float=preload("res://scripts/office_levers.gd").value("ChiefScout")
+	var concealment:=clampf(clampf(0.72+field_knowledge*0.12+logistics*0.09-float(personnel)/80.0*0.06,0.68,0.93)+cover,0.60,0.98)
+	var evasion:=clampf(clampf(0.76+logistics*0.14+field_knowledge*0.08,0.74,0.95)+cover,0.66,0.99)
 	var origin_position:Dictionary=quote.origin_position
 	var origin:=Vector2(float(origin_position.x),float(origin_position.z))
 	var planned_heading:=String(route_plan.get("planned_heading",_compass_phrase(origin,Vector2(float(route[-1].get("x",origin.x)),float(route[-1].get("z",origin.y))))))
@@ -4220,13 +4223,14 @@ func occupation_control(civ_id:String,region_id:String,coercive:bool=false)->Dic
 	if index<0 or region.is_empty() or String(region.get("controller",""))!="player":return {"error":"Select an occupied city."}
 	var force:=WorldSimulation.military.occupation_force_for_region(civ_id,region_id)
 	var troops:=maxi(0,int(force.get("troops",0)))
-	var supply:=clampf(float(force.get("supply_level",1.0)),0,1)
-	var readiness:=clampf(float(force.get("readiness",1.0)),0,1)
-	var effective:=troops*supply*(.5+.5*readiness)
+	# The one rule for holding a town (town_hold.gd): men x fed x readiness.
+	var supply:=preload("res://scripts/town_hold.gd").fed(force) if not force.is_empty() else 1.0
+	var effective:=preload("res://scripts/town_hold.gd").force_strength(force) if not force.is_empty() else 0.0
 	var base:=occupation_requirement(civilizations[index],region)
 	var required:=base
 	if coercive:required+=float(region.get("population",0))*.3*(.25+.75*clampf(float(region.get("resistance",.5)),0,1))
-	var result:={"troops":troops,"effective":effective,"required":ceili(required),"base_required":ceili(base),"supply":supply,"controlled":effective>=ceili(required)}
+	var result:={"troops":troops,"effective":effective,"required":ceili(required),"base_required":ceili(base),"supply":supply,"controlled":effective>=ceili(required),
+		"need":preload("res://scripts/town_hold.gd").need(required,supply,float(force.get("readiness",1.0)))}
 	if not bool(result.controlled):result.error="%d soldiers present, %.1f effective after supply and readiness; %d needed for %s. Bring and supply a larger garrison, or return local control."%[troops,effective,int(result.required),"city-wide coercion" if coercive else "effective occupation"]
 	return result
 
@@ -4480,6 +4484,8 @@ func peace_forecast(civ_id:String) -> Dictionary:
 	var exhaustion_gap:=float(relation.get("rival_war_exhaustion",0.0))-float(relation.get("player_war_exhaustion",0.0))*0.45
 	var objective_factor:=0.30 if bool(objective.get("complete",false)) else float(objective.get("progress",0.0))*0.12
 	var acceptance:=float(relation.get("opinion",0.0))*0.30+float(civ.diplomacy)*0.25+score_factor*0.42+strategic_leverage+exhaustion_gap*0.32+objective_factor-0.15
+	# Our messenger's hand on how the terms are heard (office_levers.gd: -0.05 to +0.10).
+	acceptance+=preload("res://scripts/office_levers.gd").value("Envoy")
 	var label:="WILL ACCEPT" if acceptance>=0.05 else ("MAY ACCEPT" if acceptance>=-0.12 else "WILL REFUSE")
 	return {"acceptance":acceptance,"label":label,"objective":objective,"strategic_leverage":strategic_leverage,"war_score":float(relation.get("war_score",0.0)),"player_exhaustion":float(relation.get("player_war_exhaustion",0.0)),"rival_exhaustion":float(relation.get("rival_war_exhaustion",0.0)),"can_accept":acceptance>=0.05}
 
@@ -4527,7 +4533,8 @@ func player_action_availability(civ_id:String,action:String)->Dictionary:
 		return {"ok":true,"action":normalized}
 	if normalized in CARRIED_DIPLOMATIC_ACTIONS and not bool(relation.get("home_location_known",false)):
 		return {"error":"Their settlement is unlocated. A returned scout report must establish a physical destination before this message can be sent.","requires_location":true}
-	var opinion:=float(relation.get("opinion",0.0))
+	# A good messenger opens doors a poor one finds shut (office_levers.gd).
+	var opinion:=float(relation.get("opinion",0.0))+preload("res://scripts/office_levers.gd").value("Envoy")
 	var at_war:=bool(relation.get("at_war",false))
 	match normalized:
 		"open_trade":
@@ -4842,7 +4849,8 @@ func _capture_region(civ:Dictionary,region_id:String,home_result:Dictionary,riva
 	var held:=region.duplicate(true)
 	held.controller="player";held.resistance=clampf(.38+float(civ.cohesion)*.30+(.14 if String(region.get("role",""))=="capital" else 0.0),.25,.92)
 	var hold_need:=ceili(occupation_requirement(owner,held))
-	var effective_survivors:=surviving*clampf(float(home_result.get("supply_level",1)),0,1)*(.5+.45*clampf(float(home_result.get("readiness",1)),0,1))
+	# The one rule for holding a town (town_hold.gd).
+	var effective_survivors:=preload("res://scripts/town_hold.gd").force_strength(home_result)
 	if effective_survivors<hold_need:
 		var message:="Battle won, but %d surviving soldiers lack the supplied, ready strength to hold %s; about %d effective personnel are required. The city remains outside your control. Reinforce before another occupation attempt."%[surviving,String(region.name),hold_need]
 		_record_world_event("Victory without occupation",message,"war",int(WorldSimulation.state.elapsed_days))

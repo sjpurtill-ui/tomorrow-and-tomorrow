@@ -387,7 +387,7 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 	var detail:Dictionary=row.get("gear_detail",{})
 	meters[0].clickable=not unknown and not (detail.get("missing",{}) as Dictionary).is_empty()
 	meters[0].set_reading(gear,"%d/%d" % [int(detail.get("issued",0)),int(detail.get("required",0))],BarModel.gear_color(gear),BarModel.gear_words(detail))
-	meters[1].set_reading(will,"%d%%" % roundi(will*100.0),BarModel.will_color(will),BarModel.will_words(will)+"\nBelow a quarter they break.")
+	meters[1].set_reading(will,"%d%%" % roundi(will*100.0),BarModel.will_color(will),BarModel.will_words(will)+"\nA band %s." % preload("res://scripts/army_lines.gd").BREAK_WORDS)
 	meters[2].set_reading(supply,"%d%%" % roundi(supply*100.0),BarModel.supply_color(String(row.get("supply_state","well"))),BarModel.supply_line(row))
 	for meter in meters:(meter as Control).visible=not unknown
 	var drill:=float(row.get("drill",0.0));var seen:=float(row.get("seen",0.0))

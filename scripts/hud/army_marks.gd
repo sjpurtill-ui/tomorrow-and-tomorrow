@@ -42,7 +42,7 @@ const MAX_OURS:=64
 const MAX_THEIRS:=96
 ## Morale below this, a force is broken (MilitaryCampaign.MORALE_BREAK is
 ## where it stops fighting altogether).
-const BROKEN_MORALE:=0.25
+const BROKEN_MORALE:=preload("res://scripts/army_lines.gd").BREAK
 ## Card budgets per zoom band (cards beyond these are left to the note).
 const CARDS:={"ground":6,"local":6,"regional":4}
 ## Reports younger than this are fresh and say nothing about their age.
@@ -405,6 +405,7 @@ static func doing(context:Dictionary)->String:
 static func _plain_status(status:String)->String:
 	if status=="": return ""
 	var table:=[
+		["withdrawing to rest","falling back to rest"],["resting and refilling","resting and refilling"],["rested and ready","rested and ready"],
 		["withdrawing","falling back home"],["escape routes cut","fighting, their way out cut"],["engaging","fighting"],
 		["investing city","laying siege"],["pressing enemy front","pressing their line"],["holding contact","holding the line, asking for help"],
 		["front contested","holding the line"],["close escape routes","closing the ring"],["flank blocked","probing their line"],

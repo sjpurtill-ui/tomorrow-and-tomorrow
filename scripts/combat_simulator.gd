@@ -442,7 +442,7 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 	for round_number in range(1, round_limit + 1):
 		if attacker_troops <= 0 or defender_troops <= 0:
 			break
-		if attacker_morale <= 0.15 or defender_morale <= 0.15:
+		if attacker_morale < MORALE_BREAK_AT or defender_morale < MORALE_BREAK_AT:
 			break
 		if Blocks.standing_men(state,"attacker")<=0 or Blocks.standing_men(state,"defender")<=0:
 			break
@@ -587,7 +587,7 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 			for b in breaking:
 				# Once the whole army breaks, its blocks go with it: the rout is
 				# the battle's ending (termination), not one block at a time.
-				if float(morale_now[side])<=MORALE_BREAK_AT: break
+				if float(morale_now[side])<MORALE_BREAK_AT: break
 				# Machines do not lose heart and run: they fight on until wrecked.
 				if is_machine(String(((state.sides[side].blocks as Array)[b] as Dictionary).get("weapon",""))): continue
 				var men0:=int((state.sides[side].blocks as Array)[b].men0)
@@ -611,7 +611,7 @@ func simulate(attacker: Dictionary, defender: Dictionary, options: Dictionary = 
 		attacking_force["troops"]=attacker_troops; defending_force["troops"]=defender_troops
 		var quality:={"attacker":_quality(attacker_cohorts,1.0),"defender":_quality(defender_cohorts,1.0)}
 		var progress:=Blocks.measure(state,quality,{"attacker":attacker_morale,"defender":defender_morale})
-		var decided:=attacker_troops<=0 or defender_troops<=0 or attacker_morale<=0.15 or defender_morale<=0.15 or Blocks.standing_men(state,"attacker")<=0 or Blocks.standing_men(state,"defender")<=0
+		var decided:=attacker_troops<=0 or defender_troops<=0 or attacker_morale<MORALE_BREAK_AT or defender_morale<MORALE_BREAK_AT or Blocks.standing_men(state,"attacker")<=0 or Blocks.standing_men(state,"defender")<=0
 		var closes:=decided or (round_number==round_limit and not carried)
 		# Why one side is winning: worked out when a phase closes (and at the start).
 		var why:Array=[]
@@ -678,8 +678,9 @@ func open_battle(attacker:Dictionary,defender:Dictionary,options:Dictionary={})-
 	return Blocks.begin(_normalize_force(attacker,"Attacker"),_normalize_force(defender,"Defender"),options)
 
 
-## The whole army breaks at this morale (as _outcome and MilitaryCampaign).
-const MORALE_BREAK_AT:=0.15
+## The whole army breaks when its will falls below this: the one break line
+## (army_lines.gd), as _outcome, battle_blocks.gd and MilitaryCampaign read it.
+const MORALE_BREAK_AT:=preload("res://scripts/army_lines.gd").BREAK
 
 
 ## Whether a side can ride down men who break: the plan says so, or (with no
@@ -785,7 +786,7 @@ func _why(state:Dictionary,a:Dictionary,d:Dictionary,ac:Array[Dictionary],dc:Arr
 		var commander:Dictionary=force.get("commander",{})
 		sides[side]={"men":Blocks.standing_men(state,side),"front":Blocks.front_men(state,side),"quality":weighted/maxf(1.0,men),"terrain":t,
 			"river":Blocks.RIVER_ATTACK if river and side=="attacker" else 1.0,"cohesion":cohesion/maxf(1.0,front) if front>0.0 else (am if side=="attacker" else dm),
-			"readiness":float(force.get("readiness",1.0)),"command":0.90+clampf(float(commander.get("command",0.5)),0.0,1.0)*0.20,
+			"readiness":float(force.get("readiness",1.0)),"command":command_factor(float(commander.get("command",0.5)),float(force.get("troops",0))),
 			"fatigue":fatigue/maxf(1.0,front) if front>0.0 else 1.0,"hunger":Blocks.HUNGER_POWER if bool(hungry[side]) else 1.0}
 	var ids:={"attacker":String((plan.get("attacker",{}) as Dictionary).get("id","")),"defender":String((plan.get("defender",{}) as Dictionary).get("id",""))}
 	var surprise:=""
@@ -1150,12 +1151,38 @@ func issued_equipment_ratio(formation:Dictionary)->float:
 ## (battle_blocks.weights); empty means everyone fights.
 func _cohort_power(cohorts: Array[Dictionary], morale: float, readiness: float,command: float,weights:PackedFloat32Array=PackedFloat32Array()) -> float:
 	var power := 0.0
+	var men := 0.0
 	var weighted:=not weights.is_empty()
 	for index in cohorts.size():
 		var cohort:Dictionary=cohorts[index]
 		var weight:=float(weights[index]) if weighted and index<weights.size() else 1.0
 		power += float(cohort.count) * weight * sqrt(float(cohort.attack) * float(cohort.defense))
-	return power*maxf(MIN_EFFECTIVE_STRENGTH,morale)*readiness*(0.90+clampf(command,0.0,1.0)*0.20)
+		men += float(cohort.count)
+	return power*maxf(MIN_EFFECTIVE_STRENGTH,morale)*readiness*command_factor(command,men)
+
+
+## What the commander's command (0..1) does to a force's fighting power:
+## COMMAND_FLOOR at none, COMMAND_FLOOR + COMMAND_SPAN at the best, 1.0 for
+## an ordinary one (0.5). A great general against a poor one is worth about
+## a third more power in a fight they direct themselves.
+const COMMAND_FLOOR:=0.85
+const COMMAND_SPAN:=0.30
+## A commander directs about COMMAND_REACH_MEN in person; past that their
+## hand reaches the fight through subordinates (whose quality is the
+## realm's), so their edge over an ordinary commander shrinks as
+## sqrt(COMMAND_REACH_MEN / men), to no less than COMMAND_REACH_MIN of it:
+## a war chief's own skill is everything to a band, a general's is diluted
+## across a corps (and shows instead in its march, supply and desertion).
+const COMMAND_REACH_MEN:=5000.0
+const COMMAND_REACH_MIN:=0.5
+
+static func command_reach(men:float)->float:
+	if men<=COMMAND_REACH_MEN: return 1.0
+	return maxf(COMMAND_REACH_MIN,sqrt(COMMAND_REACH_MEN/men))
+
+static func command_factor(command:float,men:float=0.0)->float:
+	var directed:=0.5+(clampf(command,0.0,1.0)-0.5)*command_reach(men)
+	return COMMAND_FLOOR+directed*COMMAND_SPAN
 
 
 func _engagement_context(rng: RandomNumberGenerator,attacker_share: float,defender_share: float,attacker_morale: float,defender_morale: float,terrain: float) -> Dictionary:
@@ -1395,16 +1422,22 @@ func _combat_power(force: Dictionary, opponent: Dictionary, troops: int, morale:
 
 ## tempo: the age's pace (battle_blocks.LETHALITY): being outfought wears a
 ## dispersed, dug-in line down over hours, not in one half hour.
+## Will wears toward the one break line (a quarter, army_lines.gd) at the
+## pace that once took it to 0.15: WEAR_TO_BREAK keeps the hours a battle
+## lasts in each age (the battle evaluation's historical ranges).
+const WEAR_TO_BREAK:=(1.0-MORALE_BREAK_AT)/0.85
+## How deep below the break line a beaten side's collapse is measured.
+const COLLAPSE_SPAN:=0.22/0.15
 func _next_morale(current: float, losses: int, initial_troops: int, enemy_power_share: float,resolve: float,tempo:float=1.0) -> float:
 	var casualty_shock := float(losses) / float(initial_troops) * 1.8
 	var pressure := maxf(0.0, enemy_power_share - 0.5) * 0.08 * clampf(tempo,0.0,1.0)
 	var resolve_protection:=0.78+clampf(resolve,0.0,1.0)*0.34
-	return clampf(current-(casualty_shock+pressure)/resolve_protection,0.0,1.5)
+	return clampf(current-(casualty_shock+pressure)/resolve_protection*WEAR_TO_BREAK,0.0,1.5)
 
 
 func _outcome(attacker_troops: int, defender_troops: int, attacker_morale: float, defender_morale: float) -> String:
-	var attacker_broken := attacker_troops <= 0 or attacker_morale <= 0.15
-	var defender_broken := defender_troops <= 0 or defender_morale <= 0.15
+	var attacker_broken := attacker_troops <= 0 or attacker_morale < MORALE_BREAK_AT
+	var defender_broken := defender_troops <= 0 or defender_morale < MORALE_BREAK_AT
 	if attacker_broken and defender_broken:
 		return "mutual_collapse"
 	if defender_broken:
@@ -1443,7 +1476,10 @@ func _termination_event(outcome: String,attacker: Dictionary,defender: Dictionar
 	var loser_morale:=defender_morale if outcome=="attacker_victory" else attacker_morale
 	var loser_commander:Dictionary=loser.get("commander",{})
 	var resolve:=clampf(float(loser_commander.get("resolve",0.5)),0.0,1.0)
-	var collapse:=clampf((0.22-loser_morale)/0.22,0.0,1.0)
+	# How far below the break line the beaten side fell (none just under it,
+	# full at nothing left): the same depth below the one line (army_lines.gd)
+	# that once measured below 0.15.
+	var collapse:=clampf(1.0-loser_morale/(MORALE_BREAK_AT*COLLAPSE_SPAN),0.0,1.0)
 	var pursuit_roll:=rng.randf()
 	var termination_type:="withdrawal"
 	var capture_share:=0.0
@@ -1471,10 +1507,10 @@ func _termination_event(outcome: String,attacker: Dictionary,defender: Dictionar
 	var winner_name:=String(winner.get("name","Victors"))
 	var commander_name:=String(loser_commander.get("name","THE DEFEATED COMMAND GROUP"))
 	var summary:="%s withdraws in order." % loser_name
-	if termination_type=="surrender": summary="Elements of %s surrender; %s takes %d prisoners." % [loser_name,winner_name,prisoners]
-	elif termination_type=="pursuit": summary="%s pursues the rout and takes %d prisoners." % [winner_name,prisoners]
-	elif prisoners>0: summary="%s escapes, leaving %d prisoners behind." % [loser_name,prisoners]
-	summary+="  %s is %s." % [commander_name,commander_fate]
+	if termination_type=="surrender": summary="Elements of %s surrender; %s takes %s." % [loser_name,winner_name,captive_words(prisoners)]
+	elif termination_type=="pursuit": summary=("%s pursues the rout and takes %s." % [winner_name,captive_words(prisoners)]) if prisoners>0 else "%s pursues the rout." % winner_name
+	elif prisoners>0: summary="%s escapes, leaving %s behind." % [loser_name,captive_words(prisoners)]
+	summary+=" %s %s." % [commander_name,fate_words(commander_fate)]
 	var spoils:=_battle_spoils(loser,winner,termination_type,rng)
 	return {"type":termination_type,"summary":summary,"prisoners":prisoners,"captor":winner_name,"defeated":loser_name,"commander":commander_name,"commander_record":loser_commander.duplicate(true),"commander_fate":commander_fate,"captured_general":captured_general,"spoils":spoils}
 
@@ -1544,10 +1580,12 @@ func _force_result(force: Dictionary, initial: int, remaining: int, morale: floa
 		"commander":force.get("commander",{}).duplicate(true),
 		"remaining_troops": remaining,
 		"supply_level":float(force.get("supply_level",1.0)),
+		# The one supply number (supply_state.gd fed), for the hold of a town.
+		"provision_ratio":float(force.get("provision_ratio",force.get("supply_level",1.0))),
 		"readiness":float(force.get("readiness",1.0)),
 		"casualties": initial - remaining,
 		"morale": morale,
-		"routed": remaining <= 0 or morale <= 0.15,
+		"routed": remaining <= 0 or morale < MORALE_BREAK_AT,
 		"attack": float(force.attack),
 		"defense": float(force.defense),
 		"armor": float(force.get("armor", 0.0)),
@@ -1562,3 +1600,19 @@ func _force_result(force: Dictionary, initial: int, remaining: int, morale: floa
 		"captured_in_battle":int(force.get("captured_in_battle",0)),
 		"dead":int(force.get("dead",0))
 	}
+
+
+## "1 prisoner", "12 prisoners".
+static func captive_words(count:int)->String:
+	return "%d %s" % [count,"prisoner" if count==1 else "prisoners"]
+
+
+## A beaten commander's fate as the report says it: "got away", "was taken",
+## "was killed", "was wounded but got away".
+static func fate_words(fate:String)->String:
+	match fate:
+		"escaped":return "got away"
+		"captured":return "was taken"
+		"killed":return "was killed"
+		"wounded, but escaped":return "was wounded but got away"
+	return "is %s" % fate

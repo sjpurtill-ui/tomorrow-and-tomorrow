@@ -27,7 +27,9 @@ const Mechanics:=preload("res://scripts/research_mechanics.gd")
 
 ## Size of the probe step when measuring a capacity's response to an effect.
 const SLOPE_STEP:=0.001
-## A new practice starts in this share of households (SocietyModel.register_discovery).
+## Share of households a known practice is counted at when it has no record
+## of its own (SocietyModel's default). A newly proven practice starts in
+## Research600.PROOF_ADOPTION of them (SocietyModel.register_discovery).
 const FIRST_ADOPTION:=0.025
 
 ## The twelve capacities (Culture > Society's strengths): their names and what
@@ -1010,6 +1012,9 @@ static func _chemical_note(kept:float)->String:
 ## works it needs (the same level SocietyModel._practice_level uses).
 static func practice_level(id:String)->float:
 	var level:=clampf(float(WorldSimulation.state.discovery_adoption.get(id,FIRST_ADOPTION)),0.0,1.0)
+	# A question in trial use before proof counts at its trial share.
+	var trial:=Research600.trial_share(float(WorldSimulation.state.discovery_progress.get(id,0.0)))
+	if trial>0.0 and not WorldSimulation.state.known_discoveries.has(id): level=trial
 	if Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id): level*=Goods.factor(id)
 	return level
 
@@ -1038,7 +1043,10 @@ static func raw_totals()->Dictionary:
 	if cache.has("raw"): return cache.raw
 	var result:Dictionary={}
 	var fields:Dictionary={}
-	for id_variant in WorldSimulation.state.known_discoveries:
+	# Everything known, and the questions in trial use before proof.
+	var practices:Array=WorldSimulation.state.known_discoveries.duplicate()
+	practices.append_array(Research600.trial_levels(WorldSimulation.state.discovery_progress,WorldSimulation.state.known_discoveries).keys())
+	for id_variant in practices:
 		var id:=String(id_variant)
 		var definition:Dictionary=WorldSimulation.discovery.discovery_definition(id)
 		var effects:Dictionary=definition.get("effects",{})
@@ -1131,7 +1139,7 @@ static func ledger_row(key:String,amount:float,level:float=1.0,scale:float=1.0,m
 	var usage:=""
 	match mode:
 		"now": usage="%s now, %s" % [percent(float(said.now)),usage_said if usage_said!="" else adoption_words(level)]
-		"would": usage="at full use; it starts with about %d in 100 households and spreads over years" % roundi(FIRST_ADOPTION*100.0)
+		"would": usage="at full use; it starts with about %d in 100 households and spreads over years" % roundi(Research600.PROOF_ADOPTION*100.0)
 		_: usage="in all, from everything known"
 	var tone_name:String="inert" if bool(said.inert) else ("steer" if bool(said.steer_only) else String(["cost","neutral","good"][int(said.tone)+1]))
 	var notes:Array[String]=[]

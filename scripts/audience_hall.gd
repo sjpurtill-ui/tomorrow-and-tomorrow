@@ -454,7 +454,8 @@ static func daily(day:int)->Array[Dictionary]:
 		_crises().call("daily",day)
 		_upkeep().call("daily",day)
 	_rivals().call("daily",day)
-	if not envoys_only: _war().call("daily",day)
+	# The war (war_loop.gd) is the simulation's own, advanced by the day itself
+	# (civilization_day.gd), never by the hall catching up.
 	_requests().call("daily",day)
 	# Standing exchanges sealed in talk with foreign rulers (trade_pacts.gd).
 	(load(PACTS_PATH) as GDScript).call("daily",day)
@@ -3848,6 +3849,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("divine") and not DIVINE.valid_state(data.divine): return false
 	if data.has("lives") and not bool(_lives().call("valid_state",data.lives)): return false
 	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
+	if data.has("council") and not bool((load("res://scripts/war_council.gd") as GDScript).call("valid_state",data.council)): return false
 	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
 	if data.has("hardships") and not bool((load(HARDSHIPS_PATH) as GDScript).call("valid_state",data.hardships)): return false
 	if data.has("upkeep") and not bool(_upkeep().call("valid_state",data.upkeep)): return false

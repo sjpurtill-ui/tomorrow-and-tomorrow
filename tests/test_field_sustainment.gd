@@ -4,7 +4,9 @@ extends GdUnitTestSuite
 ## gone home, dead); the sick come back when fed; fodder, fuel and rounds are
 ## a second share that weakens only the kits that need them; losses are
 ## replaced by drafts trained at the Reinforce pace who walk out and join,
-## counted as field personnel the whole way; drafts survive a save.
+## counted as field personnel the whole way; drafts survive a save. Drafts
+## come from the army's size the ruler set (army_levy_law.gd): within it new
+## men are called up; at it, only those already called up may go.
 
 const Sustainment:=preload("res://scripts/field_sustainment.gd")
 const Combat:=preload("res://scripts/combat_simulator.gd")
@@ -155,13 +157,16 @@ func test_drafts_on_the_road_survive_a_save()->void:
 	assert_int(int(MilitaryCampaign.field_drafts[0].arrive_day)).is_equal(9)
 	assert_bool(Sustainment.valid_drafts([{"army_id":-1}])).is_false()
 
-func test_drafts_come_only_from_those_set_aside_for_defence()->void:
+func test_drafts_come_from_the_army_size_the_ruler_set()->void:
 	_draftable_world()
 	GameState.population_allocations["Defense"]=0
+	GameState.ensure_population_total(1000)
 	var band:=_band(7,[_formation(11,"levy","improvised",20,30)],30.0)
 	MilitaryCampaign.field_armies.assign([band])
+	# "A few of the young": 10 of 1,000. The band's 20 already stand above it.
+	MilitaryCampaign.army_levy_level="few"
 	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
-	assert_str(String(MilitaryCampaign.field_armies[0].draft_block)).is_equal("no_people")
+	assert_str(String(MilitaryCampaign.field_armies[0].draft_block)).is_equal("at_level")
 	# Men the player already called up may go.
 	MilitaryCampaign.aggregate_recruits=10
 	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(1)

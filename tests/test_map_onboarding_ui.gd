@@ -5,10 +5,8 @@ const RENDERER:=preload("res://scripts/local_terrain.gd")
 class ClickMap extends "res://scripts/local_terrain.gd":
 	var inspected:=0
 	var convoy_moves:=0
-	var army_orders:=0
 	func _inspect_land_from_screen(_position:Vector2)->void:inspected+=1
 	func _move_settlers_to_screen(_position:Vector2)->void:convoy_moves+=1
-	func _order_selected_army_to_screen(_position:Vector2)->void:army_orders+=1
 
 var renderer:Node3D
 
@@ -66,7 +64,7 @@ func test_first_use_help_names_one_contextual_next_action_without_a_control_glos
 	assert_str(String(settled.body)).contains("Click the map to close")
 
 
-func test_left_click_inspects_and_right_click_moves_the_founding_convoy()->void:
+func test_left_click_inspects_and_right_click_moves_the_founding_convoy_never_a_band()->void:
 	var map:ClickMap=auto_free(ClickMap.new())
 	GameState.settlement_site_committed=false
 	assert_bool(map._handle_map_ground_button(MOUSE_BUTTON_LEFT,Vector2(30,40))).is_true()
@@ -75,10 +73,13 @@ func test_left_click_inspects_and_right_click_moves_the_founding_convoy()->void:
 	assert_bool(map._handle_map_ground_button(MOUSE_BUTTON_RIGHT,Vector2(30,40))).is_true()
 	assert_int(map.inspected).is_equal(1)
 	assert_int(map.convoy_moves).is_equal(1)
+	# After the founding a right-click orders nothing: bands are the war
+	# leader's to move, selected or not.
+	GameState.settlement_site_committed=true
 	map.selected_army_id=7
-	map._handle_map_ground_button(MOUSE_BUTTON_RIGHT,Vector2(30,40))
-	assert_int(map.army_orders).is_equal(1)
+	assert_bool(map._handle_map_ground_button(MOUSE_BUTTON_RIGHT,Vector2(30,40))).is_false()
 	assert_int(map.convoy_moves).is_equal(1)
+	assert_bool(map.has_method("_order_selected_army_to_screen")).is_false()
 
 
 func test_envoy_button_words_are_plain_and_point_to_the_court()->void:

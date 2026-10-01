@@ -53,7 +53,7 @@ TOLERANCES = {
 # Formula lines transcribed into model.py; check.py warns when the game line changes.
 FORMULA_ANCHORS = [
     ("scripts/discovery_system.gd", "var probability: float = discovery.chance"),
-    ("scripts/discovery_system.gd", "team_scale=float(teams.work)*Research600.team_strength"),
+    ("scripts/discovery_system.gd", "team_scale=float(teams.work)/float(sharing)"),
     ("scripts/discovery_system.gd", "var support_multiplier:="),
     ("scripts/discovery_system.gd", "return (0.45+0.55*staffing)"),
     ("scripts/discovery_system.gd", "return (0.85+_research_draw"),

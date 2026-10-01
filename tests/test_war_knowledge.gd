@@ -63,9 +63,11 @@ func test_an_order_to_burn_an_unfound_home_sends_trackers()->void:
 	var said:=WAR.order(civ_id,"war_burn",false)
 	assert_str(String(_op().get("objective",""))).is_equal("war_track")
 	assert_int(int(_op().get("band",0))).is_between(WAR.TRACKERS_MIN,WAR.TRACKERS_MAX)
-	assert_str(said).contains("No one here knows where")
+	assert_str(said).contains("Nobody here knows where")
 	assert_str(said).contains("raiders' trail")
-	assert_str(said).contains("give the word again")
+	# The stance stands: when the way is found, the war council sends the band
+	# without being told again (war_council.gd).
+	assert_str(said).contains("When the way is found, the war band goes")
 
 func test_the_war_leader_acting_alone_never_strikes_an_unfound_home()->void:
 	WAR.declare(civ_id,10,"a killed envoy")
@@ -119,5 +121,19 @@ func test_a_band_that_already_struck_their_home_knows_the_way()->void:
 func test_a_known_home_can_be_struck()->void:
 	WAR.declare(civ_id,10,"a killed envoy")
 	WAR._find_home(civ_id,10,"a test","test")
-	WAR.order(civ_id,"war_burn",false)
-	assert_str(String(_op().get("objective",""))).is_equal("war_burn")
+	# A real band of our levy goes by the land road and raids their town
+	# (war_council.gd); nothing of the old made-up band is out.
+	CivilizationSystem.set_scout_geography_authority(func(_p:Vector2)->bool:return true)
+	MilitaryCampaign.military_inventory["improvised"]=40
+	MilitaryCampaign.raise_recruits(40)
+	MilitaryCampaign.start_training("levy","improvised",40)
+	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
+	MilitaryCampaign.training_queue.clear()
+	var said:=WAR.order(civ_id,"war_burn",false)
+	CivilizationSystem.set_scout_geography_authority(Callable())
+	var band:={}
+	for a in MilitaryCampaign.field_armies:
+		if String(((a as Dictionary).get("council",{}) as Dictionary).get("act",""))=="punish": band=a
+	assert_dict(band).override_failure_message(said).is_not_empty()
+	assert_bool(bool((band.city_operation as Dictionary).get("raid",false))).is_true()
+	assert_str(String(_op().get("objective",""))).is_not_equal("war_burn")

@@ -22,6 +22,7 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
 const Ownership:=preload("res://scripts/map_ownership.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 
 var home:=Vector2.ZERO
 var city:=Vector2.ZERO
@@ -92,6 +93,13 @@ func _captured_tsaren()->Dictionary:
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
 	MilitaryCampaign.training_queue.clear()
 	MilitaryCampaign.create_field_army(18,"LEVY BAND 1")
+	# Rovik leads it: the ruler put the band under him, as the War screen and
+	# the Military Leaders screen do (leader_commands.gd). A new band serves
+	# under the war leader at home until then.
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(general.has("error")).override_failure_message(str(general)).is_false()
+	var put:=Leaders.assign(MilitaryCampaign,int(MilitaryCampaign.field_armies[0].army_id),String(general.get("figure_id","")))
+	assert_bool(put.has("error")).override_failure_message(str(put)).is_false()
 	var army:Dictionary=MilitaryCampaign.field_armies[0]
 	army["supply_level"]=1.0; army["readiness"]=1.0
 	army["position"]={"x":city.x+0.3,"z":city.y}

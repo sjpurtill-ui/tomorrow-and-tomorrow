@@ -733,6 +733,54 @@
     "warfare_readiness": 0.0019
    },
    "art": "res://assets/ui/research/paper/first300-cards/field_armorer_teams.tres"
+  },
+  "blank_outer_walls": {
+   "art": "res://assets/ui/research/subjects/barred_palisade_gates-v1.png"
+  },
+  "threshing_floor_guard": {
+   "art": "res://assets/ui/research/paper/threshing_frames.png"
+  },
+  "stocked_refuge": {
+   "art": "res://assets/ui/research/subjects/hilltop_refuges-v1.png"
+  },
+  "armed_herd_guards": {
+   "art": "res://assets/ui/research/subjects/herding_rotas-v1.png"
+  },
+  "found_goods_declared": {
+   "art": "res://assets/ui/research/subjects/standing_arbiter_appointment-v1.png"
+  },
+  "mock_fight_training": {
+   "art": "res://assets/ui/research/subjects/paired_veteran_mentoring-v1.png"
+  },
+  "feud_ending_marriage": {
+   "art": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png"
+  },
+  "herds_restocked_after_murrain": {
+   "art": "res://assets/ui/research/subjects/people_herd_counts-v1.png"
+  },
+  "ward_wall_stretches": {
+   "art": "res://assets/ui/research/subjects/wall_missile_posts-v1.png"
+  },
+  "stores_in_several_places": {
+   "art": "res://assets/ui/research/discovery-600/central_storehouses.png"
+  },
+  "flocks_inside_walls": {
+   "art": "res://assets/ui/research/subjects/alarm_relay_customs-v1.png"
+  },
+  "famine_grain_purchase": {
+   "art": "res://assets/ui/research/subjects/reserve_rotation_ledgers-v1.png"
+  },
+  "battlefield_arms_gathered": {
+   "art": "res://assets/ui/research/subjects/common_armory-v1.png"
+  },
+  "kin_ransom_customs": {
+   "art": "res://assets/ui/research/subjects/temple_common_storehouse-v1.png"
+  },
+  "garrison_relief_turns": {
+   "art": "res://assets/ui/research/subjects/gate_watchtowers-v1.png"
+  },
+  "lean_year_seed_loans": {
+   "art": "res://assets/ui/research/subjects/shared_reserve_access_rules-v1.png"
   }
  },
  "art_proposals": {

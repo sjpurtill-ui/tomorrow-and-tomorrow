@@ -919,6 +919,63 @@
     "repair_capacity": 0.0083
    },
    "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
+  },
+  "ore_hand_sorting": {
+   "art": "res://assets/ui/research/subjects/fire_setting_mining-v1.png"
+  },
+  "pulled_flax": {
+   "art": "res://assets/ui/research/paper/fiber_retting.png"
+  },
+  "reed_mat_weaving": {
+   "art": "res://assets/ui/research/subjects/reed_bed_rotation-v1.png"
+  },
+  "river_sand_gold": {
+   "art": "res://assets/ui/research/discovery-600/rank_inlay_ornament.png"
+  },
+  "graded_grinding_sand": {
+   "art": "res://assets/ui/research/subjects/tube_drilled_stone_vessels-v1.png"
+  },
+  "graded_wool_weighing": {
+   "art": "res://assets/ui/research/subjects/wool_spinning-v1.png"
+  },
+  "winter_felled_timber": {
+   "art": "res://assets/ui/research/subjects/timber_stand_reserves-v1.png"
+  },
+  "standard_reed_bundles": {
+   "art": "res://assets/ui/research/subjects/reed_bed_rotation-v1.png"
+  },
+  "mortise_joined_furniture": {
+   "art": "res://assets/ui/research/subjects/workshop_layout_planning-v1.png"
+  },
+  "level_struck_measures": {
+   "art": "res://assets/ui/research/subjects/public_grain_weighing-v1.png"
+  },
+  "hard_stone_bead_batches": {
+   "art": "res://assets/ui/research/subjects/tube_drilled_stone_vessels-v1.png"
+  },
+  "hide_bone_glue": {
+   "art": "res://assets/ui/research/paper/hide_tanning.png"
+  },
+  "stamped_bricks": {
+   "art": "res://assets/ui/research/subjects/herringbone_plano_convex_brick-v1.png"
+  },
+  "wooden_mallet_carving": {
+   "art": "res://assets/ui/research/subjects/copper_carpentry_tools-v1.png"
+  },
+  "pleated_linen": {
+   "art": "res://assets/ui/research/subjects/output_quality_sorting-v1.png"
+  },
+  "scented_oils": {
+   "art": "res://assets/ui/research/subjects/skin_oiling-v1.png"
+  },
+  "standard_cloth_lengths": {
+   "art": "res://assets/ui/research/subjects/wool_felting_fulling-v1.png"
+  },
+  "fine_wood_facings": {
+   "art": "res://assets/ui/research/subjects/workshop_layout_planning-v1.png"
+  },
+  "cast_on_tool_repair": {
+   "art": "res://assets/ui/research/subjects/closed_moulds-v1.png"
   }
  },
  "balance_600": {

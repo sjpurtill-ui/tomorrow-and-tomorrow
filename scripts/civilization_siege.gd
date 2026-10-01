@@ -43,9 +43,13 @@ static func target_status(threat:Dictionary)->Dictionary:
 	)
 static func order(siege:Dictionary,action:String)->Dictionary:
 	var source:=String(siege.shared_source_actor)
-	if action=="withdraw":
+	# Pulling back never gives home away: only the ruler's surrender yields it.
+	# Another town of ours may be given up by pulling out of it.
+	var home:=bool(WorldSimulation.settlements.settlement_record(String((siege.get("home_city",{}) as Dictionary).get("id",""))).get("primary",false))
+	if action=="withdraw" and home: return {"error":"We cannot pull back from our own home: it is lost only if you yield it. Order surrender to give it up.","surrender_only":true}
+	if action in ["withdraw","surrender"]:
 		var force:Dictionary=siege.threat.get("enemy_force",{})
-		var result:=WorldSimulation.military.recovery.capture_city(String(siege.home_city.id),String(siege.attacker_id),force)
+		var result:=WorldSimulation.military.recovery.capture_city(String(siege.home_city.id),String(siege.attacker_id),force,action=="surrender")
 		if result.has("error"):return result
 		WorldSimulation.scoped(source,func()->void:
 			var active:=WorldSimulation.military.active_siege

@@ -168,8 +168,71 @@ func test_alerts_say_what_is_wrong_with_our_fighters()->void:
 	assert_array(ids).contains(["hungry","will","men"])
 	var hungry:Dictionary=shown[ids.find("hungry")]
 	assert_str(String(hungry.tone)).is_equal("red")
-	assert_str(Alerts.tip(hungry)).contains("Ennis").contains("Readiness & supply")
+	assert_str(Alerts.tip(hungry)).contains("Ennis").contains("War screen")
 	assert_str(String(shown[ids.find("men")].page)).is_equal("recruitment")
+	WorldSimulation.clear()
+
+func test_a_resting_band_reads_resting_and_near_break_is_one_line()->void:
+	var Marks:=preload("res://scripts/hud/battle_marks.gd")
+	assert_str(Marks.state_of({"resting":true,"hungry":true})).is_equal("resting")
+	assert_str(Marks.state_words("resting")).is_equal("resting and refilling")
+	assert_str(Marks.state_of({"resting":true,"fighting":true})).is_equal("fighting")
+	# Close to breaking is a tenth above the one break line (army_lines.gd).
+	var Lines:=preload("res://scripts/army_lines.gd")
+	assert_float(preload("res://scripts/hud/army_bar_model.gd").NEAR_BREAK).is_equal_approx(Lines.BREAK+0.1,0.0001)
+	assert_float(preload("res://scripts/hud/army_alerts.gd").LOW_WILL).is_equal_approx(Lines.BREAK+0.1,0.0001)
+	assert_float(preload("res://scripts/hud/battle_marker_source.gd").MORALE_BREAK).is_equal(Lines.BREAK)
+	assert_str(preload("res://scripts/hud/army_marks.gd")._plain_status("withdrawing to rest")).is_equal("falling back to rest")
+
+func test_their_band_on_the_march_is_told_under_the_clock()->void:
+	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
+	var Council:=preload("res://scripts/war_council.gd")
+	WorldSimulation.clear();GameState.reset_for_new_world(721);MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	GameState.settlement_site_committed=true
+	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	var today:=int(WorldSimulation.state.elapsed_days)
+	var civ_id:=String(CivilizationSystem.civilizations[0].id)
+	# The watch has seen their band marching on Ashford (war_council.gd).
+	var front:Dictionary=Council._front(civ_id)
+	front["coming_band"]={"town":"Ashford","strength":40,"days":6};front["coming_day"]=today
+	var shown:=Alerts.alerts()
+	var attack:Array=shown.filter(func(a:Dictionary)->bool:return String(a.id)=="attack")
+	assert_int(attack.size()).is_equal(1)
+	assert_str(String((attack[0].lines as PackedStringArray)[0])).contains("toward Ashford · about 40 · here in 6 days")
+	assert_int(Alerts.urgent_count(shown)).is_equal(1)
+	front.erase("coming_band")
+	MilitaryCampaign.reset_for_new_world()
+	WorldSimulation.clear()
+
+func test_war_news_is_told_under_the_clock_instead_of_stopping_time()->void:
+	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
+	WorldSimulation.clear();GameState.reset_for_new_world(719);MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	GameState.settlement_site_committed=true
+	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	var today:=int(WorldSimulation.state.elapsed_days)
+	# A band coming at us: red, counted on the rail's badge.
+	MilitaryCampaign.active_threat={"id":"t1","source_name":"The Reedbank raiders","target_region_name":"Ashford","estimated_strength":40,"deadline_day":today+6,"campaign_mode":"defensive"}
+	# A battle being fought, and one fought three days ago.
+	MilitaryCampaign.own_engagements={"b1":{"id":"b1","threat":{"target_region_name":"Millford"},"home_side":"defender","defender":{"troops":34},"attacker":{"troops":40},"day_count":3}}
+	MilitaryCampaign.battle_history=[{"day":today-3,"home_side":"defender","outcome":"defender_victory","threat":{"target_region_name":"Ashford"},"message":"The raiders broke."},
+		{"day":today-40,"home_side":"defender","outcome":"attacker_victory","threat":{"target_region_name":"Old Ford"}}]
+	var shown:=Alerts.alerts()
+	var ids:=shown.map(func(a:Dictionary)->String: return String(a.id))
+	assert_array(ids).contains(["attack","battle","fought"])
+	assert_int(ids.find("attack")).is_equal(0)
+	var attack:Dictionary=shown[0]
+	assert_str(String(attack.tone)).is_equal("red")
+	assert_str(String((attack.lines as PackedStringArray)[0])).is_equal("The Reedbank raiders toward Ashford · about 40 · here in 6 days")
+	assert_str(String((shown[ids.find("battle")].lines as PackedStringArray)[0])).is_equal("At Millford · day 3 · 34 of ours against 40")
+	# Only battles of the last few days: the one forty days ago is history.
+	var fought:PackedStringArray=shown[ids.find("fought")].lines
+	assert_int(fought.size()).is_equal(1)
+	assert_str(fought[0]).is_equal("Won at Ashford · The raiders broke")
+	assert_int(Alerts.urgent_count(shown)).is_equal(2)
+	# An attack we make ourselves is not news coming at us.
+	MilitaryCampaign.active_threat.campaign_mode="offensive"
+	assert_bool(Alerts.alerts().any(func(a:Dictionary)->bool: return String(a.id)=="attack")).is_false()
+	MilitaryCampaign.reset_for_new_world()
 	WorldSimulation.clear()
 
 func test_the_queue_counts_those_drilling_outside_the_lines()->void:

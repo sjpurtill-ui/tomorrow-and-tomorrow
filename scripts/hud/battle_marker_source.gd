@@ -30,7 +30,7 @@ const THEIRS_COLOUR:=Color("#b5503c")
 const STRANGER_COLOUR:=Color("#b89a5a")
 ## Morale at which a side breaks (MilitaryCampaign.MORALE_BREAK) and the
 ## morale a fresh force usually brings to a fight.
-const MORALE_BREAK:=0.15
+const MORALE_BREAK:=preload("res://scripts/army_lines.gd").BREAK
 const MORALE_FULL:=0.7
 ## Our watchers' reach: a field army sees a fight this far off (as
 ## civilization_system._nearby_player_army), a held town a little less.

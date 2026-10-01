@@ -24,14 +24,13 @@ func meta()->Dictionary:
 	return {
 		"eyebrow":"MILITARY COMMAND",
 		"title":"Military",
-		"subtabs":["LEADERS","RECRUIT & DEPLOY","TRAINING","LOGISTICS","FEUDS","FORCES"],
+		"subtabs":["WAR"],
 	}
 
 func open_expanded_tab(sub:int)->bool:
 	if GeneralCampaign.active:return false
-	# Sub 0 is the Military Leaders screen, where the Warriors button opens;
-	# the others keep their old numbers, and Forces is the last.
-	MilitaryCampaign.open_roster("army",sub==2,["leaders","recruitment","training","support","wars","forces"][clampi(sub,0,5)])
+	# Every way in opens the War screen: the army is one page.
+	MilitaryCampaign.open_roster("army")
 	return true
 
 func tab(sub:int)->Dictionary:
