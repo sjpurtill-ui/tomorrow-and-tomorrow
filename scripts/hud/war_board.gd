@@ -347,9 +347,9 @@ func _name_war_leader()->void:
 
 
 ## What a leader is best and worst at, by the skills the engine fights,
-## camps and marches with: "Best at standing firm (5 of 5) · weakest at
-## keeping them fed (2 of 5)".
-const SKILL_WORDS:={"command":"planning the fight","tactics":"leading it","resolve":"standing firm","logistics":"keeping them fed"}
+## camps and marches with: "Best at holding firm (5/5) · weakest at supply
+## (2/5)".
+const SKILL_WORDS:={"command":"planning","tactics":"fighting","resolve":"holding firm","logistics":"supply"}
 static func skill_words(commander:Dictionary)->String:
 	if commander.is_empty():return ""
 	var best:="";var worst:="";var high:=-1;var low:=6
@@ -357,8 +357,8 @@ static func skill_words(commander:Dictionary)->String:
 		var pips:=Strips.GeneralPips.pips(float(commander.get(skill,0.5)))
 		if pips>high:high=pips;best=skill
 		if pips<low:low=pips;worst=skill
-	if high==low:return "Even in every skill: %d of 5" % high
-	return "Best at %s (%d of 5) · weakest at %s (%d of 5)" % [SKILL_WORDS[best],high,SKILL_WORDS[worst],low]
+	if high==low:return "Even in every skill (%d/5)" % high
+	return "Best at %s (%d/5) · weakest at %s (%d/5)" % [SKILL_WORDS[best],high,SKILL_WORDS[worst],low]
 
 
 ## What a leader is doing now: their bands and men and where, or "at home".
