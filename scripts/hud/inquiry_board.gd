@@ -193,13 +193,13 @@ static func _card_words(record:Dictionary)->Dictionary:
 
 ## The price of the furthest lead among the questions under way, once teams
 ## work five years or more ahead of the age: "Our learning runs ahead of its
-## age: 25 years ahead: six times the work for each question there." "" otherwise.
+## age. 25 years ahead: six times the work." "" otherwise.
 static func lead_price(records:Array)->String:
 	var furthest:Dictionary={}
 	for record:Dictionary in records:
 		if float(record.get("years_ahead",0.0))>=5.0 and (furthest.is_empty() or float(record.years_ahead)>float(furthest.years_ahead)):furthest=record
 	if furthest.is_empty():return ""
-	return "Our learning runs ahead of its age: %s for a question there. More hands buy a longer lead, not quicker answers." % Words.lead_price(float(furthest.years_ahead),float(furthest.get("work_factor",1.0)))
+	return "Our learning runs ahead of its age. %s." % Words.lead_price(float(furthest.years_ahead),float(furthest.get("work_factor",1.0)))
 
 ## One option of a free team's choice in words: its time with the team, how
 ## far ahead of its age, what it would bring and what it opens.

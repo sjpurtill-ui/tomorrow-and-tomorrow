@@ -306,6 +306,16 @@ func test_cards_keep_time_and_a_thin_team_is_named_only_below_a_third_of_normal(
 	assert_str(told).contains("three times the usual work")
 	assert_str(Visuals.plain_bottleneck(told)).contains("three times the usual work")
 	assert_str(Words.lead_price(25.0,6.0)).is_equal("25 years ahead: six times the work")
+	# A board whose teams work far ahead states the price of that lead.
+	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(1120,1600);add_child(viewport)
+	var board=Board.new();viewport.add_child(board)
+	board.setup({"fields":[],"investigations":[{"id":"lead_test","name":"Far Ahead","dynamic":"culture","progress":0.2,"research_workforce":3.0,"years_ahead":25.0,"work_factor":6.0,"estimated_days":3000,"bottleneck":"AHEAD OF ITS AGE — 25 years early: about six times the usual work"}],
+		"on_tree":func()->void:pass,"on_work":func()->void:pass,"on_domain":func(_d:String)->void:pass})
+	var price:Label=board.find_child("LeadPrice",true,false)
+	assert_object(price).is_not_null()
+	assert_str(price.text).is_equal("Our learning runs ahead of its age. 25 years ahead: six times the work.")
+	var holdup:Label=board.find_child("Holdup",true,false)
+	assert_str(holdup.text).is_equal("Ahead of its age")
 
 # --- A freed team's choice --------------------------------------------------------------------
 
