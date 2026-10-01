@@ -1,12 +1,17 @@
 {
   "id": "common_path_alignment",
   "line": "logistics",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/common_path_alignment-v1.png",
+  "prompt": "Edit this current-game WIDE panoramic travel watercolor banner retaining approximately 2051x767 proportions, sand/slate/indigo palette, quiet flat wash landscape and mature hand-drawn adults. REMOVE ALL thatched buildings, fences, cultivated land, cloth garments and neat construction. Replace background with two very low ragged hide windbreaks on crooked branches amid wild grass. Reduce crowd to four small raw-hide-clad adults establishing ONE continuous common footpath between portable camp and rocky waterbank: two crouch removing loose stones, one pulls a fallen branch clear, one gestures down the aligned natural route. Keep continuous dirt path visible left-to-right across middle, every head and working hand within central 65 percent height. No paving, shovel, baskets, pots, domestic stock or formal infrastructure. Preserve WIDE canvas and subtle watercolor medium, no photorealism, cinematic sunset, CGI or oil impasto. No writing or border.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8b5b11fe-5f6d-403f-810e-b8c58c8ae37b.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 5,
-  "approx_historical_year": -4967,
-  "prompt": "c. 4967 BCE: adults clear and align one shared footpath between simple reed huts. Mature panoramic travel watercolor on fibrous paper, flat sand-gold and faded-indigo washes, no paving, wheel, sign, written plan or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-690eebf5-66cc-4fd4-b7a8-5b984d0442b5.png",
-  "asset": "res://assets/ui/research/subjects/common_path_alignment-v1.png",
-  "sha256": "e833833be33cb4607b01fb681b322d118998dc858aec15b15868e3cc12e7ae2b",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; clear common route in central banner crop. Accepted after visual 3.37:1 crop and subject/period check."
+  "review": "Sand/slate panoramic watercolor retained. Four adults remove stones and branch and gesture along common natural path. Thatched houses/fences replaced by low ragged hide windbreaks; no paving or manufactured tools.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/common_path_alignment-v2.png",
+  "sha256": "f8a001dc832e22b1aa59f76c5750316f726182b5450a928bce8ef49fb84c2d3e"
 }

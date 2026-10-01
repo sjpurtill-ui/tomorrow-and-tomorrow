@@ -1,0 +1,21 @@
+{
+  "id": "counting_words",
+  "line": "knowledge",
+  "version": 1,
+  "replace_art600": true,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/route_memory-v2.png",
+  "prompt": "Make exactly one tiny correction: the row between the two seated adults currently has SIX pebbles. Remove one pebble and evenly space the remaining FIVE pebbles in the same place. Exactly FIVE, matching five fingers. Keep absolutely everything else unchanged: wide 2172x724 canvas, same blue-black ink/lapis/parchment medium, people, heads, hand gestures and landscape. No text or other changes.",
+  "initial_prompt": "Create a new Tomorrow and Tomorrow KNOWLEDGE research banner using the supplied current-game painting as strict medium and WIDE canvas reference, approximately 2172x724 (3:1). Blue-black ink crosshatching, muted lapis washes on warm parchment, mature adult drawing, no photographic realism. Subject: counting words and finger counts. A seated rough-hide-clad adult holds up one open hand with five clearly separate fingers, touches each fingertip with the other index finger while speaking to a second adult who repeats the gesture; five small pebbles in a row below reinforce matching number to objects. Whole heads, hands, fingers and pebbles fit in the central 65 percent height; smaller people with breathing space above and below. Portable wild camp, ragged hide, no thatched huts, cloth, pots, baskets, writing, numerals or border. Preserve reference's wide proportions and handmade ink medium. No visible text.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f106f3bb-5cad-4c3d-9776-7a63b964487a.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-896aed0d-a733-45c7-b1df-edc09e1e60d9.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 5,
+  "review": "Blue-black hatching and lapis/parchment match current knowledge banner. Two adults demonstrate five fingers, corrected row to exactly five pebbles. No text or manufactured camp structures.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "binding_style": "knowledge: blue-black ink and lapis parchment",
+  "asset": "res://assets/ui/research/subjects/counting_words-v1.png",
+  "sha256": "bea2e7cf09c8634b8fef3b162684d5af4ef63f64733757d8c83d2100c361e278"
+}

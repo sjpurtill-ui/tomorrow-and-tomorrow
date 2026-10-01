@@ -1,0 +1,19 @@
+{
+  "id": "guest_host_reciprocity",
+  "line": "logistics",
+  "version": 1,
+  "replace_art600": true,
+  "binding_style": "logistics: travel watercolor",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/paired_carrier_balancing-v2.png",
+  "prompt": "Create a current-game logistics banner matching supplied approximately 2059x764 WIDE panoramic travel watercolor, sand/slate/indigo wash shapes and simplified mature adults. A traveling rough-hide-clad guest at left offers a small handful of wild roots to a host at right, host reciprocates by pointing with open hand to an available irregular sleeping hide under one LOW ragged hide windbreak on crooked branches. Bare hands clearly extend gifts and hospitality, two complete smaller adult figures fit central band. Guest carries a small folded raw-hide bundle over shoulder, no basket or net. Quiet wild camp beside natural trail. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0509586a-0d3f-4e16-a669-9033f2fb4641.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 5,
+  "review": "Sand/indigo travel watercolor matches current logistics reference. Traveler offers roots, host gestures toward available sleeping hide under raw-hide windbreak; shoulder bundle raw hide, no basket/net.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/guest_host_reciprocity-v1.png",
+  "sha256": "19f529e56eca8d07b650b00d7109845a81ebca1f38029ff4399aeeaf64b3160f"
+}
