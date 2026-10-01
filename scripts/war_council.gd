@@ -58,6 +58,8 @@ const MIN_BAND:=3
 const RAID_FLOOR:=10
 ## Between raids while punishing (days).
 const RAID_REST_DAYS:=90
+## A raid their feud called waits at most this long for the band to be sent.
+const RAID_CALL_DAYS:=30
 ## Messengers for peace go again after this many days while refused.
 const PARLEY_GAP:=120
 ## A march the carriers would feed worse than this waits (supply_state.gd).
@@ -317,13 +319,18 @@ static func chosen(civ_id:String)->String:
 static func _stance_now(civ_id:String,civ:Dictionary,today:int,plan:Dictionary)->String:
 	if _player(): return stance_of(civ_id)
 	var f:=_front(civ_id)
+	# A called raid the war leader could not send in a month (too few, the
+	# odds, the road's food, or a war came first) is let go.
+	if _raid_called(civ_id) and today-int(f.get("raid_call",today))>RAID_CALL_DAYS: _raid_sent(f)
+	# Raiders already out finish their raid before the stance moves on.
+	var raiding:=_raid_called(civ_id) or not _band_on(civ_id,["punish"]).is_empty()
 	var rel:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
-	var hostile:=bool(rel.get("at_war",false)) or _raid_called(civ_id) or _feud_hot(civ_id,civ)
+	var hostile:=bool(rel.get("at_war",false)) or raiding or _feud_hot(civ_id,civ)
 	if not hostile:
 		f["stance"]=""
 		return ""
 	if plan.is_empty(): plan.merge(_plan_bits(today),true)
-	var stance:=rival_stance(rel,plan,_raid_called(civ_id),_feud_hot(civ_id,civ),float(WorldSimulation.state.simulation_metrics.get("food_days",0.0)))
+	var stance:=rival_stance(rel,plan,raiding,_feud_hot(civ_id,civ),float(WorldSimulation.state.simulation_metrics.get("food_days",0.0)))
 	f["stance"]=stance
 	return stance
 
@@ -352,6 +359,10 @@ static func _plan_bits(today:int)->Dictionary:
 ## people, rival_feuds between two others), not yet sent.
 static func _raid_called(civ_id:String)->bool:
 	return int(peek(civ_id).get("raid_call",-1))>=0
+
+## The called raid is sent (or let go): the call is answered.
+static func _raid_sent(f:Dictionary)->void:
+	for key in ["raid_call","raid_cause","raid_ref"]: f.erase(key)
 
 ## A feud with this people hot in this people's own world.
 static func _feud_hot(civ_id:String,civ:Dictionary)->bool:
@@ -430,11 +441,13 @@ static func _take(civ_id:String,today:int,options:Dictionary)->Dictionary:
 	var rest:=TAKE_REST_DAYS-(today-int(f.get("take_failed",-99999)))
 	if rest>0 and not insist and not bool(options.get("now",false)):
 		return _record(civ_id,"rest","%s mends the band after %s; it goes again in about %s." % [_who(),String(town.name),_span(rest)])
-	if not insist:
+	# With nobody to send the war leader says so plainly (court_war_orders:
+	# nobody under arms, or too few for a band).
+	var free:=_free_men()
+	if not insist and free>=MIN_BAND:
 		# Enough to hold it after the fight, or nobody goes (no tiny-force
 		# capture: docs/GENERAL_CAMPAIGN_DESIGN.md).
 		var need:=_hold_need(town)
-		var free:=_free_men()
 		if need>0 and free<need:
 			return _record(civ_id,"wait","%s waits: holding %s after the fight would take about %d of ours, by our scouts' count of its people, and we can send %d. About %d more would do it." % [_who(),String(town.name),need,free,need-free],{"need":need})
 		var fed:=_fed_at(town,free)
@@ -502,15 +515,15 @@ static func _punish(civ_id:String,today:int,options:Dictionary)->Dictionary:
 		return _record(civ_id,"rest","%s's raiders rest after the last raid on %s; the next goes in about %s." % [_who(),_name(civ_id),_span(rest)])
 	var town:=_punish_target(civ_id,options)
 	if town.is_empty():
-		if called: f.erase("raid_call")
+		if called: _raid_sent(f)
 		return _find_them(civ_id,today,String(options.get("asked","")))
 	if not insist:
 		var fed:=_fed_at(town,_raid_size(town))
 		if not fed.is_empty() and float(fed.ratio)<FED_MIN:
-			if called: f.erase("raid_call")
+			if called: _raid_sent(f)
 			return _record(civ_id,"wait",_hungry_road_words(town,fed),{"fed":float(fed.ratio)})
 	var done:=_launch(civ_id,town,"punish",insist,options)
-	if String(done.get("verdict",""))!="wait" and called: f.erase("raid_call")
+	if String(done.get("verdict",""))!="wait" and called: _raid_sent(f)
 	return done
 
 ## Their nearest town we know (the god's pick while it stands).

@@ -169,6 +169,38 @@ func test_take_waits_for_three_to_two_then_marches_besieges_or_storms_and_garris
 	# The fight is in the war ledger, counted once.
 	assert_int(int(WAR.front(civ_id).get("strikes",0))).is_greater_equal(1)
 
+## "Bring me their chief": a band strikes at their chief town; beating its
+## defenders, it takes their chief, who is ransomed, and the feud is sworn
+## off (war_loop chief_taken), as the court's words promise. No town is held,
+## and the engine's war flag comes down with the band home.
+func test_bring_me_their_chief_strikes_their_chief_town_and_they_ransom_him()->void:
+	for region in CivilizationSystem.civilizations[0].strategic_regions:
+		var r:Dictionary=region
+		if String(r.get("role",""))=="capital": r["role"]="granary"
+		if String(r.get("id",""))==city_id: r["role"]="capital"
+	assert_str(String(CivilizationSystem.city_intelligence.primary_id(civ_id))).is_equal(city_id)
+	_their_men(8.0)
+	_counted(10.0)
+	_train(120)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	WAR.order(civ_id,"war_chief")
+	var band:=_band("punish")
+	assert_dict(band).override_failure_message(str(Council.peek(civ_id))).is_not_empty()
+	assert_str(String(band.destination_id)).is_equal(city_id)
+	assert_bool(bool((band.get("city_operation",{}) as Dictionary).get("raid",false))).is_true()
+	_days(120,func()->bool:return not WAR.feuding(civ_id) and _band("punish").is_empty())
+	# Their chief was taken: ransomed, and the feud sworn off.
+	var kinds:Array=(WAR.state().log as Array).map(func(e:Dictionary)->String:return String(e.kind))
+	assert_array(kinds).override_failure_message("%s
+%s" % [str(WAR.front(civ_id)),str((WAR.state().log as Array).slice(0,8))]).contains(["chief_taken"])
+	assert_str(String((WAR.front(civ_id).get("feud_end",{}) as Dictionary).get("why",""))).is_equal("chief ransomed")
+	assert_bool(WAR.feuding(civ_id)).override_failure_message("%s
+%s" % [str(WAR.front(civ_id)),str(CivilizationSystem.civilizations[0].player_relation)]).is_false()
+	assert_bool(bool(CivilizationSystem.civilizations[0].player_relation.get("at_war",false))).is_false()
+	# Nothing more goes out against them, and no town of theirs is held.
+	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("leave")
+	assert_bool(_held()).is_false()
+
 ## The user judges by what he can see: a band the council sent shows on the
 ## war map as a counter on the move with its arrow (or, in the raid age, its
 ## dotted raid track) along its land road, through the existing overlay.
@@ -526,8 +558,10 @@ func test_their_raid_marches_on_our_town_as_a_band_of_their_own_army()->void:
 	CivilizationSystem.civilizations[1].player_relation["contact_level"]=2
 	_train(12)
 	var day:=int(GameState.elapsed_days)
-	# Their levy, and our town on their chart (their envoys came to us).
+	# Their levy, and our town on their chart (their envoys came to us); their
+	# days kept with ours.
 	WorldSimulation.scoped(them,func()->void:
+		WorldSimulation.state.elapsed_days=day
 		var mc=WorldSimulation.military
 		mc.military_inventory["improvised"]=120
 		mc.raise_recruits(120)
