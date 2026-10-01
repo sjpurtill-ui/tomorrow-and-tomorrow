@@ -85,11 +85,12 @@ func _ready()->void:
 	if service not in services:service="army"
 	for domain:String in services:
 		var choice:=domain
-		var button:=_button(header,_service_name(domain),func():service=choice;selected_row={};roster_filter="all";scroll.scroll_vertical=0;_build_body())
+		var button:=_button(header,_service_name(domain),func():service=choice;page="war" if choice=="army" else ("forces" if page=="war" else page);selected_row={};roster_filter="all";scroll.scroll_vertical=0;_build_body())
 		button.icon=Art.symbol(domain,accent(domain),22)
 		button.toggle_mode=true;service_buttons[domain]=button
-		# A lone land force needs no service switch.
-		button.visible=services.size()>1
+		# A lone land force needs no service switch; nor does the War screen
+		# until the people have boats or wings that fight.
+		button.visible=services.size()>1 and _has_crews(services)
 	close_button=_button(header,"×",queue_free);close_button.custom_minimum_size=Vector2(40,38);close_button.tooltip_text="Close · Escape or click the map"
 	var nav:=HFlowContainer.new();nav.add_theme_constant_override("h_separation",6);column.add_child(nav);nav_row=nav
 	for entry:Array in [["leaders","Leaders"],["forces","Forces"],["recruitment","Recruit & deploy"],["training","Training"],["support","Readiness & supply"],["wars",_wars_label()]]:
@@ -104,6 +105,12 @@ func _ready()->void:
 	scroll=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
 	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",10);scroll.add_child(body)
 	_layout();_build_body()
+
+## Whether any boat or air crews of ours are raised (joint_operations forces).
+func _has_crews(services:Array[String])->bool:
+	for force:Dictionary in MilitaryCampaign.joint_operations.state.get("forces",[]):
+		if String(force.get("owner",""))=="player" and String(force.get("domain","")) in services:return true
+	return service!="army"
 
 func _service_name(domain:String)->String:
 	if domain=="navy":return "Boats" if EraWords.hearth() else "Fleet"
@@ -321,10 +328,18 @@ func _build_body()->void:
 	if training_view:page="training"
 	for key:String in page_buttons:page_buttons[key].set_pressed_no_signal(page==key)
 	# The army is grand strategy on one page: how many serve, our enemies and
-	# what to do about each, and our leaders (hud/war_board.gd). No tabs.
-	if is_instance_valid(nav_row):nav_row.visible=service!="army"
-	if service=="army":
+	# what to do about each, and our leaders (hud/war_board.gd). No tabs. Every
+	# way in opens it (MilitaryCampaign.open_roster); the older army pages
+	# below are reached by nothing in the game.
+	var war:=service=="army" and page=="war"
+	if is_instance_valid(nav_row):nav_row.visible=not war
+	# Boats and wings keep their own pages; the leaders and the wars are the
+	# War screen's.
+	for key in ["leaders","wars"]:
+		if page_buttons.has(key):page_buttons[key].visible=service=="army"
+	if war:
 		_war();return
+	if service!="army" and page in ["leaders","wars"]:page="forces"
 	if page=="recruitment":_recruitment();return
 	if page=="support":_support();return
 	if page=="wars":_wars();return

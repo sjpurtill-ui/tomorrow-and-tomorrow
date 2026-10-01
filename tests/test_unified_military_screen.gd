@@ -18,13 +18,14 @@ func test_every_way_in_opens_the_war_screen()->void:
 		screen.free()
 
 func test_the_army_stays_on_one_page_and_one_panel()->void:
-	MilitaryCampaign.open_roster()
-	var screen=MilitaryCampaign.roster_screen
-	var panel_id:int=screen.panel.get_instance_id()
-	for page in ["recruitment","support","training","forces"]:
-		screen._show_page(page)
-		assert_object(screen.body.get_node_or_null("WarBoard")).is_not_null()
-		assert_int(screen.panel.get_instance_id()).is_equal(panel_id)
+	# However the army is asked for (an alert's page, the training flag), it
+	# is the War screen, with no tabs to leave it by.
+	for way in [["army",false,""],["army",true,""],["army",false,"support"],["army",false,"recruitment"],["army",false,"leaders"]]:
+		MilitaryCampaign.open_roster(String(way[0]),bool(way[1]),String(way[2]))
+		var screen=MilitaryCampaign.roster_screen
+		assert_object(screen.body.get_node_or_null("WarBoard")).override_failure_message(str(way)).is_not_null()
+		assert_bool(screen.nav_row.visible).is_false()
+		screen.free()
 
 func test_supply_numbers_refresh_in_place()->void:
 	# The readiness strip as a component: its numbers refresh in place.
