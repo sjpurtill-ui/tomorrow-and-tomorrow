@@ -420,6 +420,46 @@ static func tooltip(card:Dictionary)->String:
 	return "\n".join(lines)
 
 
+## The drill card's tooltip, in the court's own numbers.
+static func drill_words(card:Dictionary)->String:
+	var out:=PackedStringArray()
+	var men:=int(card.get("men",0))
+	if men>0:
+		var days:=int(card.get("days",0))
+		out.append("%s in drill at home, %d%% through it%s." % [EraWords.grouped(men),roundi(float(card.get("progress",0.0))*100.0),(", about %d %s to go" % [days,"day" if days==1 else "days"]) if days>0 else ""])
+	if int(card.get("waiting",0))>0:out.append("%s called up and waiting for a drill place." % EraWords.grouped(int(card.waiting)))
+	if int(card.get("drafts",0))>0:out.append("%s drafts in drill to replace losses in the bands." % EraWords.grouped(int(card.drafts)))
+	out.append("When they finish they join the levy at home. Double-click to open the Army screen.")
+	return "\n".join(out)
+
+## Those in drill at home, as one card (HOI4's deployment queue): {} when
+## nobody is drilling or waiting. men: in drill (not the drafts for bands),
+## progress: the drill's share done, days: the court's own "about N days"
+## (court_war_orders.forces), waiting: called up and not yet drilling,
+## drafts: replacements in drill for bands in the field, glyph: the kit most
+## of them will carry.
+static func drill_card(mc:Node)->Dictionary:
+	var men:=0;var drafts:=0;var done:=0.0;var needed:=0.0
+	var by_kit:={}
+	for o in mc.training_queue:
+		if not o is Dictionary:continue
+		var order:Dictionary=o
+		var count:=maxi(0,int(order.get("count",0)))
+		if String(order.get("mode",""))=="field_draft":drafts+=count;continue
+		men+=count
+		done+=float(order.get("progress_days",0.0))*float(count);needed+=maxf(1.0,float(order.get("required_days",1.0)))*float(count)
+		var key:=String(order.get("unit","levy"))+"|"+String(order.get("weapon","improvised"))
+		by_kit[key]=int(by_kit.get(key,0))+count
+	var waiting:=maxi(0,int(mc.aggregate_recruits))
+	if men<=0 and waiting<=0 and drafts<=0:return {}
+	var glyph:="club"
+	var most:=-1
+	for key:String in by_kit:
+		if int(by_kit[key])>most:most=int(by_kit[key]);glyph=preload("res://scripts/battle_blocks.gd").glyph_of(key.get_slice("|",0),key.get_slice("|",1))
+	var days:=int((preload("res://scripts/court_war_orders.gd").forces() as Dictionary).get("drill_days",0)) if men>0 else 0
+	return {"id":"drill","kind":"drill","army_id":Orders.HOME,"members":[],"title":"In drill at home","short":"In drill","men":men,"waiting":waiting,"drafts":drafts,
+		"progress":clampf(done/needed,0.0,1.0) if needed>0.0 else 0.0,"days":days,"glyph":glyph,"state":"holding","general":{}}
+
 ## A band's make-up, for the Forces list (hud/forces_model.gd): drill and
 ## experience across these formations weighted by their men (0..1 each), and
 ## its kinds of fighters, largest first: {drill, seen, kinds:[{unit, label,
@@ -436,7 +476,7 @@ static func make_of(formations:Array)->Dictionary:
 		drill+=clampf(float(formation.get("training",0.0)),0.0,1.0)*float(count)
 		seen+=clampf(float(formation.get("experience",0.0)),0.0,1.0)*float(count)
 		var unit:=String(formation.get("unit","levy"))
-		var kind:Dictionary=by_unit.get(unit,{"unit":unit,"label":String(units.archetype(unit).get("label",unit.replace("_"," ").capitalize())),"count":0})
+		var kind:Dictionary=by_unit.get(unit,{"unit":unit,"weapon":String(formation.get("weapon","")),"label":String(units.archetype(unit).get("label",unit.replace("_"," ").capitalize())),"count":0})
 		kind.count=int(kind.count)+count;by_unit[unit]=kind
 	var weight:=maxf(1.0,float(men))
 	return {"drill":drill/weight,"seen":seen/weight,"kinds":_largest_first(by_unit.values())}

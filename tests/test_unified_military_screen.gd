@@ -8,11 +8,11 @@ func after_test()->void:
 	await get_tree().process_frame
 func test_all_legacy_tabs_open_the_same_military_shell()->void:
 	var provider:=Provider.new(null,null)
-	for sub in 4:
+	for sub in 5:
 		assert_bool(provider.open_expanded_tab(sub)).is_true()
 		var screen=MilitaryCampaign.roster_screen
-		assert_str(screen.page).is_equal(["forces","recruitment","training","support"][sub])
-		assert_int(screen.page_buttons.size()).is_equal(4)
+		assert_str(screen.page).is_equal(["forces","recruitment","training","support","wars"][sub])
+		assert_int(screen.page_buttons.size()).is_equal(5)
 		screen.free()
 func test_navigation_keeps_one_panel_and_embeds_recruitment_and_editor()->void:
 	MilitaryCampaign.open_roster()

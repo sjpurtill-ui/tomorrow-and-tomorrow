@@ -816,6 +816,11 @@ func _capture_preview_if_requested() -> void:
 	# save an empty map and stale HUD. Give the renderer real frames first.
 	for capture_frame in 3:
 		await get_tree().process_frame
+	# Capture only: the supply map as the toolbar's Supply button shows it (its
+	# field is built on a worker thread, so give it frames).
+	if "--capture-supply-map" in OS.get_cmdline_user_args():
+		preload("res://scripts/hud/supply_map.gd").set_shown(self,true)
+		for capture_frame in 40: await get_tree().process_frame
 	# Regional terrain is streamed in slices. Finish the initial patch, then the
 	# requested camera's patch before taking an audit image of either surface.
 	for capture_stream_pass in 2:

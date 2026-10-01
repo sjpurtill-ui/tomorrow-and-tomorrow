@@ -164,6 +164,15 @@ func _build_strip()->void:
 	(chips.training.chip as Control).gui_input.connect(func(event:InputEvent):
 		if _clicked(event):page_wanted.emit("recruitment"))
 	(chips.training.chip as Control).mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+	# Hot feuds, as HOI4 keeps the wars in sight: a click opens the Feuds page.
+	var feuds:=HBoxContainer.new();feuds.name="Chip_feuds";feuds.add_theme_constant_override("separation",7);feuds.mouse_filter=Control.MOUSE_FILTER_STOP;flow.add_child(feuds)
+	_glyph(feuds,Icons.war_texture("feud",T.RED,48),22.0)
+	var feud_value:=_text(feuds,"",19,T.RED_TEXT,true);_whole(feud_value)
+	var feud_word:=_text(feuds,"hot feuds",13,T.RED_TEXT);_whole(feud_word);feud_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	chips["feuds"]={"chip":feuds,"value":feud_value,"word":feud_word}
+	feuds.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+	feuds.gui_input.connect(func(event:InputEvent):
+		if _clicked(event):page_wanted.emit("wars"))
 	if not strip_only:
 		policy_button=_button(row,"",func():page_wanted.emit("training"),Icons.command_texture("drill",T.INK,40),"How hard the forces drill, and what it costs.")
 		policy_button.name="TrainingLevel";policy_button.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -198,6 +207,11 @@ func _update_strip(sum:Dictionary)->void:
 	chips.training.value.text=EraWords.grouped(int(sum.training))
 	chips.training.chip.tooltip_text="%s drilling or called up and waiting.\nClick for Recruit & deploy." % EraWords.grouped(int(sum.training))
 	if is_instance_valid(policy_button):policy_button.text="Training: %s" % String(MilitaryCampaign.training_staff.policy("army").label).to_lower()
+	var hot:=preload("res://scripts/hud/war_ledger_model.gd").entries().filter(func(e:Dictionary)->bool: return String(e.kind)!="ended" and bool(e.get("hot",false)))
+	chips.feuds.chip.visible=not hot.is_empty()
+	chips.feuds.value.text=str(hot.size())
+	chips.feuds.word.text="hot feud" if hot.size()==1 else "hot feuds"
+	chips.feuds.chip.tooltip_text="Blood spilled within the year: %s.\nClick for the Feuds page." % ", ".join(hot.map(func(e:Dictionary)->String: return String(e.name)))
 
 
 # --- Filters and rows -------------------------------------------------------------
@@ -286,6 +300,11 @@ func _row(row:Dictionary,depth:int)->void:
 	var frame:=Panel.new();frame.clip_contents=true;frame.custom_minimum_size=Vector2(30,36) if depth>0 else Vector2(36,44);frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER;frame.add_theme_stylebox_override("panel",T.flat(T.PAPER_SUNK));top.add_child(frame)
 	var face:=TextureRect.new();face.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;face.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);face.mouse_filter=Control.MOUSE_FILTER_IGNORE;frame.add_child(face)
+	# The kit most of them carry, on the face's corner (HOI4's division icon).
+	var plate:=Panel.new();plate.name="KitPlate";plate.mouse_filter=Control.MOUSE_FILTER_IGNORE;plate.add_theme_stylebox_override("panel",T.flat(T.PAPER_RAISED,T.INK,1,2))
+	plate.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_RIGHT);plate.offset_left=-21.0;plate.offset_top=-21.0;plate.offset_right=0.0;plate.offset_bottom=0.0;frame.add_child(plate)
+	var badge:=TextureRect.new();badge.name="Kit";badge.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	badge.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);badge.offset_left=1.0;badge.offset_top=1.0;badge.offset_right=-1.0;badge.offset_bottom=-1.0;plate.add_child(badge)
 	# Wide, the columns line up down the list: the name cell gives back what
 	# a band's indent and smaller face take.
 	var who:=_cell(top,(WHO_WIDTH-20.0*depth) if wide else 110.0,true)
@@ -324,7 +343,7 @@ func _row(row:Dictionary,depth:int)->void:
 	var orders:=_button(top,"Orders",func():open_orders(String(row.id)),Icons.command_texture("arrow",T.INK,40))
 	orders.name="Orders";orders.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	live.append({"id":String(row.id),"depth":depth,"panel":panel,"state":state,"face":face,"face_key":"","who":who,"title":title,"template":template,"men_cell":men_cell,"men":men,
-		"call_up":call_up,"meters":meters,"drill_cell":drill_cell,"drill":drill,"seen_mark":seen_mark,"seen":seen,"place":place,"doing":doing,"where":where,"find":find,"talk":talk,"orders":orders})
+		"call_up":call_up,"badge":badge,"badge_key":"","meters":meters,"drill_cell":drill_cell,"drill":drill,"seen_mark":seen_mark,"seen":seen,"place":place,"doing":doing,"where":where,"find":find,"talk":talk,"orders":orders})
 
 
 func _update_row(control:Dictionary,row:Dictionary)->void:
@@ -387,6 +406,13 @@ func _update_row(control:Dictionary,row:Dictionary)->void:
 
 
 func _face(control:Dictionary,row:Dictionary)->void:
+	var kinds:Array=row.get("kinds",[])
+	var glyph:=preload("res://scripts/battle_blocks.gd").glyph_of(String((kinds[0] as Dictionary).get("unit","levy")),String((kinds[0] as Dictionary).get("weapon",""))) if not kinds.is_empty() else ""
+	if control.has("badge") and glyph!=String(control.get("badge_key","")):
+		control.badge_key=glyph
+		(control.badge as TextureRect).texture=Icons.arm_texture(glyph,T.INK,T.GOLD,48) if glyph!="" else null
+		(control.badge as TextureRect).get_parent().visible=glyph!=""
+		(control.badge as TextureRect).tooltip_text=String((kinds[0] as Dictionary).get("label","")) if not kinds.is_empty() else ""
 	var general:Dictionary=row.get("general",{})
 	var key:="%s|%s|%s" % [String(row.kind),String(general.get("figure_id","")),String(general.get("name",""))]
 	if key==String(control.face_key):return

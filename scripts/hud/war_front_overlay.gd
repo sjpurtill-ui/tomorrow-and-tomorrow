@@ -45,6 +45,7 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const CityLabels:=preload("res://scripts/hud/city_labels.gd")
 const Blockade:=preload("res://scripts/naval_blockade.gd")
 const ArmyMarks:=preload("res://scripts/hud/army_marks.gd")
+const Counter:=preload("res://scripts/hud/army_counter.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Pursuit:=preload("res://scripts/pursuit.gd")
 const March:=preload("res://scripts/march_terrain.gd")
@@ -60,6 +61,9 @@ const EASE_REDRAW_SECONDS:=1.0/30.0
 ## A new clash rings once, briefly, like ink dropped on the chart (codex/map-motion).
 const CLASH_PULSE_SECONDS:=1.3
 const MAX_CLASH_PULSES:=6
+## Men joining or lost show over the counter this long, a few at a time.
+const TROOP_PULSE_SECONDS:=2.4
+const MAX_TROOP_PULSES:=8
 ## Every drawn front is carried on this many points, so any two can morph.
 const FRONT_POINTS:=96
 ## Arrows are carried on this many points, so each eases as its army moves.
@@ -138,6 +142,11 @@ var ease_frame:=0
 var hits:Array=[]
 ## The force marks as last drawn (screen), for clicks and caption clearance.
 var drawn_marks:Array=[]
+## The counters drawn this pass, and the town cards they keep clear of.
+var counter_rects:Array[Rect2]=[]
+var counter_obstacles:Array[Rect2]=[]
+## Where counters may stand: inside the chart, clear of the HUD's bars.
+var counter_bounds:=Rect2()
 ## Captions requested by the last drawing, and their placement memory.
 var caption_requests:Array=[]
 var caption_memory:Dictionary={}
@@ -162,6 +171,9 @@ var last_compose_usec:=0
 var last_draw_usec:=0
 ## Newly joined battles: [{pos, t}] (bounded, visual only).
 var clash_pulses:Array[Dictionary]=[]
+## Our marks' men gained or lost since the day before: {id, delta, t}
+## (visual only).
+var troop_pulses:Array[Dictionary]=[]
 ## Arrows as drawn, keyed by what they belong to: {points (world), target,
 ## grow 0..1, alpha, target_alpha, data}. New ones draw out; gone ones fade.
 var live_arrows:Dictionary={}
@@ -229,6 +241,13 @@ func _process(delta:float)->void:
 			if float(pulse.t)<CLASH_PULSE_SECONDS:live.append(pulse)
 		clash_pulses=live
 		view.append(roundi(Time.get_ticks_msec()/33.0))
+	if not troop_pulses.is_empty():
+		var alive:Array[Dictionary]=[]
+		for pulse in troop_pulses:
+			pulse["t"]=float(pulse.t)+delta
+			if float(pulse.t)<TROOP_PULSE_SECONDS:alive.append(pulse)
+		troop_pulses=alive
+		view.append(roundi(Time.get_ticks_msec()/33.0))
 	if settling or arrows_moving or surging:
 		ease_elapsed+=delta
 		if ease_elapsed>=EASE_REDRAW_SECONDS: ease_elapsed=0.0; ease_frame+=1
@@ -256,6 +275,7 @@ func set_scene(next:Dictionary,immediate:bool=false)->void:
 	if not immediate and not scene.is_empty():
 		_note_new_clashes(scene,next)
 		_note_front_events(scene,next)
+		_note_troop_changes(scene,next)
 	previous=scene if not immediate else {}
 	scene=next
 	blend=1.0 if immediate or previous.is_empty() else 0.0
@@ -588,6 +608,18 @@ func collect()->Dictionary:
 		# carries), its general, what it is doing.
 		var condition:=String(Presentation.formation_visual_state(army).damage_state)
 		var morale:=clampf(float(shown.get("morale",army.get("morale",0.6))),0.0,1.0)
+		# Its counter (army_counter.gd): the kit most of its men carry, how it
+		# is fed as last known, and whether it lives off the land.
+		var moving_now:=String(shown.get("status",army.get("status","")))=="moving"
+		entry["glyph"]=Counter.main_glyph(army.get("formations",[]))
+		entry["supply"]="" if at_home else preload("res://scripts/supply_state.gd").state_of(clampf(float(shown.get("provision_ratio",shown.get("supply_level",army.get("supply_level",1.0)))),0.0,1.0))
+		if not at_home and preload("res://scripts/field_rations.gd").is_hungry(army): entry["supply"]="starving"
+		entry["foraging"]=moving_now and bool(army.get("living_off_land",false))
+		# Drafts in drill for this band (known at home, where they drill).
+		entry["drafts"]=drafts_for(id)
+		if moving_now:
+			var total:=float(army.get("distance_total_km",0.0))
+			entry["march_done"]=clampf(1.0-float(army.get("distance_remaining_km",total))/total,0.0,1.0) if total>0.0 else 0.0
 		entry.merge({"era":Presentation.formation_era(army),"branch":Presentation.formation_branch(army),
 			"general":String((army.get("commander",{}) as Dictionary).get("name","")),"selected":id==selected,"condition":condition,
 			"full":ArmyMarks.full_strength(army),"morale":morale,
@@ -650,7 +682,7 @@ func collect()->Dictionary:
 	var battles:Array=[]
 	if BattleSource.any_fighting(MilitaryCampaign,rivals) or not rival_memory.is_empty():
 		battles=BattleSource.collect(MilitaryCampaign,rivals,_battle_context(today,home,friendly,garrisons),rival_memory)
-	var inputs:={"garrisons":garrisons,"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
+	var inputs:={"garrisons":garrisons,"home_levy":_home_levy(home),"stage":stage,"today":today,"home":home,"mode":Model.mode(stage,known,largest,friendly.size(),theatre),
 		"corps_known":known.has("professional_corps") or known.has("military_staffs"),"staffs_known":known.has("military_staffs"),"strangers":strangers,
 		"friendly":friendly,"enemy":enemy,"engagements":engagements,"sieges":sieges,"raids":raids,"zones":_zone_inputs(today),
 		"lanes":_lane_inputs(today),"echelons":_echelon_inputs(friendly),"harbours":_our_blockaded_ports(today),"battles":battles}
@@ -675,6 +707,20 @@ static func _rival_militaries()->Dictionary:
 ## What the battle source needs to know of our side of the map: where our
 ## armies and held towns stand (our watchers too), the towns we know by
 ## name, and which peoples we know well enough to name and colour.
+## The levy at home, for its counter on the home town (never a front's
+## held ground): {} while nobody trained stands there.
+func _home_levy(home:Vector2)->Dictionary:
+	var army:Dictionary=MilitaryCampaign.home_army
+	var troops:=int(army.get("troops",0))
+	var drilling:=0
+	for o in MilitaryCampaign.training_queue:
+		if o is Dictionary and String((o as Dictionary).get("mode",""))!="field_draft": drilling+=maxi(0,int((o as Dictionary).get("count",0)))
+	if troops<=0 and drilling<=0: return {}
+	return {"pos":home,"troops":troops,"drilling":drilling,"full":maxi(troops,ArmyMarks.full_strength(army)),"morale":clampf(float(army.get("morale",0.6)),0.0,1.0),
+		"glyph":Counter.main_glyph(army.get("formations",[]),"club"),"general":String((army.get("commander",{}) as Dictionary).get("name","")),
+		"town":String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "home","era":Presentation.formation_era(army),"branch":Presentation.formation_branch(army)}
+
+
 func _battle_context(today:int,home:Vector2,friendly:Array,garrisons:Array)->Dictionary:
 	var armies:Dictionary={}; var troops:Dictionary={}
 	for army in MilitaryCampaign.field_armies:
@@ -1281,7 +1327,9 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 			"noun":ArmyMarks.noun(troops,stage,era,corps_known),"kind":ArmyMarks.kind(troops,stage,era,staffs_known),"detachment_of":detached,
 			"name":String(f.get("name","")),"general":"" if detached!="" else String(f.get("general","")),"doing":String(context.get("pursuit","")) if String(context.get("pursuit",""))!="" else ArmyMarks.doing(context),
 			"report_age":int(f.get("report_age",0)),"selected":bool(f.get("selected",false)),"condition":String(f.get("condition","intact")),"moving":String(context.get("status",""))=="moving",
-			"full":full,"will":clampf(float(f.get("morale",0.6)),0.0,1.0),"state":BattleMarks.state_of(context),"heading":context.get("delta",Vector2.ZERO)})
+			"full":full,"will":clampf(float(f.get("morale",0.6)),0.0,1.0),"state":BattleMarks.state_of(context),"heading":context.get("delta",Vector2.ZERO),
+			"glyph":String(f.get("glyph","")),"supply":String(f.get("supply","")),"foraging":bool(f.get("foraging",false)),
+			"days_left":int(f.get("days_left",0)),"march_done":float(f.get("march_done",-1.0)),"drafts":int(f.get("drafts",0))})
 	# Towns we hold: the garrison's mark stands on the town.
 	for g in (inputs.get("garrisons",[]) as Array):
 		var held:=int(g.get("troops",0))
@@ -1290,6 +1338,15 @@ static func _marks(inputs:Dictionary,friendly:Array,enemy:Array,built:Dictionary
 			"noun":"garrison","kind":ArmyMarks.kind(held,stage,0,staffs_known),"name":"","town":String(g.get("town","")),"general":String(g.get("general","")),
 			"doing":"holding %s" % ArmyMarks.place(String(g.get("town","the town"))),"report_age":0,"selected":false,"condition":"intact","moving":false,"fate_note":String(g.get("fate_note","")),"away":int(g.get("away",0)),
 			"full":maxi(held,int(g.get("required",held))),"will":clampf(float(g.get("morale",0.6)),0.0,1.0),"state":"hungry" if bool(g.get("hungry",false)) else "holding"})
+	# The levy at home: its own counter on the home town (HOI4 shows every
+	# unit), with those in drill on its tab.
+	var levy:Dictionary=inputs.get("home_levy",{})
+	if not levy.is_empty():
+		var held:=int(levy.troops)
+		out.append({"id":"home","side":"ours","army_id":0,"garrison":true,"home_levy":true,"pos":levy.pos,"troops":held,"era":int(levy.get("era",0)),"branch":String(levy.get("branch","foot")),
+			"noun":"levy","kind":ArmyMarks.kind(maxi(1,held),stage,int(levy.get("era",0)),staffs_known),"name":"","town":String(levy.town),"general":String(levy.general),
+			"doing":"keeping watch at home","report_age":0,"selected":false,"condition":"intact","moving":false,"full":maxi(1,int(levy.full)),"will":float(levy.morale),
+			"state":"holding","glyph":String(levy.glyph),"drilling":int(levy.drilling)})
 	# Before writing, a stranger's host is told as a feud (war_map_overlay.gd);
 	# only a general's own dated sightings (an authored campaign) are marked.
 	var strangers:Array=[] if stage=="hearth" else inputs.get("strangers",[])
@@ -2048,6 +2105,15 @@ func _draw_raid(raid:Dictionary)->void:
 ## corps and army-group marks that stand for them (hud/army_marks.gd).
 func _draw_marks(band:String,echelons_drawn:Array,battles:Array)->void:
 	drawn_marks.clear()
+	counter_rects.clear()
+	counter_obstacles.clear()
+	if _counters(band):
+		counter_bounds=Rect2(Vector2(90,100),(size-Vector2(110,170)).max(Vector2(100,100)))
+		var cities:=_city_labels()
+		if cities!=null and cities.has_method("chart_obstacles"):
+			var chart:Dictionary=cities.chart_obstacles()
+			counter_obstacles.append_array(chart.get("rects",[]))
+			if (chart.get("bounds",Rect2()) as Rect2).has_area(): counter_bounds=chart.bounds
 	var marks:Array=scene.get("marks",[])
 	if marks.is_empty(): return
 	var candidates:Array=[]
@@ -2056,6 +2122,7 @@ func _draw_marks(band:String,echelons_drawn:Array,battles:Array)->void:
 		entry.at=_screen(mark.pos)
 		var kind:=String(mark.kind)
 		entry.size=ArmyMarks.size_px(band,"band" if kind.begins_with("band") else kind)
+		if _counters(band): entry.size=Counter.plate_size(_counter_scale(band)).x*0.92
 		var priority:=int(mark.get("troops",0))
 		if bool(mark.get("selected",false)): priority+=1_000_000_000
 		if String(mark.side)=="ours": priority+=200_000_000
@@ -2079,7 +2146,40 @@ func _draw_marks(band:String,echelons_drawn:Array,battles:Array)->void:
 		drawn_marks.append(entry)
 
 
+## HOI4's counters on the close and regional charts; far out, the small
+## marks of the force's age stand for it.
+static func _counters(band:String)->bool:
+	return band in ["ground","local","regional"]
+
+static func _counter_scale(band:String)->float:
+	return 0.85 if band=="regional" else 1.0
+
+## What a mark's counter shows (army_counter.gd), from the mark alone.
+static func counter_data(entry:Dictionary,accent:Color)->Dictionary:
+	var ours:=String(entry.get("side","ours"))=="ours"
+	var members:=(entry.get("members",[]) as Array).size()
+	var data:={"side":"ours" if ours else "theirs","accent":accent,"selected":bool(entry.get("selected",false)),"members":members,"state":String(entry.get("state","")),
+		"glyph":String(entry.get("glyph","")) if String(entry.get("glyph",""))!="" else Counter.glyph_for(String(entry.get("branch","foot")),int(entry.get("era",0))),
+		"stale":(int(entry.get("report_age",0)) if ours else int(entry.get("age_days",0)))>=ArmyMarks.STALE_DAYS}
+	var counter:=ArmyMarks.counter(entry)
+	data.merge(counter,true)
+	if ours:
+		data["troops"]=int(entry.get("members_troops",entry.get("troops",0))) if members>1 else int(entry.get("troops",0))
+		data["supply"]=String(entry.get("supply",""))
+		data["foraging"]=bool(entry.get("foraging",false))
+		if int(entry.get("drilling",0))>0: data["tab"]="+%s in drill" % EraWords.grouped(int(entry.drilling))
+		elif int(entry.get("drafts",0))>0: data["tab"]="+%s coming" % EraWords.grouped(int(entry.drafts))
+		if members<=1 and float(entry.get("march_done",-1.0))>=0.0:
+			data["march_done"]=float(entry.march_done); data["days_left"]=int(entry.get("days_left",0))
+	else:
+		data["low"]=int(entry.get("members_low",entry.get("low",0))) if members>1 else int(entry.get("low",0))
+		data["high"]=int(entry.get("members_high",entry.get("high",0))) if members>1 else int(entry.get("high",0))
+	return data
+
 func _draw_mark(entry:Dictionary,band:String)->void:
+	if _counters(band):
+		_draw_counter_mark(entry,band)
+		return
 	var ours:=String(entry.side)=="ours"
 	var at:Vector2=entry.at
 	var px:=float(entry.size)
@@ -2153,12 +2253,110 @@ func _draw_mark(entry:Dictionary,band:String)->void:
 		hits.append({"kind":"sighting","centre":at,"radius":maxf(12.0,px*0.6),"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"mark":true})
 
 
+## Where a counter's plate stands: just below its spot, or above, beside,
+## aslant or further off, whichever first keeps clear of the town cards and
+## the counters already drawn and stays on the chart; when none is clear, the
+## one that covers least.
+func _counter_spot(at:Vector2,plate:Vector2,scale:float)->Vector2:
+	var gap:=7.0*scale
+	var dx:=plate.x*0.5+gap*1.6; var dy:=plate.y*0.5+gap
+	var tries:=[Vector2(0.0,dy),Vector2(0.0,-dy),Vector2(dx,0.0),Vector2(-dx,0.0),Vector2(dx,dy),Vector2(-dx,dy),Vector2(dx,-dy),Vector2(-dx,-dy),
+		Vector2(0.0,plate.y*1.5+gap*2.0),Vector2(0.0,-(plate.y*1.5+gap*2.0)),Vector2(dx*1.6,0.0),Vector2(-dx*1.6,0.0)]
+	var best:Vector2=at+(tries[0] as Vector2); var least:=INF
+	for offset:Vector2 in tries:
+		var box:=Rect2(at+offset-plate*0.5,plate).grow(3.0)
+		var cover:=0.0
+		if counter_bounds.has_area() and not counter_bounds.encloses(box): cover+=1e6
+		for r:Rect2 in counter_obstacles:
+			if box.intersects(r): cover+=box.intersection(r).get_area()
+		for r:Rect2 in counter_rects:
+			if box.intersects(r): cover+=box.intersection(r).get_area()*2.0
+		if cover<=0.0: return at+offset
+		if cover<least: least=cover; best=at+offset
+	return best
+
+## The point on a plate's edge nearest a spot (where its tie line meets it).
+static func _edge_toward(rect:Rect2,spot:Vector2)->Vector2:
+	return Vector2(clampf(spot.x,rect.position.x,rect.end.x),clampf(spot.y,rect.position.y,rect.end.y))
+
+## A force as a HOI4 counter: the plate stands just below its spot, a short
+## stroke ties it to the ground it holds, and the plate is what a click finds.
+func _draw_counter_mark(entry:Dictionary,band:String)->void:
+	var ours:=String(entry.side)=="ours"
+	var at:Vector2=entry.at
+	var age:=int(entry.get("report_age",0)) if ours else int(entry.get("age_days",0))
+	var alpha:=1.0 if ours else ArmyMarks.fade(age)
+	var accent:=OURS_WASH if ours else THEIRS_WASH
+	if not ours and not bool(entry.get("hostile",true)): accent=Color("#b89a5a")
+	elif not ours and CivilizationSystem._civilization_index(String(entry.get("owner","")))>=0: accent=preload("res://scripts/city_map_identity.gd").foreign(String(entry.owner)).accent
+	var scale:=_counter_scale(band)
+	var plate:=Counter.plate_size(scale)
+	var centre:=_counter_spot(at,plate,scale)
+	# The spot it stands on, and where it stepped aside from.
+	var ink:=INK if ours else THEIRS.darkened(0.25)
+	if bool(entry.get("moved",false)) and (entry.anchor as Vector2).distance_to(at)>3.0:
+		draw_line(entry.anchor,at,Color(ink,0.5*alpha),1.0,true)
+	draw_line(at,_edge_toward(Rect2(centre-plate*0.5,plate),at),Color(ink,0.75*alpha),1.4,true)
+	draw_circle(at,2.6*scale,Color(PAPER,0.9*alpha))
+	draw_circle(at,1.8*scale,Color(ink,alpha))
+	var data:=counter_data(entry,accent)
+	var heading:Vector2=entry.get("heading",Vector2.ZERO)
+	if heading.length_squared()>0.0:
+		var probe:=_screen((entry.pos as Vector2)+heading.normalized()*_world_per_px(entry.pos)*20.0)
+		if probe.is_finite() and _screen(entry.pos).is_finite(): data["heading"]=(probe-_screen(entry.pos)).normalized()
+	var rect:=Counter.draw(self,centre,data,scale,alpha)
+	for pulse in troop_pulses:
+		if (entry.get("members",[entry.get("id","")]) as Array).has(String(pulse.id)): _draw_troop_pulse(rect,pulse)
+	if _pointed(entry):
+		# Its card on the army bar is under the pointer: a gold ring.
+		draw_rect(rect.grow(7.0),Color(Counter.GOLD,0.22),false,6.0)
+		draw_rect(rect.grow(3.5),Counter.GOLD,false,2.5)
+	entry["plate_rect"]=rect
+	counter_rects.append(rect)
+	var reach:=maxf(plate.x,plate.y)*0.5
+	if bool(entry.get("sector",false)) and not bool(entry.get("card",false)): _request_caption("sector:%s" % String(entry.id),Vector2.INF,ArmyMarks.sector_words(entry),OURS if ours else THEIRS,3 if ours else 2,reach+8.0,centre,"plate")
+	if bool(entry.get("card",false)): _request_caption("mark:%s" % String(entry.id),Vector2.INF,"\n".join(_card_lines(entry)),OURS if ours else THEIRS,5 if bool(entry.get("selected",false)) else (3 if ours else 2),reach+6.0,centre)
+	if bool(entry.get("garrison",false)): return
+	if ours: hits.append({"kind":"army","centre":rect.get_center(),"radius":reach,"army_id":int(entry.army_id),"mark":true})
+	else:
+		var sighting:Dictionary=(entry.get("sighting",{}) as Dictionary).duplicate()
+		sighting["noun"]=String(entry.get("noun","host"))
+		hits.append({"kind":"sighting","centre":rect.get_center(),"radius":reach,"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"mark":true})
+
+
+## The drafts drilling at home for a band (training_queue field drafts).
+static func drafts_for(army_id:int)->int:
+	var count:=0
+	for o in MilitaryCampaign.training_queue:
+		if o is Dictionary and String((o as Dictionary).get("mode",""))=="field_draft" and int((o as Dictionary).get("army_id",0))==army_id: count+=maxi(0,int((o as Dictionary).get("count",0)))
+	return count
+
+
+## A mark whose card on the army bar is under the pointer (army_bar
+## ArmyCard._point_map sets the terrain's "pointed_marks": mark ids).
+func _pointed(entry:Dictionary)->bool:
+	if not is_instance_valid(terrain) or not terrain.has_meta("pointed_marks"): return false
+	var ids:Array=terrain.get_meta("pointed_marks",[])
+	if ids.is_empty(): return false
+	for id in entry.get("members",[entry.get("id","")]):
+		if ids.has(String(id)): return true
+	return false
+
+
 func _card_lines(entry:Dictionary)->PackedStringArray:
+	if bool(entry.get("home_levy",false)):
+		var general:=String(entry.get("general","")).get_slice(" ",0)
+		var lines:=PackedStringArray(["The levy at home · %s" % EraWords.grouped(int(entry.get("troops",0))),("%s's watch in %s" % [general,String(entry.get("town","home"))]) if general!="" else "the watch in %s" % String(entry.get("town","home"))])
+		if int(entry.get("drilling",0))>0: lines.append("%s more in drill" % EraWords.grouped(int(entry.drilling)))
+		return lines
 	var members:=(entry.get("members",[]) as Array).size()
 	var data:=entry.duplicate()
 	data.members=members
 	if bool(entry.get("garrison",false)) and members<=1: return ArmyMarks.card_garrison(data)
-	if String(entry.side)=="ours": return ArmyMarks.card_ours(data)
+	if String(entry.side)=="ours":
+		var lines:PackedStringArray=ArmyMarks.card_ours(data)
+		if int(entry.get("drafts",0))>0: lines.append("%s more drilling at home for them" % EraWords.grouped(int(entry.drafts)))
+		return lines
 	if members>1:
 		data.low=int(entry.get("members_low",entry.get("low",0))); data.high=int(entry.get("members_high",entry.get("high",0)))
 	return ArmyMarks.card_theirs(data)
@@ -2204,6 +2402,37 @@ func _note_new_clashes(before:Dictionary,after:Dictionary)->void:
 static func _clash_key(pos:Vector2)->Vector2i:
 	# Contacts drift a little day to day; the same battle keeps its key.
 	return Vector2i(roundi(pos.x/2.0),roundi(pos.y/2.0))
+
+## Men gained or lost by our marks from one day to the next: a "+20" in
+## gold rising over the counter (the levy grows, drafts arrive) or a "−3"
+## in red sinking under it (hunger, desertion, a fight). A mark that
+## appears or goes is not counted here.
+func _note_troop_changes(before:Dictionary,after:Dictionary)->void:
+	if preload("res://scripts/hud/motion.gd").reduced():return
+	var had:={}
+	for mark in before.get("marks",[]):
+		if mark is Dictionary and String((mark as Dictionary).get("side",""))=="ours": had[String(mark.id)]=int((mark as Dictionary).get("troops",0))
+	for mark in after.get("marks",[]):
+		if not mark is Dictionary or String((mark as Dictionary).get("side",""))!="ours": continue
+		var id:=String(mark.id)
+		if not had.has(id): continue
+		var change:=int((mark as Dictionary).get("troops",0))-int(had[id])
+		if change!=0: troop_pulses.append({"id":id,"delta":change,"t":0.0})
+	while troop_pulses.size()>MAX_TROOP_PULSES:troop_pulses.pop_front()
+
+func _draw_troop_pulse(rect:Rect2,pulse:Dictionary)->void:
+	var k:=clampf(float(pulse.t)/TROOP_PULSE_SECONDS,0.0,1.0)
+	var gain:=int(pulse.delta)>0
+	var tone:=Counter.GOLD.darkened(0.25) if gain else OXBLOOD
+	var fade:=1.0-k*k
+	var text:=("+%s" if gain else "−%s") % EraWords.grouped(absi(int(pulse.delta)))
+	var font:=T.font("ui_strong")
+	var w:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,20).x
+	var drift:=k*18.0
+	var at:=Vector2(rect.get_center().x-w*0.5,rect.position.y-8.0-drift) if gain else Vector2(rect.get_center().x-w*0.5,rect.end.y+22.0+drift)
+	draw_string_outline(font,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,20,5,Color(PAPER,0.92*fade))
+	draw_string(font,at,text,HORIZONTAL_ALIGNMENT_LEFT,-1,20,Color(tone,fade))
+	if k<0.5: draw_rect(rect.grow(2.0+k*16.0),Color(tone,0.7*(1.0-k/0.5)),false,2.0)
 
 ## Two fine rings spreading from the contact and fading: brief and quiet.
 func _draw_clash_pulse(pulse:Dictionary,wide:bool)->void:
@@ -2603,6 +2832,10 @@ func _caption_obstacles()->Dictionary:
 	if tags!=null:
 		for tag:Dictionary in tags.get("tags"): rects.append(tag.rect)
 	for entry in drawn_marks:
+		if entry.has("plate_rect"):
+			rects.append((entry.plate_rect as Rect2).grow(4.0))
+			pins.append({"at":entry.at,"clear":4.0})
+			continue
 		pins.append({"at":entry.at,"clear":float(entry.size)*0.62+2.0})
 		# The mark with its state glyph at the shoulder and its counter beneath.
 		var px:=float(entry.size)

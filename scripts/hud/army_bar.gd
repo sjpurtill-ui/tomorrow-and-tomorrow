@@ -113,14 +113,25 @@ static func shown_cards(all:Array[Dictionary])->Array[Dictionary]:
 	for card:Dictionary in all:
 		if String(card.get("kind",""))=="home":at_home.append(card)
 		else:out.append(card)
+	# Only the drill and the levy at home: the drill shows, the levy with it.
 	var defending:=at_home.any(func(c:Dictionary)->bool:return String(c.get("state",""))=="fighting")
 	if out.is_empty() and not defending:return out
 	out.append_array(at_home)
 	return out
 
 
+## The bar's cards: HOI4's deployment queue first (those in drill, before
+## they are anyone's band), then the forces as the model lists them.
+static func bar_cards(mc:Node=null)->Array[Dictionary]:
+	var all:=Model.cards(mc)
+	var host:Node=mc if mc!=null else MilitaryCampaign
+	var drill:=Model.drill_card(host) if host!=null else {}
+	if not drill.is_empty():all.insert(0,drill)
+	return shown_cards(all)
+
+
 func refresh()->void:
-	var fresh:=shown_cards(Model.cards())
+	var fresh:=bar_cards()
 	# A selection made on the map shows on the bar too.
 	if is_instance_valid(terrain) and "selected_army_id" in terrain:
 		var on_map:=int(terrain.selected_army_id)
@@ -266,9 +277,26 @@ class ArmyCard extends Control:
 		add_child(face_frame)
 		face=TextureRect.new();face.mouse_filter=Control.MOUSE_FILTER_IGNORE;face.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 		face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;face.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);face_frame.add_child(face)
-		mouse_entered.connect(func():hovered=true;queue_redraw())
-		mouse_exited.connect(func():hovered=false;queue_redraw())
+		mouse_entered.connect(func():hovered=true;queue_redraw();_point_map(true))
+		mouse_exited.connect(func():hovered=false;queue_redraw();_point_map(false))
 		if not card.is_empty():_face()
+
+	## While the pointer rests on this card, its counter on the map is ringed
+	## in gold (war_front_overlay pointed_marks): the levy at home for the
+	## home and drill cards, each member's mark for a band or a group.
+	func _point_map(on:bool)->void:
+		var terrain:Variant=bar.get("terrain") if is_instance_valid(bar) else null
+		if not is_instance_valid(terrain):return
+		var ids:Array=[]
+		if on:
+			match String(card.get("kind","")):
+				"home","drill":ids=["home"]
+				"garrison":pass
+				_:
+					for id in card.get("members",[]):ids.append("ours:%d" % int(id))
+		(terrain as Node).set_meta("pointed_marks",ids)
+		var chart:=(terrain as Node).get_node_or_null("WarMapMarks/WarFrontOverlay")
+		if chart:(chart as CanvasItem).queue_redraw()
 
 	func bind(data:Dictionary,is_chosen:bool)->void:
 		var changed_face:bool=String(card.get("id",""))!=String(data.id) or card.get("general",{})!=data.get("general",{})
@@ -283,6 +311,9 @@ class ArmyCard extends Control:
 		match String(card.get("kind","")):
 			"home":
 				face.texture=Icons.command_texture("home",T.INK,64);face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				return
+			"drill":
+				face.texture=Icons.arm_texture(String(card.get("glyph","club")),T.INK,T.GOLD,64);face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 				return
 			"garrison":
 				if general.is_empty():
@@ -312,6 +343,7 @@ class ArmyCard extends Control:
 
 	func _get_tooltip(at:Vector2)->String:
 		if card.is_empty():return ""
+		if String(card.get("kind",""))=="drill":return Model.drill_words(card)
 		for row in 3:
 			var rect:=_bar_rect(row).grow_individual(16,3,2,3)
 			if rect.has_point(at):
@@ -334,6 +366,9 @@ class ArmyCard extends Control:
 		var fade:=0.55 if bool(card.get("unknown",false)) else 1.0
 		var strong:=T.font("ui_strong")
 		var left:=_body_left()
+		if String(card.get("kind",""))=="drill":
+			_draw_drill(strong,left)
+			return
 		# The state glyph at the shoulder, then the men, then the name.
 		BattleMarks.draw_state(self,Vector2(size.x-PAD-8.0,13.0),String(card.get("state","holding")),7.0,fade)
 		var men:=EraWords.grouped(int(card.get("men",0)))
@@ -355,6 +390,30 @@ class ArmyCard extends Control:
 			var rect:=_bar_rect(row)
 			draw_texture_rect(Icons.command_texture(String(rows[row][0]),T.INK_MUTED,32),Rect2(Vector2(left,rect.position.y-4.0),Vector2(14,14)),false,Color(1,1,1,fade))
 			Model.draw_bar(self,rect,float(rows[row][1]),Color(rows[row][2],fade))
+
+
+	## The deployment card: those in drill, their progress and the days to go,
+	## and who waits behind them.
+	func _draw_drill(strong:Font,left:float)->void:
+		BattleMarks.draw_state(self,Vector2(size.x-PAD-8.0,13.0),"holding",7.0,1.0)
+		var men:=int(card.get("men",0))
+		var shown:=EraWords.grouped(men if men>0 else int(card.get("waiting",0))+int(card.get("drafts",0)))
+		var men_w:=strong.get_string_size(shown,HORIZONTAL_ALIGNMENT_LEFT,-1,15).x
+		var men_x:=size.x-PAD-20.0-men_w
+		draw_texture_rect(Icons.command_texture("drilling",T.INK,32),Rect2(Vector2(men_x-17.0,4.0),Vector2(16,16)),false)
+		draw_string(strong,Vector2(men_x,18),shown,HORIZONTAL_ALIGNMENT_LEFT,-1,15,T.INK)
+		draw_string(strong,Vector2(left,18),"In drill" if men>0 else "Called up",HORIZONTAL_ALIGNMENT_LEFT,men_x-19.0-left,14,T.INK)
+		var bar:=_bar_rect(0)
+		draw_texture_rect(Icons.command_texture("drill",T.INK_MUTED,32),Rect2(Vector2(left,bar.position.y-4.0),Vector2(14,14)),false)
+		Model.draw_bar(self,bar,float(card.get("progress",0.0)) if men>0 else 0.0,T.GOLD)
+		var lines:=PackedStringArray()
+		var days:=int(card.get("days",0))
+		if men>0:lines.append("about %d %s to go" % [days,"day" if days==1 else "days"] if days>0 else "nearly done")
+		if int(card.get("waiting",0))>0:lines.append("%s waiting to drill" % EraWords.grouped(int(card.waiting)))
+		if int(card.get("drafts",0))>0:lines.append("+%s for the bands" % EraWords.grouped(int(card.drafts)))
+		var font:=T.font("ui")
+		for k in mini(2,lines.size()):
+			draw_string(font,Vector2(left,_bar_rect(1).position.y+6.0+float(k)*13.0),lines[k],HORIZONTAL_ALIGNMENT_LEFT,size.x-left-PAD,12,T.INK_MUTED)
 
 
 class PlanInk extends Control:

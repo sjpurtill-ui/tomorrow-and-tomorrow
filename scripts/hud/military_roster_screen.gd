@@ -14,6 +14,8 @@ const T=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const ForcesBoard=preload("res://scripts/hud/forces_board.gd")
 const ReadinessBoard=preload("res://scripts/hud/readiness_board.gd")
+const WarLedger=preload("res://scripts/hud/war_ledger_board.gd")
+const WarLedgerModel=preload("res://scripts/hud/war_ledger_model.gd")
 var TEXT:=T.INK
 var MUTED:=T.INK_MUTED
 var GOOD:=T.GREEN
@@ -85,9 +87,10 @@ func _ready()->void:
 		button.visible=services.size()>1
 	close_button=_button(header,"×",queue_free);close_button.custom_minimum_size=Vector2(40,38);close_button.tooltip_text="Close · Escape or click the map"
 	var nav:=HFlowContainer.new();nav.add_theme_constant_override("h_separation",6);column.add_child(nav)
-	for entry:Array in [["forces","Forces"],["recruitment","Recruit & deploy"],["training","Training"],["support","Readiness & supply"]]:
+	for entry:Array in [["forces","Forces"],["recruitment","Recruit & deploy"],["training","Training"],["support","Readiness & supply"],["wars",_wars_label()]]:
 		var key:=String(entry[0]);var button:=_button(nav,String(entry[1]),func():_show_page(key))
 		button.toggle_mode=true;page_buttons[key]=button
+	page_buttons.wars.tooltip_text="Every feud and war with a people we know: the dead, their strength against ours, how worn each side is, and what would end it."
 	roster_button=page_buttons.forces;training_button=page_buttons.training;management_button=page_buttons.recruitment
 	var map_button:=_button(nav,"Command on map ↗",_map_command)
 	map_button.tooltip_text="Give objectives to this service on the world map. Leaders execute them."
@@ -171,6 +174,19 @@ func _support_data()->Array:
 	if items.is_empty():items.append({"id":"empty","label":"SERVICE READINESS","value":"No forces in service","note":"Their condition and crews show here."})
 	return items
 
+## "Feuds · 2" (or "Wars & feuds" once a war is fought): the page's tab, with
+## how many are open.
+func _wars_label()->String:
+	var entries:=WarLedgerModel.entries()
+	var open:=entries.filter(func(e:Dictionary)->bool: return String(e.kind)!="ended")
+	var word:="Wars & feuds" if open.any(func(e:Dictionary)->bool: return String(e.kind)=="war") else "Feuds"
+	return "%s · %d" % [word,open.size()] if not open.is_empty() else word
+
+## Feuds and wars, as HOI4's war overview (hud/war_ledger_board.gd).
+func _wars()->void:
+	var board:=WarLedger.new();body.add_child(board)
+	board.setup({})
+
 ## Readiness & supply. The army: HOI4's logistics view (hud/readiness_board.gd).
 func _support()->void:
 	if service=="army":
@@ -241,7 +257,7 @@ func _process(delta:float)->void:
 	if timer<.5:return
 	timer=0;stories.clear()
 	# The embedded recruitment, forces and readiness boards own live updates.
-	if page=="recruitment" or (service=="army" and page in ["forces","support"]):return
+	if page in ["recruitment","wars"] or (service=="army" and page in ["forces","support"]):return
 	if page=="support":_update_support();return
 	if training_view:_update_policy();return
 	var rows:=_rows();_update_hero(rows)
@@ -288,6 +304,7 @@ func _build_body()->void:
 	for key:String in page_buttons:page_buttons[key].set_pressed_no_signal(page==key)
 	if page=="recruitment":_recruitment();return
 	if page=="support":_support();return
+	if page=="wars":_wars();return
 	if service=="army":
 		# HOI4's army overview; over the Training page only its strip of totals.
 		_forces(training_view)
@@ -576,5 +593,7 @@ func _update_policy()->void:
 	policy_status.text=String(state.status).get_slice("\n",0)
 	if service=="army" and not state.active.is_empty():policy_status.text="%s · %.0f of %.0f days" % [state.active.label,state.active.progress_days,state.active.duration_days]
 	policy_status.tooltip_text=String(state.status)
-	summary_costs.food.text="%.1f" % state.food_spent;summary_costs.materials.text="%.1f" % state.materials_spent
+	# Whole measures, grouped: a running tally, not a reading to the tenth.
+	summary_costs.food.text=EraWords.grouped(roundi(float(state.food_spent))) if float(state.food_spent)>=0.5 else "none"
+	summary_costs.materials.text=EraWords.grouped(roundi(float(state.materials_spent))) if float(state.materials_spent)>=0.5 else "none"
 	summary_costs.time.text="45+ days" if service=="army" else "90+ days"

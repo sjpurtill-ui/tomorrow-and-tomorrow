@@ -175,14 +175,16 @@ func test_the_rail_leads_with_the_fantasy_and_folds_the_ledgers()->void:
 	var primary:Array=[]
 	for spec in Rail.SECTIONS:
 		if not bool(spec.get("drawer",false)):primary.append(String(spec.id))
-	assert_array(primary).is_equal(["overview","standing","world","chronicle"])
+	# The warriors stand on the rail itself (the player's word: HOI4 keeps the
+	# army one click away); the other ledgers fold into the drawer.
+	assert_array(primary).is_equal(["overview","standing","world","military","chronicle"])
 	assert_str((rail.rail_labels.overview as Label).text).is_equal("The People")
 	assert_str(rail.drawer_label.text).starts_with("Tallies")
-	# Court + the People + Standing + Known World + Chronicle + the drawer.
+	# Court + the People + Standing + Known World + Warriors + Chronicle + the drawer.
 	var visible:=0
 	for id in rail.rail_buttons:
 		if (rail.rail_buttons[id] as Control).is_visible_in_tree():visible+=1
-	assert_int(visible).is_equal(4)
+	assert_int(visible).is_equal(5)
 	assert_bool(rail.drawer_box.visible).is_false()
 	rail.toggle_drawer()
 	assert_bool(rail.drawer_box.visible).is_true()
