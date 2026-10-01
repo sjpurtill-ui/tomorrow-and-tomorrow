@@ -104,7 +104,7 @@ func test_a_levy_ordered_in_court_lifts_the_share_instead_of_being_sent_home()->
 	var answer:Dictionary=preload("res://scripts/home_orders.gd").perform({"kind":"levy","count":more,"recruit":true,"fill":false,"arm_said":true,"unit":"levy","item":""})
 	assert_int(int(answer.get("raised",0))).is_equal(more)
 	assert_str(Law.reading(MilitaryCampaign).level).is_equal("many")
-	assert_str(String(answer.get("says",""))).contains("now keeps the army at")
+	assert_str(String(answer.get("says",""))).contains("The army is now kept at 5% of the people")
 	# The war leader's next look sends nobody home.
 	assert_dict(Law.keep(MilitaryCampaign,int(WorldSimulation.state.elapsed_days),true)).is_empty()
 	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(kept+more)
@@ -184,3 +184,28 @@ func test_a_besieged_home_is_yielded_only_by_the_rulers_second_press()->void:
 	var fighting:=preload("res://scripts/hud/army_alerts.gd").alerts().filter(func(a:Dictionary)->bool:return String(a.id)=="battle")
 	assert_str(String((fighting[0].lines as PackedStringArray)[0])).starts_with("Ashford besieged · day ")
 	MilitaryCampaign.active_siege={}
+
+func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
+	var Forces:=preload("res://scripts/hud/war_forces_model.gd")
+	# Five keep the watch at home and the army is called up beside them.
+	WorldSimulation.state.population_allocations["Defense"]=5
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("The watch",[{"id":1,"unit":"levy","weapon":"improvised","count":5,"equipment":5,"training":0.5}],1,1)
+	Law.choose(MilitaryCampaign,"some")
+	var rows:=Forces.rows(MilitaryCampaign)
+	var kinds:=rows.map(func(r:Dictionary)->String:return String(r.kind))
+	assert_array(kinds).contains(["home","drill"])
+	var home:Dictionary=rows[kinds.find("home")]
+	assert_str(String(home.title)).starts_with("At home in ")
+	assert_str(String(home.doing)).contains("keep the watch")
+	assert_str(String(home.kit)).is_not_empty()
+	var drill:Dictionary=rows[kinds.find("drill")]
+	assert_int(int(drill.men)).is_equal(Law.under_arms(MilitaryCampaign))
+	# The board shows them in plain words: shares as numbers, a row per place.
+	var board:VBoxContainer=auto_free(Board.new())
+	add_child(board)
+	board.setup({})
+	assert_str((board.find_child("Level_some",true,false) as Button).text).is_equal("3%")
+	assert_object(board.find_child("Force_home",true,false)).is_not_null()
+	assert_object(board.find_child("Force_drill",true,false)).is_not_null()
+	assert_object(board.find_child("DrawnFrom",true,false)).is_not_null()
+	WorldSimulation.state.population_allocations.erase("Defense")
