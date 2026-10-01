@@ -2,11 +2,16 @@
   "id": "dawn_task_briefings",
   "line": "labor",
   "game_year": 3,
-  "approx_historical_year": -4980,
-  "prompt": "c. 4980 BCE: at dawn a leader assigns separate groups to food gathering and shelter repair. Mature expressive charcoal drawing over flat ochre wash, angular figures and coarse grain; simple early Neolithic materials, no metal, writing or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c629dcaf-e0e3-4909-b3fc-55b3eb63b7d1.png",
-  "asset": "res://assets/ui/research/subjects/dawn_task_briefings-v1.png",
-  "sha256": "3b3fe540b5ed3c95751f8a81c44c1e5de47d2fb522df651915efeb74b56ebf14",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; task assignment clear in wide crop. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-5a6a2b21-7a68-44e7-aa91-3bbda6ba82ab.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/dawn_task_briefings-v1.png",
+  "prompt": "Edit this Dawn Task Briefings painting, game year 3. Preserve the mature charcoal drawing over ochre pigment ground, rubbed paper grain, expressive adult hide-clad silhouettes, sunrise and central leader assigning tasks with outstretched arms. Remove every woven basket carried by the group at left. Replace baskets with one or two soft irregular bundles of gathered stems wrapped loosely in ragged unstitched animal hide, held under an arm or by rough raw cord; other adults walk empty-handed. No structured containers, weaving or repeated lattice marks. At right replace the tall regular reed-wall shelter with a low portable irregular animal-hide lean-to over crooked branches, while retaining the two adults arranging loose branches nearby. Keep rough naturally broken wood, not clean cut ends, no pottery or metal. Faces, assignment gesture and resulting two task groups legible across central horizontal band for 3.77:1 crop. No captions, borders, icons, photographic rendering, CGI, or children's illustration. Preserve medium and subject arrangement.",
+  "review": "Full original inspected: central adult assigns groups toward gathering and rough branch work at dawn. Woven baskets replaced by loose hide-wrapped stems and empty hands; regular reed walls replaced with irregular hide lean-to. Charcoal over ochre pigment medium preserved. Full original and 3.77:1 crop inspected; assignment arms, group faces, loose bundles and branch-work hands remain visible.",
+  "asset": "res://assets/ui/research/subjects/dawn_task_briefings-v2.png",
+  "sha256": "cd0f39aa2cc109e91113c1ab6d5768ad97b1bbee69b89c3e10e5559fe4f24a9f",
+  "mode": "built-in image_gen / edit"
 }
