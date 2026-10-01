@@ -83,6 +83,8 @@ var force_doing:Label
 var force_meters:Array=[]
 ## Who carries what (force_strips.gd CompositionStrip) and the odds as a bar.
 var force_strip:Control
+## The general's skills as pips (force_strips.gd GeneralPips).
+var general_pips:Control
 var odds_bar:Control
 var verb_buttons:Dictionary={}
 var target_row:HBoxContainer
@@ -172,6 +174,7 @@ func _build_plain_orders(parent:VBoxContainer)->void:
 		var meter:Control=Board.Meter.new();meter.kind=kind;meter.name=kind.capitalize();meter.size_flags_horizontal=Control.SIZE_EXPAND_FILL;meter.custom_minimum_size=Vector2(96,22);meters.add_child(meter);force_meters.append(meter)
 	force_meters[0].clicked.connect(_open_production)
 	force_strip=Strips.CompositionStrip.new();force_strip.name="Composition";force_strip.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_child(force_strip)
+	general_pips=Strips.GeneralPips.new();general_pips.name="GeneralSkills";words.add_child(general_pips)
 	# What: the orders by their icons.
 	var grid:=GridContainer.new();grid.name="Verbs";grid.columns=5;grid.add_theme_constant_override("h_separation",5);grid.add_theme_constant_override("v_separation",5);parent.add_child(grid)
 	for face:Array in VERB_FACES:
@@ -381,6 +384,8 @@ func _refresh_force_card()->void:
 	(force_state as StateGlyph).state=String(card.get("state","holding"));force_state.tooltip_text=state_words.substr(0,1).to_upper()+state_words.substr(1);force_state.queue_redraw()
 	var formations:Array=MilitaryCampaign.home_army.get("formations",[]) if force_id==Orders.HOME else Orders.army(force_id).get("formations",[])
 	(force_strip as Object).call("set_blocks",Strips.composition(formations))
+	var commander:Dictionary=(MilitaryCampaign.home_army if force_id==Orders.HOME else Orders.army(force_id)).get("commander",{})
+	(general_pips as Object).call("set_commander",commander,String(general.get("full_name",general.get("name",""))),force_id==Orders.HOME)
 	var doing:=String(card.get("doing",""))
 	force_doing.text="%s men · %s" % [EraWords.grouped(int(card.get("men",0))),doing] if doing!="" else "%s men" % EraWords.grouped(int(card.get("men",0)))
 	force_doing.tooltip_text=BarModel.tooltip(card).get_slice("\nClick",0)

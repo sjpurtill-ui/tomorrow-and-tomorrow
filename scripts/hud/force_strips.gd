@@ -106,3 +106,55 @@ class OddsBar extends Control:
 		if words!="":
 			var ww:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 			draw_string(font,Vector2((size.x-ww)*0.5,size.y-2),words,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK)
+
+
+## A general's skills as HOI4 shows a leader's: a glyph and five pips each,
+## from the engine's own figures (historical_figures.commander):
+##   command    which manoeuvres they can try (battle_tactics min_command);
+##   tactics    how well they choose and carry out the plan in battle;
+##   resolve    how long they stand when the fight goes badly;
+##   logistics  how well the carriers move. The engine reads it from the war
+##              leader at home, so it shows only on the levy at home.
+class GeneralPips extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	const Icons:=preload("res://scripts/resource_icons.gd")
+	const SKILLS:=[["command","front","Command","which manoeuvres they can try"],["tactics","attack","Tactics","how well they choose and carry out the plan in battle"],
+		["resolve","defend","Resolve","how long they stand when the fight goes badly"],["logistics","supply","Logistics","how well the carriers move, for every band"]]
+	const PIP:=8.0
+	var values:={}
+
+	func _ready()->void:
+		custom_minimum_size=Vector2(0,22);mouse_filter=Control.MOUSE_FILTER_PASS
+
+	## Five pips for a skill of 0..1: never fewer than one.
+	static func pips(value:float)->int:
+		return clampi(roundi(clampf(value,0.0,1.0)*5.0),1,5)
+
+	func set_commander(commander:Dictionary,name:String,at_home:bool)->void:
+		values={}
+		for skill:Array in SKILLS:
+			var key:=String(skill[0])
+			if key=="logistics" and not at_home: continue
+			if commander.has(key): values[key]=clampf(float(commander[key]),0.0,1.0)
+		visible=not values.is_empty()
+		var lines:=PackedStringArray([("%s, who leads them:" % name) if name!="" else "Who leads them:"])
+		for skill:Array in SKILLS:
+			if values.has(String(skill[0])): lines.append("%s %d of 5: %s." % [String(skill[2]),pips(float(values[String(skill[0])])),String(skill[3])])
+		tooltip_text="\n".join(lines)
+		queue_redraw()
+
+	func _draw()->void:
+		var x:=0.0
+		for skill:Array in SKILLS:
+			var key:=String(skill[0])
+			if not values.has(key): continue
+			draw_texture_rect(Icons.command_texture(String(skill[1]),T.INK,40),Rect2(Vector2(x,2),Vector2(18,18)),false)
+			x+=21.0
+			var filled:=pips(float(values[key]))
+			for i in 5:
+				var c:=Vector2(x+PIP*0.5+float(i)*PIP,11.0)
+				var diamond:=PackedVector2Array([c+Vector2(0,-3.6),c+Vector2(3.6,0),c+Vector2(0,3.6),c+Vector2(-3.6,0)])
+				if i<filled: draw_colored_polygon(diamond,T.GOLD)
+				diamond.append(diamond[0])
+				draw_polyline(diamond,Color(T.INK,0.7),1.0,true)
+			x+=PIP*5.0+10.0
