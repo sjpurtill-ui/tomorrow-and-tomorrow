@@ -219,9 +219,15 @@ func _build_stock()->void:
 		var chip:=PanelContainer.new();chip.name="Stock_"+String(row.item);chip.mouse_filter=Control.MOUSE_FILTER_PASS
 		var style:=T.flat(T.PAPER_RAISED,T.RULE,1,T.RADIUS_CONTROL);style.content_margin_left=6;style.content_margin_right=8;style.content_margin_top=3;style.content_margin_bottom=3
 		chip.add_theme_stylebox_override("panel",style);flow.add_child(chip)
-		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",5);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(line)
-		var icon:=TextureRect.new();icon.texture=Icons.equipment_texture(String(row.item),T.INK,T.GOLD,56);icon.custom_minimum_size=Vector2(28,28)
-		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(icon)
+		# HOI4's stockpile: the kit, its name, in store against needed, a bar
+		# (the shortfall hatched red) and when the lines will cover it.
+		chip.custom_minimum_size.x=196
+		var card:=HBoxContainer.new();card.add_theme_constant_override("separation",8);card.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(card)
+		var icon:=TextureRect.new();icon.texture=Icons.equipment_texture(String(row.item),T.INK,T.GOLD,64);icon.custom_minimum_size=Vector2(40,40);icon.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(icon)
+		var column:=VBoxContainer.new();column.add_theme_constant_override("separation",2);column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(column)
+		var title:=Label.new();title.name="Name";title.text=String(row.get("name",row.item));T.text(title,"kicker",T.INK_MUTED);title.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(title)
+		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",5);line.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(line)
 		for part:String in ["Have","Need","Short","Mend","Damaged"]:
 			var label:Control
 			if part=="Mend":
@@ -239,6 +245,8 @@ func _build_stock()->void:
 					"Damaged":T.text(text,"kicker",T.AMBER_TEXT)
 				label=text
 			label.name=part;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(label)
+		var bar:=StockBar.new();bar.name="Bar";bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(bar)
+		var cover:=Label.new();cover.name="Cover";T.text(cover,"small",T.INK_MUTED);cover.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(cover)
 		_stock_chips[String(row.item)]=chip
 	if data.get("stock",[]).is_empty():
 		var none:=Label.new();none.name="NoStock";none.text="No equipment in store or needed yet.";T.text(none,"small",T.INK_MUTED);flow.add_child(none)
@@ -267,8 +275,52 @@ func _apply_stock()->void:
 			else:tip.append("Short %d · its line is not making any now." % deficit)
 		if damaged>0:tip.append("%d damaged, %s." % [damaged,Plain.repair_text(String(row.get("repair_status","")))])
 		chip.tooltip_text="\n".join(tip)
+		(chip.find_child("Bar",true,false) as StockBar).set_stock(int(row.stock),needed)
+		var cover:=chip.find_child("Cover",true,false) as Label
+		var said:=cover_words(deficit,needed,float(row.get("making_per_day",0.0)),float(row.get("days_to_cover",0.0)),not (row.get("lines",[]) as Array).is_empty())
+		cover.text=String(said.text)
+		cover.add_theme_color_override("font_color",{"red":T.RED_TEXT,"amber":T.AMBER_TEXT,"green":T.GREEN_TEXT}.get(String(said.tone),T.INK_MUTED))
 		var style:=T.flat(T.PAPER_RAISED,T.DANGER_BORDER if deficit>0 else T.RULE,1,T.RADIUS_CONTROL);style.content_margin_left=6;style.content_margin_right=8;style.content_margin_top=3;style.content_margin_bottom=3
 		chip.add_theme_stylebox_override("panel",style)
+
+## The line under a stockpile card: {text, tone}. Short and made: when it is
+## covered (amber). Short and not made: red. Enough: green. Nobody needs it:
+## what the lines make, if anything.
+static func cover_words(deficit:int,needed:int,making:float,days:float,has_line:bool)->Dictionary:
+	if deficit>0:
+		if making>0.0: return {"text":"short %d · covered in %s" % [deficit,Plain.span_text(days)],"tone":"amber"}
+		return {"text":"short %d · %s" % [deficit,"its line is idle" if has_line else "no line makes it"],"tone":"red"}
+	if needed>0: return {"text":"enough for the bands"+(" · +%s" % Plain.rate_short(making) if making>0.0 else ""),"tone":"green"}
+	return {"text":"+%s" % Plain.rate_short(making) if making>0.0 else "spare","tone":"muted"}
+
+
+## In store against what the bands need, on one scale: the store in green
+## when it covers the need (ochre when it does not), and the shortfall
+## hatched in red after it.
+class StockBar extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var stock:=0
+	var needed:=0
+	func _init()->void: custom_minimum_size=Vector2(120,8)
+	func set_stock(have:int,need:int)->void:
+		stock=maxi(0,have);needed=maxi(0,need);queue_redraw()
+	func _draw()->void:
+		var top:=float(maxi(1,maxi(stock,needed)))
+		var bar:=Rect2(Vector2(0,1),Vector2(size.x,size.y-2))
+		draw_rect(bar,Color(T.INK,0.08))
+		var have:=bar.size.x*float(stock)/top
+		var covered:=needed<=0 or stock>=needed
+		if have>0.0: draw_rect(Rect2(bar.position,Vector2(have,bar.size.y)),T.GREEN if covered else Color("#a8782a"))
+		if needed>stock:
+			var gap:=Rect2(Vector2(have,bar.position.y),Vector2(bar.size.x*float(needed-stock)/top,bar.size.y))
+			draw_rect(gap,Color(T.RED,0.18))
+			# Hatching: short strokes leaning right, clipped to the gap.
+			var x:=gap.position.x
+			while x<gap.end.x:
+				draw_line(Vector2(x,gap.end.y),Vector2(minf(x+gap.size.y,gap.end.x),gap.position.y),Color(T.RED,0.85),1.2)
+				x+=4.0
+		draw_rect(bar,Color(T.INK,0.4),false,1.0)
+
 
 # --- Lines -------------------------------------------------------------------------
 

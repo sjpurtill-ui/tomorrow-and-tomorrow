@@ -304,3 +304,17 @@ func test_the_quartermaster_puts_gear_for_waiting_soldiers_first_once()->void:
 	P.move(MilitaryCampaign,int(first.id),1)
 	MilitaryCampaign.workshop.advance(2)
 	assert_int(int(MilitaryCampaign.equipment_queue[0].id)).is_equal(spear)
+
+func test_a_stockpile_card_says_when_the_shortfall_is_covered()->void:
+	var Queue:=preload("res://scripts/hud/production_queue.gd")
+	assert_str(String(Queue.cover_words(5,20,1.0,5.0,true).text)).is_equal("short 5 · covered in 5 days")
+	assert_str(String(Queue.cover_words(5,20,1.0,5.0,true).tone)).is_equal("amber")
+	assert_str(String(Queue.cover_words(5,20,0.0,0.0,false).text)).is_equal("short 5 · no line makes it")
+	assert_str(String(Queue.cover_words(5,20,0.0,0.0,true).tone)).is_equal("red")
+	assert_str(String(Queue.cover_words(0,20,0.0,0.0,true).text)).is_equal("enough for the bands")
+	assert_str(String(Queue.cover_words(0,0,0.0,0.0,false).text)).is_equal("spare")
+	_levy_at_home(20,12)
+	MilitaryCampaign.military_inventory["improvised"]=3
+	var chip:Node=_screen().find_child("Stock_improvised",true,false)
+	assert_int(int(chip.find_child("Bar",true,false).get("stock"))).is_equal(3)
+	assert_str((chip.find_child("Cover",true,false) as Label).text).contains("short")
