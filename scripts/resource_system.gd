@@ -690,25 +690,29 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	# Knowledge multipliers depend only on the resource; each is summed once,
 	# in the same order, for the first deposit of that resource.
 	var knowledge_by_resource:Dictionary={}
+	var Resources:=preload("res://scripts/civilization_resources.gd")
+	var practice:Dictionary=WorldSimulation.state.resource_practice
 	for index in material_deposits.size():
 		var deposit:Dictionary=material_deposits[index]
+		var resource_name:=String(deposit.resource)
 		var share:=weights[index]/maxf(0.001,total_weight) if float(deposit.remaining)>0.0 else 0.0
 		var assigned:=extractors*share
 		deposit.workers=roundi(assigned)
-		var profile:=_material_profile(String(deposit.resource))
-		var known_multiplier:Variant=knowledge_by_resource.get(deposit.resource)
+		var profile:=_material_profile(resource_name)
+		var known_multiplier:Variant=knowledge_by_resource.get(resource_name)
 		var knowledge_multiplier:float
 		if known_multiplier!=null:knowledge_multiplier=known_multiplier
 		else:
-			knowledge_multiplier=1.0+extraction_effect+WorldSimulation.discovery.effect(String(deposit.resource).to_lower().replace(" ","_")+"_yield")
+			knowledge_multiplier=1.0+extraction_effect+WorldSimulation.discovery.effect(resource_name.to_lower().replace(" ","_")+"_yield")
 			if String(profile.family)=="metal": knowledge_multiplier+=metal_effect
-			if preload("res://scripts/research_mechanics.gd").is_mined(catalog.get(String(deposit.resource),{}),profile): knowledge_multiplier+=mining_effect
+			if preload("res://scripts/research_mechanics.gd").is_mined(catalog.get(resource_name,{}),profile): knowledge_multiplier+=mining_effect
 			# Research names the fibre bonus "fiber_yield"; the resource is "Fiber Plants".
-			if String(deposit.resource)=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")
-			knowledge_by_resource[deposit.resource]=knowledge_multiplier
-		var practice_multiplier:=1.0+minf(0.35,_practice(String(deposit.resource),"extraction")*0.035)
-		deposit.daily_yield=assigned*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus
-		var extracted:=preload("res://scripts/civilization_resources.gd").withdraw(deposit,float(deposit.daily_yield)*span) if WorldSimulation.enabled else minf(float(deposit.remaining),float(deposit.daily_yield)*span)
+			if resource_name=="Fiber Plants": knowledge_multiplier+=WorldSimulation.discovery.effect("fiber_yield")
+			knowledge_by_resource[resource_name]=knowledge_multiplier
+		var practice_multiplier:=1.0+minf(0.35,float((practice.get(resource_name,{}) as Dictionary).get("extraction",0.0))*0.035)
+		var daily_yield:=assigned*float(profile.base_yield)*float(deposit.quality)*tool_factor*labor_eff*knowledge_multiplier*practice_multiplier*output_bonus
+		deposit.daily_yield=daily_yield
+		var extracted:=Resources.withdraw(deposit,daily_yield*span) if WorldSimulation.enabled else minf(float(deposit.remaining),daily_yield*span)
 		deposit.remaining=float(deposit.remaining)-extracted
 		deposit.stock_at_source=float(deposit.stock_at_source)+extracted
 		deposit.extracted_today=extracted/span
@@ -716,9 +720,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 		extracted_total+=extracted
 		if extracted>0.0:
 			deposit.stage="developed"
-			_gain_practice(String(deposit.resource),"extraction",extracted/maxf(1.0,assigned)*0.010)
+			_gain_practice(resource_name,"extraction",extracted/maxf(1.0,assigned)*0.010)
 		if WorldSimulation.enabled and deposit.has("world_key"):
-			preload("res://scripts/civilization_resources.gd").renew(deposit,extracted)
+			Resources.renew(deposit,extracted)
 		elif String(deposit.get("landscape_source","")) in ["woodland_catchment","plant_fiber_catchment"]:
 			# Standing growth returns slowly even when cutting is paused. It stays
 			# at the source until labor harvests and hauls it, and cannot exceed the
@@ -726,28 +730,27 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 			var capacity:=float(deposit.initial_amount)
 			var recovery:=0.001 if String(deposit.landscape_source)=="plant_fiber_catchment" else 0.00003
 			deposit.remaining=minf(capacity,float(deposit.remaining)+capacity*recovery*span)
-		elif bool(catalog[String(deposit.resource)].renewable):
+		elif bool(catalog[resource_name].renewable):
 			deposit.remaining=float(deposit.remaining)+minf(extracted*0.35,2.0*span)
 	# Deliver shipments whose real travel time has elapsed.
 	stamp=trace.mark("flow_extraction",stamp)
 	var delivered_total:=0.0
 	var today:=int(WorldSimulation.state.elapsed_days)
+	var stockpiles:Dictionary=WorldSimulation.state.resource_stockpiles
 	for deposit in material_deposits:
 		# Loads on the road are kept in order of arrival (_add_shipment), so the
 		# loads due today are the first ones; the rest are not touched.
 		var moving:=_normalized_shipments(deposit)
-		var due:=0
-		while due<moving.size() and int((moving[due] as Dictionary).arrival_day)<=today:
-			var quantity:=float((moving[due] as Dictionary).quantity)
-			WorldSimulation.state.resource_stockpiles[String(deposit.resource)]=float(WorldSimulation.state.resource_stockpiles.get(String(deposit.resource),0.0))+quantity
+		if moving.is_empty() or int((moving[0] as Dictionary).arrival_day)>today:continue
+		var resource_name:=String(deposit.resource)
+		while not moving.is_empty() and int((moving[0] as Dictionary).arrival_day)<=today:
+			var quantity:=float((moving.pop_front() as Dictionary).quantity)
+			stockpiles[resource_name]=float(stockpiles.get(resource_name,0.0))+quantity
 			deposit.delivered_today=float(deposit.delivered_today)+quantity
 			deposit.lifetime_delivered=float(deposit.lifetime_delivered)+quantity
 			delivered_total+=quantity
 			deposit.in_transit=float(deposit.in_transit)-quantity
-			due+=1
-		if due>0:
-			deposit.shipments=moving.slice(due)
-			if due==moving.size():deposit.in_transit=0.0
+		if moving.is_empty():deposit.in_transit=0.0
 	# Carriers are distributed by waiting bulk and priority.  Distance lowers daily
 	# throughput and separately creates a visible time-in-transit delay.
 	stamp=trace.mark("flow_deliveries",stamp)
@@ -805,7 +808,9 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 
 const DEPOSIT_FIELD_DEFAULTS:={"stock_at_source":0.0,"shipments":[],"extracted_today":0.0,"delivered_today":0.0,"lifetime_extracted":0.0,"lifetime_delivered":0.0,"distance_km":0.0,"travel_days":0,"bottleneck":"Not yet accessible","last_reported_bottleneck":""}
 
+const DEPOSIT_FIELD_KEYS:=["stock_at_source","shipments","extracted_today","delivered_today","lifetime_extracted","lifetime_delivered","distance_km","travel_days","bottleneck","last_reported_bottleneck"]
 func _ensure_deposit_fields(deposit:Dictionary)->void:
+	if deposit.has_all(DEPOSIT_FIELD_KEYS):return
 	for key in DEPOSIT_FIELD_DEFAULTS:
 		if not deposit.has(key): deposit[key]=DEPOSIT_FIELD_DEFAULTS[key].duplicate() if DEPOSIT_FIELD_DEFAULTS[key] is Array else DEPOSIT_FIELD_DEFAULTS[key]
 
@@ -846,7 +851,8 @@ func _add_shipment(deposit:Dictionary,shipment:Dictionary)->void:
 func _is_material_resource(resource_name:String)->bool:
 	# Civilian Goods are maintained household things in use. CivilianGoods applies
 	# their wear; raw-yard loss must not charge it again.
-	return resource_name not in ["Freshwater","Fertile Soil","Game",preload("res://scripts/civilian_goods.gd").GOODS]
+	return not NOT_MATERIAL.has(resource_name)
+static var NOT_MATERIAL:={"Freshwater":true,"Fertile Soil":true,"Game":true,preload("res://scripts/civilian_goods.gd").GOODS:true}
 
 const MATERIAL_PROFILES:={
 		"Timber":{"family":"organic","bulk":1.35,"store":"yard","loss":0.0012,"base_yield":0.34},
@@ -867,9 +873,16 @@ const ORE_PROFILE:={"family":"metal","bulk":1.55,"store":"secure","loss":0.0002,
 const MINERAL_PROFILE:={"family":"mineral","bulk":1.65,"store":"yard","loss":0.00015,"base_yield":0.24}
 
 func _material_profile(resource_name:String)->Dictionary:
-	if MATERIAL_PROFILES.has(resource_name): return MATERIAL_PROFILES[resource_name]
-	if "Ore" in resource_name or resource_name in ["Graphite","Lead Ore"]: return ORE_PROFILE
-	return MINERAL_PROFILE
+	var known:Variant=_profile_by_name.get(resource_name)
+	if known!=null:return known
+	var profile:Dictionary
+	if MATERIAL_PROFILES.has(resource_name): profile=MATERIAL_PROFILES[resource_name]
+	elif "Ore" in resource_name or resource_name in ["Graphite","Lead Ore"]: profile=ORE_PROFILE
+	else: profile=MINERAL_PROFILE
+	_profile_by_name[resource_name]=profile
+	return profile
+## Each material's profile (constants), found once per name.
+static var _profile_by_name:Dictionary={}
 
 func material_profile(resource_name:String)->Dictionary:
 	return _material_profile(resource_name).duplicate(true)

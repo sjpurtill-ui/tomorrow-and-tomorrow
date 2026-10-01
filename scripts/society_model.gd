@@ -239,6 +239,7 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 	# Each line's practice_scale is read once; scaled_effect is applied inline.
 	var scales:Dictionary={}
 	if _lower_keys.is_empty(): _build_key_sets()
+	var goods_coverage:=-1.0
 	for id in WorldSimulation.state.known_discoveries:
 		var row:Array=_effect_rows.get(id,[])
 		if row.is_empty():
@@ -249,7 +250,13 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 			for effect_name in effects:values.append(float(effects[effect_name]))
 			row=[effects.keys(),values,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id)]
 			_effect_rows[id]=row
-		var adoption_level:=_practice_level(String(id),adoption,bool(row[2]))
+		var adoption_level:float
+		if bool(row[2]) and not Goods.FACTOR_SPECIAL.has(id):
+			# A technique works as far as household goods cover it
+			# (civilian_goods.gd factor); nothing in this pass changes that cover.
+			if goods_coverage<0.0:goods_coverage=Goods.coverage()
+			adoption_level=clampf(float(adoption.get(id,0.025)),0.0,1.0)*goods_coverage
+		else:adoption_level=_practice_level(String(id),adoption,bool(row[2]))
 		var names:Array=row[0]
 		var values:PackedFloat64Array=row[1]
 		var line:=String((definitions_by_id.get(id,{}) as Dictionary).get("dynamic",""))
@@ -346,6 +353,9 @@ class Today extends RefCounted:
 	## the two).
 	var ceilings:Dictionary={}
 	var ceilings_era:=INF
+	## society_era's knowledge frontier, by what was known when it was found.
+	var frontier_key:Array=[]
+	var frontier:=-1.0
 var _today:=Today.new()
 
 ## One reading of everything the twelve capacities are made from.
@@ -991,15 +1001,22 @@ func _refresh_line_focus()->void:
 ## are 0.9 x their dated era (Research600.ERA_BAND_FRACTION).
 func society_era()->float:
 	var elapsed:=float(WorldSimulation.state.elapsed_days)/365.0
-	var eras:=PackedFloat64Array()
-	for id:Variant in WorldSimulation.state.known_discoveries:
-		var definition:Dictionary=definitions_by_id.get(id,{})
-		if definition.is_empty(): continue
-		if definition.has("design_year"): eras.append(float(definition.design_year))
-		else: eras.append(float(definition.get("earliest_year",0.0))/0.9)
-	if eras.is_empty(): return 0.0
-	eras.sort()
-	return clampf(minf(elapsed,eras[int(float(eras.size()-1)*FRONTIER_PERCENTILE)]),0.0,MODERN_ERA)
+	# The frontier depends only on what is known; it is worked out again only
+	# when that changes.
+	var known:Array=WorldSimulation.state.known_discoveries
+	var key:=[known.size(),known.hash(),definitions_by_id.size()]
+	if _today.frontier_key!=key:
+		var eras:=PackedFloat64Array()
+		for id:Variant in known:
+			var definition:Dictionary=definitions_by_id.get(id,{})
+			if definition.is_empty(): continue
+			if definition.has("design_year"): eras.append(float(definition.design_year))
+			else: eras.append(float(definition.get("earliest_year",0.0))/0.9)
+		eras.sort()
+		_today.frontier=-1.0 if eras.is_empty() else eras[int(float(eras.size()-1)*FRONTIER_PERCENTILE)]
+		_today.frontier_key=key
+	if _today.frontier<0.0: return 0.0
+	return clampf(minf(elapsed,_today.frontier),0.0,MODERN_ERA)
 
 ## Research is never free. Full-time specialists (the Knowledge role) beyond what
 ## the era's surplus could keep (about 4% of workers at year 0, 10% by year 600:
