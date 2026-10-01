@@ -101,6 +101,10 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	var words:=strength_words(glance,int(reading.now),int(reading.target))
 	bar.tooltip_text=words;column.add_child(bar)
 	column.add_child(_line(words,13,T.INK_MUTED,true))
+	if int(glance.get("watch",0))>0:
+		var watch:=_line("Apart from the army, %s keep the watch at home." % EraWords.grouped(int(glance.watch)),13,T.INK_MUTED,true);watch.name="Watch"
+		watch.tooltip_text="Home defence is not the army: it is kept by those set to defence work, and no share counts it, calls it up or sends it home."
+		column.add_child(watch)
 	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",6);column.add_child(pick)
 	for entry:Dictionary in Law.LEVELS:
 		var id:=String(entry.id)
@@ -197,12 +201,15 @@ func _lead(civ_id:String,general:String,name_words:String)->void:
 	refresh(true)
 
 
-## The army at a glance: {ready (fighters at home, in the field and holding
-## towns), drill, drill_days, waiting (recruits waiting and the hurt), armed
-## (0..1: gear issued of gear wanted), fed (0..1 of those out by the bars'
-## own measure; -1 when nobody is out)}.
+## The army at a glance, the watch at home apart: {ready (fighters at home
+## beyond the watch, in the field and holding towns), drill, drill_days,
+## waiting (recruits waiting to drill), away (hurt, scattered or taken),
+## watch (keeping the watch at home), armed (0..1: gear issued of gear
+## wanted), fed (0..1 of those out by the bars' own measure; -1 when nobody
+## is out)}.
 static func strength(mc:Node)->Dictionary:
 	var ledger:Dictionary=mc.personnel_ledger()
+	var watch:=Law.watch(mc)
 	var formations:Array=(mc.home_army.get("formations",[]) as Array).duplicate()
 	var out:=0
 	var fed:=0.0
@@ -214,16 +221,18 @@ static func strength(mc:Node)->Dictionary:
 		if bool(card.get("unknown",false)):continue
 		out+=int(card.men);fed+=float(card.men)*clampf(float(card.get("supply",1.0)),0.0,1.0)
 	var drill:=BarModel.drill_card(mc)
-	return {"ready":int(ledger.home)+int(ledger.field)+int(ledger.occupation),"drill":int(ledger.training),"drill_days":int(drill.get("days",0)),
-		"waiting":int(ledger.recruits)+int(ledger.recovering),"armed":float(BarModel.gear_of(formations,mc).share),"fed":snappedf(fed/float(out),0.01) if out>0 else -1.0}
+	return {"ready":maxi(0,int(ledger.home)-int(watch.home))+int(ledger.field)+int(ledger.occupation),"drill":maxi(0,int(ledger.training)-int(watch.drill)),"drill_days":int(drill.get("days",0)),
+		"waiting":int(ledger.recruits),"away":int(ledger.recovering)+int(ledger.get("missing",0)),"watch":int(watch.kept),
+		"armed":float(BarModel.gear_of(formations,mc).share),"fed":snappedf(fed/float(out),0.01) if out>0 else -1.0}
 
 
-## The bar in words: "327 ready · 85 in drill, about 40 days · 12 waiting or
-## hurt · 188 to call up".
+## The bar in words: "327 ready · 85 in drill, about 40 days · 12 waiting to
+## drill · 9 hurt or away · 188 to call up".
 static func strength_words(glance:Dictionary,now:int,target:int)->String:
 	var parts:=PackedStringArray(["%s ready" % EraWords.grouped(int(glance.ready))])
 	if int(glance.drill)>0:parts.append("%s in drill%s" % [EraWords.grouped(int(glance.drill)),(", about %d days" % int(glance.drill_days)) if int(glance.drill_days)>0 else ""])
-	if int(glance.waiting)>0:parts.append("%s waiting or hurt" % EraWords.grouped(int(glance.waiting)))
+	if int(glance.waiting)>0:parts.append("%s waiting to drill" % EraWords.grouped(int(glance.waiting)))
+	if int(glance.get("away",0))>0:parts.append("%s hurt or away" % EraWords.grouped(int(glance.away)))
 	if target>now:parts.append("%s to call up" % EraWords.grouped(target-now))
 	elif target>=0 and now>target:parts.append("%s above the share" % EraWords.grouped(now-target))
 	return " · ".join(parts)
@@ -405,9 +414,9 @@ static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	return label
 
 
-## HOI4's manpower bar: ready (green), in drill (amber), waiting or hurt
-## (rule), against the share kept (the ink tick); over the share, the tick
-## falls inside the bar.
+## HOI4's manpower bar: ready (green), in drill (amber), waiting, hurt or
+## away (rule), against the share kept (the ink tick); over the share, the
+## tick falls inside the bar.
 class StrengthBar extends Control:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
 	var parts:Dictionary={}
@@ -416,7 +425,7 @@ class StrengthBar extends Control:
 	func _draw()->void:
 		var whole:=Rect2(Vector2.ZERO,size)
 		draw_rect(whole,T.PAPER_SUNK)
-		var segments:=[[int(parts.get("ready",0)),T.GREEN],[int(parts.get("drill",0)),T.AMBER],[int(parts.get("waiting",0)),T.RULE_STRONG]]
+		var segments:=[[int(parts.get("ready",0)),T.GREEN],[int(parts.get("drill",0)),T.AMBER],[int(parts.get("waiting",0))+int(parts.get("away",0)),T.RULE_STRONG]]
 		var total:=0
 		for segment:Array in segments:total+=int(segment[0])
 		var scale:=float(maxi(1,maxi(total,target)))
