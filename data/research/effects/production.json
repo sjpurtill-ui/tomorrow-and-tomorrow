@@ -919,6 +919,54 @@
     "repair_capacity": 0.0083
    },
    "art": "res://assets/ui/research/paper/refractory_brick_firing.png"
+  },
+  "reed_mat_weaving": {
+   "art": "res://assets/ui/research/subjects/reed_bed_rotation-v1.png"
+  },
+  "graded_wool_weighing": {
+   "art": "res://assets/ui/research/subjects/wool_spinning-v1.png"
+  },
+  "whetstone_sharpening": {
+   "art": "res://assets/ui/research/subjects/handle_balance_testing-v1.png"
+  },
+  "scrap_copper_remelting": {
+   "art": "res://assets/ui/research/subjects/copper_casting-v1.png"
+  },
+  "bow_drill_boring": {
+   "art": "res://assets/ui/research/subjects/graded_tool_retirement-v1.png"
+  },
+  "jars_of_set_capacity": {
+   "art": "res://assets/ui/research/subjects/mould_made_bowls-v1.png"
+  },
+  "mortise_joined_furniture": {
+   "art": "res://assets/ui/research/subjects/workshop_layout_planning-v1.png"
+  },
+  "copper_standard_rod": {
+   "art": "res://assets/ui/research/subjects/standard_unit_naming-v1.png"
+  },
+  "hard_stone_bead_batches": {
+   "art": "res://assets/ui/research/subjects/tube_drilled_stone_vessels-v1.png"
+  },
+  "stamped_bricks": {
+   "art": "res://assets/ui/research/subjects/herringbone_plano_convex_brick-v1.png"
+  },
+  "pleated_linen": {
+   "art": "res://assets/ui/research/subjects/output_quality_sorting-v1.png"
+  },
+  "scented_oils": {
+   "art": "res://assets/ui/research/subjects/skin_oiling-v1.png"
+  },
+  "standard_cloth_lengths": {
+   "art": "res://assets/ui/research/subjects/wool_felting_fulling-v1.png"
+  },
+  "bronze_sickles": {
+   "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png"
+  },
+  "checked_measuring_vessels": {
+   "art": "res://assets/ui/research/subjects/closed_moulds-v1.png"
+  },
+  "edge_and_body_bronze": {
+   "art": "res://assets/ui/research/subjects/bronze_alloying-v1.png"
   }
  },
  "balance_600": {

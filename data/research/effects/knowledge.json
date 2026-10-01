@@ -788,6 +788,63 @@
     "injury_risk": -0.0009,
     "task_coordination": 0.0018
    }
+  },
+  "flock_evening_count": {
+   "art": "res://assets/ui/research/subjects/grazing_ground_recovery_marking-v1.png"
+  },
+  "clay_goods_labels": {
+   "art": "res://assets/ui/research/discovery-600/marked_storage_registers.png"
+  },
+  "sealed_message_tokens": {
+   "art": "res://assets/ui/research/discovery-600/stamp_seals.png"
+  },
+  "crescent_month_count": {
+   "art": "res://assets/ui/research/discovery-600/solar_year_reckoning.png"
+  },
+  "totals_checked_before_sealing": {
+   "art": "res://assets/ui/research/discovery-600/material_accounting.png"
+  },
+  "verbatim_messages": {
+   "art": "res://assets/ui/research/discovery-600/fire_smoke_signaling.png"
+  },
+  "recited_craft_steps": {
+   "art": "res://assets/ui/research/subjects/mentored_task_learning-v1.png"
+  },
+  "foreman_daily_logs": {
+   "art": "res://assets/ui/research/subjects/crew_count_scribes-v1.png"
+  },
+  "duplicate_contract_copies": {
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "messenger_safe_conduct": {
+   "art": "res://assets/ui/research/subjects/runner_relays_between_work_sites-v1.png"
+  },
+  "letter_greeting_formula": {
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png"
+  },
+  "staged_pupil_lessons": {
+   "art": "res://assets/ui/research/discovery-600/public_schools.png"
+  },
+  "model_contract_lessons": {
+   "art": "res://assets/ui/research/discovery-600/scribal_copying_tests.png"
+  },
+  "river_boat_letters": {
+   "art": "res://assets/ui/research/subjects/river_landings-v1.png"
+  },
+  "enveloped_letters": {
+   "art": "res://assets/ui/research/discovery-600/token_envelopes.png"
+  },
+  "merchant_partner_letters": {
+   "art": "res://assets/ui/research/subjects/barter_equivalence_custom-v1.png"
+  },
+  "scribe_final_examination": {
+   "art": "res://assets/ui/research/discovery-600/scribal_copying_tests.png"
+  },
+  "evening_star_records": {
+   "art": "res://assets/ui/research/discovery-600/star_hour_tables.png"
+  },
+  "first_line_catalogues": {
+   "art": "res://assets/ui/research/discovery-600/cross_referenced_archives.png"
   }
  },
  "balance_600": {

@@ -759,6 +759,57 @@
    },
    "name": "Remedy Compendia",
    "observation": "Great rolls gather hundreds of remedies by ailment, copied from temple to temple and consulted at the bedside."
+  },
+  "chewed_twig_toothcare": {
+   "art": "res://assets/ui/research/subjects/kohl_eye_paint-v1.png"
+  },
+  "dislocation_reduction": {
+   "art": "res://assets/ui/research/subjects/traction_fracture_setting-v1.png"
+  },
+  "boiled_herb_decoctions": {
+   "art": "res://assets/ui/research/subjects/recovery_diet_customs-v1.png"
+  },
+  "hand_washing_ewer": {
+   "art": "res://assets/ui/research/subjects/water_container_cleaning_customs-v1.png"
+  },
+  "sick_animal_separation": {
+   "art": "res://assets/ui/research/subjects/sickbed_distance_norms-v1.png"
+  },
+  "embedded_point_removal": {
+   "art": "res://assets/ui/research/subjects/wound_suturing-v1.png"
+  },
+  "house_bathing_floors": {
+   "art": "res://assets/ui/research/subjects/stone_lined_drains-v1.png"
+  },
+  "bite_and_sting_healers": {
+   "art": "res://assets/ui/research/subjects/healer_specialization_customs-v1.png"
+  },
+  "scaffold_lashing": {
+   "art": "res://assets/ui/research/subjects/course_leveling_practice-v1.png"
+  },
+  "purification_washing": {
+   "art": "res://assets/ui/research/subjects/river_bathing-v1.png"
+  },
+  "latrine_seats_over_drains": {
+   "art": "res://assets/ui/research/subjects/latrine_siting-v1.png"
+  },
+  "head_wound_grading": {
+   "art": "res://assets/ui/research/subjects/wound_suturing-v1.png"
+  },
+  "measured_remedy_doses": {
+   "art": "res://assets/ui/research/subjects/case_records-v1.png"
+  },
+  "well_cistern_replastering": {
+   "art": "res://assets/ui/research/subjects/separate_clean_water_storage-v1.png"
+  },
+  "lice_combs": {
+   "art": "res://assets/ui/research/subjects/head_shaving_lice-v1.png"
+  },
+  "sick_cup_separation": {
+   "art": "res://assets/ui/research/subjects/quarantine_travel_restrictions-v1.png"
+  },
+  "shrine_entry_washing": {
+   "art": "res://assets/ui/research/subjects/water_container_cleaning_customs-v1.png"
   }
  },
  "balance_600": {

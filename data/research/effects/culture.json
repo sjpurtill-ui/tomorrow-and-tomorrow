@@ -829,6 +829,69 @@
    },
    "observation": "Bread baked from the god's grain is shared with every household at the festival.",
    "art": "res://assets/ui/research/culture-v1.png"
+  },
+  "heirloom_stories": {
+   "art": "res://assets/ui/research/discovery-600/rank_inlay_ornament.png"
+  },
+  "first_furrow_rite": {
+   "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png"
+  },
+  "imported_vessel_copies": {
+   "art": "res://assets/ui/research/subjects/wheel_thrown_pottery-v1.png"
+  },
+  "recited_leader_names": {
+   "art": "res://assets/ui/research/discovery-600/first_shrine_house.png"
+  },
+  "shared_jar_straws": {
+   "art": "res://assets/ui/research/subjects/barley_beer-v1.png"
+  },
+  "strangers_seed_trials": {
+   "art": "res://assets/ui/research/subjects/mixed_grain_legume_meals-v1.png"
+  },
+  "named_grave_stones": {
+   "art": "res://assets/ui/research/discovery-600/graveside_libations.png"
+  },
+  "subject_word_lists": {
+   "art": "res://assets/ui/research/discovery-600/standard_sign_lists.png"
+  },
+  "foundation_deposits": {
+   "art": "res://assets/ui/research/discovery-600/shrine_terraces.png"
+  },
+  "visiting_master_craftsmen": {
+   "art": "res://assets/ui/research/discovery-600/craft_lineage_naming.png"
+  },
+  "statue_daily_care": {
+   "art": "res://assets/ui/research/discovery-600/votive_figures.png"
+  },
+  "traders_children_tongues": {
+   "art": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png"
+  },
+  "fallen_warrior_mounds": {
+   "art": "res://assets/ui/research/discovery-600/chamber_tombs.png"
+  },
+  "named_giver_offerings": {
+   "art": "res://assets/ui/research/discovery-600/votive_figures.png"
+  },
+  "ruler_year_lists": {
+   "art": "res://assets/ui/research/discovery-600/formal_chronicle_keeping.png"
+  },
+  "neighbourhood_taverns": {
+   "art": "res://assets/ui/research/subjects/named_beers-v1.png"
+  },
+  "old_tongue_studied": {
+   "art": "res://assets/ui/research/discovery-600/public_schools.png"
+  },
+  "household_ancestor_meals": {
+   "art": "res://assets/ui/research/discovery-600/graveside_libations.png"
+  },
+  "infant_lullabies": {
+   "art": "res://assets/ui/research/discovery-600/rattles_drums_pipes.png"
+  },
+  "lyre_tuning_lessons": {
+   "art": "res://assets/ui/research/discovery-600/harps_and_lyres.png"
+  },
+  "old_inscription_copies": {
+   "art": "res://assets/ui/research/discovery-600/formal_archives.png"
   }
  },
  "balance_600": {

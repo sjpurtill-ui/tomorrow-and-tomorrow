@@ -677,6 +677,63 @@
    "name": "Frontier Land Grants",
    "observation": "Soldiers and settlers are granted land on the frontier in return for service, and new villages rise along the border.",
    "social_consequence": "Landless younger sons find a future on the frontier; the frontier fills with families loyal to the grantor."
+  },
+  "infant_feeding_spouts": {
+   "art": "res://assets/ui/research/subjects/weaning_food_softening-v1.png"
+  },
+  "betrothal_meal_gifts": {
+   "art": "res://assets/ui/research/discovery-600/intermarriage_visiting_customs.png"
+  },
+  "postpartum_rest_weeks": {
+   "art": "res://assets/ui/research/subjects/obstructed_labor_recognition-v1.png"
+  },
+  "reed_bundle_houses": {
+   "art": "res://assets/ui/research/subjects/reed_bed_rotation-v1.png"
+  },
+  "rooms_added_as_family_grows": {
+   "art": "res://assets/ui/research/subjects/seasonal_sleeping_arrangements-v1.png"
+  },
+  "kinswoman_wet_nurse": {
+   "art": "res://assets/ui/research/subjects/interval_weaning_practice-v1.png"
+  },
+  "oiled_labour_massage": {
+   "art": "res://assets/ui/research/subjects/breech_repositioning_technique-v1.png"
+  },
+  "milk_for_weaned_children": {
+   "art": "res://assets/ui/research/subjects/childhood_growth_milestones-v1.png"
+  },
+  "back_to_back_house_lanes": {
+   "art": "res://assets/ui/research/subjects/household_space_planning-v1.png"
+  },
+  "prepared_birth_room": {
+   "art": "res://assets/ui/research/subjects/seasonal_sleeping_arrangements-v1.png"
+  },
+  "temple_orphan_care": {
+   "art": "res://assets/ui/research/subjects/temple_ration_issue-v1.png"
+  },
+  "shared_party_walls": {
+   "art": "res://assets/ui/research/subjects/courtyard_houses-v1.png"
+  },
+  "nursing_mother_rations": {
+   "art": "res://assets/ui/research/subjects/worker_ration_lists-v1.png"
+  },
+  "pregnant_harm_compensation": {
+   "art": "res://assets/ui/research/subjects/mediated_restitution_custom-v1.png"
+  },
+  "vacant_lot_allotment": {
+   "art": "res://assets/ui/research/subjects/public_space_allocation-v1.png"
+  },
+  "pregnancy_signs_tests": {
+   "art": "res://assets/ui/research/subjects/trained_midwife_referral-v1.png"
+  },
+  "foundling_adoption_contracts": {
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_contracts.png"
+  },
+  "childless_dowry_return": {
+   "art": "res://assets/ui/research/subjects/marriage_age_norms-v1.png"
+  },
+  "rented_rooms": {
+   "art": "res://assets/ui/research/subjects/courtyard_houses-v1.png"
   }
  },
  "balance_600": {

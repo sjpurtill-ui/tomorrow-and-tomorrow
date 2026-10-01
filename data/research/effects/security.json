@@ -733,6 +733,57 @@
     "warfare_readiness": 0.0019
    },
    "art": "res://assets/ui/research/paper/first300-cards/field_armorer_teams.tres"
+  },
+  "shaped_sling_stones": {
+   "art": "res://assets/ui/research/subjects/barred_palisade_gates-v1.png"
+  },
+  "found_goods_declared": {
+   "art": "res://assets/ui/research/subjects/standing_arbiter_appointment-v1.png"
+  },
+  "field_pit_caches": {
+   "art": "res://assets/ui/research/subjects/hilltop_refuges-v1.png"
+  },
+  "drought_water_turns": {
+   "art": "res://assets/ui/research/subjects/seasonal_well_flushing-v1.png"
+  },
+  "company_standards": {
+   "art": "res://assets/ui/research/subjects/signal_command_drill-v1.png"
+  },
+  "night_street_watch": {
+   "art": "res://assets/ui/research/subjects/rotating_watch_captaincy-v1.png"
+  },
+  "herds_restocked_after_murrain": {
+   "art": "res://assets/ui/research/subjects/people_herd_counts-v1.png"
+  },
+  "towers_within_bowshot": {
+   "art": "res://assets/ui/research/subjects/town_enclosure_walls-v1.png"
+  },
+  "equal_siege_rations": {
+   "art": "res://assets/ui/research/subjects/worker_ration_lists-v1.png"
+  },
+  "flocks_inside_walls": {
+   "art": "res://assets/ui/research/subjects/alarm_relay_customs-v1.png"
+  },
+  "set_injury_fines": {
+   "art": "res://assets/ui/research/subjects/mediated_restitution_custom-v1.png"
+  },
+  "famine_grain_purchase": {
+   "art": "res://assets/ui/research/subjects/reserve_rotation_ledgers-v1.png"
+  },
+  "scouts_ahead_of_march": {
+   "art": "res://assets/ui/research/subjects/alternate_route_scouting-v1.png"
+  },
+  "spring_passage_walls": {
+   "art": "res://assets/ui/research/subjects/spring_head_fencing-v1.png"
+  },
+  "kin_ransom_customs": {
+   "art": "res://assets/ui/research/subjects/temple_common_storehouse-v1.png"
+  },
+  "muster_rolls_with_arms": {
+   "art": "res://assets/ui/research/subjects/census_rolls-v1.png"
+  },
+  "lean_year_seed_loans": {
+   "art": "res://assets/ui/research/subjects/shared_reserve_access_rules-v1.png"
   }
  },
  "art_proposals": {

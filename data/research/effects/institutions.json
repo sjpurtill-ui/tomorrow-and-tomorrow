@@ -953,6 +953,72 @@
    },
    "observation": "Registers of service land are checked against the census, so no holder escapes his duty.",
    "art": "res://assets/ui/research/institutions-v1.png"
+  },
+  "leaders_feast_display": {
+   "art": "res://assets/ui/research/discovery-600/praise_songs.png"
+  },
+  "assent_custom_change": {
+   "art": "res://assets/ui/research/subjects/sunset_rule_custom-v1.png"
+  },
+  "traveller_road_rations": {
+   "art": "res://assets/ui/research/subjects/rest_stop_spacing_custom-v1.png"
+  },
+  "leader_hunter_carvings": {
+   "art": "res://assets/ui/research/discovery-600/emblem_processions.png"
+  },
+  "temple_flock_herders": {
+   "art": "res://assets/ui/research/subjects/temple_common_storehouse-v1.png"
+  },
+  "year_end_stocktaking": {
+   "art": "res://assets/ui/research/discovery-600/material_accounting.png"
+  },
+  "spoils_shared_assembly": {
+   "art": "res://assets/ui/research/subjects/public_dispute_airing-v1.png"
+  },
+  "paced_field_allotments": {
+   "art": "res://assets/ui/research/subjects/boundary_marker_surveys-v1.png"
+  },
+  "exile_readmission": {
+   "art": "res://assets/ui/research/subjects/mediated_restitution_custom-v1.png"
+  },
+  "officials_field_pay": {
+   "art": "res://assets/ui/research/subjects/titled_estate_overseers-v1.png"
+  },
+  "third_party_border_judgment": {
+   "art": "res://assets/ui/research/subjects/regional_arbitration_circuits-v1.png"
+  },
+  "first_basket_founding": {
+   "art": "res://assets/ui/research/discovery-600/shrine_terraces.png"
+  },
+  "reform_relief_edicts": {
+   "art": "res://assets/ui/research/subjects/public_heralds-v1.png"
+  },
+  "ruler_statue_in_temple": {
+   "art": "res://assets/ui/research/discovery-600/royal_stone_portraits.png"
+  },
+  "standing_crop_estimates": {
+   "art": "res://assets/ui/research/discovery-600/grain_levy_accounting.png"
+  },
+  "widow_orphan_protection": {
+   "art": "res://assets/ui/research/subjects/public_grievance_hearings-v1.png"
+  },
+  "local_custom_elders": {
+   "art": "res://assets/ui/research/subjects/oath_witness_registers-v1.png"
+  },
+  "servant_seals_name_master": {
+   "art": "res://assets/ui/research/discovery-600/cylinder_seals.png"
+  },
+  "balanced_foreman_accounts": {
+   "art": "res://assets/ui/research/subjects/worker_ration_lists-v1.png"
+  },
+  "failed_harvest_interest_waiver": {
+   "art": "res://assets/ui/research/subjects/cross_household_grain_audits-v1.png"
+  },
+  "silver_rated_dues": {
+   "art": "res://assets/ui/research/subjects/tributary_villages-v1.png"
+  },
+  "accession_letters": {
+   "art": "res://assets/ui/research/discovery-600/sealed_tablet_letters.png"
   }
  },
  "balance_600": {

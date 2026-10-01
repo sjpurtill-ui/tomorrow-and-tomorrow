@@ -608,6 +608,60 @@
     "task_coordination": 0.0012
    },
    "observation": "A city famed for its masons sends a crew to raise an allied ruler's temple, and they bring their methods home."
+  },
+  "raised_grinding_querns": {
+   "art": "res://assets/ui/research/subjects/batch_sizing_by_fatigue-v1.png"
+  },
+  "fieldworker_water_carriers": {
+   "art": "res://assets/ui/research/subjects/seasonal_labor_pooling-v1.png"
+  },
+  "great_work_completion_feasts": {
+   "art": "res://assets/ui/research/subjects/great_work_parties-v1.png"
+  },
+  "new_moon_rest_day": {
+   "art": "res://assets/ui/research/discovery-600/calendar_feast_days.png"
+  },
+  "tool_issue_tallies": {
+   "art": "res://assets/ui/research/subjects/load_tallies-v1.png"
+  },
+  "captive_field_labour": {
+   "art": "res://assets/ui/research/subjects/wool_spinning-v1.png"
+  },
+  "shoulder_pole_loads": {
+   "art": "res://assets/ui/research/subjects/load_bundling_by_weight-v1.png"
+  },
+  "levy_service_turns": {
+   "art": "res://assets/ui/research/subjects/shared_labor_registers-v1.png"
+  },
+  "year_round_skilled_core": {
+   "art": "res://assets/ui/research/subjects/gangs_of_ten-v1.png"
+  },
+  "gang_marks_on_blocks": {
+   "art": "res://assets/ui/research/subjects/rotating_named_gangs-v1.png"
+  },
+  "one_step_workers": {
+   "art": "res://assets/ui/research/subjects/tool_reach_zoning-v1.png"
+  },
+  "extra_day_rations": {
+   "art": "res://assets/ui/research/subjects/fixed_worker_rations-v1.png"
+  },
+  "hauling_rhythm_clapper": {
+   "art": "res://assets/ui/research/subjects/ox_drawn_sledges-v1.png"
+  },
+  "trodden_brick_clay": {
+   "art": "res://assets/ui/research/subjects/wedge_brick_well_lining-v1.png"
+  },
+  "sick_workers_marked": {
+   "art": "res://assets/ui/research/subjects/crew_count_scribes-v1.png"
+  },
+  "measured_canal_stretches": {
+   "art": "res://assets/ui/research/subjects/flood_season_great_works-v1.png"
+  },
+  "mill_house_grinding": {
+   "art": "res://assets/ui/research/subjects/portion_allotment_customs-v1.png"
+  },
+  "debt_service_limit": {
+   "art": "res://assets/ui/research/subjects/capacity_ledgers-v1.png"
   }
  },
  "balance_600": {
