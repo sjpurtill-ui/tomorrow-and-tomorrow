@@ -66,10 +66,13 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	add_child(board)
 	board.setup({})
 	for id in ["few","some","many","war","all"]:assert_object(board.find_child("Level_%s" % id,true,false)).is_not_null()
+	assert_object(board.find_child("Strength",true,false)).is_not_null()
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
 	assert_object(row).is_not_null()
 	for id in ["leave","defend","punish","take","peace","pay"]:assert_object(row.find_child("Stance_%s" % id,true,false)).is_not_null()
 	assert_object(board.find_child("Leader_war_leader",true,false)).is_not_null()
+	# Who leads against them: the war leader until a general comes forward.
+	assert_object(row.find_child("LedBy",true,false)).is_not_null()
 	# A stance is the war leader's order, and the row remembers it.
 	(row.find_child("Stance_defend",true,false) as Button).pressed.emit()
 	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("defend")
@@ -77,3 +80,57 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	assert_str(board.feedback.text).is_not_empty()
 	# Nothing on the page orders a band by hand.
 	for name in ["MoveTo","PutUnder","WholeCommand","Verbs"]:assert_object(board.find_child(name,true,false)).is_null()
+
+func test_the_army_bar_reads_ready_drill_and_waiting_against_the_share()->void:
+	assert_str(Board.strength_words({"ready":327,"drill":85,"drill_days":40,"waiting":3,"away":9},424,612)).is_equal("327 ready · 85 in drill, about 40 days · 3 waiting to drill · 9 hurt or away · 188 to call up")
+	assert_str(Board.strength_words({"ready":30,"drill":0,"drill_days":0,"waiting":0},30,20)).is_equal("30 ready · 10 above the share")
+	assert_str(Board.strength_words({"ready":4,"drill":0,"drill_days":0,"waiting":0},4,-1)).is_equal("4 ready")
+	# Nobody out: no fed share to show.
+	assert_float(float(Board.strength(MilitaryCampaign).fed)).is_equal(-1.0)
+
+func test_a_levy_ordered_in_court_lifts_the_share_instead_of_being_sent_home()->void:
+	var people:=int(WorldSimulation.state.population_total)
+	Law.choose(MilitaryCampaign,"few")
+	var kept:=Law.under_arms(MilitaryCampaign)
+	assert_int(kept).is_equal(Law.target_men("few",people))
+	# The ruler calls up more in court than the share keeps.
+	var more:=Law.target_men("many",people)-kept
+	var answer:Dictionary=preload("res://scripts/home_orders.gd").perform({"kind":"levy","count":more,"recruit":true,"fill":false,"arm_said":true,"unit":"levy","item":""})
+	assert_int(int(answer.get("raised",0))).is_equal(more)
+	assert_str(Law.reading(MilitaryCampaign).level).is_equal("many")
+	assert_str(String(answer.get("says",""))).contains("now keeps the army at")
+	# The war leader's next look sends nobody home.
+	assert_dict(Law.keep(MilitaryCampaign,int(WorldSimulation.state.elapsed_days),true)).is_empty()
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(kept+more)
+
+func test_the_war_leader_drills_the_best_foot_our_people_can_arm()->void:
+	var pick:=Law.kit(MilitaryCampaign)
+	# Early on that is spears or the plain levy: never a kit nobody can make.
+	assert_str(String(pick.unit)).is_not_empty()
+	if String(pick.item)!="":assert_bool(MilitaryCampaign._training_gate(String(pick.unit),String(pick.item)).has("error")).is_false()
+
+func test_each_leader_reads_by_what_they_are_best_and_worst_at()->void:
+	assert_str(Board.skill_words({"command":0.5,"tactics":0.5,"resolve":0.95,"logistics":0.2})).is_equal("Best at standing firm (5 of 5) · weakest at keeping them fed (1 of 5)")
+	assert_str(Board.skill_words({"command":0.5,"tactics":0.5,"resolve":0.5,"logistics":0.5})).is_equal("Even in every skill: 3 of 5")
+	assert_str(Board.skill_words({})).is_empty()
+	# The battle report's words for a beaten commander and their captives.
+	assert_str(CombatSimulator.captive_words(1)).is_equal("1 prisoner")
+	assert_str(CombatSimulator.fate_words("escaped")).is_equal("got away")
+	assert_str(CombatSimulator.fate_words("wounded, but escaped")).is_equal("was wounded but got away")
+
+func test_the_watch_at_home_is_not_the_army()->void:
+	# Five keep the watch: set to defence work and standing at home.
+	WorldSimulation.state.population_allocations["Defense"]=5
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("The watch",[{"id":1,"unit":"levy","weapon":"improvised","count":5,"equipment":5,"training":0.5}],1,1)
+	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(5)
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(0)
+	var people:=int(WorldSimulation.state.population_total)
+	Law.choose(MilitaryCampaign,"some")
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("some",people))
+	# Fewer: the army shrinks, the watch stays whole.
+	Law.choose(MilitaryCampaign,"few")
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("few",people))
+	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_greater_equal(5)
+	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(5)
+	assert_int(int(Board.strength(MilitaryCampaign).watch)).is_equal(5)
+	WorldSimulation.state.population_allocations.erase("Defense")

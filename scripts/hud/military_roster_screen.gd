@@ -314,7 +314,7 @@ func _build_body()->void:
 	_clear();stories.clear()
 	var who:=EraWords.word("rail.military","Military")
 	# One title: the people's word for their fighters; the service only when there is a choice.
-	heading.text=who if service_buttons.size()<2 or service=="army" else who+" · "+_service_name(service)
+	heading.text=("War" if service=="army" else who+" · "+_service_name(service)) if service_buttons.size()>=2 or service=="army" else who
 	management_button.text={"army":"Recruit & deploy","navy":"Fleet preparation","air":"Air preparation"}[service]
 	for domain in service_buttons:
 		service_buttons[domain].set_pressed_no_signal(domain==service)

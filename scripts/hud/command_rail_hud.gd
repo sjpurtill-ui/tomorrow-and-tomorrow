@@ -21,7 +21,7 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"standing","label":"Standing","tooltip":"What we are, how every people we know sees us, and what it makes them do"},
 	{"id":"world","label":"Known World","tooltip":"The world your scouts have walked, and who lives in it · F6"},
 	# The warriors stand on the rail itself, one click away as HOI4 keeps them.
-	{"id":"military","label":"Military","icon":8,"tooltip":"Warriors, training and command · F8"},
+	{"id":"military","label":"Military","icon":8,"tooltip":"War: how many serve, our enemies and our leaders · F8"},
 	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
 	{"id":"government","label":"Government","icon":1,"drawer":true,"tooltip":"Chiefs, officeholders and their duties · F3"},
 	{"id":"economy","label":"Food","icon":2,"sub":0,"drawer":true,"tooltip":"Food and water · F2"},
@@ -582,7 +582,7 @@ func _refresh_words()->void:
 		var extra:=""
 		if EraWords.has_boats():extra+=" · Shift+F5 the boats"
 		if EraWords.has_flight():extra+=" · Shift+F6 the air service"
-		military.tooltip_text="Warriors, training and command · F8"+extra
+		military.tooltip_text="War: how many serve, our enemies and our leaders · F8"+extra
 	for def in KPI_DEFS:
 		var parts:Dictionary=kpi_chips.get(String(def.id),{})
 		if parts.has("caption"):(parts.caption as Label).text=EraWords.word("kpi."+String(def.id),String(def.label))

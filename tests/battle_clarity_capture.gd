@@ -102,7 +102,7 @@ func _report(seed:int)->void:
 		var host:=Node.new(); add_child(host)
 		load(panel_path).open(host,seed)
 	else:
-		# main's dialog, exactly as local_terrain._show_military_attention builds it.
+		# The old report dialog, for captures of builds before the report panel.
 		var dialog:=ConfirmationDialog.new()
 		dialog.theme=HudTokens.control_theme()
 		dialog.title="BATTLE REPORT"
