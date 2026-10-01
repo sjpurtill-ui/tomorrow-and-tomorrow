@@ -69,6 +69,7 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	assert_object(board.find_child("Strength",true,false)).is_not_null()
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
 	assert_object(row).is_not_null()
+	assert_object(row.find_child("Odds",true,false)).is_not_null()
 	for id in ["leave","defend","punish","take","peace","pay"]:assert_object(row.find_child("Stance_%s" % id,true,false)).is_not_null()
 	assert_object(board.find_child("Leader_war_leader",true,false)).is_not_null()
 	# Who leads against them: the war leader until a general comes forward.
@@ -82,7 +83,7 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	for name in ["MoveTo","PutUnder","WholeCommand","Verbs"]:assert_object(board.find_child(name,true,false)).is_null()
 
 func test_the_army_bar_reads_ready_drill_and_waiting_against_the_share()->void:
-	assert_str(Board.strength_words({"ready":327,"drill":85,"drill_days":40,"waiting":12},424,612)).is_equal("327 ready · 85 in drill, about 40 days · 12 waiting or hurt · 188 to call up")
+	assert_str(Board.strength_words({"ready":327,"drill":85,"drill_days":40,"waiting":3,"away":9},424,612)).is_equal("327 ready · 85 in drill, about 40 days · 3 waiting to drill · 9 hurt or away · 188 to call up")
 	assert_str(Board.strength_words({"ready":30,"drill":0,"drill_days":0,"waiting":0},30,20)).is_equal("30 ready · 10 above the share")
 	assert_str(Board.strength_words({"ready":4,"drill":0,"drill_days":0,"waiting":0},4,-1)).is_equal("4 ready")
 	# Nobody out: no fed share to show.
@@ -108,3 +109,55 @@ func test_the_war_leader_drills_the_best_foot_our_people_can_arm()->void:
 	# Early on that is spears or the plain levy: never a kit nobody can make.
 	assert_str(String(pick.unit)).is_not_empty()
 	if String(pick.item)!="":assert_bool(MilitaryCampaign._training_gate(String(pick.unit),String(pick.item)).has("error")).is_false()
+
+func test_each_leader_reads_by_what_they_are_best_and_worst_at()->void:
+	assert_str(Board.skill_words({"command":0.5,"tactics":0.5,"resolve":0.95,"logistics":0.2})).is_equal("Best at holding firm (5/5) · weakest at supply (1/5)")
+	assert_str(Board.skill_words({"command":0.5,"tactics":0.5,"resolve":0.5,"logistics":0.5})).is_equal("Even in every skill (3/5)")
+	assert_str(Board.skill_words({})).is_empty()
+	# The battle report's words for a beaten commander and their captives.
+	assert_str(CombatSimulator.captive_words(1)).is_equal("1 prisoner")
+	assert_str(CombatSimulator.fate_words("escaped")).is_equal("got away")
+	assert_str(CombatSimulator.fate_words("wounded, but escaped")).is_equal("was wounded but got away")
+
+func test_the_watch_at_home_is_not_the_army()->void:
+	# Five keep the watch: set to defence work and standing at home.
+	WorldSimulation.state.population_allocations["Defense"]=5
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("The watch",[{"id":1,"unit":"levy","weapon":"improvised","count":5,"equipment":5,"training":0.5}],1,1)
+	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(5)
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(0)
+	var people:=int(WorldSimulation.state.population_total)
+	Law.choose(MilitaryCampaign,"some")
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("some",people))
+	# Fewer: the army shrinks, the watch stays whole.
+	Law.choose(MilitaryCampaign,"few")
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("few",people))
+	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_greater_equal(5)
+	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(5)
+	assert_int(int(Board.strength(MilitaryCampaign).watch)).is_equal(5)
+	WorldSimulation.state.population_allocations.erase("Defense")
+
+func test_a_leader_with_bands_shows_men_will_and_fed_as_bars()->void:
+	var board:VBoxContainer=auto_free(Board.new())
+	add_child(board)
+	var row:Control=board._leader_row({"id":"war_leader","leader":{"name":"Corvan","title":"War leader at home","commander":{"command":0.6}},"bands":[1,2],"men":18,"full":33,"will":0.4,"supply":0.86,"hungry":0,"places":{"Ashford":2}})
+	var bars:Node=row.find_child("Bars",true,false)
+	assert_object(bars).is_not_null()
+	assert_str((bars as Control).tooltip_text).is_equal("Men 18 of 33 · will 40% · fed 86%")
+	row.free()
+
+func test_an_open_menu_is_never_rebuilt_under_the_rulers_hand()->void:
+	WAR.blood_feud(civ_id,10,"the killing of their envoy Qira")
+	var board:VBoxContainer=auto_free(Board.new())
+	add_child(board)
+	board.setup({})
+	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
+	var take:MenuButton=row.find_child("Stance_take",true,false)
+	# Their dead change while the ruler has a menu of that row open.
+	take.get_popup().visible=true
+	WAR.front(civ_id).merge({"their_dead":7},true)
+	board.refresh()
+	assert_bool(is_instance_valid(take) and take.is_inside_tree()).is_true()
+	# Once it closes, the row is read again.
+	take.get_popup().visible=false
+	board.refresh()
+	assert_object(board.find_child("Enemy_%s" % civ_id,true,false)).is_not_same(row)

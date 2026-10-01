@@ -14,6 +14,10 @@ extends RefCounted
 ## MOBILIZE_MIN/MAX); modern total war reached 10-20%. Every person serving is
 ## one fewer at work at home: the economy reads the same personnel ledger
 ## (MilitaryCampaign.personnel_ledger).
+## The watch at home is not the army: home defence is kept by those set to
+## Defense work (MilitaryCampaign._home_garrison_target) and the home troops
+## and basic trainees who keep it. No level counts it, calls it up or sends it
+## home (watch()).
 ## MilitaryCampaign.army_levy_level holds the chosen level ("" until the ruler
 ## chooses: then nobody is called up or sent home on its account).
 ## The war leader drills them as the best foot our people can train and arm
@@ -67,10 +71,21 @@ static func target_men(id:String,population:int)->int:
 	return roundi(float(maxi(0,population))*float(entry.share))
 
 
-## Those under arms on land now: every soldier, recruit, trainee and hurt
-## soldier the personnel ledger counts, less the crews of boats and aircraft.
+## The army on land now: every soldier, recruit, trainee, hurt or scattered
+## soldier the personnel ledger counts, less the crews of boats and aircraft
+## and less the watch at home.
 static func under_arms(mc:Node)->int:
-	return maxi(0,int(mc._mobilized_count())-int(mc.joint_operations.personnel()))
+	return maxi(0,int(mc._mobilized_count())-int(mc.joint_operations.personnel())-int(watch(mc).kept))
+
+
+## The watch at home (home defence, not the army): {target (those set to
+## Defense work), home (home troops keeping it), drill (basic trainees
+## keeping it), kept}.
+static func watch(mc:Node)->Dictionary:
+	var target:=maxi(0,int(mc._home_garrison_target()))
+	var home:=mini(maxi(0,int(mc.home_army.get("troops",0))),target)
+	var drill:=mini(maxi(0,int(mc._automatic_basic_trainees())),maxi(0,target-home))
+	return {"target":target,"home":home,"drill":drill,"kept":home+drill}
 
 
 ## The army against its level today: {level, name, share, target, now, gap
@@ -117,13 +132,21 @@ static func keep(mc:Node,day:int,now:=false)->Dictionary:
 		var surplus:=have-target
 		# Those still in drill go home first, the newest orders first: their
 		# drill stops (cancel_training gives back the weapons set aside), then
-		# the recruits waiting go back to work.
+		# the recruits waiting go back to work. The watch's own drill stays.
 		var queue:Array=mc.training_queue.duplicate()
 		queue.reverse()
 		for order in queue:
 			if int(mc.aggregate_recruits)>=surplus:break
-			if not order is Dictionary or String((order as Dictionary).get("mode",""))=="field_draft" or (order as Dictionary).has("deployment_line"):continue
-			mc.cancel_training(int((order as Dictionary).get("id",-1)))
+			if not order is Dictionary:continue
+			var drill:Dictionary=order
+			if String(drill.get("mode",""))=="field_draft" or drill.has("deployment_line") or bool(drill.get("automated_basic",false)):continue
+			mc.cancel_training(int(drill.get("id",-1)))
+		# Never below the watch: only the lastingly hurt at home, recruits
+		# waiting and home troops beyond the watch go back to work.
+		var hurt:=mini(int(mc.home_army.get("disabled_pool",0)),int(mc.home_army.get("wounded_pool",0)))
+		var spare:=maxi(0,int(mc.home_army.get("troops",0))-int(watch(mc).home))
+		surplus=mini(surplus,maxi(0,hurt)+int(mc.aggregate_recruits)+spare)
+		if surplus<=0:return {}
 		var result:Dictionary=mc.demobilize(surplus)
 		var released:=int(result.get("released",0))
 		if released>0:return {"raised":0,"released":released,"said":"%d sent home to their work: the army stood above %s." % [released,level_name(id).to_lower()]}

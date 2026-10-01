@@ -26,7 +26,6 @@ const Identity:=preload("res://scripts/city_map_identity.gd")
 const WarLoop:=preload("res://scripts/war_loop.gd")
 const Orders:=preload("res://scripts/army_orders.gd")
 const Commands:=preload("res://scripts/leader_commands.gd")
-const Record:=preload("res://scripts/battle_record.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
@@ -47,7 +46,14 @@ var enemy_box:VBoxContainer
 var leader_box:VBoxContainer
 var feedback:Label
 var clock:=0.0
-var signature:=""
+## Each section's last signature, and how long a rebuild has waited on the
+## ruler's hand (seconds).
+var signatures:={}
+var waited:={}
+## A section under the pointer waits this long for the pointer to leave
+## before its numbers are read again; never while one of its menus is open
+## or a button is held.
+const HOVER_HOLD_SECONDS:=5.0
 
 
 func setup(_block:Dictionary={})->void:
@@ -68,18 +74,42 @@ func _process(delta:float)->void:
 	refresh()
 
 
+## Each section is read again only when what it shows has changed, and not
+## under the ruler's hand: a menu of it open, a button held, or the pointer
+## on it (for a few seconds). After the ruler's own word (force) all three.
 func refresh(force:=false)->void:
 	var reading:=Law.reading(MilitaryCampaign)
-	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
-	var commands:=Commands.commands(MilitaryCampaign)
 	var glance:=strength(MilitaryCampaign)
-	var next:=str([reading,glance,entries.map(func(e:Dictionary)->Array:return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),WarLoop.front(String(e.civ_id)).get("stance",""),e.get("band",{})]),
-		commands.map(func(c:Dictionary)->Array:return [c.id,c.bands,c.men,c.hungry])])
-	if not force and next==signature:return
-	signature=next
-	_build_army(reading,glance)
-	_build_enemies(entries)
-	_build_leaders(commands)
+	_rebuild("army",army_box,str([reading,glance]),force,func()->void:_build_army(reading,glance))
+	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
+	_rebuild("enemies",enemy_box,str(entries.map(func(e:Dictionary)->Array:
+		var front:Dictionary=WarLoop.front(String(e.civ_id))
+		return [e.civ_id,e.kind,e.hot,e.our_dead,e.their_dead,e.get("quiet",0),front.get("stance",""),front.get("general",""),e.get("strength",1.0),now_words(e)])),force,func()->void:_build_enemies(entries))
+	var commands:=Commands.commands(MilitaryCampaign)
+	_rebuild("leaders",leader_box,str(commands.map(func(c:Dictionary)->Array:return [c.id,c.bands,c.men,c.full,c.hungry,snappedf(float(c.will),0.05),snappedf(float(c.supply),0.05)])),force,func()->void:_build_leaders(commands))
+
+
+func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->void:
+	if not force and next==String(signatures.get(key,"")):
+		waited.erase(key)
+		return
+	if not force and _in_use(box,float(waited.get(key,0.0))):
+		waited[key]=float(waited.get(key,0.0))+REFRESH_SECONDS
+		return
+	signatures[key]=next
+	waited.erase(key)
+	build.call()
+
+
+## Whether the ruler is using a section: one of its menus open or a button
+## held on it always; the pointer resting on it, for HOVER_HOLD_SECONDS.
+func _in_use(box:Control,waited_seconds:float)->bool:
+	if box==null or not box.is_visible_in_tree():return false
+	for node in box.find_children("*","",true,false):
+		if node is MenuButton and (node as MenuButton).get_popup().visible:return true
+		if node is OptionButton and (node as OptionButton).get_popup().visible:return true
+	if not box.get_global_rect().has_point(box.get_global_mouse_position()):return false
+	return Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) or waited_seconds<HOVER_HOLD_SECONDS
 
 
 # --- The army -------------------------------------------------------------
@@ -102,6 +132,10 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	var words:=strength_words(glance,int(reading.now),int(reading.target))
 	bar.tooltip_text=words;column.add_child(bar)
 	column.add_child(_line(words,13,T.INK_MUTED,true))
+	if int(glance.get("watch",0))>0:
+		var watch:=_line("Apart from the army, %s keep the watch at home." % EraWords.grouped(int(glance.watch)),13,T.INK_MUTED,true);watch.name="Watch"
+		watch.tooltip_text="Home defence is not the army: it is kept by those set to defence work, and no share counts it, calls it up or sends it home."
+		column.add_child(watch)
 	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",6);column.add_child(pick)
 	for entry:Dictionary in Law.LEVELS:
 		var id:=String(entry.id)
@@ -146,6 +180,11 @@ func _enemy_row(e:Dictionary)->Control:
 	words.add_child(_line(Ledger.subtitle(e),13,T.INK_MUTED))
 	var dead:=DeadStrip.new();dead.ours=int(e.our_dead);dead.theirs=int(e.their_dead);dead.custom_minimum_size=Vector2(220,26);dead.tooltip_text="The dead of it all told: %d of ours, %d of theirs." % [int(e.our_dead),int(e.their_dead)];head.add_child(dead)
 	var chip:=Chip.new();chip.word=Ledger.state_word(e);head.add_child(chip)
+	# HOI4's read of who is stronger: our share of the strength against theirs.
+	var odds:=Strips.OddsBar.new();odds.name="Odds";column.add_child(odds)
+	odds.set_odds(Ledger.odds(e),Ledger.odds_words(e))
+	odds.tooltip_text="Their strength against ours, by the war leader's reckoning: people, warriors and readiness on one scale.
+Worn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("our_worn",0.0))*100.0),roundi(float(e.get("their_worn",0.0))*100.0)]
 	var now:=_line("Now: "+now_words(e),14,T.INK,true);now.tooltip_text=now_details(e);column.add_child(now)
 	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",6);column.add_child(stances)
 	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
@@ -198,12 +237,15 @@ func _lead(civ_id:String,general:String,name_words:String)->void:
 	refresh(true)
 
 
-## The army at a glance: {ready (fighters at home, in the field and holding
-## towns), drill, drill_days, waiting (recruits waiting and the hurt), armed
-## (0..1: gear issued of gear wanted), fed (0..1 of those out by the bars'
-## own measure; -1 when nobody is out)}.
+## The army at a glance, the watch at home apart: {ready (fighters at home
+## beyond the watch, in the field and holding towns), drill, drill_days,
+## waiting (recruits waiting to drill), away (hurt, scattered or taken),
+## watch (keeping the watch at home), armed (0..1: gear issued of gear
+## wanted), fed (0..1 of those out by the bars' own measure; -1 when nobody
+## is out)}.
 static func strength(mc:Node)->Dictionary:
 	var ledger:Dictionary=mc.personnel_ledger()
+	var watch:=Law.watch(mc)
 	var formations:Array=(mc.home_army.get("formations",[]) as Array).duplicate()
 	var out:=0
 	var fed:=0.0
@@ -215,16 +257,18 @@ static func strength(mc:Node)->Dictionary:
 		if bool(card.get("unknown",false)):continue
 		out+=int(card.men);fed+=float(card.men)*clampf(float(card.get("supply",1.0)),0.0,1.0)
 	var drill:=BarModel.drill_card(mc)
-	return {"ready":int(ledger.home)+int(ledger.field)+int(ledger.occupation),"drill":int(ledger.training),"drill_days":int(drill.get("days",0)),
-		"waiting":int(ledger.recruits)+int(ledger.recovering),"armed":float(BarModel.gear_of(formations,mc).share),"fed":snappedf(fed/float(out),0.01) if out>0 else -1.0}
+	return {"ready":maxi(0,int(ledger.home)-int(watch.home))+int(ledger.field)+int(ledger.occupation),"drill":maxi(0,int(ledger.training)-int(watch.drill)),"drill_days":int(drill.get("days",0)),
+		"waiting":int(ledger.recruits),"away":int(ledger.recovering)+int(ledger.get("missing",0)),"watch":int(watch.kept),
+		"armed":float(BarModel.gear_of(formations,mc).share),"fed":snappedf(fed/float(out),0.01) if out>0 else -1.0}
 
 
-## The bar in words: "327 ready · 85 in drill, about 40 days · 12 waiting or
-## hurt · 188 to call up".
+## The bar in words: "327 ready · 85 in drill, about 40 days · 12 waiting to
+## drill · 9 hurt or away · 188 to call up".
 static func strength_words(glance:Dictionary,now:int,target:int)->String:
 	var parts:=PackedStringArray(["%s ready" % EraWords.grouped(int(glance.ready))])
 	if int(glance.drill)>0:parts.append("%s in drill%s" % [EraWords.grouped(int(glance.drill)),(", about %d days" % int(glance.drill_days)) if int(glance.drill_days)>0 else ""])
-	if int(glance.waiting)>0:parts.append("%s waiting or hurt" % EraWords.grouped(int(glance.waiting)))
+	if int(glance.waiting)>0:parts.append("%s waiting to drill" % EraWords.grouped(int(glance.waiting)))
+	if int(glance.get("away",0))>0:parts.append("%s hurt or away" % EraWords.grouped(int(glance.away)))
 	if target>now:parts.append("%s to call up" % EraWords.grouped(target-now))
 	elif target>=0 and now>target:parts.append("%s above the share" % EraWords.grouped(now-target))
 	return " · ".join(parts)
@@ -349,12 +393,16 @@ func _leader_row(c:Dictionary)->Control:
 	face.texture=Portrait.texture({"name":String(leader.get("name","")),"person_id":absi(key.hash())%997+1});frame.add_child(face)
 	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",1);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
 	var name_label:=_line("%s · %s" % [String(leader.name),String(leader.title).to_lower()],15,T.INK);name_label.add_theme_font_override("font",T.font("ui_strong"));words.add_child(name_label)
-	var rated:=Record.general_line(leader.get("commander",{}),EraWords.stage())
+	var rated:=skill_words(leader.get("commander",{}))
 	if rated!="":words.add_child(_line(rated,13,T.INK_MUTED))
 	if not (leader.get("commander",{}) as Dictionary).is_empty():
 		var pips:=Strips.GeneralPips.new();pips.name="Pips";words.add_child(pips)
 		pips.set_commander(leader.get("commander",{}),String(leader.name),String(c.id)==Commands.WAR_LEADER)
 	words.add_child(_line(leader_doing(c),13,T.INK))
+	if int(c.get("men",0))>0:
+		var bars:=CommandBars.new();bars.name="Bars";bars.men=int(c.men);bars.full=int(c.full);bars.will=float(c.will);bars.fed=float(c.supply)
+		bars.tooltip_text="Men %d of %d · will %d%% · fed %d%%" % [int(c.men),int(c.full),roundi(float(c.will)*100.0),roundi(float(c.supply)*100.0)]
+		words.add_child(bars)
 	if String(c.id)==Commands.WAR_LEADER:
 		var other:=Button.new();other.name="NameWarLeader";other.text="Name another";other.flat=true;other.focus_mode=Control.FOCUS_NONE
 		other.size_flags_vertical=Control.SIZE_SHRINK_CENTER
@@ -371,6 +419,21 @@ func _name_war_leader()->void:
 	if hud==null or not hud.has_method("has_provider") or not hud.has_provider("government"):return
 	close_wanted.emit()
 	hud.open_dock("government",0)
+
+
+## What a leader is best and worst at, by the skills the engine fights,
+## camps and marches with: "Best at holding firm (5/5) · weakest at supply
+## (2/5)".
+const SKILL_WORDS:={"command":"planning","tactics":"fighting","resolve":"holding firm","logistics":"supply"}
+static func skill_words(commander:Dictionary)->String:
+	if commander.is_empty():return ""
+	var best:="";var worst:="";var high:=-1;var low:=6
+	for skill:String in SKILL_WORDS:
+		var pips:=Strips.GeneralPips.pips(float(commander.get(skill,0.5)))
+		if pips>high:high=pips;best=skill
+		if pips<low:low=pips;worst=skill
+	if high==low:return "Even in every skill (%d/5)" % high
+	return "Best at %s (%d/5) · weakest at %s (%d/5)" % [SKILL_WORDS[best],high,SKILL_WORDS[worst],low]
 
 
 ## What a leader is doing now: their bands and men and where, or "at home".
@@ -426,9 +489,9 @@ static func _line(text:String,size:int,color:Color,wrap:=false)->Label:
 	return label
 
 
-## HOI4's manpower bar: ready (green), in drill (amber), waiting or hurt
-## (rule), against the share kept (the ink tick); over the share, the tick
-## falls inside the bar.
+## HOI4's manpower bar: ready (green), in drill (amber), waiting, hurt or
+## away (rule), against the share kept (the ink tick); over the share, the
+## tick falls inside the bar.
 class StrengthBar extends Control:
 	const T:=preload("res://scripts/hud/hud_tokens.gd")
 	var parts:Dictionary={}
@@ -437,7 +500,7 @@ class StrengthBar extends Control:
 	func _draw()->void:
 		var whole:=Rect2(Vector2.ZERO,size)
 		draw_rect(whole,T.PAPER_SUNK)
-		var segments:=[[int(parts.get("ready",0)),T.GREEN],[int(parts.get("drill",0)),T.AMBER],[int(parts.get("waiting",0)),T.RULE_STRONG]]
+		var segments:=[[int(parts.get("ready",0)),T.GREEN],[int(parts.get("drill",0)),T.AMBER],[int(parts.get("waiting",0))+int(parts.get("away",0)),T.RULE_STRONG]]
 		var total:=0
 		for segment:Array in segments:total+=int(segment[0])
 		var scale:=float(maxi(1,maxi(total,target)))
@@ -449,6 +512,23 @@ class StrengthBar extends Control:
 		if target>0:
 			var tick:=clampf(size.x*float(target)/scale,1.0,size.x-1.0)
 			draw_line(Vector2(tick,-3.0),Vector2(tick,size.y+3.0),T.INK,2.0)
+
+
+## A command at a glance, as HOI4's army card: men of full strength, will
+## and fed, each a short bar in the army bar's colours.
+class CommandBars extends Control:
+	const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var men:=0
+	var full:=0
+	var will:=0.0
+	var fed:=0.0
+	func _ready()->void:custom_minimum_size=Vector2(240,14);mouse_filter=Control.MOUSE_FILTER_PASS
+	func _draw()->void:
+		var width:=minf(120.0,(size.x-16.0)/3.0)
+		var shares:=[float(men)/maxf(1.0,float(full)),will,fed]
+		var inks:=[T.GREEN,BarModel.will_color(will),T.TEAL if fed>=0.75 else (T.AMBER if fed>=0.4 else T.RED)]
+		for i in 3:BarModel.draw_bar(self,Rect2(Vector2(float(i)*(width+8.0),2.0),Vector2(width,10.0)),clampf(float(shares[i]),0.0,1.0),inks[i])
 
 
 ## The dead on each side, compact (war_ledger_marks.draw_dead).

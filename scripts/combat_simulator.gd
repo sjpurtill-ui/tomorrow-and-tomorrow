@@ -1471,10 +1471,10 @@ func _termination_event(outcome: String,attacker: Dictionary,defender: Dictionar
 	var winner_name:=String(winner.get("name","Victors"))
 	var commander_name:=String(loser_commander.get("name","THE DEFEATED COMMAND GROUP"))
 	var summary:="%s withdraws in order." % loser_name
-	if termination_type=="surrender": summary="Elements of %s surrender; %s takes %d prisoners." % [loser_name,winner_name,prisoners]
-	elif termination_type=="pursuit": summary="%s pursues the rout and takes %d prisoners." % [winner_name,prisoners]
-	elif prisoners>0: summary="%s escapes, leaving %d prisoners behind." % [loser_name,prisoners]
-	summary+="  %s is %s." % [commander_name,commander_fate]
+	if termination_type=="surrender": summary="Elements of %s surrender; %s takes %s." % [loser_name,winner_name,captive_words(prisoners)]
+	elif termination_type=="pursuit": summary=("%s pursues the rout and takes %s." % [winner_name,captive_words(prisoners)]) if prisoners>0 else "%s pursues the rout." % winner_name
+	elif prisoners>0: summary="%s escapes, leaving %s behind." % [loser_name,captive_words(prisoners)]
+	summary+=" %s %s." % [commander_name,fate_words(commander_fate)]
 	var spoils:=_battle_spoils(loser,winner,termination_type,rng)
 	return {"type":termination_type,"summary":summary,"prisoners":prisoners,"captor":winner_name,"defeated":loser_name,"commander":commander_name,"commander_record":loser_commander.duplicate(true),"commander_fate":commander_fate,"captured_general":captured_general,"spoils":spoils}
 
@@ -1562,3 +1562,19 @@ func _force_result(force: Dictionary, initial: int, remaining: int, morale: floa
 		"captured_in_battle":int(force.get("captured_in_battle",0)),
 		"dead":int(force.get("dead",0))
 	}
+
+
+## "1 prisoner", "12 prisoners".
+static func captive_words(count:int)->String:
+	return "%d %s" % [count,"prisoner" if count==1 else "prisoners"]
+
+
+## A beaten commander's fate as the report says it: "got away", "was taken",
+## "was killed", "was wounded but got away".
+static func fate_words(fate:String)->String:
+	match fate:
+		"escaped":return "got away"
+		"captured":return "was taken"
+		"killed":return "was killed"
+		"wounded, but escaped":return "was wounded but got away"
+	return "is %s" % fate
