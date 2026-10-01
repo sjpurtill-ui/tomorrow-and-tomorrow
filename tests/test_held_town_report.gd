@@ -12,6 +12,7 @@ const Ownership:=preload("res://scripts/map_ownership.gd")
 const Route:=preload("res://scripts/army_land_route.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Director:=preload("res://scripts/audience_director.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 
 ## Words that belong only to a scout's report.
 const SCOUT_WORDS:=["stale","scouts","much may have changed","brought home by","gold mark","days ago","not yet seen","estimate"," est. "]
@@ -77,6 +78,15 @@ func after_test()->void:
 	WorldSimulation.clear()
 	for node:Node in _processing: node.set_process(bool(_processing[node]))
 
+## The ruler puts a band under a general of renown, as the War screen and the
+## Military Leaders screen do (leader_commands.gd). A new band serves under
+## the war leader at home until then.
+func _under_a_general(army_id:int)->void:
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(general.has("error")).override_failure_message(str(general)).is_false()
+	var put:=Leaders.assign(MilitaryCampaign,army_id,String(general.get("figure_id","")))
+	assert_bool(put.has("error")).override_failure_message(str(put)).is_false()
+
 ## Tsaren taken; 17 of the band hold it, as in the user's game.
 func _take_tsaren()->Dictionary:
 	MilitaryCampaign.military_inventory["improvised"]=int(MilitaryCampaign.military_inventory.get("improvised",0))+18
@@ -85,6 +95,7 @@ func _take_tsaren()->Dictionary:
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
 	MilitaryCampaign.training_queue.clear()
 	MilitaryCampaign.create_field_army(18,"LEVY BAND 1")
+	_under_a_general(int(MilitaryCampaign.field_armies[0].army_id))
 	var army:Dictionary=MilitaryCampaign.field_armies[0]
 	army["supply_level"]=1.0; army["readiness"]=1.0
 	army["position"]={"x":city.x+0.3,"z":city.y}

@@ -22,6 +22,7 @@ extends RefCounted
 ##                      our scouts (a new town can be founded)
 ##   war_not_held       at war; Tsaren theirs; Rovik's band of 18 at home, 30 trained at home
 ##   tsaren_captured    Tsaren just taken: 17 of Rovik's band hold it, Rovik with 1 at the gate
+##                      (a garrison a general leaves serves under the war leader at home, Suri)
 ##   tsaren_bound       ... and Rovik was told to round up and bind the men (the user's words)
 ##   tsaren_fled        ... and Rovik was told to kill the men: some died, the rest ran for Stonefield
 ##   tsaren_burned      bound, the bound killed, women and girls taken to Seanstone, Tsaren burned
@@ -47,6 +48,7 @@ const Route:=preload("res://scripts/army_land_route.gd")
 const AiMode:=preload("res://scripts/ai_mode.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 
 const NAMES:=["home_peace","home_charted","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost","feud_unfound"]
 
@@ -227,11 +229,18 @@ func _rovik(army:Dictionary)->String:
 	return fid
 
 func band(troops:int,at_home:bool=true)->Dictionary:
-	## Rovik's band, trained and standing ready.
+	## Rovik's band, trained and standing ready. A new band serves under the
+	## war leader at home (Suri) until the ruler puts it under a general; the
+	## ruler put this one under Rovik, as the War screen and the Military
+	## Leaders screen do (leader_commands.gd).
 	train(troops)
 	var made:=MilitaryCampaign.create_field_army(troops,"ROVIK'S BAND")
 	if made.has("error"): return {"error":str(made)}
 	var army_id:=int((made.army as Dictionary).army_id)
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	if general.has("error"): return {"error":"no general for Rovik: "+str(general)}
+	var put:=Leaders.assign(MilitaryCampaign,army_id,String(general.get("figure_id","")))
+	if put.has("error"): return {"error":"Rovik could not take the band: "+str(put)}
 	var army:Dictionary=MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
 	army["supply_level"]=1.0; army["readiness"]=1.0
 	if at_home:
@@ -256,9 +265,9 @@ func take_tsaren(info:Dictionary)->Dictionary:
 	if int(garrison.get("troops",0))<=0: return {"error":"no garrison: "+str(garrison)}
 	info["band_id"]=int(army.army_id)
 	info["rovik_fid"]=String((army.commander as Dictionary).get("figure_id",""))
-	# The garrison's commander is Rovik too.
-	var force:=MilitaryCampaign.occupation_force_for_region(String(info.civ_id),String(info.tsaren_id))
-	if force.get("commander") is Dictionary: (force.commander as Dictionary)["name"]="Rovik Longstride"
+	# The 17 who hold it serve under the war leader at home (Suri): a garrison
+	# a general leaves is the war leader's, and Rovik stays with his band
+	# (military_campaign._garrison_captain).
 	return army
 
 func rovik_audience(info:Dictionary)->String:

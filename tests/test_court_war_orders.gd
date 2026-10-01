@@ -18,6 +18,7 @@ const CustomDirective:=preload("res://scripts/custom_directive.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const Modal:=preload("res://scripts/hud/audience_modal.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 
 var home:=Vector2.ZERO
 var city:=Vector2.ZERO
@@ -367,21 +368,54 @@ func test_offline_choices_reach_the_same_core()->void:
 
 func test_undrilled_levy_band_gets_an_objection_then_goes_if_the_god_insists()->void:
 	# The user's roster: a Levy band of 20 at home that has never drilled, 2 in reserve.
+	# No general was named for it, so it serves under the war leader at home
+	# (leader_commands.gd): the Marshal speaks for it as his own band.
 	_train(20)
-	MilitaryCampaign.create_field_army(20,"Levy band")
+	var levy:=int(MilitaryCampaign.create_field_army(20,"Levy band").army.army_id)
 	for f in MilitaryCampaign.field_armies[0].formations: f["training"]=0.05
 	_train(2)
 	var id:=_marshal_audience()
 	var r:=CC.hear(id,"Send our full forces into battle on Tsaren")
 	assert_str(String(r.war.verdict)).is_equal("object")
 	assert_str(String(r.war.reason)).is_equal("undrilled")
-	assert_str(String(r.actor_says)).contains("Levy band is 20 strong")
+	assert_str(String(r.actor_says)).contains("My band is 20 strong")
 	assert_str(String(r.actor_says)).contains("barely begun their drill")
+	assert_str(String(r.actor_says)).contains("At home 2 more are trained")
 	assert_str(String(r.actor_says)).contains("say the word and I take them as they are")
 	assert_str(String(MilitaryCampaign.field_armies[0].status)).is_equal("stationed")
 	var again:=CC.hear(id,"I demand it")
 	assert_str(String(again.war.verdict)).is_equal("act")
+	assert_int(int(again.objective.army_id)).is_equal(levy)
+	assert_bool(bool(again.objective.own_band)).is_true()
 	assert_str(String(MilitaryCampaign.field_armies[0].status)).is_equal("moving")
+
+func test_the_war_leader_at_home_sends_the_strongest_of_his_bands()->void:
+	# Bands serve under the war leader at home until the ruler names a general
+	# for them (leader_commands.gd), so the Marshal leads every one of them:
+	# told to attack, he sends the strongest that can go, not the first formed.
+	_train(12)
+	var small:=int(MilitaryCampaign.create_field_army(12,"LEVY BAND 1").army.army_id)
+	_train(150)
+	var large:=int(MilitaryCampaign.create_field_army(150,"LEVY BAND 2").army.army_id)
+	_set_garrison(10.0)
+	var id:=_marshal_audience()
+	var r:=CC.hear(id,"Attack Tsaren")
+	assert_str(String(r.war.verdict)).override_failure_message(String(r.get("actor_says",""))).is_equal("act")
+	var objective:Dictionary=r.get("objective",{})
+	assert_int(int(objective.get("army_id",0))).is_equal(large)
+	assert_bool(bool(objective.get("own_band",false))).is_true()
+	assert_int(int(objective.get("troops",0))).is_equal(150)
+	assert_str(String(r.get("actor_says",""))).contains("My band of 150 marches")
+	assert_str(String(MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(large)].status)).is_equal("moving")
+	assert_str(String(MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(small)].status)).is_equal("stationed")
+	# A band the ruler put under a general is that general's, never the Marshal's.
+	MilitaryCampaign.field_armies.clear()
+	_train(150)
+	var led:=int(MilitaryCampaign.create_field_army(150,"LEVY BAND 3").army.army_id)
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(Leaders.assign(MilitaryCampaign,led,String(general.get("figure_id",""))).has("error")).is_false()
+	assert_dict(WO._band_of(WO.war_leader())).is_empty()
+	assert_int(int(WO._band_of(WO.war_leader({"figure_id":String(general.figure_id)})).get("army_id",0))).is_equal(led)
 
 # ---------------------------------------------------------------------------
 # The war leader's own band (live report: "There's a band of 20 soldiers
@@ -390,10 +424,17 @@ func test_undrilled_levy_band_gets_an_objection_then_goes_if_the_god_insists()->
 
 ## The user's roster: the war leader's own band of 20, camped about 25 km
 ## from home, barely begun its drill with 3 still unarmed; 2 trained at home;
-## 20 more recruits in their first drill.
+## 20 more recruits in their first drill. The war leader is a general of
+## renown: the ruler put the band under him, as the War screen and the
+## Military Leaders screen do (leader_commands.gd); a new band serves under
+## the war leader at home until then.
 func _users_band()->Dictionary:
 	_train(20)
-	MilitaryCampaign.create_field_army(20,"LEVY BAND 1")
+	var made:=MilitaryCampaign.create_field_army(20,"LEVY BAND 1")
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(general.has("error")).override_failure_message(str(general)).is_false()
+	var put:=Leaders.assign(MilitaryCampaign,int((made.army as Dictionary).army_id),String(general.get("figure_id","")))
+	assert_bool(put.has("error")).override_failure_message(str(put)).is_false()
 	var army:Dictionary=MilitaryCampaign.field_armies[0]
 	var first:=true
 	for f in army.formations:

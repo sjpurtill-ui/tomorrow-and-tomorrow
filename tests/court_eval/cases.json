@@ -337,9 +337,10 @@
    "expect": {"handled": false, "known": true, "reply_any": ["nobody", "no one", "ruin"], "prompt_has": ["nobody of ours holds it"]}},
 
   {"id": "facts.who_holds.headman", "domain": "town_facts", "fixture": "tsaren_captured", "speaker": "headman", "source": "user",
+   "note": "The garrison Rovik's band left serves under the war leader at home (Suri); Rovik stays with his band.",
    "say": "Who holds Tsaren?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false, "known": true, "reply_any": ["Rovik", "{garrison}"], "prompt_has": ["our garrison {garrison} under Rovik Longstride"]}},
+   "expect": {"handled": false, "known": true, "reply_any": ["Suri", "{garrison}"], "prompt_has": ["our garrison {garrison} under Suri Ashvale"]}},
 
   {"id": "war.full_forces.suri", "domain": "war_march", "fixture": "war_not_held", "speaker": "suri", "source": "user",
    "say": "send our full forces into battle on Tsaren",
@@ -992,9 +993,10 @@
    "expect": {"handled": false, "known": true, "reply_any": ["Tsaren"], "prompt_has": ["ROVIK'S BAND"]}},
 
   {"id": "q.who_holds.suri", "domain": "office_questions", "fixture": "tsaren_captured", "speaker": "suri", "source": "user",
+   "note": "The garrison Rovik's band left serves under the war leader at home (Suri); Rovik stays with his band.",
    "say": "Who holds Tsaren?",
    "ideal": {"kind": "question", "action": "none", "type": "town", "ref": "$tsaren"},
-   "expect": {"handled": false, "known": true, "reply_any": ["Rovik", "{garrison}"], "prompt_has": ["our garrison {garrison} under Rovik Longstride"]}},
+   "expect": {"handled": false, "known": true, "reply_any": ["Suri", "{garrison}"], "prompt_has": ["our garrison {garrison} under Suri Ashvale"]}},
 
   {"id": "q.ford.suri", "domain": "office_questions", "fixture": "battle_won", "speaker": "suri", "source": "user",
    "say": "What happened at the ford?",

@@ -16,6 +16,7 @@ const Divine:=preload("res://scripts/divine_regard.gd")
 const Marks:=preload("res://scripts/hud/army_marks.gd")
 const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
 const Ledger:=preload("res://scripts/town_ledger.gd")
+const Leaders:=preload("res://scripts/leader_commands.gd")
 
 const USERS_ORDER:="Kill all males and take all women and girls back to seanstone and burn what remains of Tsaren to the ground."
 
@@ -76,6 +77,15 @@ func after_test()->void:
 	WorldSimulation.clear()
 	for node:Node in _processing: node.set_process(bool(_processing[node]))
 
+## The ruler puts a band under a general of renown, as the War screen and the
+## Military Leaders screen do (leader_commands.gd). A new band serves under
+## the war leader at home until then.
+func _under_a_general(army_id:int)->void:
+	var general:=Leaders.commission_general(MilitaryCampaign)
+	assert_bool(general.has("error")).override_failure_message(str(general)).is_false()
+	var put:=Leaders.assign(MilitaryCampaign,army_id,String(general.get("figure_id","")))
+	assert_bool(put.has("error")).override_failure_message(str(put)).is_false()
+
 ## The user's situation: Tsaren taken, 17 of Rovik's band holding it, one
 ## fighter still with Rovik outside the town.
 func _captured_tsaren()->Dictionary:
@@ -85,6 +95,7 @@ func _captured_tsaren()->Dictionary:
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
 	MilitaryCampaign.training_queue.clear()
 	MilitaryCampaign.create_field_army(18,"LEVY BAND 1")
+	_under_a_general(int(MilitaryCampaign.field_armies[0].army_id))
 	var army:Dictionary=MilitaryCampaign.field_armies[0]
 	army["supply_level"]=1.0; army["readiness"]=1.0
 	army["position"]={"x":city.x+0.3,"z":city.y}
@@ -245,6 +256,7 @@ func test_a_besieging_band_can_be_told_to_storm_and_objects_first()->void:
 	MilitaryCampaign.training_queue.clear()
 	var made:=MilitaryCampaign.create_field_army(200,"LEVY BAND 1")
 	var army_id:=int((made.army as Dictionary).army_id)
+	_under_a_general(army_id)
 	var index:=MilitaryCampaign._field_army_index(army_id)
 	MilitaryCampaign.field_armies[index]["position"]={"x":city.x+0.2,"z":city.y}
 	MilitaryCampaign.field_armies[index]["status"]="stationed"
@@ -462,6 +474,7 @@ func test_holding_no_town_the_order_is_answered_plainly_and_nobody_here_dies()->
 	MilitaryCampaign._complete_training(MilitaryCampaign.training_queue[0].duplicate(true))
 	MilitaryCampaign.training_queue.clear()
 	MilitaryCampaign.create_field_army(10,"LEVY BAND 1")
+	_under_a_general(int(MilitaryCampaign.field_armies[0].army_id))
 	var id:=_audience(MilitaryCampaign.field_armies[0])
 	var r:=CC.hear(id,USERS_UNNAMED_ORDER)
 	assert_str(String(r.get("verb",""))).is_equal("war")
