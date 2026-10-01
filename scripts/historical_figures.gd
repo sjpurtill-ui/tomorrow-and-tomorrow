@@ -226,6 +226,11 @@ func record_battle(result:Dictionary)->void:
 		p.battle_keys.append(key)
 		if p.battle_keys.size()>64: p.battle_keys.pop_front()
 		p.renown+=3
+		# Won or lost, by who broke (a fight nobody broke is neither).
+		var defeated:=String(term.get("defeated",""))
+		if defeated!="":
+			var lost:=defeated==String(force.get("name",""))
+			p["battles_lost" if lost else "battles_won"]=int(p.get("battles_lost" if lost else "battles_won",0))+1
 		_event(p,day,"Led %s: %s; %d soldiers remained in the force." % [force.get("name","an army"),String(result.get("outcome","undecided")).replace("_"," "),int(force.get("remaining_troops",0))])
 		if String(term.get("defeated",""))!=String(force.get("name","")): continue
 		var fate:=String(term.get("commander_fate","escaped"))

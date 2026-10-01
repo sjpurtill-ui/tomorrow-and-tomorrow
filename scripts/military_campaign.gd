@@ -161,7 +161,7 @@ func open_roster(service:String="army",training:bool=false,page:String="")->void
 		scene.hud.close_detail();scene.hud.close_dock()
 	roster_screen=load("res://scripts/hud/military_roster_screen.gd").new()
 	roster_screen.service=service;roster_screen.training_view=training
-	roster_screen.page=page if not page.is_empty() else ("training" if training else "forces")
+	roster_screen.page=page if not page.is_empty() else ("training" if training else "leaders")
 	get_tree().root.add_child(roster_screen)
 
 
