@@ -117,7 +117,10 @@ func _captured_tsaren()->Dictionary:
 	civ.strategic_regions[ri]["resistance"]=0.6
 	var garrison:=MilitaryCampaign.establish_occupation_force(civ_id,civ.strategic_regions[ri],17.0,army_id)
 	assert_int(int(garrison.get("troops",0))).override_failure_message(str(garrison)).is_greater(0)
-	return MilitaryCampaign.field_armies[MilitaryCampaign._field_army_index(army_id)]
+	# Every man stayed to hold the town: the band is its garrison now, its
+	# general with it (no band of nobody is left behind).
+	var at:=MilitaryCampaign._field_army_index(army_id)
+	return MilitaryCampaign.field_armies[at] if at>=0 else MilitaryCampaign.occupation_force_for_region(civ_id,city_id)
 
 func _war_leader(band:Dictionary)->String:
 	var audience:=Hall.summon({"figure_id":String((band.commander as Dictionary).get("figure_id",""))})

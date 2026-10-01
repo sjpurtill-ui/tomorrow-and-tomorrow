@@ -153,11 +153,15 @@ func _go_rest(army:Dictionary,today:int,first:bool)->void:
 	var who:=_band_words(army)
 	var why:=Lines.why_unfit(army)
 	if place.is_empty() or _at(army,place):
+		# It rests here: no march to make.
+		army["rest_place"]=""
 		army["command_status"]=RESTING
 		if first: _say(today,"%s rests and refills" % who,"%s is out of the fighting (%s) and rests at %s until it is fit again." % [who,why,name])
 		return
 	var moved:Dictionary=host.move_field_army(int(army.army_id),String(place.id))
 	if moved.has("error"):
+		# No road on: it rests where it stands, and is not sent again each day.
+		army["rest_place"]=""
 		army["command_status"]=RESTING
 		if first: _say(today,"%s rests where it stands" % who,"%s is out of the fighting (%s); there is no road to %s, so it rests where it stands." % [who,why,name])
 		return

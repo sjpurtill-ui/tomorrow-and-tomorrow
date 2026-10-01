@@ -1223,6 +1223,29 @@ func march_days(force:Dictionary,route:Dictionary)->int:
 ## live off the land.
 const MARCH_SAMPLES:=5
 
+## What a march would cost in food, for the war leader deciding whether to
+## go at all (feed the army, or don't go; the war council reads it):
+## {days (the one estimate, half pace counted), half_pace (share of the
+## road lived off the land), fed_on_road (the leanest share of a ration on
+## the way), fed_there (camped at the end), hungry (a stretch, or the camp,
+## below a fed day)}. The supply model's own reading (supply_state.gd
+## at_point), with the carriers as they are today.
+func march_supply(force:Dictionary,route:Dictionary)->Dictionary:
+	var mix:=MarchTerrain.mix_of(force)
+	var packed:=_march_packed(route,mix)
+	if packed.is_empty(): return {"days":0,"half_pace":0.0,"fed_on_road":1.0,"fed_there":SupplyState.fed(force),"hungry":SupplyState.fed(force)<FieldRations.HUNGRY_BELOW}
+	var origin:Vector2=route.get("origin",ArmyLandRoute.unpack(packed)[0])
+	var slowing:=_forage_slowing(force,origin,packed)
+	var troops:=maxi(1,int(force.get("troops",0)))
+	var total:=MarchTerrain.total_effort(packed)
+	var lean:=1.0
+	for k in MARCH_SAMPLES:
+		var at:Vector2=MarchTerrain.at_effort(origin,packed,total*(float(k)+0.5)/float(MARCH_SAMPLES)).position
+		lean=minf(lean,float(SupplyState.at_point(at,troops,true,false).get("ratio",1.0)))
+	var there:=float(SupplyState.at_point(MarchTerrain.at_effort(origin,packed,total).position,troops,false,false).get("ratio",1.0))
+	return {"days":MarchTerrain.days(origin,packed,_field_army_speed(force)/slowing,int(WorldSimulation.state.elapsed_days),mix),"half_pace":clampf((slowing-1.0)/(1.0/FieldRations.FORAGE_PACE-1.0),0.0,1.0),
+		"fed_on_road":lean,"fed_there":there,"hungry":minf(lean,there)<FieldRations.HUNGRY_BELOW}
+
 ## How much living off the land slows a march on this road (from `done`
 ## level km on): 1 where the carriers feed the band all the way, up to
 ## 1/FORAGE_PACE (twice the days) where they reach it nowhere. The same
@@ -6353,6 +6376,8 @@ func siege_order(siege_id:String,order:String)->Dictionary:
 		var busy:=_army_in_battle(int(saved.army_id)) if String(saved.mode)=="offensive" else _home_battle_running()
 		_settle_waiting()
 		if troops<=0 or busy: return {"error":"No available local force can enter battle; the siege orders remain in place."}
+		# A broken or weak band does not storm: the siege goes on (army_lines.gd).
+		if String(saved.mode)=="offensive" and field_index>=0 and ArmyLines.unfit(field_armies[field_index]): return {"error":"%s is not fit to storm the town: %s. The siege goes on." % [upkeep._band_words(field_armies[field_index]),ArmyLines.why_unfit(field_armies[field_index])],"unfit":true}
 		_end_siege("The forces leave siege positions for battle.",false,false)
 		active_threat=(saved.threat as Dictionary).duplicate(true)
 		var result:=begin_threat_engagement(false)

@@ -469,6 +469,35 @@ func test_a_lost_fight_at_home_is_not_the_loss_of_home()->void:
 	assert_str(String(result.strategic_outcome.message)).contains("only if its ruler yields it")
 
 
+# --- Half pace counts in the one march estimate --------------------------------
+
+func test_half_pace_counts_in_the_march_estimate()->void:
+	# No carriers for a band already out: a band of twenty lives off the
+	# land the whole way, at half pace.
+	GameState.population_allocations["Logistics"]=0
+	var band:=_band(3,[_formation(31,"levy","spear",20)],40.0)
+	MilitaryCampaign.field_armies.assign([band])
+	assert_float(float(MilitaryCampaign.carrier_reading().food)).is_less(0.05)
+	var from:=_home()+Vector2(40.0,0.0)
+	var road:Dictionary=MilitaryCampaign.field_route(from,from+Vector2(60.0,0.0),band)
+	assert_bool(road.has("error")).override_failure_message(str(road)).is_false()
+	var mix:=preload("res://scripts/march_terrain.gd").mix_of(band)
+	var packed:Array=MilitaryCampaign._march_packed(road,mix)
+	var full_pace:=preload("res://scripts/march_terrain.gd").days(from,packed,MilitaryCampaign._field_army_speed(band),int(GameState.elapsed_days),mix)
+	var days:=MilitaryCampaign.march_days(band,road)
+	assert_int(days).is_greater(full_pace)
+	assert_int(days).is_less_equal(full_pace*2+1)
+	var plan:Dictionary=MilitaryCampaign.march_supply(band,road)
+	assert_int(int(plan.days)).is_equal(days)
+	assert_float(float(plan.half_pace)).is_greater(0.5)
+	# Sent on that road, the band's own reckoning of the days is the same.
+	var live:Dictionary=MilitaryCampaign.field_armies[0]
+	live["status"]="moving"
+	MilitaryCampaign._set_march_route(live,road)
+	assert_float(float(live.march_slowing)).is_greater(1.5)
+	assert_int(MilitaryCampaign._march_days_left(live,from)).is_equal(days)
+
+
 # --- One supply number ----------------------------------------------------------
 
 func test_one_supply_number_on_the_band_its_runner_and_its_report()->void:
