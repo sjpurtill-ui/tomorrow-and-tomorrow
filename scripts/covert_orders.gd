@@ -123,6 +123,10 @@ static func read(text:String,_civ_hint:String="",_audience_id:String="")->Dictio
 	var clean:=text.strip_edges()
 	if clean=="" or clean.ends_with("?"): return {}
 	if not cue(clean): return {}
+	# Words that hold the act back lead with a plain no ("Don't send an
+	# assassin", "never send spies"): not an order, the engine says nothing is
+	# done. A later qualifier ("send him, don't let him be seen") is untouched.
+	if _re("(?i)^\\W*(no[,. ]+)?(don'?t|do not|never|do no\\b|please don'?t|call (it|that|them) off|cancel|stop sending)\\b").search(clean)!=null: return {}
 	var kind:=_kind(clean)
 	if kind=="": return {}
 	var target:=_match_target(clean)

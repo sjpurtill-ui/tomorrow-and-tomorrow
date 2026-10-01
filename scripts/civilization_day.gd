@@ -132,8 +132,10 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 const COUNCIL_PATH:="res://scripts/war_council.gd"
+const COVERT_PATH:="res://scripts/covert_ops.gd"
 static var _war_loop_script:GDScript
 static var _council_script:GDScript
+static var _covert_script:GDScript
 
 ## A day of war for the owner in scope: loaded here, not preloaded, to keep
 ## the calendar's compile order free of the court's scripts.
@@ -141,6 +143,10 @@ static func _war_day(day:int)->void:
 	if WorldSimulation.actor_id=="player":
 		if _war_loop_script==null:_war_loop_script=load(WAR_LOOP_PATH)
 		_war_loop_script.call("daily",day)
+		# Spies and assassins advance on their own schedule (covert_ops.gd):
+		# arrivals, reports, strikes, the rivals' own acts and our watch.
+		if _covert_script==null:_covert_script=load(COVERT_PATH)
+		_covert_script.call("daily",day)
 	if _council_script==null:_council_script=load(COUNCIL_PATH)
 	_council_script.call("day",day)
 

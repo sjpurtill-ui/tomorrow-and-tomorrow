@@ -779,7 +779,9 @@ static func _apply_sabotage(civ_id:String,rng:RandomNumberGenerator)->Dictionary
 		_reduce_food_days(civ_id,rng.randf_range(6.0,14.0))
 		return {"what":"stores","amount":0,"title":"Stores Burned","words":"found their stores fired in the night; their winter will be the leaner for it."}
 	elif roll<0.8:
-		# Foul a well.
+		# Foul a well: sickness and thirst, and some food spoiled with it.
+		var have:=Hall.foreign_stock(civ_id,"Food")
+		if have>0.0: EXCHANGE.take(civ_id,"Food",maxf(6.0,have*rng.randf_range(0.06,0.15)))
 		_reduce_food_days(civ_id,rng.randf_range(4.0,9.0))
 		return {"what":"well","amount":0,"title":"A Well Fouled","words":"found a well fouled; sickness and thirst follow until they dig another."}
 	else:
