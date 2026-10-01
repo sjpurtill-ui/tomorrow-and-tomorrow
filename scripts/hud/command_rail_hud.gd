@@ -20,6 +20,8 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"overview","label":"The People","icon":0,"tooltip":"The people: how many, how fed, how long they live · F1"},
 	{"id":"standing","label":"Standing","tooltip":"What we are, how every people we know sees us, and what it makes them do"},
 	{"id":"world","label":"Known World","tooltip":"The world your scouts have walked, and who lives in it · F6"},
+	# The warriors stand on the rail itself, one click away as HOI4 keeps them.
+	{"id":"military","label":"Military","icon":8,"tooltip":"Warriors, training and command · F8"},
 	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
 	{"id":"government","label":"Government","icon":1,"drawer":true,"tooltip":"Chiefs, officeholders and their duties · F3"},
 	{"id":"economy","label":"Food","icon":2,"sub":0,"drawer":true,"tooltip":"Food and water · F2"},
@@ -28,7 +30,6 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"construction","label":"Buildings","icon":5,"drawer":true,"tooltip":"Construction and infrastructure · F7"},
 	{"id":"production","label":"Production","icon":6,"drawer":true,"tooltip":"Crafts, tools and weapons in the making · F9"},
 	{"id":"civ","label":"Culture","icon":7,"drawer":true,"tooltip":"Society and civic dialogue · F4"},
-	{"id":"military","label":"Military","icon":8,"drawer":true,"tooltip":"Warriors, training and command · F8"},
 	{"id":"inquiry","label":"Research","drawer":true,"tooltip":"What the people know and are learning · F5"},
 ]
 const EraWords:=preload("res://scripts/hud/era_words.gd")
