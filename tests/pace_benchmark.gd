@@ -48,10 +48,18 @@ func run()->void:
 	if _arg("span","")!="":WorldSimulation.span_limit=maxi(1,int(_arg("span","3")))
 	var terrain:=Terrain.new();add_child(terrain)
 	terrain._configure_seamless_world();terrain._configure_shape();terrain._configure_noise()
+	terrain._prepare_river_course()
+	# The same geography the game's terrain hands the simulation (local_terrain.gd _ready).
+	CivilizationSystem.set_scout_geography_authority(Callable(terrain,"_scout_land_at"))
+	CivilizationSystem.set_ground_survey_authority(Callable(terrain,"_survey_ground_at"))
+	MilitaryCampaign.recovery.surface_assessor=Callable(terrain,"_settlement_surface_assessment")
+	WorldSimulation.water_provider=Callable(terrain,"_surface_water_site_near")
 	WorldSimulation.context_provider=terrain._civilization_geography
 	WorldSimulation.surface_material_provider=terrain._civilization_surface_materials
+	WorldSimulation.bind_geography()
 	terrain.camera=Camera3D.new();terrain.add_child(terrain.camera)
 	terrain.settler_marker=Area3D.new();terrain.add_child(terrain.settler_marker);terrain.settler_marker.position=GameState.settlement_founded_at
+	if "--census" in args:_census()
 	var days:=int(_arg("days","30"))
 	var warm:=int(_arg("warm","2"))
 	var trace=preload("res://scripts/performance_trace.gd")
@@ -116,6 +124,9 @@ func run()->void:
 		var traced:Dictionary={}
 		for key:String in trace.totals:traced[key]=snappedf(float(trace.totals[key].microseconds)/1000.0/warm_days,.01)
 		report["trace_ms_per_day"]=_sorted_desc(traced)
+		var calls:Dictionary={}
+		for key:String in trace.totals:calls[key]=snappedf(float(trace.totals[key].calls)/warm_days,.1)
+		report["trace_calls_per_day"]=calls
 	var out_name:=_arg("save-out","")
 	if out_name!="":
 		var saved:=saves.save_game(out_name)
@@ -140,6 +151,26 @@ func run()->void:
 	if out:out.store_string(JSON.stringify(report,"  "));out.close()
 	print("PACE_DONE ",json_path)
 	terrain.free();WorldSimulation.clear();get_tree().quit(0)
+
+## Why each rival steps as often as it does (world_simulation.gd _span_waits).
+func _census()->void:
+	var contact:Dictionary={}
+	for civ:Dictionary in CivilizationSystem.civilizations:
+		contact[String(civ.id)]=int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))
+	for id:String in WorldSimulation.actors:
+		var actor:Dictionary=WorldSimulation.actors[id]
+		WorldSimulation.scoped(id,func()->void:
+			var state=WorldSimulation.state
+			var military=WorldSimulation.military
+			var moving:=0
+			for army:Dictionary in military.field_armies:
+				if String(army.get("status","stationed"))!="stationed":moving+=1
+			var towns_dry:=[]
+			for city:Dictionary in state.player_settlements:
+				if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
+				towns_dry.append(snappedf(float((city.get("resource_metrics",{}) as Dictionary).get("water_intake_ratio",0.0)),.01))
+			print("PACE_CENSUS ",id," pop=",int(state.population_exact)," contact=",contact.get(id,-1)," calm=",preload("res://scripts/day_span.gd").calm()," food_span=",preload("res://scripts/day_span.gd").food_span()," limit=",WorldSimulation._span_limit_for(id)," last_gap=",actor.get("last_gap",1)," wars=",WorldSimulation.world.player_effects().get("war_count",0)," moving_armies=",moving," engaged=",not military.active_engagement.is_empty()," threat=",not military.active_threat.is_empty()," siege=",not military.active_siege.is_empty()," water=",snappedf(float(state.simulation_metrics.get("water_intake_ratio",0.0)),.01)," towns_water=",towns_dry," convoy=",state.convoy_traveling or bool(state.settlement_convoy.get("active",false))," recovery=",military.recovery.home_unavailable())
+		)
 
 ## Compares two saved worlds. A key in `ignored` may be added or dropped (a
 ## field an optimization keeps); floats within `tolerance` (relative) differ

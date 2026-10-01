@@ -42,7 +42,13 @@ func sea_route(start:Vector2,finish:Vector2)->Dictionary:
 			var b:=graph.get_point_position(endpoint)
 			if a.distance_to(b)<=spacing*2.5 and sea_edge(a,b):graph.connect_points(id,endpoint)
 	var path:=graph.get_point_path(1,2)
-	if path.is_empty():return {"error":"No connected sea route was found. Rebase to a port on the same coast or choose a nearer region."}
+	if path.is_empty():
+		# The same search fails the same way; a ruler's monthly review asks
+		# again for every ship in harbour (a few ms of land samples each).
+		var failed:={"error":"No connected sea route was found. Rebase to a port on the same coast or choose a nearer region."}
+		if route_cache.size()>=128:route_cache.clear()
+		route_cache[cache_key]=failed.duplicate(true)
+		return failed
 	return _result(Array(path),cache_key)
 
 func _result(points:Array,key:String)->Dictionary:
