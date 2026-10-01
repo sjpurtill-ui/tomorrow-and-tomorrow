@@ -1732,10 +1732,11 @@ class Surrogate:
                 self.active[ch] = -1
         held = np.bincount(ch_line[np.where(self.active >= 0)[0]], minlength=len(gd.LINES))
         turns, last = self._team_turns(year, held, followed)
-        # 2. Fewer teams (fewer researchers): the teams furthest ahead stop first.
+        # 2. Fewer teams (fewer researchers): the teams with the most work still
+        # ahead of them stop first.
         teams = np.where(self.active >= 0)[0].tolist()
         if len(teams) > q:
-            teams.sort(key=lambda ch: (-(self.open_year[int(self.active[ch])] - year), shares[ch_line[ch]] * turns[followed].sum() - turns[ch_line[ch]]))
+            teams.sort(key=lambda ch: (-self._expected_work(int(self.active[ch]), year), shares[ch_line[ch]] * turns[followed].sum() - turns[ch_line[ch]]))
             for ch in teams[:len(teams) - q]:
                 self.active[ch] = -1
                 held[ch_line[ch]] -= 1
@@ -1786,8 +1787,11 @@ class Surrogate:
                     held[li] -= 1
                     turns[li] -= 1
                     # Rows of rank tier - 2 or nearer: a waiting line's up to `tier` itself.
+                    # Only the team's own line may count as waiting here.
                     rows = self._team_placements(month, followed, busy, (ch,), tier)
-                    near = self._team_pick(rows, shares, turns, last, held, followed, year) if rows else None
+                    others = np.maximum(held, 1)
+                    others[li] = held[li]
+                    near = self._team_pick(rows, shares, turns, last, others, followed, year) if rows else None
                     held[li] += 1
                     turns[li] += 1
                     if near is not None and near[0] <= tier - 2 and near[4] != item and self._expected_work(near[4], year) * SWITCH_MARGIN < self._expected_work(item, year):

@@ -1055,9 +1055,10 @@ func _best_free_candidate(channel:String,current_day:int,busy:Dictionary,max_tie
 	if best.is_empty() or not busy.has(String(best.get("id",""))): return best
 	return _score_best_candidate(channel,current_day,busy)
 
-## Fewer researchers, fewer teams: the teams furthest ahead of their age stop
-## first; their progress stays with the question. A question the player chose
-## keeps its team.
+## Fewer researchers, fewer teams: the teams with the most work still ahead of
+## them stop first (a question far ahead of its age, or barely begun), so a
+## question nearly proven keeps its team; their progress stays with the
+## question. A question the player chose keeps its team.
 func _release_extra_teams(count:int)->void:
 	var active:Dictionary=WorldSimulation.state.active_investigations
 	var pins:=0
@@ -1065,7 +1066,7 @@ func _release_extra_teams(count:int)->void:
 	for channel_variant in active:
 		var channel:=String(channel_variant)
 		if _pinned(channel): pins+=1
-		else: order.append([research_years_ahead(discovery_definition(String(active[channel]))),channel])
+		else: order.append([_expected_work(discovery_definition(String(active[channel]))),channel])
 	var extra:=active.size()-maxi(count,pins)
 	if extra<=0: return
 	order.sort_custom(func(a:Array,b:Array)->bool: return float(a[0])>float(b[0]) if not is_equal_approx(float(a[0]),float(b[0])) else String(a[1])<String(b[1]))
@@ -1166,7 +1167,13 @@ func _switch_to_quicker_questions(current_day:int)->void:
 		var tier:=team_tier(current)
 		if best.is_empty() and tier>=4:
 			# Far ahead: the work a free team would take, two bands nearer or more.
-			var nearer:=_next_team_placement(lines,turns,held,current_day,busy,channel,tier-2)
+			# Only this team's own line may count as waiting here: another waiting
+			# line's turn comes with the next team a proof frees, and a team far
+			# ahead moves only to nearer, cheaper work.
+			var others:=held.duplicate()
+			for other:String in lines:
+				if other!=line: others[other]=maxi(1,int(others.get(other,0)))
+			var nearer:=_next_team_placement(lines,turns,others,current_day,busy,channel,tier-2)
 			if not nearer.is_empty() and int(nearer.tier)<=tier-2 and String(nearer.id)!=current_id and _expected_work(discovery_definition(String(nearer.id)))*SWITCH_MARGIN<_expected_work(current): best=nearer
 		_count_turn(held,turns,line,1)
 		if best.is_empty() and channel==_channel_key(String(current.get("dynamic","")),String(current.get("subcategory",""))):

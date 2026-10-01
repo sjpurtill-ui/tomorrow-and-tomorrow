@@ -316,6 +316,47 @@ func test_a_team_on_a_long_leap_moves_two_bands_nearer_within_a_month()->void:
 		assert_str(String(state.active_investigations.get("culture::Social cohesion",""))).is_equal("teams_long_leap")
 	)
 
+func test_a_long_leap_moves_to_cheap_work_though_another_line_waits_with_far_work()->void:
+	# The player's year-186 save: knowledge had waited five years, so a free team
+	# would take its 26-year question; that question was more work than the far
+	# teams' own, and they kept 30-to-60-year leaps beside open work 9 years ahead.
+	WorldSimulation.create_actor("teams_waiting_far",517)
+	WorldSimulation.scoped("teams_waiting_far",func()->void:
+		var state:=WorldSimulation.state
+		var research:=WorldSimulation.discovery
+		state.elapsed_days=float(10*365)
+		state.population_allocations.Knowledge=0
+		state.active_investigations.clear();state.research_targets.clear()
+		state.research_subcategory_allocations={"culture":{"Social cohesion":6},"nutrition":{"Daily supply":1},"knowledge":{"Observers":1}}
+		state.research_allocations={"culture":6,"nutrition":1,"knowledge":1}
+		# Nutrition proved a question last year; knowledge has proved nothing.
+		state.discovery_log=[{"day":int(state.elapsed_days)-365,"id":"teams_nutrition_last","dynamic":"nutrition","team_line":"nutrition"}]
+		var leap:={"id":"teams_waiting_leap","name":"Long Leap","dynamic":"culture","subcategory":"Social cohesion","earliest_year":80.0,"day":0,"requires":[],"signals":[],"observation":""}
+		var near:={"id":"teams_waiting_near","name":"Near Lead","dynamic":"nutrition","subcategory":"Daily supply","earliest_year":17.0,"day":0,"requires":[],"signals":[],"observation":""}
+		var heavy:={"id":"teams_waiting_heavy","name":"Heavy Far Work","dynamic":"knowledge","subcategory":"Observers","earliest_year":40.0,"day":0,"requires":[],"signals":[],"observation":"","chance":0.00005}
+		research.catalog_by_channel={"culture::Social cohesion":[leap],"nutrition::Daily supply":[near],"knowledge::Observers":[heavy]}
+		for question:Dictionary in [leap,near,heavy]:research.catalog_by_id[String(question.id)]=question
+		research.technology_catalog.clear()
+		assert_int(research.team_tier(leap)).is_equal(research.TEAM_TIER_LAST)
+		assert_int(research.team_tier(near)).is_equal(2)
+		assert_int(research.team_tier(heavy)).is_equal(4)
+		state.active_investigations["culture::Social cohesion"]="teams_waiting_leap"
+		state.discovery_progress["teams_waiting_leap"]=0.2
+		assert_int(int(research.research_teams().count)).is_equal(1)
+		# A free team would take knowledge's far work (its turn has come)...
+		var free:=research._next_team_placement(research._team_lines(),research._team_turns(research._team_lines(),{},int(state.elapsed_days)),{},int(state.elapsed_days),{},"culture::Social cohesion")
+		assert_str(String(free.get("id",""))).is_equal("teams_waiting_heavy")
+		# ...but the team on the long leap moves to the cheap work instead.
+		var moved:=-1
+		for day in 31:
+			state.elapsed_days+=1.0
+			research.refresh_investigations()
+			if String(state.active_investigations.get("nutrition::Daily supply",""))=="teams_waiting_near":moved=day;break
+		assert_int(moved).is_between(0,30)
+		assert_bool(state.active_investigations.has("culture::Social cohesion")).is_false()
+		assert_float(float(state.discovery_progress.get("teams_waiting_leap",0.0))).is_equal(0.2)
+	)
+
 # --- Foundation work keeps near its age ------------------------------------------------
 
 func test_foundation_work_goes_no_more_than_five_years_ahead()->void:
