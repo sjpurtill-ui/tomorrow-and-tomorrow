@@ -296,6 +296,8 @@ static func _card(civ_id:String,stance:String,done:Dictionary,words:String)->voi
 	if tracker==null: return
 	var said:=words if words!="" else "%s: %s" % [_name(civ_id),String({"leave":"leave them be","defend":"defend","punish":"punish","take":"take a town","peace":"seek peace"}.get(stance,stance))]
 	var id:int=tracker.call("register",said,"war")
+	# One stance toward a people stands: the later word replaces the earlier card.
+	tracker.call("supersede",id,"stance:%s" % civ_id)
 	var verdict:=String(done.get("verdict",""))
 	var decision:=done.duplicate()
 	decision["general"]=_who()

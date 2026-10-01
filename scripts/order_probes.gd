@@ -226,6 +226,9 @@ static func _build(refs:Dictionary)->Dictionary:
 	for t in GameState.settlement_completed:
 		if String(t)==title:built+=1
 	if built>int(refs.get("built_before",0)):return {"state":"done","line":"%s stands" % title,"progress":2.0,"moved":true}
+	# Another work was put first since (an older save's card): this one no longer is.
+	var city:Dictionary=WorldSimulation.settlements.settlement_record(String(refs.get("settlement_id",""))) if WorldSimulation.settlements!=null and String(refs.get("settlement_id",""))!="" else {}
+	if not city.is_empty() and String(city.get("construction_priority",title))!=title:return {"state":"called_off","line":"Another work was put first","progress":1.0,"moved":true}
 	var days:=1.0
 	for project:Dictionary in load("res://scripts/settlement_construction.gd")._settlement_definitions():
 		if String(project.get("name",""))==title:days=maxf(1.0,float(project.get("days",1.0)))
@@ -240,6 +243,8 @@ static func _defences(refs:Dictionary)->Dictionary:
 	var HD=load("res://scripts/home_defense.gd")
 	var r:Dictionary=HD.reading()
 	var word:=String(refs.get("word",HD.word()))
+	# A later word on the defences replaced this one (an older save's card).
+	if refs.has("word") and String(refs.word)!=String(HD.word()):return {"state":"called_off","line":"Replaced by your later word","progress":1.0,"moved":true}
 	var status:=String(r.get("status",""))
 	var building:Dictionary=r.get("building",{}) if r.get("building") is Dictionary else {}
 	var blockers:Array=r.get("blockers",[]) if r.get("blockers") is Array else []

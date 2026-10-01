@@ -30,7 +30,12 @@ const DONE_SHOW_MS:=9000
 const FADE_SECONDS:=1.2
 const CHECK_SECONDS:=0.5
 ## The words each state leads with on a card.
-const STATE_WORDS:={"accepted":"Given","under_way":"Under way","done":"Done","stalled":"Stalled","refused":"Not done","nothing":"NOTHING HAS HAPPENED"}
+const STATE_WORDS:={"accepted":"Given","under_way":"Under way","done":"Done","stalled":"Stalled","refused":"Not done","nothing":"NOTHING HAS HAPPENED","called_off":"Called off"}
+## The words' column on a card: the card's width less its stripe, glyph and
+## margins, so a wrapped line knows its height from the first frame.
+const TEXT_WIDTH:=WIDTH-10.0-4.0-8.0-22.0-8.0
+## States whose card shows a few seconds, then fades.
+const FADING:=["done","called_off"]
 
 var plate:PanelContainer
 var header:HBoxContainer
@@ -49,6 +54,13 @@ var _last_day:=-1
 var _signature:=""
 ## id -> msec when its card was first shown done.
 var _done_seen:Dictionary={}
+## What the cards on the face show: [id, state, has bar, has who] each. When
+## only their words and bars move, the cards are updated where they stand
+## (no rebuild, no jump); id -> {status, bar, card} for that.
+var _shape:=[]
+var _parts:Dictionary={}
+## The stack's size when it last asked to be placed.
+var _placed_size:=Vector2(-1,-1)
 
 
 func _ready()->void:
@@ -126,7 +138,7 @@ func shown()->Array:
 	for o in Tracker.current(1):
 		var order:Dictionary=o
 		var id:=int(order.id)
-		if String(order.state) in ["done"]:
+		if String(order.state) in FADING:
 			if not _done_seen.has(id):_done_seen[id]=now
 			if now-int(_done_seen[id])>DONE_SHOW_MS+int(FADE_SECONDS*1000.0):continue
 		out.append(order)
@@ -134,23 +146,30 @@ func shown()->Array:
 	return out
 
 
+## The cards' make-up: what decides which nodes a card has.
+static func card_shape(o:Dictionary)->Array:
+	var state:=String(o.get("state","accepted"))
+	return [int(o.get("id",0)),state,int(o.get("total",0))>0 and state!="refused",String(o.get("who",""))!=""]
+
+
 func rebuild()->void:
 	_dirty=false
 	var orders:=Tracker.orders()
 	_signature="%d|%d" % [orders.size(),int((orders[0] as Dictionary).get("id",0)) if not orders.is_empty() else 0]
+	var list:=shown()
+	var shape:=list.map(func(o)->Array:return card_shape(o as Dictionary))
+	# Only words and bars moved (a day's progress): change them where they
+	# stand. Rebuilding every card each game day shook the stack at speed.
+	if shape==_shape and not compact and cards.get_child_count()==list.size() and not showing_all:
+		for o in list:_update_card(o as Dictionary)
+		_header(orders)
+		_settle.call_deferred()
+		return
+	_shape=shape
+	_parts.clear()
 	for child in cards.get_children():
 		cards.remove_child(child);child.queue_free()
-	var list:=shown()
-	# Red orders of the last month keep the caption red.
-	var red:=0
-	var today:=int(GameState.elapsed_days)
-	for o in orders:
-		if String((o as Dictionary).state)=="nothing" and today-int((o as Dictionary).get("day",today))<=30:red+=1
-	all_button.text=("All %d" % orders.size()) if not showing_all else "Hide"
-	all_button.visible=not orders.is_empty()
-	caption.text="YOUR ORDERS" if red==0 else "YOUR ORDERS · %d NOT CARRIED OUT" % red
-	caption.add_theme_color_override("font_color",Tokens.RED_TEXT if red>0 else Tokens.GOLD_TEXT)
-	plate.visible=not orders.is_empty()
+	_header(orders)
 	if not compact:
 		for o in list:cards.add_child(_card(o as Dictionary))
 	cards.visible=not compact
@@ -161,14 +180,45 @@ func rebuild()->void:
 	_settle.call_deferred()
 
 
+## The caption and the All button: red while orders of the last month were
+## not carried out.
+func _header(orders:Array)->void:
+	var red:=0
+	var today:=int(GameState.elapsed_days)
+	for o in orders:
+		if String((o as Dictionary).state)=="nothing" and today-int((o as Dictionary).get("day",today))<=30:red+=1
+	all_button.text=("All %d" % orders.size()) if not showing_all else "Hide"
+	all_button.visible=not orders.is_empty()
+	caption.text="YOUR ORDERS" if red==0 else "YOUR ORDERS · %d NOT CARRIED OUT" % red
+	caption.add_theme_color_override("font_color",Tokens.RED_TEXT if red>0 else Tokens.GOLD_TEXT)
+	plate.visible=not orders.is_empty()
+
+
+## A card's words, bar and colour, changed where it stands.
+func _update_card(o:Dictionary)->void:
+	var parts:Dictionary=_parts.get(int(o.id),{})
+	if parts.is_empty():return
+	var state:=String(o.get("state","accepted"))
+	(parts.status as Label).text=status_words(o)
+	(parts.card as Control).tooltip_text=_tooltip(o)
+	if parts.has("bar") and is_instance_valid(parts.bar):
+		var bar:Bar=parts.bar
+		var share:=clampf(float(o.get("value",0))/float(maxi(1,int(o.get("total",0)))),0.0,1.0)
+		if not is_equal_approx(bar.share,share):bar.share=share;bar.queue_redraw()
+
+
 ## Wrapped labels report their true height only after the first sort: the
-## stack shrinks to it a frame later and asks the HUD to place it again.
+## stack shrinks to it a frame later and asks the HUD to place it again, only
+## when its size really changed (so a day's new words never shake it).
 func _settle()->void:
 	if not is_inside_tree():return
 	if not get_tree().process_frame.is_connected(_settled):get_tree().process_frame.connect(_settled,CONNECT_ONE_SHOT)
 
 func _settled()->void:
 	reset_size()
+	var now:=get_combined_minimum_size()
+	if now.is_equal_approx(_placed_size):return
+	_placed_size=now
 	relayout.emit()
 
 
@@ -224,7 +274,7 @@ static func status_words(o:Dictionary)->String:
 	if state=="nothing":
 		var rest:=line.trim_prefix("Nothing has happened yet: ").trim_prefix("Not carried out: ")
 		return rest.substr(0,1).to_upper()+rest.substr(1)
-	if state in ["done","refused"] and not line.begins_with(String(STATE_WORDS[state])):return Tracker.short("%s · %s" % [STATE_WORDS[state],line])
+	if state in ["done","refused","called_off"] and not line.begins_with(String(STATE_WORDS[state])):return Tracker.short("%s · %s" % [STATE_WORDS[state],line])
 	return line
 
 func _card(o:Dictionary)->PanelContainer:
@@ -255,12 +305,17 @@ func _card(o:Dictionary)->PanelContainer:
 	var status:=Label.new();status.name="OrderStatus";status.text=status_words(o)
 	Tokens.style_label(status,12,Tokens.text_for(colour) if state!="accepted" else Tokens.BODY_2)
 	status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;status.max_lines_visible=2;status.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	# A set width: the wrapped words know their height before the first sort.
+	status.custom_minimum_size=Vector2(TEXT_WIDTH,0)
 	column.add_child(status)
+	var parts:={"card":card,"status":status}
 	var total:=int(o.get("total",0))
 	if total>0 and state!="refused":
 		var bar:=Bar.new();bar.name="OrderBar";bar.share=clampf(float(o.get("value",0))/float(total),0.0,1.0);bar.fill=colour;bar.track=Tokens.TRACK
 		bar.custom_minimum_size=Vector2(0,4);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(bar)
-	if state=="done":
+		parts["bar"]=bar
+	_parts[int(o.id)]=parts
+	if state in FADING:
 		var id:=int(o.id)
 		var left:=float(DONE_SHOW_MS-(Time.get_ticks_msec()-int(_done_seen.get(id,Time.get_ticks_msec()))))/1000.0
 		var tween:=card.create_tween()
