@@ -1,11 +1,5 @@
 {
-  "seasonal_patterns": {
-    "path": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
-    "focus": [
-      0.5,
-      0.38
-    ]
-  },
+  "seasonal_patterns": {"path": "res://assets/ui/research/subjects/seasonal_patterns-v2.png", "focus": [0.5, 0.48], "opening_focus": [0.5, 0.48]},
   "seed_selection": {
     "path": "res://assets/ui/research/subjects/seed_selection-v1.png",
     "focus": [
@@ -118,13 +112,7 @@
       0.5
     ]
   },
-  "route_memory": {
-    "path": "res://assets/ui/research/subjects/route_memory-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "route_memory": {"path": "res://assets/ui/research/subjects/route_memory-v2.png", "focus": [0.5, 0.4]},
   "labor_rotations": {
     "path": "res://assets/ui/research/subjects/labor_rotations-v3.png",
     "focus": [
@@ -216,13 +204,7 @@
       0.5
     ]
   },
-  "stone_sorting": {
-    "path": "res://assets/ui/research/stone-selection-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "stone_sorting": {"path": "res://assets/ui/research/subjects/stone_sorting-v1.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "controlled_flaking": {
     "path": "res://assets/ui/research/subjects/controlled_flaking-v1.png",
     "focus": [

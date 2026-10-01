@@ -20,13 +20,14 @@ def replace_member(raw, key, value, allow_insert=False):
     return raw[:end].rstrip() + ',\n  "' + key + '": ' + encoded + raw[end:]
 manifest_path = ROOT / 'assets/ui/research/subject-art-manifest.json'
 manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
-first = json.loads((ROOT / 'assets/ui/research/paper/first300-card-bindings.json').read_text())
+first_path = ROOT / 'assets/ui/research/paper/first300-card-bindings.json'
+first = json.loads(first_path.read_text())
 art600_path = ROOT / 'data/research/art_600.json'
 art600_document = json.loads(art600_path.read_text())
 art600 = art600_document['items']
 for row in rows:
     key = row['id']
-    assert key not in first, 'Resolve higher-priority first-300 binding explicitly'
+    assert key not in first or row.get('replace_first300', False)
     assert key not in art600 or row.get('replace_art600', False)
     source = Path(row['source'])
     destination = ROOT / f"assets/ui/research/subjects/{key}-v{row['version']}.png"
@@ -43,9 +44,15 @@ for row in rows:
         shutil.copy2(sidecar, prior)
     metadata = dict(row)
     metadata.update(asset=resource_path,
-                    sha256=digest, mode='built-in image_gen / edit')
+                    sha256=digest, mode=row.get('mode', 'built-in image_gen / edit'))
     sidecar.write_text(json.dumps(metadata, indent=2) + '\n', encoding='utf-8')
     manifest[key] = {'path': metadata['asset'], 'focus': row['focus']}
+    if row.get('replace_first300', False):
+        prior_opening = HERE / 'prior' / (key + '-opening-binding.json')
+        if not prior_opening.exists():
+            prior_opening.write_text(json.dumps(row.get('prior_effective_binding', {'path': first.get(key)}), indent=2) + '\n')
+        first[key] = metadata['asset']
+        manifest[key]['opening_focus'] = row['focus']
     if row.get('replace_art600', False):
         prior_binding = HERE / 'prior' / (key + '-art600.json')
         if not prior_binding.exists():
@@ -55,6 +62,12 @@ raw_manifest = manifest_path.read_text(encoding='utf-8')
 for row in rows:
     raw_manifest = replace_member(raw_manifest, row['id'], manifest[row['id']], True)
 manifest_path.write_text(raw_manifest, encoding='utf-8')
+if any(row.get('replace_first300', False) for row in rows):
+    raw_first = first_path.read_text(encoding='utf-8')
+    for row in rows:
+        if row.get('replace_first300', False):
+            raw_first = replace_member(raw_first, row['id'], first[row['id']], True)
+    first_path.write_text(raw_first, encoding='utf-8')
 if any(row.get('replace_art600', False) for row in rows):
     raw_art600 = art600_path.read_text(encoding='utf-8')
     for row in rows:

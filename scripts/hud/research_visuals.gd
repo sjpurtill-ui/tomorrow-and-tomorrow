@@ -72,6 +72,8 @@ static func art(domain:String)->Texture2D:
 	# Field art is used only for a field overview, never as a discovery fallback.
 	if preload("res://scripts/hud/early_civ_art.gd").active():
 		if domain=="demography":return preload("res://scripts/hud/construction_art.gd").texture(7)
+		if domain=="ecology" and first300_manifest().has("seasonal_patterns"):
+			return texture_at(String(first300_manifest().seasonal_patterns))
 		var topics:={"nutrition":"seed_selection","health":"clean_water","labor":"joinery","knowledge":"tallies","production":"clay_shaping","infrastructure":"clean_water","logistics":"supply_groups","ecology":"seasonal_patterns","institutions":"customary_law","security":"watch_rotation","culture":"oral_epics"}
 		if topics.has(domain):
 			var source:=texture_at("res://assets/ui/research/paper/%s.png" % topics[domain])
@@ -102,6 +104,10 @@ static func focus_for(item:Dictionary)->Vector2:
 		var crop_point:Array=art600_manifest()[id].get("focus",[.5,.5])
 		return Vector2(float(crop_point[0]),float(crop_point[1]))
 	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):
+		var opening_assignment:Dictionary=manifest().get(id,{})
+		if opening_assignment.has("opening_focus") and String(opening_assignment.get("path",""))==String(first300_manifest()[id]):
+			var opening_point:Array=opening_assignment.opening_focus
+			return Vector2(float(opening_point[0]),float(opening_point[1]))
 		if id=="labor_rotations":return Vector2(.5,.30)
 		return Vector2(.5,.5) if String(first300_manifest()[id]).ends_with(".tres") else Vector2(.5,.72)
 	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return EARLY_SUBJECTS[id]

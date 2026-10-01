@@ -70,7 +70,21 @@ logged errors; captured game cards inspected. Seasonal Duty Rosters was also
 inspected and retained: flat civic fresco, hide-clad adults exchanging rough
 bundles under dry/rain cues, no formal writing, baskets or refined implements.
 
-Next chronological review: Route Memory's effective art_600 image uses the
-older rendering; Seasonal Round's effective paper image has linen-like gowns
-and baskets, while its later subject fallback is photographic. Both require
-new direction-specific paintings and deliberate effective-source bindings.
+Third checkpoint adds Route Memory, Seasonal Round and Stone Selection.
+Their older effective art and later photographic fallbacks are preserved;
+new direction-specific originals replace their selected bindings. Route Memory
+uses blue-black ink and lapis wash, Seasonal Round botanical field painting,
+and Stone Selection copper/ember palette-knife impasto. Full originals and
+wide crops inspected. Clean import, headless runtime and private GPU exit 0,
+PASS count=9 with no logged errors; actual captured game cards inspected.
+
+Explicit opening_focus metadata applies only when the opening and subject
+paths agree. Legacy first300 defaults remain unchanged and are checked by the
+probe. Early ecology overview uses the reviewed seasonal painting too.
+Provenance now distinguishes new paintings with medium references from edits.
+
+All fifteen year-1/year-2 subjects have been reviewed across this batch,
+retained Common Ground and Seasonal Duty Rosters, existing Labor Rotations,
+and the three corrected paintings reserved to PR #11. This is a worker
+handoff, not a claim that pending work has been integrated into the player.
+Chronological production continues with year 3 in a follow-up worktree.

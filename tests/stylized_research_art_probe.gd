@@ -67,6 +67,8 @@ func _ready()->void:
 		assert(sha==provenance.sha256 and not hashes.has(sha));hashes[sha]=true
 		if batch=="earliest-opening-03":
 			assert(Art.focus_for(item).is_equal_approx(Vector2(provenance.focus[0],provenance.focus[1])))
+			assert(Art.focus_for({"id":"nut_kernel_shelling"}).is_equal_approx(Vector2(.5,.72)))
+			if id=="seasonal_patterns":assert(Art.art("ecology").resource_path==expected)
 		for dimensions in [Vector2(708,210),Vector2(264,70)]:
 			var crop:=Art.crop_region(texture,dimensions,Art.focus_for(item))
 			assert(Rect2(Vector2.ZERO,texture.get_size()).grow(.01).encloses(crop))

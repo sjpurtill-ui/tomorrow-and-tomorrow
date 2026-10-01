@@ -139,5 +139,7 @@
   "shield_equipment_fitting": "res://assets/ui/research/paper/shield_equipment_fitting.png",
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
-  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png"
+  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
+  "seasonal_patterns": "res://assets/ui/research/subjects/seasonal_patterns-v2.png",
+  "stone_sorting": "res://assets/ui/research/subjects/stone_sorting-v1.png"
 }
