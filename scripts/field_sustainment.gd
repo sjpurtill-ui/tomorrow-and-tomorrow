@@ -396,8 +396,13 @@ func draft_day()->Array:
 		if day%GARRISON_FIT_EVERY==0 or not (garrison as Dictionary).has("need"): _fit_garrison(garrison)
 		targets.append(garrison)
 	for force:Dictionary in targets:
+		# A force with no empty place needs nothing reckoned (the supply line's
+		# reach is the dear part of a day's drafts).
+		if int(force.get("troops",0))<=0 or not _has_gap(force):
+			force["draft_block"]=""
+			continue
 		force["draft_block"]=draft_block(force)
-		if String(force.draft_block)!="" or int(force.get("troops",0))<=0 or not _has_gap(force): continue
+		if String(force.draft_block)!="": continue
 		var places:=open_places(force)
 		var short:=false
 		for formation_id in places:
