@@ -146,8 +146,8 @@ func _draw()->void:
 func _draw_before(scenario:Dictionary)->void:
 	var home:Vector2=scenario.home; var there:Vector2=scenario.enemy_home
 	var war:=Color("#c9574a")
-	var segment:=Marks.border_segment(home,there)
-	draw_dashed_line(_to_screen(segment[0]),_to_screen(segment[1]),Color(war,0.85),2.0,7.0,true)
+	# The contested line is the nation borders' real meeting line now (lit
+	# red on the map); this sketch has no claims, so it draws the mark alone.
 	var mark:=_to_screen(Marks.border_point(home,there))
 	draw_texture_rect(Icons.war_texture("feud",war),Rect2(mark-Vector2(13,13),Vector2(26,26)),false)
 	var before:Dictionary=scenario.before

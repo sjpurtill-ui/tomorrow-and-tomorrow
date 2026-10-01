@@ -208,7 +208,7 @@ func _assert_steady_and_changes()->void:
 	check(_count("fog_mask")==1,"fog mask did not rebuild once after new charted ground (%d)" % _count("fog_mask"))
 	# War overlay: a moved camera redraws projected marks; a still one does not.
 	var war:Control=t.war_map_overlay
-	war.marks.assign([{"id":"border:test","kind":"border","points":[Vector3(0,0,0),Vector3(5,0,5)],"tip":"","color":Color.RED,"alpha":1.0}])
+	war.marks.assign([{"id":"war:test","kind":"war","points":[Vector3(t.camera_target.x,0,t.camera_target.z)],"tag":"Feud with Test","tip":"","color":Color.RED,"alpha":1.0}])
 	war.set("marks_signature",12345)
 	war.set("collect_key",war._collect_key()) # The ledger has not moved; keep the injected marks.
 	stats.clear()
