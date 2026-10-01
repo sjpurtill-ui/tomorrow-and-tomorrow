@@ -2288,6 +2288,10 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 		var probe:=_screen((entry.pos as Vector2)+heading.normalized()*_world_per_px(entry.pos)*20.0)
 		if probe.is_finite() and _screen(entry.pos).is_finite(): data["heading"]=(probe-_screen(entry.pos)).normalized()
 	var rect:=Counter.draw(self,centre,data,scale,alpha)
+	if _pointed(entry):
+		# Its card on the army bar is under the pointer: a gold ring.
+		draw_rect(rect.grow(7.0),Color(Counter.GOLD,0.22),false,6.0)
+		draw_rect(rect.grow(3.5),Counter.GOLD,false,2.5)
 	entry["plate_rect"]=rect
 	counter_rects.append(rect)
 	var reach:=maxf(plate.x,plate.y)*0.5
@@ -2299,6 +2303,17 @@ func _draw_counter_mark(entry:Dictionary,band:String)->void:
 		var sighting:Dictionary=(entry.get("sighting",{}) as Dictionary).duplicate()
 		sighting["noun"]=String(entry.get("noun","host"))
 		hits.append({"kind":"sighting","centre":rect.get_center(),"radius":reach,"sighting":sighting,"observed":bool(entry.get("observed",false)),"enemy_id":String(entry.get("enemy_id","")),"mark":true})
+
+
+## A mark whose card on the army bar is under the pointer (army_bar
+## ArmyCard._point_map sets the terrain's "pointed_marks": mark ids).
+func _pointed(entry:Dictionary)->bool:
+	if not is_instance_valid(terrain) or not terrain.has_meta("pointed_marks"): return false
+	var ids:Array=terrain.get_meta("pointed_marks",[])
+	if ids.is_empty(): return false
+	for id in entry.get("members",[entry.get("id","")]):
+		if ids.has(String(id)): return true
+	return false
 
 
 func _card_lines(entry:Dictionary)->PackedStringArray:

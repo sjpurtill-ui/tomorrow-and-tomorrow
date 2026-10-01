@@ -182,3 +182,17 @@ func test_a_general_shows_skills_as_pips()->void:
 	pips.set_commander({},"",false)
 	assert_bool(pips.visible).is_false()
 	pips.queue_free()
+
+func test_a_card_under_the_pointer_rings_its_counter()->void:
+	var overlay:=Overlay.new()
+	var holder:=Node.new()
+	overlay.terrain=holder
+	add_child(holder)
+	assert_bool(overlay._pointed({"id":"ours:3","members":["ours:3","ours:5"]})).is_false()
+	holder.set_meta("pointed_marks",["ours:5"])
+	assert_bool(overlay._pointed({"id":"ours:3","members":["ours:3","ours:5"]})).is_true()
+	assert_bool(overlay._pointed({"id":"ours:4","members":["ours:4"]})).is_false()
+	holder.set_meta("pointed_marks",["home"])
+	assert_bool(overlay._pointed({"id":"home","members":["home"]})).is_true()
+	overlay.free()
+	holder.queue_free()

@@ -277,9 +277,26 @@ class ArmyCard extends Control:
 		add_child(face_frame)
 		face=TextureRect.new();face.mouse_filter=Control.MOUSE_FILTER_IGNORE;face.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 		face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;face.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);face_frame.add_child(face)
-		mouse_entered.connect(func():hovered=true;queue_redraw())
-		mouse_exited.connect(func():hovered=false;queue_redraw())
+		mouse_entered.connect(func():hovered=true;queue_redraw();_point_map(true))
+		mouse_exited.connect(func():hovered=false;queue_redraw();_point_map(false))
 		if not card.is_empty():_face()
+
+	## While the pointer rests on this card, its counter on the map is ringed
+	## in gold (war_front_overlay pointed_marks): the levy at home for the
+	## home and drill cards, each member's mark for a band or a group.
+	func _point_map(on:bool)->void:
+		var terrain:Variant=bar.get("terrain") if is_instance_valid(bar) else null
+		if not is_instance_valid(terrain):return
+		var ids:Array=[]
+		if on:
+			match String(card.get("kind","")):
+				"home","drill":ids=["home"]
+				"garrison":pass
+				_:
+					for id in card.get("members",[]):ids.append("ours:%d" % int(id))
+		(terrain as Node).set_meta("pointed_marks",ids)
+		var chart:=(terrain as Node).get_node_or_null("WarMapMarks/WarFrontOverlay")
+		if chart:(chart as CanvasItem).queue_redraw()
 
 	func bind(data:Dictionary,is_chosen:bool)->void:
 		var changed_face:bool=String(card.get("id",""))!=String(data.id) or card.get("general",{})!=data.get("general",{})
