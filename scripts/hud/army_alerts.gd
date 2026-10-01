@@ -117,6 +117,9 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 		var today:=int(WorldSimulation.state.elapsed_days)
 		var threat:Dictionary=mc.active_threat
 		if not threat.is_empty() and String(threat.get("campaign_mode","defensive"))!="offensive": coming.append(threat_line(threat,today))
+		# Their bands the war council has seen marching on a town of ours.
+		var council:GDScript=load("res://scripts/war_council.gd")
+		for band:Dictionary in council.call("incoming"): coming.append(threat_line(band,today))
 		for engagement_variant in mc.own_engagements.values():
 			if engagement_variant is Dictionary and not (engagement_variant as Dictionary).is_empty(): fighting.append(battle_line(engagement_variant))
 		for record_variant in mc.battle_history:

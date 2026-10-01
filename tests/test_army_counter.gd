@@ -172,6 +172,26 @@ func test_alerts_say_what_is_wrong_with_our_fighters()->void:
 	assert_str(String(shown[ids.find("men")].page)).is_equal("recruitment")
 	WorldSimulation.clear()
 
+func test_their_band_on_the_march_is_told_under_the_clock()->void:
+	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
+	var Council:=preload("res://scripts/war_council.gd")
+	WorldSimulation.clear();GameState.reset_for_new_world(721);MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
+	GameState.settlement_site_committed=true
+	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	var today:=int(WorldSimulation.state.elapsed_days)
+	var civ_id:=String(CivilizationSystem.civilizations[0].id)
+	# The watch has seen their band marching on Ashford (war_council.gd).
+	var front:Dictionary=Council._front(civ_id)
+	front["coming_band"]={"town":"Ashford","strength":40,"days":6};front["coming_day"]=today
+	var shown:=Alerts.alerts()
+	var attack:Array=shown.filter(func(a:Dictionary)->bool:return String(a.id)=="attack")
+	assert_int(attack.size()).is_equal(1)
+	assert_str(String((attack[0].lines as PackedStringArray)[0])).contains("toward Ashford · about 40 · here in 6 days")
+	assert_int(Alerts.urgent_count(shown)).is_equal(1)
+	front.erase("coming_band")
+	MilitaryCampaign.reset_for_new_world()
+	WorldSimulation.clear()
+
 func test_war_news_is_told_under_the_clock_instead_of_stopping_time()->void:
 	var Alerts:=preload("res://scripts/hud/army_alerts.gd")
 	WorldSimulation.clear();GameState.reset_for_new_world(719);MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
