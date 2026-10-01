@@ -66,7 +66,7 @@ static func build(c:Dictionary,today:int,pop_now:int=-1)->Array:
 
 
 static func _base(y:int,slot:Dictionary)->Dictionary:
-	return {"y":y,"n":y+1,"closed":true,"name":"","glyph":"quiet","pop":-1,"born":-1,"buried":-1,"learned":0,"deaths":0,"troubles":[],"dry":0,"mild":0,
+	return {"y":y,"n":y+1,"closed":true,"name":"","glyph":"quiet","pop":-1,"born":-1,"buried":-1,"learned":0,"deaths":0,"troubles":[],"dry":0,"mild":0,"routine":0,
 		"lost":[],"heads":[],"kept":[],"unmet":[],"met":[],"works":[],"turns":[],"km":0,"text":String((slot.annal as Dictionary).get("text","")),
 		"title":String((slot.annal as Dictionary).get("title","")),"age":_age(slot.age),"story":slot.story,"tallies":slot.tallies}
 
@@ -90,6 +90,7 @@ static func _closed(m:Dictionary,slot:Dictionary,shown_names:Array)->Dictionary:
 	r.km=int(m.get("km",0))
 	r.dry=int(m.get("dry",0))
 	r.mild=int(m.get("mild",0))
+	r.routine=int(m.get("routine",0))
 	var troubles:Array=[]
 	var types:Array=m.get("types",[]) if m.get("types") is Array else []
 	var kinds:Array=m.get("kinds",[]) if m.get("kinds") is Array else []
@@ -148,6 +149,7 @@ static func _current(c:Dictionary,y:int,slot:Dictionary,annals:Array,pop_now:int
 	r.deaths=deaths
 	r.dry=(a.get("dry",[]) as Array).size() if a.get("dry") is Array else 0
 	r.mild=(a.get("mild",[]) as Array).size() if a.get("mild") is Array else 0
+	r.routine=Annals.routine_troubles(y)
 	var scouts:Dictionary=a.get("scouts",{}) if a.get("scouts") is Dictionary else {}
 	r.km=int(scouts.get("km",0))
 	var lost:Array=[]
@@ -201,7 +203,9 @@ static func unnamed_words(r:Dictionary)->String:
 	var learned:=int(r.get("learned",0))
 	if learned>0:bits.append("one new way" if learned==1 else "%s new ways" % Annals._number(learned))
 	if int(r.get("km",0))>=500:bits.append("%s km walked" % Annals._grouped(int(r.km)))
-	if bits.is_empty():return "a quiet year"
+	# Fevers and fires kept only in the sickness & disaster log are not named
+	# here, but a year with one is not called quiet.
+	if bits.is_empty():return "an ordinary year" if int(r.get("routine",0))>0 else "a quiet year"
 	return " · ".join(bits.slice(0,3))
 
 

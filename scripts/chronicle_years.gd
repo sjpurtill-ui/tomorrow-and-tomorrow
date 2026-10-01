@@ -206,7 +206,9 @@ static func _troubles(a:Dictionary,annals:Array,ctx:Dictionary,out:Array,last_si
 		var again:=String(last_sig.get("dry",""))=="dry"
 		out.append({"t":"dry","w":(1.5 if again else 2.2)+2.5*float(dry_dead),"sig":"dry","text":dry_line(dry,ctx,again)})
 	if crises.is_empty():
-		if mild.is_empty() and dry.is_empty():_calm(a,annals,ctx,out,last_sig)
+		# A year whose troubles are kept only in the sickness & disaster log
+		# says nothing of troubles, and never that none came.
+		if mild.is_empty() and dry.is_empty() and int(a.get("routine",0))<=0:_calm(a,annals,ctx,out,last_sig)
 		return
 	var ended:Array=[]
 	var still:Array=[]
@@ -318,10 +320,11 @@ static func _since(annals:Array,test:Callable)->int:
 	return -1
 
 
-## Whether a closed year had any trouble: a crisis at court, or a mild
-## sickness met by custom (a year with a fever in it was not free of sickness).
+## Whether a closed year had any trouble: a crisis told, a mild sickness met
+## by custom, or one kept only in the sickness & disaster log (a year with a
+## fever in it was not free of sickness).
 static func troubled(m:Dictionary)->bool:
-	return int(m.get("crises",1))>0 or int(m.get("mild",0))>0 or int(m.get("dry",0))>0
+	return int(m.get("crises",1))>0 or int(m.get("mild",0))>0 or int(m.get("dry",0))>0 or int(m.get("routine",0))>0
 
 
 ## A season in the people's words: "in late autumn", "in the summer".

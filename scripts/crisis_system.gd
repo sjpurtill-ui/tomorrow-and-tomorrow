@@ -15,8 +15,9 @@ extends RefCounted
 ##             (1 - immunity) x (1 - medicine)^2 x hunger). Waves that kill
 ##             many return weaker 8-20 years later (catalog echoes). Only a
 ##             grave sickness (is_grave) comes to court; a mild one is met by
-##             the people's own custom and told in the year's entry, and comes
-##             to court at its turn only if it turns grave.
+##             the people's own custom and written only in the sickness &
+##             disaster log, and comes to court at its turn only if it turns
+##             grave.
 ##   stranger  the strangers' sickness: each people met can pass its sickness
 ##             to ours once, along contact and trade. When their disease pool
 ##             is far richer than ours it is a virgin-soil wave (catalog §3.1).
@@ -37,6 +38,13 @@ extends RefCounted
 ## in the middle (and, when it is bad, a second decision), deaths counted and
 ## the dead named, an aftermath, and, when people died, how to remember them.
 ## If the god stays silent, the holder acts on their own judgement.
+##
+## Telling: every crisis is written, as it runs, in the sickness & disaster
+## log (hardship_log.gd) with its numbers, and its court matter waits to be
+## summoned; it does not interrupt. Only an EXTREME one (is_extreme: one in
+## twenty of the people dead, or half the stores or shelter lost) comes to
+## the god as a card, once, and the Chronicle keeps how it ended. Telling
+## never changes what happens: the same deaths, losses and answers either way.
 ##
 ## Frequency and severity follow the catalog: the same hazard form
 ## base(era) x exp(sum beta (x - x_ref)) and the same magnitude draws, so the
@@ -64,7 +72,7 @@ const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
 const ERAS:=preload("res://scripts/technology_eras.gd")
 const HEARTH:=preload("res://scripts/hearth_count.gd")
 const SPECIFICS:=preload("res://scripts/chronicle_specifics.gd")
-const ANNALS:=preload("res://scripts/chronicle_annals.gd")
+const HARDSHIPS:=preload("res://scripts/hardship_log.gd")
 const TURNING_PATH:="res://scripts/turning_points.gd"
 
 const KEY:="crises"
@@ -120,7 +128,7 @@ const EARTH_FIRE_FACTOR:=0.5
 ## Reporting thresholds (catalog HISTORICAL_BASE_RATES).
 const SEVERE:={"hunger":0.02,"sickness":0.05,"stranger":0.05}
 ## A mild sickness (everyday fevers, coughs and flux) is not staged at court:
-## the people meet it by their own custom and the year's entry tells it. A
+## the people meet it by their own custom and only its log line tells it. A
 ## sickness comes to court (is "grave") when at its onset a death is at least
 ## a one-in-three prospect AND at least 3 in 1000 of the people are expected to
 ## die of it, or when a tenth or more of the people fall ill. Measured on a
@@ -135,9 +143,9 @@ const ESCALATE_DEATHS:=2
 const MILD_LOG_MAX:=40
 ## A dry spell comes to court only when the season's gathering will fall by a
 ## fifth or more at its worst (drought_depth). A shallower one is carried by
-## the people's own custom and told in the year's entry, like a mild sickness:
+## the people's own custom and written only in the log, like a mild sickness:
 ## on a site of middling rainfall that stages about one dry season in ten
-## years instead of one in four, and none of the shallow ones names a year.
+## years instead of one in four.
 const DROUGHT_COURT_DEPTH:=0.20
 ## A dry season this deep is remembered as the year the springs failed.
 const DROUGHT_FAILED_DEPTH:=0.28
@@ -706,7 +714,7 @@ static func _new(type:String,kind:String,name:String,day:int,x:Dictionary,extra:
 	var c:Dictionary={"id":"c%d" % int(s.serial),"type":type,"kind":kind,"name":name,"start":day,"phase":"open",
 		"pop0":int(float(x.pop)),"m":0.0,"mult":1.0,"deaths":0,"dead":[],"helpers":[],"choice":"","mid_choice":"",
 		"decide_by":day+DECIDE_DAYS,"mid_day":day+30,"end_day":day+75,"holder_pid":int(holder.get("person_id",0)),
-		"holder":String(holder.get("name","")),"holder_title":String(holder.get("office_title","")),"matter":"","signs":[],"notes":[]}
+		"holder":String(holder.get("name","")),"holder_title":String(holder.get("office_title","")),"matter":"","signs":[],"notes":[],"told":false}
 	c.merge(extra,true)
 	(s.active as Dictionary)[String(c.id)]=c
 	(s.last as Dictionary)[type]=day
@@ -754,9 +762,64 @@ static func _record(c:Dictionary,suffix:String,title:String,text:String,tier:Str
 	if court and int(c.holder_pid)>0: moment["action"]={"kind":"court","focus":{"person_id":int(c.holder_pid)}}
 	return Chronicle.record(moment)
 
-static func _announce(c:Dictionary,title:String,text:String)->void:
+## Whether a crisis is extreme by its own numbers (the thresholds and their
+## reasons are at hardship_log.gd EXTREME_DEAD_SHARE): its planned death share
+## `m`, or the dead counted so far, reach one in twenty of the people it
+## struck (`pop0`); or it took half or more of the stores or of the shelter
+## at once (`loss_share`, fires and floods). Only an extreme crisis interrupts.
+static func is_extreme(c:Dictionary)->bool:
+	var people:=maxf(1.0,float(c.get("pop0",1)))
+	if float(c.get("m",0.0))>=HARDSHIPS.EXTREME_DEAD_SHARE: return true
+	if float(c.get("deaths",0))>=people*HARDSHIPS.EXTREME_DEAD_SHARE: return true
+	return float(c.get("loss_share",0.0))>=HARDSHIPS.EXTREME_LOSS_SHARE
+
+static func _told(c:Dictionary)->bool:
+	## Told in the Chronicle already: its one card, or (a crisis saved before
+	## routine crises went to the log) the onset card it had then.
+	if c.has("told"): return bool(c.told)
+	return Chronicle.active() and (Chronicle.data().keys as Dictionary).has("crisis:%s:onset" % String(c.get("id","")))
+
+static func _tell(c:Dictionary,suffix:String,title:String,text:String,kind:String,court:bool)->void:
+	## The one card an extreme crisis gets, a moment the monthly cap cannot
+	## bury. After it, only its end goes to the Chronicle, without a card.
+	c["told"]=true
+	_record(c,suffix,title,text,"moment",kind,court,true)
+	_hardship(c)
+
+static func _ledger_line(c:Dictionary,suffix:String,title:String,text:String)->void:
+	## A routine crisis is not told, but the court still hears of it: one line
+	## in the event ledger the court reads (court_persons.recent_events),
+	## marked so the Chronicle, the council and the map ticker pass it by.
+	if not Chronicle.active(): return
+	var events:Array=GameState.simulation_events
+	events.push_front({"id":"hardship_%s_%s" % [String(c.id),suffix],"day":_day(),"title":title.substr(0,80),"description":text.substr(0,300),
+		"domain":String((TYPES[String(c.type)] as Dictionary).domain),"severity":"notice","hardship":true})
+	while events.size()>80: events.pop_back()
+
+## Crisis fields its log line copies as they change (hardship_log.gd words()).
+const LOG_FIELDS:=["sick","where","food_lost","house_lost","timber_lost","sev","holder","choice","mid_choice","rite","escalated"]
+
+static func _hardship(c:Dictionary,extra:Dictionary={})->Dictionary:
+	## Writes or updates this crisis's line in the sickness & disaster log
+	## from its own numbers. Words only: nothing here changes the crisis.
+	if not HARDSHIPS.active(): return {}
+	var fields:={"crisis":String(c.id),"type":String(c.type),"kind":String(c.get("kind","")),"name":String(c.name),"start":int(c.start),"pop":int(c.pop0),
+		"dead":int(c.deaths),"names":(c.dead as Array).slice(0,3),"extreme":is_extreme(c)}
+	for key in LOG_FIELDS:
+		if c.has(key): fields[key]=c[key]
+	fields.merge(extra,true)
+	# Its start day keeps the line its own should the crisis count ever restart.
+	return HARDSHIPS.note("%s@%d" % [String(c.id),int(c.start)],fields)
+
+static func _announce(c:Dictionary,title:String,text:String,extra:Dictionary={})->void:
+	## A crisis begins: its line in the log always; a card only when it is
+	## extreme, otherwise the court's event ledger hears of it.
 	var waits:=" %s waits to be summoned." % _given(String(c.holder)) if String(c.holder)!="" else ""
-	_record(c,"onset",title,text+waits,"moment","omen",true,true)
+	var fields:=extra.duplicate()
+	fields["place"]=String(GameState.settlement_name).strip_edges()
+	_hardship(c,fields)
+	if is_extreme(c): _tell(c,"onset",title,text+waits,"omen",true)
+	else: _ledger_line(c,"onset",title,text+waits)
 	_log("onset",text,{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"severe":bool(c.get("severe",false))})
 
 static func _plan_deaths(c:Dictionary,m:float)->void:
@@ -788,7 +851,7 @@ static func _open_hunger(day:int,x:Dictionary,shortfall:float)->void:
 	var summary:="The stores hold about %d days. %s" % [days,_cap("; ".join(PackedStringArray(c.signs)))+"." if not (c.signs as Array).is_empty() else ""]
 	_file(c,"open",summary.strip_edges(),"comes about the stores",int(c.decide_by))
 	var title:="The Pits Run Low" if not winter else "A Hungry Winter Comes"
-	_announce(c,title,"%s The god's people will go hungry before the land gives again." % summary.strip_edges())
+	_announce(c,title,"%s The god's people will go hungry before the land gives again." % summary.strip_edges(),{"food_days":days})
 
 static func _open_sickness(day:int,x:Dictionary,type:String,v:float,civ_id:String,echo:bool,new_pestilence:bool=false)->void:
 	var s:=state()
@@ -823,7 +886,8 @@ static func _open_sickness(day:int,x:Dictionary,type:String,v:float,civ_id:Strin
 static func _open_mild(c:Dictionary,day:int)->void:
 	## A mild sickness: no court, no cards. The people meet it by their own
 	## custom (keeping the sick apart, once they have that custom; otherwise
-	## everyone tends them) and the year's entry tells it.
+	## everyone tends them) and it is written only in the sickness & disaster
+	## log.
 	c["quiet"]=true
 	c["season"]=_season(day)
 	c["season_part"]=_season_part(day)
@@ -838,12 +902,14 @@ static func _open_mild(c:Dictionary,day:int)->void:
 		c.mult=float(c.mult)*float(DEATH_FACTOR.tend)
 		_policy(c,"tend",{"labor_multiplier":-0.05},30)
 		_metric("cohesion",0.004)
+	_hardship(c,{"place":String(GameState.settlement_name).strip_edges(),"by":"custom"})
 	_log("mild","%s went round %s; %d fell ill." % [_cap(String(c.name)),String(c.where),int(c.sick)],{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"option":String(c.choice)})
 
 static func _open_quiet_drought(c:Dictionary,day:int)->void:
 	## A dry spell the people carry: no court, no cards. They do what the
 	## holder does when the god is silent (carry water from farther off, the
-	## same answer every other people gives) and the year's entry tells it.
+	## same answer every other people gives); it is written only in the
+	## sickness & disaster log.
 	c["quiet"]=true
 	c["season"]=_season(day)
 	c["season_part"]=_season_part(day)
@@ -851,16 +917,15 @@ static func _open_quiet_drought(c:Dictionary,day:int)->void:
 	c.choice="carry"
 	_policy(c,"carry",{"water_collection":0.3,"labor_multiplier":-0.06},90)
 	c.mult=float(c.mult)*death_factor(c,"carry")
+	_hardship(c,{"place":String(GameState.settlement_name).strip_edges(),"by":"custom"})
 	_log("mild","%s: a dry spell the people carry by custom." % _cap(String(c.name)),{"type":"drought","sub":"drought","name":String(c.name),"crisis":String(c.id),"m":float(c.m),"option":"carry"})
 
 static func _end_quiet_drought(c:Dictionary,day:int)->void:
 	## A shallow dry spell passes as it came: its dead (rarely any) are
-	## counted and named, and the year's entry tells it in one line.
+	## counted and named in its log line. Not told in the Chronicle.
 	_due_deaths(c,0.6,"end")
-	var fact:={"id":String(c.id),"kind":"drought","name":String(c.name),"season":String(c.get("season","")),"part":String(c.get("season_part","")),
-		"days":day-int(c.start),"deaths":int(c.deaths),"dead":(c.dead as Array).slice(0,3),"sev":float(c.get("sev",0.0)),"custom":String(c.choice),"start":int(c.start),"end":day}
-	if Chronicle.active(): ANNALS.note_dry(Chronicle.data(),fact)
-	_log("mild_end","%s passed; %d died." % [_cap(String(c.name)),int(fact.deaths)],{"type":"drought","crisis":String(c.id),"deaths":int(fact.deaths),"m":float(c.m),"mult":float(c.mult)})
+	_hardship(c,{"end":day})
+	_log("mild_end","%s passed; %d died." % [_cap(String(c.name)),int(c.deaths)],{"type":"drought","crisis":String(c.id),"deaths":int(c.deaths),"m":float(c.m),"mult":float(c.mult)})
 	_close(c)
 
 static func _civ_pool(civ:Dictionary)->float:
@@ -899,7 +964,7 @@ static func _open_drought(day:int,x:Dictionary)->void:
 	if sev<DROUGHT_COURT_DEPTH:
 		_open_quiet_drought(c,day)
 		return
-	# Told a little differently each time: the chronicle keeps every dry year.
+	# Told a little differently each time: the court hears every dry year.
 	var dry_words:=_pick(["The rain has not come. The gathering grounds are brown and the %s is low.","No rain for weeks. The %s has shrunk back from its banks and the grass crackles underfoot.","The sky stays hard and clear. The seed-grass is brown before it has filled, and the %s is low."],"dry:%s" % String(c.id))
 	var summary:=(dry_words % ("river" if bool(x.river) else "water"))+(" "+_pick(["What we gather this season will be about %d parts in ten of a good year.","The gatherers expect about %d parts in ten of what a good year brings.","At this rate the season will give about %d parts in ten of the usual."],"dry_tail:%s" % String(c.id)) % clampi(roundi(float(x.weather_season)*10.0),3,9))
 	_file(c,"open",summary,"comes about the dry weather",int(c.decide_by))
@@ -923,11 +988,13 @@ static func _open_flood(day:int,x:Dictionary)->void:
 	var rng:=_rng("flood:%d" % day)
 	var food_share:=rng.randf_range(0.10,0.35)
 	var house_share:=rng.randf_range(0.08,0.30)
-	var lost:=Hall._debit_player("Food",Hall.player_stock("Food")*food_share)
+	var stock:=Hall.player_stock("Food")
+	var lost:=Hall._debit_player("Food",stock*food_share)
 	var cap_before:=int(GameState.housing_capacity)
 	var house_lost:=maxi(1,roundi(float(cap_before)*house_share))
 	GameState.housing_capacity=maxi(int(float(x.pop)*0.5),cap_before-house_lost)
-	var c:=_new("flood","flood","the High Water of %s" % _year_words(day),day,x,{"food_lost":lost,"house_lost":cap_before-int(GameState.housing_capacity),"mid_day":day+rng.randi_range(20,30),"end_day":day+rng.randi_range(55,80)})
+	var c:=_new("flood","flood","the High Water of %s" % _year_words(day),day,x,{"food_lost":lost,"house_lost":cap_before-int(GameState.housing_capacity),
+		"loss_share":_loss_share(lost,stock,cap_before-int(GameState.housing_capacity),cap_before),"mid_day":day+rng.randi_range(20,30),"end_day":day+rng.randi_range(55,80)})
 	_plan_deaths(c,_lognormal(rng,0.003,1.0,0.0,0.04))
 	if food_share>=0.25: c["severe"]=true; _stat("flood","severe")
 	var summary:="The river came over its banks in the night. It took %s of food from the pits and the water stands in the lowest huts; %s families have no roof." % [_food_words(lost),_count(clampi(roundi(float(c.house_lost)/5.0),1,12))]
@@ -938,12 +1005,15 @@ static func _open_fire(day:int,x:Dictionary)->void:
 	var rng:=_rng("fire:%d" % day)
 	var food_share:=rng.randf_range(0.04,0.22)
 	var house_share:=rng.randf_range(0.08,0.25)
-	var lost:=Hall._debit_player("Food",Hall.player_stock("Food")*food_share)
+	var stock:=Hall.player_stock("Food")
+	var lost:=Hall._debit_player("Food",stock*food_share)
 	var timber:=float(GameState.resource_stockpiles.get("Timber",0.0))
 	GameState.resource_stockpiles["Timber"]=maxf(0.0,timber*(1.0-rng.randf_range(0.1,0.4)))
 	var cap_before:=int(GameState.housing_capacity)
 	GameState.housing_capacity=maxi(int(float(x.pop)*0.5),cap_before-maxi(1,roundi(float(cap_before)*house_share)))
-	var c:=_new("fire","fire","the Burning of %s" % _year_words(day),day,x,{"food_lost":lost,"house_lost":cap_before-int(GameState.housing_capacity),"mid_day":day+rng.randi_range(12,20),"end_day":day+rng.randi_range(40,60)})
+	var c:=_new("fire","fire","the Burning of %s" % _year_words(day),day,x,{"food_lost":lost,"house_lost":cap_before-int(GameState.housing_capacity),
+		"timber_lost":timber-float(GameState.resource_stockpiles.get("Timber",0.0)),"loss_share":_loss_share(lost,stock,cap_before-int(GameState.housing_capacity),cap_before),
+		"mid_day":day+rng.randi_range(12,20),"end_day":day+rng.randi_range(40,60)})
 	_plan_deaths(c,_lognormal(rng,0.002,1.1,0.0,0.03))
 	GameState.population_health=clampf(GameState.population_health-0.01,0.02,0.97)
 	var roofs:=clampi(roundi(float(c.house_lost)/5.0),1,12)
@@ -965,7 +1035,14 @@ static func _watch_thinning(day:int,x:Dictionary)->void:
 		"Every root near the camp has been dug and the snares by the stream come back empty. The gatherers are out from before light until after dark.",
 		"The gatherers pass the old digging places and walk on to the far slopes, and still come home with half-full baskets. The game has left the near woods."],"worn:%s" % String(c.id))
 	_file(c,"open",summary,"comes about the worn land",int(c.decide_by))
-	_announce(c,"The Land Is Worn Out",summary)
+	_announce(c,"The Land Is Worn Out",summary,{"eco":float(x.ecology)})
+
+static func _loss_share(food_lost:float,food_before:float,house_lost:int,house_before:int)->float:
+	## The larger share of the stores or of the shelter a fire or flood took
+	## at once (is_extreme). Words only.
+	var food:=food_lost/food_before if food_before>0.0 else 0.0
+	var house:=float(house_lost)/float(house_before) if house_before>0 else 0.0
+	return clampf(maxf(food,house),0.0,1.0)
 
 # --------------------------------------------------------------------------
 # Effects
@@ -1105,6 +1182,7 @@ static func _mid(c:Dictionary,day:int,x:Dictionary)->void:
 		# unless it has turned grave or the dry weather has deepened.
 		var grave:=1.0-_weather_mean(day-18,day+24)>=DROUGHT_COURT_DEPTH if type=="drought" else is_grave(float(c.pop0),float(c.m))
 		if int(c.deaths)>=ESCALATE_DEATHS or grave: _escalate(c,day,n)
+		else: _hardship(c)
 		return
 	var text:=""
 	var needs:=false
@@ -1138,7 +1216,10 @@ static func _mid(c:Dictionary,day:int,x:Dictionary)->void:
 		"thinning":
 			text=String({"range":"The gatherers leave before light and come back after dark. The near ground is quiet.","rest":"The near ground is left alone. The pits fill more slowly.","burn_brush":"Green shoots are coming through the ash. The deer are back at the edge of it.","press":"The gatherers still work the same worn ground."}.get(String(c.choice),"The gatherers go on as before."))
 	(c.notes as Array).append(text)
-	_record(c,"mid",_cap(String(c.name)),text,"moment" if n>0 or needs else "notice","death" if n>0 else "omen",needs)
+	# The middle of a crisis is written only in its log line, unless this is
+	# when it turns extreme: then this report is its one card.
+	if not _told(c) and is_extreme(c): _tell(c,"mid",_cap(String(c.name)),text,"death" if n>0 else "omen",needs)
+	else: _hardship(c)
 	_log("mid",text,{"type":type,"crisis":String(c.id),"deaths":n,"decision":needs})
 	if needs:
 		c["mid_decide_by"]=day+MID_DECIDE_DAYS
@@ -1163,7 +1244,11 @@ static func _escalate(c:Dictionary,day:int,n:int)->void:
 		title="The Rain Still Does Not Come"
 	(c.notes as Array).append(text)
 	var waits:=" %s waits to be summoned." % _given(String(c.holder)) if String(c.holder)!="" else ""
-	_record(c,"onset",title,text+waits,"moment","omen",true,true)
+	# It now waits at court like any crisis: a card only if it is extreme.
+	if not _told(c) and is_extreme(c): _tell(c,"onset",title,text+waits,"omen",true)
+	else:
+		_hardship(c)
+		_ledger_line(c,"onset",title,text+waits)
 	_log("onset",text,{"type":String(c.type),"sub":String(c.kind),"name":String(c.name),"crisis":String(c.id),"m":float(c.m),"severe":bool(c.get("severe",false)),"escalated":true})
 	c["mid_decide_by"]=day+MID_DECIDE_DAYS
 	c.end_day=maxi(int(c.end_day),day+MID_DECIDE_DAYS+14)
@@ -1180,42 +1265,54 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 	var type:=String(c.type)
 	var total:=int(c.deaths)
 	var dead:Array=c.dead
-	var names:=_dead_words(total,dead)
 	var helpers:=_people_names(1,"helper:%s" % String(c.id))
 	var helper:=String(helpers[0]) if not helpers.is_empty() else ""
 	c.helpers=helpers
+	# Only an extreme crisis is told in the Chronicle: its end without a card
+	# when its card came earlier, or as its one card if it turned extreme only
+	# now. A routine one ends in its log line alone, and no telling is
+	# composed for it. The effects below happen either way.
+	var told:=_told(c)
+	var tell:=told or is_extreme(c)
 	var text:=""
 	# Told from what happened: how many fell ill and where, what was tried, and
 	# how it compares with the last one of its kind (chronicle_specifics.gd).
-	var facts:=_end_facts(c,day,helper)
+	var facts:=_end_facts(c,day,helper) if tell else {}
 	match type:
 		"sickness","stranger":
-			text=SPECIFICS.crisis_end(facts)+" "
+			if tell: text=SPECIFICS.crisis_end(facts)+" "
 			_sickness_after(c,day)
 		"hunger":
-			text="%s is over; the land gives again. " % _cap(String(c.name))
-			text+=("It took %s. " % names) if total>0 else "No one starved. "
-			if helper!="": text+="%s found roots under the snow when others had stopped looking. " % helper
+			if tell:
+				text="%s is over; the land gives again. " % _cap(String(c.name))
+				text+=("It took %s. " % _dead_words(total,dead)) if total>0 else "No one starved. "
+				if helper!="": text+="%s found roots under the snow when others had stopped looking. " % helper
 		"drought":
-			text=SPECIFICS.crisis_end(facts)+" "
+			if tell: text=SPECIFICS.crisis_end(facts)+" "
 		"flood":
-			text="The river is back in its bed. "+(("It drowned %s. " % names) if total>0 else "No one drowned. ")
+			if tell: text="The river is back in its bed. "+(("It drowned %s. " % _dead_words(total,dead)) if total>0 else "No one drowned. ")
 			if String(c.choice)=="wait": (state().until as Dictionary)["after_flood"]=day+60
 		"fire":
-			text=SPECIFICS.crisis_end(facts)+" "
+			if tell: text=SPECIFICS.crisis_end(facts)+" "
 			GameState.housing_capacity=int(GameState.housing_capacity)+int(float(c.get("house_lost",0))*(1.0 if String(c.choice) in ["apart","earth"] else 0.0))
 		"cold":
-			text="The sun is clear again. It was a hungry year, and the people are glad to see it end. "
+			if tell: text="The sun is clear again. It was a hungry year, and the people are glad to see it end. "
 		"thinning":
-			var eco:=float(x.ecology)
-			var back:=eco>=float(c.get("eco0",eco))
-			facts["back"]=back
-			text=SPECIFICS.crisis_end(facts)+" "
-	if String(c.get("silent_note",""))!="": text+=String(c.silent_note)
-	(c.notes as Array).append(text)
+			if tell:
+				var eco:=float(x.ecology)
+				facts["back"]=eco>=float(c.get("eco0",eco))
+				text=SPECIFICS.crisis_end(facts)+" "
 	if type in ["flood"] and String(c.choice) in ["high_ground","mounds"]:
 		GameState.housing_capacity=int(GameState.housing_capacity)+int(float(c.get("house_lost",0))*0.8)
-	_record(c,"end","After %s" % String(c.name),text.strip_edges(),"moment","death" if total>0 else "ceremony",false)
+	var line:=_hardship(c,{"end":day})
+	if tell:
+		if String(c.get("silent_note",""))!="": text+=String(c.silent_note)
+		if told: _record(c,"end","After %s" % String(c.name),text.strip_edges(),"notice","death" if total>0 else "ceremony",false)
+		else: _tell(c,"end","After %s" % String(c.name),text.strip_edges(),"death" if total>0 else "ceremony",false)
+	else:
+		text=HARDSHIPS.sentence(line) if not line.is_empty() else "%s is over." % _cap(String(c.name))
+		_ledger_line(c,"end","After %s" % String(c.name),text)
+	(c.notes as Array).append(text)
 	_log("end",text,{"type":type,"crisis":String(c.id),"deaths":total,"severe":bool(c.get("severe",false)),"m":float(c.m),"mult":float(c.mult)})
 	var hist:Dictionary={"id":String(c.id),"type":type,"name":String(c.name),"start":int(c.start),"end":day,"deaths":total,"dead":dead.slice(0,6),"choice":String(c.choice),"mid_choice":String(c.mid_choice),"severe":bool(c.get("severe",false)),"m":float(c.m),"sick":int(c.get("sick",0)),"where":String(c.get("where",""))}
 	var hl:Array=state().history
@@ -1248,7 +1345,7 @@ static func _sickness_after(c:Dictionary,day:int)->void:
 
 static func _end_mild(c:Dictionary,day:int)->void:
 	## A mild sickness ends as it began, without the court: its dead are
-	## counted and named, and the year's entry tells it in one line.
+	## counted and named in its log line. Not told in the Chronicle.
 	if String(c.type)=="drought":
 		_end_quiet_drought(c,day)
 		return
@@ -1260,7 +1357,7 @@ static func _end_mild(c:Dictionary,day:int)->void:
 	var list:=mild_log()
 	list.push_front(fact)
 	while list.size()>MILD_LOG_MAX: list.pop_back()
-	if Chronicle.active(): ANNALS.note_mild(Chronicle.data(),fact)
+	_hardship(c,{"end":day})
 	_log("mild_end","%s passed; %d fell ill, %d died." % [_cap(String(c.name)),int(fact.sick),int(fact.deaths)],{"type":String(c.type),"crisis":String(c.id),"deaths":int(fact.deaths),"m":float(c.m),"mult":float(c.mult)})
 	_close(c)
 
@@ -1833,9 +1930,13 @@ static func _after(c:Dictionary,phase:String,option_id:String,outcome:String,sil
 		var note:="The god was silent. %s acted alone. " % _given(String(c.holder))
 		c["silent_note"]=note if phase=="open" else String(c.get("silent_note",""))
 		if pid>0: GovernmentPeopleSystem.adjust_person_bonds(pid,{"trust":-0.02})
-		_record(c,"silent:%s" % phase,"%s Acts Alone" % _given(String(c.holder)),note+outcome,"notice","court",false)
+		# The Chronicle counts the silences only of the crises it tells.
+		if _told(c): _record(c,"silent:%s" % phase,"%s Acts Alone" % _given(String(c.holder)),note+outcome,"notice","court",false)
 	elif pid>0:
 		GovernmentPeopleSystem.record_person_memory(pid,"In %s the god told us: %s" % [String(c.name),outcome.substr(0,120)],"crisis",0.7,{"emotion":"duty"})
+	# Who decided each step, for the log line.
+	var by_key:=String({"open":"by","mid":"by_mid"}.get(phase,"by_rite"))
+	_hardship(c,{by_key:"holder" if silent else "god"})
 	_log("silent" if silent else "decided",outcome,{"type":String(c.type),"crisis":String(c.id),"phase":phase,"option":option_id})
 
 # --------------------------------------------------------------------------

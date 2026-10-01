@@ -47,6 +47,8 @@ const TOPICS:=["food","health","housing","security","people","grievance","ambiti
 const LIVES_PATH:="res://scripts/court_lives.gd"
 const AIMS_PATH:="res://scripts/legacy_aims.gd"
 const CRISES_PATH:="res://scripts/crisis_system.gd"
+## The sickness & disaster log, saved with the court (hardship_log.gd).
+const HARDSHIPS_PATH:="res://scripts/hardship_log.gd"
 const UPKEEP_PATH:="res://scripts/upkeep_warnings.gd"
 const TURNING_PATH:="res://scripts/turning_points.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
@@ -3847,6 +3849,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("lives") and not bool(_lives().call("valid_state",data.lives)): return false
 	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
 	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
+	if data.has("hardships") and not bool((load(HARDSHIPS_PATH) as GDScript).call("valid_state",data.hardships)): return false
 	if data.has("upkeep") and not bool(_upkeep().call("valid_state",data.upkeep)): return false
 	if data.has("envoy_requests") and not bool(_requests().call("valid_state",data.envoy_requests)): return false
 	if data.has("trade_pacts") and not bool((load(PACTS_PATH) as GDScript).call("valid_state",data.trade_pacts)): return false

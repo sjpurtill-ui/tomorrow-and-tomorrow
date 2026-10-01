@@ -110,6 +110,9 @@ func generate_council_item(office: String, topic: String, urgency := 0.5) -> Dic
 	return item
 
 func generate_consequence_item(event: Dictionary) -> Dictionary:
+	# Sickness and disasters are written in their own log (hardship_log.gd),
+	# not raised as council decisions; only an extreme one is told, once.
+	if bool(event.get("hardship",false)): return {}
 	var office_by_domain := {"food":"Steward","health":"Steward","ecology":"Scholar","legitimacy":"Envoy","security":"Marshal","knowledge":"Scholar","materials":"Quartermaster"}
 	var domain := String(event.get("domain","population"))
 	var office := String(office_by_domain.get(domain,"Steward"))

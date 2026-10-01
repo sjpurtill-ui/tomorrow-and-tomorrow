@@ -10,6 +10,8 @@ extends Node
 ##   bonds) and the crisis plays out: a report in the middle, deaths from the
 ##   one aggregate population (never below the shock_widening floor), the
 ##   dead named, an aftermath, and a remembrance choice when people died;
+## - each crisis is written in the sickness & disaster log as it runs; only an
+##   extreme one (hardship_log.gd) is a card, once, and its end is told;
 ## - a silent god: the holder acts alone after the deadline;
 ## - "The Land Is Thinning" becomes a decision and stops repeating;
 ## - a turning point needs a known practice and five quiet years, tells a
@@ -86,11 +88,15 @@ func _open(type:String)->Dictionary:
 		"hunger": Crisis._open_hunger(day,x,0.2)
 		"fire": Crisis._open_fire(day,x)
 		"flood": Crisis._open_flood(day,x)
-		"drought": Crisis._open_drought(day,_x({"weather_season":0.8}))
+		# A dry season deep enough to come to court (DROUGHT_COURT_DEPTH).
+		"drought": Crisis._open_drought(day,_x({"weather_season":0.75}))
 		"stranger": Crisis._open_stranger(day,x,CivilizationSystem.civilizations[0])
 	for c in Crisis.active():
 		if String(c.type)==type: return c
 	return {}
+
+func _line(c:Dictionary)->Dictionary:
+	return preload("res://scripts/hardship_log.gd").of_crisis(String(c.get("id","")))
 
 func _matter_for(c:Dictionary)->Dictionary:
 	for m in Hall.matters():
@@ -113,7 +119,9 @@ func _test_crisis(type:String,silent:bool)->void:
 	_check(not m.is_empty(),"%s: the crisis waits at court as a matter" % type)
 	_check(String(m.get("situation_type",""))=="crisis","%s: the matter is a crisis" % type)
 	var onset:=Chronicle.entries("moment").filter(func(e:Dictionary)->bool:return String(e.get("key",""))=="crisis:%s:onset" % String(c.id))
-	_check(not onset.is_empty(),"%s: the onset is a moment card" % type)
+	var extreme:=Crisis.is_extreme(c)
+	_check(onset.is_empty()!=extreme,"%s: the onset is a card only when extreme (extreme %s)" % [type,str(extreme)])
+	_check(not _line(c).is_empty(),"%s: the onset is written in the sickness & disaster log" % type)
 	if not onset.is_empty():
 		transcript.append("  CARD %s — %s" % [String(onset[0].title),String(onset[0].text)])
 		_check(String((onset[0].get("action",{}) as Dictionary).get("kind",""))=="court","%s: the card points at the court" % type)
@@ -158,8 +166,12 @@ func _test_crisis(type:String,silent:bool)->void:
 		_advance(int(GameState.elapsed_days)+2)
 	_check(String(c.phase)=="done","%s: the crisis ends (%s)" % [type,String(c.phase)])
 	var end:=Chronicle.entries("notice").filter(func(e:Dictionary)->bool:return String(e.get("key",""))=="crisis:%s:end" % String(c.id))
-	_check(not end.is_empty(),"%s: the aftermath is told" % type)
+	_check(end.is_empty()!=Crisis.is_extreme(c),"%s: the aftermath is told in the Chronicle only when extreme" % type)
 	if not end.is_empty(): transcript.append("  AFTER %s — %s" % [String(end[0].title),String(end[0].text)])
+	var line:=_line(c)
+	_check(line.has("end") and int(line.get("dead",-1))==int(c.deaths),"%s: the aftermath is in the log with its dead" % type)
+	transcript.append("  LOG %s" % preload("res://scripts/hardship_log.gd").sentence(line))
+	_check(Chronicle.entries("moment").filter(func(e:Dictionary)->bool:return String(e.get("key","")).begins_with("crisis:%s:" % String(c.id))).size()<=1,"%s: at most one card" % type)
 	var dead:=int(c.deaths)
 	_check(pop0-GameState.population_total>=0,"%s: the people are counted" % type)
 	_check(GameState.population_total>=maxi(30,roundi(float(pop0)*0.7))-1,"%s: deaths stay above the shock_widening floor" % type)
@@ -208,7 +220,8 @@ func _test_save()->void:
 	var data:Dictionary=ForeignDiplomacy.audiences.duplicate(true)
 	_check(Hall.validate_state(data),"the court state with crises validates")
 	_check(Crisis.valid_state(data.get("crises",{})),"the crisis state validates")
-	var older:=data.duplicate(true); older.erase("crises"); older.erase("turning_points")
+	_check(preload("res://scripts/hardship_log.gd").valid_state(data.get("hardships",{})),"the sickness & disaster log validates")
+	var older:=data.duplicate(true); older.erase("crises"); older.erase("turning_points"); older.erase("hardships")
 	_check(Hall.validate_state(older),"an older save without crises validates")
 	ForeignDiplomacy.audiences.erase("crises")
 	_check((Crisis.state().active as Dictionary).is_empty(),"an older save starts with no crises")

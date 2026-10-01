@@ -605,6 +605,8 @@ static func note(c:Dictionary,entry:Dictionary)->void:
 
 ## A mild sickness the people met by their own custom (crisis_system.gd):
 ## no card, no court; counted in the year it ended and told in its entry.
+## No longer called: routine sickness is kept in the sickness & disaster log
+## (hardship_log.gd). Years already counted this way are still told.
 const MILD_PER_YEAR:=12
 static func note_mild(c:Dictionary,fact:Dictionary)->void:
 	var list:=_list_of(acc(c,int(fact.get("end",-1))),"mild")
@@ -613,6 +615,7 @@ static func note_mild(c:Dictionary,fact:Dictionary)->void:
 
 ## A shallow dry spell the people carried by custom (crisis_system.gd): no
 ## card, no court; counted in the year it ended and told in its entry.
+## No longer called, like note_mild.
 const DRY_PER_YEAR:=4
 static func note_dry(c:Dictionary,fact:Dictionary)->void:
 	var list:=_list_of(acc(c,int(fact.get("end",-1))),"dry")
@@ -681,6 +684,9 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	var tally:=String((chronicle.call("voice") as Dictionary).get("era",""))!="annals" if Engine.get_main_loop()!=null else true
 	var seed:=y*7919+int(GameState.world_seed) if Engine.get_main_loop()!=null else y*7919
 	var crises:Array=a.crises
+	# Sickness and disasters kept only in their own log (hardship_log.gd) are
+	# not told, but a year that had one is not called free of them.
+	a["routine"]=routine_troubles(y)
 	var memory:={"y":y,"crises":crises.size(),"deaths":0,"learned":(a.learned as Array).size(),"pop":_people(),"km":int(a.scouts.km),"silent":0,"answered":0,"regard":"","name":""}
 	var crisis_deaths:=0
 	var worst:Dictionary={}
@@ -697,6 +703,8 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 		for f in mild:mild_deaths+=int((f as Dictionary).get("deaths",0))
 		memory["mild"]=mild.size()
 		memory["mild_deaths"]=mild_deaths
+	# Troubles kept only in the sickness & disaster log: counted, never told.
+	if int(a.get("routine",0))>0:memory["routine"]=int(a.routine)
 	for cr in crises:
 		if not bool(cr.ended):continue
 		if bool(cr.silent):memory.silent=int(memory.silent)+1
@@ -764,6 +772,15 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	var text:=" ".join(lines)
 	if text.length()>900:text=text.left(897)+"..."
 	return {"key":"annal:%d" % y,"day":y*365+364,"title":title,"text":text,"kind":"annal","tier":"notice","ledger":false,"domain":"annals","year":y+1,"memory":memory,"facts":_facts(a,memory,title)}
+
+
+## How many sicknesses and disasters ran during 0-based year `y`, read from
+## the sickness & disaster log (loaded lazily: that log tells the rare
+## extreme one through the Chronicle). 0 outside a running game.
+static func routine_troubles(y:int)->int:
+	if Engine.get_main_loop()==null:return 0
+	var log:Script=load("res://scripts/hardship_log.gd")
+	return int(log.call("count_in_year",y)) if log!=null else 0
 
 
 ## Every GENERATION_YEARS, an account of the generation just ended, told
@@ -963,6 +980,9 @@ static func _quiet_title(a:Dictionary,seed:int)->String:
 	if int(a.scouts.n)>=2:return "A year on the roads"
 	if not (a.get("dry",[]) as Array).is_empty():return "A dry summer" if String(((a.dry as Array)[0] as Dictionary).get("season",""))=="summer" else "A dry season"
 	if not learned.is_empty() and String(learned[0]).length()<=NAME_MAX_CHARS-12:return "The year of %s" % String(learned[0]).to_lower()
+	# Ordinary fevers and fires (kept in the sickness & disaster log) do not
+	# make a year quiet.
+	if int(a.get("routine",0))>0:return ["An ordinary year","A year without a name"][posmod(seed,2)]
 	return ["A quiet year","A year without a name","An ordinary year"][posmod(seed,3)]
 
 
