@@ -44,23 +44,16 @@ func _ready()->void:
 	terrain.game_speed=5.0
 	terrain.last_discovery_day=int(GameState.elapsed_days)
 	MilitaryCampaign.threat_changed.emit({"id":"probe_raid","source_name":"Reedbank Confederacy","target_region_name":"Dawngate","estimated_strength":3,"deadline_day":int(GameState.elapsed_days)+7})
-	_expect(terrain.game_speed==0.0,"Incoming attack must pause game")
+	_expect(terrain.game_speed==5.0,"An attack coming must not stop time: the alerts under the clock tell it")
 	await get_tree().process_frame
-	_expect(terrain.military_attention_dialog!=null and terrain.military_attention_dialog.visible,"Attack dialog must be visible")
-	_expect("Dawngate" in terrain.military_attention_dialog.dialog_text,"Attack must identify location")
-	_expect(terrain.military_attention_dialog.ok_button_text=="Open war planning","Attack must offer direct access to planning")
-	terrain.military_attention_dialog.hide()
 	var battle:={"seed":9988,"outcome":"defender_victory","home_side":"defender","target_region_name":"Dawngate","threat":{"source_name":"Reedbank Confederacy"},"defender":{"initial_troops":20,"remaining_troops":14,"morale":0.48}}
 	MilitaryCampaign._record_council_battle(battle)
 	terrain.game_speed=5.0
 	MilitaryCampaign.battle_resolved.emit(battle)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	_expect(terrain.game_speed==0.0,"Battle result must pause game")
-	var report_layer:Node=terrain.get_meta("battle_report_panel") if terrain.has_meta("battle_report_panel") else null
-	var report_text:=str(report_layer.get_child(0).account) if report_layer!=null and report_layer.get_child_count()>0 else ""
-	_expect("14" in report_text and "Dawngate" in report_text,"Battle report must say how many are left and where")
-	if report_layer!=null:report_layer.get_child(0)._act("continue")
+	_expect(terrain.game_speed==5.0,"A battle's end must not stop time")
+	_expect(not terrain.has_meta("battle_report_panel"),"No battle report opens by itself")
 	var content:RefCounted=load("res://scripts/hud/content/dock_content_civilization.gd").new(terrain,hud)
 	var found:=false
 	for sub in 3:

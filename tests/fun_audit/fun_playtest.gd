@@ -120,9 +120,7 @@ func _ready()->void:
 			w("century_choice",{});PeopleDirection.choose(ambition)
 			if is_instance_valid(PeopleDirection.panel):PeopleDirection.panel.queue_free()
 		if terrain.game_speed<=0.0:
-			var dlg=terrain.military_attention_dialog
-			w("paused",{"title":String(dlg.title) if dlg and is_instance_valid(dlg) else "","body":String(dlg.dialog_text).left(400) if dlg and is_instance_valid(dlg) else ""})
-			if dlg and is_instance_valid(dlg):dlg.queue_free()
+			w("paused",{})
 			terrain._set_game_speed(5)
 			if terrain.game_speed<=0.0:
 				# something else holds the pause

@@ -108,7 +108,6 @@ func _take_aim()->void:
 func _clear()->void:
 	var pause:=preload("res://scripts/hud/simulation_pause.gd")
 	if terrain.game_speed<=0.0:
-		if terrain.military_attention_dialog and is_instance_valid(terrain.military_attention_dialog):terrain.military_attention_dialog.queue_free()
 		pause.owners.clear()
 		terrain._set_game_speed(5)
 	if is_instance_valid(terrain.settlement_naming_panel):terrain.settlement_naming_panel.queue_free()

@@ -13,9 +13,6 @@ func _ready()->void:
 	var terrain:=preload("res://local_terrain.tscn").instantiate();get_tree().root.add_child.call_deferred(terrain);await get_tree().process_frame;get_tree().current_scene=terrain;terrain._set_game_speed(0)
 	CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	for frame in 10:await get_tree().process_frame
-	assert(terrain.military_attention_dialog.visible)
-	await click_control(terrain.military_attention_dialog.get_cancel_button())
-	assert(not terrain.military_attention_dialog.visible)
 	terrain._focus_known_city("civ_14_region_05");terrain.camera.size=.065;terrain._update_camera();terrain._update_scale_lod()
 	for frame in 100:await get_tree().process_frame
 	assert(not terrain.player_field_army_markers.has("1") or not terrain.player_field_army_markers["1"].visible)

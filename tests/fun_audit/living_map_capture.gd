@@ -124,8 +124,6 @@ func _release_pauses()->void:
 	var pause:=preload("res://scripts/hud/simulation_pause.gd")
 	pause.owners.clear()
 	if is_instance_valid(terrain.settlement_naming_panel):terrain.settlement_naming_panel.queue_free()
-	var dlg=terrain.military_attention_dialog
-	if dlg and is_instance_valid(dlg):dlg.queue_free()
 	if is_instance_valid(PeopleDirection.panel):PeopleDirection.panel.queue_free()
 	if PeopleDirection.needs_century_choice():PeopleDirection.choose(_arg("ambition","makers"))
 

@@ -388,8 +388,8 @@ var rendered_fog_revision:=-1
 var foreign_formation_markers:Dictionary={}
 var contact_encounter_markers:Dictionary={}
 var player_field_army_markers:Dictionary={}
-## Map-selected field army (HoI4-style: click a marker to select, right-click
-## charted land to order the march). -1 = nothing selected.
+## Map-selected field army: a click on its counter shows who leads it and what
+## it is doing (it takes no orders). -1 = nothing selected.
 var selected_army_id:=-1
 var player_field_army_paths:Dictionary={}
 ## Planned corridors for currently deployed scout parties. These show the
@@ -421,8 +421,6 @@ var map_network_elapsed:=0.05
 var rendered_resource_overlay_signature:=""
 var civilization_geography_cache:Dictionary={}
 var civilization_surface_cache:Dictionary={}
-var military_attention_dialog:ConfirmationDialog
-var military_attention_seen:Dictionary={}
 
 func _ready() -> void:
 	display_preferences=preload("res://scripts/display_preferences.gd").new()
@@ -441,10 +439,9 @@ func _ready() -> void:
 			return
 		get_tree().root.set_meta("saved_campaign_resumed",true)
 		print("SAVED_CAMPAIGN_RESUMED: ",String(restored.message),"; settlement=",GameState.settlement_name,"; seed=",GameState.world_seed)
-	if not MilitaryCampaign.threat_changed.is_connected(_on_military_threat_attention): MilitaryCampaign.threat_changed.connect(_on_military_threat_attention)
-	if not MilitaryCampaign.battle_started.is_connected(_on_city_battle_started):MilitaryCampaign.battle_started.connect(_on_city_battle_started)
-	if not MilitaryCampaign.aftermath_required.is_connected(_on_city_aftermath):MilitaryCampaign.aftermath_required.connect(_on_city_aftermath)
-	if not MilitaryCampaign.battle_resolved.is_connected(_on_battle_attention): MilitaryCampaign.battle_resolved.connect(_on_battle_attention)
+	# Grand strategy: no threat, battle or aftermath stops time or opens a
+	# panel. The map marks them, the alerts under the clock count them
+	# (hud/army_alerts.gd) and the War screen tells them.
 	_restore_military_attention.call_deferred()
 	_trace_load("ready")
 	var requested_founding_focus:=""
@@ -12645,78 +12642,17 @@ func _build_command_rail_hud(layer:CanvasLayer)->void:
 	_update_scale_bar()
 
 
-func _on_city_battle_started(_engagement:Dictionary)->void:
-	if bool(_engagement.get("commander_managed",false)):return
-	if bool((_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): return
-	# Time stops so the player sees the two sides drawn up; the battle panel
-	# lets the fight go on and follows it as the days pass (hud/battle_panel.gd).
-	_set_game_speed(0)
-	MilitaryCommandUI.call_deferred("open_engagement",String(_engagement.get("id","")))
-func _on_city_aftermath(_aftermath:Dictionary)->void:
-	_set_game_speed(0)
-	_open_war_planning.call_deferred()
-
 func _restore_military_attention()->void:
 	if GeneralCampaign.active:return
 	# An older save's captives waiting on the ruler: the general settles them
 	# now, as he does after every fight; nothing waits and nothing pauses.
 	if not MilitaryCampaign.pending_aftermath.is_empty(): MilitaryCampaign.settle_pending_aftermath()
-	if not MilitaryCampaign.active_threat.is_empty(): _on_military_threat_attention(MilitaryCampaign.active_threat,false)
-	elif not MilitaryCampaign.active_engagement.is_empty() and not bool(MilitaryCampaign.active_engagement.get("commander_managed",false)) and not bool((MilitaryCampaign.active_engagement.get("threat",{}) as Dictionary).get("routine_raid",false)): _pause_for_military_attention("active_battle","A battle is under way","Our people are fighting. War planning shows where, who is in it and what the general is doing.",false)
 
-func _on_military_threat_attention(threat:Dictionary,truncate_batch:bool=true)->void:
-	if threat.is_empty(): return
-	if bool(threat.get("routine_raid",false)): return
-	if String(threat.get("campaign_mode","defensive"))=="offensive": return
-	var location:=String(threat.get("target_region_name",GameState.settlement_name))
-	if location.is_empty(): location=GameState.settlement_name
-	_pause_for_military_attention(String(threat.get("id","threat")),"An attack is coming", "%s is coming toward %s, perhaps %d strong, and could be there by %s. Time is paused. War planning shows what your war leader means to do; if you carry on without a word, the defenders will fight or give way when they arrive." % [String(threat.get("source_name","A band we cannot name")),location,int(threat.get("estimated_strength",0)),EraWordsMap.when(int(threat.get("deadline_day",GameState.elapsed_days))).to_lower()],truncate_batch)
-
-func _on_battle_attention(result:Dictionary)->void:
-	if bool((result.get("threat",{}) as Dictionary).get("routine_raid",false)): return
-	# The war leader's report card (hud/battle_report_panel.gd) pauses time
-	# itself and resumes it on Continue. Opened deferred so the town taken and
-	# the garrison left behind are already on the battle's record.
-	var event_id:="battle_%s" % str(result.get("seed",GameState.elapsed_days))
-	if military_attention_seen.has(event_id): return
-	military_attention_seen[event_id]=true
-	GameState.elapsed_days=minf(GameState.elapsed_days,float(_simulated_day()))
-	Callable(preload("res://scripts/hud/battle_report_panel.gd"),"open").call_deferred(self,int(result.get("seed",0)),result)
-
-func _pause_for_military_attention(event_id:String,title:String,body:String,truncate_batch:bool=true)->void:
-	if military_attention_seen.has(event_id): return
-	military_attention_seen[event_id]=true
-	if military_attention_seen.size()>64: military_attention_seen.erase(military_attention_seen.keys()[0])
-	game_speed=0.0
-	# Stop a fast-forward batch at this day, not after several hidden battles.
-	# Restored notifications have no running batch: preserve the saved fraction.
-	if truncate_batch:GameState.elapsed_days=minf(GameState.elapsed_days,float(_simulated_day()))
-	_update_time_interface()
-	_show_military_attention.call_deferred(title,body)
-
-func _show_military_attention(title:String,body:String)->void:
-	if military_attention_dialog and is_instance_valid(military_attention_dialog): military_attention_dialog.queue_free()
-	military_attention_dialog=ConfirmationDialog.new()
-	military_attention_dialog.theme=HudT.control_theme()
-	military_attention_dialog.title=title
-	military_attention_dialog.dialog_text=body
-	military_attention_dialog.min_size=Vector2i(650,260)
-	military_attention_dialog.ok_button_text="Open war planning"
-	military_attention_dialog.cancel_button_text="Stay paused"
-	military_attention_dialog.get_label().add_theme_font_size_override("font_size",16)
-	military_attention_dialog.get_label().add_theme_color_override("font_color",HudT.INK)
-	add_child(military_attention_dialog)
-	military_attention_dialog.confirmed.connect(_open_war_planning)
-	military_attention_dialog.popup_centered()
-
+## Every war matter (a report's "what next", a town's war button, the
+## Civics reports) opens the one War screen (hud/war_board.gd).
 func _open_war_planning(_tab:int=0)->void:
 	if GeneralCampaign.active:GeneralCampaign.open_screen();return
-	## Deep military decisions — threats, engagements, aftermath, fronts —
-	## open as the war-planning detail dock beside the military section.
-	if hud==null: return
-	if not hud.dock.visible or hud.active_section!="military":
-		_on_hud_section_requested("military",0)
-	hud.open_detail(preload("res://scripts/hud/content/dock_detail_war_planning.gd").new(self,hud))
+	MilitaryCampaign.open_roster("army")
 
 func _select_army_and_focus(army_id:int)->void:
 	## Dock row click: select the army and center the camera on where the
@@ -13607,14 +13543,20 @@ func _select_field_army_from_screen(screen_position:Vector2)->bool:
 			_clear_army_selection()
 		return false
 	selected_army_id=best_id
-	var snapshot:Dictionary=MilitaryCampaign.field_armies_snapshot()
-	for army_variant in (snapshot.get("armies",[]) as Array):
-		var army:Dictionary=army_variant
-		if int(army.get("army_id",0))!=best_id: continue
-		if travel_status_label:
-			travel_status_label.text="%s is selected. Its general chooses the road; tell them where to go through the court." % String(army.get("name","The army"))
-		break
+	if travel_status_label:
+		for army:Dictionary in MilitaryCampaign.field_armies:
+			if int(army.get("army_id",-1))!=best_id: continue
+			travel_status_label.text=_army_status_words(army)
+			break
 	return true
+
+
+## A selected band in one line: who leads it, its men, how fed, and what it
+## is doing. The war leader and the generals move bands; the map shows them.
+func _army_status_words(army:Dictionary)->String:
+	var card:Dictionary=preload("res://scripts/hud/army_bar_model.gd").army_card(MilitaryCampaign,army)
+	var words:=String(card.get("words",""))
+	return "%s · %d men%s" % [String(card.get("title",army.get("name","The band"))),int(army.get("troops",0)),(" · "+words) if words!="" else ""]
 
 
 ## The force mark the war chart drew under a screen point, if any.
@@ -13632,33 +13574,6 @@ func _clear_army_selection()->void:
 	selected_army_id=-1
 	if travel_status_label and "is selected" in travel_status_label.text:
 		travel_status_label.text=""
-
-
-func _order_selected_army_to_screen(screen_position:Vector2)->void:
-	if selected_army_id<0: return
-	var hit:Dictionary=_terrain_hit(screen_position)
-	if hit.is_empty() or not hit.get("position") is Vector3:
-		_report_military_action({"error":"No ground under the order. Right-click land on the map."})
-		return
-	var hit_position:Vector3=hit.position
-	var target:=Vector2(hit_position.x,hit_position.z)
-	var city_target:=_contact_encounter_at(hit_position,0.15)
-	if city_target.has("city_id"):
-		var city_order:=MilitaryCampaign.move_field_army(selected_army_id,String(city_target.city_id))
-		_report_military_action(city_order)
-		return
-	if not CivilizationSystem._position_is_revealed(target):
-		_report_military_action({"error":"Uncharted ground. Send scouts first; armies march where returned reports have charted land."})
-		return
-	if not _world_surface_is_land(hit_position):
-		_report_military_action({"error":"Open water. Choose a charted land destination."})
-		return
-	var result:Dictionary=MilitaryCampaign.move_field_army_to_position(selected_army_id,target.x,target.y,"MARKED GROUND")
-	_report_military_action(result)
-
-
-func _world_surface_is_land(position:Vector3)->bool:
-	return CivilizationSystem._scout_land_at(Vector2(position.x,position.z))
 
 
 func _warfare_arrowhead_mesh(radius:float,height:float,forward:=Vector2.RIGHT)->ArrayMesh:
@@ -15302,9 +15217,8 @@ func _handle_map_ground_button(button_index:int,screen_position:Vector2)->bool:
 		_inspect_land_from_screen(screen_position)
 		return true
 	if button_index!=MOUSE_BUTTON_RIGHT:return false
-	if selected_army_id!=-1:
-		_order_selected_army_to_screen(screen_position)
-		return true
+	# Right-click walks the travellers before the founding. Bands are never
+	# moved by hand: the war leader and the generals do it.
 	if not GameState.settlement_site_committed:
 		_move_settlers_to_screen(screen_position)
 		return true
