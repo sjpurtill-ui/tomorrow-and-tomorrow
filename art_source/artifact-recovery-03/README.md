@@ -1,4 +1,4 @@
-Continuous artifact production, recovery 03, in progress.
+Continuous artifact production, recovery 03, READY for integration.
 
 Worktree C:/Users/sjpur/tt-artifact-production-recovery-03;
 branch codex/artifact-production-recovery-03;
@@ -45,3 +45,22 @@ a ragged hide slit; raised heavy stone with small pebble and braced raw lever.
 Incremental import, headless runtime and private GPU exit 0, PASS count=6;
 the six 240-pixel tiles were inspected. Audit: 1317 approved, 15 generated,
 2764 pending, errors empty. These totals exclude other delivered branches.
+
+Pigment material research: Henshilwood et al. (2011), primary abstract read:
+https://pubmed.ncbi.nlm.nih.gov/21998386/
+The study reports an ochre-rich mixture produced and stored in abalone shells
+at Blombos, with grinding and pounding equipment. It supports using a natural
+shell hollow for pigment preparation; our red/yellow/orange mixture, forked
+twig and small brace remain fictional catalogue interpretations. The paper
+does not establish those particular details or the mixture's actual use.
+
+Final twelve-original checkpoint: 1327–1338, all full square originals and
+rendered 240-pixel tiles individually inspected. Final incremental import,
+headless runtime and private GPU exit 0 with no logged errors; PASS count=12.
+Audit: 1323 approved, 15 generated, 2758 pending, errors empty. Exact source
+paths, prompts and mechanism reviews are in reviewed.json; source PNG bytes
+are retained with 512-pixel runtime import limits. Test override removed at
+handoff. No gameplay/save changes. Shared manifest/index entries need selective
+integration alongside PR #11 and #17; do not replace their complete files.
+Newer canonical main was observed at feac8ca927323441c95dc1fe42fd7f8de465e16f;
+this worker remains based on 4323d12 and has not merged or launched main.
