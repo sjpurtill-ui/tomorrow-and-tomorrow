@@ -13,6 +13,7 @@ const WAR:=preload("res://scripts/war_loop.gd")
 const Odds:=preload("res://scripts/war_odds.gd")
 const Route:=preload("res://scripts/army_land_route.gd")
 const Board:=preload("res://scripts/hud/war_board.gd")
+const Overlay:=preload("res://scripts/hud/war_front_overlay.gd")
 
 var civ_id:=""
 var city_id:=""
@@ -167,6 +168,35 @@ func test_take_waits_for_three_to_two_then_marches_besieges_or_storms_and_garris
 	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("defend")
 	# The fight is in the war ledger, counted once.
 	assert_int(int(WAR.front(civ_id).get("strikes",0))).is_greater_equal(1)
+
+## The user judges by what he can see: a band the council sent shows on the
+## war map as a counter on the move with its arrow (or, in the raid age, its
+## dotted raid track) along its land road, through the existing overlay.
+func test_a_council_band_on_the_march_shows_on_the_war_map()->void:
+	_their_men(8.0)
+	_counted(10.0)
+	_train(120)
+	WAR.blood_feud(civ_id,int(GameState.elapsed_days),"the killing of their envoy Qira")
+	_place_town(CivilizationSystem.player_world_origin+Vector2(-60.0,8.0))
+	Council.order(civ_id,"take",{"place":{"city_id":city_id,"civ_id":civ_id,"name":"Tsaren","position":{"x":city.x,"z":city.y}}})
+	var band:=_band("take")
+	assert_dict(band).is_not_empty()
+	_days(1)
+	var overlay:Control=auto_free(Overlay.new())
+	var inputs:Dictionary=overlay.call("collect")
+	var counter:={}
+	for f in inputs.get("friendly",[]):
+		if int((f as Dictionary).get("army_id",0))==int(band.army_id): counter=f
+	# Its counter, on the move toward Tsaren, with the days left.
+	assert_dict(counter).is_not_empty()
+	assert_bool((counter.objective as Vector2).is_finite()).is_true()
+	assert_int(int(counter.get("days_left",0))).is_greater(0)
+	# Its arrow (or raid track) along the road.
+	var built:=Overlay.compose(inputs)
+	var drawn:=false
+	for a in (built.get("arrows",[]) as Array)+(built.get("raids",[]) as Array):
+		if int((a as Dictionary).get("army_id",0))==int(band.army_id): drawn=true
+	assert_bool(drawn).override_failure_message(str(built.get("arrows",[]))).is_true()
 
 # ---------------------------------------------------------------------------
 # Punish
@@ -468,3 +498,80 @@ func test_a_rival_takes_a_town_of_another_rival_through_the_same_council()->void
 			if bool((c as Dictionary).get("primary",false)): return String((c as Dictionary).get("occupied_by",""))
 		return "")
 	assert_str(occupied).is_equal(first)
+
+# ---------------------------------------------------------------------------
+# Their raid on us: a real band of theirs, from their own council
+# ---------------------------------------------------------------------------
+
+## In a world of simulated peoples their feud's raid on us is a band of their
+## own army, sent by their war council by the land road to a town of ours
+## they know; the fight is the engine's, both armies bury their own, and our
+## war ledger counts it once, as their raid.
+func test_their_raid_marches_on_our_town_as_a_band_of_their_own_army()->void:
+	var them:=String(CivilizationSystem.civilizations[1].id)
+	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":.1,"surface_water_recognized":true}
+	WorldSimulation.create_actor(them,hash(them)&0x7fffffff,CivilizationSystem.player_world_origin+Vector2(40.0,0.0))
+	WorldSimulation.actors[them].controller="manual"
+	WorldSimulation.actors[them].systems.CivilizationSystem.scout_land_authority=func(_p:Vector2)->bool:return true
+	assert_bool(WorldSimulation.submit(them,{"kind":"found"}).get("ok",false)).is_true()
+	WorldSimulation.scoped(them,func()->void:
+		WorldSimulation.state.ensure_population_total(600)
+		WorldSimulation.state.settlement_completed=["Hearth Circle"]
+		WorldSimulation.settlements.ensure_founded()
+		WorldSimulation.state.resource_stockpiles["Food"]=100000.0
+		WorldSimulation.state.simulation_metrics["food_days"]=120.0)
+	WorldSimulation.enabled=true
+	WorldSimulation.refresh_projections()
+	WorldSimulation.refresh_views()
+	CivilizationSystem.civilizations[1].player_relation["contact_level"]=2
+	_train(12)
+	var day:=int(GameState.elapsed_days)
+	# Their levy, and our town on their chart (their envoys came to us).
+	WorldSimulation.scoped(them,func()->void:
+		var mc=WorldSimulation.military
+		mc.military_inventory["improvised"]=120
+		mc.raise_recruits(120)
+		mc.start_training("levy","improvised",120)
+		mc._complete_training(mc.training_queue[0].duplicate(true))
+		mc.training_queue.clear()
+		var chart=WorldSimulation.world.city_intelligence
+		var ours:=String(chart.primary_id("human"))
+		chart.publish("player",chart.capture("player",ours,0.8,day,"envoys","test"),day))
+	WAR.blood_feud(them,day,"the killing of their envoy Qira")
+	var people:=int(GameState.population_total)
+	var their_people:=int(WorldSimulation.scoped(them,func()->int:return int(WorldSimulation.state.population_total)))
+	# Their raid comes due: it goes to their council, not to a made-up band.
+	WAR._schedule(them,day,"vengeance","test")
+	WAR._execute(them,day)
+	var kinds:Array=(WAR.state().log as Array).filter(func(e:Dictionary)->bool:return String(e.civ)==them).map(func(e:Dictionary)->String:return String(e.kind))
+	assert_array(kinds).contains(["raid_called"])
+	assert_array(kinds).not_contains(["raid","skirmish"])
+	# Days pass in both worlds: their council sends the band, it marches on our
+	# town and fights our watch there.
+	var counted:=false
+	var marched:=false
+	for i in 40:
+		day+=1
+		var today:=day
+		WorldSimulation.scoped(them,func()->void:
+			WorldSimulation.state.elapsed_days=today
+			WorldSimulation.military.last_processed_day=today
+			WorldSimulation.military._process_military_day()
+			for e in WorldSimulation.military.own_engagements.values(): (e as Dictionary).erase("awaiting_player_view")
+			Council.day(today))
+		marched=marched or bool(WorldSimulation.scoped(them,func()->bool:
+			for a in WorldSimulation.military.field_armies:
+				var c:Variant=(a as Dictionary).get("council")
+				if c is Dictionary and String((c as Dictionary).get("civ",""))=="human" and String((c as Dictionary).get("act",""))=="punish": return true
+			return false))
+		GameState.elapsed_days=today
+		MilitaryCampaign.last_processed_day=today
+		MilitaryCampaign._process_military_day()
+		WAR.from_battles(today)
+		if int(WAR.front(them).get("raids",0))>0: counted=true; break
+	assert_bool(marched).override_failure_message(str(WorldSimulation.scoped(them,func()->Dictionary:return Council.peek("human")))).is_true()
+	assert_bool(counted).override_failure_message("their band never fought at our town: %s" % str(WorldSimulation.scoped(them,func()->Dictionary:return Council.peek("human")))).is_true()
+	# The dead are real on both sides and the ledger agrees with the battle.
+	var raid:Dictionary=WAR.front(them).get("last_raid",{})
+	assert_int(people-int(GameState.population_total)).is_equal(int(raid.get("our_dead",0)))
+	assert_int(their_people-int(WorldSimulation.scoped(them,func()->int:return int(WorldSimulation.state.population_total)))).is_equal(int(raid.get("their_dead",0)))

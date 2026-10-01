@@ -150,6 +150,18 @@ static func _civ(civ_id:String)->Dictionary:
 	var index:int=world._civilization_index(civ_id)
 	return world.civilizations[index] if index>=0 else {}
 
+## The god's people as other peoples see it (world_simulation human_projection)
+## carries a relation without the opinion and border tension the battle's
+## reckoning reads (civilization_system resolve_player_battle): give it the
+## same neutral values a missing field means everywhere else before a band
+## of theirs can fight ours.
+static func _battle_fields(civ_id:String)->void:
+	var civ:=_civ(civ_id)
+	if civ.is_empty() or not civ.get("player_relation") is Dictionary: return
+	var relation:Dictionary=civ.player_relation
+	for field in ["opinion","border_tension"]:
+		if not relation.has(field): relation[field]=0.0
+
 static func _name(civ_id:String)->String:
 	var name:=String(_civ(civ_id).get("name",""))
 	return name if name!="" else "them"
@@ -1068,6 +1080,7 @@ static func _launch_theirs(civ_id:String,town:Dictionary,act:String,besiege:bool
 	var free:=_free_men()
 	var going:=mini(free,count) if count>0 else free
 	if going<MIN_BAND: return _record(civ_id,"wait","The war leader has too few free to send.")
+	_battle_fields(civ_id)
 	var want:=Odds.wanted("raid" if act=="punish" else "take")
 	var reading:=_odds_at(town,going,"raid" if act=="punish" else "take") if count>0 else odds
 	if not insist and not reading.is_empty() and float(reading.raw)<want:
