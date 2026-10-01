@@ -960,20 +960,8 @@
     "route_speed": 0.0103
    }
   },
-  "jar_clay_stoppers": {
-   "art": "res://assets/ui/research/discovery-600/stamp_seals.png"
-  },
-  "desert_track_cairns": {
-   "art": "res://assets/ui/research/subjects/seasonal_route_assessment-v1.png"
-  },
   "relay_trade_gemstones": {
    "art": "res://assets/ui/research/subjects/long_distance_axe_trade-v1.png"
-  },
-  "donkey_strings": {
-   "art": "res://assets/ui/research/subjects/pack_animals-v1.png"
-  },
-  "reed_bundle_rafts": {
-   "art": "res://assets/ui/research/subjects/reed_bed_rotation-v1.png"
   },
   "one_measure_sacks": {
    "art": "res://assets/ui/research/subjects/load_bundling_by_weight-v1.png"
@@ -987,14 +975,14 @@
   "village_track_upkeep": {
    "art": "res://assets/ui/research/subjects/communal_upkeep_scheduling-v1.png"
   },
-  "stores_opened_on_sealed_order": {
-   "art": "res://assets/ui/research/subjects/seal_breaking_rights-v1.png"
+  "chiefs_gift_trade_paths": {
+   "art": "res://assets/ui/research/subjects/trade_colonies-v1.png"
   },
-  "lime_plastered_bins": {
-   "art": "res://assets/ui/research/subjects/pest_barrier_maintenance-v1.png"
+  "granaries_on_high_ground": {
+   "art": "res://assets/ui/research/subjects/regional_granaries-v1.png"
   },
-  "cached_water_jars": {
-   "art": "res://assets/ui/research/subjects/pack_animals-v1.png"
+  "island_market_trade": {
+   "art": "res://assets/ui/research/subjects/coastal_watercraft-v1.png"
   },
   "grain_rated_boats": {
    "art": "res://assets/ui/research/subjects/towpaths-v1.png"
@@ -1005,17 +993,20 @@
   "funded_trade_journeys": {
    "art": "res://assets/ui/research/subjects/market_timing_knowledge-v1.png"
   },
-  "timber_rafts": {
-   "art": "res://assets/ui/research/subjects/distant_timber_reserves-v1.png"
-  },
   "itinerary_stop_lists": {
    "art": "res://assets/ui/research/subjects/waystation_spacing_judgment-v1.png"
   },
   "rented_store_space": {
    "art": "res://assets/ui/research/subjects/storage_humidity_judging-v1.png"
   },
+  "ice_pit_house": {
+   "art": "res://assets/ui/research/subjects/layered_pit_storage-v1.png"
+  },
   "standard_pack_loads": {
    "art": "res://assets/ui/research/subjects/convoy_load_distribution-v1.png"
+  },
+  "return_loads": {
+   "art": "res://assets/ui/research/subjects/towpaths-v1.png"
   },
   "agent_sale_accounts": {
    "art": "res://assets/ui/research/subjects/cargo_seals-v1.png"

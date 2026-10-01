@@ -917,23 +917,11 @@
     "logistics_endurance": 0.0223
    }
   },
-  "soured_milk_drinks": {
-   "art": "res://assets/ui/research/subjects/butter_churning-v1.png"
-  },
-  "wild_herd_drive_funnels": {
-   "art": "res://assets/ui/research/subjects/seasonal_hunting_closures-v1.png"
-  },
-  "bird_scaring_watch": {
-   "art": "res://assets/ui/research/subjects/planting_density_adjustment-v1.png"
-  },
   "scrap_fed_pigs": {
    "art": "res://assets/ui/research/subjects/communal_meal_variety_rules-v1.png"
   },
-  "sealed_seed_reserve": {
-   "art": "res://assets/ui/research/subjects/reserve_allocation_priority-v1.png"
-  },
-  "pressed_curd_cheese": {
-   "art": "res://assets/ui/research/subjects/butter_churning-v1.png"
+  "ash_mixed_grain_stores": {
+   "art": "res://assets/ui/research/subjects/reserve_moisture_barrier_layering-v1.png"
   },
   "district_sowing_day": {
    "art": "res://assets/ui/research/subjects/irrigation_schedules-v1.png"
@@ -947,14 +935,11 @@
   "canal_strip_fields": {
    "art": "res://assets/ui/research/subjects/field_rest_scheduling-v1.png"
   },
-  "sour_dough_bread": {
-   "art": "res://assets/ui/research/subjects/clay_dome_ovens-v1.png"
+  "parched_green_ears": {
+   "art": "res://assets/ui/research/subjects/seasonal_diet_diversification-v1.png"
   },
-  "brewing_loaves": {
-   "art": "res://assets/ui/research/subjects/barley_beer-v1.png"
-  },
-  "onion_garlic_beds": {
-   "art": "res://assets/ui/research/subjects/kitchen_gardens-v1.png"
+  "flood_pool_fishing": {
+   "art": "res://assets/ui/research/subjects/fish_weirs_and_traps-v1.png"
   },
   "spring_weeding_gangs": {
    "art": "res://assets/ui/research/subjects/planting_density_adjustment-v1.png"
@@ -962,26 +947,23 @@
   "clap_net_fowling": {
    "art": "res://assets/ui/research/subjects/reed_bed_rotation-v1.png"
   },
-  "funnel_seed_plough": {
-   "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png"
+  "reaped_before_shedding": {
+   "art": "res://assets/ui/research/subjects/crop_calendars-v1.png"
   },
   "meat_sealed_in_fat": {
    "art": "res://assets/ui/research/subjects/curing_regimens-v1.png"
   },
-  "framed_grapevines": {
-   "art": "res://assets/ui/research/subjects/kitchen_gardens-v1.png"
-  },
-  "small_fish_sauce": {
-   "art": "res://assets/ui/research/subjects/salting_fish_meat-v1.png"
+  "soaked_trodden_fields": {
+   "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png"
   },
   "grain_kept_in_ear": {
    "art": "res://assets/ui/research/subjects/reserve_moisture_barrier_layering-v1.png"
   },
+  "riverbank_melon_plots": {
+   "art": "res://assets/ui/research/subjects/kitchen_gardens-v1.png"
+  },
   "clod_breaking_harrow": {
    "art": "res://assets/ui/research/discovery-600/ox_drawn_ard.png"
-  },
-  "second_season_crop": {
-   "art": "res://assets/ui/research/subjects/field_rest_scheduling-v1.png"
   },
   "stoppered_oil_jars": {
    "art": "res://assets/ui/research/paper/seed_oil_pressing.png"

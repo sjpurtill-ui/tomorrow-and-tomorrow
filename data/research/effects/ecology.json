@@ -806,53 +806,38 @@
    "observation": "Groves of great trees are reserved for the beams of temple and palace, and guarded against every other axe.",
    "art": "res://assets/ui/research/ecology-v1.png"
   },
+  "fruit_trees_left_standing": {
+   "art": "res://assets/ui/research/subjects/wood_pasture-v1.png"
+  },
+  "brush_fired_kilns": {
+   "art": "res://assets/ui/research/subjects/fuelwood_rotation-v1.png"
+  },
   "retting_pools_apart": {
    "art": "res://assets/ui/research/subjects/tannery_waste_channeling-v1.png"
-  },
-  "swidden_bush_fallow": {
-   "art": "res://assets/ui/research/subjects/replanting_after_clearance-v1.png"
   },
   "town_refuse_to_fields": {
    "art": "res://assets/ui/research/subjects/refuse_pit_rotation-v1.png"
   },
-  "summer_upland_pastures": {
-   "art": "res://assets/ui/research/subjects/grazing_rotation_customs-v1.png"
-  },
   "carcass_burial_away": {
    "art": "res://assets/ui/research/discovery-600/burial_ground_separation.png"
   },
-  "downwind_smelting": {
-   "art": "res://assets/ui/research/subjects/kiln_smoke_venting_customs-v1.png"
-  },
-  "gully_check_dams": {
+  "topsoil_saved_on_terraces": {
    "art": "res://assets/ui/research/subjects/contour_terrace_reading-v1.png"
-  },
-  "drain_outfalls_downstream": {
-   "art": "res://assets/ui/research/subjects/greywater_diversion_practice-v1.png"
-  },
-  "folded_flocks_on_fallow": {
-   "art": "res://assets/ui/research/subjects/stubble_grazing-v1.png"
   },
   "leveled_basin_fields": {
    "art": "res://assets/ui/research/discovery-600/rod_and_cord_leveling.png"
   },
-  "street_refuse_bins": {
-   "art": "res://assets/ui/research/subjects/covered_sewers-v1.png"
-  },
-  "drought_rested_pastures": {
-   "art": "res://assets/ui/research/subjects/grazing_ground_recovery_marking-v1.png"
+  "slaughter_waste_removal": {
+   "art": "res://assets/ui/research/subjects/refuse_pit_rotation-v1.png"
   },
   "drain_settling_sumps": {
    "art": "res://assets/ui/research/paper/building_drainage_coordination.png"
   },
-  "herding_contract_returns": {
-   "art": "res://assets/ui/research/subjects/people_herd_counts-v1.png"
+  "canal_silt_on_fields": {
+   "art": "res://assets/ui/research/subjects/flood_silt_fields-v1.png"
   },
-  "noxious_trades_quarter": {
-   "art": "res://assets/ui/research/subjects/workshop_effluent_separation-v1.png"
-  },
-  "tired_fields_to_grass": {
-   "art": "res://assets/ui/research/subjects/recovery_zone_designation-v1.png"
+  "canal_refuse_ban": {
+   "art": "res://assets/ui/research/subjects/greywater_diversion_practice-v1.png"
   },
   "salt_land_survey_notes": {
    "art": "res://assets/ui/research/subjects/waterlogging_recognition-v1.png"
