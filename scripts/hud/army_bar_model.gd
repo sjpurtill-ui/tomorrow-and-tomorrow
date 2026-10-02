@@ -439,6 +439,19 @@ static func drill_words(card:Dictionary)->String:
 	out.append("When they finish they join the levy at home. Double-click to open the Army screen.")
 	return "\n".join(out)
 
+## The levy card's tooltip: who is at home and how the drill goes.
+static func levy_words(card:Dictionary)->String:
+	var out:=PackedStringArray(["At home: %s under arms." % EraWords.grouped(int(card.get("men",0)))])
+	out.append("%s ready · %s keep the watch" % [EraWords.grouped(int(card.get("ready",0))),EraWords.grouped(int(card.get("watch",0)))])
+	var drilling:=int(card.get("drill",0))
+	if drilling>0:
+		var days:=int(card.get("days",0))
+		out.append("%s in drill, %d%% through it%s" % [EraWords.grouped(drilling),roundi(float(card.get("progress",0.0))*100.0),(", about %d %s to go" % [days,"day" if days==1 else "days"]) if days>0 else ""])
+	if int(card.get("waiting",0))>0:out.append("%s called up and waiting to drill" % EraWords.grouped(int(card.waiting)))
+	if int(card.get("drafts",0))>0:out.append("%s drafts in drill for the bands" % EraWords.grouped(int(card.drafts)))
+	out.append("The war leader calls up, drills and arms them to the army size you set.")
+	return "\n".join(out)
+
 ## Those in drill at home, as one card (HOI4's deployment queue): {} when
 ## nobody is drilling or waiting. men: in drill (not the drafts for bands),
 ## progress: the drill's share done, days: the court's own "about N days"

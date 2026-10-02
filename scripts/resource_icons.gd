@@ -1263,6 +1263,18 @@ static func command_glyph(kind:String,c:Color)->Array:
 		"prio0": return [_s(14,35,28,23,4.6,c),_s(28,23,42,35,4.6,c)]
 		"prio1": return [_s(14,29,28,17,4.6,c),_s(28,17,42,29,4.6,c),_s(14,41,28,29,4.6,c),_s(28,29,42,41,4.6,c)]
 		"prio2": return [_s(14,23,28,11,4.6,c),_s(28,11,42,23,4.6,c),_s(14,35,28,23,4.6,c),_s(28,23,42,35,4.6,c),_s(14,47,28,35,4.6,c),_s(28,35,42,47,4.6,c)]
+		# The War screen (hud/war_board.gd): soldiers' pay, eyes abroad, and
+		# the stances toward an enemy that had no mark of their own.
+		# Pay: a short stack of coins.
+		"coins": return [_rr(28,44,15,4.2,4,c),_rr(28,34,15,4.2,4,soft),_rr(28,24,15,4.2,4,c),_ring(28,13,8,3.2,c)]
+		# Eyes abroad: an eye, its pupil inked.
+		"eye": return [_s(6,28,17,19,3.2,c),_s(17,19,39,19,3.2,c),_s(39,19,50,28,3.2,c),_s(6,28,17,37,3.2,c),_s(17,37,39,37,3.2,c),_s(39,37,50,28,3.2,c),_c(28,28,7,c)]
+		# Leave them be: a spear laid down on the ground.
+		"leave": return [_s(6,38,42,38,3.6,c),_t(53,38,41,32,41,44,c),_s(4,48,52,48,2.6,soft)]
+		# Seek peace: a plain flag carried on a pole.
+		"peace": return [_s(15,53,15,6,3.4,c),_rr(31,17,14,9.5,1.5,c),_s(4,53,26,53,2.6,soft)]
+		# A blood price: a tied sack of food.
+		"price": return [_c(28,37,14,c),_t(19,15,37,15,28,26,c),_s(20,24,36,24,3.4,soft)]
 	return [_c(28,28,6,c)]
 
 

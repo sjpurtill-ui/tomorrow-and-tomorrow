@@ -48,7 +48,14 @@ static func stage(_terrain:Node)->Dictionary:
 	if civ.is_empty():return {"army_id":army_id}
 	var civ_id:=String(civ.id)
 	var intel:Variant=WorldSimulation.world.city_intelligence
-	# Their first town on the world's record (the capital when it stands).
+	# Their first town on the world's record (the capital when it stands);
+	# a people still on the move has its capital stand for the capture.
+	var founded:=false
+	for region in civ.get("strategic_regions",[]):
+		if bool((region as Dictionary).get("settlement_founded",true)):founded=true
+	if not founded:
+		for region in civ.get("strategic_regions",[]):
+			if String((region as Dictionary).get("role",""))=="capital":(region as Dictionary)["settlement_founded"]=true
 	var site:Dictionary={}
 	for place:Dictionary in intel.sites(false):
 		if String(place.civ_id)==civ_id and (site.is_empty() or bool(place.get("primary",false))):site=place
