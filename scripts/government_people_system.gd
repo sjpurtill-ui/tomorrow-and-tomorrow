@@ -1199,6 +1199,8 @@ func assign_settlement_leader(settlement_id:String,person_id:int)->Dictionary:
 	for index in WorldSimulation.state.player_settlements.size():
 		if String(WorldSimulation.state.player_settlements[index].get("id",""))==settlement_id: settlement_index=index; break
 	if settlement_index<0: return {"ok":false,"reason":"That settlement is not owned."}
+	# Nobody lives in a place its people left: nobody is named to lead it.
+	if WorldSimulation.settlements.abandoned(WorldSimulation.state.player_settlements[settlement_index]): return {"ok":false,"reason":WorldSimulation.settlements.left_reason(WorldSimulation.state.player_settlements[settlement_index])}
 	if government_stage==0 and WorldSimulation.state.player_settlements.size()==1:
 		var steward_id:=int((WorldSimulation.state.leadership_positions.get("Steward",{}) as Dictionary).get("person_id",0))
 		if steward_id>0 and person_id!=steward_id:
@@ -1434,6 +1436,8 @@ func rehome_from(settlement_id:String,to_id:String)->int:
 		if String(settlement.get("id",""))!=settlement_id:continue
 		settlement["leader_person_id"]=0
 		settlement["leader_title"]=settlement_leader_title()
+	# The government screens redraw on this count.
+	revision+=1
 	return moved
 
 

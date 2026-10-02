@@ -374,6 +374,12 @@ func test_its_named_people_go_with_them()->void:
 	assert_str(String(Persons.by_id("cp_test").village)).is_equal("Keansburg")
 	GovernmentPeopleSystem._ensure_local_leaders()
 	assert_int(int(dry.leader_person_id)).is_equal(0)
+	# Nor can the god name anyone to lead it (court or the people's page).
+	var named:=GovernmentPeopleSystem.assign_settlement_leader(String(dry.id),9001)
+	assert_bool(bool(named.ok)).is_false()
+	assert_str(String(named.reason)).contains("Nobody lives in")
+	assert_int(int(dry.leader_person_id)).is_equal(0)
+	assert_str(String(orla.home_settlement_id)).is_equal(capital_id)
 	ForeignDiplomacy.reset_for_new_world()
 
 ## 5. An empty place is not one of the towns we live in: not for the land we
