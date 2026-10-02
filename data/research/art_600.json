@@ -642,13 +642,7 @@
    "style": "paper_gouache",
    "match": "milestone"
   },
-  "mourning_days": {
-   "path": "res://assets/ui/research/discovery-600/mourning_days.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
-   "tile_index": 4,
-   "caption": "Mourning days of wailing and fasting (Year 18)",
-   "style": "silhouette_ochre"
-  },
+  "mourning_days": {"path": "res://assets/ui/research/subjects/mourning_days-v2.png", "style": "culture: tapestry-inspired painting", "focus": [0.5, 0.5]},
   "mutual_aid_customs": {
    "path": "res://assets/ui/research/discovery-600/mutual_aid_customs.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_20_23 PM.png",
@@ -1313,13 +1307,7 @@
    "style": "paper_gouache",
    "match": "milestone"
   },
-  "watch_duty_rotation": {
-   "path": "res://assets/ui/research/discovery-600/watch_duty_rotation.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
-   "tile_index": 8,
-   "caption": "Standing watch duty (Year 18)",
-   "style": "paper_gouache"
-  },
+  "watch_duty_rotation": {"path": "res://assets/ui/research/subjects/watch_duty_rotation-v2.png", "style": "culture: tapestry-inspired painting", "focus": [0.5, 0.5]},
   "water_trough_leveling": {
    "path": "res://assets/ui/research/discovery-600/water_trough_leveling.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",

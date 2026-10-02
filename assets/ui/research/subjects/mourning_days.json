@@ -1,0 +1,20 @@
+{
+  "id": "mourning_days",
+  "line": "culture",
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": "res://assets/ui/research/discovery-600/mourning_days.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/culture-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: Four fully clothed mourners sitting beside a simple ochre-marked earth grave, one crying with hand at cheek, another quietly supporting them; empty wood bowl set aside suggests mourning fasting. Respectful non-graphic scene. Flat interlocking indigo, rose, gold and violet tapestry-inspired PAINTING, no literal fabric, cemetery monuments or religious temples.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-852789ef-45aa-43a8-b769-ac89082205f9.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/mourning_days-v2.png",
+  "sha256": "3d4ad3ce62d104c7ff76078903eb4cfa89ceaf8a4d37196565de8d2129fff7a0",
+  "mode": "built-in image_gen / edit"
+}

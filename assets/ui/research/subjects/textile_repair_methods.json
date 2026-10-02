@@ -1,12 +1,20 @@
 {
   "id": "textile_repair_methods",
   "line": "production",
-  "game_year": 18,
-  "approx_historical_year": -4880,
-  "prompt": "c. 4880 BCE: Adults patch torn woven cloth with bone needle and repair warp strands on simple frame; thick matte impasto oil. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-04020425-850d-4f41-aa94-1d09b48f90b6.png",
-  "asset": "res://assets/ui/research/subjects/textile_repair_methods-v1.png",
-  "sha256": "dac602dd7f9a0177b362bd5feb29a9248b964e3254efac26ac9752c564091d74",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; both repair actions and fabric tear clear in crop."
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.38
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/textile_repair_methods-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/production-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: Two adults repair a coarse LOOPED PLANT-FIBER carrier: one ties broken bast strands back into the irregular open net, another uses one slender single-eye bone needle to fasten a hide patch around the torn edge. Close but roomy view of hands. No woven cloth, loom, spindle, robes, factory or metal. Flat angular copper, ember and umber palette-knife painting.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-75e6782b-771d-4476-9d58-53d1c44bfc45.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/textile_repair_methods-v2.png",
+  "sha256": "5bf8ac9ab242f328992264c57b88166733b0f9bab3c64e07044aae907fc2803b",
+  "mode": "built-in image_gen / edit"
 }

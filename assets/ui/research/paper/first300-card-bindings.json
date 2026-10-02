@@ -139,5 +139,9 @@
   "shield_equipment_fitting": "res://assets/ui/research/paper/shield_equipment_fitting.png",
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
-  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png"
+  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
+  "clean_water": "res://assets/ui/research/subjects/clean_water-v2.png",
+  "adobe_wall_construction": "res://assets/ui/research/subjects/adobe_wall_construction-v2.png",
+  "mineral_pigment_preparation": "res://assets/ui/research/subjects/mineral_pigment_preparation-v2.png",
+  "acorn_leaching": "res://assets/ui/research/subjects/acorn_leaching-v2.png"
 }

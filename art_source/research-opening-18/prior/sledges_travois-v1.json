@@ -1,0 +1,12 @@
+{
+  "id": "sledges_travois",
+  "line": "logistics",
+  "game_year": 18,
+  "approx_historical_year": -4880,
+  "prompt": "c. 4880 BCE: Two adults pull simple wooden travois loaded with bundles over dirt track beside smaller flat sledge; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f2513c4b-e461-4c92-9392-85bbbd5cbde6.png",
+  "asset": "res://assets/ui/research/subjects/sledges_travois-v1.png",
+  "sha256": "cecdd3a4f45cb40ea9fa2784f5f9cc9853487819ed9c951b0e6dae6d6c2923bb",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; hand-pulled load, two poles and tracks clear; no wheels or animals."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "skill_recognition",
+  "line": "labor",
+  "game_year": 18,
+  "approx_historical_year": -4880,
+  "prompt": "c. 4880 BCE: Community praises skilled basket weaver, exchanges finished work and invites apprentice; expressive charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bda5e5a0-b418-439f-ae34-8a2e16f7a8b0.png",
+  "asset": "res://assets/ui/research/subjects/skill_recognition-v1.png",
+  "sha256": "769c6b9d4a5d3291f1a617818729737adbad09b715b4e51febf174b06cc2081b",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; craft demonstration and social recognition clear in crop."
+}
