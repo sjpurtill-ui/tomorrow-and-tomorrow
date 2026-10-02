@@ -271,6 +271,11 @@ static func monthly(day:int)->void:
 	for civ_id in (a.arming as Dictionary).keys():
 		if day>=int((a.arming[civ_id] as Dictionary).get("march",day+1)): _march(String(civ_id),day)
 	var war:=load(WAR_PATH) as GDScript
+	# One reading of our strengths and our people's dread serves every people
+	# weighed this month (standing.gd's shared reading).
+	var standing:=load(STANDING_PATH) as GDScript
+	standing.call("_begin_reading")
+	var our:Dictionary=standing.call("strengths")
 	for civ in WorldSimulation.world.civilizations:
 		if not civ is Dictionary or not bool((civ as Dictionary).get("alive",true)): continue
 		var id:=String((civ as Dictionary).get("id",""))
@@ -285,12 +290,13 @@ static func monthly(day:int)->void:
 		if day-int(mine.get("day",-99999))<ANSWER_GAP: continue
 		# Kin by marriage do not come against kin.
 		var kin:=not (war.call("_married",id) as Dictionary).is_empty()
-		var o:=odds(id)
+		var o:=odds(id,reading(id,standing.call("view_of",id,our)))
 		var roll:=_rng("answer:%s:%d" % [id,day]).randf()
 		if roll<float(o.bow) and day-int(mine.get("refused",-99999))>=REFUSED_GAP:
 			_offer_submission(id,day,o)
 		elif not kin and roll<float(o.bow)+float(o.all_in):
 			_begin_arming(id,day,o)
+	standing.call("_end_reading")
 
 static func _rng(key:String)->RandomNumberGenerator:
 	var rng:=RandomNumberGenerator.new()
