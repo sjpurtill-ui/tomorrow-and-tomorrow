@@ -49,9 +49,9 @@ const PLAYER_COLOR:=Color("#7b2a7a")
 const INK:=Color("#2b2118")
 
 ## How strongly a people's colour lies on the heart of its land.
-const WASH_NONE:=0.07
-const WASH_FRONTIER:=0.17
-const WASH_STATE:=0.19
+const WASH_NONE:=0.09
+const WASH_FRONTIER:=0.24
+const WASH_STATE:=0.28
 ## A kingdom's colour lies a little firmer: stronger, and full further out.
 const KINGDOM_FIRMER:=1.15
 

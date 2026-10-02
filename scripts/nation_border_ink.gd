@@ -3,12 +3,13 @@ extends RefCounted
 ## partition finds, drawn as an inked chart draws them. Every width is held in
 ## screen pixels at any zoom (nation_border_ink.gdshader, like the scouts'
 ## chart ink), so a zoom within the view's step never redraws a line.
-##   Frontier: a fine hairline in each people's colour, a little ink in it,
-##   on that people's own side, over a soft band of the same colour; all of
-##   it thins and fades where the two claims grow weak and tapers away at the
+##   Frontier: a fine ink spine edged on each side in that people's colour
+##   (a little ink in it), over a soft band of the same colour; all of it
+##   thins and fades where the two claims grow weak and tapers away at the
 ##   line's open ends, so a frontier dissolves into open land.
 ##   State: one crisp line of ink with a narrow edge and a band of each
-##   side's colour, unbroken and even from end to end.
+##   side's colour, unbroken and even from end to end; only the bands soften
+##   over a few pixels where the line ends.
 ##   War: a soft red underlay along the whole meeting line with the enemy.
 ## Pure: builds ink arrays from data, so it runs on the worker with the
 ## partition.
@@ -18,13 +19,15 @@ const Stroke:=preload("res://scripts/scout_chart_stroke.gd")
 ## Widths below are design pixels of a view this many pixels high.
 const VIEW_PX:=900.0
 const INK:=Color("#2b2118")
-const PAPER:=Color("#efe3c2")
 const WAR:=Color("#c9574a")
 ## A frontier is fully drawn where both claims score at least this at the line.
 const STRENGTH_FULL:=0.30
 ## Open ends taper over this many pixels, and never over more than a third of
 ## the line.
 const TAPER_PX:=46.0
+## A state line's colour bands soften over these few pixels where it ends, so
+## they do not stop as a cut rectangle; its ink stays crisp to the end.
+const STATE_FEATHER_PX:=6.0
 ## How far the ink sits above the ground, as a share of the view.
 const CLEARANCE:=0.0008
 
@@ -32,7 +35,7 @@ const CLEARANCE:=0.0008
 ## Opacity at each point of a line. A frontier follows the claims' strength
 ## (its line fades where the claims thin out) and tapers at its open ends; a
 ## state line is even throughout; `strength_matters` false gives the taper only.
-static func profile(line:Dictionary,px:float,strength_matters:=true)->PackedFloat32Array:
+static func profile(line:Dictionary,px:float,strength_matters:=true,taper_px:=TAPER_PX)->PackedFloat32Array:
 	var points:PackedVector2Array=line.points
 	var strength:PackedFloat32Array=line.get("strength",PackedFloat32Array())
 	var out:=PackedFloat32Array()
@@ -41,7 +44,7 @@ static func profile(line:Dictionary,px:float,strength_matters:=true)->PackedFloa
 	if String(line.get("kind",""))=="state" and strength_matters: return out
 	var arcs:=Stroke.arc_lengths(points)
 	var total:=arcs[arcs.size()-1]
-	var taper:=minf(TAPER_PX*px,total/3.0)
+	var taper:=minf(taper_px*px,total/3.0)
 	for i in points.size():
 		var alpha:=1.0
 		if strength_matters and i<strength.size(): alpha=smoothstep(0.0,STRENGTH_FULL,strength[i])
@@ -122,11 +125,12 @@ static func build(lines:Array,colors:Array,view_km:float)->Array:
 		if kind=="state":
 			# Crisp and even: each side's colour as a band within its own land,
 			# a narrow inked edge of it, and one line of ink between them.
+			var feather:=profile(line,px,false,STATE_FEATHER_PX)
 			for side in [[color_a,1.0],[color_b,-1.0]]:
 				var tint:Color=side[0]
 				var facing:float=side[1]
-				strip(colour_ink,points,ground,sides,arcs,ones,ones,PackedFloat32Array([0.9*facing,2.2*facing,8.5*facing]),PackedColorArray([Color(tint,0.62),Color(tint,0.42),Color(tint,0.0)]),px)
-				strip(line_ink,points,ground,sides,arcs,ones,ones,PackedFloat32Array([0.7*facing,1.25*facing,1.8*facing]),PackedColorArray([Color(tint.lerp(INK,0.25),0.25),Color(tint.lerp(INK,0.25),0.85),Color(tint.lerp(INK,0.25),0.2)]),px)
+				strip(colour_ink,points,ground,sides,arcs,feather,ones,PackedFloat32Array([0.9*facing,2.2*facing,8.5*facing]),PackedColorArray([Color(tint,0.62),Color(tint,0.42),Color(tint,0.0)]),px)
+				strip(line_ink,points,ground,sides,arcs,feather,ones,PackedFloat32Array([0.7*facing,1.25*facing,1.8*facing]),PackedColorArray([Color(tint.lerp(INK,0.25),0.25),Color(tint.lerp(INK,0.25),0.85),Color(tint.lerp(INK,0.25),0.2)]),px)
 			strip(line_ink,points,ground,sides,arcs,ones,ones,PackedFloat32Array([-0.95,0.0,0.95]),PackedColorArray([Color(INK,0.3),Color(INK,0.95),Color(INK,0.3)]),px)
 		elif kind=="frontier":
 			# Fine, in each people's own colour on its own side, fading with the claims.
@@ -137,8 +141,9 @@ static func build(lines:Array,colors:Array,view_km:float)->Array:
 				var tint:Color=side[0]
 				var facing:float=side[1]
 				var inked:=tint.lerp(INK,0.32)
-				# A breath of paper keeps the hairline legible over dark forest.
-				strip(colour_ink,points,ground,sides,arcs,alphas,widths,PackedFloat32Array([0.0,2.6*facing]),PackedColorArray([Color(PAPER,0.16),Color(PAPER,0.0)]),px)
-				strip(colour_ink,points,ground,sides,arcs,alphas,widths,PackedFloat32Array([0.4*facing,1.8*facing,6.5*facing]),PackedColorArray([Color(tint,0.34),Color(tint,0.24),Color(tint,0.0)]),px)
-				strip(line_ink,points,ground,sides,arcs,alphas,widths,PackedFloat32Array([0.15*facing,0.85*facing,1.6*facing]),PackedColorArray([Color(inked,0.35),Color(inked,0.9),Color(inked,0.15)]),px)
+				# A soft band of the people's colour along its own side.
+				strip(colour_ink,points,ground,sides,arcs,alphas,widths,PackedFloat32Array([0.5*facing,1.6*facing,6.5*facing]),PackedColorArray([Color(tint,0.42),Color(tint,0.30),Color(tint,0.0)]),px)
+				# A fine ink spine shared down the middle, edged on each side in
+				# that people's colour: legible on olive, ochre and forest alike.
+				strip(line_ink,points,ground,sides,arcs,alphas,widths,PackedFloat32Array([0.0,0.45*facing,1.15*facing,1.75*facing]),PackedColorArray([Color(INK,0.5),Color(inked,0.95),Color(inked,0.75),Color(inked,0.0)]),px)
 	return [war_ink,colour_ink,line_ink]
