@@ -197,10 +197,12 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	assert_str(String(shown.Condition)).is_equal("%d%%" % int(rows.damage.number))
 	var queue:Dictionary=(Construction.new(terrain,hud).tab(1).blocks as Array)[0]
 	assert_int(int(rows.works.number)).is_equal(int(queue.completed))
-	# Fighters at home and walls: the Military ledger.
+	# Fighters here and walls: the Military ledger. Those who would defend
+	# home are its levy and its watch (here the levy alone fills the watch).
+	var defense:=MilitaryCampaign.settlement_defense_snapshot()
+	assert_int(int(rows.garrison.number)).is_equal(int(defense.garrison_personnel))
 	assert_int(int(rows.garrison.number)).is_equal(int(MilitaryCampaign.personnel_ledger().home))
 	assert_str(String(rows.garrison.value)).is_equal("37 fighters")
-	var defense:=MilitaryCampaign.settlement_defense_snapshot()
 	assert_str(String(rows.fortification.value)).is_equal(String(defense.short))
 	assert_int(int(rows.fortification.number)).is_equal(int(defense.stage))
 	assert_str(String(rows.fortification.note)).is_equal("needs repair")
@@ -211,6 +213,8 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	assert_float(float(rows.production.number)).is_equal_approx(float(truth.production),0.0001)
 	assert_float(float(rows.logistics.number)).is_equal_approx(float(truth.logistics),0.0001)
 	assert_float(float(rows.supply.number)).is_equal_approx(float(truth.supply),0.0001)
+	# A scout counts home's trained levy (the same rule for every people).
+	assert_int(int(truth.garrison)).is_equal(int(MilitaryCampaign.home_army.troops))
 	assert_int(int(rows.garrison.number)).is_equal(int(truth.garrison))
 	assert_float(float(rows.fortification.own)).is_equal_approx(float(truth.fortification),0.0001)
 	# The leader says the same figures.
@@ -287,8 +291,10 @@ func test_a_second_town_shows_its_own_figures_not_home()->void:
 	assert_int(int(rows.works.number)).is_equal(1)
 	assert_int(int(rows.damage.number)).is_equal(95)
 	assert_str(String(rows.water.value)).is_equal("enough for all")
-	# No levy or walls of its own: the home levy is not claimed here.
-	assert_str(String(rows.garrison.value)).is_equal("none of its own")
+	# Its own watch, the one its battle musters, never the home levy; no walls.
+	var watch:=preload("res://scripts/civilization_combat.gd").watch_count("second")
+	assert_int(int(rows.garrison.number)).is_equal(watch)
+	assert_str(String(rows.garrison.value)).is_equal(("%d on watch" % watch) if watch>0 else "no one on watch")
 	assert_str(String(rows.fortification.value)).is_equal("none")
 	# The Health page, opened on this town, agrees.
 	var health:Dictionary=Health.new(null,hud).tab(0)
