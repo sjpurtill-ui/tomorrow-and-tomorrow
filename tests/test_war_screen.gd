@@ -311,6 +311,10 @@ func test_the_war_map_frames_the_war_and_gives_the_map_back()->void:
 	assert_str(front_tip).contains("Odds:")
 	assert_str(String((e.tip_host as PackedStringArray)[0])).contains("under arms")
 	assert_str(String((mode.scene.levy_tip as PackedStringArray)[0])).starts_with("Our army at home")
+	# A click on their ground or host brings their card on the War screen into view.
+	await get_tree().process_frame
+	assert_bool(mode.show_card(civ_id)).is_true()
+	assert_bool(mode.show_card("nobody")).is_false()
 	# Our counter counts the army at home as the strip does; the watch is not the army.
 	var card:=Bar.levy_card(MilitaryCampaign)
 	assert_int(int(mode.scene.levy.troops)).is_equal(int(card.ready)+int(card.drill)+int(card.waiting))

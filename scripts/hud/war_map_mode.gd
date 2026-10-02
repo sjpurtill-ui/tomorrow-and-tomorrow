@@ -20,7 +20,8 @@ extends Control
 ##     them is old.
 ## The pointer resting on a counter, a front, a town or a people's ground
 ## gets a few plain lines with the engine's own numbers (who, how many, the
-## dead, the odds, how old our word is).
+## dead, the odds, how old our word is). A click on an enemy's ground,
+## counter, front or town brings its card on the War screen into view.
 ## Bands out, battles, raids and garrisons stay the war chart's
 ## (war_front_overlay.gd). Observe-only: nothing here orders anything, and
 ## clicks reach the map.
@@ -145,6 +146,35 @@ func _process(delta:float)->void:
 	if now!=hovered:
 		hovered=now
 		if counters!=null: counters.queue_redraw()
+
+
+## A click on an enemy's ground, counter, front or town: its card on the War
+## screen comes into view and shines a moment. Any other click is the map's.
+func _unhandled_input(event:InputEvent)->void:
+	if not active or not event is InputEventMouseButton: return
+	var press:=event as InputEventMouseButton
+	if not press.pressed or press.button_index!=MOUSE_BUTTON_LEFT: return
+	if not _free_rect(size).has_point(press.position): return
+	var i:=hit_at(press.position)
+	if i<0: return
+	var civ_id:=String((hits[i] as Dictionary).get("civ_id",""))
+	if civ_id=="" or civ_id=="player": return
+	if show_card(civ_id): get_viewport().set_input_as_handled()
+
+
+## Brings an enemy's card on the War screen into view and lights it a
+## moment. False when the War screen has no card for them.
+func show_card(civ_id:String)->bool:
+	var screen:Variant=MilitaryCampaign.roster_screen
+	if not is_instance_valid(screen): return false
+	var card:=(screen as Node).find_child("Enemy_%s" % civ_id,true,false) as Control
+	if card==null: return false
+	var scroll:Variant=(screen as Node).get("scroll")
+	if scroll is ScrollContainer: (scroll as ScrollContainer).ensure_control_visible(card)
+	card.modulate=Color(1.18,1.1,0.86)
+	var tween:=card.create_tween()
+	tween.tween_property(card,"modulate",Color.WHITE,0.9)
+	return true
 
 
 ## Where the pointer is (a capture may set it: --capture-war-hover=x,y).
@@ -622,7 +652,7 @@ func draw_top(canvas:Control)->void:
 			if q.intersects(rect): clear=false; break
 		taken.append(Rect2(at-Vector2(r+2,r+2),Vector2(r+2,r+2)*2.0))
 		var whose:=_people_name(String(t.owner)) if String(t.owner)!="" else "strangers"
-		found.append({"rect":Rect2(at-Vector2(r+3,r+3),Vector2(r+3,r+3)*2.0).merge(rect if clear else Rect2(at,Vector2.ZERO)),
+		found.append({"civ_id":String(t.owner),"rect":Rect2(at-Vector2(r+3,r+3),Vector2(r+3,r+3)*2.0).merge(rect if clear else Rect2(at,Vector2.ZERO)),
 			"lines":PackedStringArray([words,"Ours" if String(t.owner)=="player" else "A town of %s" % whose,"Burned" if bool(t.get("ruin",false)) else ""])})
 		if not clear: continue
 		taken.append(rect)
@@ -639,7 +669,7 @@ func draw_top(canvas:Control)->void:
 		if not at.is_finite(): continue
 		var fighters:=int(e.fighters)
 		var low:=roundi(float(fighters)*(1.0-_spread(bool(e.stale)))); var high:=roundi(float(fighters)*(1.0+_spread(bool(e.stale))))
-		items.append({"at":at,"tip":e.get("tip_host",PackedStringArray()),"data":{"side":"theirs","low":low,"high":high,"strength":1.0-float(e.worn),"accent":e.color,"glyph":"spear","stale":bool(e.stale) or bool(e.guessed)}})
+		items.append({"at":at,"civ_id":String(e.civ_id),"tip":e.get("tip_host",PackedStringArray()),"data":{"side":"theirs","low":low,"high":high,"strength":1.0-float(e.worn),"accent":e.color,"glyph":"spear","stale":bool(e.stale) or bool(e.guessed)}})
 	var free:=_free_rect(canvas.size)
 	for item:Dictionary in items:
 		var at:Vector2=item.at
@@ -647,7 +677,7 @@ func draw_top(canvas:Control)->void:
 		var spot:=_clear_spot(at,plate,taken,free)
 		var drawn:=Counter.draw(canvas,spot,item.data,k)
 		taken.append(drawn.grow(4.0))
-		found.push_front({"rect":drawn,"lines":item.get("tip",PackedStringArray())})
+		found.push_front({"rect":drawn,"civ_id":String(item.get("civ_id","")),"lines":item.get("tip",PackedStringArray())})
 		# A short ink line back to the town it stands for, when set aside.
 		if spot.distance_to(at)>plate.y*0.75:
 			canvas.draw_line(at,spot+(at-spot).limit_length(plate.y*0.55),Color(INK,0.55),1.4,true)
@@ -655,12 +685,12 @@ func draw_top(canvas:Control)->void:
 	# clear of every counter and name.
 	for e:Dictionary in scene.get("enemies",[]):
 		var chip:=_draw_front_chip(canvas,e,taken,free)
-		if chip.has_area(): found.push_front({"rect":chip,"lines":e.get("tip_front",PackedStringArray())})
+		if chip.has_area(): found.push_front({"rect":chip,"civ_id":String(e.civ_id),"lines":e.get("tip_front",PackedStringArray())})
 		var line:=PackedVector2Array()
 		for p in (e.get("front",PackedVector2Array()) as PackedVector2Array):
 			var q:=_screen(p)
 			if q.is_finite(): line.append(q)
-		if line.size()>=2: found.append({"line":line,"lines":e.get("tip_front",PackedStringArray())})
+		if line.size()>=2: found.append({"line":line,"civ_id":String(e.civ_id),"lines":e.get("tip_front",PackedStringArray())})
 	# The peoples' grounds, last (beneath everything else).
 	for owner in _owners():
 		for hull:PackedVector2Array in _land_of(String(owner)):
@@ -670,7 +700,7 @@ func draw_top(canvas:Control)->void:
 			var at_war:=""
 			for e:Dictionary in scene.get("enemies",[]):
 				if String(e.civ_id)==String(owner): at_war="At war with us" if bool(e.war) else "In feud with us"
-			found.append({"poly":hull,"lines":PackedStringArray([_people_name(String(owner)) if String(owner)!="player" else "Our people's ground","%d %s we know" % [count,"town" if count==1 else "towns"],at_war])})
+			found.append({"poly":hull,"civ_id":String(owner),"lines":PackedStringArray([_people_name(String(owner)) if String(owner)!="player" else "Our people's ground","%d %s we know" % [count,"town" if count==1 else "towns"],at_war])})
 	hits=found
 	# The pointer's tip, over everything.
 	if hovered>=0 and hovered<hits.size():
