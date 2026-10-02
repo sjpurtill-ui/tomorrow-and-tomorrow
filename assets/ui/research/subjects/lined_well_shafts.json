@@ -1,12 +1,59 @@
 {
   "id": "lined_well_shafts",
   "line": "infrastructure",
-  "game_year": 32,
-  "approx_historical_year": -4787,
-  "prompt": "c. 4787 BCE: Adults line earthen well shaft with woven wattle and timber braces and lower clay vessel to water; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-650d5b2d-8e56-4eea-a5d3-f254a7445a1d.png",
-  "asset": "res://assets/ui/research/subjects/lined_well_shafts-v1.png",
-  "sha256": "f858e90cb65226436c41da2cb425df75c1094bd4fad375cdcee04809c6dc3d49",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; shaft lining and water vessel visible in wide cutaway crop."
+  "status": "new",
+  "name": "Timber- and Wattle-lined Well Shafts",
+  "one_liner": "Timber- and wattle-lined well shafts",
+  "observation": "Timber- and wattle-lined well shafts.",
+  "key_threshold": false,
+  "target_year": 32,
+  "proposed_year": 32,
+  "band_low": 15,
+  "band_high": 42,
+  "min_year": 15,
+  "research_years": 4,
+  "requires_all": [
+    "well_siting"
+  ],
+  "requires_any": [
+    [
+      "wattle_and_daub_walls",
+      "framed_construction"
+    ]
+  ],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Construction",
+  "signals": [
+    "construction",
+    "materials"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/lined_well_shafts-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "version": 2,
+  "year": 32,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "infrastructure: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/infrastructure-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established infrastructure medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: Two adults kneel beside a SMALL shallow circular well shaft whose visible inner wall has closely set rough vertical wooden poles and handwoven willow branches; one fits a branch strip by hand while another holds a raw support pole. Matte mineral-blue/limestone casein. Clear lining inside earth hole, low rim, no masonry tower, pulley, modern rope winch or metal digging tools.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-426fb12e-598c-46a1-bb86-32d08030b146.png",
+  "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/lined_well_shafts-v2.png",
+  "sha256": "d4fb46083dd5097ab1aebf7cb3e17767ee91089a2b1510da4c941d20a0d51c84",
+  "mode": "built-in image_gen / edit"
 }

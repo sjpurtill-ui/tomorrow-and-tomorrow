@@ -2232,13 +2232,7 @@
       0.65
     ]
   },
-  "drop_spindles": {
-    "path": "res://assets/ui/research/paper/drop_spindles.png",
-    "focus": [
-      0.5,
-      0.65
-    ]
-  },
+  "drop_spindles": {"path": "res://assets/ui/research/subjects/drop_spindles-v2.png", "focus": [0.5, 0.35], "opening_focus": [0.5, 0.35]},
   "plain_weaving": {
     "path": "res://assets/ui/research/paper/plain_weaving.png",
     "focus": [
@@ -3785,11 +3779,11 @@
   "banishment_sentence": {"path": "res://assets/ui/research/subjects/banishment_sentence-v1.png", "focus": [0.5, 0.5]},
   "indicator_plants": {"path": "res://assets/ui/research/subjects/indicator_plants-v1.png", "focus": [0.5, 0.5]},
   "wild_honey_smoking": {"path": "res://assets/ui/research/subjects/wild_honey_smoking-v1.png", "focus": [0.5, 0.5]},
-  "tooth_drilling": {"path": "res://assets/ui/research/subjects/tooth_drilling-v1.png", "focus": [0.5, 0.5]},
-  "festival_rest_days": {"path": "res://assets/ui/research/subjects/festival_rest_days-v1.png", "focus": [0.5, 0.5]},
-  "lined_well_shafts": {"path": "res://assets/ui/research/subjects/lined_well_shafts-v1.png", "focus": [0.5, 0.5]},
-  "saddle_quern_grinding": {"path": "res://assets/ui/research/subjects/saddle_quern_grinding-v1.png", "focus": [0.5, 0.5]},
-  "skis_snowshoes": {"path": "res://assets/ui/research/subjects/skis_snowshoes-v1.png", "focus": [0.5, 0.5]},
+  "tooth_drilling": {"path": "res://assets/ui/research/subjects/tooth_drilling-v2.png", "focus": [0.5, 0.5]},
+  "festival_rest_days": {"path": "res://assets/ui/research/subjects/festival_rest_days-v2.png", "focus": [0.5, 0.5]},
+  "lined_well_shafts": {"path": "res://assets/ui/research/subjects/lined_well_shafts-v2.png", "focus": [0.5, 0.5]},
+  "saddle_quern_grinding": {"path": "res://assets/ui/research/subjects/saddle_quern_grinding-v2.png", "focus": [0.5, 0.5]},
+  "skis_snowshoes": {"path": "res://assets/ui/research/subjects/skis_snowshoes-v2.png", "focus": [0.5, 0.5]},
   "boil_lancing": {"path": "res://assets/ui/research/subjects/boil_lancing-v1.png", "focus": [0.5, 0.5]},
   "grip_wrapping_practice": {"path": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png", "focus": [0.5, 0.5]},
   "breeding_stock_sparing": {"path": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4233,6 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "ancestor_figurines": {"path": "res://assets/ui/research/subjects/ancestor_figurines-v2.png", "focus": [0.5, 0.5]}
 }
