@@ -242,3 +242,15 @@ func test_sending_the_hostage_home_is_a_mercy_they_remember()->void:
 	assert_float(DEEDS.resentment(civ_id)).is_less(hurt)
 	assert_bool(ANSWER.is_tributary(civ_id)).is_true()
 	assert_str(String(ANSWER.tributary(civ_id).hostage)).is_equal("")
+
+## A people organised for war does not raid with everything: it declares war.
+func test_a_people_organised_for_war_declares_war_when_it_comes()->void:
+	GameState.ensure_population_total(2400); GameState.housing_capacity=3200
+	_set_pop(_civ(civ_id),3000.0)
+	var day:=int(GameState.elapsed_days)
+	ANSWER._begin_arming(civ_id,day,{"why_all_in":"they resent us"})
+	var march:=int(ANSWER.arming(civ_id).march)
+	GameState.elapsed_days=march
+	ANSWER.monthly(march)
+	assert_bool(bool(_civ(civ_id).player_relation.get("at_war",false))).is_true()
+	assert_str(_chronicle_titles()).contains("War With")

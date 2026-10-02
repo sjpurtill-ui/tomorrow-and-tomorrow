@@ -27,7 +27,8 @@ extends RefCounted
 ##   more spears (their plan reads as war: civilization_strategy), which the
 ##   Chronicle warns of. Then every free fighter of theirs marches on our
 ##   nearest town as one band (war_council: the same raid, all of them), and
-##   every league member that knows the way sends its own the same month.
+##   every league member that knows the way sends its own the same month. A
+##   people organised for war (conflict_scale.gd) declares war instead.
 ##
 ## State lives in ForeignDiplomacy.audiences["answers"] (saved with the court;
 ## older saves start without it). Static helpers; preload. Read in any scope:
@@ -577,10 +578,16 @@ static func _march(civ_id:String,day:int)->void:
 	if war!=null and bool(war.call("keeps_peace",civ_id,day)):
 		_log(civ_id,"stood_down","%s laid its spears down again: the peace holds." % _name(civ_id))
 		return
+	var name:=_name(civ_id)
+	# A people organised for war (conflict_scale.gd) does not raid with
+	# everything: it declares war, and its host and its generals take the field.
+	if war!=null and bool(war.call("formal",civ_id)):
+		if bool(war.call("declare",civ_id,day,"what they remember of us")):
+			_log(civ_id,"war","%s went to war with everything it has." % name)
+		return
 	var went:Array=[]
 	for id in [civ_id]+(arm.get("league",[]) as Array):
 		if _send_all(String(id),day): went.append(String(id))
-	var name:=_name(civ_id)
 	if went.is_empty():
 		_log(civ_id,"no_march","%s gathered its spears but never found the road to us." % name)
 		return
