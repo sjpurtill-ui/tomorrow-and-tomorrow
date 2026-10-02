@@ -1,12 +1,21 @@
 {
   "id": "shared_work_signals",
   "line": "labor",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/rest_break_timing-v2.png",
+  "medium": "charcoal drawing over matte ochre wash",
+  "prompt": "Create a NEW Tomorrow and Tomorrow year-eight research painting. Reference controls wide approximately 2055x765 proportions and charcoal drawing over matte ochre wash. One coordinator claps hands together while two workers crouch preparing to lift opposite ends of ONE rough irregular log. They respond attentively before lifting in unison. All anatomy clear, unsawn log rests just above ground. Portable wild camp, rough irregular hide garments. Complete heads, hands and mechanism within central60percentheight with smaller people for actual3.37:1 crop. Full-bleed wide mature handmade2D painting. No text, labels, border, photography, CGI, cinematic light, pottery, permanent houses, cropfields or domesticated livestock. Replace subject while retaining field medium and width.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-255590c3-e237-4bdb-8a6f-efb6109e0518.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 8,
-  "approx_historical_year": -4947,
-  "prompt": "Adults move heavy timber together as central caller claps and others answer with raised hands; expressive charcoal and red ochre on rough paper.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-be299dba-3355-417f-b051-0188ca651c71.png",
-  "asset": "res://assets/ui/research/subjects/shared_work_signals-v1.png",
-  "sha256": "68d1bdee02984a13faa7ead08e604b88c14dfa480e7860a4dcacdbd68b98764c",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; coordinated work and clap visible; crop reviewed."
+  "replace_art600": false,
+  "replace_first300": false,
+  "binding_style": "labor: charcoal drawing over matte ochre wash",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/shared_work_signals-v2.png",
+  "sha256": "7e87c24a097155895357d4524412dd1f98a8d03f4b771e0be9348e091f9ee090"
 }

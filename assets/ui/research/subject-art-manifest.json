@@ -34,13 +34,7 @@
       0.5
     ]
   },
-  "basketry": {
-    "path": "res://assets/ui/research/subjects/basketry-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "basketry": {"path": "res://assets/ui/research/subjects/basketry-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "charcoal": {
     "path": "res://assets/ui/research/subjects/charcoal-v1.png",
     "focus": [
@@ -90,13 +84,7 @@
       0.5
     ]
   },
-  "herbal_classification": {
-    "path": "res://assets/ui/research/subjects/herbal_classification-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "herbal_classification": {"path": "res://assets/ui/research/subjects/herbal_classification-v3.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "clean_water": {
     "path": "res://assets/ui/research/subjects/clean_water-v1.png",
     "focus": [
@@ -3703,11 +3691,11 @@
   "vermin_deterrent_placement": {"path": "res://assets/ui/research/subjects/vermin_deterrent_placement-v1.png", "focus": [0.5, 0.5]},
   "postpartum_seclusion_care": {"path": "res://assets/ui/research/subjects/postpartum_seclusion_care-v1.png", "focus": [0.5, 0.5]},
   "witnessed_agreement_customs": {"path": "res://assets/ui/research/subjects/witnessed_agreement_customs-v1.png", "focus": [0.5, 0.5]},
-  "dry_cache_siting": {"path": "res://assets/ui/research/subjects/dry_cache_siting-v1.png", "focus": [0.5, 0.5]},
-  "elder_consultation_rites": {"path": "res://assets/ui/research/subjects/elder_consultation_rites-v1.png", "focus": [0.5, 0.5]},
-  "hazard_memory_recitation": {"path": "res://assets/ui/research/subjects/hazard_memory_recitation-v1.png", "focus": [0.5, 0.5]},
-  "shared_work_signals": {"path": "res://assets/ui/research/subjects/shared_work_signals-v1.png", "focus": [0.5, 0.5]},
-  "site_clearing_assessment": {"path": "res://assets/ui/research/subjects/site_clearing_assessment-v1.png", "focus": [0.5, 0.5]},
+  "dry_cache_siting": {"path": "res://assets/ui/research/subjects/dry_cache_siting-v2.png", "focus": [0.5, 0.5]},
+  "elder_consultation_rites": {"path": "res://assets/ui/research/subjects/elder_consultation_rites-v2.png", "focus": [0.5, 0.5]},
+  "hazard_memory_recitation": {"path": "res://assets/ui/research/subjects/hazard_memory_recitation-v2.png", "focus": [0.5, 0.5]},
+  "shared_work_signals": {"path": "res://assets/ui/research/subjects/shared_work_signals-v2.png", "focus": [0.5, 0.5]},
+  "site_clearing_assessment": {"path": "res://assets/ui/research/subjects/site_clearing_assessment-v2.png", "focus": [0.5, 0.5]},
   "contagion_avoidance_customs": {"path": "res://assets/ui/research/subjects/contagion_avoidance_customs-v1.png", "focus": [0.5, 0.5]},
   "fallow_thicket_regrowth": {"path": "res://assets/ui/research/subjects/fallow_thicket_regrowth-v1.png", "focus": [0.5, 0.5]},
   "notched_measuring_rods": {"path": "res://assets/ui/research/subjects/notched_measuring_rods-v1.png", "focus": [0.5, 0.5]},
@@ -3743,7 +3731,7 @@
   "children_light_tasks": {"path": "res://assets/ui/research/subjects/children_light_tasks-v1.png", "focus": [0.5, 0.5]},
   "consensus_amendment_custom": {"path": "res://assets/ui/research/subjects/consensus_amendment_custom-v1.png", "focus": [0.5, 0.5]},
   "ground_stone_axes": {"path": "res://assets/ui/research/subjects/ground_stone_axes-v1.png", "focus": [0.5, 0.5]},
-  "herd_size_limits": {"path": "res://assets/ui/research/subjects/herd_size_limits-v1.png", "focus": [0.5, 0.5]},
+  "herd_size_limits": {"path": "res://assets/ui/research/subjects/herd_size_limits-v2.png", "focus": [0.5, 0.39]},
   "joint_reduction": {"path": "res://assets/ui/research/subjects/joint_reduction-v1.png", "focus": [0.5, 0.5]},
   "lineage_exogamy": {"path": "res://assets/ui/research/subjects/lineage_exogamy-v1.png", "focus": [0.5, 0.5]},
   "trade_partner_tokens": {"path": "res://assets/ui/research/subjects/trade_partner_tokens-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4227,9 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "novice_task_shadowing": {"path": "res://assets/ui/research/subjects/novice_task_shadowing-v1.png", "focus": [0.5, 0.5]},
+  "circle_dances": {"path": "res://assets/ui/research/subjects/circle_dances-v1.png", "focus": [0.5, 0.54]},
+  "friction_fire_ignition": {"path": "res://assets/ui/research/subjects/friction_fire_ignition-v1.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
+  "hearth_roasting_control": {"path": "res://assets/ui/research/subjects/hearth_roasting_control-v1.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]}
 }

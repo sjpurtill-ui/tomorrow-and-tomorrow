@@ -1,12 +1,21 @@
 {
   "id": "dry_cache_siting",
   "line": "logistics",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hide_floats-v2.png",
+  "medium": "panoramic travel watercolor sand slate indigo",
+  "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and panoramic travel watercolor sand slate indigo. Two adults tuck a hide-wrapped dried-food parcel on dry high rock shelf beneath natural overhang; third points to wet hollow below showing why raised spot was selected. No wooden chest, builtgranary or pottery. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-91467ded-5bb1-41b3-84c8-8be0e156d7e4.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 8,
-  "approx_historical_year": -4947,
-  "prompt": "Adults select a raised dry cache site above damp marshy ground in a Neolithic landscape; mature travel watercolor on paper.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a27ac3f9-eec6-4736-b7a2-c1542f01bf17.png",
-  "asset": "res://assets/ui/research/subjects/dry_cache_siting-v1.png",
-  "sha256": "d5d6a02ed8010f82e8c6267418c2efc9cfb9411b5c93a020dda7f64337902b19",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; raised dry land and marsh context clear; crop reviewed."
+  "replace_art600": false,
+  "replace_first300": false,
+  "binding_style": "logistics: panoramic travel watercolor sand slate indigo",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/dry_cache_siting-v2.png",
+  "sha256": "a0f341d272fb02e1c3a82dc07c7d3912da042df9e044ab48ab389e8d37c2fcc3"
 }

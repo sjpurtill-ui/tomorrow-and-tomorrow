@@ -1,9 +1,23 @@
 {
   "id": "herbal_classification",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Medicinal Classification. An early healer compares leaves, roots and flowers in separate groups on a dark mat, each plant distinct and hands examining botanical features, no potion bottles or modern lab.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f066f19e-8f35-43f5-80e7-de99b7d53738.png",
-  "asset": "res://assets/ui/research/subjects/herbal_classification-v1.png",
-  "sha256": "36c6783b4ff439cf7d02f4e9c811fac3702d358c8c2410131eb2a579a3200fa7",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "health",
+  "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-db2ca320-deb7-46ee-bca6-2bfb8c5e8297.png",
+  "medium": "restrained fine ink and sage celadon watercolor on cream paper",
+  "prompt": "Preserve this exact sage/celadon watercolor and fine-ink medium and WIDE 2055x765 canvas. Recompose both people AND all three separate plant piles as one scene at 75 percent their current size, centered between y=170 and y=620. All hair, both people's hands, flat rocks, complete serrated-leaf pile, complete rounded-leaf pile and complete spiny-sprig pile must be visible within that central band. Add simple painted riverbank breathing space above and below. No labels, text, border, recipes or consumption. Make THREE botanical piles distinct and fully readable in a very wide 3.37:1 crop. Do not enlarge any human.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b06c7b1f-2373-4e4b-88b1-f69eb30b991f.png",
+  "version": 3,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 8,
+  "replace_art600": false,
+  "replace_first300": true,
+  "binding_style": "health: restrained fine ink and sage celadon watercolor on cream paper",
+  "review": "Corrected composition keeps complete three plant piles, hands and heads inside wide card.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "initial_prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and restrained fine ink and sage celadon watercolor on cream paper. Two adults compare visibly different leaf shapes in three separated piles on pale flat rocks. One holds serrated leaf, other points at rounded leaf and third spiny sprig set apart. No consumption, recipes, dosage or implied cures. An interpretive plant-sorting scene. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-db2ca320-deb7-46ee-bca6-2bfb8c5e8297.png",
+  "asset": "res://assets/ui/research/subjects/herbal_classification-v3.png",
+  "sha256": "a414ace464c08402dd32568b0457c849ba64b6f1b91f51ea6600939203c00353"
 }
