@@ -195,3 +195,15 @@ func test_readings_are_kept_for_the_day_and_refreshed_by_a_new_deed()->void:
 	ForeignDiplomacy.audiences.erase("deeds")
 	DIVINE.store().events.clear()
 	assert_float(DEEDS.fear(civ_id)).is_equal(0.0)
+
+## Second review: raiders of theirs killed at our hearths are no new wrong of
+## ours, and a counted deed added to later is dated by its latest telling.
+func test_last_wrong_counts_only_our_wrongs_by_their_latest_telling()->void:
+	DEEDS.blood(civ_id,5,true)
+	assert_int(DEEDS.last_wrong(civ_id)).is_equal(-1)
+	_at(100)
+	DEEDS.blood(civ_id,4,false)
+	assert_int(DEEDS.last_wrong(civ_id)).is_equal(100)
+	_at(300)
+	DEEDS.blood(civ_id,3,false)
+	assert_int(DEEDS.last_wrong(civ_id)).is_equal(300)

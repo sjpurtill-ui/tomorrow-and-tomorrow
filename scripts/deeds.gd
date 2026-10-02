@@ -136,6 +136,7 @@ static func record(civ:String,kind:String,n:int=1,words:String="",day:int=-1)->v
 				var merged:=_weights(civ,kind,total)
 				e["n"]=total; e["a"]=merged[0]; e["b"]=merged[1]
 				e["words"]=_counted_words(kind,total,civ)
+				e["last"]=day
 				_told_changed()
 				return
 	if words=="" and PER_HEAD.has(kind): words=_counted_words(kind,n,civ)
@@ -266,15 +267,25 @@ static func monthly(day:int)->void:
 			seen[key2]=day
 			record(id,"town_burned",1,"the burning of %s" % String(town_name),_changed_hands(civ,"",day,String(town_name)))
 		# Each party of captives driven off is told once, by its own record
-		# (occupation_transfers), never read again from our own head count.
+		# (occupation_transfers: on the road, or arrived among us under the
+		# same id), never read again from our own head count.
 		var mc:Variant=WorldSimulation.military
 		if mc!=null and "occupation_transfers" in mc and mc.occupation_transfers!=null:
+			var parties:Array=[]
 			for t:Dictionary in mc.occupation_transfers.data.transfers:
-				if String(t.get("source",""))!=id or String(t.get("status",""))=="citizen": continue
-				var tkey:="captives:%s:%d" % [id,int(t.get("id",-1))]
+				if String(t.get("source",""))==id and String(t.get("status",""))!="citizen": parties.append({"id":int(t.get("id",-1)),"people":int(t.get("people",0)),"day":int(t.get("depart_day",day))})
+			for g:Dictionary in mc.occupation_transfers.data.groups:
+				if String(g.get("origin",""))==id and String(g.get("status",""))!="citizen": parties.append({"id":int(g.get("id",-1)),"people":roundi(float(g.get("share",0.0))*float(WorldSimulation.state.population_exact)),"day":int(g.get("arrival_day",day))})
+			# An older save tallied captives as one count per people: those
+			# parties were told already.
+			var old_key:="captives:%s" % id
+			var told_before:=seen.has(old_key)
+			for party:Dictionary in parties:
+				var tkey:="captives:%s:%d" % [id,int(party.id)]
 				if seen.has(tkey): continue
 				seen[tkey]=day
-				record(id,"captives",int(t.get("people",0)),"",int(t.get("depart_day",day)))
+				if not told_before: record(id,"captives",int(party.people),"",int(party.day))
+			if told_before: seen.erase(old_key)
 	while seen.size()>1800: seen.erase(seen.keys()[0])
 	_trim(state().list)
 	_told_changed()
@@ -321,11 +332,16 @@ static func _sum(civ:String,word:bool)->Dictionary:
 	var a_total:=1.0-keep_a*heard
 	return {"a":clampf(a_total,0.0,1.0),"b":clampf(1.0-keep_b-minus_b,0.0,1.0)}
 
-## The day of the latest wrong told against this people (amends aside), or -1.
+## Not wrongs of ours: raiders of theirs killed at our own hearths, and amends.
+const NOT_WRONGS:=["blood_defending","amends"]
+
+## The day of the latest wrong of ours told against this people (a counted
+## deed by the last time it was added to), or -1.
 static func last_wrong(civ_id:String)->int:
 	var last:=-1
 	for e in state().list:
-		if e is Dictionary and String(e.civ)==civ_id and float(e.get("b",0.0))>0.0: last=maxi(last,int(e.day))
+		if not e is Dictionary or String(e.civ)!=civ_id or String(e.kind) in NOT_WRONGS or float(e.get("b",0.0))<=0.0: continue
+		last=maxi(last,maxi(int(e.day),int(e.get("last",-1))))
 	return last
 
 ## How much this people fears us for what it remembers we did (to them, and

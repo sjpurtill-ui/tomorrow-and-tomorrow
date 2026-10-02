@@ -74,6 +74,9 @@ static func _simulated(civ_id:String)->bool:
 static func bowed(relation:Dictionary,day:int)->Dictionary:
 	var b:Variant=relation.get("bowed",{})
 	if not b is Dictionary or (b as Dictionary).is_empty() or day-int((b as Dictionary).get("day",-99999))>=BOWED_DAYS: return {}
+	# Only while the tribute is still being paid (trade_stances drops an
+	# agreement missed twice): a bond its payer walked away from holds nobody.
+	if preload("res://scripts/trade_stances.gd").tribute(String((b as Dictionary).get("payer","")),String((b as Dictionary).get("payee",""))).is_empty(): return {}
 	return b
 
 static func _bow(first:Dictionary,second:Dictionary,relation:Dictionary,day:int)->void:

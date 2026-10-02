@@ -230,14 +230,15 @@ static func _ratio_words(ratio:float)->String:
 	return String(standing.call("_ratio_words",ratio)) if standing!=null else "match"
 
 ## Free to come against us: not a tributary, not kin by marriage, not bound
-## by a truce, a pact or a settled feud (war_loop.keeps_peace), not a people
-## organised for war (it declares war instead), and not broken.
-static func free_to_come(civ_id:String,day:int=-1)->bool:
+## by a truce, a pact or a settled feud (war_loop.keeps_peace), and not
+## broken. A people organised for war comes only when formal_ok (as a
+## league member it declares war instead of raiding).
+static func free_to_come(civ_id:String,day:int=-1,formal_ok:bool=false)->bool:
 	if day<0: day=_day()
 	if is_tributary(civ_id): return false
 	var war:=load(WAR_PATH) as GDScript
 	if war==null: return true
-	if bool(war.call("keeps_peace",civ_id,day)) or bool(war.call("broken",civ_id)) or bool(war.call("formal",civ_id)): return false
+	if bool(war.call("keeps_peace",civ_id,day)) or bool(war.call("broken",civ_id)) or (bool(war.call("formal",civ_id)) and not formal_ok): return false
 	return (war.call("_married",civ_id) as Dictionary).is_empty()
 
 static func _knows_our_towns(civ_id:String)->bool:
@@ -510,7 +511,7 @@ static func _make_hostage(civ_id:String,words:String)->String:
 	var persons:=load(PERSONS_PATH) as GDScript
 	if persons==null: return ""
 	var given:=words.get_slice(",",0).strip_edges()
-	var p:Dictionary=persons.call("create",{"sex":"male","age":"young","deed":"was given as a pledge by the %s" % _name(civ_id)})
+	var p:Dictionary=persons.call("create",{"sex":"male","age":"young"})
 	if p.is_empty(): return ""
 	# Never the answer to "a young man": only his name or his people bring him.
 	p["keys"]=["hostage:%s:%d" % [civ_id,_day()]]
@@ -646,11 +647,10 @@ static func _begin_arming(civ_id:String,day:int,o:Dictionary)->void:
 	var with:Array=[]
 	if league!=null and bool(league.call("is_member",civ_id)):
 		for other in league.call("members"):
-			if String(other)!=civ_id and free_to_come(String(other),day): with.append(String(other))
+			if String(other)!=civ_id and free_to_come(String(other),day,true): with.append(String(other))
 	var march:=day+_rng("arm:%s:%d" % [civ_id,day]).randi_range(ARMING_MIN,ARMING_MAX)
 	state().arming[civ_id]={"since":day,"march":march,"league":with,"cause":String(o.get("why_all_in","")).substr(0,160)}
 	_mark(civ_id,"all_in",day)
-	(state().peoples[civ_id] as Dictionary)["came"]=day
 	var name:=_name(civ_id)
 	var allies:=""
 	if not with.is_empty():
@@ -679,13 +679,24 @@ static func _march(civ_id:String,day:int)->void:
 	if war!=null and bool(war.call("formal",civ_id)):
 		if bool(war.call("declare",civ_id,day,"what they remember of us")):
 			_log(civ_id,"war","%s went to war with everything it has." % name)
+			_mark(civ_id,"all_in",day)
+			(state().peoples[civ_id] as Dictionary)["came"]=day
 		return
 	var went:Array=[]
 	for id in [civ_id]+(arm.get("league",[]) as Array):
 		# Each is weighed again on the day: a member that has since bowed, made
 		# peace or married into us stays home.
-		if String(id)!=civ_id and not free_to_come(String(id),day): continue
+		if String(id)!=civ_id and not free_to_come(String(id),day,true): continue
+		# A member organised for war declares war on us beside them.
+		if String(id)!=civ_id and war!=null and bool(war.call("formal",String(id))):
+			if bool(war.call("declare",String(id),day,"standing with %s against us" % name)): went.append(String(id))
+			continue
 		if _send_all(String(id),day): went.append(String(id))
+	# Those who came are marked so: none comes with everything again for
+	# ALL_IN_GAP, nor without a new wrong of ours since (monthly).
+	for id in went:
+		_mark(String(id),"all_in",day)
+		(state().peoples[String(id)] as Dictionary)["came"]=day
 	if went.is_empty():
 		_log(civ_id,"no_march","%s gathered its spears but never found the road to us." % name)
 		return
