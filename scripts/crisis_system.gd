@@ -523,7 +523,8 @@ static func inputs(day:int)->Dictionary:
 		"divers":clampf(float(EARLY_CARE.diet_window(WorldSimulation.state)),0.0,1.0),
 		"trade":_trade_level(),"ecology":float(m.get("ecology",0.88)),
 		"cohesion":float(m.get("cohesion",0.58)),
-		"pressure":maxf(0.0,pop/carrying-0.85),
+		# The whole people against the whole land, as births and deaths read it.
+		"pressure":maxf(0.0,EARLY_CARE.people_on_the_land(WorldSimulation.state)/carrying-0.85),
 		"weather":_weather(day),"weather_season":_weather_mean(day-24,day+36),
 		"season":_season_wave(day),
 		"river":(water_origin=="mapped_hydrology" or water_kind.contains("river")) and water_km>=0.0 and water_km<=2.0,

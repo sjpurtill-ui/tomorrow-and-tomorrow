@@ -151,3 +151,32 @@ func test_explanation_names_known_practices_and_what_to_learn()->void:
 	var birth:Dictionary=rows[3]
 	assert_str(String(birth.status)).is_equal("Not yet practiced")
 	assert_str(String(birth.detail)).contains("To learn")
+
+
+## "A settlement of 40 grows just as fast as one of 120": crowding and spare
+## land are the whole people's. Inside a hamlet's own day (its count swapped
+## in), a large people is neither a remnant nor measured town by town against
+## the whole realm's land.
+func test_a_hamlet_of_a_large_people_is_judged_by_the_whole_people()->void:
+	var saved_pop:=GameState.population_exact
+	var saved_scope:=bool(SettlementModel._local_population_scope)
+	var saved_national:=float(SettlementModel._national_population_in_scope)
+	GameState.population_exact=620.0
+	assert_float(EarlyCare.people_on_the_land(GameState)).is_equal_approx(620.0,0.001)
+	var whole:Dictionary=EarlyCare.profile(GameState,discovery)
+	# The hamlet's own day: 40 people in scope, 620 in the people.
+	SettlementModel._local_population_scope=true
+	SettlementModel._national_population_in_scope=620.0
+	GameState.population_exact=40.0
+	var hamlet:Dictionary=EarlyCare.profile(GameState,discovery)
+	assert_float(EarlyCare.people_on_the_land(GameState)).is_equal_approx(620.0,0.001)
+	assert_float(float(hamlet.spare_land)).is_equal(0.0)
+	assert_float(float(hamlet.crowding)).is_equal_approx(float(whole.crowding),0.0001)
+	# A true remnant (the whole people is 40) still finds land plentiful.
+	SettlementModel._national_population_in_scope=40.0
+	var remnant:Dictionary=EarlyCare.profile(GameState,discovery)
+	assert_float(float(remnant.spare_land)).is_greater(0.0)
+	SettlementModel._local_population_scope=saved_scope
+	SettlementModel._national_population_in_scope=saved_national
+	GameState.population_exact=saved_pop
+
