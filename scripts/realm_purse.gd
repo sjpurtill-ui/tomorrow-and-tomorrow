@@ -520,12 +520,15 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	var rich:=rich_levy(output)*span
 	var owed:=reached-evaded+rich
 	var coin:=0.0
+	# One draw on the households' coin a day, shared by the levy and any
+	# charter fees: never more than COIN_DRAW of what they hold.
+	var coin_cap:=maxf(0.0,float(s.private_currency))*COIN_DRAW
 	if String(s.economy_stage)=="currency" and not in_kind() and owed>0.0:
 		# Only what changes hands for money is paid in coin (the day's traded
 		# goods at the share money settles); the rest of the harvest's share is
 		# taken in kind. The coin never outruns the households' own purses.
 		var exchanged:=maxf(0.0,float(real_accounts.get("observed_trade",0.0)))*clampf(monetization,0.0,1.0)
-		coin=minf(minf(owed,exchanged*rate*r*(1.0-ev)*span),maxf(0.0,float(s.private_currency))*COIN_DRAW)
+		coin=minf(minf(owed,exchanged*rate*r*(1.0-ev)*span),coin_cap)
 		if coin>0.0:
 			s.private_currency=float(s.private_currency)-coin
 			s.currency_supply=maxf(0.0,float(s.currency_supply)-coin)
@@ -539,15 +542,16 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	# Charter fees (or the state works' surplus): a share of the business
 	# sector's part of the day's output, taken with the levy as far as the
 	# keepers reach (enterprise.gd purse_rate). After coinage it is paid in
-	# coin as far as the households hold it; the rest in kind, out of this
-	# town's own stores, never past what it can spare.
+	# coin within the day's one draw on the households' coin (what the levy
+	# left of it); the rest in kind, out of this town's own stores, never past
+	# what it can spare.
 	var charter:=0.0
 	var fee_rate:=float(_business().call("purse_rate"))
 	if fee_rate>0.0:
 		var fee_owed:=output*float(_business().call("share"))*fee_rate*r*span
 		var fee_coin:=0.0
 		if String(s.economy_stage)=="currency" and not in_kind() and fee_owed>0.0:
-			fee_coin=minf(fee_owed*clampf(monetization,0.0,1.0),maxf(0.0,float(s.private_currency))*COIN_DRAW)
+			fee_coin=minf(fee_owed*clampf(monetization,0.0,1.0),maxf(0.0,coin_cap-coin))
 			if fee_coin>0.0:
 				s.private_currency=float(s.private_currency)-fee_coin
 				s.currency_supply=maxf(0.0,float(s.currency_supply)-fee_coin)
@@ -761,6 +765,10 @@ static func settle(day:int)->Dictionary:
 	var report:={"day":day,"days":days,"levy":float(month.levy),"paid":{},"due":{},"army":{},"relief":{}}
 	if float(month.levy)>0.0:
 		_note(purse,float(month.levy),"The month's levy, %d in 100 of it hidden" % roundi(float(month.evaded)/maxf(0.001,float(month.assessed)*maxf(0.01,reach()))*100.0),"levy")
+	# Charter fees (or the state works' surplus) came in with the levy: told
+	# on their own line, so the record explains the balance.
+	if float(month.get("charter",0.0))>0.0:
+		_note(purse,float(month.charter),"The month's %s" % String(_business().call("purse_name")).to_lower(),"charter")
 	# The store's food rots as the capital's own stored food does.
 	var rotted:=_spoil(purse,days)
 	if rotted>=0.5:_note(purse,-rotted,"Rotted in the store","out")

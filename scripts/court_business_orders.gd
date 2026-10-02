@@ -5,12 +5,16 @@ extends RefCounted
 ## Steward (the Headman) while no Treasurer is named.
 ##
 ##   "guard the trades", "keep the guilds' rules"             Guarded
-##   "grant charters", "sell the right to trade"               Chartered
+##   "grant charters (to the trades)", "sell the right to trade" Chartered
 ##   "open the markets to all", "let anyone trade"             Open
 ##   "let the state run the works", "nationalize the works"    State works
-## "free the markets" is a standing policy (government_policy_catalog.gd
-## market_deregulation), "trade with the Esurai" the Envoy's (court_trade.gd),
-## "guard the gate" the war leader's: none is read here. Questions ("how is
+## Each needs words aimed at the trades as a whole: "keep the prisoner
+## guarded", "guard the markets from thieves", "a chartered ship", "give
+## licences to the hunters", "open the market on feast day" and "open trade
+## routes to the east" are not stances. "free the markets" is a standing
+## policy (government_policy_catalog.gd market_deregulation), "trade with the
+## Esurai" the Envoy's (court_trade.gd), "guard the gate" the war leader's:
+## none is read here. Questions ("how is
 ## business?", "what do the merchant houses bring us?") are answered from the
 ## business fact sheet (facts(), answer()), offline and for the live voice.
 ##
@@ -28,9 +32,17 @@ const EraWords:=preload("res://scripts/hud/era_words.gd")
 const NEGATE:="(?i)\\b(stop|stopping|no longer|don'?t|do not|dont|never|cease|halt|no more|not|refuse|forbid)\\b"
 ## Words that hand the line to another office.
 const ELSEWHERE:="(?i)\\bfree (?:the |our )?markets?\\b|\\b(deregulat\\w*|liberali[sz]e|price controls?)\\b|\\btrade with\\b|\\b(gates?|walls?|camp|border|ford|bridge|road|roads|stores?|granar\\w*|well|wells)\\b"
-const OPEN:="(?i)\\bopen (?:up )?(?:the |our )?(?:markets?|trades?|business|commerce)(?: (?:to|for) (?:all|everyone|anyone|all comers))?\\b|\\blet (?:anyone|everyone|any man|all comers|whoever will) (?:trade|open (?:a )?shops?|set up (?:a )?(?:shops?|trades?|business))\\b|\\bfree enterprise\\b|\\bbusiness (?:open|free)\\b|\\bopen stance\\b"
-const CHARTER:="(?i)\\b(?:grant|give|sell|issue|award)\\w* (?:out )?(?:royal |trade |trading )?(charters?|licen[cs]es?)\\b|\\bcharter (?:the |our )?(?:trades|merchants?|guilds?|houses|companies|traders)\\b|\\bsell (?:the )?right to trade\\b|\\bcharters? (?:for|at) a fee\\b|\\bchartered\\b"
-const GUARD:="(?i)\\bguard (?:the |our )?(?:trades|crafts|guilds|markets)\\b|\\b(?:protect|shelter) (?:the |our )?(?:trades|crafts)\\b|\\bkeep (?:the |our )?(?:trades|crafts|business) (?:under|by|to) (?:the )?(?:guilds?|rules|custom)\\b|\\bkeep (?:the |our )?guilds'? rules\\b|\\bguilds and rules\\b|\\brein in (?:the |our )?(?:merchants?|trades|houses|companies|traders|business)\\b|\\bguarded\\b"
+## The trades as a whole: the sector the stance is about.
+const SECTOR:="(?:the |our )?(?:trades|crafts|merchants|merchant houses|trading houses|guilds|companies|businesses|business|craftsmen|craftsfolk|workshops|shops|traders)"
+## Open: the markets (or trade, business) opened to all, free trade or free
+## enterprise; never a market opened on a feast day or a road opened east.
+const OPEN:="(?i)\\bopen (?:up )?(?:the |our )?(?:markets?|trades?|business|commerce) (?:to|for) (?:all|everyone|anyone|all comers|every man|any man)\\b|\\blet (?:anyone|everyone|any man|all comers|whoever will) (?:trade|open (?:a )?shops?|set up (?:a )?(?:shops?|trades?|business))\\b|\\bfree enterprise\\b|\\bfree trade(?: and (?:free )?enterprise)?\\s*[.!]*\\s*$"
+## Chartered: charters or licences granted to the trades (or charters with no
+## one named), the right to trade sold, charters for a fee.
+const CHARTER:="(?i)\\b(?:grant|give|sell|issue|award)\\w* (?:out )?(?:royal |trade |trading )?(?:charters?|licen[cs]es?) (?:to|for) "+SECTOR+"\\b|\\b(?:grant|sell|issue|award)\\w* (?:trade |trading )?charters(?: for a fee)?\\s*[.!]*\\s*$|\\b(?:grant|give|sell|issue)\\w* (?:out )?(?:trade |trading )?licen[cs]es to trade\\b|\\bcharter (?:the |our )?(?:trades|merchants|guilds|merchant houses|companies|trading houses)\\b|\\bsell (?:the )?right to trade\\b|\\bcharters? (?:for|at) a fee\\b"
+## Guarded: the trades guarded by guilds and rules; never a thing guarded from
+## thieves or raiders.
+const GUARD:="(?i)\\b(?:guard|protect|shelter) (?:the |our )?(?:trades|crafts)\\b(?![^.!?]*\\bfrom\\b)|\\bkeep (?:the |our )?(?:trades|crafts|business) (?:under|by|to) (?:the )?(?:guilds?|rules|custom)|\\bkeep (?:the |our )?guilds'? rules\\b|\\bguilds and rules\\b|\\brein in (?:the |our )?(?:merchant houses|merchants|trades|trading houses|companies|businesses|business)\\b"
 const STATE:="(?i)\\b(?:let |have |make )?the state (?:run|own|take over|take|hold|manage)s? (?:the |our )?(?:great )?(?:works|industries|trades|mills|factories)\\b|\\bnationali[sz]e (?:the |our )?(?:great )?(?:works|industries|trades|mills|factories|business)\\b|\\bstate works\\b"
 const QUESTION:="(?i)(\\?\\s*[!.]*\\s*$|^\\s*((and|so|then|now|well|but|also)\\s+)?(how|what|where|who|whom|whose|which|when|why|should|shall|tell me|is (it|there|that|this|the|our)|are (we|they|there|the|our|you)|do (we|they|you|the|our)|does (the|it|our)|can (you|we)|could (you|we)|would|will (we|they|you|our)|have (we|they|you|the|our)|has (the|our))\\b)"
 
@@ -110,7 +122,7 @@ static func perform(reading:Dictionary)->Dictionary:
 static func _effect_sentence(q:Dictionary)->String:
 	if Business.rung()<1:return ""
 	var said:="As %s grow toward %s of our workers, all work goes %s faster and the richest fifth gain about %d %s in 100." % [_who(),Business.in_100(float(q.target)),Business.percent(float(q.work)).trim_prefix("+"),roundi(float(q.rich)*100.0),"part" if roundi(float(q.rich)*100.0)==1 else "parts"]
-	if float(q.purse_season)>=0.5:said+=" %s bring about %s a season into %s." % [String(q.purse_name),Purse.amount_text(float(q.purse_season)),Purse.account_name()]
+	if float(q.purse_season)>=0.5:said+=" %s bring about %s a season into %s at today's size, about %s once grown." % [String(q.purse_name),Purse.amount_text(float(q.purse_now)),Purse.account_name(),Purse.amount_text(float(q.purse_season))]
 	said+=" Busts: %s." % String(q.odds).to_lower()
 	return said
 
@@ -153,14 +165,14 @@ static func facts()->Dictionary:
 		"share":roundi(Business.share()*1000.0)/10.0,"target":roundi(Business.target()*1000.0)/10.0,"stance":id,"stance_name":Business.stance_name(id),"stance_words":Business.stance_words(id),
 		"work":roundi(float(x.work)*1000.0)/10.0,"trade":roundi(float(x.trade)*100.0),"rich":roundi(float(x.rich)*100.0),"odds":String(q.odds),"one_in":roundi(1.0/float(q.bust_year)) if float(q.bust_year)>0.0 else 0,
 		"booming":Business.booming(),"bust_left":Business.bust_left(),"form":String((Business.FORMS.get(form,{}) as Dictionary).get("name","")),
-		"purse_name":String(q.purse_name),"purse_season":roundi(float(Purse.charter_per_day())*Purse.SEASON_DAYS),"unit":Purse.unit_word(),"choices":Business.choices()}
+		"purse_name":String(q.purse_name),"purse_now":roundi(float(q.purse_now)),"purse_season":roundi(float(q.purse_season)),"unit":Purse.unit_word(),"choices":Business.choices()}
 
 ## The sheet as prompt lines for the live voice (plain, exact figures).
 static func text(p:Dictionary)->String:
 	if p.is_empty():return ""
 	if int(p.rung)<1:return "Business: none beyond household crafts yet; it needs %s." % String(p.next_needs)
 	var said:="Business: %s. %s in 100 of our workers are in it, heading for %s. The stance is %s (%s). It adds %s%% to all work and goods, trade reach +%d, and the richest fifth +%d parts in 100. Busts: %s." % [String(p.rung_name).to_lower(),_num(float(p.share)),_num(float(p.target)),String(p.stance_name),String(p.stance_words).to_lower(),_num(float(p.work)),int(p.trade),int(p.rich),String(p.odds).to_lower()]
-	if int(p.purse_season)>0:said+=" %s bring %s %s a season into the purse." % [String(p.purse_name),EraWords.grouped(int(p.purse_season)),String(p.unit)]
+	if int(p.purse_season)>0:said+=" %s bring %s %s a season into the purse at today's size, about %s once grown." % [String(p.purse_name),EraWords.grouped(int(p.purse_now)),String(p.unit),EraWords.grouped(int(p.purse_season))]
 	if bool(p.booming):said+=" The trades are booming: credit is running high."
 	if int(p.bust_left)>0:said+=" A bust is still felt: %d more %s of slower work." % [int(p.bust_left),"month" if int(p.bust_left)==1 else "months"]
 	if String(p.form)!="":said+=" Our crafts are organized as %s." % String(p.form).to_lower()
@@ -170,18 +182,25 @@ static func text(p:Dictionary)->String:
 static func _num(value:float)->String:
 	return ("%.1f" % value).trim_suffix(".0")
 
-const ASKS:="(?i)\\b(business|businesses|enterprise|merchant houses?|merchants|trading houses?|guilds?|companies|company|corporations?|stalls|hired workshops|banking houses|bankers|the trades|charters?|charter fees|booms?|booming|busts?|bubbles?)\\b"
+## A question about business itself: the sector named, never a loose word
+## ("companies of spearmen", "the guild of hunters", "merchants" from abroad).
+const ASKS:="(?i)\\b(business|businesses|enterprise|merchant houses?|trading houses?|banking houses?|hired workshops|chartered companies|corporations|charter fees|charters for a fee|the trades|our trades)\\b"
+## Booms and busts count only with trade named beside them.
+const ASKS_BUST:="(?i)\\b(booms?|booming|busts?|bubbles?|crash\\w*)\\b"
+const TRADE_WORDS:="(?i)\\b(trades?|business\\w*|markets?|merchant houses?|banking houses?|companies|enterprise)\\b"
 
 ## The answer to a question about business, from its sheet, or "".
 static func answer(sheet:Dictionary,lower:String)->String:
 	var p:Dictionary=sheet.get("business",{}) if sheet.get("business") is Dictionary else {}
-	if p.is_empty() or not _has(lower,ASKS):return ""
+	if p.is_empty():return ""
+	var about_busts:=_has(lower,ASKS_BUST) and _has(lower,TRADE_WORDS)
+	if not _has(lower,ASKS) and not about_busts:return ""
 	if int(p.rung)<1:return "We have no business beyond household crafts yet. It needs %s." % String(p.next_needs)
-	if _has(lower,"(?i)\\b(busts?|booms?|booming|bubbles?|fail\\w*|crash\\w*)\\b"):
+	if about_busts:
 		var now:=""
 		if int(p.bust_left)>0:now=" A bust is still felt: work goes slower for %d more %s." % [int(p.bust_left),"month" if int(p.bust_left)==1 else "months"]
 		elif bool(p.booming):now=" They are booming now, on credit, and that raises the odds while it lasts."
 		return "Under the %s stance, busts come %s.%s" % [String(p.stance_name).to_lower(),String(p.odds).to_lower(),now]
 	if _has(lower,"(?i)\\b(charters?|charter fees|fees)\\b") and int(p.purse_season)>0:
-		return "%s bring about %s %s a season into %s." % [String(p.purse_name),EraWords.grouped(int(p.purse_season)),String(p.unit),Purse.account_name()]
+		return "%s bring about %s %s a season into %s at today's size, about %s once grown." % [String(p.purse_name),EraWords.grouped(int(p.purse_now)),String(p.unit),Purse.account_name(),EraWords.grouped(int(p.purse_season))]
 	return "%s: %s in 100 of our workers, heading for %s, under the %s stance. They add %s%% to all work and goods, carry our trade +%d further, and the richest fifth hold %d parts in 100 more. Busts: %s." % [String(p.rung_name),_num(float(p.share)),_num(float(p.target)),String(p.stance_name).to_lower(),_num(float(p.work)),int(p.trade),int(p.rich),String(p.odds).to_lower()]

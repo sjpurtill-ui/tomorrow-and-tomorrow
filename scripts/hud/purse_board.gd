@@ -230,7 +230,7 @@ func _build_business()->void:
 	var said:=_line("%s of the workers · heading for %s" % [Business.in_100(share),Business.in_100(goal)],13,T.INK);said.name="ShareWords"
 	size_row.add_child(said)
 	var effect:=_line(Business.effects_words(),14,T.GREEN_TEXT,true);effect.name="BusinessEffect"
-	effect.tooltip_text="What business does now, at its size today: all work and the goods made go this much faster, trade reaches this much further, and the richest fifth settle this many parts in 100 higher."
+	effect.tooltip_text="What business does now, at its size today: all work (harvests, within what the land yields; building, digging, hauling and learning) and the goods made go this much faster, trade reaches this much further, and the richest fifth settle this many parts in 100 higher. The workshops' making capacity rises with it, up to its usual ceiling."
 	column.add_child(effect)
 	# The stance: one at a time, set like the levy.
 	var pick:=HBoxContainer.new();pick.name="Stances";pick.add_theme_constant_override("separation",8);column.add_child(pick)
@@ -241,7 +241,7 @@ func _build_business()->void:
 		button.text="%s\n%s work · %s" % [Business.stance_name(id),Business.percent(float(q.work)),_short_odds(float(q.bust_year))]
 		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		button.set_pressed_no_signal(id==current)
-		var fee:=("\n%s: about %s a season." % [String(q.purse_name),Purse.amount_text(float(q.purse_season))]) if float(q.purse_season)>=0.5 else ""
+		var fee:=("\n%s: about %s a season at today's size, %s once grown." % [String(q.purse_name),Purse.amount_text(float(q.purse_now)),Purse.number(float(q.purse_season))]) if float(q.purse_season)>=0.5 else ""
 		button.tooltip_text="%s: %s.\nGrows toward %s of the workers.\nAll work and goods %s, trade reach +%d.\nThe richest fifth +%d parts in 100.\nBusts: %s.%s\nChanging costs %d points of trust." % [Business.stance_name(id),String(q.words).to_lower(),Business.in_100(float(q.target)),Business.percent(float(q.work)),roundi(float(q.trade)*100.0),roundi(float(q.rich)*100.0),String(q.odds).to_lower(),fee,roundi(Business.CHANGE_TRUST*100.0)]
 		button.pressed.connect(func()->void:_choose_stance(id))
 		pick.add_child(button)

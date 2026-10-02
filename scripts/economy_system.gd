@@ -574,8 +574,10 @@ func _process_public_finance(_trade_volume:float,monetization:float,_military_bu
 	var output:=float(levy.output)*float(WorldSimulation.span)
 	var reached:=float(levy.assessed)*float(levy.reach)
 	var tax_capacity:={"active":float(levy.rate)>0.0,"statutory_rate":float(levy.rate),"compliance":1.0-float(levy.evasion),"administrative_reach":float(levy.reach),"taxable_exchange":output,"statutory_assessment":float(levy.assessed),
-		"administratively_assessed":reached,"compliant_assessment":float(levy.levy),"collectible":float(levy.levy),"effective_rate":float(levy.levy)/output if output>0.0 else 0.0,"noncompliance_gap":float(levy.evaded),"liquidity_gap":0.0,"coin":float(levy.coin)}
-	return {"revenue":float(levy.levy),"spending":0.0,"civil_upkeep":0.0,"military_upkeep":0.0,"civil_due":0.0,"military_due":0.0,"civil_coverage":1.0,"military_coverage":1.0,"spending_priority":WorldSimulation.state.public_spending_priority,"borrowing":0.0,"debt_service":0.0,"interest_accrued":0.0,"debt_capacity":0.0,"tax_capacity":tax_capacity}
+		"administratively_assessed":reached,"compliant_assessment":float(levy.levy),"collectible":float(levy.levy),"effective_rate":float(levy.levy)/output if output>0.0 else 0.0,"noncompliance_gap":float(levy.evaded),"liquidity_gap":0.0,"coin":float(levy.coin),"charter":float(levy.get("charter",0.0))}
+	# Revenue is all the purse took today: the levy and any charter fees, as
+	# its coin (tax_capacity.coin) counts both.
+	return {"revenue":float(levy.levy)+float(levy.get("charter",0.0)),"spending":0.0,"civil_upkeep":0.0,"military_upkeep":0.0,"civil_due":0.0,"military_due":0.0,"civil_coverage":1.0,"military_coverage":1.0,"spending_priority":WorldSimulation.state.public_spending_priority,"borrowing":0.0,"debt_service":0.0,"interest_accrued":0.0,"debt_capacity":0.0,"tax_capacity":tax_capacity}
 
 ## The realm's purse at a glance for the day's report (realm_purse.gd): its
 ## balance, a season's levy and lines, and whether it holds.

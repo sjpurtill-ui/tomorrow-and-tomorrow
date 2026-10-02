@@ -121,15 +121,36 @@ func test_rungs_need_knowledge_and_money()->void:
 	assert_int(Business.rung()).is_equal(5)
 
 
-func test_the_default_stance_is_guarded_then_chartered()->void:
+func test_the_stance_stays_guarded_until_chosen_and_new_rungs_are_told_once()->void:
 	_at_rung(1)
 	assert_str(Business.stance()).is_equal("guarded")
+	# Merchant houses arrive: no fee starts unasked, and the god is told once.
 	_at_rung(2)
-	assert_str(Business.stance()).is_equal("chartered")
-	# A chosen stance stands whatever the rung.
+	_size(0.03)
+	assert_str(Business.stance()).is_equal("guarded")
+	assert_float(Business.purse_rate()).is_equal(0.0)
+	Business.step(0);Business.step(30)
+	var told:=_told("business_rung_2")
+	assert_int(told.size()).is_equal(1)
+	var text:=String((told[0] as Dictionary).get("text",""))
+	assert_str(text).contains("Charters are now possible")
+	assert_str(text).contains("Chartered: up to")
+	assert_str(text).contains("busts about 1 in")
+	assert_str(text).contains("stays guarded")
+	Business.step(60);Business.step(90)
+	assert_int(_told("business_rung_2").size()).is_equal(1)
+	assert_str(Business.stance()).is_equal("guarded")
+	# The target the board shows follows the stance at once.
 	Business.set_stance("open")
+	assert_float(float(Business.state().target)).is_equal_approx(Business.target("open"),0.000001)
+	# A chosen stance stands whatever the rung.
 	_at_rung(3)
 	assert_str(Business.stance()).is_equal("open")
+	Business.set_stance("guarded")
+	assert_float(float(Business.state().target)).is_equal_approx(Business.target("guarded"),0.000001)
+
+func _told(key:String)->Array:
+	return (Chronicle.data().entries as Array).filter(func(x:Dictionary)->bool:return String(x.get("key",""))==key)
 
 
 # --- 2. Size ------------------------------------------------------------------------
@@ -139,12 +160,12 @@ func test_the_share_moves_toward_its_target_at_the_stated_pace()->void:
 	_money("weighed_metal",0.6)
 	_size(0.0)
 	var goal:=Business.target()
-	# rung cap x stance reach x market x credit (no credit yet: 0.85).
-	assert_float(goal).is_equal_approx(0.10*0.9*0.6*0.85,0.0001)
+	# rung cap x stance reach (Guarded until chosen) x market x credit (no credit yet: 0.85).
+	assert_float(goal).is_equal_approx(0.10*0.75*0.6*0.85,0.0001)
 	# Credit: 0.7 + 0.3 x the share still free.
 	_money("weighed_metal",0.6,500.0,0.25)
 	assert_float(Business.credit_term()).is_equal_approx(0.7+0.3*0.75,0.0001)
-	assert_float(Business.target()).is_equal_approx(0.10*0.9*0.6*(0.7+0.3*0.75),0.0001)
+	assert_float(Business.target()).is_equal_approx(0.10*0.75*0.6*(0.7+0.3*0.75),0.0001)
 	_money("weighed_metal",0.6)
 	# A twelfth of the gap a year while growing.
 	Business.step(0)
@@ -290,7 +311,7 @@ func test_state_works_need_their_knowledge()->void:
 	assert_bool(Business.choices().has("state")).is_false()
 	var refused:=Business.set_stance("state")
 	assert_bool(bool(refused.ok)).is_false()
-	assert_str(Business.stance()).is_equal("chartered")
+	assert_str(Business.stance()).is_equal("guarded")
 	_know("nationalized_core_industries")
 	assert_bool(Business.choices().has("state")).is_true()
 	assert_bool(bool(Business.set_stance("state").ok)).is_true()
@@ -474,10 +495,24 @@ func test_computer_rulers_choose_by_temperament_and_never_open_at_war()->void:
 		Controller.business_orders("trader",{"personality":free,"at_war":false})
 		return Business.stance())
 	assert_str(chosen).is_equal("open")
+	# A war that starts within the year does not flip it at once ...
+	var soon:String=WorldSimulation.scoped("trader",func()->String:
+		WorldSimulation.state.elapsed_days=int(WorldSimulation.state.elapsed_days)+30
+		Controller.business_orders("trader",{"personality":free,"at_war":true})
+		return Business.stance())
+	assert_str(soon).is_equal("open")
+	# ... at the year's review at war, Open is not chosen ...
 	var at_war:String=WorldSimulation.scoped("trader",func()->String:
+		WorldSimulation.state.elapsed_days=int(WorldSimulation.state.elapsed_days)+365
 		Controller.business_orders("trader",{"personality":free,"at_war":true})
 		return Business.stance())
 	assert_str(at_war).is_not_equal("open")
+	# ... and peace a month later does not flip it back before the next review.
+	var peace:String=WorldSimulation.scoped("trader",func()->String:
+		WorldSimulation.state.elapsed_days=int(WorldSimulation.state.elapsed_days)+30
+		Controller.business_orders("trader",{"personality":free,"at_war":false})
+		return Business.stance())
+	assert_str(peace).is_equal(at_war)
 	# The god's own record was not touched.
 	assert_bool(bool(Business.state().chosen)).is_false()
 
@@ -497,7 +532,10 @@ func test_the_court_reads_the_business_orders()->void:
 	assert_dict(BusinessOrders.read("guard the trades with guilds and rules")).is_equal({"kind":"business","stance":"guarded"})
 	assert_dict(BusinessOrders.read("Let the state run the great works")).is_equal({"kind":"business","stance":"state"})
 	assert_dict(BusinessOrders.read("let the state run the works")).is_equal({"kind":"business","stance":"state"})
-	for said in ["free the markets","Trade with the Esurai","Open trade with the Varesh","guard the gate","Open the gates","open the stores to the hungry","Should we open the markets to all?",
+	for said in ["Keep the prisoner guarded","Make sure the envoy is guarded","Guard the markets from thieves","Protect the crafts from the raiders",
+			"Hire a chartered ship to carry the grain","Bring me the man from the chartered house","Give licences to the hunters","Issue licenses to fish the lake",
+			"Open the market on feast day","Open trade routes to the east","grant charters to the towns","free trade with the Esurai",
+			"free the markets","Trade with the Esurai","Open trade with the Varesh","guard the gate","Open the gates","open the stores to the hungry","Should we open the markets to all?",
 			"don't grant charters","never open the markets","Build a great work","Raise the levy","How is business?","Guard the walls","The state is strong","if we grant charters the rich will grow"]:
 		assert_dict(BusinessOrders.read(said)).override_failure_message("'%s' was read as a business order" % said).is_empty()
 	# No line of the court evaluation (the user's own words) is read as one.
@@ -620,9 +658,165 @@ func test_the_business_record_survives_a_save_and_older_saves_start_partway()->v
 	assert_float(goal).is_greater(0.0)
 	assert_float(float(started.share)).is_equal_approx(goal*0.4,0.00001)
 	assert_int(int(started.reached)).is_equal(2)
-	assert_str(Business.stance()).is_equal("chartered")
+	assert_float(float(started.target)).is_equal_approx(goal,0.00001)
+	assert_str(Business.stance()).is_equal("guarded")
 	# And a new world starts with no business at all.
 	GameState.enterprise={}
 	GameState.economy_stage="subsistence"
 	assert_float(float(Business.state().share)).is_equal(0.0)
 
+
+# --- 11. Stated odds are the rolled odds ---------------------------------------------------
+
+## Months of the engine's own monthly step from a share of 0.1, with seeded
+## rolls: the busts that came, against the sum of the odds the screens stated
+## each month (quote().bust_year, the boom included).
+func _long_run(stance:String,years:int,used:float)->Dictionary:
+	GameState.enterprise={}
+	_at_rung(5)
+	_money("currency",1.0,1000.0 if used>0.0 else 0.0,used)
+	_size(0.1,stance)
+	Business.forced_roll=-1.0
+	var day:=0
+	Business.step(day)
+	var expected:=0.0
+	var busts:=0
+	var exact:=true
+	var booming:=0
+	for m in years*12:
+		var stated:=float(Business.quote(stance).bust_year)
+		var monthly:=1.0-pow(1.0-stated,1.0/12.0)
+		expected+=monthly
+		day+=30
+		var month:=Business.step(day)
+		if absf(float(month.get("p",monthly))-monthly)>0.0000001:exact=false
+		if month.has("bust"):busts+=1
+		if Business.booming():booming+=1
+	Business.forced_roll=1.0
+	print("ODDS %s credit used %.1f: stated 1 in %.1f years, simulated 1 in %.1f (%d busts in %d years, %.1f expected; booming %d%% of months)" % [stance,used,float(years)/maxf(0.001,expected),float(years)/maxf(1.0,float(busts)),busts,years,expected,roundi(float(booming)/float(years*12)*100.0)])
+	return {"busts":busts,"expected":expected,"exact":exact}
+
+func test_long_run_busts_match_the_stated_odds()->void:
+	for run in [["guarded",1500,0.0],["guarded",1500,0.7],["open",800,0.7]]:
+		var r:=_long_run(String(run[0]),int(run[1]),float(run[2]))
+		assert_bool(bool(r.exact)).override_failure_message("%s: the roll used odds other than those stated" % str(run)).is_true()
+		var expected:=float(r.expected)
+		assert_float(absf(float(r.busts)-expected)).override_failure_message("%s: %d busts against %.1f stated" % [str(run),int(r.busts),expected]).is_less_equal(3.0*sqrt(expected))
+	# Booms raise the odds only so far: twice the base at most.
+	_at_rung(5)
+	var e:=_size(0.1,"guarded")
+	e.boom_months=500
+	assert_float(Business.bust_month()).is_equal_approx(Business.bust_month("guarded",0)*2.0,0.0000001)
+
+
+func test_a_boom_needs_a_real_gap_and_credit_in_use()->void:
+	_at_rung(3)
+	_money("currency",1.0,1000.0,0.7)
+	var goal:=Business.target("open")
+	# Within a twentieth of its target the sector is not booming, however long it grows.
+	_size(goal*0.97,"open")
+	Business.step(0);Business.step(30)
+	assert_bool(Business.booming()).is_false()
+	_size(goal*0.5,"open")
+	Business.step(60)
+	assert_bool(Business.booming()).is_true()
+	# Without credit in use, no boom.
+	_money("currency",1.0,1000.0,0.3)
+	Business.step(90)
+	assert_bool(Business.booming()).is_false()
+
+
+func test_the_first_step_after_a_load_rolls_only_the_part_of_the_month()->void:
+	_at_rung(3)
+	_size(0.1,"open")
+	Business.step(15)
+	var month:=Business.step(30)
+	assert_float(float(month.p)).is_equal_approx(1.0-pow(1.0-Business.bust_month("open",0),0.5),0.0000001)
+	var next:=Business.step(60)
+	assert_float(float(next.p)).is_equal_approx(Business.bust_month("open",0),0.0000001)
+
+
+# --- 12. The purse, the revenue and the record ------------------------------------------
+
+func test_charter_coin_shares_the_levys_one_draw_and_counts_as_revenue()->void:
+	_at_rung(3)
+	_stock_food(200.0)
+	GameState.private_currency=1000.0
+	GameState.currency_supply=1400.0
+	GameState.monetary_reserve_metals={"Silver":600.0}
+	_size(0.15,"chartered")
+	Purse.state()
+	Purse.set_levy("heavy")
+	var accounts:={"daily_output_value":20000.0,"observed_trade":20000.0}
+	var day:=Purse.accrue(accounts,1.0)
+	assert_float(float(day.charter)).is_greater(0.0)
+	assert_float(float(day.coin)).override_failure_message("the levy and the fees draw on the households' coin once").is_less_equal(1000.0*Purse.COIN_DRAW+0.001)
+	assert_float(1000.0-float(GameState.private_currency)).is_equal_approx(float(day.coin),0.001)
+	# The economy's revenue is all the purse took, as its coin counts both.
+	GameState.private_currency=1000.0
+	var finance:=EconomySystem._process_public_finance(0.0,1.0,{},accounts)
+	var tax:Dictionary=finance.tax_capacity
+	assert_float(float(tax.charter)).is_greater(0.0)
+	assert_float(float(finance.revenue)).is_equal_approx(float(tax.collectible)+float(tax.charter),0.0001)
+
+
+func test_the_month_tells_charter_fees_on_their_own_line()->void:
+	_at_rung(2)
+	_stock_food(200.0)
+	_size(0.08,"chartered")
+	var purse:=Purse.state()
+	purse.last_settle_day=0
+	var fees:=0.0
+	for i in 5:fees+=float(Purse.accrue({"daily_output_value":1000.0},0.0).charter)
+	Purse.settle(30)
+	var lines:=Purse.history().filter(func(n:Dictionary)->bool:return String(n.kind)=="charter")
+	assert_int(lines.size()).is_equal(1)
+	assert_float(float((lines[0] as Dictionary).amount)).is_equal_approx(fees,0.0001)
+	assert_str(String((lines[0] as Dictionary).why)).contains("charter fees")
+
+
+func test_the_fee_is_said_at_todays_size_and_once_grown()->void:
+	_at_rung(2)
+	GameState.economy_metrics["real_economy"]={"daily_output_value":1000.0}
+	_size(0.02)
+	var q:=Business.quote("chartered")
+	assert_float(float(q.purse_now)).is_equal_approx(1000.0/Purse.food_price()*0.02*0.05*Purse.reach()*Purse.SEASON_DAYS,0.01)
+	assert_float(float(q.purse_season)).is_equal_approx(1000.0/Purse.food_price()*float(q.target)*0.05*Purse.reach()*Purse.SEASON_DAYS,0.01)
+	var said:=String(BusinessOrders.perform({"stance":"chartered"}).says)
+	assert_str(said).contains("at today's size")
+	assert_str(said).contains("once grown")
+	var sheet:=BusinessOrders.facts()
+	assert_int(int(sheet.purse_now)).is_equal(roundi(float(Business.quote("chartered").purse_now)))
+	assert_str(BusinessOrders.text(sheet)).contains("at today's size")
+
+
+# --- 13. Food and the making capacity -------------------------------------------------------
+
+func test_the_harvest_takes_the_whole_business_factor()->void:
+	var workers:=200.0
+	_size(0.0)
+	var plain:=FoodSystem._produce(workers,0.8,0.9,false)
+	_size(0.0).factor=1.3
+	var lifted:=FoodSystem._produce(workers,0.8*1.3,0.9,false)
+	for source in ["Fresh plants","Fresh meat","Fish"]:
+		var before:=float(plain.get(source,0.0))
+		if before<=0.001:continue
+		var ratio:=float(lifted.get(source,0.0))/before
+		print("FOOD %s ratio %.3f" % [source,ratio])
+		assert_float(ratio).override_failure_message("%s grows with the factor, never past it" % source).is_between(1.0,1.3001)
+
+
+# --- 14. Court answers keep to business ------------------------------------------------------
+
+func test_business_answers_need_business_words()->void:
+	var sheet:={"business":BusinessOrders.facts()}
+	# No business yet: a question about it is answered; others are not.
+	assert_str(BusinessOrders.answer(sheet,"how is business?")).contains("no business beyond household crafts")
+	for asked in ["how many companies of spearmen do we have?","what does the guild of hunters say?","are the merchants from the east here?","did the bridge bust in the flood?"]:
+		assert_str(BusinessOrders.answer(sheet,asked)).override_failure_message("'%s' was answered as business" % asked).is_empty()
+	_at_rung(1)
+	_size(0.02)
+	sheet={"business":BusinessOrders.facts()}
+	for asked in ["how many companies of spearmen do we have?","what does the guild of hunters say?","are the merchants from the east here?"]:
+		assert_str(BusinessOrders.answer(sheet,asked)).override_failure_message("'%s' was answered as business" % asked).is_empty()
+	assert_str(BusinessOrders.answer(sheet,"how often do the trades bust?")).contains("about 1 in")

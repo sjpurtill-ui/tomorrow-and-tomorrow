@@ -26,10 +26,15 @@ extends RefCounted
 ##           works): a share of the sector's output taken with the levy
 ##           (realm_purse.gd accrue), out of each town's own stores.
 ##
-## Booms and busts: a seeded monthly roll (step()) against stated odds; a
-## bust cuts the sector by a third, slows all work for 6 to 12 months, writes
-## off debts through the credit ledger, takes 2 points from the richest fifth
-## and 0.04 from holding together, and the Chronicle tells it once.
+## Booms and busts: a seeded monthly roll (step()) against the odds stated
+## on every screen at that moment (the boom included); a bust cuts the sector
+## by a third, slows all work for 6 to 12 months, writes off debts through the
+## credit ledger, takes 2 points from the richest fifth and 0.04 from holding
+## together, and the Chronicle tells it once.
+##
+## The stance is Guarded until the god (or a computer ruler, by temperament)
+## chooses another: no fee starts without a word. Each new rung is told once,
+## with what each stance would do there.
 ##
 ## Every people keeps its own record in its own scope (WorldSimulation.state
 ## .enterprise) and steps it monthly from civilization_day.gd; computer
@@ -99,10 +104,16 @@ const OLDER_SAVE_START:=0.4
 const TRADE_REACH:=0.3
 ## Before credit is kept the credit term is this; after, 0.7 + 0.3 x free credit.
 const NO_CREDIT:=0.85
-## A boom: growing while more than half the credit is used; work +2%.
+## A boom: the sector well short of its target (target above share x
+## BOOM_GAP) while more than half the credit is used; work +2%. The months
+## of a boom raise the odds of a bust, counted up to BOOM_MONTHS_MAX.
 const BOOM_CREDIT:=0.5
+const BOOM_GAP:=1.05
 const BOOM_GAIN:=0.02
 const BOOM_ODDS_MONTHS:=24.0
+const BOOM_MONTHS_MAX:=24
+## A computer ruler weighs the stance again at most once a year.
+const RULER_REVIEW_DAYS:=365
 ## A bust: a third of the sector fails at once; all work -4% for 6 to 12
 ## months, easing; the failed third's debts are written off (the sector holds
 ## recorded credit at twice its share of the workers, at most 90 in 100); the
@@ -124,7 +135,7 @@ const HISTORY_LIMIT:=12
 
 static func _fresh()->Dictionary:
 	return {"version":VERSION,"share":0.0,"target":0.0,"reached":0,"stance":"","chosen":false,"factor":1.0,"wealth":0.0,
-		"last_day":-1,"boom_months":0,"bust":{},"busts":0,"last_roll":{},"history":[]}
+		"last_day":-1,"boom_months":0,"bust":{},"busts":0,"last_roll":{},"history":[],"told_rung":0,"ruler_day":-1}
 
 ## This people's record, made whole. An older save (or a new world) starts at
 ## the rung its knowledge allows, with share at OLDER_SAVE_START of that
@@ -142,7 +153,8 @@ static func state()->Dictionary:
 		e["version"]=VERSION
 		if first:
 			e.reached=knowledge_rung()
-			e.share=target()*OLDER_SAVE_START
+			e.target=target()
+			e.share=float(e.target)*OLDER_SAVE_START
 			_refresh(e)
 	return e
 
@@ -234,8 +246,9 @@ static func form()->String:
 static func _form_numbers()->Dictionary:
 	return FORMS.get(form(),NO_FORM)
 
-static func default_stance(r:int)->String:
-	return "guarded" if r<2 else "chartered"
+## Guarded at every rung until a stance is chosen: fees never start unasked.
+static func default_stance(_r:int)->String:
+	return "guarded"
 
 ## The stance in force: the god's (or the ruler's) word, else the default.
 static func stance()->String:
@@ -387,7 +400,7 @@ static func bust_month(with_stance:String="",boom_months:int=-1)->float:
 	var r:=rung()
 	if r<=0:return 0.0
 	var id:=with_stance if STANCE.has(with_stance) else stance()
-	var months:=int(_raw().get("boom_months",0)) if boom_months<0 else boom_months
+	var months:=clampi(int(_raw().get("boom_months",0)) if boom_months<0 else boom_months,0,BOOM_MONTHS_MAX)
 	return float(BUST_BASE[r])*float((STANCE[id] as Dictionary).bust)*float(_form_numbers().bust)*(1.0-banking())*(1.0+float(months)/BOOM_ODDS_MONTHS)
 
 ## A year's odds: 1 - (1 - p)^12.
@@ -421,9 +434,11 @@ static func _rng(day:int)->RandomNumberGenerator:
 # --- The month ------------------------------------------------------------------------
 
 ## Once a month (civilization_day.gd "enterprise" step; at once on other days
-## and inside a town's day): the rung is read again, the share moves toward
-## its target, a boom is counted, a bust eases, and one seeded roll is made
-## against the month's stated odds. Returns the month's report, or {}.
+## and inside a town's day): the rung is read again (a new one told once), a
+## bust eases, one seeded roll is made against the odds stated all month (the
+## boom as it stood), the share moves toward its target and a boom is
+## counted. A step over part of a month (the first after a load) rolls only
+## that part. Returns the month's report, or {}.
 static func step(day:int)->Dictionary:
 	var s=WorldSimulation.state
 	if String(s.resource_settlement_id)!="":return {}
@@ -434,31 +449,43 @@ static func step(day:int)->Dictionary:
 		_refresh(e)
 		return {}
 	if floori(float(day)/MONTH_DAYS)<=floori(float(last)/MONTH_DAYS):return {}
-	var months:=clampi(roundi(float(day-last)/MONTH_DAYS),1,12)
-	var years:=float(clampi(day-last,1,365))/365.0
+	var elapsed:=float(clampi(day-last,1,365))
+	var months_part:=minf(12.0,elapsed/MONTH_DAYS)
+	var months:=maxi(1,roundi(months_part))
+	var years:=elapsed/365.0
 	e.last_day=day
 	e.reached=maxi(int(e.get("reached",0)),knowledge_rung())
 	var r:=rung()
+	if r>=1 and r>int(e.get("told_rung",0)):
+		e.told_rung=r
+		_tell_rung(r)
+	# A bust under way eases with the months gone by.
+	var bust:Dictionary=e.get("bust",{}) if e.get("bust") is Dictionary else {}
+	if int(bust.get("left",0))>0:
+		bust.left=maxi(0,int(bust.left)-months)
+		if int(bust.left)<=0:e.bust={}
+	# The month's roll, against the odds the screens stated all month.
 	var before:=float(e.share)
+	var report:={"day":day,"rung":r}
+	var busted:=false
+	if r>=1 and before>0.0:
+		var p:=1.0-pow(1.0-clampf(bust_month(),0.0,1.0),months_part)
+		var roll:=_rng(day).randf() if forced_roll<0.0 else forced_roll
+		e.last_roll={"day":day,"p":p,"roll":roll,"months":months_part}
+		report["p"]=p;report["roll"]=roll
+		busted=roll<p
+	# The share moves toward its target over the time gone by.
 	var goal:=target()
 	e.target=goal
 	var now:=before
 	if goal>before:now+=(goal-before)*(1.0-pow(1.0-GROW_YEAR,years))
 	else:now-=(before-goal)*(1.0-pow(1.0-SHRINK_YEAR,years))
 	e.share=clampf(now,0.0,1.0)
-	var growing:=goal>before+0.0001
-	e.boom_months=int(e.get("boom_months",0))+months if r>=1 and growing and credit_used()>BOOM_CREDIT else 0
-	var bust:Dictionary=e.get("bust",{}) if e.get("bust") is Dictionary else {}
-	if int(bust.get("left",0))>0:
-		bust.left=maxi(0,int(bust.left)-months)
-		if int(bust.left)<=0:e.bust={}
-	var report:={"day":day,"rung":r,"share":float(e.share),"target":goal,"boom_months":int(e.boom_months)}
-	if r>=1 and float(e.share)>0.0:
-		var p:=1.0-pow(1.0-clampf(bust_month(),0.0,1.0),float(months))
-		var roll:=_rng(day).randf() if forced_roll<0.0 else forced_roll
-		e.last_roll={"day":day,"p":p,"roll":roll}
-		report["p"]=p;report["roll"]=roll
-		if roll<p:report["bust"]=bust_now(day)
+	# A boom: well short of its target, on credit more than half used.
+	var booming_now:=r>=1 and goal>before*BOOM_GAP and goal>0.0 and credit_used()>BOOM_CREDIT
+	e.boom_months=mini(BOOM_MONTHS_MAX,int(e.get("boom_months",0))+months) if booming_now else 0
+	if busted:report["bust"]=bust_now(day)
+	report.merge({"share":float(e.share),"target":goal,"boom_months":int(e.boom_months)},true)
 	_refresh(e)
 	return report
 
@@ -553,6 +580,33 @@ static func _tell_bust(b:Dictionary)->void:
 	chronicle.call("record",{"title":"The %s fail" % _plain_failed(int(b.rung)),"text":text,"tier":"notice","kind":"economy","key":"business_bust_%d" % int(b.day),"action":{"kind":"section","section":"economy","sub":2}})
 	Purse._note(Purse.state(),0.0,"Business failures: a third of the sector failed","bust")
 
+## A new rung, told once to the god's own people, with what each stance
+## would do there (the Chronicle, and a line in the purse's record).
+static func _tell_rung(r:int)->void:
+	if WorldSimulation.actor_id!="player":return
+	var chronicle:=load("res://scripts/chronicle.gd") as GDScript
+	var home:=String(WorldSimulation.state.settlement_name)
+	var now:=stance()
+	var parts:PackedStringArray=[]
+	for id in choices():
+		var q:=quote(String(id))
+		var fee:=(", %s about %s a season once grown" % [String(q.purse_name).to_lower(),Purse.amount_text(float(q.purse_season))]) if float(q.purse_season)>=0.5 else ""
+		parts.append("%s: up to %s of the workers, work %s%s, busts %s" % [stance_name(String(id)),in_100(float(q.target)),percent(float(q.work)),fee,String(q.odds).to_lower()])
+	var opening:="%s now trade in %s." % [_cap(_who_words(r)),home if home!="" else "our towns"]
+	if r==2:opening+=" Charters are now possible; nothing is charged until you choose."
+	var text:="%s %s. The stance stays %s until you choose another." % [opening,"; ".join(parts),stance_name(now).to_lower()]
+	if chronicle!=null:chronicle.call("record",{"title":rung_name(r),"text":text,"tier":"notice","kind":"economy","key":"business_rung_%d" % r,"action":{"kind":"section","section":"economy","sub":2}})
+	Purse._note(Purse.state(),0.0,"%s now trade among us" % _cap(_who_words(r)),"business_rung")
+
+static func _who_words(r:int)->String:
+	match r:
+		1:return "stalls and hired workshops"
+		2:return "merchant houses and guilds"
+		3:return "banking houses and long-distance partnerships"
+		4:return "chartered companies"
+		5:return "corporations"
+	return "traders"
+
 static func _failed_words(r:int)->String:
 	match r:
 		1:return "the stalls and hired workshops"
@@ -595,6 +649,7 @@ static func set_stance(id:String)->Dictionary:
 			trust=CHANGE_TRUST
 			_hearts(0.0,-CHANGE_TRUST)
 		Purse._note(Purse.state(),0.0,"Business is %s now%s" % [stance_name(key).to_lower(),(": trust %d points lower for the change" % roundi(trust*100.0)) if trust>0.0 else ""],"business")
+	e.target=target()
 	_refresh(e)
 	return {"ok":true,"changed":changed,"stance":key,"before":before,"trust":trust,"quote":quote(key)}
 
@@ -603,6 +658,15 @@ static func order(o:Dictionary)->Dictionary:
 	var result:=set_stance(String(o.get("stance","")))
 	if not bool(result.get("ok",false)):return {"error":String(result.get("error",""))}
 	return result
+
+## Whether a computer ruler weighs the stance again today: once a year, so
+## a war's start or end does not flip it month by month.
+static func ruler_due(day:int)->bool:
+	var at:=int(_raw().get("ruler_day",-1))
+	return at<0 or day<at or day-at>=RULER_REVIEW_DAYS
+
+static func ruler_reviewed(day:int)->void:
+	state()["ruler_day"]=day
 
 ## A computer ruler's stance by temperament: assertive and disciplined →
 ## Chartered, open-minded → Open, empathetic → Guarded. A ruler at war never
@@ -624,8 +688,10 @@ static func ruler_stance(personality:Dictionary,at_war:bool)->String:
 # --- Reading it -----------------------------------------------------------------------
 
 ## A stance as the engine would run it now, at the share it heads for:
-## {stance, name, words, target, work, goods, trade, rich, bust_year, words_odds,
-## purse, purse_name, purse_season}. work and goods are factors - 1.
+## {stance, name, words, target, work, goods, trade, rich, bust_year, odds,
+## purse, purse_name, purse_now, purse_season}. work and goods are factors - 1;
+## the bust odds are this month's (a boom included), as the roll takes them;
+## purse_now is a season's fee at today's size, purse_season once grown.
 static func quote(id:String)->Dictionary:
 	var key:=id if STANCE.has(id) else stance()
 	var goal:=target(key)
@@ -633,11 +699,12 @@ static func quote(id:String)->Dictionary:
 	var work:=productivity(goal,key,r)-1.0
 	var bounds:=_bounds()
 	var rich:=maxf(0.0,float(bounds[1])-float(bounds[2]))*clampf(_wealth_pull(goal,key),0.0,1.0) if bounds.size()>=3 else 0.0
-	var year:=bust_year(key,0)
+	# The odds as the month's roll takes them now, a boom under way included.
+	var year:=bust_year(key)
 	var purse:=float((STANCE[key] as Dictionary).get("purse",0.0))
-	var season:=Purse.output_per_day()*goal*purse*Purse.reach()*Purse.SEASON_DAYS if purse>0.0 and goal>0.0 else 0.0
+	var per_share:=Purse.output_per_day()*purse*Purse.reach()*Purse.SEASON_DAYS if purse>0.0 else 0.0
 	return {"stance":key,"name":stance_name(key),"words":stance_words(key),"target":goal,"work":work,"goods":work,"trade":goal*TRADE_REACH,"rich":rich,
-		"bust_year":year,"odds":odds_words(year),"purse":purse,"purse_name":purse_name(key),"purse_season":season}
+		"bust_year":year,"odds":odds_words(year),"purse":purse,"purse_name":purse_name(key),"purse_now":per_share*share(),"purse_season":per_share*goal}
 
 ## What the sector does now, at its share today: {work, goods, trade, rich}
 ## (work and goods as factors - 1, trade in market-access points, rich in

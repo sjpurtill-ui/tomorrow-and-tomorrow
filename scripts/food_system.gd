@@ -405,7 +405,11 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	gathering_weight=float(shifted["Fresh plants"]);hunting_weight=float(shifted["Fresh meat"]);fishing_weight=float(shifted["Fish"])
 	var terrain_gather:=lerpf(0.54,1.34,clampf(float(environment.get("forage",0.45)),0.0,1.0))
 	var terrain_hunt:=lerpf(0.52,1.38,clampf(float(environment.get("game",0.40)),0.0,1.0))
-	var efficiency:=lerpf(0.76,1.08,clampf(labor_efficiency,0.0,1.0))
+	# The business sector's gain reaches the harvest whole (enterprise.gd): the
+	# hands' own efficiency sets the usual curve, and the sector's factor
+	# multiplies it, bounded by the factor itself.
+	var business:=preload("res://scripts/enterprise.gd").factor()
+	var efficiency:=lerpf(0.76,1.08,clampf(labor_efficiency/maxf(0.5,business),0.0,1.0))*business
 	var ecological:=lerpf(0.58,1.04,clampf(ecology,0.0,1.0))
 	var practice:=1.0
 	practice+=WorldSimulation.discovery.effect("foraging_yield")

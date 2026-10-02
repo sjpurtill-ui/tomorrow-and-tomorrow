@@ -808,10 +808,11 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var workshop_function:=float(capacities.get("workshop_function",0.0))
 	var storage_function:=float(capacities.get("storage_function",0.0))
 	var craft_coverage := clampf(makers/maxf(1.0,population*0.05),0.0,1.25)
-	var material_target := clampf(0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+WorldSimulation.discovery.effect("tool_quality")*0.30+WorldSimulation.discovery.effect("craft_output")*0.22+WorldSimulation.progression.effect("tool_quality")*0.22+WorldSimulation.progression.effect("craft_output")*0.18+modifier_strength("skilled_craftspeople")+policy_effect("material_target")+WorldSimulation.state.founding_effect("material_target"),0.02,0.96)
+	# The business sector makes more with the same hands (enterprise.gd): its
+	# factor raises the target before the usual ceiling, so every reader of the
+	# making capacity sees it in its usual range.
+	var material_target := clampf((0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+WorldSimulation.discovery.effect("tool_quality")*0.30+WorldSimulation.discovery.effect("craft_output")*0.22+WorldSimulation.progression.effect("tool_quality")*0.22+WorldSimulation.progression.effect("craft_output")*0.18+modifier_strength("skilled_craftspeople")+policy_effect("material_target")+WorldSimulation.state.founding_effect("material_target"))*business,0.02,0.96)
 	if "Open Work Area" in WorldSimulation.state.settlement_completed: material_target += 0.08
-	# The business sector makes more with the same hands (enterprise.gd).
-	material_target*=business
 	var material_capacity := lerpf(float(previous.get("material_capacity",0.12)),material_target,SPAN.rate(0.012))
 	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+WorldSimulation.discovery.effect("haul_capacity")*0.18+WorldSimulation.discovery.effect("route_speed")*0.12+WorldSimulation.progression.effect("haul_capacity")*0.14+WorldSimulation.progression.effect("route_speed")*0.10+policy_effect("logistics_target")+WorldSimulation.state.founding_effect("logistics_target")+float(foreign_effects.market_access_bonus)*0.24,0.03,0.95)
 	var logistics := lerpf(float(previous.get("logistics",0.16)),logistics_target,SPAN.rate(0.016))

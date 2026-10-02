@@ -62,13 +62,13 @@ It moves a twelfth of the gap a year while growing, and a quarter a year while s
 | Open | "Free trade and enterprise: fastest growth, more inequality, booms and busts" | ×1.0 | ×1.15 | ×1.5 | ×1.6 | nothing beyond the levy |
 | State works | (needs `nationalized_core_industries`) "The state runs the great works" | ×0.8 | ×0.85 | ×0.3 | ×0.2 | the sector's surplus: 1 part in 10 of its output |
 
-- The default is Guarded before rung 2 and Chartered from rung 2.
+- The default is Guarded at every rung until the god chooses another (changed in review: fees never start unasked). Each new rung is told once, with what each stance would do there.
 - Changing the stance costs a little trust: 2 points, told once.
 - Computer rulers choose by temperament: assertive and disciplined → Chartered, open-minded → Open, empathetic → Guarded. A ruler at war never chooses Open.
 
 ### Booms and busts (stated odds, seeded rolls)
 
-- While the sector is growing and credit is more than half used, it is **booming**. Productivity gets +2% while it lasts.
+- While the sector is well short of its target (target above share × 1.05) and credit is more than half used, it is **booming**. Productivity gets +2% while it lasts. Boom months count up to 24 at most.
 - Each month one seeded roll against `p_bust = base × stance × form × (1 − banking) × (1 + boom_months/24)`, where:
   - `base` by rung is 0, 0.001, 0.002, 0.003, 0.004, 0.005 a month;
   - `banking` = 0.4 × max adoption of `double_entry_ledgers`, `audited_company_accounts` and `chartered_central_bank`.
@@ -105,11 +105,27 @@ Where the design left room, the code does this (`scripts/enterprise.gd`):
 
 - **Target** is never more than the rung can hold (`rung_cap`); the form's reach multiplies the stance's. Before craft guilds are known there is no form, and every form number is 1.
 - **Wealth.** Where custom pulls the richest fifth back to (the age's ordinary share) rises by `(ceiling - ordinary) x min(1, share x stance_wealth x form_wealth)`. So the pull always stays inside the age's bounds, and the stance matters at every rung. Examples at coin: banking houses (16%) under Chartered add 5 points; corporations (55%) under Open add 21, and under Guarded 7.
-- **Charter fees and the state works' surplus** are a share of the business sector's part of each day's output (`output x share`), as far as the keepers reach (`realm_purse.reach`). They are taken in each town's own day beside the levy (`realm_purse.accrue`). After coinage the monetized part is paid in coin from households, up to the levy's coin limit. The rest is taken in kind, only from food beyond a town's 45 days. Nothing is made up. The purse records them as "charter" in its month and towns, so the board shows "Charter fees" (or "The state works") in "Where it comes from" and in the budget.
+- **Charter fees and the state works' surplus** are a share of the business sector's part of each day's output (`output x share`), as far as the keepers reach (`realm_purse.reach`). They are taken in each town's own day beside the levy (`realm_purse.accrue`).
+  - After coinage the monetized part is paid in coin from households. The levy and the fees share one draw a day: at most a quarter of the households' coin (`COIN_DRAW`).
+  - The rest is taken in kind, only from food beyond a town's 45 days. Nothing is made up.
+  - The purse records them as "charter" in its month and towns. The board shows "Charter fees" (or "The state works") in "Where it comes from" and in the budget. The monthly reckoning notes them on their own line. The economy's revenue for the day counts them with the levy.
+  - Every screen and the court give the fee both ways: at today's size and once grown.
 - **Trust cost.** A change of stance takes 2 points of legitimacy in every town, but only once business exists (rung 1 or more). The purse's record notes it once. At rung 0 the word is kept for later and costs nothing.
-- **Boom.** The sector booms while its target is above its share and more than half the recorded credit is used (the capital's `credit_utilization`). `boom_months` counts up, and is cleared when the boom ends or a bust strikes.
-- **The roll.** The roll is seeded by `hash(world_seed, people, month index)`, and only rungs 1 and up with a share above 0 roll. A step covering several months rolls once, against `1 - (1 - p)^months`.
+- **Boom.** The sector booms while its target is above its share × 1.05 and more than half the recorded credit is used (the capital's `credit_utilization`). `boom_months` counts up to 24, and is cleared when the boom ends or a bust strikes.
+- **The roll.** Each month the roll comes first, against the odds the screens stated all month (the boom months as they stood). Then the share grows and the boom is counted. The roll is seeded by `hash(world_seed, people, month index)`, and only rungs 1 and up with a share above 0 roll. A step over part of a month (the first after a load) rolls only that part: `1 - (1 - p)^(days/30)`.
+- **Stated odds are the rolled odds.** The stance buttons, the court reply and the fact sheet all quote the current month's odds, booms included. Busts simulated over centuries with seeded rolls match them (tests/test_enterprise.gd, rung 5):
+
+| Stance and credit | Stated | Simulated |
+|---|---|---|
+| Guarded, no credit | 1 in 33 years | 1 in 34 (44 busts in 1,500 years) |
+| Guarded, credit 70% used | 1 in 21 | 1 in 23 (65 busts in 1,500 years) |
+| Open, credit 70% used | 1 in 5.7 | 1 in 5.8 (137 busts in 800 years) |
+
+  With credit used heavily, a sector that busts keeps falling short of its target, so it stays booming: in the Open run, 98 months in 100. That doubles the odds.
+- **Food and the making capacity.** The harvest takes the factor whole: the usual efficiency curve is read on the hands' own efficiency and then multiplied by the factor, within what the land yields. The making capacity's target is raised before its usual ceiling (0.96), so every reader sees it in its usual range.
+- **Computer rulers** weigh the stance once a year. A war's start or end does not flip it month by month, and at war Open is never chosen.
 - **A bust's debts.** The debts written off are a third of the sector's part of recorded credit. The sector holds credit at twice its share of the workers, at most 90 in 100. The write-off goes through each town's own credit ledger (`credit_default`, "Business failures"). The 2 points come off the richest fifth, never below the age's floor, and are shared out to the other fifths by their shares. Holding together falls 0.04 in every town.
+- **The court** reads a stance only from words aimed at the trades as a whole. "Keep the prisoner guarded", "a chartered ship", "give licences to the hunters" and "open trade routes to the east" are not stances. It answers business questions only when business is named ("business", "merchant houses", "the trades", "charter fees", or a bust or boom of the trades). Loose words ("companies of spearmen", "the guild of hunters") are left to other answers.
 - **Words by age.** Before guilds are known, Guarded reads "Old custom and rules". Before writing, Chartered reads "You sell the right to trade".
 - **Where it runs.** The month runs in the "enterprise" step of `civilization_day.gd`, after the purse. The daily readers (`factor()`, `market_bonus()`, `wealth_lift()`, `purse_rate()`) read only the cached record.
 

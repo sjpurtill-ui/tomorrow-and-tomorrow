@@ -195,11 +195,15 @@ static func purse_orders(id:String,plan:Dictionary)->void:
 
 ## The ruler's stance on business by their nature (enterprise.gd
 ## ruler_stance): assertive and disciplined, Chartered; open-minded, Open;
-## empathetic, Guarded; never Open at war. Only a change is ordered, and only
-## once the people have business beyond the household.
+## empathetic, Guarded; never Open at war. Weighed once a year (ruler_due),
+## so a war's start or end does not flip it month by month; only a change is
+## ordered, and only once the people have business beyond the household.
 static func business_orders(id:String,plan:Dictionary)->void:
 	var Business:=preload("res://scripts/enterprise.gd")
 	if Business.rung()<1:return
+	var day:=int(WorldSimulation.state.elapsed_days)
+	if not Business.ruler_due(day):return
+	Business.ruler_reviewed(day)
 	var pick:=Business.ruler_stance(plan.get("personality",{}),bool(plan.get("at_war",false)))
 	if pick!=Business.stance():WorldSimulation.submit(id,{"kind":"business","stance":pick})
 
