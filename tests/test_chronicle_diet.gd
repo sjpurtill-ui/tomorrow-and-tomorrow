@@ -10,9 +10,16 @@ const Annals:=preload("res://scripts/chronicle_annals.gd")
 const Lives:=preload("res://scripts/court_lives.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
 const Build:=preload("res://scripts/settlement_construction.gd")
+const Card:=preload("res://scripts/hud/chronicle_card.gd")
+const Towns:=preload("res://scripts/settlement_model.gd")
+const Saves:=preload("res://scripts/save_system.gd")
 const Y:=365
 const WORKS:=["Storage Pits","Lean-to Shelters","Open Work Area","Gathering Yard","Hearth Shrine","Public Stores","Framed Hall"]
 const TOWNS:=[["settlement_001","Ashley Springs"],["settlement_002","Highwatch"],["settlement_003","Stonefield"],["settlement_004","Valebridge"],["settlement_005","Windfield"]]
+
+## Each replayed town's finished works, from the Hearth Circle every new
+## town is founded with (settlement_model.gd CITY_RESOURCE_DEFAULTS).
+var built:={}
 
 func before_test()->void:
 	WorldSimulation.clear()
@@ -20,6 +27,17 @@ func before_test()->void:
 	ForeignDiplomacy.ensure();ForeignDiplomacy.audiences.erase("lives")
 	Chronicle.pending_cards.clear()
 	GameState.chronicle={}
+	built={}
+
+
+func _at(day:int)->void:
+	GameState.elapsed_days=float(day)
+	Chronicle.ingest_day({"discoveries":[],"progression":[]})
+
+
+func _rec(line:Dictionary)->Dictionary:
+	GameState.elapsed_days=float(int(line.get("day",0)))
+	return Chronicle.record(line)
 
 
 ## One line of the replay: when, how it is recorded, and what the test
@@ -58,7 +76,7 @@ func _fixture()->Array:
 	# the second's too, the last three's after the realm's next step.
 	for k in TOWNS.size():
 		for i in WORKS.size():
-			lines.append(_line((2+8*k)*Y+100+20*i,"work:"+String(WORKS[i]),"moment",{"work":WORKS[i],"town":k,"era":1 if k<=1 else 2,"before":i}))
+			lines.append(_line((2+8*k)*Y+100+20*i,"work:"+String(WORKS[i]),"moment",{"work":WORKS[i],"town":k,"era":1 if k<=1 else 2}))
 	# Lines from files this diet does not own (war_loop.gd, rival_rulers.gd,
 	# the ledger), folded by the general rule alone.
 	for n in 9:
@@ -103,8 +121,11 @@ func _play(line:Dictionary)->Dictionary:
 		return {"key":String(told.key),"text":"A cairn of stones: %s." % String(r.label),"tier":"notice"}
 	if r.has("work"):
 		var town:Array=TOWNS[int(r.town)]
+		# Built the way a town keeps its works: founded with its Hearth Circle.
+		if not built.has(town[0]):built[town[0]]=(Towns.CITY_RESOURCE_DEFAULTS.settlement_completed as Array).duplicate()
+		(built[town[0]] as Array).append(String(r.work))
 		var said:PackedStringArray=["room for food +%d rations" % (1000+day%997)]
-		var request:=Build.finished_telling(String(r.work),String(town[0]),String(town[1]),said,day,int(r.era),int(r.before))
+		var request:=Build.finished_telling(String(r.work),String(town[0]),String(town[1]),said,day,int(r.era),Build.works_before(built[town[0]],String(r.work)))
 		Chronicle.record(request)
 		return {"key":String(request.key),"text":String(request.text),"tier":String(request.tier),"request":request}
 	if r.has("clash"):
@@ -248,14 +269,17 @@ func test_forty_years_of_chatter_fold_and_every_turning_point_stays()->void:
 	assert_str(String(windfield_first.tier)).is_equal("notice")
 	assert_str(String(windfield_first.text)).contains("Raised at Windfield, its first work")
 
-	# Routine lines from other files fold by the general rule; a folded card
-	# opens what its latest line opens.
+	# Routine lines from other files fold by the general rule, into a card
+	# that opens the same people's court.
 	var talk:=entries.filter(func(x:Dictionary)->bool:return String(x.get("family",""))=="ildor will not talk" and String(x.tier)!="whisper")
 	assert_int(talk.size()).is_equal(1)
 	assert_int(int(talk[0].told)).is_equal(9)
-	var watch:=entries.filter(func(x:Dictionary)->bool:return String(x.get("family",""))=="city reconnaissance" and String(x.tier)!="whisper")
-	assert_int(watch.size()).is_equal(1)
-	assert_int(int(((watch[0] as Dictionary).action as Dictionary).mission_id)).is_equal(116)
+	assert_str(String(((talk[0] as Dictionary).action as Dictionary).focus.civ_id)).is_equal("civ_02")
+	# A watch report opens its own illustrated report: never folded into
+	# another's (the year's telling still steps back the close ones).
+	for x in entries.filter(func(x:Dictionary)->bool:return String(x.get("family",""))=="city reconnaissance"):
+		assert_bool((x as Dictionary).has("same_as")).is_false()
+		assert_bool((x as Dictionary).has("told")).is_false()
 	# Envoy refusals years apart are each told; close ones fold.
 	var refusals:=entries.filter(func(x:Dictionary)->bool:return String(x.get("family",""))=="kezari sends no envoys" and String(x.tier)!="whisper")
 	assert_int(refusals.size()).is_equal(3)
@@ -266,35 +290,178 @@ func test_forty_years_of_chatter_fold_and_every_turning_point_stays()->void:
 	assert_bool(Chronicle.valid_state(GameState.chronicle)).is_true()
 
 
-func _raid(key:String,day:int,extra:Dictionary={})->Dictionary:
-	GameState.elapsed_days=float(day)
-	var line:={"key":key,"day":day,"title":"Kezari Raiders at the Herds","text":"Raiders came at dusk.","tier":"notice","kind":"war","action":{"kind":"court","focus":{"civ_id":"civ_01"}}}
+func _seen(key:String,day:int,extra:Dictionary={})->Dictionary:
+	var line:={"key":key,"day":day,"title":"Kezari Herders at the Ford","text":"Herders came at dusk.","tier":"notice","kind":"contact","action":{"kind":"court","focus":{"civ_id":"civ_01"}}}
 	line.merge(extra,true)
-	return Chronicle.record(line)
+	return _rec(line)
 
 
 func test_a_family_folds_within_its_window_and_is_news_again_after()->void:
-	var first:=_raid("raid:1",100)
-	var second:=_raid("raid:2",900,{"text":"Raiders came at dawn."})
+	var first:=_seen("seen:1",100)
+	var second:=_seen("seen:2",900,{"text":"Herders came at dawn."})
 	assert_str(String(first.tier)).is_equal("notice")
 	assert_str(String(second.tier)).is_equal("whisper")
-	assert_str(String(second.same_as)).is_equal("raid:1")
+	assert_str(String(second.same_as)).is_equal("seen:1")
 	assert_int(int(first.told)).is_equal(2)
-	assert_str(String(first.text)).starts_with("Raiders came at dusk. Told twice since Year 1; the latest, Year 3 · ")
-	assert_str(String(first.text)).ends_with(": Raiders came at dawn.")
+	assert_str(String(first.text)).starts_with("Herders came at dusk. Told twice since Year 1; the latest, Year 3 · ")
+	assert_str(String(first.text)).ends_with(": Herders came at dawn.")
 	# A repeat keeps its own line in the event ledger.
-	assert_bool(GameState.simulation_events.any(func(e:Dictionary)->bool:return String(e.get("id",""))=="chronicle_raid:2")).is_true()
+	assert_bool(GameState.simulation_events.any(func(e:Dictionary)->bool:return String(e.get("id",""))=="chronicle_seen:2")).is_true()
 	# More than the window after the last one: news again, a card of its own.
-	var third:=_raid("raid:3",2100,{"text":"Raiders burned the fold."})
+	var third:=_seen("seen:3",2100,{"text":"Herders camped by the fold."})
 	assert_str(String(third.tier)).is_equal("notice")
 	assert_bool(third.has("same_as")).is_false()
 	# A line asked never to fold, and a moment, stand alone.
-	var kept:=_raid("raid:4",2110,{"fold":false})
+	var kept:=_seen("seen:4",2110,{"fold":false})
 	assert_str(String(kept.tier)).is_equal("notice")
 	assert_bool(kept.has("same_as")).is_false()
-	var felt:=_raid("raid:5",2400,{"tier":"moment"})
+	var felt:=_seen("seen:5",2400,{"tier":"moment"})
 	assert_str(String(felt.tier)).is_equal("moment")
 	assert_bool(felt.has("same_as")).is_false()
+
+
+## Review finding 1: a warning or a card that sends the god to a page to act
+## (food running short, soldiers unpaid, fewer hearths) is never folded: each
+## is its own card, and the ticker reads the newest.
+func test_warnings_and_calls_to_act_are_never_folded()->void:
+	var calls:=[
+		{"key":"split_food:s1:short:%d","title":"Riverbend Will Run Out of Food","text":"At your split Riverbend gets %d food a day and eats 9. Put 3 more on getting food.","tier":"notice","kind":"warning","domain":"food"},
+		{"key":"purse_unpaid_%d","title":"The soldiers go unpaid","text":"You stopped their pay. Their will fell %d points.","tier":"notice","kind":"war","action":{"kind":"section","section":"economy","sub":2}},
+		{"key":"dwindling:%d","title":"Why the hearths are fewer","text":"The people have lost %d souls in two winters.","tier":"notice","kind":"hearth_count","domain":"population","action":{"kind":"section","section":"health","sub":0}}]
+	for i in 3:
+		var day:int=[400,800,1100][i]
+		for call in calls:
+			var told:Dictionary=(call as Dictionary).duplicate(true)
+			# Numbers of different lengths: the same words (digits folded) are
+			# stepped back by the year's telling, which is not what is tested here.
+			told.key=String(told.key) % day;told.text=String(told.text) % [7,42,311][i];told["day"]=day
+			var e:=_rec(told)
+			assert_str(String(e.tier)).override_failure_message("stepped back: "+String(told.key)).is_equal("notice")
+			assert_bool(e.has("same_as")).override_failure_message("folded: "+String(told.key)).is_false()
+	for e in GameState.chronicle.entries:assert_bool((e as Dictionary).has("told")).is_false()
+	assert_str(Chronicle.latest_headline()).contains("WHY THE HEARTHS ARE FEWER")
+	assert_str(Chronicle.latest_headline()).contains("311 souls")
+	assert_bool(Chronicle.foldable({"kind":"warning","tier":"notice"},"x")).is_false()
+
+
+## Review finding 2: raids and battles (war_loop.gd, keyed war:raid: and
+## war:battle:, their court card carrying the battle to watch) each keep their
+## own card and their own battle.
+func test_raids_and_battles_keep_their_own_report()->void:
+	var raid:={"title":"Kezari Raiders at the Herds","tier":"notice","kind":"war","domain":"security"}
+	var one:=_rec(raid.merged({"key":"war:raid:civ_01:100","day":100,"text":"At first light 9 Kezari men came for the herds.","action":{"kind":"court","focus":{"civ_id":"civ_01"},"battle_seed":111}},true))
+	var two:=_rec(raid.merged({"key":"war:raid:civ_01:400","day":400,"text":"At first light 6 Kezari men came for the herds.","action":{"kind":"court","focus":{"civ_id":"civ_01"},"battle_seed":222}},true))
+	var three:=_rec(raid.merged({"key":"war:battle:civ_01:333","day":700,"text":"7 Kezari fighters came for the herds and our people met them.","action":{"kind":"court","focus":{"civ_id":"civ_01"}}},true))
+	var four:=_rec(raid.merged({"key":"war:raid:civ_01:1000","day":1000,"text":"At first light 4 Kezari men came for the herds.","action":{"kind":"court","focus":{"civ_id":"civ_01"}}},true))
+	for e in [one,two,three,four]:
+		assert_str(String((e as Dictionary).tier)).is_equal("notice")
+		assert_bool((e as Dictionary).has("same_as")).is_false()
+		assert_bool((e as Dictionary).has("told")).is_false()
+	assert_int(int((one.action as Dictionary).battle_seed)).is_equal(111)
+	assert_int(int((two.action as Dictionary).battle_seed)).is_equal(222)
+	# A card with a battle to watch never folds, whatever its key.
+	assert_bool(Chronicle.plain_action({"kind":"court","focus":{"civ_id":"civ_01"},"battle_seed":5},true)).is_false()
+	assert_bool(Chronicle.foldable({"key":"war:op:x","tier":"notice","kind":"war","action":{"kind":"court","focus":{"civ_id":"civ_01"},"battle_seed":5}})).is_false()
+
+
+## Review finding 3: a title that does not name its people ("The Trail Went
+## Cold") never folds one people's card into another's; a card keeps its own
+## action. Two towns' pages are two cards too.
+func test_different_peoples_never_share_a_card()->void:
+	var trail:={"title":"The Trail Went Cold","tier":"notice","kind":"war","domain":"security"}
+	var malewa:=_rec(trail.merged({"key":"war:op:civ_04:war_track:100","day":100,"text":"Lorn's trackers lost Malewa's raiders' trail.","action":{"kind":"court","focus":{"civ_id":"civ_04"}}},true))
+	var ildor:=_rec(trail.merged({"key":"war:op:civ_02:war_track:400","day":400,"text":"Lorn's trackers lost Ildor's raiders' trail.","action":{"kind":"court","focus":{"civ_id":"civ_02"}}},true))
+	assert_str(String(ildor.tier)).is_equal("notice")
+	assert_bool(ildor.has("same_as")).is_false()
+	var again:=_rec(trail.merged({"key":"war:op:civ_04:war_track:700","day":700,"text":"Lorn's trackers lost Malewa's raiders again.","action":{"kind":"court","focus":{"civ_id":"civ_04"}}},true))
+	assert_str(String(again.same_as)).is_equal(String(malewa.key))
+	assert_int(int(malewa.told)).is_equal(2)
+	assert_str(String(((malewa.action as Dictionary).focus as Dictionary).civ_id)).is_equal("civ_04")
+	assert_bool(ildor.has("told")).is_false()
+	assert_str(String(((ildor.action as Dictionary).focus as Dictionary).civ_id)).is_equal("civ_02")
+	# A source's own group (fold_as) still keeps two towns' pages apart.
+	var drive:={"title":"Back From the Drive","tier":"notice","kind":"work","fold_as":"drive"}
+	var here:=_rec(drive.merged({"key":"drive:1","day":1000,"text":"The drovers are home at Reedford.","action":{"kind":"section","section":"settlement","sub":0,"city":"c1"}},true))
+	var there:=_rec(drive.merged({"key":"drive:2","day":1300,"text":"The drovers are home at Highwatch.","action":{"kind":"section","section":"settlement","sub":0,"city":"c2"}},true))
+	assert_bool(there.has("same_as")).is_false()
+	assert_bool(here.has("told")).is_false()
+
+
+## Review finding 4: a new town is founded with its Hearth Circle
+## (settlement_model.gd), so its first real work is still its first.
+func test_a_new_towns_first_work_counts_from_its_founding_hearth()->void:
+	var completed:Array=(Towns.CITY_RESOURCE_DEFAULTS.settlement_completed as Array).duplicate()
+	assert_array(completed).contains(["Hearth Circle"])
+	completed.append("Storage Pits")
+	assert_int(Build.works_before(completed,"Storage Pits")).is_equal(0)
+	completed.append("Lean-to Shelters")
+	assert_int(Build.works_before(completed,"Lean-to Shelters")).is_equal(1)
+	# Storage Pits stood elsewhere already: this one is told as the town's first.
+	Chronicle.data().firsts["work:Storage Pits"]=1
+	Chronicle.data().firsts["work:Storage Pits:era1"]=1
+	var told:=Build.finished_telling("Storage Pits","settlement_009","Reedford",PackedStringArray(),500,1,Build.works_before(["Hearth Circle","Storage Pits"],"Storage Pits"))
+	assert_str(String(told.tier)).is_equal("notice")
+	assert_bool(bool(told.get("fold",true))).is_false()
+	assert_str(String(told.text)).contains("Raised at Reedford, its first work")
+	var next:=Build.finished_telling("Storage Pits","settlement_010","Highwatch",PackedStringArray(),560,1,Build.works_before(["Hearth Circle","Lean-to Shelters","Storage Pits"],"Storage Pits"))
+	assert_bool(next.has("fold")).is_false()
+	assert_str(String(next.text)).not_contains("its first work")
+
+
+## Review finding 5: a repeat folded into last year's card is still told in
+## its own year's entry (the year's wars and word from other peoples).
+func test_a_folded_repeat_still_counts_in_its_own_year()->void:
+	_at(10)
+	var talk:={"title":"Ildor Will Not Talk","tier":"notice","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":"civ_02"}}}
+	var envoy:={"title":"Kezari Sends No Envoys","tier":"notice","kind":"contact","action":{"kind":"court","focus":{"civ_id":"civ_01"}}}
+	_rec(talk.merged({"key":"war:op:civ_02:war_parley:100","day":100,"text":"Lorn's messengers came back with nothing."},true))
+	_rec(envoy.merged({"key":"court:rival:120","day":120,"text":"Kezari will not send another envoy into the hall."},true))
+	_at(370)
+	var talk2:=_rec(talk.merged({"key":"war:op:civ_02:war_parley:500","day":500,"text":"Lorn's messengers came back with nothing, again."},true))
+	var envoy2:=_rec(envoy.merged({"key":"court:rival:520","day":520,"text":"Kezari will not send another envoy, not this year either."},true))
+	assert_str(String(talk2.same_as)).is_equal("war:op:civ_02:war_parley:100")
+	assert_str(String(envoy2.same_as)).is_equal("court:rival:120")
+	assert_bool(bool(talk2.repeat)).is_true()
+	var year:Dictionary=Annals.acc(Chronicle.data(),520)
+	assert_int(int(year.year)).is_equal(1)
+	assert_array(year.wars).contains(["Ildor Will Not Talk"])
+	assert_bool((year.abroad as Array).any(func(n:Dictionary)->bool:return String(n.get("text","")).contains("not this year either"))).is_true()
+
+
+## Review finding 6: a card the card layer already queued shows what folded
+## into it since (hud/chronicle_card.gd takes the Chronicle's current copy).
+func test_a_queued_card_shows_what_folded_into_it_since()->void:
+	Chronicle.data()
+	var first:=_rec(Build.finished_telling("Framed Hall","settlement_001","Ashley Springs",PackedStringArray(),100,1,3))
+	assert_str(String(first.tier)).is_equal("moment")
+	assert_int(Chronicle.pending_cards.size()).is_equal(1)
+	# The card layer has taken it into its own queue, not yet shown.
+	var queued:Dictionary=Chronicle.pending_cards.pop_front()
+	var card:=Card.new()
+	auto_free(card)
+	add_child(card)
+	card.queue.assign([queued])
+	var again:=_rec(Build.finished_telling("Framed Hall","settlement_002","Highwatch",PackedStringArray(),160,1,3))
+	assert_str(String(again.same_as)).is_equal(String(first.key))
+	assert_str(String(queued.text)).not_contains("Told twice")
+	card._next()
+	assert_str(String(card.current.text)).contains("Told twice since Year 1")
+	assert_str(String(card.current.text)).contains("Raised at Highwatch")
+	assert_str(card.caption.text).contains("Raised at Highwatch")
+	assert_str(String((card.current.action as Dictionary).section)).is_equal("construction")
+
+
+## Review finding 7: the load repairs a Chronicle that does not read as one
+## (save_system.gd _repair_chronicle, using Chronicle.valid_state); an older
+## save's Chronicle loads untouched.
+func test_an_unreadable_chronicle_starts_afresh_on_load()->void:
+	var good:={"reflected_GameState":{"chronicle":{"version":1,"entries":[{"key":"k","day":3,"tier":"notice","title":"A line","text":"Words.","action":{"kind":"court","focus":{}}}]}}}
+	assert_bool(Saves._repair_chronicle(good)).is_false()
+	assert_int((good.reflected_GameState.chronicle.entries as Array).size()).is_equal(1)
+	var bad:={"reflected_GameState":{"chronicle":{"entries":[{"key":7,"day":"soon","tier":"loud"}]}}}
+	assert_bool(Saves._repair_chronicle(bad)).is_true()
+	assert_dict(bad.reflected_GameState.chronicle).is_empty()
+	assert_bool(Saves._repair_chronicle({})).is_false()
 
 
 func test_an_older_save_still_loads_and_folds_into_its_old_cards()->void:

@@ -539,6 +539,9 @@ static func note(c:Dictionary,entry:Dictionary)->void:
 	var title:=String(entry.get("title",""))
 	var tier:=String(entry.get("tier",""))
 	if bool(entry.get("folded",false)):a.folded=int(a.folded)+1
+	# A repeat folded into an older card (chronicle.gd) is a tally line there,
+	# but still news for the year it happened in.
+	if tier=="whisper" and bool(entry.get("repeat",false)):tier="notice"
 	if key.begins_with("crisis:"):
 		var parts:=key.split(":")
 		if parts.size()>2 and parts[2]=="silent":

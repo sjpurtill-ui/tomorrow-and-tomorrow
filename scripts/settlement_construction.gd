@@ -244,11 +244,22 @@ static func tell_finished(title:String)->Dictionary:
 	var id:=String(WorldSimulation.state.resource_settlement_id)
 	var town:=String(WorldSimulation.settlements.settlement_record(id).get("name","")) if not id.is_empty() else ""
 	if town.is_empty():town=String(WorldSimulation.state.settlement_name)
-	# Works this town finished before this one (an older save's towns have
-	# no mark in the Chronicle's firsts yet).
-	var before:=maxi(0,(WorldSimulation.state.settlement_completed as Array).size()-1)
+	var before:=works_before(WorldSimulation.state.settlement_completed,title)
 	var told:=finished_telling(title,id,town,said,int(WorldSimulation.state.elapsed_days),_era_step(),before)
 	return chronicle.record(told) if not told.is_empty() else {}
+
+## Works a town finished before `title` (just added to `completed`), not
+## counting the Hearth Circle every new town is founded with
+## (settlement_model.gd CITY_RESOURCE_DEFAULTS). An older save's towns have no
+## mark in the Chronicle's firsts, so this tells whether it is a town's first.
+static func works_before(completed:Array,title:String)->int:
+	var n:=0
+	var skipped:=false
+	for done in completed:
+		if String(done)=="Hearth Circle":continue
+		if String(done)==title and not skipped:skipped=true;continue
+		n+=1
+	return n
 
 ## The realm's era step (0 bands .. 3 iron and sail), from what the people
 ## know (character_voice.gd era_tier).

@@ -25,12 +25,14 @@ extends RefCounted
 ##       "priority" (true: a moment that the monthly cap never downgrades,
 ##       for first contact and the first winter).
 ##       Folding (the Chronicle's diet): a notice whose family was told within
-##       FOLD_WINDOW_DAYS folds into that card instead of becoming a new one.
-##       The card counts it and shows its words as the latest line; the repeat
-##       is kept as a tally line and in the event ledger. "fold_as" (a group
-##       key; default the title's family), "fold_days" (that group's window)
-##       and "fold" (false: never folded) shape it. Moments, firsts, priority
-##       lines and anything waiting on the god (see foldable) never fold.
+##       FOLD_WINDOW_DAYS, to the same people or place (the same card action),
+##       folds into that card instead of becoming a new one. The card counts
+##       it and shows its words as the latest line; the repeat is kept as a
+##       tally line, in the event ledger and in its own year's telling.
+##       "fold_as" (a group key; default the title's family), "fold_days"
+##       (that group's window) and "fold" (false: never folded) shape it.
+##       Moments, firsts, priority lines, warnings and anything waiting on the
+##       god (see foldable) never fold.
 ##   Chronicle.record_first(key:String, moment:Dictionary)->Dictionary
 ##       Records only the first time `key` is seen for this people.
 ##   Chronicle.record_beat(beat:Dictionary)->Dictionary
@@ -57,15 +59,17 @@ const CONDITION_QUIET_DAYS:=60
 const FOLD_WINDOW_DAYS:=1095
 ## A card gathers repeats for at most this long; the next one is told afresh.
 const FOLD_SPAN_DAYS:=3650
+## How far back fresh() looks for a queued card's stored entry.
+const FRESH_LOOK:=400
 ## Never folded, by kind, key or the action the card offers: deaths, births,
-## foundings, the year's entries, crises, the story's firsts and turnings,
-## aims taken up, kept or failed, wars and feuds begun, turned or ended, a
-## price named for peace, battles, ceremonies waiting.
-const FOLD_NEVER_KINDS:=["death","birth","founding","annal"]
+## foundings, the year's entries, warnings (they ask the god to act), crises,
+## the story's firsts and turnings, aims taken up, kept or failed, wars and
+## feuds begun, turned or ended, a price named for peace, raids and battles
+## (each keeps its own report), ceremonies waiting.
+const FOLD_NEVER_KINDS:=["death","birth","founding","annal","warning"]
 const FOLD_NEVER_KEYS:=["annal:","age:","crisis:","first:","beat:","discovery:","milestone:","learned:","turning:","court:death","court:succession",
 	"aim:start:","aim:done:","aim:fail:","aim:release:","ceremony:","war:feud:","war:declared:","war:terms:","war:war_to_feud:","war:peace:",
-	"court_war:","town_fate:","aftermath:","battle"]
-const FOLD_NEVER_ACTIONS:=["ceremony","battle"]
+	"war:raid:","war:battle:","court_war:","town_fate:","aftermath:","battle"]
 ## Era-defining practices stay moments even when their field is not new.
 const RESEARCH_MILESTONES:=["seed_selection","public_schools","printing_process","steam_propulsion","powered_flight","reactor_engineering"]
 ## Headcounts the people have never reached before are remembered once.
@@ -143,15 +147,18 @@ static func record(moment:Dictionary)->Dictionary:
 	if shaped.has("same_as"):entry["same_as"]=String(shaped.same_as)
 	var group:=String(moment.get("fold_as",shaped.family)).strip_edges()
 	if group!="" and group!=String(shaped.family):entry["fold_as"]=group
-	# A notice already told lately folds into its card (FOLD_WINDOW_DAYS); one
-	# the year's telling already stepped back is still counted on that card.
+	# A notice already told lately, to the same people or place, folds into
+	# its card (FOLD_WINDOW_DAYS); one the year's telling already stepped back
+	# is still counted on that card.
 	var head:Dictionary={}
 	var repeat:=false
 	if wanted=="notice" and tier in ["notice","whisper"] and not shaped.has("same_as") and foldable(moment,key):
-		head=_fold_head(c,group,day,int(moment.get("fold_days",FOLD_WINDOW_DAYS)),String(shaped.family))
+		head=_fold_head(c,group,String(shaped.family),action_sign(moment.get("action",{})),day,int(moment.get("fold_days",FOLD_WINDOW_DAYS)))
 		if not head.is_empty():
 			repeat=tier=="notice"
 			tier="whisper";entry.tier="whisper";entry["folded"]=true;entry["same_as"]=String(head.key)
+			# Still news for its own year's telling (chronicle_annals.gd note).
+			if repeat:entry["repeat"]=true
 	# The story's own telling replaces a plainer report of the same finding.
 	for older in shaped.get("demote",[]):_demote(c,String(older),key)
 	for optional in ["art","action","domain","source","first","learned"]:
@@ -175,10 +182,13 @@ static func record(moment:Dictionary)->Dictionary:
 # --- Folding repeats -----------------------------------------------------------
 
 ## Whether a record request may fold into an earlier card of its family:
-## only a plain notice. Never a moment (nor one the monthly cap lowered), a
-## first or priority line, and never anything that waits on the god: a death,
-## a crisis, a war begun or a battle, a ceremony, a court summons (a card that
-## opens the court on a person), an aim taken up, kept or failed.
+## only a plain notice that asks nothing of the god. Never a moment (nor one
+## the monthly cap lowered), a first or priority line, a warning, and never
+## anything that waits on the god: a death, a crisis, a war begun or a raid or
+## battle, a ceremony, a court summons (a card that opens the court on a
+## person), an aim taken up, kept or failed. A card that opens anything but
+## the court folds only when its source asks for it by "fold_as", and then
+## only to open a page of the dock, never a report or a battle.
 static func foldable(moment:Dictionary,key:String="")->bool:
 	if key.is_empty():key=String(moment.get("key",""))
 	if moment.has("fold") and not bool(moment.fold):return false
@@ -187,10 +197,33 @@ static func foldable(moment:Dictionary,key:String="")->bool:
 	if String(moment.get("kind","")) in FOLD_NEVER_KINDS:return false
 	for prefix in FOLD_NEVER_KEYS:
 		if key.begins_with(prefix):return false
-	var action:Dictionary=moment.get("action",{}) if moment.get("action") is Dictionary else {}
-	if String(action.get("kind","")) in FOLD_NEVER_ACTIONS:return false
-	if String(action.get("kind",""))=="court" and action.get("focus") is Dictionary and (action.focus as Dictionary).has("person_id"):return false
-	return true
+	return plain_action(moment.get("action",{}),String(moment.get("fold_as",""))!="")
+
+
+## A card's action that a fold may keep: none, or the court opened on a
+## people (or on nobody). With `asked` (the source's own "fold_as"), also a
+## page of the dock. Never a person summoned, a report, a battle to watch or
+## a ceremony to attend.
+static func plain_action(action:Variant,asked:bool=false)->bool:
+	if not action is Dictionary or (action as Dictionary).is_empty():return true
+	var a:Dictionary=action
+	if a.has("battle_seed") or a.has("seed"):return false
+	match String(a.get("kind","")):
+		"court":
+			var focus:Variant=a.get("focus",{})
+			if not focus is Dictionary:return false
+			for field in (focus as Dictionary):
+				if String(field)!="civ_id":return false
+			return true
+		"section":return asked
+	return false
+
+
+## What a card opens, as words: two lines fold together only when they open
+## the same thing (the same people, the same page).
+static func action_sign(action:Variant)->String:
+	if not action is Dictionary or (action as Dictionary).is_empty():return ""
+	return JSON.stringify(action)
 
 
 ## The group a told entry folds by: its "fold_as", else its family.
@@ -200,20 +233,21 @@ static func fold_group(entry:Dictionary)->String:
 	return Annals._family(String(entry.get("title","")))
 
 
-## The newest card of `group` still gathering repeats on `day`: told (or last
-## folded into) within `window` days, and first told within FOLD_SPAN_DAYS
-## (or `window`, when longer). {} when the next one is news again. A card an
-## older save kept before groups were named is matched by its `family`.
-static func _fold_head(c:Dictionary,group:String,day:int,window:int,family:String="")->Dictionary:
+## The newest card of `group` that opens the same thing (`sign`) and still
+## gathers repeats on `day`: told (or last folded into) within `window`
+## days, and first told within FOLD_SPAN_DAYS (or `window`, when longer). {}
+## when the next one is news again. A card an older save kept before groups
+## were named is matched by its `family`.
+static func _fold_head(c:Dictionary,group:String,family:String,sign:String,day:int,window:int)->Dictionary:
 	if group.is_empty():return {}
 	for e in c.entries:
 		if not e is Dictionary:continue
 		var entry:Dictionary=e
 		if String(entry.get("tier",""))=="whisper":continue
 		var same:=fold_group(entry)==group or (family!="" and not entry.has("fold_as") and String(entry.get("family",""))==family)
-		if not same:continue
+		if not same or action_sign(entry.get("action",{}))!=sign:continue
 		# A card that itself waits on the god is never rewritten.
-		if not foldable({"kind":entry.get("kind",""),"action":entry.get("action",{})},String(entry.get("key",""))):return {}
+		if not foldable({"kind":entry.get("kind",""),"action":entry.get("action",{}),"fold_as":entry.get("fold_as","")},String(entry.get("key",""))):return {}
 		var first_day:=int(entry.get("day",day))
 		if day-int(entry.get("last_day",first_day))>window:return {}
 		if day-first_day>maxi(FOLD_SPAN_DAYS,window):return {}
@@ -222,7 +256,9 @@ static func _fold_head(c:Dictionary,group:String,day:int,window:int,family:Strin
 
 
 ## Counts a repeat on its card: how many times now, and the latest words,
-## after the card's own. The card opens what the latest one opens.
+## after the card's own. The card keeps its own action: a repeat folds only
+## into a card that opens the same thing. A card still waiting to be shown
+## shows the count too (fresh(), used by hud/chronicle_card.gd).
 static func _fold_into(head:Dictionary,entry:Dictionary)->void:
 	if not head.has("told"):
 		head["told"]=1
@@ -233,10 +269,23 @@ static func _fold_into(head:Dictionary,entry:Dictionary)->void:
 	head["last_text"]=String(entry.get("text",""))
 	if String(entry.get("title",""))!=String(head.get("title","")):head["last_title"]=String(entry.get("title",""))
 	else:head.erase("last_title")
-	if entry.get("action") is Dictionary:head["action"]=(entry.action as Dictionary).duplicate(true)
 	head["text"]=fold_text(head)
 	for card in pending_cards:
 		if String(card.get("key",""))==String(head.get("key","")):card.merge(head,true)
+
+
+## A card as the Chronicle now holds it: a card queued for showing may have
+## gathered repeats since (its count and latest line). `card` itself when
+## the Chronicle no longer keeps it.
+static func fresh(card:Dictionary)->Dictionary:
+	if not active() or String(card.get("key",""))=="":return card
+	var key:=String(card.key)
+	var looked:=0
+	for e in data().entries:
+		looked+=1
+		if looked>FRESH_LOOK:break
+		if e is Dictionary and String((e as Dictionary).get("key",""))==key:return (e as Dictionary).duplicate(true)
+	return card
 
 
 ## A card's words with its repeats: "... Told twelve times since Year 218;
@@ -288,6 +337,7 @@ static func valid_state(c:Variant)->bool:
 			if entry.has(field) and not (entry[field] is int or entry[field] is float):return false
 		for field in ["text","family","fold_as","base_text","last_text","last_key","last_title","same_as"]:
 			if entry.has(field) and not entry[field] is String:return false
+		if entry.has("action") and not entry.action is Dictionary:return false
 	return true
 
 

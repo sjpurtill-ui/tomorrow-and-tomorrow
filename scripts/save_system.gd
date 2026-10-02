@@ -109,6 +109,7 @@ func _load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	# Research ids renamed since the save was written load under their current ids.
 	payload=preload("res://scripts/discovery_id_aliases.gd").migrate(payload)
 	_repair_shared_craft_positions(payload)
+	_repair_chronicle(payload)
 	if int(payload.get("version",-1))!=SAVE_VERSION: return {"error":"This save was written by an incompatible version."}
 	var metadata:Dictionary=payload.get("metadata",{})
 	# Older releases could lose this entire section after its popup was closed.
@@ -169,6 +170,18 @@ func _load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	if legacy_campaign:message+=" This older game keeps its old rules for other peoples. Start a new world to play with the current ones."
 	return {"ok":true,"legacy_campaign":legacy_campaign,"message":message}
 
+
+## The Chronicle is the story told of the world, not the world: one that does
+## not read as a Chronicle (chronicle.gd valid_state) starts afresh rather
+## than refusing the save. Older saves, without its fold fields, are valid as
+## they are. Returns true when it was replaced.
+static func _repair_chronicle(payload:Dictionary)->bool:
+	var state:Variant=payload.get("reflected_GameState",{})
+	if not state is Dictionary or not (state as Dictionary).has("chronicle"):return false
+	if preload("res://scripts/chronicle.gd").valid_state((state as Dictionary).chronicle):return false
+	push_warning("The saved Chronicle could not be read; it starts afresh.")
+	(state as Dictionary)["chronicle"]={}
+	return true
 
 ## Crafts shared under a rival compact were once stored without a position,
 ## which the exchange validator rejects. Place them at the rival's home.
