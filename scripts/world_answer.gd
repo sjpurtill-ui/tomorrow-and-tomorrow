@@ -35,8 +35,11 @@ extends RefCounted
 ## a rival's own planner asks arming() about itself.
 
 const VERSION:=1
-## One great answer per people every this many days.
+## One great answer per people every this many days; after coming at us with
+## everything, a people needs longer to gather itself again (and the dead it
+## left at our hearths are told as fear, leaning it toward bowing next).
 const ANSWER_GAP:=2*365
+const ALL_IN_GAP:=5*365
 ## A refused submission is not offered again for this long.
 const REFUSED_GAP:=3*365
 const ARMING_MIN:=60
@@ -287,7 +290,7 @@ static func monthly(day:int)->void:
 		# A war between peoples organised for it is fought out by its own rules.
 		if bool(relation.get("at_war",false)) and bool(war.call("formal",id)): continue
 		var mine:Dictionary=(a.peoples as Dictionary).get(id,{})
-		if day-int(mine.get("day",-99999))<ANSWER_GAP: continue
+		if day-int(mine.get("day",-99999))<(ALL_IN_GAP if String(mine.get("kind",""))=="all_in" else ANSWER_GAP): continue
 		# Kin by marriage do not come against kin.
 		var kin:=not (war.call("_married",id) as Dictionary).is_empty()
 		var o:=odds(id,reading(id,standing.call("view_of",id,our)))

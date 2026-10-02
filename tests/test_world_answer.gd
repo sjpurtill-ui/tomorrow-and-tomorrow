@@ -274,3 +274,19 @@ func test_a_vow_to_make_us_yield_leans_them_to_come_and_is_undone_if_they_bow()-
 	ANSWER._bind(civ_id,day,20.0,"","")
 	assert_str(String((aims.state().rivals as Dictionary)[civ_id].status)).is_equal("failed")
 	assert_str(_chronicle_titles()).contains("Came to Nothing")
+
+## After coming at us with everything, a people takes years to gather itself:
+## no second answer for ALL_IN_GAP days, however it feels.
+func test_after_everything_they_need_years_before_they_answer_again()->void:
+	_terrorise(civ_id,8)
+	_set_pop(_civ(civ_id),400.0)
+	var day:=int(GameState.elapsed_days)
+	ANSWER._begin_arming(civ_id,day,{"why_all_in":"they resent us"})
+	var march:=int(ANSWER.arming(civ_id).march)
+	ANSWER.monthly(march)
+	var later:=march
+	for m in range(1,int(ANSWER.ALL_IN_GAP/30.0)-int((march-day)/30.0)-1):
+		later=day+m*30+ (march-day)
+		ANSWER.monthly(later)
+	assert_bool(ANSWER.arming(civ_id).is_empty()).is_true()
+	assert_bool(_occasion("submission",civ_id).is_empty()).is_true()
