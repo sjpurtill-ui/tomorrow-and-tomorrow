@@ -14036,6 +14036,8 @@ func _ensure_war_map_overlay()->void:
 	# Fronts, the generals' arrows, clashes and zones are inked beneath the marks.
 	var fronts:=preload("res://scripts/hud/war_front_overlay.gd").new(); fronts.name="WarFrontOverlay"; fronts.terrain=self; layer.add_child(fronts)
 	war_map_overlay=preload("res://scripts/hud/war_map_overlay.gd").new(); war_map_overlay.name="WarMapOverlay"; war_map_overlay.terrain=self; layer.add_child(war_map_overlay)
+	# The War screen's map mode (HOI4): lands, fronts and hosts, framed.
+	var war_mode_map:=preload("res://scripts/hud/war_map_mode.gd").new(); war_mode_map.terrain=self; layer.add_child(war_mode_map)
 
 
 func _refresh_warfare_front_markers(front_views:Array)->void:

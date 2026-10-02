@@ -9,6 +9,25 @@ const HallProbe:=preload("res://tests/audience_hall_probe.gd")
 const Law:=preload("res://scripts/army_levy_law.gd")
 const Board:=preload("res://scripts/hud/war_board.gd")
 const Bar:=preload("res://scripts/hud/army_bar.gd")
+const MapMode:=preload("res://scripts/hud/war_map_mode.gd")
+
+## A map for the War map to draw on: an orthographic camera looking straight
+## down at its target, the towns' cards on their own layer, flat ground.
+class FakeMap extends Node3D:
+	var camera:Camera3D
+	var camera_target:=Vector3.ZERO
+	var city_labels:Control
+	var capture_render_active:=true
+	func _ready()->void:
+		camera=Camera3D.new(); camera.projection=Camera3D.PROJECTION_ORTHOGONAL; camera.size=12.0; add_child(camera); camera.current=true
+		var layer:=CanvasLayer.new(); layer.name="CityLabels"; add_child(layer)
+		city_labels=Control.new(); layer.add_child(city_labels)
+		_update_camera()
+	func _height_at(_x:float,_z:float)->float: return 0.0
+	func _update_camera()->void:
+		camera.global_position=camera_target+Vector3(0,400,0)
+		camera.look_at(camera_target,Vector3.FORWARD)
+	func _update_scale_lod()->void: pass
 
 var probe:Node
 var civ_id:=""
@@ -258,3 +277,75 @@ func test_the_strip_reads_the_same_for_a_village_and_an_empire()->void:
 	assert_str(Board.compact(1_260_000)).is_equal("1.3 million")
 	assert_str(Board.compact(3_400_000_000)).is_equal("3.4 billion")
 	assert_str(Board.compact(2_000_000_000)).is_equal("2 billion")
+
+
+## The user, 2026-10-01: "errrr okay, not so sure how that's hoi4". In HOI4
+## the map is the war: the War screen turns the map into a war map (peoples'
+## ground, fronts, hosts) framed on the war, and gives the map back after.
+func test_the_war_map_frames_the_war_and_gives_the_map_back()->void:
+	var home:Vector2=CivilizationSystem.player_world_origin
+	var there:=home+Vector2(200.0,0.0)
+	var intel=CivilizationSystem.city_intelligence
+	var seen:Dictionary=intel.location_record({"city_id":"test_kaldren","civ_id":civ_id,"name":"Kaldren","position":{"x":there.x,"z":there.y}},5,"scout","test")
+	intel.publish("player",seen,5)
+	WAR.blood_feud(civ_id,10,"old wrongs")
+	var map:=FakeMap.new(); add_child(map)
+	map.camera_target=Vector3(home.x,0.0,home.y); map._update_camera()
+	var layer:=CanvasLayer.new(); map.add_child(layer)
+	var mode:Control=MapMode.new(); mode.terrain=map; layer.add_child(mode)
+	mode._process(0.016)
+	assert_bool(mode.active).override_failure_message("closed, the map is the map").is_false()
+	MilitaryCampaign.open_roster("army")
+	await get_tree().process_frame
+	mode._process(0.016)
+	assert_bool(mode.active).is_true()
+	var enemies:Array=mode.scene.enemies
+	assert_int(enemies.size()).is_equal(1)
+	var e:Dictionary=enemies[0]
+	assert_bool((e.there as Vector2).distance_to(there)<0.01).override_failure_message(str(e.there)).is_true()
+	assert_bool(bool(e.hot)).is_true()
+	# The front stands across the way between us, about halfway.
+	var front:PackedVector2Array=e.front
+	assert_int(front.size()).is_greater_equal(2)
+	assert_float(front[front.size()/2].distance_to(home.lerp(there,0.5))).is_less(30.0)
+	# Our ground and theirs are both drawn; the towns' cards step aside.
+	var owners:Array=mode._owners()
+	assert_bool(owners.has(civ_id)).is_true()
+	assert_bool(map.city_labels.get_parent().visible).is_false()
+	# The view pulls back to take in a town 200 km off.
+	assert_float(map.camera.size).is_greater(100.0)
+	# Closed again: the cards and the view come back as they were.
+	MilitaryCampaign.roster_screen.free()
+	await get_tree().process_frame
+	mode._process(0.016)
+	assert_bool(mode.active).is_false()
+	assert_bool(map.city_labels.get_parent().visible).is_true()
+	assert_float(map.camera.size).is_equal_approx(12.0,0.01)
+	map.free()
+
+
+## Each people ranges a share of the way to its nearest neighbour, never less
+## than a town's own reach nor more than a long march.
+func test_each_people_ranges_a_share_of_the_way_to_its_neighbour()->void:
+	var towns:=[{"owner":"player","at":Vector2.ZERO},{"owner":"a","at":Vector2(100,0)},{"owner":"b","at":Vector2(0,1000)},{"owner":"c","at":Vector2(0,1010)}]
+	var r:=MapMode._ranges(towns)
+	assert_float(float(r.player)).is_equal_approx(100.0*MapMode.RANGE_SHARE,0.01)
+	assert_float(float(r.a)).is_equal_approx(100.0*MapMode.RANGE_SHARE,0.01)
+	assert_float(float(r.b)).is_equal_approx(MapMode.RANGE_MIN_KM,0.01)
+	var far:=MapMode._ranges([{"owner":"player","at":Vector2.ZERO},{"owner":"a","at":Vector2(5000,0)}])
+	assert_float(float(far.player)).is_equal_approx(MapMode.RANGE_MAX_KM,0.01)
+
+
+## A host's counter never covers a town's name, nor stands under the War
+## screen's strip, column or bar.
+func test_a_counter_never_covers_a_name_nor_stands_under_the_war_screen()->void:
+	var plate:=Vector2(94,36)
+	var bounds:=Rect2(Vector2(96,150),Vector2(900,500))
+	var name_rect:=Rect2(Vector2(560,330),Vector2(90,20))
+	var spot:=MapMode._clear_spot(Vector2(600,380),plate,[name_rect],bounds)
+	var placed:=Rect2(spot-plate*0.5,plate)
+	assert_bool(placed.intersects(name_rect)).is_false()
+	assert_bool(bounds.encloses(placed)).is_true()
+	# A town right under the strip: its counter goes beside or below, inside.
+	var high:=MapMode._clear_spot(Vector2(500,160),plate,[],bounds)
+	assert_bool(bounds.encloses(Rect2(high-plate*0.5,plate))).is_true()
