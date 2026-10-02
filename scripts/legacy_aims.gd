@@ -575,8 +575,13 @@ static func _cand_friend(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	c.legacy="the Bond with %s" % _the(String(best.name))
 	return c
 
+## How many hearths we keep: the towns our people live in, never a place
+## they left (settlement_model.lived_in).
+static func _hearths()->int:
+	return SettlementModel.lived_in(GameState.player_settlements).size()
+
 static func _cand_settle(by:Dictionary,rng:RandomNumberGenerator)->Dictionary:
-	var count:=GameState.player_settlements.size()
+	var count:=_hearths()
 	if GameState.population_total<90 or count>=6: return {}
 	# A shrinking band cannot spare its young; the court does not ask it.
 	if String(by.get("source",""))!="god" and (observed_growth()<=0.0 or GameState.population_total<140): return {}
@@ -675,7 +680,7 @@ static func _condition_scores(day:int)->Dictionary:
 		var level:=int(((civ as Dictionary).get("player_relation",{}) as Dictionary).get("contact_level",0))
 		if level==1: scores.reach=1.4
 		if level>=2: scores.friend=maxf(float(scores.friend),0.9)
-	if GameState.player_settlements.size()<=1 and GameState.population_total>=140 and observed_growth()>0.0: scores.settle=1.0
+	if _hearths()<=1 and GameState.population_total>=140 and observed_growth()>0.0: scores.settle=1.0
 	if float(metrics.get("cohesion",0.58))<0.5: scores.unity=1.5
 	# The century's ambition colours what the court reaches for.
 	var ambition:=String(PeopleDirection.ambition)
@@ -1401,7 +1406,7 @@ static func adopt(cand:Dictionary,chosen_by:String,day:int)->Dictionary:
 	match String(aim.template):
 		"grow": aim.baseline=GameState.population_total
 		"knowledge": aim.baseline=GameState.known_discoveries.size()
-		"settle": aim.baseline=GameState.player_settlements.size()
+		"settle": aim.baseline=_hearths()
 		"learn": aim.baseline=known_in(String(aim.subject))
 	s.active=aim
 	(s.used as Dictionary)[String(aim.template)]=day
@@ -1444,7 +1449,7 @@ static func measure(aim:Dictionary)->float:
 	var base:=float(aim.get("baseline",0.0)); var target:=float(aim.get("target",1.0))
 	match template:
 		"grow","knowledge","settle":
-			var now:=float(GameState.population_total) if template=="grow" else (float(GameState.known_discoveries.size()) if template=="knowledge" else float(GameState.player_settlements.size()))
+			var now:=float(GameState.population_total) if template=="grow" else (float(GameState.known_discoveries.size()) if template=="knowledge" else float(_hearths()))
 			if template=="knowledge": return clampf((now-base)/maxf(1.0,target),0.0,1.0)
 			return clampf((now-base)/maxf(1.0,target-base),0.0,1.0)
 		"plenty","work":
@@ -1483,7 +1488,7 @@ static func value_words(aim:Dictionary)->String:
 		"learn":
 			var got_in:=maxi(0,known_in(String(aim.subject))-int(aim.baseline))
 			return "%s new way%s of %s" % [_count(got_in),"" if got_in==1 else "s",_count(int(aim.target))]
-		"settle": return "%s of %s hearths" % [_count(GameState.player_settlements.size()),_count(int(aim.target))]
+		"settle": return "%s of %s hearths" % [_count(_hearths()),_count(int(aim.target))]
 		"plenty": return "%s of %s full" % [winters(int(floor(float(aim.get("acc",0.0))/365.0))),winters(int(aim.years))]
 		"unity":
 			if bool(aim.get("hold",false)): return "%s of %s at one fire" % [winters(int(floor(float(aim.get("acc",0.0))/365.0))),winters(int(aim.years))]

@@ -239,7 +239,7 @@ func refresh()->void:
 		# The founding convoy is a prompt, not a city: it keeps its readout open.
 		var compact:=kind!="founding_convoy"
 		var detail:Vector2=text.detail
-		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail,"clearance":float(label.get_meta("glyph_clearance",GLYPH_CLEARANCE)),"note":text.note,"badge":text.badge,"ours":String(ownership.get("kind",""))=="occupied"})
+		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":T.INK_MUTED if bool(text.get("left",false)) else label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail,"clearance":float(label.get_meta("glyph_clearance",GLYPH_CLEARANCE)),"note":text.note,"badge":text.badge,"ours":String(ownership.get("kind",""))=="occupied"})
 		if not (text.summary as Dictionary).is_empty():entries.back()["summary"]=text.summary
 		signature+=str(text_key)+String(id)+str(anchor)+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	var work_entries:=_work_entries(camera,viewport_size)
@@ -280,6 +280,14 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 			count="Population "+EraWords.grouped(int(held.residents))
 		else:summary=report_summary(record,int(GameState.elapsed_days))
 		status=summary.status
+	# A town of ours its people left (dry_towns.gd): said plainly, no guard.
+	var left:=false
+	if not foreign and id!="":
+		var town:Dictionary=SettlementModel.settlement_record(id)
+		if SettlementModel.abandoned(town):
+			left=true
+			count="Nobody lives here"
+			status="Abandoned: no water"
 	var lines:=wrap_name(title,font,minf(260,bounds.size.x-56))
 	var ui:=T.font("ui")
 	var width:=maxf(ui.get_string_size(count,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x,ui.get_string_size(affiliation,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x)+20
@@ -291,7 +299,7 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	var badge:=int(ownership.get("garrison",0))
 	# Our own town: those guarding it beside its name (home_guard). Home
 	# defence is not an army, so it has no counter of its own on the map.
-	if not foreign and badge<=0:badge=guard if guard>=0 else home_guard(id)
+	if not foreign and badge<=0 and not left:badge=guard if guard>=0 else home_guard(id)
 	if not note.is_empty():width=maxf(width,ui.get_string_size(note,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 	# A town we hold carries its guard's count beside the name.
 	if badge>0:name_width+=badge_width(badge)+6
@@ -299,7 +307,7 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	# place beside the name instead of landing on its last letters.
 	var detail:=Vector2(ceilf(maxf(135,maxf(width,name_width))),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0)+(18 if not note.is_empty() else 0))
 	if not summary.is_empty():detail=Vector2(maxf(260,maxf(width,name_width)),float(lines.size())*20+130+(18 if not note.is_empty() else 0))
-	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail,"note":note,"badge":badge}
+	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail,"note":note,"badge":badge,"left":left}
 
 ## Those who would defend one of our towns if it were attacked now, as its
 ## battle musters them (civilization_combat.gd defenders): at home the levy

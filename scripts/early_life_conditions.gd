@@ -176,7 +176,8 @@ static func carrying_capacity(state:Node,discovery:Node)->float:
 			var low:Array=TERRITORY_CAPACITY[index-1]
 			base=lerpf(float(low[1]),float(high[1]),(era-float(low[0]))/(float(high[0])-float(low[0])))
 			break
-	var settlements:=maxi(1,(state.player_settlements as Array).size())
+	# Only towns people live in work land (settlement_model.lived_in).
+	var settlements:=maxi(1,WorldSimulation.settlements.lived_in(state.player_settlements).size())
 	# Daughter settlements claim less new land each than the first.
 	var territory:=1.0+sqrt(float(settlements-1))*1.6
 	var methods:=1.0+maxf(0.0,discovery.effect("cultivation_yield"))+maxf(0.0,discovery.effect("soil_productivity"))*0.6+maxf(0.0,discovery.effect("food_output"))*0.5+maxf(0.0,discovery.effect("food_storage"))*0.25

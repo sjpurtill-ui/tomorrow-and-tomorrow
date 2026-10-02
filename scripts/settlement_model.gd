@@ -292,9 +292,46 @@ func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	state.resource_settlement_id=previous_id
 	return result
 
+## A town its people have left (dry_towns.gd): nobody lives there (its count
+## is 0, never the one-person floor of a lived-in town), so its day is not
+## run, no goods, food, captives or displaced families are sent there, no
+## caravan sets out from it, no capital is made of it and it is not counted
+## among the towns we live in (lived_in).
+func abandoned(record:Dictionary)->bool:
+	return String(record.get("status",""))=="abandoned"
+
+## The towns a people live in: all their towns but those left empty. Every
+## count of "our towns" (the land the people work, the offices and cast it
+## needs, the aims to found hearths) reads this. `records` defaults to the
+## register of the people in scope.
+func lived_in(records:Variant=null)->Array:
+	var out:Array=[]
+	for record:Dictionary in (WorldSimulation.state.player_settlements if records==null else records):
+		if not abandoned(record):out.append(record)
+	return out
+
+## Why nothing can be ordered in a place its people left, in plain words.
+func left_reason(record:Dictionary)->String:
+	return "Nobody lives in %s now: its people left for lack of water." % String(record.get("name","that place"))
+
+## Where people or goods bound for `record` go instead: the town itself while
+## people live there, else the town its people went to (abandoned_to), else
+## the capital. {} only when there is no town at all.
+func lived_in_town_for(record:Dictionary)->Dictionary:
+	var here:=record
+	for step in 8:
+		if here.is_empty() or not abandoned(here):return here
+		here=settlement_record(String(here.get("abandoned_to","")))
+	for candidate:Dictionary in WorldSimulation.state.player_settlements:
+		if bool(candidate.get("primary",false)):return candidate
+	return {}
+
 func process_city_resources(settlement_id:String,context:Dictionary,daily_work:Callable=Callable(),timings:Dictionary={})->void:
 	if not String(settlement_record(settlement_id).get("occupied_by","")).is_empty():return
 	var record:=settlement_record(settlement_id)
+	# An empty place has no day: a town floored at one person would otherwise
+	# be born into and die out of the people's count.
+	if abandoned(record):return
 	if record.is_empty() or bool(record.get("primary",false)): return
 	if int(record.get("last_resource_day",-1))>=int(WorldSimulation.state.elapsed_days): return
 	var started:=Time.get_ticks_usec() if not timings.is_empty() else 0
@@ -373,6 +410,13 @@ func receive_city_trade_arrivals()->void:
 		if destination.is_empty():
 			pending.append(shipment)
 			continue
+		# Cargo for a place its people left goes on to the town they went to.
+		if abandoned(destination):
+			destination=lived_in_town_for(destination)
+			if destination.is_empty():
+				pending.append(shipment)
+				continue
+			shipment["destination_id"]=String(destination.id);shipment["destination_name"]=String(destination.get("name",""))
 		var quantity:=float(shipment.quantity)
 		var delivered:=quantity*exp(-0.00035*float(shipment.travel_days)) if String(shipment.resource)=="Food" else quantity
 		with_city_resources(String(destination.id),func()->void:
@@ -396,7 +440,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	var material_reserves:Dictionary={}
 	var conduit_supply:Dictionary=WorldSimulation.state.resource_stockpiles.duplicate()
 	for city:Dictionary in WorldSimulation.state.player_settlements:
-		if not String(city.get("occupied_by","")).is_empty():continue
+		if not String(city.get("occupied_by","")).is_empty() or abandoned(city):continue
 		water_targets[String(city.id)]=with_city_resources(String(city.id),func()->Dictionary:
 			return with_local_population(func()->Dictionary:
 				material_reserves[String(city.id)]=preload("res://scripts/local_material_reserves.gd").calculate()
@@ -427,7 +471,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 	var known_routes:Dictionary={}
 	var available_transport:Dictionary={}
 	for source in WorldSimulation.state.player_settlements:
-		if not String(source.get("occupied_by","")).is_empty():continue
+		if not String(source.get("occupied_by","")).is_empty() or abandoned(source):continue
 		local_stores[String(source.id)]=_city_stores(source)
 		local_populations[String(source.id)]=_settlement_population(source)
 		local_positions[String(source.id)]=_record_position(source)
@@ -443,7 +487,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 		available_transport[String(source.id)]=maxf(0.0,carriers*float(capacity.capacity_per_worker)-occupied)*WorldSimulation.span
 	# One request per good per city; no citizen or merchant entities are created.
 	for destination in WorldSimulation.state.player_settlements:
-		if not String(destination.get("occupied_by","")).is_empty():continue
+		if not String(destination.get("occupied_by","")).is_empty() or abandoned(destination):continue
 		var destination_population:=float(local_populations[String(destination.id)])
 		var destination_stores:Dictionary=local_stores[String(destination.id)]
 		var trade_goods:Array=CITY_TRADE_GOODS.duplicate()
@@ -466,7 +510,7 @@ func process_city_trade(route_assessor:Callable=Callable())->void:
 			var nearest:=INF
 			var surplus:=0.0
 			for source in WorldSimulation.state.player_settlements:
-				if not String(source.get("occupied_by","")).is_empty():continue
+				if not String(source.get("occupied_by","")).is_empty() or abandoned(source):continue
 				if String(source.id)==String(destination.id) or float(available_transport.get(source.id,0.0))<=0.01: continue
 				var source_position:Vector2=local_positions[String(source.id)]
 				var destination_position:Vector2=local_positions[String(destination.id)]
@@ -535,7 +579,7 @@ func delivery_reach(settlement_id:String,_resource:String="Food")->Dictionary:
 	var at:=_record_position(here)
 	var nearest:={};var best:=INF
 	for other:Dictionary in towns:
-		if String(other.id)==settlement_id or not String(other.get("occupied_by","")).is_empty():continue
+		if String(other.id)==settlement_id or not String(other.get("occupied_by","")).is_empty() or abandoned(other):continue
 		var distance:=_record_position(other).distance_to(at)
 		if distance<best:best=distance;nearest=other
 	if nearest.is_empty():return {}
@@ -677,15 +721,43 @@ func rename_settlement(settlement_id:String,new_name:String)->Dictionary:
 	return {"ok":false,"reason":"That settlement is not owned."}
 
 
-func suggested_settlement_name(destination:Vector2,origin_name:String="")->String:
+## A new town's name that no known town or region bears: ours, every other
+## people's (all peoples draw from the same name tables) and the regions we
+## know of theirs. The place's own seeded name comes first; a taken one tries
+## a few more roots and endings, then a number.
+func suggested_settlement_name(destination:Vector2,origin_name:String="",used:Dictionary={})->String:
 	var seed:=absi(hash("%d:place_name:%d:%d:%s" % [WorldSimulation.state.world_seed,roundi(destination.x*10.0),roundi(destination.y*10.0),origin_name]))
-	var root:=String(SETTLEMENT_NAME_ROOTS[posmod(seed,SETTLEMENT_NAME_ROOTS.size())])
-	var ending:=String(SETTLEMENT_NAME_ENDINGS[posmod(seed/37+11,SETTLEMENT_NAME_ENDINGS.size())])
-	var suggestion:=root+ending
-	var used:Array[String]=[]
-	for settlement in WorldSimulation.state.player_settlements: used.append(String(settlement.get("name","")).to_lower())
-	if suggestion.to_lower() in used: suggestion="%s %s" % [root,str(WorldSimulation.state.next_player_settlement_id)]
-	return suggestion
+	if used.is_empty():used=names_in_use()
+	var first_root:=String(SETTLEMENT_NAME_ROOTS[posmod(seed,SETTLEMENT_NAME_ROOTS.size())])
+	for attempt in 12:
+		var pick:=seed+attempt*7919
+		var root:=String(SETTLEMENT_NAME_ROOTS[posmod(pick,SETTLEMENT_NAME_ROOTS.size())])
+		var ending:=String(SETTLEMENT_NAME_ENDINGS[posmod(pick/37+11,SETTLEMENT_NAME_ENDINGS.size())])
+		if not used.has((root+ending).to_lower()): return root+ending
+	return "%s %s" % [first_root,str(WorldSimulation.state.next_player_settlement_id)]
+
+## The names in use, read once per expansion review (its quote cache).
+func _review_names(review_cache:Dictionary)->Dictionary:
+	if not review_cache.has("names"):review_cache["names"]=names_in_use()
+	return review_cache.names
+
+## Every town and region name in use, lower-cased: the towns of the people in
+## scope, of the god's people and of every other people (each keeps its own
+## register), and the regions of the peoples known (rival towns stand as
+## regions there too). Never empty: an unnamed entry is kept as "".
+func names_in_use()->Dictionary:
+	var used:={"":true}
+	var registers:Array=[WorldSimulation.state.player_settlements,GameState.player_settlements]
+	for actor:Dictionary in WorldSimulation.actors.values():
+		var people:Variant=(actor.get("systems",{}) as Dictionary).get("GameState")
+		if people!=null:registers.append(people.player_settlements)
+	for register:Array in registers:
+		for town:Dictionary in register:used[String(town.get("name","")).to_lower()]=true
+	for world:Variant in [WorldSimulation.world,CivilizationSystem]:
+		if world==null:continue
+		for civ:Dictionary in world.civilizations:
+			for region:Dictionary in civ.get("strategic_regions",[]):used[String(region.get("name","")).to_lower()]=true
+	return used
 
 func _record_position(record:Dictionary)->Vector2:
 	var value:Variant=record.get("position",Vector2.ZERO)
@@ -911,6 +983,9 @@ func _primary_able_population()->float:
 
 func _settlement_population(record:Dictionary)->float:
 	if bool(record.get("primary",false)): return primary_population_exact()
+	# Nobody lives in a place its people left: every rebuild of the towns'
+	# shares from this count keeps it at 0.
+	if abandoned(record): return 0.0
 	if _local_population_scope and String(record.get("id",""))==WorldSimulation.state.resource_settlement_id:return WorldSimulation.state.population_exact
 	return maxf(1.0,float(national_population())*maxf(0.0,float(record.get("population_share",0.0))))
 
@@ -1163,6 +1238,7 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 	var origin:Dictionary={}
 	var origin_distance:=INF
 	for settlement in network.settlements:
+		if abandoned(settlement):continue
 		var distance:=destination.distance_to(_record_position(settlement))
 		if distance<origin_distance:
 			origin_distance=distance
@@ -1211,7 +1287,7 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 		"population_share":population_share,"known_land":true,"known_route":true,"map_source":String(land.get("source","returned chart")),
 		"population_sources":WorldSimulation.state.proportional_population_commitment(founders),
 		"food":food_required,"materials":founding_materials,
-		"suggested_name":suggested_settlement_name(destination,String(origin.get("name",""))),
+		"suggested_name":suggested_settlement_name(destination,String(origin.get("name","")),_review_names(review_cache)),
 		"material_required":founding_material_required,"material_supplied":float(material_plan.supplied_value),
 		# Legacy fields remain readable for old UI/tests while no longer acting as
 		# independent requirements.

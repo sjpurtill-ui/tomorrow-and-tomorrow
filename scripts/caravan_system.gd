@@ -271,6 +271,13 @@ static func _install_leader(completed:Dictionary,record:Dictionary)->void:
 static func _dissolve_home(convoy:Dictionary,record:Dictionary)->Dictionary:
 	var origin_id:=String(convoy.get("origin_id",""))
 	var origin:Dictionary=WorldSimulation.settlements.settlement_record(origin_id)
+	# A home its people left meanwhile (dry_towns.gd): the caravan goes on to
+	# the town they went to.
+	var home_name:=String(convoy.get("origin_name","its home settlement"))
+	if not origin.is_empty() and WorldSimulation.settlements.abandoned(origin):
+		origin=WorldSimulation.settlements.lived_in_town_for(origin)
+		origin_id=String(origin.get("id",""))
+		home_name=String(WorldSimulation.state.settlement_name) if bool(origin.get("primary",false)) else String(origin.get("name",home_name))
 	if not origin.is_empty() and not bool(origin.get("primary",false)):
 		origin["population_share"]=float(origin.get("population_share",0.0))+float(convoy.get("population_share",0.0))
 	var food:=float(record.get("food",0.0))
@@ -283,7 +290,7 @@ static func _dissolve_home(convoy:Dictionary,record:Dictionary)->Dictionary:
 		)
 	WorldSimulation.state.settlement_convoy={}
 	WorldSimulation.state.settlement_network_revision+=1
-	return {"ok":false,"returned":true,"caravan":record,"population":int(record.get("population",0)),"reason":"The caravan returned to %s." % String(convoy.get("origin_name","its home settlement"))}
+	return {"ok":false,"returned":true,"caravan":record,"population":int(record.get("population",0)),"reason":"The caravan returned to %s." % home_name}
 
 # --------------------------------------------------------------- overrides
 

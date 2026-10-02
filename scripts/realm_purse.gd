@@ -594,6 +594,11 @@ static func output_per_head()->float:
 		return maxf(0.05,float(month.output)/float(month.person_days))
 	return maxf(0.05,output_per_day()/maxf(1.0,float(WorldSimulation.state.population_exact)))
 
+## A town its people left (settlement_model.abandoned, dry_towns.gd): it
+## earns, pays and eats nothing.
+static func _left(city:Dictionary)->bool:
+	return String(city.get("status",""))=="abandoned"
+
 ## What the whole realm brings in a day (each town's own reading), in the
 ## purse's unit.
 static func output_per_day()->float:
@@ -601,7 +606,7 @@ static func output_per_day()->float:
 	if String(s.resource_settlement_id)!="":return units(_output_of(s.economy_metrics))
 	var total:=_output_of(s.economy_metrics)
 	for city:Dictionary in s.player_settlements:
-		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
+		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty() or _left(city):continue
 		var local:Variant=city.get("local_resources",{})
 		if local is Dictionary:total+=_output_of((local as Dictionary).get("economy_metrics",{}))
 	return units(total)
@@ -874,7 +879,7 @@ static func _places()->Array:
 	var capital_record:Dictionary={}
 	for city:Dictionary in s.player_settlements:
 		if bool(city.get("primary",false)):capital_record=city;continue
-		if not String(city.get("occupied_by","")).is_empty():continue
+		if not String(city.get("occupied_by","")).is_empty() or _left(city):continue
 		var local:Variant=city.get("local_resources",{})
 		if not local is Dictionary or (local as Dictionary).is_empty():continue
 		var share:=maxf(0.0,float(city.get("population_share",0.0)))
@@ -921,7 +926,8 @@ static func food_places()->Array:
 	var s=WorldSimulation.state
 	var out:Array=[]
 	for city:Dictionary in s.player_settlements:
-		if not String(city.get("occupied_by","")).is_empty():continue
+		# An empty place (dry_towns.gd) neither buys nor sells food.
+		if not String(city.get("occupied_by","")).is_empty() or _left(city):continue
 		var primary:=bool(city.get("primary",false))
 		var metrics:Dictionary=s.simulation_metrics if primary else (city.get("resource_metrics",{}) as Dictionary)
 		var local:Dictionary={} if primary else (city.get("local_resources",{}) as Dictionary)

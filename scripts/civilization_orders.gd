@@ -24,7 +24,9 @@ static func execute(order:Dictionary)->Dictionary:
 			var origin:=WorldSimulation.world.player_world_origin
 			var context:=preload("res://scripts/civilization_day.gd").context(origin)
 			if not WorldSimulation.world._scout_land_at(origin):return {"error":"Choose dry land."}
-			var water:=WorldSimulation.resources.water_access_snapshot(context)
+			# The people's own found sources travel with them: the same test their
+			# town's first day makes (resource_system.site_water).
+			var water:=WorldSimulation.resources.site_water(context,WorldSimulation.state.resource_deposits)
 			if not bool(water.accessible):return {"error":"The known water source is too far away."}
 			WorldSimulation.state.settlement_founded_at=Vector3(origin.x,0,origin.y)
 			WorldSimulation.state.settlement_site_committed=true
@@ -35,7 +37,10 @@ static func execute(order:Dictionary)->Dictionary:
 			var destination:Variant=order.get("destination")
 			if not destination is Vector2:return {"error":"Choose a destination on the map."}
 			var context:=preload("res://scripts/civilization_day.gd").context(destination)
-			if not WorldSimulation.world._scout_land_at(destination) or not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):return {"error":"The destination needs dry land and known reachable water."}
+			# Water at the new place itself, within reach on foot: the test the new
+			# town's own day makes (resource_system.site_water), never the
+			# sending town's ledger.
+			if not WorldSimulation.world._scout_land_at(destination) or not bool(WorldSimulation.resources.site_water(context).accessible):return {"error":"The destination needs dry land and drinking water within 6 km."}
 			# The caravan leader plans the road (round bays and inlets); only a
 			# place with no land route at all is refused here.
 			if not WorldSimulation.world._scout_segment_is_land(WorldSimulation.world.player_world_origin,destination) and preload("res://scripts/army_land_route.gd").find(WorldSimulation.world.player_world_origin,destination,Callable(WorldSimulation.world,"_scout_land_at")).has("error"):return {"error":"The founding route must cross traversable land."}

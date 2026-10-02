@@ -130,7 +130,8 @@ static func order_steps(id:String)->Array:
 						var destination:=home+Vector2.from_angle(TAU*float(spoke)/12)*distance
 						if not WorldSimulation.world._position_is_revealed(destination):continue
 						var known:=preload("res://scripts/civilization_day.gd").context(destination)
-						if not bool(WorldSimulation.resources.water_access_snapshot(known).accessible):continue
+						# The camp's own records travel with it: the same test as "found".
+						if not bool(WorldSimulation.resources.site_water(known,WorldSimulation.state.resource_deposits).accessible):continue
 						if not WorldSimulation.submit(id,{"kind":"move","destination":destination}).has("error"):return null
 			return null
 		preload("res://scripts/ai_workshop_turnover.gd").advance(id,WorldSimulation.military)
@@ -220,12 +221,9 @@ static func expansion_order_steps(id:String,plan_source:Callable)->Array:
 		sites.append(["expansion_site",func()->void:
 			if not bool(shared.get("eligible",false)) or index>=(shared.points as Array).size():return
 			var point:Vector2=shared.points[index]
-			if not bool(WorldSimulation.settlements.known_land_assessment(point).known):return
-			var quote:=WorldSimulation.settlements.settlement_convoy_quote(point,0,shared.quote_cache)
-			if not bool(quote.get("ok",false)):return
-			var context:=preload("res://scripts/civilization_day.gd").context(point)
-			if not bool(WorldSimulation.resources.water_access_snapshot(context).accessible):return
-			var value:=expansion_site_value(context,shared.plan)
+			var site:=expansion_site(point,shared.plan,shared.quote_cache)
+			if site.is_empty():return
+			var value:=float(site.value)
 			# The settlers carry the rations this temper judges enough for the new
 			# town's first weeks (a bold ruler sends thinner stores).
 			if value>float(shared.best_value):shared.best={"kind":"settle","destination":point,"establishment_days":float((shared.plan as Dictionary).get("settle_margin_days",STRATEGY.ESTABLISHMENT_DAYS))};shared.best_value=value
@@ -234,6 +232,21 @@ static func expansion_order_steps(id:String,plan_source:Callable)->Array:
 		if bool(shared.get("eligible",false)) and not (shared.best as Dictionary).is_empty():WorldSimulation.submit(id,shared.best)
 	])
 	return parts
+
+## One candidate site, judged the same way by the leaders' council (above)
+## and the court's "found a new town" (realm_orders._found): charted land,
+## drinking water at the site itself within reach (resource_system.site_water,
+## the very test the new town's own day makes, never the capital's ledger),
+## and a caravan the stores can send. {} when refused, else
+## {value, context, water}.
+static func expansion_site(point:Vector2,plan:Dictionary,quote_cache:Dictionary={})->Dictionary:
+	if not bool(WorldSimulation.settlements.known_land_assessment(point).known):return {}
+	var context:=preload("res://scripts/civilization_day.gd").context(point)
+	var water:Dictionary=WorldSimulation.resources.site_water(context)
+	if not bool(water.accessible):return {}
+	var quote:=WorldSimulation.settlements.settlement_convoy_quote(point,0,quote_cache)
+	if not bool(quote.get("ok",false)):return {}
+	return {"value":expansion_site_value(context,plan),"context":context,"water":water}
 
 static func expansion_candidates(home:Vector2,distance:float)->Array[Vector2]:
 	var points:Array[Vector2]=[]
@@ -247,7 +260,10 @@ static func expansion_site_value(context:Dictionary,plan:Dictionary)->float:
 	var environment:Dictionary=context.environment_profile
 	var p:Dictionary=plan.personality
 	var value:=float(environment.get("food_potential",0))*(.6+float(p.empathy))
-	value+=float(environment.get("water_access",0))*(.4+float(p.openness))
+	# Drinking water as the town's day will fetch it: the share the families
+	# carry themselves from the nearest fresh source (1 beside it, 0 beyond
+	# 6 km). The sea's salt water is no drinking water.
+	value+=float(WorldSimulation.resources.site_water(context).household_share)*(.4+float(p.openness))
 	# Use measured local cover, not the nonexistent profile "forest" key.
 	# A material-starved capital has a reason to found a supplying settlement;
 	# ordinary convoy costs, known routes and finite city trade still apply.

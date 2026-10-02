@@ -58,7 +58,8 @@ static func watch_count(city_id:String)->int:
 ## watch_count for a town's record already in hand (no search of the towns).
 static func watch_of(city:Dictionary)->int:
 	var mc:Variant=WorldSimulation.military
-	if city.is_empty() or mc==null: return 0
+	# Nobody keeps watch in a place its people left (dry_towns.gd).
+	if city.is_empty() or mc==null or WorldSimulation.settlements.abandoned(city): return 0
 	var people:=float(WorldSimulation.settlements._settlement_population(city))
 	var share:=clampf(people/maxf(1.0,float(WorldSimulation.state.population_exact)),0.0,1.0)
 	return maxi(0,mini(roundi(float(mc._home_garrison_target())*share),floori(people)))
@@ -253,7 +254,8 @@ static func displace(civ_id:String,city_id:String,requested:int)->int:
 		if source.is_empty():return 0
 		var destinations:Array=[]
 		for city:Dictionary in WorldSimulation.state.player_settlements:
-			if String(city.id)!=city_id and String(city.get("occupied_by","")).is_empty():destinations.append(city)
+			# Never into a place its people left (settlement_model.abandoned).
+			if String(city.id)!=city_id and String(city.get("occupied_by","")).is_empty() and String(city.get("status",""))!="abandoned":destinations.append(city)
 		if destinations.is_empty():return 0
 		var amount:=mini(maxi(0,requested),floori(WorldSimulation.settlements._settlement_population(source)*.35))
 		var share:=float(amount)/maxf(1,WorldSimulation.state.population_exact)
