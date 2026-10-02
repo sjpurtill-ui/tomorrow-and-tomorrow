@@ -151,12 +151,23 @@ func test_town_treasuries_merge_once_into_one_realm_account()->void:
 	GameState.public_treasury=0.0
 	Purse.state()
 	assert_float(float(Purse.state().balance)).is_equal_approx(130.0,0.001)
+	# After coinage the share on goods sold for money is paid in coin: it
+	# leaves the households' circulation with its backing, every coin counted.
+	var private_before:=GameState.private_currency
+	var coin_before:=float(Purse.state().coin)
+	var paid:=Purse.accrue({"daily_output_value":200.0,"observed_trade":50.0},0.5)
+	assert_float(float(paid.coin)).is_greater(0.0)
+	assert_float(float(paid.coin)).is_less(float(paid.levy))
+	assert_float(GameState.private_currency).is_equal_approx(private_before-float(paid.coin),0.0001)
+	assert_float(float(Purse.state().coin)).is_equal_approx(coin_before+float(paid.coin),0.0001)
+	assert_float(GameState.currency_supply).is_equal_approx(GameState.private_currency+GameState.currency_hoards+GameState.public_treasury+GameState.mutual_aid_reserve,0.001)
+	assert_bool(bool(EconomySystem.accounting_audit().ok)).is_true()
 	# One account: the capital's and the town's levies both fill it.
 	var before:=Purse.balance()
 	Purse.accrue({"daily_output_value":200.0},0.0)
 	SettlementModel.with_city_resources("dawngate",func()->void:Purse.accrue({"daily_output_value":100.0},0.0))
 	assert_float(Purse.balance()).is_greater(before)
-	assert_float(float((Purse.state().month as Dictionary).output)).is_equal_approx(300.0,0.001)
+	assert_float(float((Purse.state().month as Dictionary).output)).is_equal_approx(200.0+300.0,0.001)
 
 
 # --- 4. Words by age --------------------------------------------------------------------

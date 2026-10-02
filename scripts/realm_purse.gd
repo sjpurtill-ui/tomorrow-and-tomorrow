@@ -385,8 +385,8 @@ static func quote(level:String)->Dictionary:
 ## in each town's own scope, the capital's first): the share of what it
 ## brought in that the realm's hands reach, less what is hidden. Before
 ## coinage it is a claim on what the stores already hold; after coinage the
-## households' money share is paid in coin, with its backing. Returns the
-## day's account for the economy's report.
+## share of it on goods sold for money is paid in coin, with its backing, and
+## the rest in kind. Returns the day's account for the economy's report.
 static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	var s=WorldSimulation.state
 	var purse:=state()
@@ -406,7 +406,11 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	var levy:=reached-evaded+rich
 	var coin:=0.0
 	if String(s.economy_stage)=="currency" and levy>0.0:
-		coin=minf(levy*clampf(monetization,0.0,1.0),maxf(0.0,float(s.private_currency))*COIN_DRAW)
+		# Only what changes hands for money is paid in coin (the day's traded
+		# goods at the share money settles); the rest of the harvest's share is
+		# taken in kind. The coin never outruns the households' own purses.
+		var exchanged:=maxf(0.0,float(real_accounts.get("observed_trade",0.0)))*clampf(monetization,0.0,1.0)
+		coin=minf(minf(levy,exchanged*rate*r*(1.0-ev)*span),maxf(0.0,float(s.private_currency))*COIN_DRAW)
 		if coin>0.0:
 			s.private_currency=float(s.private_currency)-coin
 			s.currency_supply=maxf(0.0,float(s.currency_supply)-coin)
