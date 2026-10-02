@@ -225,6 +225,7 @@ static func _pending_words(audience:Dictionary)->String:
 	if String(p.get("ask",""))=="chase": return "The war leader offered to send men after those who fled; the ruler may say yes (confirm), no (cancel), or name how many (pursue)."
 	if String(p.get("ask",""))=="abandon": return "The war leader asked whether to leave the town unguarded and bring its garrison home; yes is confirm, no is cancel."
 	if String(p.get("ask",""))=="measure": return "The war leader asked: \"%s\" The ruler may name one of those choices (town_measure or town_fate), say yes (confirm: the first choice), or no (cancel)." % String(p.get("question",""))
+	if String(p.get("ask",""))=="which_people": return "The court asked \"%s\" about the ruler's order \"%s\": the ruler names the village (ours, or the town), or says no (cancel)." % [String(p.get("question","")),String(p.get("text",""))]
 	if String(p.get("ask",""))!="": return "The war leader asked the ruler a question about the order \"%s\"; yes is confirm, no is cancel." % String(p.get("text",""))
 	if bool(p.get("which_town",false)): return "The war leader asked which town the order \"%s\" is for." % String(p.get("text",""))
 	if String(p.get("verb",""))=="war": return "The war leader objected to the order \"%s\"; the ruler may insist." % String(p.get("text",""))

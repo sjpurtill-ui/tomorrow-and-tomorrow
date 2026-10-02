@@ -56,6 +56,14 @@ Memory, dread, grudges, reputation, legitimacy, cohesion, later incidents, and
 costs in food, time and guard load all persist. A harsh act is remembered by the
 people it struck, by their neighbours and by the officer who carried it out.
 
+Grave orders against the god's own people ("kill all women in the village",
+"burn our own village", "drive out the old") are adjudicated the same way
+(scripts/grave_home.gd): the one ordered may obey, plead or refuse; each hand
+may refuse or flee; each person named is caught on stated odds, a few days'
+work at most; the dead and the fled come off the population model by group
+and sex, in that town's own count, and births fall while the women are fewer.
+"The village" is asked about when a town we hold, or a war, makes it unclear.
+
 ## Officials know their office
 
 Each official answers from an exact fact sheet for their office

@@ -59,8 +59,15 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## only by word: the "trade" domain, 15 more runs a path); the whole
 ## corpus, measured domain by domain, then passed offline 696, live 697,
 ## sloppy 74.
+## Measured again before the next change (every case passing): offline 757,
+## live 758, sloppy 74. Grave orders against our own people (grave_home.gd:
+## the user's "Kill all women in the village" and its lowercase and typed
+## variants, the children, half the farmers, our own village burned, the old
+## driven out, "which village?" with Tsaren held or at war, Tsaren spoken of,
+## a law said of the village: the "grave_home" domain, 14 runs a path, 6
+## careless): offline 771, live 772, sloppy 80.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":696,"live":697,"sloppy":74}
+const BASELINE:={"offline":771,"live":772,"sloppy":80}
 
 var _processing:Dictionary={}
 

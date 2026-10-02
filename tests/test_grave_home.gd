@@ -140,6 +140,8 @@ func _carry(id:String,words:String,insist:bool=true)->Dictionary:
 func test_killing_the_women_balances_the_ledger_and_says_its_numbers()->void:
 	var w:=_world("home_peace")
 	var id:=_audience(w)
+	# Home's own count, as a day of play leaves it (the births read it).
+	SettlementModel.with_local_population(func()->void: pass,true)
 	var pop:=int(GameState.population_total)
 	var deaths:=int(GameState.lifetime_deaths)
 	var gone:=int(GameState.lifetime_departures)
@@ -148,7 +150,6 @@ func test_killing_the_women_balances_the_ledger_and_says_its_numbers()->void:
 	var fertile:=GameState.fertile_women()
 	var pregnant:=GameState.estimated_active_pregnancies()
 	var result:=_carry(id,USERS_LINE)
-	print("GRAVE_HOME_TEST kill: ",result.get("stage","")," | ",result.get("outcome",""))
 	var done:Dictionary=result.get("grave_home",{})
 	if String(result.get("stage",""))!=Grave.VERB:
 		# The one ordered refused even when the god insisted: nobody touched.
@@ -169,11 +170,14 @@ func test_killing_the_women_balances_the_ledger_and_says_its_numbers()->void:
 	# Bounded: the hands who would do it, five a day each, three days at most.
 	assert_int(dead).is_less_equal(int(done.willing)*Grave.KILLS_PER_HAND*Grave.DAYS_MAX)
 	assert_float(float(done.catch_odds)).is_between(0.35,0.92)
-	assert_int(dead+escaped).is_equal(int(done.targets))
+	assert_int(dead+escaped+int(done.hid)).is_equal(int(done.targets))
 	# Births fall with the women; their pregnancies are lost with them.
 	assert_float(GameState.fertile_women()).is_less(fertile)
 	assert_float(GameState.fertile_women_factor()).is_less(1.0)
 	assert_int(GameState.estimated_active_pregnancies()).is_less(pregnant)
+	# ... and so does home's own count, which the daily births read.
+	var local_factor:float=SettlementModel.with_local_population(func()->float: return GameState.fertile_women_factor())
+	assert_float(local_factor).is_less(1.0)
 	# Said with its numbers and how it was decided.
 	var outcome:=String(result.outcome)
 	for n in [dead,escaped]: assert_bool(CC._re("(?<![0-9])%d(?![0-9])|\\b%s\\b" % [n,preload("res://scripts/town_fate.gd")._count(n)]).search(outcome)!=null).override_failure_message("%d not in: %s" % [n,outcome]).is_true()
@@ -207,7 +211,6 @@ func test_burning_our_own_village_takes_houses_and_stores()->void:
 	var houses:=int(GameState.housing_capacity)
 	var food:=float(GameState.resource_stockpiles.get("Food",0.0))
 	var result:=_carry(id,"Burn our own village")
-	print("GRAVE_HOME_TEST burn: ",result.get("stage","")," | ",result.get("outcome",""))
 	var done:Dictionary=result.get("grave_home",{})
 	if String(result.get("stage",""))!=Grave.VERB: return
 	assert_int(houses-int(GameState.housing_capacity)).is_equal(int(done.houses_lost))
@@ -223,7 +226,6 @@ func test_driving_out_the_old_kills_nobody()->void:
 	var deaths:=int(GameState.lifetime_deaths)
 	var elders:=float(GameState.population_cohorts.elders)
 	var result:=_carry(id,"Drive out the old")
-	print("GRAVE_HOME_TEST drive: ",result.get("stage","")," | ",result.get("outcome",""))
 	var done:Dictionary=result.get("grave_home",{})
 	if String(result.get("stage",""))!=Grave.VERB: return
 	assert_int(int(GameState.lifetime_deaths)).is_equal(deaths)
@@ -273,3 +275,21 @@ func test_departures_of_women_keep_the_count_of_women()->void:
 	assert_int(int(gone.count)).is_equal(30)
 	assert_float(female-_female()).is_equal_approx(30.0,0.001)
 	assert_float(float(GameState.population_cohorts.male)).is_equal_approx(male,0.001)
+
+func test_a_town_of_ours_named_is_its_own_people_only()->void:
+	var w:=_world("home_towns")
+	var id:=_audience(w)
+	var audience:=Hall.find(id)
+	var r:=Grave.reading("Kill all the women of Reedmouth",audience,CC.roster(audience))
+	assert_str(String(r.get("kind",""))).is_equal("act")
+	assert_str(String(r.get("home",""))).is_equal("Reedmouth")
+	assert_str(String(r.get("settlement_id",""))).is_not_empty()
+	var home_before:=SettlementModel.primary_population_exact()
+	var pop:=int(GameState.population_total)
+	var result:=Grave.carry(id,audience,CC.roster(audience),r,true,{})
+	if String(result.get("stage",""))!=Grave.VERB: return
+	var done:Dictionary=result.get("grave_home",{})
+	assert_str(String(result.outcome)).contains("Reedmouth")
+	# Reedmouth's people, not home's: home keeps its count (the hands who fled aside).
+	assert_float(absf(SettlementModel.primary_population_exact()-home_before)).is_less_equal(float(int(done.hands_fled))+1.0)
+	assert_int(pop-int(done.dead)-int(done.escaped)-int(done.hands_fled)-int(done.kin_fled)).is_equal(int(GameState.population_total))

@@ -25,9 +25,10 @@ extends RefCounted
 ##   4. The people: each one named is caught on the stated odds (catch_odds:
 ##      the hands against their number, as town_fate.catch_odds); a hand does
 ##      a day's work (KILLS_PER_HAND, DRIVE_PER_HAND) for at most DAYS_MAX days,
-##      so a few dozen hands are never instant and total. Those not caught run
-##      and leave the realm (killing) or hide and stay (driving out). Of the
-##      rest of the people a share flees too (flight_odds).
+##      so a few dozen hands are never instant and total. Those not caught run:
+##      from a killing most leave the realm (ESCAPED_LEAVE) and the rest hide
+##      with kin; from a driving out they hide and stay. Of the rest of the
+##      people a share flees too (flight_odds).
 ##   5. The ledger: deaths by group (GameState.register_directive_population_
 ##      deaths with the cohorts and the sex named), flight (register_population
 ##      _departures), the pregnancies of the women lost (lose_pregnancies), the
@@ -63,6 +64,9 @@ const DRIVE_PER_HAND:=8
 const DAYS_MAX:=3
 ## Of the hands who refuse, the share who flee the realm rather than stay.
 const HAND_FLEE:=0.4
+## Of those who got away from a killing, the share who leave the realm (the
+## rest hide with kin and stay among us).
+const ESCAPED_LEAVE:=0.6
 ## The directive the deaths are recorded under (GameState's demographic ledger).
 const DEATH_ID:="killing_at_the_gods_word"
 
@@ -154,10 +158,10 @@ static func reading(text:String,audience:Dictionary,list:Array[Dictionary]=[])->
 	var how:=String(verb.how)
 	var groups:=_groups(span)
 	var place:=_has(span,VILLAGE_RE)
-	var home:=String(GameState.settlement_name)
-	var own:=_has(span,OWN_RE) or (home!="" and WarOrders._name_hit(span,home))
-	for s in GameState.player_settlements:
-		if s is Dictionary and String((s as Dictionary).get("name",""))!="" and WarOrders._name_hit(span,String((s as Dictionary).name)): own=true
+	# Which of our towns: one named, else the one whose leader is ordered, else home.
+	var town:=_our_town(span,list)
+	var home:=String(town.get("name",""))
+	var own:=_has(span,OWN_RE) or bool(town.get("named",false))
 	if how=="burn":
 		# Burning people is killing them; burning a place is burning the village.
 		if not groups.is_empty(): how="kill"
@@ -168,7 +172,7 @@ static func reading(text:String,audience:Dictionary,list:Array[Dictionary]=[])->
 		elif place or own: groups=[_group_row(GROUPS[GROUPS.size()-1])]
 		else: return {}
 	var trades_only:=groups.all(func(g:Dictionary)->bool: return String(g.get("role",""))!="")
-	var out:={"how":how,"groups":groups,"share":_share(span),"count":_number(span,groups),"text":clean.substr(0,300),"own":own,"home":home}
+	var out:={"how":how,"groups":groups,"share":_share(span),"count":_number(span,groups),"text":clean.substr(0,300),"own":own,"home":home,"settlement_id":String(town.get("id",""))}
 	if own or trades_only:
 		out["kind"]="act"; return out
 	var id:=String(audience.get("id",""))
@@ -179,18 +183,48 @@ static func reading(text:String,audience:Dictionary,list:Array[Dictionary]=[])->
 		# are the town we hold as before; "the village" is asked.
 		if not WarOrders._town_in_audience(held,id).is_empty() or _town_order_recent(audience): return {}
 		if not place: return {}
-		out["kind"]="ask"; out["options"]=_options(held); out["question"]=_question(out,held)
+		out["kind"]="ask"; out["options"]=_options(held,home); out["question"]=_question(out,held)
 		return out
 	# A town of theirs this audience speaks of: what it would take (take_first).
 	if not WarOrders._place_in_audience(id).is_empty(): return {}
-	if _any_war():
+	var at_war:=_any_war()
+	if at_war or _feud():
 		# At war with none of theirs held: "kill all the men" is answered by the
 		# war leader (nobody of theirs is in our hands); "the village" is asked.
-		if not place: return {}
-		out["kind"]="ask"; out["options"]=_options([]); out["question"]=_question(out,[])
+		# In a feud (no war declared) whose women are meant is asked as well.
+		if at_war and not place: return {}
+		out["kind"]="ask"; out["options"]=_options([],home); out["question"]=_question(out,[])
 		return out
 	out["kind"]="act"
 	return out
+
+static func _our_town(span:String,list:Array[Dictionary])->Dictionary:
+	## The town of ours the order falls on: {id ("" for home, whose people are the
+	## realm's own count), name, named (said outright)}. A town of ours named in
+	## the words; else the town whose leader stands before the god; else home.
+	var home:={"id":"","name":String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "our village","named":false}
+	for s in GameState.player_settlements:
+		if not s is Dictionary: continue
+		var name:=String((s as Dictionary).get("name",""))
+		if name=="" or not WarOrders._name_hit(span,name): continue
+		if bool((s as Dictionary).get("primary",false)): return {"id":"","name":String(home.name),"named":true}
+		return {"id":String((s as Dictionary).get("id","")),"name":name,"named":true}
+	if String(GameState.settlement_name)!="" and WarOrders._name_hit(span,String(GameState.settlement_name)): return {"id":"","name":String(home.name),"named":true}
+	for e:Dictionary in list:
+		if not bool(e.get("speaker",false)) or String(e.get("office_key",""))!="settlement": continue
+		var sid:=String(e.get("settlement_id",""))
+		for s in GameState.player_settlements:
+			if s is Dictionary and String((s as Dictionary).get("id",""))==sid and not bool((s as Dictionary).get("primary",false)) and String((s as Dictionary).get("name",""))!="":
+				return {"id":sid,"name":String((s as Dictionary).name),"named":false}
+	return home
+
+static func _scoped(settlement_id:String,operation:Callable)->Variant:
+	## Done among that town's own people (SettlementModel's local count, which
+	## the daily births and deaths read), then folded back into the realm's.
+	var model:Variant=WorldSimulation.settlements if WorldSimulation.settlements!=null else SettlementModel
+	var local:=func()->Variant: return model.with_local_population(operation,true)
+	if settlement_id!="": return model.with_city_resources(settlement_id,local)
+	return local.call()
 
 static func _verb(lower:String)->Dictionary:
 	var best:Dictionary={}
@@ -273,21 +307,32 @@ static func _any_war()->bool:
 		if bool(rel.get("at_war",false)): return true
 	return false
 
+static func _feuding(civ_id:String)->bool:
+	## A blood feud with a small people (war_loop.gd): fighting, no war declared.
+	var war_loop:=load("res://scripts/war_loop.gd") as GDScript
+	return war_loop!=null and civ_id!="" and bool(war_loop.call("feuding",civ_id))
+
+static func _feud()->bool:
+	if WorldSimulation.world==null: return false
+	for c in WorldSimulation.world.civilizations:
+		if c is Dictionary and String((c as Dictionary).get("id",""))!="player" and _feuding(String((c as Dictionary).get("id",""))): return true
+	return false
+
 static func _foe_name()->String:
 	if WorldSimulation.world==null: return ""
 	for c in WorldSimulation.world.civilizations:
 		if not c is Dictionary or String((c as Dictionary).get("id",""))=="player": continue
 		var rel:Dictionary=(c as Dictionary).get("player_relation",{}) if (c as Dictionary).get("player_relation") is Dictionary else {}
-		if bool(rel.get("at_war",false)): return String((c as Dictionary).get("name",""))
+		if bool(rel.get("at_war",false)) or _feuding(String((c as Dictionary).get("id",""))): return String((c as Dictionary).get("name",""))
 	return ""
 
-static func _options(held:Array)->Array:
-	var out:Array=[{"id":"own","name":String(GameState.settlement_name)}]
+static func _options(held:Array,home:String="")->Array:
+	var out:Array=[{"id":"own","name":home if home!="" else String(GameState.settlement_name)}]
 	for t in held: out.append({"id":"town","city_id":String((t as Dictionary).city_id),"name":String((t as Dictionary).name)})
 	return out
 
 static func _question(r:Dictionary,held:Array)->String:
-	var home:=String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "our own village"
+	var home:=String(r.get("home","")) if String(r.get("home",""))!="" else "our own village"
 	if held.is_empty():
 		var foe:=_foe_name()
 		return "Which village do you mean: %s, our own? We hold no town of %s; none of their people are in our hands." % [home,("the "+foe) if foe!="" else "theirs"]
@@ -320,8 +365,8 @@ static func answer(id:String,audience:Dictionary,list:Array[Dictionary],clean:St
 	if held_back or _has(lower,"^\\W*(no|nope|nay|neither|none|nobody|no one|never mind|forget it|leave (it|them)|not now)\\b"):
 		audience.erase("pending_command")
 		return cc.call("_plain_answer",id,audience,clean,context,"Nothing is done to anyone.")
-	var home:=String(GameState.settlement_name).to_lower()
 	var options:Array=p.get("options",[])
+	var home:=String((options[0] as Dictionary).get("name","")).to_lower() if not options.is_empty() else String(GameState.settlement_name).to_lower()
 	for o in options:
 		var opt:Dictionary=o
 		if String(opt.get("id",""))=="town" and WarOrders._name_hit(lower,String(opt.get("name",""))):
@@ -329,6 +374,11 @@ static func answer(id:String,audience:Dictionary,list:Array[Dictionary],clean:St
 	# A town of theirs we do not hold, named: what it would take (the war orders).
 	for t:Dictionary in WarOrders.known_places():
 		if WarOrders._name_hit(lower,String(t.name)): return _to_town(id,audience,list,clean,context,stored,t)
+	# A people named (a feud's raiders, a people at war): theirs, by the war orders.
+	if WorldSimulation.world!=null:
+		for c in WorldSimulation.world.civilizations:
+			if c is Dictionary and String((c as Dictionary).get("id",""))!="player" and WarOrders._name_hit(lower,String((c as Dictionary).get("name",""))):
+				return _to_town(id,audience,list,clean,context,stored,{"name":String((c as Dictionary).name),"civ_id":String((c as Dictionary).id)})
 	var ordinal:=_re("(?i)\\b(first|1st|the first one)\\b").search(lower)!=null
 	var second:=_re("(?i)\\b(second|2nd|last|the other|theirs|the one we (hold|took))\\b").search(lower)!=null
 	if second and options.size()>1:
@@ -549,10 +599,19 @@ static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dict
 		refused2.outcome="%s would not do it to our own people (a chance of %s). %s Nothing was done to %s." % [String(person.get("name","They")),Ledger.chance_words(p_refuse),String(refused2.outcome),label]
 		return refused2
 	var done:Dictionary
-	if how=="burn": done=_burn(id,r_in,rng)
-	else: done=_cull(id,r_in,rng)
+	# Among the town's own people (its local count), then the realm's; every
+	# number reported is what the ledger moved.
+	var realm_before:=int(GameState.population_total)
+	var sid:=String(r_in.get("settlement_id",""))
+	if how=="burn": done=_scoped(sid,func()->Dictionary: return _burn(id,r_in,rng))
+	else: done=_scoped(sid,func()->Dictionary: return _cull(id,r_in,rng))
+	GameState.synchronize_population_allocations()
+	done["population_before"]=realm_before; done["population_after"]=int(GameState.population_total)
 	r["grave_home"]=done
 	var lead:=_obeyed_words(actor,ob)
+	# The chance they would have refused, all told (their own nature's, then this).
+	var refuse_all:=float(ob.get("chance",0.0))+(1.0-float(ob.get("chance",0.0)))*p_refuse
+	if lead!="" and not person.is_empty(): lead=lead.trim_suffix(".")+" (the chance they would refuse it: %s)." % Ledger.chance_words(refuse_all)
 	r.outcome=(lead+" "+String(done.get("words",""))).strip_edges()
 	r.executed=bool(done.get("ok",false))
 	r.stage=VERB if r.executed else ("refuse_hands" if int(done.get("willing",1))<=0 else "none")
@@ -576,7 +635,7 @@ static func _actor(list:Array[Dictionary],speaker:Dictionary,cc:GDScript)->Dicti
 
 static func _label(r_in:Dictionary)->String:
 	## "the women of Seanstone", "half the farmers of Seanstone", "Seanstone".
-	var home:=String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "our village"
+	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "our village")
 	if String(r_in.get("how",""))=="burn": return home
 	var names:=PackedStringArray()
 	for g in r_in.get("groups",[]): names.append(String((g as Dictionary).get("words","people")))
@@ -603,7 +662,7 @@ static func _obeyed_words(actor:Dictionary,ob:Dictionary)->String:
 		"reluctant": return "%s obeyed, though it cost them." % name
 		_: return "%s obeyed%s." % [name,", trembling" if String(ob.get("manner",""))=="trembling" else ""]
 
-static func _actor_says(done:Dictionary,ob:Dictionary,r_in:Dictionary)->String:
+static func _actor_says(done:Dictionary,ob:Dictionary,_r_in:Dictionary)->String:
 	## The one ordered, in plain words, from the numbers decided.
 	if int(done.get("willing",1))<=0:
 		return "None of them would do it. %s" % ("%d fled the realm rather than do it." % int(done.hands_fled) if int(done.get("hands_fled",0))>0 else "They stand where they are and look at the ground.")
@@ -613,7 +672,8 @@ static func _actor_says(done:Dictionary,ob:Dictionary,r_in:Dictionary)->String:
 	match String(done.get("how","")):
 		"burn": return "%s %s burned. %s" % [lead,String(done.get("home","The village")),("%d died in the fires." % int(done.dead)) if int(done.get("dead",0))>0 else "Nobody died in the fires."]
 		"drive": return "%s %d of them are gone from the realm." % [lead,int(done.get("moved",0))]
-	return "%s %d are dead. %s" % [lead,int(done.get("dead",0)),("%d ran and fled the realm." % int(done.escaped)) if int(done.get("escaped",0))>0 else "None got away."]
+	var away:=int(done.get("escaped",0))+int(done.get("hid",0))
+	return "%s %d are dead. %s" % [lead,int(done.get("dead",0)),("%d got away." % away) if away>0 else "None got away."]
 
 static func _hands_step(h:Dictionary,how:String,weight:float,people:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	var n:=int(h.n)
@@ -635,7 +695,7 @@ static func _cull(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Diction
 	## Killing or driving out the groups named, on stated odds, through the
 	## population model. Every number reported is what the ledger moved.
 	var how:=String(r_in.get("how","kill"))
-	var home:=String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village"
+	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village")
 	var people:=DIVINE.people_regard(Hall._officials())
 	var pop_before:=int(GameState.population_total)
 	var fertile_before:=GameState.fertile_women()
@@ -693,10 +753,14 @@ static func _cull(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Diction
 			if caught>0:
 				var died:Dictionary=GameState.register_directive_population_deaths(caught,DEATH_ID,"%d %s of %s were killed at the god's word." % [caught,String(g.words),home],target)
 				row["dead"]=int(died.get("count",0)); dead+=int(row.dead)
-			# Those not caught run as it begins, and leave the realm.
+			# Those not caught run as it begins: most leave the realm, the rest
+			# hide with kin in the hills and stay (ESCAPED_LEAVE, a roll each).
 			if rest>0:
-				var ran:Dictionary=GameState.register_population_departures(rest,"Fled the killing at the god's word",weights,String(g.sex))
-				row["escaped"]=int(ran.get("count",0)); escaped+=int(row.escaped)
+				var leaving:=_binom(rng,rest,ESCAPED_LEAVE)
+				if leaving>0:
+					var ran:Dictionary=GameState.register_population_departures(leaving,"Fled the killing at the god's word",weights,String(g.sex))
+					row["escaped"]=int(ran.get("count",0)); escaped+=int(row.escaped)
+				row["hid"]=rest-leaving; hid+=rest-leaving
 		else:
 			if caught>0:
 				var gone:Dictionary=GameState.register_population_departures(caught,"Driven out at the god's word",weights,String(g.sex))
@@ -727,7 +791,13 @@ static func _cull(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Diction
 	var t:="%s went through %s against %s %s: %s %s each, %s." % [_cap(_count(willing)),home,_count(total),who,"a good chance to" if p>=0.6 else ("an even chance to" if p>=0.4 else "a poor chance to"),"catch" if how=="kill" else "find",Ledger.chance_words(p)]
 	if how=="kill":
 		t+=" %s %s were killed%s" % [_cap(_count(dead)),who,(" over %s" % _days(days)) if days>1 else ""]
-		t+=("; %s got away and fled the realm." % _count(escaped)) if escaped>0 else "; none got away."
+		if escaped+hid<=0: t+="; none got away."
+		else:
+			t+="; %s got away" % _count(escaped+hid)
+			var away:=PackedStringArray()
+			if escaped>0: away.append("%s fled the realm" % _count(escaped))
+			if hid>0: away.append("%s hid with kin and stay among us" % _count(hid))
+			t+=": "+" and ".join(away)+"."
 	else:
 		t+=" %s %s were driven out of the realm%s" % [_cap(_count(moved)),who,(" over %s" % _days(days)) if days>1 else ""]
 		t+=("; %s hid with kin and stay among us." % _count(hid)) if hid>0 else "."
@@ -749,7 +819,7 @@ static func _label_words(r_in:Dictionary)->String:
 static func _burn(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	## Our own village set on fire by our own hands: the houses, the stores, the
 	## few who could not get out, and those who flee after. On stated shares.
-	var home:=String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village"
+	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village")
 	var people:=DIVINE.people_regard(Hall._officials())
 	var pop_before:=int(GameState.population_total)
 	var h:=hands()
@@ -799,7 +869,7 @@ static func _burn(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Diction
 # What lasts
 # --------------------------------------------------------------------------
 
-static func _consequences(id:String,actor:Dictionary,ob:Dictionary,r_in:Dictionary,done:Dictionary)->void:
+static func _consequences(_id:String,actor:Dictionary,ob:Dictionary,r_in:Dictionary,done:Dictionary)->void:
 	var how:=String(done.get("how","kill"))
 	var home:=String(done.get("home","the village"))
 	var before:=maxi(1,int(done.get("population_before",1)))
@@ -838,7 +908,7 @@ static func _consequences(id:String,actor:Dictionary,ob:Dictionary,r_in:Dictiona
 			_: memory="At the god's word I had %s killed: %d dead." % [label,int(done.get("dead",0))]
 		GovernmentPeopleSystem.record_person_memory(pid2,memory,"divine",0.95,{"emotion":"horror" if reluctant else "duty","outcome":"grave_home_"+how})
 	elif String(actor.get("kind",""))=="figure":
-		HistoricalFigures.note(String(actor.get("figure_id","")),_day(),"At the ruler's word he had %s %s." % [label,String({"burn":"burned","drive":"driven out"}.get(how,"killed"))])
+		HistoricalFigures.note(String(actor.get("figure_id","")),_day(),"At the ruler's word they had %s %s." % [label,String({"burn":"burned","drive":"driven out"}.get(how,"killed"))])
 	# Every people that knows us hears of it.
 	if WorldSimulation.world!=null:
 		for civ in WorldSimulation.world.civilizations:
@@ -847,7 +917,7 @@ static func _consequences(id:String,actor:Dictionary,ob:Dictionary,r_in:Dictiona
 			DIVINE.add_civ_dread(String((civ as Dictionary).id),clampf(0.02+0.1*weight,0.02,0.12))
 	# One sober Chronicle entry, and the realm's own log.
 	var day:=_day()
-	var title:=String({"burn":"The Burning of %s" % home,"drive":"The Driving Out of %s" % _cap(label)}.get(how,"The Killing of %s" % _cap(label))).substr(0,70)
+	var title:=String({"burn":"The Burning of %s" % home,"drive":"The Driving Out of %s" % label}.get(how,"The Killing of %s" % label)).substr(0,70)
 	var text:=String(done.get("words",""))
 	Chronicle.record({"key":"grave_home:%s:%d:%s" % [how,day,String(r_in.get("text","")).md5_text().substr(0,8)],"title":title,"text":("By the god's word. "+text).substr(0,600),
 		"tier":"moment","kind":"story","domain":"demography","priority":true})
