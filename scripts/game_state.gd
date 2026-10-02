@@ -9,6 +9,9 @@ const TRACE:=preload("res://scripts/performance_trace.gd")
 ## conceptions: about 0.65 of the baseline is conceived in ordinary founding
 ## conditions, and a pregnancy lasts about three quarters of a year.
 const FOUNDING_PREGNANCY_SHARE:=0.5
+## Girls among the newborn, and women among the grown of a people nobody has
+## culled: the share the birth model reads its mothers against.
+const BIRTH_FEMALE_SHARE:=0.495
 
 const POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
 const PRODUCTIVE_POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics"]
@@ -824,7 +827,47 @@ func estimated_active_pregnancies() -> int:
 	return roundi(float(pregnancy_cohorts.get("first_trimester",0.0))+float(pregnancy_cohorts.get("second_trimester",0.0))+float(pregnancy_cohorts.get("third_trimester",0.0)))
 
 func _reproductive_age_population() -> float:
+	# Scaled by the women among the grown: a people whose women were killed or
+	# driven off has fewer mothers, however many men of those ages it keeps.
+	return _fertile_age_weight()*fertile_women_factor()
+
+func _fertile_age_weight() -> float:
 	return float(population_cohorts.get("youth",0.0))*0.45+float(population_cohorts.get("early_adults",0.0))*0.50+float(population_cohorts.get("established_adults",0.0))*0.45+float(population_cohorts.get("mature_adults",0.0))*0.16
+
+func adult_female_share() -> float:
+	## Grown women among the grown (14 and over): the realm's own count of
+	## women less the girls (children are born about half girls). 0.495 in a
+	## people nobody has culled; lower after women are killed or driven off,
+	## and back toward it over a generation as the girls grow up.
+	var female:=float(population_cohorts.get("female",0.0))
+	var male:=float(population_cohorts.get("male",0.0))
+	if female+male<=0.000001: return BIRTH_FEMALE_SHARE
+	var children:=maxf(0.0,float(population_cohorts.get("children",0.0)))
+	var adults:=population_exact-children
+	if adults<=0.5: return BIRTH_FEMALE_SHARE
+	return clampf((female-children*BIRTH_FEMALE_SHARE)/adults,0.0,1.0)
+
+func fertile_women_factor() -> float:
+	## The mothers a people has against an ordinary people of its size and ages:
+	## 1 unless its women were killed or driven off (men lost never raise it).
+	var factor:=clampf(adult_female_share()/BIRTH_FEMALE_SHARE,0.0,1.0)
+	return 1.0 if factor>0.999999 else factor
+
+func fertile_women() -> float:
+	## Women of an age to bear children (the birth model's own reckoning).
+	return _fertile_age_weight()*clampf(adult_female_share()/BIRTH_FEMALE_SHARE,0.0,2.0)
+
+func lose_pregnancies(share:float) -> float:
+	## Mothers-to-be killed or driven off take their pregnancies with them:
+	## that share of every stage is gone. Returns the pregnancies lost.
+	var s:=clampf(share,0.0,1.0)
+	if s<=0.0: return 0.0
+	var lost:=0.0
+	for key in ["first_trimester","second_trimester","third_trimester","postpartum"]:
+		var v:=float(pregnancy_cohorts.get(key,0.0))
+		if key!="postpartum": lost+=v*s
+		pregnancy_cohorts[key]=v*(1.0-s)
+	return lost
 
 func pregnancy_summary() -> Dictionary:
 	initialize_population_model()
@@ -943,12 +986,22 @@ func _remove_population_exact(amount:float,cause:String,weight_override:Dictiona
 
 var lifetime_departures := 0
 
-func register_population_departures(count:int,reason:String,age_weights:Dictionary={}) -> Dictionary:
+func register_population_departures(count:int,reason:String,age_weights:Dictionary={},sex:String="") -> Dictionary:
 	## People who leave the civilization alive — staying with foreign bands,
 	## marrying out. Reduces the population without touching mortality records.
+	## sex "female"/"male": only women (or men) left, and the realm's count of
+	## each says so (as register_directive_population_deaths keeps it).
 	initialize_population_model()
 	var actual:=mini(maxi(0,count),maxi(0,population_total-1))
+	var prior_female:=float(population_cohorts.get("female",population_exact*BIRTH_FEMALE_SHARE))
+	var prior_male:=float(population_cohorts.get("male",population_exact-prior_female))
+	if sex=="female": actual=mini(actual,floori(prior_female))
+	elif sex=="male": actual=mini(actual,floori(prior_male))
 	var removed:=_remove_population_exact(float(actual),reason,age_weights,false)
+	if sex in ["female","male"]:
+		population_cohorts["female"]=maxf(0.0,prior_female-removed) if sex=="female" else prior_female
+		population_cohorts["male"]=maxf(0.0,prior_male-removed) if sex=="male" else prior_male
+		_refresh_population_summary()
 	var emitted:=roundi(removed)
 	lifetime_departures+=emitted
 	synchronize_population_allocations()
@@ -1156,6 +1209,8 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var away_share:=clampf(absent_adults/maxf(1.0,float(population_cohorts.get("working_age",population_exact*0.6))),0.0,1.0)
 	var eligible:=maxf(0.0,reproductive_population*(1.0-away_share)-active-postpartum*0.55)
 	var baseline_annual:=float(population_cohorts.get("youth",0.0))*0.45*0.23+float(population_cohorts.get("early_adults",0.0))*0.50*0.285+float(population_cohorts.get("established_adults",0.0))*0.45*0.18+float(population_cohorts.get("mature_adults",0.0))*0.16*0.040
+	# Fewer women, fewer mothers: births fall with the women killed or gone.
+	baseline_annual*=fertile_women_factor()
 	var availability:=clampf(eligible/maxf(1.0,reproductive_population),0.0,1.0)
 	var annual_conceptions:=baseline_annual*_conception_condition_factor(context)*availability*clampf(float(context.get("conception_care",1.0)),0.3,2.0)
 	annual_conceptions*=1.0-clampf(float(context.get("fertility_transition",0.0)),0.0,0.85) # research_3000: births couples choose not to have
@@ -1185,6 +1240,11 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	pregnancy_cohorts["postpartum"]=maxf(0.0,postpartum+deliveries-postpartum/365.0)
 	population_cohorts["children"]=float(population_cohorts.get("children",0.0))+live_births_exact
 	population_exact+=live_births_exact
+	# Newborns come about half girls, whatever became of their mothers' generation:
+	# a people that lost its women regains them as the girls grow up.
+	if population_cohorts.has("female") and population_cohorts.has("male"):
+		population_cohorts["female"]=float(population_cohorts.female)+live_births_exact*BIRTH_FEMALE_SHARE
+		population_cohorts["male"]=float(population_cohorts.male)+live_births_exact*(1.0-BIRTH_FEMALE_SHARE)
 	if TRACE.enabled and self==GameState:TRACE.flow("birth","Live births",live_births_exact)
 	_remove_population_exact(neonatal_deaths_exact,"Neonatal complications")
 	_remove_population_exact(maternal_deaths_exact,"Complications of childbirth")

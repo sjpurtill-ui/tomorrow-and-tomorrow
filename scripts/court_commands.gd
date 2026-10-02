@@ -46,6 +46,7 @@ const HomeOrders:=preload("res://scripts/home_orders.gd")
 const PurseOrders:=preload("res://scripts/court_purse_orders.gd")
 const Realm:=preload("res://scripts/court_realm_acts.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
+const GraveHome:=preload("res://scripts/grave_home.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
 const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","war","order"]
@@ -541,6 +542,12 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var trade:Dictionary=(load("res://scripts/court_trade.gd") as GDScript).call("hear",id,audience,clean,context)
 	if not trade.is_empty(): return trade
 	var list:=roster(audience)
+	# The answer to "Which village do you mean?" about a grave order against
+	# our own people (grave_home.gd): ours is carried out there, a town not
+	# ours goes to the war orders, "no" drops it.
+	if String(audience.get("origin",""))!="foreign":
+		var grave_answer:=GraveHome.answer(id,audience,list,clean,context)
+		if not grave_answer.is_empty(): return grave_answer
 	# The realm's purse (court_purse_orders.gd): the levy on the harvest, the
 	# soldiers' pay, scholars, crews and food for the hungry; read before the
 	# levy of fighters can take "raise the levy" for a call to arms.
@@ -640,6 +647,14 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if String(cls.verb) in CRUEL and String(cls.act)=="command" and not bool(cls.insist) and not own_business:
 		var owned:=_owned_people(_harm_object(clean,cls),list)
 		if owned!="": return _plain_answer(id,audience,clean,context,"%s are our own people. Nothing is done to them: say plainly whom you mean." % _cap_first(owned))
+	# A grave order against our own people ("kill all women in the village",
+	# "kill half the farmers", "burn our own village", "drive out the old"):
+	# adjudicated on the realm's own population (grave_home.gd), or one
+	# question when the village is unclear. A town we hold that this audience
+	# speaks of, or a people of theirs, stays the war orders' (below).
+	if not foreign and not bool(cls.insist) and String(cls.act)!="question" and not own_business:
+		var grave:=GraveHome.reading(clean,audience,list)
+		if not grave.is_empty(): return GraveHome.carry(id,audience,list,grave,false,context)
 	# Harm ordered on a people or a town's people ("kill all the males of
 	# Tsaren") is a war order about that town, whoever it was said to and
 	# whatever the live reading names: never a hand laid on anyone here.
@@ -672,6 +687,10 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 		cls.act="command"; cls.verb="exile"; cls.confidence=0.85; cls.verb_at=_re(SEND_HOME_PATTERN).search(clean).get_start()
 	var insist:=bool(cls.insist)
 	if insist:
+		# A plea over a grave order against our own people: the god's "do it"
+		# settles it (grave_home.gd), never another act on whoever stands here.
+		var grave_again:=GraveHome.insisted(id,audience,list,clean,context)
+		if not grave_again.is_empty(): return grave_again
 		var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 		if not pending.is_empty() and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS and String(pending.get("verb",""))=="war":
 			# The god overrides the war leader's objection: the original order stands.
@@ -1057,6 +1076,7 @@ static func realm_business(id:String,text:String)->bool:
 	if not Realm.nation(clean).is_empty() or not Realm.rename(clean).is_empty(): return true
 	if not Realm.group_act(clean,audience,list,mention).is_empty(): return true
 	if not Realm.law(clean,list,mention).is_empty(): return true
+	if not GraveHome.reading(clean,audience,list).is_empty(): return true
 	if not Realm.gift(clean).is_empty(): return true
 	if not HomeOrders.read(clean).is_empty(): return true
 	if not _appoint_reading(clean,audience,list).is_empty(): return true
@@ -2989,5 +3009,12 @@ static func decided_words(result:Dictionary)->String:
 		elif verdict=="object": parts.append("%s OBJECTS: nothing has marched. They explain why and what would fix it; if the god insists they will go." % actor)
 		elif String((result.get("war",{}) as Dictionary).get("reason",""))=="already_marching": parts.append("Nothing NEW is ordered: the army the god sent is ALREADY on the road; say so plainly with the place and the days left. Never promise to go again.")
 		else: parts.append("It CANNOT be done as ordered: nothing has marched. Say plainly why and what would change that. Never promise to go.")
+	if String(result.get("verb",""))==GraveHome.VERB:
+		# The god's own people (grave_home.gd): the numbers decided, said soberly.
+		var stage:=String(result.get("stage",""))
+		if stage==GraveHome.VERB: parts.append("This WAS done to the god's OWN people, exactly as written: keep every number; tell it soberly in plain words, with no gore and nothing of how anyone died; children are only counted, never described. Never add deaths, never say it was not done.")
+		elif stage=="grave_ask": parts.append("NOTHING has been done yet; ONE question is asked, exactly as given: "+String(result.get("actor_says","")))
+		elif stage=="grave_hesitate": parts.append("NOTHING has been done to the people yet.")
+		else: parts.append("NOTHING was done to the people named; say why, plainly.")
 	if bool(result.get("removed",false)) and String(result.get("target_name",""))!="": parts.append("%s is gone and does not speak." % String(result.target_name))
 	return " ".join(parts)

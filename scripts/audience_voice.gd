@@ -3099,7 +3099,9 @@ func _stage_line(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Dict
 
 const COMMAND_WITNESS:={"maim":"witness_execution","kill":"witness_execution","exile":"witness_exile","detain":"witness_exile","terrify":"witness_shaken","penance":"witness_shaken",
 	"hesitate":"witness_shaken","refuse_flee":"witness_shaken","refuse_seized":"witness_shaken","prostrate":"witness_shaken","demote":"witness_shaken",
-	"bless":"witness_glad","raise":"witness_envy","appoint":"witness_envy","boon":"witness_glad","give":"witness_glad"}
+	"bless":"witness_glad","raise":"witness_envy","appoint":"witness_envy","boon":"witness_glad","give":"witness_glad",
+	# A grave order against our own people held back (grave_home.gd): the court is shaken.
+	"grave_hesitate":"witness_shaken","refuse_hands":"witness_shaken"}
 
 func _offline_command(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Array[Dictionary]:
 	## Stage direction, the actor's answer as decided, the target's if they are
@@ -3197,7 +3199,11 @@ func _command_instruction(s:Dictionary,extra:Dictionary)->String:
 	var fate:=envoy_state_words(result)
 	if fate!="": parts.append(fate+" Any goods moved are exactly as WHAT ACTUALLY HAPPENED says, and no others.")
 	parts.append("The ruler's words were: \"%s\". The stage direction shows what the engine decided, never a different act." % String(result.get("text","")).substr(0,200))
-	parts.append("First 'narrator' writes ONE stage direction in square brackets, one or two sentences, vivid, concrete and physical (graphic is fine, but never sexual detail: of rape say only that it was done, to whom, and what followed), showing exactly what was decided and how the watchers take it. Weapons and tools only from: %s, cord, or bare hands; nothing the WORLD line lacks. Name people as given." % ", ".join(tools))
+	if String(result.get("verb",""))==CC.GraveHome.VERB:
+		# A grave order against the god's own people (grave_home.gd): sober, never graphic.
+		parts.append("First 'narrator' writes ONE short stage direction in square brackets: the hall hearing what was decided, sober and plain. No gore, nothing of how anyone died or of the dead; children are never described. Name people as given.")
+	else:
+		parts.append("First 'narrator' writes ONE stage direction in square brackets, one or two sentences, vivid, concrete and physical (graphic is fine, but never sexual detail: of rape say only that it was done, to whom, and what followed), showing exactly what was decided and how the watchers take it. Weapons and tools only from: %s, cord, or bare hands; nothing the WORLD line lacks. Name people as given." % ", ".join(tools))
 	if not actor.is_empty():
 		var manner:String=String({"obey":"answers in ONE short line: it is done, or they go at once, in their own manner","reluctant":"answers in ONE short line: it cost them, but they did it","hesitate":"pleads in ONE short line not to have to do it; they have not done it","refuse":"says in ONE short line why they would not; they have not done it"}.get(ob,"answers in ONE line"))
 		parts.append("'%s' %s." % [String(actor.key),manner])

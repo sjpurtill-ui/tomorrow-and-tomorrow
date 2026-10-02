@@ -13,7 +13,8 @@ extends GdUnitTestSuite
 ## raise BASELINE as fixes land (never lower it to hide a regression).
 ##
 ## Environment (all optional):
-##   COURT_EVAL_FILTER   only cases whose id or domain contains this (no threshold then)
+##   COURT_EVAL_FILTER   only cases whose id or domain contains this; several may be
+##                       comma-separated (no threshold then)
 ##   COURT_EVAL_PATHS    e.g. "live" or "offline,sloppy" (no threshold then)
 ##   COURT_EVAL_VERBOSE  1: print the exchange of every failing case
 ##   COURT_EVAL_REPORT   a file path: the full results as JSON (outside user://saves)
@@ -110,8 +111,11 @@ func test_the_court_listens_and_does_the_right_thing()->void:
 	# in the player's own interaction file.
 	var real_root:=String(Store.user_root)
 	Store.user_root=SPARE_ROOT
+	# Several filters, comma-separated ("grave_group,home_law"), so the corpus
+	# can be run in batches that each finish quickly.
+	var filters:=Array(filter.split(",",false)).map(func(f:String)->String: return f.strip_edges())
 	for c:Dictionary in h.cases:
-		if filter!="" and not (filter in String(c.id) or filter==String(c.get("domain",""))): continue
+		if filter!="" and not filters.any(func(f:String)->bool: return f in String(c.id) or f==String(c.get("domain",""))): continue
 		for path:String in h.paths_of(c):
 			if only!="" and not path in only.split(",",false): continue
 			results.append(h.run(c,path))

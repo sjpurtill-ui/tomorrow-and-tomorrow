@@ -457,6 +457,19 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	for res in ["Food","Timber","Stone","Fiber Plants","Forced Labor","Transport Carts"]: m[res.to_lower().replace(" ","_")]=roundi(float(GameState.resource_stockpiles.get(res,0.0)))
 	m["spears"]=int(MilitaryCampaign.military_inventory.get("spear",0))
 	m["population"]=int(GameState.population_total)
+	# Our own people by group, from the population model (grave_home.gd): the
+	# grown women and men, children and old, the women of an age to bear, the
+	# pregnancies, and the dead and gone since the world began.
+	var kids:=maxf(0.0,float(GameState.population_cohorts.get("children",0.0)))
+	var grown:=maxf(0.0,float(GameState.population_exact)-kids)
+	m["our_women"]=roundi(grown*GameState.adult_female_share())
+	m["our_men"]=roundi(grown*(1.0-GameState.adult_female_share()))
+	m["our_children"]=roundi(kids)
+	m["our_elders"]=roundi(float(GameState.population_cohorts.get("elders",0.0)))
+	m["our_fertile"]=roundi(GameState.fertile_women())
+	m["our_pregnancies"]=int(GameState.estimated_active_pregnancies())
+	m["our_deaths"]=int(GameState.lifetime_deaths)
+	m["our_departures"]=int(GameState.lifetime_departures)
 	m["modifiers"]=(GameState.active_modifiers as Array).size()
 	m["practice_prisoners"]=String(MilitaryCampaign.aftermath_practice.get("prisoners",""))
 	m["practice_spoils"]=String(MilitaryCampaign.aftermath_practice.get("spoils",""))

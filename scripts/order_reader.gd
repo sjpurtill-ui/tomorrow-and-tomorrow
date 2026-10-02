@@ -533,6 +533,9 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# no order of its own goes to him, and an unclear one is taken as his own
 	# nearest reading (court_war_orders.pending_answer), never asked again.
 	if String(theirs.get("ask",""))=="measure" and kind!="question" and (kind!="order" or action=="none"): return {"route":"engine","context":{"reader":true}}
+	# The court asked which village a grave order on our own people meant
+	# (grave_home.gd): the answer is read by the words themselves.
+	if String(theirs.get("ask",""))=="which_people" and kind!="question": return {"route":"legacy","why":"the answer to which village"}
 	if kind!="question":
 		# Words that hold back all they name ("don't kill him", "no, don't
 		# attack", "Kavu must not be punished"): the engine answers them
@@ -545,6 +548,11 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 		# blessing on many or on one named, a new name for our town, an office
 		# given or taken): the words' own reading carries it, as offline.
 		if (kind=="speech" or action=="none") and String(audience.get("origin",""))=="court" and (CC.realm_business(audience_id,text) or CC.DIVINE.intent(text) in ["terrify","bless","raise_up"]): return {"route":"legacy","why":"the realm's own business"}
+		# A grave order against our own people ("kill all women in the
+		# village"): the engine reads whose people from the words and the state,
+		# and asks itself when the village is unclear (grave_home.gd), whatever
+		# the reading named (never a person here, never a town's fate by guess).
+		if not CC.GraveHome.reading(text,audience,CC.roster(audience)).is_empty(): return {"route":"legacy","why":"a grave order against our own people"}
 	# The captives and spoils of our last fight (or the standing word for the
 	# next) are read by the war orders' own words, whatever the reading named:
 	# "free the captives" read as talk is still that order (never a question).
