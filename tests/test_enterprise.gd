@@ -500,15 +500,10 @@ func test_computer_rulers_choose_by_temperament_and_never_open_at_war()->void:
 		Controller.business_orders("trader",{"personality":free,"at_war":false})
 		return Business.stance())
 	assert_str(chosen).is_equal("open")
-	# A war that starts within the year does not flip it at once ...
-	var soon:String=WorldSimulation.scoped("trader",func()->String:
-		WorldSimulation.state.elapsed_days=int(WorldSimulation.state.elapsed_days)+30
-		Controller.business_orders("trader",{"personality":free,"at_war":true})
-		return Business.stance())
-	assert_str(soon).is_equal("open")
-	# ... at the year's review at war, Open is not chosen ...
+	# A war that starts within the year turns a ruler away from Open at once
+	# (never Open at war; it only ever moves away from Open) ...
 	var at_war:String=WorldSimulation.scoped("trader",func()->String:
-		WorldSimulation.state.elapsed_days=int(WorldSimulation.state.elapsed_days)+365
+		WorldSimulation.state.elapsed_days=int(WorldSimulation.state.elapsed_days)+30
 		Controller.business_orders("trader",{"personality":free,"at_war":true})
 		return Business.stance())
 	assert_str(at_war).is_not_equal("open")
@@ -537,11 +532,15 @@ func test_the_court_reads_the_business_orders()->void:
 	assert_dict(BusinessOrders.read("guard the trades with guilds and rules")).is_equal({"kind":"business","stance":"guarded"})
 	assert_dict(BusinessOrders.read("Let the state run the great works")).is_equal({"kind":"business","stance":"state"})
 	assert_dict(BusinessOrders.read("let the state run the works")).is_equal({"kind":"business","stance":"state"})
+	# "Have the state…" is an order, though "have the" opens questions.
+	assert_dict(BusinessOrders.read("Have the state run the works")).is_equal({"kind":"business","stance":"state"})
+	assert_dict(BusinessOrders.read("Have the state run the works?")).is_empty()
 	for said in ["Keep the prisoner guarded","Make sure the envoy is guarded","Guard the markets from thieves","Protect the crafts from the raiders",
 			"Hire a chartered ship to carry the grain","Bring me the man from the chartered house","Give licences to the hunters","Issue licenses to fish the lake",
 			"Open the market on feast day","Open trade routes to the east","grant charters to the towns","free trade with the Esurai",
 			"free the markets","Trade with the Esurai","Open trade with the Varesh","guard the gate","Open the gates","open the stores to the hungry","Should we open the markets to all?",
-			"don't grant charters","never open the markets","Build a great work","Raise the levy","How is business?","Guard the walls","The state is strong","if we grant charters the rich will grow"]:
+			"don't grant charters","never open the markets","Build a great work","Raise the levy","How is business?","Guard the walls","The state is strong","if we grant charters the rich will grow",
+			"give charters to the companies of spearmen","charter the companies of archers","Rein in the companies of spearmen","grant licences to the guild of hunters"]:
 		assert_dict(BusinessOrders.read(said)).override_failure_message("'%s' was read as a business order" % said).is_empty()
 	# No line of the court evaluation (the user's own words) is read as one.
 	var cases:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://tests/court_eval/cases.json"))
@@ -854,7 +853,8 @@ func test_business_answers_need_business_words()->void:
 	var sheet:={"business":BusinessOrders.facts()}
 	# No business yet: a question about it is answered; others are not.
 	assert_str(BusinessOrders.answer(sheet,"how is business?")).contains("no business beyond household crafts")
-	for asked in ["how many companies of spearmen do we have?","what does the guild of hunters say?","are the merchants from the east here?","did the bridge bust in the flood?"]:
+	for asked in ["how many companies of spearmen do we have?","what does the guild of hunters say?","are the merchants from the east here?","did the bridge bust in the flood?",
+			"what is our business with the Esurai?","how is the business of war going?","how are the trades with the Esurai?"]:
 		assert_str(BusinessOrders.answer(sheet,asked)).override_failure_message("'%s' was answered as business" % asked).is_empty()
 	_at_rung(1)
 	_size(0.02)

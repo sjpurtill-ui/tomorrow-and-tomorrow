@@ -202,9 +202,10 @@ static func business_orders(id:String,plan:Dictionary)->void:
 	var Business:=preload("res://scripts/enterprise.gd")
 	if Business.rung()<1:return
 	var day:=int(WorldSimulation.state.elapsed_days)
-	if not Business.ruler_due(day):return
+	var at_war:=bool(plan.get("at_war",false))
+	if not Business.ruler_due(day) and not (at_war and Business.stance()=="open"):return
 	Business.ruler_reviewed(day)
-	var pick:=Business.ruler_stance(plan.get("personality",{}),bool(plan.get("at_war",false)))
+	var pick:=Business.ruler_stance(plan.get("personality",{}),at_war)
 	if pick!=Business.stance():WorldSimulation.submit(id,{"kind":"business","stance":pick})
 
 static func expansion_orders(id:String,plan:Dictionary)->void:

@@ -33,16 +33,16 @@ const NEGATE:="(?i)\\b(stop|stopping|no longer|don'?t|do not|dont|never|cease|ha
 ## Words that hand the line to another office.
 const ELSEWHERE:="(?i)\\bfree (?:the |our )?markets?\\b|\\b(deregulat\\w*|liberali[sz]e|price controls?)\\b|\\btrade with\\b|\\b(gates?|walls?|camp|border|ford|bridge|road|roads|stores?|granar\\w*|well|wells)\\b"
 ## The trades as a whole: the sector the stance is about.
-const SECTOR:="(?:the |our )?(?:trades|crafts|merchants|merchant houses|trading houses|guilds|companies|businesses|business|craftsmen|craftsfolk|workshops|shops|traders)"
+const SECTOR:="(?:the |our )?(?:trades|crafts|merchants|merchant houses|trading houses|guilds|companies|businesses|business|craftsmen|craftsfolk|workshops|shops|traders)(?!\\s+of\\b)"
 ## Open: the markets (or trade, business) opened to all, free trade or free
 ## enterprise; never a market opened on a feast day or a road opened east.
 const OPEN:="(?i)\\bopen (?:up )?(?:the |our )?(?:markets?|trades?|business|commerce) (?:to|for) (?:all|everyone|anyone|all comers|every man|any man)\\b|\\blet (?:anyone|everyone|any man|all comers|whoever will) (?:trade|open (?:a )?shops?|set up (?:a )?(?:shops?|trades?|business))\\b|\\bfree enterprise\\b|\\bfree trade(?: and (?:free )?enterprise)?\\s*[.!]*\\s*$"
 ## Chartered: charters or licences granted to the trades (or charters with no
 ## one named), the right to trade sold, charters for a fee.
-const CHARTER:="(?i)\\b(?:grant|give|sell|issue|award)\\w* (?:out )?(?:royal |trade |trading )?(?:charters?|licen[cs]es?) (?:to|for) "+SECTOR+"\\b|\\b(?:grant|sell|issue|award)\\w* (?:trade |trading )?charters(?: for a fee)?\\s*[.!]*\\s*$|\\b(?:grant|give|sell|issue)\\w* (?:out )?(?:trade |trading )?licen[cs]es to trade\\b|\\bcharter (?:the |our )?(?:trades|merchants|guilds|merchant houses|companies|trading houses)\\b|\\bsell (?:the )?right to trade\\b|\\bcharters? (?:for|at) a fee\\b"
+const CHARTER:="(?i)\\b(?:grant|give|sell|issue|award)\\w* (?:out )?(?:royal |trade |trading )?(?:charters?|licen[cs]es?) (?:to|for) "+SECTOR+"\\b|\\b(?:grant|sell|issue|award)\\w* (?:trade |trading )?charters(?: for a fee)?\\s*[.!]*\\s*$|\\b(?:grant|give|sell|issue)\\w* (?:out )?(?:trade |trading )?licen[cs]es to trade\\b|\\bcharter (?:the |our )?(?:trades|merchants|guilds|merchant houses|companies|trading houses)\\b(?!\\s+of\\b)|\\bsell (?:the )?right to trade\\b|\\bcharters? (?:for|at) a fee\\b"
 ## Guarded: the trades guarded by guilds and rules; never a thing guarded from
 ## thieves or raiders.
-const GUARD:="(?i)\\b(?:guard|protect|shelter) (?:the |our )?(?:trades|crafts)\\b(?![^.!?]*\\bfrom\\b)|\\bkeep (?:the |our )?(?:trades|crafts|business) (?:under|by|to) (?:the )?(?:guilds?|rules|custom)|\\bkeep (?:the |our )?guilds'? rules\\b|\\bguilds and rules\\b|\\brein in (?:the |our )?(?:merchant houses|merchants|trades|trading houses|companies|businesses|business)\\b"
+const GUARD:="(?i)\\b(?:guard|protect|shelter) (?:the |our )?(?:trades|crafts)\\b(?![^.!?]*\\bfrom\\b)|\\bkeep (?:the |our )?(?:trades|crafts|business) (?:under|by|to) (?:the )?(?:guilds?|rules|custom)|\\bkeep (?:the |our )?guilds'? rules\\b|\\bguilds and rules\\b|\\brein in (?:the |our )?(?:merchant houses|merchants|trades|trading houses|companies|businesses|business)\\b(?!\\s+of\\b)"
 const STATE:="(?i)\\b(?:let |have |make )?the state (?:run|own|take over|take|hold|manage)s? (?:the |our )?(?:great )?(?:works|industries|trades|mills|factories)\\b|\\bnationali[sz]e (?:the |our )?(?:great )?(?:works|industries|trades|mills|factories|business)\\b|\\bstate works\\b"
 const QUESTION:="(?i)(\\?\\s*[!.]*\\s*$|^\\s*((and|so|then|now|well|but|also)\\s+)?(how|what|where|who|whom|whose|which|when|why|should|shall|tell me|is (it|there|that|this|the|our)|are (we|they|there|the|our|you)|do (we|they|you|the|our)|does (the|it|our)|can (you|we)|could (you|we)|would|will (we|they|you|our)|have (we|they|you|the|our)|has (the|our))\\b)"
 
@@ -59,7 +59,9 @@ static func _has(text:String,pattern:String)->bool:
 
 static func read(text:String)->Dictionary:
 	var lower:=text.strip_edges().to_lower().replace("’","'")
-	if lower.is_empty() or _has(lower,QUESTION) or _has(lower,NEGATE):return {}
+	if lower.is_empty() or _has(lower,NEGATE):return {}
+	# "Have the state run the works" is an order; only a real question is not.
+	if _has(lower,QUESTION) and (lower.contains("?") or not _has(lower,STATE)):return {}
 	if _has(lower,"(?i)\\bif\\b|\\bsuppose\\b|\\bthe elders say\\b"):return {}
 	var state:=_has(lower,STATE)
 	var open:=_has(lower,OPEN)
@@ -184,7 +186,7 @@ static func _num(value:float)->String:
 
 ## A question about business itself: the sector named, never a loose word
 ## ("companies of spearmen", "the guild of hunters", "merchants" from abroad).
-const ASKS:="(?i)\\b(business|businesses|enterprise|merchant houses?|trading houses?|banking houses?|hired workshops|chartered companies|corporations|charter fees|charters for a fee|the trades|our trades)\\b"
+const ASKS:="(?i)\\b(?:business(?:es)?\\b(?!\\s+(?:of|with)\\b)|enterprise|merchant houses?|trading houses?|banking houses?|hired workshops|chartered companies|corporations|charter fees|charters for a fee|(?:the|our) trades\\b(?!\\s+(?:of|with)\\b))"
 ## Booms and busts count only with trade named beside them.
 const ASKS_BUST:="(?i)\\b(booms?|booming|busts?|bubbles?|crash\\w*)\\b"
 const TRADE_WORDS:="(?i)\\b(trades?|business\\w*|markets?|merchant houses?|banking houses?|companies|enterprise)\\b"

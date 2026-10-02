@@ -566,6 +566,9 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	month.output=float(month.output)+output*span;month.person_days=float(month.person_days)+float(s.population_exact)*span;month.coin=float(month.coin)+coin
 	month["short"]=float(month.get("short",0.0))+short
 	month["charter"]=float(month.get("charter",0.0))+charter
+	# The state works' surplus is told apart from charter fees, by the stance
+	# on the day it was taken (a change mid-month splits the month's line).
+	if charter>0.0 and String(_business().call("stance"))=="state":month["state_surplus"]=float(month.get("state_surplus",0.0))+charter
 	# Where it came from: each town's own day is levied in its own scope.
 	if not month.get("towns") is Dictionary: month["towns"]={}
 	var town_id:=String(s.resource_settlement_id)
@@ -767,8 +770,10 @@ static func settle(day:int)->Dictionary:
 		_note(purse,float(month.levy),"The month's levy, %d in 100 of it hidden" % roundi(float(month.evaded)/maxf(0.001,float(month.assessed)*maxf(0.01,reach()))*100.0),"levy")
 	# Charter fees (or the state works' surplus) came in with the levy: told
 	# on their own line, so the record explains the balance.
-	if float(month.get("charter",0.0))>0.0:
-		_note(purse,float(month.charter),"The month's %s" % String(_business().call("purse_name")).to_lower(),"charter")
+	var surplus:=float(month.get("state_surplus",0.0))
+	var fees:=maxf(0.0,float(month.get("charter",0.0))-surplus)
+	if fees>0.0:_note(purse,fees,"The month's charter fees","charter")
+	if surplus>0.0:_note(purse,surplus,"The month's surplus from the state works","charter")
 	# The store's food rots as the capital's own stored food does.
 	var rotted:=_spoil(purse,days)
 	if rotted>=0.5:_note(purse,-rotted,"Rotted in the store","out")
