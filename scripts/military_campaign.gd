@@ -2865,14 +2865,15 @@ func _engagement_enemy_side(engagement:Dictionary)->String:
 func _home_defense_force(allocate_id:bool=true)->Dictionary:
 	var force:=home_army.duplicate(true)
 	force.readiness=float(force.get("readiness",.5))*recovery.defense_factor()
-	# Home's own share of the watch; the other towns keep the rest of it
-	# (civilization_combat.gd watch_ledger: one watch, no one in two places).
-	var militia:=int(preload("res://scripts/civilization_combat.gd").home_watch(self))
+	# Home's own share of the watch and its townsfolk who rise, one untrained
+	# block; the other towns keep the rest (civilization_combat.gd guard_ledger).
+	var block:Dictionary=preload("res://scripts/civilization_combat.gd").home_militia(self)
+	var militia:=int(block.count)
 	if militia<=0: return force
 	var formations:Array=(force.get("formations",[]) as Array).duplicate(true)
 	var formation_id:=next_formation_id if allocate_id else -1
 	if allocate_id:next_formation_id+=1
-	formations.append({"id":formation_id,"unit":"levy","weapon":"improvised","count":militia,"authorized_count":militia,"equipment":0,"equipment_required":militia,"ammunition":0,"ammunition_required":0,"training":0.20,"experience":0.0,"personnel_condition":_trainee_condition(),"emergency_militia":true})
+	formations.append({"id":formation_id,"unit":"levy","weapon":"improvised","count":militia,"authorized_count":militia,"equipment":0,"equipment_required":militia,"ammunition":0,"ammunition_required":0,"training":float(block.training),"experience":0.0,"personnel_condition":_trainee_condition(),"emergency_militia":true})
 	var assembled:Dictionary=simulator.create_formation_force(_home_army_name(),formations,float(force.get("morale",_campaign_morale())),maxf(0.08,float(force.get("readiness",0.18))))
 	assembled["commander"]=(force.get("commander",_marshal_commander()) as Dictionary).duplicate(true)
 	assembled["supply_level"]=float(force.get("supply_level",1.0))
@@ -4788,9 +4789,10 @@ func settlement_defense_snapshot()->Dictionary:
 	var trained_troops:=maxi(0,int(home_army.get("troops",0)))
 	# Defense labor is physically present and serves in the watch while its basic
 	# training rotates automatically. Formal formations remain separately visible.
-	# Home's guard is its levy and its own share of the watch (as its battle
-	# musters them, _home_defense_force); a town needs 3.5 in 100 of its people.
-	var troops:=trained_troops+int(preload("res://scripts/civilization_combat.gd").home_watch(self))
+	# Home's guard is its levy, its own share of the watch and its townsfolk
+	# who rise (as its battle musters them, _home_defense_force); a town needs
+	# 3.5 in 100 of its people.
+	var troops:=trained_troops+int(preload("res://scripts/civilization_combat.gd").home_militia(self).count)
 	var garrison_required:=maxi(8,ceili(maxf(1.0,WorldSimulation.settlements.primary_population_exact())*0.035))
 	var garrison_coverage:=clampf(float(troops)/float(garrison_required),0.0,1.0)
 	var integrity:=float(settlement_defense.integrity)

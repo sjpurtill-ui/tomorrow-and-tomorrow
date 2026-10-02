@@ -144,11 +144,16 @@ func test_home_defence_is_beside_the_town_name_not_an_army()->void:
 	var home:Dictionary=GameState.player_settlements[0]
 	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
 	assert_bool(bool(home.get("primary",false))).is_true()
+	var Combat:=preload("res://scripts/civilization_combat.gd")
+	var defense:=maxi(0,int(GameState.population_allocations.get("Defense",0)))
+	# One town: the whole watch is at home, with its townsfolk who rise.
 	var watch:=Labels.home_guard(String(home.id))
-	assert_int(watch).is_equal(maxi(0,int(GameState.population_allocations.get("Defense",0))))
+	assert_int(int(Combat.home_militia().watch)).is_equal(defense)
+	assert_int(watch).is_equal(defense+int(Combat.home_militia().rise))
 	MilitaryCampaign.home_army["troops"]=9
-	# The nine trained stand with whoever else keeps the watch.
-	assert_int(Labels.home_guard(String(home.id))).is_equal(maxi(9,watch))
+	# The nine trained stand with whoever else keeps the watch, and the townsfolk.
+	assert_int(int(Combat.home_militia().watch)).is_equal(maxi(0,defense-9))
+	assert_int(Labels.home_guard(String(home.id))).is_equal(9+int(Combat.home_militia().count))
 	assert_int(Labels.home_guard("nowhere")).is_equal(0)
 	assert_int(Labels.home_guard("__founding_convoy__")).is_equal(0)
 	# The army bar keeps to armies: no card for home defence.

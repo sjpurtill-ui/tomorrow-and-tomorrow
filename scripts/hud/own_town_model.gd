@@ -42,27 +42,40 @@ const TEENS:=["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen",
 # --------------------------------------------------------------------------
 
 ## Who defends the town if it is attacked now, as its battle musters them
-## (civilization_combat.gd defenders): at home the trained levy and home's
-## share of the watch, with the home walls; any other town of ours its share
-## of the watch and no walls; a town another people holds (home too, once
-## taken) none of ours.
-## `defenders` is the one count its map badge shows too. Read unscoped, as
-## the Military ledger does.
+## (civilization_combat.gd guard_of): at home the trained levy, home's share
+## of the watch and its townsfolk who rise, with the home walls; any other
+## town of ours its share of the watch and its townsfolk, and no walls; a
+## town another people holds (home too, once taken) none of ours.
+## `defenders` is the one count its map badge and a scout show too. Read
+## unscoped, as the Military ledger does.
 static func strength(primary:bool,settlement_id:String="")->Dictionary:
 	var record:=SettlementModel.settlement_record(settlement_id)
 	if record.is_empty() and primary:
 		for city:Dictionary in GameState.player_settlements:
 			if bool(city.get("primary",false)):record=city;break
 	var held_by:=String(record.get("occupied_by",""))
-	var guard:=Combat.defenders_of(record)
+	# Before any town is founded, the whole people stands at home.
+	var guard:Dictionary=Combat.guard_of(record) if not record.is_empty() else Combat.home_defenders()
+	var trained:=int(guard.get("trained",0));var watch:=int(guard.get("watch",0));var rise:=int(guard.get("rise",0))
 	if not primary:
-		return {"town":true,"held_by":held_by,"fighters":0,"watch":guard,"defenders":guard,"capital":_capital_name(),
+		return {"town":true,"held_by":held_by,"fighters":0,"watch":watch,"rise":rise,"defenders":watch+rise,"capital":_capital_name(),
 			"wall_stage":0,"wall_name":"Open ground","wall_integrity":1.0,"wall_words":""}
 	var defense:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
-	var home:=Combat.home_defenders() if held_by.is_empty() else {"trained":0,"watch":0}
-	return {"held_by":held_by,"fighters":int(home.trained),"watch":int(home.watch),"defenders":guard if not record.is_empty() else int(home.trained)+int(home.watch),
+	return {"held_by":held_by,"fighters":trained,"watch":watch,"rise":rise,"defenders":trained+watch+rise,
 		"wall_stage":int(defense.get("stage",0)),"wall_name":String(defense.get("short","Open ground")),"wall_integrity":float(defense.get("integrity",1.0)),
 		"wall_words":String(defense.get("description",""))}
+
+## What the townsfolk who rise are, in the row's tooltip (civilization_combat
+## RISE_SHARE).
+const RISE_WORDS:="When raiders come, about 1 in 10 of the town's grown people take up arms beside the watch. They are untrained."
+
+## Those who would fight untrained, in words: "4 on watch, 9 would take up
+## arms"; "no one" when nobody would.
+static func untrained_words(watch:int,rise:int)->String:
+	var parts:PackedStringArray=[]
+	if watch>0:parts.append("%s on watch" % EraWords.grouped(watch))
+	if rise>0:parts.append("%s would take up arms" % EraWords.grouped(rise))
+	return ", ".join(parts) if not parts.is_empty() else "no one"
 
 ## The first town's name, lettered as the map letters it (city_labels.gd
 ## chart_name of the home label): where our trained fighters live. "home"
@@ -232,15 +245,14 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			if String(s.get("held_by",""))!="":
 				return {"key":key,"name":"Fighters here","value":"none of ours","number":0,"own":0.0,"relative":true,
 					"meaning":"Another people holds this town. None of ours stand guard here."}
+			var trained:=int(s.get("fighters",0))
+			var value:=untrained_words(int(s.get("watch",0)),int(s.get("rise",0)))
 			if s.is_empty() or bool(s.get("town",false)):
-				return {"key":key,"name":"Fighters here","value":("%s on watch" % EraWords.grouped(guard)) if guard>0 else "no one on watch","number":guard,"own":float(guard),"relative":true,
-					"meaning":"Townsfolk who take up arms when raiders come. Our trained fighters stay at %s unless a general sends them." % String(s.get("capital","home"))}
-			var trained:=int(s.fighters)
-			var value:="no one"
+				return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
+					"meaning":"The watch, and the townsfolk who take up arms when raiders come. Our trained fighters stay at %s unless a general sends them." % String(s.get("capital","home"))}
 			if trained>0:value="%s fighter%s" % [EraWords.grouped(guard),"" if guard==1 else "s"]
-			elif guard>0:value="%s on watch" % EraWords.grouped(guard)
 			return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
-				"note":("%s trained" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"Our trained fighters, and townsfolk who take up arms when raiders come."}
+				"note":("%s trained" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"Our trained fighters, the watch, and the townsfolk who take up arms when raiders come."}
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
 			if s.is_empty() or int(s.wall_stage)<=0:
@@ -344,8 +356,9 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 	match key:
 		"garrison":
 			var s:Dictionary=f.get("strength",{})
-			if not s.is_empty() and not bool(s.get("town",false)) and int(s.fighters)>0 and int(s.watch)>0:
-				lines.append("%s trained, %s townsfolk on watch." % [EraWords.grouped(int(s.fighters)),EraWords.grouped(int(s.watch))])
+			if not s.is_empty() and not bool(s.get("town",false)) and int(s.fighters)>0 and int(s.get("watch",0))+int(s.get("rise",0))>0:
+				lines.append("%s trained, %s." % [EraWords.grouped(int(s.fighters)),untrained_words(int(s.get("watch",0)),int(s.get("rise",0)))])
+			if String(s.get("held_by",""))=="":lines.append(RISE_WORDS)
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
 			if not s.is_empty() and int(s.wall_stage)>0:lines.append("They stand %s whole." % ("mostly" if float(s.wall_integrity)>=0.7 else "only partly") if EraWords.hearth() else "They stand %d%% whole." % roundi(float(s.wall_integrity)*100.0))

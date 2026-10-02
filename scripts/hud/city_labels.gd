@@ -319,10 +319,11 @@ static func home_guard(settlement_id:String)->int:
 
 ## Every town of ours's guard by id (home_guard for each), read in one pass
 ## and again only when what it rests on changes: the day, the Defense share,
-## the levy at home, our people and our towns. refresh runs every frame.
+## the levy at home, those under arms, our people and our towns. refresh
+## runs every frame.
 func _guards()->Dictionary:
 	var key:=hash([int(GameState.elapsed_days),float(GameState.population_allocations.get("Defense",0.0)),int(MilitaryCampaign.home_army.get("troops",0)),
-		float(GameState.population_exact),GameState.player_settlements.size()])
+		int(MilitaryCampaign._mobilized_count()),float(GameState.population_exact),GameState.player_settlements.size()])
 	if key!=guards_key:
 		guards=COMBAT.defenders_by_town()
 		guards_key=key
