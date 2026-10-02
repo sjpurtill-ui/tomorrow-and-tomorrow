@@ -451,16 +451,20 @@ func test_a_queued_card_shows_what_folded_into_it_since()->void:
 	assert_str(String((card.current.action as Dictionary).section)).is_equal("construction")
 
 
-## Review finding 7: the load repairs a Chronicle that does not read as one
-## (save_system.gd _repair_chronicle, using Chronicle.valid_state); an older
-## save's Chronicle loads untouched.
-func test_an_unreadable_chronicle_starts_afresh_on_load()->void:
+## Review finding 7: the load mends a Chronicle with an entry that does not
+## read as one (save_system.gd _repair_chronicle, chronicle.repair): only that
+## entry is set aside and the rest of the story, its annals and its crises,
+## are kept. An older save's Chronicle loads untouched.
+func test_an_unreadable_entry_is_set_aside_and_the_story_kept_on_load()->void:
 	var good:={"reflected_GameState":{"chronicle":{"version":1,"entries":[{"key":"k","day":3,"tier":"notice","title":"A line","text":"Words.","action":{"kind":"court","focus":{}}}]}}}
 	assert_bool(Saves._repair_chronicle(good)).is_false()
 	assert_int((good.reflected_GameState.chronicle.entries as Array).size()).is_equal(1)
-	var bad:={"reflected_GameState":{"chronicle":{"entries":[{"key":7,"day":"soon","tier":"loud"}]}}}
+	var bad:={"reflected_GameState":{"chronicle":{"annals":[{"y":3}],"entries":[{"key":7,"day":"soon","tier":"loud"},{"key":"k2","day":4,"tier":"moment","title":"Kept","text":"Kept."}]}}}
 	assert_bool(Saves._repair_chronicle(bad)).is_true()
-	assert_dict(bad.reflected_GameState.chronicle).is_empty()
+	var mended:Dictionary=bad.reflected_GameState.chronicle
+	assert_int((mended.entries as Array).size()).is_equal(1)
+	assert_str(String((mended.entries as Array)[0].title)).is_equal("Kept")
+	assert_int((mended.annals as Array).size()).is_equal(1)
 	assert_bool(Saves._repair_chronicle({})).is_false()
 
 

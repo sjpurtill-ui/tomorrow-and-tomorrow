@@ -341,6 +341,23 @@ static func valid_state(c:Variant)->bool:
 	return true
 
 
+## Mends a saved Chronicle in place rather than losing it: an entry that
+## does not read as one is dropped (only that entry), and a container of the
+## wrong kind starts afresh (only that field). Returns how many were mended.
+static func repair(c:Dictionary)->int:
+	var mended:=0
+	for field in ["entries","moment_days"]:
+		if c.has(field) and not c[field] is Array: c[field]=[]; mended+=1
+	for field in ["firsts","keys","moment_ids"]:
+		if c.has(field) and not c[field] is Dictionary: c[field]={}; mended+=1
+	if c.get("entries") is Array:
+		var kept:Array=[]
+		for e in c.entries:
+			if valid_state({"entries":[e]}): kept.append(e)
+			else: mended+=1
+		c["entries"]=kept
+	return mended
+
 static func _demote(c:Dictionary,older_key:String,by_key:String)->void:
 	for e in c.entries:
 		if String((e as Dictionary).get("key",""))!=older_key:continue

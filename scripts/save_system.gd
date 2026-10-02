@@ -171,17 +171,22 @@ func _load_game(slot:String=DEFAULT_SLOT)->Dictionary:
 	return {"ok":true,"legacy_campaign":legacy_campaign,"message":message}
 
 
-## The Chronicle is the story told of the world, not the world: one that does
-## not read as a Chronicle (chronicle.gd valid_state) starts afresh rather
-## than refusing the save. Older saves, without its fold fields, are valid as
-## they are. Returns true when it was replaced.
+## The Chronicle is the story told of the world, not the world: one with an
+## entry that does not read as one (chronicle.gd valid_state) is mended in
+## place (chronicle.repair: only that entry is dropped) rather than refusing
+## the save or losing the rest of the story. Older saves, without its fold
+## fields, are valid as they are. Returns true when anything was mended.
 static func _repair_chronicle(payload:Dictionary)->bool:
 	var state:Variant=payload.get("reflected_GameState",{})
 	if not state is Dictionary or not (state as Dictionary).has("chronicle"):return false
-	if preload("res://scripts/chronicle.gd").valid_state((state as Dictionary).chronicle):return false
-	push_warning("The saved Chronicle could not be read; it starts afresh.")
-	(state as Dictionary)["chronicle"]={}
-	return true
+	var chronicle:Variant=(state as Dictionary).chronicle
+	if not chronicle is Dictionary:
+		(state as Dictionary)["chronicle"]={}
+		return true
+	if preload("res://scripts/chronicle.gd").valid_state(chronicle):return false
+	var mended:=int(preload("res://scripts/chronicle.gd").repair(chronicle))
+	push_warning("The saved Chronicle had %d entries that could not be read; they were set aside and the rest kept." % mended)
+	return mended>0
 
 ## Crafts shared under a rival compact were once stored without a position,
 ## which the exchange validator rejects. Place them at the rival's home.
