@@ -487,6 +487,7 @@ static func _record_battle(civ_id:String,name:String,our_dead:int,their_dead:int
 static func _exhaust(civ_id:String,our_dead:int,their_dead:int)->void:
 	var war:Dictionary=front(civ_id).get("war",{})
 	if war.is_empty(): return
+	preload("res://scripts/deeds.gd").blood(civ_id,their_dead,false)
 	war["our_dead"]=int(war.get("our_dead",0))+our_dead
 	war["their_dead"]=int(war.get("their_dead",0))+their_dead
 	war["our_exh"]=clampf(float(war.get("our_exh",0.0))+0.04+float(our_dead)/_our_pop()*6.0,0.0,1.0)
@@ -880,6 +881,9 @@ static func _begin_feud(f:Dictionary,day:int)->void:
 ## ours), the dead on each side, and how worn each people is by it (the same
 ## measure a war keeps, _exhaust).
 static func _tally(civ_id:String,kind:String,our_dead:int,their_dead:int)->void:
+	# Their dead are remembered a generation (deeds.gd): raiders killed at our
+	# hearths are feared more than resented.
+	preload("res://scripts/deeds.gd").blood(civ_id,their_dead,kind=="raids")
 	var f:=front(civ_id)
 	f[kind]=int(f.get(kind,0))+1
 	f["our_dead"]=int(f.get("our_dead",0))+our_dead
@@ -1262,6 +1266,12 @@ static func _end_feud(civ_id:String,day:int,why:String,text:String)->void:
 	f["guard_until"]=-1
 	_peace_made(f)
 	_rivals().call("settle_grudges",civ_id,0.6)
+	# The peace sets down the whole feud's wrongs, not only the heaviest: an
+	# old killing of theirs does not start the feud again the day after
+	# (rival_rulers._war_preparation). What they suffered is still told
+	# (deeds.gd); a price paid or a marriage eases it.
+	_rivals().call("settle_wrongs_before",civ_id,day)
+	if why in ["blood price","marriage"]: preload("res://scripts/deeds.gd").amends(civ_id,"the %s that ended the feud" % why)
 	Hall._shift_relation(civ_id,0.08,-0.2)
 	_chronicle("feud_end:%s:%d" % [civ_id,day],"The Feud With %s Is Settled" % name,told,"moment",civ_id)
 	ForeignDiplomacy.remember(civ_id,"The feud with the god's people is settled: %s." % why)
@@ -1766,6 +1776,8 @@ static func daily(day:int)->void:
 			if (front(id).war as Dictionary).is_empty(): continue
 		if not (front(id).war as Dictionary).is_empty(): _check_end(id,day)
 	if day%30==0:
+		# What is told of us: towns taken or burned, captives driven off (deeds.gd).
+		preload("res://scripts/deeds.gd").monthly(day)
 		# Who stands together against us, before anyone moves.
 		preload("res://scripts/fear_league.gd").monthly(day)
 		_grudges(day)

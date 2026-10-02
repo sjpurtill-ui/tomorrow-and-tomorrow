@@ -271,8 +271,10 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var trust:=clampf(0.5+float(leader.get("trust",0.0))*0.5+(0.15 if String(relation.get("treaty","none")) not in ["none","","war"] else 0.0)-(0.3 if bool(relation.get("at_war",false)) else 0.0)+persuaded,0.0,1.0)
 	why["trust"]="their ruler's trust in our word%s%s" % [(" · a treaty between us" if String(relation.get("treaty","none")) not in ["none","","war"] else ""),(" · our envoys' persuasion %+d" % roundi(persuaded*100.0)) if absf(persuaded)>=0.01 else ""]
 	var grudge:=float(character.get("grudge_weight",0.0))
-	var resentment:=clampf(float(ties.get("resentment",0.0))+grudge*0.5,0.0,1.0)
-	why["resentment"]="grudges held against us" if resentment>0.05 else "no grudge held"
+	# Open grudges (their ruler's) over what their people still tell of us.
+	var told:=float(preload("res://scripts/deeds.gd").resentment(civ_id))
+	var resentment:=clampf(float(ties.get("resentment",0.0))+grudge*0.5+told*0.6,0.0,1.0)
+	why["resentment"]=("grudges held against us" if grudge>0.05 else "")+(" · " if grudge>0.05 and told>0.05 else "")+("what they still tell of us" if told>0.05 else "") if resentment>0.05 else "no grudge held"
 	# The dangers: rich and not feared is raided; weak and unrespected is tested.
 	var envy:=clampf((float(our.wealth.value)*0.6+heard*0.4)*(1.0-awe)*(1.0-trust*0.5)*(1.0-fear*0.5),0.0,1.0)
 	why["envy"]="they see our stores and works%s" % (" and too few to guard them" if awe<0.35 else "")

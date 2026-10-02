@@ -244,6 +244,17 @@ static func settle_grudges(civ_id:String,share:float)->Array:
 		settled.append(String(g.text))
 	return settled
 
+static func settle_wrongs_before(civ_id:String,day:int)->Array:
+	## A feud set down (war_loop._end_feud) settles every wrong done to their
+	## envoys before that day: the peace covers the whole feud. Returns clauses.
+	var settled:Array=[]
+	for g in character(civ_id).get("grudges",[]):
+		if not g is Dictionary or bool(g.get("settled",false)) or int(g.get("day",day+1))>day: continue
+		if not String(g.get("source","")).get_slice(":",0) in ENVOY_WRONGS: continue
+		g["settled"]=true
+		settled.append(String(g.get("text","")))
+	return settled
+
 static func debt(civ_id:String,owed_by:String,resource:String,amount:float,due_in:int,clause:String)->void:
 	var c:=character(civ_id)
 	if c.is_empty() or amount<=0.0: return
@@ -1498,7 +1509,8 @@ static func _war_preparation(civ_id:String,c:Dictionary,day:int)->void:
 		var wrong:=_top_envoy_wrong(c)
 		var marker:=int(wrong.get("day",-1))
 		var war:=Hall._war()
-		if marker>=0 and int(c.get("feud_vowed",-99999))!=marker and not bool(war.call("hot",civ_id,day)):
+		# A feud settled (a price, a parley, a marriage, a truce) holds its term.
+		if marker>=0 and int(c.get("feud_vowed",-99999))!=marker and not bool(war.call("hot",civ_id,day)) and not bool(war.call("keeps_peace",civ_id,day)):
 			c["feud_vowed"]=marker
 			war.call("blood_feud",civ_id,day,wrong_words(wrong),"","envoy_wrong")
 		elif marker>=0: c["feud_vowed"]=marker

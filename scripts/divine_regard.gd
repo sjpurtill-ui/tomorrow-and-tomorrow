@@ -101,6 +101,8 @@ static func _record_event(entry:Dictionary)->void:
 	var list:Array=store().events
 	list.push_front(entry)
 	while list.size()>EVENTS_MAX: list.pop_back()
+	# The long memory under the fresh talk: told for a generation (deeds.gd).
+	preload("res://scripts/deeds.gd").from_divine(entry)
 
 # --------------------------------------------------------------------------
 # Reading a person
@@ -330,11 +332,15 @@ static func people_regard(officials:Array)->Dictionary:
 	# (civic_building_effects.gd: Hearth Shrine and Shrine House).
 	var civic:=preload("res://scripts/civic_building_effects.gd")
 	# The priest who keeps the god's rites (office_levers.gd: -2 to +6 points).
-	love=clampf(love+clampf(warmth,-0.2,0.15)+civic.effect("devotion")+preload("res://scripts/office_levers.gd").value("HighPriest"),0.0,1.0)
-	var dread:=clampf((dread_sum/n if n>0 else 0.1)*0.75+minf(0.3,echo)-civic.effect("dread_eased"),0.0,1.0)
+	# What is still told of the god a generation on (deeds.gd): the long memory
+	# under the fresh talk. Cruelty remembered cools love as well as feeding dread.
+	var told:Dictionary=preload("res://scripts/deeds.gd").home()
+	love=clampf(love+clampf(warmth,-0.2,0.15)+civic.effect("devotion")+preload("res://scripts/office_levers.gd").value("HighPriest")+float(told.love)*0.5-float(told.dread)*0.25,0.0,1.0)
+	var dread:=clampf((dread_sum/n if n>0 else 0.1)*0.75+minf(0.3,echo)+float(told.dread)*0.8-civic.effect("dread_eased"),0.0,1.0)
 	var resentment:=res_sum/n if n>0 else 0.0
 	var out:=read(clampf(love,0.0,1.0),dread,resentment)
 	out["love"]=clampf(love,0.0,1.0); out["dread"]=dread; out["resentment"]=resentment
+	out["told_dread"]=float(told.dread); out["told_love"]=float(told.love)
 	out["read"]=_people_words(String(out.id))
 	return out
 

@@ -3853,6 +3853,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("frequency") and not String(data.frequency) in FREQUENCIES: return false
 	if data.has("last_speaker") and (not data.last_speaker is String or String(data.last_speaker).length()>120): return false
 	if data.has("divine") and not DIVINE.valid_state(data.divine): return false
+	if data.has("deeds") and not bool((load("res://scripts/deeds.gd") as GDScript).call("valid_state",data.deeds)): return false
 	if data.has("lives") and not bool(_lives().call("valid_state",data.lives)): return false
 	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
 	if data.has("council") and not bool((load("res://scripts/war_council.gd") as GDScript).call("valid_state",data.council)): return false
