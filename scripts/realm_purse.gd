@@ -420,6 +420,13 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	var month:Dictionary=purse.month
 	month.levy=float(month.levy)+levy;month.rich=float(month.rich)+rich;month.assessed=float(month.assessed)+assessed;month.evaded=float(month.evaded)+evaded
 	month.output=float(month.output)+output*span;month.person_days=float(month.person_days)+float(s.population_exact)*span;month.coin=float(month.coin)+coin
+	# Where it came from: each town's own day is levied in its own scope.
+	if not month.get("towns") is Dictionary: month["towns"]={}
+	var town_id:=String(s.resource_settlement_id)
+	var town:Dictionary=(month.towns as Dictionary).get(town_id,{"levy":0.0,"evaded":0.0,"unreached":0.0,"output":0.0,"people":0.0,"days":0.0})
+	town.levy=float(town.levy)+levy-rich;town.evaded=float(town.evaded)+evaded;town.unreached=float(town.unreached)+assessed-reached
+	town.output=float(town.output)+output*span;town.people=float(town.people)+float(s.population_exact)*span;town.days=float(town.days)+span
+	(month.towns as Dictionary)[town_id]=town
 	out.merge({"levy":levy,"assessed":assessed,"evaded":evaded,"coin":coin,"rich":rich,"reach":r,"evasion":ev,"output":output},true)
 	return out
 
@@ -941,6 +948,44 @@ static func forecast()->Dictionary:
 		"seasons_left":(float(purse.balance)/-net) if net<-0.01 else -1.0,"debt":float(purse.debt)}
 
 ## What the purse would buy at today's food price: rations, or "" with no market.
+## Where the purse's coming-in comes from, a season at the pace of the last
+## months kept (the month under way when none is kept yet): each town's levy
+## on what its people make, what households hid from it, what lay beyond the
+## keepers' reach, the rich's levy and what other systems paid in.
+## {towns:[{id, name, levy, evaded, unreached, people}], rich, deposits,
+##  evaded, unreached, coin_share}.
+static func sources()->Dictionary:
+	var purse:=state()
+	var months:Array=(purse.months as Array).duplicate()
+	if months.is_empty(): months=[purse.month]
+	var days:=0.0
+	var towns:={}
+	var rich:=0.0; var deposits:=0.0; var coin:=0.0; var levy_all:=0.0
+	for m in months:
+		if not m is Dictionary: continue
+		var d:=float((m as Dictionary).get("days",float(MONTH_DAYS)))
+		# The month under way: as many days as its towns have been levied.
+		if is_same(m,purse.month):
+			d=1.0
+			for id in (m.get("towns",{}) as Dictionary): d=maxf(d,float(((m.towns as Dictionary)[id] as Dictionary).get("days",0.0)))
+		days+=d
+		rich+=float(m.get("rich",0.0)); deposits+=float(m.get("deposits",0.0)); coin+=float(m.get("coin",0.0)); levy_all+=float(m.get("levy",0.0))
+		for id in (m.get("towns",{}) as Dictionary):
+			var t:Dictionary=(m.towns as Dictionary)[id]
+			var into:Dictionary=towns.get_or_add(String(id),{"levy":0.0,"evaded":0.0,"unreached":0.0,"people":0.0,"days":0.0})
+			for k in ["levy","evaded","unreached","people","days"]: into[k]=float(into[k])+float(t.get(k,0.0))
+	var scale:=SEASON_DAYS/maxf(1.0,days)
+	var out:Array=[]
+	var evaded:=0.0; var unreached:=0.0
+	for id in towns:
+		var t:Dictionary=towns[id]
+		var name:=String(WorldSimulation.state.settlement_name) if String(id)=="" else String(WorldSimulation.settlements.settlement_record(String(id)).get("name",String(id)))
+		var row:={"id":String(id),"name":name,"levy":float(t.levy)*scale,"evaded":float(t.evaded)*scale,"unreached":float(t.unreached)*scale,"people":roundi(float(t.people)/maxf(1.0,float(t.days)))}
+		evaded+=float(row.evaded); unreached+=float(row.unreached)
+		out.append(row)
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.levy)>float(b.levy))
+	return {"towns":out,"rich":rich*scale,"deposits":deposits*scale,"evaded":evaded,"unreached":unreached,"coin_share":clampf(coin/maxf(0.001,levy_all),0.0,1.0) if levy_all>0.0 else 0.0,"days":days}
+
 static func buys_rations()->float:
 	if not market_open():return -1.0
 	return float(state().balance)/maxf(0.2,float(WorldSimulation.state.market_prices.get("Food",1.0)))

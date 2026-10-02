@@ -50,6 +50,7 @@ const DESIGN_SIZE:=Vector2(1280,820)
 const KINDS:={
 	"gift":{"herald":"A GIFT FROM %s","eyebrow":"AN ENVOY BEARS GIFTS"},
 	"request":{"herald":"A PLEA FROM %s","eyebrow":"AN ENVOY ASKS YOUR AID"},
+	"vow":{"herald":"A VOW FROM %s","eyebrow":"AN ENVOY BRINGS A VOW"},
 	"threat":{"herald":"AN ULTIMATUM FROM %s","eyebrow":"AN ENVOY DEMANDS TRIBUTE"},
 	"news":{"herald":"NEWS FROM %s","eyebrow":"AN ENVOY BRINGS WORD"},
 	"proposal":{"herald":"A PROPOSAL FROM %s","eyebrow":"AN ENVOY BRINGS AN OFFER"},
@@ -1809,9 +1810,12 @@ func _envoy_band(audience:Dictionary)->Control:
 	if expires>0 and String(audience.get("status",""))=="waiting":
 		var left:=expires-day
 		timing+=" · leaves %s" % ("today" if left<=0 else ("tomorrow" if left==1 else "in %d days" % left))
-	var eyebrow:=Tokens.make_label("%s · %s" % [String(KINDS.get(kind,KINDS.news).eyebrow),timing.to_upper()],12,Tokens.INK_MUTED,.12);words.add_child(eyebrow)
+	# A vow of vengeance asks nothing: it is named as the vow it is.
+	var shown_kind:=kind
+	if String((audience.get("situation",{}) as Dictionary).get("type","") if audience.get("situation") is Dictionary else "")=="vengeance_vow": shown_kind="vow"
+	var eyebrow:=Tokens.make_label("%s · %s" % [String(KINDS.get(shown_kind,KINDS.news).eyebrow),timing.to_upper()],12,Tokens.INK_MUTED,.12);words.add_child(eyebrow)
 	var subject:=String(audience.get("civ_name","A foreign people")).to_upper()
-	var herald_text:=String(KINDS.get(kind,KINDS.news).herald) % subject
+	var herald_text:=String(KINDS.get(shown_kind,KINDS.news).herald) % subject
 	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation",{}) is Dictionary else {}
 	var headline:=String(situation.get("headline","")).strip_edges()
 	if not headline.is_empty():herald_text=("%s %s" % [subject,headline]).to_upper()

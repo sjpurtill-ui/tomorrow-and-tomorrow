@@ -175,7 +175,7 @@ static func reading(civ_id:String,view:Dictionary={})->Dictionary:
 	var st:Dictionary=(load("res://scripts/envoy_aftermath.gd") as GDScript).call("standing",civ_id)
 	var league:=load("res://scripts/fear_league.gd") as GDScript
 	var bound:=war!=null and (bool(war.call("keeps_peace",civ_id,_day())) or not (war.call("_married",civ_id) as Dictionary).is_empty())
-	return {"known":bool(v.get("known",false)),"vow":_vow(civ_id),"at_peace":bound,"fear":float(v.get("fear",0.0)),"resentment":float(v.get("resentment",0.0)),"ratio":float(v.get("strength_ratio",1.0)),
+	return {"known":bool(v.get("known",false)),"vow":_vow(civ_id),"sworn_vengeance":bool((load("res://scripts/envoy_aftermath.gd") as GDScript).call("sworn",civ_id)),"at_peace":bound,"fear":float(v.get("fear",0.0)),"resentment":float(v.get("resentment",0.0)),"ratio":float(v.get("strength_ratio",1.0)),
 		"bold":(float(p.get("assertiveness",0.5))+float(p.get("risk_tolerance",0.5)))*0.5,"worn":float(front.get("their_exh",0.0)),
 		"lost":(st.get("held",[]) as Array).size()+(st.get("burned",[]) as Array).size(),"trait":String(character.get("trait","")),
 		"league":league!=null and bool(league.call("is_member",civ_id))}
@@ -197,7 +197,7 @@ static func odds(civ_id:String,r:Dictionary={})->Dictionary:
 	# bound to peace with us (a truce, a pact, a settled feud, kin, tribute)
 	# does not come.
 	if res>=0.45 and ratio<=1.5 and float(r.worn)<0.4 and not bool(r.get("at_peace",false)) and (bool(r.knows_way) if r.has("knows_way") else _knows_our_towns(civ_id)):
-		var all_in:=(res-0.45)*0.25*clampf(1.6-ratio,0.0,1.0)*(0.6+bold)*(1.3 if String(r.trait) in ["grudge","hunter"] else 1.0)*(1.5 if bool(r.league) else 1.0)*float(VOW_ALL_IN.get(String(r.get("vow","")),1.0))
+		var all_in:=(res-0.45)*0.25*clampf(1.6-ratio,0.0,1.0)*(0.6+bold)*(1.3 if String(r.trait) in ["grudge","hunter"] else 1.0)*(1.5 if bool(r.league) else 1.0)*float(VOW_ALL_IN.get(String(r.get("vow","")),1.0))*(VENGEANCE_ALL_IN if bool(r.get("sworn_vengeance",false)) else 1.0)
 		out.all_in=clampf(all_in,0.0,ALL_IN_MAX)
 		out.why_all_in="they resent us (%d in 100) and our spears %s theirs%s" % [roundi(res*100.0),_ratio_words(ratio)," with their league's" if bool(r.league) else ""]
 	return out
@@ -207,6 +207,9 @@ static func odds(civ_id:String,r:Dictionary={})->Dictionary:
 ## to bind us in friendship, they seldom come at all.
 const VOW_BOW:={"humble":0.6,"bond":1.2}
 const VOW_ALL_IN:={"humble":1.3,"bond":0.4}
+## A ruler who has sworn vengeance to our face (envoy_aftermath.gd) comes
+## sooner: the vow is the warning, the arming its keeping.
+const VENGEANCE_ALL_IN:=1.4
 const AIMS_PATH:="res://scripts/legacy_aims.gd"
 
 ## The template of their ruler's vow still sworn ("humble", "bond", ...), or "".

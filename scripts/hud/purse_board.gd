@@ -22,6 +22,7 @@ const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","rel
 
 var head_box:VBoxContainer
 var levy_box:VBoxContainer
+var sources_box:VBoxContainer
 var lines_box:VBoxContainer
 var wealth_box:VBoxContainer
 var ledger_box:VBoxContainer
@@ -36,6 +37,7 @@ func setup(_block:Dictionary={})->void:
 	add_theme_constant_override("separation",12)
 	head_box=_section(Purse.account_name())
 	feedback=_line("",14,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
+	sources_box=_section("Where it comes from")
 	levy_box=_section("The levy")
 	lines_box=_section("What it pays for")
 	wealth_box=_section("Who holds the wealth")
@@ -65,6 +67,8 @@ func refresh(force:=false)->void:
 	var purse:=Purse.state()
 	var season:=Purse.season()
 	_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
+	var sources:=Purse.sources()
+	_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.rich)),roundi(float(sources.deposits)),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
 	_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),roundi(float(forecast.levy)),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
 	_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open()]),force,func()->void:_build_lines(forecast,purse))
 	var parts:Variant=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{})
@@ -131,6 +135,36 @@ func _budget_words(ins:Array,outs:Array)->String:
 	for entry:Array in ins:parts.append("%s +%s" % [String(entry[0]),Purse.number(float(entry[1]))])
 	for entry:Array in outs:parts.append("%s −%s" % [String(entry[0]),Purse.number(float(entry[1]))])
 	return "A season, in %s: %s" % [Purse.unit_word(),", ".join(parts)]
+
+
+# --- Where it comes from ------------------------------------------------------------
+
+## Each town's levy on what its people make, a season at the pace of the last
+## months; the rich's levy; what other systems paid in; and what never came:
+## hidden by households, or beyond the keepers' reach.
+func _build_sources(sources:Dictionary)->void:
+	_clear(sources_box)
+	var towns:Array=sources.towns
+	if towns.is_empty() and float(sources.rich)<=0.0 and float(sources.deposits)<=0.0:
+		sources_box.add_child(_line("Nothing has come in yet.",13,T.INK_MUTED,true));return
+	var total:=float(sources.rich)+float(sources.deposits)
+	for t:Dictionary in towns: total+=float(t.levy)
+	var rows:Array=[]
+	for t:Dictionary in towns: rows.append([String(t.name),float(t.levy),"the levy on what %s people make" % EraWords.grouped(int(t.people)),"%s %s hidden by households" % [Purse.number(float(t.evaded)),Purse.unit_word()] if float(t.evaded)>=0.5 else ""])
+	if float(sources.rich)>0.0: rows.append(["The rich",float(sources.rich),"the levy on the richest fifth (while the wealth levy holds)",""])
+	if float(sources.deposits)>0.0: rows.append(["Other",float(sources.deposits),"tolls, spoils and fees paid in",""])
+	for r:Array in rows:
+		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10)
+		var who:=_line(String(r[0]),13,T.INK);who.custom_minimum_size=Vector2(140,0);row.add_child(who)
+		var bar:=ProgressBar.new();bar.show_percentage=false;bar.max_value=maxf(1.0,total);bar.value=float(r[1]);bar.custom_minimum_size=Vector2(120,10);bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(bar)
+		var amount:=_line("+%s a season · %d%%" % [Purse.number(float(r[1])),roundi(float(r[1])/maxf(0.001,total)*100.0)],13,T.GREEN_TEXT);row.add_child(amount)
+		row.tooltip_text=_cap(String(r[2]))+(". "+_cap(String(r[3]))+"." if String(r[3])!="" else ".")
+		sources_box.add_child(row)
+	var lost:PackedStringArray=[]
+	if float(sources.evaded)>=0.5: lost.append("%s hidden by households" % Purse.number(float(sources.evaded)))
+	if float(sources.unreached)>=0.5: lost.append("%s beyond the keepers' reach" % Purse.number(float(sources.unreached)))
+	if not lost.is_empty(): sources_box.add_child(_line("Never came in, a season: %s." % ", ".join(lost),13,T.INK_MUTED,true))
+	if float(sources.coin_share)>0.01: sources_box.add_child(_line("%d%% of it is paid in coin; the rest is taken in goods." % roundi(float(sources.coin_share)*100.0),13,T.INK_MUTED,true))
 
 
 # --- The levy -----------------------------------------------------------------------
@@ -214,8 +248,8 @@ func _effect_words(line:String,on:bool,entry:Dictionary,purse:Dictionary)->Strin
 		"army":
 			if on and int(purse.get("unpaid_months",0))==0:return "%s · will and readiness kept" % String(entry.get("who",""))
 			return "Unpaid: will −%d a month, 1 in 50 go home" % roundi(100.0*0.06)
-		"scholars":return ("%s · research %d in 100 faster" if on else "%s · would make research %d in 100 faster") % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0)]
-		"crews":return ("%s · building %d in 100 faster" if on else "%s · would build %d in 100 faster") % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0)]
+		"scholars":return ("%s · research %d%% faster: a 100-day discovery in %d days" if on else "%s · would make research %d%% faster: a 100-day discovery in %d days") % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0),roundi(100.0/(1.0+Purse.SCHOLARS_MAX))]
+		"crews":return ("%s · building %d%% faster: a 100-day work in %d days" if on else "%s · would build %d%% faster: a 100-day work in %d days") % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0),roundi(100.0/(1.0+Purse.CREWS_MAX))]
 		"relief":
 			if not Purse.market_open():return "No market yet: nothing can be bought"
 			var towns:=Purse.food_places()

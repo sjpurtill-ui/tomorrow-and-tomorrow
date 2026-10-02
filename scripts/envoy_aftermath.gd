@@ -159,7 +159,7 @@ static func mix(civ_id:String)->Dictionary:
 	if weak: out["dread_tribute"]=0.3+harsh*1.2+(1.0-assertive)*0.4
 	# Defiance comes from a proud ruler who was struck hard and is not helpless.
 	var vow:=(assertive*0.9+bold*0.4+harsh*0.6)*(0.35 if weak else 1.0)
-	if not (st.held as Array).is_empty() or not (st.burned as Array).is_empty() or harsh>=0.1: out["vengeance_vow"]=maxf(0.05,vow-0.25)
+	if (not (st.held as Array).is_empty() or not (st.burned as Array).is_empty() or harsh>=0.1) and not sworn(civ_id): out["vengeance_vow"]=maxf(0.05,vow-0.25)
 	return out
 
 # --------------------------------------------------------------------------
@@ -226,15 +226,17 @@ static func candidate(situation_type:String,civ_id:String,_occasion:Dictionary,r
 			req={"town":String(town3.name),"city_id":String(town3.id),"people":roundi(float(region.get("population",0.0)))}
 			s.summary="%s pleads for the %d people still living in %s under your garrison: that they be left their homes, their stores and their lives." % [name,int(req.people),String(town3.name)]
 		"vengeance_vow":
+			# A vow is sworn once: by this ruler, for these losses (vow_key).
+			if sworn(civ_id): return {}
 			var town4:=_held_first(st)
 			var what:=String(town4.get("name","")) if not town4.is_empty() else (String((st.burned as Array)[0]) if not (st.burned as Array).is_empty() else "")
 			if what=="": what="what you did to them"
 			s.headline="brings a vow of vengeance for %s" % what
-			s.ask="aftermath:vow:%d" % floori(day/365.0)
+			s.ask=vow_key(civ_id,st)
 			req={"town":what,"seat":String(st.seat)}
 			s.summary="%s sends no gift and asks nothing. %s swears that %s will be paid for, however long it takes." % [name,who,what]
 	if String(s.get("ask",""))=="" or used.has(String(s.ask)): return {}
-	if String(s.ask).begins_with(GIVE_BACK) and _asked_before(civ_id,String(s.ask)): return {}
+	if (String(s.ask).begins_with(GIVE_BACK) or String(s.ask).begins_with(VOW)) and _asked_before(civ_id,String(s.ask)): return {}
 	s["req"]=req
 	return {"kind":"request","situation":s}
 
@@ -243,6 +245,35 @@ static func candidate(situation_type:String,civ_id:String,_occasion:Dictionary,r
 ## matters most to them that day). Granted or refused, it does not ask again
 ## until we take another town of theirs.
 const GIVE_BACK:="aftermath:give_back:"
+## A vow of vengeance is sworn ONCE by a ruler for what was lost: not every
+## year their envoys come. A new ruler (generation) or a new loss (another
+## town taken or burned) may swear again. Kept on the ruler's own record
+## (rival_rulers character "vowed"), so the hall's limited memory never lets
+## the same vow come round again.
+const VOW:="aftermath:vow:"
+static func vow_key(civ_id:String,st:Dictionary={})->String:
+	if st.is_empty(): st=standing(civ_id)
+	var lost:PackedStringArray=PackedStringArray()
+	for t:Dictionary in st.get("held",[]): lost.append(String(t.get("id","")))
+	for n in st.get("burned",[]): lost.append(String(n))
+	lost.sort()
+	var r:=_rivals()
+	var gen:=int((r.call("character",civ_id) as Dictionary).get("gen",0)) if r!=null else 0
+	return VOW+"g%d:%d" % [gen,hash(",".join(lost))]
+
+## Has this ruler already sworn vengeance for these losses?
+static func sworn(civ_id:String)->bool:
+	var r:=_rivals()
+	if r==null: return false
+	var c:Dictionary=r.call("character",civ_id)
+	return String((c.get("vowed",{}) as Dictionary).get("key","")) == vow_key(civ_id) if c.get("vowed") is Dictionary else false
+
+static func _mark_sworn(civ_id:String,key:String)->void:
+	var r:=_rivals()
+	if r==null: return
+	var c:Dictionary=r.call("character",civ_id)
+	if c.is_empty(): return
+	c["vowed"]={"key":key.substr(0,80),"day":_day()}
 static func _give_back_key(st:Dictionary)->String:
 	var ids:PackedStringArray=PackedStringArray()
 	for t:Dictionary in st.held: ids.append(String(t.id))
@@ -282,6 +313,8 @@ static func dress(audience:Dictionary)->void:
 	var civ_id:=String(audience.get("civ_id",""))
 	var st:=standing(civ_id)
 	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
+	# The vow is sworn the day their envoy brings it.
+	if String(situation.get("type",""))=="vengeance_vow": _mark_sworn(civ_id,String(situation.get("ask","")))
 	if bool(st.capital_lost) and String(st.seat)!="":
 		var speaker:Dictionary=audience.get("speaker",{}) if audience.get("speaker") is Dictionary else {}
 		var title:=String(speaker.get("title",""))

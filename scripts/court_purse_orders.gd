@@ -194,8 +194,8 @@ static func _line(line:String,on:bool)->Dictionary:
 	if float(f.out)>income+0.5:short=" All that is paid now comes to %s a season, more than the levy brings in (%s): %s holds %s." % [_amount(float(f.out)),Purse.number(income),store,_amount(Purse.balance())]
 	match line:
 		"army":out.says="The soldiers are paid from %s: about %s a season in %s, for %s.%s" % [store,_amount(per),Purse.pay_word(),who,short]
-		"scholars":out.says="The scholars are kept from %s: about %s a season for %s. Their work goes about %d in 100 faster while they are paid.%s" % [store,_amount(per),who,roundi(Purse.SCHOLARS_MAX*100.0),short]
-		"crews":out.says="Crews are hired from %s: about %s a season for %s. Building goes about %d in 100 faster while they are paid.%s" % [store,_amount(per),who,roundi(Purse.CREWS_MAX*100.0),short]
+		"scholars":out.says="The scholars are kept from %s: about %s a season for %s. Their work goes about %d%% faster while they are paid: what took 100 days takes about %d.%s" % [store,_amount(per),who,roundi(Purse.SCHOLARS_MAX*100.0),roundi(100.0/(1.0+Purse.SCHOLARS_MAX)),short]
+		"crews":out.says="Crews are hired from %s: about %s a season for %s. Building goes about %d%% faster while they are paid: what took 100 days takes about %d.%s" % [store,_amount(per),who,roundi(Purse.CREWS_MAX*100.0),roundi(100.0/(1.0+Purse.CREWS_MAX)),short]
 		"relief":out.says="Food will be bought for hungry towns each month, up to a quarter of %s." % store
 	out.outcome="%s from %s." % [_cap(String(LINE_WORDS[line][1])),store]
 	return out
