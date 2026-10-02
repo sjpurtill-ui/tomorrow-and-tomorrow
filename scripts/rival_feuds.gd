@@ -19,6 +19,17 @@ const War:=preload("res://scripts/war_loop.gd")
 const CIV:=preload("res://scripts/civilization_system.gd")
 const EXCHANGE:=preload("res://scripts/civilization_exchange.gd")
 
+## A feud's ending between two other peoples, by the rule the god's own
+## feuds follow (world_answer.gd): a people worn out by the feud (it has
+## buried SPENT_SHARE of itself) and outmatched (the other's fighting
+## strength BOW_RATIO times its own) may bow, at BOW_MONTHLY a month less its
+## ruler's boldness. It pays tribute through the one trade ledger
+## (trade_stances, the same agreement every people's tribute is) and the
+## feud ends; while it pays, no new feud starts between them (BOWED_DAYS).
+const BOW_RATIO:=1.5
+const BOW_MONTHLY:=0.05
+const BOWED_DAYS:=5*365
+
 ## Monthly share by which a pair's opinion and border tension drift back
 ## toward calm while they are not feuding.
 const CALM_MONTHLY:=0.04
@@ -50,12 +61,43 @@ static func tick(day:int,days:int)->void:
 			if int(relation.get("feud_since",-1))>=0 and spent:
 				for key in ["feud_since","feud_last","feud_raids","feud_dead","feud_cause"]: relation.erase(key)
 				relation["feud_ended_day"]=day
-			elif int(relation.get("feud_since",-1))>=0: _feud(first,second,relation,day,days)
+			elif int(relation.get("feud_since",-1))>=0:
+				_feud(first,second,relation,day,days)
+				if day%30<days and int(relation.get("feud_since",-1))>=0: _bow(first,second,relation,day)
 			elif day%30<days: _calm(relation)
 			if relation.hash()!=before: world._set_pair_relation(i,j,relation)
 
 static func _simulated(civ_id:String)->bool:
 	return WorldSimulation.actors.has(civ_id)
+
+## Has one of this pair bowed to the other lately? {payer, payee, day} or {}.
+static func bowed(relation:Dictionary,day:int)->Dictionary:
+	var b:Variant=relation.get("bowed",{})
+	if not b is Dictionary or (b as Dictionary).is_empty() or day-int((b as Dictionary).get("day",-99999))>=BOWED_DAYS: return {}
+	return b
+
+static func _bow(first:Dictionary,second:Dictionary,relation:Dictionary,day:int)->void:
+	var dead:Dictionary=relation.get("feud_dead",{}) if relation.get("feud_dead") is Dictionary else {}
+	var Standing:=preload("res://scripts/standing.gd")
+	for pair in [[first,second],[second,first]]:
+		var weak:Dictionary=pair[0]; var strong:Dictionary=pair[1]
+		var spent:=float(dead.get(String(weak.id),0))>=float(weak.get("population",100.0))*SPENT_SHARE
+		var ratio:=Standing.their_fighting_strength(strong)/maxf(1.0,Standing.their_fighting_strength(weak))
+		if not spent or ratio<BOW_RATIO: continue
+		var chance:=BOW_MONTHLY*clampf(1.3-float(weak.get("aggression",0.5)),0.2,1.0)
+		if War._rng("rival_bow:%s:%s:%d" % [String(weak.id),String(strong.id),day]).randf()>=chance: continue
+		var Stances:=preload("res://scripts/trade_stances.gd")
+		Stances._begin_tribute(String(weak.id),String(strong.id),maxf(1.0,Stances.tribute_size(String(weak.id))),day)
+		for key in ["feud_since","feud_last","feud_raids","feud_dead","feud_cause"]: relation.erase(key)
+		relation["feud_ended_day"]=day
+		relation["bowed"]={"payer":String(weak.id),"payee":String(strong.id),"day":day}
+		relation["border_tension"]=minf(float(relation.get("border_tension",0.5)),0.35)
+		# Word reaches us of it if we know them both.
+		var known:=func(c:Dictionary)->bool: return int((c.get("player_relation",{}) as Dictionary).get("contact_level",0))>=1
+		if known.call(weak) and known.call(strong):
+			preload("res://scripts/chronicle.gd").record({"key":"rival_bow:%s:%s:%d" % [String(weak.id),String(strong.id),day],"title":"%s Bow to %s" % [String(weak.get("name","")),String(strong.get("name",""))],
+				"text":"Word comes that %s, worn out by its feud, has bowed to %s and pays it tribute." % [String(weak.get("name","")),String(strong.get("name",""))],"tier":"notice","kind":"contact","domain":"diplomacy"})
+		return
 
 ## Grudges fade between feuds; a pact or a truce is left as it stands.
 static func _calm(relation:Dictionary)->void:

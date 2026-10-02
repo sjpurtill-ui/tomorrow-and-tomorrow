@@ -2192,6 +2192,8 @@ static func _rival_wars(day:int)->void:
 			if relation.is_empty() or bool(relation.get("at_war",false)) or String(relation.get("pending_message",""))!="" or String(relation.get("treaty","none")) in ["non_aggression","truce","trade"]: continue
 			# Already feuding: the feud runs its own course (CivilizationSystem).
 			if world.has_method("rival_feud_hot") and bool(world.rival_feud_hot(relation,day)): continue
+			# One bowed to the other lately and pays it tribute (rival_feuds.gd).
+			if not preload("res://scripts/rival_feuds.gd").bowed(relation,day).is_empty(): continue
 			var monthly:=rival_war_hazard(first,second,relation,(float(counts.get(String(first.id),1))+float(counts.get(String(second.id),1)))*0.5)/12.0
 			if _rng("rivalwar:%s:%s:%d" % [String(first.id),String(second.id),day]).randf()>=monthly: continue
 			# Two small peoples do not declare war: the same quarrel is a feud,
