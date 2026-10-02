@@ -180,3 +180,18 @@ func test_the_memory_saves_and_is_checked()->void:
 	DIVINE.store().events.clear()
 	assert_float(DEEDS.fear(civ_id)).is_equal(0.0)
 	assert_array(DEEDS.remembered(civ_id)).is_empty()
+
+## Read many times a day, worked out once: a new deed, a new day or a new
+## ledger (an older save loaded) is read afresh.
+func test_readings_are_kept_for_the_day_and_refreshed_by_a_new_deed()->void:
+	_kill_envoy(civ_id,"Solv Greyeyes")
+	var first:=DEEDS.fear(civ_id)
+	assert_float(DEEDS.fear(civ_id)).is_equal(first)
+	_kill_envoy(civ_id,"Hesk Reedweaver")
+	assert_float(DEEDS.fear(civ_id)).is_greater(first)
+	var now:=DEEDS.fear(civ_id)
+	_at(10+20*365)
+	assert_float(DEEDS.fear(civ_id)).is_less(now)
+	ForeignDiplomacy.audiences.erase("deeds")
+	DIVINE.store().events.clear()
+	assert_float(DEEDS.fear(civ_id)).is_equal(0.0)

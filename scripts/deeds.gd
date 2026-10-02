@@ -68,6 +68,22 @@ const PEOPLE_ACT_SHARE:=0.8
 static func _day()->int:
 	return int(GameState.elapsed_days)
 
+## Readings are asked many times a day (every view, every envoy weighed): each
+## one is worked out once a day and kept until a deed is told or the day turns.
+static var _cache:Dictionary={}
+static var _cache_day:=-1
+static var _cache_list:Variant=null
+static func _cached(key:String)->Variant:
+	var list:Variant=(ForeignDiplomacy.audiences.get("deeds",{}) as Dictionary).get("list") if ForeignDiplomacy.audiences.get("deeds") is Dictionary else null
+	if _cache_day!=_day() or not is_same(_cache_list,list):
+		_cache.clear(); _cache_day=_day(); _cache_list=list
+	return _cache.get(key)
+static func _keep(key:String,value:Variant)->Variant:
+	_cache[key]=value
+	return value
+static func _told_changed()->void:
+	_cache.clear()
+
 static func state()->Dictionary:
 	ForeignDiplomacy.ensure()
 	var s:Dictionary=ForeignDiplomacy.audiences
@@ -120,10 +136,12 @@ static func record(civ:String,kind:String,n:int=1,words:String="",day:int=-1)->v
 				var merged:=_weights(civ,kind,total)
 				e["n"]=total; e["a"]=merged[0]; e["b"]=merged[1]
 				e["words"]=_counted_words(kind,total,civ)
+				_told_changed()
 				return
 	if words=="" and PER_HEAD.has(kind): words=_counted_words(kind,n,civ)
 	list.push_front({"day":day,"kind":kind.substr(0,32),"civ":civ.substr(0,64),"n":n,"a":w[0],"b":w[1],"words":words.substr(0,160)})
 	_trim(list)
+	_told_changed()
 
 static func _weights(civ:String,kind:String,n:int)->Array:
 	if civ=="home":
@@ -244,6 +262,7 @@ static func monthly(day:int)->void:
 		seen[ckey]=maxi(before,captives)
 	while seen.size()>1800: seen.erase(seen.keys()[0])
 	_trim(state().list)
+	_told_changed()
 
 ## The day a town of theirs changed hands (its region's record), else today.
 static func _changed_hands(civ:Dictionary,region_id:String,day:int,name:String="")->int:
@@ -291,15 +310,24 @@ static func _sum(civ:String,word:bool)->Dictionary:
 ## a share for what we did to others).
 static func fear(civ_id:String)->float:
 	if civ_id=="" or civ_id=="player" or civ_id=="home": return 0.0
-	return float(_sum(civ_id,true).a)
+	var got:Variant=_cached("fear:"+civ_id)
+	if got!=null: return float(got)
+	return float(_keep("fear:"+civ_id,float(_sum(civ_id,true).a)))
 
 ## How much this people resents us for what we did to it.
 static func resentment(civ_id:String)->float:
 	if civ_id=="" or civ_id=="player" or civ_id=="home": return 0.0
-	return float(_sum(civ_id,false).b)
+	var got:Variant=_cached("res:"+civ_id)
+	if got!=null: return float(got)
+	return float(_keep("res:"+civ_id,float(_sum(civ_id,false).b)))
 
 ## Our own people's long memory of the god: {dread, love}.
 static func home()->Dictionary:
+	var got:Variant=_cached("home")
+	if got is Dictionary: return (got as Dictionary).duplicate()
+	return (_keep("home",_home()) as Dictionary).duplicate()
+
+static func _home()->Dictionary:
 	var s:=_sum("home",false)
 	# Love is told the same way as dread: every remembered kindness adds, and
 	# a cruelty (a curse, a killing) takes some away.
