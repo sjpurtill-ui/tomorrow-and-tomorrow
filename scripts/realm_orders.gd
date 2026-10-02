@@ -760,14 +760,14 @@ static func _found(reading:Dictionary)->Dictionary:
 	var candidates:Array=[] if site_override.is_valid() else Ctl.expansion_candidates(WorldSimulation.world.player_world_origin,float(plan.get("settle_distance",20.0)))
 	if site_override.is_valid(): best=site_override.call()
 	for p:Vector2 in candidates:
-		if not bool(WorldSimulation.settlements.known_land_assessment(p).get("known",false)): continue
-		if not bool(WorldSimulation.settlements.settlement_convoy_quote(p,0.0,cache).get("ok",false)): continue
-		var ctx:Dictionary=preload("res://scripts/civilization_day.gd").context(p)
-		if not bool(WorldSimulation.resources.water_access_snapshot(ctx).get("accessible",false)): continue
-		var near_river:=float(ctx.get("surface_water_distance_km",INF))<=2.0
-		var v:=float(Ctl.expansion_site_value(ctx,plan))+(2.0 if river and near_river else 0.0)
+		# The leaders' own test of a site (charted land, water at the site
+		# itself within 6 km, a caravan the stores can send).
+		var site:Dictionary=Ctl.expansion_site(p,plan,cache)
+		if site.is_empty(): continue
+		var near_river:=float((site.context as Dictionary).get("surface_water_distance_km",INF))<=2.0
+		var v:=float(site.value)+(2.0 if river and near_river else 0.0)
 		if v>top: top=v;best=p;found_river=near_river
-	if best==Vector2.INF: return _no("found_town","Our people know no place near enough, with water and a road, where a new town could stand. Send scouts out first.")
+	if best==Vector2.INF: return _no("found_town","Our people know no place near enough, with drinking water within 6 km and a road, where a new town could stand. Send scouts out first.")
 	var went:Dictionary=WorldSimulation.settlements.begin_settlement_convoy(best,0.0,"",false,{"establishment_days":float(plan.get("settle_margin_days",45.0))})
 	if not bool(went.get("ok",false)): return _no("found_town",_plain(String(went.get("reason","The settlers cannot set out."))))
 	var km:=roundi(float(went.get("distance_km",0.0)))

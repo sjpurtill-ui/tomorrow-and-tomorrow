@@ -315,35 +315,13 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 		clean_water_required=population*.05*WorldSimulation.discovery.adoption("clean_water")
 	var practice_required:=wound_cleaning_required+clean_water_required
 	var total_required:=drinking_required+practice_required
-	var accessible_quality:=0.0
-	var nearest_source_km:=INF
-	var source_kind:="none"
-	var source_id:=""
-	var source_origin:="none"
-	var origin:Vector3=context.get("origin",WorldSimulation.state.settlement_founded_at)
-	for deposit_variant in WorldSimulation.state.resource_deposits:
-		var deposit:Dictionary=deposit_variant
-		if String(deposit.get("resource",""))!="Freshwater": continue
-		var stage:=String(deposit.get("stage","unknown"))
-		if stage not in ["surveyed","accessible","developed"]: continue
-		var distance_km:=Vector2(origin.x,origin.z).distance_to(Vector2(deposit.position.x,deposit.position.z))
-		deposit["distance_km"]=distance_km
-		# Surveyed exposed water is already a collectable geographic feature. Formal
-		# access work improves organization; it is not a prerequisite for drinking.
-		if stage in ["accessible","developed"] or distance_km<=6.0:
-			if distance_km<nearest_source_km:
-				nearest_source_km=distance_km
-				accessible_quality=float(deposit.get("quality",0.85))
-				source_kind="surveyed surface water" if stage=="surveyed" else "organized water source"
-				source_id=String(deposit.get("id","freshwater_occurrence"))
-				source_origin="recognized_occurrence"
-	var hydrology_distance:=float(context.get("surface_water_distance_km",INF))
-	if hydrology_distance<=6.0 and hydrology_distance<nearest_source_km:
-		nearest_source_km=hydrology_distance
-		accessible_quality=1.0
-		source_kind=String(context.get("surface_water_kind","visible river or drainage"))
-		source_id=String(context.get("surface_water_id","local_surface_hydrology"))
-		source_origin="mapped_hydrology"
+	# The one source search (site_water): the same rule judges a new town's site.
+	var source:=site_water(context,WorldSimulation.state.resource_deposits,true)
+	var accessible_quality:=float(source.quality)
+	var nearest_source_km:=float(source.distance_km)
+	var source_kind:=String(source.kind)
+	var source_id:=String(source.id)
+	var source_origin:=String(source.origin)
 	var carriers:=WorldSimulation.state.effective_workers("Logistics")
 	var food_workers:=WorldSimulation.state.effective_workers("Food")
 	# Water fetching is basic household subsistence, not a specialist occupation
@@ -403,14 +381,63 @@ func _household_surface_water_access_ratio(distance_km:float)->float:
 	## Immediate drinking water is self-provisioned at household scale. Adjacent
 	## riverbanks provide a modest refill surplus; the floor falls away with the
 	## physical carry so a six-kilometre source still needs organized labor.
-	if distance_km<0.0 or distance_km==INF or distance_km>6.0: return 0.0
+	if distance_km<0.0 or distance_km==INF or distance_km>DRINKING_REACH_KM: return 0.0
 	if distance_km<=1.0: return 1.18
 	return lerpf(1.18,0.38,clampf((distance_km-1.0)/5.0,0.0,1.0))
+
+
+## How far people walk for their daily drinking water (the 6 km collection limit).
+const DRINKING_REACH_KM:=6.0
+
+## Where a place drinks: the one reading of a place's water. Every town's day
+## (_process_water_flow) and every test of a new town's site (the leaders'
+## council, the court, the settle order, a wandering people's camp) use it.
+## A mapped river or drainage within 6 km of the place counts (the same
+## hydrology as the map), and so do the freshwater sources the people living
+## at that place have found: surveyed within 6 km, or organized at any
+## distance. A new site has found nothing yet, so it is judged by the map's
+## water alone, never by the capital's ledger. `record` writes each source's
+## distance on the people's own records (their town's own day only).
+## {accessible, distance_km (INF when none), kind, id, origin, quality,
+## household_share: 0..1, the share of the drinking the families fetch
+## themselves at that carry (1 beside the water, 0 beyond reach)}.
+func site_water(context:Dictionary,deposits:Array=[],record:bool=false)->Dictionary:
+	var origin:Vector3=context.get("origin",WorldSimulation.state.settlement_founded_at)
+	var here:=Vector2(origin.x,origin.z)
+	var found:={"accessible":false,"distance_km":INF,"kind":"none","id":"","origin":"none","quality":0.0}
+	for deposit_variant in deposits:
+		var deposit:Dictionary=deposit_variant
+		if String(deposit.get("resource",""))!="Freshwater": continue
+		var stage:=String(deposit.get("stage","unknown"))
+		if stage not in ["surveyed","accessible","developed"]: continue
+		var position:Vector3=deposit.get("position",Vector3.ZERO)
+		var distance_km:=here.distance_to(Vector2(position.x,position.z))
+		if record: deposit["distance_km"]=distance_km
+		# Surveyed exposed water is already a collectable geographic feature. Formal
+		# access work improves organization; it is not a prerequisite for drinking.
+		if (stage in ["accessible","developed"] or distance_km<=DRINKING_REACH_KM) and distance_km<float(found.distance_km):
+			found={"distance_km":distance_km,"quality":float(deposit.get("quality",0.85)),
+				"kind":"surveyed surface water" if stage=="surveyed" else "organized water source",
+				"id":String(deposit.get("id","freshwater_occurrence")),"origin":"recognized_occurrence"}
+	var hydrology_distance:=float(context.get("surface_water_distance_km",INF))
+	if hydrology_distance<=DRINKING_REACH_KM and hydrology_distance<float(found.distance_km):
+		found={"distance_km":hydrology_distance,"quality":1.0,
+			"kind":String(context.get("surface_water_kind","visible river or drainage")),
+			"id":String(context.get("surface_water_id","local_surface_hydrology")),"origin":"mapped_hydrology"}
+	found["accessible"]=float(found.quality)>0.0
+	# Wells and channels shorten the walk (research_mechanics.water_walk_factor),
+	# exactly as the town's day counts it.
+	var walk_km:float=float(found.distance_km)*preload("res://scripts/research_mechanics.gd").water_walk_factor() if bool(found.accessible) else INF
+	found["household_share"]=clampf(_household_surface_water_access_ratio(walk_km)/_household_surface_water_access_ratio(0.0),0.0,1.0)
+	return found
 
 
 # Hydrology is a geographic source, not a fabricated point deposit. This fixed-
 # shape snapshot lets map/resource views highlight the actual recognized river
 # or drainage that supplies drinking, fishing, and sanitation work.
+# It shows the town in scope its OWN water ledger. It never judges another
+# place: a site for a new town is judged by site_water (the capital's ledger
+# once stood in for every candidate site and sent settlers to dry ground).
 func water_access_snapshot(context:Dictionary={})->Dictionary:
 	var water:Dictionary=WorldSimulation.state.water_metrics
 	var accessible:=bool(water.get("source_accessible",false))

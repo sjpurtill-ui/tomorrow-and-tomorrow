@@ -119,7 +119,8 @@ func capture(civ_id:String,force:Dictionary={},yielded:bool=false)->Dictionary:
 	WorldSimulation.military.military_inventory.clear();WorldSimulation.military.military_consumables.clear()
 	entry.report=region.duplicate(true)
 	for other:Dictionary in WorldSimulation.state.player_settlements:
-		if String(other.id)!=String(city.id) and String(other.get("occupied_by","")).is_empty():
+		# Never a place its people left (settlement_model.abandoned).
+		if String(other.id)!=String(city.id) and String(other.get("occupied_by","")).is_empty() and String(other.get("status",""))!="abandoned":
 			_activate_capital(other);break
 	_record("%s is occupied. Residents retain their society and institutions; recovery decisions remain available." % String(city.name))
 	return {"ok":true,"occupation_required":capacity.required,"message":"The city is occupied. Continue through local resistance, negotiation, or the escaped group's recovery."}

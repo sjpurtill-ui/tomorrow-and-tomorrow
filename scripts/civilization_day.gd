@@ -93,6 +93,10 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 	),
 		S.step("construction",timings,func()->void:WorldSimulation.settlements.with_local_population(run.build)),
 		S.step("secondary_plan",timings,func()->Array:return _city_steps(run.build,run.secondary_timings,timings,"secondary_settlements")),
+		# A town that has had no water within reach for a week is left: its
+		# families go to the nearest town of theirs with water (dry_towns.gd),
+		# before the day's goods are sent between towns.
+		S.step("dry_towns",timings,func()->void:preload("res://scripts/dry_towns.gd").daily(day)),
 		S.step("city_trade",timings,func()->void:WorldSimulation.settlements.process_city_trade()),
 		# The realm's purse reckons its month: the soldiers' pay, food for the
 		# hungry, crews and scholars (realm_purse.gd; at once on other days).

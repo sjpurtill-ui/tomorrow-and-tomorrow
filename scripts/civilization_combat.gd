@@ -209,7 +209,8 @@ static func displace(civ_id:String,city_id:String,requested:int)->int:
 		if source.is_empty():return 0
 		var destinations:Array=[]
 		for city:Dictionary in WorldSimulation.state.player_settlements:
-			if String(city.id)!=city_id and String(city.get("occupied_by","")).is_empty():destinations.append(city)
+			# Never into a place its people left (settlement_model.abandoned).
+			if String(city.id)!=city_id and String(city.get("occupied_by","")).is_empty() and String(city.get("status",""))!="abandoned":destinations.append(city)
 		if destinations.is_empty():return 0
 		var amount:=mini(maxi(0,requested),floori(WorldSimulation.settlements._settlement_population(source)*.35))
 		var share:=float(amount)/maxf(1,WorldSimulation.state.population_exact)
