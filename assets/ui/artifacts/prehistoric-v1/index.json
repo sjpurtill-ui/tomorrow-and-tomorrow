@@ -5245,6 +5245,54 @@
     "1402": {
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1402.png",
       "sha256": "3a4e5ace3283ea30445c51b68d3a00c2ebd429f95df77bc7491b986f88bb8687"
+    },
+    "1520": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1520.png",
+      "sha256": "eed4551a1a42ae974eb0e74105440e3a57d5a26007673712e00e62e3bc9e44c0"
+    },
+    "1521": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1521.png",
+      "sha256": "20a00842a0a85ab81486c0e8e74f4e2371a577153845656915d506e6088315f6"
+    },
+    "1522": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1522.png",
+      "sha256": "00cee129a8349b91c782e75fa056fd98a69ff704c9aaf779ab1e578ef86a92d4"
+    },
+    "1523": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1523.png",
+      "sha256": "b0fde6f4d6147815448ae46d57d3c2b715b7d07a3d5b47764fe2ddda0506360f"
+    },
+    "1524": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1524.png",
+      "sha256": "304ddfdabc7a2ba0ee2a53ddb3fb77a7ac7b40bb2cb39313c744e40a19319d10"
+    },
+    "1525": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1525.png",
+      "sha256": "98de8941ec207d0cb28c3272372fc9b3d4e2841ac981023989c50dda3dd9ab8a"
+    },
+    "1526": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1526.png",
+      "sha256": "29f3c707e2398ed4a2f41102e6c2c54f9f1a98ceedeb7237713d7f749e157d1c"
+    },
+    "1527": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1527.png",
+      "sha256": "9094bd672e76f84f8c855deb98824ff35b6dda893a693fbfe8bd14142d331274"
+    },
+    "1528": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1528.png",
+      "sha256": "0191cfc26ca7fb7ef36e582bc01d91b3d15c921a49e9c0a6cf42463b5c9a8869"
+    },
+    "1529": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1529.png",
+      "sha256": "5e78be4caee0cdf8ed85b96a607be04319f9ef5d8f14d78e079c1280a274879d"
+    },
+    "1530": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1530.png",
+      "sha256": "bb4f0cf0e55a698c062175cb728a454055878d55e22a327bc1b19915ec32c10d"
+    },
+    "1531": {
+      "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1531.png",
+      "sha256": "f7a35a02b997555a3c77fc4d38075ac7109403854737f115dd3bccc8b7dface5"
     }
   }
 }
