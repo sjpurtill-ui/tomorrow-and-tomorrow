@@ -169,9 +169,13 @@ static func _tell_chronicle(entry:Dictionary,told:Dictionary)->Dictionary:
 	var key:=String(told.get("key","court:%s:%d:%s" % [kind,int(entry.day),(String(entry.title)+text).md5_text().left(10)]))
 	var focus:Dictionary=told.get("focus",{}) if told.get("focus") is Dictionary else {}
 	# The court's own ledger line stands in for the event ledger (rites have none).
-	return Chronicle.record({"key":key,"day":int(entry.day),"title":String(entry.title),"text":text,
+	var request:={"key":key,"day":int(entry.day),"title":String(entry.title),"text":text,
 		"tier":String(told.get("tier",CHRONICLE_TIERS.get(kind,"notice"))),"kind":String(CHRONICLE_KINDS.get(kind,"court")),
-		"action":{"kind":"court","focus":focus},"ledger":false,"domain":"institutions" if kind in ["death","succession","callback"] else "court"})
+		"action":{"kind":"court","focus":focus},"ledger":false,"domain":"institutions" if kind in ["death","succession","callback"] else "court"}
+	# How a routine line folds into its earlier card (chronicle.gd fold_as).
+	for field in ["fold_as","fold_days","fold"]:
+		if told.has(field): request[field]=told[field]
+	return Chronicle.record(request)
 
 static func chronicle(limit:int=40,kind:String="")->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
@@ -992,7 +996,13 @@ static func _mark_rite(kind:String,label:String,day:int,days:int,pid:int=0)->voi
 	while rites.size()>RITES_MAX: rites.pop_back()
 	if kind!="pyre":
 		var rite:=String(Lines.RITE_WORDS.get(kind,"a rite"))
-		record("rite",rite_title(rite,label),"%s: %s." % [rite.substr(0,1).to_upper()+rite.substr(1),label])
+		# Rites are routine: one card per kind gathers the cairns (or fires, or
+		# processions) raised within RITE_FOLD_DAYS of each other, counted.
+		record("rite",rite_title(rite,label),"%s: %s." % [rite.substr(0,1).to_upper()+rite.substr(1),label],{},{"fold_as":"rite:"+kind,"fold_days":RITE_FOLD_DAYS})
+
+## A rite of a kind raised within this many days of the last is counted on
+## that one's Chronicle card, not told as a new one.
+const RITE_FOLD_DAYS:=1825
 
 ## "A cairn of stones for the dead", "A standing stone for the first sown
 ## ground": the rite and what it was for, so each reads as its own.

@@ -69,6 +69,9 @@ const CRISIS_GAP:=1095
 ## Years into a live aim, fresh voices may speak of another (the audit asks
 ## that the court speak of an aim at least once a decade).
 const RENEW_DAYS:=1825
+## An aim at odds with what we keep (a pact, a friendship) is told when the
+## people have not argued over the same clash within this many days.
+const CLASH_NEWS_DAYS:=7300
 ## Historical growth bands, % per year (benchmarks_600.json growth_pct).
 const GROWTH_BANDS:={0:{"min":-2.0,"low":-0.5,"typical":0.4,"high":1.2,"max":2.0},100:{"min":-1.0,"low":-0.3,"typical":0.5,"high":1.4,"max":1.8},300:{"min":-1.0,"low":-0.2,"typical":0.5,"high":1.5,"max":1.9},600:{"min":-1.0,"low":-0.2,"typical":0.4,"high":1.3,"max":1.8}}
 ## Largest single work at the founding, person-days (benchmarks_600.json
@@ -779,6 +782,7 @@ static func file_proposal(day:int,cands:Array[Dictionary],mode:String="propose")
 	var audience:=Hall._new_audience("court","petition",day)
 	audience.speaker={"name":String(holder.get("name","")).substr(0,100),"title":String(holder.get("office_title","Official")).substr(0,100),"person_id":int(holder.get("person_id",0)),"role":"official"}
 	var summary:=""
+	var opening:=false
 	if mode=="crisis":
 		summary="%s would have us set our aim aside for this: %s." % [String(holder.get("name","")),titles[0]]
 	elif mode=="renew":
@@ -787,7 +791,8 @@ static func file_proposal(day:int,cands:Array[Dictionary],mode:String="propose")
 		# The first time, the old question; after that, what the last aim came to.
 		var last:Dictionary=(s.history as Array)[0] if not (s.history as Array).is_empty() and (s.history as Array)[0] is Dictionary else {}
 		var came:=String({"fulfilled":"was kept","failed":"ran out of winters","released":"was set aside"}.get(String(last.get("status","")),""))
-		if last.is_empty() or came=="":summary="What should our children say of us? The court speaks of: %s." % "; ".join(titles)
+		opening=last.is_empty() or came==""
+		if opening:summary="What should our children say of us? The court speaks of: %s." % "; ".join(titles)
 		else:summary="%s %s. Now the court speaks of: %s." % [_cap(String(last.get("title",""))),came,"; ".join(titles)]
 	audience.petition={"topic":"aim","summary":summary.substr(0,400),"suggested_decree":""}
 	audience.situation={"type":"aim","ask":"aim:%d" % int(s.serial),"headline":"speaks of what we should strive for","summary":summary.substr(0,400),
@@ -800,9 +805,30 @@ static func file_proposal(day:int,cands:Array[Dictionary],mode:String="propose")
 	s.stats.proposals=int(s.stats.proposals)+1
 	_log("proposed",summary,{"mode":mode,"holder":String(holder.get("name","")),"titles":" | ".join(titles)})
 	Chronicle.record({"key":"aim:proposed:%d:%s" % [day,String(cands[0].cid)],"title":"The Court Speaks of an Aim" if mode=="propose" else "A Call to Set Our Aim Aside",
-		"text":"%s waits to be summoned. %s" % [String(holder.get("name","")),summary],"tier":"notice","kind":"court","domain":"institutions",
+		"text":"%s waits to be summoned. %s" % [String(holder.get("name","")),summary],"tier":proposal_tier(mode,opening),"kind":"court","domain":"institutions",
 		"action":{"kind":"court","focus":{"person_id":int(holder.get("person_id",0))}},"ledger":false})
 	return entry
+
+## The Chronicle tells an aim's real changes (taken up, kept, failed, a new
+## clash); the court's talk of aims is status. The very first question of
+## what to strive for, and a crisis that would set the aim aside, are told
+## as notices; the court's later proposals and calls to set an aim aside are
+## kept in the season's tally (their matter waits at court with its own card).
+static func proposal_tier(mode:String,opening:bool)->String:
+	return "notice" if mode=="crisis" or (mode=="propose" and opening) else "whisper"
+
+## How the aim goes (behind at its halfway) is status: a tally line.
+const COURSE_TIER:="whisper"
+
+## An aim at odds is told when its clash is new this generation.
+static func clash_tier(odds:String,day:int)->String:
+	return "whisper" if Chronicle.told_before(odds,"aim:contradiction:",CLASH_NEWS_DAYS,day) else "notice"
+
+## A rival's vow that ends: told when they had their way, or when it came
+## close (we were warned) or crossed our own aim; a boast that never came
+## close came to nothing quietly, kept in the season's tally.
+static func rival_end_tier(status:String,warned:bool,clash:bool)->String:
+	return "notice" if status=="fulfilled" or warned or clash else "whisper"
 
 static func file_course(day:int)->Dictionary:
 	## Halfway and falling behind: the aim's keeper comes back to court.
@@ -827,8 +853,10 @@ static func file_course(day:int)->Dictionary:
 	s.matter_day=day
 	aim["course_filed"]=day
 	_log("course",summary,{"holder":String(holder.get("name",""))})
+	# How the aim goes is status, not a change: kept in the season's tally; the
+	# keeper's matter waits at court with its own card.
 	Chronicle.record({"key":"aim:course:%s" % String(aim.id),"title":"Our Aim Falters","text":"%s %s would speak with the god about it." % [summary,String(holder.get("name",""))],
-		"tier":"notice","kind":"court","domain":"institutions","action":{"kind":"court","focus":{"person_id":int(holder.get("person_id",0))}},"ledger":false})
+		"tier":COURSE_TIER,"kind":"court","domain":"institutions","action":{"kind":"court","focus":{"person_id":int(holder.get("person_id",0))}},"ledger":false})
 	return entry
 
 static func file_halfway(day:int)->Dictionary:
@@ -1404,8 +1432,10 @@ static func adopt(cand:Dictionary,chosen_by:String,day:int)->Dictionary:
 	var clash:=_flag_contradiction(cand,"adopted")
 	if clash!="":
 		aim["contradiction"]=clash.substr(0,200)
-		Chronicle.record({"key":"aim:contradiction:"+String(aim.id),"title":"An Aim at Odds","text":"Some at the fire shake their heads. %s The god has chosen, and the people will try to do both." % clash,
-			"tier":"notice","kind":"court","domain":String(aim.domain),"ledger":false})
+		var odds:="Some at the fire shake their heads. %s The god has chosen, and the people will try to do both." % clash
+		# A clash the people already argued over this generation is no news.
+		Chronicle.record({"key":"aim:contradiction:"+String(aim.id),"title":"An Aim at Odds","text":odds,
+			"tier":clash_tier(odds,day),"kind":"court","domain":String(aim.domain),"ledger":false})
 	return aim
 
 static func measure(aim:Dictionary)->float:
@@ -1867,7 +1897,7 @@ static func _rival_close(r:Dictionary,status:String,day:int)->void:
 		if status=="fulfilled": text="%s of %s has done what they swore: %s.%s" % [String(r.leader),_the(String(r.civ_name)),String(r.phrase),(" It sets back our own aim.") if clash else ""]
 		else: text="%s of %s swore to %s, and it came to nothing. Our people laugh about it at the fires." % [String(r.leader),_the(String(r.civ_name)),String(r.phrase)]
 		Chronicle.record({"key":"aim:rival:%s:%s:%d" % [status,String(r.civ_id),int(r.start_day)],"title":("%s Have Their Way" if status=="fulfilled" else "The Boast of %s Came to Nothing") % (_cap(_the(String(r.civ_name))) if status=="fulfilled" else _the(String(r.civ_name))),
-			"text":text,"tier":"notice","kind":"contact","domain":"culture","ledger":true})
+			"text":text,"tier":rival_end_tier(status,r.has("warned_day"),clash),"kind":"contact","domain":"culture","ledger":true})
 	_log("rival_"+status,String(r.title),{"civ":String(r.civ_name),"clash":clash})
 
 static func _clash_on_fulfil(aim:Dictionary)->void:

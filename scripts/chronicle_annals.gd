@@ -216,7 +216,14 @@ static func _remember_said(c:Dictionary,entry:Dictionary)->void:
 
 static func _dampable(moment:Dictionary,key:String)->bool:
 	if bool(moment.get("priority",false)) or bool(moment.get("first",false)):return false
+	# A line asked never to fold (chronicle.gd "fold": false) never steps back.
+	if moment.has("fold") and not bool(moment.fold):return false
 	if String(moment.get("kind","")) in ["death","annal","birth","founding","ceremony"]:return false
+	# Nor does a card that waits on the god: a battle to watch, a ceremony, a
+	# person summoned to court.
+	var action:Dictionary=moment.get("action",{}) if moment.get("action") is Dictionary else {}
+	if String(action.get("kind","")) in ["battle","ceremony"]:return false
+	if String(action.get("kind",""))=="court" and action.get("focus") is Dictionary and (action.focus as Dictionary).has("person_id"):return false
 	for prefix in ["aim:","court:death","discovery:","first:","annal:","ceremony:","turning:","war:","beat:","milestone:"]:
 		if key.begins_with(prefix):return false
 	return true
@@ -532,6 +539,9 @@ static func note(c:Dictionary,entry:Dictionary)->void:
 	var title:=String(entry.get("title",""))
 	var tier:=String(entry.get("tier",""))
 	if bool(entry.get("folded",false)):a.folded=int(a.folded)+1
+	# A repeat folded into an older card (chronicle.gd) is a tally line there,
+	# but still news for the year it happened in.
+	if tier=="whisper" and bool(entry.get("repeat",false)):tier="notice"
 	if key.begins_with("crisis:"):
 		var parts:=key.split(":")
 		if parts.size()>2 and parts[2]=="silent":
@@ -765,9 +775,12 @@ static func compose(c:Dictionary,a:Dictionary)->Dictionary:
 	var turns:Array=[]
 	for t in a.get("turnings",[]):turns.append(String((t as Dictionary).get("title","")))
 	if not turns.is_empty():memory["turns"]=turns
+	# A year with no name is titled by what stood out against the years before
+	# it, and never with the same words as the year just past.
+	var title:=_cap(name) if name!="" else _quiet_title(a,seed,annals)
+	memory["title"]=title
 	annals.append(memory)
 	while annals.size()>ANNALS_MAX:annals.pop_front()
-	var title:=_cap(name) if name!="" else _quiet_title(a,seed)
 	if lines.is_empty():lines.append("Nothing out of the ordinary was told at the fires." if tally else "The keepers found little to add to the registers.")
 	var text:=" ".join(lines)
 	if text.length()>900:text=text.left(897)+"..."
@@ -973,17 +986,68 @@ static func _trouble_name(name:String,m:Dictionary)->bool:
 	return counted!=null and _type_of_words(base)!=""
 
 
-static func _quiet_title(a:Dictionary,seed:int)->String:
-	if int(a.born)>=int(a.buried)+3:return "A year of many births"
+## How many earlier years a year's births are set against ("the most births
+## in ten years").
+const BIRTHS_LOOKBACK:=9
+## Births at least this share above the recent years' average are "many".
+const MANY_BIRTHS_SHARE:=1.25
+
+
+## The title of a year the people did not name: what stood out in it, the
+## rarest first (a dry season, much learning, a record or a real rise in
+## births, a year of more burials than births, the roads), never the same
+## words as the year before. When everything that stood out was said of the
+## year before too, it says what differs: its own births and burials.
+## `annals` holds the closed years before this one.
+static func _quiet_title(a:Dictionary,seed:int,annals:Array=[])->String:
+	var last:=""
+	if not annals.is_empty() and annals.back() is Dictionary:last=String((annals.back() as Dictionary).get("title",""))
+	var born:=int(a.born)
+	var buried:=int(a.buried)
 	var learned:Array=a.learned
-	if learned.size()>=5:return "A year of %s new ways" % _number(learned.size())
-	if int(a.scouts.n)>=2:return "A year on the roads"
-	if not (a.get("dry",[]) as Array).is_empty():return "A dry summer" if String(((a.dry as Array)[0] as Dictionary).get("season",""))=="summer" else "A dry season"
-	if not learned.is_empty() and String(learned[0]).length()<=NAME_MAX_CHARS-12:return "The year of %s" % String(learned[0]).to_lower()
+	var picks:Array=[]
+	if not (a.get("dry",[]) as Array).is_empty():picks.append("A dry summer" if String(((a.dry as Array)[0] as Dictionary).get("season",""))=="summer" else "A dry season")
+	if learned.size()>=5:picks.append("A year of %s new ways" % _number(learned.size()))
+	var before:=_births_before(annals)
+	if born>=buried+3:
+		var record:=before.size()>=3 and born>int(before.max())
+		if record and before.size()>=BIRTHS_LOOKBACK:picks.append("The most births in %s years" % _number(before.size()+1))
+		elif record and before.size()==annals.size():picks.append("More births than any year before")
+		elif before.is_empty() or float(born)>=MANY_BIRTHS_SHARE*_mean(before):
+			picks.append("A year of many births")
+	elif buried>=born+3:
+		picks.append("More buried than born")
+	if int(a.scouts.n)>=2:picks.append("A year on the roads")
+	if not learned.is_empty() and String(learned[0]).length()<=NAME_MAX_CHARS-12:picks.append("The year of %s" % String(learned[0]).to_lower())
+	for pick in picks:
+		if String(pick)!=last:return String(pick)
+	if born>0 or buried>0:
+		var counted:="%s born, %s buried" % [_cap(_number(born)),_number(buried)]
+		if counted!=last:return counted
 	# Ordinary fevers and fires (kept in the sickness & disaster log) do not
 	# make a year quiet.
-	if int(a.get("routine",0))>0:return ["An ordinary year","A year without a name"][posmod(seed,2)]
-	return ["A quiet year","A year without a name","An ordinary year"][posmod(seed,3)]
+	var plain:Array=["An ordinary year","A year without a name"] if int(a.get("routine",0))>0 else ["A quiet year","A year without a name","An ordinary year"]
+	var at:=posmod(seed,plain.size())
+	if String(plain[at])==last:at=(at+1)%plain.size()
+	return String(plain[at])
+
+
+## Births in the closed years before this one (newest BIRTHS_LOOKBACK, those
+## that kept a count).
+static func _births_before(annals:Array)->Array:
+	var out:Array=[]
+	for i in range(annals.size()-1,-1,-1):
+		if out.size()>=BIRTHS_LOOKBACK:break
+		var m:Variant=annals[i]
+		if m is Dictionary and (m as Dictionary).has("born") and int((m as Dictionary).born)>=0:out.append(int((m as Dictionary).born))
+	return out
+
+
+static func _mean(values:Array)->float:
+	if values.is_empty():return 0.0
+	var total:=0.0
+	for v in values:total+=float(v)
+	return total/float(values.size())
 
 
 static func _divine_lines(y:int)->Array:

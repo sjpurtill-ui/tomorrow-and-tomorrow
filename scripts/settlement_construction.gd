@@ -244,10 +244,61 @@ static func tell_finished(title:String)->Dictionary:
 	var id:=String(WorldSimulation.state.resource_settlement_id)
 	var town:=String(WorldSimulation.settlements.settlement_record(id).get("name","")) if not id.is_empty() else ""
 	if town.is_empty():town=String(WorldSimulation.state.settlement_name)
+	var before:=works_before(WorldSimulation.state.settlement_completed,title)
+	var told:=finished_telling(title,id,town,said,int(WorldSimulation.state.elapsed_days),_era_step(),before)
+	return chronicle.record(told) if not told.is_empty() else {}
+
+## Works a town finished before `title` (just added to `completed`), not
+## counting the Hearth Circle every new town is founded with
+## (settlement_model.gd CITY_RESOURCE_DEFAULTS). An older save's towns have no
+## mark in the Chronicle's firsts, so this tells whether it is a town's first.
+static func works_before(completed:Array,title:String)->int:
+	var n:=0
+	var skipped:=false
+	for done in completed:
+		if String(done)=="Hearth Circle":continue
+		if String(done)==title and not skipped:skipped=true;continue
+		n+=1
+	return n
+
+## The realm's era step (0 bands .. 3 iron and sail), from what the people
+## know (character_voice.gd era_tier).
+static func _era_step()->int:
+	var voice:=preload("res://scripts/character_voice.gd")
+	return voice.era_tier(voice.era_tags("player"))
+
+## How a finished work is told. The first of its kind is a moment. After that
+## a kind is told once per era step: the same work raised in another town in
+## the same step folds into that telling, counted (chronicle.gd fold_as),
+## unless it is a new town's first work, which is told as its own notice.
+## Marks the Chronicle's firsts; {} when the Chronicle keeps none.
+static func finished_telling(title:String,town_id:String,town:String,said:PackedStringArray,day:int,era:int,works_before:int=0)->Dictionary:
+	var chronicle=preload("res://scripts/chronicle.gd")
+	if not chronicle.active():return {}
+	var firsts:Dictionary=chronicle.data().firsts
+	var kind_mark:="work:"+title
+	var era_mark:="work:%s:era%d" % [title,era]
+	var town_mark:="town_work:"+(town_id if not town_id.is_empty() else "home")
+	var kind_first:=not firsts.has(kind_mark)
+	if kind_first:
+		# An older save told its works before these marks were kept.
+		for key in chronicle.data().keys:
+			if String(key).begins_with("work_done:") and String(key).ends_with(":"+title):kind_first=false;break
+	var era_first:=not firsts.has(era_mark)
+	# The home's first work is its Hearth Circle; a new town's is its own news.
+	var town_first:=not town_id.is_empty() and works_before<=0 and not firsts.has(town_mark)
+	for mark in [kind_mark,era_mark,town_mark]:
+		if not firsts.has(mark):firsts[mark]=day
 	var text:=("Raised at %s" % town) if not town.is_empty() else "Raised"
+	if town_first and not kind_first:text+=", its first work"
 	text+=(": "+", ".join(said)+".") if not said.is_empty() else "."
-	return chronicle.record({"key":"work_done:%s:%s" % [id,title],"title":"The %s %s" % [title,"stand" if title.ends_with("s") else "stands"],"text":text,
-		"kind":"work","tier":"notice" if title=="Hearth Circle" else "moment","domain":"infrastructure","action":{"kind":"section","section":"construction","sub":0}})
+	var told:={"key":"work_done:%s:%s" % [town_id,title],"day":day,"title":"The %s %s" % [title,"stand" if title.ends_with("s") else "stands"],"text":text,
+		"kind":"work","tier":"moment" if kind_first and title!="Hearth Circle" else "notice","domain":"infrastructure","action":{"kind":"section","section":"construction","sub":0},
+		"fold_as":"work_done:%s:era%d" % [title.to_lower(),era],"fold_days":1<<30}
+	# A kind's first telling in a new era step, and a new town's first work,
+	# each stand on their own.
+	if era_first or town_first:told["fold"]=false
+	return told
 
 static func set_priority(city_id:String,title:String)->Dictionary:
 	var city:=WorldSimulation.settlements.settlement_record(city_id)

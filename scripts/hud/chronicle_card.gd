@@ -185,7 +185,9 @@ func _apply_appear()->void:
 func _next()->void:
 	if queue.is_empty():
 		showing=false;current={};panel.visible=false;return
-	current=queue.pop_front()
+	# As the Chronicle holds it now: a card that waited may have gathered
+	# repeats since it was queued (chronicle.gd fresh).
+	current=Chronicle.fresh(queue.pop_front())
 	_render(current)
 	showing=true;hold=HOLD_SECONDS;fade=1.0;appear=0.0
 	panel.modulate.a=0.0;eyebrow.modulate.a=0.0;panel.visible=true
