@@ -541,6 +541,8 @@ static func after_answer(audience:Dictionary,option_id:String)->void:
 	elif kind=="threat" and option_id in ["defy","counter"] and bluff: _stat("bluffs_called")
 	elif kind=="threat" and option_id=="pay": _stat("paid")
 	if type=="war_support" and option_id=="stand": _stand_with(civ_id,String(situation.get("enemy","")))
+	# A tributary's call for protection, answered (world_answer.gd).
+	if type=="war_support": (load("res://scripts/world_answer.gd") as GDScript).call("protection_answered",civ_id,String(situation.get("enemy","")),option_id)
 
 static func on_refusal(audience:Dictionary,option_id:String)->Dictionary:
 	## A real demand refused: the ruler decides, by trait and strength, whether
@@ -970,7 +972,8 @@ static func _adopt(civ_id:String,day:int)->void:
 static func _stand_with(ally:String,enemy:String)->void:
 	if enemy=="" or enemy=="player" or Hall._civ_index(enemy)<0: return
 	var day:=_day()
-	var kin:=not (_rivals().call("has_bond",ally,["marriage","ally"]) as Dictionary).is_empty()
+	# Kin, and a people that bows to us and pays for our protection.
+	var kin:=not (_rivals().call("has_bond",ally,["marriage","ally","tributary"]) as Dictionary).is_empty()
 	if kin and not _truce_binds(enemy,day) and not bool(_relation(enemy).get("at_war",false)):
 		declare(enemy,day,"your fighters standing with %s" % _name(ally),ally)
 		_stat("dragged_in")
@@ -979,7 +982,11 @@ static func _stand_with(ally:String,enemy:String)->void:
 
 static func stand_words(civ_id:String,enemy:String,name:String,enemy_name:String)->String:
 	## The option text for standing with a people at war (or in a feud).
-	var kin:=not (_rivals().call("has_bond",civ_id,["marriage","ally"]) as Dictionary).is_empty()
+	var bond:Dictionary=_rivals().call("has_bond",civ_id,["marriage","ally","tributary"])
+	var kin:=not bond.is_empty()
+	if String(bond.get("kind",""))=="tributary":
+		if enemy!="" and not Scale.formal(enemy): return "%s pays you tribute for this: your fighters go to protect them, and %s will count you in the feud and send raiders. Stay out and they will withhold their tribute." % [name,enemy_name]
+		return "%s pays you tribute for this: your fighters go to their war, and %s will be at war with you. Stay out and they will withhold their tribute." % [name,enemy_name]
 	if kin and enemy!="" and not Scale.formal(enemy): return "You are kin to %s: your fighters go to stand with them, and %s will count you in the feud and send raiders." % [name,enemy_name]
 	if kin: return "You are kin to %s: your fighters go to their war, and %s will be at war with you." % [name,enemy_name]
 	return "Warmer with %s; %s will count you an enemy's friend, and may send raiders." % [name,enemy_name]

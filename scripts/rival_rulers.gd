@@ -332,14 +332,17 @@ static func daily(day:int)->void:
 				g["returned"]=true
 				Hall._add_occasion({"key":"grudge:%s:%d" % [id,int(g.day)],"type":"grudge","civ_id":id,"day":day,"expires":day+300,
 					"data":{"text":"an old grievance between your peoples","grudge_day":int(g.day)}})
-		var kin:=has_bond(id,["marriage","ally"])
+		var kin:=has_bond(id,["marriage","ally","tributary"])
 		if not kin.is_empty():
+			# A people that bows to us calls for the protection it pays for.
+			var bowed:=String(kin.get("kind",""))=="tributary"
 			for other in (civ.get("relations",{}) as Dictionary):
 				if String(other)=="player" or not _fighting((civ.relations as Dictionary)[other],day): continue
 				var enemy_name:=Hall._civ_name(String(other))
 				var feud:=not bool(((civ.relations as Dictionary)[other] as Dictionary).get("at_war",false))
+				var asks:="%s, which pays you tribute, calls for your protection %s %s" % [name,"in its feud with" if feud else "against",enemy_name] if bowed else "%s calls on its kin %s %s" % [name,"in its feud with" if feud else "against",enemy_name]
 				Hall._add_occasion({"key":"kin_call:%s:%s:%d" % [id,String(other),floori(day/365.0)],"type":"kin_call","civ_id":id,"day":day,"expires":day+90,"crisis":true,
-					"data":{"text":"%s calls on its kin %s %s" % [name,"in its feud with" if feud else "against",enemy_name],"enemy":String(other),"enemy_name":enemy_name,"feud":feud}})
+					"data":{"text":asks,"enemy":String(other),"enemy_name":enemy_name,"feud":feud}})
 				break
 
 static func _later(civ_id:String,c:Dictionary,day:int)->void:

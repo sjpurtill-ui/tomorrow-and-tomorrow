@@ -290,3 +290,26 @@ func test_after_everything_they_need_years_before_they_answer_again()->void:
 		ANSWER.monthly(later)
 	assert_bool(ANSWER.arming(civ_id).is_empty()).is_true()
 	assert_bool(_occasion("submission",civ_id).is_empty()).is_true()
+
+## A people that bows pays for our protection: it calls on us as kin do when
+## its neighbours raid it, the hall says what is at stake, and a refusal makes
+## it withhold its tribute at the next reckoning.
+func test_a_tributary_we_will_not_protect_withholds_its_tribute()->void:
+	_terrorise(civ_id,8)
+	_set_pop(_civ(civ_id),40.0)
+	var day:=int(GameState.elapsed_days)
+	ANSWER._bind(civ_id,day,20.0,"Tam, son of Ilak","")
+	assert_bool(RIVALS.has_bond(civ_id,["tributary"]).is_empty()).is_false()
+	var enemy:=String(CivilizationSystem.civilizations[2].id)
+	var words:=WAR.stand_words(civ_id,enemy,Hall._civ_name(civ_id),Hall._civ_name(enemy))
+	assert_str(words).contains("pays you tribute for this")
+	assert_str(words).contains("withhold their tribute")
+	ANSWER.protection_answered(civ_id,enemy,"abstain")
+	GameState.elapsed_days=day+365
+	ANSWER.monthly(day+365)
+	assert_bool(ANSWER.is_tributary(civ_id)).is_false()
+	assert_bool(RIVALS.has_bond(civ_id,["tributary"]).is_empty()).is_true()
+	assert_str(_chronicle_titles()).contains("Withholds Its Tribute")
+	var told:=""
+	for e in (GameState.chronicle.get("entries",[]) as Array): told+=String((e as Dictionary).get("text",""))
+	assert_str(told).contains("you would not protect them against %s" % Hall._civ_name(enemy))

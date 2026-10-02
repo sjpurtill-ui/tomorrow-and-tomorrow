@@ -453,6 +453,11 @@ static func _bind(civ_id:String,day:int,value:float,hostage:String,lead:String)-
 	var agreement:=Stances.tribute(civ_id,"player")
 	if not agreement.is_empty(): agreement["until"]=day+BOND_AHEAD
 	state().tributaries[civ_id]={"since":day,"value":snappedf(value,0.1),"hostage":hostage.substr(0,80),"due":day+365,"years":0,"seen_paid":0.0,"hostage_id":_make_hostage(civ_id,hostage)}
+	# Bowed, they are ours to protect (rival_rulers bonds): when their
+	# neighbours raid them they call on us as kin do (kin_call), and a refusal
+	# is remembered at the next reckoning.
+	var rivals:=load(RIVALS_PATH) as GDScript
+	if rivals!=null: rivals.call("bond",civ_id,"tributary","we bow to the god and pay its people tribute",day+BOND_AHEAD)
 	var war:=load(WAR_PATH) as GDScript
 	if war!=null and bool(war.call("feuding",civ_id,day)): war.call("_end_feud",civ_id,day,"submission","%s bowed to the god." % name)
 	var index:=Hall._civ_index(civ_id)
@@ -528,10 +533,27 @@ static func hostage_judged(p:Dictionary,action:String)->String:
 			deeds.call("record",civ_id,"harm_hostage",1,"what the god did to %s, their hostage" % given)
 	return ""
 
+## A tributary called on us against its enemy (rival_rulers kin_call; the
+## hall's war_support): standing with it is the protection it pays for; staying
+## out, or counselling peace, is remembered, and at the next reckoning it
+## withholds its tribute (_tribute_due).
+static func protection_answered(civ_id:String,enemy:String,option_id:String)->void:
+	var t:=tributary(civ_id)
+	if t.is_empty(): return
+	if option_id=="stand":
+		t.erase("refused_day"); t.erase("refused_against")
+		_log(civ_id,"protected","We stood with %s against %s." % [_name(civ_id),_name(enemy)])
+		return
+	t["refused_day"]=_day()
+	t["refused_against"]=_name(enemy).substr(0,60)
+	_log(civ_id,"abandoned","We would not stand with %s against %s." % [_name(civ_id),_name(enemy)])
+
 ## The bond ends: the tribute agreement in the trade ledger is set down and
 ## they are tributaries no more.
 static func _break_bond(civ_id:String,why:String)->void:
 	var a:=state()
+	var rivals:=load(RIVALS_PATH) as GDScript
+	if rivals!=null: rivals.call("break_bond",civ_id,["tributary"])
 	if (TradeLedger.state().tributes as Dictionary).has(Stances.skey(civ_id,"player")): (TradeLedger.state().tributes as Dictionary).erase(Stances.skey(civ_id,"player"))
 	(a.tributaries as Dictionary).erase(civ_id)
 	var index:=Hall._civ_index(civ_id)
@@ -553,8 +575,13 @@ static func _tribute_due(civ_id:String,day:int)->void:
 		return
 	var r:=reading(civ_id)
 	var agreement:=Stances.tribute(civ_id,"player")
-	if not agreement.is_empty() and float(r.fear)>=PAY_FEAR and float(r.ratio)>=PAY_RATIO:
+	var abandoned:=day-int(t.get("refused_day",-99999))<=365
+	if not agreement.is_empty() and float(r.fear)>=PAY_FEAR and float(r.ratio)>=PAY_RATIO and not abandoned:
 		agreement["until"]=day+BOND_AHEAD
+		var rivals:=load(RIVALS_PATH) as GDScript
+		if rivals!=null:
+			rivals.call("break_bond",civ_id,["tributary"])
+			rivals.call("bond",civ_id,"tributary","we bow to the god and pay its people tribute",day+BOND_AHEAD)
 		var paid:=float(agreement.get("paid",0.0))
 		var this_year:=maxf(0.0,paid-float(t.get("seen_paid",0.0)))
 		t["seen_paid"]=paid
@@ -564,7 +591,7 @@ static func _tribute_due(civ_id:String,day:int)->void:
 		_chronicle("tribute:%s:%d" % [civ_id,day],"%s Keeps Faith" % name,"%s still bows: tribute worth %s came this year, the %s year since it bowed." % [name,_qty(this_year),_nth(int(t.years))],"moment" if first else "notice",civ_id)
 		_log(civ_id,"tribute_paid","worth %s" % _qty(this_year))
 		return
-	var why:="their goods ran out" if agreement.is_empty() else ("they no longer fear us enough" if float(r.fear)<PAY_FEAR else "their spears now match ours")
+	var why:="their goods ran out" if agreement.is_empty() else ("you would not protect them against %s" % String(t.get("refused_against","their enemies")) if abandoned else ("they no longer fear us enough" if float(r.fear)<PAY_FEAR else "their spears now match ours"))
 	_break_bond(civ_id,why)
 	_mark(civ_id,"withheld",day)
 	var text:="%s did not bring its tribute this year: %s. The bond is broken. %s is still in our hands." % [name,why,String(t.get("hostage","Their hostage"))]
