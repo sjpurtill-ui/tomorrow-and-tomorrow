@@ -381,10 +381,12 @@ static func labor()->Array:
 		mix[best][1]=int(mix[best][1])+1;remainders[mix[best][0]]=-1.0;given+=1
 	mix=mix.filter(func(pair:Array)->bool:return int(pair[1])>0)
 	var out:Array=[]
+	# What each work does now and what ten more would do (role_effects.gd),
+	# worked out again only when the work changes or a week has passed.
+	var effects:=RoleEffects.all_cached()
 	for role:String in Manual.ROLES:
-		# What the work does now and what ten more would do (role_effects.gd).
 		out.append({"id":role,"label":Manual.task_words(role),"count":int(counts[role]),"icon":String(ROLE_TASK.get(role,"gather")),"mix":mix if role=="Food" else [],
-			"effect":RoleEffects.of(role)})
+			"effect":(effects.get(role,{}) as Dictionary).duplicate()})
 	return out
 
 

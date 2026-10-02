@@ -494,26 +494,26 @@ static func knowledge()->Dictionary:
 	var lines_followed:=roundi(asked/2.0)
 	var fit:=1.0 if asked<=maxf(1.0,floorf(keepers)) else clampf(keepers/maxf(1.0,asked),0.15,1.0)
 	if asked<=0.0:
-		lines.append(_line("Keepers for the research","no lines followed","No research line is followed, so the keepers only watch and remember; set the research to give them lines to carry.","plain"))
+		lines.append(_line("Learners for the research","no lines followed","No research line is followed, so the learners only watch and remember; set the research to give them lines to carry.","plain"))
 	else:
-		lines.append(_line("Keepers for the research","%s of %s" % [_whole(keepers),_whole(asked)],
-			"Two lore keepers are asked for each research line followed (%s lines). With %s, learning runs at %d in 100 of full attention." % [_count(lines_followed),_whole(keepers),roundi(fit*100.0)],"good" if fit>=1.0 else "bad"))
+		lines.append(_line("Learners for the research","%s of %s" % [_whole(keepers),_whole(asked)],
+			"Two learners are asked for each research line followed (%s lines). With %s, learning runs at %d in 100 of full attention." % [_count(lines_followed),_whole(keepers),roundi(fit*100.0)],"good" if fit>=1.0 else "bad"))
 	# Learning: keepers × work pace × attention ÷ (92 × people, at least 3000)
 	# a day, times what helps it (consequence_engine.gd knowledge_gain).
 	var pop:=maxf(1.0,float(state.population_exact))
 	var labor:=float(state.simulation_metrics.get("labor_efficiency",0.72))
 	var gain:=keepers*labor*fit/maxf(3000.0,pop*92.0)*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))*lerpf(0.55,1.45,float(state.combined_intelligence))
 	lines.append(_line("What the people know","+%s points a year" % _two(gain*365.0*100.0),
-		"Lore keepers add to what the people know, which speeds every discovery. It stands at %d of 100; the keepers add about %s points a year at today's pace." % [roundi(float(state.simulation_metrics.get("knowledge",0.18))*100.0),_two(gain*365.0*100.0)],"good" if gain>0.0 else "bad"))
+		"Learners add to what the people know, which speeds every discovery. It stands at %d of 100; the learners add about %s points a year at today's pace." % [roundi(float(state.simulation_metrics.get("knowledge",0.18))*100.0),_two(gain*365.0*100.0)],"good" if gain>0.0 else "bad"))
 	# Research teams: full strength up to 12 keepers, less for each beyond
 	# (research_600_catalog.gd team_capacity).
 	var team:=Research600.team_capacity(keepers)
 	if keepers<=float(Research600.RESEARCH_TEAMS):
 		lines.append(_line("Research strength","full strength" if keepers>0.0 else "none",
-			"Up to %d keepers work at full strength on the research; past that each one adds less." % Research600.RESEARCH_TEAMS,"good" if keepers>0.0 else "bad"))
+			"Up to %d learners work at full strength on the research; past that each one adds less." % Research600.RESEARCH_TEAMS,"good" if keepers>0.0 else "bad"))
 	else:
-		lines.append(_line("Research strength","%s keepers' worth" % _one(team),
-			"Up to %d keepers work at full strength on the research; past that each adds less, so %s keepers work as %s." % [Research600.RESEARCH_TEAMS,_whole(keepers),_one(team)],"good"))
+		lines.append(_line("Research strength","%s learners' worth" % _one(team),
+			"Up to %d learners work at full strength on the research; past that each adds less, so %s learners work as %s." % [Research600.RESEARCH_TEAMS,_whole(keepers),_one(team)],"good"))
 	# Too many keepers: past the share the age can spare, each costs work,
 	# weariness, cohesion and births (society_model.gd specialist upkeep).
 	var model=DiscoverySystem.society_model
@@ -522,23 +522,23 @@ static func knowledge()->Dictionary:
 	var able:=_able()
 	var excess:=float(model.specialist_excess) if model!=null else 0.0
 	if excess>0.0:
-		lines.append(_line("Too many keepers","%s over" % _whole(excess*able),
-			"The people can spare %d in 100 of the workers as full-time keepers at this age (%s people). Past that the extra ones cost more work for everyone, weariness, cohesion and births." % [roundi(sustainable*100.0),_whole(sustainable*able)],"bad"))
+		lines.append(_line("Too many learners","%s over" % _whole(excess*able),
+			"The people can spare %d in 100 of the workers as full-time learners at this age (%s people). Past that the extra ones cost more work for everyone, weariness, cohesion and births." % [roundi(sustainable*100.0),_whole(sustainable*able)],"bad"))
 	else:
-		lines.append(_line("Keepers the people can spare","up to %s" % _whole(sustainable*able),
-			"The people can spare %d in 100 of the workers as full-time keepers at this age. Past that the extra ones cost more work for everyone, weariness, cohesion and births." % roundi(sustainable*100.0),"plain"))
+		lines.append(_line("Learners the people can spare","up to %s" % _whole(sustainable*able),
+			"The people can spare %d in 100 of the workers as full-time learners at this age. Past that the extra ones cost more work for everyone, weariness, cohesion and births." % roundi(sustainable*100.0),"plain"))
 	# Teaching: keepers spread practices to the rest (society_model.gd teaching).
 	var teaching:=_raw("Knowledge")/pop*0.055
 	var all_teaching:=teaching+_raw("Administration")/pop*0.018+_raw("Crafting")/pop*0.012
 	lines.append(_line("Teaching new ways","%d in 100 of the teaching" % roundi(teaching/maxf(0.000001,all_teaching)*100.0) if all_teaching>0.0 else "none",
-		"New practices spread to more households each month as people teach them; keepers teach most, stewards and makers some.","good" if teaching>0.0 else "plain"))
+		"New practices spread to more households each month as people teach them; learners teach most, stewards and makers some.","good" if teaching>0.0 else "plain"))
 	if CIVIC.SHRINE_HOUSE in state.settlement_completed:
 		var tended:=CIVIC.keepers_ratio()
 		lines.append(_line("Tending the Shrine House","%d of 100" % roundi(minf(1.0,tended)*100.0),
-			"The Shrine House does its full good only while lore keepers tend it, 1 in 100 of the people (%s would)." % _count(ceili(pop*CIVIC.SHRINE_KEEPERS_SHARE)),"good" if tended>=1.0 else "bad"))
+			"The Shrine House does its full good only while learners tend it, 1 in 100 of the people (%s would)." % _count(ceili(pop*CIVIC.SHRINE_KEEPERS_SHARE)),"good" if tended>=1.0 else "bad"))
 	_great_work_line(lines,"Knowledge")
 	lines.append(_cost_line("Knowledge",keepers))
-	return {"lead":"Lore keepers watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else.","lines":lines}
+	return {"lead":"Learners watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else.","lines":lines}
 
 
 # --- Keeping and caring -------------------------------------------------------------

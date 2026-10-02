@@ -21,8 +21,9 @@ the GDScript so they cannot drift):
   cultural labor bias (cultural_inheritance.gd WORK) and its wish for food
   work planned as deeper stores (reserve_lean_of), in model.py _allocate_labor;
 * the path the work leans toward: work_paths.gd choose by temper (no war or
-  neighbours' pull here), its WORK added to the labor bias and its FOOD_LEAN
-  to the reserve;
+  neighbours' pull here); each role takes the larger of the path's WORK and
+  the ambitions' labor bias, and the reserve the larger of the two leans
+  (work_paths.gd lean: one temper's two asks never stack);
 * research: the ruler's emphasis (preferences research weights plus the
   controller's culture weights, research_plan in ATTENTION_STEPS steps)
   and the ambition's pace (PeopleDirection.research_multiplier);
@@ -310,10 +311,11 @@ class LeaderSurrogate(Surrogate):
                 bias[role] = bias.get(role, 0.0) + v * s
         # The path the ruler leans the work toward (work_paths.gd lean).
         path = work_path(p)
+        food_wish = float(bias.get("Food", 0.0))
         for role, v in PATH_WORK.get(path, {}).items():
-            bias[role] = bias.get(role, 0.0) + float(v)
+            bias[role] = max(bias.get(role, 0.0), float(v))
         self.culture_bias = bias
-        self.reserve_lean = clamp(float(bias.get("Food", 0.0)) / RESERVE_FOOD_WISH + float(PATH_FOOD_LEAN.get(path, 0.0)), 0.0, 1.0)
+        self.reserve_lean = clamp(max(food_wish / RESERVE_FOOD_WISH, float(PATH_FOOD_LEAN.get(path, 0.0))), 0.0, 1.0)
         relevant = {line: sum(s for c, s in share.items() if line in AMBITIONS[c]["domains"]) for line in gd.LINES}
         mult = np.array([.95 + .30 * relevant[line] for line in gd.LINES])
         self.chance = self.base_chance * mult[self.cat.line]

@@ -22,13 +22,20 @@ extends RefCounted
 ## (civilization_controller.gd work_path_orders: an ordinary order, kind
 ## "work_path"); the player's own leaders, and any people no computer rules,
 ## by the people's tendency (leader_personality.from_values: the values they
-## live by), on the same rule every REVIEW_DAYS (current()). A people's values
-## start near the middle, so the player's leaders start balanced.
+## live by), on the same rule every REVIEW_DAYS, read at the realm's level
+## before any town's work is laid (current(), from
+## GovernmentPeopleSystem._delegate_settlements). A people's values start near
+## the middle, so the player's leaders start balanced.
 ##
-## What it does: the path adds planning weight to its work in the leaders'
-## split (GovernmentPeopleSystem._allocations_for_focus, through lean()); food
+## What it does: the path asks for planning weight on its work in the leaders'
+## split (GovernmentPeopleSystem._allocations_for_focus, through lean()). It
+## does not stack on the people's own ambitions, which come from the same
+## temper: each role gets the larger of the two asks, not their sum (a
+## scholarly ruler with the inquiry ambition is not twice on learning). Food
 ## still comes first, as the survival guard and the age's food floor are laid
-## on after it. Growth also asks the planners for a deeper food reserve.
+## on after it. Growth also asks the planners for a deeper food reserve (the
+## larger of its ask and the ambition's), and the Food page says so
+## (GovernmentPeopleSystem.reserve_plan reads food_lean()).
 ##
 ## Kept on PeopleDirection.work_path, saved with each people:
 ## {id, since, reviewed, why, score, by ("ruler" | "leaders")}.
@@ -44,8 +51,10 @@ const PATH_TEMPER:={
 	"learning":{"openness":.55,"risk_tolerance":-.25,"discipline":.20},
 	"building":{"discipline":.55,"openness":-.25,"risk_tolerance":-.20},
 }
-## Only a ruler at least this open is scholarly enough to take learning.
+## Only a ruler at least this open is scholarly enough to take learning; one
+## on it keeps it until its openness falls below SCHOLARLY_LEAVE.
 const SCHOLARLY:=.68
+const SCHOLARLY_LEAVE:=.64
 ## Below this fit no path leads: the split stays balanced.
 const BALANCED_BELOW:=.58
 ## A path held is kept while it is within this of the best.
@@ -71,7 +80,7 @@ const WORK:={
 const FOOD_LEAN:={"growth":.5}
 const NAMES:={"growth":"growth","making":"making and trade","war":"war","learning":"learning","building":"building","balanced":"a balanced split"}
 ## The work each path leans toward, in the People view's words.
-const LEANS:={"growth":"more on getting food and on keeping and caring","making":"more on making, carrying, cutting and digging","war":"more on keeping watch",
+const LEANS:={"growth":"more on keeping and caring, and a deeper food reserve","making":"more on making, carrying, cutting and digging","war":"more on keeping watch",
 	"learning":"more on learning","building":"more on building, cutting and digging","balanced":"no one task more than the rest"}
 ## The temper each path suits, in a few words.
 const TEMPERS:={"growth":"caring and careful","making":"open and steady","war":"proud and hard","learning":"scholarly","building":"disciplined and careful","balanced":"even"}
@@ -90,15 +99,17 @@ static func fit(path:String,p:Dictionary)->float:
 		out+=weight*value if weight>=0.0 else -weight*(1.0-value)
 	return out
 
-static func scholarly(p:Dictionary)->bool:
-	return clampf(float(p.get("openness",.5)),0.0,1.0)>=SCHOLARLY
+## Scholarly enough for learning: SCHOLARLY to take it up, SCHOLARLY_LEAVE to
+## keep it (`on_it`), so a ruler near the line does not flip month by month.
+static func scholarly(p:Dictionary,on_it:bool=false)->bool:
+	return clampf(float(p.get("openness",.5)),0.0,1.0)>=(SCHOLARLY_LEAVE if on_it else SCHOLARLY)
 
 ## Each path's score for this temper in this situation; learning only for a
-## scholarly temper.
-static func scores(p:Dictionary,s:Dictionary)->Dictionary:
+## scholarly temper (`kept_path` is the path already held).
+static func scores(p:Dictionary,s:Dictionary,kept_path:String="")->Dictionary:
 	var out:={}
 	for path:String in PATHS:
-		if path=="learning" and not scholarly(p):continue
+		if path=="learning" and not scholarly(p,kept_path=="learning"):continue
 		out[path]=fit(path,p)
 	out.war=float(out.war)+THREAT_PULL*clampf(float(s.get("threat",0.0)),0.0,1.0)+(WAR_PULL if bool(s.get("at_war",false)) else 0.0)
 	if bool(s.get("roofless",false)):out.building=float(out.building)+NEED_PULL
@@ -108,15 +119,15 @@ static func scores(p:Dictionary,s:Dictionary)->Dictionary:
 
 ## The path this temper takes in this situation: {id, score, why, scores}.
 ## `held` is the path already taken ("" for none), kept while near the best.
-static func choose(p:Dictionary,s:Dictionary,held:String="")->Dictionary:
-	var all:=scores(p,s)
+static func choose(p:Dictionary,s:Dictionary,kept_path:String="")->Dictionary:
+	var all:=scores(p,s,kept_path)
 	var best:="balanced"
 	var top:=BALANCED_BELOW
 	for path:String in PATHS:
 		if all.has(path) and float(all[path])>top:top=float(all[path]);best=path
-	if held!="" and held!=best and NAMES.has(held):
-		var kept:=BALANCED_BELOW if held=="balanced" else float(all.get(held,-1.0))
-		if kept>=top-STICK:best=held;top=kept
+	if kept_path!="" and kept_path!=best and NAMES.has(kept_path):
+		var kept:=BALANCED_BELOW if kept_path=="balanced" else float(all.get(kept_path,-1.0))
+		if kept>=top-STICK:best=kept_path;top=kept
 	return {"id":best,"score":top,"why":why(best,s),"scores":all}
 
 ## Why, in a few plain words: the temper, and what pulls.
@@ -183,10 +194,11 @@ static func record(id:String,reason:String,score:float,by:String)->Dictionary:
 	direction.work_path={"id":id,"since":since,"reviewed":day,"why":reason,"score":snappedf(score,.001),"by":by}
 	return direction.work_path
 
-## The path the leaders' split leans toward today in this scope. A computer
-## ruler's is the one it chose at its review (balanced until it has chosen);
-## any other people's leaders review it on the same rule every REVIEW_DAYS,
-## from the people's tendency.
+## The path this people's work leans toward today, reviewed when due. A
+## computer ruler's is the one it chose at its review (balanced until it has
+## chosen); any other people's leaders review it on the same rule every
+## REVIEW_DAYS, from the people's tendency. Call it at the realm's level, never
+## inside one town's scope: the realm's own count is what the leaders read.
 static func current()->String:
 	var direction:Variant=WorldSimulation.direction
 	if direction==null:return "balanced"
@@ -200,13 +212,21 @@ static func current()->String:
 	var id:=held()
 	return id if id!="" else "balanced"
 
-## Lays the path's lean on the leaders' planning weights (in place) and
-## returns the food reserve lean the planners should keep with it.
-static func lean(weights:Dictionary,reserve_lean:float)->float:
-	var path:=current()
+## Lays the path held on the leaders' planning weights (in place) and returns
+## the food reserve lean the planners keep with it. `bias` is the people's
+## own ambitions' ask (cultural_inheritance.gd labor_bias), already in the
+## weights: each role ends with the larger of the two asks, never their sum,
+## and the reserve lean likewise. Reads the path held (current() reviews it at
+## the realm's level first), so a town's scope never re-chooses it.
+static func lean(weights:Dictionary,bias:Dictionary,reserve_lean:float)->float:
+	var path:=held() if held()!="" else "balanced"
 	var work:Dictionary=WORK.get(path,{})
-	for role:String in work:weights[role]=float(weights.get(role,0.0))+float(work[role])
-	return clampf(reserve_lean+float(FOOD_LEAN.get(path,0.0)),0.0,1.0)
+	for role:String in work:weights[role]=float(weights.get(role,0.0))+maxf(0.0,float(work[role])-maxf(0.0,float(bias.get(role,0.0))))
+	return clampf(maxf(reserve_lean,food_lean()),0.0,1.0)
+
+## The deeper food reserve the path held asks for (0..1).
+static func food_lean()->float:
+	return float(FOOD_LEAN.get(held(),0.0))
 
 ## A computer ruler's order (civilization_orders.gd "work_path"):
 ## {kind, path, why, score}.

@@ -10,8 +10,10 @@ extends RefCounted
 ## early_life_conditions.gd; survey cover: resource_system.gd; goods:
 ## civilian_goods.gd; the watch as the army: military_campaign.gd; learning
 ## without a cap: discovery_system.gd), each function here is re-pointed with
-## one line. Each line keeps to twelve words or fewer, as the People view's
-## labels do. Static; preload.
+## one line. "Ten more" is always the gain over now. Each line keeps to
+## twelve words or fewer, as the People view's labels do. The People view
+## reads all nine through all_cached(): worked out again when the work changes
+## or a week has passed, not every day. Static; preload.
 
 const Impact:=preload("res://scripts/task_impact.gd")
 const Construction:=preload("res://scripts/settlement_construction.gd")
@@ -22,6 +24,24 @@ const Mechanics:=preload("res://scripts/research_mechanics.gd")
 
 ## "Ten more" is this many people.
 const MORE:=10
+const ROLES:=["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
+## Days the People view keeps a reading while the work stands as it is.
+const CACHE_DAYS:=7
+
+static var _cache_key:=""
+static var _cache:Dictionary={}
+
+## All nine roles' lines, kept while the work stands and for CACHE_DAYS:
+## {role: {now, plus_ten}}.
+static func all_cached()->Dictionary:
+	var state=_state()
+	var key:="%s|%d|%d|%d|%d" % [String(WorldSimulation.actor_id),int(state.world_seed),int(state.elapsed_days)/CACHE_DAYS,int(state.population_total),state.population_allocations.hash()]
+	if key!=_cache_key:
+		var fresh:={}
+		for role:String in ROLES:fresh[role]=of(role)
+		_cache=fresh
+		_cache_key=key
+	return _cache
 
 static func of(role:String)->Dictionary:
 	match role:
@@ -75,7 +95,7 @@ static func survey()->Dictionary:
 		return _row("Nothing left here they know how to find.","Ten more: nothing new until they learn new kinds.")
 	if searchers<=0.0:
 		return _row("Nobody searches; %s finds show only by chance." % _count(hidden),"Ten more: finds come %s times as fast." % _one(more))
-	return _row("Finds come %s times as fast as with nobody searching." % _one(now),"Ten more: %s times as fast." % _one(more))
+	return _row("Finds come %s times as fast as with nobody searching." % _one(now),"Ten more: finds come %s times as fast as now." % _one(more/maxf(0.01,now)))
 
 # --- Cutting and digging ------------------------------------------------------------
 
@@ -107,19 +127,19 @@ static func construction()->Dictionary:
 		var left:=maxf(0.0,float(project.days)-done)
 		var name:=String(project.name)
 		if pace<=0.0:return _row("Nobody builds: the %s stands unfinished." % name,"Ten more: done in %s." % Impact._days(left/maxf(0.0001,faster)))
-		return _row("The %s: %s left." % [name,Impact._days(left/pace)],"Ten more: done in %s." % Impact._days(left/maxf(0.0001,faster)))
+		return _row("The %s: %s left." % [name,Impact._days(left/pace)],"Ten more: done %s sooner." % Impact._days(left/pace-left/maxf(0.0001,faster)))
 	if Construction.housing_under_way():
 		var homes:=Construction.housing_work_per_day()
 		var homes_more:=homes+homes/maxf(0.01,builders)*_ten("Construction") if builders>0.0 else homes
 		var batch:=Construction.HOUSING_BATCH_WORK
 		return _row("New homes: %d places every %s." % [Construction.housing_batch_places(),Impact._days(batch/maxf(0.0001,homes))],
-			"Ten more: every %s." % Impact._days(batch/maxf(0.0001,homes_more)))
+			"Ten more: each batch %s sooner." % Impact._days(batch/maxf(0.0001,homes)-batch/maxf(0.0001,homes_more)))
 	# Upkeep: builders at 5 in 100 of the people mend the town's monthly wear.
 	var pop:=_pop()
 	var mending:float=Mechanics.mending_factor()
 	var monthly:=func(people:float)->float:return Impact.BUILD_MEND*clampf(people/maxf(1.0,pop*Impact.BUILD_UPKEEP_SHARE),0.0,1.0)*mending-Impact.BUILD_WEAR
 	return _row("No work waits; repair moves %s points a month." % Impact._signed(float(monthly.call(builders))*100.0),
-		"Ten more: %s points a month." % Impact._signed(float(monthly.call(builders+_ten("Construction")))*100.0))
+		"Ten more: %s points a month." % Impact._signed((float(monthly.call(builders+_ten("Construction")))-float(monthly.call(builders)))*100.0))
 
 # --- Making -------------------------------------------------------------------------
 
@@ -164,11 +184,11 @@ static func logistics()->Dictionary:
 # --- Learning -----------------------------------------------------------------------
 
 ## What the people know, a year (consequence_engine.gd knowledge gain:
-## keepers × pace × attention ÷ (92 × people, at least 3000)), and research
-## strength in keepers' worth (research_600_catalog.gd team_capacity).
+## learners × pace × attention ÷ (92 × people, at least 3000)), and research
+## strength in learners' worth (research_600_catalog.gd team_capacity).
 static func knowledge()->Dictionary:
 	var state=_state()
-	var keepers:=_workers("Knowledge")
+	var learners:=_workers("Knowledge")
 	var pop:=_pop()
 	var asked:=Research600.keepers_asked(state.research_allocations)
 	var labor:=float(state.simulation_metrics.get("labor_efficiency",0.72))
@@ -176,9 +196,9 @@ static func knowledge()->Dictionary:
 	var gain:=func(people:float)->float:
 		var fit:=1.0 if asked<=maxf(1.0,floorf(people)) else clampf(people/maxf(1.0,asked),0.15,1.0)
 		return people*labor*fit/maxf(3000.0,pop*92.0)*rate*365.0*100.0
-	var more:=keepers+_ten("Knowledge")
-	return _row("What we know: +%s points a year; research at %s keepers' worth." % [_points(float(gain.call(keepers))),_one(Research600.team_capacity(keepers))],
-		"Ten more: +%s points a year; %s keepers' worth." % [_points(float(gain.call(more))),_one(Research600.team_capacity(more))])
+	var more:=learners+_ten("Knowledge")
+	return _row("What we know: +%s points a year; research at %s learners' worth." % [_points(float(gain.call(learners))),_one(Research600.team_capacity(learners))],
+		"Ten more: +%s points a year, +%s learners' worth." % [_points(float(gain.call(more))-float(gain.call(learners))),_one(Research600.team_capacity(more)-Research600.team_capacity(learners))])
 
 # --- Keeping and caring -------------------------------------------------------------
 
@@ -192,8 +212,8 @@ static func administration()->Dictionary:
 	var cover:=func(people:float)->float:return clampf(people*reach/maxf(1.0,pop*Impact.STEWARD_SHARE),0.0,1.25)
 	var now:=float(cover.call(keepers))
 	var more:=float(cover.call(keepers+_ten("Administration")))
-	var later:="Ten more: cohesion +%d, trust +%d." % [roundi(more*Impact.STEWARD_COHESION*100.0),roundi(more*Impact.STEWARD_TRUST*100.0)]
-	if now>=1.25:later="Ten more: no more; they are full at %s." % _count(ceili(pop*Impact.STEWARD_SHARE*1.25/reach))
+	var later:="Ten more: cohesion +%d, trust +%d." % [roundi((more-now)*Impact.STEWARD_COHESION*100.0),roundi((more-now)*Impact.STEWARD_TRUST*100.0)]
+	if now>=1.25:later="Ten more: nothing more; they are full at %s." % _count(ceili(pop*Impact.STEWARD_SHARE*1.25/reach))
 	return _row("Cohesion +%d points, trust in the chiefs +%d." % [roundi(now*Impact.STEWARD_COHESION*100.0),roundi(now*Impact.STEWARD_TRUST*100.0)],later)
 
 # --- Keeping watch ------------------------------------------------------------------
@@ -209,7 +229,26 @@ static func defense()->Dictionary:
 	var required:=int(walls.get("garrison_required",maxi(8,ceili(pop*0.035))))
 	var guard:=int(walls.get("garrison_guard",roundi(watch)))
 	return _row("Safety +%d points; guard %d of %d at home." % [roundi(float(lift.call(watch))),guard,required],
-		"Ten more: safety +%d points, up to 96; guard %d of %d." % [roundi(float(lift.call(watch+MORE))-float(lift.call(watch))),guard+MORE,required])
+		"Ten more: safety +%d points, up to 96; guard at home +%d." % [roundi(float(lift.call(watch+MORE))-float(lift.call(watch))),_home_guard_gain()])
+
+## The guard ten more on watch add at home, as the defender ledger shares
+## the watch out (civilization_combat.gd guard_ledger): the watch is the
+## Defense hands past the trained levy at home, shared among the towns that
+## keep a guard by how many live in each.
+static func _home_guard_gain()->int:
+	var Combat:=preload("res://scripts/civilization_combat.gd")
+	var watch:=_raw("Defense")
+	var trained:=float(MilitaryCampaign.home_army.get("troops",0)) if MilitaryCampaign.home_army is Dictionary else 0.0
+	var added:=maxf(0.0,watch+MORE-trained)-maxf(0.0,watch-trained)
+	var home:=Combat._home_record()
+	if home.is_empty():return roundi(added)
+	var here:=0.0;var total:=0.0
+	for city:Dictionary in _state().player_settlements:
+		if not Combat.keeps_watch(city):continue
+		var people:=maxf(0.0,float(WorldSimulation.settlements._settlement_population(city)))
+		total+=people
+		if String(city.get("id",""))==String(home.get("id","")):here=people
+	return roundi(added*(here/total if total>0.0 else 1.0))
 
 # --- Helpers ------------------------------------------------------------------------
 

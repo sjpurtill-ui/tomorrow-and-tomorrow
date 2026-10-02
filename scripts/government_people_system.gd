@@ -1768,6 +1768,9 @@ func reserve_plan()->Dictionary:
 		WorldSimulation.direction._ensure_cultural_memory()
 		var bias:=preload("res://scripts/cultural_inheritance.gd").labor_bias(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))
 		lean=reserve_lean_of(float(bias.get("Food",0.0)))
+		# The path the work leans toward asks its own deeper reserve (growth):
+		# the larger of the two, as the leaders' split plans it (work_paths.gd lean).
+		lean=maxf(lean,preload("res://scripts/work_paths.gd").food_lean())
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	var demand:=maxf(0.01,float(metrics.get("food_consumption",0)))
 	var target:=RESERVE_TARGET_DAYS*(1.0+lean)
@@ -1838,8 +1841,9 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 		# not a share the planners' own floor already covers.
 		reserve_lean=reserve_lean_of(float(bias.get("Food",0.0)))
 		# The path the people's rulers lean the work toward (work_paths.gd):
-		# growth, making and trade, war, learning, building, or none.
-		reserve_lean=preload("res://scripts/work_paths.gd").lean(weights,reserve_lean)
+		# growth, making and trade, war, learning, building, or none; each
+		# role takes the larger of its ask and the ambitions', not both.
+		reserve_lean=preload("res://scripts/work_paths.gd").lean(weights,bias,reserve_lean)
 	# The workshop officer asks for gatherers while soldiers' gear lacks materials.
 	if WorldSimulation.military!=null:weights.Extraction=float(weights.get("Extraction",0))+float(WorldSimulation.military.workshop.extraction_request().get("weight",0.0))
 	# Guards in proportion to how hard the neighbours press (docs/STANDING_DESIGN.md
@@ -1885,6 +1889,9 @@ func _delegate_settlements(_day:int)->void:
 	var total_weight:=0.0
 	var satellite_share:=0.0
 	var management_changed:=false
+	# The path the work leans toward, reviewed from the realm's own count
+	# before any town's work is laid (work_paths.gd).
+	preload("res://scripts/work_paths.gd").current()
 	for settlement in WorldSimulation.state.player_settlements:
 		if not bool(settlement.get("primary",false)): satellite_share+=maxf(0.0,float(settlement.get("population_share",0.0)))
 	for index in WorldSimulation.state.player_settlements.size():

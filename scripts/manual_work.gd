@@ -37,7 +37,7 @@ const TASKS:={
 	"Construction":["building","builds","building"],
 	"Crafting":["making","makes things","making"],
 	"Logistics":["carrying","carries","carrying"],
-	"Knowledge":["learning","keeps the lore","learning"],
+	"Knowledge":["learning","learns","learning"],
 	"Administration":["keeping and caring","keeps and cares","keeping and caring"],
 	"Defense":["keeping watch","keeps watch","keeping watch"],
 }
@@ -516,7 +516,7 @@ static func _doing(role:String,n:int)->String:
 		"Construction":return "build"
 		"Crafting":return "make things"
 		"Logistics":return "carry"
-		"Knowledge":return "keep the lore"
+		"Knowledge":return "learn"
 		"Administration":return "keep and care"
 		"Defense":return "keep watch"
 	return task_words(role)

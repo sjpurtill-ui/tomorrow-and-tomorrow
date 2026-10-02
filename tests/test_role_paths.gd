@@ -17,6 +17,7 @@ const HomeOrders:=preload("res://scripts/home_orders.gd")
 const Answers:=preload("res://scripts/court_answers.gd")
 const Effects:=preload("res://scripts/role_effects.gd")
 const Paths:=preload("res://scripts/work_paths.gd")
+const Research600:=preload("res://scripts/research_600_catalog.gd")
 const Personality:=preload("res://scripts/leader_personality.gd")
 const People:=preload("res://scripts/hud/people_model.gd")
 const Overview:=preload("res://scripts/hud/content/dock_content_overview.gd")
@@ -115,6 +116,10 @@ func test_making_and_keeping_and_caring_are_the_words()->void:
 	assert_str(String(Answers.WORK_WORDS.administration)).is_equal("keeping and caring")
 	for pair:Array in People.TASKS:
 		assert_str(String(pair[1])).not_contains("making tools").not_contains("keeping the stores")
+	# Learning is the learners' work, never "keepers" (the court reads bare
+	# "keepers" as keeping and caring).
+	for words:String in Manual.TASKS.Knowledge:assert_str(words).not_contains("keep")
+	assert_str(Manual._doing("Knowledge",1)).is_equal("learn")
 
 func test_the_court_reads_the_new_words_and_the_old()->void:
 	var cases:={
@@ -127,6 +132,8 @@ func test_the_court_reads_the_new_words_and_the_old()->void:
 		"put 3 more on keeping watch":"Defense",
 		"Put 2 more on the watch":"Defense",
 		"put 2 more on the lore keepers":"Knowledge",
+		"put 2 more on the learners":"Knowledge",
+		"put 2 more on the keepers":"Administration",
 	}
 	for said:String in cases:
 		var reading:=HomeOrders.work_reading(said)
@@ -152,6 +159,13 @@ func test_every_role_says_what_it_does_now_and_what_ten_more_would_do()->void:
 			_assert_plain(String(effect.get(field,"")),"%s %s" % [role,field])
 		assert_str(String(effect.plus_ten)).starts_with("Ten more")
 		print("[role_paths] %s: %s %s" % [Manual.task_words(role),String(effect.now),String(effect.plus_ten)])
+	# Learning is told in learners, never keepers, on the row and in its panel.
+	var learning:=Effects.knowledge()
+	assert_str(String(learning.now)+String(learning.plus_ten)).contains("learners").not_contains("keepers")
+	var panel:=preload("res://scripts/task_impact.gd").knowledge()
+	var told:=String(panel.lead)
+	for line:Dictionary in panel.lines:told+=" "+String(line.label)+" "+String(line.value)+" "+String(line.words)
+	assert_str(told.to_lower()).not_contains("keepers").contains("learners")
 	# The People view's rows carry them.
 	var tasks:=People.labor()
 	assert_int(tasks.size()).is_equal(ROLES.size())
@@ -185,6 +199,46 @@ func test_the_people_view_draws_each_effect_under_its_row()->void:
 	var said:=PackedStringArray()
 	for line_variant in (block.labor.who as Array):said.append(String((line_variant as Dictionary).get("text","")))
 	assert_str(" ".join(said)).contains("Our leaders keep the work balanced")
+
+## "Ten more" is always the gain over now, never a new total.
+func test_ten_more_is_always_the_gain()->void:
+	_world()
+	var pop:=float(GameState.population_exact)
+	# Keeping and caring: coverage = keepers ÷ 3.5 in 100 of the people, up to 1.25.
+	var keepers:=float(GameState.effective_workers("Administration"))
+	var raw:=float(GameState.population_allocations.get("Administration",0))
+	var ten:=10.0*(keepers/raw if raw>0.0 else 1.0)
+	var now:=clampf(keepers/(pop*0.035),0.0,1.25)
+	var more:=clampf((keepers+ten)/(pop*0.035),0.0,1.25)
+	assert_str(String(Effects.administration().plus_ten)).is_equal("Ten more: cohesion +%d, trust +%d." % [roundi((more-now)*20.0),roundi((more-now)*10.0)])
+	# Learning: the knowing and the research strength they add.
+	var learners:=float(GameState.effective_workers("Knowledge"))
+	var raw_learners:=float(GameState.population_allocations.get("Knowledge",0))
+	var strength:=Research600.team_capacity(learners+10.0*(learners/raw_learners if raw_learners>0.0 else 1.0))-Research600.team_capacity(learners)
+	assert_str(String(Effects.knowledge().plus_ten)).contains("+%s learners' worth" % preload("res://scripts/task_impact.gd")._one(strength))
+	# Building: how much sooner, not when.
+	assert_str(String(Effects.construction().plus_ten)).contains("sooner")
+	# The watch: the guard ten more add at home, by the home's share of the
+	# people in towns that keep a guard (here, one town: all of it).
+	assert_str(String(Effects.defense().plus_ten)).contains("guard at home +10")
+
+func test_the_people_view_works_the_effects_out_weekly_or_when_the_work_changes()->void:
+	_world()
+	var day:=int(GameState.elapsed_days)
+	GameState.elapsed_days=day-posmod(day,Effects.CACHE_DAYS)
+	var week:=Effects.all_cached()
+	assert_bool(is_same(Effects.all_cached(),week)).is_true()
+	# A day later in the same week: the same reading.
+	GameState.elapsed_days+=1
+	assert_bool(is_same(Effects.all_cached(),week)).is_true()
+	# A week on: read again.
+	GameState.elapsed_days+=Effects.CACHE_DAYS
+	var later:=Effects.all_cached()
+	assert_bool(is_same(later,week)).is_false()
+	# The work changed: read again at once.
+	GameState.population_allocations.Defense=int(GameState.population_allocations.Defense)+3
+	assert_bool(is_same(Effects.all_cached(),later)).is_false()
+	assert_int(Effects.all_cached().size()).is_equal(9)
 
 func test_ten_more_reads_the_engine_rule()->void:
 	_world()
@@ -221,6 +275,12 @@ func test_each_temper_takes_its_path()->void:
 	var scores:Dictionary=fresh.scores
 	if absf(float(scores.get(other,0.0))-float(fresh.score))<=Paths.STICK:
 		assert_str(String(Paths.choose(trader,CALM,other).id)).is_equal(other)
+	# A scholar on learning keeps it until openness falls below the leaving
+	# line, so a ruler near the line does not flip month by month.
+	var near:=_temper(Paths.SCHOLARLY-.02,.75,.4,.25,.15)
+	assert_str(String(Paths.choose(near,CALM).id)).is_not_equal("learning")
+	assert_str(String(Paths.choose(near,CALM,"learning").id)).is_equal("learning")
+	assert_str(String(Paths.choose(_temper(Paths.SCHOLARLY_LEAVE-.02,.75,.4,.25,.15),CALM,"learning").id)).is_not_equal("learning")
 	# Every path says why in plain words.
 	for path:String in Paths.NAMES:
 		assert_str(Paths.why(path,CALM)).is_not_empty()
@@ -308,6 +368,52 @@ func test_the_path_leans_the_leaders_split()->void:
 	# age's floor are laid on after the path).
 	for path:String in shares:
 		assert_float(float(shares[path].Food)).is_greater_equal(float(base.Food)-0.5)
+
+## One temper asks twice, through its ambition and its path: each role takes
+## the larger ask, never both; the deeper food reserve likewise.
+func test_the_path_does_not_stack_on_the_ambitions()->void:
+	_world()
+	PeopleDirection.work_path={"id":"learning","since":0,"reviewed":int(GameState.elapsed_days),"why":"","score":.8,"by":"ruler"}
+	var weights:={"Knowledge":20.0,"Survey":8.0}
+	Paths.lean(weights,{"Knowledge":14.0,"Survey":4.0},0.0)
+	assert_float(float(weights.Knowledge)).is_equal_approx(20.0,0.0001)
+	assert_float(float(weights.Survey)).is_equal_approx(8.0,0.0001)
+	weights={"Knowledge":6.0,"Survey":8.0}
+	Paths.lean(weights,{},0.0)
+	assert_float(float(weights.Knowledge)).is_equal_approx(6.0+float(Paths.WORK.learning.Knowledge),0.0001)
+	weights={"Knowledge":10.0}
+	Paths.lean(weights,{"Knowledge":4.0},0.0)
+	assert_float(float(weights.Knowledge)).is_equal_approx(10.0+float(Paths.WORK.learning.Knowledge)-4.0,0.0001)
+	PeopleDirection.work_path.id="growth"
+	assert_float(Paths.lean({},{},0.2)).is_equal_approx(float(Paths.FOOD_LEAN.growth),0.0001)
+	assert_float(Paths.lean({},{},0.9)).is_equal_approx(0.9,0.0001)
+
+## The Food page says the reserve the planners aim for, the path's included.
+func test_the_food_page_reserve_counts_the_path()->void:
+	_world()
+	var demand:=maxf(0.01,float(GameState.simulation_metrics.get("food_consumption",0.0)))
+	var cap:=float(FoodSystem._food_storage_capacity())/demand*0.8
+	PeopleDirection.work_path={"id":"balanced","since":0,"reviewed":int(GameState.elapsed_days),"why":"","score":.58,"by":"leaders"}
+	var plain:=float(GovernmentPeopleSystem.reserve_plan().target_days)
+	PeopleDirection.work_path.id="growth"
+	var growth:=float(GovernmentPeopleSystem.reserve_plan().target_days)
+	assert_float(plain).is_equal_approx(minf(GovernmentPeopleSystem.RESERVE_TARGET_DAYS,cap),0.01)
+	assert_float(growth).is_equal_approx(minf(GovernmentPeopleSystem.RESERVE_TARGET_DAYS*(1.0+float(Paths.FOOD_LEAN.growth)),cap),0.01)
+	assert_str(String(Paths.LEANS.growth)).not_contains("getting food").contains("deeper food reserve")
+
+## The leaders read the realm's own count, before any town's work is laid; a
+## town's scope never re-chooses the path.
+func test_the_leaders_review_at_the_realm_level()->void:
+	_world()
+	assert_int(int(PeopleDirection.work_path.reviewed)).is_equal(int(GameState.elapsed_days))
+	PeopleDirection.work_path={"id":"war","since":0,"reviewed":int(GameState.elapsed_days)-400,"why":"old","score":.7,"by":"leaders"}
+	var city:Dictionary=GameState.player_settlements[0]
+	var leader:=GovernmentPeopleSystem._person_record(int(city.get("leader_person_id",0)))
+	SettlementModel.with_city_resources(String(city.id),func()->Dictionary:return GovernmentPeopleSystem._allocations_for_focus("balanced",leader,true))
+	assert_str(String(PeopleDirection.work_path.why)).is_equal("old")
+	_delegate()
+	assert_int(int(PeopleDirection.work_path.reviewed)).is_equal(int(GameState.elapsed_days))
+	assert_str(Paths.held()).is_equal("balanced")
 
 func test_our_leaders_start_balanced_and_not_on_learning()->void:
 	_world()

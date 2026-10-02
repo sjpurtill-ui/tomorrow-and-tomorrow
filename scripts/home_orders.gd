@@ -227,7 +227,7 @@ const WORK_TASKS:=[
 	["Construction","building|builders|construction|the building work"],
 	["Crafting","making(?: tools| goods| things)?|makers|crafts?|crafting|toolmaking|tool ?making|the workshops?"],
 	["Logistics","carrying(?: water)?|carriers|hauling|haulers|porters|fetching water|water carrying"],
-	["Knowledge","learning|the lore|lore ?keeping|lore keepers|studying|study|teaching|scholars"],
+	["Knowledge","learning|learners|the lore|lore ?keeping|lore keepers|studying|study|teaching|scholars"],
 	# "keeping and caring" (keepers and carers); the old "keeping the stores"
 	# and "stewards" still read. Never a bare "keeping": that is the watch's.
 	["Administration","keeping and caring|keeping the stores|keepers and carers|keepers|carers|caring(?: for the (?:sick|young|children|newborns|mothers))?|stewards|stewarding|the council'?s business|keeping count"],
