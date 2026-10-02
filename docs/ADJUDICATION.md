@@ -57,17 +57,24 @@ costs in food, time and guard load all persist. A harsh act is remembered by the
 people it struck, by their neighbours and by the officer who carried it out.
 
 Grave orders against the god's own people ("kill all women in the village",
-"burn our own village", "drive out the old") are adjudicated the same way
-(scripts/grave_home.gd): only people named as the act's own object (never a
-goat, trees or the dead; driving out is out of the realm, never out of the
-hall); the one ordered may obey, plead or refuse; each hand may refuse or
-flee; each person named is caught on stated odds, a few days' work at most;
-the dead and the fled come off the population model by age and sex (each
-person once), in that town's own count; births fall while the women of
-child-bearing age are fewer, and only their pregnancies are lost. "The
-village" is asked about when a town we hold, a war or a feud makes it
-unclear; only a short, clear answer settles it, and any other words drop the
-question and are heard as themselves.
+"burn our own village", "banish the old") are adjudicated the same way
+(scripts/grave_home.gd). Only an order counts: the verb opens its own clause,
+and a sentence that forbids, doubts, reports or supposes the act ("we must
+not...", "the elders say we should...", "if the harvest fails...") is no
+order. Only people named right after the verb count, within the verb's own
+clause (never a goat, trees, the dead or time; "the sick women" is asked
+about, whom exactly); burning is of the village itself; banishing is out of
+the realm, never out of the hall or into the forest. Every such act is first
+read back with its numbers ("You would have the 300 women of Seanstone
+killed?") and is carried out only on the god's plain yes in the very next
+line of the same audience; any other line drops it. Then the one ordered may
+obey, plead (again, only the very next line settles it) or refuse; each hand
+may refuse or flee; each person named is caught on stated odds, a few days'
+work at most; the dead and the fled come off the population model by age and
+sex (each person once), in that town's own count; births fall while the
+women of child-bearing age are fewer, and only their pregnancies are lost.
+"The village" is asked about when a town we hold, a war or a feud makes it
+unclear; only a short, clear answer settles it.
 
 ## Officials know their office
 

@@ -70,8 +70,15 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## thrown out of the hall), words that are no answer to "which village?", a
 ## new order while it is open, and the women and the old counted once: 15
 ## more runs a path): offline 786, live 787, sloppy 80.
+## Then the read-back (every grave act on our own people is said back with
+## its numbers and done only on the god's yes in the very next line; the
+## order alone, or with any other line between, does nothing), sentences that
+## forbid, doubt, report or suppose it, objects that end with the verb's own
+## clause, moving people within the realm, people narrowed ("the sick
+## women": whom exactly), part of the village burned: 28 more runs a path):
+## offline 814, live 815, sloppy 80.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":786,"live":787,"sloppy":80}
+const BASELINE:={"offline":814,"live":815,"sloppy":80}
 
 var _processing:Dictionary={}
 
