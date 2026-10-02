@@ -40,6 +40,14 @@ func _soldiers(count:int)->void:
 	fx.train(count)
 
 
+## The capital's stores: `days` of food for its people (the levy takes food
+## only above LEVY_KEEP_DAYS of their need).
+func _stock_food(days:float,need:float=900.0)->void:
+	GameState.simulation_metrics["food_consumption"]=need
+	GameState.food_stocks={"Fresh food":0.0,"Stored food":need*days}
+	GameState.resource_stockpiles["Food"]=need*days
+
+
 # --- 1. Inequality can fall again, within the age's bounds -------------------------
 
 func test_inequality_falls_back_within_the_ages_bounds()->void:
@@ -166,6 +174,7 @@ func test_town_treasuries_merge_once_into_one_realm_account()->void:
 	assert_float(float(Purse.state().balance)).is_equal_approx(130.0,0.001)
 	# After coinage the share on goods sold for money is paid in coin: it
 	# leaves the households' circulation with its backing, every coin counted.
+	_stock_food(200.0)
 	var private_before:=GameState.private_currency
 	var coin_before:=float(Purse.state().coin)
 	var paid:=Purse.accrue({"daily_output_value":200.0,"observed_trade":50.0},0.5)
@@ -189,20 +198,25 @@ func test_the_purse_is_named_by_what_the_people_know()->void:
 	GameState.economy_stage="subsistence"
 	Purse.state().balance=340.0
 	assert_str(Purse.account_name()).is_equal("the common store")
-	assert_str(Purse.amount_text(340.0)).is_equal("340 rations' worth")
-	assert_str(Purse.pay_word()).is_equal("food and gifts")
+	assert_str(Purse.amount_text(340.0)).is_equal("340 rations")
+	assert_str(Purse.pay_word()).is_equal("food")
+	# Working metal does not make the store silver: it holds food until coin.
 	GameState.economy_stage="weighed_metal"
 	GameState.known_discoveries.append("copper_smelting")
-	assert_str(Purse.account_name()).is_equal("the silver store")
-	assert_str(Purse.amount_text(340.0)).is_equal("340 silver")
+	assert_str(Purse.account_name()).is_equal("the common store")
+	assert_str(Purse.amount_text(340.0)).is_equal("340 rations")
+	assert_float(Purse.held_food()).is_equal_approx(340.0,0.001)
+	GameState.market_prices["Food"]=0.5
 	GameState.economy_stage="currency"
 	# Coin is said only once the people keep registers or public credit.
 	assert_str(Purse.unit_word()).is_equal("silver")
 	GameState.known_discoveries.append("property_registers")
 	assert_str(Purse.account_name()).is_equal("the treasury")
 	assert_str(Purse.amount_text(340.0)).is_equal("340 coin")
-	# One account: the words changed, the balance did not.
-	assert_float(Purse.balance()).is_equal(340.0)
+	# One account: at coinage the food it holds is counted in coin at the
+	# market price, and it is still the same food.
+	assert_float(Purse.balance()).is_equal_approx(170.0,0.001)
+	assert_float(Purse.held_food()).is_equal_approx(340.0,0.001)
 
 
 # --- 5. The levy: its levels, yield and costs --------------------------------------------
@@ -225,14 +239,25 @@ func test_levy_levels_take_the_ages_share_with_their_yield_and_costs()->void:
 	# Early states take a fifth at most.
 	GameState.economy_stage="weighed_metal"
 	assert_float(float(Purse.quote("heavy").rate)).is_equal_approx(0.2,0.0001)
-	# The yield is the engine's: output x rate x reach x (1 - hidden).
+	# The yield is the engine's: output x rate x reach x (1 - hidden), in
+	# rations at the food price, and it is food taken out of the town's stores.
 	GameState.economy_stage="subsistence"
+	_stock_food(200.0)
 	Purse.set_levy("heavy")
 	var q:=Purse.quote("heavy")
 	var before:=Purse.balance()
+	var food_before:=float(GameState.resource_stockpiles.get("Food",0.0))
 	var day:=Purse.accrue({"daily_output_value":150.0},0.0)
-	assert_float(Purse.balance()-before).is_equal_approx(150.0*float(q.rate)*float(q.reach)*(1.0-float(q.evasion)),0.01)
+	var due:=150.0/Purse.food_price()*float(q.rate)*float(q.reach)*(1.0-float(q.evasion))
+	assert_float(Purse.balance()-before).is_equal_approx(due,0.01)
+	assert_float(food_before-float(GameState.resource_stockpiles.get("Food",0.0))).is_equal_approx(due,0.01)
 	assert_float(float(day.evaded)).is_greater(0.0)
+	# A town without LEVY_KEEP_DAYS of food keeps it: the keepers take nothing.
+	_stock_food(Purse.LEVY_KEEP_DAYS-1.0)
+	var hungry:=Purse.accrue({"daily_output_value":150.0},0.0)
+	assert_float(float(hungry.levy)).is_equal(0.0)
+	assert_float(float(hungry.short)).is_equal_approx(due,0.01)
+	assert_float(float(GameState.resource_stockpiles.get("Food",0.0))).is_equal_approx(900.0*(Purse.LEVY_KEEP_DAYS-1.0),0.01)
 	# Its cost reaches the people: trust and holding together, in the economy's pressure.
 	assert_float(Purse.levy_pressure()).is_equal_approx(0.8*Purse.LEVY_TRUST,0.0001)
 	Purse.set_levy("light")
@@ -317,11 +342,11 @@ func test_scholars_and_crews_give_bounded_effects()->void:
 	assert_float(Purse.scholars_factor()).is_equal(1.0)
 
 
-# --- 8. Relief buys food at the market price -------------------------------------------------
+# --- 8. Food for the hungry: the store's own first, then bought with coin ----------------------
 
-func test_relief_buys_food_for_a_hungry_town_at_the_market_price()->void:
-	GameState.food_stocks={"Fresh food":0.0,"Stored food":6000.0}
-	GameState.resource_stockpiles["Food"]=6000.0
+func test_relief_sends_the_stores_food_first_then_buys_with_coin()->void:
+	GameState.food_stocks={"Fresh food":0.0,"Stored food":72000.0}
+	GameState.resource_stockpiles["Food"]=72000.0
 	GameState.economy_metrics["price_observations"]=12
 	GameState.market_prices["Food"]=1.25
 	GameState.simulation_metrics["food_days"]=120.0
@@ -330,22 +355,36 @@ func test_relief_buys_food_for_a_hungry_town_at_the_market_price()->void:
 	var record:Dictionary=GameState.player_settlements[-1]
 	SettlementModel._ensure_city_resources(record)
 	record["resource_metrics"]={"food_days":4.0,"food_consumption":200.0}
+	# Before coin: the store's food goes on the road; the capital's own stores
+	# are not touched, and nothing is bought.
 	Purse.state().balance=2000.0
 	var capital_food:=float(GameState.resource_stockpiles.get("Food",0.0))
-	var bought:=Purse.buy_relief(500.0)
-	assert_float(float(bought.spent)).is_greater(0.0)
-	assert_float(float(bought.spent)).is_less_equal(500.0+0.001)
-	# At the seller's market price, every ration paid for.
-	assert_float(float(bought.spent)).is_equal_approx(float(bought.rations)*1.25,0.01)
-	assert_float(capital_food-float(GameState.resource_stockpiles.get("Food",0.0))).is_equal_approx(float(bought.rations),0.01)
-	assert_float(Purse.balance()).is_equal_approx(2000.0-float(bought.spent),0.01)
-	# The food is on the road to the hungry town, as a delivery between towns.
+	var sent:=Purse.buy_relief(500.0)
+	assert_float(float(sent.rations)).is_equal_approx(500.0,0.01)
+	assert_float(float(sent.spent)).is_equal_approx(500.0,0.01)
+	assert_float(Purse.balance()).is_equal_approx(1500.0,0.01)
+	assert_float(float(GameState.resource_stockpiles.get("Food",0.0))).is_equal_approx(capital_food,0.01)
 	var on_road:=0.0
 	for shipment:Dictionary in GameState.city_trade_shipments:
 		if String(shipment.destination_id)=="dawngate": on_road+=float(shipment.quantity)
-	assert_float(on_road).is_equal_approx(float(bought.rations),0.01)
+	assert_float(on_road).is_equal_approx(500.0,0.01)
+	# With coin and no food in the store, food is bought from a town with
+	# food to spare at the seller's market price, every ration paid for.
+	GameState.city_trade_shipments.clear()
+	GameState.economy_stage="currency"
+	var purse:=Purse.state()
+	purse.balance=0.0;purse.coin=0.0
+	Purse.stage()
+	purse.balance=400.0;purse.coin=400.0
+	var bought:=Purse.buy_relief(500.0)
+	assert_float(float(bought.spent)).is_greater(0.0)
+	assert_float(float(bought.spent)).is_less_equal(400.0+0.001)
+	assert_float(float(bought.spent)).is_equal_approx(float(bought.rations)*1.25,0.01)
+	assert_float(capital_food-float(GameState.resource_stockpiles.get("Food",0.0))).is_equal_approx(float(bought.rations),0.01)
+	assert_float(Purse.balance()).is_equal_approx(400.0-float(bought.spent),0.01)
 	# No market, no purchase: said plainly.
 	GameState.economy_metrics["price_observations"]=0
+	purse.balance=100.0;purse.coin=100.0
 	var none:=Purse.buy_relief(500.0)
 	assert_float(float(none.spent)).is_equal(0.0)
 	assert_str(String(none.reason)).contains("no market")
@@ -545,6 +584,7 @@ func test_the_purse_settles_monthly_and_costs_no_more_a_day()->void:
 ## it is taken, and the board says it town by town, with what was hidden.
 func test_the_board_says_where_the_silver_comes_from()->void:
 	GameState.economy_stage="subsistence"
+	_stock_food(200.0)
 	Purse.set_levy("heavy")
 	for i in 30: Purse.accrue({"daily_output_value":150.0},0.0)
 	var sources:=Purse.sources()
@@ -562,8 +602,99 @@ func test_the_board_says_where_the_silver_comes_from()->void:
 	assert_str(text).contains("WHERE IT COMES FROM")
 	assert_str(text).contains(String(GameState.settlement_name))
 	# A season at the pace of the days levied: about three months of it.
-	assert_float(float(home.levy)).is_greater(25.0*float(Purse.quote("heavy").rate)*150.0)
+	assert_float(float(home.levy)).is_greater(25.0*float(Purse.quote("heavy").rate)*150.0/Purse.food_price())
 	assert_str(text).contains("hidden by households")
 	await await_idle_frame()
 	remove_child(board)
 	board.free()
+
+
+## "Where did the silver come from?": the store holds only what the levy
+## took out of the towns' stores. Pay puts it back in common hands, it rots
+## as stored food does, and an older save's tally is counted again once.
+func test_the_store_holds_real_food_that_pay_returns_and_time_rots()->void:
+	GameState.economy_stage="subsistence"
+	_stock_food(200.0)
+	_soldiers(40)
+	_output(900.0)
+	var purse:=Purse.state()
+	purse.balance=5000.0
+	var food_before:=float(GameState.resource_stockpiles.get("Food",0.0))
+	var day:=int(GameState.elapsed_days)
+	purse.last_settle_day=day
+	var next:=day+30-posmod(day,30)
+	var report:=Purse.settle(next)
+	var paid:=float((report.paid as Dictionary).get("army",0.0))
+	assert_float(paid).is_greater(0.0)
+	# The soldiers' pay is food back in the capital's stores (its only town).
+	assert_float(float(GameState.resource_stockpiles.get("Food",0.0))-food_before).is_equal_approx(paid,0.01)
+	# The store rotted at the capital's own rate for stored food.
+	var rotted:=float((Purse.state().months as Array)[0].get("spoiled",0.0))
+	var rate:=float(FoodSystem.stored_spoilage_rate())
+	assert_float(rate).is_greater(0.0)
+	assert_float(rotted).is_equal_approx(5000.0*(1.0-pow(1.0-rate,float(next-day))),0.5)
+	assert_float(Purse.balance()).is_equal_approx(5000.0-rotted-paid,0.5)
+	# The forecast counts what a season of rot would take.
+	assert_float(float(Purse.forecast().rot)).is_greater(0.0)
+
+
+func test_an_older_purses_tally_is_counted_again_once()->void:
+	GameState.economy_stage="weighed_metal"
+	_output(900.0)
+	GameState.realm_purse={"version":1,"balance":225000.0,"coin":0.0,"backing":{},"levy":"usual","lines":{"army":true,"relief":false,"crews":false,"scholars":false},
+		"months":[{"levy":1400.0,"days":30.0},{"levy":1400.0,"days":30.0}],"month":{},"ledger":[{"day":1,"amount":1400.0,"why":"The month's levy","kind":"levy","balance":225000.0}],"migrated":true}
+	var purse:=Purse.state()
+	var year:=maxf(1400.0/30.0*365.0/Purse.food_price(),float(Purse.quote("usual").per_day)*365.0)
+	assert_float(float(purse.balance)).is_equal_approx(minf(225000.0/Purse.food_price(),year),1.0)
+	assert_float(float(purse.balance)).is_less(225000.0)
+	assert_str(String(purse.unit)).is_equal("ration")
+	assert_bool(purse.has("recount")).is_false()
+	assert_str(String((purse.ledger as Array)[0].why)).contains("Counted again")
+	# Once: a second reading counts nothing again.
+	var held:=float(purse.balance)
+	Purse.state()
+	assert_float(Purse.balance()).is_equal(held)
+
+
+## Review of the store: an older purse touched first by trade between peoples
+## is still counted again; after coinage a ration in is a ration out whatever
+## grain fetches; the levy takes fresh and stored food in their shares.
+func test_trade_touching_an_older_purse_first_does_not_skip_the_recount()->void:
+	GameState.economy_stage="subsistence"
+	_output(900.0)
+	GameState.realm_purse={"version":1,"balance":225000.0,"coin":0.0,"backing":{},"levy":"usual","lines":{"army":true},"months":[{"levy":1400.0,"days":30.0}],"month":{},"ledger":[],"migrated":true}
+	Purse.held_coin(GameState)
+	assert_float(Purse.balance()).is_less(225000.0)
+	assert_str(String((Purse.state().ledger as Array)[0].why)).contains("Counted again")
+
+
+func test_after_coinage_a_ration_in_is_a_ration_out_whatever_grain_fetches()->void:
+	GameState.economy_stage="currency"
+	GameState.market_prices["Food"]=0.7
+	_stock_food(200.0)
+	Purse.state()
+	Purse.stage()
+	assert_str(String(Purse.state().unit)).is_equal("coin")
+	var food_before:=float(GameState.resource_stockpiles.get("Food",0.0))
+	Purse.accrue({"daily_output_value":700.0},0.0)
+	var taken:=food_before-float(GameState.resource_stockpiles.get("Food",0.0))
+	assert_float(taken).is_greater(0.0)
+	assert_float(Purse.held_food()).is_equal_approx(taken,0.01)
+	# Grain doubles in price: the store still holds the same food, and paying
+	# it all out returns every ration it took.
+	GameState.market_prices["Food"]=1.4
+	assert_float(Purse.held_food()).is_equal_approx(taken,0.01)
+	var purse:=Purse.state()
+	var before_pay:=float(GameState.resource_stockpiles.get("Food",0.0))
+	Purse._pay_out(purse,float(purse.balance),"army")
+	assert_float(float(GameState.resource_stockpiles.get("Food",0.0))-before_pay).is_equal_approx(taken,0.01)
+
+
+func test_the_levy_takes_fresh_and_stored_food_in_their_shares()->void:
+	GameState.food_stocks={"Fresh food":1000.0,"Stored food":3000.0}
+	GameState.resource_stockpiles["Food"]=4000.0
+	var took:=float(FoodSystem.take_for_levy(400.0))
+	assert_float(took).is_equal_approx(400.0,0.001)
+	assert_float(float(GameState.food_stocks["Fresh food"])).is_equal_approx(900.0,0.001)
+	assert_float(float(GameState.food_stocks["Stored food"])).is_equal_approx(2700.0,0.001)
+	assert_float(float(GameState.resource_stockpiles["Food"])).is_equal_approx(3600.0,0.001)
