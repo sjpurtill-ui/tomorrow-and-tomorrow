@@ -1,0 +1,7 @@
+# Artifact batch16 — ready for integration
+
+Twelve fictional prehistoric experiments, IDs1496–1507, based on429e2a72dc2dca8918a7cf36ff9ab0bb15f019d5, branch codex/artifact-production-active-16. The established square ivory matte gouache reference supplies painting medium only. Objects are imagined preserved fragments, not claims about excavated finds. Distinct raw-material mechanisms: sheltered ember, widened hide carrying strap, reversed broken flint scraper, heat-exposed clay comparison, suspended stone sound experiment, inclined bark seed tray, folded edge cover, shell/clay grip, fork-span gauge, negative leaf soot print, loose crossed-root moss cradle and wood support for flint.
+
+Every full original and actual240px tile reviewed. The span gauge initially duplicated its fork; corrected to one fork with both tips inside a small rock opening before registration. Exact generation/edit prompts and source PNGs preserved in reviewed.json. Final import clean; headless/private GPU ARTIFACT_RECOVERY16_PASS count=12; approved runtime lookup, unique hashes,512px limits and prehistoric/living-origin separation pass; audit errors=[]; exact12 bank rows/12 index bindings changed. Probe exited; captures/logs remain ignored in artifacts.
+
+No simulation/save changes; save compatible. Canonical game/player/editor untouched. Shared bank manifest/index require selective merge of1496–1507. Generated unrelated imports and UIDs excluded. Player inclusion awaits designated integration.
