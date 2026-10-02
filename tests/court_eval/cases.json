@@ -847,6 +847,20 @@
    "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 2}, "confidence": 0.9},
    "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==1", "work_watch": "<before", "modifiers": "==before", "home_troops": "==before"}, "reply_has": ["2 fewer keep watch", "{work_watch} now"]}},
 
+  {"id": "work.more_caring", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Keeping and caring (keepers and carers), the People view's word since the people-first overhaul; the old 'keeping the stores' still reads.",
+   "say": "Put 5 more on keeping and caring",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 5}, "confidence": 0.9},
+   "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==1", "work_care": ">before", "modifiers": "==before", "moving": "==before"}, "reply_has": ["5 more keep and care", "{work_care} now"]},
+   "variants": ["put five more on keeping the stores", "Put 5 more on the carers"]},
+
+  {"id": "work.more_making", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Making (was making tools): the makers turn what is cut, dug and carried into goods; the old words still read.",
+   "say": "Put 5 more on making",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 5}, "confidence": 0.9},
+   "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==1", "work_make": ">before", "modifiers": "==before", "moving": "==before"}, "reply_has": ["5 more make things", "{work_make} now"]},
+   "variants": ["put five more on making tools"]},
+
   {"id": "work.leaders_again", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "note": "Set by hand, then handed back: the leaders share out the work again at once, and the headman says what they put first and who is at work now.",
    "steps": [

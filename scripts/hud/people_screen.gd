@@ -494,7 +494,14 @@ func _labor_row(labor:Dictionary,task_variant:Variant)->VBoxContainer:
 	var task:Dictionary=task_variant
 	var role:=String(task.get("id",""))
 	parent.name="TaskBox_"+role
-	var row:=HBoxContainer.new();row.name="Task_"+role;row.add_theme_constant_override("separation",6);parent.add_child(row)
+	# The row and, under it, what the work does now and what ten more would do
+	# (role_effects.gd), kept together so an opened task's panel sits just below.
+	var head:=VBoxContainer.new();head.name="TaskHead";head.add_theme_constant_override("separation",2);parent.add_child(head)
+	var row:=HBoxContainer.new();row.name="Task_"+role;row.add_theme_constant_override("separation",6);head.add_child(row)
+	var effect:Dictionary=task.get("effect",{}) if task.get("effect") is Dictionary else {}
+	for part:Array in [["now","Effect"],["plus_ten","TenMore"]]:
+		if String(effect.get(String(part[0]),""))=="":continue
+		var line:=T.make_label(String(effect[part[0]]),11,T.TEXT_SOFT);line.name=String(part[1]);line.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;head.add_child(line)
 	var toggle:=TaskToggle.new(String(task.get("label","")),open_task==role);toggle.name="Task";row.add_child(toggle)
 	toggle.pressed.connect(toggle_task.bind(role))
 	var crowd:=HBoxContainer.new();crowd.add_theme_constant_override("separation",-3);crowd.size_flags_horizontal=Control.SIZE_EXPAND_FILL;crowd.clip_contents=true;row.add_child(crowd)

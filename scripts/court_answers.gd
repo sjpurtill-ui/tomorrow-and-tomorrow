@@ -747,8 +747,8 @@ static func _fed_answer(sheet:Dictionary,lower:String)->String:
 ## Words for what the stores hold, to the store's own name.
 const STORE_WORDS:=[["Timber","\\b(timber|wood|logs?|lumber)\\b"],["Stone","\\b(stones?|rock)\\b"],["Clay","\\b(clay|mud brick)\\b"],["Fiber Plants","\\b(fib(er|re)s?|reeds?|flax|rushes)\\b"],["Forced Labor","\\b(bondservants?|slaves|forced labou?r)\\b"],["Transport Carts","\\b(carts?|sledges?|wagons?)\\b"]]
 ## The work, in plain words (population_allocations task names).
-const WORK_WORDS:={"food":"getting food","survey":"going over the land","extraction":"cutting timber and quarrying stone","construction":"building","crafting":"making tools and goods","logistics":"hauling and carrying",
-	"knowledge":"learning and teaching the young","administration":"keeping the council's business","defense":"on the watch"}
+const WORK_WORDS:={"food":"getting food","survey":"going over the land","extraction":"cutting timber and quarrying stone","construction":"building","crafting":"making goods","logistics":"hauling and carrying",
+	"knowledge":"learning and teaching the young","administration":"keeping and caring","defense":"on the watch"}
 
 static func _stores_answer(sheet:Dictionary,lower:String)->String:
 	var stock:Dictionary=sheet.get("stock",{})
