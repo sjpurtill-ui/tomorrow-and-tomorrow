@@ -1,12 +1,18 @@
 {
   "id": "ground_stone_axes",
   "line": "production",
-  "game_year": 16,
-  "approx_historical_year": -4893,
-  "prompt": "c. 4893 BCE: Adults grind dark mineral stone axe head on abrasive slab and bind finished stone adze head to wood haft; matte impasto oil. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a65666eb-c725-4b28-b185-94f4c473b84c.png",
-  "asset": "res://assets/ui/research/subjects/ground_stone_axes-v1.png",
-  "sha256": "ded41bb4d6362577fa4e4f2ca8094a086e724b3732c652149c177cfebd821d73",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; rejected first because axe head looked metallic; selected head reads unmistakably as stone in crop."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies production medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: Two seated adults grind a modest stone axe-head back and forth on a broad wet abrasive slab; a second finished dull stone blade is lashed into a simple split wooden haft beside them. Low frontal view with complete heads below upper quarter. Flat angular copper/ember/soot palette-knife painting, visibly planar matte pigment, no photo/3D relief. Coarse hides, wood and cord; no metal axes, machinery or polished stone building.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas, hands and central action y350..590. Zoom out enough that actual3.37:1 card keeps heads and mechanism. Top/bottom peripheral bands background only. Varied scene, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and small earthen dwellings, but plain weaving is later. Never introduce later tools/buildings from reference.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/production-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e981de82-21e9-4f73-b812-54804d9d0f6a.png",
+  "replace_first300": false,
+  "replace_art600": false,
+  "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+  "asset": "res://assets/ui/research/subjects/ground_stone_axes-v2.png",
+  "sha256": "d2cf1d29b954fc3636ea2525b90a0adcbf9807fb1625f58565e2f1b47a33cebc",
+  "mode": "built-in image_gen / edit"
 }

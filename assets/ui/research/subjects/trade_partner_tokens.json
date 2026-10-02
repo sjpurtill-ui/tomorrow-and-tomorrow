@@ -1,12 +1,18 @@
 {
   "id": "trade_partner_tokens",
   "line": "logistics",
-  "game_year": 16,
-  "approx_historical_year": -4893,
-  "prompt": "c. 4893 BCE: Neolithic trade partners exchange plain unmarked bone token with modest goods at river path; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f24c979e-0529-4416-95a0-5c9a850a1d41.png",
-  "asset": "res://assets/ui/research/subjects/trade_partner_tokens-v1.png",
-  "sha256": "e3630b72633a252236aed096699cf9604c4ea137fedd717ad79a032f51cf455c",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; token handoff and goods clear in crop, no writing or coinage."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.45
+  ],
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies logistics medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: Two traveling adults greet beside a shaded wooded path, one offers a small naturally pierced shell on a cord as a remembered hospitality token while the other welcomes them with an open hand. A tied bundle of raw hides and a basket of nuts lie nearby. Panoramic travel watercolor sand/slate/indigo, broad matte washes and drawn edges. Complete heads comfortably central; no formal coin, ornate seal, writing, metal or generic river marketplace.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas; hands and central action y350..590. Zoom out to preserve heads and mechanism in actual3.37:1 card. Peripheral top/bottom bands only background. Different setting and viewpoint, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and earthen shelters; woven cloth is later. No later tools or clothes copied from reference.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/logistics-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e4dc084e-4cb5-4105-b6a7-ac536bdda6a4.png",
+  "replace_first300": false,
+  "replace_art600": false,
+  "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+  "asset": "res://assets/ui/research/subjects/trade_partner_tokens-v2.png",
+  "sha256": "216dbe49ea82c0cb6f0e331d620356384323054df7cee39fc3e64f98b5e947c0",
+  "mode": "built-in image_gen / edit"
 }

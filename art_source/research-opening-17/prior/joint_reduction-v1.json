@@ -1,0 +1,12 @@
+{
+  "id": "joint_reduction",
+  "line": "health",
+  "game_year": 16,
+  "approx_historical_year": -4893,
+  "prompt": "c. 4893 BCE: Skilled adult supports injured persons dislocated shoulder and guides arm while helper steadies torso; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5564b5a2-ba30-43de-87fd-084ceb21dee4.png",
+  "asset": "res://assets/ui/research/subjects/joint_reduction-v1.png",
+  "sha256": "968cd634cf3bab86f8a3492339c45841c332aadb7514035edb2df4b398a92e83",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; careful shoulder treatment reads in crop without graphic injury or instructional text."
+}

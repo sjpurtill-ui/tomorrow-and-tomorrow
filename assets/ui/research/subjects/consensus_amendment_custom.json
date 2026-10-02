@@ -1,12 +1,18 @@
 {
   "id": "consensus_amendment_custom",
   "line": "institutions",
-  "game_year": 16,
-  "approx_historical_year": -4893,
-  "prompt": "c. 4893 BCE: Community publicly revises custom through open-hand agreement in a circle with elder witness; archaic mineral fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aae3ec97-fed6-4ec8-b9e4-ae380e8de493.png",
-  "asset": "res://assets/ui/research/subjects/consensus_amendment_custom-v1.png",
-  "sha256": "d6b92ab1f00aca026e5ffc06330e10e76e43c422670199255cfc14795777a8ff",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; group assent and deliberation clear, no writing."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies institutions medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: A small circle of six adults sitting at an open village threshold discuss changing a shared custom; one lays a plain branching twig between them, another makes a calm open-palmed agreeing gesture. Dusty plum, limestone and muted gold matte fresco, flat rhythmic silhouettes. Rough hide garments, earth walls and plain reed shade; no enormous statue, temple, writing or formal throne.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas, hands and central action y350..590. Zoom out enough that actual3.37:1 card keeps heads and mechanism. Top/bottom peripheral bands background only. Varied scene, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and small earthen dwellings, but plain weaving is later. Never introduce later tools/buildings from reference.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/institutions-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-24c6f200-2008-48ac-86a0-95656015a40f.png",
+  "replace_first300": false,
+  "replace_art600": false,
+  "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+  "asset": "res://assets/ui/research/subjects/consensus_amendment_custom-v2.png",
+  "sha256": "b62e76d79930d316f0b33f5232060dbd9eb74cdc5ba4d0258ed4c427c3718dac",
+  "mode": "built-in image_gen / edit"
 }

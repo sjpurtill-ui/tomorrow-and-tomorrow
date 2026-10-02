@@ -1,0 +1,12 @@
+{
+  "id": "ground_stone_axes",
+  "line": "production",
+  "game_year": 16,
+  "approx_historical_year": -4893,
+  "prompt": "c. 4893 BCE: Adults grind dark mineral stone axe head on abrasive slab and bind finished stone adze head to wood haft; matte impasto oil. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a65666eb-c725-4b28-b185-94f4c473b84c.png",
+  "asset": "res://assets/ui/research/subjects/ground_stone_axes-v1.png",
+  "sha256": "ded41bb4d6362577fa4e4f2ca8094a086e724b3732c652149c177cfebd821d73",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; rejected first because axe head looked metallic; selected head reads unmistakably as stone in crop."
+}
