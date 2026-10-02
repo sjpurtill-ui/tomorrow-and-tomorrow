@@ -20,7 +20,8 @@ extends Control
 ##     them is old.
 ## The pointer resting on a counter, a front, a town or a people's ground
 ## gets a few plain lines with the engine's own numbers (who, how many, the
-## dead, the odds, how old our word is).
+## dead, the odds, how old our word is). A click on an enemy's ground,
+## counter, front or town brings its card on the War screen into view.
 ## Bands out, battles, raids and garrisons stay the war chart's
 ## (war_front_overlay.gd). Observe-only: nothing here orders anything, and
 ## clicks reach the map.
@@ -147,6 +148,35 @@ func _process(delta:float)->void:
 		if counters!=null: counters.queue_redraw()
 
 
+## A click on an enemy's ground, counter, front or town: its card on the War
+## screen comes into view and shines a moment. Any other click is the map's.
+func _unhandled_input(event:InputEvent)->void:
+	if not active or not event is InputEventMouseButton: return
+	var press:=event as InputEventMouseButton
+	if not press.pressed or press.button_index!=MOUSE_BUTTON_LEFT: return
+	if not _free_rect(size).has_point(press.position): return
+	var i:=hit_at(press.position)
+	if i<0: return
+	var civ_id:=String((hits[i] as Dictionary).get("civ_id",""))
+	if civ_id=="" or civ_id=="player": return
+	if show_card(civ_id): get_viewport().set_input_as_handled()
+
+
+## Brings an enemy's card on the War screen into view and lights it a
+## moment. False when the War screen has no card for them.
+func show_card(civ_id:String)->bool:
+	var screen:Variant=MilitaryCampaign.roster_screen
+	if not is_instance_valid(screen): return false
+	var card:=(screen as Node).find_child("Enemy_%s" % civ_id,true,false) as Control
+	if card==null: return false
+	var scroll:Variant=(screen as Node).get("scroll")
+	if scroll is ScrollContainer: (scroll as ScrollContainer).ensure_control_visible(card)
+	card.modulate=Color(1.18,1.1,0.86)
+	var tween:=card.create_tween()
+	tween.tween_property(card,"modulate",Color.WHITE,0.9)
+	return true
+
+
 ## Where the pointer is (a capture may set it: --capture-war-hover=x,y).
 func _pointer()->Vector2:
 	for arg in OS.get_cmdline_user_args():
@@ -259,11 +289,14 @@ func collect()->Dictionary:
 	var reading:=Law.reading(MilitaryCampaign)
 	var target:=int(reading.get("target",-1))
 	var people:=maxi(1,int(reading.get("population",GameState.population_total)))
-	out["levy_tip"]=_lines(PackedStringArray(["At home: %s under arms" % EraWords.grouped(int(levy.get("ready",0))+int(levy.get("watch",0))),
-		"%s ready · %s on the watch" % [EraWords.grouped(int(levy.get("ready",0))),EraWords.grouped(int(levy.get("watch",0)))],
-		("%s in drill" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else "",
+	# The army at home, as the strip counts it (ready, in drill, waiting);
+	# the watch keeps the towns and is not the army (army_levy_law.watch).
+	var army_home:=int(levy.get("ready",0))+int(levy.get("drill",0))+int(levy.get("waiting",0))
+	out["levy_tip"]=_lines(PackedStringArray(["Our army at home: %s" % EraWords.grouped(army_home),
+		"%s ready%s" % [EraWords.grouped(int(levy.get("ready",0))),(" · %s in drill" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else ""],
+		("%s on the watch, keeping the towns (not the army)" % EraWords.grouped(int(levy.get("watch",0)))) if int(levy.get("watch",0))>0 else "",
 		("Army kept at %s of %s: %s" % [Law.level_name(String(reading.get("level",""))),EraWords.grouped(people),EraWords.grouped(target)]) if target>0 else "No army size chosen"]))
-	out.levy={"side":"ours","troops":int(levy.get("ready",0))+int(levy.get("watch",0)),"strength":clampf(float(reading.get("now",0))/float(target),0.0,1.0) if target>0 else 1.0,
+	out.levy={"side":"ours","troops":army_home,"strength":clampf(float(reading.get("now",0))/float(target),0.0,1.0) if target>0 else 1.0,
 		"will":float(levy.get("will",0.6)),"glyph":String(levy.get("glyph","spear")),"accent":OURS,
 		"tab":("%d in drill" % int(levy.get("drill",0))) if int(levy.get("drill",0))>0 else ""}
 	out.frame=frame
@@ -591,7 +624,8 @@ func draw_top(canvas:Control)->void:
 		hits=[]
 		return
 	var view:=Rect2(Vector2.ZERO,canvas.size)
-	var taken:Array=[]
+	# What the war chart drew (bands' counters, battles) is never covered.
+	var taken:Array=_chart_rects()
 	var found:Array=[]
 	var font:=T.font("voice")
 	var fs:=14
@@ -618,7 +652,7 @@ func draw_top(canvas:Control)->void:
 			if q.intersects(rect): clear=false; break
 		taken.append(Rect2(at-Vector2(r+2,r+2),Vector2(r+2,r+2)*2.0))
 		var whose:=_people_name(String(t.owner)) if String(t.owner)!="" else "strangers"
-		found.append({"rect":Rect2(at-Vector2(r+3,r+3),Vector2(r+3,r+3)*2.0).merge(rect if clear else Rect2(at,Vector2.ZERO)),
+		found.append({"civ_id":String(t.owner),"rect":Rect2(at-Vector2(r+3,r+3),Vector2(r+3,r+3)*2.0).merge(rect if clear else Rect2(at,Vector2.ZERO)),
 			"lines":PackedStringArray([words,"Ours" if String(t.owner)=="player" else "A town of %s" % whose,"Burned" if bool(t.get("ruin",false)) else ""])})
 		if not clear: continue
 		taken.append(rect)
@@ -635,7 +669,7 @@ func draw_top(canvas:Control)->void:
 		if not at.is_finite(): continue
 		var fighters:=int(e.fighters)
 		var low:=roundi(float(fighters)*(1.0-_spread(bool(e.stale)))); var high:=roundi(float(fighters)*(1.0+_spread(bool(e.stale))))
-		items.append({"at":at,"tip":e.get("tip_host",PackedStringArray()),"data":{"side":"theirs","low":low,"high":high,"strength":1.0-float(e.worn),"accent":e.color,"glyph":"spear","stale":bool(e.stale) or bool(e.guessed)}})
+		items.append({"at":at,"civ_id":String(e.civ_id),"tip":e.get("tip_host",PackedStringArray()),"data":{"side":"theirs","low":low,"high":high,"strength":1.0-float(e.worn),"accent":e.color,"glyph":"spear","stale":bool(e.stale) or bool(e.guessed)}})
 	var free:=_free_rect(canvas.size)
 	for item:Dictionary in items:
 		var at:Vector2=item.at
@@ -643,7 +677,7 @@ func draw_top(canvas:Control)->void:
 		var spot:=_clear_spot(at,plate,taken,free)
 		var drawn:=Counter.draw(canvas,spot,item.data,k)
 		taken.append(drawn.grow(4.0))
-		found.push_front({"rect":drawn,"lines":item.get("tip",PackedStringArray())})
+		found.push_front({"rect":drawn,"civ_id":String(item.get("civ_id","")),"lines":item.get("tip",PackedStringArray())})
 		# A short ink line back to the town it stands for, when set aside.
 		if spot.distance_to(at)>plate.y*0.75:
 			canvas.draw_line(at,spot+(at-spot).limit_length(plate.y*0.55),Color(INK,0.55),1.4,true)
@@ -651,12 +685,12 @@ func draw_top(canvas:Control)->void:
 	# clear of every counter and name.
 	for e:Dictionary in scene.get("enemies",[]):
 		var chip:=_draw_front_chip(canvas,e,taken,free)
-		if chip.has_area(): found.push_front({"rect":chip,"lines":e.get("tip_front",PackedStringArray())})
+		if chip.has_area(): found.push_front({"rect":chip,"civ_id":String(e.civ_id),"lines":e.get("tip_front",PackedStringArray())})
 		var line:=PackedVector2Array()
 		for p in (e.get("front",PackedVector2Array()) as PackedVector2Array):
 			var q:=_screen(p)
 			if q.is_finite(): line.append(q)
-		if line.size()>=2: found.append({"line":line,"lines":e.get("tip_front",PackedStringArray())})
+		if line.size()>=2: found.append({"line":line,"civ_id":String(e.civ_id),"lines":e.get("tip_front",PackedStringArray())})
 	# The peoples' grounds, last (beneath everything else).
 	for owner in _owners():
 		for hull:PackedVector2Array in _land_of(String(owner)):
@@ -666,7 +700,7 @@ func draw_top(canvas:Control)->void:
 			var at_war:=""
 			for e:Dictionary in scene.get("enemies",[]):
 				if String(e.civ_id)==String(owner): at_war="At war with us" if bool(e.war) else "In feud with us"
-			found.append({"poly":hull,"lines":PackedStringArray([_people_name(String(owner)) if String(owner)!="player" else "Our people's ground","%d %s we know" % [count,"town" if count==1 else "towns"],at_war])})
+			found.append({"poly":hull,"civ_id":String(owner),"lines":PackedStringArray([_people_name(String(owner)) if String(owner)!="player" else "Our people's ground","%d %s we know" % [count,"town" if count==1 else "towns"],at_war])})
 	hits=found
 	# The pointer's tip, over everything.
 	if hovered>=0 and hovered<hits.size():
@@ -720,17 +754,21 @@ func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2
 	var size:=Vector2(w,fs+6.0+12.0)
 	var n:=pts.size()
 	var tries:=[n/2,n/5,(n*4)/5,0,n-1]
+	# The first place clear of everything; else the one that covers least
+	# (our side first, then theirs, further out each time).
 	var place:=Vector2.INF
-	for reach in [34.0,64.0]:
+	var least:=INF
+	for reach:float in [34.0,70.0,110.0,-40.0,-80.0]:
 		for i:int in tries:
 			var centre:Vector2=pts[clampi(i,0,n-1)]-toward*reach
 			var rect:=Rect2(centre-size*0.5,size)
 			if free.has_area() and not free.encloses(rect): continue
-			var clear:=true
+			var cover:=0.0
 			for r:Rect2 in taken:
-				if r.intersects(rect): clear=false; break
-			if clear: place=centre; break
-		if place.is_finite(): break
+				if r.intersects(rect): cover+=r.intersection(rect).get_area()
+			if cover<least: least=cover; place=centre
+			if cover<=0.0: break
+		if least<=0.0: break
 	if not place.is_finite(): place=pts[n/2]-toward*34.0
 	var box:=Rect2(place-size*0.5,size)
 	taken.append(box.grow(3.0))
@@ -745,6 +783,31 @@ func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2
 	canvas.draw_rect(Rect2(bar.position+Vector2(w*float(e.ours_share),0),Vector2(w*(1.0-float(e.ours_share)),bar.size.y)),theirs.darkened(0.1))
 	canvas.draw_rect(bar.grow(1.5),Color(INK,0.85),false,1.2)
 	return box
+
+
+## The war chart's own marks on screen (war_front_overlay.gd): its counters
+## and its battles.
+func _chart_rects()->Array:
+	var out:Array=[]
+	# Every band of ours where it stands: its counter and, in a fight, its
+	# battle are drawn there, whatever the chart has drawn so far this frame.
+	for army in MilitaryCampaign.field_armies:
+		if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
+		var at:=_screen(_v2((army as Dictionary).get("position",{})))
+		if at.is_finite(): out.append(Rect2(at-Vector2(70,50),Vector2(140,100)))
+	var chart:Node=terrain.get_node_or_null("WarMapMarks/WarFrontOverlay") if is_instance_valid(terrain) else null
+	if chart==null: return out
+	var counted:Variant=chart.get("counter_rects")
+	if counted is Array:
+		for r in counted: if r is Rect2: out.append((r as Rect2).grow(4.0))
+	var drawn:Variant=chart.get("hits")
+	if drawn is Array:
+		for h in drawn:
+			if h is Dictionary and String((h as Dictionary).get("kind","")) in ["battle","battles"]:
+				var c:Vector2=(h as Dictionary).get("centre",Vector2.INF)
+				var radius:=float((h as Dictionary).get("radius",20.0))+10.0
+				if c.is_finite(): out.append(Rect2(c-Vector2(radius,radius),Vector2(radius,radius)*2.0))
+	return out
 
 
 ## Where a counter for a town may stand: above its mark, then to either side,

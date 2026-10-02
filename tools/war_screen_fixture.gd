@@ -9,6 +9,8 @@ extends RefCounted
 ## in play.
 ## "calm" (--capture-war-calm): the early village before any war, 120
 ## people, four on the watch, two in drill and no band out, at peace.
+## "battle" (--capture-war-battle): the war, and the band met on the road by
+## a band of theirs: a real battle begins (begin_threat_engagement).
 
 const Commands:=preload("res://scripts/leader_commands.gd")
 const WarLoop:=preload("res://scripts/war_loop.gd")
@@ -22,6 +24,7 @@ const DRILL:=3
 static func stage(_terrain:Node,mode:="war")->Dictionary:
 	if WorldSimulation.direction.needs_century_choice():WorldSimulation.direction.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
 	if mode=="calm":return _calm()
+	if mode=="battle":return _battle(stage(_terrain,"war"))
 	GameState.ensure_population_total(PEOPLE)
 	GameState.housing_capacity=maxi(GameState.housing_capacity,PEOPLE+PEOPLE/5)
 	GameState.elapsed_days=maxf(GameState.elapsed_days,40.0)
@@ -94,6 +97,29 @@ static func stage(_terrain:Node,mode:="war")->Dictionary:
 	band["last_report"]=mc._army_report_snapshot(band)
 	mc.field_armies[index]=band
 	return {"army_id":army_id,"civ_id":civ_id,"town":town_name,"general":String(general.get("name","")),"feuds":WarLoop.feuds().size()}
+
+
+## The war's band met on its road by a band of theirs a little larger, as
+## the game's own field contact makes one: the battle begins and is fought.
+static func _battle(war:Dictionary)->Dictionary:
+	var mc:Node=MilitaryCampaign
+	var army_id:=int(war.get("army_id",0))
+	var civ_id:=String(war.get("civ_id",""))
+	var index:int=mc._field_army_index(army_id)
+	if index<0 or civ_id=="":return war
+	var band:Dictionary=mc.field_armies[index]
+	band["status"]="stationed"
+	band["morale"]=0.8
+	mc.field_armies[index]=band
+	var at:Dictionary=band.position
+	var enemy:Dictionary=mc.simulator.create_formation_force("their band",[{"unit":"levy","weapon":"improvised","count":BAND+3,"equipment":0,"training":0.25}],0.7,0.3)
+	enemy["commander"]=mc.simulator.create_commander("their war leader",0.5,0.5,0.5,0.5)
+	mc.active_threat={"id":"capture-contact","title":"Contact","incident_kind":"campaign","campaign_mode":"offensive","source_civ_id":civ_id,"source_name":WarLoop._name(civ_id),
+		"field_encounter":true,"formation_id":"capture","target_region_id":"","target_region_name":"the road","field_army_id":army_id,"enemy_force":enemy,"terrain_defense":1.0,
+		"seed":7,"deadline_day":99999,"discovered_day":int(GameState.elapsed_days),"target_position":{"x":float(at.x)+0.2,"z":float(at.z)}}
+	var begun:Dictionary=mc.begin_threat_engagement(false)
+	war["battle"]=String(begun.get("id",begun.get("error","")))
+	return war
 
 
 ## The village before any war: four keep the watch, two drill, the army
