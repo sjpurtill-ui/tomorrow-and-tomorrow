@@ -462,8 +462,10 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	# pregnancies, and the dead and gone since the world began.
 	var kids:=maxf(0.0,float(GameState.population_cohorts.get("children",0.0)))
 	var grown:=maxf(0.0,float(GameState.population_exact)-kids)
-	m["our_women"]=roundi(grown*GameState.adult_female_share())
-	m["our_men"]=roundi(grown*(1.0-GameState.adult_female_share()))
+	var women:=GameState.women_in(["youth","early_adults","established_adults","mature_adults","elders"])
+	m["our_women"]=roundi(women)
+	m["our_men"]=roundi(grown-women)
+	m["our_old_women"]=roundi(GameState.women_in(["elders"]))
 	m["our_children"]=roundi(kids)
 	m["our_elders"]=roundi(float(GameState.population_cohorts.get("elders",0.0)))
 	m["our_fertile"]=roundi(GameState.fertile_women())

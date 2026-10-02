@@ -535,8 +535,12 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# nearest reading (court_war_orders.pending_answer), never asked again.
 	if String(theirs.get("ask",""))=="measure" and kind!="question" and (kind!="order" or action=="none"): return {"route":"engine","context":{"reader":true}}
 	# The court asked which village a grave order on our own people meant
-	# (grave_home.gd): the answer is read by the words themselves.
-	if String(theirs.get("ask",""))=="which_people" and kind!="question": return {"route":"legacy","why":"the answer to which village"}
+	# (grave_home.gd): a short, clear answer is read by the words themselves;
+	# any other words drop the question and are read as what they are.
+	if String(theirs.get("ask",""))=="which_people":
+		if not CC.GraveHome.answer_choice(audience,text).is_empty(): return {"route":"legacy","why":"the answer to which village"}
+		audience.erase("pending_command")
+		theirs={}
 	if kind!="question":
 		# Words that hold back all they name ("don't kill him", "no, don't
 		# attack", "Kavu must not be punished"): the engine answers them

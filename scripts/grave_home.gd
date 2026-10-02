@@ -5,40 +5,49 @@ extends RefCounted
 ## village", "drive out the old": the god's word against the people who are
 ## its own. Read here, adjudicated from the one ledger (docs/ADJUDICATION.md)
 ## and carried out through the real population model (GameState's age
-## cohorts, its count of women and men, the pregnancies, the work), never a
-## counter of its own:
-##   1. Whose people. Ours when the words say so ("our village", "my people",
-##      Seanstone, the farmers), or when no other people is in our hands and no
-##      war is on. A town or people of theirs named, "their"/"them", or a town
-##      we hold that this audience is speaking of: the war orders
+## cohorts, its women by age, the pregnancies, the work), never a counter of
+## its own:
+##   1. What the words fall on. People, named outright as the act's own object
+##      (the women, the old, the children, half the farmers, everyone in the
+##      village): never a goat, the dead, trees, rats or wolves, and never
+##      "everyone" read into a place alone. Burning is of the village itself
+##      ("burn our own village"); driving out is out of the realm ("banish
+##      the elders", "drive the old out of the village", never "throw the
+##      men out of the hall").
+##   2. Whose people. Ours when the words say so ("our village", Seanstone, our
+##      second town named), or when no other people is in our hands and no war
+##      or feud is on. A town or people of theirs named, "their"/"them", or a
+##      town we hold that this audience is speaking of: the war orders
 ##      (town_fate.gd), as before. "The village" while we hold a town nobody
-##      has spoken of, or at war with none held: ONE question, which
-##      (answer() carries the reply; never the same question again).
-##   2. The one ordered: court_commands.obedience (obey, plead, refuse), then
+##      has spoken of, or at war or in a feud: ONE question, which. Only a
+##      short, clear answer settles it (answer_choice: a village named, "our
+##      own", yes or no); anything else drops the question and is heard as
+##      itself.
+##   3. The one ordered: court_commands.obedience (obey, plead, refuse), then
 ##      the stated chance anyone refuses a grave order on their own people
-##      (refusal_odds: their empathy, love, courage and dread; the god's
-##      insistence halves it). A refusal is court_commands._refusal (they flee,
-##      or kneel bound); a plea waits for the god's "do it".
-##   3. The hands: our fighters at home, else the watch, else a few men the
-##      official gathers. Each may refuse (hand_refusal_odds, one seeded roll
-##      each); of those who refuse some flee the realm, with their gear.
-##   4. The people: each one named is caught on the stated odds (catch_odds:
-##      the hands against their number, as town_fate.catch_odds); a hand does
-##      a day's work (KILLS_PER_HAND, DRIVE_PER_HAND) for at most DAYS_MAX days,
-##      so a few dozen hands are never instant and total. Those not caught run:
-##      from a killing most leave the realm (ESCAPED_LEAVE) and the rest hide
-##      with kin; from a driving out they hide and stay. Of the rest of the
-##      people a share flees too (flight_odds).
-##   5. The ledger: deaths by group (GameState.register_directive_population_
-##      deaths with the cohorts and the sex named), flight (register_population
-##      _departures), the pregnancies of the women lost (lose_pregnancies), the
-##      houses and stores burned. The count before, less what is reported, is
-##      the count after.
-##   6. What lasts: dread and lost love (divine_regard PEOPLE_ACTS, the court's
-##      bonds and memories), legitimacy and cohesion, fewer births while the
-##      women are fewer (the birth model reads the women left), every people
-##      that knows us hears of it, a Chronicle moment in plain words, and the
-##      memory of the one who did it.
+##      (refusal_odds); a refusal is court_commands._refusal; a plea waits for
+##      the god's "do it".
+##   4. The hands: our fighters at home, else the watch, else a few men the
+##      official gathers (all men of home). Each may refuse (hand_refusal_odds,
+##      one seeded roll each); of those who refuse some flee the realm with
+##      their gear, off home's own count.
+##   5. The people, by age and sex (each cohort's women or men; the overlap of
+##      "the women and the old" counted once): each one named is caught on the
+##      stated odds (catch_odds); a hand does a day's work (KILLS_PER_HAND,
+##      DRIVE_PER_HAND) for at most DAYS_MAX days. Those not caught run: from a
+##      killing most leave the realm (ESCAPED_LEAVE), the rest hide with kin;
+##      from a driving out they hide and stay. Of the rest a share flees too.
+##   6. The ledger: GameState.register_population_deaths_by_cell and
+##      register_population_departures by cohort and sex, in that town's own
+##      count; the pregnancies of the women of child-bearing age who were
+##      killed or left; the work they did (a killing of the farmers leaves
+##      fewer farmers); the houses and stores burned. Before, less what is
+##      reported, is after.
+##   7. What lasts: dread and lost love (divine_regard PEOPLE_ACTS), the
+##      court's bonds and a true memory of what was ordered, legitimacy and
+##      cohesion, fewer births while the women are fewer, every people that
+##      knows us hears of it, a Chronicle moment in plain words, and the memory
+##      of the one who did it.
 ## Laws ("execute every thief", "anyone who murders will be put to death")
 ## stay laws (court_realm_acts.law): never read here. The words are plain and
 ## never graphic; children are counted, never described.
@@ -73,19 +82,20 @@ const DEATH_ID:="killing_at_the_gods_word"
 const ADULT:=["youth","early_adults","established_adults","mature_adults","elders"]
 const WORKING:=["youth","early_adults","established_adults","mature_adults"]
 const ALL:=["children","youth","early_adults","established_adults","mature_adults","elders"]
+const SEXES:=["female","male"]
 
 ## Groups of our people the words may name, in the order they are tried:
 ## [id, pattern, cohorts, sex, words, refusal weight].
 const GROUPS:=[
-	["old_women","\\bold (women|wives|mothers|woman)\\b",["elders"],"female","old women",0.14],
-	["old_men","\\bold (men|males|man)\\b",["elders"],"male","old men",0.12],
-	["elders","\\b(old people|old ones|old folks?|elders|elderly|the aged|grandmothers|grandfathers|grey ?beards|grey ?heads|the old(?=\\s*$|\\s*[,.!;]|\\s+(and|too|now|first|as|from|out|away|of|in|at|with|who|that|here|there)\\b))",["elders"],"","old people",0.12],
+	["old_women","\\bold_w\\b",["elders"],"female","old women",0.14],
+	["old_men","\\bold_m\\b",["elders"],"male","old men",0.12],
+	["elders","\\b(old people|old ones|old folks?|elders|elderly|the aged|grandmothers|grandfathers|grey ?beards|grey ?heads|the old(?=\\s*$|\\s+(and|too|now|first|as well)\\b))",["elders"],"","old people",0.12],
 	["girls","\\b(girls|daughters|little girls)\\b",["children"],"female","girls",0.22],
 	["boys","\\b(boys|sons|little boys)\\b",["children"],"male","boys",0.22],
 	["children","\\b(children|kids|young ones|little ones|babies|infants|toddlers|every child)\\b",["children"],"","children",0.22],
 	["women","\\b(women|womenfolk|wives|mothers|females|every woman|every female)\\b",ADULT,"female","women",0.15],
 	["men","\\b(men|males|menfolk|husbands|fathers|every man|every male)\\b",ADULT,"male","men",0.08],
-	["everyone","\\b(everyone|everybody|every ?one of them|every soul|all of them|them all|the people|our people|my people|villagers|townsfolk|townspeople|inhabitants|residents|population|families|households|the whole (village|town|camp|settlement|people))\\b",ALL,"","people",0.2],
+	["everyone","\\b(everyone|everybody|every soul|the people|our people|my people|all the people|villagers|townsfolk|townspeople|inhabitants|residents|population|families|households|the whole (vill?age|town|camp|settlement|people))\\b",ALL,"","people",0.2],
 ]
 ## Our own people by their work: [id, pattern, work role, words].
 const TRADES:=[
@@ -95,13 +105,28 @@ const TRADES:=[
 	["carriers","\\b(carriers?|porters?|haulers?)\\b","Logistics","carriers"],
 	["quarrymen","\\b(miners?|quarrymen|woodcutters?|stonecutters?)\\b","Extraction","quarrymen and woodcutters"],
 ]
-const KILL_RE:="(?i)\\b(kill|kills|kil|kiil|killl|slay|slaughter|massacre|butcher|execute|exterminate|murder|wipe out|cut down|do away with|get rid of|put [\\w' ]{0,30}?to (the sword|death)|rid [\\w' ]{0,30}?\\bof)\\b"
-const BURN_RE:="(?i)\\b(burn|burns|torch|set fire to|set [\\w' ]{0,30}?(on fire|alight|ablaze)|put [\\w' ]{0,30}?to the torch|raze)\\b"
-const DRIVE_RE:="(?i)\\b((drive|cast|throw|chase|force|turn|kick|run) [\\w' ]{0,40}?\\b(out|away|off)\\b|banish|exile|expel)\\b"
+const KILL_RE:="(?i)\\b(kill|kills|kil|kiil|killl|slay|slaughter|massacre|butcher|execute|exterminate|murder|wipe out|cut down|do away with|get rid of|put (?<putobj>[\\w' ]{1,40}?) to (the sword|death)|rid (?<ridplace>[\\w' ]{0,30}?)\\s*of)\\b"
+const BURN_RE:="(?i)\\b(burn|burns|torch|raze|set fire to|set (?<setobj>[\\w' ]{1,30}?) (on fire|alight|ablaze)|put (?<torchobj>[\\w' ]{1,30}?) to the torch)\\b"
+## Out of the realm, by the verb itself: banish, exile, expel.
+const BANISH_RE:="(?i)\\b(banish|exile|expel)\\b"
+## "Drive / cast ... out": out of the realm only with realm words, or bare.
+const OUT_RE:="(?i)\\b(drive|cast|throw|chase|force|turn|kick|run|send)\\s+(?<mid>[\\w' ]{0,40}?)\\s*\\b(out|away|off)\\b"
+## Words that take the people out of the realm, not out of a room.
+const REALM_PHRASE:="(?i)\\b((out of|from|away from|beyond|past|outside( of)?) (the |our |my |this )?(own )?(realm|lands?|country|territory|kingdom|valley|vill?age|vilage|villiage|town|camp|settlement|hearths|homes?|people|tribe|clan|midst|borders?)|beyond the (hills|river|border|mountains|forest|marshes|pass)|(in)?to the (wild|wilds|wilderness|hills|forest|waste|wastes|desert|marsh|marshes)|for good|forever|never to return|from (among )?us)\\b"
+## Out of a town of ours, by its name.
+const FROM_TOWN:="(?i)\\b(out of|from|away from) %s\\b"
+## A place the words move them to or from that is no leaving of the realm.
+const PLACE_PHRASE:="(?i)\\b(out of|from|off|to|into|onto|away from|across|toward|towards)\\s+(the |our |my |this |his |her |their )?[a-z]+"
 ## Where one order ends and the next begins.
 const NEXT_RE:="(?i)[,;.!]|\\b(then|and then|take|bring|carry|lead|send|march|haul|give|keep|hold|spare|free|release|leave|feed|build)\\b"
+## Where the act's own object ends: a place, a time, a clause about them.
+const HEAD_END:="(?i)\\b(in|of|at|from|around|near|by|on|inside|outside|across|beyond|within|among|to|into|with|who|whom|that|which|out|away|off|for|before|after|now|today|tonight|tomorrow|too|here|there|immediately|at once|once)\\b"
+## A count or a part leading the object ("half the farmers", "20 of the women").
+const QUANTITY:="(?i)^(all|every one of|each of|both|half|most|some|several|many|a few|two thirds|three quarters|a third|one third|a quarter|one quarter|a fourth|a fifth|one fifth|a tenth|one tenth|\\d{1,7}|a dozen|a score|a hundred|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|hundred)(\\s+of)?\\s+"
 ## "The village", "this town": a village not named.
 const VILLAGE_RE:="(?i)\\b(the|this|that|our|my|a|in|of) (vill?age|vilage|villiage|town|camp|settlement|hamlet|houses|homes|huts)\\b"
+## The village itself as what is burned.
+const PLACE_HEAD:="(?i)^(the |our |my |this |that )*(own |whole |entire )?(vill?age|vilage|villiage|town|camp|settlement|hamlet|houses|homes|huts|home)\\b"
 ## The words say the people are ours.
 const OWN_RE:="(?i)\\b(our|my) own\\b|\\b(our|my) (vill?age|vilage|villiage|town|camp|settlement|hamlet|home|homes|houses|huts|people|folk|kin|realm|hearths?|women|men|children|old|elders|girls|boys|farmers|hunters|builders|craftsmen|families|households|subjects|tribe|clan)\\b|\\bat home\\b|\\bof ours\\b|\\bamong us\\b|\\bin our midst\\b"
 ## Someone else's people, or the captives of a fight: the war orders'.
@@ -115,6 +140,8 @@ const PARTS:=[
 	["\\b(a fifth|one fifth|1/5|every fifth)\\b",0.2],["\\b(a tenth|one tenth|1/10|every tenth)\\b",0.1],["\\b(some|several)\\b",0.2],
 ]
 const NUMBER_WORDS:={"a few":4,"a dozen":12,"a score":20,"a hundred":100,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12,"fifteen":15,"twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"hundred":100}
+## Words a short answer to "Which village?" may hold besides the names.
+const ANSWER_WORDS:=["the","village","town","camp","settlement","one","of","our","own","ours","home","here","i","mean","meant","that","this","please","then","in","it","is","a","yes","just","only","first","second","last","other","theirs","we","hold","held","took","taken","captured","there","oh","well","um","uh","said","course","obviously"]
 
 static func _re(pattern:String)->RegEx:
 	var re:=RegEx.new(); re.compile(pattern)
@@ -136,13 +163,14 @@ static func _day()->int:
 static func reading(text:String,audience:Dictionary,list:Array[Dictionary]=[])->Dictionary:
 	## {} when these words are no grave order against our own people (or are
 	## the war orders' business). Otherwise {kind:"act"|"ask", how:"kill"|
-	## "burn"|"drive", groups:[...], share, count, text, own, options?}.
+	## "burn"|"drive", groups:[...], share, count, text, own, home,
+	## settlement_id, options?, question?}.
 	var clean:=text.strip_edges().replace("’","'")
 	if clean=="" or clean.ends_with("?") or audience.is_empty(): return {}
 	if String(audience.get("origin",""))=="foreign": return {}
 	var lower:=clean.to_lower()
 	if _has(lower,"^\\W*(what|why|how|who|whom|where|when|should|could|can|would|shall we|do we|is it|are we|did|does|have we)\\b"): return {}
-	var verb:=_verb(lower)
+	var verb:=_verb(clean)
 	if verb.is_empty(): return {}
 	# Words that hold an act back, a law, wrongdoers, a condition: never this.
 	for p:Dictionary in Realm.clauses(clean):
@@ -154,25 +182,26 @@ static func reading(text:String,audience:Dictionary,list:Array[Dictionary]=[])->
 	var span:=_span(lower,int(verb.at))
 	# Someone else's people, or one person: the war orders and the person acts.
 	if _has(span,FOREIGN_RE) or bool(cc.call("_names_a_place",span)): return {}
-	if _one_person(span,list,cc): return {}
+	var object:=String(verb.object).strip_edges()
+	if object=="" or _one_person(object,list,cc): return {}
 	var how:=String(verb.how)
-	var groups:=_groups(span)
+	var head:=_head(object)
+	var groups:=_groups(head)
+	if how=="burn":
+		# Burning people is killing them; burning the village itself is
+		# burning the village; anything else burned (the dead, the fields) is
+		# none of this.
+		if not groups.is_empty(): how="kill"
+		elif not _has(head,PLACE_HEAD) and not _names_ours(head): return {}
+	elif groups.is_empty(): return {}
+	if how=="drive" and not _leaves_realm(String(verb.kind),span): return {}
 	var place:=_has(span,VILLAGE_RE)
 	# Which of our towns: one named, else the one whose leader is ordered, else home.
 	var town:=_our_town(span,list)
 	var home:=String(town.get("name",""))
 	var own:=_has(span,OWN_RE) or bool(town.get("named",false))
-	if how=="burn":
-		# Burning people is killing them; burning a place is burning the village.
-		if not groups.is_empty(): how="kill"
-		elif not (own or place): return {}
-	if groups.is_empty():
-		# "Kill the village", "drive everyone out of our town": all its people.
-		if how=="burn": pass
-		elif place or own: groups=[_group_row(GROUPS[GROUPS.size()-1])]
-		else: return {}
-	var trades_only:=groups.all(func(g:Dictionary)->bool: return String(g.get("role",""))!="")
-	var out:={"how":how,"groups":groups,"share":_share(span),"count":_number(span,groups),"text":clean.substr(0,300),"own":own,"home":home,"settlement_id":String(town.get("id",""))}
+	var trades_only:=not groups.is_empty() and groups.all(func(g:Dictionary)->bool: return String(g.get("role",""))!="")
+	var out:={"how":how,"groups":groups,"share":_share(object),"count":_number(object,groups),"text":clean.substr(0,300),"own":own,"home":home,"settlement_id":String(town.get("id",""))}
 	if own or trades_only:
 		out["kind"]="act"; return out
 	var id:=String(audience.get("id",""))
@@ -191,12 +220,76 @@ static func reading(text:String,audience:Dictionary,list:Array[Dictionary]=[])->
 	if at_war or _feud():
 		# At war with none of theirs held: "kill all the men" is answered by the
 		# war leader (nobody of theirs is in our hands); "the village" is asked.
-		# In a feud (no war declared) whose women are meant is asked as well.
+		# In a feud (no war declared) whose people are meant is asked as well.
 		if at_war and not place: return {}
 		out["kind"]="ask"; out["options"]=_options([],home); out["question"]=_question(out,[])
 		return out
 	out["kind"]="act"
 	return out
+
+static func _verb(clean:String)->Dictionary:
+	## The first grave verb and the words it falls on: {how, kind, at, end,
+	## object}. kind: "kill", "burn", "banish" (banish, exile, expel), "out"
+	## (drive... out).
+	var lower:=clean.to_lower().replace("’","'")
+	var best:Dictionary={}
+	var k:=_re(KILL_RE).search(lower)
+	if k!=null:
+		var obj:=k.get_string("putobj") if k.get_string("putobj")!="" else lower.substr(k.get_end())
+		best={"how":"kill","kind":"kill","at":k.get_start(),"end":k.get_end(),"object":obj}
+	var b:=_re(BURN_RE).search(lower)
+	if b!=null and (best.is_empty() or b.get_start()<int(best.at)):
+		var obj2:=b.get_string("setobj") if b.get_string("setobj")!="" else (b.get_string("torchobj") if b.get_string("torchobj")!="" else lower.substr(b.get_end()))
+		best={"how":"burn","kind":"burn","at":b.get_start(),"end":b.get_end(),"object":obj2}
+	var ban:=_re(BANISH_RE).search(lower)
+	if ban!=null and (best.is_empty() or ban.get_start()<int(best.at)):
+		best={"how":"drive","kind":"banish","at":ban.get_start(),"end":ban.get_end(),"object":lower.substr(ban.get_end())}
+	var o:=_re(OUT_RE).search(lower)
+	if o!=null and (best.is_empty() or o.get_start()<int(best.at)):
+		var mid:=o.get_string("mid").strip_edges()
+		best={"how":"drive","kind":"out","at":o.get_start(),"end":o.get_end(),"object":mid if mid!="" else lower.substr(o.get_end()),"bare":mid=="","verb":o.get_string(1)}
+	return best
+
+static func _head(object:String)->String:
+	## The act's own object: the people (or place) the verb falls on, less a
+	## count or part before it and anything after a place, time or clause
+	## ("half the farmers" -> "the farmers"; "all women in the village" ->
+	## "women"). A thing of theirs ("the women's goats") is the thing.
+	var o:=object.strip_edges().to_lower()
+	o=_re(QUANTITY).sub(o,"",false).strip_edges()
+	var cut:=_re(HEAD_END).search(o)
+	if cut!=null: o=o.substr(0,cut.get_start())
+	o=o.strip_edges()
+	var own:=_re("(?i)(\\w)('s|s')\\s+").search(o)
+	while own!=null:
+		o=o.substr(own.get_end()).strip_edges()
+		own=_re("(?i)(\\w)('s|s')\\s+").search(o)
+	return o
+
+static func _leaves_realm(kind:String,span:String)->bool:
+	## Driving out is out of the realm: banish, exile, expel, or "drive / cast
+	## out" with nowhere else named; any other words of moving people ("throw
+	## the men out of the hall", "chase the boys off the walls") only with
+	## words that take them out of the realm.
+	if _has(span,REALM_PHRASE): return true
+	# Out of a town of ours named ("banish the elders from Seanstone").
+	var ours:Array=[String(GameState.settlement_name).to_lower()]
+	for s in GameState.player_settlements:
+		if s is Dictionary: ours.append(String((s as Dictionary).get("name","")).to_lower())
+	for name in ours:
+		if String(name)!="" and _has(span,FROM_TOWN % WarOrders._escape(String(name))): return true
+	# Out of or off somewhere else, or to the fields: no leaving of the realm.
+	if _has(span,PLACE_PHRASE): return false
+	if kind=="banish": return true
+	var m:=_re(OUT_RE).search(span)
+	return m!=null and m.get_string(1).to_lower() in ["drive","cast"] and m.get_string(3).to_lower()=="out"
+
+static func _names_ours(head:String)->bool:
+	var home:=String(GameState.settlement_name)
+	if home!="" and WarOrders._name_hit(head,home): return true
+	for s in GameState.player_settlements:
+		if s is Dictionary and String((s as Dictionary).get("name",""))!="" and WarOrders._name_hit(head,String((s as Dictionary).name)): return true
+	return false
 
 static func _our_town(span:String,list:Array[Dictionary])->Dictionary:
 	## The town of ours the order falls on: {id ("" for home, whose people are the
@@ -218,26 +311,20 @@ static func _our_town(span:String,list:Array[Dictionary])->Dictionary:
 				return {"id":sid,"name":String((s as Dictionary).name),"named":false}
 	return home
 
-static func _scoped(settlement_id:String,operation:Callable)->Variant:
+static func _scoped(settlement_id:String,operation:Callable,commit:bool=true)->Variant:
 	## Done among that town's own people (SettlementModel's local count, which
-	## the daily births and deaths read), then folded back into the realm's.
+	## the daily births and deaths read), then folded back into the realm's
+	## (commit), or only read.
 	var model:Variant=WorldSimulation.settlements if WorldSimulation.settlements!=null else SettlementModel
-	var local:=func()->Variant: return model.with_local_population(operation,true)
+	var local:=func()->Variant: return model.with_local_population(operation,commit)
 	if settlement_id!="": return model.with_city_resources(settlement_id,local)
 	return local.call()
-
-static func _verb(lower:String)->Dictionary:
-	var best:Dictionary={}
-	for pair in [["kill",KILL_RE],["burn",BURN_RE],["drive",DRIVE_RE]]:
-		var m:=_re(String(pair[1])).search(lower)
-		if m!=null and (best.is_empty() or m.get_start()<int(best.at)): best={"how":String(pair[0]),"at":m.get_start(),"end":m.get_end()}
-	return best
 
 static func _span(lower:String,at:int)->String:
 	## The words the act falls on: from its verb up to the next order.
 	var span:=lower.substr(at)
-	var own_verb:=_verb(span)
-	var from:=int(own_verb.get("end",0))
+	var first:=_re("^\\S+\\s*").search(span)
+	var from:=first.get_end() if first!=null else 0
 	var cut:=span.length()
 	for m in _re(NEXT_RE).search_all(span,from):
 		var before:=span.substr(0,m.get_start()).strip_edges()
@@ -246,10 +333,10 @@ static func _span(lower:String,at:int)->String:
 		cut=m.get_start(); break
 	return span.substr(0,cut).strip_edges()
 
-static func _one_person(span:String,list:Array[Dictionary],cc:GDScript)->bool:
+static func _one_person(object:String,list:Array[Dictionary],cc:GDScript)->bool:
 	## One person named ("Kavu", "the headman", "him"): a person act, not this.
-	if list.is_empty(): return _has(span,"\\b(him|her|you|yourself|himself|herself)\\b")
-	for m:Dictionary in cc.call("mentions",span,list):
+	if list.is_empty(): return _has(object,"\\b(him|her|you|yourself|himself|herself)\\b")
+	for m:Dictionary in cc.call("mentions",object,list):
 		if String(m.by) in ["name","title"] and String(m.get("of",""))=="": return true
 		if String(m.by)=="pronoun" and String(m.word) in ["him","her","you","yourself","himself","herself","this one","that one"]: return true
 	return false
@@ -257,21 +344,20 @@ static func _one_person(span:String,list:Array[Dictionary],cc:GDScript)->bool:
 static func _group_row(row:Array)->Dictionary:
 	return {"id":String(row[0]),"cohorts":(row[2] as Array).duplicate(),"sex":String(row[3]),"words":String(row[4]),"weight":float(row[5])}
 
-static func _groups(span:String)->Array:
-	## The groups the words name ("the women and children"), each once; "the
+static func _groups(head:String)->Array:
+	## The groups the head names ("the women and children"), each once; "the
 	## old men" is never also "the men", and everyone is everyone.
 	var out:Array=[]
-	var taken:=span.replace("old women","old_w").replace("old woman","old_w").replace("old men","old_m").replace("old man","old_m").replace("old wives","old_w").replace("old mothers","old_w").replace("old males","old_m")
+	if head=="": return out
+	var taken:=head.replace("old women","old_w").replace("old woman","old_w").replace("old men","old_m").replace("old man","old_m").replace("old wives","old_w").replace("old mothers","old_w").replace("old males","old_m")
 	for row in GROUPS:
-		var pattern:=String(row[1])
-		var hit:=false
-		match String(row[0]):
-			"old_women": hit=_has(taken,"\\bold_w\\b")
-			"old_men": hit=_has(taken,"\\bold_m\\b")
-			_: hit=_has(taken,"(?i)"+pattern)
-		if not hit: continue
+		var hit:=_re("(?i)"+String(row[1])).search(taken)
+		if hit==null: continue
 		if String(row[0])=="everyone": return [_group_row(row)]
-		out.append(_group_row(row))
+		var g:=_group_row(row); g["at"]=hit.get_start()
+		out.append(g)
+	# In the order the words name them ("the women and the old").
+	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.get("at",0))<int(b.get("at",0)))
 	# "The girls and the boys" are the children; "children" with either is the children.
 	var ids:=out.map(func(g:Dictionary)->String: return String(g.id))
 	if "children" in ids: out=out.filter(func(g:Dictionary)->bool: return not String(g.id) in ["girls","boys"])
@@ -279,18 +365,19 @@ static func _groups(span:String)->Array:
 		out=out.filter(func(g:Dictionary)->bool: return not String(g.id) in ["girls","boys"])
 		out.append(_group_row(GROUPS[5]))
 	for row in TRADES:
-		if _has(span,"(?i)"+String(row[1])): out.append({"id":String(row[0]),"cohorts":WORKING.duplicate(),"sex":"","words":String(row[3]),"weight":0.08,"role":String(row[2])})
+		if _has(head,"(?i)"+String(row[1])): out.append({"id":String(row[0]),"cohorts":WORKING.duplicate(),"sex":"","words":String(row[3]),"weight":0.08,"role":String(row[2])})
 	return out
 
-static func _share(span:String)->float:
+static func _share(object:String)->float:
+	var o:=object.to_lower()
 	for pair in PARTS:
-		if _has(span,"(?i)"+String(pair[0])): return float(pair[1])
+		if _has(o,"(?i)"+String(pair[0])): return float(pair[1])
 	return 1.0
 
-static func _number(span:String,groups:Array)->int:
+static func _number(object:String,groups:Array)->int:
 	## A count asked for ("kill 20 of the women", "kill ten farmers"), or 0.
 	if groups.is_empty(): return 0
-	var m:=_re("(?i)\\b(\\d{1,7}|a few|a dozen|a score|a hundred|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|hundred)\\s+(of\\s+(the|our|my|its)\\s+)?(\\w+\\s+)?(old |little |young )?(women|woman|men|man|males|females|children|kids|boys|girls|people|villagers|elders|old|ones|farmers|hunters|herders|fishers|builders|craftsmen|potters|weavers|carriers|families|households)\\b").search(span)
+	var m:=_re("(?i)^\\s*(\\d{1,7}|a few|a dozen|a score|a hundred|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|hundred)\\b").search(object)
 	if m==null: return 0
 	var word:=m.get_string(1).to_lower()
 	return int(word) if word.is_valid_int() else int(NUMBER_WORDS.get(word,0))
@@ -349,46 +436,92 @@ static func _pending(audience:Dictionary)->Dictionary:
 	if String(p.get("verb",""))!=PENDING_VERB or _day()-int(p.get("day",-99))>PENDING_DAYS: return {}
 	return p
 
-static func answer(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary)->Dictionary:
-	## The god's answer to "Which village do you mean?": our own (it is done
-	## here, adjudicated), a town we hold or theirs (the war orders), or no.
-	## {} when these words answer nothing of ours.
+static func answer_choice(audience:Dictionary,clean:String)->Dictionary:
+	## A short, clear answer to "Which village do you mean?": {pick:"own"} (our
+	## own, named or "ours"), {pick:"town", option} (a town we held, by name or
+	## "the second"), {pick:"place", place} (another town or people of theirs
+	## named), {pick:"no"}, {pick:"yes"} (a bare yes or "do it": which is still
+	## not said, unless there is only our own). {} for any other words: those
+	## are no answer, and are heard as themselves. Read only.
 	var p:=_pending(audience)
 	if p.is_empty() or String(p.get("ask",""))!="which_people": return {}
-	var lower:=clean.to_lower().strip_edges()
-	if lower=="" or lower.ends_with("?"): return {}
-	var stored:Dictionary=(p.get("reading",{}) as Dictionary).duplicate(true)
-	var cc:=_cc()
-	var held_back:=false
-	for part:Dictionary in Realm.clauses(clean):
-		if bool(part.held): held_back=true
-	if held_back or _has(lower,"^\\W*(no|nope|nay|neither|none|nobody|no one|never mind|forget it|leave (it|them)|not now)\\b"):
-		audience.erase("pending_command")
-		return cc.call("_plain_answer",id,audience,clean,context,"Nothing is done to anyone.")
+	var text:=clean.strip_edges().replace("’","'")
+	if text=="" or text.ends_with("?"): return {}
+	var lower:=_re("[.!]+$").sub(text.to_lower(),"",false).strip_edges()
 	var options:Array=p.get("options",[])
-	var home:=String((options[0] as Dictionary).get("name","")).to_lower() if not options.is_empty() else String(GameState.settlement_name).to_lower()
+	if _has(lower,"^(no|nope|nay|neither|none( of them)?|nobody|no one|never mind|forget it|cancel( that| it)?|leave it|leave them( be)?|not now|stop|no,? (leave|forget) it)$"): return {"pick":"no"}
+	var cc:=_cc()
+	var insist:=String(cc.get_script_constant_map().get("INSIST_PATTERN",""))
+	if _has(lower,"^(yes|yeah|yep|aye|yes,? (do it|go ahead))$") or (insist!="" and _re(insist).search(text)!=null) or bool(cc.call("bare_assent",text)):
+		return {"pick":"own"} if options.size()<=1 else {"pick":"yes"}
+	var words:=Array(_re("[^a-z0-9' ]").sub(lower," ",true).split(" ",false))
+	if words.is_empty() or words.size()>7: return {}
+	var allowed:=ANSWER_WORDS.duplicate()
+	var names:Array=[]
 	for o in options:
-		var opt:Dictionary=o
-		if String(opt.get("id",""))=="town" and WarOrders._name_hit(lower,String(opt.get("name",""))):
-			return _to_town(id,audience,list,clean,context,stored,WarOrders._held_town(String(opt.get("city_id",""))))
-	# A town of theirs we do not hold, named: what it would take (the war orders).
-	for t:Dictionary in WarOrders.known_places():
-		if WarOrders._name_hit(lower,String(t.name)): return _to_town(id,audience,list,clean,context,stored,t)
-	# A people named (a feud's raiders, a people at war): theirs, by the war orders.
+		for w in String((o as Dictionary).get("name","")).to_lower().split(" ",false): allowed.append(w)
+	var places:Array=[]
+	for t:Dictionary in WarOrders.known_places(): places.append({"name":String(t.name).trim_prefix("Reported home of "),"place":t})
 	if WorldSimulation.world!=null:
 		for c in WorldSimulation.world.civilizations:
-			if c is Dictionary and String((c as Dictionary).get("id",""))!="player" and WarOrders._name_hit(lower,String((c as Dictionary).get("name",""))):
-				return _to_town(id,audience,list,clean,context,stored,{"name":String((c as Dictionary).name),"civ_id":String((c as Dictionary).id)})
-	var ordinal:=_re("(?i)\\b(first|1st|the first one)\\b").search(lower)!=null
-	var second:=_re("(?i)\\b(second|2nd|last|the other|theirs|the one we (hold|took))\\b").search(lower)!=null
-	if second and options.size()>1:
-		var opt2:Dictionary=options[1]
-		return _to_town(id,audience,list,clean,context,stored,WarOrders._held_town(String(opt2.get("city_id",""))))
-	if ordinal or _has(lower,"\\b(our own|ours|our (vill?age|town|camp|people|home|settlement)|my (vill?age|town|people|home)|home|here|us|our)\\b") or (home!="" and WarOrders._name_hit(lower,home)):
-		stored["kind"]="act"; stored["own"]=true
-		audience.erase("pending_command")
-		return carry(id,audience,list,stored,false,context,clean)
+			if c is Dictionary and String((c as Dictionary).get("id",""))!="player" and String((c as Dictionary).get("name",""))!="": places.append({"name":String((c as Dictionary).name),"place":{"name":String((c as Dictionary).name),"civ_id":String((c as Dictionary).id)}})
+	for pl in places:
+		for w in String((pl as Dictionary).name).to_lower().split(" ",false): allowed.append(w)
+	for w in words:
+		if not String(w) in allowed: return {}
+	for o in options:
+		if String((o as Dictionary).get("id",""))=="town" and WarOrders._name_hit(lower,String((o as Dictionary).get("name",""))): return {"pick":"town","option":o}
+	for pl in places:
+		if WarOrders._name_hit(lower,String((pl as Dictionary).name)): return {"pick":"place","place":(pl as Dictionary).place}
+	if options.size()>1 and words.any(func(w:String)->bool: return w in ["second","last","other","theirs","hold","held","took","taken","captured"]):
+		return {"pick":"town","option":options[1]}
+	if not options.is_empty() and WarOrders._name_hit(lower,String((options[0] as Dictionary).get("name",""))): return {"pick":"own"}
+	if words.any(func(w:String)->bool: return w in ["our","own","ours","home","here","first"]): return {"pick":"own"}
 	return {}
+
+static func answer(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary)->Dictionary:
+	## The god's answer to "Which village do you mean?": our own (done here,
+	## adjudicated), a town we hold or theirs (the war orders), or no. Any
+	## other words drop the question and are heard as themselves ({}).
+	var p:=_pending(audience)
+	if p.is_empty() or String(p.get("ask",""))!="which_people": return {}
+	var choice:=answer_choice(audience,clean)
+	if choice.is_empty():
+		# The same order said again: still not said which (never asked twice).
+		if _norm(clean)==_norm(String(p.get("text",""))):
+			return _cc().call("_plain_answer",id,audience,clean,context,"Nothing is done until you say which village: %s." % _option_words(p.get("options",[]) as Array),true)
+		audience.erase("pending_command")
+		return {}
+	var stored:Dictionary=(p.get("reading",{}) as Dictionary).duplicate(true)
+	var cc:=_cc()
+	match String(choice.pick):
+		"no":
+			audience.erase("pending_command")
+			return cc.call("_plain_answer",id,audience,clean,context,"Nothing is done to anyone.")
+		"yes":
+			return cc.call("_plain_answer",id,audience,clean,context,"Nothing is done until you say which village: %s." % _option_words(p.get("options",[]) as Array),true)
+		"town":
+			var opt:Dictionary=choice.option
+			var town:=WarOrders._held_town(String(opt.get("city_id","")))
+			if town.is_empty(): return _reask(id,audience,list,clean,context,stored,String(opt.get("name","")))
+			return _to_town(id,audience,list,clean,context,stored,town)
+		"place":
+			return _to_town(id,audience,list,clean,context,stored,choice.place as Dictionary)
+	stored["kind"]="act"; stored["own"]=true
+	audience.erase("pending_command")
+	return carry(id,audience,list,stored,false,context,clean)
+
+static func _reask(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary,stored:Dictionary,lost:String)->Dictionary:
+	## The town named is no longer ours: asked again with what is true now.
+	audience.erase("pending_command")
+	var again:=stored.duplicate(true)
+	var held:=WarOrders.held_towns()
+	again["kind"]="ask"; again["options"]=_options(held,String(stored.get("home","")))
+	again["question"]=("%s is no longer in our hands. " % lost if lost!="" else "")+_question(again,held)
+	return carry(id,audience,list,again,false,context,clean)
+
+static func _norm(text:String)->String:
+	return _re("[^a-z0-9 ]").sub(text.to_lower(),"",true).strip_edges()
 
 static func insisted(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary)->Dictionary:
 	## "Do it", "I demand it" with an order of ours waiting: after a plea it is
@@ -411,10 +544,11 @@ static func _option_words(options:Array)->String:
 static func _to_town(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary,stored:Dictionary,town:Dictionary)->Dictionary:
 	## The answer named a town not ours to strike: the order as the war orders
 	## read it for that town (its fate when we hold it, else what it would take).
+	var name:=String(town.get("name","")).trim_prefix("Reported home of ")
+	if name=="": return _reask(id,audience,list,clean,context,stored,"")
 	audience.erase("pending_command")
 	var cc:=_cc()
 	var said:=String(stored.get("text",""))
-	var name:=String(town.get("name","")).trim_prefix("Reported home of ")
 	var lower:=said.to_lower()
 	var named:=_re(VILLAGE_RE).sub(said,"of "+name,false) if _has(lower,VILLAGE_RE) else "%s of %s" % [said,name]
 	var civ:=String(audience.get("civ_id",""))
@@ -489,19 +623,66 @@ static func _binom(r:RandomNumberGenerator,n:int,p:float)->int:
 # Who is in the ledger
 # --------------------------------------------------------------------------
 
-static func group_count(g:Dictionary)->int:
-	## How many of a group the population model holds: the age cohorts named,
-	## the women or men among them, those at a kind of work.
+static func cells(groups:Array)->Array:
+	## The people the groups name, by age cohort and sex, each counted once
+	## ("the women and the old": the old women once): [{cohort, sex, have
+	## (in the cohort), target (named), trade (named by their work)}]. Work is
+	## spread evenly over the working ages (the work split has no ages).
+	var out:Array=[]
+	var working:=0.0
+	for c in WORKING: working+=maxf(0.0,float(GameState.population_cohorts.get(c,0.0)))
+	for cohort in ALL:
+		var n:=maxf(0.0,float(GameState.population_cohorts.get(cohort,0.0)))
+		var women:=GameState.women_in([cohort])
+		for sex in SEXES:
+			var have:=women if sex=="female" else maxf(0.0,n-women)
+			if have<=0.000001: continue
+			var miss:=1.0
+			var trade_part:=0.0
+			for g in groups:
+				var gd:Dictionary=g
+				if not (gd.get("cohorts",[]) as Array).has(cohort): continue
+				if String(gd.get("sex",""))!="" and String(gd.sex)!=sex: continue
+				var cover:=1.0
+				if String(gd.get("role",""))!="":
+					cover=clampf(float(GameState.population_allocations.get(String(gd.role),0))/maxf(1.0,working),0.0,1.0)
+					trade_part=1.0-(1.0-trade_part)*(1.0-cover)
+				miss*=1.0-cover
+			var share:=1.0-miss
+			if share<=0.0: continue
+			out.append({"cohort":cohort,"sex":sex,"have":have,"target":have*share,"trade":(have*trade_part) if share>0.0 else 0.0})
+	return out
+
+static func group_count(groups:Array)->int:
+	## How many people the groups name, each once, in whole people of each age
+	## and sex (as the act takes them).
+	var total:=0
+	for c in cells(groups): total+=floori(float((c as Dictionary).target)+0.000001)
+	return maxi(0,mini(total,GameState.population_total-1))
+
+static func _want(cs:Array,share:float,count:int)->int:
+	## The whole of those named, a part ("half"), or a number of them.
 	var total:=0.0
-	for c in g.get("cohorts",[]): total+=maxf(0.0,float(GameState.population_cohorts.get(String(c),0.0)))
-	var sex:=String(g.get("sex",""))
-	if sex!="":
-		var children_only:=(g.get("cohorts",[]) as Array)==["children"]
-		var share:=GameState.BIRTH_FEMALE_SHARE if children_only else GameState.adult_female_share()
-		total*=share if sex=="female" else 1.0-share
-	var role:=String(g.get("role",""))
-	if role!="": total=minf(total,float(GameState.population_allocations.get(role,0)))
-	return maxi(0,mini(floori(total+0.000001),GameState.population_total-1))
+	var whole_total:=0
+	for c in cs:
+		total+=float((c as Dictionary).target)
+		whole_total+=floori(float((c as Dictionary).target)+0.000001)
+	var want:=mini(whole_total,floori(total*share+0.000001)) if count<=0 else mini(count,whole_total)
+	# Each cell its part, in whole people (largest remainders), never more than there are.
+	var k:=float(want)/maxf(0.000001,total)
+	var assigned:=0
+	var rest:Array=[]
+	for c in cs:
+		var exact:=float((c as Dictionary).target)*k
+		var whole:=mini(floori(exact+0.000001),floori(float((c as Dictionary).have)+0.000001))
+		(c as Dictionary)["want"]=whole; assigned+=whole
+		rest.append({"c":c,"frac":exact-float(whole)})
+	rest.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.frac)>float(b.frac))
+	for item in rest:
+		if assigned>=want: break
+		var c:Dictionary=item.c
+		if int(c.want)+1<=floori(float(c.have)+0.000001): c["want"]=int(c.want)+1; assigned+=1
+	return assigned
 
 static func hands()->Dictionary:
 	## Who carries it out: our fighters at home, else the watch, else a few men
@@ -520,7 +701,7 @@ static func hands()->Dictionary:
 
 static func _hands_flee(h:Dictionary,n:int)->int:
 	## Hands who fled the realm rather than do it: out of their bands, with their
-	## gear, and out of the people's count. Returns those gone.
+	## gear, and out of home's count (men of working age). Returns those gone.
 	if n<=0: return 0
 	var left:=n
 	if String(h.get("who",""))=="fighters":
@@ -537,7 +718,7 @@ static func _hands_flee(h:Dictionary,n:int)->int:
 			left-=take
 	# The watch, or men gathered for it, are ordinary people: all of them go.
 	var going:=n-left if String(h.get("who",""))=="fighters" else n
-	var gone:Dictionary=GameState.register_population_departures(going,"Fled rather than kill their own people",{"youth":1.0,"early_adults":1.0,"established_adults":1.0,"mature_adults":0.5})
+	var gone:Dictionary=_scoped("",func()->Dictionary: return GameState.register_population_departures(going,"Fled rather than kill their own people",{"children":0.0,"youth":1.0,"early_adults":1.0,"established_adults":1.0,"mature_adults":0.5,"elders":0.0},"male"))
 	return int(gone.get("count",0))
 
 # --------------------------------------------------------------------------
@@ -559,7 +740,7 @@ static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dict
 	if String(r_in.get("kind",""))=="ask":
 		# The same unclear order again after the question: not asked twice.
 		var open:=_pending(audience)
-		if not open.is_empty() and String(open.get("ask",""))=="which_people":
+		if not open.is_empty() and String(open.get("ask",""))=="which_people" and String(open.get("text",""))==String(r_in.get("text","")):
 			return cc.call("_plain_answer",id,audience,words,{"echoed":true},"Nothing is done until you say which village: %s." % _option_words(open.get("options",[]) as Array))
 		audience["pending_command"]={"verb":PENDING_VERB,"ask":"which_people","actor":String(actor.get("key","")),"target":"","day":_day(),"text":String(r_in.text),"reading":r_in.duplicate(true),"options":(r_in.get("options",[]) as Array).duplicate(true),"question":String(r_in.get("question",""))}
 		r.stage="grave_ask"; r.executed=false; r.reaction="neutral"
@@ -598,15 +779,7 @@ static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dict
 		refused2.verb=VERB
 		refused2.outcome="%s would not do it to our own people (a chance of %s). %s Nothing was done to %s." % [String(person.get("name","They")),Ledger.chance_words(p_refuse),String(refused2.outcome),label]
 		return refused2
-	var done:Dictionary
-	# Among the town's own people (its local count), then the realm's; every
-	# number reported is what the ledger moved.
-	var realm_before:=int(GameState.population_total)
-	var sid:=String(r_in.get("settlement_id",""))
-	if how=="burn": done=_scoped(sid,func()->Dictionary: return _burn(id,r_in,rng))
-	else: done=_scoped(sid,func()->Dictionary: return _cull(id,r_in,rng))
-	GameState.synchronize_population_allocations()
-	done["population_before"]=realm_before; done["population_after"]=int(GameState.population_total)
+	var done:=_act(id,r_in,rng)
 	r["grave_home"]=done
 	var lead:=_obeyed_words(actor,ob)
 	# The chance they would have refused, all told (their own nature's, then this).
@@ -614,13 +787,75 @@ static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dict
 	if lead!="" and not person.is_empty(): lead=lead.trim_suffix(".")+" (the chance they would refuse it: %s)." % Ledger.chance_words(refuse_all)
 	r.outcome=(lead+" "+String(done.get("words",""))).strip_edges()
 	r.executed=bool(done.get("ok",false))
-	r.stage=VERB if r.executed else ("refuse_hands" if int(done.get("willing",1))<=0 else "none")
+	r.stage=VERB if r.executed else ("refuse_hands" if int(done.get("hands",0))>0 and int(done.get("willing",1))<=0 else "none")
 	r["actor_says"]=_actor_says(done,ob,r_in)
 	r.witness_ids=cc.call("_witness_ids",id,[])
 	if r.executed: _consequences(id,actor,ob,r_in,done)
 	elif int(done.get("hands_fled",0))>0:
 		DIVINE.record_people_act("terrify_people")
 	return r
+
+static func _act(id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Dictionary:
+	## The act itself, on the ledger: who is named (read in the town's own
+	## count), the hands (home's men), then the act in the town's own count,
+	## then the work as it now stands. Every number reported is what moved.
+	var how:=String(r_in.get("how","kill"))
+	var sid:=String(r_in.get("settlement_id",""))
+	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village")
+	var realm_before:=int(GameState.population_total)
+	var alloc_before:=(GameState.population_allocations as Dictionary).duplicate()
+	var people:=DIVINE.people_regard(Hall._officials())
+	var weight:=0.0
+	for g in r_in.get("groups",[]): weight=maxf(weight,float((g as Dictionary).get("weight",0.1)))
+	var out:={"ok":false,"how":how,"home":home,"hands":0,"willing":0,"refused":0,"hands_fled":0,"dead":0,"moved":0,"escaped":0,"hid":0,"kin_fled":0,"targets":0,"pregnancies_lost":0,"population_before":realm_before}
+	# Women by age are kept from now on, the realm's and every town's alike.
+	if how!="burn": GameState.ensure_female_cohorts()
+	var targets:=0
+	if how!="burn":
+		targets=int(_scoped(sid,func()->int: return group_count(r_in.get("groups",[]) as Array),false))
+		out.targets=targets
+		if targets<=0:
+			out["words"]="There are no %s in %s to %s." % [_label_words(r_in),home,"kill" if how=="kill" else "drive out"]
+			out["population_after"]=int(GameState.population_total)
+			return out
+	var h:=hands()
+	var hs:=_hands_step(h,"burn" if how=="burn" else how,0.1 if how=="burn" else weight,people,rng)
+	out.hands=int(hs.n); out["hand_odds"]=float(hs.p); out.refused=int(hs.refused); out.hands_fled=int(hs.fled); out.willing=int(hs.willing)
+	var parts:=PackedStringArray([_hands_words(h,hs)])
+	if int(hs.willing)<=0:
+		parts.append("Nothing was done to %s." % (_label(r_in) if how!="burn" else home))
+		out["population_after"]=int(GameState.population_total)
+		out["words"]=" ".join(parts)
+		return out
+	var done:Dictionary
+	if how=="burn": done=_scoped(sid,func()->Dictionary: return _burn(r_in,int(hs.willing),people,rng))
+	else: done=_scoped(sid,func()->Dictionary: return _cull(r_in,int(hs.willing),people,rng))
+	out.merge(done,true)
+	# Those the act itself reached for (whole people of each age and sex).
+	if done.has("asked"): out.targets=int(done.asked)
+	GameState.synchronize_population_allocations()
+	# The work as it now stands: those killed or driven out for their work are
+	# gone from it (the work split follows the ledger, then the people left).
+	if float(done.get("trade_lost",0.0))>0.0: _work_after(alloc_before,done.get("trade_by_role",{}) as Dictionary)
+	out["population_after"]=int(GameState.population_total)
+	parts.append(String(done.get("words","")))
+	out["words"]=" ".join(parts).strip_edges()
+	return out
+
+static func _work_after(before:Dictionary,lost:Dictionary)->void:
+	## The work split once some of a kind of work were killed or driven out: that
+	## work keeps the people it had less those lost; every other kind keeps its
+	## share of the rest. The split is the ledger's (population_allocations).
+	var roles:Array=GameState.POPULATION_ROLES
+	var kept:={}
+	var total:=0.0
+	for role in roles:
+		kept[role]=maxf(0.0,float(before.get(role,0))-float(lost.get(role,0.0)))
+		total+=float(kept[role])
+	if total<=0.0: return
+	var pct:Dictionary=GameState.population_allocation_percentages
+	for role in roles: pct[role]=float(kept[role])/total*100.0
+	GameState.synchronize_population_allocations()
 
 static func _actor(list:Array[Dictionary],speaker:Dictionary,cc:GDScript)->Dictionary:
 	## The one ordered: the one before the god when they hold office or lead
@@ -637,10 +872,7 @@ static func _label(r_in:Dictionary)->String:
 	## "the women of Seanstone", "half the farmers of Seanstone", "Seanstone".
 	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "our village")
 	if String(r_in.get("how",""))=="burn": return home
-	var names:=PackedStringArray()
-	for g in r_in.get("groups",[]): names.append(String((g as Dictionary).get("words","people")))
-	var who:=" and ".join(names) if not names.is_empty() else "people"
-	return "%sthe %s of %s" % [_part_words(r_in),who,home]
+	return "%sthe %s of %s" % [_part_words(r_in),_label_words(r_in),home]
 
 static func _part_words(r_in:Dictionary)->String:
 	## "half ", "a third of ", "20 of ", or "" for all of them.
@@ -655,6 +887,11 @@ static func _part_words(r_in:Dictionary)->String:
 	if share>=0.19: return "some of "
 	return "a tenth of "
 
+static func _label_words(r_in:Dictionary)->String:
+	var names:=PackedStringArray()
+	for g in r_in.get("groups",[]): names.append(String((g as Dictionary).get("words","people")))
+	return " and ".join(names) if not names.is_empty() else "people"
+
 static func _obeyed_words(actor:Dictionary,ob:Dictionary)->String:
 	var name:=String(actor.get("name",""))
 	if name=="": return ""
@@ -664,7 +901,7 @@ static func _obeyed_words(actor:Dictionary,ob:Dictionary)->String:
 
 static func _actor_says(done:Dictionary,ob:Dictionary,_r_in:Dictionary)->String:
 	## The one ordered, in plain words, from the numbers decided.
-	if int(done.get("willing",1))<=0:
+	if int(done.get("hands",0))>0 and int(done.get("willing",1))<=0:
 		return "None of them would do it. %s" % ("%d fled the realm rather than do it." % int(done.hands_fled) if int(done.get("hands_fled",0))>0 else "They stand where they are and look at the ground.")
 	if not bool(done.get("ok",false)): return ""
 	var reluctant:=String(ob.get("id",""))=="reluctant"
@@ -691,102 +928,86 @@ static func _hands_words(h:Dictionary,s:Dictionary)->String:
 	if int(s.fled)>0: t+=", and %s of them fled the realm rather than do it" % _count(int(s.fled))
 	return t+"."
 
-static func _cull(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Dictionary:
-	## Killing or driving out the groups named, on stated odds, through the
-	## population model. Every number reported is what the ledger moved.
+static func _cull(r_in:Dictionary,willing:int,people:Dictionary,rng:RandomNumberGenerator)->Dictionary:
+	## Killing or driving out the people named, by age and sex, on stated odds,
+	## in this town's own count. Every number reported is what the ledger moved.
 	var how:=String(r_in.get("how","kill"))
 	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village")
-	var people:=DIVINE.people_regard(Hall._officials())
 	var pop_before:=int(GameState.population_total)
 	var fertile_before:=GameState.fertile_women()
-	var weight:=0.0
-	for g in r_in.get("groups",[]): weight=maxf(weight,float((g as Dictionary).get("weight",0.1)))
-	var h:=hands()
-	var hs:=_hands_step(h,how,weight,people,rng)
-	var out:={"ok":false,"how":how,"home":home,"hands":int(hs.n),"hand_odds":float(hs.p),"refused":int(hs.refused),"hands_fled":int(hs.fled),"willing":int(hs.willing),
-		"targets":0,"dead":0,"moved":0,"escaped":0,"hid":0,"kin_fled":0,"pregnancies_lost":0,"population_before":pop_before,"by_group":{}}
-	var parts:=PackedStringArray([_hands_words(h,hs)])
-	if int(hs.willing)<=0:
-		parts.append("Nothing was done to %s." % _label(r_in))
-		out["population_after"]=int(GameState.population_total)
-		out["words"]=" ".join(parts)
-		return out
-	# Whom: each group's own count, the part asked for.
-	var rows:Array=[]
-	var total:=0
-	var asked:=int(r_in.get("count",0))
-	var share:=float(r_in.get("share",1.0))
-	var have:=0
-	for g in r_in.get("groups",[]): have+=group_count(g as Dictionary)
-	for g in r_in.get("groups",[]):
-		var n:=group_count(g as Dictionary)
-		var want:=roundi(float(n)*share) if asked<=0 else (roundi(float(asked)*float(n)/float(maxi(1,have))))
-		want=clampi(want,0,n)
-		rows.append({"g":g,"have":n,"want":want}); total+=want
+	var cs:=cells(r_in.get("groups",[]) as Array)
+	var total:=_want(cs,float(r_in.get("share",1.0)),int(r_in.get("count",0)))
+	var out:={"ok":false,"dead":0,"moved":0,"escaped":0,"hid":0,"kin_fled":0,"pregnancies_lost":0,"asked":total}
 	if total<=0:
-		parts.append("There are no %s in %s to %s." % [_label_words(r_in),home,"kill" if how=="kill" else "drive out"])
-		out["population_after"]=int(GameState.population_total)
-		out["words"]=" ".join(parts)
+		out["words"]="There are no %s in %s to %s." % [_label_words(r_in),home,"kill" if how=="kill" else "drive out"]
 		return out
-	var willing:=int(hs.willing)
 	var p:=catch_odds(willing,total)
 	var cap:=willing*(KILLS_PER_HAND if how=="kill" else DRIVE_PER_HAND)*DAYS_MAX
 	var caught_total:=0
-	for row in rows:
-		row["caught"]=_binom(rng,int(row.want),p); caught_total+=int(row.caught)
+	for c in cs:
+		(c as Dictionary)["caught"]=_binom(rng,int((c as Dictionary).want),p); caught_total+=int((c as Dictionary).caught)
 	# A few hands do a few days' work; the rest run or hide before they come.
 	if caught_total>cap:
 		var scale:=float(cap)/float(caught_total)
-		caught_total=0
-		for row in rows:
-			row["caught"]=floori(float(row.caught)*scale); caught_total+=int(row.caught)
+		for c in cs: (c as Dictionary)["caught"]=floori(float((c as Dictionary).caught)*scale)
 	var dead:=0; var moved:=0; var escaped:=0; var hid:=0
-	for row in rows:
-		var g:Dictionary=row.g
+	var trade_by_role:={}
+	var trade_lost:=0.0
+	if how=="kill":
+		var kill_cells:Array=[]
+		for c in cs:
+			if int((c as Dictionary).caught)>0: kill_cells.append({"cohort":String((c as Dictionary).cohort),"sex":String((c as Dictionary).sex),"count":int((c as Dictionary).caught)})
+		var died:Dictionary=GameState.register_population_deaths_by_cell(kill_cells,DEATH_ID,"%s were killed at the god's word." % _cap(_label(r_in)),_label(r_in))
+		for row in died.get("cells",[]):
+			for c in cs:
+				if String((c as Dictionary).cohort)==String((row as Dictionary).cohort) and String((c as Dictionary).sex)==String((row as Dictionary).sex): (c as Dictionary)["dead"]=int((row as Dictionary).dead)
+		dead=int(died.get("count",0))
+	for c in cs:
+		var cd:Dictionary=c
 		var weights:={}
-		for c in ALL: weights[c]=1.0 if (g.cohorts as Array).has(c) else 0.0
-		var target:={"age_cohorts":(g.cohorts as Array).duplicate(),"label":"%s of %s" % [String(g.words),home]}
-		if String(g.sex)!="": target["sex"]=String(g.sex)
-		var caught:=int(row.caught)
-		var rest:=int(row.want)-caught
+		for k in ALL: weights[k]=1.0 if k==String(cd.cohort) else 0.0
 		if how=="kill":
-			if caught>0:
-				var died:Dictionary=GameState.register_directive_population_deaths(caught,DEATH_ID,"%d %s of %s were killed at the god's word." % [caught,String(g.words),home],target)
-				row["dead"]=int(died.get("count",0)); dead+=int(row.dead)
 			# Those not caught run as it begins: most leave the realm, the rest
-			# hide with kin in the hills and stay (ESCAPED_LEAVE, a roll each).
-			if rest>0:
-				var leaving:=_binom(rng,rest,ESCAPED_LEAVE)
-				if leaving>0:
-					var ran:Dictionary=GameState.register_population_departures(leaving,"Fled the killing at the god's word",weights,String(g.sex))
-					row["escaped"]=int(ran.get("count",0)); escaped+=int(row.escaped)
-				row["hid"]=rest-leaving; hid+=rest-leaving
+			# hide with kin and stay (ESCAPED_LEAVE, a roll each).
+			var rest:=int(cd.want)-int(cd.get("dead",0))
+			var leaving:=_binom(rng,rest,ESCAPED_LEAVE)
+			var ran:=0
+			if leaving>0: ran=int(GameState.register_population_departures(leaving,"Fled the killing at the god's word",weights,String(cd.sex)).get("count",0))
+			cd["fled"]=ran; escaped+=ran
+			cd["hid"]=maxi(0,int(cd.want)-int(cd.get("dead",0))-ran); hid+=int(cd.hid)
+			cd["gone"]=int(cd.get("dead",0))+ran
 		else:
-			if caught>0:
-				var gone:Dictionary=GameState.register_population_departures(caught,"Driven out at the god's word",weights,String(g.sex))
-				row["moved"]=int(gone.get("count",0)); moved+=int(row.moved)
-			# Those not found hide with kin and stay.
-			row["hid"]=rest; hid+=rest
-		(out.by_group as Dictionary)[String(g.id)]={"words":String(g.words),"have":int(row.have),"asked":int(row.want),"dead":int(row.get("dead",0)),"moved":int(row.get("moved",0)),"escaped":int(row.get("escaped",0)),"hid":int(row.get("hid",0))}
+			var gone:=0
+			if int(cd.caught)>0: gone=int(GameState.register_population_departures(int(cd.caught),"Driven out at the god's word",weights,String(cd.sex)).get("count",0))
+			cd["moved"]=gone; moved+=gone
+			cd["hid"]=maxi(0,int(cd.want)-gone); hid+=int(cd.hid)
+			cd["gone"]=gone
+		# Those of a kind of work among them: gone from that work.
+		if float(cd.get("trade",0.0))>0.0 and float(cd.target)>0.0:
+			var lost:=float(cd.gone)*float(cd.trade)/float(cd.target)
+			trade_lost+=lost
+			for g in r_in.get("groups",[]):
+				var role:=String((g as Dictionary).get("role",""))
+				if role!="": trade_by_role[role]=float(trade_by_role.get(role,0.0))+lost/float(maxi(1,(r_in.get("groups",[]) as Array).filter(func(x:Dictionary)->bool: return String(x.get("role",""))!="").size()))
 	# The rest of the people: a share flees the realm after it, the more the
 	# more of their kin were killed or driven out.
 	var fp:=flight_odds(dead+moved,pop_before,people,how)
-	var rest_people:=maxi(0,int(GameState.population_total)-1)
-	var kin:=_binom(rng,rest_people,fp)
+	var kin:=_binom(rng,maxi(0,int(GameState.population_total)-1),fp)
 	var kin_gone:=0
 	if kin>0: kin_gone=int(GameState.register_population_departures(kin,"Fled the realm after the god's killing" if how=="kill" else "Left the realm after the god's driving out",{"children":1.0,"youth":1.0,"early_adults":1.0,"established_adults":1.0,"mature_adults":1.0,"elders":1.0}).get("count",0))
-	# Women killed or gone take their pregnancies with them.
+	# The women of child-bearing age killed or gone take their pregnancies with them.
 	var fertile_after:=GameState.fertile_women()
-	var share_lost:=clampf(1.0-fertile_after/maxf(0.000001,fertile_before),0.0,1.0) if fertile_before>0.0 else 0.0
+	var share_lost:=clampf(1.0-fertile_after/fertile_before,0.0,1.0) if fertile_before>0.000001 else 0.0
 	var preg_lost:=0
-	if share_lost>=0.001: preg_lost=roundi(GameState.lose_pregnancies(share_lost))
+	if share_lost>=0.0001: preg_lost=roundi(GameState.lose_pregnancies(share_lost))
 	GameState.synchronize_population_allocations()
 	var days:=ceili(float(dead+moved)/float(maxi(1,willing*(KILLS_PER_HAND if how=="kill" else DRIVE_PER_HAND))))
 	out.ok=dead+moved>0
-	out.targets=total; out.dead=dead; out.moved=moved; out.escaped=escaped; out.hid=hid; out.kin_fled=kin_gone; out.pregnancies_lost=preg_lost
+	out.dead=dead; out.moved=moved; out.escaped=escaped; out.hid=hid; out.kin_fled=kin_gone; out.pregnancies_lost=preg_lost
 	out["catch_odds"]=p; out["flight_odds"]=fp; out["days"]=days
 	out["fertile_before"]=roundi(fertile_before); out["fertile_after"]=roundi(fertile_after)
-	out["population_after"]=int(GameState.population_total)
+	out["trade_lost"]=trade_lost; out["trade_by_role"]=trade_by_role
+	out["cells"]=cs
 	var who:=_label_words(r_in)
 	var t:="%s went through %s against %s %s: %s %s each, %s." % [_cap(_count(willing)),home,_count(total),who,"a good chance to" if p>=0.6 else ("an even chance to" if p>=0.4 else "a poor chance to"),"catch" if how=="kill" else "find",Ledger.chance_words(p)]
 	if how=="kill":
@@ -801,38 +1022,21 @@ static func _cull(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Diction
 	else:
 		t+=" %s %s were driven out of the realm%s" % [_cap(_count(moved)),who,(" over %s" % _days(days)) if days>1 else ""]
 		t+=("; %s hid with kin and stay among us." % _count(hid)) if hid>0 else "."
-	parts.append(t)
+	var parts:=PackedStringArray([t])
 	if kin_gone>0: parts.append("%s more of our people %s." % [_cap(_count(kin_gone)),"fled the realm after it" if how=="kill" else "went with them"])
-	# Mothers among those named: fewer births for as long as the women are fewer.
-	var mothers:=(r_in.get("groups",[]) as Array).any(func(g:Dictionary)->bool: return String(g.get("sex",""))!="male" and (g.get("cohorts",[]) as Array).has("early_adults"))
-	if mothers and (fertile_before-fertile_after)>=1.0:
+	# Mothers among them: fewer births for as long as the women are fewer.
+	if fertile_before-fertile_after>=1.0:
 		var left:=roundi(fertile_after)
 		parts.append("Fewer children will be born for years: of %s women of an age to bear, %s%s." % [_count(roundi(fertile_before)),"none are left" if left<=0 else "%s are left" % _count(left),(", and %s pregnancies were lost with them" % _count(preg_lost)) if preg_lost>0 else ""])
 	out["words"]=" ".join(parts)
 	return out
 
-static func _label_words(r_in:Dictionary)->String:
-	var names:=PackedStringArray()
-	for g in r_in.get("groups",[]): names.append(String((g as Dictionary).get("words","people")))
-	return " and ".join(names) if not names.is_empty() else "people"
-
-static func _burn(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Dictionary:
+static func _burn(r_in:Dictionary,willing:int,people:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	## Our own village set on fire by our own hands: the houses, the stores, the
 	## few who could not get out, and those who flee after. On stated shares.
 	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village")
-	var people:=DIVINE.people_regard(Hall._officials())
 	var pop_before:=int(GameState.population_total)
-	var h:=hands()
-	var hs:=_hands_step(h,"burn",0.1,people,rng)
-	var out:={"ok":false,"how":"burn","home":home,"hands":int(hs.n),"hand_odds":float(hs.p),"refused":int(hs.refused),"hands_fled":int(hs.fled),"willing":int(hs.willing),
-		"dead":0,"kin_fled":0,"houses_lost":0,"food_lost":0,"timber_lost":0,"population_before":pop_before}
-	var parts:=PackedStringArray([_hands_words(h,hs)])
-	var willing:=int(hs.willing)
-	if willing<=0:
-		parts.append("%s was not set on fire." % home)
-		out["population_after"]=int(GameState.population_total)
-		out["words"]=" ".join(parts)
-		return out
+	var fertile_before:=GameState.fertile_women()
 	# One hand fires about a dozen people's roofs in a day: a few hands burn a
 	# part of a large village, a band most of a small one.
 	var houses:=int(GameState.housing_capacity)
@@ -854,11 +1058,13 @@ static func _burn(_id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Diction
 	var kin:=_binom(rng,maxi(0,int(GameState.population_total)-1),fp)
 	var kin_gone:=0
 	if kin>0: kin_gone=int(GameState.register_population_departures(kin,"Fled the realm after the god's burning",{"children":1.0,"youth":1.0,"early_adults":1.0,"established_adults":1.0,"mature_adults":1.0,"elders":1.0}).get("count",0))
+	# The mothers among the dead and the fled take their pregnancies with them.
+	var fertile_after:=GameState.fertile_women()
+	var share_lost:=clampf(1.0-fertile_after/fertile_before,0.0,1.0) if fertile_before>0.000001 else 0.0
+	var preg_lost:=roundi(GameState.lose_pregnancies(share_lost)) if share_lost>=0.0001 else 0
 	GameState.synchronize_population_allocations()
-	out.ok=true
-	out.dead=dead; out.kin_fled=kin_gone; out.houses_lost=houses_lost; out.food_lost=food_lost; out.timber_lost=timber_lost
-	out["burned_share"]=burned_share; out["flight_odds"]=fp
-	out["population_after"]=int(GameState.population_total)
+	var out:={"ok":true,"dead":dead,"kin_fled":kin_gone,"houses_lost":houses_lost,"food_lost":food_lost,"timber_lost":timber_lost,"burned_share":burned_share,"flight_odds":fp,"pregnancies_lost":preg_lost}
+	var parts:=PackedStringArray()
 	parts.append("%s set fire to %s: houses for %d of the %d it could shelter burned (about %d in 10), with %d Food and %d Timber from the stores." % [_cap(_count(willing)),home,houses_lost,houses,clampi(roundi(burned_share*10.0),1,9),food_lost,timber_lost])
 	parts.append(("%s could not get out and died in the fires." % _cap(_count(dead))) if dead>0 else "Everyone got out of the fires alive.")
 	if kin_gone>0: parts.append("%s of our people fled the realm after it." % _cap(_count(kin_gone)))
@@ -884,31 +1090,29 @@ static func _consequences(_id:String,actor:Dictionary,ob:Dictionary,r_in:Diction
 	metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-legit,0.01,0.99)
 	metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.5))-cohesion,0.01,0.99)
 	done["legitimacy_lost"]=legit; done["cohesion_lost"]=cohesion
-	# The people: dread and lost love, remembered at every hearth.
+	# The people: dread and lost love, remembered at every hearth (once).
 	DIVINE.record_people_act(String({"kill":"slaughter_people","burn":"burn_village","drive":"drive_out_people"}.get(how,"slaughter_people")))
-	# The court hears what the god ordered done to their own kin.
-	var officials:=Hall._officials()
-	DIVINE.apply_to_court("cast_out" if how=="drive" else "strike_down",{"person_id":0,"name":label},officials)
-	for p:Dictionary in officials:
+	# The court hears what the god ordered done to their own kin, as it was:
+	# out in the village, not in the hall; each of them takes it once.
+	var heard:=_what_was_done(how,label,home,done)
+	for p:Dictionary in Hall._officials():
 		var pid:=int(p.get("person_id",0))
 		if pid<=0 or pid==int(actor.get("person_id",0)): continue
-		GovernmentPeopleSystem.adjust_person_bonds(pid,{"fear":clampf(0.02+0.1*weight,0.02,0.08),"love":-clampf(0.02+0.12*weight,0.02,0.1),"hold_days":120})
+		var personality:Dictionary=p.get("personality",{}) if p.get("personality") is Dictionary else {}
+		var empathy:=clampf(float(personality.get("empathy",0.5)),0.0,1.0)
+		GovernmentPeopleSystem.adjust_person_bonds(pid,{"fear":clampf(0.03+0.1*weight,0.03,0.1),"love":-clampf(0.02+0.12*weight+0.04*empathy,0.02,0.14),"resentment":clampf(0.01+0.05*empathy,0.01,0.06),"hold_days":120})
+		GovernmentPeopleSystem.record_person_memory(pid,"The god had %s. I heard it at court." % heard,"divine",0.8,{"emotion":"horror" if empathy>=0.6 else "dread","outcome":"grave_home_"+how})
 	# The one who carried it out carries it after.
 	var pid2:=int(actor.get("person_id",0))
 	if pid2>0:
 		var person:=GovernmentPeopleSystem.person_snapshot(pid2)
-		var personality:Dictionary=person.get("personality",{}) if person.get("personality") is Dictionary else {}
-		var empathy:=clampf(float(personality.get("empathy",0.5)),0.0,1.0)
+		var personality2:Dictionary=person.get("personality",{}) if person.get("personality") is Dictionary else {}
+		var empathy2:=clampf(float(personality2.get("empathy",0.5)),0.0,1.0)
 		var reluctant:=String(ob.get("id",""))=="reluctant"
-		GovernmentPeopleSystem.adjust_person_bonds(pid2,{"fear":0.08,"love":-0.12 if reluctant else -0.06,"obligation":0.02,"resentment":(0.06+0.1*empathy) if reluctant else 0.02+0.04*empathy,"hold_days":180})
-		var memory:=""
-		match how:
-			"burn": memory="At the god's word I had %s, our own village, set on fire; %d died in it." % [home,int(done.get("dead",0))]
-			"drive": memory="At the god's word I had %s driven out of the realm: %d of them." % [label,int(done.get("moved",0))]
-			_: memory="At the god's word I had %s killed: %d dead." % [label,int(done.get("dead",0))]
-		GovernmentPeopleSystem.record_person_memory(pid2,memory,"divine",0.95,{"emotion":"horror" if reluctant else "duty","outcome":"grave_home_"+how})
+		GovernmentPeopleSystem.adjust_person_bonds(pid2,{"fear":0.08,"love":-0.12 if reluctant else -0.06,"obligation":0.02,"resentment":(0.06+0.1*empathy2) if reluctant else 0.02+0.04*empathy2,"hold_days":180})
+		GovernmentPeopleSystem.record_person_memory(pid2,"At the god's word I had %s." % heard,"divine",0.95,{"emotion":"horror" if reluctant else "duty","outcome":"grave_home_"+how})
 	elif String(actor.get("kind",""))=="figure":
-		HistoricalFigures.note(String(actor.get("figure_id","")),_day(),"At the ruler's word they had %s %s." % [label,String({"burn":"burned","drive":"driven out"}.get(how,"killed"))])
+		HistoricalFigures.note(String(actor.get("figure_id","")),_day(),"At the ruler's word they had %s." % heard)
 	# Every people that knows us hears of it.
 	if WorldSimulation.world!=null:
 		for civ in WorldSimulation.world.civilizations:
@@ -924,6 +1128,16 @@ static func _consequences(_id:String,actor:Dictionary,ob:Dictionary,r_in:Diction
 	var events:Array=GameState.simulation_events
 	events.push_front({"day":day,"title":title,"description":text.substr(0,300),"domain":"population","severity":"major"})
 	while events.size()>80: events.pop_back()
+
+static func _what_was_done(how:String,label:String,home:String,done:Dictionary)->String:
+	## What was done, in true plain words, with its numbers.
+	match how:
+		"burn":
+			var dead:=int(done.get("dead",0))
+			return "%s, our own village, set on fire: houses for %d burned, %s" % [home,int(done.get("houses_lost",0)),("%d died in it" % dead) if dead>0 else "and nobody died in it"]
+		"drive":
+			return "%s driven out of the realm: %d of them" % [label,int(done.get("moved",0))]
+	return "%s killed: %d dead, %d fled the realm" % [label,int(done.get("dead",0)),int(done.get("escaped",0))]
 
 # --------------------------------------------------------------------------
 # Words

@@ -5,18 +5,20 @@ extends GdUnitTestSuite
 ## "Kill all women in the village". It used to become a standing order with
 ## metric nudges and nobody died. Pinned here, on the court eval's own worlds
 ## (tests/court_eval/fixtures.gd: Seanstone of 900, Kishan the Headman):
+## - what the words fall on: people named as the act's own object, never a
+##   goat, trees, the dead or wolves; driving out is out of the realm, never
+##   out of the hall; laws stay laws;
 ## - whose people: our own at peace; "the village" with a town we hold that
-##   nobody spoke of, or at war with none held, is asked; a town we hold just
-##   spoken of stays its fate; laws stay laws;
+##   nobody spoke of, or at war, is asked once; only a short, clear answer
+##   settles it, any other words drop it and are heard as themselves;
 ## - the odds are stated and the rolls seeded: the same save, the same result;
-## - the ledger balances: the people before, less the dead and the gone that
-##   are reported, are the people after; the women counted fall by the women
-##   killed and fled; the work, the houses and stores move as said;
-## - bounded: a few hands do a few days' work, never everyone at once;
-## - births fall with the women (the birth model reads the women left), and
-##   their pregnancies are lost with them; an ordinary people's births are
-##   untouched;
-## - what lasts: the people's dread and love, the court, the Chronicle;
+## - the ledger balances by age and sex: before, less the dead and the gone
+##   reported, is after; "the women and the old" counts the old women once;
+##   the work follows the farmers killed; the hands who flee are men of home;
+## - births read the women of child-bearing age only: girls and old women
+##   killed never cut today's births, and only the pregnancies of the mothers
+##   killed or gone are lost;
+## - what lasts: the people's dread, the court's true memory, the Chronicle;
 ## - the voice is told the decided numbers and never asked for gore.
 
 const Fixtures:=preload("res://tests/court_eval/fixtures.gd")
@@ -27,6 +29,8 @@ const DIVINE:=preload("res://scripts/divine_regard.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 
 const USERS_LINE:="Kill all women in the village"
+const GROWN:=["youth","early_adults","established_adults","mature_adults","elders"]
+const EVERY_AGE:=["children","youth","early_adults","established_adults","mature_adults","elders"]
 
 var fx:Fixtures
 var _processing:Dictionary={}
@@ -62,36 +66,51 @@ func _audience(w:Dictionary,role:String="headman")->String:
 	assert_str(id).is_not_empty()
 	return id
 
-func _female()->float:
-	return float(GameState.population_cohorts.get("female",0.0))
+func _ids(r:Dictionary)->Array:
+	return (r.get("groups",[]) as Array).map(func(g:Dictionary)->String: return String(g.id))
 
 # --------------------------------------------------------------------------
-# Whose people
+# What the words fall on, and whose people
 # --------------------------------------------------------------------------
 
 func test_the_users_line_is_our_own_women_at_peace()->void:
 	var w:=_world("home_peace")
 	var id:=_audience(w)
 	var audience:=Hall.find(id)
+	var list:=CC.roster(audience)
 	for words in [USERS_LINE,"kill all women in the village","kil all women in the vilage"]:
-		var r:=Grave.reading(words,audience,CC.roster(audience))
+		var r:=Grave.reading(words,audience,list)
 		assert_str(String(r.get("kind",""))).override_failure_message(words).is_equal("act")
 		assert_str(String(r.get("how",""))).is_equal("kill")
-		assert_array((r.groups as Array).map(func(g:Dictionary)->String: return String(g.id))).is_equal(["women"])
-	var half:=Grave.reading("Kill half the farmers",audience,CC.roster(audience))
+		assert_array(_ids(r)).is_equal(["women"])
+	var half:=Grave.reading("Kill half the farmers",audience,list)
 	assert_float(float(half.share)).is_equal(0.5)
 	assert_str(String((half.groups[0] as Dictionary).get("role",""))).is_equal("Food")
-	assert_str(String(Grave.reading("Burn our own village",audience,CC.roster(audience)).get("how",""))).is_equal("burn")
-	assert_str(String(Grave.reading("Drive out the old",audience,CC.roster(audience)).get("how",""))).is_equal("drive")
+	assert_int(int(Grave.reading("Kill 20 of the women",audience,list).get("count",0))).is_equal(20)
+	assert_array(_ids(Grave.reading("Kill the women and the old",audience,list))).is_equal(["women","elders"])
+	assert_str(String(Grave.reading("Burn our own village",audience,list).get("how",""))).is_equal("burn")
+	assert_str(String(Grave.reading("burn our village to the ground",audience,list).get("how",""))).is_equal("burn")
+	assert_str(String(Grave.reading("Put the women of our village to death",audience,list).get("how",""))).is_equal("kill")
+	for words in ["Drive out the old","banish the elders","drive the old people out of the village","banish the elders from Seanstone","Drive the women out of the realm","exile the old people into the wilderness"]:
+		assert_str(String(Grave.reading(words,audience,list).get("how",""))).override_failure_message(words).is_equal("drive")
 
-func test_laws_people_and_other_peoples_are_never_read_as_this()->void:
+func test_things_rooms_laws_and_other_peoples_are_never_read_as_this()->void:
 	var w:=_world("home_peace")
 	var id:=_audience(w)
 	var audience:=Hall.find(id)
 	var list:=CC.roster(audience)
-	for words in ["Execute every thief","kill all thieves","Anyone who murders will be put to death","Kill every thief in the village","never kill a man who has surrendered",
+	for words in [
+		# No people for the act's object (the review's lines).
+		"Cut down the trees around our village","Kill the sick goat in the village","get rid of the rats in our houses","kill the old dog at home",
+		"rid the village of wolves","Burn the dead in the village","Drive the wolves out of our village","kill the village","Kill the women's goats",
+		"burn the farmers' fields","kill the sick",
+		# Moving people about, not out of the realm.
+		"throw the men out of the hall","turn the men out to the fields","chase the boys off the walls","send the children away to fetch water",
+		"banish the women from the hall",
+		# Laws, one person, other peoples, words held back, questions.
+		"Execute every thief","kill all thieves","Anyone who murders will be put to death","Kill every thief in the village","never kill a man who has surrendered",
 		"Kill all the rebels","Kill Kavu","Kill him","Kill the men of Tsaren","Kill them all","Put the prisoners to death","Burn their stores","Burn the fields of the lazy",
-		"don't kill the women","How many women are in the village?","Exile Kavu and his whole family"]:
+		"don't kill the women","How many women are in the village?","Exile Kavu and his whole family","kill one woman"]:
 		assert_dict(Grave.reading(words,audience,list)).override_failure_message(words).is_empty()
 
 func test_the_village_is_asked_when_we_hold_a_town_nobody_spoke_of()->void:
@@ -110,21 +129,53 @@ func test_the_village_is_asked_when_we_hold_a_town_nobody_spoke_of()->void:
 	Hall.append_line(id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":"How many people are left in Tsaren?","day":Hall._day(),"aside":false})
 	assert_dict(Grave.reading("Kill all the women in the village",audience,list)).is_empty()
 
-func test_the_question_is_answered_and_never_asked_twice()->void:
+func test_only_a_clear_answer_settles_the_question()->void:
 	var w:=_world("tsaren_captured")
 	var id:=_audience(w)
-	var before:=int(GameState.population_total)
+	var info:Dictionary=w.info
+	var tsaren_women:=int(preload("res://scripts/town_ledger.gd").counts(String(info.civ_id),String(info.tsaren_id)).get("killed_women",0))
+	var pop:=int(GameState.population_total)
 	var asked:=CC.hear(id,"Kill all the women in the village",{"echoed":false})
 	assert_str(String(asked.get("stage",""))).is_equal("grave_ask")
-	assert_int(int(GameState.population_total)).is_equal(before)
 	# The same unclear order again: said plainly, not asked again.
 	var again:=CC.hear(id,"Kill all the women in the village",{})
-	assert_str(String(again.get("stage",""))).is_equal("none")
 	assert_str(String(again.get("outcome",""))).contains("Nothing is done until you say which village")
-	# "Our own": the order on our own people (the one ordered may plead first).
-	var ours:=CC.hear(id,"Our own, Seanstone",{})
-	assert_str(String(ours.get("verb",""))).is_equal(Grave.VERB)
-	assert_str(String(ours.get("stage",""))).is_not_equal("grave_ask")
+	var audience:=Hall.find(id)
+	# Words that are no answer: the question is dropped, nothing is done.
+	for words in ["Bring us bread","how many live in our village","the last harvest was poor"]:
+		assert_dict(Grave.answer_choice(audience,words)).override_failure_message(words).is_empty()
+	CC.hear(id,"Bring us bread",{})
+	assert_int(int(GameState.population_total)).is_equal(pop)
+	assert_dict(Grave._pending(Hall.find(id))).is_empty()
+	CC.hear(id,"the last harvest was poor",{})
+	assert_int(int(preload("res://scripts/town_ledger.gd").counts(String(info.civ_id),String(info.tsaren_id)).get("killed_women",0))).is_equal(tsaren_women)
+	assert_int(int(GameState.population_total)).is_equal(pop)
+	# Clear answers.
+	CC.hear(id,"Kill all the women in the village",{})
+	audience=Hall.find(id)
+	for pair in [["Our own, Seanstone","own"],["ours","own"],["Seanstone","own"],["Tsaren","town"],["the second one","town"],["no","no"],["neither","no"]]:
+		assert_str(String(Grave.answer_choice(audience,String(pair[0])).get("pick",""))).override_failure_message(String(pair[0])).is_equal(String(pair[1]))
+	# A new order while it is open is that order: the men of our village, never the women.
+	var women:=GameState.women_in(GROWN)
+	var men_order:=CC.hear(id,"Kill all the men of our village",{})
+	assert_str(String(men_order.get("verb",""))).is_equal(Grave.VERB)
+	if String(men_order.get("stage",""))=="grave_hesitate":
+		assert_float(GameState.women_in(GROWN)).is_equal_approx(women,0.001)
+		assert_array(_ids(Grave._pending(Hall.find(id)).get("reading",{}) as Dictionary)).is_equal(["men"])
+	else:
+		for c in ((men_order.get("grave_home",{}) as Dictionary).get("cells",[]) as Array): assert_str(String((c as Dictionary).sex)).is_equal("male")
+
+func test_a_town_lost_before_the_answer_is_asked_again()->void:
+	var w:=_world("tsaren_captured")
+	var id:=_audience(w)
+	var info:Dictionary=w.info
+	CC.hear(id,"Kill all the women in the village",{"echoed":false})
+	MilitaryCampaign.remove_occupation_force(String(info.civ_id),String(info.tsaren_id))
+	var pop:=int(GameState.population_total)
+	var r:=CC.hear(id,"Tsaren",{})
+	assert_str(String(r.get("stage",""))).is_equal("grave_ask")
+	assert_str(String(r.get("actor_says",""))).contains("no longer in our hands").contains("Seanstone").not_contains(" of ,")
+	assert_int(int(GameState.population_total)).is_equal(pop)
 
 # --------------------------------------------------------------------------
 # The ledger, the odds, the bounds
@@ -145,10 +196,10 @@ func test_killing_the_women_balances_the_ledger_and_says_its_numbers()->void:
 	var pop:=int(GameState.population_total)
 	var deaths:=int(GameState.lifetime_deaths)
 	var gone:=int(GameState.lifetime_departures)
-	var women:=float(GameState.population_exact-float(GameState.population_cohorts.children))*GameState.adult_female_share()
-	var female:=_female()
+	var women:=GameState.women_in(GROWN)
+	var girls:=GameState.women_in(["children"])*1.0
 	var fertile:=GameState.fertile_women()
-	var pregnant:=GameState.estimated_active_pregnancies()
+	var pregnant:=float(GameState.pregnancy_cohorts.first_trimester)+float(GameState.pregnancy_cohorts.second_trimester)+float(GameState.pregnancy_cohorts.third_trimester)
 	var result:=_carry(id,USERS_LINE)
 	var done:Dictionary=result.get("grave_home",{})
 	if String(result.get("stage",""))!=Grave.VERB:
@@ -162,36 +213,61 @@ func test_killing_the_women_balances_the_ledger_and_says_its_numbers()->void:
 	assert_int(int(GameState.lifetime_deaths)-deaths).is_equal(dead)
 	assert_int(int(GameState.lifetime_departures)-gone).is_equal(escaped+fled+kin)
 	assert_int(int(done.population_after)).is_equal(int(GameState.population_total))
-	# The women counted fall by the women killed and fled (and their share of the rest who left).
-	var share:=female/float(pop)
-	assert_float(female-_female()).is_greater_equal(float(dead+escaped)-0.01)
-	assert_float(female-_female()).is_less_equal(float(dead+escaped)+float(fled+kin)*share+1.0)
-	assert_int(int(done.targets)).is_equal(floori(women+0.000001))
+	# The grown women fall by the women killed and fled (and their share of
+	# the kin who left); the hands who fled are men; no girl was named.
+	assert_float(women-GameState.women_in(GROWN)).is_greater_equal(float(dead+escaped)-0.01)
+	assert_float(women-GameState.women_in(GROWN)).is_less_equal(float(dead+escaped+kin)+0.01)
+	assert_float(GameState.women_in(["children"])).is_greater_equal(girls*(1.0-float(kin)/float(pop-dead-escaped-fled))-1.0)
+	# Whole women of each age (a part of one in each age is never struck).
+	assert_int(int(done.targets)).is_between(floori(women)-5,floori(women))
 	# Bounded: the hands who would do it, five a day each, three days at most.
 	assert_int(dead).is_less_equal(int(done.willing)*Grave.KILLS_PER_HAND*Grave.DAYS_MAX)
 	assert_float(float(done.catch_odds)).is_between(0.35,0.92)
 	assert_int(dead+escaped+int(done.hid)).is_equal(int(done.targets))
-	# Births fall with the women; their pregnancies are lost with them.
-	assert_float(GameState.fertile_women()).is_less(fertile)
-	assert_float(GameState.fertile_women_factor()).is_less(1.0)
-	assert_int(GameState.estimated_active_pregnancies()).is_less(pregnant)
+	# Births fall with the mothers; only the pregnancies of the mothers gone go.
+	var fertile_after:=GameState.fertile_women()
+	assert_float(fertile_after).is_less(fertile)
+	var pregnant_after:=float(GameState.pregnancy_cohorts.first_trimester)+float(GameState.pregnancy_cohorts.second_trimester)+float(GameState.pregnancy_cohorts.third_trimester)
+	assert_float(pregnant_after/pregnant).is_equal_approx(fertile_after/fertile,0.001)
 	# ... and so does home's own count, which the daily births read.
-	var local_factor:float=SettlementModel.with_local_population(func()->float: return GameState.fertile_women_factor())
-	assert_float(local_factor).is_less(1.0)
+	var local_fertile:float=SettlementModel.with_local_population(func()->float: return GameState.fertile_women_factor())
+	assert_float(local_fertile).is_less(1.0)
 	# Said with its numbers and how it was decided.
 	var outcome:=String(result.outcome)
 	for n in [dead,escaped]: assert_bool(CC._re("(?<![0-9])%d(?![0-9])|\\b%s\\b" % [n,preload("res://scripts/town_fate.gd")._count(n)]).search(outcome)!=null).override_failure_message("%d not in: %s" % [n,outcome]).is_true()
 	assert_str(outcome).contains("chance").contains("women")
-	# What lasts: the people's dread, love lost, standing, the Chronicle.
+	# What lasts: the people's dread, the Chronicle, a true memory at court.
 	var people:=DIVINE.people_regard(Hall._officials())
 	assert_float(float(people.dread)).is_greater(0.2)
 	var found:=false
 	for e in (Chronicle.data().entries as Array):
 		if String((e as Dictionary).get("key","")).begins_with("grave_home:kill"): found=true
 	assert_bool(found).is_true()
+	var true_memory:=false
+	for p:Dictionary in Hall._officials():
+		for m in (GovernmentPeopleSystem.person_snapshot(int(p.person_id)).get("memories",[]) as Array):
+			if not "women of Seanstone" in str(m): continue
+			assert_str(str(m)).not_contains("in the hall")
+			if "killed: %d dead" % dead in str(m): true_memory=true
+	assert_bool(true_memory).is_true()
 	# The voice is told the numbers decided, and never asked for gore.
 	var told:=CC.decided_words(result)
 	assert_str(told).contains(String(result.outcome).substr(0,60)).contains("no gore")
+
+func test_the_women_and_the_old_are_counted_once()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w,"kavu")
+	var audience:=Hall.find(id)
+	var r:=Grave.reading("Kill the women and the old",audience,CC.roster(audience))
+	var named:=0
+	for c in GROWN: named+=floori(GameState.women_in([c])+0.000001)
+	named+=floori(float(GameState.population_cohorts.elders)-GameState.women_in(["elders"])+0.000001)
+	assert_int(Grave.group_count(r.groups as Array)).is_equal(named)
+	var result:=Grave.carry(id,audience,CC.roster(audience),r,true,{})
+	if String(result.get("stage",""))!=Grave.VERB: return
+	var done:Dictionary=result.grave_home
+	assert_int(int(done.dead)+int(done.escaped)+int(done.hid)).is_equal(int(done.targets))
+	assert_int(int(done.targets)).is_less_equal(named)
 
 func test_the_same_save_rolls_the_same()->void:
 	var first:Dictionary
@@ -203,6 +279,21 @@ func test_the_same_save_rolls_the_same()->void:
 		var got:={"stage":String(r.stage),"dead":int(done.get("dead",0)),"escaped":int(done.get("escaped",0)),"kin":int(done.get("kin_fled",0)),"pop":int(GameState.population_total),"outcome":String(r.outcome)}
 		if i==0: first=got
 		else: assert_dict(got).is_equal(first)
+
+func test_the_farmers_killed_are_gone_from_the_fields()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w,"suri")
+	var farmers:=int(GameState.population_allocations.Food)
+	var result:=_carry(id,"Kill all the farmers")
+	if String(result.get("stage",""))!=Grave.VERB: return
+	var done:Dictionary=result.grave_home
+	var lost:=int(done.dead)+int(done.escaped)
+	assert_int(lost).is_greater(0)
+	# The work the ledger shows the same day: the farmers less those killed or
+	# fled, and at most their share of the others who left.
+	var now:=int(GameState.population_allocations.Food)
+	assert_int(now).is_less_equal(farmers-lost+1)
+	assert_int(now).is_greater_equal(farmers-lost-int(done.kin_fled)-int(done.hands_fled)-2)
 
 func test_burning_our_own_village_takes_houses_and_stores()->void:
 	var w:=_world("home_peace")
@@ -233,48 +324,70 @@ func test_driving_out_the_old_kills_nobody()->void:
 	assert_float(float(GameState.population_cohorts.elders)).is_less(elders)
 	assert_int(int(done.moved)+int(done.hid)).is_equal(int(done.targets))
 
+func test_the_hands_who_flee_are_men_of_home()->void:
+	_world("home_peace")
+	var women:=GameState.women_in(EVERY_AGE)
+	var pop:=float(GameState.population_exact)
+	var gone:=Grave._hands_flee({"who":"watch"},5)
+	assert_int(gone).is_equal(5)
+	assert_float(GameState.women_in(EVERY_AGE)).is_equal_approx(women,0.001)
+	assert_float(float(GameState.population_exact)).is_equal_approx(pop-5.0,0.001)
+
 # --------------------------------------------------------------------------
 # The birth model
 # --------------------------------------------------------------------------
 
-func test_births_read_the_women_left()->void:
-	# An ordinary people: the factor is exactly 1, and newborns keep it so.
-	_world("home_peace")
-	assert_float(GameState.fertile_women_factor()).is_equal(1.0)
+func _births(days:int)->float:
 	var ctx:={"health":0.8,"food_security":0.9,"housing_ratio":0.9,"cohesion":0.6}
-	var base_births:=0.0
-	var snap:=fx.snapshot()
-	for d in 120: base_births+=float(GameState.process_reproduction_day(ctx).get("births_count",0))
+	var n:=0.0
+	for d in days: n+=float(GameState.process_reproduction_day(ctx).get("births_count",0))
+	return n
+
+func test_births_read_the_women_of_child_bearing_age()->void:
+	# An ordinary people keeps no women by age, and its births are untouched.
+	_world("home_peace")
+	assert_bool(GameState.has_female_cohorts()).is_false()
 	assert_float(GameState.fertile_women_factor()).is_equal(1.0)
+	var snap:=fx.snapshot()
+	var base_births:=_births(400)
 	fx.restore(snap)
 	var fertile:=GameState.fertile_women()
-	# Half the grown women killed: fewer conceptions, fewer births.
-	var women:=floori((float(GameState.population_exact)-float(GameState.population_cohorts.children))*GameState.adult_female_share())
-	GameState.register_directive_population_deaths(women/2,"test","half the women",{"age_cohorts":["youth","early_adults","established_adults","mature_adults","elders"],"sex":"female"})
-	# The women among the grown fall to about two thirds of an ordinary
-	# people's (the dead were grown too), and the mothers to about half.
-	assert_float(GameState.fertile_women_factor()).is_between(0.6,0.72)
+	# Half the grown women killed: half the mothers, fewer births.
+	var women:=floori(GameState.women_in(GROWN))
+	GameState.register_directive_population_deaths(women/2,"test","half the women",{"age_cohorts":GROWN,"sex":"female"})
 	assert_float(GameState.fertile_women()/fertile).is_between(0.45,0.55)
-	GameState.lose_pregnancies(0.5)
-	var after_births:=0.0
-	for d in 120: after_births+=float(GameState.process_reproduction_day(ctx).get("births_count",0))
-	assert_float(after_births).is_less(base_births)
-	# Newborns come about half girls: the women's share climbs back.
-	var share:=GameState.adult_female_share()
-	assert_float(share).is_less(GameState.BIRTH_FEMALE_SHARE)
-	# Men lost never raise the births.
+	assert_float(_births(400)).is_less(base_births)
+	# Girls killed, or old women: today's mothers are the same (the girls are
+	# missed as mothers years from now, as they would have grown up).
+	for cell in [{"cohort":"children","sex":"female","count":100},{"cohort":"elders","sex":"female","count":30}]:
+		fx.restore(snap)
+		var died:=GameState.register_population_deaths_by_cell([cell],"test","test")
+		assert_int(int(died.count)).is_equal(int(cell.count))
+		assert_float(GameState.fertile_women()).override_failure_message(str(cell)).is_equal_approx(fertile,0.0001)
+		assert_float(_births(400)).override_failure_message(str(cell)).is_greater_equal(base_births*0.97)
+	# Men lost never lower the mothers.
 	fx.restore(snap)
-	GameState.register_directive_population_deaths(100,"test","men",{"age_cohorts":["youth","early_adults","established_adults","mature_adults","elders"],"sex":"male"})
-	assert_float(GameState.fertile_women_factor()).is_equal(1.0)
+	GameState.register_directive_population_deaths(100,"test","men",{"age_cohorts":GROWN,"sex":"male"})
+	assert_float(GameState.fertile_women()).is_equal_approx(fertile,0.0001)
+	# Ordinary deaths after a cull keep each age's women as they are (no drift).
+	fx.restore(snap)
+	GameState.register_directive_population_deaths(women/2,"test","half the women",{"age_cohorts":GROWN,"sex":"female"})
+	var ratio:=GameState.women_in(["early_adults"])/float(GameState.population_cohorts.early_adults)
+	GameState.register_population_deaths(60,"Hunger")
+	assert_float(GameState.women_in(["early_adults"])/float(GameState.population_cohorts.early_adults)).is_equal_approx(ratio,0.0001)
+	# The realm's totals are read from the women by age.
+	var total:=0.0
+	for c in EVERY_AGE: total+=GameState.women_in([c])
+	assert_float(float(GameState.population_cohorts.female)).is_equal_approx(total,0.001)
 
 func test_departures_of_women_keep_the_count_of_women()->void:
 	_world("home_peace")
-	var female:=_female()
-	var male:=float(GameState.population_cohorts.get("male",0.0))
-	var gone:=GameState.register_population_departures(30,"test",{"youth":1.0,"early_adults":1.0},"female")
+	var female:=GameState.women_in(EVERY_AGE)
+	var men:=float(GameState.population_exact)-female
+	var gone:=GameState.register_population_departures(30,"test",{"children":0.0,"youth":1.0,"early_adults":1.0,"established_adults":0.0,"mature_adults":0.0,"elders":0.0},"female")
 	assert_int(int(gone.count)).is_equal(30)
-	assert_float(female-_female()).is_equal_approx(30.0,0.001)
-	assert_float(float(GameState.population_cohorts.male)).is_equal_approx(male,0.001)
+	assert_float(female-GameState.women_in(EVERY_AGE)).is_equal_approx(30.0,0.001)
+	assert_float(float(GameState.population_exact)-GameState.women_in(EVERY_AGE)).is_equal_approx(men,0.001)
 
 func test_a_town_of_ours_named_is_its_own_people_only()->void:
 	var w:=_world("home_towns")
@@ -286,10 +399,15 @@ func test_a_town_of_ours_named_is_its_own_people_only()->void:
 	assert_str(String(r.get("settlement_id",""))).is_not_empty()
 	var home_before:=SettlementModel.primary_population_exact()
 	var pop:=int(GameState.population_total)
+	var women:=GameState.women_in(GROWN)
 	var result:=Grave.carry(id,audience,CC.roster(audience),r,true,{})
 	if String(result.get("stage",""))!=Grave.VERB: return
 	var done:Dictionary=result.get("grave_home",{})
 	assert_str(String(result.outcome)).contains("Reedmouth")
-	# Reedmouth's people, not home's: home keeps its count (the hands who fled aside).
+	# Reedmouth's people, not home's: home keeps its count less the hands who fled.
 	assert_float(absf(SettlementModel.primary_population_exact()-home_before)).is_less_equal(float(int(done.hands_fled))+1.0)
 	assert_int(pop-int(done.dead)-int(done.escaped)-int(done.hands_fled)-int(done.kin_fled)).is_equal(int(GameState.population_total))
+	# The realm's women, read back from the towns: never counted twice.
+	var lost:=float(int(done.dead)+int(done.escaped))
+	assert_float(GameState.women_in(GROWN)).is_less_equal(women-lost+1.0)
+	assert_float(GameState.women_in(GROWN)).is_greater_equal(women-lost-float(done.kin_fled)-1.0)
