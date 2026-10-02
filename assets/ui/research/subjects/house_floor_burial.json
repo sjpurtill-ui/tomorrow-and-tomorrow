@@ -1,0 +1,23 @@
+{
+  "id": "house_floor_burial",
+  "line": "culture",
+  "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-c2c2c94a-8e73-4f85-9095-9201f015f1a6.png",
+  "medium": "flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric",
+  "prompt": "Preserve this exact WIDE painting, indigo/rose/gold pigment planes, three adults, fully hide-wrapped opaque bundle, cutaway earthen floor grave, adobe wall and roofpost. Remove ONLY the incidental dark ceramic pot and small bowl on left window ledge, and remove the little upright woven decorative panel behind them. Replace their occupied areas with plain adobe wall/ledge pigment. Keep every other subject detail, proportions and layout unchanged. No text or new objects.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1457b409-667a-41d7-9ff1-ecbedefc7a77.png",
+  "initial_prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match supplied WIDE approximately2055x765 proportions and flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric. Three fully clothed adults quietly place a completely hide-wrapped human-sized bundle into shallow grave beneath earthen floor of a simple adobe house. An open cutaway foreground lets floor edge and pit read clearly; rough mudwall with timber roofpost. Bundle fully opaque no exposed body or bones. Respectful burial and household memory, no spectacle, gravegoods, writtenmarks or ornate tomb. House exists because this discovery requires adobe/framedconstruction despite targetyear9. Rough hide garments, mature readable handmade2D art. Entire people and subject action MUST be smaller and within y=170..620 central band, all heads hands and objects intact for3.37:1crop. Fullbleedwide, no text, labels, borders, photography, CGI or cinematiclight. Reference medium and width only, replace subject.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-c2c2c94a-8e73-4f85-9095-9201f015f1a6.png",
+  "version": 1,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 9,
+  "replace_first300": false,
+  "replace_art600": true,
+  "binding_style": "flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric",
+  "mode": "built-in image_gen / reference-guided painting",
+  "review": "Full source reviewed, actual wide card review pending",
+  "asset": "res://assets/ui/research/subjects/house_floor_burial-v1.png",
+  "sha256": "dce5dcb0829e7557855cfb5eadfb9096412f1f217c9de58107f8eb2af6a45385"
+}
