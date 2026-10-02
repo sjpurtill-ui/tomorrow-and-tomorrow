@@ -418,6 +418,7 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 			if c[key] is int or c[key] is float: m[key]=int(c[key])
 		m["ledger"]=1
 		m["ledger_ok"]=1 if bool(Ledger.check(civ,city).get("ok",false)) else 0
+		m["violated"]=int(Ledger.of(civ,city,false).get("violated",0))
 		m["_snap"]=Ledger.snapshot(civ,city)
 	else:
 		m["ledger"]=0; m["ledger_ok"]=1
@@ -644,7 +645,7 @@ static func _material(m:Dictionary)->String:
 		# court's known persons, the realm's name: what acts at home really change.
 		"office_headman","office_suri","office_kavu","office_imeri","love_headman","love_suri","love_kavu","love_imeri","dread_headman","dread_suri","dread_kavu","dread_imeri",
 		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","nation_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
-		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found","army_level",
+		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found","violated","army_level",
 		# Who sets the daily work and the people at each task (manual_work.gd).
 		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
 		# Trade with other peoples (trade_stances.gd) and what a gift reached.
