@@ -539,3 +539,31 @@ func test_the_purse_settles_monthly_and_costs_no_more_a_day()->void:
 	var new_cost:=Time.get_ticks_usec()-started
 	print("purse per-day cost: old finance %d us/yr, purse %d us/yr" % [old_cost,new_cost])
 	assert_int(new_cost).is_less_equal(maxi(old_cost*2,2000))
+
+
+## "Need to see where the silver is coming from": each town's levy is kept as
+## it is taken, and the board says it town by town, with what was hidden.
+func test_the_board_says_where_the_silver_comes_from()->void:
+	GameState.economy_stage="subsistence"
+	Purse.set_levy("heavy")
+	for i in 30: Purse.accrue({"daily_output_value":150.0},0.0)
+	var sources:=Purse.sources()
+	assert_int((sources.towns as Array).size()).is_equal(1)
+	var home:Dictionary=(sources.towns as Array)[0]
+	assert_str(String(home.name)).is_equal(String(GameState.settlement_name))
+	assert_float(float(home.levy)).is_greater(0.0)
+	assert_float(float(home.evaded)).is_greater(0.0)
+	var board:=Board.new()
+	add_child(board)
+	board.setup({})
+	var said:=PackedStringArray()
+	for node in board.find_children("*","Label",true,false): said.append((node as Label).text)
+	var text:=" | ".join(said)
+	assert_str(text).contains("WHERE IT COMES FROM")
+	assert_str(text).contains(String(GameState.settlement_name))
+	# A season at the pace of the days levied: about three months of it.
+	assert_float(float(home.levy)).is_greater(25.0*float(Purse.quote("heavy").rate)*150.0)
+	assert_str(text).contains("hidden by households")
+	await await_idle_frame()
+	remove_child(board)
+	board.free()
