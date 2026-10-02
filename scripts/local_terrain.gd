@@ -14494,19 +14494,26 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		return
 	var conversation_action:=AdvisorSystem.civic_conversation_action(text,settlement_id,int(leader.get("person_id",0)))
 	text=AdvisorSystem.civic_retry_text(text,settlement_id)
-	# Killing, burning or driving out our own people by group is given at
-	# court, read back and done only on the god's yes (grave_home.gd): never a
-	# council directive, whose repression would register deaths unread.
-	var grave_home:GDScript=load("res://scripts/grave_home.gd")
-	if bool(grave_home.call("names_our_people",text)):
-		input.text=""
-		if travel_status_label: travel_status_label.text=String(grave_home.get_script_constant_map().get("COUNCIL_NO",""))
-		return
 	if conversation_action=="withdraw":
 		input.text=""
 		var withdrawn:=AdvisorSystem.withdraw_pending_civic_directive(settlement_id,int(leader.get("person_id",0)),text)
 		var withdrawal_message:=String(withdrawn.get("message",withdrawn.get("reason","There is no unresolved directive to withdraw.")))
 		if travel_status_label: travel_status_label.text=PaperKit.sentence(withdrawal_message.split("\n")[0])
+		if hud:
+			hud._queue_signature="__stale__"
+			hud.refresh()
+			hud.request_immediate_dock_refresh()
+		return
+	# Killing, burning or driving out our own people by group is given at
+	# court, read back and done only on the god's yes (grave_home.gd): never a
+	# council directive. The god's words and the plain answer stay in the
+	# council's own exchange, where they were typed.
+	var grave_home:GDScript=load("res://scripts/grave_home.gd")
+	if bool(grave_home.call("names_our_people",text)):
+		input.text=""
+		var refusal:=String(grave_home.get_script_constant_map().get("COUNCIL_NO",""))
+		AdvisorSystem.record_civic_refusal(settlement_id,text,refusal)
+		if travel_status_label: travel_status_label.text=refusal
 		if hud:
 			hud._queue_signature="__stale__"
 			hud.refresh()

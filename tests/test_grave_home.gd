@@ -303,11 +303,120 @@ func test_arrivals_of_known_sex_are_counted_so()->void:
 	GameState.register_population_arrivals(100,"test",{"children":0.2,"early_adults":0.8},0.6)
 	assert_float(GameState.women_in(["children"])-girls).is_equal_approx(20.0*GameState.BIRTH_FEMALE_SHARE,0.01)
 	assert_float(GameState.women_in(GROWN)-grown).is_equal_approx(60.0-20.0*GameState.BIRTH_FEMALE_SHARE,0.01)
-	# All women and girls said, with children among them: the grown are all women.
+	# All of one sex ("the women and girls"): every age, children too.
 	girls=GameState.women_in(["children"]); grown=GameState.women_in(GROWN)
 	GameState.register_population_arrivals(50,"test",{"children":0.2,"early_adults":0.8},1.0)
-	assert_float(GameState.women_in(["children"])-girls).is_equal_approx(10.0*GameState.BIRTH_FEMALE_SHARE,0.01)
+	assert_float(GameState.women_in(["children"])-girls).is_equal_approx(10.0,0.01)
 	assert_float(GameState.women_in(GROWN)-grown).is_equal_approx(40.0,0.01)
+	# The make-up by age wins (captives as they were chosen: town_fate.gd).
+	girls=GameState.women_in(["children"]); grown=GameState.women_in(GROWN)
+	GameState.register_population_arrivals(30,"test",{"children":10.0,"early_adults":20.0},0.5,{"children":0.0,"early_adults":1.0})
+	assert_float(GameState.women_in(["children"])-girls).is_equal_approx(0.0,0.01)
+	assert_float(GameState.women_in(GROWN)-grown).is_equal_approx(20.0,0.01)
+
+func test_captives_come_home_as_they_were_chosen()->void:
+	_world("home_peace")
+	var TownFate:=preload("res://scripts/town_fate.gd")
+	var units:={"women":{"group":"women","band":"","share":1.0},"girls_young":{"group":"children","band":"girls_young","share":1.0}}
+	var profile:={"children":40.0,"youth":20.0,"early_adults":30.0,"established_adults":20.0,"mature_adults":10.0,"elders":10.0}
+	var made:Dictionary=TownFate._captive_make_up(units,{"women":4},{"women":16,"girls_young":10},profile,30)
+	var cohorts:Dictionary=made.cohorts
+	var shares:Dictionary=made.female_shares
+	assert_float(float(cohorts.children)).is_equal_approx(10.0,0.01)
+	assert_float(float(cohorts.elders)).is_equal_approx(0.0,0.01)
+	assert_float(float(cohorts.youth)+float(cohorts.early_adults)+float(cohorts.established_adults)+float(cohorts.mature_adults)).is_equal_approx(20.0,0.01)
+	for key in ["children","youth","early_adults","established_adults","mature_adults"]:
+		assert_float(float(shares[key])).override_failure_message(key).is_equal_approx(1.0,0.0001)
+	var women:=GameState.women_in(EVERY_AGE)
+	GameState.register_population_arrivals(30,"captives",cohorts,-1.0,shares)
+	assert_float(GameState.women_in(EVERY_AGE)-women).is_equal_approx(30.0,0.01)
+
+# --------------------------------------------------------------------------
+# The ledger (fourth review): no directive from words kills or drives out
+# our own people; only grave_home, read back and confirmed
+# --------------------------------------------------------------------------
+
+func _gone()->Array:
+	return [int(GameState.lifetime_deaths),int(GameState.lifetime_departures),roundi(float(GameState.population_exact))]
+
+func test_the_council_never_kills_or_drives_out_our_people()->void:
+	for text in ["Purge the old women of Seanstone","Kill all women over 60 as soon as possible.","Execute the sick.","Kill all the rebels","Banish the old from our lands",
+			"Forcibly relocate the population.","Execute one worker as an example.","Have all the women of Seanstone killed"]:
+		_world("home_peace")
+		var before:=_gone()
+		var interpreted:=PronouncementInterpreter._local_interpretation(String(text))
+		var order:=AdvisorSystem.execute_pronouncement(String(text),interpreted)
+		for i in 30: ConsequenceEngine._process_directive_migration(maxf(1.0,GameState.population_exact),1.0)
+		assert_array(_gone()).override_failure_message(String(text)+" "+String(order.get("status",""))).is_equal(before)
+		for policy in (order.get("parameters",{}) as Dictionary).get("interpretation",{}).get("policies",[]):
+			if String((policy as Dictionary).get("id",""))=="mass_repression":
+				assert_bool(bool((policy as Dictionary).get("applied",true))).override_failure_message(String(text)).is_false()
+
+func test_a_law_or_standing_order_never_drives_anyone_out_now()->void:
+	_world("home_peace")
+	var before:=_gone()
+	var Custom:=preload("res://scripts/custom_directive.gd")
+	for text in ["Exile every thief","Drive out the rebels","banish all who steal"]:
+		var plan:=Custom.offline_plan(String(text))
+		if plan.is_empty(): continue
+		ConsequenceEngine.apply_directive(Custom.ID,Custom.MAIN_MAGNITUDE,90.0,"test",{"source_order_id":"t_"+String(text),"directive_parameters":{"custom_plan":plan}})
+	for i in 120: ConsequenceEngine._process_directive_migration(maxf(1.0,GameState.population_exact),1.0)
+	assert_array(_gone()).is_equal(before)
+	# A sacrifice by the order itself: nothing is done, said plainly.
+	var sacrifice:={"summary":"Give a child to the god","natures":["human_sacrifice"],"coercion":0.85}
+	var refused:=ConsequenceEngine.apply_directive(Custom.ID,Custom.MAIN_MAGNITUDE,30.0,"test",{"source_order_id":"t_sacrifice","directive_parameters":{"custom_plan":sacrifice}})
+	assert_bool(bool(refused.get("applied",true))).is_false()
+	assert_str(String(refused.get("error",""))).contains("read-back")
+	assert_array(_gone()).is_equal(before)
+	# The pregnancy threat's deadline kills nobody and drives nobody out.
+	var threat:="Tell parents with single children that they are failing the tribe and will be killed if they are not pregnant within 6 months."
+	AdvisorSystem.execute_pronouncement(threat,PronouncementInterpreter._local_interpretation(threat))
+	for modifier in GameState.active_modifiers:
+		if String((modifier as Dictionary).get("id",""))=="coercive_pronatalism":
+			GameState.elapsed_days=float((modifier as Dictionary).until_day)+1.0
+	ConsequenceEngine.refresh_policy_lifecycle()
+	assert_int(int(GameState.lifetime_deaths)).is_equal(int(before[0]))
+	assert_int(int(GameState.lifetime_departures)).is_equal(int(before[1]))
+
+func test_the_deed_said_done_to_them_is_read_back()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w)
+	var audience:=Hall.find(id)
+	var list:=CC.roster(audience)
+	for pair in [["Have all the women of Seanstone killed","kill"],["have the old women of our village killed","kill"],["I want the old women of Seanstone dead","kill"],
+			["All the women of Seanstone must be killed","kill"],["Purge the old women of Seanstone","kill"],["Cull the old of our village","kill"],
+			["Sacrifice the children of Seanstone","kill"],["Have the old of Seanstone banished","drive"],["Kill the women of our village and their children","kill"]]:
+		var r:=Grave.reading(String(pair[0]),audience,list)
+		assert_str(String(r.get("kind",""))).override_failure_message(String(pair[0])+" "+str(r)).is_equal("act")
+		assert_str(String(r.get("how",""))).override_failure_message(String(pair[0])).is_equal(String(pair[1]))
+	assert_array(_ids(Grave.reading("Kill the women of our village and their children",audience,list))).is_equal(["women","children"])
+	# Laws for wrongdoers stay laws; a town of theirs named goes to the war orders.
+	for words in ["Kill the men who steal","From now on kill every man who steals","Attack Tsaren and kill all the men"]:
+		assert_dict(Grave.reading(words,audience,list)).override_failure_message(words).is_empty()
+	var pop:=int(GameState.population_total)
+	var r2:=CC.hear(id,"Have all the women of Seanstone killed",{})
+	assert_str(String(r2.get("stage",""))).is_equal("grave_readback")
+	assert_int(int(GameState.population_total)).is_equal(pop)
+
+func test_only_a_bare_assent_is_pressing_words()->void:
+	for word in ["Okay, attack Tsaren","Now summon the headman","Sure, bring us bread","go on and feed the children"]:
+		assert_bool(Grave.assent_like(word)).override_failure_message(word).is_false()
+	for word in ["Okay","Now!","go on","I said kill them","Obey me!","you heard me."]:
+		assert_bool(Grave.assent_like(word)).override_failure_message(word).is_true()
+	var w:=_world("home_peace")
+	var id:=_audience(w)
+	CC.hear(id,"Kill all the women of our village",{})
+	var r:=CC.hear(id,"Now summon the headman",{})
+	assert_str(String(r.get("outcome",""))).not_contains("to carry it out")
+	assert_dict(Grave._pending(Hall.find(id))).is_empty()
+
+func test_the_council_guard_lets_other_words_pass()->void:
+	_world("home_peace")
+	for words in ["Turn the herders away from the spring","withdraw the order to kill the women","Cancel the order to kill the old","Kill the men who steal",
+			"don't kill the women","Send the women and children away from the village"]:
+		assert_bool(Grave.names_our_people(words)).override_failure_message(words).is_false()
+	for words in ["Purge the old women of Seanstone","Have all the women of Seanstone killed","Kill the women and their children","drive the old out of our lands"]:
+		assert_bool(Grave.names_our_people(words)).override_failure_message(words).is_true()
 
 # --------------------------------------------------------------------------
 # The choke point (third review): our own people end here, whatever the words

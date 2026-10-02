@@ -1268,16 +1268,23 @@ func register_population_deaths_by_cell(cells:Array,directive_id:String,descript
 	result["record"]=record
 	return result
 
-func register_population_arrivals(count:int,source:String="new arrivals",cohort_profile:Dictionary={},female_share:float=-1.0) -> Dictionary:
-	## female_share: the women among them when it is known (captives taken
-	## home, say); otherwise about half. Arrivals of one sex start the count
-	## of women by age (ensure_female_cohorts), so that count stays true.
+func register_population_arrivals(count:int,source:String="new arrivals",cohort_profile:Dictionary={},female_share:float=-1.0,female_shares:Dictionary={}) -> Dictionary:
+	## female_shares: the share of women and girls in each age cohort when the
+	## arrivals' make-up is known (captives taken home: town_fate.gd, the women
+	## and girls, men and boys as they were chosen); it wins. female_share: the
+	## women among them as one share when only that is known; otherwise about
+	## half. Arrivals of one sex start the count of women by age
+	## (ensure_female_cohorts), so that count stays true.
 	initialize_population_model()
 	var actual:=maxi(0,count)
 	if actual<=0: return {"count":0,"source":source,"population_after":population_total,"cohorts":{}}
+	var by_age:=not female_shares.is_empty()
 	var share_known:=female_share>=0.0 and is_finite(female_share)
 	var arriving_women:=clampf(female_share,0.0,1.0) if share_known else BIRTH_FEMALE_SHARE
 	if share_known and absf(arriving_women-BIRTH_FEMALE_SHARE)>0.02: ensure_female_cohorts()
+	if by_age:
+		for key in female_shares:
+			if absf(float(female_shares[key])-BIRTH_FEMALE_SHARE)>0.02: ensure_female_cohorts(); break
 	var weights:=cohort_profile.duplicate(true)
 	if weights.is_empty():
 		# Small mobile groups skew toward working ages while still allowing
@@ -1287,17 +1294,20 @@ func register_population_arrivals(count:int,source:String="new arrivals",cohort_
 	for key in POPULATION_AGE_COHORTS: total_weight+=maxf(0.0,float(weights.get(key,0.0)))
 	if total_weight<=0.000001: total_weight=1.0
 	var added:Dictionary={}
-	# The known share is of the grown: children arrive about half girls, as
-	# born, and the grown carry the rest, so the women among them still come to
-	# the share given (clamped when the children alone exceed it).
+	# One share only, neither all of one sex nor none: children arrive about
+	# half girls, as born, and the grown carry the rest, so the women among them
+	# still come to the share given (clamped when the children alone exceed it).
+	# All of one sex ("the women and girls"): every age, children too.
 	var children:=float(actual)*maxf(0.0,float(weights.get("children",0.0)))/total_weight
 	var grown_women:=arriving_women
-	if share_known and float(actual)-children>0.0:
+	var one_sex:=arriving_women<=0.0001 or arriving_women>=0.9999
+	if share_known and not one_sex and float(actual)-children>0.0:
 		grown_women=clampf((arriving_women*float(actual)-children*BIRTH_FEMALE_SHARE)/(float(actual)-children),0.0,1.0)
 	for key in POPULATION_AGE_COHORTS:
 		var amount:=float(actual)*maxf(0.0,float(weights.get(key,0.0)))/total_weight
 		population_cohorts[key]=float(population_cohorts.get(key,0.0))+amount
-		var women_share:=BIRTH_FEMALE_SHARE if key=="children" and share_known else grown_women
+		var women_share:=BIRTH_FEMALE_SHARE if key=="children" and share_known and not one_sex else grown_women
+		if by_age: women_share=clampf(float(female_shares.get(key,BIRTH_FEMALE_SHARE)),0.0,1.0)
 		if has_female_cohorts(): population_cohorts[FEMALE_PREFIX+key]=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))+amount*women_share
 		added[key]=amount
 	population_exact+=float(actual)

@@ -592,8 +592,9 @@ static func assessment(plan:Dictionary,duration_days:float,office_execution:floa
 	if material_factor<0.9: limitations.append("material stores cannot fund all of it")
 	if float(plan.get("feasibility",1.0))<0.2: limitations.append("what is asked lies beyond what people can do; only the attempt is possible")
 	var days:=clampf(duration_days,7.0,730.0)
+	var kills:=kills_by_order(plan)
 	return {
-		"id":ID,"domain":"social","can_apply":true,"blocker":"","limitations":limitations,
+		"id":ID,"domain":"social","can_apply":not kills,"blocker":NO_READ_BACK if kills else "","limitations":limitations,
 		"requested_magnitude":MAIN_MAGNITUDE,"effective_magnitude":MAIN_MAGNITUDE*implementation,"duration_days":days,
 		"implementation_rate":implementation,"office_execution":clampf(office_execution,0.0,1.12),
 		"capacity":{"active":0,"slots":1,"factor":1.0},
@@ -657,6 +658,22 @@ static func realize(plan:Dictionary,order_id:String,implementation:float)->Array
 			"side_effect":true,"narrative":true,"nature":String(narrative.get("id",""))})
 	return result
 
+## Deaths and departures of our own people by an order from the god's words
+## are registered only by grave_home.gd (read back with its numbers, then the
+## god's yes) and the persons engine's judgment of one person: never by a
+## directive, a law or a standing order (here, consequence_engine.gd).
+const NO_READ_BACK:="Nothing is done to anyone without your word on a read-back: an order to kill or drive out our own people is given at court, read back with its numbers, and done only on your yes."
+
+static func kills_by_order(plan:Dictionary)->bool:
+	## Does the plan kill people by the order itself (a sacrifice, a counted
+	## example)? Such a plan is never carried out as a directive.
+	if bool(plan.get("no_deaths",false)): return false
+	if int(plan.get("counted_deaths",0))>0: return true
+	for nature_variant in plan.get("natures",[]):
+		var row:Array=_nature_spec(String(nature_variant),String(plan.get("summary",""))).get("deaths",[])
+		if not row.is_empty() and bool(row[4]): return true
+	return false
+
 static func _deaths(plan:Dictionary,order_id:String,implementation:float)->Dictionary:
 	# Words of killing or harm from the court (court_commands.custom_order):
 	# the order moves the realm's measures only; nobody dies of it here.
@@ -683,8 +700,12 @@ static func _deaths(plan:Dictionary,order_id:String,implementation:float)->Dicti
 static func apply(plan:Dictionary,duration_days:float,source:String,metadata:Dictionary,office_execution:float)->Dictionary:
 	# A war order is never a vague social directive: it belongs to the war
 	# leader and the real armies (court_war_orders.gd), or to an honest no.
-	if not (load("res://scripts/court_war_orders.gd").read(String(plan.get("summary",""))) as Dictionary).is_empty():
+	if not bool(plan.get("law",false)) and not (load("res://scripts/court_war_orders.gd").read(String(plan.get("summary",""))) as Dictionary).is_empty():
 		return {"applied":false,"war_order":true,"reason":"A war order goes to the war leader, not the council."}
+	# Killing by the order itself: nothing is done (NO_READ_BACK).
+	if kills_by_order(plan):
+		var refused:=assessment(plan,duration_days,office_execution)
+		return {"applied":false,"assessment":refused,"error":NO_READ_BACK,"reason":NO_READ_BACK}
 	var state:=WorldSimulation.state
 	var order_id:=String(metadata.get("source_order_id",""))
 	var assessed:=assessment(plan,duration_days,office_execution)
@@ -785,8 +806,8 @@ static func apply(plan:Dictionary,duration_days:float,source:String,metadata:Dic
 	var death:=_deaths(plan,order_id,implementation)
 	if not death.is_empty() and float(plan.get("future_delay",0))<=0.0:
 		if bool(death.deliberate):
-			var registered:=state.register_directive_population_deaths(int(death.count),ID,"%s (%s)" % [String(death.cause).capitalize(),String(plan.get("summary","")).substr(0,60)],{})
-			direct["population_deaths"]=int(registered.get("count",0))
+			# Never by a directive (NO_READ_BACK; apply refuses such plans first).
+			direct["population_deaths"]=0
 		else:
 			# Accidents happen during the work, not at the moment of the order.
 			for modifier_variant in state.active_modifiers:

@@ -88,6 +88,18 @@ day, with the same numbers, carries it out; "now!", "okay", "go on", "you
 heard me" and the like after a read-back, or after one was dropped, do
 nothing, and a read-back clears any older open question of the order reader.
 
+The same holds at the ledger: no directive from the god's words (the council,
+a settlement leader, a law, a standing order, a custom order) ever registers
+deaths or departures of our own people. Lethal repression and a killing by
+the order itself (a sacrifice, a counted example) are not carried out at all
+("Nothing is done to anyone without your word on a read-back"); any other
+directive is felt in its measures only, its deaths, the flight from them, a
+deadline's killings and a decree's departures struck
+(consequence_engine.gd, custom_directive.gd). Laws for wrongdoers stay laws
+and act on future offenders. Only grave_home (read back, then the god's yes)
+and the judgment of one named person register such deaths; accidents of the
+work and the collapse of a great work are the world's own.
+
 ## Officials know their office
 
 Each official answers from an exact fact sheet for their office

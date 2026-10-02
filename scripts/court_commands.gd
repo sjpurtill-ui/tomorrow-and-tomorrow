@@ -2764,6 +2764,9 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	if plan.is_empty(): plan=CustomDirective.attempt_plan(text)
 	if grave:
 		plan=plan.duplicate(true); plan["no_deaths"]=true; plan.erase("counted_deaths")
+	# A law for our own people ("kill the men who steal") is never read again
+	# as a war order on the way (custom_directive.apply).
+	if law: plan=plan.duplicate(true); plan["law"]=true
 	var policy:=CustomDirective.policy_from_plan(plan)
 	var actor:Dictionary=context.get("actor",{}) if context.get("actor") is Dictionary else {}
 	var execution:=0.8

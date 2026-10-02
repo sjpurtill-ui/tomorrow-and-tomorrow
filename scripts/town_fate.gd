@@ -904,6 +904,40 @@ static func _left_words(civ_id:String,region_id:String,name:String)->String:
 
 ## The chance to round up each of those the god names: the men bound or dead
 ## leave nobody to hide them; kept indoors, fewer slip away.
+static func _captive_make_up(units:Dictionary,held_by:Dictionary,caught_by:Dictionary,town_profile:Dictionary,people:int)->Dictionary:
+	## Those taken home by age and sex: {cohorts (counts, scaled to the people
+	## who set out), female_shares (women and girls in each cohort)}; {} when
+	## nobody is counted. The grown are spread over the grown ages as the
+	## town's own are.
+	var men:=0.0; var women:=0.0; var old:=0.0; var girls:=0.0; var boys:=0.0; var kids:=0.0
+	for key in units:
+		var n:=float(int(held_by.get(key,0))+int(caught_by.get(key,0)))
+		if n<=0.0: continue
+		var u:Dictionary=units[key]
+		var band:=String(u.get("band",""))
+		match String(u.group):
+			"men": men+=n
+			"women": women+=n
+			"elders": old+=n
+			_:
+				if band.begins_with("girls"): girls+=n
+				elif band.begins_with("boys"): boys+=n
+				else: kids+=n
+	var all_n:=men+women+old+girls+boys+kids
+	if all_n<=0.0 or people<=0: return {}
+	var scale:=float(people)/all_n
+	var grown_ages:=["youth","early_adults","established_adults","mature_adults"]
+	var grown_weight:=0.0
+	for key in grown_ages: grown_weight+=maxf(0.0,float(town_profile.get(key,0.0)))
+	var cohorts:={"children":(girls+boys+kids)*scale,"elders":old*scale}
+	for key in grown_ages:
+		var w:=maxf(0.0,float(town_profile.get(key,0.0)))/grown_weight if grown_weight>0.0 else 0.25
+		cohorts[key]=(men+women)*scale*w
+	var shares:={"elders":GameState.BIRTH_FEMALE_SHARE}
+	shares["children"]=(girls+kids*GameState.BIRTH_FEMALE_SHARE)/(girls+boys+kids) if girls+boys+kids>0.0 else GameState.BIRTH_FEMALE_SHARE
+	for key in grown_ages: shares[key]=women/(men+women) if men+women>0.0 else GameState.BIRTH_FEMALE_SHARE
+	return {"cohorts":cohorts,"female_shares":shares}
+
 static func round_up_odds(l:Dictionary,force:Dictionary)->float:
 	var p:=ROUNDED_UP_SHARE
 	var men_start:=maxi(1,roundi(float(int(l.get("start",0)))*MEN_SHARE))
@@ -1003,6 +1037,13 @@ static func _carry(civ_id:String,region_id:String,name:String,home:String,status
 		var share:=0.0 if String(u.group)=="men" else (1.0 if String(u.group)=="women" else (1.0 if band.begins_with("girls") else (0.0 if band.begins_with("boys") else 0.495)))
 		women_n+=n*share; all_n+=n
 	if all_n>0.0: transfer["female_share"]=women_n/all_n
+	# And by age, as they were chosen: the grown women and men, the old, the
+	# girls and boys, never the whole town's make-up (the women carried off
+	# come home as women, their daughters as girls).
+	var made:=_captive_make_up(units,held_caught_by,caught_by,transfer.get("cohorts",{}) as Dictionary,int(transfer.get("people",0)))
+	if not made.is_empty():
+		transfer["cohorts"]=made.cohorts
+		transfer["female_shares"]=made.female_shares
 	# The ledger: those we held go first, then the free, by unit in
 	# proportion to those caught.
 	var from_held:=mini(count,held_caught)

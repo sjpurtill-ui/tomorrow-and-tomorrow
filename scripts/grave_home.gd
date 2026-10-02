@@ -111,8 +111,15 @@ const TRADES:=[
 ## Every noun above, for reading where a group of people ends.
 const PEOPLE_NOUN:="(old (women|woman|wives|mothers|men|man|males|people|ones|folks?)|little (girls|boys|ones)|young ones|grown (men|women)|every (man|woman|child|male|female|soul)|whole (vill?age|town|camp|settlement|people|tribe|clan)|old|aged|elders|elderly|grandmothers|grandfathers|grey ?beards|grey ?heads|girls|daughters|boys|sons|children|kids|babies|infants|toddlers|women|womenfolk|wives|mothers|females|men|males|menfolk|husbands|fathers|everyone|everybody|people|villagers|townsfolk|townspeople|inhabitants|residents|population|families|households|farmers?|field ?hands|hunters?|gatherers?|foragers?|herders?|herdsmen|shepherds?|fishers?|fishermen|builders?|masons?|diggers?|craftsmen|crafters?|craftspeople|potters?|weavers?|smiths?|toolmakers?|carvers?|tanners?|carriers?|porters?|haulers?|miners?|quarrymen|woodcutters?|stonecutters?)"
 ## The verbs, as whole words (their place in the sentence is checked apart).
-const KILL_RE:="(?i)\\b(kill|kil|kiil|killl|slay|slaughter|massacre|butcher|execute|exterminate|murder|wipe out|cut down|do away with|get rid of|hang|behead|strangle|drown|poison|put (?<putobj>[\\w' ]{1,40}?) to (the sword|death)|rid (?<ridplace>[\\w' ]{0,30}?)\\s*of)\\b"
+const KILL_RE:="(?i)\\b(kill|kil|kiil|killl|slay|slaughter|massacre|butcher|execute|exterminate|murder|purge|cull|sacrifice|eliminate|annihilate|wipe out|cut down|do away with|get rid of|hang|behead|strangle|drown|poison|put (?<putobj>[\\w' ]{1,40}?) to (the sword|death)|rid (?<ridplace>[\\w' ]{0,30}?)\\s*of)\\b"
 const BURN_RE:="(?i)\\b(burn|torch|raze|set fire to|set (?<setobj>[\\w' ]{1,30}?) (on fire|alight|ablaze)|put (?<torchobj>[\\w' ]{1,30}?) to the torch)\\b"
+## The deed said as done to them ("have the women killed", "I want the old
+## dead", "the women of Seanstone must be killed"): [word, how, kind].
+const DONE_WORDS:="(killed|kil+ed|slain|slaughtered|massacred|butchered|murdered|executed|exterminated|purged|culled|sacrificed|eliminated|hanged|hung|beheaded|strangled|drowned|poisoned|put to death|put to the sword|wiped out|done away with|dead|burned|burnt|torched|razed|banished|exiled|expelled|driven out|cast out|thrown out|chased out|run out)"
+## "Have / get / see / make / let ... killed", the god's own wish ("I want ... dead").
+const CAUSE_RE:="(?i)\\b(?:have|get|see|make|let|i want|i need|i will have|i'll have)\\s+(?:that\\s+|to it that\\s+)?(?<pobj>[\\w' ]{1,60}?)\\s+(?:(?:are|is)\\s+|be\\s+)?(?<done>%s)\\b"
+## "All the women of Seanstone must be / are to be / shall be killed".
+const SUBJ_RE:="(?i)(?:^|[,;:]\\s*|\\b(?:and|now|then|so)\\s+)(?<sobj>(?:all|every|each|half|the|our|my|these|those)\\b[\\w' ]{0,60}?)\\s+(?:(?:are|is)\\s+to\\s+be|must\\s+be|shall\\s+be|will\\s+be|should\\s+be|ought to be)\\s+(?<done>%s)\\b"
 ## Out of the realm, by the verb itself: banish, exile, expel.
 const BANISH_RE:="(?i)\\b(banish|exile|expel)\\b"
 ## "Drive / cast ... out": out of the realm only with words that say so.
@@ -137,9 +144,9 @@ const REALM_WORDS:="(?i)\\b(never to return|for good|forever)\\b"
 const CLAUSE_CUT:="(?i)[,;:.!?]|\\b(from now on|from this day|from today|henceforth|hereafter|always|every time|each time|but|so|then|until|till|while|because|before|after|since|unless|if|when|whenever|lest|to|who|whom|that|which|whose|take|bring|carry|lead|send|march|haul|herd|give|keep|hold|spare|free|release|leave|feed|build|burn|torch|raze|drive|cast|throw|let|make|tie|bind|round up|enslave|kill|slay|execute|protect|guard|go|come|return)\\b"
 ## A count or a part leading the object ("half the farmers", "20 of the women").
 const QUANT:="(?i)^(all|every one|each|both|half|most|some|several|many|a few|two thirds|three quarters|a third|one third|a quarter|one quarter|a fourth|a fifth|one fifth|a tenth|one tenth|\\d{1,7}|a dozen|a score|a hundred|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|hundred)(\\s+of)?\\s+"
-const DETERMINERS:="(?i)^((the|our|my|this|these|those|own|all|of)\\s+)+"
+const DETERMINERS:="(?i)^((the|our|my|their|this|these|those|own|all|of)\\s+)+"
 ## Words after a group that keep it whole: where they are, and when.
-const PEOPLE_TAIL:="(?i)(\\s+((in|of|from|at|across|throughout|within|among|out of)\\s+(the |our |my |this )?(own |whole )?(vill?age|vilage|villiage|town|camp|settlement|hamlet|home|homes|houses|realm|lands?|hearths?%s)|at home|of ours|among us|here|there|now|today|tonight|at once|immediately|too|as well|first|all|alike|every one|to a (man|woman)|without mercy|to the last|(in)?to the (wild|wilds|wilderness|hills|forest|waste|wastes|desert|marsh|marshes)|beyond the (borders?|hills|river|mountains|pass)|out of (the |our |my )?(realm|lands?|country|territory|kingdom)|for good|forever|never to return))+$"
+const PEOPLE_TAIL:="(?i)(\\s+((in|of|from|at|across|throughout|within|among|out of)\\s+(the |our |my |this )?(own |whole )?(vill?age|vilage|villiage|town|camp|settlement|hamlet|home|homes|houses|realm|lands?|hearths?%s)|at home|of ours|among us|here|there|now|today|tonight|tomorrow|soon|as soon as possible|quickly|swiftly|at once|immediately|too|as well|first|all|alike|every one|to a (man|woman)|without mercy|to the last|(in)?to the (wild|wilds|wilderness|hills|forest|waste|wastes|desert|marsh|marshes)|beyond the (borders?|hills|river|mountains|pass)|out of (the |our |my )?(realm|lands?|country|territory|kingdom)|for good|forever|never to return))+$"
 ## The village or town itself, as what is burned.
 const PLACE_CORE:="(?i)^(own |whole |entire )?(vill?age|vilage|villiage|town|camp|settlement|hamlet|home)$"
 ## "The village", "this town": a village not named.
@@ -164,6 +171,7 @@ const NOT_ORDER_WHY:=[
 ## What the court says when words that name our own people are no order.
 const NOT_ORDER_WORDS:={
 	"forbid":"Nothing is done to them: those words forbid it, they do not order it.",
+	"withdraw":"Nothing is done to anyone: those words take an order back, they give none.",
 	"if":"Nothing is done now: an order that waits on an \"if\" or a \"when\" is not given. If you mean it, say it plainly, and it will be read back to you.",
 	"reported":"Nothing is done: those were others' words, not your order.",
 	"wonder":"Nothing is done: that was wondered aloud, not ordered.",
@@ -251,7 +259,10 @@ static func _read(clean:String,sentence:String,verb:Dictionary,audience:Dictiona
 	# Someone else's people: the war orders. Read past a condition or a time
 	# ("kill the women if they resist", "... when the enemy comes"): those
 	# words say when, never whose.
-	if not own and _foreign(rest,cc): return {}
+	if not own and _foreign(rest,cc,clean.to_lower()): return {}
+	# People named by a wrong they do ("kill the men who steal", "from now on
+	# kill every man who steals"): a law for wrongdoers, never this.
+	if bool(phrase.get("qualified",false)) and _wrongdoers(object): return {}
 	var groups:Array=phrase.get("groups",[])
 	var trades_only:=not groups.is_empty() and groups.all(func(g:Dictionary)->bool: return String(g.get("role",""))!="")
 	var out:={"how":how,"groups":groups,"share":float(phrase.get("share",1.0)),"count":int(phrase.get("count",0)),"text":clean.substr(0,300),"own":own,"home":home,"settlement_id":String(town.get("id",""))}
@@ -262,7 +273,7 @@ static func _read(clean:String,sentence:String,verb:Dictionary,audience:Dictiona
 	# never a town we hold read into them ("if the harvest fails, kill all the
 	# women" while we hold Tsaren). An order that only opens with another verb
 	# ("take the food and kill the men") stays the war orders'.
-	var no_order:=why in ["if","rule","wonder","reported","forbid"]
+	var no_order:=why in ["if","rule","wonder","reported","forbid","withdraw"]
 	if not (own or trades_only):
 		var id:=String(audience.get("id",""))
 		var held:=WarOrders.held_towns()
@@ -303,10 +314,16 @@ static func _not_an_order(sentence:String,verb:Dictionary,list:Array[Dictionary]
 	var s:=_re(EMPHASIS_RE).sub(_re(REALM_WORDS).sub(sentence," ",true)," ",true)
 	for p:Dictionary in Realm.clauses(s):
 		if bool(p.held): return "forbid"
+	if _has(sentence.substr(0,int(verb.at)),WITHDRAW_RE): return "withdraw"
 	var mention:=func(t:String,l:Array[Dictionary])->Array[Dictionary]: return cc.call("mentions",t,l)
-	if _has(s,RULE_RE) or not Realm.law(clean,list,mention).is_empty(): return "rule"
+	# A law names a wrong; the grave verb itself ("murder all the women") is
+	# never read as the wrong a law is about.
+	var unverbed:=sentence.substr(0,int(verb.at))+" "+sentence.substr(int(verb.end))
+	if _has(s,RULE_RE) or not Realm.law(unverbed,list,mention).is_empty(): return "rule"
+	# "I want them dead", "I want you to kill...": the god's own will, a command.
+	var said:=_re("(?i)\\bi (want|need|will have|'ll have|order|command|bid|demand)\\b").sub(s," ",true)
 	for row in NOT_ORDER_WHY:
-		if _has(s,String(row[1])): return String(row[0])
+		if _has(said,String(row[1])): return String(row[0])
 	var lead:=_re(EMPHASIS_RE).sub(sentence.substr(0,int(verb.at))," ",true)
 	if not _is_command(lead,list,cc): return "lead"
 	return ""
@@ -330,21 +347,41 @@ static func names_our_people(text:String)->bool:
 		var phrase:=_people(object)
 		if not (phrase.has("groups") or bool(phrase.get("qualified",false)) or (String(verb.how)=="burn" and _burns_the_village(object))): continue
 		var rest:=s.substr(int(verb.at))
+		# Moving people within the realm ("turn the herders away from the
+		# spring"), words that forbid it or take an order back ("withdraw the
+		# order to kill the women"), and a law for wrongdoers ("kill the men who
+		# steal") are the council's own business.
+		if String(verb.how)=="drive" and not _leaves_realm(String(verb.kind),rest): continue
+		if _has(s,String(NOT_ORDER_WHY[0][1])) or _has(s,WITHDRAW_RE): continue
+		if bool(phrase.get("qualified",false)) and _wrongdoers(object): continue
 		var none:Array[Dictionary]=[]
 		var own:=_has(rest,OWN_RE) or bool(_our_town(rest,none).get("named",false))
-		if not own and _foreign(rest,_cc()): continue
+		if not own and _foreign(rest,_cc(),lower): continue
 		return true
 	return false
+
+## Taking an order back: never a new order.
+const WITHDRAW_RE:="(?i)\\b(withdraw|cancel|repeal|rescind|revoke|call off|undo|take back|(lift|end) (the|that|this|my) (order|decree|law|ban))\\b"
+
+static func _wrongdoers(object:String)->bool:
+	## Are the people named by a wrong they do ("the men who steal", "every
+	## woman who lies", "the drunk men")? Read in the verb's own clause.
+	var first:=_re("[,;:.!?]").search(object)
+	var span:=object.substr(0,first.get_start()) if first!=null else object
+	return _has(span,Realm.CRIME_RE)
 
 ## A condition or a time after the order ("if they resist", "when the enemy
 ## comes"): it says when, never whose people.
 const WHEN_CLAUSE:="(?i)\\b(if|unless|when|whenever|once|until|till|lest|in case|before|after)\\b[^,;]*"
 
-static func _foreign(rest:String,cc:GDScript)->bool:
+static func _foreign(rest:String,cc:GDScript,whole:String="")->bool:
 	## Do the words from the verb on name someone else's people (theirs, the
-	## enemy's, a place of theirs), a condition or a time left aside?
+	## enemy's), a condition or a time left aside, or do the words anywhere name
+	## a town or a people of theirs ("attack Tsaren and kill all the men")?
+	## "The women and their children" are the women's own.
 	var main:=_re(WHEN_CLAUSE).sub(rest," ",true)
-	return _has(main,FOREIGN_RE) or bool(cc.call("_names_a_place",main))
+	main=_re("(?i)\\b(and|with|along with|together with|as well as) (their|them)\\b").sub(main," and ",true)
+	return _has(main,FOREIGN_RE) or bool(cc.call("_names_a_place",main)) or (whole!="" and bool(cc.call("_names_a_place",whole)))
 
 static func grave_words(text:String)->bool:
 	## Read only: do these words order a killing, a burning, a banishing or
@@ -377,6 +414,20 @@ static func _verb(s:String)->Dictionary:
 	if o!=null and (best.is_empty() or o.get_start()<int(best.at)):
 		var mid:=o.get_string("mid").strip_edges()
 		best={"how":"drive","kind":"out","at":o.get_start(),"end":o.get_end(),"object":mid if mid!="" else s.substr(o.get_end()),"bare":mid==""}
+	# The deed said as done to them: "have the women killed", "the old must be
+	# driven out of the realm". The people are before the word, not after.
+	for pattern in [CAUSE_RE,SUBJ_RE]:
+		var d:=_re(String(pattern) % DONE_WORDS).search(s)
+		if d==null: continue
+		var obj:=d.get_string("pobj") if String(pattern)==CAUSE_RE else d.get_string("sobj")
+		var at:=d.get_start() if String(pattern)==CAUSE_RE else d.get_start("sobj")
+		if not best.is_empty() and int(best.at)<=at and int(best.end)<=d.get_start("done"): continue
+		var done:=d.get_string("done").to_lower()
+		var how:="kill"; var kind:="kill"
+		if done in ["burned","burnt","torched","razed"]: how="burn"; kind="burn"
+		elif done in ["banished","exiled","expelled"]: how="drive"; kind="banish"
+		elif done in ["driven out","cast out","thrown out","chased out","run out"]: how="drive"; kind="out"
+		best={"how":how,"kind":kind,"at":at,"end":d.get_end(),"object":obj,"done":true}
 	return best
 
 static func _is_command(lead:String,list:Array[Dictionary],cc:GDScript)->bool:
@@ -447,6 +498,9 @@ static func _group_phrase(seg:String,first:bool)->Dictionary:
 	s=_re(DETERMINERS).sub(s,"",false).strip_edges()
 	s=_re(PEOPLE_TAIL % _town_names()).sub(s,"",false).strip_edges()
 	if s=="": return {}
+	# "Women over 60", "the boys under ten": people narrowed by age.
+	var age:=_re("(?i)\\s+(over|under|above|below|older than|younger than|aged|past)\\s+(the age of\\s+)?(\\d{1,3}|ten|twelve|fifteen|twenty|thirty|forty|fifty|sixty|seventy|eighty)(\\s+years?)?(\\s+old)?(\\s+and\\s+(over|up|older|under|younger))?$").search(s)
+	if age!=null and not _groups_of(s.substr(0,age.get_start())).is_empty(): return {"qualified":true}
 	var g:=_groups_of(s)
 	if not g.is_empty(): return {"groups":g,"share":share,"count":count}
 	# A group noun at the end with other words before it: people narrowed.
@@ -655,7 +709,7 @@ static func assent_like(text:String)->bool:
 	var cc:=_cc()
 	var map:Dictionary=cc.get_script_constant_map()
 	return confirms(text) or _re(String(map.get("INSIST_PATTERN",""))).search(text)!=null or _re(String(map.get("CONFIRM_PATTERN",""))).search(text)!=null or bool(cc.call("bare_assent",text)) \
-		or _has(text,"(?i)^\\W*(i said (kill|burn|banish|drive|do)|obey( me)?|you heard me|now|at once|okay|ok|sure|go on|carry on)\\b")
+		or _has(text,"(?i)^\\W*(i said (kill|burn|banish|drive|do)( it| them| them all| it now)?|obey( me)?|you heard me|now|at once|okay|ok|sure|go on|carry on)[\\s!.,]*$")
 
 static func continues(audience:Dictionary,text:String)->bool:
 	## Read only: do these words answer what grave_home has open here (a clear

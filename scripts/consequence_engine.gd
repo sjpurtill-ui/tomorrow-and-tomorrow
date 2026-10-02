@@ -162,6 +162,12 @@ func directive_assessment(effect_id:String,requested_magnitude:float,duration_da
 	if not can_apply:
 		blocker="; ".join(blockers) if not blockers.is_empty() else "Implementation capacity is too low to produce a measurable effect."
 		if counted_action: blocker="The requested count is %d; eligible population is %d and available enforcement capacity is %d. No one was killed and no effects were applied." % [int(counted_target.exact_count),floori(_directive_target_population(counted_target,population)),floori(float(WorldSimulation.state.population_cohorts.get("working_age",0))*security_capacity)]
+	# Killing our own people is never a directive from words (the council, a
+	# law, a standing order): grave_home.gd alone registers such deaths, read
+	# back and confirmed. Nothing is done, said plainly.
+	if effect_id in KILLING_DIRECTIVES:
+		can_apply=false
+		blocker=CUSTOM.NO_READ_BACK
 	return {
 		"id":effect_id,"domain":String(contract.get("domain","social")),"can_apply":can_apply,
 		"blocker":blocker,"limitations":blockers,
@@ -310,6 +316,9 @@ func _remaining_directive_death_capacity(population:float,security_capacity:floa
 	var annual_capacity:=mini(maxi(0,roundi(population)-1),roundi(float(WorldSimulation.state.population_allocations.get("Defense",0))*3.0+population*security_capacity*0.002))
 	return maxi(0,annual_capacity-recent)
 
+## Directives whose whole act is killing our own people (never carried out).
+const KILLING_DIRECTIVES:=["mass_repression"]
+
 func _apply_directive_direct_effects(effect_id:String,assessment:Dictionary)->Dictionary:
 	var applied:Dictionary={}
 	var planned:Dictionary=assessment.get("direct_effects_planned",{})
@@ -317,20 +326,11 @@ func _apply_directive_direct_effects(effect_id:String,assessment:Dictionary)->Di
 	for channel_variant in planned:
 		var channel:=String(channel_variant)
 		if channel=="population_deaths":
-			var requested_deaths:=maxi(0,int(planned[channel]))
-			var parameters:Dictionary=assessment.get("directive_parameters",{})
-			var target:Dictionary=parameters.get("demographic_target",{})
-			target=target.duplicate(true)
-			target["source_order_id"]=String(assessment.get("source_order_id",""))
-			var description:="The order executed %s once." % String(target.get("label","the specified count")) if bool(parameters.get("one_time",false)) else String(assessment.get("second_order_consequence","Deaths resulted from directive enforcement."))
-			var death_result:=WorldSimulation.state.register_directive_population_deaths(requested_deaths,effect_id,description,target)
-			applied[channel]=int(death_result.get("count",0))
-			# Some targeted people flee or hide when enforcement is visible. Departures
-			# are living population loss, not falsely recorded casualties.
-			if requested_deaths>0 and not bool(parameters.get("one_time",false)) and float(assessment.get("resistance",0.0))>0.30:
-				var departures:=floori(float(requested_deaths)*float(assessment.get("resistance",0.0))*0.45)
-				var departure_result:=WorldSimulation.state.register_population_departures(departures,"Flight from directive: %s" % effect_id.replace("_"," "))
-				applied["population_departures"]=int(departure_result.get("count",0))
+			# Deaths of our own people (and the flight they would cause) are never
+			# registered by a directive from words: grave_home.gd alone, read back
+			# and confirmed (CUSTOM.NO_READ_BACK). The rest of the order is felt.
+			applied[channel]=0
+			applied["withheld_deaths"]=maxi(0,int(planned[channel]))
 			continue
 		if not metric_map.has(channel): continue
 		var metric:=String(metric_map[channel])
@@ -447,15 +447,14 @@ func _resolve_deadline_enforcement(policy:Dictionary)->void:
 	var target_households:=maxi(0,int(policy.get("deadline_target_households",0)))
 	var new_conceptions:=maxi(0,WorldSimulation.state.lifetime_conceptions-int(policy.get("deadline_baseline_conceptions",WorldSimulation.state.lifetime_conceptions)))
 	var noncompliant:=maxi(0,target_households-mini(target_households,new_conceptions))
-	var parameters:Dictionary=policy.get("directive_parameters",{})
-	var target:Dictionary=parameters.get("demographic_target",{})
 	var security_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("security",0.0)),0.0,1.0)
 	var executable:=mini(noncompliant,_remaining_directive_death_capacity(maxf(1.0,WorldSimulation.state.population_exact),security_capacity))
 	var enforced:=floori(float(executable)*clampf(float(policy.get("implementation_rate",0.0)),0.0,1.0))
-	var death_result:=WorldSimulation.state.register_directive_population_deaths(enforced,String(policy.get("id","coercive_pronatalism")),"Parents in households that did not meet the pregnancy threat were killed when its deadline arrived.",target)
-	var killed:=int(death_result.get("count",0))
-	var flight_result:=WorldSimulation.state.register_population_departures(floori(float(noncompliant)*clampf(float(policy.get("resistance",0.0)),0.0,1.0)*0.24),"Flight from pregnancy enforcement")
-	var fled:=int(flight_result.get("count",0))
+	# The threat's killing, and the flight from it, are never carried out by a
+	# directive from words (CUSTOM.NO_READ_BACK): nobody dies or leaves of it.
+	var killed:=0
+	var fled:=0
+	policy["withheld_deaths"]=enforced
 	var legitimacy:=float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))
 	var cohesion:=float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))
 	WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(legitimacy-0.01-minf(0.08,float(killed+fled)/maxf(1.0,WorldSimulation.state.population_exact)*0.22),0.01,0.99)
@@ -463,7 +462,7 @@ func _resolve_deadline_enforcement(policy:Dictionary)->void:
 	policy["deadline_result"]={"target_households":target_households,"new_conceptions":new_conceptions,"noncompliant_households":noncompliant,"deaths":killed,"departures":fled}
 	var description:="The pregnancy deadline passed."
 	if killed>0 or fled>0: description+=" Enforcement killed %d people; %d fled or disappeared from the census." % [killed,fled]
-	elif noncompliant>0: description+=" The threatened punishment exceeded the settlement's actual enforcement reach, and no deaths were carried out."
+	elif noncompliant>0: description+=" No one was killed: " +CUSTOM.NO_READ_BACK
 	else: description+=" Recorded conceptions met the threatened quota; no deadline killing was attempted."
 	_add_event("Pregnancy Threat Deadline",description,"population","danger" if killed>0 else "warning")
 
@@ -993,9 +992,10 @@ func _process_directive_migration(population:float,span:float)->void:
 		progress-=float(arrivals)
 		WorldSimulation.state.register_population_arrivals(arrivals,"drawn by decree")
 	elif progress<=-1.0:
-		var departures:=floori(-progress)
-		progress+=float(departures)
-		WorldSimulation.state.register_population_departures(departures,"Left because of a decree")
+		# Driving our own people out is never a decree's doing (an exile law,
+		# a standing order): only grave_home.gd, read back and confirmed,
+		# registers their leaving (CUSTOM.NO_READ_BACK). Nobody leaves of it.
+		progress=0.0
 	if is_zero_approx(pull): progress=0.0
 	WorldSimulation.state.simulation_metrics["directive_migration_progress"]=progress
 
