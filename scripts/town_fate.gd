@@ -92,6 +92,37 @@ const ENSLAVE_GROUP:="\\benslave\\s+(all\\s+)?(of\\s+)?(the\\s+|their\\s+|its\\s
 ## "Kill the men you have tied up": only those we hold.
 const BOUND_ONLY:="\\b((that|whom|who|which)\\s+(you|we|they|your men|the garrison|our men|you've|we've)\\s+(have\\s+|had\\s+|already\\s+|just\\s+)*(tied|bound|chained|taken|captured|caught|rounded up|locked up|roped)|(the|all the|every one of the|those|these)\\s+(bound|tied|captive|chained|roped|captured)\\s+(men|ones|prisoners|males)|the prisoners|those (we|you) (hold|are holding|have tied|have bound)|(who|that) are (tied|bound|chained|held|prisoners|under guard))"
 
+## RAPE of a town's women by the garrison, at the god's word ("let the men
+## rape the women of Tsaren"). Grown women only: the ledger's girls are
+## children, and no garrison of ours is set on children (the commander
+## refuses that part, plainly). Early war was cruel in this way, and it
+## changed peoples' numbers: the pregnancies go into the struck people's own
+## count, and the children are born to them.
+## The words: rape, ravish, violate, defile, let loose on, "give the women to
+## the men", "let the soldiers have the women".
+const VIOLATE_VERB:="\\b(rape|rapes|raped|raping|ravish\\w*|violate|violated|violating|defile|defiled|defiling|have their way with|take their pleasure (of|with)|let [\\w' ]{0,30}loose on|loose on)"
+const VIOLATE_GIVEN:="\\b(give|hand)\\b[\\w' ]{0,30}\\b(women|womenfolk|wives)\\b[\\w' ]{0,16}\\b(to|for) (the|our) (men|soldiers|garrison|fighters|warriors|troops)\\b|\\blet (the|our) (men|soldiers|garrison|fighters|warriors|troops) (have|use|enjoy) (the|their|all the) (women|womenfolk|wives)\\b"
+const VIOLATE_ADULTS:="\\b(women|womenfolk|wives|females?|widows|mothers)\\b"
+const VIOLATE_KIDS:="\\b(girls?|daughters|children|child|boys?|maidens|young ones|little ones|kids)\\b"
+## Where the words for this act end and the next order begins.
+const VIOLATE_STOP:="\\b(then|and then|kill|slay|slaughter|massacre|butcher|execute|take|bring|carry|drive|lead|send|march|burn|raze|torch|spare|free|release|keep|hold|bind|enslave|loot|plunder|strip)\\b"
+## How many days it goes on when the words do not say.
+const VIOLATE_DAYS:=3
+## Of the women raped, the share who die of it.
+const VIOLATE_DEATH:=0.02
+## Of the women raped and living, the share of an age to conceive and not
+## already with child.
+const FERTILE_SHARE:=0.6
+## The chance of conceiving from one day of it: about 5 in 100, the measured
+## rate for a single assault.
+const CONCEIVE_PER_DAY:=0.05
+## The pregnancies show after this many days, and our war leader hears of it.
+const SHOWN_DAYS:=90
+## Where their people's own lives are not simulated, the children are born
+## this long after, this share of the pregnancies ending in a child born alive.
+const BIRTH_DAYS:=270
+const BORN_SHARE:=0.8
+
 static func _re(pattern:String,text:String)->RegExMatch:
 	var r:=RegEx.new(); r.compile(pattern); return r.search(text)
 
@@ -156,9 +187,38 @@ static func fate_words(lower:String,home_name:String="")->Dictionary:
 	if not out.has("captives"):
 		for row in POLICY_WORDS:
 			if _has(String(row[1]),lower): out["policy"]=String(row[0]); break
+	# Rape: the women the words name (grown women only); children named are
+	# refused by the commander (_violate).
+	var span:=violate_span(lower)
+	if span!="":
+		if _has(VIOLATE_ADULTS,span): out["violate"]=true
+		if _has(VIOLATE_KIDS,span): out["violate_kids"]=true
+		var long:=_re("\\b(\\d{1,2}|one|two|three|four|five|six|seven) (whole )?days?\\b",lower)
+		if long!=null:
+			out["violate_days"]=int(long.get_string(1)) if long.get_string(1).is_valid_int() else int(AGE_WORDS.get(long.get_string(1),VIOLATE_DAYS))
+			# "For three days" is how long, never how many.
+			if out.has("count") and int(out.count)==int(out.violate_days): out.erase("count")
 	if out.is_empty() or (out.size()==1 and out.has("count")): return {}
 	if _has(GROUP_WORDS,lower): out["group"]=true
 	return out
+
+## The words the order to rape is about: from the verb to the next order
+## ("rape the women and kill the men": "the women and"); when the verb has
+## no people of its own ("rape and kill the women"), the next order's. ""
+## when the words give no such order.
+static func violate_span(lower:String)->String:
+	var given:=_re(VIOLATE_GIVEN,lower)
+	if given!=null: return given.get_string()
+	var m:=_re(VIOLATE_VERB,lower)
+	if m==null: return ""
+	var rest:=lower.substr(m.get_end())
+	var stop:=_re(VIOLATE_STOP,rest)
+	var span:=rest if stop==null else rest.substr(0,stop.get_start())
+	if not _has(VIOLATE_ADULTS,span) and not _has(VIOLATE_KIDS,span) and stop!=null:
+		var after:=rest.substr(stop.get_end())
+		var stop2:=_re(VIOLATE_STOP,after)
+		span=after if stop2==null else after.substr(0,stop2.get_start())
+	return span if (_has(VIOLATE_ADULTS,span) or _has(VIOLATE_KIDS,span)) else ""
 
 ## The groups a killing names, from the words after the verb up to the next
 ## order ("kill the males and take the women" kills the men only). Default men.
@@ -326,7 +386,7 @@ static func apply(civ_id:String,region_id:String,fate_in:Dictionary,general:Dict
 	var day:=int(WorldSimulation.state.elapsed_days)
 	# The town's one ledger of its people: every step below reads it afresh
 	# and writes it before the world's own count changes (town_ledger.gd).
-	var out:={"ok":true,"town":name,"garrison":garrison,"killed":0,"escaped":0,"captives":0,"moved":0,"move_status":"","burned":false,"tribute":0,"left":false,"spared":false,"policy":"","reinforced":0,"freed":0,"arrive_days":0,"fled":{}}
+	var out:={"ok":true,"town":name,"garrison":garrison,"killed":0,"escaped":0,"captives":0,"moved":0,"move_status":"","burned":false,"tribute":0,"left":false,"spared":false,"policy":"","reinforced":0,"freed":0,"arrive_days":0,"fled":{},"violated":0,"violate_deaths":0,"conceived":0}
 	var parts:PackedStringArray=PackedStringArray()
 	var refusals:PackedStringArray=PackedStringArray()
 	var harsh:=0.0
@@ -349,6 +409,8 @@ static func apply(civ_id:String,region_id:String,fate_in:Dictionary,general:Dict
 			garrison=int(mc.occupation_force_for_region(civ_id,region_id).get("troops",garrison))
 			out.reinforced=maxi(0,garrison-before); out.garrison=garrison
 			parts.append("%s more join the garrison of %s; %s hold it now." % [_cap(_count(int(out.reinforced))),name,_count(garrison)])
+	# Rape of the women, before anything else the words order.
+	if bool(fate.get("violate",false)) or bool(fate.get("violate_kids",false)): harsh+=_violate(civ_id,region_id,name,fate,garrison,general,out,parts,refusals,day)
 	# Killing: those we hold, then the free on the stated odds.
 	if bool(fate.get("kill_men",false)): harsh+=_kill(civ_id,region_id,name,fate,garrison,out,parts,refusals,day)
 	# People walked home: captives in bonds, or residents as our own.
@@ -450,6 +512,177 @@ static func apply(civ_id:String,region_id:String,fate_in:Dictionary,general:Dict
 	Chronicle.record({"key":"town_fate:%s:%d" % [region_id,day],"title":_title(name,out).substr(0,70),"text":" ".join(parts),
 		"tier":"moment","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
 	return out
+
+
+# --------------------------------------------------------------------------
+# Rape
+# --------------------------------------------------------------------------
+
+## The chance each free woman is found and raped: one fighter reaching about
+## two women a day over the days it goes on, against the women there. Those
+## we hold cannot hide (+0.25). Within what sacked towns show: in a small
+## town most, in a large one with a small garrison a third or more.
+static func violate_odds(garrison:int,women:int,days:int)->float:
+	if women<=0 or garrison<=0: return 0.0
+	var reach:=clampf(float(garrison)*2.0*float(maxi(1,days))/float(women),0.0,1.5)
+	return clampf(0.2+0.5*reach/1.5+0.05*float(maxi(1,days)-1),0.15,0.85)
+
+## The god's order to rape the women of a town we hold. Those we hold are
+## reached first and cannot hide; the free are each reached on the stated
+## odds, one seeded roll each. A few die of it (the ledger's dead, through
+## the world's count as a killing is). Of the rest, those of an age to bear
+## and not already with child conceive on the stated odds, and those
+## pregnancies go into their own people's count (_conceive). Children are
+## never part of it: the commander refuses that, plainly.
+static func _violate(civ_id:String,region_id:String,name:String,fate:Dictionary,garrison:int,general:Dictionary,out:Dictionary,parts:PackedStringArray,refusals:PackedStringArray,day:int)->float:
+	if bool(fate.get("violate_kids",false)):
+		refusals.append("None of the children of %s are touched: I will not set the men on children." % name)
+	if not bool(fate.get("violate",false)): return 0.0
+	var l:=Ledger.of(civ_id,region_id)
+	var held:=0
+	for status in Ledger.HELD: held+=Ledger.count(l,String(status),"women")
+	var free:=Ledger.count(l,"free","women")
+	if held+free<=0:
+		refusals.append("There are no women left in %s. %s" % [name,_left_words(civ_id,region_id,name)])
+		return 0.0
+	var days:=clampi(int(fate.get("violate_days",VIOLATE_DAYS)),1,7)
+	var p:=violate_odds(garrison,held+free,days)
+	var p_held:=minf(0.95,p+0.25)
+	var r:=Ledger.rng(region_id,day,"violate")
+	var hurt_held:=Ledger.roll(r,held,p_held)
+	var hurt_free:=Ledger.roll(r,free,p)
+	var hurt:=hurt_held+hurt_free
+	var died:=Ledger.roll(r,hurt,VIOLATE_DEATH)
+	var fertile:=Ledger.roll(r,hurt-died,FERTILE_SHARE)
+	var p_child:=1.0-pow(1.0-CONCEIVE_PER_DAY,float(days))
+	var conceived:=Ledger.roll(r,fertile,p_child)
+	# The dead, out of the ledger first and then the world's count (as _kill).
+	if died>0:
+		var backup:=l.duplicate(true)
+		var gone:=int(Ledger.remove(l,Ledger.plan_of(Ledger.HELD,["women"]),mini(died,hurt_held),"killed").total)
+		gone+=int(Ledger.remove(l,[["free","women"]],died-gone,"killed").total)
+		var done:Dictionary=WorldSimulation.world.occupation_resident_order(civ_id,region_id,"kill_residents",gone,true) if gone>0 else {}
+		if done.has("error"):
+			Ledger.region_ref(civ_id,region_id)["ledger"]=backup
+			l=Ledger.of(civ_id,region_id)
+			died=0
+			_grieve(civ_id,region_id)
+		else: died=gone
+		# The world keeps its own copy of the town now: read the ledger afresh.
+		l=Ledger.of(civ_id,region_id)
+	else: _grieve(civ_id,region_id)
+	l["violated"]=int(l.get("violated",0))+hurt
+	l["violated_dead"]=int(l.get("violated_dead",0))+died
+	l["conceived"]=int(l.get("conceived",0))+conceived
+	if conceived>0:
+		var rec:={"day":day,"n":conceived,"shown":false}
+		# Their own people's demography carries the pregnancies when it is
+		# simulated; else the children are born here on the stated share.
+		if not _conceive(civ_id,region_id,conceived):
+			rec["born"]=Ledger.roll(r,conceived,BORN_SHARE)
+			rec["due"]=day+BIRTH_DAYS
+		var list:Array=l.get("pregnancies",[]) if l.get("pregnancies") is Array else []
+		list.append(rec)
+		l["pregnancies"]=list
+	out.violated=hurt
+	out.violate_deaths=died
+	out.conceived=conceived
+	out["violate_odds"]=p
+	out["violate_days"]=days
+	Measures.settle_records(civ_id,region_id)
+	parts.append(_violate_words(name,garrison,days,held,hurt_held,free,hurt_free,p,died))
+	return 1.0 if hurt>0 else 0.0
+
+## "For three days the 17 of the garrison were let loose on the women of
+## Tsaren. All 12 we held were raped. Of the 204 free in their houses, each
+## had about 1 in 3 chance of being found, and 70 were. Two died of it."
+static func _violate_words(name:String,garrison:int,days:int,held:int,hurt_held:int,free:int,hurt_free:int,p:float,died:int)->String:
+	var bits:PackedStringArray=PackedStringArray()
+	bits.append("For %s the %s of the garrison were let loose on the women of %s." % [_days(days),_count(garrison),name])
+	if held>0: bits.append(("All %s we held were raped." % _count(held)) if hurt_held>=held else ("Of the %s we held, %s were raped." % [_count(held),_count(hurt_held)]))
+	if free>0: bits.append("Of the %s free in their houses, each had %s of being found, and %s were." % [_count(free),Ledger.chance_words(p),_count(hurt_free)])
+	if died>0: bits.append("%s died of it." % _cap(_count(died)))
+	bits.append("If any are with child, it will show in a few months.")
+	return " ".join(bits)
+
+## A town's people after a cruelty that killed nobody: grievance at its
+## height, trust gone, resistance up (as a killing leaves them).
+static func _grieve(civ_id:String,region_id:String)->void:
+	var world:Variant=WorldSimulation.world
+	var index:int=world._civilization_index(civ_id)
+	if index<0: return
+	var civ:Dictionary=world.civilizations[index]
+	var ri:int=world._region_index(civ,region_id)
+	if ri<0: return
+	var region:Dictionary=civ.strategic_regions[ri]
+	var data:Dictionary=Governance.state(region)
+	data.grievance=1.0; data.trust=0.0
+	region.governance=data
+	region["resistance"]=clampf(float(region.get("resistance",0.0))+0.25,0.0,1.0)
+	civ.strategic_regions[ri]=region; world.civilizations[index]=civ
+	if WorldSimulation.enabled: Combat.governance(civ_id,region_id,region)
+
+## Pregnancies into the struck people's own count, where their town's lives
+## are simulated: the town's pregnancy record (game_state
+## process_reproduction_day) carries them to term with its own losses, and
+## the children are born to them there. False where it is not simulated.
+static func _conceive(civ_id:String,region_id:String,n:int)->bool:
+	if n<=0 or not WorldSimulation.enabled: return false
+	var region:Dictionary=WorldSimulation.world.region_snapshot(civ_id,region_id)
+	var local_id:=String(region.get("local_city_id",""))
+	if local_id.is_empty(): return false
+	var added:Variant=WorldSimulation.scoped(Combat.owner(civ_id),func()->int:
+		return WorldSimulation.settlements.with_city_resources(local_id,func()->int:
+			return WorldSimulation.settlements.with_local_population(func()->int:
+				var state:Variant=WorldSimulation.state
+				state.pregnancy_cohorts["first_trimester"]=float(state.pregnancy_cohorts.get("first_trimester",0.0))+float(n)
+				return n,true)
+		)
+	)
+	return int(added)==n
+
+## Children born in a town whose people are not simulated: the town's count,
+## its people's count and young, and the ledger's free children together.
+static func _births(civ_id:String,region_id:String,n:int)->int:
+	if n<=0: return 0
+	var world:Variant=WorldSimulation.world
+	var index:int=world._civilization_index(civ_id)
+	if index<0: return 0
+	var l:=Ledger.of(civ_id,region_id)
+	var r:=Ledger.region_ref(civ_id,region_id)
+	if r.is_empty(): return 0
+	# The bands first: they are made to add up to the children already there.
+	Ledger._kid_add(l,"p:free",n)
+	var row:Dictionary=l.present.free
+	row["children"]=int(row.get("children",0))+n
+	l["joined"]=int(l.get("joined",0))+n
+	r["population"]=float(r.get("population",0.0))+float(n)
+	var civ:Dictionary=world.civilizations[index]
+	civ["population"]=float(civ.get("population",0.0))+float(n)
+	if civ.get("cohorts") is Dictionary and (civ.cohorts as Dictionary).has("children"):
+		(civ.cohorts as Dictionary)["children"]=float(civ.cohorts.children)+float(n)
+	return n
+
+## Each day: the pregnancies show and our war leader hears of it; where their
+## lives are not simulated, the children are born when they are due. Told
+## once each, in the Chronicle.
+static func _pregnancies_day(civ_id:String,region_id:String,l:Dictionary,day:int)->void:
+	var list:Variant=l.get("pregnancies")
+	if not list is Array: return
+	var name:=String(Ledger.region_ref(civ_id,region_id).get("name","the town"))
+	for rec in list:
+		if not rec is Dictionary: continue
+		var p:Dictionary=rec
+		if not bool(p.get("shown",false)) and day>=int(p.get("day",day))+SHOWN_DAYS:
+			p["shown"]=true
+			Chronicle.record({"key":"violated_with_child:%s:%d" % [region_id,int(p.day)],"title":("With Child in %s" % name).substr(0,70),
+				"text":"%s of the women of %s our garrison raped are with child by our men." % [_cap(_count(int(p.n))),name],"tier":"notice","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
+		if p.has("due") and not bool(p.get("born_done",false)) and day>=int(p.due):
+			p["born_done"]=true
+			var born:=_births(civ_id,region_id,int(p.get("born",0)))
+			if born>0:
+				Chronicle.record({"key":"violated_born:%s:%d" % [region_id,int(p.day)],"title":("Children Born in %s" % name).substr(0,70),
+					"text":"%s children were born in %s to the women our garrison raped. Of %s pregnancies, the rest were lost." % [_cap(_count(born)),name,_count(int(p.n))],"tier":"notice","kind":"war","domain":"security","action":{"kind":"court","focus":{"civ_id":civ_id}}})
 
 
 # --------------------------------------------------------------------------
@@ -973,6 +1206,7 @@ static func daily(day:int)->Array:
 		var civ_id:=String(pair[0]); var region_id:=String(pair[1])
 		var r:=Ledger.region_ref(civ_id,region_id)
 		var l:=Ledger.of(civ_id,region_id)
+		_pregnancies_day(civ_id,region_id,l,day)
 		var ruin:Dictionary=l.get("ruin",{}) if l.get("ruin") is Dictionary else {}
 		if ruin.is_empty(): continue
 		var h:=Ledger.hold(civ_id,region_id)
@@ -1057,13 +1291,13 @@ static func _heard(civ_id:String,region_id:String,rs:Dictionary,day:int)->Dictio
 ## Dread and grudges; our reputation; the court's dread of the god.
 static func _consequences(civ_id:String,name:String,out:Dictionary,harsh:float,general:Dictionary,day:int)->void:
 	var mc:Variant=WorldSimulation.military
-	var killed:=int(out.killed); var captives:=int(out.captives)
-	var weight:=clampf(float(killed+captives)/60.0,0.0,1.0)
+	var killed:=int(out.killed); var captives:=int(out.captives); var violated:=int(out.get("violated",0))
+	var weight:=clampf(float(killed+captives+violated)/60.0,0.0,1.0)
 	if bool(out.spared) or int(out.freed)>0 or String(out.policy) in ["self_rule","equal_citizenship","stewardship"]:
 		Hall._shift_relation(civ_id,0.06,-0.04)
 		mc._adjust_war_reputation(0.08,0.0,-0.04)
 	if harsh<=0.0: return
-	var what:="the men of %s you put to the sword" % name if killed>0 else ("the women and children of %s you carried off" % name if captives>0 else ("%s, which you burned" % name if bool(out.burned) else "what you did to %s" % name))
+	var what:="the women of %s your men raped" % name if violated>0 and killed==0 else "the men of %s you put to the sword" % name if killed>0 else ("the women and children of %s you carried off" % name if captives>0 else ("%s, which you burned" % name if bool(out.burned) else "what you did to %s" % name))
 	# The people who were struck: hatred, dread and a grudge they keep.
 	Hall._shift_relation(civ_id,-clampf(0.12*harsh,0.05,0.4),clampf(0.1*harsh,0.05,0.3))
 	DIVINE.add_civ_dread(civ_id,clampf(0.06*harsh+0.12*weight,0.04,0.35))
@@ -1079,7 +1313,7 @@ static func _consequences(civ_id:String,name:String,out:Dictionary,harsh:float,g
 	# Our own record: feared, hated, remembered.
 	mc._adjust_war_reputation(0.0,clampf(0.05*harsh+0.1*weight,0.02,0.3),clampf(0.04*harsh+0.08*weight,0.02,0.25))
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
-	if killed>0:
+	if killed>0 or violated>0:
 		metrics["cohesion"]=clampf(float(metrics.get("cohesion",0.5))-clampf(0.01+0.03*weight,0.01,0.04),0.0,1.0)
 	if captives>0:
 		metrics["legitimacy"]=clampf(float(metrics.get("legitimacy",0.5))-clampf(0.01+0.02*weight,0.01,0.03),0.0,1.0)
@@ -1094,8 +1328,9 @@ static func _consequences(civ_id:String,name:String,out:Dictionary,harsh:float,g
 
 
 static func _note(name:String,out:Dictionary)->String:
-	if bool(out.spared) and int(out.killed)==0 and int(out.captives)==0: return "%s is spared and held." % name
+	if bool(out.spared) and int(out.killed)==0 and int(out.captives)==0 and int(out.get("violated",0))==0: return "%s is spared and held." % name
 	var bits:PackedStringArray=PackedStringArray()
+	if int(out.get("violated",0))>0: bits.append("%s women raped" % _count(int(out.violated))+(", %s died of it" % _count(int(out.violate_deaths)) if int(out.get("violate_deaths",0))>0 else ""))
 	if int(out.killed)>0: bits.append("%s killed" % _count(int(out.killed)))
 	if int(out.escaped)>0: bits.append("%s got away" % _count(int(out.escaped)))
 	if int(out.captives)>0: bits.append("%s captives on the road to %s" % [_count(int(out.captives)),String(WorldSimulation.state.settlement_name)])
@@ -1114,6 +1349,7 @@ static func _note(name:String,out:Dictionary)->String:
 static func _title(name:String,out:Dictionary)->String:
 	if int(out.killed)>0 and bool(out.burned): return "The Sack of %s" % name
 	if int(out.killed)>0: return "The Men of %s Put to the Sword" % name
+	if int(out.get("violated",0))>0: return "The Rape of %s" % name
 	if int(out.captives)>0 and bool(out.burned): return "%s Burned, Its Women and Children Taken" % name
 	if bool(out.burned): return "%s Burned" % name
 	if int(out.captives)>0: return "Captives Taken From %s" % name
@@ -1127,6 +1363,7 @@ static func _title(name:String,out:Dictionary)->String:
 
 static func _memory(name:String,out:Dictionary)->String:
 	var bits:PackedStringArray=PackedStringArray()
+	if int(out.get("violated",0))>0: bits.append("raped %s of the women of %s" % [_count(int(out.violated)),name])
 	if int(out.killed)>0: bits.append("killed %s of %s" % [_count(int(out.killed)),name])
 	if int(out.captives)>0: bits.append("drove %s captives home" % _count(int(out.captives)))
 	if bool(out.burned): bits.append("burned %s" % name)

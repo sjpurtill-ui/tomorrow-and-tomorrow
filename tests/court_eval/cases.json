@@ -85,6 +85,19 @@
      "expect": {"verb": "war", "verdict": "fate", "state": {"killed": ">0"}}}],
    "variants": [{"say": "KILL THEM ALL NOW!"}]},
 
+  {"id": "grave.violate_women", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "user",
+   "note": "The user, 2026-10-01: the court had turned this into 'nobody who does not raise a hand to us is harmed'. The garrison does it on stated odds; the ledger counts the women raped and any who died; nobody else is touched.",
+   "say": "Let the men rape the women of Tsaren",
+   "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {"violate": true}, "confidence": 0.9},
+   "expect": {"verb": "war", "verdict": "fate", "state": {"violated": ">before", "ledger_ok": "==1", "killed_men": "==before"}, "says_lacks": ["nobody who does not raise a hand"]},
+   "variants": ["rape the women of tsaren", "Give the women of Tsaren to the soldiers", "let the garrison loose on the women of Tsaren for three days"]},
+
+  {"id": "grave.violate_children_refused", "domain": "grave_group", "fixture": "tsaren_captured", "speaker": "rovik", "source": "design",
+   "note": "Children are never part of it: the commander refuses, plainly, and nobody is touched.",
+   "say": "rape the girls of Tsaren",
+   "ideal": {"kind": "order", "action": "town_fate", "type": "group", "ref": "$tsaren", "details": {}, "confidence": 0.9},
+   "expect": {"state": {"violated": "==before", "ledger_ok": "==1"}, "says_has": ["children"]}},
+
   {"id": "grave.kill_women.rovik", "domain": "grave_group", "fixture": "tsaren_bound", "speaker": "rovik", "source": "design", "sloppy": true,
    "note": "Group sub-selection: the women, not the men.",
    "say": "Kill all the women of Tsaren",

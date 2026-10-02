@@ -1707,7 +1707,7 @@ static func _fate(out:Dictionary,reading:Dictionary)->Dictionary:
 		var failed:=_no(out,"fate_failed",String(result.error),"")
 		failed.outcome="Nothing is done at %s." % String(town.get("name","the town"))
 		return failed
-	var harsh:=bool(fate.get("kill_men",false)) or bool(fate.get("captives",false)) or bool(fate.get("raze",false))
+	var harsh:=bool(fate.get("kill_men",false)) or bool(fate.get("captives",false)) or bool(fate.get("raze",false)) or bool(fate.get("violate",false))
 	var qualm:=""
 	if harsh:
 		var person:Dictionary=GovernmentPeopleSystem.person_snapshot(int(out.general_pid)) if int(out.general_pid)>0 else {}
