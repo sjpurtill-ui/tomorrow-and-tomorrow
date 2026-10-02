@@ -31,9 +31,12 @@ a year of the levy at its own last pace, and the record says so.
   the state counts every household). Each town's own economy day takes it:
   output x rate x the realm's reach (office_levers.reach with tallies and
   registers) x (1 - the share hidden), as food out of that town's stores
-  (FoodSystem.take_for_levy). The keepers never take a town's last 20 days of
-  food: what a hungry town cannot give stays with it ("left with hungry
-  towns"). After coinage the households' money share is paid in coin, with
+  (FoodSystem.take_for_levy, from fresh and stored food in the share each is
+  held). The keepers take only what a town holds beyond 45 days of its need,
+  where its food security starts to fall: what a town without that much
+  cannot give stays with it ("left with hungry towns"). After coinage the
+  food is kept at one book price (the market price at coinage), so a ration
+  in is a ration out whatever grain fetches. After coinage the households' money share is paid in coin, with
   its backing. It weighs on trust in the chiefs (up to 4.8 points) and on
   holding together (up to 2.6) through the social pressure, beside its clamp.
 - **Rot**: the store's food rots each month at the capital's own rate for

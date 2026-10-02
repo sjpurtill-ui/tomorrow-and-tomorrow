@@ -41,7 +41,7 @@ func _soldiers(count:int)->void:
 
 
 ## The capital's stores: `days` of food for its people (the levy takes food
-## only above HUNGRY_DAYS of their need).
+## only above LEVY_KEEP_DAYS of their need).
 func _stock_food(days:float,need:float=900.0)->void:
 	GameState.simulation_metrics["food_consumption"]=need
 	GameState.food_stocks={"Fresh food":0.0,"Stored food":need*days}
@@ -252,12 +252,12 @@ func test_levy_levels_take_the_ages_share_with_their_yield_and_costs()->void:
 	assert_float(Purse.balance()-before).is_equal_approx(due,0.01)
 	assert_float(food_before-float(GameState.resource_stockpiles.get("Food",0.0))).is_equal_approx(due,0.01)
 	assert_float(float(day.evaded)).is_greater(0.0)
-	# A hungry town keeps its last days of food: the keepers take nothing.
-	_stock_food(Purse.HUNGRY_DAYS-1.0)
+	# A town without LEVY_KEEP_DAYS of food keeps it: the keepers take nothing.
+	_stock_food(Purse.LEVY_KEEP_DAYS-1.0)
 	var hungry:=Purse.accrue({"daily_output_value":150.0},0.0)
 	assert_float(float(hungry.levy)).is_equal(0.0)
 	assert_float(float(hungry.short)).is_equal_approx(due,0.01)
-	assert_float(float(GameState.resource_stockpiles.get("Food",0.0))).is_equal_approx(900.0*(Purse.HUNGRY_DAYS-1.0),0.01)
+	assert_float(float(GameState.resource_stockpiles.get("Food",0.0))).is_equal_approx(900.0*(Purse.LEVY_KEEP_DAYS-1.0),0.01)
 	# Its cost reaches the people: trust and holding together, in the economy's pressure.
 	assert_float(Purse.levy_pressure()).is_equal_approx(0.8*Purse.LEVY_TRUST,0.0001)
 	Purse.set_levy("light")
@@ -371,7 +371,10 @@ func test_relief_sends_the_stores_food_first_then_buys_with_coin()->void:
 	# With coin and no food in the store, food is bought from a town with
 	# food to spare at the seller's market price, every ration paid for.
 	GameState.city_trade_shipments.clear()
+	GameState.economy_stage="currency"
 	var purse:=Purse.state()
+	purse.balance=0.0;purse.coin=0.0
+	Purse.stage()
 	purse.balance=400.0;purse.coin=400.0
 	var bought:=Purse.buy_relief(500.0)
 	assert_float(float(bought.spent)).is_greater(0.0)
@@ -651,3 +654,47 @@ func test_an_older_purses_tally_is_counted_again_once()->void:
 	var held:=float(purse.balance)
 	Purse.state()
 	assert_float(Purse.balance()).is_equal(held)
+
+
+## Review of the store: an older purse touched first by trade between peoples
+## is still counted again; after coinage a ration in is a ration out whatever
+## grain fetches; the levy takes fresh and stored food in their shares.
+func test_trade_touching_an_older_purse_first_does_not_skip_the_recount()->void:
+	GameState.economy_stage="subsistence"
+	_output(900.0)
+	GameState.realm_purse={"version":1,"balance":225000.0,"coin":0.0,"backing":{},"levy":"usual","lines":{"army":true},"months":[{"levy":1400.0,"days":30.0}],"month":{},"ledger":[],"migrated":true}
+	Purse.held_coin(GameState)
+	assert_float(Purse.balance()).is_less(225000.0)
+	assert_str(String((Purse.state().ledger as Array)[0].why)).contains("Counted again")
+
+
+func test_after_coinage_a_ration_in_is_a_ration_out_whatever_grain_fetches()->void:
+	GameState.economy_stage="currency"
+	GameState.market_prices["Food"]=0.7
+	_stock_food(200.0)
+	Purse.state()
+	Purse.stage()
+	assert_str(String(Purse.state().unit)).is_equal("coin")
+	var food_before:=float(GameState.resource_stockpiles.get("Food",0.0))
+	Purse.accrue({"daily_output_value":700.0},0.0)
+	var taken:=food_before-float(GameState.resource_stockpiles.get("Food",0.0))
+	assert_float(taken).is_greater(0.0)
+	assert_float(Purse.held_food()).is_equal_approx(taken,0.01)
+	# Grain doubles in price: the store still holds the same food, and paying
+	# it all out returns every ration it took.
+	GameState.market_prices["Food"]=1.4
+	assert_float(Purse.held_food()).is_equal_approx(taken,0.01)
+	var purse:=Purse.state()
+	var before_pay:=float(GameState.resource_stockpiles.get("Food",0.0))
+	Purse._pay_out(purse,float(purse.balance),"army")
+	assert_float(float(GameState.resource_stockpiles.get("Food",0.0))-before_pay).is_equal_approx(taken,0.01)
+
+
+func test_the_levy_takes_fresh_and_stored_food_in_their_shares()->void:
+	GameState.food_stocks={"Fresh food":1000.0,"Stored food":3000.0}
+	GameState.resource_stockpiles["Food"]=4000.0
+	var took:=float(FoodSystem.take_for_levy(400.0))
+	assert_float(took).is_equal_approx(400.0,0.001)
+	assert_float(float(GameState.food_stocks["Fresh food"])).is_equal_approx(900.0,0.001)
+	assert_float(float(GameState.food_stocks["Stored food"])).is_equal_approx(2700.0,0.001)
+	assert_float(float(GameState.resource_stockpiles["Food"])).is_equal_approx(3600.0,0.001)

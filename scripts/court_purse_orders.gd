@@ -289,7 +289,7 @@ static func text(p:Dictionary)->String:
 	said+=" The richest fifth of our households hold %d in every 100 parts of the wealth; the poorest fifth %d." % [int(p.top_fifth),int(p.bottom_fifth)]
 	return said
 
-const ASKS_BALANCE:="(?i)\\b(treasury|purse|common store|store|silver store|how much (?:silver|coin|money|wealth)|what (?:do|have) we (?:in|got in) (?:the )?(?:treasury|purse|store))\\b"
+const ASKS_BALANCE:="(?i)\\b(treasury|purse|common store|the store|silver store|how much (?:silver|coin|money|wealth)|what (?:do|have) we (?:in|got in) (?:the )?(?:treasury|purse|store))\\b"
 const ASKS_LEVY:="(?i)\\b(levy|levies|tax|taxes|dues|tithe)\\b"
 const ASKS_SPENDING:="(?i)\\b(spend|spending|spent|pay for|pays for|going out|goes out|outgo|costs?)\\b"
 const ASKS_ARMY_PAY:="(?i)\\b(soldiers|army|warriors|fighters|troops)\\b[^?]*\\b(paid|pay|pays|wages?)\\b|\\b(paid|pay|pays|wages?)\\b[^?]*\\b(soldiers|army|warriors|fighters|troops)\\b"

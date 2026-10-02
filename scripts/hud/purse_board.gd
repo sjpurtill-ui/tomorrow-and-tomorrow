@@ -168,7 +168,7 @@ func _build_sources(sources:Dictionary)->void:
 	var lost:PackedStringArray=[]
 	if float(sources.evaded)>=0.5: lost.append("%s hidden by households" % Purse.number(float(sources.evaded)))
 	if float(sources.unreached)>=0.5: lost.append("%s beyond the keepers' reach" % Purse.number(float(sources.unreached)))
-	if float(sources.get("short",0.0))>=0.5: lost.append("%s left with hungry towns" % Purse.number(float(sources.short)))
+	if float(sources.get("short",0.0))>=0.5: lost.append("%s left with towns that had none to spare" % Purse.number(float(sources.short)))
 	if not lost.is_empty(): sources_box.add_child(_line("Never came in, a season: %s." % ", ".join(lost),13,T.INK_MUTED,true))
 	if float(sources.coin_share)>0.01: sources_box.add_child(_line("%d%% of it is paid in coin; the rest is taken in goods." % roundi(float(sources.coin_share)*100.0),13,T.INK_MUTED,true))
 
@@ -269,7 +269,10 @@ func _effect_tip(line:String)->String:
 		"army":return "Pay on top of rations: %s. Unpaid soldiers lose will each month, are slower to muster, and some go home; more after three months." % Purse.pay_word()
 		"scholars":return "A keep for those at research, a seventh of a day's work each. While it is paid, research goes faster."
 		"crews":return "Wages for those at building, a seventh of a day's work each. While they are paid, building goes faster."
-		"relief":return "Each month, food goes from the store to towns under %d days of it, up to a quarter of the store. With coin, more is bought at the market price from towns with more than %d days of it." % [int(Purse.HUNGRY_DAYS),int(Purse.SELLER_DAYS)]
+		"relief":
+			var tip:="Each month, food goes from the store to towns under %d days of it, up to a quarter of the store." % int(Purse.HUNGRY_DAYS)
+			if not Purse.in_kind():tip+=" With coin, more is bought at the market price from towns with more than %d days of it." % int(Purse.SELLER_DAYS)
+			return tip
 	return ""
 
 func _toggle(line:String,on:bool)->void:
