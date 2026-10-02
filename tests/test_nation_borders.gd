@@ -416,3 +416,14 @@ func test_a_claim_keeps_its_own_outline()->void:
 	var judged:=Borders.make_claim("civ_02","x",Vector2.ZERO,Borders.estimated_radius(5000.0))
 	assert_float(float(judged.radius)).is_equal_approx(Borders.estimated_radius(5000.0),0.0001)
 	assert_float(Borders.estimated_radius(5000.0)).is_greater(Borders.estimated_radius(500.0))
+
+
+func test_the_research_screens_say_what_it_does_to_the_map()->void:
+	var Board:=preload("res://scripts/hud/inquiry_board.gd")
+	var surveys:Dictionary=Board._card_words({"id":"boundary_marker_surveys","effects":{"legitimacy":0.002},"progress":0.3})
+	assert_str(String(surveys.would)).contains("Our lands are marked: our frontier shows on the map.")
+	assert_str(String(surveys.tooltip)).contains("On the map: Our lands are marked")
+	var congress:Dictionary=Board._card_words({"id":"sovereign_realms_congress","effects":{},"progress":0.1})
+	assert_str(String(congress.would)).contains("Borders with realms that also know this become fixed lines.")
+	var other:Dictionary=Board._card_words({"id":"fire_making","effects":{},"progress":0.1})
+	assert_str(String(other.would)).not_contains("map")
