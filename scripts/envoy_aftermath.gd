@@ -200,7 +200,7 @@ static func candidate(situation_type:String,civ_id:String,_occasion:Dictionary,r
 			if town.is_empty(): return {}
 			var offer:=_surplus(civ_id,20.0)
 			s.headline="comes to ask for %s back" % String(town.name)
-			s.ask="aftermath:return:%s:%d" % [String(town.id),floori(day/365.0)]
+			s.ask=_give_back_key(st)
 			req={"town":String(town.name),"city_id":String(town.id),"capital":bool(town.capital)}
 			if not offer.is_empty():
 				var amount:=Hall._nice(minf(float(offer.stock)*(0.45 if bool(town.capital) else 0.3),maxf(20.0,float(civ.get("population",100.0))*(1.2 if bool(town.capital) else 0.7))))
@@ -212,7 +212,7 @@ static func candidate(situation_type:String,civ_id:String,_occasion:Dictionary,r
 			var town2:=_held_first(st)
 			var from:=String(town2.get("name","")) if not town2.is_empty() else ""
 			var ransom:=_surplus(civ_id,15.0)
-			s.ask="aftermath:captives:%d" % floori(day/180.0)
+			s.ask=_give_back_key(st)
 			req={"road":road,"home":home,"town":from}
 			if not ransom.is_empty() and road>0: req.merge({"pay_res":String(ransom.res),"pay_amt":Hall._nice(minf(float(ransom.stock)*0.3,clampf(float(road)*3.0,8.0,120.0)))})
 			var where:="on the road to your country" if road>0 and home==0 else ("living among your people in bonds" if road==0 else "on the road and among your people")
@@ -222,7 +222,7 @@ static func candidate(situation_type:String,civ_id:String,_occasion:Dictionary,r
 			if town3.is_empty(): return {}
 			var region:Dictionary=WorldSimulation.world.region_snapshot(civ_id,String(town3.id))
 			s.headline="pleads for the people of %s" % String(town3.name)
-			s.ask="aftermath:plea:%s:%d" % [String(town3.id),floori(day/365.0)]
+			s.ask=_give_back_key(st)
 			req={"town":String(town3.name),"city_id":String(town3.id),"people":roundi(float(region.get("population",0.0)))}
 			s.summary="%s pleads for the %d people still living in %s under your garrison: that they be left their homes, their stores and their lives." % [name,int(req.people),String(town3.name)]
 		"vengeance_vow":
@@ -234,8 +234,26 @@ static func candidate(situation_type:String,civ_id:String,_occasion:Dictionary,r
 			req={"town":what,"seat":String(st.seat)}
 			s.summary="%s sends no gift and asks nothing. %s swears that %s will be paid for, however long it takes." % [name,who,what]
 	if String(s.get("ask",""))=="" or used.has(String(s.ask)): return {}
+	if String(s.ask).begins_with(GIVE_BACK) and _asked_before(civ_id,String(s.ask)): return {}
 	s["req"]=req
 	return {"kind":"request","situation":s}
+
+## One plea a conquest. A beaten people asks once for what we took from it
+## (the town, its people under our garrison, or the captives: whichever
+## matters most to them that day). Granted or refused, it does not ask again
+## until we take another town of theirs.
+const GIVE_BACK:="aftermath:give_back:"
+static func _give_back_key(st:Dictionary)->String:
+	var ids:PackedStringArray=PackedStringArray()
+	for t:Dictionary in st.held: ids.append(String(t.id))
+	ids.sort()
+	return GIVE_BACK+(",".join(ids) if not ids.is_empty() else "captives")
+
+## Whether this people already asked this, at any time the hall remembers.
+static func _asked_before(civ_id:String,ask:String)->bool:
+	for entry in Hall.state().ledger:
+		if entry is Dictionary and String(entry.get("speaker",""))=="civ:"+civ_id and String(entry.get("ask",""))==ask: return true
+	return false
 
 # --------------------------------------------------------------------------
 # The envoy speaks for whoever leads them now

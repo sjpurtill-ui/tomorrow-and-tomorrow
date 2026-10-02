@@ -108,15 +108,16 @@ const MAKE_FIGHTERS:="(?i)\\b(make|create|build|produce|put together|train up|ge
 const OUR_NAMED:="(?i)\\b(the|our|those|these|my)\\s+(?!new\\b|more\\b|fresh\\b)(?:[a-z0-9]+\\s+)?(levies|soldiers|fighters|warriors|troops|recruits)\\b"
 ## "Levy a tax", "levy ten hides from each family": goods, not fighters.
 const LEVY_GOODS:="(?i)\\b(tax|taxes|tribute|tithe|dues?|shares?|hides?|food|grain|goods|stores?|payment|furs?|meat|timber|stone)\\b"
-## Standing our fighters down: dismissed, released, sent home or back to work.
-const STAND_DOWN_VERBS:="(?i)\\b(dismiss|dismissed|release|released|discharge|discharged|demobili[sz]e|demobili[sz]ed|stand [\\w' ]{0,30}?down|disband|disbanded|let [\\w' ]{0,30}?go home|send [\\w' ]{0,30}?(?:home|back to (?:the |their )?(?:fields|work|workforce|homes|hearths|families))|return [\\w' ]{0,30}?to (?:the |their )?(?:workforce|fields|work|homes|hearths|families))\\b"
+## Standing our fighters down: dismissed, released, suspended, dissolved, sent
+## home or back to work.
+const STAND_DOWN_VERBS:="(?i)\\b(dismiss|dismissed|release|released|discharge|discharged|demobili[sz]e|demobili[sz]ed|stand [\\w' ]{0,30}?down|disband|disbanded|suspend|suspended|dissolve|dissolved|disperse|dispersed|abolish|abolished|break [\\w' ]{0,30}?up|do away with|let [\\w' ]{0,30}?go home|send [\\w' ]{0,30}?(?:home|back to (?:the |their )?(?:fields|work|workforce|homes|hearths|families))|return [\\w' ]{0,30}?to (?:the |their )?(?:workforce|fields|work|homes|hearths|families))\\b"
 ## Our own fighters, as a group or a number ("5 of our soldiers").
-const OUR_FIGHTERS:="(?i)\\b(soldiers?|fighters?|warriors?|levies|levy|recruits?|troops|spearmen|archers|bowmen|men under arms|men at arms|fighting men)\\b"
+const OUR_FIGHTERS:="(?i)\\b(soldiers?|soldiery|fighters?|warriors?|levies|levy|recruits?|troops|spearmen|archers|bowmen|men under arms|men[- ]at[- ]arms|fighting men|armed men)\\b"
 ## The army as a whole, or its bands: "disband the army", "stand the host
-## down", "send the war bands home".
-const OUR_ARMY:="(?i)\\b(army|armies|host|war ?bands?|bands|forces|raiders)\\b"
+## down", "send the war bands home", "suspend all military".
+const OUR_ARMY:="(?i)\\b(army|armies|military|armed forces|host|war ?bands?|bands|forces|raiders)\\b"
 ## All of them, said with no number: "the army", "our soldiers", "everyone".
-const ALL_OF_THEM:="(?i)\\b(all|every|everyone|everybody|each|the whole)\\b|\\b(the|our|my)\\s+(?:\\w+\\s+)?(army|armies|host|war ?bands|bands|forces|soldiers|fighters|warriors|troops|levy|levies|spearmen|archers|bowmen|men under arms|fighting men|raiders)\\b"
+const ALL_OF_THEM:="(?i)\\b(all|every|everyone|everybody|each|the whole)\\b|\\b(the|our|my)\\s+(?:\\w+\\s+)?(army|armies|military|host|war ?bands|bands|forces|soldiers|soldiery|fighters|warriors|troops|levy|levies|spearmen|archers|bowmen|men under arms|fighting men|raiders)\\b"
 ## Others sent out who are not fighters ("send the scouting band home").
 const NOT_FIGHTERS:="(?i)\\b(scouts?|scouting|settlers?|envoys?|messengers?|traders?|caravans?|hunters?|herders?|workers?|builders?|carriers?|pilgrims?)\\b"
 
@@ -367,6 +368,9 @@ static func stand_down_reading(text:String)->Dictionary:
 	if clean.is_empty() or clean.ends_with("?") or _has(clean,QUESTION_LEADS): return {}
 	var lower:=clean.to_lower()
 	if not _has(lower,STAND_DOWN_VERBS) or _has(lower,THEIRS): return {}
+	# "Suspend the drill", "suspend the soldiers' pay": the training or the pay
+	# stops (realm_orders.gd, court_purse_orders.gd), nobody is sent home.
+	if _has(lower,"\\bsuspend(?:ed)?\\b") and _has(lower,"\\b(training|drill|drilling|exercises?|pay|paying|wages?|rations?)\\b"): return {}
 	# One band of ours named: "disband Lorn's band", "disband the raiders for
 	# Eldwick" (a band's own name may name their town).
 	var band:=_band_named(lower)
@@ -536,8 +540,10 @@ static func _nobody_free_outcome(mc:Variant,asked:int)->String:
 ## Our fighters sent home to their work (army_levy_law.gd stand_down): the
 ## bands at home fold back first, never the watch, and the size the war
 ## leader keeps falls to what is left, so nobody is called up in their place.
-## "Disband the army" keeps no army at all: those away go home when they come
-## back. One band named goes home whole, at once or when it gets there.
+## "Disband the army" keeps no army at all: the bands away turn for home now
+## (those in a fight once it is decided) and their men go back to work when
+## they get there. One band named goes home whole, at once or when it gets
+## there.
 static func _stand_down(reading:Dictionary)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	if mc==null: return {"ok":false,"kind":"stand_down","says":"","outcome":""}
@@ -556,7 +562,18 @@ static func _stand_down(reading:Dictionary)->Dictionary:
 	var r:Dictionary=Law.stand_down(mc,n,everyone)
 	var released:=int(r.get("released",0))
 	var level_words:=String(r.get("said",""))
-	out.ok=released>0 or level_words!=""
+	# No army at all: every band out turns for home, whatever its errand.
+	var recalled:=0
+	var fighting:=0
+	if everyone:
+		var council:=load("res://scripts/war_council.gd") as GDScript
+		for army in (mc.field_armies as Array).duplicate():
+			if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
+			var men:=int((army as Dictionary).get("troops",0))
+			if bool(council.call("_send_home",army)): recalled+=men
+			else: fighting+=men
+	out["recalled"]=recalled
+	out.ok=released>0 or level_words!="" or recalled>0
 	out.count=released
 	var parts:PackedStringArray=PackedStringArray()
 	if int(r.get("released_injured_veterans",0))>0: parts.append("%d who were hurt" % int(r.released_injured_veterans))
@@ -568,13 +585,18 @@ static func _stand_down(reading:Dictionary)->Dictionary:
 	var gear:=_gear_words(r)
 	if gear!="": lines.append(gear)
 	var away:=int(r.get("away",0))
-	if away>0 and everyone: lines.append("%d more are away with the bands; they go home when they come back." % away)
+	if everyone:
+		if recalled>0: lines.append("The %d away with the bands turn for home; they go back to their work when they get there." % recalled)
+		if fighting>0: lines.append("%d are in a fight and cannot be called back until it is decided." % fighting)
 	elif away>0 and released<n: lines.append("%d more are away with the bands." % away)
 	if everyone and int(r.get("held",0))>0: lines.append("The %d holding the towns we took stay there." % int(r.held))
 	if int(r.get("watch",0))>0 and (everyone or released<n): lines.append("The %d on the watch stay at their posts." % int(r.watch))
 	if level_words!="": lines.append(level_words)
 	out.says=" ".join(lines)
-	out.outcome=("%d stood down and back at work at home." % released) if released>0 else ("No army is kept now." if level_words!="" else "Nothing is set in motion: nobody is under arms at home.")
+	if released>0: out.outcome="%d stood down and back at work at home." % released
+	elif recalled>0: out.outcome="The bands turn for home to be stood down."
+	elif level_words!="": out.outcome="No army is kept now."
+	else: out.outcome="Nothing is set in motion: nobody is under arms at home."
 	return out
 
 

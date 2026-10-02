@@ -236,6 +236,24 @@ func test_a_blood_price_settles_the_feud_and_keeps_their_raiders_home()->void:
 	assert_bool(WAR._truce_binds(civ_id,20)).override_failure_message("a paid blood price does not keep the raiders home").is_true()
 	assert_str(_chronicle_about(civ_id)).contains("settled")
 
+## The user, 2026-10-01: "They keep threatening me and then sending me food to
+## end the feud, and then threatening me again." Their peace taken, they send
+## no tribute demands or tests while the settlement holds, and our own word to
+## punish them is set down so our raiders do not start it again.
+func test_a_peace_they_paid_for_ends_their_threats_and_our_punishing()->void:
+	# Before any feud they could demand tribute (the gate below is the peace's).
+	assert_dict(Hall._candidate("tribute_demand",civ_id,{"type":"routine","civ_id":civ_id,"data":{}},RandomNumberGenerator.new(),{},5)).is_not_empty()
+	WAR.blood_feud(civ_id,10,"old wrongs")
+	WAR.front(civ_id)["stance"]="punish"
+	WAR._peace_answered({"civ_id":civ_id,"terms":{"resource":"Food","amount":12.0}},"accept")
+	assert_bool(WAR.feuding(civ_id)).is_false()
+	assert_str(String(WAR.front(civ_id).get("stance",""))).is_equal("")
+	var rng:=RandomNumberGenerator.new()
+	for later in [40,300,900]:
+		assert_bool(WAR.keeps_peace(civ_id,later)).is_true()
+		for asked in ["tribute_demand","test_of_resolve","emboldened_demand","redress_demand"]:
+			assert_dict(Hall._candidate(asked,civ_id,{"type":"routine","civ_id":civ_id,"data":{}},rng,{},later)).override_failure_message("%s on day %d" % [asked,later]).is_empty()
+
 func test_a_marriage_between_the_peoples_ends_the_feud()->void:
 	WAR.blood_feud(civ_id,10,"old wrongs")
 	RIVALS.bond(civ_id,"marriage","the marriage of Wren into your people")
