@@ -66,8 +66,12 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## driven out, "which village?" with Tsaren held or at war, Tsaren spoken of,
 ## a law said of the village: the "grave_home" domain, 14 runs a path, 6
 ## careless): offline 771, live 772, sloppy 80.
+## Then what grave words never fall on (a goat, trees, the dead, wolves; men
+## thrown out of the hall), words that are no answer to "which village?", a
+## new order while it is open, and the women and the old counted once: 15
+## more runs a path): offline 786, live 787, sloppy 80.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":771,"live":772,"sloppy":80}
+const BASELINE:={"offline":786,"live":787,"sloppy":80}
 
 var _processing:Dictionary={}
 

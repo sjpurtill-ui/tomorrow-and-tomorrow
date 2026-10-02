@@ -58,11 +58,16 @@ people it struck, by their neighbours and by the officer who carried it out.
 
 Grave orders against the god's own people ("kill all women in the village",
 "burn our own village", "drive out the old") are adjudicated the same way
-(scripts/grave_home.gd): the one ordered may obey, plead or refuse; each hand
-may refuse or flee; each person named is caught on stated odds, a few days'
-work at most; the dead and the fled come off the population model by group
-and sex, in that town's own count, and births fall while the women are fewer.
-"The village" is asked about when a town we hold, or a war, makes it unclear.
+(scripts/grave_home.gd): only people named as the act's own object (never a
+goat, trees or the dead; driving out is out of the realm, never out of the
+hall); the one ordered may obey, plead or refuse; each hand may refuse or
+flee; each person named is caught on stated odds, a few days' work at most;
+the dead and the fled come off the population model by age and sex (each
+person once), in that town's own count; births fall while the women of
+child-bearing age are fewer, and only their pregnancies are lost. "The
+village" is asked about when a town we hold, a war or a feud makes it
+unclear; only a short, clear answer settles it, and any other words drop the
+question and are heard as themselves.
 
 ## Officials know their office
 
