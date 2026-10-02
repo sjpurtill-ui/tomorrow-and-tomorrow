@@ -541,3 +541,40 @@ func test_charted_ground_is_followed_through_growth_and_trims()->void:
 	areas.clear()
 	areas.append_array(saved)
 	CivilizationSystem.fog_revision+=1
+
+
+func test_strangers_towns_are_read_as_our_people_know_them()->void:
+	var intelligence:RefCounted=CivilizationSystem.city_intelligence
+	var saved_records:Dictionary=intelligence.get("records")
+	var saved_civilizations:Array=CivilizationSystem.civilizations
+	CivilizationSystem.civilizations=[{"id":"civ_02","name":"Kezari","strategic_regions":[
+		{"id":"c2_a","controller":"civ_02","position":Vector2(100.0,0.0),"boundary":_outline(Vector2(100.0,0.0),6.0),"settlement_founded":true,"population":5000.0},
+		{"id":"c2_b","controller":"player","position":Vector2(130.0,0.0),"boundary":_outline(Vector2(130.0,0.0),3.0),"settlement_founded":true,"population":900.0},
+		{"id":"c2_c","controller":"civ_02","position":Vector2(80.0,30.0),"boundary":[],"settlement_founded":true,"population":2000.0},
+		{"id":"c2_d","controller":"civ_02","position":Vector2(90.0,-30.0),"boundary":_outline(Vector2(90.0,-30.0),4.0),"settlement_founded":true,"ledger":{"ruin":{"day":5}}}]}]
+	intelligence.set("records",{"player":{
+		"c2_a":{"city_id":"c2_a","civ_id":"civ_02","controller":"civ_02","position":{"x":100.0,"z":0.0},"fields":{}},
+		# We took this one since the last report: our people know what they hold.
+		"c2_b":{"city_id":"c2_b","civ_id":"civ_02","controller":"civ_02","position":{"x":130.0,"z":0.0},"fields":{}},
+		# No outline kept: judged from the head count reported.
+		"c2_c":{"city_id":"c2_c","civ_id":"civ_02","controller":"civ_02","position":{"x":80.0,"z":30.0},"fields":{"population":{"low":1800.0,"high":2200.0}}},
+		# Burned by us: no land to draw.
+		"c2_d":{"city_id":"c2_d","civ_id":"civ_02","controller":"civ_02","position":{"x":90.0,"z":-30.0},"fields":{}},
+		# Seen, but whose it is nobody knows.
+		"far":{"city_id":"far","civ_id":"","controller":"","position":{"x":95.0,"z":5.0},"fields":{}}}})
+	var cache:Dictionary={}
+	var claims:=Borders.foreign_claims(Vector2(100.0,0.0),500.0,cache)
+	var by_id:Dictionary={}
+	for claim:Dictionary in claims: by_id[String(claim.id)]=claim
+	assert_array(by_id.keys()).contains_exactly_in_any_order(["town:c2_a","town:c2_b","town:c2_c"])
+	assert_str(String(by_id["town:c2_a"].owner)).is_equal("civ_02")
+	assert_str(String(by_id["town:c2_b"].owner)).is_equal("player")
+	assert_float(float(by_id["town:c2_a"].radius)).is_between(5.5,6.6)
+	assert_float(float(by_id["town:c2_c"].radius)).is_equal_approx(Borders.estimated_radius(2000.0),0.01)
+	# Read again with nothing moved: every claim is the one already made.
+	var again:=Borders.foreign_claims(Vector2(100.0,0.0),500.0,cache)
+	for claim:Dictionary in again: assert_bool(is_same(claim,by_id[String(claim.id)])).is_true()
+	# Out of reach: not read at all.
+	assert_int(Borders.foreign_claims(Vector2(-900.0,0.0),100.0,{}).size()).is_equal(0)
+	intelligence.set("records",saved_records)
+	CivilizationSystem.civilizations=saved_civilizations

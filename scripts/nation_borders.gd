@@ -228,19 +228,28 @@ static func foreign_claims(center:Vector2,reach:float,cache:Dictionary={})->Arra
 		var place:Variant=region.get("position",at)
 		if place is Vector2: at=place
 		var boundary:Variant=region.get("boundary",[])
-		var radius:=0.0
-		if (boundary is Array or boundary is PackedVector2Array) and int(boundary.size())>=3:
-			for point in boundary:
-				if point is Vector2: radius=maxf(radius,(point as Vector2).distance_to(at))
-		if radius<=0.0:
+		var outlined:=(boundary is Array or boundary is PackedVector2Array) and int(boundary.size())>=3
+		# One outline point's reach keys the claim: a town's outline only
+		# scales as it grows, so the full outline is read again only when its
+		# reach has moved by a step (about 2%).
+		var probe:=0.0
+		var people:=0.0
+		if outlined and boundary[0] is Vector2: probe=(boundary[0] as Vector2).distance_to(at)
+		if probe<=0.0:
+			outlined=false
 			var estimate:Dictionary=(report.get("fields",{}) as Dictionary).get("population",{})
-			var people:=(float(estimate.get("low",0.0))+float(estimate.get("high",0.0)))*0.5
+			people=(float(estimate.get("low",0.0))+float(estimate.get("high",0.0)))*0.5
 			if people<=0.0: people=float(region.get("population",800.0))
-			radius=estimated_radius(people)
-			boundary=null
-		var sig:=hash([holder,at.snapped(Vector2.ONE*0.001),roundi(log(maxf(radius,0.000001))/log(1.02)),int(boundary.size()) if boundary!=null else 0])
+			probe=estimated_radius(people)
+		var sig:=hash([holder,at.snapped(Vector2.ONE*0.001),roundi(log(maxf(probe,0.000001))/log(1.02)),int(boundary.size()) if outlined else -1])
 		var held:Dictionary=cache.get(city_id,{})
-		var claim:Dictionary=held.get("claim",{}) if int(held.get("sig",0))==sig else make_claim(holder,"town:"+city_id,at,radius,boundary)
+		var claim:Dictionary=held.get("claim",{})
+		if int(held.get("sig",0))!=sig or claim.is_empty():
+			var radius:=probe
+			if outlined:
+				for point in boundary:
+					if point is Vector2: radius=maxf(radius,(point as Vector2).distance_to(at))
+			claim=make_claim(holder,"town:"+city_id,at,radius,boundary if outlined else null)
 		kept[city_id]={"sig":sig,"claim":claim}
 		out.append(claim)
 	cache.clear()
