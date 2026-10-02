@@ -37,7 +37,7 @@ func test_the_same_researchers_make_the_same_progress_under_any_emphasis()->void
 	WorldSimulation.scoped("parity",func()->void:
 		WorldSimulation.state.population_allocations.Knowledge=60
 		var researchers:=float(WorldSimulation.state.effective_workers("Knowledge"))
-		assert_float(researchers).is_greater(R.RESEARCH_TEAMS)
+		assert_float(researchers).is_greater(12.0)
 		var everything:Dictionary={}
 		for line:String in S.DOMAINS:everything[line]=12
 		var totals:Array[float]=[]
@@ -46,7 +46,7 @@ func test_the_same_researchers_make_the_same_progress_under_any_emphasis()->void
 		for plan:Dictionary in [{"security":4},{"knowledge":1,"production":1,"infrastructure":1,"nutrition":1},SENSIBLE,everything]:
 			_lay_out(plan)
 			totals.append(_work())
-		for value in totals:assert_float(value).is_equal_approx(R.team_capacity(researchers),.0001)
+		for value in totals:assert_float(value).is_equal_approx(R.team_capacity(researchers,float(WorldSimulation.state.population_exact)),.0001)
 	)
 
 func test_piling_attention_onto_one_line_gives_it_turns_never_a_bigger_team()->void:
@@ -60,8 +60,9 @@ func test_piling_attention_onto_one_line_gives_it_turns_never_a_bigger_team()->v
 		var heavy:=float(WorldSimulation.discovery.research_capacity_for("knowledge",knowledge).team_scale)
 		var light:=float(WorldSimulation.discovery.research_capacity_for("culture",culture).team_scale)
 		assert_float(heavy).is_equal_approx(light,.000001)
-		# More researchers field more teams, each doing an equal part of more work,
-		# with returns that diminish (Research600.team_capacity).
+		# More researchers field more teams, each doing an equal part of more work:
+		# every learner counts, a little less each on one question
+		# (Research600.team_capacity).
 		var many:=float(WorldSimulation.discovery.research_teams().work)
 		WorldSimulation.state.population_allocations.Knowledge=6
 		var few:=float(WorldSimulation.discovery.research_teams().work)

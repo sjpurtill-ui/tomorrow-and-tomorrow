@@ -101,23 +101,74 @@ FERTILITY_TRANSITION = "context.get(\"fertility_transition\"" in g.source("scrip
 # and computer rulers plan in the player's 0-12 steps. Absent -> the older rules.
 ATTENTION_STEPS = float(g.const("scripts/research_600_catalog.gd", "ATTENTION_STEPS", default=0.0, optional=True))
 RESEARCH_TEAMS = float(g.const("scripts/research_600_catalog.gd", "RESEARCH_TEAMS", default=0.0, optional=True))
-PARITY = ATTENTION_STEPS > 0.0 and RESEARCH_TEAMS > 0.0
+# Learning without a cap (docs/PEOPLE_FIRST.md A): Research600.QUESTION_EXPONENT
+# present -> every learner counts (team_capacity = teams_at x team_strength of
+# each team's people, scaled so the normal share keeps normal_work), the teams
+# grow without TEAMS_MAX, and a people keeping more learners than its age can
+# spare earns a lead over the calendar (LEAD_YEARS_PER_DOUBLING): its questions
+# are dated, its scholarship counted and its payoffs capped from calendar + lead.
+QUESTION_EXPONENT = float(g.const("scripts/research_600_catalog.gd", "QUESTION_EXPONENT", default=0.0, optional=True))
+UNCAPPED = QUESTION_EXPONENT > 0.0
+NORMAL = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
+          for k in ("NORMAL_FULL", "NORMAL_LOG", "NORMAL_RESEARCH_SHARE", "LEAD_YEARS_PER_DOUBLING", "LEAD_FALL_DOUBLINGS")}
+PARITY = ATTENTION_STEPS > 0.0 and (RESEARCH_TEAMS > 0.0 or UNCAPPED)
 REPLAN_STEPS = float(g.const("scripts/civilization_controller.gd", "REPLAN_STEPS", default=0.0, optional=True))
 
 
 def team_strength(researchers: float) -> float:
-    """Research600.team_strength (the old per-channel team scale): in full up to
-    one person, then 1 + 0.78 log10(people)."""
+    """Research600.team_strength: in full up to one person, then people^
+    QUESTION_EXPONENT (uncapped) or 1 + 0.78 log10(people) (the older rule)."""
     if researchers < 1.0:
         return max(0.0, researchers)
+    if UNCAPPED:
+        return researchers ** QUESTION_EXPONENT
     return 1.0 + math.log10(researchers) * 0.78
 
 
-def team_capacity(researchers: float) -> float:
-    """Research600.team_capacity: the whole community's work, in teams."""
+def teams_at(researchers: float) -> float:
+    """Research600.teams_at: team_count before rounding (at least one)."""
+    if researchers <= 0.0:
+        return 1.0
+    return max(1.0, TEAMS["TEAMS_BASE"] + TEAMS["TEAMS_PER_TENFOLD"] * math.log10(researchers / TEAMS["TEAMS_REF"]))
+
+
+def learners_work(researchers: float) -> float:
+    """Research600.learners_work: teams_at teams, each at team_strength."""
+    if researchers <= 0.0:
+        return 0.0
+    teams = teams_at(researchers)
+    return teams * team_strength(researchers / teams)
+
+
+def normal_work(population: float) -> float:
+    """Research600.normal_work: the normal share's work in a people of this size."""
+    normal = max(0.0, population) * NORMAL["NORMAL_RESEARCH_SHARE"]
+    if normal <= NORMAL["NORMAL_FULL"]:
+        return normal
+    return NORMAL["NORMAL_FULL"] * (1.0 + NORMAL["NORMAL_LOG"] * math.log10(normal / NORMAL["NORMAL_FULL"]))
+
+
+def team_capacity(researchers: float, population: float = -1.0) -> float:
+    """Research600.team_capacity: the whole community's work (no knee when
+    uncapped, scaled by the people's size; the older rule's knee otherwise)."""
+    if UNCAPPED:
+        work = learners_work(researchers)
+        if population < 0.0 or work <= 0.0:
+            return work
+        base = learners_work(max(0.0, population) * NORMAL["NORMAL_RESEARCH_SHARE"])
+        return work * (normal_work(population) / base if base > 0.0 else 1.0)
     if researchers <= RESEARCH_TEAMS:
         return max(0.0, researchers)
     return RESEARCH_TEAMS * team_strength(researchers / RESEARCH_TEAMS)
+
+
+def lead_rate(share: float, sustainable: float) -> float:
+    """Research600.lead_rate: years a year the lead moves with the learning share."""
+    if sustainable <= 0.0 or NORMAL["LEAD_YEARS_PER_DOUBLING"] <= 0.0:
+        return 0.0
+    fall = NORMAL["LEAD_FALL_DOUBLINGS"]
+    doublings = -fall if share <= 0.0 else max(-fall, math.log2(share / sustainable))
+    return NORMAL["LEAD_YEARS_PER_DOUBLING"] * doublings
 
 
 def attention_steps(allocations: dict) -> dict:
@@ -169,7 +220,7 @@ NEAR_AGE_YEARS = float(g.const("scripts/discovery_system.gd", "NEAR_AGE_YEARS", 
 # steps to proof (STAGES) start trial use (TRIAL_SHARE) before proof.
 TEAMS = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
          for k in ("TEAMS_BASE", "TEAMS_PER_TENFOLD", "TEAMS_REF", "TEAMS_MAX", "TEAM_MAX_WAIT_YEARS", "TEAM_TURN_YEARS", "PROOF_ADOPTION")}
-TEAM_MODE = TEAMS["TEAMS_MAX"] > 0
+TEAM_MODE = TEAMS["TEAMS_BASE"] > 0
 STAGES = [float(x) for x in g.const("scripts/research_600_catalog.gd", "STAGES", default=[], optional=True)]
 TRIAL_SHARE = [float(x) for x in g.const("scripts/research_600_catalog.gd", "TRIAL_SHARE", default=[], optional=True)]
 AGE_BUCKET_SCORE = float(g.const("scripts/discovery_system.gd", "AGE_BUCKET_SCORE", default=0.0, optional=True))
@@ -188,7 +239,7 @@ def team_count(researchers: float) -> int:
     if researchers <= 0.0:
         return 1
     x = TEAMS["TEAMS_BASE"] + TEAMS["TEAMS_PER_TENFOLD"] * math.log10(researchers / TEAMS["TEAMS_REF"])
-    return int(clamp(math.floor(x + 0.5) if x >= 0 else -math.floor(-x + 0.5), 1, TEAMS["TEAMS_MAX"]))
+    return int(clamp(math.floor(x + 0.5) if x >= 0 else -math.floor(-x + 0.5), 1, TEAMS["TEAMS_MAX"] if TEAMS["TEAMS_MAX"] > 0 else 1e18))
 
 
 def trial_share(progress):
@@ -407,6 +458,8 @@ class Surrogate:
         self.unit_alloc = np.zeros(nch, dtype=np.int64)
         self.line_channels = [np.where((cat.channel_line == li) & cat.channel_staffable)[0] for li in range(len(gd.LINES))]
         self.scholarship = 0.0
+        # DiscoverySystem.learning_lead: years the people's learning runs ahead.
+        self.lead = 0.0
         self.effects = np.zeros(len(cat.effect_keys))
         self.effect_raw = np.zeros(len(cat.effect_keys))
         self.ceiling_era = 0.0
@@ -620,7 +673,7 @@ class Surrogate:
         if eras.size:
             eras = np.sort(eras)
             frontier = eras[int((eras.size - 1) * self.c.frontier_percentile)]
-            self.ceiling_era = clamp(min(self.day / YEAR, frontier), 0.0, self.c.modern_era)
+            self.ceiling_era = clamp(min(self.day / YEAR + self.lead, frontier), 0.0, self.c.modern_era)
         else:
             self.ceiling_era = 0.0
         lo, hi = gd.era_bounds(cat, self.c, self.ceiling_era)
@@ -1386,6 +1439,10 @@ class Surrogate:
         staffing = clamp(min(researchers_total / 6.0, researchers_total / pop / 0.03), 0.0, 1.0)
         rate = (0.45 + 0.55 * staffing) * lerp(0.85, 1.2, self.education) * lerp(0.7, 1.0, self.food_security)
         self.scholarship += rate * days / YEAR
+        if UNCAPPED and SUSTAINABLE_SPECIALISTS:
+            # DiscoverySystem._advance_learning (goods assumed covered here).
+            share = researchers_total / max(1.0, self.able)
+            self.lead = max(0.0, self.lead + lead_rate(share, curve(SUSTAINABLE_SPECIALISTS, self.ceiling_era)) * days / YEAR)
         open_mask = self.ready & self.cond_ok & cat.channel_staffable[cat.channel] & self.offered
         if self.stale_k.get("STALE_ABANDON"):
             # Research600.pursued (research_3000): superseded practices are abandoned.
@@ -1394,7 +1451,7 @@ class Surrogate:
             open_mask &= doublings <= math.log2(k["STALE_ABANDON"])
         if TEAM_MODE:
             self._line_open = np.bincount(cat.line[open_mask], minlength=len(gd.LINES)) > 0
-            return self._research_teams(days, year, open_mask, researchers_total)
+            return self._research_teams(days, year, open_mask, researchers_total, year + self.lead)
         # DiscoverySystem._channel_has_candidate: a line is live only with an open
         # question within NEAR_AGE_YEARS of its age; otherwise its units help the
         # line's live channels, and work ahead only when none is live.
@@ -1502,7 +1559,7 @@ class Surrogate:
                     continue
             if cand is not None and (item < 0 or not open_mask[item] or recheck):
                 current_item = item
-                era_cost = np.maximum(0.0, cat.era[cand] - self.scholarship - self.tune_window) / self.tune_doubling
+                era_cost = np.maximum(0.0, cat.era[cand] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling
                 early_work = np.exp2(self._early_doublings(cand, year)) - 1.0
                 score = self.affinity[cand] + self.signal_score[cand] + weights[ch] * 8.0 - era_cost * 20.0 - early_work * EARLY_SCORE_PER_WORK + self.targets[cand] * 1e5
                 if self.stale_k.get("STALE_DOUBLING"):
@@ -1538,7 +1595,7 @@ class Surrogate:
                 if known_ext is None:
                     known_ext = np.concatenate([self.known, [False, False]])
                 precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
-            difficulty = self.cost_draw[item] * 2.0 ** (min(30.0, max(0.0, cat.era[item] - self.scholarship - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
+            difficulty = self.cost_draw[item] * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 # Research600.stale_factor (research_3000)
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
@@ -1563,7 +1620,7 @@ class Surrogate:
         """DiscoverySystem._candidate_score over one channel's open questions,
         with the age bucket (a question of its age before any ahead of it)."""
         cat = self.cat
-        era_cost = np.maximum(0.0, cat.era[cand] - self.scholarship - self.tune_window) / self.tune_doubling
+        era_cost = np.maximum(0.0, cat.era[cand] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling
         early_work = np.exp2(self._early_doublings(cand, year)) - 1.0
         score = self.affinity[cand] + self.signal_score[cand] + units * 8.0 - era_cost * 20.0 - early_work * EARLY_SCORE_PER_WORK + self.targets[cand] * 1e5
         if self.stale_k.get("STALE_DOUBLING"):
@@ -1728,8 +1785,11 @@ class Surrogate:
             return (rank, 0 if waited else 1, -(year - last[li]) if waited else 0.0, -(shares[li] * total - turns[li]), -score, ch)
         return min(placements, key=key)
 
-    def _research_teams(self, days: float, year: float, open_mask, researchers_total: float) -> list:
-        """DiscoverySystem research with teams (see TEAMS above)."""
+    def _research_teams(self, days: float, year: float, open_mask, researchers_total: float, age: float | None = None) -> list:
+        """DiscoverySystem research with teams (see TEAMS above). ``year`` is the
+        calendar (turns, waits); ``age`` the people's own age (questions' age)."""
+        if age is None:
+            age = year
         cat, c, p = self.cat, self.c, self.p
         units = np.array([max(0, int(self.s_research.get(line, 0))) for line in gd.LINES], dtype=float)
         lines_total = float(units.sum())
@@ -1757,13 +1817,13 @@ class Surrogate:
         # ahead of them stop first.
         teams = np.where(self.active >= 0)[0].tolist()
         if len(teams) > q:
-            teams.sort(key=lambda ch: (-self._expected_work(int(self.active[ch]), year), shares[ch_line[ch]] * turns[followed].sum() - turns[ch_line[ch]]))
+            teams.sort(key=lambda ch: (-self._expected_work(int(self.active[ch]), age), shares[ch_line[ch]] * turns[followed].sum() - turns[ch_line[ch]]))
             for ch in teams[:len(teams) - q]:
                 self.active[ch] = -1
                 held[ch_line[ch]] -= 1
                 turns[ch_line[ch]] -= 1
         busy = set(int(i) for i in self.active[self.active >= 0])
-        month = {"year": year, "open_mask": open_mask, "units_ch": units_ch, "chan": {}, "due": {}}
+        month = {"year": age, "open_mask": open_mask, "units_ch": units_ch, "chan": {}, "due": {}}
         # 3. Free teams take questions: their age first, then lines below their share.
         free = q - int((self.active >= 0).sum())
         while free > 0:
@@ -1785,7 +1845,7 @@ class Surrogate:
             due_free = None
             for ch in np.where(self.active >= 0)[0].tolist():
                 item = int(self.active[ch])
-                if self.open_year[item] <= year or self.targets[item] > 0:
+                if self.open_year[item] <= age or self.targets[item] > 0:
                     continue
                 if due_free is None:
                     due_free = self._team_placements(month, followed, busy, max_bucket=0)
@@ -1802,7 +1862,7 @@ class Surrogate:
                     best = self._team_pick(due, shares, turns, last, held, followed, year)
                     held[li] += 1
                     turns[li] += 1
-                tier = self._team_tier_of(item, year) if FAR_BANDS else 0
+                tier = self._team_tier_of(item, age) if FAR_BANDS else 0
                 if best is None and tier >= 4:
                     li = ch_line[ch]
                     held[li] -= 1
@@ -1815,12 +1875,12 @@ class Surrogate:
                     near = self._team_pick(rows, shares, turns, last, others, followed, year) if rows else None
                     held[li] += 1
                     turns[li] += 1
-                    if near is not None and near[0] <= tier - 2 and near[4] != item and self._expected_work(near[4], year) * SWITCH_MARGIN < self._expected_work(item, year):
+                    if near is not None and near[0] <= tier - 2 and near[4] != item and self._expected_work(near[4], age) * SWITCH_MARGIN < self._expected_work(item, age):
                         best = near
                 if best is None and int(cat.channel[item]) == ch:
                     # In its own channel, a much quicker question (SWITCH_MARGIN less work).
                     own = self._team_best(month, ch, busy)
-                    if own is not None and own[0] != item and self._expected_work(own[0], year) * SWITCH_MARGIN < self._expected_work(item, year):
+                    if own is not None and own[0] != item and self._expected_work(own[0], age) * SWITCH_MARGIN < self._expected_work(item, age):
                         best = (own[2], own[1], int(ch_line[ch]), ch, own[0])
                 if best is None:
                     busy.add(item)
@@ -1843,7 +1903,7 @@ class Surrogate:
         if len(teams) == 0:
             return found
         # 5. Every team does an equal part of the community's whole work.
-        community = team_capacity(on_lines)
+        community = team_capacity(on_lines, self.population) if UNCAPPED else team_capacity(on_lines)
         share = community / float(len(teams))
         food_support = lerp(0.62, 1.08, clamp(self.food_security, 0, 1))
         material_support = lerp(0.72, 1.12, clamp(self.material, 0.0, 1.2) / 1.2)
@@ -1862,7 +1922,7 @@ class Surrogate:
                 if known_ext is None:
                     known_ext = np.concatenate([self.known, [False, False]])
                 precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
-            difficulty = self.cost_draw[item] * 2.0 ** (min(30.0, max(0.0, cat.era[item] - self.scholarship - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
+            difficulty = self.cost_draw[item] * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, age))) / precedent
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
             prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace \
@@ -1881,7 +1941,7 @@ class Surrogate:
 
     def _expected_work(self, i: int, year: float) -> float:
         """DiscoverySystem._expected_work: remaining work over the question's chance."""
-        era_cost = max(0.0, float(self.cat.era[i]) - self.scholarship - self.tune_window) / self.tune_doubling
+        era_cost = max(0.0, float(self.cat.era[i]) - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling
         difficulty = float(self.cost_draw[i]) * 2.0 ** (min(30.0, era_cost) + float(self._early_doublings(i, year)))
         return (1.0 - float(self.progress[i])) * difficulty / max(1e-9, float(self.chance[i]))
 

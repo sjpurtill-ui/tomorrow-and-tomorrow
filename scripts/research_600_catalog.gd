@@ -37,11 +37,14 @@ const ERA_BAND_FRACTION:=0.9
 ## question's opening year by up to OPEN_JITTER of it (at most OPEN_JITTER_MAX
 ## years), so questions dated to the same round year open over several years
 ## instead of in one batch. A people may take up any question whose foundations
-## it knows, whatever the calendar says: every AHEAD_STEP_YEARS it stands ahead
-## of the question's age adds the whole of the question's usual work again (5
-## years ahead: twice the work; 25 years: six times). Research lines never sit
-## idle waiting for a date, a people far ahead pays in proportion, and lines
-## still take up the questions of their own age first (their cost is lowest).
+## it knows, whatever the calendar says: every AHEAD_STEP_YEARS the question
+## stands ahead of the people's own age (the calendar plus the lead its learning
+## has earned, DiscoverySystem.learning_year) adds the whole of the question's
+## usual work again (5 years ahead: twice the work; 25 years: six times).
+## Research lines never sit idle waiting for a date, a leap pays in proportion,
+## and lines still take up the questions of their own age first (their cost is
+## lowest). A people that presses learning moves its own age ahead
+## (LEAD_YEARS_PER_DOUBLING), so its work is priced from where it stands.
 const OPEN_JITTER:=0.10
 const OPEN_JITTER_MAX:=5.0
 const AHEAD_STEP_YEARS:=5.0
@@ -139,20 +142,53 @@ const DIFFUSION_TEAM:=0.0
 ## attention counts as one step, whatever numbers the ruler set, and computer
 ## rulers lay out their plans in this many steps.
 const ATTENTION_STEPS:=24
-## A people's researchers do the work of about one team for each of the twelve
-## lines of inquiry, whatever the emphasis: up to this many researchers each
-## count in full, and beyond it more people add less (team_capacity).
-const RESEARCH_TEAMS:=12.0
+## Learning has no cap (docs/PEOPLE_FIRST.md A). Every learner counts: there is
+## no number past which more learners stop adding work. On one question more
+## people add a little less each (QUESTION_EXPONENT: twice the people do about
+## 1.8 times the work), and more learners also work more questions at once
+## (team_count), so 200 learners do about 1.8 times the work of 100.
+const QUESTION_EXPONENT:=0.85
+## The pace every age's questions were measured against (PACE_BY_YEAR): a people
+## with the normal share at learning (NORMAL_RESEARCH_SHARE) did the work of
+## that many learners in full up to NORMAL_FULL, then NORMAL_LOG of NORMAL_FULL
+## more for every tenfold (normal_work). A people at the normal share keeps that
+## pace whatever its size; every learner more or fewer counts from there
+## (team_capacity), so pressing learning is a real path, not a wasted crowd.
+const NORMAL_FULL:=12.0
+const NORMAL_LOG:=0.78
 ## Teams carry questions. A people's researchers work in equal teams, each on
 ## one question until it is proven, so every question under way moves visibly
 ## season by season instead of twenty questions crawling at once. A band of a
 ## hundred with two or three at learning runs 4 questions; every tenfold more
-## researchers adds 4 more, up to 24 (team_count). The teams share the
-## community's whole work (team_capacity) equally: more teams never add work.
+## researchers adds 4 more, without end (team_count: 24 at 250,000 learners,
+## 28 at 2.5 million). The teams share the community's whole work
+## (team_capacity) equally: more teams never add work.
 const TEAMS_BASE:=4
 const TEAMS_PER_TENFOLD:=4
 const TEAMS_REF:=2.5
-const TEAMS_MAX:=24
+## Learners use goods: tallies, writing stuff and tools. One goods-unit keeps a
+## learner LEARNER_DAYS_PER_GOOD days. Short of goods, learning slows to
+## GOODS_FLOOR of its pace at none (progress x (GOODS_FLOOR + the rest x cover)).
+const LEARNER_DAYS_PER_GOOD:=20.0
+const GOODS_FLOOR:=0.5
+## The store learning draws on (civilian_goods.gd GOODS).
+const GOODS_KEY:="Civilian Goods"
+## A people's own age. Keeping more learners than its age can spare (the
+## sustainable share, society_model.gd SUSTAINABLE_SPECIALISTS) carries its
+## learning ahead of the calendar: each doubling of that share adds
+## LEAD_YEARS_PER_DOUBLING years a year to its lead (twice the share: 15 years
+## ahead in a century). Below the sustainable share the lead falls back the same
+## way, never below the calendar. Questions are dated against the people's own
+## age (DiscoverySystem.learning_year), not the calendar, and what it knows pays
+## off to the age its knowledge has reached (SocietyModel.society_era). In the
+## fast sim (tools/sim) a people with about a sixth of its workers learning
+## reaches bronze and archives some 55 years early by year 300, one with a third
+## some 80 years early, at the cost of most of its growth; at the usual share
+## nothing moves (the older rule gave all three the same years).
+const LEAD_YEARS_PER_DOUBLING:=0.15
+## The lead falls back at most this many doublings a year (a people with no
+## learners at all loses LEAD_YEARS_PER_DOUBLING x 3 years a year).
+const LEAD_FALL_DOUBLINGS:=3.0
 ## A followed line with a question of its age never goes longer than this
 ## without a team (DiscoverySystem team turns).
 const TEAM_MAX_WAIT_YEARS:=5.0
@@ -172,10 +208,16 @@ const NORMAL_RESEARCH_SHARE:=0.025
 const THIN_TEAM_FRACTION:=0.3333333
 
 ## Questions a community of `researchers` works at once: 4 for a band of 2-3,
-## 4 more for every tenfold, at most TEAMS_MAX (never fewer than one).
+## 4 more for every tenfold, without end (never fewer than one).
 static func team_count(researchers:float)->int:
 	if researchers<=0.0: return 1
-	return clampi(roundi(TEAMS_BASE+TEAMS_PER_TENFOLD*log(researchers/TEAMS_REF)/log(10.0)),1,TEAMS_MAX)
+	return maxi(1,roundi(teams_at(researchers)))
+
+## team_count before rounding (at least one): the work rule reads it, so one
+## learner more never jumps the work when a team is added.
+static func teams_at(researchers:float)->float:
+	if researchers<=0.0: return 1.0
+	return maxf(1.0,TEAMS_BASE+TEAMS_PER_TENFOLD*log(researchers/TEAMS_REF)/log(10.0))
 
 ## The step a question's evidence has reached: 0 early cases, 1 first cases
 ## (a third), 2 repeated (two thirds).
@@ -383,22 +425,92 @@ static func chance_for(research_years:float,design_year:float=0.0)->float:
 	return pace_for(design_year)/(DAILY_SCALE*365.0*maxf(0.25,research_years))
 
 
-## The whole research community's work, in teams, from its researchers alone
-## (before food, tools, schooling and officials). Emphasis shares this out; it
-## never adds to it. Up to RESEARCH_TEAMS researchers each count in full.
-static func team_capacity(researchers:float)->float:
-	if researchers<=RESEARCH_TEAMS: return maxf(0.0,researchers)
-	return RESEARCH_TEAMS*team_strength(researchers/RESEARCH_TEAMS)
+## The whole research community's work from its learners alone (before food,
+## goods, tools, schooling and officials). Emphasis shares this out; it never
+## adds to it. No knee: every learner counts. The learners work teams_at()
+## questions at once, each team at team_strength of its people, so twice the
+## learners do about 1.8 times the work, ten times about 7.6 times.
+## `population` (the people's size) sets the scale: a people with the normal
+## share at learning does normal_work(population), the pace its questions were
+## measured against, and every learner beyond or below that share counts from
+## there. Without a population the work is in learners (one learner alone, one).
+static func team_capacity(researchers:float,population:float=-1.0)->float:
+	var work:=learners_work(researchers)
+	if population<0.0 or work<=0.0: return work
+	return work*learner_scale(population)
 
 
-## How strongly `researchers` people on one question work: in full up to one
-## person, then more slowly than their number (ten people on one question do
-## not work ten times as fast). A line's part of the community's work is its
-## team's strength over all teams' strength, so piling people onto one line has
-## diminishing returns while spreading them never adds to the whole.
-static func team_strength(researchers:float)->float:
-	if researchers<1.0: return maxf(0.0,researchers)
-	return 1.0+log(researchers)/log(10.0)*0.78
+## The work of `researchers` learners in teams, before the people's scale:
+## teams_at(researchers) teams of equal people, each at team_strength.
+static func learners_work(researchers:float)->float:
+	if researchers<=0.0: return 0.0
+	var teams:=teams_at(researchers)
+	return teams*team_strength(researchers/teams)
+
+
+## How strongly `people` work on one question: in full up to one person, then
+## about people^QUESTION_EXPONENT (ten people on one question do about seven
+## times the work of one, a hundred about fifty times). Never a cap.
+static func team_strength(people:float)->float:
+	if people<1.0: return maxf(0.0,people)
+	return pow(people,QUESTION_EXPONENT)
+
+
+## The work a people of `population` does with the normal share at learning
+## (NORMAL_RESEARCH_SHARE): the pace every age's questions were measured
+## against (PACE_BY_YEAR, docs/research/BENCHMARKS_600.md).
+static func normal_work(population:float)->float:
+	var normal:=maxf(0.0,population)*NORMAL_RESEARCH_SHARE
+	if normal<=NORMAL_FULL: return normal
+	return NORMAL_FULL*(1.0+NORMAL_LOG*log(normal/NORMAL_FULL)/log(10.0))
+
+
+## What a learner's work counts for in a people of `population`: 1 in a band;
+## in a larger people the normal share does normal_work, and each learner more
+## or fewer moves the work along learners_work from there.
+static func learner_scale(population:float)->float:
+	var work:=learners_work(maxf(0.0,population)*NORMAL_RESEARCH_SHARE)
+	return normal_work(population)/work if work>0.0 else 1.0
+
+
+## Goods `learners` use over `days` (LEARNER_DAYS_PER_GOOD learner-days a unit).
+static func goods_need(learners:float,days:float=1.0)->float:
+	return maxf(0.0,learners)*maxf(0.0,days)/LEARNER_DAYS_PER_GOOD
+
+
+## Learning's pace at goods `cover` (0..1): GOODS_FLOOR with none, in full with
+## all it needs. A shortage halves learning at most.
+static func goods_factor(cover:float)->float:
+	return GOODS_FLOOR+(1.0-GOODS_FLOOR)*clampf(cover,0.0,1.0)
+
+
+## Goods held where learning draws them: the stores of the acting place (the
+## people's home stores while research runs). The one place learning reads
+## goods (civilian_goods.gd keeps them; re-point here if goods move).
+static func goods_held()->float:
+	return maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(GOODS_KEY,0.0)))
+
+
+## Share of what `learners` need over `days` that the stores cover (1 with no
+## learners). With `take`, the goods used are taken from the stores.
+static func goods_cover(learners:float,days:float=1.0,take:=false)->float:
+	var need:=goods_need(learners,days)
+	if need<=0.0: return 1.0
+	var used:=minf(goods_held(),need)
+	if take and used>0.0:
+		var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+		stocks[GOODS_KEY]=maxf(0.0,float(stocks.get(GOODS_KEY,0.0))-used)
+	return used/need
+
+
+## Years a year a people's lead over the calendar moves with `share` of its able
+## at learning (goods counted) against the `sustainable` share of its age:
+## LEAD_YEARS_PER_DOUBLING for each doubling past it, the same back below it
+## (at most LEAD_FALL_DOUBLINGS doublings).
+static func lead_rate(share:float,sustainable:float)->float:
+	if sustainable<=0.0: return 0.0
+	var doublings:=-LEAD_FALL_DOUBLINGS if share<=0.0 else maxf(-LEAD_FALL_DOUBLINGS,log(share/sustainable)/log(2.0))
+	return LEAD_YEARS_PER_DOUBLING*doublings
 
 
 ## Steps of attention (on the ATTENTION_STEPS scale) each line holds under
@@ -510,6 +622,9 @@ static func _build_relevance()->void:
 
 
 ## Research pace for an item of `design_year` (PACE_BY_YEAR, linear between points).
+## It is the question's own size, read from the age the question belongs to and
+## never from the calendar: a people far ahead pays the same for a question as
+## a people of its age does, so it never holds back a people that presses on.
 static func pace_for(design_year:float)->float:
 	if design_year<=float(PACE_BY_YEAR[0][0]): return float(PACE_BY_YEAR[0][1])
 	for index in range(1,PACE_BY_YEAR.size()):

@@ -889,8 +889,9 @@ func _visit_catalog_dependency(discovery_id:String,definitions:Dictionary,visit_
 # Phase 3 balance. A society's discoveries fill what its age allowed and no more:
 # every effect total is clamped to an era-anchored ceiling on its beneficial side
 # (the harmful side keeps the flat EFFECT_LIMITS bound, so costs always bite).
-# The ceiling rises with the society's era, the more conservative of the elapsed
-# calendar and the frontier of what it actually knows, and reaches the modern
+# The ceiling rises with the society's era, the more conservative of its own age
+# (the calendar plus the lead its learning earned) and the frontier of what it
+# actually knows, and reaches the modern
 # EFFECT_LIMITS only at MODERN_ERA. Player, owned AI seats and projected rivals
 # (ProgressionSystem.rival_effect) use the same era_ceiling_for().
 # Benchmarks: docs/research/BENCHMARKS_600.md.
@@ -1043,12 +1044,18 @@ func _refresh_line_focus()->void:
 		if share>even: line_focus[String(line)]=clampf((share-even)/(1.0-even),0.0,1.0)
 	for value:Variant in line_focus.values(): _max_focus=maxf(_max_focus,float(value))
 
-## The society's age for effect ceilings: the elapsed calendar or its knowledge
+## The society's age for effect ceilings: its own age (the calendar plus the
+## lead its learning has earned, DiscoverySystem.learning_lead) or its knowledge
 ## frontier (FRONTIER_PERCENTILE of its known discoveries' eras), whichever is
-## earlier. Registry items carry their design year; other entries' era gates
-## are 0.9 x their dated era (Research600.ERA_BAND_FRACTION).
+## earlier. What a people knows pays off to the age its knowledge reached, not
+## to the calendar's: a people that presses learning ahead reaps it, while
+## the ceilings still keep each age's payoff to what that age could do.
+## Registry items carry their design year; other entries' era gates are 0.9 x
+## their dated era (Research600.ERA_BAND_FRACTION).
 func society_era()->float:
 	var elapsed:=float(WorldSimulation.state.elapsed_days)/365.0
+	var owner:Variant=WorldSimulation.discovery
+	if owner!=null and is_same(owner.society_model,self): elapsed+=maxf(0.0,float(owner.learning_lead))
 	# The frontier depends only on what is known; it is worked out again only
 	# when that changes.
 	var known:Array=WorldSimulation.state.known_discoveries
