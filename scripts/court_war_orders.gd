@@ -2192,10 +2192,10 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 		var walls:=float(enemy.get("fortification",0.25))
 		var arms:=Odds.their_arms(String(target.civ_id),int(enemy.get("age",-1)))
 		var untrained:=float(enemy.get("untrained",0.0))
-		stated_odds=Odds.of(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id),false,-1.0,untrained)
+		stated_odds=Odds.of(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id),false,-1.0,untrained,String(target.city_id))
 		if not stated_odds.is_empty():
 			out["odds"]=stated_odds
-			if float(stated_odds.raw)<want: more=Odds.more_for(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id),want,false,-1.0,untrained)
+			if float(stated_odds.raw)<want: more=Odds.more_for(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id),want,false,-1.0,untrained,String(target.city_id))
 	var weaker:=Odds.weaker(stated_odds) if not stated_odds.is_empty() else ratio<OBJECT_RATIO
 	var short_of_line:=not stated_odds.is_empty() and float(stated_odds.raw)<want
 	out["more"]=more

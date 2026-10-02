@@ -446,16 +446,19 @@ func test_our_towns_are_counted_by_a_strangers_scout_as_their_battle_musters_the
 	assert_bool((intel.truth(TOWN).values as Dictionary).has("garrison")).is_false()
 
 
-func test_a_rivals_other_town_is_counted_fought_and_landed_on_by_its_guard()->void:
+## Alpha, a people under the shared rules, with its home and a second town,
+## Alphaford (settlement_002), where three in ten of its people live and
+## fifty of them are on defence work; projected onto our charts as
+## CivilizationSystem's first people. Our chart's region id of Alphaford.
+func _alpha_with_a_town()->String:
 	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":.1,"surface_water_recognized":true}
 	WorldSimulation.create_actor("alpha",777,Vector2.ZERO)
 	WorldSimulation.actors.alpha.controller="manual"
-	var local:="settlement_002"
 	WorldSimulation.scoped("alpha",func()->void:
 		WorldSimulation.state.ensure_population_total(1000)
 		WorldSimulation.state.settlement_completed=["Hearth Circle"]
 		WorldSimulation.settlements.ensure_founded()
-		var second:Dictionary={"id":local,"sequence":2,"primary":false,"name":"Alphaford","position":Vector2(60,0),"population_share":.3,"founded_day":0,"status":"established","territory_context":{},"environment_profile":{}}
+		var second:Dictionary={"id":TOWN,"sequence":2,"primary":false,"name":"Alphaford","position":Vector2(60,0),"population_share":.3,"founded_day":0,"status":"established","territory_context":{},"environment_profile":{}}
 		WorldSimulation.state.player_settlements.append(second);WorldSimulation.state.next_player_settlement_id=3;WorldSimulation.settlements._ensure_city_resources(second)
 		WorldSimulation.state.population_allocations["Defense"]=50
 		WorldSimulation.military.home_army=WorldSimulation.military._empty_home_army()
@@ -464,15 +467,25 @@ func test_a_rivals_other_town_is_counted_fought_and_landed_on_by_its_guard()->vo
 	civ.id="alpha";civ.name="Alpha"
 	WorldSimulation.scoped("alpha",func()->void:WorldSimulation.project(civ))
 	CivilizationSystem.civilizations[0]=civ
+	return _region_of(civ,TOWN)
+
+
+## Our chart's region id of a town of `civ`'s by its own id ("" for none).
+func _region_of(civ:Dictionary,local:String)->String:
+	for region:Dictionary in civ.strategic_regions:
+		if String(region.get("local_city_id",""))==local:return String(region.id)
+	return ""
+
+
+func test_a_rivals_other_town_is_counted_fought_and_landed_on_by_its_guard()->void:
+	var local:=TOWN
+	var region_id:=_alpha_with_a_town()
 	var parts:Dictionary=WorldSimulation.scoped("alpha",func()->Dictionary:return Combat.guard_ledger().get(local,{}))
 	# Fifty on their defence work, three in ten of their people in Alphaford,
 	# and three in ten of their townsfolk who rise.
 	assert_int(int(parts.watch)).is_equal(15)
 	assert_int(int(parts.rise)).is_greater(0)
 	var guard:=int(parts.watch)+int(parts.rise)
-	var region_id:=""
-	for region:Dictionary in civ.strategic_regions:
-		if String(region.get("local_city_id",""))==local:region_id=String(region.id)
 	assert_str(region_id).is_not_empty()
 	# Our scouts' truth of their town is its guard, as their battle musters it.
 	var truth:Dictionary=CivilizationSystem.city_intelligence.truth(region_id)
@@ -510,6 +523,90 @@ func test_the_stated_odds_arm_the_townsfolk_as_the_battle_does()->void:
 	assert_str(String(block.weapon)).is_equal("improvised")
 	assert_int(int(block.equipment)).is_equal(0)
 	assert_float(float(block.training)).is_equal(Combat.RISE_TRAINING)
+
+
+## Fighting power of `force` against `foe` behind `walls`, as the engine
+## weighs it before any blow (combat_simulator.raw_odds).
+func _power(force:Dictionary,foe:Dictionary,walls:float)->float:
+	var sim=MilitaryCampaign.simulator
+	var f:Dictionary=sim._normalize_force(force,"Them")
+	return float(sim._cohort_power(sim.evaluate_force(f,sim._normalize_force(foe,"Us"),walls),float(f.morale),float(f.readiness),float((f.get("commander",{}) as Dictionary).get("command",0.5))))
+
+
+func test_the_stated_odds_weigh_a_rivals_other_town_as_its_battle_does()->void:
+	# Alphaford's watch and townsfolk were quoted at morale 1, their people's
+	# army readiness and an ordinary captain, while they fight at 0.18
+	# readiness, their people's heart, the watch's captain and their health:
+	# several times stronger than they fight. Now one builder stands them.
+	var Odds:=preload("res://scripts/war_odds.gd")
+	var region_id:=_alpha_with_a_town()
+	assert_str(region_id).is_not_empty()
+	# A worn people: its heart and health show in its watch.
+	WorldSimulation.scoped("alpha",func()->void:
+		WorldSimulation.state.simulation_metrics["cohesion"]=0.40
+		WorldSimulation.state.simulation_metrics["security"]=0.30
+		WorldSimulation.state.population_health=0.55
+	)
+	# Alphaford is fought for by its own watch; Alpha's home by its levy.
+	assert_str(Combat.watch_town("alpha",region_id)).is_equal(TOWN)
+	var home_local:String=WorldSimulation.scoped("alpha",func()->String:
+		for city:Dictionary in WorldSimulation.state.player_settlements:
+			if bool(city.get("primary",false)):return String(city.id)
+		return ""
+	)
+	var home_region:=_region_of(CivilizationSystem.civilizations[0],home_local)
+	assert_str(home_region).is_not_empty()
+	assert_str(Combat.watch_town("alpha",home_region)).is_equal("")
+	# The battle's own defenders of Alphaford (force_for: town_watch).
+	var fights:Dictionary=WorldSimulation.scoped("alpha",func()->Dictionary:return Combat.town_watch(TOWN))
+	var guard:=int(fights.troops)
+	assert_int(guard).is_greater(0)
+	# Our scouts counted them exactly: the stated side is the battle's side.
+	_levy(40)
+	var ours:Array=MilitaryCampaign.home_army.formations
+	var quoted:=Odds.their_side(ours,float(guard),[],"alpha",false,-1.0,1.0,region_id)
+	assert_int(int(quoted.troops)).is_equal(guard)
+	assert_float(float(quoted.readiness)).is_equal(Combat.WATCH_READINESS)
+	assert_float(float(quoted.readiness)).is_equal(float(fights.readiness))
+	assert_float(float(quoted.morale)).is_equal(float(fights.morale))
+	assert_float(float(quoted.morale)).is_less(1.0)
+	assert_dict(quoted.commander as Dictionary).is_equal(fights.commander as Dictionary)
+	var said:Dictionary=(quoted.formations as Array)[0]
+	var met:Dictionary=(fights.formations as Array)[0]
+	for key in ["unit","weapon","count","equipment","training","experience","personnel_condition"]:
+		assert_str(str(said[key])).override_failure_message(key).is_equal(str(met[key]))
+	assert_float(float(said.personnel_condition)).is_less(1.0)
+	# Their strength behind the town's walls, and the whole stated reading,
+	# are the engine's own.
+	var walls:=1.2
+	assert_float(_power(quoted,MilitaryCampaign.home_army,walls)).is_equal_approx(_power(fights,MilitaryCampaign.home_army,walls),0.000001)
+	var stated:=Odds.of(MilitaryCampaign.home_army,ours,40,float(guard),0.5,[],"alpha",false,-1.0,1.0,region_id)
+	assert_bool(bool(stated.watch)).is_true()
+	var us:Dictionary=MilitaryCampaign.simulator.create_formation_force("Us",ours,float(MilitaryCampaign.home_army.get("morale",1.0)),float(MilitaryCampaign.home_army.get("readiness",1.0)))
+	if MilitaryCampaign.home_army.get("commander") is Dictionary:us["commander"]=MilitaryCampaign.home_army.commander
+	assert_float(float(stated.raw)).is_equal_approx(float(MilitaryCampaign.simulator.raw_odds(us,fights,float(stated.walls))),0.000001)
+	# Whatever arms their soldiers carry, the town's guard has what comes to
+	# hand: the arms seen do not change the reading.
+	var pikes:=[{"unit":"pikeman","weapon":"pike","count":100,"authorized_count":100,"equipment":100,"equipment_required":100,"training":0.9}]
+	assert_float(float(Odds.of(MilitaryCampaign.home_army,ours,40,float(guard),0.5,pikes,"alpha",false,-1.0,1.0,region_id).raw)).is_equal_approx(float(stated.raw),0.000001)
+	# The old reading (no town named): the same men quoted at their people's
+	# army readiness (a fairly ready army, 0.7) and morale 1, several times as
+	# strong as they fight.
+	CivilizationSystem.civilizations[0]["military_readiness"]=0.7
+	CivilizationSystem.civilizations[0]["command_readiness"]=0.5
+	var old:=Odds.their_side(ours,float(guard),[],"alpha",false,-1.0,1.0)
+	assert_bool(old.has("town_watch")).is_false()
+	assert_float(_power(old,MilitaryCampaign.home_army,walls)).is_greater(_power(fights,MilitaryCampaign.home_army,walls)*3.0)
+	# A count our scouts made of fewer: the same men to a man, fewer of them.
+	var fewer:=Odds.their_side(ours,float(guard)*0.5,[],"alpha",false,-1.0,1.0,region_id)
+	assert_int(int(fewer.troops)).is_equal(roundi(float(guard)*0.5))
+	assert_float(float(fewer.readiness)).is_equal(float(fights.readiness))
+	# How many more the war leader would want reads the same side.
+	var more:=Odds.more_for(MilitaryCampaign.home_army,ours,40,float(guard),0.5,[],"alpha",Odds.TAKE_ODDS,false,-1.0,1.0,region_id)
+	assert_int(more).is_greater_equal(0)
+	var with_more:=Odds.of(MilitaryCampaign.home_army,ours,40+more,float(guard),0.5,[],"alpha",false,-1.0,1.0,region_id)
+	assert_float(float(with_more.raw)).is_greater_equal(Odds.TAKE_ODDS)
+	WorldSimulation.context_provider=Callable()
 
 
 func test_the_defence_page_counts_the_guard_and_names_the_townsfolk_apart()->void:
