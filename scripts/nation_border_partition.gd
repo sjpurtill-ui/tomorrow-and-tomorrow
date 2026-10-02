@@ -307,13 +307,14 @@ func _cell(ix:int,iy:int)->void:
 		var owner:=labels[k]
 		run_labels.append(owner)
 		run_sides.append(node_point(nodes[k]))
+		if owner<0: continue
 		var piece:Array=[_crossing_vertex(start.x,owner)]
 		while true:
 			piece.append(_node_vertex(nodes[k]))
 			if k==int(stop.k): break
 			k=(k+1)%4
 		piece.append(_crossing_vertex(stop.x,owner))
-		if owner>=0: _emit(piece,owner)
+		_emit(piece,owner)
 	if m==2:
 		_segment(cuts[0].x,cuts[1].x,run_labels[0],run_sides[0],run_labels[1])
 		return

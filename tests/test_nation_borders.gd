@@ -507,3 +507,37 @@ func test_the_layer_builds_on_a_worker_and_publishes_its_lines()->void:
 	var hover_lines:Array=layer.get("lines")
 	assert_int(hover_lines.size()).is_equal(1)
 	assert_str(String((hover_lines[0] as Dictionary).kind)).is_equal("frontier")
+
+
+func test_charted_ground_is_followed_through_growth_and_trims()->void:
+	var layer:Node3D=auto_free(preload("res://scripts/nation_border_layer.gd").new())
+	var areas:Array=CivilizationSystem.revealed_areas
+	var saved:Array=areas.duplicate()
+	areas.clear()
+	areas.append({"kind":"circle","x":0.0,"z":0.0,"radius":5.0,"source":"a","day":1})
+	areas.append({"kind":"trail","x":10.0,"z":0.0,"radius":2.0,"points":[{"x":10.0,"z":0.0},{"x":20.0,"z":0.0}],"source":"b","day":2})
+	CivilizationSystem.fog_revision+=1
+	assert_array(Array(layer.call("_sync_record_boxes"))).is_equal([0,1])
+	# Nothing new: nothing read again.
+	assert_array(Array(layer.call("_sync_record_boxes"))).is_empty()
+	# The trail grows: only it is read again.
+	((areas[1] as Dictionary).points as Array).append({"x":30.0,"z":5.0})
+	CivilizationSystem.fog_revision+=1
+	assert_array(Array(layer.call("_sync_record_boxes"))).is_equal([1])
+	var boxes:Array=layer.get("_record_boxes")
+	assert_bool((boxes[1] as Rect2).has_point(Vector2(31.5,6.5))).is_true()
+	# A new record.
+	areas.append({"kind":"circle","x":-40.0,"z":12.0,"radius":3.0,"source":"c","day":3})
+	CivilizationSystem.fog_revision+=1
+	assert_array(Array(layer.call("_sync_record_boxes"))).is_equal([1,2])
+	# A trim drops ground already charted twice: the list shifts, nothing is new,
+	# and every bound still belongs to its own record.
+	areas.remove_at(0)
+	CivilizationSystem.fog_revision+=1
+	assert_array(Array(layer.call("_sync_record_boxes"))).is_empty()
+	boxes=layer.get("_record_boxes")
+	assert_int(boxes.size()).is_equal(2)
+	for index in areas.size(): assert_that(boxes[index]).is_equal(layer.call("_record_box",areas[index]))
+	areas.clear()
+	areas.append_array(saved)
+	CivilizationSystem.fog_revision+=1

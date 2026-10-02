@@ -61,6 +61,12 @@ var _heights_seed:=-1
 ## Charted ground: each record's bounds, kept in step with revealed_areas.
 var _record_boxes:Array[Rect2]=[]
 var _boxes_revision:=-1
+## The first record and the last one seen: while both stand where they were,
+## records were only added or the latest trail grew (as the discovery mask
+## reads them). Record identity -> [points, bounds] serves a list that shifted.
+var _first_id:=0
+var _last_id:=0
+var _box_cache:Dictionary={}
 var _fog_key:=0
 var _wash_fade:=-1.0
 var _ink_fade:=-1.0
@@ -180,37 +186,63 @@ func _read_world(view_km:float)->void:
 	world_key=hash([Borders.claims_key(foreign),looks,enemies,_fog_key,int(GameState.world_seed)])
 
 
-## Keeps each charted record's bounds; returns the first record that changed
-## (records are appended, or the latest trail grows), or -1 when none did.
-func _sync_record_boxes()->int:
+static func _record_id(record:Variant)->int:
+	if not record is Dictionary: return 0
+	var fields:Dictionary=record
+	return hash([String(fields.get("kind","circle")),float(fields.get("x",0.0)),float(fields.get("z",0.0)),float(fields.get("radius",0.0)),int(fields.get("day",0)),String(fields.get("source",""))])
+
+
+## Keeps each charted record's bounds in step with the records; returns the
+## records that are new or grew since the last look (empty when none).
+func _sync_record_boxes()->PackedInt32Array:
+	var changed:=PackedInt32Array()
 	var world:Node=CivilizationSystem
 	var revision:=int(world.fog_revision)
-	if revision==_boxes_revision: return -1
+	if revision==_boxes_revision: return changed
 	_boxes_revision=revision
 	var areas:Array=world.revealed_areas
-	var first:=maxi(0,_record_boxes.size()-1)
-	if areas.size()<_record_boxes.size():
-		first=0
-		_record_boxes.clear()
-	_record_boxes.resize(areas.size())
-	for index in range(first,areas.size()):
-		_record_boxes[index]=_record_box(areas[index]) if areas[index] is Dictionary else Rect2()
-	return first
+	var seen:=_record_boxes.size()
+	if seen>0 and areas.size()>=seen and _record_id(areas[0])==_first_id and _record_id(areas[seen-1])==_last_id:
+		# Only added, or the latest trail grew.
+		_record_boxes.resize(areas.size())
+		for index in range(seen-1,areas.size()):
+			_record_boxes[index]=_record_box(areas[index]) if areas[index] is Dictionary else Rect2()
+			_box_cache[_record_id(areas[index])]=[_points(areas[index]),_record_boxes[index]]
+			changed.append(index)
+	else:
+		# Trimmed (only ground already charted twice is dropped), loaded or
+		# reset: re-read, reusing every record's bounds already known.
+		var cache:Dictionary={}
+		_record_boxes.resize(areas.size())
+		for index in areas.size():
+			var record:Variant=areas[index]
+			var id:=_record_id(record)
+			var points:=_points(record)
+			var held:Array=_box_cache.get(id,[])
+			if not held.is_empty() and int(held[0])==points: _record_boxes[index]=held[1]
+			else:
+				_record_boxes[index]=_record_box(record) if record is Dictionary else Rect2()
+				changed.append(index)
+			cache[id]=[points,_record_boxes[index]]
+		_box_cache=cache
+	_first_id=_record_id(areas[0]) if not areas.is_empty() else 0
+	_last_id=_record_id(areas[areas.size()-1]) if not areas.is_empty() else 0
+	return changed
+
+
+static func _points(record:Variant)->int:
+	return ((record as Dictionary).get("points",[]) as Array).size() if record is Dictionary else 0
 
 
 ## Charted ground changes the drawing only inside a stranger's land: a scout
 ## walking anywhere else, or over our own ground, redraws nothing.
 func _watch_charted_ground()->void:
-	var count_before:=_record_boxes.size()
-	var first:=_sync_record_boxes()
-	if first<0: return
-	if first==0 and count_before>0:
-		_fog_key+=1
-		return
+	var changed:=_sync_record_boxes()
+	if changed.is_empty(): return
 	for claim:Dictionary in foreign:
 		var reach:=float(claim.radius)
 		var claim_box:=Rect2((claim.center as Vector2)-Vector2.ONE*reach,Vector2.ONE*reach*2.0)
-		for index in range(first,_record_boxes.size()):
+		for index in changed:
 			if claim_box.intersects(_record_boxes[index]):
 				_fog_key+=1
 				return
