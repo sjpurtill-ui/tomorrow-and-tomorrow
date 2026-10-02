@@ -168,7 +168,9 @@ static func levy_card(mc:Node=null)->Dictionary:
 	var waiting:=int(drill.get("waiting",0))
 	var leader:=Orders.war_leader_name()
 	return {"id":"levy","kind":"levy","army_id":Orders.HOME,"members":[],"title":"At home","short":"At home",
-		"men":at_home+in_drill+waiting,"ready":maxi(0,at_home-int(watch.home)),"watch":int(watch.kept),"drill":in_drill,"waiting":waiting,
+		# The army at home, as the War screen's strip counts it; the watch keeps
+		# the towns and is not the army, so it stands apart on the card.
+		"men":maxi(0,at_home-int(watch.home))+in_drill+waiting,"ready":maxi(0,at_home-int(watch.home)),"watch":int(watch.kept),"drill":in_drill,"waiting":waiting,
 		"drafts":int(drill.get("drafts",0)),"progress":float(drill.get("progress",0.0)),"days":int(drill.get("days",0)),"glyph":String(drill.get("glyph","club")),
 		"state":String(home.get("state","holding")),"general":{"name":leader} if leader!="" else {},
 		"gear":float(home.get("gear",1.0)),"gear_detail":home.get("gear_detail",{}),"will":float(home.get("will",0.6)),
