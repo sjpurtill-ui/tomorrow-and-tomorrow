@@ -1024,6 +1024,20 @@ func _process(delta: float) -> void:
 		var card:Variant=hud.get_meta("chronicle_card") if hud and hud.has_meta("chronicle_card") else null
 		travel_status_label.visible=not ((travel_council_notice!=null and travel_council_notice.visible) or (is_instance_valid(card) and bool(card.showing)))
 		if travel_status_label.visible:preload("res://scripts/hud/map_ticker_style.gd").fit(travel_status_label,get_viewport().get_visible_rect().size.x)
+		# While the War screen is open its strip and column hold the top: the
+		# slip stands under the strip, in the open part of the map; it goes
+		# back to its own place when the screen closes.
+		var war_now:=hud!=null and hud.has_method("war_open") and bool(hud.war_open())
+		if war_now and travel_status_label.visible:
+			var view_w:=get_viewport().get_visible_rect().size.x
+			var rail:=float(preload("res://scripts/hud/hud_tokens.gd").RAIL_WIDTH)
+			var free_w:=maxf(240.0,view_w-float(hud.call("_war_layout","COLUMN_WIDTH"))-24.0-rail)
+			travel_status_label.size.x=minf(travel_status_label.size.x,free_w)
+			travel_status_label.position=Vector2(rail+(free_w-travel_status_label.size.x)*0.5,64.0+float(hud.call("_war_layout","STRIP_HEIGHT"))+12.0)
+			travel_status_label.set_meta("war_placed",true)
+		elif bool(travel_status_label.get_meta("war_placed",false)):
+			travel_status_label.set_meta("war_placed",false)
+			travel_status_label.set_meta("ticker_fitted","")
 	_arbitrate_notification_overlays()
 	_process_live_report_refresh(delta)
 	if not pending_hud_section.is_empty():
