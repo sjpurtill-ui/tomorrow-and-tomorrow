@@ -164,6 +164,15 @@ static func modern_factors(discovery:Node)->Dictionary:
 static func modern_burden_lift(discovery:Node)->float:
 	return clampf(discovery.effect("modern_survival")/MODERN_BURDEN_LIFT,0.0,1.0)
 
+## The whole people living on its land: every town's people, also inside one
+## town's own day (settlement_model.with_local_population swaps in the
+## town's count; national_population keeps the people's).
+static func people_on_the_land(state:Node)->float:
+	var settlements:Variant=WorldSimulation.settlements
+	if settlements!=null and state==WorldSimulation.state and settlements.has_method("national_population"):
+		return maxf(0.0,float(settlements.call("national_population")))
+	return maxf(0.0,float(state.population_exact))
+
 ## People the society's settled land can carry now: territory by era and
 ## settlement count, raised by (era-capped) cultivation, soil and storage
 ## knowledge and lowered by worn-out wild grounds.
@@ -284,12 +293,17 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	# research_3000: modern medicine clears the burden on top of general knowledge.
 	var relief:=1.0-(1.0-burden_relief(discovery))*(1.0-modern_burden_lift(discovery))
 	var capacity:=carrying_capacity(state,discovery)
-	var crowding:=maxf(0.0,float(state.population_exact)/maxf(1.0,capacity)-CROWDING_ONSET)
+	# Crowding and spare land are the whole people's: all its towns' people
+	# against all the land they hold, read the same in every town's own day
+	# (a hamlet of a large people is not a remnant, and no town is measured
+	# alone against the whole realm's land).
+	var people:=people_on_the_land(state)
+	var crowding:=maxf(0.0,people/maxf(1.0,capacity)-CROWDING_ONSET)
 	# Spare land rescues only a remnant: it is judged against the founding
 	# territory (not later capacity), so a band thinned below a few score
 	# people recovers while a large but slow-growing society gets no boost.
 	var founding:=float((TERRITORY_CAPACITY[0] as Array)[1])
-	var spare:=maxf(0.0,SPARE_LAND_ONSET-float(state.population_exact)/founding)
+	var spare:=maxf(0.0,SPARE_LAND_ONSET-people/founding)
 	var burden:Dictionary={}
 	for key:String in ERA_BURDEN:
 		var by_age:=key in ["under5","child","adult","elder"]
@@ -299,6 +313,7 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION),blend)
 	result["carrying_capacity"]=capacity
 	result["crowding"]=crowding
+	result["spare_land"]=spare
 	var weights:Dictionary={}
 	for key:String in EXCESS_WEIGHT:weights[key]=lerpf(1.0,float(EXCESS_WEIGHT[key]),blend)
 	result["burden"]=burden
