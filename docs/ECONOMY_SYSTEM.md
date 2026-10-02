@@ -60,6 +60,13 @@ a year of the levy at its own last pace, and the record says so.
   custom, feasts, the purse's pay and a tax on the rich, within each age's
   floor and ceiling (28-55%, 32-65%, 35-75%). Each place moves the realm's
   shares by its share of the people.
+- **Charter fees** (the Chartered stance on business, one part in twenty of
+  the business sector's part of the output) and **the state works' surplus**
+  (State works, one part in ten) are taken with the levy, out of each town's
+  own stores or households' coin, never made up (enterprise.gd,
+  docs/BUSINESS_ARC.md). The business sector also multiplies the working
+  efficiency, civilian goods and the making capacity, widens market access,
+  and lifts where the richest fifth settles, inside the age's bounds.
 - Every people keeps its own purse; computer rulers set the same levers by
   their nature (civilization_controller.gd purse_orders).
 - Other systems use `balance()`, `deposit(amount, why)`,

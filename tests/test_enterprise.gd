@@ -497,9 +497,18 @@ func test_the_court_reads_the_business_orders()->void:
 	assert_dict(BusinessOrders.read("guard the trades with guilds and rules")).is_equal({"kind":"business","stance":"guarded"})
 	assert_dict(BusinessOrders.read("Let the state run the great works")).is_equal({"kind":"business","stance":"state"})
 	assert_dict(BusinessOrders.read("let the state run the works")).is_equal({"kind":"business","stance":"state"})
-	for said in ["free the markets","Trade with the Esurai","guard the gate","Open the gates","open the stores to the hungry","Should we open the markets to all?",
+	for said in ["free the markets","Trade with the Esurai","Open trade with the Varesh","guard the gate","Open the gates","open the stores to the hungry","Should we open the markets to all?",
 			"don't grant charters","never open the markets","Build a great work","Raise the levy","How is business?","Guard the walls","The state is strong","if we grant charters the rich will grow"]:
 		assert_dict(BusinessOrders.read(said)).override_failure_message("'%s' was read as a business order" % said).is_empty()
+	# No line of the court evaluation (the user's own words) is read as one.
+	var cases:Variant=JSON.parse_string(FileAccess.get_file_as_string("res://tests/court_eval/cases.json"))
+	var read_as:=PackedStringArray()
+	for case:Dictionary in (cases as Dictionary).cases:
+		var lines:Array=[case.get("say","")]
+		if case.get("variants") is Array:lines.append_array(case.variants)
+		for line in lines:
+			if line is String and not BusinessOrders.read(line).is_empty():read_as.append(line)
+	assert_array(Array(read_as)).override_failure_message("court lines read as business: %s" % str(read_as)).is_empty()
 	# Each office button's words are read as its own stance.
 	_at_rung(5)
 	_know("nationalized_core_industries")

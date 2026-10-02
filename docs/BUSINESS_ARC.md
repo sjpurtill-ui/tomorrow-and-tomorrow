@@ -99,6 +99,20 @@ The court reads plain words ("open the markets to all", "grant charters", "guard
 - Computer rulers set the stance through a new `civilization_orders` kind "business".
 - Older saves start at the rung their knowledge allows, with share at 40% of that rung's target. They grow into it; there is no sudden jump.
 
+### Stage 1 as built (2026-10-02)
+
+Where the design left room, the code does this (`scripts/enterprise.gd`):
+
+- **Target** is never more than the rung can hold (`rung_cap`); the form's reach multiplies the stance's. Before craft guilds are known there is no form, and every form number is 1.
+- **Wealth.** Where custom pulls the richest fifth back to (the age's ordinary share) rises by `(ceiling - ordinary) x min(1, share x stance_wealth x form_wealth)`. So the pull always stays inside the age's bounds, and the stance matters at every rung. Examples at coin: banking houses (16%) under Chartered add 5 points; corporations (55%) under Open add 21, and under Guarded 7.
+- **Charter fees and the state works' surplus** are a share of the business sector's part of each day's output (`output x share`), as far as the keepers reach (`realm_purse.reach`). They are taken in each town's own day beside the levy (`realm_purse.accrue`). After coinage the monetized part is paid in coin from households, up to the levy's coin limit. The rest is taken in kind, only from food beyond a town's 45 days. Nothing is made up. The purse records them as "charter" in its month and towns, so the board shows "Charter fees" (or "The state works") in "Where it comes from" and in the budget.
+- **Trust cost.** A change of stance takes 2 points of legitimacy in every town, but only once business exists (rung 1 or more). The purse's record notes it once. At rung 0 the word is kept for later and costs nothing.
+- **Boom.** The sector booms while its target is above its share and more than half the recorded credit is used (the capital's `credit_utilization`). `boom_months` counts up, and is cleared when the boom ends or a bust strikes.
+- **The roll.** The roll is seeded by `hash(world_seed, people, month index)`, and only rungs 1 and up with a share above 0 roll. A step covering several months rolls once, against `1 - (1 - p)^months`.
+- **A bust's debts.** The debts written off are a third of the sector's part of recorded credit. The sector holds credit at twice its share of the workers, at most 90 in 100. The write-off goes through each town's own credit ledger (`credit_default`, "Business failures"). The 2 points come off the richest fifth, never below the age's floor, and are shared out to the other fifths by their shares. Holding together falls 0.04 in every town.
+- **Words by age.** Before guilds are known, Guarded reads "Old custom and rules". Before writing, Chartered reads "You sell the right to trade".
+- **Where it runs.** The month runs in the "enterprise" step of `civilization_day.gd`, after the purse. The daily readers (`factor()`, `market_bonus()`, `wealth_lift()`, `purse_rate()`) read only the cached record.
+
 ## Stage 2: great houses (`great_houses.gd`, after stage 1 ships)
 
 - A handful of named houses or companies, at most 5 per people, rise from the sector, with alternative-history names. Each has:
