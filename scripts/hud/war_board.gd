@@ -58,8 +58,10 @@ const MARKS:={"leave":"leave","defend":"defend","punish":"raid","take":"besiege"
 const COLUMN_WIDTH:=400.0
 const STRIP_TOP:=62.0
 const STRIP_HEIGHT:=50.0
-## The strip's chips that give way first when the screen is narrow.
-const SHED_ORDER:=["Watch","Fed","Armed","Pay","DrawnFrom"]
+## The strip's chips that can give way when the screen is narrow; those
+## that warn of something (unpaid, short of gear, hungry) give way last
+## (shed_order).
+const SHED_ORDER:=["Watch","DrawnFrom","Pay","Armed","Fed"]
 
 var strip:PanelContainer
 var army_box:HBoxContainer
@@ -71,6 +73,8 @@ var covert:Control
 var covert_toggle:Button
 var clock:=0.0
 var _strip_room:=-1.0
+## The chips in the order they give way, the quiet ones first.
+var _shed:Array=SHED_ORDER.duplicate()
 ## Each section's last signature, and how long a rebuild has waited on the
 ## ruler's hand (seconds).
 var signatures:={}
@@ -162,13 +166,14 @@ func _build_strip()->void:
 	style.border_color=T.RULE_STRONG;style.content_margin_left=12.0;style.content_margin_right=12.0;style.content_margin_top=4.0;style.content_margin_bottom=4.0
 	style.shadow_color=Color(0,0,0,0.16 if T.is_light() else 0.4);style.shadow_size=5;style.shadow_offset=Vector2(0,2)
 	strip.add_theme_stylebox_override("panel",style)
-	army_box=HBoxContainer.new();army_box.name="Army";army_box.add_theme_constant_override("separation",12);army_box.alignment=BoxContainer.ALIGNMENT_BEGIN
+	army_box=HBoxContainer.new();army_box.name="Army";army_box.add_theme_constant_override("separation",10);army_box.alignment=BoxContainer.ALIGNMENT_BEGIN
 	strip.add_child(army_box)
 	add_child(strip)
 
 
-## Under the clock, from the rail's dock edge to the column; the least
-## pressing chips give way when the screen is narrow (SHED_ORDER).
+## Under the clock, from the rail's dock edge to the column. On a narrow
+## screen the words under the numbers go first, then the least pressing
+## chips (SHED_ORDER); the soldiers and the army size always stay.
 func _place_strip()->void:
 	if strip==null or not is_inside_tree():return
 	var view:=get_viewport().get_visible_rect().size
@@ -180,17 +185,30 @@ func _place_strip()->void:
 
 func _fit_strip()->void:
 	if strip==null or _strip_room<0.0:return
-	for chip_name in SHED_ORDER:
+	var words:Array=army_box.find_children("Caption","",true,false)
+	var size_word:=army_box.get_node_or_null("Size/SizeWord") as Control
+	if size_word!=null:words.append(size_word)
+	for chip_name in _shed:
 		var chip:=army_box.get_node_or_null(String(chip_name)) as Control
 		if chip!=null and chip.has_meta("wanted"):chip.visible=bool(chip.get_meta("wanted"))
-	for chip_name in SHED_ORDER:
-		if strip.get_combined_minimum_size().x<=_strip_room:break
+		var rule:=army_box.get_node_or_null(String(chip_name)+"Rule") as Control
+		if chip!=null and rule!=null:rule.visible=chip.visible
+	for word in words:(word as Control).visible=true
+	if _strip_width()<=_strip_room:return
+	for word in words:(word as Control).visible=false
+	for chip_name in _shed:
+		if _strip_width()<=_strip_room:break
 		var chip:=army_box.get_node_or_null(String(chip_name)) as Control
 		if chip==null or not chip.visible:continue
 		chip.visible=false
 		var rule:=army_box.get_node_or_null(String(chip_name)+"Rule") as Control
 		if rule!=null:rule.visible=false
 	strip.reset_size()
+
+
+func _strip_width()->float:
+	army_box.reset_size();strip.reset_size()
+	return strip.get_combined_minimum_size().x
 
 
 func _build_army(reading:Dictionary,glance:Dictionary)->void:
@@ -208,7 +226,7 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	_rule(army_box,"SoldiersRule")
 	# The army's size: the ruler's one decision about it, a plain share.
 	var size_box:=HBoxContainer.new();size_box.name="Size";size_box.add_theme_constant_override("separation",8);army_box.add_child(size_box)
-	var size_word:=_line("Army size",12,T.INK_MUTED);size_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	var size_word:=_line("Army size",12,T.INK_MUTED);size_word.name="SizeWord";size_word.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	size_word.tooltip_text="How many of the people the war leader keeps under arms. They call up, drill and arm to it, and send the surplus home."
 	size_box.add_child(size_word)
 	var pick:=HBoxContainer.new();pick.name="Levels";pick.add_theme_constant_override("separation",0);pick.size_flags_vertical=Control.SIZE_SHRINK_CENTER;size_box.add_child(pick)
@@ -216,7 +234,7 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	for i in count:
 		var id:=String((Law.LEVELS[i] as Dictionary).id)
 		var button:=Button.new();button.name="Level_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
-		button.text=Law.level_name(id);button.custom_minimum_size=Vector2(44,30)
+		button.text=Law.level_name(id);button.custom_minimum_size=Vector2(40,30)
 		button.add_theme_font_override("font",T.font("ui_strong"));button.add_theme_font_size_override("font_size",13)
 		for state:String in ["font_color","font_hover_color","font_focus_color"]:button.add_theme_color_override(state,T.INK_MUTED)
 		for state:String in ["font_pressed_color","font_hover_pressed_color"]:button.add_theme_color_override(state,T.INK)
@@ -232,7 +250,7 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	# Where they come from: every soldier is one fewer at work.
 	var from:=Forces.drawn_from(MilitaryCampaign)
 	_rule(army_box,"DrawnFromRule")
-	var drawn:=_value_chip("DrawnFrom","work","1 in %d" % int(from.one_in) if int(from.soldiers)>0 else "none",T.INK if int(from.soldiers)>0 else T.INK_MUTED,"Taken from work: %s of %s workers%s.\nCalling people up takes them from every kind of work alike: fields, crafts, building." % [EraWords.grouped(int(from.soldiers)),EraWords.grouped(int(from.workers)),(" (1 in %d)" % int(from.one_in)) if int(from.soldiers)>0 else ""])
+	var drawn:=_value_chip("DrawnFrom","work","1 in %d" % int(from.one_in) if int(from.soldiers)>0 else "none",T.INK if int(from.soldiers)>0 else T.INK_MUTED,"Taken from work: %s of %s workers%s.\nCalling people up takes them from every kind of work alike: fields, crafts, building." % [EraWords.grouped(int(from.soldiers)),EraWords.grouped(int(from.workers)),(" (1 in %d)" % int(from.one_in)) if int(from.soldiers)>0 else ""],"from work")
 	drawn.set_meta("wanted",true)
 	# Pay, from the realm's purse (realm_purse.gd).
 	var pay:=pay_words()
@@ -241,26 +259,26 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	if months>0:pay_word="Unpaid %d mo" % months;pay_ink=T.RED_TEXT
 	elif pay!="" and not Purse.line_on("army"):pay_word="Stopped";pay_ink=T.AMBER_TEXT
 	var pay_rule:=_rule(army_box,"PayRule");pay_rule.visible=pay!=""
-	var paid:=_value_chip("Pay","coins",pay_word,pay_ink,"%s\nSoldiers are paid from %s on top of their rations. Unpaid, they lose will each month, are slower to muster, and some go home. The Wealth page sets it." % [pay,Purse.account_name()])
+	var paid:=_value_chip("Pay","coins",pay_word,pay_ink,"%s\nSoldiers are paid from %s on top of their rations. Unpaid, they lose will each month, are slower to muster, and some go home. The Wealth page sets it." % [pay,Purse.account_name()],"pay")
 	paid.set_meta("wanted",pay!="");paid.visible=pay!=""
 	# Armed and fed, as HOI4's equipment and supply at a glance.
 	var armed:=float(glance.armed)
 	_rule(army_box,"ArmedRule")
-	var arms:=_value_chip("Armed","gear","%d%%" % roundi(armed*100.0),T.GREEN_TEXT if armed>=0.999 else (T.AMBER_TEXT if armed>=0.5 else T.RED_TEXT),"Armed: %d%% of the gear our soldiers need is in their hands. Short kit is made in the workshops (Production)." % roundi(armed*100.0))
+	var arms:=_value_chip("Armed","gear","%d%%" % roundi(armed*100.0),T.GREEN_TEXT if armed>=0.999 else (T.AMBER_TEXT if armed>=0.5 else T.RED_TEXT),"Armed: %d%% of the gear our soldiers need is in their hands. Short kit is made in the workshops (Production)." % roundi(armed*100.0),"armed")
 	arms.set_meta("wanted",now>0);arms.visible=now>0
 	var fed:=float(glance.fed)
 	var fed_rule:=_rule(army_box,"FedRule");fed_rule.visible=fed>=0.0
-	var eats:=_value_chip("Fed","supply","%d%%" % roundi(fed*100.0) if fed>=0.0 else "—",T.GREEN_TEXT if fed>=0.75 else (T.AMBER_TEXT if fed>=0.45 else T.RED_TEXT),"Fed in the field: %d%% of the rations our bands out need reached them, by the supply model's own measure." % roundi(maxf(0.0,fed)*100.0))
+	var eats:=_value_chip("Fed","supply","%d%%" % roundi(fed*100.0) if fed>=0.0 else "—",T.GREEN_TEXT if fed>=0.75 else (T.AMBER_TEXT if fed>=0.45 else T.RED_TEXT),"Fed in the field: %d%% of the rations our bands out need reached them, by the supply model's own measure." % roundi(maxf(0.0,fed)*100.0),"fed")
 	eats.set_meta("wanted",fed>=0.0);eats.visible=fed>=0.0
 	var watch:=int(glance.get("watch",0))
 	var watch_rule:=_rule(army_box,"WatchRule");watch_rule.visible=watch>0
-	var guard:=_value_chip("Watch","guard",compact(watch),T.INK,"On the watch at home: %s. Those set to defence work guard the towns. They are not the army: the army size never calls them up or sends them home." % EraWords.grouped(watch))
+	var guard:=_value_chip("Watch","guard",compact(watch),T.INK,"On the watch at home: %s. Those set to defence work guard the towns. They are not the army: the army size never calls them up or sends them home." % EraWords.grouped(watch),"on watch")
 	guard.set_meta("wanted",watch>0);guard.visible=watch>0
-	# A rule before a hidden chip hides with it.
-	for chip_name in SHED_ORDER:
-		var chip:=army_box.get_node_or_null(String(chip_name)) as Control
-		var rule:=army_box.get_node_or_null(String(chip_name)+"Rule") as Control
-		if chip!=null and rule!=null:rule.visible=chip.visible
+	var warning:=[]
+	if months>0 or pay_word=="Stopped":warning.append("Pay")
+	if now>0 and armed<0.999:warning.append("Armed")
+	if fed>=0.0 and fed<0.75:warning.append("Fed")
+	_shed=SHED_ORDER.filter(func(chip_name:String)->bool:return chip_name not in warning)+SHED_ORDER.filter(func(chip_name:String)->bool:return chip_name in warning)
 	_fit_strip()
 
 
@@ -352,7 +370,7 @@ func _enemy_row(e:Dictionary)->Control:
 	odds.set_odds(Ledger.odds(e),Ledger.odds_words(e))
 	odds.tooltip_text="Their strength against ours, by the war leader's reckoning: people, warriors and readiness on one scale.\nWorn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("our_worn",0.0))*100.0),roundi(float(e.get("their_worn",0.0))*100.0)]
 	column.add_child(_now_row(e))
-	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",4);column.add_child(stances)
+	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",3);column.add_child(stances)
 	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
 	for spec:Array in STANCES:
 		var id:=String(spec[0])
@@ -366,7 +384,7 @@ func _enemy_row(e:Dictionary)->Control:
 	foot.add_child(_led_by(civ_id))
 	if String(e.kind)=="feud" and float(e.get("blood_price",0.0))>0.0:
 		var pay:=_stance_button("pay",false)
-		pay.toggle_mode=false;pay.text="Pay %s food" % compact(roundi(float(e.blood_price)));pay.size_flags_horizontal=Control.SIZE_SHRINK_END
+		pay.toggle_mode=false;pay.text="Pay %s food" % compact(roundi(float(e.blood_price)));pay.size_flags_horizontal=Control.SIZE_SHRINK_END;_compact_skin(pay,6.0)
 		pay.tooltip_text="Pay a blood price of %s food for the dead of theirs. It ends the feud at once; their raiders will not come for it." % EraWords.grouped(roundi(float(e.blood_price)))
 		pay.pressed.connect(func()->void:_stance(civ_id,"pay","war_price"))
 		foot.add_child(pay)
@@ -437,9 +455,9 @@ static func now_short(e:Dictionary)->Dictionary:
 
 func _stance_button(id:String,chosen:bool)->Button:
 	var button:=Button.new();button.name="Stance_%s" % id;button.text=String(SHORT.get(id,id.capitalize()));button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
-	button.icon=Icons.command_texture(String(MARKS.get(id,"front")),T.INK,32);button.add_theme_constant_override("icon_max_width",16);button.add_theme_constant_override("h_separation",4)
-	button.add_theme_font_size_override("font_size",13);button.custom_minimum_size=Vector2(0,30)
-	_compact_skin(button)
+	button.icon=Icons.command_texture(String(MARKS.get(id,"front")),T.INK,32);button.add_theme_constant_override("icon_max_width",14);button.add_theme_constant_override("h_separation",3)
+	button.add_theme_font_size_override("font_size",12);button.custom_minimum_size=Vector2(0,28);button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	_compact_skin(button,4.0)
 	button.set_pressed_no_signal(chosen)
 	return button
 
@@ -586,11 +604,11 @@ static func now_details(e:Dictionary)->String:
 
 func _take_button(civ_id:String,chosen:bool)->Control:
 	var pick:=MenuButton.new();pick.name="Stance_take";pick.text="Take ▾";pick.flat=false;pick.focus_mode=Control.FOCUS_NONE
-	pick.icon=Icons.command_texture(String(MARKS.take),T.INK,32);pick.add_theme_constant_override("icon_max_width",16);pick.add_theme_constant_override("h_separation",4)
-	pick.add_theme_font_size_override("font_size",13);pick.custom_minimum_size=Vector2(0,30)
-	_compact_skin(pick)
+	pick.icon=Icons.command_texture(String(MARKS.take),T.INK,32);pick.add_theme_constant_override("icon_max_width",14);pick.add_theme_constant_override("h_separation",3)
+	pick.add_theme_font_size_override("font_size",12);pick.custom_minimum_size=Vector2(0,28);pick.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	_compact_skin(pick,4.0)
 	pick.tooltip_text="%s: %s The war leader gathers until the odds are 3 to 2, feeds the march or waits, then lays siege or storms." % [String(STANCES[3][1]),String(STANCES[3][3])]
-	if chosen:pick.add_theme_stylebox_override("normal",_compact_style(true,false))
+	if chosen:pick.add_theme_stylebox_override("normal",_compact_style(true,false,4.0))
 	var popup:=pick.get_popup()
 	var council:GDScript=load("res://scripts/war_council.gd")
 	var towns:Array=council.call("known_towns",civ_id)
@@ -794,11 +812,15 @@ func _chip(chip_name:String,mark:String)->HBoxContainer:
 	return chip
 
 
-## A strip chip with one value: mark, number, and the sentence in its tooltip.
-func _value_chip(chip_name:String,mark:String,value:String,ink:Color,tip:String)->HBoxContainer:
+## A strip chip with one value: mark, number, a word or two under it, and
+## the sentence in its tooltip.
+func _value_chip(chip_name:String,mark:String,value:String,ink:Color,tip:String,caption:="")->HBoxContainer:
 	var chip:=_chip(chip_name,mark)
-	var label:=_line(value,16,ink);label.name="Value";label.add_theme_font_override("font",T.font("ui_strong"));label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	chip.add_child(label)
+	var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",-3);stack.alignment=BoxContainer.ALIGNMENT_CENTER;stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;chip.add_child(stack)
+	var label:=_line(value,16,ink);label.name="Value";label.add_theme_font_override("font",T.font("ui_strong"));label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	stack.add_child(label)
+	if caption!="":
+		var under:=_line(caption,12,T.INK_MUTED);under.name="Caption";under.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(under)
 	chip.tooltip_text=tip
 	return chip
 
@@ -829,18 +851,18 @@ static func _segment(pressed:bool,hover:bool,index:int,count:int)->StyleBoxFlat:
 	return style
 
 
-static func _compact_style(pressed:bool,hover:bool)->StyleBoxFlat:
+static func _compact_style(pressed:bool,hover:bool,pad:=7.0)->StyleBoxFlat:
 	var style:=T.button_pressed_style() if pressed else T.action_button_style(false,hover)
-	style.content_margin_left=7.0;style.content_margin_right=7.0;style.content_margin_top=2.0;style.content_margin_bottom=2.0
+	style.content_margin_left=pad;style.content_margin_right=pad;style.content_margin_top=2.0;style.content_margin_bottom=2.0
 	if pressed:style.border_width_bottom=3
 	return style
 
 
-static func _compact_skin(button:Control)->void:
-	button.add_theme_stylebox_override("normal",_compact_style(false,false))
-	button.add_theme_stylebox_override("hover",_compact_style(false,true))
-	button.add_theme_stylebox_override("pressed",_compact_style(true,false))
-	button.add_theme_stylebox_override("hover_pressed",_compact_style(true,true))
+static func _compact_skin(button:Control,pad:=7.0)->void:
+	button.add_theme_stylebox_override("normal",_compact_style(false,false,pad))
+	button.add_theme_stylebox_override("hover",_compact_style(false,true,pad))
+	button.add_theme_stylebox_override("pressed",_compact_style(true,false,pad))
+	button.add_theme_stylebox_override("hover_pressed",_compact_style(true,true,pad))
 	button.add_theme_stylebox_override("disabled",T.button_disabled_style())
 	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	for state:String in ["font_color","font_hover_color","font_focus_color","font_pressed_color","font_hover_pressed_color"]:button.add_theme_color_override(state,T.INK)

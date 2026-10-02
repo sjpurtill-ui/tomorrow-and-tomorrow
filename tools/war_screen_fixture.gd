@@ -7,6 +7,8 @@ extends RefCounted
 ## name a general, the feud); only the band's place on the road and the war
 ## council's errand are written in, as a march already under way. Never used
 ## in play.
+## "calm" (--capture-war-calm): the early village before any war, 120
+## people, four on the watch, two in drill and no band out, at peace.
 
 const Commands:=preload("res://scripts/leader_commands.gd")
 const WarLoop:=preload("res://scripts/war_loop.gd")
@@ -17,8 +19,9 @@ const BAND:=12
 const DRILL:=3
 
 
-static func stage(_terrain:Node)->Dictionary:
+static func stage(_terrain:Node,mode:="war")->Dictionary:
 	if WorldSimulation.direction.needs_century_choice():WorldSimulation.direction.choose(String(PeopleDirection.AMBITIONS.keys()[0]))
+	if mode=="calm":return _calm()
 	GameState.ensure_population_total(PEOPLE)
 	GameState.housing_capacity=maxi(GameState.housing_capacity,PEOPLE+PEOPLE/5)
 	GameState.elapsed_days=maxf(GameState.elapsed_days,40.0)
@@ -91,6 +94,25 @@ static func stage(_terrain:Node)->Dictionary:
 	band["last_report"]=mc._army_report_snapshot(band)
 	mc.field_armies[index]=band
 	return {"army_id":army_id,"civ_id":civ_id,"town":town_name,"general":String(general.get("name","")),"feuds":WarLoop.feuds().size()}
+
+
+## The village before any war: four keep the watch, two drill, the army
+## kept at 1% of the people, nobody out.
+static func _calm()->Dictionary:
+	GameState.ensure_population_total(120)
+	GameState.housing_capacity=maxi(GameState.housing_capacity,144)
+	GameState.elapsed_days=maxf(GameState.elapsed_days,40.0)
+	var mc:Node=MilitaryCampaign
+	GameState.population_allocations["Defense"]=4
+	_train(mc,4)
+	mc.military_inventory["improvised"]=int(mc.military_inventory.get("improvised",0))+2
+	mc.raise_recruits(2)
+	mc.start_training("levy","improvised",2)
+	for order in mc.training_queue:
+		if order is Dictionary and not bool((order as Dictionary).get("automated_basic",false)):
+			(order as Dictionary)["progress_days"]=float((order as Dictionary).get("required_days",45.0))*0.65
+	mc.army_levy_level="few"
+	return {"mode":"calm","under_arms":preload("res://scripts/army_levy_law.gd").under_arms(mc)}
 
 
 ## Recruit, arm and drill `count` levy at home, as the court's levy would.

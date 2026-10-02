@@ -8,6 +8,7 @@ const WAR:=preload("res://scripts/war_loop.gd")
 const HallProbe:=preload("res://tests/audience_hall_probe.gd")
 const Law:=preload("res://scripts/army_levy_law.gd")
 const Board:=preload("res://scripts/hud/war_board.gd")
+const Bar:=preload("res://scripts/hud/army_bar.gd")
 
 var probe:Node
 var civ_id:=""
@@ -32,6 +33,7 @@ func before_test()->void:
 	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
 
 func after_test()->void:
+	if is_instance_valid(MilitaryCampaign.roster_screen):MilitaryCampaign.roster_screen.free()
 	GameState.elapsed_days=0
 	if _opponents>0: GameState.opponent_count=_opponents
 	MilitaryCampaign.reset_for_new_world()
@@ -200,12 +202,59 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	assert_str(String(home.kit)).is_not_empty()
 	var drill:Dictionary=rows[kinds.find("drill")]
 	assert_int(int(drill.men)).is_equal(Law.under_arms(MilitaryCampaign))
-	# The board shows them in plain words: shares as numbers, a row per place.
+	# The board shows them as numbers: shares on the strip, and where they
+	# are on the army bar's cards (the levy at home first, with the watch
+	# and those in drill).
 	var board:VBoxContainer=auto_free(Board.new())
 	add_child(board)
 	board.setup({})
 	assert_str((board.find_child("Level_some",true,false) as Button).text).is_equal("3%")
-	assert_object(board.find_child("Force_home",true,false)).is_not_null()
-	assert_object(board.find_child("Force_drill",true,false)).is_not_null()
 	assert_object(board.find_child("DrawnFrom",true,false)).is_not_null()
+	var levy:Dictionary=Bar.levy_card(MilitaryCampaign)
+	assert_int(int(levy.watch)).is_equal(5)
+	assert_int(int(levy.drill)+int(levy.waiting)+int(levy.ready)).is_equal(Law.under_arms(MilitaryCampaign))
+	assert_str(String(Bar.war_cards(MilitaryCampaign)[0].kind)).is_equal("levy")
 	WorldSimulation.state.population_allocations.erase("Defense")
+
+func test_the_war_screen_keeps_the_map_as_the_screen()->void:
+	# HOI4's way: a strip of numbers under the clock, a narrow column at the
+	# right edge, and the army bar along the bottom even with no band out.
+	WAR.blood_feud(civ_id,10,"the killing of their envoy Qira")
+	Law.choose(MilitaryCampaign,"some")
+	MilitaryCampaign.open_roster("army")
+	var screen=MilitaryCampaign.roster_screen
+	await get_tree().process_frame
+	await get_tree().process_frame
+	assert_bool(screen.war_mode()).is_true()
+	var view:Vector2=screen.get_viewport().get_visible_rect().size
+	assert_float(screen.panel.size.x).is_equal(Board.COLUMN_WIDTH)
+	assert_float(screen.panel.position.x+screen.panel.size.x).is_equal_approx(view.x-preload("res://scripts/hud/hud_tokens.gd").EDGE_MARGIN,0.5)
+	var strip:Control=screen.body.find_child("WarStrip",true,false)
+	assert_object(strip).is_not_null()
+	assert_bool(strip.top_level).is_true()
+	assert_float(strip.position.x+strip.size.x).is_less_equal(screen.panel.position.x)
+	# The army bar stands while the War screen is open, the levy leading it.
+	assert_bool(Bar.war_open()).is_true()
+	var bar:Control=auto_free(Bar.new());add_child(bar)
+	bar.place(Rect2(100,600,1000,bar.bar_height()));bar.refresh()
+	assert_bool(bar.visible).is_true()
+	assert_str(String(bar.cards[0].kind)).is_equal("levy")
+	# A click on the map does not close it; Escape does.
+	var click:=InputEventMouseButton.new();click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true;click.position=Vector2(view.x*0.4,view.y*0.5)
+	screen._input(click)
+	assert_bool(screen.is_queued_for_deletion()).is_false()
+	# Sentences live in the tooltips: no line on the screen runs past eight
+	# words (the war leader's own reply to a click aside).
+	for node in screen.body.find_children("*","",true,false):
+		if node is Label and node.name!="Said" and (node as Label).is_visible_in_tree():
+			assert_int((node as Label).text.split(" ",false).size()).override_failure_message((node as Label).text).is_less_equal(8)
+		if node is Button and (node as Button).is_visible_in_tree():
+			assert_int((node as Button).text.split(" ",false).size()).override_failure_message((node as Button).text).is_less_equal(8)
+	screen.free()
+
+func test_the_strip_reads_the_same_for_a_village_and_an_empire()->void:
+	assert_str(Board.compact(120)).is_equal("120")
+	assert_str(Board.compact(48_300)).is_equal("48,300")
+	assert_str(Board.compact(1_260_000)).is_equal("1.3 million")
+	assert_str(Board.compact(3_400_000_000)).is_equal("3.4 billion")
+	assert_str(Board.compact(2_000_000_000)).is_equal("2 billion")
