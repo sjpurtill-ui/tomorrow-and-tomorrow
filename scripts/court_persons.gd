@@ -1727,6 +1727,19 @@ static func _do_judge(audience_id:String,action:String,params:Dictionary,result:
 	var away:=not same_ref(ref_of(p),sref)
 	var hand:=""
 	var effects:Dictionary={}
+	# A hostage of another people (world_answer.gd): put to death or sent home,
+	# his people answer it; he is none of ours, so no count of ours changes.
+	if String(p.get("hostage_of",""))!="":
+		var answer:=load("res://scripts/world_answer.gd") as GDScript
+		var told:=String(answer.call("hostage_judged",p,action)) if answer!=null else ""
+		if action in ["execute","exile","free","pardon"] and told!="":
+			effects=DIVINE.apply_to_court("strike_down" if action=="execute" else "bless",{"person_id":0,"name":name},watchers)
+			result.outcome=told
+			result["effects"]=effects
+			result["conclude"]=same_ref(ref_of(p),sref)
+			if away: beats.append(_beat_narrator("judge_brought",slots))
+			beats.append(_beat_narrator("judge_"+("execute" if action=="execute" else "free"),slots))
+			return beats
 	match action:
 		"execute":
 			var n:=mini(count,MAX_GROUP_DEATHS)

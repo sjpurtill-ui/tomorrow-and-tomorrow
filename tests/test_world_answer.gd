@@ -201,3 +201,44 @@ func test_the_answers_save_and_are_checked()->void:
 	assert_bool(ANSWER.valid_state({"tributaries":{"x":{"since":"a"}}})).is_false()
 	ForeignDiplomacy.audiences.erase("answers")
 	assert_bool(ANSWER.is_tributary(civ_id)).is_false()
+
+const PERSONS:=preload("res://scripts/court_persons.gd")
+
+func _bound_with_hostage()->Dictionary:
+	_terrorise(civ_id,8)
+	_set_pop(_civ(civ_id),40.0)
+	ANSWER._bind(civ_id,int(GameState.elapsed_days),20.0,"Tam, son of Ilak","")
+	return PERSONS.by_id(String(ANSWER.tributary(civ_id).get("hostage_id","")))
+
+func test_the_hostage_lives_among_us_and_the_court_knows_him()->void:
+	var p:=_bound_with_hostage()
+	assert_bool(p.is_empty()).is_false()
+	assert_str(String(p.name)).is_equal("Tam, son of Ilak")
+	assert_str(String(p.hostage_of)).is_equal(civ_id)
+	assert_str(PERSONS.title_of(p)).contains("hostage of the")
+	# "Bring me Tam": the court knows whom you mean.
+	var ref:=PERSONS.resolve_name("Tam")
+	assert_str(String(ref.get("id",""))).is_equal(String(p.id))
+
+func test_putting_the_hostage_to_death_breaks_the_bond_and_brings_blood()->void:
+	var p:=_bound_with_hostage()
+	var people_before:=int(GameState.population_total)
+	var told:=ANSWER.hostage_judged(p,"execute")
+	assert_str(told).contains("put to death")
+	assert_bool(ANSWER.is_tributary(civ_id)).is_false()
+	assert_bool(Stances.tribute(civ_id,"player").is_empty()).is_true()
+	assert_bool(WAR.feuding(civ_id)).is_true()
+	var words:=PackedStringArray()
+	for t in DEEDS.remembered(civ_id,6): words.append(String(t.words))
+	assert_str(", ".join(words)).contains("the killing of Tam")
+	# He was none of ours: our count is unchanged.
+	assert_int(int(GameState.population_total)).is_equal(people_before)
+
+func test_sending_the_hostage_home_is_a_mercy_they_remember()->void:
+	var p:=_bound_with_hostage()
+	var hurt:=DEEDS.resentment(civ_id)
+	var told:=ANSWER.hostage_judged(p,"free")
+	assert_str(told).contains("sent home")
+	assert_float(DEEDS.resentment(civ_id)).is_less(hurt)
+	assert_bool(ANSWER.is_tributary(civ_id)).is_true()
+	assert_str(String(ANSWER.tributary(civ_id).hostage)).is_equal("")

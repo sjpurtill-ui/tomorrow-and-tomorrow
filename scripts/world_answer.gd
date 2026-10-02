@@ -68,6 +68,7 @@ const STANDING_PATH:="res://scripts/standing.gd"
 const DEEDS_PATH:="res://scripts/deeds.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const CHRONICLE_PATH:="res://scripts/chronicle.gd"
+const PERSONS_PATH:="res://scripts/court_persons.gd"
 
 static func _day()->int:
 	return int(GameState.elapsed_days)
@@ -418,7 +419,7 @@ static func _bind(civ_id:String,day:int,value:float,hostage:String,lead:String)-
 	Stances._begin_tribute(civ_id,"player",value,day)
 	var agreement:=Stances.tribute(civ_id,"player")
 	if not agreement.is_empty(): agreement["until"]=day+BOND_AHEAD
-	state().tributaries[civ_id]={"since":day,"value":snappedf(value,0.1),"hostage":hostage.substr(0,80),"due":day+365,"years":0,"seen_paid":0.0}
+	state().tributaries[civ_id]={"since":day,"value":snappedf(value,0.1),"hostage":hostage.substr(0,80),"due":day+365,"years":0,"seen_paid":0.0,"hostage_id":_make_hostage(civ_id,hostage)}
 	var war:=load(WAR_PATH) as GDScript
 	if war!=null and bool(war.call("feuding",civ_id,day)): war.call("_end_feud",civ_id,day,"submission","%s bowed to the god." % name)
 	var index:=Hall._civ_index(civ_id)
@@ -431,6 +432,78 @@ static func _bind(civ_id:String,day:int,value:float,hostage:String,lead:String)-
 	_chronicle("bow:%s:%d" % [civ_id,day],"%s Bows to the God" % name,text,"moment",civ_id)
 	_log(civ_id,"bow",text)
 	return text
+
+## The hostage lives among us as a person the court knows (court_persons.gd):
+## the god can summon him by name, keep him, send him home or put him to
+## death, and each is answered (hostage_judged). The id ("" if none).
+static func _make_hostage(civ_id:String,words:String)->String:
+	if words=="": return ""
+	var persons:=load(PERSONS_PATH) as GDScript
+	if persons==null: return ""
+	var given:=words.get_slice(",",0).strip_edges()
+	var p:Dictionary=persons.call("create",{"sex":"male","age":"young"})
+	if p.is_empty(): return ""
+	p["name"]=words.substr(0,80); p["given"]=given; p["family"]=""
+	p["trade"]=""; p["role"]="hostage of the %s" % _name(civ_id); p["hostage_of"]=civ_id
+	p["importance"]=8.0
+	p["household"]={"spouse":{},"children":0}
+	p["memories"]=[]
+	p["memories"].append({"day":_day(),"text":"I am %s of the %s, given to the god's people as the pledge that my people will pay." % [words,_name(civ_id)]})
+	return String(p.get("id",""))
+
+## The god's word on a hostage before the court (court_persons._do_judge):
+## put to death, the bond is broken and his people will have blood; sent home,
+## a mercy they remember; harmed, a wrong they remember. The outcome, or ""
+## when the act is the court's ordinary business (they keep him).
+static func hostage_judged(p:Dictionary,action:String)->String:
+	var civ_id:=String(p.get("hostage_of",""))
+	if civ_id=="": return ""
+	var name:=String(p.get("name","the hostage"))
+	var given:=String(p.get("given",name))
+	var people:=_name(civ_id)
+	var day:=_day()
+	var deeds:=load(DEEDS_PATH) as GDScript
+	var t:=tributary(civ_id)
+	match action:
+		"execute":
+			p["status"]="dead"; p["died_day"]=day
+			deeds.call("record",civ_id,"slay_hostage",1,"the killing of %s, given to the god as a pledge" % given)
+			deeds.call("record","home","strike_down",1,"%s, a hostage, put to death" % given)
+			var broke:=""
+			if not t.is_empty():
+				_break_bond(civ_id,"the god put %s to death" % given)
+				broke=" They will pay nothing more."
+			var war:=load(WAR_PATH) as GDScript
+			if war!=null and not bool(war.call("formal",civ_id)): war.call("blood_feud",civ_id,day,"the killing of their hostage %s" % given,"","hostage")
+			var text:="%s was put to death before the court. %s gave him as a pledge; now they will have blood for him.%s" % [name,people,broke]
+			_chronicle("hostage_killed:%s:%d" % [civ_id,day],"%s's Hostage Put to Death" % people,text,"moment",civ_id)
+			_log(civ_id,"hostage_killed",text)
+			ForeignDiplomacy.remember(civ_id,"The god killed %s, whom we gave as our pledge." % given)
+			return text
+		"exile","free","pardon":
+			p["status"]="sent_home"
+			deeds.call("amends",civ_id,"%s sent home by the god" % given)
+			if not t.is_empty():
+				t["hostage"]=""; t["hostage_id"]=""
+			var text2:="%s was sent home to the %s. They will remember the mercy; %s" % [name,people,"the tribute stands while they still fear us." if not t.is_empty() else "nothing binds them to us now."]
+			_chronicle("hostage_home:%s:%d" % [civ_id,day],"%s Goes Home" % given,text2,"notice",civ_id)
+			_log(civ_id,"hostage_home",text2)
+			ForeignDiplomacy.remember(civ_id,"The god sent %s home to us." % given)
+			return text2
+		"maim","curse","make_example","bind","terrify":
+			deeds.call("record",civ_id,"harm_hostage",1,"what the god did to %s, their hostage" % given)
+	return ""
+
+## The bond ends: the tribute agreement in the trade ledger is set down and
+## they are tributaries no more.
+static func _break_bond(civ_id:String,why:String)->void:
+	var a:=state()
+	if (TradeLedger.state().tributes as Dictionary).has(Stances.skey(civ_id,"player")): (TradeLedger.state().tributes as Dictionary).erase(Stances.skey(civ_id,"player"))
+	(a.tributaries as Dictionary).erase(civ_id)
+	var index:=Hall._civ_index(civ_id)
+	if index>=0: WorldSimulation.world.civilizations[index].player_relation["stance"]="hostile"
+	_mark(civ_id,"broken",_day())
+	_log(civ_id,"bond_broken",why)
 
 ## A year since they bowed or last weighed it: they keep paying while they
 ## still fear us and our spears still outmatch theirs, and their goods last
@@ -458,10 +531,7 @@ static func _tribute_due(civ_id:String,day:int)->void:
 		_log(civ_id,"tribute_paid","worth %s" % _qty(this_year))
 		return
 	var why:="their goods ran out" if agreement.is_empty() else ("they no longer fear us enough" if float(r.fear)<PAY_FEAR else "their spears now match ours")
-	if not agreement.is_empty(): (TradeLedger.state().tributes as Dictionary).erase(Stances.skey(civ_id,"player"))
-	(a.tributaries as Dictionary).erase(civ_id)
-	var index:=Hall._civ_index(civ_id)
-	if index>=0: WorldSimulation.world.civilizations[index].player_relation["stance"]="hostile"
+	_break_bond(civ_id,why)
 	_mark(civ_id,"withheld",day)
 	var text:="%s did not bring its tribute this year: %s. The bond is broken. %s is still in our hands." % [name,why,String(t.get("hostage","Their hostage"))]
 	_chronicle("withheld:%s:%d" % [civ_id,day],"%s Withholds Its Tribute" % name,text,"moment",civ_id)

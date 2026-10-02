@@ -48,6 +48,7 @@ const FOREIGN:={
 	"town_taken":[0.12,0.18],"town_burned":[0.16,0.22],
 	"blood":[0.006,0.009],"blood_defending":[0.005,0.004],"captives":[0.003,0.006],
 	"amends":[0.0,-0.12],
+	"slay_hostage":[0.15,0.4],"harm_hostage":[0.04,0.12],
 }
 ## Per-head kinds and the most one counted deed can weigh.
 const PER_HEAD:={"blood":[0.25,0.35],"blood_defending":[0.2,0.15],"captives":[0.15,0.25]}
