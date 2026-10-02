@@ -194,7 +194,10 @@ func collect()->Array[Dictionary]:
 		var mark:=Marks.border_point(home,there)
 		var on_line:=Borders.meeting_point("player",civ_id,mark)
 		if on_line.is_finite(): mark=on_line
-		out.append({"id":"war:"+civ_id,"kind":"war","points":[_v3(mark)],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
+		# While the War screen is open the front itself is named on the map
+		# (hud/war_map_mode.gd): no second tag for it.
+		if not bool((load("res://scripts/hud/army_bar.gd") as GDScript).call("war_open")):
+			out.append({"id":"war:"+civ_id,"kind":"war","points":[_v3(mark)],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
 	# A people we met that is broken past feuding (no town left, a handful
 	# living): its survivors at its last home, in a quiet ink; none when
 	# nobody of them lives (war_loop.survivors).
