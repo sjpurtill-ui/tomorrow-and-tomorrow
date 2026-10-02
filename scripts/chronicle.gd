@@ -59,10 +59,12 @@ const FOLD_WINDOW_DAYS:=1095
 const FOLD_SPAN_DAYS:=3650
 ## Never folded, by kind, key or the action the card offers: deaths, births,
 ## foundings, the year's entries, crises, the story's firsts and turnings,
-## aims taken up, kept or failed, wars begun and battles, ceremonies waiting.
+## aims taken up, kept or failed, wars and feuds begun, turned or ended, a
+## price named for peace, battles, ceremonies waiting.
 const FOLD_NEVER_KINDS:=["death","birth","founding","annal"]
 const FOLD_NEVER_KEYS:=["annal:","age:","crisis:","first:","beat:","discovery:","milestone:","learned:","turning:","court:death","court:succession",
-	"aim:start:","aim:done:","aim:fail:","aim:release:","ceremony:","war:feud:","court_war:","town_fate:","aftermath:","battle"]
+	"aim:start:","aim:done:","aim:fail:","aim:release:","ceremony:","war:feud:","war:declared:","war:terms:","war:war_to_feud:","war:peace:",
+	"court_war:","town_fate:","aftermath:","battle"]
 const FOLD_NEVER_ACTIONS:=["ceremony","battle"]
 ## Era-defining practices stay moments even when their field is not new.
 const RESEARCH_MILESTONES:=["seed_selection","public_schools","printing_process","steam_propulsion","powered_flight","reactor_engineering"]

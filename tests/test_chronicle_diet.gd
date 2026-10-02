@@ -72,7 +72,8 @@ func _fixture()->Array:
 		var d:=15*Y+20+n*100
 		lines.append(_line(d,"city reconnaissance","notice",{"key":"ev|%d|CITY RECONNAISSANCE" % d,"title":"City Reconnaissance","text":"Watching Pohiri: 4 scouts came home after %d months away." % (3+n),"tier":"notice","kind":"scout","action":{"kind":"scout_report","mission_id":110+n},"ledger":false}))
 	# What waits on the god: a feud begun, its battles, a crisis's end, an old
-	# order's callback (a summons), children lost, a great work to dedicate.
+	# order's callback (a summons), children lost, a price named for peace, a
+	# great work to dedicate.
 	lines.append(_line(23*Y+10,"","moment",{"key":"war:feud:civ_01:%d" % (23*Y+10),"title":"Blood Feud With Kezari","text":"Kezari will have vengeance. Nuna waits at the fire for your word.","tier":"moment","kind":"war","action":{"kind":"court","focus":{"civ_id":"civ_01"}}},true))
 	for n in 3:
 		lines.append(_line(23*Y+40+n*40,"battle at the ford","notice",{"key":"battle:%d" % n,"title":"Battle at the Ford","text":"Our fighters met Kezari's at the ford (%d)." % n,"tier":"notice","kind":"war","action":{"kind":"battle","battle_seed":n}},true))
@@ -82,6 +83,9 @@ func _fixture()->Array:
 		lines.append(_line(26*Y+50+n*200,"an old order remembered","notice",{"key":"court:callback:order_%d" % n,"title":"An Old Order Remembered","text":"Lisse has word for you of what came of it (%d)." % n,"tier":"notice","kind":"court","action":{"kind":"court","focus":{"person_id":163}}},true))
 	for n in 3:
 		lines.append(_line(27*Y+50+n*90,"a child is lost","notice",{"key":"demo:child_%d" % n,"title":"A Child Is Lost","text":"A child of the Reed hearth died (%d)." % n,"tier":"notice","kind":"death"},true))
+	for n in 2:
+		var d:=29*Y+50+n*150
+		lines.append(_line(d,"kezari names its price","notice",{"key":"war:terms:civ_01:%d" % d,"title":"Kezari Names Its Price","text":"Kezari will end the war for %d baskets of grain." % (40+n*20),"tier":"notice","kind":"war","action":{"kind":"court","focus":{"civ_id":"civ_01"}}},true))
 	lines.append(_line(28*Y+120,"","moment",{"key":"ceremony:ring","title":"The Ring of Stones stands finished","text":"The people gather for its dedication.","tier":"moment","kind":"ceremony","action":{"kind":"ceremony","work_id":"ring"}},true))
 	lines.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.day)<int(b.day))
 	return lines
