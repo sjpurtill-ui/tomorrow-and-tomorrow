@@ -1336,13 +1336,7 @@
       0.65
     ]
   },
-  "fruit_pulp_screening": {
-    "path": "res://assets/ui/research/paper/fruit_pulp_screening.png",
-    "focus": [
-      0.5,
-      0.65
-    ]
-  },
+  "fruit_pulp_screening": {"path": "res://assets/ui/research/subjects/fruit_pulp_screening-v2.png", "focus": [0.5, 0.43], "opening_focus": [0.5, 0.43]},
   "textile_dye_fixation": {
     "path": "res://assets/ui/research/paper/textile_dye_fixation.png",
     "focus": [
@@ -3737,8 +3731,8 @@
   "midday_heat_rest": {"path": "res://assets/ui/research/subjects/midday_heat_rest-v1.png", "focus": [0.5, 0.5]},
   "seasonal_tribute_counts": {"path": "res://assets/ui/research/subjects/seasonal_tribute_counts-v1.png", "focus": [0.5, 0.5]},
   "snakebite_treatment": {"path": "res://assets/ui/research/subjects/snakebite_treatment-v1.png", "focus": [0.5, 0.5]},
-  "flood_mark_reading": {"path": "res://assets/ui/research/subjects/flood_mark_reading-v1.png", "focus": [0.5, 0.5]},
-  "hide_wicker_shields": {"path": "res://assets/ui/research/subjects/hide_wicker_shields-v1.png", "focus": [0.5, 0.5]},
+  "flood_mark_reading": {"path": "res://assets/ui/research/subjects/flood_mark_reading-v2.png", "focus": [0.5, 0.5]},
+  "hide_wicker_shields": {"path": "res://assets/ui/research/subjects/hide_wicker_shields-v2.png", "focus": [0.5, 0.5]},
   "browse_line_monitoring": {"path": "res://assets/ui/research/subjects/browse_line_monitoring-v1.png", "focus": [0.5, 0.5]},
   "children_light_tasks": {"path": "res://assets/ui/research/subjects/children_light_tasks-v1.png", "focus": [0.5, 0.5]},
   "consensus_amendment_custom": {"path": "res://assets/ui/research/subjects/consensus_amendment_custom-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4233,7 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "cairn_sightline_marking": {"path": "res://assets/ui/research/subjects/cairn_sightline_marking-v2.png", "focus": [0.5, 0.45]},
+  "bone_needle_sewing": {"path": "res://assets/ui/research/subjects/bone_needle_sewing-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]}
 }
