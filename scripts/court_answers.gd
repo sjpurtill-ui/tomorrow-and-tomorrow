@@ -157,6 +157,10 @@ static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:S
 	if offices.has("scouts"):
 		var way:=_way_answer(sheet,lower)
 		if way!="": return way
+	# The business sector: the purse keeper's own count (court_business_orders.gd).
+	if offices.has("purse"):
+		var business:=String((load("res://scripts/court_business_orders.gd") as GDScript).call("answer",sheet,lower))
+		if business!="": return business
 	# The realm's purse: its keeper's own count (court_purse_orders.gd).
 	if offices.has("purse"):
 		var purse:=String((load("res://scripts/court_purse_orders.gd") as GDScript).call("answer",sheet,lower))

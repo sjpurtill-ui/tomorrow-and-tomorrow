@@ -6,6 +6,7 @@ extends Node
 
 const SPAN:=preload("res://scripts/day_span.gd")
 const Purse:=preload("res://scripts/realm_purse.gd")
+const Enterprise:=preload("res://scripts/enterprise.gd")
 const STAGE_SUBSISTENCE := "subsistence"
 const STAGE_METAL := "weighed_metal"
 const STAGE_CURRENCY := "currency"
@@ -236,7 +237,8 @@ func _market_access(context:Dictionary,foreign_effects:Dictionary={})->float:
 	var admin:=WorldSimulation.state.effective_workers("Administration")/maxf(1.0,WorldSimulation.state.population_exact*0.05)
 	var storage:=float(WorldSimulation.state.simulation_metrics.get("storage_function",0.0))
 	var foreign_access:=float((foreign_effects if not foreign_effects.is_empty() else WorldSimulation.world.player_effects()).market_access_bonus)
-	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy(),0.0,1.0)
+	# Merchant houses and companies carry trade further (enterprise.gd).
+	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy()+Enterprise.market_bonus(),0.0,1.0)
 
 ## A standing policy on the markets (freeing them opens them wider: the
 ## "market_access" channel, at most a third either way).
@@ -972,7 +974,9 @@ func _update_wealth_distribution(monetization:float,inflation:float,default_rate
 	if s.economy_stage==STAGE_SUBSISTENCE:
 		sharing*=SUBSISTENCE_SHARING
 		if float(s.simulation_metrics.get("food_days",0.0))>=FEAST_FOOD_DAYS: sharing*=FEAST_SHARING
-	var pull:=(float(shares[4])-float(bounds[2]))*sharing+Purse.redistribution()*REDISTRIBUTION_PULL
+	# Business gathers wealth: where custom pulls the richest fifth back to
+	# rises toward the age's ceiling (enterprise.gd wealth_lift).
+	var pull:=(float(shares[4])-(float(bounds[2])+Enterprise.wealth_lift(bounds)))*sharing+Purse.redistribution()*REDISTRIBUTION_PULL
 	var policy:=float(WorldSimulation.consequences.policy_effect("wealth_concentration"))*POLICY_WEALTH_PULL if WorldSimulation.consequences!=null else 0.0
 	var delta:=(push-pull+policy)*float(WorldSimulation.span)*realm_share()
 	shares[0]=maxf(0.01,shares[0]-delta*0.55)
