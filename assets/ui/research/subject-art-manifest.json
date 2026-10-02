@@ -20,13 +20,7 @@
       0.5
     ]
   },
-  "smoking": {
-    "path": "res://assets/ui/research/subjects/smoking-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "smoking": {"path": "res://assets/ui/research/subjects/smoking-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "cordage": {
     "path": "res://assets/ui/research/subjects/cordage-v1.png",
     "focus": [
@@ -3721,9 +3715,9 @@
   "sparring_customs": {"path": "res://assets/ui/research/subjects/sparring_customs-v1.png", "focus": [0.5, 0.5]},
   "splint_and_bracing_technique": {"path": "res://assets/ui/research/subjects/splint_and_bracing_technique-v1.png", "focus": [0.5, 0.5]},
   "varied_forage_rotation": {"path": "res://assets/ui/research/subjects/varied_forage_rotation-v1.png", "focus": [0.5, 0.5]},
-  "batch_task_grouping": {"path": "res://assets/ui/research/subjects/batch_task_grouping-v1.png", "focus": [0.5, 0.5]},
-  "dietary_healing_regimens": {"path": "res://assets/ui/research/subjects/dietary_healing_regimens-v1.png", "focus": [0.5, 0.5]},
-  "topsoil_depth_reading": {"path": "res://assets/ui/research/subjects/topsoil_depth_reading-v1.png", "focus": [0.5, 0.5]},
+  "batch_task_grouping": {"path": "res://assets/ui/research/subjects/batch_task_grouping-v2.png", "focus": [0.5, 0.5]},
+  "dietary_healing_regimens": {"path": "res://assets/ui/research/subjects/dietary_healing_regimens-v2.png", "focus": [0.5, 0.5]},
+  "topsoil_depth_reading": {"path": "res://assets/ui/research/subjects/topsoil_depth_reading-v2.png", "focus": [0.5, 0.5]},
   "elder_council_assent": {"path": "res://assets/ui/research/subjects/elder_council_assent-v1.png", "focus": [0.5, 0.5]},
   "task_sequencing_habits": {"path": "res://assets/ui/research/subjects/task_sequencing_habits-v1.png", "focus": [0.5, 0.5]},
   "trail_waymarking": {"path": "res://assets/ui/research/subjects/trail_waymarking-v1.png", "focus": [0.5, 0.5]},

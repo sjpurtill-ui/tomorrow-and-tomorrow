@@ -1,0 +1,12 @@
+{
+  "id": "batch_task_grouping",
+  "line": "production",
+  "game_year": 11,
+  "approx_historical_year": -4927,
+  "prompt": "c. 4927 BCE: Adults shape repeated wooden blanks, make multiple cord lengths, and assemble baskets in grouped adjacent stations; thick matte impasto oil paint. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-878069d3-7bc7-451f-9262-bac0c157689e.png",
+  "asset": "res://assets/ui/research/subjects/batch_task_grouping-v1.png",
+  "sha256": "52597d850e803ab6beadfd1e3857d3ee124e5fffa0f62b539a31f413f3e0a6f6",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too lifelike; repeated staged tasks and batches visible in wide crop."
+}
