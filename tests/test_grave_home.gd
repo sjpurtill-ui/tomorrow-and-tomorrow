@@ -110,10 +110,7 @@ func test_things_rooms_laws_and_other_peoples_are_never_read_as_this()->void:
 		# Laws, one person, other peoples, words held back, questions.
 		"Execute every thief","kill all thieves","Anyone who murders will be put to death","Kill every thief in the village","never kill a man who has surrendered",
 		"Kill all the rebels","Kill Kavu","Kill him","Kill the men of Tsaren","Kill them all","Put the prisoners to death","Burn their stores","Burn the fields of the lazy",
-		"don't kill the women","How many women are in the village?","Exile Kavu and his whole family","kill one woman",
-		# Sentences that forbid, doubt, report or suppose it (second review).
-		"We must not kill the children","It would be wrong to kill the women","The elders say we should burn our village","Do you think we should kill the old",
-		"If the harvest fails, kill the old","kill the women if they resist","Kill the women when the enemy comes",
+		"How many women are in the village?","Exile Kavu and his whole family","kill one woman",
 		# The object is the verb's own clause, and the verb opens the order.
 		"Kill two goats and feed the children","Have the butcher feed the women","The men kill deer and the women cook","Kill time until the men return",
 		"Drive out the wolves and protect the children",
@@ -123,6 +120,14 @@ func test_things_rooms_laws_and_other_peoples_are_never_read_as_this()->void:
 		# Seanstone named only as where others are taken: not our people.
 		"kill all the men of tsaren bring the women and children back to seanstone"]:
 		assert_dict(Grave.reading(words,audience,list)).override_failure_message(words).is_empty()
+	# Sentences that forbid, doubt, report, suppose it or make it a standing
+	# rule name our own people all the same: they end here, declined (nothing
+	# is done), never a law, a standing order or the council's repression.
+	for words in ["don't kill the women","We must not kill the children","It would be wrong to kill the women","The elders say we should burn our village",
+			"Do you think we should kill the old","If the harvest fails, kill the old","kill the women if they resist","Kill the women when the enemy comes",
+			"If the harvest fails, kill all the women","From now on kill every woman","Henceforth drive the old out of the realm"]:
+		var said:=Grave.reading(words,audience,list)
+		assert_str(String(said.get("kind",""))).override_failure_message(words+" "+str(said)).is_equal("decline")
 	# People narrowed: never the whole group; the court asks whom exactly.
 	for words in ["Kill the men who refused to fight","kill the men who deserted","kill the sick women","kill the wounded men"]:
 		assert_str(String(Grave.reading(words,audience,list).get("kind",""))).override_failure_message(words).is_equal("whom")
@@ -291,6 +296,128 @@ func test_arrivals_of_known_sex_are_counted_so()->void:
 	GameState.register_population_arrivals(20,"test",{"early_adults":1.0},0.0)
 	assert_float(GameState.women_in(EVERY_AGE)-women).is_equal_approx(40.0,0.01)
 	assert_float(float(GameState.population_exact)-pop).is_equal_approx(60.0,0.01)
+	# The known share is of the grown: children come about half girls, as born,
+	# and the grown carry the rest of the share given.
+	var girls:=GameState.women_in(["children"])
+	var grown:=GameState.women_in(GROWN)
+	GameState.register_population_arrivals(100,"test",{"children":0.2,"early_adults":0.8},0.6)
+	assert_float(GameState.women_in(["children"])-girls).is_equal_approx(20.0*GameState.BIRTH_FEMALE_SHARE,0.01)
+	assert_float(GameState.women_in(GROWN)-grown).is_equal_approx(60.0-20.0*GameState.BIRTH_FEMALE_SHARE,0.01)
+	# All women and girls said, with children among them: the grown are all women.
+	girls=GameState.women_in(["children"]); grown=GameState.women_in(GROWN)
+	GameState.register_population_arrivals(50,"test",{"children":0.2,"early_adults":0.8},1.0)
+	assert_float(GameState.women_in(["children"])-girls).is_equal_approx(10.0*GameState.BIRTH_FEMALE_SHARE,0.01)
+	assert_float(GameState.women_in(GROWN)-grown).is_equal_approx(40.0,0.01)
+
+# --------------------------------------------------------------------------
+# The choke point (third review): our own people end here, whatever the words
+# --------------------------------------------------------------------------
+
+func _ledger_deaths()->int:
+	return int(GameState.lifetime_deaths)+int(GameState.lifetime_departures)
+
+func test_declined_lines_kill_nobody_and_set_no_rule()->void:
+	for words in ["Kill all the women of Seanstone, I said","If the harvest fails, kill all the women","From now on kill every woman","kill all the women from now on",
+			"If they refuse, drive the old out of the realm","Henceforth burn our village"]:
+		var w:=_world("home_peace")
+		var id:=_audience(w)
+		var pop:=int(GameState.population_total)
+		var gone:=_ledger_deaths()
+		var mods:=(GameState.active_modifiers as Array).size()
+		var r:=CC.hear(id,words,{})
+		assert_str(String(r.get("verb",""))).override_failure_message(words).is_equal(Grave.VERB)
+		assert_str(String(r.get("stage",""))).override_failure_message(words+" "+String(r.get("outcome",""))+" "+String(r.get("verb",""))).is_equal("grave_readback" if words.ends_with("I said") else "grave_decline")
+		assert_int(int(GameState.population_total)).override_failure_message(words).is_equal(pop)
+		assert_int(_ledger_deaths()).override_failure_message(words).is_equal(gone)
+		assert_int((GameState.active_modifiers as Array).size()).override_failure_message(words).is_equal(mods)
+		# And nothing later carries it out.
+		CC.hear(id,"yes" if not words.ends_with("I said") else "Bring us bread",{})
+		CC.hear(id,"I demand it",{})
+		assert_int(int(GameState.population_total)).override_failure_message(words).is_equal(pop)
+		assert_int(_ledger_deaths()).override_failure_message(words).is_equal(gone)
+
+func test_insistence_in_the_words_is_the_order_itself()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w)
+	var audience:=Hall.find(id)
+	for words in ["Kill all the women of our village, I tell you","Kill all the women of Seanstone, I said","I said kill all the women of Seanstone"]:
+		var said:=Grave.reading(words,audience,CC.roster(audience))
+		assert_str(String(said.get("kind",""))).override_failure_message(words+" "+str(said)).is_equal("act")
+	var pop:=int(GameState.population_total)
+	var r:=CC.hear(id,"Kill all the women of our village, I tell you",{})
+	assert_str(String(r.get("stage",""))).override_failure_message(str(r.get("outcome",""))).is_equal("grave_readback")
+	assert_int(int(GameState.population_total)).is_equal(pop)
+
+func test_our_town_named_is_never_the_town_we_hold()->void:
+	var w:=_world("tsaren_captured")
+	var id:=_audience(w)
+	var info:Dictionary=w.info
+	var counts:=func()->Dictionary: return preload("res://scripts/town_ledger.gd").counts(String(info.civ_id),String(info.tsaren_id))
+	var before:Dictionary=counts.call()
+	var pop:=int(GameState.population_total)
+	var r:=CC.hear(id,"Kill all the women of Seanstone, I said",{})
+	assert_str(String(r.get("stage",""))).is_equal("grave_readback")
+	assert_str(String(r.get("actor_says",""))).contains("women of Seanstone")
+	var lower:="kill all the women of seanstone"
+	assert_bool(preload("res://scripts/court_war_orders.gd").names_our_town(lower)).is_true()
+	assert_bool(preload("res://scripts/court_war_orders.gd").names_our_town("kill all the women of tsaren")).is_false()
+	for words in ["If the harvest fails, kill all the women of our village","From now on kill every woman in Seanstone"]:
+		CC.hear(id,words,{})
+	assert_int(int((counts.call() as Dictionary).get("killed_women",0))).is_equal(int(before.get("killed_women",0)))
+	assert_int(int(GameState.population_total)).is_equal(pop)
+
+func test_pressing_words_after_a_read_back_do_nothing()->void:
+	for word in ["Now!","At once","Obey me","You heard me","I said kill","carry on","Okay","Sure","Go on"]:
+		var w:=_world("home_peace")
+		var id:=_audience(w)
+		var women:=GameState.women_in(GROWN)
+		CC.hear(id,"Kill all the women of our village",{})
+		var r:=CC.hear(id,word,{})
+		assert_str(String(r.get("stage",""))).override_failure_message(word).is_equal("grave_decline")
+		assert_dict(Grave._pending(Hall.find(id))).override_failure_message(word).is_empty()
+		CC.hear(id,"yes",{})
+		assert_float(GameState.women_in(GROWN)).override_failure_message(word).is_equal_approx(women,0.001)
+	# The plain yes, said several ways, still carries it.
+	for word in ["yes","Yes, do it.","I demand it","so be it","that is my word","Aye, now!"]:
+		assert_bool(Grave.confirms(word)).override_failure_message(word).is_true()
+	for word in ["Now!","At once","okay","go on","you heard me","yes kill them all"]:
+		assert_bool(Grave.confirms(word)).override_failure_message(word).is_false()
+
+func test_pressing_words_after_a_dropped_read_back_never_read_it_again()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w)
+	var women:=GameState.women_in(GROWN)
+	CC.hear(id,"Kill all the women of our village",{})
+	CC.hear(id,"Bring us bread",{})
+	for word in ["Now!","I said kill","You heard me","Obey me","yes","I demand it"]:
+		CC.hear(id,word,{})
+		assert_dict(Grave._pending(Hall.find(id))).override_failure_message(word).is_empty()
+	assert_float(GameState.women_in(GROWN)).is_equal_approx(women,0.001)
+
+func test_a_read_back_clears_the_readers_question_and_waits_one_day()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w)
+	var audience:=Hall.find(id)
+	audience["reader_pending"]={"text":"kill the men","reading":{"kind":"order","action":"town_fate"}}
+	CC.hear(id,"Kill all the women of our village",{})
+	assert_bool(Hall.find(id).has("reader_pending")).is_false()
+	# The yes on another day: the moment has passed.
+	var women:=GameState.women_in(GROWN)
+	var p:Dictionary=Grave._pending(Hall.find(id))
+	p["day"]=int(p.get("day",0))-1
+	CC.hear(id,"yes",{})
+	assert_float(GameState.women_in(GROWN)).is_equal_approx(women,0.001)
+	assert_dict(Grave._pending(Hall.find(id))).is_empty()
+
+func test_the_council_never_takes_an_order_on_our_people()->void:
+	_world("home_peace")
+	for words in ["Kill all the women","kill every woman from now on","Burn our village","If the harvest fails, kill the old","drive the children out of the realm"]:
+		assert_bool(Grave.names_our_people(words)).override_failure_message(words).is_true()
+	for words in ["Kill all the men of Tsaren","Execute every thief","Build more houses","Kill the sick goat in the village","Feed the children"]:
+		assert_bool(Grave.names_our_people(words)).override_failure_message(words).is_false()
+	# A standing order from the court's own words strikes its deaths.
+	var plan:={"no_deaths":true,"counted_deaths":5}
+	assert_dict(preload("res://scripts/custom_directive.gd")._deaths(plan,"t",1.0)).is_empty()
 
 func test_killing_the_women_balances_the_ledger_and_says_its_numbers()->void:
 	var w:=_world("home_peace")

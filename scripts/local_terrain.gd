@@ -14494,6 +14494,14 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		return
 	var conversation_action:=AdvisorSystem.civic_conversation_action(text,settlement_id,int(leader.get("person_id",0)))
 	text=AdvisorSystem.civic_retry_text(text,settlement_id)
+	# Killing, burning or driving out our own people by group is given at
+	# court, read back and done only on the god's yes (grave_home.gd): never a
+	# council directive, whose repression would register deaths unread.
+	var grave_home:GDScript=load("res://scripts/grave_home.gd")
+	if bool(grave_home.call("names_our_people",text)):
+		input.text=""
+		if travel_status_label: travel_status_label.text=String(grave_home.get_script_constant_map().get("COUNCIL_NO",""))
+		return
 	if conversation_action=="withdraw":
 		input.text=""
 		var withdrawn:=AdvisorSystem.withdraw_pending_civic_directive(settlement_id,int(leader.get("person_id",0)),text)

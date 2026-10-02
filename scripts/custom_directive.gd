@@ -658,6 +658,9 @@ static func realize(plan:Dictionary,order_id:String,implementation:float)->Array
 	return result
 
 static func _deaths(plan:Dictionary,order_id:String,implementation:float)->Dictionary:
+	# Words of killing or harm from the court (court_commands.custom_order):
+	# the order moves the realm's measures only; nobody dies of it here.
+	if bool(plan.get("no_deaths",false)): return {}
 	var rng:=_rng(order_id+"|deaths",plan)
 	var population:=maxf(1.0,WorldSimulation.state.population_exact)
 	var counted:=int(plan.get("counted_deaths",0))

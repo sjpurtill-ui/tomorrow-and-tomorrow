@@ -76,6 +76,18 @@ women of child-bearing age are fewer, and only their pregnancies are lost.
 "The village" is asked about when a town we hold, a war or a feud makes it
 unclear; only a short, clear answer settles it.
 
+grave_home is the one choke point: any line that names our own people as the
+object of a killing, a burning or a banishing ends there, read back if it is
+an order ("..., I said" included), else answered plainly that nothing is done
+(forbidden, supposed, reported, on a condition, a standing rule, whom
+exactly). It never falls through to a law, a standing order, the council's
+pipeline (whose repression could register deaths unread) or a town we hold
+read in place of our own named town. Only the plain yes ("yes", "do it", "I
+demand it", "so be it", "that is my word") in the very next line, the same
+day, with the same numbers, carries it out; "now!", "okay", "go on", "you
+heard me" and the like after a read-back, or after one was dropped, do
+nothing, and a read-back clears any older open question of the order reader.
+
 ## Officials know their office
 
 Each official answers from an exact fact sheet for their office

@@ -1287,10 +1287,18 @@ func register_population_arrivals(count:int,source:String="new arrivals",cohort_
 	for key in POPULATION_AGE_COHORTS: total_weight+=maxf(0.0,float(weights.get(key,0.0)))
 	if total_weight<=0.000001: total_weight=1.0
 	var added:Dictionary={}
+	# The known share is of the grown: children arrive about half girls, as
+	# born, and the grown carry the rest, so the women among them still come to
+	# the share given (clamped when the children alone exceed it).
+	var children:=float(actual)*maxf(0.0,float(weights.get("children",0.0)))/total_weight
+	var grown_women:=arriving_women
+	if share_known and float(actual)-children>0.0:
+		grown_women=clampf((arriving_women*float(actual)-children*BIRTH_FEMALE_SHARE)/(float(actual)-children),0.0,1.0)
 	for key in POPULATION_AGE_COHORTS:
 		var amount:=float(actual)*maxf(0.0,float(weights.get(key,0.0)))/total_weight
 		population_cohorts[key]=float(population_cohorts.get(key,0.0))+amount
-		if has_female_cohorts(): population_cohorts[FEMALE_PREFIX+key]=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))+amount*arriving_women
+		var women_share:=BIRTH_FEMALE_SHARE if key=="children" and share_known else grown_women
+		if has_female_cohorts(): population_cohorts[FEMALE_PREFIX+key]=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))+amount*women_share
 		added[key]=amount
 	population_exact+=float(actual)
 	if TRACE.enabled and self==GameState:TRACE.flow("arrival",source,float(actual))

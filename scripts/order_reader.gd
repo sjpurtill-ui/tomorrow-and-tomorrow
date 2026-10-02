@@ -490,9 +490,17 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# (grave_home.gd: a read-back, a plea, "which village?"). The god's yes or
 	# a clear answer goes to the engine's own words; anything else drops it,
 	# and the words are read as what they are.
+	# Words that would say yes or press on ("okay", "now!", "go on") go there
+	# too: they never carry anything else, and the engine says nothing is done.
 	if CC.GraveHome.has_pending(audience):
-		if CC.GraveHome.continues(audience,text): return {"route":"legacy","why":"the god's answer to the read-back"}
+		if CC.GraveHome.continues(audience,text) or CC.GraveHome.assent_like(text): return {"route":"legacy","why":"the god's answer to the read-back"}
 		CC.GraveHome._drop(audience_id,audience)
+	# A grave order against our own people ("kill all women in the village",
+	# "from now on kill every woman", "if the harvest fails, kill the old"):
+	# the engine reads whose people from the words and the state, reads it back
+	# or says plainly nothing is done (grave_home.gd), whatever the reading
+	# named (never a person here, a town's fate by guess, a law or a question).
+	if not CC.GraveHome.reading(text,audience,CC.roster(audience)).is_empty(): return {"route":"legacy","why":"a grave order against our own people"}
 	# "The women too" just after an order about a town we hold: that order
 	# again for them (court_war_orders.follow_up), whatever the reading says.
 	if not confirmed and not WarOrders.follow_up(text,audience_id).is_empty(): return {"route":"engine","context":{"reader":true}}
@@ -555,11 +563,6 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 		# blessing on many or on one named, a new name for our town, an office
 		# given or taken): the words' own reading carries it, as offline.
 		if (kind=="speech" or action=="none") and String(audience.get("origin",""))=="court" and (CC.realm_business(audience_id,text) or CC.DIVINE.intent(text) in ["terrify","bless","raise_up"]): return {"route":"legacy","why":"the realm's own business"}
-		# A grave order against our own people ("kill all women in the
-		# village"): the engine reads whose people from the words and the state,
-		# and asks itself when the village is unclear (grave_home.gd), whatever
-		# the reading named (never a person here, never a town's fate by guess).
-		if not CC.GraveHome.reading(text,audience,CC.roster(audience)).is_empty(): return {"route":"legacy","why":"a grave order against our own people"}
 	# The captives and spoils of our last fight (or the standing word for the
 	# next) are read by the war orders' own words, whatever the reading named:
 	# "free the captives" read as talk is still that order (never a question).
@@ -970,7 +973,11 @@ static func quick_plan(audience_id:String,text:String)->Dictionary:
 	if audience.is_empty() or clean.is_empty(): return {}
 	# A grave order on our own people waits only for the very next line:
 	# words that do not answer it drop it here as well (grave_home.gd).
-	if CC.GraveHome.has_pending(audience) and not CC.GraveHome.continues(audience,text): CC.GraveHome._drop(audience_id,audience)
+	# Words that would say yes or press on ("okay", "now!") go to the engine,
+	# which answers that nothing is done: never a yes to anything else.
+	if CC.GraveHome.has_pending(audience):
+		if CC.GraveHome.continues(audience,text) or CC.GraveHome.assent_like(text): return {"route":"legacy","quick":"grave"}
+		CC.GraveHome._drop(audience_id,audience)
 	if clean.ends_with("?"): return {"route":"speak","quick":"question"}
 	var theirs:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	var open:=not pending(audience).is_empty() or (not theirs.is_empty() and Hall._day()-int(theirs.get("day",-99))<=CC.PENDING_DAYS)

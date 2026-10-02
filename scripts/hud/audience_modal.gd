@@ -1326,7 +1326,12 @@ func _speak_rest(text:String)->void:
 	if not text.ends_with("?") and String(Commands.classify(text).get("act",""))!="question":_offer_closest(text)
 	# An order given to a summoned official goes to the civic council as a directive.
 	var here:=Hall.find(audience_id)
-	if String(here.get("origin",""))=="court" and Hall.is_directive(text) and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
+	# Killing, burning or driving out our own people never goes to the
+	# council (grave_home.gd reads it back at court): said plainly.
+	if String(here.get("origin",""))=="court" and Commands.GraveHome.names_our_people(text):
+		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":Commands.GraveHome.COUNCIL_NO,"day":int(GameState.elapsed_days),"aside":false})
+		_card_nothing()
+	elif String(here.get("origin",""))=="court" and Hall.is_directive(text) and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 		terrain.issue_civic_directive_text(text)
 		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":"Your words go out to the council as an order.","day":int(GameState.elapsed_days),"aside":false})
 		_card_civic(String(GameState.selected_player_settlement_id),0)
@@ -2976,6 +2981,11 @@ func civic_reply(words:String)->void:
 
 func _civic_say(text:String)->void:
 	Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+	# Killing, burning or driving out our own people is never a council
+	# directive (grave_home.gd): said plainly, nothing set in motion.
+	if Commands.GraveHome.names_our_people(text):
+		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":Commands.GraveHome.COUNCIL_NO,"day":int(GameState.elapsed_days),"aside":false})
+		_pump();return
 	SettlementModel.select_settlement(civic_settlement)
 	terrain.issue_civic_directive_text(text)
 	_sync_civic()
