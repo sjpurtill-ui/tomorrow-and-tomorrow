@@ -33,7 +33,7 @@ const CITY_RESOURCE_DEFAULTS:={
 	"cultivation_nutrients":{"nitrogen":0.0,"phosphorus":0.0},
 	"resource_stockpiles":{"Food":0.0,"Freshwater":0.0},"resource_deposits":[],
 	"civilian_goods":{"initialized":true,"last_day":-1,"report":{}},
-	"resource_events":[],"resource_practice":{},"resource_priorities":{},
+	"resource_events":[],"resource_practice":{},"resource_priorities":{},"land_survey":{},
 	"material_metrics":{},"material_history":[],"water_metrics":{},"water_history":[],
 	"food_stocks":{"Fresh food":0.0,"Stored food":0.0},
 	"fire_practice":{"initialized":false,"embers":0.0,"last_day":-1,"source":"none","last_event":"No maintained fire","fuel_today":0.0,"ignitions":0,"extinctions":0},
