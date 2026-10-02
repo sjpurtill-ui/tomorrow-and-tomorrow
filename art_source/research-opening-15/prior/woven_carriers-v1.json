@@ -1,0 +1,9 @@
+{
+  "id": "woven_carriers",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Woven Carriers. A traveler adjusts an ergonomic woven back basket and broad shoulder sling loaded with provisions, hands then free to walk along a path; no cart or pack animal.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-7da4f0e8-66b4-49ec-996c-342c245e3a64.png",
+  "asset": "res://assets/ui/research/subjects/woven_carriers-v1.png",
+  "sha256": "611670aa6d07800502c3aacb9156568b776086a1d2335c69b9b969dfc202f044",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

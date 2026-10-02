@@ -8,7 +8,7 @@
   "cereal_dehulling": "res://assets/ui/research/paper/first300-cards/cereal_dehulling.tres",
   "starch_washing_separation": "res://assets/ui/research/paper/first300-cards/starch_washing_separation.tres",
   "postharvest_loss_measurement": "res://assets/ui/research/paper/first300-cards/postharvest_loss_measurement.tres",
-  "woven_carriers": "res://assets/ui/research/paper/first300-cards/woven_carriers.tres",
+  "woven_carriers": "res://assets/ui/research/subjects/woven_carriers-v2.png",
   "rope_rigging": "res://assets/ui/research/paper/first300-cards/rope_rigging.tres",
   "wedges_and_levers": "res://assets/ui/research/paper/first300-cards/wedges_and_levers.tres",
   "salt_working": "res://assets/ui/research/paper/first300-cards/salt_working.tres",
@@ -139,5 +139,6 @@
   "shield_equipment_fitting": "res://assets/ui/research/paper/shield_equipment_fitting.png",
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
-  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png"
+  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
+  "river_craft": "res://assets/ui/research/subjects/river_craft-v2.png"
 }
