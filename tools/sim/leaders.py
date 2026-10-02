@@ -20,6 +20,9 @@ the GDScript so they cannot drift):
 * daily labor: GovernmentPeopleSystem._allocations_for_focus with the people's
   cultural labor bias (cultural_inheritance.gd WORK) and its wish for food
   work planned as deeper stores (reserve_lean_of), in model.py _allocate_labor;
+* the path the work leans toward: work_paths.gd choose by temper (no war or
+  neighbours' pull here), its WORK added to the labor bias and its FOOD_LEAN
+  to the reserve;
 * research: the ruler's emphasis (preferences research weights plus the
   controller's culture weights, research_plan in ATTENTION_STEPS steps)
   and the ambition's pace (PeopleDirection.research_multiplier);
@@ -67,6 +70,11 @@ WORK = g.const("scripts/cultural_inheritance.gd", "WORK")
 PROFILES = g.const("scripts/cultural_inheritance.gd", "PROFILES")
 AMBITIONS = g.const("scripts/people_direction.gd", "AMBITIONS")
 RESERVE_FOOD_WISH = float(g.const("scripts/government_people_system.gd", "RESERVE_FOOD_WISH"))
+PATH_TEMPER = g.const("scripts/work_paths.gd", "PATH_TEMPER")
+PATH_WORK = g.const("scripts/work_paths.gd", "WORK")
+PATH_FOOD_LEAN = g.const("scripts/work_paths.gd", "FOOD_LEAN")
+SCHOLARLY = float(g.const("scripts/work_paths.gd", "SCHOLARLY"))
+BALANCED_BELOW = float(g.const("scripts/work_paths.gd", "BALANCED_BELOW"))
 ESTABLISHMENT_DAYS = float(g.const("scripts/civilization_strategy.gd", "ESTABLISHMENT_DAYS"))
 EXPANSIONIST_DRIVE = float(g.const("scripts/civilization_strategy.gd", "EXPANSIONIST_DRIVE"))
 LONGEST_LOOK = int(g.const("scripts/civilization_strategy.gd", "LONGEST_LOOK_MONTHS"))
@@ -116,6 +124,19 @@ def choose_ambition(p: dict, peoples_known: int = -1) -> str:
     for a in TEMPER:
         if fit[a] > fit[best]:
             best = a
+    return best
+
+
+def work_path(p: dict) -> str:
+    """work_paths.gd choose, calm: the path whose temper fits best above the
+    balanced line; learning only for a scholarly temper."""
+    best, top = "balanced", BALANCED_BELOW
+    for path, weights in PATH_TEMPER.items():
+        if path == "learning" and p["openness"] < SCHOLARLY:
+            continue
+        fit = sum(w * p[a] if w >= 0 else -w * (1.0 - p[a]) for a, w in weights.items())
+        if fit > top:
+            best, top = path, fit
     return best
 
 
@@ -287,8 +308,12 @@ class LeaderSurrogate(Surrogate):
         for c, s in share.items():
             for role, v in WORK[c].items():
                 bias[role] = bias.get(role, 0.0) + v * s
+        # The path the ruler leans the work toward (work_paths.gd lean).
+        path = work_path(p)
+        for role, v in PATH_WORK.get(path, {}).items():
+            bias[role] = bias.get(role, 0.0) + float(v)
         self.culture_bias = bias
-        self.reserve_lean = clamp(float(bias.get("Food", 0.0)) / RESERVE_FOOD_WISH, 0.0, 1.0)
+        self.reserve_lean = clamp(float(bias.get("Food", 0.0)) / RESERVE_FOOD_WISH + float(PATH_FOOD_LEAN.get(path, 0.0)), 0.0, 1.0)
         relevant = {line: sum(s for c, s in share.items() if line in AMBITIONS[c]["domains"]) for line in gd.LINES}
         mult = np.array([.95 + .30 * relevant[line] for line in gd.LINES])
         self.chance = self.base_chance * mult[self.cat.line]
@@ -665,7 +690,7 @@ def main() -> int:
     for name, p in tempers.items():
         first, later = choose_ambition(p, 0), choose_ambition(p, 1)
         x = expansion_plan(p, culture_drive({later: 1.0}))
-        print(f"  {name:20s} ambition {first}{' then ' + later if later != first else ''}: settles at {x['food']:.0f} days in store, "
+        print(f"  {name:20s} path {work_path(p)}; ambition {first}{' then ' + later if later != first else ''}: settles at {x['food']:.0f} days in store, "
               f"looks every {x['months']} mo, settlers carry {x['margin']:.0f} d; "
               f"reserve x{1 + clamp(float(WORK[later].get('Food', 0)) / RESERVE_FOOD_WISH, 0, 1):.1f}; "
               f"a work at most every {wonder_interval_days(p) / 365:.1f} y")

@@ -380,7 +380,7 @@ static func construction()->Dictionary:
 	return {"lead":"Builders raise the town's works and homes, keep the town and its walls in repair, and lay the water lines and roads.","lines":lines}
 
 
-# --- Making tools -------------------------------------------------------------------
+# --- Making -------------------------------------------------------------------------
 
 static func crafting()->Dictionary:
 	var state=WorldSimulation.state
@@ -463,7 +463,7 @@ static func logistics()->Dictionary:
 	# Stores: built storage works as carriers staff it; the Public Stores need
 	# carriers at 4 in 100 and stewards at 2 in 100 (settlement_model.gd, civilian_goods.gd).
 	var staffing:=clampf(carriers/maxf(1.0,pop*0.10),0.15,1.0)
-	lines.append(_line("Keeping the stores","%d of 100 staffed" % roundi(staffing*100.0),
+	lines.append(_line("Staffing the stores","%d of 100 staffed" % roundi(staffing*100.0),
 		"Built storage holds its full share only when carriers staff it, full at a tenth of the people (%s would).%s" % [_count(ceili(pop*0.10))," The Public Stores also need carriers at 4 in 100 of the people." if "Public Stores" in state.settlement_completed else ""],"good" if staffing>=1.0 else "plain"))
 	lines.append(_line("Putting food by","%s rations a day" % _one(carriers*CARRIER_PRESERVE*(1.0+WorldSimulation.discovery.effect("food_storage"))),
 		"Carriers help dry and store the day's fresh surplus: each can put by about %s rations a day." % _two(CARRIER_PRESERVE),"good" if carriers>0.0 else "plain"))
@@ -541,7 +541,7 @@ static func knowledge()->Dictionary:
 	return {"lead":"Lore keepers watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else.","lines":lines}
 
 
-# --- Keeping the stores -------------------------------------------------------------
+# --- Keeping and caring -------------------------------------------------------------
 
 static func administration()->Dictionary:
 	var state=WorldSimulation.state
@@ -582,7 +582,7 @@ static func administration()->Dictionary:
 		"How many standing orders the court can keep in force: one, more as government grows, and up to two more when 4 in 100 of the people are stewards.","plain"))
 	_great_work_line(lines,"Administration")
 	lines.append(_cost_line("Administration",stewards))
-	return {"lead":"Stewards keep the stores and tallies, settle quarrels, take in newcomers and carry the chiefs' word.","lines":lines}
+	return {"lead":"Keepers keep the stores and tallies, settle quarrels, take in newcomers and carry the chiefs' word.","lines":lines}
 
 
 # --- Keeping watch ------------------------------------------------------------------

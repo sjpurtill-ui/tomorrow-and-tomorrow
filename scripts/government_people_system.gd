@@ -1837,6 +1837,9 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 		# deeper stores: extra hands on food until the larger reserve is full,
 		# not a share the planners' own floor already covers.
 		reserve_lean=reserve_lean_of(float(bias.get("Food",0.0)))
+		# The path the people's rulers lean the work toward (work_paths.gd):
+		# growth, making and trade, war, learning, building, or none.
+		reserve_lean=preload("res://scripts/work_paths.gd").lean(weights,reserve_lean)
 	# The workshop officer asks for gatherers while soldiers' gear lacks materials.
 	if WorldSimulation.military!=null:weights.Extraction=float(weights.get("Extraction",0))+float(WorldSimulation.military.workshop.extraction_request().get("weight",0.0))
 	# Guards in proportion to how hard the neighbours press (docs/STANDING_DESIGN.md

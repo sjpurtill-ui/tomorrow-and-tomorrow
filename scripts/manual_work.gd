@@ -35,10 +35,10 @@ const TASKS:={
 	"Survey":["searching the land","searches the land","searching the land"],
 	"Extraction":["cutting and digging","cuts and digs","cutting and digging"],
 	"Construction":["building","builds","building"],
-	"Crafting":["making tools","makes tools","making tools"],
+	"Crafting":["making","makes things","making"],
 	"Logistics":["carrying","carries","carrying"],
 	"Knowledge":["learning","keeps the lore","learning"],
-	"Administration":["keeping the stores","keeps the stores","keeping the stores"],
+	"Administration":["keeping and caring","keeps and cares","keeping and caring"],
 	"Defense":["keeping watch","keeps watch","keeping watch"],
 }
 ## What the leader is putting extra hands on, short (the leader's line).
@@ -514,9 +514,9 @@ static func _doing(role:String,n:int)->String:
 		"Survey":return "search the land"
 		"Extraction":return "cut and dig"
 		"Construction":return "build"
-		"Crafting":return "make tools"
+		"Crafting":return "make things"
 		"Logistics":return "carry"
 		"Knowledge":return "keep the lore"
-		"Administration":return "keep the stores"
+		"Administration":return "keep and care"
 		"Defense":return "keep watch"
 	return task_words(role)
