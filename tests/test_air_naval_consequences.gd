@@ -446,13 +446,22 @@ func test_an_opposed_landing_costs_both_sides_and_a_strong_beach_throws_it_back(
 	)
 	var convoy:={"destination_owner":String(city.get("controller",city.civ_id)),"destination_id":String(city.city_id)}
 	var weak:={"army_id":1,"name":"Landing force","troops":1000,"formations":[{"count":1000}]}
+	# Who stood there for them: their levy, their watch and their townsfolk
+	# (civilization_combat.guard_of), each hit by its share.
+	var stood:Dictionary=WorldSimulation.scoped("beta",func()->Dictionary:
+		var home:Dictionary={}
+		for town:Dictionary in WorldSimulation.state.player_settlements:
+			if bool(town.get("primary",false)):home=town
+		return preload("res://scripts/civilization_combat.gd").guard_of(home))
+	var everyone:=int(stood.trained)+int(stood.watch)+int(stood.rise)
 	var outcome:Dictionary=WorldSimulation.scoped("alpha",func()->Dictionary:return AN.opposed_landing(weak,convoy,.5))
 	assert_bool(bool(outcome.repulsed)).is_false()
 	var lost:=int(outcome.attacker_killed)+int(outcome.attacker_wounded)
 	assert_int(lost).is_between(20,350)
 	assert_int(int(weak.troops)).is_equal(1000-lost)
 	assert_int(int(outcome.defender_hit)).is_greater(0)
-	assert_int(int(WorldSimulation.actors.beta.systems.MilitaryCampaign.home_army.troops)).is_equal(400-int(outcome.defender_hit))
+	var trained_hit:=roundi(float(outcome.defender_hit)*400.0/float(everyone))
+	assert_int(int(WorldSimulation.actors.beta.systems.MilitaryCampaign.home_army.troops)).is_equal(400-trained_hit)
 	var small:={"army_id":2,"name":"Raid","troops":30,"formations":[{"count":30}]}
 	var thrown:Dictionary=WorldSimulation.scoped("alpha",func()->Dictionary:return AN.opposed_landing(small,convoy,0.0))
 	assert_bool(bool(thrown.repulsed)).is_true()

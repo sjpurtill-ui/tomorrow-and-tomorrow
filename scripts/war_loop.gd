@@ -712,9 +712,11 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 	var soldiers:bool=guarded and not ambush and mc!=null and int(mc.home_army.get("troops",0))>0 and not bool(mc._home_battle_running())
 	var defender:Dictionary
 	var our_n:=0
+	var guard_words:=""
 	if soldiers:
 		defender=mc._home_defense_force(true)
 		our_n=int(defender.get("troops",0))
+		guard_words=_home_guard_words(defender)
 	else:
 		our_n=_band_size(_our_pop(),rng.randf_range(0.02,0.035) if ambush else (rng.randf_range(0.04,0.06) if skirmish else rng.randf_range(0.02,0.035)))
 		defender=_band(String(GameState.settlement_name),our_n,_our_tech(),0.4,String(general.get("name","")),0.4)
@@ -773,7 +775,7 @@ static func _raid(civ_id:String,day:int,cause:String,skirmish:bool,ambush:bool=f
 		if their_dead>0: text+=" %d of theirs fell." % their_dead
 		if taken>=1.0: text+=" They took %d Food." % roundi(taken)
 	elif soldiers:
-		text="%d %s fighters came for %s and our watch of %d met them at the approaches. %s" % [their_n,name,where,our_n,_dead_words(our_dead,names,"watch")]
+		text="%d %s fighters came for %s and %s met them at the approaches. %s" % [their_n,name,where,guard_words,_dead_words(our_dead,names,"watch")]
 		if their_dead>0: text+=" %d of theirs fell." % their_dead
 		text+=" They took %d Food." % roundi(taken) if taken>=1.0 else " They took nothing."
 	elif skirmish:
@@ -869,6 +871,22 @@ static func _commit_raiders(civ_id:String,raiders:Dictionary,fight:Dictionary,ke
 			if mc._field_army_index(band_id)>=0: mc.disband_field_army(band_id))
 		return killed
 	return _their_deaths(civ_id,_cap_dead(killed,_their_pop(civ_id)))
+
+## Who of ours stood at home, as _home_defense_force mustered them, in
+## words: "our 47 fighters, 3 on watch and 9 townsfolk".
+static func _home_guard_words(defender:Dictionary)->String:
+	var everyone:=int(defender.get("troops",0))
+	var militia:=preload("res://scripts/civilization_combat.gd").home_militia()
+	var untrained:=mini(everyone,int(defender.get("emergency_militia_personnel",0)))
+	var rise:=mini(untrained,int(militia.rise))
+	var watch:=untrained-rise
+	var parts:PackedStringArray=[]
+	if everyone-untrained>0:parts.append("our %d fighters" % (everyone-untrained))
+	if watch>0:parts.append(("%d of our watch" if parts.is_empty() else "%d on watch") % watch)
+	if rise>0:parts.append(("%d of our townsfolk" if parts.is_empty() else "%d townsfolk") % rise)
+	if parts.is_empty():return "our people"
+	if parts.size()==1:return parts[0]
+	return ", ".join(parts.slice(0,parts.size()-1))+" and "+parts[parts.size()-1]
 
 ## Where an ambush waits: people out at their work in the open.
 const AMBUSHED:=["hunters","gathering","herds"]

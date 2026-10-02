@@ -347,9 +347,13 @@ func test_defense_allocation_immediately_mans_watch_and_automates_basic_training
 	GameState.population_total=500
 	GameState.population_allocations["Defense"]=16
 	var defense:=MilitaryCampaign.settlement_defense_snapshot()
-	assert_int(int(defense.garrison_personnel)).is_equal(16)
+	# The sixteen on defence work keep the watch, beside the townsfolk who
+	# rise (civilization_combat.gd guard_ledger), all untrained.
+	var militia:=preload("res://scripts/civilization_combat.gd").home_militia()
+	assert_int(int(militia.watch)).is_equal(16)
+	assert_int(int(defense.garrison_personnel)).is_equal(16+int(militia.rise))
 	assert_int(int(defense.garrison_trained)).is_equal(0)
-	assert_int(int(defense.garrison_militia)).is_equal(16)
+	assert_int(int(defense.garrison_militia)).is_equal(16+int(militia.rise))
 	MilitaryCampaign.military_inventory.improvised=16
 	MilitaryCampaign._ensure_automatic_basic_training()
 	assert_int(MilitaryCampaign._automatic_basic_trainees()).is_greater(0)
@@ -373,6 +377,8 @@ func test_untrained_local_watch_can_defend_home_before_basic_training_finishes()
 	GameState.population_allocations["Defense"]=12
 	var enemy:Dictionary=MilitaryCampaign.simulator.create_formation_force("Raiders",[{"id":91,"unit":"levy","weapon":"improvised","count":8,"equipment":0}],0.55,0.35)
 	MilitaryCampaign.active_threat={"id":"raid_probe","source_civ_id":"","source_name":"Raiders","campaign_mode":"defensive","enemy_force":enemy,"estimated_strength":8,"terrain_defense":1.0,"seed":991}
+	# The twelve on the watch and the townsfolk who rise beside them.
+	var rise:=int(preload("res://scripts/civilization_combat.gd").home_militia().rise)
 	var engagement:=MilitaryCampaign.begin_threat_engagement()
 	assert_bool(engagement.has("error")).is_false()
-	assert_int(int((engagement.get("defender",{}) as Dictionary).get("troops",0))).is_equal(12)
+	assert_int(int((engagement.get("defender",{}) as Dictionary).get("troops",0))).is_equal(12+rise)

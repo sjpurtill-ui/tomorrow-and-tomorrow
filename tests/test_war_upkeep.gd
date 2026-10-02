@@ -405,8 +405,13 @@ func test_a_town_that_is_not_home_has_its_own_watch()->void:
 	var second:Dictionary={"id":"settlement_002","sequence":2,"primary":false,"name":"Harbor","position":Vector2(100,0),"population_share":.25,"founded_day":0,"status":"established","territory_context":{},"environment_profile":{}}
 	GameState.player_settlements.append(second);GameState.next_player_settlement_id=3;SettlementModel._ensure_city_resources(second)
 	var watch:Dictionary=Combat.town_watch("settlement_002")
-	# A quarter of the people live there: a quarter of the forty on defence.
-	assert_int(int(watch.troops)).is_equal(10)
+	# A quarter of the people live there: a quarter of the forty on defence,
+	# beside a quarter of the townsfolk who rise (civilization_combat
+	# guard_ledger).
+	var parts:Dictionary=Combat.guard_ledger().get("settlement_002",{})
+	assert_int(int(parts.watch)).is_equal(10)
+	assert_int(int(parts.rise)).is_greater(0)
+	assert_int(int(watch.troops)).is_equal(10+int(parts.rise))
 	assert_str(String(watch.town_watch)).is_equal("settlement_002")
 	# Their fight is the town's own: its dead die there, home's levy is untouched.
 	var people:=GameState.population_total

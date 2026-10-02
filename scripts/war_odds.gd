@@ -40,8 +40,11 @@ const BINS:=[[1.29,5,4],[1.42,4,3],[1.75,3,2],[2.5,2,1],[4.0,3,1],[6.0,5,1]]
 ## {odds (stronger over weaker, 1 or more), ours (true when with us),
 ##  raw (ours over theirs), walls} or {} when there is nothing to weigh.
 ## A host met in the open (`open_field`) has no walls, and its readiness is
-## what our scouts made of it (`their_ready`, when given).
-static func of(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0)->Dictionary:
+## what our scouts made of it (`their_ready`, when given). `untrained` is the
+## share of their men our scouts saw were no soldiers (a town's watch and
+## townsfolk who rise, civilization_combat.guard_ledger): they stand as the
+## battle stands them, one levy block with what comes to hand.
+static func of(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	var n:=heads(formations)
 	if mc==null or n<=0 or going<=0 or their_men<1.0: return {}
@@ -55,7 +58,11 @@ static func of(force:Dictionary,formations:Array,going:int,their_men:float,forti
 	var walls:=1.0 if open_field else clampf(1.03+fort*0.34+float(civ.get("logistics",0.0))*0.07+float(civ.get("institutions",0.0))*0.05,1.04,1.38)
 	var ready:=clampf(float(civ.get("military_readiness",1.0))*0.82+float(civ.get("command_readiness",0.4))*0.18,0.1,1.0) if not civ.is_empty() else 1.0
 	if their_ready>=0.0: ready=clampf(their_ready,0.1,1.0)
-	var them:Dictionary=sim.create_formation_force("Them",scaled(kit,their_men/float(heads(kit))),1.0,ready)
+	var levy:=their_men*clampf(untrained,0.0,1.0)
+	var soldiers:=their_men-levy
+	var theirs:Array=scaled(kit,soldiers/float(heads(kit))) if soldiers>=0.5 else []
+	if levy>=0.5: theirs.append(townsfolk(roundi(levy)))
+	var them:Dictionary=sim.create_formation_force("Them",theirs,1.0,ready)
 	var raw:float=sim.raw_odds(us,them,walls)
 	return {"odds":raw if raw>=1.0 else 1.0/maxf(0.0001,raw),"ours":raw>=1.0,"raw":raw,"walls":walls}
 
@@ -71,13 +78,13 @@ static func wanted(kind:String)->float:
 ## How many more men than `going` (the same kit, drilled the same) would
 ## bring the odds to `want`: 0 when they already do, -1 when even six times
 ## as many would not. Bounded: a few readings of the combat engine.
-static func more_for(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array,civ_id:String,want:float,open_field:bool=false,their_ready:float=-1.0)->int:
+static func more_for(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array,civ_id:String,want:float,open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0)->int:
 	if going<=0 or heads(formations)<=0 or their_men<1.0: return -1
-	var now:=of(force,formations,going,their_men,fortification,their_arms,civ_id,open_field,their_ready)
+	var now:=of(force,formations,going,their_men,fortification,their_arms,civ_id,open_field,their_ready,untrained)
 	if not now.is_empty() and float(now.raw)>=want: return 0
 	for step in MORE_STEPS:
 		var n:=ceili(float(going)*float(step))
-		var o:=of(force,formations,n,their_men,fortification,their_arms,civ_id,open_field,their_ready)
+		var o:=of(force,formations,n,their_men,fortification,their_arms,civ_id,open_field,their_ready,untrained)
 		if not o.is_empty() and float(o.raw)>=want: return n-going
 	return -1
 
@@ -85,6 +92,12 @@ static func more_for(force:Dictionary,formations:Array,going:int,their_men:float
 static func said(odds:Dictionary)->String:
 	if odds.is_empty(): return ""
 	return words(float(odds.odds),bool(odds.ours))
+
+## A town's watch and townsfolk as its battle stands them: one levy block,
+## improvised arms and no kit, untrained (civilization_combat.town_watch).
+static func townsfolk(count:int)->Dictionary:
+	var Combat:=preload("res://scripts/civilization_combat.gd")
+	return {"id":-1,"unit":"levy","weapon":"improvised","count":count,"authorized_count":count,"equipment":0,"equipment_required":count,"ammunition":0,"ammunition_required":0,"training":Combat.RISE_TRAINING,"experience":0.0,"emergency_militia":true}
 
 ## Our kit carried by men drilled as a garrison is, fully armed.
 static func _as_a_garrison(formations:Array)->Array:

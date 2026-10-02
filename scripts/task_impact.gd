@@ -602,13 +602,18 @@ static func defense()->Dictionary:
 	lines.append(_line("Deaths from lawlessness","%s a year" % _one(lawless*pop) if lawless>0.0 else "none",
 		("Below %d of 100 safety people are killed in quarrels and theft: about %s a year now." % [roundi(LAWLESS_BELOW*100.0),_one(lawless*pop)]) if lawless>0.0 else "Below %d of 100 safety people start dying in quarrels and theft; safety is above that now." % roundi(LAWLESS_BELOW*100.0),
 		"bad" if lawless>0.0 else "good"))
-	# Home guard: the watch stands as the garrison; a town needs 3.5 in 100 of
-	# its people, at least 8 (military_campaign.gd settlement_defense_snapshot).
+	# Home guard: the trained and the watch stand as the garrison; a town needs
+	# 3.5 in 100 of its people, at least 8 (military_campaign.gd
+	# settlement_defense_snapshot). The townsfolk who rise are told apart:
+	# they fight when raiders come, but they are no guard.
 	var walls:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
 	var required:=int(walls.get("garrison_required",maxi(8,ceili(pop*0.035))))
-	var guard:=int(walls.get("garrison_personnel",roundi(watch)))
+	var guard:=int(walls.get("garrison_guard",roundi(watch)))
 	lines.append(_line("Guard at home","%d of %d" % [guard,required],
-		"The watch is the town's guard: in a raid or siege they defend it, the untrained ones as a levy. A town needs 3.5 in 100 of its people on guard, at least 8.","good" if guard>=required else "bad"))
+		"The trained fighters and the watch are home's guard: in a raid or siege they defend it, the watch untrained. A town needs 3.5 in 100 of its people on guard, at least 8.","good" if guard>=required else "bad"))
+	var townsfolk:=int(walls.get("garrison_townsfolk",0))
+	lines.append(_line("Townsfolk who would fight","%s at home" % _count(townsfolk) if townsfolk>0 else "none",
+		"When raiders come, about 1 in 10 of the town's grown people take up arms beside the watch. They are untrained and are not counted as the guard.","plain"))
 	lines.append(_line("Training soldiers","%d at a time" % MilitaryCampaign.training_capacity(),
 		"How many can be trained at once: 3, plus 3 for every 10 on watch, plus the commander's skill, more with drill and a standing corps.","good" if watch>0.0 else "plain"))
 	# Walls and ditches: only the watch builds them (military_campaign.gd).

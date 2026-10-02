@@ -162,6 +162,9 @@ static func our_count()->Dictionary:
 	var towns:Array=[]
 	var cities:Array=t.get("cities",[])
 	var index:=0
+	# Each town's fighters as its battle musters them and as a stranger's
+	# scout counts them (civilization_combat.gd defenders): like for like.
+	var guards:Dictionary=preload("res://scripts/civilization_combat.gd").defenders_by_town()
 	for city:Dictionary in GameState.player_settlements:
 		if String(city.get("occupied_by","")) not in ["","player"]:continue
 		var local:Dictionary=cities[index] if index<cities.size() else {}
@@ -169,8 +172,8 @@ static func our_count()->Dictionary:
 		var values:={"population":float(local.get("population",0.0))}
 		var use:=float(local.get("food_use",0.0))
 		if use>0.0:values["supply"]=float(local.get("food_stock",0.0))/use
+		values["garrison"]=float(guards.get(String(city.get("id","")),0))
 		if bool(city.get("primary",false)):
-			values["garrison"]=float(home)
 			values["fortification"]=walls
 		towns.append({"name":String(city.get("name","Settlement")),"values":values})
 	var values:={"population":float(t.get("population",0)),"garrison":float(fighters),"production":clampf(float(GameState.simulation_metrics.get("material_capacity",0.0)),0.0,1.0),
