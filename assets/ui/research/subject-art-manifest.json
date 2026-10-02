@@ -55,13 +55,7 @@
       0.5
     ]
   },
-  "pit_firing": {
-    "path": "res://assets/ui/research/subjects/pit_firing-v1.png",
-    "focus": [
-      0.5,
-      0.58
-    ]
-  },
+  "pit_firing": {"path": "res://assets/ui/research/subjects/pit_firing-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "joinery": {
     "path": "res://assets/ui/research/subjects/joinery-v2.png",
     "focus": [
@@ -251,13 +245,7 @@
       0.5
     ]
   },
-  "framed_construction": {
-    "path": "res://assets/ui/research/subjects/framed_construction-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "framed_construction": {"path": "res://assets/ui/research/subjects/framed_construction-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "fiber_grading": {
     "path": "res://assets/ui/research/subjects/fiber_grading-v1.png",
     "focus": [
@@ -286,13 +274,7 @@
       0.5
     ]
   },
-  "clay_tempering": {
-    "path": "res://assets/ui/research/subjects/clay_tempering-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "clay_tempering": {"path": "res://assets/ui/research/subjects/clay_tempering-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "sealed_vessels": {
     "path": "res://assets/ui/research/subjects/sealed_vessels-v1.png",
     "focus": [
@@ -1175,13 +1157,7 @@
       0.5
     ]
   },
-  "festival_calendar": {
-    "path": "res://assets/ui/research/subjects/festival_calendar-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "festival_calendar": {"path": "res://assets/ui/research/subjects/festival_calendar-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "oral_epics": {
     "path": "res://assets/ui/research/subjects/oral_epics-v2.png",
     "focus": [
@@ -1329,13 +1305,7 @@
       0.65
     ]
   },
-  "pulse_splitting": {
-    "path": "res://assets/ui/research/paper/pulse_splitting.png",
-    "focus": [
-      0.5,
-      0.65
-    ]
-  },
+  "pulse_splitting": {"path": "res://assets/ui/research/subjects/pulse_splitting-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "fruit_pulp_screening": {
     "path": "res://assets/ui/research/paper/fruit_pulp_screening.png",
     "focus": [
@@ -3755,16 +3725,16 @@
   "sledges_travois": {"path": "res://assets/ui/research/subjects/sledges_travois-v1.png", "focus": [0.5, 0.5]},
   "textile_repair_methods": {"path": "res://assets/ui/research/subjects/textile_repair_methods-v1.png", "focus": [0.5, 0.5]},
   "throwing_spears": {"path": "res://assets/ui/research/subjects/throwing_spears-v1.png", "focus": [0.5, 0.5]},
-  "blood_price": {"path": "res://assets/ui/research/subjects/blood_price-v1.png", "focus": [0.5, 0.5]},
-  "controlled_undergrowth_burning": {"path": "res://assets/ui/research/subjects/controlled_undergrowth_burning-v1.png", "focus": [0.5, 0.5]},
-  "down_the_line_exchange": {"path": "res://assets/ui/research/subjects/down_the_line_exchange-v1.png", "focus": [0.5, 0.5]},
-  "mouths_against_store": {"path": "res://assets/ui/research/subjects/mouths_against_store-v1.png", "focus": [0.5, 0.5]},
-  "stone_maceheads": {"path": "res://assets/ui/research/subjects/stone_maceheads-v1.png", "focus": [0.5, 0.5]},
-  "wound_packing": {"path": "res://assets/ui/research/subjects/wound_packing-v1.png", "focus": [0.5, 0.5]},
-  "ambush_raids": {"path": "res://assets/ui/research/subjects/ambush_raids-v1.png", "focus": [0.5, 0.5]},
-  "load_lashing_knots": {"path": "res://assets/ui/research/subjects/load_lashing_knots-v1.png", "focus": [0.5, 0.5]},
-  "poultices": {"path": "res://assets/ui/research/subjects/poultices-v1.png", "focus": [0.5, 0.5]},
-  "rotating_heavy_tasks": {"path": "res://assets/ui/research/subjects/rotating_heavy_tasks-v1.png", "focus": [0.5, 0.5]},
+  "blood_price": {"path": "res://assets/ui/research/subjects/blood_price-v2.png", "focus": [0.5, 0.5]},
+  "controlled_undergrowth_burning": {"path": "res://assets/ui/research/subjects/controlled_undergrowth_burning-v2.png", "focus": [0.5, 0.4]},
+  "down_the_line_exchange": {"path": "res://assets/ui/research/subjects/down_the_line_exchange-v2.png", "focus": [0.5, 0.5]},
+  "mouths_against_store": {"path": "res://assets/ui/research/subjects/mouths_against_store-v2.png", "focus": [0.5, 0.5]},
+  "stone_maceheads": {"path": "res://assets/ui/research/subjects/stone_maceheads-v2.png", "focus": [0.5, 0.5]},
+  "wound_packing": {"path": "res://assets/ui/research/subjects/wound_packing-v2.png", "focus": [0.5, 0.5]},
+  "ambush_raids": {"path": "res://assets/ui/research/subjects/ambush_raids-v2.png", "focus": [0.5, 0.5]},
+  "load_lashing_knots": {"path": "res://assets/ui/research/subjects/load_lashing_knots-v2.png", "focus": [0.5, 0.5]},
+  "poultices": {"path": "res://assets/ui/research/subjects/poultices-v2.png", "focus": [0.5, 0.5]},
+  "rotating_heavy_tasks": {"path": "res://assets/ui/research/subjects/rotating_heavy_tasks-v2.png", "focus": [0.5, 0.5]},
   "fish_weirs_and_traps": {"path": "res://assets/ui/research/subjects/fish_weirs_and_traps-v1.png", "focus": [0.5, 0.5]},
   "grain_moisture_watch": {"path": "res://assets/ui/research/subjects/grain_moisture_watch-v1.png", "focus": [0.5, 0.5]},
   "patrilocal_residence": {"path": "res://assets/ui/research/subjects/patrilocal_residence-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4209,7 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "moon_counting": {"path": "res://assets/ui/research/subjects/moon_counting-v2.png", "focus": [0.5, 0.45]},
+  "earth_oven_cooking": {"path": "res://assets/ui/research/subjects/earth_oven_cooking-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]}
 }

@@ -1,0 +1,12 @@
+{
+  "id": "poultices",
+  "line": "health",
+  "game_year": 22,
+  "approx_historical_year": -4853,
+  "prompt": "c. 4853 BCE: Caregiver crushes wild leaves with clay and fat in stone bowl and places poultice on adults sore arm; watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6cb2d83c-1ff6-4497-916a-7834750a4e37.png",
+  "asset": "res://assets/ui/research/subjects/poultices-v1.png",
+  "sha256": "7d8bb4004617d7b4b3627b121f72245d332c4dd3179acfed6e1adf88a2d295aa",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; historical care action and bowl materials clear without instructional text."
+}

@@ -1,12 +1,22 @@
 {
   "id": "load_lashing_knots",
   "line": "logistics",
-  "game_year": 22,
-  "approx_historical_year": -4853,
-  "prompt": "c. 4853 BCE: Adults secure timber and baskets to hand-drawn travois with fiber knots and hitches; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-34ee5c14-a2b6-4cce-81d2-f0389b6a7a90.png",
-  "asset": "res://assets/ui/research/subjects/load_lashing_knots-v1.png",
-  "sha256": "45b5e4992ffc49081f4d9f7e691e213c6bc98b1616b9d954def3be167ea268c8",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; lashing and loaded travois clear, no wheels or animals."
+  "year": 22,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/load_lashing_knots-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/logistics-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established logistics field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two adults fasten coarse cord around a modest wood bundle on two carrying poles, one checks a plainly visible knot while another braces the load. Sand/slate/indigo panoramic travel watercolor. No wheels, cart, animal harness, bulky framework or written knot chart.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fad2e398-f93c-47d9-8ab0-061e861c2aca.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/logistics-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/load_lashing_knots-v2.png",
+  "sha256": "7b88031fc6e6701a4f66913e05c3856394446d64259a19cc9078bdbca1c95008",
+  "mode": "built-in image_gen / edit"
 }

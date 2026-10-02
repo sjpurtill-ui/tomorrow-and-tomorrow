@@ -1,12 +1,22 @@
 {
   "id": "down_the_line_exchange",
   "line": "logistics",
-  "game_year": 20,
-  "approx_historical_year": -4867,
-  "prompt": "c. 4867 BCE: River communities pass flint, obsidian and shells from one trading pair to the next; sparse travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9545e8ae-ef61-49a9-b65e-6acd9a75e004.png",
-  "asset": "res://assets/ui/research/subjects/down_the_line_exchange-v1.png",
-  "sha256": "6a5e34b7eb205d1bb935608016dfafac892a5b2d79463470ff38fbcf0be3bd16",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; relay exchange and varied goods clear in crop."
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/down_the_line_exchange-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/logistics-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established logistics field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Three adults spaced along a woodland path pass the SAME TYPE of small shell/stone bundle from one person to another, creating a readable sequence of exchange. Sand/slate/indigo panoramic travel watercolor. No endless crowd, duplicate disconnected villages, cart, coin, written contract or river template.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-eb93bb87-3053-4339-930a-45bd2a373086.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/logistics-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/down_the_line_exchange-v2.png",
+  "sha256": "be324770a47a28cb920727e83cfe839c468e95481513f2e342fa6357110fb0c6",
+  "mode": "built-in image_gen / edit"
 }

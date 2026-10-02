@@ -1,0 +1,12 @@
+{
+  "id": "mouths_against_store",
+  "line": "demography",
+  "game_year": 20,
+  "approx_historical_year": -4867,
+  "prompt": "c. 4867 BCE: Adults compare household members to remaining grain baskets and count plain pebbles by each person; chalk pastel and cut-paper. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f638c823-7908-4ee8-9c61-dadfb68c72c7.png",
+  "asset": "res://assets/ui/research/subjects/mouths_against_store-v1.png",
+  "sha256": "857402be5a6495842cf49814266ed8e64d15756be9fa8360731b57dba31e076f",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; family, pebble count and limited store clear in crop; no writing."
+}
