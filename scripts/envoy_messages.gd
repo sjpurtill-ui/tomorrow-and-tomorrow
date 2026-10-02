@@ -426,6 +426,7 @@ static func check(civ_id:String,menace:Dictionary)->String:
 	var gate:=availability(civ_id,String(menace.purpose))
 	if gate.has("error"): return String(gate.error)
 	if String(menace.token)!="none" and not String(menace.token) in tokens_for(civ_id,String(menace.purpose)): return "Your people have killed none of their fighters; there is no such token to send."
+	if menace.has("demand") and String(menace.demand)=="submit" and bool((load("res://scripts/world_answer.gd") as GDScript).call("is_tributary",civ_id)): return "%s already bows to you and pays its tribute." % Hall._civ_name(civ_id)
 	if menace.has("demand") and not String(menace.demand) in demands_for(civ_id): return "They have done your people no wrong to apologise for."
 	if String(menace.get("demand",""))=="hostage" and not Rivals.has_bond(civ_id,["hostage"]).is_empty(): return "Kin of their ruler already lives among your people."
 	return ""
@@ -469,6 +470,7 @@ static func demand_words(civ_id:String,menace:Dictionary,speaker:String="us")->S
 		"hostage": return "one of your ruler's own kin, to live among us as a pledge"
 		"withdraw": return "that your fighters leave our border and go home"
 		"apology": return "that your ruler own %s" % (grievance(civ_id) if grievance(civ_id)!="" else "the wrong done to us")
+		"submit": return "that your people bow to %s: tribute every season, and a son of your ruler's house among us as a pledge" % _god(civ_id)
 	return "what is owed"
 
 static func short_demand(civ_id:String,menace:Dictionary)->String:
@@ -481,6 +483,7 @@ static func short_demand(civ_id:String,menace:Dictionary)->String:
 		"hostage": return "one of my own kin"
 		"withdraw": return "our fighters off the border"
 		"apology": return "an apology"
+		"submit": return "that we bow to you"
 	return "what you ask"
 
 static func consequence_words(menace:Dictionary,voice:String="god")->String:

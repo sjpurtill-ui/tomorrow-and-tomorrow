@@ -189,17 +189,27 @@ static func _seed_from_recent()->void:
 
 ## The god's acts in the hall (divine_regard._record_event): an official
 ## struck down or blessed, an envoy killed, the whole people cursed.
+## The last envoy or hostage harmed: the court's own record of the same act
+## (a strike_down or cast_out with no person of ours) is not told again.
+static var _foreign_name:=""
+static var _foreign_day:=-1
+static func told_as_foreign(name:String,day:int)->void:
+	_foreign_name=name; _foreign_day=day
+
 static func from_divine(entry:Dictionary)->void:
 	var action:=String(entry.get("action",""))
 	var civ_id:=String(entry.get("civ_id",""))
 	var name:=String(entry.get("name",""))
 	var when:=int(entry.get("day",-1)) if _num(entry.get("day")) else -1
+	if civ_id!="" and FOREIGN.has(action): told_as_foreign(name,when if when>=0 else _day())
 	var given:=name.get_slice(" ",0)
 	if civ_id!="" and FOREIGN.has(action):
 		var noun:=String({"slay_envoy":"the killing","maim_envoy":"the maiming","shame_envoy":"the shaming","terrify_envoy":"the terrifying"}.get(action,"what was done to"))
 		record(civ_id,action,1,"%s of their envoy %s" % [noun,given] if given!="" else "%s of their envoy" % noun,when)
-	# The god striking down an envoy is told once, as the killing of a guest.
-	if action=="strike_down" and int(entry.get("person_id",0))<=0: return
+	# The god's act on an envoy or a hostage is told once, as that deed; the
+	# court's own record of it (no person of ours) is not told again. Anyone
+	# else put to death or cast out before the court is told at home.
+	if action in ["strike_down","cast_out","terrify"] and int(entry.get("person_id",0))<=0 and name==_foreign_name and (when if when>=0 else _day())==_foreign_day: return
 	var home_words:=""
 	match action:
 		"strike_down": home_words="%s put to death before the court" % given
@@ -255,11 +265,16 @@ static func monthly(day:int)->void:
 			if seen.has(key2): continue
 			seen[key2]=day
 			record(id,"town_burned",1,"the burning of %s" % String(town_name),_changed_hands(civ,"",day,String(town_name)))
-		var captives:=int(st.get("captives_road",0))+int(st.get("captives_home",0))
-		var ckey:="captives:%s" % id
-		var before:=int(seen.get(ckey,0))
-		if captives>before: record(id,"captives",captives-before,"",day)
-		seen[ckey]=maxi(before,captives)
+		# Each party of captives driven off is told once, by its own record
+		# (occupation_transfers), never read again from our own head count.
+		var mc:Variant=WorldSimulation.military
+		if mc!=null and "occupation_transfers" in mc and mc.occupation_transfers!=null:
+			for t:Dictionary in mc.occupation_transfers.data.transfers:
+				if String(t.get("source",""))!=id or String(t.get("status",""))=="citizen": continue
+				var tkey:="captives:%s:%d" % [id,int(t.get("id",-1))]
+				if seen.has(tkey): continue
+				seen[tkey]=day
+				record(id,"captives",int(t.get("people",0)),"",int(t.get("depart_day",day)))
 	while seen.size()>1800: seen.erase(seen.keys()[0])
 	_trim(state().list)
 	_told_changed()

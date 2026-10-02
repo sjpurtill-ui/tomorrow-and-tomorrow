@@ -174,7 +174,8 @@ static func reading(civ_id:String,view:Dictionary={})->Dictionary:
 	var character:Dictionary=rivals.call("rival_character",civ_id) if rivals!=null else {}
 	var st:Dictionary=(load("res://scripts/envoy_aftermath.gd") as GDScript).call("standing",civ_id)
 	var league:=load("res://scripts/fear_league.gd") as GDScript
-	return {"known":bool(v.get("known",false)),"vow":_vow(civ_id),"fear":float(v.get("fear",0.0)),"resentment":float(v.get("resentment",0.0)),"ratio":float(v.get("strength_ratio",1.0)),
+	var bound:=war!=null and (bool(war.call("keeps_peace",civ_id,_day())) or not (war.call("_married",civ_id) as Dictionary).is_empty())
+	return {"known":bool(v.get("known",false)),"vow":_vow(civ_id),"at_peace":bound,"fear":float(v.get("fear",0.0)),"resentment":float(v.get("resentment",0.0)),"ratio":float(v.get("strength_ratio",1.0)),
 		"bold":(float(p.get("assertiveness",0.5))+float(p.get("risk_tolerance",0.5)))*0.5,"worn":float(front.get("their_exh",0.0)),
 		"lost":(st.get("held",[]) as Array).size()+(st.get("burned",[]) as Array).size(),"trait":String(character.get("trait","")),
 		"league":league!=null and bool(league.call("is_member",civ_id))}
@@ -192,8 +193,10 @@ static func odds(civ_id:String,r:Dictionary={})->Dictionary:
 		out.bow=clampf(bow,0.0,BOW_MAX)
 		out.why_bow="they fear us (%d in 100) and our spears %s theirs" % [roundi(fear*100.0),_ratio_words(ratio)]
 	# Whether they know the road to a town of ours is asked last, and only of a
-	# people otherwise ready to come (it is read in their own world).
-	if res>=0.45 and ratio<=1.5 and float(r.worn)<0.4 and (bool(r.knows_way) if r.has("knows_way") else _knows_our_towns(civ_id)):
+	# people otherwise ready to come (it is read in their own world). A people
+	# bound to peace with us (a truce, a pact, a settled feud, kin, tribute)
+	# does not come.
+	if res>=0.45 and ratio<=1.5 and float(r.worn)<0.4 and not bool(r.get("at_peace",false)) and (bool(r.knows_way) if r.has("knows_way") else _knows_our_towns(civ_id)):
 		var all_in:=(res-0.45)*0.25*clampf(1.6-ratio,0.0,1.0)*(0.6+bold)*(1.3 if String(r.trait) in ["grudge","hunter"] else 1.0)*(1.5 if bool(r.league) else 1.0)*float(VOW_ALL_IN.get(String(r.get("vow","")),1.0))
 		out.all_in=clampf(all_in,0.0,ALL_IN_MAX)
 		out.why_all_in="they resent us (%d in 100) and our spears %s theirs%s" % [roundi(res*100.0),_ratio_words(ratio)," with their league's" if bool(r.league) else ""]
@@ -225,6 +228,17 @@ static func _vow_undone(civ_id:String,day:int)->void:
 static func _ratio_words(ratio:float)->String:
 	var standing:=load(STANDING_PATH) as GDScript
 	return String(standing.call("_ratio_words",ratio)) if standing!=null else "match"
+
+## Free to come against us: not a tributary, not kin by marriage, not bound
+## by a truce, a pact or a settled feud (war_loop.keeps_peace), not a people
+## organised for war (it declares war instead), and not broken.
+static func free_to_come(civ_id:String,day:int=-1)->bool:
+	if day<0: day=_day()
+	if is_tributary(civ_id): return false
+	var war:=load(WAR_PATH) as GDScript
+	if war==null: return true
+	if bool(war.call("keeps_peace",civ_id,day)) or bool(war.call("broken",civ_id)) or bool(war.call("formal",civ_id)): return false
+	return (war.call("_married",civ_id) as Dictionary).is_empty()
 
 static func _knows_our_towns(civ_id:String)->bool:
 	if not WorldSimulation.enabled or not WorldSimulation.actors.has(civ_id): return true
@@ -295,9 +309,11 @@ static func monthly(day:int)->void:
 		var kin:=not (war.call("_married",id) as Dictionary).is_empty()
 		var o:=odds(id,reading(id,standing.call("view_of",id,our)))
 		var roll:=_rng("answer:%s:%d" % [id,day]).randf()
-		if roll<float(o.bow) and day-int(mine.get("refused",-99999))>=REFUSED_GAP:
-			_offer_submission(id,day,o)
-		elif not kin and roll<float(o.bow)+float(o.all_in):
+		# One roll, two stated chances: under the first they bow (unless their
+		# last bow was turned away too lately), under both together they come.
+		if roll<float(o.bow):
+			if day-int(mine.get("refused",-99999))>=REFUSED_GAP: _offer_submission(id,day,o)
+		elif not kin and float(o.all_in)>0.0 and roll<float(o.bow)+float(o.all_in):
 			_begin_arming(id,day,o)
 	standing.call("_end_reading")
 
@@ -352,7 +368,12 @@ static func _eats_per_head()->float:
 static func _hostage(civ_id:String)->String:
 	var rivals:=load(RIVALS_PATH) as GDScript
 	var ruler:=String(rivals.call("given",civ_id)) if rivals!=null else ""
-	var son:=EraNames.given_for(int(GameState.world_seed),"hostage:%s" % civ_id,false,civ_id,{ruler:true,"given:"+ruler:true})
+	# A son of this day's ruler: never the name of one given before.
+	var taken:={ruler:true,"given:"+ruler:true}
+	var persons:=load(PERSONS_PATH) as GDScript
+	if persons!=null:
+		for p in persons.call("people"): taken[String((p as Dictionary).get("given",""))]=true
+	var son:=EraNames.given_for(int(GameState.world_seed),"hostage:%s:%d" % [civ_id,_day()],false,civ_id,taken)
 	return "%s, son of %s" % [son,ruler] if ruler!="" else son
 
 static func handles(situation_type:String)->bool:
@@ -413,6 +434,8 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 	var name:=String(audience.get("civ_name",_name(civ_id)))
 	var day:=_day()
 	var value:=float(p.get("value",1.0))
+	# Bound since this envoy came (a demand of ours met first): nothing more.
+	if is_tributary(civ_id) and option_id in ["accept","more"]: return {"outcome":"%s already bows to you." % name,"reaction":"neutral"}
 	match option_id:
 		"accept":
 			var text:=_bind(civ_id,day,value,String(p.get("hostage","")),"")
@@ -449,6 +472,9 @@ static func _refused(civ_id:String,day:int,words:String)->void:
 ## feud ends, and their raiders stay home while they pay.
 static func _bind(civ_id:String,day:int,value:float,hostage:String,lead:String)->String:
 	var name:=_name(civ_id)
+	if is_tributary(civ_id): return "%s already bows to you." % name
+	# Bowed, they lay down whatever spears they were gathering against us.
+	(state().arming as Dictionary).erase(civ_id)
 	Stances._begin_tribute(civ_id,"player",value,day)
 	var agreement:=Stances.tribute(civ_id,"player")
 	if not agreement.is_empty(): agreement["until"]=day+BOND_AHEAD
@@ -480,8 +506,10 @@ static func _make_hostage(civ_id:String,words:String)->String:
 	var persons:=load(PERSONS_PATH) as GDScript
 	if persons==null: return ""
 	var given:=words.get_slice(",",0).strip_edges()
-	var p:Dictionary=persons.call("create",{"sex":"male","age":"young"})
+	var p:Dictionary=persons.call("create",{"sex":"male","age":"young","deed":"was given as a pledge by the %s" % _name(civ_id)})
 	if p.is_empty(): return ""
+	# Never the answer to "a young man": only his name or his people bring him.
+	p["keys"]=["hostage:%s:%d" % [civ_id,_day()]]
 	p["name"]=words.substr(0,80); p["given"]=given; p["family"]=""
 	p["trade"]=""; p["role"]="hostage of the %s" % _name(civ_id); p["hostage_of"]=civ_id
 	p["importance"]=8.0
@@ -503,6 +531,8 @@ static func hostage_judged(p:Dictionary,action:String)->String:
 	var day:=_day()
 	var deeds:=load(DEEDS_PATH) as GDScript
 	var t:=tributary(civ_id)
+	# The court's own record of the act (divine_regard) is this same deed.
+	deeds.call("told_as_foreign",String(p.get("name","")),day)
 	match action:
 		"execute":
 			p["status"]="dead"; p["died_day"]=day
@@ -594,7 +624,8 @@ static func _tribute_due(civ_id:String,day:int)->void:
 	var why:="their goods ran out" if agreement.is_empty() else ("you would not protect them against %s" % String(t.get("refused_against","their enemies")) if abandoned else ("they no longer fear us enough" if float(r.fear)<PAY_FEAR else "their spears now match ours"))
 	_break_bond(civ_id,why)
 	_mark(civ_id,"withheld",day)
-	var text:="%s did not bring its tribute this year: %s. The bond is broken. %s is still in our hands." % [name,why,String(t.get("hostage","Their hostage"))]
+	var kept:=String(t.get("hostage",""))
+	var text:="%s did not bring its tribute this year: %s. The bond is broken.%s" % [name,why,(" %s is still in our hands." % kept) if kept!="" else ""]
 	_chronicle("withheld:%s:%d" % [civ_id,day],"%s Withholds Its Tribute" % name,text,"moment",civ_id)
 	ForeignDiplomacy.remember(civ_id,"We no longer pay the god's people tribute.")
 	_log(civ_id,"withheld",text)
@@ -612,7 +643,7 @@ static func _begin_arming(civ_id:String,day:int,o:Dictionary)->void:
 	var with:Array=[]
 	if league!=null and bool(league.call("is_member",civ_id)):
 		for other in league.call("members"):
-			if String(other)!=civ_id: with.append(String(other))
+			if String(other)!=civ_id and free_to_come(String(other),day): with.append(String(other))
 	var march:=day+_rng("arm:%s:%d" % [civ_id,day]).randi_range(ARMING_MIN,ARMING_MAX)
 	state().arming[civ_id]={"since":day,"march":march,"league":with,"cause":String(o.get("why_all_in","")).substr(0,160)}
 	_mark(civ_id,"all_in",day)
@@ -647,6 +678,9 @@ static func _march(civ_id:String,day:int)->void:
 		return
 	var went:Array=[]
 	for id in [civ_id]+(arm.get("league",[]) as Array):
+		# Each is weighed again on the day: a member that has since bowed, made
+		# peace or married into us stays home.
+		if String(id)!=civ_id and not free_to_come(String(id),day): continue
 		if _send_all(String(id),day): went.append(String(id))
 	if went.is_empty():
 		_log(civ_id,"no_march","%s gathered its spears but never found the road to us." % name)
@@ -662,9 +696,13 @@ static func _send_all(civ_id:String,day:int)->bool:
 	if WorldSimulation.enabled and WorldSimulation.actors.has(civ_id):
 		return bool(WorldSimulation.scoped(civ_id,func()->bool:
 			var council:=load(COUNCIL_PATH) as GDScript
-			var towns:Array=council.call("known_towns","human")
-			if towns.is_empty(): return false
-			var done:Dictionary=council.call("_launch","human",towns[0],"punish",true,{"all":true})
+			# Our town nearest them that they know (the council's own pick).
+			var town:Dictionary=council.call("_punish_target","human",{})
+			if town.is_empty():
+				var towns:Array=council.call("known_towns","human")
+				if towns.is_empty(): return false
+				town=towns[0]
+			var done:Dictionary=council.call("_launch","human",town,"punish",true,{"all":true})
 			return String(done.get("verdict",""))=="act" or bool(done.get("live",false))))
 	# A people the world does not simulate in full sends its counted fighters.
 	if war==null: return false

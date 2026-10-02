@@ -313,3 +313,39 @@ func test_a_tributary_we_will_not_protect_withholds_its_tribute()->void:
 	var told:=""
 	for e in (GameState.chronicle.get("entries",[]) as Array): told+=String((e as Dictionary).get("text",""))
 	assert_str(told).contains("you would not protect them against %s" % Hall._civ_name(enemy))
+
+## Review fixes: a tributary or kin never marches with a league against us;
+## a turned-away bow is never read as arming; peace blocks the march.
+func test_only_peoples_free_to_come_ever_march_against_us()->void:
+	var other:=String(CivilizationSystem.civilizations[1].id)
+	ANSWER._bind(other,int(GameState.elapsed_days),20.0,"","")
+	assert_bool(ANSWER.free_to_come(other)).is_false()
+	assert_bool(ANSWER.free_to_come(civ_id)).is_true()
+	# A settled feud keeps them home: the odds of coming are nought.
+	WAR._end_feud(civ_id,int(GameState.elapsed_days),"peace sought","They came to end it.")
+	var r:={"known":true,"fear":0.2,"resentment":0.9,"ratio":1.0,"bold":0.6,"worn":0.0,"lost":0,"trait":"","league":false,"knows_way":true,"vow":"","at_peace":true}
+	assert_float(float(ANSWER.odds(civ_id,r).all_in)).is_equal(0.0)
+	r["at_peace"]=false
+	assert_float(float(ANSWER.odds(civ_id,r).all_in)).is_greater(0.0)
+
+func test_a_turned_away_bow_is_not_read_as_arming()->void:
+	_terrorise(civ_id,8)
+	_set_pop(_civ(civ_id),40.0)
+	var day:=int(GameState.elapsed_days)
+	ANSWER._refused(civ_id,day,"test")
+	# Past the answer gap, inside the refusal gap: whatever is rolled, a
+	# people that would bow and has no stomach to come does not arm.
+	for m in range(0,12):
+		var d:=day+ANSWER.ANSWER_GAP+m*30
+		GameState.elapsed_days=d
+		ANSWER.monthly(d)
+	assert_bool(ANSWER.arming(civ_id).is_empty()).is_true()
+
+func test_a_people_cannot_be_bound_twice_and_binding_ends_its_arming()->void:
+	var day:=int(GameState.elapsed_days)
+	ANSWER._begin_arming(civ_id,day,{"why_all_in":"they resent us"})
+	ANSWER._bind(civ_id,day,20.0,"Tam, son of Ilak","")
+	assert_bool(ANSWER.arming(civ_id).is_empty()).is_true()
+	var first:=ANSWER.tributary(civ_id)
+	assert_str(ANSWER._bind(civ_id,day+5,40.0,"Bo, son of Ilak","")).contains("already bows")
+	assert_float(float(ANSWER.tributary(civ_id).value)).is_equal(float(first.value))
