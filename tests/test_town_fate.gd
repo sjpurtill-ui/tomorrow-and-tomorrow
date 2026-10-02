@@ -289,6 +289,62 @@ func test_each_fate_reads_from_plain_words()->void:
 	assert_bool(bool(users.get("kill_men",false)) and bool(users.get("captives",false)) and bool(users.get("raze",false))).is_true()
 	assert_dict(Fate.fate_words("how is the harvest")).is_empty()
 
+## The user, 2026-10-01: "Let the men rape the women of Tsaren" was turned
+## into "nobody who does not raise a hand to us is harmed". The words name
+## grown women; children named are refused; other orders keep their own people.
+func test_rape_reads_from_plain_words()->void:
+	var plain:=Fate.fate_words("let the men rape the women of tsaren")
+	assert_bool(bool(plain.get("violate",false))).is_true()
+	assert_bool(plain.has("violate_kids")).is_false()
+	var mixed:=Fate.fate_words("rape the women and kill the children of tsaren")
+	assert_bool(bool(mixed.get("violate",false)) and bool(mixed.get("kill_men",false))).is_true()
+	assert_bool(mixed.has("violate_kids")).override_failure_message("the children are to be killed, not this").is_false()
+	assert_bool(bool(Fate.fate_words("rape and kill the women of tsaren").get("violate",false))).is_true()
+	var kids:=Fate.fate_words("rape the girls of tsaren")
+	assert_bool(bool(kids.get("violate_kids",false)) and not kids.has("violate")).is_true()
+	assert_bool(bool(Fate.fate_words("give the women of tsaren to the soldiers").get("violate",false))).is_true()
+	var days:=Fate.fate_words("let the garrison loose on the women of tsaren for 3 days")
+	assert_int(int(days.get("violate_days",0))).is_equal(3)
+	assert_bool(days.has("count")).override_failure_message("three days is how long, not how many").is_false()
+	assert_bool(Fate.fate_words("take the women home to seanstone").has("violate")).is_false()
+	assert_bool(Fate.fate_words("do not violate the truce").has("violate")).is_false()
+
+## Counted in the town's one ledger with stated odds; the dead leave the
+## world's count too; the pregnancies are recorded and, where their people's
+## lives are not simulated, come to term as the town's own children with
+## the ledger still adding up. Children named are refused and untouched.
+func test_rape_is_counted_and_its_children_are_born_to_the_town()->void:
+	_captured_tsaren()
+	var women_before:=Ledger.here(Ledger.of(civ_id,city_id),"women")
+	var kids_before:=Ledger.here(Ledger.of(civ_id,city_id),"children")
+	var done:=Fate.apply(civ_id,city_id,Fate.fate_words("let the men rape the women and girls of tsaren"),{})
+	assert_bool(done.has("error")).override_failure_message(str(done)).is_false()
+	var l:=Ledger.of(civ_id,city_id)
+	assert_int(int(done.violated)).is_greater(0)
+	assert_int(int(l.violated)).is_equal(int(done.violated))
+	assert_float(float(done.violate_odds)).is_between(0.15,0.85)
+	assert_int(int(done.conceived)).is_less_equal(int(done.violated))
+	assert_int(Ledger.here(l,"women")).is_equal(women_before-int(done.violate_deaths))
+	assert_int(Ledger.here(l,"children")).override_failure_message("no child is touched").is_equal(kids_before)
+	assert_str(String(done.text)).contains("I will not set the men on children")
+	assert_bool(bool(Ledger.check(civ_id,city_id).get("ok",false))).override_failure_message(str(Ledger.check(civ_id,city_id))).is_true()
+	assert_str(Fate._title("Tsaren",done)).is_equal("The Rape of Tsaren")
+	if WorldSimulation.enabled: return
+	# Births where their lives are not simulated: born free, children, counted.
+	var day:=int(WorldSimulation.state.elapsed_days)
+	l["pregnancies"]=[{"day":day,"n":3,"born":2,"due":day+Fate.BIRTH_DAYS,"shown":false}]
+	var pop:=float(Ledger.region_ref(civ_id,city_id).population)
+	Fate._pregnancies_day(civ_id,city_id,l,day+Fate.SHOWN_DAYS)
+	assert_bool(bool((l.pregnancies[0] as Dictionary).shown)).is_true()
+	assert_float(float(Ledger.region_ref(civ_id,city_id).population)).is_equal(pop)
+	Fate._pregnancies_day(civ_id,city_id,l,day+Fate.BIRTH_DAYS)
+	assert_float(float(Ledger.region_ref(civ_id,city_id).population)).is_equal(pop+2.0)
+	assert_int(Ledger.here(Ledger.of(civ_id,city_id),"children")).is_equal(kids_before+2)
+	assert_bool(bool(Ledger.check(civ_id,city_id).get("ok",false))).override_failure_message(str(Ledger.check(civ_id,city_id))).is_true()
+	# Told once: a second day changes nothing.
+	Fate._pregnancies_day(civ_id,city_id,l,day+Fate.BIRTH_DAYS+1)
+	assert_float(float(Ledger.region_ref(civ_id,city_id).population)).is_equal(pop+2.0)
+
 
 func test_one_outcome_line_said_once_even_when_the_stage_words_run_out()->void:
 	var band:=_captured_tsaren()
