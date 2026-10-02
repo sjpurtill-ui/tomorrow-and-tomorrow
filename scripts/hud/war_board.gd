@@ -221,6 +221,7 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 	var big:=_line(compact(now),18,T.INK);big.name="Now";big.add_theme_font_override("font",T.font("ui_strong"));top.add_child(big)
 	if target>=0:
 		var of:=_line("/ "+compact(target),14,T.INK_MUTED);of.name="Target";of.size_flags_vertical=Control.SIZE_SHRINK_END;top.add_child(of)
+	var word:=_line("soldiers",12,T.INK_MUTED);word.name="Caption";word.size_flags_vertical=Control.SIZE_SHRINK_END;word.mouse_filter=Control.MOUSE_FILTER_IGNORE;top.add_child(word)
 	var bar:=StrengthBar.new();bar.name="Strength";bar.parts=glance;bar.target=target;bar.custom_minimum_size=Vector2(92,6);bar.mouse_filter=Control.MOUSE_FILTER_IGNORE;numbers.add_child(bar)
 	soldiers.tooltip_text="Soldiers: %s%s.\n%s\nEveryone in the army: ready, in drill, waiting or hurt. The watch at home is apart." % [EraWords.grouped(now),(" of %s kept (%s of %s people)" % [EraWords.grouped(target),Law.level_name(String(reading.level)),EraWords.grouped(int(reading.population))]) if target>=0 else "",strength_words(glance,now,target)]
 	_rule(army_box,"SoldiersRule")

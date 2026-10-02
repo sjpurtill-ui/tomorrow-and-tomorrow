@@ -464,7 +464,7 @@ class ArmyCard extends Control:
 		var drilling:=int(card.get("drill",0))
 		draw_texture_rect(Icons.command_texture("drill",T.INK_MUTED,32),Rect2(Vector2(left,row.position.y-4.0),Vector2(14,14)),false)
 		var days:=int(card.get("days",0))
-		var tail:=("%d d" % days) if drilling>0 and days>0 else ("—" if drilling<=0 else "soon")
+		var tail:=("%d %s" % [days,"day" if days==1 else "days"]) if drilling>0 and days>0 else ("none" if drilling<=0 else "soon")
 		var tail_w:=font.get_string_size(tail,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 		var bar:=Rect2(row.position,Vector2(maxf(10.0,row.size.x-tail_w-6.0),row.size.y))
 		Model.draw_bar(self,bar,float(card.get("progress",0.0)) if drilling>0 else 0.0,T.GOLD)
