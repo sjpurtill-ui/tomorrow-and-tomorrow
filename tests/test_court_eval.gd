@@ -49,8 +49,13 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## town, rations, envoys, repairs, the sick kept apart: realm_orders.gd), and
 ## the user's own levy and stand-down lines: 110 more runs a path):
 ## offline 642, live 643, sloppy 74.
+## Our nation's name once there are two towns ("call our nation the
+## Reedfolk", the refusal with one town, any official answering, "what is
+## our nation called?", the town's own rename: 18 more runs a path); the
+## whole corpus, measured domain by domain, then passed offline 681, live
+## 682, sloppy 74.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":651,"live":652,"sloppy":74}
+const BASELINE:={"offline":681,"live":682,"sloppy":74}
 
 var _processing:Dictionary={}
 

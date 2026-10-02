@@ -730,6 +730,12 @@ static func _realm(id:String,audience:Dictionary,list:Array[Dictionary],clean:St
 	# The answer to "Whom do you mean?" after the god's anger with no one named.
 	var whom:=Realm.answer_whom(audience,clean,list,mention)
 	if not whom.is_empty(): return {"result":_group(id,audience,list,clean,whom,context)}
+	# Our nation's name ("call our nation the Reedfolk"): the one before the god answers.
+	var nation:=Realm.nation(clean)
+	if not nation.is_empty():
+		_echo(id,audience,clean,context)
+		audience.erase("pending_command")
+		return {"result":Realm.perform_nation(id,_result("nation_name",_speaker_entry(list),{},clean,false),nation)}
 	# The realm's own name.
 	var renamed:=Realm.rename(clean)
 	if not renamed.is_empty():
@@ -1037,7 +1043,7 @@ static func realm_business(id:String,text:String)->bool:
 	var list:=roster(audience)
 	var mention:=func(t:String,l:Array[Dictionary])->Array[Dictionary]: return mentions(t,l)
 	if not Realm.answer_whom(audience,clean,list,mention,false).is_empty(): return true
-	if not Realm.rename(clean).is_empty(): return true
+	if not Realm.nation(clean).is_empty() or not Realm.rename(clean).is_empty(): return true
 	if not Realm.group_act(clean,audience,list,mention).is_empty(): return true
 	if not Realm.law(clean,list,mention).is_empty(): return true
 	if not Realm.gift(clean).is_empty(): return true

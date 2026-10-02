@@ -3344,6 +3344,8 @@ static func voice_context(id:String)->Dictionary:
 		"history_with_civ":[],
 	}
 	if String(audience.civ_id)!="": context["history_with_civ"]=history_with("civ:"+String(audience.civ_id),3,id)
+	# What all our towns together are called, once named (nation_name.gd).
+	if String(GameState.nation_name).strip_edges()!="": context["player_people"]=String(GameState.nation_name).strip_edges()
 	context["numbers"]=_known_numbers(audience,c)
 	if not audience.terms.is_empty():
 		context["player_stock_of_terms"]=floori(player_stock(String(audience.terms.resource)))

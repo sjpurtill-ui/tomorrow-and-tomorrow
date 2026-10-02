@@ -4804,7 +4804,7 @@ func resolve_player_battle(civ_id:String,result:Dictionary)->Dictionary:
 		var changed_region:Dictionary=strategic_result.get("region",{})
 		territorial_change={"day":int(WorldSimulation.state.elapsed_days),"region_id":String(changed_region.get("id",target_region_id)),"region":String(changed_region.get("name",target_region_id)),"controller":String(changed_region.get("controller",""))}
 	if String(relation.get("war_id",""))!="":
-		_record_war_battle(String(relation.war_id),{"day":int(WorldSimulation.state.elapsed_days),"name":"Battle of %s" % String(result.get("target_region_name",target_region_id if target_region_id!="" else _player_civilization_name())).capitalize(),"location":String(result.get("target_region_name",target_region_id if target_region_id!="" else "home territory")),"outcome":"player victory" if player_won else ("rival victory" if decisive else "continued"),"losses":{"player":{"military_dead":int(home_breakdown.killed),"civilian_dead":player_civilian_dead,"wounded":int(home_breakdown.wounded),"captured":int(termination.get("prisoners",0)) if not player_won else 0,"displaced":player_displaced},String(civ.id):{"military_dead":int(rival_breakdown.killed),"civilian_dead":rival_civilian_dead,"wounded":int(rival_breakdown.wounded),"captured":prisoners,"displaced":rival_displaced}},"territorial_change":territorial_change})
+		_record_war_battle(String(relation.war_id),{"day":int(WorldSimulation.state.elapsed_days),"name":"Battle of %s" % String(result.get("target_region_name",target_region_id if target_region_id!="" else _player_home_name())).capitalize(),"location":String(result.get("target_region_name",target_region_id if target_region_id!="" else "home territory")),"outcome":"player victory" if player_won else ("rival victory" if decisive else "continued"),"losses":{"player":{"military_dead":int(home_breakdown.killed),"civilian_dead":player_civilian_dead,"wounded":int(home_breakdown.wounded),"captured":int(termination.get("prisoners",0)) if not player_won else 0,"displaced":player_displaced},String(civ.id):{"military_dead":int(rival_breakdown.killed),"civilian_dead":rival_civilian_dead,"wounded":int(rival_breakdown.wounded),"captured":prisoners,"displaced":rival_displaced}},"territorial_change":territorial_change})
 	civ["player_relation"]=relation
 	civilizations[index]=civ
 	if target_region_id!="":
@@ -5498,7 +5498,15 @@ func _remove_weighted_cohort_population(source:Dictionary,amount:float,weights:D
 	return result
 
 
+## Our people's name: the nation's own once the ruler gave one (nation_name.gd),
+## as given ("The Reedfolk"); until then the first town's (_player_home_name).
 func _player_civilization_name()->String:
+	if WorldSimulation.state.nation_name.strip_edges()!="": return WorldSimulation.state.nation_name.strip_edges()
+	return _player_home_name()
+
+
+## The home town, as the people were called before they could take a name.
+func _player_home_name()->String:
 	if WorldSimulation.state.settlement_name.strip_edges()!="": return WorldSimulation.state.settlement_name.strip_edges().to_upper()
 	return "PLAYER CIVILIZATION"
 
