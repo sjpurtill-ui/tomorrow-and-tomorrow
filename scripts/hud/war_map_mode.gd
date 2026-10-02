@@ -46,6 +46,8 @@ const REACH_KM:=2400.0
 const RANGE_SHARE:=0.38
 const RANGE_MIN_KM:=12.0
 const RANGE_MAX_KM:=180.0
+## A people with no neighbour we know of ranges this far (km).
+const RANGE_LONE_KM:=20.0
 ## A people's ground is at least this wide about each town on screen (px).
 const LAND_MIN_PX:=30.0
 ## A front with no drawn meeting line is this share of the distance long,
@@ -184,6 +186,9 @@ func collect()->Dictionary:
 		if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
 		var pos:=_v2((army as Dictionary).get("position",{}))
 		if pos.is_finite(): frame.append(pos)
+	# Our ground, whole, in the frame.
+	for land:Dictionary in out.lands:
+		if String(land.owner)=="player": frame.append_array(_extent(land.center,float(land.radius)))
 	# Every people at feud or war with us: their front and their host.
 	for e:Dictionary in Ledger.entries():
 		if String(e.get("kind",""))=="ended": continue
@@ -240,8 +245,13 @@ static func _ranges(towns:Array)->Dictionary:
 	for a:Dictionary in towns:
 		var owner:=String(a.owner)
 		if owner=="" or out.has(owner): continue
-		out[owner]=clampf(float(nearest.get(owner,(RANGE_MIN_KM+RANGE_MAX_KM)*0.5/RANGE_SHARE))*RANGE_SHARE,RANGE_MIN_KM,RANGE_MAX_KM)
+		out[owner]=clampf(float(nearest[owner])*RANGE_SHARE,RANGE_MIN_KM,RANGE_MAX_KM) if nearest.has(owner) else RANGE_LONE_KM
 	return out
+
+
+## A ground's four furthest points, to frame it whole.
+static func _extent(center:Vector2,radius:float)->Array:
+	return [center+Vector2(radius,0.0),center-Vector2(radius,0.0),center+Vector2(0.0,radius),center-Vector2(0.0,radius)]
 
 
 static func _near_any(towns:Array,at:Vector2,km:float)->bool:
@@ -443,6 +453,7 @@ func _draw()->void:
 		var owner:=String(n.owner)
 		if lettered.has(owner): continue
 		lettered[owner]=true
+		if owner=="player" and String(GameState.nation_name)=="": continue
 		var hull:PackedVector2Array=n.hull
 		var box:=Rect2(hull[0],Vector2.ZERO)
 		for q in hull: box=box.expand(q)
@@ -450,8 +461,14 @@ func _draw()->void:
 		if words.strip_edges()=="": continue
 		var fs:=clampi(roundi(box.size.x/maxf(6.0,float(words.length()))*1.25),15,40)
 		var w:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
-		# Low in its ground, under the towns and the hosts that stand by them.
+		# Low in its ground, under the towns and the hosts that stand by them;
+		# higher when the War screen's bar or strip would cover it.
+		var free:=_free_rect(size)
 		var at:=Vector2(box.get_center().x-w*0.5,box.end.y-box.size.y*0.12)
+		for share:float in [0.12,0.3,0.5,0.75]:
+			var y:=box.end.y-box.size.y*share
+			if free.encloses(Rect2(Vector2(box.get_center().x-w*0.5,y-fs),Vector2(w,fs+4.0))):
+				at=Vector2(box.get_center().x-w*0.5,y); break
 		draw_string_outline(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,5,Color(PAPER,0.7))
 		draw_string(font,at,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color((n.color as Color).darkened(0.5),0.85))
 	for e:Dictionary in scene.get("enemies",[]):
@@ -557,6 +574,60 @@ func draw_top(canvas:Control)->void:
 		# A short ink line back to the town it stands for, when set aside.
 		if spot.distance_to(at)>plate.y*0.75:
 			canvas.draw_line(at,spot+(at-spot).limit_length(plate.y*0.55),Color(INK,0.55),1.4,true)
+	# Each front's name and who is winning, on our side of it, where it is
+	# clear of every counter and name.
+	for e:Dictionary in scene.get("enemies",[]):
+		_draw_front_chip(canvas,e,taken,free)
+
+
+## A front's chip: its people's name (HOT or WAR), and a bar of who is
+## winning, on our side of the front, at the first place along it that is
+## clear of everything already placed.
+func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->void:
+	var line:PackedVector2Array=e.get("front",PackedVector2Array())
+	if line.size()<2: return
+	var pts:=PackedVector2Array()
+	for p in line:
+		var q:=_screen(p)
+		if not q.is_finite(): return
+		pts.append(q)
+	var home:=_screen(scene.home)
+	var there:=_screen(e.there)
+	if not home.is_finite() or not there.is_finite(): return
+	var toward:=(there-home).normalized()
+	var hot:=bool(e.hot) or bool(e.war)
+	var font:=T.font("ui_strong")
+	var words:=String(e.name).to_upper()+("  WAR" if bool(e.war) else ("  HOT" if bool(e.hot) else ""))
+	var fs:=12
+	var tw:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
+	var w:=maxf(70.0,tw+12.0)
+	var size:=Vector2(w,fs+6.0+12.0)
+	var n:=pts.size()
+	var tries:=[n/2,n/5,(n*4)/5,0,n-1]
+	var place:=Vector2.INF
+	for reach in [34.0,64.0]:
+		for i:int in tries:
+			var centre:Vector2=pts[clampi(i,0,n-1)]-toward*reach
+			var rect:=Rect2(centre-size*0.5,size)
+			if free.has_area() and not free.encloses(rect): continue
+			var clear:=true
+			for r:Rect2 in taken:
+				if r.intersects(rect): clear=false; break
+			if clear: place=centre; break
+		if place.is_finite(): break
+	if not place.is_finite(): place=pts[n/2]-toward*34.0
+	var box:=Rect2(place-size*0.5,size)
+	taken.append(box.grow(3.0))
+	var chip:=Rect2(box.position,Vector2(w,fs+6.0))
+	canvas.draw_rect(chip,Color(PAPER,0.95))
+	canvas.draw_rect(chip,Color(WAR_RED if hot else INK,0.85),false,1.2)
+	canvas.draw_string(font,Vector2(chip.position.x+(w-tw)*0.5,chip.end.y-5.0),words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(WAR_RED.darkened(0.2) if hot else INK,1.0))
+	var bar:=Rect2(Vector2(box.position.x,chip.end.y+3.0),Vector2(w,8.0))
+	var theirs:Color=e.color
+	canvas.draw_rect(bar.grow(1.5),Color(PAPER,0.95))
+	canvas.draw_rect(Rect2(bar.position,Vector2(w*float(e.ours_share),bar.size.y)),OURS)
+	canvas.draw_rect(Rect2(bar.position+Vector2(w*float(e.ours_share),0),Vector2(w*(1.0-float(e.ours_share)),bar.size.y)),theirs.darkened(0.1))
+	canvas.draw_rect(bar.grow(1.5),Color(INK,0.85),false,1.2)
 
 
 ## Where a counter for a town may stand: above its mark, then to either side,
@@ -630,23 +701,6 @@ func _draw_front(e:Dictionary)->void:
 		_dashed(ours_side,Color(OURS,0.75),3.0)
 		_dashed(their_side,Color(theirs.darkened(0.15),0.75),3.0)
 		_dashed(pts,Color(INK,0.75),2.0)
-	# Whose front, and who is winning, near one end on our side (the middle is
-	# where marches cross it).
-	var mid:=pts[maxi(0,pts.size()/5)]-toward*34.0
-	var w:=70.0; var h:=8.0
-	var r:=Rect2(mid-Vector2(w*0.5,h*0.5),Vector2(w,h))
-	draw_rect(r.grow(2.0),Color(PAPER,0.95))
-	draw_rect(Rect2(r.position,Vector2(w*float(e.ours_share),h)),OURS)
-	draw_rect(Rect2(r.position+Vector2(w*float(e.ours_share),0),Vector2(w*(1.0-float(e.ours_share)),h)),theirs.darkened(0.1))
-	draw_rect(r.grow(2.0),Color(INK,0.85),false,1.2)
-	var font:=T.font("ui_strong")
-	var words:=String(e.name).to_upper()+("  WAR" if bool(e.war) else ("  HOT" if bool(e.hot) else ""))
-	var fs:=12
-	var tw:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x
-	var chip:=Rect2(Vector2(mid.x-tw*0.5-6.0,r.position.y-fs-9.0),Vector2(tw+12.0,fs+6.0))
-	draw_rect(chip,Color(PAPER,0.95))
-	draw_rect(chip,Color(WAR_RED if hot else INK,0.85),false,1.2)
-	draw_string(font,Vector2(chip.position.x+6.0,chip.end.y-5.0),words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(WAR_RED.darkened(0.2) if hot else INK,1.0))
 
 
 ## "Their raiders may come": a dashed arrow from their nearest town toward our
