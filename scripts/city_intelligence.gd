@@ -65,10 +65,13 @@ func truth(city_id:String)->Dictionary:
 		var metrics:Dictionary=local.get("metrics",{})
 		values={"population":float(local.get("population",0)),"production":float(metrics.get("material_capacity",0)),"logistics":float(metrics.get("logistics",0)),"supply":float(metrics.get("food_days",-1))}
 		values.merge(_civic_observation(city_id))
+		# Who would defend it, as its battle musters them (civilization_combat
+		# defenders: home's levy and its share of the watch, any other town its
+		# share), read in our own scope: the same rule as a rival's towns
+		# (world_simulation project).
+		values["garrison"]=float(WorldSimulation.scoped("player",func()->int:return preload("res://scripts/civilization_combat.gd").defenders(city_id)))
 		if bool(city.get("primary",false)):
-			values["garrison"]=float(WorldSimulation.military.home_army.get("troops",0))
 			values["fortification"]=clampf(float(WorldSimulation.military.settlement_defense.get("stage",0))/5.0,0,1)
-		# Secondary cities do not have an independent garrison/defense ledger yet.
 		place["controller"]=String(city.get("occupied_by","player"))
 		if String(place.controller)!="player":values.erase("garrison")
 	else:

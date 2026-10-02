@@ -42,9 +42,10 @@ const TEENS:=["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen",
 # --------------------------------------------------------------------------
 
 ## Who defends the town if it is attacked now, as its battle musters them
-## (civilization_combat.gd defenders): at home the trained levy and the
-## watch, with the home walls; any other town of ours its own watch and no
-## walls; a town another people holds (home too, once taken) none of ours.
+## (civilization_combat.gd defenders): at home the trained levy and home's
+## share of the watch, with the home walls; any other town of ours its share
+## of the watch and no walls; a town another people holds (home too, once
+## taken) none of ours.
 ## `defenders` is the one count its map badge shows too. Read unscoped, as
 ## the Military ledger does.
 static func strength(primary:bool,settlement_id:String="")->Dictionary:
@@ -345,10 +346,6 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 			var s:Dictionary=f.get("strength",{})
 			if not s.is_empty() and not bool(s.get("town",false)) and int(s.fighters)>0 and int(s.watch)>0:
 				lines.append("%s trained, %s townsfolk on watch." % [EraWords.grouped(int(s.fighters)),EraWords.grouped(int(s.watch))])
-			# Like for like: a scout's count of their town is its trained
-			# fighters (city_intelligence.truth), never its watch.
-			if not (row.get("marks",[]) as Array).is_empty():
-				lines.append("Scouts count only trained fighters in other peoples' towns, not their townsfolk on watch.")
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
 			if not s.is_empty() and int(s.wall_stage)>0:lines.append("They stand %s whole." % ("mostly" if float(s.wall_integrity)>=0.7 else "only partly") if EraWords.hearth() else "They stand %d%% whole." % roundi(float(s.wall_integrity)*100.0))

@@ -30,10 +30,8 @@ static func force_for(incident:Dictionary)->Dictionary:
 		return force
 	)
 
-## A town's own watch: its share of those set to defence work (the Defense
-## share of work, as home's watch: MilitaryCampaign._home_garrison_target), in
-## proportion to the town's people, with whatever comes to hand. {} when the
-## town keeps none. Run in the town's owner's scope.
+## A town's own watch: its share of the watch (watch_ledger), with whatever
+## comes to hand. {} when the town keeps none. Run in the town's owner's scope.
 static func town_watch(city_id:String)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
@@ -47,52 +45,112 @@ static func town_watch(city_id:String)->Dictionary:
 	force["town_watch"]=city_id
 	return force
 
-## How many stand in a town's own watch (town_watch): its share of those set
-## to defence work, by its people, never more than live there. The one count
-## of a town's guard: its battles, its page and its map badge all read it.
-## Home is guarded by home_defenders instead (see defenders). 0 for no town.
-## Run in the town's owner's scope, outside any one town's.
-static func watch_count(city_id:String)->int:
-	return watch_of(WorldSimulation.settlements.settlement_record(city_id))
+## THE WATCH LEDGER, one for every people. Those set to Defense work (D,
+## MilitaryCampaign._home_garrison_target) who are not already the trained
+## levy at home (T, home_army.troops, as _home_defense_force has always
+## netted them) keep the watch: W = max(0, D - T). Each of them keeps it in
+## the town they live in: W is shared out by people among the towns that
+## keep a watch (lived in, and not held by another people), home included,
+## in whole people that add up to W exactly (largest remainder). So home is
+## defended by T and its share, every other town by its share, and all the
+## towns together by max(T, D): no one stands in two places. Before any town
+## is founded the whole watch is at home. {city_id: watch} for every town of
+## the owner (0 where none). One pass over the towns; run in the owner's
+## scope, outside any one town's. `mc` is the owner's MilitaryCampaign.
+static func watch_ledger(mc:Variant=null)->Dictionary:
+	if mc==null:mc=WorldSimulation.military
+	var out:={}
+	if mc==null:return out
+	var watch:=maxi(0,int(mc._home_garrison_target())-maxi(0,int(mc.home_army.get("troops",0))))
+	var people:={}
+	var total:=0.0
+	for city:Dictionary in WorldSimulation.state.player_settlements:
+		var id:=String(city.get("id",""))
+		out[id]=0
+		if not keeps_watch(city):continue
+		var here:=maxf(0.0,float(WorldSimulation.settlements._settlement_population(city)))
+		if here<=0.0:continue
+		people[id]=here;total+=here
+	if watch<=0 or total<=0.0:return out
+	var given:=0
+	var rest:Array=[]
+	for id:String in people:
+		var exact:=float(watch)*float(people[id])/total
+		var whole:=mini(floori(exact),floori(float(people[id])))
+		out[id]=whole;given+=whole
+		rest.append([exact-float(whole),id])
+	rest.sort_custom(func(a:Array,b:Array)->bool:return float(a[0])>float(b[0]) if float(a[0])!=float(b[0]) else String(a[1])<String(b[1]))
+	var left:=watch-given
+	for pair:Array in rest:
+		if left<=0:break
+		var id:=String(pair[1])
+		if int(out[id])+1>floori(float(people[id])):continue
+		out[id]=int(out[id])+1;left-=1
+	return out
 
-## watch_count for a town's record already in hand (no search of the towns).
+## Whether a town keeps a watch of ours: lived in (dry_towns.gd) and not held
+## by another people (siege_recovery capture, a town taken).
+static func keeps_watch(city:Dictionary)->bool:
+	return not city.is_empty() and String(city.get("occupied_by","")).is_empty() and not WorldSimulation.settlements.abandoned(city)
+
+## Home's own share of the watch (watch_ledger): the untrained neighbours
+## who stand with the levy when home is attacked (_home_defense_force).
+static func home_watch(mc:Variant=null)->int:
+	if mc==null:mc=WorldSimulation.military
+	if mc==null:return 0
+	var home:=_home_record()
+	if home.is_empty():return maxi(0,int(mc._home_garrison_target())-maxi(0,int(mc.home_army.get("troops",0))))
+	return int(watch_ledger(mc).get(String(home.get("id","")),0))
+
+static func _home_record()->Dictionary:
+	for city:Dictionary in WorldSimulation.state.player_settlements:
+		if bool(city.get("primary",false)):return city
+	return {}
+
+## How many stand in a town's own watch (town_watch): its share of the watch
+## (watch_ledger). The one count of a town's guard: its battles, its page,
+## its map badge and what a scout sees all read it. Home stands with its
+## trained levy as well (defenders). 0 for no town. Run in the town's
+## owner's scope, outside any one town's.
+static func watch_count(city_id:String)->int:
+	return int(watch_ledger().get(city_id,0))
+
+## watch_count for a town's record already in hand.
 static func watch_of(city:Dictionary)->int:
-	var mc:Variant=WorldSimulation.military
-	# Nobody keeps watch in a place its people left (dry_towns.gd).
-	if city.is_empty() or mc==null or WorldSimulation.settlements.abandoned(city): return 0
-	var people:=float(WorldSimulation.settlements._settlement_population(city))
-	var share:=clampf(people/maxf(1.0,float(WorldSimulation.state.population_exact)),0.0,1.0)
-	return maxi(0,mini(roundi(float(mc._home_garrison_target())*share),floori(people)))
+	return 0 if city.is_empty() else watch_count(String(city.get("id","")))
 
 ## Who stands at home when it is attacked, as _home_defense_force musters
-## them: the trained levy, and the watch for the rest of those set to
-## defence work. {trained, watch}. Run in the owner's scope.
+## them: the trained levy, and home's share of the watch. {trained, watch}.
+## Run in the owner's scope.
 static func home_defenders()->Dictionary:
 	var mc:Variant=WorldSimulation.military
-	if mc==null: return {"trained":0,"watch":0}
-	var trained:=maxi(0,int(mc.home_army.get("troops",0)))
-	return {"trained":trained,"watch":maxi(0,int(mc._home_garrison_target())-trained)}
+	if mc==null:return {"trained":0,"watch":0}
+	return {"trained":maxi(0,int(mc.home_army.get("troops",0))),"watch":home_watch(mc)}
 
 ## How many of the owner's people defend one of its towns if it is attacked
-## now, as force_for musters them: at home the levy and the watch, anywhere
-## else the town's own watch. 0 for a town another people holds (home
-## included: siege_recovery capture) and for a place that is not the
-## owner's. The count a town's page, badge and drawing show.
+## now, as force_for musters them: at home the levy and its share of the
+## watch, anywhere else the town's share. 0 for a town another people holds
+## (home included: siege_recovery capture) and for a place that is not the
+## owner's. The count a town's page, badge and drawing show, and a scout's.
 static func defenders(city_id:String)->int:
 	return defenders_of(WorldSimulation.settlements.settlement_record(city_id))
 
 ## defenders for a town's record already in hand.
 static func defenders_of(city:Dictionary)->int:
-	if city.is_empty() or not String(city.get("occupied_by","")).is_empty(): return 0
-	if bool(city.get("primary",false)):
-		var home:=home_defenders()
-		return int(home.trained)+int(home.watch)
-	return watch_of(city)
+	if city.is_empty():return 0
+	return int(defenders_by_town().get(String(city.get("id","")),0))
 
-## defenders for every town of the owner, by id, in one pass over its towns.
+## defenders for every town of the owner, by id, from one reading of the
+## watch ledger.
 static func defenders_by_town()->Dictionary:
-	var out:={}
-	for city:Dictionary in WorldSimulation.state.player_settlements:out[String(city.get("id",""))]=defenders_of(city)
+	var mc:Variant=WorldSimulation.military
+	var out:=watch_ledger(mc)
+	if mc==null:return out
+	for city:Dictionary in WorldSimulation.state.player_settlements:
+		if not bool(city.get("primary",false)):continue
+		var id:=String(city.get("id",""))
+		if String(city.get("occupied_by","")).is_empty():out[id]=int(out.get(id,0))+maxi(0,int(mc.home_army.get("troops",0)))
+		else:out[id]=0
 	return out
 
 static func commit_enemy(result:Dictionary)->void:

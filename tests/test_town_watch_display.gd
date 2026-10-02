@@ -153,13 +153,13 @@ func test_the_capital_is_spelled_as_the_map_spells_it()->void:
 	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).meaning)).contains("stay at home unless")
 
 
-func test_scouted_towns_are_said_to_be_counted_like_for_like()->void:
+func test_scouted_towns_are_counted_like_for_like_without_a_caveat()->void:
+	# A scout now counts a stranger's town as its battle musters it, as ours
+	# is counted: the bars compare like with like and need no warning.
 	var facts:={"strength":Model.strength(false,TOWN)}
 	var row:=Model.row_for("garrison",facts)
-	row["marks"]=[]
-	assert_str(Model._tip(row,facts)).not_contains("Scouts count")
 	row["marks"]=[{"name":"Flintwick","low":0.0,"high":2.0,"words":"about 1","seen":"a season ago"}]
-	assert_str(Model._tip(row,facts)).contains("Scouts count only trained fighters")
+	assert_str(Model._tip(row,facts)).not_contains("Scouts count")
 
 
 func test_the_map_reads_every_guard_in_one_pass_and_again_only_on_change()->void:
@@ -169,28 +169,34 @@ func test_the_map_reads_every_guard_in_one_pass_and_again_only_on_change()->void
 	var guards:Dictionary=probe._guards()
 	assert_int(int(guards[home])).is_equal(Labels.home_guard(home))
 	assert_int(int(guards[TOWN])).is_equal(Labels.home_guard(TOWN))
-	assert_int(int(guards[TOWN])).is_equal(10)
+	# Twelve trained at home; the other 28 of the forty keep the watch, a
+	# quarter of them in Valebridge.
+	assert_int(int(guards[TOWN])).is_equal(7)
+	assert_int(int(guards[home])).is_equal(12+21)
 	# Unchanged: the same reading, not a new one.
 	assert_bool(is_same(probe._guards(),guards)).is_true()
 	# The Defense share changes while the day stands still: read again.
 	GameState.population_allocations["Defense"]=80
-	assert_int(int(probe._guards()[TOWN])).is_equal(20)
-	assert_int(int(probe._guards()[home])).is_equal(80)
+	assert_int(int(probe._guards()[TOWN])).is_equal(17)
+	assert_int(int(probe._guards()[home])).is_equal(12+51)
 
 
 func test_home_shows_its_levy_and_watch_as_its_battle_musters_them()->void:
 	_levy(12)
 	var home:=_home_id()
-	# Home's battle: twelve trained and the rest of the forty on watch.
+	# Home's battle: twelve trained, and home's share of the 28 others on
+	# defence work (three in four of the people live at home): 21.
 	var musters:=int(MilitaryCampaign._home_defense_force(false).troops)
-	assert_int(musters).is_equal(40)
+	assert_int(musters).is_equal(12+21)
 	assert_int(Combat.defenders(home)).is_equal(musters)
 	var strong:=Model.strength(true,home)
 	assert_int(int(strong.defenders)).is_equal(musters)
 	var row:=Model.row_for("garrison",{"strength":strong})
 	assert_int(int(row.number)).is_equal(musters)
-	assert_str(String(row.value)).is_equal("40 fighters")
+	assert_str(String(row.value)).is_equal("33 fighters")
 	assert_str(String(row.note)).is_equal("12 trained")
+	# The Military ledger's garrison at home is the same muster.
+	assert_int(int(MilitaryCampaign.settlement_defense_snapshot().garrison_personnel)).is_equal(musters)
 	# Home's badge appears, though its label carries no id of its own.
 	assert_int(Labels.home_guard(home)).is_equal(musters)
 	assert_int(int(_card(home,"SEANSTONE").badge)).is_equal(musters)
@@ -216,3 +222,127 @@ func test_an_open_card_fits_its_name_and_badge_and_draws_one_badge()->void:
 	# The open town is drawn once, as its card; its name tag is not under it.
 	assert_array(probe.frames).contains_exactly(["other"])
 	assert_array(probe.opened).contains_exactly([[TOWN,true]])
+
+
+# --------------------------------------------------------------------------
+# One watch ledger: no one stands in two places
+# --------------------------------------------------------------------------
+
+## Five more towns of ours: seven in all, home keeping two in five.
+func _seven_towns()->Array[String]:
+	var ids:Array[String]=[_home_id(),TOWN]
+	var shares:=[.10,.08,.07,.05,.05]
+	for i in shares.size():
+		var id:="settlement_%03d" % (i+3)
+		var town:Dictionary={"id":id,"sequence":i+3,"primary":false,"name":"Town %d" % (i+3),"position":Vector2(100+40*i,60),"population_share":shares[i],"founded_day":0,"status":"established","territory_context":{},"environment_profile":{}}
+		GameState.player_settlements.append(town);SettlementModel._ensure_city_resources(town)
+		ids.append(id)
+	GameState.next_player_settlement_id=8
+	return ids
+
+
+func _sum(values:Dictionary)->int:
+	var total:=0
+	for key in values:total+=int(values[key])
+	return total
+
+
+func test_the_watch_is_shared_out_once_among_seven_towns()->void:
+	var ids:=_seven_towns()
+	var home:=_home_id()
+	GameState.population_allocations["Defense"]=60
+	_levy(12)
+	# Sixty on defence work, twelve of them the levy at home: 48 keep the
+	# watch, each in the town they live in.
+	var ledger:=Combat.watch_ledger()
+	assert_int(_sum(ledger)).is_equal(48)
+	var by_town:=Combat.defenders_by_town()
+	# All the towns together: the sixty, never more.
+	assert_int(_sum(by_town)).is_equal(60)
+	assert_int(int(by_town[home])).is_equal(12+int(ledger[home]))
+	# Home keeps two in five of the watch, Valebridge one in four.
+	assert_int(int(ledger[home])).is_between(19,20)
+	assert_int(int(ledger[TOWN])).is_equal(12)
+	# Home's battle, card and badge: the levy and home's share.
+	assert_int(int(MilitaryCampaign._home_defense_force(false).troops)).is_equal(int(by_town[home]))
+	assert_int(int(Model.strength(true,home).defenders)).is_equal(int(by_town[home]))
+	assert_int(Labels.home_guard(home)).is_equal(int(by_town[home]))
+	# Every other town's battle, card and badge: its share, the same number.
+	for id:String in ids.slice(1):
+		var share:=int(ledger[id])
+		var fights:=int(Combat.town_watch(id).get("troops",0))
+		assert_int(fights).override_failure_message(id).is_equal(share)
+		assert_int(int(Model.strength(false,id).defenders)).override_failure_message(id).is_equal(share)
+		assert_int(Labels.home_guard(id)).override_failure_message(id).is_equal(share)
+		assert_int(int(_card(id,"Town").badge)).override_failure_message(id).is_equal(share)
+	# More trained at home than on defence work: no one is left for a watch.
+	_levy(75)
+	assert_int(_sum(Combat.watch_ledger())).is_equal(0)
+	assert_int(_sum(Combat.defenders_by_town())).is_equal(75)
+	assert_int(int(Combat.defenders_by_town()[TOWN])).is_equal(0)
+
+
+func test_a_town_left_or_taken_gives_its_watch_to_the_towns_still_ours()->void:
+	_seven_towns()
+	GameState.population_allocations["Defense"]=60
+	_levy(12)
+	SettlementModel.settlement_record("settlement_003")["status"]="abandoned"
+	SettlementModel.settlement_record("settlement_004")["occupied_by"]="civ_03"
+	var ledger:=Combat.watch_ledger()
+	assert_int(int(ledger["settlement_003"])).is_equal(0)
+	assert_int(int(ledger["settlement_004"])).is_equal(0)
+	assert_int(_sum(ledger)).is_equal(48)
+
+
+# --------------------------------------------------------------------------
+# What scouts count: the same defenders, for every people
+# --------------------------------------------------------------------------
+
+func test_our_towns_are_counted_by_a_strangers_scout_as_their_battle_musters_them()->void:
+	_seven_towns()
+	GameState.population_allocations["Defense"]=60
+	_levy(12)
+	var intel=CivilizationSystem.city_intelligence
+	var guards:=Combat.defenders_by_town()
+	for city:Dictionary in GameState.player_settlements:
+		var id:=String(city.id)
+		var truth:Dictionary=intel.truth(id)
+		assert_float(float(truth.values.garrison)).override_failure_message(id).is_equal(float(guards[id]))
+	# A town another people holds is theirs to count, not ours.
+	SettlementModel.settlement_record(TOWN)["occupied_by"]="civ_03"
+	assert_bool((intel.truth(TOWN).values as Dictionary).has("garrison")).is_false()
+
+
+func test_a_rivals_other_town_is_counted_and_fought_by_its_watch()->void:
+	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":.1,"surface_water_recognized":true}
+	WorldSimulation.create_actor("alpha",777,Vector2.ZERO)
+	WorldSimulation.actors.alpha.controller="manual"
+	var local:="settlement_002"
+	WorldSimulation.scoped("alpha",func()->void:
+		WorldSimulation.state.ensure_population_total(1000)
+		WorldSimulation.state.settlement_completed=["Hearth Circle"]
+		WorldSimulation.settlements.ensure_founded()
+		var second:Dictionary={"id":local,"sequence":2,"primary":false,"name":"Alphaford","position":Vector2(60,0),"population_share":.3,"founded_day":0,"status":"established","territory_context":{},"environment_profile":{}}
+		WorldSimulation.state.player_settlements.append(second);WorldSimulation.state.next_player_settlement_id=3;WorldSimulation.settlements._ensure_city_resources(second)
+		WorldSimulation.state.population_allocations["Defense"]=50
+		WorldSimulation.military.home_army=WorldSimulation.military._empty_home_army()
+	)
+	var civ:=CivilizationSystem.civilizations[0].duplicate(true)
+	civ.id="alpha";civ.name="Alpha"
+	WorldSimulation.scoped("alpha",func()->void:WorldSimulation.project(civ))
+	CivilizationSystem.civilizations[0]=civ
+	var watch:int=WorldSimulation.scoped("alpha",func()->int:return Combat.watch_count(local))
+	# Fifty on their defence work, three in ten of their people in Alphaford.
+	assert_int(watch).is_equal(15)
+	var region_id:=""
+	for region:Dictionary in civ.strategic_regions:
+		if String(region.get("local_city_id",""))==local:region_id=String(region.id)
+	assert_str(region_id).is_not_empty()
+	# Our scouts' truth of their town is its watch, as their battle musters it.
+	var truth:Dictionary=CivilizationSystem.city_intelligence.truth(region_id)
+	assert_float(float(truth.values.garrison)).is_equal(float(watch))
+	var fights:Dictionary=WorldSimulation.scoped("alpha",func()->Dictionary:return Combat.town_watch(local))
+	assert_int(int(fights.troops)).is_equal(watch)
+	# Their scouts' truth of our Valebridge is ours, read in our own scope.
+	assert_float(float(CivilizationSystem.city_intelligence.truth(TOWN).values.garrison)).is_equal(float(Combat.defenders(TOWN)))
+	WorldSimulation.context_provider=Callable()
