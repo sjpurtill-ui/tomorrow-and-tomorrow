@@ -1,12 +1,16 @@
 {
   "id": "sparring_customs",
   "line": "security",
-  "game_year": 10,
-  "approx_historical_year": -4933,
-  "prompt": "c. 4933 BCE: Two adults practice controlled sparring with blunt wooden staffs while others watch; hand-cut woodblock print. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a31833b2-6dce-482e-bd6b-3be324d69c31.png",
-  "asset": "res://assets/ui/research/subjects/sparring_customs-v1.png",
-  "sha256": "963d30ad4dc4b2c2f581e766d5b8f0c6388434ea79607ddc44ad0cbda5510b7d",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; staff practice reads clearly as training rather than battle in crop."
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Layered handcut woodblock vermilion charcoal parchment. Two fully clothed adults practice controlled sparring with short plain wooden staffs, lightly crossed at middle; observing adult gestures pause. Relaxed training stances, no injuries, blood, battle or metal weapons. Temporary camp far behind, central whole heads hands staff crossings retained. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hafted_weapons-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-50040606-00e6-4ed7-baa2-b3d76a5c33c1.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual 3.37:1 Godot card visually reviewed; field medium, early materials, heads and distinctive action retained.",
+  "asset": "res://assets/ui/research/subjects/sparring_customs-v2.png",
+  "sha256": "39259bead0977f90c218748e4838b57b9b80c77934688f39f411e5146b8d8f2d",
+  "mode": "built-in image_gen / edit"
 }

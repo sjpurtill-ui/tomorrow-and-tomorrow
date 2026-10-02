@@ -691,13 +691,7 @@
    "caption": "Novices shadow an experienced hand (Year 8)",
    "style": "paper_gouache"
   },
-  "ochre_grave_goods": {
-   "path": "res://assets/ui/research/discovery-600/ochre_grave_goods.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
-   "tile_index": 0,
-   "caption": "Red ochre and grave goods for the dead (Year 10)",
-   "style": "silhouette_ochre"
-  },
+  "ochre_grave_goods": {"path": "res://assets/ui/research/subjects/ochre_grave_goods-v1.png", "style": "flat interlocking indigo rose gold violet tapestry-inspired painting", "focus": [0.5, 0.5]},
   "offering_omens": {
    "path": "res://assets/ui/research/discovery-600/offering_omens.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
@@ -1228,13 +1222,7 @@
    "caption": "Colophons: scribe, date and source on each tablet (Year 490)",
    "style": "paper_gouache"
   },
-  "tallies": {
-   "path": "res://assets/ui/research/discovery-600/tallies.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
-   "tile_index": 5,
-   "caption": "Notched-stick tallies (Year 10)",
-   "style": "paper_gouache"
-  },
+  "tallies": {"path": "res://assets/ui/research/subjects/tallies-v2.png", "style": "blue-black ink crosshatching over lapis parchment", "focus": [0.5, 0.5]},
   "temple_choirs": {
    "path": "res://assets/ui/research/discovery-600/temple_choirs.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",

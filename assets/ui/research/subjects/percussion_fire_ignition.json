@@ -1,0 +1,17 @@
+{
+  "id": "percussion_fire_ignition",
+  "line": "nutrition",
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Opaque botanical egg-tempera olive gold cream earth. Two crouching adults, one strikes pale flint against a dull dark iron-pyrite nodule, tiny sparks toward dry fibrous tinder on ground, other protects tinder with cupped hands. Clear stone-on-stone contact, no metal firesteel, drill, match or pottery. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-09/assets/ui/research/subjects/friction_fire_ignition-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-77d75295-a6da-4a99-a7bd-aeedf17f30b6.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual 3.37:1 Godot card visually reviewed; field medium, early materials, heads and distinctive action retained.",
+  "replace_first300": true,
+  "asset": "res://assets/ui/research/subjects/percussion_fire_ignition-v2.png",
+  "sha256": "5cf7e1183a87813518f5d8e3a55233f8176c8bbc5e00eccfab2ede097545356b",
+  "mode": "built-in image_gen / edit"
+}
