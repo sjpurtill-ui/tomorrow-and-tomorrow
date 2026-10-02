@@ -1486,7 +1486,9 @@ func _foreign_holds()->Array:
 			var id:=String(region.get("id",""))
 			if not places.has(id):continue
 			var holder:=String(region.get("controller",civ.get("id","")))
-			if holder=="" or holder==us or (us=="player" and holder=="human"):continue
+			# Our own holds: in a rival's view its holdings read "player"
+			# (_localize_controllers), so "player" is ours in every scope.
+			if holder=="" or holder in [us,"player"] or (us=="player" and holder=="human"):continue
 			var boundary:Variant=region.get("boundary",[])
 			if (boundary is PackedVector2Array or boundary is Array) and int(boundary.size())>=3:
 				holds.append({"boundary":PackedVector2Array(boundary)})
