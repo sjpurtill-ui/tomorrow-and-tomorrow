@@ -48,6 +48,9 @@ var opening_arc:Dictionary={}
 ## Generational aims (scripts/legacy_aims.gd): the live aim, proposals,
 ## legacies and rivals' vows. Replaces the three one-shot visions.
 var aims:Dictionary={}
+## The path the people's work leans toward (scripts/work_paths.gd): {id, since,
+## reviewed, why, score, by}; {} until one is chosen (older saves: balanced).
+var work_path:Dictionary={}
 ## Emitted for each Opening Arc beat: {id, kind, tier, day, title, text, refs}.
 signal opening_beat(beat:Dictionary)
 
@@ -57,7 +60,7 @@ func ensure()->void:
 	next_vision_day=last_day+30
 
 func reset_for_new_world()->void:
-	ambition=""; chosen_day=-1; chosen_century=-1; last_day=0; resolved=0; next_vision_day=30; automatic_work=true; work_baseline={}; work_day=-30; history.clear(); opening_arc={}; aims={}; cultural_memory=Culture.empty(); auto_scouting=true;auto_settlement=true;auto_research=true;inclination_review_day=-1; initialized=false
+	ambition=""; chosen_day=-1; chosen_century=-1; last_day=0; resolved=0; next_vision_day=30; automatic_work=true; work_baseline={}; work_day=-30; history.clear(); opening_arc={}; aims={}; work_path={}; cultural_memory=Culture.empty(); auto_scouting=true;auto_settlement=true;auto_research=true;inclination_review_day=-1; initialized=false
 	if is_instance_valid(panel): panel.queue_free()
 
 func choose(id:String)->Dictionary:
