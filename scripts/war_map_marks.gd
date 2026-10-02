@@ -127,22 +127,15 @@ static func raid_alpha(days_ago:int)->float:
 
 # --- Places ----------------------------------------------------------------
 
-## Where the two peoples' ground meets: partway from home toward the enemy.
+## Partway from home toward the enemy: where a feud's mark goes when our
+## lands do not meet where the map draws them. Where they do, the mark sits on
+## the real meeting line instead (nation_borders.meeting_point), and that line
+## is lit red; no stretch of border is invented here.
 static func border_point(home:Vector2,enemy:Vector2)->Vector2:
 	var delta:=enemy-home
 	var distance:=delta.length()
 	if distance<0.001: return home+Vector2(1.5,0.0)
 	return home+delta/distance*clampf(distance*0.5,1.5,40.0)
-
-
-## A short stretch of contested border, across the line between the peoples.
-static func border_segment(home:Vector2,enemy:Vector2)->PackedVector2Array:
-	var center:=border_point(home,enemy)
-	var delta:=enemy-home
-	var direction:=delta.normalized() if delta.length()>0.001 else Vector2.RIGHT
-	var across:=Vector2(-direction.y,direction.x)
-	var half:=clampf(delta.length()*0.08,0.4,6.0)
-	return PackedVector2Array([center-across*half,center+across*half])
 
 
 ## Where a raid struck: close to home, on the enemy's side, a little aside.

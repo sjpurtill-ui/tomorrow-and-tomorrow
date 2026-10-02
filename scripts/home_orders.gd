@@ -112,6 +112,13 @@ const LEVY_GOODS:="(?i)\\b(tax|taxes|tribute|tithe|dues?|shares?|hides?|food|gra
 const STAND_DOWN_VERBS:="(?i)\\b(dismiss|dismissed|release|released|discharge|discharged|demobili[sz]e|demobili[sz]ed|stand [\\w' ]{0,30}?down|disband|disbanded|let [\\w' ]{0,30}?go home|send [\\w' ]{0,30}?(?:home|back to (?:the |their )?(?:fields|work|workforce|homes|hearths|families))|return [\\w' ]{0,30}?to (?:the |their )?(?:workforce|fields|work|homes|hearths|families))\\b"
 ## Our own fighters, as a group or a number ("5 of our soldiers").
 const OUR_FIGHTERS:="(?i)\\b(soldiers?|fighters?|warriors?|levies|levy|recruits?|troops|spearmen|archers|bowmen|men under arms|men at arms|fighting men)\\b"
+## The army as a whole, or its bands: "disband the army", "stand the host
+## down", "send the war bands home".
+const OUR_ARMY:="(?i)\\b(army|armies|host|war ?bands?|bands|forces|raiders)\\b"
+## All of them, said with no number: "the army", "our soldiers", "everyone".
+const ALL_OF_THEM:="(?i)\\b(all|every|everyone|everybody|each|the whole)\\b|\\b(the|our|my)\\s+(?:\\w+\\s+)?(army|armies|host|war ?bands|bands|forces|soldiers|fighters|warriors|troops|levy|levies|spearmen|archers|bowmen|men under arms|fighting men|raiders)\\b"
+## Others sent out who are not fighters ("send the scouting band home").
+const NOT_FIGHTERS:="(?i)\\b(scouts?|scouting|settlers?|envoys?|messengers?|traders?|caravans?|hunters?|herders?|workers?|builders?|carriers?|pilgrims?)\\b"
 
 ## A kind of fighter the words ask for: [unit, its weapon, the words].
 const KIND_WORDS:=[["archer","bow","\\b(archers?|bowmen)\\b"],["spearman","spear","\\bspearmen\\b"]]
@@ -359,10 +366,53 @@ static func stand_down_reading(text:String)->Dictionary:
 	var clean:=text.strip_edges()
 	if clean.is_empty() or clean.ends_with("?") or _has(clean,QUESTION_LEADS): return {}
 	var lower:=clean.to_lower()
-	if _has(lower,THEIRS) or _has(lower,WAR_WORDS) or _names_foreign(lower): return {}
-	if not _has(lower,STAND_DOWN_VERBS) or not _has(lower,OUR_FIGHTERS): return {}
-	var recruits:=_has(lower,"\\brecruits?\\b") and not _has(lower,"\\b(soldiers?|fighters?|warriors?|troops|levies|spearmen|archers|bowmen)\\b")
-	return {"kind":"stand_down","count":number_in(lower),"all":_has(lower,"\\b(all|every|everyone|each|the whole)\\b"),"recruits":recruits}
+	if not _has(lower,STAND_DOWN_VERBS) or _has(lower,THEIRS): return {}
+	# One band of ours named: "disband Lorn's band", "disband the raiders for
+	# Eldwick" (a band's own name may name their town).
+	var band:=_band_named(lower)
+	if band.is_empty() and (_has(lower,WAR_WORDS) or _names_foreign(lower)): return {}
+	var army:=_has(lower,OUR_ARMY) and not _has(lower,NOT_FIGHTERS)
+	if band.is_empty() and not _has(lower,OUR_FIGHTERS) and not army: return {}
+	var recruits:=_has(lower,"\\brecruits?\\b") and not _has(lower,"\\b(soldiers?|fighters?|warriors?|troops|levies|spearmen|archers|bowmen)\\b") and not army
+	var count:=number_in(lower)
+	var out:={"kind":"stand_down","count":count,"all":count<=0 and not recruits and _has(lower,ALL_OF_THEM),"recruits":recruits}
+	if not band.is_empty():
+		out["band"]=int(band.get("army_id",0))
+		out["band_name"]=String(band.get("name",""))
+		out["all"]=false
+	return out
+
+
+## The band of ours the words name, by its leader ("Lorn's band", "the band
+## under Lorn") or by its own name ("the raiders for Eldwick", "the raiders"
+## when only one band is called that); {} when none, or more than one fits.
+static func _band_named(lower:String)->Dictionary:
+	var mc:Variant=WorldSimulation.military
+	if mc==null: return {}
+	var orders:=load("res://scripts/army_orders.gd")
+	var best:={}
+	var best_score:=0
+	var tied:=false
+	for army in mc.field_armies:
+		if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
+		var band:Dictionary=army
+		var score:=0
+		var leader:=String(orders.general_name(band)) if orders!=null else ""
+		var given:=_re("[^a-z]").sub(leader.get_slice(" ",0).to_lower(),"",true)
+		if given.length()>=3 and _has(lower,"\\b%s(?:'s|’s)\\s+(?:\\w+\\s+)?(?:band|men|host|raiders|fighters|warriors|war ?band|party|army)\\b|\\b(?:band|men|host|raiders|party)\\s+(?:under|of|led by)\\s+%s\\b" % [given,given]): score+=3
+		var name:=String(band.get("name","")).to_lower()
+		var words:=0
+		for raw in name.split(" ",false):
+			var word:=_re("[^a-z]").sub(String(raw),"",true)
+			if word.length()<4 or word in ["from","with","band","sent","home","their"]: continue
+			if _has(lower,"\\b%s\\b" % word): words+=1
+		if words>0 and _has(lower,"\\b(band|raiders|men|host|party|war ?band|withdrawal|guard|column)\\b"): score+=words
+		if score<=0: continue
+		if score>best_score:
+			best=band; best_score=score; tied=false
+		elif score==best_score: tied=true
+	if best.is_empty() or tied: return {}
+	return {"army_id":int(best.get("army_id",0)),"name":preload("res://scripts/equipment_logistics.gd").force_name(best)}
 
 
 ## New fighters of our own: {kind: "levy", count, recruit, fill, arm_said,
@@ -483,47 +533,100 @@ static func _nobody_free_outcome(mc:Variant,asked:int)->String:
 ## Fighters stood down (MilitaryCampaign.demobilize): those hurt first, then
 ## the recruits waiting, then the fighters at home; bands away in the field
 ## are the war leader's to bring home first. Every number is the engine's own.
+## Our fighters sent home to their work (army_levy_law.gd stand_down): the
+## bands at home fold back first, never the watch, and the size the war
+## leader keeps falls to what is left, so nobody is called up in their place.
+## "Disband the army" keeps no army at all: those away go home when they come
+## back. One band named goes home whole, at once or when it gets there.
 static func _stand_down(reading:Dictionary)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	if mc==null: return {"ok":false,"kind":"stand_down","says":"","outcome":""}
-	var waiting:=int(mc.aggregate_recruits)
-	var at_home:=int(mc.home_army.get("troops",0))
-	var free:=waiting+at_home
+	var Law:=preload("res://scripts/army_levy_law.gd")
 	var out:={"ok":false,"kind":"stand_down","count":0}
+	if int(reading.get("band",0))>0: return _stand_down_band(mc,int(reading.band),out)
+	var waiting:=int(mc.aggregate_recruits)
+	var everyone:=bool(reading.get("all",false))
 	var n:=int(reading.get("count",0))
-	if n<=0:
-		if bool(reading.get("recruits",false)): n=waiting
-		elif bool(reading.get("all",false)): n=free
-	if n<=0:
-		out.says="How many should go home? %d wait as recruits and %d are under arms at home." % [waiting,at_home] if free>0 else "There is nobody under arms at home to send back."
+	if n<=0 and bool(reading.get("recruits",false)): n=waiting
+	if n<=0 and not everyone:
+		var free:=Law.free_to_go(mc)
+		out.says=("How many should go home? %d wait as recruits and %d stand under arms at home beside the watch." % [waiting,maxi(0,free-waiting)]) if free>0 else "There is nobody under arms at home to send back."
 		out.outcome="Nothing is set in motion: no number was named." if free>0 else "Nothing is set in motion: nobody is under arms at home."
 		return out
-	if free<=0:
-		out.says="There is nobody under arms at home to send back; our fighters are away with the bands."
-		out.outcome="Nothing is set in motion: nobody is under arms at home."
-		return out
-	var r:Dictionary=mc.demobilize(mini(n,free))
-	if r.has("error"):
-		out.says="They cannot be stood down: %s" % String(r.error)
-		out.outcome="Nothing is set in motion: %s" % String(r.error)
-		return out
+	var r:Dictionary=Law.stand_down(mc,n,everyone)
 	var released:=int(r.get("released",0))
-	out.ok=released>0
+	var level_words:=String(r.get("said",""))
+	out.ok=released>0 or level_words!=""
 	out.count=released
 	var parts:PackedStringArray=PackedStringArray()
 	if int(r.get("released_injured_veterans",0))>0: parts.append("%d who were hurt" % int(r.released_injured_veterans))
 	if int(r.get("released_recruits",0))>0: parts.append("%d recruits" % int(r.released_recruits))
 	if int(r.get("released_field_soldiers",0))>0: parts.append("%d who stood under arms" % int(r.released_field_soldiers))
-	var short:=(" Only %d were at home to send back; the rest are away with the bands." % released) if released<n else ""
-	var gear:=""
+	var lines:PackedStringArray=PackedStringArray()
+	if released>0: lines.append("%d go home to their families and their work: %s." % [released,", ".join(parts) if not parts.is_empty() else "%d in all" % released])
+	else: lines.append("Nobody is at home to send back.")
+	var gear:=_gear_words(r)
+	if gear!="": lines.append(gear)
+	var away:=int(r.get("away",0))
+	if away>0 and everyone: lines.append("%d more are away with the bands; they go home when they come back." % away)
+	elif away>0 and released<n: lines.append("%d more are away with the bands." % away)
+	if everyone and int(r.get("held",0))>0: lines.append("The %d holding the towns we took stay there." % int(r.held))
+	if int(r.get("watch",0))>0 and (everyone or released<n): lines.append("The %d on the watch stay at their posts." % int(r.watch))
+	if level_words!="": lines.append(level_words)
+	out.says=" ".join(lines)
+	out.outcome=("%d stood down and back at work at home." % released) if released>0 else ("No army is kept now." if level_words!="" else "Nothing is set in motion: nobody is under arms at home.")
+	return out
+
+
+## One band of ours sent home whole: at home, its men go back to work at
+## once; out, it turns for home and its men go back to work when it gets
+## there (the size kept falls by them now).
+static func _stand_down_band(mc:Variant,army_id:int,out:Dictionary)->Dictionary:
+	var Law:=preload("res://scripts/army_levy_law.gd")
+	var index:int=mc._field_army_index(army_id)
+	if index<0:
+		out.says="That band is no more."
+		out.outcome="Nothing is set in motion: the band is gone."
+		return out
+	var band:Dictionary=mc.field_armies[index]
+	var name:=preload("res://scripts/equipment_logistics.gd").force_name(band)
+	var title:=name.substr(0,1).to_upper()+name.substr(1)
+	var men:=int(band.get("troops",0))
+	if Law.home_band(mc,band):
+		var r:Dictionary=mc.disband_field_army(army_id)
+		if r.has("error"):
+			out.says="%s cannot be stood down: %s" % [name,String(r.error)]
+			out.outcome="Nothing is set in motion: %s" % String(r.error)
+			return out
+		var gone:Dictionary=mc.stand_down(mini(men,maxi(0,int(mc.home_army.get("troops",0))-int(Law.watch(mc).home))))
+		var released:=int(gone.get("released",0))
+		var level_words:=Law.lower(mc)
+		out.ok=true
+		out.count=released
+		var said:=PackedStringArray(["%s is no more: its %d go home to their families and their work." % [title,released]])
+		var gear:=_gear_words({"returned_equipment":gone.get("returned_equipment",{})})
+		if gear!="": said.append(gear)
+		if level_words!="": said.append(level_words)
+		out.says=" ".join(said)
+		out.outcome="%d stood down and back at work at home." % released
+		return out
+	var sent:bool=(load("res://scripts/war_council.gd") as GDScript).call("_send_home",band)
+	var level_words:=Law.lower(mc,false,men)
+	out.ok=true
+	out.count=0
+	var how:=("%s turns for home. Its %d go back to their work when they get there." % [title,men]) if sent else ("%s is in a fight; it comes home when the fight is done, and its %d go back to their work." % [title,men])
+	out.says=how+(" "+level_words if level_words!="" else "")
+	out.outcome="%s goes home to be stood down." % title
+	return out
+
+
+## "Their 12 spears go back to the store.", or "" when nothing came back.
+static func _gear_words(r:Dictionary)->String:
 	var returned:Dictionary=r.get("returned_equipment",{}) if r.get("returned_equipment") is Dictionary else {}
 	var back:PackedStringArray=PackedStringArray()
 	for item in returned:
 		if int(returned[item])>0: back.append("%d %s" % [int(returned[item]),String(ITEM_NAMES.get(String(item),String(item).replace("_"," ")))])
-	if not back.is_empty(): gear=" Their %s go back to the store." % ", ".join(back)
-	out.says="%d go home to their families and their work: %s.%s%s" % [released,", ".join(parts) if not parts.is_empty() else "%d in all" % released,short,gear]
-	out.outcome="%d stood down and back at work at home." % released
-	return out
+	return ("Their %s go back to the store." % ", ".join(back)) if not back.is_empty() else ""
 
 
 ## A levy raised: called up (when the words call up new fighters), drilled
@@ -716,8 +819,9 @@ static func _drill_home(mc:Variant,out:Dictionary)->Dictionary:
 		out.outcome="Nothing is set in motion: %s" % String(began.error)
 		return out
 	out.ok=true;out.count=home;out["camp"]=true
-	out.says="Nobody new is waiting, so the %d under arms at home go to camp drill: musters, signals and changes of formation, for about %d days." % [home,roundi(float(mc.TRAINING_PROGRAMS.camp_drill.duration_days))]
-	out.outcome="The %d under arms at home begin camp drill." % home
+	var who:=preload("res://scripts/army_levy_law.gd").at_home_words(mc)
+	out.says="Nobody new is waiting, so %s go to camp drill: musters, signals and changes of formation, for about %d days." % [who,roundi(float(mc.TRAINING_PROGRAMS.camp_drill.duration_days))]
+	out.outcome="%s begin camp drill." % (who.substr(0,1).to_upper()+who.substr(1))
 	return out
 
 

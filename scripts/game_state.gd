@@ -156,6 +156,8 @@ var settlement_completed: Array[String] = []
 var settlement_site_committed := false
 var settlement_founded_at := Vector3.ZERO
 var settlement_name := ""
+## What all our towns together are called, once there are two (nation_name.gd); "" until named.
+var nation_name := ""
 var settlement_founded_day := -1
 var settlement_plots:Array[Dictionary]=[]
 var settlement_nuclei:Array[Dictionary]=[]
@@ -232,6 +234,9 @@ var economic_ledger:Array[Dictionary]=[]
 var tax_rate:=0.06
 var external_trade_policy:="balanced"
 var public_spending_priority:="balanced"
+## The realm's one purse, the god's account for the whole people
+## (realm_purse.gd). Empty in an older save: made whole on first reading.
+var realm_purse:Dictionary={}
 var external_trade_credit:=0.0
 var external_trade_exports:=0.0
 var external_trade_imports:=0.0
@@ -522,6 +527,7 @@ func reset_for_new_world(new_seed:int)->void:
 	settlement_site_committed=false
 	settlement_founded_at=Vector3.ZERO
 	settlement_name=""
+	nation_name=""
 	settlement_founded_day=-1
 	settlement_plots=[]
 	settlement_nuclei=[]
@@ -582,6 +588,7 @@ func reset_for_new_world(new_seed:int)->void:
 	tax_rate=0.06
 	external_trade_policy="balanced"
 	public_spending_priority="balanced"
+	realm_purse={}
 	external_trade_credit=0.0
 	external_trade_exports=0.0
 	external_trade_imports=0.0

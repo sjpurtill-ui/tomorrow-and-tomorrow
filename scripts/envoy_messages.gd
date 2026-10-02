@@ -449,6 +449,9 @@ static func send(civ_id:String,purpose:String,choice:Dictionary)->Dictionary:
 # --------------------------------------------------------------------------
 
 static func _god(civ_id:String="")->String:
+	# Our nation's name once given ("the god of the Reedfolk"), else the home town's.
+	var nation:=String(WorldSimulation.state.nation_name).strip_edges()
+	if nation!="": return "the god of %s" % preload("res://scripts/nation_name.gd").in_sentence(nation)
 	var home:=String(WorldSimulation.state.settlement_name).strip_edges()
 	return "the god of %s" % home if home!="" else "our god"
 

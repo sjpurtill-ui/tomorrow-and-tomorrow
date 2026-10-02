@@ -6,6 +6,7 @@ const T=preload("res://scripts/hud/hud_tokens.gd")
 const Motion=preload("res://scripts/hud/motion.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const Explainer=preload("res://scripts/effect_explainer.gd")
+const Borders=preload("res://scripts/nation_borders.gd")
 ## The hero moment of the research loop: the painting rises from the dark and
 ## wipes in left to right like ink drying (SCENE), then the carved title, a gold
 ## hairline drawn beneath it, and one line of story.
@@ -146,6 +147,11 @@ func render()->void:
 			effect_cards[key]={"value":amount,"beneficial":beneficial,"meaning":means}
 		Art.label(body,"These are the discovery’s effects at full adoption. Their contribution grows as people put the new practice to use; the Research page shows everywhere each one acts.",12,T.TEXT_SOFT,true)
 	else:Art.label(body,"This finding adds to your civilization’s established knowledge. Its practical uses depend on the resources and earlier discoveries your people can combine with it.",13,T.TEXT_SOFT,true)
+	# What it changes on the map itself, when it does (nation_borders.gd).
+	var map_note:=Borders.research_note(String(current.get("id","")))
+	if map_note!="":
+		Art.label(body,"ON THE MAP",12,T.GOLD)
+		Art.label(body,map_note,13,T.BODY,true)
 	var consequence:=String(current.get("social_consequence",""))
 	if consequence!="":Art.label(body,consequence,13,T.TEXT_SOFT,true)
 	scroll.scroll_vertical=0

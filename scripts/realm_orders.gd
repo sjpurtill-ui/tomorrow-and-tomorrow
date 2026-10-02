@@ -522,8 +522,10 @@ static func _hold_drill()->Dictionary:
 	if not (mc.training_program as Dictionary).is_empty(): return {"ok":true,"kind":"camp_drill","count":home,"says":"The %d at home are already at camp drill." % home,"outcome":"The camp drill goes on."}
 	var began:Dictionary=mc.start_training_program("camp_drill")
 	if began.has("error"): return _no("camp_drill",_plain(String(began.error)))
-	return {"ok":true,"kind":"camp_drill","count":home,"says":"The %d under arms at home go to camp drill: musters, signals and changes of formation, for about %d days." % [home,roundi(float(mc.TRAINING_PROGRAMS.camp_drill.duration_days))],
-		"outcome":"The %d under arms at home begin camp drill." % home}
+	var who:=preload("res://scripts/army_levy_law.gd").at_home_words(mc)
+	var who_title:=who.substr(0,1).to_upper()+who.substr(1)
+	return {"ok":true,"kind":"camp_drill","count":home,"says":"%s go to camp drill: musters, signals and changes of formation, for about %d days." % [who_title,roundi(float(mc.TRAINING_PROGRAMS.camp_drill.duration_days))],
+		"outcome":"%s begin camp drill." % who_title}
 
 
 static func _persistent_line(mc:Variant,item:String)->Dictionary:

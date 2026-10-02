@@ -5,6 +5,48 @@ create resources, ignore transport, or allow money to feed people. Food,
 materials, labor, storage, extraction, and delivery remain the underlying
 constraints.
 
+## The realm's purse (scripts/realm_purse.gd)
+
+One account the god commands for the whole people. Towns keep their own
+stores, money stage and households' money; the public account is the realm's.
+It is counted in one unit that holds across the ages (a ration's worth: Food 1,
+Coin 1) and named by what the people know: the common store before money,
+silver at weighed metal, coin after coinage (character_voice.gd era gates).
+Older saves merge every town's treasury, public debt and soldiers' arrears into
+it once on load, moving each treasury's coin out of its town's circulation with
+its backing; no town keeps a treasury, borrows or pays upkeep afterwards, and
+the per-town public finance described further down is superseded by it.
+
+- **The levy** is light, usual or heavy: a plain fraction of every harvest and
+  load brought in (light a quarter, usual half, heavy all of the age's most:
+  a tenth before money, a fifth at weighed metal and coin, up to a third once
+  the state counts every household). Each town's own economy day accrues it:
+  output x rate x the realm's reach (office_levers.reach with tallies and
+  registers) x (1 - the share hidden). After coinage the households' money
+  share is paid in coin, with its backing. It weighs on trust in the chiefs
+  (up to 4.8 points) and on holding together (up to 2.6) through the social
+  pressure, beside its clamp.
+- **The lines**, reckoned once a month for the month past: old debts (a
+  quarter of the purse at most), the soldiers' pay (half a day's output per
+  head for each soldier at arms, a quarter for those in drill; before money
+  it is food and gifts), food bought for hungry towns at the seller's market
+  price (a delivery between towns), hired crews (building +15%) and the
+  scholars' keep (research +12%), each a seventh of a day's output per head.
+  Unpaid soldiers lose will (6 points a month at most), readiness (to 0.85
+  after three months) and some go home (1 in 50 a month, 1 in 25 from the
+  third), through MilitaryCampaign.pay_shortfall.
+- **Wealth shares** (by fifths) are concentrated by want, rising prices,
+  defaults and money, and shared back toward each age's ordinary share
+  (subsistence 38%, weighed metal 45%, coin 50% for the richest fifth) by
+  custom, feasts, the purse's pay and a tax on the rich, within each age's
+  floor and ceiling (28-55%, 32-65%, 35-75%). Each place moves the realm's
+  shares by its share of the people.
+- Every people keeps its own purse; computer rulers set the same levers by
+  their nature (civilization_controller.gd purse_orders).
+- Other systems use `balance()`, `deposit(amount, why)`,
+  `spend(amount, why) -> bool`, `pay_home(amount, why)`, `unit_word()`,
+  `account_name()`, `history()`, `season()` and `forecast()`.
+
 ## Exchange stages
 
 1. **Resource obligations** — direct allocation, reciprocal labor, barter, and

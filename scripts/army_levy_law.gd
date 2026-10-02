@@ -19,7 +19,11 @@ extends RefCounted
 ## and basic trainees who keep it. No level counts it, calls it up or sends it
 ## home (watch()).
 ## MilitaryCampaign.army_levy_level holds the chosen level ("" until the ruler
-## chooses: then nobody is called up or sent home on its account).
+## chooses: then nobody is called up or sent home on its account; "none" keeps
+## no army at all).
+## A stand-down the ruler orders stands like a levy does: the bands at home
+## fold back, the surplus goes home, and the level falls to fit what is left
+## (stand_down(), lower()), so nobody is called up again in their place.
 ## The war leader drills them as the best foot our people can train and arm
 ## (kit()), so the levy of the musket age carries muskets, not spears. A levy
 ## the ruler orders in court stands: it lifts the level to cover it (cover()).
@@ -28,12 +32,17 @@ extends RefCounted
 const HomeOrders:=preload("res://scripts/home_orders.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Kit:=preload("res://scripts/armor_equipment.gd")
+## Loaded when used: the war council preloads this file.
+const COUNCIL_PATH:="res://scripts/war_council.gd"
 ## The kinds of foot an army is mostly made of; the war leader drills the
 ## best of them our people can train and arm.
 const LINE_BRANCHES:=["force_generation","heavy_infantry","missile_infantry"]
 
 ## The levels, smallest first: {id, share}. Said as plain shares ("3%").
+## "none" is no army: nobody is called up, and those who come home from the
+## bands go back to work (the court's "disband the army").
 const LEVELS:=[
+	{"id":"none","share":0.0},
 	{"id":"few","share":0.01},
 	{"id":"some","share":0.03},
 	{"id":"many","share":0.05},
@@ -49,17 +58,27 @@ const RAISE_SLACK:=0.02
 const RELEASE_SLACK:=0.10
 
 
+## A level by its id; an exact share a stand-down left ("share:0.0624",
+## lower()) reads as a level of that share.
 static func level(id:String)->Dictionary:
+	if id.begins_with(SHARE_PREFIX):
+		var share:=float(id.substr(SHARE_PREFIX.length()))
+		if share<0.0 or share>float((LEVELS[-1] as Dictionary).share):return {}
+		return {"id":id,"share":share}
 	for entry:Dictionary in LEVELS:
 		if String(entry.id)==id:return entry
 	return {}
 
+const SHARE_PREFIX:="share:"
 
-## The level as a plain share: "3%".
+
+## The level as a plain share: "3%" ("0.4%" below one in a hundred).
 static func level_name(id:String)->String:
 	var entry:=level(id)
 	if entry.is_empty():return "Not set"
-	return "%d%%" % roundi(float(entry.share)*100.0)
+	var share:=float(entry.share)
+	if share>0.0 and share<0.0095:return "%.1f%%" % (share*100.0)
+	return "%d%%" % roundi(share*100.0)
 
 
 ## The people the army is kept to at this level, of `population` people.
@@ -107,6 +126,9 @@ static func _level_of(mc:Node)->String:
 static func choose(mc:Node,id:String)->Dictionary:
 	if id!="" and level(id).is_empty():return {"error":"There is no such level."}
 	mc.set("army_levy_level",id)
+	# Fewer: the bands at home with nothing to do fold back first, so the
+	# surplus goes home at once; those out are called in (war_council.gd).
+	if id!="" and int(reading(mc).gap)<0:(load(COUNCIL_PATH) as GDScript).call("fold_idle_bands")
 	var done:=keep(mc,int(WorldSimulation.state.elapsed_days),true)
 	return {"ok":true,"said":String(done.get("said",""))}
 
@@ -184,6 +206,113 @@ static func cover(mc:Node)->String:
 			return "The army is now kept at %s of the people." % level_name(String(entry.id))
 	mc.set("army_levy_level","")
 	return "That is more than any share the war leader keeps: none is kept now, and nobody is sent home on its account."
+
+
+## A stand-down the ruler orders stands too: the size the war leader keeps
+## falls to the share the army is left at, exactly, so nobody is called up in
+## their place and nobody more is sent home; with no share chosen yet, that
+## share is chosen now. With `everyone`, no army is kept at all ("none"), so
+## the men coming home from the bands go back to work as well. The words to
+## add to the court's answer, or "" when the level is unchanged.
+static func lower(mc:Node,everyone:=false,leaving:=0)->String:
+	var id:=_level_of(mc)
+	if everyone:
+		if id=="none":return ""
+		mc.set("army_levy_level","none")
+		return NO_ARMY_WORDS
+	if id=="none":return ""
+	var population:=maxi(1,int(WorldSimulation.state.population_total))
+	# `leaving`: a band on its way home to be stood down still counts today.
+	var now:=maxi(0,under_arms(mc)-maxi(0,leaving))
+	if id!="" and now>=target_men(id,population):return ""
+	if now<=0:
+		mc.set("army_levy_level","none")
+		return NO_ARMY_WORDS
+	var exact:="%s%.5f" % [SHARE_PREFIX,float(now)/float(population)]
+	mc.set("army_levy_level",exact)
+	return "The army is now kept at %s of the people." % level_name(exact)
+
+const NO_ARMY_WORDS:="The war leader keeps no army now: nobody is called up."
+
+
+## The ruler sends people home from the army (the court's stand-down). The
+## bands at home with no errand fold back into the army at home (resting ones
+## too: home is where they rest), drill not yet done stops when everyone goes,
+## and `count` go back to work (every one with `everyone`): the lastingly hurt
+## first, then recruits, then the levy at home. Never the watch, never a band
+## out: those go home when they come back, as the level falls (lower()) and
+## the war leader sends home whoever stands above it. {released,
+## released_injured_veterans, released_recruits, released_field_soldiers,
+## returned_equipment, folded, away (men in bands out), held (men holding
+## towns), watch, said (the level's words)}.
+static func stand_down(mc:Node,count:int,everyone:bool)->Dictionary:
+	var folded:=fold_home_bands(mc)
+	if everyone:
+		for order in (mc.training_queue as Array).duplicate():
+			if not order is Dictionary or bool((order as Dictionary).get("automated_basic",false)):continue
+			mc.cancel_training(int((order as Dictionary).get("id",-1)))
+	var free:=free_to_go(mc)
+	var n:=free if everyone else mini(maxi(0,count),free)
+	var out:={"released":0,"released_injured_veterans":0,"released_recruits":0,"released_field_soldiers":0,"returned_equipment":{}}
+	if n>0:
+		var r:Dictionary=mc.demobilize(n)
+		if not r.has("error"):out.merge(r,true)
+	out["folded"]=folded
+	var away:=0
+	for army in mc.field_armies:
+		if army is Dictionary:away+=maxi(0,int((army as Dictionary).get("troops",0)))
+	var held:=0
+	for force in mc.occupation_forces:
+		if force is Dictionary:held+=maxi(0,int((force as Dictionary).get("troops",0)))
+	out["away"]=away
+	out["held"]=held
+	out["watch"]=int(watch(mc).kept)
+	out["said"]=lower(mc,everyone)
+	return out
+
+
+## Those the ruler can send home from the army at home today: the lastingly
+## hurt, recruits waiting, and the levy at home beyond the watch.
+static func free_to_go(mc:Node)->int:
+	var hurt:=mini(int(mc.home_army.get("disabled_pool",0)),int(mc.home_army.get("wounded_pool",0)))
+	var spare:=maxi(0,int(mc.home_army.get("troops",0))-int(watch(mc).home))
+	return maxi(0,hurt)+maxi(0,int(mc.aggregate_recruits))+spare
+
+
+## Bands standing at home with no errand under way fold back into the army
+## at home, resting ones too (home is where they rest and refill). Returns
+## the men folded.
+static func fold_home_bands(mc:Node)->int:
+	var men:=0
+	for army in (mc.field_armies as Array).duplicate():
+		if not army is Dictionary or not home_band(mc,army):continue
+		var troops:=int((army as Dictionary).get("troops",0))
+		if not mc.disband_field_army(int((army as Dictionary).get("army_id",0))).has("error"):men+=troops
+	return men
+
+
+## A band at home with nothing under way: stationed at home, not fighting,
+## aboard ships, under a general's standing orders or on the general's
+## campaign, and no errand of the war council's still out.
+static func home_band(mc:Node,band:Dictionary)->bool:
+	if int(band.get("troops",0))<=0 or bool(band.get("embarked",false)):return false
+	if String(band.get("status",""))!="stationed" or String(band.get("location_id",""))!="player_home":return false
+	var id:=int(band.get("army_id",0))
+	if mc.command_hierarchy.battle.engaged(id) or mc._army_in_battle(id) or mc._besieging(id):return false
+	if mc.command_hierarchy.controls_army(id):return false
+	if WorldSimulation.campaign!=null and bool(WorldSimulation.campaign.active) and id==int(WorldSimulation.campaign.state.get("army_id",-1)):return false
+	var errand:Variant=band.get("council")
+	if errand is Dictionary and not String((errand as Dictionary).get("phase","")) in ["","home","done"]:return false
+	return true
+
+
+## Who stands at home under arms, in a few words for the court: "the 24 on
+## the watch at home" when nobody else is home, else "the 30 under arms at
+## home".
+static func at_home_words(mc:Node)->String:
+	var home:=maxi(0,int(mc.home_army.get("troops",0)))
+	if home>0 and home<=int(watch(mc).home):return "the %d on the watch at home" % home
+	return "the %d under arms at home" % home
 
 
 ## What a level costs, in plain words: "16 of 535 serve · 1 in 21 hands

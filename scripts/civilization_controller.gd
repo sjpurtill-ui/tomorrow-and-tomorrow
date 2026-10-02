@@ -137,7 +137,7 @@ static func order_steps(id:String)->Array:
 		return review
 	]]
 	var parts:Array=review
-	for kind:String in ["research","military","defense","civilian","foreign","great_works","expansion"]:
+	for kind:String in ["research","military","purse","defense","civilian","foreign","great_works","expansion"]:
 		if kind in ["civilian","expansion"]:
 			var kind_parts:=civilian_order_steps(id,func()->Dictionary:return shared.plan) if kind=="civilian" else expansion_order_steps(id,func()->Dictionary:return shared.plan)
 			for part:Array in kind_parts:
@@ -150,11 +150,44 @@ static func order_steps(id:String)->Array:
 			match kind:
 				"research":research_orders(id,shared.plan)
 				"military":military_orders(id,shared.plan)
+				"purse":purse_orders(id,shared.plan)
 				"defense":defense_orders(id,shared.plan)
 				"foreign":foreign_orders(id,shared.plan)
 				"great_works":great_work_orders(id,shared.plan)
 		])
 	return first
+
+## The ruler's purse by their nature, with the levers the god has
+## (realm_purse.gd), reviewed with the month's plan. A forceful or disciplined
+## ruler, or one at war, takes a heavier levy, a caring one a lighter; the
+## soldiers are always paid, and a levy that cannot pay them is made heavier
+## (as is one that ran short last month). What is left keeps scholars for an
+## open mind and crews for a disciplined one; a caring ruler, or a hungry
+## people, buys food for hungry towns. Only what changes is ordered.
+static func purse_orders(id:String,plan:Dictionary)->void:
+	var Purse:=preload("res://scripts/realm_purse.gd")
+	var p:Dictionary=plan.get("personality",{})
+	var assertive:=float(p.get("assertiveness",.5));var discipline:=float(p.get("discipline",.5));var empathy:=float(p.get("empathy",.5));var open:=float(p.get("openness",.5))
+	var purse:=Purse.state()
+	var lean:=assertive*0.5+discipline*0.3-empathy*0.6+(0.35 if bool(plan.get("at_war",false)) else 0.0)
+	var level:="heavy" if lean>0.30 else ("light" if lean<-0.05 else "usual")
+	var army:=Purse.line_cost_per_day("army")*Purse.SEASON_DAYS
+	if int(purse.get("unpaid_months",0))>0:level="heavy"
+	for step in 2:
+		if level!="heavy" and float(Purse.quote(level).per_season)<army:level=String(Purse.LEVELS[Purse.LEVELS.find(level)+1])
+	var spare:=float(Purse.quote(level).per_season)-army
+	var keep:=Purse.line_cost_per_day("scholars")*Purse.SEASON_DAYS
+	var scholars:=open>0.55 and spare>=keep and int(purse.get("unpaid_months",0))==0
+	if scholars:spare-=keep
+	var crews:=discipline>0.6 and spare>=Purse.line_cost_per_day("crews")*Purse.SEASON_DAYS and int(purse.get("unpaid_months",0))==0
+	var lines:={"army":true,"scholars":scholars,"crews":crews,"relief":empathy>0.55 or bool(plan.get("hungry",false))}
+	var order:={"kind":"purse"}
+	if String(purse.levy)!=level:order["levy"]=level
+	var changed:={}
+	for line in lines:
+		if bool((purse.lines as Dictionary).get(line,false))!=bool(lines[line]):changed[line]=bool(lines[line])
+	if not changed.is_empty():order["lines"]=changed
+	if order.size()>1:WorldSimulation.submit(id,order)
 
 static func expansion_orders(id:String,plan:Dictionary)->void:
 	preload("res://scripts/day_job.gd").run_parts(expansion_order_steps(id,func()->Dictionary:return plan))

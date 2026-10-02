@@ -34,6 +34,7 @@ const Aims:=preload("res://scripts/legacy_aims.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
+const Covert:=preload("res://scripts/covert_ops.gd")
 
 const PATHS:=["offline","live","sloppy"]
 ## A fake key: it must never appear in a prompt, a line or a receipt.
@@ -480,6 +481,8 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["legitimacy_x100"]=roundi(float(GameState.simulation_metrics.get("legitimacy",0.5))*100.0)
 	m["cohesion_x100"]=roundi(float(GameState.simulation_metrics.get("cohesion",0.5))*100.0)
 	m["settlement_name"]=String(GameState.settlement_name)
+	# What all our towns together are called (nation_name.gd), "" until named.
+	m["nation_name"]=String(GameState.nation_name)
 	# The court's known persons (court_persons.gd): the living, the dead and
 	# the driven out, who is waiting before the ruler, whom the court spoke of.
 	var living:=0; var gone:=0; var bound:=0
@@ -606,6 +609,16 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 		if String((mod as Dictionary).get("id","")).begins_with("court_water"): water=1
 	m["ration"]=ration; m["clean_water"]=water
 	m["apart_custom"]=1 if bool((preload("res://scripts/crisis_system.gd").state().flags as Dictionary).get("apart_custom",false)) else 0
+	# Spies and assassins (covert_ops.gd): operations set in motion, agents out.
+	var covert:Dictionary=Covert.summary()
+	m["covert_ops"]=int(covert.ops); m["covert_abroad"]=int(covert.abroad)
+	# The realm's purse (realm_purse.gd): its balance, the levy and its lines,
+	# read as the engine takes an unread purse (its defaults).
+	var purse:Dictionary=GameState.realm_purse
+	m["purse"]=roundi(float(purse.get("balance",0.0)))
+	m["purse_levy"]=String(purse.get("levy","usual"))
+	var purse_lines:Dictionary=purse.get("lines",{"army":true}) if purse.get("lines") is Dictionary else {"army":true}
+	for line in ["army","scholars","crews","relief"]: m["purse_"+String(line)]=1 if bool(purse_lines.get(line,false)) else 0
 	m["_material"]=_material(m)
 	return m
 
@@ -618,12 +631,16 @@ static func _material(m:Dictionary)->String:
 		# Offices, the god's standing with each official and with the people, the
 		# court's known persons, the realm's name: what acts at home really change.
 		"office_headman","office_suri","office_kavu","office_imeri","love_headman","love_suri","love_kavu","love_imeri","dread_headman","dread_suri","dread_kavu","dread_imeri",
-		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
+		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","nation_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
 		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found",
 		# Who sets the daily work and the people at each task (manual_work.gd).
 		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
 		# A band sent out in a feud (war_loop.gd), and whether the feud is on.
-		"trackers","feud_ops","feud"]
+		"trackers","feud_ops","feud",
+		# Spies and assassins set in motion (covert_ops.gd).
+		"covert_ops","covert_abroad",
+		# The realm's purse: the levy and what it pays for (realm_purse.gd).
+		"purse_levy","purse_army","purse_scholars","purse_crews","purse_relief"]
 	var parts:=PackedStringArray()
 	for k in keys: parts.append("%s=%s" % [k,str(m.get(k,""))])
 	return "|".join(parts)

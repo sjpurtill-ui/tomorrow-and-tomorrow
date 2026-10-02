@@ -215,7 +215,7 @@ func refresh()->void:
 		if not Rect2(Vector2.ZERO,viewport_size).has_point(anchor):continue
 		var record:Dictionary={}
 		if bool(source.foreign):record=CivilizationSystem.city_intelligence.records.get("player",{}).get(String(id),{})
-		var affiliation:=CivilizationSystem.city_intelligence.controller_label(String(label.get_meta("city_civilization_id",""))) if bool(source.foreign) else ""
+		var affiliation:=affiliation_of(String(label.get_meta("city_civilization_id","")),bool(source.foreign),kind)
 		# Who holds it, in words, and our guard there (scripts/map_ownership.gd).
 		var ownership:Dictionary=label.get_meta("map_ownership",{})
 		if not String(ownership.get("line","")).is_empty():affiliation=String(ownership.line)
@@ -245,6 +245,13 @@ func refresh()->void:
 	works=placed_works.works;work_memory=placed_works.memory
 	_update_overflow(viewport_size)
 	queue_redraw()
+
+## Whose a town is, in words, on its card: a stranger's town names its people
+## as our chart knows them; a town of ours, our nation's name once it has
+## one (nation_name.gd), else nothing.
+static func affiliation_of(civ_id:String,foreign:bool,kind:String="city")->String:
+	if foreign:return CivilizationSystem.city_intelligence.controller_label(civ_id)
+	return String(GameState.nation_name).strip_edges() if kind=="city" else ""
 
 ## Text, wrapped lines and sizes of one city's card (see refresh's cache key).
 static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2,ownership:Dictionary={})->Dictionary:

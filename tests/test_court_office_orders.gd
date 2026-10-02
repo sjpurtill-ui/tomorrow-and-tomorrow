@@ -49,9 +49,10 @@ func test_every_choice_reaches_a_real_mechanic()->void:
 	for text in choices:
 		var home:=HomeOrders.read(String(text))
 		var war:=WarOrders.read(String(text),"")
+		var covert:=preload("res://scripts/covert_orders.gd").read(String(text),"")
 		var heard:=CC.classify(String(text))
-		var engine:=not home.is_empty() or not war.is_empty() or String(heard.get("verb","")) in ["send","war"]
-		assert_bool(engine).override_failure_message("'%s' reaches no mechanic: home %s, war %s, verb %s" % [text,str(home),str(war),String(heard.get("verb",""))]).is_true()
+		var engine:=not home.is_empty() or not war.is_empty() or not covert.is_empty() or String(heard.get("verb","")) in ["send","war"]
+		assert_bool(engine).override_failure_message("'%s' reaches no mechanic: home %s, war %s, covert %s, verb %s" % [text,str(home),str(war),str(covert),String(heard.get("verb",""))]).is_true()
 
 
 func test_a_vacant_office_falls_to_the_headman()->void:

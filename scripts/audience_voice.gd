@@ -2930,6 +2930,9 @@ func _offices_of(s:Dictionary,member:Dictionary)->Array:
 ## official's fact sheet (court_answers.gd); "" when it is not one.
 func court_answer(s:Dictionary,member:Dictionary,player_text:String)->String:
 	if String(s.get("origin",""))!="court" or not CourtAnswers.is_question(player_text): return ""
+	# Spies and assassins: answered from the covert ledger (covert_ops.gd).
+	var covert:=preload("res://scripts/covert_ops.gd").answer(player_text)
+	if covert!="": return covert
 	var sheet:=CourtFacts.sheet(_offices_of(s,member))
 	return CourtAnswers.answer(sheet,player_text,_spoken_town(s,sheet),_recent_words(s))
 

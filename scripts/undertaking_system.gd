@@ -689,13 +689,16 @@ static func _pour_rations(state:Node,r:Dictionary)->float:
 	return minf(total*.25,minf(total_work(r)*.10,maxf(0,total_work(r)-float(r.progress)))*2.0)
 static func _wage_cost(_state:Node,r:Dictionary)->float:
 	return maxf(1,(total_work(r)-float(r.progress))*.02)
+## Wages come from the realm's purse while it holds them (realm_purse.gd),
+## else in rations from the stores.
 static func _can_pay(state:Node,wage:float)->bool:
-	if String(state.economy_stage)=="currency" and float(state.public_treasury)>=wage:return true
+	if preload("res://scripts/realm_purse.gd").balance()>=wage:return true
 	var total:=0.0
 	for amount in state.food_stocks.values():total+=float(amount)
 	return total>=wage*2
 static func _wage_text(state:Node,wage:float)->String:
-	return "%d coin from the treasury" % roundi(wage) if String(state.economy_stage)=="currency" and float(state.public_treasury)>=wage else "%d rations" % roundi(wage*2)
+	var purse:=preload("res://scripts/realm_purse.gd")
+	return "%s from %s" % [purse.amount_text(wage),purse.account_name()] if purse.balance()>=wage else "%d rations" % roundi(wage*2)
 
 ## Scoped-owner decision. Returns {ok,message} or {error}.
 static func decide(city_id:String,work_id:String,option_id:String)->Dictionary:
@@ -763,8 +766,7 @@ static func _apply_decision(state:Node,r:Dictionary,city_id:String,option:String
 			text="The stores were protected."
 		"paid":
 			var wage:=_wage_cost(state,r)
-			if String(state.economy_stage)=="currency" and float(state.public_treasury)>=wage:state.public_treasury-=wage
-			else:WorldSimulation.food.issue_for_obligation(wage*2,"great_work","Wages for "+String(d.title))
+			if not preload("res://scripts/realm_purse.gd").pay_home(wage,"Wages for the crews of "+String(d.title)):WorldSimulation.food.issue_for_obligation(wage*2,"great_work","Wages for "+String(d.title))
 			r.speed=float(r.speed)*1.15;m.cohesion=clampf(float(m.get("cohesion",.5))+.02,.01,.99)
 			_shift(r,.04)
 			text="The crews are paid; the pace quickens and the work is done with care."

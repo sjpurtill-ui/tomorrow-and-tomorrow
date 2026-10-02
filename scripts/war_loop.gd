@@ -1255,6 +1255,7 @@ static func _end_feud(civ_id:String,day:int,why:String,text:String)->void:
 	f["settled_until"]=day+SETTLED_DAYS
 	f["feud_end"]={"day":day,"why":why}
 	f["guard_until"]=-1
+	_peace_made(f)
 	_rivals().call("settle_grudges",civ_id,0.6)
 	Hall._shift_relation(civ_id,0.08,-0.2)
 	_chronicle("feud_end:%s:%d" % [civ_id,day],"The Feud With %s Is Settled" % name,told,"moment",civ_id)
@@ -1548,6 +1549,12 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 	_stat("ops")
 	if at_war: war["ops"]=int(war.get("ops",0))+1
 	if objective=="war_parley":
+		if not at_war and int(f.get("level",0))<=0:
+			# The feud was set down while they were on the road: peace holds,
+			# and there is nothing more to settle or tell.
+			_peace_made(f)
+			_log(civ_id,"parley_ok","nothing left to settle")
+			return
 		var rival:=_rival(civ_id)
 		var accept:=0.25+(float(war.get("their_exh",0.0))*0.9 if at_war else 0.35)+float(war.get("score",0))*0.06-float(rival.get("grudge_weight",0.0))*0.12-(0.15 if String(rival.get("trait",""))=="grudge" else 0.0)+float(rival.get("dread",0.0))*0.2
 		if rng.randf()<clampf(accept,0.05,0.9):
@@ -1558,6 +1565,7 @@ static func _resolve_op(civ_id:String,op:Dictionary,day:int)->void:
 			else:
 				f["level"]=maxi(0,int(f.level)-1); f["pending"]={}
 				_rivals().call("settle_grudges",civ_id,0.5)
+				_peace_made(f)
 				_chronicle(key,"Words With %s" % name,"%s's messengers came back: %s will send no more raiders. The matter is closed." % [gname,name],"notice",civ_id)
 			_log(civ_id,"parley_ok","accepted")
 		else:
@@ -1681,7 +1689,14 @@ static func _close_war(civ_id:String,day:int,result:String,text:String)->void:
 	_stat("ends_"+result.replace(" ","_"))
 	_log(civ_id,"war_end",told,{"result":result,"our_dead":int(war.get("our_dead",0)),"their_dead":int(war.get("their_dead",0)),"days":day-int(war.get("start",day))})
 	f["war"]={}; f["pending"]={}; f["level"]=1; f["last_war_end"]=day; f["guard_until"]=-1; f["op"]={}
+	_peace_made(f)
 	_drop_matters(civ_id)
+
+## Peace is made with them (a truce, the feud set down, the matter closed):
+## the god's word to seek peace has done its work and is set down, so the war
+## leader sends no more messengers for it. Another word given stays.
+static func _peace_made(f:Dictionary)->void:
+	if String(f.get("stance",""))=="peace": f.erase("stance")
 
 # --------------------------------------------------------------------------
 # Daily
@@ -1860,14 +1875,19 @@ static func _count_battle(civ_id:String,r:Dictionary,our_side:String,day:int,tol
 		_chronicle(key,"%s Raiders at %s" % [name,_title_place(where)],text,"moment" if our_dead>0 or they_won else "notice",civ_id,seen_seed)
 		_file(civ_id,"raided" if war.is_empty() else "report",text,day)
 
-## A band of ours out against this people on the war council's errand.
+## A band of ours out against this people on the war council's errand. One
+## whose errand is over (on its way home, resting, home) is not: a band that
+## rested at home for years after its raid kept the feud hot, and the war
+## leader sent messengers to settle it again every season.
 static func _bands_out(civ_id:String)->bool:
 	var mc:Variant=WorldSimulation.military
 	if mc==null: return false
 	for army in mc.field_armies:
 		if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
 		var c:Variant=(army as Dictionary).get("council")
-		if c is Dictionary and String((c as Dictionary).get("civ",""))==civ_id: return true
+		if not c is Dictionary or String((c as Dictionary).get("civ",""))!=civ_id: continue
+		if String((c as Dictionary).get("phase","")) in ["home","done"]: continue
+		return true
 	return false
 
 ## The god's own band against a small people (the engine's war flag): the feud

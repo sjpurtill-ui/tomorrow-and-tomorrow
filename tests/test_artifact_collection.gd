@@ -36,13 +36,17 @@ func test_sale_conserves_money_and_moves_unique_ownership()->void:
 	E.connection("neighbor")
 	var target:=E.owner_state("neighbor")
 	GameState.economy_stage="currency";target.economy_stage="currency"
-	GameState.currency_supply=100;GameState.public_treasury=100
-	target.currency_supply=10000;target.public_treasury=10000;target.monetary_reserve_metals={"Gold":4000.0}
+	# Each realm pays and is paid from its one purse (realm_purse.gd).
+	GameState.realm_purse={"balance":100.0,"coin":100.0,"backing":{"Gold":40.0},"migrated":true}
+	target.realm_purse={"balance":10000.0,"coin":10000.0,"backing":{"Gold":4000.0},"migrated":true}
+	var backing_before:=40.0+4000.0
 	assert_bool(A.transfer(record.id,"neighbor","sell").has("ok")).is_true()
 	assert_bool(E.data().collections.has(record.id)).is_false()
 	assert_bool(target.society_exchange.collections.has(record.id)).is_true()
-	assert_float(GameState.public_treasury+target.public_treasury).is_equal_approx(10100.0,.00001)
-	assert_float(GameState.currency_supply+target.currency_supply).is_equal_approx(10100.0,.00001)
+	assert_float(float(GameState.realm_purse.balance)+float(target.realm_purse.balance)).is_equal_approx(10100.0,.00001)
+	assert_float(float(GameState.realm_purse.coin)+float(target.realm_purse.coin)).is_equal_approx(10100.0,.00001)
+	assert_float(float(GameState.realm_purse.backing.Gold)+float(target.realm_purse.backing.Gold)).is_equal_approx(backing_before,.00001)
+	assert_float(float(GameState.realm_purse.coin)).is_greater(100.0)
 	assert_bool(E.valid(E.data())).is_true();assert_bool(E.valid(target.society_exchange)).is_true()
 	assert_bool(A.transfer(record.id,"neighbor","sell").has("error")).is_true()
 

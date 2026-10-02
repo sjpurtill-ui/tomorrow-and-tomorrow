@@ -141,13 +141,34 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 	if not gear.is_empty(): out.append({"id":"gear","glyph":"gear","tone":"amber","count":gear.size(),"title":"Short of gear","lines":gear,"page":"support"})
 	if not thin.is_empty(): out.append({"id":"men","glyph":"men","tone":"amber","count":thin.size(),"title":"Under strength","lines":thin,"page":"recruitment"})
 	if not fought.is_empty(): out.append({"id":"fought","war":"feud","tone":"amber","count":fought.size(),"title":"Battles just fought","lines":fought,"page":"wars"})
+	# Spies and assassins: an agent caught or killed, a strike done, their spy
+	# caught (covert_ops.gd). Told here, never as a pop-up.
+	for covert_alert in preload("res://scripts/covert_ops.gd").alerts(): out.append(covert_alert)
+	# Soldiers gone short of their pay (realm_purse.gd's monthly reckoning):
+	# told here, never stopping time; a click opens the Wealth page.
+	var unpaid:=unpaid_alert()
+	if not unpaid.is_empty(): out.append(unpaid)
 	return out
+
+
+## The soldiers' pay short: months running, the share unpaid, who went home.
+static func unpaid_alert()->Dictionary:
+	if WorldSimulation.state==null: return {}
+	var purse:Dictionary=WorldSimulation.state.realm_purse
+	var months:=int(purse.get("unpaid_months",0))
+	if months<=0: return {}
+	var last:Dictionary=purse.get("last_army",{}) if purse.get("last_army") is Dictionary else {}
+	var lines:=PackedStringArray()
+	lines.append("%d in 100 of their pay unpaid this month" % roundi(float(last.get("unpaid",1.0))*100.0))
+	lines.append("Will down %d points" % roundi(float(last.get("will_lost",0.0))*100.0))
+	if int(last.get("deserted",0))>0: lines.append("%d went home" % int(last.deserted))
+	return {"id":"unpaid","glyph":"will","tone":"red" if months>=3 else "amber","count":months,"title":"Soldiers unpaid %d %s" % [months,"month" if months==1 else "months"],"lines":lines,"page":"forces","dock":["economy",2]}
 
 
 ## The pointer's words: the title, then one line per band or people, then
 ## where a click goes.
 static func tip(alert:Dictionary)->String:
-	var page:="the War screen"
+	var page:="the Wealth page" if alert.has("dock") else "the War screen"
 	return "%s\n%s\nClick to open %s." % [String(alert.title),"\n".join(alert.lines as PackedStringArray),page]
 
 
@@ -212,7 +233,10 @@ class AlertMark extends Control:
 
 	func _gui_input(event:InputEvent)->void:
 		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
-			MilitaryCampaign.open_roster("army",false,String(alert.get("page","forces")))
+			var dock:Array=alert.get("dock",[]) if alert.get("dock") is Array else []
+			var hud:Variant=get_tree().current_scene.get("hud") if dock.size()==2 and get_tree().current_scene!=null else null
+			if hud!=null and hud.has_method("open_dock"): hud.call("open_dock",String(dock[0]),int(dock[1]))
+			else: MilitaryCampaign.open_roster("army",false,String(alert.get("page","forces")))
 			accept_event()
 
 	func _draw()->void:

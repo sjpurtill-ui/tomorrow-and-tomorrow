@@ -52,7 +52,26 @@ func test_war_tags_never_cover_city_tags()->void:
 		# Stays close to its own mark.
 		assert_float(rect.get_center().distance_to(Vector2(card.anchor))).is_less(160.0)
 	assert_bool((result.cards[0].rect as Rect2).intersects(result.cards[1].rect)).is_false()
-	# The contested border is a short line across the way between the peoples.
-	var segment:=Marks.border_segment(Vector2.ZERO,Vector2(20,0))
-	assert_float(segment[0].distance_to(segment[1])).is_less_equal(12.0)
-	assert_float(absf(segment[0].x-10.0)).is_less(0.01)
+
+
+## No stretch of border is invented any more: the feud's mark sits on the real
+## line where our lands meet (nation_borders.gd), else partway toward them.
+func test_feud_mark_sits_on_the_real_meeting_line()->void:
+	var Borders:=preload("res://scripts/nation_borders.gd")
+	var saved:Array=Borders.published
+	var home:=Vector2.ZERO
+	var there:=Vector2(20,0)
+	assert_float(Marks.border_point(home,there).x).is_equal_approx(10.0,0.001)
+	# A meeting line with the Ankora, bowed toward us; the mark lands on it.
+	var line:=PackedVector2Array([Vector2(7,-6),Vector2(6,0),Vector2(7,6)])
+	Borders.published=[{"owners":["player","civ_2"],"kind":"frontier","points":line}]
+	var near:=Marks.border_point(home,there)
+	var mark:=Borders.meeting_point("player","civ_2",near)
+	# On the line, and no corner of it is nearer the old spot.
+	assert_float(minf(Geometry2D.get_closest_point_to_segment(mark,line[0],line[1]).distance_to(mark),Geometry2D.get_closest_point_to_segment(mark,line[1],line[2]).distance_to(mark))).is_less(0.001)
+	for corner in line: assert_float(mark.distance_to(near)).is_less_equal(corner.distance_to(near))
+	# Another people's line is not ours with them.
+	assert_bool(Borders.meeting_point("player","civ_9",Vector2(10,0)).is_finite()).is_false()
+	var overlay_source:=FileAccess.get_file_as_string("res://scripts/hud/war_map_overlay.gd")
+	assert_bool(overlay_source.contains("draw_dashed_line")).is_false()
+	Borders.published=saved

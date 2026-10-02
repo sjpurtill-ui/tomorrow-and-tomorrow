@@ -50,7 +50,7 @@ const Aims:=preload("res://scripts/legacy_aims.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Leaders:=preload("res://scripts/leader_commands.gd")
 
-const NAMES:=["home_peace","home_charted","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost","feud_unfound"]
+const NAMES:=["home_peace","home_charted","home_towns","war_not_held","tsaren_captured","tsaren_bound","tsaren_fled","tsaren_burned","old_build_bound","battle_won","envoy_after_fall","aim_suri","grain_lost","feud_unfound","ruvak_known"]
 
 ## The user's own words used to make the worlds.
 const BIND_WORDS:="Round up all the men of Tsaren and tie them up. If any resist or attempt to flee, threaten their wives and children."
@@ -196,6 +196,20 @@ func _rename(pid:int,name:String)->void:
 	for key in GameState.leadership_positions:
 		if int((GameState.leadership_positions[key] as Dictionary).get("person_id",0))==pid: GameState.leadership_positions[key]["name"]=name
 
+## A town of ours founded beside the home town, as a caravan's arrival founds
+## one (settlement_model.complete_settlement_convoy). Returns its record.
+func second_town(name:String)->Dictionary:
+	var primary:Dictionary=GameState.player_settlements[0]
+	var sequence:=GameState.next_player_settlement_id
+	var record:={"id":"settlement_%03d" % sequence,"sequence":sequence,"primary":false,"name":name,"position":(primary.position as Vector2)+Vector2(4.0+2.0*float(sequence),4.0),
+		"population_share":0.2,"founded_day":int(GameState.elapsed_days),"status":"established","source_settlement_id":String(primary.id),
+		"territory_context":{},"environment_profile":{},"auto_manage":true,"management_focus":"establishment","leader_person_id":0}
+	GameState.next_player_settlement_id+=1
+	GameState.player_settlements.append(record)
+	SettlementModel._ensure_city_resources(record)
+	GameState.settlement_network_revision+=1
+	return record
+
 func _name_the_court(info:Dictionary)->void:
 	# The court at this stage has no Scholar: Imeri keeps the trails (Chief Scout).
 	var names:={"Steward":["headman","Kishan of Reedwater"],"Marshal":["suri","Suri Ashvale"],"Quartermaster":["kavu","Kavu Dunmere"],"ChiefScout":["imeri","Imeri of Windgap"]}
@@ -294,6 +308,12 @@ func _build(name:String)->Dictionary:
 			# Our scouts have charted the land around home: a new town can be
 			# founded there (realm_orders.gd found_town).
 			CivilizationSystem._add_revealed_area(home,45.0,"scout report")
+		"home_towns":
+			info=base(false)
+			train(12)
+			# Our second town, Reedmouth: our nation, unnamed, can now take a
+			# name of its own (nation_name.gd).
+			second_town("Reedmouth")
 		"war_not_held":
 			info=base(true)
 			train(30)
@@ -372,6 +392,14 @@ func _build(name:String)->Dictionary:
 			var made:=_feud_people(info)
 			if made!="": return {"error":made}
 			notes.append("feud with %s: %s" % [String(info.feud_id),str((load("res://scripts/war_loop.gd") as GDScript).call("feud_view",String(info.feud_id)))])
+		"ruvak_known":
+			# At peace, a people named Ruvak we know well: their town charted,
+			# their ruler named, their envoys received. The god's covert orders
+			# (covert_orders.gd) can resolve and reach them.
+			info=base(false)
+			train(12)
+			var made:=_ruvak_people(info)
+			if made!="": return {"error":made}
 		"grain_lost":
 			info=base(false)
 			train(12)
@@ -426,6 +454,34 @@ func _feud_people(info:Dictionary)->String:
 	war_loop.call("_raid",id,day-40,"vengeance",false)
 	f["pending"]={}
 	if not bool(war_loop.call("feuding",id)): return "the feud did not take"
+	return ""
+
+func _ruvak_people(info:Dictionary)->String:
+	## A people named Ruvak the god knows well: at peace, their chief town
+	## charted and their ruler named, so an assassin can be sent to their hall.
+	if CivilizationSystem.civilizations.size()<2: return "no second people for Ruvak"
+	var ruvak:Dictionary=CivilizationSystem.civilizations[1]
+	ruvak["name"]="Ruvak"
+	ruvak["population"]=420.0   # small: a feud, not a war (conflict_scale.gd)
+	ruvak["cohorts"]=CivilizationSystem._scaled_cohorts(ruvak.get("cohorts",{}),420.0)
+	var id:=String(ruvak.id)
+	info["ruvak_id"]=id
+	var rel:Dictionary=ruvak.player_relation
+	rel.at_war=false; rel.treaty="none"; rel.contact_level=2; rel.met_day=0
+	rel.home_location_known=true; rel.opinion=0.1; rel.border_tension=0.15
+	# Their chief town, charted by our scouts, a short walk from home.
+	var ci:=CivilizationSystem._frontline_region_index(ruvak)
+	var regions:Array=ruvak.strategic_regions
+	var town:Dictionary=regions[ci]
+	town.name="Ruvaskel"; town.population=180.0; town.role="capital"; town.settlement_founded=true
+	town["position"]=home+Vector2(26.0,-10.0)
+	info["ruvak_town_id"]=String(town.id)
+	var day:=int(GameState.elapsed_days)
+	CivilizationSystem.city_intelligence.publish("player",CivilizationSystem.city_intelligence.capture("player",String(town.id),.75,day-20,"scout report","ruvak"),day-20)
+	CivilizationSystem.city_intelligence.records.player[String(town.id)]["position"]={"x":town.position.x,"z":town.position.y}
+	rel.home_position={"x":town.position.x,"z":town.position.y}
+	# Their ruler is named (a character for the succession to pass to).
+	(load("res://scripts/rival_rulers.gd") as GDScript).call("character",id)
 	return ""
 
 func _round_trip()->String:

@@ -747,6 +747,9 @@ static func _peace(civ_id:String,today:int,options:Dictionary)->Dictionary:
 		var left:=maxi(0,int(op.get("due",today))-today)
 		return _record(civ_id,"act","Our messengers are on their way to %s; they should be back in about %s.%s" % [_name(civ_id),_span(left),tail],{"live":true})
 	if not bool(wl.call("feuding",civ_id)) and (war.is_empty()) and not fighting(civ_id):
+		# Peace holds: the stance has done its work and is set down, so no
+		# messengers go again to settle what is settled.
+		if String(f.get("stance",""))=="peace": f.erase("stance")
 		return _record(civ_id,"noted","There is no fight with %s to end.%s" % [_name(civ_id),tail],{"live":home>0})
 	var last:=int(_front(civ_id).get("parleyed",-99999))
 	if not op.is_empty() or (today-last<PARLEY_GAP and not bool(options.get("now",false))):
@@ -784,8 +787,14 @@ static func _council_bands()->Array[Dictionary]:
 	var mc:=_mc()
 	if mc==null: return out
 	for army in mc.field_armies:
-		if army is Dictionary and (army as Dictionary).get("council") is Dictionary: out.append(army)
+		if army is Dictionary and _errand(army)!=null: out.append(army)
 	return out
+
+## The band's errand ({civ, act, phase, ...}), or null when it has none (an
+## empty record left on an old save is none).
+static func _errand(army:Dictionary)->Variant:
+	var c:Variant=army.get("council")
+	return c if c is Dictionary and not (c as Dictionary).is_empty() else null
 
 static func _band_on(civ_id:String,acts:Array)->Dictionary:
 	for band in bands_against(civ_id):
@@ -937,8 +946,14 @@ static func fold_idle_bands()->int:
 	if String(reading.get("level",""))=="" or int(reading.get("gap",0))>=0: return 0
 	var called:=0
 	for army in (mc.field_armies as Array).duplicate():
-		if not army is Dictionary or not _idle(army): continue
+		if not army is Dictionary: continue
 		var army_id:=int((army as Dictionary).get("army_id",0))
+		# At home with nothing under way, resting or not: home is where a band
+		# rests and refills, and the army at home is that.
+		if LAW.home_band(mc,army):
+			if not mc.disband_field_army(army_id).has("error"): called+=1
+			continue
+		if not _idle(army): continue
 		if _at_home(army):
 			if not mc.disband_field_army(army_id).has("error"): called+=1
 		elif _send_home(army): called+=1
@@ -953,8 +968,8 @@ static func _idle(army:Dictionary)->bool:
 	if army.get("pursuit") is Dictionary or bool(army.get("relief_assignment",false)): return false
 	# Broken, under strength or resting: the war leader's upkeep has it.
 	if not _fit(army): return false
-	var c:Variant=army.get("council")
-	if c is Dictionary and not String((c as Dictionary).get("phase","")) in ["home","done"]: return false
+	var c:Variant=_errand(army)
+	if c!=null and not String((c as Dictionary).get("phase","")) in ["home","done"]: return false
 	if String(army.get("status",""))=="moving" and String(army.get("destination_id",""))!="player_home": return false
 	if mc.command_hierarchy.battle.engaged(army_id) or mc._army_in_battle(army_id) or mc._besieging(army_id): return false
 	if mc.command_hierarchy.controls_army(army_id): return false
@@ -993,7 +1008,7 @@ static func _gather_strays(stances:Dictionary,today:int)->void:
 	for army in (mc.field_armies as Array).duplicate():
 		if not army is Dictionary: continue
 		var band:Dictionary=army
-		if band.get("council") is Dictionary or not _idle(band) or _guards_ours(band): continue
+		if _errand(band)!=null or not _idle(band) or _guards_ours(band): continue
 		var army_id:=int(band.get("army_id",0))
 		var name:="%s (%s)" % [Logistics.force_name(band),EraWords.grouped(int(band.get("troops",0)))]
 		if _at_home(band):
@@ -1182,6 +1197,9 @@ static func _forces()->Dictionary:
 	var mc:=_mc()
 	var home:=maxi(0,int(mc.home_army.get("troops",0)))
 	var keep:=ceili(float(home)*WATCH_SHARE) if home>=MIN_BAND*2 else 0
+	# With a size chosen for the army (army_levy_law.gd), the watch at home is
+	# not the army: no band takes its men, so none is drilled again to fill it.
+	if LAW._level_of(mc)!="": keep=maxi(keep,int(LAW.watch(mc).home))
 	return {"home":home,"keep":keep,"free":maxi(0,home-keep),"formations":mc.home_army.get("formations",[]),"force":mc.home_army}
 
 static func _free_men()->int:

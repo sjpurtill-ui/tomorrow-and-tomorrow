@@ -33,6 +33,9 @@ const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Strips:=preload("res://scripts/hud/force_strips.gd")
 const GeneralRecord:=preload("res://scripts/general_record.gd")
 const Forces:=preload("res://scripts/hud/war_forces_model.gd")
+const CovertBoard:=preload("res://scripts/hud/covert_board.gd")
+const Covert:=preload("res://scripts/covert_ops.gd")
+const Purse:=preload("res://scripts/realm_purse.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -66,6 +69,9 @@ func setup(_block:Dictionary={})->void:
 	feedback=_line("",15,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
 	enemy_box=_section("Our enemies")
 	leader_box=_section("Our leaders")
+	# Spies and assassins: its own section, self-refreshing (covert_board.gd).
+	var covert_kicker:=_line("SPIES AND ASSASSINS",13,T.INK_MUTED);covert_kicker.add_theme_font_override("font",T.font("ui_strong"));add_child(covert_kicker)
+	var covert:=CovertBoard.new();covert.name="CovertBoard";add_child(covert);covert.setup()
 	refresh(true)
 
 
@@ -82,7 +88,7 @@ func _process(delta:float)->void:
 func refresh(force:=false)->void:
 	var reading:=Law.reading(MilitaryCampaign)
 	var glance:=strength(MilitaryCampaign)
-	_rebuild("army",army_box,str([reading,glance]),force,func()->void:_build_army(reading,glance))
+	_rebuild("army",army_box,str([reading,glance,pay_words()]),force,func()->void:_build_army(reading,glance))
 	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
 	_rebuild("enemies",enemy_box,str(entries.map(func(e:Dictionary)->Array:
 		var front:Dictionary=WarLoop.front(String(e.civ_id))
@@ -154,7 +160,24 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 		var drawn:=_line("Taken from work: %s of %s workers (1 in %d)." % [EraWords.grouped(int(from.soldiers)),EraWords.grouped(int(from.workers)),int(from.one_in)],13,T.INK_MUTED,true)
 		drawn.name="DrawnFrom";drawn.tooltip_text="Calling people up takes them from every kind of work alike: fields, crafts, building."
 		column.add_child(drawn)
+	# What the army costs the realm's purse a season, and whether it is paid.
+	var pay:=pay_words()
+	if pay!="":
+		var paid:=_line(pay,13,T.RED_TEXT if int(Purse.state().get("unpaid_months",0))>0 else T.INK_MUTED,true)
+		paid.name="Pay";paid.tooltip_text="Soldiers are paid from %s on top of their rations. Unpaid, they lose will each month, are slower to muster, and some go home. The Wealth page sets it." % Purse.account_name()
+		column.add_child(paid)
 	column.add_child(_forces_list())
+
+
+## The army's pay in a line (realm_purse.gd): its cost a season, or how long
+## it has gone unpaid; "" with nobody to pay.
+static func pay_words()->String:
+	var per:=Purse.line_cost_per_day("army")*Purse.SEASON_DAYS
+	if per<=0.5:return ""
+	var months:=int(Purse.state().get("unpaid_months",0))
+	if months>0:return "Unpaid %d %s: will falling, some going home." % [months,"month" if months==1 else "months"]
+	if not Purse.line_on("army"):return "Their pay is stopped: about %s a season." % Purse.amount_text(per)
+	return "Pay: %s a season, in %s." % [Purse.amount_text(per),Purse.pay_word()]
 
 
 ## Every soldier where they are: one row per place (Forces.rows).
@@ -202,8 +225,22 @@ func _build_enemies(entries:Array)->void:
 	if entries.is_empty():
 		var calm:=_panel(enemy_box,"Calm")
 		calm.add_child(_line("At peace: no feud or war with anyone.",14,T.INK_MUTED,true))
-		return
-	for e:Dictionary in entries:enemy_box.add_child(_enemy_row(e))
+	else:
+		for e:Dictionary in entries:enemy_box.add_child(_enemy_row(e))
+	# Every people we know, ranked as we know them (hud/peoples_known_board.gd,
+	# at the head of the Known World).
+	var all:=Button.new();all.name="AllPeoples";all.text="All peoples we know";all.focus_mode=Control.FOCUS_NONE
+	all.size_flags_horizontal=Control.SIZE_SHRINK_BEGIN;all.tooltip_text="Every people we have met, ranked as we know them."
+	all.add_theme_color_override("font_color",T.GOLD_TEXT);all.add_theme_color_override("font_hover_color",T.INK);all.add_theme_color_override("font_pressed_color",T.INK)
+	for state:String in ["normal","pressed","disabled"]:all.add_theme_stylebox_override(state,_skin(Color(0,0,0,0),Color(0,0,0,0),4,0))
+	all.add_theme_stylebox_override("hover",_skin(T.HOVER_BG,Color(0,0,0,0),4,0))
+	all.pressed.connect(func()->void:
+		var scene:=get_tree().current_scene if is_inside_tree() else null
+		var hud:Variant=scene.get("hud") if scene!=null else null
+		if hud==null or not hud.has_method("has_provider") or not hud.has_provider("world"):return
+		close_wanted.emit()
+		hud.open_dock("world",0))
+	enemy_box.add_child(all)
 
 
 func _enemy_row(e:Dictionary)->Control:
@@ -224,6 +261,12 @@ func _enemy_row(e:Dictionary)->Control:
 	odds.tooltip_text="Their strength against ours, by the war leader's reckoning: people, warriors and readiness on one scale.
 Worn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("our_worn",0.0))*100.0),roundi(float(e.get("their_worn",0.0))*100.0)]
 	var now:=_line("Now: "+now_words(e),14,T.INK,true);now.tooltip_text=now_details(e);column.add_child(now)
+	# Our eyes there, when we have any (covert_ops.gd).
+	var eyes:Dictionary=Covert.eyes_on(civ_id)
+	if int(eyes.count)>0:
+		var word:=("Our eyes in %s: %d" % [String(e.name),int(eyes.count)])
+		if int(eyes.last_word_days)>=0:word+=" · last word %s" % Ledger.span_words(int(eyes.last_word_days))
+		var eyes_line:=_line(word,13,T.INK_MUTED,true);eyes_line.name="Eyes";column.add_child(eyes_line)
 	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",6);column.add_child(stances)
 	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
 	for spec:Array in STANCES:

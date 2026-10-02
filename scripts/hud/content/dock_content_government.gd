@@ -5,6 +5,9 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 ## from this screen with one click.
 const Words:=preload("res://scripts/hud/home_plain.gd")
 const Levers:=preload("res://scripts/office_levers.gd")
+const NationName:=preload("res://scripts/nation_name.gd")
+const NationCard:=preload("res://scripts/hud/nation_name_card.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 
 func meta()->Dictionary:
 	var government:=GovernmentPeopleSystem.structure_snapshot()
@@ -20,7 +23,27 @@ func tab(sub:int)->Dictionary:
 	var support:=clampf(float(governance.get("council_support",0.6)),0.0,1.0)
 	var kpis:Array=[]
 	if sub==1: return {"kpis":kpis,"brief":_policy_brief(governance),"blocks":_policy_blocks(governance)}
-	return {"kpis":kpis,"brief":{},"blocks":_office_blocks(legitimacy,support)}
+	return {"kpis":kpis,"brief":{},"blocks":_nation_blocks()+_office_blocks(legitimacy,support)}
+
+## "Our nation: The Reedfolk · Rename", once our people live in two towns
+## (nation_name.gd); one click opens the small naming card.
+func _nation_blocks()->Array:
+	if not NationName.can_name(): return []
+	var named:=NationName.named()
+	var places:=EraWords.word("places","towns")
+	return [{"type":"rows","items":[{"name":"Our nation: %s" % (NationName.current() if named else "not yet named"),
+		"sub":"All our %s together; each keeps its own name" % places,
+		"value":"Rename" if named else "Name it","value_color":Tokens.GOLD_TEXT,"accent":Tokens.GOLD,"on_click":rename_nation,
+		"tip":"The name other peoples know us by and the Chronicle uses. Click to %s it." % ("change" if named else "give")}]}]
+
+## Opens the naming card over the map; the dock shows the new name at once.
+func rename_nation()->void:
+	var host:Node=hud
+	var layer:Variant=terrain.get("interface_layer") if is_instance_valid(terrain) else null
+	if is_instance_valid(layer) and layer is Node: host=layer
+	if not is_instance_valid(host): return
+	NationCard.open(host,func(_name:String)->void:
+		if is_instance_valid(hud) and hud.has_method("request_immediate_dock_refresh"): hud.request_immediate_dock_refresh())
 
 func _office_blocks(legitimacy:float,support:float)->Array:
 	var items:Array=[]
@@ -95,4 +118,4 @@ func _policy_blocks(governance:Dictionary)->Array:
 	return [{"type":"rows","heading":"Standing orders","note":"how well each is carried out","items":items}]
 
 func signature()->Array:
-	return [GovernmentPeopleSystem.revision,GameState.leadership_positions.duplicate(true),ConsequenceEngine.active_policies().size(),roundi(float(GameState.simulation_metrics.get("legitimacy",0.7))*100.0)]
+	return [GovernmentPeopleSystem.revision,GameState.leadership_positions.duplicate(true),ConsequenceEngine.active_policies().size(),roundi(float(GameState.simulation_metrics.get("legitimacy",0.7))*100.0),GameState.nation_name,NationName.towns()]

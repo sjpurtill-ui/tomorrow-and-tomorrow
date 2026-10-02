@@ -5182,6 +5182,42 @@ func _process_aggregate_service_strain_day()->Dictionary:
 	return {"deserted":deserted,"pressure":pressure,"discipline":discipline,"strain":average_strain}
 
 
+## The soldiers' pay fell short this month (realm_purse.gd, the month's
+## reckoning): unpaid men lose heart, are slower to muster and some go home,
+## each bounded. `unpaid` is the share of the month's pay not given (0 when
+## paid in full: their readiness recovers), `months` the months running it has
+## fallen short. Will falls UNPAID_WILL a month at most; readiness by up to
+## UNPAID_READINESS once three months are owed; of those at home one in 50
+## leaves the first month, one in 25 from the third (carried as a fraction,
+## so a small band loses a man only after months unpaid). Historical armies
+## left unpaid mutinied and melted away over months, not days.
+const UNPAID_WILL:=0.06
+const UNPAID_READINESS:=0.15
+func pay_shortfall(unpaid:float,months:int,carry:float=0.0)->Dictionary:
+	var share:=clampf(unpaid,0.0,1.0)
+	var before:=float(home_army.get("readiness",0.0))
+	var factor:=clampf(1.0-UNPAID_READINESS*share*clampf(float(months)/3.0,0.0,1.0),1.0-UNPAID_READINESS,1.0)
+	if share<=0.0:factor=minf(1.0,float(home_army.get("pay_readiness",1.0))+0.05)
+	var forces:Array=[home_army]+field_armies
+	for force in forces:
+		if int((force as Dictionary).get("troops",0))<=0:continue
+		force["pay_readiness"]=factor
+		if share>0.0:force["morale"]=clampf(float(force.get("morale",1.0))-UNPAID_WILL*share,0.0,1.5)
+	var deserted:=0
+	var left:=maxf(0.0,carry)
+	if share>0.0:
+		var troops:=int(home_army.get("troops",0))
+		var rate:=share*(0.01+0.01*float(clampi(months,1,3)))
+		left+=float(troops)*rate
+		deserted=mini(troops,floori(left))
+		left-=float(deserted)
+		if deserted>0:
+			_stand_down_aggregate(deserted)
+			home_army["desertions_total"]=int(home_army.get("desertions_total",0))+deserted
+	_refresh_readiness()
+	return {"will_lost":UNPAID_WILL*share,"deserted":deserted,"carry":left,"pay_readiness":factor,"readiness_before":before,"readiness_after":float(home_army.get("readiness",0.0))}
+
+
 func _update_supply_day()->void:
 	var provision_day:=int(home_army.get("provision_day",-1))
 	var provision_current:=provision_day>=0 and provision_day>=int(WorldSimulation.state.elapsed_days)-1
@@ -5893,7 +5929,8 @@ func _refresh_readiness()->void:
 	for force in field_armies:
 		var condition:=_force_personnel_condition(force)
 		var prepared:Dictionary=simulator.force_readiness(force,condition)
-		force["readiness"]=clampf(float(prepared.aggregate)*(0.48+clampf(float(force.get("supply_level",1.0)),0.0,1.0)*0.52)+float(force.get("exercise_readiness_bonus",0.0)),0.0,1.25)
+		# Unpaid men are slower to muster (pay_shortfall: pay_readiness, 0.85..1).
+		force["readiness"]=clampf(float(prepared.aggregate)*(0.48+clampf(float(force.get("supply_level",1.0)),0.0,1.0)*0.52)*clampf(float(force.get("pay_readiness",1.0)),0.5,1.0)+float(force.get("exercise_readiness_bonus",0.0)),0.0,1.25)
 	var formations:Array=home_army.get("formations",[])
 	var supply:=clampf(float(home_army.get("supply_level",1.0)),0.0,1.0)
 	var discipline:=clampf(float(home_army.get("discipline",0.5)),0.0,1.0)
@@ -5909,7 +5946,7 @@ func _refresh_readiness()->void:
 		formations[formation_index]=formation
 	home_army["formations"]=formations
 	var readiness:Dictionary=simulator.force_readiness(home_army,_force_personnel_condition(home_army))
-	home_army["readiness"]=clampf(float(readiness.aggregate)*(0.48+supply*0.52)*(0.88+discipline*0.12)+exercise_bonus,0.0,1.25)
+	home_army["readiness"]=clampf(float(readiness.aggregate)*(0.48+supply*0.52)*(0.88+discipline*0.12)*clampf(float(home_army.get("pay_readiness",1.0)),0.5,1.0)+exercise_bonus,0.0,1.25)
 	home_army["readiness_components"]=readiness
 	home_army.readiness_components["supply"]=supply
 	home_army.readiness_components["discipline"]=discipline

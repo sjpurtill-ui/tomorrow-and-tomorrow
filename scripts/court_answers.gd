@@ -157,6 +157,10 @@ static func answer(sheet:Dictionary,question:String,spoken_of:String="",recent:S
 	if offices.has("scouts"):
 		var way:=_way_answer(sheet,lower)
 		if way!="": return way
+	# The realm's purse: its keeper's own count (court_purse_orders.gd).
+	if offices.has("purse"):
+		var purse:=String((load("res://scripts/court_purse_orders.gd") as GDScript).call("answer",sheet,lower))
+		if purse!="": return purse
 	var t:=town_of(sheet,lower,spoken_of)
 	var group:=_group(lower)
 	var topics:=_topics(lower)
@@ -582,6 +586,13 @@ static func _common_answer(sheet:Dictionary,lower:String)->String:
 	if _has(lower,"\\b(what|which) (day|year|season)\\b|\\bwhat time of (the )?year\\b"):
 		var parts:=String(sheet.get("when","")).split(" · ")
 		return "It is the %s of %s." % [parts[1].to_lower(),parts[0]] if parts.size()==2 else "It is %s." % String(sheet.get("when",""))
+	# Our nation's name ("what is our nation called?", "what are we called?"),
+	# from the sheet (nation_name.gd): the name given, or the town we go by.
+	if _has(lower,"\\bwhat (is|are|'s) (our|my|the) (nation|people|realm|folk|tribe|kingdom)('s)? (called|named|name)\\b|\\bwhat( is|'s) the name of (our|my|the) (nation|people|realm|folk|tribe|kingdom)\\b|\\bwhat are we called\\b(?!\\s+(to|for|on|upon|by|into)\\b)|\\bwhat do we call ourselves\\b|\\bwhat do (they|other peoples|strangers|foreigners) call us\\b|\\bwhat( is|'s) our name\\s*\\??\\s*$"):
+		var nation:=String(sheet.get("nation",""))
+		if nation!="": return "We are %s." % (("the "+nation.substr(4)) if nation.begins_with("The ") else nation)
+		var home:=String(sheet.get("home",""))
+		return ("Our people have no name of their own yet; we go by %s." % home) if home!="" else "Our people have no name of their own yet."
 	if int(sheet.get("home_people",0))>0 and _has(lower,"\\bhow many (are we|of us|souls|mouths)\\b|\\bhow many people (are there|live) (at home|here)\\b|\\bour number\\b"):
 		return "We are %d people in %s." % [int(sheet.home_people),String(sheet.get("home","our home"))]
 	# The god's word on new towns ("are our leaders founding new towns?"), as

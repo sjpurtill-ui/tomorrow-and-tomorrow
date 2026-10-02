@@ -321,6 +321,23 @@ static func from_war(id:int,decision:Dictionary)->void:
 		_:
 			refuse(id,reason,general)
 
+## A covert order (covert_orders.perform): a venture set in motion that the
+## card follows (travelling, in place, struck, outcome), an objection waiting
+## on the god's word, or a plain refusal. One card per target (supersede).
+static func from_covert(id:int,decision:Dictionary,who:String)->void:
+	var o:=find(id)
+	if o.is_empty():return
+	var carrier:=String(decision.get("carrier",who))
+	var why:=_why(String(decision.get("outcome","")),String(decision.get("says","")))
+	match String(decision.get("verdict","")):
+		"act":
+			supersede(id,"covert:%d" % int(decision.get("op_id",0)))
+			claim(id,"covert",{"op_id":int(decision.get("op_id",0))},carrier,"military")
+		"object":
+			claim(id,"waiting",{"reason":_lower_first(_why(String(decision.get("says","")),"it waits for your word"))},carrier,"court")
+		_:
+			refuse(id,why,carrier)
+
 ## A court result (court_commands.hear and the court's other answers): the
 ## mechanic behind it, or the plain truth that nothing was set in motion.
 static func from_court(id:int,result:Dictionary)->void:
@@ -333,6 +350,8 @@ static func from_court(id:int,result:Dictionary)->void:
 	if route=="war" or String(result.get("verb",""))=="war":
 		var decision:Dictionary=result.get("war",{}) if result.get("war") is Dictionary else {}
 		if not decision.is_empty():from_war(id,decision);return
+	if String(result.get("verb",""))=="covert":
+		from_covert(id,result.get("covert",{}) if result.get("covert") is Dictionary else {},who);return
 	var outcome:=String(result.get("outcome",""))
 	match route:
 		"custom_directive":
@@ -484,7 +503,9 @@ static func court_title(text:String)->String:
 			return "Drill the recruits"
 		"stand_down":
 			var n:=int(r.get("count",0))
-			return ("Send %d fighters home" % n) if n>0 else "Send fighters home"
+			if String(r.get("band_name",""))!="":return short("Disband %s" % String(r.band_name),8)
+			if n>0:return "Send %d fighters home" % n
+			return "Disband the army" if bool(r.get("all",false)) else "Send fighters home"
 		"arm":
 			var n:=int(r.get("count",0))
 			var item:=String(HO.ITEM_NAMES.get(String(r.get("item","")),"weapons"))
