@@ -254,3 +254,23 @@ func test_a_people_organised_for_war_declares_war_when_it_comes()->void:
 	ANSWER.monthly(march)
 	assert_bool(bool(_civ(civ_id).player_relation.get("at_war",false))).is_true()
 	assert_str(_chronicle_titles()).contains("War With")
+
+## What their ruler has sworn leans the answer, and a vow to make us yield
+## comes to nothing when they bow instead (legacy_aims.gd).
+func test_a_vow_to_make_us_yield_leans_them_to_come_and_is_undone_if_they_bow()->void:
+	# A middling grievance, below the monthly cap.
+	var r:={"known":true,"fear":0.5,"resentment":0.6,"ratio":1.2,"bold":0.5,"worn":0.0,"lost":0,"trait":"","league":false,"knows_way":true}
+	r["vow"]=""
+	var plain:=ANSWER.odds(civ_id,r)
+	r["vow"]="humble"
+	var sworn:=ANSWER.odds(civ_id,r)
+	assert_float(float(sworn.all_in)).is_greater(float(plain.all_in))
+	r["vow"]="bond"
+	assert_float(float(ANSWER.odds(civ_id,r).all_in)).is_less(float(plain.all_in))
+	# A sworn vow, then they bow: it is told as having come to nothing.
+	var aims:=preload("res://scripts/legacy_aims.gd")
+	var day:=int(GameState.elapsed_days)
+	(aims.state().rivals as Dictionary)[civ_id]={"civ_id":civ_id,"civ_name":Hall._civ_name(civ_id),"leader":"Ilak","template":"humble","title":"Make the God's People Yield","phrase":"make us yield to them, and pay for their peace","status":"active","known":true,"start_day":day-100,"deadline":day+3000,"progress":0.0}
+	ANSWER._bind(civ_id,day,20.0,"","")
+	assert_str(String((aims.state().rivals as Dictionary)[civ_id].status)).is_equal("failed")
+	assert_str(_chronicle_titles()).contains("Came to Nothing")

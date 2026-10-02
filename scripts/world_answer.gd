@@ -171,7 +171,7 @@ static func reading(civ_id:String,view:Dictionary={})->Dictionary:
 	var character:Dictionary=rivals.call("rival_character",civ_id) if rivals!=null else {}
 	var st:Dictionary=(load("res://scripts/envoy_aftermath.gd") as GDScript).call("standing",civ_id)
 	var league:=load("res://scripts/fear_league.gd") as GDScript
-	return {"known":bool(v.get("known",false)),"fear":float(v.get("fear",0.0)),"resentment":float(v.get("resentment",0.0)),"ratio":float(v.get("strength_ratio",1.0)),
+	return {"known":bool(v.get("known",false)),"vow":_vow(civ_id),"fear":float(v.get("fear",0.0)),"resentment":float(v.get("resentment",0.0)),"ratio":float(v.get("strength_ratio",1.0)),
 		"bold":(float(p.get("assertiveness",0.5))+float(p.get("risk_tolerance",0.5)))*0.5,"worn":float(front.get("their_exh",0.0)),
 		"lost":(st.get("held",[]) as Array).size()+(st.get("burned",[]) as Array).size(),"trait":String(character.get("trait","")),
 		"league":league!=null and bool(league.call("is_member",civ_id))}
@@ -185,16 +185,39 @@ static func odds(civ_id:String,r:Dictionary={})->Dictionary:
 	var fear:=float(r.fear); var res:=float(r.resentment); var ratio:=float(r.ratio); var bold:=float(r.bold)
 	if fear>=0.4 and ratio>=1.3:
 		var outmatched:=clampf((ratio-1.3)/1.2+0.3,0.0,1.0)
-		var bow:=(fear-0.4)*0.3*outmatched*clampf(1.3-bold,0.2,1.0)*(1.3 if int(r.lost)>0 else 1.0)*(0.5 if String(r.trait)=="grudge" else 1.0)
+		var bow:=(fear-0.4)*0.3*outmatched*clampf(1.3-bold,0.2,1.0)*(1.3 if int(r.lost)>0 else 1.0)*(0.5 if String(r.trait)=="grudge" else 1.0)*float(VOW_BOW.get(String(r.get("vow","")),1.0))
 		out.bow=clampf(bow,0.0,BOW_MAX)
 		out.why_bow="they fear us (%d in 100) and our spears %s theirs" % [roundi(fear*100.0),_ratio_words(ratio)]
 	# Whether they know the road to a town of ours is asked last, and only of a
 	# people otherwise ready to come (it is read in their own world).
 	if res>=0.45 and ratio<=1.5 and float(r.worn)<0.4 and (bool(r.knows_way) if r.has("knows_way") else _knows_our_towns(civ_id)):
-		var all_in:=(res-0.45)*0.25*clampf(1.6-ratio,0.0,1.0)*(0.6+bold)*(1.3 if String(r.trait) in ["grudge","hunter"] else 1.0)*(1.5 if bool(r.league) else 1.0)
+		var all_in:=(res-0.45)*0.25*clampf(1.6-ratio,0.0,1.0)*(0.6+bold)*(1.3 if String(r.trait) in ["grudge","hunter"] else 1.0)*(1.5 if bool(r.league) else 1.0)*float(VOW_ALL_IN.get(String(r.get("vow","")),1.0))
 		out.all_in=clampf(all_in,0.0,ALL_IN_MAX)
 		out.why_all_in="they resent us (%d in 100) and our spears %s theirs%s" % [roundi(res*100.0),_ratio_words(ratio)," with their league's" if bool(r.league) else ""]
 	return out
+
+## What their ruler has sworn about us (legacy_aims.gd rival vows) leans
+## the answer: sworn to make us yield, they come sooner and bow later; sworn
+## to bind us in friendship, they seldom come at all.
+const VOW_BOW:={"humble":0.6,"bond":1.2}
+const VOW_ALL_IN:={"humble":1.3,"bond":0.4}
+const AIMS_PATH:="res://scripts/legacy_aims.gd"
+
+## The template of their ruler's vow still sworn ("humble", "bond", ...), or "".
+static func _vow(civ_id:String)->String:
+	var aims:=load(AIMS_PATH) as GDScript
+	if aims==null: return ""
+	var s:Dictionary=aims.call("state")
+	var r:Variant=(s.get("rivals",{}) as Dictionary).get(civ_id)
+	if not r is Dictionary or String((r as Dictionary).get("status",""))!="active": return ""
+	return String((r as Dictionary).get("template",""))
+
+## They bowed: a vow to make us yield came to nothing, told as such.
+static func _vow_undone(civ_id:String,day:int)->void:
+	if _vow(civ_id)!="humble": return
+	var aims:=load(AIMS_PATH) as GDScript
+	var r:Dictionary=(aims.call("state").rivals as Dictionary)[civ_id]
+	aims.call("_rival_close",r,"failed",day)
 
 static func _ratio_words(ratio:float)->String:
 	var standing:=load(STANDING_PATH) as GDScript
@@ -428,6 +451,7 @@ static func _bind(civ_id:String,day:int,value:float,hostage:String,lead:String)-
 		var relation:Dictionary=WorldSimulation.world.civilizations[index].player_relation
 		relation["stance"]="tributary"
 	ForeignDiplomacy.remember(civ_id,"We bowed to the god and pay its people tribute.")
+	_vow_undone(civ_id,day)
 	_mark(civ_id,"bow",day)
 	var text:="%s%s bows to the god. %s pays tribute worth %s every season, and %s lives among us as their pledge. Their raiders stay home while they pay." % [lead,name,name,_qty(value),hostage if hostage!="" else "a hostage"]
 	_chronicle("bow:%s:%d" % [civ_id,day],"%s Bows to the God" % name,text,"moment",civ_id)
