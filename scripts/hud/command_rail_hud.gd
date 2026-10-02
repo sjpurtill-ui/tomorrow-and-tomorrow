@@ -197,7 +197,8 @@ func _layout()->void:
 	_position_toolbar()
 	if army_alerts:
 		# Under the clock at the map's top left; a dock covers that corner.
-		army_alerts.position=Vector2(Tokens.DOCK_X,64)
+		# The War screen's strip stands there while it is open: below it.
+		army_alerts.position=Vector2(Tokens.DOCK_X,64.0+(_war_layout("STRIP_HEIGHT")+12.0 if war_open() else 0.0))
 		army_alerts.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 	if action_feedback:
 		action_feedback.position=Vector2(maxf(Tokens.DOCK_X,view.x-action_feedback.size.x-16),maxf(124,view.y-action_feedback.size.y-112))
@@ -262,7 +263,30 @@ func _position_army_bar()->void:
 	var right:=view.x-Tokens.EDGE_MARGIN
 	if queue_root!=null and queue_root.visible and queue_root.get_child_count()>0:right-=Tokens.QUEUE_WIDTH+12.0
 	elif _orders_at_bottom():right-=order_stack.size.x+12.0
+	# The War screen's column holds the right edge while it is open.
+	if war_open():right=minf(right,view.x-Tokens.EDGE_MARGIN-_war_layout("COLUMN_WIDTH")-12.0)
 	army_bar.place(Rect2(left,bottom-height,maxf(0.0,right-left),height))
+
+## Whether the War screen is open (hud/military_roster_screen.gd war_mode):
+## its strip and column then hold the top left and the right edge.
+func war_open()->bool:
+	return preload("res://scripts/hud/army_bar.gd").war_open()
+
+## The War screen's layout numbers (hud/war_board.gd COLUMN_WIDTH,
+## STRIP_HEIGHT), read while it is open.
+func _war_layout(key:String)->float:
+	var board:GDScript=load("res://scripts/hud/war_board.gd") as GDScript
+	return float(board.get_script_constant_map().get(key,0.0)) if board!=null else 0.0
+
+## The top of what stands at the bottom right: the council's waiting
+## matters, your orders, or the map toolbar where it reaches under the
+## right edge. The War screen's column stands down to it.
+func right_stack_top()->float:
+	var view:=get_viewport().get_visible_rect().size
+	var top:=orders_top()
+	if queue_root!=null and queue_root.visible and queue_root.get_child_count()>0:top=minf(top,queue_root.position.y-8.0)
+	if toolbar!=null and toolbar.visible and toolbar.position.x+toolbar.size.x>view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH:top=minf(top,toolbar.position.y-8.0)
+	return top
 
 ## The top of what sits along the map's bottom edge (the army bar, else the
 ## toolbar), for anything that stands just above it.

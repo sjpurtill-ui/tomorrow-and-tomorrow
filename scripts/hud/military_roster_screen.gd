@@ -105,6 +105,58 @@ func _ready()->void:
 	scroll=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
 	body=VBoxContainer.new();body.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body.add_theme_constant_override("separation",10);scroll.add_child(body)
 	_layout();_build_body()
+	# The HUD moves its alerts and the army bar for the War screen's strip
+	# and column while it is open, and back when it closes.
+	tree_exited.connect(_tell_hud)
+	_tell_hud.call_deferred()
+
+## The HUD shell (hud/command_rail_hud.gd), when this screen stands over the game.
+func _hud()->Node:
+	var tree:=Engine.get_main_loop() as SceneTree
+	var scene:=tree.current_scene if tree!=null else null
+	if scene==null or not ("hud" in scene):return null
+	var hud:Variant=scene.get("hud")
+	return hud if hud is Node and is_instance_valid(hud) else null
+
+func _tell_hud()->void:
+	var hud:=_hud()
+	if hud==null:return
+	if hud.has_method("_layout"):hud.call_deferred("_layout")
+	var bar:Variant=hud.get("army_bar")
+	if bar is Node and is_instance_valid(bar) and (bar as Node).has_method("refresh"):(bar as Node).call_deferred("refresh")
+
+## The War screen's column: the right edge, from under the top bar down to
+## what stands at the bottom right (the council's queue, your orders).
+func _layout_war(view:Vector2)->void:
+	layout_size=Vector2.ZERO
+	var width:=float(WarBoard.COLUMN_WIDTH)
+	var top:=64.0
+	var bottom:=view.y-T.EDGE_MARGIN
+	var hud:=_hud()
+	if hud!=null and hud.has_method("right_stack_top"):bottom=minf(bottom,float(hud.call("right_stack_top")))
+	bottom-=4.0
+	panel.position=Vector2(view.x-T.EDGE_MARGIN-width,top)
+	var column:VBoxContainer=panel.get_child(0)
+	var content:=30.0+body.get_combined_minimum_size().y
+	var shown:=0
+	for child:Control in column.get_children():
+		if not child.visible:continue
+		shown+=1
+		if child!=scroll:content+=child.get_combined_minimum_size().y
+	content+=column.get_theme_constant("separation")*maxi(0,shown-1)
+	panel.size=Vector2(width,clampf(content,160.0,maxf(160.0,bottom-top)))
+
+## The panel's paper and heading: the War screen's narrow column, or the
+## large sheet boats and aircraft keep.
+func _skin_panel()->void:
+	var war:=war_mode()
+	var sheet:=T.paper_panel_style(false,T.RADIUS_CARD,14 if war else 24);sheet.border_color=T.RULE_STRONG
+	sheet.shadow_color=Color(0,0,0,.18 if T.is_light() else .45);sheet.shadow_size=10 if war else 18;sheet.shadow_offset=Vector2(0,4 if war else 6)
+	panel.add_theme_stylebox_override("panel",sheet)
+	T.text(heading,"title",TEXT)
+	if war:heading.add_theme_font_size_override("font_size",22)
+	close_button.custom_minimum_size=Vector2(32,30) if war else Vector2(40,38)
+	(panel.get_child(0) as VBoxContainer).add_theme_constant_override("separation",8 if war else 12)
 
 ## Whether any boat or air crews of ours are raised (joint_operations forces).
 func _has_crews(services:Array[String])->bool:
@@ -120,8 +172,18 @@ func _skin(bg:Color,border:Color=Color.TRANSPARENT,margin:int=10)->StyleBoxFlat:
 	var style:=StyleBoxFlat.new();style.bg_color=bg;style.border_color=border;style.set_border_width_all(1 if border.a>0 else 0)
 	style.set_corner_radius_all(T.RADIUS_CARD);style.set_content_margin_all(margin);return style
 
+## The War screen (the army's one page) keeps the map as the screen, as HOI4
+## does: this panel is the narrow column at the right edge, the strip of
+## numbers stands under the clock (war_board.gd) and the army bar along the
+## bottom (army_bar.gd war_cards). Boats and aircraft keep the large panel.
+func war_mode()->bool:
+	return service=="army" and page=="war"
+
 func _layout()->void:
 	var view:=get_viewport().get_visible_rect().size
+	if war_mode():
+		_layout_war(view)
+		return
 	if view!=layout_size:
 		layout_size=view
 		var inset:=maxf(16,view.x*.045)
@@ -273,6 +335,9 @@ func _input(event:InputEvent)->void:
 	if not panel.visible:return
 	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE:
 		get_viewport().set_input_as_handled();queue_free()
+	# The War screen keeps the map as the screen: a click on the map finds
+	# what is there and never closes it (Escape or × does).
+	elif war_mode():return
 	elif event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT and not panel.get_global_rect().has_point(event.position):
 		get_viewport().set_input_as_handled();queue_free()
 
@@ -319,6 +384,7 @@ func _clear()->void:
 func _build_body()->void:
 	var saved_scroll:=scroll.scroll_vertical
 	_clear();stories.clear()
+	_skin_panel()
 	var who:=EraWords.word("rail.military","Military")
 	# One title: the people's word for their fighters; the service only when there is a choice.
 	heading.text=("War" if service=="army" else who+" · "+_service_name(service)) if service_buttons.size()>=2 or service=="army" else who

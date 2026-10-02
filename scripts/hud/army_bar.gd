@@ -4,7 +4,11 @@ extends Control
 ## One paper card per army, band, garrison and the levy at home
 ## (hud/army_bar_model.gd gives every number), shown only while we have a
 ## band, army or garrison, or the levy is fighting at home (shown_cards), and
-## laid from the left edge so it never sits over the middle of the map. A card shows the general's
+## laid from the left edge so it never sits over the middle of the map.
+## While the War screen is open (war_open) the bar always stands, HOI4's
+## way, even in a village with no band out: the levy at home leads it (who
+## is ready, on the watch and in drill, with the drill's progress), then
+## every band (war_cards). A card shows the general's
 ## face and name, the men, three bars (gear, will to fight, supply) and one
 ## state glyph. Click finds the army and selects it; double-click opens the
 ## War screen (or a held town's own view): bands are not ordered by hand. An army of
@@ -21,6 +25,8 @@ const Icons:=preload("res://scripts/resource_icons.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const BattleMarks:=preload("res://scripts/hud/battle_marks.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+const Law:=preload("res://scripts/army_levy_law.gd")
+const Orders:=preload("res://scripts/army_orders.gd")
 const CARD_SIZE:=Vector2(204,70)
 const CHIP_SIZE:=Vector2(150,30)
 const GAP:=6.0
@@ -132,8 +138,45 @@ static func bar_cards(mc:Node=null)->Array[Dictionary]:
 	return shown_cards(all)
 
 
+## Whether the War screen is open (hud/military_roster_screen.gd war_mode).
+static func war_open()->bool:
+	var screen:Variant=MilitaryCampaign.roster_screen
+	return is_instance_valid(screen) and (screen as Node).is_inside_tree() and not (screen as Node).is_queued_for_deletion() and (screen as Node).has_method("war_mode") and bool(screen.call("war_mode"))
+
+
+## The bar while the War screen is open: the levy at home first, always,
+## then the armies, bands and garrisons as the model lists them.
+static func war_cards(mc:Node=null)->Array[Dictionary]:
+	var out:Array[Dictionary]=[levy_card(mc)]
+	for card:Dictionary in Model.cards(mc):
+		if String(card.get("kind",""))!="home":out.append(card)
+	return out
+
+
+## Everyone under arms at home on one card: {men (all of them), ready (at
+## home beyond the watch), watch (keeping it), drill (in drill), waiting
+## (called up, waiting to drill), drafts, progress (the drill's share
+## done), days (the court's "about N days"), state, general (the war
+## leader), position (home)}.
+static func levy_card(mc:Node=null)->Dictionary:
+	var host:Node=mc if mc!=null else MilitaryCampaign
+	var home:Dictionary=Model._home_card(host)
+	var drill:Dictionary=Model.drill_card(host)
+	var watch:=Law.watch(host)
+	var at_home:=maxi(0,int(host.home_army.get("troops",0)))
+	var in_drill:=int(drill.get("men",0))
+	var waiting:=int(drill.get("waiting",0))
+	var leader:=Orders.war_leader_name()
+	return {"id":"levy","kind":"levy","army_id":Orders.HOME,"members":[],"title":"At home","short":"At home",
+		"men":at_home+in_drill+waiting,"ready":maxi(0,at_home-int(watch.home)),"watch":int(watch.kept),"drill":in_drill,"waiting":waiting,
+		"drafts":int(drill.get("drafts",0)),"progress":float(drill.get("progress",0.0)),"days":int(drill.get("days",0)),"glyph":String(drill.get("glyph","club")),
+		"state":String(home.get("state","holding")),"general":{"name":leader} if leader!="" else {},
+		"gear":float(home.get("gear",1.0)),"gear_detail":home.get("gear_detail",{}),"will":float(home.get("will",0.6)),
+		"position":WorldSimulation.world.player_world_origin if WorldSimulation.world!=null else Vector2.INF,"home":true,"live":true,"unknown":false}
+
+
 func refresh()->void:
-	var fresh:=bar_cards()
+	var fresh:=war_cards() if war_open() else bar_cards()
 	# A selection made on the map shows on the bar too.
 	if is_instance_valid(terrain) and "selected_army_id" in terrain:
 		var on_map:=int(terrain.selected_army_id)
@@ -243,6 +286,10 @@ func select_card(card:Dictionary)->void:
 
 func open_card(card:Dictionary)->void:
 	select_card(card)
+	# The War screen is open already: a card finds its army, nothing more.
+	if war_open() and String(card.kind)!="garrison":
+		army_opened.emit(card)
+		return
 	if String(card.kind)=="garrison":
 		preload("res://scripts/hud/occupation_view.gd").open(String(card.civ_id),String(card.region_id))
 	else:
@@ -291,7 +338,7 @@ class ArmyCard extends Control:
 		var ids:Array=[]
 		if on:
 			match String(card.get("kind","")):
-				"home","drill":ids=["home"]
+				"home","drill","levy":ids=["home"]
 				"garrison":pass
 				_:
 					for id in card.get("members",[]):ids.append("ours:%d" % int(id))
@@ -310,7 +357,7 @@ class ArmyCard extends Control:
 	func _face()->void:
 		var general:Dictionary=card.get("general",{})
 		match String(card.get("kind","")):
-			"home":
+			"home","levy":
 				face.texture=Icons.command_texture("home",T.INK,64);face.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 				return
 			"drill":
@@ -345,6 +392,7 @@ class ArmyCard extends Control:
 	func _get_tooltip(at:Vector2)->String:
 		if card.is_empty():return ""
 		if String(card.get("kind",""))=="drill":return Model.drill_words(card)
+		if String(card.get("kind",""))=="levy":return Model.levy_words(card)
 		for row in 3:
 			var rect:=_bar_rect(row).grow_individual(16,3,2,3)
 			if rect.has_point(at):
@@ -374,6 +422,9 @@ class ArmyCard extends Control:
 		if String(card.get("kind",""))=="drill":
 			_draw_drill(strong,left)
 			return
+		if String(card.get("kind",""))=="levy":
+			_draw_levy(strong,left)
+			return
 		# The state glyph at the shoulder, then the men, then the name.
 		BattleMarks.draw_state(self,Vector2(size.x-PAD-8.0,13.0),String(card.get("state","holding")),7.0,fade)
 		var men:=EraWords.grouped(int(card.get("men",0)))
@@ -395,6 +446,40 @@ class ArmyCard extends Control:
 			var rect:=_bar_rect(row)
 			draw_texture_rect(Icons.command_texture(String(rows[row][0]),T.INK_MUTED,32),Rect2(Vector2(left,rect.position.y-4.0),Vector2(14,14)),false,Color(1,1,1,fade))
 			Model.draw_bar(self,rect,float(rows[row][1]),Color(rows[row][2],fade))
+
+
+	## The levy at home: everyone under arms there, the drill's progress and
+	## its days to go, then who is ready, in drill, on the watch and waiting.
+	func _draw_levy(strong:Font,left:float)->void:
+		BattleMarks.draw_state(self,Vector2(size.x-PAD-8.0,13.0),String(card.get("state","holding")),7.0,1.0)
+		var men:=EraWords.grouped(int(card.get("men",0)))
+		var men_w:=strong.get_string_size(men,HORIZONTAL_ALIGNMENT_LEFT,-1,15).x
+		var men_x:=size.x-PAD-20.0-men_w
+		draw_texture_rect(Icons.command_texture("men",T.INK,32),Rect2(Vector2(men_x-17.0,4.0),Vector2(16,16)),false)
+		draw_string(strong,Vector2(men_x,18),men,HORIZONTAL_ALIGNMENT_LEFT,-1,15,T.INK)
+		draw_string(strong,Vector2(left,18),"At home",HORIZONTAL_ALIGNMENT_LEFT,men_x-19.0-left,14,T.INK)
+		# The drill: a gold bar and the days to go.
+		var font:=T.font("ui")
+		var row:=_bar_rect(0)
+		var drilling:=int(card.get("drill",0))
+		draw_texture_rect(Icons.command_texture("drill",T.INK_MUTED,32),Rect2(Vector2(left,row.position.y-4.0),Vector2(14,14)),false)
+		var days:=int(card.get("days",0))
+		var tail:=("%d %s" % [days,"day" if days==1 else "days"]) if drilling>0 and days>0 else ("none" if drilling<=0 else "soon")
+		var tail_w:=font.get_string_size(tail,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
+		var bar:=Rect2(row.position,Vector2(maxf(10.0,row.size.x-tail_w-6.0),row.size.y))
+		Model.draw_bar(self,bar,float(card.get("progress",0.0)) if drilling>0 else 0.0,T.GOLD)
+		draw_string(font,Vector2(bar.end.x+6.0,row.position.y+7.0),tail,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK_MUTED)
+		# Ready, in drill, on the watch, waiting: a mark and a number each.
+		var x:=left
+		var y:=_bar_rect(1).position.y+2.0
+		for part:Array in [["serving",int(card.get("ready",0))],["drilling",drilling],["guard",int(card.get("watch",0))],["free",int(card.get("waiting",0))]]:
+			if int(part[1])<=0 and String(part[0]) in ["drilling","free"]:continue
+			var text:=EraWords.grouped(int(part[1]))
+			var w:=strong.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,13).x
+			if x+16.0+w>size.x-PAD:break
+			draw_texture_rect(Icons.command_texture(String(part[0]),T.INK_MUTED,32),Rect2(Vector2(x,y),Vector2(15,15)),false)
+			draw_string(strong,Vector2(x+17.0,y+12.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.INK)
+			x+=17.0+w+9.0
 
 
 	## The deployment card: those in drill, their progress and the days to go,
