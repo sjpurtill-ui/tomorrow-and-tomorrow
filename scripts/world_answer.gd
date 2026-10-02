@@ -157,8 +157,8 @@ static func tributaries()->Array[Dictionary]:
 # --------------------------------------------------------------------------
 
 ## {fear, resentment, ratio (our spears over theirs, a league's together),
-## bold, worn, lost (towns of theirs we hold or burned), trait, league,
-## knows_way, small}.
+## bold, worn, lost (towns of theirs we hold or burned), trait, league}.
+## odds() asks whether they know the road to us only when it matters.
 static func reading(civ_id:String,view:Dictionary={})->Dictionary:
 	var standing:=load(STANDING_PATH) as GDScript
 	var v:Dictionary=view if not view.is_empty() else (standing.call("view_of",civ_id) if standing!=null else {})
@@ -172,7 +172,7 @@ static func reading(civ_id:String,view:Dictionary={})->Dictionary:
 	return {"known":bool(v.get("known",false)),"fear":float(v.get("fear",0.0)),"resentment":float(v.get("resentment",0.0)),"ratio":float(v.get("strength_ratio",1.0)),
 		"bold":(float(p.get("assertiveness",0.5))+float(p.get("risk_tolerance",0.5)))*0.5,"worn":float(front.get("their_exh",0.0)),
 		"lost":(st.get("held",[]) as Array).size()+(st.get("burned",[]) as Array).size(),"trait":String(character.get("trait","")),
-		"league":league!=null and bool(league.call("is_member",civ_id)),"knows_way":_knows_our_towns(civ_id)}
+		"league":league!=null and bool(league.call("is_member",civ_id))}
 
 ## Monthly chances: {bow, all_in, why_bow, why_all_in}. The same rule for
 ## every people; only their fear, grievance, strength and nerve differ.
@@ -186,7 +186,9 @@ static func odds(civ_id:String,r:Dictionary={})->Dictionary:
 		var bow:=(fear-0.4)*0.3*outmatched*clampf(1.3-bold,0.2,1.0)*(1.3 if int(r.lost)>0 else 1.0)*(0.5 if String(r.trait)=="grudge" else 1.0)
 		out.bow=clampf(bow,0.0,BOW_MAX)
 		out.why_bow="they fear us (%d in 100) and our spears %s theirs" % [roundi(fear*100.0),_ratio_words(ratio)]
-	if res>=0.45 and ratio<=1.5 and float(r.worn)<0.4 and bool(r.get("knows_way",true)):
+	# Whether they know the road to a town of ours is asked last, and only of a
+	# people otherwise ready to come (it is read in their own world).
+	if res>=0.45 and ratio<=1.5 and float(r.worn)<0.4 and (bool(r.knows_way) if r.has("knows_way") else _knows_our_towns(civ_id)):
 		var all_in:=(res-0.45)*0.25*clampf(1.6-ratio,0.0,1.0)*(0.6+bold)*(1.3 if String(r.trait) in ["grudge","hunter"] else 1.0)*(1.5 if bool(r.league) else 1.0)
 		out.all_in=clampf(all_in,0.0,ALL_IN_MAX)
 		out.why_all_in="they resent us (%d in 100) and our spears %s theirs%s" % [roundi(res*100.0),_ratio_words(ratio)," with their league's" if bool(r.league) else ""]
