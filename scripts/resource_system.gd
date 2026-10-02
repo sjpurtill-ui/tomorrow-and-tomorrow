@@ -1215,17 +1215,20 @@ func _local_survey_inputs()->Dictionary:
 ##             every 60 people holds the land near 0.6 (land_target).
 ##   rising  : the gap to the target closes by 1 − (1 − 0.45 × r)^years, at
 ##             most 0.9 of it a year, so it is near 0.6 in a few years.
-##   sagging : above the target it falls 5 in 100 a year (paths overgrow,
+##   sagging : above the target it loses a twentieth a year (paths overgrow,
 ##             finds are forgotten), never below the target (land_step).
 ## Cutters and diggers yield × (0.75 + 0.5 × cover) (land_yield, applied in
 ## _process_material_flow). Once a month one seeded roll at the stated odds,
 ## p = 1 − e^(−0.016 × searchers × (1 + survey speed)) (land_find_odds), makes
 ## a find: a deposit of the land the people can recognise but have not
-## measured, else new ground (the registration an expedition's find uses),
-## else a richer part of a deposit being worked (a tenth more, at most twice
-## each). Each find is told once, to the god's own people only, in the
-## Chronicle. An older save starts from its survey history (the share of
-## the land's deposits it had found) and blends into the new yield over a year.
+## measured; else new ground 4 to 20 km out, on land and in no other people's
+## hold (a deposit the world's geology really holds there, or, where the world
+## keeps none, the registration an expedition's find uses); else a richer part
+## of a deposit being worked (a tenth more, at most twice each). Water, woods
+## and fibre are never a searcher's find. Each find is told once, to the god's
+## own people only, in the Chronicle: a year's finds gather on one card. An
+## older save starts from its survey history (the share of the land's
+## deposits it had found) and blends into the new yield over a year.
 const LAND_PEOPLE_PER_SEARCHER:=60.0
 const LAND_HALF:=2.0/3.0
 const LAND_RISE_YEAR:=0.45
@@ -1247,13 +1250,21 @@ const LAND_QUALITY_CAP:=1.5
 ## New ground lies this far from the town (km).
 const LAND_FIND_NEAR_KM:=4.0
 const LAND_FIND_FAR_KM:=20.0
+## Spots of new ground looked at for one find before the searchers give up.
+const LAND_FIND_TRIES:=3
 ## The least promise of the ground (its potential) where new ground is opened,
 ## as an expedition's find needs (register_expedition_occurrence).
 const LAND_FIND_POTENTIAL:=0.38
 const LAND_FINDS_KEPT:=12
-## Kinds new ground is never searched for: water, food grounds, and the woods
-## the carriers look for (surface_search_rings).
-const LAND_NOT_FOUND:=["Freshwater","Fertile Soil","Game","Timber"]
+## A find told within this many days of the last card of finds is one quiet
+## line on that card (chronicle.gd folding).
+const LAND_FOLD_DAYS:=365
+## Kinds new ground is never searched for: food grounds, and the woods and
+## fibre the carriers find (surface_search_rings). Water of every kind is
+## never a searcher's find either (_land_water).
+const LAND_NOT_FOUND:=["Freshwater","Fertile Soil","Game","Timber","Fiber Plants"]
+## Searched land this close to where it is heading is held there (the words).
+const LAND_STEADY:=0.005
 const LAND_COMPASS:=["east","south-east","south","south-west","west","north-west","north","north-east"]
 ## Test seam: when 0 or more, stands in for the month's seeded roll
 ## (tests/test_survey_cover.gd). Never set by the game.
@@ -1295,13 +1306,24 @@ func land_find_odds(searchers:float=-1.0)->float:
 	var speed:=maxf(-0.5,WorldSimulation.discovery.effect("survey_speed"))
 	return 1.0-exp(-LAND_FIND_RATE*n*(1.0+speed))
 
+## Water of every kind (surface water, deep aquifers) is found by other work,
+## never by the searchers.
+func _land_water(resource:String)->bool:
+	return String((catalog.get(resource,{}) as Dictionary).get("family",""))=="Water"
+
 ## A deposit of the land searchers look for: a material of the catalog, not
 ## water or a food ground, and not a worked front of woods, stone or fibre
 ## (those the carriers find, _ensure_surface_supply).
 func _land_kind(deposit:Dictionary)->bool:
 	var resource:=String(deposit.get("resource",""))
-	if not catalog.has(resource) or not _is_material_resource(resource):return false
+	if not catalog.has(resource) or not _is_material_resource(resource) or _land_water(resource):return false
 	return String(deposit.get("landscape_source",""))==""
+
+## A kind new ground may be opened for: a material the people can recognise,
+## never water, a food ground, or the woods and fibre the carriers find.
+func _land_new_kind(resource:String)->bool:
+	if resource in LAND_NOT_FOUND or not catalog.has(resource) or not _is_material_resource(resource) or _land_water(resource):return false
+	return recognition_ready(resource)
 
 ## How much of its land a people had searched before the land was kept: the
 ## share of the deposits it can recognise that it had found (half for one
@@ -1377,11 +1399,12 @@ func _advance_land(context:Dictionary)->void:
 	# A step over several months (a calm rival, a load) rolls once for them all.
 	var months:=mini(12,month-last)
 	var p:=1.0-pow(1.0-land_find_odds(),float(months))
-	var roll:=_land_rng(month).randf() if forced_land_roll<0.0 else forced_land_roll
+	var roll:=_land_rng(month,"roll").randf() if forced_land_roll<0.0 else forced_land_roll
 	land.last_roll={"day":day,"p":p,"roll":roll,"months":months,"searchers":_land_searchers()}
 	if roll>=p:return
 	var origin:=_land_origin(context)
-	var find:=_land_find(context,origin,_land_rng(month+7919))
+	# What is found is picked by its own seed, never the roll's.
+	var find:=_land_find(origin,_land_rng(month,"pick"))
 	if find.is_empty():
 		land.last_roll["found"]="nothing new"
 		return
@@ -1396,12 +1419,13 @@ func _advance_land(context:Dictionary)->void:
 	land.finds=finds
 	_tell_land_find(entry)
 
-## The month's roll: reproducible from the world's seed, the land's place and
-## the month, so viewing never rolls again and a load rolls the same.
-func _land_rng(month:int)->RandomNumberGenerator:
+## A month's roll ("roll") or the pick of what is found ("pick"), each its own
+## seed: reproducible from the world's seed, the land's place and the month,
+## so viewing never rolls again and a load rolls the same.
+func _land_rng(month:int,salt:String="roll")->RandomNumberGenerator:
 	var at:Vector3=WorldSimulation.state.settlement_founded_at
 	var generator:=RandomNumberGenerator.new()
-	generator.seed=hash("%d:land_find:%d:%d:%d" % [int(WorldSimulation.state.world_seed),roundi(at.x*10.0),roundi(at.z*10.0),month])
+	generator.seed=hash("%d:land_%s:%d:%d:%d" % [int(WorldSimulation.state.world_seed),salt,roundi(at.x*10.0),roundi(at.z*10.0),month])
 	return generator
 
 func _land_origin(context:Dictionary)->Vector3:
@@ -1430,16 +1454,69 @@ static func _weighted(pick:RandomNumberGenerator,weights:Array)->int:
 		if at<=0.0:return index
 	return weights.size()-1
 
+## A seeded spot 4 to 20 km out from the town.
+static func _land_spot(origin:Vector3,pick:RandomNumberGenerator)->Vector2:
+	var angle:=pick.randf()*TAU
+	var km:=pick.randf_range(LAND_FIND_NEAR_KM,LAND_FIND_FAR_KM)
+	return Vector2(origin.x,origin.z)+Vector2(cos(angle),sin(angle))*km
+
+## The ground's own profile at a spot: the map's reading where it gives one,
+## else the planet's.
+func _land_profile_at(point:Vector2)->Dictionary:
+	if WorldSimulation.context_provider.is_valid():
+		var spot:Variant=WorldSimulation.context_provider.call(point)
+		if spot is Dictionary:
+			var profile:Variant=(spot as Dictionary).get("environment_profile",{})
+			if profile is Dictionary and not (profile as Dictionary).is_empty():return profile
+	return PlanetEnvironment.profile_at(point)
+
+## The land other peoples hold, read once for a find: each town of theirs
+## by its outline or, where it keeps none, by the reach its people give it
+## (nation_borders.gd estimated_radius). Land we hold is ours.
+func _foreign_holds()->Array:
+	var holds:Array=[]
+	var world=WorldSimulation.world
+	if world==null or world.get("city_intelligence")==null:return holds
+	var places:Dictionary={}
+	for site:Dictionary in world.city_intelligence.sites(false):places[String(site.get("city_id",""))]=site.get("position",{})
+	var us:=String(WorldSimulation.actor_id)
+	var borders=load("res://scripts/nation_borders.gd")
+	for civ:Dictionary in world.civilizations:
+		for region:Dictionary in civ.get("strategic_regions",[]):
+			var id:=String(region.get("id",""))
+			if not places.has(id):continue
+			var holder:=String(region.get("controller",civ.get("id","")))
+			if holder=="" or holder==us or (us=="player" and holder=="human"):continue
+			var boundary:Variant=region.get("boundary",[])
+			if (boundary is PackedVector2Array or boundary is Array) and int(boundary.size())>=3:
+				holds.append({"boundary":PackedVector2Array(boundary)})
+				continue
+			var place:Dictionary=places[id]
+			holds.append({"center":Vector2(float(place.get("x",0.0)),float(place.get("z",0.0))),"reach":float(borders.estimated_radius(float(region.get("population",800.0))))})
+	return holds
+
+static func _in_holds(point:Vector2,holds:Array)->bool:
+	for hold:Dictionary in holds:
+		if hold.has("boundary"):
+			if Geometry2D.is_point_in_polygon(point,hold.boundary):return true
+		elif (hold.center as Vector2).distance_to(point)<=float(hold.reach):return true
+	return false
+
+## Whether `point` lies in land another people holds.
+func _foreign_land(point:Vector2)->bool:
+	return _in_holds(point,_foreign_holds())
+
 ## One find, when the month's roll came up: {kind ("new" | "richer"),
-## deposit, before (the quality before, for a richer find)}, or {} when the
-## land holds nothing more the people can find.
+## deposit, seen (it had been seen, not measured), before (the quality before,
+## for a richer find)}, or {} when the land holds nothing more the people can
+## find.
 ##   1. A deposit of this land they can recognise but have not measured (the
 ##      nearer the likelier): it is found and measured at once.
-##   2. New ground 4 to 20 km out, of a kind the ground promises (its
-##      potential, at least 0.38): the registration an expedition's find uses.
-##   3. A richer part of a deposit being worked: a tenth more from each
-##      cutter there, at most twice for each deposit and never past 1.5.
-func _land_find(context:Dictionary,origin:Vector3,pick:RandomNumberGenerator)->Dictionary:
+##   2. New ground 4 to 20 km out, on land and in no other people's hold.
+##   3. A richer part of a deposit being worked (never a worked front of
+##      woods, stone or fibre): a tenth more from each cutter there, at most
+##      twice for each deposit and never past 1.5.
+func _land_find(origin:Vector3,pick:RandomNumberGenerator)->Dictionary:
 	var state=WorldSimulation.state
 	var waiting:Array=[];var nearness:Array=[]
 	var ready:Dictionary={}
@@ -1461,30 +1538,14 @@ func _land_find(context:Dictionary,origin:Vector3,pick:RandomNumberGenerator)->D
 		found.stage="surveyed";found.clues=1.0;found.survey=1.0
 		_gain_practice(String(found.resource),"survey",0.18)
 		return {"kind":"new","deposit":found,"seen":seen}
-	var profile:Dictionary=context.get("environment_profile",{})
-	if profile.is_empty():profile=PlanetEnvironment.profile_at(Vector2(origin.x,origin.z))
-	var potentials:Dictionary=profile.get("resource_potentials",{})
-	var kinds:Array=[];var promise:Array=[]
-	for resource_variant in catalog.keys():
-		var resource:=String(resource_variant)
-		if resource in LAND_NOT_FOUND or not _is_material_resource(resource):continue
-		var potential:=float(potentials.get(resource,0.0))
-		if potential<LAND_FIND_POTENTIAL or not recognition_ready(resource):continue
-		kinds.append(resource);promise.append(potential)
-	if not kinds.is_empty():
-		var resource:String=kinds[_weighted(pick,promise)]
-		var angle:=pick.randf()*TAU
-		var km:=pick.randf_range(LAND_FIND_NEAR_KM,LAND_FIND_FAR_KM)
-		var opened:=register_expedition_occurrence(resource,Vector2(origin.x,origin.z)+Vector2(cos(angle),sin(angle))*km,profile)
-		if not opened.is_empty():
-			opened["found_by"]="searchers"
-			_gain_practice(resource,"survey",0.18)
-			return {"kind":"new","deposit":opened}
+	var opened:=_land_new_ground_world(origin,pick) if WorldSimulation.enabled else _land_new_ground_local(origin,pick)
+	if not opened.is_empty():
+		_gain_practice(String(opened.resource),"survey",0.18)
+		return {"kind":"new","deposit":opened}
 	var worked:Array=[]
 	for deposit_variant in state.resource_deposits:
 		var deposit:Dictionary=deposit_variant
-		var resource:=String(deposit.get("resource",""))
-		if not catalog.has(resource) or not _is_material_resource(resource):continue
+		if not _land_kind(deposit):continue
 		if String(deposit.get("stage","")) not in ["accessible","developed"] or deposit_exhausted(deposit):continue
 		if int(deposit.get("richer_finds",0))>=LAND_RICHER_TIMES or float(deposit.get("quality",1.0))>=LAND_QUALITY_CAP:continue
 		worked.append(deposit)
@@ -1495,7 +1556,67 @@ func _land_find(context:Dictionary,origin:Vector3,pick:RandomNumberGenerator)->D
 	richer["richer_finds"]=int(richer.get("richer_finds",0))+1
 	return {"kind":"richer","deposit":richer,"before":before}
 
-## A find told once, plainly, to the god's own people (the Chronicle only).
+## New ground where the world keeps one geology for every people: a 16 km
+## cell at a spot 4 to 20 km out, and one deposit that cell really holds
+## (civilization_resources.gd cell_occurrences), of a kind searchers find, on
+## land, in no other people's hold and not worked out, that this people does
+## not know yet (the likelier where the ground promises more). Only that
+## deposit joins the people's list, measured; a cell with nothing to find
+## adds nothing.
+func _land_new_ground_world(origin:Vector3,pick:RandomNumberGenerator)->Dictionary:
+	var Resources:=preload("res://scripts/civilization_resources.gd")
+	var state=WorldSimulation.state
+	var keys:Dictionary=Resources._world_keys()
+	var holds:=_foreign_holds()
+	for attempt in LAND_FIND_TRIES:
+		var point:=_land_spot(origin,pick)
+		var options:Array=[];var promise:Array=[]
+		for deposit:Dictionary in Resources.cell_occurrences(Vector2i(floori(point.x/16.0),floori(point.y/16.0)),keys):
+			if not _land_new_kind(String(deposit.resource)):continue
+			var at:Vector3=deposit.position
+			if _in_holds(Vector2(at.x,at.z),holds):continue
+			var reserve:Dictionary=WorldSimulation.geography_stock.get(String(deposit.world_key),{})
+			if not reserve.is_empty() and float(reserve.get("remaining",0.0))<=0.0:continue
+			options.append(deposit);promise.append(maxf(0.05,float(deposit.get("environment_potential",0.5))))
+		if options.is_empty():continue
+		var found:Dictionary=options[_weighted(pick,promise)]
+		var key:=String(found.world_key)
+		if not WorldSimulation.geography_stock.has(key):WorldSimulation.geography_stock[key]={"remaining":float(found.initial_amount),"initial_amount":float(found.initial_amount),"last_day":int(state.elapsed_days)}
+		found.remaining=float(WorldSimulation.geography_stock[key].remaining)
+		found.id="%s_%d" % [String(found.resource).to_snake_case(),state.resource_deposits.size()]
+		found.stage="surveyed";found.clues=1.0;found.survey=1.0
+		found["found_by"]="searchers"
+		state.resource_deposits.append(found)
+		return found
+	return {}
+
+## New ground where the world keeps no shared geology (an older campaign):
+## a spot 4 to 20 km out, on land and in no other people's hold, and a kind
+## its own ground promises (potential at least 0.38), registered as an
+## expedition's find is (register_expedition_occurrence).
+func _land_new_ground_local(origin:Vector3,pick:RandomNumberGenerator)->Dictionary:
+	var holds:=_foreign_holds()
+	for attempt in LAND_FIND_TRIES:
+		var point:=_land_spot(origin,pick)
+		if not WorldSimulation.world._scout_land_at(point) or _in_holds(point,holds):continue
+		var profile:=_land_profile_at(point)
+		var potentials:Dictionary=profile.get("resource_potentials",{})
+		var kinds:Array=[];var promise:Array=[]
+		for resource_variant in catalog.keys():
+			var resource:=String(resource_variant)
+			var potential:=float(potentials.get(resource,0.0))
+			if potential<LAND_FIND_POTENTIAL or not _land_new_kind(resource):continue
+			kinds.append(resource);promise.append(potential)
+		if kinds.is_empty():continue
+		var opened:=register_expedition_occurrence(String(kinds[_weighted(pick,promise)]),point,profile)
+		if opened.is_empty():continue
+		opened["found_by"]="searchers"
+		return opened
+	return {}
+
+## A find told once, plainly, to the god's own people (the Chronicle only). A
+## new find is a notice; finds told within a year of the last card of finds
+## gather on that card, each one quiet line. A richer seam is a quiet line.
 func _tell_land_find(entry:Dictionary)->void:
 	if WorldSimulation.actor_id!="player":return
 	var chronicle:=load("res://scripts/chronicle.gd") as GDScript
@@ -1503,23 +1624,25 @@ func _tell_land_find(entry:Dictionary)->void:
 	var home:=String(WorldSimulation.state.settlement_name)
 	if home=="":home="our town"
 	var what:=display_name(String(entry.resource)).to_lower()
+	var named:=what.left(1).to_upper()+what.substr(1)
 	var way:=String(entry.get("way",""))
 	var km:=float(entry.get("km",0.0))
 	var where:="close by %s" % home if km<1.0 or way=="" else "about %d km %s of %s" % [maxi(1,roundi(km)),way,home]
-	var title:String
-	var text:String
+	var action:={"kind":"section","section":"economy","sub":1}
+	var moment:={"kind":"economy","action":action,"key":"land_find:%s:%d:%s" % [String(WorldSimulation.state.resource_settlement_id),int(entry.day),String(entry.deposit_id)]}
 	if String(entry.kind)=="richer":
-		title="A richer part of the %s near %s" % [what,home]
-		text="Searchers found a richer part of the %s %s. Each cutter or digger there now brings in about a tenth more." % [what,where]
-	elif bool(entry.get("seen",false)):
-		title="The %s near %s is measured" % [what,home]
-		text="Searchers traced the %s they had seen signs of, %s. It is measured and can be opened for work." % [what,where]
+		moment.merge({"tier":"whisper","title":"A richer part of the %s near %s" % [what,home],"text":"A richer part of the %s, %s: about a tenth more from each cutter there." % [what,where]})
 	else:
-		title="%s found near %s" % [what.left(1).to_upper()+what.substr(1),home]
-		text="Searchers found %s %s. It is measured and can be opened for work." % [what,where]
-	# A richer seam is a quiet line in the year's tally; new ground is a notice.
-	var tier:="whisper" if String(entry.kind)=="richer" else "notice"
-	var told:Variant=chronicle.call("record",{"title":title,"text":text,"tier":tier,"kind":"economy","key":"land_find:%s:%d:%s" % [String(WorldSimulation.state.resource_settlement_id),int(entry.day),String(entry.deposit_id)],"action":{"kind":"section","section":"economy","sub":1}})
+		if bool(entry.get("seen",false)):
+			moment.merge({"title":"The %s near %s is measured" % [what,home],"text":"Searchers traced the %s they had seen signs of, %s. It is measured and can be opened for work." % [what,where]})
+		else:
+			moment.merge({"title":"%s found near %s" % [named,home],"text":"Searchers found %s %s. It is measured and can be opened for work." % [what,where]})
+		moment.merge({"tier":"notice","fold_as":"land_find","fold_days":LAND_FOLD_DAYS})
+		# Within the year of the last card of finds: one quiet line on it.
+		var c:Variant=chronicle.call("data")
+		var head:Variant=chronicle.call("_fold_head",c,"land_find","",String(chronicle.call("action_sign",action)),int(WorldSimulation.state.elapsed_days),LAND_FOLD_DAYS)
+		if head is Dictionary and not (head as Dictionary).is_empty():moment.text="%s, %s." % [named,where]
+	var told:Variant=chronicle.call("record",moment)
 	entry["told"]=told is Dictionary and not (told as Dictionary).is_empty()
 
 
@@ -1530,11 +1653,11 @@ func _tell_land_find(entry:Dictionary)->void:
 ## searchers, people, yield (at this cover), applied (as the engine applies
 ## it today, with an older save's blend), blend_days_left, find_month (the
 ## month's odds), finds (latest first), plus_ten {searchers, target, yield,
-## find_month}}.
-func land_reading()->Dictionary:
-	return WorldSimulation.settlements.with_local_population(func()->Dictionary:return _land_reading())
+## find_month} with `extra` more searching}.
+func land_reading(extra:float=10.0)->Dictionary:
+	return WorldSimulation.settlements.with_local_population(func()->Dictionary:return _land_reading(extra))
 
-func _land_reading()->Dictionary:
+func _land_reading(extra:float=10.0)->Dictionary:
 	var state=WorldSimulation.state
 	var kept:Dictionary=state.land_survey
 	var land:Dictionary=kept if kept.has("cover") else _land_new_record()
@@ -1544,7 +1667,7 @@ func _land_reading()->Dictionary:
 	var cover:=float(land.get("cover",0.0))
 	var settled:=bool(state.settlement_site_committed)
 	var from:=int(land.get("blend_from",-1))
-	var more:=searchers+10.0
+	var more:=searchers+extra
 	var plus:=land_target(more,people)
 	return {"settled":settled,"cover":cover,"target":land_target(searchers,people),"searchers":searchers,"people":people,
 		"yield":land_yield(cover),"applied":_land_applied(land,day) if settled else 1.0,
@@ -1552,49 +1675,107 @@ func _land_reading()->Dictionary:
 		"find_month":land_find_odds(searchers),"finds":(land.get("finds",[]) as Array).duplicate(true),
 		"plus_ten":{"searchers":more,"target":plus,"yield":land_yield(plus),"find_month":land_find_odds(more)}}
 
-## A month's odds in plain words: "about 1 chance in 7", "about 6 in 10".
+## The searched land of the whole people, as the People screen reads every
+## task: each lived-in town read in its own scope, its cover, target and
+## yields averaged by its people, the searchers summed, and the month's
+## chance of at least one find anywhere. Ten more searchers are spread over
+## the towns by their people. Read from outside any town's scope; inside
+## one, that place's own reading.
+func realm_land_reading()->Dictionary:
+	var model=WorldSimulation.settlements
+	var state=WorldSimulation.state
+	if state.player_settlements.is_empty() or String(state.resource_settlement_id)!="" or bool(model._local_population_scope):return land_reading()
+	var readings:Array=[]
+	for record:Dictionary in model.lived_in():
+		if not String(record.get("occupied_by","")).is_empty():continue
+		if bool(record.get("primary",false)):readings.append(land_reading(0.0))
+		else:readings.append(model.with_city_resources(String(record.get("id","")),func()->Dictionary:return land_reading(0.0)))
+	var settled:Array=readings.filter(func(r:Dictionary)->bool:return bool(r.get("settled",false)))
+	if settled.is_empty():return land_reading()
+	var people:=0.0;var searchers:=0.0
+	for r:Dictionary in settled:
+		people+=float(r.people)
+		searchers+=float(r.searchers)
+	var cover:=0.0;var target:=0.0;var applied:=0.0;var more_target:=0.0
+	var none:=1.0;var more_none:=1.0;var blend:=0
+	for r:Dictionary in settled:
+		var share:=float(r.people)/maxf(1.0,people)
+		var more:=float(r.searchers)+10.0*share
+		cover+=float(r.cover)*share;target+=float(r.target)*share;applied+=float(r.applied)*share
+		more_target+=land_target(more,float(r.people))*share
+		none*=1.0-float(r.find_month);more_none*=1.0-land_find_odds(more)
+		blend=maxi(blend,int(r.blend_days_left))
+	return {"settled":true,"towns":settled.size(),"cover":cover,"target":target,"searchers":searchers,"people":people,
+		"yield":land_yield(cover),"applied":applied,"blend_days_left":blend,"find_month":1.0-none,"finds":[],
+		"plus_ten":{"searchers":searchers+10.0,"target":more_target,"yield":land_yield(more_target),"find_month":1.0-more_none}}
+
+## A month's odds in plain words: "about 1 in 7", "about 6 in 10".
 static func odds_words(p:float)->String:
 	if p<=0.0005:return "none"
 	if p>=0.95:return "almost sure"
 	if p>=0.5:return "about %d in 10" % roundi(p*10.0)
-	return "about 1 chance in %d" % maxi(2,roundi(1.0/p))
+	return "about 1 in %d" % maxi(2,roundi(1.0/p))
 
 static func _in_100(value:float)->int:
 	return roundi(clampf(value,0.0,1.0)*100.0)
+
+static func _searcher_words(n:float)->String:
+	if n<0.05:return "nobody"
+	if n<0.5:return "less than one"
+	return "%d" % roundi(n)
+
+## Which way the searched land is going, in words: from where it heads
+## against where it stands, never from a rounded head count.
+static func land_heading(r:Dictionary)->String:
+	var cover:=float(r.get("cover",0.0));var target:=float(r.get("target",0.0))
+	var searchers:=float(r.get("searchers",0.0))
+	if target>cover+LAND_STEADY:return "rising toward %d with %s searching" % [_in_100(target),_searcher_words(searchers)]
+	if target<cover-LAND_STEADY:
+		if searchers<0.05:return "losing a twentieth of it a year with nobody searching"
+		return "losing a twentieth of it a year toward %d with only %s searching" % [_in_100(target),_searcher_words(searchers)]
+	if searchers<0.05:return "with nobody searching"
+	return "held there by %s searching" % _searcher_words(searchers)
+
+## What cutting and digging get as the engine applies it today; in an older
+## save's blend year, also where it is going.
+static func land_yield_words(r:Dictionary)->String:
+	var line:="×%.2f" % float(r.get("applied",1.0))
+	if int(r.get("blend_days_left",0))>0:line+=" today, ×%.2f once the change has settled in %d days" % [float(r.get("yield",1.0)),int(r.blend_days_left)]
+	return line
 
 ## The searched land in one plain line (the Materials page); "" for a people
 ## on the road.
 func land_words()->String:
 	var r:=land_reading()
 	if not bool(r.settled):return ""
-	var cover:=float(r.cover);var target:=float(r.target)
-	var searchers:=roundi(float(r.searchers))
-	var heading:=""
-	if searchers<=0:heading=", sagging 5 in 100 a year with nobody searching"
-	elif target>cover+0.005:heading=", rising to %d with %d searching" % [_in_100(target),searchers]
-	elif target<cover-0.005:heading=", sagging toward %d with only %d searching" % [_in_100(target),searchers]
-	else:heading=", held there by %d searching" % searchers
-	var line:="Searched land %d in 100%s. Cutting and digging ×%.2f (×0.75 on unsearched land, up to ×1.25)." % [_in_100(cover),heading,float(r.yield)]
-	if int(r.blend_days_left)>0:line+=" It comes in fully over %d more days; today ×%.2f." % [int(r.blend_days_left),float(r.applied)]
-	line+=" A find this month: %s." % odds_words(float(r.find_month))
-	return line
+	return "Searched land %d in 100, %s. Cutting and digging %s (×0.75 on unsearched land, up to ×1.25). A find in the next month: %s." % [_in_100(float(r.cover)),land_heading(r),land_yield_words(r),odds_words(float(r.find_month))]
 
 ## What a role does now and what ten more people there would do, in the
 ## engine's numbers, for the People view: "Survey" (searching the land) and
-## "Extraction" (cutting and digging); {} for other roles. In the scope of
-## `settlement_id` when given (a town), else the one in scope.
+## "Extraction" (cutting and digging); {} for other roles.
+## `settlement_id` names the town read, its land with its own people and
+## searchers: "" is the place in scope (the first town when none is). Read
+## from outside any town's scope; a town other than the one in scope cannot
+## be read from inside another's scope, and gives {}.
 ## {role, now, plus_ten (plain words), numbers {...}}.
 func role_effect(role:String,settlement_id:String="")->Dictionary:
-	if settlement_id!="":return WorldSimulation.settlements.with_city_resources(settlement_id,func()->Dictionary:return role_effect(role))
 	if role not in ["Survey","Extraction"]:return {}
+	if settlement_id=="":return _role_effect_here(role)
+	var model=WorldSimulation.settlements
+	var record:Dictionary=model.settlement_record(settlement_id)
+	if record.is_empty():return {}
+	var scope:="" if bool(record.get("primary",false)) else settlement_id
+	var current:=String(WorldSimulation.state.resource_settlement_id)
+	if scope==current:return _role_effect_here(role)
+	if current!="" or bool(model._local_population_scope):return {}
+	return model.with_city_resources(settlement_id,func()->Dictionary:return _role_effect_here(role))
+
+func _role_effect_here(role:String)->Dictionary:
 	var r:=land_reading()
 	var plus:Dictionary=r.plus_ten
 	if role=="Survey":
-		var searchers:=roundi(float(r.searchers))
-		var heading:="sagging 5 in 100 a year" if searchers<=0 else "heading to %d" % _in_100(float(r.target))
-		var who:="Nobody is" if searchers<=0 else "%d" % searchers
-		var now:="%s searching: the searched land is %d in 100, %s; cutters and diggers get ×%.2f. A find this month: %s." % [who,_in_100(float(r.cover)),heading,float(r.yield),odds_words(float(r.find_month))]
-		var ten:="Ten more searching: the land would head to %d in 100 (cutting and digging ×%.2f once there), and a find each month %s." % [_in_100(float(plus.target)),float(plus.yield),odds_words(float(plus.find_month))]
+		var now:="The searched land is %d in 100, %s. Cutters and diggers get %s. A find in the next month: %s." % [_in_100(float(r.cover)),land_heading(r),land_yield_words(r),odds_words(float(r.find_month))]
+		var ten:="Ten more searching: the land would head to %d in 100 (cutting and digging ×%.2f once there), and a find in the next month would be %s." % [_in_100(float(plus.target)),float(plus.yield),odds_words(float(plus.find_month))]
 		return {"role":role,"now":now,"plus_ten":ten,"numbers":r}
 	var local:Dictionary=WorldSimulation.settlements.with_local_population(func()->Dictionary:
 		return {"cutters":maxf(0.0,WorldSimulation.state.effective_workers("Extraction")),"flows":(WorldSimulation.state.material_metrics as Dictionary).duplicate()})
@@ -1602,9 +1783,9 @@ func role_effect(role:String,settlement_id:String="")->Dictionary:
 	var cutters:=float(local.cutters)
 	var per:=float(flows.get("per_cutter",0.0))
 	var cut:=float(flows.get("extracted_today",0.0))
-	var numbers:={"cutters":cutters,"extracted_today":cut,"per_cutter":per,"land_factor":float(r.applied),"plus_ten_loads":per*10.0}
+	var numbers:={"cutters":cutters,"extracted_today":cut,"per_cutter":per,"land_factor":float(r.applied),"land_yield":float(r.yield),"plus_ten_loads":per*10.0}
 	var crew:="Nobody" if cutters<0.5 else "%d" % roundi(cutters)
-	var now_words:="%s cut and dig %.1f loads a day; the searched land gives them ×%.2f." % [crew,cut,float(r.applied)]
+	var now_words:="%s cut and dig %.1f loads a day; the searched land gives them %s." % [crew,cut,land_yield_words(r)]
 	var ten_words:="Ten more would bring in nothing until a deposit is opened for work."
 	if per>0.0:ten_words="Ten more would bring in about %.1f more loads a day (%.2f each at today's yield)." % [per*10.0,per]
 	return {"role":role,"now":now_words,"plus_ten":ten_words,"numbers":numbers}

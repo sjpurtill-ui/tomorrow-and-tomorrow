@@ -5,17 +5,34 @@ extends GdUnitTestSuite
 ## and are told once, an older save blends into the new yield over a year,
 ## and a computer people follows the same rules.
 const Chronicle:=preload("res://scripts/chronicle.gd")
+const Geology:=preload("res://scripts/civilization_resources.gd")
 const SEED:=60417
+var _land_authority:Callable
+var _provider:Callable
+var _civilizations:Array
 
 func before_test()->void:
 	WorldSimulation.clear()
 	_fresh(GameState)
 	ResourceSystem.reset_for_new_world()
 	ResourceSystem.forced_land_roll=-1.0
+	_land_authority=CivilizationSystem.scout_land_authority
+	_provider=WorldSimulation.context_provider
+	_civilizations=CivilizationSystem.civilizations.duplicate(true)
+	# No land is known to be land unless a test says so.
+	CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return false
 
 func after_test()->void:
 	ResourceSystem.forced_land_roll=-1.0
 	WorldSimulation.clear()
+	CivilizationSystem.scout_land_authority=_land_authority
+	WorldSimulation.context_provider=_provider
+	CivilizationSystem.civilizations.assign(_civilizations)
+
+## Every spot is land, and its ground promises `potentials`.
+func _open_country(potentials:Dictionary)->void:
+	CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return true
+	WorldSimulation.context_provider=func(_point:Vector2)->Dictionary:return {"environment_profile":{"resource_potentials":potentials}}
 
 ## A settled people of 120 with `searchers` at the search (the same set-up for
 ## any people's state).
@@ -119,7 +136,7 @@ func test_extraction_yield_follows_the_searched_land()->void:
 func test_find_odds_are_stated_and_the_roll_is_seeded()->void:
 	assert_float(ResourceSystem.land_find_odds(10.0)).is_equal_approx(1.0-exp(-0.16),0.000001)
 	assert_float(ResourceSystem.land_find_odds(0.0)).is_equal(0.0)
-	assert_str(ResourceSystem.odds_words(ResourceSystem.land_find_odds(10.0))).is_equal("about 1 chance in 7")
+	assert_str(ResourceSystem.odds_words(ResourceSystem.land_find_odds(10.0))).is_equal("about 1 in 7")
 	GameState.population_allocations.Survey=6
 	_days(0,0)
 	_days(30,30)
@@ -183,9 +200,9 @@ func test_new_ground_uses_the_expedition_registration()->void:
 	GameState.resource_deposits=[]
 	_days(0,0)
 	ResourceSystem.forced_land_roll=0.0
-	var context:=_context()
-	context.environment_profile={"resource_potentials":{"Clay":0.9}}
-	_days(1,30,context)
+	# The spot's own ground is read, not the town's.
+	_open_country({"Clay":0.9,"Fiber Plants":0.95})
+	_days(1,30)
 	assert_int(GameState.resource_deposits.size()).is_equal(1)
 	var found:Dictionary=GameState.resource_deposits[0]
 	assert_str(String(found.resource)).is_equal("Clay")
@@ -207,6 +224,8 @@ func test_an_older_save_starts_from_its_survey_history_and_blends_over_a_year()-
 	var land:Dictionary=GameState.land_survey
 	assert_float(float(land.cover)).is_equal_approx(0.8,0.000001)
 	assert_int(int(land.blend_from)).is_equal(400)
+	# The yield quoted is the one applied today, and where it is going.
+	assert_str(ResourceSystem.land_words()).contains("Cutting and digging ×1.00 today, ×1.15 once the change has settled in 365 days")
 	GameState.elapsed_days=400+73
 	assert_float(ResourceSystem.land_yield_factor()).is_equal_approx(1.0+0.15*73.0/365.0,0.000001)
 	GameState.elapsed_days=765
@@ -292,10 +311,172 @@ func test_role_effects_say_what_the_work_does_now_and_ten_more()->void:
 func test_the_materials_page_shows_the_searched_land()->void:
 	_days(0,0)
 	var words:=ResourceSystem.land_words()
-	assert_str(words).contains("Cutting and digging ×0.75").contains("A find this month: %s." % ResourceSystem.odds_words(ResourceSystem.land_find_odds()))
+	assert_str(words).contains("Cutting and digging ×0.75").contains("A find in the next month: %s." % ResourceSystem.odds_words(ResourceSystem.land_find_odds()))
 	var page:VBoxContainer=auto_free(preload("res://scripts/hud/materials_ledger.gd").new())
 	page.setup({"city":"Stonebrook","leader":{},"managed":true,"can_direct":false,"focus":"","storage":10.0,"capacity":100.0,"hauling":0.9,"land":words,
 		"rows":[],"incoming":[],"day":0,"selected":"","on_select":func(_k:String):pass,"on_map":func():pass,"on_focus":func(_f:String):pass,"on_trade":func():pass})
 	var label:Label=page.find_child("SearchedLand",true,false)
 	assert_object(label).is_not_null()
 	assert_str(label.text).is_equal(words)
+
+
+# --- Review fixes: where new ground may be, what is never found ------------------------------------
+
+## With one geology for every people, a find is a deposit the cell really
+## holds; only it joins the list, and a cell with nothing adds nothing.
+func test_world_new_ground_adds_only_a_deposit_the_cell_really_holds()->void:
+	WorldSimulation.enabled=true
+	_open_country({"Clay":0.9,"Flint":0.9,"Salt":0.9,"Fiber Plants":0.95})
+	_days(0,0)
+	ResourceSystem.forced_land_roll=0.0
+	_days(1,30)
+	assert_int(GameState.resource_deposits.size()).is_equal(1)
+	var found:Dictionary=GameState.resource_deposits[0]
+	assert_str(String(found.stage)).is_equal("surveyed")
+	assert_str(String(found.get("found_by",""))).is_equal("searchers")
+	assert_array(["Clay","Flint","Salt"]).contains([String(found.resource)])
+	var key:=String(found.world_key)
+	var parts:=key.split(":")
+	var held:=Geology.cell_occurrences(Vector2i(int(parts[0]),int(parts[1]))).map(func(d:Dictionary)->String:return String(d.world_key))
+	assert_array(held).contains([key])
+	assert_bool(WorldSimulation.geography_stock.has(key)).is_true()
+	# Fibre is the carriers' to find; water is never the searchers'.
+	for kind in ["Fiber Plants","Timber","Freshwater","Deep Aquifer"]:
+		assert_bool(ResourceSystem._land_new_kind(kind)).override_failure_message(kind).is_false()
+
+func test_world_new_ground_in_an_empty_cell_adds_nothing()->void:
+	WorldSimulation.enabled=true
+	_open_country({})
+	var clay:=_deposit("Clay",Vector3(1,0,0),"accessible",0)
+	GameState.resource_deposits=[clay]
+	_days(0,0)
+	ResourceSystem.forced_land_roll=0.0
+	_days(1,30)
+	# Nothing was there: the find is a richer seam instead, and no cell's
+	# hidden deposits were added on the way.
+	assert_int(GameState.resource_deposits.size()).is_equal(1)
+	assert_str(String(GameState.land_survey.finds[0].kind)).is_equal("richer")
+
+func test_new_ground_is_never_in_another_peoples_hold_or_on_water()->void:
+	_open_country({"Clay":0.9})
+	CivilizationSystem.civilizations.append({"id":"civ_test","name":"Otherfolk","position":Vector2.ZERO,"strategic_regions":[{"id":"region_test","name":"Otherhold","role":"capital","map_x":0.5,"map_y":0.5,"position":Vector2(5,0),"controller":"civ_test","population":4000.0,"settlement_founded":true,
+		"boundary":PackedVector2Array([Vector2(-40,-40),Vector2(40,-40),Vector2(40,40),Vector2(-40,40)])}]})
+	assert_bool(ResourceSystem._foreign_land(Vector2(10,0))).is_true()
+	_days(0,0)
+	ResourceSystem.forced_land_roll=0.0
+	_days(1,30)
+	assert_int(GameState.resource_deposits.size()).is_equal(0)
+	assert_str(String(GameState.land_survey.last_roll.found)).is_equal("nothing new")
+	# Water everywhere (no land): nothing either.
+	CivilizationSystem.civilizations.pop_back()
+	CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return false
+	_days(31,60)
+	assert_int(GameState.resource_deposits.size()).is_equal(0)
+
+func test_water_and_worked_fronts_are_never_a_find()->void:
+	GameState.known_discoveries.append("well_siting")
+	var aquifer:=_deposit("Deep Aquifer",Vector3(2,0,0),"unknown",0)
+	var front:=_deposit("Stone",Vector3(1,0,0),"accessible",1)
+	front["landscape_source"]="surface_stone_catchment"
+	GameState.resource_deposits=[aquifer,front]
+	_days(0,0)
+	ResourceSystem.forced_land_roll=0.0
+	_days(1,30)
+	assert_str(String(aquifer.stage)).is_equal("unknown")
+	assert_float(float(front.quality)).is_equal(1.0)
+	assert_str(String(GameState.land_survey.last_roll.found)).is_equal("nothing new")
+
+func test_the_pick_has_its_own_seed()->void:
+	assert_float(ResourceSystem._land_rng(3,"pick").randf()).is_not_equal(ResourceSystem._land_rng(3,"roll").randf())
+	assert_float(ResourceSystem._land_rng(3,"roll").randf()).is_equal(ResourceSystem._land_rng(3).randf())
+
+
+# --- Review fixes: words ---------------------------------------------------------------------------
+
+func test_the_words_follow_where_the_land_is_heading_not_a_rounded_count()->void:
+	assert_str(ResourceSystem.land_heading({"cover":0.1,"target":0.2,"searchers":0.4})).is_equal("rising toward 20 with less than one searching")
+	assert_str(ResourceSystem.land_heading({"cover":0.3,"target":0.0,"searchers":0.0})).is_equal("losing a twentieth of it a year with nobody searching")
+	assert_str(ResourceSystem.land_heading({"cover":0.8,"target":0.6,"searchers":2.0})).is_equal("losing a twentieth of it a year toward 60 with only 2 searching")
+	assert_str(ResourceSystem.land_heading({"cover":0.6,"target":0.6,"searchers":2.0})).is_equal("held there by 2 searching")
+	assert_str(ResourceSystem.odds_words(0.6)).is_equal("about 6 in 10")
+
+## A year's finds gather on one card: each later find is one quiet line on it.
+func test_finds_within_a_year_gather_on_one_card()->void:
+	GameState.resource_deposits=[_deposit("Clay",Vector3(3,0,4),"unknown",0),_deposit("Flint",Vector3(0,0,-8),"unknown",1),_deposit("Clay",Vector3(-6,0,0),"unknown",2)]
+	_days(0,0)
+	ResourceSystem.forced_land_roll=0.0
+	_days(1,60)
+	var finds:Array=GameState.land_survey.finds
+	assert_int(finds.size()).is_equal(2)
+	var first:=_entry("land_find::30:%s" % String(finds[1].deposit_id))
+	var second:=_entry("land_find::60:%s" % String(finds[0].deposit_id))
+	assert_str(String(first.tier)).is_equal("notice")
+	assert_str(String(second.tier)).is_equal("whisper")
+	assert_str(String(second.same_as)).is_equal(String(first.key))
+	assert_int(int(first.told)).is_equal(2)
+	assert_bool(String(second.text).contains("\n")).is_false()
+	assert_str(String(second.text)).ends_with("of Stonebrook.")
+	assert_str(String(second.text)).not_contains("Searchers")
+	# More than a year after the card's last find, the next is news again.
+	ResourceSystem.forced_land_roll=0.99
+	_days(61,60+420)
+	ResourceSystem.forced_land_roll=0.0
+	_days(481,510)
+	var third:=_entry("land_find::510:%s" % String(GameState.land_survey.finds[0].deposit_id))
+	assert_str(String(third.tier)).is_equal("notice")
+	assert_bool(third.has("same_as")).is_false()
+
+func _entry(key:String)->Dictionary:
+	for entry:Dictionary in Chronicle.data().entries:
+		if String(entry.get("key",""))==key:return entry
+	return {}
+
+
+# --- Review fixes: the whole people, and one town read explicitly ----------------------------------
+
+func _two_towns()->String:
+	SettlementModel.reset_for_new_world()
+	GameState.settlement_completed=["Hearth Circle"]
+	SettlementModel.ensure_founded()
+	GameState.player_settlements.append({"id":"dawngate","name":"Dawngate","primary":false,"position":Vector2(10,0),"population_share":0.25,"founded_day":0})
+	_days(0,0)
+	GameState.land_survey.cover=0.5
+	SettlementModel.with_city_resources("dawngate",func()->void:
+		ResourceSystem._advance_land(_context())
+		GameState.land_survey.cover=0.2
+	)
+	for record:Dictionary in GameState.player_settlements:
+		if bool(record.get("primary",false)):return String(record.id)
+	return ""
+
+func test_the_people_screen_reads_every_town_by_its_people()->void:
+	_two_towns()
+	var home:=ResourceSystem.land_reading(0.0)
+	var town:Dictionary=SettlementModel.with_city_resources("dawngate",func()->Dictionary:return ResourceSystem.land_reading(0.0))
+	assert_float(float(town.people)).is_less(float(home.people))
+	var realm:=ResourceSystem.realm_land_reading()
+	var people:=float(home.people)+float(town.people)
+	assert_float(float(realm.people)).is_equal_approx(people,0.0001)
+	assert_float(float(realm.searchers)).is_equal_approx(float(home.searchers)+float(town.searchers),0.0001)
+	assert_float(float(realm.cover)).is_equal_approx((0.5*float(home.people)+0.2*float(town.people))/people,0.000001)
+	assert_float(float(realm.find_month)).is_equal_approx(1.0-(1.0-float(home.find_month))*(1.0-float(town.find_month)),0.000001)
+	assert_float(float(realm.plus_ten.find_month)).is_greater(float(realm.find_month))
+	# The People screen's lines read the whole people.
+	var lines:Array=preload("res://scripts/task_impact.gd").of("Survey").lines
+	var searched:Array=lines.filter(func(l:Dictionary)->bool:return String(l.label)=="Searched land")
+	assert_str(String(searched[0].value)).is_equal("%d in 100" % roundi(float(realm.cover)*100.0))
+
+func test_role_effect_reads_the_named_towns_land_with_its_own_people()->void:
+	var primary:=_two_towns()
+	var town:Dictionary=SettlementModel.with_city_resources("dawngate",func()->Dictionary:return ResourceSystem.land_reading())
+	var there:=ResourceSystem.role_effect("Survey","dawngate")
+	assert_float(float(there.numbers.cover)).is_equal(0.2)
+	assert_float(float(there.numbers.people)).is_equal_approx(float(town.people),0.0001)
+	var home:=ResourceSystem.role_effect("Survey",primary)
+	assert_float(float(home.numbers.cover)).is_equal(0.5)
+	assert_float(float(home.numbers.people)).is_equal_approx(float(ResourceSystem.land_reading().people),0.0001)
+	# From inside one town's scope another town cannot be read.
+	SettlementModel.with_city_resources("dawngate",func()->void:
+		assert_dict(ResourceSystem.role_effect("Survey",primary)).is_empty()
+		assert_float(float(ResourceSystem.role_effect("Survey","dawngate").numbers.cover)).is_equal(0.2)
+	)
