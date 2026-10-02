@@ -22,7 +22,8 @@ extends RefCounted
 ## divine_regard.people_regard (our own people's Dread and Love), the Standing
 ## page ("What they remember of us"), world_answer.gd (what a people does about
 ## us). Written by: divine_regard._record_event (every act of the god in the
-## hall), war_loop._tally/_exhaust (the dead of feuds and wars), and the
+## hall), war_loop._tally/_exhaust (the dead of feuds and wars), town_fate
+## (a held town's people put to the sword, its women violated), and the
 ## monthly look at towns taken or burned and captives driven off (monthly()).
 ##
 ## State lives in ForeignDiplomacy.audiences["deeds"] (saved with the court;
@@ -49,9 +50,12 @@ const FOREIGN:={
 	"blood":[0.006,0.009],"blood_defending":[0.005,0.004],"captives":[0.003,0.006],
 	"amends":[0.0,-0.12],
 	"slay_hostage":[0.15,0.4],"harm_hostage":[0.04,0.12],
+	# A held town's people put to the sword, or its women violated, at the
+	# god's word (town_fate.gd): per head, the weightiest deeds of all.
+	"massacre":[0.01,0.012],"violation":[0.004,0.012],
 }
 ## Per-head kinds and the most one counted deed can weigh.
-const PER_HEAD:={"blood":[0.25,0.35],"blood_defending":[0.2,0.15],"captives":[0.15,0.25]}
+const PER_HEAD:={"blood":[0.25,0.35],"blood_defending":[0.2,0.15],"captives":[0.15,0.25],"massacre":[0.45,0.55],"violation":[0.2,0.45]}
 const HOME:={
 	"strike_down":[0.05,-0.02],"cast_out":[0.03,-0.01],"terrify":[0.015,0.0],"penance":[0.01,0.0],"flight":[0.02,0.0],
 	"slay_envoy":[0.03,0.0],"maim_envoy":[0.02,0.0],"shame_envoy":[0.008,0.0],
@@ -140,6 +144,8 @@ static func _counted_words(kind:String,n:int,_civ:String)->String:
 		"blood": return "%s of theirs killed by our spears" % count
 		"blood_defending": return "%s of their raiders killed at our hearths" % count
 		"captives": return "%s of their people driven off as captives" % count
+		"massacre": return "%s of their people put to the sword in towns we held" % count
+		"violation": return "%s of their women violated by our garrisons" % count
 	return ""
 
 ## The weakest of the forgotten go first, then the faintest.

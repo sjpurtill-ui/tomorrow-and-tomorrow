@@ -199,6 +199,16 @@ func test_the_users_order_is_carried_out_on_the_town_with_real_consequences()->v
 	# The war leader says it plainly, with the numbers.
 	assert_str(String(r.actor_says)).contains("men of Tsaren were put to the sword")
 	assert_str(String(r.actor_says)).contains(str(int(o.killed)) if int(o.killed)>12 else "")
+	# Told for a generation by their people, and heard of by every people we
+	# know (deeds.gd).
+	var deeds:=preload("res://scripts/deeds.gd")
+	var told:=PackedStringArray()
+	for t:Dictionary in deeds.remembered(civ_id,6): told.append(String(t.words))
+	assert_str(", ".join(told)).contains("the slaughter of %d at Tsaren" % int(o.killed))
+	assert_float(deeds.fear(civ_id)).is_greater(0.2)
+	var other:=String(CivilizationSystem.civilizations[1].id)
+	assert_float(deeds.fear(other)).is_greater(0.05)
+	assert_float(deeds.resentment(other)).is_equal(0.0)
 
 
 func test_offline_court_offers_the_fates_of_a_held_town()->void:

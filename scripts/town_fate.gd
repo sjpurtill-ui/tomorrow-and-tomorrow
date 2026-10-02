@@ -491,6 +491,11 @@ static func apply(civ_id:String,region_id:String,fate_in:Dictionary,general:Dict
 		if not refusals.is_empty(): return {"error":" ".join(refusals)}
 		return {"error":"Tell me what is to become of %s: spare it and hold it, take captives and burn it, put the men to the sword, or take tribute and leave." % name}
 	_consequences(civ_id,name,out,harsh,general,day)
+	# Told for a generation by their people, and heard of by every people we
+	# know (deeds.gd).
+	var deeds:=preload("res://scripts/deeds.gd")
+	if int(out.killed)>0: deeds.record(civ_id,"massacre",int(out.killed),"the slaughter of %d at %s" % [int(out.killed),name],day)
+	if int(out.get("violated",0))>0: deeds.record(civ_id,"violation",int(out.violated),"what our garrison did to the women of %s" % name,day)
 	out["text"]=" ".join(parts)+(" But "+_lower_first(" ".join(refusals)) if not refusals.is_empty() else "")
 	out["outcome"]=_note(name,out)
 	# People got away and the garrison still holds the town: a chase can follow.
