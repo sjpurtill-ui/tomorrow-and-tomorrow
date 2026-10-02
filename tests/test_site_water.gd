@@ -293,6 +293,132 @@ func test_a_computer_peoples_dry_town_is_left_by_the_same_rule()->void:
 	assert_str(String(WorldSimulation.actors.gamma.systems.GameState.player_settlements.back().status)).is_equal("abandoned")
 	assert_int((GameState.chronicle.get("entries",[]) as Array).size()).is_equal(entries)
 
+## Ashleyton left for lack of water, its families in Keansburg (the capital).
+func _left_town(today:int=200)->Dictionary:
+	GameState.elapsed_days=float(today)
+	var dry:=_town("Ashleyton",HOME+Vector2(18,0),12.0)
+	_dry_days(dry,9,today)
+	return dry
+
+## 1. What they own goes with them: stores, food and the cargo on its way.
+func test_the_families_take_their_stores_and_cargo_with_them()->void:
+	_settled_world()
+	var dry:=_left_town()
+	var capital_id:=String(SettlementModel.selected_settlement().id)
+	SettlementModel.with_city_resources(String(dry.id),func()->void:
+		GameState.resource_stockpiles["Timber"]=40.0
+		FoodSystem.receive_external_food(300.0))
+	GameState.city_trade_shipments.append({"id":901,"source_id":capital_id,"source_name":"Keansburg","destination_id":String(dry.id),"destination_name":"Ashleyton","resource":"Stone","quantity":7.0,"departure_day":199.0,"arrival_day":205.0,"travel_days":6.0,"status":"in_transit","day":199})
+	var timber:=float(GameState.resource_stockpiles.get("Timber",0.0))
+	var food:=FoodSystem.total_stored()
+	var left:=DryTowns.daily(200)
+	assert_float(float(GameState.resource_stockpiles.Timber)).is_equal_approx(timber+40.0,.001)
+	assert_float(FoodSystem.total_stored()).is_equal_approx(food+300.0,.001)
+	assert_float(float(GameState.resource_stockpiles.Food)).is_equal_approx(FoodSystem.total_stored(),.001)
+	var empty:Dictionary=SettlementModel.with_city_resources(String(dry.id),func()->Dictionary:return {"food":FoodSystem.total_stored(),"timber":float(GameState.resource_stockpiles.get("Timber",0.0))})
+	assert_float(float(empty.food)).is_equal(0.0)
+	assert_float(float(empty.timber)).is_equal(0.0)
+	assert_str(String(GameState.city_trade_shipments.back().destination_id)).is_equal(capital_id)
+	assert_int(int(left[0].redirected)).is_equal(1)
+	assert_str(String((GameState.chronicle.entries as Array)[0].text)).contains("They took its stores with them.")
+	# Cargo that reaches the empty place anyway goes on to where they went.
+	GameState.city_trade_shipments.append({"id":902,"source_id":capital_id,"source_name":"Keansburg","destination_id":String(dry.id),"destination_name":"Ashleyton","resource":"Clay","quantity":5.0,"departure_day":195.0,"arrival_day":199.0,"travel_days":4.0,"status":"in_transit","day":195,"transport_mode":"cart"})
+	var clay:=float(GameState.resource_stockpiles.get("Clay",0.0))
+	SettlementModel.receive_city_trade_arrivals()
+	assert_float(float(GameState.resource_stockpiles.get("Clay",0.0))).is_equal_approx(clay+5.0,.001)
+
+## 2. Nobody lives there: no one-person floor, kept at 0 by every rebuild.
+func test_an_empty_place_counts_nobody_and_stays_empty()->void:
+	_settled_world()
+	var dry:=_left_town()
+	DryTowns.daily(200)
+	assert_float(SettlementModel._settlement_population(dry)).is_equal(0.0)
+	# Deaths elsewhere rebuild every town's share from its count.
+	MilitaryCampaign.recovery._lose_people(3,"test")
+	assert_float(float(dry.population_share)).is_equal(0.0)
+	assert_int(preload("res://scripts/civilization_combat.gd").watch_of(dry)).is_equal(0)
+
+## 3. A caravan coming home to a place its people left goes on to them.
+func test_a_caravan_coming_home_finds_its_people()->void:
+	_settled_world()
+	var dry:=_left_town()
+	DryTowns.daily(200)
+	var convoy:={"active":true,"origin_id":String(dry.id),"origin_name":"Ashleyton","population_share":40.0/GameState.population_exact,"materials_committed":{"Timber":4.0}}
+	GameState.settlement_convoy=convoy
+	# Forty settlers on the road, counted in no town until they are back.
+	var capital:=SettlementModel.primary_population_exact()
+	var food:=FoodSystem.total_stored()
+	var back:Dictionary=preload("res://scripts/caravan_system.gd")._dissolve_home(convoy,{"food":120.0,"population":40})
+	assert_float(float(dry.population_share)).is_equal(0.0)
+	assert_float(SettlementModel.primary_population_exact()).is_equal_approx(capital+40.0,.001)
+	assert_float(FoodSystem.total_stored()).is_equal_approx(food+120.0,.001)
+	assert_str(String(back.reason)).is_equal("The caravan returned to Keansburg.")
+
+## 4. The named people who lived there live where they went; nobody leads
+## the empty place, now or later.
+func test_its_named_people_go_with_them()->void:
+	_settled_world()
+	ForeignDiplomacy.reset_for_new_world()
+	var dry:=_left_town()
+	GovernmentPeopleSystem.people.append({"person_id":9001,"name":"Orla Fenn","status":"active","home_settlement_id":String(dry.id),"local_leader_of":String(dry.id),"office_key":""})
+	dry["leader_person_id"]=9001
+	var Persons:=load("res://scripts/court_persons.gd")
+	Persons.people().append({"id":"cp_test","name":"Tam","status":"living","settlement_id":String(dry.id),"village":"Ashleyton"})
+	DryTowns.daily(200)
+	var capital_id:=String(SettlementModel.selected_settlement().id)
+	var orla:Dictionary=GovernmentPeopleSystem.people.back()
+	assert_int(int(dry.leader_person_id)).is_equal(0)
+	assert_str(String(orla.local_leader_of)).is_equal("")
+	assert_str(String(orla.home_settlement_id)).is_equal(capital_id)
+	assert_str(String(Persons.by_id("cp_test").settlement_id)).is_equal(capital_id)
+	assert_str(String(Persons.by_id("cp_test").village)).is_equal("Keansburg")
+	GovernmentPeopleSystem._ensure_local_leaders()
+	assert_int(int(dry.leader_person_id)).is_equal(0)
+	ForeignDiplomacy.reset_for_new_world()
+
+## 5. An empty place is not one of the towns we live in: not for the land we
+## work, the hearths an aim counts, the nearest town for deliveries, or
+## orders to build or turn its work.
+func test_an_empty_place_is_not_counted_among_our_towns()->void:
+	_settled_world()
+	var Early:=preload("res://scripts/early_life_conditions.gd")
+	var Aims:=load("res://scripts/legacy_aims.gd")
+	var hearths:int=Aims._hearths()
+	var dry:=_left_town()
+	var riverford:=_town("Riverford",HOME+Vector2(25,0),50.0)
+	DryTowns.daily(200)
+	assert_str(String(dry.status)).is_equal("abandoned")
+	assert_int(SettlementModel.lived_in().size()).is_equal(2)
+	assert_int(int(Aims._hearths())).is_equal(hearths+1)
+	# The land worked counts the two towns lived in, not the empty third.
+	GameState.player_settlements.erase(dry)
+	var two:=Early.carrying_capacity(GameState,DiscoverySystem)
+	GameState.player_settlements.append(dry)
+	assert_float(Early.carrying_capacity(GameState,DiscoverySystem)).is_equal_approx(two,.0001)
+	dry["status"]="established"
+	assert_float(Early.carrying_capacity(GameState,DiscoverySystem)).is_greater(two)
+	dry["status"]="abandoned"
+	# The nearest town for deliveries is the capital, not the nearer empty place.
+	assert_str(String(SettlementModel.delivery_reach(String(riverford.id)).get("nearest",""))).is_not_equal("Ashleyton")
+	var built:Dictionary=preload("res://scripts/settlement_construction.gd").set_priority(String(dry.id),"")
+	assert_str(String(built.get("error",""))).is_equal("Nobody lives in Ashleyton now: its people left for lack of water.")
+	var turned:Dictionary=GovernmentPeopleSystem.set_settlement_focus(String(dry.id),"shelter")
+	assert_str(String(turned.get("reason",""))).is_equal("Nobody lives in Ashleyton now: its people left for lack of water.")
+
+## The families go where people drank their fill, before a nearer town that
+## went short.
+func test_they_go_where_water_is_enough_before_a_nearer_town_short_of_it()->void:
+	_settled_world()
+	var today:=200
+	GameState.elapsed_days=float(today)
+	var dry:=_town("Ashleyton",HOME+Vector2(30,0),12.0)
+	var short:=_town("Thinwell",HOME+Vector2(33,0),20.0)
+	short.local_resources.water_metrics={"source_accessible":true,"source_distance_km":5.5,"intake_ratio":0.6}
+	_dry_days(dry,9,today)
+	var left:=DryTowns.daily(today)
+	assert_str(String(left[0].to_name)).is_equal("Keansburg")
+	assert_float(float(short.population_share)*GameState.population_exact).is_equal_approx(20.0,.001)
+
 # --------------------------------------------------------------------------
 # One name, one town
 # --------------------------------------------------------------------------

@@ -304,6 +304,7 @@ static func set_priority(city_id:String,title:String)->Dictionary:
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	if city.is_empty():return {"error":"Found a settlement before setting construction priorities."}
 	if not String(city.get("occupied_by","")).is_empty():return {"error":"Construction is unavailable while occupied."}
+	if WorldSimulation.settlements.abandoned(city):return {"error":WorldSimulation.settlements.left_reason(city)}
 	if not title.is_empty():
 		var valid:=false
 		for project in _settlement_definitions():

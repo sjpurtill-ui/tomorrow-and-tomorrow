@@ -56,23 +56,34 @@ static func _history(city:Dictionary)->Array:
 	var history:Variant=(local as Dictionary).get("water_history",[])
 	return history if history is Array else []
 
+## A town's own water ledger, its last day (the capital's is the people's).
+static func _water(city:Dictionary)->Dictionary:
+	if bool(city.get("primary",false)):return WorldSimulation.state.water_metrics
+	var local:Variant=city.get("local_resources",{})
+	var water:Variant=(local as Dictionary).get("water_metrics",{}) if local is Dictionary else {}
+	return water if water is Dictionary else {}
+
 ## Whether a town of ours had a drinking source within reach on its last day.
 static func has_water(city:Dictionary)->bool:
-	var water:Dictionary=WorldSimulation.state.water_metrics if bool(city.get("primary",false)) else ((city.get("local_resources",{}) as Dictionary).get("water_metrics",{}) as Dictionary)
-	return bool(water.get("source_accessible",false))
+	return bool(_water(city).get("source_accessible",false))
 
-## The nearest other town of ours, lived in and not held by another people,
-## whose water ledger has a source within reach; {} when there is none.
+## Whether a town with a source still went short of water on its last day.
+static func short_today(city:Dictionary)->bool:
+	return float(_water(city).get("intake_ratio",1.0))<SHORT_OF_WATER
+
+## The town of ours the families go to: lived in, not held by another
+## people, with a source within reach; the nearest that drank its fill, else
+## the nearest with a source at all. {} when there is none.
 static func nearest_with_water(city:Dictionary)->Dictionary:
 	var model=WorldSimulation.settlements
 	var here:Vector2=model._record_position(city)
 	var best:Dictionary={}
-	var best_km:=INF
+	var best_rank:=Vector2(INF,INF)
 	for other:Dictionary in WorldSimulation.state.player_settlements:
 		if String(other.get("id",""))==String(city.get("id","")) or not String(other.get("occupied_by","")).is_empty() or model.abandoned(other):continue
 		if not has_water(other):continue
-		var km:=here.distance_to(model._record_position(other))
-		if km<best_km:best=other;best_km=km
+		var rank:=Vector2(1.0 if short_today(other) else 0.0,here.distance_to(model._record_position(other)))
+		if rank<best_rank:best=other;best_rank=rank
 	return best
 
 ## The families of `city` leave for the nearest town of theirs with water.
@@ -87,6 +98,11 @@ static func leave(city:Dictionary,day:int,dry:int)->Dictionary:
 	# The same people, in another town: the realm's count does not change.
 	city["population_share"]=0.0
 	if not bool(target.get("primary",false)):target["population_share"]=maxf(0.0,float(target.get("population_share",0.0)))+share
+	# What they own goes with them: the stores, the cargo on its way there,
+	# and the named people who lived there (its leader steps down).
+	var carried:=carry_stores(city,target)
+	var redirected:=redirect_shipments(String(city.get("id","")),target)
+	var named:=rehome(String(city.get("id","")),target)
 	city["status"]="abandoned"
 	city["abandoned_day"]=day
 	city["abandoned_cause"]="no water"
@@ -95,9 +111,64 @@ static func leave(city:Dictionary,day:int,dry:int)->Dictionary:
 	city["resource_metrics"]={}
 	state.settlement_network_revision+=1
 	var km:=(model._record_position(city) as Vector2).distance_to(model._record_position(target))
-	var done:={"city_id":String(city.get("id","")),"name":_name(city),"to":String(target.get("id","")),"to_name":_name(target),"people":people,"dry_days":dry,"distance_km":km}
+	var done:={"city_id":String(city.get("id","")),"name":_name(city),"to":String(target.get("id","")),"to_name":_name(target),"people":people,"dry_days":dry,"distance_km":km,
+		"carried":carried,"redirected":redirected,"named":named}
 	_tell(done)
 	return done
+
+## Everything in the empty town's stores goes with its people: its food into
+## the other town's food by the food system's own paths (so fresh and stored
+## food and the store's total stay one count), every other good onto that
+## town's piles. {good: amount carried}.
+static func carry_stores(city:Dictionary,target:Dictionary)->Dictionary:
+	var model=WorldSimulation.settlements
+	var goods:Dictionary=model.with_city_resources(String(city.get("id","")),func()->Dictionary:
+		var out:={}
+		var food:float=WorldSimulation.food.take_for_levy(WorldSimulation.food.total_stored())
+		if food>0.0:out["Food"]=food
+		var piles:Dictionary=WorldSimulation.state.resource_stockpiles
+		for good:String in piles.keys():
+			var amount:=float(piles[good])
+			if good=="Food" or amount<=0.0:continue
+			out[good]=amount
+			piles[good]=0.0
+		return out
+	)
+	model.with_city_resources(String(target.get("id","")),func()->void:
+		var piles:Dictionary=WorldSimulation.state.resource_stockpiles
+		for good:String in goods:
+			if good=="Food":WorldSimulation.food.receive_external_food(float(goods[good]))
+			else:piles[good]=float(piles.get(good,0.0))+float(goods[good])
+	)
+	return goods
+
+## Cargo on the road to the empty town goes on to `target` instead (rail
+## cargo is turned at its station: settlement_model.receive_city_trade_arrivals).
+## Returns how many loads were turned.
+static func redirect_shipments(city_id:String,target:Dictionary)->int:
+	var turned:=0
+	for shipment:Dictionary in WorldSimulation.state.city_trade_shipments:
+		if String(shipment.get("destination_id",""))!=city_id or String(shipment.get("transport_mode",""))=="rail":continue
+		shipment["destination_id"]=String(target.get("id",""))
+		shipment["destination_name"]=_name(target)
+		turned+=1
+	return turned
+
+## The named people of the empty town live in `target` from now: the cast
+## (its leader steps down without blame) and, for the god's people, those
+## the court has met.
+static func rehome(city_id:String,target:Dictionary)->int:
+	var to_id:=String(target.get("id",""))
+	var moved:=0
+	if WorldSimulation.government!=null:moved+=int(WorldSimulation.government.rehome_from(city_id,to_id))
+	if WorldSimulation.state==GameState:
+		# Loaded, not preloaded: the calendar's scripts stay free of the court's.
+		for person:Variant in load("res://scripts/court_persons.gd").people():
+			if not person is Dictionary or String((person as Dictionary).get("settlement_id",""))!=city_id:continue
+			person["settlement_id"]=to_id
+			person["village"]=_name(target)
+			moved+=1
+	return moved
 
 static func _name(city:Dictionary)->String:
 	if bool(city.get("primary",false)):return String(WorldSimulation.state.settlement_name)
@@ -122,7 +193,8 @@ static func words(done:Dictionary)->String:
 	var lack:="%s had no drinking water within 6 km for %d %s." % [name,dry,"day" if dry==1 else "days"]
 	if people<1:return "%s Nobody was left there. %s stands empty." % [lack,name]
 	var who:="Its one person has" if people==1 else "Its %d people have" % people
-	return "%s %s gone to %s, %s away, where there is water. %s stands empty." % [lack,who,String(done.to_name),_walk(float(done.distance_km)),name]
+	var stores:=" They took its stores with them." if not (done.get("carried",{}) as Dictionary).is_empty() else ""
+	return "%s %s gone to %s, %s away, where there is water.%s %s stands empty." % [lack,who,String(done.to_name),_walk(float(done.distance_km)),stores,name]
 
 ## "less than a day's walk", "a day's walk", "three days' walk".
 static func _walk(km:float)->String:

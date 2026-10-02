@@ -219,7 +219,7 @@ func process_day(day:int)->Array[Dictionary]:
 
 func _stage_from_conditions()->int:
 	var population:=WorldSimulation.state.population_total
-	var settlements:=WorldSimulation.state.player_settlements.size()
+	var settlements:=WorldSimulation.settlements.lived_in().size()
 	var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.0)),0.0,1.0)
 	var stage:=0
 	# Offices appear because there is enough real work to divide, not because an
@@ -445,7 +445,7 @@ func _desired_pool_size()->int:
 	# A hearth-sized polity should contain a handful of recognizable public
 	# figures, not a miniature modern bureaucracy. The cast grows only when
 	# places and specialist offices create real work for it.
-	var settlements:=WorldSimulation.state.player_settlements.size()
+	var settlements:=WorldSimulation.settlements.lived_in().size()
 	var offices:=_active_office_keys().size()
 	var ordinary:=clampi(3+government_stage*4+settlements*2+offices,6,NORMAL_GOVERNMENT_POOL)
 	return mini(MAX_GOVERNMENT_PEOPLE,maxi(ordinary,settlements+offices+4))
@@ -1420,9 +1420,28 @@ func settlement_leader(settlement_id:String)->Dictionary:
 	return {}
 
 
+## A town its people left (dry_towns.gd): its leader steps down without
+## blame (no dismissal, no lost office), and everyone whose home it was lives
+## in `to_id` from now. Returns how many named people moved.
+func rehome_from(settlement_id:String,to_id:String)->int:
+	var moved:=0
+	for person:Dictionary in people:
+		if String(person.get("local_leader_of",""))==settlement_id:person["local_leader_of"]=""
+		if String(person.get("home_settlement_id",""))==settlement_id:
+			person["home_settlement_id"]=to_id
+			moved+=1
+	for settlement:Dictionary in WorldSimulation.state.player_settlements:
+		if String(settlement.get("id",""))!=settlement_id:continue
+		settlement["leader_person_id"]=0
+		settlement["leader_title"]=settlement_leader_title()
+	return moved
+
+
 func _ensure_local_leaders(events:Array[Dictionary]=[])->void:
 	for settlement_index in WorldSimulation.state.player_settlements.size():
 		var settlement:Dictionary=WorldSimulation.state.player_settlements[settlement_index]
+		# Nobody lives in a place its people left: nobody leads it.
+		if WorldSimulation.settlements.abandoned(settlement): continue
 		var settlement_id:=String(settlement.get("id",""))
 		var current:=_person_record(int(settlement.get("leader_person_id",0)))
 		if not current.is_empty() and String(current.get("status",""))=="active" and String(current.get("local_leader_of",""))==settlement_id:
@@ -1863,6 +1882,7 @@ func _delegate_settlements(_day:int)->void:
 		if not bool(settlement.get("primary",false)): satellite_share+=maxf(0.0,float(settlement.get("population_share",0.0)))
 	for index in WorldSimulation.state.player_settlements.size():
 		var settlement:Dictionary=WorldSimulation.state.player_settlements[index]
+		if WorldSimulation.settlements.abandoned(settlement): continue
 		var share:=maxf(0.01,1.0-satellite_share) if bool(settlement.get("primary",false)) else maxf(0.001,float(settlement.get("population_share",0.0)))
 		var auto_manage:=bool(settlement.get("auto_manage",true))
 		var leader:=_person_record(int(settlement.get("leader_person_id",0)))
@@ -1926,6 +1946,7 @@ func _lay_ruler_split()->void:
 		if not bool(settlement.get("primary",false)): satellite_share+=maxf(0.0,float(settlement.get("population_share",0.0)))
 	for index in WorldSimulation.state.player_settlements.size():
 		var settlement:Dictionary=WorldSimulation.state.player_settlements[index]
+		if WorldSimulation.settlements.abandoned(settlement): continue
 		var share:=maxf(0.01,1.0-satellite_share) if bool(settlement.get("primary",false)) else maxf(0.001,float(settlement.get("population_share",0.0)))
 		var leader:=_person_record(int(settlement.get("leader_person_id",0)))
 		var skills:Dictionary=leader.get("skills",{})
@@ -2025,6 +2046,8 @@ func settlement_management(settlement_id:String)->Dictionary:
 
 func set_settlement_focus(settlement_id:String,focus:String)->Dictionary:
 	if not String(WorldSimulation.settlements.settlement_record(settlement_id).get("occupied_by","")).is_empty():return {"ok":false,"reason":"Use local recovery decisions while this city is occupied."}
+	var record:Dictionary=WorldSimulation.settlements.settlement_record(settlement_id)
+	if WorldSimulation.settlements.abandoned(record):return {"ok":false,"reason":WorldSimulation.settlements.left_reason(record)}
 	if focus not in FOCUS_LABELS: return {"ok":false,"reason":"Unknown settlement focus."}
 	# While the ruler sets the daily work, no leader can shift hands.
 	if not bool(WorldSimulation.direction.automatic_work): return {"ok":false,"reason":"You set the daily work yourself. Move people in The People, or hand the work back to our leaders."}

@@ -292,11 +292,39 @@ func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	state.resource_settlement_id=previous_id
 	return result
 
-## A town its people have left (dry_towns.gd): nobody lives there, so its day
-## is not run, no goods, food, captives or displaced families are sent there,
-## no caravan sets out from it and no capital is made of it.
+## A town its people have left (dry_towns.gd): nobody lives there (its count
+## is 0, never the one-person floor of a lived-in town), so its day is not
+## run, no goods, food, captives or displaced families are sent there, no
+## caravan sets out from it, no capital is made of it and it is not counted
+## among the towns we live in (lived_in).
 func abandoned(record:Dictionary)->bool:
 	return String(record.get("status",""))=="abandoned"
+
+## The towns a people live in: all their towns but those left empty. Every
+## count of "our towns" (the land the people work, the offices and cast it
+## needs, the aims to found hearths) reads this. `records` defaults to the
+## register of the people in scope.
+func lived_in(records:Variant=null)->Array:
+	var out:Array=[]
+	for record:Dictionary in (WorldSimulation.state.player_settlements if records==null else records):
+		if not abandoned(record):out.append(record)
+	return out
+
+## Why nothing can be ordered in a place its people left, in plain words.
+func left_reason(record:Dictionary)->String:
+	return "Nobody lives in %s now: its people left for lack of water." % String(record.get("name","that place"))
+
+## Where people or goods bound for `record` go instead: the town itself while
+## people live there, else the town its people went to (abandoned_to), else
+## the capital. {} only when there is no town at all.
+func lived_in_town_for(record:Dictionary)->Dictionary:
+	var here:=record
+	for step in 8:
+		if here.is_empty() or not abandoned(here):return here
+		here=settlement_record(String(here.get("abandoned_to","")))
+	for candidate:Dictionary in WorldSimulation.state.player_settlements:
+		if bool(candidate.get("primary",false)):return candidate
+	return {}
 
 func process_city_resources(settlement_id:String,context:Dictionary,daily_work:Callable=Callable(),timings:Dictionary={})->void:
 	if not String(settlement_record(settlement_id).get("occupied_by","")).is_empty():return
@@ -382,6 +410,13 @@ func receive_city_trade_arrivals()->void:
 		if destination.is_empty():
 			pending.append(shipment)
 			continue
+		# Cargo for a place its people left goes on to the town they went to.
+		if abandoned(destination):
+			destination=lived_in_town_for(destination)
+			if destination.is_empty():
+				pending.append(shipment)
+				continue
+			shipment["destination_id"]=String(destination.id);shipment["destination_name"]=String(destination.get("name",""))
 		var quantity:=float(shipment.quantity)
 		var delivered:=quantity*exp(-0.00035*float(shipment.travel_days)) if String(shipment.resource)=="Food" else quantity
 		with_city_resources(String(destination.id),func()->void:
@@ -544,7 +579,7 @@ func delivery_reach(settlement_id:String,_resource:String="Food")->Dictionary:
 	var at:=_record_position(here)
 	var nearest:={};var best:=INF
 	for other:Dictionary in towns:
-		if String(other.id)==settlement_id or not String(other.get("occupied_by","")).is_empty():continue
+		if String(other.id)==settlement_id or not String(other.get("occupied_by","")).is_empty() or abandoned(other):continue
 		var distance:=_record_position(other).distance_to(at)
 		if distance<best:best=distance;nearest=other
 	if nearest.is_empty():return {}
@@ -948,6 +983,9 @@ func _primary_able_population()->float:
 
 func _settlement_population(record:Dictionary)->float:
 	if bool(record.get("primary",false)): return primary_population_exact()
+	# Nobody lives in a place its people left: every rebuild of the towns'
+	# shares from this count keeps it at 0.
+	if abandoned(record): return 0.0
 	if _local_population_scope and String(record.get("id",""))==WorldSimulation.state.resource_settlement_id:return WorldSimulation.state.population_exact
 	return maxf(1.0,float(national_population())*maxf(0.0,float(record.get("population_share",0.0))))
 
@@ -1075,8 +1113,7 @@ func _settlement_network_snapshot(include_local_state:bool)->Dictionary:
 	var public_settlements:Array[Dictionary]=[]
 	for index in records.size():
 		var record:=records[index]
-		# A place its people left stands empty on the map (dry_towns.gd).
-		var population:=0.0 if abandoned(record) else _settlement_population(record)
+		var population:=_settlement_population(record)
 		var drivers:=_territory_drivers(record,population)
 		var radius:=_bounded_claim_radius(index,records,_base_claim_radius_km(record,population,drivers))
 		var boundary:=_claim_boundary(record,radius,drivers)

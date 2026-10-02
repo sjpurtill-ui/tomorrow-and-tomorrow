@@ -246,7 +246,8 @@ static func town_rows()->Array:
 	var rows:Array=[]
 	if state.player_settlements.is_empty():rows.append(_town_outlook())
 	for city:Dictionary in state.player_settlements:
-		if not String(city.get("occupied_by","")).is_empty():continue
+		# Nobody lives in a place its people left (dry_towns.gd).
+		if not String(city.get("occupied_by","")).is_empty() or WorldSimulation.settlements.abandoned(city):continue
 		var id:=String(city.get("id",""))
 		var row:Dictionary=WorldSimulation.settlements.with_city_resources(id,func()->Dictionary:
 			return WorldSimulation.settlements.with_local_population(func()->Dictionary:return _town_outlook()))
@@ -411,7 +412,7 @@ static func leaders_lines(limit:int=3)->Array:
 	var many:bool=state.player_settlements.size()>1
 	for city:Dictionary in state.player_settlements:
 		if out.size()>=limit:break
-		if not String(city.get("occupied_by","")).is_empty():continue
+		if not String(city.get("occupied_by","")).is_empty() or WorldSimulation.settlements.abandoned(city):continue
 		var management:Dictionary=WorldSimulation.government.settlement_management(String(city.get("id","")))
 		if management.is_empty():continue
 		var who:=String((management.get("leader",{}) as Dictionary).get("name","")).get_slice(" ",0)
