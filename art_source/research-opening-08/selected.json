@@ -1,0 +1,122 @@
+[
+  {
+    "id": "witnessed_agreement_customs",
+    "line": "institutions",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/household_task_ledgers-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow institutions research painting. Strictly preserve supplied WIDE approximately 2055x765 canvas proportions. Match handmade flat matte mineral fresco dusty plum/limestone/gold. Two adults meet hands in spoken agreement while THREE witnesses look toward joining hands with attentive open-handed gestures. No official seals, documents, village, farm animals or baskets. Rough irregular hide garments, portable wild camp with low hide windbreak only. WHOLE heads, hands and subject mechanism within central 60 percent height; smaller people with breathing space above/below for actual 3.37:1 crop. Full bleed WIDE painted banner, no text, borders, photography, CGI, sculpted relief or cinematic light. Reference medium and width only, replace subject.",
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "institutions: flat matte mineral fresco dusty plum/limestone/gold",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-75284286-50f8-4ee3-8559-3e36e057fef1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 7,
+    "review": "Dusty plum/gold matte fresco. Two adults join hands while three attentive witnesses gesture; houses/livestock/baskets removed.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "bone_flutes_drums",
+    "line": "culture",
+    "version": 1,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/oral_epics-v3.png",
+    "prompt": "Create new Tomorrow and Tomorrow culture research painting. Strictly preserve supplied WIDE approximately 2055x765 canvas proportions. Match handmade flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, never literal cloth. A smaller adult plays a short rough pale bone flute with three small finger holes and both hands around it; another taps irregular raw hide stretched over naturally hollow rough log, two listeners gently repeat rhythm by clapping. No polished modern musical instruments. Rough irregular hide garments, portable wild camp with low hide windbreak only. WHOLE heads, hands and subject mechanism within central 60 percent height; smaller people with breathing space above/below for actual 3.37:1 crop. Full bleed WIDE painted banner, no text, borders, photography, CGI, sculpted relief or cinematic light. Reference medium and width only, replace subject.",
+    "replace_first300": false,
+    "replace_art600": true,
+    "binding_style": "culture: flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, never literal cloth",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9f22625d-e8f6-41a5-8df0-6d32f85c3c73.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 7,
+    "review": "Interlocking indigo/rose/gold culture painting. Bone flute and raw hide over naturally hollow log accompany clapping listeners; fictional instruments, no exact specimen reconstruction.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "hafted_tools",
+    "line": "production",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/cordage-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow production research painting. Strictly preserve supplied WIDE approximately 2055x765 canvas proportions. Match handmade flat angular copper/ember/soot/umber palette-knife painting. Two smaller adults assemble crude hafted tool: one steadies irregular flint flake in split crooked wood shaft, another binds that exact junction with coarse plant cord. Dark sticky resin only at joint, spare loose fibers and rough flints on hide. No polished axe, metal, finished workshop or sawn timber. Rough irregular hide garments, portable wild camp with low hide windbreak only. WHOLE heads, hands and subject mechanism within central 60 percent height; smaller people with breathing space above/below for actual 3.37:1 crop. Full bleed WIDE painted banner, no text, borders, photography, CGI, sculpted relief or cinematic light. Reference medium and width only, replace subject.",
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "production: flat angular copper/ember/soot/umber palette-knife painting",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9abfef9b-1acd-4c2c-af40-5be940d0ad7e.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 7,
+    "review": "Copper/soot angular pigment. Hands bind coarse cord at flint/split-wood junction with dark resin; rough fibers and flints on hide.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "seed_selection",
+    "line": "nutrition",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/food_drying-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow nutrition research painting. Strictly preserve supplied WIDE approximately 2055x765 canvas proportions. Match handmade opaque botanical egg tempera in olive/gold/cream earth pigments. Two smaller adults compare gathered WILD grass seed heads, one picks fuller head and sets aside smaller poor head, second drops kept loose seeds by bare hand into tiny scratched patch of open wild earth. A few irregular wild grasses remain. No mature cereal field, farming tools, baskets, pottery or domesticated crops. Rough irregular hide garments, portable wild camp with low hide windbreak only. WHOLE heads, hands and subject mechanism within central 60 percent height; smaller people with breathing space above/below for actual 3.37:1 crop. Full bleed WIDE painted banner, no text, borders, photography, CGI, sculpted relief or cinematic light. Reference medium and width only, replace subject.",
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "nutrition: opaque botanical egg tempera in olive/gold/cream earth pigments",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-28455f5f-3e27-4038-9c13-3de979ef2934.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 7,
+    "review": "Opaque botanical earth pigment. Fuller wild grass head compared with smaller one; kept seeds hand-sown into tiny scratched patch amid wild grasses.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "postpartum_seclusion_care",
+    "line": "demography",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/birth_spacing_customs-v2.png",
+    "prompt": "Create current-game Tomorrow and Tomorrow demography research banner. Preserve supplied WIDE approximately 2055x765 canvas. Strict handmade matte angular terracotta/rust/ivory/slate chalk-pastel cut-paper painted planes. Fully hide-clothed mother rests on thick rough-hide bedding behind low hide windbreak; caregiver holds fully covered infant with only face visible, second adult offers wild berries in cupped bare hands. Quiet supportive rest, no clinical procedure or exposed body, no reed house, fabric, basket or bowl. Entire heads, hands and discovery mechanism within central 60 percent height, smaller adults with breathing room above/below for actual 3.37:1 card crop. Portable wild camp and irregular animal hides only. No text, borders, photography, CGI, sculpted relief, woven cloth, pottery, baskets or permanent buildings. Reference medium and width ONLY, replace subject.",
+    "replace_first300": false,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-79d1e28b-3b49-4ec4-a382-9d3bae756104.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 7,
+    "review": "Terracotta/slate/ivory matte angular painting. Mother rests against hide bedding with covered infant; caregiver offers berries bare-handed. Reed house, baskets, bowls and cloth removed.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "hide_floats",
+    "line": "logistics",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/vermin_deterrent_placement-v2.png",
+    "prompt": "Create current-game Tomorrow and Tomorrow logistics research banner. Preserve supplied WIDE approximately 2055x765 canvas. Strict handmade panoramic travel watercolor sand/slate/indigo. One small coarse raft of THREE naturally fallen bark-covered logs lashed with crude plant cord with TWO bulging sewn rough-hide floats tied alongside. Seated adult uses crooked branch paddle while shore helper steadies raft at shallow stream; no planks, boat hull, sail, metal or squared beam. Raft clearly meets water. Entire heads, hands and discovery mechanism within central 60 percent height, smaller adults with breathing room above/below for actual 3.37:1 card crop. Portable wild camp and irregular animal hides only. No text, borders, photography, CGI, sculpted relief, woven cloth, pottery, baskets or permanent buildings. Reference medium and width ONLY, replace subject.",
+    "replace_first300": true,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-737b9ea1-ba0e-4259-984a-76b2a0522679.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 7,
+    "review": "Sand/slate travel watercolor. Coarse log raft lashed with plant cord, two bulging stitched hide floats at sides, branch paddle and shore helper contact water.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "hafted_weapons",
+    "line": "security",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/refuge_point_marking-v2.png",
+    "prompt": "Create current-game Tomorrow and Tomorrow security research banner. Preserve supplied WIDE approximately 2055x765 canvas. Strict handmade handcut layered woodblock vermilion/charcoal/parchment. Two smaller adults assemble ONE primitive thrusting spear: an irregular chipped stone point sits in split end of long crooked raw wood shaft with dark resin and coarse cord; one steadies shaft while other wraps cord directly around point/shaft junction. Entire stone tip, hands and junction central, spare crude flint beside. No violence, metal, polished blade or formal drill ground. Entire heads, hands and discovery mechanism within central 60 percent height, smaller adults with breathing room above/below for actual 3.37:1 card crop. Portable wild camp and irregular animal hides only. No text, borders, photography, CGI, sculpted relief, woven cloth, pottery, baskets or permanent buildings. Reference medium and width ONLY, replace subject.",
+    "replace_first300": true,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0aba5819-072c-4e42-8aa4-0133073c2837.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 7,
+    "review": "Vermilion/charcoal woodblock. Adults bind irregular chipped stone point at split raw shaft junction; full point and contacting hands visible.",
+    "mode": "built-in image_gen / reference-guided painting"
+  }
+]

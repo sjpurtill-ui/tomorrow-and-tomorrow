@@ -139,5 +139,9 @@
   "shield_equipment_fitting": "res://assets/ui/research/paper/shield_equipment_fitting.png",
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
-  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png"
+  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
+  "hafted_tools": "res://assets/ui/research/subjects/hafted_tools-v2.png",
+  "seed_selection": "res://assets/ui/research/subjects/seed_selection-v2.png",
+  "hide_floats": "res://assets/ui/research/subjects/hide_floats-v2.png",
+  "hafted_weapons": "res://assets/ui/research/subjects/hafted_weapons-v2.png"
 }

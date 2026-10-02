@@ -1,0 +1,20 @@
+{
+  "id": "bone_flutes_drums",
+  "line": "culture",
+  "version": 1,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/oral_epics-v3.png",
+  "prompt": "Create new Tomorrow and Tomorrow culture research painting. Strictly preserve supplied WIDE approximately 2055x765 canvas proportions. Match handmade flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, never literal cloth. A smaller adult plays a short rough pale bone flute with three small finger holes and both hands around it; another taps irregular raw hide stretched over naturally hollow rough log, two listeners gently repeat rhythm by clapping. No polished modern musical instruments. Rough irregular hide garments, portable wild camp with low hide windbreak only. WHOLE heads, hands and subject mechanism within central 60 percent height; smaller people with breathing space above/below for actual 3.37:1 crop. Full bleed WIDE painted banner, no text, borders, photography, CGI, sculpted relief or cinematic light. Reference medium and width only, replace subject.",
+  "replace_first300": false,
+  "replace_art600": true,
+  "binding_style": "culture: flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, never literal cloth",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9f22625d-e8f6-41a5-8df0-6d32f85c3c73.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 7,
+  "review": "Interlocking indigo/rose/gold culture painting. Bone flute and raw hide over naturally hollow log accompany clapping listeners; fictional instruments, no exact specimen reconstruction.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/bone_flutes_drums-v1.png",
+  "sha256": "4f73d3547bf6dea52ee84fc26d74b5237135c450193ecb1c7a21c7b95947ffd5"
+}

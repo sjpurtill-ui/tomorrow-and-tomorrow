@@ -1,9 +1,20 @@
 {
   "id": "hafted_tools",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Hafted Tools. Hands bind a shaped stone tool head securely into a split wooden handle with plant cord and resin; the working handle joint dominates, no spear or metallic tool.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-e35ed3ed-24d1-4fe4-b626-6f10dfd24f9a.png",
-  "asset": "res://assets/ui/research/subjects/hafted_tools-v1.png",
-  "sha256": "79a93a8a4d423fb0e696a7f757d01cbaa51625f89052dd880e90c7270b2c6e42",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/cordage-v2.png",
+  "prompt": "Create new Tomorrow and Tomorrow production research painting. Strictly preserve supplied WIDE approximately 2055x765 canvas proportions. Match handmade flat angular copper/ember/soot/umber palette-knife painting. Two smaller adults assemble crude hafted tool: one steadies irregular flint flake in split crooked wood shaft, another binds that exact junction with coarse plant cord. Dark sticky resin only at joint, spare loose fibers and rough flints on hide. No polished axe, metal, finished workshop or sawn timber. Rough irregular hide garments, portable wild camp with low hide windbreak only. WHOLE heads, hands and subject mechanism within central 60 percent height; smaller people with breathing space above/below for actual 3.37:1 crop. Full bleed WIDE painted banner, no text, borders, photography, CGI, sculpted relief or cinematic light. Reference medium and width only, replace subject.",
+  "replace_first300": true,
+  "replace_art600": false,
+  "binding_style": "production: flat angular copper/ember/soot/umber palette-knife painting",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9abfef9b-1acd-4c2c-af40-5be940d0ad7e.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 7,
+  "review": "Copper/soot angular pigment. Hands bind coarse cord at flint/split-wood junction with dark resin; rough fibers and flints on hide.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/hafted_tools-v2.png",
+  "sha256": "d00e51b67076ae8d6127a2a888db369a9d2f1ca46a8b1e2f2d755a443b943cd2"
 }

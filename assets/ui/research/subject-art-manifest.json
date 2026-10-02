@@ -6,13 +6,7 @@
       0.38
     ]
   },
-  "seed_selection": {
-    "path": "res://assets/ui/research/subjects/seed_selection-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "seed_selection": {"path": "res://assets/ui/research/subjects/seed_selection-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "food_drying": {
     "path": "res://assets/ui/research/subjects/food_drying-v1.png",
     "focus": [
@@ -195,13 +189,7 @@
       0.37
     ]
   },
-  "hide_floats": {
-    "path": "res://assets/ui/research/subjects/hide_floats-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "hide_floats": {"path": "res://assets/ui/research/subjects/hide_floats-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "river_craft": {
     "path": "res://assets/ui/research/subjects/river_craft-v1.png",
     "focus": [
@@ -230,13 +218,7 @@
       0.5
     ]
   },
-  "hafted_tools": {
-    "path": "res://assets/ui/research/subjects/hafted_tools-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "hafted_tools": {"path": "res://assets/ui/research/subjects/hafted_tools-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "timber_grading": {
     "path": "res://assets/ui/research/subjects/timber_grading-v2.png",
     "focus": [
@@ -846,13 +828,7 @@
       0.5
     ]
   },
-  "hafted_weapons": {
-    "path": "res://assets/ui/research/subjects/hafted_weapons-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "hafted_weapons": {"path": "res://assets/ui/research/subjects/hafted_weapons-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "bow_craft": {
     "path": "res://assets/ui/research/subjects/bow_craft-v1.png",
     "focus": [
@@ -3701,8 +3677,8 @@
   "sightline_staking": {"path": "res://assets/ui/research/subjects/sightline_staking-v1.png", "focus": [0.5, 0.4]},
   "streambank_vegetation_watch": {"path": "res://assets/ui/research/subjects/streambank_vegetation_watch-v1.png", "focus": [0.5, 0.5]},
   "vermin_deterrent_placement": {"path": "res://assets/ui/research/subjects/vermin_deterrent_placement-v1.png", "focus": [0.5, 0.5]},
-  "postpartum_seclusion_care": {"path": "res://assets/ui/research/subjects/postpartum_seclusion_care-v1.png", "focus": [0.5, 0.5]},
-  "witnessed_agreement_customs": {"path": "res://assets/ui/research/subjects/witnessed_agreement_customs-v1.png", "focus": [0.5, 0.5]},
+  "postpartum_seclusion_care": {"path": "res://assets/ui/research/subjects/postpartum_seclusion_care-v2.png", "focus": [0.5, 0.5]},
+  "witnessed_agreement_customs": {"path": "res://assets/ui/research/subjects/witnessed_agreement_customs-v2.png", "focus": [0.5, 0.5]},
   "dry_cache_siting": {"path": "res://assets/ui/research/subjects/dry_cache_siting-v1.png", "focus": [0.5, 0.5]},
   "elder_consultation_rites": {"path": "res://assets/ui/research/subjects/elder_consultation_rites-v1.png", "focus": [0.5, 0.5]},
   "hazard_memory_recitation": {"path": "res://assets/ui/research/subjects/hazard_memory_recitation-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4215,6 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "bone_flutes_drums": {"path": "res://assets/ui/research/subjects/bone_flutes_drums-v1.png", "focus": [0.5, 0.5]}
 }
