@@ -774,9 +774,9 @@ func _capture_preview_if_requested() -> void:
 		var inspected_position:=Vector3(GameState.settlement_founded_at.x+inspected_centroid.x,0.0,GameState.settlement_founded_at.z+inspected_centroid.y)
 		inspected_position.y=_height_at(inspected_position.x,inspected_position.z)
 		_inspect_location(inspected_position)
-	if "--capture-war" in OS.get_cmdline_user_args() or "--capture-war-calm" in OS.get_cmdline_user_args():
+	if "--capture-war" in OS.get_cmdline_user_args() or "--capture-war-calm" in OS.get_cmdline_user_args() or "--capture-war-battle" in OS.get_cmdline_user_args():
 		# Capture only: a small real war (or the calm before one) for War screen screenshots.
-		print("CAPTURE WAR FIXTURE ",load("res://tools/war_screen_fixture.gd").call("stage",self,"calm" if "--capture-war-calm" in OS.get_cmdline_user_args() else "war"))
+		print("CAPTURE WAR FIXTURE ",load("res://tools/war_screen_fixture.gd").call("stage",self,"calm" if "--capture-war-calm" in OS.get_cmdline_user_args() else ("battle" if "--capture-war-battle" in OS.get_cmdline_user_args() else "war")))
 	if capture_dock!="" and hud:
 		var dock_parts:=capture_dock.split("/")
 		_on_hud_section_requested(dock_parts[0],int(dock_parts[1]) if dock_parts.size()>1 else 0)
@@ -14051,7 +14051,8 @@ func _ensure_war_map_overlay()->void:
 	var fronts:=preload("res://scripts/hud/war_front_overlay.gd").new(); fronts.name="WarFrontOverlay"; fronts.terrain=self; layer.add_child(fronts)
 	war_map_overlay=preload("res://scripts/hud/war_map_overlay.gd").new(); war_map_overlay.name="WarMapOverlay"; war_map_overlay.terrain=self; layer.add_child(war_map_overlay)
 	# The War screen's map mode (HOI4): lands, fronts and hosts, framed.
-	var war_mode_map:=preload("res://scripts/hud/war_map_mode.gd").new(); war_mode_map.terrain=self; layer.add_child(war_mode_map)
+	# Beneath the chart: its bands, marches and battles stand on our lands and fronts.
+	var war_mode_map:=preload("res://scripts/hud/war_map_mode.gd").new(); war_mode_map.terrain=self; layer.add_child(war_mode_map); layer.move_child(war_mode_map,0)
 
 
 func _refresh_warfare_front_markers(front_views:Array)->void:
