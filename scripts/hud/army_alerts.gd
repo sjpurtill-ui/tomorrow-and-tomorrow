@@ -138,18 +138,18 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 	if not hungry.is_empty(): out.append({"id":"hungry","logistics":"hungry","tone":"red","count":hungry.size(),"title":"Hungry in the field","lines":hungry,"page":"support"})
 	if not breaking.is_empty(): out.append({"id":"will","glyph":"will","tone":"red" if broken else "amber","count":breaking.size(),"title":"Ready to break","lines":breaking,"page":"forces"})
 	if not hot.is_empty(): out.append({"id":"feud","war":"feud","tone":"red","count":hot.size(),"title":"Hot feuds","lines":hot,"page":"wars"})
+	# Trade turned against us, and trade news, told once (hud/trade_alerts.gd).
+	out.append_array(preload("res://scripts/hud/trade_alerts.gd").alerts())
 	if not gear.is_empty(): out.append({"id":"gear","glyph":"gear","tone":"amber","count":gear.size(),"title":"Short of gear","lines":gear,"page":"support"})
 	if not thin.is_empty(): out.append({"id":"men","glyph":"men","tone":"amber","count":thin.size(),"title":"Under strength","lines":thin,"page":"recruitment"})
 	if not fought.is_empty(): out.append({"id":"fought","war":"feud","tone":"amber","count":fought.size(),"title":"Battles just fought","lines":fought,"page":"wars"})
-	# Trade turned against us, and trade news, told once (hud/trade_alerts.gd).
-	out.append_array(preload("res://scripts/hud/trade_alerts.gd").alerts())
 	return out
 
 
 ## The pointer's words: the title, then one line per band or people, then
 ## where a click goes.
 static func tip(alert:Dictionary)->String:
-	var page:="the Trade page" if String(alert.get("page",""))=="trade" else "the War screen"
+	var page:="the War screen"
 	return "%s\n%s\nClick to open %s." % [String(alert.title),"\n".join(alert.lines as PackedStringArray),page]
 
 
@@ -202,7 +202,7 @@ class AlertMark extends Control:
 		elif next.has("resource"): texture=Icons.texture_for(String(next.resource))
 		else: texture=Icons.command_texture(String(next.glyph),tone.darkened(0.15),64)
 		name="Alert_%s" % String(next.id)
-		tooltip_text=preload("res://scripts/hud/army_alerts.gd").tip(next)
+		tooltip_text=String(next.tip) if next.has("tip") else preload("res://scripts/hud/army_alerts.gd").tip(next)
 		custom_minimum_size=Vector2(_width(),40)
 		mouse_filter=Control.MOUSE_FILTER_STOP
 		mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
@@ -214,12 +214,20 @@ class AlertMark extends Control:
 		return 40.0+T.font("ui_strong").get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,15).x+10.0
 
 	func _gui_input(event:InputEvent)->void:
+		if String(alert.get("page",""))=="trade" and _open_trade(event): return
 		if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index==MOUSE_BUTTON_LEFT:
-			# Trade news opens the Trade page (the economy dock's fourth tab).
-			var hud:Node=get_parent().get_parent() if get_parent()!=null else null
-			if String(alert.get("page",""))=="trade" and hud!=null and hud.has_method("open_dock"): hud.call("open_dock","economy",3)
-			else: MilitaryCampaign.open_roster("army",false,String(alert.get("page","forces")))
+			MilitaryCampaign.open_roster("army",false,String(alert.get("page","forces")))
 			accept_event()
+
+	## Trade news opens the Trade page (the economy dock's fourth tab).
+	func _open_trade(event:InputEvent)->bool:
+		var click:=event as InputEventMouseButton
+		if click==null or not click.pressed or click.button_index!=MOUSE_BUTTON_LEFT: return false
+		var hud:Node=get_parent().get_parent() if get_parent()!=null else null
+		if hud==null or not hud.has_method("open_dock"): return false
+		hud.call("open_dock","economy",3)
+		accept_event()
+		return true
 
 	func _draw()->void:
 		var tone:=RED if String(alert.get("tone",""))=="red" else AMBER

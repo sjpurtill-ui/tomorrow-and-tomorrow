@@ -46,8 +46,9 @@ const TOLL:="(?i)\\b(?:tolls?|tariffs?|duties|duty on|tax (?:their|the)\\b[^.!?]
 const FAVOUR:="(?i)\\b(?:flood|favou?r|sell cheap|undersell|undercut|dump|good terms|better terms|generous terms)\\b"
 const GIFT:="(?i)\\b(?:send|give|bring|offer|ship|carry)\\b"
 const GIFT_WORDS:="(?i)\\b(?:gifts?|presents?|tokens?)\\b"
-## People sent are a party, never a gift ("send scouts", "send them men").
-const NOT_GOODS:="(?i)\\b(?:scouts?|part(?:y|ies)|searchers|hunters|men|warriors|fighters|soldiers|settlers|bands?|army|armies|word|riders|outriders|expedition|traders)\\b"
+## People sent are a party, never a gift ("send scouts", "send them men",
+## "send an assassin with gifts": spies and assassins are covert business).
+const NOT_GOODS:="(?i)\\b(?:scouts?|part(?:y|ies)|searchers|hunters|men|warriors|fighters|soldiers|settlers|bands?|army|armies|word|riders|outriders|expedition|traders|spy|spies|assassins?|agents?|killers?|thie(?:f|ves)|saboteurs?|poisoners?)\\b"
 const SEASONAL:="(?i)\\b(?:each|every)\\s+(?:season|year|spring|harvest)|\\bseasonal(?:ly)?\\b|\\bregular(?:ly)?\\b"
 const PRONOUN:="(?i)\\b(?:them|their|they|theirs)\\b"
 ## The words for each good, as people say them.

@@ -39,8 +39,8 @@ extends RefCounted
 ##
 ## Other systems fold what they move into the same ledger (note_flow): trade
 ## pacts, gifts carried by envoys, tribute from towns we hold, food taken in
-## raids. Stances (trade_stances.gd) shape every settlement; the purse
-## (purse) is the one door for money.
+## raids. Stances (trade_stances.gd) shape every settlement; pay() is the
+## one door for money (the realm's purse, realm_purse.gd, when the game has it).
 ##
 ## State: ForeignDiplomacy.audiences["trade"] (the god's own diplomacy record,
 ## saved with the audience hall; an older save starts an empty ledger).
@@ -338,8 +338,7 @@ static func _settle(p:Dictionary,day:int)->void:
 				if absf(net)>0.01:
 					var payer:=b if net>0.0 else a
 					var payee:=a if net>0.0 else b
-					var got:=-purse(payer,-absf(net),"trade with %s" % name_of(payee))
-					if got>0.0: purse(payee,got,"trade with %s" % name_of(payer))
+					var got:=pay(payer,payee,absf(net),"Trade: %s pays %s" % [name_of(payer),name_of(payee)])
 					paid=got*(1.0 if net>0.0 else -1.0)
 					if got<absf(net)-0.01:
 						# What could not be paid for does not go.
@@ -541,10 +540,8 @@ static func _give(owner:String,good:String,qty:float)->float:
 static func _levy(payer:String,receiver:String,amount:float,form:String,kind:String="toll")->float:
 	if amount<=0.0: return 0.0
 	if form in ["silver","coin"]:
-		var got:=-purse(payer,-amount,"%s to %s" % [kind,name_of(receiver)])
-		if got>0.0:
-			purse(receiver,got,"%s from %s" % [kind,name_of(payer)])
-			note_kind(payer,receiver,kind,got)
+		var got:=pay(payer,receiver,amount,"%s: %s pays %s" % [kind.capitalize(),name_of(payer),name_of(receiver)])
+		if got>0.0: note_kind(payer,receiver,kind,got)
 		if got>=amount-0.01: return got
 		return got+pay_in_kind(payer,receiver,amount-got,"",kind)
 	return pay_in_kind(payer,receiver,amount,"",kind)
@@ -934,15 +931,53 @@ static func reading(owner:String,from:String)->Array:
 # The purse: the one door for money
 # --------------------------------------------------------------------------
 
-## Every money move of trade (tolls and tribute in, gifts and purchases out,
-## priced trade both ways) goes through here, so one change can send it to
-## the realm's treasury when that lands (realm_purse.gd: balance, deposit,
-## spend, unit_word). Today it writes the capital's own accounts: coin in
-## the public treasury (with the bullion behind it, so the money supply stays
-## whole) once a people mints coin; weighed metal ("Coin" in its stores)
-## before; nothing before money. amount>0 deposits, <0 spends; returns the
-## signed amount that moved.
-static func purse(owner:String,amount:float,why:String)->float:
+## The realm's purse (realm_purse.gd), when the game has it.
+const REALM_PURSE_PATH:="res://scripts/realm_purse.gd"
+static var _realm_script:GDScript
+static var _realm_checked:=false
+
+static func _realm()->GDScript:
+	if not _realm_checked:
+		_realm_checked=true
+		if ResourceLoader.exists(REALM_PURSE_PATH): _realm_script=load(REALM_PURSE_PATH) as GDScript
+	return _realm_script
+
+## A people's own state, where its purse and stores are kept (ours: GameState).
+static func _state_of(owner:String)->Object:
+	if owner=="player": return GameState
+	var actor:Variant=WorldSimulation.actors.get(owner)
+	if not actor is Dictionary: return null
+	var systems:Variant=(actor as Dictionary).get("systems")
+	return (systems as Dictionary).get("GameState") as Object if systems is Dictionary else null
+
+## THE ONE DOOR FOR MONEY. Every money move of trade is one people paying
+## another: the balance of priced trade, a squeeze's purchases, tolls,
+## tribute and the terms of a people that gives way. Returns what reached
+## the payee (0 before money: the caller then pays in kind, or less goes).
+## Coin goes purse to purse with the metal that backs it (realm_purse.gd
+## move_coin) when the game has the realm's purse. What that does not cover
+## goes between the capitals' own accounts (_capital_money): coin in the
+## public treasury, or weighed metal by weight from store to store (silver,
+## before coin).
+static func pay(payer:String,payee:String,amount:float,why:String)->float:
+	if amount<0.0001 or payer==payee or not simulated(payer) or not simulated(payee): return 0.0
+	var moved:=0.0
+	var realm:=_realm()
+	if realm!=null:
+		var from:=_state_of(payer); var to:=_state_of(payee)
+		if from!=null and to!=null: moved=clampf(float(realm.call("move_coin",from,to,amount,why)),0.0,amount)
+	if moved<amount-0.0001:
+		var got:=-_capital_money(payer,-(amount-moved),why)
+		if got>0.0: _capital_money(payee,got,why)
+		moved+=got
+	return moved
+
+## A capital's own accounts (pay(), for what the realm's purse does not
+## hold): coin in the public treasury (with the bullion behind it, so the
+## money supply stays whole) once a people mints coin; weighed metal ("Coin"
+## in its stores) before; nothing before money. amount>0 takes in, <0 pays
+## out; returns the signed amount that moved.
+static func _capital_money(owner:String,amount:float,why:String)->float:
 	if absf(amount)<0.0001 or not simulated(owner): return 0.0
 	return float(WorldSimulation.scoped(owner,func()->float:
 		var st=WorldSimulation.state
@@ -974,9 +1009,15 @@ static func purse(owner:String,amount:float,why:String)->float:
 				return -spent
 		return 0.0))
 
+## What a people can pay another with now (no more than pay() can move): its
+## purse's coin, and the coin or weighed metal its capital holds.
 static func purse_balance(owner:String)->float:
 	if not simulated(owner): return 0.0
-	return float(WorldSimulation.scoped(owner,func()->float:
+	var held:=0.0
+	var realm:=_realm()
+	var st:=_state_of(owner)
+	if realm!=null and st!=null: held=maxf(0.0,float((realm.call("held_coin",st) as Dictionary).get("coin",0.0)))
+	return held+float(WorldSimulation.scoped(owner,func()->float:
 		match String(WorldSimulation.state.economy_stage):
 			"currency": return maxf(0.0,float(WorldSimulation.state.public_treasury))
 			"weighed_metal": return maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Coin",0.0)))

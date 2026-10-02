@@ -46,11 +46,11 @@ const HearthCount:=preload("res://scripts/hearth_count.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const AutoFounding:=preload("res://scripts/auto_founding.gd")
+const TradeLedger:=preload("res://scripts/trade_ledger.gd")
+const TradeWords:=preload("res://scripts/trade_words.gd")
 const ManualWork:=preload("res://scripts/manual_work.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
 const TownNames:=preload("res://scripts/town_names.gd")
-const TradeLedger:=preload("res://scripts/trade_ledger.gd")
-const TradeWords:=preload("res://scripts/trade_words.gd")
 
 ## Offices (government_people_system office keys) and, when no key is known,
 ## words in a title, that make each sheet.

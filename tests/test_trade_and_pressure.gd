@@ -140,6 +140,15 @@ func test_priced_trade_after_money_by_one_price_table()->void:
 	# the good it stands on: two loads of stone).
 	assert_float(paid).is_equal_approx(flint*Prices.value("Flint","player"),0.01)
 	assert_float(Prices.value("Flint","player")).is_equal_approx(2.0*float(EconomySystem.BASE_VALUES.Stone),0.001)
+	# Coin, once both mint it: the one door for money (pay) moves it from
+	# purse to purse, never more than the payer holds, and none is lost.
+	_set_stage("player","currency"); _set_stage(a,"currency")
+	WorldSimulation.scoped(a,func()->void: WorldSimulation.state.public_treasury=40.0)
+	var ours:=Ledger.purse_balance("player")
+	assert_float(Ledger.pay(a,"player",100.0,"test")).is_equal_approx(40.0,0.001)
+	assert_float(Ledger.purse_balance("player")-ours).is_equal_approx(40.0,0.001)
+	assert_float(Ledger.purse_balance(a)).is_equal_approx(0.0,0.001)
+	assert_float(Ledger.pay(a,"player",10.0,"test")).is_equal(0.0)
 	# No second table: pacts and envoys read the same one.
 	assert_bool((load("res://scripts/trade_pacts.gd") as GDScript).get_script_constant_map().has("VALUES")).is_false()
 	assert_bool((load("res://scripts/envoy_requests.gd") as GDScript).get_script_constant_map().has("VALUES")).is_false()

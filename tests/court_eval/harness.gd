@@ -599,13 +599,6 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["town_focus"]=String(town.get("management_focus","")) if not bool(town.get("auto_manage",true)) else "leaders"
 	m["defence_works"]=int(MilitaryCampaign.settlement_defense.get("project_stage",-1))
 	m["settling"]=0 if (GameState.settlement_convoy as Dictionary).is_empty() else 1
-	var ration:=0; var water:=0
-	for mod in GameState.active_modifiers:
-		if not mod is Dictionary or float((mod as Dictionary).get("until_day",0.0))<=float(GameState.elapsed_days): continue
-		if String((mod as Dictionary).get("id","")).begins_with("court_ration"): ration=1
-		if String((mod as Dictionary).get("id","")).begins_with("court_water"): water=1
-	m["ration"]=ration; m["clean_water"]=water
-	m["apart_custom"]=1 if bool((preload("res://scripts/crisis_system.gd").state().flags as Dictionary).get("apart_custom",false)) else 0
 	# Trade with the Esurai and the Varesh (trade_stances.gd): our stance and its
 	# good, and the Esurai's food stores (what a gift really reached).
 	var TradeStances:=load("res://scripts/trade_stances.gd") as GDScript
@@ -616,6 +609,13 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	for c_ in CivilizationSystem.civilizations:
 		if String((c_ as Dictionary).get("id",""))==civ: esurai=c_
 	m["esurai_food"]=roundi(float(esurai.get("food_days",0.0))*float(esurai.get("population",0.0)))
+	var ration:=0; var water:=0
+	for mod in GameState.active_modifiers:
+		if not mod is Dictionary or float((mod as Dictionary).get("until_day",0.0))<=float(GameState.elapsed_days): continue
+		if String((mod as Dictionary).get("id","")).begins_with("court_ration"): ration=1
+		if String((mod as Dictionary).get("id","")).begins_with("court_water"): water=1
+	m["ration"]=ration; m["clean_water"]=water
+	m["apart_custom"]=1 if bool((preload("res://scripts/crisis_system.gd").state().flags as Dictionary).get("apart_custom",false)) else 0
 	m["_material"]=_material(m)
 	return m
 
@@ -632,10 +632,10 @@ static func _material(m:Dictionary)->String:
 		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found",
 		# Who sets the daily work and the people at each task (manual_work.gd).
 		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
-		# A band sent out in a feud (war_loop.gd), and whether the feud is on.
-		"trackers","feud_ops","feud",
 		# Trade with other peoples (trade_stances.gd) and what a gift reached.
-		"trade_esurai","trade_good_esurai","trade_varesh","esurai_food"]
+		"trade_esurai","trade_good_esurai","trade_varesh","esurai_food",
+		# A band sent out in a feud (war_loop.gd), and whether the feud is on.
+		"trackers","feud_ops","feud"]
 	var parts:=PackedStringArray()
 	for k in keys: parts.append("%s=%s" % [k,str(m.get(k,""))])
 	return "|".join(parts)

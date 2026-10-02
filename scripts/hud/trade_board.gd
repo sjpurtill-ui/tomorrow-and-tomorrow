@@ -120,7 +120,8 @@ func _build_summary()->void:
 	_number(head,EraWords.grouped(roundi(sent*3.0)),"worth of goods sent a season")
 	_number(head,EraWords.grouped(roundi(came*3.0)),"worth of goods brought in")
 	var unit:=Ledger.purse_unit("player")
-	if unit!="":_number(head,EraWords.grouped(roundi(Ledger.purse_balance("player"))),"%s in our purse" % unit)
+	# What we can pay other peoples with now (trade_ledger.pay moves no more).
+	if unit!="":_number(head,EraWords.grouped(roundi(Ledger.purse_balance("player"))),"%s to pay other peoples" % unit)
 	var tribute_in:=0.0
 	for c:Dictionary in CivilizationSystem.civilizations:
 		var t:=Stances.tribute(String(c.get("id","")),"player")
