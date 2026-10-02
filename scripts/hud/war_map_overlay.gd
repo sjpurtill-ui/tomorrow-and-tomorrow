@@ -1,8 +1,9 @@
 extends Control
-## War on the map: one small mark per war or feud near the contested border,
-## a short tag beside it, a dashed stretch of border, the smoke of recent raids
-## and the bands that are out. Every mark explains itself on hover (or stays
-## open after a click). Tags use the city-label layout and never cover a city.
+## War on the map: one small mark per war or feud on the real meeting line
+## of our lands (the nation borders light that line red: nation_borders.gd),
+## a short tag beside it, the smoke of recent raids and the bands that are
+## out. Every mark explains itself on hover (or stays open after a click).
+## Tags use the city-label layout and never cover a city.
 ## Observe-only: clicks still reach the map.
 
 const T=preload("res://scripts/hud/hud_tokens.gd")
@@ -14,6 +15,7 @@ const WarLoop=preload("res://scripts/war_loop.gd")
 const EraNames=preload("res://scripts/era_names.gd")
 const Ledger=preload("res://scripts/hud/war_ledger_model.gd")
 const LedgerMarks=preload("res://scripts/hud/war_ledger_marks.gd")
+const Borders=preload("res://scripts/nation_borders.gd")
 ## The feud's card under the pointer is this wide.
 const CARD_WIDTH:=360.0
 
@@ -28,7 +30,7 @@ const THEIRS_COLOR:=Color("#d69a55")
 const COLLECT_EVERY:=0.25
 
 var terrain:Node
-## World marks: {id, kind: war|border|raid|band, points: Array[Vector3], tag, tip, color, alpha}
+## World marks: {id, kind: war|raid|band|remnant, points: Array[Vector3], tag, tip, color, alpha}
 var marks:Array[Dictionary]=[]
 var screen:Array[Dictionary]=[]
 var tags:Array[Dictionary]=[]
@@ -84,7 +86,7 @@ func _collect_key()->int:
 		if bool((civ.get("player_relation",{}) as Dictionary).get("at_war",false)): at_war+=1
 	var last_day:Variant=terrain.get("last_discovery_day") if is_instance_valid(terrain) else 0
 	return hash([int(GameState.elapsed_days),last_day,GameState.settlement_site_committed,at_war,hash(ledger),
-		CivilizationSystem.fog_revision,CivilizationSystem.observation_revision,GameState.known_discoveries.size()])
+		CivilizationSystem.fog_revision,CivilizationSystem.observation_revision,GameState.known_discoveries.size(),Borders.published_revision])
 
 
 func _view_signature()->int:
@@ -187,9 +189,12 @@ func collect()->Array[Dictionary]:
 		var info:={"enemy":enemy,"days":days,"our_dead":our_dead,"their_dead":their_dead,"leader":leader,"harm":harm,"op":op_info,
 			"quiet_days":today-last_fight if is_war and op_info.is_empty() else 0,"field":int(field_by_civ.get(civ_id,0)),"feud":feud}
 		var tag:=Marks.war_tag(enemy,stage,days) if not feud else "Feud with %s" % enemy
-		var segment:=Marks.border_segment(home,there)
-		out.append({"id":"border:"+civ_id,"kind":"border","points":[_v3(segment[0]),_v3(segment[1])],"tip":"The border with %s. Their men cross here." % enemy,"color":WAR_COLOR,"alpha":1.0})
-		out.append({"id":"war:"+civ_id,"kind":"war","points":[_v3(Marks.border_point(home,there))],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
+		# On the real line where our lands meet, if they meet where we draw;
+		# else partway from home toward them.
+		var mark:=Marks.border_point(home,there)
+		var on_line:=Borders.meeting_point("player",civ_id,mark)
+		if on_line.is_finite(): mark=on_line
+		out.append({"id":"war:"+civ_id,"kind":"war","points":[_v3(mark)],"tag":tag,"tip":Marks.details(info,stage),"color":WAR_COLOR,"alpha":1.0})
 	# A people we met that is broken past feuding (no town left, a handful
 	# living): its survivors at its last home, in a quiet ink; none when
 	# nobody of them lives (war_loop.survivors).
@@ -234,7 +239,7 @@ func _project()->void:
 			if camera.is_position_behind(world): ok=false; break
 			points.append(camera.unproject_position(world))
 		if not ok: continue
-		if mark.kind!="border" and not viewport.grow(-4.0).has_point(points[0]): continue
+		if not viewport.grow(-4.0).has_point(points[0]): continue
 		var entry:=mark.duplicate(); entry["screen"]=points
 		screen.append(entry)
 	_layout_tags(viewport)
@@ -288,14 +293,8 @@ func mark_at(point:Vector2)->Dictionary:
 	var best:={}
 	var best_distance:=INF
 	for entry:Dictionary in screen:
-		var distance:=INF
-		if entry.kind=="border":
-			distance=Geometry2D.get_closest_point_to_segment(point,entry.screen[0],entry.screen[1]).distance_to(point)
-			if distance>7.0: continue
-			distance+=6.0 # A mark on the line wins over the line itself.
-		else:
-			distance=(entry.screen[0] as Vector2).distance_to(point)
-			if distance>ICON*0.6: continue
+		var distance:=(entry.screen[0] as Vector2).distance_to(point)
+		if distance>ICON*0.6: continue
 		if distance<best_distance: best_distance=distance; best=entry
 	return best
 
@@ -310,8 +309,7 @@ func _input(event:InputEvent)->void:
 # --- Drawing ------------------------------------------------------------------
 
 func _draw()->void:
-	for entry:Dictionary in screen:
-		if entry.kind=="border": draw_dashed_line(entry.screen[0],entry.screen[1],Color(entry.color,0.85),2.0,7.0,true)
+	# The contested line itself is the nation borders' (lit red on the map).
 	for kind:String in ["raid","band","war"]:
 		for entry:Dictionary in screen:
 			if entry.kind!=kind: continue

@@ -388,6 +388,11 @@ func select(id:String,open_detail:bool=false)->void:
 			var ledger:VBoxContainer=Ledger.new();detail_body.add_child(ledger)
 			ledger.setup({"state":effect_state,"rows":Explainer.discovery_rows(String(item.id),bool(item.known)),
 				"intro":"Open an effect to see everywhere it acts." if item.known else "At full use. Tried in a few households before it is proven, a new practice starts with about 15 in 100 households and spreads over years. Open an effect to see everywhere it would act."})
+		# What it changes on the map itself (nation_borders.gd), when it does.
+		var map_note:=preload("res://scripts/nation_borders.gd").research_note(String(item.id))
+		if bool(item.exposed) and not map_note.is_empty():
+			Art.label(detail_body,"ON THE MAP",12,T.GOLD_TEXT)
+			Art.label(detail_body,map_note,13,T.BODY,true)
 		if not item.requires.is_empty():
 			Art.label(detail_body,"BUILDS ON",12,T.MUTED)
 			for req:String in item.requires:

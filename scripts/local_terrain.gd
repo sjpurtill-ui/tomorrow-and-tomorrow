@@ -4833,6 +4833,18 @@ func _refresh_settlement_roads()->void:
 	settlement_roads.refresh()
 	settlement_roads.update_view(camera.size,camera.size/maxf(1.0,get_viewport().get_visible_rect().size.y))
 
+## Every people's land and the lines where peoples meet (codex/nation-borders,
+## scripts/nation_border_layer.gd): our claims come from the network below,
+## the rest it reads and rebuilds itself, on a worker, only when it changes.
+var nation_border_layer:Node3D
+
+func _nation_borders()->Node3D:
+	if not is_instance_valid(nation_border_layer):
+		nation_border_layer=preload("res://scripts/nation_border_layer.gd").new()
+		nation_border_layer.set("terrain",self)
+		add_child(nation_border_layer)
+	return nation_border_layer
+
 func _refresh_settlement_network(force:=false)->void:
 	var undertaking_stamp:int=preload("res://scripts/performance_trace.gd").start()
 	_refresh_undertaking_visuals(force)
@@ -4841,6 +4853,7 @@ func _refresh_settlement_network(force:=false)->void:
 		if settlement_border_root: settlement_border_root.visible=false
 		if settlement_network_marker_root: settlement_network_marker_root.visible=false
 		if settlement_network_fabric_root: settlement_network_fabric_root.visible=false
+		_nation_borders().call("set_own_claims",[])
 		return
 	_settlement_model().ensure_founded()
 	# Coast, slope and river context come from static authored geography. Sampling 120
@@ -4895,102 +4908,19 @@ func _refresh_settlement_network(force:=false)->void:
 		settlement_network_fabric_root.name="SettlementNetworkPhysicalFabric"
 		add_child(settlement_network_fabric_root)
 	settlement_network_fabric_root.visible=true
-	var border_surface:=TERRITORY_BAND.Arrays.new()
-	var border_halo_surface:=TERRITORY_BAND.Arrays.new()
-	var ownership_surface:=SurfaceTool.new()
-	ownership_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var segment_count:=0
-	var halo_segment_count:=0
-	var ownership_triangle_count:=0
 	var visible_secondary_settlements:Array[Dictionary]=[]
-	# One exact height sample set serves fills and both border ribbons.
 	var borders_stamp:int=preload("res://scripts/performance_trace.gd").start()
-	var samples:=_territory_height_samples()
 	for settlement in network.settlements:
 		if not bool(settlement.get("primary",false)) and _settlement_marker_in_current_view(settlement): visible_secondary_settlements.append(settlement)
-		if not _settlement_boundary_in_current_view(settlement): continue
-		var boundary:PackedVector2Array=settlement.get("boundary",PackedVector2Array())
-		var radius:=float(settlement.get("claim_radius_km",0.4))
-		var visual_profile:=_settlement_expansion_visual_profile(settlement)
-		var color:Color=visual_profile.color
-		if not bool(settlement.get("primary",false)): color=color.lerp(Color("#8d9165"),0.28)
-		color.a=float(visual_profile.border_alpha)*(1.0 if bool(settlement.get("primary",false)) else 0.82)
-		# Territory reads as a hand-coloured map: a soft painted wash that pools
-		# a little darker just inside the edge, and one fine ink hairline. Both
-		# widths follow the zoom bucket (about one and eight screen pixels), so
-		# the edge never becomes a heavy 3D ring; they only change on a rebuild.
-		var ink_pixel:=_territory_ink_pixel_km()
-		var primary:=bool(settlement.get("primary",false))
-		var core_width:=ink_pixel*lerpf(0.65,0.95,clampf(float(visual_profile.border_scale)-0.72,0.0,1.0))
-		var wash_color:Color=TERRITORY_WASH.lerp(color,0.25)
-		var ownership_color:Color=wash_color
-		# Store base opacity in geometry; the camera fade is updated live in material.
-		ownership_color.a=float(visual_profile.fill_alpha)*1.6*(1.0 if primary else 0.72)
-		ownership_triangle_count+=_append_settlement_claim_fill(ownership_surface,boundary,ownership_color,0.0032,samples)
-		var edge_wash:=wash_color
-		edge_wash.a=0.15 if primary else 0.10
-		# Mitred bands (territory_border_band.gd): the wash pools at the ink line
-		# and fades inward; the hairline takes its heights from the boundary.
-		var wash_band:=ink_pixel*2.5
-		var subdivisions:=_border_ribbon_subdivisions()
-		var inner_wash:=TERRITORY_BAND.offset(boundary,-wash_band*2.0)
-		var faded_wash:=edge_wash;faded_wash.a=0.0
-		edge_wash.a*=1.5
-		# The wash's inner edge takes the boundary's cached heights, raised by what
-		# a 25% slope could climb across the band; it is transparent there, so
-		# no zoom step has to sample the planet height field afresh.
-		halo_segment_count+=TERRITORY_BAND.append(border_halo_surface,boundary,inner_wash,boundary,boundary,edge_wash,faded_wash,0.0045,samples,subdivisions,wash_band*2.0*0.25)
-		var ink:=TERRITORY_INK
-		ink.a=(0.85 if primary else 0.62)*clampf(float(visual_profile.border_alpha)/0.7,0.8,1.2)
-		segment_count+=TERRITORY_BAND.append(border_surface,TERRITORY_BAND.offset(boundary,core_width),TERRITORY_BAND.offset(boundary,-core_width),boundary,boundary,ink,ink,0.0065,samples,subdivisions)
+	# Our land, every people's colour and the lines where peoples meet are the
+	# nation borders' (scripts/nation_border_layer.gd); our claims go there.
+	_nation_borders().call("set_own_claims",network.settlements)
 	var trace=preload("res://scripts/performance_trace.gd")
 	var stamp:int=trace.mark("network_borders",borders_stamp)
 	_create_secondary_settlement_markers(visible_secondary_settlements)
 	stamp=trace.mark("network_markers",stamp)
 	_create_secondary_settlement_footprints(visible_secondary_settlements,force)
 	stamp=trace.mark("network_footprints",stamp)
-	if ownership_triangle_count>0:
-		var ownership_mesh:=ownership_surface.commit()
-		var ownership_instance:=MeshInstance3D.new()
-		ownership_instance.name="ControlledGroundWash"
-		ownership_instance.mesh=ownership_mesh
-		var ownership_material:=StandardMaterial3D.new()
-		ownership_material.vertex_color_use_as_albedo=true
-		ownership_material.albedo_color=Color(1,1,1,_settlement_claim_fill_alpha(1.0))
-		ownership_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
-		ownership_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-		ownership_material.cull_mode=BaseMaterial3D.CULL_DISABLED
-		ownership_material.roughness=1.0
-		ownership_material.depth_draw_mode=BaseMaterial3D.DEPTH_DRAW_OPAQUE_ONLY
-		ownership_instance.material_override=ownership_material
-		ownership_instance.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		settlement_border_root.add_child(ownership_instance)
-	if halo_segment_count>0:
-		var halo_mesh:=border_halo_surface.commit()
-		var halo_instance:=MeshInstance3D.new()
-		halo_instance.name="ControlledGroundBoundaryContrast"
-		halo_instance.mesh=halo_mesh
-		var halo_material:=StandardMaterial3D.new()
-		halo_material.vertex_color_use_as_albedo=true
-		halo_material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
-		halo_material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-		halo_material.cull_mode=BaseMaterial3D.CULL_DISABLED
-		halo_material.roughness=1.0
-		halo_instance.material_override=halo_material
-		settlement_border_root.add_child(halo_instance)
-	if segment_count>0:
-		var border_mesh:=border_surface.commit()
-		var border_instance:=MeshInstance3D.new()
-		border_instance.name="ControlledGroundBoundaries"
-		border_instance.mesh=border_mesh
-		var material:=StandardMaterial3D.new()
-		material.vertex_color_use_as_albedo=true
-		material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA
-		material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-		material.cull_mode=BaseMaterial3D.CULL_DISABLED
-		material.roughness=1.0
-		border_instance.material_override=material
-		settlement_border_root.add_child(border_instance)
 	stamp=trace.mark("network_meshes",stamp)
 	_update_scale_lod()
 	trace.mark("network_scale_lod",stamp)

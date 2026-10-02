@@ -1,6 +1,7 @@
 extends "res://scripts/hud/settlement_overview.gd"
 const Visuals:=preload("res://scripts/hud/research_visuals.gd")
 const Explainer:=preload("res://scripts/effect_explainer.gd")
+const Borders:=preload("res://scripts/nation_borders.gd")
 ## Below this board width the questions stack in one column and the lead
 ## painting sits above its words instead of beside them.
 const WIDE:=760.0
@@ -182,6 +183,11 @@ static func _card_words(record:Dictionary)->Dictionary:
 	if not effects.is_empty():
 		would="Would bring: %s." % Explainer.summary(effects)
 		brings="\n\nWhat it would do, at full use:\n"+Explainer.effect_lines(effects,1.0,1.0,false)
+	# What answering it would change on the map itself (nation_borders.gd).
+	var map_note:=Borders.research_note(String(record.get("id","")))
+	if map_note!="":
+		would=(would+" " if not would.is_empty() else "")+map_note
+		brings+="\n\nOn the map: "+map_note
 	var opens:=int(record.get("opens",0))
 	if opens>0:would=(would+" " if not would.is_empty() else "")+"Opens %d more question%s." % [opens,"" if opens==1 else "s"]
 	var goal:=String(record.get("observation",record.get("project_goal",record.get("project_method",""))))

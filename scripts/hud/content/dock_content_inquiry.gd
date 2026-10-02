@@ -19,6 +19,7 @@ const Research600:=preload("res://scripts/research_600_catalog.gd")
 const Plain:=preload("res://scripts/hud/home_plain.gd")
 const ARTIFACT_COLOR:=Color("#b98a5e")
 const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
+const Borders:=preload("res://scripts/nation_borders.gd")
 ## Costly parts of the pages, kept while what they are made from holds.
 var memo:=Memo.new()
 
@@ -135,7 +136,7 @@ func _investigation_blocks(domain_filter:String="")->Array:
 		items.append({
 			"name":String(record.get("name","Investigation")),
 			"sub":"%s · %s" % [Visuals.name_for(domain),phase if not phase.is_empty() else "under way"],
-			"detail":team_line+" "+Visuals.plain_bottleneck(bottleneck)+(" Would bring: %s." % Explainer.summary(effects) if not effects.is_empty() else ""),
+			"detail":team_line+" "+Visuals.plain_bottleneck(bottleneck)+(" Would bring: %s." % Explainer.summary(effects) if not effects.is_empty() else "")+(" "+Borders.research_note(String(record.get("id",""))) if Borders.research_note(String(record.get("id","")))!="" else ""),
 			"icon":ResourceIcons.domain_texture(domain,DOMAIN_COLORS.get(domain,Tokens.TEAL)),
 			"value":"%d%%" % progress,"value_color":DOMAIN_COLORS.get(domain,Tokens.TEAL),
 			"accent":DOMAIN_COLORS.get(domain,Tokens.TEAL),
@@ -269,9 +270,11 @@ static func _rows_summary(rows:Array,limit:int=3)->String:
 
 ## A known finding in one line: what it adds now, and how widely it is used.
 func _known_summary(id:String,effects:Dictionary)->String:
-	if effects.is_empty(): return "Changes nothing by itself; it opens the way to later knowledge."
+	# What it changes on the map itself, when it does (nation_borders.gd).
+	var map_note:=Borders.research_note(id)
+	if effects.is_empty(): return map_note if map_note!="" else "Changes nothing by itself; it opens the way to later knowledge."
 	var usage:=Explainer.usage_words(id)
-	return "Does: %s. %s. Open it to see each effect." % [Explainer.summary(effects),usage.left(1).to_upper()+usage.substr(1)]
+	return "Does: %s. %s. Open it to see each effect.%s" % [Explainer.summary(effects),usage.left(1).to_upper()+usage.substr(1)," "+map_note if map_note!="" else ""]
 
 ## What a field's known practices add now, before the age's limits.
 func _domain_aggregate_text(domain:String)->String:
@@ -349,8 +352,9 @@ func _technology_blocks()->Array:
 		var effects:Dictionary=technology.get("effects",{})
 		var open:=expanded_tech.has(id)
 		var detail:=String(technology.get("observation",""))
-		if effects.is_empty(): detail+="\nChanges nothing by itself; it opens the way to later knowledge."
-		else: detail+="\n%s %s.%s" % ["Does:" if known else "Would bring:",Explainer.summary(effects)," Click to %s each effect." % ("hide" if open else "see")]
+		var map_note:=Borders.research_note(id)
+		if effects.is_empty(): detail+="\n"+(map_note if map_note!="" else "Changes nothing by itself; it opens the way to later knowledge.")
+		else: detail+="\n%s %s.%s%s" % ["Does:" if known else "Would bring:",Explainer.summary(effects)," Click to %s each effect." % ("hide" if open else "see"),"\n"+map_note if map_note!="" else ""]
 		var children:Array=technology.leads_to
 		if not children.is_empty(): detail+="\nOpens %d further avenues of inquiry." % children.size()
 		var prerequisites:Array=[]

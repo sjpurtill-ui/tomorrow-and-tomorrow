@@ -60,6 +60,13 @@ func _isolate_requested_layer()->void:
 		"territory":
 			if terrain.get("settlement_border_root"):
 				(terrain.get("settlement_border_root") as Node3D).visible=false
+			# Every people's land and lines: the nation borders (nation_border_layer.gd).
+			var borders:Node3D=terrain.get("nation_border_layer")
+			if is_instance_valid(borders):
+				borders.process_mode=Node.PROCESS_MODE_DISABLED
+				borders.visible=false
+				var words:CanvasLayer=borders.get("hover_layer")
+				if is_instance_valid(words): words.visible=false
 
 
 func _argument_value(prefix:String)->String:
