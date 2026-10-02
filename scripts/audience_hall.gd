@@ -1601,7 +1601,9 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 			situation.summary="%s is short of food (about %d days of stores) and asks for %s." % [name,roundi(float(civ.get("food_days",0))),_terms_text(request)]
 			return {"kind":kind,"terms":request,"situation":situation}
 		"tribute_demand","emboldened_demand","test_of_resolve":
-			if bool(_aftermath().call("defeated",civ_id)): return {}
+			# A beaten people never demands; nor does one bound to peace with us
+			# (a feud they paid to end, a truce, kin by marriage).
+			if bool(_aftermath().call("defeated",civ_id)) or bool(_war().call("keeps_peace",civ_id,day)): return {}
 			var scale:=1.4 if situation_type=="emboldened_demand" else (0.7 if situation_type=="test_of_resolve" else 1.0)
 			var avoid:=String(previous.get("resource","")) if situation_type=="emboldened_demand" else ""
 			var threat:=_threat_terms(civ,rng,used,scale,avoid)
@@ -1705,6 +1707,8 @@ static func _candidate(situation_type:String,civ_id:String,occasion:Dictionary,r
 			situation.summary="%s protests that your recruiters invited its households away (%d visit%s so far) and wants it stopped." % [name,int(relation.get("recruitment_visits",0)),"" if int(relation.get("recruitment_visits",0))==1 else "s"]
 			return {"kind":kind,"situation":situation}
 		"debt_call","redress_demand":
+			# A settled feud closed the old wrongs: no redress is asked for them.
+			if situation_type=="redress_demand" and bool(_war().call("keeps_peace",civ_id,day)): return {}
 			return _rivals().call("candidate",situation_type,civ_id,occasion,rng,used,day)
 		"feud_peace":
 			# A worn-out or frightened people comes to end the feud, with a blood

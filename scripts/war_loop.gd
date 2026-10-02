@@ -581,6 +581,11 @@ static func _mark_harm(civ_id:String,day:int)->void:
 		if r is Dictionary and String(r.get("civ",""))==civ_id and int(r.get("harm_day",-1))<0 and day-int(r.get("day",0))<=730 and day>=int(r.get("day",0)):
 			r["harm_day"]=day
 
+## Bound to leave us alone (a truce, a pact, a feud settled with a price or a
+## parley, kin by marriage): their envoys bring no threats or demands.
+static func keeps_peace(civ_id:String,day:int)->bool:
+	return _truce_binds(civ_id,day)
+
 static func _truce_binds(civ_id:String,day:int)->bool:
 	var relation:=_relation(civ_id)
 	if String(relation.get("treaty","none"))=="non_aggression" or int(relation.get("truce_until_day",0))>day: return true
@@ -1693,10 +1698,13 @@ static func _close_war(civ_id:String,day:int,result:String,text:String)->void:
 	_drop_matters(civ_id)
 
 ## Peace is made with them (a truce, the feud set down, the matter closed):
-## the god's word to seek peace has done its work and is set down, so the war
-## leader sends no more messengers for it. Another word given stays.
+## the god's word to seek peace, to punish them or to take a town of theirs
+## has done its work and is set down, so the war leader sends no more
+## messengers or raiders for it (a punishing band left standing would start
+## the feud again the day after the peace). A word to defend stays.
 static func _peace_made(f:Dictionary)->void:
-	if String(f.get("stance",""))=="peace": f.erase("stance")
+	if String(f.get("stance","")) in ["peace","punish","take"]: f.erase("stance")
+	f.erase("punish_at")
 
 # --------------------------------------------------------------------------
 # Daily

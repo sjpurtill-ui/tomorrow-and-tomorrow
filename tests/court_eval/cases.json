@@ -762,6 +762,20 @@
    "expect": {"handled": true, "state": {"recruits": "<before", "officials": "==before", "modifiers": "==before"}},
    "variants": ["send 5 of the soldiers home", "stand down five warriors"]},
 
+  {"id": "home.disband_military", "domain": "home_orders", "fixture": "home_peace", "speaker": "suri", "source": "user",
+   "note": "The user's words, 2026-10-01: the court promised to dissolve the ranks and nothing happened (\"military\" was no word for the army, so the line became a settlement directive filed as violence against a group). Everyone at home goes back to work and no army is kept.",
+   "say": "disband all military",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {}, "confidence": 0.9},
+   "expect": {"handled": true, "state": {"recruits": "<before", "army_level": "=='none'", "officials": "==before", "modifiers": "==before"}},
+   "variants": ["suspend all military", "Suspend the military.", "dissolve our military", "stand down the whole army"]},
+
+  {"id": "home.suspend_training_not_disband", "domain": "home_orders", "fixture": "home_peace", "speaker": "suri", "source": "design",
+   "note": "Suspending the drill stops training only: nobody is sent home.",
+   "say": "suspend military training",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "details": {}, "confidence": 0.9},
+   "expect": {"handled": true, "state": {"recruits": "==before", "modifiers": "==before", "training_policy": "=='suspended'"}},
+   "variants": ["Suspend the drill for now"]},
+
   {"id": "home.give_food", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "Give Kavu twenty food",
    "ideal": {"kind": "order", "action": "give", "type": "person", "ref": "$kavu", "details": {"resource": "Food", "count": 20}, "confidence": 0.9},

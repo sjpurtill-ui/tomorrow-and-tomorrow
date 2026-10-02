@@ -196,6 +196,26 @@ func test_they_ask_for_the_captives_on_the_road_and_can_have_them_back()->void:
 	assert_float(float(CivilizationSystem.civilizations[0].population)).is_equal_approx(population+road,0.01)
 
 
+## The user, 2026-10-01: "They also need to stop asking for their fucking
+## people back." The town, its people under our garrison and the captives are
+## one plea a conquest: asked once and refused, none of the three comes back.
+func test_a_beaten_people_asks_for_its_own_back_once_a_conquest()->void:
+	_take_tsaren()
+	var done:=Fate.apply(civ_id,city_id,Fate.fate_words("kill all the males and bring all the females back to seanstone","seanstone"))
+	assert_bool(done.has("error")).override_failure_message(str(done)).is_false()
+	var rng:=RandomNumberGenerator.new()
+	var day:=int(GameState.elapsed_days)
+	var first:=Aftermath.candidate("captive_plea",civ_id,{},rng,{},day)
+	assert_str(String((first.situation as Dictionary).ask)).starts_with(Aftermath.GIVE_BACK)
+	var audience:=Hall.debug_situation("captive_plea",civ_id)
+	assert_dict(audience).is_not_empty()
+	var r:=Hall.resolve(String(audience.id),"refuse")
+	assert_bool(r.has("error")).override_failure_message(str(r)).is_false()
+	for later in [day+200,day+400,day+1500]:
+		for asked in ["captive_plea","people_plea","town_return"]:
+			assert_dict(Aftermath.candidate(asked,civ_id,{},rng,{},later)).override_failure_message("%s came back on day %d" % [asked,later]).is_empty()
+
+
 func test_the_record_shows_which_towns_they_still_hold()->void:
 	_take_tsaren()
 	var block:=CivReport.towns_block(civ_id)

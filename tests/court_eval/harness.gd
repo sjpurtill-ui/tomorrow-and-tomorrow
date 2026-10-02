@@ -575,6 +575,8 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	# The realm's own settings (realm_orders.gd): training, drill, workshop
 	# lines, what our thinkers study, the scouting, strangers, a great work.
 	m["training_policy"]=String((MilitaryCampaign.training_staff.policy("army") as Dictionary).get("id",""))
+	# The army size the war leader keeps (army_levy_law.gd): "none" keeps no army.
+	m["army_level"]=String(MilitaryCampaign.get("army_levy_level"))
 	m["drill_program"]=0 if (MilitaryCampaign.training_program as Dictionary).is_empty() else 1
 	var lines:=0; var line_target:=0
 	for job in MilitaryCampaign.equipment_queue:
@@ -642,7 +644,7 @@ static func _material(m:Dictionary)->String:
 		# court's known persons, the realm's name: what acts at home really change.
 		"office_headman","office_suri","office_kavu","office_imeri","love_headman","love_suri","love_kavu","love_imeri","dread_headman","dread_suri","dread_kavu","dread_imeri",
 		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","nation_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
-		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found",
+		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found","army_level",
 		# Who sets the daily work and the people at each task (manual_work.gd).
 		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
 		# Trade with other peoples (trade_stances.gd) and what a gift reached.
