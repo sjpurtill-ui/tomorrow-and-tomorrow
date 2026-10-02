@@ -131,7 +131,8 @@ func test_drilling_outside_the_lines_is_listed_and_grouped()->void:
 func test_home_defence_is_beside_the_town_name_not_an_army()->void:
 	# No counter for the levy at home on the war chart, whatever comes in.
 	assert_array(Overlay._marks({"stage":"reckoned","home_levy":{"pos":Vector2(10,20),"troops":9},"garrisons":[]},[],[],{})).is_empty()
-	# Our town's guard beside its name: its watch, and at home the levy too.
+	# Our town's guard beside its name: at home the levy and the watch, as
+	# home's battle musters them (tests/test_town_watch_display.gd).
 	WorldSimulation.clear();GameState.reset_for_new_world(919)
 	SettlementModel.reset_for_new_world();MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
 	GameState.initialize_population_model();GameState.ensure_population_total(120)
@@ -142,9 +143,12 @@ func test_home_defence_is_beside_the_town_name_not_an_army()->void:
 	var Labels:=preload("res://scripts/hud/city_labels.gd")
 	var home:Dictionary=GameState.player_settlements[0]
 	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
+	assert_bool(bool(home.get("primary",false))).is_true()
 	var watch:=Labels.home_guard(String(home.id))
+	assert_int(watch).is_equal(maxi(0,int(GameState.population_allocations.get("Defense",0))))
 	MilitaryCampaign.home_army["troops"]=9
-	assert_int(Labels.home_guard(String(home.id))).is_equal(watch+(9 if bool(home.get("primary",false)) else 0))
+	# The nine trained stand with whoever else keeps the watch.
+	assert_int(Labels.home_guard(String(home.id))).is_equal(maxi(9,watch))
 	assert_int(Labels.home_guard("nowhere")).is_equal(0)
 	assert_int(Labels.home_guard("__founding_convoy__")).is_equal(0)
 	# The army bar keeps to armies: no card for home defence.

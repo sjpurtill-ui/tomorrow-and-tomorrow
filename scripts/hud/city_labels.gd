@@ -12,6 +12,7 @@ const T=preload("res://scripts/hud/hud_tokens.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
 const RESOURCE_ICONS=preload("res://scripts/resource_icons.gd")
 const HELD=preload("res://scripts/held_town.gd")
+const COMBAT=preload("res://scripts/civilization_combat.gd")
 const WorkVisual=preload("res://scripts/undertaking_map_visual.gd")
 ## Cards and emblems ease in and out instead of popping (codex/map-motion).
 const PresenceFade=preload("res://scripts/hud/presence_fade.gd")
@@ -222,10 +223,13 @@ func refresh()->void:
 		var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
 		# The card's text and measured size change only with its label, report,
 		# day or era; the anchor moves every frame the camera does. Measure once.
-		var text_key:=hash([label.text,String(label.get_meta("map_status","")),affiliation,bool(source.foreign),flag!=null,bounds.size.x,int(GameState.elapsed_days),hash(record),EraWords.stage(),String(ownership.get("note","")),int(ownership.get("garrison",0))])
+		# Our town's guard is re-read with the card: its badge follows the
+		# Defense share the moment it changes, even while the days stand still.
+		var guard:=0 if bool(source.foreign) else home_guard(String(id))
+		var text_key:=hash([label.text,String(label.get_meta("map_status","")),affiliation,bool(source.foreign),flag!=null,bounds.size.x,int(GameState.elapsed_days),hash(record),EraWords.stage(),String(ownership.get("note","")),int(ownership.get("garrison",0)),guard])
 		var text:Dictionary=measured.get(id,{})
 		if int(text.get("key",0))!=text_key:
-			text=_measure_card(label,record,bool(source.foreign),affiliation,flag!=null,font,bounds,ownership)
+			text=_measure_card(label,record,bool(source.foreign),affiliation,flag!=null,font,bounds,ownership,String(id))
 			text["key"]=text_key
 			measured[id]=text
 		# The founding convoy is a prompt, not a city: it keeps its readout open.
@@ -254,7 +258,10 @@ static func affiliation_of(civ_id:String,foreign:bool,kind:String="city")->Strin
 	return String(GameState.nation_name).strip_edges() if kind=="city" else ""
 
 ## Text, wrapped lines and sizes of one city's card (see refresh's cache key).
-static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2,ownership:Dictionary={})->Dictionary:
+## `city_id` is the place's id as the layer registered it (the home town's
+## label carries none of its own); without it, the label's own id.
+static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2,ownership:Dictionary={},city_id:String="")->Dictionary:
+	var id:=city_id if city_id!="" else String(label.get_meta("city_map_id",""))
 	var parts:=label.text.split("  •  ",true,1)
 	var title:=chart_name(String(parts[0]));var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
 	if not count.begins_with("est.") and count!="Population unknown":count="Population "+count
@@ -262,7 +269,7 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	var summary:Dictionary={}
 	if foreign:
 		# A town we hold: our garrison's exact figures, never a scout's range.
-		var held:Dictionary=HELD.report(String(label.get_meta("city_map_id",""))) if String(ownership.get("kind","")) in ["occupied","ruined"] else {}
+		var held:Dictionary=HELD.report(id) if String(ownership.get("kind","")) in ["occupied","ruined"] else {}
 		if not held.is_empty():
 			summary=HELD.card_summary(held)
 			count="Population "+EraWords.grouped(int(held.residents))
@@ -279,25 +286,25 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	var badge:=int(ownership.get("garrison",0))
 	# Our own town: those guarding it beside its name (home_guard). Home
 	# defence is not an army, so it has no counter of its own on the map.
-	if not foreign and badge<=0:badge=home_guard(String(label.get_meta("city_map_id","")))
+	if not foreign and badge<=0:badge=home_guard(id)
 	if not note.is_empty():width=maxf(width,ui.get_string_size(note,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 	# A town we hold carries its guard's count beside the name.
 	if badge>0:name_width+=badge_width(badge)+6
-	var detail:=Vector2(ceilf(maxf(135,width)),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0)+(18 if not note.is_empty() else 0))
+	# The open card is never narrower than its name tag: the badge keeps its
+	# place beside the name instead of landing on its last letters.
+	var detail:=Vector2(ceilf(maxf(135,maxf(width,name_width))),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0)+(18 if not note.is_empty() else 0))
 	if not summary.is_empty():detail=Vector2(maxf(260,maxf(width,name_width)),float(lines.size())*20+130+(18 if not note.is_empty() else 0))
 	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail,"note":note,"badge":badge}
 
-## Those guarding one of our towns: its watch (the town's own hands on
-## keeping watch) and, at the home town, the levy at home. 0 for a place
-## that is not one of our towns.
+## Those who would defend one of our towns if it were attacked now, as its
+## battle musters them (civilization_combat.gd defenders): at home the levy
+## and the watch, anywhere else the town's own watch. The same count as the
+## town page's "Fighters here". 0 for a place that is not one of our towns.
 static func home_guard(settlement_id:String)->int:
 	if settlement_id=="" or settlement_id.begins_with("__"):return 0
 	var record:Dictionary=SettlementModel.settlement_record(settlement_id)
 	if record.is_empty() or not String(record.get("occupied_by","")).is_empty():return 0
-	var watch:=roundi(float(SettlementModel.with_city_resources(settlement_id,func()->float:
-		return SettlementModel.with_local_population(func()->float:return float(GameState.population_allocations.get("Defense",0.0))))))
-	if bool(record.get("primary",false)):watch+=maxi(0,int(MilitaryCampaign.home_army.get("troops",0)))
-	return maxi(0,watch)
+	return maxi(0,COMBAT.defenders(settlement_id))
 
 ## The width of the small garrison badge: a shield and the count holding it.
 static func badge_width(count:int)->float:
@@ -743,8 +750,9 @@ func _draw()->void:
 	var open:=expanded_id();var opened:={}
 	for card:Dictionary in cards:
 		if bool(card.get("compact",false)):
+			# An open card is its own name tag: drawing both doubled the badge.
+			if String(card.id)==open:opened=card;continue
 			_draw_frame(card,PresenceFade.drawn_rect(card_fades,String(card.id),card.rect,card.anchor),false,PresenceFade.alpha(card_fades,String(card.id)))
-			if String(card.id)==open:opened=card
 		else:_draw_card(card,card.rect)
 	# The open card draws last, over its neighbours, on a solid ground.
 	if not opened.is_empty():_draw_card(opened,detail_rect(opened),true)

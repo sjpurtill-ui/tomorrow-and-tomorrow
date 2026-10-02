@@ -37,10 +37,7 @@ static func force_for(incident:Dictionary)->Dictionary:
 static func town_watch(city_id:String)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
-	if city.is_empty() or mc==null: return {}
-	var people:=float(WorldSimulation.settlements._settlement_population(city))
-	var share:=clampf(people/maxf(1.0,float(WorldSimulation.state.population_exact)),0.0,1.0)
-	var watch:=mini(roundi(float(mc._home_garrison_target())*share),floori(people))
+	var watch:=watch_count(city_id)
 	if watch<=0: return {}
 	var formation:={"id":-1,"unit":"levy","weapon":"improvised","count":watch,"authorized_count":watch,"equipment":0,"equipment_required":watch,"ammunition":0,"ammunition_required":0,
 		"training":0.20,"experience":0.0,"personnel_condition":float(mc._trainee_condition()),"emergency_militia":true}
@@ -49,6 +46,39 @@ static func town_watch(city_id:String)->Dictionary:
 	force["supply_level"]=1.0
 	force["town_watch"]=city_id
 	return force
+
+## How many stand in a town's own watch (town_watch): its share of those set
+## to defence work, by its people, never more than live there. The one count
+## of a town's guard: its battles, its page and its map badge all read it.
+## Home is guarded by home_defenders instead (see defenders). 0 for no town.
+## Run in the town's owner's scope, outside any one town's.
+static func watch_count(city_id:String)->int:
+	var mc:Variant=WorldSimulation.military
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
+	if city.is_empty() or mc==null: return 0
+	var people:=float(WorldSimulation.settlements._settlement_population(city))
+	var share:=clampf(people/maxf(1.0,float(WorldSimulation.state.population_exact)),0.0,1.0)
+	return maxi(0,mini(roundi(float(mc._home_garrison_target())*share),floori(people)))
+
+## Who stands at home when it is attacked, as _home_defense_force musters
+## them: the trained levy, and the watch for the rest of those set to
+## defence work. {trained, watch}. Run in the owner's scope.
+static func home_defenders()->Dictionary:
+	var mc:Variant=WorldSimulation.military
+	if mc==null: return {"trained":0,"watch":0}
+	var trained:=maxi(0,int(mc.home_army.get("troops",0)))
+	return {"trained":trained,"watch":maxi(0,int(mc._home_garrison_target())-trained)}
+
+## How many defend one of the owner's towns if it is attacked now, as
+## force_for musters them: at home the levy and the watch, anywhere else the
+## town's own watch. 0 for a place that is not one of the owner's towns.
+static func defenders(city_id:String)->int:
+	var city:=WorldSimulation.settlements.settlement_record(city_id)
+	if city.is_empty(): return 0
+	if bool(city.get("primary",false)):
+		var home:=home_defenders()
+		return int(home.trained)+int(home.watch)
+	return watch_count(city_id)
 
 static func commit_enemy(result:Dictionary)->void:
 	var target:Dictionary=result.get("threat",{}).get("owned_target",{})
