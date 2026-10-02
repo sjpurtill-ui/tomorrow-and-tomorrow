@@ -227,3 +227,27 @@ func test_the_record_shows_which_towns_they_still_hold()->void:
 	assert_str(String(rows["Stonefield"].value)).is_equal("Theirs")
 	assert_str(String(rows["Where they live now"].detail)).is_equal("Esurai still holds Stonefield.")
 
+
+
+## A vow of vengeance is sworn once by a ruler for what was lost: not every
+## year their envoys come ("WAY TOO many of these"). A new ruler may swear it
+## again; the vow leans them toward coming with everything (world_answer.gd).
+func test_a_ruler_swears_vengeance_once_not_every_year()->void:
+	_take_tsaren()
+	var rng:=RandomNumberGenerator.new()
+	var day:=int(GameState.elapsed_days)
+	var vow:=Aftermath.candidate("vengeance_vow",civ_id,{},rng,{},day)
+	assert_dict(vow).is_not_empty()
+	assert_str(String((vow.situation as Dictionary).ask)).starts_with(Aftermath.VOW)
+	var audience:=Hall.debug_situation("vengeance_vow",civ_id)
+	assert_dict(audience).is_not_empty()
+	assert_bool(Aftermath.sworn(civ_id)).is_true()
+	assert_bool(Aftermath.mix(civ_id).has("vengeance_vow")).is_false()
+	for later in [day+365,day+730,day+3650]:
+		assert_dict(Aftermath.candidate("vengeance_vow",civ_id,{},rng,{},later)).override_failure_message("a second vow on day %d" % later).is_empty()
+	# Sworn to our face, they come with everything sooner.
+	var answer:=preload("res://scripts/world_answer.gd")
+	assert_bool(bool(answer.reading(civ_id).sworn_vengeance)).is_true()
+	# A new ruler may swear it again.
+	(preload("res://scripts/rival_rulers.gd").character(civ_id) as Dictionary)["gen"]=int(preload("res://scripts/rival_rulers.gd").character(civ_id).get("gen",0))+1
+	assert_bool(Aftermath.sworn(civ_id)).is_false()

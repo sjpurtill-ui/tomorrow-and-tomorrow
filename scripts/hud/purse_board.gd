@@ -214,8 +214,8 @@ func _effect_words(line:String,on:bool,entry:Dictionary,purse:Dictionary)->Strin
 		"army":
 			if on and int(purse.get("unpaid_months",0))==0:return "%s · will and readiness kept" % String(entry.get("who",""))
 			return "Unpaid: will −%d a month, 1 in 50 go home" % roundi(100.0*0.06)
-		"scholars":return ("%s · research %d in 100 faster" if on else "%s · would make research %d in 100 faster") % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0)]
-		"crews":return ("%s · building %d in 100 faster" if on else "%s · would build %d in 100 faster") % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0)]
+		"scholars":return ("%s · research %d%% faster: a 100-day discovery in %d days" if on else "%s · would make research %d%% faster: a 100-day discovery in %d days") % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0),roundi(100.0/(1.0+Purse.SCHOLARS_MAX))]
+		"crews":return ("%s · building %d%% faster: a 100-day work in %d days" if on else "%s · would build %d%% faster: a 100-day work in %d days") % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0),roundi(100.0/(1.0+Purse.CREWS_MAX))]
 		"relief":
 			if not Purse.market_open():return "No market yet: nothing can be bought"
 			var towns:=Purse.food_places()
