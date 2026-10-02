@@ -1268,10 +1268,16 @@ func register_population_deaths_by_cell(cells:Array,directive_id:String,descript
 	result["record"]=record
 	return result
 
-func register_population_arrivals(count:int,source:String="new arrivals",cohort_profile:Dictionary={}) -> Dictionary:
+func register_population_arrivals(count:int,source:String="new arrivals",cohort_profile:Dictionary={},female_share:float=-1.0) -> Dictionary:
+	## female_share: the women among them when it is known (captives taken
+	## home, say); otherwise about half. Arrivals of one sex start the count
+	## of women by age (ensure_female_cohorts), so that count stays true.
 	initialize_population_model()
 	var actual:=maxi(0,count)
 	if actual<=0: return {"count":0,"source":source,"population_after":population_total,"cohorts":{}}
+	var share_known:=female_share>=0.0 and is_finite(female_share)
+	var arriving_women:=clampf(female_share,0.0,1.0) if share_known else BIRTH_FEMALE_SHARE
+	if share_known and absf(arriving_women-BIRTH_FEMALE_SHARE)>0.02: ensure_female_cohorts()
 	var weights:=cohort_profile.duplicate(true)
 	if weights.is_empty():
 		# Small mobile groups skew toward working ages while still allowing
@@ -1284,7 +1290,7 @@ func register_population_arrivals(count:int,source:String="new arrivals",cohort_
 	for key in POPULATION_AGE_COHORTS:
 		var amount:=float(actual)*maxf(0.0,float(weights.get(key,0.0)))/total_weight
 		population_cohorts[key]=float(population_cohorts.get(key,0.0))+amount
-		if has_female_cohorts(): population_cohorts[FEMALE_PREFIX+key]=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))+amount*BIRTH_FEMALE_SHARE
+		if has_female_cohorts(): population_cohorts[FEMALE_PREFIX+key]=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))+amount*arriving_women
 		added[key]=amount
 	population_exact+=float(actual)
 	if TRACE.enabled and self==GameState:TRACE.flow("arrival",source,float(actual))

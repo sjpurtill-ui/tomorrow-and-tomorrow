@@ -226,6 +226,8 @@ static func _pending_words(audience:Dictionary)->String:
 	if String(p.get("ask",""))=="abandon": return "The war leader asked whether to leave the town unguarded and bring its garrison home; yes is confirm, no is cancel."
 	if String(p.get("ask",""))=="measure": return "The war leader asked: \"%s\" The ruler may name one of those choices (town_measure or town_fate), say yes (confirm: the first choice), or no (cancel)." % String(p.get("question",""))
 	if String(p.get("ask",""))=="which_people": return "The court asked \"%s\" about the ruler's order \"%s\": the ruler names the village (ours, or the town), or says no (cancel)." % [String(p.get("question","")),String(p.get("text",""))]
+	if String(p.get("ask",""))=="readback": return "The court read the order back, \"%s\", and waits: only a plain yes now (confirm) carries it out; anything else drops it." % String(p.get("question",""))
+	if String(p.get("ask",""))=="plea": return "Someone pleads against the order \"%s\": only a plain yes now (confirm) carries it out; anything else drops it." % String(p.get("text",""))
 	if String(p.get("ask",""))!="": return "The war leader asked the ruler a question about the order \"%s\"; yes is confirm, no is cancel." % String(p.get("text",""))
 	if bool(p.get("which_town",false)): return "The war leader asked which town the order \"%s\" is for." % String(p.get("text",""))
 	if String(p.get("verb",""))=="war": return "The war leader objected to the order \"%s\"; the ruler may insist." % String(p.get("text",""))
@@ -484,6 +486,13 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	## One plan from a validated reading (see the header).
 	var audience:=Hall.find(audience_id)
 	if reading.is_empty() or reading.has("rejected") or audience.is_empty(): return {"route":"legacy","why":String(reading.get("rejected","no reading"))}
+	# A grave order against our own people waits on the very next line
+	# (grave_home.gd: a read-back, a plea, "which village?"). The god's yes or
+	# a clear answer goes to the engine's own words; anything else drops it,
+	# and the words are read as what they are.
+	if CC.GraveHome.has_pending(audience):
+		if CC.GraveHome.continues(audience,text): return {"route":"legacy","why":"the god's answer to the read-back"}
+		CC.GraveHome._drop(audience_id,audience)
 	# "The women too" just after an order about a town we hold: that order
 	# again for them (court_war_orders.follow_up), whatever the reading says.
 	if not confirmed and not WarOrders.follow_up(text,audience_id).is_empty(): return {"route":"engine","context":{"reader":true}}
@@ -534,13 +543,6 @@ static func decide(audience_id:String,text:String,reading:Dictionary,confirmed:b
 	# no order of its own goes to him, and an unclear one is taken as his own
 	# nearest reading (court_war_orders.pending_answer), never asked again.
 	if String(theirs.get("ask",""))=="measure" and kind!="question" and (kind!="order" or action=="none"): return {"route":"engine","context":{"reader":true}}
-	# The court asked which village a grave order on our own people meant
-	# (grave_home.gd): a short, clear answer is read by the words themselves;
-	# any other words drop the question and are read as what they are.
-	if String(theirs.get("ask",""))=="which_people":
-		if not CC.GraveHome.answer_choice(audience,text).is_empty(): return {"route":"legacy","why":"the answer to which village"}
-		audience.erase("pending_command")
-		theirs={}
 	if kind!="question":
 		# Words that hold back all they name ("don't kill him", "no, don't
 		# attack", "Kavu must not be punished"): the engine answers them
@@ -966,6 +968,9 @@ static func quick_plan(audience_id:String,text:String)->Dictionary:
 	var clean:=text.strip_edges()
 	var audience:=Hall.find(audience_id)
 	if audience.is_empty() or clean.is_empty(): return {}
+	# A grave order on our own people waits only for the very next line:
+	# words that do not answer it drop it here as well (grave_home.gd).
+	if CC.GraveHome.has_pending(audience) and not CC.GraveHome.continues(audience,text): CC.GraveHome._drop(audience_id,audience)
 	if clean.ends_with("?"): return {"route":"speak","quick":"question"}
 	var theirs:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	var open:=not pending(audience).is_empty() or (not theirs.is_empty() and Hall._day()-int(theirs.get("day",-99))<=CC.PENDING_DAYS)

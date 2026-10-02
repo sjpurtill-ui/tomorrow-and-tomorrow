@@ -139,7 +139,9 @@ static func classify(text:String)->Dictionary:
 		return out
 	var question:=clean.ends_with("?")
 	if not question:
-		for lead:String in ["what","why","how","who","whom","where","when","tell me","hows","how's","whats","what's","wheres","where's","whos","who's","hw","wat","wht","any news","any word"]:
+		for lead:String in ["what","why","how","who","whom","where","when","tell me","hows","how's","whats","what's","wheres","where's","whos","who's","hw","wat","wht","any news","any word",
+			# Asking the court's mind, never an order ("do you think we should kill the old").
+			"do you think","do you believe","should we","should i","shall we","is it","are we","would it","what if","do we"]:
 			if lower.replace("’","'").begins_with(lead+" "): question=true; break
 	if question:
 		out.act="question"; out.confidence=0.8
@@ -535,6 +537,13 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var audience:=Hall.find(id)
 	var clean:=text.strip_edges().replace("\n"," ").substr(0,400)
 	if audience.is_empty() or String(audience.get("status",""))!="waiting" or clean.is_empty(): return {"handled":false,"act":"statement"}
+	# A grave order against our own people waits on the very next line here
+	# (grave_home.gd): the god's yes to its read-back or plea, or a clear
+	# answer to "which village?", carries it on; any other words drop it and
+	# are heard as themselves, below.
+	if GraveHome.has_pending(audience):
+		var grave_next:=GraveHome.next_line(id,audience,roster(audience),clean,context)
+		if not grave_next.is_empty(): return grave_next
 	var decree:=_sovereign_decree(id,clean,context)
 	if not decree.is_empty(): return decree
 	# Trade with another people (court_trade.gd): the Envoy's business, the
@@ -542,12 +551,6 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var trade:Dictionary=(load("res://scripts/court_trade.gd") as GDScript).call("hear",id,audience,clean,context)
 	if not trade.is_empty(): return trade
 	var list:=roster(audience)
-	# The answer to "Which village do you mean?" about a grave order against
-	# our own people (grave_home.gd): ours is carried out there, a town not
-	# ours goes to the war orders, "no" drops it.
-	if String(audience.get("origin",""))!="foreign":
-		var grave_answer:=GraveHome.answer(id,audience,list,clean,context)
-		if not grave_answer.is_empty(): return grave_answer
 	# The realm's purse (court_purse_orders.gd): the levy on the harvest, the
 	# soldiers' pay, scholars, crews and food for the hungry; read before the
 	# levy of fighters can take "raise the levy" for a call to arms.
@@ -687,10 +690,6 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 		cls.act="command"; cls.verb="exile"; cls.confidence=0.85; cls.verb_at=_re(SEND_HOME_PATTERN).search(clean).get_start()
 	var insist:=bool(cls.insist)
 	if insist:
-		# A plea over a grave order against our own people: the god's "do it"
-		# settles it (grave_home.gd), never another act on whoever stands here.
-		var grave_again:=GraveHome.insisted(id,audience,list,clean,context)
-		if not grave_again.is_empty(): return grave_again
 		var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 		if not pending.is_empty() and Hall._day()-int(pending.get("day",-99))<=PENDING_DAYS and String(pending.get("verb",""))=="war":
 			# The god overrides the war leader's objection: the original order stands.
@@ -3013,7 +3012,8 @@ static func decided_words(result:Dictionary)->String:
 		# The god's own people (grave_home.gd): the numbers decided, said soberly.
 		var stage:=String(result.get("stage",""))
 		if stage==GraveHome.VERB: parts.append("This WAS done to the god's OWN people, exactly as written: keep every number; tell it soberly in plain words, with no gore and nothing of how anyone died; children are only counted, never described. Never add deaths, never say it was not done.")
-		elif stage=="grave_ask": parts.append("NOTHING has been done yet; ONE question is asked, exactly as given: "+String(result.get("actor_says","")))
+		elif stage in ["grave_ask","grave_whom"]: parts.append("NOTHING has been done yet; ONE question is asked, exactly as given: "+String(result.get("actor_says","")))
+		elif stage=="grave_readback": parts.append("NOTHING has been done yet: %s reads the order back ONCE, with its numbers exactly as given, and waits; it is done only if the god says yes now: %s" % [String(result.get("actor_name","the official")),String(result.get("actor_says",""))])
 		elif stage=="grave_hesitate": parts.append("NOTHING has been done to the people yet.")
 		else: parts.append("NOTHING was done to the people named; say why, plainly.")
 	if bool(result.get("removed",false)) and String(result.get("target_name",""))!="": parts.append("%s is gone and does not speak." % String(result.target_name))

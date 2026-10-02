@@ -91,7 +91,7 @@ func test_the_users_line_is_our_own_women_at_peace()->void:
 	assert_str(String(Grave.reading("Burn our own village",audience,list).get("how",""))).is_equal("burn")
 	assert_str(String(Grave.reading("burn our village to the ground",audience,list).get("how",""))).is_equal("burn")
 	assert_str(String(Grave.reading("Put the women of our village to death",audience,list).get("how",""))).is_equal("kill")
-	for words in ["Drive out the old","banish the elders","drive the old people out of the village","banish the elders from Seanstone","Drive the women out of the realm","exile the old people into the wilderness"]:
+	for words in ["Drive the old out of the realm","drive out the old from our lands","banish the elders","banish the elders from Seanstone","Drive the women out of the realm","exile the old people into the wilderness","exile the old people, never to return","Kishan, banish the elders","I order you to banish the elders"]:
 		assert_str(String(Grave.reading(words,audience,list).get("how",""))).override_failure_message(words).is_equal("drive")
 
 func test_things_rooms_laws_and_other_peoples_are_never_read_as_this()->void:
@@ -110,8 +110,20 @@ func test_things_rooms_laws_and_other_peoples_are_never_read_as_this()->void:
 		# Laws, one person, other peoples, words held back, questions.
 		"Execute every thief","kill all thieves","Anyone who murders will be put to death","Kill every thief in the village","never kill a man who has surrendered",
 		"Kill all the rebels","Kill Kavu","Kill him","Kill the men of Tsaren","Kill them all","Put the prisoners to death","Burn their stores","Burn the fields of the lazy",
-		"don't kill the women","How many women are in the village?","Exile Kavu and his whole family","kill one woman"]:
+		"don't kill the women","How many women are in the village?","Exile Kavu and his whole family","kill one woman",
+		# Sentences that forbid, doubt, report or suppose it (second review).
+		"We must not kill the children","It would be wrong to kill the women","The elders say we should burn our village","Do you think we should kill the old",
+		"If the harvest fails, kill the old","kill the women if they resist","Kill the women when the enemy comes",
+		# The object is the verb's own clause, and the verb opens the order.
+		"Kill two goats and feed the children","Have the butcher feed the women","The men kill deer and the women cook","Kill time until the men return",
+		"Drive out the wolves and protect the children",
+		# Moving people within the realm; a part of the village burned.
+		"Send the women and children away from the village","Send the hunters out into the forest","Send the herders out to the hills","Drive out the old",
+		"drive the old people out of the village","Burn the huts of the sick","burn the houses","burn some houses"]:
 		assert_dict(Grave.reading(words,audience,list)).override_failure_message(words).is_empty()
+	# People narrowed: never the whole group; the court asks whom exactly.
+	for words in ["Kill the men who refused to fight","kill the men who deserted","kill the sick women","kill the wounded men"]:
+		assert_str(String(Grave.reading(words,audience,list).get("kind",""))).override_failure_message(words).is_equal("whom")
 
 func test_the_village_is_asked_when_we_hold_a_town_nobody_spoke_of()->void:
 	var w:=_world("tsaren_captured")
@@ -158,12 +170,10 @@ func test_only_a_clear_answer_settles_the_question()->void:
 	# A new order while it is open is that order: the men of our village, never the women.
 	var women:=GameState.women_in(GROWN)
 	var men_order:=CC.hear(id,"Kill all the men of our village",{})
-	assert_str(String(men_order.get("verb",""))).is_equal(Grave.VERB)
-	if String(men_order.get("stage",""))=="grave_hesitate":
-		assert_float(GameState.women_in(GROWN)).is_equal_approx(women,0.001)
-		assert_array(_ids(Grave._pending(Hall.find(id)).get("reading",{}) as Dictionary)).is_equal(["men"])
-	else:
-		for c in ((men_order.get("grave_home",{}) as Dictionary).get("cells",[]) as Array): assert_str(String((c as Dictionary).sex)).is_equal("male")
+	assert_str(String(men_order.get("stage",""))).is_equal("grave_readback")
+	assert_str(String(men_order.get("actor_says",""))).contains("men of Seanstone killed")
+	assert_float(GameState.women_in(GROWN)).is_equal_approx(women,0.001)
+	assert_array(_ids(Grave._pending(Hall.find(id)).get("reading",{}) as Dictionary)).is_equal(["men"])
 
 func test_a_town_lost_before_the_answer_is_asked_again()->void:
 	var w:=_world("tsaren_captured")
@@ -186,7 +196,99 @@ func _carry(id:String,words:String,insist:bool=true)->Dictionary:
 	var list:=CC.roster(audience)
 	var r:=Grave.reading(words,audience,list)
 	assert_str(String(r.get("kind",""))).override_failure_message(words).is_equal("act")
-	return Grave.carry(id,audience,list,r,insist,{})
+	return Grave.carry(id,audience,list,r,insist,{},"",true)
+
+# --------------------------------------------------------------------------
+# The read-back: carried out only on the god's yes in the very next line
+# --------------------------------------------------------------------------
+
+func _elders()->float:
+	return float(GameState.population_cohorts.elders)
+
+func test_the_order_alone_is_read_back_and_changes_nothing()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w,"kavu")
+	var pop:=int(GameState.population_total)
+	var r:=CC.hear(id,"Drive the old out of the realm",{})
+	assert_str(String(r.get("stage",""))).is_equal("grave_readback")
+	assert_str(String(r.get("actor_says",""))).contains("You would have the").contains("old people of Seanstone driven out of the realm?")
+	assert_int(int(GameState.population_total)).is_equal(pop)
+	assert_str(String(Grave._pending(Hall.find(id)).get("ask",""))).is_equal("readback")
+	# The very next line, a plain yes: carried out.
+	var elders:=_elders()
+	var done:=CC.hear(id,"yes",{})
+	assert_str(String(done.get("stage",""))).is_equal(Grave.VERB)
+	assert_float(_elders()).is_less(elders)
+	assert_dict(Grave._pending(Hall.find(id))).is_empty()
+
+func test_any_other_line_drops_the_read_back()->void:
+	for between in ["Bring us bread","How much food is in the stores?","the harvest was poor","Kill all the children"]:
+		var w:=_world("home_peace")
+		var id:=_audience(w,"kavu")
+		CC.hear(id,"Drive the old out of the realm",{})
+		var elders:=_elders()
+		CC.hear(id,between,{})
+		if between.begins_with("Kill"):
+			# A new grave order is read back itself; the old one is gone.
+			assert_array(_ids(Grave._pending(Hall.find(id)).get("reading",{}) as Dictionary)).is_equal(["children"])
+			continue
+		var after:=CC.hear(id,"yes",{})
+		assert_str(String(after.get("stage",""))).override_failure_message(between).is_not_equal(Grave.VERB)
+		assert_float(_elders()).override_failure_message(between).is_equal(elders)
+
+func test_a_yes_elsewhere_or_after_a_reload_does_nothing()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w,"kavu")
+	CC.hear(id,"Drive the old out of the realm",{})
+	var elders:=_elders()
+	# In another audience: nothing (there is nothing open there).
+	var other:=_audience(w,"headman")
+	assert_str(other).is_not_equal(id)
+	CC.hear(other,"yes",{})
+	assert_float(_elders()).is_equal(elders)
+	# After a load the read-back's line is not known: dropped, never acted on.
+	Grave._marks.clear()
+	CC.hear(id,"yes",{})
+	assert_float(_elders()).is_equal(elders)
+	assert_dict(Grave._pending(Hall.find(id))).is_empty()
+
+func test_a_plea_waits_only_for_the_very_next_line()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w)
+	var pop:=int(GameState.population_total)
+	CC.hear(id,USERS_LINE,{})
+	var plea:=CC.hear(id,"yes",{})
+	assert_str(String(plea.get("stage",""))).is_equal("grave_hesitate")
+	CC.hear(id,"Bring us bread",{})
+	CC.hear(id,"do it",{})
+	assert_int(int(GameState.population_total)).is_equal(pop)
+	# Asked again, then "do it" in the very next line: carried out.
+	CC.hear(id,USERS_LINE,{})
+	CC.hear(id,"yes",{})
+	var done:=CC.hear(id,"do it",{})
+	if String(done.get("stage",""))==Grave.VERB: assert_int(int(GameState.population_total)).is_less(pop)
+
+func test_a_town_lost_before_the_yes_is_never_struck_in_its_name()->void:
+	var w:=_world("home_towns")
+	var id:=_audience(w)
+	var r:=CC.hear(id,"Kill all the women of Reedmouth",{})
+	assert_str(String(r.get("stage",""))).is_equal("grave_readback")
+	var pop:=int(GameState.population_total)
+	for i in range(GameState.player_settlements.size()-1,-1,-1):
+		if String((GameState.player_settlements[i] as Dictionary).get("name",""))=="Reedmouth": GameState.player_settlements.remove_at(i)
+	var after:=CC.hear(id,"yes",{})
+	assert_str(String(after.get("outcome",""))).contains("no longer one of our towns")
+	assert_int(int(GameState.population_total)).is_equal(pop)
+
+func test_arrivals_of_known_sex_are_counted_so()->void:
+	_world("home_peace")
+	var women:=GameState.women_in(EVERY_AGE)
+	var pop:=float(GameState.population_exact)
+	GameState.register_population_arrivals(40,"test",{"youth":1.0,"early_adults":1.0},1.0)
+	assert_float(GameState.women_in(EVERY_AGE)-women).is_equal_approx(40.0,0.01)
+	GameState.register_population_arrivals(20,"test",{"early_adults":1.0},0.0)
+	assert_float(GameState.women_in(EVERY_AGE)-women).is_equal_approx(40.0,0.01)
+	assert_float(float(GameState.population_exact)-pop).is_equal_approx(60.0,0.01)
 
 func test_killing_the_women_balances_the_ledger_and_says_its_numbers()->void:
 	var w:=_world("home_peace")
@@ -263,7 +365,7 @@ func test_the_women_and_the_old_are_counted_once()->void:
 	for c in GROWN: named+=floori(GameState.women_in([c])+0.000001)
 	named+=floori(float(GameState.population_cohorts.elders)-GameState.women_in(["elders"])+0.000001)
 	assert_int(Grave.group_count(r.groups as Array)).is_equal(named)
-	var result:=Grave.carry(id,audience,CC.roster(audience),r,true,{})
+	var result:=Grave.carry(id,audience,CC.roster(audience),r,true,{},"",true)
 	if String(result.get("stage",""))!=Grave.VERB: return
 	var done:Dictionary=result.grave_home
 	assert_int(int(done.dead)+int(done.escaped)+int(done.hid)).is_equal(int(done.targets))
@@ -316,7 +418,7 @@ func test_driving_out_the_old_kills_nobody()->void:
 	var pop:=int(GameState.population_total)
 	var deaths:=int(GameState.lifetime_deaths)
 	var elders:=float(GameState.population_cohorts.elders)
-	var result:=_carry(id,"Drive out the old")
+	var result:=_carry(id,"Drive the old out of the realm")
 	var done:Dictionary=result.get("grave_home",{})
 	if String(result.get("stage",""))!=Grave.VERB: return
 	assert_int(int(GameState.lifetime_deaths)).is_equal(deaths)
@@ -400,7 +502,7 @@ func test_a_town_of_ours_named_is_its_own_people_only()->void:
 	var home_before:=SettlementModel.primary_population_exact()
 	var pop:=int(GameState.population_total)
 	var women:=GameState.women_in(GROWN)
-	var result:=Grave.carry(id,audience,CC.roster(audience),r,true,{})
+	var result:=Grave.carry(id,audience,CC.roster(audience),r,true,{},"",true)
 	if String(result.get("stage",""))!=Grave.VERB: return
 	var done:Dictionary=result.get("grave_home",{})
 	assert_str(String(result.outcome)).contains("Reedmouth")

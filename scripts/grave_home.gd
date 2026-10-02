@@ -2,55 +2,60 @@ extends RefCounted
 ## GRAVE ORDERS AGAINST THE GOD'S OWN PEOPLE.
 ##
 ## "Kill all women in the village", "kill half the farmers", "burn our own
-## village", "drive out the old": the god's word against the people who are
-## its own. Read here, adjudicated from the one ledger (docs/ADJUDICATION.md)
-## and carried out through the real population model (GameState's age
-## cohorts, its women by age, the pregnancies, the work), never a counter of
-## its own:
-##   1. What the words fall on. People, named outright as the act's own object
-##      (the women, the old, the children, half the farmers, everyone in the
-##      village): never a goat, the dead, trees, rats or wolves, and never
-##      "everyone" read into a place alone. Burning is of the village itself
-##      ("burn our own village"); driving out is out of the realm ("banish
-##      the elders", "drive the old out of the village", never "throw the
-##      men out of the hall").
-##   2. Whose people. Ours when the words say so ("our village", Seanstone, our
+## village", "banish the old": the god's word against the people who are its
+## own. Read here, adjudicated from the one ledger (docs/ADJUDICATION.md) and
+## carried out through the real population model (GameState's age cohorts,
+## its women by age, the pregnancies, the work), never a counter of its own:
+##   1. An order, and only an order. The verb opens the order's own clause
+##      (after nothing but a name spoken to, or "I order you to"); never a
+##      sentence that forbids, doubts, reports or supposes it ("we must not
+##      kill the children", "the elders say we should burn our village", "if
+##      the harvest fails, kill the old").
+##   2. What it falls on. People, named right after the verb and nothing
+##      else (the women, the old, half the farmers, everyone in the village;
+##      "the women and the old"): never goats, trees, the dead, time or
+##      wolves, and the object ends with the verb's own clause ("kill two goats
+##      and feed the children" is no order on the children). People narrowed
+##      ("the sick women", "the men who deserted") are asked about: whom
+##      exactly. Burning is of the village or town itself; banishing is out
+##      of the realm (banish, exile, expel; "drive them out of our lands",
+##      "never to return"), never "send the hunters out into the forest".
+##   3. Whose people. Ours when the words say so ("our village", Seanstone, our
 ##      second town named), or when no other people is in our hands and no war
 ##      or feud is on. A town or people of theirs named, "their"/"them", or a
 ##      town we hold that this audience is speaking of: the war orders
 ##      (town_fate.gd), as before. "The village" while we hold a town nobody
-##      has spoken of, or at war or in a feud: ONE question, which. Only a
-##      short, clear answer settles it (answer_choice: a village named, "our
-##      own", yes or no); anything else drops the question and is heard as
-##      itself.
-##   3. The one ordered: court_commands.obedience (obey, plead, refuse), then
+##      has spoken of, or at war or in a feud: ONE question, which.
+##   4. The read-back. The one ordered says the order back with its numbers
+##      ("You would have the 300 women of Seanstone killed?"). It is carried
+##      out only on the god's plain yes in the very next line of the same
+##      audience (CONFIRM: yes, do it, I demand it, so be it, that is my word).
+##      Any other next line drops it and is heard as itself; a yes later, or
+##      in another audience, does nothing (next_line, the readback mark).
+##   5. The one ordered: court_commands.obedience (obey, plead, refuse), then
 ##      the stated chance anyone refuses a grave order on their own people
-##      (refusal_odds); a refusal is court_commands._refusal; a plea waits for
-##      the god's "do it".
-##   4. The hands: our fighters at home, else the watch, else a few men the
-##      official gathers (all men of home). Each may refuse (hand_refusal_odds,
-##      one seeded roll each); of those who refuse some flee the realm with
-##      their gear, off home's own count.
-##   5. The people, by age and sex (each cohort's women or men; the overlap of
-##      "the women and the old" counted once): each one named is caught on the
-##      stated odds (catch_odds); a hand does a day's work (KILLS_PER_HAND,
-##      DRIVE_PER_HAND) for at most DAYS_MAX days. Those not caught run: from a
-##      killing most leave the realm (ESCAPED_LEAVE), the rest hide with kin;
-##      from a driving out they hide and stay. Of the rest a share flees too.
-##   6. The ledger: GameState.register_population_deaths_by_cell and
-##      register_population_departures by cohort and sex, in that town's own
-##      count; the pregnancies of the women of child-bearing age who were
-##      killed or left; the work they did (a killing of the farmers leaves
-##      fewer farmers); the houses and stores burned. Before, less what is
-##      reported, is after.
-##   7. What lasts: dread and lost love (divine_regard PEOPLE_ACTS), the
-##      court's bonds and a true memory of what was ordered, legitimacy and
-##      cohesion, fewer births while the women are fewer, every people that
-##      knows us hears of it, a Chronicle moment in plain words, and the memory
-##      of the one who did it.
+##      (refusal_odds). A plea waits for the god's yes in the very next line
+##      only.
+##   6. The hands: our fighters at home, else the watch, else a few men the
+##      official gathers (men of home). Each may refuse (hand_refusal_odds,
+##      one seeded roll each); some of those flee the realm with their gear.
+##   7. The people, by age and sex (each person once): each one named is
+##      caught on the stated odds (catch_odds); a hand does a day's work
+##      (KILLS_PER_HAND, DRIVE_PER_HAND) for at most DAYS_MAX days. Those not
+##      caught run: from a killing most leave the realm (ESCAPED_LEAVE), the
+##      rest hide with kin; from a banishing they hide and stay.
+##   8. The ledger, in that town's own count: deaths and departures by
+##      cohort and sex; the pregnancies of the mothers killed or gone; the
+##      work of those killed for their work (by each kind's size); the houses
+##      and stores burned. Before, less what is reported, is after. A town no
+##      longer ours is never struck in its name.
+##   9. What lasts: dread and lost love (divine_regard PEOPLE_ACTS), the
+##      court's true memory, legitimacy and cohesion, fewer births while the
+##      women are fewer, every people that knows us hears of it, a Chronicle
+##      moment in plain words, the memory of the one who did it.
 ## Laws ("execute every thief", "anyone who murders will be put to death")
-## stay laws (court_realm_acts.law): never read here. The words are plain and
-## never graphic; children are counted, never described.
+## stay laws (court_realm_acts.law). The words are plain and never graphic;
+## children are counted, never described.
 ## Static helpers; preload.
 
 const Hall:=preload("res://scripts/audience_hall.gd")
@@ -64,7 +69,6 @@ const CC_PATH:="res://scripts/court_commands.gd"
 ## The result's verb and the pending order's (court_commands, order_tracker).
 const VERB:="slaughter"
 const PENDING_VERB:="grave_home"
-const PENDING_DAYS:=2
 ## What one hand does in a day: kill five who cannot fight back (as
 ## town_fate.KILLS_PER_FIGHTER), or drive eight from their houses.
 const KILLS_PER_HAND:=5
@@ -84,64 +88,86 @@ const WORKING:=["youth","early_adults","established_adults","mature_adults"]
 const ALL:=["children","youth","early_adults","established_adults","mature_adults","elders"]
 const SEXES:=["female","male"]
 
-## Groups of our people the words may name, in the order they are tried:
-## [id, pattern, cohorts, sex, words, refusal weight].
+## Groups of our people a noun may name: [id, pattern, cohorts, sex, words, refusal weight].
 const GROUPS:=[
-	["old_women","\\bold_w\\b",["elders"],"female","old women",0.14],
-	["old_men","\\bold_m\\b",["elders"],"male","old men",0.12],
-	["elders","\\b(old people|old ones|old folks?|elders|elderly|the aged|grandmothers|grandfathers|grey ?beards|grey ?heads|the old(?=\\s*$|\\s+(and|too|now|first|as well)\\b))",["elders"],"","old people",0.12],
-	["girls","\\b(girls|daughters|little girls)\\b",["children"],"female","girls",0.22],
-	["boys","\\b(boys|sons|little boys)\\b",["children"],"male","boys",0.22],
-	["children","\\b(children|kids|young ones|little ones|babies|infants|toddlers|every child)\\b",["children"],"","children",0.22],
-	["women","\\b(women|womenfolk|wives|mothers|females|every woman|every female)\\b",ADULT,"female","women",0.15],
-	["men","\\b(men|males|menfolk|husbands|fathers|every man|every male)\\b",ADULT,"male","men",0.08],
-	["everyone","\\b(everyone|everybody|every soul|the people|our people|my people|all the people|villagers|townsfolk|townspeople|inhabitants|residents|population|families|households|the whole (vill?age|town|camp|settlement|people))\\b",ALL,"","people",0.2],
+	["old_women","^(old (women|woman|wives|mothers))$",["elders"],"female","old women",0.14],
+	["old_men","^(old (men|man|males))$",["elders"],"male","old men",0.12],
+	["elders","^(old|aged|elders|elderly|old people|old ones|old folks?|grandmothers|grandfathers|grey ?beards|grey ?heads)$",["elders"],"","old people",0.12],
+	["girls","^(girls|daughters|little girls)$",["children"],"female","girls",0.22],
+	["boys","^(boys|sons|little boys)$",["children"],"male","boys",0.22],
+	["children","^(children|kids|young ones|little ones|babies|infants|toddlers|every child)$",["children"],"","children",0.22],
+	["women","^(women|womenfolk|wives|mothers|females|grown women|every woman|every female)$",ADULT,"female","women",0.15],
+	["men","^(men|males|menfolk|husbands|fathers|grown men|every man|every male)$",ADULT,"male","men",0.08],
+	["everyone","^(everyone|everybody|every soul|people|villagers|townsfolk|townspeople|inhabitants|residents|population|families|households|whole (vill?age|town|camp|settlement|people|tribe|clan))$",ALL,"","people",0.2],
 ]
 ## Our own people by their work: [id, pattern, work role, words].
 const TRADES:=[
-	["farmers","\\b(farmers?|field ?hands|hunters?|gatherers?|foragers?|herders?|herdsmen|shepherds?|fishers?|fishermen)\\b","Food","farmers"],
-	["builders","\\b(builders?|masons?|diggers?)\\b","Construction","builders"],
-	["crafters","\\b(craftsmen|crafters?|craftspeople|potters?|weavers?|smiths?|toolmakers?|carvers?|tanners?)\\b","Crafting","craftspeople"],
-	["carriers","\\b(carriers?|porters?|haulers?)\\b","Logistics","carriers"],
-	["quarrymen","\\b(miners?|quarrymen|woodcutters?|stonecutters?)\\b","Extraction","quarrymen and woodcutters"],
+	["farmers","^(farmers?|field ?hands|hunters?|gatherers?|foragers?|herders?|herdsmen|shepherds?|fishers?|fishermen)$","Food","farmers"],
+	["builders","^(builders?|masons?|diggers?)$","Construction","builders"],
+	["crafters","^(craftsmen|crafters?|craftspeople|potters?|weavers?|smiths?|toolmakers?|carvers?|tanners?)$","Crafting","craftspeople"],
+	["carriers","^(carriers?|porters?|haulers?)$","Logistics","carriers"],
+	["quarrymen","^(miners?|quarrymen|woodcutters?|stonecutters?)$","Extraction","quarrymen and woodcutters"],
 ]
-const KILL_RE:="(?i)\\b(kill|kills|kil|kiil|killl|slay|slaughter|massacre|butcher|execute|exterminate|murder|wipe out|cut down|do away with|get rid of|put (?<putobj>[\\w' ]{1,40}?) to (the sword|death)|rid (?<ridplace>[\\w' ]{0,30}?)\\s*of)\\b"
-const BURN_RE:="(?i)\\b(burn|burns|torch|raze|set fire to|set (?<setobj>[\\w' ]{1,30}?) (on fire|alight|ablaze)|put (?<torchobj>[\\w' ]{1,30}?) to the torch)\\b"
+## Every noun above, for reading where a group of people ends.
+const PEOPLE_NOUN:="(old (women|woman|wives|mothers|men|man|males|people|ones|folks?)|little (girls|boys|ones)|young ones|grown (men|women)|every (man|woman|child|male|female|soul)|whole (vill?age|town|camp|settlement|people|tribe|clan)|old|aged|elders|elderly|grandmothers|grandfathers|grey ?beards|grey ?heads|girls|daughters|boys|sons|children|kids|babies|infants|toddlers|women|womenfolk|wives|mothers|females|men|males|menfolk|husbands|fathers|everyone|everybody|people|villagers|townsfolk|townspeople|inhabitants|residents|population|families|households|farmers?|field ?hands|hunters?|gatherers?|foragers?|herders?|herdsmen|shepherds?|fishers?|fishermen|builders?|masons?|diggers?|craftsmen|crafters?|craftspeople|potters?|weavers?|smiths?|toolmakers?|carvers?|tanners?|carriers?|porters?|haulers?|miners?|quarrymen|woodcutters?|stonecutters?)"
+## The verbs, as whole words (their place in the sentence is checked apart).
+const KILL_RE:="(?i)\\b(kill|kil|kiil|killl|slay|slaughter|massacre|butcher|execute|exterminate|murder|wipe out|cut down|do away with|get rid of|put (?<putobj>[\\w' ]{1,40}?) to (the sword|death)|rid (?<ridplace>[\\w' ]{0,30}?)\\s*of)\\b"
+const BURN_RE:="(?i)\\b(burn|torch|raze|set fire to|set (?<setobj>[\\w' ]{1,30}?) (on fire|alight|ablaze)|put (?<torchobj>[\\w' ]{1,30}?) to the torch)\\b"
 ## Out of the realm, by the verb itself: banish, exile, expel.
 const BANISH_RE:="(?i)\\b(banish|exile|expel)\\b"
-## "Drive / cast ... out": out of the realm only with realm words, or bare.
-const OUT_RE:="(?i)\\b(drive|cast|throw|chase|force|turn|kick|run|send)\\s+(?<mid>[\\w' ]{0,40}?)\\s*\\b(out|away|off)\\b"
-## Words that take the people out of the realm, not out of a room.
-const REALM_PHRASE:="(?i)\\b((out of|from|away from|beyond|past|outside( of)?) (the |our |my |this )?(own )?(realm|lands?|country|territory|kingdom|valley|vill?age|vilage|villiage|town|camp|settlement|hearths|homes?|people|tribe|clan|midst|borders?)|beyond the (hills|river|border|mountains|forest|marshes|pass)|(in)?to the (wild|wilds|wilderness|hills|forest|waste|wastes|desert|marsh|marshes)|for good|forever|never to return|from (among )?us)\\b"
+## "Drive / cast ... out": out of the realm only with words that say so.
+const OUT_RE:="(?i)\\b(drive|cast|throw|chase|force|turn|kick|run)\\s+(?<mid>[\\w' ]{0,40}?)\\s*\\b(out|away|off)\\b"
+## Words that say the realm is left, for "drive / cast ... out".
+const REALM_STRICT:="(?i)\\b((out of|from|beyond|past|outside( of)?) (the |our |my |this )?(own )?(realm|lands|land|country|territory|kingdom|borders?)|beyond the (border|borders|hills|river|mountains|pass)|never to return|for good|forever)\\b"
+## Where a banishing sends them that is still a leaving of the realm.
+const REALM_PHRASE:="(?i)\\b((out of|from|away from|beyond|past|outside( of)?) (the |our |my |this )?(own )?(realm|lands?|country|territory|kingdom|vill?age|town|camp|settlement|borders?)|beyond the (hills|river|border|mountains|forest|marshes|pass)|(in)?to the (wild|wilds|wilderness|hills|forest|waste|wastes|desert|marsh|marshes)|for good|forever|never to return)\\b"
 ## Out of a town of ours, by its name.
 const FROM_TOWN:="(?i)\\b(out of|from|away from) %s\\b"
 ## A place the words move them to or from that is no leaving of the realm.
 const PLACE_PHRASE:="(?i)\\b(out of|from|off|to|into|onto|away from|across|toward|towards)\\s+(the |our |my |this |his |her |their )?[a-z]+"
-## Where one order ends and the next begins.
-const NEXT_RE:="(?i)[,;.!]|\\b(then|and then|take|bring|carry|lead|send|march|haul|give|keep|hold|spare|free|release|leave|feed|build)\\b"
-## Where the act's own object ends: a place, a time, a clause about them.
-const HEAD_END:="(?i)\\b(in|of|at|from|around|near|by|on|inside|outside|across|beyond|within|among|to|into|with|who|whom|that|which|out|away|off|for|before|after|now|today|tonight|tomorrow|too|here|there|immediately|at once|once)\\b"
+## What may come before the verb in the order's own clause, once the names of
+## those spoken to are taken out: nothing, filler, or words of command.
+const LEAD_OK:="(?i)^(?:(?:yes|now|then|so|well|please|listen|hear me|right|very well|enough|go|and|go and|at once)\\b\\s*)*(?:(?:i (?:want|need|order|command|bid|tell) you(?: all)? to|i (?:order|command|decree)(?: that)?(?: you)?|you (?:will|shall|must|are to)|see (?:that|to it that) you|make sure (?:that )?you|you)\\s*)?$"
+## Words that make the sentence no order of the god's: it forbids, doubts,
+## reports, wishes or supposes the act.
+const NOT_ORDER:="(?i)\\b(not|never|no one|nobody|don'?t|doesn'?t|didn'?t|won'?t|wouldn'?t|shouldn'?t|couldn'?t|mustn'?t|can'?t|cannot|should|would|could|might|if|unless|when|whenever|lest|in case|what if|suppose|perhaps|maybe|whether|wrong|think|thinks|thought|believe|believes|say|says|said|saying|told|tell|tells|asked|asks|want|wants|wanted|wish|wishes|claim|claims|claimed|heard|hear|rumou?r|propose|proposes|suggest|suggests|advise|advises|plan|plans|planned|dream|dreamed|dreamt|story|tale)\\b"
+## Words that send them out of the realm (never a doubt or a "not").
+const REALM_WORDS:="(?i)\\b(never to return|for good|forever)\\b"
+## Where the verb's own clause ends.
+const CLAUSE_CUT:="(?i)[,;:.!?]|\\b(but|so|then|until|till|while|because|before|after|since|unless|if|when|whenever|lest|to|who|whom|that|which|whose)\\b"
 ## A count or a part leading the object ("half the farmers", "20 of the women").
-const QUANTITY:="(?i)^(all|every one of|each of|both|half|most|some|several|many|a few|two thirds|three quarters|a third|one third|a quarter|one quarter|a fourth|a fifth|one fifth|a tenth|one tenth|\\d{1,7}|a dozen|a score|a hundred|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|hundred)(\\s+of)?\\s+"
+const QUANT:="(?i)^(all|every one|each|both|half|most|some|several|many|a few|two thirds|three quarters|a third|one third|a quarter|one quarter|a fourth|a fifth|one fifth|a tenth|one tenth|\\d{1,7}|a dozen|a score|a hundred|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|hundred)(\\s+of)?\\s+"
+const DETERMINERS:="(?i)^((the|our|my|this|these|those|own|all|of)\\s+)+"
+## Words after a group that keep it whole: where they are, and when.
+const PEOPLE_TAIL:="(?i)(\\s+((in|of|from|at|across|throughout|within|among|out of)\\s+(the |our |my |this )?(own |whole )?(vill?age|vilage|villiage|town|camp|settlement|hamlet|home|homes|houses|realm|lands?|hearths?%s)|at home|of ours|among us|here|there|now|today|tonight|at once|immediately|too|as well|first|all|alike|every one|to a (man|woman)|without mercy|to the last|(in)?to the (wild|wilds|wilderness|hills|forest|waste|wastes|desert|marsh|marshes)|beyond the (borders?|hills|river|mountains|pass)|out of (the |our |my )?(realm|lands?|country|territory|kingdom)|for good|forever|never to return))+$"
+## The village or town itself, as what is burned.
+const PLACE_CORE:="(?i)^(own |whole |entire )?(vill?age|vilage|villiage|town|camp|settlement|hamlet|home)$"
 ## "The village", "this town": a village not named.
 const VILLAGE_RE:="(?i)\\b(the|this|that|our|my|a|in|of) (vill?age|vilage|villiage|town|camp|settlement|hamlet|houses|homes|huts)\\b"
-## The village itself as what is burned.
-const PLACE_HEAD:="(?i)^(the |our |my |this |that )*(own |whole |entire )?(vill?age|vilage|villiage|town|camp|settlement|hamlet|houses|homes|huts|home)\\b"
 ## The words say the people are ours.
 const OWN_RE:="(?i)\\b(our|my) own\\b|\\b(our|my) (vill?age|vilage|villiage|town|camp|settlement|hamlet|home|homes|houses|huts|people|folk|kin|realm|hearths?|women|men|children|old|elders|girls|boys|farmers|hunters|builders|craftsmen|families|households|subjects|tribe|clan)\\b|\\bat home\\b|\\bof ours\\b|\\bamong us\\b|\\bin our midst\\b"
 ## Someone else's people, or the captives of a fight: the war orders'.
 const FOREIGN_RE:="(?i)\\b(their|theirs|them|they|the enemy|enemy|enemies|foes?|those people|these people|strangers|foreigners|captives?|prisoners?|bondservants?|bondsmen|slaves|envoys?|heralds?|messengers?)\\b"
-## Wrongdoers, conditions and standing words: a law or a measure, never this.
-const EXCLUDE_RE:="(?i)\\b(rebels?|ringleaders?|troublemakers?|agitators?|instigators?|traitors?|deserters?|criminals?|outlaws?|thie(f|ves)|murderers?|wrongdoers?|the guilty|the lazy|cowards?|liars?|hoarders?|poachers?|drunkards?|anyone who|anybody who|whoever|any who|those who|all who|everyone who|everybody who|any (man|woman|one) who|if (they|any|anyone|someone|he|she)|whenever|from now on|henceforth|never|law)\\b"
+## Wrongdoers and standing words: a law or a measure, never this.
+const EXCLUDE_RE:="(?i)\\b(rebels?|ringleaders?|troublemakers?|agitators?|instigators?|traitors?|deserters?|criminals?|outlaws?|thie(f|ves)|murderers?|wrongdoers?|the guilty|the lazy|cowards?|liars?|hoarders?|poachers?|drunkards?|anyone who|anybody who|whoever|any who|those who|all who|everyone who|everybody who|any (man|woman|one) who|from now on|henceforth|law)\\b"
 ## Parts of the whole the words ask for: [pattern, share].
 const PARTS:=[
-	["\\b(two thirds|2/3)\\b",2.0/3.0],["\\b(three quarters|most)\\b",0.75],["\\b(half|one half|1/2|every (second|other))\\b",0.5],
-	["\\b(a third|one third|1/3|every third)\\b",1.0/3.0],["\\b(a quarter|one quarter|a fourth|one fourth|1/4|every fourth)\\b",0.25],
-	["\\b(a fifth|one fifth|1/5|every fifth)\\b",0.2],["\\b(a tenth|one tenth|1/10|every tenth)\\b",0.1],["\\b(some|several)\\b",0.2],
+	["^(two thirds)",2.0/3.0],["^(three quarters|most)",0.75],["^(half)",0.5],
+	["^(a third|one third)",1.0/3.0],["^(a quarter|one quarter|a fourth)",0.25],
+	["^(a fifth|one fifth)",0.2],["^(a tenth|one tenth)",0.1],["^(some|several|a few|many)",0.2],
 ]
-const NUMBER_WORDS:={"a few":4,"a dozen":12,"a score":20,"a hundred":100,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12,"fifteen":15,"twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"hundred":100}
+const NUMBER_WORDS:={"a dozen":12,"a score":20,"a hundred":100,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12,"fifteen":15,"twenty":20,"thirty":30,"forty":40,"fifty":50,"sixty":60,"hundred":100}
+## The god's plain yes to the read-back, and nothing else.
+const CONFIRM:="(?i)^\\W*(?:(?:yes|yea|yeah|yep|aye)\\b[\\s,!.]*)?(?:(?:do it|do so|i demand it|i command it|i insist|so be it|(?:that|it) is my word|that's my word|make it so|carry it out|see it done|go ahead|proceed|i said do it|i said so)\\b[\\s,!.]*)?(?:now|at once|immediately)?[\\s!.]*$"
+const CONFIRM_TOKEN:="(?i)\\b(yes|yea|yeah|yep|aye|do it|do so|i demand it|i command it|i insist|so be it|my word|make it so|carry it out|see it done|go ahead|proceed|i said)\\b"
+const DEMAND:="(?i)\\b(demand|command|insist|i said|do it|do so|carry it out|see it done)\\b"
 ## Words a short answer to "Which village?" may hold besides the names.
 const ANSWER_WORDS:=["the","village","town","camp","settlement","one","of","our","own","ours","home","here","i","mean","meant","that","this","please","then","in","it","is","a","yes","just","only","first","second","last","other","theirs","we","hold","held","took","taken","captured","there","oh","well","um","uh","said","course","obviously"]
+
+## The line each open read-back, plea or question was said on (by reference,
+## per audience): the god's answer counts only as the very next line in that
+## audience. Not saved: after a load, an open one is dropped (never acted on).
+static var _marks:Dictionary={}
 
 static func _re(pattern:String)->RegEx:
 	var re:=RegEx.new(); re.compile(pattern)
@@ -162,134 +188,220 @@ static func _day()->int:
 
 static func reading(text:String,audience:Dictionary,list:Array[Dictionary]=[])->Dictionary:
 	## {} when these words are no grave order against our own people (or are
-	## the war orders' business). Otherwise {kind:"act"|"ask", how:"kill"|
-	## "burn"|"drive", groups:[...], share, count, text, own, home,
+	## the war orders' business). Otherwise {kind:"act"|"ask"|"whom", how:
+	## "kill"|"burn"|"drive", groups, share, count, text, own, home,
 	## settlement_id, options?, question?}.
 	var clean:=text.strip_edges().replace("’","'")
 	if clean=="" or clean.ends_with("?") or audience.is_empty(): return {}
 	if String(audience.get("origin",""))=="foreign": return {}
 	var lower:=clean.to_lower()
-	if _has(lower,"^\\W*(what|why|how|who|whom|where|when|should|could|can|would|shall we|do we|is it|are we|did|does|have we)\\b"): return {}
-	var verb:=_verb(clean)
-	if verb.is_empty(): return {}
-	# Words that hold an act back, a law, wrongdoers, a condition: never this.
-	for p:Dictionary in Realm.clauses(clean):
-		if bool(p.held): return {}
 	if _has(lower,EXCLUDE_RE): return {}
 	var cc:=_cc()
 	var mention:=func(t:String,l:Array[Dictionary])->Array[Dictionary]: return cc.call("mentions",t,l)
 	if not Realm.law(clean,list,mention).is_empty(): return {}
-	var span:=_span(lower,int(verb.at))
+	# The order's own sentence: the first that holds a grave verb.
+	for sentence in _re("[^.!?;]+").search_all(lower):
+		var s:=sentence.get_string().strip_edges()
+		var verb:=_verb(s)
+		if verb.is_empty(): continue
+		return _read(clean,s,verb,audience,list,cc)
+	return {}
+
+static func _read(clean:String,sentence:String,verb:Dictionary,audience:Dictionary,list:Array[Dictionary],cc:GDScript)->Dictionary:
+	# 1. An order: the verb opens its own clause, and nothing in the sentence
+	# forbids, doubts, reports or supposes it.
+	if not _is_command(sentence.substr(0,int(verb.at)),list,cc): return {}
+	var rest:=sentence.substr(int(verb.at))
+	if _has(_re(REALM_WORDS).sub(rest," ",true),NOT_ORDER): return {}
+	for p:Dictionary in Realm.clauses(_re(REALM_WORDS).sub(sentence," ",true)):
+		if bool(p.held): return {}
 	# Someone else's people, or one person: the war orders and the person acts.
-	if _has(span,FOREIGN_RE) or bool(cc.call("_names_a_place",span)): return {}
-	var object:=String(verb.object).strip_edges()
-	if object=="" or _one_person(object,list,cc): return {}
+	if _has(rest,FOREIGN_RE) or bool(cc.call("_names_a_place",rest)): return {}
+	var object:=String(verb.object)
+	if _one_person(object,list,cc): return {}
+	# 2. What it falls on.
 	var how:=String(verb.how)
-	var head:=_head(object)
-	var groups:=_groups(head)
+	var phrase:=_people(object)
 	if how=="burn":
-		# Burning people is killing them; burning the village itself is
-		# burning the village; anything else burned (the dead, the fields) is
-		# none of this.
-		if not groups.is_empty(): how="kill"
-		elif not _has(head,PLACE_HEAD) and not _names_ours(head): return {}
-	elif groups.is_empty(): return {}
-	if how=="drive" and not _leaves_realm(String(verb.kind),span): return {}
-	var place:=_has(span,VILLAGE_RE)
-	# Which of our towns: one named, else the one whose leader is ordered, else home.
-	var town:=_our_town(span,list)
+		if phrase.has("groups"): how="kill"
+		elif not _burns_the_village(object): return {}
+	elif not phrase.has("groups") and not bool(phrase.get("qualified",false)): return {}
+	if how=="drive" and not _leaves_realm(String(verb.kind),rest): return {}
+	# 3. Whose people.
+	var place:=_has(rest,VILLAGE_RE)
+	var town:=_our_town(rest,list)
 	var home:=String(town.get("name",""))
-	var own:=_has(span,OWN_RE) or bool(town.get("named",false))
+	var own:=_has(rest,OWN_RE) or bool(town.get("named",false))
+	var groups:Array=phrase.get("groups",[])
 	var trades_only:=not groups.is_empty() and groups.all(func(g:Dictionary)->bool: return String(g.get("role",""))!="")
-	var out:={"how":how,"groups":groups,"share":_share(object),"count":_number(object,groups),"text":clean.substr(0,300),"own":own,"home":home,"settlement_id":String(town.get("id",""))}
-	if own or trades_only:
-		out["kind"]="act"; return out
-	var id:=String(audience.get("id",""))
-	var held:=WarOrders.held_towns()
-	if not held.is_empty():
-		# A town we hold that this audience is speaking of: its people (the war
-		# orders, town_fate.gd). Named nowhere, the words with no place in them
-		# are the town we hold as before; "the village" is asked.
-		if not WarOrders._town_in_audience(held,id).is_empty() or _town_order_recent(audience): return {}
-		if not place: return {}
-		out["kind"]="ask"; out["options"]=_options(held,home); out["question"]=_question(out,held)
-		return out
-	# A town of theirs this audience speaks of: what it would take (take_first).
-	if not WarOrders._place_in_audience(id).is_empty(): return {}
-	var at_war:=_any_war()
-	if at_war or _feud():
-		# At war with none of theirs held: "kill all the men" is answered by the
-		# war leader (nobody of theirs is in our hands); "the village" is asked.
-		# In a feud (no war declared) whose people are meant is asked as well.
-		if at_war and not place: return {}
-		out["kind"]="ask"; out["options"]=_options([],home); out["question"]=_question(out,[])
-		return out
-	out["kind"]="act"
+	var out:={"how":how,"groups":groups,"share":float(phrase.get("share",1.0)),"count":int(phrase.get("count",0)),"text":clean.substr(0,300),"own":own,"home":home,"settlement_id":String(town.get("id",""))}
+	var kind:="act"
+	if not (own or trades_only):
+		var id:=String(audience.get("id",""))
+		var held:=WarOrders.held_towns()
+		if not held.is_empty():
+			# A town we hold that this audience is speaking of: its people (the
+			# war orders). Named nowhere, the words with no place in them are the
+			# town we hold as before; "the village" is asked.
+			if not WarOrders._town_in_audience(held,id).is_empty() or _town_order_recent(audience): return {}
+			if not place: return {}
+			kind="ask"; out["options"]=_options(held,home); out["question"]=_question(out,held)
+		elif not WarOrders._place_in_audience(id).is_empty(): return {}
+		else:
+			var at_war:=_any_war()
+			if at_war or _feud():
+				if at_war and not place: return {}
+				kind="ask"; out["options"]=_options([],home); out["question"]=_question(out,[])
+	# People narrowed ("the sick women", "the men who deserted"): whom exactly.
+	if bool(phrase.get("qualified",false)):
+		if kind!="act": return {}
+		kind="whom"; out["words"]=String(phrase.get("words",""))
+	out["kind"]=kind
 	return out
 
-static func _verb(clean:String)->Dictionary:
-	## The first grave verb and the words it falls on: {how, kind, at, end,
-	## object}. kind: "kill", "burn", "banish" (banish, exile, expel), "out"
-	## (drive... out).
-	var lower:=clean.to_lower().replace("’","'")
+static func _verb(s:String)->Dictionary:
+	## The first grave verb in the sentence and the words right after it:
+	## {how, kind ("kill"|"burn"|"banish"|"out"), at, object, bare?}.
 	var best:Dictionary={}
-	var k:=_re(KILL_RE).search(lower)
+	var k:=_re(KILL_RE).search(s)
 	if k!=null:
-		var obj:=k.get_string("putobj") if k.get_string("putobj")!="" else lower.substr(k.get_end())
-		best={"how":"kill","kind":"kill","at":k.get_start(),"end":k.get_end(),"object":obj}
-	var b:=_re(BURN_RE).search(lower)
+		best={"how":"kill","kind":"kill","at":k.get_start(),"object":k.get_string("putobj") if k.get_string("putobj")!="" else s.substr(k.get_end())}
+	var b:=_re(BURN_RE).search(s)
 	if b!=null and (best.is_empty() or b.get_start()<int(best.at)):
-		var obj2:=b.get_string("setobj") if b.get_string("setobj")!="" else (b.get_string("torchobj") if b.get_string("torchobj")!="" else lower.substr(b.get_end()))
-		best={"how":"burn","kind":"burn","at":b.get_start(),"end":b.get_end(),"object":obj2}
-	var ban:=_re(BANISH_RE).search(lower)
+		var obj:=b.get_string("setobj") if b.get_string("setobj")!="" else (b.get_string("torchobj") if b.get_string("torchobj")!="" else s.substr(b.get_end()))
+		best={"how":"burn","kind":"burn","at":b.get_start(),"object":obj}
+	var ban:=_re(BANISH_RE).search(s)
 	if ban!=null and (best.is_empty() or ban.get_start()<int(best.at)):
-		best={"how":"drive","kind":"banish","at":ban.get_start(),"end":ban.get_end(),"object":lower.substr(ban.get_end())}
-	var o:=_re(OUT_RE).search(lower)
+		best={"how":"drive","kind":"banish","at":ban.get_start(),"object":s.substr(ban.get_end())}
+	var o:=_re(OUT_RE).search(s)
 	if o!=null and (best.is_empty() or o.get_start()<int(best.at)):
 		var mid:=o.get_string("mid").strip_edges()
-		best={"how":"drive","kind":"out","at":o.get_start(),"end":o.get_end(),"object":mid if mid!="" else lower.substr(o.get_end()),"bare":mid=="","verb":o.get_string(1)}
+		best={"how":"drive","kind":"out","at":o.get_start(),"object":mid if mid!="" else s.substr(o.get_end()),"bare":mid==""}
 	return best
 
-static func _head(object:String)->String:
-	## The act's own object: the people (or place) the verb falls on, less a
-	## count or part before it and anything after a place, time or clause
-	## ("half the farmers" -> "the farmers"; "all women in the village" ->
-	## "women"). A thing of theirs ("the women's goats") is the thing.
-	var o:=object.strip_edges().to_lower()
-	o=_re(QUANTITY).sub(o,"",false).strip_edges()
-	var cut:=_re(HEAD_END).search(o)
-	if cut!=null: o=o.substr(0,cut.get_start())
-	o=o.strip_edges()
-	var own:=_re("(?i)(\\w)('s|s')\\s+").search(o)
-	while own!=null:
-		o=o.substr(own.get_end()).strip_edges()
-		own=_re("(?i)(\\w)('s|s')\\s+").search(o)
-	return o
+static func _is_command(lead:String,list:Array[Dictionary],cc:GDScript)->bool:
+	## Before the verb in its own sentence: nothing, the names of those spoken
+	## to, filler, or words of command ("Kishan, kill...", "I order you to
+	## kill..."). Never "we must not", "the elders say we should", "if...".
+	var l:=lead.to_lower()
+	var found:Array=cc.call("mentions",l,list)
+	for i in range(found.size()-1,-1,-1):
+		var m:Dictionary=found[i]
+		if String(m.by) in ["name","title"]: l=l.substr(0,int(m.at))+" "+l.substr(int(m.end))
+	l=_re("[^a-z' ]").sub(l," ",true)
+	l=_re("\\s+").sub(l," ",true).strip_edges()
+	return _has(l,LEAD_OK)
 
-static func _leaves_realm(kind:String,span:String)->bool:
-	## Driving out is out of the realm: banish, exile, expel, or "drive / cast
-	## out" with nowhere else named; any other words of moving people ("throw
-	## the men out of the hall", "chase the boys off the walls") only with
-	## words that take them out of the realm.
-	if _has(span,REALM_PHRASE): return true
-	# Out of a town of ours named ("banish the elders from Seanstone").
+static func _clip(object:String)->Dictionary:
+	## The verb's own clause: {text, relative (cut at who/that/which)}.
+	var o:=object.strip_edges().to_lower()
+	var cut:=_re(CLAUSE_CUT).search(o)
+	if cut==null: return {"text":o,"relative":false}
+	return {"text":o.substr(0,cut.get_start()).strip_edges(),"relative":cut.get_string().to_lower() in ["who","whom","that","which","whose"]}
+
+static func _people(object:String)->Dictionary:
+	## The people right after the verb, and nothing else:
+	## {groups, share, count, words} for whole groups ("the women and the
+	## old", "half the farmers", "20 of the women of Seanstone");
+	## {qualified:true, words} for people narrowed ("the sick women", "the
+	## men who deserted"); {} for anything else (goats, trees, time, the dead).
+	var clipped:=_clip(object)
+	var text:=String(clipped.text)
+	if text=="": return {}
+	var segs:=_re("\\s*(?:\\band\\b|\\bor\\b|&)\\s*").sub(text,"|",true).split("|",false)
+	if segs.is_empty(): return {}
+	var groups:Array=[]
+	var share:=1.0
+	var count:=0
+	var words:=PackedStringArray()
+	for i in segs.size():
+		var seg:=String(segs[i]).strip_edges()
+		var p:=_group_phrase(seg,i==0)
+		if p.is_empty():
+			if i==0: return {}
+			break
+		if bool(p.get("qualified",false)): return {"qualified":true,"words":seg}
+		if i==0: share=float(p.share); count=int(p.count)
+		for g in p.groups:
+			if not groups.any(func(x:Dictionary)->bool: return String(x.id)==String((g as Dictionary).id)): groups.append(g)
+		words.append(seg)
+	if groups.is_empty(): return {}
+	# "The men who refused to fight": narrowed by what follows.
+	if bool(clipped.relative): return {"qualified":true,"words":" and ".join(words)}
+	return {"groups":groups,"share":share,"count":count,"words":" and ".join(words)}
+
+static func _group_phrase(seg:String,first:bool)->Dictionary:
+	## One group of people: {groups, share, count} | {qualified:true} | {}.
+	var s:=seg.strip_edges()
+	var share:=1.0
+	var count:=0
+	var q:=_re(QUANT).search(s)
+	if q!=null and first:
+		var lead:=q.get_string(1).to_lower()
+		if lead.is_valid_int(): count=int(lead)
+		elif NUMBER_WORDS.has(lead): count=int(NUMBER_WORDS[lead])
+		else:
+			for pair in PARTS:
+				if _has(lead,"(?i)"+String(pair[0])): share=float(pair[1]); break
+		s=s.substr(q.get_end())
+	s=_re(DETERMINERS).sub(s,"",false).strip_edges()
+	s=_re(PEOPLE_TAIL % _town_names()).sub(s,"",false).strip_edges()
+	if s=="": return {}
+	var g:=_groups_of(s)
+	if not g.is_empty(): return {"groups":g,"share":share,"count":count}
+	# A group noun at the end with other words before it: people narrowed.
+	var m:=_re("(?i)^([a-z' ]+?)\\s+"+PEOPLE_NOUN+"$").search(s)
+	if m!=null and not _groups_of(s.substr(m.get_start(2))).is_empty() and not "'" in m.get_string(1): return {"qualified":true}
+	return {}
+
+static func _groups_of(noun:String)->Array:
+	## The group a noun names exactly ("women", "old men", "farmers"), or [].
+	var n:=noun.strip_edges().to_lower()
+	for row in GROUPS:
+		if _has(n,"(?i)"+String(row[1])): return [_group_row(row)]
+	for row in TRADES:
+		if _has(n,"(?i)"+String(row[1])): return [{"id":String(row[0]),"cohorts":WORKING.duplicate(),"sex":"","words":_trade_words(String(row[3])),"weight":0.08,"role":String(row[2])}]
+	return []
+
+static func _trade_words(words:String)->String:
+	## The people of a kind of work in words their own time knows (before
+	## anyone sows a crop, those who get our food are no "farmers").
+	var tags:=preload("res://scripts/character_voice.gd").era_tags("player")
+	if preload("res://scripts/character_voice.gd").permits(words,tags): return words
+	return String({"farmers":"food-gatherers"}.get(words,"workers"))
+
+static func _town_names()->String:
+	var out:=""
+	for s in GameState.player_settlements:
+		var name:=String((s as Dictionary).get("name","")).to_lower() if s is Dictionary else ""
+		if name!="": out+="|"+WarOrders._escape(name)
+	var home:=String(GameState.settlement_name).to_lower()
+	if home!="": out+="|"+WarOrders._escape(home)
+	return out
+
+static func _burns_the_village(object:String)->bool:
+	## The village or town itself, and nothing less ("the huts of the sick",
+	## "the houses" are not the village).
+	var text:=String(_clip(object).text)
+	var seg:=String(_re("\\s*(?:\\band\\b|\\bor\\b)\\s*").sub(text,"|",true).split("|",false)[0]) if text!="" else ""
+	seg=_re("(?i)^((the|our|my|this|that)\\s+)+").sub(seg,"",false).strip_edges()
+	if _has(seg,PLACE_CORE): return true
+	for name in [String(GameState.settlement_name)]+GameState.player_settlements.map(func(t:Variant)->String: return String((t as Dictionary).get("name","")) if t is Dictionary else ""):
+		if String(name)!="" and seg==String(name).to_lower(): return true
+	return false
+
+static func _leaves_realm(kind:String,rest:String)->bool:
+	## Banishing is out of the realm: banish, exile, expel (never out of the
+	## hall or to the fields); "drive / cast ... out" only with words that say
+	## the realm is left ("out of our lands", "never to return").
+	if kind!="banish": return _has(rest,REALM_STRICT)
+	if _has(rest,REALM_PHRASE): return true
 	var ours:Array=[String(GameState.settlement_name).to_lower()]
 	for s in GameState.player_settlements:
 		if s is Dictionary: ours.append(String((s as Dictionary).get("name","")).to_lower())
 	for name in ours:
-		if String(name)!="" and _has(span,FROM_TOWN % WarOrders._escape(String(name))): return true
-	# Out of or off somewhere else, or to the fields: no leaving of the realm.
-	if _has(span,PLACE_PHRASE): return false
-	if kind=="banish": return true
-	var m:=_re(OUT_RE).search(span)
-	return m!=null and m.get_string(1).to_lower() in ["drive","cast"] and m.get_string(3).to_lower()=="out"
-
-static func _names_ours(head:String)->bool:
-	var home:=String(GameState.settlement_name)
-	if home!="" and WarOrders._name_hit(head,home): return true
-	for s in GameState.player_settlements:
-		if s is Dictionary and String((s as Dictionary).get("name",""))!="" and WarOrders._name_hit(head,String((s as Dictionary).name)): return true
-	return false
+		if String(name)!="" and _has(rest,FROM_TOWN % WarOrders._escape(String(name))): return true
+	return not _has(rest,PLACE_PHRASE)
 
 static func _our_town(span:String,list:Array[Dictionary])->Dictionary:
 	## The town of ours the order falls on: {id ("" for home, whose people are the
@@ -311,27 +423,20 @@ static func _our_town(span:String,list:Array[Dictionary])->Dictionary:
 				return {"id":sid,"name":String((s as Dictionary).name),"named":false}
 	return home
 
+static func _town_gone(settlement_id:String)->bool:
+	## A town of ours named in the order that is ours no longer (or never was).
+	if settlement_id=="": return false
+	var record:Dictionary=SettlementModel.settlement_record(settlement_id)
+	return record.is_empty() or not String(record.get("occupied_by","")).is_empty()
+
 static func _scoped(settlement_id:String,operation:Callable,commit:bool=true)->Variant:
 	## Done among that town's own people (SettlementModel's local count, which
 	## the daily births and deaths read), then folded back into the realm's
-	## (commit), or only read.
+	## (commit), or only read. Never on another town's people in its place.
 	var model:Variant=WorldSimulation.settlements if WorldSimulation.settlements!=null else SettlementModel
 	var local:=func()->Variant: return model.with_local_population(operation,commit)
 	if settlement_id!="": return model.with_city_resources(settlement_id,local)
 	return local.call()
-
-static func _span(lower:String,at:int)->String:
-	## The words the act falls on: from its verb up to the next order.
-	var span:=lower.substr(at)
-	var first:=_re("^\\S+\\s*").search(span)
-	var from:=first.get_end() if first!=null else 0
-	var cut:=span.length()
-	for m in _re(NEXT_RE).search_all(span,from):
-		var before:=span.substr(0,m.get_start()).strip_edges()
-		# "the women who take water", "those that hold the gate": inside the object.
-		if before.ends_with(" who") or before.ends_with(" that") or before.ends_with(" which"): continue
-		cut=m.get_start(); break
-	return span.substr(0,cut).strip_edges()
 
 static func _one_person(object:String,list:Array[Dictionary],cc:GDScript)->bool:
 	## One person named ("Kavu", "the headman", "him"): a person act, not this.
@@ -344,47 +449,9 @@ static func _one_person(object:String,list:Array[Dictionary],cc:GDScript)->bool:
 static func _group_row(row:Array)->Dictionary:
 	return {"id":String(row[0]),"cohorts":(row[2] as Array).duplicate(),"sex":String(row[3]),"words":String(row[4]),"weight":float(row[5])}
 
-static func _groups(head:String)->Array:
-	## The groups the head names ("the women and children"), each once; "the
-	## old men" is never also "the men", and everyone is everyone.
-	var out:Array=[]
-	if head=="": return out
-	var taken:=head.replace("old women","old_w").replace("old woman","old_w").replace("old men","old_m").replace("old man","old_m").replace("old wives","old_w").replace("old mothers","old_w").replace("old males","old_m")
-	for row in GROUPS:
-		var hit:=_re("(?i)"+String(row[1])).search(taken)
-		if hit==null: continue
-		if String(row[0])=="everyone": return [_group_row(row)]
-		var g:=_group_row(row); g["at"]=hit.get_start()
-		out.append(g)
-	# In the order the words name them ("the women and the old").
-	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return int(a.get("at",0))<int(b.get("at",0)))
-	# "The girls and the boys" are the children; "children" with either is the children.
-	var ids:=out.map(func(g:Dictionary)->String: return String(g.id))
-	if "children" in ids: out=out.filter(func(g:Dictionary)->bool: return not String(g.id) in ["girls","boys"])
-	elif "girls" in ids and "boys" in ids:
-		out=out.filter(func(g:Dictionary)->bool: return not String(g.id) in ["girls","boys"])
-		out.append(_group_row(GROUPS[5]))
-	for row in TRADES:
-		if _has(head,"(?i)"+String(row[1])): out.append({"id":String(row[0]),"cohorts":WORKING.duplicate(),"sex":"","words":String(row[3]),"weight":0.08,"role":String(row[2])})
-	return out
-
-static func _share(object:String)->float:
-	var o:=object.to_lower()
-	for pair in PARTS:
-		if _has(o,"(?i)"+String(pair[0])): return float(pair[1])
-	return 1.0
-
-static func _number(object:String,groups:Array)->int:
-	## A count asked for ("kill 20 of the women", "kill ten farmers"), or 0.
-	if groups.is_empty(): return 0
-	var m:=_re("(?i)^\\s*(\\d{1,7}|a few|a dozen|a score|a hundred|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|hundred)\\b").search(object)
-	if m==null: return 0
-	var word:=m.get_string(1).to_lower()
-	return int(word) if word.is_valid_int() else int(NUMBER_WORDS.get(word,0))
-
 static func _town_order_recent(audience:Dictionary)->bool:
 	var last:Dictionary=audience.get("town_order",{}) if audience.get("town_order") is Dictionary else {}
-	return not last.is_empty() and _day()-int(last.get("day",-99))<=PENDING_DAYS
+	return not last.is_empty() and _day()-int(last.get("day",-99))<=2
 
 static func _any_war()->bool:
 	if WorldSimulation.world==null: return false
@@ -428,21 +495,97 @@ static func _question(r:Dictionary,held:Array)->String:
 	return "Which village do you mean: %s, our own, or %s, which we hold?" % [home," or ".join(names)]
 
 # --------------------------------------------------------------------------
-# Answers, insistence
+# The very next line: answers, read-backs, pleas
 # --------------------------------------------------------------------------
 
 static func _pending(audience:Dictionary)->Dictionary:
 	var p:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
-	if String(p.get("verb",""))!=PENDING_VERB or _day()-int(p.get("day",-99))>PENDING_DAYS: return {}
+	if String(p.get("verb",""))!=PENDING_VERB: return {}
 	return p
+
+static func has_pending(audience:Dictionary)->bool:
+	return not _pending(audience).is_empty()
+
+static func _open(id:String,audience:Dictionary,pending:Dictionary)->void:
+	## Opens a read-back, plea or question on the line just said (the ruler's
+	## last line here): only the very next line in this audience answers it.
+	audience["pending_command"]=pending
+	var lines:Array=audience.get("lines",[])
+	for i in range(lines.size()-1,-1,-1):
+		if String((lines[i] as Dictionary).get("role",""))=="ruler":
+			_marks[id]=lines[i]; return
+	_marks.erase(id)
+
+static func _drop(id:String,audience:Dictionary)->void:
+	if has_pending(audience): audience.erase("pending_command")
+	_marks.erase(id)
+
+static func _fresh(id:String,audience:Dictionary,clean:String)->bool:
+	## Are these words the very next line after the one the read-back (or the
+	## plea, or the question) was opened on, in this audience?
+	var mark:Variant=_marks.get(id,null)
+	if not mark is Dictionary: return false
+	var lines:Array=audience.get("lines",[])
+	var at:=-1
+	for i in range(lines.size()-1,-1,-1):
+		if is_same(lines[i],mark): at=i; break
+	if at<0: return false
+	var said:=0
+	var last_text:=""
+	for i in range(at+1,lines.size()):
+		if String((lines[i] as Dictionary).get("role",""))=="ruler":
+			said+=1; last_text=String((lines[i] as Dictionary).get("text",""))
+	if said==0: return true
+	return said==1 and last_text.strip_edges()==clean.strip_edges()
+
+static func confirms(text:String)->bool:
+	## The god's plain yes, and nothing else ("yes", "do it", "I demand it",
+	## "so be it", "that is my word").
+	var t:=text.strip_edges()
+	return t!="" and _has(t,CONFIRM) and _has(t,CONFIRM_TOKEN)
+
+static func continues(audience:Dictionary,text:String)->bool:
+	## Read only: do these words answer what grave_home has open here (a clear
+	## answer to "which village?", or a yes to a read-back or a plea), as the
+	## very next line?
+	var p:=_pending(audience)
+	if p.is_empty() or not _fresh(String(audience.get("id","")),audience,text): return false
+	if String(p.get("ask",""))=="which_people": return not answer_choice(audience,text).is_empty()
+	return confirms(text)
+
+static func next_line(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary)->Dictionary:
+	## The god's next words after a read-back, a plea or "which village?": the
+	## yes (or a clear answer) carries it on; any other words, or any words that
+	## are not the very next line here, drop it, and are heard as themselves ({}).
+	var p:=_pending(audience)
+	if p.is_empty(): return {}
+	if not _fresh(id,audience,clean):
+		_drop(id,audience)
+		return {}
+	var stored:Dictionary=(p.get("reading",{}) as Dictionary).duplicate(true)
+	match String(p.get("ask","")):
+		"which_people": return _answer(id,audience,list,clean,context,p,stored)
+		"readback":
+			if not confirms(clean):
+				_drop(id,audience); return {}
+			_drop(id,audience)
+			stored["kind"]="act"
+			return carry(id,audience,list,stored,_has(clean,DEMAND),context,clean,true)
+		"plea":
+			if not confirms(clean):
+				_drop(id,audience); return {}
+			_drop(id,audience)
+			stored["kind"]="act"
+			return carry(id,audience,list,stored,true,context,clean,true)
+	_drop(id,audience)
+	return {}
 
 static func answer_choice(audience:Dictionary,clean:String)->Dictionary:
 	## A short, clear answer to "Which village do you mean?": {pick:"own"} (our
 	## own, named or "ours"), {pick:"town", option} (a town we held, by name or
 	## "the second"), {pick:"place", place} (another town or people of theirs
-	## named), {pick:"no"}, {pick:"yes"} (a bare yes or "do it": which is still
-	## not said, unless there is only our own). {} for any other words: those
-	## are no answer, and are heard as themselves. Read only.
+	## named), {pick:"no"}, {pick:"yes"} (a bare yes: which is still not said,
+	## unless there is only our own). {} for any other words. Read only.
 	var p:=_pending(audience)
 	if p.is_empty() or String(p.get("ask",""))!="which_people": return {}
 	var text:=clean.strip_edges().replace("’","'")
@@ -450,14 +593,10 @@ static func answer_choice(audience:Dictionary,clean:String)->Dictionary:
 	var lower:=_re("[.!]+$").sub(text.to_lower(),"",false).strip_edges()
 	var options:Array=p.get("options",[])
 	if _has(lower,"^(no|nope|nay|neither|none( of them)?|nobody|no one|never mind|forget it|cancel( that| it)?|leave it|leave them( be)?|not now|stop|no,? (leave|forget) it)$"): return {"pick":"no"}
-	var cc:=_cc()
-	var insist:=String(cc.get_script_constant_map().get("INSIST_PATTERN",""))
-	if _has(lower,"^(yes|yeah|yep|aye|yes,? (do it|go ahead))$") or (insist!="" and _re(insist).search(text)!=null) or bool(cc.call("bare_assent",text)):
-		return {"pick":"own"} if options.size()<=1 else {"pick":"yes"}
+	if confirms(text): return {"pick":"own"} if options.size()<=1 else {"pick":"yes"}
 	var words:=Array(_re("[^a-z0-9' ]").sub(lower," ",true).split(" ",false))
 	if words.is_empty() or words.size()>7: return {}
 	var allowed:=ANSWER_WORDS.duplicate()
-	var names:Array=[]
 	for o in options:
 		for w in String((o as Dictionary).get("name","")).to_lower().split(" ",false): allowed.append(w)
 	var places:Array=[]
@@ -479,62 +618,48 @@ static func answer_choice(audience:Dictionary,clean:String)->Dictionary:
 	if words.any(func(w:String)->bool: return w in ["our","own","ours","home","here","first"]): return {"pick":"own"}
 	return {}
 
-static func answer(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary)->Dictionary:
-	## The god's answer to "Which village do you mean?": our own (done here,
-	## adjudicated), a town we hold or theirs (the war orders), or no. Any
-	## other words drop the question and are heard as themselves ({}).
-	var p:=_pending(audience)
-	if p.is_empty() or String(p.get("ask",""))!="which_people": return {}
+static func _answer(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary,p:Dictionary,stored:Dictionary)->Dictionary:
 	var choice:=answer_choice(audience,clean)
+	var cc:=_cc()
 	if choice.is_empty():
 		# The same order said again: still not said which (never asked twice).
 		if _norm(clean)==_norm(String(p.get("text",""))):
-			return _cc().call("_plain_answer",id,audience,clean,context,"Nothing is done until you say which village: %s." % _option_words(p.get("options",[]) as Array),true)
-		audience.erase("pending_command")
+			var said:Dictionary=cc.call("_plain_answer",id,audience,clean,context,"Nothing is done until you say which village: %s." % _option_words(p.get("options",[]) as Array),true)
+			_open(id,audience,p)
+			return said
+		_drop(id,audience)
 		return {}
-	var stored:Dictionary=(p.get("reading",{}) as Dictionary).duplicate(true)
-	var cc:=_cc()
 	match String(choice.pick):
 		"no":
-			audience.erase("pending_command")
+			_drop(id,audience)
 			return cc.call("_plain_answer",id,audience,clean,context,"Nothing is done to anyone.")
 		"yes":
-			return cc.call("_plain_answer",id,audience,clean,context,"Nothing is done until you say which village: %s." % _option_words(p.get("options",[]) as Array),true)
+			var r:Dictionary=cc.call("_plain_answer",id,audience,clean,context,"Nothing is done until you say which village: %s." % _option_words(p.get("options",[]) as Array),true)
+			_open(id,audience,p)
+			return r
 		"town":
+			_drop(id,audience)
 			var opt:Dictionary=choice.option
 			var town:=WarOrders._held_town(String(opt.get("city_id","")))
 			if town.is_empty(): return _reask(id,audience,list,clean,context,stored,String(opt.get("name","")))
 			return _to_town(id,audience,list,clean,context,stored,town)
 		"place":
+			_drop(id,audience)
 			return _to_town(id,audience,list,clean,context,stored,choice.place as Dictionary)
+	_drop(id,audience)
 	stored["kind"]="act"; stored["own"]=true
-	audience.erase("pending_command")
 	return carry(id,audience,list,stored,false,context,clean)
+
+static func _norm(text:String)->String:
+	return _re("[^a-z0-9 ]").sub(text.to_lower(),"",true).strip_edges()
 
 static func _reask(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary,stored:Dictionary,lost:String)->Dictionary:
 	## The town named is no longer ours: asked again with what is true now.
-	audience.erase("pending_command")
 	var again:=stored.duplicate(true)
 	var held:=WarOrders.held_towns()
 	again["kind"]="ask"; again["options"]=_options(held,String(stored.get("home","")))
 	again["question"]=("%s is no longer in our hands. " % lost if lost!="" else "")+_question(again,held)
 	return carry(id,audience,list,again,false,context,clean)
-
-static func _norm(text:String)->String:
-	return _re("[^a-z0-9 ]").sub(text.to_lower(),"",true).strip_edges()
-
-static func insisted(id:String,audience:Dictionary,list:Array[Dictionary],clean:String,context:Dictionary)->Dictionary:
-	## "Do it", "I demand it" with an order of ours waiting: after a plea it is
-	## carried out; after "Which village?" it is still not said which.
-	var p:=_pending(audience)
-	if p.is_empty(): return {}
-	var stored:Dictionary=(p.get("reading",{}) as Dictionary).duplicate(true)
-	if String(p.get("ask",""))=="which_people":
-		return _cc().call("_plain_answer",id,audience,clean,context,"Nothing is done until you say which village: %s." % _option_words(p.get("options",[]) as Array),true)
-	if not bool(p.get("hesitate",false)) or stored.is_empty(): return {}
-	audience.erase("pending_command")
-	stored["kind"]="act"
-	return carry(id,audience,list,stored,true,context,clean)
 
 static func _option_words(options:Array)->String:
 	var names:=PackedStringArray()
@@ -546,7 +671,6 @@ static func _to_town(id:String,audience:Dictionary,list:Array[Dictionary],clean:
 	## read it for that town (its fate when we hold it, else what it would take).
 	var name:=String(town.get("name","")).trim_prefix("Reported home of ")
 	if name=="": return _reask(id,audience,list,clean,context,stored,"")
-	audience.erase("pending_command")
 	var cc:=_cc()
 	var said:=String(stored.get("text",""))
 	var lower:=said.to_lower()
@@ -626,7 +750,8 @@ static func _binom(r:RandomNumberGenerator,n:int,p:float)->int:
 static func cells(groups:Array)->Array:
 	## The people the groups name, by age cohort and sex, each counted once
 	## ("the women and the old": the old women once): [{cohort, sex, have
-	## (in the cohort), target (named), trade (named by their work)}]. Work is
+	## (in the cohort), target (named), whole (named outright, not only for
+	## their work), roles {role: share of the cell at that work}}]. Work is
 	## spread evenly over the working ages (the work split has no ages).
 	var out:Array=[]
 	var working:=0.0
@@ -637,20 +762,19 @@ static func cells(groups:Array)->Array:
 		for sex in SEXES:
 			var have:=women if sex=="female" else maxf(0.0,n-women)
 			if have<=0.000001: continue
-			var miss:=1.0
-			var trade_part:=0.0
+			var whole:=false
+			var roles:={}
 			for g in groups:
 				var gd:Dictionary=g
 				if not (gd.get("cohorts",[]) as Array).has(cohort): continue
 				if String(gd.get("sex",""))!="" and String(gd.sex)!=sex: continue
-				var cover:=1.0
-				if String(gd.get("role",""))!="":
-					cover=clampf(float(GameState.population_allocations.get(String(gd.role),0))/maxf(1.0,working),0.0,1.0)
-					trade_part=1.0-(1.0-trade_part)*(1.0-cover)
-				miss*=1.0-cover
-			var share:=1.0-miss
+				if String(gd.get("role",""))=="": whole=true
+				else: roles[String(gd.role)]=clampf(float(GameState.population_allocations.get(String(gd.role),0))/maxf(1.0,working),0.0,1.0)
+			var trade:=0.0
+			for r in roles: trade+=float(roles[r])
+			var share:=1.0 if whole else minf(1.0,trade)
 			if share<=0.0: continue
-			out.append({"cohort":cohort,"sex":sex,"have":have,"target":have*share,"trade":(have*trade_part) if share>0.0 else 0.0})
+			out.append({"cohort":cohort,"sex":sex,"have":have,"target":have*share,"whole":whole,"roles":roles})
 	return out
 
 static func group_count(groups:Array)->int:
@@ -674,15 +798,26 @@ static func _want(cs:Array,share:float,count:int)->int:
 	var rest:Array=[]
 	for c in cs:
 		var exact:=float((c as Dictionary).target)*k
-		var whole:=mini(floori(exact+0.000001),floori(float((c as Dictionary).have)+0.000001))
+		var whole:=mini(floori(exact+0.000001),floori(float((c as Dictionary).target)+0.000001))
 		(c as Dictionary)["want"]=whole; assigned+=whole
 		rest.append({"c":c,"frac":exact-float(whole)})
 	rest.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.frac)>float(b.frac))
 	for item in rest:
 		if assigned>=want: break
 		var c:Dictionary=item.c
-		if int(c.want)+1<=floori(float(c.have)+0.000001): c["want"]=int(c.want)+1; assigned+=1
+		if int(c.want)+1<=floori(float(c.target)+0.000001): c["want"]=int(c.want)+1; assigned+=1
 	return assigned
+
+static func _named(r_in:Dictionary)->Dictionary:
+	## Read only, in the town's own count: {want (to be struck), of (all of
+	## them), people (the town's people)}.
+	return _scoped(String(r_in.get("settlement_id","")),func()->Dictionary:
+		var cs:=cells(r_in.get("groups",[]) as Array)
+		var all:=0
+		for c in cs: all+=floori(float((c as Dictionary).target)+0.000001)
+		var want:=_want(cs,float(r_in.get("share",1.0)),int(r_in.get("count",0)))
+		return {"want":want,"of":all,"people":int(GameState.population_total)}
+	,false)
 
 static func hands()->Dictionary:
 	## Who carries it out: our fighters at home, else the watch, else a few men
@@ -725,10 +860,11 @@ static func _hands_flee(h:Dictionary,n:int)->int:
 # Carrying it out
 # --------------------------------------------------------------------------
 
-static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dictionary,insist:bool,context:Dictionary,said:String="")->Dictionary:
-	## The god's grave order on our own people, decided and carried out (or
-	## asked about). said: the words just spoken (an answer, "do it"), else the
-	## order itself.
+static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dictionary,insist:bool,context:Dictionary,said:String="",confirmed:bool=false)->Dictionary:
+	## The god's grave order on our own people: asked about ("which village?",
+	## "whom exactly?"), read back, or, on the god's yes in the very next line
+	## (confirmed), decided and carried out. said: the words just spoken (an
+	## answer, "yes"), else the order itself.
 	var cc:=_cc()
 	var words:=said if said!="" else String(r_in.get("text",""))
 	cc.call("_echo",id,audience,words,context)
@@ -737,19 +873,37 @@ static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dict
 	var r:Dictionary=cc.call("_result",VERB,actor,{},String(r_in.get("text",words)),insist)
 	r.verb=VERB; r.reaction="grave"
 	r["grave_home"]={"how":String(r_in.get("how","")),"kind":String(r_in.get("kind",""))}
-	if String(r_in.get("kind",""))=="ask":
-		# The same unclear order again after the question: not asked twice.
-		var open:=_pending(audience)
-		if not open.is_empty() and String(open.get("ask",""))=="which_people" and String(open.get("text",""))==String(r_in.get("text","")):
-			return cc.call("_plain_answer",id,audience,words,{"echoed":true},"Nothing is done until you say which village: %s." % _option_words(open.get("options",[]) as Array))
-		audience["pending_command"]={"verb":PENDING_VERB,"ask":"which_people","actor":String(actor.get("key","")),"target":"","day":_day(),"text":String(r_in.text),"reading":r_in.duplicate(true),"options":(r_in.get("options",[]) as Array).duplicate(true),"question":String(r_in.get("question",""))}
-		r.stage="grave_ask"; r.executed=false; r.reaction="neutral"
-		r.actor=speaker.duplicate(); r.actor_name=String(speaker.get("name",""))
-		r.obedience={"id":"object","manner":"plain","chance":0.0}
-		r["actor_says"]=String(r_in.get("question",""))
-		r.outcome="Nothing is done yet: the court waits to hear which village you mean."
-		return r
-	audience.erase("pending_command")
+	var who_asks:=actor if not actor.is_empty() else speaker
+	match String(r_in.get("kind","")):
+		"ask":
+			# The same unclear order again after the question: not asked twice.
+			var open:=_pending(audience)
+			if not open.is_empty() and String(open.get("ask",""))=="which_people" and String(open.get("text",""))==String(r_in.get("text","")):
+				return cc.call("_plain_answer",id,audience,words,{"echoed":true},"Nothing is done until you say which village: %s." % _option_words(open.get("options",[]) as Array))
+			_open(id,audience,{"verb":PENDING_VERB,"ask":"which_people","actor":String(actor.get("key","")),"target":"","day":_day(),"text":String(r_in.text),"reading":r_in.duplicate(true),"options":(r_in.get("options",[]) as Array).duplicate(true),"question":String(r_in.get("question",""))})
+			return _asking(r,speaker,String(r_in.get("question","")),"Nothing is done yet: the court waits to hear which village you mean.","grave_ask")
+		"whom":
+			_drop(id,audience)
+			var q:="Which of them do you mean, exactly? Nothing is done to the %s on those words: name them, or say all of them." % String(r_in.get("words","people")).trim_prefix("the ")
+			return _asking(r,who_asks,q,"Nothing is done: the court waits to hear whom exactly you mean.","grave_whom")
+	# A town of ours named that is ours no longer: never struck in its name.
+	if _town_gone(String(r_in.get("settlement_id",""))):
+		_drop(id,audience)
+		var gone:Dictionary=cc.call("_plain_answer",id,audience,words,{"echoed":true},"Nothing is done: %s is no longer one of our towns." % String(r_in.get("home","that town")))
+		gone.verb=VERB
+		return gone
+	if not confirmed:
+		# The read-back: the order said back with its numbers; only the god's
+		# yes in the very next line here carries it out.
+		var q2:=readback_words(r_in)
+		if q2=="":
+			_drop(id,audience)
+			var none:Dictionary=cc.call("_plain_answer",id,audience,words,{"echoed":true},"There are no %s in %s; nothing is done." % [_label_words(r_in),String(r_in.get("home","the village"))])
+			none.verb=VERB
+			return none
+		_open(id,audience,{"verb":PENDING_VERB,"ask":"readback","actor":String(actor.get("key","")),"target":"","day":_day(),"text":String(r_in.get("text","")),"reading":r_in.duplicate(true),"question":q2})
+		return _asking(r,who_asks,q2,"Nothing is done yet: %s waits for your word." % String(who_asks.get("name","the court")),"grave_readback")
+	_drop(id,audience)
 	var how:=String(r_in.get("how","kill"))
 	var weight:=0.0
 	for g in r_in.get("groups",[]): weight=maxf(weight,float((g as Dictionary).get("weight",0.1)))
@@ -767,7 +921,8 @@ static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dict
 		refused.outcome=String(refused.outcome)+" Nothing was done to %s." % label
 		return refused
 	if String(ob.get("id",""))=="hesitate":
-		audience["pending_command"]={"verb":PENDING_VERB,"hesitate":true,"actor":String(actor.get("key","")),"target":"","day":_day(),"text":String(r_in.get("text","")),"reading":r_in.duplicate(true)}
+		# The plea: only the god's yes in the very next line here settles it.
+		_open(id,audience,{"verb":PENDING_VERB,"ask":"plea","actor":String(actor.get("key","")),"target":"","day":_day(),"text":String(r_in.get("text","")),"reading":r_in.duplicate(true)})
 		r.stage="grave_hesitate"; r.executed=false; r.reaction="troubled"
 		r.outcome="%s has not done it. They hold back and plead for %s; your word still stands." % [String(actor.get("name","The one you ordered")),label]
 		return r
@@ -795,6 +950,27 @@ static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dict
 		DIVINE.record_people_act("terrify_people")
 	return r
 
+static func _asking(r:Dictionary,who:Dictionary,question:String,outcome:String,stage:String)->Dictionary:
+	r.stage=stage; r.executed=false; r.reaction="neutral"
+	r.actor=who.duplicate(); r.actor_name=String(who.get("name",""))
+	r.obedience={"id":"object","manner":"plain","chance":0.0}
+	r["actor_says"]=question
+	r.outcome=outcome
+	return r
+
+static func readback_words(r_in:Dictionary)->String:
+	## The order said back with its numbers: "You would have the 300 women of
+	## Seanstone killed?" "" when there is nobody to do it to.
+	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "our village")
+	var n:=_named(r_in)
+	if String(r_in.get("how",""))=="burn":
+		return "You would have %s burned, our own village, its %d people turned out of their houses?" % [home,int(n.people)]
+	var want:=int(n.want); var all:=int(n.of)
+	if want<=0: return ""
+	var who:=_label_words(r_in)
+	var whom:=("the %d %s of %s" % [want,who,home]) if want>=all else ("%d of the %d %s of %s" % [want,all,who,home])
+	return "You would have %s %s?" % [whom,"driven out of the realm" if String(r_in.get("how",""))=="drive" else "killed"]
+
 static func _act(id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Dictionary:
 	## The act itself, on the ledger: who is named (read in the town's own
 	## count), the hands (home's men), then the act in the town's own count,
@@ -803,23 +979,21 @@ static func _act(id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Dictionar
 	var sid:=String(r_in.get("settlement_id",""))
 	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village")
 	var realm_before:=int(GameState.population_total)
-	var alloc_before:=(GameState.population_allocations as Dictionary).duplicate()
 	var people:=DIVINE.people_regard(Hall._officials())
 	var weight:=0.0
 	for g in r_in.get("groups",[]): weight=maxf(weight,float((g as Dictionary).get("weight",0.1)))
 	var out:={"ok":false,"how":how,"home":home,"hands":0,"willing":0,"refused":0,"hands_fled":0,"dead":0,"moved":0,"escaped":0,"hid":0,"kin_fled":0,"targets":0,"pregnancies_lost":0,"population_before":realm_before}
 	# Women by age are kept from now on, the realm's and every town's alike.
 	if how!="burn": GameState.ensure_female_cohorts()
-	var targets:=0
 	if how!="burn":
-		targets=int(_scoped(sid,func()->int: return group_count(r_in.get("groups",[]) as Array),false))
-		out.targets=targets
-		if targets<=0:
+		var n:=_named(r_in)
+		out.targets=int(n.want)
+		if int(n.want)<=0:
 			out["words"]="There are no %s in %s to %s." % [_label_words(r_in),home,"kill" if how=="kill" else "drive out"]
 			out["population_after"]=int(GameState.population_total)
 			return out
 	var h:=hands()
-	var hs:=_hands_step(h,"burn" if how=="burn" else how,0.1 if how=="burn" else weight,people,rng)
+	var hs:=_hands_step(h,how,0.1 if how=="burn" else weight,people,rng)
 	out.hands=int(hs.n); out["hand_odds"]=float(hs.p); out.refused=int(hs.refused); out.hands_fled=int(hs.fled); out.willing=int(hs.willing)
 	var parts:=PackedStringArray([_hands_words(h,hs)])
 	if int(hs.willing)<=0:
@@ -831,31 +1005,30 @@ static func _act(id:String,r_in:Dictionary,rng:RandomNumberGenerator)->Dictionar
 	if how=="burn": done=_scoped(sid,func()->Dictionary: return _burn(r_in,int(hs.willing),people,rng))
 	else: done=_scoped(sid,func()->Dictionary: return _cull(r_in,int(hs.willing),people,rng))
 	out.merge(done,true)
-	# Those the act itself reached for (whole people of each age and sex).
 	if done.has("asked"): out.targets=int(done.asked)
+	# The work as it now stands in that town: those killed or driven out for
+	# their work are gone from it (each kind by its own losses).
+	if done.get("work_pct") is Dictionary: _set_work(sid,done.work_pct as Dictionary)
 	GameState.synchronize_population_allocations()
-	# The work as it now stands: those killed or driven out for their work are
-	# gone from it (the work split follows the ledger, then the people left).
-	if float(done.get("trade_lost",0.0))>0.0: _work_after(alloc_before,done.get("trade_by_role",{}) as Dictionary)
 	out["population_after"]=int(GameState.population_total)
 	parts.append(String(done.get("words","")))
 	out["words"]=" ".join(parts).strip_edges()
 	return out
 
-static func _work_after(before:Dictionary,lost:Dictionary)->void:
-	## The work split once some of a kind of work were killed or driven out: that
-	## work keeps the people it had less those lost; every other kind keeps its
-	## share of the rest. The split is the ledger's (population_allocations).
-	var roles:Array=GameState.POPULATION_ROLES
-	var kept:={}
-	var total:=0.0
-	for role in roles:
-		kept[role]=maxf(0.0,float(before.get(role,0))-float(lost.get(role,0.0)))
-		total+=float(kept[role])
-	if total<=0.0: return
-	var pct:Dictionary=GameState.population_allocation_percentages
-	for role in roles: pct[role]=float(kept[role])/total*100.0
-	GameState.synchronize_population_allocations()
+static func _set_work(sid:String,pct:Dictionary)->void:
+	## That town's own work split after those killed for their work: the
+	## town's record when it keeps its own split (or is not home), else the
+	## realm's (home's own work).
+	var record:Dictionary={}
+	if sid!="": record=SettlementModel.settlement_record(sid)
+	else:
+		for s in GameState.player_settlements:
+			if s is Dictionary and bool((s as Dictionary).get("primary",false)): record=s
+	if not record.is_empty() and (sid!="" or not (record.get("local_allocations",{}) as Dictionary).is_empty()):
+		record["local_allocations"]=pct.duplicate()
+		return
+	var shares:Dictionary=GameState.population_allocation_percentages
+	for role in pct: shares[role]=float(pct[role])
 
 static func _actor(list:Array[Dictionary],speaker:Dictionary,cc:GDScript)->Dictionary:
 	## The one ordered: the one before the god when they hold office or lead
@@ -935,6 +1108,7 @@ static func _cull(r_in:Dictionary,willing:int,people:Dictionary,rng:RandomNumber
 	var home:=String(r_in.get("home","")) if String(r_in.get("home",""))!="" else (String(GameState.settlement_name) if String(GameState.settlement_name)!="" else "the village")
 	var pop_before:=int(GameState.population_total)
 	var fertile_before:=GameState.fertile_women()
+	var work_before:=(GameState.population_allocations as Dictionary).duplicate()
 	var cs:=cells(r_in.get("groups",[]) as Array)
 	var total:=_want(cs,float(r_in.get("share",1.0)),int(r_in.get("count",0)))
 	var out:={"ok":false,"dead":0,"moved":0,"escaped":0,"hid":0,"kin_fled":0,"pregnancies_lost":0,"asked":total}
@@ -945,14 +1119,12 @@ static func _cull(r_in:Dictionary,willing:int,people:Dictionary,rng:RandomNumber
 	var cap:=willing*(KILLS_PER_HAND if how=="kill" else DRIVE_PER_HAND)*DAYS_MAX
 	var caught_total:=0
 	for c in cs:
-		(c as Dictionary)["caught"]=_binom(rng,int((c as Dictionary).want),p); caught_total+=int((c as Dictionary).caught)
+		(c as Dictionary)["caught"]=_binom(rng,int((c as Dictionary).get("want",0)),p); caught_total+=int((c as Dictionary).caught)
 	# A few hands do a few days' work; the rest run or hide before they come.
 	if caught_total>cap:
 		var scale:=float(cap)/float(caught_total)
 		for c in cs: (c as Dictionary)["caught"]=floori(float((c as Dictionary).caught)*scale)
 	var dead:=0; var moved:=0; var escaped:=0; var hid:=0
-	var trade_by_role:={}
-	var trade_lost:=0.0
 	if how=="kill":
 		var kill_cells:Array=[]
 		for c in cs:
@@ -962,6 +1134,7 @@ static func _cull(r_in:Dictionary,willing:int,people:Dictionary,rng:RandomNumber
 			for c in cs:
 				if String((c as Dictionary).cohort)==String((row as Dictionary).cohort) and String((c as Dictionary).sex)==String((row as Dictionary).sex): (c as Dictionary)["dead"]=int((row as Dictionary).dead)
 		dead=int(died.get("count",0))
+	var work_lost:={}
 	for c in cs:
 		var cd:Dictionary=c
 		var weights:={}
@@ -969,26 +1142,25 @@ static func _cull(r_in:Dictionary,willing:int,people:Dictionary,rng:RandomNumber
 		if how=="kill":
 			# Those not caught run as it begins: most leave the realm, the rest
 			# hide with kin and stay (ESCAPED_LEAVE, a roll each).
-			var rest:=int(cd.want)-int(cd.get("dead",0))
+			var rest:=int(cd.get("want",0))-int(cd.get("dead",0))
 			var leaving:=_binom(rng,rest,ESCAPED_LEAVE)
 			var ran:=0
 			if leaving>0: ran=int(GameState.register_population_departures(leaving,"Fled the killing at the god's word",weights,String(cd.sex)).get("count",0))
 			cd["fled"]=ran; escaped+=ran
-			cd["hid"]=maxi(0,int(cd.want)-int(cd.get("dead",0))-ran); hid+=int(cd.hid)
+			cd["hid"]=maxi(0,int(cd.get("want",0))-int(cd.get("dead",0))-ran); hid+=int(cd.hid)
 			cd["gone"]=int(cd.get("dead",0))+ran
 		else:
 			var gone:=0
 			if int(cd.caught)>0: gone=int(GameState.register_population_departures(int(cd.caught),"Driven out at the god's word",weights,String(cd.sex)).get("count",0))
 			cd["moved"]=gone; moved+=gone
-			cd["hid"]=maxi(0,int(cd.want)-gone); hid+=int(cd.hid)
+			cd["hid"]=maxi(0,int(cd.get("want",0))-gone); hid+=int(cd.hid)
 			cd["gone"]=gone
-		# Those of a kind of work among them: gone from that work.
-		if float(cd.get("trade",0.0))>0.0 and float(cd.target)>0.0:
-			var lost:=float(cd.gone)*float(cd.trade)/float(cd.target)
-			trade_lost+=lost
-			for g in r_in.get("groups",[]):
-				var role:=String((g as Dictionary).get("role",""))
-				if role!="": trade_by_role[role]=float(trade_by_role.get(role,0.0))+lost/float(maxi(1,(r_in.get("groups",[]) as Array).filter(func(x:Dictionary)->bool: return String(x.get("role",""))!="").size()))
+		# Those named only for their work: gone from that work, each kind by its size.
+		if not bool(cd.get("whole",false)) and not (cd.get("roles",{}) as Dictionary).is_empty():
+			var roles:Dictionary=cd.roles
+			var sum:=0.0
+			for role in roles: sum+=float(roles[role])
+			for role in roles: work_lost[role]=float(work_lost.get(role,0.0))+float(cd.gone)*float(roles[role])/maxf(0.000001,sum)
 	# The rest of the people: a share flees the realm after it, the more the
 	# more of their kin were killed or driven out.
 	var fp:=flight_odds(dead+moved,pop_before,people,how)
@@ -1001,12 +1173,25 @@ static func _cull(r_in:Dictionary,willing:int,people:Dictionary,rng:RandomNumber
 	var preg_lost:=0
 	if share_lost>=0.0001: preg_lost=roundi(GameState.lose_pregnancies(share_lost))
 	GameState.synchronize_population_allocations()
+	# The work split those losses leave (applied to the town's own split after).
+	var trade_lost:=0.0
+	for role in work_lost: trade_lost+=float(work_lost[role])
+	if trade_lost>0.0:
+		var kept:={}
+		var sum_kept:=0.0
+		for role in GameState.POPULATION_ROLES:
+			kept[role]=maxf(0.0,float(work_before.get(role,0))-float(work_lost.get(role,0.0)))
+			sum_kept+=float(kept[role])
+		if sum_kept>0.0:
+			var pct:={}
+			for role in GameState.POPULATION_ROLES: pct[role]=float(kept[role])/sum_kept*100.0
+			out["work_pct"]=pct
 	var days:=ceili(float(dead+moved)/float(maxi(1,willing*(KILLS_PER_HAND if how=="kill" else DRIVE_PER_HAND))))
 	out.ok=dead+moved>0
 	out.dead=dead; out.moved=moved; out.escaped=escaped; out.hid=hid; out.kin_fled=kin_gone; out.pregnancies_lost=preg_lost
 	out["catch_odds"]=p; out["flight_odds"]=fp; out["days"]=days
 	out["fertile_before"]=roundi(fertile_before); out["fertile_after"]=roundi(fertile_after)
-	out["trade_lost"]=trade_lost; out["trade_by_role"]=trade_by_role
+	out["trade_lost"]=trade_lost; out["work_lost"]=work_lost
 	out["cells"]=cs
 	var who:=_label_words(r_in)
 	var t:="%s went through %s against %s %s: %s %s each, %s." % [_cap(_count(willing)),home,_count(total),who,"a good chance to" if p>=0.6 else ("an even chance to" if p>=0.4 else "a poor chance to"),"catch" if how=="kill" else "find",Ledger.chance_words(p)]

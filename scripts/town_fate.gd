@@ -992,6 +992,17 @@ static func _carry(civ_id:String,region_id:String,name:String,home:String,status
 		return 0.0
 	var transfer:Dictionary=(mc.occupation_transfers.data.transfers as Array).back()
 	out.arrive_days=int(transfer.get("days",0))
+	# Who they are: the women among them, so our own count of women and men
+	# is true when they arrive (game_state.register_population_arrivals).
+	var women_n:=0.0; var all_n:=0.0
+	for key in units:
+		var n:=float(int(held_caught_by.get(key,0))+int(caught_by.get(key,0)))
+		if n<=0.0: continue
+		var u:Dictionary=units[key]
+		var band:=String(u.get("band",""))
+		var share:=0.0 if String(u.group)=="men" else (1.0 if String(u.group)=="women" else (1.0 if band.begins_with("girls") else (0.0 if band.begins_with("boys") else 0.495)))
+		women_n+=n*share; all_n+=n
+	if all_n>0.0: transfer["female_share"]=women_n/all_n
 	# The ledger: those we held go first, then the free, by unit in
 	# proportion to those caught.
 	var from_held:=mini(count,held_caught)
