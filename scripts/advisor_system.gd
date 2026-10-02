@@ -605,6 +605,21 @@ func _civic_control_is_question(normalized:String)->bool:
 	return false
 
 
+func record_civic_refusal(settlement_id:String,player_text:String,message:String)->void:
+	## Words the council never takes up as an order (grave_home.gd: an order on
+	## our own people is given at court and read back): the god's words and the
+	## plain answer, in the exchange where they were typed.
+	if not player_text.strip_edges().is_empty():
+		_append_civic_dialogue(settlement_id,{
+			"day":int(WorldSimulation.state.elapsed_days),"speaker":"player","speaker_name":"You",
+			"text":player_text.strip_edges().substr(0,500),"status":"not_taken_up",
+		})
+	_append_civic_dialogue(settlement_id,{
+		"day":int(WorldSimulation.state.elapsed_days),"speaker":"record","speaker_name":"COUNCIL RECORD",
+		"text":message,"status":"not_taken_up",
+	})
+
+
 func record_civic_leadership_change(settlement_id:String,player_text:String,result:Dictionary)->void:
 	if not player_text.strip_edges().is_empty():
 		_append_civic_dialogue(settlement_id,{

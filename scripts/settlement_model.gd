@@ -186,6 +186,10 @@ func with_local_population(operation:Callable,commit_demographics:=false)->Varia
 			var resize:=local_population/maxf(1.0,float(population_state.get("population",local_population)))
 			for key in values: values[key]=float(values[key])*resize
 			state.set(field,values)
+		# The realm keeps its women by age (a killing or flight of one sex):
+		# so does this town's count, from before anything is done in it, so
+		# what it changes is added back exactly (game_state.ensure_female_cohorts).
+		if field=="population_cohorts" and (saved.population_cohorts as Dictionary).has(state.FEMALE_PREFIX+"children"): state.ensure_female_cohorts()
 		local_before[field]=(state.get(field) as Dictionary).duplicate(true)
 	state.demographic_remainders=population_state.get("demographic_remainders",{}).duplicate(true)
 	state.death_progress=float(population_state.get("death_progress",float(saved.death_progress)*ratio))
@@ -232,11 +236,24 @@ func with_local_population(operation:Callable,commit_demographics:=false)->Varia
 		state.population_exact=overall;state.population_total=roundi(overall)
 		for field in ["population_cohorts","pregnancy_cohorts"]:
 			var combined:Dictionary=(saved[field] as Dictionary).duplicate(true)
+			# Women by age began to be kept in this town just now: the realm's and
+			# the town's counts from before are read by age the same way first.
+			if field=="population_cohorts" and (after[field] as Dictionary).has(state.FEMALE_PREFIX+"children"):
+				_women_by_age(combined,state); _women_by_age(local_before[field],state)
 			for key in after[field]: combined[key]=maxf(0.0,float(combined.get(key,0.0))+float(after[field][key])-float(local_before[field].get(key,0.0)))
 			state.set(field,combined)
 		if not record.is_empty(): record["population_state"]=after
 	_local_population_scope=false
 	return result
+
+static func _women_by_age(cohorts:Dictionary,state:Variant)->void:
+	## The women of each age cohort, where a count has only its totals: the
+	## same share in every cohort (as game_state.ensure_female_cohorts).
+	var prefix:String=state.FEMALE_PREFIX
+	if cohorts.has(prefix+"children"): return
+	var female:=float(cohorts.get("female",0.0)); var male:=float(cohorts.get("male",0.0))
+	var share:=clampf(female/(female+male),0.0,1.0) if female+male>0.000001 else float(state.BIRTH_FEMALE_SHARE)
+	for key in state.POPULATION_AGE_COHORTS: cohorts[prefix+String(key)]=maxf(0.0,float(cohorts.get(String(key),0.0)))*share
 
 func with_city_resources(settlement_id:String,operation:Callable)->Variant:
 	var state:=WorldSimulation.state

@@ -13,7 +13,8 @@ extends GdUnitTestSuite
 ## raise BASELINE as fixes land (never lower it to hide a regression).
 ##
 ## Environment (all optional):
-##   COURT_EVAL_FILTER   only cases whose id or domain contains this (no threshold then)
+##   COURT_EVAL_FILTER   only cases whose id or domain contains this; several may be
+##                       comma-separated (no threshold then)
 ##   COURT_EVAL_PATHS    e.g. "live" or "offline,sloppy" (no threshold then)
 ##   COURT_EVAL_VERBOSE  1: print the exchange of every failing case
 ##   COURT_EVAL_REPORT   a file path: the full results as JSON (outside user://saves)
@@ -58,8 +59,26 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## only by word: the "trade" domain, 15 more runs a path); the whole
 ## corpus, measured domain by domain, then passed offline 696, live 697,
 ## sloppy 74.
+## Measured again before the next change (every case passing): offline 757,
+## live 758, sloppy 74. Grave orders against our own people (grave_home.gd:
+## the user's "Kill all women in the village" and its lowercase and typed
+## variants, the children, half the farmers, our own village burned, the old
+## driven out, "which village?" with Tsaren held or at war, Tsaren spoken of,
+## a law said of the village: the "grave_home" domain, 14 runs a path, 6
+## careless): offline 771, live 772, sloppy 80.
+## Then what grave words never fall on (a goat, trees, the dead, wolves; men
+## thrown out of the hall), words that are no answer to "which village?", a
+## new order while it is open, and the women and the old counted once: 15
+## more runs a path): offline 786, live 787, sloppy 80.
+## Then the read-back (every grave act on our own people is said back with
+## its numbers and done only on the god's yes in the very next line; the
+## order alone, or with any other line between, does nothing), sentences that
+## forbid, doubt, report or suppose it, objects that end with the verb's own
+## clause, moving people within the realm, people narrowed ("the sick
+## women": whom exactly), part of the village burned: 28 more runs a path):
+## offline 814, live 815, sloppy 80.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":696,"live":697,"sloppy":74}
+const BASELINE:={"offline":866,"live":868,"sloppy":80}
 
 var _processing:Dictionary={}
 
@@ -110,8 +129,11 @@ func test_the_court_listens_and_does_the_right_thing()->void:
 	# in the player's own interaction file.
 	var real_root:=String(Store.user_root)
 	Store.user_root=SPARE_ROOT
+	# Several filters, comma-separated ("grave_group,home_law"), so the corpus
+	# can be run in batches that each finish quickly.
+	var filters:=Array(filter.split(",",false)).map(func(f:String)->String: return f.strip_edges())
 	for c:Dictionary in h.cases:
-		if filter!="" and not (filter in String(c.id) or filter==String(c.get("domain",""))): continue
+		if filter!="" and not filters.any(func(f:String)->bool: return f in String(c.id) or f==String(c.get("domain",""))): continue
 		for path:String in h.paths_of(c):
 			if only!="" and not path in only.split(",",false): continue
 			results.append(h.run(c,path))

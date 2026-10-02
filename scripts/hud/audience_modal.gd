@@ -1303,8 +1303,8 @@ func _speak_rest(text:String)->void:
 	# A settlement leader's civic conversation: plain words (not questions)
 	# go through the civic pipeline, which answers, objects or refuses.
 	if not civic_settlement.is_empty() and resolved_result.is_empty() and not text.ends_with("?") and Hall.divine_intent(audience_id,text).is_empty():
-		_civic_say(text)
-		_card_civic(civic_settlement,speaker_person_id)
+		if _civic_say(text): _card_civic(civic_settlement,speaker_person_id)
+		else: _card_nothing()
 		return
 	# Words that are themselves an act of the god (terror, penance, blessing,
 	# exaltation) are carried out; the room reacts to the act.
@@ -1326,7 +1326,12 @@ func _speak_rest(text:String)->void:
 	if not text.ends_with("?") and String(Commands.classify(text).get("act",""))!="question":_offer_closest(text)
 	# An order given to a summoned official goes to the civic council as a directive.
 	var here:=Hall.find(audience_id)
-	if String(here.get("origin",""))=="court" and Hall.is_directive(text) and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
+	# Killing, burning or driving out our own people never goes to the
+	# council (grave_home.gd reads it back at court): said plainly.
+	if String(here.get("origin",""))=="court" and Commands.GraveHome.names_our_people(text):
+		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":Commands.GraveHome.COUNCIL_NO,"day":int(GameState.elapsed_days),"aside":false})
+		_card_nothing()
+	elif String(here.get("origin",""))=="court" and Hall.is_directive(text) and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 		terrain.issue_civic_directive_text(text)
 		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":"Your words go out to the council as an order.","day":int(GameState.elapsed_days),"aside":false})
 		_card_civic(String(GameState.selected_player_settlement_id),0)
@@ -2972,15 +2977,23 @@ func _refresh_civic_strip(force:bool=false)->void:
 ## speech, carried by the civic pipeline like anything else you say.
 func civic_reply(words:String)->void:
 	if civic_settlement.is_empty() or not resolved_result.is_empty():return
-	_civic_say(words)
+	var _sent:=_civic_say(words)
 
-func _civic_say(text:String)->void:
+func _civic_say(text:String)->bool:
+	## Sends the god's words to the settlement's leader; false when they are
+	## never a council order (an order on our own people: said plainly here).
 	Hall.append_line(audience_id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":int(GameState.elapsed_days),"aside":false})
+	# Killing, burning or driving out our own people is never a council
+	# directive (grave_home.gd): said plainly, nothing set in motion.
+	if Commands.GraveHome.names_our_people(text):
+		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":Commands.GraveHome.COUNCIL_NO,"day":int(GameState.elapsed_days),"aside":false})
+		_pump();return false
 	SettlementModel.select_settlement(civic_settlement)
 	terrain.issue_civic_directive_text(text)
 	_sync_civic()
 	_refresh_civic_strip(true)
 	_pump()
+	return true
 
 func _sync_civic()->void:
 	## Mirror the leader's civic answers into this audience as they arrive.

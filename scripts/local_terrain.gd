@@ -14504,6 +14504,21 @@ func _issue_freeform_order(input: LineEdit) -> void:
 			hud.refresh()
 			hud.request_immediate_dock_refresh()
 		return
+	# Killing, burning or driving out our own people by group is given at
+	# court, read back and done only on the god's yes (grave_home.gd): never a
+	# council directive. The god's words and the plain answer stay in the
+	# council's own exchange, where they were typed.
+	var grave_home:GDScript=load("res://scripts/grave_home.gd")
+	if bool(grave_home.call("names_our_people",text)):
+		input.text=""
+		var refusal:=String(grave_home.get_script_constant_map().get("COUNCIL_NO",""))
+		AdvisorSystem.record_civic_refusal(settlement_id,text,refusal)
+		if travel_status_label: travel_status_label.text=refusal
+		if hud:
+			hud._queue_signature="__stale__"
+			hud.refresh()
+			hud.request_immediate_dock_refresh()
+		return
 	input.editable=false
 	var active_context:Array[Dictionary]=[]
 	for policy in ConsequenceEngine.active_policies(): active_context.append({"id":String(policy.get("id","")),"remaining_days":ceili(float(policy.get("remaining_days",0.0)))})

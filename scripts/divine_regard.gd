@@ -298,7 +298,10 @@ static func fade(person:Dictionary,day:int)->bool:
 
 ## The god's acts on the people as a whole (court_realm_acts.gd), remembered
 ## at every hearth: [dread they leave, love they leave], fading over months.
-const PEOPLE_ACTS:={"terrify_people":[0.08,-0.03],"curse_people":[0.07,-0.06],"harsh_law":[0.04,-0.01],"bless_people":[0.0,0.05],"bless_fields":[0.0,0.04]}
+const PEOPLE_ACTS:={"terrify_people":[0.08,-0.03],"curse_people":[0.07,-0.06],"harsh_law":[0.04,-0.01],"bless_people":[0.0,0.05],"bless_fields":[0.0,0.04],
+	# Grave orders against the god's own people (grave_home.gd): a killing of
+	# them, their own village burned, a group of them driven out of the realm.
+	"slaughter_people":[0.3,-0.25],"burn_village":[0.2,-0.18],"drive_out_people":[0.12,-0.1]}
 
 static func record_people_act(action:String)->void:
 	## One act of the god on the whole people (terror, a curse, a harsh law, a

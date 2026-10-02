@@ -56,6 +56,53 @@ Memory, dread, grudges, reputation, legitimacy, cohesion, later incidents, and
 costs in food, time and guard load all persist. A harsh act is remembered by the
 people it struck, by their neighbours and by the officer who carried it out.
 
+Grave orders against the god's own people ("kill all women in the village",
+"burn our own village", "banish the old") are adjudicated the same way
+(scripts/grave_home.gd). Only an order counts: the verb opens its own clause,
+and a sentence that forbids, doubts, reports or supposes the act ("we must
+not...", "the elders say we should...", "if the harvest fails...") is no
+order. Only people named right after the verb count, within the verb's own
+clause (never a goat, trees, the dead or time; "the sick women" is asked
+about, whom exactly); burning is of the village itself; banishing is out of
+the realm, never out of the hall or into the forest. Every such act is first
+read back with its numbers ("You would have the 300 women of Seanstone
+killed?") and is carried out only on the god's plain yes in the very next
+line of the same audience; any other line drops it. Then the one ordered may
+obey, plead (again, only the very next line settles it) or refuse; each hand
+may refuse or flee; each person named is caught on stated odds, a few days'
+work at most; the dead and the fled come off the population model by age and
+sex (each person once), in that town's own count; births fall while the
+women of child-bearing age are fewer, and only their pregnancies are lost.
+"The village" is asked about when a town we hold, a war or a feud makes it
+unclear; only a short, clear answer settles it.
+
+grave_home is the one choke point: any line that names our own people as the
+object of a killing, a burning or a banishing ends there, read back if it is
+an order ("..., I said" included), else answered plainly that nothing is done
+(forbidden, supposed, reported, on a condition, a standing rule, whom
+exactly). It never falls through to a law, a standing order, the council's
+pipeline (whose repression could register deaths unread) or a town we hold
+read in place of our own named town. Only the plain yes ("yes", "do it", "I
+demand it", "so be it", "that is my word") in the very next line, the same
+day, with the same numbers, carries it out; "now!", "okay", "go on", "you
+heard me" and the like after a read-back, or after one was dropped, do
+nothing, and a read-back clears any older open question of the order reader.
+
+The same holds at the ledger: no directive from the god's words (the council,
+a settlement leader, a law, a standing order, a custom order) kills our own
+people or removes them by its own act. Lethal repression and a killing by the
+order itself (a sacrifice, one example, one person unnamed) are not carried
+out at all, and the court says so plainly ("Nothing is done to anyone: no one
+of ours is put to death or driven out by a standing order..."); any other
+directive is felt in its measures only, its deaths, a deadline's killings and
+its own removal of people (an exile, a banishing) struck
+(consequence_engine.gd, custom_directive.gd). The people's own response
+stays: families who flee a harsh order or a threat of their own accord do
+leave. Laws for wrongdoers stay laws and act on future offenders. Only
+grave_home (read back, then the god's yes) and the judgment of one named
+person register such deaths; accidents of the work and the collapse of a
+great work are the world's own.
+
 ## Officials know their office
 
 Each official answers from an exact fact sheet for their office

@@ -46,6 +46,7 @@ const HomeOrders:=preload("res://scripts/home_orders.gd")
 const PurseOrders:=preload("res://scripts/court_purse_orders.gd")
 const Realm:=preload("res://scripts/court_realm_acts.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
+const GraveHome:=preload("res://scripts/grave_home.gd")
 
 const ACTS:=["question","statement","command","threat","blessing"]
 const VERBS:=["kill","maim","exile","detain","penance","terrify","bless","boon","raise","demote","appoint","give","take","send","war","order"]
@@ -138,7 +139,9 @@ static func classify(text:String)->Dictionary:
 		return out
 	var question:=clean.ends_with("?")
 	if not question:
-		for lead:String in ["what","why","how","who","whom","where","when","tell me","hows","how's","whats","what's","wheres","where's","whos","who's","hw","wat","wht","any news","any word"]:
+		for lead:String in ["what","why","how","who","whom","where","when","tell me","hows","how's","whats","what's","wheres","where's","whos","who's","hw","wat","wht","any news","any word",
+			# Asking the court's mind, never an order ("do you think we should kill the old").
+			"do you think","do you believe","should we","should i","shall we","is it","are we","would it","what if","do we"]:
 			if lower.replace("’","'").begins_with(lead+" "): question=true; break
 	if question:
 		out.act="question"; out.confidence=0.8
@@ -534,6 +537,13 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var audience:=Hall.find(id)
 	var clean:=text.strip_edges().replace("\n"," ").substr(0,400)
 	if audience.is_empty() or String(audience.get("status",""))!="waiting" or clean.is_empty(): return {"handled":false,"act":"statement"}
+	# A grave order against our own people waits on the very next line here
+	# (grave_home.gd): the god's yes to its read-back or plea, or a clear
+	# answer to "which village?", carries it on; any other words drop it and
+	# are heard as themselves, below.
+	if GraveHome.has_pending(audience):
+		var grave_next:=GraveHome.next_line(id,audience,roster(audience),clean,context)
+		if not grave_next.is_empty(): return grave_next
 	var decree:=_sovereign_decree(id,clean,context)
 	if not decree.is_empty(): return decree
 	# Trade with another people (court_trade.gd): the Envoy's business, the
@@ -627,6 +637,18 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	# the war leader still free to object if it cannot be done well.
 	var confirming:=_confirmed_war(id,audience,list,clean,context)
 	if not confirming.is_empty(): return confirming
+	# THE CHOKE POINT for words that name our own people as the object of a
+	# killing, a burning or a banishing ("kill all women in the village",
+	# "from now on kill every woman", "if the harvest fails, kill the old"):
+	# they end in grave_home.gd, read back first when they are an order, else
+	# answered plainly that nothing is done. Never a law, a standing order, the
+	# council's pipeline or a town's fate in their place. A town we hold that
+	# this audience speaks of, or a people of theirs, stays the war orders'.
+	# Insisting words that name them ("kill all the women of Seanstone, I
+	# said") are the order itself, read back like any other.
+	if not foreign:
+		var grave:=GraveHome.reading(clean,audience,list)
+		if not grave.is_empty(): return GraveHome.carry(id,audience,list,grave,false,context)
 	# The realm's own business, read before war (court_realm_acts.gd): the
 	# god's anger or favour on many, a law for our own people, the realm's
 	# name, a verb that falls on one person named in any case, a gift.
@@ -702,6 +724,9 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 			if said==clean: continue
 			var again:=classify(said)
 			if bool(again.insist) or String(again.act)=="question": continue
+			# Words about our own people (grave_home.gd) are never read again from
+			# "now!": only their own read-back and a plain yes carry them out.
+			if not GraveHome.reading(said,audience,list).is_empty(): return _nothing_waiting(id,audience,clean,context,said)
 			var again_people:=harm_to_people(said,again,list)
 			if again_people!="":
 				# "Now!" after "kill all the males of Tsaren": the same war order again.
@@ -1057,6 +1082,7 @@ static func realm_business(id:String,text:String)->bool:
 	if not Realm.nation(clean).is_empty() or not Realm.rename(clean).is_empty(): return true
 	if not Realm.group_act(clean,audience,list,mention).is_empty(): return true
 	if not Realm.law(clean,list,mention).is_empty(): return true
+	if not GraveHome.reading(clean,audience,list).is_empty(): return true
 	if not Realm.gift(clean).is_empty(): return true
 	if not HomeOrders.read(clean).is_empty(): return true
 	if not _appoint_reading(clean,audience,list).is_empty(): return true
@@ -1229,6 +1255,9 @@ static func _people_route(text:String,cls:Dictionary,audience:Dictionary,live:Di
 	## ours or theirs; {verb:"order"} for words about our own people with no
 	## town or foe in them ("kill all the rebels"), which go to the council's
 	## own path like any other order. Never a person in the hall.
+	# Our own town named ("kill all the women of Seanstone"): never a town of
+	# theirs in its place (grave_home.gd answers our own people).
+	if WarOrders.names_our_town(text.to_lower()) and not _names_a_place(text.to_lower()): return {"verb":"order","harm":""}
 	var reading:=_people_reading(text,cls,audience,live,people)
 	# "Put the prisoners to death" with nobody of theirs in our hands: the
 	# captives' own plain answer (we hold none), never a standing order.
@@ -2718,15 +2747,35 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	if custom_directive_handler.is_valid():
 		var handled:Variant=custom_directive_handler.call(text,context)
 		if handled is Dictionary and bool((handled as Dictionary).get("ok",false)): return handled
+	# Killing by the order itself (a sacrifice, one example, one person
+	# unnamed): nothing is done, said plainly and why; never sent on to the
+	# council, never said to go ahead.
+	if not law and GraveHome.names_one_unnamed(text):
+		return {"ok":false,"route":"recorded","outcome":GraveHome.ONE_NO}
+	if not law and CustomDirective.kills_by_order(CustomDirective.offline_plan(text)):
+		return {"ok":false,"route":"recorded","outcome":CustomDirective.NO_READ_BACK}
 	var terrain:Variant=context.get("terrain",null)
 	var sid:=String(context.get("settlement_id",""))
-	var civic:=terrain is Object and is_instance_valid(terrain) and (terrain as Object).has_method("issue_civic_directive_text")
+	# Killing, burning, banishing or harming people (a law on wrongdoers, an
+	# order on "the rebels") never goes to the council's pipeline, whose
+	# repression could register deaths of our own people with no read-back
+	# (grave_home.gd is the one path that may): a standing order that moves
+	# the realm's measures only, its deaths struck from the plan.
+	var grave:=GraveHome.grave_words(text)
+	var civic:=not grave and terrain is Object and is_instance_valid(terrain) and (terrain as Object).has_method("issue_civic_directive_text")
 	if civic and (sid!="" or Hall.is_directive(text)):
 		if sid!="": SettlementModel.select_settlement(sid)
 		(terrain as Object).call("issue_civic_directive_text",text)
 		return {"ok":true,"route":"civic","settlement_id":sid if sid!="" else String(SettlementModel.selected_settlement_snapshot().get("id","")),"outcome":"It goes out to the council to be carried out."}
 	var plan:=CustomDirective.offline_plan(text)
 	if plan.is_empty(): plan=CustomDirective.attempt_plan(text)
+	if CustomDirective.kills_by_order(plan) and not law:
+		return {"ok":false,"route":"recorded","outcome":CustomDirective.NO_READ_BACK}
+	if grave:
+		plan=plan.duplicate(true); plan["no_deaths"]=true; plan.erase("counted_deaths")
+	# A law for our own people ("kill the men who steal") is never read again
+	# as a war order on the way (custom_directive.apply).
+	if law: plan=plan.duplicate(true); plan["law"]=true
 	var policy:=CustomDirective.policy_from_plan(plan)
 	var actor:Dictionary=context.get("actor",{}) if context.get("actor") is Dictionary else {}
 	var execution:=0.8
@@ -2738,6 +2787,9 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	var applied:Dictionary=ConsequenceEngine.apply_directive(CustomDirective.ID,CustomDirective.MAIN_MAGNITUDE,float(policy.get("days",CustomDirective.DEFAULT_DAYS)),"court_command",
 		{"source_order_id":order_id,"directive_parameters":policy.get("directive_parameters",{})},execution)
 	if not bool(applied.get("applied",false)):
+		# Refused for what it would do to our own people: said so, never sent on.
+		if String(applied.get("error",""))==CustomDirective.NO_READ_BACK:
+			return {"ok":false,"route":"recorded","outcome":CustomDirective.NO_READ_BACK}
 		if civic:
 			(terrain as Object).call("issue_civic_directive_text",text)
 			return {"ok":true,"route":"civic","settlement_id":sid if sid!="" else String(SettlementModel.selected_settlement_snapshot().get("id","")),"outcome":"It goes out to the council to be carried out."}
@@ -2989,5 +3041,14 @@ static func decided_words(result:Dictionary)->String:
 		elif verdict=="object": parts.append("%s OBJECTS: nothing has marched. They explain why and what would fix it; if the god insists they will go." % actor)
 		elif String((result.get("war",{}) as Dictionary).get("reason",""))=="already_marching": parts.append("Nothing NEW is ordered: the army the god sent is ALREADY on the road; say so plainly with the place and the days left. Never promise to go again.")
 		else: parts.append("It CANNOT be done as ordered: nothing has marched. Say plainly why and what would change that. Never promise to go.")
+	if String(result.get("verb",""))==GraveHome.VERB:
+		# The god's own people (grave_home.gd): the numbers decided, said soberly.
+		var stage:=String(result.get("stage",""))
+		if stage==GraveHome.VERB: parts.append("This WAS done to the god's OWN people, exactly as written: keep every number; tell it soberly in plain words, with no gore and nothing of how anyone died; children are only counted, never described. Never add deaths, never say it was not done.")
+		elif stage=="grave_ask": parts.append("NOTHING has been done yet; ONE question is asked, exactly as given: "+String(result.get("actor_says","")))
+		elif stage=="grave_whom": parts.append("NOTHING is done, and nothing waits on an answer: say plainly, as given, that the order must be given again naming exactly whom. Ask no question: "+String(result.get("actor_says","")))
+		elif stage=="grave_readback": parts.append("NOTHING has been done yet: %s reads the order back ONCE, with its numbers exactly as given, and waits; it is done only if the god says yes now: %s" % [String(result.get("actor_name","the official")),String(result.get("actor_says",""))])
+		elif stage=="grave_hesitate": parts.append("NOTHING has been done to the people yet.")
+		else: parts.append("NOTHING was done to the people named, and nothing will be on these words; say why, plainly. Never say it was done or is being done.")
 	if bool(result.get("removed",false)) and String(result.get("target_name",""))!="": parts.append("%s is gone and does not speak." % String(result.target_name))
 	return " ".join(parts)

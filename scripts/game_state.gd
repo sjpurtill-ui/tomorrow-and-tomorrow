@@ -9,6 +9,14 @@ const TRACE:=preload("res://scripts/performance_trace.gd")
 ## conceptions: about 0.65 of the baseline is conceived in ordinary founding
 ## conditions, and a pregnancy lasts about three quarters of a year.
 const FOUNDING_PREGNANCY_SHARE:=0.5
+## Girls among the newborn, and women among the grown of a people nobody has
+## culled: the share the birth model reads its mothers against.
+const BIRTH_FEMALE_SHARE:=0.495
+## The women in each age cohort, kept only once a people's women and men have
+## been struck apart (a killing or a flight of one sex: ensure_female_cohorts):
+## "female_children", "female_youth"... Ordinary peoples keep none and read
+## BIRTH_FEMALE_SHARE of every cohort, exactly as before.
+const FEMALE_PREFIX:="female_"
 
 const POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics","Knowledge","Administration","Defense"]
 const PRODUCTIVE_POPULATION_ROLES := ["Food","Survey","Extraction","Construction","Crafting","Logistics"]
@@ -773,10 +781,15 @@ func _normalize_population_cohorts() -> void:
 		return
 	# Reads and loads revisit this method. Do not rescale already conserved
 	# cohorts for floating-point summation noise; that made inspection mutate them.
+	var by_sex:=has_female_cohorts()
 	if absf(current-target)>maxf(1.0,target)*1e-12:
 		var scale:=target/current
 		for key in POPULATION_AGE_COHORTS:
 			population_cohorts[key]=maxf(0.0,float(population_cohorts.get(key,0.0))*scale)
+			if by_sex: population_cohorts[FEMALE_PREFIX+key]=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))*scale
+	if by_sex:
+		for key in POPULATION_AGE_COHORTS:
+			population_cohorts[FEMALE_PREFIX+key]=clampf(float(population_cohorts.get(FEMALE_PREFIX+key,0.0)),0.0,float(population_cohorts.get(key,0.0)))
 	_refresh_population_summary()
 
 func _refresh_population_summary() -> void:
@@ -790,7 +803,13 @@ func _refresh_population_summary() -> void:
 	var female:=maxf(0.0,float(population_cohorts.get("female",0.0)))
 	var male:=maxf(0.0,float(population_cohorts.get("male",0.0)))
 	var sex_total:=female+male
-	if sex_total<=0.000001:
+	if has_female_cohorts():
+		# The women by age are the count; the totals are read from them.
+		female=0.0
+		for key in POPULATION_AGE_COHORTS: female+=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))
+		female=clampf(female,0.0,population_exact)
+		male=population_exact-female
+	elif sex_total<=0.000001:
 		female=population_exact*0.495
 		male=population_exact-female
 	elif absf(sex_total-population_exact)>maxf(1.0,population_exact)*1e-12:
@@ -824,7 +843,66 @@ func estimated_active_pregnancies() -> int:
 	return roundi(float(pregnancy_cohorts.get("first_trimester",0.0))+float(pregnancy_cohorts.get("second_trimester",0.0))+float(pregnancy_cohorts.get("third_trimester",0.0)))
 
 func _reproductive_age_population() -> float:
+	# The women of child-bearing ages: each cohort's share of mothers against an
+	# ordinary cohort's (1 unless its women were killed or driven off; girls and
+	# old women are never counted; men lost never change it).
+	return float(population_cohorts.get("youth",0.0))*0.45*_mothers_ratio("youth")+float(population_cohorts.get("early_adults",0.0))*0.50*_mothers_ratio("early_adults")+float(population_cohorts.get("established_adults",0.0))*0.45*_mothers_ratio("established_adults")+float(population_cohorts.get("mature_adults",0.0))*0.16*_mothers_ratio("mature_adults")
+
+func _fertile_age_weight() -> float:
 	return float(population_cohorts.get("youth",0.0))*0.45+float(population_cohorts.get("early_adults",0.0))*0.50+float(population_cohorts.get("established_adults",0.0))*0.45+float(population_cohorts.get("mature_adults",0.0))*0.16
+
+func has_female_cohorts() -> bool:
+	return population_cohorts.has(FEMALE_PREFIX+"children")
+
+func ensure_female_cohorts() -> void:
+	## Begin keeping the women of each age cohort (before a killing or a flight
+	## of one sex): every cohort gets the realm's own share of women.
+	if has_female_cohorts() or population_cohorts.is_empty(): return
+	var female:=float(population_cohorts.get("female",0.0))
+	var male:=float(population_cohorts.get("male",0.0))
+	var share:=clampf(female/(female+male),0.0,1.0) if female+male>0.000001 else BIRTH_FEMALE_SHARE
+	for key in POPULATION_AGE_COHORTS: population_cohorts[FEMALE_PREFIX+key]=maxf(0.0,float(population_cohorts.get(key,0.0)))*share
+
+func women_in(cohorts:Array) -> float:
+	## The women among these age cohorts, from the population model.
+	var total:=0.0
+	var by_sex:=has_female_cohorts()
+	var share:=float(population_cohorts.get("female",0.0))/maxf(0.000001,population_exact) if population_cohorts.has("female") else BIRTH_FEMALE_SHARE
+	for key in cohorts:
+		var n:=maxf(0.0,float(population_cohorts.get(String(key),0.0)))
+		total+=clampf(float(population_cohorts.get(FEMALE_PREFIX+String(key),0.0)),0.0,n) if by_sex else n*share
+	return total
+
+func _mothers_ratio(cohort:String) -> float:
+	if not has_female_cohorts(): return 1.0
+	var n:=float(population_cohorts.get(cohort,0.0))
+	if n<=0.000001: return 1.0
+	var r:=maxf(0.0,float(population_cohorts.get(FEMALE_PREFIX+cohort,0.0)))/(BIRTH_FEMALE_SHARE*n)
+	return 1.0 if absf(r-1.0)<1e-9 else r
+
+func fertile_women() -> float:
+	## Women of an age to bear children (the birth model's own reckoning).
+	return _reproductive_age_population()
+
+func fertile_women_factor() -> float:
+	## The mothers a people has against an ordinary people of its size and ages:
+	## 1 unless its women of child-bearing ages were killed or driven off.
+	var base:=_fertile_age_weight()
+	if base<=0.000001: return 1.0
+	var factor:=_reproductive_age_population()/base
+	return 1.0 if absf(factor-1.0)<1e-9 else factor
+
+func lose_pregnancies(share:float) -> float:
+	## Mothers-to-be killed or driven off take their pregnancies with them:
+	## that share of every stage is gone. Returns the pregnancies lost.
+	var s:=clampf(share,0.0,1.0)
+	if s<=0.0: return 0.0
+	var lost:=0.0
+	for key in ["first_trimester","second_trimester","third_trimester","postpartum"]:
+		var v:=float(pregnancy_cohorts.get(key,0.0))
+		if key!="postpartum": lost+=v*s
+		pregnancy_cohorts[key]=v*(1.0-s)
+	return lost
 
 func pregnancy_summary() -> Dictionary:
 	initialize_population_model()
@@ -868,9 +946,14 @@ func _advance_age_cohorts_one_day() -> void:
 	for transition in [["children","youth"],["youth","early_adults"],["early_adults","established_adults"],["established_adults","mature_adults"],["mature_adults","elders"]]:
 		var source:=String(transition[0])
 		var destination:=String(transition[1])
-		var moving:=float(population_cohorts.get(source,0.0))/float(POPULATION_COHORT_DURATIONS_DAYS[source])
-		population_cohorts[source]=maxf(0.0,float(population_cohorts.get(source,0.0))-moving)
+		var before:=float(population_cohorts.get(source,0.0))
+		var moving:=before/float(POPULATION_COHORT_DURATIONS_DAYS[source])
+		population_cohorts[source]=maxf(0.0,before-moving)
 		population_cohorts[destination]=float(population_cohorts.get(destination,0.0))+moving
+		if has_female_cohorts() and before>0.000001:
+			var women:=float(population_cohorts.get(FEMALE_PREFIX+source,0.0))*moving/before
+			population_cohorts[FEMALE_PREFIX+source]=maxf(0.0,float(population_cohorts.get(FEMALE_PREFIX+source,0.0))-women)
+			population_cohorts[FEMALE_PREFIX+destination]=float(population_cohorts.get(FEMALE_PREFIX+destination,0.0))+women
 
 func _accumulate_demographic_count(key:String,amount:float) -> int:
 	var accumulated:=maxf(0.0,float(demographic_remainders.get(key,0.0))+maxf(0.0,amount))
@@ -896,8 +979,12 @@ func _mortality_weights_for(cause:String) -> Dictionary:
 		"Neonatal complications": return {"children":1.0,"youth":0.0,"early_adults":0.0,"established_adults":0.0,"mature_adults":0.0,"elders":0.0}
 		_: return {"children":0.8,"youth":0.25,"early_adults":0.32,"established_adults":0.55,"mature_adults":1.25,"elders":3.2}
 
-func _remove_population_exact(amount:float,cause:String,weight_override:Dictionary={},record_mortality:bool=true) -> float:
+func _remove_population_exact(amount:float,cause:String,weight_override:Dictionary={},record_mortality:bool=true,sex:String="") -> float:
+	## sex "female"/"male": only women (or men) of the cohorts are taken, and the
+	## women of each cohort are kept from then on (ensure_female_cohorts).
 	initialize_population_model()
+	if sex in ["female","male"]: ensure_female_cohorts()
+	var by_sex:=has_female_cohorts()
 	var actual:=clampf(amount,0.0,maxf(0.0,population_exact-1.0))
 	last_population_removal_by_cohort={}
 	if actual<=0.0: return 0.0
@@ -910,21 +997,26 @@ func _remove_population_exact(amount:float,cause:String,weight_override:Dictiona
 		if remaining<=0.000001: break
 		var weighted_total:=0.0
 		for key in POPULATION_AGE_COHORTS:
-			var available:=float(population_cohorts.get(key,0.0))
+			var available:=_removable(key,sex)
 			if available>0.000001: weighted_total+=available*maxf(0.0,float(weights.get(key,1.0)))
 		var use_fallback:=weighted_total<=0.000001
 		if use_fallback:
-			for key in POPULATION_AGE_COHORTS: weighted_total+=float(population_cohorts.get(key,0.0))
+			for key in POPULATION_AGE_COHORTS: weighted_total+=_removable(key,sex)
 		if weighted_total<=0.000001: break
 		var pass_remaining:=remaining
 		var removed_this_pass:=0.0
 		for key in POPULATION_AGE_COHORTS:
-			var available:=float(population_cohorts.get(key,0.0))
+			var available:=_removable(key,sex)
 			if available<=0.000001: continue
 			var basis:=available if use_fallback else available*maxf(0.0,float(weights.get(key,1.0)))
 			if basis<=0.0: continue
 			var removed:=minf(available,pass_remaining*basis/weighted_total)
-			population_cohorts[key]=available-removed
+			var cohort_before:=float(population_cohorts.get(key,0.0))
+			population_cohorts[key]=maxf(0.0,cohort_before-removed)
+			if by_sex:
+				var women:=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))
+				var women_gone:=removed if sex=="female" else (0.0 if sex=="male" else (women*removed/cohort_before if cohort_before>0.000001 else 0.0))
+				population_cohorts[FEMALE_PREFIX+key]=maxf(0.0,women-women_gone)
 			last_population_removal_by_cohort[key]=float(last_population_removal_by_cohort.get(key,0.0))+removed
 			if record_mortality:
 				mortality_by_age_cohort[key]=float(mortality_by_age_cohort.get(key,0.0))+removed
@@ -941,14 +1033,29 @@ func _remove_population_exact(amount:float,cause:String,weight_override:Dictiona
 	if TRACE.enabled and self==GameState:TRACE.flow("death" if record_mortality else "departure",cause,removed_total)
 	return removed_total
 
+## What of a cohort a removal may take: all of it, or its women, or its men.
+func _removable(key:String,sex:String) -> float:
+	var n:=maxf(0.0,float(population_cohorts.get(key,0.0)))
+	if not sex in ["female","male"] or not has_female_cohorts(): return n
+	var women:=clampf(float(population_cohorts.get(FEMALE_PREFIX+key,0.0)),0.0,n)
+	return women if sex=="female" else n-women
+
 var lifetime_departures := 0
 
-func register_population_departures(count:int,reason:String,age_weights:Dictionary={}) -> Dictionary:
+func register_population_departures(count:int,reason:String,age_weights:Dictionary={},sex:String="") -> Dictionary:
 	## People who leave the civilization alive — staying with foreign bands,
 	## marrying out. Reduces the population without touching mortality records.
+	## sex "female"/"male": only women (or men) left, and the realm's count of
+	## each says so (as register_directive_population_deaths keeps it).
 	initialize_population_model()
 	var actual:=mini(maxi(0,count),maxi(0,population_total-1))
-	var removed:=_remove_population_exact(float(actual),reason,age_weights,false)
+	if sex in ["female","male"]:
+		ensure_female_cohorts()
+		var eligible:=0.0
+		for key in POPULATION_AGE_COHORTS:
+			if age_weights.is_empty() or float(age_weights.get(key,0.0))>0.0: eligible+=_removable(key,sex)
+		actual=mini(actual,floori(eligible+0.000001))
+	var removed:=_remove_population_exact(float(actual),reason,age_weights,false,sex)
 	var emitted:=roundi(removed)
 	lifetime_departures+=emitted
 	synchronize_population_allocations()
@@ -1076,8 +1183,6 @@ func register_directive_population_deaths(count:int,directive_id:String,descript
 	# illness, hunger, travel, and war, and leaves at least one living person.
 	var safe_id:=directive_id.strip_edges().to_lower().replace(" ","_").substr(0,80)
 	var cause:="Directive: %s" % safe_id.replace("_"," ").capitalize()
-	var prior_female:=float(population_cohorts.get("female",population_exact*0.495))
-	var prior_male:=float(population_cohorts.get("male",population_exact-prior_female))
 	var age_weights:Dictionary={}
 	var selected_cohorts:Array=target.get("age_cohorts",[])
 	if not selected_cohorts.is_empty():
@@ -1087,17 +1192,16 @@ func register_directive_population_deaths(count:int,directive_id:String,descript
 		eligible=0.0
 		for key_variant in selected_cohorts: eligible+=maxf(0.0,float(population_cohorts.get(String(key_variant),0.0)))
 	var target_sex:=String(target.get("sex",""))
-	if target_sex=="female": eligible=minf(eligible,prior_female)
-	elif target_sex=="male": eligible=minf(eligible,prior_male)
-	var actual_request:=mini(maxi(0,count),maxi(0,floori(eligible)))
-	var removed:=_remove_population_exact(float(actual_request),cause,age_weights)
+	if target_sex in ["female","male"]:
+		# Only the women (or men) of those ages: kept by age from now on.
+		initialize_population_model()
+		ensure_female_cohorts()
+		eligible=0.0
+		for key in POPULATION_AGE_COHORTS:
+			if selected_cohorts.is_empty() or selected_cohorts.has(key): eligible+=_removable(key,target_sex)
+	var actual_request:=mini(maxi(0,count),maxi(0,floori(eligible+0.000001)))
+	var removed:=_remove_population_exact(float(actual_request),cause,age_weights,true,target_sex if target_sex in ["female","male"] else "")
 	var emitted:=roundi(removed)
-	if target_sex=="female":
-		population_cohorts["female"]=maxf(0.0,prior_female-removed)
-		population_cohorts["male"]=prior_male
-	elif target_sex=="male":
-		population_cohorts["female"]=prior_female
-		population_cohorts["male"]=maxf(0.0,prior_male-removed)
 	_refresh_population_summary()
 	lifetime_deaths+=emitted
 	_record_vital_statistics(0,emitted)
@@ -1118,10 +1222,69 @@ func register_directive_population_deaths(count:int,directive_id:String,descript
 	result["record"]=record
 	return result
 
-func register_population_arrivals(count:int,source:String="new arrivals",cohort_profile:Dictionary={}) -> Dictionary:
+func register_population_deaths_by_cell(cells:Array,directive_id:String,description:String,label:String="")->Dictionary:
+	## Deaths of people named by age and sex ([{cohort, sex, count}]): each off
+	## its own cohort, its women or its men, never more than are there; one
+	## record in the demographic ledger. {count, cells (each with its dead),
+	## population_after}.
+	initialize_population_model()
+	var safe_id:=directive_id.strip_edges().to_lower().replace(" ","_").substr(0,80)
+	var cause:="Directive: %s" % safe_id.replace("_"," ").capitalize()
+	var done:Array=[]
+	var total:=0
+	var affected:={}
+	for c in cells:
+		if not c is Dictionary: continue
+		var cohort:=String((c as Dictionary).get("cohort",""))
+		var sex:=String((c as Dictionary).get("sex",""))
+		if not cohort in POPULATION_AGE_COHORTS: continue
+		if sex in ["female","male"]: ensure_female_cohorts()
+		var want:=mini(maxi(0,int((c as Dictionary).get("count",0))),floori(_removable(cohort,sex)+0.000001))
+		want=mini(want,maxi(0,floori(population_exact-1.0)))
+		var dead:=0
+		if want>0:
+			var weights:={}
+			for key in POPULATION_AGE_COHORTS: weights[key]=1.0 if key==cohort else 0.0
+			dead=roundi(_remove_population_exact(float(want),cause,weights,true,sex))
+			affected[cohort]=float(affected.get(cohort,0.0))+float(dead)
+		var row:=(c as Dictionary).duplicate(); row["dead"]=dead
+		done.append(row); total+=dead
+	_refresh_population_summary()
+	lifetime_deaths+=total
+	_record_vital_statistics(0,total)
+	synchronize_population_allocations()
+	var result:={"count":total,"cells":done,"cause":cause,"population_after":population_total}
+	if total<=0: return result
+	var day:=int(elapsed_days)
+	var record:Dictionary={
+		"id":"directive_deaths_%d_%d" % [day,demographic_ledger.size()],"day":day,"start_day":day,"end_day":day,
+		"title":"%d %s during %s" % [total,"death" if total==1 else "deaths",safe_id.replace("_"," ")],"description":description.substr(0,320),
+		"domain":"population","severity":"demographic","kind":"death","count":total,"cause":cause,
+		"location":"Civilization under directive","population_after":population_total,"source_order_id":"",
+		"affected_cohorts":affected,"demographic_target":{"cells":cells.duplicate(true),"label":label},"target_label":label,"aggregate":true
+	}
+	demographic_ledger.push_front(record)
+	if demographic_ledger.size()>120: demographic_ledger.resize(120)
+	result["record"]=record
+	return result
+
+func register_population_arrivals(count:int,source:String="new arrivals",cohort_profile:Dictionary={},female_share:float=-1.0,female_shares:Dictionary={}) -> Dictionary:
+	## female_shares: the share of women and girls in each age cohort when the
+	## arrivals' make-up is known (captives taken home: town_fate.gd, the women
+	## and girls, men and boys as they were chosen); it wins. female_share: the
+	## women among them as one share when only that is known; otherwise about
+	## half. Arrivals of one sex start the count of women by age
+	## (ensure_female_cohorts), so that count stays true.
 	initialize_population_model()
 	var actual:=maxi(0,count)
 	if actual<=0: return {"count":0,"source":source,"population_after":population_total,"cohorts":{}}
+	var by_age:=not female_shares.is_empty()
+	var share_known:=female_share>=0.0 and is_finite(female_share)
+	var arriving_women:=clampf(female_share,0.0,1.0) if share_known else BIRTH_FEMALE_SHARE
+	if share_known and absf(arriving_women-BIRTH_FEMALE_SHARE)>0.02: ensure_female_cohorts()
+	if by_age:
+		for key in female_shares:
+			if absf(float(female_shares[key])-BIRTH_FEMALE_SHARE)>0.02: ensure_female_cohorts(); break
 	var weights:=cohort_profile.duplicate(true)
 	if weights.is_empty():
 		# Small mobile groups skew toward working ages while still allowing
@@ -1131,9 +1294,21 @@ func register_population_arrivals(count:int,source:String="new arrivals",cohort_
 	for key in POPULATION_AGE_COHORTS: total_weight+=maxf(0.0,float(weights.get(key,0.0)))
 	if total_weight<=0.000001: total_weight=1.0
 	var added:Dictionary={}
+	# One share only, neither all of one sex nor none: children arrive about
+	# half girls, as born, and the grown carry the rest, so the women among them
+	# still come to the share given (clamped when the children alone exceed it).
+	# All of one sex ("the women and girls"): every age, children too.
+	var children:=float(actual)*maxf(0.0,float(weights.get("children",0.0)))/total_weight
+	var grown_women:=arriving_women
+	var one_sex:=arriving_women<=0.0001 or arriving_women>=0.9999
+	if share_known and not one_sex and float(actual)-children>0.0:
+		grown_women=clampf((arriving_women*float(actual)-children*BIRTH_FEMALE_SHARE)/(float(actual)-children),0.0,1.0)
 	for key in POPULATION_AGE_COHORTS:
 		var amount:=float(actual)*maxf(0.0,float(weights.get(key,0.0)))/total_weight
 		population_cohorts[key]=float(population_cohorts.get(key,0.0))+amount
+		var women_share:=BIRTH_FEMALE_SHARE if key=="children" and share_known and not one_sex else grown_women
+		if by_age: women_share=clampf(float(female_shares.get(key,BIRTH_FEMALE_SHARE)),0.0,1.0)
+		if has_female_cohorts(): population_cohorts[FEMALE_PREFIX+key]=float(population_cohorts.get(FEMALE_PREFIX+key,0.0))+amount*women_share
 		added[key]=amount
 	population_exact+=float(actual)
 	if TRACE.enabled and self==GameState:TRACE.flow("arrival",source,float(actual))
@@ -1155,7 +1330,8 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	var absent_adults:=maxf(0.0,float(context.get("absent_adults",0.0)))
 	var away_share:=clampf(absent_adults/maxf(1.0,float(population_cohorts.get("working_age",population_exact*0.6))),0.0,1.0)
 	var eligible:=maxf(0.0,reproductive_population*(1.0-away_share)-active-postpartum*0.55)
-	var baseline_annual:=float(population_cohorts.get("youth",0.0))*0.45*0.23+float(population_cohorts.get("early_adults",0.0))*0.50*0.285+float(population_cohorts.get("established_adults",0.0))*0.45*0.18+float(population_cohorts.get("mature_adults",0.0))*0.16*0.040
+	# Fewer women of child-bearing age, fewer mothers (1 in an ordinary people).
+	var baseline_annual:=float(population_cohorts.get("youth",0.0))*0.45*0.23*_mothers_ratio("youth")+float(population_cohorts.get("early_adults",0.0))*0.50*0.285*_mothers_ratio("early_adults")+float(population_cohorts.get("established_adults",0.0))*0.45*0.18*_mothers_ratio("established_adults")+float(population_cohorts.get("mature_adults",0.0))*0.16*0.040*_mothers_ratio("mature_adults")
 	var availability:=clampf(eligible/maxf(1.0,reproductive_population),0.0,1.0)
 	var annual_conceptions:=baseline_annual*_conception_condition_factor(context)*availability*clampf(float(context.get("conception_care",1.0)),0.3,2.0)
 	annual_conceptions*=1.0-clampf(float(context.get("fertility_transition",0.0)),0.0,0.85) # research_3000: births couples choose not to have
@@ -1185,9 +1361,12 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	pregnancy_cohorts["postpartum"]=maxf(0.0,postpartum+deliveries-postpartum/365.0)
 	population_cohorts["children"]=float(population_cohorts.get("children",0.0))+live_births_exact
 	population_exact+=live_births_exact
+	# Newborns come about half girls, whatever became of their mothers' generation:
+	# a people that lost its women regains them as the girls grow up.
+	if has_female_cohorts(): population_cohorts[FEMALE_PREFIX+"children"]=float(population_cohorts.get(FEMALE_PREFIX+"children",0.0))+live_births_exact*BIRTH_FEMALE_SHARE
 	if TRACE.enabled and self==GameState:TRACE.flow("birth","Live births",live_births_exact)
 	_remove_population_exact(neonatal_deaths_exact,"Neonatal complications")
-	_remove_population_exact(maternal_deaths_exact,"Complications of childbirth")
+	_remove_population_exact(maternal_deaths_exact,"Complications of childbirth",{},true,"female" if has_female_cohorts() else "")
 	_normalize_population_cohorts()
 	var conceptions_count:=_accumulate_demographic_count("conceptions",conceptions_exact)
 	var births_count:=_accumulate_demographic_count("births",live_births_exact)

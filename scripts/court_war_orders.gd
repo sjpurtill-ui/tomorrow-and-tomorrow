@@ -857,6 +857,25 @@ static func _option_named(lower:String,options:Array)->Dictionary:
 			if _has(lower,String(key)): return option
 	return {}
 
+static func names_our_town(lower:String)->bool:
+	## Do the words name one of our own towns (home, or a town of ours)? Such
+	## words are never read as a town of theirs we hold (grave_home.gd).
+	var names:Array=[String(WorldSimulation.state.settlement_name) if WorldSimulation.state!=null else ""]
+	if WorldSimulation.state!=null:
+		for s in WorldSimulation.state.player_settlements:
+			if s is Dictionary: names.append(String((s as Dictionary).get("name","")))
+	for n in names:
+		# Only where people are, never where they are taken ("take the girls
+		# back to Seanstone"): that is the war orders' own business.
+		var said:=_re("\\b(to|into|towards?|unto)\\s+(our\\s+|the\\s+)?%s\\b" % _escape(String(n).to_lower())).sub(lower," ",true) if String(n)!="" else lower
+		if String(n)!="" and _name_hit(said,String(n)):
+			# Not a town of theirs we hold that shares a word with it.
+			var theirs:=false
+			for t:Dictionary in held_towns()+known_places():
+				if _name_hit(lower,String(t.name)) and String(t.name).to_lower()==String(n).to_lower(): theirs=true
+			if not theirs: return true
+	return false
+
 static func _implied_town(clean:String,lower:String,named:Dictionary,army:bool,audience_id:String)->Dictionary:
 	## A fate order that names no town. With one town held, it is that town;
 	## with several, the one spoken of in this audience, else the one taken
@@ -865,6 +884,8 @@ static func _implied_town(clean:String,lower:String,named:Dictionary,army:bool,a
 	## ("no_town"): there is nobody of theirs in our hands.
 	var fate:=TownFate.fate_words(lower)
 	if not TownFate.implicit(fate,lower): return {}
+	# Our own town named, and no town of theirs: never the town we hold.
+	if names_our_town(lower) and named.is_empty(): return {}
 	# A town of ours that nobody of ours holds, named: what is true of it
 	# (take_first says who holds it and what became of those we held).
 	if bool(named.get("unguarded",false)) and _name_hit(lower,String(named.get("name",""))):
@@ -939,6 +960,11 @@ static func group_harm_reading(text:String,verb:String="kill",object:String="",c
 	fate["group"]=true
 	var base:={"fate":fate,"full":false,"insist":_has(lower,INSIST_WORDS),"place":"","army_words":false,"text":clean.substr(0,300),"harm":verb,"group_harm":true}
 	var target:=find_target(clean+(" "+object if object!="" else ""),context_civ)
+	# Our own town named, and no town of theirs: never the town we hold in its
+	# place. Nobody of theirs is meant; said plainly.
+	if target.is_empty() and names_our_town(lower):
+		var ours:=base.duplicate(); ours["kind"]="no_town"; ours["target"]={}; ours["ours"]=true
+		return ours
 	if target.is_empty() or target.has("ambiguous"):
 		var spoken:=_place_in_audience(audience_id)
 		if not spoken.is_empty(): target=spoken
@@ -1844,6 +1870,11 @@ static func _which_town(out:Dictionary,reading:Dictionary)->Dictionary:
 
 static func _no_town(out:Dictionary,reading:Dictionary)->Dictionary:
 	## Violence to a people when we hold none of their towns: said plainly.
+	# Our own town named (names_our_town): never a town of theirs in its place.
+	if bool(reading.get("ours",false)):
+		var own:=_no(out,"no_town","That is our own town: the war leader lays no hand on our own people.","Speak to the court plainly if you mean our own people.")
+		own.outcome="Nothing is done."
+		return own
 	var fate:Dictionary=reading.get("fate",{})
 	var what:="to kill or carry off" if bool(fate.get("kill_men",false)) and bool(fate.get("captives",false)) else ("to kill" if bool(fate.get("kill_men",false)) else "to carry off")
 	# Towns we took and no longer hold: named, so the god hears why.

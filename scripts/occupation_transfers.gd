@@ -141,7 +141,7 @@ func _arrive(transfer:Dictionary,day:int)->void:
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if not bool(city.get("primary",false)): counts[String(city.id)]=WorldSimulation.settlements._settlement_population(city)
 	var people:=int(transfer.people)
-	WorldSimulation.state.register_population_arrivals(people,"Arrivals from "+String(transfer.origin_name),transfer.cohorts)
+	WorldSimulation.state.register_population_arrivals(people,"Arrivals from "+String(transfer.origin_name),transfer.cohorts,float(transfer.get("female_share",-1.0)),transfer.get("female_shares",{}) if transfer.get("female_shares") is Dictionary else {})
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if counts.has(String(city.id)): city.population_share=(float(counts[String(city.id)])+(people if String(city.id)==String(transfer.destination) else 0))/WorldSimulation.state.population_exact
 	for group:Dictionary in data.groups: group.share=float(group.share)*old_population/WorldSimulation.state.population_exact
