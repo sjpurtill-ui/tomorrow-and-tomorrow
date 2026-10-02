@@ -106,6 +106,19 @@ func test_freeing_the_markets_widens_them_and_concentrates_wealth()->void:
 	assert_array(ours).is_empty()
 
 
+func test_repeated_economic_news_has_one_realm_wide_cooldown()->void:
+	GameState.player_settlements.append({"id":"dawngate","name":"Dawngate","primary":false,"position":Vector2(10,0),"population_share":0.25,"founded_day":0})
+	var events:Array[Dictionary]=[]
+	EconomySystem._threshold_event(events,"wealth_concentration","Claims Concentrate","test",120)
+	# The same condition met in a second town the same season is not told again.
+	SettlementModel.with_city_resources("dawngate",func()->void:EconomySystem._threshold_event(events,"wealth_concentration","Claims Concentrate","test",120))
+	assert_int(events.size()).is_equal(1)
+	GameState.elapsed_days+=121
+	SettlementModel.with_city_resources("dawngate",func()->void:EconomySystem._threshold_event(events,"wealth_concentration","Claims Concentrate","test",120))
+	assert_int(events.size()).is_equal(2)
+	assert_str(String(events[1].get("settlement_name",""))).is_equal("Dawngate")
+
+
 # --- 2. Soldiers are counted against the whole realm's workers ----------------------
 
 func test_soldiers_are_counted_against_the_whole_realms_workers()->void:

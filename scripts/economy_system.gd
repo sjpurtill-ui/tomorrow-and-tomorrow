@@ -179,7 +179,9 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	if WorldSimulation.state.economy_stage==STAGE_CURRENCY:
 		if reserve/maxf(1.0,WorldSimulation.state.currency_supply)<0.50: _threshold_event(events,"weak_reserve","Currency Backing Narrows","Issued currency is approaching the reserve limit. Further issue will be constrained and trust is exposed to shocks.",90)
 		if float(currency_liquidity.hoard_share)>0.24: _threshold_event(events,"currency_hoarding","Currency Leaves Circulation","Households now hold %d%% of issued currency outside active exchange. Taxes, credit, and ordinary purchases face a liquidity shortage even though the units still exist." % roundi(float(currency_liquidity.hoard_share)*100.0),45)
-	if inequality>0.48: _threshold_event(events,"wealth_concentration","Claims Concentrate","The richest fifth of households now hold %d in every 100 parts of the realm's wealth, adding pressure to cohesion and legitimacy." % roundi(float(WorldSimulation.state.wealth_shares[4])*100.0),120)
+	# Told when the richest fifth nears the most the age allows (WEALTH_BOUNDS),
+	# not at an ordinary share; the pressure itself applies every day.
+	if float(WorldSimulation.state.wealth_shares[4])>=float((WEALTH_BOUNDS.get(String(WorldSimulation.state.economy_stage),WEALTH_BOUNDS.subsistence) as Array)[1])-0.05: _threshold_event(events,"wealth_concentration","Claims Concentrate","The richest fifth of households now hold %d in every 100 parts of the realm's wealth, adding pressure to cohesion and legitimacy." % roundi(float(WorldSimulation.state.wealth_shares[4])*100.0),120)
 	for event in events:
 		WorldSimulation.state.economy_events.push_front(event)
 	if WorldSimulation.state.economy_events.size()>120: WorldSimulation.state.economy_events.resize(120)
