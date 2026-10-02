@@ -630,8 +630,9 @@ func _draw_front(e:Dictionary)->void:
 		_dashed(ours_side,Color(OURS,0.75),3.0)
 		_dashed(their_side,Color(theirs.darkened(0.15),0.75),3.0)
 		_dashed(pts,Color(INK,0.75),2.0)
-	# Whose front, and who is winning, at its middle on our side.
-	var mid:=pts[mid_index]-toward*30.0
+	# Whose front, and who is winning, near one end on our side (the middle is
+	# where marches cross it).
+	var mid:=pts[maxi(0,pts.size()/5)]-toward*34.0
 	var w:=70.0; var h:=8.0
 	var r:=Rect2(mid-Vector2(w*0.5,h*0.5),Vector2(w,h))
 	draw_rect(r.grow(2.0),Color(PAPER,0.95))
