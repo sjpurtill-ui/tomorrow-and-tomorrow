@@ -98,11 +98,12 @@ static func events(limit:int=6,person_id:int=0)->Array[Dictionary]:
 	return out
 
 static func _record_event(entry:Dictionary)->void:
+	# The long memory under the fresh talk: told for a generation (deeds.gd).
+	# Told first, so an older save's first deeds are its earlier acts only.
+	preload("res://scripts/deeds.gd").from_divine(entry)
 	var list:Array=store().events
 	list.push_front(entry)
 	while list.size()>EVENTS_MAX: list.pop_back()
-	# The long memory under the fresh talk: told for a generation (deeds.gd).
-	preload("res://scripts/deeds.gd").from_divine(entry)
 
 # --------------------------------------------------------------------------
 # Reading a person

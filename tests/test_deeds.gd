@@ -170,7 +170,13 @@ func test_the_memory_saves_and_is_checked()->void:
 	assert_bool(DEEDS.valid_state(data)).is_true()
 	assert_bool(DEEDS.valid_state({"list":[{"day":"x","kind":"blood","civ":"a"}]})).is_false()
 	assert_bool(DEEDS.valid_state({"list":"nope"})).is_false()
-	# An older save has no memory: nothing is told, nothing breaks.
+	# An older save starts its memory from the acts the court still talks of.
 	ForeignDiplomacy.audiences.erase("deeds")
+	var seeded:=DEEDS.remembered(civ_id)
+	assert_int(seeded.size()).is_equal(1)
+	assert_str(String(seeded[0].words)).contains("Solv")
+	# With nothing to recall, nothing is told and nothing breaks.
+	ForeignDiplomacy.audiences.erase("deeds")
+	DIVINE.store().events.clear()
 	assert_float(DEEDS.fear(civ_id)).is_equal(0.0)
 	assert_array(DEEDS.remembered(civ_id)).is_empty()

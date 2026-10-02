@@ -66,9 +66,12 @@ static func _day()->int:
 static func state()->Dictionary:
 	ForeignDiplomacy.ensure()
 	var s:Dictionary=ForeignDiplomacy.audiences
-	if not s.get("deeds") is Dictionary or int((s.deeds as Dictionary).get("version",0))!=VERSION:
-		s["deeds"]={"version":VERSION,"list":[],"seen":{}}
+	var fresh:=not s.get("deeds") is Dictionary or int((s.deeds as Dictionary).get("version",0))!=VERSION
+	if fresh: s["deeds"]={"version":VERSION,"list":[],"seen":{}}
 	var d:Dictionary=s.deeds
+	# An older save: the god's latest acts the court still talks of
+	# (divine_regard's recent events) are the first deeds told.
+	if fresh: _seed_from_recent()
 	if not d.get("list") is Array: d["list"]=[]
 	if not d.get("seen") is Dictionary: d["seen"]={}
 	return d
@@ -150,16 +153,26 @@ static func _trim(list:Array)->void:
 			if s<low: low=s; weakest=e
 		list.erase(weakest)
 
+static func _seed_from_recent()->void:
+	var holder:Variant=ForeignDiplomacy.audiences.get("divine")
+	var events:Variant=(holder as Dictionary).get("events") if holder is Dictionary else null
+	if not events is Array: return
+	var list:Array=(events as Array).duplicate()
+	list.reverse()
+	for e in list:
+		if e is Dictionary: from_divine(e)
+
 ## The god's acts in the hall (divine_regard._record_event): an official
 ## struck down or blessed, an envoy killed, the whole people cursed.
 static func from_divine(entry:Dictionary)->void:
 	var action:=String(entry.get("action",""))
 	var civ_id:=String(entry.get("civ_id",""))
 	var name:=String(entry.get("name",""))
+	var when:=int(entry.get("day",-1)) if _num(entry.get("day")) else -1
 	var given:=name.get_slice(" ",0)
 	if civ_id!="" and FOREIGN.has(action):
 		var noun:=String({"slay_envoy":"the killing","maim_envoy":"the maiming","shame_envoy":"the shaming","terrify_envoy":"the terrifying"}.get(action,"what was done to"))
-		record(civ_id,action,1,"%s of their envoy %s" % [noun,given] if given!="" else "%s of their envoy" % noun)
+		record(civ_id,action,1,"%s of their envoy %s" % [noun,given] if given!="" else "%s of their envoy" % noun,when)
 	# The god striking down an envoy is told once, as the killing of a guest.
 	if action=="strike_down" and int(entry.get("person_id",0))<=0: return
 	var home_words:=""
@@ -181,7 +194,7 @@ static func from_divine(entry:Dictionary)->void:
 		"bless_people": home_words="the god's blessing on the people"
 		"bless_fields": home_words="the god's blessing on the fields"
 	if home_words=="" and (load("res://scripts/divine_regard.gd") as GDScript).get_script_constant_map().get("PEOPLE_ACTS",{}).has(action): home_words=action.replace("_"," ")
-	if home_words!="": record("home",action,1,home_words)
+	if home_words!="": record("home",action,1,home_words,when)
 
 ## The dead of a feud or a war, by our hand: our raiders' and our watch's.
 static func blood(civ_id:String,their_dead:int,defending:bool)->void:
@@ -211,12 +224,12 @@ static func monthly(day:int)->void:
 			var key:="town:%s:%s" % [id,String(town.get("id",""))]
 			if seen.has(key): continue
 			seen[key]=day
-			record(id,"town_taken",1,"the taking of %s" % String(town.get("name","their town")),day)
+			record(id,"town_taken",1,"the taking of %s" % String(town.get("name","their town")),_changed_hands(civ,String(town.get("id","")),day))
 		for town_name in st.get("burned",[]):
 			var key2:="burn:%s:%s" % [id,String(town_name)]
 			if seen.has(key2): continue
 			seen[key2]=day
-			record(id,"town_burned",1,"the burning of %s" % String(town_name),day)
+			record(id,"town_burned",1,"the burning of %s" % String(town_name),_changed_hands(civ,"",day,String(town_name)))
 		var captives:=int(st.get("captives_road",0))+int(st.get("captives_home",0))
 		var ckey:="captives:%s" % id
 		var before:=int(seen.get(ckey,0))
@@ -224,6 +237,15 @@ static func monthly(day:int)->void:
 		seen[ckey]=maxi(before,captives)
 	while seen.size()>1800: seen.erase(seen.keys()[0])
 	_trim(state().list)
+
+## The day a town of theirs changed hands (its region's record), else today.
+static func _changed_hands(civ:Dictionary,region_id:String,day:int,name:String="")->int:
+	for r in civ.get("strategic_regions",[]):
+		if not r is Dictionary: continue
+		if (region_id!="" and String((r as Dictionary).get("id",""))==region_id) or (name!="" and String((r as Dictionary).get("name",""))==name):
+			var changed:=int((r as Dictionary).get("last_control_change_day",0))
+			return changed if changed>0 and changed<=day else day
+	return day
 
 # --------------------------------------------------------------------------
 # Reading

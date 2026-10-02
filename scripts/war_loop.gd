@@ -593,6 +593,8 @@ static func _truce_binds(civ_id:String,day:int)->bool:
 	# A feud settled with a blood price or a parley, and kin by marriage, keep
 	# their raiders home.
 	if int(_peek(civ_id).get("settled_until",-1))>day: return true
+	# A people that bowed and pays its tribute keeps its raiders home.
+	if bool((load("res://scripts/world_answer.gd") as GDScript).call("is_tributary",civ_id)): return true
 	return not _married(civ_id).is_empty()
 
 ## A marriage between our peoples (rival_rulers.gd bonds): kin do not raid kin.
@@ -1780,6 +1782,8 @@ static func daily(day:int)->void:
 		preload("res://scripts/deeds.gd").monthly(day)
 		# Who stands together against us, before anyone moves.
 		preload("res://scripts/fear_league.gd").monthly(day)
+		# What each people does about us: bow, or come with everything.
+		(load("res://scripts/world_answer.gd") as GDScript).call("monthly",day)
 		_grudges(day)
 		_rival_wars(day)
 	# Feuds between two other simulated peoples are fought for real.

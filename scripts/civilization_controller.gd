@@ -21,6 +21,8 @@ static func current_plan(id:String,personality:Dictionary={})->Dictionary:
 	for civ:Dictionary in WorldSimulation.world.civilizations:
 		situation.at_war=bool(situation.at_war) or bool(civ.player_relation.get("at_war",false))
 		if int(civ.player_relation.get("contact_level",0))>=2:met+=1
+	# Gathering every spear to settle it with the god's people (world_answer.gd).
+	if id!="player" and not ((load("res://scripts/world_answer.gd") as GDScript).call("arming",id) as Dictionary).is_empty(): situation.at_war=true
 	situation["peoples_known"]=met
 	# The same sovereign personality supplies the foreign leader's dialogue.
 	situation["integration_pressure"]=float(preload("res://scripts/society_exchange.gd").pressure().unsettled_share)

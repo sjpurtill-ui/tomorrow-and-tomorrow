@@ -1307,7 +1307,8 @@ static func _launch(civ_id:String,town:Dictionary,act:String,insist:bool,options
 	var free:=_free_men()
 	var odds:=_odds_at(town,free,"raid" if raid else "take")
 	var besiege:bool=not raid and free>=SIEGE_MIN and (_mc().active_siege as Dictionary).is_empty() and (odds.is_empty() or float(odds.raw)<STORM_ODDS)
-	var count:=_raid_size(town) if raid else 0
+	# Everything they have (world_answer.gd): every free fighter goes as one band.
+	var count:=(free if bool(options.get("all",false)) else _raid_size(town)) if raid else 0
 	if _player(): return _launch_ours(civ_id,town,act,besiege,count,insist,options)
 	return _launch_theirs(civ_id,town,act,besiege,count,insist,odds)
 

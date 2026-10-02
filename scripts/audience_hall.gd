@@ -194,6 +194,8 @@ const SITUATIONS:={
 	"captive_plea":{"kind":"request","headline":"comes about the captives you took","mechanic":"envoy_aftermath.gd; captives on the road turned home, captives at home freed (occupation_transfers)"},
 	"people_plea":{"kind":"request","headline":"pleads for its people under your spears","mechanic":"envoy_aftermath.gd; town_fate spare, dread and relation"},
 	"vengeance_vow":{"kind":"request","headline":"brings a vow of vengeance","mechanic":"envoy_aftermath.gd; grudges, dread and border tension"},
+	# A people that bows (world_answer.gd).
+	"submission":{"kind":"request","headline":"comes to bow before the god","mechanic":"world_answer.gd; tribute every harvest from their ledger, a hostage, their raiders kept home"},
 }
 
 ## Which situations an occasion invites, with base weights.
@@ -210,6 +212,7 @@ const OCCASION_MIX:={
 	"third_war":{"war_support":1.0,"news_report":0.35},
 	"dread_tribute":{"dread_tribute":1.0},
 	"feud_peace":{"feud_peace":1.0},
+	"submission":{"submission":1.0},
 	"dread_test":{"test_of_resolve":1.0,"tribute_demand":0.4},
 	"debt_due":{"debt_call":1.0},
 	"grudge":{"redress_demand":1.0,"tribute_demand":0.25},
@@ -1406,6 +1409,11 @@ static func _generate_foreign_occasion(occasion:Dictionary,day:int)->Dictionary:
 	var leader:=ForeignDiplomacy.leader(civ_id)
 	if civ.is_empty() or leader.is_empty(): return {}
 	var rng:=_rng("occasion:%s:%s:%d" % [civ_id,String(occasion.get("key","")),int(state().serial)],day)
+	# They come to bow (world_answer.gd): through a feud, past their own
+	# withholding and the business a beaten people would otherwise bring.
+	if String(occasion.get("type",""))=="submission":
+		var bow:Dictionary=_requests().call("candidate","submission",civ_id,occasion,rng,_used_asks("civ:"+civ_id,day),day)
+		return {} if bow.is_empty() else _foreign_audience(civ_id,bow,occasion,day)
 	# A people that dreads the god and keeps its distance sends fewer envoys;
 	# one whose envoys were harmed here may send none at all.
 	if bool(_lives().call("avoids",civ_id,occasion,rng)): return {}
@@ -3854,6 +3862,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("last_speaker") and (not data.last_speaker is String or String(data.last_speaker).length()>120): return false
 	if data.has("divine") and not DIVINE.valid_state(data.divine): return false
 	if data.has("deeds") and not bool((load("res://scripts/deeds.gd") as GDScript).call("valid_state",data.deeds)): return false
+	if data.has("answers") and not bool((load("res://scripts/world_answer.gd") as GDScript).call("valid_state",data.answers)): return false
 	if data.has("lives") and not bool(_lives().call("valid_state",data.lives)): return false
 	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
 	if data.has("council") and not bool((load("res://scripts/war_council.gd") as GDScript).call("valid_state",data.council)): return false
