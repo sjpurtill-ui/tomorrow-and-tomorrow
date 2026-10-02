@@ -1910,7 +1910,7 @@ func research_capacity_for(dynamic_id:String,subcategory:String,teams:Dictionary
 		"workforce_share":workforce_share,"researchers":researchers,"team_scale":team_scale,"team_people":team_people,
 		"teams":int(teams.count),"placed":int(teams.placed),
 		"education":education,"science_capacity":researchers*education,"parallel":parallel,
-		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*parallel*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))
+		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*parallel*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))*preload("res://scripts/realm_purse.gd").scholars_factor()
 	}
 
 

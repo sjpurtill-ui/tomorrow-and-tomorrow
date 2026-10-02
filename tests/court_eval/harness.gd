@@ -606,6 +606,13 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 		if String((mod as Dictionary).get("id","")).begins_with("court_water"): water=1
 	m["ration"]=ration; m["clean_water"]=water
 	m["apart_custom"]=1 if bool((preload("res://scripts/crisis_system.gd").state().flags as Dictionary).get("apart_custom",false)) else 0
+	# The realm's purse (realm_purse.gd): its balance, the levy and its lines,
+	# read as the engine takes an unread purse (its defaults).
+	var purse:Dictionary=GameState.realm_purse
+	m["purse"]=roundi(float(purse.get("balance",0.0)))
+	m["purse_levy"]=String(purse.get("levy","usual"))
+	var purse_lines:Dictionary=purse.get("lines",{"army":true}) if purse.get("lines") is Dictionary else {"army":true}
+	for line in ["army","scholars","crews","relief"]: m["purse_"+String(line)]=1 if bool(purse_lines.get(line,false)) else 0
 	m["_material"]=_material(m)
 	return m
 
@@ -623,7 +630,9 @@ static func _material(m:Dictionary)->String:
 		# Who sets the daily work and the people at each task (manual_work.gd).
 		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
 		# A band sent out in a feud (war_loop.gd), and whether the feud is on.
-		"trackers","feud_ops","feud"]
+		"trackers","feud_ops","feud",
+		# The realm's purse: the levy and what it pays for (realm_purse.gd).
+		"purse_levy","purse_army","purse_scholars","purse_crews","purse_relief"]
 	var parts:=PackedStringArray()
 	for k in keys: parts.append("%s=%s" % [k,str(m.get(k,""))])
 	return "|".join(parts)
