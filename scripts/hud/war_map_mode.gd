@@ -259,11 +259,14 @@ func collect()->Dictionary:
 	var reading:=Law.reading(MilitaryCampaign)
 	var target:=int(reading.get("target",-1))
 	var people:=maxi(1,int(reading.get("population",GameState.population_total)))
-	out["levy_tip"]=_lines(PackedStringArray(["At home: %s under arms" % EraWords.grouped(int(levy.get("ready",0))+int(levy.get("watch",0))),
-		"%s ready · %s on the watch" % [EraWords.grouped(int(levy.get("ready",0))),EraWords.grouped(int(levy.get("watch",0)))],
-		("%s in drill" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else "",
+	# The army at home, as the strip counts it (ready, in drill, waiting);
+	# the watch keeps the towns and is not the army (army_levy_law.watch).
+	var army_home:=int(levy.get("ready",0))+int(levy.get("drill",0))+int(levy.get("waiting",0))
+	out["levy_tip"]=_lines(PackedStringArray(["Our army at home: %s" % EraWords.grouped(army_home),
+		"%s ready%s" % [EraWords.grouped(int(levy.get("ready",0))),(" · %s in drill" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else ""],
+		("%s on the watch, keeping the towns (not the army)" % EraWords.grouped(int(levy.get("watch",0)))) if int(levy.get("watch",0))>0 else "",
 		("Army kept at %s of %s: %s" % [Law.level_name(String(reading.get("level",""))),EraWords.grouped(people),EraWords.grouped(target)]) if target>0 else "No army size chosen"]))
-	out.levy={"side":"ours","troops":int(levy.get("ready",0))+int(levy.get("watch",0)),"strength":clampf(float(reading.get("now",0))/float(target),0.0,1.0) if target>0 else 1.0,
+	out.levy={"side":"ours","troops":army_home,"strength":clampf(float(reading.get("now",0))/float(target),0.0,1.0) if target>0 else 1.0,
 		"will":float(levy.get("will",0.6)),"glyph":String(levy.get("glyph","spear")),"accent":OURS,
 		"tab":("%d in drill" % int(levy.get("drill",0))) if int(levy.get("drill",0))>0 else ""}
 	out.frame=frame
