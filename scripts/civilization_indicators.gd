@@ -9,7 +9,8 @@ static func infant_mortality_per_1000(state:Node=GameState,discovery:Node=Discov
 	var metrics:Dictionary=state.simulation_metrics
 	var context:Dictionary={
 		"health":state.population_health,
-		"food_security":state.food_security,
+		# What is eaten, as the day's births read it (food_care.gd).
+		"food_security":state.fed_security() if state.has_method("fed_security") else state.food_security,
 		"housing_ratio":float(metrics.get("housing_ratio",0.5)),
 		"cohesion":float(metrics.get("cohesion",0.58)),
 		"traveling":bool(metrics.get("traveling",false)),

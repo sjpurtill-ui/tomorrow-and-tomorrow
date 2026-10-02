@@ -85,10 +85,9 @@ const REDISTRIBUTION_WEIGHT:={"relief":1.0,"crews":0.8,"army":0.5,"scholars":0.2
 ## month while the line is on.
 const HUNGRY_DAYS:=20.0
 ## The levy takes only what a town holds beyond this many days of its
-## people's need: below it a town's food security falls (consequence_engine
-## counts food days up to 45), so the keepers never push a town there, and
-## food sent to the hungry (RELIEF_TARGET) is never taken back.
-const LEVY_KEEP_DAYS:=45.0
+## people's need: the lean buffer (food_care.gd LEAN_DAYS) that food security
+## counts, so the keepers never push a town below it.
+const LEVY_KEEP_DAYS:=preload("res://scripts/food_care.gd").LEAN_DAYS
 const RELIEF_TARGET:=35.0
 const SELLER_DAYS:=60.0
 const SELLER_KEEP:=45.0

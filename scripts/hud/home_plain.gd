@@ -49,7 +49,9 @@ static func food(days:float,flow:Dictionary,reported:bool=true)->Dictionary:
 			else:result.cause="we eat more than comes in each day"
 		_:
 			result.cause="what comes in matches what is eaten"
-	if days<30.0 and result.trend!="rising":result.tone="bad"
+	# Under the lean buffer (food_care.gd), or falling toward it, is bad.
+	var lean:=float(preload("res://scripts/food_care.gd").LEAN_DAYS)
+	if (days<lean and result.trend!="rising") or (days<lean*1.5 and result.trend=="falling"):result.tone="bad"
 	elif days<90.0 and result.trend=="falling":result.tone="warn"
 	result.sentence="%s; %s: %s." % [String(result.headline),String(result.trend),String(result.cause)]
 	return result
