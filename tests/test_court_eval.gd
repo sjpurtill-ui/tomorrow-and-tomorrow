@@ -78,7 +78,7 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## women": whom exactly), part of the village burned: 28 more runs a path):
 ## offline 814, live 815, sloppy 80.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":861,"live":863,"sloppy":80}
+const BASELINE:={"offline":866,"live":868,"sloppy":80}
 
 var _processing:Dictionary={}
 

@@ -23,7 +23,7 @@ func test_one_example_is_one_worker_read_and_never_killed_by_the_council()->void
 	var policy:Dictionary=order.parameters.interpretation.policies[0]
 	assert_bool(bool(policy.get("applied",true))).is_false()
 	assert_str(String(order.get("status",""))).is_equal("blocked")
-	assert_str(JSON.stringify(order)).contains("without your word on a read-back")
+	assert_str(JSON.stringify(order)).contains("Nothing is done to anyone")
 	assert_float(GameState.population_exact).is_equal_approx(population,0.00001)
 	assert_int(GameState.lifetime_deaths).is_equal(deaths)
 	assert_array(GameState.demographic_ledger).is_empty()
@@ -357,7 +357,7 @@ func test_lethal_target_is_demographically_scoped_and_audited()->void:
 	var directive:=AdvisorSystem.execute_pronouncement("Kill all women over 60 as soon as possible.",interpreted)
 	var applied_policy:Dictionary=directive.parameters.interpretation.policies[0]
 	assert_bool(bool(applied_policy.get("applied",true))).is_false()
-	assert_str(JSON.stringify(directive)).contains("without your word on a read-back")
+	assert_str(JSON.stringify(directive)).contains("Nothing is done to anyone")
 	assert_array(GameState.demographic_ledger).is_empty()
 	assert_float(GameState.population_exact).is_equal_approx(population,0.00001)
 
@@ -390,7 +390,7 @@ func test_grim_population_directive_is_never_carried_out_by_the_council()->void:
 	var directive:=AdvisorSystem.execute_pronouncement("Execute the sick.",interpreted)
 	var policy:Dictionary=directive.parameters.interpretation.policies[0]
 	assert_bool(bool(policy.get("applied",true))).is_false()
-	assert_str(JSON.stringify(directive)).contains("without your word on a read-back")
+	assert_str(JSON.stringify(directive)).contains("Nothing is done to anyone")
 	assert_int(GameState.population_total).is_equal(population_before)
 	assert_int(GameState.lifetime_deaths).is_equal(deaths)
 	assert_array(GameState.demographic_ledger).is_empty()

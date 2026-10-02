@@ -245,6 +245,19 @@ static func _read(clean:String,sentence:String,verb:Dictionary,audience:Dictiona
 	var how:=String(verb.how)
 	var phrase:=_people(object)
 	var people:=phrase.has("groups") or bool(phrase.get("qualified",false))
+	# One person, unnamed ("sacrifice a child to me", "kill a woman"): no group
+	# to read back and nobody named to judge, so nothing is done, said plainly
+	# (never a standing order that seems to promise it).
+	if not people and how!="burn" and _has(String(_clip(object).text),ONE_UNNAMED_RE) and not _wrongdoers(object):
+		if how=="drive" and not _leaves_realm(String(verb.kind),rest): return {}
+		if _foreign(rest,cc,clean.to_lower()) and not _has(rest,OWN_RE): return {}
+		# A law ("never kill a man who has surrendered") stays a law, which
+		# kills nobody now (consequence_engine.gd); other words that are no
+		# order ("if the harvest fails, sacrifice a child") are said plainly.
+		var why_one:=_not_an_order(sentence,verb,list,cc,clean)
+		if why_one in ["forbid","rule","withdraw"]: return {}
+		if why_one!="": return _declined({"how":how,"text":clean.substr(0,300)},why_one)
+		return {"kind":"one","how":how,"text":clean.substr(0,300),"words":String(_clip(object).text)}
 	if how=="burn":
 		if phrase.has("groups"): how="kill"
 		elif not _burns_the_village(object): return {}
@@ -352,11 +365,35 @@ static func names_our_people(text:String)->bool:
 		# order to kill the women"), and a law for wrongdoers ("kill the men who
 		# steal") are the council's own business.
 		if String(verb.how)=="drive" and not _leaves_realm(String(verb.kind),rest): continue
-		if _has(s,String(NOT_ORDER_WHY[0][1])) or _has(s,WITHDRAW_RE): continue
+		var held:=_re(REALM_WORDS).sub(s," ",true)
+		if _has(held,String(NOT_ORDER_WHY[0][1])) or _has(held,WITHDRAW_RE): continue
 		if bool(phrase.get("qualified",false)) and _wrongdoers(object): continue
 		var none:Array[Dictionary]=[]
 		var own:=_has(rest,OWN_RE) or bool(_our_town(rest,none).get("named",false))
 		if not own and _foreign(rest,_cc(),lower): continue
+		return true
+	return false
+
+## One person, unnamed, as what the act falls on.
+const ONE_UNNAMED_RE:="(?i)^(a|an|one|some|any|another|a single|just one)\\s+(little\\s+|young\\s+|old\\s+|newborn\\s+)?(child|baby|babe|infant|boy|girl|man|woman|person|soul|villager|youth|elder|worker|farmer|hunter|slave|servant|mother|father|son|daughter|wife|husband|maiden|virgin|example|captive of ours|one of (us|ours|our own))\\b|^(someone|somebody|anyone|anybody)\\b"
+## What the court says to it.
+const ONE_NO:="Nothing is done: no one is put to death or driven out on words that name nobody. Bring the one you mean before you by name, and judge them yourself."
+
+static func names_one_unnamed(text:String)->bool:
+	## Read only, for the court's other paths (court_commands.custom_order):
+	## do these words order one person, unnamed, killed or banished ("sacrifice
+	## a child to me", "execute one example")? Never forbidden, a law for a
+	## wrong, or moving someone within the realm.
+	var lower:=text.strip_edges().replace("’","'").to_lower()
+	if lower=="" or _has(lower,EXCLUDE_RE): return false
+	for sentence in _re("[^.!?;]+").search_all(lower):
+		var s:=sentence.get_string().strip_edges()
+		var verb:=_verb(s)
+		if verb.is_empty() or String(verb.how)=="burn": continue
+		var object:=String(verb.object)
+		if not _has(String(_clip(object).text),ONE_UNNAMED_RE) or _wrongdoers(object): continue
+		if String(verb.how)=="drive" and not _leaves_realm(String(verb.kind),s.substr(int(verb.at))): continue
+		if _has(_re(REALM_WORDS).sub(s," ",true),String(NOT_ORDER_WHY[0][1])): continue
 		return true
 	return false
 
@@ -394,6 +431,7 @@ static func grave_words(text:String)->bool:
 	var verb:=not _verb(lower).is_empty() or bool(cc.call("is_harm",text))
 	if not verb: return false
 	if _has(lower,"(?i)\\b"+PEOPLE_NOUN+"\\b") or _has(lower,EXCLUDE_RE): return true
+	if _has(lower,"(?i)\\b(child|baby|infant|boy|girl|man|woman|person|soul|villager|someone|somebody)\\b"): return true
 	return _re(String(cc.get_script_constant_map().get("GROUP_OBJECT_PATTERN",""))).search(text)!=null
 
 static func _verb(s:String)->Dictionary:
@@ -1076,6 +1114,11 @@ static func carry(id:String,audience:Dictionary,list:Array[Dictionary],r_in:Dict
 			var no:Dictionary=cc.call("_plain_answer",id,audience,words,{"echoed":true},String(NOT_ORDER_WORDS.get(String(r_in.get("why","lead")),NOT_ORDER_WORDS.lead)))
 			no.verb=VERB; no.stage="grave_decline"
 			return no
+		"one":
+			_drop(id,audience)
+			var none_named:Dictionary=cc.call("_plain_answer",id,audience,words,{"echoed":true},ONE_NO)
+			none_named.verb=VERB; none_named.stage="grave_decline"
+			return none_named
 	# A town of ours named that is ours no longer: never struck in its name.
 	if _town_gone(String(r_in.get("settlement_id",""))):
 		_drop(id,audience)

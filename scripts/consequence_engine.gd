@@ -450,19 +450,21 @@ func _resolve_deadline_enforcement(policy:Dictionary)->void:
 	var security_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("security",0.0)),0.0,1.0)
 	var executable:=mini(noncompliant,_remaining_directive_death_capacity(maxf(1.0,WorldSimulation.state.population_exact),security_capacity))
 	var enforced:=floori(float(executable)*clampf(float(policy.get("implementation_rate",0.0)),0.0,1.0))
-	# The threat's killing, and the flight from it, are never carried out by a
-	# directive from words (CUSTOM.NO_READ_BACK): nobody dies or leaves of it.
+	# The threat's killing is never carried out by a directive from words
+	# (CUSTOM.NO_READ_BACK). Households who flee the threat of their own
+	# accord are its consequence, and do leave.
 	var killed:=0
-	var fled:=0
 	policy["withheld_deaths"]=enforced
+	var flight_result:=WorldSimulation.state.register_population_departures(floori(float(noncompliant)*clampf(float(policy.get("resistance",0.0)),0.0,1.0)*0.24),"Flight from pregnancy enforcement")
+	var fled:=int(flight_result.get("count",0))
 	var legitimacy:=float(WorldSimulation.state.simulation_metrics.get("legitimacy",0.5))
 	var cohesion:=float(WorldSimulation.state.simulation_metrics.get("cohesion",0.5))
 	WorldSimulation.state.simulation_metrics["legitimacy"]=clampf(legitimacy-0.01-minf(0.08,float(killed+fled)/maxf(1.0,WorldSimulation.state.population_exact)*0.22),0.01,0.99)
 	WorldSimulation.state.simulation_metrics["cohesion"]=clampf(cohesion-0.008-minf(0.06,float(killed+fled)/maxf(1.0,WorldSimulation.state.population_exact)*0.18),0.01,0.99)
 	policy["deadline_result"]={"target_households":target_households,"new_conceptions":new_conceptions,"noncompliant_households":noncompliant,"deaths":killed,"departures":fled}
 	var description:="The pregnancy deadline passed."
-	if killed>0 or fled>0: description+=" Enforcement killed %d people; %d fled or disappeared from the census." % [killed,fled]
-	elif noncompliant>0: description+=" No one was killed: " +CUSTOM.NO_READ_BACK
+	if killed>0: description+=" Enforcement killed %d people; %d fled or disappeared from the census." % [killed,fled]
+	elif noncompliant>0: description+=" No one was killed: no one of ours is put to death by a standing order."+(" %d fled the threat or disappeared from the census." % fled if fled>0 else "")
 	else: description+=" Recorded conceptions met the threatened quota; no deadline killing was attempted."
 	_add_event("Pregnancy Threat Deadline",description,"population","danger" if killed>0 else "warning")
 
@@ -992,10 +994,12 @@ func _process_directive_migration(population:float,span:float)->void:
 		progress-=float(arrivals)
 		WorldSimulation.state.register_population_arrivals(arrivals,"drawn by decree")
 	elif progress<=-1.0:
-		# Driving our own people out is never a decree's doing (an exile law,
-		# a standing order): only grave_home.gd, read back and confirmed,
-		# registers their leaving (CUSTOM.NO_READ_BACK). Nobody leaves of it.
-		progress=0.0
+		# Families leaving of their own accord because of a harsh order. The
+		# order's own removal of people (an exile, a banishing) never reaches
+		# here (custom_directive.realize strikes it): only grave_home.gd.
+		var departures:=floori(-progress)
+		progress+=float(departures)
+		WorldSimulation.state.register_population_departures(departures,"Left because of a decree")
 	if is_zero_approx(pull): progress=0.0
 	WorldSimulation.state.simulation_metrics["directive_migration_progress"]=progress
 

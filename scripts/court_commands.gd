@@ -2747,6 +2747,13 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	if custom_directive_handler.is_valid():
 		var handled:Variant=custom_directive_handler.call(text,context)
 		if handled is Dictionary and bool((handled as Dictionary).get("ok",false)): return handled
+	# Killing by the order itself (a sacrifice, one example, one person
+	# unnamed): nothing is done, said plainly and why; never sent on to the
+	# council, never said to go ahead.
+	if not law and GraveHome.names_one_unnamed(text):
+		return {"ok":false,"route":"recorded","outcome":GraveHome.ONE_NO}
+	if not law and CustomDirective.kills_by_order(CustomDirective.offline_plan(text)):
+		return {"ok":false,"route":"recorded","outcome":CustomDirective.NO_READ_BACK}
 	var terrain:Variant=context.get("terrain",null)
 	var sid:=String(context.get("settlement_id",""))
 	# Killing, burning, banishing or harming people (a law on wrongdoers, an
@@ -2762,6 +2769,8 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 		return {"ok":true,"route":"civic","settlement_id":sid if sid!="" else String(SettlementModel.selected_settlement_snapshot().get("id","")),"outcome":"It goes out to the council to be carried out."}
 	var plan:=CustomDirective.offline_plan(text)
 	if plan.is_empty(): plan=CustomDirective.attempt_plan(text)
+	if CustomDirective.kills_by_order(plan) and not law:
+		return {"ok":false,"route":"recorded","outcome":CustomDirective.NO_READ_BACK}
 	if grave:
 		plan=plan.duplicate(true); plan["no_deaths"]=true; plan.erase("counted_deaths")
 	# A law for our own people ("kill the men who steal") is never read again
@@ -2778,6 +2787,9 @@ static func custom_order(text:String,context:Dictionary)->Dictionary:
 	var applied:Dictionary=ConsequenceEngine.apply_directive(CustomDirective.ID,CustomDirective.MAIN_MAGNITUDE,float(policy.get("days",CustomDirective.DEFAULT_DAYS)),"court_command",
 		{"source_order_id":order_id,"directive_parameters":policy.get("directive_parameters",{})},execution)
 	if not bool(applied.get("applied",false)):
+		# Refused for what it would do to our own people: said so, never sent on.
+		if String(applied.get("error",""))==CustomDirective.NO_READ_BACK:
+			return {"ok":false,"route":"recorded","outcome":CustomDirective.NO_READ_BACK}
 		if civic:
 			(terrain as Object).call("issue_civic_directive_text",text)
 			return {"ok":true,"route":"civic","settlement_id":sid if sid!="" else String(SettlementModel.selected_settlement_snapshot().get("id","")),"outcome":"It goes out to the council to be carried out."}

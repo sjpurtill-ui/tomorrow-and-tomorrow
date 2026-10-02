@@ -619,9 +619,14 @@ static func realize(plan:Dictionary,order_id:String,implementation:float)->Array
 	var days:=float(plan.get("days",DEFAULT_DAYS))
 	var result:Array[Dictionary]=[]
 	var rite_params:Array=plan.get("rite_params",[]) if plan.get("rite_params") is Array else []
+	var removal:=removes_people(plan)
 	for effect_variant in plan.get("effects",[]):
 		var effect:Dictionary=(effect_variant as Dictionary).duplicate(true)
 		var parameter:=String(effect.get("parameter",""))
+		# The order's own removal of people ("exile every thief"): struck, never
+		# carried out by a directive (NO_READ_BACK). Families who flee a harsh
+		# order of their own accord are its side effects, below.
+		if removal and parameter=="migration" and float(effect.get("strength",0.0))<0.0: continue
 		var rolled:=float(effect.get("strength",0.0))*(1.0+rng.randf_range(-1.0,1.0)*float(effect.get("uncertainty",0.2))*0.5)
 		# The attempt at an impossible thing still costs effort and stirs feeling;
 		# only the intended physical result is scaled by feasibility.
@@ -662,7 +667,15 @@ static func realize(plan:Dictionary,order_id:String,implementation:float)->Array
 ## are registered only by grave_home.gd (read back with its numbers, then the
 ## god's yes) and the persons engine's judgment of one person: never by a
 ## directive, a law or a standing order (here, consequence_engine.gd).
-const NO_READ_BACK:="Nothing is done to anyone without your word on a read-back: an order to kill or drive out our own people is given at court, read back with its numbers, and done only on your yes."
+const NO_READ_BACK:="Nothing is done to anyone: no one of ours is put to death or driven out by a standing order. One person is judged by name, before you; a group only on your order at court, read back with its numbers, and your yes."
+
+## An order's own removal of people (an exile, a banishing, a deportation):
+## never by a directive. The people's own flight from a harsh order stays.
+const REMOVAL_RE:="(?i)\\b(exile|banish|expel|deport|drive (them |the [\\w' ]{1,30} |[\\w']+ )?out|cast (them |the [\\w' ]{1,30} |[\\w']+ )?out|throw (them |the [\\w' ]{1,30} |[\\w']+ )?out|send (them |the [\\w' ]{1,30} |[\\w']+ )?away)"
+
+static func removes_people(plan:Dictionary)->bool:
+	if (plan.get("natures",[]) as Array).has("exile"): return true
+	return RegEx.create_from_string(REMOVAL_RE).search(String(plan.get("summary","")))!=null
 
 static func kills_by_order(plan:Dictionary)->bool:
 	## Does the plan kill people by the order itself (a sacrifice, a counted

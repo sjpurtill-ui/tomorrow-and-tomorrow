@@ -110,7 +110,7 @@ func test_things_rooms_laws_and_other_peoples_are_never_read_as_this()->void:
 		# Laws, one person, other peoples, words held back, questions.
 		"Execute every thief","kill all thieves","Anyone who murders will be put to death","Kill every thief in the village","never kill a man who has surrendered",
 		"Kill all the rebels","Kill Kavu","Kill him","Kill the men of Tsaren","Kill them all","Put the prisoners to death","Burn their stores","Burn the fields of the lazy",
-		"How many women are in the village?","Exile Kavu and his whole family","kill one woman",
+		"How many women are in the village?","Exile Kavu and his whole family",
 		# The object is the verb's own clause, and the verb opens the order.
 		"Kill two goats and feed the children","Have the butcher feed the women","The men kill deer and the women cook","Kill time until the men return",
 		"Drive out the wolves and protect the children",
@@ -128,6 +128,12 @@ func test_things_rooms_laws_and_other_peoples_are_never_read_as_this()->void:
 			"If the harvest fails, kill all the women","From now on kill every woman","Henceforth drive the old out of the realm"]:
 		var said:=Grave.reading(words,audience,list)
 		assert_str(String(said.get("kind",""))).override_failure_message(words+" "+str(said)).is_equal("decline")
+	# One person, unnamed: nothing is done, said plainly (no group to read
+	# back, nobody named to judge).
+	for words in ["kill one woman","Sacrifice a child to me","Kill a woman","Execute one worker as an example","Put a child to death"]:
+		var one:=Grave.reading(words,audience,list)
+		assert_str(String(one.get("kind",""))).override_failure_message(words+" "+str(one)).is_equal("one")
+	assert_dict(Grave.reading("never kill a man who has surrendered",audience,list)).is_empty()
 	# People narrowed: never the whole group; the court asks whom exactly.
 	for words in ["Kill the men who refused to fight","kill the men who deserted","kill the sick women","kill the wounded men"]:
 		assert_str(String(Grave.reading(words,audience,list).get("kind",""))).override_failure_message(words).is_equal("whom")
@@ -356,17 +362,19 @@ func test_a_law_or_standing_order_never_drives_anyone_out_now()->void:
 	_world("home_peace")
 	var before:=_gone()
 	var Custom:=preload("res://scripts/custom_directive.gd")
-	for text in ["Exile every thief","Drive out the rebels","banish all who steal"]:
-		var plan:=Custom.offline_plan(String(text))
-		if plan.is_empty(): continue
-		ConsequenceEngine.apply_directive(Custom.ID,Custom.MAIN_MAGNITUDE,90.0,"test",{"source_order_id":"t_"+String(text),"directive_parameters":{"custom_plan":plan}})
-	for i in 120: ConsequenceEngine._process_directive_migration(maxf(1.0,GameState.population_exact),1.0)
+	# The order's own removal ("exile every thief") is struck: nobody leaves of it.
+	var exile:=Custom.offline_plan("Exile every thief")
+	for effect in Custom.realize(exile,"t_exile",1.0):
+		if not bool((effect as Dictionary).get("side_effect",false)):
+			assert_bool(String((effect as Dictionary).get("parameter",""))=="migration" and float((effect as Dictionary).get("strength",0.0))<0.0).is_false()
+	ConsequenceEngine.apply_directive(Custom.ID,Custom.MAIN_MAGNITUDE,90.0,"test",{"source_order_id":"t_exile","directive_parameters":{"custom_plan":exile}})
+	for i in 365: ConsequenceEngine._process_directive_migration(maxf(1.0,GameState.population_exact),1.0)
 	assert_array(_gone()).is_equal(before)
 	# A sacrifice by the order itself: nothing is done, said plainly.
 	var sacrifice:={"summary":"Give a child to the god","natures":["human_sacrifice"],"coercion":0.85}
 	var refused:=ConsequenceEngine.apply_directive(Custom.ID,Custom.MAIN_MAGNITUDE,30.0,"test",{"source_order_id":"t_sacrifice","directive_parameters":{"custom_plan":sacrifice}})
 	assert_bool(bool(refused.get("applied",true))).is_false()
-	assert_str(String(refused.get("error",""))).contains("read-back")
+	assert_str(String(refused.get("error",""))).contains("Nothing is done to anyone")
 	assert_array(_gone()).is_equal(before)
 	# The pregnancy threat's deadline kills nobody and drives nobody out.
 	var threat:="Tell parents with single children that they are failing the tribe and will be killed if they are not pregnant within 6 months."
@@ -376,7 +384,16 @@ func test_a_law_or_standing_order_never_drives_anyone_out_now()->void:
 			GameState.elapsed_days=float((modifier as Dictionary).until_day)+1.0
 	ConsequenceEngine.refresh_policy_lifecycle()
 	assert_int(int(GameState.lifetime_deaths)).is_equal(int(before[0]))
-	assert_int(int(GameState.lifetime_departures)).is_equal(int(before[1]))
+
+func test_families_still_flee_a_harsh_order_of_their_own_accord()->void:
+	_world("home_peace")
+	var gone:=int(GameState.lifetime_departures)
+	# The people's own flight from a harsh order (a side effect of it, as
+	# custom_directive.realize rolls them): families leave over the year.
+	var day:=float(GameState.elapsed_days)
+	GameState.active_modifiers.append({"id":"custom_directive","kind":"policy","effects":{"migration_pull":-1.0},"magnitude":0.2,"started_day":day,"until_day":day+400.0,"custom_role":"side_effect","source_order_id":"t_flight"})
+	for i in 365: ConsequenceEngine._process_directive_migration(maxf(1.0,GameState.population_exact),1.0)
+	assert_int(int(GameState.lifetime_departures)).is_greater(gone)
 
 func test_the_deed_said_done_to_them_is_read_back()->void:
 	var w:=_world("home_peace")
@@ -410,12 +427,32 @@ func test_only_a_bare_assent_is_pressing_words()->void:
 	assert_str(String(r.get("outcome",""))).not_contains("to carry it out")
 	assert_dict(Grave._pending(Hall.find(id))).is_empty()
 
+func test_a_refused_killing_is_never_said_to_go_ahead()->void:
+	var w:=_world("home_peace")
+	var id:=_audience(w)
+	var pop:=int(GameState.population_total)
+	var deaths:=int(GameState.lifetime_deaths)
+	for words in ["Sacrifice a child to me","Kill a woman","Execute one worker as an example"]:
+		var r:=CC.hear(id,words,{})
+		var said:=String(r.get("outcome",""))
+		assert_str(said).override_failure_message(words+" :: "+said).contains("Nothing is done")
+		for promise in ["carried out","standing order","goes out to the council","take hold"]:
+			assert_str(said).override_failure_message(words+" :: "+said).not_contains(promise)
+	# The custom order path itself: refused plainly, never sent on.
+	for words in ["Sacrifice a child to me","Just execute one example to scare the workers."]:
+		var custom:=CC.custom_order(words,{"terrain":null})
+		assert_bool(bool(custom.get("ok",true))).override_failure_message(words).is_false()
+		assert_str(String(custom.get("outcome",""))).override_failure_message(words).contains("Nothing is done")
+	assert_int(int(GameState.population_total)).is_equal(pop)
+	assert_int(int(GameState.lifetime_deaths)).is_equal(deaths)
+
 func test_the_council_guard_lets_other_words_pass()->void:
 	_world("home_peace")
 	for words in ["Turn the herders away from the spring","withdraw the order to kill the women","Cancel the order to kill the old","Kill the men who steal",
 			"don't kill the women","Send the women and children away from the village"]:
 		assert_bool(Grave.names_our_people(words)).override_failure_message(words).is_false()
-	for words in ["Purge the old women of Seanstone","Have all the women of Seanstone killed","Kill the women and their children","drive the old out of our lands"]:
+	for words in ["Purge the old women of Seanstone","Have all the women of Seanstone killed","Kill the women and their children","drive the old out of our lands",
+			"drive the old women out of the realm, never to return"]:
 		assert_bool(Grave.names_our_people(words)).override_failure_message(words).is_true()
 
 # --------------------------------------------------------------------------
