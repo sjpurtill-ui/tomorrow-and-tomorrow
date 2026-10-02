@@ -15,17 +15,13 @@ static func force_for(incident:Dictionary)->Dictionary:
 	var field_id:=int(incident.get("owned_force_id",0))
 	var formation_id:=String(incident.get("formation_id",""))
 	if formation_id.contains(":army:"):field_id=int(formation_id.get_slice(":army:",1))
-	var city_id:=String(incident.get("target_region_id",""))
-	var local_id:=""
-	if city_id!="":
-		var place:=WorldSimulation.world.region_snapshot(String(incident.source_civ_id),city_id)
-		local_id=String(place.get("local_city_id",""))
+	var local_id:=_town_of(String(incident.get("source_civ_id","")),String(incident.get("target_region_id","")))
 	return WorldSimulation.scoped(id,func()->Dictionary:
 		var force:Dictionary={}
 		if field_id>0:
 			var index:=WorldSimulation.military._field_army_index(field_id)
 			if index>=0:force=WorldSimulation.military.field_armies[index].duplicate(true)
-		elif local_id.is_empty() or bool(WorldSimulation.settlements.settlement_record(local_id).get("primary",false)):
+		elif not _own_watch(local_id):
 			force=WorldSimulation.military._home_defense_force(false)
 			# Home's watch and townsfolk stand as one block with an id of their
 			# own, so they go home after the fight (commit_enemy), not into the
@@ -40,23 +36,78 @@ static func force_for(incident:Dictionary)->Dictionary:
 		return force
 	)
 
+## The town a battle at `region_id` of `civ_id`'s (a region, as the
+## attacker's world names it) is fought for: its own id, "" for none (then
+## home stands, force_for).
+static func _town_of(civ_id:String,region_id:String)->String:
+	if region_id=="" or WorldSimulation.world==null:return ""
+	return String(WorldSimulation.world.region_snapshot(civ_id,region_id).get("local_city_id",""))
+
+## Whether a town is defended by its own watch and townsfolk (town_watch)
+## and not by home's levy: any town but home. Run in its owner's scope.
+static func _own_watch(local_id:String)->bool:
+	return not local_id.is_empty() and not bool(WorldSimulation.settlements.settlement_record(local_id).get("primary",false))
+
+## The town of `civ_id`'s at `region_id` when its battle would be fought by
+## its own watch and townsfolk alone, as force_for musters it: the town's
+## own id, or "" for their home (its levy stands there), for a place of no
+## people that musters its towns, or for no place. The stated odds ask this
+## (war_odds.gd), so they weigh the defenders the battle would.
+static func watch_town(civ_id:String,region_id:String)->String:
+	var id:=owner(civ_id)
+	if id!="player" and not WorldSimulation.actors.has(id):return ""
+	var local_id:=_town_of(civ_id,region_id)
+	if local_id.is_empty():return ""
+	return local_id if bool(WorldSimulation.scoped(id,func()->bool:return _own_watch(local_id))) else ""
+
 ## A town's own defenders when it is attacked: its share of the watch and
 ## its townsfolk who rise (guard_ledger), with whatever comes to hand, as one
-## untrained block. {} when nobody would stand. Run in the town's owner's
-## scope.
+## untrained block (watch_force). {} when nobody would stand. Run in the
+## town's owner's scope.
 static func town_watch(city_id:String)->Dictionary:
-	var mc:Variant=WorldSimulation.military
-	var city:=WorldSimulation.settlements.settlement_record(city_id)
-	var guard:Dictionary=guard_ledger(mc).get(city_id,{})
-	var count:=int(guard.get("watch",0))+int(guard.get("rise",0))
-	if count<=0: return {}
-	var formation:={"id":-1,"unit":"levy","weapon":"improvised","count":count,"authorized_count":count,"equipment":0,"equipment_required":count,"ammunition":0,"ammunition_required":0,
-		"training":militia_training(int(guard.get("watch",0)),int(guard.get("rise",0))),"experience":0.0,"personnel_condition":float(mc._trainee_condition()),"emergency_militia":true}
-	var force:Dictionary=mc.simulator.create_formation_force("%s watch" % String(city.get("name","the town")),[formation],float(mc._campaign_morale()),0.18)
-	force["commander"]=mc.simulator.create_commander("TOWN WATCH",0.35,0.35,0.35,0.45)
-	force["supply_level"]=1.0
-	force["town_watch"]=city_id
+	var guard:Dictionary=guard_ledger(WorldSimulation.military).get(city_id,{})
+	var force:=watch_force(String(WorldSimulation.settlements.settlement_record(city_id).get("name","the town")),int(guard.get("watch",0)),int(guard.get("rise",0)))
+	if not force.is_empty():force["town_watch"]=city_id
 	return force
+
+## How a town's watch and townsfolk stand in its battle: called from their
+## work to the gate, as ready as such men are (combat_simulator readiness),
+## under the watch's own captain (command, tactics and logistics 0.35,
+## resolve 0.45), with their people's heart (campaign morale) and health
+## (the condition of men not yet drilled).
+const WATCH_READINESS:=0.18
+const WATCH_CAPTAIN:=[0.35,0.35,0.35,0.45]
+
+## The force `watch` watchmen and `rise` townsfolk of a town called `name`
+## stand as, one untrained block with what comes to hand: the one builder of
+## a town's guard in battle (town_watch) and in the stated odds
+## (watch_counted). {} for nobody. Run in the town's owner's scope.
+static func watch_force(name:String,watch:int,rise:int)->Dictionary:
+	var mc:Variant=WorldSimulation.military
+	var count:=maxi(0,watch)+maxi(0,rise)
+	if count<=0 or mc==null: return {}
+	var formation:={"id":-1,"unit":"levy","weapon":"improvised","count":count,"authorized_count":count,"equipment":0,"equipment_required":count,"ammunition":0,"ammunition_required":0,
+		"training":militia_training(maxi(0,watch),maxi(0,rise)),"experience":0.0,"personnel_condition":float(mc._trainee_condition()),"emergency_militia":true}
+	var force:Dictionary=mc.simulator.create_formation_force("%s watch" % name,[formation],float(mc._campaign_morale()),WATCH_READINESS)
+	force["commander"]=mc.simulator.create_commander("TOWN WATCH",float(WATCH_CAPTAIN[0]),float(WATCH_CAPTAIN[1]),float(WATCH_CAPTAIN[2]),float(WATCH_CAPTAIN[3]))
+	force["supply_level"]=1.0
+	return force
+
+## `count` of a town's guard, as a stranger's scouts counted them, standing
+## as its battle would stand them (watch_force): its watch and its
+## townsfolk in the shares its guard ledger holds now, in the owner's
+## scope. {} for nobody, or a people that does not muster its towns.
+static func watch_counted(civ_id:String,city_id:String,count:int)->Dictionary:
+	var id:=owner(civ_id)
+	if count<=0 or city_id.is_empty() or (id!="player" and not WorldSimulation.actors.has(id)):return {}
+	return WorldSimulation.scoped(id,func()->Dictionary:
+		var guard:Dictionary=guard_ledger(WorldSimulation.military).get(city_id,{})
+		var watch:=int(guard.get("watch",0));var rise:=int(guard.get("rise",0))
+		var seen:=roundi(float(count)*float(watch)/float(watch+rise)) if watch+rise>0 else 0
+		var force:=watch_force(String(WorldSimulation.settlements.settlement_record(city_id).get("name","the town")),seen,count-seen)
+		if not force.is_empty():force["town_watch"]=city_id
+		return force
+	)
 
 ## THE TOWNSFOLK RISE. When raiders come, a town's able grown people take up
 ## arms beside its watch: about one in ten of them, untrained and with what
@@ -78,9 +129,13 @@ const RISE_TRAINING:=0.10
 ## (home_defenders). One pass over the towns; run in the owner's scope,
 ## outside any one town's. `mc` is the owner's MilitaryCampaign.
 ##  - The watch. Those set to Defense work (D, _home_garrison_target) who are
-##    not already the trained levy at home (T, home_army.troops, as
-##    _home_defense_force has always netted them) keep the watch,
-##    W = max(0, D - T), each in the town they live in.
+##    not already under arms keep the watch, each in the town they live in:
+##    W = max(0, D - (M - B)), where M is everyone mobilized anywhere
+##    (_mobilized_count: the levy at home and its hurt, scattered and taken,
+##    recruits, drill, bands in the field, garrisons, crews) and B is the
+##    watch's own basic drill at home (_automatic_basic_trainees), added
+##    back because Defense labour keeps the watch while its drill rotates
+##    (_whole_people).
 ##  - The rise. Of the grown people (working age) not already on defence
 ##    work or under arms (everyone mobilized counts against the Defense share
 ##    first, then against other work: personnel_ledger), RISE_SHARE take up

@@ -569,6 +569,15 @@ with machine accounting; (7) recruitment fixes and template numbers.
   (a town's defence 1.03 + 0.34 × fortification). The line says the
   assumption: "Odds, if they are armed as we are: about 3 to 2 for us, their
   walls counting for them." The one-line summary carries "odds 3:2".
+  - A town other than their home is fought for by its own watch and
+    townsfolk alone (`civilization_combat.watch_town`, as `force_for`
+    musters it). The odds stand the men counted there with the battle's own
+    builder (`civilization_combat.watch_force`): readiness 0.18, their
+    people's campaign morale, the watch's captain (command 0.35) and the
+    condition of their undrilled people, with what comes to hand. They were
+    quoted at morale 1, their army's readiness and an ordinary captain,
+    several times as strong as they fight. The line says so: "Odds against
+    its watch and townsfolk, who fight with what comes to hand: ...".
 - **Iteration 12, ground by kit.** On the war chart a formation's occupied
   ground comes from its ledger kit (`army_front_visual.occupied_area`): 4 m²
   a man, plus 20 m² for each vehicle or gun, 6 m² for each mount, and 4 m²

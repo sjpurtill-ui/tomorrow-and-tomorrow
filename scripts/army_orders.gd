@@ -308,11 +308,16 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 		var odds:={}
 		if bool(enemy.known) and going>0:
 			arms=_their_arms(String(p.civ_id),int(enemy.age))
-			if not arms.is_empty(): out.lines.append("They carry %s." % arms_words(arms))
-			odds=stated_odds(speed_force,formations,going,float(enemy.get("mid",0.0)),float(enemy.get("fortification",0.25)),arms,String(p.civ_id),false,-1.0,float(enemy.get("untrained",0.0)))
+			odds=stated_odds(speed_force,formations,going,float(enemy.get("mid",0.0)),float(enemy.get("fortification",0.25)),arms,String(p.civ_id),false,-1.0,float(enemy.get("untrained",0.0)),String(p.city_id))
+			# Only the town's own watch and townsfolk stand there (war_odds
+			# their_side): they fight with what comes to hand, whatever their
+			# people's soldiers carry.
+			var watch:=bool(odds.get("watch",false))
+			if not arms.is_empty() and not watch: out.lines.append("They carry %s." % arms_words(arms))
 			if not odds.is_empty():
 				out["odds"]=odds
-				out.lines.append("Odds%s: %s%s." % [" with the arms our scouts saw" if not arms.is_empty() else ", if they carry arms like ours",odds_words(float(odds.odds),bool(odds.ours)),(", their walls counting for them" if float(odds.walls)>1.08 else "")])
+				var against:=" against its watch and townsfolk, who fight with what comes to hand" if watch else (" with the arms our scouts saw" if not arms.is_empty() else ", if they carry arms like ours")
+				out.lines.append("Odds%s: %s%s." % [against,odds_words(float(odds.odds),bool(odds.ours)),(", their walls counting for them" if float(odds.walls)>1.08 else "")])
 		var weaker:=Odds.weaker(odds) if not odds.is_empty() else ratio<WO.OBJECT_RATIO
 		if going<WO.MIN_FORCE:
 			out.likely="impossible"; out.lines.append("%d cannot take a town; %s will refuse." % [going,who_objects])
@@ -358,8 +363,8 @@ static func preview(force_id:int,verb_id:String,target:Dictionary)->Dictionary:
 
 ## The stated odds and the scouts' word on their arms live in war_odds.gd,
 ## which the court's spoken orders read too.
-static func stated_odds(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0)->Dictionary:
-	return Odds.of(force,formations,going,their_men,fortification,their_arms,civ_id,open_field,their_ready,untrained)
+static func stated_odds(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0,city_id:String="")->Dictionary:
+	return Odds.of(force,formations,going,their_men,fortification,their_arms,civ_id,open_field,their_ready,untrained,city_id)
 
 static func _their_arms(civ_id:String,age:int)->Array: return Odds.their_arms(civ_id,age)
 static func arms_words(arms:Array)->String: return Odds.arms_words(arms)

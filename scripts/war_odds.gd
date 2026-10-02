@@ -7,13 +7,17 @@ extends RefCounted
 ## them lately; they are drilled as a garrison is (GARRISON_DRILL) and as
 ## ready as their people's army; and they stand behind the walls the battle
 ## gives the town (civilization_system: 1.03 + 0.34 x fortification + 0.07 x
-## logistics + 0.05 x institutions, 1.04 to 1.38).
+## logistics + 0.05 x institutions, 1.04 to 1.38). A town of theirs other
+## than their home is fought for by its own watch and townsfolk alone, and
+## they are weighed as its battle stands them, by the battle's own builder
+## (their_side, civilization_combat.watch_force).
 ## The Army grid's preview (army_orders.gd) and the court's spoken order
 ## (court_war_orders.gd) read the same odds, and the war leader objects as
 ## "the weaker side" by them (OBJECT_BELOW), so one panel never says both.
 ## Static helpers; preload.
 
 const StrategyAI:=preload("res://scripts/civilization_strategy.gd")
+const Combat:=preload("res://scripts/civilization_combat.gd")
 const KitLedger:=preload("res://scripts/equipment_ledger.gd")
 
 ## How well a town's defenders are drilled when our scouts could not tell.
@@ -38,33 +42,60 @@ const EVEN_BELOW:=1.15
 const BINS:=[[1.29,5,4],[1.42,4,3],[1.75,3,2],[2.5,2,1],[4.0,3,1],[6.0,5,1]]
 
 ## {odds (stronger over weaker, 1 or more), ours (true when with us),
-##  raw (ours over theirs), walls} or {} when there is nothing to weigh.
+##  raw (ours over theirs), walls, watch (true when only the town's own
+##  watch and townsfolk stand there)} or {} when there is nothing to weigh.
 ## A host met in the open (`open_field`) has no walls, and its readiness is
 ## what our scouts made of it (`their_ready`, when given). `untrained` is the
 ## share of their men our scouts saw were no soldiers (a town's watch and
 ## townsfolk who rise, civilization_combat.guard_ledger): they stand as the
-## battle stands them, one levy block with what comes to hand.
-static func of(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0)->Dictionary:
-	var mc:Variant=WorldSimulation.military
-	var n:=heads(formations)
-	if mc==null or n<=0 or going<=0 or their_men<1.0: return {}
-	var sim=mc.simulator
-	var us:Dictionary=sim.create_formation_force("Us",scaled(formations,float(going)/float(n)),float(force.get("morale",1.0)),float(force.get("readiness",1.0)))
-	us["stores_share"]=float(force.get("stores_share",1.0))
-	if force.get("commander") is Dictionary: us["commander"]=force.commander
+## battle stands them, one levy block with what comes to hand. `city_id` is
+## the town (its region, as our charts name it): see their_side.
+static func of(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0,city_id:String="")->Dictionary:
+	if WorldSimulation.military==null or heads(formations)<=0 or going<=0 or their_men<1.0: return {}
+	return _against(force,formations,going,their_side(formations,their_men,their_arms,civ_id,open_field,their_ready,untrained,city_id),_walls(fortification,civ_id,open_field))
+
+## The men they stand against us, `their_men` as our scouts counted them,
+## as the battle would stand them (civilization_combat.force_for).
+##  - A town of theirs other than their home (civilization_combat
+##    watch_town) is fought for by its own watch and townsfolk alone, built
+##    by the battle's own builder (civilization_combat.watch_force): as ready
+##    as men called from their work, under the watch's captain, with their
+##    people's heart and health. Whatever our scouts made of their arms,
+##    those men fight with what comes to hand.
+##  - Anywhere else: their soldiers in the arms our scouts saw (or ours,
+##    drilled as a garrison), as ready as their people's army, beside one
+##    levy block for the share our scouts saw were no soldiers.
+static func their_side(formations:Array,their_men:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0,city_id:String="")->Dictionary:
+	var sim=WorldSimulation.military.simulator
+	var watch_id:=Combat.watch_town(civ_id,city_id) if not open_field and city_id!="" else ""
+	if watch_id!="":
+		var guard:=Combat.watch_counted(civ_id,watch_id,roundi(their_men))
+		if not guard.is_empty(): return guard
 	var kit:Array=their_arms if heads(their_arms)>0 else _as_a_garrison(formations)
 	var civ:=_civ(civ_id)
-	var fort:=clampf(fortification,0.0,1.0)
-	var walls:=1.0 if open_field else clampf(1.03+fort*0.34+float(civ.get("logistics",0.0))*0.07+float(civ.get("institutions",0.0))*0.05,1.04,1.38)
 	var ready:=clampf(float(civ.get("military_readiness",1.0))*0.82+float(civ.get("command_readiness",0.4))*0.18,0.1,1.0) if not civ.is_empty() else 1.0
 	if their_ready>=0.0: ready=clampf(their_ready,0.1,1.0)
 	var levy:=their_men*clampf(untrained,0.0,1.0)
 	var soldiers:=their_men-levy
-	var theirs:Array=scaled(kit,soldiers/float(heads(kit))) if soldiers>=0.5 else []
+	var theirs:Array=scaled(kit,soldiers/float(heads(kit))) if soldiers>=0.5 and heads(kit)>0 else []
 	if levy>=0.5: theirs.append(townsfolk(roundi(levy)))
-	var them:Dictionary=sim.create_formation_force("Them",theirs,1.0,ready)
+	return sim.create_formation_force("Them",theirs,1.0,ready)
+
+## The walls the battle gives the town (none in the open).
+static func _walls(fortification:float,civ_id:String,open_field:bool)->float:
+	if open_field: return 1.0
+	var civ:=_civ(civ_id)
+	return clampf(1.03+clampf(fortification,0.0,1.0)*0.34+float(civ.get("logistics",0.0))*0.07+float(civ.get("institutions",0.0))*0.05,1.04,1.38)
+
+## `going` of our `formations`, as `force` stands, against `them` behind
+## `walls`: the reading of() returns.
+static func _against(force:Dictionary,formations:Array,going:int,them:Dictionary,walls:float)->Dictionary:
+	var sim=WorldSimulation.military.simulator
+	var us:Dictionary=sim.create_formation_force("Us",scaled(formations,float(going)/float(heads(formations))),float(force.get("morale",1.0)),float(force.get("readiness",1.0)))
+	us["stores_share"]=float(force.get("stores_share",1.0))
+	if force.get("commander") is Dictionary: us["commander"]=force.commander
 	var raw:float=sim.raw_odds(us,them,walls)
-	return {"odds":raw if raw>=1.0 else 1.0/maxf(0.0001,raw),"ours":raw>=1.0,"raw":raw,"walls":walls}
+	return {"odds":raw if raw>=1.0 else 1.0/maxf(0.0001,raw),"ours":raw>=1.0,"raw":raw,"walls":walls,"watch":them.has("town_watch")}
 
 ## True when the war leader would object that we are the weaker side.
 static func weaker(odds:Dictionary)->bool:
@@ -78,14 +109,15 @@ static func wanted(kind:String)->float:
 ## How many more men than `going` (the same kit, drilled the same) would
 ## bring the odds to `want`: 0 when they already do, -1 when even six times
 ## as many would not. Bounded: a few readings of the combat engine.
-static func more_for(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array,civ_id:String,want:float,open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0)->int:
-	if going<=0 or heads(formations)<=0 or their_men<1.0: return -1
-	var now:=of(force,formations,going,their_men,fortification,their_arms,civ_id,open_field,their_ready,untrained)
-	if not now.is_empty() and float(now.raw)>=want: return 0
+static func more_for(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array,civ_id:String,want:float,open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0,city_id:String="")->int:
+	if WorldSimulation.military==null or going<=0 or heads(formations)<=0 or their_men<1.0: return -1
+	# Theirs and the walls are the same at every size of ours: read them once.
+	var them:=their_side(formations,their_men,their_arms,civ_id,open_field,their_ready,untrained,city_id)
+	var walls:=_walls(fortification,civ_id,open_field)
+	if float(_against(force,formations,going,them,walls).raw)>=want: return 0
 	for step in MORE_STEPS:
 		var n:=ceili(float(going)*float(step))
-		var o:=of(force,formations,n,their_men,fortification,their_arms,civ_id,open_field,their_ready,untrained)
-		if not o.is_empty() and float(o.raw)>=want: return n-going
+		if float(_against(force,formations,n,them,walls).raw)>=want: return n-going
 	return -1
 
 ## "about 3 to 2 for us" / "about 2 to 3 against us" from a reading of of().
@@ -93,10 +125,10 @@ static func said(odds:Dictionary)->String:
 	if odds.is_empty(): return ""
 	return words(float(odds.odds),bool(odds.ours))
 
-## A town's watch and townsfolk as its battle stands them: one levy block,
-## improvised arms and no kit, untrained (civilization_combat.town_watch).
+## The watch and townsfolk who stand beside their home's soldiers
+## (MilitaryCampaign._home_defense_force): one levy block, improvised arms
+## and no kit, untrained. A town's guard alone stands by their_side.
 static func townsfolk(count:int)->Dictionary:
-	var Combat:=preload("res://scripts/civilization_combat.gd")
 	return {"id":-1,"unit":"levy","weapon":"improvised","count":count,"authorized_count":count,"equipment":0,"equipment_required":count,"ammunition":0,"ammunition_required":0,"training":Combat.RISE_TRAINING,"experience":0.0,"emergency_militia":true}
 
 ## Our kit carried by men drilled as a garrison is, fully armed.
