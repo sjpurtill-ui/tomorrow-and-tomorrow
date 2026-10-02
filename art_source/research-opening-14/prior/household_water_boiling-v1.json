@@ -1,0 +1,12 @@
+{
+  "id": "household_water_boiling",
+  "line": "health",
+  "game_year": 13,
+  "approx_historical_year": -4913,
+  "prompt": "c. 4913 BCE: Adults let muddy river water settle in clay vessel then pour clear upper layer away from dark sediment; flat watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a518eca3-9650-456b-8094-692f870b1702.png",
+  "asset": "res://assets/ui/research/subjects/household_water_boiling-v1.png",
+  "sha256": "6989fefd73f03debe2c201e6f9e862ba1b03eec5247ccc8b002c4c1d4741fb4d",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; depicts actual title/observation Drinking Water Left to Settle, not boiling despite technical ID; dark sediment and clear pour visible."
+}
