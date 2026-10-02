@@ -86,6 +86,9 @@ var pinned_id:=""
 var last_bounds:=Rect2()
 ## Per-city measured card text, keyed by what the text depends on.
 var measured:Dictionary={}
+## Our towns' guards by id and what they were read from (_guards).
+var guards:Dictionary={}
+var guards_key:=0
 ## Great works (undertaking_map_visual map marks): an inked emblem while the
 ## monument is too small to read, and a smaller paper name card beside it.
 ## They give way to the cities: a work whose mark would sit on a city's pin
@@ -204,6 +207,7 @@ func refresh()->void:
 	var entries:Array[Dictionary]=[]
 	var font:=T.voice_font()
 	var signature:=str(viewport_size)+str(reserved)
+	var town_guards:=_guards()
 	for id in sources.keys():
 		var source:Dictionary=sources[id]
 		var label:Label3D=source.label.get_ref()
@@ -223,13 +227,13 @@ func refresh()->void:
 		var flag:=label.get_node_or_null("CivilizationFlag") as Sprite3D
 		# The card's text and measured size change only with its label, report,
 		# day or era; the anchor moves every frame the camera does. Measure once.
-		# Our town's guard is re-read with the card: its badge follows the
-		# Defense share the moment it changes, even while the days stand still.
-		var guard:=0 if bool(source.foreign) else home_guard(String(id))
+		# Our town's guard is part of the key: its badge follows the Defense
+		# share the moment it changes, even while the days stand still.
+		var guard:=0 if bool(source.foreign) else int(town_guards.get(String(id),0))
 		var text_key:=hash([label.text,String(label.get_meta("map_status","")),affiliation,bool(source.foreign),flag!=null,bounds.size.x,int(GameState.elapsed_days),hash(record),EraWords.stage(),String(ownership.get("note","")),int(ownership.get("garrison",0)),guard])
 		var text:Dictionary=measured.get(id,{})
 		if int(text.get("key",0))!=text_key:
-			text=_measure_card(label,record,bool(source.foreign),affiliation,flag!=null,font,bounds,ownership,String(id))
+			text=_measure_card(label,record,bool(source.foreign),affiliation,flag!=null,font,bounds,ownership,String(id),guard)
 			text["key"]=text_key
 			measured[id]=text
 		# The founding convoy is a prompt, not a city: it keeps its readout open.
@@ -259,8 +263,9 @@ static func affiliation_of(civ_id:String,foreign:bool,kind:String="city")->Strin
 
 ## Text, wrapped lines and sizes of one city's card (see refresh's cache key).
 ## `city_id` is the place's id as the layer registered it (the home town's
-## label carries none of its own); without it, the label's own id.
-static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2,ownership:Dictionary={},city_id:String="")->Dictionary:
+## label carries none of its own); without it, the label's own id. `guard`
+## is our town's guard when already read (refresh's _guards), else -1.
+static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2,ownership:Dictionary={},city_id:String="",guard:int=-1)->Dictionary:
 	var id:=city_id if city_id!="" else String(label.get_meta("city_map_id",""))
 	var parts:=label.text.split("  •  ",true,1)
 	var title:=chart_name(String(parts[0]));var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
@@ -286,7 +291,7 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	var badge:=int(ownership.get("garrison",0))
 	# Our own town: those guarding it beside its name (home_guard). Home
 	# defence is not an army, so it has no counter of its own on the map.
-	if not foreign and badge<=0:badge=home_guard(id)
+	if not foreign and badge<=0:badge=guard if guard>=0 else home_guard(id)
 	if not note.is_empty():width=maxf(width,ui.get_string_size(note,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
 	# A town we hold carries its guard's count beside the name.
 	if badge>0:name_width+=badge_width(badge)+6
@@ -302,9 +307,18 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 ## town page's "Fighters here". 0 for a place that is not one of our towns.
 static func home_guard(settlement_id:String)->int:
 	if settlement_id=="" or settlement_id.begins_with("__"):return 0
-	var record:Dictionary=SettlementModel.settlement_record(settlement_id)
-	if record.is_empty() or not String(record.get("occupied_by","")).is_empty():return 0
 	return maxi(0,COMBAT.defenders(settlement_id))
+
+## Every town of ours's guard by id (home_guard for each), read in one pass
+## and again only when what it rests on changes: the day, the Defense share,
+## the levy at home, our people and our towns. refresh runs every frame.
+func _guards()->Dictionary:
+	var key:=hash([int(GameState.elapsed_days),float(GameState.population_allocations.get("Defense",0.0)),int(MilitaryCampaign.home_army.get("troops",0)),
+		float(GameState.population_exact),GameState.player_settlements.size()])
+	if key!=guards_key:
+		guards=COMBAT.defenders_by_town()
+		guards_key=key
+	return guards
 
 ## The width of the small garrison badge: a shield and the count holding it.
 static func badge_width(count:int)->float:

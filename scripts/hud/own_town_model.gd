@@ -21,6 +21,7 @@ const Identity:=preload("res://scripts/city_map_identity.gd")
 const Shelter:=preload("res://scripts/hud/shelter_status.gd")
 const Goods:=preload("res://scripts/civilian_goods.gd")
 const Combat:=preload("res://scripts/civilization_combat.gd")
+const Labels:=preload("res://scripts/hud/city_labels.gd")
 
 ## The page's groups and their rows, in order. The foreign page's groups,
 ## plus what only we can know.
@@ -43,29 +44,31 @@ const TEENS:=["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen",
 ## Who defends the town if it is attacked now, as its battle musters them
 ## (civilization_combat.gd defenders): at home the trained levy and the
 ## watch, with the home walls; any other town of ours its own watch and no
-## walls. `defenders` is the one count its map badge shows too. Read
-## unscoped, as the Military ledger does.
+## walls; a town another people holds (home too, once taken) none of ours.
+## `defenders` is the one count its map badge shows too. Read unscoped, as
+## the Military ledger does.
 static func strength(primary:bool,settlement_id:String="")->Dictionary:
+	var record:=SettlementModel.settlement_record(settlement_id)
+	if record.is_empty() and primary:
+		for city:Dictionary in GameState.player_settlements:
+			if bool(city.get("primary",false)):record=city;break
+	var held_by:=String(record.get("occupied_by",""))
+	var guard:=Combat.defenders_of(record)
 	if not primary:
-		# A town someone else holds keeps no watch of ours.
-		var held_by:=String(SettlementModel.settlement_record(settlement_id).get("occupied_by",""))
-		var watch:=Combat.watch_count(settlement_id) if held_by.is_empty() else 0
-		return {"town":true,"fighters":0,"watch":watch,"defenders":watch,"capital":_capital_name(),
+		return {"town":true,"held_by":held_by,"fighters":0,"watch":guard,"defenders":guard,"capital":_capital_name(),
 			"wall_stage":0,"wall_name":"Open ground","wall_integrity":1.0,"wall_words":""}
 	var defense:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
-	var home:=Combat.home_defenders()
-	return {"fighters":int(home.trained),"watch":int(home.watch),"defenders":int(home.trained)+int(home.watch),
+	var home:=Combat.home_defenders() if held_by.is_empty() else {"trained":0,"watch":0}
+	return {"held_by":held_by,"fighters":int(home.trained),"watch":int(home.watch),"defenders":guard if not record.is_empty() else int(home.trained)+int(home.watch),
 		"wall_stage":int(defense.get("stage",0)),"wall_name":String(defense.get("short","Open ground")),"wall_integrity":float(defense.get("integrity",1.0)),
 		"wall_words":String(defense.get("description",""))}
 
-## The first town's name, as the map letters it: where our trained fighters
-## live. "home" before it has one.
+## The first town's name, lettered as the map letters it (city_labels.gd
+## chart_name of the home label): where our trained fighters live. "home"
+## before it has one.
 static func _capital_name()->String:
 	var name:=String(GameState.settlement_name).strip_edges()
-	for city:Dictionary in GameState.player_settlements:
-		if bool(city.get("primary",false)):name=String(city.get("name",name)).strip_edges();break
-	if name=="" or name=="FIRST SETTLEMENT":return "home"
-	return name.capitalize() if name==name.to_upper() else name
+	return Labels.chart_name(name.to_upper()) if name!="" else "home"
 
 ## Every exact figure of the town in scope. `settlement` is the dock's
 ## selected settlement snapshot; `strong` is strength() for this town.
@@ -225,6 +228,9 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			# Everyone who would fight here today: the count on the map badge.
 			var s:Dictionary=f.get("strength",{})
 			var guard:=maxi(0,int(s.get("defenders",0)))
+			if String(s.get("held_by",""))!="":
+				return {"key":key,"name":"Fighters here","value":"none of ours","number":0,"own":0.0,"relative":true,
+					"meaning":"Another people holds this town. None of ours stand guard here."}
 			if s.is_empty() or bool(s.get("town",false)):
 				return {"key":key,"name":"Fighters here","value":("%s on watch" % EraWords.grouped(guard)) if guard>0 else "no one on watch","number":guard,"own":float(guard),"relative":true,
 					"meaning":"Townsfolk who take up arms when raiders come. Our trained fighters stay at %s unless a general sends them." % String(s.get("capital","home"))}
@@ -339,6 +345,10 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 			var s:Dictionary=f.get("strength",{})
 			if not s.is_empty() and not bool(s.get("town",false)) and int(s.fighters)>0 and int(s.watch)>0:
 				lines.append("%s trained, %s townsfolk on watch." % [EraWords.grouped(int(s.fighters)),EraWords.grouped(int(s.watch))])
+			# Like for like: a scout's count of their town is its trained
+			# fighters (city_intelligence.truth), never its watch.
+			if not (row.get("marks",[]) as Array).is_empty():
+				lines.append("Scouts count only trained fighters in other peoples' towns, not their townsfolk on watch.")
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
 			if not s.is_empty() and int(s.wall_stage)>0:lines.append("They stand %s whole." % ("mostly" if float(s.wall_integrity)>=0.7 else "only partly") if EraWords.hearth() else "They stand %d%% whole." % roundi(float(s.wall_integrity)*100.0))

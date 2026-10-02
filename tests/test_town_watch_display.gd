@@ -114,7 +114,68 @@ func test_a_town_with_no_one_on_watch_says_so()->void:
 func test_a_town_someone_else_holds_keeps_no_watch_of_ours()->void:
 	SettlementModel.settlement_record(TOWN)["occupied_by"]="civ_03"
 	assert_int(int(Model.strength(false,TOWN).defenders)).is_equal(0)
+	assert_int(Combat.defenders(TOWN)).is_equal(0)
 	assert_int(Labels.home_guard(TOWN)).is_equal(0)
+	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).value)).is_equal("none of ours")
+
+
+## The town's drawing, from the page's own figures.
+func _sketch(strong:Dictionary)->Dictionary:
+	return Model.sketch_data({"id":"","population":100,"places":120,"broken":0.0,"food_reported":false,"food_days":-1.0,"material":0.0,"logistics":0.0,"water":{},"completed":[],"strength":strong},"")
+
+
+func test_home_taken_by_another_people_shows_none_of_ours_everywhere()->void:
+	# Home taken (siege_recovery.capture marks the home record occupied).
+	_levy(12)
+	var home:=_home_id()
+	SettlementModel.settlement_record(home)["occupied_by"]="civ_03"
+	assert_int(Combat.defenders(home)).is_equal(0)
+	for id:String in [home,""]:
+		var strong:=Model.strength(true,id)
+		assert_int(int(strong.defenders)).override_failure_message(id).is_equal(0)
+		var row:=Model.row_for("garrison",{"strength":strong})
+		assert_int(int(row.number)).is_equal(0)
+		assert_str(String(row.value)).is_equal("none of ours")
+		assert_bool((_sketch(strong).fields as Dictionary).has("garrison")).is_false()
+	assert_int(Labels.home_guard(home)).is_equal(0)
+	assert_int(int(_card(home,"SEANSTONE").badge)).is_equal(0)
+
+
+func test_the_capital_is_spelled_as_the_map_spells_it()->void:
+	GameState.settlement_name="Ash-ford by the water"
+	var meaning:=String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).meaning)
+	# The map letters home from its upper-cased name (local_terrain
+	# _settlement_display_name, then city_labels chart_name).
+	var on_map:=Labels.chart_name(GameState.settlement_name.to_upper())
+	assert_str(on_map).is_equal("Ash-Ford By The Water")
+	assert_str(meaning).contains("stay at %s unless" % on_map)
+	GameState.settlement_name=""
+	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).meaning)).contains("stay at home unless")
+
+
+func test_scouted_towns_are_said_to_be_counted_like_for_like()->void:
+	var facts:={"strength":Model.strength(false,TOWN)}
+	var row:=Model.row_for("garrison",facts)
+	row["marks"]=[]
+	assert_str(Model._tip(row,facts)).not_contains("Scouts count")
+	row["marks"]=[{"name":"Flintwick","low":0.0,"high":2.0,"words":"about 1","seen":"a season ago"}]
+	assert_str(Model._tip(row,facts)).contains("Scouts count only trained fighters")
+
+
+func test_the_map_reads_every_guard_in_one_pass_and_again_only_on_change()->void:
+	_levy(12)
+	var home:=_home_id()
+	var probe:Probe=auto_free(Probe.new())
+	var guards:Dictionary=probe._guards()
+	assert_int(int(guards[home])).is_equal(Labels.home_guard(home))
+	assert_int(int(guards[TOWN])).is_equal(Labels.home_guard(TOWN))
+	assert_int(int(guards[TOWN])).is_equal(10)
+	# Unchanged: the same reading, not a new one.
+	assert_bool(is_same(probe._guards(),guards)).is_true()
+	# The Defense share changes while the day stands still: read again.
+	GameState.population_allocations["Defense"]=80
+	assert_int(int(probe._guards()[TOWN])).is_equal(20)
+	assert_int(int(probe._guards()[home])).is_equal(80)
 
 
 func test_home_shows_its_levy_and_watch_as_its_battle_musters_them()->void:

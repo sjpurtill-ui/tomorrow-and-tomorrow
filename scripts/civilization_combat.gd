@@ -53,8 +53,11 @@ static func town_watch(city_id:String)->Dictionary:
 ## Home is guarded by home_defenders instead (see defenders). 0 for no town.
 ## Run in the town's owner's scope, outside any one town's.
 static func watch_count(city_id:String)->int:
+	return watch_of(WorldSimulation.settlements.settlement_record(city_id))
+
+## watch_count for a town's record already in hand (no search of the towns).
+static func watch_of(city:Dictionary)->int:
 	var mc:Variant=WorldSimulation.military
-	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	if city.is_empty() or mc==null: return 0
 	var people:=float(WorldSimulation.settlements._settlement_population(city))
 	var share:=clampf(people/maxf(1.0,float(WorldSimulation.state.population_exact)),0.0,1.0)
@@ -69,16 +72,27 @@ static func home_defenders()->Dictionary:
 	var trained:=maxi(0,int(mc.home_army.get("troops",0)))
 	return {"trained":trained,"watch":maxi(0,int(mc._home_garrison_target())-trained)}
 
-## How many defend one of the owner's towns if it is attacked now, as
-## force_for musters them: at home the levy and the watch, anywhere else the
-## town's own watch. 0 for a place that is not one of the owner's towns.
+## How many of the owner's people defend one of its towns if it is attacked
+## now, as force_for musters them: at home the levy and the watch, anywhere
+## else the town's own watch. 0 for a town another people holds (home
+## included: siege_recovery capture) and for a place that is not the
+## owner's. The count a town's page, badge and drawing show.
 static func defenders(city_id:String)->int:
-	var city:=WorldSimulation.settlements.settlement_record(city_id)
-	if city.is_empty(): return 0
+	return defenders_of(WorldSimulation.settlements.settlement_record(city_id))
+
+## defenders for a town's record already in hand.
+static func defenders_of(city:Dictionary)->int:
+	if city.is_empty() or not String(city.get("occupied_by","")).is_empty(): return 0
 	if bool(city.get("primary",false)):
 		var home:=home_defenders()
 		return int(home.trained)+int(home.watch)
-	return watch_count(city_id)
+	return watch_of(city)
+
+## defenders for every town of the owner, by id, in one pass over its towns.
+static func defenders_by_town()->Dictionary:
+	var out:={}
+	for city:Dictionary in WorldSimulation.state.player_settlements:out[String(city.get("id",""))]=defenders_of(city)
+	return out
 
 static func commit_enemy(result:Dictionary)->void:
 	var target:Dictionary=result.get("threat",{}).get("owned_target",{})
