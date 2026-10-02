@@ -591,7 +591,8 @@ func draw_top(canvas:Control)->void:
 		hits=[]
 		return
 	var view:=Rect2(Vector2.ZERO,canvas.size)
-	var taken:Array=[]
+	# What the war chart drew (bands' counters, battles) is never covered.
+	var taken:Array=_chart_rects()
 	var found:Array=[]
 	var font:=T.font("voice")
 	var fs:=14
@@ -720,17 +721,21 @@ func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2
 	var size:=Vector2(w,fs+6.0+12.0)
 	var n:=pts.size()
 	var tries:=[n/2,n/5,(n*4)/5,0,n-1]
+	# The first place clear of everything; else the one that covers least
+	# (our side first, then theirs, further out each time).
 	var place:=Vector2.INF
-	for reach in [34.0,64.0]:
+	var least:=INF
+	for reach:float in [34.0,70.0,110.0,-40.0,-80.0]:
 		for i:int in tries:
 			var centre:Vector2=pts[clampi(i,0,n-1)]-toward*reach
 			var rect:=Rect2(centre-size*0.5,size)
 			if free.has_area() and not free.encloses(rect): continue
-			var clear:=true
+			var cover:=0.0
 			for r:Rect2 in taken:
-				if r.intersects(rect): clear=false; break
-			if clear: place=centre; break
-		if place.is_finite(): break
+				if r.intersects(rect): cover+=r.intersection(rect).get_area()
+			if cover<least: least=cover; place=centre
+			if cover<=0.0: break
+		if least<=0.0: break
 	if not place.is_finite(): place=pts[n/2]-toward*34.0
 	var box:=Rect2(place-size*0.5,size)
 	taken.append(box.grow(3.0))
@@ -745,6 +750,31 @@ func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2
 	canvas.draw_rect(Rect2(bar.position+Vector2(w*float(e.ours_share),0),Vector2(w*(1.0-float(e.ours_share)),bar.size.y)),theirs.darkened(0.1))
 	canvas.draw_rect(bar.grow(1.5),Color(INK,0.85),false,1.2)
 	return box
+
+
+## The war chart's own marks on screen (war_front_overlay.gd): its counters
+## and its battles.
+func _chart_rects()->Array:
+	var out:Array=[]
+	# Every band of ours where it stands: its counter and, in a fight, its
+	# battle are drawn there, whatever the chart has drawn so far this frame.
+	for army in MilitaryCampaign.field_armies:
+		if not army is Dictionary or int((army as Dictionary).get("troops",0))<=0: continue
+		var at:=_screen(_v2((army as Dictionary).get("position",{})))
+		if at.is_finite(): out.append(Rect2(at-Vector2(70,50),Vector2(140,100)))
+	var chart:Node=terrain.get_node_or_null("WarMapMarks/WarFrontOverlay") if is_instance_valid(terrain) else null
+	if chart==null: return out
+	var counted:Variant=chart.get("counter_rects")
+	if counted is Array:
+		for r in counted: if r is Rect2: out.append((r as Rect2).grow(4.0))
+	var drawn:Variant=chart.get("hits")
+	if drawn is Array:
+		for h in drawn:
+			if h is Dictionary and String((h as Dictionary).get("kind","")) in ["battle","battles"]:
+				var c:Vector2=(h as Dictionary).get("centre",Vector2.INF)
+				var radius:=float((h as Dictionary).get("radius",20.0))+10.0
+				if c.is_finite(): out.append(Rect2(c-Vector2(radius,radius),Vector2(radius,radius)*2.0))
+	return out
 
 
 ## Where a counter for a town may stand: above its mark, then to either side,
