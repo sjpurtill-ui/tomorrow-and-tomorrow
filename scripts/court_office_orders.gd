@@ -21,8 +21,11 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 
 ## Which business each office carries.
-const FAMILIES:={"Marshal":"war","Quartermaster":"stores","Steward":"town","ChiefScout":"scouting","Scholar":"learning"}
-const FAMILY_ORDER:=["war","stores","town","scouting","learning"]
+const FAMILIES:={"Marshal":"war","Quartermaster":"stores","Steward":"town","ChiefScout":"scouting","Scholar":"learning","Envoy":"trade"}
+const FAMILY_ORDER:=["war","stores","town","trade","scouting","learning"]
+## Trade with other peoples (court_trade.gd): the Envoy's, the Headman's
+## while no Envoy holds office.
+const Trade:=preload("res://scripts/court_trade.gd")
 
 
 ## The office of the one before the god: an official's own, the war leader of
@@ -66,6 +69,7 @@ static func menus(audience_id:String)->Array:
 			"war": out.append_array(_war())
 			"stores": out.append_array(_stores())
 			"town": out.append_array(_town())
+			"trade": out.append_array(_trade())
 			"scouting": out.append_array(_scouting())
 			"learning": out.append_array(_learning())
 	return out
@@ -182,14 +186,18 @@ static func _town()->Array:
 			if people=="": continue
 			var the:="the "+people.trim_prefix("The ").trim_prefix("the ")
 			envoys.append(_item("%s: talk" % people,"Send an envoy to %s" % the))
+			# Trade and gifts are the trade family's buttons (court_trade.gd).
 			if bool(rel.get("at_war",false)): envoys.append(_item("%s: ask for peace" % people,"Send envoys to %s to ask for peace" % the))
-			else:
-				envoys.append(_item("%s: trade" % people,"Open trade with %s" % the))
-				envoys.append(_item("%s: gifts" % people,"Send gifts to %s" % the))
-				envoys.append(_item("%s: declare war" % people,"Declare war on %s" % the))
+			else: envoys.append(_item("%s: declare war" % people,"Declare war on %s" % the))
 			if envoys.size()>=16: break
 	if not envoys.is_empty(): out.append(_menu("Envoys","Envoys",envoys))
 	return out
+
+
+# --- The messenger: trade with other peoples ----------------------------------------
+
+static func _trade()->Array:
+	return Trade.menus()
 
 
 # --- The chief scout ------------------------------------------------------------
@@ -226,7 +234,7 @@ static func closest(words:String,count:int=3)->Array:
 	var wanted:=_stems(words)
 	if wanted.is_empty(): return []
 	var scored:Array=[]
-	for family in [_war(),_stores(),_town(),_scouting(),_learning()]:
+	for family in [_war(),_stores(),_town(),_trade(),_scouting(),_learning()]:
 		for menu:Dictionary in family:
 			var items:Array=(menu.items as Array) if menu.has("items") else [{"label":String(menu.label),"text":String(menu.text)}]
 			for item:Dictionary in items:

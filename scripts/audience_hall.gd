@@ -3855,6 +3855,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("upkeep") and not bool(_upkeep().call("valid_state",data.upkeep)): return false
 	if data.has("envoy_requests") and not bool(_requests().call("valid_state",data.envoy_requests)): return false
 	if data.has("trade_pacts") and not bool((load(PACTS_PATH) as GDScript).call("valid_state",data.trade_pacts)): return false
+	if data.has("trade") and not bool((load("res://scripts/trade_ledger.gd") as GDScript).call("valid_state",data.trade)): return false
 	if data.has("menace") and not bool((load(MENACE_PATH) as GDScript).call("valid_state",data.menace)): return false
 	if data.has("turning_points") and not bool((load(TURNING_PATH) as GDScript).call("valid_state",data.turning_points)): return false
 	if data.has("court_persons"):

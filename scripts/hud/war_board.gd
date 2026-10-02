@@ -224,6 +224,9 @@ func _enemy_row(e:Dictionary)->Control:
 	odds.tooltip_text="Their strength against ours, by the war leader's reckoning: people, warriors and readiness on one scale.
 Worn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("our_worn",0.0))*100.0),roundi(float(e.get("their_worn",0.0))*100.0)]
 	var now:=_line("Now: "+now_words(e),14,T.INK,true);now.tooltip_text=now_details(e);column.add_child(now)
+	# Trade, where a stance or a dependence bears on them (trade_words.gd).
+	var trade_line:=String(preload("res://scripts/trade_words.gd").war_line(civ_id))
+	if trade_line!="":column.add_child(_line(trade_line,13,T.INK_MUTED))
 	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",6);column.add_child(stances)
 	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
 	for spec:Array in STANCES:

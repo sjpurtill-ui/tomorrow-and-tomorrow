@@ -30,8 +30,13 @@ const CHRONICLE_PATH:="res://scripts/chronicle.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 
 const RESOURCES:=["Food","Timber","Stone","Clay","Fiber Plants"]
-## Relative worth of goods (as envoy_requests.gd VALUES).
-const VALUES:={"Food":1.0,"Timber":1.4,"Stone":1.8,"Clay":1.3,"Fiber Plants":1.5}
+## What goods are worth: the one price table (trade_prices.gd: the economy's
+## own prices), read for whichever people weighs them.
+const PRICES:=preload("res://scripts/trade_prices.gd")
+const LEDGER_PATH:="res://scripts/trade_ledger.gd"
+
+static func worth(res:String,owner:String="player")->float:
+	return PRICES.value(res,owner)
 const CADENCES:={"season":91,"year":365}
 const STANCES:=["propose","accept","counter","refuse","consult"]
 const MAX_YEARS:=10
@@ -289,8 +294,8 @@ static func _threshold(civ_id:String)->float:
 
 static func ratio(civ_id:String,terms:Dictionary)->float:
 	## What they receive over what they give, as they value it.
-	var value_in:=float(terms.give_amt)*float(VALUES.get(terms.give_res,1.0))*_need_mult(civ_id,String(terms.give_res))
-	var value_out:=float(terms.get_amt)*float(VALUES.get(terms.get_res,1.0))*_surplus_mult(civ_id,String(terms.get_res))
+	var value_in:=float(terms.give_amt)*worth(String(terms.give_res),civ_id)*_need_mult(civ_id,String(terms.give_res))
+	var value_out:=float(terms.get_amt)*worth(String(terms.get_res),civ_id)*_surplus_mult(civ_id,String(terms.get_res))
 	return value_in/maxf(0.01,value_out)
 
 static func appraise(civ_id:String,terms:Dictionary,final:bool=false,allow_consult:bool=false)->Dictionary:
@@ -317,13 +322,13 @@ static func appraise(civ_id:String,terms:Dictionary,final:bool=false,allow_consu
 		return {"decision":"refuse","terms":terms,"reason":"you ask too much %s for too little %s" % [String(t.get_res),String(t.give_res)]}
 	if r<threshold:
 		# Ask more of you if you can carry it; otherwise offer less of theirs.
-		var unit_in:=float(VALUES.get(t.give_res,1.0))*_need_mult(civ_id,String(t.give_res))
-		var value_out:=float(t.get_amt)*float(VALUES.get(t.get_res,1.0))*_surplus_mult(civ_id,String(t.get_res))
+		var unit_in:=worth(String(t.give_res),civ_id)*_need_mult(civ_id,String(t.give_res))
+		var value_out:=float(t.get_amt)*worth(String(t.get_res),civ_id)*_surplus_mult(civ_id,String(t.get_res))
 		var wanted:=_round_up(value_out*threshold/maxf(0.01,unit_in))
 		if wanted<=cap(String(t.give_res)) and float(wanted)<=player_stock(String(t.give_res))*0.5:
 			t.give_amt=wanted
 		else:
-			var unit_out:=float(VALUES.get(t.get_res,1.0))*_surplus_mult(civ_id,String(t.get_res))
+			var unit_out:=worth(String(t.get_res),civ_id)*_surplus_mult(civ_id,String(t.get_res))
 			var fair_out:=floori(float(t.give_amt)*unit_in/threshold/maxf(0.01,unit_out))
 			if fair_out<1: return {"decision":"refuse","terms":terms,"reason":"what you offer is worth too little to us"}
 			t.get_amt=fair_out
@@ -404,19 +409,19 @@ static func offline_choices(civ_id:String)->Array[Dictionary]:
 	# What you hold most of (by worth) and what they hold most of.
 	var ours:=""; var ours_worth:=0.0
 	for res:String in RESOURCES:
-		var worth:=player_stock(res)*float(VALUES[res])
+		var held_worth:=player_stock(res)*worth(res)
 		if res=="Food" and float(GameState.simulation_metrics.get("food_days",60.0))<45.0: continue
-		if worth>ours_worth: ours_worth=worth; ours=res
+		if held_worth>ours_worth: ours_worth=held_worth; ours=res
 	var theirs:=""; var best:=0.0
 	for res:String in RESOURCES:
 		if res==ours: continue
-		var worth:=float(their_limit(civ_id,res))*float(VALUES[res])/maxf(0.2,player_stock(res)/maxf(1.0,float(GameState.population_exact)))
-		if their_limit(civ_id,res)>=3 and worth>best: best=worth; theirs=res
+		var wanted:=float(their_limit(civ_id,res))*worth(res,civ_id)/maxf(0.2,player_stock(res)/maxf(1.0,float(GameState.population_exact)))
+		if their_limit(civ_id,res)>=3 and wanted>best: best=wanted; theirs=res
 	if ours=="" or theirs=="": return out
 	var get_amt:=clampi(their_limit(civ_id,theirs)/2,1,cap(theirs))
 	for preset in [["fair","season",8,1.0],["lean","year",5,0.75]]:
-		var unit_in:=float(VALUES[ours])*_need_mult(civ_id,ours)
-		var unit_out:=float(VALUES[theirs])*_surplus_mult(civ_id,theirs)
+		var unit_in:=worth(ours,civ_id)*_need_mult(civ_id,ours)
+		var unit_out:=worth(theirs,civ_id)*_surplus_mult(civ_id,theirs)
 		var amount:=get_amt if String(preset[1])=="season" else mini(cap(theirs),get_amt*2)
 		var give:=_round_up(float(amount)*unit_out*_threshold(civ_id)*float(preset[3])/maxf(0.01,unit_in))
 		give=mini(give,cap(ours))
@@ -542,6 +547,11 @@ static func settle(p:Dictionary,day:int)->void:
 	if gave>0.0: Hall._credit_civ(civ_id,give_res,gave)
 	var got:=_their_take(civ_id,get_res,send_t) if send_t>0.0 else 0.0
 	if got>0.0: got=EXCHANGE.receive("player",get_res,got)
+	# Both loads go on the one trade ledger (trade_ledger.gd): what we lean on them for.
+	var ledger:=load(LEDGER_PATH) as GDScript
+	if ledger!=null:
+		if gave>0.0: ledger.call("note_flow","player",civ_id,give_res,gave,"pact")
+		if got>0.0: ledger.call("note_flow",civ_id,"player",get_res,got,"pact")
 	p.done=int(p.done)+1
 	p.due=int(p.due)+period(t)
 	var mine_ok:=fp>=0.999
@@ -647,7 +657,7 @@ static func context(civ_id:String)->Dictionary:
 	var active:Array=[]
 	for p in pacts(civ_id): active.append({"terms":short_words(p.terms),"portions_done":int(p.done),"portions":int(p.terms.portions)})
 	return {"your_people_have_plenty_of":plenty,"your_people_are_short_of":short,"most_you_would_give_per_portion":limits,
-		"relative_worth":VALUES,"least_value_you_accept_per_value_given":snappedf(_threshold(civ_id),0.05),"exchanges_in_force":active,"era_portion_ceiling":{"Food":cap("Food"),"Timber":cap("Timber"),"Stone":cap("Stone"),"Clay":cap("Clay"),"Fiber Plants":cap("Fiber Plants")}}
+		"relative_worth":PRICES.table(RESOURCES,civ_id),"least_value_you_accept_per_value_given":snappedf(_threshold(civ_id),0.05),"exchanges_in_force":active,"era_portion_ceiling":{"Food":cap("Food"),"Timber":cap("Timber"),"Stone":cap("Stone"),"Clay":cap("Clay"),"Fiber Plants":cap("Fiber Plants")}}
 
 static func next_words(p:Dictionary)->String:
 	if String(p.status)!="active": return String(p.status).capitalize()

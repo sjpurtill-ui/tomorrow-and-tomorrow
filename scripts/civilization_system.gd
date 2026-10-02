@@ -5026,10 +5026,12 @@ func player_effects()->Dictionary:
 	var occupied_production_bonus:=0.0
 	var occupation_relief_demand:=0.0
 	var occupation_food_transfer:=0.0
+	# Trade partners are peoples goods really pass to and from (trade_ledger.gd),
+	# never a treaty with nothing moving; the volume is their worth a day.
+	var real_trade:Dictionary=(load("res://scripts/trade_ledger.gd") as GDScript).call("access",WorldSimulation.actor_id)
+	active_trade=int(real_trade.get("partners",0)); trade_volume=float(real_trade.get("value",0.0))/30.0
 	for civ in civilizations:
 		var relation:Dictionary=civ.player_relation
-		if String(relation.get("treaty","none"))=="trade" and not bool(relation.get("at_war",false)):
-			active_trade+=1; trade_volume+=float(relation.get("trade",0.0))
 		if String(relation.get("treaty","none"))=="non_aggression": treaty_count+=1
 		if bool(relation.get("at_war",false)):
 			war_count+=1

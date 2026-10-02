@@ -534,6 +534,10 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if audience.is_empty() or String(audience.get("status",""))!="waiting" or clean.is_empty(): return {"handled":false,"act":"statement"}
 	var decree:=_sovereign_decree(id,clean,context)
 	if not decree.is_empty(): return decree
+	# Trade with another people (court_trade.gd): the Envoy's business, the
+	# Headman's while no Envoy holds office, carried out by the trade ledger.
+	var trade:Dictionary=(load("res://scripts/court_trade.gd") as GDScript).call("hear",id,audience,clean,context)
+	if not trade.is_empty(): return trade
 	var list:=roster(audience)
 	var cls:=classify(clean)
 	# The god's word on new towns ("stop founding new towns", "our leaders may

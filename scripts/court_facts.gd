@@ -49,6 +49,8 @@ const AutoFounding:=preload("res://scripts/auto_founding.gd")
 const ManualWork:=preload("res://scripts/manual_work.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
 const TownNames:=preload("res://scripts/town_names.gd")
+const TradeLedger:=preload("res://scripts/trade_ledger.gd")
+const TradeWords:=preload("res://scripts/trade_words.gd")
 
 ## Offices (government_people_system office keys) and, when no key is known,
 ## words in a title, that make each sheet.
@@ -92,6 +94,8 @@ static func offices(persona:Dictionary,speaker:Dictionary={},holder_key:String="
 	if war: out.append("war")
 	if not own_war and (key in STORE_KEYS or (key=="" and _any(office,STORE_WORDS))): out.append("stores")
 	if key in TRIBUTE_KEYS or (key=="" and _any(office,TRIBUTE_WORDS)): out.append("tribute")
+	# The Headman carries trade with other peoples while no Envoy holds office.
+	elif key=="Steward" and GovernmentPeopleSystem.officeholder("Envoy").is_empty(): out.append("tribute")
 	if key in SCOUT_KEYS or (key=="" and _any(office,SCOUT_WORDS)): out.append("scouts")
 	return out
 
@@ -528,7 +532,12 @@ static func _tribute(out:Dictionary)->void:
 			var rel:Dictionary=(c as Dictionary).get("player_relation",{}) if (c as Dictionary).get("player_relation") is Dictionary else {}
 			if int(rel.get("contact_level",0))<=0: continue
 			var pact:Dictionary=(ForeignDiplomacy.commitments.state.get("pacts",{}) as Dictionary).get(String(c.id),{}) if ForeignDiplomacy!=null else {}
-			peoples.append({"people":String(c.get("name","")),"treaty":String(rel.get("treaty","none")),"trade":snappedf(float(rel.get("trade",0.0)),0.01),"pact":String(pact.get("kind",pact.get("action",""))) if not pact.is_empty() else "none"})
+			# What really passes between us, from the trade ledger (trade_ledger.gd).
+			var cid:=String(c.id)
+			var trade:=TradeLedger.flow_value("player",cid)+TradeLedger.flow_value(cid,"player")
+			peoples.append({"people":String(c.get("name","")),"treaty":String(rel.get("treaty","none")),"trade":snappedf(trade,0.1),"pact":String(pact.get("kind",pact.get("action",""))) if not pact.is_empty() else "none",
+				"we_send":TradeWords.flow_words("player",cid),"they_send":TradeWords.flow_words(cid,"player"),"they_lean":TradeWords.leaning_line(cid,"player"),"we_lean":TradeWords.leaning_line("player",cid),
+				"our_stance":TradeWords.stance_words("player",cid),"their_stance":TradeWords.theirs_label(cid),"tribute":TradeWords.tribute_label(cid),"met":int(rel.get("contact_level",0))>=2})
 	out["peoples"]=peoples
 
 # --------------------------------------------------------------------------
@@ -746,7 +755,15 @@ static func text(s:Dictionary)->String:
 	if (s.get("offices",[]) as Array).has("tribute"):
 		lines.append("Tribute taken: %s." % ("; ".join(PackedStringArray(s.get("tribute_taken",[]))) if not (s.get("tribute_taken",[]) as Array).is_empty() else "none"))
 		var ties:PackedStringArray=PackedStringArray()
-		for p:Dictionary in s.get("peoples",[]): ties.append("%s: treaty %s, trade %s, pact %s" % [String(p.people),String(p.treaty),str(p.trade),String(p.pact)])
+		for p:Dictionary in s.get("peoples",[]):
+			var tie:="%s: treaty %s, trade worth %s a month, pact %s" % [String(p.people),String(p.treaty),str(p.trade),String(p.pact)]
+			if bool(p.get("met",false)): tie+="; we send %s; they send %s" % [String(p.get("we_send","nothing")),String(p.get("they_send","nothing"))]
+			for key in ["they_lean","we_lean"]:
+				if String(p.get(key,""))!="": tie+="; "+String(p[key]).trim_suffix(".")
+			if String(p.get("our_stance",""))!="": tie+="; we have them %s" % String(p.our_stance)
+			if String(p.get("their_stance",""))!="": tie+="; %s" % String(p.their_stance).to_lower()
+			if String(p.get("tribute",""))!="": tie+="; %s" % String(p.tribute).to_lower()
+			ties.append(tie)
 		if not ties.is_empty(): lines.append("Peoples: %s." % "; ".join(ties))
 	if (s.get("offices",[]) as Array).has("scouts"):
 		var out_now:PackedStringArray=PackedStringArray()

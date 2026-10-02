@@ -47,8 +47,11 @@ const Aftermath:=preload("res://scripts/envoy_aftermath.gd")
 const RECENT_MAX:=40
 const PLEDGES_MAX:=16
 const TICK:=10
-## Relative worth of goods when a people trades or repays in kind.
-const VALUES:={"Food":1.0,"Timber":1.4,"Stone":1.8,"Clay":1.3,"Fiber Plants":1.5}
+## What goods are worth when a people trades or repays in kind: the one price
+## table (trade_prices.gd, the economy's own prices).
+const PRICES:=preload("res://scripts/trade_prices.gd")
+static func _value(res:String)->float:
+	return PRICES.value(res,"player")
 const PLACES:=["north woods","east ridge","river bend","upper valley","south marsh","west hills","old ford","far meadows"]
 
 ## Each request: its herald headline and its family (variety is judged by
@@ -266,7 +269,7 @@ static func _surplus(civ_id:String,exclude:Array,min_stock:float=30.0)->Dictiona
 		if String(res) in exclude: continue
 		var stock:=Hall.foreign_stock(civ_id,String(res))
 		if stock<min_stock: continue
-		var worth:=stock*float(VALUES.get(res,1.0))
+		var worth:=stock*_value(String(res))
 		if worth>best_value: best_value=worth; best={"res":String(res),"stock":stock}
 	return best
 
@@ -351,7 +354,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			if amount<10.0 or amount>have: return {}
 			var repay:=_surplus(civ_id,["Food"],20.0)
 			var repay_res:=String(repay.get("res","Food"))
-			var repay_amt:=Hall._nice(amount*1.3*float(VALUES.Food)/float(VALUES.get(repay_res,1.0)))
+			var repay_amt:=Hall._nice(amount*1.3*_value("Food")/_value(String(repay_res)))
 			var episode:=int(data.get("episode",floori(day/365.0)))
 			s.ask="er:food_loan:%d" % episode
 			req={"amount":amount,"repay_res":repay_res,"repay_amt":repay_amt,"due_in":rng.randi_range(240,360)}
@@ -366,7 +369,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			var place0:=_pick(PLACES,rng)
 			var yields:={"Timber":"woods","Stone":"quarries","Clay":"clay pits","Fiber Plants":"reed beds"}
 			var goods:=_pick(yields.keys(),rng)
-			var amount0:=Hall._nice(float(workers)*60.0*0.12*float(VALUES.Food)/float(VALUES.get(goods,1.0))*rng.randf_range(0.9,1.2))
+			var amount0:=Hall._nice(float(workers)*60.0*0.12*_value("Food")/_value(String(goods))*rng.randf_range(0.9,1.2))
 			s.ask="er:labour:%d" % floori(day/365.0)
 			req={"food":food,"workers":workers,"res":goods,"amount":amount0,"where":"%s in the %s" % [String(yields[goods]),place0],"days":60}
 			terms={"resource":"Food","amount":food}
@@ -388,7 +391,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			if offer.is_empty(): return {}
 			var give:=Hall._nice(minf(pop*(0.5 if want=="Food" else 0.15)*rng.randf_range(0.8,1.2),Hall.player_stock(want)*0.2))
 			if give<8.0: return {}
-			var receive:=Hall._nice(give*float(VALUES.get(want,1.0))/float(VALUES.get(offer.res,1.0))*rng.randf_range(1.0,1.2))
+			var receive:=Hall._nice(give*_value(String(want))/_value(String(offer.res))*rng.randf_range(1.0,1.2))
 			var cap:=float(offer.stock)*0.35
 			if receive>cap:
 				give=Hall._nice(give*cap/receive); receive=Hall._nice(cap)
@@ -416,7 +419,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			var pay:=_surplus(civ_id,["Food"],30.0)
 			s.ask="er:forage:%s" % place
 			req={"place":place,"monthly":monthly,"months":6}
-			if not pay.is_empty(): req.merge({"pay_res":String(pay.res),"pay_amt":Hall._nice(minf(float(pay.stock)*0.2,monthly*6.0*0.7/float(VALUES.get(pay.res,1.0))))})
+			if not pay.is_empty(): req.merge({"pay_res":String(pay.res),"pay_amt":Hall._nice(minf(float(pay.stock)*0.2,monthly*6.0*0.7/_value(String(pay.res))))})
 			s.summary="%s's hunters ask leave to hunt and gather in your %s for half a year; they would take about %d Food a month from that country." % [name,place,roundi(monthly)]
 		"craft_teaching":
 			if opinion<-0.1 or r==null: return {}
@@ -495,7 +498,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			if amount2<10.0: return {}
 			var pay3:=_surplus(civ_id,[res],20.0)
 			req={"enemy":String(enemy.id),"enemy_name":String(enemy.name),"res":res,"amount":amount2}
-			if not pay3.is_empty(): req.merge({"pay_res":String(pay3.res),"pay_amt":Hall._nice(minf(float(pay3.stock)*0.3,amount2*0.8*float(VALUES.get(res,1.0))/float(VALUES.get(pay3.res,1.0))))})
+			if not pay3.is_empty(): req.merge({"pay_res":String(pay3.res),"pay_amt":Hall._nice(minf(float(pay3.stock)*0.3,amount2*0.8*_value(String(res))/_value(String(pay3.res))))})
 			s.ask="er:supplies:"+String(enemy.id)
 			terms={"resource":res,"amount":amount2}
 			var offer_text:=" and offers %d %s for them" % [roundi(float(req.pay_amt)),String(req.pay_res)] if req.has("pay_res") else ""
@@ -826,7 +829,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			var note:=""
 			var asked:=String(typed.get("repay_res",""))
 			if asked!="" and asked!=repay_res and asked in Hall.RESOURCES:
-				var need:=Hall._nice(float(p.amount)*1.3*float(VALUES.Food)/float(VALUES.get(asked,1.0)))
+				var need:=Hall._nice(float(p.amount)*1.3*_value("Food")/_value(String(asked)))
 				if Hall.foreign_stock(civ_id,asked)>=need*0.5: repay_res=asked; repay_full=need
 				else: note=" They have too little %s to promise it, and will repay in %s." % [asked,repay_res]
 			var sent:=_give(civ_id,"Food",Hall._nice(lend))
