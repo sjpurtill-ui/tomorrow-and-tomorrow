@@ -27,6 +27,7 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"economy","label":"Food","icon":2,"sub":0,"drawer":true,"tooltip":"Food and water · F2"},
 	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"drawer":true,"tooltip":"Material stores and supply"},
 	{"id":"wealth","label":"Wealth","icon":4,"section":"economy","sub":2,"drawer":true,"tooltip":"Wealth, gifts and exchange"},
+	{"id":"trade","label":"Trade","section":"economy","sub":3,"drawer":true,"tooltip":"Trade with other peoples: what passes, who leans on whom, and pressure"},
 	{"id":"construction","label":"Buildings","icon":5,"drawer":true,"tooltip":"Construction and infrastructure · F7"},
 	{"id":"production","label":"Production","icon":6,"drawer":true,"tooltip":"Crafts, tools and weapons in the making · F9"},
 	{"id":"civ","label":"Culture","icon":7,"drawer":true,"tooltip":"Society and civic dialogue · F4"},
@@ -643,7 +644,7 @@ func set_active_section(id:String)->void:
 	for section_id in rail_buttons:
 		var button:Button=rail_buttons[section_id]
 		var target:=String(section_id);var active:bool=target==id or (target=="overview" and id=="settlement")
-		if id=="economy":active=target==["economy","materials","wealth"][clampi(dock.sub if dock else 0,0,2)]
+		if id=="economy":active=target==["economy","materials","wealth","trade"][clampi(dock.sub if dock else 0,0,3)]
 		button.add_theme_stylebox_override("normal",_approved_rail_style(active))
 		button.add_theme_stylebox_override("hover",_approved_rail_style(active,true))
 		var icon:Control=rail_icons.get(section_id)
@@ -1118,6 +1119,8 @@ func _build_toolbar()->void:
 	scale_box.add_child(world_button)
 	# The supply map (hud/supply_map.gd): where our fighters can be fed.
 	scale_box.add_child(preload("res://scripts/hud/supply_map.gd").toggle_button(terrain))
+	# The trade map (hud/trade_map.gd): goods between peoples, embargoes broken red.
+	scale_box.add_child(preload("res://scripts/hud/trade_map.gd").toggle_button(terrain))
 	# Compile the world view's shader while the map loads, so its first opening
 	# does not stall: one invisible pixel drawn with it for a moment.
 	if is_inside_tree():

@@ -1068,7 +1068,14 @@ func test_player_foreign_policy_changes_real_trade_and_war_state()->void:
 	system.civilizations[0]=civ
 	var trade:Dictionary=system.conduct_player_action(String(civ.id),"open_trade",true)
 	assert_bool(bool(trade.get("ok",false))).is_true()
+	# A compact alone moves nothing: a trade partner is a people goods really
+	# pass to and from (trade_ledger.gd), never a treaty with nothing moving.
+	assert_int(int(system.player_effects().active_trade_partners)).is_equal(0)
+	var ledger:=preload("res://scripts/trade_ledger.gd")
+	var pair:=ledger.ensure_pair("player",String(civ.id))
+	pair["val"]={"ab":20.0,"ba":20.0}
 	assert_int(int(system.player_effects().active_trade_partners)).is_equal(1)
+	ForeignDiplomacy.audiences.erase("trade")
 	var war:Dictionary=system.conduct_player_action(String(civ.id),"declare_war",true)
 	assert_bool(bool(war.get("ok",false))).is_true()
 	assert_bool(bool(system.civilizations[0].player_relation.at_war)).is_true()

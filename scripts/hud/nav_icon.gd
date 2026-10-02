@@ -70,6 +70,12 @@ func _draw()->void:
 			for r in [7.0,11.0]:
 				draw_arc(Vector2(15,14),r,deg_to_rad(150),deg_to_rad(210),10,c,2.0,true)
 				draw_arc(Vector2(15,14),r,deg_to_rad(-30),deg_to_rad(30),10,c,2.0,true)
+		"trade":
+			# Two loads passing each other on one road: goods out, goods in.
+			draw_line(Vector2(4,10),Vector2(21,10),c,3.0,true)
+			draw_colored_polygon(PackedVector2Array([Vector2(26,10),Vector2(19,5),Vector2(19,15)]),c)
+			draw_line(Vector2(26,21),Vector2(9,21),c,3.0,true)
+			draw_colored_polygon(PackedVector2Array([Vector2(4,21),Vector2(11,16),Vector2(11,26)]),c)
 		"chronicle":
 			# A tally-stick: four notches and a fifth struck across.
 			draw_rect(Rect2(4,20,22,5),c,true)

@@ -715,6 +715,10 @@ func begin_day(day:int,daily_context:Dictionary,construction:Callable=Callable()
 		S.step("exchange",timings,func()->void:
 			preload("res://scripts/civilization_exchange.gd").settle(day)
 			preload("res://scripts/civilization_exchange.gd").occupation(day)
+			# Trade between peoples, on each pair's own day (trade_ledger.gd;
+			# loaded, not preloaded, to keep the calendar's compile order free
+			# of the court's scripts).
+			(load("res://scripts/trade_ledger.gd") as GDScript).call("advance",day)
 			preload("res://scripts/great_works_rivalry.gd").advance_world(day)
 	),
 	],{},func()->void:

@@ -788,16 +788,34 @@ static func _tribute_answer(sheet:Dictionary,lower:String)->String:
 	if _has(lower,"\\b(tribute)\\b"):
 		var taken:Array=sheet.get("tribute_taken",[])
 		return ("Tribute taken: %s." % "; ".join(PackedStringArray(taken))) if not taken.is_empty() else "We have taken no tribute."
-	# Trade: with whom, and how much passes.
+	# Trade: with whom, and how much passes (the trade ledger's own words).
 	if _has(lower,"\\b(trade|trading|traders?|barter|exchange)\\b"):
 		var with_us:PackedStringArray=PackedStringArray()
 		var none:PackedStringArray=PackedStringArray()
 		for p:Dictionary in sheet.get("peoples",[]):
-			if float(p.get("trade",0.0))>0.0: with_us.append("the %s (%s)" % [String(p.people),str(p.trade)])
+			# One people named: what passes with them, and what it makes of us.
+			var named:=String(p.people).to_lower().trim_prefix("the ")
+			if named.length()>=3 and _has(lower,"\\b"+named+"s?\\b"): return _trade_with(p)
+		for p:Dictionary in sheet.get("peoples",[]):
+			if float(p.get("trade",0.0))>0.0: with_us.append("the %s (we send %s; they send %s)" % [String(p.people),String(p.get("we_send","")),String(p.get("they_send",""))])
 			else: none.append("the %s" % String(p.people))
 		if with_us.is_empty(): return "We trade with no one yet: nothing passes between us and %s." % (_join(none) if not none.is_empty() else "any people we know")
 		return "We trade with %s.%s" % [_join(with_us),(" Nothing passes between us and %s." % _join(none)) if not none.is_empty() else ""]
 	return ""
+
+## What passes between us and one people, from the keeper's facts.
+static func _trade_with(p:Dictionary)->String:
+	var name:=String(p.people)
+	if not bool(p.get("met",true)): return "We know the %s only by word: no trader of ours has reached them, and nothing passes between us." % name
+	var parts:=PackedStringArray()
+	if float(p.get("trade",0.0))>0.0: parts.append("With the %s: we send %s; they send %s." % [name,String(p.get("we_send","nothing")),String(p.get("they_send","nothing"))])
+	else: parts.append("Nothing passes between us and the %s yet." % name)
+	for key in ["they_lean","we_lean"]:
+		if String(p.get(key,""))!="": parts.append(String(p[key]))
+	if String(p.get("our_stance",""))!="": parts.append("Our stance toward them: %s." % String(p.our_stance))
+	if String(p.get("their_stance",""))!="": parts.append(String(p.their_stance)+".")
+	if String(p.get("tribute",""))!="": parts.append(String(p.tribute)+".")
+	return " ".join(parts)
 
 ## The chief scout: the parties out, and what lies beyond our lands.
 static func _scouts_answer(sheet:Dictionary,lower:String)->String:

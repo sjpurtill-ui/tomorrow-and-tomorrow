@@ -113,7 +113,16 @@ func test_new_world_uses_paid_founding_and_real_city_register()->void:
 	assert_int(CivilizationSystem.city_intelligence.sites(false).size()).is_equal(2)
 
 func test_trade_debits_both_real_stores_and_cannot_invent_imports()->void:
+	# Trade between two simulated peoples (trade_ledger.gd): goods leave one
+	# people's stores and reach the other's, never more than was held, and
+	# nothing comes from nowhere. Weighed metal with no silver to pay: what
+	# passes balances goods for goods.
+	var ledger:=preload("res://scripts/trade_ledger.gd")
 	WorldSimulation.enabled=true
+	var kept:=CivilizationSystem.civilizations.duplicate()
+	CivilizationSystem.civilizations.assign([
+		{"id":"alpha","name":"Alpha","alive":true,"population":120.0,"world_position":Vector2.ZERO,"relations":{"beta":{"opinion":0.2}},"player_relation":{"contact_level":0}},
+		{"id":"beta","name":"Beta","alive":true,"population":120.0,"world_position":Vector2(100,0),"relations":{"alpha":{"opinion":0.2}},"player_relation":{"contact_level":0}}])
 	for id:String in ["alpha","beta"]:
 		WorldSimulation.scoped(id,func()->void:
 			WorldSimulation.state.elapsed_days=1
@@ -121,10 +130,10 @@ func test_trade_debits_both_real_stores_and_cannot_invent_imports()->void:
 			WorldSimulation.state.economy_known_goods={"Stone":true,"Timber":true}
 			WorldSimulation.state.resource_stockpiles.Stone=1000.0 if id=="alpha" else 0.0
 			WorldSimulation.state.resource_stockpiles.Timber=1000.0 if id=="beta" else 0.0
-			WorldSimulation.world.civilizations.assign([{"id":"beta" if id=="alpha" else "alpha","player_relation":{"treaty":"trade","at_war":false}}])
-			WorldSimulation.economy._process_external_trade(1.0,100.0)
 		)
-	preload("res://scripts/civilization_exchange.gd").settle(1)
+	var p:=ledger.ensure_pair("alpha","beta")
+	p["known"]=true
+	ledger._settle(p,1)
 	var a:Dictionary=WorldSimulation.actors.alpha.systems.GameState.resource_stockpiles
 	var b:Dictionary=WorldSimulation.actors.beta.systems.GameState.resource_stockpiles
 	assert_float(float(a.Stone+b.Stone)).is_equal_approx(1000,.000001)
@@ -132,6 +141,8 @@ func test_trade_debits_both_real_stores_and_cannot_invent_imports()->void:
 	assert_float(float(a.Timber)).is_greater(0)
 	assert_float(float(b.Stone)).is_greater(0)
 	assert_float(WorldSimulation.actors.alpha.systems.GameState.external_trade_credit).is_equal(0.0)
+	CivilizationSystem.civilizations.assign(kept)
+	ForeignDiplomacy.audiences.erase("trade")
 
 func test_treaties_and_war_propagate_both_ways_without_sharing_private_intel()->void:
 	WorldSimulation.actors.alpha.systems.CivilizationSystem.civilizations.assign([{"id":"beta","player_relation":{"at_war":false,"treaty":"none","contact_intelligence":.9}}])
