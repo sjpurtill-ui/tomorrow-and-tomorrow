@@ -760,7 +760,7 @@ static func text(s:Dictionary)->String:
 			if bool(p.get("met",false)): tie+="; we send %s; they send %s" % [String(p.get("we_send","nothing")),String(p.get("they_send","nothing"))]
 			for key in ["they_lean","we_lean"]:
 				if String(p.get(key,""))!="": tie+="; "+String(p[key]).trim_suffix(".")
-			if String(p.get("our_stance",""))!="": tie+="; we have them %s" % String(p.our_stance)
+			if String(p.get("our_stance",""))!="": tie+="; our stance toward them: %s" % String(p.our_stance)
 			if String(p.get("their_stance",""))!="": tie+="; %s" % String(p.their_stance).to_lower()
 			if String(p.get("tribute",""))!="": tie+="; %s" % String(p.tribute).to_lower()
 			ties.append(tie)

@@ -1772,6 +1772,8 @@ func _process_diplomatic_mission(day:int)->void:
 			if WorldSimulation.enabled:preload("res://scripts/civilization_exchange.gd").receive(civ_id,gift_resource,gift_amount)
 			elif gift_resource=="Food": civ["food_days"]=clampf(float(civ.get("food_days",0.0))+gift_amount/maxf(1.0,float(civ.get("population",1.0))),0.0,180.0)
 			civ["gift_value_received"]=maxf(0.0,float(civ.get("gift_value_received",0.0)))+gift_amount
+			# A gift envoys carried is owed a return, on the one trade ledger.
+			(load("res://scripts/trade_ledger.gd") as GDScript).call("note_flow",WorldSimulation.actor_id,civ_id,gift_resource,gift_amount,"gift")
 		civ["player_relation"]=relation
 		civilizations[index]=civ
 		var purpose:=String(diplomatic_mission.get("purpose","goodwill"))

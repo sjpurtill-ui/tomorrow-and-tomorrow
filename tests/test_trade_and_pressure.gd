@@ -111,7 +111,7 @@ func test_gift_and_barter_move_real_goods_before_money()->void:
 	Ledger._settle(p,192)
 	assert_str(String(p.form)).is_equal("barter")
 	# Goods for goods: each side's load within a quarter of the other's.
-	var vab:=float(p.last.vab); var vba:=float(p.last.vba)
+	var vab:=float(p.last.trade_ab); var vba:=float(p.last.trade_ba)
 	assert_float(minf(vab,vba)).is_greater(0.0)
 	assert_float(maxf(vab,vba)/minf(vab,vba)).is_less_equal(1.0+Ledger.BARTER_SLACK+0.01)
 
@@ -212,7 +212,7 @@ func test_each_stance_has_its_effects_and_costs_on_both_ledgers()->void:
 	assert_float(float(mods.cap)).is_equal_approx(Stances.TOLL_VOLUME,0.0001)
 	Ledger._settle(p,192)
 	var toll:=float(p.last.get("toll_b" if String(p.b)=="player" else "toll_a",0.0))
-	assert_float(toll).is_equal_approx(Stances.TOLL_SHARE*(float(p.last.vab)+float(p.last.vba)),0.05)
+	assert_float(toll).is_equal_approx(Stances.TOLL_SHARE*(float(p.last.trade_ab)+float(p.last.trade_ba)),0.05)
 	assert_float(toll).is_greater(0.0)
 	# Favour: we sell a fifth below our price, and more of it.
 	Stances.set_stance("player",a,"favour")
@@ -245,6 +245,16 @@ func test_each_stance_has_its_effects_and_costs_on_both_ledgers()->void:
 	assert_float(float(((p.kinds as Dictionary).get(_dir(p,"player")+":gift",{}) as Dictionary).get("value",0.0))).is_greater(0.0)
 	assert_float(_stock("player","Food")+_stock("player","Flint")).is_less(held)
 	assert_float(Ledger.opinion("player",a)).is_greater(opinion)
+	# What they took unreturned is owed, and what is owed eases their answer.
+	p["owed"]=0.0
+	assert_float(float(Stances.factors("player",a).obligation)).is_equal(0.0)
+	var unobliged:=float((Stances.odds("toll","player",a).p as Dictionary).yield)
+	p["owed"]=1e9 if String(p.a)=="player" else -1e9
+	assert_float(Stances.owed_to("player",a)).is_greater(0.0)
+	assert_float(float(Stances.factors("player",a).obligation)).is_equal(1.0)
+	assert_float(float((Stances.odds("toll","player",a).p as Dictionary).yield)).is_greater_equal(unobliged)
+	assert_str(Words.owed_label(a)).contains("They owe us")
+	assert_int(Words.owed_label(a).split(" ",false).size()).is_less_equal(12)
 
 func test_tribute_demand_yields_and_refuses_with_stated_odds_seeded()->void:
 	var a:=String(ids[0])
@@ -374,6 +384,21 @@ func test_trade_page_and_war_line_say_it_in_few_words()->void:
 	for item in Ledger.recent_news(400): assert_int(_word_count(String(item.text))).is_less_equal(12)
 	for id in Words.LABELS: assert_int(_word_count(String(Words.LABELS[id]))).is_less_equal(12)
 	board.queue_free()
+	# The trade map: an embargo is a broken line; open trade an inked line each way.
+	var c:=Ledger.civ(a)
+	(c.player_relation as Dictionary)["home_location_known"]=true
+	(c.player_relation as Dictionary)["home_position"]={"x":150.0,"z":0.0}
+	var TradeMap:=preload("res://scripts/hud/trade_map.gd")
+	assert_bool(TradeMap.collect().any(func(l:Dictionary)->bool:return String(l.kind)=="embargo")).is_true()
+	Stances.set_stance("player",a,"free")
+	var kinds:=TradeMap.collect().map(func(l:Dictionary)->String:return String(l.kind))
+	assert_bool(kinds.has("out") and kinds.has("in")).is_true()
+	# A people that turns on our trade is told under the clock, once, in few words.
+	Stances.set_stance(a,"player","embargo","",0.0,"ai")
+	var alerts:=preload("res://scripts/hud/trade_alerts.gd").alerts()
+	assert_bool(alerts.any(func(m:Dictionary)->bool:return String(m.tone)=="red" and String((m.lines as PackedStringArray)[0]).contains(Ledger.name_of(a)))).is_true()
+	for m:Dictionary in alerts:
+		for l in m.lines: assert_int(_word_count(String(l))).is_less_equal(12)
 
 func test_court_lines_read_and_carry_out_with_odds()->void:
 	var a:=String(ids[0]); var b:=String(ids[1])

@@ -36,50 +36,11 @@ static func quote(_access:float,_domestic:float)->Dictionary:
 	WorldSimulation.market_orders.erase(WorldSimulation.actor_id)
 	WorldSimulation.economy._update_food_import_dependence(float(imported.get("Food",0.0))*float(WorldSimulation.span))
 	return result
-static func settle(day:int)->void:
-	var ids:=WorldSimulation.market_orders.keys();ids.sort()
-	# Rotate the first buyer deterministically; nationality/controller never sets priority.
-	if not ids.is_empty():
-		var offset:=posmod(day,ids.size());ids=ids.slice(offset)+ids.slice(0,offset)
-	for buyer:String in ids:
-		var buy:Dictionary=WorldSimulation.market_orders[buyer]
-		if int(buy.day)!=day:continue
-		for seller:String in ids:
-			if seller==buyer or seller not in buy.partners:continue
-			var sell:Dictionary=WorldSimulation.market_orders[seller]
-			if int(sell.day)!=day or buyer not in sell.partners:continue
-			for incoming:String in buy.needs:
-				for outgoing:String in sell.needs:
-					if incoming==outgoing:continue
-					if preload("res://scripts/abrasive_inspection.gd").unfinished(incoming) or preload("res://scripts/abrasive_inspection.gd").unfinished(outgoing):continue
-					var in_price:=float(sell.prices.get(incoming,1));var out_price:=float(buy.prices.get(outgoing,1))
-					var value:=minf(minf(float(buy.budget),float(sell.budget)),minf(minf(float(buy.needs[incoming]),float(sell.offers.get(incoming,0)))*in_price,minf(float(sell.needs[outgoing]),float(buy.offers.get(outgoing,0)))*out_price))
-					if value<=.0001:continue
-					# Matched barter is paid on both sides; no unbacked regional credit.
-					var a:=take(seller,incoming,value/in_price);var b:=take(buyer,outgoing,value/out_price)
-					var paid:=minf(a*in_price,b*out_price)
-					if a>paid/in_price:receive(seller,incoming,a-paid/in_price)
-					if b>paid/out_price:receive(buyer,outgoing,b-paid/out_price)
-					receive(buyer,incoming,paid/in_price);receive(seller,outgoing,paid/out_price)
-					book(buyer,seller,incoming,paid/in_price,paid,true);book(seller,buyer,outgoing,paid/out_price,paid,true)
-					buy.needs[incoming]-=paid/in_price;sell.offers[incoming]-=paid/in_price
-					sell.needs[outgoing]-=paid/out_price;buy.offers[outgoing]-=paid/out_price
-					buy.budget-=paid;sell.budget-=paid
-	for id:String in ids:
-		var report:Dictionary=WorldSimulation.market_orders[id].result
-		WorldSimulation.scoped(id,func()->void:WorldSimulation.economy._update_food_import_dependence(float(report.imported_goods.get("Food",0))))
-static func book(buyer:String,seller:String,resource:String,quantity:float,value:float,_barter:bool)->void:
-	for id:String in [buyer,seller]:
-		var importing:=id==buyer
-		var report:Dictionary=WorldSimulation.market_orders[id].result
-		var key:="imports" if importing else "exports"
-		var goods:="imported_goods" if importing else "exported_goods"
-		report[key]+=value;report[goods][resource]=float(report[goods].get(resource,0))+quantity
-		WorldSimulation.scoped(id,func()->void:
-			if importing:WorldSimulation.state.external_trade_imports+=value
-			else:WorldSimulation.state.external_trade_exports+=value
-			WorldSimulation.economy._ledger("external_"+key,value,seller,buyer,"%.2f %s exchanged with an actual civilization" % [quantity,resource])
-		)
+## Retired: goods between peoples move on the trade ledger's own schedule
+## (trade_ledger.gd), and quote() places no orders here; kept so the world's
+## exchange step reads the same.
+static func settle(_day:int)->void:
+	WorldSimulation.market_orders.clear()
 
 static func occupation(day:int)->void:
 	var ids:Array=WorldSimulation.actors.keys();ids.append("player");ids.sort()

@@ -606,6 +606,16 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 		if String((mod as Dictionary).get("id","")).begins_with("court_water"): water=1
 	m["ration"]=ration; m["clean_water"]=water
 	m["apart_custom"]=1 if bool((preload("res://scripts/crisis_system.gd").state().flags as Dictionary).get("apart_custom",false)) else 0
+	# Trade with the Esurai and the Varesh (trade_stances.gd): our stance and its
+	# good, and the Esurai's food stores (what a gift really reached).
+	var TradeStances:=load("res://scripts/trade_stances.gd") as GDScript
+	var ours:Dictionary=TradeStances.call("stance","player",civ)
+	m["trade_esurai"]=String(ours.get("id","free")); m["trade_good_esurai"]=String(ours.get("good",""))
+	m["trade_varesh"]=String((TradeStances.call("stance","player",varesh) as Dictionary).get("id","free")) if varesh!="" else ""
+	var esurai:Dictionary={}
+	for c_ in CivilizationSystem.civilizations:
+		if String((c_ as Dictionary).get("id",""))==civ: esurai=c_
+	m["esurai_food"]=roundi(float(esurai.get("food_days",0.0))*float(esurai.get("population",0.0)))
 	m["_material"]=_material(m)
 	return m
 
@@ -623,7 +633,9 @@ static func _material(m:Dictionary)->String:
 		# Who sets the daily work and the people at each task (manual_work.gd).
 		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
 		# A band sent out in a feud (war_loop.gd), and whether the feud is on.
-		"trackers","feud_ops","feud"]
+		"trackers","feud_ops","feud",
+		# Trade with other peoples (trade_stances.gd) and what a gift reached.
+		"trade_esurai","trade_good_esurai","trade_varesh","esurai_food"]
 	var parts:=PackedStringArray()
 	for k in keys: parts.append("%s=%s" % [k,str(m.get(k,""))])
 	return "|".join(parts)

@@ -21,12 +21,14 @@ extends RefCounted
 ##            season, for TRIBUTE_YEARS years.
 ##   gifts    each season a gift of GIFT_PER_HEAD a head of theirs from our
 ##            plenty: it costs our stores, warms them and leans them on us.
+##            What they take and do not return is owed (the pair's "owed"):
+##            an obligation that eases their answers by up to a tenth.
 ## The coercive stances (toll, embargo, squeeze, tribute) are ANSWERED. Word
 ## reaches them after the days a messenger takes (message_days); their
 ## answer is then rolled once, seeded, with the odds stated beforehand
 ## (odds()): from how much they lean on us, our strength against theirs
-## (fighters, and wealth), their ruler's nature (temper and trait), and the
-## other peoples who could supply them instead. The answers: yield (pay the
+## (fighters, and wealth), their ruler's nature (temper and trait), the
+## other peoples who could supply them instead, and the gifts they owe us. The answers: yield (pay the
 ## tribute, accept the toll, or come to terms with a payment), bear it, find
 ## another supplier, strike back with an embargo of their own, raid our
 ## traders, or war (war_loop.gd; a feud between small peoples) with the plain
@@ -117,6 +119,9 @@ static func set_stance(actor:String,target:String,id:String,good:String="",amoun
 		s.stances.erase(k)
 		if String(before.get("id","free")) in COERCIVE: _lifted(actor,target,before)
 		return {"ok":true,"said":String(preview.get("effect","")),"odds":{},"answer_day":-1,"preview":preview}
+	# The same word again changes nothing: no second message, no second roll.
+	if String(before.get("id","free"))==id and String(before.get("good",""))==good and s.stances.has(k):
+		return {"ok":true,"said":String(preview.get("effect","")),"odds":odds(id,actor,target,good,float(before.get("amount",amount))),"answer_day":int(before.get("answer",-1)),"preview":preview,"same":true}
 	var st:={"id":id,"good":good,"amount":snappedf(amount,0.01),"since":day,"by":by,"answer":-1}
 	if id in COERCIVE:
 		st["answer"]=day+message_days(actor,target)
@@ -136,6 +141,8 @@ static func set_stance(actor:String,target:String,id:String,good:String="",amoun
 	if target=="player" and id in COERCIVE: Ledger.news(id,actor,target,good)
 	if actor=="player" and target!="player" and id in ["embargo","squeeze","toll","tribute"] and by=="god":
 		ForeignDiplomacy.remember(target,String((load(WORDS_PATH) as GDScript).call("remembered",st,actor)))
+		# Their ruler trusts our word less (standing.gd reads it as their trust in us).
+		Hall._leader_trust(target,-0.03)
 	return {"ok":true,"said":String(preview.get("effect","")),"odds":odds(id,actor,target,good,float(st.get("amount",amount))),"answer_day":int(st.get("answer",-1)),"preview":preview}
 
 ## The good a people lacks most (for a squeeze with nothing yet flowing).
@@ -256,7 +263,9 @@ static func factors(actor:String,target:String,good:String="")->Dictionary:
 	if actor=="player":
 		var levers:=load(LEVERS_PATH) as GDScript
 		if levers!=null: sway=float(levers.call("value","Envoy"))
-	return {"dep":dep,"our_dep":Ledger.dependence(actor,target),"ratio":ratio,"wealth":wealth,"assertive":float(temper.get("assertiveness",0.5)),
+	# Gifts unreturned are an obligation: a people that owes us gives way more readily.
+	var obligation:=clampf(owed_to(actor,target)/maxf(1.0,output_season(target)*0.05),0.0,1.0)
+	return {"dep":dep,"our_dep":Ledger.dependence(actor,target),"ratio":ratio,"wealth":wealth,"obligation":obligation,"assertive":float(temper.get("assertiveness",0.5)),
 		"risk":float(temper.get("risk_tolerance",0.5)),"empathy":float(temper.get("empathy",0.5)),"discipline":float(temper.get("discipline",0.5)),
 		"trait":trait_id,"alt":alternatives(target,actor,good),"fear":fear,"sway":sway,"opinion":Ledger.opinion(actor,target),"output":output_season(target)}
 
@@ -268,7 +277,7 @@ static func odds(id:String,actor:String,target:String,good:String="",amount:floa
 	var dep:=float(f.dep); var alt:=float(f.alt); var a:=float(f.assertive); var r:=float(f.risk)
 	var stronger:=clampf((float(f.ratio)-1.0)/2.0,-0.5,1.0)
 	var richer:=clampf((float(f.wealth)-1.0)/3.0,-0.5,1.0)
-	var sway:=float(f.sway)
+	var sway:=float(f.sway)+0.10*float(f.get("obligation",0.0))
 	match id:
 		"toll":
 			p.yield=0.30+0.35*dep+0.15*maxf(0.0,stronger)-0.25*(a-0.5)-0.20*alt+sway
@@ -307,6 +316,14 @@ static func odds(id:String,actor:String,target:String,good:String="",amount:floa
 		total=0.95
 	p.bear=1.0-total
 	return {"p":p,"f":f}
+
+## The worth of gifts `debtor` has taken from `creditor` and not returned
+## (the pair's owed balance, from the creditor's side; 0 when none).
+static func owed_to(creditor:String,debtor:String)->float:
+	var p:=Ledger.pair(creditor,debtor)
+	if p.is_empty(): return 0.0
+	var owed:=float(p.get("owed",0.0))
+	return maxf(0.0,owed if String(p.a)==creditor else -owed)
 
 ## Fighting strength on one scale (standing.gd, as war_loop.ratio reads it).
 static func strength(owner:String)->float:

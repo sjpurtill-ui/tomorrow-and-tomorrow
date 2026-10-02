@@ -112,10 +112,10 @@ static func _the(name:String)->String:
 # --------------------------------------------------------------------------
 
 ## What flows from `from` to `to` a season (or month): "12 flint, 30 food a season".
-static func flow_words(from:String,to:String)->String:
+static func flow_words(from:String,to:String,limit:int=3)->String:
 	var p:=Ledger.pair(from,to)
 	var form:=String(p.get("form","gift")) if not p.is_empty() else "gift"
-	var line:=goods_line(Ledger.flows(from,to),form)
+	var line:=goods_line(Ledger.flows(from,to),form,limit)
 	return ("%s %s" % [line,period_word(form)]) if line!="" else "nothing"
 
 ## "Ildor gets 3 in 10 of its flint from us; without it their stores last 40 days."
@@ -155,20 +155,23 @@ static func effect_line(preview:Dictionary,actor:String,target:String)->String:
 	var them:=Ledger.name_of(target)
 	var per:=period_word(form)
 	var money:=Ledger.purse_unit(actor)
-	var worth:=func(v:float)->String: return ("%s %s" % [qty(v*(1.0 if form in ["silver","coin"] else 3.0)),money]) if money!="" and form in ["silver","coin"] else "goods worth %s" % qty(v*(1.0 if form in ["silver","coin"] else 3.0))
+	var priced:=form in ["silver","coin"]
+	var worth:=func(v:float)->String:
+		var n:=qty(v*(1.0 if priced else 3.0))
+		return ("about %s %s" % [n,money]) if money!="" and priced else "goods worth about %s" % n
 	match String(preview.get("id","")):
 		"free": return "Our traders deal with %s as it comes: %s." % [them,flow_words("player",target) if actor=="player" else "as before"]
 		"favour":
 			var flood:=String(preview.get("good",""))
-			return "We sell to %s a fifth below our price%s; trade grows 4 in 10. It costs us about %s %s." % [them,(" and push our %s on them" % good_word(flood)) if flood!="" else "",worth.call(float(preview.get("cost",0.0))),per]
+			return "We sell to %s a fifth below our price%s; trade grows 4 in 10. It costs us %s %s." % [them,(" and push our %s on them" % good_word(flood)) if flood!="" else "",worth.call(float(preview.get("cost",0.0))),per]
 		"toll":
-			return "A tenth of all trade with %s comes to us: about %s %s. Trade falls by a quarter." % [them,worth.call(float(preview.get("gain",0.0))),per]
+			return "A tenth of all trade with %s comes to us: %s %s. Trade falls by a quarter." % [them,worth.call(float(preview.get("gain",0.0))),per]
 		"embargo":
 			var lost:=flow_words(target,actor)
 			return "Nothing passes between us and %s. We lose %s; they lose %s." % [them,lost,flow_words(actor,target)]
 		"squeeze":
 			var good:=String(preview.get("good",""))
-			return "No %s goes to %s, and we buy theirs up from others: about %s %s." % [good_word(good),them,worth.call(float(preview.get("cost",0.0))),per]
+			return "No %s goes to %s, and we buy theirs up from others, costing us %s %s." % [good_word(good),them,worth.call(float(preview.get("cost",0.0))),per]
 		"tribute":
 			return "We ask %s for goods worth %s a season, for %d years." % [them,qty(float(preview.get("gain",0.0))),Stances.TRIBUTE_YEARS]
 		"gifts":
@@ -229,6 +232,22 @@ static func remembered(st:Dictionary,_actor:String)->String:
 		"toll": return "The ruler put a toll on our traders."
 		"tribute": return "The ruler demanded tribute from us."
 	return "The ruler changed how our traders are met."
+
+## One people's stance toward another as a plain act: "Ildor embargoes
+## Kezari", "we squeeze their flint", "they toll our traders".
+static func act_words(actor:String,id:String,target:String,good:String="")->String:
+	var who:="we" if actor=="player" else ("they" if target=="player" else Ledger.name_of(actor))
+	var whom:="us" if target=="player" else ("them" if actor=="player" else Ledger.name_of(target))
+	var whose:="our" if target=="player" else ("their" if actor=="player" else Ledger.name_of(target)+"'s")
+	var plural:=who in ["we","they"]
+	match id:
+		"embargo": return "%s %s %s" % [who,"embargo" if plural else "embargoes",whom]
+		"squeeze": return "%s %s %s %s" % [who,"squeeze" if plural else "squeezes",whose,good_word(good) if good!="" else "trade"]
+		"toll": return "%s %s %s traders" % [who,"toll" if plural else "tolls",whose]
+		"tribute": return "%s %s tribute of %s" % [who,"demand" if plural else "demands",whom]
+		"favour": return "%s %s %s" % [who,"favour" if plural else "favours",whom]
+		"gifts": return "%s %s %s gifts" % [who,"send" if plural else "sends",whom]
+	return ""
 
 ## The god's own stance toward a people, and theirs toward us, in a few words.
 static func stance_words(owner:String,other:String)->String:
@@ -308,6 +327,15 @@ static func _years(days:int)->String:
 	if years<=0: return "under a year"
 	return "a year" if years==1 else "%s years" % EraWords.count_word(years)
 
+## Gifts unreturned: "They owe us gifts worth about 40" (an obligation that
+## makes them give way more readily), or what we owe them.
+static func owed_label(other:String)->String:
+	var theirs:=Stances.owed_to("player",other)
+	if theirs>=1.0: return _short("They owe us gifts worth about %s" % qty(theirs))
+	var ours:=Stances.owed_to(other,"player")
+	if ours>=1.0: return _short("We owe them gifts worth about %s" % qty(ours))
+	return ""
+
 ## When their answer comes: "Their answer in about 9 days".
 static func waiting_label(actor:String,target:String)->String:
 	var st:=Stances.stance(actor,target)
@@ -325,8 +353,8 @@ static func war_line(civ_id:String)->String:
 	var parts:=PackedStringArray()
 	var ours:=Stances.stance("player",civ_id)
 	var theirs:=Stances.stance(civ_id,"player")
-	if String(ours.get("id","free"))!="free": parts.append("we have %s them" % String(SHORT.get(String(ours.id),String(ours.id))) if String(ours.id)!="squeeze" else "we squeeze their %s" % good_word(String(ours.get("good",""))))
-	if String(theirs.get("id","free")) in Stances.COERCIVE: parts.append("they have %s us" % String(SHORT.get(String(theirs.id),String(theirs.id))) if String(theirs.id)!="squeeze" else "they squeeze our %s" % good_word(String(theirs.get("good",""))))
+	if String(ours.get("id","free"))!="free": parts.append(act_words("player",String(ours.id),civ_id,String(ours.get("good",""))))
+	if String(theirs.get("id","free")) in Stances.COERCIVE: parts.append(act_words(civ_id,String(theirs.id),"player",String(theirs.get("good",""))))
 	var leaned:Dictionary=ours.get("leaned",{}) if ours.get("leaned") is Dictionary else {}
 	var lacking:=""
 	for good:String in leaned:
@@ -358,7 +386,7 @@ static func news_line(item:Dictionary)->String:
 			var p:=Ledger.pair(String(item.a),String(item.b))
 			line="New trade partner: %s · %s" % [them,form_words(String(p.get("form","gift")))]
 		"meeting": line="A meeting place with %s: barter each season" % them
-		"embargo": line="%s embargoes us · we lose %s" % [them,flow_words(other,"player")] if String(item.a)!="player" else "We embargo %s" % them
+		"embargo": line="%s embargoes us · we lose %s" % [them,flow_words(other,"player",1)] if String(item.a)!="player" else "We embargo %s" % them
 		"squeeze": line="%s cuts off our %s and buys it up" % [them,good_word(good)] if String(item.a)!="player" else "We squeeze %s's %s" % [them,good_word(good)]
 		"toll": line="%s tolls our traders · a tenth of our trade" % them
 		"yield":

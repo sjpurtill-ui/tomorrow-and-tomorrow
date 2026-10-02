@@ -41,6 +41,8 @@ var feedback:Label
 var clock:=0.0
 var signature:=""
 var waited:=0.0
+var built_msec:=-100000
+const REBUILD_MS:=2000
 
 
 func setup(_block:Dictionary={})->void:
@@ -80,10 +82,14 @@ static func reading_signature()->String:
 func refresh(force:=false)->void:
 	var next:=reading_signature()
 	if not force and next==signature:return
+	# At the fastest pace the ledger moves every day: the page is read again at
+	# most every REBUILD_MS, so the odds on its buttons cost little.
+	if not force and Time.get_ticks_msec()-built_msec<REBUILD_MS:return
 	if not force and _in_use(waited):
 		waited+=REFRESH_SECONDS
 		return
 	waited=0.0
+	built_msec=Time.get_ticks_msec()
 	signature=next
 	_build_summary()
 	_build_peoples()
@@ -111,8 +117,8 @@ func _build_summary()->void:
 		sent+=Ledger.flow_value("player",String(row.id))
 		came+=Ledger.flow_value(String(row.id),"player")
 	_number(head,str(partners.size()),"trading partners" if partners.size()!=1 else "trading partner")
-	_number(head,EraWords.grouped(roundi(sent*3.0)),"worth sent a season")
-	_number(head,EraWords.grouped(roundi(came*3.0)),"worth brought in")
+	_number(head,EraWords.grouped(roundi(sent*3.0)),"worth of goods sent a season")
+	_number(head,EraWords.grouped(roundi(came*3.0)),"worth of goods brought in")
 	var unit:=Ledger.purse_unit("player")
 	if unit!="":_number(head,EraWords.grouped(roundi(Ledger.purse_balance("player"))),"%s in our purse" % unit)
 	var tribute_in:=0.0
@@ -183,6 +189,11 @@ func _people_row(civ_id:String,contact:int)->Control:
 		var against:=_line(theirs_words,13,T.RED_TEXT if String(theirs.get("id","")) in Stances.COERCIVE else T.GREEN_TEXT);against.name="Theirs";column.add_child(against)
 	var tribute:=Words.tribute_label(civ_id)
 	if tribute!="":column.add_child(_line(tribute,13,T.GOLD_TEXT))
+	var owed:=Words.owed_label(civ_id)
+	if owed!="":
+		var debt:=_line(owed,13,T.INK_MUTED);debt.name="Owed"
+		debt.tooltip_text="Gifts not yet returned. A people that owes us gives way more readily: up to 1 in 10 on its answer."
+		column.add_child(debt)
 	column.add_child(_stance_buttons(civ_id,ours))
 	var odds_row:=_odds_row(civ_id,ours)
 	if odds_row!=null:column.add_child(odds_row)
@@ -287,6 +298,7 @@ static func _odds_tip(f:Dictionary)->String:
 	lines.append("They lean on us: %s of what they get." % Words.share_words(float(f.get("dep",0.0))))
 	lines.append("Our strength against theirs: %.1f to 1." % float(f.get("ratio",1.0)))
 	lines.append("Others who could supply them: %s." % Words.share_words(float(f.get("alt",0.0))))
+	if float(f.get("obligation",0.0))>0.0: lines.append("What they owe us for our gifts: %s of a full debt." % Words.share_words(float(f.obligation)))
 	lines.append("Their ruler: boldness %d in 10%s." % [roundi(float(f.get("assertive",0.5))*10.0),(", %s" % String(f.trait)) if String(f.get("trait",""))!="" else ""])
 	return "\n".join(lines)
 
@@ -313,7 +325,7 @@ func _build_others()->void:
 		var line:=""
 		for side:Array in [[a,b],[b,a]]:
 			var st:=Stances.stance(String(side[0]),String(side[1]))
-			if String(st.get("id","free"))!="free":line=_short("%s has %s %s" % [Ledger.name_of(String(side[0])),String(Words.SHORT.get(String(st.id),String(st.id))),Ledger.name_of(String(side[1]))])
+			if String(st.get("id","free"))!="free":line=_short(_cap(Words.act_words(String(side[0]),String(st.id),String(side[1]),String(st.get("good","")))))
 		if line=="" and value<Ledger.PARTNER_FLOOR:continue
 		if line=="":line=_short("%s and %s · %s" % [Ledger.name_of(a),Ledger.name_of(b),Words.form_words(String(p.get("form","gift")))])
 		rows.append({"line":line,"value":value})
@@ -356,6 +368,10 @@ func _number(parent:Node,value:String,word:String)->Control:
 
 func _clear(box:Node)->void:
 	for child in box.get_children():box.remove_child(child);child.queue_free()
+
+
+static func _cap(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1) if text!="" else text
 
 
 static func _short(text:String)->String:

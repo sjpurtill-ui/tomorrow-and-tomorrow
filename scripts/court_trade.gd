@@ -34,10 +34,13 @@ const LEVERS_PATH:="res://scripts/office_levers.gd"
 
 const QUESTION:="(?i)^\\s*(?:what|why|how|who|whom|where|when|whose|which|do we|does|is|are|can we)\\b"
 const EMBASSY:="(?i)\\b(envoys?|emissar(?:y|ies)|messengers?|embass(?:y|ies)|delegation|heralds?)\\b"
-const EMBARGO:="(?i)\\b(?:(?:stop|end|cease|halt|break off|ban|forbid|suspend|cut off)\\b[^.!?]{0,30}?\\b(?:all\\s+)?(?:trade|trading|exchange|barter|bartering|dealings|commerce)\\b|embargo|no (?:more |longer )?trade with|(?:don'?t|do not|never) trade with|cut (?:them|\\w+) off|close (?:our )?(?:markets?|roads?|borders?|gates) to|shut (?:out|off) (?:their|the)\\b[^.!?]{0,20}?\\btraders?)\\b"
+const EMBARGO:="(?i)\\b(?:(?:stop|end|cease|halt|break off|ban|forbid|suspend|cut off)\\b[^.!?]{0,30}?\\b(?:all\\s+)?(?:trade|trading|exchange|barter|bartering|dealings|commerce)\\b|embargo|no (?:more |longer )?trade with|(?:don'?t|do not|never) trade with|close (?:our )?markets? to|shut (?:out|off) (?:their|the)\\b[^.!?]{0,20}?\\btraders?)\\b"
 const LIFT:="(?i)\\b(?:lift|end|drop|stop|remove|call off)\\s+(?:the\\s+|our\\s+)?(?:embargo|toll|tolls|squeeze)\\b"
 const FREE:="(?i)\\b(?:(?:open|start|begin|resume|restore|reopen|renew)\\b[^.!?]{0,20}?\\btrad(?:e|ing)|trade (?:freely )?with|barter with|trade freely|let (?:our )?traders? (?:go|trade))\\b"
-const SQUEEZE:="(?i)\\b(?:buy up|buy all|corner|hoard|squeeze|starve\\b[^.!?]{0,20}?\\bof|keep\\b[^.!?]{0,25}?\\bfrom|deny|withhold)\\b"
+const SQUEEZE:="(?i)\\b(?:buy up|buy all|corner|squeeze)\\b"
+## Denying a good is a squeeze only when a people is named (said of "them" it
+## may be a siege or a war order).
+const DENY:="(?i)\\b(?:deny|withhold|keep\\b[^.!?]{0,25}?\\bfrom)\\b"
 const TRIBUTE:="(?i)\\b(?:(?:demand|exact|take|ask for|require|levy|extract|collect)\\b[^.!?]{0,20}?\\btribute|(?:make|force)\\b[^.!?]{0,25}?\\bpay\\b[^.!?]{0,10}?\\btribute|pay (?:us )?tribute)\\b"
 const TOLL:="(?i)\\b(?:tolls?|tariffs?|duties|duty on|tax (?:their|the)\\b[^.!?]{0,15}?\\btraders?|charge\\b[^.!?]{0,20}?\\b(?:toll|fee))\\b"
 const FAVOUR:="(?i)\\b(?:flood|favou?r|sell cheap|undersell|undercut|dump|good terms|better terms|generous terms)\\b"
@@ -76,7 +79,7 @@ static func read(text:String,audience:Dictionary={})->Dictionary:
 	elif _has(lower,EMBARGO): act="embargo"
 	elif _has(lower,TRIBUTE): act="tribute"
 	elif _has(lower,TOLL) and _has(lower,"(?i)\\b(?:traders?|trade|caravans?|goods|on (?:the |them|their))\\b"): act="toll"
-	elif _has(lower,SQUEEZE) and good_in(lower)!="": act="squeeze"
+	elif (_has(lower,SQUEEZE) or (_has(lower,DENY) and not people_in(lower).is_empty())) and good_in(lower)!="": act="squeeze"
 	elif _has(lower,FAVOUR) and (_has(lower,"(?i)\\b(?:markets?|traders?|terms|trade)\\b") or good_in(lower)!=""): act="favour"
 	elif _has(lower,FREE): act="free"
 	elif _has(lower,GIFT) and not _has(lower,NOT_GOODS) and (_has(lower,GIFT_WORDS) or (good_in(lower)!="" and _amount(lower)>0)): act="gift"
@@ -189,6 +192,13 @@ static func perform(reading:Dictionary)->Dictionary:
 		out.says="The %s are known to us only by word: no carrier of ours can reach them, and nothing leaves the stores." % name
 		out.outcome="Nothing is set in motion: the %s are known only by word." % name
 		return out
+	if not met and act!="free":
+		# A people known only by word: the word stands, and nothing moves until we meet them.
+		Stances.set_stance("player",civ_id,act,good,amount,"god")
+		out.ok=true
+		out.says="The %s are known to us only by word: no trader of ours reaches them, so nothing moves yet. When we meet them, it will be as you say." % name
+		out.outcome="Nothing is set in motion yet: the %s are known only by word." % name
+		return out
 	if act!="free" and Ledger.blocked("player",civ_id) in ["war","feud"]:
 		out.says="We are fighting the %s: no trader goes to them now, and no word of trade would be heard." % name
 		out.outcome="Nothing is set in motion: we are fighting the %s." % name
@@ -202,12 +212,20 @@ static func perform(reading:Dictionary)->Dictionary:
 				return out
 			out.ok=true; out.count=1
 			out.says="%s %s go to the %s with our carriers%s. It warms them, and they will owe us for it." % [_cap(Words.amount(sent,good)),"" if sent>=amount-0.5 else " (all we can spare of the %s asked)" % EraWords.grouped(int(amount)),name,by]
+			if good=="Food": out.says+=" It leaves us %s." % EraWords.store_span(_food_days())
 			out.outcome="%s sent to the %s as a gift." % [_cap(Words.amount(sent,good)),name]
 			return out
 		"free":
 			var lifted:=String(Stances.stance("player",civ_id).get("id","free"))
 			var r:=Stances.set_stance("player",civ_id,"free","",0.0,"god")
 			out.ok=true; out.count=1
+			if not met:
+				out.count=0
+				out.says="The %s are known to us only by word: no trader of ours reaches them yet." % name
+				var word:=_envoy(civ_id) if not bool(reading.get("page",false)) else ""
+				if word!="": out.says+=" "+word; out.count=1
+				out.outcome="Trade with the %s waits until we meet them." % name if word=="" else "Envoys go to the %s." % name
+				return out
 			var flows_now:=Words.flow_words("player",civ_id)
 			out.says=("%s Our traders deal with the %s as it comes%s." % ["The %s is lifted." % Words._stance_noun(lifted,"") if lifted!="free" else "",name,(": we send %s; they send %s" % [flows_now,Words.flow_words(civ_id,"player")]) if flows_now!="nothing" else ""]).strip_edges()
 			# The envoy goes to propose a standing compact, as before (not from the page).
@@ -246,15 +264,22 @@ static func _send(civ_id:String,good:String,amount:float)->float:
 	Ledger._fresh("player",spare)
 	var x:Dictionary=(spare.get("g",{}) as Dictionary).get(good,{})
 	var held:=float(x.get("s",0.0))
-	# Never the last of the food: half a moon's eating stays.
-	if good=="Food": held=maxf(0.0,held-float(x.get("d",0.0))*0.5)
+	# The god's word is obeyed, but never the very last of the food: a day's eating stays.
+	if good=="Food": held=maxf(0.0,held-float(x.get("d",0.0))/30.0)
 	var sent:=Ledger.move("player",civ_id,good,minf(amount,held))
 	if sent<=0.0: return 0.0
+	Ledger.ensure_pair("player",civ_id)
+	Ledger._book_pair("player",civ_id,good,sent)
 	Ledger.note_kind("player",civ_id,"gift",sent*Ledger.Prices.value(good,"player"))
 	Ledger._warm(civ_id,"player",Ledger._goodwill(sent*Ledger.Prices.value(good,"player"),civ_id))
 	var p:=Ledger.pair("player",civ_id)
 	if not p.is_empty() and String(p.form) in ["gift","barter"]: p["owed"]=float(p.get("owed",0.0))+(sent*Ledger.Prices.value(good,"player"))*(1.0 if String(p.a)=="player" else -1.0)
 	return sent
+
+## Days of food our stores hold now (the food system's own count).
+static func _food_days()->float:
+	var need:=maxf(1.0,float(GameState.simulation_metrics.get("food_consumption",GameState.population_exact)))
+	return FoodSystem.total_stored()/need
 
 ## The envoy who goes to propose a standing compact of trade (as before).
 static func _envoy(civ_id:String)->String:

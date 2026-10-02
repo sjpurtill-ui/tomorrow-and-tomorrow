@@ -801,7 +801,7 @@ static func _trade_with(p:Dictionary)->String:
 	else: parts.append("Nothing passes between us and the %s yet." % name)
 	for key in ["they_lean","we_lean"]:
 		if String(p.get(key,""))!="": parts.append(String(p[key]))
-	if String(p.get("our_stance",""))!="": parts.append("We have them %s." % String(p.our_stance))
+	if String(p.get("our_stance",""))!="": parts.append("Our stance toward them: %s." % String(p.our_stance))
 	if String(p.get("their_stance",""))!="": parts.append(String(p.their_stance)+".")
 	if String(p.get("tribute",""))!="": parts.append(String(p.tribute)+".")
 	return " ".join(parts)

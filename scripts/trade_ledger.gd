@@ -288,11 +288,13 @@ static func _discover_pairs(day:int)->void:
 		for b:String in seen:
 			if WorldSimulation.actors.has(b) and alive(a) and alive(b): met[key(a,b)]=[a,b] if a<b else [b,a]
 	for k:String in met:
-		if pairs.has(k): continue
+		if pairs.has(k):
+			(pairs[k] as Dictionary)["known"]=true
+			continue
 		var ids:Array=met[k]
 		var a:=String(ids[0]) if String(ids[0])<String(ids[1]) else String(ids[1])
 		var b:=String(ids[1]) if a==String(ids[0]) else String(ids[0])
-		pairs[k]={"a":a,"b":b,"since":-1,"met":day,"next":day+1+posmod(hash(k),30),"form":"gift","meet":-1,"gift_seasons":0,"owed":0.0,
+		pairs[k]={"a":a,"b":b,"known":true,"since":-1,"met":day,"next":day+1+posmod(hash(k),30),"form":"gift","meet":-1,"gift_seasons":0,"owed":0.0,
 			"ema":{"ab":{},"ba":{}},"val":{"ab":0.0,"ba":0.0},"acc":{"ab":{},"ba":{}},"kinds":{},"last":{},"total":{"ab":0.0,"ba":0.0},"last_day":day}
 
 static func _settle(p:Dictionary,day:int)->void:
@@ -314,7 +316,10 @@ static func _settle(p:Dictionary,day:int)->void:
 	var paid:=0.0
 	var tolls:={"a":0.0,"b":0.0}
 	var gifts:={"ab":0.0,"ba":0.0}
-	var why:=blocked(a,b,day)
+	# What was traded (and given) between them this time, apart from tolls,
+	# tribute, spoils and pacts: the reciprocity and the warmth read only this.
+	var traded_ab:=0.0; var traded_ba:=0.0
+	var why:=blocked(a,b,day) if bool(p.get("known",false)) else "unmet"
 	if why=="":
 		var cap:=capacity(a,b,form,period,ra,rb)*float(mods.get("cap",1.0))
 		var ab:=_fill(ra,rb,a,cap*0.5,(mods.deny as Dictionary).get("ab",[]),String((mods.flood as Dictionary).get("ab","")),float((mods.discount as Dictionary).get("ab",0.0)),(mods.buy as Dictionary).get("b",[]),form)
@@ -346,6 +351,7 @@ static func _settle(p:Dictionary,day:int)->void:
 		moved.ba=_carry(b,a,ba.goods)
 		value.ab=_worth(moved.ab,a)
 		value.ba=_worth(moved.ba,b)
+		traded_ab=float(value.ab); traded_ba=float(value.ba)
 		# Tolls: a tenth of the trade's worth to the side that levies them.
 		for side in ["a","b"]:
 			var share:=float((mods.toll as Dictionary).get(side,0.0))
@@ -370,10 +376,11 @@ static func _settle(p:Dictionary,day:int)->void:
 			value[dir]=float(value[dir])+float(noted[good])*Prices.value(good,a if dir=="ab" else b)
 	p["acc"]={"ab":{},"ba":{}}
 	_smooth(p,moved,value,elapsed)
-	var traded:=float(value.ab)+float(value.ba)
-	if form in ["gift","barter"]:
-		p["owed"]=clampf(float(p.get("owed",0.0))+float(value.ab)-float(value.ba),-1e12,1e12)
-	p["last"]={"day":day,"form":form,"ab":_rounded(moved.ab),"ba":_rounded(moved.ba),"vab":snappedf(float(value.ab),0.01),"vba":snappedf(float(value.ba),0.01),"paid":snappedf(paid,0.01),
+	var given_ab:=traded_ab+float(gifts.ab); var given_ba:=traded_ba+float(gifts.ba)
+	var traded:=given_ab+given_ba
+	if form in ["gift","barter"] or float(gifts.ab)+float(gifts.ba)>0.0:
+		p["owed"]=clampf(float(p.get("owed",0.0))+given_ab-given_ba,-1e12,1e12)
+	p["last"]={"day":day,"form":form,"ab":_rounded(moved.ab),"ba":_rounded(moved.ba),"vab":snappedf(float(value.ab),0.01),"vba":snappedf(float(value.ba),0.01),"trade_ab":snappedf(traded_ab,0.01),"trade_ba":snappedf(traded_ba,0.01),"paid":snappedf(paid,0.01),
 		"toll_a":snappedf(float(tolls.a),0.01),"toll_b":snappedf(float(tolls.b),0.01),"gift_ab":snappedf(float(gifts.ab),0.01),"gift_ba":snappedf(float(gifts.ba),0.01),"why":why}
 	p["last_day"]=day
 	var totals:Dictionary=p.get("total",{"ab":0.0,"ba":0.0})
@@ -386,12 +393,11 @@ static func _settle(p:Dictionary,day:int)->void:
 			p["since"]=day
 			if a=="player" or b=="player": _news("partner",a,b,"",day)
 		# Gifts warm the one who receives them; trade warms both a little.
-		var gift_ab:=float(value.ab)-float(value.ba)
-		if form=="gift" or float(gifts.ab)+float(gifts.ba)>0.0:
-			if gift_ab>0.0 or float(gifts.ab)>0.0: _warm(b,a,_goodwill(maxf(gift_ab,0.0)+float(gifts.ab),b))
-			if gift_ab<0.0 or float(gifts.ba)>0.0: _warm(a,b,_goodwill(maxf(-gift_ab,0.0)+float(gifts.ba),a))
+		var gift_ab:=(traded_ab-traded_ba) if form=="gift" else 0.0
+		if gift_ab>0.0 or float(gifts.ab)>0.0: _warm(b,a,_goodwill(maxf(gift_ab,0.0)+float(gifts.ab),b))
+		if gift_ab<0.0 or float(gifts.ba)>0.0: _warm(a,b,_goodwill(maxf(-gift_ab,0.0)+float(gifts.ba),a))
 		if opinion(a,b)<WARMTH_CEILING: _warm(a,b,WARMTH)
-		if form=="gift" and float(value.ab)>0.01 and float(value.ba)>0.01:
+		if form=="gift" and traded_ab>0.01 and traded_ba>0.01:
 			p["gift_seasons"]=int(p.get("gift_seasons",0))+1
 			if int(p.get("meet",-1))<0 and int(p.gift_seasons)>=MEETING_SEASONS and opinion(a,b)>=-0.1:
 				p["meet"]=day
@@ -412,7 +418,9 @@ static func capacity(a:String,b:String,form:String,period:int,ra:Dictionary={},r
 	if ra.is_empty(): ra=report(a)
 	if rb.is_empty(): rb=report(b)
 	var people:=minf(float(ra.get("pop",1.0)),float(rb.get("pop",1.0)))
-	return people*float(INTENSITY.get(form,0.06))*float(period)/30.0*reach(a,b,ra,rb)*(1.0+clampf((float(ra.get("tc",0.0))+float(rb.get("tc",0.0)))*0.5,0.0,2.0))
+	# A great work that draws strangers' traders (great_works_rivalry.trade_routing) brings more to its holder's market.
+	var drawn:=maxf(float(ra.get("gw",0.0)),float(rb.get("gw",0.0)))
+	return people*float(INTENSITY.get(form,0.06))*float(period)/30.0*reach(a,b,ra,rb)*(1.0+clampf((float(ra.get("tc",0.0))+float(rb.get("tc",0.0)))*0.5,0.0,2.0))*(1.0+drawn)
 
 ## 0..1: how much of the form's intensity reaches across the distance.
 static func reach(a:String,b:String,ra:Dictionary,rb:Dictionary)->float:
@@ -564,6 +572,7 @@ static func pay_in_kind(payer:String,receiver:String,amount:float,preferred:Stri
 		var got:=move(payer,receiver,String(o.good),q)
 		var worth:=got*float(o.v)
 		paid+=worth; left-=worth
+		_book_pair(payer,receiver,String(o.good),got)
 		note_kind(payer,receiver,kind,worth)
 	return paid
 
@@ -575,6 +584,7 @@ static func _gift(giver:String,taker:String,size:float,giver_rep:Dictionary,take
 		# Nothing they lack: what we have most of that they know.
 		return pay_in_kind(giver,taker,size,"","gift")
 	var moved:=_carry(giver,taker,load_.goods)
+	for good:String in moved: _book_pair(giver,taker,good,float(moved[good]))
 	var worth:=_worth(moved,giver)
 	note_kind(giver,taker,"gift",worth)
 	return worth
@@ -625,15 +635,7 @@ static func shift_pair(who:String,toward:String,opinion_delta:float,tension_delt
 static func note_flow(from:String,to:String,good:String,qty:float,kind:String="")->void:
 	from=owner_of(from); to=owner_of(to)
 	if qty<=0.0 or from==to or not good in GOODS: return
-	var s:=state()
-	var k:=key(from,to)
-	var p:Dictionary=(s.pairs as Dictionary).get(k,{})
-	if p.is_empty():
-		var a:=from if from<to else to
-		var b:=to if a==from else from
-		p={"a":a,"b":b,"since":-1,"met":_day(),"next":_day()+1+posmod(hash(k),30),"form":"gift","meet":-1,"gift_seasons":0,"owed":0.0,
-			"ema":{"ab":{},"ba":{}},"val":{"ab":0.0,"ba":0.0},"acc":{"ab":{},"ba":{}},"kinds":{},"last":{},"total":{"ab":0.0,"ba":0.0},"last_day":_day()}
-		s.pairs[k]=p
+	var p:=ensure_pair(from,to)
 	var dir:="ab" if String(p.a)==from else "ba"
 	var acc:Dictionary=p.get("acc",{})
 	if not acc.get(dir) is Dictionary: acc[dir]={}
@@ -642,6 +644,32 @@ static func note_flow(from:String,to:String,good:String,qty:float,kind:String=""
 	_note_report(from,good,-qty)
 	_note_report(to,good,qty)
 	if kind!="": note_kind(from,to,kind,qty*Prices.base(good))
+
+## The pair's record, made when two peoples first pass goods.
+static func ensure_pair(from:String,to:String)->Dictionary:
+	var s:=state()
+	var k:=key(from,to)
+	var p:Dictionary=(s.pairs as Dictionary).get(k,{})
+	if not p.is_empty(): return p
+	var a:=from if from<to else to
+	var b:=to if a==from else from
+	p={"a":a,"b":b,"since":-1,"met":_day(),"next":_day()+1+posmod(hash(k),30),"form":"gift","meet":-1,"gift_seasons":0,"owed":0.0,
+		"ema":{"ab":{},"ba":{}},"val":{"ab":0.0,"ba":0.0},"acc":{"ab":{},"ba":{}},"kinds":{},"last":{},"total":{"ab":0.0,"ba":0.0},"last_day":_day()}
+	s.pairs[k]=p
+	revision+=1
+	return p
+
+## Goods `move` already carried, booked to the pair's flows (folded into its
+## smoothed flows at its next settlement): what leaned one people on another.
+static func _book_pair(from:String,to:String,good:String,qty:float)->void:
+	if qty<=0.0 or from==to: return
+	var p:=pair(from,to)
+	if p.is_empty(): return
+	var dir:="ab" if String(p.a)==from else "ba"
+	var acc:Dictionary=p.get("acc",{})
+	if not acc.get(dir) is Dictionary: acc[dir]={}
+	(acc[dir] as Dictionary)[good]=float((acc[dir] as Dictionary).get(good,0.0))+qty
+	p["acc"]=acc
 
 ## The worth of what passed between two peoples by kind (tribute, spoils...),
 ## kept per direction for the Trade page.
@@ -675,8 +703,8 @@ static func _fold(day:int)->void:
 	var since:=int(fold.get("raids",-1))
 	var war:=load(WAR_PATH) as GDScript
 	if war!=null:
-		var log:Array=(war.call("state") as Dictionary).get("log",[])
-		for entry in log:
+		var entries:Array=(war.call("state") as Dictionary).get("log",[])
+		for entry in entries:
 			if not entry is Dictionary: continue
 			var d:=int((entry as Dictionary).get("day",-1))
 			if d<=since: continue
@@ -777,7 +805,7 @@ static func _read(owner:String,day:int,prev:Dictionary)->Dictionary:
 		for id in BOATS:
 			if st.known_discoveries.has(id): boats=true; break
 		return {"day":day,"fresh":day,"pop":pop,"stage":String(st.economy_stage),"cmp":bool(eco._comparison_values_observable()),"log":float(st.simulation_metrics.get("logistics",0.16)),
-			"tc":float(WorldSimulation.discovery.effect("trade_capacity")),"boats":boats,"sea":float(WorldSimulation.military.joint_operations.sea_trade_factor()) if WorldSimulation.military!=null and WorldSimulation.military.get("joint_operations")!=null else 1.0,
+			"tc":float(WorldSimulation.discovery.effect("trade_capacity")),"gw":float((load("res://scripts/great_works_rivalry.gd") as GDScript).call("trade_routing",owner)),"boats":boats,"sea":float(WorldSimulation.military.joint_operations.sea_trade_factor()) if WorldSimulation.military!=null and WorldSimulation.military.get("joint_operations")!=null else 1.0,
 			"sim":true,"g":goods,"acc_in":{},"acc_out":{}})
 
 static func _read_unsimulated(owner:String,day:int,prev:Dictionary)->Dictionary:
@@ -799,6 +827,7 @@ static func _ema(old:Dictionary,field:String,now:float,weight:float)->float:
 ## Each settlement's goods, turned to monthly rates, move the pair's
 ## smoothed flows (MONTH_WEIGHT a month).
 static func _smooth(p:Dictionary,moved:Dictionary,value:Dictionary,elapsed:int)->void:
+	revision+=1
 	var weight:=1.0-pow(1.0-MONTH_WEIGHT,float(elapsed)/30.0)
 	var month:=30.0/float(maxi(1,elapsed))
 	var ema:Dictionary=p.get("ema",{"ab":{},"ba":{}})
@@ -962,22 +991,46 @@ static func purse_unit(owner:String)->String:
 # What trade gives each people (economy_system, civilization_system)
 # --------------------------------------------------------------------------
 
+## Smoothed flows change only at a settlement: readings the economy takes
+## every day for every people are kept until then (never saved).
+static var revision:=0
+static var _cache:={}
+static var _cache_key:=-1
+
+static func _cached(kind:String,owner:String,make:Callable)->Dictionary:
+	var s:=peek()
+	var stats:Dictionary=s.get("stats",{}) if not s.is_empty() else {}
+	var key:=hash([revision,int(GameState.elapsed_days),(s.get("pairs",{}) as Dictionary).size() if not s.is_empty() else -1,float(stats.get("settlements",0.0)),float(stats.get("value",0.0))])
+	if key!=_cache_key: _cache.clear(); _cache_key=key
+	var k:=kind+":"+owner
+	if not _cache.has(k): _cache[k]=make.call()
+	return _cache[k]
+
 ## Real trade for the economy's market access (civilization_system
 ## player_effects): partners with goods actually moving, and the monthly value.
 static func access(owner:String)->Dictionary:
+	return _cached("access",owner,func()->Dictionary:return _access(owner))
+
+static func _access(owner:String)->Dictionary:
 	var s:=peek()
 	if s.is_empty(): return {"partners":0,"value":0.0}
 	var partners:=0; var value:=0.0
+	# A partner is one whose trade is worth something to us: a hundredth of a
+	# ration's worth a head a month or more.
+	var least:=maxf(PARTNER_FLOOR,population(owner)*0.01)
 	for p:Dictionary in (s.get("pairs",{}) as Dictionary).values():
 		if String(p.get("a",""))!=owner and String(p.get("b",""))!=owner: continue
 		var v:=float((p.get("val",{}) as Dictionary).get("ab",0.0))+float((p.get("val",{}) as Dictionary).get("ba",0.0))
-		if v>=PARTNER_FLOOR: partners+=1
+		if v>=least: partners+=1
 		value+=v
 	return {"partners":partners,"value":value}
 
 ## The economy's external trade for one people (civilization_exchange.quote):
 ## the last month's flows in and out, by value and goods.
 static func summary(owner:String)->Dictionary:
+	return _cached("summary",owner,func()->Dictionary:return _summary(owner)).duplicate(true)
+
+static func _summary(owner:String)->Dictionary:
 	var out:={"exports":0.0,"imports":0.0,"exported_goods":{},"imported_goods":{},"partners":0,"available":false}
 	var s:=peek()
 	if s.is_empty(): return out
