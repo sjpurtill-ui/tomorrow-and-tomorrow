@@ -39,6 +39,7 @@ const ScoutSurvival:=preload("res://scripts/scout_survival.gd")
 const CustomDirective:=preload("res://scripts/custom_directive.gd")
 const Sovereign:=preload("res://scripts/sovereign_weapons.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
+const CovertOrders:=preload("res://scripts/covert_orders.gd")
 const TownFateWords:=preload("res://scripts/town_fate.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
 const HomeOrders:=preload("res://scripts/home_orders.gd")
@@ -536,6 +537,22 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	if not decree.is_empty(): return decree
 	var list:=roster(audience)
 	var cls:=classify(clean)
+	# Spies and assassins (covert_orders.gd): a covert cue ("send a spy",
+	# "sabotage their well", "an assassin disguised as an envoy") turns the
+	# words into a real adjudicated operation, never a march or a persons
+	# inquiry. Checked first for the court's own officials, so the user's line
+	# is read as the covert act it is. Words that hold it back ("don't send a
+	# spy") are not carried out; "do it anyway" after an objection sends it.
+	if String(audience.get("origin",""))!="foreign" and String(cls.act)!="question":
+		var covert_pend:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
+		var covert_waiting:=String(covert_pend.get("verb",""))=="covert" and Hall._day()-int(covert_pend.get("day",-99))<=PENDING_DAYS
+		var affirm:=bool(cls.insist) or bool(context.get("insist",false)) or (covert_waiting and _re("(?i)^\\W*(yes|yeah|aye|do it|go ahead|go on|carry on|send (them|him|her|the)|i insist|i command|anyway|now|very well|so be it|proceed)\\b").search(clean)!=null)
+		if covert_waiting and affirm:
+			var again:=CovertOrders.read(String(covert_pend.get("text","")),String(audience.get("civ_id","")),id)
+			if not again.is_empty(): return _covert(id,audience,list,String(covert_pend.get("text","")),again,context,true)
+		elif not bool(cls.insist) and CovertOrders.cue(clean) and not holds_back(id,clean):
+			var covert:=CovertOrders.read(clean,String(audience.get("civ_id","")),id)
+			if not covert.is_empty(): return _covert(id,audience,list,clean,covert,context,false)
 	# The god's word on new towns ("stop founding new towns", "our leaders may
 	# settle new land again"): the leaders' leave, a real switch (home_orders,
 	# auto_founding.gd), set here before the words can be taken for a law, an
@@ -2461,6 +2478,12 @@ static func _home(id:String,r:Dictionary,actor:Dictionary,words:String,home:Dict
 static func dispatch_envoy(civ:Dictionary,text:String,gift:String="")->Dictionary:
 	var civ_id:=String(civ.get("id",""))
 	var name:=String(civ.get("name","their people"))
+	# Envoy sanctity broken (covert_orders.gd): no ruler will receive our
+	# envoys for a time, so none can be sent.
+	if CovertOrders.Covert.envoys_barred():
+		var days:=CovertOrders.Covert.sanctity_days_left()
+		return {"ok":false,"purpose":"","why":"No ruler will receive our envoys now: our own envoy carried a knife, and the sanctity of envoys is broken. Give it about %d days." % days,
+			"says":"No envoy of ours can go to the %s now. Since our envoy turned killer, no ruler will receive our heralds; it will be some %d days before that is forgotten." % [name,days]}
 	var lower:=text.to_lower()
 	var rel:Dictionary=civ.get("player_relation",{}) if civ.get("player_relation") is Dictionary else {}
 	var at_war:=bool(rel.get("at_war",false))
@@ -2591,6 +2614,55 @@ static func _war(id:String,audience:Dictionary,list:Array[Dictionary],r:Dictiona
 		GovernmentPeopleSystem.adjust_person_bonds(pid,{"obligation":0.02,"respect":0.01})
 		GovernmentPeopleSystem.record_person_memory(pid,"The god ordered war: %s. %s" % [text.substr(0,120),("Trackers went out after them." if String(decision.get("kind",""))=="track" else "We marched.") if verdict=="act" else "I told the god why not."],"divine",0.6,{"emotion":"duty","outcome":verdict})
 	return r
+
+static func _covert(id:String,audience:Dictionary,list:Array[Dictionary],text:String,reading:Dictionary,context:Dictionary,insist:bool)->Dictionary:
+	## A covert order (covert_orders.gd): the right official answers in
+	## character, states the odds, may object with the grave cost, and the god
+	## can insist. Spoken to someone else, it goes to the carrier and the card
+	## names them. Never "we will" followed by nothing.
+	if not bool(context.get("echoed",false)):
+		Hall.append_line(id,{"speaker":"You","role":"ruler","person_id":0,"civ_id":"","text":text,"day":Hall._day(),"aside":false})
+		audience["echoed_here"]=text
+	var kind:=String(reading.get("kind",""))
+	var who:=CovertOrders.carrier(kind)
+	var key:=("person:%d" % int(who.get("person_id",0))) if int(who.get("person_id",0))>0 else ("figure:"+String(who.get("figure_id","")) if String(who.get("figure_id",""))!="" else "")
+	var carrier:Dictionary=_entry(list,key) if key!="" else {}
+	if carrier.is_empty(): carrier=_speaker_entry(list)
+	var decision:=CovertOrders.perform(reading,insist,{"audience_id":id})
+	var r:=_result("covert",carrier,{},text,insist)
+	r.verb="covert"
+	r.actor=carrier.duplicate(); r.actor_name=String(carrier.get("name",""))
+	r["covert"]=decision
+	r["actor_says"]=String(decision.get("says",""))
+	# Spoken to someone other than the carrier: word goes to them.
+	var passed:=key!="" and String(carrier.get("key",""))!=key and String(who.get("name",""))!=""
+	var relay:="Word goes to %s. " % String(who.get("name","")) if passed else ""
+	if passed and String(r.actor_says)!="":
+		r.actor_name=String(who.get("name",""))
+		r.actor_says="%s sends back word: \"%s\"" % [_given(String(who.get("name",""))),String(r.actor_says)]
+	match String(decision.get("verdict","impossible")):
+		"act":
+			r.stage="covert_act"; r.executed=true; r.reaction="grave"
+			r.obedience={"id":"obey","manner":"ready","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience.erase("pending_command")
+		"object":
+			r.stage="covert_object"; r.executed=false; r.reaction="troubled"
+			r.obedience={"id":"object","manner":"grim","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience["pending_command"]={"verb":"covert","actor":String(carrier.get("key","")),"target":"","day":Hall._day(),"text":text.substr(0,200)}
+		_:
+			r.stage="covert_refuse"; r.executed=false; r.reaction="neutral"
+			r.obedience={"id":"object","manner":"plain","chance":0.0}
+			r.outcome=relay+String(decision.outcome)
+			audience.erase("pending_command")
+	var pid:=int(carrier.get("person_id",0))
+	if pid>0:
+		GovernmentPeopleSystem.record_person_memory(pid,"The god ordered a covert act: %s. %s" % [text.substr(0,100),"We sent someone." if String(decision.get("verdict",""))=="act" else "I told the god the cost."],"divine",0.6,{"emotion":"duty","outcome":String(decision.get("verdict",""))})
+	return r
+
+static func _given(name:String)->String:
+	return preload("res://scripts/era_names.gd").given_of(name) if name!="" else "the one who carries it"
 
 static func _strip_vocative(text:String,actor:Dictionary)->String:
 	var clean:=text.strip_edges()

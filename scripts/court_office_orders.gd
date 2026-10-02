@@ -120,6 +120,28 @@ static func _war()->Array:
 	out.append(_one("Keep the soldiers home","GuardCamp","Defend our home with the soldiers"))
 	if WorldSimulation.military!=null and not (WorldSimulation.military.field_armies as Array).is_empty():
 		out.append(_one("Bring the bands home","BandsHome","Bring all the bands home"))
+	# Assassins and sabotage: the war leader carries a killing (covert_orders.gd).
+	var strike_covert:Array=[]
+	for p:Dictionary in _covert_peoples():
+		var bare:=String(p.name)
+		strike_covert.append(_item("%s: assassin (as an envoy)" % bare,"Send an assassin to %s disguised as an envoy to strike at their leaders" % bare))
+		strike_covert.append(_item("%s: sabotage their stores" % bare,"Sabotage %s's stores" % bare))
+		if strike_covert.size()>=10: break
+	if not strike_covert.is_empty(): out.append(_menu("Assassins","Assassins",strike_covert))
+	return out
+
+
+## The peoples a covert order could name: those we know, bare (no "the", so
+## the covert reader resolves the possessive cleanly).
+static func _covert_peoples()->Array:
+	var out:Array=[]
+	if WorldSimulation.world==null: return out
+	for c in WorldSimulation.world.civilizations:
+		if not c is Dictionary or String((c as Dictionary).get("id",""))=="player": continue
+		var rel:Dictionary=(c as Dictionary).get("player_relation",{}) if (c as Dictionary).get("player_relation") is Dictionary else {}
+		if int(rel.get("contact_level",0))<1: continue
+		var name:=String((c as Dictionary).get("name","")).trim_prefix("The ").trim_prefix("the ")
+		if name!="": out.append({"name":name})
 	return out
 
 
@@ -201,6 +223,14 @@ static func _scouting()->Array:
 	out.append(_menu("Send a party","SendParty",ways))
 	out.append(_menu("Scouting","Scouting",[_item("More","Put more people on scouting"),_item("Less","Put fewer people on scouting"),_item("None","Stop sending scouts out")]))
 	out.append(_menu("Look for","LookFor",[_item("Wandering bands","Look for wandering bands who might join us"),_item("Stone and ore","Search for stone and ore")]))
+	# Spies: the Pathfinder's eyes abroad (covert_orders.gd).
+	var spy:Array=[]
+	for p:Dictionary in _covert_peoples():
+		var bare:=String(p.name)
+		spy.append(_item("Watch %s" % bare,"Send spies to %s" % bare))
+		spy.append(_item("Steal %s's craft" % bare,"Steal %s's secrets" % bare))
+		if spy.size()>=10: break
+	if not spy.is_empty(): out.append(_menu("Spies","Spies",spy))
 	return out
 
 

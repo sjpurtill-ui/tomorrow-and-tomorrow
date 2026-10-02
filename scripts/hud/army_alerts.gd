@@ -141,6 +141,9 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 	if not gear.is_empty(): out.append({"id":"gear","glyph":"gear","tone":"amber","count":gear.size(),"title":"Short of gear","lines":gear,"page":"support"})
 	if not thin.is_empty(): out.append({"id":"men","glyph":"men","tone":"amber","count":thin.size(),"title":"Under strength","lines":thin,"page":"recruitment"})
 	if not fought.is_empty(): out.append({"id":"fought","war":"feud","tone":"amber","count":fought.size(),"title":"Battles just fought","lines":fought,"page":"wars"})
+	# Spies and assassins: an agent caught or killed, a strike done, their spy
+	# caught (covert_ops.gd). Told here, never as a pop-up.
+	for covert_alert in preload("res://scripts/covert_ops.gd").alerts(): out.append(covert_alert)
 	return out
 
 

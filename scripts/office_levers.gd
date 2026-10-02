@@ -274,6 +274,34 @@ static func clear_cache()->void:
 	_reach_key=""
 
 
+# --- Intrigue (spies and assassins) ------------------------------------------
+
+## The hand an office brings to covert work (covert_ops.gd), as an added
+## edge 0..~0.1, read from the holder's own skills with reach, exactly as the
+## listed levers are. The Pathfinder is the eyes abroad and the watch at home
+## (Logistics, Knowledge, Defense); the war leader sharpens a killer's reach
+## (Defense, Knowledge). No LEVERS entry: this edge has no card of its own and
+## does not change the government screen; it is read straight from the holder,
+## so a rival's Pathfinder runs their spies exactly as ours does.
+const INTRIGUE_SKILLS:={"ChiefScout":{"Logistics":0.4,"Knowledge":0.35,"Defense":0.25},"Marshal":{"Defense":0.5,"Knowledge":0.3,"Administration":0.2}}
+const INTRIGUE_BEST:=0.10
+
+static func intrigue_edge(office:String,reach_now:float=-1.0)->float:
+	var weights:Dictionary=INTRIGUE_SKILLS.get(office,{})
+	if weights.is_empty() or WorldSimulation==null or WorldSimulation.state==null: return 0.0
+	var who:=order_holder(office)
+	var person:Dictionary=who.person if who.person is Dictionary else {}
+	if person.is_empty(): return 0.0
+	var total:=0.0; var sum:=0.0
+	for skill in weights:
+		total+=_skill(person,String(skill))*float(weights[skill]); sum+=float(weights[skill])
+	var skill:=total/maxf(0.001,sum)
+	# Ordinary holder (47) gives nothing; SKILL_SPAN above reaches the best edge.
+	var raw:=clampf((skill-ORDINARY_SKILL)/SKILL_SPAN,-1.0,1.0)*INTRIGUE_BEST
+	var r:=reach() if reach_now<0.0 else reach_now
+	return clampf(raw*r*(STAND_IN_SHARE if bool(who.acting) else 1.0),-INTRIGUE_BEST,INTRIGUE_BEST)
+
+
 # --- Traits with trade-offs --------------------------------------------------
 
 ## What a holder's traits add to the levers they work, in each lever's own

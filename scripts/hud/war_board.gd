@@ -33,6 +33,8 @@ const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Strips:=preload("res://scripts/hud/force_strips.gd")
 const GeneralRecord:=preload("res://scripts/general_record.gd")
 const Forces:=preload("res://scripts/hud/war_forces_model.gd")
+const CovertBoard:=preload("res://scripts/hud/covert_board.gd")
+const Covert:=preload("res://scripts/covert_ops.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -66,6 +68,9 @@ func setup(_block:Dictionary={})->void:
 	feedback=_line("",15,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
 	enemy_box=_section("Our enemies")
 	leader_box=_section("Our leaders")
+	# Spies and assassins: its own section, self-refreshing (covert_board.gd).
+	var covert_kicker:=_line("SPIES AND ASSASSINS",13,T.INK_MUTED);covert_kicker.add_theme_font_override("font",T.font("ui_strong"));add_child(covert_kicker)
+	var covert:=CovertBoard.new();covert.name="CovertBoard";add_child(covert);covert.setup()
 	refresh(true)
 
 
@@ -238,6 +243,12 @@ func _enemy_row(e:Dictionary)->Control:
 	odds.tooltip_text="Their strength against ours, by the war leader's reckoning: people, warriors and readiness on one scale.
 Worn by the fighting: we are %d%% worn, they are %d%%." % [roundi(float(e.get("our_worn",0.0))*100.0),roundi(float(e.get("their_worn",0.0))*100.0)]
 	var now:=_line("Now: "+now_words(e),14,T.INK,true);now.tooltip_text=now_details(e);column.add_child(now)
+	# Our eyes there, when we have any (covert_ops.gd).
+	var eyes:Dictionary=Covert.eyes_on(civ_id)
+	if int(eyes.count)>0:
+		var word:=("Our eyes in %s: %d" % [String(e.name),int(eyes.count)])
+		if int(eyes.last_word_days)>=0:word+=" · last word %s" % Ledger.span_words(int(eyes.last_word_days))
+		var eyes_line:=_line(word,13,T.INK_MUTED,true);eyes_line.name="Eyes";column.add_child(eyes_line)
 	var stances:=HBoxContainer.new();stances.name="Stances";stances.add_theme_constant_override("separation",6);column.add_child(stances)
 	var chosen:=String(WarLoop.front(civ_id).get("stance",""))
 	for spec:Array in STANCES:

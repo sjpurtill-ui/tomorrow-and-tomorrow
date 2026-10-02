@@ -37,6 +37,7 @@ static func read(o:Dictionary)->Dictionary:
 		"defences": return _defences(refs)
 		"directive": return _directive(refs)
 		"civic": return _civic(refs)
+		"covert": return preload("res://scripts/covert_ops.gd").op_card(int(refs.get("op_id",0)))
 		"waiting": return {"state":"accepted","line":"Waits on your word: "+String(refs.get("reason","")),"reason":String(refs.get("reason","")) if String(refs.get("reason",""))!="" else "it waits for your word","progress":0.0}
 		"setting": return {"state":"done","line":String(refs.get("line","Done")),"progress":1.0,"moved":true}
 	return {"state":"accepted","line":"Taken up","progress":0.0}
