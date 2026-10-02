@@ -24,6 +24,13 @@ extends RefCounted
 ##       Returns the stored entry (its "tier" says what it became), or {}.
 ##       "priority" (true: a moment that the monthly cap never downgrades,
 ##       for first contact and the first winter).
+##       Folding (the Chronicle's diet): a notice whose family was told within
+##       FOLD_WINDOW_DAYS folds into that card instead of becoming a new one.
+##       The card counts it and shows its words as the latest line; the repeat
+##       is kept as a tally line and in the event ledger. "fold_as" (a group
+##       key; default the title's family), "fold_days" (that group's window)
+##       and "fold" (false: never folded) shape it. Moments, firsts, priority
+##       lines and anything waiting on the god (see foldable) never fold.
 ##   Chronicle.record_first(key:String, moment:Dictionary)->Dictionary
 ##       Records only the first time `key` is seen for this people.
 ##   Chronicle.record_beat(beat:Dictionary)->Dictionary
@@ -45,6 +52,18 @@ const MOMENTS_PER_WINDOW:=3
 const ENTRY_LIMIT:=900
 const WHISPER_LIMIT:=160
 const CONDITION_QUIET_DAYS:=60
+## A notice of a family told within this many days (of the family's latest
+## telling) folds into the card that told it.
+const FOLD_WINDOW_DAYS:=1095
+## A card gathers repeats for at most this long; the next one is told afresh.
+const FOLD_SPAN_DAYS:=3650
+## Never folded, by kind, key or the action the card offers: deaths, births,
+## foundings, the year's entries, crises, the story's firsts and turnings,
+## aims taken up, kept or failed, wars begun and battles, ceremonies waiting.
+const FOLD_NEVER_KINDS:=["death","birth","founding","annal"]
+const FOLD_NEVER_KEYS:=["annal:","age:","crisis:","first:","beat:","discovery:","milestone:","learned:","turning:","court:death","court:succession",
+	"aim:start:","aim:done:","aim:fail:","aim:release:","ceremony:","war:feud:","court_war:","town_fate:","aftermath:","battle"]
+const FOLD_NEVER_ACTIONS:=["ceremony","battle"]
 ## Era-defining practices stay moments even when their field is not new.
 const RESEARCH_MILESTONES:=["seed_selection","public_schools","printing_process","steam_propulsion","powered_flight","reactor_engineering"]
 ## Headcounts the people have never reached before are remembered once.
@@ -107,6 +126,7 @@ static func record(moment:Dictionary)->Dictionary:
 	if keys.has(key):return {}
 	var tier:=String(moment.get("tier",""))
 	if tier not in TIERS:tier=grade(moment)
+	var wanted:=tier
 	# Routine lines step back into the tallies; the rest gain their callbacks
 	# (chronicle_annals.gd).
 	var shaped:=Annals.shape(c,moment,tier)
@@ -119,22 +139,154 @@ static func record(moment:Dictionary)->Dictionary:
 	if String(shaped.family)!="":entry["family"]=String(shaped.family)
 	if bool(shaped.folded):entry["folded"]=true
 	if shaped.has("same_as"):entry["same_as"]=String(shaped.same_as)
+	var group:=String(moment.get("fold_as",shaped.family)).strip_edges()
+	if group!="" and group!=String(shaped.family):entry["fold_as"]=group
+	# A notice already told lately folds into its card (FOLD_WINDOW_DAYS); one
+	# the year's telling already stepped back is still counted on that card.
+	var head:Dictionary={}
+	var repeat:=false
+	if wanted=="notice" and tier in ["notice","whisper"] and not shaped.has("same_as") and foldable(moment,key):
+		head=_fold_head(c,group,day,int(moment.get("fold_days",FOLD_WINDOW_DAYS)),String(shaped.family))
+		if not head.is_empty():
+			repeat=tier=="notice"
+			tier="whisper";entry.tier="whisper";entry["folded"]=true;entry["same_as"]=String(head.key)
 	# The story's own telling replaces a plainer report of the same finding.
 	for older in shaped.get("demote",[]):_demote(c,String(older),key)
 	for optional in ["art","action","domain","source","first","learned"]:
 		if moment.has(optional):entry[optional]=moment[optional].duplicate(true) if moment[optional] is Dictionary or moment[optional] is Array else moment[optional]
 	(c.entries as Array).push_front(entry)
 	keys[key]=day
+	if not head.is_empty():_fold_into(head,entry)
 	if tier=="moment":
 		var days:Array=c.moment_days
 		days.push_front(day)
 		if days.size()>12:days.resize(12)
 		pending_cards.append(entry.duplicate(true))
 		if pending_cards.size()>6:pending_cards.pop_front()
-	if tier!="whisper" and bool(moment.get("ledger",true)):_to_ledger(entry)
+	# A folded repeat keeps its line in the event ledger.
+	if (tier!="whisper" or repeat) and bool(moment.get("ledger",true)):_to_ledger(entry)
 	Annals.note(c,entry)
 	_trim(c)
 	return entry
+
+
+# --- Folding repeats -----------------------------------------------------------
+
+## Whether a record request may fold into an earlier card of its family:
+## only a plain notice. Never a moment (nor one the monthly cap lowered), a
+## first or priority line, and never anything that waits on the god: a death,
+## a crisis, a war begun or a battle, a ceremony, a court summons (a card that
+## opens the court on a person), an aim taken up, kept or failed.
+static func foldable(moment:Dictionary,key:String="")->bool:
+	if key.is_empty():key=String(moment.get("key",""))
+	if moment.has("fold") and not bool(moment.fold):return false
+	if bool(moment.get("priority",false)) or bool(moment.get("first",false)) or bool(moment.get("crowded",false)):return false
+	if String(moment.get("tier",""))=="moment":return false
+	if String(moment.get("kind","")) in FOLD_NEVER_KINDS:return false
+	for prefix in FOLD_NEVER_KEYS:
+		if key.begins_with(prefix):return false
+	var action:Dictionary=moment.get("action",{}) if moment.get("action") is Dictionary else {}
+	if String(action.get("kind","")) in FOLD_NEVER_ACTIONS:return false
+	if String(action.get("kind",""))=="court" and action.get("focus") is Dictionary and (action.focus as Dictionary).has("person_id"):return false
+	return true
+
+
+## The group a told entry folds by: its "fold_as", else its family.
+static func fold_group(entry:Dictionary)->String:
+	if String(entry.get("fold_as",""))!="":return String(entry.fold_as)
+	if String(entry.get("family",""))!="":return String(entry.family)
+	return Annals._family(String(entry.get("title","")))
+
+
+## The newest card of `group` still gathering repeats on `day`: told (or last
+## folded into) within `window` days, and first told within FOLD_SPAN_DAYS
+## (or `window`, when longer). {} when the next one is news again. A card an
+## older save kept before groups were named is matched by its `family`.
+static func _fold_head(c:Dictionary,group:String,day:int,window:int,family:String="")->Dictionary:
+	if group.is_empty():return {}
+	for e in c.entries:
+		if not e is Dictionary:continue
+		var entry:Dictionary=e
+		if String(entry.get("tier",""))=="whisper":continue
+		var same:=fold_group(entry)==group or (family!="" and not entry.has("fold_as") and String(entry.get("family",""))==family)
+		if not same:continue
+		# A card that itself waits on the god is never rewritten.
+		if not foldable({"kind":entry.get("kind",""),"action":entry.get("action",{})},String(entry.get("key",""))):return {}
+		var first_day:=int(entry.get("day",day))
+		if day-int(entry.get("last_day",first_day))>window:return {}
+		if day-first_day>maxi(FOLD_SPAN_DAYS,window):return {}
+		return entry
+	return {}
+
+
+## Counts a repeat on its card: how many times now, and the latest words,
+## after the card's own. The card opens what the latest one opens.
+static func _fold_into(head:Dictionary,entry:Dictionary)->void:
+	if not head.has("told"):
+		head["told"]=1
+		head["base_text"]=String(head.get("text",""))
+	head["told"]=int(head.told)+1
+	head["last_day"]=int(entry.get("day",0))
+	head["last_key"]=String(entry.get("key",""))
+	head["last_text"]=String(entry.get("text",""))
+	if String(entry.get("title",""))!=String(head.get("title","")):head["last_title"]=String(entry.get("title",""))
+	else:head.erase("last_title")
+	if entry.get("action") is Dictionary:head["action"]=(entry.action as Dictionary).duplicate(true)
+	head["text"]=fold_text(head)
+	for card in pending_cards:
+		if String(card.get("key",""))==String(head.get("key","")):card.merge(head,true)
+
+
+## A card's words with its repeats: "... Told twelve times since Year 218;
+## the latest, Year 229 · Summer: A cairn of stones: for the dead of the Dry
+## Year of year 229."
+static func fold_text(head:Dictionary)->String:
+	var base:=String(head.get("base_text",head.get("text","")))
+	var told:=int(head.get("told",1))
+	if told<2:return base
+	var latest:=String(head.get("last_text",""))
+	if latest.is_empty():latest=String(head.get("last_title",head.get("title","")))
+	var line:="Told %s since Year %d; the latest, %s: %s" % [Annals._times(told),int(head.get("day",0))/365+1,date_label(int(head.get("last_day",head.get("day",0)))),latest]
+	if not line.ends_with(".") and not line.ends_with("!") and not line.ends_with("?"):line+="."
+	return (base+" "+line).strip_edges() if base!="" else line
+
+
+## Whether these words were told before by an entry whose key begins with
+## `key_prefix`, within `within_days` of `day` (-1: at any time kept).
+static func told_before(text:String,key_prefix:String="",within_days:int=-1,day:int=-1)->bool:
+	if not active() or text.strip_edges().is_empty():return false
+	if day<0:day=int(GameState.elapsed_days)
+	var said:=Annals._family(plain(text.strip_edges()))
+	for e in data().entries:
+		if not e is Dictionary:continue
+		var entry:Dictionary=e
+		if within_days>=0 and day-int(entry.get("day",day))>within_days:continue
+		if key_prefix!="" and not String(entry.get("key","")).begins_with(key_prefix):continue
+		if Annals._family(String(entry.get("base_text",entry.get("text",""))))==said:return true
+	return false
+
+
+## Whether a stored Chronicle has the shape this file reads. Older saves,
+## without the fold fields ("told", "last_day", "last_text", "base_text",
+## "fold_as"), are valid as they are.
+static func valid_state(c:Variant)->bool:
+	if not c is Dictionary:return false
+	var d:Dictionary=c
+	for field in ["entries","moment_days"]:
+		if d.has(field) and not d[field] is Array:return false
+	for field in ["firsts","keys","moment_ids"]:
+		if d.has(field) and not d[field] is Dictionary:return false
+	for e in d.get("entries",[]):
+		if not e is Dictionary:return false
+		var entry:Dictionary=e
+		if not entry.get("key") is String or not entry.get("title") is String:return false
+		if not (entry.get("day") is int or entry.get("day") is float):return false
+		if String(entry.get("tier","")) not in TIERS:return false
+		for field in ["told","last_day"]:
+			if entry.has(field) and not (entry[field] is int or entry[field] is float):return false
+		for field in ["text","family","fold_as","base_text","last_text","last_key","last_title","same_as"]:
+			if entry.has(field) and not entry[field] is String:return false
+	return true
 
 
 static func _demote(c:Dictionary,older_key:String,by_key:String)->void:

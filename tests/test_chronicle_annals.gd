@@ -63,7 +63,15 @@ func test_a_repeated_notice_steps_back_until_it_is_news_again()->void:
 	assert_str(String(first.tier)).is_equal("notice")
 	assert_str(String(second.tier)).is_equal("whisper")
 	assert_bool(bool(second.get("folded",false))).is_true()
-	assert_str(String(third.tier)).is_equal("notice")
+	# Within the Chronicle's fold window the news is counted on the first card,
+	# its words the card's latest line (chronicle.gd FOLD_WINDOW_DAYS).
+	assert_str(String(third.tier)).is_equal("whisper")
+	assert_int(int(first.told)).is_equal(3)
+	assert_str(String(first.text)).contains("the watchers saw new walls")
+	# Quiet for longer than the window: news again.
+	_at(400+Chronicle.FOLD_WINDOW_DAYS+10)
+	var fourth:=Chronicle.record({"title":"City Reconnaissance","text":"Reconnaissance of Tsaren: the walls are finished.","tier":"notice","kind":"scout"})
+	assert_str(String(fourth.tier)).is_equal("notice")
 
 
 func test_a_scout_site_is_told_once_and_road_news_is_counted()->void:
