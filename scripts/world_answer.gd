@@ -11,14 +11,17 @@ extends RefCounted
 ## The odds are stated (odds()) and shown on the Standing page; the roll is
 ## seeded.
 ##
-## - BOW. Afraid and outmatched, they send an envoy to submit: tribute in
-##   Food every harvest out of their own stores, a hostage of their ruler's
-##   house, and no more raids. Taken, they are TRIBUTARIES: the feud is over,
-##   their raiders stay home (war_loop.keeps_peace), their envoys bring no
-##   demands, and each year the tribute moves between the two real ledgers
-##   (civilization_exchange). Asking for more is a gamble at stated odds.
-##   They pay while they still fear us and our spears still outmatch theirs;
-##   when either fails they WITHHOLD it, and the bond is broken.
+## - BOW. Afraid and outmatched, they send an envoy to submit: tribute every
+##   season, a hostage of their ruler's house, and no more raids. Taken, they
+##   are TRIBUTARIES: the feud is over, their raiders stay home
+##   (war_loop.keeps_peace) and their envoys bring no demands. The tribute is
+##   the economy's own (trade_stances: an agreement in the trade ledger, sized
+##   by tribute_size and collected each season in their goods, the same
+##   ledger every people's tribute runs through). Asking for twice as much is
+##   a gamble at stated odds. Each year they weigh it again: they keep paying
+##   while they still fear us and our spears still outmatch theirs; when
+##   either fails, or their goods run out, they WITHHOLD it and the bond is
+##   broken.
 ## - EVERYTHING THEY HAVE. Resentful and not outmatched (above all once bound
 ##   in a league against us), they arm for a season: their own ruler raises
 ##   more spears (their plan reads as war: civilization_strategy), which the
@@ -37,12 +40,12 @@ const ANSWER_GAP:=2*365
 const REFUSED_GAP:=3*365
 const ARMING_MIN:=60
 const ARMING_MAX:=120
-## A tributary's yearly tribute: this share of a year of its own people's
-## eating (the record's tributaries gave a tenth or less of their harvest).
-const TRIBUTE_SHARE:=0.05
-const TRIBUTE_MIN:=15.0
-## Of their stores, at most this much goes in one payment.
-const STOCK_SHARE:=0.35
+## A tribute agreement in the trade ledger is kept this far ahead while the
+## bond holds, and renewed at each yearly reckoning.
+const BOND_AHEAD:=2*365
+## Without a trade report for them: a season's tribute worth this share of
+## a season of their people's eating, at the price of Food.
+const FALLBACK_SHARE:=0.05
 ## Below these they stop paying.
 const PAY_FEAR:=0.25
 const PAY_RATIO:=1.0
@@ -54,6 +57,9 @@ const LOG_MAX:=40
 const TYPES:={"submission":{"headline":"comes to bow before the god","family":"peace"}}
 
 const Hall:=preload("res://scripts/audience_hall.gd")
+const Stances:=preload("res://scripts/trade_stances.gd")
+const TradeLedger:=preload("res://scripts/trade_ledger.gd")
+const Prices:=preload("res://scripts/trade_prices.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const EraNames:=preload("res://scripts/era_names.gd")
 const WAR_PATH:="res://scripts/war_loop.gd"
@@ -95,7 +101,7 @@ static func valid_state(data:Variant)->bool:
 				if not k is String or not data[key][k] is Dictionary or JSON.stringify(data[key][k]).length()>800: return false
 	for k in (data.get("tributaries",{}) as Dictionary):
 		var t:Dictionary=data.tributaries[k]
-		for f in ["since","amount","due"]:
+		for f in ["since","value","due"]:
 			if not _num(t.get(f)): return false
 	for k in (data.get("arming",{}) as Dictionary):
 		var a:Dictionary=data.arming[k]
@@ -202,8 +208,8 @@ static func standing_rows(civ_id:String,view:Dictionary)->Array[Dictionary]:
 	var t:=tributary(civ_id)
 	if not t.is_empty():
 		var hostage:=String(t.get("hostage",""))
-		out.append({"id":"tributary","tone":"good","words":"Pays us %d Food every harvest%s" % [roundi(float(t.get("amount",0.0))),("; %s is our hostage" % hostage) if hostage!="" else ""],
-			"detail":"Paid %d times since they bowed. They pay while they fear us (they stop below %d in 100) and our spears outmatch theirs." % [int(t.get("paid",0)),roundi(PAY_FEAR*100.0)]})
+		out.append({"id":"tributary","tone":"good","words":"Bowed to us: tribute worth %s every season%s" % [_qty(float(t.get("value",0.0))),("; %s is our hostage" % hostage) if hostage!="" else ""],
+			"detail":"Worth %s paid in all since they bowed. They pay while they fear us (they stop below %d in 100) and our spears outmatch theirs." % [_qty(paid_so_far(civ_id)),roundi(PAY_FEAR*100.0)]})
 		return out
 	var arm:=arming(civ_id)
 	if not arm.is_empty():
@@ -280,17 +286,24 @@ static func _offer_submission(civ_id:String,day:int,o:Dictionary)->void:
 		"data":{"text":"they come to bow before the god","why":String(o.get("why_bow",""))}})
 	_log(civ_id,"bow_offered","%s sends an envoy to submit: %s." % [_name(civ_id),String(o.get("why_bow",""))])
 
-## What they offer: a yearly tribute out of their own stores and a hostage
-## of their ruler's house. {resource, amount, now, hostage}.
+## What they offer: tribute every season, of the size every people's
+## tribute is (trade_stances.tribute_size: a share of what they make), and a
+## hostage of their ruler's house. {value, hostage}.
 static func terms(civ_id:String)->Dictionary:
-	var civ:=ForeignDiplomacy.civilization(civ_id)
-	var pop:=float(civ.get("population",100.0))
-	var stock:=Hall.foreign_stock(civ_id,"Food")
-	var amount:=maxf(TRIBUTE_MIN,pop*_eats_per_head()*365.0*TRIBUTE_SHARE)
-	if stock>=0.0: amount=minf(amount,maxf(TRIBUTE_MIN,stock*STOCK_SHARE))
-	amount=Hall._nice(amount)
-	var now:=Hall._nice(minf(amount,stock)) if stock>=0.0 else amount
-	return {"resource":"Food","amount":amount,"now":maxf(0.0,now),"hostage":_hostage(civ_id)}
+	var value:=Stances.tribute_size(civ_id)
+	if value<=0.0:
+		var civ:=ForeignDiplomacy.civilization(civ_id)
+		value=float(civ.get("population",100.0))*_eats_per_head()*91.0*FALLBACK_SHARE*Prices.base("Food")
+	return {"value":snappedf(maxf(1.0,value),0.1),"hostage":_hostage(civ_id)}
+
+## How a worth is said (the trade pages' own words).
+static func _qty(value:float)->String:
+	var words:=load("res://scripts/trade_words.gd") as GDScript
+	return String(words.call("qty",value)) if words!=null else "%d" % roundi(value)
+
+## Worth paid in all through the trade ledger since they bowed.
+static func paid_so_far(civ_id:String)->float:
+	return float(Stances.tribute(civ_id,"player").get("paid",0.0))
 
 ## Food one person eats in a day, read from our own people's eating (the
 ## same diet scale for every people in this age).
@@ -321,8 +334,8 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,_r
 	var why:=String((occasion.get("data",{}) as Dictionary).get("why","")) if occasion.get("data") is Dictionary else ""
 	var s:={"type":"submission","headline":"comes to bow before the god","ask":"submission:%d" % floori(float(day)/365.0)}
 	if used.has(String(s.ask)): return {}
-	s["req"]={"resource":String(t.resource),"amount":float(t.amount),"now":float(t.now),"hostage":String(t.hostage),"why":why}
-	s.summary="%s bows. %s will send %d %s every harvest%s, give %s into your keeping, and send no more raiders against us." % [name,ruler,roundi(float(t.amount)),String(t.resource),(" (%d now)" % roundi(float(t.now))) if float(t.now)>0.0 else "",String(t.hostage)]
+	s["req"]={"value":float(t.value),"hostage":String(t.hostage),"why":why}
+	s.summary="%s bows. %s will send tribute worth %s every season, give %s into your keeping, and send no more raiders against us." % [name,ruler,_qty(float(t.value)),String(t.hostage)]
 	return {"kind":"request","situation":s}
 
 ## Asking for twice as much: the odds they bear it.
@@ -337,9 +350,8 @@ static func open_lines(audience:Dictionary)->Array:
 	var civ_id:=String(audience.get("civ_id",""))
 	var rivals:=load(RIVALS_PATH) as GDScript
 	var ruler:=String(rivals.call("given",civ_id)) if rivals!=null else "Our ruler"
-	var amount:=roundi(float(p.get("amount",0.0)))
 	var out:Array=[]
-	out.append("%s will fight you no more. Every harvest we will bring you %d Food, and %s stays with you as our pledge." % [ruler,amount,String(p.get("hostage","a son of our house"))])
+	out.append("%s will fight you no more. Every season we will bring you goods worth %s, and %s stays with you as our pledge." % [ruler,_qty(float(p.get("value",0.0))),String(p.get("hostage","a son of our house"))])
 	out.append("We have buried enough of ours. Take our tribute and let our people live.")
 	return out
 
@@ -352,9 +364,9 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 	var civ_id:=String(audience.get("civ_id",""))
 	var name:=String(audience.get("civ_name",_name(civ_id)))
 	var o:Array[Dictionary]=[]
-	o.append(Hall._option("accept","Take their tribute and their hostage","%s pays %d %s every harvest and %s lives among us. Their raiders stay home." % [name,roundi(float(p.get("amount",0.0))),String(p.get("resource","Food")),String(p.get("hostage","a hostage"))],"neutral"))
+	o.append(Hall._option("accept","Take their tribute and their hostage","%s pays tribute worth %s every season and %s lives among us. Their raiders stay home." % [name,_qty(float(p.get("value",0.0))),String(p.get("hostage","a hostage"))],"neutral"))
 	var chance:=more_odds(civ_id)
-	o.append(Hall._option("more","Demand twice as much","%d in 100 they bear it and pay %d a year. Otherwise they go home shamed, and remember it." % [roundi(chance*100.0),roundi(float(p.get("amount",0.0))*2.0)],"hostile"))
+	o.append(Hall._option("more","Demand twice as much","%d in 100 they bear it and pay %s a season. Otherwise they go home shamed, and remember it." % [roundi(chance*100.0),_qty(float(p.get("value",0.0))*2.0)],"hostile"))
 	o.append(Hall._option("refuse","Turn them away","The feud goes on. They will not bow again for years.","hostile"))
 	for option in o: option["cost"]=("Risk: " if String(option.id)!="accept" else "Cost: ")+String(option.sub)
 	return o
@@ -364,16 +376,16 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 	var civ_id:=String(audience.get("civ_id",""))
 	var name:=String(audience.get("civ_name",_name(civ_id)))
 	var day:=_day()
-	var amount:=float(p.get("amount",TRIBUTE_MIN))
+	var value:=float(p.get("value",1.0))
 	match option_id:
 		"accept":
-			var text:=_bind(civ_id,day,amount,String(p.get("hostage","")),float(p.get("now",0.0)),"")
+			var text:=_bind(civ_id,day,value,String(p.get("hostage","")),"")
 			return {"outcome":text,"reaction":"neutral"}
 		"more":
 			var chance:=more_odds(civ_id)
 			var roll:=_rng("more:%s:%d" % [civ_id,day]).randf()
 			if roll<chance:
-				var text2:=_bind(civ_id,day,amount*2.0,String(p.get("hostage","")),float(p.get("now",0.0)),"They bore your demand (%d in 100): " % roundi(chance*100.0))
+				var text2:=_bind(civ_id,day,value*2.0,String(p.get("hostage","")),"They bore your demand (%d in 100): " % roundi(chance*100.0))
 				return {"outcome":text2,"reaction":"offended"}
 			_refused(civ_id,day,"the god's scorn for their submission")
 			var r:=load(RIVALS_PATH) as GDScript
@@ -396,15 +408,15 @@ static func _refused(civ_id:String,day:int,words:String)->void:
 	ForeignDiplomacy.remember(civ_id,"The god would not take our submission.")
 	(load(DEEDS_PATH) as GDScript).call("record",civ_id,"shame_envoy",1,words)
 
-## They become tributaries: the feud ends, the first tribute comes with the
-## envoy, and their raiders stay home while they pay.
-static func _bind(civ_id:String,day:int,amount:float,hostage:String,now:float,lead:String)->String:
+## They become tributaries: the tribute agreement goes into the trade ledger
+## (collected each season in their goods, like every people's tribute), the
+## feud ends, and their raiders stay home while they pay.
+static func _bind(civ_id:String,day:int,value:float,hostage:String,lead:String)->String:
 	var name:=_name(civ_id)
-	var paid:=0.0
-	if now>0.0:
-		paid=Hall.EXCHANGE.take(civ_id,"Food",minf(now,amount))
-		if paid>0.0: Hall.EXCHANGE.receive("player","Food",paid)
-	state().tributaries[civ_id]={"since":day,"resource":"Food","amount":Hall._nice(amount),"hostage":hostage.substr(0,80),"due":day+365,"paid":1 if paid>0.0 else 0,"missed":0}
+	Stances._begin_tribute(civ_id,"player",value,day)
+	var agreement:=Stances.tribute(civ_id,"player")
+	if not agreement.is_empty(): agreement["until"]=day+BOND_AHEAD
+	state().tributaries[civ_id]={"since":day,"value":snappedf(value,0.1),"hostage":hostage.substr(0,80),"due":day+365,"years":0,"seen_paid":0.0}
 	var war:=load(WAR_PATH) as GDScript
 	if war!=null and bool(war.call("feuding",civ_id,day)): war.call("_end_feud",civ_id,day,"submission","%s bowed to the god." % name)
 	var index:=Hall._civ_index(civ_id)
@@ -413,13 +425,15 @@ static func _bind(civ_id:String,day:int,amount:float,hostage:String,now:float,le
 		relation["stance"]="tributary"
 	ForeignDiplomacy.remember(civ_id,"We bowed to the god and pay its people tribute.")
 	_mark(civ_id,"bow",day)
-	var text:="%s%s bows to the god. %s pays %d Food every harvest%s, and %s lives among us as their pledge. Their raiders stay home while they pay." % [lead,name,name,roundi(amount),(" (%d came with the envoy)" % roundi(paid)) if paid>0.0 else "",hostage if hostage!="" else "a hostage"]
+	var text:="%s%s bows to the god. %s pays tribute worth %s every season, and %s lives among us as their pledge. Their raiders stay home while they pay." % [lead,name,name,_qty(value),hostage if hostage!="" else "a hostage"]
 	_chronicle("bow:%s:%d" % [civ_id,day],"%s Bows to the God" % name,text,"moment",civ_id)
 	_log(civ_id,"bow",text)
 	return text
 
-## A harvest's tribute falls due: they pay while they still fear us and our
-## spears still outmatch theirs; otherwise they withhold it and the bond breaks.
+## A year since they bowed or last weighed it: they keep paying while they
+## still fear us and our spears still outmatch theirs, and their goods last
+## (the trade ledger drops an agreement missed twice); otherwise they
+## withhold it, the agreement ends and the bond is broken.
 static func _tribute_due(civ_id:String,day:int)->void:
 	var a:=state()
 	var t:Dictionary=a.tributaries[civ_id]
@@ -429,24 +443,25 @@ static func _tribute_due(civ_id:String,day:int)->void:
 		(a.tributaries as Dictionary).erase(civ_id)
 		return
 	var r:=reading(civ_id)
-	var amount:=float(t.get("amount",TRIBUTE_MIN))
-	var stock:=Hall.foreign_stock(civ_id,"Food")
-	if float(r.fear)>=PAY_FEAR and float(r.ratio)>=PAY_RATIO and (stock<0.0 or stock>=amount*0.5):
-		var paid:=Hall.EXCHANGE.take(civ_id,"Food",minf(amount,stock*STOCK_SHARE*2.0) if stock>=0.0 else amount)
-		if paid>0.0: Hall.EXCHANGE.receive("player","Food",paid)
-		t["paid"]=int(t.get("paid",0))+1
+	var agreement:=Stances.tribute(civ_id,"player")
+	if not agreement.is_empty() and float(r.fear)>=PAY_FEAR and float(r.ratio)>=PAY_RATIO:
+		agreement["until"]=day+BOND_AHEAD
+		var paid:=float(agreement.get("paid",0.0))
+		var this_year:=maxf(0.0,paid-float(t.get("seen_paid",0.0)))
+		t["seen_paid"]=paid
+		t["years"]=int(t.get("years",0))+1
 		t["due"]=int(t.due)+365
-		t["last_paid"]=roundi(paid)
-		var first:=int(t.paid)<=2
-		_chronicle("tribute:%s:%d" % [civ_id,day],"%s Brings Its Tribute" % name,"%s brought %d Food, as it does every harvest since it bowed (the %s time)." % [name,roundi(paid),_nth(int(t.paid))],"moment" if first else "notice",civ_id)
-		_log(civ_id,"tribute_paid","%d Food" % roundi(paid))
+		var first:=int(t.years)<=1
+		_chronicle("tribute:%s:%d" % [civ_id,day],"%s Keeps Faith" % name,"%s still bows: tribute worth %s came this year, the %s year since it bowed." % [name,_qty(this_year),_nth(int(t.years))],"moment" if first else "notice",civ_id)
+		_log(civ_id,"tribute_paid","worth %s" % _qty(this_year))
 		return
-	var why:="they no longer fear us enough" if float(r.fear)<PAY_FEAR else ("their spears now match ours" if float(r.ratio)<PAY_RATIO else "their stores are too thin")
+	var why:="their goods ran out" if agreement.is_empty() else ("they no longer fear us enough" if float(r.fear)<PAY_FEAR else "their spears now match ours")
+	if not agreement.is_empty(): (TradeLedger.state().tributes as Dictionary).erase(Stances.skey(civ_id,"player"))
 	(a.tributaries as Dictionary).erase(civ_id)
 	var index:=Hall._civ_index(civ_id)
 	if index>=0: WorldSimulation.world.civilizations[index].player_relation["stance"]="hostile"
 	_mark(civ_id,"withheld",day)
-	var text:="%s did not bring its tribute this harvest: %s. The bond is broken. %s is still in our hands." % [name,why,String(t.get("hostage","Their hostage"))]
+	var text:="%s did not bring its tribute this year: %s. The bond is broken. %s is still in our hands." % [name,why,String(t.get("hostage","Their hostage"))]
 	_chronicle("withheld:%s:%d" % [civ_id,day],"%s Withholds Its Tribute" % name,text,"moment",civ_id)
 	ForeignDiplomacy.remember(civ_id,"We no longer pay the god's people tribute.")
 	_log(civ_id,"withheld",text)

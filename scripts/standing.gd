@@ -383,6 +383,15 @@ static func _record_monthly()->void:
 	metrics["standing_awe"]=float(command.awe)
 	metrics["standing_allure"]=float(command.allure)
 	metrics["standing_pride"]=float(pride(our).value)
+	# What our people still tell of their god's deeds (deeds.gd): the love and
+	# dread the god itself earned, beyond the ordinary moods of a court. Only
+	# the god's people hold a god in love or dread, and a god who has done
+	# nothing worth telling is neutral, so no people gains or loses by default
+	# (another people's month reads neutral too).
+	if String(WorldSimulation.actor_id)=="player":
+		var told:Dictionary=preload("res://scripts/deeds.gd").home()
+		metrics["standing_love"]=float(told.love)
+		metrics["standing_dread"]=float(told.dread)
 	# How many peoples we know are moved against us (the rail's Standing badge).
 	metrics["standing_dangers"]=float(danger_count(our))
 
@@ -404,7 +413,8 @@ static func danger_count(our:Dictionary={})->int:
 
 static func monthly()->Dictionary:
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
-	return {"might":float(metrics.get("standing_might",0.0)),"pride":float(metrics.get("standing_pride",0.5)),"allure":float(metrics.get("standing_allure",ALLURE_ORDINARY)),"awe":float(metrics.get("standing_awe",0.0))}
+	return {"might":float(metrics.get("standing_might",0.0)),"pride":float(metrics.get("standing_pride",0.5)),"allure":float(metrics.get("standing_allure",ALLURE_ORDINARY)),"awe":float(metrics.get("standing_awe",0.0)),
+		"love":float(metrics.get("standing_love",LOVE_ORDINARY)),"dread":float(metrics.get("standing_dread",0.0))}
 
 ## How much a target's fighting strength against ours holds a ruler back from
 ## declaring war on it: positive when they are stronger (awe of their might),
@@ -417,18 +427,48 @@ static func war_deterrence(target:Dictionary)->float:
 ## Allure an ordinary people commands (a plain village's culture and plenty).
 const ALLURE_ORDINARY:=0.25
 
+## THE GOD'S PEOPLE, LOVING OR AFRAID, for what the god has done (deeds.gd:
+## love and dread still told at the hearths, 0 when nothing is). Love draws
+## families in and binds them, and a remembered cruelty (negative love) does
+## the reverse; dread drives families off and frays them once it runs high,
+## though it props up the chiefs' word (people obey what they fear). Shares
+## a month at full love or full dread (x100 for points of 100).
+const LOVE_ORDINARY:=0.0
+const LOVE_DRAW:=0.08
+const LOVE_BIND:=0.05
+const LOVE_OBEY:=0.03
+const DREAD_DRIVE_OFF:=0.08
+const DREAD_FRAYS:=0.15
+const DREAD_FRAY:=0.08
+const DREAD_OBEY:=0.03
+
+## What our people's love and dread of the god do this month, as shares
+## (multiply by 100 for points): {draw, bind, obey_love, drive_off, fray,
+## obey_dread}.
+static func god_effects(m:Dictionary={})->Dictionary:
+	if m.is_empty(): m=monthly()
+	var love:=float(m.get("love",LOVE_ORDINARY))-LOVE_ORDINARY
+	var dread:=float(m.get("dread",0.0))
+	return {"draw":love*LOVE_DRAW,"bind":love*LOVE_BIND,"obey_love":love*LOVE_OBEY,
+		"drive_off":-dread*DREAD_DRIVE_OFF,"fray":-maxf(0.0,dread-DREAD_FRAYS)*DREAD_FRAY,"obey_dread":dread*DREAD_OBEY}
+
 ## Our warbands menace would-be newcomers; pride keeps our own people; allure
 ## draws others in.
 static func attraction_shift()->float:
 	var m:=monthly()
-	return -float(m.might)*0.08+(float(m.pride)-0.5)*0.08+(float(m.allure)-ALLURE_ORDINARY)*0.08
+	var god:=god_effects(m)
+	return -float(m.might)*0.08+(float(m.pride)-0.5)*0.08+(float(m.allure)-ALLURE_ORDINARY)*0.08+float(god.draw)+float(god.drive_off)
 
 ## Pride lifts how well the people hold together and trust their chiefs, a little.
 static func cohesion_shift()->float:
-	return (float(monthly().pride)-0.5)*0.06
+	var m:=monthly()
+	var god:=god_effects(m)
+	return (float(m.pride)-0.5)*0.06+float(god.bind)+float(god.fray)
 
 static func legitimacy_shift()->float:
-	return (float(monthly().pride)-0.5)*0.04
+	var m:=monthly()
+	var god:=god_effects(m)
+	return (float(m.pride)-0.5)*0.04+float(god.obey_love)+float(god.obey_dread)
 
 ## How far pride forgives the chiefs: the share by which the blame for
 ## unpopular orders, constant change and failed aims is lightened. A proud
@@ -544,7 +584,10 @@ static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 ## {attraction, cohesion, legitimacy, menace}.
 static func home_effects()->Dictionary:
 	var m:=monthly()
-	return {"attraction":((float(m.pride)-0.5)+(float(m.allure)-ALLURE_ORDINARY))*8.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0,"forgiveness":forgiveness(),"levy":levy_burden(),"under_arms":_warriors()/_population(),
+	var god:=god_effects(m)
+	return {"attraction":((float(m.pride)-0.5)+(float(m.allure)-ALLURE_ORDINARY))*8.0+(float(god.draw)+float(god.drive_off))*100.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0,"forgiveness":forgiveness(),"levy":levy_burden(),"under_arms":_warriors()/_population(),
+		# What their love and dread of the god do, in points of 100 (god_effects).
+		"god":{"draw":float(god.draw)*100.0,"bind":float(god.bind)*100.0,"obey_love":float(god.obey_love)*100.0,"drive_off":float(god.drive_off)*100.0,"fray":float(god.fray)*100.0,"obey_dread":float(god.obey_dread)*100.0},
 		# What the levy costs, as ConsequenceEngine's targets take it.
 		"levy_cohesion":levy_burden()*60.0,"levy_trust":levy_burden()*40.0*blame()}
 

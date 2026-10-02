@@ -14,6 +14,7 @@ const WAR:=preload("res://scripts/war_loop.gd")
 const Hall:=preload("res://scripts/audience_hall.gd")
 const HallProbe:=preload("res://tests/audience_hall_probe.gd")
 const RIVALS:=preload("res://scripts/rival_rulers.gd")
+const Stances:=preload("res://scripts/trade_stances.gd")
 
 var probe:Node
 var civ_id:=""
@@ -117,27 +118,30 @@ func test_they_come_to_bow_and_become_tributaries()->void:
 	var ids:=PackedStringArray()
 	for option in ANSWER.options(audience): ids.append(String(option.id))
 	assert_array(Array(ids)).contains_exactly(["accept","more","refuse"])
-	var theirs_before:=Hall.foreign_stock(civ_id,"Food")
 	var result:=ANSWER.resolve(audience,"accept")
 	assert_str(String(result.get("outcome",""))).contains("bows to the god")
 	assert_bool(ANSWER.is_tributary(civ_id)).is_true()
 	assert_bool(WAR.keeps_peace(civ_id,day+10)).is_true()
 	var t:=ANSWER.tributary(civ_id)
-	assert_float(float(t.amount)).is_greater_equal(ANSWER.TRIBUTE_MIN)
 	assert_str(String(t.hostage)).contains("son of")
-	assert_float(Hall.foreign_stock(civ_id,"Food")).is_less(theirs_before)
+	# The tribute is the economy's own: one agreement in the trade ledger,
+	# collected each season like any people's tribute.
+	var agreement:=Stances.tribute(civ_id,"player")
+	assert_bool(agreement.is_empty()).is_false()
+	assert_float(float(agreement.value)).is_equal_approx(float(t.value),0.11)
 	assert_str(_chronicle_titles()).contains("Bows to the God")
 
 func test_tribute_comes_each_harvest_until_they_no_longer_fear_us()->void:
 	_terrorise(civ_id,8)
 	_set_pop(_civ(civ_id),40.0)
 	var day:=int(GameState.elapsed_days)
-	ANSWER._bind(civ_id,day,30.0,"Tam, son of Ilak",0.0,"")
-	var theirs:=Hall.foreign_stock(civ_id,"Food")
+	ANSWER._bind(civ_id,day,30.0,"Tam, son of Ilak","")
 	GameState.elapsed_days=day+365
 	ANSWER.monthly(day+365)
-	assert_int(int(ANSWER.tributary(civ_id).get("paid",0))).is_equal(1)
-	assert_float(Hall.foreign_stock(civ_id,"Food")).is_less(theirs)
+	assert_int(int(ANSWER.tributary(civ_id).get("years",0))).is_equal(1)
+	# The agreement is kept ahead while the bond holds.
+	assert_int(int(Stances.tribute(civ_id,"player").until)).is_greater(day+2*365)
+	assert_str(_chronicle_titles()).contains("Keeps Faith")
 	# A generation and more on, the fear is gone: they withhold it.
 	DIVINE.store().events.clear()
 	ForeignDiplomacy.audiences.erase("deeds")
@@ -145,6 +149,7 @@ func test_tribute_comes_each_harvest_until_they_no_longer_fear_us()->void:
 	GameState.elapsed_days=day+2*365
 	ANSWER.monthly(day+2*365)
 	assert_bool(ANSWER.is_tributary(civ_id)).is_false()
+	assert_bool(Stances.tribute(civ_id,"player").is_empty()).is_true()
 	assert_str(_chronicle_titles()).contains("Withholds Its Tribute")
 
 func test_asking_twice_as_much_is_a_stated_gamble()->void:
@@ -181,7 +186,7 @@ func test_a_resentful_people_arms_then_marches_with_its_league()->void:
 func test_kin_and_tributaries_are_left_out_of_the_reckoning()->void:
 	_terrorise(civ_id,8)
 	_set_pop(_civ(civ_id),40.0)
-	ANSWER._bind(civ_id,int(GameState.elapsed_days),20.0,"",0.0,"")
+	ANSWER._bind(civ_id,int(GameState.elapsed_days),20.0,"","")
 	for m in 24: ANSWER.monthly(int(GameState.elapsed_days)+m*30)
 	assert_bool(_occasion("submission",civ_id).is_empty()).is_true()
 	assert_bool(ANSWER.arming(civ_id).is_empty()).is_true()
@@ -189,7 +194,7 @@ func test_kin_and_tributaries_are_left_out_of_the_reckoning()->void:
 func test_the_answers_save_and_are_checked()->void:
 	_terrorise(civ_id,8)
 	_set_pop(_civ(civ_id),40.0)
-	ANSWER._bind(civ_id,int(GameState.elapsed_days),20.0,"Tam, son of Ilak",0.0,"")
+	ANSWER._bind(civ_id,int(GameState.elapsed_days),20.0,"Tam, son of Ilak","")
 	ANSWER._begin_arming(String(CivilizationSystem.civilizations[1].id),int(GameState.elapsed_days),{})
 	assert_bool(ANSWER.valid_state(ForeignDiplomacy.audiences.answers)).is_true()
 	assert_bool(bool(Hall.validate_state(Hall.state()))).is_true()

@@ -371,3 +371,32 @@ func test_the_page_tells_what_they_remember_and_what_they_mean_to_do()->void:
 	assert_str(String((board.warnings as Array)[0].title)).contains("gathering every spear")
 	# Our own people's long memory is on the home card.
 	assert_str(String(board.home.told)).contains("a guest killed in the god's hall")
+
+## The god's people, loving or afraid (standing.god_effects): love draws
+## families in and binds them; dread drives them off and, past a point, frays
+## them, though it props up the chiefs' word. Read once a month, in the god's
+## scope only; another people's month is neutral.
+func test_love_and_dread_of_the_god_move_the_home_month()->void:
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+	metrics["standing_pride"]=0.5; metrics["standing_allure"]=Standing.ALLURE_ORDINARY; metrics["standing_might"]=0.0
+	metrics["standing_love"]=Standing.LOVE_ORDINARY; metrics["standing_dread"]=0.0
+	var calm_attraction:=Standing.attraction_shift()
+	var calm_cohesion:=Standing.cohesion_shift()
+	metrics["standing_love"]=0.4
+	assert_float(Standing.attraction_shift()).is_greater(calm_attraction)
+	assert_float(Standing.cohesion_shift()).is_greater(calm_cohesion)
+	metrics["standing_love"]=Standing.LOVE_ORDINARY; metrics["standing_dread"]=0.5
+	assert_float(Standing.attraction_shift()).is_less(calm_attraction)
+	assert_float(Standing.cohesion_shift()).is_less(calm_cohesion)
+	assert_float(Standing.legitimacy_shift()).is_greater(0.0)
+	# The page says it, with the engine's own numbers.
+	var effects:=Standing.home_effects()
+	assert_float(float(effects.god.drive_off)).is_equal_approx(-0.5*Standing.DREAD_DRIVE_OFF*100.0,0.01)
+	var words:Dictionary=preload("res://scripts/hud/standing_board.gd")._home_words({"effects":effects})
+	assert_str(String(words.god)).contains("dread drives families off −4.0")
+	# A god who has done nothing worth telling moves nobody (parity with
+	# every other people's month).
+	Standing.record_monthly()
+	assert_float(float(metrics.standing_love)).is_equal(0.0)
+	assert_float(float(metrics.standing_dread)).is_equal(0.0)
+	assert_bool(preload("res://scripts/hud/standing_board.gd")._home_words({"effects":Standing.home_effects()}).has("god")).is_false()
