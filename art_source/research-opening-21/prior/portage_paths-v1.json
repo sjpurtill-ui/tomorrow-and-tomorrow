@@ -1,0 +1,12 @@
+{
+  "id": "portage_paths",
+  "line": "logistics",
+  "game_year": 28,
+  "approx_historical_year": -4813,
+  "prompt": "c. 4813 BCE: Travelers carry small hide-and-wood river craft and bundles along worn path between waterways; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-39591611-416c-4d4a-bf16-f868bdebb572.png",
+  "asset": "res://assets/ui/research/subjects/portage_paths-v1.png",
+  "sha256": "ed2ac150f13e9807aee146a4f875925892458092b9efc3f61ec8dce54448a8f6",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; craft portage and second waterway clear in crop."
+}

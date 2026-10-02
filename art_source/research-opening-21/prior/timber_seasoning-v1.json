@@ -1,0 +1,9 @@
+{
+  "id": "timber_seasoning",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Timber Seasoning. Carefully spaced timber planks stacked under a simple rain shelter with air gaps and raised supports; a craftsperson checks a drying board, no cutting or joinery demonstration.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-6349feb1-d9a2-4695-8f27-d04d8d1ff3b3.png",
+  "asset": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
+  "sha256": "642b9c7254acad8de052c3097ec489f97b77a62e17a880a8aa04e5ff0b2dc15f",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

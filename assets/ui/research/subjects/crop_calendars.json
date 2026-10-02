@@ -1,9 +1,50 @@
 {
   "id": "crop_calendars",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Crop Calendars. Show a concrete, visually clear scene demonstrating this exact practice: Planting and harvest dates are preserved across households instead of remembered separately. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-00d8a12e-d3f6-40c8-9a67-6055ccc5eb55.png",
-  "asset": "res://assets/ui/research/subjects/crop_calendars-v1.png",
-  "sha256": "5c7f00a59c641c96fd66ec4266b165944e2edecf48027dbccfdbf4df5af380f2",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "nutrition",
+  "status": "catalog",
+  "name": "Crop Calendar for Sowing and Harvest",
+  "one_liner": "Crop calendar for sowing and harvest",
+  "observation": "Crop calendar for sowing and harvest.",
+  "key_threshold": false,
+  "target_year": 27,
+  "proposed_year": 27,
+  "band_low": 17,
+  "band_high": 42,
+  "min_year": 17,
+  "research_years": 3,
+  "requires_all": [
+    "seed_selection",
+    "moon_counting"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "phenology_signs"
+  ],
+  "conditions": {},
+  "shared_with": [
+    "ecology"
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+    "focus": [
+      0.5,
+      0.36
+    ]
+  },
+  "version": 2,
+  "year": 27,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "nutrition: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established nutrition medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults compare a short rough notched stick with flowering stalks and a small basket of selected seeds near a few freshly prepared planting hollows; one gestures between seedlings and ripe seed heads laid nearby. Opaque botanical egg-tempera olive/gold/cream. NO written calendar, numerals, seasonal split panels, four moons, plough, neat vast fields or modern chart.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ebeeddca-55a0-4c5d-91a0-0dbf3951c1da.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/crop_calendars-v2.png",
+  "sha256": "e504aa5ffd3473a56d6c10760cd569e4e9b5d50c9e20e63886d5a8c3287b9ace",
+  "mode": "built-in image_gen / edit"
 }

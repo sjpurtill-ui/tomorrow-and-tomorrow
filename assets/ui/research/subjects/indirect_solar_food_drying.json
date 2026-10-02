@@ -1,0 +1,44 @@
+{
+  "id": "indirect_solar_food_drying",
+  "line": "nutrition",
+  "status": "catalog",
+  "name": "Shaded Drying Racks",
+  "one_liner": "Shaded drying racks",
+  "observation": "Shaded drying racks.",
+  "key_threshold": false,
+  "target_year": 26,
+  "proposed_year": 26,
+  "band_low": 16,
+  "band_high": 41,
+  "min_year": 16,
+  "research_years": 2,
+  "requires_all": [
+    "food_drying"
+  ],
+  "requires_any": [
+    [
+      "framed_construction",
+      "basketry"
+    ]
+  ],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/first300-cards/indirect_solar_food_drying.tres",
+  "version": 2,
+  "year": 26,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "nutrition: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established nutrition medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults arrange thin slices of roots and small fish on coarse reed trays inside a low open-sided branch shelter under shade; sunlight falls on surrounding ground, air moves through open sides. Opaque botanical egg-tempera olive/gold/cream. No glass solar collector, chimney, greenhouse, fan, machine or smoking fire.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-516e6095-ee19-45c9-9068-348a22774314.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/indirect_solar_food_drying-v2.png",
+  "sha256": "bf0aa09400078c98343644267846b542da4271308031e2719ec7706adf9c0cc3",
+  "mode": "built-in image_gen / edit"
+}

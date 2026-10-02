@@ -244,13 +244,7 @@
       0.5
     ]
   },
-  "timber_seasoning": {
-    "path": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "timber_seasoning": {"path": "res://assets/ui/research/subjects/timber_seasoning-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "framed_construction": {
     "path": "res://assets/ui/research/subjects/framed_construction-v1.png",
     "focus": [
@@ -517,13 +511,7 @@
       0.5
     ]
   },
-  "crop_calendars": {
-    "path": "res://assets/ui/research/subjects/crop_calendars-v1.png",
-    "focus": [
-      0.5,
-      0.36
-    ]
-  },
+  "crop_calendars": {"path": "res://assets/ui/research/subjects/crop_calendars-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "managed_fallow": {
     "path": "res://assets/ui/research/subjects/managed_fallow-v1.png",
     "focus": [
@@ -2120,13 +2108,7 @@
       0.65
     ]
   },
-  "thatched_roofing": {
-    "path": "res://assets/ui/research/paper/thatched_roofing.png",
-    "focus": [
-      0.5,
-      0.65
-    ]
-  },
+  "thatched_roofing": {"path": "res://assets/ui/research/subjects/thatched_roofing-v2.png", "focus": [0.5, 0.35], "opening_focus": [0.5, 0.35]},
   "fired_roof_tiles": {
     "path": "res://assets/ui/research/paper/fired_roof_tiles.png",
     "focus": [
@@ -2337,13 +2319,7 @@
       0.65
     ]
   },
-  "bow_drill_drive": {
-    "path": "res://assets/ui/research/paper/bow_drill_drive.png",
-    "focus": [
-      0.5,
-      0.65
-    ]
-  },
+  "bow_drill_drive": {"path": "res://assets/ui/research/subjects/bow_drill_drive-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "treadle_lathe_drive": {
     "path": "res://assets/ui/research/paper/treadle_lathe_drive.png",
     "focus": [
@@ -3775,13 +3751,13 @@
   "milking": {"path": "res://assets/ui/research/subjects/milking-v1.png", "focus": [0.5, 0.5]},
   "route_food_caches": {"path": "res://assets/ui/research/subjects/route_food_caches-v1.png", "focus": [0.5, 0.5]},
   "sweat_baths": {"path": "res://assets/ui/research/subjects/sweat_baths-v1.png", "focus": [0.5, 0.5]},
-  "dry_stone_walls": {"path": "res://assets/ui/research/subjects/dry_stone_walls-v1.png", "focus": [0.5, 0.5]},
-  "firebreaks": {"path": "res://assets/ui/research/subjects/firebreaks-v1.png", "focus": [0.5, 0.5]},
-  "kin_care_widows_orphans": {"path": "res://assets/ui/research/subjects/kin_care_widows_orphans-v1.png", "focus": [0.5, 0.5]},
-  "petition_speakers": {"path": "res://assets/ui/research/subjects/petition_speakers-v1.png", "focus": [0.5, 0.5]},
-  "portage_paths": {"path": "res://assets/ui/research/subjects/portage_paths-v1.png", "focus": [0.5, 0.5]},
-  "purges_emetics": {"path": "res://assets/ui/research/subjects/purges_emetics-v1.png", "focus": [0.5, 0.5]},
-  "work_party_feasts": {"path": "res://assets/ui/research/subjects/work_party_feasts-v1.png", "focus": [0.5, 0.5]},
+  "dry_stone_walls": {"path": "res://assets/ui/research/subjects/dry_stone_walls-v2.png", "focus": [0.5, 0.5]},
+  "firebreaks": {"path": "res://assets/ui/research/subjects/firebreaks-v2.png", "focus": [0.5, 0.35]},
+  "kin_care_widows_orphans": {"path": "res://assets/ui/research/subjects/kin_care_widows_orphans-v2.png", "focus": [0.5, 0.5]},
+  "petition_speakers": {"path": "res://assets/ui/research/subjects/petition_speakers-v2.png", "focus": [0.5, 0.5]},
+  "portage_paths": {"path": "res://assets/ui/research/subjects/portage_paths-v2.png", "focus": [0.5, 0.5]},
+  "purges_emetics": {"path": "res://assets/ui/research/subjects/purges_emetics-v2.png", "focus": [0.5, 0.5]},
+  "work_party_feasts": {"path": "res://assets/ui/research/subjects/work_party_feasts-v2.png", "focus": [0.5, 0.5]},
   "banishment_sentence": {"path": "res://assets/ui/research/subjects/banishment_sentence-v1.png", "focus": [0.5, 0.5]},
   "indicator_plants": {"path": "res://assets/ui/research/subjects/indicator_plants-v1.png", "focus": [0.5, 0.5]},
   "wild_honey_smoking": {"path": "res://assets/ui/research/subjects/wild_honey_smoking-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4215,8 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "indirect_solar_food_drying": {"path": "res://assets/ui/research/subjects/indirect_solar_food_drying-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
+  "origin_story": {"path": "res://assets/ui/research/subjects/origin_story-v2.png", "focus": [0.5, 0.5]},
+  "threshing_frames": {"path": "res://assets/ui/research/subjects/threshing_frames-v2.png", "focus": [0.5, 0.35], "opening_focus": [0.5, 0.35]}
 }

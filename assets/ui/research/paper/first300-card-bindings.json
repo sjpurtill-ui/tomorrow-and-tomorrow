@@ -86,7 +86,7 @@
   "intensive_gardens": "res://assets/ui/research/paper/first300-cards/intensive_gardens.tres",
   "flour_sifting": "res://assets/ui/research/paper/first300-cards/flour_sifting.tres",
   "fermentation_starter_cultures": "res://assets/ui/research/paper/first300-cards/fermentation_starter_cultures.tres",
-  "indirect_solar_food_drying": "res://assets/ui/research/paper/first300-cards/indirect_solar_food_drying.tres",
+  "indirect_solar_food_drying": "res://assets/ui/research/subjects/indirect_solar_food_drying-v2.png",
   "hermetic_grain_storage": "res://assets/ui/research/paper/first300-cards/hermetic_grain_storage.tres",
   "workshop_standards": "res://assets/ui/research/paper/first300-cards/workshop_standards.tres",
   "masonry_bond_patterns": "res://assets/ui/research/paper/first300-cards/masonry_bond_patterns.tres",
@@ -130,7 +130,7 @@
   "ceramic_crucibles": "res://assets/ui/research/paper/ceramic_crucibles.png",
   "rope_laying": "res://assets/ui/research/paper/rope_laying.png",
   "sail_seaming": "res://assets/ui/research/paper/sail_seaming.png",
-  "thatched_roofing": "res://assets/ui/research/paper/thatched_roofing.png",
+  "thatched_roofing": "res://assets/ui/research/subjects/thatched_roofing-v2.png",
   "fired_roof_tiles": "res://assets/ui/research/paper/fired_roof_tiles.png",
   "wattle_and_daub_walls": "res://assets/ui/research/paper/wattle_and_daub_walls.png",
   "clay_pipe_forming": "res://assets/ui/research/paper/clay_pipe_forming.png",
@@ -139,5 +139,8 @@
   "shield_equipment_fitting": "res://assets/ui/research/paper/shield_equipment_fitting.png",
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
-  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png"
+  "bow_drill_drive": "res://assets/ui/research/subjects/bow_drill_drive-v2.png",
+  "timber_seasoning": "res://assets/ui/research/subjects/timber_seasoning-v2.png",
+  "crop_calendars": "res://assets/ui/research/subjects/crop_calendars-v2.png",
+  "threshing_frames": "res://assets/ui/research/subjects/threshing_frames-v2.png"
 }

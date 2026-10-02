@@ -1,12 +1,51 @@
 {
   "id": "kin_care_widows_orphans",
   "line": "demography",
-  "game_year": 28,
-  "approx_historical_year": -4813,
-  "prompt": "c. 4813 BCE: Extended kin welcome widowed adult and orphaned children with food and shelter; mature chalk pastel and torn-paper collage. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c93c4f8a-dcfa-44be-84b4-112dc5291ca1.png",
-  "asset": "res://assets/ui/research/subjects/kin_care_widows_orphans-v1.png",
-  "sha256": "1c915ae67430967e867f1cf049f61397ae9a70673872c99321e4053dba8bdec6",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; family welcome and children clear in crop."
+  "status": "new",
+  "name": "Widows and Orphans Taken in by Kin",
+  "one_liner": "Widows and orphans taken in by kin",
+  "observation": "Widows and orphans taken in by kin.",
+  "key_threshold": false,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 18,
+  "band_high": 43,
+  "min_year": 18,
+  "research_years": 2,
+  "requires_all": [
+    "named_descent_lines",
+    "shared_childcare"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Child survival",
+  "signals": [
+    "population",
+    "society"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/kin_care_widows_orphans-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "demography: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/demography-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established demography medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: An older adult welcomes a grieving adult and two children into a modest kin household, offering a shared place by the small hearth and one food bowl. Gentle supportive gestures, no caricature or funeral violence. Angular chalk/pastel cut-paper terracotta/rust/ivory/slate. Simple hide wraps and earthen hut, no bridal imagery, woven robes or ornate furnishings.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1c01347c-a4b4-4818-bb9f-080ad03f95d8.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/kin_care_widows_orphans-v2.png",
+  "sha256": "b5721ad478e2e7c98b93677db8cd040ca4fbe16cace9e854ece1b3f6a94bc8e0",
+  "mode": "built-in image_gen / edit"
 }

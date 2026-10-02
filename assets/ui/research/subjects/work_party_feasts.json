@@ -1,12 +1,54 @@
 {
   "id": "work_party_feasts",
   "line": "labor",
-  "game_year": 28,
-  "approx_historical_year": -4813,
-  "prompt": "c. 4813 BCE: Neighbors share modest feast after completing communal reed-shelter work; expressive charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b0bb1135-4654-4802-8054-210bf4c36c29.png",
-  "asset": "res://assets/ui/research/subjects/work_party_feasts-v1.png",
-  "sha256": "4489bf9eaba073e680c4b60315905138da689d26e8d830e4283df5912b8dc702",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; finished work and reciprocal meal clear in crop."
+  "status": "new",
+  "name": "Neighbour Work Party Repaid with a Feast",
+  "one_liner": "Neighbour work party repaid with a feast",
+  "observation": "Neighbour work party repaid with a feast.",
+  "key_threshold": true,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 12,
+  "band_high": 38,
+  "min_year": 12,
+  "research_years": 3,
+  "requires_all": [
+    "labor_rotations",
+    "reciprocal_gift_exchange"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "communal_work_songs",
+    "shared_hearth_gatherings"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Able workforce",
+  "signals": [
+    "administration",
+    "training"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/work_party_feasts-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "labor: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/labor-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established labor medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Four adults seated on hides share modest bowls of cooked roots and grain after work; nearby small stack of gathered poles and digging sticks shows completed labor. One adult passes a plain clay bowl to a resting neighbor. Charcoal over ochre, gestural silhouettes. No banquet hall, throne, fancy table, alcohol, metal cutlery, textile robes or giant village.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1754593e-7c7b-47c8-ad81-4baf17e29c47.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/work_party_feasts-v2.png",
+  "sha256": "5db57b53e9647ad823a2963f566848ba52fdb2650c4a2eb310784dd69f6aa7d9",
+  "mode": "built-in image_gen / edit"
 }
