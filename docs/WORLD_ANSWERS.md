@@ -86,8 +86,12 @@ Once a month (from `war_loop.daily`, after the fear league), every people we kno
 
 **The god can demand it.** "Bow to us" is among the envoy's demands (`envoy_messages`), answered at the menace system's own odds. It weighs 0.32, just above asking for a hostage.
 
+## Between other peoples
+
+Two computer peoples' feuds (`rival_feuds.gd`) end the same way. A people that has buried a twenty-fifth of itself in the feud and is outmatched 1.5 times may bow: 5 in 100 a month, less its ruler's boldness. It pays tribute through the same trade ledger, the feud ends, and no new feud starts between them for 5 years while it pays.
+
 ## Not yet
 
-- Computer peoples don't conquer each other or kill each other's envoys, so they rarely fear one another enough to bow.
+- Computer peoples don't conquer each other or kill each other's envoys, so they bow only to a spent, outmatched feud. They don't build the kind of long-memory dread the god can.
 - A frightened people abandoning its nearest town ("flight") is deferred: each people's towns belong to its own local simulation.
 - There is no typed court route yet for "make the Kezari bow"; the envoy compose screen has it.
