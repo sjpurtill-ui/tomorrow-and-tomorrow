@@ -1,0 +1,19 @@
+{
+  "id": "weather_sign_reading",
+  "line": "knowledge",
+  "version": 1,
+  "replace_art600": true,
+  "binding_style": "knowledge: blue-black ink and lapis parchment",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/counting_words-v1.png",
+  "prompt": "Create new Tomorrow and Tomorrow knowledge painting matching supplied CURRENT wide 2171x724 banner: blue-black ink hatching and muted lapis washes on warm parchment, mature dignified adult figures. Two SMALLER hide-clad adults read weather signs: elder's open hand indicates approaching dark layered clouds and slanting rain bands over distant hill, second adult feels wind direction with upturned palm and watches bending wild grass. Entire two heads, raised hands and cloud/rain cue visible within central 65 percent height, with generous parchment sky above/below. Wild temporary camp, no buildings, pottery, baskets, written symbols, numerical labels or modern weather instrument. Visibly drawn ink planes, no photographic realism or CGI. Full bleed WIDE canvas preserving reference proportions, no border or text.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-60ee489b-ff97-4672-9a18-ae5f27dce747.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 6,
+  "review": "Blue-black ink and lapis washes. Raised hands, cloud bands, distant rain and wind-bent grass show weather observation.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/weather_sign_reading-v1.png",
+  "sha256": "f3dc21fdd042f99ec57b06ede55717a44eea093cb7a270ef0fb06ec6ff5d49da"
+}

@@ -240,13 +240,7 @@
    "caption": "Cross-referenced archives",
    "style": "paper_gouache"
   },
-  "curious_questioning_custom": {
-   "path": "res://assets/ui/research/discovery-600/curious_questioning_custom.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
-   "tile_index": 5,
-   "caption": "Children praised for asking why (Year 6)",
-   "style": "silhouette_ochre"
-  },
+  "curious_questioning_custom": {"path": "res://assets/ui/research/subjects/curious_questioning_custom-v1.png", "style": "culture: tapestry-inspired painting", "focus": [0.5, 0.5]},
   "cylinder_seals": {
    "path": "res://assets/ui/research/discovery-600/cylinder_seals.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 01_35_50 PM.png",
@@ -1327,13 +1321,7 @@
    "caption": "Water-trough levelling (Year 460)",
    "style": "paper_gouache"
   },
-  "weather_sign_reading": {
-   "path": "res://assets/ui/research/discovery-600/weather_sign_reading.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
-   "tile_index": 3,
-   "caption": "Weather-sign reading (Year 6)",
-   "style": "paper_gouache"
-  },
+  "weather_sign_reading": {"path": "res://assets/ui/research/subjects/weather_sign_reading-v1.png", "style": "knowledge: blue-black ink and lapis parchment", "focus": [0.5, 0.5]},
   "winter_tale_nights": {
    "path": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",

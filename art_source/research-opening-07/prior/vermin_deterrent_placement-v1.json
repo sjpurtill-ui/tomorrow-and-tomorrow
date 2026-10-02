@@ -1,0 +1,12 @@
+{
+  "id": "vermin_deterrent_placement",
+  "line": "logistics",
+  "game_year": 6,
+  "approx_historical_year": -4960,
+  "prompt": "c. 4960 BCE: adults protect stored dried food by raising baskets on plain stones and placing aromatic branches around them inside a reed storage shelter. Mature panoramic travel watercolor on coarse paper, sand-gold and faded-indigo washes; no poison, metal traps, pallets, written labels or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5a5a8b5c-b86c-4a28-950c-3a51c055b611.png",
+  "asset": "res://assets/ui/research/subjects/vermin_deterrent_placement-v1.png",
+  "sha256": "f8124571b9c40938994a04a42728ea0a9af732c10ebb40d15182cbf67a3170ee",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation selected; placement around baskets legible. Accepted after visual 3.37:1 crop and subject/period check."
+}
