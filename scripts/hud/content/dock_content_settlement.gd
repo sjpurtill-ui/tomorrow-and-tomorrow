@@ -33,11 +33,12 @@ func meta()->Dictionary:
 func tab(sub:int)->Dictionary:
 	# New towns are the whole realm's business: read outside this place's stores.
 	_founding=founding_block() if sub==0 else {}
-	# The home levy and its walls, read as the Military ledger reads them, and
-	# the foreign towns our scouts have brought home; neither is the town's own.
+	# Who would defend it (home's levy, watch and walls, or the town's own
+	# watch), read as the Military ledger reads them, and the foreign towns
+	# our scouts have brought home; neither is read in the town's own scope.
 	var picked:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
 	var primary:=picked.is_empty() or bool(picked.get("primary",false))
-	_strength=Model.strength(primary) if sub==0 else {}
+	_strength=Model.strength(primary,String(picked.get("id",""))) if sub==0 else {}
 	_towns=Model.foreign_towns() if sub==0 else []
 	return SettlementModel.with_city_resources(GameState.selected_player_settlement_id,func()->Dictionary:return SettlementModel.with_local_population(func()->Dictionary:return _city_tab(sub)))
 

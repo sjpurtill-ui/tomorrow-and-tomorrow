@@ -65,8 +65,8 @@ static func read(text:String)->Dictionary:
 	var lower:=text.strip_edges().to_lower().replace("’","'")
 	if lower.is_empty() or _has(lower,QUESTION):return {}
 	var negated:=_has(lower,NEGATE)
-	# Food bought for the hungry, now ("spend 100 on food for the hungry") or
-	# each month ("buy food for the hungry towns"); "stop buying food".
+	# Food for the hungry, now ("spend 100 on food for the hungry") or each
+	# month ("send food to the hungry towns"); "stop sending food".
 	if (_has(lower,FOOD) or _has(lower,"(?i)\\bfeed\\b")) and (_has(lower,HUNGRY) or _has(lower,"(?i)\\brelief\\b")):
 		var amount:=_re(SPEND_AMOUNT).search(lower)
 		if amount!=null and not negated:return {"kind":"relief","amount":float(amount.get_string(1).replace(",",""))}
@@ -200,7 +200,7 @@ static func _line(line:String,on:bool)->Dictionary:
 	out.outcome="%s from %s." % [_cap(String(LINE_WORDS[line][1])),store]
 	return out
 
-const LINE_WORDS:={"army":["the soldiers' pay","the soldiers' pay comes"],"scholars":["the scholars' keep","the scholars are kept"],"crews":["paid crews","crews are hired"],"relief":["food for hungry towns","food for hungry towns is bought"]}
+const LINE_WORDS:={"army":["the soldiers' pay","the soldiers' pay comes"],"scholars":["the scholars' keep","the scholars are kept"],"crews":["paid crews","crews are hired"],"relief":["food for hungry towns","food goes to hungry towns"]}
 
 static func _relief(amount:float)->Dictionary:
 	var store:=Purse.account_name()
@@ -212,16 +212,18 @@ static func _relief(amount:float)->Dictionary:
 	var out:={"ok":float(bought.spent)>0.0 or standing,"changed":float(bought.spent)>0.0 or bool(turned.get("changed",false)),"kind":"relief","spent":float(bought.spent),"rations":float(bought.rations),"deliveries":bought.deliveries}
 	var parts:PackedStringArray=[]
 	for d:Dictionary in bought.deliveries:
-		parts.append("%s rations from %s to %s at %s a ration, %d %s on the road" % [Purse.number(float(d.rations)),String(d.from),String(d.to),Purse.number(float(d.price)),int(d.days),"day" if int(d.days)==1 else "days"])
+		var road:="" if int(d.days)<=0 else ", %d %s on the road" % [int(d.days),"day" if int(d.days)==1 else "days"]
+		if float(d.price)>0.0:parts.append("%s rations bought from %s for %s at %s a ration%s" % [Purse.number(float(d.rations)),String(d.from),String(d.to),Purse.number(float(d.price)),road])
+		else:parts.append("%s rations from %s to %s%s" % [Purse.number(float(d.rations)),String(d.from).to_lower(),String(d.to),road])
 	var now:=""
-	if float(bought.spent)>0.0:now="Bought %s: %s from %s." % ["; ".join(parts),_amount(float(bought.spent)),store]
-	else:now="Nothing is bought now: %s." % String(bought.reason)
+	if float(bought.rations)>0.0:now="Sent %s: %s from %s." % ["; ".join(parts),_amount(float(bought.spent)),store]
+	else:now="Nothing is sent now: %s." % String(bought.reason)
 	if standing:
-		out.says="Food will be bought for hungry towns each month, up to a quarter of %s. %s" % [store,now]
-		out.outcome="Food for hungry towns is bought each month from %s." % store
+		out.says="Food will go to hungry towns each month, up to a quarter of %s. %s" % [store,now]
+		out.outcome="Food goes to hungry towns each month from %s." % store
 	else:
 		out.says=now
-		out.outcome=("Food bought for the hungry: %s rations." % Purse.number(float(bought.rations))) if float(bought.spent)>0.0 else "Nothing is set in motion: %s." % String(bought.reason)
+		out.outcome=("Food sent to the hungry: %s rations." % Purse.number(float(bought.rations))) if float(bought.rations)>0.0 else "Nothing is set in motion: %s." % String(bought.reason)
 	return out
 
 
@@ -244,7 +246,7 @@ static func menus()->Array:
 	for share in [0.1,0.25]:
 		var n:=_round_amount(held*float(share))
 		if n>0:food.append({"label":"Spend %s" % EraWords.grouped(n),"text":"Spend %d on food for the hungry" % n})
-	food.append({"label":"Stop buying each month","text":"Stop buying food for the hungry"} if Purse.line_on("relief") else {"label":"Buy each month","text":"Buy food for the hungry towns every month"})
+	food.append({"label":"Stop sending each month","text":"Stop sending food to the hungry"} if Purse.line_on("relief") else {"label":"Send each month","text":"Send food to the hungry towns every month"})
 	out.append({"label":"Food for the hungry ▾","name":"Relief","items":food})
 	return out
 
@@ -287,7 +289,7 @@ static func text(p:Dictionary)->String:
 	said+=" The richest fifth of our households hold %d in every 100 parts of the wealth; the poorest fifth %d." % [int(p.top_fifth),int(p.bottom_fifth)]
 	return said
 
-const ASKS_BALANCE:="(?i)\\b(treasury|purse|common store|silver store|how much (?:silver|coin|money|wealth)|what (?:do|have) we (?:in|got in) (?:the )?(?:treasury|purse|store))\\b"
+const ASKS_BALANCE:="(?i)\\b(treasury|purse|common store|the store|silver store|how much (?:silver|coin|money|wealth)|what (?:do|have) we (?:in|got in) (?:the )?(?:treasury|purse|store))\\b"
 const ASKS_LEVY:="(?i)\\b(levy|levies|tax|taxes|dues|tithe)\\b"
 const ASKS_SPENDING:="(?i)\\b(spend|spending|spent|pay for|pays for|going out|goes out|outgo|costs?)\\b"
 const ASKS_ARMY_PAY:="(?i)\\b(soldiers|army|warriors|fighters|troops)\\b[^?]*\\b(paid|pay|pays|wages?)\\b|\\b(paid|pay|pays|wages?)\\b[^?]*\\b(soldiers|army|warriors|fighters|troops)\\b"
