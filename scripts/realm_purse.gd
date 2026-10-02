@@ -251,13 +251,20 @@ static func stage()->String:
 ## The money words this people has (character_voice.gd era gates): "coin"
 ## once they keep registers or public credit, "silver" once they work metal.
 ## A stage the words have not caught up with is named by the older word.
+static var _form_key:=""
+static var _form_value:="store"
 static func _form()->String:
 	var at:=stage()
 	if at=="subsistence":return "store"
+	var owner:=WorldSimulation.actor_id if WorldSimulation.actor_id!="" else "player"
+	# Read once a day per people and age: the screens ask every second.
+	var key:="%s|%s|%d|%d" % [owner,at,int(WorldSimulation.state.elapsed_days),(WorldSimulation.state.known_discoveries as Array).size()]
+	if key==_form_key:return _form_value
 	var voice:=load("res://scripts/character_voice.gd") as GDScript
-	var tags:Array=voice.call("era_tags",WorldSimulation.actor_id if WorldSimulation.actor_id!="" else "player") if voice!=null else []
-	if at=="currency" and tags.has("coin"):return "coin"
-	return "silver" if tags.has("metal") else "store"
+	var tags:Array=voice.call("era_tags",owner) if voice!=null else []
+	_form_value="coin" if at=="currency" and tags.has("coin") else ("silver" if tags.has("metal") else "store")
+	_form_key=key
+	return _form_value
 
 static func account_name()->String:
 	match _form():
@@ -785,13 +792,13 @@ static func buy_relief(budget:float,standing:=false)->Dictionary:
 	var purse:=state()
 	var out:={"spent":0.0,"rations":0.0,"deliveries":[],"reason":""}
 	var limit:=minf(maxf(0.0,budget),float(purse.balance))
-	if not market_open():out.reason="there is no market yet: the people trade without set prices";return out
+	if not market_open():out.reason="there is no market yet, and the people trade without set prices";return out
 	if limit<=0.01:out.reason="%s is empty" % account_name();return out
 	var places:=food_places()
 	var hungry:=places.filter(func(p:Dictionary)->bool:return float(p.days)<HUNGRY_DAYS)
-	if hungry.is_empty():out.reason="no town is hungry: every town has %d days of food or more" % int(HUNGRY_DAYS);return out
+	if hungry.is_empty():out.reason="no town is hungry; every town has %d days of food or more" % int(HUNGRY_DAYS);return out
 	var sellers:=places.filter(func(p:Dictionary)->bool:return float(p.days)>SELLER_DAYS)
-	if sellers.is_empty():out.reason="no town of ours has food to sell: none holds more than %d days of it" % int(SELLER_DAYS);return out
+	if sellers.is_empty():out.reason="no town of ours has food to sell; none holds more than %d days of it" % int(SELLER_DAYS);return out
 	hungry.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.days)<float(b.days))
 	var speed:=maxf(4.0,float(WorldSimulation.settlements.city_trade_capacity().get("speed_km_per_day",8.0)))
 	for h:Dictionary in hungry:

@@ -1870,7 +1870,7 @@
    "note": "A levy of fighters is the war leader's, never the harvest levy.",
    "say": "Raise a levy of ten men",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
-   "expect": {"handled": true, "state": {"purse_levy": "==before", "recruits": ">before"}}},
+   "expect": {"handled": true, "state": {"purse_levy": "==before", "training": ">before"}, "says_has": ["called up"]}},
 
   {"id": "q.purse.balance", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "note": "What is held is on the purse keeper's sheet: the Headman's while no Treasurer is named.",

@@ -111,12 +111,26 @@ static func carry(r:Dictionary,reading:Dictionary)->Dictionary:
 	r.verb="order"
 	r["route"]="purse"
 	r["purse"]=done.duplicate(true)
-	r["actor_says"]=String(done.get("says",""))
+	# Another official passes the god's word to the purse's keeper, and says so.
+	var said:=String(done.get("says",""))
+	var keeper:=keeper_of_purse()
+	var actor:Dictionary=r.get("actor",{}) if r.get("actor") is Dictionary else {}
+	if not keeper.is_empty() and int(actor.get("person_id",0))>0 and int(actor.get("person_id",0))!=int(keeper.get("person_id",0)) and said!="":
+		said="%s keeps %s; I have sent your word. %s" % [String(keeper.get("name","")).get_slice(" ",0),Purse.account_name(),said]
+	r["actor_says"]=said
 	r.outcome=String(done.get("outcome",""))
 	r.executed=bool(done.get("ok",false)) and bool(done.get("changed",false))
 	r.stage="order" if bool(r.executed) else "none"
 	r.reaction="neutral"
 	return r
+
+## Who keeps the purse: the Treasurer, or the Headman (Steward) while no
+## Treasurer is named. {} when neither office is held.
+static func keeper_of_purse()->Dictionary:
+	var gov=WorldSimulation.government
+	if gov==null:return {}
+	var held:Dictionary=gov.officeholder("Treasurer")
+	return held if not held.is_empty() else gov.officeholder("Steward")
 
 ## {ok, changed, kind, says, outcome}: the lever, set by its real mechanic.
 static func perform(reading:Dictionary)->Dictionary:

@@ -33,6 +33,7 @@ const BarModel:=preload("res://scripts/hud/army_bar_model.gd")
 const Strips:=preload("res://scripts/hud/force_strips.gd")
 const GeneralRecord:=preload("res://scripts/general_record.gd")
 const Forces:=preload("res://scripts/hud/war_forces_model.gd")
+const Purse:=preload("res://scripts/realm_purse.gd")
 const REFRESH_SECONDS:=1.0
 ## The stances, in the order the row shows them: [id, label, war_loop objective, tip].
 const STANCES:=[
@@ -82,7 +83,7 @@ func _process(delta:float)->void:
 func refresh(force:=false)->void:
 	var reading:=Law.reading(MilitaryCampaign)
 	var glance:=strength(MilitaryCampaign)
-	_rebuild("army",army_box,str([reading,glance]),force,func()->void:_build_army(reading,glance))
+	_rebuild("army",army_box,str([reading,glance,pay_words()]),force,func()->void:_build_army(reading,glance))
 	var entries:=Ledger.entries().filter(func(e:Dictionary)->bool:return String(e.kind)!="ended")
 	_rebuild("enemies",enemy_box,str(entries.map(func(e:Dictionary)->Array:
 		var front:Dictionary=WarLoop.front(String(e.civ_id))
@@ -154,7 +155,24 @@ func _build_army(reading:Dictionary,glance:Dictionary)->void:
 		var drawn:=_line("Taken from work: %s of %s workers (1 in %d)." % [EraWords.grouped(int(from.soldiers)),EraWords.grouped(int(from.workers)),int(from.one_in)],13,T.INK_MUTED,true)
 		drawn.name="DrawnFrom";drawn.tooltip_text="Calling people up takes them from every kind of work alike: fields, crafts, building."
 		column.add_child(drawn)
+	# What the army costs the realm's purse a season, and whether it is paid.
+	var pay:=pay_words()
+	if pay!="":
+		var paid:=_line(pay,13,T.RED_TEXT if int(Purse.state().get("unpaid_months",0))>0 else T.INK_MUTED,true)
+		paid.name="Pay";paid.tooltip_text="Soldiers are paid from %s on top of their rations. Unpaid, they lose will each month, are slower to muster, and some go home. The Wealth page sets it." % Purse.account_name()
+		column.add_child(paid)
 	column.add_child(_forces_list())
+
+
+## The army's pay in a line (realm_purse.gd): its cost a season, or how long
+## it has gone unpaid; "" with nobody to pay.
+static func pay_words()->String:
+	var per:=Purse.line_cost_per_day("army")*Purse.SEASON_DAYS
+	if per<=0.5:return ""
+	var months:=int(Purse.state().get("unpaid_months",0))
+	if months>0:return "Unpaid %d %s: will falling, some going home." % [months,"month" if months==1 else "months"]
+	if not Purse.line_on("army"):return "Their pay is stopped: about %s a season." % Purse.amount_text(per)
+	return "Pay: %s a season, in %s." % [Purse.amount_text(per),Purse.pay_word()]
 
 
 ## Every soldier where they are: one row per place (Forces.rows).
