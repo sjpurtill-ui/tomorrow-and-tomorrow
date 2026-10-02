@@ -1,0 +1,448 @@
+[
+  {
+    "id": "grip_wrapping_practice",
+    "line": "production",
+    "status": "era",
+    "name": "Grips Wrapped on Tool Handles",
+    "one_liner": "Grips wrapped on tool handles",
+    "observation": "Grips wrapped on tool handles.",
+    "key_threshold": false,
+    "target_year": 34,
+    "proposed_year": 34,
+    "band_low": 18,
+    "band_high": 45,
+    "min_year": 18,
+    "research_years": 1.5,
+    "requires_all": [
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "hide_smoke_curing"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 34,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "production: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established production painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: ONE seated adult with exactly TWO hands wraps rough bast fiber around a crooked wood haft holding a flint tool, testing a thicker irregular grip. One finished crude wrapping and loose fiber. Production medium: angular palette-knife PAINTING, flat copper/ember/soot/umber masses, broken pigment, no sculptural relief.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7b36ccb0-7a76-48c2-974e-7420460c90df.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "cereal_dehulling",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Hulling Emmer and Barley in Mortars",
+    "one_liner": "Hulling emmer and barley in mortars",
+    "observation": "Hulling emmer and barley in mortars.",
+    "key_threshold": false,
+    "target_year": 34,
+    "proposed_year": 34,
+    "band_low": 24,
+    "band_high": 49,
+    "min_year": 24,
+    "research_years": 2,
+    "requires_all": [
+      "threshing_frames",
+      "food_pounding_mortars"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 34,
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "nutrition: established field painting",
+    "prior_effective_source": {
+      "opening": "res://assets/ui/research/paper/first300-cards/cereal_dehulling.tres",
+      "art600": null,
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established nutrition painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: Two adults process grain: one uses a rough wooden pestle in a hollow log mortar, another separates pale kernels from papery husks in a shallow handwoven basket. Show distinctly different husk and kernel piles. Botanical opaque egg-tempera olive/gold/cream/earth; no modern milling machines.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3ee24728-62e6-4597-9243-a4994b0ada5e.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "boil_lancing",
+    "line": "health",
+    "status": "new",
+    "name": "Lancing Boils with Sharp Flint",
+    "one_liner": "Lancing boils with sharp flint",
+    "observation": "Lancing boils with sharp flint.",
+    "key_threshold": false,
+    "target_year": 34,
+    "proposed_year": 34,
+    "band_low": 24,
+    "band_high": 49,
+    "min_year": 24,
+    "research_years": 2,
+    "requires_all": [
+      "controlled_flaking",
+      "wound_cleaning"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "General health",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "version": 2,
+    "year": 34,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "health: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/boil_lancing-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/health-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established health painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: Quiet non-graphic care preparation: a caregiver chooses one tiny stone flake on a bark tray beside clean water in a rough clay bowl; a seated adult waits with a cloth-free hide wrap on the upper arm. No open wound, blood, actual lancing, medical instructions or claimed cure. Sage/celadon ink-watercolor on cream.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fd7f1ba2-dc12-4bf1-9958-bda11be9052e.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "childrens_question_circles",
+    "line": "knowledge",
+    "status": "era",
+    "name": "Children's Question Circles",
+    "one_liner": "Children's question circles",
+    "observation": "Children's question circles.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 20,
+    "band_high": 50,
+    "min_year": 20,
+    "research_years": 3,
+    "requires_all": [
+      "curious_questioning_custom"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "shared_hearth_gatherings"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "culture"
+    ],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "binding_style": "knowledge: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/childrens_question_circles.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+        "tile_index": 3,
+        "caption": "Children's question circles (Year 35)",
+        "style": "paper_gouache"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/knowledge-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established knowledge painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: An adult crouches in a circle with THREE children, pointing to a beetle on a fallen branch while one child raises a questioning hand. Curious faces and a second child examines a leaf. Knowledge medium: blue-black crosshatched ink, lapis/parchment, clearly drawn hatching. No writing, school desks or books.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0322325f-8467-40fe-9ce5-d93e7793671e.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "customary_law",
+    "line": "institutions",
+    "status": "catalog",
+    "name": "Customary Law",
+    "one_liner": "Customary law: remembered judgments bind later ones",
+    "observation": "Customary law: remembered judgments bind later ones.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 20,
+    "band_high": 50,
+    "min_year": 20,
+    "research_years": 5,
+    "requires_all": [
+      "blood_price"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "banishment_sentence",
+      "mnemonic_verse_encoding",
+      "genealogical_recitation"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "institutions: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/customary_law-v1.png",
+        "focus": [
+          0.5,
+          0.39
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/institutions-v1.png",
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/customary_law.png",
+      "focus": [
+        0.52,
+        0.76
+      ]
+    },
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established institutions painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: THREE elders and two listeners discuss a dispute outdoors around a modest hearth; one speaker holds an open palm while another indicates a small offered hide bundle between them. Modest shelters, no monarch or official throne, no written laws. Institutions matte fresco dusty plum/limestone/gold.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-18c58f60-180e-47c4-af52-d9d864759d85.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "pit_pebble_game",
+    "line": "culture",
+    "status": "new",
+    "name": "Pit-and-pebble Counting Game",
+    "one_liner": "Pit-and-pebble counting game",
+    "observation": "Pit-and-pebble counting game.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 20,
+    "band_high": 50,
+    "min_year": 20,
+    "research_years": 2,
+    "requires_all": [
+      "counting_words"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "shared_hearth_gatherings"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Inquiry breadth",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "binding_style": "culture: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/pit_pebble_game.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 2,
+        "caption": "Pit-and-pebble counting game (Year 35)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/culture-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established culture painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: TWO adults face one another over TWO uneven rows of small pits pressed into bare dirt, moving natural pebbles by hand. Pits and pebbles dominate foreground, simple campsite behind. Culture flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, not fabric or cloth texture. No wooden board, polished counters or chess.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-abfcc100-0828-475a-9c5a-b66c6cd780b4.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "hand_dough_forming",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Kneading Dough by Hand",
+    "one_liner": "Kneading dough by hand",
+    "observation": "Kneading dough by hand.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 25,
+    "band_high": 50,
+    "min_year": 25,
+    "research_years": 2,
+    "requires_all": [
+      "saddle_quern_grinding"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "nutrition: established field painting",
+    "prior_effective_source": {
+      "opening": "res://assets/ui/research/paper/first300-cards/hand_dough_forming.tres",
+      "art600": null,
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established nutrition painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: ONE kneeling adult with exactly TWO hands presses rough grain dough into irregular flat rounds on a broad stone, beside a clay water bowl and a basket of meal; low hearth in background. Nutrition opaque botanical egg-tempera olive/gold/cream/earth. No leavened loaves, oven or bakery.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6393d070-4819-4308-b1cd-636ee135d0ea.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "breeding_stock_sparing",
+    "line": "ecology",
+    "status": "new",
+    "name": "Breeding Females and Young Spared in the Hunt",
+    "one_liner": "Breeding females and young spared in the hunt",
+    "observation": "Breeding females and young spared in the hunt.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 21,
+    "band_high": 49,
+    "min_year": 21,
+    "research_years": 3,
+    "requires_all": [
+      "seasonal_protein_sourcing"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "phenology_signs"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Resource sustainability",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.3
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "ecology: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/ecology-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established ecology painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: Two adults lower their simple spears and leave an adult female deer with a young fawn undisturbed at a woodland clearing; another animal remains distant. Observational wildlife scene, NOT domesticated breeding, no fenced pen. Ecology plant-pigment painting, botanical foreground and flat landscape, restrained leafy earth greens.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-5c81223a-cdfa-46be-87ef-9bd34ad4f6c9.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "clay_sling_bullets",
+    "line": "security",
+    "status": "new",
+    "name": "Fired-clay Sling Bullets",
+    "one_liner": "Fired-clay sling bullets",
+    "observation": "Fired-clay sling bullets.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 21,
+    "band_high": 49,
+    "min_year": 21,
+    "research_years": 3,
+    "requires_all": [
+      "war_slings",
+      "pit_firing"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public safety",
+    "signals": [
+      "defense",
+      "warfare"
+    ],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "security: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/clay_sling_bullets-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/security-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established security painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: TWO adults roll thumb-sized rough ovoid clay sling stones on bare hide, with one small raw fiber sling laid flat and modest shallow firing pit beyond. Fingers and crude clay shapes visible, no metal projectiles, bullets/guns, molds or finished arsenal. Security layered hand-cut woodblock vermilion/charcoal/parchment.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-32613037-19c6-40df-a6f8-40ccd5250ec7.png",
+    "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass"
+  }
+]
