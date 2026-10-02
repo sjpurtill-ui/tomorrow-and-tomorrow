@@ -245,6 +245,9 @@ var public_spending_priority:="balanced"
 ## The realm's one purse, the god's account for the whole people
 ## (realm_purse.gd). Empty in an older save: made whole on first reading.
 var realm_purse:Dictionary={}
+## The people's business sector (enterprise.gd): its rung, size and the
+## god's stance. Empty in an older save: made whole on first reading.
+var enterprise:Dictionary={}
 var external_trade_credit:=0.0
 var external_trade_exports:=0.0
 var external_trade_imports:=0.0
@@ -597,6 +600,7 @@ func reset_for_new_world(new_seed:int)->void:
 	external_trade_policy="balanced"
 	public_spending_priority="balanced"
 	realm_purse={}
+	enterprise={}
 	external_trade_credit=0.0
 	external_trade_exports=0.0
 	external_trade_imports=0.0

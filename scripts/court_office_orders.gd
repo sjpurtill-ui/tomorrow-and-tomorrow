@@ -28,6 +28,8 @@ const WarOrders:=preload("res://scripts/court_war_orders.gd")
 const FAMILIES:={"Marshal":"war","Quartermaster":"stores","Steward":"town","ChiefScout":"scouting","Scholar":"learning","Treasurer":"purse","Envoy":"trade"}
 const FAMILY_ORDER:=["war","stores","town","purse","trade","scouting","learning"]
 const PurseOrders:=preload("res://scripts/court_purse_orders.gd")
+## The stance on business goes with the purse (court_business_orders.gd).
+const BusinessOrders:=preload("res://scripts/court_business_orders.gd")
 const Trade:=preload("res://scripts/court_trade.gd")
 
 
@@ -75,7 +77,9 @@ static func menus(audience_id:String)->Array:
 			"trade": out.append_array(_trade())
 			"scouting": out.append_array(_scouting())
 			"learning": out.append_array(_learning())
-			"purse": out.append_array(PurseOrders.menus())
+			"purse":
+				out.append_array(PurseOrders.menus())
+				out.append_array(BusinessOrders.menus())
 	return out
 
 
@@ -268,7 +272,7 @@ static func closest(words:String,count:int=3)->Array:
 	var wanted:=_stems(words)
 	if wanted.is_empty(): return []
 	var scored:Array=[]
-	for family in [_war(),_stores(),_town(),_trade(),_scouting(),_learning(),PurseOrders.menus()]:
+	for family in [_war(),_stores(),_town(),_trade(),_scouting(),_learning(),PurseOrders.menus(),BusinessOrders.menus()]:
 		for menu:Dictionary in family:
 			var items:Array=(menu.items as Array) if menu.has("items") else [{"label":String(menu.label),"text":String(menu.text)}]
 			for item:Dictionary in items:

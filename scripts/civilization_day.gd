@@ -101,6 +101,9 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 		# The realm's purse reckons its month: the soldiers' pay, food for the
 		# hungry, crews and scholars (realm_purse.gd; at once on other days).
 		S.step("purse",timings,func()->void:preload("res://scripts/realm_purse.gd").settle(day)),
+		# The business sector's month (enterprise.gd): its rung, its size, a
+		# boom counted, a bust eased, one seeded roll at stated odds.
+		S.step("enterprise",timings,func()->void:preload("res://scripts/enterprise.gd").step(day)),
 		S.step("settlement_morphology",timings,func()->void:
 			WorldSimulation.settlements.process_local_month(daily_context)
 			preload("res://scripts/undertaking_system.gd").advance_all(day)

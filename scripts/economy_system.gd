@@ -6,6 +6,7 @@ extends Node
 
 const SPAN:=preload("res://scripts/day_span.gd")
 const Purse:=preload("res://scripts/realm_purse.gd")
+const Enterprise:=preload("res://scripts/enterprise.gd")
 const STAGE_SUBSISTENCE := "subsistence"
 const STAGE_METAL := "weighed_metal"
 const STAGE_CURRENCY := "currency"
@@ -236,7 +237,8 @@ func _market_access(context:Dictionary,foreign_effects:Dictionary={})->float:
 	var admin:=WorldSimulation.state.effective_workers("Administration")/maxf(1.0,WorldSimulation.state.population_exact*0.05)
 	var storage:=float(WorldSimulation.state.simulation_metrics.get("storage_function",0.0))
 	var foreign_access:=float((foreign_effects if not foreign_effects.is_empty() else WorldSimulation.world.player_effects()).market_access_bonus)
-	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy(),0.0,1.0)
+	# Merchant houses and companies carry trade further (enterprise.gd).
+	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy()+Enterprise.market_bonus(),0.0,1.0)
 
 ## A standing policy on the markets (freeing them opens them wider: the
 ## "market_access" channel, at most a third either way).
@@ -572,8 +574,10 @@ func _process_public_finance(_trade_volume:float,monetization:float,_military_bu
 	var output:=float(levy.output)*float(WorldSimulation.span)
 	var reached:=float(levy.assessed)*float(levy.reach)
 	var tax_capacity:={"active":float(levy.rate)>0.0,"statutory_rate":float(levy.rate),"compliance":1.0-float(levy.evasion),"administrative_reach":float(levy.reach),"taxable_exchange":output,"statutory_assessment":float(levy.assessed),
-		"administratively_assessed":reached,"compliant_assessment":float(levy.levy),"collectible":float(levy.levy),"effective_rate":float(levy.levy)/output if output>0.0 else 0.0,"noncompliance_gap":float(levy.evaded),"liquidity_gap":0.0,"coin":float(levy.coin)}
-	return {"revenue":float(levy.levy),"spending":0.0,"civil_upkeep":0.0,"military_upkeep":0.0,"civil_due":0.0,"military_due":0.0,"civil_coverage":1.0,"military_coverage":1.0,"spending_priority":WorldSimulation.state.public_spending_priority,"borrowing":0.0,"debt_service":0.0,"interest_accrued":0.0,"debt_capacity":0.0,"tax_capacity":tax_capacity}
+		"administratively_assessed":reached,"compliant_assessment":float(levy.levy),"collectible":float(levy.levy),"effective_rate":float(levy.levy)/output if output>0.0 else 0.0,"noncompliance_gap":float(levy.evaded),"liquidity_gap":0.0,"coin":float(levy.coin),"charter":float(levy.get("charter",0.0))}
+	# Revenue is all the purse took today: the levy and any charter fees, as
+	# its coin (tax_capacity.coin) counts both.
+	return {"revenue":float(levy.levy)+float(levy.get("charter",0.0)),"spending":0.0,"civil_upkeep":0.0,"military_upkeep":0.0,"civil_due":0.0,"military_due":0.0,"civil_coverage":1.0,"military_coverage":1.0,"spending_priority":WorldSimulation.state.public_spending_priority,"borrowing":0.0,"debt_service":0.0,"interest_accrued":0.0,"debt_capacity":0.0,"tax_capacity":tax_capacity}
 
 ## The realm's purse at a glance for the day's report (realm_purse.gd): its
 ## balance, a season's levy and lines, and whether it holds.
@@ -972,7 +976,9 @@ func _update_wealth_distribution(monetization:float,inflation:float,default_rate
 	if s.economy_stage==STAGE_SUBSISTENCE:
 		sharing*=SUBSISTENCE_SHARING
 		if float(s.simulation_metrics.get("food_days",0.0))>=FEAST_FOOD_DAYS: sharing*=FEAST_SHARING
-	var pull:=(float(shares[4])-float(bounds[2]))*sharing+Purse.redistribution()*REDISTRIBUTION_PULL
+	# Business gathers wealth: where custom pulls the richest fifth back to
+	# rises toward the age's ceiling (enterprise.gd wealth_lift).
+	var pull:=(float(shares[4])-(float(bounds[2])+Enterprise.wealth_lift(bounds)))*sharing+Purse.redistribution()*REDISTRIBUTION_PULL
 	var policy:=float(WorldSimulation.consequences.policy_effect("wealth_concentration"))*POLICY_WEALTH_PULL if WorldSimulation.consequences!=null else 0.0
 	var delta:=(push-pull+policy)*float(WorldSimulation.span)*realm_share()
 	shares[0]=maxf(0.01,shares[0]-delta*0.55)

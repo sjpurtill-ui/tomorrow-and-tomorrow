@@ -51,6 +51,8 @@ static func execute(order:Dictionary)->Dictionary:
 		"society_policy":return preload("res://scripts/society_exchange.gd").policy(String(order.get("migration","balanced")),String(order.get("sharing","selective")))
 		# The realm's purse: the levy and the spending lines (realm_purse.gd).
 		"purse":return preload("res://scripts/realm_purse.gd").order(order)
+		# The business sector's stance: guarded, chartered, open or state works (enterprise.gd).
+		"business":return preload("res://scripts/enterprise.gd").order(order)
 		"scouting_policy":return WorldSimulation.world.scouting_staff.set_policy(float(order.get("share",0)),String(order.get("focus","exploration")),true)
 		"scout":return WorldSimulation.world.dispatch_scouts(int(order.get("days",30)),String(order.get("target","open_world")),String(order.get("heading","")),0,false,String(order.get("origin_city_id","")),bool(order.get("reckless",false)))
 		# A goodwill mission carries its gift from the sender's own stores.

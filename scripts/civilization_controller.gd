@@ -140,7 +140,7 @@ static func order_steps(id:String)->Array:
 		return review
 	]]
 	var parts:Array=review
-	for kind:String in ["research","military","purse","defense","civilian","foreign","great_works","expansion"]:
+	for kind:String in ["research","military","purse","business","defense","civilian","foreign","great_works","expansion"]:
 		if kind in ["civilian","expansion"]:
 			var kind_parts:=civilian_order_steps(id,func()->Dictionary:return shared.plan) if kind=="civilian" else expansion_order_steps(id,func()->Dictionary:return shared.plan)
 			for part:Array in kind_parts:
@@ -154,6 +154,7 @@ static func order_steps(id:String)->Array:
 				"research":research_orders(id,shared.plan)
 				"military":military_orders(id,shared.plan)
 				"purse":purse_orders(id,shared.plan)
+				"business":business_orders(id,shared.plan)
 				"defense":defense_orders(id,shared.plan)
 				"foreign":foreign_orders(id,shared.plan)
 				"great_works":great_work_orders(id,shared.plan)
@@ -191,6 +192,21 @@ static func purse_orders(id:String,plan:Dictionary)->void:
 		if bool((purse.lines as Dictionary).get(line,false))!=bool(lines[line]):changed[line]=bool(lines[line])
 	if not changed.is_empty():order["lines"]=changed
 	if order.size()>1:WorldSimulation.submit(id,order)
+
+## The ruler's stance on business by their nature (enterprise.gd
+## ruler_stance): assertive and disciplined, Chartered; open-minded, Open;
+## empathetic, Guarded; never Open at war. Weighed once a year (ruler_due),
+## so a war's start or end does not flip it month by month; only a change is
+## ordered, and only once the people have business beyond the household.
+static func business_orders(id:String,plan:Dictionary)->void:
+	var Business:=preload("res://scripts/enterprise.gd")
+	if Business.rung()<1:return
+	var day:=int(WorldSimulation.state.elapsed_days)
+	var at_war:=bool(plan.get("at_war",false))
+	if not Business.ruler_due(day) and not (at_war and Business.stance()=="open"):return
+	Business.ruler_reviewed(day)
+	var pick:=Business.ruler_stance(plan.get("personality",{}),at_war)
+	if pick!=Business.stance():WorldSimulation.submit(id,{"kind":"business","stance":pick})
 
 static func expansion_orders(id:String,plan:Dictionary)->void:
 	preload("res://scripts/day_job.gd").run_parts(expansion_order_steps(id,func()->Dictionary:return plan))

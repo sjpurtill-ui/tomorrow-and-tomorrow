@@ -10,6 +10,7 @@ const HearthCount:=preload("res://scripts/hearth_count.gd")
 ## The sickness & disaster log (hardship_log.gd): words only.
 const HARDSHIPS:=preload("res://scripts/hardship_log.gd")
 const OfficeLevers:=preload("res://scripts/office_levers.gd")
+const Enterprise:=preload("res://scripts/enterprise.gd")
 
 # One bounded causal model drives the early civilization. Narrative systems may
 # choose from these pressures, but only this file turns them into numbers.
@@ -709,11 +710,16 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	# The headman's hand on the day's work, and each town leader's on their
 	# town's (office_levers.gd labour: x0.95 to x1.06).
 	labor_efficiency*=OfficeLevers.labour()
+	# The business sector (enterprise.gd): the share of the workers in private
+	# business, by its rung, the god's stance and the people's form of
+	# organized production, works this much better; the ceiling rises with it.
+	var business:=Enterprise.factor()
+	labor_efficiency*=business
 	# Scouts, envoys, and moving settlement populations are real aggregate
 	# commitments absent from ordinary work until they arrive or return. One
 	# bounded ratio changes output without traveler or person records.
 	labor_efficiency*=1.0-clampf(float(foreign_effects.get("labor_absence",foreign_effects.get("scout_labor_absence",0.0)))*0.72,0.0,0.44)
-	labor_efficiency=clampf(labor_efficiency,0.20,1.12)
+	labor_efficiency=clampf(labor_efficiency,0.20,1.12*business)
 
 	var ecology := float(previous.get("ecology",0.88))
 	var food_result:Dictionary=_food_system().process_day({"traveling":traveling},labor_efficiency,ecology)
@@ -802,7 +808,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var workshop_function:=float(capacities.get("workshop_function",0.0))
 	var storage_function:=float(capacities.get("storage_function",0.0))
 	var craft_coverage := clampf(makers/maxf(1.0,population*0.05),0.0,1.25)
-	var material_target := clampf(0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+WorldSimulation.discovery.effect("tool_quality")*0.30+WorldSimulation.discovery.effect("craft_output")*0.22+WorldSimulation.progression.effect("tool_quality")*0.22+WorldSimulation.progression.effect("craft_output")*0.18+modifier_strength("skilled_craftspeople")+policy_effect("material_target")+WorldSimulation.state.founding_effect("material_target"),0.02,0.96)
+	# The business sector makes more with the same hands (enterprise.gd): its
+	# factor raises the target before the usual ceiling, so every reader of the
+	# making capacity sees it in its usual range.
+	var material_target := clampf((0.05+craft_coverage*0.38+minf(1.0,float(accessible_count)/4.0)*0.25+knowledge*0.18+workshop_function*0.12+WorldSimulation.discovery.effect("tool_quality")*0.30+WorldSimulation.discovery.effect("craft_output")*0.22+WorldSimulation.progression.effect("tool_quality")*0.22+WorldSimulation.progression.effect("craft_output")*0.18+modifier_strength("skilled_craftspeople")+policy_effect("material_target")+WorldSimulation.state.founding_effect("material_target"))*business,0.02,0.96)
 	if "Open Work Area" in WorldSimulation.state.settlement_completed: material_target += 0.08
 	var material_capacity := lerpf(float(previous.get("material_capacity",0.12)),material_target,SPAN.rate(0.012))
 	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+WorldSimulation.discovery.effect("haul_capacity")*0.18+WorldSimulation.discovery.effect("route_speed")*0.12+WorldSimulation.progression.effect("haul_capacity")*0.14+WorldSimulation.progression.effect("route_speed")*0.10+policy_effect("logistics_target")+WorldSimulation.state.founding_effect("logistics_target")+float(foreign_effects.market_access_bonus)*0.24,0.03,0.95)

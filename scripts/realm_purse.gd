@@ -121,7 +121,7 @@ static func _fresh()->Dictionary:
 		"unpaid_months":0,"desertion_carry":0.0,"deserted":0,"last_army":{},"debt":0.0,"events":{},"redistribution":0.0,"migrated":false,"unit":"ration","book_price":1.0}
 
 static func _empty_month()->Dictionary:
-	return {"levy":0.0,"rich":0.0,"assessed":0.0,"evaded":0.0,"output":0.0,"person_days":0.0,"coin":0.0,"deposits":0.0,"short":0.0,
+	return {"levy":0.0,"rich":0.0,"charter":0.0,"assessed":0.0,"evaded":0.0,"output":0.0,"person_days":0.0,"coin":0.0,"deposits":0.0,"short":0.0,
 		"army":0.0,"relief":0.0,"crews":0.0,"scholars":0.0,"debts":0.0,"spent":0.0,"spoiled":0.0,"army_due":0.0,"rations":0.0}
 
 ## This people's purse, made whole: a missing field takes its default, and an
@@ -506,7 +506,7 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	var s=WorldSimulation.state
 	var purse:=state()
 	_sweep_treasury(purse)
-	var out:={"levy":0.0,"assessed":0.0,"evaded":0.0,"coin":0.0,"rich":0.0,"rate":float(purse.get("rate",0.0)),"reach":0.0,"evasion":0.0,"output":0.0,"short":0.0}
+	var out:={"levy":0.0,"assessed":0.0,"evaded":0.0,"coin":0.0,"rich":0.0,"rate":float(purse.get("rate",0.0)),"reach":0.0,"evasion":0.0,"output":0.0,"short":0.0,"charter":0.0}
 	if not bool(s.settlement_site_committed) or bool(s.convoy_traveling):return out
 	if float(purse.get("rate",0.0))<=0.0:_refresh_rate(purse)
 	var span:=float(WorldSimulation.span)
@@ -520,12 +520,15 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	var rich:=rich_levy(output)*span
 	var owed:=reached-evaded+rich
 	var coin:=0.0
+	# One draw on the households' coin a day, shared by the levy and any
+	# charter fees: never more than COIN_DRAW of what they hold.
+	var coin_cap:=maxf(0.0,float(s.private_currency))*COIN_DRAW
 	if String(s.economy_stage)=="currency" and not in_kind() and owed>0.0:
 		# Only what changes hands for money is paid in coin (the day's traded
 		# goods at the share money settles); the rest of the harvest's share is
 		# taken in kind. The coin never outruns the households' own purses.
 		var exchanged:=maxf(0.0,float(real_accounts.get("observed_trade",0.0)))*clampf(monetization,0.0,1.0)
-		coin=minf(minf(owed,exchanged*rate*r*(1.0-ev)*span),maxf(0.0,float(s.private_currency))*COIN_DRAW)
+		coin=minf(minf(owed,exchanged*rate*r*(1.0-ev)*span),coin_cap)
 		if coin>0.0:
 			s.private_currency=float(s.private_currency)-coin
 			s.currency_supply=maxf(0.0,float(s.currency_supply)-coin)
@@ -536,20 +539,62 @@ static func accrue(real_accounts:Dictionary,monetization:float)->Dictionary:
 	var levy:=coin+food
 	purse.balance=float(purse.balance)+levy
 	purse.coin=float(purse.coin)+coin
+	# Charter fees (or the state works' surplus): a share of the business
+	# sector's part of the day's output, taken with the levy as far as the
+	# keepers reach (enterprise.gd purse_rate). After coinage it is paid in
+	# coin within the day's one draw on the households' coin (what the levy
+	# left of it); the rest in kind, out of this town's own stores, never past
+	# what it can spare.
+	var charter:=0.0
+	var fee_rate:=float(_business().call("purse_rate"))
+	if fee_rate>0.0:
+		var fee_owed:=output*float(_business().call("share"))*fee_rate*r*span
+		var fee_coin:=0.0
+		if String(s.economy_stage)=="currency" and not in_kind() and fee_owed>0.0:
+			fee_coin=minf(fee_owed*clampf(monetization,0.0,1.0),maxf(0.0,coin_cap-coin))
+			if fee_coin>0.0:
+				s.private_currency=float(s.private_currency)-fee_coin
+				s.currency_supply=maxf(0.0,float(s.currency_supply)-fee_coin)
+				_move_backing(s.monetary_reserve_metals,purse.backing,fee_coin*BACKING_RATIO)
+		var fee_food:=_take_food(fee_owed-fee_coin)
+		charter=fee_coin+float(fee_food.taken)
+		purse.balance=float(purse.balance)+charter
+		purse.coin=float(purse.coin)+fee_coin
+		coin+=fee_coin
 	var month:Dictionary=purse.month
 	month.levy=float(month.levy)+levy;month.rich=float(month.rich)+rich;month.assessed=float(month.assessed)+assessed;month.evaded=float(month.evaded)+evaded
 	month.output=float(month.output)+output*span;month.person_days=float(month.person_days)+float(s.population_exact)*span;month.coin=float(month.coin)+coin
 	month["short"]=float(month.get("short",0.0))+short
+	month["charter"]=float(month.get("charter",0.0))+charter
+	# The state works' surplus is told apart from charter fees, by the stance
+	# on the day it was taken (a change mid-month splits the month's line).
+	if charter>0.0 and String(_business().call("stance"))=="state":month["state_surplus"]=float(month.get("state_surplus",0.0))+charter
 	# Where it came from: each town's own day is levied in its own scope.
 	if not month.get("towns") is Dictionary: month["towns"]={}
 	var town_id:=String(s.resource_settlement_id)
 	var town:Dictionary=(month.towns as Dictionary).get(town_id,{"levy":0.0,"evaded":0.0,"unreached":0.0,"short":0.0,"output":0.0,"people":0.0,"days":0.0})
 	town.levy=float(town.levy)+maxf(0.0,levy-rich);town.evaded=float(town.evaded)+evaded;town.unreached=float(town.unreached)+assessed-reached
 	town["short"]=float(town.get("short",0.0))+short
+	town["charter"]=float(town.get("charter",0.0))+charter
 	town.output=float(town.output)+output*span;town.people=float(town.people)+float(s.population_exact)*span;town.days=float(town.days)+span
 	(month.towns as Dictionary)[town_id]=town
-	out.merge({"levy":levy,"assessed":assessed,"evaded":evaded,"coin":coin,"rich":rich,"reach":r,"evasion":ev,"output":output,"short":short},true)
+	out.merge({"levy":levy,"assessed":assessed,"evaded":evaded,"coin":coin,"rich":rich,"reach":r,"evasion":ev,"output":output,"short":short,"charter":charter},true)
 	return out
+
+## The business sector (enterprise.gd), loaded on first use: it preloads
+## this script, so this one reaches it by path.
+const ENTERPRISE_PATH:="res://scripts/enterprise.gd"
+static var _business_script:GDScript
+static func _business()->GDScript:
+	if _business_script==null:_business_script=load(ENTERPRISE_PATH)
+	return _business_script
+
+## Charter fees (or the state works' surplus) a day at today's work and
+## stance, in the purse's unit.
+static func charter_per_day()->float:
+	var rate:=float(_business().call("purse_rate"))
+	if rate<=0.0:return 0.0
+	return output_per_day()*float(_business().call("share"))*rate*reach()
 
 ## Taxing the rich (government_policy_catalog wealth_levy, while it holds):
 ## the richest fifth pay RICH_RATE of what their share of the day brings in.
@@ -723,6 +768,12 @@ static func settle(day:int)->Dictionary:
 	var report:={"day":day,"days":days,"levy":float(month.levy),"paid":{},"due":{},"army":{},"relief":{}}
 	if float(month.levy)>0.0:
 		_note(purse,float(month.levy),"The month's levy, %d in 100 of it hidden" % roundi(float(month.evaded)/maxf(0.001,float(month.assessed)*maxf(0.01,reach()))*100.0),"levy")
+	# Charter fees (or the state works' surplus) came in with the levy: told
+	# on their own line, so the record explains the balance.
+	var surplus:=float(month.get("state_surplus",0.0))
+	var fees:=maxf(0.0,float(month.get("charter",0.0))-surplus)
+	if fees>0.0:_note(purse,fees,"The month's charter fees","charter")
+	if surplus>0.0:_note(purse,surplus,"The month's surplus from the state works","charter")
 	# The store's food rots as the capital's own stored food does.
 	var rotted:=_spoil(purse,days)
 	if rotted>=0.5:_note(purse,-rotted,"Rotted in the store","out")
@@ -1115,7 +1166,7 @@ static func _merge_town_money(purse:Dictionary)->void:
 static func season()->Dictionary:
 	var purse:=state()
 	var months:Array=[purse.month]+(purse.months as Array)
-	var inn:={"levy":0.0,"rich":0.0,"deposits":0.0}
+	var inn:={"levy":0.0,"rich":0.0,"charter":0.0,"deposits":0.0}
 	var out:={"army":0.0,"relief":0.0,"crews":0.0,"scholars":0.0,"debts":0.0,"spent":0.0,"spoiled":0.0}
 	var days:=float(clampi(int(WorldSimulation.state.elapsed_days)-int(purse.get("last_settle_day",0)),0,120))
 	var rations:=0.0
@@ -1161,9 +1212,10 @@ static func forecast()->Dictionary:
 	var food:=maxf(0.0,float(purse.balance)-float(purse.coin))
 	if food>0.0 and WorldSimulation.food!=null:rot=food*(1.0-pow(1.0-float(WorldSimulation.food.stored_spoilage_rate()),SEASON_DAYS))
 	out+=rot
-	var income:=float(q.per_season)+rich
+	var charter:=charter_per_day()*SEASON_DAYS
+	var income:=float(q.per_season)+rich+charter
 	var net:=income-out
-	return {"levy":float(q.per_season),"rich":rich,"in":income,"lines":lines,"rot":rot,"out":out,"net":net,"balance":float(purse.balance),"quote":q,
+	return {"levy":float(q.per_season),"rich":rich,"charter":charter,"in":income,"lines":lines,"rot":rot,"out":out,"net":net,"balance":float(purse.balance),"quote":q,
 		"seasons_left":(float(purse.balance)/-net) if net<-0.01 else -1.0,"debt":float(purse.debt)}
 
 ## Where the purse's coming-in comes from, a season at the pace of the last
@@ -1179,7 +1231,7 @@ static func sources()->Dictionary:
 	if months.is_empty(): months=[purse.month]
 	var days:=0.0
 	var towns:={}
-	var rich:=0.0; var deposits:=0.0; var coin:=0.0; var levy_all:=0.0
+	var rich:=0.0; var deposits:=0.0; var coin:=0.0; var levy_all:=0.0; var charter:=0.0
 	for m in months:
 		if not m is Dictionary: continue
 		var d:=float((m as Dictionary).get("days",float(MONTH_DAYS)))
@@ -1188,7 +1240,7 @@ static func sources()->Dictionary:
 			d=1.0
 			for id in (m.get("towns",{}) as Dictionary): d=maxf(d,float(((m.towns as Dictionary)[id] as Dictionary).get("days",0.0)))
 		days+=d
-		rich+=float(m.get("rich",0.0)); deposits+=float(m.get("deposits",0.0)); coin+=float(m.get("coin",0.0)); levy_all+=float(m.get("levy",0.0))
+		rich+=float(m.get("rich",0.0)); deposits+=float(m.get("deposits",0.0)); coin+=float(m.get("coin",0.0)); levy_all+=float(m.get("levy",0.0))+float(m.get("charter",0.0)); charter+=float(m.get("charter",0.0))
 		for id in (m.get("towns",{}) as Dictionary):
 			var t:Dictionary=(m.towns as Dictionary)[id]
 			var into:Dictionary=towns.get_or_add(String(id),{"levy":0.0,"evaded":0.0,"unreached":0.0,"short":0.0,"people":0.0,"days":0.0})
@@ -1203,7 +1255,7 @@ static func sources()->Dictionary:
 		evaded+=float(row.evaded); unreached+=float(row.unreached); short+=float(row.short)
 		out.append(row)
 	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return float(a.levy)>float(b.levy))
-	return {"towns":out,"rich":rich*scale,"deposits":deposits*scale,"evaded":evaded,"unreached":unreached,"short":short,"coin_share":clampf(coin/maxf(0.001,levy_all),0.0,1.0) if levy_all>0.0 else 0.0,"days":days}
+	return {"towns":out,"rich":rich*scale,"charter":charter*scale,"deposits":deposits*scale,"evaded":evaded,"unreached":unreached,"short":short,"coin_share":clampf(coin/maxf(0.001,levy_all),0.0,1.0) if levy_all>0.0 else 0.0,"days":days}
 
 ## What the purse would buy at today's food price, in rations (-1 with no
 ## market). Before coinage the store holds food: it is the rations it holds.

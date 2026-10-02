@@ -4,6 +4,11 @@ extends VBoxContainer
 ## (hud/war_board.gd). Every number is the engine's own (realm_purse.gd):
 ##   the purse   what it holds, what comes in and goes out a season, and what
 ##               it would buy; the season's money in and out as two bars;
+##   business    the ladder from household crafts to corporations, the share
+##               of the workers in business against its target, what it adds
+##               to work, goods, trade and the rich, the god's stance (a
+##               button each, with its numbers) and the odds of a bust
+##               (enterprise.gd);
 ##   the levy    light, usual or heavy, said plainly ("one part in twenty of
 ##               every harvest"), with what each brings in and costs;
 ##   its lines   the soldiers' pay, the scholars' keep, hired crews and food
@@ -16,6 +21,7 @@ signal close_wanted
 
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Purse:=preload("res://scripts/realm_purse.gd")
+const Business:=preload("res://scripts/enterprise.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Tracker:=preload("res://scripts/order_tracker.gd")
 const REFRESH_SECONDS:=1.0
@@ -24,6 +30,7 @@ const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","rel
 var head_box:VBoxContainer
 var levy_box:VBoxContainer
 var sources_box:VBoxContainer
+var business_box:VBoxContainer
 var lines_box:VBoxContainer
 var wealth_box:VBoxContainer
 var ledger_box:VBoxContainer
@@ -39,6 +46,7 @@ func setup(_block:Dictionary={})->void:
 	head_box=_section(Purse.account_name())
 	feedback=_line("",14,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
 	sources_box=_section("Where it comes from")
+	business_box=_section("Business")
 	levy_box=_section("The levy")
 	lines_box=_section("What it pays for")
 	wealth_box=_section("Who holds the wealth")
@@ -69,7 +77,9 @@ func refresh(force:=false)->void:
 	var season:=Purse.season()
 	_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
 	var sources:=Purse.sources()
-	_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.rich)),roundi(float(sources.deposits)),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
+	_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.rich)),roundi(float(sources.get("charter",0.0))),roundi(float(sources.deposits)),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
+	var e:=Business.state()
+	_rebuild("business",business_box,str([Business.rung(),snappedf(Business.share(),0.001),snappedf(float(e.get("target",0.0)),0.001),Business.stance(),snappedf(Business.factor(),0.001),int(e.get("boom_months",0)),Business.bust_left(),Business.choices(),Business.next_needs(),Purse.unit_word()]),force,func()->void:_build_business())
 	_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),roundi(float(forecast.levy)),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
 	_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open()]),force,func()->void:_build_lines(forecast,purse))
 	var parts:Variant=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{})
@@ -118,6 +128,7 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	var bar:=BudgetBar.new();bar.name="Budget";bar.custom_minimum_size=Vector2(0,30)
 	var ins:Array=[["Levy",float(forecast.levy),T.GREEN]]
 	if float(forecast.rich)>0.0:ins.append(["The rich",float(forecast.rich),T.GREEN.darkened(0.2)])
+	if float(forecast.get("charter",0.0))>0.0:ins.append([Business.purse_name(),float(forecast.charter),T.GREEN.lightened(0.25)])
 	var outs:Array=[]
 	for line:String in Purse.LINES:
 		var entry:Dictionary=(forecast.lines as Dictionary).get(line,{})
@@ -150,13 +161,14 @@ func _budget_words(ins:Array,outs:Array)->String:
 func _build_sources(sources:Dictionary)->void:
 	_clear(sources_box)
 	var towns:Array=sources.towns
-	if towns.is_empty() and float(sources.rich)<=0.0 and float(sources.deposits)<=0.0:
+	if towns.is_empty() and float(sources.rich)<=0.0 and float(sources.deposits)<=0.0 and float(sources.get("charter",0.0))<=0.0:
 		sources_box.add_child(_line("Nothing has come in yet.",13,T.INK_MUTED,true));return
-	var total:=float(sources.rich)+float(sources.deposits)
+	var total:=float(sources.rich)+float(sources.deposits)+float(sources.get("charter",0.0))
 	for t:Dictionary in towns: total+=float(t.levy)
 	var rows:Array=[]
 	for t:Dictionary in towns: rows.append([String(t.name),float(t.levy),"the levy on what %s people make" % EraWords.grouped(int(t.people)),"%s %s hidden by households" % [Purse.number(float(t.evaded)),Purse.unit_word()] if float(t.evaded)>=0.5 else ""])
 	if float(sources.rich)>0.0: rows.append(["The rich",float(sources.rich),"the levy on the richest fifth (while the wealth levy holds)",""])
+	if float(sources.get("charter",0.0))>0.0: rows.append([Business.purse_name(),float(sources.charter),"the purse's part of what the business sector makes, taken with the levy",""])
 	if float(sources.deposits)>0.0: rows.append(["Other",float(sources.deposits),"tolls, spoils and fees paid in",""])
 	for r:Array in rows:
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10)
@@ -171,6 +183,94 @@ func _build_sources(sources:Dictionary)->void:
 	if float(sources.get("short",0.0))>=0.5: lost.append("%s left with towns that had none to spare" % Purse.number(float(sources.short)))
 	if not lost.is_empty(): sources_box.add_child(_line("Never came in, a season: %s." % ", ".join(lost),13,T.INK_MUTED,true))
 	if float(sources.coin_share)>0.01: sources_box.add_child(_line("%d%% of it is paid in coin; the rest is taken in goods." % roundi(float(sources.coin_share)*100.0),13,T.INK_MUTED,true))
+
+
+# --- Business -------------------------------------------------------------------------
+
+## The ladder of rungs with ours marked and what the next needs; the share of
+## the workers in business as a bar against its target; what it does now;
+## the stance buttons, each with its numbers; the odds of a bust and any
+## boom or bust under way. Every number is the engine's (enterprise.gd).
+func _build_business()->void:
+	_clear(business_box)
+	var panel:=_panel(business_box,"Business")
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
+	var r:=Business.rung()
+	var ladder:=HBoxContainer.new();ladder.name="Ladder";ladder.add_theme_constant_override("separation",4);column.add_child(ladder)
+	for index in Business.RUNGS.size():
+		var step:=PanelContainer.new();step.name="Rung_%d" % index;step.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		var here:=index==r
+		step.add_theme_stylebox_override("panel",_skin(T.PAPER if index<=r else T.PAPER_SUNK,T.GOLD if here else T.RULE,6,4 if here else 0,T.GOLD))
+		var word:=_line(String((Business.RUNGS[index] as Dictionary).short),13,T.INK if index<=r else T.INK_MUTED,true)
+		if here:word.add_theme_font_override("font",T.font("ui_strong"))
+		word.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		step.add_child(word)
+		var cap:=float((Business.RUNGS[index] as Dictionary).cap)
+		step.tooltip_text="%s%s" % [Business.rung_name(index),(": up to %s of the workers, each adding %d%% to the work" % [Business.in_100(cap),roundi(float((Business.RUNGS[index] as Dictionary).gain)*100.0)]) if cap>0.0 else ": work done at home and shared by custom"]
+		ladder.add_child(step)
+	var where:=_line("%s." % Business.rung_name(r),14,T.INK,true);where.name="RungNow"
+	column.add_child(where)
+	var needs:=Business.next_needs(true)
+	if needs!="":
+		var next:=_line("Next: %s · needs %s" % [String((Business.RUNGS[r+1] as Dictionary).short),needs],13,T.INK_MUTED,true);next.name="NextRung"
+		next.tooltip_text="%s needs %s." % [Business.rung_name(r+1),Business.next_needs()]
+		column.add_child(next)
+	if r<1:
+		column.add_child(_line("No business beyond the household yet.",13,T.INK_MUTED,true))
+		return
+	# The share of the workers in business, against where it is heading.
+	var e:=Business.state()
+	var share:=Business.share()
+	var goal:=float(e.get("target",Business.target()))
+	var size_row:=HBoxContainer.new();size_row.add_theme_constant_override("separation",10);column.add_child(size_row)
+	var bar:=ShareBar.new();bar.name="Share";bar.share=share;bar.target=goal;bar.cap=float((Business.RUNGS[r] as Dictionary).cap)
+	bar.custom_minimum_size=Vector2(120,14);bar.size_flags_horizontal=Control.SIZE_EXPAND_FILL;bar.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	bar.tooltip_text="Workers in business now (filled), where they are heading (the mark) and the most this rung can hold (the end). Growing takes decades; failures are fast."
+	size_row.add_child(bar)
+	var said:=_line("%s of the workers · heading for %s" % [Business.in_100(share),Business.in_100(goal)],13,T.INK);said.name="ShareWords"
+	size_row.add_child(said)
+	var effect:=_line(Business.effects_words(),14,T.GREEN_TEXT,true);effect.name="BusinessEffect"
+	effect.tooltip_text="What business does now, at its size today: all work (harvests, within what the land yields; building, digging, hauling and learning) and the goods made go this much faster, trade reaches this much further, and the richest fifth settle this many parts in 100 higher. The workshops' making capacity rises with it, up to its usual ceiling."
+	column.add_child(effect)
+	# The stance: one at a time, set like the levy.
+	var pick:=HBoxContainer.new();pick.name="Stances";pick.add_theme_constant_override("separation",8);column.add_child(pick)
+	var current:=Business.stance()
+	for id:String in Business.choices():
+		var q:=Business.quote(id)
+		var button:=Button.new();button.name="Stance_%s" % id;button.toggle_mode=true;button.focus_mode=Control.FOCUS_NONE
+		button.text="%s\n%s work · %s" % [Business.stance_name(id),Business.percent(float(q.work)),_short_odds(float(q.bust_year))]
+		button.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		button.set_pressed_no_signal(id==current)
+		var fee:=("\n%s: about %s a season at today's size, %s once grown." % [String(q.purse_name),Purse.amount_text(float(q.purse_now)),Purse.number(float(q.purse_season))]) if float(q.purse_season)>=0.5 else ""
+		button.tooltip_text="%s: %s.\nGrows toward %s of the workers.\nAll work and goods %s, trade reach +%d.\nThe richest fifth +%d parts in 100.\nBusts: %s.%s\nChanging costs %d points of trust." % [Business.stance_name(id),String(q.words).to_lower(),Business.in_100(float(q.target)),Business.percent(float(q.work)),roundi(float(q.trade)*100.0),roundi(float(q.rich)*100.0),String(q.odds).to_lower(),fee,roundi(Business.CHANGE_TRUST*100.0)]
+		button.pressed.connect(func()->void:_choose_stance(id))
+		pick.add_child(button)
+	var q:=Business.quote(current)
+	var words:=_line("%s." % String(q.words),13,T.INK_MUTED,true);words.name="StanceWords"
+	column.add_child(words)
+	var odds:=_line("Busts: %s at this stance." % String(Business.odds_words(Business.bust_year())).to_lower(),13,T.INK_MUTED,true);odds.name="BustOdds"
+	odds.tooltip_text="A bust cuts business by a third at once, slows all work 4% for 6 to 12 months, writes off debts, and costs the rich and the people's unity. Honest books (double-entry ledgers, audited accounts, a central bank) make busts rarer."
+	column.add_child(odds)
+	var left:=Business.bust_left()
+	if left>0:
+		var bust:=_line("A bust: all work %s for %d more %s, easing." % [Business.percent(-Business.BUST_HIT*float(left)/maxf(1.0,float((e.get("bust",{}) as Dictionary).get("months",1)))),left,"month" if left==1 else "months"],13,T.RED_TEXT,true);bust.name="BustNow"
+		column.add_child(bust)
+	elif Business.booming():
+		var boom:=_line("Booming %d %s on credit: work +%d%%, bust odds up %d%%." % [int(e.get("boom_months",0)),"month" if int(e.get("boom_months",0))==1 else "months",roundi(Business.BOOM_GAIN*100.0),roundi(float(e.get("boom_months",0))/Business.BOOM_ODDS_MONTHS*100.0)],13,T.GOLD_TEXT,true);boom.name="BoomNow"
+		column.add_child(boom)
+
+
+## "bust 1 in 40 yrs" for a stance button's second line.
+static func _short_odds(year:float)->String:
+	if year<=0.0:return "no busts"
+	return "bust 1 in %s yrs" % EraWords.grouped(maxi(1,roundi(1.0/year)))
+
+func _choose_stance(id:String)->void:
+	var result:=Business.set_stance(id)
+	var said:=String(result.get("error","")) if not bool(result.get("ok",false)) else "Business is %s%s." % [Business.stance_name(id).to_lower(),(": trust −%d" % roundi(float(result.trust)*100.0)) if float(result.get("trust",0.0))>0.0 else ""]
+	_say(said)
+	Tracker.setting_order("Business: %s" % Business.stance_name(id),{"ok":bool(result.get("ok",false)),"message":said,"reason":said},"purse",_keeper(),"economy:2")
+	refresh(true)
 
 
 # --- The levy -----------------------------------------------------------------------
@@ -430,4 +530,21 @@ class FifthsBar extends Control:
 			draw_rect(Rect2(x,0.0,width,size.y),inks[index])
 			if index>0:draw_line(Vector2(x,0.0),Vector2(x,size.y),T.PAPER,1.0)
 			x+=width
+		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)
+
+
+## The share of the workers in business (filled), its target (a mark) and
+## the most the rung can hold (the bar's end).
+class ShareBar extends Control:
+	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	var share:=0.0
+	var target:=0.0
+	var cap:=1.0
+	func _ready()->void:mouse_filter=Control.MOUSE_FILTER_PASS
+	func _draw()->void:
+		var scale:=maxf(0.0001,maxf(cap,maxf(share,target)))
+		draw_rect(Rect2(Vector2.ZERO,size),T.PAPER_SUNK)
+		draw_rect(Rect2(0.0,0.0,size.x*clampf(share/scale,0.0,1.0),size.y),T.TEAL)
+		var x:=size.x*clampf(target/scale,0.0,1.0)
+		draw_line(Vector2(x,-2.0),Vector2(x,size.y+2.0),T.GOLD,2.0)
 		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)

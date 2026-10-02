@@ -52,6 +52,7 @@ const ManualWork:=preload("res://scripts/manual_work.gd")
 const Supply:=preload("res://scripts/supply_state.gd")
 const TownNames:=preload("res://scripts/town_names.gd")
 const PurseOrders:=preload("res://scripts/court_purse_orders.gd")
+const BusinessOrders:=preload("res://scripts/court_business_orders.gd")
 
 ## Offices (government_people_system office keys) and, when no key is known,
 ## words in a title, that make each sheet.
@@ -131,7 +132,10 @@ static func sheet(which:Array)->Dictionary:
 	if which.has("stores"): _stores(out)
 	if which.has("tribute"): _tribute(out)
 	if which.has("scouts"): _scouts(out)
-	if which.has("purse"): out["purse"]=PurseOrders.facts()
+	if which.has("purse"):
+		out["purse"]=PurseOrders.facts()
+		# The business sector, which the purse's keeper sets the rules for.
+		out["business"]=BusinessOrders.facts()
 	# How each people we know sees us (standing.gd): the keepers of our ties
 	# and the war leader know it, with the odds it moves.
 	if which.has("tribute") or which.has("war"): _standing(out)
@@ -717,6 +721,7 @@ static func text(s:Dictionary)->String:
 	lines.append("Today: %s. Home: %s, %d people." % [String(s.get("when","")),String(s.get("home","")),int(s.get("home_people",0))])
 	if String(s.get("nation",""))!="": lines.append("Our nation, all our towns together, is called %s." % String(s.nation))
 	if s.get("purse") is Dictionary and not (s.purse as Dictionary).is_empty(): lines.append(PurseOrders.text(s.purse))
+	if s.get("business") is Dictionary and not (s.business as Dictionary).is_empty(): lines.append(BusinessOrders.text(s.business))
 	var hands_said:Array=s.get("hands",[])
 	if not hands_said.is_empty(): lines.append("What the council's hands are worth, against an ordinary holder: %s." % "; ".join(PackedStringArray(hands_said)))
 	var wars:Array=s.get("at_war_with",[])

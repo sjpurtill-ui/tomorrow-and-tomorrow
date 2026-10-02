@@ -178,7 +178,8 @@ static func advance()->Dictionary:
 		report.reason="Needs a settled workplace"
 	else:
 		var labor:=maxf(0.0,WorldSimulation.state.effective_workers("Crafting")*CRAFT_SHARE)*WorldSimulation.span
-		var rate:=BASE_RATE*technique_output()
+		# Techniques, and how well the business sector works (enterprise.gd).
+		var rate:=BASE_RATE*technique_output()*preload("res://scripts/enterprise.gd").factor()
 		var wanted:=maxf(0.0,float(report.target)*1.20+capital_reserve()-stock())
 		var reserve:=workshop_input_reserve()
 		var spendable:Dictionary={}
