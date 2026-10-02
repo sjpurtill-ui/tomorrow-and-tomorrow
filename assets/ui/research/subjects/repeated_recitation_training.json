@@ -1,0 +1,51 @@
+{
+  "id": "repeated_recitation_training",
+  "line": "knowledge",
+  "status": "era",
+  "name": "Recitation Drills for Craft Rules",
+  "one_liner": "Recitation drills for craft rules",
+  "observation": "Recitation drills for craft rules.",
+  "key_threshold": false,
+  "target_year": 30,
+  "proposed_year": 30,
+  "band_low": 18,
+  "band_high": 45,
+  "min_year": 18,
+  "research_years": 4,
+  "requires_all": [
+    "novice_task_shadowing"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "oral_epics"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/repeated_recitation_training.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+      "tile_index": 2,
+      "caption": "Recitation drills for craft rules (Year 30)",
+      "style": "paper_gouache"
+    },
+    "subject": null
+  },
+  "version": 2,
+  "year": 30,
+  "focus": [
+    0.5,
+    0.38
+  ],
+  "binding_style": "knowledge: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/knowledge-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established knowledge medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: An elder and three attentive learners sit at a portable hide camp, mouths gently open in call-and-response, elder gestures toward one simple stone scraper and a cord-tied branch bundle. Lapis/parchment crosshatched blue-black ink; clear storytelling through listening and repeated gestures, no written text/tablets/school building.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ed946ba3-3b8e-4332-801b-1adef0e15578.png",
+  "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/repeated_recitation_training-v2.png",
+  "sha256": "b3113fa5c445ee311e1f25c4847f8a04aaeb0ad2c897325a170f514c3af180a6",
+  "mode": "built-in image_gen / edit"
+}

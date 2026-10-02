@@ -3782,8 +3782,8 @@
   "portage_paths": {"path": "res://assets/ui/research/subjects/portage_paths-v1.png", "focus": [0.5, 0.5]},
   "purges_emetics": {"path": "res://assets/ui/research/subjects/purges_emetics-v1.png", "focus": [0.5, 0.5]},
   "work_party_feasts": {"path": "res://assets/ui/research/subjects/work_party_feasts-v1.png", "focus": [0.5, 0.5]},
-  "banishment_sentence": {"path": "res://assets/ui/research/subjects/banishment_sentence-v1.png", "focus": [0.5, 0.5]},
-  "indicator_plants": {"path": "res://assets/ui/research/subjects/indicator_plants-v1.png", "focus": [0.5, 0.5]},
+  "banishment_sentence": {"path": "res://assets/ui/research/subjects/banishment_sentence-v2.png", "focus": [0.5, 0.3]},
+  "indicator_plants": {"path": "res://assets/ui/research/subjects/indicator_plants-v2.png", "focus": [0.5, 0.2]},
   "wild_honey_smoking": {"path": "res://assets/ui/research/subjects/wild_honey_smoking-v1.png", "focus": [0.5, 0.5]},
   "tooth_drilling": {"path": "res://assets/ui/research/subjects/tooth_drilling-v1.png", "focus": [0.5, 0.5]},
   "festival_rest_days": {"path": "res://assets/ui/research/subjects/festival_rest_days-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4239,9 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "repeated_recitation_training": {"path": "res://assets/ui/research/subjects/repeated_recitation_training-v2.png", "focus": [0.5, 0.38]},
+  "pottery_style_identity": {"path": "res://assets/ui/research/subjects/pottery_style_identity-v2.png", "focus": [0.5, 0.5]},
+  "fiber_retting": {"path": "res://assets/ui/research/subjects/fiber_retting-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
+  "winnowing_practice": {"path": "res://assets/ui/research/subjects/winnowing_practice-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]}
 }
