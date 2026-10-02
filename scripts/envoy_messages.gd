@@ -66,6 +66,9 @@ const DEMANDS:={
 	"hostage":{"label":"A hostage","line":"Kin of their ruler comes to live among your people as a pledge.","ask":0.30},
 	"withdraw":{"label":"Pull back","line":"Their fighters stand down and leave the border.","ask":0.10},
 	"apology":{"label":"An apology","line":"Their ruler owns a wrong done to your people.","ask":0.08},
+	# They bow for good (world_answer.gd): tribute every season through the
+	# trade ledger, a hostage at our court, their raiders kept home.
+	"submit":{"label":"Bow to us","line":"They become tributaries: tribute every season and a son of their ruler's house as a pledge; their raiders stay home while they pay.","ask":0.32},
 }
 ## Tribute sizes: the share of their stock of that good, and what it weighs.
 const SIZES:={
@@ -231,6 +234,7 @@ static func grievance(civ_id:String)->String:
 static func demands_for(civ_id:String)->Array[String]:
 	var out:Array[String]=["tribute","ground","hostage","withdraw"]
 	if grievance(civ_id)!="": out.append("apology")
+	if not bool((load("res://scripts/world_answer.gd") as GDScript).call("is_tributary",civ_id)): out.append("submit")
 	return out
 
 static func availability(civ_id:String,purpose:String)->Dictionary:
@@ -720,6 +724,13 @@ static func _yield(civ_id:String,menace:Dictionary,result:Dictionary)->String:
 				civ3["military_readiness"]=clampf(float(civ3.get("military_readiness",0.3))-0.05,0.1,1.0)
 			Hall._shift_relation(civ_id,0.0,-0.3)
 			return "%s is calling its fighters back from the border." % name
+		"submit":
+			var answer:=load("res://scripts/world_answer.gd") as GDScript
+			if bool(answer.call("is_tributary",civ_id)): return "%s already bows to you." % name
+			var terms:Dictionary=answer.call("terms",civ_id)
+			var bound:=String(answer.call("_bind",civ_id,_day(),float(terms.value),String(terms.hostage),"At your word, "))
+			result["submitted"]=true
+			return bound
 		"apology":
 			Hall._leader_trust(civ_id,-0.05)
 			var metrics:Dictionary=WorldSimulation.state.simulation_metrics
