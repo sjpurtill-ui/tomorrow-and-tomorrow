@@ -427,3 +427,83 @@ func test_the_research_screens_say_what_it_does_to_the_map()->void:
 	assert_str(String(congress.would)).contains("Borders with realms that also know this become fixed lines.")
 	var other:Dictionary=Board._card_words({"id":"fire_making","effects":{},"progress":0.1})
 	assert_str(String(other.would)).not_contains("map")
+
+
+func test_the_wash_and_ink_shaders_compile()->void:
+	# The dummy renderer still parses shader code: a broken shader lists no uniforms.
+	var names:=func(path:String)->Array: return (load(path) as Shader).get_shader_uniform_list().map(func(u:Dictionary)->String: return String(u.name))
+	var wash:Array=names.call("res://scripts/nation_border_wash.gdshader")
+	for wanted in ["fade","terrain_grid","terrain_heights","coast_grid0","coast_level0"]: assert_array(wash).contains([wanted])
+	assert_array(names.call("res://scripts/nation_border_ink.gdshader")).contains(["fade"])
+
+
+## A stand-in for the fused terrain sampler: rows of a square patch, heights
+## from x alone, counting the rows it was asked for.
+class RowSampler extends RefCounted:
+	var rows:=0
+	func sample_rows(job:Object,first_row:int,row_count:int)->Array:
+		rows+=row_count
+		var heights:=PackedFloat32Array()
+		var spacing:=float(job.span)/float(int(job.resolution)-1)
+		var half:=float(int(job.resolution)-1)*0.5
+		for z in range(first_row,first_row+row_count):
+			for x in int(job.resolution):
+				var point:Vector2=job.center+Vector2(float(x)-half,float(z)-half)*spacing
+				heights.append(point.x*0.01+Partition.PATCH_LIFT)
+		return [heights]
+
+
+func test_the_ground_is_sampled_once_per_node_and_where_it_lies()->void:
+	var sampler:=RowSampler.new()
+	var count:=9
+	var cell:=0.5
+	var origin:=Vector2(10.0,-4.0)
+	var needed:=PackedByteArray()
+	needed.resize(count*count)
+	needed[2*count+3]=1
+	needed[5*count+7]=1
+	var cache:Dictionary={}
+	var heights:=Partition.sample_heights(sampler,origin,cell,count,needed,cache,4)
+	# Each needed node's own ground; the rest unread.
+	assert_float(heights[2*count+3]).is_equal_approx((origin.x+3.0*cell)*0.01,0.0001)
+	assert_float(heights[5*count+7]).is_equal_approx((origin.x+7.0*cell)*0.01,0.0001)
+	assert_bool(is_nan(heights[0])).is_true()
+	assert_int(sampler.rows).is_equal(2)
+	# The same ground again comes from the cache.
+	Partition.sample_heights(sampler,origin,cell,count,needed,cache,4)
+	assert_int(sampler.rows).is_equal(2)
+
+
+func test_the_layer_builds_on_a_worker_and_publishes_its_lines()->void:
+	Borders.knowledge_override={"player":["boundary_marker_surveys"],"civ_02":["boundary_marker_surveys"]}
+	var layer:Node3D=auto_free(preload("res://scripts/nation_border_layer.gd").new())
+	add_child(layer)
+	var seen:={"kind":"circle","x":40.0,"z":0.0,"radius":40.0,"source":"test","day":0}
+	var areas:Array=CivilizationSystem.revealed_areas
+	areas.append(seen)
+	CivilizationSystem.fog_revision+=1
+	layer.call("set_own_claims",[{"id":"home","primary":true,"position":Vector2(37.0,0.0),"claim_radius_km":5.0,"boundary":_outline(Vector2(37.0,0.0),5.0)}])
+	var theirs:=Borders.make_claim("civ_02","town:x",Vector2(43.0,0.0),5.0)
+	layer.set("foreign",[theirs])
+	var grid:=Borders.grid_for(Vector2(40.0,0.0),20.0)
+	layer.call("_start",grid,12345)
+	var job:Object=layer.get("_job")
+	assert_object(job).is_not_null()
+	# The layer itself waits on the task once it is done (a task is waited on once).
+	var began:=Time.get_ticks_msec()
+	while not WorkerThreadPool.is_task_completed(int(job.get("task"))) and Time.get_ticks_msec()-began<20000: OS.delay_msec(5)
+	layer.call("_poll")
+	areas.erase(seen)
+	CivilizationSystem.fog_revision+=1
+	assert_int(int(layer.get("commits"))).is_equal(1)
+	var wash:MeshInstance3D=layer.get("wash")
+	assert_int((wash.mesh as ArrayMesh).get_surface_count()).is_equal(1)
+	var inks:Array=layer.get("inks")
+	assert_int(((inks[2] as MeshInstance3D).mesh as ArrayMesh).get_surface_count()).is_equal(1)
+	# The frontier with the Kezari's town is published for the war marks and
+	# says what it is on hover.
+	var mark:=Borders.meeting_point("player","civ_02",Vector2(40.0,0.0))
+	assert_float(mark.distance_to(Vector2(40.0,0.0))).is_less(0.5)
+	var hover_lines:Array=layer.get("lines")
+	assert_int(hover_lines.size()).is_equal(1)
+	assert_str(String((hover_lines[0] as Dictionary).kind)).is_equal("frontier")

@@ -7,10 +7,10 @@ extends Node3D
 ## town founded, or grown by about 2%), what a people knows, a war or hot
 ## feud, ground charted inside a stranger's land, or the view's zoom step or
 ## a pan past the grid's margin. Never per frame or per day. Between builds a
-## frame costs two uniform writes and, while the pointer moves over the map,
-## the hover test. local_terrain hands it our towns' claims each time the
-## settlement network redraws; everything else it reads itself.
-## Observe-only: nothing here changes the world.
+## frame costs a few comparisons, and a hover test while the pointer moves
+## over a still map. local_terrain hands it our towns' claims each time the
+## settlement network redraws; everything else it reads itself, twice a
+## second. Observe-only: nothing here changes the world.
 
 const Borders:=preload("res://scripts/nation_borders.gd")
 const Sampler:=preload("res://scripts/terrain_patch_sampler.gd")
@@ -28,7 +28,7 @@ const INK_NAMES:=["NationBorderWar","NationBorderTint","NationBorderInk"]
 ## can reach into it), km.
 const FOREIGN_MARGIN_KM:=900.0
 ## The height cache holds at most this many lattice nodes.
-const HEIGHT_CACHE_LIMIT:=300000
+const HEIGHT_CACHE_LIMIT:=120000
 ## Hover: points kept per line, and how near the pointer must come (px).
 const HOVER_POINTS:=40
 const HOVER_PX:=7.0
@@ -53,12 +53,14 @@ var _job:Job=null
 var _wanted:=0
 var _look:=LOOK_EVERY
 var _world_look:=WORLD_EVERY
+var _foreign_cache:Dictionary={}
 var _sampler:RefCounted
 var _sampler_key:=0
 var _heights:Dictionary={}
 var _heights_seed:=-1
-var _fog_revision:=-1
-var _fog_count:=0
+## Charted ground: each record's bounds, kept in step with revealed_areas.
+var _record_boxes:Array[Rect2]=[]
+var _boxes_revision:=-1
 var _fog_key:=0
 var _wash_fade:=-1.0
 var _ink_fade:=-1.0
@@ -103,7 +105,7 @@ func _ready()->void:
 		add_child(ink)
 		inks.append(ink)
 		ink_materials.append(material)
-	# Beneath the city cards' layer order like the war marks; the tip is small.
+	# With the scouts' route captions: a small tip under the pointer.
 	hover_layer=CanvasLayer.new()
 	hover_layer.name="NationBorderHover"
 	hover_layer.layer=0
@@ -123,9 +125,8 @@ func _exit_tree()->void:
 
 ## Our towns' claims, each time the settlement network redraws (local_terrain).
 func set_own_claims(settlements:Array)->void:
-	var claims:=Borders.own_claims(settlements)
-	own=claims
-	own_key=Borders.claims_key(claims)
+	own=Borders.own_claims(settlements)
+	own_key=Borders.claims_key(own)
 
 
 func _camera()->Camera3D:
@@ -143,8 +144,8 @@ func _process(delta:float)->void:
 	var camera:=_camera()
 	# Under the world view nothing of the chart shows.
 	var shown:=camera!=null and not is_instance_valid(terrain.get("world_globe"))
-	visible=shown
-	hover_layer.visible=shown
+	if visible!=shown: visible=shown
+	if hover_layer.visible!=shown: hover_layer.visible=shown
 	if not shown: return
 	_poll()
 	_fade(camera.size)
@@ -166,7 +167,7 @@ func _process(delta:float)->void:
 func _read_world(view_km:float)->void:
 	var grid:=Borders.grid_for(_target(),view_km)
 	var box:Rect2=grid.box
-	foreign=Borders.foreign_claims(box.get_center(),box.size.x*0.75+FOREIGN_MARGIN_KM)
+	foreign=Borders.foreign_claims(box.get_center(),box.size.x*0.75+FOREIGN_MARGIN_KM,_foreign_cache)
 	var people:Array=["player"]
 	for claim:Dictionary in foreign:
 		if not people.has(String(claim.owner)): people.append(String(claim.owner))
@@ -179,24 +180,40 @@ func _read_world(view_km:float)->void:
 	world_key=hash([Borders.claims_key(foreign),looks,enemies,_fog_key,int(GameState.world_seed)])
 
 
-## Charted ground changes the drawing only inside a stranger's land: a scout
-## walking anywhere else, or our own ground, redraws nothing.
-func _watch_charted_ground()->void:
+## Keeps each charted record's bounds; returns the first record that changed
+## (records are appended, or the latest trail grows), or -1 when none did.
+func _sync_record_boxes()->int:
 	var world:Node=CivilizationSystem
 	var revision:=int(world.fog_revision)
-	if revision==_fog_revision: return
+	if revision==_boxes_revision: return -1
+	_boxes_revision=revision
 	var areas:Array=world.revealed_areas
-	var touched:=areas.size()<_fog_count
-	if not touched:
-		var boxes:Array[Rect2]=[]
-		for claim:Dictionary in foreign:
-			var reach:=float(claim.radius)
-			boxes.append(Rect2((claim.center as Vector2)-Vector2.ONE*reach,Vector2.ONE*reach*2.0))
-		for index in range(maxi(0,_fog_count-1),areas.size()):
-			if _record_touches(areas[index],boxes): touched=true;break
-	if touched: _fog_key+=1
-	_fog_revision=revision
-	_fog_count=areas.size()
+	var first:=maxi(0,_record_boxes.size()-1)
+	if areas.size()<_record_boxes.size():
+		first=0
+		_record_boxes.clear()
+	_record_boxes.resize(areas.size())
+	for index in range(first,areas.size()):
+		_record_boxes[index]=_record_box(areas[index]) if areas[index] is Dictionary else Rect2()
+	return first
+
+
+## Charted ground changes the drawing only inside a stranger's land: a scout
+## walking anywhere else, or over our own ground, redraws nothing.
+func _watch_charted_ground()->void:
+	var count_before:=_record_boxes.size()
+	var first:=_sync_record_boxes()
+	if first<0: return
+	if first==0 and count_before>0:
+		_fog_key+=1
+		return
+	for claim:Dictionary in foreign:
+		var reach:=float(claim.radius)
+		var claim_box:=Rect2((claim.center as Vector2)-Vector2.ONE*reach,Vector2.ONE*reach*2.0)
+		for index in range(first,_record_boxes.size()):
+			if claim_box.intersects(_record_boxes[index]):
+				_fog_key+=1
+				return
 
 
 static func _record_box(record:Dictionary)->Rect2:
@@ -208,12 +225,15 @@ static func _record_box(record:Dictionary)->Rect2:
 	return box.grow(reach)
 
 
-static func _record_touches(record_variant:Variant,boxes:Array[Rect2])->bool:
-	if not record_variant is Dictionary or boxes.is_empty(): return false
-	var box:=_record_box(record_variant)
-	for claim_box in boxes:
-		if claim_box.intersects(box): return true
-	return false
+## Charted ground near the grid, deep-copied for the worker (a scout's trail
+## grows in place on the main thread).
+func _charted_near(box:Rect2)->Array:
+	_sync_record_boxes()
+	var areas:Array=CivilizationSystem.revealed_areas
+	var out:Array=[]
+	for index in mini(areas.size(),_record_boxes.size()):
+		if _record_boxes[index].intersects(box) and areas[index] is Dictionary: out.append((areas[index] as Dictionary).duplicate(true))
+	return out
 
 
 func _start(grid:Dictionary,key:int)->void:
@@ -259,15 +279,6 @@ func _start(grid:Dictionary,key:int)->void:
 	builds+=1
 
 
-## Charted ground near the grid, deep-copied for the worker (a scout's trail
-## grows in place on the main thread).
-func _charted_near(box:Rect2)->Array:
-	var out:Array=[]
-	for record_variant in CivilizationSystem.revealed_areas:
-		if record_variant is Dictionary and _record_box(record_variant).intersects(box): out.append((record_variant as Dictionary).duplicate(true))
-	return out
-
-
 ## The terrain's own height chain, fused for any thread (terrain_patch_sampler).
 func _terrain_sampler()->RefCounted:
 	if not is_instance_valid(terrain) or terrain.get("continent_noise")==null or terrain.get("mountain_relief")==null: return null
@@ -302,11 +313,10 @@ func _commit(done:Job)->void:
 		var ground:PackedFloat32Array=line.heights
 		var stride:=maxi(1,ceili(float(points.size())/float(HOVER_POINTS)))
 		var points3:=PackedVector3Array()
-		var box:=Rect2(points[0],Vector2.ZERO)
-		for i in range(0,points.size(),stride):
-			points3.append(Vector3(points[i].x,ground[i],points[i].y))
+		var box:=AABB(Vector3(points[0].x,ground[0],points[0].y),Vector3.ZERO)
+		for i in range(0,points.size(),stride): points3.append(Vector3(points[i].x,ground[i],points[i].y))
 		points3.append(Vector3(points[points.size()-1].x,ground[ground.size()-1],points[points.size()-1].y))
-		for point in points: box=box.expand(point)
+		for point in points3: box=box.expand(point)
 		lines.append({"owners":[owners[int(line.a)],owners[int(line.b)]],"kind":String(line.kind),"war":String(line.war),"points3":points3,"box":box,"words":""})
 	Borders.publish(result.lines,owners)
 	commits+=1
@@ -349,25 +359,39 @@ func _fade(view_km:float)->void:
 ## the macro rasters, bound again only when the terrain replaces them.
 func _bind_ground()->void:
 	var grid:Variant=terrain.get("river_terrain_grid")
-	if grid is Vector4 and grid!=_ground_grid and terrain.has_method("_bind_river_terrain"):
+	var heights:Variant=terrain.get("river_terrain_height_texture")
+	if grid is Vector4 and grid!=_ground_grid and heights is Texture2D:
 		_ground_grid=grid
-		terrain.call("_bind_river_terrain",wash_material)
+		wash_material.set_shader_parameter("terrain_heights",heights)
+		wash_material.set_shader_parameter("terrain_grid",grid)
 	var coast:Variant=terrain.get("coast_mask_bindings")
-	if coast is Dictionary and terrain.has_method("_bind_coast_mask"):
-		var key:=hash([(coast as Dictionary).size(),(coast as Dictionary).get("coast_grid0"),(coast as Dictionary).get("coast_grid1")])
+	if coast is Dictionary:
+		var bindings:Dictionary=coast
+		var key:=hash([bindings.size(),bindings.get("coast_grid0"),bindings.get("coast_grid1")])
 		if key!=_coast_key:
 			_coast_key=key
-			terrain.call("_bind_coast_mask",wash_material)
+			for parameter in ["coast_level0","coast_level1","coast_grid0","coast_grid1"]:
+				if bindings.has(parameter): wash_material.set_shader_parameter(parameter,bindings[parameter])
 
 
-## The words for the border under `mouse`, or "".
+## The words for the border under `mouse`, or "". A line whose bounds are
+## nowhere near the pointer on screen is passed over without projecting it.
 func words_at(mouse:Vector2,camera:Camera3D)->String:
-	var reach:=camera.size*4.0
-	var view:=Rect2(_target()-Vector2.ONE*reach,Vector2.ONE*reach*2.0)
 	var best:=HOVER_PX
 	var found:Dictionary={}
 	for line:Dictionary in lines:
-		if not (line.box as Rect2).intersects(view): continue
+		var box:AABB=line.box
+		var reach:=Rect2()
+		var first:=true
+		var behind:=false
+		for corner in [box.position,box.position+Vector3(box.size.x,0,0),box.position+Vector3(0,0,box.size.z),box.end]:
+			if camera.is_position_behind(corner):
+				behind=true
+				break
+			var at:=camera.unproject_position(corner)
+			reach=Rect2(at,Vector2.ZERO) if first else reach.expand(at)
+			first=false
+		if not behind and not reach.grow(HOVER_PX+24.0).has_point(mouse): continue
 		var previous:=Vector2.INF
 		for point:Vector3 in (line.points3 as PackedVector3Array):
 			if camera.is_position_behind(point):
@@ -386,13 +410,15 @@ func words_at(mouse:Vector2,camera:Camera3D)->String:
 
 
 ## Whose border is under the pointer, in a few words, in a small paper tip.
+## It looks only while the map holds still and the pointer moves over it.
 class Hover extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
+	const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 	const SIZE:=13
 	var borders:Node
 	var shown:=""
 	var at:=Vector2.ZERO
 	var _tested:=0
+	var _view:=0
 	var _since:=0.0
 
 	func _ready()->void:
@@ -407,8 +433,15 @@ class Hover extends Control:
 		if camera==null or not is_visible_in_tree():
 			_show("")
 			return
+		var view:=hash([camera.global_transform,camera.size])
+		if view!=_view:
+			# The map is moving: no tip until it holds still.
+			_view=view
+			_tested=0
+			_show("")
+			return
 		var mouse:=get_local_mouse_position()
-		var key:=hash([mouse.round(),camera.global_transform,camera.size,int(borders.get("commits"))])
+		var key:=hash([mouse.round(),int(borders.get("commits"))])
 		if key==_tested: return
 		_tested=key
 		var text:=""
@@ -429,5 +462,5 @@ class Hover extends Control:
 		var origin:=at+Vector2(14,18)
 		origin.x=clampf(origin.x,8,maxf(8,size.x-box_size.x-8))
 		origin.y=clampf(origin.y,8,maxf(8,size.y-box_size.y-8))
-		draw_style_box(T.flat(T.MAP_LABEL_BG,T.BORDER_SOFT,1,4,0),Rect2(origin,box_size))
-		draw_string(font,origin+Vector2(10,7+font.get_ascent(SIZE)),shown,HORIZONTAL_ALIGNMENT_LEFT,-1,SIZE,T.INK)
+		draw_style_box(Tokens.flat(Tokens.MAP_LABEL_BG,Tokens.BORDER_SOFT,1,4,0),Rect2(origin,box_size))
+		draw_string(font,origin+Vector2(10,7+font.get_ascent(SIZE)),shown,HORIZONTAL_ALIGNMENT_LEFT,-1,SIZE,Tokens.INK)

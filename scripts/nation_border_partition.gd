@@ -46,6 +46,15 @@ var best:=PackedFloat32Array()
 var lift:=0.0
 var known_fade:=1.0
 var _buckets:Dictionary={}
+## The claims as parallel arrays: the hot loops read these, not dictionaries.
+var _centers:=PackedVector2Array()
+var _tables:Array[PackedFloat32Array]=[]
+var _owners:=PackedInt32Array()
+## Each held node's place on the ground and its wash's strength, and each
+## people's colour, read once for the four cells that share a node.
+var _node_v3:=PackedVector3Array()
+var _node_alpha:=PackedFloat32Array()
+var _colors:=PackedColorArray()
 var _index:RefCounted=null
 var _any_foreign:=false
 var _crossings:Dictionary={}
@@ -138,6 +147,9 @@ func _index_claims()->void:
 	for ci in claims.size():
 		var claim:Dictionary=claims[ci]
 		var center:Vector2=claim.center
+		_centers.append(center)
+		_tables.append(claim.table)
+		_owners.append(int(claim.owner_index))
 		var reach:=float(claim.radius)+cell*1.5
 		var low_x:=clampi(floori((center.x-reach-origin.x)/cell)>>BUCKET_SHIFT,0,last)
 		var low_y:=clampi(floori((center.y-reach-origin.y)/cell)>>BUCKET_SHIFT,0,last)
@@ -163,12 +175,22 @@ func node_point(i:int)->Vector2:
 	return origin+Vector2(float(i%n),float(int(float(i)/float(n))))*cell
 
 
+## claim_score for claim `ci`, from the parallel arrays.
+func _score(ci:int,point:Vector2)->float:
+	var offset:=point-_centers[ci]
+	var distance:=offset.length()
+	if distance<=0.0000001: return 1.0
+	var table:PackedFloat32Array=_tables[ci]
+	var f:=fposmod(atan2(offset.y,offset.x),TAU)*(float(SHAPE_SAMPLES)/TAU)
+	var i:=int(f)%SHAPE_SAMPLES
+	return 1.0-distance/maxf(lerpf(table[i],table[(i+1)%SHAPE_SAMPLES],f-floorf(f)),0.0000001)
+
+
 ## The strongest claim of `owner` at `point`; very low when it has none near.
 func owner_score(owner:int,point:Vector2)->float:
 	var top:=-1.0e9
 	for ci in _claims_at(point):
-		var claim:Dictionary=claims[ci]
-		if int(claim.owner_index)==owner: top=maxf(top,claim_score(claim,point))
+		if _owners[ci]==owner: top=maxf(top,_score(ci,point))
 	return top
 
 
@@ -177,9 +199,8 @@ func holder_at(point:Vector2)->Array:
 	var top:=-1.0e9
 	var who:=NONE
 	for ci in _claims_at(point):
-		var claim:Dictionary=claims[ci]
-		var score:=claim_score(claim,point)
-		var owner:=int(claim.owner_index)
+		var score:=_score(ci,point)
+		var owner:=_owners[ci]
 		if score>top or (score==top and owner<who): top=score;who=owner
 	return [who if top>0.0 else NONE,top]
 
@@ -202,9 +223,8 @@ func assign()->PackedByteArray:
 			var top:=-1.0e9
 			var who:=NONE
 			for ci in list:
-				var claim:Dictionary=claims[ci]
-				var score:=claim_score(claim,point)
-				var owner:=int(claim.owner_index)
+				var score:=_score(ci,point)
+				var owner:=_owners[ci]
 				if score>top or (score==top and owner<who): top=score;who=owner
 			var i:=iy*n+ix
 			best[i]=top
@@ -225,6 +245,7 @@ func set_heights(values:PackedFloat32Array)->void:
 func build(cancel:Array=[false])->Dictionary:
 	for i in n*n:
 		if is_finite(heights[i]) and heights[i]<=SEA: label[i]=WATER
+	_prepare_nodes()
 	for iy in n-1:
 		if bool(cancel[0]): return {}
 		for ix in n-1:
@@ -233,14 +254,44 @@ func build(cancel:Array=[false])->Dictionary:
 	return {"wash_vertices":_wash_vertices,"wash_colors":_wash_colors,"wash_owner":_wash_owner,"lines":_lines(),"label":label,"heights":heights}
 
 
+## Each held node's place and wash, once (a node serves four cells).
+func _prepare_nodes()->void:
+	var count:=n*n
+	_node_v3.resize(count)
+	_node_alpha.resize(count)
+	_node_alpha.fill(0.0)
+	_colors.clear()
+	for style:Dictionary in styles: _colors.append(style.get("color",Color.WHITE))
+	for i in count:
+		var owner:=label[i]
+		if owner<0 or owner>=styles.size(): continue
+		var point:=node_point(i)
+		var ground:=heights[i] if is_finite(heights[i]) else 0.0
+		_node_v3[i]=Vector3(point.x,maxf(ground,0.0)+lift,point.y)
+		var style:Dictionary=styles[owner]
+		var alpha:=float(style.get("wash",0.15))*wash_falloff(best[i],bool(style.get("firm",false)))
+		if bool(style.get("foreign",false)) and alpha>0.0: alpha*=_known(point,i)
+		_node_alpha[i]=alpha
+
+
 func _cell(ix:int,iy:int)->void:
 	var i0:=iy*n+ix
-	var nodes:=PackedInt32Array([i0,i0+1,i0+n+1,i0+n])
-	var labels:=PackedInt32Array([label[nodes[0]],label[nodes[1]],label[nodes[2]],label[nodes[3]]])
-	if maxi(maxi(labels[0],labels[1]),maxi(labels[2],labels[3]))<0: return
-	if labels[0]==labels[1] and labels[1]==labels[2] and labels[2]==labels[3]:
-		_emit([_node_vertex(nodes[0]),_node_vertex(nodes[1]),_node_vertex(nodes[2]),_node_vertex(nodes[3])],labels[0])
+	var l0:=label[i0]
+	var l1:=label[i0+1]
+	var l2:=label[i0+n+1]
+	var l3:=label[i0+n]
+	if maxi(maxi(l0,l1),maxi(l2,l3))<0: return
+	if l0==l1 and l1==l2 and l2==l3:
+		# A whole cell of one people's land: two triangles from its nodes.
+		if l0>=styles.size(): return
+		var tint:=_colors[l0]
+		for node in [i0,i0+1,i0+n+1,i0,i0+n+1,i0+n]:
+			_wash_vertices.append(_node_v3[node])
+			_wash_colors.append(Color(tint,_node_alpha[node]))
+			_wash_owner.append(l0)
 		return
+	var nodes:=PackedInt32Array([i0,i0+1,i0+n+1,i0+n])
+	var labels:=PackedInt32Array([l0,l1,l2,l3])
 	# The perimeter: a crossing on each edge between unlike corners.
 	var cuts:Array=[]
 	for k in 4:
@@ -343,22 +394,28 @@ func _crossing_vertex(crossing:Dictionary,owner:int)->Dictionary:
 	return {"p":crossing.p,"h":crossing.h,"s":owner_score(owner,crossing.p),"key":-1-int(crossing.id)}
 
 
-## One convex piece of a people's land, fanned into triangles.
+## One convex piece of a people's land, fanned into triangles. Its corners
+## at nodes take the nodes' own place and wash.
 func _emit(polygon:Array,owner:int)->void:
 	if owner<0 or owner>=styles.size() or polygon.size()<3: return
 	var style:Dictionary=styles[owner]
-	var color:Color=style.get("color",Color.WHITE)
+	var color:=_colors[owner]
 	var wash:=float(style.get("wash",0.15))
 	var firm:=bool(style.get("firm",false))
 	var foreign:=bool(style.get("foreign",false))
 	var vertices:Array[Vector3]=[]
 	var colors:Array[Color]=[]
 	for vertex:Dictionary in polygon:
+		var key:=int(vertex.key)
+		if key>=0 and label[key]==owner:
+			vertices.append(_node_v3[key])
+			colors.append(Color(color,_node_alpha[key]))
+			continue
 		var point:Vector2=vertex.p
 		var ground:=float(vertex.h)
 		if not is_finite(ground): ground=0.0
 		var alpha:=wash*wash_falloff(float(vertex.s),firm)
-		if foreign and alpha>0.0: alpha*=_known(point,int(vertex.key))
+		if foreign and alpha>0.0: alpha*=_known(point,key)
 		vertices.append(Vector3(point.x,maxf(ground,0.0)+lift,point.y))
 		colors.append(Color(color,alpha))
 	for k in range(1,polygon.size()-1):

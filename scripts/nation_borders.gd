@@ -143,12 +143,29 @@ static func ink_fade(view_km:float)->float:
 
 # --- Claims ---------------------------------------------------------------------
 
-## {owner, id, center, radius (its furthest reach), table (its outline)}.
+## {owner, id, center, radius (its furthest reach), table (its outline), key
+## (what it draws, coarsely: claim_key)}.
 static func make_claim(owner:String,id:String,center:Vector2,radius:float,boundary:Variant=null)->Dictionary:
 	var table:=Partition.shape_table(center,boundary,radius)
 	var reach:=0.0
 	for value in table: reach=maxf(reach,value)
-	return {"owner":owner,"id":id,"center":center,"radius":reach,"table":table}
+	var claim:={"owner":owner,"id":id,"center":center,"radius":reach,"table":table}
+	claim["key"]=claim_key(claim)
+	return claim
+
+
+## What one claim draws, coarsely: its holder, its town, its hearth, its reach
+## in steps of about 2% and its outline's shape. Growth short of a step keys
+## the same, so it redraws nothing.
+static func claim_key(claim:Dictionary)->int:
+	var radius:=maxf(float(claim.get("radius",0.0)),0.000001)
+	var bucket:=roundi(log(radius)/log(1.02))
+	# The hearth in steps of a twentieth of the claim's size bucket, so the same
+	# town in the same bucket always keys the same.
+	var step:=pow(1.02,float(bucket))*0.05
+	var shape:=PackedInt32Array()
+	for value in (claim.get("table",PackedFloat32Array()) as PackedFloat32Array): shape.append(roundi(value/radius*40.0))
+	return hash([String(claim.get("owner","")),String(claim.get("id","")),((claim.get("center",Vector2.ZERO) as Vector2)/step).round(),bucket,hash(shape)])
 
 
 ## A claim judged from a head count alone (km).
@@ -177,38 +194,57 @@ static func own_claims(settlements:Array)->Array[Dictionary]:
 ## same settlement model as ours) or, where it keeps none, one judged from the
 ## head count last reported. A town held by us is ours. Unnamed places and
 ## burned towns have no land to draw.
-static func foreign_claims(center:Vector2,reach:float)->Array[Dictionary]:
+## `cache` (city id -> {sig, claim}) keeps a town's claim while its holder,
+## place and reach step hold, so a read rebuilds only what moved. Our book is
+## read in place (city_intelligence.records), and who holds a town is told as
+## own_control tells it: our people always know what they hold.
+static func foreign_claims(center:Vector2,reach:float,cache:Dictionary={})->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	if Engine.get_main_loop()==null or CivilizationSystem.city_intelligence==null: return out
 	var regions:Dictionary={}
 	for civ:Dictionary in CivilizationSystem.civilizations:
 		for region:Dictionary in civ.get("strategic_regions",[]): regions[String(region.get("id",""))]=region
-	for city:Dictionary in CivilizationSystem.city_intelligence.known_cities("player","",false,center,reach):
-		var city_id:=String(city.get("city_id",""))
-		var holder:=String(city.get("controller",""))
-		if holder=="": holder=String(city.get("civ_id",""))
-		if holder=="human": holder="player"
-		if holder=="" or city_id=="": continue
-		if _report_damage(city)>=0.6: continue
+	var records:Variant=CivilizationSystem.city_intelligence.get("records")
+	var book:Dictionary=(records as Dictionary).get("player",{}) if records is Dictionary else {}
+	var kept:Dictionary={}
+	for city_variant in book:
+		var city_id:=String(city_variant)
+		var report_variant:Variant=book[city_variant]
+		if not report_variant is Dictionary or city_id=="": continue
+		var report:Dictionary=report_variant
+		var location:Variant=report.get("position",{})
+		if not location is Dictionary: continue
+		var at:=Vector2(float((location as Dictionary).get("x",0.0)),float((location as Dictionary).get("z",0.0)))
+		if at.distance_squared_to(center)>reach*reach: continue
 		var region:Dictionary=regions.get(city_id,{})
+		var holder:=String(report.get("controller",""))
+		var live:=String(region.get("controller","")) if not region.is_empty() else ""
+		if live=="player" and holder!="player": holder="player"
+		elif holder=="player" and live!="" and live!="player": holder=live
+		if holder=="": holder=String(report.get("civ_id",""))
+		if holder=="human": holder="player"
+		if holder=="" or _report_damage(report)>=0.6: continue
 		if _ruined(region) or not bool(region.get("settlement_founded",true)): continue
-		var location:Dictionary=city.get("position",{})
-		var at:=Vector2(float(location.get("x",0.0)),float(location.get("z",0.0)))
 		var place:Variant=region.get("position",at)
 		if place is Vector2: at=place
 		var boundary:Variant=region.get("boundary",[])
-		var outline:=boundary is Array or boundary is PackedVector2Array
 		var radius:=0.0
-		if outline and (boundary.size() as int)>=3:
+		if (boundary is Array or boundary is PackedVector2Array) and int(boundary.size())>=3:
 			for point in boundary:
 				if point is Vector2: radius=maxf(radius,(point as Vector2).distance_to(at))
 		if radius<=0.0:
-			var estimate:Dictionary=(city.get("fields",{}) as Dictionary).get("population",{})
+			var estimate:Dictionary=(report.get("fields",{}) as Dictionary).get("population",{})
 			var people:=(float(estimate.get("low",0.0))+float(estimate.get("high",0.0)))*0.5
 			if people<=0.0: people=float(region.get("population",800.0))
 			radius=estimated_radius(people)
 			boundary=null
-		out.append(make_claim(holder,"town:"+city_id,at,radius,boundary))
+		var sig:=hash([holder,at.snapped(Vector2.ONE*0.001),roundi(log(maxf(radius,0.000001))/log(1.02)),int(boundary.size()) if boundary!=null else 0])
+		var held:Dictionary=cache.get(city_id,{})
+		var claim:Dictionary=held.get("claim",{}) if int(held.get("sig",0))==sig else make_claim(holder,"town:"+city_id,at,radius,boundary)
+		kept[city_id]={"sig":sig,"claim":claim}
+		out.append(claim)
+	cache.clear()
+	cache.merge(kept)
 	return out
 
 
@@ -232,16 +268,8 @@ static func _ruined(region:Dictionary)->bool:
 ## changing by about 2% or its outline changing shape. Daily growth short of
 ## that redraws nothing.
 static func claims_key(claims:Array)->int:
-	var parts:Array=[]
-	for claim:Dictionary in claims:
-		var radius:=maxf(float(claim.get("radius",0.0)),0.000001)
-		var bucket:=roundi(log(radius)/log(1.02))
-		# The hearth in steps of a twentieth of the claim's size bucket, so the
-		# same town in the same bucket always keys the same.
-		var step:=pow(1.02,float(bucket))*0.05
-		var shape:=PackedInt32Array()
-		for value in (claim.get("table",PackedFloat32Array()) as PackedFloat32Array): shape.append(roundi(value/radius*40.0))
-		parts.append([String(claim.get("owner","")),String(claim.get("id","")),((claim.get("center",Vector2.ZERO) as Vector2)/step).round(),bucket,hash(shape)])
+	var parts:=PackedInt64Array()
+	for claim:Dictionary in claims: parts.append(int(claim["key"]) if claim.has("key") else claim_key(claim))
 	return hash(parts)
 
 
