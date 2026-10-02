@@ -74,8 +74,11 @@ const KNOWLEDGE_WORDS:={
 	"joint_stock_company":"joint-stock companies","limited_liability_registration":"limited liability",
 	"nationalized_core_industries":"core industries in state hands",
 }
-## Busts a month by rung, before the stance, the form and banking.
-const BUST_BASE:=[0.0,0.001,0.002,0.003,0.004,0.005]
+## Busts a month by rung, before the stance, the form and banking. At
+## corporations: Open on heavy credit about 1 in 23 years, Open about 1 in 35,
+## Guarded about 1 in 74 on heavy credit and 1 in 110 without (the design's
+## benchmark: open commercial economies roughly 1 in 20-40, guarded rarely).
+const BUST_BASE:=[0.0,0.0003,0.0006,0.0009,0.0012,0.0015]
 ## Knowledge that keeps honest books cuts the odds of a bust, at most this much.
 const BANKING:=["double_entry_ledgers","audited_company_accounts","chartered_central_bank"]
 const BANKING_CUT:=0.4
@@ -106,12 +109,16 @@ const TRADE_REACH:=0.3
 const NO_CREDIT:=0.85
 ## A boom: the sector well short of its target (target above share x
 ## BOOM_GAP) while more than half the credit is used; work +2%. The months
-## of a boom raise the odds of a bust, counted up to BOOM_MONTHS_MAX.
+## of a boom raise the odds of a bust, counted up to BOOM_MONTHS_MAX (at most
+## half again). A bust ends the boom: none comes again until the share has
+## regrown to within BOOM_GAP of where it stood (BOOM_HOLD_DAYS at most), so
+## a sector that keeps failing is not forever booming.
 const BOOM_CREDIT:=0.5
 const BOOM_GAP:=1.05
 const BOOM_GAIN:=0.02
 const BOOM_ODDS_MONTHS:=24.0
-const BOOM_MONTHS_MAX:=24
+const BOOM_MONTHS_MAX:=12
+const BOOM_HOLD_DAYS:=365
 ## A computer ruler weighs the stance again at most once a year.
 const RULER_REVIEW_DAYS:=365
 ## A bust: a third of the sector fails at once; all work -4% for 6 to 12
@@ -135,7 +142,7 @@ const HISTORY_LIMIT:=12
 
 static func _fresh()->Dictionary:
 	return {"version":VERSION,"share":0.0,"target":0.0,"reached":0,"stance":"","chosen":false,"factor":1.0,"wealth":0.0,
-		"last_day":-1,"boom_months":0,"bust":{},"busts":0,"last_roll":{},"history":[],"told_rung":0,"ruler_day":-1}
+		"last_day":-1,"boom_months":0,"bust":{},"busts":0,"last_roll":{},"history":[],"told_rung":0,"ruler_day":-1,"boom_hold":{}}
 
 ## This people's record, made whole. An older save (or a new world) starts at
 ## the rung its knowledge allows, with share at OLDER_SAVE_START of that
@@ -481,8 +488,14 @@ static func step(day:int)->Dictionary:
 	if goal>before:now+=(goal-before)*(1.0-pow(1.0-GROW_YEAR,years))
 	else:now-=(before-goal)*(1.0-pow(1.0-SHRINK_YEAR,years))
 	e.share=clampf(now,0.0,1.0)
-	# A boom: well short of its target, on credit more than half used.
-	var booming_now:=r>=1 and goal>before*BOOM_GAP and goal>0.0 and credit_used()>BOOM_CREDIT
+	# A boom: well short of its target, on credit more than half used; never
+	# while a bust's hold lasts (until the share has regrown to within
+	# BOOM_GAP of where it stood, or BOOM_HOLD_DAYS have passed).
+	var hold:Dictionary=e.get("boom_hold",{}) if e.get("boom_hold") is Dictionary else {}
+	if not hold.is_empty() and (float(e.share)*BOOM_GAP>=float(hold.get("share",0.0)) or day-int(hold.get("day",day))>=BOOM_HOLD_DAYS):
+		hold={}
+		e.boom_hold={}
+	var booming_now:=hold.is_empty() and r>=1 and goal>before*BOOM_GAP and goal>0.0 and credit_used()>BOOM_CREDIT
 	e.boom_months=mini(BOOM_MONTHS_MAX,int(e.get("boom_months",0))+months) if booming_now else 0
 	if busted:report["bust"]=bust_now(day)
 	report.merge({"share":float(e.share),"target":goal,"boom_months":int(e.boom_months)},true)
@@ -504,7 +517,9 @@ static func bust_now(day:int)->Dictionary:
 	e.share=before-cut
 	var months:=_rng(day+7).randi_range(BUST_MONTHS_MIN,BUST_MONTHS_MAX)
 	e.bust={"day":day,"months":months,"left":months,"rung":r}
+	# A bust ends the boom, and holds off the next until the sector regrows.
 	e.boom_months=0
+	e.boom_hold={"day":day,"share":before}
 	e.busts=int(e.get("busts",0))+1
 	# The failed third's debts, through each town's own credit ledger.
 	var fraction:=minf(BUST_CREDIT_MAX,before*BUST_CREDIT_SHARE)*BUST_CUT

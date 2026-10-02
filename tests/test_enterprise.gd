@@ -296,7 +296,7 @@ func test_each_stance_has_its_numbers()->void:
 		assert_float(float(q.target)).override_failure_message("%s reach" % id).is_equal_approx(cap*float(n[0])*1.0*0.85,0.0001)
 		assert_float(float(q.work)).override_failure_message("%s gain" % id).is_equal_approx(float(q.target)*0.32*float(n[1]),0.0001)
 		assert_float(float(q.rich)).override_failure_message("%s wealth" % id).is_equal_approx((0.75-0.50)*float(q.target)*float(n[2]),0.0001)
-		assert_float(Business.bust_month(id,0)).override_failure_message("%s bust odds" % id).is_equal_approx(0.003*float(n[3]),0.000001)
+		assert_float(Business.bust_month(id,0)).override_failure_message("%s bust odds" % id).is_equal_approx(0.0009*float(n[3]),0.0000001)
 		assert_float(float(q.purse)).override_failure_message("%s purse" % id).is_equal_approx(float(n[4]),0.000001)
 	# Open grows fastest and gives most to the rich; Guarded is steadiest.
 	assert_float(float(Business.quote("open").work)).is_greater(float(Business.quote("chartered").work))
@@ -370,21 +370,26 @@ func test_charter_fees_come_out_of_real_stores()->void:
 func test_bust_odds_follow_the_stated_formula()->void:
 	_at_rung(3)
 	_size(0.1,"chartered")
-	assert_float(Business.bust_month()).is_equal_approx(0.003,0.000001)
-	assert_float(Business.bust_month("chartered",12)).is_equal_approx(0.003*1.5,0.000001)
+	assert_float(Business.bust_month()).is_equal_approx(0.0009,0.0000001)
+	assert_float(Business.bust_month("chartered",12)).is_equal_approx(0.0009*1.5,0.0000001)
 	_know("double_entry_ledgers",0.5)
 	assert_float(Business.banking()).is_equal_approx(0.2,0.00001)
-	assert_float(Business.bust_month()).is_equal_approx(0.003*0.8,0.000001)
+	assert_float(Business.bust_month()).is_equal_approx(0.0009*0.8,0.0000001)
 	_form("open_professions")
-	assert_float(Business.bust_month("open",0)).is_equal_approx(0.003*1.6*1.15*0.8,0.000001)
+	assert_float(Business.bust_month("open",0)).is_equal_approx(0.0009*1.6*1.15*0.8,0.0000001)
 	var year:=Business.bust_year()
 	assert_float(year).is_equal_approx(1.0-pow(1.0-Business.bust_month(),12.0),0.000001)
 	assert_str(Business.odds_words(1.0/40.0)).is_equal("About 1 in 40 years")
 	assert_str(Business.odds_words(0.0)).is_equal("No busts")
-	# Open commercial economies bust every few decades; guarded ones rarely.
+	# Open commercial economies bust every few decades; guarded ones rarely
+	# (corporations, licensed guilds, no honest books).
 	_forget("double_entry_ledgers");_form("licensed_guilds")
-	assert_float(1.0/Business.bust_year("open",0)).is_between(15.0,45.0)
-	assert_float(1.0/Business.bust_year("guarded",0)).is_greater(50.0)
+	_at_rung(5)
+	assert_float(1.0/Business.bust_year("open",0)).is_between(30.0,40.0)
+	assert_float(1.0/Business.bust_year("open",12)).is_between(20.0,26.0)
+	assert_float(1.0/Business.bust_year("guarded",0)).is_greater(100.0)
+	assert_float(1.0/Business.bust_year("guarded",12)).is_greater(60.0)
+	_at_rung(3)
 	# A boom: growing while more than half the credit is used; work +2%.
 	_money("currency",1.0,1000.0,0.7)
 	_size(0.01,"open")
@@ -697,16 +702,53 @@ func _long_run(stance:String,years:int,used:float)->Dictionary:
 	return {"busts":busts,"expected":expected,"exact":exact}
 
 func test_long_run_busts_match_the_stated_odds()->void:
-	for run in [["guarded",1500,0.0],["guarded",1500,0.7],["open",800,0.7]]:
+	for run in [["guarded",4000,0.0],["guarded",4000,0.7],["open",2000,0.0],["open",2000,0.7]]:
 		var r:=_long_run(String(run[0]),int(run[1]),float(run[2]))
 		assert_bool(bool(r.exact)).override_failure_message("%s: the roll used odds other than those stated" % str(run)).is_true()
 		var expected:=float(r.expected)
 		assert_float(absf(float(r.busts)-expected)).override_failure_message("%s: %d busts against %.1f stated" % [str(run),int(r.busts),expected]).is_less_equal(3.0*sqrt(expected))
-	# Booms raise the odds only so far: twice the base at most.
+		# The design's benchmark at corporations: open commercial economies on
+		# heavy credit roughly 1 in 20-40 years; guarded ones rarely.
+		var stated_years:=float(run[1])/expected
+		var simulated_years:=float(run[1])/maxf(1.0,float(r.busts))
+		if String(run[0])=="open" and float(run[2])>0.0:
+			assert_float(stated_years).is_between(15.0,40.0)
+			assert_float(simulated_years).is_between(15.0,40.0)
+		if String(run[0])=="guarded":
+			assert_float(stated_years).is_greater(60.0)
+			assert_float(simulated_years).is_greater(60.0)
+	# Booms raise the odds only so far: half again at most.
 	_at_rung(5)
 	var e:=_size(0.1,"guarded")
 	e.boom_months=500
-	assert_float(Business.bust_month()).is_equal_approx(Business.bust_month("guarded",0)*2.0,0.0000001)
+	assert_float(Business.bust_month()).is_equal_approx(Business.bust_month("guarded",0)*1.5,0.0000001)
+
+
+func test_a_bust_ends_the_boom_until_the_sector_regrows()->void:
+	_at_rung(5)
+	_money("currency",1.0,1000.0,0.7)
+	_size(0.1,"open")
+	Business.step(0);Business.step(30)
+	assert_bool(Business.booming()).is_true()
+	Business.bust_now(40)
+	assert_bool(Business.booming()).is_false()
+	var held:=float((Business.state().boom_hold as Dictionary).share)
+	assert_float(held).is_greater(0.1)
+	# Still far short of its target, on heavy credit: no boom while it regrows.
+	for m in range(2,12):
+		Business.step(30*m)
+		assert_bool(Business.booming()).override_failure_message("month %d booms during the hold" % m).is_false()
+	# Regrown to within a twentieth of where it stood: the boom may return.
+	Business.state().share=held
+	Business.step(360)
+	assert_bool(Business.booming()).is_true()
+	assert_bool((Business.state().boom_hold as Dictionary).is_empty()).is_true()
+	# Or a full year after the bust, whatever the share.
+	Business.bust_now(370)
+	Business.step(390)
+	assert_bool(Business.booming()).is_false()
+	Business.step(750)
+	assert_bool(Business.booming()).is_true()
 
 
 func test_a_boom_needs_a_real_gap_and_credit_in_use()->void:

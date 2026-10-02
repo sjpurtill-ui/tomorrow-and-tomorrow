@@ -68,9 +68,9 @@ It moves a twelfth of the gap a year while growing, and a quarter a year while s
 
 ### Booms and busts (stated odds, seeded rolls)
 
-- While the sector is well short of its target (target above share × 1.05) and credit is more than half used, it is **booming**. Productivity gets +2% while it lasts. Boom months count up to 24 at most.
+- While the sector is well short of its target (target above share × 1.05) and credit is more than half used, it is **booming**. Productivity gets +2% while it lasts. Boom months count up to 12 at most, so a boom raises the odds by half at most. A bust ends the boom, and none comes again until the share has regrown to within 5% of where it stood, or a full year has passed.
 - Each month one seeded roll against `p_bust = base × stance × form × (1 − banking) × (1 + boom_months/24)`, where:
-  - `base` by rung is 0, 0.001, 0.002, 0.003, 0.004, 0.005 a month;
+  - `base` by rung is 0, 0.0003, 0.0006, 0.0009, 0.0012, 0.0015 a month (retuned in review to the benchmark below; the first draft had 0.001 to 0.005);
   - `banking` = 0.4 × max adoption of `double_entry_ledgers`, `audited_company_accounts` and `chartered_central_bank`.
 - **A bust:**
   - share falls by a third at once;
@@ -111,17 +111,18 @@ Where the design left room, the code does this (`scripts/enterprise.gd`):
   - The purse records them as "charter" in its month and towns. The board shows "Charter fees" (or "The state works") in "Where it comes from" and in the budget. The monthly reckoning notes them on their own line. The economy's revenue for the day counts them with the levy.
   - Every screen and the court give the fee both ways: at today's size and once grown.
 - **Trust cost.** A change of stance takes 2 points of legitimacy in every town, but only once business exists (rung 1 or more). The purse's record notes it once. At rung 0 the word is kept for later and costs nothing.
-- **Boom.** The sector booms while its target is above its share × 1.05 and more than half the recorded credit is used (the capital's `credit_utilization`). `boom_months` counts up to 24, and is cleared when the boom ends or a bust strikes.
+- **Boom.** The sector booms while its target is above its share × 1.05 and more than half the recorded credit is used (the capital's `credit_utilization`). `boom_months` counts up to 12, and is cleared when the boom ends or a bust strikes. A bust also sets a hold (`boom_hold`): no boom until the share has regrown to within 5% of its level before the bust, or 365 days have passed.
 - **The roll.** Each month the roll comes first, against the odds the screens stated all month (the boom months as they stood). Then the share grows and the boom is counted. The roll is seeded by `hash(world_seed, people, month index)`, and only rungs 1 and up with a share above 0 roll. A step over part of a month (the first after a load) rolls only that part: `1 - (1 - p)^(days/30)`.
 - **Stated odds are the rolled odds.** The stance buttons, the court reply and the fact sheet all quote the current month's odds, booms included. Busts simulated over centuries with seeded rolls match them (tests/test_enterprise.gd, rung 5):
 
-| Stance and credit | Stated | Simulated |
-|---|---|---|
-| Guarded, no credit | 1 in 33 years | 1 in 34 (44 busts in 1,500 years) |
-| Guarded, credit 70% used | 1 in 21 | 1 in 23 (65 busts in 1,500 years) |
-| Open, credit 70% used | 1 in 5.7 | 1 in 5.8 (137 busts in 800 years) |
+| Stance and credit | Stated (long-run average) | Simulated | Months booming |
+|---|---|---|---|
+| Guarded, no credit | 1 in 111 years | 1 in 111 (36 busts in 4,000 years) | none |
+| Guarded, credit 70% used | 1 in 101 | 1 in 103 (39 busts in 4,000 years) | 21 in 100 |
+| Open, no credit | 1 in 35 | 1 in 36 (55 busts in 2,000 years) | none |
+| Open, credit 70% used | 1 in 28 | 1 in 32 (63 busts in 2,000 years) | 53 in 100 |
 
-  With credit used heavily, a sector that busts keeps falling short of its target, so it stays booming: in the Open run, 98 months in 100. That doubles the odds.
+  The test also holds Open on heavy credit at corporations between 15 and 40 years, and Guarded above 60.
 - **Food and the making capacity.** The harvest takes the factor whole: the usual efficiency curve is read on the hands' own efficiency and then multiplied by the factor, within what the land yields. The making capacity's target is raised before its usual ceiling (0.96), so every reader sees it in its usual range.
 - **Computer rulers** weigh the stance once a year. A war's start or end does not flip it month by month, and at war Open is never chosen.
 - **A bust's debts.** The debts written off are a third of the sector's part of recorded credit. The sector holds credit at twice its share of the workers, at most 90 in 100. The write-off goes through each town's own credit ledger (`credit_default`, "Business failures"). The 2 points come off the richest fifth, never below the age's floor, and are shared out to the other fifths by their shares. Holding together falls 0.04 in every town.
@@ -142,5 +143,14 @@ Where the design left room, the code does this (`scripts/enterprise.gd`):
 
 - Early shops add almost nothing (under 1%). Merchant houses and banking add a few percent.
 - Chartered companies and corporations add 10–35% to output per worker over a century. That matches the organizational share of the early-modern and industrial gains, beside technology's larger share.
-- Busts come every few decades in open commercial economies (roughly 1 in 20–40 years) and rarely under guarded ones.
+- Busts come every few decades in open commercial economies (roughly 1 in 20–40 years) and rarely under guarded ones. As built, the odds at corporations, with no form and no honest books:
+
+| Stance | No boom | Booming (12 months or more) | With honest books in full (×0.6), no boom |
+|---|---|---|---|
+| Open | 1 in 35 years | 1 in 24 | 1 in 58 |
+| Chartered | 1 in 56 | 1 in 38 | 1 in 93 |
+| Guarded | 1 in 112 | 1 in 75 | 1 in 186 |
+| State works | 1 in 278 | 1 in 186 | 1 in 463 |
+
+  Lower rungs are rarer still. Under Open, Chartered and Guarded, with no boom: stalls and workshops bust 1 in 174, 278 and 556 years; merchant houses 1 in 87, 139 and 278; banking houses 1 in 58, 93 and 186; chartered companies 1 in 44, 70 and 139.
 - Wealth concentration stays inside each age's bounds.
