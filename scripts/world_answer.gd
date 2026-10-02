@@ -305,6 +305,10 @@ static func monthly(day:int)->void:
 		if bool(relation.get("at_war",false)) and bool(war.call("formal",id)): continue
 		var mine:Dictionary=(a.peoples as Dictionary).get(id,{})
 		if day-int(mine.get("day",-99999))<(ALL_IN_GAP if String(mine.get("kind",""))=="all_in" else ANSWER_GAP): continue
+		# Having come at us with everything once, they come again only for a
+		# new wrong done to them since (deeds.gd): old grudges alone do not
+		# send a people to throw all its spears at us twice.
+		var came:=int(mine.get("came",-1))
 		# Kin by marriage do not come against kin.
 		var kin:=not (war.call("_married",id) as Dictionary).is_empty()
 		var o:=odds(id,reading(id,standing.call("view_of",id,our)))
@@ -313,7 +317,7 @@ static func monthly(day:int)->void:
 		# last bow was turned away too lately), under both together they come.
 		if roll<float(o.bow):
 			if day-int(mine.get("refused",-99999))>=REFUSED_GAP: _offer_submission(id,day,o)
-		elif not kin and float(o.all_in)>0.0 and roll<float(o.bow)+float(o.all_in):
+		elif not kin and float(o.all_in)>0.0 and roll<float(o.bow)+float(o.all_in) and (came<0 or int((load(DEEDS_PATH) as GDScript).call("last_wrong",id))>came):
 			_begin_arming(id,day,o)
 	standing.call("_end_reading")
 
@@ -619,7 +623,6 @@ static func _tribute_due(civ_id:String,day:int)->void:
 		t["due"]=int(t.due)+365
 		var first:=int(t.years)<=1
 		_chronicle("tribute:%s:%d" % [civ_id,day],"%s Keeps Faith" % name,"%s still bows: tribute worth %s came this year, the %s year since it bowed." % [name,_qty(this_year),_nth(int(t.years))],"moment" if first else "notice",civ_id)
-		_log(civ_id,"tribute_paid","worth %s" % _qty(this_year))
 		return
 	var why:="their goods ran out" if agreement.is_empty() else ("you would not protect them against %s" % String(t.get("refused_against","their enemies")) if abandoned else ("they no longer fear us enough" if float(r.fear)<PAY_FEAR else "their spears now match ours"))
 	_break_bond(civ_id,why)
@@ -647,6 +650,7 @@ static func _begin_arming(civ_id:String,day:int,o:Dictionary)->void:
 	var march:=day+_rng("arm:%s:%d" % [civ_id,day]).randi_range(ARMING_MIN,ARMING_MAX)
 	state().arming[civ_id]={"since":day,"march":march,"league":with,"cause":String(o.get("why_all_in","")).substr(0,160)}
 	_mark(civ_id,"all_in",day)
+	(state().peoples[civ_id] as Dictionary)["came"]=day
 	var name:=_name(civ_id)
 	var allies:=""
 	if not with.is_empty():

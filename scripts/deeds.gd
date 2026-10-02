@@ -321,6 +321,13 @@ static func _sum(civ:String,word:bool)->Dictionary:
 	var a_total:=1.0-keep_a*heard
 	return {"a":clampf(a_total,0.0,1.0),"b":clampf(1.0-keep_b-minus_b,0.0,1.0)}
 
+## The day of the latest wrong told against this people (amends aside), or -1.
+static func last_wrong(civ_id:String)->int:
+	var last:=-1
+	for e in state().list:
+		if e is Dictionary and String(e.civ)==civ_id and float(e.get("b",0.0))>0.0: last=maxi(last,int(e.day))
+	return last
+
 ## How much this people fears us for what it remembers we did (to them, and
 ## a share for what we did to others).
 static func fear(civ_id:String)->float:
