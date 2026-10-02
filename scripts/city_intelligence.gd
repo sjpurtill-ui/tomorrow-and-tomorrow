@@ -69,11 +69,13 @@ func truth(city_id:String)->Dictionary:
 		# defenders: home's levy and its share of the watch, any other town its
 		# share), read in our own scope: the same rule as a rival's towns
 		# (world_simulation project).
-		values["garrison"]=float(WorldSimulation.scoped("player",func()->int:return preload("res://scripts/civilization_combat.gd").defenders(city_id)))
+		var guard:Dictionary=WorldSimulation.scoped("player",func()->Dictionary:return preload("res://scripts/civilization_combat.gd").guard_of(WorldSimulation.settlements.settlement_record(city_id)))
+		values["garrison"]=float(int(guard.trained)+int(guard.watch)+int(guard.rise))
+		values["garrison_untrained"]=float(int(guard.watch)+int(guard.rise))
 		if bool(city.get("primary",false)):
 			values["fortification"]=clampf(float(WorldSimulation.military.settlement_defense.get("stage",0))/5.0,0,1)
 		place["controller"]=String(city.get("occupied_by","player"))
-		if String(place.controller)!="player":values.erase("garrison")
+		if String(place.controller)!="player":values.erase("garrison");values.erase("garrison_untrained")
 	else:
 		var location:Dictionary=system._region_location(city_id)
 		if location.is_empty(): return {}
@@ -85,9 +87,9 @@ func truth(city_id:String)->Dictionary:
 		values={"population":float(region.population),"fortification":fort,"damage":float(region.damage),"garrison":system.land_military_population(civ)*float(region.strategic_weight)*(.72+fort)*(.82+float(civ.logistics)*.36),"production":float(civ.production)*(1-float(region.damage)*.5),"logistics":float(civ.logistics)*(1-float(region.damage)*.3),"supply":float(civ.food_days)}
 		if bool(civ.get("shared_rules",false)):
 			var local:Dictionary=region.get("local_metrics",{})
-			values={"population":float(region.population),"fortification":fort,"damage":float(region.damage),"garrison":int(region.get("garrison",0)),"production":float(local.get("material_capacity",0)),"logistics":float(local.get("logistics",0)),"supply":float(local.get("food_days",0))}
+			values={"population":float(region.population),"fortification":fort,"damage":float(region.damage),"garrison":int(region.get("garrison",0)),"garrison_untrained":int(region.get("garrison_untrained",0)),"production":float(local.get("material_capacity",0)),"logistics":float(local.get("logistics",0)),"supply":float(local.get("food_days",0))}
 		if String(region.controller)=="player":
-			for key in ["garrison","production","logistics","supply"]: values.erase(key)
+			for key in ["garrison","garrison_untrained","production","logistics","supply"]: values.erase(key)
 		elif bool(civ.get("shared_rules",false)) and WorldSimulation.actors.has(String(civ.id)) and region.has("local_city_id"):
 			values.merge(WorldSimulation.scoped(String(civ.id),func()->Dictionary:return _civic_observation(String(region.local_city_id))))
 		else:
@@ -126,6 +128,9 @@ func capture(observer:String,city_id:String,quality:float,day:int,source:String,
 		var high:float=ceil((center+width)/quantum)*quantum
 		if FIELDS[key].unit=="capacity": high=minf(1,high)
 		fields[key]={"low":low,"high":high,"observed_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366)}
+		# Who of them carry no drill (the watch and the townsfolk who rise), as
+		# a share in tenths: the stated odds arm them as a levy (war_odds.gd).
+		if key=="garrison" and actual.values.has("garrison_untrained"):fields[key]["untrained_share"]=snappedf(clampf(float(actual.values.garrison_untrained)/maxf(1.0,value),0.0,1.0),0.1)
 	var observation:={"city_id":city_id,"civ_id":String(actual.civ_id) if quality>=.35 else "","name":String(actual.name) if quality>=.35 else "Unidentified settlement","position":actual.position.duplicate(true),"controller":String(actual.controller) if quality>=.35 else "","observed_day":day,"reported_day":day,"quality":quality,"source":source,"reference":reference,"observation_days":clampi(observation_days,1,366),"fields":fields}
 	# Great works standing or rising here, frozen at this observation (great_works_rivalry.gd).
 	var works:=preload("res://scripts/great_works_rivalry.gd").sight(system,actual,quality,day,observer+city_id+reference)

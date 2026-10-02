@@ -118,10 +118,35 @@ static func guard_ledger(mc:Variant=null)->Dictionary:
 ## before they are shared out among the towns.
 static func _whole_people(mc:Variant)->Dictionary:
 	var state=WorldSimulation.state
+	# Grown people away from home (caravans, convoys, scouts, envoys, scholars
+	# abroad) cannot rise, as they cannot enlist (recruitment_capacity). Read
+	# first: reading them settles the people's counts, as enlisting does.
+	var away:=_away(state)
 	var defense:=maxi(0,int(mc._home_garrison_target()))
-	var serving:=maxi(defense,int(mc._mobilized_count()))
-	var adults:=maxf(0.0,float(state.population_cohorts.get("working_age",float(state.population_exact)*0.60))-float(serving))
-	return {"watch":maxi(0,defense-maxi(0,int(mc.home_army.get("troops",0)))),"rise_exact":RISE_SHARE*adults}
+	# Everyone under arms anywhere (_mobilized_count): the levy at home and
+	# its hurt, scattered and taken, recruits and those in drill, bands in the
+	# field, garrisons in taken towns, crews. A band marching out is still
+	# under arms: it is never counted again as the watch. Only the watch's
+	# own basic drill, at home, stays the watch (settlement_defense_snapshot:
+	# Defense labour serves in the watch while its drill rotates).
+	var mobilized:=maxi(0,int(mc._mobilized_count()))
+	var arms:=maxi(0,mobilized-maxi(0,int(mc._automatic_basic_trainees())))
+	var watch:=maxi(0,defense-arms)
+	var serving:=maxi(defense,mobilized)
+	var adults:=maxf(0.0,float(state.population_cohorts.get("working_age",float(state.population_exact)*0.60))-float(away)-float(serving))
+	return {"watch":watch,"rise_exact":RISE_SHARE*adults}
+
+## Grown people of the people in scope who are away from their towns.
+static func _away(state:Variant)->int:
+	var away:=0
+	var world:Variant=WorldSimulation.world
+	# Read only from a world already made: player_population_commitments
+	# first makes a world that is not (CivilizationSystem.initialize), and a
+	# count of defenders must never remake the world it is read from.
+	var made:bool=world!=null and world.has_method("player_population_commitments") and (WorldSimulation.actor_id!="player" or (not (world.civilizations as Array).is_empty() and int(state.world_seed)==int(world.last_world_seed)))
+	if made:away+=int(world.player_population_commitments().get("working_absent",0))
+	away+=int(preload("res://scripts/scholar_visits.gd").absent(state,int(state.elapsed_days)))
+	return maxi(0,away)
 
 ## `amount` whole people shared out by `people` (id -> count, summing to
 ## `total`), largest remainder first, never more in a town than live there
@@ -238,18 +263,25 @@ static func defenders_of(city:Dictionary)->int:
 	if city.is_empty():return 0
 	return int(defenders_by_town().get(String(city.get("id","")),0))
 
-## defenders for every town of the owner, by id, from one reading of the
-## guard ledger.
-static func defenders_by_town()->Dictionary:
+## Who would defend every town of the owner, part by part, by id, from one
+## reading of the guard ledger: {city_id: {trained, watch, rise}}.
+static func guards_by_town()->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	var out:={}
 	var ledger:=guard_ledger(mc)
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		var id:=String(city.get("id",""))
 		var guard:Dictionary=ledger.get(id,{})
-		var count:=int(guard.get("watch",0))+int(guard.get("rise",0))
-		if bool(city.get("primary",false)) and String(city.get("occupied_by","")).is_empty() and mc!=null:count+=maxi(0,int(mc.home_army.get("troops",0)))
-		out[id]=count
+		var trained:=0
+		if bool(city.get("primary",false)) and String(city.get("occupied_by","")).is_empty() and mc!=null:trained=maxi(0,int(mc.home_army.get("troops",0)))
+		out[id]={"trained":trained,"watch":int(guard.get("watch",0)),"rise":int(guard.get("rise",0))}
+	return out
+
+## defenders for every town of the owner, by id (guards_by_town summed).
+static func defenders_by_town()->Dictionary:
+	var out:={}
+	var guards:=guards_by_town()
+	for id in guards:out[id]=int(guards[id].trained)+int(guards[id].watch)+int(guards[id].rise)
 	return out
 
 static func commit_enemy(result:Dictionary)->void:

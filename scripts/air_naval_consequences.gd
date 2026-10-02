@@ -535,16 +535,14 @@ static func opposed_landing(army:Dictionary,convoy:Dictionary,naval_support:floa
 	_remove_field_army_troops(army,hit,killed)
 	var defender_loss:=clampf(.05+.25*(1.0-ratio)*(.7+.6*support),.03,.4)
 	var defender_hit:=roundi(defenders*defender_loss)
+	var defender_killed:=roundi(float(defender_hit)*.35)
 	var target:=Combat.owner(view) if WorldSimulation.enabled else view
 	if WorldSimulation.enabled and (target=="player" or WorldSimulation.actors.has(target)):
 		var local:=Combat.local_city(view,region_id)
-		var removed:Variant=_in(target,func()->int:
-			var primary:=bool(WorldSimulation.settlements.settlement_record(local).get("primary",false))
-			if not primary:return 0
-			var available:=mini(defender_hit,int(WorldSimulation.military.home_army.get("troops",0)))
-			remove_home_troops(available,roundi(float(available)*.35))
-			return available)
-		outcome.defender_hit=int(removed if removed!=null else 0)
+		var struck:Variant=_in(target,func()->Dictionary:return strike_town_guard(local,defender_hit))
+		var on_beach:Dictionary=struck if struck is Dictionary else {}
+		outcome.defender_hit=int(on_beach.get("hit",0))
+		defender_killed=int(on_beach.get("killed",0))
 	elif not WorldSimulation.enabled and view!="player":
 		var location:Dictionary=WorldSimulation.world._region_location(region_id)
 		if not location.is_empty():
@@ -554,8 +552,30 @@ static func opposed_landing(army:Dictionary,convoy:Dictionary,naval_support:floa
 	var enemy:=target if WorldSimulation.enabled else ""
 	note_losses(here(),enemy,{"military_dead":killed,"wounded":hit-killed},{})
 	if enemy!="" and int(outcome.defender_hit)>0:
-		note_losses(enemy,here(),{"military_dead":roundi(float(outcome.defender_hit)*.35),"wounded":int(outcome.defender_hit)-roundi(float(outcome.defender_hit)*.35)},{})
+		note_losses(enemy,here(),{"military_dead":defender_killed,"wounded":int(outcome.defender_hit)-defender_killed},{})
+	outcome["defender_killed"]=defender_killed
 	return outcome
+
+## `hits` among those who stood on the beach for a town (run in its owner's
+## scope): its guard as its battle musters it (civilization_combat.guard_of),
+## each part hit by its share. The trained come off the levy at home (a third
+## of them killed, the rest hurt); the watch and townsfolk are the town's own
+## people, its dead counted in that town as a town's own fight counts them
+## (MilitaryCampaign._apply_town_watch_result), the hurt going home.
+## {hit, killed}: only those who were there to be hit.
+static func strike_town_guard(city_id:String,hits:int)->Dictionary:
+	var guard:=Combat.guard_of(WorldSimulation.settlements.settlement_record(city_id))
+	var trained:=int(guard.trained);var militia:=int(guard.watch)+int(guard.rise)
+	var total:=trained+militia
+	if hits<=0 or total<=0:return {"hit":0,"killed":0}
+	var struck:=mini(hits,total)
+	var trained_hit:=mini(trained,roundi(float(struck)*float(trained)/float(total)))
+	var militia_hit:=mini(militia,struck-trained_hit)
+	var trained_killed:=roundi(float(trained_hit)*.35)
+	var militia_killed:=roundi(float(militia_hit)*.35)
+	if trained_hit>0:remove_home_troops(trained_hit,trained_killed)
+	if militia_killed>0:WorldSimulation.military._apply_town_watch_result(city_id,{},[{"defender_casualties":{"killed":militia_killed}}],"defender")
+	return {"hit":trained_hit+militia_hit,"killed":trained_killed+militia_killed}
 
 static func _remove_field_army_troops(army:Dictionary,count:int,killed:int)->void:
 	var remaining:=mini(count,int(army.get("troops",0)))

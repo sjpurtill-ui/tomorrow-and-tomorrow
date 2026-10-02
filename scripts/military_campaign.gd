@@ -4789,12 +4789,15 @@ func settlement_defense_snapshot()->Dictionary:
 	var trained_troops:=maxi(0,int(home_army.get("troops",0)))
 	# Defense labor is physically present and serves in the watch while its basic
 	# training rotates automatically. Formal formations remain separately visible.
-	# Home's guard is its levy, its own share of the watch and its townsfolk
-	# who rise (as its battle musters them, _home_defense_force); a town needs
-	# 3.5 in 100 of its people.
-	var troops:=trained_troops+int(preload("res://scripts/civilization_combat.gd").home_militia(self).count)
+	# Who stands at home if it is attacked is its levy, its own share of the
+	# watch and its townsfolk who rise (as its battle musters them,
+	# _home_defense_force). Its guard is the levy and the watch alone: a town
+	# needs 3.5 in 100 of its people on guard; the townsfolk are no guard.
+	var militia:Dictionary=preload("res://scripts/civilization_combat.gd").home_militia(self)
+	var troops:=trained_troops+int(militia.count)
+	var guard:=trained_troops+int(militia.watch)
 	var garrison_required:=maxi(8,ceili(maxf(1.0,WorldSimulation.settlements.primary_population_exact())*0.035))
-	var garrison_coverage:=clampf(float(troops)/float(garrison_required),0.0,1.0)
+	var garrison_coverage:=clampf(float(guard)/float(garrison_required),0.0,1.0)
 	var integrity:=float(settlement_defense.integrity)
 	var construction:Dictionary={}
 	if project_index>=0:
@@ -4803,7 +4806,7 @@ func settlement_defense_snapshot()->Dictionary:
 		var left:=maxf(0.0,float(project.work)-float(settlement_defense.project_work))
 		construction={"active":true,"stage":project_index,"name":String(project.name),"short":String(project.short),"progress":float(settlement_defense.project_progress),"work_done":float(settlement_defense.project_work),"work_required":float(project.work),"materials":(settlement_defense.reserved_materials as Dictionary).duplicate(true),
 			"daily_work":daily,"days_left":left/daily if daily>0.0 else -1.0,"started_by":String(settlement_defense.get("started_by","")),"started_day":int(settlement_defense.get("started_day",-1))}
-	return {"stage":stage_index,"name":String(stage.name),"short":String(stage.short),"description":String(stage.description),"integrity":integrity,"defense_bonus":float(stage.defense_bonus)*integrity,"observation_radius_km":float(stage.observation_km)*(0.82+integrity*0.18),"store_protection":float(stage.store_protection)*integrity,"garrison_personnel":troops,"garrison_trained":trained_troops,"garrison_militia":maxi(0,troops-trained_troops),"garrison_required":garrison_required,"garrison_coverage":garrison_coverage,"basic_training_automatic":true,"construction":construction,"word":String(settlement_defense.word),"completed_day":int(settlement_defense.get("completed_day",-1)),"next":settlement_defense_upgrade_availability()}
+	return {"stage":stage_index,"name":String(stage.name),"short":String(stage.short),"description":String(stage.description),"integrity":integrity,"defense_bonus":float(stage.defense_bonus)*integrity,"observation_radius_km":float(stage.observation_km)*(0.82+integrity*0.18),"store_protection":float(stage.store_protection)*integrity,"garrison_personnel":troops,"garrison_trained":trained_troops,"garrison_militia":maxi(0,troops-trained_troops),"garrison_guard":guard,"garrison_watch":int(militia.watch),"garrison_townsfolk":int(militia.rise),"garrison_required":garrison_required,"garrison_coverage":garrison_coverage,"basic_training_automatic":true,"construction":construction,"word":String(settlement_defense.word),"completed_day":int(settlement_defense.get("completed_day",-1)),"next":settlement_defense_upgrade_availability()}
 
 
 func _process_settlement_defense_day()->void:

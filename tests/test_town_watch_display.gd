@@ -90,7 +90,7 @@ func _parts(id:String)->Dictionary:
 ## of the people living in those towns.
 func _rise_expected(keeping_share:float=1.0)->int:
 	var serving:=maxi(int(GameState.population_allocations.get("Defense",0)),int(MilitaryCampaign._mobilized_count()))
-	var adults:=maxf(0.0,float(GameState.population_cohorts.get("working_age",0.0))-float(serving))
+	var adults:=maxf(0.0,float(GameState.population_cohorts.get("working_age",0.0))-float(Combat._away(GameState))-float(serving))
 	return roundi(Combat.RISE_SHARE*adults*keeping_share)
 
 
@@ -156,6 +156,57 @@ func test_the_townsfolk_rise_untrained_one_in_ten_of_those_not_already_serving()
 	assert_int(_rises()).is_equal(_rise_expected(0.75))
 
 
+func test_a_band_marching_out_is_still_under_arms_not_the_watch()->void:
+	_levy(30)
+	var home:=_home_id()
+	# Forty on defence work, thirty of them the levy: ten keep the watch.
+	assert_int(_sum(Combat.watch_ledger())).is_equal(10)
+	var rise:=_rises()
+	var home_before:=Combat.defenders(home)
+	var town_before:=Combat.defenders(TOWN)
+	var formed:=MilitaryCampaign.create_field_army(20)
+	assert_bool(formed.has("error")).override_failure_message(str(formed)).is_false()
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(10)
+	# The twenty who marched are under arms still: the watch and the
+	# townsfolk who rise are the same, and home stands with twenty fewer.
+	assert_int(_sum(Combat.watch_ledger())).is_equal(10)
+	assert_int(_rises()).is_equal(rise)
+	assert_int(Combat.defenders(TOWN)).is_equal(town_before)
+	assert_int(Combat.defenders(home)).is_equal(home_before-20)
+	assert_int(int(MilitaryCampaign._home_defense_force(false).troops)).is_equal(home_before-20)
+	# The hurt, the scattered and the taken are no watch either.
+	MilitaryCampaign.home_army["wounded_pool"]=5
+	assert_int(_sum(Combat.watch_ledger())).is_equal(5)
+	# Those away from home (caravans, convoys, scholars) do not rise.
+	assert_int(_rises()).is_equal(_rise_expected())
+
+
+func test_a_landing_hits_the_guard_where_it_stands()->void:
+	var AN:=preload("res://scripts/air_naval_consequences.gd")
+	_levy(12)
+	var home:=_home_id()
+	# At Valebridge only its watch and townsfolk stand: its own people fall.
+	var people:=GameState.population_total
+	var levy:=int(MilitaryCampaign.home_army.troops)
+	var town:=AN.strike_town_guard(TOWN,6)
+	assert_int(int(town.hit)).is_equal(6)
+	assert_int(int(town.killed)).is_equal(2)
+	assert_int(people-GameState.population_total).is_equal(2)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(levy)
+	# At home the hits fall on the levy and on the watch and townsfolk by
+	# their share of those who stood.
+	var parts:=Combat.guard_of(SettlementModel.settlement_record(home))
+	var stood:=int(parts.trained)+int(parts.watch)+int(parts.rise)
+	people=GameState.population_total
+	var at_home:=AN.strike_town_guard(home,20)
+	assert_int(int(at_home.hit)).is_equal(20)
+	var trained_hit:=roundi(20.0*12.0/float(stood))
+	assert_int(levy-int(MilitaryCampaign.home_army.troops)).is_equal(trained_hit)
+	assert_int(people-GameState.population_total).is_equal(int(at_home.killed))
+	# No more are hit than stood there.
+	assert_int(int(AN.strike_town_guard(TOWN,10_000).hit)).is_equal(Combat.defenders(TOWN))
+
+
 func test_a_town_with_no_one_on_watch_still_has_its_townsfolk()->void:
 	GameState.population_allocations["Defense"]=0
 	var parts:=_parts(TOWN)
@@ -165,8 +216,8 @@ func test_a_town_with_no_one_on_watch_still_has_its_townsfolk()->void:
 	assert_str(String(row.value)).is_equal("%d would take up arms" % int(parts.rise))
 	assert_int(Labels.home_guard(TOWN)).is_equal(int(parts.rise))
 	assert_int(int(_card(TOWN,"Valebridge").badge)).is_equal(int(parts.rise))
-	# Nobody grown and free: nobody at all.
-	GameState.population_cohorts["working_age"]=0.0
+	# Every grown person already called up: nobody is left to rise.
+	MilitaryCampaign.aggregate_recruits=100_000
 	assert_dict(Combat.town_watch(TOWN)).is_empty()
 	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).value)).is_equal("no one")
 	assert_int(int(_card(TOWN,"Valebridge").badge)).is_equal(0)
@@ -434,4 +485,51 @@ func test_a_rivals_other_town_is_counted_fought_and_landed_on_by_its_guard()->vo
 	assert_int(int(landed.defenders)).is_equal(roundi(float(guard)*.3+200.0*.02))
 	# Their scouts' truth of our Valebridge is ours, read in our own scope.
 	assert_float(float(CivilizationSystem.city_intelligence.truth(TOWN).values.garrison)).is_equal(float(Combat.defenders(TOWN)))
+	# Our scouts see how many of them are no soldiers, and the stated odds arm
+	# those as the battle does: a levy with what comes to hand.
+	assert_float(float(truth.values.garrison_untrained)).is_equal(float(guard))
+	var intel=CivilizationSystem.city_intelligence
+	var day:=int(GameState.elapsed_days)
+	intel.publish("player",intel.capture("player",region_id,.9,day,"test","t"),day)
+	var estimate:Dictionary=preload("res://scripts/court_war_orders.gd").enemy_estimate(region_id)
+	assert_bool(bool(estimate.known)).is_true()
+	assert_float(float(estimate.untrained)).is_equal(1.0)
 	WorldSimulation.context_provider=Callable()
+
+
+func test_the_stated_odds_arm_the_townsfolk_as_the_battle_does()->void:
+	var Odds:=preload("res://scripts/war_odds.gd")
+	_levy(12)
+	var ours:Array=MilitaryCampaign.home_army.formations
+	# Forty men drilled as a garrison against forty townsfolk with what comes
+	# to hand: the townsfolk are far weaker.
+	var soldiers:=Odds.of(MilitaryCampaign.home_army,ours,12,40.0,0.0,[],"",true,1.0,0.0)
+	var townsfolk:=Odds.of(MilitaryCampaign.home_army,ours,12,40.0,0.0,[],"",true,1.0,1.0)
+	assert_float(float(townsfolk.raw)).is_greater(float(soldiers.raw))
+	var block:=Odds.townsfolk(9)
+	assert_str(String(block.weapon)).is_equal("improvised")
+	assert_int(int(block.equipment)).is_equal(0)
+	assert_float(float(block.training)).is_equal(Combat.RISE_TRAINING)
+
+
+func test_the_defence_page_counts_the_guard_and_names_the_townsfolk_apart()->void:
+	var Impact:=preload("res://scripts/task_impact.gd")
+	# Nobody on defence work and no levy: home has no guard, though its
+	# townsfolk would still rise.
+	GameState.population_allocations["Defense"]=0
+	var rows:={}
+	for line:Dictionary in Impact.defense().lines:rows[String(line.label)]=line
+	var defense:=MilitaryCampaign.settlement_defense_snapshot()
+	assert_int(int(defense.garrison_guard)).is_equal(0)
+	assert_int(int(defense.garrison_townsfolk)).is_greater(0)
+	assert_str(String(rows["Guard at home"].value)).starts_with("0 of ")
+	assert_str(String(rows["Guard at home"].tone)).is_equal("bad")
+	assert_str(String(rows["Guard at home"].words)).not_contains("The watch is the town's guard")
+	assert_str(String(rows["Townsfolk who would fight"].words)).contains("1 in 10")
+	assert_float(float(defense.garrison_coverage)).is_equal(0.0)
+	# The levy and the watch are the guard; the townsfolk are not.
+	_levy(12)
+	GameState.population_allocations["Defense"]=40
+	defense=MilitaryCampaign.settlement_defense_snapshot()
+	assert_int(int(defense.garrison_guard)).is_equal(12+int(defense.garrison_watch))
+	assert_int(int(defense.garrison_personnel)).is_equal(int(defense.garrison_guard)+int(defense.garrison_townsfolk))

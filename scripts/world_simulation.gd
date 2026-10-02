@@ -400,9 +400,11 @@ func project(civ:Dictionary)->void:
 		region.population=0.0
 		region.fortification=0.0
 		region["garrison"]=0
+		region["garrison_untrained"]=0
 	# Who would defend each town, as its battle musters them (one reading of
-	# the watch ledger): what a scout of theirs can count.
-	var guards:Dictionary=preload("res://scripts/civilization_combat.gd").defenders_by_town()
+	# the guard ledger): what a scout of theirs can count, and how many of
+	# them are untrained (the watch and the townsfolk who rise).
+	var guards:Dictionary=preload("res://scripts/civilization_combat.gd").guards_by_town()
 	for index in network.settlements.size():
 		var city:Dictionary=network.settlements[index]
 		var primary:=bool(city.get("primary",false))
@@ -443,7 +445,9 @@ func project(civ:Dictionary)->void:
 		if String(region.controller).is_empty():region.controller=String(civ.id)
 		region["local_metrics"]=local.metrics.duplicate(true)
 		region.fortification=clampf(float(military.settlement_defense.get("stage",0))/5.0,0,1) if primary else 0.0
-		region.garrison=int(guards.get(String(city.id),0))
+		var guard:Dictionary=guards.get(String(city.id),{})
+		region.garrison=int(guard.get("trained",0))+int(guard.get("watch",0))+int(guard.get("rise",0))
+		region["garrison_untrained"]=int(guard.get("watch",0))+int(guard.get("rise",0))
 		region["stores"]=local.stores.duplicate(true)
 		for occupied:Dictionary in military.recovery.data.occupied:
 			if String(occupied.city_id)==String(city.id) and not bool(occupied.get("liberated",false)):

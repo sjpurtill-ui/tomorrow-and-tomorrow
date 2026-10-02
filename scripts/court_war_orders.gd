@@ -1303,7 +1303,9 @@ static func _enemy_estimate(city_id:String)->Dictionary:
 	# The walls, as far as our scouts saw them (a town's defence in battle).
 	var walls:Dictionary=(report.get("fields",{}) as Dictionary).get("fortification",{})
 	var fortification:=(float(walls.get("low",0.25))+float(walls.get("high",0.25)))*0.5 if not walls.is_empty() else 0.25
-	return {"known":true,"low":roundi(low),"high":roundi(high),"mid":(low+high)*0.5,"age":int(field.get("age_days",report.get("age_days",0))),"fortification":fortification}
+	# How many of them our scouts saw were no soldiers (a town's watch and
+	# townsfolk, civilization_combat.guard_ledger): the odds arm them as a levy.
+	return {"known":true,"low":roundi(low),"high":roundi(high),"mid":(low+high)*0.5,"age":int(field.get("age_days",report.get("age_days",0))),"fortification":fortification,"untrained":clampf(float(field.get("untrained_share",0.0)),0.0,1.0)}
 
 static func _muster_trainees()->int:
 	## "Take them as they are": every recruit still in drill leaves the drill
@@ -2189,10 +2191,11 @@ static func _strike(out:Dictionary,reading:Dictionary,insist:bool)->Dictionary:
 		var theirs_here:=float(enemy.get("mid",0.0))*(0.72 if kind=="raid" else 1.0)
 		var walls:=float(enemy.get("fortification",0.25))
 		var arms:=Odds.their_arms(String(target.civ_id),int(enemy.get("age",-1)))
-		stated_odds=Odds.of(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id))
+		var untrained:=float(enemy.get("untrained",0.0))
+		stated_odds=Odds.of(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id),false,-1.0,untrained)
 		if not stated_odds.is_empty():
 			out["odds"]=stated_odds
-			if float(stated_odds.raw)<want: more=Odds.more_for(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id),want)
+			if float(stated_odds.raw)<want: more=Odds.more_for(speed_force,forms,going,theirs_here,walls,arms,String(target.civ_id),want,false,-1.0,untrained)
 	var weaker:=Odds.weaker(stated_odds) if not stated_odds.is_empty() else ratio<OBJECT_RATIO
 	var short_of_line:=not stated_odds.is_empty() and float(stated_odds.raw)<want
 	out["more"]=more

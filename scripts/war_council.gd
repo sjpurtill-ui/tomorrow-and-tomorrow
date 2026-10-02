@@ -606,7 +606,7 @@ static func _raid_size(town:Dictionary)->int:
 	var arms:=Odds.their_arms(String(town.civ_id),int(enemy.get("age",-1)))
 	for n in [least,maxi(least,ceili(mid)),maxi(least,ceili(mid*1.5)),maxi(least,ceili(mid*2.0)),maxi(least,ceili(mid*3.0))]:
 		if n>=free: break
-		var o:=Odds.of(forces.force,formations,n,mid,walls,arms,String(town.civ_id))
+		var o:=Odds.of(forces.force,formations,n,mid,walls,arms,String(town.civ_id),false,-1.0,float(enemy.get("untrained",0.0)))
 		if not o.is_empty() and float(o.raw)>=Odds.TAKE_ODDS: return n
 	return free
 
@@ -1080,7 +1080,7 @@ static func _band_odds(band:Dictionary,town:Dictionary,kind:String)->Dictionary:
 	var enemy:=_estimate(String(town.city_id))
 	if not bool(enemy.get("known",false)): return {}
 	var mid:=float(enemy.get("mid",0.0))*(0.72 if kind=="raid" else 1.0)
-	return Odds.of(band,formations,going,mid,float(enemy.get("fortification",0.25)),Odds.their_arms(String(town.civ_id),int(enemy.get("age",-1))),String(town.civ_id))
+	return Odds.of(band,formations,going,mid,float(enemy.get("fortification",0.25)),Odds.their_arms(String(town.civ_id),int(enemy.get("age",-1))),String(town.civ_id),false,-1.0,float(enemy.get("untrained",0.0)))
 
 ## Fit to be sent: not resting, nor broken or under strength (army_lines.gd,
 ## band_upkeep.gd).
@@ -1252,7 +1252,7 @@ static func _odds_at(town:Dictionary,going:int,kind:String)->Dictionary:
 	var forces:=_forces()
 	if Odds.heads(forces.formations)<=0: return {}
 	var mid:=float(enemy.get("mid",0.0))*(0.72 if kind=="raid" else 1.0)
-	return Odds.of(forces.force,forces.formations,going,mid,float(enemy.get("fortification",0.25)),Odds.their_arms(String(town.civ_id),int(enemy.get("age",-1))),String(town.civ_id))
+	return Odds.of(forces.force,forces.formations,going,mid,float(enemy.get("fortification",0.25)),Odds.their_arms(String(town.civ_id),int(enemy.get("age",-1))),String(town.civ_id),false,-1.0,float(enemy.get("untrained",0.0)))
 
 ## How the carriers would feed a band of `troops` at the town ({ratio,
 ## season, km, days} or {} when nobody can say). The god's people read the
