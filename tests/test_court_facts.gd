@@ -279,3 +279,19 @@ func test_the_offline_path_is_unchanged()->void:
 	var lines:Array=Hall.find(id).get("lines",[])
 	assert_int(lines.size()).is_greater(before+1)
 	for line:Dictionary in lines.slice(before): assert_str(String(line.get("text",""))).not_contains(SECRET)
+
+## Every official knows who has bowed to us and pays tribute, who gathers every
+## spear against us, and what our people still tell of the god (world_answer.gd,
+## deeds.gd): the court never invents ignorance of it.
+func test_every_official_knows_who_bowed_who_arms_and_what_is_told()->void:
+	var answer:=preload("res://scripts/world_answer.gd")
+	var other:=String(CivilizationSystem.civilizations[1].id)
+	answer._bind(civ_id,int(GameState.elapsed_days),12.0,"Tam, son of Ilak","")
+	answer._begin_arming(other,int(GameState.elapsed_days),{"why_all_in":"they resent us"})
+	preload("res://scripts/divine_regard.gd").record_envoy_harm(other,String(CivilizationSystem.civilizations[1].name),"Solv Greyeyes","kill",0.3)
+	for office in [["stores"],["war"],["tribute"]]:
+		var said:=Facts.text(Facts.sheet(office))
+		assert_str(said).contains("Bowed to us and pay tribute: %s" % String(CivilizationSystem.civilizations[0].name))
+		assert_str(said).contains("Tam, son of Ilak is their hostage")
+		assert_str(said).contains("Gathering every spear against us: %s" % String(CivilizationSystem.civilizations[1].name))
+		assert_str(said).contains("a guest killed in the god's hall")

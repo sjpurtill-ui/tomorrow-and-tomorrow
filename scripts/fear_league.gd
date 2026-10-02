@@ -54,8 +54,11 @@ static func monthly(day:int)->void:
 	var league:=_state()
 	var was:Array=members()
 	var bound:Array=[]
+	var answer:=load("res://scripts/world_answer.gd") as GDScript
 	for v:Dictionary in Standing.views():
 		var id:=String(v.civ_id)
+		# A people that bows to us is under our protection, not against us.
+		if answer!=null and bool(answer.call("is_tributary",id)): continue
 		var fear:=float(v.fear)
 		var holds:=fear>=JOIN_FEAR or (float(v.awe)>=JOIN_AWE and float(v.resentment)>=JOIN_RESENTMENT)
 		if not holds and id in was and fear>=LEAVE_FEAR: holds=true

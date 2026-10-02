@@ -647,9 +647,17 @@ func _fill_home()->void:
 		var said:=_voice(column,String(words.regard),18)
 		said.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		_home_refs.regard=said
+	if String(h.get("told",""))!="":
+		var told:=Kit.label(column,String(h.told),"note")
+		told.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		_home_refs.told=told
 	var note:=Kit.label(column,String(words.note),"note")
 	note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	_home_refs.note=note
+	if words.has("god"):
+		var god:=Kit.label(column,String(words.god),"note")
+		god.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		_home_refs.god=god
 	if words.has("levy"):
 		var heavy:=Kit.label(column,String(words.levy),"note",T.RED)
 		heavy.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
@@ -679,6 +687,13 @@ static func _home_words(h:Dictionary)->Dictionary:
 		if absf(amount)<0.05: continue
 		parts.append("%s %s%.1f" % [String(pair[1]),"+" if amount>0.0 else "−",absf(amount)])
 	words["note"]=("This month, in points of 100: "+"; ".join(parts)+".") if not parts.is_empty() else "Pride is ordinary this month: it neither draws people to us nor holds them."
+	var god:Dictionary=effects.get("god",{}) if effects.get("god") is Dictionary else {}
+	var god_parts:PackedStringArray=[]
+	for pair:Array in [["draw","their love draws families in"],["bind","love binds them"],["obey_love","love lends the chiefs' word weight"],["drive_off","dread drives families off"],["fray","dread frays them"],["obey_dread","dread makes them obey"]]:
+		var amount:=float(god.get(String(pair[0]),0.0))
+		if absf(amount)<0.05: continue
+		god_parts.append("%s %s%.1f" % [String(pair[1]),"+" if amount>0.0 else "−",absf(amount)])
+	if not god_parts.is_empty(): words["god"]="What they feel for you does this month, in points of 100: "+"; ".join(god_parts)+"."
 	var levy:=float(effects.get("levy",0.0))
 	if levy>0.0:
 		words["levy"]="%d%% of the people are under arms: more than households carry without complaint. Holding together −%.1f and trust in the chiefs −%.1f, in points of 100." % [roundi(float(effects.get("under_arms",0.0))*100.0),float(effects.get("levy_cohesion",levy*60.0)),float(effects.get("levy_trust",levy*40.0))]
@@ -691,7 +706,7 @@ static func _home_words(h:Dictionary)->Dictionary:
 static func _home_shape_of(h:Dictionary)->Array:
 	var effects:Dictionary=h.get("effects",{})
 	var forgiving:=float(effects.get("forgiveness",0.0))
-	return [String(h.get("regard_words",""))!="",float(effects.get("levy",0.0))>0.0,absf(forgiving)>=0.02,forgiving>0.0]
+	return [String(h.get("regard_words",""))!="",String(h.get("told",""))!="",_home_words(h).has("god"),float(effects.get("levy",0.0))>0.0,absf(forgiving)>=0.02,forgiving>0.0]
 
 ## Our people's medallions and lines take the month's figures in place.
 func _fill_home_words(h:Dictionary)->void:
@@ -703,6 +718,8 @@ func _fill_home_words(h:Dictionary)->void:
 		_put(refs.word,String(medal[3]))
 	var words:=_home_words(h)
 	if _home_refs.has("regard"):_put(_home_refs.regard,String(words.regard))
+	if _home_refs.has("told"):_put(_home_refs.told,String(h.get("told","")))
+	if _home_refs.has("god"):_put(_home_refs.god,String(words.get("god","")))
 	_put(_home_refs.note,String(words.note))
 	if _home_refs.has("levy"):_put(_home_refs.levy,String(words.get("levy","")))
 	if _home_refs.has("forgiving"):_put(_home_refs.forgiving,String(words.get("forgiving","")))

@@ -244,6 +244,17 @@ static func settle_grudges(civ_id:String,share:float)->Array:
 		settled.append(String(g.text))
 	return settled
 
+static func settle_wrongs_before(civ_id:String,day:int)->Array:
+	## A feud set down (war_loop._end_feud) settles every wrong done to their
+	## envoys before that day: the peace covers the whole feud. Returns clauses.
+	var settled:Array=[]
+	for g in character(civ_id).get("grudges",[]):
+		if not g is Dictionary or bool(g.get("settled",false)) or int(g.get("day",day+1))>day: continue
+		if not String(g.get("source","")).get_slice(":",0) in ENVOY_WRONGS: continue
+		g["settled"]=true
+		settled.append(String(g.get("text","")))
+	return settled
+
 static func debt(civ_id:String,owed_by:String,resource:String,amount:float,due_in:int,clause:String)->void:
 	var c:=character(civ_id)
 	if c.is_empty() or amount<=0.0: return
@@ -321,14 +332,17 @@ static func daily(day:int)->void:
 				g["returned"]=true
 				Hall._add_occasion({"key":"grudge:%s:%d" % [id,int(g.day)],"type":"grudge","civ_id":id,"day":day,"expires":day+300,
 					"data":{"text":"an old grievance between your peoples","grudge_day":int(g.day)}})
-		var kin:=has_bond(id,["marriage","ally"])
+		var kin:=has_bond(id,["marriage","ally","tributary"])
 		if not kin.is_empty():
+			# A people that bows to us calls for the protection it pays for.
+			var bowed:=String(kin.get("kind",""))=="tributary"
 			for other in (civ.get("relations",{}) as Dictionary):
 				if String(other)=="player" or not _fighting((civ.relations as Dictionary)[other],day): continue
 				var enemy_name:=Hall._civ_name(String(other))
 				var feud:=not bool(((civ.relations as Dictionary)[other] as Dictionary).get("at_war",false))
+				var asks:="%s, which pays you tribute, calls for your protection %s %s" % [name,"in its feud with" if feud else "against",enemy_name] if bowed else "%s calls on its kin %s %s" % [name,"in its feud with" if feud else "against",enemy_name]
 				Hall._add_occasion({"key":"kin_call:%s:%s:%d" % [id,String(other),floori(day/365.0)],"type":"kin_call","civ_id":id,"day":day,"expires":day+90,"crisis":true,
-					"data":{"text":"%s calls on its kin %s %s" % [name,"in its feud with" if feud else "against",enemy_name],"enemy":String(other),"enemy_name":enemy_name,"feud":feud}})
+					"data":{"text":asks,"enemy":String(other),"enemy_name":enemy_name,"feud":feud}})
 				break
 
 static func _later(civ_id:String,c:Dictionary,day:int)->void:
@@ -1498,7 +1512,8 @@ static func _war_preparation(civ_id:String,c:Dictionary,day:int)->void:
 		var wrong:=_top_envoy_wrong(c)
 		var marker:=int(wrong.get("day",-1))
 		var war:=Hall._war()
-		if marker>=0 and int(c.get("feud_vowed",-99999))!=marker and not bool(war.call("hot",civ_id,day)):
+		# A feud settled (a price, a parley, a marriage, a truce) holds its term.
+		if marker>=0 and int(c.get("feud_vowed",-99999))!=marker and not bool(war.call("hot",civ_id,day)) and not bool(war.call("keeps_peace",civ_id,day)):
 			c["feud_vowed"]=marker
 			war.call("blood_feud",civ_id,day,wrong_words(wrong),"","envoy_wrong")
 		elif marker>=0: c["feud_vowed"]=marker

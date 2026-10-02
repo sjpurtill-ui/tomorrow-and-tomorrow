@@ -363,3 +363,22 @@ func test_a_counter_never_covers_a_name_nor_stands_under_the_war_screen()->void:
 	# A town right under the strip: its counter goes beside or below, inside.
 	var high:=MapMode._clear_spot(Vector2(500,160),plate,[],bounds)
 	assert_bool(bounds.encloses(Rect2(high-plate*0.5,plate))).is_true()
+
+## A people gathering every spear against us is on the War screen, feud or
+## no feud, and its card leads with the days until it marches
+## (world_answer.gd).
+func test_a_people_arming_against_us_leads_its_card_with_the_march()->void:
+	var answer:=preload("res://scripts/world_answer.gd")
+	var ledger:=preload("res://scripts/hud/war_ledger_model.gd")
+	var day:=int(GameState.elapsed_days)
+	answer._begin_arming(civ_id,day,{"why_all_in":"they resent us"})
+	var entry:Dictionary={}
+	for e:Dictionary in ledger.entries(day):
+		if String(e.civ_id)==civ_id: entry=e
+	assert_bool(entry.is_empty()).is_false()
+	var left:=int(answer.arming(civ_id).march)-day
+	assert_int(int(entry.arming_days)).is_equal(left)
+	var said:=Board.now_short(entry)
+	assert_bool(bool(said.danger)).is_true()
+	assert_str(String(said.text)).contains("Gathering every spear")
+	assert_str(String(said.text)).contains("%d days" % left)

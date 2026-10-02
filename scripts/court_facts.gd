@@ -182,6 +182,22 @@ static func _common(out:Dictionary)->void:
 			else: peace.append(String(c.get("name","")))
 	out["at_war_with"]=wars
 	out["feuding_with"]=feuds
+	# Who has bowed to us, who gathers every spear against us
+	# (world_answer.gd), and what our people still tell of the god (deeds.gd):
+	# things every official at court knows.
+	var answer:=load("res://scripts/world_answer.gd") as GDScript
+	var bowed:Array=[]
+	var arming:Array=[]
+	if answer!=null and world!=null:
+		for t:Dictionary in answer.call("tributaries"):
+			bowed.append({"name":String(t.name),"value":String(answer.call("_qty",float(t.get("value",0.0)))),"since":floori(float(t.get("since",0))/365.0),"hostage":String(t.get("hostage",""))})
+		for c in world.civilizations:
+			if not c is Dictionary: continue
+			var arm:Dictionary=answer.call("arming",String((c as Dictionary).get("id","")))
+			if not arm.is_empty(): arming.append({"name":String(c.get("name","")),"days":maxi(0,int(arm.get("march",0))-_day())})
+	out["tributaries"]=bowed
+	out["arming"]=arming
+	out["people_told"]=String(preload("res://scripts/hud/content/dock_content_standing.gd")._told_at_home())
 	out["at_peace_with"]=peace
 	out["broken_peoples"]=broken
 	# The last fight, as everyone has heard it: where, when and who won.
@@ -708,6 +724,13 @@ static func text(s:Dictionary)->String:
 	var feud_rows:PackedStringArray=PackedStringArray()
 	for v:Dictionary in s.get("feuding_with",[]): feud_rows.append(feud_words(v))
 	lines.append("At war with: %s.%s At peace with: %s." % [", ".join(PackedStringArray(wars)) if not wars.is_empty() else "nobody",(" In a feud with: %s (a feud, not a war: raids and killings back and forth, nothing declared)." % "; ".join(feud_rows)) if not feud_rows.is_empty() else "",", ".join(PackedStringArray(peace)) if not peace.is_empty() else "nobody we know"])
+	var bowed_rows:PackedStringArray=PackedStringArray()
+	for t:Dictionary in s.get("tributaries",[]): bowed_rows.append("%s (tribute worth %s every season since year %d%s)" % [String(t.name),String(t.value),int(t.since),("; %s is their hostage with us" % String(t.hostage)) if String(t.get("hostage",""))!="" else ""])
+	if not bowed_rows.is_empty(): lines.append("Bowed to us and pay tribute: %s. Their raiders stay home while they pay." % "; ".join(bowed_rows))
+	var arming_rows:PackedStringArray=PackedStringArray()
+	for a:Dictionary in s.get("arming",[]): arming_rows.append("%s (they march on us in about %d days, with every fighter they have)" % [String(a.name),int(a.days)])
+	if not arming_rows.is_empty(): lines.append("Gathering every spear against us: %s." % "; ".join(arming_rows))
+	if String(s.get("people_told",""))!="": lines.append(String(s.people_told))
 	var broken_rows:PackedStringArray=PackedStringArray()
 	for left:Dictionary in s.get("broken_peoples",[]): broken_rows.append(broken_words(left))
 	if not broken_rows.is_empty(): lines.append("Broken, with no town left: %s. No feud with them goes on: they are too few to raid anyone." % "; ".join(broken_rows))

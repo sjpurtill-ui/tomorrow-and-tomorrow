@@ -98,3 +98,32 @@ func test_simulated_peoples_are_not_left_with_an_undelivered_war_note()->void:
 	CivilizationSystem._set_pair_relation(0,1,relation)
 	Feuds.tick(30,5)
 	assert_str(String(_relation().get("pending_message",""))).is_equal("")
+
+## Parity with the god's own feuds (world_answer.gd): a people worn out by its
+## feud and outmatched bows to the stronger and pays tribute through the one
+## trade ledger; the feud ends, and no new one starts while it pays.
+func test_a_spent_outmatched_people_bows_to_the_stronger_and_pays()->void:
+	CivilizationSystem.civilizations[0].population=600.0
+	CivilizationSystem.civilizations[1].population=120.0
+	CivilizationSystem.start_rival_feud(0,1,300,"old quarrels")
+	var relation:=_relation().duplicate(true)
+	relation["feud_dead"]={second_id:10,first_id:2}
+	relation["feud_last"]=300
+	CivilizationSystem._set_pair_relation(0,1,relation)
+	var bowed:={}
+	for month in 60:
+		var day:=330+month*30
+		var r:=_relation().duplicate(true)
+		if int(r.get("feud_since",-1))<0: break
+		r["feud_last"]=day
+		Feuds._bow(CivilizationSystem.civilizations[0],CivilizationSystem.civilizations[1],r,day)
+		CivilizationSystem._set_pair_relation(0,1,r)
+		bowed=Feuds.bowed(r,day)
+		if not bowed.is_empty(): break
+	assert_bool(bowed.is_empty()).is_false()
+	assert_str(String(bowed.payer)).is_equal(second_id)
+	assert_str(String(bowed.payee)).is_equal(first_id)
+	assert_int(int(_relation().get("feud_since",-1))).is_equal(-1)
+	assert_bool(preload("res://scripts/trade_stances.gd").tribute(second_id,first_id).is_empty()).is_false()
+	# The stronger never bows; an unspent people never bows.
+	assert_bool(preload("res://scripts/trade_stances.gd").tribute(first_id,second_id).is_empty()).is_true()

@@ -339,3 +339,64 @@ func test_a_stronger_target_deters_war_and_a_weak_one_emboldens()->void:
 	var relation:={"opinion":-0.35,"at_war":false,"treaty":"none"}
 	assert_str(Strategy.diplomatic_action(relation,plan,90.0,strong)).is_not_equal("declare_war")
 	assert_str(Strategy.diplomatic_action(relation,plan,90.0,weak)).is_equal("declare_war")
+
+func test_the_page_tells_what_they_remember_and_what_they_mean_to_do()->void:
+	var id:=_met(160.0,10.0,0.7)
+	_arm(4,0.6)
+	var divine:=preload("res://scripts/divine_regard.gd")
+	var answer:=preload("res://scripts/world_answer.gd")
+	for i in 6:
+		GameState.elapsed_days=400.0+i*100.0
+		divine.record_envoy_harm(id,String(CivilizationSystem.civilizations[0].name),"Envoy%d Reed" % i,"kill",0.3)
+		preload("res://scripts/rival_rulers.gd").grudge(id,"the killing of their envoy Envoy%d" % i,1.0,"slain_envoy:%d" % i)
+	Standing.forget()
+	var page=preload("res://scripts/hud/content/dock_content_standing.gd").new(null,null)
+	var board:Dictionary=page.tab(0).blocks[0]
+	var theirs:Dictionary={}
+	for p:Dictionary in board.peoples:
+		if String(p.civ_id)==id: theirs=p
+	var memories:=PackedStringArray()
+	for m:Dictionary in theirs.memories: memories.append(String(m.text))
+	assert_str(" ".join(memories)).contains("They tell of the killing of their envoy")
+	assert_str(" ".join(memories)).contains("more years")
+	# What they mean to do, at the engine's own odds.
+	var o:=answer.odds(id,answer.reading(id,Standing.view_of(id)))
+	var rows:=PackedStringArray()
+	for c:Dictionary in theirs.consequences: rows.append(String(c.words))
+	if float(o.all_in)>0.0: assert_str(" ".join(rows)).contains("every spear they have: "+Standing.monthly_odds_words(float(o.all_in)))
+	if float(o.bow)>0.0: assert_str(" ".join(rows)).contains("bow and pay us tribute: "+Standing.monthly_odds_words(float(o.bow)))
+	# Arming leads the dangers.
+	answer._begin_arming(id,int(GameState.elapsed_days),{"why_all_in":"they resent us"})
+	board=page.tab(0).blocks[0]
+	assert_str(String((board.warnings as Array)[0].title)).contains("gathering every spear")
+	# Our own people's long memory is on the home card.
+	assert_str(String(board.home.told)).contains("a guest killed in the god's hall")
+
+## The god's people, loving or afraid (standing.god_effects): love draws
+## families in and binds them; dread drives them off and, past a point, frays
+## them, though it props up the chiefs' word. Read once a month, in the god's
+## scope only; another people's month is neutral.
+func test_love_and_dread_of_the_god_move_the_home_month()->void:
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+	metrics["standing_pride"]=0.5; metrics["standing_allure"]=Standing.ALLURE_ORDINARY; metrics["standing_might"]=0.0
+	metrics["standing_love"]=Standing.LOVE_ORDINARY; metrics["standing_dread"]=0.0
+	var calm_attraction:=Standing.attraction_shift()
+	var calm_cohesion:=Standing.cohesion_shift()
+	metrics["standing_love"]=0.4
+	assert_float(Standing.attraction_shift()).is_greater(calm_attraction)
+	assert_float(Standing.cohesion_shift()).is_greater(calm_cohesion)
+	metrics["standing_love"]=Standing.LOVE_ORDINARY; metrics["standing_dread"]=0.5
+	assert_float(Standing.attraction_shift()).is_less(calm_attraction)
+	assert_float(Standing.cohesion_shift()).is_less(calm_cohesion)
+	assert_float(Standing.legitimacy_shift()).is_greater(0.0)
+	# The page says it, with the engine's own numbers.
+	var effects:=Standing.home_effects()
+	assert_float(float(effects.god.drive_off)).is_equal_approx(-0.5*Standing.DREAD_DRIVE_OFF*100.0,0.01)
+	var words:Dictionary=preload("res://scripts/hud/standing_board.gd")._home_words({"effects":effects})
+	assert_str(String(words.god)).contains("dread drives families off −4.0")
+	# A god who has done nothing worth telling moves nobody (parity with
+	# every other people's month).
+	Standing.record_monthly()
+	assert_float(float(metrics.standing_love)).is_equal(0.0)
+	assert_float(float(metrics.standing_dread)).is_equal(0.0)
+	assert_bool(preload("res://scripts/hud/standing_board.gd")._home_words({"effects":Standing.home_effects()}).has("god")).is_false()

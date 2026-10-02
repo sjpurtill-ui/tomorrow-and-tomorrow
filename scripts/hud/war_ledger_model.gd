@@ -27,7 +27,7 @@ const OP_WORDS:={"war_guard":"guarding the approaches","war_pursue":"on the raid
 	"war_chief":"gone for their headman","war_parley":"gone to talk","war_pay":"taking them the blood price","war_price":"asking a blood price","war_general":"in the field","war_rest":"resting","war_let":"standing down"}
 ## How a feud ended (war_loop _end_feud's why), in plain words.
 const END_WORDS:={"marriage":"kin by marriage now","blood price":"a blood price was paid","parley":"a parley held","peace sought":"their peace-seeker was heard","ransom":"a ransom was paid",
-	"went cold":"three quiet winters: it went cold","broken":"their people are broken"}
+	"went cold":"three quiet winters: it went cold","broken":"their people are broken","submission":"they bowed to the god and pay tribute"}
 
 
 ## Every feud and war with a people we know, wars first and then the hottest;
@@ -63,6 +63,26 @@ static func entries(day:int=-1)->Array[Dictionary]:
 			"peace_due":WarLoop.peace_due(civ_id,day),"blood_price":WarLoop.blood_price(civ_id),
 			"last_raid":{} if raid.is_empty() else {"target":String(raid.get("target","")),"days_ago":day-int(raid.get("day",day)),"our_dead":int(raid.get("our_dead",0)),"taken":int(raid.get("taken",0))}},true)
 		out.append(entry); listed[civ_id]=true
+	# A people gathering every spear against us is on the page whether or not
+	# a feud runs (world_answer.gd): the days until it marches lead its card.
+	var answer:=load("res://scripts/world_answer.gd") as GDScript
+	if answer!=null:
+		for civ in WorldSimulation.world.civilizations:
+			var civ_id:=String((civ as Dictionary).get("id","")) if civ is Dictionary else ""
+			if civ_id=="" or not _alive(civ_id): continue
+			var arm:Dictionary=answer.call("arming",civ_id)
+			if arm.is_empty(): continue
+			var left:=maxi(0,int(arm.get("march",day))-day)
+			if listed.has(civ_id):
+				for e in out:
+					if String((e as Dictionary).civ_id)==civ_id: (e as Dictionary)["arming_days"]=left
+				continue
+			var f2:Dictionary=fronts.get(civ_id,{}) if fronts.get(civ_id) is Dictionary else {}
+			var entry2:=_common(civ_id,f2,bands,day)
+			entry2.merge({"kind":"feud","hot":true,"since":int(arm.get("since",day)),"days":maxi(0,day-int(arm.get("since",day))),"cause":"what they remember of us",
+				"our_dead":int(f2.get("our_dead",0)),"their_dead":int(f2.get("their_dead",0)),"raids":0,"strikes":0,"our_worn":0.0,"their_worn":clampf(float(f2.get("their_exh",0.0)),0.0,1.0),
+				"quiet":99999,"home_known":WarLoop.home_known(civ_id),"way":"","open_fight":false,"peace_due":false,"blood_price":WarLoop.blood_price(civ_id),"last_raid":{},"arming_days":left},true)
+			out.append(entry2); listed[civ_id]=true
 	for civ_variant in fronts.keys():
 		var civ_id:=String(civ_variant)
 		if listed.has(civ_id) or not fronts[civ_variant] is Dictionary: continue

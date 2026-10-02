@@ -487,6 +487,7 @@ static func _record_battle(civ_id:String,name:String,our_dead:int,their_dead:int
 static func _exhaust(civ_id:String,our_dead:int,their_dead:int)->void:
 	var war:Dictionary=front(civ_id).get("war",{})
 	if war.is_empty(): return
+	preload("res://scripts/deeds.gd").blood(civ_id,their_dead,false)
 	war["our_dead"]=int(war.get("our_dead",0))+our_dead
 	war["their_dead"]=int(war.get("their_dead",0))+their_dead
 	war["our_exh"]=clampf(float(war.get("our_exh",0.0))+0.04+float(our_dead)/_our_pop()*6.0,0.0,1.0)
@@ -540,6 +541,8 @@ static func after_answer(audience:Dictionary,option_id:String)->void:
 	elif kind=="threat" and option_id in ["defy","counter"] and bluff: _stat("bluffs_called")
 	elif kind=="threat" and option_id=="pay": _stat("paid")
 	if type=="war_support" and option_id=="stand": _stand_with(civ_id,String(situation.get("enemy","")))
+	# A tributary's call for protection, answered (world_answer.gd).
+	if type=="war_support": (load("res://scripts/world_answer.gd") as GDScript).call("protection_answered",civ_id,String(situation.get("enemy","")),option_id)
 
 static func on_refusal(audience:Dictionary,option_id:String)->Dictionary:
 	## A real demand refused: the ruler decides, by trait and strength, whether
@@ -592,6 +595,8 @@ static func _truce_binds(civ_id:String,day:int)->bool:
 	# A feud settled with a blood price or a parley, and kin by marriage, keep
 	# their raiders home.
 	if int(_peek(civ_id).get("settled_until",-1))>day: return true
+	# A people that bowed and pays its tribute keeps its raiders home.
+	if bool((load("res://scripts/world_answer.gd") as GDScript).call("is_tributary",civ_id)): return true
 	return not _married(civ_id).is_empty()
 
 ## A marriage between our peoples (rival_rulers.gd bonds): kin do not raid kin.
@@ -880,6 +885,9 @@ static func _begin_feud(f:Dictionary,day:int)->void:
 ## ours), the dead on each side, and how worn each people is by it (the same
 ## measure a war keeps, _exhaust).
 static func _tally(civ_id:String,kind:String,our_dead:int,their_dead:int)->void:
+	# Their dead are remembered a generation (deeds.gd): raiders killed at our
+	# hearths are feared more than resented.
+	preload("res://scripts/deeds.gd").blood(civ_id,their_dead,kind=="raids")
 	var f:=front(civ_id)
 	f[kind]=int(f.get(kind,0))+1
 	f["our_dead"]=int(f.get("our_dead",0))+our_dead
@@ -964,7 +972,8 @@ static func _adopt(civ_id:String,day:int)->void:
 static func _stand_with(ally:String,enemy:String)->void:
 	if enemy=="" or enemy=="player" or Hall._civ_index(enemy)<0: return
 	var day:=_day()
-	var kin:=not (_rivals().call("has_bond",ally,["marriage","ally"]) as Dictionary).is_empty()
+	# Kin, and a people that bows to us and pays for our protection.
+	var kin:=not (_rivals().call("has_bond",ally,["marriage","ally","tributary"]) as Dictionary).is_empty()
 	if kin and not _truce_binds(enemy,day) and not bool(_relation(enemy).get("at_war",false)):
 		declare(enemy,day,"your fighters standing with %s" % _name(ally),ally)
 		_stat("dragged_in")
@@ -973,7 +982,11 @@ static func _stand_with(ally:String,enemy:String)->void:
 
 static func stand_words(civ_id:String,enemy:String,name:String,enemy_name:String)->String:
 	## The option text for standing with a people at war (or in a feud).
-	var kin:=not (_rivals().call("has_bond",civ_id,["marriage","ally"]) as Dictionary).is_empty()
+	var bond:Dictionary=_rivals().call("has_bond",civ_id,["marriage","ally","tributary"])
+	var kin:=not bond.is_empty()
+	if String(bond.get("kind",""))=="tributary":
+		if enemy!="" and not Scale.formal(enemy): return "%s pays you tribute for this: your fighters go to protect them, and %s will count you in the feud and send raiders. Stay out and they will withhold their tribute." % [name,enemy_name]
+		return "%s pays you tribute for this: your fighters go to their war, and %s will be at war with you. Stay out and they will withhold their tribute." % [name,enemy_name]
 	if kin and enemy!="" and not Scale.formal(enemy): return "You are kin to %s: your fighters go to stand with them, and %s will count you in the feud and send raiders." % [name,enemy_name]
 	if kin: return "You are kin to %s: your fighters go to their war, and %s will be at war with you." % [name,enemy_name]
 	return "Warmer with %s; %s will count you an enemy's friend, and may send raiders." % [name,enemy_name]
@@ -1262,6 +1275,12 @@ static func _end_feud(civ_id:String,day:int,why:String,text:String)->void:
 	f["guard_until"]=-1
 	_peace_made(f)
 	_rivals().call("settle_grudges",civ_id,0.6)
+	# The peace sets down the whole feud's wrongs, not only the heaviest: an
+	# old killing of theirs does not start the feud again the day after
+	# (rival_rulers._war_preparation). What they suffered is still told
+	# (deeds.gd); a price paid or a marriage eases it.
+	_rivals().call("settle_wrongs_before",civ_id,day)
+	if why in ["blood price","marriage"]: preload("res://scripts/deeds.gd").amends(civ_id,"the %s that ended the feud" % why)
 	Hall._shift_relation(civ_id,0.08,-0.2)
 	_chronicle("feud_end:%s:%d" % [civ_id,day],"The Feud With %s Is Settled" % name,told,"moment",civ_id)
 	ForeignDiplomacy.remember(civ_id,"The feud with the god's people is settled: %s." % why)
@@ -1766,8 +1785,12 @@ static func daily(day:int)->void:
 			if (front(id).war as Dictionary).is_empty(): continue
 		if not (front(id).war as Dictionary).is_empty(): _check_end(id,day)
 	if day%30==0:
+		# What is told of us: towns taken or burned, captives driven off (deeds.gd).
+		preload("res://scripts/deeds.gd").monthly(day)
 		# Who stands together against us, before anyone moves.
 		preload("res://scripts/fear_league.gd").monthly(day)
+		# What each people does about us: bow, or come with everything.
+		(load("res://scripts/world_answer.gd") as GDScript).call("monthly",day)
 		_grudges(day)
 		_rival_wars(day)
 	# Feuds between two other simulated peoples are fought for real.
@@ -2169,6 +2192,8 @@ static func _rival_wars(day:int)->void:
 			if relation.is_empty() or bool(relation.get("at_war",false)) or String(relation.get("pending_message",""))!="" or String(relation.get("treaty","none")) in ["non_aggression","truce","trade"]: continue
 			# Already feuding: the feud runs its own course (CivilizationSystem).
 			if world.has_method("rival_feud_hot") and bool(world.rival_feud_hot(relation,day)): continue
+			# One bowed to the other lately and pays it tribute (rival_feuds.gd).
+			if not preload("res://scripts/rival_feuds.gd").bowed(relation,day).is_empty(): continue
 			var monthly:=rival_war_hazard(first,second,relation,(float(counts.get(String(first.id),1))+float(counts.get(String(second.id),1)))*0.5)/12.0
 			if _rng("rivalwar:%s:%s:%d" % [String(first.id),String(second.id),day]).randf()>=monthly: continue
 			# Two small peoples do not declare war: the same quarrel is a feud,

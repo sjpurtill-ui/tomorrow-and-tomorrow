@@ -1026,7 +1026,11 @@ static func active_rites(day:int=-1)->Array[Dictionary]:
 static func rival_dread(civ_id:String)->float:
 	## How much a foreign people dreads the god: their own memory of its wrath,
 	## and what travellers say of how it treats its own.
-	return clampf(DIVINE.civ_dread(civ_id)+_people_dread()*0.35,0.0,1.0)
+	# The fresh dread of the latest wrath (months), over what is still told of
+	# us a generation on (deeds.gd): they add as chances do.
+	var fresh:=clampf(DIVINE.civ_dread(civ_id),0.0,1.0)
+	var told:=float(preload("res://scripts/deeds.gd").fear(civ_id))
+	return clampf(1.0-(1.0-fresh)*(1.0-told)+_people_dread()*0.35,0.0,1.0)
 
 ## A reading under way (standing.gd: the month's views of every people we
 ## know) reads our own people's dread once: every foreign view in it shares

@@ -396,3 +396,22 @@ func test_court_pacts_pane_and_ties_replace_the_council()->void:
 	assert_bool((court.find_child("ConversationPane",true,false) as Control).visible).is_true()
 	assert_bool(court.focus({"civ_id":first,"purpose":"declare_war"})).is_true()
 	assert_str(String(court.compose.purpose)).is_equal("declare_war")
+
+## "Bow to us" (world_answer.gd): demanded at the menace's own stated odds; if
+## they give way they become tributaries through the one tribute ledger, with
+## a hostage the court knows. A people that already bows is not asked again.
+func test_a_demand_to_bow_makes_them_tributaries_when_they_give_way()->void:
+	var answer:=preload("res://scripts/world_answer.gd")
+	_revering(first)
+	_terrified(first)
+	assert_array(Messages.demands_for(first)).contains(["submit"])
+	var menace:=Messages.build("demand",{"by":"wrath","demand":"submit"})
+	var f:=Messages.forecast(first,menace)
+	assert_float(float(f.chance)).is_greater(0.0)
+	# Asking them to bow weighs more than asking for a modest tribute.
+	assert_float(Messages.score(first,menace)).is_less(Messages.score(first,Messages.build("demand",{"by":"wrath","demand":"tribute","size":"modest"})))
+	var result:=Messages.arrive(_mission(first,"demand",{"by":"wrath","demand":"submit"}),int(GameState.elapsed_days))
+	if String(result.answer)=="comply":
+		assert_bool(answer.is_tributary(first)).is_true()
+		assert_bool(preload("res://scripts/trade_stances.gd").tribute(first,"player").is_empty()).is_false()
+		assert_array(Messages.demands_for(first)).not_contains(["submit"])

@@ -429,3 +429,19 @@ func test_the_war_screen_links_to_all_peoples_we_know()->void:
 	var link:Button=box.get_child(box.get_child_count()-1)
 	assert_str(String(link.name)).is_equal("AllPeoples")
 	assert_str(link.text).is_equal("All peoples we know")
+
+## A people that bows to us, or gathers every spear against us
+## (world_answer.gd), says so in the "between us" cell.
+func test_between_us_says_who_bows_and_who_arms()->void:
+	var Model:=preload("res://scripts/hud/peoples_known_model.gd")
+	var answer:=preload("res://scripts/world_answer.gd")
+	var a:=String(CivilizationSystem.civilizations[0].id)
+	var b:=String(CivilizationSystem.civilizations[1].id)
+	answer._bind(a,int(GameState.elapsed_days),20.0,"Tam, son of Ilak","")
+	answer._begin_arming(b,int(GameState.elapsed_days),{"why_all_in":"they resent us"})
+	var bowed:=Model.relation_cell({"civ_id":a,"treaty":"none"})
+	assert_str(String(bowed.text)).is_equal("Bows to us")
+	assert_str(String(bowed.tip)).contains("Tam, son of Ilak")
+	var arming:=Model.relation_cell({"civ_id":b,"treaty":"none"})
+	assert_str(String(arming.text)).is_equal("Arming against us")
+	assert_str(String(arming.tone)).is_equal("danger")

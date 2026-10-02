@@ -425,6 +425,10 @@ func _now_row(e:Dictionary)->Control:
 static func now_short(e:Dictionary)->Dictionary:
 	var civ_id:=String(e.get("civ_id",""))
 	var today:=int(WorldSimulation.state.elapsed_days) if WorldSimulation!=null and WorldSimulation.state!=null else 0
+	# Gathering every spear against us (world_answer.gd): it leads the card.
+	if int(e.get("arming_days",-1))>=0:
+		var left:=int(e.arming_days)
+		return {"state":"fighting","text":"Gathering every spear · they march %s" % ("any day" if left<=3 else "in "+_days(left)),"danger":true}
 	var council:GDScript=load("res://scripts/war_council.gd")
 	var bands:Array=council.call("bands_against",civ_id) if civ_id!="" else []
 	if not bands.is_empty():
