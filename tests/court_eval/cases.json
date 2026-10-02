@@ -1815,7 +1815,7 @@
    "say": "Call our nation the Reedfolk",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
    "expect": {"handled": true, "verb": "nation_name", "state": {"nation_name": "=='The Reedfolk'", "settlement_name": "==before", "modifiers": "==before"}, "reply_has": ["the Reedfolk", "Reedmouth"]},
-   "variants": ["our people shall be called the Reedfolk", "name our realm the Reedfolk", "call our people the reedfolk", "From now on we shall be known as the Reedfolk", "Let our nation be called the Reedfolk.", "the name of our nation is the Reedfolk", "Kishan, call our nation the Reedfolk"]},
+   "variants": ["our people shall be called the Reedfolk", "name our realm the Reedfolk", "call our people the reedfolk", "From now on we shall be known as the Reedfolk", "Let our nation be called the Reedfolk.", "the name of our nation is the Reedfolk", "Kishan, call our nation the Reedfolk", "Call our nation \"the Reedfolk\"", "Name our nation: the Reedfolk", "we shall call ourselves the Reedfolk"]},
 
   {"id": "cul.nation.one_town", "domain": "culture", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "note": "One town: the people go by its name. The headman says so plainly; nothing is named and nothing else changes.",

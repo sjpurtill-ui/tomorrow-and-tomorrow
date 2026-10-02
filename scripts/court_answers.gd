@@ -584,7 +584,7 @@ static func _common_answer(sheet:Dictionary,lower:String)->String:
 		return "It is the %s of %s." % [parts[1].to_lower(),parts[0]] if parts.size()==2 else "It is %s." % String(sheet.get("when",""))
 	# Our nation's name ("what is our nation called?", "what are we called?"),
 	# from the sheet (nation_name.gd): the name given, or the town we go by.
-	if _has(lower,"\\bwhat (is|are|'s) (our|my|the) (nation|people|realm|folk|tribe|kingdom)('s)? (called|named|name)\\b|\\bwhat( is|'s) the name of (our|my|the) (nation|people|realm|folk|tribe|kingdom)\\b|\\bwhat (are|do) we call(ed)?( ourselves)?\\b|\\bwhat do (they|other peoples|strangers|foreigners) call us\\b|\\bwhat( is|'s) our name\\b"):
+	if _has(lower,"\\bwhat (is|are|'s) (our|my|the) (nation|people|realm|folk|tribe|kingdom)('s)? (called|named|name)\\b|\\bwhat( is|'s) the name of (our|my|the) (nation|people|realm|folk|tribe|kingdom)\\b|\\bwhat are we called\\b(?!\\s+(to|for|on|upon|by|into)\\b)|\\bwhat do we call ourselves\\b|\\bwhat do (they|other peoples|strangers|foreigners) call us\\b|\\bwhat( is|'s) our name\\s*\\??\\s*$"):
 		var nation:=String(sheet.get("nation",""))
 		if nation!="": return "We are %s." % (("the "+nation.substr(4)) if nation.begins_with("The ") else nation)
 		var home:=String(sheet.get("home",""))

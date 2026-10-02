@@ -20,10 +20,22 @@ const Answers:=preload("res://scripts/court_answers.gd")
 const StandingDock:=preload("res://scripts/hud/content/dock_content_standing.gd")
 const GovernmentDock:=preload("res://scripts/hud/content/dock_content_government.gd")
 const ChronicleDock:=preload("res://scripts/hud/content/dock_content_chronicle.gd")
+const CityLabels:=preload("res://scripts/hud/city_labels.gd")
 
 class Hud extends Control:
 	var refreshes:=0
 	func request_immediate_dock_refresh()->void:refreshes+=1
+
+## The map's own naming card (local_terrain.gd), its drawing stood in for.
+class NamingMap extends "res://scripts/local_terrain.gd":
+	func _set_game_speed(speed:float)->void:game_speed=speed
+	func _update_time_interface()->void:pass
+	func _present_caravan_reports()->void:pass
+	func _refresh_settlement_convoy_marker()->void:pass
+	func _refresh_settlement_network(_force:=false)->void:pass
+	func _set_camera_target(_target:Vector3)->void:pass
+	func _height_at(_x:float,_z:float)->float:return 0.0
+	func _settlement_model()->Node:return SettlementModel
 
 var slot:=""
 var fx:Fixtures
@@ -45,6 +57,7 @@ func before_test()->void:
 
 func after_test()->void:
 	if slot!="": DirAccess.remove_absolute(SaveSystem.slot_path(slot))
+	preload("res://scripts/character_voice.gd").knowledge_override.erase("player")
 
 
 func after()->void:
@@ -99,6 +112,7 @@ func test_one_town_reads_as_the_town_and_cannot_be_named_yet()->void:
 	assert_str(Envoys._god()).is_equal("the god of Seanstone")
 	assert_str(String(ChronicleDock.new(null,null).meta().eyebrow)).is_equal("THE STORY OF THE PEOPLE")
 	assert_str(String(CommunityNetwork.nodes()[0].name)).is_equal("Seanstone")
+	assert_str(CityLabels.affiliation_of("player",false,"city")).is_equal("")
 	assert_bool(Facts.sheet(["common"]).has("nation")).is_false()
 	# The Government screen has no nation line, and nothing can name it.
 	assert_str(String(GovernmentDock.new(null,null).tab(0).blocks[0].type)).is_equal("cabinet")
@@ -144,6 +158,66 @@ func test_the_second_founding_asks_and_its_card_names_the_nation()->void:
 	# A third founding does not ask again.
 	fx.second_town("Ashbank")
 	assert_bool(NationName.ask_at_founding()).is_false()
+
+
+func test_the_maps_founding_card_asks_for_the_nation_with_the_new_town()->void:
+	var town:=fx.second_town("Reedmouth")
+	var layer:CanvasLayer=auto_free(CanvasLayer.new())
+	add_child(layer)
+	var map:NamingMap=auto_free(NamingMap.new())
+	map.interface_layer=layer
+	map.game_speed=3.0
+	# The caravan's arrival founds the town; its naming card follows, paused.
+	map._show_convoy_arrival({"ok":true,"settlement":town,"population":30})
+	await await_idle_frame()
+	assert_object(map.settlement_naming_panel).is_not_null()
+	assert_object(map.nation_name_input).is_not_null()
+	assert_str(map.settlement_name_input.text).is_equal("Reedmouth")
+	assert_float(map.game_speed).is_equal(0.0)
+	assert_object(map.settlement_naming_panel.find_child("NationNameSuggestions",true,false)).is_not_null()
+	map.nation_name_input.text="the reedfolk"
+	map._commit_settlement_name()
+	assert_str(GameState.nation_name).is_equal("The Reedfolk")
+	assert_object(map.settlement_naming_panel).is_null()
+	assert_object(map.nation_name_input).is_null()
+	assert_float(map.game_speed).is_equal(3.0)
+	# The town kept its name, and no renaming of it was told.
+	assert_str(String(SettlementModel.settlement_by_id(String(town.id)).get("name",""))).is_equal("Reedmouth")
+	for event:Dictionary in GameState.simulation_events: assert_str(String(event.get("title",""))).is_not_equal("Settlement Named")
+	assert_int(_told().size()).is_equal(1)
+	# A town's plain renaming never asks for the nation; nor does a founding
+	# once the nation has its name.
+	map._open_settlement_naming_panel(String(town.id))
+	assert_object(map.settlement_naming_panel).is_not_null()
+	assert_object(map.nation_name_input).is_null()
+	map._dismiss_settlement_naming_panel()
+	var third:=fx.second_town("Ashbank")
+	map._show_convoy_arrival({"ok":true,"settlement":third,"population":30})
+	await await_idle_frame()
+	assert_object(map.settlement_naming_panel).is_null()
+
+
+func test_the_names_heard_are_graded_by_what_the_people_know()->void:
+	fx.second_town("Reedmouth")
+	var CV:=preload("res://scripts/character_voice.gd")
+	var land:="The "+String(NationName.LAND_FOLK[NationName.land_word()])
+	# A band that keeps no villages: whose kin they are, the hearths they have.
+	CV.knowledge_override["player"]=[]
+	assert_array(NationName.suggestions(4)).contains_exactly([land,"The Folk of Seanstone","Kishan's Kin","The Two Hearths"])
+	# Villages and fields: the founder's children.
+	CV.knowledge_override["player"]=["seed_selection"]
+	assert_array(NationName.suggestions(4)).contains_exactly([land,"The Folk of Seanstone","The Children of Kishan","The Two Hearths"])
+	# Writing: a realm and its towns; a kingdom only once kingship is known.
+	CV.knowledge_override["player"]=["pictographic_records"]
+	assert_array(NationName.suggestions(4)).contains_exactly([land,"The Realm of Seanstone","The Children of Kishan","The Two Towns"])
+	CV.knowledge_override["player"]=["pictographic_records","kingship"]
+	assert_bool(NationName.suggestions(4).has("The Kingdom of Seanstone")).is_true()
+	# Never a name already ours or another people's.
+	CV.knowledge_override["player"]=[]
+	NationName.give_name(land,"screen")
+	assert_bool(NationName.suggestions(4).has(land)).is_false()
+	CivilizationSystem.civilizations[1]["name"]="Folk of Seanstone"
+	assert_bool(NationName.suggestions(4).has("The Folk of Seanstone")).is_false()
 
 
 func test_skipping_names_nothing_and_only_the_next_founding_asks_again()->void:
@@ -209,7 +283,8 @@ func test_the_court_line_names_the_nation_and_the_order_card_is_done()->void:
 	# The words that name all our towns together, and look-alikes that do not.
 	for said in ["Call our nation the Reedfolk","call our people the reedfolk","Our people shall be called the Reedfolk","name our realm the Reedfolk",
 			"From now on we shall be known as the Reedfolk","Let our nation be called the Reedfolk.","the name of our nation is the Reedfolk",
-			"rename our nation to the Reedfolk","Kishan, call our nation the Reedfolk","Our people will be known as the Reedfolk from this day"]:
+			"rename our nation to the Reedfolk","Kishan, call our nation the Reedfolk","Our people will be known as the Reedfolk from this day",
+			"Call our nation \"the Reedfolk\"","Name our nation: the Reedfolk","We shall call ourselves the Reedfolk"]:
 		assert_str(String(Realm.nation(said).get("name",""))).override_failure_message("'%s' did not name the nation" % said).is_equal("The Reedfolk")
 	for said in ["call our people to the fire","Call our people home","our people are hungry","Rename Seanstone to Godshold","Call our town Godshold",
 			"What is our nation called?","name the people who stole the grain","call the people together","Kill Kavu, call our nation the Reedfolk"]:
@@ -305,6 +380,10 @@ func test_foreign_and_chronicle_uses_show_the_name()->void:
 	assert_str(String(ChronicleDock.new(null,null).meta().eyebrow)).is_equal("THE STORY OF THE REEDFOLK")
 	assert_str(StandingDock.new(null,null)._our_name()).is_equal("The Reedfolk")
 	assert_str(String(CommunityNetwork.nodes()[0].name)).is_equal("The Reedfolk")
+	# Our towns' map cards wear the name; a stranger's town still wears theirs.
+	assert_str(CityLabels.affiliation_of("player",false,"city")).is_equal("The Reedfolk")
+	assert_str(CityLabels.affiliation_of("player",false,"founding_convoy")).is_equal("")
+	assert_str(CityLabels.affiliation_of(civ_id,true,"city")).is_equal("Esurai")
 	var told:=_told()
 	assert_int(told.size()).is_equal(1)
 	assert_str(String(told[0].text)).is_equal("By the god's word, the people of Seanstone and Reedmouth are called the Reedfolk from this day.")
@@ -325,6 +404,10 @@ func test_the_home_towns_own_uses_stay_the_town()->void:
 	for city:Dictionary in GameState.player_settlements: assert_str(String(city.name)).is_not_equal("The Reedfolk")
 	assert_str(String(Realm.rename("Rename Seanstone to Godshold").get("name",""))).is_equal("Godshold")
 	assert_dict(Realm.nation("Rename Seanstone to Godshold")).is_empty()
+	# Questions about other names are not about ours.
+	for asked in ["what do we call the river?","what are we called to do?","what's our name for the ford?"]:
+		assert_str(Answers._common_answer(sheet,asked)).override_failure_message(asked).is_not_equal("We are the Reedfolk.")
+	assert_str(Answers._common_answer(sheet,"what do we call ourselves?")).is_equal("We are the Reedfolk.")
 	# Unnamed, an official says plainly what we go by.
 	GameState.nation_name=""
 	assert_str(Answers._common_answer(Facts.sheet(["common"]),"what are we called?")).is_equal("Our people have no name of their own yet; we go by Seanstone.")

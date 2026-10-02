@@ -617,6 +617,8 @@ const NATION_PATTERNS:=[
 	"(?i)^{lead}(?:the\\s+name\\s+of\\s+{whole}|{whole}'s\\s+name)\\s+(?:is|shall\\s+be|will\\s+be)\\s+(?:now\\s+)?{name}{tail}$",
 	# "we shall be known as the Reedfolk", "let us be called X", "from now on we are called X"
 	"(?i)^{lead}(?:let\\s+us\\s+be|we\\s+(?:are|shall\\s+be|will\\s+be))\\s+(?:now\\s+)?(?:called|named|known\\s+as)\\s+{name}{tail}$",
+	# "we shall call ourselves the Reedfolk", "let us call ourselves X"
+	"(?i)^{lead}(?:we\\s+(?:shall|will)\\s+|let\\s+us\\s+|let'?s\\s+)?(?:call|name)\\s+ourselves\\s+{name}{tail}$",
 ]
 ## A "name" that is no name: "call our people to the fire", "...home".
 const NATION_NOT_A_NAME:=["to","in","into","at","for","from","with","back","home","out","up","down","together","here","there","now","again","forth","away","off","on","upon","before","after","and","or","so","if","when","because","by","a","an","our","my","your","their","his","her","its","them","him","us","me","you","it","that","this","these","those","what","who","whom","which","something","anything","nothing","everyone","everybody","all","every","today","tomorrow","not","no","never"]
@@ -624,8 +626,9 @@ const NATION_NOT_A_NAME:=["to","in","into","at","for","from","with","back","home
 static func nation(text:String)->Dictionary:
 	## {name} when the words give all our towns together a name ("call our
 	## nation the Reedfolk", "our people shall be called the Reedfolk", "name
-	## our realm Ashmark"); {} otherwise, and for any question.
-	var clean:=text.strip_edges().replace("’","'").trim_suffix(".").trim_suffix("!").strip_edges()
+	## our realm Ashmark"); {} otherwise, and for any question. A name in
+	## quotes or after a colon reads the same.
+	var clean:=text.strip_edges().replace("’","'").replace("\"","").replace("“","").replace("”","").replace(":"," ").strip_edges().trim_suffix(".").trim_suffix("!").strip_edges()
 	if clean=="" or clean.ends_with("?"): return {}
 	for pat in NATION_PATTERNS:
 		var full:=String(pat).replace("{lead}",NATION_LEAD).replace("{whole}",NATION_WHOLE).replace("{tail}",NATION_TAIL).replace("{name}","(?<new>[\\w' -]{2,32}?)")

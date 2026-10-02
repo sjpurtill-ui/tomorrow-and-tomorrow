@@ -188,7 +188,7 @@ static func suggestions(count:int=4)->Array[String]:
 	# The first town.
 	var home:=_first_town()
 	if home!="":
-		if stage>=2 and GameState.known_discoveries.has("kingship"): candidates.append("The Kingdom of %s" % home)
+		if stage>=2 and CV.known_ids("player").has("kingship"): candidates.append("The Kingdom of %s" % home)
 		elif stage>=2: candidates.append("The Realm of %s" % home)
 		else: candidates.append("The Folk of %s" % home)
 	# The founders: the one who kept the first fire.
