@@ -2141,13 +2141,7 @@
       0.65
     ]
   },
-  "wattle_and_daub_walls": {
-    "path": "res://assets/ui/research/paper/wattle_and_daub_walls.png",
-    "focus": [
-      0.5,
-      0.65
-    ]
-  },
+  "wattle_and_daub_walls": {"path": "res://assets/ui/research/subjects/wattle_and_daub_walls-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "clay_pipe_forming": {
     "path": "res://assets/ui/research/paper/clay_pipe_forming.png",
     "focus": [
@@ -3765,16 +3759,16 @@
   "load_lashing_knots": {"path": "res://assets/ui/research/subjects/load_lashing_knots-v1.png", "focus": [0.5, 0.5]},
   "poultices": {"path": "res://assets/ui/research/subjects/poultices-v1.png", "focus": [0.5, 0.5]},
   "rotating_heavy_tasks": {"path": "res://assets/ui/research/subjects/rotating_heavy_tasks-v1.png", "focus": [0.5, 0.5]},
-  "fish_weirs_and_traps": {"path": "res://assets/ui/research/subjects/fish_weirs_and_traps-v1.png", "focus": [0.5, 0.5]},
-  "grain_moisture_watch": {"path": "res://assets/ui/research/subjects/grain_moisture_watch-v1.png", "focus": [0.5, 0.5]},
-  "patrilocal_residence": {"path": "res://assets/ui/research/subjects/patrilocal_residence-v1.png", "focus": [0.5, 0.5]},
-  "seasonal_crisis_leader": {"path": "res://assets/ui/research/subjects/seasonal_crisis_leader-v1.png", "focus": [0.5, 0.5]},
-  "spawning_calendar": {"path": "res://assets/ui/research/subjects/spawning_calendar-v1.png", "focus": [0.5, 0.5]},
-  "herd_recovery_pursuit": {"path": "res://assets/ui/research/subjects/herd_recovery_pursuit-v1.png", "focus": [0.5, 0.5]},
-  "herding_rotas": {"path": "res://assets/ui/research/subjects/herding_rotas-v1.png", "focus": [0.5, 0.5]},
-  "milking": {"path": "res://assets/ui/research/subjects/milking-v1.png", "focus": [0.5, 0.5]},
-  "route_food_caches": {"path": "res://assets/ui/research/subjects/route_food_caches-v1.png", "focus": [0.5, 0.5]},
-  "sweat_baths": {"path": "res://assets/ui/research/subjects/sweat_baths-v1.png", "focus": [0.5, 0.5]},
+  "fish_weirs_and_traps": {"path": "res://assets/ui/research/subjects/fish_weirs_and_traps-v2.png", "focus": [0.5, 0.4], "opening_focus": [0.5, 0.4]},
+  "grain_moisture_watch": {"path": "res://assets/ui/research/subjects/grain_moisture_watch-v2.png", "focus": [0.5, 0.5]},
+  "patrilocal_residence": {"path": "res://assets/ui/research/subjects/patrilocal_residence-v2.png", "focus": [0.5, 0.5]},
+  "seasonal_crisis_leader": {"path": "res://assets/ui/research/subjects/seasonal_crisis_leader-v2.png", "focus": [0.5, 0.5]},
+  "spawning_calendar": {"path": "res://assets/ui/research/subjects/spawning_calendar-v2.png", "focus": [0.5, 0.4]},
+  "herd_recovery_pursuit": {"path": "res://assets/ui/research/subjects/herd_recovery_pursuit-v2.png", "focus": [0.5, 0.5]},
+  "herding_rotas": {"path": "res://assets/ui/research/subjects/herding_rotas-v2.png", "focus": [0.5, 0.5]},
+  "milking": {"path": "res://assets/ui/research/subjects/milking-v2.png", "focus": [0.5, 0.4], "opening_focus": [0.5, 0.4]},
+  "route_food_caches": {"path": "res://assets/ui/research/subjects/route_food_caches-v2.png", "focus": [0.5, 0.5]},
+  "sweat_baths": {"path": "res://assets/ui/research/subjects/sweat_baths-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "dry_stone_walls": {"path": "res://assets/ui/research/subjects/dry_stone_walls-v1.png", "focus": [0.5, 0.5]},
   "firebreaks": {"path": "res://assets/ui/research/subjects/firebreaks-v1.png", "focus": [0.5, 0.5]},
   "kin_care_widows_orphans": {"path": "res://assets/ui/research/subjects/kin_care_widows_orphans-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4233,8 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "grog_preparation": {"path": "res://assets/ui/research/subjects/grog_preparation-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
+  "knot_tally_cross_check": {"path": "res://assets/ui/research/subjects/knot_tally_cross_check-v2.png", "focus": [0.5, 0.5]},
+  "reciprocal_gift_exchange": {"path": "res://assets/ui/research/subjects/reciprocal_gift_exchange-v2.png", "focus": [0.5, 0.5]}
 }

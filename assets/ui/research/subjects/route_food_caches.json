@@ -1,12 +1,51 @@
 {
   "id": "route_food_caches",
   "line": "logistics",
-  "game_year": 25,
-  "approx_historical_year": -4833,
-  "prompt": "c. 4833 BCE: Travelers place covered dried-food baskets at plain stone cairns along familiar river route for later journeys; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-844d246f-5cdc-4b8f-ad09-8a95c4c61cdc.png",
-  "asset": "res://assets/ui/research/subjects/route_food_caches-v1.png",
-  "sha256": "fff3d463775043baf5c9d15ada3f890eab68a979a29654ccd1579605a4922606",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; two caches and route travelers clear in crop, no writing."
+  "status": "new",
+  "name": "Food Caches Along Regular Travel Routes",
+  "one_liner": "Food caches along regular travel routes",
+  "observation": "Food caches along regular travel routes.",
+  "key_threshold": false,
+  "target_year": 25,
+  "proposed_year": 25,
+  "band_low": 15,
+  "band_high": 35,
+  "min_year": 15,
+  "research_years": 3,
+  "requires_all": [
+    "dry_cache_siting",
+    "trail_waymarking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Route quality",
+  "signals": [
+    "travel",
+    "logistics"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/route_food_caches-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "year": 25,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "logistics: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/logistics-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: Two travelers place one small dried-food basket into a dry shallow rock recess above a winding footpath, then fit a loose flat stone cover; a simple stack of three stones marks this cache site. Panoramic travel watercolor sand/slate/indigo. Distinct arid ridge environment no decorative river, no cart, road, barrels or signpost.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1da26b10-a9c9-435c-8b4e-c5b65243f1ae.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/route_food_caches-v2.png",
+  "sha256": "d3804c8f394128f540b0b17197b392bc7f2940171e306f2b8aa9e1e52cecd800",
+  "mode": "built-in image_gen / edit"
 }

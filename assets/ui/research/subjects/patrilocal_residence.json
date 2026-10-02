@@ -1,12 +1,50 @@
 {
   "id": "patrilocal_residence",
   "line": "demography",
-  "game_year": 24,
-  "approx_historical_year": -4840,
-  "prompt": "c. 4840 BCE: Newly married adult woman joins husbands extended kin household as family welcomes her and own kin wave farewell; chalk pastel cut-paper collage. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4f468e4e-957b-4501-a29b-b58ab96230ed.png",
-  "asset": "res://assets/ui/research/subjects/patrilocal_residence-v1.png",
-  "sha256": "7da9202eef47c075428211b4f4eaa1a4738e2b735c46ef098d31de8e426d222d",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; move between family shelters clear in crop."
+  "status": "new",
+  "name": "Bride Joins Her Husband's Kin",
+  "one_liner": "Bride joins her husband's kin",
+  "observation": "Bride joins her husband's kin.",
+  "key_threshold": false,
+  "target_year": 24,
+  "proposed_year": 24,
+  "band_low": 14,
+  "band_high": 34,
+  "min_year": 14,
+  "research_years": 2,
+  "requires_all": [
+    "lineage_exogamy"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Fertility conditions",
+  "signals": [
+    "population",
+    "society"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/patrilocal_residence-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "year": 24,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "demography: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/demography-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: An adult couple carrying one hide bundle is welcomed by the man's kin outside a modest round earthen hut. Welcoming elder gestures to a place beside the household hearth. Angular chalk/pastel cut-paper planes terracotta/rust/ivory/slate. No bridal gown, wedding ceremony, rings, later jewelry or gender-status caricature.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-01c53346-d695-48e1-8fd2-c8fcf4aec0e3.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/patrilocal_residence-v2.png",
+  "sha256": "3ea93f3d7fbd79c2def768a0b5c160c214bd6915645d21dbf6a4c2d9b2c6b445",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,0 +1,12 @@
+{
+  "id": "herding_rotas",
+  "line": "labor",
+  "game_year": 25,
+  "approx_historical_year": -4833,
+  "prompt": "c. 4833 BCE: Herders hand communal sheep and goats to next pair for pasture duty at settlement edge; charcoal and red ochre drawing. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9716a6c8-57ec-4d8c-b52e-4395699e8e14.png",
+  "asset": "res://assets/ui/research/subjects/herding_rotas-v1.png",
+  "sha256": "ce98869981ef63f1ed4a1c53aafd31ab9fcb1eda47db38243db4b33afcc3a5f0",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; handoff and shared flock clear in crop."
+}

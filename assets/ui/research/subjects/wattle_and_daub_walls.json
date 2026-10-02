@@ -1,0 +1,42 @@
+{
+  "id": "wattle_and_daub_walls",
+  "line": "infrastructure",
+  "status": "catalog",
+  "name": "Wattle-and-daub Walls",
+  "one_liner": "Wattle-and-daub walls",
+  "observation": "Wattle-and-daub walls.",
+  "key_threshold": false,
+  "target_year": 24,
+  "proposed_year": 24,
+  "band_low": 10,
+  "band_high": 32,
+  "min_year": 10,
+  "research_years": 3,
+  "requires_all": [
+    "framed_construction",
+    "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "adobe_wall_construction"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/wattle_and_daub_walls.png",
+  "year": 24,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "infrastructure: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/infrastructure-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: Two adults press wet earth onto a partly complete panel of thin interlaced branches between crude wooden uprights; exposed lattice remains next to newly covered smooth earth. Matte mineral-blue/limestone casein painting. Complete working hands, visible branch crossing. No bricks, metal nails, saw-cut lumber, woven cloth robes or elaborate town.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-38768fe2-bc42-497d-8ae3-2781a481f59b.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/wattle_and_daub_walls-v2.png",
+  "sha256": "8bcc2ea540c12d52e5f53d2b69fb7df6dbc9c0f39019045e9bcad4a59913b500",
+  "mode": "built-in image_gen / edit"
+}

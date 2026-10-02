@@ -1,0 +1,12 @@
+{
+  "id": "patrilocal_residence",
+  "line": "demography",
+  "game_year": 24,
+  "approx_historical_year": -4840,
+  "prompt": "c. 4840 BCE: Newly married adult woman joins husbands extended kin household as family welcomes her and own kin wave farewell; chalk pastel cut-paper collage. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4f468e4e-957b-4501-a29b-b58ab96230ed.png",
+  "asset": "res://assets/ui/research/subjects/patrilocal_residence-v1.png",
+  "sha256": "7da9202eef47c075428211b4f4eaa1a4738e2b735c46ef098d31de8e426d222d",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; move between family shelters clear in crop."
+}

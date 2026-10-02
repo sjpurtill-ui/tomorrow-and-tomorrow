@@ -1,0 +1,48 @@
+{
+  "id": "knot_tally_cross_check",
+  "line": "knowledge",
+  "status": "era",
+  "name": "Two Households Cross-check Their Tallies",
+  "one_liner": "Two households cross-check their tallies",
+  "observation": "Two households cross-check their tallies.",
+  "key_threshold": false,
+  "target_year": 25,
+  "proposed_year": 25,
+  "band_low": 15,
+  "band_high": 40,
+  "min_year": 15,
+  "research_years": 3,
+  "requires_all": [
+    "tallies"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "witnessed_agreement_customs",
+    "household_councils"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/discovery-600/knot_tally_cross_check.png",
+    "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+    "tile_index": 1,
+    "caption": "Two households cross-check their tallies (Year 25)",
+    "style": "paper_gouache"
+  },
+  "year": 25,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "knowledge: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/knowledge-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: Two households represented by two seated adults compare two short cords with coarse knots side by side over a hide, with one rough notched stick for checking. Blue-black crosshatched ink on parchment with restrained lapis. No writing, numerals, tally board grids, money, quipu array or later textile clothing.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-76afe2b7-7e03-4efc-af81-6f3b24c09051.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/knot_tally_cross_check-v2.png",
+  "sha256": "66c520af5110d3bf967360c439dd8e0c8492b7eb07430e0a2f58c268f30dda53",
+  "mode": "built-in image_gen / edit"
+}
