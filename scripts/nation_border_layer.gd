@@ -54,6 +54,8 @@ var _wanted:=0
 var _look:=LOOK_EVERY
 var _world_look:=WORLD_EVERY
 var _foreign_cache:Dictionary={}
+## The grid the world was last read about.
+var _read_grid:Array=[]
 var _sampler:RefCounted
 var _sampler_key:=0
 var _heights:Dictionary={}
@@ -159,11 +161,12 @@ func _process(delta:float)->void:
 	if _look<LOOK_EVERY: return
 	_look=0.0
 	_bind_ground()
+	var grid:=Borders.grid_for(_target(),camera.size)
 	_world_look+=LOOK_EVERY
-	if _world_look>=WORLD_EVERY:
+	# A grid that moved reads the world about it first, so one build follows.
+	if _world_look>=WORLD_EVERY or grid.key!=_read_grid:
 		_world_look=0.0
 		_read_world(camera.size)
-	var grid:=Borders.grid_for(_target(),camera.size)
 	var key:=hash([grid.key,own_key,world_key])
 	if key!=_wanted and _job==null: _start(grid,key)
 
@@ -172,6 +175,7 @@ func _process(delta:float)->void:
 ## world's part of the rebuild key.
 func _read_world(view_km:float)->void:
 	var grid:=Borders.grid_for(_target(),view_km)
+	_read_grid=grid.key
 	var box:Rect2=grid.box
 	foreign=Borders.foreign_claims(box.get_center(),box.size.x*0.75+FOREIGN_MARGIN_KM,_foreign_cache)
 	var people:Array=["player"]
