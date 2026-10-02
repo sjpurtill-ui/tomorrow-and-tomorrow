@@ -4,22 +4,22 @@ const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
 ## The Food, Materials and Wealth docks (one section, three tabs). The rail
 ## names each tab, so the dock's title follows the tab the player opened.
-const TITLES:=["Food","Materials","Wealth"]
+const TITLES:=["Food","Materials","Wealth","Trade"]
 const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
 ## Costly parts of the pages, kept while what they are made from holds.
 var memo:=Memo.new()
-const EYEBROWS:=["What we eat and drink","What we build and make with","What we hold and owe"]
+const EYEBROWS:=["What we eat and drink","What we build and make with","What we hold and owe","What passes between us and other peoples"]
 
 func _current_sub()->int:
 	var dock:Variant=hud.get("dock") if is_instance_valid(hud) else null
-	return clampi(int(dock.sub) if dock!=null and is_instance_valid(dock) else 0,0,2)
+	return clampi(int(dock.sub) if dock!=null and is_instance_valid(dock) else 0,0,3)
 
 func meta()->Dictionary:
 	var sub:=_current_sub()
 	return {
 		"eyebrow":EYEBROWS[sub],
 		"title":TITLES[sub],"serif":true,"title_size":38,"spread_tabs":true,
-		"subtabs":["Food & water","Materials","Wealth"],
+		"subtabs":["Food & water","Materials","Wealth","Trade"],
 	}
 
 func tab(sub:int)->Dictionary:
@@ -29,6 +29,7 @@ func _local_tab(sub:int)->Dictionary:
 	match sub:
 		1:return {"blocks":[_materials_data()]}
 		2:return _wealth_tab()
+		3:return {"blocks":[{"type":"trade_board"}]}
 	return {"blocks":[_provisions_data()]}
 
 func _food_blocks(metrics:Dictionary)->Array:

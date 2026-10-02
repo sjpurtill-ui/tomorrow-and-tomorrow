@@ -51,11 +51,15 @@ const CASES_PATH:="res://tests/court_eval/cases.json"
 ## offline 642, live 643, sloppy 74.
 ## Our nation's name once there are two towns ("call our nation the
 ## Reedfolk", the refusal with one town, any official answering, "what is
-## our nation called?", the town's own rename: 18 more runs a path); the
-## whole corpus, measured domain by domain, then passed offline 681, live
-## 682, sloppy 74.
+## our nation called?", the town's own rename: 18 more runs a path), and
+## trade with other peoples (court_trade.gd: an embargo, a tribute demand,
+## a squeeze, a gift of grain, flooding their markets, a toll, trade opened
+## again, "their flint", what passes with them, gifts to a people known
+## only by word: the "trade" domain, 15 more runs a path); the whole
+## corpus, measured domain by domain, then passed offline 696, live 697,
+## sloppy 74.
 ## Raise these as the court improves; the results are deterministic.
-const BASELINE:={"offline":681,"live":682,"sloppy":74}
+const BASELINE:={"offline":696,"live":697,"sloppy":74}
 
 var _processing:Dictionary={}
 

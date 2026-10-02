@@ -1961,6 +1961,63 @@
   {"id": "q.purse.soldiers_paid", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
    "say": "Are the soldiers paid?",
    "ideal": {"kind": "question", "action": "none", "type": "none"},
-   "expect": {"handled": false, "known": true, "reply_has": ["a season"]}}
+   "expect": {"handled": false, "known": true, "reply_has": ["a season"]}},
+
+  {"id": "trade.stop", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "An embargo: nothing passes either way. The Headman carries it while no Messenger holds office, and says their odds.",
+   "say": "Stop all trade with the Esurai",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"trade_esurai": "=='embargo'", "food": "==before", "modifiers": "==before"}, "says_has": ["Their answer:"]},
+   "variants": ["Embargo the Esurai", "stop all trade with esurai"]},
+
+  {"id": "trade.tribute", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "A demand for tribute: word travels to them, and their answer is rolled once, with the odds stated now.",
+   "say": "Demand tribute from the Esurai",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"trade_esurai": "=='tribute'", "food": "==before"}, "says_has": ["in 10", "Word reaches them"]},
+   "variants": ["Make the Esurai pay us tribute"]},
+
+  {"id": "trade.squeeze", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Buy up the Esurai's flint",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"trade_esurai": "=='squeeze'", "trade_good_esurai": "=='Flint'"}, "says_has": ["flint"]},
+   "variants": ["Keep flint from the Esurai"]},
+
+  {"id": "trade.gift", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "A gift of real goods now: our stores fall and theirs rise by the same.",
+   "say": "Send the Esurai 200 grain",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"food": "<before", "esurai_food": ">before", "modifiers": "==before"}, "says_has": ["200 food"]},
+   "variants": ["Give the Esurai 200 food"]},
+
+  {"id": "trade.flood", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Flood the Esurai's markets with cloth",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"trade_esurai": "=='favour'", "trade_good_esurai": "=='Civilian Goods'"}, "says_has": ["a fifth below our price"]}},
+
+  {"id": "trade.toll", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Put a toll on the Esurai's traders",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"trade_esurai": "=='toll'"}, "says_has": ["A tenth"]}},
+
+  {"id": "trade.reopen", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Trade opened again after an embargo: the stance is lifted.",
+   "steps": [{"say": "Stop all trade with the Esurai", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"handled": true, "state": {"trade_esurai": "=='embargo'"}}}, {"say": "Trade with the Esurai", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"handled": true, "state": {"trade_esurai": "=='free'"}, "says_has": ["lifted"]}}]},
+
+  {"id": "trade.their", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "'Their' is the people last named in this audience.",
+   "steps": [{"say": "Tell me about the Esurai.", "ideal": {"kind": "question", "action": "none", "type": "people", "ref": "$esurai"}, "expect": {"handled": false}}, {"say": "buy up their flint", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"handled": true, "state": {"trade_esurai": "=='squeeze'", "trade_good_esurai": "=='Flint'"}}}]},
+
+  {"id": "trade.ask", "domain": "trade", "fixture": "home_peace", "speaker": "kavu", "source": "design",
+   "note": "What passes with one people is the keeper's count, answered from the trade ledger.",
+   "say": "What do we trade with the Esurai?",
+   "ideal": {"kind": "question", "action": "none", "type": "people", "ref": "$esurai"},
+   "expect": {"handled": false, "known": true, "reply_any": ["Esurai"], "prompt_has": ["trade"]}},
+
+  {"id": "trade.unmet_gifts", "domain": "trade", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "The Varesh are known only by word: the word stands, nothing leaves the stores, and the court says so.",
+   "say": "Send gifts to the Varesh each season",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"trade_varesh": "=='gifts'", "food": "==before"}, "says_has": ["only by word"]}}
 ]
 }

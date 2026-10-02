@@ -1772,6 +1772,8 @@ func _process_diplomatic_mission(day:int)->void:
 			if WorldSimulation.enabled:preload("res://scripts/civilization_exchange.gd").receive(civ_id,gift_resource,gift_amount)
 			elif gift_resource=="Food": civ["food_days"]=clampf(float(civ.get("food_days",0.0))+gift_amount/maxf(1.0,float(civ.get("population",1.0))),0.0,180.0)
 			civ["gift_value_received"]=maxf(0.0,float(civ.get("gift_value_received",0.0)))+gift_amount
+			# A gift envoys carried is owed a return, on the one trade ledger.
+			(load("res://scripts/trade_ledger.gd") as GDScript).call("note_flow",WorldSimulation.actor_id,civ_id,gift_resource,gift_amount,"gift")
 		civ["player_relation"]=relation
 		civilizations[index]=civ
 		var purpose:=String(diplomatic_mission.get("purpose","goodwill"))
@@ -5026,10 +5028,12 @@ func player_effects()->Dictionary:
 	var occupied_production_bonus:=0.0
 	var occupation_relief_demand:=0.0
 	var occupation_food_transfer:=0.0
+	# Trade partners are peoples goods really pass to and from (trade_ledger.gd),
+	# never a treaty with nothing moving; the volume is their worth a day.
+	var real_trade:Dictionary=(load("res://scripts/trade_ledger.gd") as GDScript).call("access",WorldSimulation.actor_id)
+	active_trade=int(real_trade.get("partners",0)); trade_volume=float(real_trade.get("value",0.0))/30.0
 	for civ in civilizations:
 		var relation:Dictionary=civ.player_relation
-		if String(relation.get("treaty","none"))=="trade" and not bool(relation.get("at_war",false)):
-			active_trade+=1; trade_volume+=float(relation.get("trade",0.0))
 		if String(relation.get("treaty","none"))=="non_aggression": treaty_count+=1
 		if bool(relation.get("at_war",false)):
 			war_count+=1
