@@ -8,30 +8,46 @@ constraints.
 ## The realm's purse (scripts/realm_purse.gd)
 
 One account the god commands for the whole people. Towns keep their own
-stores, money stage and households' money; the public account is the realm's.
-It is counted in one unit that holds across the ages (a ration's worth: Food 1,
-Coin 1) and named by what the people know: the common store before money,
-silver at weighed metal, coin after coinage (character_voice.gd era gates).
+stores, money stage and households' money; the public account is the realm's,
+and it holds only what is really in it. Before coinage it is **the common
+store**: food the levy took out of each town's own stores, counted in rations.
+After coinage it is **the treasury**: coin with its backing, plus the food
+still taken in kind, counted in coin at the market price (the unit changes once,
+at coinage). Working metal does not make the store silver.
 Older saves merge every town's treasury, public debt and soldiers' arrears into
 it once on load, moving each treasury's coin out of its town's circulation with
 its backing; no town keeps a treasury, borrows or pays upkeep afterwards, and
 the per-town public finance described further down is superseded by it.
 
+Why it changed (2026-10-02): the levy used to be only written down. Nothing
+left the towns' stores, pay handed nothing over, and nothing rotted, so the
+player's year-237 store read 225,000 "silver" against 100,000 rations in all
+seven towns. A purse kept that way is counted again once on load: it keeps
+a year of the levy at its own last pace, and the record says so.
+
 - **The levy** is light, usual or heavy: a plain fraction of every harvest and
   load brought in (light a quarter, usual half, heavy all of the age's most:
   a tenth before money, a fifth at weighed metal and coin, up to a third once
-  the state counts every household). Each town's own economy day accrues it:
+  the state counts every household). Each town's own economy day takes it:
   output x rate x the realm's reach (office_levers.reach with tallies and
-  registers) x (1 - the share hidden). After coinage the households' money
-  share is paid in coin, with its backing. It weighs on trust in the chiefs
-  (up to 4.8 points) and on holding together (up to 2.6) through the social
-  pressure, beside its clamp.
+  registers) x (1 - the share hidden), as food out of that town's stores
+  (FoodSystem.take_for_levy). The keepers never take a town's last 20 days of
+  food: what a hungry town cannot give stays with it ("left with hungry
+  towns"). After coinage the households' money share is paid in coin, with
+  its backing. It weighs on trust in the chiefs (up to 4.8 points) and on
+  holding together (up to 2.6) through the social pressure, beside its clamp.
+- **Rot**: the store's food rots each month at the capital's own rate for
+  stored food (FoodSystem.stored_spoilage_rate: storage pits, preserving
+  methods and the keeper of stores lower it). So the store cannot grow without
+  end: it settles where the levy left over after pay equals what rots.
 - **The lines**, reckoned once a month for the month past: old debts (a
   quarter of the purse at most), the soldiers' pay (half a day's output per
-  head for each soldier at arms, a quarter for those in drill; before money
-  it is food and gifts), food bought for hungry towns at the seller's market
-  price (a delivery between towns), hired crews (building +15%) and the
-  scholars' keep (research +12%), each a seventh of a day's output per head.
+  head for each soldier at arms, a quarter for those in drill), food for hungry
+  towns (the store's own food carried from the capital first; then, with coin,
+  food bought at the seller's market price, a delivery between towns), hired
+  crews (building +15%) and the scholars' keep (research +12%), each a seventh
+  of a day's output per head. Pay is food back in common hands: into every town's
+  stores by its share of the people (a great work's wages into that town's).
   Unpaid soldiers lose will (6 points a month at most), readiness (to 0.85
   after three months) and some go home (1 in 50 a month, 1 in 25 from the
   third), through MilitaryCampaign.pay_shortfall.

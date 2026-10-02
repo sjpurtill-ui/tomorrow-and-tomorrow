@@ -9,7 +9,8 @@ extends VBoxContainer
 ##   its lines   the soldiers' pay, the scholars' keep, hired crews and food
 ##               for hungry towns: a switch each, its cost a season, its effect;
 ##   the wealth  who holds it by fifths, and the pressure it puts on trust.
-## The words follow the age: the common store, silver, then coin.
+## The words follow the age: the common store (food, in rations) until
+## coinage, then the treasury (coin).
 
 signal close_wanted
 
@@ -18,7 +19,7 @@ const Purse:=preload("res://scripts/realm_purse.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Tracker:=preload("res://scripts/order_tracker.gd")
 const REFRESH_SECONDS:=1.0
-const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","relief":"Food bought","debts":"Old debts","spent":"Gifts and buying"}
+const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","relief":"Food for the hungry","debts":"Old debts","spent":"Gifts and buying","spoiled":"Rot"}
 
 var head_box:VBoxContainer
 var levy_box:VBoxContainer
@@ -87,12 +88,12 @@ func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->voi
 
 func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	_clear(head_box)
-	# The account's own name heads it, by the age: the common store, silver, the treasury.
+	# The account's own name heads it, by the age: the common store, the treasury.
 	var kicker:=get_child(head_box.get_index()-1) as Label
 	if kicker!=null:kicker.text=Purse.account_name().to_upper()
 	var panel:=_panel(head_box,"Purse")
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
-	panel.tooltip_text="The realm's one account. Every town keeps its own stores; this is the god's to spend."
+	panel.tooltip_text="The realm's one account. Every town keeps its own stores; this is the god's to spend." if not Purse.in_kind() else "Food the levy took from every town's stores, kept for all. The god's to spend: it pays the soldiers, feeds the hungry, keeps scholars and crews. It rots slowly, as stored food does."
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",22);column.add_child(head)
 	var held:=_number(head,Purse.number(Purse.balance()),Purse.unit_word());held.name="Balance"
 	held.tooltip_text="What %s holds now, in %s." % [Purse.account_name(),Purse.unit_word()]
@@ -100,11 +101,14 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	inn.tooltip_text="The levy at today's work, after what is hidden."
 	var out:=_number(head,"−"+Purse.number(float(forecast.out)),"a season");out.name="GoingOut"
 	out.tooltip_text="What the lines switched on cost a season at today's numbers."
-	# What it buys: food at the market price, or before a market the seasons
-	# of the soldiers' pay it holds.
+	# Before coinage it is food: how long it would feed everyone. After, what
+	# it buys at the market price, or the seasons of the soldiers' pay it holds.
 	var rations:=Purse.buys_rations()
 	var army:=float(((forecast.lines as Dictionary).get("army",{}) as Dictionary).get("per_season",0.0))
-	if rations>=0.0:
+	if Purse.in_kind():
+		var feeds:=_number(head,EraWords.grouped(roundi(Purse.days_of_food())),"days of food for everyone");feeds.name="Buys"
+		feeds.tooltip_text="How long it would feed all our people, at what they eat a day now."
+	elif rations>=0.0:
 		var buys:=_number(head,EraWords.grouped(roundi(rations)),"rations it buys");buys.name="Buys"
 		buys.tooltip_text="Food at today's market price, about %s a ration." % Purse.number(float(WorldSimulation.state.market_prices.get("Food",1.0)))
 	elif army>0.5:
@@ -118,6 +122,7 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	for line:String in Purse.LINES:
 		var entry:Dictionary=(forecast.lines as Dictionary).get(line,{})
 		if bool(entry.get("on",false)) and float(entry.get("per_season",0.0))>0.0:outs.append([String(LINE_LABELS[line]),float(entry.per_season),_ink(line)])
+	if float(forecast.get("rot",0.0))>=0.5:outs.append([String(LINE_LABELS.spoiled),float(forecast.rot),T.INK_MUTED])
 	bar.ins=ins;bar.outs=outs
 	bar.tooltip_text=_budget_words(ins,outs)
 	column.add_child(bar)
@@ -163,6 +168,7 @@ func _build_sources(sources:Dictionary)->void:
 	var lost:PackedStringArray=[]
 	if float(sources.evaded)>=0.5: lost.append("%s hidden by households" % Purse.number(float(sources.evaded)))
 	if float(sources.unreached)>=0.5: lost.append("%s beyond the keepers' reach" % Purse.number(float(sources.unreached)))
+	if float(sources.get("short",0.0))>=0.5: lost.append("%s left with hungry towns" % Purse.number(float(sources.short)))
 	if not lost.is_empty(): sources_box.add_child(_line("Never came in, a season: %s." % ", ".join(lost),13,T.INK_MUTED,true))
 	if float(sources.coin_share)>0.01: sources_box.add_child(_line("%d%% of it is paid in coin; the rest is taken in goods." % roundi(float(sources.coin_share)*100.0),13,T.INK_MUTED,true))
 
@@ -234,9 +240,9 @@ func _line_row(line:String,forecast:Dictionary,purse:Dictionary)->Control:
 	toggle.tooltip_text="%s: %s." % [String(Purse.LINE_NAMES[line]),"switch it off" if on else "switch it on"]
 	toggle.pressed.connect(func()->void:_toggle(line,not on))
 	row.add_child(toggle)
-	if line=="relief" and Purse.market_open():
-		var now:=Button.new();now.name="BuyNow";now.text="Buy now";now.focus_mode=Control.FOCUS_NONE;now.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-		now.tooltip_text="Spend up to a quarter of %s on food for hungry towns today." % Purse.account_name()
+	if line=="relief":
+		var now:=Button.new();now.name="BuyNow";now.text="Send now";now.focus_mode=Control.FOCUS_NONE;now.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		now.tooltip_text="Send up to a quarter of %s to hungry towns today." % Purse.account_name()
 		now.pressed.connect(_buy_now)
 		row.add_child(now)
 	return panel
@@ -251,10 +257,10 @@ func _effect_words(line:String,on:bool,entry:Dictionary,purse:Dictionary)->Strin
 		"scholars":return ("%s · research %d%% faster: a 100-day discovery in %d days" if on else "%s · would make research %d%% faster: a 100-day discovery in %d days") % [String(entry.get("who","")),roundi(Purse.SCHOLARS_MAX*100.0),roundi(100.0/(1.0+Purse.SCHOLARS_MAX))]
 		"crews":return ("%s · building %d%% faster: a 100-day work in %d days" if on else "%s · would build %d%% faster: a 100-day work in %d days") % [String(entry.get("who","")),roundi(Purse.CREWS_MAX*100.0),roundi(100.0/(1.0+Purse.CREWS_MAX))]
 		"relief":
-			if not Purse.market_open():return "No market yet: nothing can be bought"
 			var towns:=Purse.food_places()
-			if towns.size()<2:return "One town only: no other town to buy from"
 			var hungry:=towns.filter(func(p:Dictionary)->bool:return float(p.days)<Purse.HUNGRY_DAYS).size()
+			if Purse.in_kind():return "%d hungry %s · the store holds %s days of food" % [hungry,"town" if hungry==1 else "towns",EraWords.grouped(roundi(Purse.days_of_food()))]
+			if not Purse.market_open():return "%d hungry %s · no market to buy more" % [hungry,"town" if hungry==1 else "towns"]
 			return "%d hungry %s · food about %s a ration" % [hungry,"town" if hungry==1 else "towns",Purse.number(float(WorldSimulation.state.market_prices.get("Food",1.0)))]
 	return ""
 
@@ -263,7 +269,7 @@ func _effect_tip(line:String)->String:
 		"army":return "Pay on top of rations: %s. Unpaid soldiers lose will each month, are slower to muster, and some go home; more after three months." % Purse.pay_word()
 		"scholars":return "A keep for those at research, a seventh of a day's work each. While it is paid, research goes faster."
 		"crews":return "Wages for those at building, a seventh of a day's work each. While they are paid, building goes faster."
-		"relief":return "Each month, food is bought at the market price from towns with more than %d days of it, for towns under %d days." % [int(Purse.SELLER_DAYS),int(Purse.HUNGRY_DAYS)]
+		"relief":return "Each month, food goes from the store to towns under %d days of it, up to a quarter of the store. With coin, more is bought at the market price from towns with more than %d days of it." % [int(Purse.HUNGRY_DAYS),int(Purse.SELLER_DAYS)]
 	return ""
 
 func _toggle(line:String,on:bool)->void:
@@ -276,7 +282,7 @@ func _toggle(line:String,on:bool)->void:
 
 func _buy_now()->void:
 	var bought:=Purse.buy_relief(Purse.balance()*Purse.RELIEF_SHARE)
-	var said:="Bought %s rations for %s." % [Purse.number(float(bought.rations)),Purse.amount_text(float(bought.spent))] if float(bought.spent)>0.0 else "Nothing bought: %s." % String(bought.reason)
+	var said:="Sent %s rations to the hungry." % Purse.number(float(bought.rations)) if float(bought.rations)>0.0 else "Nothing sent: %s." % String(bought.reason)
 	_say(said)
 	Tracker.setting_order("Buy food for the hungry",{"ok":float(bought.spent)>0.0,"message":said,"reason":said},"purse",_keeper(),"economy:2")
 	refresh(true)

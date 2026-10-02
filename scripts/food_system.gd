@@ -951,6 +951,21 @@ func food_account_snapshot(window_days:int=30)->Dictionary:
 		"history_limit":FOOD_ISSUE_HISTORY_LIMIT,"charged_once_at_departure":true,"bounded":true
 	}
 
+## The realm's levy taken in kind (realm_purse.gd accrue): food leaves this
+## place's stores for the common store, every day, so it is not kept among
+## the departure issues the food panel lists.
+func take_for_levy(requested:float)->float:
+	initialize()
+	var removed:=0.0
+	for amount in _consume(maxf(0.0,requested)).values(): removed+=float(amount)
+	_sync_total()
+	return removed
+
+## How fast stored food rots a day here (the realm's common store keeps
+## its grain as the capital keeps its own).
+func stored_spoilage_rate()->float:
+	return clampf(float(_spoilage_rates(false)[1]),0.0,1.0)
+
 func receive_external_food(requested:float)->float:
 	initialize()
 	var received:=maxf(0.0,requested)
