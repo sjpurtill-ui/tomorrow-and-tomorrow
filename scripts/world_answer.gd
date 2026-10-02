@@ -153,9 +153,9 @@ static func tributaries()->Array[Dictionary]:
 ## {fear, resentment, ratio (our spears over theirs, a league's together),
 ## bold, worn, lost (towns of theirs we hold or burned), trait, league,
 ## knows_way, small}.
-static func reading(civ_id:String)->Dictionary:
+static func reading(civ_id:String,view:Dictionary={})->Dictionary:
 	var standing:=load(STANDING_PATH) as GDScript
-	var v:Dictionary=standing.call("view_of",civ_id) if standing!=null else {}
+	var v:Dictionary=view if not view.is_empty() else (standing.call("view_of",civ_id) if standing!=null else {})
 	var p:=Hall._personality(civ_id)
 	var war:=load(WAR_PATH) as GDScript
 	var front:Dictionary=war.call("_peek",civ_id) if war!=null else {}
@@ -194,6 +194,35 @@ static func _knows_our_towns(civ_id:String)->bool:
 	if not WorldSimulation.enabled or not WorldSimulation.actors.has(civ_id): return true
 	return bool(WorldSimulation.scoped(civ_id,func()->bool:
 		return not ((load(COUNCIL_PATH) as GDScript).call("known_towns","human") as Array).is_empty()))
+
+## What this people's answer to us is, as the Standing page says it:
+## [{id, tone, words, detail}] (consequences rows), worst first.
+static func standing_rows(civ_id:String,view:Dictionary)->Array[Dictionary]:
+	var out:Array[Dictionary]=[]
+	var t:=tributary(civ_id)
+	if not t.is_empty():
+		var hostage:=String(t.get("hostage",""))
+		out.append({"id":"tributary","tone":"good","words":"Pays us %d Food every harvest%s" % [roundi(float(t.get("amount",0.0))),("; %s is our hostage" % hostage) if hostage!="" else ""],
+			"detail":"Paid %d times since they bowed. They pay while they fear us (they stop below %d in 100) and our spears outmatch theirs." % [int(t.get("paid",0)),roundi(PAY_FEAR*100.0)]})
+		return out
+	var arm:=arming(civ_id)
+	if not arm.is_empty():
+		var left:=maxi(0,int(arm.get("march",_day()))-_day())
+		out.append({"id":"arming","tone":"danger","words":"Gathering every spear against us: they march in about %s" % _days_words(left),
+			"detail":String(arm.get("cause",""))})
+		return out
+	var standing:=load(STANDING_PATH) as GDScript
+	var o:=odds(civ_id,reading(civ_id,view))
+	if float(o.all_in)>0.0:
+		out.append({"id":"all_in","tone":"danger","words":"May come at us with every spear they have: %s" % String(standing.call("monthly_odds_words",float(o.all_in))),"detail":"Because %s. One great answer every two years at most." % String(o.why_all_in)})
+	if float(o.bow)>0.0:
+		out.append({"id":"bow","tone":"good","words":"May come to bow and pay us tribute: %s" % String(standing.call("monthly_odds_words",float(o.bow))),"detail":"Because %s." % String(o.why_bow)})
+	return out
+
+static func _days_words(days:int)->String:
+	if days<=7: return "a few days"
+	if days<45: return "%d days" % (roundi(float(days)/5.0)*5)
+	return "%d months" % maxi(1,roundi(float(days)/30.0))
 
 # --------------------------------------------------------------------------
 # Monthly

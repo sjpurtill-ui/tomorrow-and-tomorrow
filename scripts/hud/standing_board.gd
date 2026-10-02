@@ -647,6 +647,10 @@ func _fill_home()->void:
 		var said:=_voice(column,String(words.regard),18)
 		said.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 		_home_refs.regard=said
+	if String(h.get("told",""))!="":
+		var told:=Kit.label(column,String(h.told),"note")
+		told.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
+		_home_refs.told=told
 	var note:=Kit.label(column,String(words.note),"note")
 	note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	_home_refs.note=note
@@ -691,7 +695,7 @@ static func _home_words(h:Dictionary)->Dictionary:
 static func _home_shape_of(h:Dictionary)->Array:
 	var effects:Dictionary=h.get("effects",{})
 	var forgiving:=float(effects.get("forgiveness",0.0))
-	return [String(h.get("regard_words",""))!="",float(effects.get("levy",0.0))>0.0,absf(forgiving)>=0.02,forgiving>0.0]
+	return [String(h.get("regard_words",""))!="",String(h.get("told",""))!="",float(effects.get("levy",0.0))>0.0,absf(forgiving)>=0.02,forgiving>0.0]
 
 ## Our people's medallions and lines take the month's figures in place.
 func _fill_home_words(h:Dictionary)->void:
@@ -703,6 +707,7 @@ func _fill_home_words(h:Dictionary)->void:
 		_put(refs.word,String(medal[3]))
 	var words:=_home_words(h)
 	if _home_refs.has("regard"):_put(_home_refs.regard,String(words.regard))
+	if _home_refs.has("told"):_put(_home_refs.told,String(h.get("told","")))
 	_put(_home_refs.note,String(words.note))
 	if _home_refs.has("levy"):_put(_home_refs.levy,String(words.get("levy","")))
 	if _home_refs.has("forgiving"):_put(_home_refs.forgiving,String(words.get("forgiving","")))

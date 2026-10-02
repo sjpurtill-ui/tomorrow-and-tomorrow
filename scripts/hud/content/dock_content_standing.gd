@@ -129,11 +129,15 @@ func _people(v:Dictionary,our:Dictionary)->Dictionary:
 	var rivals:=load(RIVALS_PATH) as GDScript if ResourceLoader.exists(RIVALS_PATH) else null
 	var character:Dictionary=rivals.call("rival_character",civ_id) if rivals!=null else {}
 	var memories:Array=[]
+	# What their people still tell of us, and for how long (deeds.gd).
+	var deeds:=preload("res://scripts/deeds.gd")
+	for told:Dictionary in deeds.remembered(civ_id,2):
+		memories.append({"tone":"good" if String(told.tone)=="amends" else "danger","text":"They tell of %s, year %d: %s." % [String(told.words),int(told.year),deeds.years_words(int(told.years_left))]})
 	for grudge:Dictionary in character.get("grudges",[]):
-		if memories.size()>=2: break
+		if memories.size()>=3: break
 		memories.append({"tone":"danger","text":"They remember %s." % String(grudge.text).trim_suffix(".")})
 	for bond:Dictionary in character.get("bonds",[]):
-		if memories.size()>=3: break
+		if memories.size()>=4: break
 		memories.append({"tone":"good","text":String(bond.text).trim_suffix(".")+"."})
 	return {"civ_id":civ_id,"name":String(v.civ_name),"accent":identity.get("accent",Tokens.GOLD),"emblem":Identity.emblem(civ_id),
 		"relation":_relation_words(civ_id,relation),"ruler":_ruler_words(character),"headline":Standing.view_words(v),
@@ -187,7 +191,15 @@ func _home(our:Dictionary,seen:Array)->Dictionary:
 	var legitimacy:=float(GameState.simulation_metrics.get("legitimacy",0.5))
 	return {"pride":float(pride.value),"pride_why":String(pride.why),
 		"love":float(regard.get("love",0.5)),"dread":float(regard.get("dread",0.0)),"regard_words":String(regard.get("read","")),
-		"trust":legitimacy,"resentment":float(regard.get("resentment",0.0)),"effects":Standing.home_effects()}
+		"trust":legitimacy,"resentment":float(regard.get("resentment",0.0)),"effects":Standing.home_effects(),
+		"told":_told_at_home()}
+
+## What our own people still tell of their god (deeds.gd), weightiest first.
+static func _told_at_home()->String:
+	var deeds:=preload("res://scripts/deeds.gd")
+	var parts:PackedStringArray=[]
+	for told:Dictionary in deeds.remembered("home",3): parts.append("%s (year %d)" % [String(told.words),int(told.year)])
+	return ("At every hearth they still tell of "+", ".join(parts)+".") if not parts.is_empty() else ""
 
 ## The dangers the page leads with, worst first: what the peoples we know
 ## will do about what they see, then what the shape of our strengths risks.
@@ -198,6 +210,8 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 			if String(c.tone)!="danger": continue
 			var title:=""
 			match String(c.id):
+				"arming": title="%s is gathering every spear against us" % String(p.name)
+				"all_in": title="%s may come at us with everything" % String(p.name)
 				"league": title="%s stand together against us" % String(p.name)
 				"envy": title="%s envy our stores" % String(p.name)
 				"grudge": title="%s nurse a grudge against us" % String(p.name)
@@ -215,7 +229,7 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 	return warnings
 
 static func _rank(id:String)->int:
-	return {"league":0,"envy":1,"grudge":2,"tribute_demand":3,"redress_demand":4}.get(id,5)
+	return {"arming":-1,"league":0,"all_in":1,"envy":1,"grudge":2,"tribute_demand":3,"redress_demand":4}.get(id,5)
 
 ## What answers a danger, in the engine's own terms.
 static func _fix_for(id:String,our:Dictionary)->Dictionary:
@@ -226,6 +240,8 @@ static func _fix_for(id:String,our:Dictionary)->Dictionary:
 			return {"words":"An envoy with gifts or redress can ease a grudge.","section":"","sub":0,"action":""}
 		"league":
 			return {"words":"Fear binds them: fewer warbands at their borders, gifts and kept word ease it; more spears only deepen it.","section":"","sub":0,"action":""}
+		"arming","all_in":
+			return {"words":"More under arms and ready at home meets them; a blood price or gifts sent first may turn them back (Might %d%%)." % roundi(float(our.might.value)*100.0),"section":"military","sub":0,"action":"Warriors"}
 	return {"words":"","section":"","sub":0,"action":""}
 
 static func _neglect_words(id:String)->String:

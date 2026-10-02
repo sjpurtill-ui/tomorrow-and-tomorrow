@@ -515,6 +515,9 @@ static func times_words(weight:float)->String:
 static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 	var out:Array[Dictionary]=[]
 	if not bool(v.get("known",false)): return out
+	# What they mean to do about us at last: bow, or come with everything.
+	var answer:=load("res://scripts/world_answer.gd") as GDScript
+	if answer!=null: out.append_array(answer.call("standing_rows",civ_id,v))
 	var league:=load("res://scripts/fear_league.gd") as GDScript
 	if league!=null and bool(league.call("is_member",civ_id)):
 		var others:PackedStringArray=[]
