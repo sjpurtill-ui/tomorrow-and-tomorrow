@@ -541,7 +541,18 @@ static func _bands_summary(seen:Array)->Dictionary:
 static func relation_cell(people:Dictionary)->Dictionary:
 	var word:="Peace";var tone:="ink";var order:=4
 	var tip:="At peace with us."
-	if bool(people.get("feud",false)):
+	# Their answer to us (world_answer.gd): bowed and paying, or gathering every spear.
+	var answer:=load("res://scripts/world_answer.gd") as GDScript
+	var civ_id:=String(people.get("civ_id",""))
+	var bowed:Dictionary=answer.call("tributary",civ_id) if answer!=null and civ_id!="" else {}
+	var arming:Dictionary=answer.call("arming",civ_id) if answer!=null and civ_id!="" else {}
+	if not arming.is_empty():
+		word="Arming against us";tone="danger";order=0
+		tip="Gathering every spear against us: they march in about %d days." % maxi(0,int(arming.get("march",0))-int(GameState.elapsed_days))
+	elif not bowed.is_empty():
+		word="Bows to us";tone="good";order=8
+		tip="They bowed to us and pay tribute every season%s." % ((": %s is our hostage" % String(bowed.get("hostage",""))) if String(bowed.get("hostage",""))!="" else "")
+	elif bool(people.get("feud",false)):
 		var hot:=bool(people.get("hot",false))
 		word="Hot feud" if hot else "Simmering feud";tone="danger" if hot else "warn";order=1 if hot else 2
 		tip="In a feud with us; blood was spilled lately." if hot else "In a feud with us, quiet for now."
