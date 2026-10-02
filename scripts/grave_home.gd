@@ -134,7 +134,7 @@ const NOT_ORDER:="(?i)\\b(not|never|no one|nobody|don'?t|doesn'?t|didn'?t|won'?t
 ## Words that send them out of the realm (never a doubt or a "not").
 const REALM_WORDS:="(?i)\\b(never to return|for good|forever)\\b"
 ## Where the verb's own clause ends.
-const CLAUSE_CUT:="(?i)[,;:.!?]|\\b(but|so|then|until|till|while|because|before|after|since|unless|if|when|whenever|lest|to|who|whom|that|which|whose)\\b"
+const CLAUSE_CUT:="(?i)[,;:.!?]|\\b(but|so|then|until|till|while|because|before|after|since|unless|if|when|whenever|lest|to|who|whom|that|which|whose|take|bring|carry|lead|send|march|haul|herd|give|keep|hold|spare|free|release|leave|feed|build|burn|torch|raze|drive|cast|throw|let|make|tie|bind|round up|enslave|kill|slay|execute|protect|guard|go|come|return)\\b"
 ## A count or a part leading the object ("half the farmers", "20 of the women").
 const QUANT:="(?i)^(all|every one|each|both|half|most|some|several|many|a few|two thirds|three quarters|a third|one third|a quarter|one quarter|a fourth|a fifth|one fifth|a tenth|one tenth|\\d{1,7}|a dozen|a score|a hundred|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|sixty|hundred)(\\s+of)?\\s+"
 const DETERMINERS:="(?i)^((the|our|my|this|these|those|own|all|of)\\s+)+"
@@ -227,11 +227,13 @@ static func _read(clean:String,sentence:String,verb:Dictionary,audience:Dictiona
 		elif not _burns_the_village(object): return {}
 	elif not phrase.has("groups") and not bool(phrase.get("qualified",false)): return {}
 	if how=="drive" and not _leaves_realm(String(verb.kind),rest): return {}
-	# 3. Whose people.
-	var place:=_has(rest,VILLAGE_RE)
-	var town:=_our_town(rest,list)
+	# 3. Whose people, read from the verb's own clause ("kill all the men,
+	# bring the women to Seanstone": Seanstone is only where the women go).
+	var clause:=sentence.substr(int(verb.at),int(verb.end)-int(verb.at))+" "+String(_clip(sentence.substr(int(verb.end))).text)
+	var place:=_has(clause,VILLAGE_RE)
+	var town:=_our_town(clause,list)
 	var home:=String(town.get("name",""))
-	var own:=_has(rest,OWN_RE) or bool(town.get("named",false))
+	var own:=_has(clause,OWN_RE) or bool(town.get("named",false))
 	var groups:Array=phrase.get("groups",[])
 	var trades_only:=not groups.is_empty() and groups.all(func(g:Dictionary)->bool: return String(g.get("role",""))!="")
 	var out:={"how":how,"groups":groups,"share":float(phrase.get("share",1.0)),"count":int(phrase.get("count",0)),"text":clean.substr(0,300),"own":own,"home":home,"settlement_id":String(town.get("id",""))}
@@ -265,18 +267,18 @@ static func _verb(s:String)->Dictionary:
 	var best:Dictionary={}
 	var k:=_re(KILL_RE).search(s)
 	if k!=null:
-		best={"how":"kill","kind":"kill","at":k.get_start(),"object":k.get_string("putobj") if k.get_string("putobj")!="" else s.substr(k.get_end())}
+		best={"how":"kill","kind":"kill","at":k.get_start(),"end":k.get_end(),"object":k.get_string("putobj") if k.get_string("putobj")!="" else s.substr(k.get_end())}
 	var b:=_re(BURN_RE).search(s)
 	if b!=null and (best.is_empty() or b.get_start()<int(best.at)):
 		var obj:=b.get_string("setobj") if b.get_string("setobj")!="" else (b.get_string("torchobj") if b.get_string("torchobj")!="" else s.substr(b.get_end()))
-		best={"how":"burn","kind":"burn","at":b.get_start(),"object":obj}
+		best={"how":"burn","kind":"burn","at":b.get_start(),"end":b.get_end(),"object":obj}
 	var ban:=_re(BANISH_RE).search(s)
 	if ban!=null and (best.is_empty() or ban.get_start()<int(best.at)):
-		best={"how":"drive","kind":"banish","at":ban.get_start(),"object":s.substr(ban.get_end())}
+		best={"how":"drive","kind":"banish","at":ban.get_start(),"end":ban.get_end(),"object":s.substr(ban.get_end())}
 	var o:=_re(OUT_RE).search(s)
 	if o!=null and (best.is_empty() or o.get_start()<int(best.at)):
 		var mid:=o.get_string("mid").strip_edges()
-		best={"how":"drive","kind":"out","at":o.get_start(),"object":mid if mid!="" else s.substr(o.get_end()),"bare":mid==""}
+		best={"how":"drive","kind":"out","at":o.get_start(),"end":o.get_end(),"object":mid if mid!="" else s.substr(o.get_end()),"bare":mid==""}
 	return best
 
 static func _is_command(lead:String,list:Array[Dictionary],cc:GDScript)->bool:

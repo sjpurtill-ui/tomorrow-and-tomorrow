@@ -119,7 +119,9 @@ func test_things_rooms_laws_and_other_peoples_are_never_read_as_this()->void:
 		"Drive out the wolves and protect the children",
 		# Moving people within the realm; a part of the village burned.
 		"Send the women and children away from the village","Send the hunters out into the forest","Send the herders out to the hills","Drive out the old",
-		"drive the old people out of the village","Burn the huts of the sick","burn the houses","burn some houses"]:
+		"drive the old people out of the village","Burn the huts of the sick","burn the houses","burn some houses",
+		# Seanstone named only as where others are taken: not our people.
+		"kill all the men of tsaren bring the women and children back to seanstone"]:
 		assert_dict(Grave.reading(words,audience,list)).override_failure_message(words).is_empty()
 	# People narrowed: never the whole group; the court asks whom exactly.
 	for words in ["Kill the men who refused to fight","kill the men who deserted","kill the sick women","kill the wounded men"]:
