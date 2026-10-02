@@ -76,13 +76,7 @@
       0.5
     ]
   },
-  "well_siting": {
-    "path": "res://assets/ui/research/subjects/well_siting-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "well_siting": {"path": "res://assets/ui/research/subjects/well_siting-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "wound_cleaning": {
     "path": "res://assets/ui/research/subjects/wound_cleaning-v1.png",
     "focus": [
@@ -279,13 +273,7 @@
       0.5
     ]
   },
-  "clay_testing": {
-    "path": "res://assets/ui/research/subjects/clay_testing-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "clay_testing": {"path": "res://assets/ui/research/subjects/clay_testing-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "clay_tempering": {
     "path": "res://assets/ui/research/subjects/clay_tempering-v1.png",
     "focus": [
@@ -587,13 +575,7 @@
       0.5
     ]
   },
-  "birth_attendants": {
-    "path": "res://assets/ui/research/subjects/birth_attendants-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "birth_attendants": {"path": "res://assets/ui/research/subjects/birth_attendants-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "latrine_siting": {
     "path": "res://assets/ui/research/subjects/latrine_siting-v1.png",
     "focus": [
@@ -1245,13 +1227,7 @@
       0.5
     ]
   },
-  "shared_childcare": {
-    "path": "res://assets/ui/research/subjects/shared_childcare-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "shared_childcare": {"path": "res://assets/ui/research/subjects/shared_childcare-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "maternal_recovery": {
     "path": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
     "focus": [
@@ -1322,13 +1298,7 @@
       0.65
     ]
   },
-  "root_grating_dewatering": {
-    "path": "res://assets/ui/research/paper/root_grating_dewatering.png",
-    "focus": [
-      0.5,
-      0.65
-    ]
-  },
+  "root_grating_dewatering": {"path": "res://assets/ui/research/subjects/root_grating_dewatering-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "pulse_splitting": {
     "path": "res://assets/ui/research/paper/pulse_splitting.png",
     "focus": [
@@ -3724,10 +3694,10 @@
   "batch_task_grouping": {"path": "res://assets/ui/research/subjects/batch_task_grouping-v1.png", "focus": [0.5, 0.5]},
   "dietary_healing_regimens": {"path": "res://assets/ui/research/subjects/dietary_healing_regimens-v1.png", "focus": [0.5, 0.5]},
   "topsoil_depth_reading": {"path": "res://assets/ui/research/subjects/topsoil_depth_reading-v1.png", "focus": [0.5, 0.5]},
-  "elder_council_assent": {"path": "res://assets/ui/research/subjects/elder_council_assent-v1.png", "focus": [0.5, 0.5]},
-  "task_sequencing_habits": {"path": "res://assets/ui/research/subjects/task_sequencing_habits-v1.png", "focus": [0.5, 0.5]},
-  "trail_waymarking": {"path": "res://assets/ui/research/subjects/trail_waymarking-v1.png", "focus": [0.5, 0.5]},
-  "war_slings": {"path": "res://assets/ui/research/subjects/war_slings-v1.png", "focus": [0.5, 0.5]},
+  "elder_council_assent": {"path": "res://assets/ui/research/subjects/elder_council_assent-v2.png", "focus": [0.5, 0.5]},
+  "task_sequencing_habits": {"path": "res://assets/ui/research/subjects/task_sequencing_habits-v2.png", "focus": [0.5, 0.5]},
+  "trail_waymarking": {"path": "res://assets/ui/research/subjects/trail_waymarking-v2.png", "focus": [0.5, 0.5]},
+  "war_slings": {"path": "res://assets/ui/research/subjects/war_slings-v2.png", "focus": [0.5, 0.5]},
   "burn_scar_regrowth_tracking": {"path": "res://assets/ui/research/subjects/burn_scar_regrowth_tracking-v1.png", "focus": [0.5, 0.5]},
   "household_water_boiling": {"path": "res://assets/ui/research/subjects/household_water_boiling-v1.png", "focus": [0.5, 0.5]},
   "pest_deterrent_storage_herbs": {"path": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v1.png", "focus": [0.5, 0.5]},
@@ -3739,7 +3709,7 @@
   "snakebite_treatment": {"path": "res://assets/ui/research/subjects/snakebite_treatment-v1.png", "focus": [0.5, 0.5]},
   "flood_mark_reading": {"path": "res://assets/ui/research/subjects/flood_mark_reading-v1.png", "focus": [0.5, 0.5]},
   "hide_wicker_shields": {"path": "res://assets/ui/research/subjects/hide_wicker_shields-v1.png", "focus": [0.5, 0.5]},
-  "browse_line_monitoring": {"path": "res://assets/ui/research/subjects/browse_line_monitoring-v1.png", "focus": [0.5, 0.5]},
+  "browse_line_monitoring": {"path": "res://assets/ui/research/subjects/browse_line_monitoring-v2.png", "focus": [0.5, 0.5]},
   "children_light_tasks": {"path": "res://assets/ui/research/subjects/children_light_tasks-v1.png", "focus": [0.5, 0.5]},
   "consensus_amendment_custom": {"path": "res://assets/ui/research/subjects/consensus_amendment_custom-v1.png", "focus": [0.5, 0.5]},
   "ground_stone_axes": {"path": "res://assets/ui/research/subjects/ground_stone_axes-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4209,7 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "distance_call_signals": {"path": "res://assets/ui/research/subjects/distance_call_signals-v2.png", "focus": [0.5, 0.5]},
+  "kin_body_ornament": {"path": "res://assets/ui/research/subjects/kin_body_ornament-v2.png", "focus": [0.5, 0.5]}
 }

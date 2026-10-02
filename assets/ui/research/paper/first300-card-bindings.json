@@ -15,7 +15,7 @@
   "peat_drying": "res://assets/ui/research/paper/first300-cards/peat_drying.tres",
   "seed_reserves": "res://assets/ui/research/paper/first300-cards/seed_reserves.tres",
   "irrigation_schedules": "res://assets/ui/research/paper/first300-cards/irrigation_schedules.tres",
-  "birth_attendants": "res://assets/ui/research/paper/first300-cards/birth_attendants.tres",
+  "birth_attendants": "res://assets/ui/research/subjects/birth_attendants-v2.png",
   "pictographic_records": "res://assets/ui/research/paper/first300-cards/pictographic_records.tres",
   "root_cellars": "res://assets/ui/research/paper/first300-cards/root_cellars.tres",
   "raised_granaries": "res://assets/ui/research/paper/first300-cards/raised_granaries.tres",
@@ -107,7 +107,7 @@
   "professional_corps": "res://assets/ui/research/paper/first300-cards/professional_corps.tres",
   "battlefield_medicine": "res://assets/ui/research/paper/first300-cards/battlefield_medicine.tres",
   "nut_kernel_shelling": "res://assets/ui/research/paper/nut_kernel_shelling.png",
-  "root_grating_dewatering": "res://assets/ui/research/paper/root_grating_dewatering.png",
+  "root_grating_dewatering": "res://assets/ui/research/subjects/root_grating_dewatering-v2.png",
   "pulse_splitting": "res://assets/ui/research/paper/pulse_splitting.png",
   "fruit_pulp_screening": "res://assets/ui/research/paper/fruit_pulp_screening.png",
   "textile_dye_fixation": "res://assets/ui/research/paper/textile_dye_fixation.png",
@@ -139,5 +139,8 @@
   "shield_equipment_fitting": "res://assets/ui/research/paper/shield_equipment_fitting.png",
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
-  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png"
+  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
+  "clay_testing": "res://assets/ui/research/subjects/clay_testing-v2.png",
+  "well_siting": "res://assets/ui/research/subjects/well_siting-v2.png",
+  "shared_childcare": "res://assets/ui/research/subjects/shared_childcare-v2.png"
 }
