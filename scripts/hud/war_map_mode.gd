@@ -18,6 +18,9 @@ extends Control
 ##     each enemy's host a counter on their nearest town, in their colour,
 ##     its size as the war leader reckons it ("~240"), faded when our word of
 ##     them is old.
+## The pointer resting on a counter, a front, a town or a people's ground
+## gets a few plain lines with the engine's own numbers (who, how many, the
+## dead, the odds, how old our word is).
 ## Bands out, battles, raids and garrisons stay the war chart's
 ## (war_front_overlay.gd). Observe-only: nothing here orders anything, and
 ## clicks reach the map.
@@ -29,6 +32,7 @@ const Ledger:=preload("res://scripts/hud/war_ledger_model.gd")
 const Borders:=preload("res://scripts/nation_borders.gd")
 const Law:=preload("res://scripts/army_levy_law.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
+const EraWords:=preload("res://scripts/hud/era_words.gd")
 
 ## How often the ledgers are read again (seconds of real time).
 const COLLECT_EVERY:=0.5
@@ -79,6 +83,10 @@ var labels_layer:CanvasLayer
 var labels_were:=true
 ## The counters' and towns' own canvas, above the lands and fronts.
 var counters:Control
+## What the pointer can rest on, as last drawn: [{rect | poly | line, lines}],
+## topmost first; and the one it rests on now (its index, -1 for none).
+var hits:Array=[]
+var hovered:=-1
 
 
 func _ready()->void:
@@ -131,6 +139,34 @@ func _process(delta:float)->void:
 		drawn_view=view
 		queue_redraw()
 		if counters!=null: counters.queue_redraw()
+	# The pointer: what it rests on, if anything, in the open part of the map.
+	var mouse:=_pointer()
+	var now:=hit_at(mouse) if _free_rect(size).has_point(mouse) else -1
+	if now!=hovered:
+		hovered=now
+		if counters!=null: counters.queue_redraw()
+
+
+## Where the pointer is (a capture may set it: --capture-war-hover=x,y).
+func _pointer()->Vector2:
+	for arg in OS.get_cmdline_user_args():
+		if String(arg).begins_with("--capture-war-hover="):
+			var xy:=String(arg).trim_prefix("--capture-war-hover=").split(",")
+			if xy.size()==2: return Vector2(float(xy[0]),float(xy[1]))
+	return get_viewport().get_mouse_position()
+
+
+## The topmost thing drawn under `point`, as an index into hits; -1 for none.
+func hit_at(point:Vector2)->int:
+	for i in hits.size():
+		var h:Dictionary=hits[i]
+		if h.has("rect") and (h.rect as Rect2).has_point(point): return i
+		if h.has("line"):
+			var line:PackedVector2Array=h.line
+			for j in range(1,line.size()):
+				if Geometry2D.get_closest_point_to_segment(point,line[j-1],line[j]).distance_to(point)<=10.0: return i
+		if h.has("poly") and Geometry2D.is_point_in_polygon(point,h.poly): return i
+	return -1
 
 
 ## The towns' paper cards step aside while the war map shows, and come back.
@@ -204,13 +240,29 @@ func collect()->Dictionary:
 		if not there.is_finite(): continue
 		frame.append_array(theirs if not theirs.is_empty() else [there])
 		var raw:=float(Ledger.odds(e).raw)
-		(out.enemies as Array).append({"civ_id":civ_id,"name":String(e.get("name","")),"there":there,"guessed":guessed,"front":_front(civ_id,home,there),
-			"hot":bool(e.get("hot",false)),"war":String(e.get("kind",""))=="war","fighters":WarLoop._their_fighters(civ_id),"stale":_word_age(civ_id)>STALE_DAYS,
+		var age:=_word_age(civ_id)
+		var fighters:=WarLoop._their_fighters(civ_id)
+		var people:=String(e.get("name",""))
+		var front_tip:=PackedStringArray([Ledger.subtitle(e),"Dead: %s of ours, %s of theirs" % [EraWords.grouped(int(e.get("our_dead",0))),EraWords.grouped(int(e.get("their_dead",0)))],
+			"Odds: %s" % Ledger.odds_words(e)])
+		if bool(e.get("hot",false)) and String(e.get("kind",""))!="war": front_tip.append("Hot: their raiders may come")
+		var spread:=_spread(age>STALE_DAYS)
+		var host_tip:=PackedStringArray([("%s under arms: about %s" % [people,EraWords.grouped(fighters)]+((", maybe %s to %s" % [EraWords.grouped(roundi(fighters*(1.0-spread))),EraWords.grouped(roundi(fighters*(1.0+spread)))]) if age>STALE_DAYS else "")) if fighters>0 else "%s under arms: not known" % people,
+			"As the war leader reckons it" if age<99999 else "We have no word of their towns",
+			("Our word of them is %s old" % Ledger.span_words(age)) if age<99999 else "",
+			("Worn by the fighting: %d%%" % roundi(float(e.get("their_worn",0.0))*100.0)) if float(e.get("their_worn",0.0))>0.0 else ""])
+		(out.enemies as Array).append({"tip_front":_lines(front_tip),"tip_host":_lines(host_tip),"civ_id":civ_id,"name":people,"there":there,"guessed":guessed,"front":_front(civ_id,home,there),
+			"hot":bool(e.get("hot",false)),"war":String(e.get("kind",""))=="war","fighters":fighters,"stale":age>STALE_DAYS,
 			"worn":clampf(float(e.get("their_worn",0.0)),0.0,1.0),"ours_share":clampf(raw/(1.0+raw),0.05,0.95),"color":_color(civ_id)})
 	# Our army at home (army_bar.gd levy_card): on our chief town.
 	var levy:=ArmyBar.levy_card(MilitaryCampaign)
 	var reading:=Law.reading(MilitaryCampaign)
 	var target:=int(reading.get("target",-1))
+	var people:=maxi(1,int(reading.get("population",GameState.population_total)))
+	out["levy_tip"]=_lines(PackedStringArray(["At home: %s under arms" % EraWords.grouped(int(levy.get("ready",0))+int(levy.get("watch",0))),
+		"%s ready · %s on the watch" % [EraWords.grouped(int(levy.get("ready",0))),EraWords.grouped(int(levy.get("watch",0)))],
+		("%s in drill" % EraWords.grouped(int(levy.get("drill",0)))) if int(levy.get("drill",0))>0 else "",
+		("Army kept at %s of %s: %s" % [Law.level_name(String(reading.get("level",""))),EraWords.grouped(people),EraWords.grouped(target)]) if target>0 else "No army size chosen"]))
 	out.levy={"side":"ours","troops":int(levy.get("ready",0))+int(levy.get("watch",0)),"strength":clampf(float(reading.get("now",0))/float(target),0.0,1.0) if target>0 else 1.0,
 		"will":float(levy.get("will",0.6)),"glyph":String(levy.get("glyph","spear")),"accent":OURS,
 		"tab":("%d in drill" % int(levy.get("drill",0))) if int(levy.get("drill",0))>0 else ""}
@@ -476,6 +528,20 @@ func _draw()->void:
 		if (bool(e.hot) or bool(e.war)) and not bool(e.guessed): _draw_threat(e)
 
 
+## How far the war leader's count of a host may be off: wider when our word
+## of them is old.
+static func _spread(stale:bool)->float:
+	return 0.25 if stale else 0.12
+
+
+## Lines for the pointer, the empty ones left out.
+static func _lines(parts:PackedStringArray)->PackedStringArray:
+	var out:=PackedStringArray()
+	for p in parts:
+		if String(p).strip_edges()!="": out.append(p)
+	return out
+
+
 func _owners()->Array:
 	var seen:={}
 	for land:Dictionary in scene.get("lands",[]): seen[String(land.owner)]=true
@@ -521,9 +587,12 @@ func _land_of(owner:String)->Array:
 ## Above the grounds and fronts: the towns as dots and names, then the hosts'
 ## counters, each clear of every name.
 func draw_top(canvas:Control)->void:
-	if not active or scene.is_empty(): return
+	if not active or scene.is_empty():
+		hits=[]
+		return
 	var view:=Rect2(Vector2.ZERO,canvas.size)
 	var taken:Array=[]
+	var found:Array=[]
 	var font:=T.font("voice")
 	var fs:=14
 	for t:Dictionary in scene.get("towns",[]):
@@ -548,6 +617,9 @@ func draw_top(canvas:Control)->void:
 		for q:Rect2 in taken:
 			if q.intersects(rect): clear=false; break
 		taken.append(Rect2(at-Vector2(r+2,r+2),Vector2(r+2,r+2)*2.0))
+		var whose:=_people_name(String(t.owner)) if String(t.owner)!="" else "strangers"
+		found.append({"rect":Rect2(at-Vector2(r+3,r+3),Vector2(r+3,r+3)*2.0).merge(rect if clear else Rect2(at,Vector2.ZERO)),
+			"lines":PackedStringArray([words,"Ours" if String(t.owner)=="player" else "A town of %s" % whose,"Burned" if bool(t.get("ruin",false)) else ""])})
 		if not clear: continue
 		taken.append(rect)
 		canvas.draw_string_outline(font,spot,words,HORIZONTAL_ALIGNMENT_LEFT,-1,fs,4,Color(PAPER,0.9))
@@ -557,13 +629,13 @@ func draw_top(canvas:Control)->void:
 	var plate:=Counter.plate_size(k)
 	var items:Array=[]
 	var home:=_screen(scene.get("home",Vector2.INF))
-	if home.is_finite() and not (scene.get("levy",{}) as Dictionary).is_empty(): items.append({"at":home,"data":scene.levy})
+	if home.is_finite() and not (scene.get("levy",{}) as Dictionary).is_empty(): items.append({"at":home,"data":scene.levy,"tip":scene.get("levy_tip",PackedStringArray())})
 	for e:Dictionary in scene.get("enemies",[]):
 		var at:=_screen(e.there)
 		if not at.is_finite(): continue
 		var fighters:=int(e.fighters)
-		var low:=roundi(float(fighters)*(0.75 if bool(e.stale) else 0.85)); var high:=roundi(float(fighters)*(1.3 if bool(e.stale) else 1.15))
-		items.append({"at":at,"data":{"side":"theirs","low":low,"high":high,"strength":1.0-float(e.worn),"accent":e.color,"glyph":"spear","stale":bool(e.stale) or bool(e.guessed)}})
+		var low:=roundi(float(fighters)*(1.0-_spread(bool(e.stale)))); var high:=roundi(float(fighters)*(1.0+_spread(bool(e.stale))))
+		items.append({"at":at,"tip":e.get("tip_host",PackedStringArray()),"data":{"side":"theirs","low":low,"high":high,"strength":1.0-float(e.worn),"accent":e.color,"glyph":"spear","stale":bool(e.stale) or bool(e.guessed)}})
 	var free:=_free_rect(canvas.size)
 	for item:Dictionary in items:
 		var at:Vector2=item.at
@@ -571,29 +643,73 @@ func draw_top(canvas:Control)->void:
 		var spot:=_clear_spot(at,plate,taken,free)
 		var drawn:=Counter.draw(canvas,spot,item.data,k)
 		taken.append(drawn.grow(4.0))
+		found.push_front({"rect":drawn,"lines":item.get("tip",PackedStringArray())})
 		# A short ink line back to the town it stands for, when set aside.
 		if spot.distance_to(at)>plate.y*0.75:
 			canvas.draw_line(at,spot+(at-spot).limit_length(plate.y*0.55),Color(INK,0.55),1.4,true)
 	# Each front's name and who is winning, on our side of it, where it is
 	# clear of every counter and name.
 	for e:Dictionary in scene.get("enemies",[]):
-		_draw_front_chip(canvas,e,taken,free)
+		var chip:=_draw_front_chip(canvas,e,taken,free)
+		if chip.has_area(): found.push_front({"rect":chip,"lines":e.get("tip_front",PackedStringArray())})
+		var line:=PackedVector2Array()
+		for p in (e.get("front",PackedVector2Array()) as PackedVector2Array):
+			var q:=_screen(p)
+			if q.is_finite(): line.append(q)
+		if line.size()>=2: found.append({"line":line,"lines":e.get("tip_front",PackedStringArray())})
+	# The peoples' grounds, last (beneath everything else).
+	for owner in _owners():
+		for hull:PackedVector2Array in _land_of(String(owner)):
+			var count:=0
+			for t:Dictionary in scene.get("towns",[]):
+				if String(t.owner)==String(owner): count+=1
+			var at_war:=""
+			for e:Dictionary in scene.get("enemies",[]):
+				if String(e.civ_id)==String(owner): at_war="At war with us" if bool(e.war) else "In feud with us"
+			found.append({"poly":hull,"lines":PackedStringArray([_people_name(String(owner)) if String(owner)!="player" else "Our people's ground","%d %s we know" % [count,"town" if count==1 else "towns"],at_war])})
+	hits=found
+	# The pointer's tip, over everything.
+	if hovered>=0 and hovered<hits.size():
+		_draw_tip(canvas,(hits[hovered] as Dictionary).get("lines",PackedStringArray()))
+
+
+## A few plain lines by the pointer, on paper.
+func _draw_tip(canvas:Control,lines:PackedStringArray)->void:
+	var shown:=_lines(lines)
+	if shown.is_empty(): return
+	var font:=T.font("ui")
+	var bold:=T.font("ui_strong")
+	var fs:=13
+	var w:=0.0
+	for i in shown.size():
+		w=maxf(w,(bold if i==0 else font).get_string_size(shown[i],HORIZONTAL_ALIGNMENT_LEFT,-1,fs).x)
+	var size:=Vector2(w+20.0,shown.size()*(fs+5.0)+12.0)
+	var at:=_pointer()+Vector2(18,18)
+	var free:=_free_rect(canvas.size)
+	if at.x+size.x>free.end.x: at.x=at.x-size.x-30.0
+	if at.y+size.y>free.end.y: at.y=at.y-size.y-30.0
+	var box:=Rect2(at,size)
+	canvas.draw_rect(Rect2(box.position+Vector2(2,3),box.size),Color(0,0,0,0.2))
+	canvas.draw_rect(box,Color(PAPER,0.98))
+	canvas.draw_rect(box,Color(INK,0.85),false,1.2)
+	for i in shown.size():
+		canvas.draw_string(bold if i==0 else font,box.position+Vector2(10.0,12.0+fs+i*(fs+5.0)-3.0),shown[i],HORIZONTAL_ALIGNMENT_LEFT,-1,fs,Color(INK,1.0 if i==0 else 0.85))
 
 
 ## A front's chip: its people's name (HOT or WAR), and a bar of who is
 ## winning, on our side of the front, at the first place along it that is
 ## clear of everything already placed.
-func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->void:
+func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->Rect2:
 	var line:PackedVector2Array=e.get("front",PackedVector2Array())
-	if line.size()<2: return
+	if line.size()<2: return Rect2()
 	var pts:=PackedVector2Array()
 	for p in line:
 		var q:=_screen(p)
-		if not q.is_finite(): return
+		if not q.is_finite(): return Rect2()
 		pts.append(q)
 	var home:=_screen(scene.home)
 	var there:=_screen(e.there)
-	if not home.is_finite() or not there.is_finite(): return
+	if not home.is_finite() or not there.is_finite(): return Rect2()
 	var toward:=(there-home).normalized()
 	var hot:=bool(e.hot) or bool(e.war)
 	var font:=T.font("ui_strong")
@@ -628,6 +744,7 @@ func _draw_front_chip(canvas:Control,e:Dictionary,taken:Array,free:Rect2)->void:
 	canvas.draw_rect(Rect2(bar.position,Vector2(w*float(e.ours_share),bar.size.y)),OURS)
 	canvas.draw_rect(Rect2(bar.position+Vector2(w*float(e.ours_share),0),Vector2(w*(1.0-float(e.ours_share)),bar.size.y)),theirs.darkened(0.1))
 	canvas.draw_rect(bar.grow(1.5),Color(INK,0.85),false,1.2)
+	return box
 
 
 ## Where a counter for a town may stand: above its mark, then to either side,

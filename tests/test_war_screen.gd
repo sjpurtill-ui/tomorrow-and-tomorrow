@@ -304,6 +304,13 @@ func test_the_war_map_frames_the_war_and_gives_the_map_back()->void:
 	var e:Dictionary=enemies[0]
 	assert_bool((e.there as Vector2).distance_to(there)<0.01).override_failure_message(str(e.there)).is_true()
 	assert_bool(bool(e.hot)).is_true()
+	# The pointer gets the engine's own numbers: the front's dead and odds,
+	# their host as reckoned, ours at home.
+	var front_tip:=" / ".join(e.tip_front)
+	assert_str(front_tip).contains("Dead:")
+	assert_str(front_tip).contains("Odds:")
+	assert_str(String((e.tip_host as PackedStringArray)[0])).contains("under arms")
+	assert_str(String((mode.scene.levy_tip as PackedStringArray)[0])).starts_with("At home")
 	# The front stands across the way between us, about halfway.
 	var front:PackedVector2Array=e.front
 	assert_int(front.size()).is_greater_equal(2)
