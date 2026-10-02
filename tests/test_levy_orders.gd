@@ -153,7 +153,10 @@ func test_dismissing_soldiers_stands_them_down_and_never_demotes_anyone()->void:
 
 
 func test_standing_down_sends_the_recruits_then_the_fighters_home()->void:
-	Fixtures.new(self).train(8)
+	# Eight under arms beside those who keep the watch (army_levy_law.gd
+	# watch(): set to defence work, never the army's to send home).
+	var watch:=int(preload("res://scripts/army_levy_law.gd").watch(MilitaryCampaign).target)
+	Fixtures.new(self).train(8+watch)
 	MilitaryCampaign.raise_recruits(3)
 	var home_before:=int(MilitaryCampaign.home_army.get("troops",0))
 	var done:=HomeOrders.perform(HomeOrders.read(DISMISS_LINE))
@@ -162,11 +165,17 @@ func test_standing_down_sends_the_recruits_then_the_fighters_home()->void:
 	assert_int(MilitaryCampaign.aggregate_recruits).is_equal(0)
 	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(home_before-2)
 	assert_str(String(done.says)).contains("go home")
-	# No number and no "all": the court asks how many, and nobody goes.
-	var asked:=HomeOrders.perform(HomeOrders.read("send the soldiers home"))
+	# A number never named and nobody named as a whole: the court asks how
+	# many, and nobody goes.
+	var asked:=HomeOrders.perform(HomeOrders.read("send some soldiers home"))
 	assert_bool(bool(asked.ok)).is_false()
 	assert_str(String(asked.says)).contains("How many")
 	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(home_before-2)
+	# "The soldiers" are all of them: every one beside the watch goes home.
+	var all:=HomeOrders.perform(HomeOrders.read("send the soldiers home"))
+	assert_bool(bool(all.ok)).is_true()
+	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(watch)
+	assert_str(String(all.says)).contains("on the watch stay")
 
 
 ## Founding one town (realm_orders.gd found_town): the settlers set out.

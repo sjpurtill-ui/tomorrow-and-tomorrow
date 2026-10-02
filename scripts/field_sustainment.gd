@@ -449,6 +449,7 @@ const BLOCK_WORDS:={
 	"cut_off":"No drafts: no road our carriers use reaches them.",
 	"last":"No drafts for a band reinforced last.",
 	"campaign":"The general's campaign keeps its own ranks.",
+	"few":"No draft for so few: its empty places are one or two here and there.",
 }
 
 static func block_words(block:String)->String:
@@ -456,7 +457,7 @@ static func block_words(block:String)->String:
 
 ## The same reason in a few words: "the army stands at the size you set".
 static func block_reason(block:String)->String:
-	return String({"at_level":"the army stands at the size you set","nobody_free":"nobody is free to call up","hungry":"they are starving","cut_off":"no road our carriers use reaches them","last":"it is reinforced last","campaign":"the general's campaign keeps its own ranks"}.get(block,"no drafts can reach them"))
+	return String({"at_level":"the army stands at the size you set","nobody_free":"nobody is free to call up","hungry":"they are starving","cut_off":"no road our carriers use reaches them","last":"it is reinforced last","campaign":"the general's campaign keeps its own ranks","few":"its empty places are too few to call a draft for"}.get(block,"no drafts can reach them"))
 
 ## How many more the war leader may call up for the army today: the gap to
 ## the size the ruler chose (army_levy_law.gd, a share of the people), or,
@@ -508,13 +509,18 @@ func draft_day()->Array:
 		if String(force.draft_block)!="": continue
 		var places:=open_places(force)
 		var short:=false
+		var few:=false
+		var drafted:=false
 		for formation_id in places:
 			var place:Dictionary=places[formation_id]
 			var need:=int(place.count)
-			if need<maxi(DRAFT_MIN_MEN,ceili(float(place.size)*DRAFT_MIN_SHARE)): continue
+			if need<maxi(DRAFT_MIN_MEN,ceili(float(place.size)*DRAFT_MIN_SHARE)):
+				few=true
+				continue
 			if reserve>0:
 				var sent:=_send_reserve(force,int(formation_id),place,mini(need,reserve))
 				reserve-=sent; need-=sent
+				drafted=drafted or sent>0
 				if sent>0: started.append({"key":draft_key(force),"army_id":int(force.get("army_id",0)),"formation_id":int(formation_id),"count":sent,"from":"reserve"})
 			if need<=0: continue
 			var count:=mini(need,free)
@@ -545,13 +551,23 @@ func draft_day()->Array:
 				order["target_formation_id"]=int(formation_id)
 				order["required_days"]=maxf(3.0,float(order.get("required_days",30.0))*DRAFT_TRAINING)
 			free-=count
+			drafted=true
 			force["drafted_today"]=int(force.get("drafted_today",0))+count
 			started.append({"key":draft_key(force),"army_id":int(force.get("army_id",0)),"formation_id":int(formation_id),"count":count})
 		# Places left open with nobody to fill them: why, in one word. The
 		# size the ruler set stops it while free hands remain; else nobody is
 		# free.
 		if short: force["draft_block"]="at_level" if levy_room()<maxi(0,int(host.recruitment_capacity())-int(host._mobilized_count())) else "nobody_free"
+		# Only empty places too few to call a draft for (one here, two there):
+		# nothing will come for them, so a band resting to refill is not kept
+		# waiting for ever (band_upkeep.gd _nothing_more_coming).
+		elif few and not drafted and not _drafts_open(force): force["draft_block"]="few"
 	return started
+
+## Drafts already in drill or on the road for this band or garrison.
+func _drafts_open(force:Dictionary)->bool:
+	var coming:=drafts_for_force(force)
+	return int(coming.get("on_road",0))+int(coming.get("in_training",0))>0
 
 static func _has_gap(force:Dictionary)->bool:
 	for formation in force.get("formations",[]):

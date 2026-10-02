@@ -484,7 +484,9 @@ static func court_title(text:String)->String:
 			return "Drill the recruits"
 		"stand_down":
 			var n:=int(r.get("count",0))
-			return ("Send %d fighters home" % n) if n>0 else "Send fighters home"
+			if String(r.get("band_name",""))!="":return short("Disband %s" % String(r.band_name),8)
+			if n>0:return "Send %d fighters home" % n
+			return "Disband the army" if bool(r.get("all",false)) else "Send fighters home"
 		"arm":
 			var n:=int(r.get("count",0))
 			var item:=String(HO.ITEM_NAMES.get(String(r.get("item","")),"weapons"))
