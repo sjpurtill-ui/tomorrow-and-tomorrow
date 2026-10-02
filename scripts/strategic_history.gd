@@ -9,6 +9,8 @@ static func capture_scopes()->Dictionary:
 	var standing_metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	for key:String in ["might","endurance","wealth","reach","persuasion","splendor","genius","cunning","order","pride","awe","allure"]:
 		if standing_metrics.has("standing_"+key): scopes.civilization["standing_"+key]=roundf(clampf(float(standing_metrics["standing_"+key]),0.0,1.0)*100.0)
+	# The realm's one purse (realm_purse.gd), in its own unit.
+	scopes.civilization["purse"]=roundf(float((WorldSimulation.state.realm_purse as Dictionary).get("balance",0.0)))
 	for city in WorldSimulation.state.player_settlements:
 		var id:=String(city.get("id",""))
 		if id.is_empty(): continue

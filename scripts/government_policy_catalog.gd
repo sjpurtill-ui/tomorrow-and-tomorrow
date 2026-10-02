@@ -9,6 +9,7 @@ const EFFECT_LABELS := {
 	"material_target":"material capacity","logistics_target":"logistics","security_target":"security",
 	"ecology_delta":"ecology per day","legitimacy_target":"legitimacy","conception_support":"conception conditions"
 	,"stone_priority":"stone collection priority","construction_rate":"construction pace"
+	,"wealth_concentration":"the richest fifth's share of wealth","market_access":"market reach"
 }
 
 # Player-facing program names. Parser identifiers stay internal so leaders and
@@ -61,6 +62,8 @@ const EFFECT_OBSERVATIONS := {
 	"conception_support":{"metric":"annual_conceptions_expected","label":"expected conceptions","format":"annual"}
 	,"stone_priority":{"metric":"stockpile:Stone","label":"stored stone","format":"quantity"}
 	,"construction_rate":{"metric":"housing_capacity","label":"usable housing places","format":"quantity"}
+	,"wealth_concentration":{"metric":"top_fifth_share","label":"richest fifth's share of wealth","format":"ratio"}
+	,"market_access":{"metric":"market_access","label":"market reach","format":"ratio"}
 }
 
 const POLICIES := {
@@ -81,8 +84,8 @@ const POLICIES := {
 	"population_resettlement":{"office":"Marshal","skills":["Logistics","Defense"],"magnitude":0.16,"days":180.0,"ripple":"Forced relocation concentrates control and routes while displacement causes exposure, resistance, and loss.","effects":{"labor_multiplier":-0.12,"health_target":-0.08,"cohesion_target":-0.18,"logistics_target":0.12,"security_target":0.08,"legitimacy_target":-0.16}},
 	"mass_repression":{"office":"Marshal","skills":["Defense","Administration"],"magnitude":0.12,"days":90.0,"ripple":"Lethal repression may suppress an immediate threat, but deaths, fear, resistance, lost knowledge, and legitimacy damage persist.","effects":{"labor_multiplier":-0.10,"health_target":-0.12,"cohesion_target":-0.35,"knowledge_gain":-0.18,"security_target":0.22,"legitimacy_target":-0.42}},
 	"conscription_drive":{"office":"Marshal","skills":["Defense","Administration"],"magnitude":0.16,"days":180.0,"ripple":"Conscription increases mobilization readiness while removing labor and creating resistance; it does not create trained or equipped units.","effects":{"labor_multiplier":-0.16,"cohesion_target":-0.08,"security_target":0.30,"legitimacy_target":-0.06}},
-	"wealth_levy":{"office":"Steward","skills":["Administration","Diplomacy"],"magnitude":0.16,"days":180.0,"ripple":"A wealth levy redirects existing capacity toward common stores while collection occupies labor and provokes resistance.","effects":{"labor_multiplier":-0.06,"cohesion_target":0.06,"material_target":0.18,"legitimacy_target":0.08}},
-	"market_deregulation":{"office":"Envoy","skills":["Diplomacy","Logistics"],"magnitude":0.14,"days":180.0,"ripple":"Looser exchange rules improve material and route coordination while inequality pressure strains cohesion and legitimacy.","effects":{"cohesion_target":-0.08,"material_target":0.14,"logistics_target":0.14,"legitimacy_target":-0.05}},
+	"wealth_levy":{"office":"Steward","skills":["Administration","Diplomacy"],"magnitude":0.16,"days":180.0,"ripple":"The richest fifth pay an extra share into the realm's purse (realm_purse.gd) and their share of the wealth falls; collection occupies labor and provokes resistance.","effects":{"labor_multiplier":-0.06,"cohesion_target":0.06,"material_target":0.18,"legitimacy_target":0.08,"wealth_concentration":-1.0}},
+	"market_deregulation":{"office":"Envoy","skills":["Diplomacy","Logistics"],"magnitude":0.14,"days":180.0,"ripple":"Looser exchange rules widen the market, so prices follow plenty and want faster, while wealth gathers in the richest fifth and strains cohesion and legitimacy.","effects":{"cohesion_target":-0.08,"material_target":0.14,"logistics_target":0.14,"legitimacy_target":-0.05,"market_access":0.6,"wealth_concentration":0.8}},
 	"information_control":{"office":"Marshal","skills":["Defense","Administration"],"magnitude":0.16,"days":180.0,"ripple":"Information controls ease short-term coordination at the cost of knowledge, trust, and legitimacy.","effects":{"cohesion_target":0.05,"knowledge_gain":-0.30,"security_target":0.10,"legitimacy_target":-0.20}}
 	,"stone_gathering_drive":{"office":"Quartermaster","skills":["Provisioning","Logistics"],"magnitude":0.18,"days":120.0,"ripple":"Available extractors and carriers favor recognized stone sources; food, repair, and other materials receive less labor.","effects":{"labor_multiplier":-0.05,"material_target":0.12,"stone_priority":1.80}}
 	,"stone_housing_program":{"office":"Steward","skills":["Construction","Administration"],"magnitude":0.16,"days":365.0,"ripple":"Builders replace or extend housing with stone where the material, access, and learned practice permit; other construction waits.","effects":{"labor_multiplier":-0.08,"material_target":0.08,"construction_rate":0.55,"stone_priority":0.80}}
@@ -206,6 +209,10 @@ func formatted_effects(effects:Dictionary,magnitude:float)->String:
 		if not EFFECT_LABELS.has(channel): continue
 		var value:=float(effects[channel])*magnitude
 		if String(channel)=="ecology_delta": lines.append("%s %+.4f/day" % [EFFECT_LABELS[channel],value])
+		# The richest fifth's share moves by points a month (economy_system.gd
+		# POLICY_WEALTH_PULL a day for each unit of the channel); market reach by points.
+		elif String(channel)=="wealth_concentration": lines.append("%s %+.1f points a month" % [EFFECT_LABELS[channel],value*0.0025*30.0*100.0])
+		elif String(channel)=="market_access": lines.append("%s %+.1f points" % [EFFECT_LABELS[channel],value*100.0])
 		else: lines.append("%s %+.1f%%" % [EFFECT_LABELS[channel],value*100.0])
 	return " • ".join(lines)
 

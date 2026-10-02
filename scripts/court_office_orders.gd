@@ -21,8 +21,11 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const WarOrders:=preload("res://scripts/court_war_orders.gd")
 
 ## Which business each office carries.
-const FAMILIES:={"Marshal":"war","Quartermaster":"stores","Steward":"town","ChiefScout":"scouting","Scholar":"learning"}
-const FAMILY_ORDER:=["war","stores","town","scouting","learning"]
+## The realm's purse is the Treasurer's (court_purse_orders.gd), the
+## Headman's while no Treasurer is named.
+const FAMILIES:={"Marshal":"war","Quartermaster":"stores","Steward":"town","ChiefScout":"scouting","Scholar":"learning","Treasurer":"purse"}
+const FAMILY_ORDER:=["war","stores","town","purse","scouting","learning"]
+const PurseOrders:=preload("res://scripts/court_purse_orders.gd")
 
 
 ## The office of the one before the god: an official's own, the war leader of
@@ -68,6 +71,7 @@ static func menus(audience_id:String)->Array:
 			"town": out.append_array(_town())
 			"scouting": out.append_array(_scouting())
 			"learning": out.append_array(_learning())
+			"purse": out.append_array(PurseOrders.menus())
 	return out
 
 
@@ -256,7 +260,7 @@ static func closest(words:String,count:int=3)->Array:
 	var wanted:=_stems(words)
 	if wanted.is_empty(): return []
 	var scored:Array=[]
-	for family in [_war(),_stores(),_town(),_scouting(),_learning()]:
+	for family in [_war(),_stores(),_town(),_scouting(),_learning(),PurseOrders.menus()]:
 		for menu:Dictionary in family:
 			var items:Array=(menu.items as Array) if menu.has("items") else [{"label":String(menu.label),"text":String(menu.text)}]
 			for item:Dictionary in items:

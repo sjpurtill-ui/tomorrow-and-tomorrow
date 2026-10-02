@@ -5,6 +5,7 @@ extends Node
 # by FoodSystem and WorldSimulation.resources.
 
 const SPAN:=preload("res://scripts/day_span.gd")
+const Purse:=preload("res://scripts/realm_purse.gd")
 const STAGE_SUBSISTENCE := "subsistence"
 const STAGE_METAL := "weighed_metal"
 const STAGE_CURRENCY := "currency"
@@ -22,6 +23,9 @@ const METAL_VALUES := {"Copper Ore":1.0,"Tin Ore":1.4,"Iron Ore":0.7,"Coin":1.0}
 const PUBLIC_SPENDING_PRIORITIES := ["balanced","civil_first","military_first"]
 
 var initialized := false
+## The day's social pressure by cause, for the Wealth page (economy_metrics
+## "social_pressure_parts"): unequal, want, prices, levy, benefit, total.
+var _pressure_parts:Dictionary={}
 var last_processed_day := -1
 
 func reset_for_new_world()->void:
@@ -68,6 +72,8 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	# none of which today's market steps below change; read them once.
 	var foreign_effects:=WorldSimulation.world.player_effects()
 	var market_access:=_market_access(context,foreign_effects)
+	# For a policy's observed effect (consequence_engine reads simulation metrics).
+	WorldSimulation.state.simulation_metrics["market_access"]=market_access
 	var monetization:=_monetization(market_access)
 	var trade_volume:=_trade_volume(market_access,monetization)
 	_update_currency_demand(trade_volume,monetization)
@@ -82,20 +88,21 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	var credit:=_process_credit(trade_volume,market_access,reliability,events)
 	var mutual_aid:=_process_mutual_risk_pool(trade_volume,float(credit.defaulted))
 	var military_burden:=_military_burden_snapshot()
-	var finance:=_process_public_finance(trade_volume,monetization,military_burden)
+	# What the day brought in, then the realm's levy on it (realm_purse.gd).
+	var real_accounts:=_real_economy_accounts(trade_volume,market_access,military_burden)
+	var finance:=_process_public_finance(trade_volume,monetization,military_burden,real_accounts)
 	var tax_capacity:Dictionary=finance.tax_capacity
 	currency_liquidity["liquid_private"]=WorldSimulation.state.private_currency
 	currency_liquidity["transactional_share"]=WorldSimulation.state.private_currency/maxf(1.0,WorldSimulation.state.currency_supply) if WorldSimulation.state.economy_stage==STAGE_CURRENCY else 0.0
 	currency_liquidity["nontransactional_share"]=(WorldSimulation.state.public_treasury+WorldSimulation.state.currency_hoards+WorldSimulation.state.mutual_aid_reserve)/maxf(1.0,WorldSimulation.state.currency_supply) if WorldSimulation.state.economy_stage==STAGE_CURRENCY else 0.0
 	var revenue:=float(finance.revenue)
 	var upkeep:=float(finance.spending)
-	var fiscal_outlook:=_fiscal_outlook_for(30.0,trade_volume,monetization,military_burden,WorldSimulation.state.public_treasury,WorldSimulation.state.private_currency,WorldSimulation.state.tax_rate)
+	var fiscal_outlook:=_purse_outlook()
 	var inflation:=clampf(price_index/maxf(0.01,previous_index)-1.0,-0.25,0.50) if price_index>0.0 and previous_index>0.0 else 0.0
 	var available_metal:=_available_metal_value()
 	var reserve:=_monetary_reserve_value()
 	var liquid_money:=maxf(0.0,WorldSimulation.state.private_currency)
 	var velocity:=trade_volume/maxf(1.0,liquid_money) if WorldSimulation.state.economy_stage==STAGE_CURRENCY else 0.0
-	var real_accounts:=_real_economy_accounts(trade_volume,market_access,military_burden)
 	var public_obligations:=_process_resource_obligations(real_accounts,monetization,reliability)
 	real_accounts["public_obligations"]=public_obligations
 	real_accounts["obligation_pressure"]=clampf(float(real_accounts.obligation_pressure)+float(public_obligations.pressure),0.0,1.0)
@@ -124,6 +131,7 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 		"private_liquidity_days":real_accounts.private_liquidity_days,"labor_return_index":real_accounts.labor_return_index,"daily_labor_income":real_accounts.daily_labor_income
 	}
 	WorldSimulation.state.economy_metrics["military_burden"]=military_burden
+	WorldSimulation.state.economy_metrics["social_pressure_parts"]=_pressure_parts.duplicate()
 	WorldSimulation.state.economy_metrics["civil_upkeep"]=finance.civil_upkeep
 	WorldSimulation.state.economy_metrics["military_upkeep"]=finance.military_upkeep
 	WorldSimulation.state.economy_metrics["civil_upkeep_due"]=finance.civil_due
@@ -165,19 +173,15 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	if float(external_trade.get("claim_limit",0.0))>0.0 and WorldSimulation.state.external_trade_credit/float(external_trade.claim_limit)>0.95: _threshold_event(events,"foreign_claim_limit","Regional Buyers Saturated","The settlement holds nearly as many claims on regional partners as current routes and institutions can support. Further exports need imports or deeper trade capacity.",60)
 	if float(external_trade.get("claim_loss",0.0))>0.05: _threshold_event(events,"foreign_claim_loss","Foreign Claims Impaired","Weak regional capacity made %.1f units of accumulated trade claims unrecoverable today." % float(external_trade.claim_loss),45)
 	if float(credit.get("utilization",0.0))>0.90: _threshold_event(events,"credit_limit","Private Credit Tightens","Recorded private obligations use %d%% of supportable capacity. New credit is scarce until claims are repaid or productive security improves." % roundi(float(credit.utilization)*100.0),60)
+	# The realm's treasury, its pay and its debts are the purse's own news,
+	# told once at its monthly reckoning (realm_purse.gd); here only the
+	# households' money of this place.
 	if WorldSimulation.state.economy_stage==STAGE_CURRENCY:
-		if WorldSimulation.state.public_treasury<_public_upkeep(military_burden).total*7.0: _threshold_event(events,"empty_treasury","Public Treasury Thin","Current public holdings cover less than a week of administrative, works, and military monetary obligations.",45)
 		if reserve/maxf(1.0,WorldSimulation.state.currency_supply)<0.50: _threshold_event(events,"weak_reserve","Currency Backing Narrows","Issued currency is approaching the reserve limit. Further issue will be constrained and trust is exposed to shocks.",90)
-		if WorldSimulation.state.civil_arrears+WorldSimulation.state.military_arrears>maxf(2.0,WorldSimulation.state.population_exact*0.10): _threshold_event(events,"public_arrears","Public Obligations Unpaid","The treasury has carried %.1f units of unpaid civil and military obligations into another day." % (WorldSimulation.state.civil_arrears+WorldSimulation.state.military_arrears),30)
-		if float(finance.debt_capacity)>0.0 and WorldSimulation.state.public_debt/float(finance.debt_capacity)>0.82: _threshold_event(events,"public_debt","Public Credit Near Its Limit","Recorded public claims have reached %d%% of supportable capacity. New borrowing is constrained and future levies face debt service." % roundi(WorldSimulation.state.public_debt/float(finance.debt_capacity)*100.0),90)
 		if float(currency_liquidity.hoard_share)>0.24: _threshold_event(events,"currency_hoarding","Currency Leaves Circulation","Households now hold %d%% of issued currency outside active exchange. Taxes, credit, and ordinary purchases face a liquidity shortage even though the units still exist." % roundi(float(currency_liquidity.hoard_share)*100.0),45)
-		if WorldSimulation.state.tax_rate>=0.12 and float(tax_capacity.compliance)<0.55: _threshold_event(events,"levy_resistance","Levy Compliance Erodes","Only %d%% of administratively assessed exchange is expected to comply at the current statutory rate. Legitimacy, records, arrears, inequality, and rate pressure all shape collection." % roundi(float(tax_capacity.compliance)*100.0),60)
-		if float(tax_capacity.liquidity_gap)>0.05: _threshold_event(events,"levy_liquidity_gap","Households Cannot Pay Assessed Levy","The assessed levy exceeds active household currency by %.1f units. Raising the statutory rate cannot collect money that is parked elsewhere or does not exist." % float(tax_capacity.liquidity_gap),45)
-		if float(finance.civil_coverage)<0.55: _threshold_event(events,"civil_payments_displaced","Civil Obligations Deferred","Only %d%% of civil obligations were paid under the %s spending priority. Administrative and public-works arrears continue to accumulate." % [roundi(float(finance.civil_coverage)*100.0),String(finance.spending_priority).replace("_"," ")],30)
-		if float(finance.military_coverage)<0.55: _threshold_event(events,"military_payments_displaced","Military Obligations Deferred","Only %d%% of military monetary obligations were paid under the %s spending priority. Payroll and upkeep arrears continue to accumulate." % [roundi(float(finance.military_coverage)*100.0),String(finance.spending_priority).replace("_"," ")],30)
-		if String(fiscal_outlook.status)=="default risk": _threshold_event(events,"fiscal_default_risk","Public Finance Cannot Clear","Visible treasury holdings, receipts, and safe borrowing cover only %d%% of the next thirty days of civil, military, arrears, and interest obligations." % roundi(float(fiscal_outlook.coverage_ratio)*100.0),30)
-		elif String(fiscal_outlook.status)=="strained": _threshold_event(events,"fiscal_strain","Treasury Has Little Margin","The current thirty-day fiscal forecast clears narrowly, leaving the settlement exposed to a trade, price, or mobilization shock.",45)
-	if inequality>0.48: _threshold_event(events,"wealth_concentration","Claims Concentrate","A growing share of exchange claims is held by the wealthiest households, adding pressure to cohesion and legitimacy.",120)
+	# Told when the richest fifth nears the most the age allows (WEALTH_BOUNDS),
+	# not at an ordinary share; the pressure itself applies every day.
+	if float(WorldSimulation.state.wealth_shares[4])>=float((WEALTH_BOUNDS.get(String(WorldSimulation.state.economy_stage),WEALTH_BOUNDS.subsistence) as Array)[1])-0.05: _threshold_event(events,"wealth_concentration","Claims Concentrate","The richest fifth of households now hold %d in every 100 parts of the realm's wealth, adding pressure to cohesion and legitimacy." % roundi(float(WorldSimulation.state.wealth_shares[4])*100.0),120)
 	for event in events:
 		WorldSimulation.state.economy_events.push_front(event)
 	if WorldSimulation.state.economy_events.size()>120: WorldSimulation.state.economy_events.resize(120)
@@ -232,7 +236,12 @@ func _market_access(context:Dictionary,foreign_effects:Dictionary={})->float:
 	var admin:=WorldSimulation.state.effective_workers("Administration")/maxf(1.0,WorldSimulation.state.population_exact*0.05)
 	var storage:=float(WorldSimulation.state.simulation_metrics.get("storage_function",0.0))
 	var foreign_access:=float((foreign_effects if not foreign_effects.is_empty() else WorldSimulation.world.player_effects()).market_access_bonus)
-	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access,0.0,1.0)
+	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy(),0.0,1.0)
+
+## A standing policy on the markets (freeing them opens them wider: the
+## "market_access" channel, at most a third either way).
+func _market_policy()->float:
+	return float(WorldSimulation.consequences.policy_effect("market_access")) if WorldSimulation.consequences!=null else 0.0
 
 func _monetization(market_access:float)->float:
 	match WorldSimulation.state.economy_stage:
@@ -271,7 +280,9 @@ func _update_prices(market_access:float,trade_volume:float=1.0)->float:
 			monetary_pressure=pow(clampf(spendable_supply/WorldSimulation.state.currency_demand,0.55,2.8),0.12)
 		var target:=float(BASE_VALUES[resource_name])*pow(scarcity,0.42)*monetary_pressure*(1.0+float(WorldSimulation.state.material_metrics.get("lost_today",0.0))/maxf(10.0,population)*0.08)
 		var old:=float(WorldSimulation.state.market_prices.get(resource_name,BASE_VALUES[resource_name]))
-		var damping:=0.035+market_access*0.025
+		# Freed markets let prices follow plenty and want faster (a policy's
+		# "market_access" effect, government_policy_catalog.gd).
+		var damping:=(0.035+market_access*0.025)*(1.0+maxf(0.0,_market_policy())*3.0)
 		WorldSimulation.state.market_prices[resource_name]=lerpf(old,target,SPAN.rate(damping))
 		var weight:=3.0 if resource_name=="Food" else 1.0
 		weighted+=float(WorldSimulation.state.market_prices[resource_name])/float(BASE_VALUES[resource_name])*weight
@@ -442,6 +453,12 @@ func cycle_external_trade_policy()->String:
 	_ledger("policy",0.0,"sovereign","regional_trade",WorldSimulation.state.external_trade_policy.replace("_"," ").capitalize()+" trade stance")
 	return WorldSimulation.state.external_trade_policy
 
+## This place's share of the realm's people (1 for the whole realm, or a
+## reading made outside any town's own day).
+func realm_share()->float:
+	var national:=float(WorldSimulation.settlements.national_population()) if WorldSimulation.settlements!=null else WorldSimulation.state.population_exact
+	return clampf(WorldSimulation.state.population_exact/maxf(1.0,national),0.0,1.0)
+
 func _real_economy_accounts(trade_volume:float,market_access:float,military_burden:Dictionary={})->Dictionary:
 	# These accounts observe the physical simulation; they do not consume a second
 	# ration or material unit. FoodSystem and ResourceSystem remain authoritative.
@@ -461,6 +478,10 @@ func _real_economy_accounts(trade_volume:float,market_access:float,military_burd
 		housing_ratio=clampf(0.20+WorldSimulation.state.effective_workers("Logistics")/maxf(1.0,population*0.10)*0.27+WorldSimulation.state.effective_workers("Construction")/maxf(1.0,population*0.12)*0.17,0.0,0.86)
 	var essential_coverage:=clampf(food_coverage*0.62+material_coverage*0.18+housing_ratio*0.20,0.0,1.0)
 	var mobilized:=_first_numeric(military_burden,["mobilized_population","field_personnel","mobilized_citizens","field_soldiers"])
+	if military_burden.is_empty() and WorldSimulation.military!=null: mobilized=float(WorldSimulation.military._mobilized_count())
+	# The soldiers are the whole realm's: each place carries its share of them
+	# against its own workers, never the capital alone for every town's men.
+	mobilized*=realm_share()
 	var security_duty:=maxf(mobilized,float(WorldSimulation.state.population_allocations.get("Defense",0))*0.50)
 	var workshop_diversion:=clampf(_first_numeric(military_burden,["workshop_diversion"]),0.0,1.0)
 	var diverted_craft_labor:=float(WorldSimulation.state.population_allocations.get("Crafting",0))*workshop_diversion
@@ -541,56 +562,28 @@ func _process_resource_obligations(real_accounts:Dictionary,monetization:float,r
 	if material_fulfilled>0.0: _ledger("material_due_rendered",material_fulfilled,"households","public_stores","%s material contribution value" % regime)
 	return {"regime":regime,"scheduled":scheduled,"scheduled_adoption":levy_adoption,"in_kind_share":in_kind_share,"assessment_reach":assessment_reach,"gross_labor_due":gross_labor_due,"labor_due":assessed_labor_due,"labor_outstanding":labor_outstanding,"labor_fulfilled":labor_fulfilled,"labor_arrears":WorldSimulation.state.in_kind_labor_arrears,"labor_coverage":clampf(labor_coverage,0.0,1.0),"gross_material_due":gross_material_due,"material_due":assessed_material_due,"material_outstanding":material_outstanding,"material_fulfilled":material_fulfilled,"material_arrears":WorldSimulation.state.in_kind_material_arrears,"material_coverage":clampf(material_coverage,0.0,1.0),"pressure":pressure}
 
-func _process_public_finance(trade_volume:float,monetization:float,military_burden:Dictionary={})->Dictionary:
-	if WorldSimulation.state.economy_stage!=STAGE_CURRENCY: return {"revenue":0.0,"spending":0.0,"civil_upkeep":0.0,"military_upkeep":0.0,"civil_due":0.0,"military_due":0.0,"civil_coverage":1.0,"military_coverage":1.0,"spending_priority":WorldSimulation.state.public_spending_priority,"borrowing":0.0,"debt_service":0.0,"interest_accrued":0.0,"debt_capacity":0.0,"tax_capacity":_tax_capacity_for(WorldSimulation.state.tax_rate,trade_volume,monetization,WorldSimulation.state.private_currency)}
-	var admin_coverage:=clampf(WorldSimulation.state.effective_workers("Administration")/maxf(1.0,WorldSimulation.state.population_exact*0.04),0.0,1.0)
-	var tax_capacity:=_tax_capacity_for(WorldSimulation.state.tax_rate,trade_volume,monetization,WorldSimulation.state.private_currency)
-	var revenue:=float(tax_capacity.collectible)
-	# A multi-day step (day_span.gd) collects, accrues and pays `span` days.
-	var span:=float(WorldSimulation.span)
-	if span>1.0:revenue=minf(maxf(0.0,WorldSimulation.state.private_currency),revenue*span)
-	WorldSimulation.state.private_currency-=revenue
-	WorldSimulation.state.public_treasury+=revenue
-	var debt_capacity:=_public_debt_capacity(trade_volume,monetization,admin_coverage,WorldSimulation.state.tax_rate,float(tax_capacity.compliance))
-	var interest_accrued:=0.0
-	if WorldSimulation.state.public_debt>0.0:
-		var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.25)),0.0,1.0)
-		var utilization:=WorldSimulation.state.public_debt/maxf(1.0,debt_capacity)
-		var annual_rate:=clampf(0.025+(1.0-institutions)*0.055+utilization*0.035-WorldSimulation.discovery.adoption("public_credit")*0.015,0.012,0.14)
-		interest_accrued=WorldSimulation.state.public_debt*annual_rate/365.0*span
-		WorldSimulation.state.public_debt+=interest_accrued
-		WorldSimulation.state.public_interest_accrued+=interest_accrued
-	var upkeep:=_public_upkeep(military_burden)
-	var civil_obligation:=WorldSimulation.state.civil_arrears+float(upkeep.civil)*span
-	var military_obligation:=WorldSimulation.state.military_arrears+float(upkeep.military)*span
-	var requested:=civil_obligation+military_obligation
-	var borrowing:=0.0
-	if WorldSimulation.state.public_treasury<requested and WorldSimulation.discovery.adoption("public_credit")>=0.25:
-		var debt_room:=maxf(0.0,debt_capacity-WorldSimulation.state.public_debt)
-		borrowing=minf(requested-WorldSimulation.state.public_treasury,minf(debt_room,WorldSimulation.state.private_currency))
-		WorldSimulation.state.private_currency-=borrowing
-		WorldSimulation.state.public_treasury+=borrowing
-		WorldSimulation.state.public_debt+=borrowing
-		WorldSimulation.state.public_borrowed+=borrowing
-		if borrowing>0.0: _ledger("public_borrowing",borrowing,"private","public","Treasury obligation issue")
-	var allocation:=_allocate_public_spending(WorldSimulation.state.public_treasury,civil_obligation,military_obligation,WorldSimulation.state.public_spending_priority)
-	var spending:=float(allocation.spending)
-	WorldSimulation.state.public_treasury-=spending
-	WorldSimulation.state.private_currency+=spending
-	if revenue>0.0: _ledger("tax",revenue,"private","public","Exchange levy")
-	if spending>0.0: _ledger("spending",spending,"public","private","Civil and military public obligations")
-	var civil_paid:=float(allocation.civil_paid)
-	var military_paid:=float(allocation.military_paid)
-	WorldSimulation.state.civil_arrears=maxf(0.0,civil_obligation-civil_paid)
-	WorldSimulation.state.military_arrears=maxf(0.0,military_obligation-military_paid)
-	var debt_service:=minf(WorldSimulation.state.public_debt,minf(WorldSimulation.state.public_treasury,maxf(0.0,revenue-spending)*0.55+WorldSimulation.state.public_treasury*0.12))
-	if debt_service>0.0:
-		WorldSimulation.state.public_treasury-=debt_service
-		WorldSimulation.state.private_currency+=debt_service
-		WorldSimulation.state.public_debt=maxf(0.0,WorldSimulation.state.public_debt-debt_service)
-		WorldSimulation.state.public_debt_repaid+=debt_service
-		_ledger("public_debt_service",debt_service,"public","private","Public credit principal and interest")
-	return {"revenue":revenue,"spending":spending,"civil_upkeep":civil_paid,"military_upkeep":military_paid,"civil_due":float(upkeep.civil),"military_due":float(upkeep.military),"civil_coverage":allocation.civil_coverage,"military_coverage":allocation.military_coverage,"spending_priority":allocation.priority,"borrowing":borrowing,"debt_service":debt_service,"interest_accrued":interest_accrued,"debt_capacity":debt_capacity,"tax_capacity":tax_capacity}
+## The public side of this place's day: the realm's levy on what it brought in
+## (realm_purse.gd accrue). The realm's one purse pays soldiers, scholars,
+## crews and relief at its monthly reckoning; no town keeps a treasury of its
+## own, borrows or pays upkeep from one. The record keeps the old report's
+## shape: revenue is the day's levy, compliance what is not hidden.
+func _process_public_finance(_trade_volume:float,monetization:float,_military_burden:Dictionary={},real_accounts:Dictionary={})->Dictionary:
+	var levy:Dictionary=Purse.accrue(real_accounts,monetization)
+	var output:=float(levy.output)*float(WorldSimulation.span)
+	var reached:=float(levy.assessed)*float(levy.reach)
+	var tax_capacity:={"active":float(levy.rate)>0.0,"statutory_rate":float(levy.rate),"compliance":1.0-float(levy.evasion),"administrative_reach":float(levy.reach),"taxable_exchange":output,"statutory_assessment":float(levy.assessed),
+		"administratively_assessed":reached,"compliant_assessment":float(levy.levy),"collectible":float(levy.levy),"effective_rate":float(levy.levy)/output if output>0.0 else 0.0,"noncompliance_gap":float(levy.evaded),"liquidity_gap":0.0,"coin":float(levy.coin)}
+	return {"revenue":float(levy.levy),"spending":0.0,"civil_upkeep":0.0,"military_upkeep":0.0,"civil_due":0.0,"military_due":0.0,"civil_coverage":1.0,"military_coverage":1.0,"spending_priority":WorldSimulation.state.public_spending_priority,"borrowing":0.0,"debt_service":0.0,"interest_accrued":0.0,"debt_capacity":0.0,"tax_capacity":tax_capacity}
+
+## The realm's purse at a glance for the day's report (realm_purse.gd): its
+## balance, a season's levy and lines, and whether it holds.
+func _purse_outlook()->Dictionary:
+	var purse:Dictionary=WorldSimulation.state.realm_purse
+	var held:=float(purse.get("balance",0.0))
+	var status:="sound"
+	if int(purse.get("unpaid_months",0))>0: status="default risk"
+	elif held<=0.01: status="thin"
+	return {"active":true,"status":status,"coverage_ratio":1.0 if status=="sound" else 0.0,"discretionary_headroom":held,"balance":held,"levy":String(purse.get("levy","usual"))}
 
 func _public_debt_capacity(trade_volume:float,monetization:float,admin_coverage:float,tax_rate_override:float=-1.0,compliance_override:float=1.0)->float:
 	var adoption:=WorldSimulation.discovery.adoption("public_credit")
@@ -939,20 +932,63 @@ func _process_mutual_risk_pool(trade_volume:float,defaulted_claims:float)->Dicti
 	result.reserve=WorldSimulation.state.mutual_aid_reserve
 	return result
 
-func _update_wealth_distribution(monetization:float,inflation:float,default_rate:float,revenue:float,real_accounts:Dictionary={})->float:
-	if WorldSimulation.state.wealth_shares.size()!=5: WorldSimulation.state.wealth_shares=[0.08,0.13,0.19,0.25,0.35]
+## The richest fifth's share of the realm's wealth, by what the people know:
+## [floor, ceiling, where custom pulls it back to]. Historical ranges: bands
+## and early villages share widely (the richest fifth near a third);
+## chiefdoms and early states 40-55%; money economies commonly 45-60%, and
+## 75% only at the extreme.
+const WEALTH_BOUNDS:={"subsistence":[0.28,0.55,0.38],"weighed_metal":[0.32,0.65,0.45],"currency":[0.35,0.75,0.50]}
+## How fast sharing out pulls the shares back a day (half-way in about 1.6
+## years), stronger before money (gifts, reciprocity), and stronger still
+## with feasts when the stores hold FEAST_FOOD_DAYS of food.
+const WEALTH_REVERSION:=0.0012
+const SUBSISTENCE_SHARING:=1.5
+const FEAST_SHARING:=1.25
+const FEAST_FOOD_DAYS:=60.0
+## The chief's redistribution: for each share of the realm's output the
+## purse put back in common hands last month, the richest fifth's share falls
+## this much a day (realm_purse.gd redistribution).
+const REDISTRIBUTION_PULL:=0.004
+## A policy that names wealth (taxing the rich lowers it, freeing the markets
+## raises it) moves the richest fifth's share this much a day per unit of its
+## effect (government_policy_catalog.gd "wealth_concentration").
+const POLICY_WEALTH_PULL:=0.0025
+
+## Who holds the realm's wealth, by fifths of its households. Want, rising
+## prices, defaults and money concentrate it; custom shares it back toward the
+## age's ordinary share, and the purse's pay and relief and a tax on the rich
+## spread it. Each place moves the realm's shares by its own share of the
+## people, within the age's bounds (WEALTH_BOUNDS). Returns the quintile Gini.
+func _update_wealth_distribution(monetization:float,inflation:float,default_rate:float,_revenue:float,real_accounts:Dictionary={})->float:
+	var s=WorldSimulation.state
+	if s.wealth_shares.size()!=5: s.wealth_shares.assign([0.08,0.13,0.19,0.25,0.35])
+	var bounds:Array=WEALTH_BOUNDS.get(String(s.economy_stage),WEALTH_BOUNDS.subsistence)
+	var shares:Array[float]=s.wealth_shares
 	var shortage:=_shortage_pressure()
 	var labor_return:=float(real_accounts.get("labor_return_index",1.0))
 	var wage_pressure:=maxf(0.0,0.75-labor_return)*0.00010-maxf(0.0,labor_return-1.15)*0.000035
-	var concentration_delta:=clampf(shortage*0.00020+maxf(0.0,inflation)*0.0015+default_rate*0.006+monetization*0.000025+wage_pressure-revenue/maxf(1.0,WorldSimulation.state.currency_supply)*0.0008,-0.0002,0.0008)
-	if WorldSimulation.span>1:concentration_delta=clampf(shortage*0.00020+maxf(0.0,inflation)*0.0015+default_rate*0.006+monetization*0.000025+wage_pressure-revenue/WorldSimulation.span/maxf(1.0,WorldSimulation.state.currency_supply)*0.0008,-0.0002,0.0008)*WorldSimulation.span
-	WorldSimulation.state.wealth_shares[0]=maxf(0.01,WorldSimulation.state.wealth_shares[0]-concentration_delta*0.55)
-	WorldSimulation.state.wealth_shares[1]=maxf(0.03,WorldSimulation.state.wealth_shares[1]-concentration_delta*0.30)
-	WorldSimulation.state.wealth_shares[4]=minf(0.75,WorldSimulation.state.wealth_shares[4]+concentration_delta*0.85)
+	var push:=clampf(shortage*0.00020+maxf(0.0,inflation)*0.0015+default_rate*0.006+monetization*0.000025+wage_pressure,-0.0002,0.0008)
+	var sharing:=WEALTH_REVERSION
+	if s.economy_stage==STAGE_SUBSISTENCE:
+		sharing*=SUBSISTENCE_SHARING
+		if float(s.simulation_metrics.get("food_days",0.0))>=FEAST_FOOD_DAYS: sharing*=FEAST_SHARING
+	var pull:=(float(shares[4])-float(bounds[2]))*sharing+Purse.redistribution()*REDISTRIBUTION_PULL
+	var policy:=float(WorldSimulation.consequences.policy_effect("wealth_concentration"))*POLICY_WEALTH_PULL if WorldSimulation.consequences!=null else 0.0
+	var delta:=(push-pull+policy)*float(WorldSimulation.span)*realm_share()
+	shares[0]=maxf(0.01,shares[0]-delta*0.55)
+	shares[1]=maxf(0.03,shares[1]-delta*0.30)
+	shares[4]=maxf(0.05,shares[4]+delta*0.85)
 	var total:=0.0
-	for share in WorldSimulation.state.wealth_shares: total+=float(share)
-	for index in WorldSimulation.state.wealth_shares.size(): WorldSimulation.state.wealth_shares[index]=float(WorldSimulation.state.wealth_shares[index])/maxf(0.001,total)
-	return _quintile_gini(WorldSimulation.state.wealth_shares)
+	for share in shares: total+=float(share)
+	for index in shares.size(): shares[index]=float(shares[index])/maxf(0.001,total)
+	var bounded:=clampf(shares[4],float(bounds[0]),float(bounds[1]))
+	if absf(bounded-shares[4])>0.000001:
+		var scale:=(1.0-bounded)/maxf(0.001,1.0-shares[4])
+		for index in 4: shares[index]=shares[index]*scale
+		shares[4]=bounded
+	# For policy observation (consequence_engine reads simulation metrics).
+	s.simulation_metrics["top_fifth_share"]=shares[4]
+	return _quintile_gini(shares)
 
 func _quintile_gini(shares:Array[float])->float:
 	var cumulative:=0.0
@@ -995,7 +1031,10 @@ func household_welfare_snapshot(real_accounts:Dictionary={},monetization:float=-
 			# but precautionary hoards and public money remain unavailable here.
 			liquidity_draw=minf(liquid_private/30.0,basket_cost*0.25)
 	var compliance:=clampf(float(WorldSimulation.state.economy_metrics.get("tax_compliance",0.75)),0.18,0.98)
-	var tax_drag:=tax_rate*compliance if WorldSimulation.state.economy_stage==STAGE_CURRENCY else 0.0
+	# The realm's levy is taken in every age (in kind before money): what
+	# households give up of their work (realm_purse.gd take). A rate asked for
+	# explicitly is read at today's compliance.
+	var tax_drag:=Purse.take() if statutory_tax_rate<0.0 else tax_rate*compliance
 	var disposable_claim_capacity:=maxf(0.0,labor_income*(1.0-tax_drag)+liquidity_draw)
 	var aggregate_affordability:=clampf(disposable_claim_capacity/maxf(0.01,basket_cost*market_exposure),0.0,1.25)
 	var shares:Array[float]=WorldSimulation.state.wealth_shares.duplicate()
@@ -1065,10 +1104,18 @@ func _economic_social_pressure(inflation:float,default_rate:float,inequality:flo
 	var labor_return_pressure:=maxf(0.0,0.70-float(real_accounts.get("labor_return_index",1.0)))*0.035
 	var hoarding_pressure:=maxf(0.0,float(currency_liquidity.get("hoard_share",0.0))-0.12)*0.08
 	var distribution_pressure:=float(household_welfare.get("claim_exclusion",0.0))*0.06+float(household_welfare.get("access_gap",0.0))*0.025
-	var hardship:=_shortage_pressure()*0.10+real_pressure+debt_pressure+labor_return_pressure+hoarding_pressure+distribution_pressure+maxf(0.0,inflation)*0.20+default_rate*0.8+maxf(0.0,inequality-0.32)*0.12+maxf(0.0,WorldSimulation.state.tax_rate-0.12)*0.10+arrears_pressure
+	var hardship:=_shortage_pressure()*0.10+real_pressure+debt_pressure+labor_return_pressure+hoarding_pressure+distribution_pressure+maxf(0.0,inflation)*0.20+default_rate*0.8+maxf(0.0,inequality-0.32)*0.12+arrears_pressure
 	var risk_pool_relief:=float(mutual_aid.get("payout",0.0))/maxf(1.0,WorldSimulation.state.population_exact)*0.06
 	var coordination_benefit:=market_access*reliability*0.025+clampf(risk_pool_relief,0.0,0.02)
-	return clampf(coordination_benefit-hardship,-0.20,0.025)
+	# The realm's levy weighs on its own, beside the clamp: a heavy levy is
+	# never hidden behind hardship that already fills it (realm_purse.gd).
+	var levy:=Purse.levy_pressure()
+	var pressure:=clampf(coordination_benefit-hardship,-0.20,0.025)
+	# What the Wealth page shows: each cause in points, as the clamp leaves it.
+	var unequal:=maxf(0.0,inequality-0.32)*0.12+distribution_pressure
+	var scale:=absf(minf(0.0,pressure))/maxf(0.0001,hardship) if hardship>0.0 else 0.0
+	_pressure_parts={"unequal":unequal*scale,"want":(_shortage_pressure()*0.10+real_pressure+labor_return_pressure)*scale,"prices":(maxf(0.0,inflation)*0.20+default_rate*0.8+hoarding_pressure+debt_pressure+arrears_pressure)*scale,"levy":levy,"benefit":maxf(0.0,pressure),"total":pressure-levy}
+	return pressure-levy
 
 func set_tax_rate(rate:float)->float:
 	WorldSimulation.state.tax_rate=clampf(rate,0.0,0.25)
@@ -1493,9 +1540,11 @@ func benchmark_status()->Dictionary:
 
 func _threshold_event(events:Array[Dictionary],id:String,title:String,description:String,cooldown:int)->void:
 	var key:="economy_"+id
-	if int(WorldSimulation.state.last_simulation_event_days.get(key,-100000))+cooldown>int(WorldSimulation.state.elapsed_days): return
-	WorldSimulation.state.last_simulation_event_days[key]=int(WorldSimulation.state.elapsed_days)
+	# One cooldown for the whole realm: a condition met in many towns is told
+	# once, not once a town (realm_purse.gd event_due).
+	if not Purse.event_due(key,cooldown): return
 	var event:=_event(title,description,"warning")
+	if String(WorldSimulation.state.resource_settlement_id)!="": event["settlement_name"]=String(WorldSimulation.state.settlement_name)
 	event["condition_id"]=key
 	event["recurring_condition"]=true
 	events.append(event)

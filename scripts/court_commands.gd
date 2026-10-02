@@ -43,6 +43,7 @@ const CovertOrders:=preload("res://scripts/covert_orders.gd")
 const TownFateWords:=preload("res://scripts/town_fate.gd")
 const Measures:=preload("res://scripts/occupation_measures.gd")
 const HomeOrders:=preload("res://scripts/home_orders.gd")
+const PurseOrders:=preload("res://scripts/court_purse_orders.gd")
 const Realm:=preload("res://scripts/court_realm_acts.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
 
@@ -536,6 +537,12 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var decree:=_sovereign_decree(id,clean,context)
 	if not decree.is_empty(): return decree
 	var list:=roster(audience)
+	# The realm's purse (court_purse_orders.gd): the levy on the harvest, the
+	# soldiers' pay, scholars, crews and food for the hungry; read before the
+	# levy of fighters can take "raise the levy" for a call to arms.
+	if String(audience.get("origin",""))=="court" and not is_harm(clean):
+		var purse:=PurseOrders.read(clean)
+		if not purse.is_empty(): return PurseOrders.carry(_result("order",_speaker_entry(list),{},clean,false),purse)
 	var cls:=classify(clean)
 	# Spies and assassins (covert_orders.gd): a covert cue ("send a spy",
 	# "sabotage their well", "an assassin disguised as an envoy") turns the

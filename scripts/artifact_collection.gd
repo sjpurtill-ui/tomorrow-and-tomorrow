@@ -286,10 +286,10 @@ static func check(id:String,recipient:String,mode:String,offered:String="")->Dic
 	var value:=price(item)
 	if mode=="sell":
 		if source.economy_stage!="currency" or target.economy_stage!="currency":return {"error":"Both civilizations need currency before a sale."}
-		if target.public_treasury<value:return {"error":"The buyer cannot afford this object."}
-		var reserve:=0.0
-		for amount:float in target.monetary_reserve_metals.values():reserve+=amount
-		if reserve<value/2.5:return {"error":"The buyer lacks transferable monetary backing."}
+		# The buyer pays from its realm's purse (realm_purse.gd), coin with its backing.
+		var held:=preload("res://scripts/realm_purse.gd").held_coin(target)
+		if float(held.coin)<value:return {"error":"The buyer cannot afford this object."}
+		if float(held.backing)<value/2.5:return {"error":"The buyer lacks transferable monetary backing."}
 	return {"ok":true,"value":value}
 
 ## Owner-explicit exchange between any two owners ("player" or an actor id):
@@ -328,14 +328,7 @@ static func transfer(id:String,recipient:String,mode:String,offered:String="")->
 	var other:Dictionary=target.society_exchange.collections.get(offered,{})
 	var value:=float(checked.value)
 	if mode=="sell":
-		var backing:=value/2.5
-		for metal:String in target.monetary_reserve_metals:
-			var moved:=minf(backing,float(target.monetary_reserve_metals[metal]))
-			target.monetary_reserve_metals[metal]-=moved
-			source.monetary_reserve_metals[metal]=float(source.monetary_reserve_metals.get(metal,0))+moved
-			backing-=moved
-		target.public_treasury-=value;target.currency_supply-=value
-		source.public_treasury+=value;source.currency_supply+=value
+		preload("res://scripts/realm_purse.gd").move_coin(target,source,value,"%s sold to %s" % [String(item.get("name","A treasure")),String(target.settlement_name)])
 	var message:="%s: %s transferred to %s." % [mode.capitalize(),item.name,target.settlement_name]
 	for owner:Node in [source,target]:
 		owner.society_exchange.history.push_front({"day":int(source.elapsed_days),"text":message})

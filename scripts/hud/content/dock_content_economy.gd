@@ -142,17 +142,29 @@ func _trade_block()->Dictionary:
 
 var selected_account:=""
 var show_work:=false
+## The Wealth tab: the realm's purse first (hud/purse_board.gd, which reads
+## the realm itself and refreshes on its own), then this place's day's work
+## and its households' money. Trade between peoples mounts its own board
+## between them: one line, blocks.append(<its block>), where marked.
 func _wealth_tab()->Dictionary:
+	var blocks:Array=[{"type":"purse_board"}]
+	# Trade between peoples (econ-trade) mounts its board here.
+	blocks.append(_ledger_block())
+	return {"blocks":blocks}
+
+## This place's day's work and its households' money (hud/wealth_ledger.gd).
+## The realm's treasury is the purse's, above: no town keeps its own.
+func _ledger_block()->Dictionary:
 	var city:=SettlementModel.settlement_record(GameState.selected_player_settlement_id)
 	var stage:=GameState.economy_stage
 	var accounts:Array=[]
 	var history:Array=Charts.finance(GameState.selected_player_settlement_id).get("items",[]) if stage in ["currency","weighed_metal"] else []
-	var definitions:Array=[["treasury","Public treasury",GameState.public_treasury,0],["private_currency","Household money",GameState.private_currency,1],["hoards","Private hoards",GameState.currency_hoards,2],["aid","Mutual aid",GameState.mutual_aid_reserve,3]] if stage=="currency" else [["metal","Exchange metal",GameState.weighed_metal_circulation,-1]] if stage=="weighed_metal" else []
+	var definitions:Array=[["private_currency","Household money",GameState.private_currency,1],["hoards","Private hoards",GameState.currency_hoards,2],["aid","Mutual aid",GameState.mutual_aid_reserve,3]] if stage=="currency" else [["metal","Exchange metal",GameState.weighed_metal_circulation,-1]] if stage=="weighed_metal" else []
 	for definition:Array in definitions:
 		var points:Array=[]
 		for row:Dictionary in history:points.append({"day":row.day,"value":row.get(definition[0],null)})
 		accounts.append({"key":definition[0],"name":definition[1],"balance":float(definition[2]),"art":definition[3],"points":points})
-	return {"blocks":[{"type":"wealth_ledger","title":"Wealth","stage":stage,"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(GameState.selected_player_settlement_id),"managed":city.get("auto_manage",true),"economy":Indicators.economy(),"history":GameState.economy_history.slice(maxi(0,GameState.economy_history.size()-12)),"conditions":{"health":float(GameState.population_health),"cohesion":float(GameState.simulation_metrics.get("cohesion",1.0)),"housing":float(GameState.simulation_metrics.get("housing_ratio",1.0))},"accounts":accounts,"selected":selected_account,"show_work":show_work,"on_select":func(key:String):selected_account="" if selected_account==key else key;hud.request_immediate_dock_refresh(),"on_work":func():show_work=not show_work;hud.request_immediate_dock_refresh(),"on_history":focused_action("Past balances","",func()->Dictionary:return {"blocks":[Charts.finance(GameState.selected_player_settlement_id)]}).on_press,"on_stores":jump("economy",1),"on_policy":jump("government",0)}]}
+	return {"type":"wealth_ledger","title":"Wealth","stage":stage,"city":city.get("name","Founding camp"),"leader":GovernmentPeopleSystem.settlement_leader(GameState.selected_player_settlement_id),"managed":city.get("auto_manage",true),"economy":Indicators.economy(),"history":GameState.economy_history.slice(maxi(0,GameState.economy_history.size()-12)),"conditions":{"health":float(GameState.population_health),"cohesion":float(GameState.simulation_metrics.get("cohesion",1.0)),"housing":float(GameState.simulation_metrics.get("housing_ratio",1.0))},"accounts":accounts,"selected":selected_account,"show_work":show_work,"on_select":func(key:String):selected_account="" if selected_account==key else key;hud.request_immediate_dock_refresh(),"on_work":func():show_work=not show_work;hud.request_immediate_dock_refresh(),"on_history":focused_action("Past balances","",func()->Dictionary:return {"blocks":[Charts.finance(GameState.selected_player_settlement_id)]}).on_press,"on_stores":jump("economy",1),"on_policy":jump("government",0)}
 
 func open_expanded_tab(sub:int)->bool:
 	return false

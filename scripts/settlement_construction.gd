@@ -120,11 +120,12 @@ static func daily_work()->float:
 	var builders:=float(WorldSimulation.state.effective_workers("Construction"))
 	var carriers:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var makers:=float(WorldSimulation.state.population_allocations.get("Crafting",0))
-	return (builders/8.0)*(.82+carriers/30.0+makers/50.0)*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate")+WorldSimulation.consequences.policy_effect("construction_rate"))
+	# Crews the realm's purse pays work faster (realm_purse.gd crews_bonus).
+	return (builders/8.0)*(.82+carriers/30.0+makers/50.0)*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate")+WorldSimulation.consequences.policy_effect("construction_rate")+preload("res://scripts/realm_purse.gd").crews_bonus())
 
 ## A day's work on new homes at today's crews (HOUSING_BATCH_WORK a batch).
 static func housing_work_per_day()->float:
-	return float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))
+	return float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+preload("res://scripts/realm_purse.gd").crews_bonus())
 
 ## The places one batch of new homes adds, with what the people know of
 ## building (housing_output: framing, room division; the Framed Hall's share

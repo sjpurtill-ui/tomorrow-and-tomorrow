@@ -1883,6 +1883,84 @@
    "say": "Call our people to the fire",
    "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
    "expect": {"state": {"settlement_name": "==before", "nation_name": "==before"}},
-   "variants": ["call our people home"]}
+   "variants": ["call our people home"]},
+
+  {"id": "purse.raise_levy", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "The levy on the harvest, raised: the realm's purse (realm_purse.gd), never a levy of fighters. The Headman keeps the purse while no Treasurer is named.",
+   "say": "Raise the levy",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"purse_levy": "=='heavy'", "recruits": "==before"}, "says_has": ["one part in ten", "a season"]},
+   "variants": ["raise the levy", "RAISE THE LEVY", "Make the levy heavier", "raise taxes"]},
+
+  {"id": "purse.lower_levy", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Lower the levy",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"purse_levy": "=='light'"}, "says_has": ["one part in forty"]},
+   "variants": ["lower the levy", "cut the taxes", "Lighten the levy"]},
+
+  {"id": "purse.heavy_levy", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Make the levy heavy",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"purse_levy": "=='heavy'"}, "says_has": ["hide what they owe"]},
+   "variants": ["Set the levy to heavy", "I want a heavy levy"]},
+
+  {"id": "purse.stop_pay", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "Unpaid soldiers lose will and some go home: the answer says so in numbers.",
+   "say": "Stop paying the soldiers",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"purse_army": "==0", "home_troops": "==before"}, "says_has": ["will falls", "1 in 50"]},
+   "variants": ["stop paying the soldiers", "Don't pay the army anymore", "no more pay for the warriors"]},
+
+  {"id": "purse.pay_soldiers", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "steps": [{"say": "Stop paying the soldiers", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"handled": true, "state": {"purse_army": "==0"}}}, {"say": "Pay the soldiers", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9}, "expect": {"handled": true, "state": {"purse_army": "==1"}, "says_has": ["a season"]}}],
+   "variants": ["pay the army", "Pay our warriors again"]},
+
+  {"id": "purse.fund_scholars", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Fund the scholars",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"purse_scholars": "==1"}, "says_has": ["faster"]},
+   "variants": ["fund the scholars", "Pay the scholars to keep at their work", "support our lore keepers"]},
+
+  {"id": "purse.hire_crews", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Hire crews",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"purse_crews": "==1"}, "says_has": ["faster"]},
+   "variants": ["hire crews to build", "Pay the builders"]},
+
+  {"id": "purse.relief_100", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "One town and no market: nothing can be bought, and the court says why instead of pretending.",
+   "say": "Spend 100 on food for the hungry",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "stage": "none", "state": {"purse": "==before", "food": "==before"}, "says_has": ["Nothing is bought"]},
+   "variants": ["spend 100 on food for the hungry"]},
+
+  {"id": "purse.relief_monthly", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Buy food for the hungry towns every month",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"purse_relief": "==1"}, "says_has": ["each month"]}},
+
+  {"id": "purse.not_fighters", "domain": "purse", "fixture": "home_peace", "speaker": "suri", "source": "design",
+   "note": "A levy of fighters is the war leader's, never the harvest levy.",
+   "say": "Raise a levy of ten men",
+   "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
+   "expect": {"handled": true, "state": {"purse_levy": "==before", "training": ">before"}, "says_has": ["called up"]}},
+
+  {"id": "q.purse.balance", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "note": "What is held is on the purse keeper's sheet: the Headman's while no Treasurer is named.",
+   "say": "How much is in the treasury?",
+   "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "reply_has": ["common store", "{purse}"], "prompt_has": ["The realm's account is the common store"]},
+   "variants": ["how much do we have in the common store?", "hw much is in the treasury"]},
+
+  {"id": "q.purse.levy", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "What does the levy bring in?",
+   "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "reply_has": ["one part in twenty", "a season"], "prompt_has": ["The levy is usual"]},
+   "variants": ["what does the levy bring in", "How much do the taxes bring?"]},
+
+  {"id": "q.purse.soldiers_paid", "domain": "purse", "fixture": "home_peace", "speaker": "headman", "source": "design",
+   "say": "Are the soldiers paid?",
+   "ideal": {"kind": "question", "action": "none", "type": "none"},
+   "expect": {"handled": false, "known": true, "reply_has": ["a season"]}}
 ]
 }
