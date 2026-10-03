@@ -3,6 +3,43 @@ extends GdUnitTestSuite
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Stage:=preload("res://scripts/hud/court_stage.gd")
 const Walk:=preload("res://scripts/hud/court_motion.gd")
+const Acting:=preload("res://scripts/hud/court_acting.gd")
+
+class ExitStage extends Control:
+	var court_set:Node3D
+	func set_point(_mark:String)->Vector3:return Vector3(0,0,4)
+
+func test_a_delayed_floor_sitter_departure_never_restores_the_stool()->void:
+	var previous_acting:=Stage.acting
+	Stage.acting=Acting.service()
+	for tracked_stance in ["cross",""]:
+		var stage:Control=auto_free(ExitStage.new());add_child(stage)
+		var figure:=Stage.Figure.new();stage.add_child(figure)
+		var spot:=Node3D.new();stage.add_child(spot)
+		var body:=Figure3D.new();spot.add_child(body)
+		assert_bool(body.setup({"variant":"male_old","outfit":"robe","stance":"sit","keep_stance":true})).is_true()
+		body.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+		figure.body3d=body;figure.spot=spot;figure._stage=weakref(stage)
+		figure.rest_clip="sit";figure.acting_stance=tracked_stance
+		Acting.idle(body,"cross")
+		var actor=Acting.of(body)
+		for i in 30:
+			body.skeleton.reset_bone_poses();body.player.advance(1.0/30.0);actor.step(1.0/30.0)
+		var stool:MeshInstance3D=body._mesh_named("prop_stool")
+		assert_bool(stool.visible).is_false()
+		figure.leave(1.0,3.0,1.0,"bow")
+		figure._move.pause()
+		for i in 12:
+			figure._move.custom_step(1.0/30.0)
+			body.skeleton.reset_bone_poses();body.player.advance(1.0/30.0);actor.step(1.0/30.0)
+			assert_bool(stool.visible).override_failure_message("the waiting departure put a stool through the rising floor sitter").is_false()
+		assert_str(String(body.clip)).is_equal("stand")
+		assert_str(figure.rest_clip).is_equal("stand")
+		figure._move.kill()
+		# Explicitly returning to an ordinary seated posture still has support.
+		Acting.idle(body,"sit")
+		assert_bool(stool.visible).is_true()
+	Stage.acting=previous_acting
 
 func test_facing_crosses_the_angle_seam_without_spinning()->void:
 	var body:Node3D=auto_free(Figure3D.new());add_child(body)
