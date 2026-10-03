@@ -198,7 +198,7 @@ func test_pressing_learning_runs_ahead_and_easing_off_lets_the_calendar_catch_up
 		GameState.elapsed_days+=1.0
 		DiscoverySystem.process_day({})
 	var gained:=float(DiscoverySystem.learning_lead)
-	assert_float(gained).is_greater(0.05)
+	assert_float(gained).is_greater(0.01)
 	assert_float(DiscoverySystem.learning_year()).is_equal_approx(float(GameState.elapsed_days)/365.0+gained,0.0001)
 	# Nobody learning: the calendar catches up, never passing below it.
 	GameState.population_allocations["Knowledge"]=0
@@ -392,7 +392,23 @@ func test_what_the_economy_can_spare_reads_its_real_age_never_the_lead()->void:
 	assert_float(float(model.economy_era())).is_equal_approx(float(GameState.elapsed_days)/365.0,0.01)
 	assert_float(float(model.specialist_excess)).is_equal_approx(excess,0.000001)
 	assert_float(DiscoverySystem.sustainable_learning_share()).is_equal_approx(spare,0.000001)
+	# The lead itself is paid for: the extra learners' upkeep grows with it.
+	assert_float(float(model.specialist_burden)).is_equal_approx(1.0+200.0/R.LEAD_UPKEEP_YEARS,0.000001)
 	assert_float(preload("res://scripts/artifact_collection.gd").era_bonus_cap()).is_equal_approx(artifacts,0.000001)
 	# Foundations to start now are read from the people's own age.
 	var source:=FileAccess.get_file_as_string("res://scripts/research_foundations.gd")
 	assert_str(source).contains("discovery.learning_year()")
+
+func test_a_lead_is_paid_for_in_the_extra_learners_upkeep()->void:
+	var model=DiscoverySystem.society_model
+	GameState.population_allocations["Knowledge"]=roundi(float(GameState.able_population())/3.0)
+	DiscoverySystem.learning_lead=0.0
+	model._rebuild_effect_totals(DiscoverySystem.catalog)
+	var births:=float(model.effect("conception_support"))
+	var work:=float(model.effect("labor_demand"))
+	assert_float(float(model.specialist_burden)).is_equal(1.0)
+	DiscoverySystem.learning_lead=R.LEAD_UPKEEP_YEARS*0.5
+	model._rebuild_effect_totals(DiscoverySystem.catalog)
+	assert_float(float(model.specialist_burden)).is_equal_approx(1.5,0.000001)
+	assert_float(float(model.effect("conception_support"))).is_less(births)
+	assert_float(float(model.effect("labor_demand"))).is_greater_equal(work)

@@ -182,21 +182,23 @@ const LEAD_GOODS_YEARS:=20.0
 ## And the people carry it: every LEAD_UPKEEP_YEARS ahead adds the usual
 ## upkeep of learners past the share the age can spare again (SocietyModel
 ## specialist upkeep: work, weariness, cohesion, births and stores).
-const LEAD_UPKEEP_YEARS:=100.0
+const LEAD_UPKEEP_YEARS:=300.0
 ## The store learning draws on (civilian_goods.gd GOODS).
 const GOODS_KEY:="Civilian Goods"
-## A people's own age. Keeping more learners than its age can spare (the
-## sustainable share, society_model.gd SUSTAINABLE_SPECIALISTS) carries its
+## A people's own age. Keeping more learners on the research lines than its
+## age can spare (the sustainable share, society_model.gd
+## SUSTAINABLE_SPECIALISTS, read at the economy's real age) carries its
 ## learning ahead of the calendar: each doubling of that share adds
-## LEAD_YEARS_PER_DOUBLING years a year to its lead (twice the share: 15 years
+## LEAD_YEARS_PER_DOUBLING years a year to its lead (twice the share: 6 years
 ## ahead in a century). Below the sustainable share the lead falls back the same
 ## way, never below the calendar. Questions are dated against the people's own
 ## age (DiscoverySystem.learning_year), not the calendar, and what it knows pays
-## off to the age its knowledge has reached (SocietyModel.society_era). In the
-## fast sim (tools/sim) a people with about a sixth of its workers learning
-## reaches bronze and archives some 55 years early by year 300, one with a third
-## some 80 years early, at the cost of most of its growth; at the usual share
-## nothing moves (the older rule gave all three the same years).
+## off to the age its knowledge has reached (SocietyModel.society_era). A lead is
+## a little extra, never wild, and it is paid for (LEAD_GOODS_YEARS,
+## LEAD_UPKEEP_YEARS): in the fast sim (tools/sim, docs/PEOPLE_FIRST.md A) a
+## people with a sixth of its workers learning reaches writing, bronze and
+## place value some 20-30 years before their band floors, one with a third some
+## 30-40 years before, with fewer people, goods and guards than a sensible one.
 const LEAD_YEARS_PER_DOUBLING:=0.06
 ## The lead falls back at most this many doublings a year (a people with no
 ## learners at all loses LEAD_YEARS_PER_DOUBLING x 3 years a year).
