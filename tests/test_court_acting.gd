@@ -15,7 +15,7 @@ extends GdUnitTestSuite
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const DT:=1.0/30.0
-const CORE:=["gasp","flinch","laugh","laugh_stifled","side_eye_l","side_eye_r","bow_shallow","bow_deep","bow_overdeep","kneel","defiant",
+const CORE:=["gasp","flinch","laugh","laugh_polite","laugh_stifled","side_eye_l","side_eye_r","bow_shallow","bow_deep","bow_overdeep","kneel","defiant",
 	"talk_explain","talk_emphatic","talk_hesitant","talk_plead","talk_one","talk_dismiss","scratch_head"]
 
 
@@ -51,6 +51,18 @@ func _hand(f:Node3D,side:="R")->Vector3:
 
 func _bone_y(f:Node3D,bone:String)->float:
 	return f.skeleton.get_bone_global_pose(f.skeleton.find_bone(bone)).origin.y
+
+
+func test_clips_play_at_their_own_length()->void:
+	## Blender keys a frame each 1/30 s; the library must say so (a scene left at
+	## 24 fps once played every clip 1.25 times slower than its face).
+	for variant in Figure3D.VARIANTS:
+		var lib:=Acting.library(variant)
+		for clip in ["gasp","laugh","kneel","stance_guard"]:
+			var anim:Animation=lib.get(clip)
+			assert_object(anim).is_not_null()
+			if anim==null:continue
+			assert_float(anim.length).override_failure_message("%s %s lasts %.2f s, not %.2f" % [variant,clip,anim.length,Acting.clip_length(clip)]).is_equal_approx(Acting.clip_length(clip),0.04)
 
 
 func test_every_body_has_the_shared_clip_library()->void:
@@ -133,8 +145,9 @@ func test_a_new_reaction_crossfades_from_the_last()->void:
 		_frame(f,a)
 		fastest=maxf(fastest,_hand(f).distance_to(last)/DT)
 		last=_hand(f)
-	# the hands travel from the bow to the folded arms, never jumping: under 3 m/s
-	assert_float(fastest).is_less(3.0)
+	# the hands travel from the bow to the folded arms, never jumping (a quick
+	# human arm moves 3-5 m/s; a pop from one pose to another is 9 m/s and more)
+	assert_float(fastest).is_less(5.0)
 
 
 func test_a_sitter_keeps_their_seat_and_a_staff_its_hand()->void:
@@ -358,3 +371,175 @@ func test_the_directors_acts_are_performed()->void:
 	var g:=_figure()
 	service.play(g,{"clip":"no_such_act","beat":"no_such_act","fallback":"bow","hold":false,"speed":1.0,"blend":0.25})
 	assert_str(String(g.clip)).is_equal("bow")
+
+
+# --- round 2 ------------------------------------------------------------------------
+
+func _head_yaw(f:Node3D)->float:
+	var a=Acting.of(f)
+	var head:int=f.skeleton.find_bone("head")
+	var fwd:Vector3=(f.skeleton as Skeleton3D).get_bone_global_pose(head).basis.get_rotation_quaternion()*a._rest_gi[head]*Vector3.BACK
+	return rad_to_deg(atan2(fwd.x,fwd.z))
+
+
+func _head_pitch(f:Node3D)->float:
+	var a=Acting.of(f)
+	var head:int=f.skeleton.find_bone("head")
+	var fwd:Vector3=(f.skeleton as Skeleton3D).get_bone_global_pose(head).basis.get_rotation_quaternion()*a._rest_gi[head]*Vector3.BACK
+	return rad_to_deg(asin(clampf(fwd.y,-1.0,1.0)))
+
+
+func test_the_big_laugh_throws_the_head_back_and_the_polite_one_does_not()->void:
+	var f:=_figure()
+	var a=Acting.of(f)
+	Acting.set_ambient(f,0.0)
+	_run(f,0.5)
+	var rest_pitch:=_head_pitch(f)
+	Acting.play(f,"laugh")
+	_run(f,0.55)
+	assert_float(_head_pitch(f)-rest_pitch).override_failure_message("the head did not go back").is_greater(14.0)
+	assert_float(a.face_now[Acting.CH_JAW]).is_greater(0.5)
+	assert_float(a.face_now[Acting.CH_SMILE]).is_greater(0.8)
+	var g:=_figure()
+	Acting.set_ambient(g,0.0)
+	_run(g,0.5)
+	var g_rest:=_head_pitch(g)
+	Acting.play(g,"laugh_polite")
+	_run(g,0.5)
+	var lift:=_head_pitch(g)-g_rest
+	assert_float(lift).is_between(2.0,14.0)
+
+
+func test_a_side_eye_turns_the_head_and_narrows_the_lids()->void:
+	var f:=_figure()
+	var a=Acting.of(f)
+	Acting.set_ambient(f,0.0)
+	_run(f,0.5)
+	var rest_yaw:=_head_yaw(f)
+	Acting.play(f,"side_eye_l")
+	_run(f,1.3)
+	assert_float(_head_yaw(f)-rest_yaw).override_failure_message("the head did not turn to its left").is_greater(18.0)
+	assert_float(a.face_now[Acting.CH_LIDS]).is_less(0.7)
+
+
+func test_a_half_catch_takes_the_weight_on_bent_knees()->void:
+	var f:=_figure()
+	_run(f,0.3)
+	var stand:=_bone_y(f,"hips")
+	var hand0:=_hand(f,"L")
+	Acting.play(f,"half_catch_l")
+	_run(f,1.0)
+	assert_float(stand-_bone_y(f,"hips")).override_failure_message("the knees did not bend to take them").is_greater(0.12)
+	assert_float(_hand(f,"L").x-hand0.x).override_failure_message("the hands did not go out to them").is_greater(0.15)
+
+
+func test_a_faint_never_goes_through_the_floor()->void:
+	var f:=_figure()
+	var a=Acting.of(f)
+	_run(f,0.3)
+	Acting.play(f,"faint_l")
+	var lowest:=10.0
+	for i in int(2.4/DT):
+		_frame(f,a)
+		for bone in ["foot.L","foot.R","toe.L","toe.R","shin.L","shin.R"]:
+			lowest=minf(lowest,_bone_y(f,bone))
+	assert_float(lowest).override_failure_message("a foot went %.3f m into the floor" % -lowest).is_greater(-0.02)
+	assert_float(_bone_y(f,"hips")).override_failure_message("not down on the floor").is_less(0.35)
+
+
+func test_stances_for_life_from_the_acting()->void:
+	# the guard leans on the figure's staff: the stance under it is the staff's, the hand stays put
+	var g:=_figure()
+	Acting.idle(g,"guard")
+	assert_str(String(g.stance)).is_equal("staff")
+	var a=Acting.of(g)
+	assert_str(String(a.base_stance)).is_equal("guard")
+	_run(g,1.0)
+	var lo:=_hand(g,"R");var hi:=_hand(g,"R")
+	for i in int(8.0/DT):
+		_frame(g,a)
+		var h:=_hand(g,"R")
+		lo=Vector3(minf(lo.x,h.x),minf(lo.y,h.y),minf(lo.z,h.z));hi=Vector3(maxf(hi.x,h.x),maxf(hi.y,h.y),maxf(hi.z,h.z))
+	assert_float((hi-lo).length()).override_failure_message("the staff hand wandered %.3f m" % (hi-lo).length()).is_less(0.012)
+	# an elder on a low seat sits lower than on a high one
+	var low:=_figure()
+	Acting.idle(low,"log",{"seat":0.30})
+	var high:=_figure()
+	Acting.idle(high,"log",{"seat":0.46})
+	_run(low,1.0);_run(high,1.0)
+	assert_float(_bone_y(high,"hips")-_bone_y(low,"hips")).is_between(0.08,0.24)
+	# seated, a gasp does not stand them up
+	var seat:=_bone_y(low,"hips")
+	Acting.play(low,"gasp")
+	_run(low,0.7)
+	assert_float(absf(_bone_y(low,"hips")-seat)).is_less(0.02)
+	# by the fire they crouch
+	var fire:=_figure()
+	Acting.idle(fire,"fire")
+	_run(fire,1.0)
+	assert_float(_bone_y(fire,"hips")).is_less(0.6)
+	# and back to a stance of the figure's own: the acting's base goes
+	Acting.idle(fire,"stand")
+	_run(fire,1.0)
+	assert_str(String(Acting.of(fire).base_stance)).is_empty()
+	assert_float(_bone_y(fire,"hips")).is_greater(0.8)
+
+
+func test_exits_are_plans_of_clips_the_library_has()->void:
+	for style in ["bow","storm","storm_back","sober","led"]:
+		var plan:Array=Acting.exit_plan(style)
+		assert_int(plan.size()).is_greater(0)
+		var leaves:=false
+		for step:Dictionary in plan:
+			var clip:=String(step.clip)
+			assert_bool(Acting.has_clip(clip) or clip=="walk_out").override_failure_message("%s: no clip %s" % [style,clip]).is_true()
+			if float(step.move)<0.0 and String(step.face)=="out":leaves=true
+		assert_bool(leaves).override_failure_message("%s never leaves" % style).is_true()
+	for clip in ["back_out","storm_walk","walk_sober","walk_led"]:
+		assert_float(float(Acting.clip_meta(clip).get("speed_mps",0.0))).is_greater(0.3)
+
+
+func test_the_stage_calls_reach_the_acting()->void:
+	## court_stage.gd _beat: acting.play(body, act, args) and acting.set_mood(body, vector).
+	var service=Acting.service()
+	var f:=_figure()
+	var a=Acting.of(f)
+	service.play(f,"faint",{"clip":"faint","beat":"faint","fallback":"kneel","hold":true,"speed":1.0,"blend":0.25,"at":"","dur":1.6})
+	assert_str(String(a._a.clip)).starts_with("faint_")
+	service.set_mood(f,{"fear":0.8})
+	assert_bool(a._mood_explicit).is_false()
+	_run(f,0.4)
+	assert_float(a._mood[Acting.M_FEAR]).is_greater(0.4)
+	_run(f,3.0)
+	assert_float(a._mood[Acting.M_FEAR]).is_less(0.2)
+
+
+func test_the_face_runs_on_the_figures_expression_morphs()->void:
+	var f:=_figure()
+	var mouth:MeshInstance3D
+	for m in f._meshes:
+		if String(m.name)=="Mouth":mouth=m
+	if mouth==null or mouth.find_blend_shape_by_name(&"smile")<0:return
+	Acting.set_mood(f,{"joy":1.0})
+	f.set_mood("warm")   # J's own mood morph would double the smile: the acting keeps it at 0
+	_run(f,2.5)
+	assert_float(mouth.get_blend_shape_value(mouth.find_blend_shape_by_name(&"smile"))).is_greater(0.5)
+	assert_float(mouth.get_blend_shape_value(mouth.find_blend_shape_by_name(&"mood_smile"))).is_less(0.01)
+	var a=Acting.of(f)
+	Acting.speak(f,"Bring me the oxen.",1.5,{"gestures":false})
+	var most:=0.0
+	for i in 30:
+		_frame(f,a)
+		for v in Acting.VISEMES:
+			var idx:=mouth.find_blend_shape_by_name(StringName(v))
+			if idx>=0:most=maxf(most,mouth.get_blend_shape_value(idx))
+	assert_float(most).override_failure_message("no viseme moved").is_greater(0.5)
+
+
+func test_the_rooms_business_is_in_the_library()->void:
+	for act in ["cough","keep_apart","rub_belly","pat_belly","sharpen_spear","rub_hands","stamp_feet","swat_fly","stretch","whisper","wring_hands","shush","fan_self","laugh_polite"]:
+		var spec:Array=Acting.ACT_MAP.get(act,[])
+		assert_bool(spec.is_empty()).override_failure_message("no performance for %s" % act).is_false()
+		var clip:=String(spec[1])
+		for c in ([clip+"l",clip+"r"] if clip.ends_with("_") else [clip]):
+			assert_bool(Acting.has_clip(c)).override_failure_message("%s wants %s" % [act,c]).is_true()

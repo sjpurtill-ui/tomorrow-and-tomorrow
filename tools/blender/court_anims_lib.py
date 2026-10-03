@@ -149,11 +149,14 @@ def curve(kind, x):
 class Seq:
     """Keys on a timeline: [(t, value, kind)], kind is how the key is reached."""
 
-    def __init__(self, keys):
+    def __init__(self, keys, period=None):
         self.keys = [(k[0], k[1], k[2] if len(k) > 2 else "ease") + tuple(k[3:]) for k in keys]
         self.keys.sort(key=lambda k: k[0])
+        self.period = period   # a loop: times wrap (so lagging bones close the loop too)
 
     def seg(self, t):
+        if self.period:
+            t = t % self.period
         ks = self.keys
         if t <= ks[0][0]:
             return ks[0], ks[0], 0.0
@@ -266,6 +269,25 @@ def chest_space(p, w):
 def chest_dir(p, d):
     head, D = chest_frame(p)
     return D.inverted() @ Vector(d)
+
+
+def chest_to_world(p, w):
+    """A point in the chest's rest frame, where it is in the hall in pose p."""
+    head, D = chest_frame(p)
+    return head + D @ (Vector(w) - FRAME.chest)
+
+
+def world_key(p, key):
+    """An ArmKey written in the hall (figure axes) for a body posed as p,
+    turned into the chest frame the arm solver works in."""
+    return ArmKey(chest_space(p, key.w), chest_dir(p, key.pole), chest_dir(p, key.along), chest_dir(p, key.palm),
+                  key.curl, key.sh, key.arc)
+
+
+def key_to_world(p, key):
+    """The other way: an ArmKey in the chest frame, as it lies in the hall in pose p."""
+    head, D = chest_frame(p)
+    return ArmKey(chest_to_world(p, key.w), D @ key.pole, D @ key.along, D @ key.palm, key.curl, key.sh, key.arc)
 
 
 def place_hand(contact, along, palm, reach=0.45, off=0.016):

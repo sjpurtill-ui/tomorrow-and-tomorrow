@@ -164,7 +164,14 @@ def main():
     keep = []
     for ob in objs:
         if ob.type == 'MESH':
-            if ob.hide_render:
+            base_name = ob.name.split(".")[0]
+            if base_name in ("prop_staff", "prop_bowl"):
+                ob.hide_render = True
+                ob.hide_viewport = False
+                for i, slot in enumerate(ob.material_slots):
+                    slot.material = P.toon("PROP_%d" % i, P.srgb("6b4a2e" if "staff" in base_name else "a0603a"))
+                keep.append(ob)
+            elif ob.hide_render:
                 bpy.data.objects.remove(ob, do_unlink=True)
             else:
                 keep.append(ob)
@@ -188,8 +195,10 @@ def main():
         for i, (r, ms) in enumerate(people):
             show = i < n
             r.location = Vector(((i - (n - 1) / 2.0) * gap, 0.0, 0.0))
+            want_prop = "prop_" + str(clip.meta.get("prop", "-"))
             for m in ms:
-                m.hide_render = not show
+                nm_ = m.name.split(".")[0]
+                m.hide_render = (not show) or (nm_.startswith("prop_") and nm_ != want_prop)
             if not show:
                 continue
             t = times[i]

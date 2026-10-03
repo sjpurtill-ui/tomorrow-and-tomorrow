@@ -45,7 +45,7 @@ VERSION = 1
 
 def args():
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    o = {"variants": list(cf_body.VARIANTS.keys()), "only": None, "out": os.path.join(ROOT, "assets", "court_figures", "anims")}
+    o = {"variants": list(cf_body.VARIANTS.keys()), "only": None, "out": os.path.join(ROOT, "assets", "court_figures", "anims"), "no_manifest": False}
     i = 0
     while i < len(a):
         if a[i] == "--variants":
@@ -54,6 +54,9 @@ def args():
         elif a[i] == "--only":
             o["only"] = a[i + 1].split(",")
             i += 1
+        elif a[i] == "--no-manifest":
+            o["no_manifest"] = True
+            i -= 1
         elif a[i] == "--out":
             o["out"] = os.path.abspath(a[i + 1])
             i += 1
@@ -93,6 +96,11 @@ def stub_mesh(rig):
 
 
 def write_clips(rig, f, clips, only=None):
+    # keys are written a frame each 1/30 s: the exporter turns frames into
+    # seconds by the scene's rate, which must be 30 too (Blender's default is 24,
+    # which would play every clip 1.25 times slower in the game)
+    bpy.context.scene.render.fps = FPS
+    bpy.context.scene.render.fps_base = 1.0
     k = f.H / 1.72
     poser = cf_anim.Poser(rig, k)
     if rig.animation_data is None:
@@ -201,8 +209,9 @@ def main():
         path = os.path.join(o["out"], "court_anims_%s.glb" % v)
         export(rig, stub, path)
         log(v, len(made), "clips", round(os.path.getsize(path) / 1024), "KB", round(time.time() - t0, 1), "s")
-    # face curves and meta do not depend on the body (written on the last one)
-    if clips is not None and not o["only"]:
+    # face curves and meta do not depend on the body (written on the last one;
+    # --no-manifest when building one body at a time)
+    if clips is not None and not o["only"] and not o["no_manifest"]:
         manifest(clips, list(cf_body.VARIANTS.keys()), o["out"])
     log("done")
 
