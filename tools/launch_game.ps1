@@ -50,7 +50,10 @@ if ($previousImport -ne $importCommit) {
     $importArguments = @('--headless', '--editor', '--import', '--path', ('"' + $projectRoot + '"'), '--log-file', ('"' + $importLog + '"'))
     Write-Output 'Importing updated game scripts and artwork before launch...'
     $importProcess = Start-Process -FilePath $godotExecutable.FullName -ArgumentList $importArguments -WorkingDirectory $projectRoot -WindowStyle Hidden -Wait -PassThru
-    if ($importProcess.ExitCode -ne 0 -or (Select-String -LiteralPath $importLog -Pattern '^SCRIPT ERROR:|^ERROR:' -Quiet)) {
+    # Godot reports "UVs are required to generate tangents" for untextured
+    # meshes (the court's modelled sets); the mesh imports fine without them.
+    $importErrors = Select-String -LiteralPath $importLog -Pattern '^SCRIPT ERROR:|^ERROR:' | Where-Object { $_.Line -notmatch '^ERROR: UVs are required to generate tangents\.$' }
+    if ($importProcess.ExitCode -ne 0 -or $importErrors) {
         throw "Game import failed; player launch stopped. Inspect $importLog"
     }
     [IO.File]::WriteAllText($importMarker, $importCommit)
