@@ -61,8 +61,6 @@ const PASSAGE_SAVED:=8
 const IDLE_HANDS:=0.1
 ## A share of the payer's stock it pays at most in one deal.
 const PAY_SHARE:=0.35
-## Odds a loan is repaid, before the people's own record of repaying.
-const REPAY_ODDS:=0.85
 
 ## Requests that are deals: something of ours for something of theirs (or
 ## a plea for help). These get the deal block, proportional refusals and a
@@ -103,7 +101,8 @@ const COURTEOUS:=0.5
 ## Below this weight a turned-down request brings no grudge, and its people
 ## come back cooler rather than with a demand (audience_hall._sequel_plan).
 const SOFT:=0.4
-## A counter turned down: they go home without a deal, a little cooler.
+## A counter turned down: they go home without a deal, their regard this
+## much lower (the card says it; nothing else is applied).
 const COUNTER_LOST:=0.01
 
 # --------------------------------------------------------------------------
@@ -138,14 +137,30 @@ static func temper(civ_id:String,needed:float)->float:
 	var proud:=String(ForeignDiplomacy.leader(civ_id).get("temperament",""))=="Proud guardian"
 	return clampf(1.0+0.3*needed-0.4*(float(p.assertiveness)-0.5)+0.2*(float(p.empathy)-0.5)-(0.1 if proud else 0.0),0.7,1.35)
 
-## Odds a loan is repaid: lower for a people that has failed to repay before.
-static func repay_odds(civ_id:String)->float:
-	var odds:=REPAY_ODDS
+## How much of a loan their stores could repay, by the repayment rule itself
+## (envoy_requests.daily): when it falls due, traders bring what they owe if
+## they hold at least half of it, up to 6 in 10 of what they hold, and come
+## again for the rest. Read from what they hold now: {share (0..1 of the
+## loan their stores cover today), words (their holding and their record)}.
+static func repayable(civ_id:String,res:String,owed:float)->Dictionary:
+	if owed<=0.0: return {"share":1.0,"words":"nothing owed"}
+	var held:=DV.held(civ_id,res)
+	var share:=0.0
+	var words:=""
+	if held>=owed/0.6: share=1.0; words="they hold %d %s now, enough to repay it in full if they still do when it falls due" % [roundi(held),res]
+	elif held>=owed*0.5: share=clampf(held*0.6/owed,0.0,1.0); words="they hold %d %s now, enough for about %d of it at first" % [roundi(held),res,roundi(held*0.6)]
+	else: words="they hold only %d %s now, too little to repay unless they gather more" % [roundi(held),res]
+	var failed:=0
+	var repaid:=0
 	var answers:Variant=(Hall.state().get("envoy_requests",{}) as Dictionary).get("answers",{}) if Hall.state().get("envoy_requests") is Dictionary else {}
 	if answers is Dictionary:
 		for entry in (answers as Dictionary).get(civ_id,[]):
-			if entry is Dictionary and String(((entry as Dictionary).get("x",{}) as Dictionary).get("repaid",""))=="none": odds-=0.25
-	return clampf(odds,0.3,0.95)
+			var how:=String(((entry as Dictionary).get("x",{}) as Dictionary).get("repaid","")) if entry is Dictionary else ""
+			if how=="none": failed+=1
+			elif how=="full": repaid+=1
+	if failed>0: words+="; they failed to repay us %s before" % ("once" if failed==1 else "%d times" % failed)
+	elif repaid>0: words+="; they have repaid us before"
+	return {"share":share,"words":words}
 
 # --------------------------------------------------------------------------
 # What they offer
@@ -208,8 +223,8 @@ static func weigh(type:String,p:Dictionary,civ_id:String)->Dictionary:
 	match type:
 		"food_loan":
 			_goods_out(w,"Food",float(p.get("amount",0)),civ_id)
-			var odds:=repay_odds(civ_id)
-			_goods_in(w,String(p.get("repay_res","Food")),float(p.get("repay_amt",0)),civ_id,odds,"back within the year (about %d in 10 that it is repaid)" % roundi(odds*10.0))
+			var back:=repayable(civ_id,String(p.get("repay_res","Food")),float(p.get("repay_amt",0)))
+			_goods_in(w,String(p.get("repay_res","Food")),float(p.get("repay_amt",0)),civ_id,float(back.share),"back within the year (%s)" % String(back.words))
 		"work_for_food":
 			_goods_out(w,"Food",float(p.get("food",0)),civ_id)
 			_goods_in(w,String(p.get("res","Timber")),float(p.get("amount",0)),civ_id,1.0,"gathered by their workers")
@@ -382,7 +397,7 @@ static func refusal_words(r:Dictionary)->String:
 	var t:=roundi(-float(r.get("t",0.0))*100.0)
 	if t>0: parts.append("their ruler trusts you %d point%s less" % [t,"" if t==1 else "s"])
 	var x:=roundi(float(r.get("x",0.0))*100.0)
-	if x>0: parts.append("the border %d point%s tenser" % [x,"" if x==1 else "s"])
+	if x>0: parts.append("the border grows %d point%s tenser" % [x,"" if x==1 else "s"])
 	parts.append("they keep a grudge" if float(r.get("g",0.0))>0.0 else "no grudge")
 	if float(r.get("d",0.0))>0.0: parts.append("and they fear you a little more")
 	return ", ".join(parts)
@@ -406,6 +421,21 @@ static func refusal_reason(audience:Dictionary)->String:
 
 ## Goods their workers can gather from our land (work_for_food).
 const GATHERED:=["Timber","Stone","Clay","Fiber Plants"]
+## What one of their workers gathers from our land in a day, in rations'
+## worth (envoy_requests work_for_food: 0.12 a worker-day), and the most a
+## good season gives over that (the request's own dice reach 1.2).
+const GATHER_RATE:=0.12
+const GATHER_MOST:=1.2
+
+## The most their workers can gather of `res` in the days they stay (half
+## again as long for "a third month"): workers x days x GATHER_RATE x
+## GATHER_MOST, in units of the good. A counter past it is no counter: they
+## cannot bring in what their hands cannot gather.
+static func gather_cap(p:Dictionary,res:String,more:bool)->float:
+	var days:=float(p.get("days",60))*(MORE if more else 1.0)
+	var worth:=float(p.get("workers",0))*days*GATHER_RATE*GATHER_MOST*DV.price("player","Food")
+	var first:=float(p.get("amount",0.0))*DV.price("player",String(p.get("res",res)))*(MORE if more else 1.0)
+	return maxf(worth,first)/maxf(0.01,DV.price("player",res))
 ## A counter may take at most this share of their stock of a good.
 const COUNTER_SHARE:=0.5
 
@@ -436,6 +466,7 @@ static func terms(type:String,p:Dictionary,civ_id:String,d:Dictionary,option_id:
 		var labour:=first_amt*DV.price("player",first)
 		if q<=0.0: q=labour*(MORE if option_id=="counter_more" else 1.0)/DV.price("player",res)
 		q=Hall._nice(q)
+		if q>Hall._nice(gather_cap(p,res,option_id=="counter_more"))+0.5: return {}
 		var extra:=q*DV.price("player",res)/maxf(0.01,labour)-1.0
 		over=maxf(0.0,extra)+(0.15 if option_id=="counter_more" else 0.0)
 	else:

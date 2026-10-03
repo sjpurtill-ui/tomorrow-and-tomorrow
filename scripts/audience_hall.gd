@@ -1319,6 +1319,9 @@ static func _add_sequel(audience:Dictionary,option_id:String,day:int)->void:
 	# A refusal light enough (a deal poor for us, envoy_deals.gd) brings them
 	# back cooler, as a courteous decline does, never with a demand.
 	if option_id=="refuse" and bool(_requests().call("soft_refusal",audience)): option_id="decline"
+	# A counter is what it came to: agreed, the request taken; refused, a
+	# courteous no (envoy_requests.effective_option).
+	option_id=String(_requests().call("effective_option",audience,option_id))
 	var refused:=option_id in ["refuse","rebuff","rebuke","abstain","dismiss","ignored","expired","defy","stand","decline","counter"]
 	var threat_paid:=String(audience.get("kind",""))=="threat" and option_id=="pay"
 	var aid_given:=(_situation_type(audience)=="aid_request" and option_id in ["grant","grant_half"]) or bool(_requests().call("brings_sequel",_situation_type(audience),option_id))

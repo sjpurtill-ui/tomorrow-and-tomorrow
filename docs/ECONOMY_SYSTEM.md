@@ -228,9 +228,18 @@ that has zero impact on me at all."
   is worth a quarter more to us), or half again as much. Each states its
   odds (0.45 + regard x 0.3 + trust x 0.15 - (assertiveness - 0.5) x 0.5 +
   need x 0.25 - reach past the first terms x 0.4, within 1 to 9 in 10) and
-  what a refusal does (no deal, regard 1 point lower). A seeded roll decides.
-  Typed counters ("ask for 30 flint instead") and the live reading's go
-  through the same rule (`envoy_deals.terms`).
+  what a refusal does (no deal, regard 1 point lower, and nothing else). A
+  seeded roll decides. Typed counters ("ask for 30 flint instead") and the
+  live reading's go through the same rule (`envoy_deals.terms`), apply only
+  to the counter they name, and are cleared if they cannot be met. Workers'
+  gathering is capped at what they can gather (workers x days x 0.12
+  rations' worth x 1.2). An agreed counter on a plea is help given (the
+  grateful return); a refused one a courteous no. Only answers that roll
+  state odds.
+- **A loan's repayment** is read from the repayment rule itself (traders
+  bring what is owed if they hold half of it, up to 6 in 10 of what they
+  hold): the card says what they hold now and their record, not a chance.
+- Hands lent abroad do not rise to defend (`civilization_combat._away`).
 - **Variety**: a deal poor for us is brought less often (its appeal, 0.3 to
   1, weighs the hall's choice); gifts are chosen by their worth to us.
 

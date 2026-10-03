@@ -388,3 +388,138 @@ func test_save_compatibility()->void:
 	var older:=Hall.state().duplicate(true)
 	(older.envoy_requests as Dictionary).erase("lent")
 	assert_bool(Hall.validate_state(older)).is_true()
+
+# --- review of PR #134 -----------------------------------------------------------------------
+
+func _raise_until(type:String,agree:bool,option_id:String,i:int=0)->Dictionary:
+	## An envoy of this kind whose seeded roll on the counter comes out as asked.
+	for n in 40:
+		var a:=_raise(type,i)
+		if a.is_empty(): return {}
+		var c:={}
+		for x in _req(a).get("counters",[]):
+			if String(x.id)==option_id: c=x
+		if c.is_empty(): return {}
+		if Deals.agrees(a,option_id,Deals.odds(a,float(c.over)))==agree: return a
+		Hall.resolve(String(a.id),"decline")
+	return {}
+
+func test_review_1_a_typed_work_counter_cannot_gather_more_than_the_workers_can()->void:
+	var a:=_raise("work_for_food",0,10.0)
+	assert_dict(a).is_not_empty()
+	var p:=_req(a)
+	# Another good from our land than the one they offered to gather.
+	var other:="Timber" if String(p.res)!="Timber" else "Stone"
+	var cap:=Deals.gather_cap(p,other,false)
+	# "Gather 50000" is no counter: the workers cannot gather it, in another
+	# good or as more of the same.
+	assert_dict(Deals.counter_terms(a,"counter_good",other,50000.0)).is_empty()
+	assert_dict(Deals.counter_terms(a,"counter_good",other,Hall._nice(cap)*2.0)).is_empty()
+	assert_dict(Deals.counter_terms(a,"counter_more","",50000.0)).is_empty()
+	# Within what they can gather, it stands.
+	assert_dict(Deals.counter_terms(a,"counter_good",other,floorf(cap*0.5))).is_not_empty()
+	# Through the typed path: refused, and nothing appears, now or when the work is done.
+	var read:=ER.typed_choice(a,"Have them gather 50000 %s instead" % other.to_lower())
+	assert_str(String(read.get("option",""))).is_equal("counter_good")
+	assert_str(String(read.get("ask_res",""))).is_equal(other)
+	ER.apply_typed(Hall.find(String(a.id)),read)
+	var held:=Hall.player_stock(other)
+	var result:=Hall.resolve(String(a.id),"counter_good")
+	assert_bool(bool(result.ok)).is_false()
+	var day:=int(GameState.elapsed_days)+int(p.days)*2
+	GameState.elapsed_days=day+(10-day%10)%10
+	ER.daily(int(GameState.elapsed_days))
+	assert_float(Hall.player_stock(other)).is_less_equal(held+0.01)
+
+func test_review_2_a_rejected_typed_counter_leaves_the_cards_counters_alone()->void:
+	var a:=_raise("healer_plea")
+	var card:Dictionary=(_req(a).counters as Array).filter(func(x:Dictionary)->bool:return String(x.id)=="counter_more")[0]
+	# The god named a counter they cannot meet: 9000 of their payment.
+	ER.apply_typed(Hall.find(String(a.id)),{"option":"counter_more","ask_amt":9000.0})
+	assert_bool(bool(Hall.resolve(String(a.id),"counter_more").ok)).is_false()
+	# The words are cleared with the error: the card's own counter is the card's.
+	assert_bool(Hall._situation(Hall.find(String(a.id))).has("typed")).is_false()
+	assert_dict(ER._counter(Hall.find(String(a.id)),_req(a),"counter_more",{})).is_equal(card)
+	# Words naming one counter never bend another.
+	var named:={"counter":"counter_good","ask_res":"Salt","ask_amt":20.0}
+	assert_dict(ER._counter(a,_req(a),"counter_more",named)).is_equal(card)
+	var res:=String(card.res)
+	var mine:=Hall.player_stock(res)
+	var agrees:=Deals.agrees(a,"counter_more",Deals.odds(a,float(card.over)))
+	assert_bool(bool(Hall.resolve(String(a.id),"counter_more").ok)).is_true()
+	if agrees: assert_float(Hall.player_stock(res)-mine).is_equal_approx(float(card.amt),0.6)
+
+func test_review_3_only_answers_that_roll_state_odds()->void:
+	var barter:=_raise("barter",0,10.0)
+	if not barter.is_empty(): assert_str(String(_option(barter,"bargain").sub)).contains("in 10 that they agree")
+	_back("fugitive_return"); _civ().player_relation.recruitment_visits=1
+	var fugitive:=Hall.debug_situation("fugitive_return",ids[0],{})
+	assert_dict(fugitive).is_not_empty()
+	assert_str(String(_option(fugitive,"bargain").sub)).not_contains("in 10")
+	var rites:=_raise("rite_keeper")
+	assert_str(String(_option(rites,"bargain").sub)).not_contains("in 10")
+	assert_str(String(_option(rites,"counter_more").sub)).contains("in 10 that they agree")
+	# Demanding our captured scouts back rolls, so it says its odds.
+	CivilizationSystem.captured_player_scouts[ids[0]]={"count":3,"captured_day":380}
+	var held:=Hall.debug_situation("captive_scouts",ids[0],{})
+	assert_str(String(_option(held,"refuse").sub)).contains("in 10 that they agree")
+
+func test_review_4_a_refused_counter_costs_exactly_what_the_card_says()->void:
+	var a:=_raise_until("healer_plea",false,"counter_more")
+	assert_dict(a).is_not_empty()
+	assert_str(String(_option(a,"counter_more").sub)).contains("their regard falls about %d point" % roundi(Deals.COUNTER_LOST*100.0))
+	var civ:=_civ()
+	var opinion:=float(civ.player_relation.opinion)
+	var trust:=float(ForeignDiplomacy.leader(ids[0]).trust)
+	var tension:=float(civ.player_relation.border_tension)
+	var result:=Hall.resolve(String(a.id),"counter_more")
+	assert_bool(bool(result.ok)).is_true()
+	assert_str(String(result.outcome)).contains("without a deal")
+	assert_float(opinion-float(civ.player_relation.opinion)).is_equal_approx(Deals.COUNTER_LOST,0.0001)
+	assert_float(float(ForeignDiplomacy.leader(ids[0]).trust)).is_equal_approx(trust,0.0001)
+	assert_float(float(civ.player_relation.border_tension)).is_equal_approx(tension,0.0001)
+
+func test_review_5_a_loans_repayment_is_read_from_their_stores_not_a_made_up_chance()->void:
+	var a:=_raise("food_loan",0,10.0)
+	var p:=_req(a)
+	var d:Dictionary=p.deal
+	assert_str(String(d.get)).not_contains("in 10")
+	assert_str(String(d.get)).contains("they hold %d %s now" % [roundi(DV.held(ids[0],String(p.repay_res))),String(p.repay_res)])
+	# By the repayment rule: enough held, the whole loan is counted; too little, none of it.
+	var full:=Deals.repayable(ids[0],String(p.repay_res),float(p.repay_amt))
+	assert_float(float(full.share)).is_equal(1.0)
+	_stores(ids[0],{String(p.repay_res):float(p.repay_amt)*0.3})
+	var short:=Deals.repayable(ids[0],String(p.repay_res),float(p.repay_amt))
+	assert_float(float(short.share)).is_equal(0.0)
+	assert_str(String(short.words)).contains("too little")
+
+func test_review_6_hands_lent_abroad_do_not_rise_to_defend()->void:
+	var combat:=preload("res://scripts/civilization_combat.gd")
+	var before:=int(combat._away(WorldSimulation.state))
+	var a:=_raise("joint_hunt")
+	assert_bool(bool(Hall.resolve(String(a.id),"accept").ok)).is_true()
+	assert_int(int(combat._away(WorldSimulation.state))-before).is_equal(int(_req(a).hunters))
+
+func test_review_7_an_agreed_counter_on_help_brings_the_grateful_return()->void:
+	var a:=_raise_until("healer_plea",true,"counter_more")
+	assert_dict(a).is_not_empty()
+	assert_bool(bool(Hall.resolve(String(a.id),"counter_more").ok)).is_true()
+	var found:=false
+	for o in Hall.occasions():
+		if String(o.get("type",""))=="sequel" and String(o.get("civ_id",""))==ids[0]:
+			found=true
+			assert_str(String(((o.data as Dictionary).previous as Dictionary).option)).is_equal("accept")
+			assert_dict(ER.extra_mix("sequel",o)).is_equal(ER.SEQUEL_WARM)
+	assert_bool(found).is_true()
+	# A refused counter is a courteous no: they come back cooler, never with a demand.
+	var b:=_raise_until("healer_plea",false,"counter_more",1)
+	assert_dict(b).is_not_empty()
+	Hall.resolve(String(b.id),"counter_more")
+	for o in Hall.occasions():
+		if String(o.get("type",""))=="sequel" and String(o.get("civ_id",""))==ids[1]:
+			assert_str(String(((o.data as Dictionary).previous as Dictionary).option)).is_equal("decline")
+
+func test_review_8_the_border_grows_tenser_in_plain_words()->void:
+	var a:=_raise("forage_leave",0,10.0)
+	assert_str(String(_option(a,"refuse").sub)).contains("the border grows")
+	assert_str(Deals.refusal_words({"o":-0.02,"x":0.06,"g":0.0})).contains("the border grows 6 points tenser")

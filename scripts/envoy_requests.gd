@@ -182,6 +182,13 @@ static func brings_sequel(situation_type:String,option_id:String)->bool:
 	## Help given brings the same people back in gratitude, as food aid does.
 	return is_help(situation_type) and option_id in ["accept","gift","partial"]
 
+static func effective_option(audience:Dictionary,option_id:String)->String:
+	## What a counter came to, for what follows (sequels, the next envoy): an
+	## agreed counter is the request taken ("accept"), a refused one a
+	## courteous no ("decline"). Any other answer is itself.
+	if not option_id.begins_with("counter_"): return option_id
+	return "accept" if String(Hall._situation(audience).get("counter_result",""))=="agreed" else "decline"
+
 static func _rivals()->GDScript:
 	return load(RIVALS_PATH) as GDScript
 
@@ -827,6 +834,10 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 ## How far past the first terms each old "ask for more" answer reaches, for
 ## its odds (envoy_deals.odds): a third more goods, twice the offering, a toll.
 const BARGAIN_OVER:={"barter":0.3,"blessing_rite":0.3,"sacred_site":0.15,"forage_leave":0.2}
+## The answers named "bargain" that roll _bargain_holds (the others, a
+## blood-price or a keeper who teaches fear, always happen and state no odds).
+## Demanding captured scouts back (captive_scouts "refuse", ours) rolls too.
+const BARGAIN_ROLLS:=["barter","forage_leave","blessing_rite","succession_backing","hostage_exchange","sacred_site","captive_scouts"]
 
 static func _deal_options(audience:Dictionary,type:String,p:Dictionary,o:Array[Dictionary])->void:
 	## The fair-deal answers (envoy_deals.gd): what taking it is worth to us,
@@ -835,7 +846,7 @@ static func _deal_options(audience:Dictionary,type:String,p:Dictionary,o:Array[D
 	var d:=Deals.deal_of(audience) if type in Deals.DEALS or type=="blessing_rite" else {}
 	for option in o:
 		var id:=String(option.id)
-		if id=="bargain":
+		if (id=="bargain" and type in BARGAIN_ROLLS) or (id=="refuse" and type=="captive_scouts" and String(p.get("side",""))=="ours"):
 			var chance:=Deals.odds(audience,float(BARGAIN_OVER.get(type,0.0)))
 			option["odds"]=snappedf(chance,0.01)
 			option["sub"]=String(option.sub)+" %s." % Hall._cap_first(Deals.odds_words(chance))
@@ -982,6 +993,8 @@ static func _counter(audience:Dictionary,p:Dictionary,option_id:String,typed:Dic
 	var card:={}
 	for c in p.get("counters",[]):
 		if c is Dictionary and String(c.get("id",""))==option_id: card=c
+	# The god's words are the terms of the counter they named, and of no other.
+	if String(typed.get("counter",""))!=option_id: return card
 	var ask_res:=String(typed.get("ask_res",""))
 	var ask_amt:=float(typed.get("ask_amt",0.0))
 	if ask_res=="" and ask_amt<=0.0: return card
@@ -998,6 +1011,17 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 	var type:=Hall._situation_type(audience)
 	if Aftermath.handles(type): return Aftermath.resolve(audience,option_id)
 	if Answer.handles(type): return Answer.resolve(audience,option_id)
+	var result:=_resolve_request(audience,option_id)
+	# An answer that could not be given leaves no typed terms behind to bend
+	# the cards' own answers (a counter the god named that they cannot meet).
+	if result.has("error"):
+		var situation:=Hall._situation(audience)
+		situation.erase("typed")
+		audience["situation"]=situation
+	return result
+
+static func _resolve_request(audience:Dictionary,option_id:String)->Dictionary:
+	var type:=Hall._situation_type(audience)
 	var p:=_req(audience)
 	var civ_id:=String(audience.civ_id)
 	var civ:=ForeignDiplomacy.civilization(civ_id)
@@ -1033,11 +1057,12 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 		if c.is_empty(): return {"error":"They cannot meet that: they hold too little of it, or it is no use to us."}
 		var chance:=Deals.odds(audience,float(c.over))
 		facts.merge({"ask_res":String(c.res),"ask_amt":float(c.amt)},true)
+		var situation:=Hall._situation(audience)
 		if not Deals.agrees(audience,option_id,chance):
-			var needed:=float(Deals.deal_of(audience).get("need",0.0))
-			var cooler:=Deals.COUNTER_LOST+0.01*needed
+			# Exactly what the card said: regard COUNTER_LOST lower, nothing else.
+			var cooler:=Deals.COUNTER_LOST
 			Hall._shift_relation(civ_id,-cooler+mood,0.0)
-			Hall._leader_trust(civ_id,-0.01)
+			situation["counter_result"]="refused"
 			outcome="You asked %s for %d %s. Their envoy would not agree (%s) and went home without a deal; their regard fell about %d point%s." % [name,_n(c.amt),String(c.res),Deals.odds_words(chance),roundi(cooler*100.0),"" if roundi(cooler*100.0)==1 else "s"]
 			memory="The ruler asked more than we would give, and we went home without a deal."
 			ForeignDiplomacy.remember(civ_id,memory)
@@ -1045,6 +1070,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			_note_answer(audience,type,option_id,facts)
 			return {"outcome":_fix(outcome),"reaction":"neutral"}
 		facts["agreed"]=true
+		situation["counter_result"]="agreed"
 		p=p.duplicate(true)
 		var fields:Array=Deals.PAY_FIELDS[type]
 		p[String(fields[0])]=String(c.res)
