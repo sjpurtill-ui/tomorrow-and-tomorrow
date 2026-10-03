@@ -1,18 +1,18 @@
 {
  "spec": "path_balanced:74119:15",
- "commit": "192d87c4842b4f8605c897c06ab43dd86ccec01b",
+ "commit": "9d797e5fb8b97f7cc864dd545e6ba4c9aaa488bd",
  "sources_at_launch": {
-  "scripts/discovery_system.gd": "3b2d1ea7503b",
-  "scripts/society_model.gd": "840968d2dae0",
-  "scripts/game_state.gd": "eb09f6fb8e3b",
-  "scripts/early_life_conditions.gd": "126206d338b3",
+  "scripts/discovery_system.gd": "2402eb5c6e5a",
+  "scripts/society_model.gd": "896cfd2ee372",
+  "scripts/game_state.gd": "a5ad24315aef",
+  "scripts/early_life_conditions.gd": "b4f802895ac3",
   "scripts/food_system.gd": "f9c179ba009c",
-  "scripts/consequence_engine.gd": "1843f8bd699a",
-  "scripts/research_600_catalog.gd": "54b30e997bfd",
+  "scripts/consequence_engine.gd": "9d6098ac7cfe",
+  "scripts/research_600_catalog.gd": "117c1160a47b",
   "scripts/technology_eras.gd": "c0bbf4054a38",
-  "scripts/artifact_collection.gd": "9195657cdf5b",
+  "scripts/artifact_collection.gd": "09967d81337d",
   "data/research/research_600.json": "47ba727954f5",
-  "scripts/food_care.gd": "6b0cc38ffc04",
+  "scripts/food_care.gd": "36539b3afc49",
   "scripts/government_people_system.gd": "f03c8cd3c4de",
   "scripts/work_paths.gd": "fe433552f1b9",
   "scripts/civilian_goods.gd": "cf735b80d85e",
@@ -21,7 +21,7 @@
   "scripts/watch_military.gd": "b9811b70a2cd",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 216.0,
+ "wall_seconds": 131.5,
  "returncode": 0,
- "generated": "2026-10-02 23:38:56"
+ "generated": "2026-10-03 01:28:09"
 }
