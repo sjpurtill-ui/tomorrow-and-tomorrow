@@ -78,6 +78,13 @@ const CUES:={
 	"bird":{"variants":6,"db":-24.0,"kind":"weather"},
 	"crow":{"variants":2,"db":-26.0,"kind":"weather"},
 	"god_wrath_boom":{"variants":2,"db":-6.0,"kind":"god"},
+	"snort_wake":{"variants":2,"db":-9.0,"kind":"body"},
+	"dog_scratch":{"variants":2,"db":-15.0,"kind":"animal"},
+	"dog_yawn":{"variants":2,"db":-13.0,"kind":"animal"},
+	"dog_shake":{"variants":1,"db":-14.0,"kind":"animal"},
+	"dog_thump":{"variants":2,"db":-16.0,"kind":"animal"},
+	"dog_query":{"variants":2,"db":-14.0,"kind":"animal"},
+	"paws":{"variants":3,"db":-24.0,"kind":"animal"},
 	"grunt":{"variants":3,"db":-12.0,"kind":"voice"},
 	"dog_flop":{"variants":2,"db":-15.0,"kind":"animal"},
 	"whoosh":{"variants":3,"db":-16.0,"kind":"thing"},
@@ -96,9 +103,9 @@ const BEDS:={
 	"wind_soft":{"seconds":11.0,"db":-28.0},
 	"wind_hard":{"seconds":11.0,"db":-19.0},
 	"wind_indoor":{"seconds":11.0,"db":-29.0},
-	"murmur_small":{"seconds":9.0,"db":-19.0},
-	"murmur":{"seconds":9.0,"db":-16.0},
-	"murmur_hall":{"seconds":9.0,"db":-14.0},
+	"murmur_small":{"seconds":9.0,"db":-18.0},
+	"murmur":{"seconds":9.0,"db":-15.0},
+	"murmur_hall":{"seconds":9.0,"db":-13.0},
 	"room":{"seconds":6.0,"db":-38.0},
 }
 
@@ -109,6 +116,7 @@ static func variants(name:String)->int:
 	return int((CUES.get(name,{}) as Dictionary).get("variants",1))
 
 static func level(name:String)->float:
+	name=name.get_slice("@",0)
 	if CUES.has(name):return float(CUES[name].db)
 	if BEDS.has(name):return float(BEDS[name].db)
 	return -12.0
@@ -185,6 +193,13 @@ static func make(name:String,variant:=0)->PackedFloat32Array:
 		"crow":b=crow(v,rng)
 		"god_wrath_boom":b=god_boom(v,rng)
 		"grunt":b=grunt(v,rng)
+		"snort_wake":b=snort_wake(v,rng)
+		"dog_scratch":b=dog_scratch(v,rng)
+		"dog_yawn":b=dog_yawn(v,rng)
+		"dog_shake":b=dog_shake(v,rng)
+		"dog_thump":b=dog_thump(v,rng)
+		"dog_query":b=dog_query(v,rng)
+		"paws":b=paws(v,rng)
 		"dog_flop":b=dog_flop(v,rng)
 		"whoosh":b=whoosh(v,rng)
 		"kneel_cloth":b=kneel_cloth(v,rng)
@@ -234,29 +249,61 @@ static func room_gasp(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	Synth.lowpass(b,6000.0)
 	return b
 
-## A laugh held behind the lips: a snort through the nose, then the
-## shoulders shake: "mm-hm-hm", and one more snort.
+## A laugh held behind closed lips: a snort through the nose (the nostrils
+## flutter), then the shoulders shake "hm-hm-hm" at four or five a second,
+## each pulse a burst of breath through the nose with a little voice in it,
+## falling; a last small snort out.
 static func snort_laugh(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	var voice:=_room_voice(v,23)
-	voice["breath"]=0.25
-	var steps:=[[0.02,"u",0.0,0.0,1.0,1.0],[0.07,"u",0.0,1.0,1.0,1.0],[0.04,"u",0.0,0.0,1.0,1.0],
-		[0.09,"u",0.55,0.3,1.35,1.0],[0.05,"u",0.0,0.1,1.3,1.0],[0.08,"u",0.5,0.3,1.25,1.0],[0.05,"u",0.0,0.1,1.2,1.0],
-		[0.07,"u",0.4,0.3,1.15,1.0],[0.08,"u",0.0,0.0,1.1,1.0],[0.06,"u",0.0,0.8,1.0,1.0],[0.05,"u",0.0,0.0,1.0,1.0]]
-	if v==2:steps.insert(3,[0.06,"u",0.0,0.7,1.0,1.0])
-	return Voice.gesture(voice,steps,rng.randi())
+	voice["breath"]=0.2;voice["rd"]=1.6
+	var pulses:=3+v%2
+	var rate:=4.6+0.3*float(v)
+	var b:=Synth.buffer(0.2+float(pulses)/rate+0.35)
+	# the snort: nasal turbulence, the nostrils fluttering at ~30 Hz
+	_nose(b,0.0,0.13,1.0,32.0,rng)
+	var t:=0.16
+	var pitch:=1.25
+	for k in pulses:
+		var hm:=Voice.gesture(voice,[[0.01,"u",0.0,0.0,pitch,1.0],[0.075,"u",0.55-0.08*k,0.25,pitch*0.94,1.0],[0.03,"u",0.0,0.0,pitch*0.9,1.0]],rng.randi())
+		Synth.mix_into(b,hm,Synth.n_of(t),0.75-0.1*k)
+		_nose(b,t,0.11,0.55-0.08*k,0.0,rng)
+		t+=1.0/rate*rng.randf_range(0.93,1.07)
+		pitch*=0.93
+	_nose(b,t+0.04,0.1,0.45,26.0,rng)
+	return b
 
-## "Ha, ha-ha-ha": breath and voice in bursts, falling.
+## Breath through the nose: noise in the nose's band, a quick onset and an
+## easing off; flutter (Hz) shakes it like the nostrils do.
+static func _nose(b:PackedFloat32Array,at:float,d:float,amp:float,flutter:float,rng:RandomNumberGenerator)->void:
+	var s:=Synth.white(d,rng)
+	var low:=s.duplicate()
+	Synth.bandpass(s,2200.0,1.3);Synth.bandpass(low,700.0,2.5)
+	for i in s.size():
+		var tt:=float(i)/RATE
+		var env:=minf(1.0,tt/0.008)*exp(-tt/(d*0.45))
+		var fl:=1.0 if flutter<=0.0 else 0.55+0.45*sin(TAU*flutter*tt)
+		s[i]=(s[i]+low[i]*0.6)*env*fl
+	Synth.mix_into(b,s,Synth.n_of(at),amp)
+
+
+## "Ha-ha-ha-ha": aspirated pulses at about four and a half a second, each an
+## "h" of breath into a voiced "a" whose pitch falls, the whole run falling
+## and fading; then the breath back in.
 static func laugh(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	var voice:=_room_voice(v,31)
-	voice["breath"]=0.3
-	var steps:Array=[[0.01,"a",0.0,0.0,1.0]]
-	var p:=1.4
+	voice["breath"]=0.25;voice["rd"]=1.5
+	var steps:Array=[[0.01,"a",0.0,0.0,1.5]]
+	var p:=1.55
+	var rate:=4.5+0.4*float(v)
 	for i in 5:
-		steps.append([0.035,"a",0.0,0.8,p])
-		steps.append([0.085+rng.randf_range(-0.01,0.02),"a",1.0,0.35,p*0.97])
-		steps.append([0.05,"a",0.0,0.05,p*0.95])
-		p*=0.93
-	steps.append([0.18,"e",0.0,0.5,1.0])
+		var whole:=1.0/rate*rng.randf_range(0.94,1.06)
+		var key:="a" if i%3!=2 else "ae"
+		steps.append([0.04,key,0.0,0.85,p])
+		steps.append([whole*0.5,key,1.0-0.1*i,0.35,p*0.9])
+		steps.append([whole*0.5-0.04,key,0.0,0.12,p*0.88])
+		p*=0.92
+	# the breath back in, a little rough
+	steps.append([0.26,"e",0.08,0.55,1.3])
 	steps.append([0.05,"y",0.0,0.0,1.0])
 	return Voice.gesture(voice,steps,rng.randi())
 
@@ -286,30 +333,47 @@ static func snore(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	Synth.lowpass(b,2400.0)
 	return b
 
-## A stomach in a silent room: a gurgle that wanders in pitch under the belly
-## wall, a long "grrrooOOoowl", and a bubble or two.
+## A stomach in a silent room, built the way borborygmi are: gas and liquid
+## pushed along the gut make a low pitched growl that wanders (90-300 Hz),
+## shaken by the liquid at 8-20 Hz, and bursts of gurgles (short damped
+## bubbles, 120-550 Hz, gliding) in irregular clusters; it swells and dies.
 static func stomach_growl(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
-	var seconds:=1.5+0.3*v
-	var pitch:=Synth.track(seconds,[[0.0,90.0+rng.randf_range(-10,10)],[seconds*0.3,150.0+rng.randf_range(-20,30)],[seconds*0.55,110.0],[seconds*0.8,170.0+rng.randf_range(0,40)],[seconds,95.0]])
-	var wob:=Synth.wander(seconds,0.045,rng,0.75,1.25)
+	var seconds:=1.5+0.35*v
+	var b:=Synth.buffer(seconds+0.2)
+	# the growl: a wandering low pitch through the belly wall
+	var pitch:=Synth.wander(seconds,0.18,rng,95.0,170.0+40.0*v)
+	var wob:=Synth.wander(seconds,0.05,rng,0.85,1.18)
 	for i in pitch.size():pitch[i]*=wob[i]
-	var b:=Synth.tone(pitch,[1.0,0.7,0.5,0.35,0.22,0.12])
-	# the gurgle: the sound comes and goes in bubbles
-	var bub:=Synth.wander(seconds,0.03,rng,0.0,1.0)
-	for i in b.size():b[i]*=pow(bub[i],1.6)
-	Synth.bandpass(b,260.0,1.4)
-	var air:=Synth.pink(seconds,rng,0.25)
-	Synth.lowpass(air,300.0)
-	for i in b.size():b[i]+=air[i]*bub[i]
-	Synth.shape(b,[[0.0,0.0],[0.15,0.6],[seconds*0.5,1.0],[seconds*0.85,0.7],[seconds,0.0]])
-	# bubbles: little falling blips at the end
-	for k in 2+v:
-		var at:=seconds*rng.randf_range(0.55,0.95)
-		var blip:=Synth.tone(Synth.track(0.07,[[0.0,rng.randf_range(260,380)],[0.07,rng.randf_range(150,200)]]))
-		Synth.shape(blip,[[0.0,0.0],[0.01,1.0],[0.07,0.0]])
-		Synth.mix_into(b,blip,Synth.n_of(at),0.35)
-	Synth.lowpass(b,700.0)
+	var growl:=Synth.tone(pitch,[1.0,0.8,0.55,0.35,0.2])
+	# the liquid shakes it: an irregular tremble at 8-20 Hz
+	var shake:=Synth.wander(seconds,0.028,rng,0.0,1.0)
+	for i in growl.size():growl[i]*=0.08+0.92*shake[i]*shake[i]
+	Synth.bandpass(growl,220.0,1.2)
+	Synth.shape(growl,[[0.0,0.0],[seconds*0.2,0.8],[seconds*0.5,1.0],[seconds*0.75,0.55],[seconds,0.0]])
+	Synth.mix_into(b,growl,0,1.0)
+	# the gurgles: damped bubbles in clusters, denser in the middle
+	var t:=rng.randf_range(0.05,0.2)
+	while t<seconds:
+		var x:=t/seconds
+		var density:=sin(PI*x)
+		var f:=rng.randf_range(120.0,330.0) if rng.randf()<0.7 else rng.randf_range(330.0,550.0)
+		var glide:=rng.randf_range(-0.35,0.45)
+		var d:=rng.randf_range(0.02,0.07)
+		var bub:=Synth.tone(Synth.track(d,[[0.0,f],[d,f*(1.0+glide)]]),[1.0,0.3])
+		Synth.shape(bub,[[0.0,0.0],[0.003,1.0],[d,0.0]])
+		Synth.mix_into(b,bub,Synth.n_of(t),rng.randf_range(0.4,0.9)*(0.4+0.6*density))
+		# clusters: a quick run, then a wait
+		t+=rng.randf_range(0.025,0.07) if rng.randf()<0.65 else rng.randf_range(0.12,0.35)/(0.4+density)
+	# the end: one rising squeak of gas
+	if v!=1:
+		var at:=seconds*0.86
+		var sq:=Synth.tone(Synth.track(0.16,[[0.0,260.0],[0.16,480.0+60.0*v]]),[1.0,0.4])
+		Synth.shape(sq,[[0.0,0.0],[0.02,1.0],[0.12,0.6],[0.16,0.0]])
+		Synth.mix_into(b,sq,Synth.n_of(at),0.35)
+	Synth.lowpass2(b,700.0)
+	Synth.highpass(b,60.0)
 	return b
+
 
 ## A cough; fought: behind closed lips, "hmpf... hmpf", then a careful "hm".
 static func cough(v:int,rng:RandomNumberGenerator,fought:bool)->PackedFloat32Array:
@@ -398,30 +462,47 @@ static func _frames(track:PackedFloat32Array)->PackedFloat32Array:
 # Things
 # =============================================================================
 
-## Wood that sticks and slips: a board under a shifting foot, a log, a post.
-## The slips come slow, quicken and slow again ("eeee-rrrk"), each one ringing
-## the wood's own few partials.
+## Wood that sticks and slips under a weight: each slip a short knock rung
+## through the board's own modes. The slips come at 40-300 a second, so the
+## train itself is the creak's pitch: slow and low as the weight comes on,
+## quicker and higher as it slides, uneven (a slip skipped, a slip doubled).
+## Variants: 0 a floor board, 1 a log or a bench (low groan), 2 a post (higher).
 static func creak(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
-	var seconds:=0.75+0.15*v
-	var b:=Synth.buffer(seconds+0.1)
-	var modes:Array=[[380.0,870.0,1650.0,2900.0],[260.0,610.0,1240.0,2300.0],[520.0,1130.0,2050.0,3400.0]][v]
-	var t:=0.02
-	var imp:=Synth.buffer(seconds+0.1)
+	var seconds:float=[0.8,1.05,0.7][v]
+	var b:=Synth.buffer(seconds+0.15)
+	var slow_hz:float=[45.0,32.0,90.0][v]
+	var fast_hz:float=[150.0,95.0,260.0][v]
+	var modes:Array=[[[150.0,22.0,1.0],[340.0,26.0,0.8],[610.0,30.0,0.55],[980.0,40.0,0.3],[1600.0,60.0,0.12]],
+		[[95.0,16.0,1.0],[230.0,20.0,0.85],[470.0,26.0,0.5],[820.0,34.0,0.25],[1350.0,50.0,0.1]],
+		[[260.0,24.0,1.0],[560.0,28.0,0.7],[1020.0,36.0,0.45],[1650.0,50.0,0.25],[2500.0,70.0,0.1]]][v]
+	# the train of slips
+	var imp:=Synth.buffer(seconds+0.15)
+	var t:=0.01
+	var knock:=Synth.n_of(0.0009)
 	while t<seconds:
 		var x:=t/seconds
-		# the stick-slip rate: slow, fast in the middle, slow again
-		var period:=lerpf(0.012,0.0032,sin(PI*x))*(1.0+rng.randf_range(-0.12,0.12))
-		var amp:=sin(PI*minf(1.0,x*1.15))*rng.randf_range(0.6,1.0)
-		var i:=Synth.n_of(t)
-		if i<imp.size():imp[i]+=amp
-		t+=period
-	for k in modes.size():
+		var hz:=lerpf(slow_hz,fast_hz,sin(PI*minf(1.0,x*1.2)))
+		var period:=1.0/hz*(1.0+rng.randf_range(-0.12,0.12))
+		var amp:=sin(PI*minf(1.0,x*1.1))*rng.randf_range(0.55,1.0)
+		if rng.randf()<0.06:amp*=0.15
+		var i0:=Synth.n_of(t)
+		# a slip is a short raised-cosine knock, not a single sample
+		for k in knock:
+			if i0+k<imp.size():imp[i0+k]+=amp*0.5*(1.0-cos(TAU*float(k)/float(knock)))
+		t+=period*(2.0 if rng.randf()<0.04 else 1.0)
+	for m in modes:
 		var ring:=imp.duplicate()
-		Synth.bandpass(ring,float(modes[k]),[14.0,16.0,18.0,20.0][k])
-		Synth.mix_into(b,ring,0,[1.0,0.65,0.35,0.15][k])
-	Synth.highpass(b,150.0)
-	Synth.lowpass(b,4500.0)
+		Synth.resonate(ring,float(m[0]),float(m[1]))
+		Synth.mix_into(b,ring,0,float(m[2]))
+	# a breath of friction noise riding the slips
+	var fr:=Synth.white(seconds+0.15,rng)
+	Synth.bandpass(fr,1800.0,1.2)
+	for i in fr.size():fr[i]*=absf(imp[i])*4.0
+	Synth.lowpass(fr,3000.0)
+	Synth.mix_into(b,fr,0,0.06)
+	Synth.highpass(b,50.0)
 	return b
+
 
 ## A wooden bowl hits the earth floor, bounces, then rolls on its rim faster
 ## and faster until it settles (variant 1: a clay bowl, brighter).
@@ -796,6 +877,101 @@ static func bump(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	Synth.mix_into(b,rustle(v,rng,0.2),0,0.3)
 	return b
 
+## The dog scratches: a hind paw drumming its flank at ~8 a second, the
+## collar of fur rustling with it.
+static func dog_scratch(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=1.2+0.4*v
+	var b:=Synth.buffer(d+0.1)
+	var t:=0.02
+	var rate:=7.5+1.5*v
+	while t<d:
+		var thump:=Synth.white(0.03,rng)
+		Synth.lowpass2(thump,400.0)
+		Synth.shape(thump,[[0.0,0.0],[0.003,1.0],[0.03,0.0]])
+		Synth.mix_into(b,thump,Synth.n_of(t),rng.randf_range(0.6,1.0))
+		var fur:=Synth.white(0.06,rng)
+		Synth.bandpass(fur,2600.0,0.9)
+		Synth.shape(fur,[[0.0,0.0],[0.01,1.0],[0.06,0.0]])
+		Synth.mix_into(b,fur,Synth.n_of(t+0.005),0.25)
+		t+=1.0/rate*rng.randf_range(0.9,1.1)
+	Synth.shape(b,[[0.0,1.0],[d*0.8,1.0],[d,0.4]])
+	return b
+
+## The dog yawns: a long squeaky whine that opens and falls, jaws clapping shut.
+static func dog_yawn(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.2)
+	var d:=0.75+0.15*v
+	var p:=Synth.track(d,[[0.0,650.0+60.0*v],[d*0.3,1100.0+80.0*v],[d,520.0]])
+	var w:=Synth.tone(p,[1.0,0.5,0.25,0.1])
+	var air:=Synth.white(d,rng,0.4)
+	Synth.bandpass(air,1300.0,1.0)
+	for i in w.size():w[i]=w[i]*0.6+air[i]
+	Synth.bandpass(w,1100.0,0.8)
+	Synth.shape(w,[[0.0,0.0],[0.08,0.6],[d*0.35,1.0],[d*0.85,0.5],[d,0.0]])
+	Synth.mix_into(b,w,Synth.n_of(0.02),1.0)
+	Synth.burst(b,d+0.05,0.01,900.0,1.0,0.6,rng)
+	return b
+
+## The dog shakes itself: a loose flapping of ears and coat, fast, slowing.
+static func dog_shake(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.0)
+	var t:=0.02;var gap:=0.045
+	while t<0.85:
+		var flap:=Synth.white(0.035,rng)
+		Synth.bandpass(flap,rng.randf_range(700.0,1400.0),0.8)
+		Synth.shape(flap,[[0.0,0.0],[0.004,1.0],[0.035,0.0]])
+		Synth.mix_into(b,flap,Synth.n_of(t),rng.randf_range(0.5,1.0)*(1.0-t))
+		t+=gap;gap*=1.04
+	Synth.mix_into(b,rustle(v,rng,0.7),Synth.n_of(0.05),0.4)
+	return b
+
+## A wagging tail thumping the earth floor (the dog lying down).
+static func dog_thump(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.4)
+	var t:=0.02
+	for k in 4+v:
+		var th:=Synth.white(0.05,rng)
+		Synth.lowpass2(th,260.0)
+		Synth.shape(th,[[0.0,0.0],[0.004,1.0],[0.05,0.0]])
+		Synth.mix_into(b,th,Synth.n_of(t),rng.randf_range(0.7,1.0))
+		t+=rng.randf_range(0.2,0.28)
+	return b
+
+## The dog's head-tilt question: a tiny rising whine, "hm?"
+static func dog_query(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=0.28+0.06*v
+	var p:=Synth.track(d,[[0.0,780.0],[d*0.6,1050.0+80.0*v],[d,1250.0]])
+	var w:=Synth.tone(p,[1.0,0.3])
+	var air:=Synth.white(d,rng,0.05)
+	Synth.bandpass(air,1500.0,1.5)
+	for i in w.size():w[i]+=air[i]
+	Synth.shape(w,[[0.0,0.0],[0.04,1.0],[d*0.7,0.8],[d,0.0]])
+	return w
+
+## Paws on earth: soft pads and a click of claws.
+static func paws(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.2)
+	var pad:=Synth.white(0.03,rng)
+	Synth.lowpass2(pad,350.0)
+	Synth.shape(pad,[[0.0,0.0],[0.003,1.0],[0.03,0.0]])
+	Synth.mix_into(b,pad,Synth.n_of(0.01),1.0)
+	Synth.burst(b,0.012+0.004*v,0.002,3200.0,2.0,0.25,rng)
+	return b
+
+## A waking snort: the breath catches in the throat ("hrrnk!"), a flutter of
+## the soft palate, then a bewildered little "hm?".
+static func snort_wake(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var voice:=Voice.plain("old_man" if v==0 else "man",197+v)
+	voice["f0"]=40.0;voice["jitter"]=0.15;voice["shimmer"]=0.35;voice["fry"]=0.3;voice["breath"]=0.6;voice["rd"]=0.6
+	var b:=Synth.buffer(0.9)
+	var snort:=Voice.gesture(voice,[[0.01,"o",0.0,0.0,1.0,0.8],[0.16,"o",0.9,0.8,1.3,0.8],[0.03,"o",0.0,0.0,1.0,0.8]],rng.randi())
+	for i in snort.size():snort[i]*=0.6+0.4*sin(TAU*36.0*float(i)/RATE)
+	Synth.mix_into(b,snort,0,1.0)
+	var hm:=Voice.plain("old_man" if v==0 else "man",199+v)
+	var q:=Voice.gesture(hm,[[0.01,"u",0.0,0.0,1.0,1.0],[0.16,"u",0.6,0.05,1.25,1.0],[0.04,"u",0.0,0.0,1.3,1.0]],rng.randi())
+	Synth.mix_into(b,q,Synth.n_of(0.42),0.5)
+	return b
+
 ## The dog flops down: a soft weight on the earth and a sigh through the nose.
 static func dog_flop(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	var b:=Synth.buffer(0.9)
@@ -1028,20 +1204,61 @@ static func wind_bed(d:float,rng:RandomNumberGenerator,strength:float,indoor:boo
 	if indoor:Synth.lowpass(b,500.0)
 	return b
 
-## The people waiting: low talk of a few, of more, of a hall, unclear and
-## soft, as if from across the room.
-static func murmur_bed(d:float,rng:RandomNumberGenerator,people:int)->PackedFloat32Array:
-	var b:=Synth.buffer(d)
-	for k in people:
-		var reg:String=["man","woman","man","old_woman","woman","old_man","man","woman","youth_m","girl","man"][k%11]
-		var voice:=Voice.plain(reg,301+k*13)
-		var talk:=Voice.babble(voice,d,rng.randi(),k%3==2)
+## The people waiting: low talk of a few, of more, of a hall, in their own
+## tongue (tongue: court_voice.gd phonology(); empty: a plain one), unclear
+## and soft, as if from across the room. people: how many talk.
+static func murmur_bed(d:float,rng:RandomNumberGenerator,people:int,tongue:Dictionary={})->PackedFloat32Array:
+	return murmur_mix(murmur_tracks(tongue,rng.randi(),d+0.6),people,d,rng)
+
+## Six of the people talking in turns, each a seamless loop `seconds` long
+## (less the crossfade): men, women, the old. The murmur of any size is mixed
+## from these (murmur_mix), so a hall full of talk costs six voices.
+const MURMUR_VOICES:=["man","woman","old_man","woman","man","old_woman"]
+static func murmur_tracks(tongue:Dictionary,seed_value:int,seconds:float)->Array[PackedFloat32Array]:
+	var out:Array[PackedFloat32Array]=[]
+	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
+	for k in MURMUR_VOICES.size():
+		var voice:=Voice.plain(String(MURMUR_VOICES[k]),301+k*13+seed_value%97)
+		if not tongue.is_empty():voice["tongue"]=tongue
+		var talk:=Voice.babble(voice,seconds,rng.randi(),false,{"joy":0.15} if k%2==0 else {})
 		# each one talks for a while and then listens
-		var turns:=Synth.wander(d,rng.randf_range(1.2,2.6),rng,0.0,1.0)
-		for i in mini(talk.size(),turns.size()):talk[i]*=smoothstep(0.35,0.7,turns[i])
-		Synth.mix_into(b,talk,0,rng.randf_range(0.5,1.0))
-	Synth.lowpass(b,2000.0)
-	var air:=Synth.pink(d,rng,0.04)
-	Synth.lowpass(air,800.0)
-	for i in b.size():b[i]+=air[i]
-	return b
+		var turns:=Synth.wander(seconds,rng.randf_range(1.0,2.2),rng,0.0,1.0)
+		for i in mini(talk.size(),turns.size()):talk[i]*=0.08+0.92*smoothstep(0.3,0.65,turns[i])
+		# now and then someone laughs a little, or agrees
+		if k==1 or k==4:
+			var aside:=Voice.gesture(voice,[[0.01,"a",0.0,0.0,1.3],[0.05,"a",0.0,0.7,1.3],[0.1,"a",0.7,0.3,1.2],[0.06,"a",0.0,0.2,1.15],[0.1,"a",0.6,0.3,1.08],[0.05,"y",0.0,0.0,1.0]],rng.randi())
+			Synth.mix_into(talk,aside,Synth.n_of(rng.randf_range(1.0,seconds-1.5)),0.7)
+		var top:=Synth.peak_of(talk)
+		if top>0.0:Synth.scale(talk,0.5/top)
+		out.append(Synth.seamless(talk,0.6))
+	return out
+
+## A murmur of `people` voices from the six (the seventh and on are the six
+## again, a little higher or lower and elsewhere in their talk), placed near
+## and far, softened by the room. A seamless loop `seconds` long.
+static func murmur_mix(tracks:Array[PackedFloat32Array],people:int,seconds:float,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var n:=Synth.n_of(seconds+0.6)
+	var b:=PackedFloat32Array();b.resize(n)
+	if tracks.is_empty():return Synth.seamless(b,0.6)
+	for k in people:
+		var src:PackedFloat32Array=tracks[k%tracks.size()]
+		var m:=src.size()
+		var ratio:=1.0 if k<tracks.size() else rng.randf_range(0.9,1.1)
+		var pos:=rng.randf_range(0.0,float(m))
+		var gain:=rng.randf_range(0.45,1.0)*(1.0 if k<tracks.size() else 0.75)
+		for i in n:
+			var j:=int(pos);var f:=pos-j
+			b[i]+=lerpf(src[j%m],src[(j+1)%m],f)*gain
+			pos+=ratio
+			if pos>=m:pos-=m
+	# across the room: the top of the voices softened, the boom of the lows
+	# gone (it is talk, not rumble), two near walls answering
+	Synth.lowpass(b,2400.0)
+	Synth.highpass(b,180.0)
+	var room:=b.duplicate()
+	Synth.mix_into(b,room,Synth.n_of(0.023),0.22)
+	Synth.mix_into(b,room,Synth.n_of(0.041),0.15)
+	var air:=Synth.pink(seconds+0.6,rng,0.03*sqrt(float(people)))
+	Synth.lowpass(air,700.0)
+	for i in mini(b.size(),air.size()):b[i]+=air[i]
+	return Synth.seamless(b,0.6)

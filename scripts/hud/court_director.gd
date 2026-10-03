@@ -928,6 +928,11 @@ static func _direct(ctx:Dictionary)->Array:
 static func _god_speaks(ctx:Dictionary,out:Array)->void:
 	var event:Dictionary=ctx.event
 	var rng:RandomNumberGenerator=ctx.rng
+	# The stage says how the words land (court_stage.gd _tone_of): wrath or
+	# favour; either spelling of favour.
+	var tone:=String(event.get("tone",""))
+	var wrath:=tone=="wrath"
+	var favour:=tone in ["favor","favour"]
 	_beat(out,0.0,"room","hush",{"dur":1.6,"bubbles":"dim"},"anticipation")
 	var main:=_m(ctx,String(ctx.main))
 	var order:Array=_people(ctx)
@@ -949,7 +954,7 @@ static func _god_speaks(ctx:Dictionary,out:Array)->void:
 	# Under the voice, one or two do their own small thing.
 	var rng0:RandomNumberGenerator=ctx.rng
 	for m:Dictionary in _shuffled(rng0,_people(ctx,[String(ctx.main),sleeper,dozing])).slice(0,rng0.randi_range(1,2)):
-		var small:String=["straighten","lips_pressed","shift_weight","glance_up" if float(m.dread)>=0.4 else "smile_warm"][rng0.randi_range(0,3)]
+		var small:String=["straighten","lips_pressed","shift_weight","glance_up" if float(m.dread)>=0.4 or wrath else "smile_warm"][rng0.randi_range(0,3)]
 		_beat(out,0.9+rng0.randf()*0.6,String(m.key),small,{},"reaction")
 	# The voice usually wakes the sleeper, a beat behind everyone; now and
 	# then they sleep straight through it.
@@ -959,7 +964,13 @@ static func _god_speaks(ctx:Dictionary,out:Array)->void:
 		var shaky:Array=_jumpiest(_people(ctx,[String(ctx.main)]))
 		if not shaky.is_empty():_beat(out,0.6,String((shaky[0] as Dictionary).key),"glance_up",{"because":"people_dread"},"reaction")
 	_play_bits(ctx,out,0.4)
-	if String(event.get("tone",""))=="favor" and people_love(ctx.facts)>=LOVE_HIGH:
+	# Angry words: the one they fall on goes still, and the jumpiest in the
+	# room flinches at the first of them.
+	if wrath:
+		if not main.is_empty():_beat(out,0.25,String(ctx.main),"freeze",{},"reaction")
+		var jumpy:Array=_jumpiest(_people(ctx,[String(ctx.main),sleeper]))
+		if not jumpy.is_empty():_beat(out,0.35,String((jumpy[0] as Dictionary).key),"flinch",{"dur":0.5},"reaction")
+	if favour and people_love(ctx.facts)>=LOVE_HIGH:
 		var warm:Array=_people(ctx,[String(ctx.main)])
 		if not warm.is_empty():_beat(out,1.0,String(_pick(ctx,warm).key),"lean_in",{"because":"people_love"},"reaction")
 
@@ -1033,9 +1044,10 @@ static func _wrath(ctx:Dictionary,out:Array,action:String,target:String,response
 	var rng:RandomNumberGenerator=ctx.rng
 	var t_m:=_m(ctx,target)
 	var big:=action=="terrify"
-	# Anticipation: the room stills, the camera goes in on them.
+	# Anticipation: the room stills, the camera goes in on them (close, head
+	# and shoulders, when it is the god's terror).
 	_beat(out,0.0,"room","hush",{"dur":3.6 if big else 2.4},"anticipation")
-	if not t_m.is_empty():_shot(out,0.0,"push_in",{"target":target})
+	if not t_m.is_empty():_shot(out,0.0,"push_in",{"target":target,"close":true} if big else {"target":target})
 	var sleeper:=_asleep(ctx)
 	for m:Dictionary in _people(ctx,[target,sleeper]):
 		if rng.randf()<(0.75 if big else 0.4):_beat(out,0.08+rng.randf()*0.2,String(m.key),"freeze",{},"anticipation")
@@ -1224,7 +1236,7 @@ static func _command(ctx:Dictionary,out:Array)->void:
 	if not a_m.is_empty():
 		match ob:
 			"refuse":
-				_shot(out,0.0,"push_in",{"target":actor})
+				_shot(out,0.0,"push_in",{"target":actor,"close":true})
 				_beat(out,0.5,actor,"shake_head",{},"action")
 				_beat(out,1.0,actor,"stand_firm",{},"action")
 				_gasp(ctx,out,1.1,[actor],_rested(ctx,"gasp_pretend"))
@@ -1624,7 +1636,7 @@ static func _terrify_envoy(ctx:Dictionary,out:Array)->void:
 	var response:=String(ctx.event.get("response",""))
 	var temper:=String(_m(ctx,envoy).get("temper",""))
 	_beat(out,0.0,"room","hush",{"dur":3.4},"anticipation")
-	_shot(out,0.0,"push_in",{"target":envoy})
+	_shot(out,0.0,"push_in",{"target":envoy,"close":true})
 	_shot(out,0.55,"shake",{"strength":0.3})
 	if response in ["defy","defiant"]:
 		_beat(out,0.55,envoy,"stand_firm",{},"action")
@@ -1757,7 +1769,7 @@ static func _favourable(ctx:Dictionary)->bool:
 		"divine":return String(event.get("action","")) in ["bless","boon","raise_up"]
 		"decree":return bool(event.get("accepted",String(event.get("reaction","")) in ["delighted","pleased"]))
 		"command":return String(event.get("obedience",""))=="obey" and not String(event.get("verb","")) in ["kill","maim","detain","exile"]
-		"god_speaks":return String(event.get("tone",""))=="favor"
+		"god_speaks":return String(event.get("tone","")) in ["favor","favour"]
 		"summon":return true
 	return false
 

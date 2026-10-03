@@ -36,6 +36,8 @@ const Acting:=preload("res://scripts/hud/court_acting.gd")
 const DivineRegard:=preload("res://scripts/divine_regard.gd")
 const Voice:=preload("res://scripts/character_voice.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
+const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
+const Paths:=preload("res://scripts/hud/court_paths.gd")
 
 const MAIN:="main"
 const BUBBLE_PAPER:=Color("fbf4e4")
@@ -278,7 +280,12 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictio
 	if years>=46:face["aged"]=clampf(float(years-46)/24.0,0.0,1.0)
 	var look:={"variant":"%s_%s" % [sex,band],"outfit":outfit,"hair":String(styles[(h>>7)%styles.size()]),"beard":beard,
 		"skin":skin,"hair_colour":hair_colour,"cloth":cloth,"leather":Color("5b3b24").lerp(cloth[1],0.15),"without":without,
-		"stance":String(stances[(h>>19)%stances.size()]),"face":face,"mood":"neutral"}
+		"stance":String(stances[(h>>19)%stances.size()]),"face":face,"mood":"neutral","seed":h}
+	# Their years when the game knows them (a child gets a child's body, J's
+	# FigureLook; without them the figure reads its age from the face).
+	var known:Variant=person.get("age",null)
+	if known is int or known is float:look["years"]=int(known)
+	elif String(known if known!=null else "").to_lower()=="child":look["years"]=9
 	# Two people on one screen are never dressed and coloured alike.
 	if screen_registry!=null:
 		var taken:Dictionary=screen_registry.get("_look_of",{})
@@ -452,12 +459,16 @@ func frame_cast(time:=0.0)->void:
 	if rig==null:return
 	rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
 	var subjects:=[]
+	var lead:Variant=null
 	for key in cast_order:
 		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.role=="crowd":continue
 		subjects.append(f.spot)
+		if f.role==MAIN:lead=f.spot
 	if subjects.is_empty():subjects.append(set_point("petitioner"))
-	rig.call("wide",subjects,time)
+	# The one before the god leads the frame (the rest are kept around them).
+	if lead!=null:rig.call("wide",subjects,time,lead)
+	else:rig.call("wide",subjects,time)
 
 ## Where a newcomer stands in the set: the one before the god on the
 ## petitioner's mark (an envoy on the envoy's), their company on the marks
@@ -578,13 +589,19 @@ func add_figure(key:String,person:Dictionary,role:String,name_text:String="",tit
 	# An envoy's gift of food is carried in by the first of their company.
 	if f.role=="attendant" and f.body3d!=null and not _bearer_chosen and String((facts.get("gift",{}) as Dictionary).get("resource","")).to_lower()=="food":
 		_bearer_chosen=true
-		f.body3d.carry("bundle",true)
+		# (once the body stands in the hall: the bundle rides between its hands)
+		var bearer:=f.body3d
+		if bearer.is_inside_tree():bearer.carry("bundle",true)
+		else:bearer.ready.connect(func()->void:if is_instance_valid(bearer):bearer.carry("bundle",true),CONNECT_ONE_SHOT)
 	figures[key]=f;cast_order.append(key)
 	if enter:_arrivals.append(key)
 	if _laid_out:
 		layout(true)
 		_run_arrivals()
 	return f
+
+## The stances already standing in this room (FigureLook.room_stance).
+var _room_stances:Dictionary={}
 
 ## Each person keeps their own stance for life; the room is spread so it never
 ## looks like a line of hostages: at most one pair of clasped hands in the
@@ -632,6 +649,12 @@ func _embody(f:Figure)->void:
 		# Onlookers on a log sit on it; nobody sits on a standing mark's air.
 		if m!=null and bool(m.get_meta("sit",false)) and f.role=="crowd":look.stance="sit"
 		if m!=null and bool(m.get_meta("sit",false)) and String(look.get("stance",""))=="sit":seat=float(m.get_meta("seat",0.47))
+	# The one before the god stands as they feel (kept); everyone else is
+	# spread within their people (J) and, for the room, at most one keeps
+	# their hands clasped before them.
+	if f.role==MAIN:look["keep_stance"]=true
+	look=FigureLook.vary(look)
+	if seat<0.0 or String(look.get("stance",""))!="sit":look["stance"]=FigureLook.room_stance(look,_room_stances)
 	if not body.setup(look):
 		body.free();return
 	if court_set!=null:
@@ -641,7 +664,9 @@ func _embody(f:Figure)->void:
 		if not mark.is_empty():
 			var m:Marker3D=court_set.call("mark",mark)
 			var holder:=m.get_parent() as Node3D
-			spot.transform=(holder.transform if holder!=null else Transform3D.IDENTITY)*m.transform
+			# A mark's -Z is the way a person there faces; a figure's front is +Z
+			# (M's place() turns them the same way).
+			spot.transform=(holder.transform if holder!=null else Transform3D.IDENTITY)*m.transform*Transform3D(Basis(Vector3.UP,PI),Vector3.ZERO)
 		else:
 			# every mark is taken: at the back, along the far side
 			var extra:=_marks.size()+cast_order.size()
@@ -654,7 +679,9 @@ func _embody(f:Figure)->void:
 			f.lift=seat-0.47
 		body.add_child(CourtSet.contact_shadow(0.85,0.6,0.5))
 		f.spot=spot;f.mark_name=mark
+		if seat<0.0:_space_spot(f)
 		f.attach_body(body,null,self)
+		_acting_stance(f,seat)
 		return
 	view3d.add_child(body)
 	var shade:=MeshInstance3D.new();shade.name="Shade_"+node_key(f.key)
@@ -662,6 +689,100 @@ func _embody(f:Figure)->void:
 	shade.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	view3d.add_child(shade)
 	f.attach_body(body,shade,self)
+
+## Nobody stands on another, in a thing, or hidden behind another as the
+## hall is watched: a newcomer whose mark lies in line with someone already
+## standing (as the camera looks), too close to them, or on a log, a rack or a
+## post steps a little aside, onto open floor (never onto the fire). The one
+## before the god and the seated keep their places.
+const APART:=0.62
+const IN_LINE:=0.5
+func _space_spot(f:Figure)->void:
+	if court_set==null or f.spot==null or f.role==MAIN:return
+	var yaw:=22.0
+	if court_set.get("rig")!=null and (court_set.get("rig") as Object).get("base_yaw")!=null:yaw=float((court_set.get("rig") as Object).get("base_yaw"))
+	var right:=Vector2(cos(deg_to_rad(yaw)),-sin(deg_to_rad(yaw)))
+	var toward:=Vector2(sin(deg_to_rad(yaw)),cos(deg_to_rad(yaw)))
+	var room:Variant=Paths.room_of(court_set)
+	var fire:Variant=Paths._mark_xz(court_set,"fire")
+	var home:=Vector2(f.spot.position.x,f.spot.position.z)
+	var others:Array[Vector2]=[]
+	for key in cast_order:
+		var o:=figure(key)
+		if o==null or o==f or o.spot==null or o.leaving:continue
+		others.append(Vector2(o.spot.position.x,o.spot.position.z))
+	var crowded:=func(at:Vector2)->float:
+		# how far into someone's room, in line with them, or in a thing a place is
+		var worst:=0.0
+		if room!=null and Paths.solid_at(room,at):worst=1.0
+		for them in others:
+			var d:=at-them
+			worst=maxf(worst,APART-d.length())
+			if absf(d.dot(toward))<3.5:worst=maxf(worst,IN_LINE-absf(d.dot(right)))
+		return worst
+	if float(crowded.call(home))<=0.0:return
+	var best:=home;var best_cost:=float(crowded.call(home))+0.001
+	for step:float in [0.15,0.3,0.45,0.6,0.75]:
+		for way:Vector2 in [right,-right,toward,-toward]:
+			var at:Vector2=home+way*step
+			if room!=null and Paths.solid_at(room,at):continue
+			if fire!=null and at.distance_to(fire as Vector2)<1.5:continue
+			var cost:float=maxf(float(crowded.call(at)),0.0)+step*0.05
+			if cost<best_cost:best=at;best_cost=cost
+		if best_cost<=0.05:break
+	f.spot.position=Vector3(best.x,f.spot.position.y,best.y)
+
+## A walk in the hall (spot-local points, from their mark to far) that goes
+## round the set's things and everyone standing (court_paths.gd); empty: the
+## old way (round the fire only).
+func plan_walk(f:Figure,far:Vector3)->PackedVector3Array:
+	if court_set==null or f==null or f.spot==null:return PackedVector3Array()
+	var room:Variant=Paths.room_of(court_set)
+	if room==null:return PackedVector3Array()
+	var from3:=f.spot.position
+	var to3:=f.spot.transform*far
+	var people:=[]
+	for key in cast_order:
+		var other:=figure(key)
+		if other==null or other==f or other.leaving or other.spot==null:continue
+		people.append(Vector3(other.spot.position.x,other.spot.position.z,0.3))
+	var way:=Paths.route(room,Vector2(from3.x,from3.z),Vector2(to3.x,to3.z),people)
+	if way.size()<2:return PackedVector3Array()
+	var back:=f.spot.transform.affine_inverse()
+	var out:=PackedVector3Array()
+	for point in way:
+		var local:=back*Vector3(point.x,from3.y,point.y)
+		local.y=0.0
+		out.append(local)
+	out[0]=Vector3.ZERO;out[out.size()-1]=far
+	return out
+
+## The acting's own stances (K) where the hall calls for them: an envoy's
+## guard leans on the staff; in winter one onlooker standing near the fire
+## crouches to warm their hands at it. Seated onlookers keep the figure's
+## own seat (the set's height), and nobody else changes how they stand.
+var _warming:=false
+func _acting_stance(f:Figure,seat:float)->void:
+	if acting==null or f.body3d==null:return
+	var want:=""
+	if f.role=="attendant" and String(f.body3d.stance)=="staff" and Acting.has_clip("stance_guard"):want="guard"
+	elif f.role=="crowd" and not _warming and seat<0.0 and String(facts.get("season",""))=="winter" and Acting.has_clip("stance_fire") and _near_fire(f):want="fire"
+	if want.is_empty():return
+	if want=="fire":_warming=true
+	f.acting_stance=want
+	var body:=f.body3d
+	var go:=func()->void:
+		if is_instance_valid(body) and not f.leaving:Acting.idle(body,want)
+	if body.is_inside_tree():go.call()
+	else:body.ready.connect(go,CONNECT_ONE_SHOT)
+
+## Whether someone's mark is close enough to the fire to warm their hands.
+func _near_fire(f:Figure)->bool:
+	if court_set==null or f.spot==null or not court_set.call("has_mark","fire"):return false
+	var m:Marker3D=court_set.call("mark","fire")
+	var holder:=m.get_parent() as Node3D
+	var at:=((holder.transform if holder!=null and holder!=court_set else Transform3D.IDENTITY)*m.transform).origin
+	return Vector2(at.x-f.spot.position.x,at.z-f.spot.position.z).length()<=2.4
 
 static var _shade_quad:QuadMesh
 static var _shade_mat:ShaderMaterial
@@ -834,6 +955,11 @@ func add_extra(entry:Dictionary)->void:
 	if String(entry.get("role",""))!="crowd":return
 	var person:={"name":String(entry.get("name","someone")),"person_id":0,"sex":String(entry.get("sex","")),"age":int(entry.get("age",30))}
 	var f:=add_figure(key,person,"crowd")
+	# Given a seat (a log, a bench), they sit on it, whatever they hold:
+	# nobody stands in a bench. The director hears they sit.
+	if f!=null and f.body3d!=null and String(f.body3d.stance)=="sit" and court_set!=null and not f.mark_name.is_empty() and court_set.call("has_mark",f.mark_name) and bool((court_set.call("mark",f.mark_name) as Marker3D).get_meta("sit",false)):
+		(extras[key] as Dictionary)["stance"]="sit"
+		return
 	if f!=null and f.body3d!=null and String(entry.get("stance",""))!="":
 		var look:Dictionary=f.body3d.look.duplicate();look["stance"]=String(entry.stance)
 		f.body3d.setup(look);f.rest_clip=f.body3d.rest_clip();f.body3d.play(f.rest_clip,0.0)
@@ -1148,7 +1274,10 @@ func shot(name:String,args:Dictionary={})->void:
 			var a:=figure(String(args.get("a","")));var b:=figure(String(args.get("b","")))
 			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
-			if body!=null:rig.call("push_in",body,float(args.get("seconds",2.4)))
+			# A close-up (head and shoulders) for the god's wrath on them and
+			# the big reactions: M's close_up, else the push-in.
+			if body!=null and bool(args.get("close",false)) and rig.has_method("close_up"):rig.call("close_up",body,float(args.get("seconds",1.6)))
+			elif body!=null:rig.call("push_in",body,float(args.get("seconds",2.4)))
 		"reaction":
 			if body!=null:rig.call("reaction",body,float(args.get("time",0.0)))
 		"shake":rig.call("shake",float(args.get("strength",0.35)))
@@ -1372,7 +1501,10 @@ func _layout_set(animate:bool)->void:
 		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.body3d==null:continue
 		var yaw:=0.0
-		if focus!=null and f!=main and f.role in ["court","crowd"]:
+		if f.acting_stance=="fire" and f.spot.is_inside_tree():
+			var to_fire:=f.spot.to_local(set_point("fire"))
+			yaw=clampf(rad_to_deg(atan2(to_fire.x,to_fire.z)),-150.0,150.0)
+		elif focus!=null and f!=main and f.role in ["court","crowd"]:
 			var to:=f.spot.to_local(focus.global_position)
 			yaw=clampf(rad_to_deg(atan2(to.x,to.z))*(0.45 if f.role=="court" else 0.3),-70.0,70.0)
 		f.rest_yaw=yaw
@@ -1766,6 +1898,8 @@ class Figure extends Control:
 	## The mood the engine gives them (a beat's mood returns to it).
 	var own_mood:="neutral"
 	var rest_yaw:=0.0
+	## One of the acting's own stances they keep (K: "guard", "fire"), or "".
+	var acting_stance:=""
 	## How far they have sunk (put to death where they stood), in metres.
 	var sink:=0.0:
 		set(value):sink=value;_sync()
@@ -1863,6 +1997,10 @@ class Figure extends Control:
 	func _route(far:Vector3)->PackedVector3Array:
 		var out:=PackedVector3Array([Vector3.ZERO])
 		var stage:=_stage.get_ref() as Control if _stage!=null else null
+		# Round the set's things and the people standing (court_paths.gd).
+		if stage!=null and stage.get("court_set")!=null and spot!=null:
+			var planned:PackedVector3Array=stage.call("plan_walk",self,far)
+			if planned.size()>=2:return planned
 		if stage!=null and stage.get("court_set")!=null:
 			var fire:=spot.to_local(stage.set_point("fire"))
 			var a:=Vector2.ZERO;var b:=Vector2(far.x,far.z);var c:=Vector2(fire.x,fire.z)
@@ -1980,11 +2118,11 @@ class Figure extends Control:
 			"led":
 				_move.tween_callback(func()->void:_clip("kneel",0.3,0.0);_light(0.78))
 				_move.tween_interval(1.1)
-				_move.tween_callback(func()->void:_clip("walk_out",0.3,0.0);_light(0.66))
-				pace*=1.25
+				_move.tween_callback(func()->void:_acted("walk_led","walk_out",0.3,{"loop":true});_light(0.66))
+				pace=_pace_of("walk_led",pace*1.25)
 			"storm":
-				_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
-				pace=float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+				_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
+				pace=_pace_of("storm_walk",float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT)
 			_:
 				_move.tween_callback(func()->void:body3d.face(rest_yaw*.2,0.25);_clip("bow",0.3,0.0))
 				_move.tween_interval(2.35)
@@ -2011,37 +2149,45 @@ class Figure extends Control:
 		if style.begins_with("backward"):
 			var back:=clampf(2.2/whole,0.15,0.6)
 			_move.tween_callback(func()->void:body3d.face(rest_yaw*.3,0.25);_clip("bow",0.3,0.0))
-			# Bowing all the way, a bow and a half-step, and another.
-			var bows:=3
-			for i in bows:
-				_move.tween_method(_back_step,back*float(i)/float(bows),back*float(i+1)/float(bows),0.8)
-				_move.tween_callback(func()->void:_clip("bow",0.2,0.25))
+			if Self.acting!=null and Self.Acting.has_clip("back_out"):
+				# The acting's own backing-away bow (K), a step at a time at its pace.
+				_move.tween_interval(0.5)
+				_move.tween_callback(func()->void:_acted("back_out","",0.25,{"loop":true}))
+				_move.tween_method(_back_step,0.0,back,clampf(whole*back/maxf(_pace_of("back_out",0.42),0.1),1.2,5.0))
+			else:
+				# Bowing all the way, a bow and a half-step, and another.
+				var bows:=3
+				for i in bows:
+					_move.tween_method(_back_step,back*float(i)/float(bows),back*float(i+1)/float(bows),0.8)
+					_move.tween_callback(func()->void:_clip("bow",0.2,0.25))
 			if style=="backward_bump":
 				# Into the post: a jolt forward, a look round, a bow to the post.
+				_move.tween_callback(func()->void:_acted("bump_post","",0.05))
 				_move.tween_property(self,"nudge",Vector3(0.0,0.0,0.12),0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 				_move.tween_property(self,"nudge",Vector3.ZERO,0.2)
 				_move.tween_callback(func()->void:
 					var ahead:=_path_at(minf(back+0.05,1.0))-_path_at(back)
 					body3d.rotation.y=atan2(ahead.x,ahead.z)
 					_clip("bow",0.2,0.0))
-				_move.tween_interval(1.1)
-			_move.tween_callback(func()->void:_clip("walk_out",0.35,0.0))
+				_move.tween_interval(maxf(1.1,_length_of("bump_post",1.1)-0.28))
+			_move.tween_callback(func()->void:_let_go(0.3);_clip("walk_out",0.35,0.0))
 			_move.tween_method(_stroll_step.bind(false),back,1.0,clampf(whole*(1.0-back)/maxf(walk_pace,0.1),0.8,6.0))
 			_move.tween_callback(_vanish)
 			return
 		# Storming off, then back for what they left.
-		var stride:float=float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+		var stride:=_pace_of("storm_walk",float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT)
 		var door:=0.82
-		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
 		_move.tween_method(_stroll_step.bind(false),0.0,door,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
-		_move.tween_callback(func()->void:_clip(rest_clip,0.25))
-		_move.tween_interval(0.6)
-		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		# Stopped short at the door: they remember.
+		_move.tween_callback(func()->void:_clip(rest_clip,0.25);_acted("storm_stop","",0.06))
+		_move.tween_interval(maxf(0.6,_length_of("storm_stop",0.6)-0.2))
+		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
 		_move.tween_method(_stroll_step.bind(true),door,0.0,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
 		# Snatched up: their stance (and its prop) for a moment.
-		_move.tween_callback(func()->void:body3d.face(rest_yaw,0.2);_clip(rest_clip,0.2))
-		_move.tween_interval(0.7)
-		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_callback(func()->void:body3d.face(rest_yaw,0.2);_clip(rest_clip,0.2);_acted("snatch_up","",0.08))
+		_move.tween_interval(maxf(0.7,_length_of("snatch_up",0.7)-0.1))
+		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
 		_move.tween_method(_stroll_step.bind(false),0.0,1.0,clampf(whole/maxf(stride,0.1),0.8,5.0))
 		_move.tween_callback(_vanish)
 
@@ -2072,6 +2218,34 @@ class Figure extends Control:
 
 	func _clip(name:String,blend:=0.3,at:=-1.0)->void:
 		if body3d!=null and is_instance_valid(body3d):body3d.play(name,blend,at)
+
+	## One of the acting's clips (K: back_out, bump_post, storm_walk,
+	## storm_stop, snatch_up, walk_led...) over the figure's own, when the
+	## acting is plugged in and its library has it; the figure's own clip
+	## (fallback) underneath either way.
+	func _acted(name:String,fallback:String,blend:=0.25,opts:={})->void:
+		if body3d==null or not is_instance_valid(body3d):return
+		if not fallback.is_empty():_clip(fallback,blend,0.0)
+		if Self.acting!=null and Self.Acting.has_clip(name) and body3d.is_inside_tree():
+			var o:Dictionary=opts.duplicate();o["blend"]=blend
+			Self.Acting.play(body3d,name,o)
+
+	## The acting lets go of a looping walk (back to the figure's own clip).
+	func _let_go(blend:=0.3)->void:
+		if Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():Self.Acting.stop(body3d,blend)
+
+	## How fast this body covers the hall in one of the acting's walks (its
+	## own metres a second, for a 1.72 m body), else the given pace.
+	func _pace_of(name:String,otherwise:float)->float:
+		if Self.acting==null or not Self.Acting.has_clip(name):return otherwise
+		var mps:=float(Self.Acting.clip_meta(name).get("speed_mps",0.0))
+		if mps<=0.0:return otherwise
+		return mps*float(body3d.body_height)/1.72
+
+	## How long one of the acting's clips runs, else the given seconds.
+	func _length_of(name:String,otherwise:float)->float:
+		if Self.acting==null or not Self.Acting.has_clip(name):return otherwise
+		return maxf(float(Self.Acting.clip_length(name)),0.2)
 
 	## How much light falls where they stand (the set's), times the speaker's lift.
 	var light_base:=1.0
@@ -2312,6 +2486,10 @@ class Figure extends Control:
 	var exit_style:=""
 	func leave(side:float,distance:float,delay:float=0.0,style:="bow")->void:
 		leaving=true;exit_style=style
+		# Off the staff (or up from the fire) before they walk.
+		if not acting_stance.is_empty() and Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():
+			Self.Acting.idle(body3d,String(body3d.stance))
+			acting_stance=""
 		if spot==null:
 			if style.begins_with("backward"):style="bow"
 			elif style=="storm_back":style="storm"

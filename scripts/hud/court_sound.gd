@@ -45,6 +45,18 @@ static var _cache:Dictionary={}
 static var _lock:=Mutex.new()
 ## Render voices on the calling thread (tests, offline renders).
 static var sync_render:=false
+## The court that is open now (the set's animals call it: animal()).
+static var current:Node
+## Our people's tongue for the murmur, by "owner:seed" (written on the main
+## thread, read by workers), and the six talkers made from it.
+static var _tongues:Dictionary={}
+static var _tracks:Dictionary={}
+static var _prewarmed:Dictionary={}
+## The keeper: one quiet node for the whole game that makes sounds ahead of
+## time and collects every worker job (prewarm()); courts hand theirs to it.
+static var keeper:Node
+const MURMUR_PEOPLE:={"murmur_small":3,"murmur":6,"murmur_hall":10}
+const MURMUR_SECONDS:=9.0
 
 ## The director's acts (court_director.gd ACTS) as sounds: [cue, dB offset,
 ## delay seconds]. Acts of the dog and the goat sound only from an animal.
@@ -145,6 +157,11 @@ var _talk:Dictionary={}       # body instance id -> token of the line in flight
 var _token:=0
 var _open:=false
 var _tasks:Array[int]=[]      # worker-thread jobs not yet collected
+## The keeper (prewarm()): makes sounds ahead of time and collects jobs.
+var keeps:=false
+var _tongue_key:=""
+var _murmur_wanted:=""        # the murmur in our tongue, while a stand-in plays
+var _animal_last:Dictionary={} # cue -> when an animal last made it
 var _bed_list:Array=[]        # beds_for() of the open room, made once
 
 # =============================================================================
@@ -164,7 +181,16 @@ static func attach(stage_node:Control)->Node:
 	return made
 
 func _ready()->void:
+	if keeps:
+		_timer=Timer.new();_timer.name="Collect";_timer.wait_time=0.25
+		add_child(_timer);_timer.timeout.connect(_tick)
+		if not _tasks.is_empty():_timer.start()
+		return
 	ensure_bus()
+	if stage!=null:
+		current=self
+		_tongue_key=register_tongue("player",world_seed())
+		prewarm(keeper.get_parent() if keeper!=null and is_instance_valid(keeper) and keeper.is_inside_tree() else get_tree().root)
 	_rng.seed=hash("court_sound|%s" % (String(stage.get("audience_key")) if stage!=null and stage.get("audience_key")!=null else "court"))
 	for i in 8:
 		var p:=AudioStreamPlayer.new();p.bus=BUS;p.name="Sound%d" % i
@@ -186,21 +212,27 @@ func _join_hall()->void:
 	for i in 8:
 		var p:=AudioStreamPlayer3D.new();p.bus=BUS;p.name="Sound3D%d" % i
 		p.attenuation_model=AudioStreamPlayer3D.ATTENUATION_DISABLED
-		p.panning_strength=0.55;p.doppler_tracking=AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
+		p.panning_strength=0.9;p.doppler_tracking=AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
 		p.max_polyphony=2
 		_space.add_child(p);_pool3d.append(p)
 
 func _exit_tree()->void:
+	if current==self:current=null
+	if keeper==self:keeper=null
 	stop_all()
 	if is_instance_valid(_space):_space.queue_free()
-	for id in _tasks:WorkerThreadPool.wait_for_task_completion(id)
+	# a court that closes does not wait for its jobs: the keeper collects them
+	if not keeps and keeper!=null and is_instance_valid(keeper) and keeper.is_inside_tree():
+		for id in _tasks:keeper.call("_track",id)
+	else:
+		for id in _tasks:WorkerThreadPool.wait_for_task_completion(id)
 	_tasks.clear()
 
 ## A worker-thread job to collect once it is done (every task is waited for).
 func _track(id:int)->void:
 	if id<0:return
 	_tasks.append(id)
-	_ensure_timer()
+	if is_inside_tree():_ensure_timer()
 
 func _collect()->void:
 	var i:=0
@@ -270,9 +302,61 @@ static func stream_for(name:String,variant:=0)->AudioStreamWAV:
 	var held:Variant=_cache.get(key,null)
 	_lock.unlock()
 	if held!=null:return held
-	var made:=Foley.stream(name,variant)
+	var made:AudioStreamWAV
+	if name.contains("@"):made=_murmur_stream(name.get_slice("@",0),name.get_slice("@",1))
+	else:made=Foley.stream(name,variant)
 	_lock.lock();_cache[key]=made;_lock.unlock()
 	return made
+
+## A people's tongue, read here (main thread) so workers can make its murmur.
+static func register_tongue(owner:String,seed_value:int)->String:
+	var key:="%s:%d" % [owner,seed_value]
+	_lock.lock();var has:=_tongues.has(key);_lock.unlock()
+	if not has:
+		var tongue:=Voice.phonology(owner,seed_value)
+		_lock.lock();_tongues[key]=tongue;_lock.unlock()
+	return key
+
+## The crowd's murmur of a size ("murmur_small", "murmur", "murmur_hall") in a
+## registered tongue: six talkers made once per tongue, mixed to the size.
+static func _murmur_stream(size:String,key:String)->AudioStreamWAV:
+	_lock.lock()
+	var tracks:Variant=_tracks.get(key,null)
+	var tongue:Dictionary=_tongues.get(key,{})
+	_lock.unlock()
+	if tracks==null:
+		var made:=Foley.murmur_tracks(tongue,Synth.seed_of(key),MURMUR_SECONDS+0.6)
+		_lock.lock();_tracks[key]=made;_lock.unlock()
+		tracks=made
+	var rng:=RandomNumberGenerator.new();rng.seed=Synth.seed_of(key+"|"+size)
+	var b:=Foley.murmur_mix(tracks,int(MURMUR_PEOPLE.get(size,6)),MURMUR_SECONDS,rng)
+	var top:=Synth.peak_of(b)
+	if top>0.0001:Synth.scale(b,0.6/top)
+	return Synth.to_stream(b,0.0,true)
+
+## Makes the court's sounds ahead of time on a worker thread, so the room is
+## never silent when the court opens: the beds, our people's murmur in their
+## own tongue, the god's swells and the common sounds. Call once the game
+## has loaded (display_preferences.gd does) and again when the court is
+## first summoned; a second call for the same world does nothing.
+static func prewarm(host:Node,force:=false)->void:
+	if host==null or not host.is_inside_tree():return
+	if DisplayServer.get_name()=="headless" and not force:return
+	var key:=register_tongue("player",world_seed())
+	if _prewarmed.has(key) and not force:return
+	_prewarmed[key]=true
+	var list:Array=[]
+	for bed in ["fire","wind_soft","wind_hard","wind_indoor","room"]:list.append([bed,0])
+	for size in MURMUR_PEOPLE:list.append(["%s@%s" % [size,key],0])
+	list.append(["god_swell_wrath",0]);list.append(["god_swell_favour",0])
+	for cue_name in ["gasp","room_gasp","creak","stomach_growl","snore","snort_wake","swallow","cough_fought","knees_knock","rustle","snort_laugh","fire_pop","step_earth","kneel_cloth","faint_thump","bowl_drop"]:
+		for v in Foley.variants(cue_name):list.append([cue_name,v])
+	if keeper==null or not is_instance_valid(keeper):
+		keeper=Self.new()
+		keeper.name="CourtSoundKeeper"
+		keeper.set("keeps",true)
+		host.add_child.call_deferred(keeper)
+	keeper.call("_track",warm(list))
 
 static func cached(name:String,variant:=0)->bool:
 	_lock.lock()
@@ -305,7 +389,7 @@ static func clear_cache()->void:
 ## Returns whether it will sound.
 func cue(name:String,at_body:Node3D=null,opts:Dictionary={})->bool:
 	if name.is_empty() or not can_play():return false
-	if not Foley.CUES.has(name) and not name in ["snort_wake","mutter"]:return false
+	if not Foley.CUES.has(name) and name!="mutter":return false
 	if float(opts.get("delay",0.0))>0.0:
 		_queue.append({"at":_now()+float(opts.delay),"name":name,"body":at_body,"opts":opts.duplicate()})
 		_ensure_timer()
@@ -314,11 +398,10 @@ func cue(name:String,at_body:Node3D=null,opts:Dictionary={})->bool:
 		return voice(at_body,_mutter_text(),1.1,"neutral","",{"whisper":true,"db":float(opts.get("db",0.0))})
 	var real:=name
 	var variant:=int(opts.get("variant",-1))
-	if name=="snort_wake":real="snort_laugh";variant=2
 	var n:=Foley.variants(real)
 	if variant<0:variant=_rng.randi_range(0,n-1)
 	var s:=stream_for(real,variant)
-	var db:=Foley.level(real)+float(opts.get("db",0.0))+(4.0 if name=="snort_wake" else 0.0)
+	var db:=Foley.level(real)+float(opts.get("db",0.0))
 	var pitch:=float(opts.get("pitch",_rng.randf_range(0.95,1.05)))
 	return _play(s,at_body,db,pitch,name)!=null
 
@@ -536,6 +619,12 @@ func ambience(set_id:String,season_id:String,facts_in:Dictionary={})->void:
 	set_kind=set_id if not set_id.is_empty() else "fire_ring"
 	season=season_id if season_id in ["spring","summer","autumn","winter"] else "summer"
 	facts=facts_in.duplicate()
+	# the set knows which beasts the people keep (hens, goats)
+	var cs:Variant=stage.get("court_set") if stage!=null else null
+	if cs is Node3D and is_instance_valid(cs) and (cs as Node3D).get("facts") is Dictionary:
+		var kept:Dictionary=(cs as Node3D).get("facts")
+		for key in ["herds","fowl"]:
+			if kept.has(key) and not facts.has(key):facts[key]=kept[key]
 	_open=true
 	var bus:=ensure_bus()
 	var room:=AudioServer.get_bus_effect(bus,0) as AudioEffectReverb
@@ -544,6 +633,9 @@ func ambience(set_id:String,season_id:String,facts_in:Dictionary={})->void:
 		room.wet=0.04 if open_air else (0.12 if set_kind in ["longhouse"] else 0.18)
 		room.room_size=0.15 if open_air else (0.32 if set_kind=="longhouse" else 0.55)
 	_bed_list=beds_for(set_kind,season,facts)
+	if _tongue_key.is_empty():_tongue_key=register_tongue("player",world_seed())
+	for role in _bed_list:
+		if String(role[0])=="murmur":role[1]="%s@%s" % [String(role[1]),_tongue_key]
 	var warm_list:Array=[]
 	for role in _bed_list:warm_list.append([String(role[1]),0])
 	warm_list.append(["god_swell_wrath",0]);warm_list.append(["god_swell_favour",0])
@@ -576,12 +668,17 @@ func _start_beds()->void:
 	for role:Array in _bed_list:
 		var bed_role:=String(role[0]);var bed_name:=String(role[1])
 		if not cached(bed_name,0) and not sync_render:
-			# not made yet: the timer starts it when it is
-			continue
+			# not made yet: a murmur already made (another tongue, the plain
+			# one) stands in until ours is ready; anything else waits
+			if bed_role!="murmur":continue
+			var stand_in:=_murmur_stand_in(bed_name)
+			if stand_in.is_empty():continue
+			_murmur_wanted=bed_name
+			bed_name=stand_in
 		var p:AudioStreamPlayer=_beds.get(bed_role,null)
 		if p==null:
 			p=AudioStreamPlayer.new();p.name="Bed_"+bed_role;p.bus=BUS;add_child(p);_beds[bed_role]=p
-		var level:=Foley.level(bed_name)+float(role[2])
+		var level:=Foley.level(bed_name.get_slice("@",0))+float(role[2])
 		_bed_db[bed_role]=level
 		var s:=stream_for(bed_name,0)
 		if p.stream!=s:p.stream=s
@@ -590,6 +687,35 @@ func _start_beds()->void:
 			p.play(_rng.randf_range(0.0,maxf(0.0,s.get_length()-1.0)))
 			_fade(bed_role,(-80.0 if (_hushed and bed_role=="murmur") else level),1.2)
 	_ensure_timer()
+
+## A murmur that is made already, to stand in for `wanted` while it is made.
+func _murmur_stand_in(wanted:String)->String:
+	var size:=wanted.get_slice("@",0)
+	_lock.lock()
+	var keys:=_cache.keys()
+	_lock.unlock()
+	for k in keys:
+		var name:=String(k).get_slice("|",0)
+		if name.begins_with(size+"@") or name==size:return name
+	for k in keys:
+		if String(k).begins_with("murmur"):return String(k).get_slice("|",0)
+	return ""
+
+## Ours is ready: the stand-in gives way to it.
+func _swap_murmur()->void:
+	var p:AudioStreamPlayer=_beds.get("murmur",null)
+	var wanted:=_murmur_wanted
+	_murmur_wanted=""
+	if p==null:return
+	var level:=float(_bed_db.get("murmur",-16.0))
+	var old:Tween=_bed_tweens.get("murmur",null)
+	if old!=null and old.is_valid():old.kill()
+	var tw:=create_tween()
+	tw.tween_property(p,"volume_db",level-18.0,0.6)
+	tw.tween_callback(func()->void:
+		p.stream=stream_for(wanted,0);p.play(_rng.randf_range(0.0,5.0)))
+	tw.tween_property(p,"volume_db",-80.0 if _hushed else level,0.9)
+	_bed_tweens["murmur"]=tw
 
 func _fade(role:String,to_db:float,seconds:float)->void:
 	var p:AudioStreamPlayer=_beds.get(role,null)
@@ -672,6 +798,10 @@ func god(text:String,seconds:float,tone:="")->bool:
 ## pops and hisses, the birds, the hens, the goat, the beds still to start.
 func _tick()->void:
 	if not _tasks.is_empty():_collect()
+	if keeps:
+		if _tasks.is_empty():_timer.stop()
+		return
+	if not _murmur_wanted.is_empty() and cached(_murmur_wanted,0):_swap_murmur()
 	if not can_play():
 		if _tasks.is_empty():_timer.stop()
 		return
@@ -692,7 +822,7 @@ func _tick()->void:
 	# beds made since the court opened
 	for role:Array in _bed_list:
 		var p:AudioStreamPlayer=_beds.get(String(role[0]),null)
-		if (p==null or not p.playing) and cached(String(role[1]),0):_start_beds();break
+		if (p==null or not p.playing) and (cached(String(role[1]),0) or (String(role[0])=="murmur" and not _murmur_stand_in(String(role[1])).is_empty())):_start_beds();break
 	if _hushed:return
 	_life("fire_pop",now,0.25,1.6,0.0)
 	_life("fire_hiss",now,7.0,20.0,0.0)
@@ -858,6 +988,38 @@ func _register_variant(name:String,who:String)->int:
 	if years<13:v=2
 	elif years>=60:v=3
 	return mini(v,n-1)
+
+# --- the animals ---------------------------------------------------------------
+
+## What a beast's own clips sound like: [cue, dB, least seconds between]
+## (court_animal_3d.gd plays them as it lives on the set; M's hook calls animal()).
+const ANIMAL_SOUNDS:={
+	"dog":{"bark":["dog_bark",0.0,0.0],"sniff":["dog_sniff",0.0,2.0],"scratch":["dog_scratch",0.0,3.0],"lie":["dog_flop",0.0,3.0],
+		"cower":["dog_whimper",0.0,2.5],"tilt":["dog_query",0.0,3.0],"yawn":["dog_yawn",0.0,6.0],"shake":["dog_shake",0.0,6.0],
+		"wag":["dog_thump",0.0,4.0],"grab":["snatch",-4.0,1.0],"walk":["paws",0.0,0.0],"trot":["paws",2.0,0.0]},
+	"goat":{"bleat":["goat_bleat",0.0,2.0],"chew":["goat_chew",0.0,6.0],"graze":["goat_chew",-2.0,6.0],"eat":["goat_chew",-2.0,6.0]},
+	"hen":{"peck":["hens",-3.0,6.0],"cluck":["hens",0.0,4.0],"idle":["hens",-6.0,10.0]},
+}
+
+## A beast on the set did something (one of its clips): it is heard, at its
+## place, not too often. The tail thumps only when the dog is lying down; in
+## the god's hush the beasts are quieter (a whimper is not).
+func animal(species:String,clip:String,body:Node3D=null)->bool:
+	var table:Dictionary=ANIMAL_SOUNDS.get(species,{})
+	if not table.has(clip) or not can_play():return false
+	var spec:Array=table[clip]
+	var name:=String(spec[0])
+	if clip=="wag" and body!=null and body.has_method("is_down") and not bool(body.call("is_down")):return false
+	var now:=_now()
+	var gap:=float(spec[2])
+	if gap>0.0 and now-float(_animal_last.get(name,-99.0))<gap:return false
+	_animal_last[name]=now
+	var db:=float(spec[1])-(6.0 if _hushed and name!="dog_whimper" else 0.0)
+	if name=="paws":
+		var pace:=4.0 if clip=="trot" else 2.6
+		footsteps(body,1.2,pace,false,"paws",db)
+		return true
+	return cue(name,body,{"db":db})
 
 # --- reading the stage --------------------------------------------------------
 

@@ -9,7 +9,7 @@
 cd "$(dirname "$0")/../.." || exit 1
 BLENDER="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 LOCK=/c/Users/sjpur/tt-court-lock-blender
-VARIANTS=${@:-male_adult female_adult male_old female_old male_young female_young}
+VARIANTS=${@:-male_adult female_adult male_old female_old male_young female_young child}
 mkdir -p reports/court_figures
 ME=""
 release() {

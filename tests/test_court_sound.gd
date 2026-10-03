@@ -7,6 +7,8 @@ extends GdUnitTestSuite
 ##   own tongue's sounds), and the babble keeps the mouth's own timing;
 ## - fear is higher than pride; a mutter is a whisper;
 ## - nothing plays while the court's sound is muted or the court is hidden;
+## - the glottis is a proper LF pulse; the crowd murmurs in our own tongue;
+##   the dog is heard now and then; a sound comes from where its maker stands;
 ## - the director's acts that are heard map to sounds that exist, and the
 ##   hush cuts the crowd's murmur dead.
 ## Headless; no files, no network, no save.
@@ -227,3 +229,92 @@ func test_a_sound_beat_plays_its_sound()->void:
 	assert_int((sound.get("_queue") as Array).size()).is_greater(1)
 	sound.call("on_beat",{"t":0.0,"who":"main","act":"sound","args":{"name":"babble_mutter","words":5,"people":"player","gain":0.5}},null)
 	assert_str(String((sound.get("played") as Array).back().name)).is_equal("voice")
+
+func test_the_glottis_is_an_lf_pulse()->void:
+	# a period of flow derivative that returns the flow to where it began, its
+	# sharpest fall at -1; breathier shapes have a stronger first harmonic
+	var h12:=[]
+	for rd in [0.5,1.1,2.2]:
+		var made:Array=Voice.lf_pulse(rd,256)
+		var pulse:PackedFloat32Array=made[0]
+		var total:=0.0;var low:=0.0
+		for i in 256:total+=pulse[i];low=minf(low,pulse[i])
+		assert_float(absf(total/256.0)).is_less(0.01)
+		assert_float(low).is_between(-1.05,-0.8)
+		var re1:=0.0;var im1:=0.0;var re2:=0.0;var im2:=0.0
+		for i in 256:
+			var a:=TAU*float(i)/256.0
+			re1+=pulse[i]*cos(a);im1+=pulse[i]*sin(a);re2+=pulse[i]*cos(2.0*a);im2+=pulse[i]*sin(2.0*a)
+		h12.append(10.0*log((re1*re1+im1*im1)/(re2*re2+im2*im2))/log(10.0))
+	assert_float(float(h12[1])).is_greater(float(h12[0]))
+	assert_float(float(h12[2])).is_greater(float(h12[1]))
+
+func test_the_murmur_speaks_our_tongue()->void:
+	var ours:=Voice.phonology("player",SEED)
+	var tracks:=Foley.murmur_tracks(ours,7,2.0)
+	assert_int(tracks.size()).is_equal(Foley.MURMUR_VOICES.size())
+	var plain:=Foley.murmur_tracks({},7,2.0)
+	assert_bool(tracks[0]==plain[0]).is_false()
+	var rng:=RandomNumberGenerator.new();rng.seed=3
+	var hall:=Foley.murmur_mix(tracks,10,1.5,rng)
+	assert_float(float(hall.size())/Synth.RATE).is_between(1.45,1.55)
+	assert_float(Synth.rms_of(hall)).is_greater(0.001)
+
+func test_the_dog_is_heard_now_and_then()->void:
+	var made:=_court()
+	var sound:Node=made[1]
+	Sound.set_volume(1.0)
+	assert_bool(sound.call("animal","dog","sniff",null)).is_true()
+	# not again at once
+	assert_bool(sound.call("animal","dog","sniff",null)).is_false()
+	assert_bool(sound.call("animal","dog","bark",null)).is_true()
+	assert_bool(sound.call("animal","dog","bark",null)).is_true()
+	# a clip with no sound, a beast we do not know
+	assert_bool(sound.call("animal","dog","idle",null)).is_false()
+	assert_bool(sound.call("animal","ox","bark",null)).is_false()
+	Sound.set_volume(0.0)
+	assert_bool(sound.call("animal","dog","scratch",null)).is_false()
+
+class FakeStage extends Control:
+	var view3d:SubViewport
+	var extras:={}
+	var audience_key:="test"
+	func figure(_key:String)->Object:return null
+
+static func _balance(cap:AudioEffectCapture)->Vector2:
+	var n:=cap.get_frames_available()
+	var buf:=cap.get_buffer(n)
+	var l:=0.0;var r:=0.0
+	for v in buf:l+=v.x*v.x;r+=v.y*v.y
+	return Vector2(sqrt(l/maxf(1.0,float(n))),sqrt(r/maxf(1.0,float(n))))
+
+func test_sounds_come_from_where_people_stand()->void:
+	# the stage's hall listens through its camera: someone on the left of the
+	# picture is heard on the left
+	var stage:=FakeStage.new()
+	var view:=SubViewport.new();view.own_world_3d=true;view.size=Vector2i(64,64)
+	stage.add_child(view);stage.view3d=view
+	var cam:=Camera3D.new();view.add_child(cam);cam.position=Vector3(0.0,1.5,6.0);cam.current=true
+	var left:=Node3D.new();view.add_child(left);left.position=Vector3(-3.0,0.0,0.0)
+	var right:=Node3D.new();view.add_child(right);right.position=Vector3(3.0,0.0,0.0)
+	add_child(stage)
+	auto_free(stage)
+	var sound:Node=Sound.attach(stage)
+	Sound.set_volume(1.0)
+	var cap:=AudioEffectCapture.new();cap.buffer_length=3.0
+	AudioServer.add_bus_effect(0,cap)
+	var slot:=AudioServer.get_bus_effect_count(0)-1
+	await get_tree().process_frame
+	cap.clear_buffer()
+	sound.call("cue","creak",left,{"variant":0,"pitch":1.0,"db":6.0})
+	await get_tree().create_timer(0.7).timeout
+	var from_left:=_balance(cap)
+	cap.clear_buffer()
+	sound.call("cue","creak",right,{"variant":0,"pitch":1.0,"db":6.0})
+	await get_tree().create_timer(0.7).timeout
+	var from_right:=_balance(cap)
+	AudioServer.remove_bus_effect(0,slot)
+	prints("left L/R",from_left,"right L/R",from_right)
+	assert_float(from_left.x+from_left.y).override_failure_message("nothing was heard").is_greater(0.0001)
+	assert_float(from_left.x).is_greater(from_left.y*1.1)
+	assert_float(from_right.y).is_greater(from_right.x*1.1)

@@ -19,6 +19,9 @@ const Modal:=preload("res://scripts/hud/audience_modal.gd")
 const Stage:=preload("res://scripts/hud/court_stage.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
+const Acting:=preload("res://scripts/hud/court_acting.gd")
+const Paths:=preload("res://scripts/hud/court_paths.gd")
+const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 
 var _root_size:=Vector2i.ZERO
 
@@ -34,6 +37,7 @@ func before_test()->void:
 
 
 func after_test()->void:
+	Backdrop.tier_override=-1
 	Stage.directing=true
 	Stage.director=null
 	Stage.acting=null
@@ -203,3 +207,122 @@ func test_a_dropped_bowl_lies_on_the_floor_and_a_bundle_rides_the_hands()->void:
 	body.set_down()
 	assert_bool(body.is_processing()).is_false()
 	assert_float(bundle.global_position.y-body.global_position.y).is_less(0.2)
+
+
+func test_the_acted_ways_out_play_the_actings_own_walks()->void:
+	# With the acting (K) plugged in, backing out bowing plays its back_out
+	# and storming off its storm_walk; they still leave by the door and are
+	# gone at the end.
+	if not _ready_or_skip():return
+	if not Acting.has_clip("back_out") or not Acting.has_clip("storm_walk"):return
+	Stage.acting=Acting.service()
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	var other:Stage.Figure=null
+	for key in stage.cast_order:
+		var f:Stage.Figure=stage.figure(key)
+		if f!=null and f!=main and f.spot!=null and f.body3d!=null:other=f;break
+	main.leave(-1.0,1.0,0.0,"backward_bump")
+	main._move.custom_step(1.0)
+	var acting:Node=Acting.of(main.body3d)
+	assert_object(acting).is_not_null()
+	assert_str(String(acting.get("_a").clip)).is_equal("back_out")
+	if other!=null:
+		other.leave(-1.0,1.0,0.0,"storm_back")
+		other._move.custom_step(0.3)
+		assert_str(String(Acting.of(other.body3d).get("_a").clip)).is_equal("storm_walk")
+	stage.settle()
+	assert_bool(main.body3d.visible).is_false()
+
+
+## Everyone standing in the hall (not seated, not leaving).
+func _standing(stage:Control)->Array:
+	var out:=[]
+	for key in stage.cast_order:
+		var f:Stage.Figure=stage.figure(key)
+		if f==null or f.leaving or f.spot==null or f.body3d==null:continue
+		if String(f.body3d.stance)=="sit":continue
+		out.append(f)
+	return out
+
+
+func test_nobody_stands_on_another_or_in_a_thing_and_one_clasp_a_room()->void:
+	# With the director's onlookers too. Marks are taken once each; standing
+	# people keep a body's room apart; nobody stands on a log, a post or the
+	# fire; the hall has at most one pair of hands clasped before them.
+	if not _ready_or_skip():return
+	Stage.directing=true
+	# Every hall: the fire circle, the longhouse, the mudbrick hall, the grand hall.
+	var seen:={}
+	for tier in [0,1,2,3]:
+		Backdrop.tier_override=tier
+		for id in ([_home_audience(),_envoy_audience()] if tier<2 else [_home_audience()]):
+			if String(id).is_empty():continue
+			await _check_room(String(id),seen)
+	assert_int(seen.size()).is_greater_equal(3)
+
+
+func _check_room(id:String,seen:Dictionary)->void:
+	var modal:Control=await _open(id)
+	var stage:Control=modal.court_stage
+	stage.settle()
+	seen[String(stage.court_set.get("kind"))]=true
+	var room:Variant=Paths.room_of(stage.court_set)
+	assert_object(room).is_not_null()
+	var standing:=_standing(stage)
+	assert_int(standing.size()).is_greater_equal(2)
+	var clasped:=0
+	for i in standing.size():
+		var a:Stage.Figure=standing[i]
+		var pa:Vector3=a.spot.position
+		if String(a.body3d.stance)=="clasped":clasped+=1
+		assert_bool(Paths.solid_at(room,Vector2(pa.x,pa.z))).override_failure_message("%s stands in a thing at %s (%s, %s)" % [a.key,pa,a.mark_name,stage.court_set.get("kind")]).is_false()
+		for j in range(i+1,standing.size()):
+			var b:Stage.Figure=standing[j]
+			var pb:Vector3=b.spot.position
+			assert_float(Vector2(pa.x-pb.x,pa.z-pb.z).length()).override_failure_message("%s and %s stand %s apart" % [a.key,b.key,Vector2(pa.x-pb.x,pa.z-pb.z).length()]).is_greater(0.55)
+	assert_int(clasped).override_failure_message("%d clasp their hands in the %s" % [clasped,stage.court_set.get("kind")]).is_less_equal(1)
+	modal.queue_free()
+	await await_idle_frame()
+
+
+func test_the_way_in_goes_round_people_and_things()->void:
+	# Each standing person's way in from the door keeps a body's room from
+	# everyone else standing and from the set's things (bar the door and
+	# their own mark at either end).
+	if not _ready_or_skip():return
+	Stage.directing=true
+	for tier in [0,1,2,3]:
+		Backdrop.tier_override=tier
+		await _check_ways_in(_home_audience())
+
+
+func _check_ways_in(id:String)->void:
+	var modal:Control=await _open(id)
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var room:Variant=Paths.room_of(stage.court_set)
+	var door:Vector3=stage.set_point("door")
+	var standing:=_standing(stage)
+	var walked:=0
+	for f:Stage.Figure in standing:
+		var way:PackedVector3Array=stage.plan_walk(f,f.spot.to_local(door))
+		if way.size()<2:continue
+		walked+=1
+		f._path=way
+		var length:=f._path_length()
+		for i in 61:
+			var at:Vector3=f.spot.to_global(f._path_at(float(i)/60.0))
+			var along:=length*float(i)/60.0
+			if along<0.45 or length-along<0.7:continue
+			var here:Vector3=(stage.court_set as Node3D).to_local(at)
+			assert_bool(Paths.solid_at(room,Vector2(here.x,here.z))).override_failure_message("%s walks through a thing at %s in the %s" % [f.key,here,stage.court_set.get("kind")]).is_false()
+			for other:Stage.Figure in standing:
+				if other==f:continue
+				var them:Vector3=other.spot.global_position
+				assert_float(Vector2(at.x-them.x,at.z-them.z).length()).override_failure_message("%s walks through %s at %s in the %s" % [f.key,other.key,at,stage.court_set.get("kind")]).is_greater(0.4)
+	assert_int(walked).is_greater_equal(2)
+	modal.queue_free()
+	await await_idle_frame()
