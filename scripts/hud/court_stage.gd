@@ -33,6 +33,7 @@ const Studio:=preload("res://scripts/hud/court_figure_studio.gd")
 const Looks:=preload("res://scripts/people_appearance.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
+const DivineRegard:=preload("res://scripts/divine_regard.gd")
 const Voice:=preload("res://scripts/character_voice.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 
@@ -156,6 +157,15 @@ var _sound:Node
 ## The beats the director gave for the last event (an exit or an arrival
 ## reads them: backing out bowing, coming back, the wrong side).
 var _last_beats:Array=[]
+## The camera's current claim: a shot holds until its event's beats are
+## done, unless a weightier event comes (wrath, the god > an arrival, a
+## decision > speech > the room's own life).
+var _shot_until:=0.0
+var _shot_weight:=0
+var _event_weight:=1
+var _event_end:=0.0
+## Whose face the camera has gone in on (bubbles keep off it).
+var _focus_key:=""
 var _beat_sets:Array=[]
 ## What the engine says about the hall now (the Court fills it): era, season,
 ## stores_days, hungry, sick, at_war, love, dread, mood, offer.
@@ -351,9 +361,18 @@ func _init()->void:
 	resized.connect(_on_resized)
 
 func _ready()->void:
-	if sound!=null:
+	if sound!=null and _sound==null:
 		var made:Variant=sound.call("attach",self)
 		if made is Node:_sound=made
+	_ambience()
+
+## The room's own sound for this place and season (N): the beds and the
+## room's life, from the facts.
+func _ambience()->void:
+	if _sound==null or not is_instance_valid(_sound):return
+	var kind:="fire_ring"
+	if court_set!=null and court_set.get("kind")!=null:kind=String(court_set.get("kind"))
+	_sound.call("ambience",kind,String(facts.get("season","summer")),facts)
 
 ## One transparent SubViewport under the plates and bubbles: every modelled
 ## figure on this stage stands in it, seen by one camera that maps the
@@ -411,6 +430,10 @@ func _track_all()->void:
 ## onlookers are seen over their shoulders), clear of the UI laid over it.
 func frame_cast(time:=0.0)->void:
 	if court_set==null or camera==null or not camera.is_inside_tree():return
+	# A shot still holding (a push-in on the one before the god) is not cut
+	# back to everyone by a newcomer or a resize.
+	if _now()<_shot_until and _shot_weight>=2 and time>0.0:return
+	_focus_key=""
 	camera.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
 	var subjects:=[]
 	for key in cast_order:
@@ -547,6 +570,35 @@ func add_figure(key:String,person:Dictionary,role:String,name_text:String="",tit
 		_run_arrivals()
 	return f
 
+## Each person keeps their own stance for life; the room is spread so it never
+## looks like a line of hostages: at most one pair of clasped hands in the
+## hall. The one before the god stands as they feel: the frightened with
+## their hands clasped before them, the proud with arms folded, the warm
+## easy; an envoy as their temper is.
+const EASY_STANCES:=["hip","belt","stand","folded","hip","stand"]
+func _spread_stance(f:Figure,own:String)->String:
+	var h:=absi(("%s|%d|stance" % [String(f.person.get("name",f.key)),int(f.person.get("person_id",0))]).hash())
+	var stance:=own
+	if f.role==MAIN:
+		if String(f.person.get("role",""))=="envoy" or layout_kind=="envoy":
+			var temper:=String(f.person.get("temper",""))
+			if temper.is_empty() and director!=null and director.has_method("envoy_temper") and facts.get("envoy") is Dictionary:temper=String(director.call("envoy_temper",facts.envoy))
+			stance=String({"haughty":"folded","nervous":"clasped","greedy":"belt","calm":"stand"}.get(temper,own if own!="clasped" else "stand"))
+		else:
+			var dread:=float(DivineRegard.dread_of(f.person)) if f.person.has("relationships") else 0.0
+			var love:=float(DivineRegard.love_of(f.person)) if f.person.has("relationships") else 0.4
+			if dread>=0.45:stance="clasped"
+			elif float(f.person.get("pride",0.5))>=0.7:stance="folded"
+			elif love>=0.6:stance="stand" if own!="hip" else "hip"
+			elif own=="clasped":stance=String(EASY_STANCES[h%EASY_STANCES.size()])
+	if stance!="clasped":return stance
+	# Someone already has their hands clasped: this one stands otherwise.
+	for key in cast_order:
+		var other:=figure(key)
+		if other!=null and other!=f and other.body3d!=null and String(other.body3d.stance)=="clasped":
+			return String(EASY_STANCES[h%EASY_STANCES.size()])
+	return stance
+
 ## Gives a figure its modelled body in the hall (and its shade on the floor).
 func _embody(f:Figure)->void:
 	var body:=Figure3D.new();body.name="Body_"+node_key(f.key)
@@ -554,6 +606,7 @@ func _embody(f:Figure)->void:
 	# The one before the god, and an envoy's company, stand.
 	if f.role in [MAIN,"attendant"] and String(look.get("stance","")) in ["sit","crouch"]:look.stance="clasped"
 	if f.role==MAIN and String(look.get("stance",""))=="bowl" and layout_kind=="home":look.stance="clasped"
+	look.stance=_spread_stance(f,String(look.get("stance","stand")))
 	var mark:=""
 	var seat:=-1.0
 	if court_set!=null:
@@ -663,7 +716,21 @@ func event(kind:String,data:Dictionary={})->void:
 	if beats is Array:all.append_array(beats)
 	if lines is Array:all.append_array(lines)
 	_last_beats=all
+	_event_weight=_weight_of(kind,data)
+	var span:=0.0
+	for beat in all:
+		if beat is Dictionary:span=maxf(span,float((beat as Dictionary).get("t",0.0))+float(((beat as Dictionary).get("args",{}) as Dictionary).get("dur",0.8)))
+	_event_end=_now()+span
 	if not all.is_empty():run_beats(all)
+
+## How weighty an event is for the camera.
+static func _weight_of(kind:String,data:Dictionary)->int:
+	match kind:
+		"divine","terrify_envoy","command":return 4
+		"god":return 3
+		"enter","exit","gift","decree","promise","dismiss","defer":return 2
+		"line","direction":return 1
+	return 0
 
 ## Did the director just give this person this act (by its own name)?
 func _directed(who:String,act:String)->Dictionary:
@@ -779,6 +846,7 @@ func mutter(who:String,text:String)->void:
 	bubble.tail_side="left" if x>mouth.x else "right"
 	bubble.tip=mouth-bubble.position
 	if (bubble.tail_side=="left" and bubble.tip.x>-4.0) or (bubble.tail_side=="right" and bubble.tip.x<bubble.size.x+4.0):bubble.tail_side="none"
+	_clear_focus(bubble)
 	bubble.queue_redraw()
 	bubble.modulate.a=0.0
 	var tw:=bubble.create_tween()
@@ -799,6 +867,7 @@ func glyph(who:String,glyph_name:String)->void:
 	var at:=Vector2(f.home.x+f.size.x*.18,f.home.y-24.0) if glyph_name in GLYPHS_LOW else Vector2(head.x+f.size.x*.22,head.y+4.0)
 	mark.position=(at-mark.size*.5).clamp(Vector2(4.0,top_inset+2.0),Vector2(maxf(4.0,size.x-mark.size.x-4.0),maxf(top_inset+2.0,size.y-mark.size.y-4.0))).round()
 	mark.pivot_offset=mark.size*.5
+	if who!=_focus_key:_clear_focus(mark)
 	if Motion.reduced():
 		get_tree().create_timer(1.2).timeout.connect(mark.queue_free);return
 	mark.scale=Vector2(.4,.4);mark.modulate.a=0.0
@@ -1047,6 +1116,14 @@ func shot(name:String,args:Dictionary={})->void:
 	if court_set==null or camera==null:
 		if camera_rig!=null and camera_rig.has_method("shot"):camera_rig.call("shot",name,args)
 		return
+	# A lighter event does not cut a weightier event's shot short (a shake
+	# never takes the camera's claim).
+	var weight:=int(args.get("weight",_event_weight))
+	if name!="shake":
+		if _now()<_shot_until and weight<_shot_weight:return
+		_shot_weight=weight
+		_shot_until=maxf(_event_end,_now()+1.0)
+		_focus_key=String(args.get("target","")) if name in ["push_in","reaction"] else ""
 	var target:=figure(String(args.get("target","")))
 	var body:Node3D=target.body3d if target!=null and target.body3d!=null else null
 	match name:
@@ -1343,6 +1420,14 @@ func say(key:String,text:String,aside:=false,animate:=true,ref:=-1)->Label:
 	if animate:bubble.pop_in()
 	return bubble.label
 
+## Whether the god's words are wrath or favour (the swell under them), read
+## the way the hall reads a spoken act (divine_regard.gd intent).
+static func _tone_of(text:String)->String:
+	var act:=String(DivineRegard.intent(text))
+	if act in ["terrify","penance"]:return "wrath"
+	if act in ["bless","raise_up"]:return "favour"
+	return ""
+
 ## The god's own words, from above.
 func god_says(text:String,animate:=true,ref:=-1)->Label:
 	if is_instance_valid(_god):_drop(_god,false)
@@ -1367,7 +1452,7 @@ func god_says(text:String,animate:=true,ref:=-1)->Label:
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null and not f.leaving:f.look_up()
-	event("god",{"text":text,"seconds":reveal_time(text)})
+	event("god",{"text":text,"seconds":reveal_time(text),"tone":_tone_of(text)})
 	if animate:
 		_god.descend()
 		_rays.modulate.a=0.0
@@ -1553,6 +1638,7 @@ func _place_bubble(bubble:Bubble)->void:
 		if (to_right and bubble.tip.x>-4.0) or (not to_right and bubble.tip.x<bs.x+4.0):bubble.tail_side="none"
 	bubble.pivot_offset=bubble.tip.clamp(Vector2.ZERO,bs)
 	bubble.home_y=0.0
+	if bubble.speaker!=_focus_key:_clear_focus(bubble)
 	bubble.queue_redraw()
 
 ## The faces of everyone standing here but one, as stage rectangles.
@@ -1573,10 +1659,41 @@ func _place_god()->void:
 		_rays.target=Rect2(_god.position,_god.size);_rays.queue_redraw()
 
 func _place_caption()->void:
-	## Low on the stage like a line under a picture, but above the name plates.
+	## A line under the picture. In the modelled hall it sits in a band at the
+	## very foot of the stage, and goes to the top, under the god's band,
+	## rather than lie over the face the camera is on.
 	if not is_instance_valid(_caption):return
-	_caption.position=Vector2((_usable_width()-_caption.size.x)*.5,maxf(top_inset+6.0,size.y-_caption.size.y-PLATE_ROOM)).round()
+	var foot:=size.y-_caption.size.y-(8.0 if court_set!=null else PLATE_ROOM)
+	_caption.position=Vector2((_usable_width()-_caption.size.x)*.5,maxf(top_inset+6.0,foot)).round()
+	var face:=_focus_face()
+	if face.size.x>0.0 and Rect2(_caption.position,_caption.size).intersects(face):
+		var high:=top_inset+6.0+(_god.size.y+6.0 if is_instance_valid(_god) else 0.0)
+		_caption.position.y=round(high)
 	_caption.home_y=_caption.position.y
+
+## The face the camera is pushed in on, as a stage rectangle (empty: none).
+func _focus_face()->Rect2:
+	var f:=figure(_focus_key)
+	if f==null or f.leaving:return Rect2()
+	var top:=head_point(f)
+	return Rect2(top.x-f.size.x*.30,top.y,f.size.x*.60,f.size.y*.28)
+
+## A bubble never lies over the face the camera has gone in on: above it if
+## there is room, else to the side with more room.
+func _clear_focus(bubble:Control)->void:
+	var face:=_focus_face()
+	if face.size.x<=0.0 or not is_instance_valid(bubble):return
+	var rect:=Rect2(bubble.position,bubble.size)
+	if not rect.intersects(face.grow(4.0)):return
+	if face.position.y-bubble.size.y-8.0>=top_inset+4.0:
+		bubble.position.y=face.position.y-bubble.size.y-8.0
+	elif face.position.x>size.x-face.end.x:
+		bubble.position.x=maxf(6.0,face.position.x-bubble.size.x-10.0)
+	else:
+		bubble.position.x=minf(size.x-bubble.size.x-6.0,face.end.x+10.0)
+	if bubble is Bubble:
+		var b:=bubble as Bubble
+		b.tail_side="none";b.queue_redraw()
 
 func _place_thinking()->void:
 	if not is_instance_valid(thinking) or not thinking.visible:return
