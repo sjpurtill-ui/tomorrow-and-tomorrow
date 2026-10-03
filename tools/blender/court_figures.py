@@ -150,6 +150,8 @@ def build_variant(variant, quick=False, ao=True):
     heads = [body, eyes, brows, mouth] + [o for key, objs in sets.items() if key.startswith(("hair_", "beard_")) for o in objs]
     cf_body.face_morphs(f, heads)
     cf_body.mood_morphs(f, mouth, brows)
+    riders = [o for key, objs in sets.items() if key.startswith("beard_") for o in objs]
+    cf_body.expression_morphs(f, body, eyes, brows, mouth, face.get("eye_center", {}), riders)
     cf_anim.write_actions(rig, k, frame=f)
     sets["props"] = build_props(rig, f)
     log(variant, "clips", len(cf_anim.CLIPS), round(time.time() - t0, 1), "s")
@@ -461,6 +463,13 @@ def _write_masks(body, masks):
 
 
 def export(rig, sets, path):
+    # Every morph rests at 0: the file's default weights come from these values.
+    for objs in sets.values():
+        for o in objs:
+            keys = o.data.shape_keys if o.type == 'MESH' else None
+            if keys is not None:
+                for kb in keys.key_blocks:
+                    kb.value = 0.0
     for o in bpy.context.selected_objects:
         o.select_set(False)
     rig.select_set(True)
@@ -492,12 +501,26 @@ def manifest(entries, out_dir):
         "props": {"staff": "prop_staff", "bowl": "prop_bowl", "sit": "prop_stool"},
         "face_shapes": ["face_" + n for n in cf_body.FACE_SHAPES],
         "moods": ["mood_smile", "mood_tight", "mood_worry", "mood_stern"],
+        "expressions": list(cf_body.EXPRESSIONS),
+        "visemes": list(cf_body.VISEMES),
         "slots": list(cf_body.SLOT_DEFAULTS.keys()),
     }
-    for e in entries:
+    # bodies built in separate runs keep their entries
+    path = os.path.join(out_dir, "court_figures.json")
+    if os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as fh:
+                old = json.load(fh)
+            built = {e["variant"] for e in entries}
+            data["variants"] = [e for e in old.get("variants", []) if e.get("variant") not in built] + entries
+            order = list(cf_body.VARIANTS.keys())
+            data["variants"].sort(key=lambda e: order.index(e["variant"]) if e["variant"] in order else 99)
+        except (OSError, ValueError, KeyError):
+            pass
+    for e in data["variants"]:
         for kind, names in e.get("outfits", {}).items():
             data["outfits"][kind] = sorted(set(data["outfits"][kind]) | set(names))
-    with open(os.path.join(out_dir, "court_figures.json"), "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8") as fh:
         json.dump(data, fh, indent=1)
 
 

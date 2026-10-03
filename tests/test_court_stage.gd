@@ -24,12 +24,17 @@ var _root_size:=Vector2i.ZERO
 
 
 func before_test()->void:
+	# The stage's own acting, without the director's (its own suite covers it).
+	Stage.directing=false
+	Stage.director=null
 	Fixtures.new(self).base(false)
 	_root_size=get_tree().root.size
 	get_tree().root.size=Vector2i(1920,1080)
 
 
 func after_test()->void:
+	Stage.directing=true
+	Stage.director=null
 	get_tree().root.size=_root_size
 	Tokens.set_color_mode("light")
 
@@ -820,7 +825,7 @@ class StubDirector extends RefCounted:
 		if String(event.kind)!="line":return []
 		var other:=""
 		for member in cast:
-			if String(member.key)!="main":other=String(member.key)
+			if String(member.get("role",""))=="court":other=String(member.key)
 		return [{"t":0.0,"who":"main","act":"gesture","args":{"clip":"bow"}},
 			{"t":0.0,"who":other,"act":"aside","args":{"text":"He says that every spring."}}]
 
@@ -837,9 +842,40 @@ func test_a_directors_beats_play_on_the_stage()->void:
 	assert_str(_clip_of(modal,Stage.MAIN)).is_equal("bow")
 	var asides:=[]
 	for b in _bubbles(modal):
-		if (b as Stage.Bubble).kind=="aside":asides.append(b)
+		if (b as Stage.Bubble).kind=="mutter":asides.append(b)
 	assert_int(asides.size()).is_greater_equal(1)
 	# The cast the director sees is who stands here, with their bodies.
 	var cast:Array=modal.court_stage.cast_list()
 	assert_bool(cast.is_empty()).is_false()
 	assert_object((cast[0] as Dictionary).figure).is_not_null()
+
+
+# --- With the director (L): the room, its life, and wrath as the engine decided ----
+
+func test_with_the_director_the_room_lives_and_agrees_with_the_engine()->void:
+	Stage.directing=true
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var stage:Control=modal.court_stage
+	assert_object(Stage.director).is_not_null()
+	# Bystanders of our people stand in the room (no plates), each a figure.
+	var crowd:=0
+	for key in stage.cast_order:
+		var f:Stage.Figure=stage.figure(key)
+		if f!=null and f.role=="crowd":
+			crowd+=1
+			assert_object(f.body3d).is_not_null()
+			assert_bool(f.plate.visible).is_false()
+	assert_int(crowd).is_greater_equal(2)
+	assert_bool(stage.facts.has("era")).is_true()
+	# Wrath: the engine decides how they meet it, and the stage agrees.
+	var result:Dictionary=modal.divine("terrify")
+	if bool(result.get("ok",false)):
+		for i in 30:
+			if stage._beats!=null and stage._beats.is_valid():stage._beats.custom_step(0.25)
+		var clip:=_clip_of(modal,Stage.MAIN)
+		var response:=String(result.get("response",""))
+		if response=="defy":assert_str(clip).is_not_equal("kneel")
+		elif response=="cower":assert_bool(clip in ["kneel","bow"] or clip.begins_with("kneel")).override_failure_message("cowering but "+clip).is_true()
+	Stage.directing=false
+	Stage.director=null

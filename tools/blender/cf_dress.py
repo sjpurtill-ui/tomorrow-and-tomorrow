@@ -387,7 +387,7 @@ def beard_style(f, style):
             top = np.interp(th, [0, 18, 30, 40], [0.16, 0.24, 0.24, -0.5])
             lowest = -0.06
         else:
-            top = np.interp(th, [0, 22, 55, 92, 110], [0.135, 0.235, 0.39, 0.45, 0.38])
+            top = np.interp(th, [0, 22, 55, 92, 110], [0.120, 0.215, 0.30, 0.40, 0.34]) if style in ("beard_short", "beard_stubble")                 else np.interp(th, [0, 22, 55, 92, 110], [0.135, 0.235, 0.36, 0.44, 0.38])
             lowest = {"beard_full": -0.12, "beard_long": -0.07}.get(style, -0.035)
         g = np.maximum(u - top, lowest - u) * f.head_h
         return np.maximum(g, (th - 104.0) * 0.001)
