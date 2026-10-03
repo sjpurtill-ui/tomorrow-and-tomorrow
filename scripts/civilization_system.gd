@@ -3753,7 +3753,9 @@ func _process_intercivilization_relations(day:int)->void:
 			if treaty=="truce":
 				tension=maxf(0.0,tension-0.018)
 				if tension<0.18: treaty="none"
-			elif treaty in ["trade","non_aggression"] and opinion<0.04:
+			# A treaty breaks when regard falls below its floor: lower between
+			# persuasive peoples (standing.gd treaty_floor; 0.04 for typical ones).
+			elif treaty in ["trade","non_aggression"] and opinion<preload("res://scripts/standing.gd").treaty_floor(String(first.id),String(second.id)):
 				treaty="none"
 			relation["treaty"]=treaty
 			var war_capacity:=_war_count(first)<2 and _war_count(second)<2

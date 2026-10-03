@@ -61,7 +61,11 @@ class Medallion extends Control:
 		var width:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,18).x
 		draw_string(font,center+Vector2(-width*0.5,7.0),text,HORIZONTAL_ALIGNMENT_LEFT,-1,18,T.INK)
 
-## The rose of our nine strengths, drawn like a chart's wind rose.
+## The rose of our nine strengths, drawn like a chart's wind rose. Its rings
+## are the age's yardstick (standing_scale.gd): the middle ring a typical
+## people of our age, the rim the most the age has seen. Every people we know
+## is laid beside ours as a fine inked line, dashed where it is our watchers'
+## estimate; the one chosen is drawn stronger, its uncertainty a soft band.
 class Rose extends Control:
 	signal picked(id:String)
 	var strengths:Array=[]
@@ -69,6 +73,8 @@ class Rose extends Control:
 	var theirs:Dictionary={}
 	var their_color:=Color.WHITE
 	var their_name:=""
+	## Every people we know: [{values, color, name, chosen}].
+	var others:Array=[]
 	var highlight:=-1
 	func _init()->void:
 		custom_minimum_size=Vector2(330,330)
@@ -79,6 +85,20 @@ class Rose extends Control:
 		strengths=items;ghost=year_ago;queue_redraw()
 	func compare(values:Dictionary,tint:Color,name:String)->void:
 		theirs=values;their_color=tint;their_name=name;queue_redraw()
+	func overlay(list:Array)->void:
+		others=list;queue_redraw()
+	func _value_of(values:Dictionary,id:String,key:String="value")->float:
+		var entry:Variant=values.get(id,{})
+		return clampf(float((entry as Dictionary).get(key,(entry as Dictionary).get("value",0.0))),0.0,1.0) if entry is Dictionary else 0.0
+	func _estimated(values:Dictionary)->bool:
+		for item:Dictionary in strengths:
+			var entry:Variant=values.get(String(item.id),{})
+			if entry is Dictionary and not bool((entry as Dictionary).get("exact",true)): return true
+		return false
+	func _outline(values:Dictionary,key:String="value")->PackedVector2Array:
+		var shape:=PackedVector2Array()
+		for i in strengths.size(): shape.append(_point(i,maxf(0.02,_value_of(values,String(strengths[i].id),key))))
+		return shape
 	func set_highlight(index:int)->void:
 		if index==highlight: return
 		highlight=index;queue_redraw()
@@ -103,19 +123,46 @@ class Rose extends Control:
 			draw_polyline(outline,T.RULE_STRONG if ring==1.0 else T.RULE,1.4 if ring==1.0 else 1.0,true)
 		for i in count:
 			draw_line(center,center+Vector2.from_angle(_angle(i))*radius,T.RULE_STRONG if i==highlight else T.RULE,2.0 if i==highlight else 1.0,true)
+		# The age's yardstick named on its rings, small, beside the top spoke.
+		var note_font:=T.voice_font(true)
+		for pair:Array in [[0.5,"typical of our age"],[1.0,"the most the age has seen"]]:
+			var at:=center+Vector2(5.0,-radius*float(pair[0])-3.0)
+			draw_string(note_font,at,String(pair[1]),HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color(T.INK_MUTED,0.85))
 		# Last year's shape, faint, so the change shows.
 		if not ghost.is_empty():
 			var past:=PackedVector2Array()
 			for i in count: past.append(_point(i,float(ghost.get(String(strengths[i].id),0.0))/100.0))
 			past.append(past[0])
 			for i in past.size()-1: _dashes(past[i],past[i+1],T.INK_MUTED,1.2,4.0)
-		# A people we know, laid over ours.
+		# Every people we know, fine and faint behind ours: dashed where it is
+		# our watchers' estimate, a whole line where we know them well.
+		for other:Dictionary in others:
+			if bool(other.get("chosen",false)): continue
+			var values:Dictionary=other.get("values",{})
+			var tint:Color=other.get("color",T.INK_MUTED)
+			var line:=_outline(values)
+			line.append(line[0])
+			if _estimated(values):
+				for i in line.size()-1: _dashes(line[i],line[i+1],Color(tint,0.55),1.2,5.0)
+			else: draw_polyline(line,Color(tint,0.55),1.2,true)
+		# The people chosen beside ours: how unsure we are of them as a soft
+		# band (between the low and the high of each estimate), a light wash
+		# and a stronger line.
 		if not theirs.is_empty():
-			var shape:=PackedVector2Array()
-			for i in count: shape.append(_point(i,maxf(0.02,float((theirs.get(String(strengths[i].id),{}) as Dictionary).get("value",0.0)))))
-			if shape.size()>=3: draw_colored_polygon(shape,Color(their_color,0.10))
+			var shape:=_outline(theirs)
+			var unsure:=_estimated(theirs)
+			if unsure:
+				var low:=_outline(theirs,"low")
+				var high:=_outline(theirs,"high")
+				for i in count:
+					var j:=(i+1)%count
+					var quad:=PackedVector2Array([low[i],low[j],high[j],high[i]])
+					if Geometry2D.triangulate_polygon(quad).size()>=3: draw_colored_polygon(quad,Color(their_color,0.09))
+			elif shape.size()>=3: draw_colored_polygon(shape,Color(their_color,0.10))
 			shape.append(shape[0])
-			for i in shape.size()-1: _dashes(shape[i],shape[i+1],their_color.darkened(0.15),2.2,7.0)
+			if unsure:
+				for i in shape.size()-1: _dashes(shape[i],shape[i+1],their_color.darkened(0.15),2.2,7.0)
+			else: draw_polyline(shape,their_color.darkened(0.15),2.2,true)
 		# Ours: a gold wash and a gold line.
 		var ours:=PackedVector2Array()
 		for i in count: ours.append(_point(i,maxf(0.02,float(strengths[i].value))))
@@ -146,7 +193,7 @@ class Rose extends Control:
 			draw_string(strong,Vector2(x+(block_width-name_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y),name,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.GOLD_TEXT if i==highlight else T.INK)
 			draw_string(plain,Vector2(x+(block_width-value_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y+15.0),value,HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.INK_MUTED)
 		if their_name!="" and not theirs.is_empty():
-			var note:="- - %s, as travellers tell it" % their_name
+			var note:=("- - %s, as our watchers reckon them; shaded, how unsure we are" % their_name) if _estimated(theirs) else ("%s, as we know them" % their_name)
 			draw_string(plain,Vector2(8.0,size.y-8.0),note,HORIZONTAL_ALIGNMENT_LEFT,size.x-16.0,12,T.text_for(their_color) if their_color!=Color.WHITE else T.INK_MUTED)
 	func _dashes(from:Vector2,to:Vector2,color:Color,width:float,dash:float)->void:
 		var length:=from.distance_to(to)
@@ -178,7 +225,10 @@ class Rose extends Control:
 		if index<0: return ""
 		var item:Dictionary=strengths[index]
 		var text:="%s %d%%: %s.\n%s." % [String(item.name),roundi(float(item.value)*100.0),String(item.means),String(item.why).left(1).to_upper()+String(item.why).substr(1)]
-		if not theirs.is_empty(): text+="\n%s: about %d%%." % [their_name,roundi(float((theirs.get(String(item.id),{}) as Dictionary).get("value",0.0))*100.0)]
+		for other:Dictionary in others:
+			var entry:Variant=(other.get("values",{}) as Dictionary).get(String(item.id),{})
+			if entry is Dictionary: text+="\n%s: %s." % [String(other.get("name","")),Standing.estimate_words(entry as Dictionary)]
+		text+="\n50% is a typical people of our age; 100% the most the age has seen."
 		return text+"\nClick to open %s." % String(item.section_name)
 
 var data:Dictionary={}
@@ -193,6 +243,7 @@ var strength_list:VBoxContainer
 var strength_rows:Array[Control]=[]
 var compare_row:HFlowContainer
 var dangers:VBoxContainer
+var arts:VBoxContainer
 var peoples_heading:Label
 var peoples:GridContainer
 var home:VBoxContainer
@@ -201,6 +252,7 @@ func setup(block:Dictionary)->void:
 	name="StandingBoard"
 	add_theme_constant_override("separation",18)
 	_build_hero()
+	arts=VBoxContainer.new();arts.name="ArtsAtWork";arts.add_theme_constant_override("separation",8);add_child(arts)
 	dangers=VBoxContainer.new();dangers.name="Dangers";dangers.add_theme_constant_override("separation",8);add_child(dangers)
 	var peoples_box:=VBoxContainer.new();peoples_box.name="Peoples";peoples_box.add_theme_constant_override("separation",10);add_child(peoples_box)
 	peoples_heading=Kit.label(peoples_box,"How the peoples we know see us","kicker")
@@ -226,6 +278,7 @@ func apply(block:Dictionary)->void:
 	seal.texture=Identity.emblem("player")
 	_refill("strengths",[block.get("strengths",[]),block.get("year_ago",{})],_fill_strengths)
 	_refill("compare",[_compare_print(),String((block.get("view_state",{}) as Dictionary).get("compare",""))],_fill_compare)
+	_refill("arts",block.get("arts",{}),_fill_arts)
 	_refill("dangers",block.get("warnings",[]),_fill_dangers)
 	_refill("peoples",block.get("peoples",[]),_fill_peoples)
 	_refill("home",block.get("home",{}),_fill_home)
@@ -259,6 +312,8 @@ func _theirs(p:Dictionary)->Dictionary:
 
 func _layout()->void:
 	if hero_body: hero_body.columns=2 if size.x>=WIDE_AT else 1
+	var arts_grid:=find_child("ArtsGrid",true,false) as GridContainer
+	if arts_grid: arts_grid.columns=2 if size.x>=WIDE_AT else 1
 	if peoples: peoples.columns=2 if size.x>=TWO_CARDS_AT else 1
 
 static func _card(accent:Color=Color(0,0,0,0),pad:float=16.0)->PanelContainer:
@@ -351,6 +406,7 @@ func _fill_strengths()->void:
 	_clear(strength_list)
 	strength_rows.clear()
 	_strength_refs.clear()
+	Kit.label(strength_list,"Each against the peoples of our age: 50% is a typical people, 80% what the best of them managed, 100% the most the age has seen.","note")
 	Kit.label(strength_list,"Faint dashes on the rose: a year ago. Click a strength to raise it." if not (data.get("year_ago",{}) as Dictionary).is_empty() else "Click a strength to raise it.","note")
 	for index in items.size():
 		strength_list.add_child(_strength_row(items[index],index))
@@ -386,7 +442,7 @@ func _strength_row(item:Dictionary,index:int)->Control:
 ## One strength's value, year's change and reason, for the first drawing and
 ## every refresh.
 func _fill_strength(refs:Dictionary,item:Dictionary)->void:
-	(refs.row as Control).tooltip_text="%s: %s.\n%s.\nRaised through %s; it costs %s. Click to open %s." % [String(item.name),String(item.means),String(item.why),String(item.section_name),String(item.cost),String(item.section_name)]
+	(refs.row as Control).tooltip_text="%s: %s.\n%s.%s\n50%% is a typical people of our age, 100%% the most the age has seen.\nRaised through %s; it costs %s. Click to open %s." % [String(item.name),String(item.means),_sentence(String(item.why)),("\nAgainst the age: %s." % String(item.parts)) if String(item.get("parts",""))!="" else "",String(item.section_name),String(item.cost),String(item.section_name)]
 	if refs.moved!=null:
 		var change:=float(item.change)
 		var words:="steady over the year" if absf(change)<1.0 else ("%s%d in a year" % ["+" if change>0.0 else "−",roundi(absf(change))])
@@ -415,8 +471,17 @@ func _fill_compare()->void:
 	var shown:=false
 	if list.is_empty():
 		rose.compare({},Color.WHITE,"")
+		rose.overlay([])
 		return
-	var caption:=Kit.label(compare_row,"Lay beside ours:","note",Color(0,0,0,0),false)
+	# Every people we know, faint beside ours; the chosen one drawn stronger.
+	var overlays:Array=[]
+	for p:Dictionary in list:
+		if not _comparable(p): continue
+		var values:=_theirs(p)
+		if values.is_empty(): continue
+		overlays.append({"values":values,"color":p.get("accent",T.RED),"name":String(p.name),"chosen":String(p.civ_id)==chosen})
+	rose.overlay(overlays)
+	var caption:=Kit.label(compare_row,"Beside ours, as we know them:","note",Color(0,0,0,0),false)
 	caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	for p:Dictionary in list:
 		var comparable:=_comparable(p)
@@ -424,8 +489,9 @@ func _fill_compare()->void:
 		chip.name="Compare_"+String(p.civ_id)
 		chip.toggle_mode=true
 		chip.text=String(p.name)
+		chip.icon=_dot(p.get("accent",T.RED)) if comparable else null
 		chip.disabled=not comparable
-		chip.tooltip_text="We know too little of them yet." if not comparable else "Lay %s's strengths, as travellers tell it, over ours." % String(p.name)
+		chip.tooltip_text="We know too little of them yet: our watchers cannot say how strong they are." if not comparable else "Draw %s's strengths, as our watchers reckon them, stronger beside ours. %s" % [String(p.name),String(p.get("known_words",""))]
 		chip.button_pressed=String(p.civ_id)==chosen
 		chip.add_theme_font_size_override("font_size",13)
 		chip.add_theme_color_override("font_color",T.INK)
@@ -448,6 +514,57 @@ func _fill_compare()->void:
 			rose.compare(theirs,tint,String(p.name))
 			shown=true
 	if not shown: rose.compare({},Color.WHITE,"")
+
+## A small inked dot in a people's colour, for its chip (the rose's legend).
+static var _dots:Dictionary={}
+static func _dot(tint:Color)->Texture2D:
+	var key:=tint.to_html()
+	if _dots.has(key): return _dots[key]
+	var image:=Image.create(12,12,false,Image.FORMAT_RGBA8)
+	image.fill(Color(0,0,0,0))
+	for y in 12:
+		for x in 12:
+			var d:=Vector2(x-5.5,y-5.5).length()
+			if d<=5.0: image.set_pixel(x,y,Color(tint,clampf(5.5-d,0.0,1.0)))
+	var texture:=ImageTexture.create_from_image(image)
+	_dots[key]=texture
+	return texture
+
+# ------------------------------------------- cunning and persuasion at work
+
+## What our cunning and persuasion do this month, with the engine's numbers
+## (standing.gd arts_at_work): two columns, each a heading and its rows; the
+## detail of each row in its tooltip.
+func _fill_arts()->void:
+	_clear(arts)
+	var at_work:Dictionary=data.get("arts",{})
+	if at_work.is_empty():
+		arts.visible=false
+		return
+	arts.visible=true
+	Kit.label(arts,"What our cunning and persuasion do","kicker")
+	var card:=_card(T.TEAL,16.0)
+	card.name="Arts"
+	arts.add_child(card)
+	var grid:=GridContainer.new();grid.columns=2 if size.x>=WIDE_AT else 1
+	grid.name="ArtsGrid"
+	grid.add_theme_constant_override("h_separation",22);grid.add_theme_constant_override("v_separation",12)
+	card.add_child(grid)
+	for pair:Array in [["cunning","Cunning",float(at_work.get("cunning_value",0.5))],["persuasion","Persuasion",float(at_work.get("persuasion_value",0.5))]]:
+		var column:=VBoxContainer.new();column.name="Arts_"+String(pair[0]);column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.add_theme_constant_override("separation",5)
+		grid.add_child(column)
+		var head:=HBoxContainer.new();head.add_theme_constant_override("separation",8);column.add_child(head)
+		var title:=_voice(head,String(pair[1]),20,false)
+		title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		Kit.label(head,"%d%%" % roundi(float(pair[2])*100.0),"value",Color(0,0,0,0),false)
+		var meter:=Meter.new();meter.set_value(float(pair[2]),T.TEAL if String(pair[0])=="cunning" else T.GOLD);column.add_child(meter)
+		Kit.label(column,"Half is a typical people of our age; each effect below is the engine's own, the same for every people.","note")
+		for row:Dictionary in at_work.get(String(pair[0]),[]):
+			var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.mouse_filter=Control.MOUSE_FILTER_PASS;column.add_child(line)
+			var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(6,6);dot.color=T.INK_MUTED;dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;dot.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(dot)
+			var words:=Kit.label(line,String(row.words),"body")
+			words.tooltip_text=String(row.get("detail",""))
+			words.mouse_filter=Control.MOUSE_FILTER_PASS
 
 # -------------------------------------------------------------- the dangers
 

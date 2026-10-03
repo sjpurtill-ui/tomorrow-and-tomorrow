@@ -9,6 +9,9 @@ static func capture_scopes()->Dictionary:
 	var standing_metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	for key:String in ["might","endurance","wealth","reach","persuasion","splendor","genius","cunning","order","pride","awe","allure"]:
 		if standing_metrics.has("standing_"+key): scopes.civilization["standing_"+key]=roundf(clampf(float(standing_metrics["standing_"+key]),0.0,1.0)*100.0)
+	# Readings against the age (standing_scale.gd, from 2026-10-03) carry their
+	# scale, so a year's change is never read across the old absolute one.
+	if standing_metrics.has("standing_day"): scopes.civilization["standing_scale"]=2
 	# The realm's one purse (realm_purse.gd), in its own unit.
 	scopes.civilization["purse"]=roundf(float((WorldSimulation.state.realm_purse as Dictionary).get("balance",0.0)))
 	for city in WorldSimulation.state.player_settlements:

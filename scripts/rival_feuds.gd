@@ -145,7 +145,12 @@ static func raid(attacker:Dictionary,defender:Dictionary,day:int)->Dictionary:
 	var d_n:=War._band_size(d_pop,rng.randf_range(0.02,0.035))
 	var band_a:=War._band("%s raiders" % String(attacker.get("name",a_id)),a_n,float(attacker.get("knowledge",0.15)),float(attacker.get("military_readiness",0.5)),"their war leader",0.5)
 	var band_d:=War._band(String(defender.get("name",d_id)),d_n,float(defender.get("knowledge",0.15)),float(defender.get("military_readiness",0.5)),"their war leader",0.45)
-	var fight:=War._clash(band_a,band_d,1.0,key)
+	# The defenders' cunning sees the raiders coming (standing.gd
+	# forewarn_odds, the same rule as for raids on the god's people): seen,
+	# they meet them on ground of their choosing (war_loop._raid's x1.35).
+	var Standing:=preload("res://scripts/standing.gd")
+	var seen:=rng.randf()<Standing.forewarn_odds(Standing.art_of(d_id,"cunning"))
+	var fight:=War._clash(band_a,band_d,1.35 if seen else 1.0,key)
 	var won:=bool(fight.won)
 	var d_dead:=War._cap_dead(int(fight.def_dead),d_pop)
 	var a_dead:=War._cap_dead(int(fight.att_dead),a_pop)
@@ -162,7 +167,7 @@ static func raid(attacker:Dictionary,defender:Dictionary,day:int)->Dictionary:
 	# Each remembers: the raided most of all.
 	_remember(d_id,a_id,0.05,0.10)
 	_remember(a_id,d_id,0.02,0.05)
-	return {"won":won,"attacker_dead":a_dead,"defender_dead":d_dead,"taken":taken}
+	return {"won":won,"attacker_dead":a_dead,"defender_dead":d_dead,"taken":taken,"seen":seen}
 
 static func _food_held()->float:
 	var total:=0.0

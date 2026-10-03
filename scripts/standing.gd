@@ -12,9 +12,12 @@ extends RefCounted
 ## Nothing is stored, so nothing can drift from the ledger. Every value comes
 ## with its reasons in plain words, for the court and the Standing page.
 ##
-## Strengths are 0..1 against what the age expects (a village is not weak for
-## lacking an empire's army). Views are what one other people feels: 0..1.
-## Envy and Contempt are the two dangers read from the views.
+## Strengths are 0..1 against the age (standing_scale.gd): 0.5 is the typical
+## people of the age, 0.8 what its best-documented peoples did, 1.0 the most
+## the age has plausibly seen, on a log scale between (a village is not weak
+## for lacking an empire's army, and no hoard of one thing fills a strength).
+## Views are what one other people feels: 0..1. Envy and Contempt are the two
+## dangers read from the views.
 
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Rewards:=preload("res://scripts/undertaking_rewards.gd")
@@ -24,18 +27,11 @@ const LIVES_PATH:="res://scripts/court_lives.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 ## The built fabric (built_fabric.gd): fine works, walls and stone.
 const Fabric:=preload("res://scripts/built_fabric.gd")
+## The age's yardstick: what 20%, 50%, 80% and 100% mean for each strength.
+const Scale:=preload("res://scripts/standing_scale.gd")
 
-## Share of the people under arms, trained and ready, that is full Might for
-## any age (pre-modern mobilisation tops out near 7%: war_loop MOBILIZE_MAX).
-const MIGHT_FULL_SHARE:=0.07
 ## A trained, ready warrior counts as this many untrained defenders.
 const WARRIOR_WEIGHT:=3.0
-## Days of food in store that is full Wealth and full Endurance: food_care.gd
-## store_gate of the old 90 and 120, as the rulers' own store gates count the
-## lean stores (plain numbers for the fast sim; test_food_care checks them).
-## Envy raids still come for a well-stocked people.
-const WEALTH_FOOD_DAYS:=45.0
-const ENDURANCE_FOOD_DAYS:=60.0
 ## Envy and Contempt start to move peoples above these.
 const ENVY_RAID_FLOOR:=0.35
 const CONTEMPT_FLOOR:=0.3
@@ -145,67 +141,285 @@ static func forget()->void:
 	pass
 
 static func _reckon_strengths()->Dictionary:
-	var s=WorldSimulation.state
-	var m:Dictionary=s.simulation_metrics
-	var pop:=_population()
+	var year:=_year()
 	var result:Dictionary={}
-	var warriors:=_warriors()
+	result["might"]=_might(year)
+	result["genius"]=_genius(year)
+	result["persuasion"]=_persuasion(year)
+	result["cunning"]=_cunning(year)
+	result["wealth"]=_wealth(year)
+	var splendor:=_splendor(year)
+	result["_culture"]=float(splendor.get("_culture",0.0))
+	result["_beauty"]=float(splendor.get("_beauty",0.0))
+	splendor.erase("_culture");splendor.erase("_beauty")
+	result["splendor"]=splendor
+	result["order"]=_order(year)
+	result["endurance"]=_endurance(year)
+	result["reach"]=_reach(year)
+	return result
+
+## The game year of the people in scope (0 = 5000 BC).
+static func _year()->float:
+	return maxf(0.0,float(WorldSimulation.state.elapsed_days)/365.0)
+
+## One part of a strength: its reading against the age (0..1), its weight,
+## the measure itself and the age's typical measure.
+static func _part(id:String,score:float,weight:float,measure:float,anchors:Array)->Dictionary:
+	return {"id":id,"score":clampf(score,0.0,1.0),"weight":weight,"measure":measure,"typical":float(anchors[1]) if anchors.size()>1 else 0.5,"high":float(anchors[2]) if anchors.size()>2 else 0.8,"max":float(anchors[3]) if anchors.size()>3 else 1.0}
+
+static func _blend(parts:Array)->float:
+	var total:=0.0
+	var weights:=0.0
+	for p:Dictionary in parts:
+		total+=float(p.score)*float(p.weight)
+		weights+=float(p.weight)
+	return clampf(total/maxf(0.0001,weights),0.0,1.0)
+
+static func _entry(parts:Array,why:String)->Dictionary:
+	return {"value":_blend(parts),"why":why,"parts":parts}
+
+## "1.4 in 100" for a share.
+static func _per_hundred(share:float)->String:
+	var x:=share*100.0
+	if x>=9.95: return "%d in 100" % roundi(x)
+	return "%.1f in 100" % x
+
+static func _n(x:float)->String:
+	if absf(x)>=10.0: return "%d" % roundi(x)
+	return "%.1f" % x
+
+## "about twice a typical people of our age (30)": a measure against the age.
+static func _vs(measure:float,anchors:Array,typical_words:String="")->String:
+	var words:=Scale.compare_words(measure,anchors)
+	if words=="": return ""
+	return "%s (%s)" % [words,typical_words if typical_words!="" else _n(float(anchors[1]))]
+
+static func _pct(x:float)->String:
+	return "%d%%" % roundi(x*100.0)
+
+static func _count_word(n:int)->String:
+	return ["no","one","two","three","four","five","six","seven","eight","nine","ten"][n] if n>=0 and n<=10 else str(n)
+
+## MIGHT: the share of the whole people ready to fight (warriors x their
+## readiness), walls and stone counting each defender for more, against the
+## age (standing_scale.gd might_anchors: the benchmark's defense_labor_share).
+static func _might(year:float)->Dictionary:
+	var pop:=_population()
+	var warriors:=clampf(_warriors(),0.0,pop)
 	var readiness:=_readiness()
-	var walls:=clampf(_walls()/Fabric.BASTION_BONUS,0.0,1.0)
-	var might:=clampf(warriors*readiness/maxf(1.0,pop*MIGHT_FULL_SHARE)+Fabric.FORT_MIGHT*walls,0.0,1.0)
-	result["might"]={"value":might,"why":"%d under arms or training, ready %d%%, among %d people%s" % [roundi(warriors),roundi(readiness*100.0),roundi(pop),("; walls and stone +%d" % roundi(Fabric.FORT_MIGHT*walls*100.0)) if walls>0.005 else ""]}
+	var walls:=_walls()
+	var lift:=1.0+Fabric.FORT_STRENGTH*walls
+	var share:=warriors*readiness/pop*lift
+	var a:=Scale.might_anchors(year)
+	var parts:=[_part("ready",Scale.score(share,a),1.0,share,a)]
+	var why:="%d under arms or training, ready %d%%, among %d people: %s ready to fight%s, %s" % [roundi(warriors),roundi(readiness*100.0),roundi(pop),_per_hundred(share),(" with walls and stone (x%.2f)" % lift) if walls>0.005 else "",_vs(share,a,_per_hundred(float(a[1])))]
+	return _entry(parts,why)
+
+## GENIUS: what we know against the age (standing_scale.gd known_anchors) and
+## how many of us are at research; the most learned people we know is named
+## beside it, as far as we know them.
+static func _genius(year:float)->Dictionary:
+	var s=WorldSimulation.state
 	var known:=float(s.known_discoveries.size())
-	var best_known:=_best_known_rival()
-	var scholars:=float(s.effective_workers("Knowledge"))
-	var genius:=clampf(0.5+(known-best_known)/maxf(20.0,maxf(known,best_known))*1.5,0.0,1.0) if best_known>=0.0 else clampf(0.35+scholars/maxf(1.0,pop)*3.0,0.0,1.0)
-	result["genius"]={"value":genius,"why":"%d practices known%s; %d people at research" % [roundi(known),(" against %d for the most learned people we know" % roundi(best_known)) if best_known>=0.0 else "",roundi(scholars)]}
-	var envoy:=_office_skill("Envoy","Diplomacy")
+	var a:=Scale.known_anchors(year)
+	var scholars:=maxf(0.0,float(s.effective_workers("Knowledge")))
+	var share:=scholars/_population()
+	var sa:=Scale.anchors(Scale.SCHOLARS,year)
+	var parts:=[_part("known",Scale.score(known,a),GENIUS_WEIGHTS.known,known,a),_part("scholars",Scale.score(share,sa),GENIUS_WEIGHTS.scholars,share,sa)]
+	var why:="%d practices known, %s; %d at research (%s), %s" % [roundi(known),_vs(known,a,"about %d" % roundi(float(a[1]))),roundi(scholars),_per_hundred(share),_vs(share,sa,_per_hundred(float(sa[1])))]
+	var rival:=best_known_rival()
+	if not rival.is_empty():
+		if bool(rival.get("unknown",false)): why+="; we know too little of the peoples we know to say what they know"
+		else: why+="; the most learned people we know, %s, %s" % [String(rival.name),String(rival.words)]
+	return _entry(parts,why)
+
+const GENIUS_WEIGHTS:={"known":0.6,"scholars":0.4}
+const PERSUASION_WEIGHTS:={"envoy":0.3,"openness":0.15,"familiarity":0.1,"treaties":0.15,"gifts":0.15,"abroad":0.15}
+const CUNNING_WEIGHTS:={"scout":0.25,"eyes":0.25,"agents":0.15,"caught":0.1,"intel":0.25}
+const SPLENDOR_WEIGHTS:={"works":0.55,"culture":0.25,"beauty":0.2}
+
+## PERSUASION: our envoy's skill, how open our ways are, how well we know
+## the peoples we know, the treaties and exchanges we keep, the gifts we give
+## and the time our envoys spend abroad. A typical people of the age reads 0.5.
+static func _persuasion(year:float)->Dictionary:
+	var speaker:=_speaker()
+	var envoy:=float(speaker.skill)
+	var s=WorldSimulation.state
 	var lived:Dictionary=s.societal_values.get("lived",{}) if s.societal_values is Dictionary else {}
 	var openness:=clampf((float(lived.get("openness",.5))+float(lived.get("pluralism",.5)))*.5,0,1)
-	var persuasion:=clampf(envoy*0.55+openness*0.3+_familiarity()*0.15,0.0,1.0)
-	result["persuasion"]={"value":persuasion,"why":"our envoy's skill %d%%, openness %d%%" % [roundi(envoy*100.0),roundi(openness*100.0)]}
+	var familiarity:=_familiarity()
+	var fa:=Scale.anchors(Scale.FAMILIARITY,year)
+	var kept:=treaties_kept()
+	var ta:=Scale.anchors(Scale.TREATIES,year)
+	var gifts:=gifts_given()
+	var ga:=Scale.anchors(Scale.GIFTS,year)
+	var abroad:=envoy_days()
+	var ea:=Scale.anchors(Scale.ENVOY_DAYS,year)
+	var gift_rate:=float(gifts.per_head_year)
+	var days_rate:=float(abroad.days)/_population()*100.0
+	var parts:=[_part("envoy",Scale.skill_score(envoy),PERSUASION_WEIGHTS.envoy,envoy,[0.2,Scale.ORDINARY_SKILL,0.8,1.0]),
+		_part("openness",openness,PERSUASION_WEIGHTS.openness,openness,[0.2,0.5,0.8,1.0]),
+		_part("familiarity",Scale.score(familiarity,fa),PERSUASION_WEIGHTS.familiarity,familiarity,fa),
+		_part("treaties",Scale.score(1.0+float(kept.count),ta),PERSUASION_WEIGHTS.treaties,float(kept.count),ta),
+		_part("gifts",Scale.score(1.0+20.0*gift_rate,ga),PERSUASION_WEIGHTS.gifts,gift_rate,ga),
+		_part("abroad",Scale.score(1.0+days_rate/10.0,ea),PERSUASION_WEIGHTS.abroad,days_rate,ea)]
+	var bits:PackedStringArray=[]
+	bits.append(String(speaker.words))
+	bits.append("openness %s" % _pct(openness))
+	bits.append("%s treat%s or exchange%s kept" % [_count_word(int(kept.count)),"y" if int(kept.count)==1 else "ies","" if int(kept.count)==1 else "s"])
+	bits.append(("gifts worth %s a head a year" % _n(gift_rate)) if gift_rate>0.005 else "no gifts given lately")
+	bits.append(("%d envoy-days abroad in five years" % roundi(float(abroad.days))) if float(abroad.days)>=1.0 else "no envoys abroad in five years")
+	return _entry(parts,", ".join(bits))
+
+## CUNNING: our chief scout, the scouts and the watch, our agents abroad,
+## the spies of theirs we catch and turn, and how well we know the peoples
+## we know. A typical people of the age reads 0.5.
+static func _cunning(year:float)->Dictionary:
+	var s=WorldSimulation.state
+	var pop:=_population()
 	var scout:=_office_skill("ChiefScout","Knowledge")
-	var cunning:=clampf(scout*0.6+clampf(float(s.population_allocations.get("Survey",0))/maxf(1.0,pop*0.08),0.0,1.0)*0.4,0.0,1.0)
-	result["cunning"]={"value":cunning,"why":"our chief scout's skill %d%%, %d out watching and finding" % [roundi(scout*100.0),int(s.population_allocations.get("Survey",0))]}
-	var food_days:=float(m.get("food_days",0.0))
+	var surveyors:=float(s.population_allocations.get("Survey",0))
+	var watch:=float(s.population_allocations.get("Defense",0))
+	var eyes:=(surveyors+watch*0.5)/pop
+	var sa:=Scale.anchors(Scale.SCOUTS,year)
+	var agents:=agents_abroad_count()
+	var caught:=spies_caught()
+	var intel:=_intel()
+	var ia:=Scale.anchors(Scale.INTEL,year)
+	var parts:=[_part("scout",Scale.skill_score(scout),CUNNING_WEIGHTS.scout,scout,[0.2,Scale.ORDINARY_SKILL,0.8,1.0]),
+		_part("eyes",Scale.score(eyes,sa),CUNNING_WEIGHTS.eyes,eyes,sa),
+		_part("agents",Scale.bonus_score(float(agents),AGENTS_HALF),CUNNING_WEIGHTS.agents,float(agents),[0.0,0.0,AGENTS_HALF,AGENTS_HALF*3.0]),
+		_part("caught",Scale.bonus_score(float(caught.count),CAUGHT_HALF),CUNNING_WEIGHTS.caught,float(caught.count),[0.0,0.0,CAUGHT_HALF,CAUGHT_HALF*3.0]),
+		_part("intel",Scale.score(intel,ia) if intel>=0.0 else Scale.TYPICAL_SCORE,CUNNING_WEIGHTS.intel,intel,ia)]
+	var bits:PackedStringArray=[]
+	bits.append("our chief scout's skill %s%s" % [_pct(scout),"" if scout>0.2 else " (no chief scout named)"])
+	bits.append("%d out scouting and %d on the watch (%s, %s)" % [roundi(surveyors),roundi(watch),_per_hundred(eyes),_vs(eyes,sa,_per_hundred(float(sa[1])))])
+	bits.append(("%s agent%s abroad" % [_count_word(agents),"" if agents==1 else "s"]) if agents>0 else "no agents abroad")
+	if int(caught.count)>0: bits.append("%s of their spies caught or turned in three years" % _count_word(int(caught.count)))
+	if intel>=0.0: bits.append("we know the peoples we know %s" % _knowledge_words(intel))
+	return _entry(parts,", ".join(bits))
+
+## Agents abroad and spies caught: each this many more lifts the part half
+## the way from typical to the most.
+const AGENTS_HALF:=2.0
+const CAUGHT_HALF:=3.0
+
+static func _knowledge_words(intel:float)->String:
+	if intel>=0.6: return "well"
+	if intel>=0.35: return "fairly well"
+	if intel>=0.2: return "a little"
+	return "hardly at all"
+
+## WEALTH: food in store, building materials and made goods a head, against
+## the age. Stores alone cannot fill it.
+static func _wealth(year:float)->Dictionary:
+	var s=WorldSimulation.state
+	var pop:=_population()
+	var food_days:=maxf(0.0,float(s.simulation_metrics.get("food_days",0.0)))
 	var materials:=0.0
-	for resource in ["Timber","Stone","Clay","Fiber Plants"]: materials+=float(s.resource_stockpiles.get(resource,0.0))
-	var wealth:=clampf(clampf(food_days/WEALTH_FOOD_DAYS,0.0,1.0)*0.65+clampf(materials/maxf(1.0,pop*5.0),0.0,1.0)*0.35,0.0,1.0)
-	result["wealth"]={"value":wealth,"why":"food for %d days, %d loads of materials" % [roundi(food_days),roundi(materials)]}
+	for resource in ["Timber","Stone","Clay","Fiber Plants"]: materials+=maxf(0.0,float(s.resource_stockpiles.get(resource,0.0)))
+	var goods:=maxf(0.0,float(s.resource_stockpiles.get("Civilian Goods",0.0)))
+	var fa:=Scale.anchors(Scale.STORES,year)
+	var ma:=Scale.anchors(Scale.MATERIALS,year)
+	var ga:=Scale.anchors(Scale.GOODS,year)
+	var parts:=[_part("food",Scale.score(food_days,fa),WEALTH_WEIGHTS.food,food_days,fa),_part("materials",Scale.score(materials/pop,ma),WEALTH_WEIGHTS.materials,materials/pop,ma),_part("goods",Scale.score(goods/pop,ga),WEALTH_WEIGHTS.goods,goods/pop,ga)]
+	var why:="food for %d days, %s; %s loads of materials and %s of made goods a head (a typical people of our age: %s and %s)" % [roundi(food_days),_vs(food_days,fa),_n(materials/pop),_n(goods/pop),_n(float(ma[1])),_n(float(ga[1]))]
+	return _entry(parts,why)
+
+const WEALTH_WEIGHTS:={"food":0.5,"materials":0.25,"goods":0.25}
+const ENDURANCE_WEIGHTS:={"food":0.45,"water":0.1,"walls":0.2,"health":0.125,"cohesion":0.125}
+const ORDER_WEIGHTS:={"legitimacy":0.35,"cohesion":0.2,"administration":0.2,"steward":0.25}
+const REACH_WEIGHTS:={"logistics":0.5,"met":0.5}
+
+## SPLENDOR: our great works' renown, our culture's allure and the fine
+## works of our towns, against the age. Returns "_culture" and "_beauty" for
+## the views as well.
+static func _splendor(year:float)->Dictionary:
 	# Every standing great work counts, whatever it was built for (its size,
 	# outcome and repair); welcoming and far-famed purposes add on top.
 	var report:=Culture.allure_report(false)
 	var works:=float(report.works)
-	result["_culture"]=float(report.allure)
-	var tier:=float(WorldSimulation.settlements.city_form().get("tier",0.0)) if WorldSimulation.settlements!=null and WorldSimulation.settlements.has_method("city_form") else 0.0
-	var from_works:=works*SPLENDOR_WORKS
-	var from_culture:=maxf(0.0,float(report.allure)-works)*SPLENDOR_CULTURE
-	var from_era:=clampf(tier/6.0,0.0,1.0)*SPLENDOR_ERA
+	var points:=maxf(0.0,float(report.get("works_points",0.0)))
+	var culture:=clampf(maxf(0.0,float(report.allure)-works),0.0,1.0)
 	# The fine works our builders raise and keep in every town (built_fabric.gd).
 	var beauty:=Fabric.realm_beauty()
-	var from_beauty:=beauty*Fabric.BEAUTY_SPLENDOR
-	result["_culture"]=clampf(float(result["_culture"])+beauty*Fabric.BEAUTY_CULTURE,0.0,1.0)
-	result["_beauty"]=beauty
-	var splendor:=clampf(from_works+from_culture+from_era+from_beauty,0.0,1.0)
+	var wa:=Scale.anchors(Scale.WORKS,year)
+	var ca:=Scale.anchors(Scale.CULTURE,year)
+	var ba:=Scale.anchors(Scale.BEAUTY,year)
+	var parts:=[_part("works",Scale.score(1.0+points,wa),SPLENDOR_WEIGHTS.works,points,wa),_part("culture",Scale.score_share(culture,ca),SPLENDOR_WEIGHTS.culture,culture,ca),_part("beauty",Scale.score(1.0+10.0*beauty,Scale.beauty_anchors(year)),SPLENDOR_WEIGHTS.beauty,beauty,ba)]
 	var standing_works:=int(report.get("works_standing",0))
-	var works_words:="no great work standing yet"
-	if from_works>0.0:works_words="%s, %.0f allure among other peoples (+%d)" % ["lesser monuments and remains that visitors see" if standing_works==0 else ("one great work standing" if standing_works==1 else "%d great works standing" % standing_works),float(report.get("works_points",0.0)),roundi(from_works*100.0)]
-	result["splendor"]={"value":splendor,"why":"%s; our culture and treasures (+%d); the town's building era %d (+%d); our builders' fine works (+%d)" % [works_words,roundi(from_culture*100.0),roundi(tier),roundi(from_era*100.0),roundi(from_beauty*100.0)]}
+	var works_words:="no great work standing yet" if points<0.5 else ("%s, renown %d" % ["lesser monuments and remains that visitors see" if standing_works==0 else ("one great work standing" if standing_works==1 else "%d great works standing" % standing_works),roundi(points)])
+	var why:="%s (a typical people of our age: renown about %d); our culture's allure %s (typical %s); our builders' fine works %s (typical %s)" % [works_words,maxi(0,roundi(float(wa[1])-1.0)),_pct(culture),_pct(float(ca[1])),_pct(beauty),_pct(float(ba[1]))]
+	var out:=_entry(parts,why)
+	out["_culture"]=clampf(float(report.allure)+beauty*Fabric.BEAUTY_CULTURE,0.0,1.0)
+	out["_beauty"]=beauty
+	return out
+
+## ORDER: trust in the chiefs, holding together, the hands at administration
+## and the steward's own, against the age.
+static func _order(year:float)->Dictionary:
+	var s=WorldSimulation.state
+	var m:Dictionary=s.simulation_metrics
 	var legitimacy:=float(m.get("legitimacy",0.5))
 	var cohesion:=float(m.get("cohesion",0.5))
-	var order:=clampf(legitimacy*0.55+cohesion*0.25+_office_skill("Steward","Administration")*0.2,0.0,1.0)
-	result["order"]={"value":order,"why":"trust in the chiefs %d%%, holding together %d%%" % [roundi(legitimacy*100.0),roundi(cohesion*100.0)]}
-	var water_days:=float(s.water_metrics.get("days",0.0))
+	var admin:=float(s.population_allocations.get("Administration",0))/_population()
+	var steward:=_office_skill("Steward","Administration")
+	var la:=Scale.anchors(Scale.LEGITIMACY,year)
+	var ca:=Scale.anchors(Scale.COHESION,year)
+	var aa:=Scale.anchors(Scale.ADMINISTRATION,year)
+	var parts:=[_part("legitimacy",Scale.score_share(legitimacy,la),ORDER_WEIGHTS.legitimacy,legitimacy,la),_part("cohesion",Scale.score_share(cohesion,ca),ORDER_WEIGHTS.cohesion,cohesion,ca),
+		_part("administration",Scale.score(admin,aa),ORDER_WEIGHTS.administration,admin,aa),_part("steward",Scale.skill_score(steward),ORDER_WEIGHTS.steward,steward,[0.2,Scale.ORDINARY_SKILL,0.8,1.0])]
+	var why:="trust in the chiefs %s and holding together %s (a typical people of our age: %s and %s); %s at administration (typical %s); the steward's skill %s%s" % [_pct(legitimacy),_pct(cohesion),_pct(float(la[1])),_pct(float(ca[1])),_per_hundred(admin),_per_hundred(float(aa[1])),_pct(steward),"" if steward>0.2 else " (no steward named)"]
+	return _entry(parts,why)
+
+## ENDURANCE: how long we could hold out, starved or besieged: food and
+## water in store, walls, health and holding together, against the age.
+static func _endurance(year:float)->Dictionary:
+	var s=WorldSimulation.state
+	var m:Dictionary=s.simulation_metrics
+	var food_days:=maxf(0.0,float(m.get("food_days",0.0)))
+	var water_days:=maxf(0.0,float(s.water_metrics.get("days",0.0)))
+	var walls:=_walls()
 	var health:=float(s.population_health)
-	var endurance:=clampf(clampf(food_days/ENDURANCE_FOOD_DAYS,0.0,1.0)*0.4+clampf(water_days/5.0,0.0,1.0)*0.15+health*0.25+cohesion*0.2,0.0,1.0)
-	result["endurance"]={"value":endurance,"why":"food for %d days, water for %d, health %d%%" % [roundi(food_days),roundi(water_days),roundi(health*100.0)]}
+	var cohesion:=float(m.get("cohesion",0.5))
+	var fa:=Scale.anchors(Scale.STORES,year)
+	var wa:=Scale.anchors(Scale.WATER,year)
+	var da:=Scale.anchors(Scale.WALLS,year)
+	var ha:=Scale.anchors(Scale.HEALTH,year)
+	var ca:=Scale.anchors(Scale.COHESION,year)
+	var parts:=[_part("food",Scale.score(food_days,fa),ENDURANCE_WEIGHTS.food,food_days,fa),_part("water",Scale.score(water_days,wa),ENDURANCE_WEIGHTS.water,water_days,wa),_part("walls",Scale.score(walls,da),ENDURANCE_WEIGHTS.walls,walls,da),
+		_part("health",Scale.score_share(health,ha),ENDURANCE_WEIGHTS.health,health,ha),_part("cohesion",Scale.score_share(cohesion,ca),ENDURANCE_WEIGHTS.cohesion,cohesion,ca)]
+	var why:="food for %d days, %s; water for %d (typical %d); walls %s (typical %s); health %s" % [roundi(food_days),_vs(food_days,fa),roundi(water_days),roundi(float(wa[1])),_wall_words(walls),_wall_words(float(da[1])),_pct(health)]
+	return _entry(parts,why)
+
+static func _wall_words(bonus:float)->String:
+	if bonus<0.005: return "none"
+	return "+%d%% to every defender" % roundi(bonus*100.0)
+
+## REACH: how far our carriers go and how many peoples know us.
+static func _reach(year:float)->Dictionary:
 	var met:=0
 	for civ:Dictionary in WorldSimulation.world.civilizations:
-		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: met+=1
-	var logistics:=float(m.get("logistics",0.16))
-	var reach:=clampf(logistics*0.6+clampf(float(met)/5.0,0.0,1.0)*0.4,0.0,1.0)
-	result["reach"]={"value":reach,"why":"carrying and hauling %d%%, %d peoples met" % [roundi(logistics*100.0),met]}
-	return result
+		if bool(civ.get("alive",true)) and int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=2: met+=1
+	var logistics:=float(WorldSimulation.state.simulation_metrics.get("logistics",0.16))
+	var la:=Scale.anchors(Scale.LOGISTICS,year)
+	var ma:=Scale.anchors(Scale.MET,year)
+	var parts:=[_part("logistics",Scale.score_share(logistics,la),REACH_WEIGHTS.logistics,logistics,la),_part("met",Scale.score(1.0+float(met),ma),REACH_WEIGHTS.met,float(met),ma)]
+	var why:="carrying and hauling %s (a typical people of our age: %s); %s %s met (typical %s)" % [_pct(logistics),_pct(float(la[1])),_count_word(met),"people" if met==1 else "peoples",_n(maxf(0.0,float(ma[1])-1.0))]
+	return _entry(parts,why)
+
+## Who carries our word abroad and their Diplomacy: the Envoy once that
+## office is open (government stage 4), the Steward (the hearth chief who
+## speaks for the people) before it. An open office left empty reads 0.2.
+## {skill, words}.
+static func _speaker()->Dictionary:
+	var government=WorldSimulation.government
+	var open:=government!=null and government.has_method("office_is_active") and bool(government.office_is_active("Envoy"))
+	if open:
+		var envoy:=_office_skill("Envoy","Diplomacy")
+		return {"skill":envoy,"words":"our envoy's skill %s%s" % [_pct(envoy),"" if envoy>0.2 else " (the office stands empty)"]}
+	var chief:=_office_skill("Steward","Diplomacy")
+	return {"skill":chief,"words":"our chief speaks for us (no envoy's office yet), skill %s" % _pct(chief)}
 
 static func _office_skill(office:String,skill:String)->float:
 	var government=WorldSimulation.government
@@ -230,12 +444,176 @@ static func _ties(civ_id:String)->Dictionary:
 	var ties:Variant=(connections as Dictionary).get(Exchange.owner_id(civ_id),{})
 	return ties if ties is Dictionary else {}
 
-static func _best_known_rival()->float:
-	var best:=-1.0
+## How well we know the peoples we know: their contact_intelligence, the mean
+## over every people met (0..0.95); -1 when we know nobody.
+static func _intel()->float:
+	var total:=0.0
+	var count:=0
 	for civ:Dictionary in WorldSimulation.world.civilizations:
-		if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<2: continue
-		best=maxf(best,float((civ.get("discovery_profile",{}).get("technologies",[]) as Array).size()))
+		var relation:Dictionary=civ.get("player_relation",{})
+		if not bool(civ.get("alive",true)) or int(relation.get("contact_level",0))<2: continue
+		total+=clampf(float(relation.get("contact_intelligence",0.0)),0.0,1.0)
+		count+=1
+	return total/float(count) if count>0 else -1.0
+
+# ------------------------------------------------- the ledgers the arts read
+
+## The people in scope as the shared ledgers name it ("player" for the god's).
+static func _owner()->String:
+	return String(WorldSimulation.actor_id)
+
+## Treaties in force with the peoples we know (trade, non-aggression, an
+## alliance) and the exchanges we kept to the end (trade_pacts.gd): {count,
+## in_force, kept}. Read only: the ledgers are never made here.
+static func treaties_kept()->Dictionary:
+	var in_force:=0
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		var relation:Dictionary=civ.get("player_relation",{})
+		if not bool(civ.get("alive",true)) or int(relation.get("contact_level",0))<2 or bool(relation.get("at_war",false)): continue
+		if String(relation.get("treaty","none")) in ["trade","non_aggression","alliance"]: in_force+=1
+	var kept:=0
+	var book:Variant=ForeignDiplomacy.audiences.get("trade_pacts",{})
+	var pacts:Variant=(book as Dictionary).get("pacts",[]) if book is Dictionary else []
+	var owner:=_owner()
+	if pacts is Array:
+		for p in pacts:
+			if not p is Dictionary: continue
+			# The exchange binds both sides: ours, and theirs with us.
+			if owner!="player" and String((p as Dictionary).get("civ_id",""))!=owner: continue
+			var status:=String((p as Dictionary).get("status",""))
+			if status=="completed" or (status=="active" and int((p as Dictionary).get("miss_p",0))==0 and int((p as Dictionary).get("done",0))>0): kept+=1
+	return {"count":in_force+kept,"in_force":in_force,"kept":kept}
+
+## Gifts we gave other peoples (the trade ledger's gifts, envoys' gifts
+## included), as a yearly rate a head of our people, the older the less:
+## {per_head_year, value}.
+const GIFT_RECENT_DAYS:=3*365
+static func gifts_given()->Dictionary:
+	var trade:Variant=ForeignDiplomacy.audiences.get("trade",{})
+	var pairs:Variant=(trade as Dictionary).get("pairs",{}) if trade is Dictionary else {}
+	var owner:=_owner()
+	var day:=_day()
+	var rate:=0.0
+	var value:=0.0
+	if pairs is Dictionary:
+		for k in pairs:
+			var p:Variant=(pairs as Dictionary)[k]
+			if not p is Dictionary: continue
+			var dir:=""
+			if String((p as Dictionary).get("a",""))==owner: dir="ab"
+			elif String((p as Dictionary).get("b",""))==owner: dir="ba"
+			else: continue
+			var kinds:Variant=(p as Dictionary).get("kinds",{})
+			var row:Variant=(kinds as Dictionary).get(dir+":gift") if kinds is Dictionary else null
+			if not row is Dictionary: continue
+			var given:=maxf(0.0,float((row as Dictionary).get("value",0.0)))
+			var since:=maxi(365,day-maxi(0,int((p as Dictionary).get("met",0))))
+			var age:=day-int((row as Dictionary).get("day",day))
+			var fresh:=1.0 if age<=GIFT_RECENT_DAYS else (0.5 if age<=GIFT_RECENT_DAYS*2 else 0.25)
+			value+=given
+			rate+=given/float(since)*365.0*fresh
+	return {"per_head_year":rate/_population(),"value":value}
+
+## Envoy-days our people spent abroad in the last five years: envoys on
+## missions (CivilizationSystem diplomatic missions, every people's own) and,
+## for the god's people, hands lent abroad on an envoy's business.
+const ABROAD_WINDOW:=5*365
+static func envoy_days()->Dictionary:
+	var world=WorldSimulation.world
+	var day:=_day()
+	var from:=day-ABROAD_WINDOW
+	var total:=0.0
+	var missions:=0
+	var records:Array=[]
+	if world!=null and "diplomatic_history" in world: records.append_array(world.diplomatic_history)
+	if world!=null and "diplomatic_mission" in world and not (world.diplomatic_mission as Dictionary).is_empty(): records.append(world.diplomatic_mission)
+	for r in records:
+		if not r is Dictionary: continue
+		var start:=int((r as Dictionary).get("depart_day",day))
+		var end:=int((r as Dictionary).get("returned_day",mini(day,int((r as Dictionary).get("return_day",day)))))
+		var overlap:=mini(end,day)-maxi(start,from)
+		if overlap<=0: continue
+		total+=float(overlap)*maxf(1.0,float((r as Dictionary).get("personnel",1)))
+		missions+=1
+	if _owner()=="player": total+=float(preload("res://scripts/lent_hands.gd").away(day))*30.0
+	return {"days":total,"missions":missions}
+
+## Our agents abroad now: for the god's people, agents on a watch or a source
+## left in their towns (covert_ops.gd) and turned spies sent back as our eyes;
+## for another people, its spies on the road to us or among us (the same
+## ledger, from their side).
+static func agents_abroad_count()->int:
+	var covert:Variant=ForeignDiplomacy.audiences.get("covert",{})
+	var owner:=_owner()
+	var n:=0
+	if covert is Dictionary:
+		if owner=="player":
+			for op in (covert as Dictionary).get("ops",[]):
+				if op is Dictionary and String((op as Dictionary).get("stage","")) in ["travelling","in_place"] and String((op as Dictionary).get("kind","")) in ["watch","plant"]: n+=1
+		else:
+			for spy in (covert as Dictionary).get("incoming",[]):
+				if spy is Dictionary and String((spy as Dictionary).get("civ_id",""))==owner: n+=1
+	if owner=="player":
+		var captives:Variant=ForeignDiplomacy.audiences.get("captives",{})
+		if captives is Dictionary:
+			for p in (captives as Dictionary).get("prisoners",[]):
+				if p is Dictionary and String((p as Dictionary).get("status",""))=="double": n+=1
+	return n
+
+## Spies of others caught (and turned) in the last three years: for the god's
+## people, theirs our watch took and those won over; for another people, ours
+## its watch took (captured_agents.gd abroad).
+const CAUGHT_WINDOW:=3*365
+static func spies_caught()->Dictionary:
+	var owner:=_owner()
+	var day:=_day()
+	var n:=0
+	var turned:=0
+	var captives:Variant=ForeignDiplomacy.audiences.get("captives",{})
+	if owner=="player":
+		var covert:Variant=ForeignDiplomacy.audiences.get("covert",{})
+		if covert is Dictionary:
+			for c in (covert as Dictionary).get("caught",[]):
+				if c is Dictionary and day-int((c as Dictionary).get("day",-99999))<=CAUGHT_WINDOW: n+=1
+		if captives is Dictionary:
+			for p in (captives as Dictionary).get("prisoners",[]):
+				if p is Dictionary and String((p as Dictionary).get("status","")) in ["joined","double"]: turned+=1
+	elif captives is Dictionary:
+		for a in (captives as Dictionary).get("abroad",[]):
+			if a is Dictionary and String((a as Dictionary).get("civ_id",""))==owner and day-int((a as Dictionary).get("day",day))<=CAUGHT_WINDOW: n+=1
+	return {"count":n+turned,"caught":n,"turned":turned}
+
+## The most learned people we know, as far as we know them: {civ_id, name,
+## known, low, high, exact, words}; {"unknown": true} when we know too little
+## of any of them; {} when we know nobody. Their own count (their
+## known_discoveries, in their own ledger), seen through our estimate: never
+## a false 0.
+static func best_known_rival()->Dictionary:
+	var best:={}
+	var any:=false
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if not bool(civ.get("alive",true)) or int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<2: continue
+		any=true
+		var id:=String(civ.id)
+		var theirs:=known_of(id)
+		if theirs<0: continue
+		var est:=estimate(id,"known",float(theirs),true)
+		if bool(est.get("unknown",false)): continue
+		if best.is_empty() or float(est.value)>float(best.known):
+			best={"civ_id":id,"name":String(civ.get("name",id)),"known":float(est.value),"low":float(est.low),"high":float(est.high),"exact":bool(est.exact)}
+	if not any: return {}
+	if best.is_empty(): return {"unknown":true}
+	var ours:=float(WorldSimulation.state.known_discoveries.size())
+	var amount:=("%d" % roundi(float(best.known))) if bool(best.exact) else ("about %d (%d to %d, by our watchers)" % [roundi(float(best.known)),roundi(float(best.low)),roundi(float(best.high))])
+	best["words"]="knows %s, %s ours" % [amount,Scale.against_words(float(best.known),maxf(1.0,ours))]
 	return best
+
+## How many practices another people knows, read from its own ledger (its
+## known_discoveries in its own scope); -1 when the world does not simulate it.
+static func known_of(civ_id:String)->int:
+	var state:Variant=Exchange.owner_state(civ_id)
+	if state==null: return -1
+	return (state.known_discoveries as Array).size()
 
 # ---------------------------------------------------------------------- views
 
@@ -260,7 +638,10 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var might_term:=clampf((ratio-0.8)/1.6,0.0,1.0)
 	# Works they have heard of, and what we know that they do not.
 	var heard:=clampf(Rewards.diplomatic_bonus(WorldSimulation.state,civ_id,_day())/0.20,0.0,1.0)
-	var their_known:=float((civ.get("discovery_profile",{}).get("technologies",[]) as Array).size())
+	# They know their own learning (their known_discoveries, in their own
+	# ledger); a people the world does not simulate counts as a typical one.
+	var counted:=known_of(civ_id)
+	var their_known:=float(counted) if counted>=0 else float(Scale.known_anchors(_year())[1])
 	var our_known:=float(WorldSimulation.state.known_discoveries.size())
 	var lead:=clampf((our_known-their_known)/maxf(20.0,maxf(our_known,their_known)),-1.0,1.0)
 	var awe:=clampf(might_term*0.45+heard*0.35+maxf(0.0,lead)*0.35,0.0,1.0)
@@ -268,13 +649,14 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var lives:=_lives()
 	var fear:=float(lives.call("rival_dread",civ_id)) if lives!=null else 0.0
 	why["fear"]="what they remember of our wrath and harm" if fear>0.05 else "no harm done to them"
-	# Allure: plenty, beauty and learning draw them; our warbands menace them.
+	# Allure: what our name draws by itself (renown: works, culture, plenty,
+	# learning, order, good words), a lead in learning they can see, and our
+	# warbands at a tense border menacing them.
 	var tension:=clampf(float(relation.get("border_tension",0.0)),0.0,1.0)
-	var menace:=float(our.might.value)*(0.35+tension*0.65)
-	var culture:=float(our.get("_culture",-1.0))
-	if culture<0.0: culture=float(Culture.allure_report(false).allure)
-	var allure:=clampf(culture*0.5+float(our.wealth.value)*0.25+maxf(0.0,lead)*0.15+float(our.order.value)*0.1-menace*0.35,0.0,1.0)
-	why["allure"]="plenty %d%%, culture %d%%%s" % [roundi(float(our.wealth.value)*100.0),roundi(culture*100.0),(" · our warbands menace them (−%d)" % roundi(menace*35.0)) if menace>0.05 else ""]
+	var menace:=maxf(0.0,float(our.might.value)-MENACE_FROM)*tension*BORDER_MENACE
+	var drawn:=renown(our)
+	var allure:=clampf(float(drawn.allure)+maxf(0.0,lead)*0.1-menace,0.0,1.0)
+	why["allure"]="%s%s" % [String(drawn.allure_why),(" · our warbands at a tense border menace them (−%d)" % roundi(menace*100.0)) if menace>0.005 else ""]
 	var ties:=_ties(civ_id)
 	var respect:=clampf(float(ties.get("respect",0.0))+heard*0.25+maxf(0.0,lead)*0.2+clampf(ratio-0.7,0.0,1.0)*0.2+float(our.order.value)*0.15+float(our.get("_beauty",0.0))*Fabric.BEAUTY_RESPECT,0.0,1.0)
 	why["respect"]="their scholars' and travellers' regard, works that stand, our order"
@@ -292,8 +674,13 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var resentment:=clampf(float(ties.get("resentment",0.0))+grudge*0.5+told*0.6,0.0,1.0)
 	why["resentment"]=("grudges held against us" if grudge>0.05 else "")+(" · " if grudge>0.05 and told>0.05 else "")+("what they still tell of us" if told>0.05 else "") if resentment>0.05 else "no grudge held"
 	# The dangers: rich and not feared is raided; weak and unrespected is tested.
-	var envy:=clampf((float(our.wealth.value)*0.6+heard*0.4)*(1.0-awe)*(1.0-trust*0.5)*(1.0-fear*0.5),0.0,1.0)
-	why["envy"]="they see our stores and works%s" % (" and too few to guard them" if awe<0.35 else "")
+	# Envy grows with our plenty and more with how far it passes theirs (their
+	# own month's reading; a people not simulated counts as a typical one).
+	var our_wealth:=float(our.wealth.value)
+	var their_wealth:=their_reading_value(civ_id,"wealth")
+	var richer:=maxf(0.0,our_wealth-their_wealth)
+	var envy:=clampf((our_wealth*ENVY_PLENTY+richer*ENVY_RICHER+heard*0.4)*(1.0-awe)*(1.0-trust*0.5)*(1.0-fear*0.5),0.0,1.0)
+	why["envy"]="they see our stores and works%s%s" % [(" (our plenty %d%% against their %d%%)" % [roundi(our_wealth*100.0),roundi(their_wealth*100.0)]) if richer>0.05 else ""," and too few to guard them" if awe<0.35 else ""]
 	var contempt:=clampf((1.0-respect)*clampf(1.25-ratio,0.0,1.0)*(1.0-fear*0.6),0.0,1.0)
 	why["contempt"]="our fighting strength %s theirs" % _ratio_words(ratio)
 	return {"known":true,"allure":allure,"awe":awe,"fear":fear,"respect":respect,"trust":trust,"resentment":resentment,"envy":envy,"contempt":contempt,"strength_ratio":ratio,"why":why}
@@ -328,29 +715,72 @@ static func views()->Array[Dictionary]:
 ## the awe and allure a people like theirs commands. The same for every people,
 ## computer-run or not: read from its own strengths (its works, might,
 ## learning, plenty, order and culture), never from who happens to have met it.
-## {value, why, awe, allure}. 0.5 is ordinary. `seen` is kept for callers.
+## {value, why, awe, allure}. 0.5 is ordinary: a typical people of the age is
+## neither proud nor ashamed. `seen` is kept for callers.
 static func pride(our:Dictionary={},_seen:Array=[])->Dictionary:
 	if our.is_empty(): our=strengths()
 	var command:=renown(our)
-	# 0.5 is an ordinary people; splendour, awe and allure raise it.
-	var value:=clampf(0.5+float(our.splendor.value)*0.25+float(command.awe)*0.15+float(command.allure)*0.1,0.0,1.0)
-	var words:PackedStringArray=["the works and treasures we live among"]
-	if float(command.awe)>=0.3: words.append("the awe our might and works command")
-	if float(command.allure)>=0.3: words.append("the pull of our plenty and our ways")
+	var value:=clampf(0.5+(float(our.splendor.value)-0.5)*PRIDE_SPLENDOR+(float(command.awe)-AWE_ORDINARY)*PRIDE_AWE+(float(command.allure)-ALLURE_ORDINARY)*PRIDE_ALLURE,0.0,1.0)
+	var words:PackedStringArray=[]
+	if float(our.splendor.value)>=0.6: words.append("the works and treasures we live among, finer than most of the age")
+	elif float(our.splendor.value)<0.4: words.append("works and treasures poorer than most of the age")
+	else: words.append("works and treasures like most peoples of the age")
+	if float(command.awe)>=AWE_ORDINARY+0.1: words.append("the awe our might and works command")
+	if float(command.allure)>=ALLURE_ORDINARY+0.1: words.append("the pull of our plenty and our ways")
 	return {"value":value,"awe":float(command.awe),"allure":float(command.allure),"why":", ".join(words)}
+
+## What a reading of 1 above the typical in each moves pride.
+const PRIDE_SPLENDOR:=0.3
+const PRIDE_AWE:=0.25
+const PRIDE_ALLURE:=0.15
+## The awe a typical people of the age commands by what it is.
+const AWE_ORDINARY:=0.25
 
 ## The awe and allure a people commands by what it is, before anyone in
 ## particular sees it (view_of adds each observer's own memories and
-## strength): might, works and a lead in learning awe; culture, plenty,
-## learning and good order draw, and warbands put people off.
+## strength). Each strength is read against the typical people of the age
+## (0.5): a typical people commands AWE_ORDINARY and ALLURE_ORDINARY. Might,
+## works and learning awe; works, culture, plenty, learning, good order and
+## good words draw; warbands past the ordinary put people off.
+## {awe, allure, allure_why}.
 static func renown(our:Dictionary={})->Dictionary:
 	if our.is_empty(): our=strengths()
 	var might:=float(our.might.value)
 	var genius:=float(our.genius.value)
-	var culture:=float(our.get("_culture",0.0))
-	var awe:=clampf(might*0.45+float(our.splendor.value)*0.35+maxf(0.0,genius-0.5)*0.4,0.0,1.0)
-	var allure:=clampf(culture*0.5+float(our.wealth.value)*0.25+maxf(0.0,genius-0.5)*0.2+float(our.order.value)*0.1-might*0.35*0.35,0.0,1.0)
-	return {"awe":awe,"allure":allure}
+	var splendor:=float(our.splendor.value)
+	var wealth:=float(our.wealth.value)
+	var order:=float(our.order.value)
+	var persuasion:=float((our.get("persuasion",{}) as Dictionary).get("value",0.5))
+	var culture:=_culture_score(our)
+	var awe:=clampf(AWE_ORDINARY+(might-0.5)*0.45+(splendor-0.5)*0.35+(genius-0.5)*0.3,0.0,1.0)
+	var menace:=maxf(0.0,might-MENACE_FROM)*RENOWN_MENACE
+	var allure:=clampf(ALLURE_ORDINARY+(splendor-0.5)*0.2+(culture-0.5)*0.2+(wealth-0.5)*0.2+(genius-0.5)*0.1+(order-0.5)*0.1+(persuasion-0.5)*PERSUASION_ALLURE-menace,0.0,1.0)
+	var bits:PackedStringArray=[]
+	for pair:Array in [["plenty",wealth],["culture",culture],["works",splendor],["learning",genius],["order",order],["good words",persuasion]]:
+		var v:=float(pair[1])
+		if v>=0.6: bits.append("our %s draws them" % String(pair[0]))
+		elif v<=0.35: bits.append("our %s does not" % String(pair[0]))
+	if menace>0.005: bits.append("our warbands put them off (−%d)" % roundi(menace*100.0))
+	return {"awe":awe,"allure":allure,"allure_why":("; ".join(bits)) if not bits.is_empty() else "nothing about us draws them more than any people of the age"}
+
+## The culture part of our splendor (its reading against the age); a reading
+## from before the parts were kept counts as typical.
+static func _culture_score(our:Dictionary)->float:
+	for part in (our.get("splendor",{}) as Dictionary).get("parts",[]):
+		if part is Dictionary and String((part as Dictionary).get("id",""))=="culture": return float((part as Dictionary).score)
+	return 0.5
+
+## Might past this reading menaces would-be newcomers and neighbours.
+const MENACE_FROM:=0.5
+## How much each point of might past MENACE_FROM takes from allure: by itself,
+## and again at a tense border (x the tension).
+const RENOWN_MENACE:=0.15
+const BORDER_MENACE:=0.3
+## Persuasion's share in our allure: good words draw people to us.
+const PERSUASION_ALLURE:=0.15
+## Envy: our plenty, and how far it passes theirs.
+const ENVY_PLENTY:=0.45
+const ENVY_RICHER:=0.8
 
 # -------------------------------------------------------- read by daily systems
 
@@ -395,6 +825,9 @@ static func _record_monthly()->void:
 	var our:=strengths()
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	for row:Array in STRENGTHS: metrics["standing_"+String(row[0])]=float((our[String(row[0])] as Dictionary).value)
+	# The day of the reading: another people's month is read from here, and
+	# a reading this old is read again (their_reading).
+	metrics["standing_day"]=float(_day())
 	var command:=renown(our)
 	metrics["standing_awe"]=float(command.awe)
 	metrics["standing_allure"]=float(command.allure)
@@ -430,7 +863,8 @@ static func danger_count(our:Dictionary={})->int:
 static func monthly()->Dictionary:
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	return {"might":float(metrics.get("standing_might",0.0)),"pride":float(metrics.get("standing_pride",0.5)),"allure":float(metrics.get("standing_allure",ALLURE_ORDINARY)),"awe":float(metrics.get("standing_awe",0.0)),
-		"love":float(metrics.get("standing_love",LOVE_ORDINARY)),"dread":float(metrics.get("standing_dread",0.0))}
+		"love":float(metrics.get("standing_love",LOVE_ORDINARY)),"dread":float(metrics.get("standing_dread",0.0)),
+		"persuasion":float(metrics.get("standing_persuasion",0.5)),"cunning":float(metrics.get("standing_cunning",0.5))}
 
 ## How much a target's fighting strength against ours holds a ruler back from
 ## declaring war on it: positive when they are stronger (awe of their might),
@@ -473,7 +907,11 @@ static func god_effects(m:Dictionary={})->Dictionary:
 static func attraction_shift()->float:
 	var m:=monthly()
 	var god:=god_effects(m)
-	return -float(m.might)*0.08+(float(m.pride)-0.5)*0.08+(float(m.allure)-ALLURE_ORDINARY)*0.08+float(god.draw)+float(god.drive_off)
+	return -maxf(0.0,float(m.might)-MENACE_FROM)*ATTRACTION_MENACE+(float(m.pride)-0.5)*0.08+(float(m.allure)-ALLURE_ORDINARY)*0.08+persuasion_draw(float(m.persuasion))+float(god.draw)+float(god.drive_off)
+
+## What might past MENACE_FROM takes from how much families want to join us
+## and stay, a month (a war-minded people at 0.85 loses about 5.6 points).
+const ATTRACTION_MENACE:=0.16
 
 ## Pride lifts how well the people hold together and trust their chiefs, a little.
 static func cohesion_shift()->float:
@@ -601,21 +1039,278 @@ static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 static func home_effects()->Dictionary:
 	var m:=monthly()
 	var god:=god_effects(m)
-	return {"attraction":((float(m.pride)-0.5)+(float(m.allure)-ALLURE_ORDINARY))*8.0+(float(god.draw)+float(god.drive_off))*100.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-float(m.might)*8.0,"forgiveness":forgiveness(),"levy":levy_burden(),"under_arms":_warriors()/_population(),
+	return {"attraction":((float(m.pride)-0.5)+(float(m.allure)-ALLURE_ORDINARY))*8.0+persuasion_draw(float(m.persuasion))*100.0+(float(god.draw)+float(god.drive_off))*100.0,"cohesion":cohesion_shift()*100.0,"legitimacy":legitimacy_shift()*100.0,"menace":-maxf(0.0,float(m.might)-MENACE_FROM)*ATTRACTION_MENACE*100.0,"persuasion_draw":persuasion_draw(float(m.persuasion))*100.0,"forgiveness":forgiveness(),"levy":levy_burden(),"under_arms":_warriors()/_population(),
 		# What their love and dread of the god do, in points of 100 (god_effects).
 		"god":{"draw":float(god.draw)*100.0,"bind":float(god.bind)*100.0,"obey_love":float(god.obey_love)*100.0,"drive_off":float(god.drive_off)*100.0,"fray":float(god.fray)*100.0,"obey_dread":float(god.obey_dread)*100.0},
 		# What the levy costs, as ConsequenceEngine's targets take it.
 		"levy_cohesion":levy_burden()*60.0,"levy_trust":levy_burden()*40.0*blame()}
 
-## Another people's strengths, reckoned in their own scope by the same code as
-## ours ({} if they are not simulated). Rounded to tens: we know them from
-## envoys and travellers, not from their own tallies.
-static func their_strengths(civ_id:String)->Dictionary:
-	if civ_id=="" or not WorldSimulation.actors.has(civ_id): return {}
-	var theirs:Variant=WorldSimulation.scoped(civ_id,func()->Dictionary: return strengths())
+# ------------------------------------------------ other peoples, as we know them
+
+## Another people's month's reading is read from their own ledger (their
+## simulation_metrics, written by their own record_monthly in their own
+## scope); one older than this is reckoned again in their scope.
+const READING_STALE_DAYS:=45
+## Below this certainty we can say nothing of them: "unknown", never a false 0.
+const UNKNOWN_BELOW:=0.1
+## How far either side an estimate of one of their readings runs (points of
+## 100, or a share of a count) when we hardly know them: x (1 - certainty).
+const ESTIMATE_WIDEST:=0.4
+## Cunning's hand in how sure we are: a reading of 1 adds this, 0 takes it.
+const CUNNING_CERTAINTY:=0.3
+## An agent of ours on watch among them, or a source in their town (and for
+## another people, a spy of theirs among us): at least this sure.
+const EYES_CERTAINTY:=0.75
+## One estimate a season: the same until new word comes.
+const ESTIMATE_SEASON:=91
+
+## Our own month's reading of one of our strengths (0.5 before the first).
+static func own_art(id:String)->float:
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("standing_"+id,0.5)),0.0,1.0)
+
+## Another people's (owner's) month's reading of one strength: 0.5 when the
+## world does not simulate them.
+static func art_of(owner:String,id:String)->float:
+	var state:Variant=Exchange.owner_state(owner)
+	if state==null: return 0.5
+	return clampf(float(state.simulation_metrics.get("standing_"+id,0.5)),0.0,1.0)
+
+## Their true strengths, {id: value}: their own month's reading, or reckoned
+## again in their own scope when it is missing or old. Read only: the world is
+## never made or remade by a reading (as civilization_combat._away). {} when
+## the world does not simulate them.
+static func their_true(civ_id:String)->Dictionary:
+	var state:Variant=Exchange.owner_state(civ_id)
+	if state==null: return {}
+	var owner:=Exchange.owner_id(civ_id)
+	var metrics:Dictionary=state.simulation_metrics
+	var out:Dictionary={}
+	if metrics.has("standing_day") and int(state.elapsed_days)-int(float(metrics.standing_day))<=READING_STALE_DAYS:
+		for row:Array in STRENGTHS: out[String(row[0])]=clampf(float(metrics.get("standing_"+String(row[0]),0.5)),0.0,1.0)
+		return out
+	if owner!="player" and not WorldSimulation.actors.has(owner): return {}
+	var theirs:Variant=strengths() if owner==String(WorldSimulation.actor_id) else WorldSimulation.scoped(owner,func()->Dictionary: return strengths())
 	if not theirs is Dictionary: return {}
-	var result:Dictionary={}
 	for row:Array in STRENGTHS:
 		var entry:Variant=(theirs as Dictionary).get(String(row[0]),{})
-		if entry is Dictionary: result[String(row[0])]={"value":snappedf(clampf(float((entry as Dictionary).get("value",0.0)),0.0,1.0),0.1)}
+		out[String(row[0])]=clampf(float((entry as Dictionary).get("value",0.5)),0.0,1.0) if entry is Dictionary else 0.5
+	return out
+
+## Their reading of one strength as it stands (true, not our estimate: their
+## own feelings and plans read their own); the typical 0.5 when unknown.
+static func their_reading_value(civ_id:String,id:String)->float:
+	return float(their_true(civ_id).get(id,Scale.TYPICAL_SCORE))
+
+## Our relation with a people we know, as our own scope keeps it.
+static func _relation_with(civ_id:String)->Dictionary:
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if String(civ.get("id",""))==civ_id: return civ.get("player_relation",{})
+	return {}
+
+## How sure we are of another people, 0..1: how well we know them (our
+## relation's contact_intelligence: 0.2 at a first meeting, up to 0.95 with
+## envoys, scouts and years), an agent of ours among them (at least
+## EYES_CERTAINTY), and our cunning (CUNNING_CERTAINTY either way).
+static func certainty(civ_id:String)->float:
+	var relation:=_relation_with(civ_id)
+	if relation.is_empty() or int(relation.get("contact_level",0))<2: return 0.0
+	var sure:=clampf(float(relation.get("contact_intelligence",0.2)),0.0,0.95)
+	if _eyes_among(civ_id)>0: sure=maxf(sure,EYES_CERTAINTY)
+	return clampf(sure+(own_art("cunning")-0.5)*2.0*CUNNING_CERTAINTY,0.0,1.0)
+
+## Our agents among them now (the god's covert ops on watch or a source);
+## for another people, its spies among us.
+static func _eyes_among(civ_id:String)->int:
+	var covert:Variant=ForeignDiplomacy.audiences.get("covert",{})
+	if not covert is Dictionary: return 0
+	var n:=0
+	if _owner()=="player":
+		for op in (covert as Dictionary).get("ops",[]):
+			if op is Dictionary and String((op as Dictionary).get("civ_id",""))==civ_id and String((op as Dictionary).get("stage",""))=="in_place" and String((op as Dictionary).get("kind","")) in ["watch","plant"]: n+=1
+	elif Exchange.owner_id(civ_id)=="player":
+		for spy in (covert as Dictionary).get("incoming",[]):
+			if spy is Dictionary and String((spy as Dictionary).get("civ_id",""))==_owner(): n+=1
+	return n
+
+## Our estimate of one of their readings: {value, low, high, exact, spread,
+## certainty, unknown, right}. The surer we are, the narrower the band; and
+## the surer and more cunning, the likelier our watchers got it right at all
+## (else the value is off by up to the band). One estimate a season.
+## `is_count`: a count (practices known), whose band is a share of it.
+static func estimate(civ_id:String,key:String,truth:float,is_count:bool=false)->Dictionary:
+	var sure:=certainty(civ_id)
+	if sure<UNKNOWN_BELOW: return {"unknown":true,"value":-1.0,"low":-1.0,"high":-1.0,"exact":false,"spread":ESTIMATE_WIDEST,"certainty":sure,"right":false}
+	var spread:=ESTIMATE_WIDEST*(1.0-sure)
+	var rng:=RandomNumberGenerator.new()
+	rng.seed=hash("%d|estimate|%s|%s|%s|%d" % [int(WorldSimulation.state.world_seed),_owner(),civ_id,key,_day()/ESTIMATE_SEASON])
+	var right:=rng.randf()<estimate_right_odds(sure)
+	var err:=0.0 if right else rng.randf_range(-1.0,1.0)*spread
+	var value:float
+	var low:float
+	var high:float
+	if is_count:
+		value=maxf(0.0,truth*(1.0+err))
+		low=maxf(0.0,value*(1.0-spread))
+		high=value*(1.0+spread)
+	else:
+		value=clampf(truth+err,0.0,1.0)
+		low=clampf(value-spread,0.0,1.0)
+		high=clampf(value+spread,0.0,1.0)
+	return {"unknown":false,"value":value,"low":low,"high":high,"exact":spread<0.03,"spread":spread,"certainty":sure,"right":right}
+
+## The odds our watchers got a reading of theirs right at all, by how sure we
+## are of them and our cunning.
+static func estimate_right_odds(sure:float)->float:
+	return clampf(sure*0.6+(own_art("cunning")-0.5)*0.4,0.05,0.95)
+
+## Another people's nine strengths as we know them: {id: {value, low, high,
+## exact, unknown}} plus "_certainty" and "_unknown"; {} when the world does
+## not simulate them or we have not met them. The same for every people: our
+## knowledge of them and our cunning set the band.
+static func their_strengths(civ_id:String)->Dictionary:
+	if civ_id=="": return {}
+	var sure:=certainty(civ_id)
+	if sure<=0.0: return {}
+	var truth:=their_true(civ_id)
+	if truth.is_empty(): return {}
+	var result:Dictionary={"_certainty":sure,"_unknown":sure<UNKNOWN_BELOW}
+	for row:Array in STRENGTHS:
+		var id:=String(row[0])
+		var est:=estimate(civ_id,id,float(truth.get(id,0.5)))
+		result[id]={"value":float(est.value),"low":float(est.low),"high":float(est.high),"exact":bool(est.exact),"unknown":bool(est.unknown)}
 	return result
+
+## "about 60% (50 to 70)" or "62%" or "unknown" for one of their estimates.
+static func estimate_words(est:Dictionary)->String:
+	if bool(est.get("unknown",false)) or float(est.get("value",-1.0))<0.0: return "unknown"
+	if bool(est.get("exact",false)): return "%d%%" % roundi(float(est.value)*100.0)
+	return "about %d%% (%d to %d)" % [roundi(float(est.value)*100.0),roundi(float(est.low)*100.0),roundi(float(est.high)*100.0)]
+
+# ------------------------------------------------------- cunning at work
+# Every effect reads the cunning of the people it serves from that people's
+# own month's reading; the same rule for every people.
+
+## The odds a raid coming at a people is seen before it falls, and how many
+## days before: a typical people (0.5) half the time, 17 days ahead.
+const FOREWARN_ODDS_TYPICAL:=0.5
+const FOREWARN_ODDS_SLOPE:=0.8
+const FOREWARN_DAYS_MIN:=5.0
+const FOREWARN_DAYS_SPAN:=25.0
+static func forewarn_odds(cunning:float)->float:
+	return clampf(FOREWARN_ODDS_TYPICAL+(cunning-0.5)*FOREWARN_ODDS_SLOPE,0.05,0.95)
+static func forewarn_days(cunning:float)->int:
+	return roundi(FOREWARN_DAYS_MIN+clampf(cunning,0.0,1.0)*FOREWARN_DAYS_SPAN)
+
+## A people arming against us is heard of when it begins on forewarn_odds;
+## otherwise word comes only in the last this many days before they march
+## (world_answer.gd _late_word, read at its monthly reckoning).
+const LATE_WORD_DAYS:=30
+
+## How our watchers read an envoy's threat (rival_rulers.gd _bluff): the odds
+## a bluff shows its tells, a real threat its signs, and a real threat a
+## misleading tell. A typical people keeps the old odds (0.85, 0.7, 0.15).
+static func bluff_reading(cunning:float)->Dictionary:
+	return {"tells":clampf(0.55+cunning*0.6,0.5,0.98),"signs":clampf(0.4+cunning*0.6,0.4,0.95),"false_tells":clampf(0.3-cunning*0.3,0.02,0.3)}
+
+## Our covert operations (covert_ops.gd odds): success odds up and the odds
+## of being caught down, by cunning past the typical.
+const COVERT_EDGE:=0.2
+static func covert_edge(cunning:float)->float:
+	return (cunning-0.5)*COVERT_EDGE
+
+## Our watch catching their agents (covert_ops.gd _catch_chance).
+const CATCH_EDGE:=0.3
+static func catch_edge(cunning:float)->float:
+	return (cunning-0.5)*CATCH_EDGE
+
+## A scout's or spy's look at a town (city_intelligence.gd capture): the
+## quality of the look rises, and the error band narrows, with cunning.
+const INTEL_SHARPEN:=0.2
+static func intel_quality_edge(cunning:float)->float:
+	return (cunning-0.5)*INTEL_SHARPEN
+static func intel_error_factor(cunning:float)->float:
+	return clampf(1.15-cunning*0.3,0.8,1.15)
+
+# ---------------------------------------------------- persuasion at work
+
+## An envoy's deal (envoy_deals.gd): their ruler pays more freely to a
+## persuasive people (temper), and bends to harder terms more often (odds).
+const DEAL_TEMPER:=0.2
+const COUNTER_EDGE:=0.2
+static func deal_temper(persuasion:float)->float:
+	return (persuasion-0.5)*DEAL_TEMPER
+static func counter_edge(persuasion:float)->float:
+	return (persuasion-0.5)*COUNTER_EDGE
+
+## A message sent home with a captured agent (captured_agents.gd): heeded
+## more often from a persuasive people.
+const MESSAGE_EDGE:=0.2
+static func message_edge(persuasion:float)->float:
+	return (persuasion-0.5)*MESSAGE_EDGE
+
+## Exchanges and treaties hold better: a trade pact bears this many more
+## failed portions before it is ended (trade_pacts.gd MISSES_TO_LAPSE), and a
+## treaty between two peoples breaks only when regard falls this much lower
+## (civilization_system.gd: 0.04 by default).
+static func pact_grace(persuasion:float)->int:
+	return roundi((persuasion-0.5)*4.0)
+const TREATY_BREAK:=0.04
+const TREATY_HOLD:=0.12
+static func treaty_floor(first:String,second:String)->float:
+	return TREATY_BREAK-((art_of(first,"persuasion")+art_of(second,"persuasion"))*0.5-0.5)*TREATY_HOLD
+
+## Families of other peoples drawn to settle with us (society_exchange.gd
+## attraction): this much a month at full persuasion past the typical.
+const PERSUASION_DRAW:=0.06
+static func persuasion_draw(persuasion:float)->float:
+	return (persuasion-0.5)*PERSUASION_DRAW
+
+## Softer grudges: a new grudge against a persuasive people weighs less
+## (rival_rulers.gd grudge): x0.8 at full persuasion, x1.2 at none.
+const GRUDGE_SOFTEN:=0.4
+static func grudge_factor(persuasion:float)->float:
+	return clampf(1.0-(persuasion-0.5)*GRUDGE_SOFTEN,0.7,1.3)
+
+## What our cunning and persuasion do this month, with the engine's numbers,
+## for the Standing page and the court: {cunning:[...], persuasion:[...]},
+## each row {words, detail}.
+static func arts_at_work()->Dictionary:
+	var c:=own_art("cunning")
+	var p:=own_art("persuasion")
+	var bluff:=bluff_reading(c)
+	var sure:=_mean_certainty()
+	var cunning_rows:Array=[
+		{"words":"Raids seen coming: %d in 100, about %d days ahead" % [roundi(forewarn_odds(c)*100.0),forewarn_days(c)],"detail":"When raiders are sent against us, our watchers see them coming on these odds; then the watch keeps the approaches until they come, and meets them on ground of our choosing. A typical people of the age sees half of them, 17 days ahead."},
+		{"words":"A people arming against us heard of at once: %d in 100" % roundi(forewarn_odds(c)*100.0),"detail":"Otherwise word comes only in the last %d days before they march." % LATE_WORD_DAYS},
+		{"words":"An envoy's bluff seen through: %d in 100; a real threat's signs read: %d in 100" % [roundi(float(bluff.tells)*100.0),roundi(float(bluff.signs)*100.0)],"detail":"Misleading tells on a real threat: %d in 100. A typical people: 85, 70 and 15." % roundi(float(bluff.false_tells)*100.0)},
+		{"words":"Our agents' odds %s; caught %s" % [_signed_points(covert_edge(c)),_signed_points(-covert_edge(c))],"detail":"Added to the stated odds of every watch, source, theft and strike our agents attempt."},
+		{"words":"Their spies caught: %s" % _signed_points(catch_edge(c)),"detail":"Added to our watch's odds of taking a spy or an assassin of theirs."},
+	]
+	if sure>=0.0:
+		cunning_rows.append({"words":"What we know of the peoples we know: within %d points either way, right %d in 100" % [roundi(ESTIMATE_WIDEST*(1.0-clampf(sure,0.0,1.0))*100.0),roundi(estimate_right_odds(sure)*100.0)],"detail":"Our estimates of their strengths, their learning and their spears, on every screen that shows them. Envoys, scouts and years of contact make them surer; cunning adds or takes away up to %d points." % roundi(CUNNING_CERTAINTY*100.0)})
+	var grace:=maxi(1,3+pact_grace(p))
+	var persuasion_rows:Array=[
+		{"words":"Envoys' deals: their ruler pays %s; agrees to harder terms %s" % [_signed_points(deal_temper(p),"more","less"),_signed_points(counter_edge(p))],"detail":"In every envoy's bargain: what they offer for what they ask, and the odds they take our counter."},
+		{"words":"A message sent home with a captured agent heeded: %s" % _signed_points(message_edge(p)),"detail":"Added to the odds their ruler heeds a warning, bows to a threat, takes an offer of peace or meets a demand."},
+		{"words":"Exchanges bear %d failed portion%s before they are ended" % [grace,"" if grace==1 else "s"],"detail":"Three for a typical people. Between other peoples too, a treaty holds until regard falls %s." % _signed_points((p-0.5)*TREATY_HOLD,"lower","higher")},
+		{"words":"Families of other peoples drawn to us: %+.1f a month (points of 100)" % (persuasion_draw(p)*100.0),"detail":"Added to how much families want to join us and stay."},
+		{"words":"New grudges against us weigh x%.2f" % grudge_factor(p),"detail":"A grudge of theirs over a wrong of ours starts lighter, so it fades sooner and sends raiders later."},
+		{"words":"Their rulers' trust in our word: %s" % _signed_points((p-0.5)*0.2),"detail":"How our envoys carry themselves."},
+	]
+	return {"cunning":cunning_rows,"persuasion":persuasion_rows,"cunning_value":c,"persuasion_value":p}
+
+static func _signed_points(x:float,up:String="",down:String="")->String:
+	var points:=roundi(x*100.0)
+	if points==0: return "as for a typical people"
+	if up!="": return "%d points %s" % [absi(points),up if points>0 else down]
+	return "%+d points" % points
+
+## How sure we are of the peoples we know, on average (-1 when none).
+static func _mean_certainty()->float:
+	var total:=0.0
+	var count:=0
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if not bool(civ.get("alive",true)) or int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<2: continue
+		total+=certainty(String(civ.id))
+		count+=1
+	return total/float(count) if count>0 else -1.0

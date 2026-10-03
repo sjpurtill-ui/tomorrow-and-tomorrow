@@ -117,7 +117,13 @@ static func _common(civ_id:String,f:Dictionary,bands:Dictionary,day:int)->Dictio
 		var objective:=String(op.get("objective",""))
 		band={"objective":objective,"words":String(OP_WORDS.get(objective,"out against them")),"men":int(op.get("band",0)),"general":String(op.get("general","")),
 			"days_left":maxi(0,int(op.get("due",day))-day)}
-	return {"civ_id":civ_id,"name":WarLoop._name(civ_id),"strength":WarLoop.ratio(civ_id),"dread":WarLoop._dread(civ_id),"band":band,"bands":bands.get(civ_id,[])}
+	# Their strength as our watchers reckon it (standing.gd estimate: how well
+	# we know them and our cunning), the same reckoning the Standing page shows.
+	var truth:=WarLoop.ratio(civ_id)
+	var est:=preload("res://scripts/standing.gd").estimate(civ_id,"strength_ratio",truth,true)
+	var known:=not bool(est.get("unknown",false))
+	return {"civ_id":civ_id,"name":WarLoop._name(civ_id),"strength":float(est.value) if known else truth,"strength_exact":known and bool(est.exact),
+		"strength_low":float(est.low) if known else truth,"strength_high":float(est.high) if known else truth,"dread":WarLoop._dread(civ_id),"band":band,"bands":bands.get(civ_id,[])}
 
 
 ## The war leader's measure of their strength against ours, as the odds:
@@ -127,10 +133,14 @@ static func odds(entry:Dictionary)->Dictionary:
 	var raw:=1.0/theirs
 	return {"raw":raw,"odds":maxf(raw,1.0/raw),"ours":raw>=1.0}
 
-## "about 2 to 1 for us": their strength against ours in words.
+## "about 2 to 1 for us": their strength against ours in words (our
+## watchers' reckoning, with its band when we do not know them well).
 static func odds_words(entry:Dictionary)->String:
 	var o:=odds(entry)
-	return WarOdds.words(float(o.odds),bool(o.ours))
+	var words:=WarOdds.words(float(o.odds),bool(o.ours))
+	if entry.has("strength_exact") and not bool(entry.strength_exact):
+		words+=" by our watchers' reckoning (theirs somewhere between %.1f and %.1f times ours)" % [float(entry.get("strength_low",1.0)),float(entry.get("strength_high",1.0))]
+	return words
 
 
 ## Our bands at or bound for their towns: {civ_id: [{army_id, name, troops,

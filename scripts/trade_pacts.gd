@@ -54,6 +54,13 @@ const ACTIVE_MAX:=8
 const ENDED_MAX:=8
 const LOG_MAX:=10
 const MISSES_TO_LAPSE:=3
+
+## How many failed portions of ours they bear before they end it: three, and
+## more (or fewer) by our persuasion (standing.gd pact_grace); never fewer
+## than one.
+static func misses_borne()->int:
+	var Standing:=preload("res://scripts/standing.gd")
+	return maxi(1,MISSES_TO_LAPSE+Standing.pact_grace(Standing.art_of("player","persuasion")))
 const GOODWILL_CAP:=0.12
 
 # --------------------------------------------------------------------------
@@ -587,12 +594,13 @@ static func settle(p:Dictionary,day:int)->void:
 	else: p.miss_t=0
 	_log(p,outcome,text)
 	_record(("Traders From %s" % name.substr(0,36)) if outcome=="delivered" else ("A Short Portion From %s" % name.substr(0,30) if outcome=="partial" else "No Exchange With %s" % name.substr(0,32)),text,civ_id,"tp:%s:%d" % [p.id,int(p.done)],tier)
-	if int(p.miss_p)>=MISSES_TO_LAPSE:
+	var borne:=misses_borne()
+	if int(p.miss_p)>=borne:
 		p.status="cancelled"; p["ended"]=day
 		Hall._shift_relation(civ_id,-0.05,0.03); Hall._leader_trust(civ_id,-0.08)
 		_grudge(civ_id,"how you stopped sending the %s you promised" % give_res,0.35,"pact_broken:"+String(p.id))
-		_log(p,"cancelled","They ended it: you failed %d portions running." % MISSES_TO_LAPSE)
-		_record("%s Ends the Exchange" % name.substr(0,40),"%s has ended the exchange of %s: your people failed %d portions running. They will remember it." % [name,short_words(t),MISSES_TO_LAPSE],civ_id,"broken:"+String(p.id),"notice")
+		_log(p,"cancelled","They ended it: you failed %d portions running." % borne)
+		_record("%s Ends the Exchange" % name.substr(0,40),"%s has ended the exchange of %s: your people failed %d portions running. They will remember it." % [name,short_words(t),borne],civ_id,"broken:"+String(p.id),"notice")
 		ForeignDiplomacy.remember(civ_id,"The ruler stopped keeping our exchange, so we ended it.")
 		return
 	if int(p.miss_t)>=MISSES_TO_LAPSE:
