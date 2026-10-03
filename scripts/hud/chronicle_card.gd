@@ -213,7 +213,7 @@ func _render(entry:Dictionary)->void:
 	banner.texture=texture if wide else null
 	picture.texture=null if wide else texture
 	var action:Dictionary=entry.get("action",{})
-	action_button.text={"ceremony":"Attend the dedication","court":"Go to the court","scout_report":"Hear the scouts' tale","battle":"Read the battle report","section":"See what we learned" if kind=="discovery" else "Look closer"}.get(String(action.get("kind","")),"Open %s" % String(voice.feed))
+	action_button.text={"ceremony":"Attend the dedication","court":"Go to the court","prisoner":"Bring them before you","scout_report":"Hear the scouts' tale","battle":"Read the battle report","section":"See what we learned" if kind=="discovery" else "Look closer"}.get(String(action.get("kind","")),"Open %s" % String(voice.feed))
 
 
 static func texture_for(entry:Dictionary)->Texture2D:
@@ -238,6 +238,9 @@ func _act()->void:
 			if director and director.has_method("open_ceremony"):director.call("open_ceremony",String(action.get("work_id","")))
 		"court":
 			preload("res://scripts/audience_director.gd").open_court_for(action.get("focus",{}))
+		"prisoner":
+			# One held under guard (captured_agents.gd): brought before the god.
+			preload("res://scripts/audience_director.gd").open_court_for({"prisoner_id":String(action.get("prisoner_id",""))})
 		"scout_report":
 			open_scout_report(int(action.get("mission_id",0)))
 		"battle":

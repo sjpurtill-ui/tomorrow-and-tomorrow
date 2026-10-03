@@ -47,6 +47,8 @@ const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
 const Works:=preload("res://scripts/great_works_audience.gd")
+## PRISONER (captured_agents.gd, builder P): a spy or assassin held under guard.
+const Prisoners:=preload("res://scripts/captured_agents.gd")
 const WorkPlate:=preload("res://scripts/hud/great_work_plate.gd")
 const WORK_KINDS:=["great_work","wonder_proposal"]
 const AMBITION_TIPS:={"modest":"A modest work: cheaper, surer, pays little.","grand":"A grand work: promise and risk in balance.","audacious":"An audacious work: pays greatly, fails often."}
@@ -722,6 +724,9 @@ func _dossier_rows(audience:Dictionary)->Array:
 	elif String(audience.get("kind","")) in WORK_KINDS:
 		rows.append_array(_work_dossier(audience))
 	else:
+		# PRISONER (captured_agents.gd, builder P): who they are and what they said; a word shown false in red.
+		if audience.has("prisoner_id"):
+			for row:Array in Prisoners.dossier_rows(String(audience.get("id",""))):rows.append([String(row[0]),String(row[1]),Tokens.RED if String(row[2])=="false" else Tokens.BODY])
 		var petitioner:Dictionary=context.get("petitioner",{}) if context.get("petitioner") is Dictionary else {}
 		if not petitioner.is_empty():
 			rows.append(["Trust in you",String(petitioner.get("trust","moderate")),Tokens.BODY])
@@ -742,6 +747,9 @@ func _speaker_person(audience:Dictionary)->Dictionary:
 	# A transient envoy record: bound to the civ's appearance family, never saved.
 	var envoy:={"name":String(speaker.get("name","Envoy")),"person_id":0}
 	var civ_id:=String(audience.get("civ_id",""))
+	# PRISONER (captured_agents.gd, builder P): drawn as one of their own people.
+	if civ_id.is_empty() and String(speaker.get("prisoner_civ_id",""))!="":
+		civ_id=String(speaker.prisoner_civ_id);envoy["sex"]=String(speaker.get("sex",""))
 	if not civ_id.is_empty():EarlyArt.bind_foreign_identity(envoy,civ_id,int(GameState.world_seed))
 	return envoy
 
@@ -800,7 +808,9 @@ func _build_options()->void:
 	_build_orders_row()
 	_sync_command_line()
 
-const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"],["garrison","Garrison ▾"]]
+const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"],["garrison","Garrison ▾"],
+	# PRISONER (captured_agents.gd, builder P): the five questions in three manners.
+	["gentle","Ask gently ▾"],["firm","Ask firmly ▾"],["terror","Ask in terror ▾"]]
 
 ## "What you stand to gain" shown as one line (the hall was too short), and
 ## whether the player opened it again by hand.
@@ -864,6 +874,8 @@ func _persons_live()->bool:
 
 func persons_choices()->Array[Dictionary]:
 	## What the Court offers about people at this step (from real state).
+	# PRISONER (captured_agents.gd, builder P): their questions, with the odds.
+	if mode=="audience" and Prisoners.is_prisoner_audience(audience_id):return Prisoners.choices(audience_id)
 	return Persons.choices(audience_id if mode=="audience" else "")
 
 func _build_persons_row()->void:
@@ -872,12 +884,14 @@ func _build_persons_row()->void:
 	if not is_instance_valid(persons_row):return
 	for child in persons_row.get_children():child.queue_free()
 	var audience:=Hall.find(audience_id)
-	persons_row.visible=not _persons_live() and resolved_result.is_empty() and String(audience.get("origin",""))=="court" and String(audience.get("status",""))=="waiting"
+	# PRISONER (captured_agents.gd, builder P): the questions and their odds show online too.
+	var prisoner:=audience.has("prisoner_id")
+	persons_row.visible=(not _persons_live() or prisoner) and resolved_result.is_empty() and String(audience.get("origin",""))=="court" and String(audience.get("status",""))=="waiting"
 	if not persons_row.visible:return
 	# Offline war orders: the same words the god could type, built from real
 	# state, reaching the same engine (court_war_orders.gd).
 	var offered:=persons_choices()
-	offered.append_array(WarOrders.offline_choices(audience_id))
+	if not prisoner:offered.append_array(WarOrders.offline_choices(audience_id))
 	_fill_persons_menus(persons_row,offered)
 
 ## ORDERS BY OFFICE: the official's own business as a few plain choices,
@@ -1009,6 +1023,13 @@ func persons_choose(choice:Dictionary)->Dictionary:
 	## The same core decides and applies it as the live path does.
 	var action:=String(choice.get("action",""))
 	var params:Dictionary=choice.get("params",{}) if choice.get("params") is Dictionary else {}
+	# PRISONER (captured_agents.gd, builder P): a question put in a manner.
+	if action=="prisoner_ask":
+		if mode!="audience" or not resolved_result.is_empty():return {}
+		var asked:=Prisoners.ask(audience_id,String(params.get("topic","")),String(params.get("manner","firm")))
+		_prisoner_beat(asked)
+		_after_persons(asked)
+		return asked
 	if action=="command":
 		if mode!="audience":return {}
 		var heard:=Commands.hear(audience_id,String(params.get("command_text","")),{"terrain":terrain,"civic_settlement":civic_settlement})
@@ -1304,6 +1325,17 @@ func _speak()->void:
 	_last_words=text
 	_clear_suggestions()
 	_open_card(text)
+	# PRISONER (captured_agents.gd, builder P): their questions, the god's acts
+	# on them and their fate in the god's own words, before any other reading.
+	if resolved_result.is_empty() and Prisoners.is_prisoner_audience(audience_id):
+		var held:=Prisoners.hear(audience_id,text)
+		if bool(held.get("handled",false)):
+			if String(held.get("option",""))!="":choose(String(held.option))
+			elif String(held.get("divine",""))!="":divine(String(held.divine),text)
+			else:
+				_prisoner_beat(held)
+				_after_persons(held)
+			return
 	# Naming a successor at a mourning ("Let Iska keep the fire") chooses them.
 	if resolved_result.is_empty():
 		var named:=String(Lives.typed_choice(audience_id,text))
@@ -1596,6 +1628,9 @@ func choose(option_id:String)->Dictionary:
 	var audience:=Hall.find(audience_id)
 	var result:Dictionary=Hall.resolve(audience_id,option_id)
 	if not bool(result.get("ok",false)):
+		# PRISONER (captured_agents.gd, builder P): which words go home with them.
+		if result.get("choices") is Array:
+			_prisoner_words(result);return result
 		_show_toast(String(result.get("outcome",result.get("error",""))))
 		_build_options();return result
 	if not String(result.get("next_audience_id","")).is_empty():
@@ -1617,8 +1652,32 @@ func choose(option_id:String)->Dictionary:
 	if _order_card>0:
 		Tracker.done(_order_card,Tracker._why(String(result.get("outcome","")),"Answered"))
 		_order_card=0
+	# PRISONER (captured_agents.gd, builder P): the engine has put them to death;
+	# the hall shows it (L's set piece; vouched: result {}).
+	if String(result.get("action",""))=="execute" and String(result.get("prisoner_id",""))!="" and has_method("show_execution"):call("show_execution",String(result.get("words","")),{})
 	_show_outcome(result)
 	return result
+
+## PRISONER (captured_agents.gd, builder P): the words that go home with them,
+## each with their ruler's odds, under the speaking row (typing works too).
+func _prisoner_words(result:Dictionary)->void:
+	if not is_instance_valid(suggest_row):return
+	_clear_suggestions()
+	var caption:=Tokens.make_label(String(result.get("ask","Which words go with them?")),12,Tokens.TEXT_SOFT);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	suggest_row.add_child(caption)
+	for c:Dictionary in result.choices:
+		var button:=Button.new();button.name="PrisonerWords_"+String(c.get("id","")).replace(":","_");button.text=String(c.get("label",""));button.tooltip_text=String(c.get("tip",""))
+		_order_style(button)
+		var id:=String(c.get("id",""))
+		button.pressed.connect(func()->void:
+			_clear_suggestions()
+			choose(id))
+		suggest_row.add_child(button)
+	suggest_row.visible=true
+
+## PRISONER (captured_agents.gd, builder P): the questioning beat for the stage.
+func _prisoner_beat(result:Dictionary)->void:
+	if is_instance_valid(court_stage) and result.get("beat") is Dictionary:court_stage.event("prisoner",result.beat as Dictionary)
 
 ## How the one before you leaves once the audience is concluded.
 var _exit_style:="bow"

@@ -47,7 +47,7 @@ static func sections()->Array:
 	var learned:=Covert.learned(6)
 	if not learned.is_empty():
 		var rows2:Array=[]
-		for f:Dictionary in learned: rows2.append("%s — %s" % [String(f.fact),_age(int(f.age_days))])
+		for f:Dictionary in learned: rows2.append("%s — %s%s" % [String(f.fact),_age(int(f.age_days)),(" · FALSE: "+String(f.get("found_by",""))) if bool(f.get("found_false",false)) else ""])
 		out.append({"kind":"learned","title":"What they have learned","rows":rows2})
 	var outcomes:=Covert.outcomes(6)
 	if not outcomes.is_empty():
@@ -57,8 +57,12 @@ static func sections()->Array:
 	var caught:=Covert.caught_spies(6)
 	if not caught.is_empty():
 		var rows4:Array=[]
-		for c:Dictionary in caught: rows4.append("%s of %s, %s%s" % [("an assassin" if String(c.kind)=="assassinate" else "a spy"),String(c.civ_name),_age(int(c.age_days)),(" · "+String(c.fate)) if String(c.fate)!="" else ""])
+		for c:Dictionary in caught: rows4.append("%s%s of %s, %s%s" % [(String(c.name)+", ") if String(c.get("name",""))!="" else "",("an assassin" if String(c.kind)=="assassinate" else "a spy"),String(c.civ_name),_age(int(c.age_days)),(" · "+String(c.fate)) if String(c.fate)!="" else ""])
 		out.append({"kind":"caught","title":"Their spies we have caught","rows":rows4})
+	# Those we hold, what they said (a word our own eyes showed false is
+	# marked), and ours judged abroad (captured_agents.gd).
+	var held:=preload("res://scripts/captured_agents.gd").board_rows(6)
+	if not held.is_empty(): out.append({"kind":"prisoners","title":"Prisoners and what they said","rows":held})
 	if out.is_empty():
 		out.append({"kind":"empty","title":"","rows":["No one of ours is abroad in secret."]})
 	return out

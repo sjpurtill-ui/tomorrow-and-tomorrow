@@ -55,6 +55,11 @@ const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const WAR_PATH:="res://scripts/war_loop.gd"
 ## What the ruler stands to gain from a proposal, read from the engine.
 const STAKES_PATH:="res://scripts/proposal_stakes.gd"
+## A prisoner before the god (captured_agents.gd): their fate cards, the god's
+## wrath and favour on them, their regard, and their summons.
+const CAPTIVES_PATH:="res://scripts/captured_agents.gd"
+static func _captives()->GDScript:
+	return load(CAPTIVES_PATH) as GDScript
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
 const VERSION:=3
 const EXPIRY_DAYS:=20
@@ -528,6 +533,8 @@ static func _expire(day:int)->void:
 			ForeignDiplomacy.remember(id,"Our envoy %s waited %d days in the ruler's antechamber and was never received. They came home insulted." % [String(audience.speaker.name),int(day-int(audience.arrived_day))])
 			audience.outcome="%s waited %d days without an audience and has left, insulted. %s thinks less of you (opinion −0.04, trust −0.03)." % [String(audience.speaker.name),int(day-int(audience.arrived_day)),String(audience.civ_name)]
 			_add_sequel(audience,"ignored",day)
+		elif audience.has("prisoner_id"):
+			audience.outcome="%s was taken back under guard." % String(audience.speaker.name)
 		else:
 			# The ruler called them in; if the ruler never saw them, no one is slighted.
 			var matter:String="their report on %s" % String(audience.get("report",{}).get("subject_name","what they found")) if audience.kind=="report" else _topic_words(String(audience.petition.get("topic","")))
@@ -801,6 +808,7 @@ static func summonable()->Array[Dictionary]:
 static func summon(target:Dictionary)->Dictionary:
 	## Call someone into the hall now. They open with their most pressing
 	## matter; with nothing to raise they simply answer the summons.
+	if String(target.get("prisoner_id",""))!="": return _captives().call("summon",String(target.prisoner_id))
 	var keys:=summon_keys(target)
 	if keys.is_empty(): return {}
 	for audience in waiting():
@@ -2408,6 +2416,7 @@ static func options(id:String)->Array[Dictionary]:
 	var audience:=find(id)
 	var result:Array[Dictionary]=[]
 	if audience.is_empty() or String(audience.status)!="waiting": return result
+	if audience.has("prisoner_id"): return _captives().call("options",audience)
 	var terms:Dictionary=audience.terms
 	var text:=_terms_text(terms)
 	match String(audience.kind):
@@ -2611,6 +2620,7 @@ static func _proposal_options(audience:Dictionary)->Array[Dictionary]:
 static func resolve(id:String,option_id:String)->Dictionary:
 	var audience:=find(id)
 	if audience.is_empty() or String(audience.status)!="waiting": return {"ok":false,"outcome":"No audience is waiting.","reaction":"neutral"}
+	if audience.has("prisoner_id"): return _captives().call("resolve",audience,option_id)
 	var chosen:={}
 	for option in options(id):
 		if String(option.id)==option_id: chosen=option
@@ -3396,6 +3406,9 @@ static func voice_context(id:String)->Dictionary:
 		if audience.kind in WORK_KINDS:
 			var gwa:=_great_works()
 			if gwa!=null: context["wonder_proposal" if audience.kind=="wonder_proposal" else "great_work"]=gwa.call("voice_facts",audience)
+		if audience.has("prisoner_id"):
+			# A prisoner says only what they have said (captured_agents.gd).
+			context["prisoner"]=_captives().call("voice_view",id)
 		var known_id:=String((audience.speaker as Dictionary).get("known_id",""))
 		if known_id!="":
 			# A summoned commoner speaks for themselves, from their own life.
@@ -3630,6 +3643,7 @@ static func regard_of(id:String)->Dictionary:
 	## envoy's people regard the ruler.
 	var audience:=find(id)
 	if audience.is_empty(): return {}
+	if audience.has("prisoner_id"): return _captives().call("regard",id)
 	if String(audience.get("origin",""))=="foreign": return DIVINE.foreign_regard(String(audience.get("civ_id","")))
 	var pid:=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
 	if pid<=0: return {}
@@ -3646,6 +3660,7 @@ static func divine_options(id:String)->Array[Dictionary]:
 	var audience:=find(id)
 	var result:Array[Dictionary]=[]
 	if audience.is_empty() or String(audience.get("status",""))!="waiting": return result
+	if audience.has("prisoner_id"): return _captives().call("divine_options",audience)
 	var done:Array=audience.get("divine",[]) if audience.get("divine") is Array else []
 	if String(audience.get("origin",""))=="foreign":
 		if ForeignDiplomacy.civilization(String(audience.get("civ_id",""))).is_empty(): return result
@@ -3714,6 +3729,7 @@ static func divine(id:String,action:String,words:String="",target_pid:int=0,how:
 	## the god's command; {"quiet":true} when the caller narrates the act itself.
 	var audience:=find(id)
 	if audience.is_empty() or String(audience.get("status",""))!="waiting": return {"ok":false,"outcome":"No audience is waiting."}
+	if audience.has("prisoner_id") and target_pid<=0: return _captives().call("divine",audience,action,words)
 	var speaker_pid:=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
 	var done:Array=audience.get("divine",[]) if audience.get("divine") is Array else []
 	if target_pid>0 and target_pid!=speaker_pid:
@@ -3871,6 +3887,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
 	if data.has("council") and not bool((load("res://scripts/war_council.gd") as GDScript).call("valid_state",data.council)): return false
 	if data.has("covert") and not bool((load("res://scripts/covert_ops.gd") as GDScript).call("valid_state",data.covert)): return false
+	if data.has("captives") and not bool(_captives().call("valid_state",data.captives)): return false
 	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
 	if data.has("hardships") and not bool((load(HARDSHIPS_PATH) as GDScript).call("valid_state",data.hardships)): return false
 	if data.has("upkeep") and not bool(_upkeep().call("valid_state",data.upkeep)): return false

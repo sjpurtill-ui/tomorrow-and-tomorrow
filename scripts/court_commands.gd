@@ -538,6 +538,12 @@ static func hear(id:String,text:String,context:Dictionary={})->Dictionary:
 	var audience:=Hall.find(id)
 	var clean:=text.strip_edges().replace("\n"," ").substr(0,400)
 	if audience.is_empty() or String(audience.get("status",""))!="waiting" or clean.is_empty(): return {"handled":false,"act":"statement"}
+	# A prisoner before the god (captured_agents.gd): "put him to death",
+	# "send him home and tell ...", "turn him" are their fate, carried out by
+	# the prisoner's own engine; other words go on as usual.
+	if audience.has("prisoner_id"):
+		var held:Dictionary=(load("res://scripts/captured_agents.gd") as GDScript).call("hear_command",id,clean)
+		if not held.is_empty(): return held
 	# A grave order against our own people waits on the very next line here
 	# (grave_home.gd): the god's yes to its read-back or plea, or a clear
 	# answer to "which village?", carries it on; any other words drop it and
