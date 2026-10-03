@@ -1,12 +1,16 @@
 {
   "id": "burn_scar_regrowth_tracking",
   "line": "ecology",
-  "game_year": 13,
-  "approx_historical_year": -4913,
-  "prompt": "c. 4913 BCE: Adults revisit burn scar and examine new green shoots among charred stumps, comparing with unburned scrub; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bc1d3082-15ff-490f-9b78-5b0849d36adc.png",
-  "asset": "res://assets/ui/research/subjects/burn_scar_regrowth_tracking-v1.png",
-  "sha256": "c68688915c405668b74e321292740dcd44dad9e472c4303ac817be84f1fb3b46",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; burn scar and regrowth jointly visible in wide crop."
+  "prompt": "Create ONE finished research painting. Reference supplies WIDE canvas and field medium only, change subject completely. Preserve wide2055x765 fullbleed, NEVER3:2. Botanical foreground detailed plantpigments flatlandscapebands. Two crouching adults compare new green shoots rooted in old cold blackened patch against mature unburntplants nearby; pointing hands show shoot beside charcoalstump. No activefire cropfields pottery livestock instrument. All whole heads hands and primary objects CENTRAL y170..610 with ample landscape top/bottom for3.37:1 gamecard. Adults simplehideclothing, maturehandmade flat2D pigmentpapergrain, no photorealism CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-12/assets/ui/research/subjects/topsoil_depth_reading-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4f3d9eed-ff18-49b7-80b5-63ed63398049.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual3.37:1 Godot card visually reviewed; complete heads, hands, mechanism and field medium retained.",
+  "asset": "res://assets/ui/research/subjects/burn_scar_regrowth_tracking-v2.png",
+  "sha256": "45a72e6ab7f326316e7d2c470c8df392bfd36fd3915f88c91579cdc4379fd3ec",
+  "mode": "built-in image_gen / edit"
 }

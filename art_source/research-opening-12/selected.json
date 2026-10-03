@@ -1,0 +1,55 @@
+[
+  {
+    "id": "batch_task_grouping",
+    "line": "production",
+    "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Flat angular matte palette-knife pigment copper ember soot umber. Three seated adults divide same simple stone-tool making job: one sorts rough flint flakes, another seats flake in split handle, third prepares coarse cord nearby. Distinct three small material piles and orderly handoffs in one early portable camp, no factory table pottery metal or finishedlatergoods. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-11/assets/ui/research/subjects/hide_smoke_curing-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-31d07b81-badd-4d90-9d1f-935bf037ec7a.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full original and actual final3.37:1 Godot card visually reviewed: field medium, early materials, heads and action retained."
+  },
+  {
+    "id": "smoking",
+    "line": "nutrition",
+    "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Opaque botanical egg-tempera olive gold cream earth. Two crouching adults tend a SMALL smoky low hearth beneath roughly tied open branch rack with three modest strips of meat high above smouldering embers. Gentle smoke rises through meat, no vigorousflames or cookingpot. Simple portable camp, not hut or smokeroven. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-09/assets/ui/research/subjects/hearth_roasting_control-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1a63b8bd-610b-4c83-86b5-2bc991e93a00.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full original and actual final3.37:1 Godot card visually reviewed: field medium, early materials, heads and action retained.",
+    "replace_first300": true
+  },
+  {
+    "id": "dietary_healing_regimens",
+    "line": "health",
+    "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Restrained sage celadon ink and watercolor on cream. Calm fully clothed recovering adult sits covered in hide blanket beside caregiver offering plain WOODEN dish containing softened roots and small berries; a second similar wooden dish with ordinary food nearby. Simple hand gesture of mealcare, no medicinal procedure, no labeled herb, ceramic pot or metal instrument. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-11/assets/ui/research/subjects/splint_and_bracing_technique-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fc43c826-edf7-4e03-957a-29ad73aabc1f.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full original and actual final3.37:1 Godot card visually reviewed: field medium, early materials, heads and action retained."
+  },
+  {
+    "id": "topsoil_depth_reading",
+    "line": "ecology",
+    "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Botanical foreground detail with flat landscape bands and plant pigments. Two crouching adults inspect shallow handdug soil pit showing dark humus layer over pale subsoil; one holds short rough stick against thickness, other compares pinch of soil. Small central soilcut and gesture clear, wild grasses and roots in sidewall. No numbered measure metal shovel or advanced cultivatedfield. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-10/assets/ui/research/subjects/fallow_thicket_regrowth-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a251948a-3f7f-46e6-91a9-c59688e26c50.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full original and actual final3.37:1 Godot card visually reviewed: field medium, early materials, heads and action retained."
+  }
+]

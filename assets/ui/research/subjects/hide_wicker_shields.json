@@ -1,12 +1,18 @@
 {
   "id": "hide_wicker_shields",
   "line": "security",
-  "game_year": 15,
-  "approx_historical_year": -4900,
-  "prompt": "c. 4900 BCE: Adults weave wicker frames and bind stretched hide over them for protective round shields; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aee9cc3f-fbd5-4cf4-a7b7-63850ef81fc0.png",
-  "asset": "res://assets/ui/research/subjects/hide_wicker_shields-v1.png",
-  "sha256": "482319a01af11f0b40be1ac0c8aeae68e8b6a3ebbcfc342ef3476075dac8c42a",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; wicker frame, hide covering and restrained practice clear in crop."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "prompt": "Create ONE new Tomorrow and Tomorrow security research painting. Reference guides handmade woodblock medium and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height/panoramic aspect, full bleed; no frame/text/default3:2. Two early adults test an unfinished rawhide-covered wicker shield in a sparse upland camp: one holds the rough oval shield sideways, showing its woven twig rim and simple hide straps, the other presses a plain wooden practice stick lightly against it. Layered hand-cut woodblock painting, vermilion, charcoal and parchment, bold irregular cut edges and flat interlocking masses. Hide garments, no metal bosses, swords, heraldry, uniforms or fortification.\nKeep all primary heads/hands/shield action in central y170..610 of765px-high panorama to preserve an actual3.37:1 card crop. Distinct oblique camp composition, no generic kneeling river couple. Coarse basketry and rawhide are inherited game capabilities.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/security-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-12615333-1597-4ad4-bcc7-14a32efb65b1.png",
+  "replace_art600": false,
+  "replace_first300": false,
+  "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass.",
+  "asset": "res://assets/ui/research/subjects/hide_wicker_shields-v2.png",
+  "sha256": "36d4c161e8cd8e06ce59738455fb5ec07fe57b7f0da7125223f49052e50a4b29",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,12 +1,53 @@
 {
   "id": "household_mediators",
   "line": "institutions",
-  "game_year": 45,
-  "approx_historical_year": -4700,
-  "prompt": "c. 4700 BCE: Respected adult mediates a dispute between two households in a Neolithic village; civic fresco. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6dc9ccd5-caa6-4bd5-bd5d-bcccf6de586f.png",
-  "asset": "res://assets/ui/research/subjects/household_mediators-v1.png",
-  "sha256": "8ef82cab8607a626bfbe159777185232f83056cf6041ac1005a388ddcf4616a2",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; rejected first for Egyptian-looking figures; selected clearer Neolithic dress and village setting in wide crop."
+  "status": "new",
+  "name": "Go-betweens Mediate Quarrels Between Households",
+  "one_liner": "Go-betweens mediate quarrels between households",
+  "observation": "Go-betweens mediate quarrels between households.",
+  "key_threshold": false,
+  "target_year": 45,
+  "proposed_year": 45,
+  "band_low": 30,
+  "band_high": 60,
+  "min_year": 30,
+  "research_years": 3,
+  "requires_all": [
+    "customary_law"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Institutional flexibility",
+  "signals": [
+    "administration",
+    "society"
+  ],
+  "version": 2,
+  "year": 45,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/institutions-v1.png",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/household_mediators-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: Three adults seated on low stones outside two modest hide shelters. The central unarmed mediator holds open palms while the two household representatives gesture calmly toward one disputed food basket. No throne, crown, soldiers, courthouse or written contract. Medium: matte fresco dusty plum, limestone and gold. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8e3a7873-3596-4185-8467-46d4b448c229.png",
+  "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/household_mediators-v2.png",
+  "sha256": "f1b01becca846e971876f580a18874ba0324006cc639bc9d987a51f8ec3d8a54",
+  "mode": "built-in image_gen / edit"
 }

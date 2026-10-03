@@ -1,0 +1,42 @@
+{
+  "id": "threshing_frames",
+  "line": "nutrition",
+  "status": "catalog",
+  "name": "Threshing on Beaten Floors",
+  "one_liner": "Threshing on beaten floors",
+  "observation": "Threshing on beaten floors.",
+  "key_threshold": false,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 18,
+  "band_high": 43,
+  "min_year": 18,
+  "research_years": 3,
+  "requires_all": [
+    "seed_selection"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "grain_moisture_watch",
+    "site_clearing_assessment"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {},
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.35
+  ],
+  "binding_style": "nutrition: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established nutrition medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults use simple straight wooden beating sticks on dry grain stalks laid on a small smooth beaten-earth clearing; a third gathers loose separated grain beside a coarse basket. Opaque botanical egg-tempera olive/gold/cream. This live discovery is threshing on beaten floors, NOT a later threshing machine. No hinged flail, animal treadmill, metal tools, invented frame apparatus or plough.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-22e18f91-c8f1-4d6e-87f8-4f6ea6397f82.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/threshing_frames-v2.png",
+  "sha256": "1697937a291bf717857fe4a2b320a7105956d85c5fe28e46bf1db3555ee2df94",
+  "mode": "built-in image_gen / edit"
+}

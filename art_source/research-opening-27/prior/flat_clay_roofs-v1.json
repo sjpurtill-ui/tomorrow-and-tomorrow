@@ -1,0 +1,12 @@
+{
+  "id": "flat_clay_roofs",
+  "line": "infrastructure",
+  "game_year": 44,
+  "approx_historical_year": -4707,
+  "prompt": "c. 4707 BCE: Adults pack clay over reed-covered beams on a flat roof; casein gouache. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-70af28e5-dfd7-40dd-8588-ee821357cb9a.png",
+  "asset": "res://assets/ui/research/subjects/flat_clay_roofs-v1.png",
+  "sha256": "13c6db60ef95845f4cf71ed8281fd5e9792861e78fee22b08a71c2194bb6590b",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Roof structure and clay coating clear in crop."
+}

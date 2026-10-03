@@ -1,0 +1,12 @@
+{
+  "id": "sparring_customs",
+  "line": "security",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: Two adults practice controlled sparring with blunt wooden staffs while others watch; hand-cut woodblock print. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a31833b2-6dce-482e-bd6b-3be324d69c31.png",
+  "asset": "res://assets/ui/research/subjects/sparring_customs-v1.png",
+  "sha256": "963d30ad4dc4b2c2f581e766d5b8f0c6388434ea79607ddc44ad0cbda5510b7d",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; staff practice reads clearly as training rather than battle in crop."
+}

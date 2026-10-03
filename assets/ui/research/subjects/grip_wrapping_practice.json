@@ -1,12 +1,51 @@
 {
   "id": "grip_wrapping_practice",
   "line": "production",
-  "game_year": 34,
-  "approx_historical_year": -4773,
-  "prompt": "c. 4773 BCE: Craftsperson wraps fiber cordage around stone-tool wooden handles for secure grip; thick matte impasto oil. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ffc87f64-f036-4a7e-9de6-dc32dd64c3b0.png",
-  "asset": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png",
-  "sha256": "828a1940efeb18cf4da7835062735f9f472bd6c328a06db1f60e364aabda48f1",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; wrapped handle and stone head visible in crop."
+  "status": "era",
+  "name": "Grips Wrapped on Tool Handles",
+  "one_liner": "Grips wrapped on tool handles",
+  "observation": "Grips wrapped on tool handles.",
+  "key_threshold": false,
+  "target_year": 34,
+  "proposed_year": 34,
+  "band_low": 18,
+  "band_high": 45,
+  "min_year": 18,
+  "research_years": 1.5,
+  "requires_all": [
+    "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "hide_smoke_curing"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 34,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "production: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/production-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established production painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: ONE seated adult with exactly TWO hands wraps rough bast fiber around a crooked wood haft holding a flint tool, testing a thicker irregular grip. One finished crude wrapping and loose fiber. Production medium: angular palette-knife PAINTING, flat copper/ember/soot/umber masses, broken pigment, no sculptural relief.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7b36ccb0-7a76-48c2-974e-7420460c90df.png",
+  "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/grip_wrapping_practice-v2.png",
+  "sha256": "a86689d29c34dd21ab69e1acf0d7ddec41f511d755edc3b3901fa4555cd75302",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,9 +1,18 @@
 {
   "id": "food_drying",
-  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Food Drying. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Composition must make the unique subject instantly recognizable in a wide cropped research card, keeping main action across the center band. A close natural still life of thin strips of fish and fruit drying on simple woven reed racks in moving dry air. An early gatherer's hands space pieces apart; sunlight passes through a linen windbreak, no fire or smoke, no jars. Dry texture and airflow visually central. Early human community, simple unornamented natural clothing if visible, no national identity. Not a montage, not a UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c7559da1-3443-4a16-a8b9-aa45fedf2fe5.png",
-  "asset": "res://assets/ui/research/subjects/food_drying-v1.png",
-  "sha256": "3a79e55d20ac4c7decdf05a01c1735f0cb1e244cc25c327bb0ac82f8e5ff5863",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "nutrition",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/nut_kernel_shelling-v1.png",
+  "prompt": "Create a new current-game Tomorrow and Tomorrow nutrition research banner. Strictly preserve supplied WIDE painting canvas proportions approximately 2055x765. Match opaque botanical egg-tempera painting in olive/gold/cream earth tones. Two smaller hide-clad adults lay thin irregular wild meat strips and split wild fruit onto coarse crooked branches lashed with rough plant cord above open ground in breeze; one hand spreads slices apart. No woven racks, baskets, pottery, roof, farming or permanent building. Mature handmade 2D art, rough irregular animal hides, wild portable camp. Entire heads, hands and subject action within central 65 percent height, people 70 percent normal scale for 3.37:1 card crop. Full bleed wide panoramic painting, no text, borders, photography, CGI, cinematic light, cloth, ceramic pots or cultivated crops. Reference is MEDIUM and WIDTH only, replace its subject completely.",
+  "replace_first300": true,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f13b7a5e-eb2c-42a2-8d9a-d321a77a7cdc.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 6,
+  "review": "Opaque earth pigment painting. Wild meat and fruit spaced along crooked branch rack with coarse cord. No pottery or cultivated crop.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/food_drying-v2.png",
+  "sha256": "f8b6fe566e13a16a30f1b49ee785aa9e7cdabec1de89a7afb7f12d43bcf6872c"
 }

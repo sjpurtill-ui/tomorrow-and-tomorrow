@@ -1,12 +1,22 @@
 {
   "id": "stone_maceheads",
   "line": "security",
-  "game_year": 20,
-  "approx_historical_year": -4867,
-  "prompt": "c. 4867 BCE: Craftspeople drill rounded heavy stone mace head and bind another to plain wooden haft; hand-cut woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-47024ae1-7355-4de5-a991-d33b11e6e0fd.png",
-  "asset": "res://assets/ui/research/subjects/stone_maceheads-v1.png",
-  "sha256": "a018b782af74ac268a6b171d2cbfea8a4d2c014c62c76482e44be2ca0e6a11ca",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; mineral stone head and practice mace clear, no metal."
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/stone_maceheads-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/security-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established security field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two adults examine one rough ground-stone macehead lashed to a short wood handle; one presents the small implement, the other checks the binding beside a natural grinding stone. Layered hand-cut woodblock vermilion/charcoal/parchment. No combat, blood, skull target, drilled precision ring, metal, polished ornament or extra monstrous weapon.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.\nCritical correction: the implement must have a ROUND OVOID ground-stone CLUB HEAD with blunt rounded ends, firmly seated at a small forked wood handle using rawhide/cord binding. NOT a pointed stone, triangular blade, axe, adze or spear. Compact rounded mace shown clearly between the two people. All heads begin BELOW y180; central head and hands y300..570.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1fdfdd43-6e03-4744-af10-c0fcf575d9af.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/security-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/stone_maceheads-v2.png",
+  "sha256": "ecc83072413059e5d5a19c7952fe43b1da4b5da8ce9dd4b76a358f3f223186fd",
+  "mode": "built-in image_gen / edit"
 }

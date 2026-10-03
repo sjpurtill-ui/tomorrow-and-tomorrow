@@ -1,9 +1,18 @@
 {
   "id": "drainage",
-  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Ground Drainage. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. Low oblique view of two early workers cutting a shallow drainage channel around a simple earthen dwelling after rain. Water visibly follows a gently sloped channel away from muddy occupied ground toward a lower patch of reeds. Warm light on wet soil, strong legible water path. No well, aqueduct, pipe, brick sewer or modern machinery. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-0b40f499-373a-4a85-8375-46872455e283.png",
-  "asset": "res://assets/ui/research/subjects/drainage-v1.png",
-  "sha256": "2eccf3adde3d0cc7c1d8e2014bb1765bb2e04fa7f78c10657703b1b39bab90ae",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "infrastructure",
+  "game_year": 4,
+  "version": 2,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f4c73635-bee3-42ec-9dad-3e27c9718a3e.png",
+  "prompt": "Create a replacement research banner for Tomorrow and Tomorrow, matching the supplied CURRENT GAME banner's wide canvas proportions (approximately 2057 x 765, 2.7:1 landscape), flat matte casein-gouache treatment, adult figure drawing, mineral blue/cool ivory/limestone/slate palette, hand-brushed planar forms and restrained grain. This is an infrastructure illustration titled internally drainage; NO visible text. Change the subject completely to earliest-stage runoff drainage: two adults wearing crude ragged untreated hide wraps use crooked wooden digging sticks to scrape a shallow narrow surface channel that diverts rainwater downhill AWAY from a dry sleeping hide underneath one low irregular hide-and-branch windbreak. A little water follows the channel toward lower ground; dry sleeping area remains clearly visible beside it. Portable camp only, no house, wall, thatched hut, ceramic pot, basket, woven cloth, metal spade, boots, domestic chickens, farm or finished infrastructure. Match the reference's flat two-dimensional depiction: simplified dignified adult faces, painted silhouettes, broad opaque planes, no photographic skin or water reflections, no cinematic sunset, no 3D or impasto relief. Keep both faces, digging hands, channel and dry sleeping hide in a tight central horizontal band suitable for a 3.37:1 card crop. Full-bleed WIDE banner, retain supplied reference's width-to-height proportions; not square or 3:2. No decorative frame, writing, labels or watermark.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/hazard_landmark_memory-v1.png",
+  "mode": "built-in image_gen / reference-guided new subject",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "review": "Full original 2055x765 inspected. Flat mineral blue casein gouache matches actual 2057x765 current infrastructure reference. Two rough-hide adults scrape shallow runoff away from dry hide sleeping shelter using crooked raw sticks. No ceramic pots, baskets, permanent hut, shovels, boots or photography. User rejected the old photographic source and incorrect 3:2 starting format; this source uses current wide banner proportions.",
+  "asset": "res://assets/ui/research/subjects/drainage-v2.png",
+  "sha256": "04123f971ca1ba659baeee89ecb2302b4b68288451b853ad8d941ab4c2471c53"
 }

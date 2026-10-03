@@ -1,0 +1,12 @@
+{
+  "id": "task_sequencing_habits",
+  "line": "labor",
+  "game_year": 12,
+  "approx_historical_year": -4920,
+  "prompt": "c. 4920 BCE: Adults sort reeds, bind repeated bundles and install them on shelter frame in sequence; expressive charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7c81c86e-cf38-481f-a7e3-621f0972c235.png",
+  "asset": "res://assets/ui/research/subjects/task_sequencing_habits-v1.png",
+  "sha256": "08f199edfabaf3189a92fc1e94e89474c3ea841eb33c7096a0cf138620859b79",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; successive stations and ordered work clear in crop."
+}

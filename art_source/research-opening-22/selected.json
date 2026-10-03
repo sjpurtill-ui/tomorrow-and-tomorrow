@@ -1,0 +1,308 @@
+[
+  {
+    "id": "repeated_recitation_training",
+    "line": "knowledge",
+    "status": "era",
+    "name": "Recitation Drills for Craft Rules",
+    "one_liner": "Recitation drills for craft rules",
+    "observation": "Recitation drills for craft rules.",
+    "key_threshold": false,
+    "target_year": 30,
+    "proposed_year": 30,
+    "band_low": 18,
+    "band_high": 45,
+    "min_year": 18,
+    "research_years": 4,
+    "requires_all": [
+      "novice_task_shadowing"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "oral_epics"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/repeated_recitation_training.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+        "tile_index": 2,
+        "caption": "Recitation drills for craft rules (Year 30)",
+        "style": "paper_gouache"
+      },
+      "subject": null
+    },
+    "version": 2,
+    "year": 30,
+    "focus": [
+      0.5,
+      0.38
+    ],
+    "binding_style": "knowledge: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/knowledge-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established knowledge medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: An elder and three attentive learners sit at a portable hide camp, mouths gently open in call-and-response, elder gestures toward one simple stone scraper and a cord-tied branch bundle. Lapis/parchment crosshatched blue-black ink; clear storytelling through listening and repeated gestures, no written text/tablets/school building.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ed946ba3-3b8e-4332-801b-1adef0e15578.png",
+    "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "banishment_sentence",
+    "line": "institutions",
+    "status": "new",
+    "name": "Casting Out as the Gravest Sentence",
+    "one_liner": "Casting out as the gravest sentence",
+    "observation": "Casting out as the gravest sentence.",
+    "key_threshold": false,
+    "target_year": 30,
+    "proposed_year": 30,
+    "band_low": 18,
+    "band_high": 45,
+    "min_year": 18,
+    "research_years": 3,
+    "requires_all": [
+      "elder_council_assent"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "blood_price"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Administration",
+    "signals": [
+      "administration",
+      "society"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/banishment_sentence-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "version": 2,
+    "year": 30,
+    "focus": [
+      0.5,
+      0.3
+    ],
+    "binding_style": "institutions: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/institutions-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established institutions medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: Three sober elders stand inside a tiny camp boundary while a solitary adult with one small hide bundle walks away along an open path, looking back. Dusty-plum limestone matte fresco planes. Clear separation between community and departing adult, no violence, chains, throne, prison, royal insignia or crowd punishment.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8a43dea8-89da-4a54-8e7e-e07d0c453c44.png",
+    "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "pottery_style_identity",
+    "line": "culture",
+    "status": "new",
+    "name": "Pottery Motifs That Mark a People",
+    "one_liner": "Pottery motifs that mark a people",
+    "observation": "Pottery motifs that mark a people.",
+    "key_threshold": false,
+    "target_year": 30,
+    "proposed_year": 30,
+    "band_low": 16,
+    "band_high": 45,
+    "min_year": 16,
+    "research_years": 3,
+    "requires_all": [
+      "pit_firing",
+      "kin_body_ornament"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [
+      "production"
+    ],
+    "subcategory": "Social cohesion",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/pottery_style_identity.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 0,
+        "caption": "Pottery motifs that mark a people (Year 30)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    },
+    "version": 2,
+    "year": 30,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "culture: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/culture-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established culture medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: Two adults compare TWO squat handmade fired-clay pots, each bearing a DIFFERENT simple scratched zigzag/dot band, at a modest earthen shelter. Tapestry-inspired PAINTING: flat interlocking indigo/rose/gold planes, not literal cloth. Small body ornaments and hide garments, no wheel-thrown identical vessels, glaze, written symbols or woven clothing.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b685ddc2-2b98-404c-9e6d-021b1794f841.png",
+    "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "fiber_retting",
+    "line": "production",
+    "status": "catalog",
+    "name": "Flax Retted in Ponds",
+    "one_liner": "Flax retted in ponds",
+    "observation": "Flax retted in ponds.",
+    "key_threshold": false,
+    "target_year": 30,
+    "proposed_year": 30,
+    "band_low": 16,
+    "band_high": 40,
+    "min_year": 16,
+    "research_years": 3,
+    "requires_all": [
+      "fiber_grading"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "cordage",
+      "seed_selection"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": null
+    },
+    "version": 2,
+    "year": 30,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "production: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established production medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: Two adults place a tied bundle of long flax stems partly underwater in a shallow still pond, with one soaked bundle and pale separated fiber strands on the bank. Copper/ember/soot flat angular palette-knife planes; mechanism is plant stalk soaking and separating fibers, no fabric, loom, spindle, modern tank or metal tools.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f1b01af8-cf2d-40fb-861e-646b3ea7a046.png",
+    "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds.",
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/fiber_retting.png",
+      "focus": [
+        0.5,
+        0.7
+      ]
+    }
+  },
+  {
+    "id": "winnowing_practice",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Winnowing Chaff in the Wind",
+    "one_liner": "Winnowing chaff in the wind",
+    "observation": "Winnowing chaff in the wind.",
+    "key_threshold": false,
+    "target_year": 30,
+    "proposed_year": 30,
+    "band_low": 20,
+    "band_high": 45,
+    "min_year": 20,
+    "research_years": 2,
+    "requires_all": [
+      "threshing_frames",
+      "basketry"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": null
+    },
+    "version": 2,
+    "year": 30,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "nutrition: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established nutrition medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: ONE adult crouches slightly and tilts a shallow handwoven basket, a short stream of grain falling into a second basket on the ground while a SMALL distinct cloud of light chaff drifts sideways in the breeze. Olive/gold/cream opaque egg-tempera botanical painting. Both baskets and complete head/hands/action within central band, no machine, giant airborne grain spray, metal or woven clothing.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ffec3172-8e3f-4670-86c6-489c6d31571a.png",
+    "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds.",
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/winnowing_practice.png",
+      "focus": [
+        0.5,
+        0.73
+      ]
+    }
+  },
+  {
+    "id": "indicator_plants",
+    "line": "ecology",
+    "status": "new",
+    "name": "Indicator Plants for Good and Poor Ground",
+    "one_liner": "Indicator plants for good and poor ground",
+    "observation": "Indicator plants for good and poor ground.",
+    "key_threshold": false,
+    "target_year": 30,
+    "proposed_year": 30,
+    "band_low": 18,
+    "band_high": 42,
+    "min_year": 18,
+    "research_years": 3,
+    "requires_all": [
+      "topsoil_depth_reading"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "herbal_classification"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Land health",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/indicator_plants-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "version": 2,
+    "year": 30,
+    "focus": [
+      0.5,
+      0.2
+    ],
+    "binding_style": "ecology: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/ecology-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established ecology medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: Two adults crouch comparing a green broad-leaf patch over dark deep soil and a sparse pale grass patch over exposed stony ground; one lifts a small plant with roots and clinging earth. Botanical foreground and flat plant-pigment landscape, olive/earth/ivory. Clear soil/plant contrast, no labeled chart, written map, measuring instrument or modern agronomy equipment.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-97e2cc13-9925-466e-9717-af694d6304e8.png",
+    "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds."
+  }
+]

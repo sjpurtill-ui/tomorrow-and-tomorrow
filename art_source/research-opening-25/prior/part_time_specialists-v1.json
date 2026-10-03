@@ -1,0 +1,12 @@
+{
+  "id": "part_time_specialists",
+  "line": "labor",
+  "game_year": 36,
+  "approx_historical_year": -4760,
+  "prompt": "c. 4760 BCE: Household member shapes fine stone tool while kin cook, weave and tend crops in shared domestic work; charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-eed2fb29-4dea-47a9-8284-c404ea89c269.png",
+  "asset": "res://assets/ui/research/subjects/part_time_specialists-v1.png",
+  "sha256": "7532e71ca2688454d707754691d2eeab2d87cd586b230694b94e2bbf661fb60d",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; skilled craft among household chores clear in crop."
+}

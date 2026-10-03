@@ -1,0 +1,12 @@
+{
+  "id": "topsoil_depth_reading",
+  "line": "ecology",
+  "game_year": 11,
+  "approx_historical_year": -4927,
+  "prompt": "c. 4927 BCE: Adults test depth of dark topsoil with plain wooden digging stick beside exposed pale subsoil layer; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-075b148c-117f-420f-b042-f823e0bd1954.png",
+  "asset": "res://assets/ui/research/subjects/topsoil_depth_reading-v1.png",
+  "sha256": "e7daab0489e58fbd1c70e3fb1923c73846eff535cb231f036ee1aaaa2e6b2e22",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; soil profile and digging stick clear in crop."
+}

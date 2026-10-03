@@ -1,0 +1,12 @@
+{
+  "id": "snakebite_treatment",
+  "line": "health",
+  "game_year": 14,
+  "approx_historical_year": -4907,
+  "prompt": "c. 4907 BCE: Adults tend another persons ankle bite with simple plant-fiber binding while snake recedes; sparse watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e539c2fe-fcf0-4fcb-9e93-196dc1dafb0b.png",
+  "asset": "res://assets/ui/research/subjects/snakebite_treatment-v1.png",
+  "sha256": "a0f5cef816c201de5b608ce22375f071e6ca38077496080e7f60b200a8d08245",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too lifelike; period care custom depicted without instructional graphic; crop reviewed."
+}

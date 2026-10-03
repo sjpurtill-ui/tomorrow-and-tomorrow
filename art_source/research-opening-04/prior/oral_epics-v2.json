@@ -1,0 +1,10 @@
+{
+  "id": "oral_epics",
+  "prompt": "Recompose this exact oral storytelling scene so it reads beautifully in a very wide banner. Seat the elderly reciter on a low rock, gesturing vividly to attentive listeners on both sides. All important faces and the storyteller's expressive hands must fit within the middle horizontal 35% of the image height. Camera a little farther back; balanced horizontal group at similar head heights, no tall standing person. Keep the dusk firelight, realistic painterly finish, early clothing, and obvious spoken storytelling. No weaving, books, text, flags, UI or border.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c51df515-4216-4e9a-b2b0-8fb773a180a3.png",
+  "version": 2,
+  "asset": "res://assets/ui/research/subjects/oral_epics-v2.png",
+  "sha256": "aa5a26e384144b9eae58d355640ba511db9ac0579112f5ca55e91737f0321f65",
+  "mode": "built-in image_gen / edit",
+  "review": "pending visual audit"
+}

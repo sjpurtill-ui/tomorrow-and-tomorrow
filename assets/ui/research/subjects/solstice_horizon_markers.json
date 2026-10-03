@@ -1,0 +1,60 @@
+{
+  "id": "solstice_horizon_markers",
+  "line": "knowledge",
+  "status": "new",
+  "name": "Horizon Sunrise Markers for the Solstices",
+  "one_liner": "Horizon sunrise markers for the solstices",
+  "observation": "Horizon sunrise markers for the solstices.",
+  "key_threshold": false,
+  "target_year": 40,
+  "proposed_year": 40,
+  "band_low": 25,
+  "band_high": 60,
+  "min_year": 25,
+  "research_years": 6,
+  "requires_all": [
+    "moon_counting"
+  ],
+  "requires_any": [
+    [
+      "cairn_sightline_marking",
+      "sightline_staking"
+    ]
+  ],
+  "precedents": [
+    "seasonal_patterns"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Observers",
+  "signals": [
+    "information",
+    "research"
+  ],
+  "version": 2,
+  "year": 40,
+  "focus": [
+    0.5,
+    0.3
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/solstice_horizon_markers.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+      "tile_index": 4,
+      "caption": "Horizon sunrise markers for the solstices (Year 40)",
+      "style": "paper_gouache"
+    },
+    "subject": null
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/knowledge-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established knowledge painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two observers stand behind an irregular wooden sighting stake and small rough cairn, looking along a clear alignment to LOW sunrise on distant hills. Show simple horizon comparison, NO astronomical instruments, Stonehenge, calendar writing or monumental stone circle. Medium: blue-black crosshatched ink, lapis and parchment. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4cb8197c-925a-460a-9980-5434a546def6.png",
+  "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600.",
+  "asset": "res://assets/ui/research/subjects/solstice_horizon_markers-v2.png",
+  "sha256": "6d83114693d0d148472f2020791bc0a487722bd61b438816fc027946a20a3340",
+  "mode": "built-in image_gen / edit"
+}

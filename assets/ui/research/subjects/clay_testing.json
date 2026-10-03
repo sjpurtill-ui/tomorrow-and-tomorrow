@@ -1,9 +1,17 @@
 {
   "id": "clay_testing",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Clay Testing. Hands compare small clay test tiles with visibly different shrinkage cracks and textures beside raw samples. Material comparison and test pieces, not decorative pottery-making.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-e4b6f58b-c349-4162-9239-8921dc879ec3.png",
-  "asset": "res://assets/ui/research/subjects/clay_testing-v1.png",
-  "sha256": "5623178be1b28d2e55654894e0391fb1bd02378eb0f8f26626b7e1dabb43e405",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Flat angular matte palette-knife pigment copper ember soot umber. Two seated adults wet crude clay with water from simple hollow WOODEN dish, one rolls small clay coil between hands; beside them three small rawclay test lumps with different cracks after drying. No ceramic vessel kiln fired pot writing or workshop. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-12/assets/ui/research/subjects/batch_task_grouping-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-35a2d09c-59bf-428d-acc0-b67fe732760e.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual3.37:1 Godot card visually reviewed; primary heads, hands and subject action retained, field medium and chronology checked.",
+  "replace_first300": true,
+  "asset": "res://assets/ui/research/subjects/clay_testing-v2.png",
+  "sha256": "9dc11d782b7400c00e51620848bf08426191bb2e11855388ca3c1067fc6e813a",
+  "mode": "built-in image_gen / edit"
 }

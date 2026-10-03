@@ -1,0 +1,19 @@
+{
+  "id": "named_landmark_lore",
+  "line": "culture",
+  "version": 1,
+  "replace_art600": true,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/oral_epics-v3.png",
+  "prompt": "Create a current-game culture banner matching supplied approximately 2170x725 WIDE tapestry-inspired PAINTING: flat interlocking indigo/rose/gold/violet pigment shapes and mature dignified adults, not literal woven fabric. Three smaller hide-clad adults seated on low rocky ridge: elder tells landmark lore with open-hand gesture toward DISTINCT split upright natural rock and crooked lone tree across valley; second adult repeats gesture to younger adult who looks at the landmarks. Keep same landmarks fully visible and storytelling mouths/gestures central. No campfire required, no sunset realism. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bbd09ba8-5d0d-4e92-913c-87d835aa1910.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 5,
+  "review": "Interlocking indigo/rose/gold painted planes match wide current culture reference. Elder and repeater gesture toward split natural rock and crooked tree; no literal tapestry or buildings.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "binding_style": "culture: tapestry-inspired painting",
+  "asset": "res://assets/ui/research/subjects/named_landmark_lore-v1.png",
+  "sha256": "6b63ffd3603e4f51795c9f26adb28b7387f45362b69e30e287155beb5fb87d0a"
+}

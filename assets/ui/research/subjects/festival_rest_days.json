@@ -1,12 +1,57 @@
 {
   "id": "festival_rest_days",
   "line": "labor",
-  "game_year": 32,
-  "approx_historical_year": -4787,
-  "prompt": "c. 4787 BCE: Adults set down field tools and share food, dancing and simple clappers for communal seasonal rest; charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-671d934b-bdde-468c-805b-7526c7a96ab8.png",
-  "asset": "res://assets/ui/research/subjects/festival_rest_days-v1.png",
-  "sha256": "cf3891f53ac64b429885ef96814d55d34bb235a003a91f3839cc316e9711cd8f",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; deliberate rest and festival clear in crop."
+  "status": "new",
+  "name": "Festival Rest Days",
+  "one_liner": "Festival rest days",
+  "observation": "Festival rest days.",
+  "key_threshold": false,
+  "target_year": 32,
+  "proposed_year": 32,
+  "band_low": 15,
+  "band_high": 42,
+  "min_year": 15,
+  "research_years": 2,
+  "requires_all": [
+    "festival_calendar",
+    "rest_break_timing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [
+    "culture"
+  ],
+  "subcategory": "Workload balance",
+  "signals": [
+    "administration",
+    "training"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/festival_rest_days-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "version": 2,
+  "year": 32,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "labor: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/labor-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established labor medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: Four adults rest together beside a quiet hearth after collective work, sharing roots from a modest bowl while one taps a small hide-covered hand drum. A few laid-down digging sticks signal pause from labor. Ochre/charcoal dry-brush drawing. Hide clothing, small portable camp, no kings, luxury banquet, procession or musical notation.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ff0fa5c3-b7b6-4c05-9916-877eed588ccd.png",
+  "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/festival_rest_days-v2.png",
+  "sha256": "860e51816b283154ea1eb24e5b16919809fa4c0e9f4d3c6ac1b204c68dd6aa77",
+  "mode": "built-in image_gen / edit"
 }

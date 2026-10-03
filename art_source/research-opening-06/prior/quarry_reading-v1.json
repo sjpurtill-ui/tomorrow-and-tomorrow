@@ -1,0 +1,9 @@
+{
+  "id": "quarry_reading",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Reading the Quarry Face. A quarry worker traces a natural seam across a exposed stone face with a finger while studying layered fractures; no explosives, machinery or finished stone blocks.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-15ec0c47-8e55-4e72-921f-47fa655b4147.png",
+  "asset": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+  "sha256": "038d0fbe3e6bc70f00c6dac5f5824670dc54ea90634e9403702affedd6147204",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

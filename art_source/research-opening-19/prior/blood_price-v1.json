@@ -1,0 +1,12 @@
+{
+  "id": "blood_price",
+  "line": "institutions",
+  "game_year": 20,
+  "approx_historical_year": -4867,
+  "prompt": "c. 4867 BCE: A household compensates injured persons kin with baskets and grain while elders witness peaceful resolution; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c5d55860-0284-44a6-adf9-eaa984b0896e.png",
+  "asset": "res://assets/ui/research/subjects/blood_price-v1.png",
+  "sha256": "64d589b2d362b32e77f75df8b854329c50472922d92ea2a4cd7fe82fe0444cce",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; restitution goods and witnessed resolution clear in crop."
+}

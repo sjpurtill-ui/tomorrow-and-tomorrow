@@ -1,0 +1,12 @@
+{
+  "id": "grip_wrapping_practice",
+  "line": "production",
+  "game_year": 34,
+  "approx_historical_year": -4773,
+  "prompt": "c. 4773 BCE: Craftsperson wraps fiber cordage around stone-tool wooden handles for secure grip; thick matte impasto oil. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ffc87f64-f036-4a7e-9de6-dc32dd64c3b0.png",
+  "asset": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png",
+  "sha256": "828a1940efeb18cf4da7835062735f9f472bd6c328a06db1f60e364aabda48f1",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; wrapped handle and stone head visible in crop."
+}

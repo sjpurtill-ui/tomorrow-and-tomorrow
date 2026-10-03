@@ -1,12 +1,57 @@
 {
   "id": "saddle_quern_grinding",
   "line": "nutrition",
-  "game_year": 32,
-  "approx_historical_year": -4787,
-  "prompt": "c. 4787 BCE: Adults grind harvested grain on saddle-shaped stone querns using hand stones, flour falling into baskets; matte egg tempera. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cb834e71-103e-43d0-ae6b-0abf9f94109c.png",
-  "asset": "res://assets/ui/research/subjects/saddle_quern_grinding-v1.png",
-  "sha256": "2dd53205ccaf9fcc21e178471361a196729effdad4e076a27157fc9814dedc30",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; saddle querns, grain and flour clear in crop."
+  "status": "new",
+  "name": "Grinding Grain on Saddle Querns",
+  "one_liner": "Grinding grain on saddle querns",
+  "observation": "Grinding grain on saddle querns.",
+  "key_threshold": false,
+  "target_year": 32,
+  "proposed_year": 32,
+  "band_low": 22,
+  "band_high": 47,
+  "min_year": 22,
+  "research_years": 3,
+  "requires_all": [
+    "winnowing_practice",
+    "food_pounding_mortars"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "ground_stone_axes"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Daily supply",
+  "signals": [
+    "food",
+    "storage"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/saddle_quern_grinding-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "version": 2,
+  "year": 32,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "nutrition: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established nutrition medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: ONE adult kneels at a low curved saddle-quern stone and pushes a handheld oval rubbing stone with BOTH hands across pale grain, producing a small visible meal pile below; a shallow basket holds whole grain beside it. Olive/gold/cream botanical egg tempera. Complete head,2hands, two grinding stones, grain and meal centered. No rotary mill, millwheel, metal or woven cloth.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6ac304f7-85b2-42d0-8d7b-10185b53bbbb.png",
+  "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/saddle_quern_grinding-v2.png",
+  "sha256": "79f7ea32b90b5b8db0a8b19b076715cf18b14707d446f95ddb1eaa4af29f5995",
+  "mode": "built-in image_gen / edit"
 }

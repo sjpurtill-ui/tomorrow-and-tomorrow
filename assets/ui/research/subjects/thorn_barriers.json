@@ -1,12 +1,56 @@
 {
   "id": "thorn_barriers",
   "line": "security",
-  "game_year": 45,
-  "approx_historical_year": -4700,
-  "prompt": "c. 4700 BCE: Villagers construct a thorny brush barrier around a small reed camp; hand-cut woodblock print. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4f150e51-e57f-401b-96f9-deada40fcdf9.png",
-  "asset": "res://assets/ui/research/subjects/thorn_barriers-v1.png",
-  "sha256": "16e0e20e7fde6512783ff8758e07e5ed3988efb4334a7fc4f8c330296b84b50d",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; Thorn barrier and settlement clear in crop."
+  "status": "new",
+  "name": "Thorn and Brush Barriers Around Camps",
+  "one_liner": "Thorn and brush barriers around camps",
+  "observation": "Thorn and brush barriers around camps.",
+  "key_threshold": false,
+  "target_year": 45,
+  "proposed_year": 45,
+  "band_low": 29,
+  "band_high": 61,
+  "min_year": 29,
+  "research_years": 3,
+  "requires_all": [
+    "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "watch_rotation",
+    "refuge_point_marking"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Public safety",
+  "signals": [
+    "defense",
+    "warfare"
+  ],
+  "version": 2,
+  "year": 45,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/security-v1.png",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/thorn_barriers-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: Two adults interlock rough thorn and brush branches along a low irregular camp boundary. One lifts a thorn branch into place and one presses down existing brush. A simple hide shelter behind, no military fortress, spear array, masonry wall or battle. Medium: layered hand-cut woodblock in vermilion, charcoal and parchment. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a4045c6f-f1f2-4a30-a4f6-7d3a99abecfb.png",
+  "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/thorn_barriers-v2.png",
+  "sha256": "cdfaf4c256eaf01c103b5781717027824b499fdf8587a456456d0e8833da79dd",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,12 +1,56 @@
 {
   "id": "disability_care",
   "line": "health",
-  "game_year": 38,
-  "approx_historical_year": -4747,
-  "prompt": "c. 4747 BCE: Adult with lasting leg impairment uses wooden staff while kin supports path walking, shares food and includes basket weaving; sparse watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d74e5886-946a-46c0-ac5c-0744d4eb389b.png",
-  "asset": "res://assets/ui/research/subjects/disability_care-v1.png",
-  "sha256": "b50ac5e72989f68a1aee9f2aab386746e3258e3f4d7454ccb91a7c88dd2dad66",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; first did not clearly show impairment; selected mutual care, staff and contribution clear."
+  "status": "new",
+  "name": "Lifelong Care for the Lame and Disabled",
+  "one_liner": "Lifelong care for the lame and disabled",
+  "observation": "Lifelong care for the lame and disabled.",
+  "key_threshold": false,
+  "target_year": 38,
+  "proposed_year": 38,
+  "band_low": 28,
+  "band_high": 53,
+  "min_year": 28,
+  "research_years": 3,
+  "requires_all": [
+    "kin_care_widows_orphans"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "splint_and_bracing_technique"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "General health",
+  "signals": [
+    "health",
+    "illness"
+  ],
+  "version": 2,
+  "year": 38,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "health: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/disability_care-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/health-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established health painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: A seated older adult with limited mobility is INCLUDED in a small camp activity, sorting seeds on a bark tray while a younger companion offers a hand and a crude branch walking staff rests nearby. Everyday support and participation, dignity, no miraculous cure, medical gear, visible deformity, injury or infantile depiction. Health sage/celadon ink-watercolor on cream.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bcfd9730-d2e5-46c5-828a-0b4769f2ec40.png",
+  "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600.",
+  "asset": "res://assets/ui/research/subjects/disability_care-v2.png",
+  "sha256": "e323d77463a9b3df44121d002db773ae0f58e8ee02d3bb652ce6a164b6bc37d6",
+  "mode": "built-in image_gen / edit"
 }

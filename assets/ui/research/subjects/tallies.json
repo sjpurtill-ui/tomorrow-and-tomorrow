@@ -1,9 +1,18 @@
 {
   "id": "tallies",
-  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Material Tallies. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Composition must make the unique subject instantly recognizable in a wide cropped research card, keeping main action across the center band. An early storekeeper makes simple repeated tally notches in a small bone or wooden counting stick using a flint flake, beside counted bundles and a small row of pebbles. Focus on the notched tally stick and careful counting hands. No alphabet, numerals, paper or modern bookkeeping. Early human community, simple unornamented natural clothing if visible, no national identity. Not a montage, not a UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-cd084932-f8a7-4235-9c0a-89fa4cf8ecd6.png",
-  "asset": "res://assets/ui/research/subjects/tallies-v1.png",
-  "sha256": "9f083a9f2f95ed3b957898b2a0ee3e0ed219464b3c90ad8f3a3db2d42d221434",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "knowledge",
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never 3:2. Blue-black ink crosshatching and lapis over aged cream parchment. Two seated adults tally five pebbles by cutting five short parallel notches in a plain wooden stick with small stone flake. Hands, five pebbles and stick distinctly visible, no letters or numerals. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual 3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/counting_words-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-af4aade7-c563-4a8f-81be-8cf2d8fb89f6.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual 3.37:1 Godot card visually reviewed; field medium, early materials, heads and distinctive action retained.",
+  "replace_art600": true,
+  "binding_style": "blue-black ink crosshatching over lapis parchment",
+  "asset": "res://assets/ui/research/subjects/tallies-v2.png",
+  "sha256": "7cd5ef4c263488138602bd5d733ccfc65b8ef7dcb496a6952eee2bd9b7fb4338",
+  "mode": "built-in image_gen / edit"
 }

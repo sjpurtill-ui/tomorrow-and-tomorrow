@@ -1,0 +1,20 @@
+{
+  "id": "mineral_pigment_preparation",
+  "line": "production",
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/production-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: An adult kneels grinding red ochre chunks on a coarse stone slab with a rounded stone; another blends the powder with a small amount of binder in a shell, visible red and yellow pigments. Flat angular copper, ember, soot, umber palette-knife painting. No refined palette, paint tube, glass, metal or workshop machinery.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-94492523-9250-4483-861f-86ae0794f16f.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/mineral_pigment_preparation-v2.png",
+  "sha256": "3ef4abb3147713c23b4338b6a4c5878f0111197d78072d22748b517a28952d26",
+  "mode": "built-in image_gen / edit"
+}

@@ -1,12 +1,46 @@
 {
   "id": "grain_moisture_watch",
   "line": "nutrition",
-  "game_year": 24,
-  "approx_historical_year": -4840,
-  "prompt": "c. 4840 BCE: Adults spread and turn grain to dry on woven mats while inspecting baskets for damp under reed granary; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-45c36ba7-e597-4717-b986-cdeb51ccabb8.png",
-  "asset": "res://assets/ui/research/subjects/grain_moisture_watch-v1.png",
-  "sha256": "d62b996475ee27bff63de7b9a5825b0e4d0aab95f236279816a2656fe86dfe33",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; drying, turning and moisture watch clear in crop."
+  "status": "era",
+  "name": "Grain Dried and Turned Against Damp",
+  "one_liner": "Grain dried and turned against damp",
+  "observation": "Grain dried and turned against damp.",
+  "key_threshold": false,
+  "target_year": 24,
+  "proposed_year": 24,
+  "band_low": 14,
+  "band_high": 34,
+  "min_year": 14,
+  "research_years": 2,
+  "requires_all": [
+    "seed_selection",
+    "food_drying"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/grain_moisture_watch-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "year": 24,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "nutrition: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: Two adults turn small heaps of grain on a low flat reed tray in a dry open clearing; a third compares a small damp clump beside a basket, distinct shade/sun boundary. Opaque botanical egg-tempera olive/gold/cream. No thermometer, modern silo, machinery, labelled diagram or huge fields.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-dfefe778-7b65-4dfb-9187-e5f7fd17b96e.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/grain_moisture_watch-v2.png",
+  "sha256": "c9dfdcffa2097f0bf8e5a3a1588513ac00547eeecd1e0229848d8b524770506f",
+  "mode": "built-in image_gen / edit"
 }

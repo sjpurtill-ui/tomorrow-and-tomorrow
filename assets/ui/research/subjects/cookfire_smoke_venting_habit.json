@@ -1,12 +1,16 @@
 {
   "id": "cookfire_smoke_venting_habit",
   "line": "ecology",
-  "game_year": 14,
-  "approx_historical_year": -4907,
-  "prompt": "c. 4907 BCE: Adults tend cookfire at edge of reed shelter while smoke escapes through open high roof gap; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c7184c00-54a7-4f95-8080-ffcdba659031.png",
-  "asset": "res://assets/ui/research/subjects/cookfire_smoke_venting_habit-v1.png",
-  "sha256": "dd2cafd60df4680395f3c196be24bee9e41ae7abe4096ffaf0fcdcea4b845e0e",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; smoke plume and vent gap visible in crop."
+  "prompt": "Create ONE finished research painting. Preserve reference fullbleed WIDE2055x765 canvas and botanical pigmentpapergrain field aesthetic only. NEWcomposition obliqueexteriorview of simple low earthenhome with rawwoodposts hide-coveredroof and conspicuous OPEN highgable gap; pale cookfiresmoke visibly travelsout highgap and driftsaway intoair. Two small fullyhideclothed adults raise rolledhideflap nearhighgap; anotherfamily sits calmly outsidebesidewoodendish. Smalllow hearthvisiblethroughopenentrance, no chimney masonry metal stove glass complicatedarchitecture textlabels. Matureflatlandscape bands with botanicalforeground, no CGI photographcartoon. Entireheads hands roofgap and smokebeginnings fitcentral y170..610, ampleskyandground foractual3.37:1card.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-14/assets/ui/research/subjects/burn_scar_regrowth_tracking-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9fc67400-fde7-436a-ae7c-08178caa2301.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.45
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "asset": "res://assets/ui/research/subjects/cookfire_smoke_venting_habit-v2.png",
+  "sha256": "6be8822c5dafa58d657382f79d12eabe434da363cd63b9e32bca874d08b413ab",
+  "mode": "built-in image_gen / edit"
 }

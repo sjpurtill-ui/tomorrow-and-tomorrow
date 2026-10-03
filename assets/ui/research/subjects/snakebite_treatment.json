@@ -1,12 +1,16 @@
 {
   "id": "snakebite_treatment",
   "line": "health",
-  "game_year": 14,
-  "approx_historical_year": -4907,
-  "prompt": "c. 4907 BCE: Adults tend another persons ankle bite with simple plant-fiber binding while snake recedes; sparse watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e539c2fe-fcf0-4fcb-9e93-196dc1dafb0b.png",
-  "asset": "res://assets/ui/research/subjects/snakebite_treatment-v1.png",
-  "sha256": "a0f5cef816c201de5b608ce22375f071e6ca38077496080e7f60b200a8d08245",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; first too lifelike; period care custom depicted without instructional graphic; crop reviewed."
+  "prompt": "Create ONE finished research painting. Preserve reference widecanvas about2055x765 fullbleed and field medium ONLY, change subject completely. Restrained sageceladon ink watercolor cream. Calm observation aftersnakebiteorsting: fullyclothed seated adult rests anklewhile companion kneels nearby watching and offers ordinarywoodencup ofwater. Anotheradult points at smallsnake retreating FARAWAY loweredge. No incision suction tourniquet applicationplant medicaltools blood graphicinjury, depictsocialsupportonly. Allwholeheads hands and mainobjects fit central y170..610, modestfigure scale with ampleskyandground foractual3.37:1card. Mature handmade flat2D pigmentpapergrain; simplehideclothing. No photography CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-14/assets/ui/research/subjects/household_water_boiling-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-c296a80e-57c6-4b37-8426-0ff6f00f9a97.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.57
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "asset": "res://assets/ui/research/subjects/snakebite_treatment-v2.png",
+  "sha256": "84c8ecceaff7b1145f669f955f94dd2fe7a178714d5500bab7ca0c6d8d7a27a7",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,12 +1,60 @@
 {
   "id": "leaf_fodder_pollarding",
   "line": "ecology",
-  "game_year": 45,
-  "approx_historical_year": -4700,
-  "prompt": "c. 4700 BCE: Villagers cut leafy branches from a pollarded tree to feed goats; plant-pigment naturalist illustration. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c8cda413-ac55-4cd5-afa1-538f5fd27e03.png",
-  "asset": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v1.png",
-  "sha256": "c21bd34b6c521d341c44a349d859f2956edcee7031752818e046a63f10b42676",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; Pollarded tree, cut foliage and goats clear in crop."
+  "status": "new",
+  "name": "Pollarded Trees Cut for Leaf Fodder",
+  "one_liner": "Pollarded trees cut for leaf fodder",
+  "observation": "Pollarded trees cut for leaf fodder.",
+  "key_threshold": false,
+  "target_year": 45,
+  "proposed_year": 45,
+  "band_low": 29,
+  "band_high": 61,
+  "min_year": 29,
+  "research_years": 4,
+  "requires_all": [
+    "animal_taming",
+    "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "fallow_thicket_regrowth"
+  ],
+  "conditions": {
+    "environment": [
+      "woodland"
+    ]
+  },
+  "shared_with": [],
+  "subcategory": "Land health",
+  "signals": [
+    "nature",
+    "survey"
+  ],
+  "version": 2,
+  "year": 45,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/ecology-v1.png",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: One adult holds a crude hafted stone tool beside a modest low pollarded tree with rough cut branches and new leafy shoots; another gathers leafy twigs into a small bundle while two goats browse fallen leaves. No steel axe or modern orchard. Medium: botanical foreground and flat landscape in plant pigments. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-39296f4f-2d16-49b1-89b0-547bcdebc2c2.png",
+  "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v2.png",
+  "sha256": "30e92edf3cfa752f4663ac25a2a426e810dd85430dc665e29f3ee55570d7aa0d",
+  "mode": "built-in image_gen / edit"
 }

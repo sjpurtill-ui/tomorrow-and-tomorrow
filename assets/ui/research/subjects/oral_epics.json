@@ -1,10 +1,19 @@
 {
   "id": "oral_epics",
-  "prompt": "Recompose this exact oral storytelling scene so it reads beautifully in a very wide banner. Seat the elderly reciter on a low rock, gesturing vividly to attentive listeners on both sides. All important faces and the storyteller's expressive hands must fit within the middle horizontal 35% of the image height. Camera a little farther back; balanced horizontal group at similar head heights, no tall standing person. Keep the dusk firelight, realistic painterly finish, early clothing, and obvious spoken storytelling. No weaving, books, text, flags, UI or border.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c51df515-4216-4e9a-b2b0-8fb773a180a3.png",
-  "version": 2,
-  "asset": "res://assets/ui/research/subjects/oral_epics-v2.png",
-  "sha256": "aa5a26e384144b9eae58d355640ba511db9ac0579112f5ca55e91737f0321f65",
-  "mode": "built-in image_gen / edit",
-  "review": "pending visual audit"
+  "line": "culture",
+  "game_year": 3,
+  "version": 3,
+  "focus": [
+    0.5,
+    0.45
+  ],
+  "replace_art600": true,
+  "binding_style": "culture: tapestry-inspired painting",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9ce0a96c-71f3-4bbe-a625-b7c12351881e.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/shared_hearth_gatherings-v1.png",
+  "prompt": "Create a completely NEW game year-3 research painting for Oral Epics: trained reciters keep long accounts. Reference supplies ONLY mature tapestry-inspired painted medium, interlocking flat angular forms, coarse fiber-like paint grain, indigo/dusty-rose/warm-gold/dusk-violet palette. Copy none of its seated hearth circle composition. New scene: a standing elder reciter at center-left tells a long remembered account, mouth open and one open hand held horizontally at shoulder level toward an attentive group of five adults seated at right. Another adult quietly repeats the account with a smaller remembering gesture. All wear ragged unstitched animal-hide wraps. An unobtrusive small fire toward left lights the gathering without cinematic glow, open prehistoric dusk landscape. Scene emphasizes trained memory and sustained recitation, no gods, fantasy apparition, floating illustrations, written text or music notation. Very wide panoramic painting approx 3:1, faces, open mouth, reciting and repeating hands all in compact central horizontal band for 3.77:1 crop. Deliberate flat pigment shapes, angular mature adults, no photographic skin or digital volume. Tapestry means rendering only: no physical tapestry, woven clothes, baskets, rugs, pottery, sewn garments, furniture, buildings, metal, captions, border or watermark.",
+  "mode": "built-in image_gen / new image with medium reference",
+  "review": "Full original inspected: standing elder with open mouth and shoulder-level recitation gesture, five attentive adults and one repeating listener beside small fire. All hide-clad, flat interlocking indigo/rose/gold/violet pigment with coarse fiber-like paint grain. No written records, physical weaving or fantasy overlay. Full original and 3.77:1 crop inspected; reciter mouth and outstretched hand, repeating listener and all attentive faces remain visible.",
+  "asset": "res://assets/ui/research/subjects/oral_epics-v3.png",
+  "sha256": "6cc08d786e85ff7edd20b64209cbcd9ee89a1a0b6f4579f35f7f144e2f58fbfa"
 }

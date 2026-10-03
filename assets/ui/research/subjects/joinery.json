@@ -1,10 +1,17 @@
 {
   "id": "joinery",
-  "prompt": "Correct this early Wood Joinery illustration by removing the metal chisel or blade in the foreground. Replace it with one simple loose chipped flint scraper lying on the bench. Preserve the precisely fitted mortise and tenon, the carpenter's working hands, wooden mallet, natural light and beautiful wood grain. Simplify the distant background to a modest settlement of earth and timber homes, no medieval stone towers. No metal tools or fittings anywhere.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-2e8f8a42-893c-403b-98f8-46ba8e5f384b.png",
-  "version": 2,
-  "mode": "built-in image_gen / edit",
-  "asset": "res://assets/ui/research/subjects/joinery-v2.png",
-  "sha256": "ffeea7e227870e194e117784cfa12e4b11f4dc50746ca7483b77de4d794ae004",
-  "review": "source checked; banner pending"
+  "line": "infrastructure",
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Matte casein gouache mineral blue limestone cream. Two seated adults fit a simple shallow notch in one rough pole across another, wrapping coarse cord around intersection. Make crossed pole joint and hands central, portable camp with few leaning poles. No metal nails, boards, mortise furniture or masonry. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-09/assets/ui/research/subjects/site_clearing_assessment-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a310f126-b0b7-4080-a004-79dc83de432a.png",
+  "version": 3,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual 3.37:1 Godot card visually reviewed; field medium, early materials, heads and distinctive action retained.",
+  "replace_first300": true,
+  "asset": "res://assets/ui/research/subjects/joinery-v3.png",
+  "sha256": "5fb05fdd12000d19a37bc4a79a8c719595a60afbd13a60271b4b1b86fc6c0888",
+  "mode": "built-in image_gen / edit"
 }

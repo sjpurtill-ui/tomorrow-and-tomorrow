@@ -1,0 +1,42 @@
+{
+  "id": "bow_drill_drive",
+  "line": "production",
+  "status": "catalog",
+  "name": "Bow Drill for Beads, Wood and Stone",
+  "one_liner": "Bow drill for beads, wood and stone",
+  "observation": "Bow drill for beads, wood and stone.",
+  "key_threshold": false,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 15,
+  "band_high": 38,
+  "min_year": 15,
+  "research_years": 3,
+  "requires_all": [
+    "cordage"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "friction_fire_ignition",
+    "controlled_flaking"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/bow_drill_drive.png",
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "production: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/production-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established production medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: ONE kneeling craftsperson with EXACTLY TWO hands uses a crude bow drill to bore a small wooden piece. Upper hand presses a palm-sized stone socket on a vertical wooden spindle; other hand moves the curved branch bow horizontally, its coarse cord wound once around spindle. Workpiece supported on low stone. No fire needed. Flat angular palette-knife copper/ember/soot. No metal bit, wheel, carpentry bench, three hands, oversized hunting bow or loose unconnected spindle.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fce20244-550b-4345-95a7-8b71538b519c.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/bow_drill_drive-v2.png",
+  "sha256": "07dced9840cac1cc59a5d8bc50762c07d5264b592d8d11fe38cab49457483399",
+  "mode": "built-in image_gen / edit"
+}

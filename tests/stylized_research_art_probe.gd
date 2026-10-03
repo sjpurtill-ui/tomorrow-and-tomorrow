@@ -36,6 +36,14 @@ func _ready()->void:
 	if batch=="earliest-20":get_window().size=Vector2i(1440,1320)
 	if "--opening-chronology-01" in OS.get_cmdline_user_args():
 		batch="earliest-opening-01";selected=["labor_rotations"]
+	if "--opening-chronology-02" in OS.get_cmdline_user_args():
+		batch="earliest-opening-02";selected=["watch_rotation","wound_cleaning","edible_resource_recognition"]
+	if "--opening-chronology-03" in OS.get_cmdline_user_args():
+		batch="earliest-opening-03";selected=[]
+		var selection:Array=JSON.parse_string(FileAccess.get_file_as_string("res://art_source/research-opening-03/selected.json"))
+		for row:Dictionary in selection:selected.append(row.id)
+		assert(not selected.is_empty())
+		assert(Art.focus_for({"id":"agreed_signal_codes"}).is_equal_approx(Vector2(.5,.5)))
 	for id:String in selected:
 		assert(DiscoverySystem.catalog_by_id.has(id),"Missing live discovery: "+id)
 		var item:Dictionary=DiscoverySystem.catalog_by_id[id].duplicate(true);item.exposed=true
@@ -59,6 +67,10 @@ func _ready()->void:
 		var sha:=FileAccess.get_sha256(expected)
 		var provenance:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://assets/ui/research/subjects/"+id+".json"))
 		assert(sha==provenance.sha256 and not hashes.has(sha));hashes[sha]=true
+		if batch=="earliest-opening-03":
+			assert(Art.focus_for(item).is_equal_approx(Vector2(provenance.focus[0],provenance.focus[1])))
+			assert(Art.focus_for({"id":"nut_kernel_shelling"}).is_equal_approx(Vector2(.5,.72)))
+			if id=="seasonal_patterns":assert(Art.art("ecology").resource_path==expected)
 		for dimensions in [Vector2(708,210),Vector2(264,70)]:
 			var crop:=Art.crop_region(texture,dimensions,Art.focus_for(item))
 			assert(Rect2(Vector2.ZERO,texture.get_size()).grow(.01).encloses(crop))

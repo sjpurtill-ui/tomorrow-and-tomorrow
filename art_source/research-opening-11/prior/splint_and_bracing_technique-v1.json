@@ -1,0 +1,12 @@
+{
+  "id": "splint_and_bracing_technique",
+  "line": "health",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: Healer binds straight wooden splints around another adults injured lower leg with plain cordage as helper steadies them; watercolor and sparse ink. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-20cc90f6-a139-4b89-b5aa-f49b76eb6661.png",
+  "asset": "res://assets/ui/research/subjects/splint_and_bracing_technique-v1.png",
+  "sha256": "c380a0bc6fe3e350984844d7d42646e2ad66cf8977b1c4e44349a73ed5c5fbb9",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too lifelike; splints and binding clear in crop."
+}

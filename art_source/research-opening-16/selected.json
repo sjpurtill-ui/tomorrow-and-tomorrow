@@ -1,0 +1,84 @@
+[
+  {
+    "id": "cairn_sightline_marking",
+    "line": "knowledge",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "prompt": "Create ONE new Tomorrow and Tomorrow research painting. The reference guides its mature handmade knowledge medium and the EXACT EXTRA-WIDE CANVAS ONLY, not subject. Preserve reference width, height and panoramic aspect; paint full bleed edge to edge with no frame, text or paper border. Do not produce a default 3:2 image. New subject: Two early adults on a rocky high ridge align their sight between two low irregular cairns and a distant pass. One crouches beside the near cairn and points along the route; the second stands farther along the ridge. Cool lapis and blue-black crosshatched ink on parchment, incisive hand-drawn hatching. No writing, telescope or formal surveying gear.\nPrimary heads, hands and practical action stay within central vertical band y=170..610 of the wide 765px-high reference, so an actual 3.37:1 card preserves them. Paint a distinct coherent scene, not collaged icons or generic same couple at river sunset. Early-game fictional capability chronology permits cordage, basketry and worked hides. No later industrial or permanent urban technology.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/knowledge-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0b3efffe-ab52-44dc-82d7-666a9f1909b2.png",
+    "replace_art600": true,
+    "replace_first300": false,
+    "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass."
+  },
+  {
+    "id": "bone_needle_sewing",
+    "line": "production",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Keep this entire panoramic painted composition, canvas dimensions2054x766, faces, clothing, shelter, flat copper/ember palette and framing exactly. Correct ONLY the sewing implements. The working ivory bone sewing needle between the man's hands must be a SLENDER pointed bone splinter: ONE tiny drilled eye near ONE blunt end, opposite end pointed with NO second hole. Thread goes through that single eye into the hide seam. It is not a wide double-ended shuttle. The loose bone AWL on the ground at lower left must be an unperforated tapering pale pointed spike, NO drilled eye or hole anywhere. No metal. Preserve all other painting details and wide full-bleed aspect.",
+    "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-96af8243-eeea-442b-bac6-8ea75ae3145f.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7faf378b-b35d-4f70-8b29-94c611bf2cdb.png",
+    "replace_art600": false,
+    "replace_first300": true,
+    "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass.",
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/bone_needle_sewing.png",
+      "focus": [
+        0.5,
+        0.59
+      ]
+    }
+  },
+  {
+    "id": "flood_mark_reading",
+    "line": "infrastructure",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Create ONE new Tomorrow and Tomorrow research painting. The reference guides its mature handmade infrastructure medium and the EXACT EXTRA-WIDE CANVAS ONLY, not subject. Preserve reference width, height and panoramic aspect; paint full bleed edge to edge with no frame, text or paper border. Do not produce a default 3:2 image. New subject: Two adults stand on a dry exposed river bank examining a continuous high-water stain and snagged reeds halfway up the eroded bank face. One points directly at the stain, the other compares it with the lower current river level. Three-quarter side view along the bank, mineral blue and limestone matte casein gouache. No constructed quay, levee or measuring ruler.\nPrimary heads, hands and practical action stay within central vertical band y=170..610 of the wide 765px-high reference, so an actual 3.37:1 card preserves them. Paint a distinct coherent scene, not collaged icons or generic same couple at river sunset. Early-game fictional capability chronology permits cordage, basketry and worked hides. No later industrial or permanent urban technology.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/infrastructure-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-abbc9c98-cfaa-49a4-83c3-c6d931cdcb9c.png",
+    "replace_art600": false,
+    "replace_first300": false,
+    "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass."
+  },
+  {
+    "id": "fruit_pulp_screening",
+    "line": "nutrition",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.43
+    ],
+    "prompt": "Create ONE new Tomorrow and Tomorrow research painting. The reference guides its mature handmade nutrition medium and the EXACT EXTRA-WIDE CANVAS ONLY, not subject. Preserve reference width, height and panoramic aspect; paint full bleed edge to edge with no frame, text or paper border. Do not produce a default 3:2 image. New subject: An adult presses soft wild plum pulp through a loosely woven shallow fiber screen into an opaque rough wooden bowl, another separates hard fruit stones and skins on a leaf. Closer tabletop-height view outdoors by shaded fruit trees, faces and mechanism central. Opaque botanical egg tempera, olive/gold/cream and earth pigments, visibly flat brushwork. Coarse basketry, no metal sieve, glass, pottery glaze or planted orchard rows.\nPrimary heads, hands and practical action stay within central vertical band y=170..610 of the wide 765px-high reference, so an actual 3.37:1 card preserves them. Paint a distinct coherent scene, not collaged icons or generic same couple at river sunset. Early-game fictional capability chronology permits cordage, basketry and worked hides. No later industrial or permanent urban technology.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/nutrition-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-61740bd7-1f7c-4976-a0b0-12fab94f6566.png",
+    "replace_art600": false,
+    "replace_first300": true,
+    "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass."
+  },
+  {
+    "id": "hide_wicker_shields",
+    "line": "security",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Create ONE new Tomorrow and Tomorrow security research painting. Reference guides handmade woodblock medium and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height/panoramic aspect, full bleed; no frame/text/default3:2. Two early adults test an unfinished rawhide-covered wicker shield in a sparse upland camp: one holds the rough oval shield sideways, showing its woven twig rim and simple hide straps, the other presses a plain wooden practice stick lightly against it. Layered hand-cut woodblock painting, vermilion, charcoal and parchment, bold irregular cut edges and flat interlocking masses. Hide garments, no metal bosses, swords, heraldry, uniforms or fortification.\nKeep all primary heads/hands/shield action in central y170..610 of765px-high panorama to preserve an actual3.37:1 card crop. Distinct oblique camp composition, no generic kneeling river couple. Coarse basketry and rawhide are inherited game capabilities.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/security-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-12615333-1597-4ad4-bcc7-14a32efb65b1.png",
+    "replace_art600": false,
+    "replace_first300": false,
+    "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass."
+  }
+]

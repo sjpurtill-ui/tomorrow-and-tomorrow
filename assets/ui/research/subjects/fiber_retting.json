@@ -1,0 +1,53 @@
+{
+  "id": "fiber_retting",
+  "line": "production",
+  "status": "catalog",
+  "name": "Flax Retted in Ponds",
+  "one_liner": "Flax retted in ponds",
+  "observation": "Flax retted in ponds.",
+  "key_threshold": false,
+  "target_year": 30,
+  "proposed_year": 30,
+  "band_low": 16,
+  "band_high": 40,
+  "min_year": 16,
+  "research_years": 3,
+  "requires_all": [
+    "fiber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "cordage",
+    "seed_selection"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": null
+  },
+  "version": 2,
+  "year": 30,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "production: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/production-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established production medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: Two adults place a tied bundle of long flax stems partly underwater in a shallow still pond, with one soaked bundle and pale separated fiber strands on the bank. Copper/ember/soot flat angular palette-knife planes; mechanism is plant stalk soaking and separating fibers, no fabric, loom, spindle, modern tank or metal tools.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f1b01af8-cf2d-40fb-861e-646b3ea7a046.png",
+  "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds.",
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/fiber_retting.png",
+    "focus": [
+      0.5,
+      0.7
+    ]
+  },
+  "asset": "res://assets/ui/research/subjects/fiber_retting-v2.png",
+  "sha256": "494e66dd58d677bcd17517e5f113715ef9369507b1824643e6d9de4a94c1eced",
+  "mode": "built-in image_gen / edit"
+}

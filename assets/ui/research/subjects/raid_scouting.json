@@ -1,12 +1,55 @@
 {
   "id": "raid_scouting",
   "line": "security",
-  "game_year": 40,
-  "approx_historical_year": -4733,
-  "prompt": "c. 4733 BCE: Scouts move ahead on ridge and hand-signal to hidden following raid party; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-49041ea9-50ee-4516-9faa-d9c403e3494e.png",
-  "asset": "res://assets/ui/research/subjects/raid_scouting-v1.png",
-  "sha256": "f78732d765694e4007d50036a8b11911d3efb9c0ea70a73d71e3d1a89512406f",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; forward scouts and following party clear, no actual violence."
+  "status": "new",
+  "name": "Scouts Sent Ahead of a Raiding Party",
+  "one_liner": "Scouts sent ahead of a raiding party",
+  "observation": "Scouts sent ahead of a raiding party.",
+  "key_threshold": false,
+  "target_year": 40,
+  "proposed_year": 40,
+  "band_low": 25,
+  "band_high": 55,
+  "min_year": 25,
+  "research_years": 3,
+  "requires_all": [
+    "ambush_raids"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "distance_call_signals"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Public safety",
+  "signals": [
+    "defense",
+    "warfare"
+  ],
+  "version": 2,
+  "year": 40,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/raid_scouting-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/security-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established security painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two lightly equipped scouts crouch at a ridge edge, one quietly indicating a distant small settlement while a few companions wait well behind. Crude wooden spear and stone point, no fight, injury, army uniforms, metal or tactical map. Medium: layered hand-cut woodblock vermilion/charcoal/parchment. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ba0505ef-6aeb-4b48-8d24-8713d0db76f0.png",
+  "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600.",
+  "asset": "res://assets/ui/research/subjects/raid_scouting-v2.png",
+  "sha256": "e80d36006b43b783f893ccc24d3fbffa792df13af61d90e9534f15b0695a749c",
+  "mode": "built-in image_gen / edit"
 }

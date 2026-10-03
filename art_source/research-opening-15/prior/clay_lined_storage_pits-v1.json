@@ -1,0 +1,12 @@
+{
+  "id": "clay_lined_storage_pits",
+  "line": "infrastructure",
+  "game_year": 14,
+  "approx_historical_year": -4907,
+  "prompt": "c. 4907 BCE: Adults smooth wet clay along storage pit walls and lower dried food in reed basket into completed adjacent pit; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2ccb52ee-63b8-494b-96b1-4f7124bed488.png",
+  "asset": "res://assets/ui/research/subjects/clay_lined_storage_pits-v1.png",
+  "sha256": "0b19a67ea4b6e4b084d4437e87c12597e71da43d78af5396f24025b10ae78e2a",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; clay lining and food pit clear in wide crop."
+}

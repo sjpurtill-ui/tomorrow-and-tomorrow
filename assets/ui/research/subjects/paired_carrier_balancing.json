@@ -2,11 +2,16 @@
   "id": "paired_carrier_balancing",
   "line": "logistics",
   "game_year": 4,
-  "approx_historical_year": -4973,
-  "prompt": "c. 4973 BCE: two adults balance a heavy load of gathered roots suspended from the center of a timber carrying pole supported at both ends. Mature flat panoramic travel watercolor, faded indigo and sand-gold washes, no cart, wheel, metal or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5e238461-a677-4bd0-855e-ac74bb9db80e.png",
-  "asset": "res://assets/ui/research/subjects/paired_carrier_balancing-v1.png",
-  "sha256": "3dda5fd00ef21af97a940cd3c05d9aabb1f9e982a0a775f4083ee01a2bdcf7e0",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation selected; first had camera-like landscape. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bc6222f4-1941-4b29-8487-153c1bd0c502.png",
+  "prompt": "Edit this CURRENT GAME wide logistics watercolor banner, retain approximately 2059x764 proportions, mature flat moving indigo silhouettes, sand/slate/indigo watercolor washes and simple hide clothing. Keep two adults shouldering ONE crooked natural wooden pole with a heavy shared load suspended between them. Replace the woven/netted basket shape entirely with ONE irregular RAW HIDE sling hanging from four crude raw cord loops, containing loose wild roots and broken branch pieces. No basket weave or net grid. Keep load visibly balanced between shoulders. Reduce whole carriers slightly vertically, enough to show complete heads and both shoulder grips inside central 70 percent height; bring feet up slightly if needed for full-width composition. No refined yoke, metal, pottery, finished clothes or boats. Preserve reference's flat travel watercolor, no photography, CGI or thick oil relief. Wide banner unchanged, no square, no 3:2, no labels or border.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/paired_carrier_balancing-v1.png",
+  "focus": [
+    0.5,
+    0.45
+  ],
+  "review": "Full 2059x764 wide original inspected: two indigo adult silhouettes shoulder same crooked pole, four crude cord loops suspend one raw-hide sling containing wild roots/branch fragments. Woven/net basket removed. Current panoramic watercolor retained, faces/grips/load inside central band.",
+  "asset": "res://assets/ui/research/subjects/paired_carrier_balancing-v2.png",
+  "sha256": "3914e48e25d1fde00a59b0dd4ae950698f78b1ceec2a7c0a5376cf6b0f544507",
+  "mode": "built-in image_gen / edit"
 }

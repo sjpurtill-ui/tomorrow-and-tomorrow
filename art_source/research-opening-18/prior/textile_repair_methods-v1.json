@@ -1,0 +1,12 @@
+{
+  "id": "textile_repair_methods",
+  "line": "production",
+  "game_year": 18,
+  "approx_historical_year": -4880,
+  "prompt": "c. 4880 BCE: Adults patch torn woven cloth with bone needle and repair warp strands on simple frame; thick matte impasto oil. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-04020425-850d-4f41-aa94-1d09b48f90b6.png",
+  "asset": "res://assets/ui/research/subjects/textile_repair_methods-v1.png",
+  "sha256": "dac602dd7f9a0177b362bd5feb29a9248b964e3254efac26ac9752c564091d74",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; both repair actions and fabric tear clear in crop."
+}

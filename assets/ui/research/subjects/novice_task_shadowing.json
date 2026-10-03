@@ -1,0 +1,21 @@
+{
+  "id": "novice_task_shadowing",
+  "line": "knowledge",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/weather_sign_reading-v1.png",
+  "medium": "blue-black ink crosshatching with muted lapis on parchment",
+  "prompt": "Create a NEW Tomorrow and Tomorrow year-eight research painting. Reference controls wide approximately 2055x765 proportions and blue-black ink crosshatching with muted lapis on parchment. Experienced hand demonstrates trimming a loose stone flake against larger core; attentive younger adult sits adjacent repeating same wrist gesture with separate stone; observer looks between their hands. Demonstration and copied action clearly readable. Portable wild camp, rough irregular hide garments. Complete heads, hands and mechanism within central60percentheight with smaller people for actual3.37:1 crop. Full-bleed wide mature handmade2D painting. No text, labels, border, photography, CGI, cinematic light, pottery, permanent houses, cropfields or domesticated livestock. Replace subject while retaining field medium and width.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-376da9c4-f2d4-47a1-8476-fb0474517a18.png",
+  "version": 1,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 8,
+  "replace_art600": true,
+  "replace_first300": false,
+  "binding_style": "knowledge: blue-black ink crosshatching with muted lapis on parchment",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/novice_task_shadowing-v1.png",
+  "sha256": "800be7d10eae6b25cd09ad82440d3889fa6c3f69f59b3171ef352bd7a7ecf32c"
+}

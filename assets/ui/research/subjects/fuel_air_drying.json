@@ -1,0 +1,18 @@
+{
+  "id": "fuel_air_drying",
+  "line": "production",
+  "version": 1,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/edge_resharpening_rounds-v2.png",
+  "prompt": "Create a new current-game Tomorrow and Tomorrow production research banner. Strictly preserve supplied WIDE painting canvas proportions approximately 2055x765. Match flat angular palette-knife PAINTING in copper/ember/soot/umber, no sculptural relief. An adult spreads damp rough dead branches apart on two naturally fallen logs, second adult compares dark wet branch with lighter dry branch; air gaps and sunlight between sticks clearly visible, cold ash hearth aside. No constructed shed, sawn lumber or metal. Mature handmade 2D art, rough irregular animal hides, wild portable camp. Entire heads, hands and subject action within central 65 percent height, people 70 percent normal scale for 3.37:1 card crop. Full bleed wide panoramic painting, no text, borders, photography, CGI, cinematic light, cloth, ceramic pots or cultivated crops. Reference is MEDIUM and WIDTH only, replace its subject completely.",
+  "replace_first300": true,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7ee5a852-54c6-404a-8cfe-f12f224d9be4.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 6,
+  "review": "Angular copper/soot painting. Rough branches separated across naturally fallen logs; adult compares wet and dry wood.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/fuel_air_drying-v1.png",
+  "sha256": "bf811cefbbc87621a8b670b3031ece1ddec9a09164642e3346548328ec4a9feb"
+}

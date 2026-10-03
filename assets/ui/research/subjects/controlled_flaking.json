@@ -1,9 +1,20 @@
 {
   "id": "controlled_flaking",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Controlled Flaking. Extreme close view of hands using a rounded hammerstone to detach a deliberate flake from a prepared flint core; several consistent flakes on hide, no handles or polished axes.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f7c03855-85b3-4183-bad0-eeca40a57c6f.png",
-  "asset": "res://assets/ui/research/subjects/controlled_flaking-v1.png",
-  "sha256": "32821c6e4c23c381a09dfcd97d4600de217cebb10ee591630cd50886b0524b6a",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "game_year": 4,
+  "version": 2,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3b4968de-d65c-4758-8c2d-fff176e2fee7.png",
+  "prompt": "Make exactly one tiny correction to this image: extend or move the narrow tip of the pale raw antler tine a few pixels left so it visibly touches and presses the gray flint edge at the flake-removal point. There must be NO GAP between antler tip and stone edge. Preserve EVERYTHING ELSE: the wide approximately 2056x765 canvas, current game flat angular impasto-painted hands and limited ochre/umber/copper palette, all hand positions, rough hide, background and loose chips. No added text or objects, no photographic detail. This is pressure flaking, the contact is the whole mechanism.",
+  "initial_prompt": "Make a new CURRENT GAME production research banner using the supplied actual production banner as a strict visual style and canvas reference. Preserve its approximately 2057x765 WIDE 2.7:1 format, flat angular hand shapes, simplified finger planes, copper/ember/soot/umber pigment and palette-knife marks. Change the action to PRESSURE FLAKING: one adult hand supports a small thin flint point on raw hide, the other hand grips a short irregular raw antler tine whose narrow tip presses directly against the stone's edge; a tiny narrow flake breaks away at this contact, other small flakes below. Keep whole hands and contact centered across the wide frame, no faces needed. Match reference's visibly painted simplified hands, no photographic anatomy, nails, lifelike skin, cinematic light, glossy digital relief or 3D. No hammerstone, metal, pot, textile, refined tool or writing. Full-bleed wide banner, don't change to 3:2 or square. All key action inside central horizontal band suitable for 3.37:1 card crop. No borders or labels.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7519b464-9dd1-4d98-a34f-7794f0ab265b.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/edge_testing_by_feel-v1.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "review": "Wide 2055x765 source inspected. Actual current production reference anchors simplified angular copper/umber painted hands and wide canvas. Raw antler tine directly contacts flint edge, narrow released chip visible. One targeted contact correction retained all other composition. Prior unreferenced 3:2 result held and unbound after user aesthetic/width correction.",
+  "asset": "res://assets/ui/research/subjects/controlled_flaking-v2.png",
+  "sha256": "1dc6e2ab66aa19144f4177a9ccd267a2595aba0876b8d05cc618e8fb8db06a49",
+  "mode": "built-in image_gen / edit"
 }

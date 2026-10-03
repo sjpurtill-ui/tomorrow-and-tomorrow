@@ -1,9 +1,60 @@
 {
   "id": "customary_law",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Customary Law. An elder mediates a calm disagreement between two households in an open village circle while other elders listen and recall earlier judgments; oral precedent, no crown, courthouse or written lawbook.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-7c4910a7-e0be-4ec9-ab8b-a71d31bbb846.png",
-  "asset": "res://assets/ui/research/subjects/customary_law-v1.png",
-  "sha256": "3c5030d73e53efaaae2a10a0790e19934c102169e12f7a9dfba505ccd739f87c",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "institutions",
+  "status": "catalog",
+  "name": "Customary Law",
+  "one_liner": "Customary law: remembered judgments bind later ones",
+  "observation": "Customary law: remembered judgments bind later ones.",
+  "key_threshold": false,
+  "target_year": 35,
+  "proposed_year": 35,
+  "band_low": 20,
+  "band_high": 50,
+  "min_year": 20,
+  "research_years": 5,
+  "requires_all": [
+    "blood_price"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "banishment_sentence",
+    "mnemonic_verse_encoding",
+    "genealogical_recitation"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 35,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "binding_style": "institutions: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/customary_law-v1.png",
+      "focus": [
+        0.5,
+        0.39
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/institutions-v1.png",
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/customary_law.png",
+    "focus": [
+      0.52,
+      0.76
+    ]
+  },
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established institutions painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: THREE elders and two listeners discuss a dispute outdoors around a modest hearth; one speaker holds an open palm while another indicates a small offered hide bundle between them. Modest shelters, no monarch or official throne, no written laws. Institutions matte fresco dusty plum/limestone/gold.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-18c58f60-180e-47c4-af52-d9d864759d85.png",
+  "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/customary_law-v2.png",
+  "sha256": "5ede7ce09857ebac4766cb7bec09d75d691d2bf181c046435d2f65d6fd825905",
+  "mode": "built-in image_gen / edit"
 }

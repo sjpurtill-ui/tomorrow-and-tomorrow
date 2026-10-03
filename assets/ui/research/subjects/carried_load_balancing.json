@@ -2,11 +2,16 @@
   "id": "carried_load_balancing",
   "line": "logistics",
   "game_year": 2,
-  "approx_historical_year": -4987,
-  "prompt": "Early Neolithic traveler adjusts a woven forehead tumpline attached to a broad back basket so two bundles balance. Mature hand-painted panoramic watercolor in sand gold and faded indigo, simple hide-and-fiber wrap. No shoulder pole, later technology, photorealism or writing. Very wide card crop with high focus.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-027ce1b4-023b-4769-93d8-7f7ed49a5cb0.png",
-  "asset": "res://assets/ui/research/subjects/carried_load_balancing-v1.png",
-  "sha256": "bc0ad1cb283f48b266ae4d5301d9a6c95e1513e30c4a1d885073023ae5ea541e",
-  "mode": "built-in image_gen / new image",
-  "review": "Third generation selected: simplified watercolor silhouette with visible tumpline in high-focused crop. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.4
+  ],
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d1c86699-c0e9-4da1-9759-d389e2b2fc3d.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-02/assets/ui/research/subjects/carried_load_balancing-v1.png",
+  "prompt": "Edit this existing research painting for Carried Loads Balanced on Tumpline and Back, an opening-era logistics discovery. Preserve its mature handmade watercolor and restrained ink aesthetic, muted blue/ochre on warm paper, side-on figure, walking posture, broad panoramic landscape and composition. Replace ONLY the tightly woven basket on the person's back with a ragged unstitched hide sheet gathered around the loose bundle of reeds, held by a few rough raw-fiber ties. Keep the loose reed ends visible. The simple tumpline must run from the gathered hide load up over the person's forehead to carry the weight; keep that functional route legible. No woven basket, no sewn pack, no modern straps or metal fittings. Preserve all other details, watercolor transparency and flat painted silhouette. No text or frame, no photorealism or 3D.",
+  "review": "Full image inspected: rough gathered hide wraps loose reeds; coarse ties and forehead tumpline carry load visibly. Existing mature panoramic watercolor, adult posture and landscape retained. Removes woven basket before game-year-8 basketry; no sewn pack or metal fittings. Full image and 3.37:1 crop inspected; forehead tie, gathered hide and reeds remain legible.",
+  "asset": "res://assets/ui/research/subjects/carried_load_balancing-v2.png",
+  "sha256": "c2fde8bccc9000563e95efa10807863e2f9af7d1bc47cbf50a03c5205065dccc",
+  "mode": "built-in image_gen / edit"
 }

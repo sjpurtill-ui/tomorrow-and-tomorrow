@@ -1,12 +1,58 @@
 {
   "id": "fish_weirs_and_traps",
   "line": "nutrition",
-  "game_year": 23,
-  "approx_historical_year": -4847,
-  "prompt": "c. 4847 BCE: River fishers tend V-shaped wicker weir, basket traps and stone-sinker fiber net for fish and fowl; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-15c1b218-2f90-478c-8f79-53e62ced29a0.png",
-  "asset": "res://assets/ui/research/subjects/fish_weirs_and_traps-v1.png",
-  "sha256": "bc1729d8fd61495c0da66a75eb2ff75e0e44f662246f64bdc8424332e2972e09",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; weir, basket trap, stone sinkers and distant waterfowl clear in crop."
+  "status": "new",
+  "name": "Fish Weirs, Basket Traps and Sinker Nets for Fish and Fowl",
+  "one_liner": "Fish weirs, basket traps and sinker nets for fish and fowl",
+  "observation": "Fish weirs, basket traps and sinker nets for fish and fowl.",
+  "key_threshold": false,
+  "target_year": 23,
+  "proposed_year": 23,
+  "band_low": 13,
+  "band_high": 33,
+  "min_year": 13,
+  "research_years": 3,
+  "requires_all": [
+    "seasonal_protein_sourcing",
+    "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "cordage"
+  ],
+  "conditions": {
+    "environment": [
+      "river",
+      "coast"
+    ]
+  },
+  "shared_with": [],
+  "subcategory": "Daily supply",
+  "signals": [
+    "food",
+    "storage"
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/fish_weirs_and_traps-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "year": 23,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.4
+  ],
+  "binding_style": "nutrition: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: At a shallow stream, two adults inspect a crude funnel basket fish trap against a short arc of reed stakes; water visible through open lattice. A small rough net with stone sinkers lies on bank. Opaque botanical egg-tempera olive/gold/cream. No boat, factory mesh, metal hooks or masonry dam.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-63fe4d69-397d-4a40-b4d2-804e6733e93b.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/fish_weirs_and_traps-v2.png",
+  "sha256": "9ec859fd1c76f3d18522551f3e07507b9324a1421ee416f2ac433269d959f5fd",
+  "mode": "built-in image_gen / edit"
 }

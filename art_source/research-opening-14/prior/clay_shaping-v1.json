@@ -1,0 +1,9 @@
+{
+  "id": "clay_shaping",
+  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Clay Vessels. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Composition must make the unique subject instantly recognizable in a wide cropped research card, keeping main action across the center band. An early craftsperson hand-builds a small unfired clay bowl using thumb pressure and simple coils of wet clay on a rough mat. Damp raw earth, unfinished irregular rim, skilled hands. No potter wheel, kiln, fire, painted decorations, glaze, metal tools or elaborate finished pottery. Early human community, simple unornamented natural clothing if visible, no national identity. Not a montage, not a UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-4e375745-551d-4e05-82e7-e2c0cf9b3efa.png",
+  "asset": "res://assets/ui/research/subjects/clay_shaping-v1.png",
+  "sha256": "0473eeedf71dee77c741f304b262c8630fb9b3ac1eaf7bdbbb3c6ab216b08b7a",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

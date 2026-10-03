@@ -1,12 +1,16 @@
 {
   "id": "clay_lined_storage_pits",
   "line": "infrastructure",
-  "game_year": 14,
-  "approx_historical_year": -4907,
-  "prompt": "c. 4907 BCE: Adults smooth wet clay along storage pit walls and lower dried food in reed basket into completed adjacent pit; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2ccb52ee-63b8-494b-96b1-4f7124bed488.png",
-  "asset": "res://assets/ui/research/subjects/clay_lined_storage_pits-v1.png",
-  "sha256": "0b19a67ea4b6e4b084d4437e87c12597e71da43d78af5396f24025b10ae78e2a",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; clay lining and food pit clear in wide crop."
+  "prompt": "Create ONE finished research painting. Preserve reference widecanvas about2055x765 fullbleed and field medium ONLY, change subject completely. Mattecaseingouache mineralblue limestone. Lowground-level obliqueview of two small open earthstoragepits: adult kneeling presses rawwetclay along exposed wall of onepit, otheradult holds claylump beside secondfinished lining. Plain shallowpits no masonry kiln pots moderncrosssectionlabels. Allwholeheads hands and mainobjects fit central y170..610, modestfigure scale with ampleskyandground foractual3.37:1card. Mature handmade flat2D pigmentpapergrain; simplehideclothing. No photography CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-11/assets/ui/research/subjects/joinery-v3.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-085381e3-3f14-4918-b624-53256003b426.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "asset": "res://assets/ui/research/subjects/clay_lined_storage_pits-v2.png",
+  "sha256": "60420c0a1a14628846693ddbe03c1ea40b490fd1073fa6406dd3ca09562ce83b",
+  "mode": "built-in image_gen / edit"
 }

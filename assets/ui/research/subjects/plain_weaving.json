@@ -1,0 +1,49 @@
+{
+  "id": "plain_weaving",
+  "line": "production",
+  "status": "catalog",
+  "name": "Plain-weave Linen Cloth",
+  "one_liner": "Plain-weave linen cloth",
+  "observation": "Plain-weave linen cloth.",
+  "key_threshold": false,
+  "target_year": 44,
+  "proposed_year": 44,
+  "band_low": 25,
+  "band_high": 60,
+  "min_year": 25,
+  "research_years": 4,
+  "requires_all": [
+    "warp_weighted_looms",
+    "fiber_retting"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 44,
+  "focus": [
+    0.5,
+    0.1
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/paper/plain_weaving.png",
+      "focus": [
+        0.5,
+        0.65
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/production-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established production painting medium and EXACT EXTRA-WIDE canvas width/aspect. Full bleed, no frame/grid/text/3:2. NEW SUBJECT: One adult passes a rough weft stick through a modest upright branch warp-weighted loom; a small unpatterned rectangular plain-weave strip of coarse plant fiber is clearly visible, irregular clay weights below. Another holds retted fiber. This is the first plain weaving; CLOTHING remains hides/fur, NO embroidered fabric, metal loom or later textile workshop. Medium flat angular palette-knife copper/ember/soot/umber. Zoom out so ALL heads, hands and mechanisms fit central y170..590 on a765px banner for the actual3.37:1 card. Gameyears42\u201344, modest prehistoric materials: wood, reed, stone, raw hides/fur, clay, bast fibers. Do not copy reference's unrelated village or river subject. No metal, woven clothing, ornate later technology or photographic lighting.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6c5c8dce-0799-433e-adcc-0628fd6cc353.png",
+  "review": "Full original inspected; accepted subject and established field painting medium. Actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/plain_weaving-v2.png",
+  "sha256": "aaaf7e402d3d92c1db0b16b64338777e9010175496a92a3d28d1156f63dd5d61",
+  "mode": "built-in image_gen / edit"
+}

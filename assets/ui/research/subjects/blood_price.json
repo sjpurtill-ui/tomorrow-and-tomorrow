@@ -1,12 +1,22 @@
 {
   "id": "blood_price",
   "line": "institutions",
-  "game_year": 20,
-  "approx_historical_year": -4867,
-  "prompt": "c. 4867 BCE: A household compensates injured persons kin with baskets and grain while elders witness peaceful resolution; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c5d55860-0284-44a6-adf9-eaa984b0896e.png",
-  "asset": "res://assets/ui/research/subjects/blood_price-v1.png",
-  "sha256": "64d589b2d362b32e77f75df8b854329c50472922d92ea2a4cd7fe82fe0444cce",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; restitution goods and witnessed resolution clear in crop."
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/blood_price-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/institutions-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established institutions field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two kin groups meet with an elder mediating a peaceful compensation handover of a modest basket and shell cord; restrained open-palmed gestures at a plain camp threshold. Dusty plum/limestone/subdued gold matte fresco. No blood, violence, coins, written contract, uniform officials, throne or temple.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9f7de6a8-db38-4e7c-be6d-4368348bc2a1.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/institutions-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/blood_price-v2.png",
+  "sha256": "41f0adb1c333fc7a2a3631dde62133b30a9af9e4dcc0be1a4d4efaeb234eb957",
+  "mode": "built-in image_gen / edit"
 }
