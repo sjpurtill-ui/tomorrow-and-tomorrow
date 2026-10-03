@@ -169,13 +169,13 @@ func test_wrath_jolts_the_frame_and_the_dog_cowers()->void:
 	stage.settle()
 	var dog:Node3D=stage.court_set.call("animal","dog")
 	stage.event("divine",{"action":"terrify","response":"cower"})
-	assert_bool(stage.camera.call("is_moving")).is_true()
+	assert_bool(stage.rig.call("is_moving")).is_true()
 	if dog!=null:assert_str(String(dog.get("clip"))).contains("cower")
 	# The director's shots land on the set's camera.
 	stage.shot("push_in",{"target":Stage.MAIN})
-	assert_str(String(stage.camera.get("shot"))).is_equal("push_in")
+	assert_str(String(stage.rig.get("current_shot"))).is_equal("push_in")
 	stage.shot("wide")
-	assert_str(String(stage.camera.get("shot"))).is_equal("wide")
+	assert_str(String(stage.rig.get("current_shot"))).is_equal("wide")
 
 
 func test_a_dropped_bowl_lies_on_the_floor_and_a_bundle_rides_the_hands()->void:

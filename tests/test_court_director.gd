@@ -4,11 +4,15 @@ extends GdUnitTestSuite
 ## never contradicts it:
 ## - one the engine says defied the god never kneels, bows or shakes;
 ## - nobody is hungry on stage while the stores are full; no cough without a
-##   sickness, no spears without a war;
-## - a muttered line cites only what the fact sheet and the event hold, in
-##   plain speech of the people's own age;
-## - the same seed gives the same beats, and two hundred events in a row do
-##   not go stale.
+##   sickness, no spears without a war, no stamping in summer, no fly in winter,
+##   no scribe where nobody writes;
+## - a muttered line answers something visible, comes only from someone bold
+##   enough, never in a terrified or grieving room, is eight words or fewer,
+##   sidelong (never to the god), and cites only what the facts and the event
+##   hold, in plain speech of the people's own age; it can be turned off;
+## - the same seed gives the same beats; over a long campaign no bit is more
+##   than about one event in twelve and no muttered line comes back within
+##   three game years.
 ## Pure: no game state is read or written.
 
 const Director:=preload("res://scripts/hud/court_director.gd")
@@ -17,14 +21,16 @@ const CV:=preload("res://scripts/character_voice.gd")
 const Plain:=preload("res://scripts/plain_speech.gd")
 
 const NUMBER_WORDS:={"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,"ten":10,"eleven":11,"twelve":12}
+const SEASONS:=["spring","summer","autumn","winter"]
 
 static func home_cast()->Array:
 	return [
 		{"key":"main","role":"main","kind":"petitioner","name":"Hena Tuvasi","age":38,"courage":0.5,"pride":0.5,"love":0.45,"dread":0.3,"voice":"grant","x":0.40},
-		{"key":"p1","role":"court","kind":"official","name":"Orrin Vael","age":47,"courage":0.75,"pride":0.8,"love":0.35,"dread":0.15,"voice":"achilles","office":"War leader","x":0.66},
-		{"key":"p2","role":"court","kind":"official","name":"Suri Danek","age":33,"courage":0.3,"pride":0.3,"love":0.6,"dread":0.55,"voice":"falstaff","office":"Headman","x":0.14},
-		{"key":"p3","role":"court","kind":"hearth_chief","name":"Kavu Mbeli","age":41,"courage":0.35,"pride":0.2,"love":0.7,"dread":0.4,"voice":"polonius","office":"Hearth chief of Reedmouth","x":0.80},
-		{"key":"p4","role":"court","kind":"official","name":"Tamsin Oru","age":29,"courage":0.6,"pride":0.45,"love":0.5,"dread":0.2,"empathy":0.8,"voice":"atticus","office":"Keeper of Tribute","x":0.27},
+		{"key":"p1","role":"court","kind":"official","name":"Orrin Vael","age":47,"courage":0.75,"pride":0.8,"love":0.35,"dread":0.15,"voice":"achilles","disposition":"cantankerous","office":"War leader","x":0.66},
+		{"key":"p2","role":"court","kind":"official","name":"Suri Danek","age":33,"courage":0.3,"pride":0.3,"love":0.6,"dread":0.55,"voice":"falstaff","disposition":"sycophantic","office":"Headman","x":0.14},
+		{"key":"p3","role":"court","kind":"hearth_chief","name":"Kavu Mbeli","age":41,"courage":0.35,"pride":0.2,"love":0.7,"dread":0.4,"voice":"polonius","disposition":"diplomatic","office":"Hearth chief of Reedmouth","x":0.80},
+		{"key":"p4","role":"court","kind":"official","name":"Tamsin Oru","age":29,"courage":0.6,"pride":0.45,"love":0.5,"dread":0.2,"empathy":0.8,"voice":"atticus","disposition":"principled","office":"Keeper of Tribute","x":0.27},
+		{"key":"p5","role":"court","kind":"official","name":"Gedde Ran","age":52,"courage":0.55,"pride":0.45,"love":0.5,"dread":0.25,"voice":"sancho","office":"Keeper of the Fire","x":0.72},
 		{"key":"c1","role":"crowd","kind":"elder","name":"Ama Seld","age":71,"courage":0.5,"pride":0.4,"love":0.5,"dread":0.2,"x":0.93},
 		{"key":"c2","role":"crowd","kind":"child","name":"Lio","age":7,"courage":0.3,"pride":0.1,"love":0.5,"dread":0.3,"x":0.88},
 		{"key":"c3","role":"crowd","kind":"commoner","name":"Brann Ute","age":30,"courage":0.35,"pride":0.3,"love":0.4,"dread":0.5,"stance":"bowl","x":0.53},
@@ -32,9 +38,9 @@ static func home_cast()->Array:
 		{"key":"goat","role":"animal","kind":"goat","name":"the goat","x":0.98},
 	]
 
-static func envoy_cast()->Array:
+static func envoy_cast(temper:="nervous")->Array:
 	var out:Array=[
-		{"key":"main","role":"main","kind":"envoy","name":"Ishkar Velu","age":44,"courage":0.6,"pride":0.6,"x":0.26},
+		{"key":"main","role":"main","kind":"envoy","name":"Ishkar Velu","age":44,"courage":0.6,"pride":0.6,"temper":temper,"x":0.26},
 		{"key":"att0","role":"attendant","kind":"guard","name":"Dov","age":26,"x":0.09},
 		{"key":"att1","role":"attendant","kind":"bearer","name":"Nel","age":22,"x":0.42},
 	]
@@ -43,12 +49,12 @@ static func envoy_cast()->Array:
 	return out
 
 static func hungry_facts()->Dictionary:
-	return {"food_days":9,"population":214,"season":"winter","era_tags":[],"era_tier":0,"people_dread":0.35,"people_love":0.5,
+	return {"day":4000,"food_days":9,"population":214,"season":"winter","era_tags":[],"era_tier":0,"people_dread":0.35,"people_love":0.5,
 		"sickness":{"name":"the Marsh Cough","deaths":3},"war":{"enemy":"Kelvar","kind":"feud"},
 		"envoy":{"civ":"Ashwen","days_waiting":4,"their_food_days":25},"gift":{"resource":"Food","amount":40}}
 
 static func full_facts(days:int)->Dictionary:
-	return {"food_days":days,"population":214,"season":"summer","era_tags":["farming","pottery"],"era_tier":1,"people_dread":0.2,"people_love":0.55}
+	return {"day":4000,"food_days":days,"population":214,"season":"summer","era_tags":["farming","pottery"],"era_tier":1,"people_dread":0.2,"people_love":0.55}
 
 ## A spread of every kind of event, for the sweeps.
 static func events()->Array:
@@ -74,16 +80,20 @@ static func events()->Array:
 		{"kind":"command","verb":"send","stage":"send","actor":"p4","target":"","obedience":"obey","manner":"trembling"},
 		{"kind":"command","verb":"kill","stage":"prostrate","actor":"p1","target":"god"},
 		{"kind":"decree","who":"main","accepted":true,"reaction":"delighted"},
+		{"kind":"decree","who":"main","accepted":true,"reaction":"pleased","cost":{"resource":"Food","amount":30}},
 		{"kind":"decree","who":"main","accepted":false,"reaction":"offended"},
+		{"kind":"decree","issued":true,"accepted":true,"who":"main"},
 		{"kind":"promise","who":"main"},
-		{"kind":"dismiss","who":"main"},
+		{"kind":"dismiss","who":"main","reaction":"offended"},
+		{"kind":"wait","who":"main"},
 		{"kind":"summon","who":"main"},
 		{"kind":"exit","who":"main","style":"storm"},
-		{"kind":"exit","who":"main","style":"bow"},
+		{"kind":"exit","who":"main","style":"bow","reaction":"pleased"},
 	]
 
 static func envoy_events()->Array:
 	return [
+		{"kind":"summon","who":"main"},
 		{"kind":"gift","accepted":true,"resource":"Food","amount":40,"who":"main"},
 		{"kind":"gift","accepted":false,"resource":"Food","amount":40,"who":"main"},
 		{"kind":"gift","accepted":true,"resource":"Timber","amount":25,"who":"main"},
@@ -91,7 +101,8 @@ static func envoy_events()->Array:
 		{"kind":"terrify_envoy","response":"cower","target":"main"},
 		{"kind":"envoy_insulted","who":"main"},
 		{"kind":"line","who":"main","text":"My ruler sends greetings and asks that you remember the river crossing, where our hunters and yours met last summer, and the 12 days it took us to come here."},
-		{"kind":"decree","who":"main","accepted":true,"reaction":"pleased","terms":{"resource":"Food","amount":30}},
+		{"kind":"decree","who":"main","accepted":true,"reaction":"pleased","cost":{"resource":"Food","amount":30}},
+		{"kind":"exit","who":"main","style":"storm"},
 	]
 
 # --- The engine's word stands ---------------------------------------------------
@@ -108,8 +119,9 @@ func test_one_who_defied_never_kneels_or_bows()->void:
 				if String(beat.who)==String(event.target):
 					assert_bool(String(beat.act) in Director.KNEEL_LIKE or String(beat.act)=="kneel_bound").override_failure_message(
 						"%s defied the god but was shown to %s (seed %d)" % [event.target,beat.act,seed_value]).is_false()
-		for beat:Dictionary in Director.beats_for({"kind":"terrify_envoy","response":"defy","target":"main"},envoy_cast(),hungry_facts(),seed_value,memory):
-			if String(beat.who)=="main":assert_bool(String(beat.act) in Director.KNEEL_LIKE).override_failure_message("the envoy defied but %s" % beat.act).is_false()
+		for temper in ["haughty","nervous","greedy","calm"]:
+			for beat:Dictionary in Director.beats_for({"kind":"terrify_envoy","response":"defy","target":"main"},envoy_cast(temper),hungry_facts(),seed_value,memory):
+				if String(beat.who)=="main":assert_bool(String(beat.act) in Director.KNEEL_LIKE).override_failure_message("the %s envoy defied but %s" % [temper,beat.act]).is_false()
 
 func test_defiance_stands_firm_and_cowering_goes_down()->void:
 	var firm:=Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"defy"},home_cast(),full_facts(60),3)
@@ -128,16 +140,20 @@ func test_a_refusal_never_bows_and_seized_is_forced_down_bound()->void:
 		assert_bool(_did(fled,"p1","kneel_bound")).is_false()
 		assert_bool(_did(fled,"p1","bolt")).is_true()
 
-func test_the_dead_do_nothing_more_and_nobody_laughs()->void:
+func test_death_and_exile_stay_sober()->void:
 	var memory:={}
 	for seed_value in 80:
-		var event:={"kind":"divine","action":"strike_down","target":"main","terminal":true}
-		var list:=Director.beats_for(event,home_cast(),hungry_facts(),seed_value,memory)
-		for beat:Dictionary in list:
-			assert_bool(String(beat.act) in Director.COMIC_ACTS).override_failure_message("comedy at a death: %s %s" % [beat.who,beat.act]).is_false()
+		for event:Dictionary in [{"kind":"divine","action":"strike_down","target":"main","terminal":true},{"kind":"divine","action":"cast_out","target":"p2"},
+				{"kind":"exit","who":"main","style":"led"},{"kind":"exit","who":"main","style":"fall"},
+				{"kind":"command","verb":"exile","stage":"exile","actor":"p1","target":"main","obedience":"obey","executed":true,"removed":true}]:
+			var list:=Director.beats_for(event,home_cast(),hungry_facts(),seed_value,memory)
+			for beat:Dictionary in list:
+				assert_bool(String(beat.act) in Director.COMIC_ACTS).override_failure_message("comedy at %s: %s %s" % [event,beat.who,beat.act]).is_false()
+			assert_array(Director.asides_for(event,hungry_facts(),home_cast(),seed_value,memory)).is_empty()
+		var death:=Director.beats_for({"kind":"divine","action":"strike_down","target":"main","terminal":true},home_cast(),hungry_facts(),seed_value,{})
+		for beat:Dictionary in death:
 			if String(beat.who)=="main":assert_str(String(beat.act)).is_equal("stricken")
-		assert_bool(_did(list,"c1","cover_eyes") or _did(list,"p4","cover_eyes") or _did(list,"c3","cover_eyes")).override_failure_message("nobody covered the child's eyes").is_true()
-		assert_array(Director.asides_for(event,hungry_facts(),home_cast(),seed_value,memory)).is_empty()
+		assert_bool(_did(death,"c1","cover_eyes") or _did(death,"p4","cover_eyes") or _did(death,"c3","cover_eyes")).override_failure_message("nobody covered the child's eyes").is_true()
 
 # --- Only what the facts hold -------------------------------------------------------
 
@@ -149,9 +165,10 @@ func test_nobody_is_hungry_while_the_stores_are_full()->void:
 			for cast in [home_cast(),envoy_cast()]:
 				for loop:Dictionary in Director.ambient(cast,facts,seed_value):
 					assert_bool(String(loop.act) in Director.HUNGER_ACTS).override_failure_message("hunger shown with %d days of food: %s" % [days,loop.act]).is_false()
-			for event:Dictionary in [{"kind":"divine","action":"boon","target":"p4","response":"blessed","terms":{"resource":"Food","amount":12}},{"kind":"divine","action":"penance","target":"main","response":"endure"}]:
-				for beat:Dictionary in Director.beats_for(event,home_cast(),facts,seed_value):
-					assert_bool(String(beat.act) in Director.HUNGER_ACTS).override_failure_message("hungry beat with %d days: %s" % [days,beat.act]).is_false()
+			var memory:={}
+			for event:Dictionary in events():
+				for beat:Dictionary in Director.beats_for(event,home_cast(),facts,seed_value,memory):
+					assert_bool(String(beat.act) in Director.HUNGER_ACTS).override_failure_message("hungry beat with %d days: %s in %s" % [days,beat.act,event.kind]).is_false()
 			for beat:Dictionary in Director.beats_for({"kind":"gift","accepted":true,"resource":"Food","amount":40,"who":"main"},envoy_cast(),facts,seed_value):
 				assert_bool(String(beat.act) in Director.HUNGER_ACTS).is_false()
 	# No food figure in the sheet at all: nothing shows hunger either.
@@ -182,23 +199,67 @@ func test_no_cough_without_sickness_no_spears_without_war()->void:
 	assert_bool(acts.has("sharpen_spear")).is_true()
 	assert_str(String(acts.get("cough",""))).is_equal("sickness")
 
-# --- Words from the facts only --------------------------------------------------------
+func test_the_season_shows_only_in_its_season()->void:
+	for season in SEASONS:
+		var facts:=full_facts(60);facts["season"]=season
+		var memory:={}
+		for seed_value in 30:
+			for event:Dictionary in events():
+				for beat:Dictionary in Director.beats_for(event,home_cast(),facts,seed_value,memory):
+					if season!="winter":assert_bool(String(beat.act) in Director.WINTER_ACTS).override_failure_message("%s in %s" % [beat.act,season]).is_false()
+					if season!="summer":assert_bool(String(beat.act) in Director.SUMMER_ACTS).override_failure_message("%s in %s" % [beat.act,season]).is_false()
+			for loop:Dictionary in Director.ambient(home_cast(),facts,seed_value):
+				if season!="winter":assert_bool(String(loop.act) in Director.WINTER_ACTS).is_false()
+				if season!="summer":assert_bool(String(loop.act) in Director.SUMMER_ACTS).is_false()
+	var winter:={};var summer:={}
+	for seed_value in 20:
+		var w:=full_facts(60);w["season"]="winter"
+		var s:=full_facts(60);s["season"]="summer"
+		for loop:Dictionary in Director.ambient(home_cast(),w,seed_value):winter[String(loop.act)]=true
+		for loop:Dictionary in Director.ambient(home_cast(),s,seed_value):summer[String(loop.act)]=true
+	assert_bool(winter.has("stamp_feet") or winter.has("breath")).is_true()
+	assert_bool(summer.has("swat_fly")).is_true()
+
+func test_the_hall_grows_with_the_age()->void:
+	var stone:=Director.extras({"era_tags":[],"era_tier":0,"people_dread":0.7,"people_love":0.2},3)
+	var villages:=Director.extras({"era_tags":["dairy","farming"],"era_tier":1,"people_dread":0.1,"people_love":0.8},3)
+	var letters:=Director.extras({"era_tags":["dairy","farming","writing","metal"],"era_tier":2},3)
+	var grand:=Director.extras({"era_tags":["dairy","farming","writing","metal","coin","ships"],"era_tier":3},3)
+	var kinds:=func(list:Array)->Array:return list.map(func(e:Dictionary)->String:return String(e.kind))
+	var people:=func(list:Array)->int:return list.filter(func(e:Dictionary)->bool:return String(e.role)=="crowd").size()
+	assert_bool("goat" in kinds.call(stone)).override_failure_message("a goat before anyone pens a herd").is_false()
+	assert_bool("goat" in kinds.call(villages)).is_true()
+	assert_bool("scribe" in kinds.call(villages)).override_failure_message("a scribe before anyone writes").is_false()
+	assert_bool("scribe" in kinds.call(letters)).is_true()
+	assert_bool("door_guard" in kinds.call(letters)).is_true()
+	assert_int(int(people.call(stone))).is_less(int(people.call(villages)))
+	assert_int(int(people.call(villages))).is_less(int(people.call(letters)))
+	assert_int(int(people.call(letters))).is_less(int(people.call(grand)))
+	for entry:Dictionary in stone:
+		if String(entry.role)=="crowd":assert_float(float(entry.dread)).is_greater(0.5)
+	for entry:Dictionary in villages:
+		if String(entry.role)=="crowd":assert_float(float(entry.love)).is_greater(0.6)
+	assert_str(JSON.stringify(Director.extras({"era_tags":[]},11))).is_equal(JSON.stringify(Director.extras({"era_tags":[]},11)))
+
+# --- Who dares to mutter, and what ---------------------------------------------------
 
 func test_asides_cite_only_facts_present()->void:
 	var said:=0
-	var runs:=[[home_cast(),events()],[envoy_cast(),envoy_events()]]
+	var runs:=[[home_cast(),events()],[envoy_cast("haughty"),envoy_events()],[envoy_cast("greedy"),envoy_events()]]
 	for facts:Dictionary in [hungry_facts(),full_facts(80),{"season":"spring"}]:
 		for run:Array in runs:
 			var memory:={}
 			var cast:Array=run[0]
-			for seed_value in 30:
-				var last_had:=false
+			for seed_value in 40:
+				var since:=99
 				for event:Dictionary in run[1]:
 					Director.beats_for(event,cast,facts,seed_value,memory)
 					var lines:=Director.asides_for(event,facts,cast,seed_value,memory)
 					assert_int(lines.size()).is_less_equal(1)
-					assert_bool(last_had and not lines.is_empty()).override_failure_message("two muttered lines running").is_false()
-					last_had=not lines.is_empty()
+					since+=1
+					if not lines.is_empty():
+						assert_int(since).override_failure_message("muttered lines too close together").is_greater(Director.ASIDE_GAP)
+						since=0
 					for line:Dictionary in lines:
 						said+=1
 						_check_aside(line,event,facts,cast)
@@ -208,15 +269,19 @@ func _check_aside(line:Dictionary,event:Dictionary,facts:Dictionary,cast:Array)-
 	var text:=String(line.text)
 	var who:=String(line.who)
 	assert_bool(who in ["main","god","",String(event.get("target","")),String(event.get("actor",""))]).override_failure_message("%s should not mutter: %s" % [who,text]).is_false()
-	var keys:=cast.map(func(c:Dictionary)->String:return String(c.key))
-	assert_bool(who in keys).is_true()
+	var speaker:={}
+	for c:Dictionary in cast:
+		if String(c.key)==who:speaker=c
+	assert_bool(speaker.is_empty()).override_failure_message("%s is not in the hall" % who).is_false()
+	# Only the bold, a child or an old one dare.
+	assert_float(Director.dare(Director.member(speaker))).override_failure_message("%s is too frightened to say: %s" % [who,text]).is_greater_equal(Director.DARE_MIN)
+	assert_int(Asides.word_count(text)).override_failure_message("too long: %s" % text).is_less_equal(8)
 	# Every cited fact is in the sheet, the event or the cast.
 	for cite in line.cites:
 		assert_bool(_resolves(String(cite),event,facts,cast)).override_failure_message("'%s' cites %s, which is not there" % [text,cite]).is_true()
 	# Every number said is a number the sheet or the event holds.
 	var allowed:=_numbers(facts)+_numbers(event)
-	var said:=String(event.get("text",""))
-	var hit:=Director.number_in(said)
+	var hit:=Director.number_in(String(event.get("text","")))
 	if not hit.is_empty():allowed.append(int(hit.value))
 	for n in _numbers_in(text):
 		assert_bool(n in allowed).override_failure_message("'%s' says %d; the facts hold %s" % [text,n,allowed]).is_true()
@@ -228,22 +293,21 @@ func _check_aside(line:Dictionary,event:Dictionary,facts:Dictionary,cast:Array)-
 func _resolves(path:String,event:Dictionary,facts:Dictionary,cast:Array)->bool:
 	var parts:=path.split(".")
 	match parts[0]:
-		"facts":
-			var at:Variant=facts
-			for i in range(1,parts.size()):
-				if not at is Dictionary or not (at as Dictionary).has(parts[i]):return false
-				at=(at as Dictionary)[parts[i]]
-			return true
+		"facts":return _walk(facts,parts.slice(1))
 		"event":
-			match parts[1]:
-				"amount":return (event.get("terms",{}) as Dictionary).has("amount") or event.has("amount")
-				"resource":return (event.get("terms",{}) as Dictionary).has("resource") or event.has("resource")
-				"text":return event.has("text")
-			return event.has(parts[1])
+			if parts[1] in ["amount","resource"]:
+				return event.has(parts[1]) or (event.get("terms",{}) as Dictionary).has(parts[1]) or (event.get("cost",{}) as Dictionary).has(parts[1])
+			return _walk(event,parts.slice(1))
 		"cast":
 			for c:Dictionary in cast:
-				if String(c.key)==parts[1]:return true
+				if String(c.key)==parts[1]:return parts.size()<3 or c.has(parts[2])
 	return false
+
+func _walk(at:Variant,path:Array)->bool:
+	for key in path:
+		if not at is Dictionary or not (at as Dictionary).has(key):return false
+		at=(at as Dictionary)[key]
+	return true
 
 func _numbers(source:Variant)->Array:
 	var out:Array=[]
@@ -262,24 +326,139 @@ func _numbers_in(text:String)->Array:
 	for m in words.search_all(text):out.append(int(NUMBER_WORDS[m.get_string().to_lower()]))
 	return out
 
-func test_every_muttered_line_is_plain_and_of_any_age()->void:
-	var slots:={"amount":"twelve","resource":"food","food_days":"nine","name":"Hena","number":"forty","days_waiting":"four","envoy_civ":"Ashwen","enemy":"Kelvar","sickness":"the Marsh Cough","deaths":"three"}
+func test_every_muttered_line_is_short_plain_and_sidelong()->void:
+	var slots:={"amount":"40","resource":"fibre","food_days":"nine","name":"Hena","other":"Orrin","number":"forty","envoy_civ":"Ash Wen","enemy":"Kel Var","thing":"staff"}
 	for entry:Dictionary in Asides.all_templates():
 		var text:=Asides.render(String(entry.text),slots)
 		assert_str(text).override_failure_message("unfilled: %s" % entry.text).is_not_empty()
+		assert_int(Asides.word_count(text)).override_failure_message("over eight words (%s): %s" % [entry.situation,text]).is_less_equal(Asides.MAX_WORDS)
 		assert_bool(Plain.is_maxim(text)).override_failure_message("a maxim (%s): %s" % [entry.situation,text]).is_false()
-		# Muttered lines carry no gated words at all: they fit the oldest age.
-		assert_array(CV.lexicon_hits(text,[])).override_failure_message("era words in: %s" % text).is_empty()
+		# Lines carry no words of a later age unless their situation needs it.
+		var tags:Array=Asides.NEEDS.get(String(entry.situation),[])
+		assert_array(CV.lexicon_hits(text,tags)).override_failure_message("era words in: %s" % text).is_empty()
 		assert_bool(CV.imitation_ok(text)).is_true()
-		assert_bool(text.to_lower().contains("god says") or text.to_lower().begins_with("i am your god")).is_false()
+		# Sidelong: never said to the god.
+		var low:=text.to_lower()
+		for address in ["great one","my lord","o god","my god","your will","as you command"]:
+			assert_bool(low.contains(address)).override_failure_message("said to the god: %s" % text).is_false()
 
-func test_an_aside_needs_its_facts()->void:
-	# Food gift to a hall whose stores are not on the sheet: no line about days of food.
+func test_the_frightened_never_mutter()->void:
 	var memory:={}
+	var cast:=home_cast()
+	for entry:Dictionary in cast:
+		if String(entry.get("role",""))!="animal":entry["dread"]=0.8;entry["courage"]=0.3
+	var facts:=full_facts(60)
 	for seed_value in 200:
-		for line:Dictionary in Director.asides_for({"kind":"divine","action":"boon","target":"p4","response":"blessed","terms":{"resource":"Food","amount":12}},{"season":"spring"},home_cast(),seed_value,memory):
-			assert_bool("facts.food_days" in line.cites).is_false()
-			assert_str(String(line.situation)).is_not_equal("boon_hungry")
+		for event:Dictionary in events():
+			Director.beats_for(event,cast,facts,seed_value,memory)
+			# Everyone here is frightened, even the child: not a word.
+			var lines:=Director.asides_for(event,facts,cast,seed_value,memory)
+			assert_array(lines).override_failure_message("someone frightened muttered: %s" % [lines]).is_empty()
+
+func test_a_terrified_room_is_silent()->void:
+	var memory:={}
+	var dread:=full_facts(60);dread["people_dread"]=0.7
+	for seed_value in 120:
+		for event:Dictionary in [{"kind":"divine","action":"terrify","target":"main","response":"cower"},{"kind":"divine","action":"terrify","target":"p1","response":"defy"},
+				{"kind":"command","verb":"kill","stage":"prostrate","actor":"p1","target":"god"}]:
+			Director.beats_for(event,home_cast(),hungry_facts(),seed_value,memory)
+			assert_array(Director.asides_for(event,hungry_facts(),home_cast(),seed_value,memory)).is_empty()
+		for event:Dictionary in [{"kind":"terrify_envoy","response":"cower","target":"main"}]:
+			Director.beats_for(event,envoy_cast(),hungry_facts(),seed_value,memory)
+			assert_array(Director.asides_for(event,hungry_facts(),envoy_cast(),seed_value,memory)).is_empty()
+		for event:Dictionary in events():
+			Director.beats_for(event,home_cast(),dread,seed_value,memory)
+			assert_array(Director.asides_for(event,dread,home_cast(),seed_value,memory)).override_failure_message("a muttered line in a hall in dread").is_empty()
+	# The silence has one small noise in it now and then, and it is real.
+	var breaks:={}
+	for seed_value in 80:
+		for beat:Dictionary in Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),hungry_facts(),seed_value,{}):
+			if String(beat.act) in ["stomach_growl","stifle_cough","floor_creak","swallow_loud","bleat"]:breaks[String(beat.act)]=true
+	assert_int(breaks.size()).is_greater_equal(3)
+	for beat:Dictionary in Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),full_facts(60),5,{}):
+		assert_bool(String(beat.act) in ["stomach_growl","stifle_cough"]).is_false()
+
+func test_muttering_can_be_turned_off()->void:
+	var director:=Director.new()
+	var heard:=0
+	for i in 60:
+		var event:Dictionary=events()[i%events().size()]
+		director.beats(event,home_cast(),hungry_facts(),i)
+		heard+=director.asides(event,hungry_facts(),home_cast(),i).size()
+	assert_int(heard).is_greater(0)
+	Director.mutters_enabled=false
+	var quiet:=Director.new()
+	var off:=0
+	for i in 60:
+		var event:Dictionary=events()[i%events().size()]
+		quiet.beats(event,home_cast(),hungry_facts(),i)
+		off+=quiet.asides(event,hungry_facts(),home_cast(),i).size()
+	Director.mutters_enabled=true
+	assert_int(off).is_equal(0)
+	var facts:=hungry_facts();facts["mutters"]=false
+	var memory:={}
+	for i in 60:
+		var event:Dictionary=events()[i%events().size()]
+		Director.beats_for(event,home_cast(),facts,i,memory)
+		assert_array(Director.asides_for(event,facts,home_cast(),i,memory)).is_empty()
+
+# --- The scenes the player sees most ---------------------------------------------------
+
+func test_the_scenes_are_there()->void:
+	var seen:={}
+	var facts:=full_facts(60);facts["era_tags"]=["farming","dairy","writing"];facts["era_tier"]=2
+	var cast:=home_cast()+[{"key":"scribe","role":"crowd","kind":"scribe","name":"Pell","age":40,"x":0.6}]
+	var stranger:=home_cast().duplicate(true);stranger[0]={"key":"main","role":"main","kind":"commoner","name":"Bo Narra","age":30,"courage":0.4,"pride":0.2,"dread":0.4}
+	var child:=home_cast().duplicate(true);child[0]={"key":"main","role":"main","kind":"child","name":"Tiri","age":8,"courage":0.6,"pride":0.3,"dread":0.2}
+	var gifted:=home_cast().duplicate(true);gifted[0]={"key":"main","role":"main","kind":"child","name":"Asa","age":9,"gifted":"Logistics","courage":0.6,"pride":0.3,"dread":0.2}
+	var nervous:=home_cast().duplicate(true);nervous[0]["dread"]=0.6
+	var staffed:=home_cast().duplicate(true);staffed[0]["stance"]="staff"
+	var summer:=facts.duplicate();summer["season"]="summer"
+	var winter:=facts.duplicate();winter["season"]="winter"
+	var gift_facts:=facts.duplicate();gift_facts["gift"]={"resource":"Food","amount":40}
+	for seed_value in 120:
+		var memory:={}
+		for pair:Array in [[{"kind":"wait","who":"main"},cast,facts],[{"kind":"promise","who":"main"},cast,facts],[{"kind":"dismiss","who":"main","reaction":"furious"},cast,facts],
+				[{"kind":"decree","who":"main","accepted":true,"reaction":"pleased","cost":{"resource":"Food","amount":30}},cast,facts],
+				[{"kind":"decree","issued":true,"accepted":true},cast,facts],[{"kind":"divine","action":"bless","target":"main","response":"relief"},cast,facts],
+				[{"kind":"summon","who":"main"},nervous,facts],[{"kind":"summon","who":"main"},child,facts],[{"kind":"summon","who":"main"},stranger,facts],
+				[{"kind":"summon","who":"main"},gifted,facts],[{"kind":"exit","who":"main","style":"bow","reaction":"delighted"},cast,facts],
+				[{"kind":"exit","who":"main","style":"storm","reaction":"furious"},staffed,facts],[{"kind":"god_speaks","text":"Go on."},cast,summer],
+				[{"kind":"line","who":"p2","text":"The pens are full."},cast,winter],[{"kind":"god_speaks","text":"Write it."},cast,facts],
+				[{"kind":"summon","who":"main"},envoy_cast("haughty"),facts],[{"kind":"summon","who":"main"},envoy_cast("nervous"),facts],[{"kind":"summon","who":"main"},envoy_cast("greedy"),facts],
+				[{"kind":"gift","accepted":false,"resource":"Food","amount":40,"who":"main"},envoy_cast("haughty"),gift_facts],[{"kind":"exit","who":"main","style":"storm","reaction":"furious"},envoy_cast("haughty"),gift_facts,"keep"]]:
+			# Each moment fresh, except an exit that follows its own audience.
+			if pair.size()<4:memory={}
+			for beat:Dictionary in Director.beats_for(pair[0],pair[1],pair[2],seed_value,memory):seen[String(beat.act)]=true
+	for act in ["catch_eye","deflate_polite","bow_curt","glum","scribble","over_thank","enter_wrong","wave","bow_wrong","count_heads","bump_post",
+			"come_back","come_back_for","snatch_up","snore","swat_fly","stamp_feet","shake_hand","sniff_disdain","startle","appraise","gawk","stare_down","nod_too_much"]:
+		assert_bool(seen.has(act)).override_failure_message("never played: %s" % act).is_true()
+
+func test_make_them_wait_puts_the_old_one_back_to_sleep()->void:
+	var found:=false
+	for seed_value in 40:
+		var memory:={}
+		var woke_first:=false
+		for i in 3:
+			var first:=Director.beats_for({"kind":"god_speaks","text":"Speak."},home_cast(),full_facts(60),seed_value*10+i,memory)
+			if _did(first,"c1","jerk_awake"):woke_first=true;break
+		if not woke_first:continue
+		var wait:=Director.beats_for({"kind":"wait","who":"main"},home_cast(),full_facts(60),seed_value,memory)
+		if not _did(wait,"c1","doze_off"):continue
+		# Asleep again, and the next time the god speaks they wake again,
+		# though they were woken only a moment ago.
+		assert_str(Director.asleep(home_cast(),full_facts(60),memory)).is_equal("c1")
+		found=true;break
+	assert_bool(found).is_true()
+
+func test_a_stranger_bows_to_the_wrong_person_and_a_child_waves()->void:
+	var stranger:=home_cast().duplicate(true);stranger[0]={"key":"main","role":"main","kind":"commoner","name":"Bo Narra","age":30,"courage":0.4,"pride":0.2,"dread":0.4}
+	var bowed_to:={}
+	for seed_value in 40:
+		for beat:Dictionary in Director.beats_for({"kind":"summon","who":"main"},stranger,full_facts(60),seed_value):
+			if String(beat.act)=="bow_wrong":bowed_to[String((beat.args as Dictionary).at)]=true
+	# The grandest-looking official: the proud war leader.
+	assert_bool(bowed_to.has("p1")).is_true()
 
 # --- Same seed, and never stale ----------------------------------------------------------
 
@@ -298,11 +477,10 @@ func test_variety_holds_over_two_hundred_events()->void:
 	var last_sig:={}
 	var bit_uses:={}
 	var signatures:={}
-	var asides:=0
-	var aside_run:=0
 	for i in 200:
 		var event:Dictionary=pool[rng.randi_range(0,pool.size()-1)]
-		var list:=Director.beats_for(event,home_cast(),hungry_facts(),1000+i,memory)
+		var facts:=hungry_facts();facts["day"]=4000+i*7
+		var list:=Director.beats_for(event,home_cast(),facts,1000+i,memory)
 		var sig:=Director._signature(list)
 		var kind:=String(event.kind)
 		if not sig.is_empty():
@@ -311,16 +489,9 @@ func test_variety_holds_over_two_hundred_events()->void:
 		signatures[sig]=true
 		for bit in memory.get("bits",{}):
 			if int(memory.bits[bit])==int(memory.n):bit_uses[bit]=int(bit_uses.get(bit,0))+1
-		var lines:=Director.asides_for(event,hungry_facts(),home_cast(),1000+i,memory)
-		if lines.is_empty():aside_run=0
-		else:
-			asides+=1;aside_run+=1
-			assert_int(aside_run).is_less(2)
+		Director.asides_for(event,facts,home_cast(),1000+i,memory)
 	assert_int(bit_uses.size()).override_failure_message("only %d comic bits used: %s" % [bit_uses.size(),bit_uses]).is_greater_equal(12)
-	for bit in bit_uses:assert_int(int(bit_uses[bit])).override_failure_message("%s used %d times in 200" % [bit,bit_uses[bit]]).is_less_equal(40)
 	assert_int(signatures.size()).is_greater_equal(120)
-	# About one event in four or five has a muttered line.
-	assert_int(asides).is_between(25,70)
 
 func test_the_same_terror_plays_differently_each_time()->void:
 	var memory:={}
@@ -328,6 +499,177 @@ func test_the_same_terror_plays_differently_each_time()->void:
 	var event:={"kind":"divine","action":"terrify","target":"main","response":"cower"}
 	for i in 30:seen[Director._signature(Director.beats_for(event,home_cast(),hungry_facts(),500+i,memory))]=true
 	assert_int(seen.size()).is_greater_equal(24)
+
+## A long campaign: 1000 mixed events over 20 game years, through two ages
+## and every season, with hunger, sickness and a war coming and going, the
+## court changing, envoys of every temper, summoned strangers and children.
+## No bit plays in more than about one event in twelve; no muttered line
+## comes back within three game years.
+func test_a_long_campaign_stays_fresh()->void:
+	var report:=_campaign(1000,20261003)
+	var shares:Dictionary=report.shares
+	for bit in shares:
+		assert_float(float(shares[bit])).override_failure_message("%s played in %.1f%% of events" % [bit,float(shares[bit])*100.0]).is_less_equal(0.085)
+	assert_int(int(report.line_repeats_within_3y)).is_equal(0)
+	assert_int(int(report.bits_used)).is_greater_equal(25)
+	assert_int(int(report.asides)).is_between(40,220)
+	# Nobody carries an audience: no one over about a quarter of its bits.
+	assert_int(int(report.cap_breaks)).is_equal(0)
+	# The children do not carry the comedy (a quarter of the bits at most),
+	# and the officials carry their share of it.
+	var star_kinds:Dictionary=report.star_kinds
+	assert_float(float(star_kinds.get("child",0))/float(report.stars)).is_less_equal(0.25)
+	assert_float(float(int(star_kinds.get("official",0))+int(star_kinds.get("hearth_chief",0)))/float(report.stars)).is_greater_equal(0.3)
+	var mutter_kinds:Dictionary=report.mutter_kinds
+	assert_float(float(mutter_kinds.get("child",0))/float(int(report.asides))).is_less_equal(0.4)
+	print(String(report.text))
+
+func _campaign(count:int,rng_seed:int)->Dictionary:
+	var rng:=RandomNumberGenerator.new();rng.seed=rng_seed
+	var memory:={}
+	var court:=[
+		{"key":"p1","role":"court","kind":"official","name":"Orrin Vael","age":47,"courage":0.75,"pride":0.8,"love":0.35,"dread":0.15,"voice":"achilles"},
+		{"key":"p2","role":"court","kind":"official","name":"Suri Danek","age":33,"courage":0.3,"pride":0.3,"love":0.6,"dread":0.55,"voice":"falstaff"},
+		{"key":"p3","role":"court","kind":"hearth_chief","name":"Kavu Mbeli","age":41,"courage":0.35,"pride":0.2,"love":0.7,"dread":0.4,"voice":"polonius"},
+		{"key":"p4","role":"court","kind":"official","name":"Tamsin Oru","age":29,"courage":0.6,"pride":0.45,"love":0.5,"dread":0.2,"empathy":0.8,"voice":"atticus"},
+		{"key":"p5","role":"court","kind":"official","name":"Gedde Ran","age":63,"courage":0.7,"pride":0.6,"love":0.4,"dread":0.1,"voice":"grant","stance":"staff"},
+		{"key":"p6","role":"court","kind":"hearth_chief","name":"Mirel Ost","age":52,"courage":0.5,"pride":0.7,"love":0.3,"dread":0.25,"voice":"iago"},
+		{"key":"p7","role":"court","kind":"official","name":"Juno Pell","age":36,"courage":0.55,"pride":0.5,"love":0.65,"dread":0.3,"voice":"lincoln"},
+	]
+	var total:=0
+	var day:=0
+	var bit_events:={}
+	var line_last:={}
+	var line_counts:={}
+	var repeats:=0
+	var asides:=0
+	var kinds:={}
+	var audience:=0
+	var examples:Array=[]
+	var worst_share:=0.0
+	var cap_breaks:=0
+	var star_kinds:={}
+	var mutter_kinds:={}
+	var stars_total:=0
+	while total<count:
+		audience+=1
+		day+=rng.randi_range(48,78)
+		var year:=day/365
+		var tags:Array=[]
+		var tier:=0
+		if year>=7:tags=["farming","pottery","dairy"];tier=1
+		if year>=14:tags=["farming","pottery","dairy","writing","metal"];tier=2
+		var season:=String(SEASONS[int(floor((float(day)+45.0)/91.25))%4])
+		var facts:={"day":day,"season":season,"era_tags":tags,"era_tier":tier,"food_days":[60,40,22,12,8,30,90][(year/2+audience/9)%7],
+			"people_dread":[0.2,0.3,0.4,0.6,0.25][(year/3)%5],"people_love":[0.5,0.6,0.4,0.7][(year/4)%4]}
+		if year%5==2:facts["sickness"]={"name":"the Grey Fever","deaths":2+year%7}
+		if year%6>=3:facts["war"]={"enemy":"Kelvar","kind":"feud"}
+		var cast:Array=[]
+		var roll:=rng.randf()
+		var main:Dictionary
+		var envoy:=false
+		if roll<0.22:
+			envoy=true
+			main={"key":"main","role":"main","kind":"envoy","name":"Envoy %d" % audience,"age":40,"courage":rng.randf(),"pride":rng.randf(),"temper":["haughty","nervous","greedy","calm"][rng.randi_range(0,3)]}
+			facts["envoy"]={"civ":["Ashwen","Kelvar","Tossa"][rng.randi_range(0,2)],"days_waiting":rng.randi_range(1,9),"their_food_days":rng.randi_range(8,60)}
+			if rng.randf()<0.4:facts["gift"]={"resource":["Food","Timber","Stone"][rng.randi_range(0,2)],"amount":rng.randi_range(10,60)}
+			cast=[main,{"key":"att0","role":"attendant","kind":"guard","name":"Dov","age":26},{"key":"att1","role":"attendant","kind":"bearer","name":"Nel","age":22}]
+		elif roll<0.27:main={"key":"main","role":"main","kind":"commoner","name":"Bo Narra %d" % audience,"age":30,"courage":0.4,"pride":0.2,"dread":0.4}
+		elif roll<0.30:main={"key":"main","role":"main","kind":"child","name":"Tiri %d" % audience,"age":8,"courage":0.6,"pride":0.3,"dread":0.2,"gifted":"Logistics" if rng.randf()<0.3 else ""}
+		else:
+			var who:Dictionary=(court[rng.randi_range(0,court.size()-1)] as Dictionary).duplicate()
+			who["key"]="main";who["role"]="main"
+			main=who
+		if not envoy:cast=[main]
+		var present:=_shuffled_copy(court,rng).slice(0,rng.randi_range(3,5))
+		for o:Dictionary in present:
+			if String(o.name)!=String(main.name):cast.append(o)
+		cast+=Director.extras(facts,audience)
+		var x:=0.05
+		for c:Dictionary in cast:c["x"]=x;x+=0.09
+		var plan:Array=[{"kind":"summon","who":"main"}]
+		if envoy and facts.has("gift"):plan.append({"kind":"gift","accepted":rng.randf()<0.7,"resource":String(facts.gift.resource),"amount":int(facts.gift.amount),"who":"main"})
+		for i in rng.randi_range(2,5):
+			plan.append({"kind":"line","who":"main" if i%2==0 else String((present[0] as Dictionary).key),"text":["We need %d more hands at the pits." % rng.randi_range(3,40),"The pens are full.","They came by the river path.","It will take %d days." % rng.randi_range(2,30)][rng.randi_range(0,3)]})
+			if rng.randf()<0.5:plan.append({"kind":"god_speaks","text":"Go on."})
+		var r:=rng.randf()*0.8
+		if envoy:
+			if r<0.12:plan.append({"kind":"terrify_envoy","response":["defy","cower"][rng.randi_range(0,1)],"target":"main"})
+			elif r<0.2:plan.append({"kind":"envoy_insulted","who":"main"})
+			plan.append({"kind":"decree","who":"main","accepted":rng.randf()<0.6,"reaction":["pleased","neutral","offended"][rng.randi_range(0,2)],"cost":{"resource":"Food","amount":rng.randi_range(5,40)} if rng.randf()<0.4 else {}})
+		else:
+			if r<0.1:plan.append({"kind":"divine","action":"terrify","target":"main","response":["cower","endure","defy"][rng.randi_range(0,2)]})
+			elif r<0.16:plan.append({"kind":"divine","action":["bless","boon","raise_up"][rng.randi_range(0,2)],"target":"main","response":"blessed","terms":{"resource":"Food","amount":rng.randi_range(5,20)}})
+			elif r<0.2:plan.append({"kind":"divine","action":"penance","target":"main","response":"endure"})
+			elif r<0.27:plan.append({"kind":"command","verb":"order","stage":"none","actor":String((present[0] as Dictionary).key),"target":"","obedience":"obey","executed":false})
+			elif r<0.33:plan.append({"kind":"wait","who":"main"})
+			elif r<0.35:plan.append({"kind":"divine","action":"strike_down","target":"main","terminal":true})
+			var answer:=rng.randf()
+			if answer<0.4:plan.append({"kind":"decree","who":"main","accepted":true,"reaction":"pleased","cost":{"resource":"Food","amount":rng.randi_range(5,40)} if rng.randf()<0.3 else {}})
+			elif answer<0.6:plan.append({"kind":"promise","who":"main"})
+			elif answer<0.8:plan.append({"kind":"dismiss","who":"main","reaction":["offended","furious","neutral"][rng.randi_range(0,2)]})
+			else:plan.append({"kind":"decree","issued":true,"accepted":true})
+		var dead:=plan.any(func(e:Dictionary)->bool:return String(e.get("action",""))=="strike_down")
+		if not dead:plan.append({"kind":"exit","who":"main","style":["bow","bow","storm"][rng.randi_range(0,2)],"reaction":["pleased","delighted","furious"][rng.randi_range(0,2)]})
+		var aud_stars:={}
+		var aud_total:=0
+		for event:Dictionary in plan:
+			if total>=count:break
+			var seed_value:=hash("%d|%d" % [audience,total])
+			Director.beats_for(event,cast,facts,seed_value,memory)
+			kinds[String(event.kind)]=int(kinds.get(String(event.kind),0))+1
+			for bit in memory.get("bits",{}):
+				if int(memory.bits[bit])==int(memory.n):bit_events[bit]=int(bit_events.get(bit,0))+1
+			var played:Dictionary=(memory.get("last",{}) as Dictionary).get("played",{})
+			for bit in played:
+				var star:=String((played[bit] as Dictionary).get("star",""))
+				if star.is_empty():continue
+				aud_stars[star]=int(aud_stars.get(star,0))+1;aud_total+=1;stars_total+=1
+				var star_kind:=_kind_of(cast,star)
+				star_kinds[star_kind]=int(star_kinds.get(star_kind,0))+1
+			for line:Dictionary in Director.asides_for(event,facts,cast,seed_value,memory):
+				var speaker_kind:=_kind_of(cast,String(line.who))
+				mutter_kinds[speaker_kind]=int(mutter_kinds.get(speaker_kind,0))+1
+				asides+=1
+				var id:=String(line.line_id)
+				if line_last.has(id) and day-int(line_last[id])<1095:repeats+=1
+				line_last[id]=day
+				line_counts[id]=int(line_counts.get(id,0))+1
+				if examples.size()<30:examples.append("    y%-2d %-16s %-10s \"%s\"" % [day/365,String(line.situation),String((cast.filter(func(c:Dictionary)->bool:return String(c.key)==String(line.who))[0] as Dictionary).get("kind","")),String(line.text)])
+			total+=1
+		for who in aud_stars:
+			var allowed:=maxi(2 if String(who)=="main" else 1,floori(0.25*float(aud_total)))
+			if int(aud_stars[who])>allowed:cap_breaks+=1
+			if aud_total>=4:worst_share=maxf(worst_share,float(aud_stars[who])/float(aud_total))
+	var shares:={}
+	for bit in bit_events:shares[bit]=float(bit_events[bit])/float(total)
+	var rows:PackedStringArray=PackedStringArray(["","=== LONG CAMPAIGN: %d events, %d audiences, %d years ===" % [total,audience,day/365],"Bits (share of events):"])
+	var ordered:=shares.keys()
+	ordered.sort_custom(func(a,b)->bool:return float(shares[a])>float(shares[b]))
+	for bit in ordered:rows.append("  %-16s %4d  %5.1f%%" % [bit,int(bit_events[bit]),float(shares[bit])*100.0])
+	var most:=0
+	for id in line_counts:most=maxi(most,int(line_counts[id]))
+	rows.append("Muttered lines: %d in %d events (1 in %.1f); %d different lines; most-said line %d times; repeats within 3 years: %d" % [asides,total,float(total)/maxf(1.0,float(asides)),line_counts.size(),most,repeats])
+	rows.append("Event mix: %s" % JSON.stringify(kinds))
+	rows.append("Who carries the bits (%d in all): %s" % [stars_total,JSON.stringify(star_kinds)])
+	rows.append("Who mutters: %s" % JSON.stringify(mutter_kinds))
+	rows.append("Per audience, the most one person carried: %.0f%% of its bits (audiences with 4+ bits); over the cap: %d" % [worst_share*100.0,cap_breaks])
+	rows.append("The first muttered lines (year, situation, who, words):")
+	rows.append_array(PackedStringArray(examples))
+	return {"shares":shares,"line_repeats_within_3y":repeats,"bits_used":bit_events.size(),"asides":asides,"text":"\n".join(rows),
+		"cap_breaks":cap_breaks,"star_kinds":star_kinds,"mutter_kinds":mutter_kinds,"stars":stars_total}
+
+func _kind_of(cast:Array,key:String)->String:
+	for c:Dictionary in cast:
+		if String(c.key)==key:return String(c.get("kind","official"))
+	return "?"
+
+func _shuffled_copy(list:Array,rng:RandomNumberGenerator)->Array:
+	var out:=list.duplicate()
+	for i in range(out.size()-1,0,-1):
+		var j:=rng.randi_range(0,i)
+		var swap:Variant=out[i];out[i]=out[j];out[j]=swap
+	return out
 
 # --- The shape of a moment -----------------------------------------------------------------
 
@@ -356,17 +698,16 @@ func test_the_room_lifts_its_faces_when_the_god_speaks()->void:
 func test_the_sleeper_wakes_and_stays_awake_a_while()->void:
 	var memory:={}
 	var woke_at:=-1
-	for i in 40:
+	for i in 60:
 		var list:=Director.beats_for({"kind":"god_speaks","text":"Speak."},home_cast(),full_facts(60),i,memory)
 		if _did(list,"c1","jerk_awake"):
 			if woke_at>=0:assert_int(i-woke_at).is_greater_equal(Director.DOZE_AGAIN)
 			woke_at=i
 	assert_int(woke_at).is_greater_equal(0)
-	# In a room in dread, nobody dozes.
 	var dread:=full_facts(60);dread["people_dread"]=0.7
 	assert_str(Director.dozer(home_cast(),dread)).is_empty()
 
-# --- Adapters from the engine's results --------------------------------------------------
+# --- Adapters and the stage's shapes ---------------------------------------------------------
 
 func test_adapters_read_the_engines_results()->void:
 	var cast:=home_cast()
@@ -384,36 +725,15 @@ func test_adapters_read_the_engines_results()->void:
 	assert_str(String(c.actor)).is_equal("p1")
 	assert_str(String(c.target)).is_equal("main")
 	assert_str(String(c.obedience)).is_equal("refuse")
+	assert_str(String(Director.event_from_command({"verb":"law"},cast,5).kind)).is_equal("decree")
 	var gift:=Director.event_from_resolution({"kind":"gift","terms":{"resource":"Food","amount":40}},"refuse",{"reaction":"offended"})
 	assert_bool(bool(gift.accepted)).is_false()
+	assert_str(String(Director.event_from_resolution({"kind":"petition"},"promise",{"reaction":"pleased"}).kind)).is_equal("promise")
+	assert_str(String(Director.event_from_resolution({"kind":"petition"},"dismiss",{"reaction":"furious"}).kind)).is_equal("dismiss")
+	var grant:=Director.event_from_resolution({"kind":"request","terms":{"resource":"Food","amount":30}},"grant",{"reaction":"pleased"})
+	assert_int(int((grant.cost as Dictionary).amount)).is_equal(30)
 	assert_str(String(Director.event_from_line({"role":"ruler","text":"Kneel."},"").kind)).is_equal("god_speaks")
-
-func test_the_crowd_is_of_its_people_and_its_age()->void:
-	var stone:=Director.extras({"era_tags":[],"people_dread":0.7,"people_love":0.2},3)
-	var herds:=Director.extras({"era_tags":["dairy","farming"],"people_dread":0.1,"people_love":0.8},3)
-	var keys:=func(list:Array)->Array:return list.map(func(e:Dictionary)->String:return String(e.key))
-	assert_bool("goat" in keys.call(stone)).override_failure_message("a goat before anyone pens a herd").is_false()
-	assert_bool("goat" in keys.call(herds)).is_true()
-	assert_bool("dog" in keys.call(stone)).is_true()
-	for entry:Dictionary in stone:
-		if String(entry.role)=="crowd":assert_float(float(entry.dread)).is_greater(0.5)
-	for entry:Dictionary in herds:
-		if String(entry.role)=="crowd":assert_float(float(entry.love)).is_greater(0.6)
-	# The same seed gives the same crowd.
-	assert_str(JSON.stringify(Director.extras({"era_tags":[]},11))).is_equal(JSON.stringify(Director.extras({"era_tags":[]},11)))
-
-func test_every_act_has_a_way_to_be_played()->void:
-	var memory:={}
-	for event:Dictionary in events():
-		for beat:Dictionary in Director.beats_for(event,home_cast(),hungry_facts(),8,memory):
-			assert_bool(Director.ACTS.has(String(beat.act))).override_failure_message("no acting entry for %s" % beat.act).is_true()
-	for loop:Dictionary in Director.ambient(home_cast(),hungry_facts(),8):assert_bool(Director.ACTS.has(String(loop.act))).is_true()
-	var kneel:=Director.performance({"act":"kneel","args":{}})
-	assert_str(String(kneel.clip)).is_equal("kneel")
-	assert_bool(bool(kneel.hold)).is_true()
-	assert_str(String(Director.performance({"act":"stand_firm","args":{}}).mood)).is_equal("defiant")
-
-# --- The stage's own shapes (docs/COURT_STAGE_3D.md section 5) -------------------------------
+	assert_str(String(Director.event_wait().kind)).is_equal("wait")
 
 ## A cast as the stage hands it over: {key, role, person, figure, mood}.
 static func stage_cast()->Array:
@@ -434,20 +754,18 @@ func test_the_stage_object_speaks_the_stages_primitives()->void:
 	var facts:={"era":"stone","season":"winter","stores_days":9,"hungry":true,"sick":false,"at_war":false,"love":0.4,"dread":0.3}
 	var seen:={}
 	for i in 40:
-		var list:=director.beats({"kind":"divine","action":"terrify","response":"defy"},stage_cast(),facts,i)
+		var list:=director.beats({"kind":"divine","action":"penance","response":"defy"},stage_cast(),facts,i)
 		for beat:Dictionary in list:
 			seen[String(beat.act)]=true
-			assert_bool(String(beat.act) in ["play","look_at","mood","shot","hush"]).override_failure_message("not a stage primitive: %s" % beat.act).is_true()
+			assert_bool(String(beat.act) in ["play","look_at","mood","shot","hush","sound","bubble"]).override_failure_message("not a stage primitive: %s" % beat.act).is_true()
 			if String(beat.who)=="main":
 				assert_bool(String((beat.args as Dictionary).get("beat","")) in Director.KNEEL_LIKE).override_failure_message("main defied but %s" % beat.args).is_false()
 				assert_str(String((beat.args as Dictionary).get("fallback",""))).is_not_equal("kneel")
 				assert_str(String((beat.args as Dictionary).get("fallback",""))).is_not_equal("bow")
-		var lines:=director.asides({"kind":"divine","action":"terrify","response":"defy"},facts,stage_cast(),i)
-		for line:Dictionary in lines:
+		for line:Dictionary in director.asides({"kind":"divine","action":"penance","response":"defy"},facts,stage_cast(),i):
 			assert_str(String(line.act)).is_equal("aside")
 			assert_str(String((line.args as Dictionary).text)).is_equal(String(line.text))
 	assert_bool(seen.has("play") and seen.has("mood") and seen.has("look_at") and seen.has("shot")).is_true()
-	# The memory is the director's own: bits rest across calls.
 	assert_int(int(director.stage_memory.get("n",0))).is_equal(40)
 
 func test_the_stages_facts_and_events_are_read()->void:
@@ -462,43 +780,141 @@ func test_the_stages_facts_and_events_are_read()->void:
 	assert_float(float((cast[2] as Dictionary).dread)).is_equal(0.6)
 	assert_str(String(Director.normal_event({"kind":"god","text":"Speak."},cast).kind)).is_equal("god_speaks")
 	assert_str(String(Director.normal_event({"kind":"enter","who":"main"},cast).kind)).is_equal("summon")
-	var envoy_cast:=[{"key":"main","role":"main","person":{"name":"Ishkar Velu","role":"envoy","person_id":0}},{"key":"att0","role":"attendant","person":{"name":"Dov"}}]
-	var normal:=Director.normal_cast(envoy_cast,{"offer":{"resource":"Food","amount":40}})
+	assert_str(String(Director.normal_event({"kind":"defer"},cast).kind)).is_equal("wait")
+	var envoy_stage:=[{"key":"main","role":"main","person":{"name":"Ishkar Velu","role":"envoy","person_id":0}},{"key":"att0","role":"attendant","person":{"name":"Dov"}}]
+	var normal:=Director.normal_cast(envoy_stage,{"offer":{"resource":"Food","amount":40},"envoy":{"kind":"threat","temperament":"Proud guardian"}})
 	assert_str(String((normal[0] as Dictionary).kind)).is_equal("envoy")
+	assert_str(String((normal[0] as Dictionary).temper)).is_equal("haughty")
 	assert_str(String((normal[1] as Dictionary).kind)).is_equal("bearer")
 	assert_str(String(Director.normal_event({"kind":"divine","action":"terrify","response":"cower"},normal).kind)).is_equal("terrify_envoy")
 	var flog:=Director.normal_event({"kind":"divine","action":"envoy_flog"},normal)
 	assert_str(String(flog.kind)).is_equal("command")
 	assert_str(String(flog.verb)).is_equal("maim")
-	# An engine result handed over whole is read by the matching adapter.
 	var whole:=Director.normal_event({"kind":"divine","result":{"ok":true,"action":"terrify","person_id":5,"response":"defy"}},Director.normal_cast(stage_cast(),facts))
 	assert_str(String(whole.response)).is_equal("defy")
 	assert_str(String(whole.target)).is_equal("main")
+	assert_str(Director.envoy_temper({"their_dread":0.6,"kind":"threat"})).is_equal("nervous")
+	assert_str(Director.envoy_temper({"trait":"magpie"})).is_equal("greedy")
+	assert_str(Director.envoy_temper({"temperament":"Bridge-builder","kind":"gift"})).is_equal("calm")
+
+func test_every_act_has_a_way_to_be_played()->void:
+	var memory:={}
+	for event:Dictionary in events()+envoy_events():
+		for beat:Dictionary in Director.beats_for(event,home_cast() if not String(event.kind) in ["gift","terrify_envoy","envoy_insulted"] else envoy_cast(),hungry_facts(),8,memory):
+			assert_bool(Director.ACTS.has(String(beat.act))).override_failure_message("no acting entry for %s" % beat.act).is_true()
+	for loop:Dictionary in Director.ambient(envoy_cast("greedy"),hungry_facts(),8):assert_bool(Director.ACTS.has(String(loop.act))).is_true()
+	var kneel:=Director.performance({"act":"kneel","args":{}})
+	assert_str(String(kneel.clip)).is_equal("kneel")
+	assert_bool(bool(kneel.hold)).is_true()
+	assert_str(String(Director.performance({"act":"stand_firm","args":{}}).mood)).is_equal("defiant")
+
+# --- Sound, bubbles and the officials' own ways -------------------------------------------
+
+func test_what_is_heard_is_named_and_the_hush_cuts_the_murmur()->void:
+	var memory:={}
+	var names:={}
+	for seed_value in 60:
+		for event:Dictionary in events():
+			for beat:Dictionary in Director.beats_for(event,home_cast(),hungry_facts(),seed_value,memory):
+				if not beat.has("sound"):continue
+				var heard:Dictionary=beat.sound
+				names[String(heard.name)]=true
+				assert_str(String(heard.name)).is_not_empty()
+				if String(beat.act)=="hush":
+					assert_str(String(heard.name)).is_equal("murmur_cut")
+					assert_bool(bool((beat.args as Dictionary).get("cut",false))).is_true()
+				else:
+					assert_bool(Director.SOUNDS.has(String(beat.act)) or String(heard.name)=="gasp_room").override_failure_message("unlisted sound on %s" % beat.act).is_true()
+	for name in ["growl","cough_fought","creak","swallow","gasp_room","snort_laugh","bowl_clatter","faint_thump","dog_whimper","goat_bleat","footsteps","murmur_cut"]:
+		assert_bool(names.has(name)).override_failure_message("never heard: %s (heard %s)" % [name,names.keys()]).is_true()
+	# A room's gasp is one sound, not ten.
+	for seed_value in 40:
+		var list:=Director.beats_for({"kind":"command","verb":"detain","stage":"refuse_seized","actor":"p1","target":"main","obedience":"refuse"},home_cast(),hungry_facts(),seed_value,{})
+		var rooms:=0
+		for beat:Dictionary in list:
+			if beat.has("sound") and String(beat.sound.name)=="gasp_room":rooms+=1
+		assert_int(rooms).is_less_equal(1)
+	# The stage gets them as primitives, with the glyph for the bubble.
+	var director:=Director.new()
+	var glyphs:={}
+	for i in 60:
+		for beat:Dictionary in director.beats({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),hungry_facts(),i):
+			if String(beat.act)=="sound" and String((beat.args as Dictionary).get("glyph",""))!="":glyphs[String(beat.args.glyph)]=true
+	assert_int(glyphs.size()).is_greater_equal(2)
+
+func test_officials_keep_their_comic_ways_for_life()->void:
+	assert_str(Director.quirk_of({"name":"A","disposition":"sycophantic"},"official")).is_equal("flatterer")
+	assert_str(Director.quirk_of({"name":"A","disposition":"cantankerous"},"official")).is_equal("jealous")
+	assert_str(Director.quirk_of({"name":"A","disposition":"principled"},"hearth_chief")).is_equal("pedant")
+	assert_str(Director.quirk_of({"name":"A","disposition":"diplomatic"},"official")).is_equal("yes_man")
+	assert_str(Director.quirk_of({"name":"A","voice":"sancho"},"official")).is_equal("sleepy")
+	assert_str(Director.quirk_of({"name":"A","disposition":"principled"},"child")).is_empty()
+	# The same person, the same way, every time; across many people, all five.
+	var seen:={}
+	for i in 200:
+		var entry:={"name":"Person %d" % i,"person_id":1000+i}
+		var q:=Director.quirk_of(entry,"official")
+		assert_str(Director.quirk_of(entry.duplicate(),"official")).is_equal(q)
+		seen[q]=true
+	for q in Director.QUIRKS:assert_bool(seen.has(q)).override_failure_message("nobody is %s" % q).is_true()
+
+func test_each_comic_way_plays_on_the_one_who_has_it()->void:
+	var starred:={}
+	var rows:=[
+		[{"kind":"line","who":"main","text":"We have 40 hides drying and the snow is coming early this year."},"quirk_count","p4"],
+		[{"kind":"god_speaks","text":"So be it."},"quirk_flatter","p2"],
+		[{"kind":"line","who":"main","text":"The river path is washed out past the second bend, and the hunters will not go that way now."},"quirk_yawn","p5"],
+		[{"kind":"divine","action":"bless","target":"main","response":"blessed"},"quirk_jealous","p1"],
+		[{"kind":"line","who":"p4","text":"The pens are full."},"quirk_agree","p3"],
+	]
+	for seed_value in 200:
+		for row:Array in rows:
+			var memory:={}
+			Director.beats_for(row[0],home_cast(),full_facts(60),seed_value,memory)
+			var played:Dictionary=(memory.get("last",{}) as Dictionary).get("played",{})
+			if played.has(String(row[1])):
+				assert_str(String((played[row[1]] as Dictionary).star)).is_equal(String(row[2]))
+				starred[String(row[1])]=true
+	for row:Array in rows:assert_bool(starred.has(String(row[1]))).override_failure_message("%s never played" % row[1]).is_true()
+
+func test_every_situation_has_ten_lines()->void:
+	for situation in Asides.LINES:
+		assert_int(Asides.count(String(situation))).override_failure_message("%s has only %d lines" % [situation,Asides.count(String(situation))]).is_greater_equal(10)
+
+func test_a_terrified_speaker_trembles_in_their_bubble()->void:
+	var memory:={}
+	Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),full_facts(60),3,memory)
+	var after:=Director.speech_style({"kind":"line","who":"main","text":"Yes, Great One."},home_cast(),full_facts(60),memory)
+	assert_str(String(after.style)).is_equal("tremble")
+	assert_str(String(Director.speech_style({"kind":"line","who":"p2","text":"Yes."},home_cast(),full_facts(60),{}).style)).is_equal("tremble")
+	assert_str(String(Director.speech_style({"kind":"line","who":"p1","text":"No."},home_cast(),full_facts(60),{}).style)).is_equal("speech")
+	assert_str(String(Director.speech_style({"kind":"line","who":"c2","text":"Hi."},home_cast(),full_facts(60),{}).style)).is_equal("small")
+	var list:=Director.beats_for({"kind":"line","who":"p2","text":"The stores hold nine days."},home_cast(),full_facts(60),5,{})
+	assert_bool(_did(list,"p2","bubble")).is_true()
 
 # --- For the coordinator: a sample screenplay ------------------------------------------------
 
 func test_print_a_screenplay()->void:
 	var memory:={}
-	var facts:=hungry_facts()
+	var facts:={"day":2200,"food_days":9,"population":214,"season":"winter","era_tags":["farming","pottery","dairy"],"era_tier":1,"people_dread":0.3,"people_love":0.5,
+		"sickness":{"name":"the Marsh Cough","deaths":3}}
 	var scenes:=[
-		["The god speaks into a hungry hall",{"kind":"god_speaks","text":"Why are my people thin?"},home_cast()],
-		["Wrath on the petitioner, who cowers",{"kind":"divine","action":"terrify","target":"main","response":"cower","witnesses":{"p1":"unbowed","p2":"shaken","p3":"shaken","p4":"shaken"}},home_cast()],
-		["Wrath on the war leader, who defies it",{"kind":"divine","action":"terrify","target":"p1","response":"defy"},home_cast()],
-		["A boon of twelve food while the stores hold nine days",{"kind":"divine","action":"boon","target":"p4","response":"blessed","terms":{"resource":"Food","amount":12}},home_cast()],
-		["An envoy's food gift, accepted",{"kind":"gift","accepted":true,"resource":"Food","amount":40,"who":"main"},envoy_cast()],
-		["The envoy is terrified",{"kind":"terrify_envoy","response":"cower","target":"main"},envoy_cast()],
-		["An order nobody can carry out",{"kind":"command","verb":"order","stage":"none","actor":"p2","target":"","obedience":"obey","executed":false},home_cast()],
-		["A petition granted",{"kind":"decree","who":"main","accepted":true,"reaction":"delighted"},home_cast()],
+		["Hena reports",{"kind":"line","who":"main","text":"We have 40 hides drying and the snow is coming early this year, Great One."}],
+		["The god speaks",{"kind":"god_speaks","text":"And the stores?"}],
+		["Tamsin answers, then Hena",{"kind":"line","who":"p4","text":"Nine days of food, if nobody eats much."}],
+		["",{"kind":"line","who":"main","text":"We can stretch it to twelve with the dried fish."}],
+		["The god gives Hena 12 food from the stores",{"kind":"divine","action":"boon","target":"main","response":"relief","terms":{"resource":"Food","amount":12},"witnesses":{"p1":"envy"}}],
+		["The god makes them wait",{"kind":"wait","who":"main"}],
+		["The god's fury falls on Hena, who cowers",{"kind":"divine","action":"terrify","target":"main","response":"cower","witnesses":{"p1":"unbowed"}}],
+		["Hena answers, shaking",{"kind":"line","who":"main","text":"It will be done, Great One."}],
+		["Hena leaves, pleased all the same",{"kind":"exit","who":"main","style":"bow","reaction":"pleased"}],
 	]
-	var text:PackedStringArray=PackedStringArray(["","=== SCREENPLAY (food 9 days, Marsh Cough 3 dead, feud with Kelvar, winter) ==="])
+	var text:PackedStringArray=PackedStringArray(["","=== SCREENPLAY (villages, winter, stores 9 days, Marsh Cough). Orrin is jealous, Suri a flatterer, Kavu agrees with everyone, Tamsin a pedant, Gedde sleepy ==="])
 	var i:=0
 	for scene:Array in scenes:
-		text.append("-- %s" % scene[0])
-		text.append(Director.screenplay(scene[1],scene[2],facts,77+i*13,memory))
+		if String(scene[0])!="":text.append("-- %s" % scene[0])
+		text.append(Director.screenplay(scene[1],home_cast(),facts,311+i*17,memory))
 		i+=1
-	text.append("-- Idle business in this hall:")
-	for loop:Dictionary in Director.ambient(home_cast(),facts,77):
-		text.append("  %-6s %-14s every %s  (because %s)" % [loop.who,loop.act,"held" if bool(loop.hold) else "%s-%ss" % [loop.every[0],loop.every[1]],loop.because])
 	print("\n".join(text))
 
 # --- Helpers ------------------------------------------------------------------------------------

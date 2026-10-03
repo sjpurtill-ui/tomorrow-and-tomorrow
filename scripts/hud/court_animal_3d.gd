@@ -22,9 +22,16 @@ const INK:=preload("res://assets/court_sets/shaders/court_set_ink.gdshader")
 ## Each species' paint by slot.
 const PALETTE:={
 	"dog":{"COAT":"a06c3b","COAT_LIGHT":"e0c99e","COAT_DARK":"5f4027","NOSE":"1d1612","EYE":"150f0c","EYE_SHINE":"fbf6ea"},
+	"goat":{"COAT":"d8ccb2","COAT_DARK":"4a3a2e","NOSE":"3a2c26","HOOF":"2c241e","HORN":"8c8070","EYE":"120c08","EYE_AMBER":"b8862e"},
+}
+## A species' own clip for each of the court's animal acts (the dog's names).
+const CLIP_MAP:={
+	"goat":{"sniff":"graze","sit":"lie","sit_idle":"lie_idle","scratch":"graze","cower":"startle","cower_idle":"look",
+		"wag":"bleat","tilt":"look","look_up":"look","bark":"bleat","grab":"graze","trot":"walk"},
 }
 ## What a one-off clip settles into when it ends.
-const AFTER:={"sit":"sit_idle","lie":"lie_idle","cower":"cower_idle","stand_up":"idle","look_up":"idle","bark":"idle","grab":"idle","tilt":"idle"}
+const AFTER:={"sit":"sit_idle","lie":"lie_idle","cower":"cower_idle","stand_up":"idle","look_up":"idle","bark":"idle","grab":"idle","tilt":"idle",
+	"bleat":"idle","startle":"look","look":"idle"}
 ## Clips the animal is down in (it must stand up before it walks).
 const DOWN:=["sit","sit_idle","scratch","lie","lie_idle"]
 ## Keep clear of the fire by this much when walking past it.
@@ -141,7 +148,7 @@ func start_at(mark_name:String)->void:
 	var m:Marker3D=cs.call("mark",mark_name)
 	if m==null:return
 	position=m.position
-	var z:=m.basis.z
+	var z:=-m.basis.z
 	_yaw=atan2(z.x,z.z)+rng.randf_range(-0.6,0.6);_yaw_goal=_yaw
 	rotation.y=_yaw
 	# the dog's first spot is by the fire, lying down
@@ -164,6 +171,7 @@ func _ready()->void:
 # --- Clips --------------------------------------------------------------------------
 
 func play(clip_name:String,blend:=0.25,at:=-1.0)->void:
+	clip_name=String((CLIP_MAP.get(species,{}) as Dictionary).get(clip_name,clip_name))
 	if player==null or not player.has_animation(clip_name):return
 	if clip_name==clip and at<0.0 and player.is_playing():return
 	clip=clip_name
@@ -179,6 +187,7 @@ func is_down()->bool:
 	return clip in DOWN
 
 func clip_length(clip_name:String)->float:
+	clip_name=String((CLIP_MAP.get(species,{}) as Dictionary).get(clip_name,clip_name))
 	return player.get_animation(clip_name).length if player!=null and player.has_animation(clip_name) else 0.0
 
 # --- Moving -------------------------------------------------------------------------

@@ -583,6 +583,8 @@ func _new_stage(parent:Control,kind:String)->Control:
 		made.facts.merge(Directing.facts_now(Hall.find(audience_id)),true)
 		# The acting (K) moves, looks and speaks for every modelled person.
 		if Stage.acting==null:Stage.acting=Acting.service()
+		# The court's sound (N): babble voices, the room, the hush.
+		if Stage.sound==null and ResourceLoader.exists("res://scripts/hud/court_sound.gd"):Stage.sound=load("res://scripts/hud/court_sound.gd")
 	# The court's modelled place for this era: the people stand in it, its
 	# camera frames them, its lights fall on them; the painting stays behind
 	# it as the fallback for a machine without the models.
@@ -591,6 +593,8 @@ func _new_stage(parent:Control,kind:String)->Control:
 	set_facts["seed"]=hash(audience_id)
 	if made.use_set(Backdrop.current_stage(),set_facts) and is_instance_valid(backdrop):backdrop.visible=false
 	parent.add_child(made);made.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	made.event("open",{"layout":kind,"era":made.facts.get("era",0),"season":String(made.facts.get("season","")),
+		"set":String(made.court_set.get("kind")) if made.court_set!=null and made.court_set.get("kind")!=null else ""})
 	made.advance_requested.connect(advance)
 	made.history_requested.connect(show_history_at)
 	made.resized.connect(_refit_popovers)
@@ -1226,7 +1230,7 @@ func _build_footer()->Control:
 	row.add_child(_build_return_button())
 	wait_button=Button.new();wait_button.name="MakeThemWait";wait_button.text="Make them wait";wait_button.custom_minimum_size=Vector2(150,34)
 	wait_button.tooltip_text="Send them to the antechamber. Guests kept waiting too long leave insulted."
-	wait_button.pressed.connect(make_them_wait);row.add_child(wait_button)
+	wait_button.pressed.connect(_wait_pressed);row.add_child(wait_button)
 	_add_court_controls(row,"Receive envoys at once")
 	queue_label=Tokens.make_label("",13,Tokens.TEXT_SOFT);queue_label.name="QueueLabel";queue_label.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(queue_label)
 	next_button=Button.new();next_button.name="NextAudience";next_button.text="Receive the next ›";next_button.custom_minimum_size=Vector2(150,34)
@@ -1679,6 +1683,22 @@ func _show_outcome(result:Dictionary,leave:=true)->void:
 	outcome_box.add_child(receipt)
 	_refresh_footer()
 
+## The button: the hall sees them made to wait (they shift, try to catch the
+## god's eye, the old one nods off) for a moment, then they are set aside.
+var _waiting_out:=false
+func _wait_pressed()->void:
+	if _waiting_out:return
+	if not is_instance_valid(court_stage) or Stage.director==null or mode!="audience" or not resolved_result.is_empty() or Motion.reduced():
+		make_them_wait();return
+	_waiting_out=true
+	if is_instance_valid(wait_button):wait_button.disabled=true
+	court_stage.event("defer",{"who":Stage.MAIN})
+	var id:=audience_id
+	get_tree().create_timer(2.6).timeout.connect(func()->void:
+		_waiting_out=false
+		if is_instance_valid(wait_button):wait_button.disabled=false
+		if audience_id==id and mode=="audience" and resolved_result.is_empty():make_them_wait())
+
 func make_them_wait()->void:
 	if mode=="audience" and resolved_result.is_empty():Hall.defer(audience_id)
 	if from_court and mode!="rest":show_court()
@@ -1823,7 +1843,7 @@ func _process(delta:float)->void:
 		_sync_rendered(said)
 		if rendered_lines>=said.size() and not (_voice_ok() and voice.busy(audience_id)):
 			_leave_when_quiet=false
-			court_stage.conclude(.6,_exit_style)
+			court_stage.conclude(.6,_exit_style,String(resolved_result.get("reaction","")))
 	if not pending_words.is_empty():_deliver_pending_words()
 	if not pending_matter.is_empty() and mode=="audience" and is_instance_valid(speech_input):
 		speech_input.placeholder_text=pending_matter;pending_matter=""
@@ -2369,7 +2389,7 @@ func _envoy_settings_popover()->Control:
 	box.add_child(Tokens.make_label("THE COURT",11,Tokens.TEXT_DIM,.12))
 	wait_button=Button.new();wait_button.name="MakeThemWait";wait_button.text="Make them wait";wait_button.custom_minimum_size=Vector2(0,34)
 	wait_button.tooltip_text="Send them to the antechamber. Guests kept waiting too long leave insulted."
-	wait_button.pressed.connect(make_them_wait);box.add_child(wait_button)
+	wait_button.pressed.connect(_wait_pressed);box.add_child(wait_button)
 	_add_court_controls(box,"Receive envoys at once")
 	voice_label.clip_text=false;voice_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;voice_label.custom_minimum_size=Vector2(290,0)
 	box.move_child(voice_label,box.get_child_count()-1)
