@@ -913,11 +913,14 @@ class Surrogate:
         # work_paths.gd cap_learning: the leaders' own split (no focus set by
         # hand) puts at most the path's cap of the people on learning; what is
         # cut goes to the other work besides food in proportion, so food is as
-        # planned.
+        # planned. The measured mixes (s.labor, from truth runs before the cap)
+        # are the leaders' own split too and are capped alike; a focus set by
+        # hand or a scenario's own knowledge_share is the ruler's word, as a
+        # manual split is in the engine, and is not.
         cap = getattr(self, "learning_cap", None)
         if cap is None and LEARNING_CAP:
             cap = float(LEARNING_CAP.get("balanced", 1.0))
-        if cap is not None and not self.s.labor and not self.s.focus:
+        if cap is not None and not self.s.focus and float(getattr(self, "active_knowledge_share", -1.0)) < 0:
             most = cap * sum(w.values())
             if w["Knowledge"] > most:
                 others = sum(v for r, v in w.items() if r not in ("Food", "Knowledge"))
