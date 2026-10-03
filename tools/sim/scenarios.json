@@ -892,8 +892,8 @@
     }
    ]
   },
-  "path_average": {
-   "_doc": "Truth probe mirror (truth_probe.gd --scenario=average --path=balanced): the leaders' own balanced work on an average site, the founding-years check.",
+  "avg_balanced": {
+   "_doc": "Truth probe mirror (truth_probe.gd --scenario=average --path=balanced): the leaders' own balanced work on an average site (between good and poor).",
    "site": "average",
    "research": {
     "demography": 2,
