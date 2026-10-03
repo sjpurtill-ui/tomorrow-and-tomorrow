@@ -601,6 +601,11 @@ static func defense_decision(plan:Dictionary)->Dictionary:
 	for key:String in parts:danger=maxf(danger,float(parts[key]))
 	var wariness:=defense_wariness(plan)
 	result.merge({"danger":danger,"parts":parts,"wariness":wariness,"weighed":danger*(.6+.8*wariness),"need":float(DEFENSE_STAGE_NEED[stage])},true)
+	# Skilled builders want walls of their own accord (built_fabric.gd wall_wish).
+	var wish:=float(preload("res://scripts/built_fabric.gd").wall_wish())
+	if wish>0.0:
+		result.weighed=float(result.weighed)+wish
+		result.parts["builders"]=wish
 	if float(result.weighed)<float(result.need):result.blockers.append("danger %.2f x wariness %.2f is %.2f, below the %.2f %s need" % [danger,wariness,float(result.weighed),float(result.need),String(works.short).to_lower()])
 	var food_days:=float(state.simulation_metrics.get("food_days",0.0))
 	result.food_days=food_days

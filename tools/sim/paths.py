@@ -121,6 +121,24 @@ def summarize(runs: list, years: int) -> dict:
             "hunger_per_1000": mean([1000.0 * x["hunger_toll"] / max(1.0, x["person_years"]) for x in rows]),
             "towns": mean([x["towns"] for x in rows]),
             "lead": mean([x["lead"] for x in rows]),
+            # The built fabric (fabric.py): standing's might (the watch and the
+            # walls), awe and allure, the defences, homes, roads, beauty, craft
+            # and the standard great works.
+            "might": mean([x.get("might_strength", 0.0) for x in rows]),
+            "defense": mean([x.get("defense_bonus", 0.0) for x in rows]),
+            "awe": mean([x.get("awe", 0.0) for x in rows]),
+            "allure": mean([x.get("allure_view", 0.0) for x in rows]),
+            "splendor": mean([x.get("splendor", 0.0) for x in rows]),
+            "home_quality": mean([x.get("home_quality", 0.0) for x in rows]),
+            "stone": mean([x.get("stone_share", 0.0) for x in rows]),
+            "roads": mean([x.get("roads", 0.0) for x in rows]),
+            "beauty": mean([x.get("beauty", 0.0) for x in rows]),
+            "works_cover": mean([x.get("works_cover", 0.0) for x in rows]),
+            "craft": mean([x.get("craft", 0.0) for x in rows]),
+            "great_works": mean([x.get("great_works", 0.0) for x in rows]),
+            "follies": mean([x.get("follies", 0.0) for x in rows]),
+            "works_points": mean([x.get("works_points", 0.0) for x in rows]),
+            "builders_pct": mean([x["alloc"]["Construction"] for x in rows]),
         }
     return out
 
@@ -183,6 +201,18 @@ def main() -> int:
             print(f"  {n:20s} {fmt(m['people']):>9s} {fmt(m['output_per_worker'], 2):>7s} {fmt(m['known']):>6s} {fmt(m['goods_per_head'], 1):>8s} "
                   f"{fmt(m['field_strength']):>8s} {fmt(m['infant_mortality']):>5s} {fmt(m['life_expectancy'], 1):>5s} {fmt(m['growth_pct'], 2):>6s} "
                   f"{fmt(m['food_labor_share'], 1):>6s} {fmt(m['watch_of_people'], 1):>6s} {fmt(m['towns']):>5s} {fmt(m['lead']):>5s}")
+
+    print("\nThe built fabric: builders % / craft / homes' quality / stone share / roads / beauty / works cover / defence / might / awe / allure / great works (follies) / renown points")
+    for y in years:
+        print(f"\n  year {y}")
+        print(f"  {'scenario':20s} {'build%':>6s} {'craft':>5s} {'homes':>5s} {'stone':>5s} {'roads':>5s} {'beauty':>6s} {'works':>5s} {'def':>5s} {'might':>5s} {'awe':>5s} {'allure':>6s} {'great':>9s} {'renown':>6s}")
+        for n in names:
+            m = summary[n].get(y)
+            if not m:
+                continue
+            print(f"  {n:20s} {fmt(m['builders_pct'], 1):>6s} {fmt(m['craft'], 1):>5s} {fmt(m['home_quality'], 2):>5s} {fmt(m['stone'], 2):>5s} {fmt(m['roads'], 2):>5s} {fmt(m['beauty'], 2):>6s} "
+                  f"{fmt(m['works_cover'], 2):>5s} {fmt(m['defense'], 2):>5s} {fmt(m['might'], 2):>5s} {fmt(m['awe'], 2):>5s} {fmt(m['allure'], 2):>6s} "
+                  f"{fmt(m['great_works'], 1) + ' (' + fmt(m['follies'], 1) + ')':>9s} {fmt(m['works_points'], 0):>6s}")
 
     print("\nFounding years (people at 0 / 7.5 / 15 / 30 / 60; the low and its year; births and deaths in years 0-7.5)")
     for n in names:
@@ -250,7 +280,8 @@ def main() -> int:
         # Each path's payoff counts: people, knowledge, field strength, output per
         # worker, goods a head, infant deaths (fewer is better) and years ahead of
         # the calendar (3 or more counts).
-        keys = [("people", True), ("known", True), ("field_strength", True), ("output_per_worker", True), ("goods_per_head", True), ("infant_mortality", False)]
+        keys = [("people", True), ("known", True), ("field_strength", True), ("output_per_worker", True), ("goods_per_head", True), ("infant_mortality", False),
+                ("might", True), ("awe", True), ("allure", True)]
         group = lambda n: "split" if n.startswith(("split_", "switch_")) else n.split("_", 1)[0]
         for a in names:
             for b in names:
@@ -262,7 +293,7 @@ def main() -> int:
                 better += ma["lead"] - mb["lead"] >= 3.0
                 worse += mb["lead"] - ma["lead"] >= 3.0
                 if better and not worse:
-                    print(f"  DOMINATED  {b} by {a} at year {final} (people, knowledge, field strength, output, goods, infant deaths, lead)")
+                    print(f"  DOMINATED  {b} by {a} at year {final} (people, knowledge, field strength, output, goods, infant deaths, might, awe, allure, lead)")
                     flags += 1
     print(f"  {flags} flag(s)")
     if args.json:

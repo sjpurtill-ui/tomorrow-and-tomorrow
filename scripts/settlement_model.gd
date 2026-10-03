@@ -25,6 +25,8 @@ const CITY_RESOURCE_DEFAULTS:={
 	"civilian_care":{"enabled":true,"staff_share":0.25,"episodes":[],"next_id":1,"last_day":-1,"history":[],"report":{}},
 	"household_clothing":{"last_day":-1,"report":{}},
 	"city_form":{"tier":-1.0,"condition":-1.0},
+	# Each town's built fabric (built_fabric.gd), made on its first reckoning.
+	"built_fabric":{},
 	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"water_waste_works":{"works":[],"next_id":1,"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
@@ -371,7 +373,12 @@ func city_trade_capacity()->Dictionary:
 	var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.0)),0.0,1.0)
 	var transport:=maxf(0.0,WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"))
 	var hauling:=maxf(0.0,WorldSimulation.discovery.effect("haul_capacity")+WorldSimulation.progression.effect("haul_capacity"))
-	return {"ready":logistics>=0.30 and institutions>=0.20,"logistics":logistics,"speed_km_per_day":8.0*(1.0+logistics+transport),"range_km":12.0+logistics*120.0+transport*180.0,"capacity_per_worker":(4.0+logistics*24.0)*(1.0+hauling),"reason":"Leaders need 30% logistics and 20% institutions to organize regular intercity deliveries."}
+	var capacity:={"ready":logistics>=0.30 and institutions>=0.20,"logistics":logistics,"speed_km_per_day":8.0*(1.0+logistics+transport),"range_km":12.0+logistics*120.0+transport*180.0,"capacity_per_worker":(4.0+logistics*24.0)*(1.0+hauling),"reason":"Leaders need 30% logistics and 20% institutions to organize regular intercity deliveries."}
+	# The roads between our towns (built_fabric.gd ROAD_SPEED, ROAD_REACH).
+	var Fabric:=preload("res://scripts/built_fabric.gd")
+	capacity.speed_km_per_day=float(capacity.speed_km_per_day)*Fabric.speed_factor()
+	capacity.range_km=float(capacity.range_km)*Fabric.reach_factor()
+	return capacity
 
 func _city_stores(record:Dictionary)->Dictionary:
 	if bool(record.get("primary",false)): return WorldSimulation.state.resource_stockpiles
@@ -1260,7 +1267,7 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 	founders=mini(founders,maxi(0,roundi(available_primary)-80))
 	if founders<40:
 		return {"ok":false,"reason":"At least 80 people must remain at the source settlement after a 40-person founding party is organized."}
-	var duration:=maxf(0.5,maxf(duration_days,origin_distance/SETTLEMENT_CONVOY_KM_PER_DAY))
+	var duration:=maxf(0.5,maxf(duration_days,origin_distance/(SETTLEMENT_CONVOY_KM_PER_DAY*preload("res://scripts/built_fabric.gd").speed_factor())))
 	# The road's rations and about 45 days for the new town's first weeks; the
 	# leaders who send the settlers may judge those weeks thinner or fuller
 	# (civilization_strategy.gd settle_margin_days).
@@ -1583,7 +1590,9 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	var active_construction:Array[Dictionary]=[]
 	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
-	var builders:=WorldSimulation.state.effective_workers("Construction")
+	# The works crew alone raises water channels, works and railways
+	# (built_fabric.gd crews: every builder works one job).
+	var builders:=float(preload("res://scripts/built_fabric.gd").crews().infra)
 	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 
 	var water_sites:=0
@@ -1635,9 +1644,10 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 func _advance_city_form(month_day:int)->void:
 	var form:=city_form()
 	var supported:=float(_supported_fabric_tier(month_day))
-	var builders:=WorldSimulation.state.effective_workers("Construction")
 	var population:=maxf(1.0,float(_primary_population()))
-	var building_share:=clampf(builders/maxf(1.0,population*0.05),0.0,1.0)
+	# The repair crew alone (built_fabric.gd crews): the town's other builders
+	# raise homes, civic works, walls and its fabric.
+	var building_share:=preload("res://scripts/built_fabric.gd").repair_share()
 	# Upkeep and renewal draw a monthly basket of building materials sized by
 	# population and era; the share actually paid limits repair and progress.
 	var need:=population*0.02*(1.0+0.25*float(form.tier))*building_share
@@ -2330,7 +2340,10 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 			_record_plot_building_event(plot,"vacated" if String(plot.status)=="vacant" else "reoccupied",day,{},false,"Population redistributed across usable household ground.")
 			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Ground %s" % ("Vacated" if String(plot.status)=="vacant" else "Reoccupied"),"plot_id":int(plot.id)})
-	var builders:=WorldSimulation.state.effective_workers("Construction")
+	# The repair crew keeps the buildings; the works crew the water channels
+	# and works (built_fabric.gd crews: every builder works one job).
+	var crew:Dictionary=preload("res://scripts/built_fabric.gd").crews()
+	var builders:=float(crew.builders)
 	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 	var maintained_plots:=0
 	for plot in WorldSimulation.state.settlement_plots:
@@ -2338,9 +2351,10 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		maintained_plots+=1
 	var water_lines:=preload("res://scripts/water_conveyance.gd").active_lines()
 	var water_works:int=preload("res://scripts/water_waste_works.gd").data().works.size()
-	var maintenance_per_plot:=builders*labor_efficiency/maxf(1.0,float(maintained_plots+water_lines+water_works))*0.0032
-	preload("res://scripts/water_conveyance.gd").scheduled_maintenance(maintenance_per_plot/.01,day)
-	preload("res://scripts/water_waste_works.gd").scheduled_maintenance(maintenance_per_plot/.01,day)
+	var maintenance_per_plot:=float(crew.repair)*labor_efficiency/maxf(1.0,float(maintained_plots))*0.0032
+	var maintenance_per_line:=float(crew.infra)*labor_efficiency/maxf(1.0,float(water_lines+water_works))*0.0032
+	preload("res://scripts/water_conveyance.gd").scheduled_maintenance(maintenance_per_line/.01,day)
+	preload("res://scripts/water_waste_works.gd").scheduled_maintenance(maintenance_per_line/.01,day)
 	var hardship:=clampf(1.0-float(WorldSimulation.state.simulation_metrics.get("health",WorldSimulation.state.population_health)),0.0,1.0)
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=WorldSimulation.state.world_seed^day^0x27d4eb2d

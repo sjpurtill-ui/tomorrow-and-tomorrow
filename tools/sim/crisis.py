@@ -24,6 +24,10 @@ import math
 import numpy as np
 
 import gdparse as g
+import fabric as _fabric
+
+HOME_SICKNESS = _fabric.K["HOME_SICKNESS"]
+HOME_FIRE = _fabric.K["HOME_FIRE"]
 
 CS = "scripts/crisis_system.gd"
 COH = ["children", "youth", "early_adults", "established_adults", "mature_adults", "elders"]
@@ -160,6 +164,7 @@ class Crises:
         cap = max(1.0, getattr(s, "carrying_capacity", 0.0) or 1.0)
         return {
             "pop": pop, "crowd": pop / max(1.0, s.housing_capacity), "dens": clamp(pop / 5000.0, 0.02, 1.0),
+            "homes_q": float(s.fabric.quality) if hasattr(s, "fabric") else 0.0,
             "health": s.health, "food_days": s.stored_days, "intake": s.last["intake"], "shortage_days": s.shortage_days,
             "first_shortage": first_shortage, "water_q": clamp(water - 0.15 * de + 0.2 * ws + 0.2 * san, 0.0, WATER_Q_MAX),
             "H": H, "med": hk * ramp(MEDICINE_CEILING, H), "inst": float(s.capacities.get("institutions", 0.25)),
@@ -198,11 +203,13 @@ class Crises:
             sick *= 1.3
         if self.flags["apart_custom"]:
             sick *= 0.85
+        sick *= math.exp(-HOME_SICKNESS * x.get("homes_q", 0.0))   # built_fabric.gd (crisis_system.gd)
         out["sickness"] = clamp(sick, 0.0, 3.0)
         out["pestilence_emerge"] = ramp(PANDEMIC_EMERGE, x["H"]) / 100.0 * math.exp(1.6 * (x["dens"] - 0.4) + 1.2 * (x["trade"] - 0.4) + 0.8 * hunger_on + 0.6 * (self.pool - 0.4)) * (1.0 - 0.5 * x["med"])
         fire = BASE_FIRE * math.exp(1.0 * (x["crowd"] - CROWD_REF)) * (1.0 + 1.5 * drought_on + 0.8 * max(0.0, 1.0 - x["weather"])) * (1.0 + 0.3 * max(0.0, -x["season"]))
         if self.flags["spaced"]:
             fire *= SPACED_FIRE_FACTOR
+        fire *= math.exp(-HOME_FIRE * x.get("homes_q", 0.0))   # built_fabric.gd (crisis_system.gd)
         if day < self.until.get("burn", -1):
             fire *= 2.0
         out["fire"] = clamp(fire, 0.0, 2.0)

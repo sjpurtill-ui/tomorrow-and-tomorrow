@@ -74,7 +74,10 @@ static func start_from_order(text:String,order_id:String="")->Dictionary:
 static func _cost_words(result:Dictionary)->String:
 	var assessment:Dictionary=result.get("assessment",{}) if result.get("assessment") is Dictionary else {}
 	var spoken:=String(assessment.get("spoken","")).strip_edges()
-	return spoken.substr(0,220) if spoken!="" else "It will take years of work and stone."
+	var said:=spoken.substr(0,220) if spoken!="" else "It will take years of work and stone."
+	# The odds and the payoff, stated with the builders' numbers (built_fabric.gd great_words).
+	var stated:=String(assessment.get("stated","")).strip_edges()
+	return said+(" "+stated if stated!="" else "")
 
 static func _chronicle(name:String,line:String,city_id:String)->void:
 	preload("res://scripts/chronicle.gd").record({"key":"order_work:%s:%s" % [city_id,name.md5_text().left(8)],"title":"The God Calls for %s" % name,

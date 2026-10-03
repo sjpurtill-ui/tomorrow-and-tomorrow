@@ -319,7 +319,7 @@ Each path gets a clear payoff and a real cost; balanced is never at least as goo
 | Daughter towns' land | `early_life_conditions.gd TERRITORY_SLOPE` 1.6 → 0.85 | A people founding a town every generation reaches about 19,000 by year 600 (high 20,000), not 30,000. |
 | Food yields | `food_system.gd harvest_settled`: the founding yields (1.34, `CULTIVATION_YIELD` 5.65) settle to `HARVEST_SETTLED` 0.77 of them by `HARVEST_SETTLED_YEAR` 200 | The founding decades keep the age's usual food share (the same as before, on good and average land); from year 300 the leaders keep 35–40% on food (was 27–30%, under the plausible floor of 35). |
 
-Still open (the user's decisions): building has no payoff the engine's numbers reach (no great works or splendor in the measure; it trails every path), and making's goods have no sink (the barter ceiling holds every path's goods near 4–5 a head).
+Still open (the user's decisions): making's goods have no sink (the barter ceiling holds every path's goods near 4–5 a head). Building's payoff is now the built fabric (docs/BUILT_FABRIC.md): homes by grade, roads, beauty, works, walls and the builders' craft.
 
 ## Crises' share of the age table (2026-10-03)
 

@@ -1,0 +1,277 @@
+# The built fabric (2026-10-03)
+
+The user, verbatim:
+
+> Building is still not impactful enough. Building needs to not just be a ridiculous amount of homes for people. That's absurd. People have homes over their heads. What is the quality of the homes? That's the real question. Do they have roads? Are their places beautiful? More builders, more work, more impact, more protection. ... The more building, the more stone, the more power, the more immovable a place is. Builders are critical, and they affect allure, awe, might, and productivity. The more building, the more types of building people know how to do as well, to use different types of materials to make powerful structures. And the more likely they are to succeed with great work, obviously and the more powerful that great work is likely to be.
+
+## What was wrong (Phase 1)
+
+A headless probe on the real engine (`tools/sim/build_probe.tscn`, the building path, 8 years) booked every builder-day to what it worked on:
+
+| Where the builders' days went | Builder-days | Share |
+|---|---|---|
+| The 9 fixed civic works (the 5 reachable ones done by day 330) | 334 | 0.9% |
+| New homes (only when the town is over 80% full) | 232 | 0.7% |
+| Nothing measurable (repair of a town already in full repair) | 34,652 | 98.4% |
+
+- Homes were a count. Once every person had a place, builders added nothing.
+- Repair is full once 5 in 100 of the people build.
+- Defences were raised by the watch alone.
+- Builders added at most +0.05 to a great work's odds, and nothing to its payoff.
+- Roads were drawing only.
+- Timber, stone and fibre piled up unused.
+- In the fast sim, the building path was dominated by the war path at year 600.
+
+## The design
+
+`scripts/built_fabric.gd` keeps each town's built fabric (`GameState.built_fabric`, swapped per town through `settlement_model.gd CITY_RESOURCE_DEFAULTS`) and the whole people's builders' craft (`GameState.fabric_realm`).
+
+Every people runs the same code in its own scope. Only how many build differs.
+
+### The builders' days
+
+Every `TICK_DAYS` (10) a town reckons its fabric. `settlement_construction.gd process_day` calls it, so the day's cost is one comparison.
+
+1. **Every builder works one job** (`crews`). These are the builders the town counts: a great work's crew and military works are already out (`effective_workers`). In order:
+   - **homes:** `HOMES_SHORT` (70 in 100) while some sleep without a roof, so repair and the walls never stop; `HOMES_AHEAD` (30 in 100) while new homes go up ahead of need (`housing_work_per_day` reads this crew);
+   - **civic:** `CIVIC_SHARE` (half) of the rest while a civic work is in hand (`daily_work` reads this crew);
+   - **repair:** what the town's civic works need to be kept in repair, at most `REPAIR_SHARE` (5 in 100) of the people, and half that once in full repair (`settlement_model.gd _advance_city_form` reads this crew);
+   - **works:** `INFRA_SHARE` (25 in 100) of the rest while the town has water channels, water and waste works or railways, built or going up: they raise and keep them (`settlement_model.gd process_month` and its maintenance); the buildings' own upkeep is the repair crew's;
+   - **walls:** at home, `WALL_SHARE` (40 in 100) of the rest while a stage goes up or the walls are mended after a fight;
+   - **fabric:** everyone left.
+2. **Their work.** Fabric builders × working pace × days × (1 + `CRAFT_WORK` a level of craft) × (1 + `KILN_BUILDING` × kiln cover).
+3. **Upkeep first,** in `UPKEEP_ORDER`: homes, the walls (`WALL_UPKEEP`, 1 in 100 of the standing stage's work a year), then work buildings, roads, and fine works last.
+   - Upkeep that is not done wears the account down:
+     - homes fall a grade (`GRADE_WEAR`, 30 in 100 a year for huts, 3 for stone);
+     - roads roughen (`ROAD_WEAR`, 8 in 100);
+     - work buildings decay (`WORKS_WEAR`, 5);
+     - fine works weather (`BEAUTY_WEAR`, 4).
+   - **A people that stops building visibly declines,** and the screens say so (homes fall a grade, the walls crumble, works decay, roads roughen, fine works weather).
+4. **Improvements** take what is left, by `SPLIT` (homes 35, roads 15, work buildings 20, fine works 30).
+   - What one account cannot use goes to the others.
+   - Fine works are the sink: carved posts, plazas, painted halls, monuments.
+5. **Real materials.** Every improvement takes timber, clay or stone. The town keeps back `RESERVE` (1 a person of each), plus the bills of its civic works and arms, plus the next defence stage's.
+   - Builders without materials stand idle, and the screens say so.
+
+### 1. Home quality, not home count
+
+The share of a town's places in each grade:
+
+| Grade | Quality | Build (builder-days a place) | Materials a place | Upkeep a year | Knowledge (any one) | Craft (from, all places at) |
+|---|---|---|---|---|---|---|
+| windbreaks and lean-tos | 0 | | | 0 | | |
+| huts | 0.30 | 3 | timber 0.5, fibre 0.5 | 0.35 | joinery, thatched roofing | 0, 1 |
+| timber houses | 0.55 | 8 | timber 2.5 | 0.6 | framed construction, timber post-beam | 1, 3 |
+| mudbrick houses | 0.75 | 14 | clay 4, timber 0.5 | 0.8 | adobe walls, mould-made mudbricks | 2, 5.5 |
+| stone houses | 1.0 | 30 | stone 7, clay 1 | 0.4 | dry stone walls, dressed stone, kiln-fired brick | 3, 9 |
+
+- New places (a new batch of homes) go up as huts, or as lean-tos before huts are known.
+- Places lost to fire or flood are lost from every grade alike.
+- **What the homes' quality q (0..1) does** (consequence_engine.gd, crisis_system.gd):
+  - the health target +`HOME_WEATHER` (0.03) × (the season's cold + ¾ of its heat) × q, the weather's toll on those who have a roof (the housing shortfall's own exposure deaths are the homes' count, untouched);
+  - illness deaths × (1 − 0.2q);
+  - outbreaks of sickness × e^(−0.3q);
+  - fires × e^(−q);
+  - health target +0.03q;
+  - cohesion target +0.04q.
+- **At q = 0 nothing changes:** the founding years and the 15-year truth runs are untouched by the homes.
+
+### 2. Roads and paths
+
+- **The road index.** Road work a person over `ROAD_FULL` (300 builder-days a person for full roads). It reaches at most:
+  - 0.35 for paths;
+  - 0.7 with graded roads known;
+  - 1.0 with paved haul roads known.
+- **Materials.** Graded and paved roads take 0.12 stone a builder-day.
+- **What the index R does:**
+  - the carriers' hauling target +0.10R;
+  - hauls from deposits × (1 + 0.35R);
+  - goods between towns, caravans and founding parties × (1 + 0.6R) speed;
+  - trade reach × (1 + 0.5R), in city trade and the trade ledger;
+  - townsfolk who reach a fight in time × (1 + 0.3R).
+- **The map.** The kind of road the map draws, and the army's march pace on it, follow what the people know (`settlement_roads.gd`, `march_terrain.gd`). The road index acts through speed, hauling and reach, and through the ink: `ink_quality` (the index against the best known) is the visual hook for rough, broken ink on unkept roads.
+
+### 3. Beauty: awe and allure
+
+- **What beauty is.** Fine-work points a person; beauty = 1 − e^(−points / `BEAUTY_SCALE` 600).
+  - A builder-day of fine work is worth 1 + 0.2 for each fine-work practice known (wall painting, megaliths, terraces, relief carving, niched facades, stepped tombs and temples, palace painting, portraits).
+  - Each builder-day takes 0.2 loads of stone, timber or clay.
+- **At home:**
+  - cohesion +0.03;
+  - love of the god +0.05 (divine_regard.gd);
+  - Splendor +0.40 (standing.gd), and through it pride and awe.
+- **Abroad:**
+  - the allure of our culture +0.50 (standing.gd), so migration in, envoys and trade;
+  - other peoples' respect +0.10.
+
+### 4. Might and immovability
+
+- **Builders on the walls.**
+  - They work beside the watch at `BUILDER_WALL_WEIGHT` (1.5) a watchman's share, × (1 + 0.05 a level of craft).
+  - On stone stages (walled districts, bastions) the watch alone works at `STONE_WATCH` (0.35): stone needs builders' skill.
+  - The defence ledger (`military_campaign.gd settlement_defense_daily_work`), sieges and town battles read the same numbers.
+  - **The council and the screens judge the next stage with the walls crew that would go to it** (`wall_builders_ready`, recorded at each reckoning). A watchman's own rate never includes the builders, and the watch the council asks for is what remains after the builders' work (`settlement_defense_full_pace_workers`, `home_defense.gd watch_fix`).
+- **The council.** Skilled builders want walls: the council weighs danger plus `WALL_WISH` (0.14 a level of craft past 2, at most 0.6).
+- **Stronger walls.**
+  - Walls kept by skilled builders hold × (1 + 0.02 a level of craft).
+  - The home town's stone houses add +0.15 × their share to the defences and +0.10 to the stores raiders cannot reach.
+  - Sieges and town battles read the snapshot's `defense_bonus`.
+- **Wear.** Walls wear 3 in 100 of their integrity a year while their upkeep goes undone; the walls crew mends them after a fight (with a fifth of the watch).
+- **Might** (standing.gd) gets +0.40 × the defences over the strongest works' bonus.
+- **Other peoples** weigh our fighting strength × (1 + 0.8 × the defences' bonus): awe, contempt and war deterrence.
+
+### 5. Productivity: work buildings
+
+- **Cover.** Work buildings a person over `WORKS_FULL` (600 builder-days a person). Each builder-day takes 0.25 loads of stone, timber or clay.
+- **Each kind acts once what it needs is known.** At full cover:
+
+| Work building | Role | Full cover |
+|---|---|---|
+| workshops | making | goods × 1.20 |
+| granaries | getting food | stored food rots × 0.75 |
+| kilns (kiln control) | building | builders' work × 1.10 |
+| storehouses and yards | carrying, cutting and digging | hauling +0.06, every deposit +15% |
+| wells and water works (well siting) | carrying | water each carrier brings × 1.30 |
+
+### 6. Builders' craft
+
+- **Experience.** Every builder adds a builder-day a day. The people's experience fades e-fold over `CRAFT_YEARS` (36), a working life and a half.
+- **The level.** Living experience a person over `CRAFT_PER_LEVEL` (275), up to 10. It settles at builders' share of the people × 365 × pace × 36 / 275.
+- **Each level:**
+  - builders work 3% faster;
+  - the infrastructure line learns 4% faster;
+  - the construction signal every building question reads rises 0.12 (civilization_day.gd context): **knowledge by doing**;
+  - a builder on the walls works 5% more;
+  - walls hold 2% better;
+  - a great work's capability +0.025.
+- **It gates the dwelling grades** (table above).
+
+### 7. Great works
+
+- **The odds** (`wonder_concept.gd assess`). Capability adds:
+  - 0.025 a level of craft;
+  - up to 0.05 for the crew on the work (full at 15 builders on it; a work not yet begun counts the fifth of the builders it would get);
+  - 0.06 × (cover − 0.5) for the materials in store.
+  - The "Builders" factor names them.
+- **The roll reads the whole people's craft** even while one town's count is in scope (`craft_of`), so it uses the odds and payoff the screen states.
+- **Materials.** The fabric never takes what a great work under way has still to use (`great_bills`: its bill per unit of work × the work left, so a grander work keeps its larger bill).
+- **The crew** the odds count is the work's own (half the builders when pressed, a fifth when careful), never another work's.
+- **The payoff** (`undertaking_system.gd apply_outcome`). A work that stands has its strength, rewards and renown × (1 + 0.05 a level of craft), and × 1.15 more under a gifted master builder (geniuses.gd). The work records it as `payoff`.
+- **Stated plainly.** The assessment's `stated` text is shown on the great work's screen and in the order's reply, for example: "With 14 builders on the work at craft 3.0 and 400 stone in store (100 in 100 of the materials), the odds it stands are 83 in 100 (a triumph 18, flawed 12, it falls 17); if it stands, its strength, rewards and renown count x1.15 for the builders' craft and Ama, a gifted master builder."
+
+### Costs
+
+- **The building path leans harder:** `work_paths.gd WORK` building is Construction 22 and Extraction 8 (was 10 and 4). It keeps about 20 in 100 of the workers building, against 14 for balanced.
+- **What it pays:** fewer makers, carriers, carers and watchmen. Its people are about 3% fewer than a balanced people's at year 600, with more infant deaths, a smaller field force and fewer goods a head.
+- **Everything the fabric does costs** builders' hands, timber, clay and stone, and upkeep for ever after.
+
+### Shared-file edits (minimal, marked)
+
+| File | Edit |
+|---|---|
+| `game_state.gd` | two vars (`built_fabric`, `fabric_realm`) and their reset, marked `[built-fabric]` |
+| `military_campaign.gd` | the builders' hands in `settlement_defense_daily_work`; walls' quality and stone in `settlement_defense_snapshot`; walls' wear, marked `[built-fabric]` |
+| `discovery_system.gd` | one factor in the two leader-factor chains, marked `[built-fabric]` |
+| `settlement_model.gd` | one default key; trade speed and range; convoy speed |
+
+**Saves.** Older saves load.
+- A town's fabric is made on its first day, at the grades the people could build at the craft its present builders would have given it (no sudden fall); every reader sees it from that day, and the realm hears of the town at once.
+- Its roads start at the kind its map already drew for what the people know (`settlement_roads.gd known_tier`), so maps and marches lose nothing.
+- The craft starts at what the present builders, read for the whole people, would have built up.
+
+## On screen
+
+- **The People view (building row):** "Homes 67/100, roads 43, beauty 48; craft 3.8." / "Ten more: 120 places a year to mudbrick, craft toward 4.6."
+  - When too few build: "Too few to keep it all: homes fall a grade."
+  - When materials are short: "Ten more: little, materials are short; more cutters and diggers."
+- **The Buildings page, The Town tab:**
+  - Homes by kind: one bar of the grades, and what the next grade needs.
+  - The built fabric: bars for homes, roads, beauty, work buildings, walls and stone, craft and upkeep kept.
+  - Falling into disrepair, when it is.
+  - Where the builders' days go: upkeep, homes, roads, work buildings, fine works, walls and idle.
+  - What the built fabric does, line by line with the rule it comes from.
+  - What ten more builders would buy now.
+- **The town page:** "Homes and streets" (quality, roads and beauty, or "falling into disrepair") and "Builders' craft" (now, and where it settles).
+- **Standing:** Might's reason names "walls and stone +N"; Splendor's names "our builders' fine works (+N)".
+- **The capacity history** names "How good our homes are" and "Roads and paths" in the infrastructure capacity.
+- **Great works:** the odds and the payoff with the builders' numbers.
+
+## Fast sim
+
+`tools/sim/fabric.py` mirrors all of it (the constants are parsed from the game) with a standard great-works policy that every path runs alike. `paths.py` reports the fabric, might, awe, allure and great works, and counts might, awe and allure in its dominance check.
+
+**Main → this branch** (`python tools/sim/paths.py`, 3 seeds, 600 years; main read with `SIM_GAME_REV=ba77e964`, where the fabric is off but the walls and the standard great works run as they did).
+
+How to read the columns:
+- **might, awe, allure:** standing's readings (might counts the watch at the ready and, on this branch, the walls).
+- **defence:** the defences' bonus.
+- **out/wk:** output per worker.
+- **per cutter:** loads cut a day.
+- **maker cap:** goods a maker could make a day.
+- **homes:** the homes' quality.
+- **IMR:** infant deaths per 1,000.
+- **works:** great works standing.
+- **renown:** their allure points.
+
+| Path | Year | people | known | might | defence | awe | allure | out/wk | per cutter | maker cap | homes | IMR | works | renown |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| balanced | 100 | 360 → 376 | 446 → 447 | 0.19 → 0.21 | 0.04 → 0.04 | 0.22 → 0.29 | 0.27 → 0.32 | 1.84 → 2.01 | 0.53 → 0.54 | 1.384 → 1.435 | 0.00 → 0.56 | 188 → 190 | 5.0 → 5.7 | 34 → 46 |
+| balanced | 300 | 1,292 → 1,264 | 760 → 759 | 0.17 → 0.27 | 0.04 → 0.15 | 0.29 → 0.38 | 0.26 → 0.35 | 1.99 → 1.83 | 0.51 → 0.56 | 1.426 → 1.527 | 0.00 → 0.67 | 198 → 196 | 18.7 → 19.7 | 153 → 186 |
+| balanced | 600 | 4,297 → 4,378 | 1,130 → 1,130 | 0.17 → 0.26 | 0.04 → 0.15 | 0.28 → 0.38 | 0.26 → 0.35 | 1.98 → 1.98 | 0.51 → 0.55 | 1.434 → 1.553 | 0.00 → 0.68 | 194 → 194 | 36.7 → 39.7 | 305 → 389 |
+| growth | 100 | 420 → 421 | 455 → 454 | 0.16 → 0.18 | 0.04 → 0.04 | 0.20 → 0.27 | 0.31 → 0.37 | 1.84 → 1.99 | 0.53 → 0.53 | 1.369 → 1.386 | 0.00 → 0.48 | 162 → 164 | 4.3 → 5.7 | 31 → 45 |
+| growth | 300 | 1,385 → 1,418 | 763 → 763 | 0.14 → 0.23 | 0.04 → 0.13 | 0.27 → 0.35 | 0.32 → 0.38 | 1.97 → 1.97 | 0.50 → 0.52 | 1.413 → 1.482 | 0.00 → 0.59 | 173 → 173 | 18.0 → 19.7 | 150 → 182 |
+| growth | 600 | 4,836 → 4,744 | 1,133 → 1,133 | 0.15 → 0.24 | 0.04 → 0.13 | 0.28 → 0.36 | 0.32 → 0.39 | 1.79 → 1.80 | 0.54 → 0.56 | 1.399 → 1.515 | 0.00 → 0.61 | 168 → 166 | 36.0 → 39.7 | 302 → 381 |
+| making | 100 | 364 → 371 | 445 → 446 | 0.16 → 0.19 | 0.04 → 0.04 | 0.21 → 0.28 | 0.26 → 0.32 | 2.05 → 1.89 | 0.52 → 0.55 | 1.356 → 1.412 | 0.00 → 0.51 | 192 → 191 | 5.0 → 5.3 | 32 → 43 |
+| making | 300 | 1,244 → 1,247 | 759 → 759 | 0.16 → 0.24 | 0.04 → 0.13 | 0.28 → 0.36 | 0.26 → 0.33 | 1.99 → 2.01 | 0.57 → 0.51 | 1.413 → 1.481 | 0.00 → 0.63 | 198 → 199 | 18.7 → 19.3 | 151 → 181 |
+| making | 600 | 4,237 → 4,231 | 1,130 → 1,130 | 0.15 → 0.24 | 0.04 → 0.14 | 0.28 → 0.37 | 0.26 → 0.34 | 1.98 → 2.00 | 0.51 → 0.55 | 1.424 → 1.521 | 0.00 → 0.63 | 195 → 195 | 36.0 → 38.7 | 298 → 374 |
+| war | 100 | 350 → 353 | 445 → 445 | 0.63 → 0.69 | 0.04 → 0.04 | 0.42 → 0.50 | 0.20 → 0.26 | 2.00 → 1.85 | 0.52 → 0.54 | 1.350 → 1.396 | 0.00 → 0.50 | 192 → 191 | 5.0 → 5.3 | 32 → 43 |
+| war | 300 | 1,258 → 1,241 | 760 → 759 | 0.60 → 0.75 | 0.04 → 0.13 | 0.48 → 0.59 | 0.21 → 0.27 | 1.97 → 1.80 | 0.50 → 0.55 | 1.400 → 1.467 | 0.00 → 0.62 | 200 → 198 | 18.7 → 19.3 | 151 → 180 |
+| war | 600 | 4,187 → 4,194 | 1,129 → 1,129 | 0.58 → 0.67 | 0.04 → 0.13 | 0.47 → 0.56 | 0.21 → 0.29 | 1.95 → 1.95 | 0.52 → 0.54 | 1.416 → 1.506 | 0.00 → 0.61 | 195 → 195 | 36.3 → 38.7 | 300 → 373 |
+| learning | 100 | 394 → 384 | 511 → 512 | 0.16 → 0.19 | 0.04 → 0.04 | 0.24 → 0.32 | 0.29 → 0.35 | 1.85 → 1.88 | 0.55 → 0.52 | 1.331 → 1.429 | 0.00 → 0.50 | 193 → 193 | 5.0 → 5.7 | 34 → 52 |
+| learning | 300 | 1,212 → 1,224 | 814 → 814 | 0.15 → 0.24 | 0.04 → 0.13 | 0.31 → 0.38 | 0.29 → 0.34 | 1.82 → 1.99 | 0.54 → 0.54 | 1.409 → 1.476 | 0.00 → 0.63 | 197 → 197 | 18.7 → 19.7 | 153 → 189 |
+| learning | 600 | 4,274 → 4,229 | 1,176 → 1,177 | 0.15 → 0.23 | 0.04 → 0.13 | 0.30 → 0.38 | 0.27 → 0.35 | 1.97 → 1.98 | 0.53 → 0.56 | 1.417 → 1.508 | 0.00 → 0.62 | 195 → 195 | 36.7 → 39.3 | 305 → 386 |
+| building | 100 | 366 → 357 | 445 → 445 | 0.17 → 0.24 | 0.04 → 0.15 | 0.21 → 0.34 | 0.27 → 0.36 | 1.88 → 1.89 | 0.53 → 0.53 | 1.337 → 1.441 | 0.00 → 0.68 | 192 → 196 | 4.7 → 5.7 | 30 → 49 |
+| building | 300 | 1,263 → 1,244 | 759 → 759 | 0.15 → 0.41 | 0.04 → 0.44 | 0.28 → 0.48 | 0.26 → 0.37 | 2.01 → 2.00 | 0.50 → 0.61 | 1.407 → 1.543 | 0.00 → 0.82 | 200 → 202 | 18.3 → 19.0 | 149 → 191 |
+| building | 600 | 4,186 → 4,366 | 1,129 → 1,129 | 0.15 → 0.44 | 0.04 → 0.50 | 0.28 → 0.49 | 0.26 → 0.37 | 1.99 → 2.00 | 0.51 → 0.55 | 1.416 → 1.588 | 0.00 → 0.82 | 195 → 200 | 35.7 → 38.7 | 297 → 410 |
+
+**The fabric on this branch:**
+
+| Path | Year | Builders % of workers | Craft | Homes | Stone share | Roads | Beauty | Work buildings | Defences |
+|---|---|---|---|---|---|---|---|---|---|
+| balanced | 300 | 15.4 | 3.6 | 0.67 | 0.11 | 0.31 | 0.36 | 0.30 | 0.15 |
+| balanced | 600 | 13.9 | 3.7 | 0.68 | 0.12 | 0.24 | 0.40 | 0.38 | 0.15 |
+| growth | 300 | 12.2 | 3.1 | 0.59 | 0.02 | 0.24 | 0.28 | 0.24 | 0.13 |
+| growth | 600 | 12.5 | 3.2 | 0.61 | 0.04 | 0.17 | 0.34 | 0.30 | 0.13 |
+| making | 300 | 12.9 | 3.2 | 0.63 | 0.04 | 0.24 | 0.30 | 0.25 | 0.13 |
+| making | 600 | 12.4 | 3.4 | 0.63 | 0.05 | 0.20 | 0.37 | 0.33 | 0.14 |
+| war | 300 | 13.3 | 3.1 | 0.62 | 0.02 | 0.23 | 0.28 | 0.24 | 0.13 |
+| war | 600 | 11.9 | 3.2 | 0.61 | 0.04 | 0.18 | 0.35 | 0.30 | 0.13 |
+| learning | 300 | 12.5 | 3.2 | 0.63 | 0.03 | 0.25 | 0.30 | 0.24 | 0.13 |
+| learning | 600 | 11.9 | 3.3 | 0.62 | 0.04 | 0.19 | 0.33 | 0.30 | 0.13 |
+| building | 300 | 20.7 | 5.1 | 0.82 | 0.35 | 0.43 | 0.60 | 0.58 | 0.44 |
+| building | 600 | 19.7 | 5.3 | 0.82 | 0.37 | 0.42 | 0.60 | 0.67 | 0.50 |
+
+**What it shows** (after both reviews: one crew per builder, its own crews for water, waste and rail works, homes at most 70 in 100 of the builders in a shortage, the council judging the next stage with the walls crew, great works keeping their bills)
+
+- **The building path pays off in its own measures.** Against balanced at year 600:
+  - might 0.44 against 0.26, and defences 0.50 against 0.15 (walled districts and a stone town);
+  - awe 0.49 against 0.38, and allure 0.37 against 0.35;
+  - homes 0.82 against 0.68, with 37 in 100 of its places stone against 12;
+  - roads 0.42 against 0.24, and work buildings 0.67 against 0.38;
+  - its makers about 2% more productive;
+  - great-work renown 410 against 389.
+- **It is no longer dominated.** On main the extended dominance check found it dominated by balanced and by making.
+- **It pays real costs:**
+  - as many people as balanced at year 600, but 2% fewer at 300;
+  - infant deaths 200 against 194 (fewer carers);
+  - a field force about 30% smaller (fewer on the watch);
+  - fewer goods a head.
+- **It does not dominate.** War keeps far more might (0.67) and awe (0.56); growth keeps more people and allure (0.39) and fewer infant deaths.
+- **Balanced peoples change little.** People, knowledge, infant deaths and life expectancy stay within seed noise of main.
+- **Flags.** The paths suite has 7 flags (main: 11, with building dominated):
+  - main's food-share flags;
+  - balanced's early writing and bronze;
+  - making dominated by balanced, as on main. Making's goods still have no sink (docs/PEOPLE_FIRST.md).
+- **Calibration.**
+  - The truth runs were re-recorded on this branch after the reviews: seven 15-year runs, including `path_building`, one engine at a time.
+  - `check.py --strict` passes: 7 runs within tolerance, score 38.0, only the listed food-days gaps.

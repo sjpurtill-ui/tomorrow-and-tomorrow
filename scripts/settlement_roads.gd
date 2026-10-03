@@ -62,13 +62,27 @@ static func material()->ShaderMaterial:
 static var _knowledge_key:=-1
 static var _knowledge:Dictionary={}
 static func knowledge()->Dictionary:
+	# The kind of road drawn, and the march pace on it, follow what the people
+	# know; how well the builders keep them is the ink's quality
+	# (built_fabric.gd ink_quality) and the speed of what travels them.
 	var size_key:=GameState.discovery_log.size()*100003+GameState.known_discoveries.size()
 	if size_key==_knowledge_key:return _knowledge
 	_knowledge_key=size_key
+	_knowledge=_known()
+	return _knowledge
+
+## The kind of road the people know how to make, laid or not: 0 footpath,
+## 1 cart track, 2 made road.
+## `state`: whose (the map's own people when null).
+static func known_tier(state:Object=null)->int:
+	return int(_known(state).tier)
+
+static func _known(state:Object=null)->Dictionary:
+	if state==null:state=GameState
 	var ids:Dictionary={}
-	for entry in GameState.discovery_log:
+	for entry in state.get("discovery_log"):
 		if entry is Dictionary:ids[String(entry.get("id",""))]=true
-	for id in GameState.known_discoveries:ids[String(id)]=true
+	for id in state.get("known_discoveries"):ids[String(id)]=true
 	var any:=func(list:Array)->bool:
 		for id in list:
 			if ids.has(id):return true
@@ -79,8 +93,7 @@ static func knowledge()->Dictionary:
 	var bridge:=0
 	if any.call(["timber_bridges"]):bridge=1
 	if any.call(["stone_arch_bridges"]):bridge=2
-	_knowledge={"tier":tier,"bridge":bridge}
-	return _knowledge
+	return {"tier":tier,"bridge":bridge}
 
 ## The places the network joins: [world Vector2, radius km, key].
 func _places()->Array:

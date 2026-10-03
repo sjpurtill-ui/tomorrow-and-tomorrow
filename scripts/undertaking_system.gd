@@ -248,7 +248,7 @@ static func commission(city_id:String,concept:Dictionary,ambition:String,site_he
 static func assess_record(r:Dictionary,owner:String)->Dictionary:
 	var concept:=Catalog.get_definition(String(r.id)).duplicate()
 	if not bool(concept.get("concept",false)):return {}
-	return Concept.assess(concept,owner,{"architect":r.get("architect",{}),"shift":float(r.get("shift",0.0))})
+	return Concept.assess(concept,owner,{"architect":r.get("architect",{}),"shift":float(r.get("shift",0.0)),"record":r})
 ## Stage decisions and events move the odds (bounded).
 static func _shift(r:Dictionary,delta:float)->void:
 	r.shift=clampf(float(r.get("shift",0.0))+delta,-.4,.4)
@@ -617,6 +617,15 @@ static func apply_outcome(state:Node,r:Dictionary,city:Dictionary,day:int,outcom
 		r.condition=minf(float(Concept.OUTCOME_CONDITION.get(outcome,.9)),clampf(float(r.quality)/total_work(r),.3,1)+.1)
 		r.rewards=Concept.rewards_for(String(p.purpose),String(p.ambition),outcome)
 		r.effect={"family":String(d.effect),"strength":Concept.pay(String(p.ambition),outcome)}
+		# [built-fabric] Skilled builders and a gifted master builder make a
+		# work that stands worth more: its strength, rewards and renown x the
+		# payoff (built_fabric.gd great_payoff), recorded with the work.
+		var gifted:=preload("res://scripts/geniuses.gd").architect_capability(r.get("architect",{}))>0.0
+		var payoff:=float(preload("res://scripts/built_fabric.gd").great_payoff(state,gifted))
+		r.payoff=snappedf(payoff,.001)
+		r.effect.strength=float(r.effect.strength)*payoff
+		for key:String in (r.rewards as Dictionary).keys():r.rewards[key]=snappedf(float(r.rewards[key])*payoff,.0001)
+		r.allure_scale=minf(4.0,float(r.get("allure_scale",1.0))*payoff)
 		r.legacy={"triumph":"A triumph beyond its builders' vision","success":"Useful, not yet renowned","flawed":"It stands, but its flaws are plain to all"}[outcome]
 		if outcome!="flawed" and int(r.strain)>=180:r.legacy="An achievement built through hardship"
 		if outcome=="triumph":m.cohesion=clampf(float(m.get("cohesion",.5))+.03,.01,.99);m.legitimacy=clampf(float(m.get("legitimacy",.5))+.02,.01,.99)

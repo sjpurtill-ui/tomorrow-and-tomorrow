@@ -106,6 +106,9 @@ func _impact(item:Dictionary,site:Dictionary)->Array:
 			if assessment.get("odds") is Dictionary and not (assessment.odds as Dictionary).is_empty():odds=assessment.odds
 			lines.append({"label":"When it is finished","value":"%d%% falls" % roundi(float(odds.get("collapse",0.0))*100.0),
 				"words":"The engine's odds today: a triumph %d%%, it stands %d%%, it stands flawed %d%%, it falls %d%%. A fall kills some of its builders and costs cohesion and legitimacy; a triumph raises both." % [roundi(float(odds.get("triumph",0.0))*100.0),roundi(float(odds.get("success",0.0))*100.0),roundi(float(odds.get("flawed",0.0))*100.0),roundi(float(odds.get("collapse",0.0))*100.0)],"tone":"bad" if float(odds.get("collapse",0.0))>=0.2 else "plain"})
+			# The builders' share of the odds and the payoff, stated (built_fabric.gd).
+			if String(assessment.get("stated",""))!="":
+				lines.append({"label":"The builders","value":"x%.2f if it stands" % float(assessment.get("payoff",1.0)),"words":String(assessment.stated),"tone":"plain"})
 		lines.append({"label":"Materials","value":"as it rises","words":"Stone, timber and the rest are drawn from the stores as the work is done; when they run out it stalls, and after five idle years it is abandoned.","tone":"plain"})
 	elif status=="functioning":
 		for key in ["reward_text","effect_text"]:

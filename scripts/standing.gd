@@ -22,6 +22,8 @@ const Exchange:=preload("res://scripts/society_exchange.gd")
 const Culture:=preload("res://scripts/artifact_culture.gd")
 const LIVES_PATH:="res://scripts/court_lives.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
+## The built fabric (built_fabric.gd): fine works, walls and stone.
+const Fabric:=preload("res://scripts/built_fabric.gd")
 
 ## Share of the people under arms, trained and ready, that is full Might for
 ## any age (pre-modern mobilisation tops out near 7%: war_loop MOBILIZE_MAX).
@@ -107,7 +109,12 @@ static func our_fighting_strength()->float:
 	var pop:=_population()
 	var warriors:=clampf(_warriors(),0.0,pop)
 	var readiness:=_readiness()
-	return maxf(1.0,(pop-warriors)*0.8+warriors*(1.0+WARRIOR_WEIGHT*readiness))
+	# Behind walls and in stone, every defender counts for more (built_fabric.gd FORT_STRENGTH).
+	return maxf(1.0,(pop-warriors)*0.8+warriors*(1.0+WARRIOR_WEIGHT*readiness))*(1.0+Fabric.FORT_STRENGTH*_walls())
+
+## The defences' bonus (military_campaign.gd settlement_defense_snapshot).
+static func _walls()->float:
+	return maxf(0.0,Fabric.defense_bonus_now())
 
 static func _warriors()->float:
 	if WorldSimulation.military==null: return 0.0
@@ -144,8 +151,9 @@ static func _reckon_strengths()->Dictionary:
 	var result:Dictionary={}
 	var warriors:=_warriors()
 	var readiness:=_readiness()
-	var might:=clampf(warriors*readiness/maxf(1.0,pop*MIGHT_FULL_SHARE),0.0,1.0)
-	result["might"]={"value":might,"why":"%d under arms or training, ready %d%%, among %d people" % [roundi(warriors),roundi(readiness*100.0),roundi(pop)]}
+	var walls:=clampf(_walls()/Fabric.BASTION_BONUS,0.0,1.0)
+	var might:=clampf(warriors*readiness/maxf(1.0,pop*MIGHT_FULL_SHARE)+Fabric.FORT_MIGHT*walls,0.0,1.0)
+	result["might"]={"value":might,"why":"%d under arms or training, ready %d%%, among %d people%s" % [roundi(warriors),roundi(readiness*100.0),roundi(pop),("; walls and stone +%d" % roundi(Fabric.FORT_MIGHT*walls*100.0)) if walls>0.005 else ""]}
 	var known:=float(s.known_discoveries.size())
 	var best_known:=_best_known_rival()
 	var scholars:=float(s.effective_workers("Knowledge"))
@@ -173,11 +181,16 @@ static func _reckon_strengths()->Dictionary:
 	var from_works:=works*SPLENDOR_WORKS
 	var from_culture:=maxf(0.0,float(report.allure)-works)*SPLENDOR_CULTURE
 	var from_era:=clampf(tier/6.0,0.0,1.0)*SPLENDOR_ERA
-	var splendor:=clampf(from_works+from_culture+from_era,0.0,1.0)
+	# The fine works our builders raise and keep in every town (built_fabric.gd).
+	var beauty:=Fabric.realm_beauty()
+	var from_beauty:=beauty*Fabric.BEAUTY_SPLENDOR
+	result["_culture"]=clampf(float(result["_culture"])+beauty*Fabric.BEAUTY_CULTURE,0.0,1.0)
+	result["_beauty"]=beauty
+	var splendor:=clampf(from_works+from_culture+from_era+from_beauty,0.0,1.0)
 	var standing_works:=int(report.get("works_standing",0))
 	var works_words:="no great work standing yet"
 	if from_works>0.0:works_words="%s, %.0f allure among other peoples (+%d)" % ["lesser monuments and remains that visitors see" if standing_works==0 else ("one great work standing" if standing_works==1 else "%d great works standing" % standing_works),float(report.get("works_points",0.0)),roundi(from_works*100.0)]
-	result["splendor"]={"value":splendor,"why":"%s; our culture and treasures (+%d); the town's building era %d (+%d)" % [works_words,roundi(from_culture*100.0),roundi(tier),roundi(from_era*100.0)]}
+	result["splendor"]={"value":splendor,"why":"%s; our culture and treasures (+%d); the town's building era %d (+%d); our builders' fine works (+%d)" % [works_words,roundi(from_culture*100.0),roundi(tier),roundi(from_era*100.0),roundi(from_beauty*100.0)]}
 	var legitimacy:=float(m.get("legitimacy",0.5))
 	var cohesion:=float(m.get("cohesion",0.5))
 	var order:=clampf(legitimacy*0.55+cohesion*0.25+_office_skill("Steward","Administration")*0.2,0.0,1.0)
@@ -263,7 +276,7 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var allure:=clampf(culture*0.5+float(our.wealth.value)*0.25+maxf(0.0,lead)*0.15+float(our.order.value)*0.1-menace*0.35,0.0,1.0)
 	why["allure"]="plenty %d%%, culture %d%%%s" % [roundi(float(our.wealth.value)*100.0),roundi(culture*100.0),(" · our warbands menace them (−%d)" % roundi(menace*35.0)) if menace>0.05 else ""]
 	var ties:=_ties(civ_id)
-	var respect:=clampf(float(ties.get("respect",0.0))+heard*0.25+maxf(0.0,lead)*0.2+clampf(ratio-0.7,0.0,1.0)*0.2+float(our.order.value)*0.15,0.0,1.0)
+	var respect:=clampf(float(ties.get("respect",0.0))+heard*0.25+maxf(0.0,lead)*0.2+clampf(ratio-0.7,0.0,1.0)*0.2+float(our.order.value)*0.15+float(our.get("_beauty",0.0))*Fabric.BEAUTY_RESPECT,0.0,1.0)
 	why["respect"]="their scholars' and travellers' regard, works that stand, our order"
 	var rivals:=_rivals()
 	var character:Dictionary=rivals.call("rival_character",civ_id) if rivals!=null else {}
