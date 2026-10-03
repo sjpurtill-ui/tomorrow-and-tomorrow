@@ -1,0 +1,9 @@
+{
+  "id": "clean_water",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Clean-Water Practice. An early household takes clear drinking water upstream while a separate washing place lies well downstream; close foreground focus on the protected drinking source and covered wooden water container, no modern pipes.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-30e105a5-1075-4884-acc4-7ff5186ed6ea.png",
+  "asset": "res://assets/ui/research/subjects/clean_water-v1.png",
+  "sha256": "6feb23722b3592c6d35e12f8d2a79797817bafcce4f0519273109af5d28af2e1",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

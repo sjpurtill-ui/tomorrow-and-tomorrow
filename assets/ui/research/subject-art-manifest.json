@@ -142,8 +142,12 @@
     ]
   },
   "clean_water": {
-    "path": "res://assets/ui/research/subjects/clean_water-v1.png",
+    "path": "res://assets/ui/research/subjects/clean_water-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -1428,10 +1432,14 @@
     ]
   },
   "acorn_leaching": {
-    "path": "res://assets/ui/research/paper/acorn_leaching.png",
+    "path": "res://assets/ui/research/subjects/acorn_leaching-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "root_grating_dewatering": {
@@ -2255,10 +2263,14 @@
     ]
   },
   "adobe_wall_construction": {
-    "path": "res://assets/ui/research/paper/adobe_wall_construction.png",
+    "path": "res://assets/ui/research/subjects/adobe_wall_construction-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "wattle_and_daub_walls": {
@@ -3165,10 +3177,14 @@
     ]
   },
   "mineral_pigment_preparation": {
-    "path": "res://assets/ui/research/paper/mineral_pigment_preparation.png",
+    "path": "res://assets/ui/research/subjects/mineral_pigment_preparation-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "textile_dye_extraction": {
@@ -6280,56 +6296,56 @@
     ]
   },
   "soil_exhaustion_recognition": {
-    "path": "res://assets/ui/research/subjects/soil_exhaustion_recognition-v1.png",
+    "path": "res://assets/ui/research/subjects/soil_exhaustion_recognition-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "lineage_land_tenure": {
-    "path": "res://assets/ui/research/subjects/lineage_land_tenure-v1.png",
+    "path": "res://assets/ui/research/subjects/lineage_land_tenure-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "phenology_signs": {
-    "path": "res://assets/ui/research/subjects/phenology_signs-v1.png",
+    "path": "res://assets/ui/research/subjects/phenology_signs-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "plot_yield_memory": {
-    "path": "res://assets/ui/research/subjects/plot_yield_memory-v1.png",
+    "path": "res://assets/ui/research/subjects/plot_yield_memory-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "skill_recognition": {
-    "path": "res://assets/ui/research/subjects/skill_recognition-v1.png",
+    "path": "res://assets/ui/research/subjects/skill_recognition-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "sledges_travois": {
-    "path": "res://assets/ui/research/subjects/sledges_travois-v1.png",
+    "path": "res://assets/ui/research/subjects/sledges_travois-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "textile_repair_methods": {
-    "path": "res://assets/ui/research/subjects/textile_repair_methods-v1.png",
+    "path": "res://assets/ui/research/subjects/textile_repair_methods-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.38
     ]
   },
   "throwing_spears": {
-    "path": "res://assets/ui/research/subjects/throwing_spears-v1.png",
+    "path": "res://assets/ui/research/subjects/throwing_spears-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9960,6 +9976,20 @@
     "focus": [
       0.5,
       0.43
+    ]
+  },
+  "mourning_days": {
+    "path": "res://assets/ui/research/subjects/mourning_days-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "watch_duty_rotation": {
+    "path": "res://assets/ui/research/subjects/watch_duty_rotation-v2.png",
+    "focus": [
+      0.5,
+      0.5
     ]
   }
 }

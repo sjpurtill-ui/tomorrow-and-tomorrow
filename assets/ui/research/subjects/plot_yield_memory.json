@@ -1,12 +1,20 @@
 {
   "id": "plot_yield_memory",
   "line": "nutrition",
-  "game_year": 18,
-  "approx_historical_year": -4880,
-  "prompt": "c. 4880 BCE: Elder orally compares small and large baskets of grain from contrasting plots with younger adult; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9367537b-7e0f-4c7f-8b41-0674e8d581b5.png",
-  "asset": "res://assets/ui/research/subjects/plot_yield_memory-v1.png",
-  "sha256": "c16a656a4786e304ba79c576bf5c21f73f4a8a2116c1b55de75c7bb43d30a68c",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; yield comparison and oral recollection clear, no record text."
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/plot_yield_memory-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/nutrition-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: Two growers sit between two small grain plots, comparing two modest baskets of harvested seed while gesturing toward the corresponding patches. Oral recollection, no written tally or documents. Olive, gold, cream botanical egg tempera; rough hide garments and hand gathered seed.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bb0ae6b9-2362-4c50-8f19-09183e11a4f8.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/plot_yield_memory-v2.png",
+  "sha256": "b5b874a79f42d4f7abe83c5898b544c4488a64bb9aeffc68914556e16c43c72a",
+  "mode": "built-in image_gen / edit"
 }

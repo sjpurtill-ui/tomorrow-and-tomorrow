@@ -1,9 +1,20 @@
 {
   "id": "clean_water",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Clean-Water Practice. An early household takes clear drinking water upstream while a separate washing place lies well downstream; close foreground focus on the protected drinking source and covered wooden water container, no modern pipes.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-30e105a5-1075-4884-acc4-7ff5186ed6ea.png",
-  "asset": "res://assets/ui/research/subjects/clean_water-v1.png",
-  "sha256": "6feb23722b3592c6d35e12f8d2a79797817bafcce4f0519273109af5d28af2e1",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "health",
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/clean_water.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/health-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: A wide stream flows left to right: on the LEFT upstream a person fills a plain wood bowl from clear water, on the RIGHT far downstream another washes a hide and two goats drink. Visually separated activities along the flow, no treatment machine, aqueduct, glass or pipes. Sage and celadon ink-watercolor over cream.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7bd3eaaf-e1de-470a-8de1-b219f7571e87.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/clean_water-v2.png",
+  "sha256": "5e2efc5fb08770b5a48ce172fd28891f4149f50d9edf72dcb855646fe892ba8a",
+  "mode": "built-in image_gen / edit"
 }

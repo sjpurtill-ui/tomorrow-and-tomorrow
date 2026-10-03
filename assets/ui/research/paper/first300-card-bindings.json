@@ -175,5 +175,9 @@
   "river_craft": "res://assets/ui/research/subjects/river_craft-v2.png",
   "bone_needle_sewing": "res://assets/ui/research/subjects/bone_needle_sewing-v2.png",
   "layered_clothing_design": "res://assets/ui/research/subjects/layered_clothing_design-v2.png",
-  "animal_taming": "res://assets/ui/research/subjects/animal_taming-v2.png"
+  "animal_taming": "res://assets/ui/research/subjects/animal_taming-v2.png",
+  "clean_water": "res://assets/ui/research/subjects/clean_water-v2.png",
+  "adobe_wall_construction": "res://assets/ui/research/subjects/adobe_wall_construction-v2.png",
+  "mineral_pigment_preparation": "res://assets/ui/research/subjects/mineral_pigment_preparation-v2.png",
+  "acorn_leaching": "res://assets/ui/research/subjects/acorn_leaching-v2.png"
 }

@@ -1,0 +1,20 @@
+{
+  "id": "adobe_wall_construction",
+  "line": "infrastructure",
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/adobe_wall_construction.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/infrastructure-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: Three adults build a low wall from irregular HAND-FORMED mud lumps, palms rounding wet clay mixed with straw, another pressing a lump onto an uneven course. Matte mineral-blue and limestone casein. No rectangular moulds, uniform industrial bricks, metal tools or tall finished city.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8370fb34-b56d-4e67-a327-576a85901fea.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/adobe_wall_construction-v2.png",
+  "sha256": "a4bf5a971cb57b0de8eaf3ed850d0a18af37606768d67d1c7f1d0def4e0e2ab1",
+  "mode": "built-in image_gen / edit"
+}

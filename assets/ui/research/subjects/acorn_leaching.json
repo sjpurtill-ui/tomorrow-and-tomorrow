@@ -1,0 +1,20 @@
+{
+  "id": "acorn_leaching",
+  "line": "nutrition",
+  "year": 19,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/acorn_leaching.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/nutrition-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: At a woodland stream edge, two adults rinse crushed acorn kernels in a coarse open basket resting in shallow running water, shelled acorns and pounding stone nearby. No cultivated grain, water mill, glass, metal or cooking directions. Opaque botanical egg tempera olive, gold, cream and earth.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b0801e72-0d4b-497b-9ed3-c53e66cb7462.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/acorn_leaching-v2.png",
+  "sha256": "98559a4b0d44e2f29390378133248e895fe9eb6b9ec71b8522f965c97eb60db4",
+  "mode": "built-in image_gen / edit"
+}
