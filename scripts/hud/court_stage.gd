@@ -32,6 +32,7 @@ const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Studio:=preload("res://scripts/hud/court_figure_studio.gd")
 const Looks:=preload("res://scripts/people_appearance.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
+const Acting:=preload("res://scripts/hud/court_acting.gd")
 const Voice:=preload("res://scripts/character_voice.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 
@@ -135,6 +136,9 @@ static var set_builder:Object     # M: build(era, facts) -> Node3D with marks
 static var camera_rig:Object      # M: attach(stage, camera, set_root); shot(name, args)
 static var acting:Object          # K: play / look_at / set_mood / speak / idle
 static var director:Object        # L: beats / ambient / asides
+static var sound:GDScript         # N: court_sound.gd (attach(stage) -> Node; on_event; on_beat); null: a silent court
+## The bystanders' muttered lines, a setting (the director reads it here).
+static var mutters_enabled:=true
 ## The Court installs L's director while this is on (tests may turn it off).
 static var directing:=true
 ## Off for a run (tests): no modelled court, the figures stand before the
@@ -147,6 +151,11 @@ var court_set:Node3D
 var _marks:Dictionary={}
 var _hush_tween:Tween
 var _bearer_chosen:=false
+## The court's sound (N), once the stage stands in the tree.
+var _sound:Node
+## The beats the director gave for the last event (an exit or an arrival
+## reads them: backing out bowing, coming back, the wrong side).
+var _last_beats:Array=[]
 ## What the engine says about the hall now (the Court fills it): era, season,
 ## stores_days, hungry, sick, at_war, love, dread, mood, offer.
 var facts:Dictionary={}
@@ -340,6 +349,11 @@ func _init()->void:
 	figure_layer=_layer("Figures");god_layer=_layer("FromAbove");bubble_layer=_layer("Bubbles");caption_layer=_layer("Captions")
 	resized.connect(_on_resized)
 
+func _ready()->void:
+	if sound!=null:
+		var made:Variant=sound.call("attach",self)
+		if made is Node:_sound=made
+
 ## One transparent SubViewport under the plates and bubbles: every modelled
 ## figure on this stage stands in it, seen by one camera that maps the
 ## stage's pixels onto the hall (layout() still decides where people stand).
@@ -410,6 +424,23 @@ func frame_cast(time:=0.0)->void:
 ## behind, our officials in the arc about the fire, onlookers on the logs
 ## and at the back. "" when every mark is taken.
 func _take_mark(f:Figure)->String:
+	# M's assignment for the whole cast as it stands (main first, then the
+	# company, officials, the seated and the standing), kept for everyone
+	# already placed; the old search below when it cannot place them.
+	if court_set.has_method("assign_marks"):
+		var entries:=[]
+		for key in cast_order:
+			var other:=figure(key)
+			if other==null or other==f:continue
+			entries.append({"key":key,"role":other.role,"stance":String(other.body3d.stance) if other.body3d!=null else ""})
+		entries.append({"key":f.key,"role":f.role,"stance":String(f.body3d.stance) if f.body3d!=null else ""})
+		var assigned:Dictionary=court_set.call("assign_marks",entries,layout_kind)
+		var name_out:=String(assigned.get(f.key,""))
+		if not name_out.is_empty():
+			var holder:=figure(String(_marks.get(name_out,"")))
+			if holder==null or holder.leaving or holder==f:
+				_marks[name_out]=f.key
+				return name_out
 	var wanted:Array=[]
 	var crowd_marks:Array=[]
 	for m:Marker3D in court_set.call("marks_for","crowd_"):crowd_marks.append(String(m.name))
@@ -618,6 +649,8 @@ static func mood_of(regard:Dictionary,envoy_mood:=0.0)->String:
 ## beats on top.
 func event(kind:String,data:Dictionary={})->void:
 	_event_index+=1
+	_last_beats=[]
+	if _sound!=null and is_instance_valid(_sound):_sound.call("on_event",kind,data)
 	if court_set!=null:_set_answers(kind,data)
 	if director==null or not director.has_method("beats"):return
 	var happened:=data.duplicate();happened["kind"]=kind
@@ -628,7 +661,16 @@ func event(kind:String,data:Dictionary={})->void:
 	var all:Array=[]
 	if beats is Array:all.append_array(beats)
 	if lines is Array:all.append_array(lines)
+	_last_beats=all
 	if not all.is_empty():run_beats(all)
+
+## Did the director just give this person this act (by its own name)?
+func _directed(who:String,act:String)->Dictionary:
+	for beat in _last_beats:
+		if not beat is Dictionary or String((beat as Dictionary).get("who",""))!=who:continue
+		var args:Dictionary=(beat as Dictionary).get("args",{}) if (beat as Dictionary).get("args") is Dictionary else {}
+		if String((beat as Dictionary).get("act",""))=="play" and String(args.get("beat",""))==act:return args
+	return {}
 
 ## The god's acts that are wrath, and those that are favour (the frame
 ## jolts at wrath and the dog cowers; at favour the dog wags).
@@ -638,16 +680,20 @@ const FAVOUR_ACTS:=["bless","boon","raise_up","honour","honor","reward","envoy_f
 ## The place answers the god: wrath jolts the frame and sends the dog
 ## cowering; favour sets it wagging; at the god's voice it looks up.
 func _set_answers(kind:String,data:Dictionary)->void:
-	var dog:Node3D=court_set.call("animal","dog")
+	var beasts:Array=[]
+	for kind_of in ["dog","goat"]:
+		var beast:Node3D=court_set.call("animal",kind_of)
+		if beast!=null and beast.has_method("on_god"):beasts.append(beast)
 	match kind:
 		"divine":
 			var action:=String(data.get("action",""))
 			if action in WRATH_ACTS:
 				if camera!=null and camera.has_method("shake"):camera.call("shake",0.6)
-				if dog!=null:dog.call("on_god","wrath")
-			elif action in FAVOUR_ACTS and dog!=null:dog.call("on_god","favour")
+				for beast:Node3D in beasts:beast.call("on_god","wrath")
+			elif action in FAVOUR_ACTS:
+				for beast:Node3D in beasts:beast.call("on_god","favour")
 		"god":
-			if dog!=null:dog.call("on_god","voice")
+			for beast:Node3D in beasts:beast.call("on_god","voice")
 
 ## An animal's beat (the director's dog or goat) on the set's own beast.
 func _animal_beat(key:String,beat:Dictionary)->void:
@@ -713,23 +759,74 @@ func add_extra(entry:Dictionary)->void:
 func mutter(who:String,text:String)->void:
 	var f:=figure(who)
 	if f==null or f.leaving or text.strip_edges().is_empty():return
+	# One at a time: a newer mutter takes the place of an older one.
+	for child in bubble_layer.get_children():
+		if child is Bubble and (child as Bubble).kind=="mutter":(child as Bubble).queue_free()
 	var bubble:=Bubble.new();bubble.name="Mutter";bubble.kind="mutter";bubble.speaker=who
 	bubble_layer.add_child(bubble)
-	bubble.setup(text,HudTokens.voice_font(true),14 if compact else 15,Color("4a3d2c"),Color(0.96,0.93,0.86,0.92),Color("9a8566"),minf(260.0,size.x*.24),false,"",12)
+	# Small and sidelong: 0.8 of a speech bubble's letter, a paler paper, no
+	# kicker, the tail from the side toward their mouth.
+	bubble.setup(text,HudTokens.voice_font(true),13 if compact else 15,Color("4a3d2c"),Color(ASIDE_PAPER,0.85),Color("9a8566"),minf(240.0,size.x*.22),false,"",12)
 	var head:=head_point(f)
-	var right:=head.x<size.x*.5
-	bubble.position=Vector2(clampf(head.x+(18.0 if right else -18.0-bubble.size.x),6.0,maxf(6.0,size.x-bubble.size.x-6.0)),clampf(head.y-bubble.size.y*.2,top_inset+4.0,maxf(top_inset+4.0,size.y-bubble.size.y-6.0))).round()
-	bubble.tail_side="none"
+	var mouth:=Vector2(head.x,head.y+f.size.y*.10)
+	# Beside the head, away from the middle of the hall.
+	var outward:=head.x>size.x*.5
+	var x:=mouth.x+22.0 if outward else mouth.x-22.0-bubble.size.x
+	x=clampf(x,6.0,maxf(6.0,size.x-bubble.size.x-6.0))
+	var y:=clampf(mouth.y-bubble.size.y*.7,top_inset+4.0,maxf(top_inset+4.0,size.y-bubble.size.y-6.0))
+	bubble.position=Vector2(x,y).round()
+	bubble.tail_side="left" if x>mouth.x else "right"
+	bubble.tip=mouth-bubble.position
+	if (bubble.tail_side=="left" and bubble.tip.x>-4.0) or (bubble.tail_side=="right" and bubble.tip.x<bubble.size.x+4.0):bubble.tail_side="none"
+	bubble.queue_redraw()
 	bubble.modulate.a=0.0
 	var tw:=bubble.create_tween()
-	tw.tween_property(bubble,"modulate:a",0.92,Motion.duration(Motion.FAST))
-	tw.tween_interval(hold_time(text)+1.0)
-	tw.tween_property(bubble,"modulate:a",0.0,Motion.duration(Motion.BASE))
+	tw.tween_property(bubble,"modulate:a",1.0,0.2)
+	tw.tween_interval(hold_time(text))
+	tw.tween_property(bubble,"modulate:a",0.0,0.6)
 	tw.tween_callback(bubble.queue_free)
+
+## A noise made visible: a tiny wordless bubble by the head (or at the feet
+## for a thump, a clatter or a fall), drawn in ink, gone in a moment.
+const GLYPHS_LOW:=["thump","clatter"]
+func glyph(who:String,glyph_name:String)->void:
+	var f:=figure(who)
+	if f==null or glyph_name.is_empty():return
+	var mark:=Glyph.new();mark.name="Glyph";mark.glyph=glyph_name
+	bubble_layer.add_child(mark)
+	var head:=head_point(f)
+	var at:=Vector2(f.home.x+f.size.x*.18,f.home.y-24.0) if glyph_name in GLYPHS_LOW else Vector2(head.x+f.size.x*.22,head.y+4.0)
+	mark.position=(at-mark.size*.5).clamp(Vector2(4.0,top_inset+2.0),Vector2(maxf(4.0,size.x-mark.size.x-4.0),maxf(top_inset+2.0,size.y-mark.size.y-4.0))).round()
+	mark.pivot_offset=mark.size*.5
+	if Motion.reduced():
+		get_tree().create_timer(1.2).timeout.connect(mark.queue_free);return
+	mark.scale=Vector2(.4,.4);mark.modulate.a=0.0
+	var tw:=mark.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(mark,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(mark,"modulate:a",1.0,0.12)
+	tw.set_parallel(false)
+	tw.tween_interval(1.0)
+	tw.tween_property(mark,"modulate:a",0.0,0.25)
+	tw.tween_callback(mark.queue_free)
+
+## How the bubble of a line is performed (never what it says): it trembles
+## for the terrified; a child's is smaller.
+func _style_bubble(who:String,args:Dictionary)->void:
+	var newest:Bubble=null
+	for child in bubble_layer.get_children():
+		if child is Bubble and (child as Bubble).speaker==who and not (child as Bubble).dropping and (child as Bubble).kind in ["speech","aside"]:newest=child
+	if newest==null:return
+	match String(args.get("style","")):
+		"tremble":newest.tremble(float(args.get("amount",0.5)),reveal_time(newest.text)+1.5)
+		"small":
+			newest.pivot_offset=newest.tip.clamp(Vector2.ZERO,newest.size)
+			newest.scale=Vector2(.86,.86)
 
 ## The room's own life: the director's loops of idle business, each seeded,
 ## driven by one quarter-second timer (nothing per frame), paused while hushed.
 func start_ambient()->void:
+	_glances()
 	if director==null or not director.has_method("ambient") or not is_inside_tree():return
 	var specs:Variant=director.call("ambient",cast_list(),facts,hash("%s|ambient" % audience_key))
 	_ambient.clear()
@@ -747,6 +844,26 @@ func start_ambient()->void:
 		_ambient_timer=Timer.new();_ambient_timer.name="RoomLife";_ambient_timer.wait_time=0.25
 		add_child(_ambient_timer);_ambient_timer.timeout.connect(_ambient_tick)
 	if not _ambient.is_empty():_ambient_timer.start()
+
+## Where an idle glance may fall (K's acting): the nearest neighbours, the
+## fire, and the one before the god (and what they carry).
+func _glances()->void:
+	if acting==null or not three_d:return
+	var heads:Array=[]
+	for key in cast_order:
+		var f:=figure(key)
+		if f!=null and f.body3d!=null and not f.leaving and f.body3d.is_inside_tree():heads.append([key,f.body3d.head_top()])
+	var fire:=set_point("fire") if court_set!=null else Vector3.ZERO
+	for row:Array in heads:
+		var f:=figure(String(row[0]))
+		var near:=heads.filter(func(o:Array)->bool:return String(o[0])!=String(row[0]))
+		near.sort_custom(func(a:Array,b:Array)->bool:return (a[1] as Vector3).distance_to(row[1])<(b[1] as Vector3).distance_to(row[1]))
+		var points:=PackedVector3Array()
+		for o:Array in near.slice(0,3):points.append(o[1])
+		if court_set!=null:points.append(fire+Vector3(0.0,0.4,0.0))
+		var main:=figure(MAIN)
+		if main!=null and main.body3d!=null and String(row[0])!=MAIN:points.append(main.body3d.global_position+Vector3(0.0,1.0,0.0))
+		Acting.set_glance_points(f.body3d,points)
 
 func _now()->float:
 	return float(Time.get_ticks_msec())/1000.0
@@ -789,6 +906,7 @@ func _beat(beat:Dictionary)->void:
 	var body:Node3D=f.body3d if f!=null and not f.leaving else null
 	var args:Dictionary=beat.get("args",{}) if beat.get("args") is Dictionary else {}
 	var act:=String(beat.get("act",""))
+	if _sound!=null and is_instance_valid(_sound):_sound.call("on_beat",beat,body)
 	if f==null and court_set!=null and String((extras.get(who,{}) as Dictionary).get("role",""))=="animal":
 		if act=="play":_animal_beat(who,beat)
 		return
@@ -796,11 +914,16 @@ func _beat(beat:Dictionary)->void:
 		"shot":
 			shot(String(args.get("name","wide")),args)
 		"hush":
-			hush(float(args.get("dur",2.0)))
+			hush(float(args.get("dur",2.0)),String(args.get("bubbles",""))=="dim")
 		"aside":
 			mutter(who,String(args.get("text","")))
+		"bubble":
+			_style_bubble(who,args)
+		"sound":
+			if String(args.get("glyph",""))!="":glyph(who,String(args.glyph))
 		"play":
 			if body==null:return
+			if _moved(f,args):return
 			_props_after(f,String(args.get("beat",args.get("clip",""))))
 			if acting!=null and acting.has_method("play"):
 				acting.call("play",body,args,self);return
@@ -833,6 +956,43 @@ func _beat(beat:Dictionary)->void:
 			# anything else the acting layer knows by name (speak, idle, stop...)
 			if body!=null and acting!=null and acting.has_method(act):acting.call(act,body,args,self)
 
+## Acts that move someone through the hall. The walks in and out (the wrong
+## side, backing out bowing, storming back for what was left) are the
+## arrival's and the exit's own (arrive, conclude); here, the small steps.
+const WALKED_ACTS:=["enter_wrong","hurry_round","back_out_bowing","bump_post","bow_to_post","storm_off","stop_short","come_back","come_back_for","snatch_up","hurry_after","bolt"]
+func _moved(f:Figure,args:Dictionary)->bool:
+	var act:=String(args.get("beat",""))
+	if act in WALKED_ACTS:return f.spot!=null or f.leaving
+	var other:=figure(String(args.get("at","")))
+	match act:
+		"bow_wrong":
+			# They bow, deeply, to the grandest official instead of the god.
+			if other==null or other.body3d==null:return false
+			f.bow_toward(other.body3d.global_position)
+			return true
+		"hide_behind":
+			if f.spot==null or other==null or other.body3d==null or camera==null:return false
+			var away:=(other.body3d.global_position-camera.global_position)
+			away.y=0.0
+			f.step_to(other.body3d.global_position+away.normalized()*0.45+Vector3(0.18,0.0,0.0),0.5,3.6)
+			return false
+		"edge_forward":
+			if f.spot==null:return false
+			var front:=god_point()-f.body3d.global_position;front.y=0.0
+			f.step_to(f.body3d.global_position+front.normalized()*0.35,0.9,7.0)
+			return false
+		"step_back":
+			if f.spot==null:return false
+			var back:=f.body3d.global_position-god_point();back.y=0.0
+			f.step_to(f.body3d.global_position+back.normalized()*0.3,0.35,3.0)
+			return false
+		"make_room":
+			if f.spot==null or other==null or other.body3d==null:return false
+			var aside:=f.body3d.global_position-other.body3d.global_position;aside.y=0.0
+			f.step_to(f.body3d.global_position+aside.normalized()*0.3,0.6,4.0)
+			return false
+	return false
+
 ## A held thing follows the act: a dropped bowl falls and stays on the floor
 ## (they stand empty-handed after); a bundle rides between the hands while it
 ## is lifted or struggled with, and stays where it is set down.
@@ -854,8 +1014,17 @@ func _props_after(f:Figure,act:String)->void:
 
 ## The room goes still for a while (the god speaks, a sentence falls): the
 ## acting holds everyone's idle business; the room's own loops wait too.
-func hush(seconds:float)->void:
+func hush(seconds:float,dim:=false)->void:
 	_hush_until=maxf(_hush_until,_now()+seconds)
+	if dim and is_inside_tree() and not Motion.reduced():
+		for child in bubble_layer.get_children():
+			var old:=child as Control
+			if old==null or (old is Bubble and (old as Bubble).dropping):continue
+			var was:=old.modulate.a
+			var tw:=old.create_tween()
+			tw.tween_property(old,"modulate:a",minf(was,0.45),0.25)
+			tw.tween_interval(maxf(seconds-0.5,0.2))
+			tw.tween_property(old,"modulate:a",was,0.4)
 	if acting==null or not acting.has_method("hush"):return
 	for key in cast_order:
 		var f:=figure(key)
@@ -953,7 +1122,11 @@ func subject_of(words:String,about:="")->String:
 
 ## They walk in from the side (the threshold) once the stage has a size.
 func arrive(keys:Array)->void:
-	for key in keys:event("enter",{"who":String(key)})
+	for key in keys:
+		event("enter",{"who":String(key)})
+		# The director sent them in by the wrong side.
+		var f:=figure(String(key))
+		if f!=null and not _directed(String(key),"enter_wrong").is_empty():f.wrong_side=true
 	for key in keys:
 		if has_figure(String(key)) and not String(key) in _arrivals:_arrivals.append(String(key))
 	if _laid_out:_run_arrivals()
@@ -978,15 +1151,30 @@ func _run_arrivals()->void:
 ##  "led"   no bow, darkened, taken out quickly (cast out, seized, maimed);
 ##  "fall"  put to death: they sink and are gone where they stood;
 ##  "stay"  nobody leaves.
-func conclude(delay:float=1.4,style:="bow")->void:
+func conclude(delay:float=1.4,style:="bow",reaction:="")->void:
 	if style=="stay":return
-	event("exit",{"who":MAIN,"style":style})
+	event("exit",{"who":MAIN,"style":style,"reaction":reaction})
+	# How the director has them go: backing out bowing (into the door post),
+	# or storming off and coming back for what they left (the bearer, who
+	# stays put until then).
+	var main_style:=style
+	var left_behind:=""
+	if not _directed(MAIN,"back_out_bowing").is_empty():main_style="backward_bump" if not _directed(MAIN,"bump_post").is_empty() else "backward"
+	var back_for:=_directed(MAIN,"come_back_for")
+	if not back_for.is_empty() or not _directed(MAIN,"come_back").is_empty():
+		main_style="storm_back"
+		left_behind=String(back_for.get("at",""))
 	var index:=0
 	for key in cast_order.duplicate():
 		var f:=figure(key)
 		if f==null or f.leaving or not f.role in [MAIN,"attendant"]:continue
 		# Their company is not struck down with them: they are sent away.
 		var own:=style if f.role==MAIN or style!="fall" else "led"
+		if f.role==MAIN:own=main_style
+		elif key==left_behind:
+			f.leave(-1.0,maxf(size.x*.4,f.size.x*2.0) if f.body3d==null else f.home.x+f.size.x,delay+5.2,"storm")
+			index+=1
+			continue
 		var distance:=maxf(size.x*.4,f.size.x*2.0)
 		if f.body3d!=null:distance=f.home.x+f.size.x
 		f.leave(-1.0,distance,delay+index*0.2,own)
@@ -1445,6 +1633,14 @@ class Figure extends Control:
 	var lift:=0.0
 	var stroll:=0.0:
 		set(value):stroll=value;_sync()
+	## A small step off their mark (spot-local metres): hiding behind someone,
+	## edging forward, making room. Tweened out and back.
+	var nudge:=Vector3.ZERO:
+		set(value):nudge=value;_sync()
+	## The director sent them in by the wrong side (they stop, lost, then
+	## hurry round to their mark).
+	var wrong_side:=false
+	var _step:Tween
 	var _path:=PackedVector3Array()
 	var _act:Tween
 	var _shift:Tween
@@ -1487,7 +1683,7 @@ class Figure extends Control:
 		if body3d==null or not is_instance_valid(body3d) or _stage==null:return
 		if spot!=null:
 			var at:=_path_at(stroll)
-			body3d.position=Vector3(at.x,lift-sink,at.z)
+			body3d.position=Vector3(at.x,lift-sink,at.z)+nudge
 			_track()
 			return
 		var stage:=_stage.get_ref() as Control
@@ -1563,7 +1759,9 @@ class Figure extends Control:
 
 	func _stroll_in(delay:float)->void:
 		var stage:=_stage.get_ref() as Control
-		_path=_route(spot.to_local(stage.set_point("door")))
+		if wrong_side and not Motion.reduced():
+			_stroll_in_wrong(delay);return
+		_path=_route(spot.to_local(_door(stage,0)))
 		stroll=1.0
 		modulate.a=1.0
 		if Motion.reduced():
@@ -1578,10 +1776,50 @@ class Figure extends Control:
 		_move.tween_method(_stroll_step.bind(true),1.0,0.0,time)
 		_move.tween_callback(_settle_in)
 
+	## The set's door (0) and the way out beyond it (1) (M's door_points).
+	func _door(stage:Control,which:int)->Vector3:
+		var court:Variant=stage.get("court_set")
+		if court is Node3D and (court as Node3D).has_method("door_points"):
+			var points:Array=(court as Node3D).call("door_points")
+			if points.size()>which:return points[which]
+		return stage.set_point("door" if which==0 else "door_out")
+
+	## In by the wrong side: from the far side of the hall, a few steps in,
+	## a stop and a look about (someone points), then round to their mark.
+	func _stroll_in_wrong(delay:float)->void:
+		var stage:=_stage.get_ref() as Control
+		var door:=_door(stage,0)
+		var mine:=spot.global_position
+		var wrong:=Vector3(2.0*mine.x-door.x,door.y,door.z)
+		_path=_route(spot.to_local(wrong))
+		stroll=1.0
+		var pace:float=float(Self.Figure3D.WALK_SPEED.walk_in)*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+		var first:=_path_at(0.98)-_path_at(1.0)
+		body3d.rotation.y=atan2(first.x,first.z)
+		_clip("walk_in",0.0,0.0)
+		_move=create_tween()
+		if delay>0.0:_move.tween_interval(delay)
+		var lost:=0.6
+		_move.tween_method(_stroll_step.bind(true),1.0,lost,clampf(_path_length()*(1.0-lost)/maxf(pace,0.1),0.6,3.0))
+		_move.tween_callback(func()->void:_clip(rest_clip,0.3);body3d.face(rest_yaw+60.0,0.4))
+		_move.tween_interval(0.7)
+		_move.tween_callback(func()->void:body3d.face(rest_yaw-50.0,0.5))
+		_move.tween_interval(0.9)
+		# Round to their mark, hurrying.
+		_move.tween_callback(func()->void:
+			var here:=_path_at(stroll)
+			_path=_route(here)
+			stroll=1.0
+			_clip("walk_in",0.25,0.0))
+		_move.tween_method(_stroll_step.bind(true),1.0,0.0,1.4)
+		_move.tween_callback(func()->void:wrong_side=false;_settle_in())
+
 	func _stroll_out(delay:float,style:String)->void:
 		if _act and _act.is_valid():_act.kill()
 		var stage:=_stage.get_ref() as Control
-		_path=_route(spot.to_local(stage.set_point("door_out")))
+		_path=_route(spot.to_local(_door(stage,1)))
+		if style in ["backward","backward_bump","storm_back"] and not Motion.reduced():
+			_stroll_out_acted(delay,style);return
 		_move=create_tween()
 		if delay>0.0:_move.tween_interval(delay)
 		if Motion.reduced():
@@ -1610,6 +1848,83 @@ class Figure extends Control:
 		var time:=clampf(_path_length()/maxf(pace,0.1),1.2,7.0)
 		_move.tween_method(_stroll_step.bind(false),0.0,1.0,time)
 		_move.tween_callback(_vanish)
+
+	## Walking backward: they keep facing the hall (no turn with the path).
+	func _back_step(value:float)->void:
+		stroll=value
+
+	## The exits the director acts out:
+	##  "backward"       backing away bowing, a couple of metres, then out;
+	##  "backward_bump"  the same, into the door post: a jolt, a bow to the
+	##                   post, then out;
+	##  "storm_back"     storming off, stopping short at the door, coming back
+	##                   to their mark for what they left, and out again.
+	func _stroll_out_acted(delay:float,style:String)->void:
+		var whole:=maxf(_path_length(),0.5)
+		var walk_pace:float=float(Self.Figure3D.WALK_SPEED.walk_out)*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+		_move=create_tween()
+		if delay>0.0:_move.tween_interval(delay)
+		if style.begins_with("backward"):
+			var back:=clampf(2.2/whole,0.15,0.6)
+			_move.tween_callback(func()->void:body3d.face(rest_yaw*.3,0.25);_clip("bow",0.3,0.0))
+			# Bowing all the way, a bow and a half-step, and another.
+			var bows:=3
+			for i in bows:
+				_move.tween_method(_back_step,back*float(i)/float(bows),back*float(i+1)/float(bows),0.8)
+				_move.tween_callback(func()->void:_clip("bow",0.2,0.25))
+			if style=="backward_bump":
+				# Into the post: a jolt forward, a look round, a bow to the post.
+				_move.tween_property(self,"nudge",Vector3(0.0,0.0,0.12),0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				_move.tween_property(self,"nudge",Vector3.ZERO,0.2)
+				_move.tween_callback(func()->void:
+					var ahead:=_path_at(minf(back+0.05,1.0))-_path_at(back)
+					body3d.rotation.y=atan2(ahead.x,ahead.z)
+					_clip("bow",0.2,0.0))
+				_move.tween_interval(1.1)
+			_move.tween_callback(func()->void:_clip("walk_out",0.35,0.0))
+			_move.tween_method(_stroll_step.bind(false),back,1.0,clampf(whole*(1.0-back)/maxf(walk_pace,0.1),0.8,6.0))
+			_move.tween_callback(_vanish)
+			return
+		# Storming off, then back for what they left.
+		var stride:float=float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+		var door:=0.82
+		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_method(_stroll_step.bind(false),0.0,door,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
+		_move.tween_callback(func()->void:_clip(rest_clip,0.25))
+		_move.tween_interval(0.6)
+		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_method(_stroll_step.bind(true),door,0.0,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
+		# Snatched up: their stance (and its prop) for a moment.
+		_move.tween_callback(func()->void:body3d.face(rest_yaw,0.2);_clip(rest_clip,0.2))
+		_move.tween_interval(0.7)
+		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_method(_stroll_step.bind(false),0.0,1.0,clampf(whole/maxf(stride,0.1),0.8,5.0))
+		_move.tween_callback(_vanish)
+
+	## A small step to a point in the hall (world), and back after a while.
+	func step_to(world:Vector3,time:float,back_after:float)->void:
+		if spot==null or body3d==null or leaving or not is_inside_tree():return
+		if _step and _step.is_valid():_step.kill()
+		var local:=spot.to_local(world)-_path_at(stroll)
+		local.y=0.0
+		if local.length()>1.2:local=local.normalized()*1.2
+		_step=create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		_step.tween_property(self,"nudge",local,maxf(time,0.15))
+		if back_after>0.0:
+			_step.tween_interval(back_after)
+			_step.tween_property(self,"nudge",Vector3.ZERO,0.6)
+
+	## They turn to someone and bow to them, deeply (the wrong one); turned
+	## back to the god after.
+	func bow_toward(world:Vector3)->void:
+		if body3d==null or leaving:return
+		if _act and _act.is_valid():_act.kill()
+		var way:=world-body3d.global_position
+		var yaw:=rad_to_deg(atan2(way.x,way.z))
+		if body3d.get_parent() is Node3D:yaw-=rad_to_deg((body3d.get_parent() as Node3D).global_rotation.y)
+		body3d.face(yaw,0.3)
+		_clip("bow",0.3,0.0)
+		_later(2.2,func()->void:body3d.face(rest_yaw,0.4);_clip(rest_clip,0.4))
 
 	func _clip(name:String,blend:=0.3,at:=-1.0)->void:
 		if body3d!=null and is_instance_valid(body3d):body3d.play(name,blend,at)
@@ -1853,6 +2168,9 @@ class Figure extends Control:
 	var exit_style:=""
 	func leave(side:float,distance:float,delay:float=0.0,style:="bow")->void:
 		leaving=true;exit_style=style
+		if spot==null:
+			if style.begins_with("backward"):style="bow"
+			elif style=="storm_back":style="storm"
 		if not is_inside_tree():return
 		if _move and _move.is_valid():_move.kill()
 		if _lean and _lean.is_valid():_lean.kill()
@@ -1900,6 +2218,7 @@ class Figure extends Control:
 		if body3d!=null and is_instance_valid(body3d):
 			if leaving:
 				if spot==null and exit_style!="fall":walk=-maxf(home.x+size.x,1.0)
+				nudge=Vector3.ZERO
 				_vanish()
 			elif spot!=null and stroll!=0.0:
 				stroll=0.0;_settle_in()
@@ -2217,6 +2536,21 @@ class Bubble extends Control:
 		## Ends any entrance at once (used when everything is shown at once).
 		if _tween and _tween.is_valid():_tween.custom_step(10.0)
 
+	## The words of the terrified shake a little (never what they say): each
+	## letter's line jitters about a pixel at about eleven times a second for
+	## a while, then settles.
+	var _shake:Tween
+	func tremble(amount:float,seconds:float)->void:
+		if label==null or not is_inside_tree() or Motion.reduced():return
+		if _shake and _shake.is_valid():_shake.kill()
+		var base:=label.position
+		var reach:=0.6+1.2*clampf(amount,0.0,1.0)
+		var rng:=RandomNumberGenerator.new();rng.seed=hash(text)
+		_shake=create_tween()
+		for i in clampi(int(seconds*11.0),4,80):
+			_shake.tween_property(label,"position",base+Vector2(rng.randf_range(-reach,reach),rng.randf_range(-reach,reach)*0.7),1.0/11.0)
+		_shake.tween_property(label,"position",base,0.12)
+
 # =================================================================================
 
 class Rays extends Control:
@@ -2241,3 +2575,81 @@ class Rays extends Control:
 			draw_polygon(points,colours)
 		var glow:=Rect2(target.position-Vector2(18,10),target.size+Vector2(36,20))
 		draw_rect(glow,Color(gold,.10))
+
+# =================================================================================
+
+class Glyph extends Control:
+	## A noise made visible: a tiny wordless bubble, ink on paper (the icon
+	## engine's manner: a disc and a few strokes). glyph: zzz, cough, growl,
+	## creak, gulp, snort, clatter, thump, clap, yawn, gasp, bleat, whimper,
+	## slap; anything else is three dots.
+	var glyph:="dots"
+
+	func _init()->void:
+		mouse_filter=Control.MOUSE_FILTER_IGNORE
+		size=Vector2(34.0,30.0)
+
+	func _draw()->void:
+		var c:=size*0.5
+		var ink:=Color("3b2f22")
+		draw_circle(c,13.0,Color(Self.ASIDE_PAPER,0.94))
+		draw_arc(c,13.0,0.0,TAU,28,Color(ink,0.75),1.5,true)
+		var w:=1.8
+		match glyph:
+			"zzz":
+				for i in 3:
+					var o:=c+Vector2(-6.0+i*4.5,4.0-i*4.5)
+					var k:=2.2+i*0.6
+					draw_polyline(PackedVector2Array([o+Vector2(-k,-k),o+Vector2(k,-k),o+Vector2(-k,k),o+Vector2(k,k)]),ink,w,true)
+			"cough":
+				draw_circle(c+Vector2(-2,1),3.5,ink)
+				for i in 6:
+					var a:=TAU*float(i)/6.0-0.4
+					draw_line(c+Vector2(-2,1)+Vector2(cos(a),sin(a))*5.5,c+Vector2(-2,1)+Vector2(cos(a),sin(a))*9.0,ink,w,true)
+			"growl":
+				for row in 2:
+					var pts:=PackedVector2Array()
+					for i in 9:pts.append(c+Vector2(-8.0+i*2.0,-3.0+row*6.0+(1.6 if i%2==0 else -1.6)))
+					draw_polyline(pts,ink,w,true)
+			"creak":
+				draw_polyline(PackedVector2Array([c+Vector2(-8,2),c+Vector2(-4,-4),c+Vector2(0,3),c+Vector2(4,-4),c+Vector2(8,2)]),ink,w,true)
+			"gulp":
+				draw_circle(c+Vector2(0,3),4.5,ink)
+				draw_colored_polygon(PackedVector2Array([c+Vector2(-3.8,1.5),c+Vector2(3.8,1.5),c+Vector2(0,-8)]),ink)
+			"snort":
+				draw_line(c+Vector2(-7,-2),c+Vector2(-2,-2),ink,w+0.4,true)
+				draw_line(c+Vector2(2,-2),c+Vector2(7,-2),ink,w+0.4,true)
+				draw_arc(c+Vector2(0,3),5.0,0.2,PI-0.2,10,ink,w,true)
+			"clatter":
+				for i in 3:draw_line(c+Vector2(-6+i*6,-8),c+Vector2(-4+i*6,-3),ink,w,true)
+				draw_arc(c+Vector2(0,4),6.0,0.0,PI,12,ink,w,true)
+			"thump":
+				for i in 8:
+					var a:=TAU*float(i)/8.0
+					draw_line(c+Vector2(cos(a),sin(a))*3.0,c+Vector2(cos(a),sin(a))*(9.0 if i%2==0 else 6.0),ink,w,true)
+			"clap":
+				draw_arc(c+Vector2(-3,0),6.0,-1.2,1.2,10,ink,w,true)
+				draw_arc(c+Vector2(3,0),6.0,PI-1.2,PI+1.2,10,ink,w,true)
+			"yawn":
+				var pts:=PackedVector2Array()
+				for i in 17:
+					var a:=TAU*float(i)/16.0
+					pts.append(c+Vector2(cos(a)*4.5,sin(a)*7.5))
+				draw_polyline(pts,ink,w,true)
+			"gasp":
+				draw_arc(c+Vector2(-1,1),5.5,0.0,TAU,18,ink,w+0.4,true)
+				draw_arc(c+Vector2(7,-6),1.8,0.0,TAU,8,ink,w,true)
+			"bleat":
+				var pts:=PackedVector2Array()
+				for i in 9:pts.append(c+Vector2(-8.0+i*2.0,sin(float(i)*1.4)*3.0))
+				draw_polyline(pts,ink,w,true)
+				draw_circle(c+Vector2(8,-5),1.8,ink)
+			"whimper":
+				draw_arc(c+Vector2(0,-2),7.0,0.3,PI-0.3,12,ink,w,true)
+				draw_line(c+Vector2(-5,4),c+Vector2(-3,8),ink,w,true)
+			"slap":
+				for i in 5:
+					var a:=TAU*float(i)/5.0-PI*0.5
+					draw_line(c,c+Vector2(cos(a),sin(a))*8.5,ink,w,true)
+			_:
+				for i in 3:draw_circle(c+Vector2(-6.0+i*6.0,1.0),1.9,ink)
