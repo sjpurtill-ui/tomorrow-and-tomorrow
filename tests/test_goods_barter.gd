@@ -51,6 +51,8 @@ func before_test()->void:
 	GameState.simulation_metrics["labor_efficiency"]=0.8
 	# No arms in any old armoury unless a test puts them there.
 	_clear_armoury("player")
+	# Flint and stone in store: spears and bows are within the makers' reach.
+	GameState.resource_stockpiles.merge({"Flint":20.0,"Stone":20.0},true)
 	for id:String in ids: _clear_armoury(id)
 
 func after_test()->void:
@@ -427,6 +429,8 @@ func test_arms_cost_per_fighter_is_high_and_rises_with_the_age()->void:
 	assert_float(float(cost.worth_goods)).is_greater(8.0)
 	assert_float(float(cost.worth_rations)).is_between(40.0,80.0)
 	assert_float(Arms.weapons_quality()).is_equal(1.0)
+	# Bronze learned, with copper and tin in store.
+	GameState.resource_stockpiles.merge({"Copper Ore":50.0,"Tin Ore":10.0,"Timber":50.0,"Fiber Plants":50.0},true)
 	GameState.known_discoveries.append("bronze_weaponry"); GameState.discovery_adoption["bronze_weaponry"]=0.5
 	var bronze:=Arms.cost_per_fighter()
 	assert_float(float(bronze.maker_days)).is_equal(16.0)
@@ -437,38 +441,43 @@ func test_arms_cost_per_fighter_is_high_and_rises_with_the_age()->void:
 func test_the_weapons_stock_api_for_the_military()->void:
 	_work("player","Defense",30)
 	_stores("player",{Arms.GOOD:12.0})
-	# The old armoury's spears and bows count as held for the watch: nothing moved.
+	# The old armoury's spears and bows count as held: nothing moved.
 	MilitaryCampaign.military_inventory["spear"]=5
 	MilitaryCampaign.military_inventory["bow"]=2
 	MilitaryCampaign.military_inventory["improvised"]=40
 	assert_int(Arms.weapons_held()).is_equal(19)
-	assert_int(Arms.arms_wanted()).is_equal(11)
-	# Until the military takes any, the watch carries none.
+	# Held for the watch's own kit: the made sets and the armoury's of it.
+	var kit:=Arms.kit_item()
+	assert_int(Arms.weapons_held(kit)).is_equal(12+int(MilitaryCampaign.military_inventory.get(kit,0)))
+	assert_int(Arms.arms_wanted()).is_equal(30-Arms.weapons_held(kit))
+	# The watch carries what its formations carry: none yet.
 	assert_int(Arms.weapons_issued()).is_equal(0)
-	# Taken: made sets first, then the old armoury, the cheapest kit first.
+	# Taken with no kit named: made sets first, then the old armoury, the cheapest kit first.
 	var cheaper:="spear" if Arms._kit_worth("spear")<Arms._kit_worth("bow") else "bow"
 	var dearer:="bow" if cheaper=="spear" else "spear"
 	var dearer_count:=int(MilitaryCampaign.military_inventory[dearer])
-	assert_int(Arms.take_weapons(12+int(MilitaryCampaign.military_inventory[cheaper]))).is_equal(12+(5 if cheaper=="spear" else 2))
+	var first:=12+int(MilitaryCampaign.military_inventory[cheaper])
+	assert_int(Arms.take_weapons(first)).is_equal(first)
 	assert_float(_stock("player",Arms.GOOD)).is_equal(0.0)
 	assert_int(int(MilitaryCampaign.military_inventory[cheaper])).is_equal(0)
 	assert_int(int(MilitaryCampaign.military_inventory[dearer])).is_equal(dearer_count)
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(40)
-	var issued:=Arms.weapons_issued()
 	assert_int(Arms.weapons_held()).is_equal(dearer_count)
-	assert_int(Arms.arms_wanted()).is_equal(11)
-	# Never more than is held.
+	# Never more than is held; the arms record counts what passed.
 	assert_int(Arms.take_weapons(50)).is_equal(dearer_count)
 	assert_int(Arms.weapons_held()).is_equal(0)
-	assert_int(Arms.weapons_issued()).is_equal(19)
-	# Back into store, or lost with the fallen.
+	assert_float(float(Arms.record().issued)).is_equal(19.0)
+	# Made sets back into store (never more than the record took), or lost with the fallen.
 	assert_int(Arms.return_weapons(5)).is_equal(5)
 	assert_int(Arms.weapons_held()).is_equal(5)
 	assert_int(Arms.lose_weapons(4)).is_equal(4)
-	assert_int(Arms.weapons_issued()).is_equal(10)
+	assert_float(float(Arms.record().issued)).is_equal(10.0)
+	assert_float(float(Arms.record().lost)).is_equal(4.0)
 	assert_int(Arms.return_weapons(100)).is_equal(10)
-	assert_int(Arms.weapons_issued()).is_equal(0)
-	assert_int(issued).is_greater(0)
+	assert_float(float(Arms.record().issued)).is_equal(0.0)
+	# A kit named goes back to the armoury, as that kit (never traded).
+	assert_int(Arms.return_weapons(3,"bow")).is_equal(3)
+	assert_int(int(MilitaryCampaign.military_inventory.bow)).is_equal(3)
 
 
 func test_taking_arms_is_exact_with_part_sets()->void:

@@ -87,8 +87,9 @@ func prepare()->void:
 				var weapon:=String(order.weapon)
 				var required:int=host._equipment_required_for(String(order.unit),int(order.count))
 				var held:int=order.get("reserved_equipment",0)
-				var take:=mini(maxi(0,required-held),maxi(0,int(host.military_inventory.get(weapon,0))))
-				order.reserved_equipment=held+take;host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))-take
+				# Reserved from what is held for the kit (watch_military.gd: made sets, then the armoury).
+				var take:=int(preload("res://scripts/watch_military.gd").take_weapons(host,maxi(0,required-held),weapon))
+				order.reserved_equipment=held+take
 func status(id:int,slot:int)->Dictionary:
 	return _status(line(id),orders(id,slot))
 func _status(item:Dictionary,jobs:Array[Dictionary])->Dictionary:
@@ -200,7 +201,7 @@ func cancel_slot(id:int,slot:int)->Dictionary:
 	if item.is_empty() or slot not in item.slots:return {"error":"That band is no longer in training."}
 	for order:Dictionary in orders(id,slot):
 		var weapon:=String(order.weapon)
-		host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+int(order.get("reserved_equipment",0))
+		preload("res://scripts/watch_military.gd").return_weapons(host,int(order.get("reserved_equipment",0)),weapon)
 		host.training_queue.erase(order)
 	item.slots.erase(slot)
 	return {"ok":true,"message":"One band stood down. Its recruits went home; its gear went back to the stores."}
@@ -210,7 +211,7 @@ func cancel(id:int)->Dictionary:
 	for slot in item.slots:
 		for order:Dictionary in orders(id,int(slot)):
 			var weapon:=String(order.weapon)
-			host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+int(order.get("reserved_equipment",0))
+			preload("res://scripts/watch_military.gd").return_weapons(host,int(order.get("reserved_equipment",0)),weapon)
 			# Cancellation releases these draftees to civilian life, not another queue.
 			host.training_queue.erase(order)
 	data.lines.erase(item)

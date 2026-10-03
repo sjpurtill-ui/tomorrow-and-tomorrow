@@ -533,7 +533,7 @@ func retrain_formation(formation_id:int,unit:String,weapon:String)->Dictionary:
 	var retained_experience:=clampf(float(formation.get("experience",0.0)),0.0,1.0)
 	var old_weapon:=String(formation.get("weapon","improvised"))
 	var returned_gear:=int(formation.get("equipment",0))
-	military_inventory[old_weapon]=int(military_inventory.get(old_weapon,0))+returned_gear
+	preload("res://scripts/watch_military.gd").return_weapons(self,returned_gear,old_weapon)
 	var ammunition_type:=_ammunition_type_for(old_weapon)
 	var returned_ammunition:=int(formation.get("ammunition",0)) if ammunition_type!="" else 0
 	if returned_ammunition>0: military_consumables[ammunition_type]=int(military_consumables.get(ammunition_type,0))+returned_ammunition
@@ -557,7 +557,7 @@ func cancel_training(order_id:int)->Dictionary:
 			if int(member.get("id",-1))!=order_id and (batch<0 or int(member.get("build_batch",-1))!=batch):continue
 			returned+=maxi(0,int(member.get("count",0)))
 			var weapon:=String(member.get("weapon","improvised"))
-			military_inventory[weapon]=int(military_inventory.get(weapon,0))+int(member.get("reserved_equipment",0))
+			preload("res://scripts/watch_military.gd").return_weapons(self,int(member.get("reserved_equipment",0)),weapon)
 			training_queue.remove_at(index)
 		aggregate_recruits+=returned
 		if batch>=0:cancel_template_recruitment(batch)
@@ -1002,7 +1002,7 @@ func remove_occupation_force(civ_id:String,region_id:String,return_survivors:boo
 		for formation in force.get("formations",[]):
 			var weapon:=String(formation.get("weapon","improvised"))
 			var equipment:=maxi(0,int(formation.get("equipment",0)))
-			if equipment>0: military_inventory[weapon]=int(military_inventory.get(weapon,0))+equipment; returned_equipment[weapon]=int(returned_equipment.get(weapon,0))+equipment
+			if equipment>0: preload("res://scripts/watch_military.gd").return_weapons(self,equipment,weapon); returned_equipment[weapon]=int(returned_equipment.get(weapon,0))+equipment
 			var ammunition_type:=_ammunition_type_for(weapon)
 			var ammunition:=maxi(0,int(formation.get("ammunition",0)))
 			if ammunition_type!="" and ammunition>0: military_consumables[ammunition_type]=int(military_consumables.get(ammunition_type,0))+ammunition
@@ -4171,7 +4171,7 @@ func _refit_to_ledger()->void:
 			var required:int=_equipment_required_for(String(formation.get("unit","levy")),authorized) if force_index==0 else simulator.equipment_required_for_weapon(weapon,authorized)
 			var equipment:=int(formation.get("equipment",0))
 			if equipment>required:
-				military_inventory[weapon]=int(military_inventory.get(weapon,0))+equipment-required
+				preload("res://scripts/watch_military.gd").return_weapons(self,equipment-required,weapon)
 				formation["equipment"]=required
 			formation["equipment_required"]=required
 			var rounds_required:=_ammunition_required_for(weapon,required)
@@ -5347,6 +5347,8 @@ func _process_military_day()->void:
 	# A multi-day step (day_span.gd) delivers `span` days of convoy capacity.
 	var delivery_bank_cap:=maxf(10.0,daily_delivery_capacity*maxf(3.0,WorldSimulation.span))
 	var available_delivery_load:=minf(delivery_bank_cap,maxf(0.0,float(home_army.get("delivery_load_bank",0.0)))+daily_delivery_capacity*WorldSimulation.span)
+	# Those at home with what comes to hand take up the made kit as made sets come.
+	preload("res://scripts/watch_military.gd").rekit_for_made(self)
 	var delivered:=_deliver_inventory_replacements(available_delivery_load)
 	var equipment_load_used:=float(home_army.get("equipment_delivery_load_used",0.0))
 	var remaining_delivery_load:=maxf(0.0,available_delivery_load-equipment_load_used)
@@ -5573,15 +5575,17 @@ func _deliver_inventory_replacements(delivery_limit:float)->int:
 		if remaining_capacity<=0.0001: break
 		var formation:Dictionary=formations[index]
 		var item:=String(formation.get("weapon","improvised"))
-		var available:=int(military_inventory.get(item,0))
+		# Held for this kit: made sets (for the watch's own kit) and the armoury's.
+		var available:int=preload("res://scripts/watch_military.gd").weapons_held(self,item)
 		var required:=int(formation.get("equipment_required",formation.get("authorized_count",formation.get("count",0))))
 		var missing:=maxi(0,required-int(formation.get("equipment",0)))
 		var item_load:=_equipment_delivery_load(item)
 		var transfer:=mini(mini(available,missing),floori((remaining_capacity+0.000001)/item_load))
 		if transfer<=0: continue
+		transfer=preload("res://scripts/watch_military.gd").take_weapons(self,transfer,item)
+		if transfer<=0: continue
 		formation["equipment"]=int(formation.get("equipment",0))+transfer
 		formations[index]=formation
-		military_inventory[item]=available-transfer
 		delivered+=transfer
 		remaining_capacity-=float(transfer)*item_load
 	home_army["formations"]=formations
@@ -5638,7 +5642,7 @@ func _next_equipment_delivery_load()->float:
 	var next_load:=INF
 	for formation in home_army.get("formations",[]):
 		var item:=String(formation.get("weapon","improvised"))
-		if int(military_inventory.get(item,0))<=0: continue
+		if int(preload("res://scripts/watch_military.gd").weapons_held(self,item))<=0: continue
 		var required:=int(formation.get("equipment_required",formation.get("authorized_count",formation.get("count",0))))
 		if int(formation.get("equipment",0))<required: next_load=minf(next_load,_equipment_delivery_load(item))
 	return 0.0 if is_inf(next_load) else next_load
@@ -5941,7 +5945,7 @@ func _process_training_day()->void:
 			training["count"]=int(training.count)-injuries
 			training_injury_pool+=injuries
 		if int(training.count)<=0:
-			military_inventory[weapon]=int(military_inventory.get(weapon,0))+int(training.get("reserved_equipment",0))
+			preload("res://scripts/watch_military.gd").return_weapons(self,int(training.get("reserved_equipment",0)),weapon)
 			training_queue.remove_at(index)
 			continue
 		if float(training.progress_days)<float(training.required_days):
@@ -6054,8 +6058,9 @@ func _complete_training(training:Dictionary)->void:
 		var reinforcement_target:Dictionary=formations[target_index]
 		equipment_needed=maxi(0,int(reinforcement_target.get("equipment_required",_equipment_required_for(String(training.unit),int(reinforcement_target.get("authorized_count",reinforcement_target.get("count",0))))))-int(reinforcement_target.get("equipment",0)))
 	var reserved:=int(training.get("reserved_equipment",0))
-	var issued:=mini(equipment_needed,reserved+(0 if training.has("deployment_line") else int(military_inventory.get(weapon,0))))
-	military_inventory[weapon]=int(military_inventory.get(weapon,0))+reserved-issued
+	var from_reserve:=mini(equipment_needed,reserved)
+	var issued:=from_reserve+(0 if training.has("deployment_line") else preload("res://scripts/watch_military.gd").take_weapons(self,equipment_needed-from_reserve,weapon))
+	if reserved>from_reserve: preload("res://scripts/watch_military.gd").return_weapons(self,reserved-from_reserve,weapon)
 	var new_training:=_training_quality(String(training.unit),retained_experience)*equipment_training_factor*clampf(float(training.get("progress_days",training.get("required_days",1)))/maxf(1,float(training.get("required_days",1))),0,1)
 	if training.has("prior_skill"):new_training=maxf(new_training,float(training.prior_skill))
 	if target_index>=0:
