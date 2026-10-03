@@ -1,7 +1,7 @@
 shader_type spatial;
 // A spark rising from the fire: a tiny bright point that cools as it climbs
 // (COLOR.a is what is left of its life).
-render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
+render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled, fog_disabled;
 
 uniform vec3 hot : source_color = vec3(1.0, 0.78, 0.38);
 uniform vec3 cold : source_color = vec3(0.9, 0.25, 0.05);

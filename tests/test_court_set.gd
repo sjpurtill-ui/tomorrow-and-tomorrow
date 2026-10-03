@@ -273,6 +273,154 @@ func test_the_rig_takes_the_stage_s_camera_and_shots_by_name()->void:
 	assert_bool((made.get("rig") as Node).call("is_moving")).is_true()
 
 
+## The fire as the camera sees it: points on a cylinder about the hearth's flames.
+func _fire_points(made:Node3D)->PackedVector3Array:
+	var info:Dictionary=made.get("info")
+	var fire:Dictionary=(info.get("fx",{}) as Dictionary).get("fire",{})
+	var at:=CourtSet._vec(fire.get("pos",[0,0,0]))
+	var size:=float(fire.get("size",1.0))
+	var out:=PackedVector3Array()
+	for k in 12:
+		var a:=TAU*float(k)/12.0
+		for y in [0.0,0.7*size,1.4*size]:
+			out.append(at+Vector3(cos(a)*0.55*size,y,sin(a)*0.55*size))
+	return out
+
+
+func _screen_rect(lens:Camera3D,points:PackedVector3Array)->Rect2:
+	var r:=Rect2(lens.unproject_position(points[0]),Vector2.ZERO)
+	for p in points:r=r.expand(lens.unproject_position(p))
+	return r
+
+
+func _petitioner_box(lens:Camera3D,at:Vector3)->Rect2:
+	var right:=lens.global_transform.basis.x
+	right.y=0.0;right=right.normalized()
+	var pts:=PackedVector3Array()
+	for y in [0.05,0.9,1.75]:
+		for s in [-0.3,0.3]:pts.append(at+Vector3(0,y,0)+right*s)
+	return _screen_rect(lens,pts)
+
+
+func test_the_hearth_is_never_behind_or_before_the_petitioner()->void:
+	for kind:String in KINDS:
+		for spec in [[1318,330,"wide"],[1536,864,"wide"],[1318,330,"push_in"],[1536,864,"push_in"]]:
+			var built:=_strip_view(kind,int(spec[0]),int(spec[1]))
+			var made:Node3D=built[1]
+			var rig:Node=made.get("rig")
+			var lens:Camera3D=made.get("camera")
+			rig.call("set_insets",40.0,40.0)
+			var body:=Node3D.new();made.add_child(body)
+			made.call("place",body,"petitioner")
+			var subjects:Array=[body]
+			for key in ["officials_0","officials_1","officials_2","officials_3"]:subjects.append((made.call("mark",key) as Marker3D).position)
+			rig.call("wide",subjects,0.0,body)
+			if String(spec[2])=="push_in":rig.call("push_in",body,0.0)
+			var at:=body.global_position
+			# nothing of the fire lies between the lens and the petitioner's torso
+			var fire:=_fire_points(made)
+			var info:Dictionary=made.get("info")
+			var centre:=CourtSet._vec(((info.get("fx",{}) as Dictionary).get("fire",{}) as Dictionary).get("pos",[0,0,0]))
+			for y in [0.9,1.3]:
+				var torso:=at+Vector3(0,y,0)
+				for i in 40:
+					var p:=lens.global_position.lerp(torso,float(i)/39.0)
+					var flat:=Vector2(p.x-centre.x,p.z-centre.z).length()
+					assert_bool(flat<0.75 and p.y<1.6).override_failure_message("%s %s: fire between lens and torso" % [kind,spec]).is_false()
+			# and on the screen the fire stands clear of the petitioner
+			var fire_rect:=_screen_rect(lens,fire)
+			var body_rect:=_petitioner_box(lens,at)
+			assert_bool(fire_rect.intersects(body_rect)).override_failure_message("%s %s: fire %s overlaps petitioner %s" % [kind,spec,fire_rect,body_rect]).is_false()
+
+
+## A person's head and chest, as the camera sees them.
+func _upper_box(lens:Camera3D,m:Marker3D)->Rect2:
+	var right:=lens.global_transform.basis.x
+	right.y=0.0;right=right.normalized()
+	var base:=m.global_position
+	var low:=1.05;var high:=1.75
+	if bool(m.get_meta("sit",false)):
+		low=float(m.get_meta("seat",0.47))+0.35;high=float(m.get_meta("seat",0.47))+1.0
+	var pts:=PackedVector3Array()
+	for y in [low,high]:
+		for s in [-0.22,0.22]:pts.append(base+Vector3(0,y,0)+right*s)
+	return _screen_rect(lens,pts)
+
+
+func test_nobody_s_head_or_chest_is_behind_the_flames()->void:
+	var bad:=PackedStringArray()
+	for kind:String in KINDS:
+		for size in [[1318,330],[1536,864]]:
+			var built:=_strip_view(kind,int(size[0]),int(size[1]))
+			var made:Node3D=built[1]
+			var rig:Node=made.get("rig")
+			var lens:Camera3D=made.get("camera")
+			rig.call("set_insets",40.0,40.0)
+			var main:=(made.call("mark","petitioner") as Marker3D).position
+			var subjects:Array=[main]
+			for key in ["officials_0","officials_1","officials_2","officials_3","officials_4","officials_5"]:subjects.append((made.call("mark",key) as Marker3D).position)
+			rig.call("wide",subjects,0.0,main)
+			var fire:=_screen_rect(lens,_fire_points(made))
+			for m:Marker3D in made.get("marks").values():
+				var n:=String(m.name)
+				if not (n=="petitioner" or n.begins_with("officials_") or n.begins_with("crowd_")):continue
+				if fire.intersects(_upper_box(lens,m)):bad.append("%s %dx%d %s" % [kind,size[0],size[1],n])
+	assert_int(bad.size()).override_failure_message("behind the flames: %s" % ", ".join(bad)).is_equal(0)
+
+
+func test_the_reaction_cut_is_eye_level_on_a_third()->void:
+	var built:=_strip_view("chiefs_hall",1536,864)
+	var made:Node3D=built[1]
+	var rig:Node=made.get("rig")
+	var lens:Camera3D=made.get("camera")
+	var body:=Node3D.new();made.add_child(body)
+	made.call("place",body,"officials_0")
+	rig.call("reaction",body,0.0)
+	var head:=body.global_position+Vector3.UP*1.62
+	assert_float(absf(lens.global_position.y-head.y)).is_less(0.45)
+	var x:=lens.unproject_position(head).x/1536.0
+	assert_bool((x>0.18 and x<0.46) or (x>0.54 and x<0.82)).override_failure_message("head at %.2f of the width" % x).is_true()
+
+
+func test_quality_low_thins_the_air_and_the_ink()->void:
+	var made:=_built("chiefs_hall")
+	made.call("set_quality","low","test")
+	assert_bool((made.get("shimmer") as Node3D).visible).is_false()
+	for p:GPUParticles3D in made.get("particles"):
+		if String(p.name)=="Smoke":assert_int(p.amount).is_less_equal(12)
+		if String(p.name)=="Dust":assert_bool(p.visible).is_false()
+	made.call("set_quality","high","test")
+	assert_bool((made.get("shimmer") as Node3D).visible).is_true()
+	assert_str(String((made.call("quality_report") as Dictionary).level)).is_equal("high")
+
+
+func test_static_pieces_are_merged()->void:
+	for kind:String in KINDS:
+		var made:=_built(kind)
+		var model:Node3D=made.get("model")
+		var meshes:=model.find_children("*","MeshInstance3D",true,false)
+		assert_bool(model.find_child("StaticInked",true,false)!=null).is_true()
+		assert_int(meshes.size()).override_failure_message("%s: %d meshes" % [kind,meshes.size()]).is_less(64)
+
+
+func test_the_season_shows()->void:
+	var made:=_built("hearth_council",{"season":"winter"})
+	assert_float(float((made.call("_ground_material") as ShaderMaterial).get_shader_parameter("snow"))).is_equal(1.0)
+	var body:=Node3D.new();made.add_child(body)
+	var puff:GPUParticles3D=made.call("add_breath",body)
+	assert_bool(puff.visible).is_true()
+	made.call("apply_facts",{"season":"summer"})
+	assert_float(float((made.call("_ground_material") as ShaderMaterial).get_shader_parameter("snow"))).is_equal(0.0)
+	assert_bool(puff.visible).is_false()
+	var flies:Array=made.get("flies")
+	assert_bool(not flies.is_empty() and (flies[0] as Node3D).visible).is_true()
+	made.call("apply_facts",{"season":"autumn"})
+	assert_bool((flies[0] as Node3D).visible).is_false()
+	assert_float(float((made.call("_ground_material") as ShaderMaterial).get_shader_parameter("leaves"))).is_equal(1.0)
+	made.call("apply_facts",{"season":"Spring"})
+	assert_float(float((made.call("_ground_material") as ShaderMaterial).get_shader_parameter("flowers"))).is_equal(1.0)
+
+
 func test_set_rests_when_hidden()->void:
 	var made:=_built("chiefs_hall")
 	made.call("set_active",false)

@@ -44,6 +44,7 @@ SLOT_COLOURS = {
     "BRONZE": (0.62, 0.42, 0.20), "TABLET": (0.66, 0.54, 0.40), "CARPET": (0.55, 0.18, 0.15),
     "GOLD": (0.8, 0.6, 0.2), "ROPE": (0.6, 0.5, 0.3), "ONION": (0.8, 0.7, 0.5),
     "FLAGS": (0.6, 0.57, 0.52), "STONE_BLOCK": (0.68, 0.63, 0.55), "STONE_DARK": (0.35, 0.33, 0.3),
+    "STONE_LICHEN": (0.55, 0.53, 0.5),
 }
 UV = "UVMap"
 
@@ -334,6 +335,45 @@ def rock(bld, name, at, size, seed=0.0, slot="STONE", flat=0.6, subdiv=2, wear=0
     bmesh.ops.transform(bm, matrix=Matrix.Translation(B(at)) @ rot, verts=bm.verts)
     bm.normal_update()
     bld.add(name, bm, slot, wear=wear)
+
+
+def standing_stone(bld, name, foot, height, width, depth, face=(0, 0, 1), seed=0.0, lean=(0.0, 0.0), slot="STONE_LICHEN"):
+    """A standing stone: a tall slab, broad faced, thinning and rounding to a
+    weathered top, its edges chipped, set a little into the ground and leaning."""
+    f = Vector(foot)
+    fwd = Vector(face).normalized()
+    side = Vector((fwd.z, 0.0, -fwd.x))
+    rings = 14
+    segs = 18
+    verts = []
+    uvs = []
+    for j in range(rings + 1):
+        v = j / rings
+        y = -0.25 + (height + 0.25) * v
+        taper = 1.0 - 0.22 * v ** 1.5
+        top = math.sqrt(max(0.0, 1.0 - ((v - 0.82) / 0.18) ** 2)) if v > 0.82 else 1.0
+        for k in range(segs + 1):
+            a = 2 * math.pi * (k % segs) / segs
+            c, sn = math.cos(a), math.sin(a)
+            # a rounded-rectangle section: broad across, thin through
+            ex = math.copysign(abs(c) ** 0.6, c) * width * 0.5 * taper * top
+            ez = math.copysign(abs(sn) ** 0.6, sn) * depth * 0.5 * taper * top
+            n = 1.0 + 0.09 * _fractal(Vector((c * 1.5 + seed, sn * 1.5, v * 3.0)), 0.7, 2.0, 3)
+            chip = 0.06 * max(0.0, _noise(Vector((c * 4.0, sn * 4.0 + seed, v * 6.0))))
+            p = f + side * ex * (n - chip) + fwd * ez * (n - chip) + Vector((lean[0] * y, y, lean[1] * y))
+            verts.append(B(p))
+            uvs.append((k / segs * (width + depth), y))
+    faces = []
+    w = segs + 1
+    for j in range(rings):
+        for k in range(segs):
+            a0 = j * w + k
+            faces.append((a0, a0 + 1, a0 + 1 + w, a0 + w))
+    faces.append(tuple(range((rings) * w, (rings) * w + segs)))
+    bm = _bm_from(verts, faces, uvs)
+    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=1e-6)
+    bm.normal_update()
+    bld.add(name, bm, slot)
 
 
 def sheet(cols, rows, fn):

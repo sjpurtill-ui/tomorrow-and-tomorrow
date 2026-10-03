@@ -51,6 +51,9 @@ var main:Variant=null
 var current_shot:="wide"
 ## Soft focus on the far background (off on a machine that cannot afford it).
 var far_blur:=true
+## Things the room shot keeps in view if it can (the dog by the fire): nodes
+## or points; only their backs (a little above the ground) are asked for.
+var also_show:Array=[]
 
 var _from:=Transform3D.IDENTITY
 var _to:=Transform3D.IDENTITY
@@ -251,11 +254,16 @@ func push_in(fig:Variant,seconds:=5.0)->void:
 	var pts:=_head_points(fig,0.62)
 	_go(frame(pts,yaw,base_pitch*0.5,base_fov*0.75,headroom*0.6),base_fov*0.75,seconds,EASE_SLOW,"push_in",_foot_of(fig))
 
-## A cut to someone as they take something in: chest up, turned to see their face.
+## A cut to someone as they take something in: at their eye level, chest up,
+## on the third of the frame that leaves room for where they look.
 func reaction(fig:Variant,time:=0.0)->void:
-	var yaw:=clampf(lerpf(base_yaw,_facing_yaw(fig),0.55),yaw_range.x,yaw_range.y)
-	var pts:=_head_points(fig,0.72)
-	_go(frame(pts,yaw,base_pitch*0.45,base_fov*0.72,headroom*0.5),base_fov*0.72,time,EASE_OUT,"reaction",_foot_of(fig))
+	var yaw:=clampf(lerpf(base_yaw,_facing_yaw(fig),0.6),yaw_range.x,yaw_range.y)
+	var pts:=_head_points(fig,0.7)
+	var basis:=Basis.from_euler(Vector3(0.0,deg_to_rad(yaw),0.0))
+	var looks:=_facing_dir(fig)
+	# they look toward screen right: stand them on the left third, and so on
+	var anchor:=-0.34 if looks.dot(basis.x)>0.0 else 0.34
+	_go(frame(pts,yaw,-2.5,base_fov*0.6,0.06,anchor),base_fov*0.6,time,EASE_OUT,"reaction",_foot_of(fig))
 
 ## Back to the room.
 func home(time:=0.9)->void:
@@ -295,7 +303,7 @@ func settle()->void:
 
 ## The transform that sees every point from this yaw and pitch through this
 ## field (across the width), inside the free part of the view, headroom left.
-func frame(points:PackedVector3Array,yaw:float,pitch:float,fov_deg:float,head_frac:=0.0)->Transform3D:
+func frame(points:PackedVector3Array,yaw:float,pitch:float,fov_deg:float,head_frac:=0.0,anchor_x:=0.0)->Transform3D:
 	var basis:=Basis.from_euler(Vector3(deg_to_rad(pitch),deg_to_rad(yaw),0.0))
 	var right:=basis.x;var up:=basis.y;var back:=basis.z
 	if points.is_empty():points=PackedVector3Array([centre])
@@ -330,7 +338,7 @@ func frame(points:PackedVector3Array,yaw:float,pitch:float,fov_deg:float,head_fr
 			var depth:=maxf(dist-rel.dot(back),0.05)
 			var nx:=rel.dot(right)/(depth*tan_h);var ny:=rel.dot(up)/(depth*tan_v)
 			lo=Vector2(minf(lo.x,nx),minf(lo.y,ny));hi=Vector2(maxf(hi.x,nx),maxf(hi.y,ny))
-		var want:=Vector2((left_n+right_n)*0.5,(bottom_n+top_n)*0.5)
+		var want:=Vector2((left_n+right_n)*0.5+anchor_x*(right_n-left_n)*0.5,(bottom_n+top_n)*0.5)
 		var shift:=(lo+hi)*0.5-want
 		target+=right*shift.x*dist*tan_h+up*shift.y*dist*tan_v
 	return Transform3D(basis,target+back*dist)
@@ -368,14 +376,14 @@ func _room_points(subjects:Array,lead:Variant,t:float,yaw:float,pitch:float)->Pa
 	var out:=PackedVector3Array()
 	var others:Array=[]
 	for s in subjects:
-		if s!=lead:others.append(s)
+		if not is_same(s,lead):others.append(s)
 	var lead_at:=_foot_of(lead) if lead!=null else centre
 	others.sort_custom(func(a:Variant,b:Variant)->bool:return _foot_of(a).distance_to(lead_at)<_foot_of(b).distance_to(lead_at))
 	var keep:=int(round(lerpf(float(others.size()),minf(3.0,float(others.size())),t)))
 	if lead!=null:
 		var foot:=_foot_of(lead);var head:=_head_of(lead)
 		out.append(head+Vector3.UP*0.1)
-		var low:=foot.lerp(head,lerpf(0.0,0.42,t))-Vector3.UP*FEET_MARGIN*(1.0-t)
+		var low:=foot.lerp(head,lerpf(0.0,0.36,t))-Vector3.UP*FEET_MARGIN*(1.0-t)
 		out.append(low)
 		out.append(low.lerp(head,0.6)+Vector3(0.32,0.0,0.0))
 		out.append(low.lerp(head,0.6)-Vector3(0.32,0.0,0.0))
@@ -384,6 +392,10 @@ func _room_points(subjects:Array,lead:Variant,t:float,yaw:float,pitch:float)->Pa
 		var foot2:=_foot_of(s);var head2:=_head_of(s)
 		out.append(head2+Vector3.UP*0.08)
 		out.append(foot2.lerp(head2,lerpf(0.0,0.86,t))-Vector3.UP*FEET_MARGIN*(1.0-t))
+	for extra in also_show:
+		# only when it is near the one before the god (a dog off at the door is not asked for)
+		if (_alive(extra) or typeof(extra)==TYPE_VECTOR3) and _foot_of(extra).distance_to(lead_at)<3.2:
+			out.append(_foot_of(extra)+Vector3.UP*0.4)
 	if out.is_empty():out.append(centre)
 	return out
 
@@ -411,6 +423,14 @@ func _focus_for(subjects:Array,lead:Variant)->Vector3:
 		var p:=_foot_of(s)
 		if p.z<furthest.z:furthest=p
 	return furthest
+
+## Which way a subject faces, flat on the ground (a figure's front is +Z).
+func _facing_dir(subject:Variant)->Vector3:
+	if typeof(subject)==TYPE_OBJECT and _alive(subject):
+		var z:=(subject as Node3D).global_transform.basis.z
+		z.y=0.0
+		if z.length()>0.01:return z.normalized()
+	return Vector3.BACK
 
 ## Which way a subject faces (a figure's front is +Z), as a camera yaw that sees its face.
 func _facing_yaw(subject:Variant)->float:

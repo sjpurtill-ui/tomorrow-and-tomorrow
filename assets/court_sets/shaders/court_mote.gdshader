@@ -1,7 +1,7 @@
 shader_type spatial;
 // A mote of dust drifting in the light: under the open sky it glints faintly
 // everywhere; in a hall it shows only inside the sun's shaft.
-render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled;
+render_mode unshaded, blend_add, depth_draw_never, cull_disabled, shadows_disabled, fog_disabled;
 
 uniform vec3 colour : source_color = vec3(1.0, 0.92, 0.75);
 uniform float brightness = 0.55;
