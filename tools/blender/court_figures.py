@@ -428,6 +428,11 @@ def _bind_garment(obj, pc, body, proxy, rig, f):
     name = pc.name
     hangs = any(t in name for t in ("robe_body", "robe_trim", "tunic_body", "tunic_trim", "hide_wrap", "mantle"))
     in_sleeve = _sleeve_vertices(obj, pc)
+    # a knee-length skirt's front follows the thighs and lies over the shins:
+    # a knee raised to kneel, sit or crouch stays under the cloth instead of
+    # coming out from under it (that skin is hidden, so the legs looked cut
+    # off at the knee). Not the long robe: its hem would split at every step.
+    front = _front_of_legs(obj, f) if hangs and name.startswith(("tunic_", "hide_")) else None
 
     def ease(co, i):
         if in_sleeve is not None and in_sleeve[i]:
@@ -440,7 +445,7 @@ def _bind_garment(obj, pc, body, proxy, rig, f):
         if hangs and z < f.z_hip:
             # below the hips a skirt moves with the hips more than either leg
             t = min(1.0, max(0.0, (f.z_hip - z) / 0.20))
-            return [("hips", 0.55 * t)]
+            return [("hips", 0.55 * t * (1.0 - 0.8 * (front[i] if front is not None else 0.0)))]
         return []
 
     if in_sleeve is not None:
@@ -451,22 +456,37 @@ def _bind_garment(obj, pc, body, proxy, rig, f):
         cf_rig.bind_from_body(obj, proxy if name != "hide_cape" else body, rig, ease=None)
     if hangs:
         cf_rig._ease_weights(obj, ease)
-        _skirt_off_shins(obj, in_sleeve)
+        _skirt_off_shins(obj, in_sleeve, front)
         cf_rig._normalize(obj)
         cf_rig.smooth_weights(obj, repeat=6, factor=0.5)
 
 
-def _skirt_off_shins(obj, in_sleeve):
+def _skirt_off_shins(obj, in_sleeve, front=None):
     """A skirt hangs from the hips and thighs: what the shins and feet held
-    goes to the thigh above them, so a knee bent forward never splits the hem."""
+    goes to the thigh above them, so a knee bent forward never splits the hem.
+    Where `front` (0..1 a vertex) is given, that share stays on the shins: a
+    skirt's front lies over the shins of someone kneeling or sitting."""
     table = cf_rig._weights_table(obj)
     for i, w in enumerate(table):
         if in_sleeve is not None and in_sleeve[i]:
             continue
+        keep = front[i] if front is not None else 0.0
         for low in [n for n in w if n.split(".")[0] in ("shin", "foot", "toe")]:
-            thigh = "thigh." + low.split(".")[-1]
-            w[thigh] = w.get(thigh, 0.0) + w.pop(low)
+            side = low.split(".")[-1]
+            val = w.pop(low)
+            w["thigh." + side] = w.get("thigh." + side, 0.0) + val * (1.0 - keep)
+            if keep > 0.0:
+                w["shin." + side] = w.get("shin." + side, 0.0) + val * keep
     cf_rig._write_table(obj, table)
+
+
+def _front_of_legs(obj, f):
+    """How much each vertex is the garment's front (1 straight ahead of the
+    legs, fading to 0 by the sides), below the hips only."""
+    co = np.array([v.co[:] for v in obj.data.vertices], dtype=np.float32)
+    th = np.arctan2(co[:, 0], -(co[:, 1] - f.pelvis.y))
+    below = np.clip((f.z_hip - co[:, 2]) / 0.10, 0.0, 1.0)
+    return np.clip(1.5 * np.cos(th) - 0.2, 0.0, 1.0) * below
 
 
 def _sleeve_vertices(obj, pc):
