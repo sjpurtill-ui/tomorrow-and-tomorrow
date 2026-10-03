@@ -305,6 +305,22 @@ The note has room for about 19 letters (every top-strip value must fit at 1280 w
   
   The same rules apply to all peoples; only the tendencies differ. No ruler goes all in on learning unless its temperament is scholarly. Log and test the spread of paths across a world's peoples.
 
+## Balance P2 (2026-10-03)
+
+Each path gets a clear payoff and a real cost; balanced is never at least as good as another path on every measure; balanced peoples stay in the historical bands and all-in paths go a little extra. Tested on the fast sim (`tools/sim/paths.py`, recalibrated to engine truth on this branch).
+
+| Item | Change | Why |
+|---|---|---|
+| Learners' births upkeep | `society_model.gd SPECIALIST_UPKEEP.conception_support` −1.0 → −0.7 | A third-learning people sat at the births limit for centuries (a fifth of balanced by 1200); now about an eighth smaller. At −0.5 the learning path paid nothing in people before year 150 under the new learning pace (#121); at −0.7 it pays from about its hundredth year. |
+| A lead's goods | `research_600_catalog.gd LEAD_GOODS_YEARS` 20 → 60 | A century ahead asked six times the goods a learner; now under three. |
+| Carers ease crowding | `early_life_conditions.gd CARER_CROWDING` 0.5 | Full carer cover lifts half of crowding's toll on deaths and births: the growth path fills its land further (+17% people). |
+| The watch's upkeep | `society_model.gd WATCH_SUSTAINABLE` 0.06, `WATCH_UPKEEP` 1.0 | A watch past 6 in 100 of the workers costs as extra learners do (work, weariness, cohesion, births, stores). Shown on the People view ("Too many on watch", the engine's births number). |
+| Learning caps | `work_paths.gd LEARNING_CAP` growth/making/war/building .03 → .035 | Every path but learning learns as balanced does, so balanced no longer wins on knowledge; no free learners. |
+| Daughter towns' land | `early_life_conditions.gd TERRITORY_SLOPE` 1.6 → 0.85 | A people founding a town every generation reaches about 19,000 by year 600 (high 20,000), not 30,000. |
+| Food yields | `food_system.gd BASE_SUBSISTENCE_YIELD_CALIBRATION` 1.34 → 1.07, `CULTIVATION_YIELD` 4.52 (was 5.65 inline) | The leaders keep about 34–38% of the people on food (was 27–30%, under the plausible floor). |
+
+Still open (the user's decisions): building has no payoff the engine's numbers reach (no great works or splendor in the measure; it trails every path), and making's goods have no sink (the barter ceiling holds every path's goods near 4–5 a head).
+
 ## Integration rules (every builder)
 - Work only in your worktree, on your `codex/<task>` branch. Never use `git stash`, never merge main yourself, never launch the player game, never remove a worktree.
 - Edit files other than your own only in small, local hunks, and list them. Shared hotspots: `game_state.gd`, `consequence_engine.gd` (B owns), `military_campaign.gd` (E owns), `discovery_system.gd` (A owns), `economy_system.gd` (D owns), `world_simulation.gd`, `local_terrain.gd`, `save_system.gd`.
