@@ -1,0 +1,516 @@
+[
+  {
+    "id": "fish_weirs_and_traps",
+    "line": "nutrition",
+    "status": "new",
+    "name": "Fish Weirs, Basket Traps and Sinker Nets for Fish and Fowl",
+    "one_liner": "Fish weirs, basket traps and sinker nets for fish and fowl",
+    "observation": "Fish weirs, basket traps and sinker nets for fish and fowl.",
+    "key_threshold": false,
+    "target_year": 23,
+    "proposed_year": 23,
+    "band_low": 13.0,
+    "band_high": 33.0,
+    "min_year": 13.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "seasonal_protein_sourcing",
+      "basketry"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "cordage"
+    ],
+    "conditions": {
+      "environment": [
+        "river",
+        "coast"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Daily supply",
+    "signals": [
+      "food",
+      "storage"
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/fish_weirs_and_traps-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "seasonal_crisis_leader",
+    "line": "institutions",
+    "status": "new",
+    "name": "A Leader Chosen for a Season of Need",
+    "one_liner": "A leader chosen for a season of need",
+    "observation": "A leader chosen for a season of need.",
+    "key_threshold": false,
+    "target_year": 24,
+    "proposed_year": 24,
+    "band_low": 12.0,
+    "band_high": 35.0,
+    "min_year": 12.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "household_councils"
+    ],
+    "requires_any": [
+      [
+        "emergency_food_caching",
+        "raid_scouting"
+      ]
+    ],
+    "precedents": [
+      "elder_council_assent"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "security"
+    ],
+    "subcategory": "Administration",
+    "signals": [
+      "administration",
+      "society"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/seasonal_crisis_leader-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "grog_preparation",
+    "line": "production",
+    "status": "catalog",
+    "name": "Crushed-sherd Grog",
+    "one_liner": "Crushed-sherd grog",
+    "observation": "Crushed-sherd grog.",
+    "key_threshold": false,
+    "target_year": 24,
+    "proposed_year": 24,
+    "band_low": 12.0,
+    "band_high": 32.0,
+    "min_year": 12.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "clay_tempering"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/first300-cards/grog_preparation.tres"
+  },
+  {
+    "id": "wattle_and_daub_walls",
+    "line": "infrastructure",
+    "status": "catalog",
+    "name": "Wattle-and-daub Walls",
+    "one_liner": "Wattle-and-daub walls",
+    "observation": "Wattle-and-daub walls.",
+    "key_threshold": false,
+    "target_year": 24,
+    "proposed_year": 24,
+    "band_low": 10.0,
+    "band_high": 32.0,
+    "min_year": 10.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "framed_construction",
+      "basketry"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "adobe_wall_construction"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/wattle_and_daub_walls.png"
+  },
+  {
+    "id": "grain_moisture_watch",
+    "line": "nutrition",
+    "status": "era",
+    "name": "Grain Dried and Turned Against Damp",
+    "one_liner": "Grain dried and turned against damp",
+    "observation": "Grain dried and turned against damp.",
+    "key_threshold": false,
+    "target_year": 24,
+    "proposed_year": 24,
+    "band_low": 14.0,
+    "band_high": 34.0,
+    "min_year": 14.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "seed_selection",
+      "food_drying"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/grain_moisture_watch-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "patrilocal_residence",
+    "line": "demography",
+    "status": "new",
+    "name": "Bride Joins Her Husband's Kin",
+    "one_liner": "Bride joins her husband's kin",
+    "observation": "Bride joins her husband's kin.",
+    "key_threshold": false,
+    "target_year": 24,
+    "proposed_year": 24,
+    "band_low": 14.0,
+    "band_high": 34.0,
+    "min_year": 14.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "lineage_exogamy"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Fertility conditions",
+    "signals": [
+      "population",
+      "society"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/patrilocal_residence-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "spawning_calendar",
+    "line": "ecology",
+    "status": "new",
+    "name": "Fish-run and Spawning Season Calendar",
+    "one_liner": "Fish-run and spawning season calendar",
+    "observation": "Fish-run and spawning season calendar.",
+    "key_threshold": false,
+    "target_year": 24,
+    "proposed_year": 24,
+    "band_low": 14.0,
+    "band_high": 34.0,
+    "min_year": 14.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "phenology_signs"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "fish_weirs_and_traps"
+    ],
+    "conditions": {
+      "environment": [
+        "river"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Resource sustainability",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/spawning_calendar-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "knot_tally_cross_check",
+    "line": "knowledge",
+    "status": "era",
+    "name": "Two Households Cross-check Their Tallies",
+    "one_liner": "Two households cross-check their tallies",
+    "observation": "Two households cross-check their tallies.",
+    "key_threshold": false,
+    "target_year": 25,
+    "proposed_year": 25,
+    "band_low": 15.0,
+    "band_high": 40.0,
+    "min_year": 15.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "tallies"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "witnessed_agreement_customs",
+      "household_councils"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/discovery-600/knot_tally_cross_check.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+      "tile_index": 1,
+      "caption": "Two households cross-check their tallies (Year 25)",
+      "style": "paper_gouache"
+    }
+  },
+  {
+    "id": "reciprocal_gift_exchange",
+    "line": "culture",
+    "status": "new",
+    "name": "Gifts Given and Returned Bind Households",
+    "one_liner": "Gifts given and returned bind households",
+    "observation": "Gifts given and returned bind households.",
+    "key_threshold": false,
+    "target_year": 25,
+    "proposed_year": 25,
+    "band_low": 12.0,
+    "band_high": 35.0,
+    "min_year": 12.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "guest_host_reciprocity"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "trade_partner_tokens",
+      "shared_hearth_gatherings"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Social cohesion",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/discovery-600/reciprocal_gift_exchange.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+      "tile_index": 7,
+      "caption": "Gifts given and returned bind households (Year 25)",
+      "style": "silhouette_ochre"
+    }
+  },
+  {
+    "id": "herding_rotas",
+    "line": "labor",
+    "status": "new",
+    "name": "Herding Rotas for Common Flocks",
+    "one_liner": "Herding rotas for common flocks",
+    "observation": "Herding rotas for common flocks.",
+    "key_threshold": false,
+    "target_year": 25,
+    "proposed_year": 25,
+    "band_low": 10.0,
+    "band_high": 35.0,
+    "min_year": 10.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "labor_rotations",
+      "animal_taming"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "herd_size_limits"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "nutrition"
+    ],
+    "subcategory": "Coordination",
+    "signals": [
+      "administration",
+      "training"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/herding_rotas-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "milking",
+    "line": "nutrition",
+    "status": "new",
+    "name": "Milking Goats, Sheep and Cows",
+    "one_liner": "Milking goats, sheep and cows",
+    "observation": "Milking goats, sheep and cows.",
+    "key_threshold": true,
+    "target_year": 25,
+    "proposed_year": 25,
+    "band_low": 15.0,
+    "band_high": 35.0,
+    "min_year": 15.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "animal_taming"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Diet quality",
+    "signals": [
+      "food",
+      "storage"
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/milking-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "sweat_baths",
+    "line": "health",
+    "status": "new",
+    "name": "Sweat Baths in Heated Huts",
+    "one_liner": "Sweat baths in heated huts",
+    "observation": "Sweat baths in heated huts.",
+    "key_threshold": false,
+    "target_year": 25,
+    "proposed_year": 25,
+    "band_low": 15.0,
+    "band_high": 35.0,
+    "min_year": 15.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "hearth_heat_retention",
+      "framed_construction"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Water & sanitation",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/sweat_baths-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "route_food_caches",
+    "line": "logistics",
+    "status": "new",
+    "name": "Food Caches Along Regular Travel Routes",
+    "one_liner": "Food caches along regular travel routes",
+    "observation": "Food caches along regular travel routes.",
+    "key_threshold": false,
+    "target_year": 25,
+    "proposed_year": 25,
+    "band_low": 15.0,
+    "band_high": 35.0,
+    "min_year": 15.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "dry_cache_siting",
+      "trail_waymarking"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Route quality",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/route_food_caches-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "herd_recovery_pursuit",
+    "line": "security",
+    "status": "new",
+    "name": "Pursuit to Recover Raided Herds",
+    "one_liner": "Pursuit to recover raided herds",
+    "observation": "Pursuit to recover raided herds.",
+    "key_threshold": false,
+    "target_year": 25,
+    "proposed_year": 25,
+    "band_low": 15.0,
+    "band_high": 35.0,
+    "min_year": 15.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "animal_taming"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "ambush_raids"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public safety",
+    "signals": [
+      "defense",
+      "warfare"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/herd_recovery_pursuit-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  }
+]

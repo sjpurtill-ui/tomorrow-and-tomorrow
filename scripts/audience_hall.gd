@@ -55,6 +55,11 @@ const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const WAR_PATH:="res://scripts/war_loop.gd"
 ## What the ruler stands to gain from a proposal, read from the engine.
 const STAKES_PATH:="res://scripts/proposal_stakes.gd"
+## A prisoner before the god (captured_agents.gd): their fate cards, the god's
+## wrath and favour on them, their regard, and their summons.
+const CAPTIVES_PATH:="res://scripts/captured_agents.gd"
+static func _captives()->GDScript:
+	return load(CAPTIVES_PATH) as GDScript
 const REACTIONS:=["delighted","pleased","neutral","offended","furious"]
 const VERSION:=3
 const EXPIRY_DAYS:=20
@@ -104,7 +109,8 @@ const PERSON_CRISIS_GAP:=90
 const REPEAT_DAYS:=1095
 const LEDGER_MAX:=240
 const OCCASIONS_MAX:=48
-const SITUATION_JSON_MAX:=4000
+## Room for a request's deal as each side counts it (envoy_deals.gd) beside its words.
+const SITUATION_JSON_MAX:=5000
 ## Waiting audiences a legacy save keeps when it is calmed on load.
 const MIGRATION_KEEP:=2
 ## Matters: what the court would raise if summoned. Only foreign envoys come
@@ -528,6 +534,8 @@ static func _expire(day:int)->void:
 			ForeignDiplomacy.remember(id,"Our envoy %s waited %d days in the ruler's antechamber and was never received. They came home insulted." % [String(audience.speaker.name),int(day-int(audience.arrived_day))])
 			audience.outcome="%s waited %d days without an audience and has left, insulted. %s thinks less of you (opinion −0.04, trust −0.03)." % [String(audience.speaker.name),int(day-int(audience.arrived_day)),String(audience.civ_name)]
 			_add_sequel(audience,"ignored",day)
+		elif audience.has("prisoner_id"):
+			audience.outcome="%s was taken back under guard." % String(audience.speaker.name)
 		else:
 			# The ruler called them in; if the ruler never saw them, no one is slighted.
 			var matter:String="their report on %s" % String(audience.get("report",{}).get("subject_name","what they found")) if audience.kind=="report" else _topic_words(String(audience.petition.get("topic","")))
@@ -801,6 +809,7 @@ static func summonable()->Array[Dictionary]:
 static func summon(target:Dictionary)->Dictionary:
 	## Call someone into the hall now. They open with their most pressing
 	## matter; with nothing to raise they simply answer the summons.
+	if String(target.get("prisoner_id",""))!="": return _captives().call("summon",String(target.prisoner_id))
 	var keys:=summon_keys(target)
 	if keys.is_empty(): return {}
 	for audience in waiting():
@@ -1307,6 +1316,12 @@ static func _add_sequel(audience:Dictionary,option_id:String,day:int)->void:
 	# heard or a proposal answered is finished; their next envoy waits for new
 	# business.
 	var harmed:=option_id.begins_with("envoy_")
+	# A refusal light enough (a deal poor for us, envoy_deals.gd) brings them
+	# back cooler, as a courteous decline does, never with a demand.
+	if option_id=="refuse" and bool(_requests().call("soft_refusal",audience)): option_id="decline"
+	# A counter is what it came to: agreed, the request taken; refused, a
+	# courteous no (envoy_requests.effective_option).
+	option_id=String(_requests().call("effective_option",audience,option_id))
 	var refused:=option_id in ["refuse","rebuff","rebuke","abstain","dismiss","ignored","expired","defy","stand","decline","counter"]
 	var threat_paid:=String(audience.get("kind",""))=="threat" and option_id=="pay"
 	var aid_given:=(_situation_type(audience)=="aid_request" and option_id in ["grant","grant_half"]) or bool(_requests().call("brings_sequel",_situation_type(audience),option_id))
@@ -1515,7 +1530,9 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 			if mix.has(situation_type): continue
 			var candidate:Dictionary=er.call("candidate",situation_type,civ_id,occasion,wider,used,day)
 			if candidate.is_empty(): continue
-			candidate["w"]=float(extra[situation_type])*float(er.call("temperament",situation_type,civ_id))*float(_lives().call("dread_weight",situation_type,civ_id))
+			# A deal poor for us (a food payment to a people drowning in food) comes
+			# less often: its appeal, from envoy_deals.gd (0.3 to 1).
+			candidate["w"]=float(extra[situation_type])*float(er.call("temperament",situation_type,civ_id))*float(_lives().call("dread_weight",situation_type,civ_id))*float(candidate.get("appeal",1.0))
 			result.append(candidate)
 	# Variety: the same business (or family of business) back to back grows unlikely.
 	for candidate in result:
@@ -2014,6 +2031,9 @@ static func _gift_terms(civ_id:String,civ:Dictionary,rng:RandomNumberGenerator,u
 		var amount:=_nice(minf(stock*rng.randf_range(0.05,0.12)*scale,cap*rng.randf_range(0.7,1.2)))
 		if amount<5.0 or amount>stock: continue
 		var score:=amount/maxf(1.0,cap)*rng.randf_range(0.6,1.4)*pow(0.4,float(recent.get(String(resource),0)))
+		# A gift is chosen for what it is worth to us: food to a people drowning
+		# in food is seldom sent (deal_value.gd).
+		score*=preload("res://scripts/deal_value.gd").unit_worth("player",String(resource))/maxf(0.01,preload("res://scripts/trade_prices.gd").value(String(resource),"player"))
 		if score>best_score: best_score=score; best={"resource":resource,"amount":amount}
 	return best
 
@@ -2408,6 +2428,7 @@ static func options(id:String)->Array[Dictionary]:
 	var audience:=find(id)
 	var result:Array[Dictionary]=[]
 	if audience.is_empty() or String(audience.status)!="waiting": return result
+	if audience.has("prisoner_id"): return _captives().call("options",audience)
 	var terms:Dictionary=audience.terms
 	var text:=_terms_text(terms)
 	match String(audience.kind):
@@ -2611,6 +2632,7 @@ static func _proposal_options(audience:Dictionary)->Array[Dictionary]:
 static func resolve(id:String,option_id:String)->Dictionary:
 	var audience:=find(id)
 	if audience.is_empty() or String(audience.status)!="waiting": return {"ok":false,"outcome":"No audience is waiting.","reaction":"neutral"}
+	if audience.has("prisoner_id"): return _captives().call("resolve",audience,option_id)
 	var chosen:={}
 	for option in options(id):
 		if String(option.id)==option_id: chosen=option
@@ -3392,10 +3414,17 @@ static func voice_context(id:String)->Dictionary:
 			"trust":_words(float(leader.get("trust",0)),[[-0.3,"distrustful"],[0.1,"undecided"],[1e9,"trusting"]]),"character":_rivals().call("prompt_view",String(audience.civ_id))}
 		var regard:=DIVINE.foreign_regard(String(audience.civ_id))
 		if not regard.is_empty(): context["their_regard"]={"reads":"they "+String(regard.read),"reverence":_band_word(float(regard.love)),"dread":_band_word(float(regard.dread))}
+		# What the deal is worth to each side, as the engine counts it
+		# (envoy_deals.gd): a live voice states these when asked.
+		var deal:Dictionary=_stakes().call("voice_facts",stakes(id))
+		if not deal.is_empty(): context["stakes"]=deal
 	else:
 		if audience.kind in WORK_KINDS:
 			var gwa:=_great_works()
 			if gwa!=null: context["wonder_proposal" if audience.kind=="wonder_proposal" else "great_work"]=gwa.call("voice_facts",audience)
+		if audience.has("prisoner_id"):
+			# A prisoner says only what they have said (captured_agents.gd).
+			context["prisoner"]=_captives().call("voice_view",id)
 		var known_id:=String((audience.speaker as Dictionary).get("known_id",""))
 		if known_id!="":
 			# A summoned commoner speaks for themselves, from their own life.
@@ -3630,6 +3659,7 @@ static func regard_of(id:String)->Dictionary:
 	## envoy's people regard the ruler.
 	var audience:=find(id)
 	if audience.is_empty(): return {}
+	if audience.has("prisoner_id"): return _captives().call("regard",id)
 	if String(audience.get("origin",""))=="foreign": return DIVINE.foreign_regard(String(audience.get("civ_id","")))
 	var pid:=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
 	if pid<=0: return {}
@@ -3646,6 +3676,7 @@ static func divine_options(id:String)->Array[Dictionary]:
 	var audience:=find(id)
 	var result:Array[Dictionary]=[]
 	if audience.is_empty() or String(audience.get("status",""))!="waiting": return result
+	if audience.has("prisoner_id"): return _captives().call("divine_options",audience)
 	var done:Array=audience.get("divine",[]) if audience.get("divine") is Array else []
 	if String(audience.get("origin",""))=="foreign":
 		if ForeignDiplomacy.civilization(String(audience.get("civ_id",""))).is_empty(): return result
@@ -3714,6 +3745,7 @@ static func divine(id:String,action:String,words:String="",target_pid:int=0,how:
 	## the god's command; {"quiet":true} when the caller narrates the act itself.
 	var audience:=find(id)
 	if audience.is_empty() or String(audience.get("status",""))!="waiting": return {"ok":false,"outcome":"No audience is waiting."}
+	if audience.has("prisoner_id") and target_pid<=0: return _captives().call("divine",audience,action,words)
 	var speaker_pid:=int((audience.get("speaker",{}) as Dictionary).get("person_id",0))
 	var done:Array=audience.get("divine",[]) if audience.get("divine") is Array else []
 	if target_pid>0 and target_pid!=speaker_pid:
@@ -3871,6 +3903,7 @@ static func validate_state(data:Variant)->bool:
 	if data.has("war") and not bool(_war().call("valid_state",data.war)): return false
 	if data.has("council") and not bool((load("res://scripts/war_council.gd") as GDScript).call("valid_state",data.council)): return false
 	if data.has("covert") and not bool((load("res://scripts/covert_ops.gd") as GDScript).call("valid_state",data.covert)): return false
+	if data.has("captives") and not bool(_captives().call("valid_state",data.captives)): return false
 	if data.has("crises") and not bool(_crises().call("valid_state",data.crises)): return false
 	if data.has("hardships") and not bool((load(HARDSHIPS_PATH) as GDScript).call("valid_state",data.hardships)): return false
 	if data.has("upkeep") and not bool(_upkeep().call("valid_state",data.upkeep)): return false

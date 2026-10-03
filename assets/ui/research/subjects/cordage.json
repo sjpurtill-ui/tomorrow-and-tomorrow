@@ -1,9 +1,18 @@
 {
   "id": "cordage",
-  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Twisted Cordage. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Composition must make the unique subject instantly recognizable in a wide cropped research card, keeping main action across the center band. Two pairs of early craftspeople's hands rolling and twisting loose pale plant fibers into a strong braided cord; loose fibers at left, partially twisted strands central, finished coil at right on dark bark. Rich macro material detail. No basket or pottery. Early human community, simple unornamented natural clothing if visible, no national identity. Not a montage, not a UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-8bf3f52c-1ccc-4242-899d-ec60b3a70117.png",
-  "asset": "res://assets/ui/research/subjects/cordage-v1.png",
-  "sha256": "b05c6b66f3c5e436f8b421c9edc3767af8f06275d66cb508d660eda860653473",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/edge_resharpening_rounds-v2.png",
+  "prompt": "Create a new current-game Tomorrow and Tomorrow production research banner. Strictly preserve supplied WIDE painting canvas proportions approximately 2055x765. Match flat angular palette-knife PAINTING in copper/ember/soot/umber, no sculptural relief. Two smaller seated adults twist two separate rough plant-fiber strands together into ONE coarse two-ply cord; bare hands and fibers visibly meet, loose unworked fibers beside them on rough hide. No loom, spool or finished textile. Mature handmade 2D art, rough irregular animal hides, wild portable camp. Entire heads, hands and subject action within central 65 percent height, people 70 percent normal scale for 3.37:1 card crop. Full bleed wide panoramic painting, no text, borders, photography, CGI, cinematic light, cloth, ceramic pots or cultivated crops. Reference is MEDIUM and WIDTH only, replace its subject completely.",
+  "replace_first300": true,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-28313372-df7d-4ae7-8326-f4d20ea54669.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 6,
+  "review": "Angular copper/soot painting. Hands meet two rough plant strands twisting into coarse cord, loose fibers beside hide.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/cordage-v2.png",
+  "sha256": "dc575f2ed9c0706bb79e79dc5b60addabba67836cf2725405706f3b0190ab57e"
 }

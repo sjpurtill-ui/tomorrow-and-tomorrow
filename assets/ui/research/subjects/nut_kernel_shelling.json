@@ -1,0 +1,20 @@
+{
+  "id": "nut_kernel_shelling",
+  "line": "nutrition",
+  "version": 1,
+  "replace_first300": true,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/hearth_heat_retention-v1.png",
+  "prompt": "ONLY correct framing of this painting: shrink the entire foreground human-and-working-object group to 75 percent current size and center vertically, with ALL complete heads below y=130 and ALL working hands, infant if present, food/shell piles or stone-covering action above y=635. Preserve the SAME wide approximately 2055x765 canvas, SAME existing painted medium/palette/people/action/materials. Extend existing simple background pigment above and below. No new objects, text, baskets, pots, buildings, photography or 3D. Entire working group must occupy central 65 percent height so no heads or discovery cues get cut in wide banner crop.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3e06d5c8-a7af-4a80-be01-6816e716989f.png",
+  "initial_prompt": "Create a current-game nutrition painting matching supplied wide opaque botanical egg-tempera banner, olive/gold/cream/earth pigments, broad matte painted shapes and mature figures. Two small seated adults shell gathered wild hazelnuts: one holds a rounded hammer pebble just over ONE nut resting on a flat anvil stone, other picks pale kernels out of cracked brown shells. Clear separate small groups of whole nuts, empty jagged shells and cream kernels lie on an irregular raw hide. Keep striking hand, pebble/nut/anvil relationship and kernel-picking fingers readable. Wild hazel leaves at one edge, no orchard. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-48ee2e14-05ca-4882-b4eb-8d877d4016e6.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 5,
+  "review": "Matte olive/gold egg-tempera treatment. Hammer pebble above nut on stone, other adult picks kernel; whole nuts/empty shells/kernels separated on raw hide. Targeted reduction keeps complete heads and piles visible.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/nut_kernel_shelling-v1.png",
+  "sha256": "e35d5a040e7cb7fda423c2e99a81dcb9fe7c1c254285ddfc4ae7234a9a26679a"
+}

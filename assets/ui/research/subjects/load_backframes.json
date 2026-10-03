@@ -1,12 +1,56 @@
 {
   "id": "load_backframes",
   "line": "logistics",
-  "game_year": 45,
-  "approx_historical_year": -4700,
-  "prompt": "c. 4700 BCE: Adults carry reed bundles on simple wooden backframes; travel watercolor and ink. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5d36b353-1c52-446f-9221-38710a068c6d.png",
-  "asset": "res://assets/ui/research/subjects/load_backframes-v1.png",
-  "sha256": "9e48c0d95ed72e481e04758df046a95b53d5a802c820e431bc89bcf889980623",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; Wooden backframes and carried loads clear in crop."
+  "status": "new",
+  "name": "Backframes for Bulky Loads",
+  "one_liner": "Backframes for bulky loads",
+  "observation": "Backframes for bulky loads.",
+  "key_threshold": false,
+  "target_year": 45,
+  "proposed_year": 45,
+  "band_low": 29,
+  "band_high": 61,
+  "min_year": 29,
+  "research_years": 3,
+  "requires_all": [
+    "load_lashing_knots",
+    "joinery"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "woven_carriers"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Carrying capacity",
+  "signals": [
+    "travel",
+    "logistics"
+  ],
+  "version": 2,
+  "year": 45,
+  "focus": [
+    0.5,
+    0.2
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/logistics-v1.png",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/load_backframes-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: Side view of one adult fitting a rough branch carrying frame with fiber straps and a bulky bundle of reeds, another checks the lashing. Show the load resting on the branch backframe, no modern backpack, buckles or metal. Medium: panoramic travel watercolor in sand, slate and indigo. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2a8d570c-bb45-4dca-abac-705b530af405.png",
+  "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/load_backframes-v2.png",
+  "sha256": "3ceff0d6c6c6efa5c53f1f8ae2dc1e9fa31c9ef9d0f0c53a9d387da2dd4abae4",
+  "mode": "built-in image_gen / edit"
 }

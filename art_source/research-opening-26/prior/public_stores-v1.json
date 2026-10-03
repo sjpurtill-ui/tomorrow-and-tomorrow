@@ -1,0 +1,9 @@
+{
+  "id": "public_stores",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Public Stores. A shared storehouse doorway with households contributing grain baskets while a steward carefully distributes an existing reserve; visible varied provisions on raised dry shelves, no private market stall.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-6751926e-3abe-44db-97d9-c5c7e7a73cb5.png",
+  "asset": "res://assets/ui/research/subjects/public_stores-v1.png",
+  "sha256": "49d861270d3f5f85eb2f20ed1bdd02501708fd8efa7c6119563d254b26289563",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

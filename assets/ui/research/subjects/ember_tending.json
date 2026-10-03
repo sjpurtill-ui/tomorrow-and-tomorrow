@@ -1,0 +1,29 @@
+{
+  "id": "ember_tending",
+  "line": "nutrition",
+  "game_year": 3,
+  "version": 1,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/ember_tending.png",
+    "source": "EARLY_SUBJECTS",
+    "focus": [
+      0.5,
+      0.69
+    ]
+  },
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0622cd31-868a-4d1d-855f-cf8c7fc129df.png",
+  "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-419059c6-01e9-423f-8cf4-67e138d355a0.png",
+  "prompt": "Make a precise composition correction to this Ember Tending tempera painting so its story fits a very narrow game card. Preserve the opaque olive/gold/earth egg-tempera medium, both hide-clad adults, twig drawing ash over live coal, naturally curled bark with ember supported on forked branch, no pottery and all material details. Recompose both adults leaning forward with heads substantially LOWER, near the upper-middle of the image, and move the small hearth/coal UP nearer the middle. Both complete faces INCLUDING forehead and eyes, banking twig tip, glowing hearth coal, both carrying hands and bark ember MUST fit together entirely inside the CENTRAL 50 PERCENT of image height. Reduce adult figure scale slightly if needed; add simple flat painted landscape above and foreground below. Produce a very wide panoramic painting approximately 3:1. Do not crop faces or hands. Do not add new technology, vessel, writing, frame, photorealism or CGI. Only change placement and scale to compact the action vertically.",
+  "mode": "built-in image_gen / edit",
+  "review": "Full original inspected: hide-clad adults bank a living coal with twig and ash, and support a naturally curled bark fragment with a rough forked branch for ember transfer. Opaque olive/gold/earth tempera pigment planes, no pottery, woven containers or modern reference objects. Specific bark carrier is an artistic interpretation under game capability constraints, not an archaeologically verified artifact reconstruction. Final full original and 3.77:1 crop inspected; both complete faces, banking twig, glowing coal, bark ember and supporting hands remain visible. Initial composition clipped faces in narrow crop; corrected by reducing figures and compacting the action before binding.",
+  "initial_prompt": "Create a completely NEW game research painting for Ember Tending, year 3: carrying and banking fire before pottery. Reference supplies ONLY mature opaque botanical egg-tempera medium, olive/deep-green/wheat-gold/cream/earth palette, crisp flat pigment shapes and brushed grain. Copy NONE of its greenhouse, crop rows, modern sleeve or cultivated grain. Scene: two adults in ragged unstitched hide wraps kneel beside a low hearth of rough stones. Left adult uses a rough twig to draw pale ash gently over a small living red coal; right adult prepares to carry a tiny ash-covered ember in an irregular naturally curled bark fragment resting on a forked crooked branch, holding the branch well away from the hot coal. Clearly depict conservation and transfer of an existing ember, no ignition apparatus. Small dry natural tinder fibers, irregular loose twigs and wild sparse plants, flat olive landscape bands. No ceramic vessel, bowl, jar, lid, woven basket, polished tray, wood carpentry, metal, writing, refined clothing or buildings. Wide panorama approximately 3:1; both adult faces, twig banking action, coal glow and bark supported by forked branch together across central horizontal band for 3.77:1 card crop. Flat opaque egg-tempera planes, dignified adults, visibly hand-painted, no photographic shading, CGI, cinematic light, cute illustration, borders, symbols or captions.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-419059c6-01e9-423f-8cf4-67e138d355a0.png",
+  "initial_reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/gene_edited_crops-v1.png",
+  "asset": "res://assets/ui/research/subjects/ember_tending-v1.png",
+  "sha256": "beb6fac18ceec5fa608ea3dd04043b7340190b31ffe9206dccbe0c3092b3b7cb"
+}

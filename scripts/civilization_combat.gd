@@ -151,6 +151,9 @@ static func _away(state:Variant)->int:
 	var made:bool=world!=null and world.has_method("player_population_commitments") and (WorldSimulation.actor_id!="player" or (not (world.civilizations as Array).is_empty() and int(state.world_seed)==int(world.last_world_seed)))
 	if made:away+=int(world.player_population_commitments().get("working_absent",0))
 	away+=int(preload("res://scripts/scholar_visits.gd").absent(state,int(state.elapsed_days)))
+	# Hands of the god's people lent abroad on an envoy's business (a teacher,
+	# healers, hunters on a drive: lent_hands.gd) are not home to rise.
+	if WorldSimulation.actor_id=="player": away+=roundi(preload("res://scripts/lent_hands.gd").away(int(state.elapsed_days)))
 	return maxi(0,away)
 
 ## `amount` whole people shared out by `people` (id -> count, summing to

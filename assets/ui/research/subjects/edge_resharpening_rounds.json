@@ -1,12 +1,17 @@
 {
   "id": "edge_resharpening_rounds",
   "line": "production",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/edge_resharpening_rounds-v1.png",
+  "prompt": "Reframe this current-game WIDE flat angular copper/ember/umber palette-knife painting while preserving approximately 2055x765 canvas and visibly painted simple hands. Show THREE smaller seated adults taking turns resharpening used flint edges: central adult holds rough flint on raw hide and touches raw antler tine to its worn edge with fresh small flakes below; two adults observe with their own used stones. Every complete head, all working hands, stone-antler contact and flakes fit in central 65 percent height, ample ochre space above and below. Remove oversized cropped foreground figures; keep compact group. Crude hide wraps, open temporary camp. No metal, polished handles, baskets, pots, woven cloth or structures. Flat angular pigment planes, not photographic anatomy or 3D relief. Preserve current reference's WIDE proportions, no writing or border.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4783d7bf-27d4-483f-ae9c-893d91684706.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 5,
-  "approx_historical_year": -4967,
-  "prompt": "c. 4967 BCE: workers pass worn flint blades and stone scrapers around for resharpening, one pressure-flakes an edge while another tests it. Mature flat palette-knife impasto in ochre, ember orange and soot black; no metal, writing or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fc677b5d-10bb-42fb-a868-f830e2f063e1.png",
-  "asset": "res://assets/ui/research/subjects/edge_resharpening_rounds-v1.png",
-  "sha256": "078dc59d2265c80d44a195140782c050131b9e9c5da36cbc14291ed05bbb51c5",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; repeated sharpening process and flint tools clear. Accepted after visual 3.37:1 crop and subject/period check."
+  "review": "Flat angular copper/umber palette-knife medium retained. Three smaller adults resharpen used flints in turn, central antler touches edge with flakes below; heads and working hands visible.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/edge_resharpening_rounds-v2.png",
+  "sha256": "2d8c9fce7d63341b81e53b2d9474e427280a3c8f76cfc69fee3c3d91cc6a2ada"
 }

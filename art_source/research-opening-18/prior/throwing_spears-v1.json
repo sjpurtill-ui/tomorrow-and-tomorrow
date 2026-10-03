@@ -1,0 +1,12 @@
+{
+  "id": "throwing_spears",
+  "line": "security",
+  "game_year": 18,
+  "approx_historical_year": -4880,
+  "prompt": "c. 4880 BCE: Neolithic adults practice casting light wooden throwing spears with chipped-stone points toward plain straw bundles; hand-carved woodblock print, black and ochre. Mature handmade 2D; no metal, writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-436024a5-6899-441a-9c03-d7f62b7f7ffb.png",
+  "asset": "res://assets/ui/research/subjects/throwing_spears-v1.png",
+  "sha256": "60f46ef9f2431bb5b3b1dceaf93c4a5831f17bff43146f0f81a946e41b95c95d",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; light spear in flight, stone points and target clear in wide crop."
+}

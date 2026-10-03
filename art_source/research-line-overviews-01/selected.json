@@ -1,0 +1,242 @@
+[
+  {
+    "id": "demography",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/birth_spacing_customs-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow demography FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately 2055x765 and matte angular chalk-pastel/cut-paper terracotta/rust/ivory/slate pigment planes. Five smaller fully hide-clothed people of different ages share camp space: two adults hold covered infant bundle, elder and younger adult guide clothed child placing a sleeping hide. One low hide windbreak, broad open land. Full-bleed wide handmade 2D composition, complete heads/hands and action in central60percentheight, people small enough for3.37:1crop. Show broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, impasto relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "matte angular chalk-pastel/cut-paper terracotta/rust/ivory/slate pigment planes",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-223df490-04e1-48f7-925b-6addebd2ba96.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "8c5f65c34777b9b078b2e4919eb7422109b53e03112288511fe66355b26accc1",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/demography-v1.png",
+    "dimensions": [
+      2056,
+      765
+    ],
+    "sha256": "d209677f3f5adf8fe49a59ba4a385037de0d5be6d4645d15bd860e865e8de183"
+  },
+  {
+    "id": "nutrition",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/food_drying-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow nutrition FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately 2055x765 and opaque botanical egg tempera olive/gold/cream/earth colors. Three smaller hide-clad adults gather wild roots, crush a few seeds between rough stones and share berries from loose raw-hide patch beside quiet hearth. Wild uncultivated plants, no field, basket, pot or roof. Full-bleed wide handmade 2D composition, complete heads/hands and action in central60percentheight, people small enough for3.37:1crop. Show broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, impasto relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "opaque botanical egg tempera olive/gold/cream/earth colors",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6e486c75-fb1f-4d18-972a-88c51b7703de.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "d4f57efcb2a788d23923005cd9283758f3bc66d2b590c159e0ebda14edcfe91f",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/nutrition-v1.png",
+    "dimensions": [
+      2055,
+      765
+    ],
+    "sha256": "8af5e7fec936dfef5bf443b86bfc0ae5a9b30c728aeab94e15f1817cfb3906be"
+  },
+  {
+    "id": "health",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/delousing-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow health FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately 2055x765 and restrained ink and sage/celadon watercolor on visible cream paper. Three smaller fully hide-clothed adults at wild water edge: caregiver gently rinses one adult's dirty hand using water held in cupped hands, another sorts recognizable leafy sprigs on loose hide. Caring attentive gestures, no surgical treatment, illness caricature or manufactured basin. Full-bleed wide handmade 2D composition, complete heads/hands and action in central60percentheight, people small enough for3.37:1crop. Show broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, impasto relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "restrained ink and sage/celadon watercolor on visible cream paper",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2aa57e69-a401-4595-ab6d-26496a21c632.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "011bd8ac4b191965bf123dc8f63ad335bb5d3304ed848f7305036f431c0cd54c",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/health-v1.png",
+    "dimensions": [
+      2055,
+      765
+    ],
+    "sha256": "c4a1ddf42d6abd2103e544a99bec83b69d4e4bbac11b29fc53bab711e640838c"
+  },
+  {
+    "id": "labor",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/rest_break_timing-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow labor FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately 2055x765 and charcoal drawing over ochre ground, broad expressive flat strokes. Four smaller hide-clad adults coordinate a shared task: two carry ONE irregular naturally fallen log together, third points to clear route, fourth rests in shade of low hide windbreak. Rough unworked wood, no saw, axe, building or squared beam. Full-bleed wide handmade 2D composition, complete heads/hands and action in central60percentheight, people small enough for3.37:1crop. Show broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, impasto relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "charcoal drawing over ochre ground, broad expressive flat strokes",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0913e892-796f-4f39-b89a-bb5a24bd74cd.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "a1bf07f41423b17c13e651876b46fc775ced33c25802144b1a772c79e6224425",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/labor-v1.png",
+    "dimensions": [
+      2055,
+      765
+    ],
+    "sha256": "f68987a8ced4fb0b206f414a449b182dc74325865029b470c4c2637ad35cb7a2"
+  },
+  {
+    "id": "knowledge",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/weather_sign_reading-v1.png",
+    "prompt": "Create new Tomorrow and Tomorrow knowledge FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately2055x765 and blue-black crosshatched ink, muted lapis wash on warm parchment. Three smaller hide-clad adults teach observation: elder compares two naturally fractured stones while novice repeats hand gesture, another points toward weather clouds and rough landmark tree; few loose pebbles on earth. Full-bleed wide handmade2Dcomposition, complete heads/hands and action in central60percentheight, people small for3.37:1crop. Broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, sculptural relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "blue-black crosshatched ink, muted lapis wash on warm parchment",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d81e8ba4-b68b-49d3-adb6-82980764853b.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "76043fac4719661fc4c81fe631e3c7e53e4172c6efe190ed0e0d1bb81c91021d",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/knowledge-v1.png",
+    "dimensions": [
+      2172,
+      724
+    ],
+    "sha256": "800d29158e7e3dcd7d1d33e28aa10f2401e521424150eaf3c94cb93a9a95d075"
+  },
+  {
+    "id": "production",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hafted_tools-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow production FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately2055x765 and flat angular palette-knife pigment painting copper/ember/soot/umber. Three smaller hide-clad adults compare raw flint, twist rough plant fibers and fit chipped flint into split crooked branch at one loose-hide work patch. Distinct material contacts visible, no forge, polished tools, metal, pottery or workshop. Full-bleed wide handmade2Dcomposition, complete heads/hands and action in central60percentheight, people small for3.37:1crop. Broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, sculptural relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "flat angular palette-knife pigment painting copper/ember/soot/umber",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4406fcb9-facc-4069-8aca-a2326be400c3.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "0ce64f44c68f3a4e3e44ae6b0cc001dea36322be95554d278c867b1a4af85d4a",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/production-v1.png",
+    "dimensions": [
+      2055,
+      765
+    ],
+    "sha256": "fd7397e9b3a3635da03c27182a5b8bd01f672254f4bf041cf7dd52b87dcefcf8"
+  },
+  {
+    "id": "infrastructure",
+    "reference": "C:/Users/sjpur/TomorrowandTomorrow/assets/ui/research/subjects/hazard_landmark_memory-v1.png",
+    "prompt": "Create new Tomorrow and Tomorrow infrastructure FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately2055x765 and matte opaque casein-gouache mineral blue/limestone/earth architectural planes. Three smaller hide-clad adults select dry camp ground: one aligns rough branch stakes, one clears small loose stones, one indicates a natural shallow rain runoff channel along rocky bank. Low hide windbreak, no formal house or masonry. Full-bleed wide handmade2Dcomposition, complete heads/hands and action in central60percentheight, people small for3.37:1crop. Broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, sculptural relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "matte opaque casein-gouache mineral blue/limestone/earth architectural planes",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0a952200-20f4-4488-91c8-4e38f3cd5fec.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "4a290df81757fbdfbecbc52fa1dcddc14b9edb9b4db6d384788c035ddadb3ec2",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/infrastructure-v1.png",
+    "dimensions": [
+      2055,
+      765
+    ],
+    "sha256": "930896c3e582b1f4939fb5d529f8eb93015dd695d01bef22579c527a31c020e2"
+  },
+  {
+    "id": "logistics",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hide_floats-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow logistics FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately2055x765 and panoramic travel watercolor sand/slate/indigo. Four smaller hide-clad adults move gathered wild supplies across open landscape: two balance coarse hide parcels on rough carrying branch, one points along natural river path, fourth steadies a simple lashed-log float at bank. No carts, roads, cloth sacks, baskets, cargo ship or buildings. Full-bleed wide handmade2Dcomposition, complete heads/hands and action in central60percentheight, people small for3.37:1crop. Broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, sculptural relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "panoramic travel watercolor sand/slate/indigo",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-077d82be-26a5-4cef-9f43-7001cc835188.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "8ae1426813df3d505c32581000516ab27f7a2299e1fcd4dc662036fa857ce260",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/logistics-v1.png",
+    "dimensions": [
+      2056,
+      765
+    ],
+    "sha256": "a09c914990b76368787f7679c65431c9e4839d286eaf2c2b298920a7e18e8827"
+  },
+  {
+    "id": "institutions",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/witnessed_agreement_customs-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow institutions FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately2055x765 and matte fresco dusty plum/limestone/gold mineral pigment. Five smaller hide-clad adults form a loose discussion circle on bare earth; elder listens while two others speak with open palms, another distributes a few wild roots bare-handed over loose hide. No documents, throne, formal official costume or house. Full-bleed wide handmade2Dcomposition, complete heads/hands and action in central60percentheight, people small for3.37:1crop. Broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, sculptural relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "matte fresco dusty plum/limestone/gold mineral pigment",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-cfbf03cf-de31-4036-ba4e-370b5380d8d3.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "0231d81777316e5b2a479f65829ec716b884fc19300bf171e1ccc32448f1720d",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/institutions-v1.png",
+    "dimensions": [
+      2055,
+      765
+    ],
+    "sha256": "9d4463d45f56f1c96eac8bd4e023b05d568ccb6f9de7487defa962fdd1d0c105"
+  },
+  {
+    "id": "security",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hafted_weapons-v2.png",
+    "prompt": "Create new Tomorrow and Tomorrow security FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately2055x765 and layered handcut woodblock vermilion/charcoal/parchment. Three smaller hide-clad adults keep watch at rocky ridge: one observes distant open approach, one gives open-hand warning toward companions, third holds a rough wooden spear lowered beside cairn. No combat, armor, fortress or shields. Full-bleed wide handmade2Dcomposition, complete heads/hands and action in central60percentheight, people small for3.37:1crop. Broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, sculptural relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "layered handcut woodblock vermilion/charcoal/parchment",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f8055f23-055d-4017-8f01-3a617f2f652b.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "850dff036c54ffe57f59d95c10d57e1495d8f47bdc736d084b2206e892de6d70",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/security-v1.png",
+    "dimensions": [
+      2056,
+      765
+    ],
+    "sha256": "703d277d3eff9a3a9a1c797b6cc1c2c3212063fba9d97707ea73e2f50e5d41ab"
+  },
+  {
+    "id": "culture",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/bone_flutes_drums-v1.png",
+    "prompt": "Create new Tomorrow and Tomorrow culture FIELD OVERVIEW painting, not a specific discovery card. Supplied CURRENT approved banner controls WIDE proportions approximately2055x765 and tapestry-inspired PAINTING in interlocking indigo/rose/gold/violet pigment planes. Five smaller hide-clad adults share memory and rhythm beside low hearth: elder tells story with open palm toward familiar lone tree across valley, another plays rough bone flute, three listeners quietly clap or repeat gesture. No literal tapestry, woven cloth or buildings. Full-bleed wide handmade2Dcomposition, complete heads/hands and action in central60percentheight, people small for3.37:1crop. Broad field of human activity with readable foreground and simple landscape bands. No text, border, icons, labels, photography, CGI, cinematic light, sculptural relief, woven cloth, ceramic pots, baskets or permanent houses. Mature dignified adult illustration. Replace reference subject, retain medium and width.",
+    "medium": "tapestry-inspired PAINTING in interlocking indigo/rose/gold/violet pigment planes",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e586b145-c475-48e0-b86e-4825c0c8b536.png",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "generated",
+    "prior_sha256": "eeacea05b8d7cd71b282662917035e01f15fd919727e04575bce1804d2465e79",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/culture-v1.png",
+    "dimensions": [
+      2055,
+      765
+    ],
+    "sha256": "0e2780d57f2a29abf3b633e23acafc845f4b476d0af8b2a19ceb95ec3aaa0b62"
+  },
+  {
+    "id": "ecology",
+    "source": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/seasonal_patterns-v2.png",
+    "reference": "Reviewed ecology seasonal-patterns painting in chronology-03",
+    "prompt": "Reuse reviewed seasonal_patterns-v2 original unchanged as ecology overview",
+    "medium": "botanical foreground and flat landscape bands in plant pigments",
+    "review": "Full source and actual wide card, 92x92 inquiry thumbnail, 230x190 culture-panel crop visually reviewed; PASS",
+    "mode": "reuse",
+    "prior_sha256": "60a7c36fde076431b0fc5f4292b5ad0643d2ae36a881c8984d07a2a9e28279de",
+    "prior_dimensions": [
+      1536,
+      1024
+    ],
+    "path": "res://assets/ui/research/ecology-v1.png",
+    "dimensions": [
+      2172,
+      724
+    ],
+    "sha256": "d9b16c1ca8af60f703dcfa67b8592e4435e279390fead23e4ba5a39d262ca65c"
+  }
+]

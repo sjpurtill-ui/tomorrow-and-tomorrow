@@ -1,0 +1,12 @@
+{
+  "id": "purges_emetics",
+  "line": "health",
+  "game_year": 28,
+  "approx_historical_year": -4813,
+  "prompt": "c. 4813 BCE: Healer sorts bitter wild leaves by plain stone bowl while patient rests and helper offers water; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c19ce7e9-2a1b-4958-97d1-830782f55f8c.png",
+  "asset": "res://assets/ui/research/subjects/purges_emetics-v1.png",
+  "sha256": "439380b0a65b46c0322bbb4b1d51c201ec7b082af01ea03c20d06ea98a19b775",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too lifelike; historical care custom shown without instruction or graphic distress."
+}

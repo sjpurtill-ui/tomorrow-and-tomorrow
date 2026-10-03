@@ -1,0 +1,12 @@
+{
+  "id": "disability_care",
+  "line": "health",
+  "game_year": 38,
+  "approx_historical_year": -4747,
+  "prompt": "c. 4747 BCE: Adult with lasting leg impairment uses wooden staff while kin supports path walking, shares food and includes basket weaving; sparse watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d74e5886-946a-46c0-ac5c-0744d4eb389b.png",
+  "asset": "res://assets/ui/research/subjects/disability_care-v1.png",
+  "sha256": "b50ac5e72989f68a1aee9f2aab386746e3258e3f4d7454ccb91a7c88dd2dad66",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first did not clearly show impairment; selected mutual care, staff and contribution clear."
+}

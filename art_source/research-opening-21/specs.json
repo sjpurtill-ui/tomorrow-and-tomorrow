@@ -1,0 +1,486 @@
+[
+  {
+    "id": "timber_seasoning",
+    "line": "production",
+    "status": "catalog",
+    "name": "Timber Barked, Stacked and Seasoned",
+    "one_liner": "Timber barked, stacked and seasoned",
+    "observation": "Timber barked, stacked and seasoned.",
+    "key_threshold": false,
+    "target_year": 26,
+    "proposed_year": 26,
+    "band_low": 14.0,
+    "band_high": 35.0,
+    "min_year": 14.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "timber_grading",
+      "ground_stone_axes"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "thatched_roofing",
+    "line": "infrastructure",
+    "status": "catalog",
+    "name": "Reed and Straw Thatch",
+    "one_liner": "Reed and straw thatch",
+    "observation": "Reed and straw thatch.",
+    "key_threshold": false,
+    "target_year": 26,
+    "proposed_year": 26,
+    "band_low": 10.0,
+    "band_high": 35.0,
+    "min_year": 10.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "framed_construction",
+      "cordage"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/thatched_roofing.png"
+  },
+  {
+    "id": "indirect_solar_food_drying",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Shaded Drying Racks",
+    "one_liner": "Shaded drying racks",
+    "observation": "Shaded drying racks.",
+    "key_threshold": false,
+    "target_year": 26,
+    "proposed_year": 26,
+    "band_low": 16.0,
+    "band_high": 41.0,
+    "min_year": 16.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "food_drying"
+    ],
+    "requires_any": [
+      [
+        "framed_construction",
+        "basketry"
+      ]
+    ],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/first300-cards/indirect_solar_food_drying.tres"
+  },
+  {
+    "id": "crop_calendars",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Crop Calendar for Sowing and Harvest",
+    "one_liner": "Crop calendar for sowing and harvest",
+    "observation": "Crop calendar for sowing and harvest.",
+    "key_threshold": false,
+    "target_year": 27,
+    "proposed_year": 27,
+    "band_low": 17.0,
+    "band_high": 42.0,
+    "min_year": 17.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "seed_selection",
+      "moon_counting"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "phenology_signs"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "ecology"
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+      "focus": [
+        0.5,
+        0.36
+      ]
+    }
+  },
+  {
+    "id": "petition_speakers",
+    "line": "institutions",
+    "status": "new",
+    "name": "Speakers Carry Household Petitions to the Living God",
+    "one_liner": "Speakers carry household petitions to the living god",
+    "observation": "Speakers carry household petitions to the living god.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 15.0,
+    "band_high": 40.0,
+    "min_year": 15.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "hearth_shrine_offerings",
+      "household_councils"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Institutional flexibility",
+    "signals": [
+      "administration",
+      "society"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/petition_speakers-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "origin_story",
+    "line": "culture",
+    "status": "new",
+    "name": "Origin Story",
+    "one_liner": "Origin story: how the people and their god came to this land",
+    "observation": "Origin story: how the people and their god came to this land.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 14.0,
+    "band_high": 40.0,
+    "min_year": 14.0,
+    "research_years": 4.0,
+    "requires_all": [
+      "oral_epics",
+      "hearth_shrine_offerings"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "named_landmark_lore"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Collective memory",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/discovery-600/origin_story.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+      "tile_index": 8,
+      "caption": "Origin story: how the people and their god came to this land (Year 28)",
+      "style": "silhouette_ochre"
+    }
+  },
+  {
+    "id": "work_party_feasts",
+    "line": "labor",
+    "status": "new",
+    "name": "Neighbour Work Party Repaid with a Feast",
+    "one_liner": "Neighbour work party repaid with a feast",
+    "observation": "Neighbour work party repaid with a feast.",
+    "key_threshold": true,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 12.0,
+    "band_high": 38.0,
+    "min_year": 12.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "labor_rotations",
+      "reciprocal_gift_exchange"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "communal_work_songs",
+      "shared_hearth_gatherings"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Able workforce",
+    "signals": [
+      "administration",
+      "training"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/work_party_feasts-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "bow_drill_drive",
+    "line": "production",
+    "status": "catalog",
+    "name": "Bow Drill for Beads, Wood and Stone",
+    "one_liner": "Bow drill for beads, wood and stone",
+    "observation": "Bow drill for beads, wood and stone.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 15.0,
+    "band_high": 38.0,
+    "min_year": 15.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "cordage"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "friction_fire_ignition",
+      "controlled_flaking"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/bow_drill_drive.png"
+  },
+  {
+    "id": "dry_stone_walls",
+    "line": "infrastructure",
+    "status": "new",
+    "name": "Dry-stone Walls for Pens and Terraces",
+    "one_liner": "Dry-stone walls for pens and terraces",
+    "observation": "Dry-stone walls for pens and terraces.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 12.0,
+    "band_high": 38.0,
+    "min_year": 12.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "stone_sorting",
+      "sightline_staking"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public works",
+    "signals": [
+      "construction",
+      "materials"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/dry_stone_walls-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "threshing_frames",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Threshing on Beaten Floors",
+    "one_liner": "Threshing on beaten floors",
+    "observation": "Threshing on beaten floors.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 18.0,
+    "band_high": 43.0,
+    "min_year": 18.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "seed_selection"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "grain_moisture_watch",
+      "site_clearing_assessment"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {}
+  },
+  {
+    "id": "purges_emetics",
+    "line": "health",
+    "status": "new",
+    "name": "Purges and Emetics from Bitter Plants",
+    "one_liner": "Purges and emetics from bitter plants",
+    "observation": "Purges and emetics from bitter plants.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 18.0,
+    "band_high": 43.0,
+    "min_year": 18.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "herbal_classification",
+      "dietary_healing_regimens"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "General health",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/purges_emetics-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "kin_care_widows_orphans",
+    "line": "demography",
+    "status": "new",
+    "name": "Widows and Orphans Taken in by Kin",
+    "one_liner": "Widows and orphans taken in by kin",
+    "observation": "Widows and orphans taken in by kin.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 18.0,
+    "band_high": 43.0,
+    "min_year": 18.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "named_descent_lines",
+      "shared_childcare"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Child survival",
+    "signals": [
+      "population",
+      "society"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/kin_care_widows_orphans-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "portage_paths",
+    "line": "logistics",
+    "status": "new",
+    "name": "Portage Paths Between Waterways",
+    "one_liner": "Portage paths between waterways",
+    "observation": "Portage paths between waterways.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 17.0,
+    "band_high": 39.0,
+    "min_year": 17.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "river_craft",
+      "trail_waymarking"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {
+      "environment": [
+        "river"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Trade reach",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/portage_paths-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  {
+    "id": "firebreaks",
+    "line": "ecology",
+    "status": "new",
+    "name": "Firebreaks Cleared Around Camps and Fields",
+    "one_liner": "Firebreaks cleared around camps and fields",
+    "observation": "Firebreaks cleared around camps and fields.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 17.0,
+    "band_high": 39.0,
+    "min_year": 17.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "controlled_undergrowth_burning"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Land health",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/firebreaks-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  }
+]

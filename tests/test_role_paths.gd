@@ -422,6 +422,60 @@ func test_the_leaders_say_why_learning_is_low()->void:
 	assert_str(raised).contains("at most %s in 100" % Paths._share_words(Paths.learning_cap()*100.0)).contains("the share for war, raised by their wish to learn")
 	assert_float(Paths.learning_cap()).is_greater(float(Paths.LEARNING_CAP.war))
 
+## HUNGER NEVER TAKES THE FEW LEARNERS (poor land: four in five gathering left
+## one person learning, and the people never found its fields). The leaders
+## keep 3.5 in 100 on learning, taking the hands from building, making,
+## carrying and the watch in proportion, never from food, and never more than
+## half of that work.
+func test_hunger_never_takes_the_few_learners()->void:
+	_world()
+	var weights:={"Food":300.0,"Survey":8.0,"Extraction":11.0,"Construction":11.0,"Crafting":7.0,"Logistics":12.0,"Knowledge":2.0,"Administration":4.0,"Defense":4.0}
+	var before:=weights.duplicate()
+	var total:=0.0
+	for role:String in weights:total+=float(weights[role])
+	var moved:=Paths.keep_learners(weights)
+	assert_float(float(weights.Knowledge)/total).is_equal_approx(Paths.LEARNERS_KEPT,0.000001)
+	assert_float(moved).is_equal_approx((float(weights.Knowledge)-2.0)/total,0.000001)
+	for role in ["Food","Survey","Extraction","Administration"]:assert_float(float(weights[role])).override_failure_message(role).is_equal(float(before[role]))
+	var gave:=(float(weights.Knowledge)-2.0)/(11.0+7.0+12.0+4.0)
+	for role in Paths.LEARNERS_KEPT_FROM:assert_float(float(weights[role])/float(before[role])).override_failure_message(role).is_equal_approx(1.0-gave,0.000001)
+	# Learning already at its share: nothing moves.
+	var calm:={"Food":40.0,"Knowledge":5.0,"Construction":11.0,"Crafting":7.0,"Logistics":12.0,"Defense":4.0}
+	assert_float(Paths.keep_learners(calm)).is_equal(0.0)
+	assert_float(float(calm.Construction)).is_equal(11.0)
+	# Never more than half of building, making, carrying and the watch.
+	var starving:={"Food":2000.0,"Knowledge":0.0,"Construction":4.0,"Crafting":2.0,"Logistics":2.0,"Defense":2.0}
+	Paths.keep_learners(starving)
+	assert_float(float(starving.Knowledge)).is_equal_approx(5.0,0.000001)
+	assert_float(float(starving.Food)).is_equal(2000.0)
+	# A watch the ruler holds at a share stays where the ruler put it.
+	MilitaryCampaign.watch_work_share=0.05
+	var held:=before.duplicate()
+	Paths.keep_learners(held)
+	assert_float(float(held.Defense)).is_equal(4.0)
+	MilitaryCampaign.watch_work_share=-1.0
+
+## In a hunger the leaders' plan keeps the learners, and the People view says
+## so in plain words; the tip always says the rule.
+func test_the_leaders_keep_their_learners_in_hunger_and_say_so()->void:
+	_world()
+	assert_str(String(Paths.leaders_line().tip)).contains("Even when food runs short they keep 3.5 in 100 on learning, taking the hands from building, making, carrying and the watch, never from food.")
+	assert_str(String(Paths.leaders_line().text)).not_contains("hunger")
+	# Short of food, stores nearly gone: the survival guard puts nearly everyone on food.
+	GameState.simulation_metrics.merge({"food_labor_share":0.80,"food_production":100.0,"food_consumption":118.0,"food_days":2.0,"food_projected_days":2.0,"food_net":-18.0,"food_intake_ratio":0.9},true)
+	_delegate()
+	var shares:Dictionary=GameState.population_allocation_percentages
+	assert_float(float(shares.Food)).is_greater(65.0)
+	assert_float(float(shares.Knowledge)).override_failure_message("learning %.2f" % float(shares.Knowledge)).is_greater(3.0)
+	assert_float(float(GameState.player_settlements[0].get("learners_kept",0.0))).is_greater(0.0)
+	assert_str(String(Paths.leaders_line().text)).contains("They keep their few learners even in this hunger.")
+	_assert_plain(String(Paths.leaders_line().text),"leaders line")
+	# Fed again: the plan needs no keeping, and the line says nothing of hunger.
+	_food_needs_a_third()
+	_delegate()
+	assert_float(float(GameState.player_settlements[0].get("learners_kept",0.0))).is_equal(0.0)
+	assert_str(String(Paths.leaders_line().text)).not_contains("hunger")
+
 ## Ores want someone who knows the craft, not five scholars: a people that
 ## knows a deposit's own practice works it with a learner or two, whatever
 ## its path; one that knows none of them still needs five.

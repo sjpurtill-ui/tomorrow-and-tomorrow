@@ -2,11 +2,16 @@
   "id": "dawn_readiness_drill",
   "line": "security",
   "game_year": 4,
-  "approx_historical_year": -4973,
-  "prompt": "c. 4973 BCE: at dawn adults practice quickly gathering flint-tipped spears from a reed shelter. Mature flat hand-cut woodblock print, black and vermilion ink, rough carved silhouettes; no helmets, armor, metal, writing or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-73b9e0ee-e527-4a57-965e-725f3fecac69.png",
-  "asset": "res://assets/ui/research/subjects/dawn_readiness_drill-v1.png",
-  "sha256": "f3f9c0ca819e56dd5f499fd90eb0b70306ca92e4f33ad021988217bc4986ec90",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation selected; first cropped action and used comic-like radiating marks. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7970f50e-6dca-426f-994c-2e0d45598165.png",
+  "prompt": "Edit this CURRENT GAME wide security woodblock banner, preserving its approximately 2158x729 WIDE canvas, mature flat carved black silhouettes, vermilion/charcoal/parchment limited layers and knife-cut texture. Keep three hide-clad adults rehearsing a dawn readiness signal with simple raw wooden/flint spears and raised signaling hand. Remove the finished reed hut, its reed walls, baskets, pottery and canoe completely. Replace hut with one low ragged hide windbreak on crooked branches, resting on natural ground; riverbank remains without boats. Crude portable camp, no refined buildings, metal, woven cloth or polished components. Reduce figure group slightly so every full head, signaling arm, spear grip and tip is visible inside central 70 percent height for wide card cropping. Preserve established graphic woodblock rendering and wide proportions. No photographic lighting, CGI, cute cartoon, words or border.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/dawn_readiness_drill-v1.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full 2157x729 original inspected: three flat carved woodblock adults rehearse dawn readiness, raised hand/weapon cue, raw wooden/flint spears. Hut, baskets, pottery and canoe removed, one ragged hide windbreak retained. Complete adult faces and spear grips inside wide central band. Existing vermilion/charcoal/parchment medium retained.",
+  "asset": "res://assets/ui/research/subjects/dawn_readiness_drill-v2.png",
+  "sha256": "5648fd1126fb8437d575ebe08aaf673becbb7d26ec4a563c639941cdeed5d57f",
+  "mode": "built-in image_gen / edit"
 }

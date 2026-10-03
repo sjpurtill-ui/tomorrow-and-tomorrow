@@ -1,0 +1,12 @@
+{
+  "id": "lineage_land_tenure",
+  "line": "institutions",
+  "game_year": 18,
+  "approx_historical_year": -4880,
+  "prompt": "c. 4880 BCE: Lineage elders show kin shared fields and grazing grounds from a plain boundary cairn; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a27c6cc1-5b86-4ec7-9421-fb0fe83c9870.png",
+  "asset": "res://assets/ui/research/subjects/lineage_land_tenure-v1.png",
+  "sha256": "3baeb8caca532d8eb502112bcd0dfb216bdae21a54cc43cfd908f974cffc1b40",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; kin group, boundary and landscape clear; no deed or writing."
+}

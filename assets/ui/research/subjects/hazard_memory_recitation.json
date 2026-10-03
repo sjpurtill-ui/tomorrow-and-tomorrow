@@ -1,12 +1,21 @@
 {
   "id": "hazard_memory_recitation",
   "line": "security",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hafted_weapons-v2.png",
+  "medium": "layered handcut woodblock vermilion charcoal parchment",
+  "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and layered handcut woodblock vermilion charcoal parchment. An elder gestures warning toward distant crumbling cliff-edge path; three listeners seated around a small cairn repeat pointed and open-palm gestures. Hazard remembered through spoken lore, no writing. Clear cliff and safe foreground. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fab4165d-fce0-46ae-81e2-a88333198664.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 8,
-  "approx_historical_year": -4947,
-  "prompt": "Elder orally recounts a remembered river hazard to younger adults beside low hearth; hand-cut woodblock print in black and ochre.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5362e1b7-97f7-436b-87a0-e9a97853c76e.png",
-  "asset": "res://assets/ui/research/subjects/hazard_memory_recitation-v1.png",
-  "sha256": "f425f7bfea649cee30c086143927f586d2db38c5d63b52818e405eb0c11f05e7",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; oral recitation and hazardous bank clear; crop reviewed."
+  "replace_art600": false,
+  "replace_first300": false,
+  "binding_style": "security: layered handcut woodblock vermilion charcoal parchment",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/hazard_memory_recitation-v2.png",
+  "sha256": "d3632acbafe9a357e6a10324ae64f43130628b3fb1ec3b81695e7a8de0ae14f0"
 }

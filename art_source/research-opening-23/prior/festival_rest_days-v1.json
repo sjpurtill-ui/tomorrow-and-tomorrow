@@ -1,0 +1,12 @@
+{
+  "id": "festival_rest_days",
+  "line": "labor",
+  "game_year": 32,
+  "approx_historical_year": -4787,
+  "prompt": "c. 4787 BCE: Adults set down field tools and share food, dancing and simple clappers for communal seasonal rest; charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-671d934b-bdde-468c-805b-7526c7a96ab8.png",
+  "asset": "res://assets/ui/research/subjects/festival_rest_days-v1.png",
+  "sha256": "cf3891f53ac64b429885ef96814d55d34bb235a003a91f3839cc316e9711cd8f",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; deliberate rest and festival clear in crop."
+}

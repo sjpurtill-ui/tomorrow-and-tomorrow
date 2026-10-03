@@ -1,0 +1,12 @@
+{
+  "id": "emergency_food_caching",
+  "line": "security",
+  "game_year": 5,
+  "approx_historical_year": -4967,
+  "prompt": "c. 4967 BCE: adults lower baskets of dried food into a lined earth pit and conceal the reserve beneath stones and brush. Mature layered hand-cut woodblock print, charcoal and vermilion on warm parchment; no lock, masonry granary, writing or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2f775c04-2e05-40d9-b10d-df20c64caf84.png",
+  "asset": "res://assets/ui/research/subjects/emergency_food_caching-v1.png",
+  "sha256": "a2a7394eeb5e823ed10bb3339c28c2218118fd264f3d7e2b13dcde5771b2a1a0",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation selected; cache pit and cover clear. Accepted after visual 3.37:1 crop and subject/period check."
+}

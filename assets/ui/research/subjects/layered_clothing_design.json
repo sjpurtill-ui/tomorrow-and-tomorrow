@@ -1,0 +1,25 @@
+{
+  "id": "layered_clothing_design",
+  "line": "production",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.4
+  ],
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies production medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: In a cold windy sparse upland camp, one adult wears a short sewn hide inner tunic while another places a loose fur outer wrap over their shoulders, showing TWO separate overlapping layers. Complete faces and hands central, coarse sinew stitching, angular flat copper/umber/soot palette-knife painting. No woven fabric, buttons, metal needles, tailored modern trousers or mannequin.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas, hands and central action y350..590. Zoom out enough that actual3.37:1 card keeps heads and mechanism. Top/bottom peripheral bands background only. Varied scene, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and small earthen dwellings, but plain weaving is later. Never introduce later tools/buildings from reference.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/production-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-98d0f315-3305-43da-9b2f-b3f60d9a896b.png",
+  "replace_first300": true,
+  "replace_art600": false,
+  "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/layered_clothing_design.png",
+    "focus": [
+      0.5,
+      0.52
+    ]
+  },
+  "asset": "res://assets/ui/research/subjects/layered_clothing_design-v2.png",
+  "sha256": "ce2be414017c0a096be60ead052a656877710c048e7dd63442f4de9b00cb8c16",
+  "mode": "built-in image_gen / edit"
+}

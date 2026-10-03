@@ -1,12 +1,56 @@
 {
   "id": "breeding_stock_sparing",
   "line": "ecology",
-  "game_year": 35,
-  "approx_historical_year": -4767,
-  "prompt": "c. 4767 BCE: Hunters lower bows and let mother deer with fawn pass, choosing solitary male beyond; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cc1fcde6-75d8-45af-a392-fa009379985e.png",
-  "asset": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png",
-  "sha256": "0eb9fe7a39dcbdc5269df74df27c9ecc755c2d08ff03d145a344f7711e893054",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; sparing female and young clear in crop."
+  "status": "new",
+  "name": "Breeding Females and Young Spared in the Hunt",
+  "one_liner": "Breeding females and young spared in the hunt",
+  "observation": "Breeding females and young spared in the hunt.",
+  "key_threshold": false,
+  "target_year": 35,
+  "proposed_year": 35,
+  "band_low": 21,
+  "band_high": 49,
+  "min_year": 21,
+  "research_years": 3,
+  "requires_all": [
+    "seasonal_protein_sourcing"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "phenology_signs"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Resource sustainability",
+  "signals": [
+    "nature",
+    "survey"
+  ],
+  "version": 2,
+  "year": 35,
+  "focus": [
+    0.5,
+    0.3
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "ecology: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/ecology-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established ecology painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: Two adults lower their simple spears and leave an adult female deer with a young fawn undisturbed at a woodland clearing; another animal remains distant. Observational wildlife scene, NOT domesticated breeding, no fenced pen. Ecology plant-pigment painting, botanical foreground and flat landscape, restrained leafy earth greens.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-5c81223a-cdfa-46be-87ef-9bd34ad4f6c9.png",
+  "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/breeding_stock_sparing-v2.png",
+  "sha256": "761b3e68658f3b431ab776aaa183c9a7bb0252ee42b3f77709ed316b1903dc2a",
+  "mode": "built-in image_gen / edit"
 }

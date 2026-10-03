@@ -1,12 +1,51 @@
 {
   "id": "sweat_baths",
   "line": "health",
-  "game_year": 25,
-  "approx_historical_year": -4833,
-  "prompt": "c. 4833 BCE: Adults heat rounded stones outdoors and carry them into small reed-and-hide sweat hut where steam rises; watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f7b634c2-b6fc-4ec7-9a85-73c7ec25cec2.png",
-  "asset": "res://assets/ui/research/subjects/sweat_baths-v1.png",
-  "sha256": "b175102102313db163091d826c51d752fcd7681dacd34e02c6a2bb0eabdd6f27",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; heated stones, hut and steam clear in crop."
+  "status": "new",
+  "name": "Sweat Baths in Heated Huts",
+  "one_liner": "Sweat baths in heated huts",
+  "observation": "Sweat baths in heated huts.",
+  "key_threshold": false,
+  "target_year": 25,
+  "proposed_year": 25,
+  "band_low": 15,
+  "band_high": 35,
+  "min_year": 15,
+  "research_years": 3,
+  "requires_all": [
+    "hearth_heat_retention",
+    "framed_construction"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Water & sanitation",
+  "signals": [
+    "health",
+    "illness"
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/sweat_baths-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "year": 25,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "health: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/health-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: Outside a small low hide-covered branch shelter, two fully clothed adults prepare a few warmed stones with wooden tongs beside a simple hearth and a small clay water bowl; faint steam seen at partly open doorway. Sage/celadon ink-watercolor on cream. Keep all figures covered in hides. No nudity, metal stove, chimney, tiled bath, bucket technology or medical efficacy claim.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-55eda958-ebeb-468f-9cce-800ca2c14dde.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/sweat_baths-v2.png",
+  "sha256": "3b9af3a2eadd529e8e297e627019840f194f0c922e5ac84c2ebdd2076fea808b",
+  "mode": "built-in image_gen / edit"
 }

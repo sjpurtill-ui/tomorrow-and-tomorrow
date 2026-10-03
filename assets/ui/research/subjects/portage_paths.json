@@ -1,12 +1,55 @@
 {
   "id": "portage_paths",
   "line": "logistics",
-  "game_year": 28,
-  "approx_historical_year": -4813,
-  "prompt": "c. 4813 BCE: Travelers carry small hide-and-wood river craft and bundles along worn path between waterways; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-39591611-416c-4d4a-bf16-f868bdebb572.png",
-  "asset": "res://assets/ui/research/subjects/portage_paths-v1.png",
-  "sha256": "ed2ac150f13e9807aee146a4f875925892458092b9efc3f61ec8dce54448a8f6",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; craft portage and second waterway clear in crop."
+  "status": "new",
+  "name": "Portage Paths Between Waterways",
+  "one_liner": "Portage paths between waterways",
+  "observation": "Portage paths between waterways.",
+  "key_threshold": false,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 17,
+  "band_high": 39,
+  "min_year": 17,
+  "research_years": 3,
+  "requires_all": [
+    "river_craft",
+    "trail_waymarking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+    "environment": [
+      "river"
+    ]
+  },
+  "shared_with": [],
+  "subcategory": "Trade reach",
+  "signals": [
+    "travel",
+    "logistics"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/portage_paths-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "logistics: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/logistics-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established logistics medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Four adults carry ONE small hollowed wooden dugout canoe on shoulders across a short dry neck of land between two visible waterways. Clear single complete hull, bow/stern unobstructed, footpath curving toward water. Panoramic travel watercolor sand/slate/indigo. No plank hull, sail, oars with metal fittings, cart, wheels or road.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ade48982-0c3b-429c-8f00-3b6bc2abe480.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/portage_paths-v2.png",
+  "sha256": "87fe9822bb3cd2b9c6dac50f75993ccbd6bc1417924d37c19934c7610c48eeb2",
+  "mode": "built-in image_gen / edit"
 }

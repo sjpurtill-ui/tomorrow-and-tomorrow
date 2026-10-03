@@ -1,0 +1,7 @@
+# Twelve prehistoric experiment illustrations
+
+Worker `codex/artifact-production-recovery-11`, base `196a7b56145b835dda4fdb6b2acb66831ac6234c`. Owns catalogue1436–1447 originals, bank entries, runtime index and review helpers. Exact sources and built-in prompts in reviewed.json; all originals unmodified.
+
+Fictional raw prehistoric experiments in established matte gouache on ivory, with small crudely removed natural supports. Tinder carrier, twig cross joint, shell lamp, marked pebble, bone toggle, bent-branch spring, leaf impression, cushioned stone, seed grip, weighted hide corner, antler soil probe and wind shield remain distinct. Organic preservation is imagined; these are not claimed actual archaeological finds. No modern components or later refined craftsmanship. Bone toggle now fastens a hide slit; spring now has a taut sinew tie. Three initial sources with unrelated extra experimental props were held and replaced. Held candidates never entered the bank. The abstract spring is a small material experiment, without arrow or weapon scene.
+
+Final import clean after initial cold dependency errors; headless ARTIFACT_RECOVERY11_PASS count=12; final isolated GPU exit0, twelve-item PASS. Full originals and all actual240-square tiles inspected. Bank audit errors[] and exact structural scope1436–1447. Review-helper captions corrected before final capture. Test override, captures and unrelated cache/import churn excluded. No chronology, simulation or save changes. Awaiting designated integration.

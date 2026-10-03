@@ -1,0 +1,19 @@
+{
+  "id": "genealogical_recitation",
+  "line": "culture",
+  "game_year": 4,
+  "version": 1,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2fbaceea-168e-4351-b011-480676d432cb.png",
+  "prompt": "New genealogical-recitation research banner matching supplied WIDE culture painting's approximately 2170x725 proportions and current game mature flat tapestry-inspired painted treatment: indigo, dusty rose, warm gold, dusk violet; angular interlocking pigment planes and coarse matte grain. Change scene to an elder reciting each household's lineage. Seated gray-haired elder at left speaks with one open hand directed toward a nearby three-generation household: gray-haired adult, adult parent, and child together. Another adult listener repeats the account with a small hand gesture toward their own household. Two distinct family groups, respectful listening, not a generic epic performance or mystical symbols. All wear rough ragged untreated hide wraps; natural rocks and small raw-hide windbreak only. No writing, record tablets, emblems, pottery, basket, woven costumes or finished buildings. Complete heads and elder's family-pointing hand/repeater gesture in the middle 70 percent of image height with clear margins above/below, suitable for 3.37:1 crop. Full-bleed wide banner matches reference shape, no 3:2 or square. No photography, CGI, cartoon, heavy raised oil relief or text.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/oral_epics-v3.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_art600": true,
+  "binding_style": "culture: tapestry-inspired painting",
+  "review": "Full 2170x725 banner inspected. Culture palette/angular interlocking pigment matches wide painted reference. Seated elder directs open hand to gray-haired adult, parent and child household; second adult repeater gestures toward another household. Two family groupings, raw hides, no physical tapestry, symbols, record tablet or refined camp. Replaces small silhouette tile with dedicated wide subject.",
+  "asset": "res://assets/ui/research/subjects/genealogical_recitation-v1.png",
+  "sha256": "b40682ce9c64fa06000ba133be78c10bd877901a36140ccb4c1e75e846681a43",
+  "mode": "built-in image_gen / edit"
+}

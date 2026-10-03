@@ -1,9 +1,53 @@
 {
   "id": "household_space_planning",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Household Space Planning. Show a concrete, visually clear scene demonstrating this exact practice: Sleeping space, ventilation, and care areas are planned around household needs rather than floor area alone. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. These are early settled communities. Use small earth, stone and timber buildings and simple fiber clothing. Tools are stone, bone and wood unless this discovery specifically concerns metalworking. No steel tools, modern objects, medieval castles, grand cities or industrial machinery. Make this scene composition distinct, with varied climate and terrain.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-652aae54-9f35-4298-8e78-a43e9f0568e4.png",
-  "asset": "res://assets/ui/research/subjects/household_space_planning-v1.png",
-  "sha256": "e42eef1626214b774dc9ed96da3d560a2744cacb085b0c206d400f4337434131",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "demography",
+  "status": "catalog",
+  "name": "Household Space Planned for Sleep, Air and Care",
+  "one_liner": "Household space planned for sleep, air and care",
+  "observation": "Household space planned for sleep, air and care.",
+  "key_threshold": false,
+  "target_year": 42,
+  "proposed_year": 42,
+  "band_low": 27,
+  "band_high": 62,
+  "min_year": 27,
+  "research_years": 3,
+  "requires_all": [
+    "extended_family_room_division"
+  ],
+  "requires_any": [
+    [
+      "adobe_wall_construction",
+      "framed_construction"
+    ]
+  ],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 42,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/demography-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established demography painting medium and EXACT EXTRA-WIDE canvas width/aspect. Full bleed, no frame/grid/text/3:2. NEW SUBJECT: Show a cutaway-like OPEN VIEW into a modest branch-and-hide shelter with TWO simple low interior branch dividers. One adult gestures to separate sleeping hides, food baskets and a small work patch; another moves a basket. Deliberate household spatial arrangement, no floorplan drawing, grand house, later masonry rooms or furniture. Medium angular chalk/pastel cut-paper terracotta/rust/ivory/slate. Zoom out so ALL heads, hands and mechanisms fit central y170..590 on a765px banner for the actual3.37:1 card. Gameyears42\u201344, modest prehistoric materials: wood, reed, stone, raw hides/fur, clay, bast fibers. Do not copy reference's unrelated village or river subject. No metal, woven clothing, ornate later technology or photographic lighting.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-620d7472-d014-4246-b8bd-cd02b4f8c179.png",
+  "review": "Full original inspected; accepted subject and established field painting medium. Actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/household_space_planning-v2.png",
+  "sha256": "d075a5465270aefb62374f68b7bc01a5981d33732230bafa367701417744cbcb",
+  "mode": "built-in image_gen / edit"
 }

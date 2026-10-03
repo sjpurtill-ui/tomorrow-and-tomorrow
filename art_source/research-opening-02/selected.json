@@ -1,0 +1,47 @@
+[
+  {
+    "id": "watch_rotation",
+    "asset": "res://assets/ui/research/subjects/watch_rotation-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-dc9567d4-7bea-4a21-a712-3ca993b5fe1b.png",
+    "prompt": "Correct this Watch Rotation game painting. Preserve the mature hand-cut woodblock print, charcoal/vermilion inks on warm parchment, two adult hide-clad sentries passing a rough flint-tipped wooden spear, temporary branch-and-hide shelters and sleeping person. Remove the basket or vessel at far right completely, replace with bare earth. Improve discovery-card readability by moving both sentry heads down and handoff up into the same middle horizontal band: all heads and spear handoff must survive a 3.37:1 banner crop centered 45 percent down the image. No metal, pottery, weaving, farming, fixed fortification, writing, frames, photorealism or childlike art. Wide 3:2 landscape.",
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "effective_year": 2,
+    "before_early": "res://assets/ui/research/paper/watch_rotation.png",
+    "review": "Full-image review: handmade woodblock shift handoff; hide clothing, portable shelters, stone spear. Basket removed; no fortifications, metal or pottery. Full image and 3.37:1 banner visually reviewed; runtime and private GPU card checks passed.",
+    "sha256": "837dd5dc9c1fd5485df2b5bb733b4319fa78c633090816e22303acf299220305",
+    "mode": "built-in image_gen"
+  },
+  {
+    "id": "wound_cleaning",
+    "asset": "res://assets/ui/research/subjects/wound_cleaning-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9380723c-9910-48d7-b838-454f662dfc1c.png",
+    "prompt": "Use case: historical-scene. One game research illustration for Washing Wounds with Clean Water, an opening expedition before pottery or farming. Two dignified adults in roughly joined hides crouch at a clear shallow spring: caregiver uses cupped bare hands to pour clean water gently onto a small superficial scrape on the other's forearm; a few small water droplets make rinsing unmistakable. No gore. No basin, bowl, jug, ceramic, cloth, basket, metal, syringe, buildings or writing. Approved Health & care style: mature transparent watercolor with restrained ink on warm linen paper, sage/celadon, muted skin tones, bleeding washes, simplified flat adult forms, compassionate readable gesture. No photography, volumetric digital painting, cute characters or borders. Wide 3:2 landscape, generous paper. Arrange both faces, rinsing hands and forearm inside a single horizontal band centered 50 percent down; they must all remain readable in a 3.37:1 research banner crop. No labels or watermark.",
+    "focus": [
+      0.5,
+      0.3
+    ],
+    "effective_year": 2,
+    "before_early": "res://assets/ui/research/paper/wound_cleaning.png",
+    "review": "Full-image review: watercolor/ink with sage washes; cupped hands rinse small forearm scrape at spring. Hide clothing, no ceramic basin or advanced equipment. Full image and 3.37:1 banner visually reviewed; runtime and private GPU card checks passed.",
+    "sha256": "7add6238d825080b4ae33d3088c262928b31ac6f3bbdf6502174245977fd94f8",
+    "mode": "built-in image_gen"
+  },
+  {
+    "id": "edible_resource_recognition",
+    "asset": "res://assets/ui/research/subjects/edible_resource_recognition-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-435844ce-531d-43e9-a7e2-e072a231ad08.png",
+    "prompt": "NEW SCENE using reference solely for opaque botanical egg-tempera technique and flat plant morphology. Do not copy its greenhouse, farming or clothing. Create Edible Plants, Roots and Seeds Known by Season in a prehistoric mobile expedition. Close-up bare adult hands: one points at the broad serrated leaves and seed stalk of a wild edible herb rooted in rough soil; second holds a lifted root with attached matching leaf stem beside it. No people faces needed. Hands are simple flat ochre paint planes exactly like reference. Plant foreground has crisp flat leaf shapes; background is plain warm cream with two muted olive landscape bands. Sparse composition, clear visual comparison and wild foraging. All identification action at middle height for 3.37:1 banner. 3:2 full image. Visible opaque brush marks and handmade flat editorial painting, not shaded realistic bodies. No basket, ceramic, metal, woven sleeves, cultivated rows, buildings, text, border, emblem, photograph, 3D or cinematic lighting.",
+    "focus": [
+      0.5,
+      0.55
+    ],
+    "effective_year": 2,
+    "before_early": "res://assets/ui/research/paper/edible_resource_recognition.png",
+    "review": "Full-image reviewed: opaque flat tempera, ochre bare hands compare dandelion leaves and lifted root. Wild soil, no basket, ceramics, farming or advanced clothing. Rejected preceding realistic variant. Full image and 3.37:1 banner visually reviewed; runtime and private GPU card checks passed.",
+    "sha256": "0b33f0b451b734ccf919c812b27a48055bd04d9f77b5e04f0ce1439044e76768",
+    "mode": "built-in image_gen"
+  }
+]

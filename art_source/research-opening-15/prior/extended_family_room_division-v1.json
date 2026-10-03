@@ -1,0 +1,12 @@
+{
+  "id": "extended_family_room_division",
+  "line": "demography",
+  "game_year": 14,
+  "approx_historical_year": -4907,
+  "prompt": "c. 4907 BCE: Extended household lays separate sleeping mats in two zones divided by woven screens around shared hearth; chalk pastel and torn-paper collage. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-74591f52-eaaa-4eec-a77a-d079d2341b72.png",
+  "asset": "res://assets/ui/research/subjects/extended_family_room_division-v1.png",
+  "sha256": "7bdabb48e540139004b7e6412cb428d1a55dceddb24acacb02f760c364854673",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; partitions and distinct sleeping zones clear in crop."
+}

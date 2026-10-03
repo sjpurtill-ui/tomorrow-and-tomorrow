@@ -243,3 +243,95 @@ func test_tap_pins_city_card_until_click_away()->void:
 	var away:=InputEventMouseButton.new();away.button_index=MOUSE_BUTTON_LEFT;away.pressed=true;away.position=Vector2(100,650)
 	overlay._input(away)
 	assert_str(overlay.expanded_id()).is_empty()
+
+# --------------------------------------------------------------------------
+# The guard badge: those keeping watch, then "+N" townsfolk who would rise
+# --------------------------------------------------------------------------
+
+const EraWords:=preload("res://scripts/hud/era_words.gd")
+
+## One of our towns' cards, measured as the layer measures it, with its guard
+## in the badge's parts.
+func guard_card(title:String,watch:int,rise:int,flag:bool=false)->Dictionary:
+	var label:=Label3D.new();label.text="%s  •  60" % title
+	var card:=Labels._measure_card(label,{},false,"",flag,preload("res://scripts/hud/hud_tokens.gd").voice_font(),Rect2(0,0,1600,900),{},"guarded",{"watch":watch,"rise":rise,"bands":0})
+	label.free()
+	card["id"]="guarded";card["compact"]=true;card["flag"]=null
+	return card
+
+func test_guard_badge_sets_the_watch_apart_from_the_townsfolk_and_fits_its_tag()->void:
+	var ui:=preload("res://scripts/hud/hud_tokens.gd").font("ui")
+	var voice:=preload("res://scripts/hud/hud_tokens.gd").voice_font()
+	# "2 +5": the townsfolk take room of their own beside the watch.
+	assert_str(Labels.rise_text(5)).is_equal("+5")
+	assert_float(Labels.badge_width(2,5)).is_greater(Labels.badge_width(2)+8.0)
+	assert_float(Labels.badge_width(0,3)).is_greater(Labels.badge_width(0)+8.0)
+	for parts:Array in [[2,5,false],[0,3,false],[1240,3800,false],[2,5,true],[7,0,false]]:
+		var card:=guard_card("Ashfire",int(parts[0]),int(parts[1]),bool(parts[2]))
+		assert_int(int(card.badge)).is_equal(int(parts[0]))
+		assert_int(int(card.rise)).is_equal(int(parts[1]))
+		assert_str(String(card.badge_tip)).is_not_empty()
+		var text_x:=46.0 if bool(parts[2]) else 11.0
+		var name_end:=text_x+voice.get_string_size("Ashfire",HORIZONTAL_ALIGNMENT_LEFT,-1,Labels.NAME_SIZE).x
+		# The tag makes room for the whole badge after the name: inside the
+		# tag, clear of the name's last letter, on the name's line.
+		var tag:=Rect2(Vector2(300,200),Vector2(float(card.name_width),float(card.lines.size())*20+10))
+		var chip:=Labels.badge_rect(card,tag)
+		assert_bool(tag.encloses(chip)).override_failure_message(str(parts)).is_true()
+		assert_float(chip.position.x-tag.position.x).override_failure_message(str(parts)).is_greater_equal(name_end+8.0)
+		assert_float(tag.end.x-chip.end.x).is_equal_approx(5.0,1.0)
+		# The figures fit inside the chip: count, gap, "+N".
+		var figures:=15.0+ui.get_string_size(EraWords.grouped(int(parts[0])),HORIZONTAL_ALIGNMENT_LEFT,-1,Labels.BADGE_SIZE).x
+		if int(parts[1])>0:figures+=Labels.BADGE_RISE_GAP+ui.get_string_size(Labels.rise_text(int(parts[1])),HORIZONTAL_ALIGNMENT_LEFT,-1,Labels.BADGE_SIZE).x
+		assert_float(figures).is_less_equal(chip.size.x)
+		# The open card is never narrower, and its badge stays in place.
+		assert_float(float((card.detail as Vector2).x)).is_greater_equal(float(card.name_width))
+		assert_bool(Labels.badge_rect(card,Rect2(tag.position,card.detail))==chip).is_true()
+	# Nobody keeps watch and nobody would rise: no badge, no room for one.
+	var bare:=guard_card("Ashfire",0,0)
+	assert_str(String(bare.badge_tip)).is_empty()
+	assert_float(float(bare.name_width)).is_equal(ceilf(voice.get_string_size("Ashfire",HORIZONTAL_ALIGNMENT_LEFT,-1,Labels.NAME_SIZE).x+22))
+
+func test_guard_badge_words_say_who_keeps_watch_and_who_would_rise()->void:
+	assert_str(Labels.guard_words(2,5)).is_equal("2 keep watch here. If the town is attacked, about 5 of its grown townsfolk would take up whatever is at hand and fight beside them (1 in 10 of the grown people).")
+	assert_str(Labels.guard_words(0,3)).is_equal("No one keeps watch here. If the town is attacked, about 3 of its grown townsfolk would take up whatever is at hand and fight (1 in 10 of the grown people).")
+	assert_str(Labels.guard_words(1,0)).is_equal("1 keeps watch here.")
+	assert_str(Labels.guard_words(2,5,2)).ends_with("None of them is kept as the home guard: a general may lead them away in a band.")
+	assert_str(Labels.guard_words(35,9,20)).ends_with("15 of them are the home guard and stay; a general may lead the other 20 away in a band.")
+	assert_str(Labels.guard_words(1240,380)).starts_with("1,240 keep watch here.").contains("about 380 of its")
+	assert_str(Labels.held_words(17)).is_equal("17 of our fighters hold this town.")
+
+func test_guard_badge_words_open_under_the_pointer_and_stay_on_screen()->void:
+	var overlay:=hover_overlay()
+	var card:=guard_card("Ashfire",2,5)
+	card["rect"]=Rect2(Vector2(400,500),Vector2(float(card.name_width),30));card["anchor"]=Vector2(390,560);card["detail_extent"]=card.detail
+	card["color"]=Color.WHITE;card["lines"]=["Ashfire"]
+	var shown:Array[Dictionary]=[card,overlay.cards[1]]
+	overlay.cards=shown
+	var chip:=Labels.badge_rect(card,card.rect)
+	# Resting on the badge: its words wait as the card does, then open.
+	overlay.hover_at(chip.get_center())
+	assert_str(overlay.badge_hover_id).is_equal("guarded")
+	assert_str(overlay.badge_at(chip.get_center())).is_equal("guarded")
+	overlay._process(.4)
+	assert_float(overlay.badge_elapsed).is_greater_equal(Labels.HOVER_DELAY)
+	# The card opened under the pointer and its badge did not move.
+	assert_str(overlay.expanded_id()).is_equal("guarded")
+	assert_str(overlay.badge_at(chip.get_center())).is_equal("guarded")
+	# Elsewhere on the open card, or off it: no words.
+	overlay.hover_at(card.rect.position+Vector2(8,20))
+	assert_str(overlay.badge_hover_id).is_empty()
+	overlay.hover_at(Vector2(100,650))
+	assert_str(overlay.badge_hover_id).is_empty()
+	# A badge with no words (a town of strangers) opens none.
+	assert_str(overlay.badge_at(Labels.badge_rect(overlay.cards[1],overlay.cards[1].rect).get_center())).is_empty()
+	# The words open under the card, or above it near the foot of the screen,
+	# always on screen.
+	var screen:=Rect2(0,0,1280,720)
+	var below:=Labels.badge_tip_rect(chip,card.rect,Vector2(300,80),screen)
+	assert_float(below.position.y).is_greater_equal(card.rect.end.y)
+	assert_float(below.position.x).is_equal(chip.position.x)
+	var low:=Rect2(Vector2(1200,660),Vector2(70,30))
+	var above:=Labels.badge_tip_rect(Labels.badge_rect(card,low),low,Vector2(300,80),screen)
+	assert_float(above.end.y).is_less_equal(low.position.y)
+	assert_bool(screen.encloses(above)).is_true()

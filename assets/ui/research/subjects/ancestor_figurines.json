@@ -1,0 +1,61 @@
+{
+  "id": "ancestor_figurines",
+  "line": "culture",
+  "status": "new",
+  "name": "Clay Figurines of Ancestors",
+  "one_liner": "Clay figurines of ancestors",
+  "observation": "Clay figurines of ancestors.",
+  "key_threshold": false,
+  "target_year": 32,
+  "proposed_year": 32,
+  "band_low": 18,
+  "band_high": 48,
+  "min_year": 18,
+  "research_years": 3,
+  "requires_all": [
+    "clay_shaping"
+  ],
+  "requires_any": [
+    [
+      "plastered_ancestor_skulls",
+      "house_floor_burial"
+    ]
+  ],
+  "precedents": [
+    "pit_firing"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Collective memory",
+  "signals": [
+    "society",
+    "information"
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/ancestor_figurines.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+      "tile_index": 1,
+      "caption": "Clay figurines of ancestors (Year 32)",
+      "style": "silhouette_ochre"
+    },
+    "subject": null
+  },
+  "version": 2,
+  "year": 32,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "culture: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/culture-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established culture medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: Two adults gently shape two palm-sized crude clay ancestor figurines with simplified rounded heads and pinched bodies beside a hearth; one elder studies the small figures. Tapestry-inspired PAINTING, flat interlocking indigo/rose/gold planes, not cloth. Figurines rough undecorated, no monumental idol, painted portrait, crown, letters or polished sculpture.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-c8569bc8-8f05-4fb0-a868-aa72d9d788e2.png",
+  "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/ancestor_figurines-v2.png",
+  "sha256": "bc12ca34c205b4a2f52f31e9260ed5adcfbcbe004983d8261d659ab8370c09f3",
+  "mode": "built-in image_gen / edit"
+}

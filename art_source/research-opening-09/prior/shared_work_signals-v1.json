@@ -1,0 +1,12 @@
+{
+  "id": "shared_work_signals",
+  "line": "labor",
+  "game_year": 8,
+  "approx_historical_year": -4947,
+  "prompt": "Adults move heavy timber together as central caller claps and others answer with raised hands; expressive charcoal and red ochre on rough paper.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-be299dba-3355-417f-b051-0188ca651c71.png",
+  "asset": "res://assets/ui/research/subjects/shared_work_signals-v1.png",
+  "sha256": "68d1bdee02984a13faa7ead08e604b88c14dfa480e7860a4dcacdbd68b98764c",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; coordinated work and clap visible; crop reviewed."
+}

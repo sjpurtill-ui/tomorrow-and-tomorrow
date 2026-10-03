@@ -1,0 +1,128 @@
+[
+  {
+    "id": "alarm_relay_signals",
+    "line": "security",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/alarm_relay_signals-v1.png",
+    "prior_sha256": "36ebf0dffed7594bd41a153807fb29f6df1cdcbc67017c226b159f5d6e829040",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-00643e17-495a-48cc-96d5-142d610d8774.png",
+    "review": "Full original inspected: three separated hide-clad adult callers with cupped hands, formal huts removed, one low ragged hide windbreak on crooked branches. Charcoal/vermilion layered carved woodblock medium preserved. Full original and 3.77:1 crop inspected; all three cupped-hand call gestures and faces remain visible."
+  },
+  {
+    "id": "council_messenger_duty",
+    "line": "institutions",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/council_messenger_duty-v1.png",
+    "prior_sha256": "0c3e73c0c30511db55c225e8add4d8d3d5dd970d33c24623a5106503c4f8bd30",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f5809e54-2bee-4024-b96f-562c2d7bf239.png",
+    "review": "Full original inspected: messenger approaches adult gathering under tree, callers beckon households. Matte flat civic fresco preserved. Formal reed huts, baskets, decorative borders and standardized stump stools removed; ragged hide windbreaks and natural rocks replace them. Full original and 3.77:1 crop inspected; messenger, beckoning hands and seated gathering remain legible."
+  },
+  {
+    "id": "dawn_task_briefings",
+    "line": "labor",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/dawn_task_briefings-v1.png",
+    "prior_sha256": "3b3fe540b5ed3c95751f8a81c44c1e5de47d2fb522df651915efeb74b56ebf14",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-5a6a2b21-7a68-44e7-aa91-3bbda6ba82ab.png",
+    "review": "Full original inspected: central adult assigns groups toward gathering and rough branch work at dawn. Woven baskets replaced by loose hide-wrapped stems and empty hands; regular reed walls replaced with irregular hide lean-to. Charcoal over ochre pigment medium preserved. Full original and 3.77:1 crop inspected; assignment arms, group faces, loose bundles and branch-work hands remain visible."
+  },
+  {
+    "id": "edge_testing_by_feel",
+    "line": "production",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/edge_testing_by_feel-v1.png",
+    "prior_sha256": "4e5fc25a4e04ffccd9c4c3413bed611e21eb5e9ff9fff6e220a9bbbced3c9925",
+    "status": "retained",
+    "review": "Tactile flint edge comparison; chunky copper/ember impasto, hands and edge legible. Full original and 3.77:1 crop reviewed."
+  },
+  {
+    "id": "ember_tending",
+    "line": "nutrition",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/paper/ember_tending.png",
+    "prior_sha256": "27db4c5699545d0f17a8ca5c9ee565ee9ce4caa135e7ba15277cf31c3a749d17",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0622cd31-868a-4d1d-855f-cf8c7fc129df.png",
+    "review": "Full original inspected: hide-clad adults bank a living coal with twig and ash, and support a naturally curled bark fragment with a rough forked branch for ember transfer. Opaque olive/gold/earth tempera pigment planes, no pottery, woven containers or modern reference objects. Specific bark carrier is an artistic interpretation under game capability constraints, not an archaeologically verified artifact reconstruction. Final full original and 3.77:1 crop inspected; both complete faces, banking twig, glowing coal, bark ember and supporting hands remain visible. Initial composition clipped faces in narrow crop; corrected by reducing figures and compacting the action before binding."
+  },
+  {
+    "id": "hazard_landmark_memory",
+    "line": "infrastructure",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/hazard_landmark_memory-v1.png",
+    "prior_sha256": "eb3f533970414c028af6761dac38e14dfce4e7b3856c6da2fd3b26c8b9b6670e",
+    "status": "retained",
+    "review": "Hide-clad travelers identify rough split rock, bent tree and dangerous water; mineral-blue matte gouache. Full original and 3.77:1 crop reviewed."
+  },
+  {
+    "id": "labor_position_customs",
+    "line": "demography",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/labor_position_customs-v1.png",
+    "prior_sha256": "164301400d59a0e2f704e247d63a7e36999c9fa86ab8c91b4f5d517a625233d5",
+    "status": "retained",
+    "review": "Three hide-clad adults demonstrate supported birth posture with hand grips; mature flat terracotta/ivory chalk and cut-paper shapes. Full original and 3.77:1 crop reviewed."
+  },
+  {
+    "id": "landmark_route_naming",
+    "line": "logistics",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/landmark_route_naming-v1.png",
+    "prior_sha256": "9fccd1800e265362ba5b55fdf085943ba43a5da59f6a19228b88396013bb1b76",
+    "status": "retained",
+    "review": "Hide-clad travelers point along natural river bend and mountain landmarks; sand/slate travel watercolor. Full original and 3.77:1 crop reviewed."
+  },
+  {
+    "id": "named_descent_lines",
+    "line": "demography",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/named_descent_lines-v1.png",
+    "prior_sha256": "fa854f48d814527588be3328bedc9aa117f241f12dd9467f9350901ef5d2c2c9",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3457b130-f402-487e-be95-6e4fcc4bb339.png",
+    "review": "Full original inspected: elder with uncovered gray hair recounts kin connections by pointing/open-hand gesture to parent, child and adult listener. Ragged unstitched hide wraps replace woven robes; ceramic pot and regular shelter ribs removed. Mature flat terracotta/ivory cut-paper and chalk-pigment rendering preserved. Full original and 3.77:1 crop inspected; all four faces, elder gestures and child remain visible."
+  },
+  {
+    "id": "oral_epics",
+    "line": "culture",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/discovery-600/oral_epics.png",
+    "prior_sha256": "248d61bcce4cce45dad6b00bb1efffa1cfe9e480a9753385ceb5f84d265f4fbb",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9ce0a96c-71f3-4bbe-a625-b7c12351881e.png",
+    "review": "Full original inspected: standing elder with open mouth and shoulder-level recitation gesture, five attentive adults and one repeating listener beside small fire. All hide-clad, flat interlocking indigo/rose/gold/violet pigment with coarse fiber-like paint grain. No written records, physical weaving or fantasy overlay. Full original and 3.77:1 crop inspected; reciter mouth and outstretched hand, repeating listener and all attentive faces remain visible."
+  },
+  {
+    "id": "relay_call_stations",
+    "line": "knowledge",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/discovery-600/relay_call_stations.png",
+    "prior_sha256": "02518833c840709b69b631d84db9d112ab25bfdb0694b7571986cb04289b4e5b",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-25ff54eb-e6a1-42ee-b385-d55fca370afe.png",
+    "review": "Full original inspected: three hide-clad adult callers occupy successive natural rocky rises, with cupped-hand call gestures and directed attention. Blue-black ink contour/crosshatching and flat lapis wash on open parchment; no constructed stations, sound symbols, modern objects or photographic rendering. Full original and 3.77:1 crop inspected; all three callers, faces and cupped hands remain visible at their respective distances."
+  },
+  {
+    "id": "sickness_pattern_memory",
+    "line": "health",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/subjects/sickness_pattern_memory-v1.png",
+    "prior_sha256": "97b032bb7176ec01344b448e3749fd456c65d1198616676fd696b76765ca2e2a",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0f1a132a-eabe-421f-9ad9-b92b27b17b84.png",
+    "review": "Full original inspected: elder compares dried seed head and fresh leaf while explaining a remembered season to listener, caregiver rests hand on tired adult's shoulder. Painted transparent watercolor with fine ink and sage/celadon/cream pigment. No medicine cure claim, containers, woven garments, formal structure or damaged image corners. Full original and 3.77:1 crop inspected; explaining gesture, seasonal comparison, all four faces and caregiver contact remain visible."
+  },
+  {
+    "id": "timber_grading",
+    "line": "ecology",
+    "game_year": 3,
+    "prior_effective_path": "res://assets/ui/research/paper/timber_grading.png",
+    "prior_sha256": "edec4a7bd406af295090cc7c7df6fabc0e0743141c03a7c663eb932ad1352055",
+    "status": "replacement reviewed",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-340b27cc-8a1d-4e97-9e04-056e2e054fc1.png",
+    "review": "Full original inspected: adult sights along sound natural branch; second points at knots and crumbly rotten fibers in rejected lengths. Ragged hides, irregular broken branch ends, detailed wild plants and coarse bark against flat landscape bands in layered field pigments. No saw-cut stock, refined tool, modern clothing or copied seasonal-comparison subject. Wood-property comparison is artistic interpretation informed by primary raw-material selection research, not specific-site reconstruction. Full original and 3.77:1 crop inspected; sighting branch, both faces, pointing fingers, knots and rotten fibers remain visible."
+  }
+]

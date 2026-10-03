@@ -1,0 +1,421 @@
+[
+  {
+    "id": "grip_wrapping_practice",
+    "line": "production",
+    "status": "era",
+    "name": "Grips Wrapped on Tool Handles",
+    "one_liner": "Grips wrapped on tool handles",
+    "observation": "Grips wrapped on tool handles.",
+    "key_threshold": false,
+    "target_year": 34,
+    "proposed_year": 34,
+    "band_low": 18.0,
+    "band_high": 45.0,
+    "min_year": 18.0,
+    "research_years": 1.5,
+    "requires_all": [
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "hide_smoke_curing"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 34,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "production: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/production-v1.png"
+  },
+  {
+    "id": "cereal_dehulling",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Hulling Emmer and Barley in Mortars",
+    "one_liner": "Hulling emmer and barley in mortars",
+    "observation": "Hulling emmer and barley in mortars.",
+    "key_threshold": false,
+    "target_year": 34,
+    "proposed_year": 34,
+    "band_low": 24.0,
+    "band_high": 49.0,
+    "min_year": 24.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "threshing_frames",
+      "food_pounding_mortars"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 34,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "nutrition: established field painting",
+    "prior_effective_source": {
+      "opening": "res://assets/ui/research/paper/first300-cards/cereal_dehulling.tres",
+      "art600": null,
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/nutrition-v1.png"
+  },
+  {
+    "id": "boil_lancing",
+    "line": "health",
+    "status": "new",
+    "name": "Lancing Boils with Sharp Flint",
+    "one_liner": "Lancing boils with sharp flint",
+    "observation": "Lancing boils with sharp flint.",
+    "key_threshold": false,
+    "target_year": 34,
+    "proposed_year": 34,
+    "band_low": 24.0,
+    "band_high": 49.0,
+    "min_year": 24.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "controlled_flaking",
+      "wound_cleaning"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "General health",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "version": 2,
+    "year": 34,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "health: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/boil_lancing-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/health-v1.png"
+  },
+  {
+    "id": "childrens_question_circles",
+    "line": "knowledge",
+    "status": "era",
+    "name": "Children's Question Circles",
+    "one_liner": "Children's question circles",
+    "observation": "Children's question circles.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 20.0,
+    "band_high": 50.0,
+    "min_year": 20.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "curious_questioning_custom"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "shared_hearth_gatherings"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "culture"
+    ],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "binding_style": "knowledge: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/childrens_question_circles.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+        "tile_index": 3,
+        "caption": "Children's question circles (Year 35)",
+        "style": "paper_gouache"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/knowledge-v1.png"
+  },
+  {
+    "id": "customary_law",
+    "line": "institutions",
+    "status": "catalog",
+    "name": "Customary Law",
+    "one_liner": "Customary law: remembered judgments bind later ones",
+    "observation": "Customary law: remembered judgments bind later ones.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 20.0,
+    "band_high": 50.0,
+    "min_year": 20.0,
+    "research_years": 5.0,
+    "requires_all": [
+      "blood_price"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "banishment_sentence",
+      "mnemonic_verse_encoding",
+      "genealogical_recitation"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "institutions: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/customary_law-v1.png",
+        "focus": [
+          0.5,
+          0.39
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/institutions-v1.png",
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/customary_law.png",
+      "focus": [
+        0.52,
+        0.76
+      ]
+    }
+  },
+  {
+    "id": "pit_pebble_game",
+    "line": "culture",
+    "status": "new",
+    "name": "Pit-and-pebble Counting Game",
+    "one_liner": "Pit-and-pebble counting game",
+    "observation": "Pit-and-pebble counting game.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 20.0,
+    "band_high": 50.0,
+    "min_year": 20.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "counting_words"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "shared_hearth_gatherings"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Inquiry breadth",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "binding_style": "culture: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/pit_pebble_game.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 2,
+        "caption": "Pit-and-pebble counting game (Year 35)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/culture-v1.png"
+  },
+  {
+    "id": "hand_dough_forming",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Kneading Dough by Hand",
+    "one_liner": "Kneading dough by hand",
+    "observation": "Kneading dough by hand.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 25.0,
+    "band_high": 50.0,
+    "min_year": 25.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "saddle_quern_grinding"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "nutrition: established field painting",
+    "prior_effective_source": {
+      "opening": "res://assets/ui/research/paper/first300-cards/hand_dough_forming.tres",
+      "art600": null,
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/nutrition-v1.png"
+  },
+  {
+    "id": "breeding_stock_sparing",
+    "line": "ecology",
+    "status": "new",
+    "name": "Breeding Females and Young Spared in the Hunt",
+    "one_liner": "Breeding females and young spared in the hunt",
+    "observation": "Breeding females and young spared in the hunt.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 21.0,
+    "band_high": 49.0,
+    "min_year": 21.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "seasonal_protein_sourcing"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "phenology_signs"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Resource sustainability",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "ecology: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/ecology-v1.png"
+  },
+  {
+    "id": "clay_sling_bullets",
+    "line": "security",
+    "status": "new",
+    "name": "Fired-clay Sling Bullets",
+    "one_liner": "Fired-clay sling bullets",
+    "observation": "Fired-clay sling bullets.",
+    "key_threshold": false,
+    "target_year": 35,
+    "proposed_year": 35,
+    "band_low": 21.0,
+    "band_high": 49.0,
+    "min_year": 21.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "war_slings",
+      "pit_firing"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public safety",
+    "signals": [
+      "defense",
+      "warfare"
+    ],
+    "version": 2,
+    "year": 35,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "security: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/clay_sling_bullets-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/security-v1.png"
+  }
+]

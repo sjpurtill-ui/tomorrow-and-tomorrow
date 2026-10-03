@@ -1,0 +1,18 @@
+{
+  "id": "plastered_ancestor_skulls",
+  "line": "culture",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.43
+  ],
+  "prompt": "Generate ONE new Tomorrow and Tomorrow culture research painting. Reference supplies flat painted tapestry-inspired medium and EXACT EXTRA-WIDE2055x765 canvas only. Preserve wide dimensions/aspect full bleed, no text/frame/default3:2. NEW SUBJECT: Inside a modest earthen household, one adult carefully places a SINGLE old ancestor cranium with a plain pale plaster-modeled human face and TWO simple shell eyes in a low earth-wall recess; another sits nearby quietly. Respectful non-graphic ancestor memory, dry old bone only, no gore. Flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, not textile or literal embroidery. Sideways three-quarter view, faces and object central. No rows of bare cartoon skulls, exposed teeth horror, modern sculpture tools, shrine temple or patterned clothing.\nAll complete heads and ancestor object comfortably within y170..610, upper/lower peripheral background bands. Deep indigo house interior, muted rose and pale ivory modeled face, small gold highlights, pattern rhythm made of painted shapes not literal fabric. Garments plain rough hides. Skull itself must visibly have a PLASTER-MODELED FACE rather than bare exposed eye sockets, shell eyes and rounded nose. No teeth needed. Fictional household practice after house-floor burial and clay shaping, no claim to reconstruct a particular museum find.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/culture-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-755b41ad-796b-4897-8f31-81a5bde65e11.png",
+  "replace_first300": false,
+  "replace_art600": true,
+  "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+  "asset": "res://assets/ui/research/subjects/plastered_ancestor_skulls-v2.png",
+  "sha256": "6ab4c2e8b3475574645474a77700dd60c66081b0df2490f105aaa5bf0406049f",
+  "mode": "built-in image_gen / edit"
+}

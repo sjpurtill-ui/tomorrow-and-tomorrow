@@ -1,0 +1,325 @@
+[
+  {
+    "id": "festival_calendar",
+    "line": "culture",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": true,
+    "prior_effective_source": "res://assets/ui/research/discovery-600/festival_calendar.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/artifacts/field-style-references/culture-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established culture field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Six fully clothed adults in rough hide garments gather for a seasonal celebration around a modest hearth at a portable camp, one elder points to a seasonal flowering branch beside them. Flat tapestry-inspired PAINTING with indigo, rose, gold and violet interlocking shapes; no literal tapestry, permanent temple, written calendar or later robes.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8af7c09f-5ab5-4278-aa5d-7340e5dd97b4.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/culture-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "mouths_against_store",
+    "line": "demography",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/mouths_against_store-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/artifacts/field-style-references/demography-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established demography field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: At a small earth-walled food shelter, an elder compares one modest seed basket with three plain tally sticks while several family members wait; heads and baskets visible, oral accounting of mouths and stores. Angular chalk/pastel cut-paper terracotta, rust, ivory and slate. No written numerals, ledger, monumental granary or woven robes.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-58cb850e-6bbe-47aa-9c4d-98e76770c76f.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/demography-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "controlled_undergrowth_burning",
+    "line": "ecology",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/controlled_undergrowth_burning-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/artifacts/field-style-references/ecology-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established ecology field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Several adults observe a very small low undergrowth fire in a sparse woodland clearing, with damp cleared ground separating it from mature trees and fresh regrowth visible on an earlier patch. Detailed botanical foreground, flat plant-pigment landscape bands. No dramatic wildfire, inferno, modern firefighting or how-to diagram.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f550036a-ed69-4537-87fe-00465a8ac940.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/ecology-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "wound_packing",
+    "line": "health",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/wound_packing-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/artifacts/field-style-references/health-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established health field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Non-graphic quiet care scene at a reed shade: a seated adult's forearm already covered by a simple clean hide/fiber dressing; companion calmly offers water in a wood cup while another prepares loose plant fibers separately. Sage/celadon ink-watercolor on cream. No exposed wound, blood, procedural steps, insertion, forceful action or claim of remedy effectiveness.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-15ebb4e1-7b34-4ec6-834c-9c42b6434d0e.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/health-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "framed_construction",
+    "line": "infrastructure",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/framed_construction.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/infrastructure-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established infrastructure field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Three adults raise a SMALL simple timber frame, rough posts and one horizontal beam held in split-and-cord joints; one steadies a post, two guide the beam. Mineral blue/limestone matte casein. No elaborate truss, uniform lumber, nails, metal, crane, large completed town or woven clothing.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-98285495-84be-4897-9a03-4605565eb410.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/infrastructure-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "blood_price",
+    "line": "institutions",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/blood_price-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/institutions-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established institutions field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two kin groups meet with an elder mediating a peaceful compensation handover of a modest basket and shell cord; restrained open-palmed gestures at a plain camp threshold. Dusty plum/limestone/subdued gold matte fresco. No blood, violence, coins, written contract, uniform officials, throne or temple.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9f7de6a8-db38-4e7c-be6d-4368348bc2a1.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/institutions-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "down_the_line_exchange",
+    "line": "logistics",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/down_the_line_exchange-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/logistics-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established logistics field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Three adults spaced along a woodland path pass the SAME TYPE of small shell/stone bundle from one person to another, creating a readable sequence of exchange. Sand/slate/indigo panoramic travel watercolor. No endless crowd, duplicate disconnected villages, cart, coin, written contract or river template.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-eb93bb87-3053-4339-930a-45bd2a373086.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/logistics-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "pulse_splitting",
+    "line": "nutrition",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/pulse_splitting.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established nutrition field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two adults split dried wild peas or lentils with rough stones on a natural slab, open pods and split pale halves visibly distinct in small baskets. Botanical egg tempera olive/gold/cream/earth. No milling machine, iron implement, later seed crop, written recipe or woven robe.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1557cded-c12c-4b5c-b36b-29e145865841.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/nutrition-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "pit_firing",
+    "line": "production",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/pit_firing.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established production field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: One adult tends a small shallow EARTH PIT containing several uneven hand-pinched clay vessels surrounded by embers, another places a short dry twig at the pit edge. Flat angular copper/ember/soot/umber palette-knife paint. No masonry kiln, chimney, potter wheel, metal tool or glazed pot.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e4fa96e2-8fc3-42eb-8a89-d776ef9e465a.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/production-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "stone_maceheads",
+    "line": "security",
+    "year": 20,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/stone_maceheads-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/security-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established security field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two adults examine one rough ground-stone macehead lashed to a short wood handle; one presents the small implement, the other checks the binding beside a natural grinding stone. Layered hand-cut woodblock vermilion/charcoal/parchment. No combat, blood, skull target, drilled precision ring, metal, polished ornament or extra monstrous weapon.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.\nCritical correction: the implement must have a ROUND OVOID ground-stone CLUB HEAD with blunt rounded ends, firmly seated at a small forked wood handle using rawhide/cord binding. NOT a pointed stone, triangular blade, axe, adze or spear. Compact rounded mace shown clearly between the two people. All heads begin BELOW y180; central head and hands y300..570.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1fdfdd43-6e03-4744-af10-c0fcf575d9af.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/security-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "poultices",
+    "line": "health",
+    "year": 22,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/poultices-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/health-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established health field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: An adult pounds a few leaves with a stone on a small slab while a companion folds crushed leaves into a coarse plant-fiber pad; a resting person sits nearby fully clothed. Sage/celadon ink-watercolor cream. Non-graphic preparation only, no open injury, treatment instructions or medical efficacy claim.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a2d62b35-99b5-43d5-b3bf-12030b247613.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/health-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "moon_counting",
+    "line": "knowledge",
+    "year": 22,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": "res://assets/ui/research/discovery-600/moon_counting.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/knowledge-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established knowledge field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: One seated observer under a night sky studies ONE visible crescent moon and adds a single mark to a plain tally stick, companion listens. Blue-black crosshatched ink with lapis/parchment highlights. No row of multiple moons, labeled diagram, written numerals, telescope or modern astronomy tool.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6877ae68-e171-4879-a861-2cc190c3c2ef.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/knowledge-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "rotating_heavy_tasks",
+    "line": "labor",
+    "year": 22,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/rotating_heavy_tasks-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/labor-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established labor field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Four adults exchange places carrying a modest wood pole between two people: rested pair receives the load while tired pair sits beside a portable shade. Charcoal over ochre, sketchy angular figures. Clearly paired labor rotation, no giant load, chains, forced labor, metal or formal uniform.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ecf7c6e5-9f0c-44fe-933d-a33b63cc84c9.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/labor-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "load_lashing_knots",
+    "line": "logistics",
+    "year": 22,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/load_lashing_knots-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/logistics-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established logistics field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two adults fasten coarse cord around a modest wood bundle on two carrying poles, one checks a plainly visible knot while another braces the load. Sand/slate/indigo panoramic travel watercolor. No wheels, cart, animal harness, bulky framework or written knot chart.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fad2e398-f93c-47d9-8ab0-061e861c2aca.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/logistics-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "earth_oven_cooking",
+    "line": "nutrition",
+    "year": 22,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/earth_oven_cooking.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established nutrition field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two adults cover a small earth cooking pit with leaves and loose soil, a few warm stones and wild roots visible along its near edge. Botanical egg tempera olive/gold/cream/earth. No potter kiln, chimney, metal oven, written recipe or enormous blaze.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b6f2ec7d-7ce3-4cb3-ad8a-fcedab7ec51f.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/nutrition-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "clay_tempering",
+    "line": "production",
+    "year": 22,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/clay_tempering.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established production field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Three adults mix gritty sand or crushed shell into a lump of wet clay on a low natural slab, fingers kneading coarse inclusions; another compares a rough small pinched clay cup. Flat angular copper/ember/soot/umber palette-knife paint. No mechanized mixer, refined glazed pottery, potter wheel, metal or literal 3D relief.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4395b0ee-771a-40db-b0ed-6d23a9d8bc4f.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/production-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  },
+  {
+    "id": "ambush_raids",
+    "line": "security",
+    "year": 22,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/subjects/ambush_raids-v1.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/security-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established security field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Non-graphic scene: three fully clothed scouts crouch behind brush watching a small rival party farther away on a path; one signals silence, simple wood/stone spears kept low. Layered hand-cut woodblock vermilion/charcoal/parchment. No attack contact, blood, guns, metal armor, uniform army or modern tactical diagram.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-5a9d17fd-b06c-48bb-9bc7-3273518e2d18.png",
+    "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+    "reference_snapshot": "res://art_source/research-opening-19/style-reference/security-v1.png",
+    "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694"
+  }
+]

@@ -151,16 +151,21 @@ func test_home_defence_is_beside_the_town_name_not_an_army()->void:
 	# its townsfolk who rise.
 	MilitaryCampaign.keep_watch()
 	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(defense)
-	var watch:=Labels.home_guard(String(home.id))
+	# Home's badge: everyone keeping watch there, and apart from them the
+	# townsfolk who would rise.
+	var parts:=Labels.guard_parts(String(home.id))
 	assert_int(int(Combat.home_militia().watch)).is_equal(roundi(float(defense)*MilitaryCampaign.watch_split()))
-	assert_int(watch).is_equal(defense+int(Combat.home_militia().rise))
+	assert_int(int(parts.watch)).is_equal(defense)
+	assert_int(int(parts.rise)).is_equal(int(Combat.home_militia().rise))
 	MilitaryCampaign.home_army["troops"]=9
 	# Nine left at home: the home guard is as many as stand there, beside the
 	# townsfolk.
 	assert_int(int(Combat.home_militia().watch)).is_equal(mini(9,roundi(9.0*MilitaryCampaign.watch_split())))
-	assert_int(Labels.home_guard(String(home.id))).is_equal(9+int(Combat.home_militia().count))
-	assert_int(Labels.home_guard("nowhere")).is_equal(0)
-	assert_int(Labels.home_guard("__founding_convoy__")).is_equal(0)
+	parts=Labels.guard_parts(String(home.id))
+	assert_int(int(parts.watch)).is_equal(9)
+	assert_int(int(parts.rise)).is_equal(int(Combat.home_militia().count))
+	assert_dict(Labels.guard_parts("nowhere")).is_equal(Labels.NO_GUARD)
+	assert_dict(Labels.guard_parts("__founding_convoy__")).is_equal(Labels.NO_GUARD)
 	# The army bar keeps to armies: no card for home defence.
 	var Bar:=preload("res://scripts/hud/army_bar.gd")
 	assert_bool(Bar.bar_cards(MilitaryCampaign).any(func(c:Dictionary)->bool: return String(c.kind)=="home")).is_false()

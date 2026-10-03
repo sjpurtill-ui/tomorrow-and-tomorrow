@@ -1,12 +1,62 @@
 {
   "id": "part_time_specialists",
   "line": "labor",
-  "game_year": 36,
-  "approx_historical_year": -4760,
-  "prompt": "c. 4760 BCE: Household member shapes fine stone tool while kin cook, weave and tend crops in shared domestic work; charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-eed2fb29-4dea-47a9-8284-c404ea89c269.png",
-  "asset": "res://assets/ui/research/subjects/part_time_specialists-v1.png",
-  "sha256": "7532e71ca2688454d707754691d2eeab2d87cd586b230694b94e2bbf661fb60d",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; skilled craft among household chores clear in crop."
+  "status": "new",
+  "name": "Part-time Craft Specialists Within Households",
+  "one_liner": "Part-time craft specialists within households",
+  "observation": "Part-time craft specialists within households.",
+  "key_threshold": true,
+  "target_year": 36,
+  "proposed_year": 36,
+  "band_low": 18,
+  "band_high": 48,
+  "min_year": 18,
+  "research_years": 4,
+  "requires_all": [
+    "skill_recognition",
+    "seasonal_work_round"
+  ],
+  "requires_any": [
+    [
+      "food_drying",
+      "smoking"
+    ]
+  ],
+  "precedents": [],
+  "conditions": {
+    "min_population": 30
+  },
+  "shared_with": [],
+  "subcategory": "Work efficiency",
+  "signals": [
+    "administration",
+    "training"
+  ],
+  "version": 2,
+  "year": 36,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "labor: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/part_time_specialists-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/labor-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established labor painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: A modest camp divides seasonal work: ONE seated skilled maker shapes a crude clay bowl, a second adult prepares a flint tool nearby, and two others return carrying gathered branches. No permanent specialist workshop, factory or markets. Labor charcoal drawing over ochre, distinctly loose shaded pigment.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bfb63be7-b712-45d7-be0d-3e6999ddaaa3.png",
+  "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600.",
+  "asset": "res://assets/ui/research/subjects/part_time_specialists-v2.png",
+  "sha256": "5d8c0b2b253092562b4696e7a737351af2d61602d98287a4578f7b8d6139c29f",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,9 +1,19 @@
 {
   "id": "route_memory",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Encoded Routes. An experienced traveler points out a distant river bend and mountain saddle while recounting the route to companions; one companion repeats the gestures. An oral chain of landmarks, no paper map, compass or signpost.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-00fe5c13-aee7-4d12-8094-e0c4e14c0c0c.png",
-  "asset": "res://assets/ui/research/subjects/route_memory-v1.png",
-  "sha256": "c46f8fabc4eab270b10dddec0ee88ded1fe5c4d2055a3c43b49b83ef64d85691",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "knowledge",
+  "game_year": 2,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.4
+  ],
+  "replace_art600": true,
+  "binding_style": "knowledge: blue-black ink with lapis wash",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0c914819-130d-4152-89a3-8aab2d4302f6.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/stored_program_computer-v1.png",
+  "prompt": "Create a NEW opening-era research painting for Encoded Routes: travel told as a fixed story, game year 2. Use attached reference ONLY for mature blue-black ink contour and crosshatching, lapis wash on open parchment ivory paper; copy NONE of its computers, machines, clothing, furniture, paper records or indoor setting. Scene: three adult travelers in ragged unstitched hide wraps pause on a bare ridge. An elder at left tells the sequence of the route, pointing outward toward a distinctive forked rock, a lone wind-bent tree and a distant mountain notch aligned across the landscape. A listening adult nearer the center repeats the pointing gesture to recall that sequence. The third watches the landmarks. Memory communicated by real landmarks, story and shared gesture, no written map, diagram, arrows or pseudo-writing. Wide panoramic painting about 3:1 with faces, pointing hands and landmark sequence together across central horizontal band for wide game-card crops. Precise irregular ink line, hatch marks and flat lapis wash; minimal facial detail, dignified adults. No photographic realism, cinematic light, volumetric digital painting, cute proportions. No baskets, ceramic, sewn tunics, metal, buildings, standardized tools, books, labels, border or watermark.",
+  "review": "Full image inspected: three hide-clad adult travelers, elder recounts a route by pointing to weathered forked rock outcrop, bent tree and mountain notch; listener repeats gesture. Blue-black contour/hatching and flat lapis wash, open parchment. No copied computer, written map, later clothing or photo rendering. Full image and 3.37:1 crop inspected; elder and repeated gesture plus all three landmarks remain visible.",
+  "mode": "built-in image_gen / new image with medium reference",
+  "asset": "res://assets/ui/research/subjects/route_memory-v2.png",
+  "sha256": "d8d4d48d6eea89822d6621a60ddd74bb5b05d467672b77ade7b1ca7aaa8d7b3a"
 }

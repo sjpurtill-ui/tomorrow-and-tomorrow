@@ -188,7 +188,7 @@ def make_r2(clips):
     # front of the hips (a skirt or a robe would leave them bare and the legs
     # would seem cut off at the knee). Holds.
     # =================================================================================
-    import court_anims_exec as X
+    import court_anims_more as X
     for sd, nm in ((1.0, "faint_l"), (-1.0, "faint_r")):
         a = Act(2.2, drag=1.1, feet=False, base_pose=X.square())
         legs0 = X._legs0(a)

@@ -1,0 +1,12 @@
+{
+  "id": "war_slings",
+  "line": "security",
+  "game_year": 12,
+  "approx_historical_year": -4920,
+  "prompt": "c. 4920 BCE: Adults choose smooth river stones and demonstrate a plain braided-fiber sling during restrained training; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-727ad1f9-25b2-43c1-8afe-67aabb45d5af.png",
+  "asset": "res://assets/ui/research/subjects/war_slings-v1.png",
+  "sha256": "46e26c1f5213f7823d03fd7c8f1aeb4b36d2743195490dbe005ae51f06549041",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; sling and chosen stones clear, no later weapons, crop reviewed."
+}

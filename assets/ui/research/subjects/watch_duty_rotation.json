@@ -1,0 +1,20 @@
+{
+  "id": "watch_duty_rotation",
+  "line": "knowledge",
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": "res://assets/ui/research/discovery-600/watch_duty_rotation.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/knowledge-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: Two adults hand over a plain wooden staff at an open woodland camp edge, one arriving alert while the retiring watcher sits to rest; a third stays near a reed shelter. Blue-black crosshatched ink with lapis and parchment. No palisade, army uniform, tower or metal weapon.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-98b664a8-2cc4-4d96-bd51-fc6ebe8afb5d.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/watch_duty_rotation-v2.png",
+  "sha256": "bacb645ab413573dfa1f161ec6bcb1b687461f60bf94089b895ad5773c338198",
+  "mode": "built-in image_gen / edit"
+}

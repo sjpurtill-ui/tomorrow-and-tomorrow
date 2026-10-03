@@ -1,9 +1,25 @@
 {
   "id": "quarry_reading",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Reading the Quarry Face. A quarry worker traces a natural seam across a exposed stone face with a finger while studying layered fractures; no explosives, machinery or finished stone blocks.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-15ec0c47-8e55-4e72-921f-47fa655b4147.png",
-  "asset": "res://assets/ui/research/subjects/quarry_reading-v1.png",
-  "sha256": "038d0fbe3e6bc70f00c6dac5f5824670dc54ea90634e9403702affedd6147204",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "ecology",
+  "version": 2,
+  "replace_first300": true,
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/quarry_reading.png",
+    "focus": [
+      0.5,
+      0.51
+    ]
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/fiber_grading-v2.png",
+  "prompt": "Create a current-game ecology banner matching supplied approximately 2060x763 WIDE detailed botanical foreground and flat landscape bands, plant-pigment greens ochres muted blue, matte hand-painted mature figures. Two small kneeling hide-clad adults READ a natural rocky outcrop: one points directly to a visible crack/fracture line in gray stone while holding a loose angular flint fragment beside it for comparison; other examines coarse crumbly reddish layer adjacent. Distinct usable fine gray fracture versus crumbly layer, sparse wild plants beside stone. No developed quarry pit, masonry, hammer, metal, sawn blocks or tools beyond loose stone fragments. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-95306cb7-dfcb-4ebc-bf5a-a7062afa18f0.png",
+  "focus": [
+    0.5,
+    0.25
+  ],
+  "game_year": 5,
+  "review": "Botanical foreground and flat plant-pigment landscape match current ecology reference. Adult points at gray stone fracture holding loose flint; other examines crumbly reddish layer. No developed quarry or metal tooling.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/quarry_reading-v2.png",
+  "sha256": "58a34a5a04aab5777eb7f400ef4d1771da32fbb88dfef050d32bf9d256391b3e"
 }

@@ -1,0 +1,12 @@
+{
+  "id": "wound_packing",
+  "line": "health",
+  "game_year": 20,
+  "approx_historical_year": -4867,
+  "prompt": "c. 4867 BCE: Caregiver tends adult arm wound with moss, plant lint and leaves under reed shelter; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cfeec6ea-754d-4303-a447-6294923405f6.png",
+  "asset": "res://assets/ui/research/subjects/wound_packing-v1.png",
+  "sha256": "aced84f9d4bd7ba40bb6ede472fd1874461c069e85ad062c10e1290d3a453f8a",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; period care custom depicted without graphic injury or instructional labels."
+}

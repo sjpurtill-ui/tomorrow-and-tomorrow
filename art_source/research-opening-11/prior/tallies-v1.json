@@ -1,0 +1,9 @@
+{
+  "id": "tallies",
+  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Material Tallies. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Composition must make the unique subject instantly recognizable in a wide cropped research card, keeping main action across the center band. An early storekeeper makes simple repeated tally notches in a small bone or wooden counting stick using a flint flake, beside counted bundles and a small row of pebbles. Focus on the notched tally stick and careful counting hands. No alphabet, numerals, paper or modern bookkeeping. Early human community, simple unornamented natural clothing if visible, no national identity. Not a montage, not a UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-cd084932-f8a7-4235-9c0a-89fa4cf8ecd6.png",
+  "asset": "res://assets/ui/research/subjects/tallies-v1.png",
+  "sha256": "9f083a9f2f95ed3b957898b2a0ee3e0ed219464b3c90ad8f3a3db2d42d221434",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

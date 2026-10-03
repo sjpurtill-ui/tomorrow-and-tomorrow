@@ -1,0 +1,12 @@
+{
+  "id": "ambush_raids",
+  "line": "security",
+  "game_year": 22,
+  "approx_historical_year": -4853,
+  "prompt": "c. 4853 BCE: Scouts rehearse dawn ambush with hidden group in brush and approach group on trail; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-85e2653c-1e4b-4b46-bf8b-908bf013d026.png",
+  "asset": "res://assets/ui/research/subjects/ambush_raids-v1.png",
+  "sha256": "77a6dfbdec2ed67337ecb1222804ae95144c55a6beb83de75df7c1e7ff818381",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; dawn concealment and rehearsal clear, no actual injury."
+}

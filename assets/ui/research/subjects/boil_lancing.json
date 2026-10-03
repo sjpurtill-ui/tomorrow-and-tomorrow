@@ -1,12 +1,55 @@
 {
   "id": "boil_lancing",
   "line": "health",
-  "game_year": 34,
-  "approx_historical_year": -4773,
-  "prompt": "c. 4773 BCE: Caregiver holds simple chipped flint near small raised boil on adults forearm while helper steadies them; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d3d4559f-c143-45aa-a7fb-732c049fa69f.png",
-  "asset": "res://assets/ui/research/subjects/boil_lancing-v1.png",
-  "sha256": "7386385604d8fdc597c86c7503d1884ee72a89b8b0efbc312ca7863d26de295a",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; first lacked visible ailment; selected small boil, flint and care clear without graphic instruction."
+  "status": "new",
+  "name": "Lancing Boils with Sharp Flint",
+  "one_liner": "Lancing boils with sharp flint",
+  "observation": "Lancing boils with sharp flint.",
+  "key_threshold": false,
+  "target_year": 34,
+  "proposed_year": 34,
+  "band_low": 24,
+  "band_high": 49,
+  "min_year": 24,
+  "research_years": 2,
+  "requires_all": [
+    "controlled_flaking",
+    "wound_cleaning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "General health",
+  "signals": [
+    "health",
+    "illness"
+  ],
+  "version": 2,
+  "year": 34,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "health: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/boil_lancing-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/health-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established health painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: Quiet non-graphic care preparation: a caregiver chooses one tiny stone flake on a bark tray beside clean water in a rough clay bowl; a seated adult waits with a cloth-free hide wrap on the upper arm. No open wound, blood, actual lancing, medical instructions or claimed cure. Sage/celadon ink-watercolor on cream.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fd7f1ba2-dc12-4bf1-9958-bda11be9052e.png",
+  "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/boil_lancing-v2.png",
+  "sha256": "abef16e3e8adc4b91ee20dd1384f13b1de6480c16606a24cb04480d502b21625",
+  "mode": "built-in image_gen / edit"
 }

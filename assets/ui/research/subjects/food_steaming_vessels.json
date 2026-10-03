@@ -1,0 +1,45 @@
+{
+  "id": "food_steaming_vessels",
+  "line": "nutrition",
+  "status": "catalog",
+  "name": "Steaming Food Over Boiling Pots",
+  "one_liner": "Steaming food over boiling pots",
+  "observation": "Steaming food over boiling pots.",
+  "key_threshold": false,
+  "target_year": 40,
+  "proposed_year": 40,
+  "band_low": 25,
+  "band_high": 55,
+  "min_year": 25,
+  "research_years": 3,
+  "requires_all": [
+    "pit_firing",
+    "clay_tempering"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "earth_oven_cooking"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 40,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": null
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established nutrition painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: One adult tends an early rough clay pot on a small hearth; a shallow perforated clay insert above the pot holds a few roots and greens, softly rising steam. Clay-only arrangement, no metal colander, elaborate cooking station or modern lidded appliance. Medium: opaque botanical egg-tempera olive/gold/cream/earth. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-801d2715-8b24-4d57-b8f0-45910ffdc799.png",
+  "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600.",
+  "asset": "res://assets/ui/research/subjects/food_steaming_vessels-v2.png",
+  "sha256": "3af813d5f9e0699bbe4b1ebc6daf62a96f2a5011f98532ad6a8f29021d9ca405",
+  "mode": "built-in image_gen / edit"
+}

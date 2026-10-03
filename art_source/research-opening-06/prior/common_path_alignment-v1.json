@@ -1,0 +1,12 @@
+{
+  "id": "common_path_alignment",
+  "line": "logistics",
+  "game_year": 5,
+  "approx_historical_year": -4967,
+  "prompt": "c. 4967 BCE: adults clear and align one shared footpath between simple reed huts. Mature panoramic travel watercolor on fibrous paper, flat sand-gold and faded-indigo washes, no paving, wheel, sign, written plan or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-690eebf5-66cc-4fd4-b7a8-5b984d0442b5.png",
+  "asset": "res://assets/ui/research/subjects/common_path_alignment-v1.png",
+  "sha256": "e833833be33cb4607b01fb681b322d118998dc858aec15b15868e3cc12e7ae2b",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation selected; clear common route in central banner crop. Accepted after visual 3.37:1 crop and subject/period check."
+}

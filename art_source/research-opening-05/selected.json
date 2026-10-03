@@ -1,0 +1,163 @@
+[
+  {
+    "id": "drainage",
+    "line": "infrastructure",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f4c73635-bee3-42ec-9dad-3e27c9718a3e.png",
+    "prompt": "Create a replacement research banner for Tomorrow and Tomorrow, matching the supplied CURRENT GAME banner's wide canvas proportions (approximately 2057 x 765, 2.7:1 landscape), flat matte casein-gouache treatment, adult figure drawing, mineral blue/cool ivory/limestone/slate palette, hand-brushed planar forms and restrained grain. This is an infrastructure illustration titled internally drainage; NO visible text. Change the subject completely to earliest-stage runoff drainage: two adults wearing crude ragged untreated hide wraps use crooked wooden digging sticks to scrape a shallow narrow surface channel that diverts rainwater downhill AWAY from a dry sleeping hide underneath one low irregular hide-and-branch windbreak. A little water follows the channel toward lower ground; dry sleeping area remains clearly visible beside it. Portable camp only, no house, wall, thatched hut, ceramic pot, basket, woven cloth, metal spade, boots, domestic chickens, farm or finished infrastructure. Match the reference's flat two-dimensional depiction: simplified dignified adult faces, painted silhouettes, broad opaque planes, no photographic skin or water reflections, no cinematic sunset, no 3D or impasto relief. Keep both faces, digging hands, channel and dry sleeping hide in a tight central horizontal band suitable for a 3.37:1 card crop. Full-bleed WIDE banner, retain supplied reference's width-to-height proportions; not square or 3:2. No decorative frame, writing, labels or watermark.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/hazard_landmark_memory-v1.png",
+    "mode": "built-in image_gen / reference-guided new subject",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "review": "Full original 2055x765 inspected. Flat mineral blue casein gouache matches actual 2057x765 current infrastructure reference. Two rough-hide adults scrape shallow runoff away from dry hide sleeping shelter using crooked raw sticks. No ceramic pots, baskets, permanent hut, shovels, boots or photography. User rejected the old photographic source and incorrect 3:2 starting format; this source uses current wide banner proportions."
+  },
+  {
+    "id": "aptitude_trials",
+    "line": "labor",
+    "game_year": 4,
+    "version": 3,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8574c506-52e9-4036-b403-fa0a1582d158.png",
+    "prompt": "Correct only the framing of this current-game wide charcoal/ochre painting. Keep the SAME approximately 2058x764 canvas, flat expressive charcoal marks over ochre wash, three adult hide-clad characters, mentor pointing to flint handling, other adult sorting raw stems, no basket. Recompose the three foreground people SMALLER within the wide canvas: show every complete head with at least 90 pixels of breathing room above, and keep their faces, mentor's pointing hand, stem-sorting hands, flint-holding hands and stones all inside the central horizontal 70 percent of image height. Reduce oversized close-up figures to achieve this; add only simple ochre camp/sky space above and below. No new tools, no containers, no written text, no photography, no 3D, no thick oil-paint treatment. Preserve wide banner proportions; don't make square or 3:2.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/aptitude_trials-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full wide original inspected: reduced figures preserve complete heads and all aptitude hands across central band, basket absent, charcoal/ochre rendering and current 2058x764 format retained. Framing corrected after actual GPU card showed heads cut off.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3397fe25-1df6-408d-b8d8-2e9ae97a1e82.png",
+    "initial_prompt": "Edit this CURRENT GAME wide charcoal-over-ochre research banner with minimal changes. Preserve its approximately 2059x764 wide canvas proportions, adult figures, expressive flat charcoal drawing, ochre wash, silhouettes, rough-hide clothing and hand/tool composition. It depicts an older adult comparing aptitude of two new adult workers sorting wild stems and flint. Remove the woven basket at far left entirely; replace it with a loose open scrap of raw hide holding a few wild stems, no container. Remove any shaped refined tool shafts or neat prepared poles in background; keep crude crooked branch supports and ragged hides. Preserve central mentor pointing at young adult's flint handling, and adult on left separating raw stems. Do not convert style to photography, CGI, oil impasto, glossy relief, cinematic lighting or cartoon. Keep current wide format, no 3:2 or square canvas. No text, labels or decorative border."
+  },
+  {
+    "id": "controlled_flaking",
+    "line": "production",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3b4968de-d65c-4758-8c2d-fff176e2fee7.png",
+    "prompt": "Make exactly one tiny correction to this image: extend or move the narrow tip of the pale raw antler tine a few pixels left so it visibly touches and presses the gray flint edge at the flake-removal point. There must be NO GAP between antler tip and stone edge. Preserve EVERYTHING ELSE: the wide approximately 2056x765 canvas, current game flat angular impasto-painted hands and limited ochre/umber/copper palette, all hand positions, rough hide, background and loose chips. No added text or objects, no photographic detail. This is pressure flaking, the contact is the whole mechanism.",
+    "initial_prompt": "Make a new CURRENT GAME production research banner using the supplied actual production banner as a strict visual style and canvas reference. Preserve its approximately 2057x765 WIDE 2.7:1 format, flat angular hand shapes, simplified finger planes, copper/ember/soot/umber pigment and palette-knife marks. Change the action to PRESSURE FLAKING: one adult hand supports a small thin flint point on raw hide, the other hand grips a short irregular raw antler tine whose narrow tip presses directly against the stone's edge; a tiny narrow flake breaks away at this contact, other small flakes below. Keep whole hands and contact centered across the wide frame, no faces needed. Match reference's visibly painted simplified hands, no photographic anatomy, nails, lifelike skin, cinematic light, glossy digital relief or 3D. No hammerstone, metal, pot, textile, refined tool or writing. Full-bleed wide banner, don't change to 3:2 or square. All key action inside central horizontal band suitable for 3.37:1 card crop. No borders or labels.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7519b464-9dd1-4d98-a34f-7794f0ab265b.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/edge_testing_by_feel-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "review": "Wide 2055x765 source inspected. Actual current production reference anchors simplified angular copper/umber painted hands and wide canvas. Raw antler tine directly contacts flint edge, narrow released chip visible. One targeted contact correction retained all other composition. Prior unreferenced 3:2 result held and unbound after user aesthetic/width correction."
+  },
+  {
+    "id": "fever_watch_customs",
+    "line": "demography",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b1953cf5-6444-498e-83e7-188aa015a048.png",
+    "prompt": "Edit this current-game WIDE demography research banner, preserving approximately 2056x765 proportions and its flat angular chalk-pastel/cut-paper painted figures, terracotta/rust/warm ivory/slate palette. Keep caregiver checking a feverish infant's forehead during a night watch, dignified quiet gesture, infant wrapped in rough hide at center-right. Replace ALL regular tied reed-wall panels with ONE low ragged hide windbreak draped on crooked natural branches. Replace the neatly tied reed sleeping mat with an irregular thick raw hide on bare earth. Reduce large flame at far right to a small banked ember glow safely separated from infant. Keep night opening visible with slate sky. Make caregiver complete head and hand, infant face and sleeping hide visible inside central 70 percent height for a 3.37:1 crop; move scene slightly inward if needed. No pottery, woven cloth, baskets, finished house or fence. Preserve current flat handmade aesthetic, no photography, no CGI or dramatic light. No text or border. Canvas remains wide.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/fever_watch_customs-v1.png",
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "review": "Full 2056x765 wide original inspected. Current flat angular terracotta/slate medium retained; regular reed walls and mat replaced by ragged hide windbreak and sleeping hide. Caregiver forehead contact with infant visible, fire reduced to safe small separated banked glow. Focus raised to retain caregiver face and infant in card."
+  },
+  {
+    "id": "sleeping_area_rotation",
+    "line": "demography",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-c57c96be-4af4-4ed2-83d5-0430145b30aa.png",
+    "prompt": "Fix framing ONLY in this current wide painting. Keep the full 2060x763 wide canvas and matte demography pigment aesthetic. Scale the ENTIRE central action group (all three people, their three moved raw hides, and central hearth) to 75 percent of its present size, centered vertically in the canvas. This must create at least 100 pixels of clear ground above the TOP of every head and 100 pixels below the LOWEST working hand. All heads, lifting hands, hides and hearth fit within the middle 560 pixels of height. Preserve overhead arrangement and rough-hide windbreaks, no reed mats, no permanent fence, no additional objects. Keep flat painted faces/planes, no photography or 3D. No text.",
+    "initial_prompt": "Edit this actual CURRENT GAME wide demography research banner, preserving its approximately 2059x764 proportions, overhead layout, mature flat chalk-pastel/cut-paper painted people, terracotta/rust/warm ivory/slate palette. Subject is sleeping places rotated near hearth. Replace ALL neatly rectangular reed mats with irregular folded raw animal hides being moved by the same three adults. Replace the tall regular tied reed enclosure with two low broken ragged hide windbreak sections on crooked branches, leaving camp open to natural ground. Keep central small stone-ring hearth and three adults moving the hides to different sleeping positions; no permanent house, neat fence, woven cloth, baskets, pottery or metal. For wide 3.37:1 card crop, bring the upper two adults slightly downward and lower adult upward so ALL three complete heads, lifting hands, moved hides and hearth sit inside central 70 percent height. Preserve handmade flat medium, no photographic skin/lighting, CGI or impasto. Wide canvas stays wide, no text or borders.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7eed07b1-6d5a-4626-b5a3-f4d163583315.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/sleeping_area_rotation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full wide 2058x764 original inspected: overhead three adults rotate irregular raw sleeping hides around hearth, regular reed enclosure removed for isolated ragged hide windbreaks. Entire action group reduced to preserve heads, lifting hands, moved hides and hearth inside wide crop. Current flat demography pigment retained."
+  },
+  {
+    "id": "dawn_readiness_drill",
+    "line": "security",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7970f50e-6dca-426f-994c-2e0d45598165.png",
+    "prompt": "Edit this CURRENT GAME wide security woodblock banner, preserving its approximately 2158x729 WIDE canvas, mature flat carved black silhouettes, vermilion/charcoal/parchment limited layers and knife-cut texture. Keep three hide-clad adults rehearsing a dawn readiness signal with simple raw wooden/flint spears and raised signaling hand. Remove the finished reed hut, its reed walls, baskets, pottery and canoe completely. Replace hut with one low ragged hide windbreak on crooked branches, resting on natural ground; riverbank remains without boats. Crude portable camp, no refined buildings, metal, woven cloth or polished components. Reduce figure group slightly so every full head, signaling arm, spear grip and tip is visible inside central 70 percent height for wide card cropping. Preserve established graphic woodblock rendering and wide proportions. No photographic lighting, CGI, cute cartoon, words or border.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/dawn_readiness_drill-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full 2157x729 original inspected: three flat carved woodblock adults rehearse dawn readiness, raised hand/weapon cue, raw wooden/flint spears. Hut, baskets, pottery and canoe removed, one ragged hide windbreak retained. Complete adult faces and spear grips inside wide central band. Existing vermilion/charcoal/parchment medium retained."
+  },
+  {
+    "id": "fiber_grading",
+    "line": "ecology",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-67ebe986-c884-40a2-9af9-5f0adac3a4fa.png",
+    "prompt": "New ecology research banner strictly matching the supplied CURRENT GAME wide ecology painting's approximately 2060x763 canvas, flat naturalist plant-pigment rendering, moss/fern/earth/muted sky palette, detailed botanical foreground and flat landscape bands. New subject FIBER GRADING: two dignified adults in rough untreated hide wraps seated at a natural flat rock compare loose wild bast strips: one tests a long supple strand between hands; other compares coarse brittle short strips and separates them into distinct loose groups on raw hide. Wild stem/bark remnants beside them, no woven cloth, prepared baskets, machinery, polished workbench or cultivated field. The whole two heads, hands stretching strands and three fiber groups are kept close together inside central 70 percent height, generous breathing room at top/bottom for 3.37:1 crop. Mature flat clearly painted silhouettes and plant shapes, no photographic skin, depth blur, cinematic light, CGI or relief. Full bleed wide banner; no square or 3:2, no labels or border. The reference supplies rendering and width only, do not copy riverbank erosion subject.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/streambank_vegetation_watch-v1.png",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "replace_first300": true,
+    "review": "Full 2060x763 original inspected: two rough-hide adults test long supple strand and compare coarse brittle strips, three loose fiber groups on raw hide, wild stem remnants. Current naturalist plant pigments/detail against flat landscape bands retained. Replaces photo rendering, no basket or manufactured workbench."
+  },
+  {
+    "id": "hearth_heat_retention",
+    "line": "nutrition",
+    "game_year": 4,
+    "version": 1,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f76ca987-48a3-45c1-9e41-3774694a2a3e.png",
+    "prompt": "New nutrition research banner strictly matching supplied CURRENT GAME wide egg-tempera painting's approximately 2048x768 canvas, opaque flat pigment, olive/deep green/wheat gold/cream/earth palette, visible thin brush marks and mature simplified adult silhouettes. New subject HEARTH HEAT RETENTION: two adults in rough untreated hide wraps kneel beside low ember hearth. One uses crooked raw twig to bank pale ash over glowing coals; other positions one coarse natural stone beside hearth, irregular retained stone ring holds warmth. Clearly show exposed glowing coals adjacent to banked ash and stone placement, no big flames. Hide sleeping camp in distance with one low rough hide windbreak. No pottery, woven baskets, woven robes, farming, architecture, metal or refined tools. Reference supplies only paint medium/palette and wide format, none of its later costumes or baskets. Complete heads, twig-working hand, stone-placement hands, coals and ash fit central 70 percent height for 3.37:1 crop. No photographic light or skin, CGI, thick relief or text. Wide full bleed approximately 2.7:1 banner; not square or 3:2.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/seasonal_protein_sourcing-v1.png",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "replace_first300": true,
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/hearth_heat_retention.png",
+      "focus": [
+        0.5,
+        0.73
+      ],
+      "resolver": "EARLY_SUBJECTS"
+    },
+    "review": "Full 2054x766 original inspected: two rough-hide adults bank ash with crooked twig and position coarse stone beside glowing embers, exposed/banked coals and stone-placement hands visible. Current opaque earth/olive tempera retained with no reference baskets/costumes copied. Low portable hide windbreak only, no pottery or built structure."
+  },
+  {
+    "id": "genealogical_recitation",
+    "line": "culture",
+    "game_year": 4,
+    "version": 1,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2fbaceea-168e-4351-b011-480676d432cb.png",
+    "prompt": "New genealogical-recitation research banner matching supplied WIDE culture painting's approximately 2170x725 proportions and current game mature flat tapestry-inspired painted treatment: indigo, dusty rose, warm gold, dusk violet; angular interlocking pigment planes and coarse matte grain. Change scene to an elder reciting each household's lineage. Seated gray-haired elder at left speaks with one open hand directed toward a nearby three-generation household: gray-haired adult, adult parent, and child together. Another adult listener repeats the account with a small hand gesture toward their own household. Two distinct family groups, respectful listening, not a generic epic performance or mystical symbols. All wear rough ragged untreated hide wraps; natural rocks and small raw-hide windbreak only. No writing, record tablets, emblems, pottery, basket, woven costumes or finished buildings. Complete heads and elder's family-pointing hand/repeater gesture in the middle 70 percent of image height with clear margins above/below, suitable for 3.37:1 crop. Full-bleed wide banner matches reference shape, no 3:2 or square. No photography, CGI, cartoon, heavy raised oil relief or text.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/oral_epics-v3.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_art600": true,
+    "binding_style": "culture: tapestry-inspired painting",
+    "review": "Full 2170x725 banner inspected. Culture palette/angular interlocking pigment matches wide painted reference. Seated elder directs open hand to gray-haired adult, parent and child household; second adult repeater gestures toward another household. Two family groupings, raw hides, no physical tapestry, symbols, record tablet or refined camp. Replaces small silhouette tile with dedicated wide subject."
+  },
+  {
+    "id": "paired_carrier_balancing",
+    "line": "logistics",
+    "game_year": 4,
+    "version": 2,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bc6222f4-1941-4b29-8487-153c1bd0c502.png",
+    "prompt": "Edit this CURRENT GAME wide logistics watercolor banner, retain approximately 2059x764 proportions, mature flat moving indigo silhouettes, sand/slate/indigo watercolor washes and simple hide clothing. Keep two adults shouldering ONE crooked natural wooden pole with a heavy shared load suspended between them. Replace the woven/netted basket shape entirely with ONE irregular RAW HIDE sling hanging from four crude raw cord loops, containing loose wild roots and broken branch pieces. No basket weave or net grid. Keep load visibly balanced between shoulders. Reduce whole carriers slightly vertically, enough to show complete heads and both shoulder grips inside central 70 percent height; bring feet up slightly if needed for full-width composition. No refined yoke, metal, pottery, finished clothes or boats. Preserve reference's flat travel watercolor, no photography, CGI or thick oil relief. Wide banner unchanged, no square, no 3:2, no labels or border.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/paired_carrier_balancing-v1.png",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "review": "Full 2059x764 wide original inspected: two indigo adult silhouettes shoulder same crooked pole, four crude cord loops suspend one raw-hide sling containing wild roots/branch fragments. Woven/net basket removed. Current panoramic watercolor retained, faces/grips/load inside central band."
+  }
+]

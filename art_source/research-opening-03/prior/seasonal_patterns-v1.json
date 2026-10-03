@@ -1,0 +1,9 @@
+{
+  "id": "seasonal_patterns",
+  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Seasonal Patterns. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. A thoughtful forager examines buds, fallen leaves, ripened berries and a shed antler laid together on a flat stone outdoors, with migrating birds crossing an autumn sky. A natural visual record of recurring seasonal changes. Focus on contrasting botanical seasonal evidence and observation. No clock, calendar, written symbols, garden rows or sophisticated tools. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-3cad2fe2-c3b7-427d-b5f3-f6150f83119b.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
+  "sha256": "f0e39ee173ae903165f411eb8c62052c3478036060209de7da29c1dc671ab20e",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

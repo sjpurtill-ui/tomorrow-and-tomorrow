@@ -1,0 +1,12 @@
+{
+  "id": "flood_mark_reading",
+  "line": "infrastructure",
+  "game_year": 15,
+  "approx_historical_year": -4900,
+  "prompt": "c. 4900 BCE: Adults point to old high-water debris stripe above current low river level and assess higher shelter ground; flat matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2bc1ccf2-7cd9-46eb-8fa9-93b372ba1fca.png",
+  "asset": "res://assets/ui/research/subjects/flood_mark_reading-v1.png",
+  "sha256": "8aef17e0c2cfa05b156372d884ff621304f977967848c9975665acd605aee13e",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too scenic/lifelike; high-water mark and low water visibly distinct in crop."
+}

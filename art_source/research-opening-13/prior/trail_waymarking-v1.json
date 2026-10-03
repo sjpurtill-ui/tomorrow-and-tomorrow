@@ -1,0 +1,12 @@
+{
+  "id": "trail_waymarking",
+  "line": "logistics",
+  "game_year": 12,
+  "approx_historical_year": -4920,
+  "prompt": "c. 4920 BCE: Travelers stack small plain stone cairn at forest trail fork and scrape simple blaze in tree bark with stone flake; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d873d5e7-2504-4836-8534-d012df074ec9.png",
+  "asset": "res://assets/ui/research/subjects/trail_waymarking-v1.png",
+  "sha256": "e3072c9bda21a632d91049967199380f7f395d302307de03e41c4b1c4d1ffd4e",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; both waymarking methods and path fork clear in crop; no writing."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "infant_swaddling_practice",
+  "line": "demography",
+  "game_year": 5,
+  "approx_historical_year": -4967,
+  "prompt": "c. 4967 BCE: caregivers wrap an infant against cold in an undyed woven-fiber swaddle beside a stone-ring hearth. Mature flat chalk pastel and cut-paper collage, terracotta and warm ivory; no patterned blanket, cradle, later dress or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1ab26be5-ad1c-4041-bd8b-da0ae052a98d.png",
+  "asset": "res://assets/ui/research/subjects/infant_swaddling_practice-v1.png",
+  "sha256": "091f9760ef4a2da340c2f05365e703caefeb6249aef3503add6627a73dddbe77",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation selected; infant and protective wrap legible in banner crop. Accepted after visual 3.37:1 crop and subject/period check."
+}

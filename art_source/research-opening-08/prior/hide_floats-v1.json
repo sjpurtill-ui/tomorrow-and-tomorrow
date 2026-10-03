@@ -1,0 +1,9 @@
+{
+  "id": "hide_floats",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Hide Floats. Several visibly inflated animal-hide bladders lashed beneath a light wooden platform support bundles and one traveler on quiet shallow water. Handmade buoyancy, not a canoe or plank boat.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-fbbfd4c0-0de6-48bb-82d9-ba6cd14e2982.png",
+  "asset": "res://assets/ui/research/subjects/hide_floats-v1.png",
+  "sha256": "f512d1e7f136fd21bcc6bb22643d8f91635f7733bcaae87135997010eb8f9a18",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}
