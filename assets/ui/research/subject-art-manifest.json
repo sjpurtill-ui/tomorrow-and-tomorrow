@@ -914,8 +914,12 @@
     ]
   },
   "bow_craft": {
-    "path": "res://assets/ui/research/subjects/bow_craft-v1.png",
+    "path": "res://assets/ui/research/subjects/bow_craft-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -5951,31 +5955,31 @@
     ]
   },
   "contagion_avoidance_customs": {
-    "path": "res://assets/ui/research/subjects/contagion_avoidance_customs-v1.png",
+    "path": "res://assets/ui/research/subjects/contagion_avoidance_customs-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "fallow_thicket_regrowth": {
-    "path": "res://assets/ui/research/subjects/fallow_thicket_regrowth-v1.png",
+    "path": "res://assets/ui/research/subjects/fallow_thicket_regrowth-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "notched_measuring_rods": {
-    "path": "res://assets/ui/research/subjects/notched_measuring_rods-v1.png",
+    "path": "res://assets/ui/research/subjects/notched_measuring_rods-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "seasonal_protein_sourcing": {
-    "path": "res://assets/ui/research/subjects/seasonal_protein_sourcing-v1.png",
+    "path": "res://assets/ui/research/subjects/seasonal_protein_sourcing-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.55
     ]
   },
   "carrying_poles": {
@@ -9820,6 +9824,13 @@
       0.5
     ],
     "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "house_floor_burial": {
+    "path": "res://assets/ui/research/subjects/house_floor_burial-v1.png",
+    "focus": [
       0.5,
       0.5
     ]
