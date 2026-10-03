@@ -65,11 +65,11 @@ const GRADE_CRAFT_FULL:=[0.0,1.0,3.0,5.5,9.0]
 ##   illness       illness deaths x (1 - this x quality)
 ##   sickness      outbreaks of sickness x exp(-this x quality) (crisis_system.gd)
 ##   fire          fires x exp(-this x quality) (crisis_system.gd)
-const HOME_HEALTH:=0.04
-const HOME_COHESION:=0.05
+const HOME_HEALTH:=0.03
+const HOME_COHESION:=0.04
 const HOME_EXPOSURE:=0.5
 const HOME_ILLNESS:=0.2
-const HOME_SICKNESS:=0.4
+const HOME_SICKNESS:=0.3
 const HOME_FIRE:=1.0
 
 # --- Roads ---------------------------------------------------------------------------
@@ -643,8 +643,18 @@ static func wall_wish()->float:
 ## Standing's reading of the defences, 0..1 (the defences' bonus over the
 ## strongest works').
 static func fort_reading()->float:
-	if WorldSimulation.military==null or not WorldSimulation.military.has_method("settlement_defense_snapshot"):return 0.0
-	return clampf(float(WorldSimulation.military.settlement_defense_snapshot().get("defense_bonus",0.0))/BASTION_BONUS,0.0,1.0)
+	return clampf(defense_bonus_now()/BASTION_BONUS,0.0,1.0)
+
+## The defences' bonus as settlement_defense_snapshot gives it (the stage's
+## bonus x integrity x wall_quality + stone_defense), read straight from the
+## ledger without the snapshot's guard reckoning (standing.gd reads it often).
+static func defense_bonus_now()->float:
+	var mc=WorldSimulation.military
+	if mc==null or not "settlement_defense" in mc:return 0.0
+	var ledger:Dictionary=mc.settlement_defense
+	var stages:Array=mc.SETTLEMENT_DEFENSE_STAGES
+	var stage:=clampi(int(ledger.get("stage",0)),0,stages.size()-1)
+	return float((stages[stage] as Dictionary).defense_bonus)*clampf(float(ledger.get("integrity",1.0)),0.0,1.0)*wall_quality()+stone_defense()
 
 
 # ===========================================================================================
@@ -908,3 +918,19 @@ static func plus_lines(more:float=10.0)->Array:
 	_add_line(lines,"Craft","%s to %s" % [_one(float(p.craft_settles)),_one(float(p.craft_then))],"Where the builders' craft settles over a working life, now and with them.")
 	if bool(p.short):_add_line(lines,"Materials","short","Some builders stand idle for want of timber, clay and stone: more cutters and diggers, or carriers bringing them from our other towns.","bad")
 	return lines
+
+
+## The headman's line of fact on building (court_facts.gd): the homes by
+## grade, the roads, beauty and work buildings, the builders' craft and
+## whether it is all kept.
+static func court_line()->String:
+	if not bool(WorldSimulation.state.settlement_site_committed):return ""
+	var r:=report()
+	var homes:Array=r.homes
+	var parts:PackedStringArray=[]
+	for g in range(GRADES.size()-1,-1,-1):
+		if float(homes[g])>=0.005:parts.append("%d in 100 %s" % [roundi(float(homes[g])*100.0),String(GRADE_WORDS[g])])
+	var kept:=decline_words(r)
+	return "Building: homes %d of 100 good (%s); roads %d of 100 (%s known); fine works %d of 100; work buildings %d of 100; builders' craft %s of %d, settling at %s; %s." % [
+		roundi(float(r.quality)*100.0),", ".join(parts),roundi(float(r.roads)*100.0),String(ROAD_WORDS[int(r.road_kind)]),roundi(float(r.beauty)*100.0),roundi(float(r.cover)*100.0),
+		_one(float(r.craft)),roundi(CRAFT_MAX),_one(float(r.craft_settles)),"all of it is kept" if kept.is_empty() else "too few builders: "+", ".join(kept)]

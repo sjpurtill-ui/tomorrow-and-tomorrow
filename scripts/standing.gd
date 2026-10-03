@@ -114,8 +114,7 @@ static func our_fighting_strength()->float:
 
 ## The defences' bonus (military_campaign.gd settlement_defense_snapshot).
 static func _walls()->float:
-	if WorldSimulation.military==null or not WorldSimulation.military.has_method("settlement_defense_snapshot"):return 0.0
-	return maxf(0.0,float(WorldSimulation.military.settlement_defense_snapshot().get("defense_bonus",0.0)))
+	return maxf(0.0,Fabric.defense_bonus_now())
 
 static func _warriors()->float:
 	if WorldSimulation.military==null: return 0.0
