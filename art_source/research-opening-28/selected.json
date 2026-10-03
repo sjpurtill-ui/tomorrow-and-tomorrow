@@ -1,0 +1,374 @@
+[
+  {
+    "id": "standard_measures",
+    "line": "knowledge",
+    "status": "catalog",
+    "name": "Body Measures",
+    "one_liner": "Body measures: hand, forearm, pace, basket",
+    "observation": "Body measures: hand, forearm, pace, basket.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 30,
+    "band_high": 65,
+    "min_year": 30,
+    "research_years": 5,
+    "requires_all": [
+      "counting_words"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "notched_measuring_rods",
+      "paired_measure_checking"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": true,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/knowledge-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/standard_measures.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+        "tile_index": 5,
+        "caption": "Body measures: hand, forearm, pace, basket (Year 45)",
+        "style": "paper_gouache"
+      },
+      "subject": {
+        "path": "res://assets/ui/research/subjects/standard_measures-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: Three adults compare one person's forearm length with a rough ungraduated stick, then its length against a plain basket mouth. Only crude body measures and simple notched wood, no numerals, written ledger, standardized ruler or formal metrology school. Medium: blue-black crosshatched ink with lapis and parchment. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-351ccab1-60fc-420e-bfc5-c28f545d48fc.png",
+    "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted."
+  },
+  {
+    "id": "household_mediators",
+    "line": "institutions",
+    "status": "new",
+    "name": "Go-betweens Mediate Quarrels Between Households",
+    "one_liner": "Go-betweens mediate quarrels between households",
+    "observation": "Go-betweens mediate quarrels between households.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 30,
+    "band_high": 60,
+    "min_year": 30,
+    "research_years": 3,
+    "requires_all": [
+      "customary_law"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Institutional flexibility",
+    "signals": [
+      "administration",
+      "society"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/institutions-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/household_mediators-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: Three adults seated on low stones outside two modest hide shelters. The central unarmed mediator holds open palms while the two household representatives gesture calmly toward one disputed food basket. No throne, crown, soldiers, courthouse or written contract. Medium: matte fresco dusty plum, limestone and gold. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8e3a7873-3596-4185-8467-46d4b448c229.png",
+    "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted."
+  },
+  {
+    "id": "named_star_figures",
+    "line": "culture",
+    "status": "new",
+    "name": "Star Figures Named in Stories",
+    "one_liner": "Star figures named in stories",
+    "observation": "Star figures named in stories.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 28,
+    "band_high": 65,
+    "min_year": 28,
+    "research_years": 3,
+    "requires_all": [
+      "oral_epics"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "moon_counting",
+      "weather_sign_reading"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Social cohesion",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.3
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/culture-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/named_star_figures.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 5,
+        "caption": "Star figures named in stories (Year 45)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    },
+    "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: A seated storyteller points toward a small loose group of natural stars while two listeners follow the gesture, beside a modest ember hearth and hide shelter. Flat star dots, no drawn constellation lines, zodiac symbols, text or magical figures in the sky. Medium: flat interlocking tapestry-inspired PAINTING in indigo, rose, gold and violet, not literal cloth. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-098bd8f5-2976-40fd-93d7-dc6a54c43426.png",
+    "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted."
+  },
+  {
+    "id": "poppy_analgesia",
+    "line": "health",
+    "status": "new",
+    "name": "Poppy Latex to Ease Pain",
+    "one_liner": "Poppy latex to ease pain",
+    "observation": "Poppy latex to ease pain.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 30,
+    "band_high": 65,
+    "min_year": 30,
+    "research_years": 3,
+    "requires_all": [
+      "herbal_classification"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "seed_selection"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "General health",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/health-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/poppy_analgesia-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: A quiet historical botanical-care scene: one adult observes intact poppy flowers and round seed capsules beside a resting adult on a hide mat. A small plain earthen bowl nearby. No incisions, extraction steps, dosage, ingestion, drug preparation tools, or miraculous cure imagery. Medium: sage and celadon ink-watercolor on cream. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d753c1f3-879f-49ad-8065-449ca3fd5f87.png",
+    "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted."
+  },
+  {
+    "id": "load_backframes",
+    "line": "logistics",
+    "status": "new",
+    "name": "Backframes for Bulky Loads",
+    "one_liner": "Backframes for bulky loads",
+    "observation": "Backframes for bulky loads.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 29,
+    "band_high": 61,
+    "min_year": 29,
+    "research_years": 3,
+    "requires_all": [
+      "load_lashing_knots",
+      "joinery"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "woven_carriers"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Carrying capacity",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.2
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/logistics-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/load_backframes-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: Side view of one adult fitting a rough branch carrying frame with fiber straps and a bulky bundle of reeds, another checks the lashing. Show the load resting on the branch backframe, no modern backpack, buckles or metal. Medium: panoramic travel watercolor in sand, slate and indigo. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2a8d570c-bb45-4dca-abac-705b530af405.png",
+    "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted."
+  },
+  {
+    "id": "leaf_fodder_pollarding",
+    "line": "ecology",
+    "status": "new",
+    "name": "Pollarded Trees Cut for Leaf Fodder",
+    "one_liner": "Pollarded trees cut for leaf fodder",
+    "observation": "Pollarded trees cut for leaf fodder.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 29,
+    "band_high": 61,
+    "min_year": 29,
+    "research_years": 4,
+    "requires_all": [
+      "animal_taming",
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "fallow_thicket_regrowth"
+    ],
+    "conditions": {
+      "environment": [
+        "woodland"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Land health",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/ecology-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: One adult holds a crude hafted stone tool beside a modest low pollarded tree with rough cut branches and new leafy shoots; another gathers leafy twigs into a small bundle while two goats browse fallen leaves. No steel axe or modern orchard. Medium: botanical foreground and flat landscape in plant pigments. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-39296f4f-2d16-49b1-89b0-547bcdebc2c2.png",
+    "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted."
+  },
+  {
+    "id": "thorn_barriers",
+    "line": "security",
+    "status": "new",
+    "name": "Thorn and Brush Barriers Around Camps",
+    "one_liner": "Thorn and brush barriers around camps",
+    "observation": "Thorn and brush barriers around camps.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 29,
+    "band_high": 61,
+    "min_year": 29,
+    "research_years": 3,
+    "requires_all": [
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "watch_rotation",
+      "refuge_point_marking"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public safety",
+    "signals": [
+      "defense",
+      "warfare"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/security-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/thorn_barriers-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: Two adults interlock rough thorn and brush branches along a low irregular camp boundary. One lifts a thorn branch into place and one presses down existing brush. A simple hide shelter behind, no military fortress, spear array, masonry wall or battle. Medium: layered hand-cut woodblock in vermilion, charcoal and parchment. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a4045c6f-f1f2-4a30-a4f6-7d3a99abecfb.png",
+    "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted."
+  }
+]

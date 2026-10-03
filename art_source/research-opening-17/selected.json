@@ -1,0 +1,151 @@
+[
+  {
+    "id": "consensus_amendment_custom",
+    "line": "institutions",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies institutions medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: A small circle of six adults sitting at an open village threshold discuss changing a shared custom; one lays a plain branching twig between them, another makes a calm open-palmed agreeing gesture. Dusty plum, limestone and muted gold matte fresco, flat rhythmic silhouettes. Rough hide garments, earth walls and plain reed shade; no enormous statue, temple, writing or formal throne.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas, hands and central action y350..590. Zoom out enough that actual3.37:1 card keeps heads and mechanism. Top/bottom peripheral bands background only. Varied scene, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and small earthen dwellings, but plain weaving is later. Never introduce later tools/buildings from reference.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/institutions-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-24c6f200-2008-48ac-86a0-95656015a40f.png",
+    "replace_first300": false,
+    "replace_art600": false,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed."
+  },
+  {
+    "id": "children_light_tasks",
+    "line": "labor",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies labor medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: Two fully clothed children in rough hide tunics sort small dry twigs and edible nuts beside a seated supervising adult at a portable camp, doing light safe tasks. Charcoal marks over ochre ground, sketchy angular drawing, midday neutral light. No crop field, sickle, dangerous tool, heavy load or staged agricultural harvest.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas, hands and central action y350..590. Zoom out enough that actual3.37:1 card keeps heads and mechanism. Top/bottom peripheral bands background only. Varied scene, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and small earthen dwellings, but plain weaving is later. Never introduce later tools/buildings from reference.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/labor-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-307a57af-9ed3-4a55-8be9-891fc9a1546a.png",
+    "replace_first300": false,
+    "replace_art600": false,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed."
+  },
+  {
+    "id": "ground_stone_axes",
+    "line": "production",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies production medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: Two seated adults grind a modest stone axe-head back and forth on a broad wet abrasive slab; a second finished dull stone blade is lashed into a simple split wooden haft beside them. Low frontal view with complete heads below upper quarter. Flat angular copper/ember/soot palette-knife painting, visibly planar matte pigment, no photo/3D relief. Coarse hides, wood and cord; no metal axes, machinery or polished stone building.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas, hands and central action y350..590. Zoom out enough that actual3.37:1 card keeps heads and mechanism. Top/bottom peripheral bands background only. Varied scene, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and small earthen dwellings, but plain weaving is later. Never introduce later tools/buildings from reference.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/production-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e981de82-21e9-4f73-b812-54804d9d0f6a.png",
+    "replace_first300": false,
+    "replace_art600": false,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed."
+  },
+  {
+    "id": "layered_clothing_design",
+    "line": "production",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies production medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: In a cold windy sparse upland camp, one adult wears a short sewn hide inner tunic while another places a loose fur outer wrap over their shoulders, showing TWO separate overlapping layers. Complete faces and hands central, coarse sinew stitching, angular flat copper/umber/soot palette-knife painting. No woven fabric, buttons, metal needles, tailored modern trousers or mannequin.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas, hands and central action y350..590. Zoom out enough that actual3.37:1 card keeps heads and mechanism. Top/bottom peripheral bands background only. Varied scene, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and small earthen dwellings, but plain weaving is later. Never introduce later tools/buildings from reference.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/production-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-98d0f315-3305-43da-9b2f-b3f60d9a896b.png",
+    "replace_first300": true,
+    "replace_art600": false,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/layered_clothing_design.png",
+      "focus": [
+        0.5,
+        0.52
+      ]
+    }
+  },
+  {
+    "id": "animal_taming",
+    "line": "nutrition",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies nutrition medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: An adult offers fresh cut leaves to three wary goats inside a low irregular woven-branch pen while a second adult secures its simple twig gate, modest first penned herd. Opaque botanical egg tempera in olive/gold/cream earth pigments. Side view, heads/hand/animal interaction central. No wool sheep shearing, dairy milking, cultivated grain field, masonry barn, metal fence or mounted riding.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas; hands and central action y350..590. Zoom out to preserve heads and mechanism in actual3.37:1 card. Peripheral top/bottom bands only background. Different setting and viewpoint, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and earthen shelters; woven cloth is later. No later tools or clothes copied from reference.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/nutrition-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-c5f24202-18c8-4563-9875-87dd5538ace6.png",
+    "replace_first300": true,
+    "replace_art600": false,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/animal_taming.png",
+      "focus": [
+        0.5,
+        0.69
+      ]
+    }
+  },
+  {
+    "id": "joint_reduction",
+    "line": "health",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies health medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: A covered seated adult rests a sore shoulder against a folded hide cushion after care, with two attendants calmly supporting the arm and offering water in an opaque rough wooden cup. Sage/celadon ink and restrained watercolor, cream and muted earth. Non-graphic quiet care, all clothed in simple hide garments. No forceful maneuver, tutorial steps, exposed wound, modern splint hardware or medical efficacy claim.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas; hands and central action y350..590. Zoom out to preserve heads and mechanism in actual3.37:1 card. Peripheral top/bottom bands only background. Different setting and viewpoint, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and earthen shelters; woven cloth is later. No later tools or clothes copied from reference.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/health-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6d3d8fde-b8c7-4374-8937-ffb489c4a4f4.png",
+    "replace_first300": false,
+    "replace_art600": false,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed."
+  },
+  {
+    "id": "lineage_exogamy",
+    "line": "demography",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies demography medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: Two adults from separate household groups exchange a simple shell-on-cord gift while both families stand nearby welcoming them, a peaceful meeting between kin groups in an open early settlement court. Angular chalk-pastel/cut-paper terracotta, rust, ivory and slate, flat distinct people silhouettes. Hide garments, reed/earth shelters; no white bridal dress, woven formal robes, priest, modern rings or later palace.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas; hands and central action y350..590. Zoom out to preserve heads and mechanism in actual3.37:1 card. Peripheral top/bottom bands only background. Different setting and viewpoint, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and earthen shelters; woven cloth is later. No later tools or clothes copied from reference.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/demography-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2b6f405f-0f30-40cb-82e4-c3a973bc0288.png",
+    "replace_first300": false,
+    "replace_art600": false,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed."
+  },
+  {
+    "id": "trade_partner_tokens",
+    "line": "logistics",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies logistics medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: Two traveling adults greet beside a shaded wooded path, one offers a small naturally pierced shell on a cord as a remembered hospitality token while the other welcomes them with an open hand. A tied bundle of raw hides and a basket of nuts lie nearby. Panoramic travel watercolor sand/slate/indigo, broad matte washes and drawn edges. Complete heads comfortably central; no formal coin, ornate seal, writing, metal or generic river marketplace.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas; hands and central action y350..590. Zoom out to preserve heads and mechanism in actual3.37:1 card. Peripheral top/bottom bands only background. Different setting and viewpoint, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and earthen shelters; woven cloth is later. No later tools or clothes copied from reference.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/logistics-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e4dc084e-4cb5-4105-b6a7-ac536bdda6a4.png",
+    "replace_first300": false,
+    "replace_art600": false,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed."
+  },
+  {
+    "id": "plastered_ancestor_skulls",
+    "line": "culture",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.43
+    ],
+    "prompt": "Generate ONE new Tomorrow and Tomorrow culture research painting. Reference supplies flat painted tapestry-inspired medium and EXACT EXTRA-WIDE2055x765 canvas only. Preserve wide dimensions/aspect full bleed, no text/frame/default3:2. NEW SUBJECT: Inside a modest earthen household, one adult carefully places a SINGLE old ancestor cranium with a plain pale plaster-modeled human face and TWO simple shell eyes in a low earth-wall recess; another sits nearby quietly. Respectful non-graphic ancestor memory, dry old bone only, no gore. Flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, not textile or literal embroidery. Sideways three-quarter view, faces and object central. No rows of bare cartoon skulls, exposed teeth horror, modern sculpture tools, shrine temple or patterned clothing.\nAll complete heads and ancestor object comfortably within y170..610, upper/lower peripheral background bands. Deep indigo house interior, muted rose and pale ivory modeled face, small gold highlights, pattern rhythm made of painted shapes not literal fabric. Garments plain rough hides. Skull itself must visibly have a PLASTER-MODELED FACE rather than bare exposed eye sockets, shell eyes and rounded nose. No teeth needed. Fictional household practice after house-floor burial and clay shaping, no claim to reconstruct a particular museum find.",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/culture-v1.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-755b41ad-796b-4897-8f31-81a5bde65e11.png",
+    "replace_first300": false,
+    "replace_art600": true,
+    "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed."
+  }
+]

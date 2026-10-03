@@ -1,0 +1,29 @@
+[
+  {
+    "id": "dissenting_voice_custom",
+    "game_year": 4,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "status": "retained after full-original review"
+  },
+  {
+    "id": "symptom_sharing_customs",
+    "game_year": 4,
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "status": "retained after full-original review"
+  },
+  {
+    "id": "tool_hazard_awareness",
+    "game_year": 4,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "status": "retained after full-original review"
+  }
+]

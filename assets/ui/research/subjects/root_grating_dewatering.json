@@ -1,0 +1,17 @@
+{
+  "id": "root_grating_dewatering",
+  "line": "nutrition",
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Opaque botanical egg-tempera olive gold cream earth. One seated adult grates plain starchy root against naturally rough flat stone, producing coarse pale pulp; another squeezes pulp in small folded hide scrap above hollow WOODEN dish with drops visible. No ceramic pot metal grater wovencloth press or hazardous unidentifiedplant instructions. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-12/assets/ui/research/subjects/smoking-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-53dd9bb0-54c6-4e2e-b576-3c1d5008ba8f.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual3.37:1 Godot card visually reviewed; primary heads, hands and subject action retained, field medium and chronology checked.",
+  "replace_first300": true,
+  "asset": "res://assets/ui/research/subjects/root_grating_dewatering-v2.png",
+  "sha256": "6cb530115e347087925cefd132551d32b4c155252a0d91807d0899f9c2876fcc",
+  "mode": "built-in image_gen / edit"
+}

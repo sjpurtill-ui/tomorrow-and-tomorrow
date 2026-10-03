@@ -1,0 +1,18 @@
+{
+  "id": "food_pounding_mortars",
+  "line": "nutrition",
+  "version": 1,
+  "replace_first300": true,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/hearth_heat_retention-v1.png",
+  "prompt": "Create a current-game nutrition painting matching supplied wide opaque botanical egg-tempera banner, olive/gold/cream/earth pigments, broad matte painted shapes and mature figures. Two kneeling adults process gathered wild roots in a NATURALLY hollow weathered stone: one holds a short rounded stone pestle vertically with both hands, its lower end touching roots in the hollow; other lays whole roots nearby on an irregular hide. A little crushed pulp at hollow edge. No huge carved wooden mortar or tall manufactured pestle. Keep root-pounding mechanism exceptionally clear. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9530126b-9b54-4569-8b03-93b7fa9871c4.png",
+  "focus": [
+    0.5,
+    0.4
+  ],
+  "game_year": 5,
+  "review": "Matte olive/gold egg-tempera treatment. Short rounded stone pestle visibly contacts root pulp inside weathered stone hollow. Raw roots and irregular hide; no tall carved wooden mortar or cultivated field.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/food_pounding_mortars-v1.png",
+  "sha256": "bcfdfb65cd73e587714c894ac1ee3c18af02e6d7b3ff4487d16bef51c8992b01"
+}

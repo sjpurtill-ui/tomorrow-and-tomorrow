@@ -1,0 +1,12 @@
+{
+  "id": "lactational_spacing_awareness",
+  "line": "demography",
+  "game_year": 2,
+  "approx_historical_year": -4987,
+  "prompt": "Early Neolithic nursing mother with infant and older caregiver sharing experience about time between births, full seated figures contained within middle of wide card. Mature chalk pastel and torn cut-paper collage, terracotta and warm ivory, angular adult silhouettes. Respectful, no diagram, classical robes, photorealism or writing.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-efcf7285-7427-4eda-8698-4bd2cc473ee5.png",
+  "asset": "res://assets/ui/research/subjects/lactational_spacing_awareness-v1.png",
+  "sha256": "134dc098b6a8ca59d743cc2ce5fe639cff8fb1593404c0de46212c0a423713e3",
+  "mode": "built-in image_gen / new image",
+  "review": "Third generation selected; prior crops cut the heads or nursing action. Accepted after visual 3.37:1 crop and subject/period check."
+}

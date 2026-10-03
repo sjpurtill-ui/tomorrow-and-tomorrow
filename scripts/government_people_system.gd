@@ -1311,6 +1311,58 @@ func remove_settlement_leader(settlement_id:String,action:String="dismiss")->Dic
 	return {"ok":true,"action":action,"former":previous,"successor":successor_record,"event":event,"legitimacy_cost":legitimacy_cost,"cohesion_cost":cohesion_cost,"message":message}
 
 
+func person_died_abroad(person_id:int,cause:String)->Dictionary:
+	## One of the ruler's people put to death abroad by another people
+	## (captured_agents.gd: an agent of ours taken and judged there). The ruler
+	## did not do it: no dismissal, no execution by sovereign order, no cost to
+	## legitimacy or cohesion. They are dead first, so no succession can name
+	## them again; their offices then pass through the ordinary succession,
+	## and one truthful event says so. The caller counts the death itself (by
+	## their age and sex).
+	initialize()
+	var index:=_find_person_index(person_id)
+	if index<0 or String(people[index].get("status",""))!="active": return {"ok":false,"reason":"That person is not available."}
+	var name:=String(people[index].get("name","One of ours"))
+	var offices:Array[String]=[]
+	for office_key in WorldSimulation.state.leadership_positions.keys():
+		if int((WorldSimulation.state.leadership_positions[office_key] as Dictionary).get("person_id",0))==person_id: offices.append(String(office_key))
+	var local_id:=String(people[index].get("local_leader_of",""))
+	people[index]["status"]="deceased"
+	people[index]["died_day"]=int(WorldSimulation.state.elapsed_days)
+	people[index]["removal_reason"]="died_abroad"
+	people[index]["death_cause"]=cause.substr(0,200)
+	people[index]["office_key"]=""
+	people[index]["office_title"]=""
+	people[index]["local_leader_of"]=""
+	var titles:Array[String]=[]
+	for office_key in offices:
+		titles.append(String(office_definition(office_key).get("title",office_key)))
+		WorldSimulation.state.leadership_positions.erase(office_key)
+	if local_id!="":
+		for settlement_index in WorldSimulation.state.player_settlements.size():
+			if String(WorldSimulation.state.player_settlements[settlement_index].get("id",""))!=local_id: continue
+			titles.append("%s of %s" % [settlement_leader_title(),String(WorldSimulation.state.player_settlements[settlement_index].get("name","the settlement"))])
+			WorldSimulation.state.player_settlements[settlement_index]["leader_person_id"]=0
+	_ensure_pool()
+	var successors:Array[String]=[]
+	for office_key in offices:
+		var successor:=_automatic_successor(office_key,person_id)
+		if successor.is_empty(): continue
+		var appointed:=mark_central_appointment(int(successor.person_id),office_key)
+		if not appointed.is_empty(): successors.append(String(appointed.get("name","")))
+	_ensure_local_leaders()
+	var held:=(" (%s)" % ", ".join(PackedStringArray(titles))) if not titles.is_empty() else ""
+	var after:=(" %s took up the work." % ", ".join(PackedStringArray(successors))) if not successors.is_empty() else ""
+	var event:={"day":int(WorldSimulation.state.elapsed_days),"title":"Died Abroad","description":"%s%s died abroad: %s.%s" % [name,held,cause.strip_edges().trim_suffix("."),after],
+		"domain":"institutions","severity":"major" if not titles.is_empty() else "notice"}
+	WorldSimulation.state.simulation_events.push_front(event)
+	if WorldSimulation.state.simulation_events.size()>80: WorldSimulation.state.simulation_events.resize(80)
+	if local_id!="": WorldSimulation.state.settlement_network_revision+=1
+	revision+=1
+	_sync_advisor_roster()
+	return {"ok":true,"name":name,"titles":titles,"successors":successors,"event":event}
+
+
 func person_departs(person_id:int,reason:String="fled")->Dictionary:
 	## An official leaves the ruler's service alive: cast out by decree
 	## ("exiled"), bound and kept under guard ("detained") or slipped away in

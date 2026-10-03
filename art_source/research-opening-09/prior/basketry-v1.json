@@ -1,0 +1,9 @@
+{
+  "id": "basketry",
+  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Basketry. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. Close-up of a craftsperson weaving an unfinished reed basket, upright ribs and the over-under weave perfectly readable, hands adding one flexible reed, finished plain baskets set beside it on a mat in a riverside workshop. Soft side light across beautiful woven fiber texture. No loom, rope twisting, pottery, writing or metal tools. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-46911b61-18f2-4a5c-9256-cac2230e5fc6.png",
+  "asset": "res://assets/ui/research/subjects/basketry-v1.png",
+  "sha256": "6e82e7234934217438bbf8ef06170aead1f3b257937582d63a5aa524c4a712a7",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

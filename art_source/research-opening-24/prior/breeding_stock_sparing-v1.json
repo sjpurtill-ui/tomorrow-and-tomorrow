@@ -1,0 +1,12 @@
+{
+  "id": "breeding_stock_sparing",
+  "line": "ecology",
+  "game_year": 35,
+  "approx_historical_year": -4767,
+  "prompt": "c. 4767 BCE: Hunters lower bows and let mother deer with fawn pass, choosing solitary male beyond; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cc1fcde6-75d8-45af-a392-fa009379985e.png",
+  "asset": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png",
+  "sha256": "0eb9fe7a39dcbdc5269df74df27c9ecc755c2d08ff03d145a344f7711e893054",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; sparing female and young clear in crop."
+}

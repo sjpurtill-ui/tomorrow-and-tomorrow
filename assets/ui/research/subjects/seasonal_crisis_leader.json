@@ -1,12 +1,59 @@
 {
   "id": "seasonal_crisis_leader",
   "line": "institutions",
-  "game_year": 24,
-  "approx_historical_year": -4840,
-  "prompt": "c. 4840 BCE: Community selects temporary leader to coordinate reed shelter repairs during hard storm season; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bb4168b0-c8d2-42ba-9fd1-f5bb822fd991.png",
-  "asset": "res://assets/ui/research/subjects/seasonal_crisis_leader-v1.png",
-  "sha256": "24ee9b0d06eb8a4b3123d3fa8350e624fada3f46ec864f3b5118764f868103f5",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; community decision and crisis work clear in crop, no crown."
+  "status": "new",
+  "name": "A Leader Chosen for a Season of Need",
+  "one_liner": "A leader chosen for a season of need",
+  "observation": "A leader chosen for a season of need.",
+  "key_threshold": false,
+  "target_year": 24,
+  "proposed_year": 24,
+  "band_low": 12,
+  "band_high": 35,
+  "min_year": 12,
+  "research_years": 3,
+  "requires_all": [
+    "household_councils"
+  ],
+  "requires_any": [
+    [
+      "emergency_food_caching",
+      "raid_scouting"
+    ]
+  ],
+  "precedents": [
+    "elder_council_assent"
+  ],
+  "conditions": {},
+  "shared_with": [
+    "security"
+  ],
+  "subcategory": "Administration",
+  "signals": [
+    "administration",
+    "society"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/seasonal_crisis_leader-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "year": 24,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "institutions: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/institutions-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: A compact group of five adults in hide wraps chooses one adult for a temporary period of need: elder offers a plain staff while others indicate a nearly empty grain basket. Matte fresco dusty plum/limestone/muted gold, flat outlined figures. No crown, throne, royal robes, military uniform or written ballots.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ca158d20-657e-45dc-932d-9d904429b156.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/seasonal_crisis_leader-v2.png",
+  "sha256": "63724ebde2c9fae9b1d94b01cef7bfc085914a27c447cb87c23980b688873a5a",
+  "mode": "built-in image_gen / edit"
 }

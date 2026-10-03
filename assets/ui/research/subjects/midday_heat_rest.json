@@ -1,12 +1,16 @@
 {
   "id": "midday_heat_rest",
   "line": "labor",
-  "game_year": 14,
-  "approx_historical_year": -4907,
-  "prompt": "c. 4907 BCE: Adults set down timber and stone tools, rest in shade and drink during hot midday; charcoal and red ochre on rough paper. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c23cecc1-aca3-49d0-9808-dac5ecc26608.png",
-  "asset": "res://assets/ui/research/subjects/midday_heat_rest-v1.png",
-  "sha256": "66240616e5bf6cfc4cc2642f4e755a50f8c010dbc2792596e964e83fc9229a5c",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; shaded pause, water and short hot-season shadow clear in crop."
+  "prompt": "Create ONE finished research painting. Preserve reference widecanvas about2055x765 fullbleed and field medium ONLY, change subject completely. Charcoal overochre. Three adults rest in broad tree shade beside laid-down roughstone tools and cordtiedbrush load duringhot midday. Smallfigures relaxed seated, brightwashed dryland beyondshade, no eveninggoldensunset formalworkshop metal. Allwholeheads hands and mainobjects fit central y170..610, modestfigure scale with ampleskyandground foractual3.37:1card. Mature handmade flat2D pigmentpapergrain; simplehideclothing. No photography CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-13/assets/ui/research/subjects/task_sequencing_habits-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6b682740-d216-4351-96be-be0977a4616e.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "asset": "res://assets/ui/research/subjects/midday_heat_rest-v2.png",
+  "sha256": "b4c8b2dcfce7a0de1bd5c6b688ed226eae0f18e46bae7d8c5ec4f618206aa9ca",
+  "mode": "built-in image_gen / edit"
 }

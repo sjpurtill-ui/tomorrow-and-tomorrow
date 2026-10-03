@@ -1,12 +1,50 @@
 {
   "id": "milking",
   "line": "nutrition",
-  "game_year": 25,
-  "approx_historical_year": -4833,
-  "prompt": "c. 4833 BCE: Adults milk goat, sheep and early solid-brown domestic cow into clay bowls; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-921aed09-c5ef-4d62-9826-87fe43e8b904.png",
-  "asset": "res://assets/ui/research/subjects/milking-v1.png",
-  "sha256": "3bcdbce4398b743cd2025da118ec95139eb1d3745cced39320d46848f4a8eecd",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; rejected first for modern Holstein-like spotted cow; selected primitive solid-brown cattle and milking actions clear."
+  "status": "new",
+  "name": "Milking Goats, Sheep and Cows",
+  "one_liner": "Milking goats, sheep and cows",
+  "observation": "Milking goats, sheep and cows.",
+  "key_threshold": true,
+  "target_year": 25,
+  "proposed_year": 25,
+  "band_low": 15,
+  "band_high": 35,
+  "min_year": 15,
+  "research_years": 3,
+  "requires_all": [
+    "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Diet quality",
+  "signals": [
+    "food",
+    "storage"
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/milking-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "year": 25,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.4
+  ],
+  "binding_style": "nutrition: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: Side view of one adult kneeling beside a calm female goat, hands at udder over a small plain clay bowl; another adult holds goat gently at neck. Opaque botanical egg-tempera olive/gold/cream. Correct goat anatomy and coherent two hands. No cow-milking machine, refined stool, spigot, dairy machinery or fabric robes.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f629e3b3-f7ea-4e2f-92a0-37d0ff71f46e.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/milking-v2.png",
+  "sha256": "af1dcedf71f3cb99b0a316b2a3e7b6be97d5485d14a3101cff176ab9d0e5e815",
+  "mode": "built-in image_gen / edit"
 }

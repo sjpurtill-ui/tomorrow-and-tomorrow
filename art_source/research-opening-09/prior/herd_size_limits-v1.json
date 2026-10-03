@@ -1,0 +1,12 @@
+{
+  "id": "herd_size_limits",
+  "line": "ecology",
+  "game_year": 16,
+  "approx_historical_year": -4893,
+  "prompt": "c. 4893 BCE: Herders guide modest goat herd away from browsed shrubs so vegetation recovers; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c9a9e510-f78c-44a7-b88d-364288a8aad3.png",
+  "asset": "res://assets/ui/research/subjects/herd_size_limits-v1.png",
+  "sha256": "b40ed13867348d9fd3650ee7ccdadc7461b9ba622fc2dc1589d7ce146fc6893c",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; modest herd and shrub browse context clear in crop."
+}

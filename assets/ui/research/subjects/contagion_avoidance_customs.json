@@ -1,12 +1,21 @@
 {
   "id": "contagion_avoidance_customs",
   "line": "health",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-09/assets/ui/research/subjects/herbal_classification-v3.png",
+  "medium": "restrained fine ink sage celadon watercolor cream paper",
+  "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match supplied WIDE approximately2055x765 proportions and restrained fine ink sage celadon watercolor cream paper. One weary fully clothed adult rests on hide bedding under low hide windbreak. Another places wild roots on flat rock beside sleeper while two other adults sit visibly farther away in separate camp space. Quiet dignity, readable physical separation, care without abandonment. No visible wounds, masks, laboratory, medicine or claim of effective treatment. Rough hide garments, mature readable handmade2D art. Entire people and subject action MUST be smaller and within y=170..620 central band, all heads hands and objects intact for3.37:1crop. Fullbleedwide, no text, labels, borders, photography, CGI or cinematiclight. Reference medium and width only, replace subject.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6eb3e589-225d-4cb9-80d9-d62d433d3c5e.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 9,
-  "approx_historical_year": -4940,
-  "prompt": "c. 4940 BCE: Adults leave water near an ill person in a separate reed shelter while another guides neighbors to keep respectful distance; flat watercolor and black ink on fibrous paper. No text, photorealism, CGI or childlike style.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-012bb71a-220c-4457-9484-5784142579e3.png",
-  "asset": "res://assets/ui/research/subjects/contagion_avoidance_customs-v1.png",
-  "sha256": "17571c680e082de4dc29aaede44712fc6a147079a3b06cfba1453fead4ccf695",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; first too lifelike; practical spacing and care read in 3.37:1 crop."
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "restrained fine ink sage celadon watercolor cream paper",
+  "mode": "built-in image_gen / reference-guided painting",
+  "review": "Full source reviewed, actual wide card review pending",
+  "asset": "res://assets/ui/research/subjects/contagion_avoidance_customs-v2.png",
+  "sha256": "b816eb7a2a075391258a0fc02869e521461b55fdf20430e346a4dfe2f12de60b"
 }

@@ -1,0 +1,12 @@
+{
+  "id": "trade_partner_tokens",
+  "line": "logistics",
+  "game_year": 16,
+  "approx_historical_year": -4893,
+  "prompt": "c. 4893 BCE: Neolithic trade partners exchange plain unmarked bone token with modest goods at river path; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f24c979e-0529-4416-95a0-5c9a850a1d41.png",
+  "asset": "res://assets/ui/research/subjects/trade_partner_tokens-v1.png",
+  "sha256": "e3630b72633a252236aed096699cf9604c4ea137fedd717ad79a032f51cf455c",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; token handoff and goods clear in crop, no writing or coinage."
+}

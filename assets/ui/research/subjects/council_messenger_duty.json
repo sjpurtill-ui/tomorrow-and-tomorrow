@@ -2,11 +2,16 @@
   "id": "council_messenger_duty",
   "line": "institutions",
   "game_year": 3,
-  "approx_historical_year": -4980,
-  "prompt": "c. 4980 BCE: a messenger summons households to a council gathering beneath a tree. Flat 2D mineral-pigment civic fresco on coarse plaster, dusty plum, limestone and muted gold; early Neolithic hide and fiber wraps, no written messages, classical robes or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0d914918-6fb6-409d-8869-26f2b5513ee9.png",
-  "asset": "res://assets/ui/research/subjects/council_messenger_duty-v1.png",
-  "sha256": "0c3e73c0c30511db55c225e8add4d8d3d5dd970d33c24623a5106503c4f8bd30",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation selected; first had Classical-looking clothing. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f5809e54-2bee-4024-b96f-562c2d7bf239.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/council_messenger_duty-v1.png",
+  "prompt": "Edit this Council Messenger Duty painting for game year 3. Preserve mature matte civic fresco medium on rough plaster, flat dignified adult silhouettes, dusty plum/limestone/muted gold palette, messenger running toward gathering and callers beckoning households. Remove ALL decorative triangle/dot frieze borders at top and bottom: replace those with continuous plain natural scene pigment. Remove both rigid enclosed reed huts and all woven baskets at the edges. Use bare earth with sparse scrub and low ragged animal-hide windbreaks loosely over crooked natural branches, no enclosed architecture or neat frame. Replace four neat saw-cut stump seats beneath central listeners with rough irregular natural rocks, unshaped. Keep ragged unstitched hide clothing, no woven garments. Preserve the central gathering under the tree, messenger and beckoning gestures, arrange faces and hands within central horizontal band for very wide 3.77:1 crop. No typography, emblems, pottery, metal, baskets, later carpentry, photorealism, smooth volume or childlike proportions. A continuous mature flat fresco painting, caption-free.",
+  "review": "Full original inspected: messenger approaches adult gathering under tree, callers beckon households. Matte flat civic fresco preserved. Formal reed huts, baskets, decorative borders and standardized stump stools removed; ragged hide windbreaks and natural rocks replace them. Full original and 3.77:1 crop inspected; messenger, beckoning hands and seated gathering remain legible.",
+  "asset": "res://assets/ui/research/subjects/council_messenger_duty-v2.png",
+  "sha256": "535c6cfd5fe528aff79142dec43bbe47caef6fdfba2be96774062ce27177cc10",
+  "mode": "built-in image_gen / edit"
 }

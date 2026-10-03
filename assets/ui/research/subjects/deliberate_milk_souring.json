@@ -1,12 +1,51 @@
 {
   "id": "deliberate_milk_souring",
   "line": "nutrition",
-  "game_year": 36,
-  "approx_historical_year": -4760,
-  "prompt": "c. 4760 BCE: Adults keep milk until thick sour curd forms then scoop curd into basket-lined vessel; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-ba525219-f97f-488c-9224-0c1bec46c33e.png",
-  "asset": "res://assets/ui/research/subjects/deliberate_milk_souring-v1.png",
-  "sha256": "bafa0ac1d9b339a901f2d7393206384af4f995eebbe861358e67564c29903951",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; liquid milk and thick curd visually distinct."
+  "status": "era",
+  "name": "Soured Milk Kept as a Thick Curd",
+  "one_liner": "Soured milk kept as a thick curd",
+  "observation": "Soured milk kept as a thick curd.",
+  "key_threshold": false,
+  "target_year": 36,
+  "proposed_year": 36,
+  "band_low": 26,
+  "band_high": 51,
+  "min_year": 26,
+  "research_years": 2,
+  "requires_all": [
+    "milking"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "pit_firing"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 36,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "nutrition: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/deliberate_milk_souring-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established nutrition painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: ONE adult tilts a rough clay bowl to examine separated pale curds and thin liquid, with another modest clay milk pot under reed shade nearby and a small goat in the background. Hide clothing, no commercial dairy, cheese wheel, modern culture jars, metal strainer or precise recipe. Nutrition opaque botanical egg-tempera olive/gold/cream/earth.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-22eea31a-0ac9-445b-b348-28c5b0d0bab1.png",
+  "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600.",
+  "asset": "res://assets/ui/research/subjects/deliberate_milk_souring-v2.png",
+  "sha256": "8ca3793202dcd28c16393326cc3fbcc79773255a35c5dbda211ab400ce028a13",
+  "mode": "built-in image_gen / edit"
 }

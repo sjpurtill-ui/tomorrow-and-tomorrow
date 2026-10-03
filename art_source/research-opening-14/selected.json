@@ -1,0 +1,55 @@
+[
+  {
+    "id": "clay_shaping",
+    "line": "production",
+    "prompt": "Create ONE finished research painting. Reference supplies WIDE canvas and field medium only, change subject completely. Preserve wide2055x765 fullbleed, NEVER3:2. Flat angular matte paletteknife copper ember soot umber. Two seated adults make FIRST crude handbuilt clay pots: one adds short uneven clay coil to low rough vessel, other pinches small lopsided clay cup with thumb. Unfired wet clay, fingerprints, raw lumps, no potterwheel kiln glaze metal or formalworkshop. All whole heads hands and primary objects CENTRAL y170..610 with ample landscape top/bottom for3.37:1 gamecard. Adults simplehideclothing, maturehandmade flat2D pigmentpapergrain, no photorealism CGI cartoon frame text logo.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-13/assets/ui/research/subjects/clay_testing-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-90d0e048-524d-48f7-bc06-8e133ffb7105.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full original and final actual3.37:1 Godot card visually reviewed; complete heads, hands, mechanism and field medium retained.",
+    "replace_first300": true
+  },
+  {
+    "id": "pest_deterrent_storage_herbs",
+    "line": "nutrition",
+    "prompt": "Create ONE finished research painting. Reference supplies WIDE canvas and field medium only, change subject completely. Preserve wide2055x765 fullbleed, NEVER3:2. Opaque botanical eggtempera olive gold cream earth. Two seated adults lay simple leafy herb sprigs between dried food portions in shallow open rough reed baskets under temporary hide shelter. Herbs and food plainly visible; no elaborategranary glass ceramic metal, no magical vapors. All whole heads hands and primary objects CENTRAL y170..610 with ample landscape top/bottom for3.37:1 gamecard. Adults simplehideclothing, maturehandmade flat2D pigmentpapergrain, no photorealism CGI cartoon frame text logo.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-12/assets/ui/research/subjects/smoking-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fe4093be-f692-4549-80f5-570640990575.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full original and final actual3.37:1 Godot card visually reviewed; complete heads, hands, mechanism and field medium retained."
+  },
+  {
+    "id": "household_water_boiling",
+    "line": "health",
+    "prompt": "Edit this painting preserving exact2055x765 widecanvas, sageceladon ink/watercolor aesthetic, fullyclothed seated adults and centralcomposition. Correct held bowl: it is an OPAQUE hollowed wooden bowl, no glass or transparent cutaway. Threequarter overheadview looks INSIDE open rim, water top visible with fine settled brown sediment at deepest bottom beneath pale water; solidwood outside hidescontents. Man holdsbowl slightlytilted towardviewerwithoutspilling. Preserve secondwoodenbowl and no fire/steam/boiling. Do not addtextframe. Primary heads hands bowls remainwithincentral y170..610 for3.37:1card.",
+    "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-581df282-2ecf-4066-a2e2-009f39cef210.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0852c675-827b-41c8-ad4e-4c5e7a37e6b9.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full original and final actual3.37:1 Godot card visually reviewed; complete heads, hands, mechanism and field medium retained."
+  },
+  {
+    "id": "burn_scar_regrowth_tracking",
+    "line": "ecology",
+    "prompt": "Create ONE finished research painting. Reference supplies WIDE canvas and field medium only, change subject completely. Preserve wide2055x765 fullbleed, NEVER3:2. Botanical foreground detailed plantpigments flatlandscapebands. Two crouching adults compare new green shoots rooted in old cold blackened patch against mature unburntplants nearby; pointing hands show shoot beside charcoalstump. No activefire cropfields pottery livestock instrument. All whole heads hands and primary objects CENTRAL y170..610 with ample landscape top/bottom for3.37:1 gamecard. Adults simplehideclothing, maturehandmade flat2D pigmentpapergrain, no photorealism CGI cartoon frame text logo.",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-12/assets/ui/research/subjects/topsoil_depth_reading-v2.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4f3d9eed-ff18-49b7-80b5-63ed63398049.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "review": "Full original and final actual3.37:1 Godot card visually reviewed; complete heads, hands, mechanism and field medium retained."
+  }
+]

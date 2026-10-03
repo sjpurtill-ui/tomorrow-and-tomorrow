@@ -1,12 +1,16 @@
 {
   "id": "extended_family_room_division",
   "line": "demography",
-  "game_year": 14,
-  "approx_historical_year": -4907,
-  "prompt": "c. 4907 BCE: Extended household lays separate sleeping mats in two zones divided by woven screens around shared hearth; chalk pastel and torn-paper collage. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-74591f52-eaaa-4eec-a77a-d079d2341b72.png",
-  "asset": "res://assets/ui/research/subjects/extended_family_room_division-v1.png",
-  "sha256": "7bdabb48e540139004b7e6412cb428d1a55dceddb24acacb02f760c364854673",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; partitions and distinct sleeping zones clear in crop."
+  "prompt": "Create ONE finished research painting. Preserve reference widecanvas about2055x765 fullbleed and field medium ONLY, change subject completely. Angular chalkpastel cutpaper terracotta rust ivoryslate. Side-on wide view INSIDE simple low earthenhomestead: adults rearrange hidebedding into three distinct family sleepingareas divided by plainbranch screen, onefamily sitswithfullycoveredchildren onright. Rawwoodposts earthenwalls simplehide no brick metal furniture luxuriouspalace. Allwholeheads hands and mainobjects fit central y170..610, modestfigure scale with ampleskyandground foractual3.37:1card. Mature handmade flat2D pigmentpapergrain; simplehideclothing. No photography CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-13/assets/ui/research/subjects/shared_childcare-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-94775d19-3a42-4164-aeab-cbbef7bdfa60.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "asset": "res://assets/ui/research/subjects/extended_family_room_division-v2.png",
+  "sha256": "fc6b03f7f80ed75ff49c9e801f9369099a4575328fbb517c6ebc1a0085cc7f6b",
+  "mode": "built-in image_gen / edit"
 }

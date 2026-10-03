@@ -1,12 +1,54 @@
 {
   "id": "paired_measure_checking",
   "line": "production",
-  "game_year": 38,
-  "approx_historical_year": -4747,
-  "prompt": "c. 4747 BCE: Two trusted keepers independently pour grain into matching clay cups and compare equal levels before storing; thick matte impasto oil. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-81b5c144-e396-4d0e-af37-129616605b70.png",
-  "asset": "res://assets/ui/research/subjects/paired_measure_checking-v1.png",
-  "sha256": "223809cb88d9ab9a4834b65738f47bd5976a5f0776c1f326e97d764f4e0689bc",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; paired cups and checking gesture clear, no numerals."
+  "status": "era",
+  "name": "Two Keepers Check Each Measure",
+  "one_liner": "Two keepers check each measure",
+  "observation": "Two keepers check each measure.",
+  "key_threshold": false,
+  "target_year": 38,
+  "proposed_year": 38,
+  "band_low": 20,
+  "band_high": 50,
+  "min_year": 20,
+  "research_years": 1.5,
+  "requires_all": [
+    "notched_measuring_rods"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "witnessed_agreement_customs",
+    "knot_tally_cross_check"
+  ],
+  "conditions": {},
+  "shared_with": [
+    "knowledge"
+  ],
+  "version": 2,
+  "year": 38,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "production: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/paired_measure_checking-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/production-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established production painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: TWO adults kneel comparing TWO rough notched wooden rods aligned side by side against the width of a branch bundle; one indicates an irregular notch while the other checks the matching span. Only crude cuts, NO numbers, writing, ruler markings, graduated metal gauges or finished carpentry. Production flat angular palette-knife painting copper/ember/soot/umber.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.\nCorrection: Edit the supplied painting, preserving its exact extra-wide canvas, flat angular copper/ember painting style, people and setting. Correct the central measurement mechanism: exactly TWO rough notched wooden rods parallel side by side, each held/checkable between the two adults. Remove the third rod entirely. Keep the branch bundle below, irregular crude notches, no modern ruler numbers, no refined carpentry. Keep whole heads and hands.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1c604cb7-e12b-46b6-b2db-2e79c990d31e.png",
+  "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600.",
+  "asset": "res://assets/ui/research/subjects/paired_measure_checking-v2.png",
+  "sha256": "7bff8a505b016416c7685c14f598db9236beb5e7ae689a7333621beaf01ae92a",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,0 +1,12 @@
+{
+  "id": "herd_recovery_pursuit",
+  "line": "security",
+  "game_year": 25,
+  "approx_historical_year": -4833,
+  "prompt": "c. 4833 BCE: Neolithic group follows hoof tracks at dawn toward goats taken from communal herd; restrained hand-cut woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-63aea1c3-358c-459f-8c1f-d80889cb4174.png",
+  "asset": "res://assets/ui/research/subjects/herd_recovery_pursuit-v1.png",
+  "sha256": "dffc40e190546aba8512c9a22067605dff8730fa39caba077523190114b3265f",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; tracks, pursuit and distant herd clear, no injury."
+}

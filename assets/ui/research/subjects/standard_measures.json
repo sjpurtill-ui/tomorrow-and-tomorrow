@@ -1,9 +1,57 @@
 {
   "id": "standard_measures",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Shared Measures. Two makers compare grain scoops against one plain reference vessel and align simple wooden measuring rods; agreement on the same volume and length, no written numerals or modern rulers.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-1c461a5e-72dc-449a-b315-93c70b238872.png",
-  "asset": "res://assets/ui/research/subjects/standard_measures-v1.png",
-  "sha256": "54be3201c5418260c45144f3578b1182b702a7e1a47f76eae38754e0f544f9ba",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "knowledge",
+  "status": "catalog",
+  "name": "Body Measures",
+  "one_liner": "Body measures: hand, forearm, pace, basket",
+  "observation": "Body measures: hand, forearm, pace, basket.",
+  "key_threshold": false,
+  "target_year": 45,
+  "proposed_year": 45,
+  "band_low": 30,
+  "band_high": 65,
+  "min_year": 30,
+  "research_years": 5,
+  "requires_all": [
+    "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "notched_measuring_rods",
+    "paired_measure_checking"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 45,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": true,
+  "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/knowledge-v1.png",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/standard_measures.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+      "tile_index": 5,
+      "caption": "Body measures: hand, forearm, pace, basket (Year 45)",
+      "style": "paper_gouache"
+    },
+    "subject": {
+      "path": "res://assets/ui/research/subjects/standard_measures-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: Three adults compare one person's forearm length with a rough ungraduated stick, then its length against a plain basket mouth. Only crude body measures and simple notched wood, no numerals, written ledger, standardized ruler or formal metrology school. Medium: blue-black crosshatched ink with lapis and parchment. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-351ccab1-60fc-420e-bfc5-c28f545d48fc.png",
+  "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/standard_measures-v2.png",
+  "sha256": "41444e97a359d5ae3eef4e761ab76382b415bec6ced9f3baf5455b6f7b65389e",
+  "mode": "built-in image_gen / edit"
 }

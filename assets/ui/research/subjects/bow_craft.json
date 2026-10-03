@@ -1,9 +1,21 @@
 {
   "id": "bow_craft",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: War Bow Craft. Show a concrete, visually clear scene demonstrating this exact practice: Bow woods, strings, draw lengths, and arrow shafts are matched deliberately for reliable military use. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-fa5c6144-50d8-437b-82df-74b567aec675.png",
-  "asset": "res://assets/ui/research/subjects/bow_craft-v1.png",
-  "sha256": "45b4637c78ae6508b2a462e528b8425699fc59755d4915dc57b012b85c954d87",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "security",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hafted_weapons-v2.png",
+  "medium": "layered handcut woodblock vermilion charcoal parchment",
+  "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match supplied WIDE approximately2055x765 proportions and layered handcut woodblock vermilion charcoal parchment. One seated adult gently checks shallow bend of simple ONE-piece wooden selfbow with attached coarse string, never aiming at anyone. Adjacent adult attaches two rough feathers to rear of plain arrow using plant fibre. Complete bow curve and string endpoints readable, no compositebow, crossbow or quiverhardware. Rough hide garments, mature readable handmade2D art. Entire people and subject action MUST be smaller and within y=170..620 central band, all heads hands and objects intact for3.37:1crop. Fullbleedwide, no text, labels, borders, photography, CGI or cinematiclight. Reference medium and width only, replace subject.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-752666f0-5fcb-4ce3-9ded-70145ff3b33a.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 9,
+  "replace_first300": true,
+  "replace_art600": false,
+  "binding_style": "layered handcut woodblock vermilion charcoal parchment",
+  "mode": "built-in image_gen / reference-guided painting",
+  "review": "Full source reviewed, actual wide card review pending",
+  "asset": "res://assets/ui/research/subjects/bow_craft-v2.png",
+  "sha256": "5c349fb9e2841b994bb62243498c9105171e6f760e02b64e3716c0da6ce9bc56"
 }

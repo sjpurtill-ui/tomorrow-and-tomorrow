@@ -1,12 +1,16 @@
 {
   "id": "varied_forage_rotation",
   "line": "nutrition",
-  "game_year": 10,
-  "approx_historical_year": -4933,
-  "prompt": "c. 4933 BCE: Adults compare seasonal baskets of berries, nuts, roots and leaves and gesture toward contrasting foraging habitats; flat egg tempera. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1b47e12e-5ba4-43c9-b049-8a1ba5cd1299.png",
-  "asset": "res://assets/ui/research/subjects/varied_forage_rotation-v1.png",
-  "sha256": "43dd324dec7122a1060aff1c84a50eac6299220cd4f12c96899fe5efd704443f",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; varied foods and seasonal habitat gesture clear in wide crop."
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Opaque botanical egg-tempera olive gold cream earth. Two adult foragers consult three small separate baskets of nuts, roots and berries, pointing toward woodland, meadow and stream in one coherent panoramic landscape. No labels or panels. Seasonal alternatives implied by landscape, no abundant cultivated orchard or cropfield. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-10/assets/ui/research/subjects/seasonal_protein_sourcing-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-88159378-4834-48cb-8c96-144cac446966.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual 3.37:1 Godot card visually reviewed; field medium, early materials, heads and distinctive action retained.",
+  "asset": "res://assets/ui/research/subjects/varied_forage_rotation-v2.png",
+  "sha256": "aeeb296acdd4b956754c41acf3de7bc93dee878014baf702453cdf88624cb140",
+  "mode": "built-in image_gen / edit"
 }

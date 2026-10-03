@@ -1,0 +1,18 @@
+{
+  "id": "curious_questioning_custom",
+  "line": "culture",
+  "version": 1,
+  "replace_art600": true,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/oral_epics-v3.png",
+  "prompt": "Create current-game culture banner matching supplied approximately 2170x725 WIDE tapestry-inspired PAINTING, flat interlocking indigo/rose/gold/violet pigment planes, mature adult anatomy, children drawn respectfully not cute cartoon. Small seated elder warmly answers one standing child's questioning open-hand gesture; second younger child listens and an adult encourages by open palm. Child points to curling smoke above tiny safely separated ember and elder responds with gesture to upward air, curiosity and explanation clear. All complete heads and gestures in central 65 percent height, smaller compact group with sky breathing room. Crude irregular hides, wild camp beside rocks, no buildings, baskets, pottery, woven cloth, writing, diagrams or text. Pigment painting, not literal tapestry, photography or CGI. Preserve WIDE proportions, no border.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bce20645-1465-410a-8331-ff28dc0434b7.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 6,
+  "review": "Interlocking indigo, rose and gold painted planes. Young questioner points toward rising smoke as elder and others respond.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/curious_questioning_custom-v1.png",
+  "sha256": "56905df196c83a2be55d3999d79c314a1b967203aea699af34438d7d9e3c5342"
+}

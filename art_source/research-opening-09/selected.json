@@ -1,0 +1,232 @@
+[
+  {
+    "id": "novice_task_shadowing",
+    "line": "knowledge",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/weather_sign_reading-v1.png",
+    "medium": "blue-black ink crosshatching with muted lapis on parchment",
+    "prompt": "Create a NEW Tomorrow and Tomorrow year-eight research painting. Reference controls wide approximately 2055x765 proportions and blue-black ink crosshatching with muted lapis on parchment. Experienced hand demonstrates trimming a loose stone flake against larger core; attentive younger adult sits adjacent repeating same wrist gesture with separate stone; observer looks between their hands. Demonstration and copied action clearly readable. Portable wild camp, rough irregular hide garments. Complete heads, hands and mechanism within central60percentheight with smaller people for actual3.37:1 crop. Full-bleed wide mature handmade2D painting. No text, labels, border, photography, CGI, cinematic light, pottery, permanent houses, cropfields or domesticated livestock. Replace subject while retaining field medium and width.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-376da9c4-f2d4-47a1-8476-fb0474517a18.png",
+    "version": 1,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": true,
+    "replace_first300": false,
+    "binding_style": "knowledge: blue-black ink crosshatching with muted lapis on parchment",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "elder_consultation_rites",
+    "line": "institutions",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/witnessed_agreement_customs-v2.png",
+    "medium": "matte mineral fresco dusty plum limestone gold",
+    "prompt": "Create a NEW Tomorrow and Tomorrow year-eight research painting. Reference controls wide approximately 2055x765 proportions and matte mineral fresco dusty plum limestone gold. Two grey-haired elders seated on rough rocks listen to two adults describing alternative routes with open gestures toward distant river fork. Consultation before difficult choice, no king, throne, documents or seal. Portable wild camp, rough irregular hide garments. Complete heads, hands and mechanism within central60percentheight with smaller people for actual3.37:1 crop. Full-bleed wide mature handmade2D painting. No text, labels, border, photography, CGI, cinematic light, pottery, permanent houses, cropfields or domesticated livestock. Replace subject while retaining field medium and width.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e4fb269d-a38c-4ea7-8432-f9e8f4d330f9.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": false,
+    "binding_style": "institutions: matte mineral fresco dusty plum limestone gold",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "circle_dances",
+    "line": "culture",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/bone_flutes_drums-v1.png",
+    "medium": "flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric",
+    "prompt": "Create a NEW Tomorrow and Tomorrow year-eight research painting. Reference controls wide approximately 2055x765 proportions and flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric. Six smaller fully hide-clothed adults form low broad oval ring holding neighbours hands while gently stepping together around small hearth; distinct feet, intelligible joined hands. No modern costume or ceremony borrowed from specific living culture. Portable wild camp, rough irregular hide garments. Complete heads, hands and mechanism within central60percentheight with smaller people for actual3.37:1 crop. Full-bleed wide mature handmade2D painting. No text, labels, border, photography, CGI, cinematic light, pottery, permanent houses, cropfields or domesticated livestock. Replace subject while retaining field medium and width.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-46b969d8-2d44-46ad-84bf-469c73ecd7a1.png",
+    "version": 1,
+    "focus": [
+      0.5,
+      0.54
+    ],
+    "game_year": 8,
+    "replace_art600": true,
+    "replace_first300": false,
+    "binding_style": "culture: flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "shared_work_signals",
+    "line": "labor",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/rest_break_timing-v2.png",
+    "medium": "charcoal drawing over matte ochre wash",
+    "prompt": "Create a NEW Tomorrow and Tomorrow year-eight research painting. Reference controls wide approximately 2055x765 proportions and charcoal drawing over matte ochre wash. One coordinator claps hands together while two workers crouch preparing to lift opposite ends of ONE rough irregular log. They respond attentively before lifting in unison. All anatomy clear, unsawn log rests just above ground. Portable wild camp, rough irregular hide garments. Complete heads, hands and mechanism within central60percentheight with smaller people for actual3.37:1 crop. Full-bleed wide mature handmade2D painting. No text, labels, border, photography, CGI, cinematic light, pottery, permanent houses, cropfields or domesticated livestock. Replace subject while retaining field medium and width.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-255590c3-e237-4bdb-8a6f-efb6109e0518.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": false,
+    "binding_style": "labor: charcoal drawing over matte ochre wash",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "basketry",
+    "line": "production",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/cordage-v2.png",
+    "medium": "flat angular palette-knife copper ember soot umber painted shapes, not raised3Drelief",
+    "prompt": "Create NEW Tomorrow and Tomorrow year-eight research painting. Match supplied WIDE approximately2055x765 proportions and flat angular palette-knife copper ember soot umber painted shapes, not raised3Drelief. Adult threads two flexible reeds around upright stakes of an incomplete small basket; another coils coarse plant strands into low rounded base. Clear interlaced fibres and working hands. Basketmaking is newly available; no pottery. Rough hide garments and portable wild camp only. Complete heads, hands and subject mechanism within central60percentheight, smaller people with breathing space for actual3.37:1crop. Full bleed wide mature handmade2D art. No captions, text, border, photography, CGI, cinematiclighting or cultivatedfields. Replace reference subject, retain medium and width.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d454357c-e360-4dc7-a8e8-f1e487bdaaf3.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": true,
+    "binding_style": "production: flat angular palette-knife copper ember soot umber painted shapes, not raised3Drelief",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "site_clearing_assessment",
+    "line": "infrastructure",
+    "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/infrastructure-v1.png",
+    "medium": "matte casein gouache mineralblue limestone",
+    "prompt": "Create NEW Tomorrow and Tomorrow year-eight research painting. Match supplied WIDE approximately2055x765 proportions and matte casein gouache mineralblue limestone. Three people assess dry level campsite above stream: one points between loose roots and stones, another carries small obstacle stone aside, third lightly marks ground with rough stick. Undisturbed wet hollow beyond remains unoccupied. No finished village. Rough hide garments and portable wild camp only. Complete heads, hands and subject mechanism within central60percentheight, smaller people with breathing space for actual3.37:1crop. Full bleed wide mature handmade2D art. No captions, text, border, photography, CGI, cinematiclighting or cultivatedfields. Replace reference subject, retain medium and width.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-eefce2e5-a231-481e-a9d4-86e1c6dbfc79.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": false,
+    "binding_style": "infrastructure: matte casein gouache mineralblue limestone",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "friction_fire_ignition",
+    "line": "nutrition",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/food_drying-v2.png",
+    "medium": "opaque botanical egg tempera olive gold cream earth",
+    "prompt": "Create NEW Tomorrow and Tomorrow year-eight research painting. Match supplied WIDE approximately2055x765 proportions and opaque botanical egg tempera olive gold cream earth. Seated adult rolls a straight vertical hand-drill spindle between two open palms above a rough wooden hearthboard. Spindle bottom in notch beside tiny dark ember dust; helper holds airy dry tinder nest nearby. ONE spindle, coherent opposed palms, tiny smoke not huge flame, no bowdrill. Rough hide garments and portable wild camp only. Complete heads, hands and subject mechanism within central60percentheight, smaller people with breathing space for actual3.37:1crop. Full bleed wide mature handmade2D art. No captions, text, border, photography, CGI, cinematiclighting or cultivatedfields. Replace reference subject, retain medium and width.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-aa852d53-ef8a-4804-a1c2-67e012b2dc8f.png",
+    "version": 1,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": true,
+    "binding_style": "nutrition: opaque botanical egg tempera olive gold cream earth",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "hearth_roasting_control",
+    "line": "nutrition",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/food_drying-v2.png",
+    "medium": "opaque botanical egg tempera olive gold cream earth",
+    "prompt": "Create NEW Tomorrow and Tomorrow year-eight research painting. Match supplied WIDE approximately2055x765 proportions and opaque botanical egg tempera olive gold cream earth. One adult turns plain twig skewer with small food portions over quiet glowing coals; another uses forked stick to shift edible root on flat warmed stone beside coals. Rough stone ring, distinct food and controlled heat. No pots or sophisticated ovens. Rough hide garments and portable wild camp only. Complete heads, hands and subject mechanism within central60percentheight, smaller people with breathing space for actual3.37:1crop. Full bleed wide mature handmade2D art. No captions, text, border, photography, CGI, cinematiclighting or cultivatedfields. Replace reference subject, retain medium and width.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b20ab007-26a3-460f-a2c0-bd7aa207eefc.png",
+    "version": 1,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": true,
+    "binding_style": "nutrition: opaque botanical egg tempera olive gold cream earth",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "herbal_classification",
+    "line": "health",
+    "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-db2ca320-deb7-46ee-bca6-2bfb8c5e8297.png",
+    "medium": "restrained fine ink and sage celadon watercolor on cream paper",
+    "prompt": "Preserve this exact sage/celadon watercolor and fine-ink medium and WIDE 2055x765 canvas. Recompose both people AND all three separate plant piles as one scene at 75 percent their current size, centered between y=170 and y=620. All hair, both people's hands, flat rocks, complete serrated-leaf pile, complete rounded-leaf pile and complete spiny-sprig pile must be visible within that central band. Add simple painted riverbank breathing space above and below. No labels, text, border, recipes or consumption. Make THREE botanical piles distinct and fully readable in a very wide 3.37:1 crop. Do not enlarge any human.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b06c7b1f-2373-4e4b-88b1-f69eb30b991f.png",
+    "version": 3,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": true,
+    "binding_style": "health: restrained fine ink and sage celadon watercolor on cream paper",
+    "review": "Corrected composition keeps complete three plant piles, hands and heads inside wide card.",
+    "mode": "built-in image_gen / reference-guided painting",
+    "initial_prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and restrained fine ink and sage celadon watercolor on cream paper. Two adults compare visibly different leaf shapes in three separated piles on pale flat rocks. One holds serrated leaf, other points at rounded leaf and third spiny sprig set apart. No consumption, recipes, dosage or implied cures. An interpretive plant-sorting scene. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-db2ca320-deb7-46ee-bca6-2bfb8c5e8297.png"
+  },
+  {
+    "id": "dry_cache_siting",
+    "line": "logistics",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hide_floats-v2.png",
+    "medium": "panoramic travel watercolor sand slate indigo",
+    "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and panoramic travel watercolor sand slate indigo. Two adults tuck a hide-wrapped dried-food parcel on dry high rock shelf beneath natural overhang; third points to wet hollow below showing why raised spot was selected. No wooden chest, builtgranary or pottery. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-91467ded-5bb1-41b3-84c8-8be0e156d7e4.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": false,
+    "binding_style": "logistics: panoramic travel watercolor sand slate indigo",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "hazard_memory_recitation",
+    "line": "security",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/hafted_weapons-v2.png",
+    "medium": "layered handcut woodblock vermilion charcoal parchment",
+    "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and layered handcut woodblock vermilion charcoal parchment. An elder gestures warning toward distant crumbling cliff-edge path; three listeners seated around a small cairn repeat pointed and open-palm gestures. Hazard remembered through spoken lore, no writing. Clear cliff and safe foreground. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fab4165d-fce0-46ae-81e2-a88333198664.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": false,
+    "binding_style": "security: layered handcut woodblock vermilion charcoal parchment",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "herd_size_limits",
+    "line": "ecology",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/seasonal_patterns-v2.png",
+    "medium": "detailed botanical foreground with flat landscape bands in plant pigments",
+    "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and detailed botanical foreground with flat landscape bands in plant pigments. Two herders observe FIVE small goatlike animals browsing low shrubs in open uncultivated land. One gestures from bare overbrowsed patch toward leafy thicket beyond; other holds rough staff. Early animal-taming dependency exists for this discovery; no fenced ranch, barns or modern breeds. Show finite browse, not mass livestock. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-070f350c-b1e9-4bec-8cac-cbaa1695bad7.png",
+    "version": 2,
+    "focus": [
+      0.5,
+      0.39
+    ],
+    "game_year": 8,
+    "replace_art600": false,
+    "replace_first300": false,
+    "binding_style": "ecology: detailed botanical foreground with flat landscape bands in plant pigments",
+    "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+    "mode": "built-in image_gen / reference-guided painting"
+  }
+]

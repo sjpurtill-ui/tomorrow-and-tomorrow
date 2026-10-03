@@ -1,12 +1,20 @@
 {
   "id": "lineage_land_tenure",
   "line": "institutions",
-  "game_year": 18,
-  "approx_historical_year": -4880,
-  "prompt": "c. 4880 BCE: Lineage elders show kin shared fields and grazing grounds from a plain boundary cairn; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a27c6cc1-5b86-4ec7-9421-fb0fe83c9870.png",
-  "asset": "res://assets/ui/research/subjects/lineage_land_tenure-v1.png",
-  "sha256": "3baeb8caca532d8eb502112bcd0dfb216bdae21a54cc43cfd908f974cffc1b40",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; kin group, boundary and landscape clear; no deed or writing."
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/lineage_land_tenure-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/institutions-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: A family of three generations stands at a low uninscribed stone boundary between a small plot and rough pasture; an elder gestures along the shared ground while younger relatives listen. Dusty plum, limestone, subdued gold matte fresco. No document, ownership deed, temple or writing.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6334f4e8-4ce7-43e3-97d9-767a92878087.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/lineage_land_tenure-v2.png",
+  "sha256": "c69f756342e5f2860150d271b55d317535d6142aea4b030288f9b03904b7bce5",
+  "mode": "built-in image_gen / edit"
 }

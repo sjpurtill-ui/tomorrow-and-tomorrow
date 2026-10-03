@@ -1066,7 +1066,10 @@ static func _work_short(out:Dictionary)->String:
 static func for_audience(audience:Dictionary)->Dictionary:
 	## The stakes of the audience's proposal (the block above the answers), {}
 	## when it proposes nothing to weigh.
-	if audience.is_empty() or String(audience.get("status",""))!="waiting" or String(audience.get("origin",""))!="court": return {}
+	if audience.is_empty() or String(audience.get("status",""))!="waiting": return {}
+	# An envoy's request: the deal as each side counts it (envoy_deals.gd).
+	if String(audience.get("origin",""))=="foreign": return (load("res://scripts/envoy_requests.gd") as GDScript).call("stakes",audience)
+	if String(audience.get("origin",""))!="court": return {}
 	match String(audience.get("kind","")):
 		"wonder_proposal": return for_wonder(audience)
 		"great_work":

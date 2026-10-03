@@ -1,0 +1,12 @@
+{
+  "id": "elder_consultation_rites",
+  "line": "institutions",
+  "game_year": 8,
+  "approx_historical_year": -4947,
+  "prompt": "An elder seated on stone advises adult community members on where to place shelters by river; stylized archaic civic fresco.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4afdc4f3-bc92-4eab-9a8d-de4939a6e62c.png",
+  "asset": "res://assets/ui/research/subjects/elder_consultation_rites-v1.png",
+  "sha256": "cd6e215534700537e72446958740a2dff5c3748a937d2b47cf5a4d81706fea2b",
+  "mode": "built-in image_gen / new image",
+  "review": "Later flat fresco generation selected; rejected lifelike prior version; gesture, listeners and river visible in crop."
+}

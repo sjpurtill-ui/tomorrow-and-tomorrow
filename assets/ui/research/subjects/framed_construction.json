@@ -1,9 +1,22 @@
 {
   "id": "framed_construction",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Framed Construction. A partially completed timber dwelling exposes its load-bearing posts and beams while workers raise a crossmember; infill walls remain secondary, no concrete or steel.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-c7a8bc5e-140d-463a-9911-61da9cdfabce.png",
-  "asset": "res://assets/ui/research/subjects/framed_construction-v1.png",
-  "sha256": "ed757feb77e52853760c6f87625794ec9870f23193e5d7fb68fd9067f015f192",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "infrastructure",
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/framed_construction.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/infrastructure-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established infrastructure field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Three adults raise a SMALL simple timber frame, rough posts and one horizontal beam held in split-and-cord joints; one steadies a post, two guide the beam. Mineral blue/limestone matte casein. No elaborate truss, uniform lumber, nails, metal, crane, large completed town or woven clothing.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-98285495-84be-4897-9a03-4605565eb410.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/infrastructure-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/framed_construction-v2.png",
+  "sha256": "f60112562d306be226e03953cc29eae6317a50c74f6cc07181b235b3b493c33f",
+  "mode": "built-in image_gen / edit"
 }

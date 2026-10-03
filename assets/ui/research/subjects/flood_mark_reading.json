@@ -1,12 +1,18 @@
 {
   "id": "flood_mark_reading",
   "line": "infrastructure",
-  "game_year": 15,
-  "approx_historical_year": -4900,
-  "prompt": "c. 4900 BCE: Adults point to old high-water debris stripe above current low river level and assess higher shelter ground; flat matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2bc1ccf2-7cd9-46eb-8fa9-93b372ba1fca.png",
-  "asset": "res://assets/ui/research/subjects/flood_mark_reading-v1.png",
-  "sha256": "8aef17e0c2cfa05b156372d884ff621304f977967848c9975665acd605aee13e",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; first too scenic/lifelike; high-water mark and low water visibly distinct in crop."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "prompt": "Create ONE new Tomorrow and Tomorrow research painting. The reference guides its mature handmade infrastructure medium and the EXACT EXTRA-WIDE CANVAS ONLY, not subject. Preserve reference width, height and panoramic aspect; paint full bleed edge to edge with no frame, text or paper border. Do not produce a default 3:2 image. New subject: Two adults stand on a dry exposed river bank examining a continuous high-water stain and snagged reeds halfway up the eroded bank face. One points directly at the stain, the other compares it with the lower current river level. Three-quarter side view along the bank, mineral blue and limestone matte casein gouache. No constructed quay, levee or measuring ruler.\nPrimary heads, hands and practical action stay within central vertical band y=170..610 of the wide 765px-high reference, so an actual 3.37:1 card preserves them. Paint a distinct coherent scene, not collaged icons or generic same couple at river sunset. Early-game fictional capability chronology permits cordage, basketry and worked hides. No later industrial or permanent urban technology.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/infrastructure-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-abbc9c98-cfaa-49a4-83c3-c6d931cdcb9c.png",
+  "replace_art600": false,
+  "replace_first300": false,
+  "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass.",
+  "asset": "res://assets/ui/research/subjects/flood_mark_reading-v2.png",
+  "sha256": "dcd68fe24150548381fcfcf7cbb1371773143ba2db2d5f54bb430f70b218d6eb",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,0 +1,12 @@
+{
+  "id": "fallow_thicket_regrowth",
+  "line": "ecology",
+  "game_year": 9,
+  "approx_historical_year": -4940,
+  "prompt": "c. 4940 BCE: Adults identify tender shoots and berry shrubs regrowing in a fallow clearing; hand-ground plant pigments and fine ink on paper. No text, photorealism, CGI or childlike style.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-04b3aa21-1dee-4eae-bb79-e9cec25de4ba.png",
+  "asset": "res://assets/ui/research/subjects/fallow_thicket_regrowth-v1.png",
+  "sha256": "adbf7f3fc0e229e2bd171133c10f2573145df032b9676df520c94057f35b4c8d",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too lifelike; plant regrowth and observation clear in crop."
+}

@@ -1,0 +1,12 @@
+{
+  "id": "infant_carrying_slings",
+  "line": "demography",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: Caregiver carries infant in woven sling while another adult prepares a reed cradleboard with cordage; mature chalk pastel and torn cut-paper. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7534e0dd-1c84-4e82-baca-faf6dca2164b.png",
+  "asset": "res://assets/ui/research/subjects/infant_carrying_slings-v1.png",
+  "sha256": "c12cfdba398288103e4dfec6dac117120f2e4e27851fe92da7f580e98df3411f",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; sling and cradleboard construction visible in wide crop."
+}

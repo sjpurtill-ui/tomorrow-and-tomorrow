@@ -1,12 +1,20 @@
 {
   "id": "skill_recognition",
   "line": "labor",
-  "game_year": 18,
-  "approx_historical_year": -4880,
-  "prompt": "c. 4880 BCE: Community praises skilled basket weaver, exchanges finished work and invites apprentice; expressive charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-bda5e5a0-b418-439f-ae34-8a2e16f7a8b0.png",
-  "asset": "res://assets/ui/research/subjects/skill_recognition-v1.png",
-  "sha256": "769c6b9d4a5d3291f1a617818729737adbad09b715b4e51febf174b06cc2081b",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; craft demonstration and social recognition clear in crop."
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/skill_recognition-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/labor-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: At a small outdoor camp, a skilled older basket maker holds up a well-shaped woven twig basket as three people recognize the maker with attentive gestures; one novice studies their hands. Charcoal drawing over ochre. Hide clothing and simple portable tools only.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8ce2ec88-e87c-4df2-a05d-98a768abcac8.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/skill_recognition-v2.png",
+  "sha256": "6f59f2675e1b19de073b032524186df0b2eabee1984c0d3e38f577005ca29903",
+  "mode": "built-in image_gen / edit"
 }

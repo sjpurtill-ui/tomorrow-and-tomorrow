@@ -1,0 +1,22 @@
+{
+  "id": "earth_oven_cooking",
+  "line": "nutrition",
+  "year": 22,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/earth_oven_cooking.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established nutrition field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two adults cover a small earth cooking pit with leaves and loose soil, a few warm stones and wild roots visible along its near edge. Botanical egg tempera olive/gold/cream/earth. No potter kiln, chimney, metal oven, written recipe or enormous blaze.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b6f2ec7d-7ce3-4cb3-ad8a-fcedab7ec51f.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/nutrition-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/earth_oven_cooking-v2.png",
+  "sha256": "dbdd82703bd2779051f2d4a439b7ebcbe87a23cdb38095de915eb632ace1f3b7",
+  "mode": "built-in image_gen / edit"
+}

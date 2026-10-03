@@ -1,12 +1,20 @@
 {
   "id": "witnessed_agreement_customs",
   "line": "institutions",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/household_task_ledgers-v2.png",
+  "prompt": "Create new Tomorrow and Tomorrow institutions research painting. Strictly preserve supplied WIDE approximately 2055x765 canvas proportions. Match handmade flat matte mineral fresco dusty plum/limestone/gold. Two adults meet hands in spoken agreement while THREE witnesses look toward joining hands with attentive open-handed gestures. No official seals, documents, village, farm animals or baskets. Rough irregular hide garments, portable wild camp with low hide windbreak only. WHOLE heads, hands and subject mechanism within central 60 percent height; smaller people with breathing space above/below for actual 3.37:1 crop. Full bleed WIDE painted banner, no text, borders, photography, CGI, sculpted relief or cinematic light. Reference medium and width only, replace subject.",
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "institutions: flat matte mineral fresco dusty plum/limestone/gold",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-75284286-50f8-4ee3-8559-3e36e057fef1.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 7,
-  "approx_historical_year": -4953,
-  "prompt": "Two Neolithic household representatives make an oral agreement in front of adult witnesses, hands on shoulders; archaic mineral fresco on plaster.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-61d3b134-4493-48c1-9585-9503f02a3061.png",
-  "asset": "res://assets/ui/research/subjects/witnessed_agreement_customs-v1.png",
-  "sha256": "92831b473168400ee64af3c777e5b8c3ecd54b687c50963493062c1e03be2c80",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; rejected first for lifelike/classical faces; oral agreement and witnesses clear; crop reviewed."
+  "review": "Dusty plum/gold matte fresco. Two adults join hands while three attentive witnesses gesture; houses/livestock/baskets removed.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/witnessed_agreement_customs-v2.png",
+  "sha256": "815f56e6e0da77785422bc50f4435c98724dd23547615700416737683107164f"
 }

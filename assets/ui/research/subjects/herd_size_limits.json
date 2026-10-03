@@ -1,12 +1,21 @@
 {
   "id": "herd_size_limits",
   "line": "ecology",
-  "game_year": 16,
-  "approx_historical_year": -4893,
-  "prompt": "c. 4893 BCE: Herders guide modest goat herd away from browsed shrubs so vegetation recovers; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c9a9e510-f78c-44a7-b88d-364288a8aad3.png",
-  "asset": "res://assets/ui/research/subjects/herd_size_limits-v1.png",
-  "sha256": "b40ed13867348d9fd3650ee7ccdadc7461b9ba622fc2dc1589d7ce146fc6893c",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; modest herd and shrub browse context clear in crop."
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/seasonal_patterns-v2.png",
+  "medium": "detailed botanical foreground with flat landscape bands in plant pigments",
+  "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and detailed botanical foreground with flat landscape bands in plant pigments. Two herders observe FIVE small goatlike animals browsing low shrubs in open uncultivated land. One gestures from bare overbrowsed patch toward leafy thicket beyond; other holds rough staff. Early animal-taming dependency exists for this discovery; no fenced ranch, barns or modern breeds. Show finite browse, not mass livestock. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-070f350c-b1e9-4bec-8cac-cbaa1695bad7.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.39
+  ],
+  "game_year": 8,
+  "replace_art600": false,
+  "replace_first300": false,
+  "binding_style": "ecology: detailed botanical foreground with flat landscape bands in plant pigments",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/herd_size_limits-v2.png",
+  "sha256": "dc725163536f76736b3151655082db50cffa03bae799cdd3eb2a7c4e07266aa7"
 }

@@ -1,0 +1,25 @@
+{
+  "id": "bone_needle_sewing",
+  "line": "production",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "prompt": "Keep this entire panoramic painted composition, canvas dimensions2054x766, faces, clothing, shelter, flat copper/ember palette and framing exactly. Correct ONLY the sewing implements. The working ivory bone sewing needle between the man's hands must be a SLENDER pointed bone splinter: ONE tiny drilled eye near ONE blunt end, opposite end pointed with NO second hole. Thread goes through that single eye into the hide seam. It is not a wide double-ended shuttle. The loose bone AWL on the ground at lower left must be an unperforated tapering pale pointed spike, NO drilled eye or hole anywhere. No metal. Preserve all other painting details and wide full-bleed aspect.",
+  "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-96af8243-eeea-442b-bac6-8ea75ae3145f.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7faf378b-b35d-4f70-8b29-94c611bf2cdb.png",
+  "replace_art600": false,
+  "replace_first300": true,
+  "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass.",
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/bone_needle_sewing.png",
+    "focus": [
+      0.5,
+      0.59
+    ]
+  },
+  "asset": "res://assets/ui/research/subjects/bone_needle_sewing-v2.png",
+  "sha256": "d2270f7b60c8f5c09a7e12130b1e59cd780cbb8d8b7340fe287ceae059588e5e",
+  "mode": "built-in image_gen / edit"
+}

@@ -1,0 +1,43 @@
+{
+  "id": "hand_dough_forming",
+  "line": "nutrition",
+  "status": "catalog",
+  "name": "Kneading Dough by Hand",
+  "one_liner": "Kneading dough by hand",
+  "observation": "Kneading dough by hand.",
+  "key_threshold": false,
+  "target_year": 35,
+  "proposed_year": 35,
+  "band_low": 25,
+  "band_high": 50,
+  "min_year": 25,
+  "research_years": 2,
+  "requires_all": [
+    "saddle_quern_grinding"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 35,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "binding_style": "nutrition: established field painting",
+  "prior_effective_source": {
+    "opening": "res://assets/ui/research/paper/first300-cards/hand_dough_forming.tres",
+    "art600": null,
+    "subject": null
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established nutrition painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: ONE kneeling adult with exactly TWO hands presses rough grain dough into irregular flat rounds on a broad stone, beside a clay water bowl and a basket of meal; low hearth in background. Nutrition opaque botanical egg-tempera olive/gold/cream/earth. No leavened loaves, oven or bakery.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6393d070-4819-4308-b1cd-636ee135d0ea.png",
+  "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/hand_dough_forming-v2.png",
+  "sha256": "c2bf9f443028a57fae7eae5368887cfc29e5df52fde83c5fd31889126899c8f0",
+  "mode": "built-in image_gen / edit"
+}

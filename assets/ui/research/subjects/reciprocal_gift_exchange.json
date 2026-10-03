@@ -1,0 +1,53 @@
+{
+  "id": "reciprocal_gift_exchange",
+  "line": "culture",
+  "status": "new",
+  "name": "Gifts Given and Returned Bind Households",
+  "one_liner": "Gifts given and returned bind households",
+  "observation": "Gifts given and returned bind households.",
+  "key_threshold": false,
+  "target_year": 25,
+  "proposed_year": 25,
+  "band_low": 12,
+  "band_high": 35,
+  "min_year": 12,
+  "research_years": 2,
+  "requires_all": [
+    "guest_host_reciprocity"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "trade_partner_tokens",
+    "shared_hearth_gatherings"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Social cohesion",
+  "signals": [
+    "society",
+    "information"
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/discovery-600/reciprocal_gift_exchange.png",
+    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+    "tile_index": 7,
+    "caption": "Gifts given and returned bind households (Year 25)",
+    "style": "silhouette_ochre"
+  },
+  "year": 25,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "culture: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/culture-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: At a simple camp hearth, two adult households exchange modest gifts: a small seed basket offered one way and a plain shell cord returned the other; another adult watches warmly. Tapestry-inspired PAINTING with flat interlocking indigo/rose/gold/violet shapes, not actual woven cloth. Hide wraps no woven robes, no money, luxury treasures or banquet.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9b1a0a6f-df80-4ec4-8759-5a681dd1cbc9.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/reciprocal_gift_exchange-v2.png",
+  "sha256": "ac012f7d27df8b7054f1f1dae3274d661b4d6e284a0c7ed87d1ae5ea670d044b",
+  "mode": "built-in image_gen / edit"
+}

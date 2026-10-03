@@ -1,9 +1,26 @@
 {
   "id": "seasonal_patterns",
-  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Seasonal Patterns. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. A thoughtful forager examines buds, fallen leaves, ripened berries and a shed antler laid together on a flat stone outdoors, with migrating birds crossing an autumn sky. A natural visual record of recurring seasonal changes. Focus on contrasting botanical seasonal evidence and observation. No clock, calendar, written symbols, garden rows or sophisticated tools. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-3cad2fe2-c3b7-427d-b5f3-f6150f83119b.png",
-  "asset": "res://assets/ui/research/subjects/seasonal_patterns-v1.png",
-  "sha256": "f0e39ee173ae903165f411eb8c62052c3478036060209de7da29c1dc671ab20e",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "ecology",
+  "game_year": 2,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.48
+  ],
+  "replace_first300": true,
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/seasonal_patterns.png",
+    "source": "EARLY_SUBJECTS",
+    "focus": [
+      0.4,
+      0.64
+    ]
+  },
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-579f6dc5-b850-4fba-8caa-09a0ef475954.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/atmospheric_co2_record-v1.png",
+  "prompt": "Create a NEW opening-era research painting for Seasonal Round: plants and animals return on cycles, game year 2. Use reference ONLY for mature naturalist FIELD PAINTING in layered plant pigments: flat moss/fern/earth/muted sky bands, detailed botanical foreground, visible dry-brush pigment grain. Copy none of the measuring station, instruments, clothing, alpine species or modern subject. Scene: one adult forager in a ragged unstitched hide wrap compares a fresh budding wild twig with a few preserved dried leaves and old seed heads resting on a rough naturally flat rock. Nearby living wild plants show buds and new growth; a small line of migrating birds returns across the middle sky. The forager observes botanical evidence of returning seasons, a simple gesture from sample to living plant; no written calendar, diagram, symbols or garden rows. Detailed recognizable wild plant shapes against flat landscape bands, single coherent outdoor scene, no automatic river. Wide panorama about 3:1. Put face, examining hand, twig, dried samples, live plants and birds together in central horizontal band to remain legible in 3.37:1 card crop. Adult restrained silhouette, painted naturalist detail, no photographic skin, cinematic light, polished 3D or cute proportions. No baskets, pottery, linen gown, sewn tunic, woven cloth, metal, architecture, prepared tablet, tools, frame, text or watermark.",
+  "review": "Full image inspected: hide-clad observer compares budding wild twig, dried leaves and old seed heads on natural rock; living wild plants and migrating birds form seasonal evidence. Layered plant-like pigments, botanical detail and flat landscape bands, no station copied from medium reference. No baskets, woven gowns, farm rows, written calendar or modern instruments. Full image and 3.37:1 crop inspected; face, samples, living plants and migrating birds remain legible.",
+  "mode": "built-in image_gen / new image with medium reference",
+  "asset": "res://assets/ui/research/subjects/seasonal_patterns-v2.png",
+  "sha256": "d9b16c1ca8af60f703dcfa67b8592e4435e279390fead23e4ba5a39d262ca65c"
 }

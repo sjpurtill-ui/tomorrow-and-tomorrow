@@ -1,0 +1,18 @@
+{
+  "id": "ochre_grave_goods",
+  "line": "culture",
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE full-bleed2055x765 canvas and tapestry-inspired PAINTING medium ONLY, interlocking flat indigo rose gold violet pigment planes, never literal cloth. Change scene: three fully clothed adults kneel around a shallow house-floor grave in simple adobe interior. One places small natural ochre lump and plain bone pendant beside completely opaque hide-wrapped bundle; no body or bones visible. Another holds low wooden dish of red ochre, third watches. Early unfired clay house floor, no pottery, decorated panel, writing or metal. All whole heads hands bundle and goods central strip y170..610 with generous painted surroundings for actual3.37:1 crop. Mature handmadeflat2D, no photorealism CGI childlike art frame logo text.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-10/assets/ui/research/subjects/house_floor_burial-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-66d7cd2b-44fa-4a81-b396-3405c63c7d30.png",
+  "version": 1,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_art600": true,
+  "binding_style": "flat interlocking indigo rose gold violet tapestry-inspired painting",
+  "review": "Full original and final actual 3.37:1 Godot card visually reviewed; field medium, early materials, heads and distinctive action retained.",
+  "asset": "res://assets/ui/research/subjects/ochre_grave_goods-v1.png",
+  "sha256": "ffb417a80ca8d85ea6104bfa8fba47b5ff541ef158f2fd138744e83ab28940f9",
+  "mode": "built-in image_gen / edit"
+}

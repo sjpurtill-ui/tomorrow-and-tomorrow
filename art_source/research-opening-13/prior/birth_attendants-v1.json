@@ -1,0 +1,9 @@
+{
+  "id": "birth_attendants",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Experienced Birth Attendants. Show a concrete, visually clear scene demonstrating this exact practice: Birth attendants preserve positioning, cleanliness, warning signs, and methods of assisting difficult labor. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-315b6861-8e78-49df-98a5-eebbc4247ca6.png",
+  "asset": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+  "sha256": "210f93af98b541b255b317f65da119a39b9d3873e0109cab0c6e924cc8f3c576",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

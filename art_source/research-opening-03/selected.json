@@ -1,0 +1,165 @@
+[
+  {
+    "id": "carried_load_balancing",
+    "line": "logistics",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d1c86699-c0e9-4da1-9759-d389e2b2fc3d.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-02/assets/ui/research/subjects/carried_load_balancing-v1.png",
+    "prompt": "Edit this existing research painting for Carried Loads Balanced on Tumpline and Back, an opening-era logistics discovery. Preserve its mature handmade watercolor and restrained ink aesthetic, muted blue/ochre on warm paper, side-on figure, walking posture, broad panoramic landscape and composition. Replace ONLY the tightly woven basket on the person's back with a ragged unstitched hide sheet gathered around the loose bundle of reeds, held by a few rough raw-fiber ties. Keep the loose reed ends visible. The simple tumpline must run from the gathered hide load up over the person's forehead to carry the weight; keep that functional route legible. No woven basket, no sewn pack, no modern straps or metal fittings. Preserve all other details, watercolor transparency and flat painted silhouette. No text or frame, no photorealism or 3D.",
+    "review": "Full image inspected: rough gathered hide wraps loose reeds; coarse ties and forehead tumpline carry load visibly. Existing mature panoramic watercolor, adult posture and landscape retained. Removes woven basket before game-year-8 basketry; no sewn pack or metal fittings. Full image and 3.37:1 crop inspected; forehead tie, gathered hide and reeds remain legible."
+  },
+  {
+    "id": "shared_hearth_gatherings",
+    "line": "culture",
+    "game_year": 1,
+    "version": 1,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_art600": true,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-cba600e8-9a7c-4490-8717-642b764a7218.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/radio_broadcasting-v1.png",
+    "prompt": "Create a completely new opening-era research painting for Shared Hearth Gatherings, game year 1. The attached reference supplies ONLY mature tapestry-inspired PAINTING MEDIUM: interlocking flat pigment shapes, rhythmic angular adult silhouettes, coarse fiber-like paint grain, indigo, dusty rose, warm gold and dusk violet. Copy none of its objects, clothing, architecture or radio. Scene: six dignified adults in simple ragged unstitched animal-hide wraps sit in a loose curved group on bare ground around a small shared fire, exchanging a gesture and listening to one another. No later craft objects. A few rough stones contain the small fire, loose natural firewood. Open prehistoric landscape in flat dusk bands, no automatic river. Warm communal attention, varied adult profiles, no cute faces. Very wide panoramic painting approx 3:1; place all faces, hands, communal gesture and fire together across the central horizontal band for 3.37:1 card cropping. Deliberate flat shapes and visible handmade paint, no digital volume or cinematic light. Tapestry is rendering only: no woven garments, physical tapestry, rugs, baskets, pottery, sewn tunics, metal, finished furniture, buildings, alphabet, emblems, captions, border or watermark.",
+    "review": "Full image inspected: six adult hide-clad figures exchange gesture around small shared fire on bare earth, no later furnishings or craft objects. Mature interlocking flat painted shapes and fiber-like pigment grain, indigo/rose/gold/violet culture palette. Reference used for medium only. Full image and 3.37:1 crop inspected; all six adult faces, communal gesture and shared fire remain visible.",
+    "mode": "built-in image_gen / new image with medium reference"
+  },
+  {
+    "id": "raw_material_prestaging",
+    "line": "production",
+    "game_year": 1,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9dcf34d2-48c1-49b9-90b4-aecdf8c860c9.png",
+    "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-abe235d5-5be6-4c59-a366-bf52486daa91.png",
+    "prompt": "Make one precise historical correction to this painting, preserving the adult figures, arrangement of stone/wood/reed/clay raw heaps, absence of baskets, hide lean-to, flat copper and ember-orange palette-knife impasto style and wide composition. Change the few round clean cut ends of the wood logs in the central raw-stock pile to irregular jagged broken branch ends with crude splinters and uneven fracture faces. No circular saw-cut discs or neatly standardized logs. Keep raw bark, crooked lengths and all other scene details. No new tools, pottery, weaving, metal, text, frame or photographic rendering.",
+    "initial_prompt": "Edit this existing research painting for Raw Stock Set Out Before a Work Session, game year 1. Keep its mature palette-knife impasto oil aesthetic, scraped chunky flat paint planes, copper/ember orange/soot/umber palette, adult hide-clad figures and broad horizontal composition. Preserve the visible action of laying out rough stones, wood, reeds and clay for later work. Remove every woven basket, woven fence or structured reed container in the background, at both far edges and anywhere else. Replace those only with loose ragged bundles of raw reeds resting on earth; no weaving or lattice. The hide lean-to may remain crude and minimal. Preserve rough stone material heaps and natural irregular wood. No finished tools, pottery, metal, standardized carpentry, writing, labels, frame, photorealism or CGI. Keep all hands and piles legible in wide card crop.",
+    "initial_reference": "C:/Users/sjpur/tt-research-art-opening-chronology-02/assets/ui/research/subjects/raw_material_prestaging-v1.png",
+    "review": "Full corrected image inspected: four hide-clad adults lay out rough stone, broken wood, loose reeds and clay. Woven containers/fences removed, central wood ends made jagged and irregular. Mature chunky flat impasto pigment and copper/ember/soot palette preserved. No saw-cut stock, metal, pottery or woven objects. Full image and 3.37:1 crop inspected; sorting hands and all four raw heaps remain legible."
+  },
+  {
+    "id": "communal_work_songs",
+    "line": "culture",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.43
+    ],
+    "replace_art600": true,
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2552990d-4193-4867-9b03-f70777a0059b.png",
+    "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8301acad-a26d-458a-8d06-5be6c620d8e4.png",
+    "prompt": "Make one precise composition correction to this Communal Work Songs painting, preserving the four adult hide-clad figures, open singing mouth, group grips on rough branched trunk, flat tapestry-inspired culture painting and all landscape details. Lower the lead singer's raised free arm: bend it into an outward cue at about shoulder height, with the OPEN HAND no higher than the top of his head. Keep a clear rhythmic cue toward the group. His head, cueing hand and all four grips on the trunk must fit within the same compact middle horizontal band for very wide 3.37:1 and 3.77:1 game-card crops. No other change, no new technology, text, borders, photo lighting or 3D.",
+    "review": "Full corrected image inspected: lead singer cues at shoulder height with open mouth, all four adults grip naturally branched trunk in shared rhythmic lift. Flat culture medium preserved, no later technology. Initial high hand did not fit narrow crops; corrected before final approval. Focus [.5,.43] checked for wide and narrow cards.",
+    "initial_prompt": "Create a distinct opening-era research painting for Communal Work Songs, game year 2. Use the supplied painting ONLY for its mature tapestry-inspired paint medium and indigo/dusty rose/warm gold/dusk violet palette, interlocking flat angular shapes and visible coarse fiber-like pigment grain. Do not copy the hearth, seated circle or fire. New scene: four dignified adults in ragged unstitched hide wraps jointly lift and move a rough fallen branch trunk, their grips and alternating stepping postures creating a visible shared rhythm. One adult at the left sings a work call, mouth subtly open and free hand raised in time; others look toward that cue as they lift together. Crude natural timber, bare ground and flat landscape bands, no saw-cut log ends. No written music, symbols or soundwave graphics. Wide panorama approx 3:1, faces/hands/trunk/call gesture across the middle horizontal band for 3.37:1 crop. Adult angular proportions, tactile flat paint, restrained expressive profiles. No physical tapestry, woven clothes, baskets, pottery, sewn tunics, refined tools, metal, wheels, buildings, furniture, borders, captions, watermarks, photographic lighting, smooth digital volume or childlike illustration.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8301acad-a26d-458a-8d06-5be6c620d8e4.png"
+  },
+  {
+    "id": "household_task_division",
+    "line": "labor",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f55523ee-75b6-4070-b10a-0a5ed97fbcb2.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/household_task_division-v1.png",
+    "prompt": "Make one precise historical correction to this Household Tasks Divided by Age and Season research painting, game year 2. Preserve its expressive charcoal over ochre wash, coarse smears, adult figures, pointing task assignment gesture, twig gathering and simple hide shelters. Replace ONLY the woven seed basket at lower left with an irregular ragged hide sheet laid directly on the ground, with loose wild seeds scattered on that hide. Keep the crouching person's hands sorting those seeds. No woven rim or vessel shape; a simple flat unstitched animal-hide scrap. Preserve all other scene details and wide composition. No new technology, text, labels, frame, photorealism or 3D.",
+    "review": "Full image inspected: woven basket replaced by flat ragged hide with wild seeds, crouching sorting hands retained. Adult assigning gesture, gathered twigs and bare hearth preserved. Expressive charcoal smears on ochre wash; no refined vessels or later materials. 3.37:1 crop inspected; sorting hands, seeds, task assignment and twig gathering remain clear, focus [.5,.45] retains assigner's head."
+  },
+  {
+    "id": "lactational_spacing_awareness",
+    "line": "demography",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1e07844f-660a-4b66-ba1b-14da9f5ecc65.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/lactational_spacing_awareness-v1.png",
+    "prompt": "Make a precise opening-era correction to this Nursing Delays the Next Pregnancy research painting, game year 2. Preserve the respectful nursing mother and infant, seated elder's explanatory gesture, intimate full figures, mature chalk pastel and torn cut-paper collage, flat terracotta/warm ivory/slate palette, open paper and wide composition. Remove ALL woven baskets and the dark manufactured bowl beside them. Replace those vessel spots with a few loose natural reeds and irregular stones on bare earth, no container. Replace the neat latticed reed shelter panel on the right with a crude uneven hide sheet draped over a few rough branches; no weaving or straight manufactured panel. Preserve the nursing action, adult expressions, posture and all other composition details. No new pottery, woven cloth, metal, sewn clothing, text, diagram, labels, frame, photorealism or 3D.",
+    "review": "Full corrected image inspected: respectful nursing mother/infant and explaining elder retained, woven baskets and manufactured bowl removed, lattice panel replaced by irregular hide draped over rough branches. Flat chalk/paper pigment, terracotta/ivory/slate palette, adult profiles and nursing action clear. Full image and 3.37:1 crop inspected; both adult faces, infant and nursing/teaching gestures remain visible."
+  },
+  {
+    "id": "route_memory",
+    "line": "knowledge",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "replace_art600": true,
+    "binding_style": "knowledge: blue-black ink with lapis wash",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0c914819-130d-4152-89a3-8aab2d4302f6.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/stored_program_computer-v1.png",
+    "prompt": "Create a NEW opening-era research painting for Encoded Routes: travel told as a fixed story, game year 2. Use attached reference ONLY for mature blue-black ink contour and crosshatching, lapis wash on open parchment ivory paper; copy NONE of its computers, machines, clothing, furniture, paper records or indoor setting. Scene: three adult travelers in ragged unstitched hide wraps pause on a bare ridge. An elder at left tells the sequence of the route, pointing outward toward a distinctive forked rock, a lone wind-bent tree and a distant mountain notch aligned across the landscape. A listening adult nearer the center repeats the pointing gesture to recall that sequence. The third watches the landmarks. Memory communicated by real landmarks, story and shared gesture, no written map, diagram, arrows or pseudo-writing. Wide panoramic painting about 3:1 with faces, pointing hands and landmark sequence together across central horizontal band for wide game-card crops. Precise irregular ink line, hatch marks and flat lapis wash; minimal facial detail, dignified adults. No photographic realism, cinematic light, volumetric digital painting, cute proportions. No baskets, ceramic, sewn tunics, metal, buildings, standardized tools, books, labels, border or watermark.",
+    "review": "Full image inspected: three hide-clad adult travelers, elder recounts a route by pointing to weathered forked rock outcrop, bent tree and mountain notch; listener repeats gesture. Blue-black contour/hatching and flat lapis wash, open parchment. No copied computer, written map, later clothing or photo rendering. Full image and 3.37:1 crop inspected; elder and repeated gesture plus all three landmarks remain visible.",
+    "mode": "built-in image_gen / new image with medium reference"
+  },
+  {
+    "id": "seasonal_patterns",
+    "line": "ecology",
+    "game_year": 2,
+    "version": 2,
+    "focus": [
+      0.5,
+      0.48
+    ],
+    "replace_first300": true,
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/seasonal_patterns.png",
+      "source": "EARLY_SUBJECTS",
+      "focus": [
+        0.4,
+        0.64
+      ]
+    },
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-579f6dc5-b850-4fba-8caa-09a0ef475954.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/atmospheric_co2_record-v1.png",
+    "prompt": "Create a NEW opening-era research painting for Seasonal Round: plants and animals return on cycles, game year 2. Use reference ONLY for mature naturalist FIELD PAINTING in layered plant pigments: flat moss/fern/earth/muted sky bands, detailed botanical foreground, visible dry-brush pigment grain. Copy none of the measuring station, instruments, clothing, alpine species or modern subject. Scene: one adult forager in a ragged unstitched hide wrap compares a fresh budding wild twig with a few preserved dried leaves and old seed heads resting on a rough naturally flat rock. Nearby living wild plants show buds and new growth; a small line of migrating birds returns across the middle sky. The forager observes botanical evidence of returning seasons, a simple gesture from sample to living plant; no written calendar, diagram, symbols or garden rows. Detailed recognizable wild plant shapes against flat landscape bands, single coherent outdoor scene, no automatic river. Wide panorama about 3:1. Put face, examining hand, twig, dried samples, live plants and birds together in central horizontal band to remain legible in 3.37:1 card crop. Adult restrained silhouette, painted naturalist detail, no photographic skin, cinematic light, polished 3D or cute proportions. No baskets, pottery, linen gown, sewn tunic, woven cloth, metal, architecture, prepared tablet, tools, frame, text or watermark.",
+    "review": "Full image inspected: hide-clad observer compares budding wild twig, dried leaves and old seed heads on natural rock; living wild plants and migrating birds form seasonal evidence. Layered plant-like pigments, botanical detail and flat landscape bands, no station copied from medium reference. No baskets, woven gowns, farm rows, written calendar or modern instruments. Full image and 3.37:1 crop inspected; face, samples, living plants and migrating birds remain legible.",
+    "mode": "built-in image_gen / new image with medium reference"
+  },
+  {
+    "id": "stone_sorting",
+    "line": "production",
+    "game_year": 2,
+    "version": 1,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/stone_sorting.png",
+      "source": "EARLY_SUBJECTS",
+      "focus": [
+        0.64,
+        0.72
+      ],
+      "later_fallback": {
+        "path": "res://assets/ui/research/stone-selection-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2f2b131d-0d6e-4ec9-b486-6ef8667358e7.png",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/raw_material_prestaging-v2.png",
+    "prompt": "Create a new mature handmade 2D game research painting: prehistoric stone sorting, two adults wearing ragged unstitched animal hides compare three unworked stones by grain and fresh fracture on a natural flat rock. One adult raises a small round hammer pebble close to a rough flint to hear its ring; the other points to a pale fresh fracture. No finished axe, metal, pottery, baskets, weaving, linen, writing, polished architecture. Medium: chunky palette-knife impasto painting in copper, ember, soot and umber, thick expressive flat pigment planes and scraped edges; clearly painted, never photorealistic or 3D, never children's illustration. Reference image is for pigment handling and palette ONLY; create a different stone-comparison scene, no copied arrangement. Wide panoramic composition within a landscape image, keep BOTH faces, examining hands, hammer pebble and contrasting stones within the central horizontal band so a 3.7:1 card crop remains understandable. Quiet serious observational scene, warm mineral ground, minimal rough vegetation. No letters, captions, borders or diagrams.",
+    "mode": "built-in image_gen / new image with medium reference",
+    "review": "Full original inspected: two adult hide-clad figures compare dark flint, granular stone and pale fractured stone; small hammer pebble and pointing gesture remain distinct. Chunky copper/ember/soot/umber impasto pigment, no refined tools, containers, weaving or photorealism. Full original and 3.77:1 crop inspected; both faces, hammer pebble, pointing fingers and all three stones remain visible."
+  }
+]

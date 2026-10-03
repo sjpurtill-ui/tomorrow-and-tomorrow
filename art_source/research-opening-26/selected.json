@@ -1,0 +1,521 @@
+[
+  {
+    "id": "solstice_horizon_markers",
+    "line": "knowledge",
+    "status": "new",
+    "name": "Horizon Sunrise Markers for the Solstices",
+    "one_liner": "Horizon sunrise markers for the solstices",
+    "observation": "Horizon sunrise markers for the solstices.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25,
+    "band_high": 60,
+    "min_year": 25,
+    "research_years": 6,
+    "requires_all": [
+      "moon_counting"
+    ],
+    "requires_any": [
+      [
+        "cairn_sightline_marking",
+        "sightline_staking"
+      ]
+    ],
+    "precedents": [
+      "seasonal_patterns"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Observers",
+    "signals": [
+      "information",
+      "research"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.3
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/solstice_horizon_markers.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+        "tile_index": 4,
+        "caption": "Horizon sunrise markers for the solstices (Year 40)",
+        "style": "paper_gouache"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/knowledge-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established knowledge painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two observers stand behind an irregular wooden sighting stake and small rough cairn, looking along a clear alignment to LOW sunrise on distant hills. Show simple horizon comparison, NO astronomical instruments, Stonehenge, calendar writing or monumental stone circle. Medium: blue-black crosshatched ink, lapis and parchment. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4cb8197c-925a-460a-9980-5434a546def6.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "public_stores",
+    "line": "institutions",
+    "status": "catalog",
+    "name": "Common Store Kept Under Watch",
+    "one_liner": "Common store kept under watch",
+    "observation": "Common store kept under watch.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25,
+    "band_high": 55,
+    "min_year": 25,
+    "research_years": 4,
+    "requires_all": [
+      "clay_lined_storage_pits",
+      "leader_gift_redistribution"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "watch_rotation",
+      "seasonal_tribute_counts"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "nutrition"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.3
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/public_stores-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/institutions-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established institutions painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two adults open and inspect ONE modest clay-lined underground storage pit containing sacks or baskets of grain; a third keeps watch by a plain branch barrier. Communal custody and exchange, no palace, temple granary, writing or officials' uniforms. Medium: matte fresco dusty plum, limestone and muted gold. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3c83d8c0-53d1-4193-a60c-62b0e457bec8.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "winter_tale_nights",
+    "line": "culture",
+    "status": "new",
+    "name": "Winter Tale Nights",
+    "one_liner": "Winter tale nights",
+    "observation": "Winter tale nights.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25,
+    "band_high": 60,
+    "min_year": 25,
+    "research_years": 2,
+    "requires_all": [
+      "oral_epics",
+      "festival_calendar"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Social cohesion",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 4,
+        "caption": "Winter tale nights (Year 40)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/culture-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established culture painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Inside a modest hide-and-branch shelter in winter, one seated storyteller gestures while four listeners, including an older adult and child, attend around a small hearth. Snow outside the doorway, warm interior; no grand hall, theatrical stage, text or literal cloth texture. Medium: flat tapestry-inspired PAINTING, interlocking indigo/rose/gold/violet, never actual cloth. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ce1eddaf-45e4-423a-85d1-5cb69deae977.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "slack_season_building",
+    "line": "labor",
+    "status": "new",
+    "name": "Building Work Kept for the Slack Season",
+    "one_liner": "Building work kept for the slack season",
+    "observation": "Building work kept for the slack season.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 20,
+    "band_high": 52,
+    "min_year": 20,
+    "research_years": 3,
+    "requires_all": [
+      "seasonal_work_round",
+      "framed_construction"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Able workforce",
+    "signals": [
+      "administration",
+      "training"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/slack_season_building-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/labor-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established labor painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Three adults raise a small rough timber-and-branch shelter frame during the quiet season; idle seed baskets and bare harvested patch in distance imply slack season. Clear lifting and root-lashing action, no masonry monument, dressed lumber or scaffolding machinery. Medium: charcoal drawing over ochre. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-70793b0c-1dd0-46d6-9289-468bc8a64fad.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "warp_weighted_looms",
+    "line": "production",
+    "status": "catalog",
+    "name": "Warp-weighted Loom",
+    "one_liner": "Warp-weighted loom",
+    "observation": "Warp-weighted loom.",
+    "key_threshold": true,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 22,
+    "band_high": 55,
+    "min_year": 22,
+    "research_years": 5,
+    "requires_all": [
+      "drop_spindles",
+      "framed_construction"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "clay_shaping"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": "res://assets/ui/research/paper/first300-cards/warp_weighted_looms.tres",
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/warp_weighted_looms.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+        "tile_index": 5,
+        "caption": "Woven textiles (Year 310)",
+        "style": "paper_gouache",
+        "match": "milestone"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established production painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: An adult adjusts rough hanging fibers on ONE early upright branch loom; irregular unfired or crudely fired clay weights hang distinctly from the warp ends near the ground. Experimental incomplete narrow woven strip ONLY, no finished broad cloth or woven garments. One simple shed rod, no modern machine or elaborate loom. Medium: flat angular palette-knife painting copper/ember/soot/umber, no photographic relief. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.\nCorrection: Preserve this exact extra-wide flat angular copper/ember painting. Zoom out the adult and entire early warp-weighted branch loom by about25percent, adding sky/ground around them. Every post tip must fit well INSIDE the canvas, main loom top and adult head around y170 and irregular hanging clay weights around y570 on a765px image. Keep crude root lashings and distinct clay weights tied to hanging warp fibers. Only tiny incomplete woven sample, no broad finished cloth. No woven garments, metal or modern machinery.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6fb96391-8429-4474-9bed-18418dba11a5.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "stone_wall_footings",
+    "line": "infrastructure",
+    "status": "new",
+    "name": "Stone Footings Under Earthen Walls",
+    "one_liner": "Stone footings under earthen walls",
+    "observation": "Stone footings under earthen walls.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 20,
+    "band_high": 50,
+    "min_year": 20,
+    "research_years": 3,
+    "requires_all": [
+      "dry_stone_walls"
+    ],
+    "requires_any": [
+      [
+        "adobe_wall_construction",
+        "wattle_and_daub_walls"
+      ]
+    ],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public works",
+    "signals": [
+      "construction",
+      "materials"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/stone_wall_footings-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/infrastructure-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established infrastructure painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two adults place irregular fieldstones in a LOW foundation course, with a SHORT rough wattle-and-daub wall supported immediately above it. Show stone-earth interface clearly, one carries a stone, no cut masonry or monumental city. Medium: matte casein mineral blue and limestone. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-66419f92-5fdc-45fe-9366-eba9f9fb1666.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "food_steaming_vessels",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Steaming Food Over Boiling Pots",
+    "one_liner": "Steaming food over boiling pots",
+    "observation": "Steaming food over boiling pots.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25,
+    "band_high": 55,
+    "min_year": 25,
+    "research_years": 3,
+    "requires_all": [
+      "pit_firing",
+      "clay_tempering"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "earth_oven_cooking"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established nutrition painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: One adult tends an early rough clay pot on a small hearth; a shallow perforated clay insert above the pot holds a few roots and greens, softly rising steam. Clay-only arrangement, no metal colander, elaborate cooking station or modern lidded appliance. Medium: opaque botanical egg-tempera olive/gold/cream/earth. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-801d2715-8b24-4d57-b8f0-45910ffdc799.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "brushwood_trackways",
+    "line": "logistics",
+    "status": "new",
+    "name": "Brushwood Mats Laid Over Soft Ground",
+    "one_liner": "Brushwood mats laid over soft ground",
+    "observation": "Brushwood mats laid over soft ground.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25,
+    "band_high": 55,
+    "min_year": 25,
+    "research_years": 3,
+    "requires_all": [
+      "trail_waymarking",
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "basketry"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Carrying capacity",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/brushwood_trackways-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/logistics-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established logistics painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two adults lay loose interwoven branch bundles across a small boggy gap; another carrying a bark basket crosses the finished low brushwood section. Rough branches directly on soft ground, no sawn-plank bridge or giant engineering structure. Medium: panoramic travel watercolor sand/slate/indigo. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a039eb37-e462-46f2-892e-d4174a69499c.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "swidden_cycle",
+    "line": "ecology",
+    "status": "new",
+    "name": "Swidden Cycle",
+    "one_liner": "Swidden cycle: clear, crop, leave to regrow",
+    "observation": "Swidden cycle: clear, crop, leave to regrow.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25,
+    "band_high": 55,
+    "min_year": 25,
+    "research_years": 4,
+    "requires_all": [
+      "fallow_thicket_regrowth",
+      "controlled_undergrowth_burning"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "seed_selection",
+      "ground_stone_axes"
+    ],
+    "conditions": {
+      "environment": [
+        "woodland"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Natural recovery",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.1
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/swidden_cycle-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/ecology-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established ecology painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: A clear continuous woodland landscape shows THREE adjoining stages: small cooled charred clearing, a cultivated seed patch tended by an adult, and vigorous young thicket regrowth. Another adult points between patches, botanical foreground. No raging fire, industrial agriculture, repeating sunset village. Medium: plant-pigment botanical foreground and flat landscape. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-07362bc3-f6ee-4ed8-a60c-a2e9dadfa47f.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  },
+  {
+    "id": "raid_scouting",
+    "line": "security",
+    "status": "new",
+    "name": "Scouts Sent Ahead of a Raiding Party",
+    "one_liner": "Scouts sent ahead of a raiding party",
+    "observation": "Scouts sent ahead of a raiding party.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25,
+    "band_high": 55,
+    "min_year": 25,
+    "research_years": 3,
+    "requires_all": [
+      "ambush_raids"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "distance_call_signals"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public safety",
+    "signals": [
+      "defense",
+      "warfare"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/raid_scouting-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/security-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established security painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two lightly equipped scouts crouch at a ridge edge, one quietly indicating a distant small settlement while a few companions wait well behind. Crude wooden spear and stone point, no fight, injury, army uniforms, metal or tactical map. Medium: layered hand-cut woodblock vermilion/charcoal/parchment. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ba0505ef-6aeb-4b48-8d24-8713d0db76f0.png",
+    "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600."
+  }
+]

@@ -1,12 +1,55 @@
 {
   "id": "clay_sling_bullets",
   "line": "security",
-  "game_year": 35,
-  "approx_historical_year": -4767,
-  "prompt": "c. 4767 BCE: Adults shape and fire small oval clay sling pellets beside simple fiber sling; hand-cut woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d703e530-7215-481d-b8b8-4873bea62557.png",
-  "asset": "res://assets/ui/research/subjects/clay_sling_bullets-v1.png",
-  "sha256": "7a34e9074452dfcffd59588c0c2560191fa9e73765c2e1346d54a287fca8006a",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; clay bullets, low firing hearth and sling clear."
+  "status": "new",
+  "name": "Fired-clay Sling Bullets",
+  "one_liner": "Fired-clay sling bullets",
+  "observation": "Fired-clay sling bullets.",
+  "key_threshold": false,
+  "target_year": 35,
+  "proposed_year": 35,
+  "band_low": 21,
+  "band_high": 49,
+  "min_year": 21,
+  "research_years": 3,
+  "requires_all": [
+    "war_slings",
+    "pit_firing"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Public safety",
+  "signals": [
+    "defense",
+    "warfare"
+  ],
+  "version": 2,
+  "year": 35,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "security: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/clay_sling_bullets-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/security-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established security painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: TWO adults roll thumb-sized rough ovoid clay sling stones on bare hide, with one small raw fiber sling laid flat and modest shallow firing pit beyond. Fingers and crude clay shapes visible, no metal projectiles, bullets/guns, molds or finished arsenal. Security layered hand-cut woodblock vermilion/charcoal/parchment.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-32613037-19c6-40df-a6f8-40ccd5250ec7.png",
+  "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/clay_sling_bullets-v2.png",
+  "sha256": "8ccd5cb2f88a7412db36d946631643b769de7115e4fa1fcda05eb11ff124e4d6",
+  "mode": "built-in image_gen / edit"
 }

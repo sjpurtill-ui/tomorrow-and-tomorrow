@@ -1,9 +1,22 @@
 {
   "id": "clay_tempering",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Tempered Clay. Hands deliberately mix crushed shell and gritty sand into wet clay on a slab; coarse temper and kneaded clay clearly visible, no finished vessel or kiln.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-0de3a134-67d2-462a-b8bd-28165ced8a92.png",
-  "asset": "res://assets/ui/research/subjects/clay_tempering-v1.png",
-  "sha256": "18e07babdd19099de026ddbe66d4aff36f724989cd0a957b8caf0413bf01cf97",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "year": 22,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/clay_tempering.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/production-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established production field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Three adults mix gritty sand or crushed shell into a lump of wet clay on a low natural slab, fingers kneading coarse inclusions; another compares a rough small pinched clay cup. Flat angular copper/ember/soot/umber palette-knife paint. No mechanized mixer, refined glazed pottery, potter wheel, metal or literal 3D relief.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4395b0ee-771a-40db-b0ed-6d23a9d8bc4f.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/production-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/clay_tempering-v2.png",
+  "sha256": "d857ca31acdbea3f4a21dba7c5a0eb1ccb9a5716671fd13ed9c892843fda942e",
+  "mode": "built-in image_gen / edit"
 }

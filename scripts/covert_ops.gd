@@ -57,6 +57,9 @@ const Chronicle:=preload("res://scripts/chronicle.gd")
 const WAR_LOOP_PATH:="res://scripts/war_loop.gd"
 const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const SCALE_PATH:="res://scripts/conflict_scale.gd"
+## A caught agent of theirs becomes a person held under guard; ours taken
+## abroad are judged by their ruler the same way (captured_agents.gd).
+const CAPTIVES_PATH:="res://scripts/captured_agents.gd"
 
 const KEY:="covert"
 const VERSION:=1
@@ -150,6 +153,7 @@ static func forget()->void:
 static func _war()->GDScript: return load(WAR_LOOP_PATH) as GDScript
 static func _rivals()->GDScript: return load(RIVALS_PATH) as GDScript
 static func _scale()->GDScript: return load(SCALE_PATH) as GDScript
+static func _captives()->GDScript: return load(CAPTIVES_PATH) as GDScript
 
 static func _civ(civ_id:String)->Dictionary:
 	var index:=Hall._civ_index(civ_id)
@@ -525,13 +529,15 @@ static func odds_words(chance:float)->String:
 # Launching an operation
 # --------------------------------------------------------------------------
 
-static func launch(kind:String,civ_id:String,city_id:String,cover:String,agent:Dictionary,target_desc:String="")->Dictionary:
+static func launch(kind:String,civ_id:String,city_id:String,cover:String,agent:Dictionary,target_desc:String="",their_own:bool=false)->Dictionary:
 	## Set an operation in motion. Returns the op (with its stated odds), or
 	## {"error":...} when it cannot go. Nothing is rolled here; the roll comes
 	## when it arrives or strikes, seeded from the op (viewing never re-rolls).
 	if not kind in KINDS: return {"error":"unknown operation"}
 	if not cover in COVERS: cover="none"
-	var barred:=method_barred(kind)
+	# their_own: one of their own people won over to us goes home as our eyes
+	# (captured_agents.gd send_double): no craft of ours is needed for that.
+	var barred:=method_barred(kind) if not their_own else ""
 	if barred!="": return {"error":barred}
 	if agent.is_empty(): agent=volunteer()
 	var s:=state()
@@ -565,6 +571,8 @@ static func daily(day:int)->void:
 	for op in (s.ops as Array).duplicate():
 		_advance(op as Dictionary,day)
 	_catch_incoming(day)
+	# Prisoners held, tended, sent home or won over; ours held abroad.
+	_captives().call("daily",day)
 	if day>=int(s.get("next_rival",day)):
 		s["next_rival"]=day+RIVAL_TICK
 		_rivals_scheme(day)
@@ -613,14 +621,43 @@ static func _watch_report(op:Dictionary,day:int)->void:
 static func _plant_report(op:Dictionary,day:int)->void:
 	var rng:=_rng(String(op.seed)+":plant:%d" % day)
 	var odds:Dictionary=op.odds
-	if rng.randf()<float(odds.get("caught",0.1)):
+	# A pretender sent back as our eyes is their own ruler's: never found out
+	# by them (captured_agents.gd), though the stated odds stay on the card.
+	var found:=rng.randf()<float(odds.get("caught",0.1))
+	if found and not bool(op.get("double_feigned",false)):
 		_agent_caught_ours(op,day,"a source in their town")
+		return
+	if bool(op.get("double_feigned",false)):
+		# Won over only in seeming: they serve their own ruler, and the word
+		# they send us is false (kept false in the ledger, with the truth).
+		_learn_false(String(op.civ_id),day,String(op.agent_name),op)
+		_raise_intel_of_us(String(op.civ_id),0.06)
+		op["next_report"]=day+PLANT_REPORT_DAYS
+		_stat("double_false_reports")
 		return
 	_sharpen(String(op.civ_id),String(op.city_id),0.86,day,"our source")
 	var fact:=_watch_fact(String(op.civ_id),String(op.city_id))
 	if fact!="": _learn(String(op.civ_id),fact,day,String(op.agent_name))
+	# A true double agent also feeds their ruler false word of us.
+	if bool(op.get("double",false)): _raise_intel_of_us(String(op.civ_id),-0.08)
 	op["next_report"]=day+PLANT_REPORT_DAYS
 	_stat("plant_reports")
+
+## What a double agent who was only pretending sends us: their numbers
+## halved or doubled, recorded false with the truth beside it.
+static func _learn_false(civ_id:String,day:int,who:String,op:Dictionary)->void:
+	var fighters:=int(_war().call("_their_fighters",civ_id))
+	var rng:=_rng(String(op.seed)+":false:%d" % day)
+	var said:=maxi(5,roundi(float(maxi(fighters,10))*(rng.randf_range(0.35,0.55) if rng.randf()<0.5 else rng.randf_range(1.8,2.6))))
+	var s:=state()
+	(s.learned as Array).push_front({"day":day,"civ_id":civ_id,"civ_name":_name(civ_id),"fact":"%s have about %d fighters." % [_name(civ_id),said],"who":who,"false":true,"truth":"%s have about %d fighters." % [_name(civ_id),fighters]})
+	while (s.learned as Array).size()>LEARNED_MAX: (s.learned as Array).pop_back()
+
+## How well their ruler knows us (the relation's own measure).
+static func _raise_intel_of_us(civ_id:String,amount:float)->void:
+	var rel:=_relation(civ_id)
+	if rel.is_empty(): return
+	rel["rival_player_intelligence"]=clampf(float(rel.get("rival_player_intelligence",0.0))+amount,0.0,1.0)
 
 static func _sharpen(civ_id:String,city_id:String,quality:float,day:int,source:String)->void:
 	## Our knowledge of them gets better estimates, through the same chart the
@@ -735,6 +772,12 @@ static func _resolve_assassination(op:Dictionary,day:int,success:bool,rng:Random
 	else:
 		_stat("assassination_failed")
 	_end_strike(op,day,traced,true)
+	# Taken alive: their ruler judges our assassin, by temper and stated odds.
+	if fate=="taken":
+		var judged:Dictionary=_captives().call("judge_ours",op,day,"after the strike")
+		(op.outcome as Dictionary)["judged"]=String(judged.get("choice",""))
+		_agent_deed(String(op.agent),String(judged.get("told","")))
+		_credit_plain("%s Judged by %s" % [String(op.agent_name),_name(civ_id)],"%s, taken alive among %s: %s" % [String(op.agent_name),_the(civ_id),String(judged.get("told",""))],"notice",day)
 
 ## A secret we lack that they hold, moved forward for us (bounded).
 static func _steal_secret(civ_id:String,rng:RandomNumberGenerator)->String:
@@ -934,8 +977,12 @@ static func _agent_caught_ours(op:Dictionary,day:int,doing:String)->void:
 	_agent_deed(String(op.agent),"Caught %s among %s%s." % [doing,_the(String(op.civ_id)),"; broke and named us" if talks else "; gave nothing up"])
 	_raise_suspicion(String(op.civ_id),0.3)
 	if talks: _feud_or_war(op,day,false)
+	# Their ruler decides what becomes of them, as we decide for theirs.
+	var judged:Dictionary=_captives().call("judge_ours",op,day,doing)
+	(op.outcome as Dictionary)["judged"]=String(judged.get("choice",""))
+	_agent_deed(String(op.agent),String(judged.get("told","")))
 	_credit(op,"%s Caught%s" % [String(op.agent_name),(" — and Talked" if talks else "")],
-		"%s was caught %s among %s%s." % [String(op.agent_name),doing,_the(String(op.civ_id)),"; under their hands they named us, and the blood is on our road now" if talks else "; they gave nothing away"],"notice")
+		"%s was caught %s among %s%s. %s" % [String(op.agent_name),doing,_the(String(op.civ_id)),"; under their hands they named us, and the blood is on our road now" if talks else "; they gave nothing away",String(judged.get("told",""))],"notice")
 	_stat("ours_caught")
 
 static func _op_agent(op:Dictionary)->Dictionary:
@@ -989,6 +1036,9 @@ static func _rival_scheme_chance(civ_id:String,rel:Dictionary)->float:
 	base+=clampf(float(character.get("grudge_weight",0.0)),0.0,1.5)*0.12
 	if String(character.get("trait",""))=="grudge": base+=0.06
 	base+=clampf(float(rel.get("border_tension",0.0)),0.0,1.0)*0.08
+	# Deterred for a while: one of theirs put to death, or our words heeded
+	# (captured_agents.gd scheme_factor).
+	base*=float(_captives().call("scheme_factor",civ_id))
 	return clampf(base,0.0,0.6)
 
 static func _catch_incoming(day:int)->void:
@@ -1001,11 +1051,17 @@ static func _catch_incoming(day:int)->void:
 		# Our watch catches some, by our security, the Pathfinder's hand and
 		# the share we keep on the watch.
 		if rng.randf()<_catch_chance():
-			(s.caught as Array).push_front({"day":day,"civ_id":String(sp.civ_id),"civ_name":String(sp.civ_name),"kind":String(sp.kind),"fate":""})
+			# A person, held under guard: named, with what they know
+			# (captured_agents.gd). The god brings them in from the notice.
+			var held:Dictionary=_captives().call("take",sp,day)
+			(s.caught as Array).push_front({"day":day,"civ_id":String(sp.civ_id),"civ_name":String(sp.civ_name),"kind":String(sp.kind),"fate":"","prisoner_id":String(held.get("id","")),"name":String(held.get("name",""))})
 			while (s.caught as Array).size()>CAUGHT_MAX: (s.caught as Array).pop_back()
 			_stat("caught_theirs")
-			_credit_plain("A Spy of %s Caught" % String(sp.civ_name),
-				"Our watch took %s of %s's%s in our town." % [("an assassin" if String(sp.kind)=="assassinate" else "a spy"),_the(String(sp.civ_id)),""],"notice",day)
+			var what:="an assassin" if String(sp.kind)=="assassinate" else "a spy"
+			var where:=String(GameState.settlement_name).strip_edges()
+			Chronicle.record({"key":"covert:%d:caught:%s" % [day,String(held.get("id",""))],"title":"%s of %s Caught" % [what.capitalize(),_the(String(sp.civ_id))],
+				"text":"Our watch took %s, %s of %s, in %s. %s is held under guard." % [String(held.get("name","one of theirs")),what,_the(String(sp.civ_id)),where if where!="" else "our town","She" if String(held.get("sex",""))=="female" else "He"],
+				"tier":"notice","kind":"court","domain":"security","action":{"kind":"prisoner","prisoner_id":String(held.get("id",""))}})
 		elif String(sp.kind)=="assassinate":
 			# An assassin our watch missed: a bounded attempt on us, mostly foiled.
 			_stat("theirs_struck")
@@ -1058,7 +1114,9 @@ static func learned(limit:int=8)->Array:
 	var out:Array=[]
 	var day:=_day()
 	for f in state().learned:
-		out.append({"fact":String((f as Dictionary).fact),"civ_name":String((f as Dictionary).civ_name),"age_days":maxi(0,day-int((f as Dictionary).day)),"who":String((f as Dictionary).get("who",""))})
+		# A word shown false (a double agent who only pretended) says so.
+		out.append({"fact":String((f as Dictionary).fact),"civ_name":String((f as Dictionary).civ_name),"age_days":maxi(0,day-int((f as Dictionary).day)),"who":String((f as Dictionary).get("who","")),
+			"found_false":bool((f as Dictionary).get("found_false",false)),"found_by":String((f as Dictionary).get("found_by",""))})
 		if out.size()>=limit: break
 	return out
 
@@ -1095,7 +1153,12 @@ static func caught_spies(limit:int=8)->Array:
 	var out:Array=[]
 	var day:=_day()
 	for c in state().caught:
-		out.append({"civ_name":String((c as Dictionary).civ_name),"civ_id":String((c as Dictionary).civ_id),"kind":String((c as Dictionary).kind),"age_days":maxi(0,day-int((c as Dictionary).day)),"fate":String((c as Dictionary).get("fate",""))})
+		var entry:Dictionary=c
+		# The prisoner's own record is the one ledger of what became of them.
+		var pid:=String(entry.get("prisoner_id",""))
+		var fate:=String(_captives().call("caught_fate",pid)) if pid!="" else ""
+		if fate=="": fate=String(entry.get("fate",""))
+		out.append({"civ_name":String(entry.civ_name),"civ_id":String(entry.civ_id),"kind":String(entry.kind),"age_days":maxi(0,day-int(entry.day)),"fate":fate,"name":String(entry.get("name","")),"prisoner_id":pid})
 		if out.size()>=limit: break
 	return out
 
@@ -1155,7 +1218,7 @@ static func alerts(day:int=-1)->Array:
 	var out:Array=[]
 	var theirs:PackedStringArray=PackedStringArray()
 	for c in state().caught:
-		if day-int((c as Dictionary).day)<=ALERT_DAYS: theirs.append("%s of %s taken in our town" % [("an assassin" if String((c as Dictionary).kind)=="assassinate" else "a spy"),_the(String((c as Dictionary).civ_id))])
+		if day-int((c as Dictionary).day)<=ALERT_DAYS: theirs.append("%s%s of %s taken in our town" % [(String((c as Dictionary).get("name",""))+", ") if String((c as Dictionary).get("name",""))!="" else "",("an assassin" if String((c as Dictionary).kind)=="assassinate" else "a spy"),_the(String((c as Dictionary).civ_id))])
 	if not theirs.is_empty(): out.append({"id":"covert_caught","war":"feud","tone":"amber","count":theirs.size(),"title":"Spies of theirs caught","lines":theirs,"page":"wars"})
 	var ours:PackedStringArray=PackedStringArray()
 	var red:=false
@@ -1185,7 +1248,7 @@ static func answer(text:String)->String:
 		var caught:=caught_spies(6)
 		if caught.is_empty(): return "We have caught no spies of theirs in our towns."
 		var bits:PackedStringArray=PackedStringArray()
-		for c:Dictionary in caught: bits.append("%s of %s%s, %s" % [("an assassin" if String(c.kind)=="assassinate" else "a spy"),c.civ_name,(" (%s)" % c.fate) if String(c.fate)!="" else "",_since(int(c.age_days))])
+		for c:Dictionary in caught: bits.append("%s%s of %s%s, %s" % [(String(c.name)+", ") if String(c.get("name",""))!="" else "",("an assassin" if String(c.kind)=="assassinate" else "a spy"),c.civ_name,(" (%s)" % c.fate) if String(c.fate)!="" else "",_since(int(c.age_days))])
 		return "Our watch has taken %s." % _join(bits)
 	# Our agents abroad and what they learned.
 	var abroad:=agents_abroad()

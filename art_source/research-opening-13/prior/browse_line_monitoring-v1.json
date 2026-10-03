@@ -1,0 +1,12 @@
+{
+  "id": "browse_line_monitoring",
+  "line": "ecology",
+  "game_year": 16,
+  "approx_historical_year": -4893,
+  "prompt": "c. 4893 BCE: Adults inspect horizontal browse line where goat herd has eaten lower shrub leaves; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b3fcfb7e-d525-46ad-849c-025750c68d99.png",
+  "asset": "res://assets/ui/research/subjects/browse_line_monitoring-v1.png",
+  "sha256": "7f197e0fed3cbf5ccb1402e730f6ed8e178fa2e388475e1f0081305ed28e15fe",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; browse line and herd clear in wide crop."
+}

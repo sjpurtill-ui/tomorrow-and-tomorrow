@@ -1,12 +1,54 @@
 {
   "id": "slack_season_building",
   "line": "labor",
-  "game_year": 40,
-  "approx_historical_year": -4733,
-  "prompt": "c. 4733 BCE: Adults raise reed-and-timber shelter frame during post-harvest slack season with empty field stubble and stores; charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f1f408e3-1d6a-4228-9fb6-accef66bd159.png",
-  "asset": "res://assets/ui/research/subjects/slack_season_building-v1.png",
-  "sha256": "6d372e01334d2e021ed1abb30f7ac6aade7ae784d09cbaa1e8a0a3f84bbeddbb",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; seasonal pause in field work and building clear."
+  "status": "new",
+  "name": "Building Work Kept for the Slack Season",
+  "one_liner": "Building work kept for the slack season",
+  "observation": "Building work kept for the slack season.",
+  "key_threshold": false,
+  "target_year": 40,
+  "proposed_year": 40,
+  "band_low": 20,
+  "band_high": 52,
+  "min_year": 20,
+  "research_years": 3,
+  "requires_all": [
+    "seasonal_work_round",
+    "framed_construction"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Able workforce",
+  "signals": [
+    "administration",
+    "training"
+  ],
+  "version": 2,
+  "year": 40,
+  "focus": [
+    0.5,
+    0.4
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/slack_season_building-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/labor-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established labor painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Three adults raise a small rough timber-and-branch shelter frame during the quiet season; idle seed baskets and bare harvested patch in distance imply slack season. Clear lifting and root-lashing action, no masonry monument, dressed lumber or scaffolding machinery. Medium: charcoal drawing over ochre. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-70793b0c-1dd0-46d6-9289-468bc8a64fad.png",
+  "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600.",
+  "asset": "res://assets/ui/research/subjects/slack_season_building-v2.png",
+  "sha256": "4563204bbaf323eef742009c407829f62d313ea482129e9ed8b0ff7cf430cb4c",
+  "mode": "built-in image_gen / edit"
 }

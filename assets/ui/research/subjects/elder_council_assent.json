@@ -1,12 +1,16 @@
 {
   "id": "elder_council_assent",
   "line": "institutions",
-  "game_year": 12,
-  "approx_historical_year": -4920,
-  "prompt": "c. 4920 BCE: Two elders publicly assent to settlement decision before younger adults and witnesses; archaic mineral fresco on plaster. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7aafd7b6-1dfa-4ee7-9feb-abdc9cfca8fa.png",
-  "asset": "res://assets/ui/research/subjects/elder_council_assent-v1.png",
-  "sha256": "bc12ac656aaf1d068213d3253f9326f337611cafbc1a651090ff0478d549e412",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; visible assent and witnesses, no writing, crop reviewed."
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Matte fresco dusty plum limestone pale gold. Four seated adult elders in open circle beside temporary hide shelter; central elder raises one hand in assent, two others raise hands gently, fourth listens. Shared modest bundle of branches central, no crown throne paperwork permanent council hall or chiefdom imagery. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-11/assets/ui/research/subjects/household_councils-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-146af829-a30d-4b79-8a98-7c3a771ed6af.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual3.37:1 Godot card visually reviewed; primary heads, hands and subject action retained, field medium and chronology checked.",
+  "asset": "res://assets/ui/research/subjects/elder_council_assent-v2.png",
+  "sha256": "97f262a63694e832c66ccee3ae3b483da6ddf2d216e4cfde748112452e147609",
+  "mode": "built-in image_gen / edit"
 }
