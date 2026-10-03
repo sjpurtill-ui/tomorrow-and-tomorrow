@@ -70,6 +70,7 @@ const SHAFT:=preload("res://assets/court_sets/shaders/court_shaft.gdshader")
 const CONTACT:=preload("res://assets/court_sets/shaders/court_contact.gdshader")
 const SKY:=preload("res://assets/court_sets/shaders/court_sky.gdshader")
 const PAPER:=preload("res://assets/court_sets/shaders/court_paper.gdshader")
+const POOL:=preload("res://assets/court_sets/shaders/court_pool.gdshader")
 const INK_POST:=preload("res://assets/court_sets/shaders/court_ink_post.gdshader")
 
 const KIND_BY_STAGE:={
@@ -182,7 +183,7 @@ const GOD_KEYS:=["energy","angle","shaft","dim","fire","fire_h","lean","gust","s
 const GOD_NEUTRAL:=[0.0,15.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0]
 const GOD_TONES:={
 	"speaks":{"colour":Color(1.0,0.86,0.58),"p":[7.0,15.0,0.55,0.22,0.78,0.85,0.22,0.0,0.0,0.0,0.0,0.15]},
-	"wrath":{"colour":Color(0.66,0.78,1.0),"p":[5.5,11.0,0.6,0.35,0.32,0.42,0.6,1.0,1.0,-0.18,1.0,0.0]},
+	"wrath":{"colour":Color(0.84,0.89,1.0),"p":[2.4,12.0,0.4,0.55,0.32,0.42,0.6,1.0,1.0,-0.2,1.0,0.0]},
 	"favour":{"colour":Color(1.0,0.76,0.42),"p":[6.0,21.0,0.5,0.1,1.35,1.25,0.0,0.0,0.0,0.06,0.0,1.0]},
 }
 var god_tone:="off"
@@ -190,6 +191,12 @@ var god_spot:SpotLight3D
 var god_shaft:MeshInstance3D
 var god_dust:GPUParticles3D
 var _god_shaft_mat:ShaderMaterial
+var god_pool:MeshInstance3D
+var _god_pool_mat:ShaderMaterial
+## The hall's own sun shafts (dimmed while the god's light owns the opening).
+var _sun_shaft_mats:Array[ShaderMaterial]=[]
+var _sun_shaft_strength:Array[float]=[]
+var _god_out:=-1.0
 var _god_dust_mat:ShaderMaterial
 var _god_dust_pm:ParticleProcessMaterial
 var _god_cur:=PackedFloat32Array(GOD_NEUTRAL)
@@ -768,6 +775,7 @@ func _make_air()->void:
 		shaft.mesh=cyl
 		var mat:=ShaderMaterial.new();mat.shader=SHAFT
 		mat.set_shader_parameter("strength",float(spec.get("strength",0.22)))
+		_sun_shaft_mats.append(mat);_sun_shaft_strength.append(float(spec.get("strength",0.22)))
 		mat.set_shader_parameter("soft",float(spec.get("soft",0.0)))
 		shaft.material_override=mat
 		shaft.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -1111,7 +1119,26 @@ func god_light(target:Variant=null,tone:="speaks",hold:=0.0,fade:=-1.0)->void:
 	if hold>0.0 and tone!="off":
 		if _god_tween==null or not _god_tween.is_valid():_god_tween=create_tween()
 		_god_tween.tween_interval(hold)
-		_god_tween.tween_callback(god_light.bind(null,"off",0.0,-1.0))
+		_god_tween.tween_callback(_god_ease_out)
+
+## The god's words as one moment, on the same envelope as N's swell
+## (court_sound.gd god(text, seconds, tone)): in over 1.2 s, held for the
+## words and a breath (seconds + 0.4), out over 2.2 s. Call it in the same
+## frame as the sound's god(): tone "" (awe), "wrath" or "favour".
+const GOD_SWELL_IN:=1.2
+const GOD_SWELL_HOLD:=0.4
+const GOD_SWELL_OUT:=2.2
+func god_moment(target:Variant,tone:="",seconds:=2.0)->void:
+	var t:="speaks"
+	if tone=="wrath":t="wrath"
+	elif tone in ["favour","favor"]:t="favour"
+	god_light(target,t,maxf(0.4,seconds+GOD_SWELL_HOLD),GOD_SWELL_IN if t!="wrath" else 0.25)
+	_god_out=GOD_SWELL_OUT
+
+func _god_ease_out()->void:
+	var out:=_god_out
+	_god_out=-1.0
+	god_light(null,"off",0.0,out)
 
 ## The tone in force and how far in it is (tests, the director).
 func god_state()->Dictionary:
@@ -1136,6 +1163,13 @@ func _god_make()->void:
 	god_shaft.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	god_shaft.visible=false
 	add_child(god_shaft)
+	god_pool=MeshInstance3D.new();god_pool.name="GodPool"
+	var plane:=PlaneMesh.new();plane.size=Vector2(2.4,2.4);god_pool.mesh=plane
+	_god_pool_mat=ShaderMaterial.new();_god_pool_mat.shader=POOL
+	god_pool.material_override=_god_pool_mat
+	god_pool.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	god_pool.visible=false
+	add_child(god_pool)
 	god_dust=GPUParticles3D.new();god_dust.name="GodDust"
 	god_dust.amount=36;god_dust.lifetime=5.0;god_dust.randomness=0.5
 	_god_dust_pm=ParticleProcessMaterial.new()
@@ -1192,7 +1226,11 @@ func _god_aim()->void:
 	var x_axis:=y_axis.cross(Vector3.FORWARD if absf(y_axis.z)<0.9 else Vector3.RIGHT).normalized()
 	var z_axis:=x_axis.cross(y_axis).normalized()
 	god_shaft.transform=Transform3D(Basis(x_axis,y_axis*length,z_axis),s+dir*length*0.5)
+	# the column fades out above their head: it never paints over them
+	_god_shaft_mat.set_shader_parameter("fade_from",clampf(1.0-3.2/maxf(length,0.1),0.0,0.95))
+	_god_shaft_mat.set_shader_parameter("fade_to",clampf(1.0-2.0/maxf(length,0.1),0.05,1.0))
 	god_dust.global_position=t+Vector3(0.0,1.25,0.0)
+	god_pool.global_position=Vector3(t.x,t.y+0.03,t.z)
 	_god_dust_mat.set_shader_parameter("shaft_top",s)
 	_god_dust_mat.set_shader_parameter("shaft_dir",dir)
 	_god_dust_mat.set_shader_parameter("shaft_radius",0.7)
@@ -1228,10 +1266,19 @@ func _god_apply()->void:
 		# under the open sky the beam must stand out against daylight
 		god_spot.visible=on;god_spot.light_energy=energy*(1.3 if open_sky else 0.65);god_spot.spot_angle=angle;god_spot.light_color=_god_col
 		god_shaft.visible=shaft_s>0.01
-		# in a hall the sun's own shaft already stands in the room: the god's is fainter
-		_god_shaft_mat.set_shader_parameter("strength",shaft_s*(2.4 if open_sky else 0.45));_god_shaft_mat.set_shader_parameter("colour",_god_col)
+		# the god's column owns the opening (the sun's own shaft fades below)
+		_god_shaft_mat.set_shader_parameter("strength",shaft_s*(2.0 if open_sky else 1.1));_god_shaft_mat.set_shader_parameter("colour",_god_col)
 		_god_dust_mat.set_shader_parameter("colour",_god_col.lerp(Color(1,1,1),0.3))
 		god_dust.emitting=on and active and level=="high"
+		# the pool on the ground: the light reads even where the beam does not
+		var peak:=7.0 if god_tone!="wrath" else 2.4
+		var share:=clampf(energy/peak,0.0,1.0)
+		god_pool.visible=share>0.02
+		_god_pool_mat.set_shader_parameter("colour",_god_col)
+		_god_pool_mat.set_shader_parameter("strength",share*(0.55 if open_sky else 0.4)*(0.6 if god_tone=="wrath" else 1.0))
+		# in a hall the god's light owns the opening: the sun's own shaft fades
+		for i in _sun_shaft_mats.size():
+			_sun_shaft_mats[i].set_shader_parameter("strength",_sun_shaft_strength[i]*(1.0-0.8*share))
 		_god_dust_pm.gravity=Vector3(0.0,0.02+0.3*rise,0.0)+_god_wind*1.6*gust
 	if _god_base.is_empty():return
 	var env:=world_env.environment if world_env!=null else null
@@ -1241,10 +1288,13 @@ func _god_apply()->void:
 	if sun!=null:
 		var open:=bool((info.get("light",{}) as Dictionary).get("open_sky",true))
 		var turn:=sun_turn*(1.0 if open else 0.5)
-		sun.light_energy=float(_god_base.sun_energy)*(1.0-dim*(1.1 if open else 0.5))*(1.0+0.25*sharp)
+		# a darker room, not a brighter beam; in a hall the sun's pool fades
+		# while the god's light owns the opening
+		var owns:=0.0 if open else clampf(energy/2.4,0.0,1.0)
+		sun.light_energy=float(_god_base.sun_energy)*(1.0-dim*(1.1 if open else 0.5))*(1.0+0.15*sharp)*(1.0-0.8*owns)
 		sun.transform.basis=Basis((_god_base.sun_rot as Quaternion).slerp(_sun_wrath,turn))
 		sun.shadow_blur=lerpf(float(_god_base.sun_blur),0.2,sharp)
-		sun.light_color=(_god_base.sun_colour as Color).lerp(Color(0.78,0.86,1.0),sharp*0.7)
+		sun.light_color=(_god_base.sun_colour as Color).lerp(Color(0.86,0.9,1.0),sharp*0.35)
 	if bounce!=null:bounce.light_energy=float(_god_base.bounce)*fire
 	_fire_mul=fire
 	for mat in _flame_mats:

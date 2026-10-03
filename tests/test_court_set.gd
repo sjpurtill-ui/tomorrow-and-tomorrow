@@ -501,6 +501,38 @@ func test_the_god_s_light_falls_on_the_one_addressed()->void:
 		assert_int(shadowed).is_equal(1)
 
 
+func test_the_god_light_owns_the_hall_and_keeps_the_room_dark_in_wrath()->void:
+	var made:=_built("chiefs_hall")
+	var body:=Node3D.new();made.add_child(body)
+	made.call("place",body,"petitioner")
+	var shafts:Array=made.get("_sun_shaft_mats")
+	assert_int(shafts.size()).is_greater(0)
+	var before:=float((shafts[0] as ShaderMaterial).get_shader_parameter("strength"))
+	made.call("god_light",body,"speaks",0.0,0.0)
+	assert_float(float((shafts[0] as ShaderMaterial).get_shader_parameter("strength"))).is_less(before*0.5)
+	assert_bool((made.get("god_pool") as Node3D).visible).is_true()
+	var env:Environment=(made.get("world_env") as WorldEnvironment).environment
+	var speak_ambient:=env.ambient_light_energy
+	made.call("god_light",body,"wrath",0.0,0.0)
+	# wrath darkens the room more and lights them less brightly than the voice
+	assert_float(env.ambient_light_energy).is_less(speak_ambient)
+	assert_float((made.get("god_spot") as SpotLight3D).light_energy).is_less(5.0)
+	made.call("god_light",null,"off",0.0,0.0)
+	assert_float(float((shafts[0] as ShaderMaterial).get_shader_parameter("strength"))).is_equal_approx(before,0.001)
+
+
+func test_god_moment_rides_the_swell()->void:
+	var made:=_built("hearth_council")
+	var body:=Node3D.new();made.add_child(body)
+	made.call("place",body,"petitioner")
+	made.call("god_moment",body,"",2.0)
+	assert_str(String((made.call("god_state") as Dictionary).tone)).is_equal("speaks")
+	made.call("god_moment",body,"wrath",1.5)
+	assert_str(String((made.call("god_state") as Dictionary).tone)).is_equal("wrath")
+	made.call("god_moment",body,"favor",1.0)
+	assert_str(String((made.call("god_state") as Dictionary).tone)).is_equal("favour")
+
+
 func test_set_rests_when_hidden()->void:
 	var made:=_built("chiefs_hall")
 	made.call("set_active",false)
