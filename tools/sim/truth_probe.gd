@@ -100,6 +100,9 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 	if start_days>0:WorldSimulation.scoped("ec",func()->void:_seed_era(scenario,start_days))
 	var rows:Array=[]
 	var discoveries:Array=[]
+	# Each deposit's stage as it changes: [day, resource, stage] (when ores open).
+	var stages:Array=[]
+	var staged:Dictionary={}
 	var holder:Dictionary={"starting":[]}
 	var tally:={"shortage_days":0,"hunger_days":0,"seen":0,"births":0,"deaths":0}
 	var start:=Time.get_ticks_msec()
@@ -127,6 +130,13 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 				var id:=String(known[int(tally.seen)])
 				discoveries.append([day,id,String(WorldSimulation.discovery.discovery_definition(id).get("dynamic",""))])
 				tally.seen=int(tally.seen)+1
+			for deposit_variant in state.resource_deposits:
+				if not deposit_variant is Dictionary:continue
+				var deposit_id:=String((deposit_variant as Dictionary).get("id",""))
+				var stage:=String((deposit_variant as Dictionary).get("stage",""))
+				if String(staged.get(deposit_id,""))!=stage:
+					staged[deposit_id]=stage
+					if stage!="unknown":stages.append([day,String(deposit_variant.get("resource","")),stage,int(state.population_allocations.get("Knowledge",0))])
 			var metrics:Dictionary=state.simulation_metrics
 			if float(metrics.get("food_intake_ratio",1.0))<0.95:tally.shortage_days=int(tally.shortage_days)+1
 			if float((metrics.get("mortality_components",{}) as Dictionary).get("Hunger",0.0))>0.004:tally.hunger_days=int(tally.hunger_days)+1
@@ -137,7 +147,7 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 		)
 		if day%60==0:await get_tree().process_frame
 	return {"schema":"sim_truth/1","scenario":scenario_name,"seed":seed_value,"years":years,"scenario_config":scenario,"start_year":float(scenario.get("start_year",0.0)),
-		"starting_known":holder.starting,"rows":rows,"discoveries":discoveries,"seconds":(Time.get_ticks_msec()-start)/1000.0}
+		"starting_known":holder.starting,"rows":rows,"discoveries":discoveries,"stages":stages,"seconds":(Time.get_ticks_msec()-start)/1000.0}
 
 ## research_3000 spot check: the society at game year start_days/365 with the
 ## seed file's knowledge, its people, housed and with two months of stores.
@@ -231,7 +241,16 @@ func _row(year:int,tally:Dictionary,start:int)->Dictionary:
 	var allure:=float(preload("res://scripts/artifact_culture.gd").allure()) if art_count>0 else 0.0
 	var research_alloc:Dictionary={}
 	for line in DOMAINS:research_alloc[line]=int(state.research_allocations.get(line,0))
-	return {"year":year,"population":state.population_total,"cohorts":cohorts,"pregnant":snappedf(pregnant,0.01),
+	# The ores' state: the nearest to open of each kind, and what blocks it.
+	var ores:Dictionary={}
+	for deposit_variant in state.resource_deposits:
+		if not deposit_variant is Dictionary:continue
+		var deposit:Dictionary=deposit_variant
+		var resource:=String(deposit.get("resource",""))
+		if not resource in ["Copper Ore","Tin Ore","Iron Ore"]:continue
+		if ores.has(resource) and float((ores[resource] as Dictionary).access)>=float(deposit.get("access",0.0)):continue
+		ores[resource]={"stage":String(deposit.get("stage","")),"access":snappedf(float(deposit.get("access",0.0)),0.01),"route":snappedf(float(deposit.get("route",0.0)),0.01),"blockers":(deposit.get("blockers",[]) as Array).duplicate()}
+	return {"year":year,"population":state.population_total,"cohorts":cohorts,"pregnant":snappedf(pregnant,0.01),"ores":ores,
 		"life_expectancy":snappedf(state.projected_life_expectancy(),0.1),
 		"infant_mortality":snappedf(Indicators.infant_mortality_per_1000(state,WorldSimulation.discovery),0.1),
 		"health":snappedf(state.population_health,0.001),"food_security":snappedf(state.food_security,0.001),

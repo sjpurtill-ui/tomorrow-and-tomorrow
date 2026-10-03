@@ -218,6 +218,21 @@ func test_the_food_count_says_its_own_hands_and_nothing_else_changes()->void:
 # The ruler's split
 # --------------------------------------------------------------------------
 
+## The ruler's own split is the ruler's: learning at 20 in 100 stays at 20
+## when the day's work is laid, however few the leaders' paths would put on
+## it (work_paths.gd LEARNING_CAP holds only the leaders' own split).
+func test_a_ruler_split_heavy_on_learning_is_kept()->void:
+	_world()
+	PeopleDirection.work_baseline={"Food":40.0,"Survey":5.0,"Extraction":8.0,"Construction":8.0,"Crafting":7.0,"Logistics":7.0,"Knowledge":20.0,"Administration":3.0,"Defense":2.0}
+	PeopleDirection.automatic_work=false
+	GovernmentPeopleSystem.delegate_now()
+	_count(100.0,100.0)
+	GovernmentPeopleSystem.delegate_now()
+	var able:=float(GameState.able_population())
+	var learning:=float(GameState.population_allocations.Knowledge)/able*100.0
+	assert_float(learning).override_failure_message("learning %.1f in 100" % learning).is_equal_approx(20.0,100.0/able+0.01)
+	assert_float(float(GameState.population_allocation_percentages.Knowledge)).is_greater(float(preload("res://scripts/work_paths.gd").LEARNING_CAP.learning)*100.0)
+
 func test_the_ruler_split_holds_day_after_day_in_every_town()->void:
 	_world(240)
 	# A second town of ours: the split is the whole realm's.
