@@ -581,6 +581,12 @@ func _plan_start(args:Dictionary)->void:
 		_things[name]=thing
 		thing.global_position=_plan_at((things[name] as Dictionary).get("at",[0,0,0]))
 		thing.rotation.y=yaw
+		if name=="block" and (things[name] as Dictionary).has("top"):
+			var kit:=_props_kit()
+			if kit!=null and thing.has_meta("prop"):
+				var size:Array=(kit.call("info",String(thing.get_meta("prop"))) as Dictionary).get("size",[])
+				if size.size()>=2 and float(size[1])>0.0:
+					thing.scale.y=float(things[name].top)*float(v.body_height)/Figure3D.REFERENCE_HEIGHT/float(size[1])
 	# everyone to their place, facing the plan's way, things in hand, clips on
 	for role:String in plan.roles:
 		var r:Dictionary=plan.roles[role]
@@ -597,7 +603,12 @@ func _plan_start(args:Dictionary)->void:
 				walk=clampf(far/1.2,0.35,1.4)
 				# The authored act takes over empty-handed; do not resume the old staff/bowl pose.
 				_walk_to(key,to,walk,"stand")
-			b.face(rad_to_deg(yaw)+float(r.get("yaw",0.0))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),maxf(walk,0.2))
+			var heading:=rad_to_deg(yaw)+float(r.get("yaw",0.0))-rad_to_deg(b.get_parent_node_3d().global_rotation.y)
+			if walk>0.0:
+				# A routed approach owns facing until its last step.
+				var turn:=_tween();turn.tween_interval(walk)
+				turn.tween_callback(func()->void:if is_instance_valid(b):b.face(heading,0.2))
+			else:b.face(heading,0.2)
 		for side:String in (r.get("props",{}) as Dictionary):
 			var name:=String(r.props[side])
 			var prop:=_plan_thing(name)
@@ -605,7 +616,38 @@ func _plan_start(args:Dictionary)->void:
 			_things[name]=prop
 			var kit:=_props_kit()
 			var held:=false
-			if kit!=null and prop.has_meta("prop"):held=bool(kit.call("hold",prop,b,"hand."+side))
+			if Acting.of(b)!=null:
+				# These clips aim the tool from the closed fist, not the generic
+				# hand-bone socket. Keep the asset's grip at that authored origin.
+				var grip:=Node3D.new();grip.name="PlanGrip_"+side
+				court.add_child(grip);_made.append(grip);grip.add_child(prop)
+				if kit!=null and prop.has_meta("prop"):
+					var spec:Dictionary=kit.call("info",String(prop.get_meta("prop")))
+					var at:Array=spec.get("grip",[0,0,0])
+					var anchor:=Vector3(float(at[0]),float(at[1]),float(at[2]))
+					var tool_basis:=Basis.IDENTITY
+					if act=="three_swing_beheading" and name=="axe" and spec.has("edge"):
+						# The authored tool aims its edge 0.66m along the fist.
+						# This asset's blade projects sideways from its haft.
+						var edge:Array=spec.edge
+						var reach:=Vector3(edge[0],edge[1],edge[2])-anchor
+						var size:=0.66*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
+						tool_basis=Basis(Quaternion(reach.normalized(),Vector3.UP)).scaled(Vector3.ONE*size/reach.length())
+					prop.transform=Transform3D(tool_basis,-(tool_basis*anchor))
+				grip.global_transform=Acting.of(b).fist_frame(1 if side=="R" else 0)
+				if r.has(name+"_rests"):
+					var rest:Array=r[name+"_rests"]
+					var facing:=Basis(Vector3.UP,yaw+deg_to_rad(float(r.get("yaw",0.0))))
+					grip.global_transform=Transform3D(facing,_plan_at(r.get("at",[0,0,0]))+facing*Vector3(rest[0],rest[1],rest[2]))
+					if walk>0.0:
+						var pickup:=_tween();pickup.tween_interval(walk)
+						pickup.tween_callback(func()->void:if is_instance_valid(b) and is_instance_valid(grip):Acting.hold(b,grip,side))
+					else:Acting.hold(b,grip,side)
+				else:Acting.hold(b,grip,side)
+				for own in ["prop_staff","prop_bowl"]:
+					for node in b.find_children(own,"MeshInstance3D",true,false):(node as Node3D).visible=false
+				held=true
+			elif kit!=null and prop.has_meta("prop"):held=bool(kit.call("hold",prop,b,"hand."+side))
 			if not held:
 				var hand:=_hand(key,side)
 				if hand!=null:hand.add_child(prop)
