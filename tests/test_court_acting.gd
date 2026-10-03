@@ -543,3 +543,60 @@ func test_the_rooms_business_is_in_the_library()->void:
 		var clip:=String(spec[1])
 		for c in ([clip+"l",clip+"r"] if clip.ends_with("_") else [clip]):
 			assert_bool(Acting.has_clip(c)).override_failure_message("%s wants %s" % [act,c]).is_true()
+
+
+# --- round 3 ------------------------------------------------------------------------
+
+func test_every_act_the_director_speaks_has_a_performance()->void:
+	## Every name in court_director.gd ACTS (people's, not the camera's or the
+	## animals') is a clip, a gesture, a look or a face here: none falls back.
+	var text:=FileAccess.get_file_as_string("res://scripts/hud/court_director.gd")
+	var start:=text.find("const ACTS:={")
+	if start<0:return
+	var block:=text.substr(start,text.find("\n}",start)-start)
+	var re:=RegEx.new();re.compile("(?m)^\\t\"([a-z_]+)\":\\{")
+	var not_people:=["wide","push_in","reaction","two_shot","shake","hush","perk_up","whimper","hide_under","sniff","tail_wag","lie_down","chew","bleat","nibble","bark"]
+	var missing:=PackedStringArray()
+	for hit in re.search_all(block):
+		var act:=hit.get_string(1)
+		if act in not_people:continue
+		var spec:Array=Acting.ACT_MAP.get(act,[])
+		if spec.is_empty() and not Acting.has_clip(act):missing.append(act);continue
+		if not spec.is_empty() and String(spec[0])=="clip":
+			var clip:=String(spec[1])
+			for c in ([clip+"l",clip+"r"] if clip.ends_with("_") else [clip]):
+				if not Acting.has_clip(c):missing.append("%s->%s" % [act,c])
+		if not spec.is_empty() and String(spec[0])=="gesture" and not Acting.GESTURES.has(String(spec[1])):missing.append("%s->%s" % [act,spec[1]])
+	assert_array(Array(missing)).override_failure_message("no performance for: %s" % ", ".join(missing)).is_empty()
+
+
+func test_the_new_gestures_move_the_head_and_end()->void:
+	for g in ["nod_slow","look_round","deflate","lean_in","nod_proud","jerk_head","nod_on"]:
+		var f:=_figure()
+		var a=Acting.of(f)
+		Acting.set_ambient(f,0.0)
+		_run(f,0.4)
+		var yaw0:=_head_yaw(f);var pitch0:=_head_pitch(f)
+		Acting.gesture(f,g,1.0,1.0)
+		var moved:=0.0
+		for i in int(1.0/DT):
+			_frame(f,a)
+			moved=maxf(moved,absf(_head_yaw(f)-yaw0)+absf(_head_pitch(f)-pitch0))
+		assert_float(moved).override_failure_message("%s did not move the head" % g).is_greater(2.0)
+		_run(f,2.5)
+		assert_int(a._g).override_failure_message("%s never ended" % g).is_equal(-1)
+
+
+func test_a_catch_meets_the_fall_where_it_is()->void:
+	var faller:=_figure("stand","female_adult")
+	var catcher:=_figure()
+	catcher.position=Vector3(0.75,0.0,0.0)   # she is on his right
+	var fa=Acting.of(faller);var ca=Acting.of(catcher)
+	Acting.play(faller,"faint_l")
+	for i in 6:_frame(faller,fa);_frame(catcher,ca)
+	Acting.service().play(catcher,"half_catch",{"beat":"half_catch","at":"","fallback":""})
+	# without a cast key there is nobody to catch: the catch plays alone
+	assert_str(String(ca._a.clip)).starts_with("half_catch")
+	ca.catch(faller)
+	assert_str(String(fa._a.clip)).starts_with("faint_caught_")
+	assert_float(absf(ca._a.t-fa._a.t)).is_less(0.05)

@@ -612,8 +612,10 @@ def make_clips():
                                  hands="R", blend_in=0.3, blend_out=0.5, tags=["puzzled"])
     import court_anims_more
     import court_anims_r2
+    import court_anims_r3
     court_anims_more.make_more(clips)
     court_anims_r2.make_r2(clips)
+    court_anims_r3.make_r3(clips)
     return clips
 
 
