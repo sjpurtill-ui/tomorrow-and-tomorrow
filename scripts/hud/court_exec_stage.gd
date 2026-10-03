@@ -222,10 +222,84 @@ func _walk_path(key:String,to:Vector3)->PackedVector3Array:
 			var at:=court.to_local(body.global_position)
 			people.append(Vector3(at.x,at.z,0.3))
 	var route:=Paths.route(room,Vector2(start.x,start.z),Vector2(goal.x,goal.z),people)
+	if route.is_empty():route=_seat_route(court,room,Vector2(start.x,start.z),Vector2(goal.x,goal.z),people)
 	var out:=PackedVector3Array()
 	for at:Vector2 in route:out.append(court.to_global(Vector3(at.x,start.y,at.y)))
 	# An obstructed/no-route result must not turn into a straight hearth crossing.
 	return out
+
+## Seated marks deliberately lie on low benches. The normal floor grid cannot
+## leave a deep bench with its small endpoint opening. Locally allow the seat
+## below the actor, while retaining the table, walls, people and hearth.
+static func _seat_route(court:Node3D,room:Paths.Room,start:Vector2,goal:Vector2,people:Array)->PackedVector2Array:
+	var seats:=[]
+	var marks:Variant=court.get("marks")
+	if not marks is Dictionary:return PackedVector2Array()
+	for endpoint:Vector2 in [start,goal]:
+		for mark:Node3D in (marks as Dictionary).values():
+			if not bool(mark.get_meta("sit",false)):continue
+			var at3:Vector3=Paths._in_set(mark,court).origin
+			var at:=Vector2(at3.x,at3.z)
+			if endpoint.distance_to(at)>0.45:continue
+			seats.append({"at":at,"height":float(mark.get_meta("seat",0.45))+0.12})
+			break
+	if seats.is_empty():return PackedVector2Array()
+	var changed:Array[Vector2i]=[]
+	var fire:Variant=Paths._mark_xz(court,"fire")
+	for seat:Dictionary in seats:
+		var high:=_above_seat_obstacles(court,room,float(seat.height))
+		var centre:=room.square(seat.at)
+		# Only release the starting/ending seat neighbourhood, never the hall.
+		for z in range(-12,13):
+			for x in range(-12,13):
+				var cell:=centre+Vector2i(x,z)
+				if not room.inside(cell) or not room.astar.is_point_solid(cell):continue
+				var at:=room.centre(cell)
+				if at.distance_to(seat.at)>2.4:continue
+				if fire!=null and at.distance_to(fire as Vector2)<Paths.FIRE_RADIUS+Paths.WALKER+Paths.CELL:continue
+				# The longhouse's low stone hearth extends beyond the flame circle.
+				if fire!=null and String(court.get("kind"))=="longhouse":
+					var hearth:=at-(fire as Vector2)
+					if absf(hearth.x)<2.55 and absf(hearth.y)<1.15:continue
+				var clear:=true
+				# The regular grid rounds a 0.22m body up to two 0.2m cells.
+				# At a seat that seals the usable gap between bench and table;
+				# use the actual body radius for this bounded departure only.
+				for dz in range(-1,2):
+					for dx in range(-1,2):
+						if Vector2(dx,dz).length()*Paths.CELL>Paths.WALKER:continue
+						var near:=cell+Vector2i(dx,dz)
+						if not room.inside(near) or high[near.y*room.width+near.x]!=0:clear=false
+				if clear:room.astar.set_point_solid(cell,false);changed.append(cell)
+	var route:=Paths.route(room,start,goal,people)
+	for cell in changed:room.astar.set_point_solid(cell,true)
+	return route
+
+## The model is merged, so mesh names cannot distinguish a bench from its
+## adjoining feast board. Rasterize only faces above the particular seat.
+static func _above_seat_obstacles(court:Node3D,room:Paths.Room,height:float)->PackedByteArray:
+	var hard:=PackedByteArray();hard.resize(room.width*room.height);hard.fill(0)
+	var model:=court.get_node_or_null("Model")
+	if model==null:return hard
+	for part:Node3D in model.get_children():
+		if Paths._open_part(String(part.name)) or not Paths._shown(part,court):continue
+		var meshes:Array=[part] if part is MeshInstance3D else []
+		meshes.append_array(part.find_children("*","MeshInstance3D",true,false))
+		for mesh:MeshInstance3D in meshes:
+			if mesh.mesh==null or not Paths._shown(mesh,court):continue
+			var xf:Transform3D=Paths._in_set(mesh,court)
+			for surface in mesh.mesh.get_surface_count():
+				var arrays:=mesh.mesh.surface_get_arrays(surface)
+				var verts:PackedVector3Array=xf*(arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+				var ids:PackedInt32Array=arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX]!=null else PackedInt32Array()
+				if ids.is_empty():
+					ids.resize(verts.size())
+					for i in verts.size():ids[i]=i
+				for i in range(0,ids.size()-2,3):
+					var a:=verts[ids[i]];var b:=verts[ids[i+1]];var c:=verts[ids[i+2]]
+					if maxf(a.y,maxf(b.y,c.y))<height or minf(a.y,minf(b.y,c.y))>Paths.BAND_HIGH:continue
+					Paths._triangle(room,hard,Vector2(a.x,a.z),Vector2(b.x,b.z),Vector2(c.x,c.z))
+	return hard
 
 static func _walk_length(path:PackedVector3Array)->float:
 	var length:=0.0
