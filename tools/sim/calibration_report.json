@@ -1,24 +1,25 @@
 {
- "score": 42.89328533034586,
- "failures": 6,
+ "score": 30.17485022506785,
+ "failures": 2,
  "calibrated": {
   "disease_pressure": 0.094,
   "storage_base_rations": 3341.25,
   "knowledge_gain_mult": 2.75,
-  "_fitted": "2026-09-25 00:55 score 107.7 on 7 truth runs",
+  "_fitted": "2026-10-02 23:10 fit on 5 people-first truth runs (15 y each): throughput, food_adjust_rate, other_mortality, disease_pressure; cohesion_offset scanned (0.07)",
   "fresh_spoil_mult": 0.675,
   "other_mortality": 0.00275,
   "throughput_growth": 0.19875,
-  "throughput": 0.7637499999999999,
-  "food_adjust_rate": 0.9624999999999999,
-  "cohesion_offset": 0.0,
+  "throughput": 0.76375,
+  "food_adjust_rate": 1.2075,
+  "cohesion_offset": 0.07,
   "housing_build_rate": 0.0255,
   "institution_offset": 0.1,
   "accessible_deposits_per_decade": 2.05,
   "signal_scale": 0.125,
-  "food_buffer": 1.485
+  "food_buffer": 1.485,
+  "harvest_mult": 1.1
  },
- "table_md": "| truth run | metric | year | real | surrogate | tolerance | ok |\n|---|---|---:|---:|---:|---|:-:|\n| path_balanced_5150_15y | cohesion | 5 | 0.879 | 0.822 | ±0.08 | ✓ |\n| path_balanced_5150_15y | cohesion | 10 | 0.869 | 0.832 | ±0.08 | ✓ |\n| path_balanced_5150_15y | cohesion | 15 | 0.856 | 0.812 | ±0.08 | ✓ |\n| path_balanced_5150_15y | decades_total | 15 | 59 found | 23% off | ≤32% of real | ✓ |\n| path_balanced_5150_15y | education | 5 | 0.384 | 0.367 | ±0.1 | ✓ |\n| path_balanced_5150_15y | education | 10 | 0.532 | 0.625 | ±0.1 | ✓ |\n| path_balanced_5150_15y | education | 15 | 0.731 | 0.707 | ±0.1 | ✓ |\n| path_balanced_5150_15y | food_days | 5 | 19.6 | 23.4 | ±35% | ✓ |\n| path_balanced_5150_15y | food_days | 10 | 24.6 | 29.6 | ±35% | ✓ |\n| path_balanced_5150_15y | food_days | 15 | 23.4 | 29.9 | ±35% | ✓ |\n| path_balanced_5150_15y | food_labor | 5 | 35.2 | 39 | ±6 | ✓ |\n| path_balanced_5150_15y | food_labor | 10 | 35.1 | 36.1 | ±6 | ✓ |\n| path_balanced_5150_15y | food_labor | 15 | 37.4 | 40.7 | ±6 | ✓ |\n| path_balanced_5150_15y | food_security | 5 | 0.973 | 0.98 | ±0.08 | ✓ |\n| path_balanced_5150_15y | food_security | 10 | 0.978 | 0.98 | ±0.08 | ✓ |\n| path_balanced_5150_15y | food_security | 15 | 0.978 | 0.98 | ±0.08 | ✓ |\n| path_balanced_5150_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_5150_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_5150_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_5150_15y | infant_mortality | 5 | 264 | 267 | ±20% | ✓ |\n| path_balanced_5150_15y | infant_mortality | 10 | 258 | 253 | ±20% | ✓ |\n| path_balanced_5150_15y | infant_mortality | 15 | 248 | 243 | ±20% | ✓ |\n| path_balanced_5150_15y | known | 5 | 26 | 32 | ±25% | ✓ |\n| path_balanced_5150_15y | known | 10 | 45 | 56 | ±25% | ✓ |\n| path_balanced_5150_15y | known | 15 | 69 | 82.5 | ±25% | ✓ |\n| path_balanced_5150_15y | life_expectancy | 5 | 25.2 | 24.4 | ±4 | ✓ |\n| path_balanced_5150_15y | life_expectancy | 10 | 25.5 | 25.5 | ±4 | ✓ |\n| path_balanced_5150_15y | life_expectancy | 15 | 26.8 | 26.4 | ±4 | ✓ |\n| path_balanced_5150_15y | lines_per_decade | 15 | 59 found | 26% off | ≤88% of real | ✓ |\n| path_balanced_5150_15y | lines_total | 15 | 59 found | 23% off | ≤24% of real | ✓ |\n| path_balanced_5150_15y | population | 5 | 107 | 112 | ±15% | ✓ |\n| path_balanced_5150_15y | population | 10 | 102 | 109 | ±15% | ✓ |\n| path_balanced_5150_15y | population | 15 | 100 | 108 | ±15% | ✓ |\n| path_balanced_5150_15y | scholarship | 5 | 3.07 | 3.17 | ±15% | ✓ |\n| path_balanced_5150_15y | scholarship | 10 | 6.22 | 6.53 | ±15% | ✓ |\n| path_balanced_5150_15y | scholarship | 15 | 9.61 | 10.1 | ±15% | ✓ |\n| path_balanced_74119_15y | cohesion | 5 | 0.89 | 0.822 | ±0.08 | ✓ |\n| path_balanced_74119_15y | cohesion | 10 | 0.881 | 0.832 | ±0.08 | ✓ |\n| path_balanced_74119_15y | cohesion | 15 | 0.94 | 0.812 | ±0.08 | ✗ |\n| path_balanced_74119_15y | decades_total | 15 | 71 found | 15% off | ≤29% of real | ✓ |\n| path_balanced_74119_15y | education | 5 | 0.409 | 0.367 | ±0.1 | ✓ |\n| path_balanced_74119_15y | education | 10 | 0.603 | 0.625 | ±0.1 | ✓ |\n| path_balanced_74119_15y | education | 15 | 0.736 | 0.707 | ±0.1 | ✓ |\n| path_balanced_74119_15y | food_days | 5 | 18.9 | 23.4 | ±35% | ✓ |\n| path_balanced_74119_15y | food_days | 10 | 22.8 | 29.6 | ±35% | ✓ |\n| path_balanced_74119_15y | food_days | 15 | 22.6 | 29.9 | ±35% | ✓ |\n| path_balanced_74119_15y | food_labor | 5 | 34.8 | 39 | ±6 | ✓ |\n| path_balanced_74119_15y | food_labor | 10 | 39.4 | 36.1 | ±6 | ✓ |\n| path_balanced_74119_15y | food_labor | 15 | 36.4 | 40.7 | ±6 | ✓ |\n| path_balanced_74119_15y | food_security | 5 | 0.974 | 0.98 | ±0.08 | ✓ |\n| path_balanced_74119_15y | food_security | 10 | 0.975 | 0.98 | ±0.08 | ✓ |\n| path_balanced_74119_15y | food_security | 15 | 0.979 | 0.98 | ±0.08 | ✓ |\n| path_balanced_74119_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_74119_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_74119_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_74119_15y | infant_mortality | 5 | 257 | 267 | ±20% | ✓ |\n| path_balanced_74119_15y | infant_mortality | 10 | 254 | 253 | ±20% | ✓ |\n| path_balanced_74119_15y | infant_mortality | 15 | 243 | 243 | ±20% | ✓ |\n| path_balanced_74119_15y | known | 5 | 29 | 32 | ±25% | ✓ |\n| path_balanced_74119_15y | known | 10 | 50 | 56 | ±25% | ✓ |\n| path_balanced_74119_15y | known | 15 | 81 | 82.5 | ±25% | ✓ |\n| path_balanced_74119_15y | life_expectancy | 5 | 25.6 | 24.4 | ±4 | ✓ |\n| path_balanced_74119_15y | life_expectancy | 10 | 25.8 | 25.5 | ±4 | ✓ |\n| path_balanced_74119_15y | life_expectancy | 15 | 26.8 | 26.4 | ±4 | ✓ |\n| path_balanced_74119_15y | lines_per_decade | 15 | 71 found | 16% off | ≤80% of real | ✓ |\n| path_balanced_74119_15y | lines_total | 15 | 71 found | 4% off | ≤22% of real | ✓ |\n| path_balanced_74119_15y | population | 5 | 112 | 112 | ±15% | ✓ |\n| path_balanced_74119_15y | population | 10 | 105 | 109 | ±15% | ✓ |\n| path_balanced_74119_15y | population | 15 | 104 | 108 | ±15% | ✓ |\n| path_balanced_74119_15y | scholarship | 5 | 3.15 | 3.17 | ±15% | ✓ |\n| path_balanced_74119_15y | scholarship | 10 | 6.36 | 6.53 | ±15% | ✓ |\n| path_balanced_74119_15y | scholarship | 15 | 9.79 | 10.1 | ±15% | ✓ |\n| path_growth_74119_15y | cohesion | 5 | 0.96 | 0.94 | ±0.08 | ✓ |\n| path_growth_74119_15y | cohesion | 10 | 0.961 | 0.947 | ±0.08 | ✓ |\n| path_growth_74119_15y | cohesion | 15 | 0.961 | 0.931 | ±0.08 | ✓ |\n| path_growth_74119_15y | decades_total | 15 | 77 found | 14% off | ≤28% of real | ✓ |\n| path_growth_74119_15y | education | 5 | 0.406 | 0.357 | ±0.1 | ✓ |\n| path_growth_74119_15y | education | 10 | 0.609 | 0.597 | ±0.1 | ✓ |\n| path_growth_74119_15y | education | 15 | 0.737 | 0.706 | ±0.1 | ✓ |\n| path_growth_74119_15y | food_days | 5 | 18.5 | 28.9 | ±35% | gap |\n| path_growth_74119_15y | food_days | 10 | 32.2 | 44 | ±35% | gap |\n| path_growth_74119_15y | food_days | 15 | 30.4 | 44.3 | ±35% | gap |\n| path_growth_74119_15y | food_labor | 5 | 32.8 | 40.9 | ±6 | ✗ |\n| path_growth_74119_15y | food_labor | 10 | 39.6 | 36.2 | ±6 | ✓ |\n| path_growth_74119_15y | food_labor | 15 | 36.5 | 40.8 | ±6 | ✓ |\n| path_growth_74119_15y | food_security | 5 | 0.975 | 0.98 | ±0.08 | ✓ |\n| path_growth_74119_15y | food_security | 10 | 0.979 | 0.98 | ±0.08 | ✓ |\n| path_growth_74119_15y | food_security | 15 | 0.979 | 0.98 | ±0.08 | ✓ |\n| path_growth_74119_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_growth_74119_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_growth_74119_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_growth_74119_15y | infant_mortality | 5 | 211 | 230 | ±20% | ✓ |\n| path_growth_74119_15y | infant_mortality | 10 | 211 | 214 | ±20% | ✓ |\n| path_growth_74119_15y | infant_mortality | 15 | 199 | 211 | ±20% | ✓ |\n| path_growth_74119_15y | known | 5 | 29 | 31 | ±25% | ✓ |\n| path_growth_74119_15y | known | 10 | 52 | 53.5 | ±25% | ✓ |\n| path_growth_74119_15y | known | 15 | 87 | 79 | ±25% | ✓ |\n| path_growth_74119_15y | life_expectancy | 5 | 28.9 | 26.9 | ±4 | ✓ |\n| path_growth_74119_15y | life_expectancy | 10 | 29 | 28.2 | ±4 | ✓ |\n| path_growth_74119_15y | life_expectancy | 15 | 30.4 | 28.6 | ±4 | ✓ |\n| path_growth_74119_15y | lines_per_decade | 15 | 77 found | 14% off | ≤77% of real | ✓ |\n| path_growth_74119_15y | lines_total | 15 | 77 found | 10% off | ≤21% of real | ✓ |\n| path_growth_74119_15y | population | 5 | 113 | 114 | ±15% | ✓ |\n| path_growth_74119_15y | population | 10 | 108 | 112 | ±15% | ✓ |\n| path_growth_74119_15y | population | 15 | 108 | 112 | ±15% | ✓ |\n| path_growth_74119_15y | scholarship | 5 | 3.05 | 3.02 | ±15% | ✓ |\n| path_growth_74119_15y | scholarship | 10 | 6.27 | 6.22 | ±15% | ✓ |\n| path_growth_74119_15y | scholarship | 15 | 9.73 | 9.64 | ±15% | ✓ |\n| path_learning_74119_15y | cohesion | 5 | 0.857 | 0.808 | ±0.08 | ✓ |\n| path_learning_74119_15y | cohesion | 10 | 0.911 | 0.821 | ±0.08 | ✗ |\n| path_learning_74119_15y | cohesion | 15 | 0.961 | 0.823 | ±0.08 | ✗ |\n| path_learning_74119_15y | decades_total | 15 | 206 found | 12% off | ≤20% of real | ✓ |\n| path_learning_74119_15y | education | 5 | 0.677 | 0.704 | ±0.1 | ✓ |\n| path_learning_74119_15y | education | 10 | 0.743 | 0.713 | ±0.1 | ✓ |\n| path_learning_74119_15y | education | 15 | 0.747 | 0.717 | ±0.1 | ✓ |\n| path_learning_74119_15y | food_days | 5 | 19.1 | 28 | ±35% | gap |\n| path_learning_74119_15y | food_days | 10 | 20 | 29.9 | ±35% | gap |\n| path_learning_74119_15y | food_days | 15 | 24.5 | 30.3 | ±35% | ✓ |\n| path_learning_74119_15y | food_labor | 5 | 31.9 | 37 | ±6 | ✓ |\n| path_learning_74119_15y | food_labor | 10 | 35.5 | 34.3 | ±6 | ✓ |\n| path_learning_74119_15y | food_labor | 15 | 31.7 | 34.9 | ±6 | ✓ |\n| path_learning_74119_15y | food_security | 5 | 0.974 | 0.98 | ±0.08 | ✓ |\n| path_learning_74119_15y | food_security | 10 | 0.98 | 0.98 | ±0.08 | ✓ |\n| path_learning_74119_15y | food_security | 15 | 0.98 | 0.98 | ±0.08 | ✓ |\n| path_learning_74119_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_learning_74119_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_learning_74119_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_learning_74119_15y | infant_mortality | 5 | 260 | 262 | ±20% | ✓ |\n| path_learning_74119_15y | infant_mortality | 10 | 233 | 230 | ±20% | ✓ |\n| path_learning_74119_15y | infant_mortality | 15 | 218 | 225 | ±20% | ✓ |\n| path_learning_74119_15y | known | 5 | 86 | 79 | ±25% | ✓ |\n| path_learning_74119_15y | known | 10 | 166 | 147 | ±25% | ✓ |\n| path_learning_74119_15y | known | 15 | 216 | 191 | ±25% | ✓ |\n| path_learning_74119_15y | life_expectancy | 5 | 25.5 | 24.8 | ±4 | ✓ |\n| path_learning_74119_15y | life_expectancy | 10 | 28 | 27.3 | ±4 | ✓ |\n| path_learning_74119_15y | life_expectancy | 15 | 28.9 | 27.7 | ±4 | ✓ |\n| path_learning_74119_15y | lines_per_decade | 15 | 206 found | 17% off | ≤55% of real | ✓ |\n| path_learning_74119_15y | lines_total | 15 | 206 found | 14% off | ≤15% of real | ✓ |\n| path_learning_74119_15y | population | 5 | 112 | 112 | ±15% | ✓ |\n| path_learning_74119_15y | population | 10 | 104 | 108 | ±15% | ✓ |\n| path_learning_74119_15y | population | 15 | 104 | 107 | ±15% | ✓ |\n| path_learning_74119_15y | scholarship | 5 | 4.97 | 4.97 | ±15% | ✓ |\n| path_learning_74119_15y | scholarship | 10 | 10.5 | 10.4 | ±15% | ✓ |\n| path_learning_74119_15y | scholarship | 15 | 16 | 15.8 | ±15% | ✓ |\n| path_war_74119_15y | cohesion | 5 | 0.855 | 0.805 | ±0.08 | ✓ |\n| path_war_74119_15y | cohesion | 10 | 0.843 | 0.815 | ±0.08 | ✓ |\n| path_war_74119_15y | cohesion | 15 | 0.882 | 0.797 | ±0.08 | ✗ |\n| path_war_74119_15y | decades_total | 15 | 70 found | 19% off | ≤29% of real | ✓ |\n| path_war_74119_15y | education | 5 | 0.401 | 0.352 | ±0.1 | ✓ |\n| path_war_74119_15y | education | 10 | 0.587 | 0.577 | ±0.1 | ✓ |\n| path_war_74119_15y | education | 15 | 0.736 | 0.706 | ±0.1 | ✓ |\n| path_war_74119_15y | food_days | 5 | 23.2 | 23.1 | ±35% | ✓ |\n| path_war_74119_15y | food_days | 10 | 25.6 | 29.6 | ±35% | ✓ |\n| path_war_74119_15y | food_days | 15 | 24.3 | 29.8 | ±35% | ✓ |\n| path_war_74119_15y | food_labor | 5 | 31.7 | 39.2 | ±6 | ✗ |\n| path_war_74119_15y | food_labor | 10 | 37.5 | 36.3 | ±6 | ✓ |\n| path_war_74119_15y | food_labor | 15 | 35.4 | 40.9 | ±6 | ✓ |\n| path_war_74119_15y | food_security | 5 | 0.975 | 0.98 | ±0.08 | ✓ |\n| path_war_74119_15y | food_security | 10 | 0.975 | 0.98 | ±0.08 | ✓ |\n| path_war_74119_15y | food_security | 15 | 0.976 | 0.98 | ±0.08 | ✓ |\n| path_war_74119_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_war_74119_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_war_74119_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_war_74119_15y | infant_mortality | 5 | 264 | 272 | ±20% | ✓ |\n| path_war_74119_15y | infant_mortality | 10 | 262 | 260 | ±20% | ✓ |\n| path_war_74119_15y | infant_mortality | 15 | 247 | 253 | ±20% | ✓ |\n| path_war_74119_15y | known | 5 | 27 | 29 | ±25% | ✓ |\n| path_war_74119_15y | known | 10 | 47 | 49.5 | ±25% | ✓ |\n| path_war_74119_15y | known | 15 | 80 | 72 | ±25% | ✓ |\n| path_war_74119_15y | life_expectancy | 5 | 25.2 | 24.1 | ±4 | ✓ |\n| path_war_74119_15y | life_expectancy | 10 | 25.4 | 25.1 | ±4 | ✓ |\n| path_war_74119_15y | life_expectancy | 15 | 26.4 | 25.6 | ±4 | ✓ |\n| path_war_74119_15y | lines_per_decade | 15 | 70 found | 19% off | ≤81% of real | ✓ |\n| path_war_74119_15y | lines_total | 15 | 70 found | 11% off | ≤22% of real | ✓ |\n| path_war_74119_15y | population | 5 | 112 | 112 | ±15% | ✓ |\n| path_war_74119_15y | population | 10 | 104 | 108 | ±15% | ✓ |\n| path_war_74119_15y | population | 15 | 103 | 107 | ±15% | ✓ |\n| path_war_74119_15y | scholarship | 5 | 3.03 | 3.01 | ±15% | ✓ |\n| path_war_74119_15y | scholarship | 10 | 6.24 | 6.19 | ±15% | ✓ |\n| path_war_74119_15y | scholarship | 15 | 9.67 | 9.57 | ±15% | ✓ |",
+ "table_md": "| truth run | metric | year | real | surrogate | tolerance | ok |\n|---|---|---:|---:|---:|---|:-:|\n| path_balanced_5150_15y | cohesion | 5 | 0.838 | 0.87 | ±0.08 | ✓ |\n| path_balanced_5150_15y | cohesion | 10 | 0.835 | 0.884 | ±0.08 | ✓ |\n| path_balanced_5150_15y | cohesion | 15 | 0.828 | 0.852 | ±0.08 | ✓ |\n| path_balanced_5150_15y | decades_total | 15 | 32 found | 17% off | ≤43% of real | ✓ |\n| path_balanced_5150_15y | education | 5 | 0.365 | 0.337 | ±0.1 | ✓ |\n| path_balanced_5150_15y | education | 10 | 0.461 | 0.509 | ±0.1 | ✓ |\n| path_balanced_5150_15y | education | 15 | 0.684 | 0.703 | ±0.1 | ✓ |\n| path_balanced_5150_15y | food_days | 5 | 19.9 | 22.3 | ±35% | ✓ |\n| path_balanced_5150_15y | food_days | 10 | 20.1 | 26.2 | ±35% | ✓ |\n| path_balanced_5150_15y | food_days | 15 | 20 | 29.1 | ±35% | gap |\n| path_balanced_5150_15y | food_labor | 5 | 43.2 | 44.8 | ±6 | ✓ |\n| path_balanced_5150_15y | food_labor | 10 | 40.8 | 40.6 | ±6 | ✓ |\n| path_balanced_5150_15y | food_labor | 15 | 47.8 | 47.8 | ±6 | ✓ |\n| path_balanced_5150_15y | food_security | 5 | 0.975 | 0.98 | ±0.08 | ✓ |\n| path_balanced_5150_15y | food_security | 10 | 0.977 | 0.979 | ±0.08 | ✓ |\n| path_balanced_5150_15y | food_security | 15 | 0.978 | 0.98 | ±0.08 | ✓ |\n| path_balanced_5150_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_5150_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_5150_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_5150_15y | infant_mortality | 5 | 274 | 274 | ±20% | ✓ |\n| path_balanced_5150_15y | infant_mortality | 10 | 270 | 266 | ±20% | ✓ |\n| path_balanced_5150_15y | infant_mortality | 15 | 266 | 265 | ±20% | ✓ |\n| path_balanced_5150_15y | known | 5 | 19 | 19 | ±25% | ✓ |\n| path_balanced_5150_15y | known | 10 | 30 | 31.5 | ±25% | ✓ |\n| path_balanced_5150_15y | known | 15 | 42 | 47.5 | ±25% | ✓ |\n| path_balanced_5150_15y | life_expectancy | 5 | 24.7 | 24.1 | ±4 | ✓ |\n| path_balanced_5150_15y | life_expectancy | 10 | 24.9 | 24.6 | ±4 | ✓ |\n| path_balanced_5150_15y | life_expectancy | 15 | 25.2 | 24.8 | ±4 | ✓ |\n| path_balanced_5150_15y | lines_per_decade | 15 | 32 found | 27% off | ≤119% of real | ✓ |\n| path_balanced_5150_15y | lines_total | 15 | 32 found | 20% off | ≤32% of real | ✓ |\n| path_balanced_5150_15y | population | 5 | 116 | 122 | ±15% | ✓ |\n| path_balanced_5150_15y | population | 10 | 118 | 125 | ±15% | ✓ |\n| path_balanced_5150_15y | population | 15 | 122 | 129 | ±15% | ✓ |\n| path_balanced_5150_15y | scholarship | 5 | 3.26 | 3.19 | ±15% | ✓ |\n| path_balanced_5150_15y | scholarship | 10 | 6.64 | 6.58 | ±15% | ✓ |\n| path_balanced_5150_15y | scholarship | 15 | 10.3 | 10.2 | ±15% | ✓ |\n| path_balanced_74119_15y | cohesion | 5 | 0.872 | 0.87 | ±0.08 | ✓ |\n| path_balanced_74119_15y | cohesion | 10 | 0.836 | 0.884 | ±0.08 | ✓ |\n| path_balanced_74119_15y | cohesion | 15 | 0.864 | 0.852 | ±0.08 | ✓ |\n| path_balanced_74119_15y | decades_total | 15 | 36 found | 4% off | ≤41% of real | ✓ |\n| path_balanced_74119_15y | education | 5 | 0.386 | 0.337 | ±0.1 | ✓ |\n| path_balanced_74119_15y | education | 10 | 0.523 | 0.509 | ±0.1 | ✓ |\n| path_balanced_74119_15y | education | 15 | 0.717 | 0.703 | ±0.1 | ✓ |\n| path_balanced_74119_15y | food_days | 5 | 18.2 | 22.3 | ±35% | ✓ |\n| path_balanced_74119_15y | food_days | 10 | 20.1 | 26.2 | ±35% | ✓ |\n| path_balanced_74119_15y | food_days | 15 | 20 | 29.1 | ±35% | gap |\n| path_balanced_74119_15y | food_labor | 5 | 38.8 | 44.8 | ±6 | ✗ |\n| path_balanced_74119_15y | food_labor | 10 | 48.7 | 40.6 | ±6 | seed |\n| path_balanced_74119_15y | food_labor | 15 | 46.4 | 47.8 | ±6 | ✓ |\n| path_balanced_74119_15y | food_security | 5 | 0.961 | 0.98 | ±0.08 | ✓ |\n| path_balanced_74119_15y | food_security | 10 | 0.977 | 0.979 | ±0.08 | ✓ |\n| path_balanced_74119_15y | food_security | 15 | 0.977 | 0.98 | ±0.08 | ✓ |\n| path_balanced_74119_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_74119_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_74119_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_balanced_74119_15y | infant_mortality | 5 | 265 | 274 | ±20% | ✓ |\n| path_balanced_74119_15y | infant_mortality | 10 | 268 | 266 | ±20% | ✓ |\n| path_balanced_74119_15y | infant_mortality | 15 | 255 | 265 | ±20% | ✓ |\n| path_balanced_74119_15y | known | 5 | 18 | 19 | ±25% | ✓ |\n| path_balanced_74119_15y | known | 10 | 31 | 31.5 | ±25% | ✓ |\n| path_balanced_74119_15y | known | 15 | 46 | 47.5 | ±25% | ✓ |\n| path_balanced_74119_15y | life_expectancy | 5 | 25.1 | 24.1 | ±4 | ✓ |\n| path_balanced_74119_15y | life_expectancy | 10 | 25.1 | 24.6 | ±4 | ✓ |\n| path_balanced_74119_15y | life_expectancy | 15 | 25.9 | 24.8 | ±4 | ✓ |\n| path_balanced_74119_15y | lines_per_decade | 15 | 36 found | 15% off | ≤112% of real | ✓ |\n| path_balanced_74119_15y | lines_total | 15 | 36 found | 10% off | ≤31% of real | ✓ |\n| path_balanced_74119_15y | population | 5 | 119 | 122 | ±15% | ✓ |\n| path_balanced_74119_15y | population | 10 | 119 | 125 | ±15% | ✓ |\n| path_balanced_74119_15y | population | 15 | 122 | 129 | ±15% | ✓ |\n| path_balanced_74119_15y | scholarship | 5 | 3.3 | 3.19 | ±15% | ✓ |\n| path_balanced_74119_15y | scholarship | 10 | 6.75 | 6.58 | ±15% | ✓ |\n| path_balanced_74119_15y | scholarship | 15 | 10.4 | 10.2 | ±15% | ✓ |\n| path_growth_74119_15y | cohesion | 5 | 0.96 | 0.955 | ±0.08 | ✓ |\n| path_growth_74119_15y | cohesion | 10 | 0.961 | 0.96 | ±0.08 | ✓ |\n| path_growth_74119_15y | cohesion | 15 | 0.96 | 0.938 | ±0.08 | ✓ |\n| path_growth_74119_15y | decades_total | 15 | 39 found | 12% off | ≤39% of real | ✓ |\n| path_growth_74119_15y | education | 5 | 0.384 | 0.336 | ±0.1 | ✓ |\n| path_growth_74119_15y | education | 10 | 0.521 | 0.511 | ±0.1 | ✓ |\n| path_growth_74119_15y | education | 15 | 0.718 | 0.704 | ±0.1 | ✓ |\n| path_growth_74119_15y | food_days | 5 | 18.5 | 27.7 | ±35% | gap |\n| path_growth_74119_15y | food_days | 10 | 32.6 | 42.1 | ±35% | ✓ |\n| path_growth_74119_15y | food_days | 15 | 32.3 | 43.8 | ±35% | gap |\n| path_growth_74119_15y | food_labor | 5 | 41.3 | 47.1 | ±6 | ✓ |\n| path_growth_74119_15y | food_labor | 10 | 49.3 | 41.3 | ±6 | gap |\n| path_growth_74119_15y | food_labor | 15 | 47 | 47.9 | ±6 | ✓ |\n| path_growth_74119_15y | food_security | 5 | 0.974 | 0.98 | ±0.08 | ✓ |\n| path_growth_74119_15y | food_security | 10 | 0.978 | 0.98 | ±0.08 | ✓ |\n| path_growth_74119_15y | food_security | 15 | 0.978 | 0.98 | ±0.08 | ✓ |\n| path_growth_74119_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_growth_74119_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_growth_74119_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_growth_74119_15y | infant_mortality | 5 | 229 | 243 | ±20% | ✓ |\n| path_growth_74119_15y | infant_mortality | 10 | 229 | 229 | ±20% | ✓ |\n| path_growth_74119_15y | infant_mortality | 15 | 221 | 238 | ±20% | ✓ |\n| path_growth_74119_15y | known | 5 | 18 | 19.5 | ±25% | ✓ |\n| path_growth_74119_15y | known | 10 | 31 | 33.5 | ±25% | ✓ |\n| path_growth_74119_15y | known | 15 | 49 | 49.5 | ±25% | ✓ |\n| path_growth_74119_15y | life_expectancy | 5 | 27.9 | 26.1 | ±4 | ✓ |\n| path_growth_74119_15y | life_expectancy | 10 | 27.9 | 27.1 | ±4 | ✓ |\n| path_growth_74119_15y | life_expectancy | 15 | 28.5 | 26.6 | ±4 | ✓ |\n| path_growth_74119_15y | lines_per_decade | 15 | 39 found | 19% off | ≤108% of real | ✓ |\n| path_growth_74119_15y | lines_total | 15 | 39 found | 4% off | ≤29% of real | ✓ |\n| path_growth_74119_15y | population | 5 | 120 | 123 | ±15% | ✓ |\n| path_growth_74119_15y | population | 10 | 122 | 127 | ±15% | ✓ |\n| path_growth_74119_15y | population | 15 | 126 | 133 | ±15% | ✓ |\n| path_growth_74119_15y | scholarship | 5 | 3.2 | 3.15 | ±15% | ✓ |\n| path_growth_74119_15y | scholarship | 10 | 6.57 | 6.53 | ±15% | ✓ |\n| path_growth_74119_15y | scholarship | 15 | 10.2 | 10.1 | ±15% | ✓ |\n| path_learning_74119_15y | cohesion | 5 | 0.841 | 0.856 | ±0.08 | ✓ |\n| path_learning_74119_15y | cohesion | 10 | 0.828 | 0.868 | ±0.08 | ✓ |\n| path_learning_74119_15y | cohesion | 15 | 0.886 | 0.849 | ±0.08 | ✓ |\n| path_learning_74119_15y | decades_total | 15 | 120 found | 14% off | ≤22% of real | ✓ |\n| path_learning_74119_15y | education | 5 | 0.527 | 0.616 | ±0.1 | ✓ |\n| path_learning_74119_15y | education | 10 | 0.736 | 0.707 | ±0.1 | ✓ |\n| path_learning_74119_15y | education | 15 | 0.741 | 0.711 | ±0.1 | ✓ |\n| path_learning_74119_15y | food_days | 5 | 18.3 | 22.1 | ±35% | ✓ |\n| path_learning_74119_15y | food_days | 10 | 20 | 29.2 | ±35% | gap |\n| path_learning_74119_15y | food_days | 15 | 19.9 | 29.4 | ±35% | gap |\n| path_learning_74119_15y | food_labor | 5 | 37.9 | 43.7 | ±6 | ✓ |\n| path_learning_74119_15y | food_labor | 10 | 47.6 | 40.5 | ±6 | ✗ |\n| path_learning_74119_15y | food_labor | 15 | 43.1 | 45.7 | ±6 | ✓ |\n| path_learning_74119_15y | food_security | 5 | 0.964 | 0.98 | ±0.08 | ✓ |\n| path_learning_74119_15y | food_security | 10 | 0.979 | 0.98 | ±0.08 | ✓ |\n| path_learning_74119_15y | food_security | 15 | 0.98 | 0.98 | ±0.08 | ✓ |\n| path_learning_74119_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_learning_74119_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_learning_74119_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_learning_74119_15y | infant_mortality | 5 | 267 | 273 | ±20% | ✓ |\n| path_learning_74119_15y | infant_mortality | 10 | 257 | 250 | ±20% | ✓ |\n| path_learning_74119_15y | infant_mortality | 15 | 231 | 243 | ±20% | ✓ |\n| path_learning_74119_15y | known | 5 | 39 | 38 | ±25% | ✓ |\n| path_learning_74119_15y | known | 10 | 78 | 77.5 | ±25% | ✓ |\n| path_learning_74119_15y | known | 15 | 130 | 114 | ±25% | ✓ |\n| path_learning_74119_15y | life_expectancy | 5 | 25.1 | 24.1 | ±4 | ✓ |\n| path_learning_74119_15y | life_expectancy | 10 | 26.3 | 25.9 | ±4 | ✓ |\n| path_learning_74119_15y | life_expectancy | 15 | 28.2 | 26.6 | ±4 | ✓ |\n| path_learning_74119_15y | lines_per_decade | 15 | 120 found | 17% off | ≤61% of real | ✓ |\n| path_learning_74119_15y | lines_total | 15 | 120 found | 15% off | ≤17% of real | ✓ |\n| path_learning_74119_15y | population | 5 | 119 | 121 | ±15% | ✓ |\n| path_learning_74119_15y | population | 10 | 119 | 124 | ±15% | ✓ |\n| path_learning_74119_15y | population | 15 | 122 | 129 | ±15% | ✓ |\n| path_learning_74119_15y | scholarship | 5 | 4.84 | 4.84 | ±15% | ✓ |\n| path_learning_74119_15y | scholarship | 10 | 10.2 | 10.2 | ±15% | ✓ |\n| path_learning_74119_15y | scholarship | 15 | 15.7 | 15.6 | ±15% | ✓ |\n| path_war_74119_15y | cohesion | 5 | 0.831 | 0.852 | ±0.08 | ✓ |\n| path_war_74119_15y | cohesion | 10 | 0.824 | 0.864 | ±0.08 | ✓ |\n| path_war_74119_15y | cohesion | 15 | 0.836 | 0.841 | ±0.08 | ✓ |\n| path_war_74119_15y | decades_total | 15 | 35 found | 3% off | ≤41% of real | ✓ |\n| path_war_74119_15y | education | 5 | 0.385 | 0.335 | ±0.1 | ✓ |\n| path_war_74119_15y | education | 10 | 0.519 | 0.504 | ±0.1 | ✓ |\n| path_war_74119_15y | education | 15 | 0.707 | 0.703 | ±0.1 | ✓ |\n| path_war_74119_15y | food_days | 5 | 18.8 | 21.5 | ±35% | ✓ |\n| path_war_74119_15y | food_days | 10 | 24 | 25.3 | ±35% | ✓ |\n| path_war_74119_15y | food_days | 15 | 23.3 | 29.4 | ±35% | ✓ |\n| path_war_74119_15y | food_labor | 5 | 38.6 | 45.1 | ±6 | gap |\n| path_war_74119_15y | food_labor | 10 | 47.2 | 41.4 | ±6 | ✓ |\n| path_war_74119_15y | food_labor | 15 | 45.6 | 47.5 | ±6 | ✓ |\n| path_war_74119_15y | food_security | 5 | 0.967 | 0.98 | ±0.08 | ✓ |\n| path_war_74119_15y | food_security | 10 | 0.975 | 0.98 | ±0.08 | ✓ |\n| path_war_74119_15y | food_security | 15 | 0.976 | 0.98 | ±0.08 | ✓ |\n| path_war_74119_15y | health | 5 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_war_74119_15y | health | 10 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_war_74119_15y | health | 15 | 0.97 | 0.97 | ±0.08 | ✓ |\n| path_war_74119_15y | infant_mortality | 5 | 274 | 278 | ±20% | ✓ |\n| path_war_74119_15y | infant_mortality | 10 | 271 | 270 | ±20% | ✓ |\n| path_war_74119_15y | infant_mortality | 15 | 262 | 269 | ±20% | ✓ |\n| path_war_74119_15y | known | 5 | 18 | 19 | ±25% | ✓ |\n| path_war_74119_15y | known | 10 | 30 | 30 | ±25% | ✓ |\n| path_war_74119_15y | known | 15 | 45 | 46 | ±25% | ✓ |\n| path_war_74119_15y | life_expectancy | 5 | 24.7 | 23.8 | ±4 | ✓ |\n| path_war_74119_15y | life_expectancy | 10 | 25 | 24.3 | ±4 | ✓ |\n| path_war_74119_15y | life_expectancy | 15 | 25.6 | 24.5 | ±4 | ✓ |\n| path_war_74119_15y | lines_per_decade | 15 | 35 found | 11% off | ≤114% of real | ✓ |\n| path_war_74119_15y | lines_total | 15 | 35 found | 3% off | ≤31% of real | ✓ |\n| path_war_74119_15y | population | 5 | 119 | 121 | ±15% | ✓ |\n| path_war_74119_15y | population | 10 | 118 | 124 | ±15% | ✓ |\n| path_war_74119_15y | population | 15 | 120 | 127 | ±15% | ✓ |\n| path_war_74119_15y | scholarship | 5 | 3.3 | 3.17 | ±15% | ✓ |\n| path_war_74119_15y | scholarship | 10 | 6.75 | 6.53 | ±15% | ✓ |\n| path_war_74119_15y | scholarship | 15 | 10.4 | 10.1 | ±15% | ✓ |",
  "comparisons": [
   {
    "truth": "path_balanced_5150_15y.json",
@@ -26,190 +27,190 @@
     [
      "population",
      5,
-     107.0,
-     112.39670729987935,
+     116.0,
+     121.64343299649963,
      true
     ],
     [
      "life_expectancy",
      5,
+     24.7,
+     24.059410497492305,
+     true
+    ],
+    [
+     "infant_mortality",
+     5,
+     274.0,
+     273.95231157028036,
+     true
+    ],
+    [
+     "food_days",
+     5,
+     19.9,
+     22.322280783703654,
+     true
+    ],
+    [
+     "food_security",
+     5,
+     0.975,
+     0.9799059242272392,
+     true
+    ],
+    [
+     "health",
+     5,
+     0.97,
+     0.9699999999999996,
+     true
+    ],
+    [
+     "known",
+     5,
+     19.0,
+     19.0,
+     true
+    ],
+    [
+     "scholarship",
+     5,
+     3.26,
+     3.190738711260729,
+     true
+    ],
+    [
+     "education",
+     5,
+     0.365,
+     0.3369789911663597,
+     true
+    ],
+    [
+     "food_labor",
+     5,
+     43.2,
+     44.80475280604234,
+     true
+    ],
+    [
+     "cohesion",
+     5,
+     0.838,
+     0.8698189788490067,
+     true
+    ],
+    [
+     "population",
+     10,
+     118.0,
+     124.79147360462791,
+     true
+    ],
+    [
+     "life_expectancy",
+     10,
+     24.9,
+     24.624932426287586,
+     true
+    ],
+    [
+     "infant_mortality",
+     10,
+     269.5,
+     265.913496089267,
+     true
+    ],
+    [
+     "food_days",
+     10,
+     20.1,
+     26.180658559107147,
+     true
+    ],
+    [
+     "food_security",
+     10,
+     0.977,
+     0.9793325719475887,
+     true
+    ],
+    [
+     "health",
+     10,
+     0.97,
+     0.9699999999999996,
+     true
+    ],
+    [
+     "known",
+     10,
+     30.0,
+     31.5,
+     true
+    ],
+    [
+     "scholarship",
+     10,
+     6.64,
+     6.582143339457891,
+     true
+    ],
+    [
+     "education",
+     10,
+     0.461,
+     0.5088276301187173,
+     true
+    ],
+    [
+     "food_labor",
+     10,
+     40.8,
+     40.61109440519484,
+     true
+    ],
+    [
+     "cohesion",
+     10,
+     0.835,
+     0.8838199577136863,
+     true
+    ],
+    [
+     "population",
+     15,
+     122.0,
+     128.7126916348406,
+     true
+    ],
+    [
+     "life_expectancy",
+     15,
      25.2,
-     24.44162640187925,
-     true
-    ],
-    [
-     "infant_mortality",
-     5,
-     263.5,
-     267.47602158214136,
-     true
-    ],
-    [
-     "food_days",
-     5,
-     19.6,
-     23.356004060256133,
-     true
-    ],
-    [
-     "food_security",
-     5,
-     0.973,
-     0.9798864408567973,
-     true
-    ],
-    [
-     "health",
-     5,
-     0.97,
-     0.9699999999999996,
-     true
-    ],
-    [
-     "known",
-     5,
-     26.0,
-     32.0,
-     true
-    ],
-    [
-     "scholarship",
-     5,
-     3.07,
-     3.1700684547278204,
-     true
-    ],
-    [
-     "education",
-     5,
-     0.384,
-     0.3667866796219329,
-     true
-    ],
-    [
-     "food_labor",
-     5,
-     35.2,
-     39.01024545565019,
-     true
-    ],
-    [
-     "cohesion",
-     5,
-     0.879,
-     0.8220329568783744,
-     true
-    ],
-    [
-     "population",
-     10,
-     102.0,
-     108.77174630607911,
-     true
-    ],
-    [
-     "life_expectancy",
-     10,
-     25.5,
-     25.513238543696822,
-     true
-    ],
-    [
-     "infant_mortality",
-     10,
-     258.2,
-     253.32964372998768,
-     true
-    ],
-    [
-     "food_days",
-     10,
-     24.6,
-     29.620332620447016,
-     true
-    ],
-    [
-     "food_security",
-     10,
-     0.978,
-     0.9798777996097421,
-     true
-    ],
-    [
-     "health",
-     10,
-     0.97,
-     0.9699999999999996,
-     true
-    ],
-    [
-     "known",
-     10,
-     45.0,
-     56.0,
-     true
-    ],
-    [
-     "scholarship",
-     10,
-     6.22,
-     6.530796792788425,
-     true
-    ],
-    [
-     "education",
-     10,
-     0.532,
-     0.624905672896652,
-     true
-    ],
-    [
-     "food_labor",
-     10,
-     35.1,
-     36.071351824303946,
-     true
-    ],
-    [
-     "cohesion",
-     10,
-     0.869,
-     0.8324812252410945,
-     true
-    ],
-    [
-     "population",
-     15,
-     100.0,
-     107.96387765111336,
-     true
-    ],
-    [
-     "life_expectancy",
-     15,
-     26.8,
-     26.391612576322593,
+     24.801492294626904,
      true
     ],
     [
      "infant_mortality",
      15,
-     248.2,
-     243.00748255278717,
+     266.2,
+     265.13305205117047,
      true
     ],
     [
      "food_days",
      15,
-     23.4,
-     29.892490423554538,
-     true
+     20.0,
+     29.133483460484804,
+     false
     ],
     [
      "food_security",
      15,
      0.978,
-     0.9798102023335485,
+     0.9797951560164412,
      true
     ],
     [
@@ -222,57 +223,57 @@
     [
      "known",
      15,
-     69.0,
-     82.5,
+     42.0,
+     47.5,
      true
     ],
     [
      "scholarship",
      15,
-     9.61,
-     10.100424941416033,
+     10.28,
+     10.213823852598797,
      true
     ],
     [
      "education",
      15,
-     0.731,
-     0.7073308366186957,
+     0.684,
+     0.7033528637399502,
      true
     ],
     [
      "food_labor",
      15,
-     37.4,
-     40.66949128328474,
+     47.8,
+     47.794128174675976,
      true
     ],
     [
      "cohesion",
      15,
-     0.856,
-     0.8122972341038917,
+     0.828,
+     0.8522224751673229,
      true
     ],
     [
      "lines_per_decade",
      15,
-     59,
-     0.2627118644067797,
+     32,
+     0.265625,
      true
     ],
     [
      "lines_total",
      15,
-     59,
-     0.2288135593220339,
+     32,
+     0.203125,
      true
     ],
     [
      "decades_total",
      15,
-     59,
-     0.2288135593220339,
+     32,
+     0.171875,
      true
     ]
    ]
@@ -283,36 +284,36 @@
     [
      "population",
      5,
-     112.0,
-     112.39670729987935,
+     119.0,
+     121.64343299649963,
      true
     ],
     [
      "life_expectancy",
      5,
-     25.6,
-     24.44162640187925,
+     25.1,
+     24.059410497492305,
      true
     ],
     [
      "infant_mortality",
      5,
-     257.2,
-     267.47602158214136,
+     265.0,
+     273.95231157028036,
      true
     ],
     [
      "food_days",
      5,
-     18.9,
-     23.356004060256133,
+     18.2,
+     22.322280783703654,
      true
     ],
     [
      "food_security",
      5,
-     0.974,
-     0.9798864408567973,
+     0.961,
+     0.9799059242272392,
      true
     ],
     [
@@ -325,211 +326,211 @@
     [
      "known",
      5,
-     29.0,
-     32.0,
+     18.0,
+     19.0,
      true
     ],
     [
      "scholarship",
      5,
-     3.15,
-     3.1700684547278204,
+     3.3,
+     3.190738711260729,
      true
     ],
     [
      "education",
      5,
-     0.409,
-     0.3667866796219329,
+     0.386,
+     0.3369789911663597,
      true
     ],
     [
      "food_labor",
      5,
-     34.8,
-     39.01024545565019,
-     true
-    ],
-    [
-     "cohesion",
-     5,
-     0.89,
-     0.8220329568783744,
-     true
-    ],
-    [
-     "population",
-     10,
-     105.0,
-     108.77174630607911,
-     true
-    ],
-    [
-     "life_expectancy",
-     10,
-     25.8,
-     25.513238543696822,
-     true
-    ],
-    [
-     "infant_mortality",
-     10,
-     254.5,
-     253.32964372998768,
-     true
-    ],
-    [
-     "food_days",
-     10,
-     22.8,
-     29.620332620447016,
-     true
-    ],
-    [
-     "food_security",
-     10,
-     0.975,
-     0.9798777996097421,
-     true
-    ],
-    [
-     "health",
-     10,
-     0.97,
-     0.9699999999999996,
-     true
-    ],
-    [
-     "known",
-     10,
-     50.0,
-     56.0,
-     true
-    ],
-    [
-     "scholarship",
-     10,
-     6.36,
-     6.530796792788425,
-     true
-    ],
-    [
-     "education",
-     10,
-     0.603,
-     0.624905672896652,
-     true
-    ],
-    [
-     "food_labor",
-     10,
-     39.4,
-     36.071351824303946,
-     true
-    ],
-    [
-     "cohesion",
-     10,
-     0.881,
-     0.8324812252410945,
-     true
-    ],
-    [
-     "population",
-     15,
-     104.0,
-     107.96387765111336,
-     true
-    ],
-    [
-     "life_expectancy",
-     15,
-     26.8,
-     26.391612576322593,
-     true
-    ],
-    [
-     "infant_mortality",
-     15,
-     243.4,
-     243.00748255278717,
-     true
-    ],
-    [
-     "food_days",
-     15,
-     22.6,
-     29.892490423554538,
-     true
-    ],
-    [
-     "food_security",
-     15,
-     0.979,
-     0.9798102023335485,
-     true
-    ],
-    [
-     "health",
-     15,
-     0.97,
-     0.9699999999999996,
-     true
-    ],
-    [
-     "known",
-     15,
-     81.0,
-     82.5,
-     true
-    ],
-    [
-     "scholarship",
-     15,
-     9.79,
-     10.100424941416033,
-     true
-    ],
-    [
-     "education",
-     15,
-     0.736,
-     0.7073308366186957,
-     true
-    ],
-    [
-     "food_labor",
-     15,
-     36.4,
-     40.66949128328474,
-     true
-    ],
-    [
-     "cohesion",
-     15,
-     0.94,
-     0.8122972341038917,
+     38.8,
+     44.80475280604234,
      false
+    ],
+    [
+     "cohesion",
+     5,
+     0.872,
+     0.8698189788490067,
+     true
+    ],
+    [
+     "population",
+     10,
+     119.0,
+     124.79147360462791,
+     true
+    ],
+    [
+     "life_expectancy",
+     10,
+     25.1,
+     24.624932426287586,
+     true
+    ],
+    [
+     "infant_mortality",
+     10,
+     267.6,
+     265.913496089267,
+     true
+    ],
+    [
+     "food_days",
+     10,
+     20.1,
+     26.180658559107147,
+     true
+    ],
+    [
+     "food_security",
+     10,
+     0.977,
+     0.9793325719475887,
+     true
+    ],
+    [
+     "health",
+     10,
+     0.97,
+     0.9699999999999996,
+     true
+    ],
+    [
+     "known",
+     10,
+     31.0,
+     31.5,
+     true
+    ],
+    [
+     "scholarship",
+     10,
+     6.75,
+     6.582143339457891,
+     true
+    ],
+    [
+     "education",
+     10,
+     0.523,
+     0.5088276301187173,
+     true
+    ],
+    [
+     "food_labor",
+     10,
+     48.7,
+     40.61109440519484,
+     false
+    ],
+    [
+     "cohesion",
+     10,
+     0.836,
+     0.8838199577136863,
+     true
+    ],
+    [
+     "population",
+     15,
+     122.0,
+     128.7126916348406,
+     true
+    ],
+    [
+     "life_expectancy",
+     15,
+     25.9,
+     24.801492294626904,
+     true
+    ],
+    [
+     "infant_mortality",
+     15,
+     255.2,
+     265.13305205117047,
+     true
+    ],
+    [
+     "food_days",
+     15,
+     20.0,
+     29.133483460484804,
+     false
+    ],
+    [
+     "food_security",
+     15,
+     0.977,
+     0.9797951560164412,
+     true
+    ],
+    [
+     "health",
+     15,
+     0.97,
+     0.9699999999999996,
+     true
+    ],
+    [
+     "known",
+     15,
+     46.0,
+     47.5,
+     true
+    ],
+    [
+     "scholarship",
+     15,
+     10.45,
+     10.213823852598797,
+     true
+    ],
+    [
+     "education",
+     15,
+     0.717,
+     0.7033528637399502,
+     true
+    ],
+    [
+     "food_labor",
+     15,
+     46.4,
+     47.794128174675976,
+     true
+    ],
+    [
+     "cohesion",
+     15,
+     0.864,
+     0.8522224751673229,
+     true
     ],
     [
      "lines_per_decade",
      15,
-     71,
-     0.1619718309859155,
+     36,
+     0.1527777777777778,
      true
     ],
     [
      "lines_total",
      15,
-     71,
-     0.035211267605633804,
+     36,
+     0.09722222222222222,
      true
     ],
     [
      "decades_total",
      15,
-     71,
-     0.14788732394366197,
+     36,
+     0.041666666666666664,
      true
     ]
    ]
@@ -540,36 +541,36 @@
     [
      "population",
      5,
-     113.0,
-     113.89883644418414,
+     120.0,
+     122.95536012838792,
      true
     ],
     [
      "life_expectancy",
      5,
-     28.9,
-     26.889489529409307,
+     27.9,
+     26.078325303490516,
      true
     ],
     [
      "infant_mortality",
      5,
-     211.3,
-     230.3894109221152,
+     228.7,
+     242.76071971291918,
      true
     ],
     [
      "food_days",
      5,
      18.5,
-     28.86581197594451,
+     27.68280342347898,
      false
     ],
     [
      "food_security",
      5,
-     0.975,
-     0.9799901027210893,
+     0.974,
+     0.9799917148311615,
      true
     ],
     [
@@ -582,71 +583,71 @@
     [
      "known",
      5,
-     29.0,
-     31.0,
+     18.0,
+     19.5,
      true
     ],
     [
      "scholarship",
      5,
-     3.05,
-     3.0193766127764956,
+     3.2,
+     3.1528848660505595,
      true
     ],
     [
      "education",
      5,
-     0.406,
-     0.3570053039876908,
+     0.384,
+     0.33582497824756424,
      true
     ],
     [
      "food_labor",
      5,
-     32.8,
-     40.86447697879875,
-     false
+     41.3,
+     47.128265116502746,
+     true
     ],
     [
      "cohesion",
      5,
      0.96,
-     0.9397524916085913,
+     0.9547039418377505,
      true
     ],
     [
      "population",
      10,
-     108.0,
-     111.52235006076391,
+     122.0,
+     127.37521110930166,
      true
     ],
     [
      "life_expectancy",
      10,
-     29.0,
-     28.20262647776325,
+     27.9,
+     27.08580991517033,
      true
     ],
     [
      "infant_mortality",
      10,
-     211.2,
-     213.84519131203945,
+     228.8,
+     229.342725831895,
      true
     ],
     [
      "food_days",
      10,
-     32.2,
-     43.99500616608111,
-     false
+     32.6,
+     42.10041079700872,
+     true
     ],
     [
      "food_security",
      10,
-     0.979,
-     0.9799504067679281,
+     0.978,
+     0.9799644419359053,
      true
     ],
     [
@@ -659,71 +660,71 @@
     [
      "known",
      10,
-     52.0,
-     53.5,
+     31.0,
+     33.5,
      true
     ],
     [
      "scholarship",
      10,
-     6.27,
-     6.2171754363874,
+     6.57,
+     6.527038059476162,
      true
     ],
     [
      "education",
      10,
-     0.609,
-     0.597090068836988,
+     0.521,
+     0.5111108539778515,
      true
     ],
     [
      "food_labor",
      10,
-     39.6,
-     36.23637229375708,
-     true
+     49.3,
+     41.333038765411594,
+     false
     ],
     [
      "cohesion",
      10,
      0.961,
-     0.9470790711476356,
+     0.9599999991687403,
      true
     ],
     [
      "population",
      15,
-     108.0,
-     111.76463682159164,
+     126.0,
+     132.55064590496735,
      true
     ],
     [
      "life_expectancy",
      15,
-     30.4,
-     28.552641927588507,
+     28.5,
+     26.5923316079776,
      true
     ],
     [
      "infant_mortality",
      15,
-     198.6,
-     211.31022457607236,
+     221.2,
+     238.16924258329036,
      true
     ],
     [
      "food_days",
      15,
-     30.4,
-     44.25002709705896,
+     32.3,
+     43.750375388793486,
      false
     ],
     [
      "food_security",
      15,
-     0.979,
-     0.9798408657879853,
+     0.978,
+     0.9798617243451905,
      true
     ],
     [
@@ -736,57 +737,57 @@
     [
      "known",
      15,
-     87.0,
-     79.0,
+     49.0,
+     49.5,
      true
     ],
     [
      "scholarship",
      15,
-     9.73,
-     9.635670965686327,
+     10.23,
+     10.149178691406572,
      true
     ],
     [
      "education",
      15,
-     0.737,
-     0.7064178975661348,
+     0.718,
+     0.7035906573102766,
      true
     ],
     [
      "food_labor",
      15,
-     36.5,
-     40.77103136852969,
+     47.0,
+     47.943861874821266,
      true
     ],
     [
      "cohesion",
      15,
-     0.961,
-     0.931414893401395,
+     0.96,
+     0.9375785647808337,
      true
     ],
     [
      "lines_per_decade",
      15,
-     77,
-     0.14285714285714285,
+     39,
+     0.19230769230769232,
      true
     ],
     [
      "lines_total",
      15,
-     77,
-     0.1038961038961039,
+     39,
+     0.038461538461538464,
      true
     ],
     [
      "decades_total",
      15,
-     77,
-     0.14285714285714285,
+     39,
+     0.11538461538461539,
      true
     ]
    ]
@@ -797,36 +798,36 @@
     [
      "population",
      5,
-     112.0,
-     111.5981253258812,
+     119.0,
+     120.98863734695973,
      true
     ],
     [
      "life_expectancy",
      5,
-     25.5,
-     24.793421237692428,
+     25.1,
+     24.111605955974056,
      true
     ],
     [
      "infant_mortality",
      5,
-     260.1,
-     262.09259208734,
+     266.7,
+     272.54722185048126,
      true
     ],
     [
      "food_days",
      5,
-     19.1,
-     28.042503617179726,
-     false
+     18.3,
+     22.14653907952924,
+     true
     ],
     [
      "food_security",
      5,
-     0.974,
-     0.9797705420551385,
+     0.964,
+     0.9799044341969186,
      true
     ],
     [
@@ -839,71 +840,71 @@
     [
      "known",
      5,
-     86.0,
-     79.0,
+     39.0,
+     38.0,
      true
     ],
     [
      "scholarship",
      5,
-     4.97,
-     4.97268568735641,
+     4.84,
+     4.840019020818785,
      true
     ],
     [
      "education",
      5,
-     0.677,
-     0.7043805226376927,
+     0.527,
+     0.6162454615998902,
      true
     ],
     [
      "food_labor",
      5,
-     31.9,
-     36.9832993654344,
+     37.9,
+     43.73136177900983,
      true
     ],
     [
      "cohesion",
      5,
-     0.857,
-     0.8077071297489804,
+     0.841,
+     0.8560911089952424,
      true
     ],
     [
      "population",
      10,
-     104.0,
-     108.14558316133827,
+     119.0,
+     124.10766390238192,
      true
     ],
     [
      "life_expectancy",
      10,
-     28.0,
-     27.32277068192022,
+     26.3,
+     25.88501180147125,
      true
     ],
     [
      "infant_mortality",
      10,
-     233.3,
-     229.7791893308439,
+     257.4,
+     249.84684611982846,
      true
     ],
     [
      "food_days",
      10,
      20.0,
-     29.93822268110494,
+     29.192710286168275,
      false
     ],
     [
      "food_security",
      10,
-     0.98,
-     0.9799774807630737,
+     0.979,
+     0.9799702207660471,
      true
     ],
     [
@@ -916,71 +917,71 @@
     [
      "known",
      10,
-     166.0,
-     147.0,
+     78.0,
+     77.5,
      true
     ],
     [
      "scholarship",
      10,
-     10.48,
-     10.403216117902076,
+     10.24,
+     10.233965490706872,
      true
     ],
     [
      "education",
      10,
-     0.743,
-     0.713324430349392,
+     0.736,
+     0.7067949978663146,
      true
     ],
     [
      "food_labor",
      10,
-     35.5,
-     34.28471141461758,
-     true
+     47.6,
+     40.48871097196883,
+     false
     ],
     [
      "cohesion",
      10,
-     0.911,
-     0.8211144413530426,
-     false
+     0.828,
+     0.8675866428583056,
+     true
     ],
     [
      "population",
      15,
-     104.0,
-     107.37902060541126,
+     122.0,
+     128.8385803440691,
      true
     ],
     [
      "life_expectancy",
      15,
-     28.9,
-     27.716481033048133,
+     28.2,
+     26.59066705268863,
      true
     ],
     [
      "infant_mortality",
      15,
-     218.2,
-     224.99572451372035,
+     231.4,
+     242.79227113082288,
      true
     ],
     [
      "food_days",
      15,
-     24.5,
-     30.290954596386957,
-     true
+     19.9,
+     29.428164773861067,
+     false
     ],
     [
      "food_security",
      15,
      0.98,
-     0.9798439035829679,
+     0.979885926618699,
      true
     ],
     [
@@ -993,57 +994,57 @@
     [
      "known",
      15,
-     216.0,
-     191.0,
+     130.0,
+     113.5,
      true
     ],
     [
      "scholarship",
      15,
-     16.0,
-     15.82479770273027,
+     15.74,
+     15.584999244633826,
      true
     ],
     [
      "education",
      15,
-     0.747,
-     0.7174244385141506,
+     0.741,
+     0.710947446924541,
      true
     ],
     [
      "food_labor",
      15,
-     31.7,
-     34.86197974396782,
+     43.1,
+     45.680333361459006,
      true
     ],
     [
      "cohesion",
      15,
-     0.961,
-     0.82302397692308,
-     false
+     0.886,
+     0.8490185587254172,
+     true
     ],
     [
      "lines_per_decade",
      15,
-     206,
-     0.16990291262135923,
+     120,
+     0.17083333333333334,
      true
     ],
     [
      "lines_total",
      15,
-     206,
-     0.1407766990291262,
+     120,
+     0.15416666666666667,
      true
     ],
     [
      "decades_total",
      15,
-     206,
-     0.12135922330097088,
+     120,
+     0.1375,
      true
     ]
    ]
@@ -1054,36 +1055,36 @@
     [
      "population",
      5,
-     112.0,
-     112.22343266026365,
+     119.0,
+     121.10281407617225,
      true
     ],
     [
      "life_expectancy",
      5,
-     25.2,
-     24.139021572528165,
+     24.7,
+     23.80339337860204,
      true
     ],
     [
      "infant_mortality",
      5,
-     263.8,
-     272.3311651398037,
+     274.4,
+     278.06156427085455,
      true
     ],
     [
      "food_days",
      5,
-     23.2,
-     23.1467163698612,
+     18.8,
+     21.47612391308846,
      true
     ],
     [
      "food_security",
      5,
-     0.975,
-     0.9799204082153181,
+     0.967,
+     0.9797408265579595,
      true
     ],
     [
@@ -1096,71 +1097,71 @@
     [
      "known",
      5,
-     27.0,
-     29.0,
+     18.0,
+     19.0,
      true
     ],
     [
      "scholarship",
      5,
-     3.03,
-     3.0137910659568283,
+     3.3,
+     3.166567609869448,
      true
     ],
     [
      "education",
      5,
-     0.401,
-     0.352366879627502,
+     0.385,
+     0.33476826558890604,
      true
     ],
     [
      "food_labor",
      5,
-     31.7,
-     39.241896752456086,
+     38.6,
+     45.12896503517729,
      false
     ],
     [
      "cohesion",
      5,
-     0.855,
-     0.8050053360780391,
+     0.831,
+     0.852249404972609,
      true
     ],
     [
      "population",
      10,
-     104.0,
-     108.43694542781445,
+     118.0,
+     123.63451348678416,
      true
     ],
     [
      "life_expectancy",
      10,
-     25.4,
-     25.09255667593957,
+     25.0,
+     24.34075842744435,
      true
     ],
     [
      "infant_mortality",
      10,
-     261.8,
-     260.2306645366449,
+     270.7,
+     270.2864179301413,
      true
     ],
     [
      "food_days",
      10,
-     25.6,
-     29.63072364010802,
+     24.0,
+     25.25349664822135,
      true
     ],
     [
      "food_security",
      10,
      0.975,
-     0.9799004084990823,
+     0.9796947558512443,
      true
     ],
     [
@@ -1173,71 +1174,71 @@
     [
      "known",
      10,
-     47.0,
-     49.5,
+     30.0,
+     30.0,
      true
     ],
     [
      "scholarship",
      10,
-     6.24,
-     6.18542953767173,
+     6.75,
+     6.530395310638339,
      true
     ],
     [
      "education",
      10,
-     0.587,
-     0.5768307066983906,
+     0.519,
+     0.5037269129945716,
      true
     ],
     [
      "food_labor",
      10,
-     37.5,
-     36.34673003423132,
+     47.2,
+     41.437935133253575,
      true
     ],
     [
      "cohesion",
      10,
-     0.843,
-     0.8147379858417995,
+     0.824,
+     0.8639383034568047,
      true
     ],
     [
      "population",
      15,
-     103.0,
-     107.23954597427769,
+     120.0,
+     126.89128126844832,
      true
     ],
     [
      "life_expectancy",
      15,
-     26.4,
-     25.59573225970444,
+     25.6,
+     24.548052377988817,
      true
     ],
     [
      "infant_mortality",
      15,
-     247.2,
-     252.91370983585114,
+     261.9,
+     268.8761071014358,
      true
     ],
     [
      "food_days",
      15,
-     24.3,
-     29.824791435539925,
+     23.3,
+     29.440395365230202,
      true
     ],
     [
      "food_security",
      15,
      0.976,
-     0.9798094298477985,
+     0.9797968564997173,
      true
     ],
     [
@@ -1250,57 +1251,57 @@
     [
      "known",
      15,
-     80.0,
-     72.0,
+     45.0,
+     46.0,
      true
     ],
     [
      "scholarship",
      15,
-     9.67,
-     9.569970259075475,
+     10.39,
+     10.12338996776483,
      true
     ],
     [
      "education",
      15,
-     0.736,
-     0.705795726651536,
+     0.707,
+     0.7032889265878421,
      true
     ],
     [
      "food_labor",
      15,
-     35.4,
-     40.8936059202854,
+     45.6,
+     47.4511913252844,
      true
     ],
     [
      "cohesion",
      15,
-     0.882,
-     0.7968997149173287,
-     false
+     0.836,
+     0.8410857357759929,
+     true
     ],
     [
      "lines_per_decade",
      15,
-     70,
-     0.18571428571428572,
+     35,
+     0.11428571428571428,
      true
     ],
     [
      "lines_total",
      15,
-     70,
-     0.11428571428571428,
+     35,
+     0.02857142857142857,
      true
     ],
     [
      "decades_total",
      15,
-     70,
-     0.18571428571428572,
+     35,
+     0.02857142857142857,
      true
     ]
    ]

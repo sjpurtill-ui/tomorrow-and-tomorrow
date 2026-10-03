@@ -200,6 +200,11 @@
    "value": 600.0,
    "source": "research_3000 surrogate player model: daughter settlements from this year (the 0-600 balance was fitted to one territory, BENCHMARKS_600)",
    "fit": false
+  },
+  "harvest_mult": {
+   "value": 1.0,
+   "source": "lumped: what the engine's daily harvest gets that the surrogate leaves out (founding traditions' food_yield, progression food_output, abundant-game and lean-harvest modifiers, the gathering lever, seed-selection coverage); fitted to the truth's food work",
+   "fit": true
   }
  },
  "research": {
@@ -360,18 +365,19 @@
   "disease_pressure": 0.094,
   "storage_base_rations": 3341.25,
   "knowledge_gain_mult": 2.75,
-  "_fitted": "2026-10-02 23:10 fit on 5 people-first truth runs (15 y each): throughput, food_adjust_rate, other_mortality, disease_pressure; cohesion_offset scanned (0.07)",
+  "_fitted": "2026-10-03 balance P2 truth (5 path runs, 15 y): harvest_mult 1.1 scanned and fitted; food_adjust_rate held at 1 (a re-planning rate cannot pass 1); the rest as fitted 2026-10-02",
   "fresh_spoil_mult": 0.675,
   "other_mortality": 0.00275,
   "throughput_growth": 0.19875,
   "throughput": 0.76375,
-  "food_adjust_rate": 0.9625,
+  "food_adjust_rate": 1.0,
   "cohesion_offset": 0.07,
   "housing_build_rate": 0.0255,
   "institution_offset": 0.1,
   "accessible_deposits_per_decade": 2.05,
   "signal_scale": 0.125,
-  "food_buffer": 1.485
+  "food_buffer": 1.485,
+  "harvest_mult": 1.1
  },
  "_formula_hashes": {
   "scripts/discovery_system.gd::var probability: float = discovery.chance": "2cfcfb6316",

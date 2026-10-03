@@ -1338,7 +1338,11 @@ class Surrogate:
         ecol = lerp(0.58, 1.04, clamp(self.ecology, 0, 1))
         practice = 1.0 + e("foraging_yield") + e("food_output") + self.policy("food_yield")
         weather = self._weather(day)
-        cal = c.yield_calibration
+        # harvest_mult (fitted, params.json): what the engine's harvest gets that the
+        # surrogate leaves out (founding traditions' food_yield, progression food_output,
+        # season and game modifiers, the gathering lever, seed coverage).
+        harvest = float(p.get("harvest_mult", 1.0))
+        cal = c.yield_calibration * harvest
         raw = {
             "plants": W * adapted["plants"] * 4.55 * cal * tg * season["plants"] * eff_f * ecol * sh["gather"] * practice * weather,
             "meat": W * adapted["meat"] * 4.85 * cal * th * season["meat"] * eff_f * ecol * sh["hunt"] * (1.0 + float(p["access_game"]) * 0.18) * (1.0 + e("hunting_yield")) * practice * lerp(1.0, weather, 0.38),
@@ -1346,7 +1350,7 @@ class Surrogate:
         }
         staples = 0.0
         if cult_w > 0:
-            staples = W * cult_w * CULTIVATION_YIELD * season["staples"] * eff_f * sh["cult"] * (0.68 + prof.get("fertility", 0.0) * 0.38 + float(p["access_fertile"]) * 0.12) \
+            staples = W * cult_w * CULTIVATION_YIELD * harvest * season["staples"] * eff_f * sh["cult"] * (0.68 + prof.get("fertility", 0.0) * 0.38 + float(p["access_fertile"]) * 0.12) \
                 * self._agronomy_yield() * (1.0 + self._lever("cultivation")) * (1.0 + max(0.0, e("farm_mechanization"))) \
                 * (1.0 + e("soil_productivity") + e("cultivation_yield")) * clamp(weather ** 1.25, 0.46, 1.30)
         # _apply_wild_ceilings + wild_food_capacity
