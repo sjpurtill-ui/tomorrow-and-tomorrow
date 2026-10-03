@@ -1,6 +1,6 @@
 {
  "spec": "path_balanced:74119:15",
- "commit": "fc17827e8c597902345fcdb90454d58465ef7926",
+ "commit": "484aeca238d3661b033f534c7500e18b8a9b2e81",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "f309d9311627",
   "scripts/society_model.gd": "1b3e35dc26d7",
@@ -20,14 +20,14 @@
   "scripts/weapons_stock.gd": "4add78acd046",
   "scripts/watch_military.gd": "ec1cd7d0af11",
   "scripts/crisis_background.gd": "138760ec064e",
-  "scripts/crisis_system.gd": "77ab15fad5f9",
+  "scripts/crisis_system.gd": "854a60fb6706",
   "scripts/crisis_unattended.gd": "38bc50272819",
   "scripts/built_fabric.gd": "fe92161c61b7",
   "scripts/settlement_construction.gd": "55bb3fda4014",
-  "data/research/effects/*.json": "977e4ba51ffc",
-  "scripts/dry_water.gd": "9e99fb92db20"
+  "scripts/dry_water.gd": "566f1a07c874",
+  "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 100.1,
+ "wall_seconds": 124.9,
  "returncode": 0,
- "generated": "2026-10-03 17:00:00"
+ "generated": "2026-10-03 17:33:01"
 }
