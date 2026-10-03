@@ -73,8 +73,12 @@
     ]
   },
   "clay_shaping": {
-    "path": "res://assets/ui/research/subjects/clay_shaping-v1.png",
+    "path": "res://assets/ui/research/subjects/clay_shaping-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -6127,21 +6131,21 @@
     ]
   },
   "burn_scar_regrowth_tracking": {
-    "path": "res://assets/ui/research/subjects/burn_scar_regrowth_tracking-v1.png",
+    "path": "res://assets/ui/research/subjects/burn_scar_regrowth_tracking-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "household_water_boiling": {
-    "path": "res://assets/ui/research/subjects/household_water_boiling-v1.png",
+    "path": "res://assets/ui/research/subjects/household_water_boiling-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "pest_deterrent_storage_herbs": {
-    "path": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v1.png",
+    "path": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v2.png",
     "focus": [
       0.5,
       0.5

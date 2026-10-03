@@ -170,5 +170,6 @@
   "smoking": "res://assets/ui/research/subjects/smoking-v2.png",
   "clay_testing": "res://assets/ui/research/subjects/clay_testing-v2.png",
   "well_siting": "res://assets/ui/research/subjects/well_siting-v2.png",
-  "shared_childcare": "res://assets/ui/research/subjects/shared_childcare-v2.png"
+  "shared_childcare": "res://assets/ui/research/subjects/shared_childcare-v2.png",
+  "clay_shaping": "res://assets/ui/research/subjects/clay_shaping-v2.png"
 }

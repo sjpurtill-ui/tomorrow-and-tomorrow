@@ -1,0 +1,12 @@
+{
+  "id": "pest_deterrent_storage_herbs",
+  "line": "nutrition",
+  "game_year": 13,
+  "approx_historical_year": -4913,
+  "prompt": "c. 4913 BCE: Adults layer aromatic herbs among dried food in reed storage baskets to repel insects and rodents; matte egg tempera panel painting. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b51ea14d-71dd-48e3-96e7-5fbf40ac38c6.png",
+  "asset": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v1.png",
+  "sha256": "8093b7a0a68745b6b700e691dbc12a4778c0034e3b67db0b309fa9836f3af1cd",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; herb placement and storage action clear in crop."
+}
