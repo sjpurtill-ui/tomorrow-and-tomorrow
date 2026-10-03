@@ -72,6 +72,7 @@ const SKY:=preload("res://assets/court_sets/shaders/court_sky.gdshader")
 const PAPER:=preload("res://assets/court_sets/shaders/court_paper.gdshader")
 const POOL:=preload("res://assets/court_sets/shaders/court_pool.gdshader")
 const Blood:=preload("res://scripts/hud/court_blood.gd")
+const BOIL:=preload("res://assets/court_sets/shaders/court_boil.gdshader")
 const ExecProps:=preload("res://scripts/hud/court_exec_props.gd")
 const INK_POST:=preload("res://assets/court_sets/shaders/court_ink_post.gdshader")
 
@@ -104,6 +105,7 @@ const PALETTE:={
 	"LEAF":["3b4628","485332"],"GRASS":["5b6634","70714a"],"BERRY":["4a2224","4a2224"],"SOOT":["4a443e","56504a"],
 	"ONION":["b89a6a","b89a6a"],"BREAD":["a8743c","b8844a"],
 	"BROTH":["7a5634","7a5634"],"BLOOD_DRY":["5a1410","5a1410"],"SOCKET":["1c1410","1c1410"],
+	"SKULL":["e2d7bd","e2d7bd"],"FLETCH":["d9d0bc","d9d0bc"],"IRON":["45464a","55565a"],"MELT":["ffb040","ffd070"],"BRONZE_CAST":["c08a42","dcae62"],"WICKER":["a8894f","b8995c"],
 	"BLANKET":["dye0","dye0"],
 	"WEAVE_A":["dye0","dye0","dye1","e3d4b0"],"WEAVE_B":["dye1","dye1","dye2","e3d4b0"],"WEAVE_C":["d8c8a4","d8c8a4","dye0","dye2"],
 	"CARPET":["dye0","dye0","dye1","d8c4a0"],
@@ -214,6 +216,10 @@ var _god_target:=Vector3.ZERO
 var _god_wind:=Vector3(1.0,0.1,0.35)
 var _sun_wrath:=Quaternion.IDENTITY
 var _fire_mul:=1.0
+## The god's own fire settings (god_light) and the hearth's flare on top (fire_flare).
+var _fire_now:=1.0
+var _fire_h_now:=1.0
+var _flare:=0.0
 var _flame_mats:Array[ShaderMaterial]=[]
 var _gust_mats:Array[ShaderMaterial]=[]
 var _smoke_pm:ParticleProcessMaterial
@@ -401,6 +407,10 @@ func _material(slot:String,inked:bool)->ShaderMaterial:
 			made.set_shader_parameter("emission_amount",2.4);made.set_shader_parameter("emission_flicker",0.6)
 		"CHAR":
 			made.set_shader_parameter("emission_amount",2.2);made.set_shader_parameter("emission_flicker",0.5)
+		"MELT":
+			made.set_shader_parameter("emission_amount",3.2);made.set_shader_parameter("emission_flicker",0.35)
+		"IRON":
+			made.set_shader_parameter("rim_amount",0.3)
 		"GRASS","LEAF":
 			made.set_shader_parameter("wrap",0.35);made.set_shader_parameter("mottle",0.18);made.set_shader_parameter("variation",0.2)
 			made.set_shader_parameter("haze_max",0.55);made.set_shader_parameter("haze_start",14.0);made.set_shader_parameter("haze_end",60.0)
@@ -412,6 +422,9 @@ func _material(slot:String,inked:bool)->ShaderMaterial:
 			made.set_shader_parameter("wrap",0.25);made.set_shader_parameter("mottle",0.05);made.set_shader_parameter("variation",0.04)
 		"GOLD","BRONZE":
 			made.set_shader_parameter("rim_amount",0.35)
+		"BRONZE_CAST":
+			# the statue gleams: a hard rim of light, a little glow of its own
+			made.set_shader_parameter("rim_amount",0.7);made.set_shader_parameter("emission_amount",0.12)
 	if slot in ["BARK","WOOD","STONE","HIDE","HIDE_DARK","REED","CLAY","PLANK","THATCH"]:
 		made.set_shader_parameter("haze_max",0.45);made.set_shader_parameter("haze_start",22.0);made.set_shader_parameter("haze_end",80.0)
 	if inked:made.next_pass=_ink()
@@ -1300,9 +1313,10 @@ func _god_apply()->void:
 		sun.shadow_blur=lerpf(float(_god_base.sun_blur),0.2,sharp)
 		sun.light_color=(_god_base.sun_colour as Color).lerp(Color(0.86,0.9,1.0),sharp*0.35)
 	if bounce!=null:bounce.light_energy=float(_god_base.bounce)*fire
-	_fire_mul=fire
+	_fire_now=fire;_fire_h_now=fire_h
+	_fire_mul=fire*(1.0+2.2*_flare)
 	for mat in _flame_mats:
-		mat.set_shader_parameter("height_mul",fire_h)
+		mat.set_shader_parameter("height_mul",fire_h*(1.0+2.6*_flare))
 		mat.set_shader_parameter("lean",lean)
 	for mat in _gust_mats:
 		mat.set_shader_parameter("gust",gust)
@@ -1316,7 +1330,10 @@ var _trophy_root:Node3D
 var _skull_stakes:Array[Node3D]=[]
 var _skull_heap:Array[Node3D]=[]
 ## How many trophies show (tests): skulls on stakes, skulls heaped, stains.
-var trophies:={"stakes":0,"heap":0,"stains":0}
+var trophies:={"stakes":0,"heap":0,"stains":0,"statues":0}
+var _statues:Array[Node3D]=[]
+const STATUES_SHOWN:=4
+const FIGURE_PATH:="res://scripts/hud/court_figure_3d.gd"
 const SKULL_STAKES:=9
 const SKULL_HEAP:=12
 const STAIN_DAYS:=5.0
@@ -1345,6 +1362,89 @@ func blood()->Node3D:
 		blood_node=Blood.new()
 		add_child(blood_node)
 	return blood_node
+
+## WHOOMPH (act 3): the hearth roars up for a moment, flames three times
+## their height and the firelight flaring over the room, then dies back.
+func fire_flare(seconds:=1.6,strength:=1.0)->void:
+	if not is_inside_tree():
+		_set_flare(0.0);return
+	var t:=create_tween()
+	t.tween_method(_set_flare,0.0,strength,0.12).set_ease(Tween.EASE_OUT)
+	t.tween_interval(maxf(seconds-0.9,0.1))
+	t.tween_method(_set_flare,strength,0.0,0.8).set_ease(Tween.EASE_IN)
+
+func _set_flare(k:float)->void:
+	_flare=k
+	_fire_mul=_fire_now*(1.0+2.2*k)
+	for mat in _flame_mats:mat.set_shader_parameter("height_mul",_fire_h_now*(1.0+2.6*k))
+
+## A small fire of the hearth's own flames (under a cauldron, on its
+## fire_seat): it flares with the hearth. Free it when the act is done.
+func small_fire(at:Vector3,size:=0.35)->Node3D:
+	return _flame(to_local(at) if is_inside_tree() else at,size,"SmallFire",2)
+
+## The pot or cauldron comes to the boil (act 14): bubbles swell and pop on
+## its broth (its "broth" seat), `amount` 0..1. Returns the boil's surface;
+## stop_boil(prop) takes it off.
+func boil(prop:Node3D,amount:=1.0)->MeshInstance3D:
+	if prop==null:return null
+	var spec:=ExecProps.info(String(prop.get_meta("prop",prop.name)))
+	if not spec.has("broth"):return null
+	var surface:=prop.get_node_or_null("Boil") as MeshInstance3D
+	if surface==null:
+		surface=MeshInstance3D.new();surface.name="Boil"
+		var plane:=PlaneMesh.new();plane.size=Vector2(2.0,2.0);surface.mesh=plane
+		var mat:=ShaderMaterial.new();mat.shader=BOIL
+		mat.set_shader_parameter("broth",_colour(String((PALETTE.get("BROTH",["7a5634"]) as Array)[0]),Color("7a5634")))
+		mat.set_shader_parameter("seed",randf()*40.0)
+		surface.material_override=mat
+		surface.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		prop.add_child(surface)
+	var r:=float(spec.get("broth_radius",0.4))*0.98
+	var b:Array=spec.broth
+	surface.transform=Transform3D(Basis.from_scale(Vector3(r,1.0,r)),Vector3(float(b[0]),float(b[1])+0.006,float(b[2])))
+	(surface.material_override as ShaderMaterial).set_shader_parameter("boil",clampf(amount,0.0,1.0))
+	surface.visible=true
+	return surface
+
+func stop_boil(prop:Node3D)->void:
+	if prop!=null and prop.get_node_or_null("Boil")!=null:(prop.get_node("Boil") as Node3D).visible=false
+
+## Where the dogs drag the dead out of sight: in at the door, out past it
+## and round behind the windbreak or the end wall (global points).
+func drag_route()->Array[Vector3]:
+	var out:Array[Vector3]=[]
+	for name_ in ["door","behind_windbreak"]:
+		var m:=mark(name_)
+		if m!=null:out.append(m.global_position if is_inside_tree() else m.position)
+	return out
+
+## A herd brought in for an act (the pigs, the cattle or oxen, a bear, an
+## elephant): `count` of `species`, each in one of `coats` in turn, in at
+## the door, standing. They are held for the director and go with the set.
+func beasts(species:String,count:=1,coats:Array=[])->Array:
+	var out:Array=[]
+	if not Animal.available(species):return out
+	var door:=mark("door")
+	var at:=door.position if door!=null else Vector3(-5.0,0.0,0.0)
+	var fire:=mark("fire").position if has_mark("fire") else Vector3.ZERO
+	var inward:=Vector3(fire.x-at.x,0.0,fire.z-at.z).normalized()
+	var right:=inward.cross(Vector3.UP).normalized()
+	var size:=float(((Animal.manifest().get("species",{}) as Dictionary).get(species,{}) as Dictionary).get("height",0.8))
+	for i in count:
+		var beast:Node3D=Animal.new()
+		var coat_name:=String(coats[i%coats.size()]) if not coats.is_empty() else ""
+		if not beast.call("setup",species,self,8000+i*7,coat_name):
+			beast.free();continue
+		add_child(beast)
+		beast.position=at+inward*(0.8+size*0.9*float(i/3))+right*(float(i%3)-1.0)*size*0.9
+		beast.rotation.y=atan2(inward.x,inward.z)
+		beast.call("play","idle",0.0,float(i)*0.53)
+		# it does nothing of its own accord: it waits on the director
+		beast.set("herded",true)
+		animals.append(beast)
+		out.append(beast)
+	return out
 
 ## The camp dogs come running (act 4): the dog of the court and `count`
 ## more, each its own coat, in at the door. Returns them all (the court's own
@@ -1376,8 +1476,9 @@ func dog_pack(count:=3)->Array:
 func _apply_trophies()->void:
 	var count:=maxi(0,int(facts.get("executions",0)))
 	var days:Array=facts.get("execution_days",[]) if facts.get("execution_days",[]) is Array else []
-	if count==0 and days.is_empty() and _trophy_root==null:
-		trophies={"stakes":0,"heap":0,"stains":0};return
+	var statues:Array=facts.get("statues",[]) if facts.get("statues",[]) is Array else []
+	if count==0 and days.is_empty() and statues.is_empty() and _trophy_root==null:
+		trophies={"stakes":0,"heap":0,"stains":0,"statues":0};return
 	_trophy_ensure()
 	var stakes:=mini(count,SKULL_STAKES)
 	for i in _skull_stakes.size():_skull_stakes[i].visible=i<stakes
@@ -1393,7 +1494,82 @@ func _apply_trophies()->void:
 		var at:=centre+Vector3(srng.randf_range(-0.9,0.9),0.0,srng.randf_range(-0.6,0.6))
 		b.call("stain",i,Vector3(at.x,0.0,at.z),srng.randf_range(0.9,1.5),age,STAIN_DAYS)
 		if age<STAIN_DAYS:shown+=1
-	trophies={"stakes":stakes,"heap":heap,"stains":shown}
+	var standing:=_apply_statues(statues)
+	trophies={"stakes":stakes,"heap":heap,"stains":shown,"statues":standing}
+
+## The bronze statues by the door (act 20's trophy): each one a person in
+## the figures' own body, set in the pose they were dipped in and cast whole
+## in bronze, on a plinth inside the door. facts.statues: [{look, clip, at}]
+## (GameState.court_statues). Returns how many stand.
+func _apply_statues(list:Array)->int:
+	var want:=mini(list.size(),STATUES_SHOWN)
+	while _statues.size()>want:
+		var gone:Node3D=_statues.pop_back()
+		if is_instance_valid(gone):gone.queue_free()
+	if want==0 or _trophy_root==null:return 0
+	if not ResourceLoader.exists(FIGURE_PATH):return 0
+	var figure_script:=load(FIGURE_PATH) as Script
+	var door:=mark("door")
+	if door==null or figure_script==null:return 0
+	var base:=door.position
+	var fire:=mark("fire").position if has_mark("fire") else Vector3.ZERO
+	var inward:=Vector3(fire.x-base.x,0.0,fire.z-base.z).normalized()
+	var right:=inward.cross(Vector3.UP).normalized()
+	for i in want:
+		var entry:Dictionary=list[list.size()-want+i] if list[list.size()-want+i] is Dictionary else {}
+		if i<_statues.size() and is_instance_valid(_statues[i]) and _statues[i].get_meta("entry",{})==entry:continue
+		if i<_statues.size() and is_instance_valid(_statues[i]):_statues[i].queue_free()
+		var holder:=Node3D.new();holder.name="Statue%d" % i
+		holder.set_meta("entry",entry)
+		var side:=1.0 if i%2==0 else -1.0
+		holder.position=base+inward*(0.6+1.4*float(i/2))+right*side*1.75
+		holder.rotation.y=atan2(-right.x*side,-right.z*side)*0.5+atan2(inward.x,inward.z)*0.5
+		_trophy_root.add_child(holder)
+		var plinth:=exec_prop("plinth")
+		if plinth!=null:holder.add_child(plinth)
+		# the figure is made once the hall is up (its rig wants the tree)
+		if holder.is_inside_tree():_make_statue(holder,entry,figure_script)
+		else:holder.tree_entered.connect(_make_statue.bind(holder,entry,figure_script),CONNECT_ONE_SHOT)
+		if i<_statues.size():_statues[i]=holder
+		else:_statues.append(holder)
+	return want
+
+func _make_statue(holder:Node3D,entry:Dictionary,figure_script:Script)->void:
+	if not is_instance_valid(holder) or holder.get_node_or_null("Figure")!=null:return
+	var fig:Node3D=figure_script.new();fig.name="Figure"
+	holder.add_child(fig)
+	var look:Dictionary=(entry.get("look",{}) as Dictionary).duplicate(true)
+	if not bool(fig.call("setup",look)):
+		fig.queue_free();return
+	fig.position=Vector3(0.0,0.66,0.0)
+	var clip:=String(entry.get("clip",""))
+	if clip.is_empty():clip=String(fig.call("rest_clip"))
+	fig.call("play",clip,0.0,float(entry.get("at",0.5)))
+	_bronze(fig)
+
+## Cast in bronze: every surface of a figure in the set's own bronze, its
+## clip stopped where it was (the statue never moves again).
+func _bronze(fig:Node3D)->void:
+	var metal:=_material("BRONZE_CAST",true)
+	for node in fig.find_children("*","MeshInstance3D",true,false):
+		(node as MeshInstance3D).material_override=metal
+	for player in fig.find_children("*","AnimationPlayer",true,false):
+		var ap:=player as AnimationPlayer
+		ap.advance(0.0)
+		ap.pause()
+	fig.set_process(false)
+
+## Remember someone dipped in bronze (the director, act 20): their look, the
+## clip and the moment they were cast in. They stand by the door for good.
+static func remember_statue(look:Dictionary,clip:="",at:=0.5)->void:
+	var loop:=Engine.get_main_loop() as SceneTree
+	var state:Node=loop.root.get_node_or_null("GameState") if loop!=null and loop.root!=null else null
+	if state==null:return
+	var list:Variant=state.get("court_statues")
+	if not list is Array:return
+	(list as Array).append({"look":look.duplicate(true),"clip":clip,"at":at})
+	var cap:=int(state.get("COURT_STATUES_MAX")) if state.get("COURT_STATUES_MAX")!=null else 6
+	while (list as Array).size()>cap:(list as Array).pop_front()
 
 func _trophy_ensure()->void:
 	if _trophy_root!=null:return
@@ -1423,7 +1599,8 @@ func _trophy_ensure()->void:
 		var side2:=1.0 if i%2==0 else -1.0
 		var along2:=0.35+0.6*float((i/2)%5)
 		sk.position=base+inward*(along2+0.12*float(i%3))+right*side2*(0.95+0.12*float(i/10))
-		sk.rotation=Vector3(0.0,atan2(inward.x,inward.z)+float(i)*0.9-1.2,deg_to_rad(float(i*13%30)-15.0))
+		# heaped, but each grinning into the hall
+		sk.rotation=Vector3(deg_to_rad(-float(i*7%14)),atan2(inward.x,inward.z)+deg_to_rad(float(i*37%70)-35.0),deg_to_rad(float(i*13%24)-12.0))
 		sk.visible=false
 		_trophy_root.add_child(sk)
 		_skull_heap.append(sk)
@@ -1596,6 +1773,11 @@ static func facts_from_game(owner:="player")->Dictionary:
 		if causes is Array:
 			var dead:=executions_from(causes as Array,today)
 			out.executions=dead.executions;out.execution_days=dead.execution_days
+		# every execution ever (the window above forgets after 400 days)
+		var ever:Variant=state.get("executions_total")
+		if ever!=null:out.executions=maxi(int(out.get("executions",0)),int(ever))
+		var statues:Variant=state.get("court_statues")
+		if statues is Array and not (statues as Array).is_empty():out.statues=(statues as Array).duplicate(true)
 	var voice:=load("res://scripts/character_voice.gd")
 	if voice!=null and voice.has_method("era_tier"):
 		var tags:Variant=voice.call("era_tags",owner)

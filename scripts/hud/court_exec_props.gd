@@ -15,6 +15,11 @@ extends RefCounted
 ##                                         they make pots, else the paunch on its
 ##                                         tripod), or "" if none
 ##   CourtExecProps.lid_for(name)          a pot's lid ("cook_pot" -> "cook_pot_lid")
+##   CourtExecProps.throw(prop, from, to, seconds, arc)  fly it there on an arc,
+##                                         spinning (stones) or tip first (spears,
+##                                         arrows); returns the Tween
+##   CourtExecProps.stick(prop, into, at, dir)  stuck in someone (or a wall)
+##                                         where it hit, quivering a moment
 ## Presentation only.
 
 const DIR:="res://assets/court_sets/exec/"
@@ -36,11 +41,20 @@ static func info(prop_name:String)->Dictionary:
 static func names()->Array:
 	return (manifest().get("props",{}) as Dictionary).keys()
 
-## Whether the people can have this prop (what it needs, among their era tags).
-static func available(prop_name:String,tags:Array)->bool:
-	for need in info(prop_name).get("needs",[]):
+## Whether the people can have this prop: what it needs among their era
+## tags, and (when their known discoveries are given) one of the discoveries
+## it asks for ("known_any", e.g. the bow: bow_craft or composite_bow).
+static func available(prop_name:String,tags:Array,known:Array=[])->bool:
+	var spec:=info(prop_name)
+	if spec.is_empty():return false
+	for need in spec.get("needs",[]):
 		if not tags.has(String(need)):return false
-	return not info(prop_name).is_empty()
+	var any:Array=spec.get("known_any",[])
+	if not any.is_empty() and not known.is_empty():
+		for id in any:
+			if known.has(String(id)):return true
+		return false
+	return true
 
 ## The props that can play a part, best first (the first the people can have
 ## is used): the cook's pot is a clay pot once they make pots, before that a
@@ -54,12 +68,32 @@ const ROLES:={
 	"bone":["thighbone"],
 	"skull":["skull"],
 	"boulder":["boulder"],
+	"ledge":["boulder_ledge"],
 	"trophy_stake":["skull_stake"],
+	"ash":["ash_pile"],
+	"spear":["spear_bronze","spear_flint"],
+	"stone":["stone_b","stone_a","stone_c"],
+	"cauldron":["cauldron_bronze","cauldron_clay"],
+	"stake":["impaling_stake"],
+	"bow":["bow"],
+	"arrow":["arrow"],
+	"noose":["noose_rope"],
+	"gallows":["gallows"],
+	"wheel":["wheel_solid"],
+	"catapult":["catapult"],
+	"cannon":["cannon"],
+	"falling_blade":["blade_frame"],
+	"crucible":["crucible"],
+	"hoist":["hoist"],
+	"monolith":["monolith"],
+	"monolith_rig":["monolith_rig"],
+	"pit_gate":["pit_gate"],
+	"plinth":["plinth"],
 }
 
-static func pick(role:String,tags:Array)->String:
+static func pick(role:String,tags:Array,known:Array=[])->String:
 	for prop_name in ROLES.get(role,[role]):
-		if available(String(prop_name),tags):return String(prop_name)
+		if available(String(prop_name),tags,known):return String(prop_name)
 	return ""
 
 static func lid_for(prop_name:String)->String:
@@ -124,6 +158,81 @@ static func hold(prop:Node3D,figure:Node3D,hand:="hand.R")->bool:
 	for own in ["prop_staff","prop_bowl"]:
 		for node in figure.find_children(own,"MeshInstance3D",true,false):(node as Node3D).visible=false
 	return true
+
+## Fly a prop from `from` to `to` (global points) over `seconds`, rising
+## `arc` above the line at its middle: a stone tumbles, a spear or an arrow
+## flies tip first along its arc. It is put in `into` (the set) first. The
+## Tween is returned (tween_callback on it for the hit).
+static func throw(prop:Node3D,into:Node,from:Vector3,to:Vector3,seconds:=0.7,arc:=0.8)->Tween:
+	if prop==null or into==null or not into.is_inside_tree():return null
+	if prop.get_parent()!=into:
+		if prop.get_parent()!=null:prop.get_parent().remove_child(prop)
+		into.add_child(prop)
+	var pointed:bool=not (info(String(prop.get_meta("prop",prop.name))).get("tip",[]) as Array).is_empty()
+	var spin:=Vector3(randf_range(-9.0,9.0),randf_range(-6.0,6.0),randf_range(-9.0,9.0))
+	var fly:=func(k:float)->void:
+		if not is_instance_valid(prop):return
+		var at:=from.lerp(to,k)+Vector3(0.0,4.0*arc*k*(1.0-k),0.0)
+		if pointed:
+			# along the arc's tangent, tip first
+			var d:=(to-from)+Vector3(0.0,4.0*arc*(1.0-2.0*k),0.0)
+			prop.global_transform=Transform3D(_along(d.normalized()),at-_along(d.normalized())*_tip(prop))
+		else:
+			prop.global_transform=Transform3D(Basis.from_euler(spin*k*seconds),at)
+	var t:=prop.create_tween()
+	t.tween_method(fly,0.0,1.0,maxf(seconds,0.05))
+	return t
+
+## Stick a pointed prop (a spear, an arrow) into what it hit: into a figure
+## it rides the nearest of its chest, head or hips; into the set it stays
+## where it is. `at` the hit point, `dir` the way it was flying (global).
+## It quivers, then settles. Returns the node it now rides.
+static func stick(prop:Node3D,into:Node3D,at:Vector3,dir:Vector3,depth:=0.12)->Node3D:
+	if prop==null or into==null:return null
+	var holder:Node3D=into
+	var skels:=into.find_children("*","Skeleton3D",true,false)
+	if not skels.is_empty():
+		var skel:=skels[0] as Skeleton3D
+		var best:="";var best_d:=1e9
+		for bone in ["chest","spine","head","hips","pelvis","thigh.L","thigh.R","upper_arm.L","upper_arm.R"]:
+			var i:=skel.find_bone(bone)
+			if i<0:continue
+			var d:=(skel.global_transform*skel.get_bone_global_pose(i).origin).distance_to(at)
+			if d<best_d:best_d=d;best=bone
+		if not best.is_empty():
+			var key:="Stuck_"+best.replace(".","_")
+			var attach:=skel.get_node_or_null(key) as BoneAttachment3D
+			if attach==null:
+				attach=BoneAttachment3D.new();attach.name=key;attach.bone_name=best
+				skel.add_child(attach)
+			holder=attach
+	var basis:=_along(dir.normalized())
+	var xf:=Transform3D(basis,at-basis*(_tip(prop)-Vector3(0.0,depth,0.0)))
+	if prop.get_parent()!=null:prop.get_parent().remove_child(prop)
+	holder.add_child(prop)
+	prop.global_transform=xf
+	if prop.is_inside_tree():
+		# it quivers where it went in, then settles
+		var rest:=prop.transform
+		var tip_local:=_tip(prop)-Vector3(0.0,depth,0.0)
+		var quiver:=func(k:float)->void:
+			if not is_instance_valid(prop):return
+			var wob:=sin(k*40.0)*(1.0-k)*0.12
+			var turn:=Basis(Vector3.RIGHT,wob)*Basis(Vector3.FORWARD,wob*0.6)
+			prop.transform=rest*Transform3D(turn,tip_local-turn*tip_local)
+		var q:=prop.create_tween()
+		q.tween_method(quiver,0.0,1.0,0.9)
+	return holder
+
+static func _tip(prop:Node3D)->Vector3:
+	return _vec(info(String(prop.get_meta("prop",prop.name))).get("tip",[0,0,0]))
+
+## A basis whose +Y runs along `d` (the prop's length, tip first).
+static func _along(d:Vector3)->Basis:
+	if d.length_squared()<0.0001:return Basis.IDENTITY
+	var y:=d.normalized()
+	var x:=y.cross(Vector3.UP if absf(y.y)<0.95 else Vector3.RIGHT).normalized()
+	return Basis(x,y,x.cross(y).normalized())
 
 ## Take it out of their hand and leave it where it is (top level in `into`).
 static func let_go(prop:Node3D,into:Node)->void:

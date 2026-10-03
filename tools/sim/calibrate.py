@@ -128,6 +128,9 @@ FORMULA_ANCHORS = [
     ("scripts/crisis_unattended.gd", "s.immunity=maxf(float(s.immunity),minf(0.85,0.35+4.0*float(c.m)))"),
     ("scripts/crisis_unattended.gd", "if float(c.pop0)*float(c.m)*float(c.mult)*0.6>=1.5 or bool(c.get(\"virgin\",false)):"),
     ("scripts/game_state.gd", "for key in POPULATION_AGE_COHORTS:hazards[key]=float(hazards[key])*float(kept.get(key,1.0))"),
+    # Poor land: hunger never takes the few learners (work_paths.gd keep_learners).
+    ("scripts/work_paths.gd", "var keep:=minf(LEARNERS_KEPT,learning_cap())*total"),
+    ("scripts/work_paths.gd", "var moved:=minf(keep-have,pool*LEARNERS_KEPT_MOST)"),
 ]
 
 

@@ -23,6 +23,21 @@ const EXEC:=[
 	{"tag":"exec-trophies-hall","era":"chiefs_hall","facts":{"food":0.8,"tier":1,"era_tags":["pottery","metal"],"executions":17,"execution_days":[0.0,1.0,1.0,3.0,4.0,9.0]},"cast":"hall"},
 	{"tag":"exec-grip","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band"},
 	{"tag":"exec-trophies-fire","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[],"executions":5,"execution_days":[0.0,2.0]},"cast":"band"},
+	{"tag":"exec-skulls","era":"chiefs_hall","facts":{"food":0.8,"tier":1,"era_tags":["pottery","metal"],"executions":21,"execution_days":[]},"cast":"none"},
+	{"tag":"exec-sheet2","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"none"},
+	{"tag":"exec-flare","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band"},
+	{"tag":"exec-spears","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band"},
+	{"tag":"exec-stones","era":"elders_circle","facts":{"food":0.75,"tier":1,"era_tags":["pottery","farming"]},"cast":"band"},
+	{"tag":"exec-boulder","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band"},
+	{"tag":"exec-cauldron","era":"chiefs_hall","facts":{"food":0.8,"tier":1,"era_tags":["pottery","metal","weaving"]},"cast":"hall"},
+	{"tag":"exec-cauldron-clay","era":"elders_circle","facts":{"food":0.75,"tier":1,"era_tags":["pottery","farming"]},"cast":"band"},
+	{"tag":"exec-stake","era":"chiefs_hall","facts":{"food":0.8,"tier":1,"era_tags":["pottery","weaving"]},"cast":"hall"},
+	{"tag":"exec-herd","era":"elders_circle","facts":{"food":0.75,"tier":1,"era_tags":["pottery","farming","dairy"]},"cast":"band"},
+	{"tag":"exec-big","era":"imperial_court","facts":{"food":0.8,"tier":3,"era_tags":["pottery","metal","writing","wheel","masonry"]},"cast":"none"},
+	{"tag":"exec-statues","era":"chiefs_hall","facts":{"food":0.8,"tier":1,"era_tags":["pottery","metal"],"executions":6,
+		"statues":[{"look":{"variant":"male_adult","outfit":"tunic","hair":"long","beard":"beard_full","stance":"stand"},"clip":"raise_hand","at":0.5},
+			{"look":{"variant":"female_adult","outfit":"tunic","hair":"braids","stance":"stand"},"clip":"point","at":0.6}]},"cast":"hall"},
+	{"tag":"exec-arrows","era":"elders_circle","facts":{"food":0.75,"tier":1,"era_tags":["pottery","farming"]},"cast":"band"},
 ]
 
 func _ready()->void:
@@ -33,7 +48,10 @@ func _ready()->void:
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	if capture:get_window().size=Vector2i(W,H)
 	await _frames(2)
-	if only=="execclip":
+	if only=="execperf":
+		CourtSet.quality="high"
+		if capture:await _geyser_perf()
+	elif only=="execclip":
 		# saving every frame is slow: keep the hall at high quality throughout
 		CourtSet.quality="high"
 		if capture:
@@ -195,6 +213,204 @@ func _exec_shot(spec:Dictionary)->void:
 			if bodies.has(key):(bodies[key] as Node3D).visible=false
 		_quiet(court)
 		rig.call("frame_points",pts,-1000.0,-6.0)
+	elif tag=="exec-skulls":
+		# close on the trophies by the door: do the skulls read as skulls?
+		var door2:Vector3=(court.call("mark","door") as Marker3D).position
+		var fire3:Vector3=(court.call("mark","fire") as Marker3D).position
+		var inward2:=(fire3-door2).normalized()
+		var right2:=inward2.cross(Vector3.UP).normalized()
+		rig.call("frame_points",PackedVector3Array([door2+inward2*0.2+right2*1.3,door2+inward2*0.2-right2*1.3,door2+inward2*2.0+right2*1.3+Vector3(0,1.8,0),door2+inward2*2.0-right2*1.3]),-1000.0,-12.0)
+	elif tag=="exec-sheet2":
+		var dog2:Node3D=court.call("animal","dog")
+		if dog2!=null:dog2.visible=false
+		var rows2:=[[1.6,["cauldron_clay","cauldron_bronze","boulder_ledge","impaling_stake"]],[3.3,["cook_pot","cook_pot_lid","ash_pile","skull","stone_a","stone_b","stone_c"]],[4.3,["spear_flint","spear_bronze","bow","arrow"]]]
+		var laid2:=["spear_flint","spear_bronze","bow","arrow"]
+		for row:Array in rows2:
+			var names:Array=row[1]
+			var total:=0.0
+			for prop_name:String in names:
+				var size:Array=Props.info(prop_name).get("size",[0.5,0.5,0.5])
+				total+=(float(size[1]) if prop_name in laid2 else float(size[0]))+0.35
+			var x:=-total*0.5
+			for prop_name:String in names:
+				var size2:Array=Props.info(prop_name).get("size",[0.5,0.5,0.5])
+				if prop_name in laid2:
+					var p2:=_prop(court,prop_name,Vector3(x,0.04,float(row[0])))
+					p2.rotation=Vector3(0.0,0.0,deg_to_rad(-90.0))
+					x+=float(size2[1])+0.35
+				else:
+					_prop(court,prop_name,Vector3(x+float(size2[0])*0.5,0.0,float(row[0])),-20.0 if prop_name=="skull" else 0.0)
+					x+=float(size2[0])+0.35
+		rig.call("frame_points",PackedVector3Array([Vector3(-3.4,0,4.6),Vector3(3.4,0,4.6),Vector3(-3.4,2.7,1.3),Vector3(3.4,2.7,1.3)]),0.0,-16.0)
+	elif tag=="exec-flare":
+		# act 3: WHOOMPH, the hearth roars up; the ash of the last one smoulders by it
+		_prop(court,"ash_pile",Vector3(0.95,0.0,1.05),0.0)
+		court.call("fire_flare",3.0,1.0)
+		var elder:Node3D=bodies.get("officials_0")
+		if elder!=null:
+			elder.position=Vector3(1.2,0.0,1.75);elder.rotation.y=deg_to_rad(200.0)
+			elder.call("play","crouch",0.0,0.5)
+		_quiet(court)
+		rig.call("wide",[bodies.get("petitioner"),elder,bodies.get("officials_1")],0.0,bodies.get("petitioner"))
+		wait=20
+	elif tag=="exec-spears":
+		# act 5: the pincushion, a spear in the air, one in the hide wall
+		var victim2:Node3D=bodies.get("petitioner")
+		victim2.call("play","stand",0.0,0.3)
+		var chest:=victim2.global_position+Vector3(0.0,1.2,0.0)
+		# each flew in from a side: its butt sticks out toward the one who threw it
+		# they came down on him from their arcs: the butts stand up and out
+		var hits:=[[Vector3(0.12,0.15,0.08),Vector3(-0.7,-0.6,-0.35)],[Vector3(-0.12,0.0,0.08),Vector3(0.75,-0.55,-0.3)],[Vector3(0.1,-0.3,0.08),Vector3(-0.5,-0.75,-0.4)],[Vector3(-0.08,0.35,0.06),Vector3(0.45,-0.8,-0.35)],[Vector3(0.1,-0.55,0.06),Vector3(-0.8,-0.45,-0.4)]]
+		for h:Array in hits:
+			var sp:=_prop(court,"spear_flint",Vector3.ZERO)
+			Props.stick(sp,victim2,chest+h[0],(h[1] as Vector3).normalized(),0.3)
+		var wall_sp:=_prop(court,"spear_flint",Vector3.ZERO)
+		Props.stick(wall_sp,court,Vector3(-2.6,1.1,-4.6),Vector3(-0.2,-0.15,-1.0),0.25)
+		var flying:=_prop(court,"spear_flint",Vector3.ZERO)
+		var from2:=Vector3(2.6,1.6,1.0);var to2:=chest
+		var k2:=0.6
+		var at2:=from2.lerp(to2,k2)+Vector3(0.0,4.0*0.5*k2*(1.0-k2),0.0)
+		var d2:=((to2-from2)+Vector3(0.0,4.0*0.5*(1.0-2.0*k2),0.0)).normalized()
+		flying.global_transform=Transform3D(Props._along(d2),at2-Props._along(d2)*Vector3(0,1.0,0))
+		for key in ["officials_1","officials_3"]:
+			var thrower:Node3D=bodies.get(key)
+			if thrower!=null:
+				thrower.rotation.y=atan2(victim2.position.x-thrower.position.x,victim2.position.z-thrower.position.z)
+				thrower.call("play","staff",0.0,0.4)
+				Props.hold(_prop(court,"spear_flint",Vector3.ZERO),thrower)
+		_quiet(court)
+		rig.call("wide",[victim2,bodies.get("officials_1"),bodies.get("officials_0")],0.0,victim2)
+	elif tag=="exec-stones":
+		# act 6: everyone throws; stones in the air, the first ones on the ground
+		var victim3:Node3D=bodies.get("petitioner")
+		victim3.call("play","kneel",0.0,5.0)
+		var head:=victim3.global_position+Vector3(0.0,0.9,0.0)
+		var k3:=0
+		for key in ["officials_0","officials_1","officials_2","officials_3","crowd_5"]:
+			var thrower2:Node3D=bodies.get(key)
+			if thrower2==null:continue
+			var from3:=thrower2.global_position+Vector3(0.0,1.6,0.0)
+			var kk:=0.35+0.12*float(k3%4)
+			var st:=_prop(court,["stone_a","stone_b","stone_c"][k3%3],from3.lerp(head,kk)+Vector3(0.0,4.0*0.6*kk*(1.0-kk),0.0))
+			st.rotation=Vector3(float(k3)*1.3,float(k3)*0.7,0.4)
+			thrower2.call("play","raise_hand" if k3%2==0 else "point",0.0,0.6)
+			k3+=1
+		for i in 9:
+			var a:=float(i)*0.9
+			_prop(court,["stone_b","stone_a","stone_c"][i%3],victim3.position+Vector3(cos(a)*0.5,0.0,sin(a)*0.4),float(i)*40.0)
+		_quiet(court)
+		rig.call("wide",[victim3,bodies.get("officials_0"),bodies.get("officials_1")],0.0,victim3)
+	elif tag=="exec-boulder":
+		# act 1: the ledge, the boulder on it, two men at the lever
+		var victim4:Node3D=bodies.get("petitioner")
+		var ledge:=_prop(court,"boulder_ledge",victim4.position+Vector3(-0.2,0.0,-0.9),0.0)
+		var boulder:=_prop(court,"boulder",Vector3.ZERO)
+		Props.seat(boulder,ledge,"boulder_seat")
+		boulder.position+=Vector3(0.0,0.0,0.25)
+		victim4.call("play","stand",0.0,0.3)
+		for pair in [["officials_1",Vector3(-0.9,0.0,-1.0)],["officials_3",Vector3(0.7,0.0,-1.15)]]:
+			var man:Node3D=bodies.get(pair[0])
+			if man!=null:
+				man.position=ledge.position+(pair[1] as Vector3);man.rotation.y=atan2(ledge.position.x-man.position.x,ledge.position.z-man.position.z)
+				man.call("play","raise_hand",0.0,0.5)
+		_quiet(court)
+		rig.call("wide",[victim4,bodies.get("officials_1"),bodies.get("officials_3")],0.0,victim4)
+	elif tag.begins_with("exec-cauldron"):
+		# act 14: the great cauldron on the boil over its coals; a skull bobs up
+		var tags2:Array=(spec.facts as Dictionary).get("era_tags",[])
+		var name2:=Props.pick("cauldron",tags2)
+		var victim5:Node3D=bodies.get("petitioner")
+		var pot2:=_prop(court,name2,victim5.position+Vector3(1.3,0.0,0.2),0.0)
+		court.call("boil",pot2,1.0)
+		var fire_seat:Array=Props.info(name2).fire_seat
+		court.call("small_fire",pot2.global_position+Vector3(float(fire_seat[0]),float(fire_seat[1]),float(fire_seat[2])),0.32)
+		var bob:=_prop(court,"skull",Vector3.ZERO)
+		var broth:Array=Props.info(name2).broth
+		court.remove_child(bob)
+		pot2.add_child(bob);bob.position=Vector3(0.12,float(broth[1])-0.1,0.08);bob.rotation=Vector3(-0.5,0.4,0.2)
+		var cook2:Node3D=bodies.get("officials_1")
+		if cook2!=null:
+			cook2.position=pot2.position+Vector3(0.75,0.0,-0.45)
+			cook2.rotation.y=atan2(pot2.position.x-cook2.position.x,pot2.position.z-cook2.position.z)
+			cook2.call("play","staff",0.0,0.3)
+			Props.hold(_prop(court,"cook_ladle",Vector3.ZERO),cook2)
+		victim5.call("play","stand",0.0,0.3)
+		_quiet(court)
+		rig.call("wide",[victim5,cook2,bodies.get("officials_0")],0.0,victim5)
+		wait=50
+	elif tag=="exec-stake":
+		var victim6:Node3D=bodies.get("petitioner")
+		_prop(court,"impaling_stake",victim6.position+Vector3(0.9,0.0,-0.2),0.0)
+		victim6.call("play","stand",0.0,0.3)
+		_quiet(court)
+		rig.call("wide",[victim6,bodies.get("officials_1"),bodies.get("officials_0")],0.0,victim6)
+	elif tag=="exec-arrows":
+		# act 16: the archers at their bows; the porcupine
+		var victim7:Node3D=bodies.get("petitioner")
+		victim7.call("play","stand",0.0,0.3)
+		var body7:=victim7.global_position+Vector3(0.0,1.1,0.0)
+		# a porcupine: in all over, from the right and from above, every angle
+		for i in 14:
+			var a2:=float(i)*2.4
+			var arrow:=_prop(court,"arrow",Vector3.ZERO)
+			var off:=Vector3(sin(a2)*0.14,-0.5+float(i)/13.0*1.05,0.1+0.03*cos(a2*1.7))
+			var d3:=Vector3(-1.0+0.5*cos(a2),-0.6*sin(a2*0.7)-0.2,-0.8+0.5*sin(a2*1.3)).normalized()
+			Props.stick(arrow,victim7,body7+off,d3,0.12)
+		for key in ["officials_1","officials_3"]:
+			var archer:Node3D=bodies.get(key)
+			if archer!=null:
+				archer.rotation.y=atan2(victim7.position.x-archer.position.x,victim7.position.z-archer.position.z)
+				archer.call("play","staff",0.0,0.4)
+				Props.hold(_prop(court,"bow",Vector3.ZERO),archer)
+		_quiet(court)
+		rig.call("wide",[victim7,bodies.get("officials_1"),bodies.get("officials_0")],0.0,victim7)
+	elif tag=="exec-herd":
+		# the pigs at their dinner (act 9), the cattle come in (act 8)
+		var victim8:Node3D=bodies.get("petitioner")
+		victim8.call("play","kneel",0.0,5.0)
+		var pigs:Array=court.call("beasts","pig",5,["pink","spotted","black","bristly","pink"])
+		for i in pigs.size():
+			var pig:Node3D=pigs[i]
+			pig.call("set_active",false)
+			var a3:=float(i)/float(pigs.size())*TAU+0.4
+			pig.position=victim8.position+Vector3(cos(a3)*0.75,0.0,sin(a3)*0.55)
+			pig.rotation.y=atan2(victim8.position.x-pig.position.x,victim8.position.z-pig.position.z)
+			pig.call("play","eat" if i%3!=2 else "squeal",0.0,float(i)*0.29)
+		var herd2:Array=court.call("beasts","cattle",3,["red","pied","dun"])
+		for i in herd2.size():
+			var cow:Node3D=herd2[i]
+			cow.call("set_active",false)
+			cow.position=Vector3(2.2+float(i)*1.4,0.0,-1.4+float(i%2)*0.9)
+			cow.rotation.y=deg_to_rad(-120.0+float(i)*15.0)
+			cow.call("play",["gallop","shake_hoof","idle"][i],0.0,0.2+float(i)*0.31)
+		_quiet(court)
+		rig.call("wide",[victim8,bodies.get("officials_0"),bodies.get("officials_1"),herd2[0]],0.0,victim8)
+	elif tag=="exec-big":
+		# the bear up on its hind legs (act 17), the elephant's foot coming down (act 18)
+		var bear2:Node3D=(court.call("beasts","bear",1,[]) as Array)[0]
+		bear2.call("set_active",false)
+		bear2.position=Vector3(-2.2,0.0,2.2);bear2.rotation.y=deg_to_rad(30.0)
+		bear2.call("play","rear",0.0,1.2)
+		var ele2:Node3D=(court.call("beasts","elephant",1,[]) as Array)[0]
+		ele2.call("set_active",false)
+		ele2.position=Vector3(2.0,0.0,0.4);ele2.rotation.y=deg_to_rad(-60.0)
+		ele2.call("play","stomp",0.0,0.85)
+		var pig2:Node3D=(court.call("beasts","pig",1,["spotted"]) as Array)[0]
+		pig2.call("set_active",false)
+		pig2.position=Vector3(-0.4,0.0,3.2);pig2.rotation.y=deg_to_rad(10.0)
+		pig2.call("play","squeal",0.0,0.4)
+		var ox:Node3D=(court.call("beasts","cattle",1,["black"]) as Array)[0]
+		ox.call("set_active",false)
+		ox.position=Vector3(0.2,0.0,1.6);ox.rotation.y=deg_to_rad(80.0)
+		ox.call("play","pull",0.0,0.5)
+		rig.call("frame_points",PackedVector3Array([Vector3(-3.2,0,3.6),Vector3(4.2,0,3.6),Vector3(-3.2,3.6,0.0),Vector3(4.2,3.6,0.0)]),0.0,-8.0)
+	elif tag=="exec-statues":
+		var door4:Vector3=(court.call("mark","door") as Marker3D).position
+		var fire4:Vector3=(court.call("mark","fire") as Marker3D).position
+		var inward4:=(fire4-door4).normalized()
+		var right4:=inward4.cross(Vector3.UP).normalized()
+		_quiet(court)
+		rig.call("frame_points",PackedVector3Array([door4+right4*2.4,door4-right4*2.4,door4+inward4*3.2+right4*2.4+Vector3(0,2.6,0),door4+inward4*3.2-right4*2.4]),-1000.0,-10.0)
 	elif tag.begins_with("exec-trophies"):
 		var door:Vector3=(court.call("mark","door") as Marker3D).position
 		var fire2:Vector3=(court.call("mark","fire") as Marker3D).position
@@ -214,6 +430,44 @@ func _exec_shot(spec:Dictionary)->void:
 		var path:=out_dir+"court-%s.png" % tag
 		image.save_png(path)
 		print("CAPTURE ",path)
+	view.queue_free()
+	await _frames(2)
+
+## The frame cost of the blood: the hall in the court's strip with its people,
+## measured idle, mid-geyser (jet, drops, spray, pool, stickers) and after.
+func _geyser_perf()->void:
+	var spec:={"tag":"geyserperf","era":"chiefs_hall","facts":{"food":0.8,"tier":1,"era_tags":["pottery","metal","weaving"]},"cast":"hall","size":STRIP,"insets":[40,40]}
+	var made:=await _stage(spec)
+	var view:SubViewport=made[0];var court:Node3D=made[1];var bodies:Dictionary=made[2]
+	var victim:Node3D=bodies.get("petitioner")
+	var block:=_prop(court,"block",victim.position+Vector3(0.0,0.0,0.75),0.0)
+	_quiet(court)
+	RenderingServer.viewport_set_measure_render_time(view.get_viewport_rid(),true)
+	for i in 30:await get_tree().process_frame
+	for phase in ["idle","geyser","after"]:
+		if phase=="geyser":
+			var blood:Node3D=court.call("blood")
+			var neck:=block.global_position+Vector3(0.0,0.62,0.05)
+			blood.call("geyser",neck,Vector3(0.12,1.0,0.2),3.0,1.15)
+			var front:Array=[]
+			for key in ["officials_0","officials_1","officials_2"]:
+				if bodies.has(key):front.append(bodies[key])
+			blood.call("spray",neck,front,1.0)
+			blood.call("pool",block.global_position+Vector3(0.0,0.0,0.3),0.6,2.0)
+			for i in 8:await get_tree().process_frame
+		if phase=="after":
+			for i in 150:await get_tree().process_frame
+		var gpu:=0.0;var cpu:=0.0;var n:=0;var draws:=0;var prims:=0
+		for i in 60:
+			await get_tree().process_frame
+			gpu+=RenderingServer.viewport_get_measured_render_time_gpu(view.get_viewport_rid())
+			cpu+=RenderingServer.viewport_get_measured_render_time_cpu(view.get_viewport_rid())
+			draws=maxi(draws,view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME))
+			prims=maxi(prims,view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME))
+			n+=1
+		var blood2:Node3D=court.call("blood") if phase!="idle" else null
+		print("PERF blood %s draws=%d primitives=%d gpu_ms=%.2f cpu_ms=%.2f fps=%d splats=%d stickers=%d jets=%d" % [phase,draws,prims,gpu/float(n),cpu/float(n),Engine.get_frames_per_second(),
+			int(blood2.get("landed")) if blood2!=null else 0,int(blood2.call("stickers_on")) if blood2!=null else 0,int(blood2.call("jets_on")) if blood2!=null else 0])
 	view.queue_free()
 	await _frames(2)
 

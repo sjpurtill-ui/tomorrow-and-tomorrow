@@ -90,6 +90,18 @@ const LEARNING_CAP:={"balanced":.035,"growth":.035,"making":.035,"war":.035,"bui
 ## A people set on ideas (the inquiry ambition) may put this much more of the
 ## people on learning on any other path, times the ambition's share.
 const INQUIRY_CAP:=.04
+## Hunger never takes the people's few learners: when the food work swells,
+## the leaders still keep this share of the people at work on learning (the
+## balanced path's, never more than the path's own cap). The hands come from
+## LEARNERS_KEPT_FROM (building, crafting, carrying and the watch; not the
+## watch while the ruler holds its share), never from food, and at most
+## LEARNERS_KEPT_MOST of that work goes. On poor land, where four in five
+## must gather, this is what lets a people find its fields (seed_selection)
+## instead of starving out; on good and average land learning already holds
+## this share outside a short lean-season alarm.
+const LEARNERS_KEPT:=.035
+const LEARNERS_KEPT_FROM:=["Construction","Crafting","Logistics","Defense"]
+const LEARNERS_KEPT_MOST:=.5
 ## The deeper food reserve a path asks the planners for (reserve_lean, 0..1).
 const FOOD_LEAN:={"growth":.5}
 const NAMES:={"growth":"growth","making":"making and trade","war":"war","learning":"learning","building":"building","balanced":"a balanced split"}
@@ -250,6 +262,30 @@ static func learning_cap()->float:
 	for weight in choices.values():total+=float(weight)
 	return cap+(INQUIRY_CAP*float(choices.get("inquiry",0.0))/total if total>0.0 else 0.0)
 
+## Keeps learning at LEARNERS_KEPT of the leaders' planning weights at least
+## (in place), taking the hands from LEARNERS_KEPT_FROM in proportion, never
+## from food. Returns the share of the plan moved onto learning (0 when
+## learning already holds it).
+static func keep_learners(weights:Dictionary)->float:
+	var total:=0.0
+	for role:String in weights:total+=maxf(0.0,float(weights[role]))
+	if total<=0.0:return 0.0
+	var keep:=minf(LEARNERS_KEPT,learning_cap())*total
+	var have:=maxf(0.0,float(weights.get("Knowledge",0.0)))
+	if have>=keep:return 0.0
+	# A watch the ruler holds at a share stays at it (watch_military.gd hold_share).
+	var held_watch:Variant=WorldSimulation.military.get("watch_work_share") if WorldSimulation.military!=null else null
+	var from:Array=LEARNERS_KEPT_FROM.filter(func(role:String)->bool:return role!="Defense" or held_watch==null or float(held_watch)<0.0)
+	var pool:=0.0
+	for role:String in from:pool+=maxf(0.0,float(weights.get(role,0.0)))
+	if pool<=0.0:return 0.0
+	var moved:=minf(keep-have,pool*LEARNERS_KEPT_MOST)
+	for role:String in from:
+		var weight:=maxf(0.0,float(weights.get(role,0.0)))
+		weights[role]=weight-moved*weight/pool
+	weights.Knowledge=have+moved
+	return moved/total
+
 ## Holds learning to learning_cap() of the leaders' planning weights, food
 ## included (in place). What is cut goes to the other work besides food in
 ## proportion, so the hands on food stay as the planners worked them out.
@@ -295,11 +331,21 @@ static func leaders_line()->Dictionary:
 	var whose:="the share for %s" % String(NAMES[id])
 	if cap>float(LEARNING_CAP.get(id,LEARNING_CAP.balanced))+0.0001:whose+=", raised by their wish to learn"
 	var limit:="at most %s in 100 of the people on learning, %s; when you set the work yourself there is no such limit." % [_share_words(cap*100.0),whose]
+	var hunger:="Even when food runs short they keep %s in 100 on learning, taking the hands from building, making, carrying and the watch, never from food." % _share_words(minf(LEARNERS_KEPT,cap)*100.0)
+	var now:=" They keep their few learners even in this hunger." if learners_kept_now() else ""
 	if id=="balanced":
-		return {"text":"Our leaders keep the work balanced, favouring no one task.","tip":"%s They put %s" % [tip,limit]}
+		return {"text":"Our leaders keep the work balanced, favouring no one task.%s" % now,"tip":"%s They put %s %s" % [tip,limit,hunger]}
 	var since:=int(kept.get("since",int(WorldSimulation.state.elapsed_days)))
-	return {"text":"Our leaders lean the work toward %s." % String(NAMES[id]),
-		"tip":"%s They put %s, and %s The people's ways are %s. Since year %d." % [tip,String(LEANS[id]),limit,String(kept.get("why",TEMPERS[id])),since/365+1]}
+	return {"text":"Our leaders lean the work toward %s.%s" % [String(NAMES[id]),now],
+		"tip":"%s They put %s, and %s %s The people's ways are %s. Since year %d." % [tip,String(LEANS[id]),limit,hunger,String(kept.get("why",TEMPERS[id])),since/365+1]}
+
+## Whether the leaders are keeping learners against hunger today (any town of
+## ours whose plan moved hands onto learning: GovernmentPeopleSystem
+## learners_kept).
+static func learners_kept_now()->bool:
+	for city:Variant in WorldSimulation.state.player_settlements:
+		if city is Dictionary and float((city as Dictionary).get("learners_kept",0.0))>0.0001:return true
+	return false
 
 ## "3.5", "15": a share in 100 as the tip says it.
 static func _share_words(value:float)->String:
