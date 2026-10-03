@@ -1783,6 +1783,8 @@ func effective_workers(role:String,include_military_construction:bool=false,incl
 	if role=="Administration" and not include_civic_records:capacity=maxf(0,capacity-preload("res://scripts/civic_administration.gd").reserved(self,capacity))
 	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/technology_operations.gd").reserved_workers(self))
 	capacity*=1.0+preload("res://scripts/undertaking_system.gd").benefit(self,role)
+	# A grown genius of this work makes each person on it count for more (geniuses.gd).
+	capacity*=1.0+preload("res://scripts/geniuses.gd").bonus(self,role)
 	if role=="Construction":capacity*=1.0-preload("res://scripts/undertaking_system.gd").share(self)
 	return capacity
 
