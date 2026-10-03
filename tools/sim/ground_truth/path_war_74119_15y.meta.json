@@ -1,0 +1,27 @@
+{
+ "spec": "path_war:74119:15",
+ "commit": "aaac26f67330647d9ed8aac0affb97c5838d7cae",
+ "sources_at_launch": {
+  "scripts/discovery_system.gd": "3b2d1ea7503b",
+  "scripts/society_model.gd": "840968d2dae0",
+  "scripts/game_state.gd": "7f1793d1e314",
+  "scripts/early_life_conditions.gd": "cbaef6237a37",
+  "scripts/food_system.gd": "f9c179ba009c",
+  "scripts/consequence_engine.gd": "9a9f785d83df",
+  "scripts/research_600_catalog.gd": "54b30e997bfd",
+  "scripts/technology_eras.gd": "c0bbf4054a38",
+  "scripts/artifact_collection.gd": "9195657cdf5b",
+  "data/research/research_600.json": "47ba727954f5",
+  "scripts/food_care.gd": "36539b3afc49",
+  "scripts/government_people_system.gd": "f03c8cd3c4de",
+  "scripts/work_paths.gd": "fe433552f1b9",
+  "scripts/civilian_goods.gd": "cf735b80d85e",
+  "scripts/resource_system.gd": "57c02961ea0d",
+  "scripts/weapons_stock.gd": "30db6adc02c7",
+  "scripts/watch_military.gd": "03bcaf665b93",
+  "data/research/effects/*.json": "977e4ba51ffc"
+ },
+ "wall_seconds": 106.3,
+ "returncode": 0,
+ "generated": "2026-10-02 23:21:56"
+}

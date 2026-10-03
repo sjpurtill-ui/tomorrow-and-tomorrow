@@ -18,9 +18,11 @@ python tools/sim/tune.py --sweep tune_research_pace=0.6,0.8,1,1.25     # sweep o
 python tools/sim/tune.py --optimize --seeds 6                          # recommended game changes -> tools/sim/reports/
 python tools/sim/matrix.py --seeds 6                                   # docs/research/LINE_MAX_MATRIX.md (+ .json, .tsv)
 python tools/sim/sweep_strategies.py                                   # docs/research/STRATEGY_SWEEP.md (+ .json)
+python tools/sim/paths.py                                             # people-first suite: every path, extremes, switches (one report, ~7 min)
 python tools/sim/check.py                                              # exit 1 if the surrogate drifted from the engine
-python tools/sim/run_truth.py                                          # refresh ground truth from the real engine (headless, ~20-25 min)
+python tools/sim/run_truth.py                                          # refresh ground truth from the real engine (headless, one engine at a time, ~11 min)
 python tools/sim/calibrate.py --fit                                    # refit the free constants to the truth
+python tools/sim/calibrate.py --rehash                                 # record the formula anchors after re-transcribing one
 python tools/sim/ingest_rc.py rc.log                                   # add research_600_campaign_probe output as long-horizon truth
 ```
 
@@ -34,17 +36,75 @@ Requirements: Python 3.11 and numpy. The Godot executable is used only by `run_t
 | `gamedata.py` | Loads the research data and parses the engine constants. |
 | `gdparse.py` | Reads constants straight out of GDScript. |
 | `params.json` | Constants that cannot be parsed, each with its source. The `calibrated` section holds the fitted values. |
-| `scenarios.json` | Player-policy knobs. The `sensible`/`poor`/`research`/`ai`/`artifacts` scenarios mirror the truth probe. |
+| `scenarios.json` | Player-policy knobs. The `path_<p>` scenarios mirror the truth probe (`--path`); `suites` names the people-first suite. The `sensible`/`poor`/`research`/`ai`/`artifacts` scenarios mirror the pre-overhaul truth (archived). |
+| `paths.py` | The people-first suite and its one report: paths, extremes, switches, the founding years, milestones and flags against the benchmark bands. |
 | `truth_probe.gd/.tscn` | Real-engine recorder: a JSON row per year, every discovery with its day, and artifact study. |
 | `dump_catalog.gd` | Headless snapshot of the live catalog → `cache/live_catalog.json`. |
-| `run_truth.py` | Refreshes the catalog snapshot, runs the truth probes in parallel, and records source hashes at launch. |
+| `run_truth.py` | Refreshes the catalog snapshot, runs the truth probes (one engine at a time by default; `path_<p>` specs run a path), and records source hashes at launch. |
 | `calibrate.py`, `check.py` | Fitting and drift checking. Holds `TOLERANCES`, `KNOWN_GAPS` and `FORMULA_ANCHORS`. |
 | `tune.py`, `matrix.py`, `sweep_strategies.py`, `facets.py` | Balancing tools and the facet and benchmark logic they share. |
-| `ground_truth/` | Truth runs (≈150–400 KB JSON each) plus `.meta.json` with the source hashes. `validation_batch2_pace1/` and `validation_batch3_pace25/` hold the earlier truth used for the out-of-sample checks. |
+| `ground_truth/` | Truth runs plus `.meta.json` with the source hashes: five 15-year path runs (2026-10-02). `archive_pre_people_first/` holds the 100-200-year truth of the engine before the overhaul; `validation_batch2_pace1/` and `validation_batch3_pace25/` the earlier out-of-sample truth. |
+
+## People first (2026-10-02): what changed
+
+The people-first overhaul (`docs/PEOPLE_FIRST.md`) made every role a path. The surrogate now models it, and is calibrated against post-overhaul truth.
+
+**New in `model.py`** (each block names its engine source; constants are parsed, so they cannot drift):
+
+| Part | Mirrors |
+|---|---|
+| The leaders' own work: the focus they pick (`focus: "auto"`), the people's ambition, the path's lean and learning cap, the food reserve | `GovernmentPeopleSystem._focus_decision_for_settlement`, `_allocations_for_focus`; `cultural_inheritance.gd WORK`; `work_paths.gd WORK`, `FOOD_LEAN`, `LEARNING_CAP`, `cap_learning` |
+| The ruler's own split, with the town's leader feeding it past the split while the food alarm is up | `GovernmentPeopleSystem._ruler_split_fed` |
+| The work re-planned at every sub-step (4 a month) | the engine re-plans daily; a monthly plan lagged the seasons and over-planned food by 8-10 points |
+| Searched land and the cutters' day; one raw-materials stock | `resource_system.gd land_step`, `land_yield`, extraction `daily_yield` (base yields over the makers' basket) |
+| Making as the engine does it: wear, the learners' draw first, arms first while the watch lacks them, then the homes, then barter up to the ceiling, specialization, efficiency, materials | `civilian_goods.gd advance`, `ceiling`; `weapons_stock.gd make`, `AGES` |
+| The watch is the army: drill toward the training quality, arms, a people given to war; a field-strength proxy and standing's might | `watch_military.gd drill_day`, `martial_edge`; `MilitaryCampaign._training_quality`, `_training_rate`; `standing.gd our_fighting_strength` |
+| New towns for a computer people (`expand: "leaders"`) | `leaders.py _expansion` (`civilization_strategy.gd` expansion) |
+| Phases may change the split, the path, the ambition or the focus at a year | (strategy switches) |
+| Health counts the harm of working materials | `ConsequenceEngine process_health_cost` |
+
+Surrogate stand-ins, not engine numbers: the yards hold about 6 loads a head (`RAW_PER_HEAD_HELD`), builders use 0.02 loads a day each (`BUILD_DRAW`), and barter making draws only on half the raw stock (`BARTER_MATERIAL_FLOOR` stands in). The field-strength proxy (each of the watch 1 + 3 × drill, at the arms' quality, improvised arms 0.55) is a reading, not the combat engine.
+
+**Truth.** `run_truth.py` now runs five 15-year path runs by default (`path_balanced` × 2 seeds, `path_growth`, `path_war`, `path_learning`), one engine at a time: about 1.3-2.7 minutes each, 7-11 minutes in all, so that a player's game on the same machine is not slowed. The current truth was launched from main 237f399c (with #116 and #119, the learning caps). Each is the probe's sensible scenario with `--path=<p>`. The pre-overhaul truth is kept in `ground_truth/archive_pre_people_first/`.
+
+**Fit** (`calibrate.py --fit --only throughput food_adjust_rate food_buffer cohesion_offset other_mortality disease_pressure`, then a scan): research throughput 0.536 → 0.764 (the engine's learners ran about 30% ahead of the old surrogate in the first 15 years), food re-planning 0.72 → 0.96, other mortality 0.0035 → 0.0028, disease pressure 0.15 → 0.094, cohesion offset 0.07. `check.py --strict` passes: 5 truth runs within tolerance (score 27.8), no formula drift, 6 known gaps (stores held deeper than the engine's 20 days; the first years' food work on the growth and war paths, where the engine's founding traditions and modifiers raise the harvest).
+
+| Truth run, year 15 | People (real / surrogate) | Discoveries | Infant deaths | Life expectancy | Food work % |
+|---|---|---|---|---|---|
+| balanced 74119 | 104 / 109 | 81 / 82 | 243 / 243 | 26.8 / 26.4 | 36.4 / 38.8 |
+| growth 74119 | 108 / 112 | 87 / 78 | 199 / 210 | 30.4 / 28.7 | 36.5 / 38.9 |
+| war 74119 | 103 / 108 | 80 / 72 | 247 / 252 | 26.4 / 25.8 | 35.4 / 38.6 |
+| learning 74119 | 104 / 108 | 216 / 191 | 218 / 224 | 28.9 / 27.8 | 31.7 / 33.4 |
+
+The founding years' decline is in the engine itself (and the surrogate follows it): 120 founders fall to about 104 by year 15, with births 67 and deaths 82. It comes from the founders' age mix (26% aged 45 or more, `game_state.gd initialize_population_model`) and infant deaths near 250 per 1,000 before any care is learned.
+
+**What the truth cannot vouch for.** It is 15 years long: research pace, the food work and the founding years are checked; growth past the first crowding, the arms, the land survey, the making ceiling and new towns are transcribed from the engine but not yet compared with a long engine run. Re-run `run_truth.py` when learning pace (workstream A follow-ups) or frontier growth and younger founders land.
+
+### The people-first suite on c5bfb995 (3 seeds, 1,200 years, `python tools/sim/paths.py`)
+
+People / discoveries / field strength at years 300, 600 and 1,200 (one town until crowding from year 600; `towns_*` found a town every 30 years):
+
+| Scenario | People | Discoveries | Field strength | Infant deaths (yr 600) |
+|---|---|---|---|---|
+| leaders, balanced | 1,162 / 3,914 / 34,546 | 750 / 1,124 / 2,060 | 75 / 332 / 4,177 | 188 |
+| leaders, growth | 1,188 / 3,989 / 35,057 | 749 / 1,120 / 1,979 | 65 / 290 / 3,618 | 160 |
+| leaders, war | 1,160 / 3,904 / 34,312 | 748 / 1,119 / 1,950 | 262 / 1,162 / 14,516 | 191 |
+| leaders, learning | 1,132 / 3,871 / 34,578 | 796 / 1,161 / 2,107 | 62 / 281 / 3,559 | 190 |
+| leaders, making | 1,160 / 3,903 / 34,263 | 748 / 1,119 / 1,953 | 67 / 298 / 3,715 | 190 |
+| computer people with towns, balanced | 3,627 / 30,239 / 89,494 | 781 / 1,285 / 2,083 | 195 / 2,634 / 10,732 | 192 |
+| split, balanced | 1,155 / 3,859 / 34,887 | 751 / 1,124 / 2,065 | 83 / 379 / 5,187 | 183 |
+| split, big and dumb (1% learning, 14% caring) | 1,170 / 3,646 / 33,680 | 636 / 816 / 1,325 | 85 / 327 / 5,009 | 144 |
+| split, small and smart (30% learning) | 420 / 2,796 / 6,811 | 818 / 1,219 / 1,817 | 15 / 161 / 459 | 173 |
+| split, war-heavy (20% on watch) | 1,141 / 3,727 / 33,370 | 731 / 1,001 / 1,570 | 429 / 1,903 / 25,610 | 195 |
+| split, making-heavy (22% making) | 1,141 / 3,720 / 33,282 | 731 / 998 / 1,574 | 21 / 91 / 1,237 | 195 |
+| growth until 200, then learning | 932 / 3,188 / 14,292 | 771 / 1,178 / 1,978 | 34 / 186 / 1,047 | 176 |
+| learning until 200, then growth | 988 / 3,846 / 34,057 | 735 / 1,007 / 1,479 | 68 / 378 / 5,066 | 142 |
+
+The suite's flags on this revision: the leaders' food work is 29-33% at years 300-1,200, under the plausible floor (35 at 300, 32 at 600; the truth shows 32-37% by year 15); balanced peoples reach writing (211) and iron (650) before their band floors, and a computer people with towns reaches every milestone to coinage early and 30,000 people by 600 (high 20,000); growth, making and building are dominated by balanced at 1,200 (the 3% learning cap of #116 against balanced's 3.5% leaves them 4-5% behind in knowledge, 17-18% by 2,400); making does not raise goods a head (the barter ceiling binds for every path); big and dumb and the switch from learning to growth go under the "a little extra" infant-death line (144 and 140 against 145-165).
 
 ## What it models
 
-The surrogate models one aggregate society, stepped month by month. Research, adoption, effect totals, capacities and artifacts update once a month. Demography and food take two sub-steps a month, using the engine's daily rates.
+The surrogate models one aggregate society, stepped month by month. Research, adoption, effect totals, capacities and artifacts update once a month. Demography and food take four sub-steps a month (two before the people-first recalibration), using the engine's daily rates, and the leaders re-plan the work at each.
 
 | Surrogate part | Mirrors (engine source) | How the numbers get in |
 |---|---|---|

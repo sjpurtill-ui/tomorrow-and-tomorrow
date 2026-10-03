@@ -4,6 +4,7 @@
     python tools/sim/calibrate.py              # compare only (table)
     python tools/sim/calibrate.py --fit        # fit 'fit': true params, write params.json 'calibrated'
     python tools/sim/calibrate.py --fit --rounds 3 --seeds 3
+    python tools/sim/calibrate.py --rehash     # record FORMULA_ANCHORS after re-transcribing (no fit)
 
 Ground truth: tools/sim/ground_truth/<scenario>_<seed>_<years>y.json produced by
 run_truth.py (the real engine, headless). Each truth run is compared with the
@@ -29,7 +30,7 @@ import gdparse  # noqa: E402
 import simlib  # noqa: E402
 
 SIM = Path(__file__).resolve().parent
-CHECKPOINTS = [5, 10, 25, 50, 75, 100, 150, 200, 300, 400, 500, 600]
+CHECKPOINTS = [5, 10, 15, 20, 25, 50, 75, 100, 150, 200, 300, 400, 500, 600]
 # metric: (kind, tolerance). rel: |s-t| <= tol*max(|t|, floor); abs: |s-t| <= tol.
 TOLERANCES = {
     "population": ("rel", 0.15, 50.0),
@@ -49,6 +50,9 @@ TOLERANCES = {
     "art_studied": ("abs", 1.5, 0),
     "art_science": ("abs", 0.04, 0),
     "art_allure": ("abs", 0.10, 0),
+    # People first: the leaders' food work (percentage points of those at work) and cohesion.
+    "food_labor": ("abs", 6.0, 0),
+    "cohesion": ("abs", 0.08, 0),
 }
 # Formula lines transcribed into model.py; check.py warns when the game line changes.
 FORMULA_ANCHORS = [
@@ -57,9 +61,12 @@ FORMULA_ANCHORS = [
     ("scripts/discovery_system.gd", "var support_multiplier:="),
     ("scripts/discovery_system.gd", "return (0.45+0.55*staffing)"),
     ("scripts/discovery_system.gd", "return (0.85+_research_draw"),
-    ("scripts/society_model.gd", "var spread:=(0.00035+teaching+practice+directed)"),
-    ("scripts/society_model.gd", "var combined:=clampf("),
+    ("scripts/society_model.gd", "var spread:=(common_spread+practice+directed)"),
+    ("scripts/society_model.gd", "var teaching:=observers/population*0.055"),
+    ("scripts/society_model.gd", "base=clampf((0.18+keepers*0.22+health*0.14"),
     ("scripts/consequence_engine.gd", "var food_security_target := clampf("),
+    ("scripts/food_care.gd", "var eaten:=0.05+minf(1.15,production_ratio)*0.25"),
+    ("scripts/consequence_engine.gd", "var process_health_cost:="),
     ("scripts/consequence_engine.gd", "var health_target := clampf("),
     ("scripts/consequence_engine.gd", "var cohesion_target := clampf("),
     ("scripts/consequence_engine.gd", "var material_target := clampf("),
@@ -75,6 +82,26 @@ FORMULA_ANCHORS = [
     ("scripts/food_system.gd", "var burden_target:=clampf("),
     ("scripts/artifact_collection.gd", "return {\"weight\":weight,\"total_weight\":total"),
     ("scripts/artifact_culture.gd", "var collection:=ALLURE_COLLECTION"),
+    # People first (docs/PEOPLE_FIRST.md): the leaders' work, the ruler's split,
+    # searched land, cutting, making, arms and the watch (model.py _people_first,
+    # _goods_step, _lay_path, _auto_focus, _ruler_split_fed).
+    ("scripts/government_people_system.gd", "for role in changes: weights[role]="),
+    ("scripts/government_people_system.gd", "if housing_ratio<0.96:"),
+    ("scripts/government_people_system.gd", "var wanted:=eats*(1.05+RESERVE_MARGIN*gap)"),
+    ("scripts/work_paths.gd", "for role:String in work:weights[role]="),
+    ("scripts/work_paths.gd", "var most:=learning_cap()*total"),
+    ("scripts/resource_system.gd", "return r/(r+LAND_HALF)"),
+    ("scripts/resource_system.gd", "var rate:=clampf(LAND_RISE_YEAR*land_ratio(searchers,people),0.0,LAND_RISE_MAX)"),
+    ("scripts/resource_system.gd", "var daily_yield:=assigned*float(profile.base_yield)"),
+    ("scripts/consequence_engine.gd", "return clampf(0.18+float(WorldSimulation.state.simulation_metrics.get(\"material_capacity\""),
+    ("scripts/civilian_goods.gd", "var rate:=BASE_RATE*technique_output()*pace*specialization()"),
+    ("scripts/civilian_goods.gd", "var need:=maxf(0.0,float(report.target)*1.20"),
+    ("scripts/civilian_goods.gd", "return target()*1.20+capital_reserve()+maxf(1.0,WorldSimulation.state.population_exact)*SURPLUS_PER_HEAD"),
+    ("scripts/weapons_stock.gd", "var work:=makers*share*efficiency*span"),
+    ("scripts/watch_military.gd", "var ceiling:=(float(mc._training_quality("),
+    ("scripts/watch_military.gd", "var rate:=float(mc._training_rate())"),
+    ("scripts/military_campaign.gd", "return clampf(base+float(commander.get(\"command\",0.5))*0.12"),
+    ("scripts/military_campaign.gd", "return (0.42+security*0.55)*(1.0+_adoption(\"formation_drill\")*0.35"),
 ]
 
 
@@ -84,6 +111,8 @@ def row_at(rows: list, year: float):
 
 
 def metric(row: dict, key: str):
+    if key == "food_labor":
+        return (row.get("alloc") or {}).get("Food")
     if key.startswith("art_"):
         a = row.get("artifacts", {})
         return {"art_studied": a.get("studied"), "art_science": a.get("science"), "art_allure": a.get("allure")}[key]
@@ -151,7 +180,9 @@ KNOWN_GAPS = {
     ("poor", "known"): "follows the poor-site population gap (fewer researchers)",
     ("poor", "lines_total"): "follows the poor-site population gap (fewer researchers)",
     ("poor", "food_security"): "the poor site's food-labor floor surplus (GovernmentPeopleSystem._apply_food_labor_floor) is not carried into the surrogate's coarse poor-site harvest; the engine's food security runs ~0.1 higher",
-    ("*", "food_days"): "timing of Storage Pits / Public Stores builds (settlement construction queue) is approximated",
+    ("path_growth", "food_labor"): "first years: the engine's harvest per food worker runs ~10-15% above the surrogate's (founding traditions' food_yield, the abundant-game modifier and the gathering lever are not modelled), so its leaders need fewer on food; within tolerance from year 10",
+    ("path_war", "food_labor"): "as path_growth: the first years' harvest per food worker (founding traditions, modifiers) is not modelled",
+    ("*", "food_days"): "the engine's leaders hold the store near 20 days (LEAN_DAYS) while the surrogate's monthly-to-weekly re-planning keeps 28-44; food security counts only the first 20 days, so deaths, births and health are unaffected",
 }
 
 
@@ -224,6 +255,7 @@ def fit_space() -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--fit", action="store_true")
+    ap.add_argument("--rehash", action="store_true", help="record the FORMULA_ANCHORS hashes (after re-transcribing a formula) without fitting")
     ap.add_argument("--rounds", type=int, default=2)
     ap.add_argument("--seeds", type=int, default=2)
     ap.add_argument("--only", nargs="*", default=None, help="fit only these params")
@@ -239,11 +271,20 @@ def main() -> int:
         print(f"reading game files from {rev[:10]} (the revision the truth runs were launched from)")
     else:
         print("reading game files from the working tree")
+    doc = json.loads((SIM / "params.json").read_text(encoding="utf-8"))
+    if args.rehash:
+        missing = [f"{p}: {a}" for p, a in FORMULA_ANCHORS if gdparse.line_hash(p, a) is None]
+        if missing:
+            print("anchors not found in the game:\n  " + "\n  ".join(missing))
+            return 1
+        doc["_formula_hashes"] = {f"{p}::{a}": gdparse.line_hash(p, a) for p, a in FORMULA_ANCHORS}
+        (SIM / "params.json").write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"recorded {len(FORMULA_ANCHORS)} formula anchors")
+        return 0
     truths = simlib.truth_runs()
     if not truths:
         print("no ground truth in tools/sim/ground_truth (run tools/sim/run_truth.py)")
         return 2
-    doc = json.loads((SIM / "params.json").read_text(encoding="utf-8"))
     current = dict(doc.get("calibrated", {}))
     with ProcessPoolExecutor(max_workers=args.jobs) as pool:
         best_score, comps = evaluate(truths, current, args.seeds, pool)
