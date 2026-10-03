@@ -68,6 +68,30 @@ func test_place_turns_a_figure_front_to_the_mark()->void:
 	assert_vector(body.global_position).is_equal_approx(m.global_position,Vector3(0.01,0.01,0.01))
 
 
+func test_the_stage_s_cast_is_given_marks()->void:
+	var made:=_built("hearth_council")
+	var cast:=[{"key":"main","role":"main","stance":"clasped"},{"key":"p1","role":"court","stance":"staff"},
+		{"key":"p2","role":"court","stance":"sit"},{"key":"p3","role":"court","stance":"hip"}]
+	var marks:Dictionary=made.call("assign_marks",cast,"home")
+	assert_str(String(marks.main)).is_equal("petitioner")
+	assert_str(String(marks.p1)).is_equal("officials_0")
+	# the one who sits takes a seat
+	assert_bool(bool((made.call("mark",String(marks.p2)) as Marker3D).get_meta("sit",false))).is_true()
+	assert_str(String(marks.p3)).is_equal("officials_1")
+	var envoy:Dictionary=made.call("assign_marks",[{"key":"main","role":"main"},{"key":"att0","role":"attendant"},{"key":"att1","role":"attendant"}],"envoy")
+	assert_str(String(envoy.main)).is_equal("envoy_0")
+	assert_str(String(envoy.att0)).is_equal("envoy_1")
+	assert_str(String(envoy.att1)).is_equal("envoy_2")
+	# nobody shares a mark, however many there are
+	var many:Array=[]
+	for i in 30:many.append({"key":"k%d" % i,"role":"court","stance":"stand"})
+	var spread:Dictionary=made.call("assign_marks",many,"home")
+	var seen:={}
+	for key in spread:
+		assert_bool(seen.has(spread[key])).is_false()
+		seen[spread[key]]=true
+
+
 func test_sit_marks_carry_a_seat()->void:
 	for era in ["hearth_council","elders_circle","chiefs_hall","temple_palace","imperial_court"]:
 		var made:=_built(era)

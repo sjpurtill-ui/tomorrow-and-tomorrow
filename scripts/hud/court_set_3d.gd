@@ -426,6 +426,50 @@ func place(node:Node3D,mark_name:String)->void:
 		at.y+=float(m.get_meta("seat",0.0))-0.47*node.global_transform.basis.get_scale().y
 	node.global_transform=Transform3D(turned*Basis.from_scale(node.global_transform.basis.get_scale()),at)
 
+## Which mark each of the stage's cast stands on. entries: [{key, role
+## ("main", "court", "attendant"), stance}] in the stage's order; layout_kind
+## "home" or "envoy". The one before the god takes the petitioner's mark (an
+## envoy envoy_0, their company envoy_1..); officials fill officials_* in
+## order, those who sit taking the seats among crowd_*; the rest stand in the
+## crowd. Returns {key: mark name}; nobody shares a mark.
+func assign_marks(entries:Array,layout_kind:="home")->Dictionary:
+	var out:={}
+	var used:={}
+	var officials:Array[Marker3D]=marks_for("officials_")
+	var crowd:Array[Marker3D]=marks_for("crowd_")
+	var seats:Array[Marker3D]=[]
+	var standing:Array[Marker3D]=[]
+	for m in crowd:
+		if bool(m.get_meta("sit",false)):seats.append(m)
+		else:standing.append(m)
+	var envoys:=0
+	for entry:Dictionary in entries:
+		var key:=String(entry.get("key",""))
+		var role:=String(entry.get("role","court"))
+		var name_out:=""
+		if role=="main":
+			name_out="envoy_0" if layout_kind=="envoy" else "petitioner"
+		elif role=="attendant":
+			envoys+=1
+			name_out="envoy_%d" % envoys
+		if name_out.is_empty() or not marks.has(name_out) or used.has(name_out):
+			name_out=""
+			var pools:Array=[seats,officials,standing] if String(entry.get("stance",""))=="sit" else [officials,standing,seats]
+			for pool:Array in pools:
+				for m:Marker3D in pool:
+					if not used.has(String(m.name)):
+						name_out=String(m.name);break
+				if not name_out.is_empty():break
+		if name_out.is_empty():continue
+		used[name_out]=true
+		out[key]=name_out
+	return out
+
+## Where people come in and go out (the door, and beyond it).
+func door_points()->Array[Vector3]:
+	var a:=mark("door");var b:=mark("door_out")
+	return [a.global_position if a!=null else Vector3(-6,0,0.5),b.global_position if b!=null else Vector3(-9,0,0.5)]
+
 ## Where the god's presence is (people look up to it).
 func god_point()->Vector3:
 	var m:=mark("throne_gaze")

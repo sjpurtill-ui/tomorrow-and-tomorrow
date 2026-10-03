@@ -22,6 +22,8 @@ uniform float ao_amount = 1.0;
 uniform float band_soft = 0.16;
 uniform float grain = 0.05;
 uniform int cover_channel = 0;
+// Skin: the edge between light and shade warms, as light does under skin.
+uniform vec3 terminator : source_color = vec3(0.0, 0.0, 0.0);
 uniform bool flat_colour = false;
 // How much of the old fixed key still shows (0: the set's lights only).
 uniform float fixed_key = 0.0;
@@ -82,7 +84,8 @@ void light() {
 	float tone = max(lit * ATTENUATION, half_lit * min(1.0, ATTENUATION * 1.5));
 	// the shade side keeps a warm tint of the skin's own shadow, not grey
 	vec3 tint = mix(shade_tint, vec3(1.0), tone);
-	DIFFUSE_LIGHT += LIGHT_COLOR * tint * tone / PI;
+	float edge = clamp(lit * (1.0 - lit) * 4.0, 0.0, 1.0) * ATTENUATION;
+	DIFFUSE_LIGHT += LIGHT_COLOR * (tint * tone + terminator * edge * 0.35) / PI;
 	if (flat_colour) {
 		DIFFUSE_LIGHT += LIGHT_COLOR * ATTENUATION * 0.15 / PI;
 	}

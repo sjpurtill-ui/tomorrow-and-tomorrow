@@ -79,6 +79,52 @@
     "walk": 0.78,
     "trot": 1.7
    }
+  },
+  "goat": {
+   "glb": "court_goat.glb",
+   "triangles": 6400,
+   "height": 0.95,
+   "clips": {
+    "idle": {
+     "seconds": 3.6,
+     "loop": true
+    },
+    "graze": {
+     "seconds": 3.0,
+     "loop": true
+    },
+    "bleat": {
+     "seconds": 1.2,
+     "loop": false
+    },
+    "walk": {
+     "seconds": 1.0,
+     "loop": true
+    },
+    "startle": {
+     "seconds": 0.9,
+     "loop": false
+    },
+    "lie": {
+     "seconds": 1.0,
+     "loop": false
+    },
+    "lie_idle": {
+     "seconds": 5.0,
+     "loop": true
+    },
+    "look": {
+     "seconds": 0.6,
+     "loop": false
+    },
+    "stand_up": {
+     "seconds": 0.7,
+     "loop": false
+    }
+   },
+   "speeds": {
+    "walk": 0.6
+   }
   }
  }
 }
