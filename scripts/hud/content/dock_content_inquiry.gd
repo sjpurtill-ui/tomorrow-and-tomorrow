@@ -140,7 +140,8 @@ func _investigation_blocks(domain_filter:String="")->Array:
 			"icon":ResourceIcons.domain_texture(domain,DOMAIN_COLORS.get(domain,Tokens.TEAL)),
 			"value":"%d%%" % progress,"value_color":DOMAIN_COLORS.get(domain,Tokens.TEAL),
 			"accent":DOMAIN_COLORS.get(domain,Tokens.TEAL),
-			"tip":"%s\n%s\n%s%s" % [String(DOMAIN_GOALS.get(domain,"")),String(record.get("project_goal","")),String(record.get("project_method","")),"\n\nWhat it would do, at full use:\n"+Explainer.effect_lines(effects,1.0,1.0,false) if not effects.is_empty() else ""],
+			# A young people's slow learning beside its clock (DiscoverySystem.founding_words).
+			"tip":"%s\n%s\n%s%s%s" % [String(DOMAIN_GOALS.get(domain,"")),String(record.get("project_goal","")),String(record.get("project_method","")),("\n\n"+String(record.founding_note)) if not String(record.get("founding_note","")).is_empty() else "","\n\nWhat it would do, at full use:\n"+Explainer.effect_lines(effects,1.0,1.0,false) if not effects.is_empty() else ""],
 		})
 		if unlock_lines.size()<3:
 			# The line of inquiry, what it has seen, and what answering it would
