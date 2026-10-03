@@ -25,10 +25,11 @@ extends RefCounted
 ##    MAX_LIVING children and grown at once.
 ## 2. NOTICED, once, at an age of 6 to 10: chance NOTICE_BASE + NOTICE_CARE x
 ##    carer cover + NOTICE_TEACH x teacher cover, 10..90 in 100. Carer cover is
-##    the keepers and carers over CARER_SHARE of the people (the carers' own
-##    rule, food_care.gd CARE_SHARE), teacher cover the learners over
-##    TEACHER_SHARE, each at most 1: the usual split notices about half. Unnoticed, the child grows
-##    up ordinary: no record, no effect. That is the cost of neglect.
+##    the carers' own rule (food_care.gd): the cover of full care the engine
+##    applies today, full at 8 in 100 of the people on keeping and caring.
+##    Teacher cover is the learners at work over TEACHER_SHARE of the people,
+##    at most 1. The usual split notices about half. Unnoticed, the child
+##    grows up ordinary: no record, no effect. That is the cost of neglect.
 ## 3. GROWN at 16, a noticed child becomes a figure of the work's calling
 ##    (FIGURE_ROLE) and greatly enhances that work while alive: strength
 ##    STRENGTH_BASE..+STRENGTH_SPAN by gift (x PATRON with the god's
@@ -79,9 +80,8 @@ const NOTICE_CARE:=0.35
 const NOTICE_TEACH:=0.35
 const NOTICE_FLOOR:=0.10
 const NOTICE_CEILING:=0.90
-## Carers and learners, as a share of the people, for full cover (carers as
-## food_care.gd CARE_SHARE reckons them).
-const CARER_SHARE:=0.08
+## Learners at work, as a share of the people, for full teacher cover (carers
+## are reckoned by food_care.gd, CARE_SHARE).
 const TEACHER_SHARE:=0.06
 ## A grown genius's strength: STRENGTH_BASE + STRENGTH_SPAN x gift.
 const STRENGTH_BASE:=0.15
@@ -352,14 +352,27 @@ static func talent_of(gift:float)->float:
 	return snappedf(0.90+0.08*clampf(gift,0.0,1.0),0.001)
 
 ## The chance a gifted child is noticed today, and why:
-## {chance, care, teach, carers, learners, people}.
+## {chance, care, teach, learners, people}. Carers count by the carers' one
+## rule (food_care.gd): the cover of full care the engine applies today, and
+## for `more_carers` the cover they would settle toward, as food_care's own
+## "ten more" reckons it. Learners count as the work they do (effective
+## workers: a gifted scholar teaches more).
 static func notice_parts(state:Node,more_carers:float=0.0,more_learners:float=0.0)->Dictionary:
 	var people:=maxf(1.0,float(state.population_exact))
-	var carers:=maxf(0.0,float(state.population_allocations.get("Administration",0)))+more_carers
-	var learners:=maxf(0.0,float(state.population_allocations.get("Knowledge",0)))+more_learners
-	var care:=clampf(carers/(people*CARER_SHARE),0.0,1.0)
+	var care:=care_cover(state,more_carers)
+	var learners:=maxf(0.0,float(state.effective_workers("Knowledge")))+more_learners
 	var teach:=clampf(learners/(people*TEACHER_SHARE),0.0,1.0)
-	return {"chance":clampf(NOTICE_BASE+NOTICE_CARE*care+NOTICE_TEACH*teach,NOTICE_FLOOR,NOTICE_CEILING),"care":care,"teach":teach,"carers":carers,"learners":learners,"people":people}
+	return {"chance":clampf(NOTICE_BASE+NOTICE_CARE*care+NOTICE_TEACH*teach,NOTICE_FLOOR,NOTICE_CEILING),"care":care,"teach":teach,"learners":learners,"people":people}
+
+## The carers' cover of full care (food_care.gd): applied today, settling
+## toward the hands on keeping and caring; before the first day's care is
+## reckoned, what those hands give at once.
+static func care_cover(state:Node,more_carers:float=0.0)->float:
+	var FoodCare:=preload("res://scripts/food_care.gd")
+	var target:=FoodCare.care_target_of(state)
+	var care:=FoodCare.care_cover_of(state) if (state.early_care as Dictionary).has("carer_cover") else target
+	if more_carers>0.0:care+=FoodCare.care_cover(FoodCare.keepers_of(state)+more_carers,maxf(1.0,float(state.population_exact)))-target
+	return clampf(care,0.0,1.0)
 
 # --- Great works ---------------------------------------------------------------------
 
@@ -397,6 +410,36 @@ static func gift_words(p:Dictionary,state:Node=null)->String:
 	if layer=="Defense":
 		return "a rare gift for keeping watch: when leading, each command skill runs %d in 100 above their own" % roundi(command_bonus(p)*100.0)
 	return "a rare gift for %s: every %s counts for %d in 100 more while they live" % [String(GIFT[layer]),String(WORKER[layer]),roundi(contribution(p,s)*100.0)]
+
+## What the god's patronage does for a grown genius, in plain words with the
+## engine's numbers (HistoricalFigures.support: three places at most). Their
+## gift is a fifth stronger (PATRON); discoveries in their field, if their
+## calling has one, come quicker by their patronage lift (HistoricalFigures
+## patron_lift; a field gains at most 40 in 100 from all it supports); a war
+## leader's skills rise by a fifth of that lift too; a great work begun under
+## a supported master builder is a little likelier to stand.
+static func patronage_words(figures:Node,p:Dictionary,state:Node=null)->String:
+	var layer:=layer_of(p)
+	if layer=="":return ""
+	var s:Node=state if state!=null else WorldSimulation.state
+	var on:=bool(p.get("supported",false))
+	var lift:=float(figures.patron_lift(p))
+	var her:="her" if String(p.get("gender",""))=="woman" else "his"
+	var she:="she" if String(p.get("gender",""))=="woman" else "he"
+	var gift:=command_bonus(p) if layer=="Defense" else contribution(p,s)
+	var plain:=gift/PATRON if on else gift
+	var helped:=plain*PATRON
+	var verb:=func(word:String)->String:return word+("s" if on else "")
+	var parts:PackedStringArray=[]
+	if layer=="Defense":
+		parts.append("%s %s lead over an ordinary war leader from %d to %d in 100 on each skill" % [verb.call("raise"),her,roundi(plain*100.0),roundi((helped+lift*0.2)*100.0)])
+	else:
+		parts.append("%s %s gift a fifth stronger (%d in 100 instead of %d)" % [verb.call("make"),her,roundi(helped*100.0),roundi(plain*100.0)])
+	var field:=String(((load("res://scripts/chronicle.gd") as GDScript).get_script_constant_map().get("DOMAIN_NAMES",{}) as Dictionary).get(String(p.get("domain","")),"")).replace(" & "," and ")
+	if field!="":parts.append("%s our discoveries in %s by %d in 100 while %s lives" % [verb.call("quicken"),field,roundi(lift*100.0),she])
+	if layer=="Construction":parts.append("%s a great work begun under %s a little likelier to stand" % [verb.call("make"),"her" if she=="she" else "him"])
+	var joined:=" and ".join(parts) if parts.size()<3 else ", ".join(parts.slice(0,parts.size()-1))+" and "+parts[-1]
+	return ("Your patronage %s." if on else "Your patronage (three at most at once) would %s.") % joined
 
 ## The hint the player reads when a child is noticed, and when grown.
 static func hint(layer:String,share:float,pronoun:String,grown:bool)->String:
@@ -437,8 +480,7 @@ static func _tell_grown(figures:Node,state:Node,p:Dictionary,day:int)->void:
 	var she:="she" if String(p.get("gender",""))=="woman" else "he"
 	if _player_scope():
 		var share:=command_bonus(p) if layer=="Defense" else contribution(p,state)
-		var patron:=" With your patronage it would be %d." % roundi(share*PATRON*100.0)
-		var text:="%s of %s, the child with a gift for %s, is grown. From today %s.%s" % [String(p.name),String(p.get("origin","our town")),String(GIFT[layer]),hint(layer,share,she,true),patron]
+		var text:="%s of %s, the child with a gift for %s, is grown. From today %s. %s" % [String(p.name),String(p.get("origin","our town")),String(GIFT[layer]),hint(layer,share,she,true),patronage_words(figures,p,state)]
 		_chronicle().record({"key":"genius-grown:%s" % String(p.id),"day":day,"title":"%s comes of age" % _given(String(p.name)),"text":text,"tier":"notice","kind":"court","domain":String(ART_DOMAIN[layer]),
 			"action":{"kind":"court","focus":{"figure_id":String(p.id)}}})
 		return
@@ -506,14 +548,14 @@ static func explain(role:String,result:Dictionary)->void:
 		var age:=(int(state.elapsed_days)-int(p.born))/365
 		if role=="Defense":
 			var lift:=command_bonus(p)
-			lines.append(_line("Gifted %s" % _given(String(p.name)),"+%d in 100" % roundi(lift*100.0),"%s, a gifted war leader (%d), leads with command, tactics, marching and hold on the fighters each %d in 100 above their own, and is sent first when a war leader is wanted. %s" % [String(p.name),age,roundi(lift*100.0),"Your patronage adds a fifth." if bool(p.get("supported",false)) else "Your patronage would make it %d." % roundi(lift*PATRON*100.0)],"good"))
+			lines.append(_line("Gifted %s" % _given(String(p.name)),"+%d in 100" % roundi(lift*100.0),"%s, a gifted war leader (%d), leads with command, tactics, marching and hold on the fighters each %d in 100 above their own, and is sent first when a war leader is wanted. %s" % [String(p.name),age,roundi(lift*100.0),patronage_words(figures,p,state)],"good"))
 			continue
 		var share:=contribution(p,state)
 		var full:=reach(state,role)>=1.0
 		lines.append(_line("Gifted %s" % _given(String(p.name)),"+%d in 100" % roundi(share*100.0),
 			"%s, a %s (%d), makes each person on this work count for %d in 100 more while %s lives. %s %s" % [String(p.name),String(TITLE[role]),age,roundi(share*100.0),she,
 			"All of them feel it in full." if full else "One person reaches %d in full; with %d here it thins." % [int(REACH),roundi(float(state.population_allocations.get(role,0)))],
-			"Your patronage adds a fifth." if bool(p.get("supported",false)) else "Your patronage would make it %d." % roundi(share*PATRON*100.0)],"good"))
+			patronage_words(figures,p,state)],"good"))
 	if grown.size()>1 and role!="Defense":
 		lines.append(_line("All the gifted","+%d in 100" % roundi(float(figures.genius_bonus.get(role,0.0))*100.0),"Together they add %d in 100 (at most %d)." % [roundi(float(figures.genius_bonus.get(role,0.0))*100.0),roundi(LAYER_CAP*100.0)],"good"))
 	for g:Dictionary in figures.geniuses:
@@ -527,7 +569,7 @@ static func explain(role:String,result:Dictionary)->void:
 		var per_year:=expected_per_year(births)
 		var born:="A gifted child is born about once in %d years among our %d births a year." % [roundi(1.0/per_year),roundi(births)] if per_year>0.0 else "No child was born to us this past year, so no gifted one either."
 		lines.append(_line("Gifted children noticed","%d in 100" % roundi(float(now.chance)*100.0),
-			"%s With %d keepers and carers and %d learners, about %d in 100 are noticed; the rest grow up ordinary. Ten more here: %d in 100." % [born,roundi(float(now.carers)),roundi(float(now.learners)),roundi(float(now.chance)*100.0),roundi(float(more.chance)*100.0)],"plain"))
+			"%s With carers giving %d in 100 of full care and %d learners at work, about %d in 100 are noticed; the rest grow up ordinary. Ten more here: %d in 100." % [born,roundi(float(now.care)*100.0),roundi(float(now.learners)),roundi(float(now.chance)*100.0),roundi(float(more.chance)*100.0)],"plain"))
 	result["lines"]=lines
 
 static func _years(n:int)->String:

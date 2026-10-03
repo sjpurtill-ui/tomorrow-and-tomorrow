@@ -52,7 +52,7 @@ func _ready()->void:
 		feedback.text=String(result.get("error","Your support has changed.")); _refresh())
 	patron.custom_minimum_size.x=220
 	feedback=P.label(layout,"","body",T.INK)
-	P.label(layout,"You can support up to three living people at once. Support speeds progress in their field, and a general you support also leads better. Their early lives are imagined; their deeds are what happened in your game.","small",T.INK_MUTED)
+	P.label(layout,"You can support up to three living people at once. Patronage quickens our discoveries in their field, makes a general lead better and makes a gifted person's gift a fifth stronger. Their early lives are imagined; their deeds are what happened in your game.","small",T.INK_MUTED)
 	_refresh()
 
 func _button(parent:Node,text:String,action:Callable)->Button:
@@ -61,6 +61,26 @@ func _button(parent:Node,text:String,action:Callable)->Button:
 func _process(delta:float)->void:
 	refresh_clock+=delta
 	if refresh_clock>1: refresh_clock=0; _refresh()
+
+## What this person adds and what the god's patronage does, in plain words
+## with the engine's numbers (HistoricalFigures.patron_lift, living_bonus,
+## legacy; a gifted person's gift and patronage, geniuses.gd).
+static func patronage_text(p:Dictionary)->String:
+	var figures:=WorldSimulation.figures
+	var learned:=ChronicleScript.DOMAIN_NAMES.has(String(p.domain))
+	var field:=field_name(String(p.domain))
+	if p.status=="dead":
+		return "Their life's work still quickens our discoveries in %s by %.1f in 100." % [field,float(p.legacy)*100.0] if learned else "Their name is remembered; no field of discovery goes quicker for them."
+	if p.status!="living":return "They add nothing while %s." % String(p.status).replace("_"," ")
+	# A gifted person's gift and what patronage does for it (geniuses.gd).
+	if p.get("genius") is Dictionary:
+		var Geniuses:=preload("res://scripts/geniuses.gd")
+		return "%s has %s. %s" % [String(p.name).get_slice(" ",0),Geniuses.gift_words(p),Geniuses.patronage_words(figures,p)]
+	var lift:=float(figures.patron_lift(p))
+	var general:=" and makes them lead %d in 100 better on each skill" % roundi(lift*20.0) if String(p.role) in figures.COMMAND_ROLES else ""
+	var does:="adds to their name and to what they leave behind%s; no field of discovery goes quicker for it" % general if not learned else "quickens our discoveries in %s by %d in 100 while they live%s" % [field,roundi(lift*100.0),general]
+	if p.supported:return "Your patronage %s." % does
+	return "Your patronage (three at most at once) would %s." % does.replace("adds ","add ").replace("quickens ","quicken ").replace(" and makes them"," and make them")
 
 static func field_name(domain:String)->String:
 	return String(ChronicleScript.DOMAIN_NAMES.get(domain,domain.replace("_"," "))).replace(" & "," and ")
@@ -85,18 +105,7 @@ func _refresh()->void:
 	previous.disabled=index==0; next.disabled=index==roster.size()-1
 	patron.disabled=p.status!="living" and not p.supported
 	patron.text="Withdraw support" if p.supported else "Support their work"
-	var field:=field_name(String(p.domain))
-	if p.status=="dead":
-		effect.text="Their life's work still speeds progress in %s by %.1f%%." % [field,float(p.legacy)*100]
-	elif p.status!="living": effect.text="They add nothing to %s while %s." % [field,String(p.status).replace("_"," ")]
-	else:
-		var bonus:float=WorldSimulation.figures.living_bonus(p)
-		var potential:float=(.12+float(p.talent)*.18)*100
-		effect.text="Their work speeds progress in %s by %.1f%% now. With your support it could reach %.1f%%." % [field,bonus*100,potential]
-	# A gifted figure's gift, by the engine's own numbers (geniuses.gd).
-	if p.get("genius") is Dictionary and p.status=="living":
-		var gift:=preload("res://scripts/geniuses.gd").gift_words(p)
-		effect.text="%s has %s.\n%s" % [String(p.name).get_slice(" ",0),gift,effect.text]
+	effect.text=patronage_text(p)
 	var pages:=1+ceili(float(p.events.size())/3.0)
 	chapter=clampi(chapter,0,pages-1); chapter_previous.disabled=chapter==0; chapter_next.disabled=chapter==pages-1
 	page.text="Their early life" if chapter==0 else "What they did · page %d of %d" % [chapter,pages-1]

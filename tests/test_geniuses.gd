@@ -132,23 +132,31 @@ func test_an_older_save_starts_with_none()->void:
 
 func test_notice_odds_rise_with_carers_and_learners()->void:
 	var people:=float(GameState.population_exact)
+	var FoodCare:=preload("res://scripts/food_care.gd")
 	GameState.population_allocations.Administration=0;GameState.population_allocations.Knowledge=0
 	var none:=float(G.notice_parts(GameState).chance)
 	assert_float(none).is_equal_approx(G.NOTICE_BASE,0.0001)
-	GameState.population_allocations.Administration=roundi(people*G.CARER_SHARE)
+	# Carers count by the carers' one rule: the cover food_care applies today.
+	GameState.early_care={"carer_cover":0.5}
+	assert_float(G.care_cover(GameState)).is_equal_approx(FoodCare.care_cover_of(GameState),0.0001)
 	var cared:=float(G.notice_parts(GameState).chance)
-	GameState.population_allocations.Knowledge=roundi(people*G.TEACHER_SHARE)
+	assert_float(cared).is_equal_approx(G.NOTICE_BASE+G.NOTICE_CARE*0.5,0.0001)
+	# Ten more carers: the cover they would settle toward, as food_care reckons it.
+	var ten:=G.care_cover(GameState,10.0)
+	assert_float(ten).is_equal_approx(minf(1.0,0.5+FoodCare.care_cover(FoodCare.keepers_of(GameState)+10.0,people)-FoodCare.care_target_of(GameState)),0.0001)
+	GameState.early_care={"carer_cover":1.0}
+	GameState.population_allocations.Knowledge=roundi(people*G.TEACHER_SHARE*2.0)
 	var both:=float(G.notice_parts(GameState).chance)
 	assert_float(cared).is_greater(none)
 	assert_float(both).is_greater(cared)
 	assert_float(both).is_equal_approx(G.NOTICE_CEILING,0.0001)
 	# The rolls follow the stated odds: many children, about that share seen.
-	assert_float(_noticed_share(0,0)).is_between(0.10,0.32)
-	assert_float(_noticed_share(roundi(people*G.CARER_SHARE),roundi(people*G.TEACHER_SHARE))).is_between(0.80,0.98)
+	assert_float(_noticed_share(0.0,0)).is_between(0.10,0.32)
+	assert_float(_noticed_share(1.0,roundi(people*G.TEACHER_SHARE*2.0))).is_between(0.80,0.98)
 
-func _noticed_share(carers:int,learners:int)->float:
+func _noticed_share(care:float,learners:int)->float:
 	var figures:=HistoricalFigures
-	GameState.population_allocations.Administration=carers;GameState.population_allocations.Knowledge=learners
+	GameState.early_care={"carer_cover":care};GameState.population_allocations.Knowledge=learners
 	figures.genius_tally={}
 	for i in 120:
 		figures.geniuses.clear()
@@ -158,7 +166,7 @@ func _noticed_share(carers:int,learners:int)->float:
 
 func test_the_unnoticed_grow_up_ordinary()->void:
 	var figures:=HistoricalFigures
-	GameState.population_allocations.Administration=0;GameState.population_allocations.Knowledge=0
+	GameState.population_allocations.Administration=0;GameState.population_allocations.Knowledge=0;GameState.early_care={}
 	var missed:Dictionary={}
 	for i in 40:
 		var g:=_child(figures,"Construction",7*365)
@@ -382,3 +390,71 @@ func test_the_gifted_save_and_load()->void:
 	var older:=curated.duplicate(true)
 	older.people=(older.people as Array).filter(func(q:Dictionary)->bool:return not q.has("genius"))
 	assert_bool(figures.import_state(older).has("ok")).is_true()
+
+# --------------------------------------------------------------------------
+# A gift makes the work count for more, never more people
+# --------------------------------------------------------------------------
+
+func test_wages_and_head_counts_are_per_head_not_per_gift()->void:
+	var Purse:=preload("res://scripts/realm_purse.gd")
+	var Impact:=preload("res://scripts/task_impact.gd")
+	var figures:=HistoricalFigures
+	var heads:=float(GameState.workers_at("Construction"))
+	var wage:=Purse.line_cost_per_day("crews",1.0)
+	var scholars:=Purse.line_cost_per_day("scholars",1.0)
+	var cost:=_line_value(Impact.of("Construction"),"What it costs")
+	_grown(figures,"Construction",1.0)
+	_grown(figures,"Knowledge",1.0)
+	# The work goes quicker...
+	assert_float(float(GameState.effective_workers("Construction"))).is_greater(heads*1.2)
+	# ...but nobody new is paid or fed for it, or counted.
+	assert_float(float(GameState.workers_at("Construction"))).is_equal_approx(heads,0.0001)
+	assert_float(Purse.line_cost_per_day("crews",1.0)).is_equal_approx(wage,0.0001)
+	assert_float(Purse.line_cost_per_day("scholars",1.0)).is_equal_approx(scholars,0.0001)
+	assert_str(_line_value(Impact.of("Construction"),"What it costs")).is_equal(cost)
+	# Food for the work is every head set to it, as the food rules count them.
+	var raw:=float(GameState.population_allocations.get("Construction",0))
+	assert_str(cost).is_equal("%s rations a day" % Impact._one(raw*float(Impact.EXERTION.Construction)))
+
+func _line_value(said:Dictionary,label:String)->String:
+	for line:Dictionary in said.get("lines",[]):
+		if String(line.label)==label:return String(line.value)
+	return ""
+
+func test_patronage_says_what_it_does()->void:
+	var figures:=HistoricalFigures
+	var p:=_grown(figures,"Food",0.5)
+	var lift:=roundi(float(figures.patron_lift(p))*100.0)
+	var share:=G.contribution(p,GameState)
+	var words:=G.patronage_words(figures,p)
+	assert_str(words).contains("a fifth stronger").contains("food and farming").contains("%d in 100 instead of %d" % [roundi(share*G.PATRON*100.0),roundi(share*100.0)]).contains("by %d in 100" % lift)
+	assert_str(words).not_contains("%")
+	figures.support(String(p.id))
+	G.refresh(figures,GameState)
+	assert_str(G.patronage_words(figures,p)).starts_with("Your patronage makes")
+	# The figures' book says it for every figure: a field quickened, or none.
+	var Screen:=preload("res://scripts/historical_figures_screen.gd")
+	assert_str(Screen.patronage_text(p)).contains("food and farming")
+	var builder:=_grown(figures,"Construction",0.5)
+	assert_str(Screen.patronage_text(builder)).not_contains("discoveries in").contains("great work")
+	for other:Dictionary in figures.people:
+		if other.has("genius") or String(other.status)!="living":continue
+		assert_str(Screen.patronage_text(other)).starts_with("Your patronage").not_contains("%")
+
+func test_gifted_war_leaders_always_stand_at_court()->void:
+	var Roster:=preload("res://scripts/hud/court_roster.gd")
+	var figures:=HistoricalFigures
+	for i in Roster.MAX_GENERALS+1:figures._create("General",int(GameState.elapsed_days))
+	var p:=_grown(figures,"Defense",0.5)
+	var shown:=Roster._figures().map(func(f:Dictionary)->String:return String(f.id))
+	assert_bool(shown.has(String(p.id))).is_true()
+	assert_str(Roster._figure_title(p)).is_equal("Gifted war leader")
+
+func test_the_people_view_lines_follow_a_coming_of_age()->void:
+	var RoleEffects:=preload("res://scripts/role_effects.gd")
+	RoleEffects.all_cached()
+	var before:=String(RoleEffects._cache_key)
+	_grown(HistoricalFigures,"Construction",0.5)
+	RoleEffects.all_cached()
+	assert_str(String(RoleEffects._cache_key)).is_not_equal(before)
+	assert_str(G.row_words("Construction")).contains("Gifted")

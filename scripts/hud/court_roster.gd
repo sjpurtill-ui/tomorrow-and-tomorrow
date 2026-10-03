@@ -142,15 +142,18 @@ static func _figures()->Array[Dictionary]:
 	if not is_instance_valid(HistoricalFigures): return result
 	var assigned:Array=HistoricalFigures.assignments.values()
 	var generals:Array[Dictionary]=[]
+	var gifted_generals:Array[Dictionary]=[]
 	for figure in HistoricalFigures.people:
 		if not figure is Dictionary or String(figure.get("status",""))=="dead": continue
 		match String(figure.get("role","")):
 			"Architect": result.append(figure)
-			"General": generals.append(figure)
+			# Gifted war leaders always stand at court, beyond MAX_GENERALS (geniuses.gd).
+			"General": (gifted_generals if figure.get("genius") is Dictionary else generals).append(figure)
 			_:
 				# The gifted grown of the other works (geniuses.gd).
 				if figure.get("genius") is Dictionary: result.append(figure)
 	generals.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(assigned.has(a.id))>int(assigned.has(b.id)))
+	result.append_array(gifted_generals)
 	for index in mini(generals.size(),MAX_GENERALS): result.append(generals[index])
 	return result
 
