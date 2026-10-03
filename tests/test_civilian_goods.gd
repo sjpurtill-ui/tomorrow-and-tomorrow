@@ -1,6 +1,7 @@
 extends GdUnitTestSuite
-## Civilian Goods: one household stock made by Crafting workers from a raw
+## Civilian Goods: one household stock made by makers (Crafting) from a raw
 ## basket, worn out daily, and read by techniques through goods coverage.
+## Makers make for the homes first, then for barter, at how well people work.
 const Goods=preload("res://scripts/civilian_goods.gd")
 
 func before_test()->void:
@@ -11,6 +12,9 @@ func before_test()->void:
 	GameState.ensure_population_total(100)
 	GameState.settlement_site_committed=true;GameState.convoy_traveling=false;GameState.resource_settlement_id=""
 	GameState.population_allocations.Crafting=20
+	# No watch: no arms are wanted, so every maker makes goods.
+	GameState.population_allocations.Defense=0
+	GameState.simulation_metrics["labor_efficiency"]=.8
 	GameState.resource_stockpiles={"Fiber Plants":100.0,"Timber":100.0,"Clay":100.0,"Stone":100.0,"Flint":100.0}
 	GameState.civilian_goods=Goods.empty_state()
 	GameState.elapsed_days=10
@@ -24,32 +28,42 @@ func know(id:String,adoption:float=1.0)->void:
 	GameState.discovery_adoption[id]=adoption
 
 func labor_output()->float:
-	return GameState.effective_workers("Crafting")*Goods.CRAFT_SHARE*Goods.BASE_RATE*Goods.technique_output()
+	return GameState.effective_workers("Crafting")*Goods.CRAFT_SHARE*Goods.BASE_RATE*Goods.technique_output()*float(GameState.simulation_metrics.labor_efficiency)*Goods.specialization()
 
-func test_crafting_labor_makes_goods_from_the_raw_basket_up_to_the_wanted_stock()->void:
+func test_makers_make_for_the_homes_then_for_barter_from_the_raw_basket()->void:
 	var before:Dictionary=GameState.resource_stockpiles.duplicate()
 	var wanted:=Goods.target()*1.2
 	assert_float(labor_output()).is_greater(wanted)
 	var report:=Goods.advance()
-	assert_float(float(report.made)).is_equal_approx(wanted,.00001)
-	assert_float(Goods.stock()).is_equal_approx(wanted,.00001)
-	assert_str(String(report.reason)).is_equal("Replenishing as needed")
+	# Every maker's day is made: the homes' need first, the rest for barter.
+	assert_float(float(report.made)).is_equal_approx(labor_output(),.00001)
+	assert_float(float(report.for_barter)).is_equal_approx(labor_output()-wanted,.00001)
+	assert_float(Goods.stock()).is_equal_approx(labor_output(),.00001)
+	assert_float(Goods.spare()).is_equal_approx(labor_output()-Goods.target(),.00001)
+	assert_str(String(report.reason)).is_equal("Making goods for barter")
+	assert_float(float(report.per_maker)).is_equal_approx(Goods.goods_per_maker_day(),.00001)
+	assert_float(float(report.worth)).is_equal_approx(Goods.worth_in_rations(labor_output()),.0001)
 	var drawn:=0.0
 	for item:String in Goods.BASKET:
 		var used:=float(before[item])-float(GameState.resource_stockpiles[item])
 		assert_float(float(report.inputs[item])).is_equal_approx(used,.000001)
 		drawn+=used
-	assert_float(drawn).is_equal_approx(wanted*Goods.RAW_PER_UNIT,.000001)
+	assert_float(drawn).is_equal_approx(labor_output()*Goods.RAW_PER_UNIT,.000001)
 	# With every material on hand the draw follows the basket weights.
 	assert_float(float(report.inputs.Timber)/float(report.inputs["Fiber Plants"])).is_equal_approx(float(Goods.BASKET.Timber)/float(Goods.BASKET["Fiber Plants"]),.0001)
 
 func test_output_is_limited_by_labor_and_by_raw_materials()->void:
 	GameState.ensure_population_total(2000)
 	GameState.population_allocations.Crafting=2
+	GameState.population_allocations.Defense=0
 	var expected:=labor_output()
 	assert_float(expected).is_less(Goods.target()*1.2)
 	var report:=Goods.advance()
 	assert_float(float(report.made)).is_equal_approx(expected,.00001)
+	# Output follows how well people work.
+	GameState.elapsed_days+=1
+	GameState.simulation_metrics["labor_efficiency"]=.4
+	assert_float(float(Goods.advance().made)).is_equal_approx(expected*.5,.00001)
 	# One scarce material is covered by the rest of the basket.
 	GameState.resource_stockpiles={"Stone":.05}
 	GameState.elapsed_days+=1

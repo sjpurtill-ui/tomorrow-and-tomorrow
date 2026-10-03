@@ -10,7 +10,10 @@ extends VBoxContainer
 ##   our stance toward them (the buttons: Trade freely, Favour, Toll,
 ##   Embargo, Squeeze, Demand tribute, Send gifts), each with its effect and
 ##   their odds in the engine's numbers on the pointer;
-##   their answer: the odds while word travels, then the answer itself.
+##   their answer: the odds while word travels, then the answer itself;
+##   what our goods buy from them (the "Buy with goods" menu): arms, what they
+##   have to spare, families who come to work, our own taken captive, each
+##   at its stated terms (trade_ledger.gd deal_terms, goods_deal).
 ## A stance is the god's word, the same as at court (court_trade.gd): the
 ## Messenger (the Headman while there is none) carries it, and it gets a card
 ## at the bottom right. Below, the trade between other peoples we know of.
@@ -28,6 +31,8 @@ const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Tracker:=preload("res://scripts/order_tracker.gd")
+const Goods:=preload("res://scripts/civilian_goods.gd")
+const Arms:=preload("res://scripts/weapons_stock.gd")
 const REFRESH_SECONDS:=1.0
 const MAX_WORDS:=12
 const HOVER_HOLD_SECONDS:=5.0
@@ -76,6 +81,7 @@ static func reading_signature()->String:
 	parts.append(str(s.get("tributes",{})))
 	parts.append(str((s.get("news",[]) as Array).size()))
 	parts.append(str(int(GameState.elapsed_days)/7))
+	parts.append(str([roundi(Goods.spare()),Arms.weapons_held()]))
 	return str(hash("|".join(parts)))
 
 
@@ -127,6 +133,11 @@ func _build_summary()->void:
 		var t:=Stances.tribute(String(c.get("id","")),"player")
 		if not t.is_empty():tribute_in+=float(t.value)
 	if tribute_in>0.0:_number(head,EraWords.grouped(roundi(tribute_in)),"tribute a season")
+	# Goods are our first currency with other peoples; arms are what the watch needs.
+	var spare:=_number(head,EraWords.grouped(roundi(Goods.spare())),"goods to trade");spare.name="GoodsToTrade"
+	spare.tooltip_text="Goods beyond what the homes use: they buy what other peoples have to spare, arms, and families who come to work. Makers make about %s a day." % str(snappedf(float((GameState.civilian_goods.get("report",{}) as Dictionary).get("made",0.0)),0.1))
+	var arms:=_number(head,EraWords.grouped(Arms.weapons_held()),"arms in store");arms.name="ArmsInStore"
+	arms.tooltip_text="Sets of arms, one a fighter, for a watch of %s. A set costs about %s goods to make." % [EraWords.grouped(roundi(Arms.watch())),str(roundi(float(Arms.cost_per_fighter().worth_goods)))]
 	if partners.is_empty():
 		column.add_child(_line("No goods pass between us and any people yet.",13,T.INK_MUTED,true))
 	column.add_child(_line("Gifts and barter settle each season; silver and coin each month.",13,T.INK_MUTED,true))
@@ -196,6 +207,8 @@ func _people_row(civ_id:String,contact:int)->Control:
 		debt.tooltip_text="Gifts not yet returned. A people that owes us gives way more readily: up to 1 in 10 on its answer."
 		column.add_child(debt)
 	column.add_child(_stance_buttons(civ_id,ours))
+	var buy:=_buy_menu(civ_id)
+	if buy!=null:column.add_child(buy)
 	var odds_row:=_odds_row(civ_id,ours)
 	if odds_row!=null:column.add_child(odds_row)
 	var last:=Words.answer_label("player",civ_id)
@@ -274,6 +287,60 @@ func _squeeze_goods(civ_id:String)->Array:
 		if Ledger.want_of(g,good)>0.0 and float((g.get(good,{}) as Dictionary).get("d",0.0))>0.0:out.append({"good":good,"words":"they lack it"})
 		if out.size()>=6:break
 	return out
+
+
+## What our goods can buy from them, each at its stated terms: arms for the
+## watch, what they have to spare, families who come to work, our own taken
+## captive. Choosing one carries it out (trade_ledger.gd goods_deal).
+func _buy_menu(civ_id:String)->Control:
+	var offers:=Ledger.deal_offers("player",civ_id)
+	var pick:=MenuButton.new();pick.name="BuyWithGoods";pick.flat=false;pick.focus_mode=Control.FOCUS_NONE
+	pick.text="Buy with goods ▾"
+	if offers.is_empty():
+		var why:=Ledger.deal_terms("player",civ_id,Ledger.ARMS,1.0)
+		pick.disabled=true;pick.tooltip_text=String(why.get("why","They have nothing to spare for our goods."))
+		return pick
+	var popup:=pick.get_popup()
+	var terms:Array=[]
+	for i in offers.size():
+		var offer:Dictionary=offers[i]
+		var what:=String(offer.what)
+		var t:=Ledger.deal_terms("player",civ_id,what,_deal_count(offer))
+		terms.append(t)
+		if bool(t.ok):popup.add_item(_short(_cap(String(t.words))),i)
+		else:
+			popup.add_item(_short("%s · %s" % [_deal_name(what),String(t.why)]),i)
+			popup.set_item_disabled(popup.get_item_count()-1,true)
+		popup.set_item_tooltip(popup.get_item_count()-1,"%s goods a %s at their own prices. We have %s goods to spare." % [str(snappedf(float(t.each),0.1)),"head" if what in Ledger.PEOPLE else ("set" if what==Ledger.ARMS else "load"),str(roundi(float(t.spare)))])
+	pick.tooltip_text="Our goods buy what they have to spare, at their prices."
+	popup.id_pressed.connect(func(index:int)->void:_deal(civ_id,terms[index] as Dictionary))
+	return pick
+
+
+## How many to ask for: the arms the watch lacks, all of ours they hold, a
+## few families, ten loads of a good.
+func _deal_count(offer:Dictionary)->float:
+	match String(offer.what):
+		Ledger.ARMS:return float(maxi(1,mini(Arms.arms_wanted(),20)))
+		"captives":return float(offer.most)
+		"families":return minf(float(offer.most),5.0)
+	return 10.0
+
+
+func _deal_name(what:String)->String:
+	match what:
+		"families":return "Families to work"
+		"captives":return "Ransom our captives"
+		Ledger.ARMS:return "Arms"
+	return _cap(Words.good_word(what))
+
+
+func _deal(civ_id:String,terms:Dictionary)->void:
+	var done:=Ledger.goods_deal("player",civ_id,String(terms.what),float(terms.count))
+	var said:=String(done.get("said",""))
+	_say(said)
+	Tracker.setting_order("Buy with goods: %s" % Ledger.name_of(civ_id),{"ok":bool(done.get("ok",false)),"message":said,"reason":said},"trade",String(CourtTrade.carrier().get("name","")),"economy:3")
+	refresh(true)
 
 
 ## Their answer: the odds while word travels and after, as chips.

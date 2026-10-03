@@ -73,11 +73,69 @@ a year of the levy at its own last pace, and the record says so.
   `spend(amount, why) -> bool`, `pay_home(amount, why)`, `unit_word()`,
   `account_name()`, `history()`, `season()` and `forecast()`.
 
+## Goods, barter and arms (2026-10-02, docs/PEOPLE_FIRST.md D)
+
+Making is a path: makers turn what is cut, dug and carried into goods, goods
+are the first currency, and a making people can buy and make arms.
+
+- **Goods** (`civilian_goods.gd`): one stock counted in goods-worth (worth
+  6 rations at the reference price). A maker makes CRAFT_SHARE (0.18) of a day
+  x 5 x the crafts known (+5 in 100 each) x how well people work (the
+  working efficiency, which carries the business factor): 0.72 a day at the
+  usual pace (0.8), so **ten makers make about 7 goods a day, some 43
+  rations' worth** (8.6 with the founders' four crafts). Makers make for the
+  homes first (their target x 1.2), then **for barter**, up to 4 goods-worth
+  a head held, drawing for barter only on materials beyond half of what the
+  stores want (the builders' share stays). Goods wear 0.4 in 100 a day.
+  **A little extra for a making people** (the user, 2026-10-02: "make it be
+  a little extra"): once more than 5 in 100 make, each maker makes more, up
+  to +15 in 100 when 1 in 5 make, and the homes and market hold up to half
+  again as many goods a head. A balanced people gets none of it; arms stay
+  as dear.
+  `spare()` (beyond the homes' need), `draw(n)` (learners' and buyers' use),
+  `buys(n)`, `worth_in_rations(n)` and `role_effect("Crafting")` (what making
+  does now and with ten more makers) are its readers.
+- **Barter from year one**: the first stage is named "Barter" (its id stays
+  `subsistence` for saves). Prices are kept from the first day goods change
+  hands (no tallies needed at home; strangers still begin with gifts until
+  tallies and measures or a meeting place, `values_comparable_abroad()`).
+  The day's goods count in the trade volume and the output; the part that
+  changes hands is goods made x market access (`economy_metrics.goods_made`,
+  `goods_worth`, `goods_changed`, `goods_traded_days`). Market access gains up
+  to 0.08 from makers and 0.06 from carriers at 5 in 100 of the people each
+  (`barter_reach()`). Barter's share of exchange grows from 26 to 48 in 100
+  with market access.
+- **Goods buy** (`trade_ledger.gd deal_terms` / `goods_deal`): between two
+  peoples who barter (past their first seasons of gifts), goods buy what the
+  other has to spare (beyond 1.1 x its wanted holding) at the seller's price
+  x 1.2; **arms** the same way; **families who come to work** (a season's food,
+  90 rations, a head in goods; at most 2 in 100 of the seller's people a
+  deal, only from a people that thinks well of us); and **our own taken
+  captive** (120 rations a head; counted from the war's record). Goods and
+  the good or the grown people move through the one ledger (move, the pair's
+  flows, kinds and `deals`); counts add up on both sides. The Trade page's
+  "Buy with goods" menu states each term. Computer rulers buy arms when their
+  watch lacks them (at war, or with three sets' worth of goods to spare) and
+  take in families from a hungry partner when their own food is plenty
+  (`trade_stances.gd goods_buys`). Goods for goods stays the season's coarse
+  barter.
+- **Arms** (`weapons_stock.gd`): one set arms one fighter. A spear and a bow
+  take **10 maker-days** and 1.4 timber, 0.3 flint, 0.4 plant fiber (about 8
+  goods, 48 rations); bronze 16 maker-days with copper and tin; iron 14;
+  muskets 18; rifles 9; automatic rifles 7, with metals and coal. While the
+  watch lacks arms, 1 in 5 of the makers make them (2 in 5 at war) and make
+  no goods that day. The stock is "Arms" in every town's stores (worn like
+  durable things in a yard) plus the old armoury's spears and bows, priced at
+  48 and traded as a good. The military's API: `weapons_held()`,
+  `take_weapons(n)`, `return_weapons(n)`, `lose_weapons(n)`,
+  `weapons_issued()`, `arms_wanted()`, `cost_per_fighter()`,
+  `weapons_quality()`.
+
 ## Exchange stages
 
-1. **Resource obligations** — direct allocation, reciprocal labor, barter, and
-   public stores dominate. Market values exist as internal comparison values,
-   but monetization is capped at 12%.
+1. **Barter** (id `subsistence`) — barter of goods for food and materials,
+   reciprocal labor and public stores. Prices are kept from the first barter;
+   monetization is capped at 12%.
 2. **Weighed-metal exchange** — requires adopted tallies and shared measures,
    productive capacity, and a usable metal surplus. Resources and labor remain
    valid payment. Standard weights reduce the coincidence-of-wants problem.

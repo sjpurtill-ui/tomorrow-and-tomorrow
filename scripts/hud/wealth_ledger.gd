@@ -19,7 +19,7 @@ func setup(block:Dictionary)->void:
 	_refs={"accounts":[],"segments":[],"legend":[]}
 	var money:=String(data.stage)=="currency";var metal:=String(data.stage)=="weighed_metal"
 	var status:=HBoxContainer.new();add_child(status)
-	var stage:=_voice("Coin economy" if money else "Weighed-metal exchange" if metal else "Wealth is what we hold and owe one another",18);stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;status.add_child(stage)
+	var stage:=_voice("Coin economy" if money else "Weighed-metal exchange" if metal else "Barter: goods for food and materials",18);stage.size_flags_horizontal=Control.SIZE_EXPAND_FILL;status.add_child(stage)
 	_refs.city=T.make_label("",13,T.MUTED);status.add_child(_refs.city)
 	# The day's work, as an equivalent number of people working at their best.
 	var work:=HBoxContainer.new();work.add_theme_constant_override("separation",14);add_child(work)
@@ -30,8 +30,8 @@ func setup(block:Dictionary)->void:
 		_line(self,"This counts useful work only. It does not count land, buildings, belongings or coin.",13,T.MUTED)
 	_rule(self)
 	if not money and not metal:
-		add_child(_voice("Gifts and shared stores",19))
-		_line(self,"There is no money yet. Wealth is the food and materials in store, and the gifts and favours households owe one another.",13,T.BODY)
+		add_child(_voice("Goods, stores and gifts",19))
+		_line(self,"There is no money yet. Households trade the goods makers make for food and materials, and prices are kept. Wealth is the goods, food and materials in store, and the favours households owe one another.",13,T.BODY)
 		_button(self,"See the material stores",data.on_stores,"Wood, stone, clay and fibre in store")
 	else:
 		add_child(T.make_label("MONEY HELD" if money else "EXCHANGE METAL",12,T.MUTED))

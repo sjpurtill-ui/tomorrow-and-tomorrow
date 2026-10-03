@@ -88,7 +88,22 @@ func _form(variant:String)->void:
 
 func test_rungs_need_knowledge_and_money()->void:
 	GameState.economy_stage="subsistence"
-	assert_int(Business.rung()).override_failure_message("no business before weighed metal or coin").is_equal(0)
+	GameState.economy_metrics["goods_traded_days"]=0
+	assert_int(Business.rung()).override_failure_message("no business before goods change hands").is_equal(0)
+	# Barter (docs/PEOPLE_FIRST.md D): stalls and workshops once goods change
+	# hands at kept prices, before any money.
+	GameState.economy_metrics["price_observations"]=3
+	assert_str(Business.next_needs()).contains("goods changing hands")
+	GameState.economy_metrics["goods_traded_days"]=5
+	assert_int(Business.rung()).override_failure_message("stalls under barter").is_equal(1)
+	GameState.economy_metrics["price_observations"]=0
+	assert_int(Business.rung()).override_failure_message("barter needs prices kept").is_equal(0)
+	# Merchant houses wait on money.
+	_know("licensed_guilds",0.3)
+	GameState.economy_metrics["price_observations"]=3
+	assert_int(Business.rung()).override_failure_message("merchant houses need weighed metal or coin").is_equal(1)
+	assert_str(Business.next_needs()).contains("weighed metal or coin")
+	_forget("licensed_guilds")
 	_money("weighed_metal")
 	GameState.economy_metrics["price_observations"]=0
 	assert_int(Business.rung()).override_failure_message("prices must be kept").is_equal(0)
@@ -232,16 +247,22 @@ func test_the_factor_reaches_the_working_efficiency_and_lifts_its_ceiling()->voi
 	assert_float(target_lifted).is_equal_approx(target_plain*lift,0.01)
 
 
+## Goods follow how well people work (civilian_goods.gd efficiency), and the
+## working efficiency carries the factor (consequence_engine.gd).
 func test_civilian_goods_scale_with_the_factor()->void:
 	GameState.population_allocations["Crafting"]=2
+	GameState.population_allocations["Defense"]=0
 	GameState.resource_stockpiles[Goods.GOODS]=0.0
 	for item in Goods.BASKET:GameState.resource_stockpiles[item]=500.0
 	GameState.civilian_goods=Goods.empty_state()
+	GameState.simulation_metrics["labor_efficiency"]=0.8
 	var plain:=float(Goods.advance().made)
 	assert_float(plain).is_greater(0.0)
 	GameState.resource_stockpiles[Goods.GOODS]=0.0
 	GameState.civilian_goods=Goods.empty_state()
 	_size(0.0).factor=1.3
+	# The day's working efficiency with the factor in it, as the engine makes it.
+	GameState.simulation_metrics["labor_efficiency"]=0.8*Business.factor()
 	var lifted:=float(Goods.advance().made)
 	assert_float(lifted).is_equal_approx(plain*1.3,0.0005)
 

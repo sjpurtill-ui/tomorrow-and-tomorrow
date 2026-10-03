@@ -37,8 +37,10 @@ func test_same_orders_and_daily_inputs_produce_identical_owned_state()->void:
 		assert_bool(_simulated(first[name])==_simulated(second[name])).override_failure_message("Different owned state in "+name).is_true()
 
 ## Each people names and draws its own folk (names, portraits keyed to the
-## civilization id); everything they simulate must still match exactly.
-const IDENTITY_KEYS:=["name","given","early_art_profile","appearance_civ_id","used"]
+## civilization id), and rolls its own business sector's month (the roll is
+## seeded by the people, enterprise.gd; with barter from year one the stalls
+## roll from the first months); everything else they simulate must match.
+const IDENTITY_KEYS:=["name","given","early_art_profile","appearance_civ_id","used","last_roll"]
 func _simulated(value:Variant)->Variant:
 	if value is Dictionary:
 		var result:={}

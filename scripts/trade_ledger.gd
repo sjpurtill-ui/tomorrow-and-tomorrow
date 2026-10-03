@@ -56,14 +56,14 @@ const WAR_PATH:="res://scripts/war_loop.gd"
 const VERSION:=1
 ## The goods that pass between peoples (as between our own towns:
 ## settlement_model.gd CITY_TRADE_GOODS).
-const GOODS:=["Food","Salt","Flint","Stone","Timber","Clay","Fiber Plants","Medicinal Plants","Copper Ore","Tin Ore","Iron Ore","Coal","Civilian Goods"]
+const GOODS:=["Food","Salt","Flint","Stone","Timber","Clay","Fiber Plants","Medicinal Plants","Copper Ore","Tin Ore","Iron Ore","Coal","Civilian Goods","Arms"]
 ## Goods any people wants once it lacks them, before it has seen them traded.
 ## The rest (salt, herbs, ores, coal) are wanted once the people knows them.
-const BASIC:=["Food","Flint","Stone","Timber","Clay","Fiber Plants","Civilian Goods"]
+const BASIC:=["Food","Flint","Stone","Timber","Clay","Fiber Plants","Civilian Goods","Arms"]
 ## How well a good carries over distance: worth much for its weight and keeps
 ## (salt, herbs, flint, made goods) above 1; bulk (grain, timber, stone) below.
 ## A load of it uses value/CARRY of a pair's capacity.
-const CARRY:={"Food":0.5,"Salt":1.6,"Flint":1.2,"Stone":0.4,"Timber":0.4,"Clay":0.5,"Fiber Plants":0.8,"Medicinal Plants":1.6,"Copper Ore":0.9,"Tin Ore":1.0,"Iron Ore":0.8,"Coal":0.5,"Civilian Goods":1.4}
+const CARRY:={"Food":0.5,"Salt":1.6,"Flint":1.2,"Stone":0.4,"Timber":0.4,"Clay":0.5,"Fiber Plants":0.8,"Medicinal Plants":1.6,"Copper Ore":0.9,"Tin Ore":1.0,"Iron Ore":0.8,"Coal":0.5,"Civilian Goods":1.4,"Arms":1.3}
 const FORMS:=["gift","barter","silver","coin"]
 ## Days between settlements of a pair, by form.
 const PERIOD:={"gift":91,"barter":91,"silver":30,"coin":30}
@@ -104,6 +104,26 @@ const PARTNER_FLOOR:=0.5
 ## What a people pays over the price to buy a good up from others, so that a
 ## people it squeezes cannot get it (trade_stances.gd "squeeze").
 const SQUEEZE_PREMIUM:=1.25
+## GOODS BUY (goods_deal): goods are the first currency between peoples.
+const ARMS:="Arms"
+const MONEY_GOOD:="Civilian Goods"
+## A one-off purchase costs this much over the seller's own price.
+const DEAL_PREMIUM:=1.2
+## People who come for goods: a season's food a person, in goods, for
+## families who come to work; four months' food to ransom one of ours.
+const FAMILY_RATIONS:=90.0
+const RANSOM_RATIONS:=120.0
+## At most this share of the seller's people come in one deal; a seller
+## keeps at least FAMILY_KEEP people; and lets its families go only to a
+## people it holds at FAMILY_OPINION or better.
+const FAMILY_SHARE:=0.02
+const FAMILY_KEEP:=30
+const FAMILY_OPINION:=0.0
+const PEOPLE:=["families","captives"]
+## Grown people of working age come (and are ransomed): no children taken.
+const ADULTS:={"youth":0.15,"early_adults":0.40,"established_adults":0.30,"mature_adults":0.15}
+## Deals kept on a pair's record (newest first).
+const DEALS_KEPT:=8
 
 # --------------------------------------------------------------------------
 # State
@@ -761,9 +781,16 @@ static func _fresh(owner:String,r:Dictionary)->void:
 	WorldSimulation.scoped(owner,func()->void:
 		for good:String in g:
 			var x:Dictionary=g[good]
-			x["s"]=WorldSimulation.food.total_stored() if good=="Food" else maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(good,0.0)))
+			x["s"]=_held_in_scope(good)
 			x["v"]=Prices.in_scope(good)
 	)
+
+## What the people in scope holds of a good: food in all its stores, arms in
+## every store and the old armoury (weapons_stock.gd), else the capital's stores.
+static func _held_in_scope(good:String)->float:
+	if good=="Food": return WorldSimulation.food.total_stored()
+	if good==ARMS: return preload("res://scripts/weapons_stock.gd").held_exact()
+	return maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(good,0.0)))
 
 static func _read(owner:String,day:int,prev:Dictionary)->Dictionary:
 	if not simulated(owner): return _read_unsimulated(owner,day,prev)
@@ -789,7 +816,7 @@ static func _read(owner:String,day:int,prev:Dictionary)->Dictionary:
 		var old_g:Dictionary=prev.get("g",{})
 		var goods:={}
 		for good:String in GOODS:
-			var stock:=WorldSimulation.food.total_stored() if good=="Food" else maxf(0.0,float(st.resource_stockpiles.get(good,0.0)))
+			var stock:=_held_in_scope(good)
 			var known:=good=="Food" or bool(eco._resource_is_economically_known(good,stock))
 			var old:Dictionary=old_g.get(good,{})
 			var made:=food_made if good=="Food" else maxf(0.0,float(cum.get(good,0.0))-float(old.get("c",cum.get(good,0.0))))
@@ -801,7 +828,7 @@ static func _read(owner:String,day:int,prev:Dictionary)->Dictionary:
 		var boats:=false
 		for id in BOATS:
 			if st.known_discoveries.has(id): boats=true; break
-		return {"day":day,"fresh":day,"pop":pop,"stage":String(st.economy_stage),"cmp":bool(eco._comparison_values_observable()),"log":float(st.simulation_metrics.get("logistics",0.16)),
+		return {"day":day,"fresh":day,"pop":pop,"stage":String(st.economy_stage),"cmp":bool(eco.values_comparable_abroad()),"log":float(st.simulation_metrics.get("logistics",0.16)),
 			"tc":float(WorldSimulation.discovery.effect("trade_capacity")),"gw":float((load("res://scripts/great_works_rivalry.gd") as GDScript).call("trade_routing",owner)),"boats":boats,"sea":float(WorldSimulation.military.joint_operations.sea_trade_factor()) if WorldSimulation.military!=null and WorldSimulation.military.get("joint_operations")!=null else 1.0,
 			"sim":true,"g":goods,"acc_in":{},"acc_out":{}})
 
@@ -843,6 +870,214 @@ static func _smooth(p:Dictionary,moved:Dictionary,value:Dictionary,elapsed:int)-
 		val[dir]=lerpf(float(val.get(dir,0.0)),float(value.get(dir,0.0))*month,weight)
 	p["ema"]=ema
 	p["val"]=val
+
+# --------------------------------------------------------------------------
+# Goods buy: the first currency between peoples
+# --------------------------------------------------------------------------
+
+## Goods (Civilian Goods) buy what another people has to spare: a resource,
+## arms, or people (families who come to work for goods; our own people
+## taken captive, ransomed home). One good, one count, one price, between two
+## peoples who barter (past the first seasons of gifts: form_of), at the
+## seller's own prices (trade_prices.gd) and DEAL_PREMIUM over them for goods.
+## Coarse on purpose: no market of goods for goods. Every people by the same
+## rules. A reading never writes: deal_terms states the terms; goods_deal
+## carries them out through move() and the pair's record.
+
+## What `owner` holds beyond what it wants of `good` (OFFER_OVER its holding).
+static func spare_of(owner:String,good:String)->float:
+	return float(WorldSimulation.scoped(owner,func()->float:
+		var pop:=maxf(1.0,float(WorldSimulation.state.population_exact))
+		var desired:=float(WorldSimulation.economy._desired_stock(good,pop))
+		return maxf(0.0,_held_in_scope(good)-desired*OFFER_OVER)))
+
+## Goods a people can spend: what it holds beyond its homes' need.
+static func goods_to_spend(owner:String)->float:
+	return float(WorldSimulation.scoped(owner,func()->float:return preload("res://scripts/civilian_goods.gd").spare()))
+
+## Our people `holder` took captive (the war's own record, war_loop.gd's log)
+## not yet ransomed home. Only the god's war keeps such a record.
+static func captives_held(holder:String,ours:String)->int:
+	if ours!="player": return 0
+	var war:=load(WAR_PATH) as GDScript
+	if war==null: return 0
+	var taken:=0
+	for entry in (war.call("state") as Dictionary).get("log",[]):
+		if entry is Dictionary and String((entry as Dictionary).get("civ",""))==holder: taken+=maxi(0,int((entry as Dictionary).get("captives",0)))
+	var p:=pair(ours,holder)
+	var back:=int(((p.get("ransomed",{}) if p.get("ransomed") is Dictionary else {}) as Dictionary).get(ours,0))
+	return maxi(0,taken-back)
+
+## The terms of one deal, read and never written: {ok, why, what, asked,
+## count, each (goods a unit), goods (in all), most (what the seller parts
+## with), spare (goods the buyer can spend), form, unit (the seller's price
+## of one, in its own reckoning), words}.
+static func deal_terms(buyer:String,seller:String,what:String,count:float)->Dictionary:
+	buyer=owner_of(buyer); seller=owner_of(seller)
+	var out:={"ok":false,"why":"","what":what,"asked":count,"count":0.0,"each":0.0,"goods":0.0,"most":0.0,"spare":0.0,"form":"","unit":0.0,"words":""}
+	if buyer==seller or not alive(seller) or not alive(buyer):
+		out.why="There is no such people to deal with."
+		return out
+	if not simulated(buyer) or not simulated(seller):
+		out.why="No trader of ours reaches them."
+		return out
+	var person:=what in PEOPLE
+	if not person and (not what in GOODS or what==MONEY_GOOD):
+		out.why="Goods buy goods only in the season's barter."
+		return out
+	var p:=pair(buyer,seller)
+	if p.is_empty() or not bool(p.get("known",false)):
+		out.why="Our traders have not met them."
+		return out
+	var why:=blocked(buyer,seller)
+	if why!="" and not (what=="captives" and why=="feud"):
+		out.why=String({"war":"We are at war: no trader crosses.","feud":"We are feuding: no trader crosses.","hostile":"They will not meet our traders."}.get(why,"Nothing passes between us now."))
+		return out
+	var form:=form_of(p,report(buyer),report(seller))
+	out.form=form
+	if form=="gift":
+		out.why="Only gifts pass between us yet: goods buy once we meet to barter."
+		return out
+	var goods_value:=maxf(0.01,Prices.value(MONEY_GOOD,seller))
+	var unit:=0.0
+	var most:=0.0
+	match what:
+		"families":
+			unit=FAMILY_RATIONS*Prices.value("Food",seller)
+			var pop:=population(seller)
+			most=floorf(minf(pop*FAMILY_SHARE,maxf(0.0,pop-float(FAMILY_KEEP))))
+			if opinion(seller,buyer)<FAMILY_OPINION:
+				out.why="They will not let their families go to us."
+				return out
+		"captives":
+			unit=RANSOM_RATIONS*Prices.value("Food",seller)
+			most=float(captives_held(seller,buyer))
+			if most<1.0:
+				out.why="They hold none of ours."
+				return out
+		_:
+			unit=Prices.value(what,seller)*DEAL_PREMIUM
+			most=spare_of(seller,what)
+			if what==ARMS: most=floorf(most+0.000001)
+	var each:=unit/goods_value
+	var spare:=goods_to_spend(buyer)
+	out.unit=unit
+	out.each=each
+	out.most=most
+	out.spare=spare
+	var whole:=person or what==ARMS
+	var n:=minf(maxf(0.0,count),minf(most,spare/maxf(0.0001,each)))
+	if whole: n=floorf(n+0.000001)
+	out.count=n
+	out.goods=n*each
+	var least:=1.0 if whole else 0.01
+	if n<least:
+		if most<least: out.why="They have none to spare." if not person else "None of theirs would come."
+		elif count<least: out.why="Name how many."
+		else: out.why="We have too few goods to spare: %s goods a %s." % [_qty(each),_unit_word(what)]
+		return out
+	out.ok=true
+	out.words="%s for %s goods (%s goods %s)" % [_deal_amount(n,what),_qty(n*each),_qty(each),"a head" if person else "each"]
+	return out
+
+static func _qty(value:float)->String:
+	return str(roundi(value)) if value>=10.0 else str(snappedf(value,0.1))
+
+static func _unit_word(what:String)->String:
+	if what in PEOPLE: return "head"
+	if what==ARMS: return "set of arms"
+	return "load"
+
+static func _deal_amount(n:float,what:String)->String:
+	match what:
+		"families": return "%d %s come to work" % [int(n),"people" if int(n)!=1 else "person"]
+		"captives": return "%d of ours ransomed home" % int(n)
+		ARMS: return "arms for %d %s" % [int(n),"fighters" if int(n)!=1 else "fighter"]
+	return "%s %s" % [_qty(n),String({"Fiber Plants":"plant fiber","Medicinal Plants":"healing herbs"}.get(what,what.to_lower()))]
+
+## Carries out a deal at the terms deal_terms states: the buyer's goods go to
+## the seller, the good (or the people) to the buyer, through the one ledger.
+## Returns the terms with ok, the counts that moved and `said`.
+static func goods_deal(buyer:String,seller:String,what:String,count:float,by:String="god")->Dictionary:
+	buyer=owner_of(buyer); seller=owner_of(seller)
+	var t:=deal_terms(buyer,seller,what,count)
+	if not bool(t.ok):
+		t["said"]=String(t.why)
+		return t
+	var n:=float(t.count)
+	var paid:=move(buyer,seller,MONEY_GOOD,float(t.goods))
+	if paid<float(t.goods)-0.001:
+		# What could not be paid for does not come.
+		n=paid/maxf(0.0001,float(t.each))
+		if what in PEOPLE or what==ARMS: n=floorf(n+0.000001)
+	var got:=0.0
+	if what in PEOPLE: got=float(_move_people(seller,buyer,int(n),what))
+	else: got=move(seller,buyer,what,n)
+	# Goods paid for what did not come go back.
+	var owed_back:=maxf(0.0,paid-got*float(t.each))
+	if owed_back>0.001: paid-=move(seller,buyer,MONEY_GOOD,owed_back)
+	var p:=pair(buyer,seller)
+	_book_pair(buyer,seller,MONEY_GOOD,paid)
+	if not what in PEOPLE: _book_pair(seller,buyer,what,got)
+	var value:=paid*Prices.value(MONEY_GOOD,seller)
+	note_kind(buyer,seller,"deal",value)
+	note_kind(seller,buyer,"deal",value)
+	var deals:Array=p.get("deals",[]) if p.get("deals") is Array else []
+	deals.push_front({"day":_day(),"buyer":buyer,"what":what,"count":snappedf(got,0.01),"goods":snappedf(paid,0.01),"by":by})
+	while deals.size()>DEALS_KEPT: deals.pop_back()
+	p["deals"]=deals
+	# A fair deal warms both a little, as trade does.
+	if opinion(buyer,seller)<WARMTH_CEILING: _warm(buyer,seller,WARMTH)
+	if opinion(seller,buyer)<WARMTH_CEILING: _warm(seller,buyer,WARMTH)
+	_stat("deals")
+	_stat("deal_value",value)
+	revision+=1
+	t["count"]=got
+	t["goods"]=paid
+	t["ok"]=got>0.0
+	t["said"]=_cap("%s for %s goods." % [_deal_amount(got,what),_qty(paid)]) if got>0.0 else "Nothing came."
+	if got>0.0 and (buyer=="player" or seller=="player"): news("deal",buyer,seller,what,{"count":snappedf(got,0.01),"goods":snappedf(paid,0.01),"buyer":buyer})
+	return t
+
+static func _cap(text:String)->String:
+	return text.substr(0,1).to_upper()+text.substr(1) if text!="" else text
+
+## People who come (or are ransomed) from one people to another: the seller's
+## count falls and the buyer's rises by the same grown people. Returns how many.
+static func _move_people(seller:String,buyer:String,n:int,kind:String)->int:
+	if n<=0: return 0
+	var away:="Went to work for %s for goods" % name_of(buyer) if kind=="families" else "Ransomed home by %s" % name_of(buyer)
+	var home:="Families from %s, come to work for goods" % name_of(seller) if kind=="families" else "Our people ransomed from %s" % name_of(seller)
+	var left:=int(WorldSimulation.scoped(seller,func()->int:return int((WorldSimulation.state.register_population_departures(n,away,ADULTS) as Dictionary).get("count",0))))
+	if left<=0: return 0
+	WorldSimulation.scoped(buyer,func()->void:WorldSimulation.state.register_population_arrivals(left,home,ADULTS))
+	if kind=="captives":
+		var p:=pair(buyer,seller)
+		var back:Dictionary=p.get("ransomed",{}) if p.get("ransomed") is Dictionary else {}
+		back[buyer]=int(back.get(buyer,0))+left
+		p["ransomed"]=back
+	return left
+
+## What goods could buy from `seller` now, for the Trade page: arms, then
+## each good it has to spare (the one we lack most first), then people.
+static func deal_offers(buyer:String,seller:String,limit:int=6)->Array:
+	var out:Array=[]
+	var wanted:Array=[ARMS]
+	var g:Dictionary=report(buyer).get("g",{})
+	var rows:Array=[]
+	for good:String in GOODS:
+		if good==MONEY_GOOD or good==ARMS: continue
+		rows.append({"good":good,"need":want_of(g,good)/maxf(1.0,float((g.get(good,{}) as Dictionary).get("d",1.0)))})
+	rows.sort_custom(func(x:Dictionary,y:Dictionary)->bool:return float(x.need)>float(y.need) or (float(x.need)==float(y.need) and String(x.good)<String(y.good)))
+	for row:Dictionary in rows: wanted.append(String(row.good))
+	wanted.append_array(PEOPLE)
+	for what:String in wanted:
+		var whole:=what in PEOPLE or what==ARMS
+		var t:=deal_terms(buyer,seller,what,1.0 if whole else 10.0)
+		if float(t.get("most",0.0))<(1.0 if whole else 0.01): continue
+		out.append(t)
+		if out.size()>=limit: break
+	return out
 
 # --------------------------------------------------------------------------
 # The dependence ledger

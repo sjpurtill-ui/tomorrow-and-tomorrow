@@ -17,6 +17,8 @@ func test_households_share_scarce_inputs_with_ordered_work()->void:
 		var state=WorldSimulation.state
 		state.settlement_site_committed=true;state.convoy_traveling=false
 		state.population_allocations.Crafting=20
+		# No watch: no arms are wanted (weapons_stock.gd), only household goods.
+		state.population_allocations.Defense=0
 		state.resource_stockpiles[Goods.GOODS]=0.0;state.resource_stockpiles.Stone=10.0
 		for item:String in ["Fiber Plants","Clay","Flint"]:state.resource_stockpiles[item]=0.0
 		state.civilian_goods=Goods.empty_state()

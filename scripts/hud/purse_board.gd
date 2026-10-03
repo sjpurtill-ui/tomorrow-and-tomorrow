@@ -4,6 +4,9 @@ extends VBoxContainer
 ## (hud/war_board.gd). Every number is the engine's own (realm_purse.gd):
 ##   the purse   what it holds, what comes in and goes out a season, and what
 ##               it would buy; the season's money in and out as two bars;
+##   goods       what the makers make a day and its worth, what a day's goods
+##               buy, barter at home, and the arms in store with what a
+##               fighter's set costs (civilian_goods.gd, weapons_stock.gd);
 ##   business    the ladder from household crafts to corporations, the share
 ##               of the workers in business against its target, what it adds
 ##               to work, goods, trade and the rich, the god's stance (a
@@ -22,6 +25,9 @@ signal close_wanted
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Purse:=preload("res://scripts/realm_purse.gd")
 const Business:=preload("res://scripts/enterprise.gd")
+const Goods:=preload("res://scripts/civilian_goods.gd")
+const Arms:=preload("res://scripts/weapons_stock.gd")
+const Words:=preload("res://scripts/trade_words.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Tracker:=preload("res://scripts/order_tracker.gd")
 const REFRESH_SECONDS:=1.0
@@ -31,6 +37,7 @@ var head_box:VBoxContainer
 var levy_box:VBoxContainer
 var sources_box:VBoxContainer
 var business_box:VBoxContainer
+var goods_box:VBoxContainer
 var lines_box:VBoxContainer
 var wealth_box:VBoxContainer
 var ledger_box:VBoxContainer
@@ -46,6 +53,7 @@ func setup(_block:Dictionary={})->void:
 	head_box=_section(Purse.account_name())
 	feedback=_line("",14,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
 	sources_box=_section("Where it comes from")
+	goods_box=_section("Goods and arms")
 	business_box=_section("Business")
 	levy_box=_section("The levy")
 	lines_box=_section("What it pays for")
@@ -78,6 +86,8 @@ func refresh(force:=false)->void:
 	_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
 	var sources:=Purse.sources()
 	_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.rich)),roundi(float(sources.get("charter",0.0))),roundi(float(sources.deposits)),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
+	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
+	_rebuild("goods",goods_box,str([snappedf(float(report.get("made",0.0)),0.1),roundi(Goods.stock()),roundi(Goods.spare()),Arms.weapons_held(),Arms.weapons_issued(),roundi(Arms.watch()),snappedf(float(report.get("arms_made",0.0)),0.01),String(WorldSimulation.state.economy_stage),snappedf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.01),roundi(Goods.worth_in_rations(1.0)*10.0)]),force,func()->void:_build_goods())
 	var e:=Business.state()
 	_rebuild("business",business_box,str([Business.rung(),snappedf(Business.share(),0.001),snappedf(float(e.get("target",0.0)),0.001),Business.stance(),snappedf(Business.factor(),0.001),int(e.get("boom_months",0)),Business.bust_left(),Business.choices(),Business.next_needs(),Purse.unit_word()]),force,func()->void:_build_business())
 	_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),roundi(float(forecast.levy)),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
@@ -183,6 +193,58 @@ func _build_sources(sources:Dictionary)->void:
 	if float(sources.get("short",0.0))>=0.5: lost.append("%s left with towns that had none to spare" % Purse.number(float(sources.short)))
 	if not lost.is_empty(): sources_box.add_child(_line("Never came in, a season: %s." % ", ".join(lost),13,T.INK_MUTED,true))
 	if float(sources.coin_share)>0.01: sources_box.add_child(_line("%d%% of it is paid in coin; the rest is taken in goods." % roundi(float(sources.coin_share)*100.0),13,T.INK_MUTED,true))
+
+
+# --- Goods and arms ---------------------------------------------------------------------
+
+## What the makers make a day and its worth, what a day's goods buy, barter at
+## home (before money), and the arms in store against the watch, with what a
+## fighter's set costs: the engine's own numbers (civilian_goods.gd,
+## economy_system.gd, weapons_stock.gd).
+func _build_goods()->void:
+	_clear(goods_box)
+	var panel:=_panel(goods_box,"Goods")
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",8);panel.add_child(column)
+	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
+	var made:=float(report.get("made",0.0))
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",22);column.add_child(head)
+	var day:=_number(head,_amount(made),"goods made a day");day.name="GoodsMade"
+	day.tooltip_text="Makers make for the homes first, then for barter. Each makes about %s a day now: more with the crafts the people know, and as well as people work." % _amount(Goods.goods_per_maker_day())
+	var worth:=_number(head,_amount(Goods.worth_in_rations(made)),"rations' worth");worth.name="GoodsWorth"
+	worth.tooltip_text="What a day's goods fetch in food at our own prices: one goods-worth is about %s rations now." % _amount(Goods.worth_in_rations(1.0))
+	var held:=_number(head,EraWords.grouped(roundi(Goods.stock())),"goods held");held.name="GoodsHeld"
+	held.tooltip_text="%s are in the homes' use; %s more can change hands." % [EraWords.grouped(roundi(minf(Goods.stock(),Goods.target()))),EraWords.grouped(roundi(Goods.spare()))]
+	var buys:=Goods.buys(maxf(made,0.0),["Food","Timber"])
+	var buy_line:=_line("A day's goods buy %s rations or %s timber." % [_amount(float(buys.Food)),_amount(float(buys.Timber))],13,T.INK,true);buy_line.name="GoodsBuy"
+	buy_line.tooltip_text="At our own prices. With other peoples, goods also buy arms, and bring families who come to work: see the Trade page."
+	column.add_child(buy_line)
+	if String(WorldSimulation.state.economy_stage)=="subsistence":
+		var reach:=float(WorldSimulation.state.economy_metrics.get("market_access",0.0))
+		var barter:=_line("Barter: goods for food and materials, prices kept.",13,T.INK_MUTED,true);barter.name="Barter"
+		barter.tooltip_text="%d in 100 of what is made reaches the market. Makers and carriers widen it: makers bring goods to trade, carriers bring them to the hearth." % roundi(reach*100.0)
+		column.add_child(barter)
+	if String(report.get("reason",""))!="" and made<=0.001:
+		column.add_child(_line(String(report.reason)+".",13,T.INK_MUTED,true))
+	# Arms: in store against the watch, and what a set costs.
+	var cost:=Arms.cost_per_fighter()
+	var held_arms:=Arms.weapons_held()
+	var watch:=roundi(Arms.watch())
+	var arms_row:=HBoxContainer.new();arms_row.add_theme_constant_override("separation",22);column.add_child(arms_row)
+	var store:=_number(arms_row,EraWords.grouped(held_arms),"arms in store");store.name="ArmsHeld"
+	store.tooltip_text="Sets of arms, one for each fighter. The watch carries %s more. A fighter with none fights with what comes to hand." % EraWords.grouped(Arms.weapons_issued())
+	_number(arms_row,EraWords.grouped(watch),"on watch")
+	var arms_made:=float(report.get("arms_made",0.0))
+	if arms_made>0.0001:_number(arms_row,_amount(arms_made),"made a day")
+	var materials:PackedStringArray=[]
+	for item:String in (cost.materials as Dictionary):materials.append("%s %s" % [_amount(float(cost.materials[item])),Words.good_word(item)])
+	var set_line:=_line("Arming one fighter: %s maker-days, worth %s goods." % [_amount(float(cost.maker_days)),_amount(float(cost.worth_goods))],13,T.INK_MUTED,true);set_line.name="ArmsCost"
+	set_line.tooltip_text="One set is %s: %s maker-days and %s. While the watch lacks arms, %d in 100 of the makers make them (%d in 100 at war); those makers make no goods that day." % [String(cost.kind),_amount(float(cost.maker_days)),", ".join(materials),roundi(Arms.ARMS_SHARE*100.0),roundi(Arms.WAR_SHARE*100.0)]
+	column.add_child(set_line)
+
+
+static func _amount(value:float)->String:
+	if value>=10.0:return EraWords.grouped(roundi(value))
+	return str(snappedf(value,0.1))
 
 
 # --- Business -------------------------------------------------------------------------
