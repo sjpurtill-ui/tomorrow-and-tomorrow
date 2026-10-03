@@ -619,6 +619,12 @@ func ambience(set_id:String,season_id:String,facts_in:Dictionary={})->void:
 	set_kind=set_id if not set_id.is_empty() else "fire_ring"
 	season=season_id if season_id in ["spring","summer","autumn","winter"] else "summer"
 	facts=facts_in.duplicate()
+	# the set knows which beasts the people keep (hens, goats)
+	var cs:Variant=stage.get("court_set") if stage!=null else null
+	if cs is Node3D and is_instance_valid(cs) and (cs as Node3D).get("facts") is Dictionary:
+		var kept:Dictionary=(cs as Node3D).get("facts")
+		for key in ["herds","fowl"]:
+			if kept.has(key) and not facts.has(key):facts[key]=kept[key]
 	_open=true
 	var bus:=ensure_bus()
 	var room:=AudioServer.get_bus_effect(bus,0) as AudioEffectReverb
