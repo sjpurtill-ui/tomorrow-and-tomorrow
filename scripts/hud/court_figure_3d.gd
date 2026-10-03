@@ -76,6 +76,8 @@ var model:Node3D
 var skeleton:Skeleton3D
 var player:AnimationPlayer
 var clip:=""
+## Travel speed / the authored walk speed. Acting walks use this clock too.
+var locomotion_rate:=1.0
 var head_bone:=-1
 var head_height:=0.28
 var body_height:=1.72
@@ -598,10 +600,15 @@ func drop_held(empty_stance:="stand")->Node3D:
 func play(name:String,blend:=0.25,at:=-1.0)->void:
 	if player==null or not player.has_animation(name):return
 	if name==clip and at<0.0 and player.is_playing():return
+	set_locomotion_rate(1.0)
 	clip=name
 	_props_for(name)
 	player.play(name,blend)
 	if at>=0.0:player.seek(fmod(at,player.get_animation(name).length),true)
+
+func set_locomotion_rate(rate:float)->void:
+	locomotion_rate=maxf(rate,0.0)
+	if player!=null:player.speed_scale=locomotion_rate
 
 func clip_length(name:String)->float:
 	return player.get_animation(name).length if player!=null and player.has_animation(name) else 0.0
@@ -617,7 +624,9 @@ func face(yaw_degrees:float,time:=0.3)->void:
 	if time<=0.0 or not is_inside_tree():
 		rotation_degrees.y=yaw_degrees;return
 	_yaw_tween=create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_yaw_tween.tween_property(self,"rotation_degrees:y",yaw_degrees,time)
+	# Angles wrap at 180 degrees; cross that seam by the short turn.
+	var target:=rotation.y+wrapf(deg_to_rad(yaw_degrees)-rotation.y,-PI,PI)
+	_yaw_tween.tween_property(self,"rotation:y",target,time)
 
 ## The top of the head in world space (speech bubbles hang above it).
 func head_top()->Vector3:

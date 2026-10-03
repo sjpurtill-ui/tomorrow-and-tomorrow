@@ -38,6 +38,7 @@ const Voice:=preload("res://scripts/character_voice.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
+const WalkMotion:=preload("res://scripts/hud/court_motion.gd")
 const Prewarm:=preload("res://scripts/hud/court_prewarm.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
 const ExecStage:=preload("res://scripts/hud/court_exec_stage.gd")
@@ -883,11 +884,11 @@ func _beside_a_grown_up(f:Figure)->void:
 ## A walk in the hall (spot-local points, from their mark to far) that goes
 ## round the set's things and everyone standing (court_paths.gd); empty: the
 ## old way (round the fire only).
-func plan_walk(f:Figure,far:Vector3)->PackedVector3Array:
+func plan_walk(f:Figure,far:Vector3,start:=Vector3.ZERO)->PackedVector3Array:
 	if court_set==null or f==null or f.spot==null:return PackedVector3Array()
 	var room:Variant=Paths.room_of(court_set)
 	if room==null:return PackedVector3Array()
-	var from3:=f.spot.position
+	var from3:=f.spot.transform*start
 	var to3:=f.spot.transform*far
 	var people:=[]
 	for key in cast_order:
@@ -902,7 +903,7 @@ func plan_walk(f:Figure,far:Vector3)->PackedVector3Array:
 		var local:=back*Vector3(point.x,from3.y,point.y)
 		local.y=0.0
 		out.append(local)
-	out[0]=Vector3.ZERO;out[out.size()-1]=far
+	out[0]=start;out[out.size()-1]=far
 	return out
 
 ## The acting's own stances (K) where the hall calls for them: an envoy's
@@ -2317,6 +2318,9 @@ class Figure extends Control:
 	func arriving_in()->float:
 		if leaving or stroll<=0.0 or _move==null or not _move.is_valid():return 0.0
 		return maxf(walk_total-_move.get_total_elapsed_time(),0.0)
+
+	func _arriving()->bool:
+		return not leaving and _move!=null and _move.is_valid() and (stroll>0.0 if spot!=null else absf(walk)>0.01)
 	## One of the acting's own stances they keep (K: "guard", "fire"), or "".
 	var acting_stance:=""
 	## How far they have sunk (put to death where they stood), in metres.
@@ -2339,6 +2343,7 @@ class Figure extends Control:
 	var wrong_side:=false
 	var _step:Tween
 	var _path:=PackedVector3Array()
+	var _travel_progress:=0.0
 	var _act:Tween
 	var _shift:Tween
 	var _idle:Tween
@@ -2413,16 +2418,16 @@ class Figure extends Control:
 		position=(foot-Vector2(box.x*.5,box.y)).round()
 
 	## The way between their mark and a point (spot-local), around the fire.
-	func _route(far:Vector3)->PackedVector3Array:
-		var out:=PackedVector3Array([Vector3.ZERO])
+	func _route(far:Vector3,start:=Vector3.ZERO)->PackedVector3Array:
+		var out:=PackedVector3Array([start])
 		var stage:=_stage.get_ref() as Control if _stage!=null else null
 		# Round the set's things and the people standing (court_paths.gd).
 		if stage!=null and stage.get("court_set")!=null and spot!=null:
-			var planned:PackedVector3Array=stage.call("plan_walk",self,far)
+			var planned:PackedVector3Array=stage.call("plan_walk",self,far,start)
 			if planned.size()>=2:return planned
 		if stage!=null and stage.get("court_set")!=null:
 			var fire:=spot.to_local(stage.set_point("fire"))
-			var a:=Vector2.ZERO;var b:=Vector2(far.x,far.z);var c:=Vector2(fire.x,fire.z)
+			var a:=Vector2(start.x,start.z);var b:=Vector2(far.x,far.z);var c:=Vector2(fire.x,fire.z)
 			var ab:=b-a
 			var t:=clampf((c-a).dot(ab)/maxf(ab.length_squared(),0.001),0.0,1.0)
 			var near:=a+ab*t
@@ -2434,7 +2439,8 @@ class Figure extends Control:
 		return out
 
 	func _path_at(along:float)->Vector3:
-		if _path.size()<2 or along<=0.0:return Vector3.ZERO
+		if _path.is_empty():return Vector3.ZERO
+		if _path.size()<2 or along<=0.0:return _path[0]
 		var total:=0.0
 		for i in _path.size()-1:total+=_path[i].distance_to(_path[i+1])
 		var want:=clampf(along,0.0,1.0)*total
@@ -2450,13 +2456,31 @@ class Figure extends Control:
 		return total
 
 	## Walking: turned the way they go along the path.
-	func _stroll_step(value:float,inward:bool)->void:
-		var ahead:=_path_at(clampf(value+(-0.02 if inward else 0.02),0.0,1.0))
+	func _stroll_step(value:float,inward:bool,delta:=1.0/60.0)->void:
+		# Look ahead by a step's distance, independent of the route's length.
+		var look_ahead:=0.30/maxf(_path_length(),0.01)
+		var ahead:=_path_at(clampf(value+(-look_ahead if inward else look_ahead),0.0,1.0))
 		var here:=_path_at(value)
 		var way:=ahead-here
 		if Vector2(way.x,way.z).length()>0.002:
-			body3d.rotation.y=lerp_angle(body3d.rotation.y,atan2(way.x,way.z),0.25)
+			body3d.rotation.y=lerp_angle(body3d.rotation.y,atan2(way.x,way.z),1.0-exp(-12.0*maxf(delta,0.0)))
 		stroll=value
+
+	func _queue_stroll(from:float,to:float,seconds:float,pace:float,inward:bool)->void:
+		_move.tween_callback(func()->void:
+			_travel_progress=0.0
+			# A prior bow/look tween must not fight the path's steering.
+			body3d.face(body3d.rotation_degrees.y,0.0))
+		_move.tween_method(_travel_step.bind(from,to,seconds,pace,inward),0.0,1.0,seconds)
+		_move.tween_callback(func()->void:body3d.set_locomotion_rate(1.0))
+
+	func _travel_step(progress:float,from:float,to:float,seconds:float,pace:float,inward:bool)->void:
+		var motion:=Self.WalkMotion.sample(progress,seconds)
+		var delta:=maxf(progress-_travel_progress,0.0)*seconds
+		_travel_progress=progress
+		var metres:=absf(to-from)*_path_length()
+		body3d.set_locomotion_rate(motion.y*metres/maxf(seconds*pace,0.001))
+		_stroll_step(lerpf(from,to,motion.x),inward,delta)
 
 	func _stroll_in(delay:float)->void:
 		var stage:=_stage.get_ref() as Control
@@ -2479,7 +2503,7 @@ class Figure extends Control:
 			body3d.visible=false
 			_move.tween_interval(delay)
 			_move.tween_callback(func()->void:if is_instance_valid(body3d):body3d.visible=true)
-		_move.tween_method(_stroll_step.bind(true),1.0,0.0,time)
+		_queue_stroll(1.0,0.0,time,pace,true)
 		_move.tween_callback(_settle_in)
 
 	## The set's door (0) and the way out beyond it (1) (M's door_points).
@@ -2507,7 +2531,7 @@ class Figure extends Control:
 		_move=create_tween()
 		if delay>0.0:_move.tween_interval(delay)
 		var lost:=0.6
-		_move.tween_method(_stroll_step.bind(true),1.0,lost,clampf(_path_length()*(1.0-lost)/maxf(pace,0.1),0.6,3.0))
+		_queue_stroll(1.0,lost,clampf(_path_length()*(1.0-lost)/maxf(pace,0.1),0.6,3.0),pace,true)
 		_move.tween_callback(func()->void:_clip(rest_clip,0.3);body3d.face(rest_yaw+60.0,0.4))
 		_move.tween_interval(0.7)
 		_move.tween_callback(func()->void:body3d.face(rest_yaw-50.0,0.5))
@@ -2518,13 +2542,21 @@ class Figure extends Control:
 			_path=_route(here)
 			stroll=1.0
 			_clip("walk_in",0.25,0.0))
-		_move.tween_method(_stroll_step.bind(true),1.0,0.0,1.4)
+		_queue_stroll(1.0,0.0,1.4,pace,true)
 		_move.tween_callback(func()->void:wrong_side=false;_settle_in())
 
 	func _stroll_out(delay:float,style:String)->void:
 		if _act and _act.is_valid():_act.kill()
 		var stage:=_stage.get_ref() as Control
-		_path=_route(spot.to_local(_door(stage,1)))
+		# A dismissal can arrive halfway through an entrance or a small step.
+		# Leave from those feet, without jumping back to the assigned mark.
+		var start:=_path_at(stroll)+nudge
+		if _step and _step.is_valid():_step.kill()
+		_path=_route(spot.to_local(_door(stage,1)),start)
+		nudge=Vector3.ZERO
+		stroll=0.0
+		body3d.set_locomotion_rate(1.0)
+		if delay>0.0 and String(body3d.clip).begins_with("walk"):_clip(rest_clip,0.2)
 		if style in ["backward","backward_bump","storm_back"] and not Motion.reduced():
 			_stroll_out_acted(delay,style);return
 		_move=create_tween()
@@ -2553,7 +2585,7 @@ class Figure extends Control:
 				_move.tween_interval(2.35)
 				_move.tween_callback(func()->void:_clip("walk_out",0.35,0.0))
 		var time:=clampf(_path_length()/maxf(pace,0.1),1.2,7.0)
-		_move.tween_method(_stroll_step.bind(false),0.0,1.0,time)
+		_queue_stroll(0.0,1.0,time,pace,false)
 		_move.tween_callback(_vanish)
 
 	## Walking backward: they keep facing the hall (no turn with the path).
@@ -2596,24 +2628,24 @@ class Figure extends Control:
 					_clip("bow",0.2,0.0))
 				_move.tween_interval(maxf(1.1,_length_of("bump_post",1.1)-0.28))
 			_move.tween_callback(func()->void:_let_go(0.3);_clip("walk_out",0.35,0.0))
-			_move.tween_method(_stroll_step.bind(false),back,1.0,clampf(whole*(1.0-back)/maxf(walk_pace,0.1),0.8,6.0))
+			_queue_stroll(back,1.0,clampf(whole*(1.0-back)/maxf(walk_pace,0.1),0.8,6.0),walk_pace,false)
 			_move.tween_callback(_vanish)
 			return
 		# Storming off, then back for what they left.
 		var stride:=_pace_of("storm_walk",float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT)
 		var door:=0.82
 		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
-		_move.tween_method(_stroll_step.bind(false),0.0,door,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
+		_queue_stroll(0.0,door,clampf(whole*door/maxf(stride,0.1),0.8,4.0),stride,false)
 		# Stopped short at the door: they remember.
 		_move.tween_callback(func()->void:_clip(rest_clip,0.25);_acted("storm_stop","",0.06))
 		_move.tween_interval(maxf(0.6,_length_of("storm_stop",0.6)-0.2))
 		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
-		_move.tween_method(_stroll_step.bind(true),door,0.0,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
+		_queue_stroll(door,0.0,clampf(whole*door/maxf(stride,0.1),0.8,4.0),stride,true)
 		# Snatched up: their stance (and its prop) for a moment.
 		_move.tween_callback(func()->void:body3d.face(rest_yaw,0.2);_clip(rest_clip,0.2);_acted("snatch_up","",0.08))
 		_move.tween_interval(maxf(0.7,_length_of("snatch_up",0.7)-0.1))
 		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
-		_move.tween_method(_stroll_step.bind(false),0.0,1.0,clampf(whole/maxf(stride,0.1),0.8,5.0))
+		_queue_stroll(0.0,1.0,clampf(whole/maxf(stride,0.1),0.8,5.0),stride,false)
 		_move.tween_callback(_vanish)
 
 	## A small step to a point in the hall (world), and back after a while.
@@ -2817,12 +2849,13 @@ class Figure extends Control:
 		if leaving:return
 		if body3d!=null:
 			if _act and _act.is_valid():_act.kill()
-			# They turn a little to the god they answer and speak with their hands.
-			body3d.face(rest_yaw*.55,0.35)
 			var stage:=_stage.get_ref() as Control if _stage!=null else null
 			if stage!=null:body3d.look_at_point(stage.god_point(),0.5)
-			_clip(body3d.talk_clip(both_hands),0.35)
 			_light(1.06)
+			# Their face can answer on the way in; their feet still have to walk.
+			if _arriving():return
+			body3d.face(rest_yaw*.55,0.35)
+			_clip(body3d.talk_clip(both_hands),0.35)
 			_later(seconds,func()->void:
 				_clip(rest_clip,0.5);_light(1.0);body3d.face(rest_yaw,0.5))
 			return
@@ -2842,24 +2875,26 @@ class Figure extends Control:
 		if body3d==null or speaker==null or speaker.body3d==null:
 			listen_toward(speaker.home.x if speaker!=null else home.x);return
 		if _act and _act.is_valid():_act.kill()
+		body3d.look_at_point(speaker.body3d.head_top()+Vector3(0.0,-0.10*speaker.body3d.scale.y,0.0),0.45)
+		_light(0.95)
+		if _arriving():return
 		var toward:=clampf((speaker.home.x-home.x)/maxf(size.x*3.0,1.0)*90.0,-55.0,55.0)
 		if spot!=null:
 			var to:=spot.to_local(speaker.body3d.global_position)
 			toward=clampf(rad_to_deg(atan2(to.x,to.z)),-75.0,75.0)
 		body3d.face(lerpf(rest_yaw,toward,.45),0.5)
-		body3d.look_at_point(speaker.body3d.head_top()+Vector3(0.0,-0.10*speaker.body3d.scale.y,0.0),0.45)
 		_clip(rest_clip,0.45)
-		_light(0.95)
 
 	## Someone else speaks: they turn a little toward them and listen.
 	func listen_toward(x:float)->void:
 		if leaving:return
 		if body3d!=null:
 			if _act and _act.is_valid():_act.kill()
+			_light(0.93)
+			if _arriving():return
 			# Facing the hall, the speaker on the right is on their left.
 			body3d.face(rest_yaw,0.3)
 			_clip(rest_clip,0.4)
-			_light(0.93)
 			return
 		var side:=signf(x-home.x)
 		_pose(deg_to_rad(1.6)*side,4.0*side,1.0,Color(.90,.89,.87))
@@ -2870,11 +2905,12 @@ class Figure extends Control:
 		if body3d!=null:
 			if _act and _act.is_valid():_act.kill()
 			# Every face lifts to the god's voice, from where they stand.
-			body3d.face(rest_yaw*.5,0.45)
 			var stage:=_stage.get_ref() as Control if _stage!=null else null
 			if stage!=null:body3d.look_at_point(stage.god_point(true),0.5)
-			_clip(rest_clip,0.5)
 			_light(1.03)
+			if _arriving():return
+			body3d.face(rest_yaw*.5,0.45)
+			_clip(rest_clip,0.5)
 			return
 		_pose(0.0,0.0,1.0,Color(1.03,1.02,.98))
 		if not is_inside_tree() or Motion.reduced():return
@@ -2886,6 +2922,7 @@ class Figure extends Control:
 	## Walk in from the side: a few steps, into place.
 	func enter_from(side:float,distance:float,delay:float=0.0)->void:
 		if not is_inside_tree():return
+		if _act and _act.is_valid():_act.kill()
 		if _move and _move.is_valid():_move.kill()
 		if body3d!=null and spot!=null:
 			_stroll_in(delay);return
