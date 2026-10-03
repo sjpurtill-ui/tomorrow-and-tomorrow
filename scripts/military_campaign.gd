@@ -4920,10 +4920,14 @@ const DEFENSE_WORDS:=["people","build","hold"]
 ## (or `workers` of them): workers x labour efficiency x DEFENSE_WORK_PER_HAND,
 ## never more than DEFENSE_DAILY_SHARE of the stage a day. The daily work, the
 ## people's council and the screens all read this.
-func settlement_defense_daily_work(stage_index:int,workers:float=-1.0)->float:
+func settlement_defense_daily_work(stage_index:int,workers:float=-1.0,builders:bool=true)->float:
 	if stage_index<0 or stage_index>=SETTLEMENT_DEFENSE_STAGES.size(): return 0.0
 	if workers<0.0: workers=maxf(0.0,float(watch_at_home()))
 	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
+	# [built-fabric] The builders on the walls work beside the watch; stone
+	# stages need their skill (built_fabric.gd wall_hands). `builders` false:
+	# the watch alone (a watchman's rate).
+	workers=preload("res://scripts/built_fabric.gd").wall_hands(workers,stage_index,builders)
 	return minf(float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE,workers*efficiency*DEFENSE_WORK_PER_HAND)
 
 
@@ -4936,7 +4940,11 @@ const DEFENSE_WORK_PER_HAND:=0.38
 func settlement_defense_full_pace_workers(stage_index:int)->int:
 	if stage_index<0 or stage_index>=SETTLEMENT_DEFENSE_STAGES.size(): return 0
 	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
-	return ceili(float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE/(efficiency*DEFENSE_WORK_PER_HAND)-0.0001)
+	# [built-fabric] Less the builders' own hands, at a watchman's rate on that stage.
+	var Fabric:=preload("res://scripts/built_fabric.gd")
+	var watchman:=Fabric.wall_hands(1.0,stage_index,false)
+	var needed:=float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE/(efficiency*DEFENSE_WORK_PER_HAND)-Fabric.wall_builder_hands(stage_index)
+	return maxi(0,ceili(needed/maxf(0.01,watchman)-0.0001))
 
 
 func settlement_defense_upgrade_availability()->Dictionary:
@@ -5004,7 +5012,10 @@ func settlement_defense_snapshot()->Dictionary:
 		var left:=maxf(0.0,float(project.work)-float(settlement_defense.project_work))
 		construction={"active":true,"stage":project_index,"name":String(project.name),"short":String(project.short),"progress":float(settlement_defense.project_progress),"work_done":float(settlement_defense.project_work),"work_required":float(project.work),"materials":(settlement_defense.reserved_materials as Dictionary).duplicate(true),
 			"daily_work":daily,"days_left":left/daily if daily>0.0 else -1.0,"started_by":String(settlement_defense.get("started_by","")),"started_day":int(settlement_defense.get("started_day",-1))}
-	return {"stage":stage_index,"name":String(stage.name),"short":String(stage.short),"description":String(stage.description),"integrity":integrity,"defense_bonus":float(stage.defense_bonus)*integrity,"observation_radius_km":float(stage.observation_km)*(0.82+integrity*0.18),"store_protection":float(stage.store_protection)*integrity,"garrison_personnel":troops,"garrison_trained":trained_troops,"garrison_militia":int(militia.count),"garrison_guard":guard,"garrison_watch":maxi(0,at_home-trained_troops),"garrison_townsfolk":int(militia.rise),"garrison_required":garrison_required,"garrison_coverage":garrison_coverage,"basic_training_automatic":true,"construction":construction,"word":String(settlement_defense.word),"completed_day":int(settlement_defense.get("completed_day",-1)),"next":settlement_defense_upgrade_availability()}
+	# [built-fabric] Walls kept by skilled builders hold better, and the home
+	# town's stone houses are strongpoints of their own (built_fabric.gd).
+	var Fabric:=preload("res://scripts/built_fabric.gd")
+	return {"stage":stage_index,"name":String(stage.name),"short":String(stage.short),"description":String(stage.description),"integrity":integrity,"defense_bonus":float(stage.defense_bonus)*integrity*Fabric.wall_quality()+Fabric.stone_defense(),"observation_radius_km":float(stage.observation_km)*(0.82+integrity*0.18),"store_protection":minf(0.9,float(stage.store_protection)*integrity+Fabric.stone_stores()),"works_bonus":float(stage.defense_bonus)*integrity,"craft_bonus":float(stage.defense_bonus)*integrity*(Fabric.wall_quality()-1.0),"stone_bonus":Fabric.stone_defense(),"garrison_personnel":troops,"garrison_trained":trained_troops,"garrison_militia":int(militia.count),"garrison_guard":guard,"garrison_watch":maxi(0,at_home-trained_troops),"garrison_townsfolk":int(militia.rise),"garrison_required":garrison_required,"garrison_coverage":garrison_coverage,"basic_training_automatic":true,"construction":construction,"word":String(settlement_defense.word),"completed_day":int(settlement_defense.get("completed_day",-1)),"next":settlement_defense_upgrade_availability()}
 
 
 func _process_settlement_defense_day()->void:
@@ -5034,9 +5045,14 @@ func _process_settlement_defense_day()->void:
 			# ledger line); every other people keeps its clerk's line.
 			if not preload("res://scripts/home_defense.gd").tell_finished(project_index,by):
 				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s completed" % String(project.name).capitalize(),"description":String(project.description),"domain":"security","severity":"notice"})
+	# [built-fabric] Unkept walls wear (built_fabric.gd wall_wear).
+	if int(settlement_defense.stage)>0 and not _home_battle_running():
+		var worn:=preload("res://scripts/built_fabric.gd").wall_wear(float(WorldSimulation.span))
+		if worn>0.0:settlement_defense["integrity"]=clampf(float(settlement_defense.integrity)-worn,0.0,1.0);changed=true
 	var integrity:=float(settlement_defense.integrity)
 	if integrity<1.0 and not _home_battle_running():
-		var repair_workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))+maxf(0.0,float(watch_at_home()))*0.20
+		# [built-fabric] The walls crew mends them (built_fabric.gd crews), with a fifth of the watch.
+		var repair_workers:=preload("res://scripts/built_fabric.gd").wall_builders()+maxf(0.0,float(watch_at_home()))*0.20
 		if repair_workers>0.0:
 			settlement_defense["integrity"]=move_toward(integrity,1.0,minf(0.006,repair_workers*0.00012)*WorldSimulation.span)
 			changed=true

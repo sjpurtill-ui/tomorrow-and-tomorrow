@@ -50,10 +50,12 @@ static func allowed(fig:Node3D)->bool:
 static func prepare(fig:Node3D)->void:
 	if not allowed(fig) or fig.has_meta(&"gore_prepared"):return
 	var skel:Skeleton3D=fig.get("skeleton")
-	var state:={"poses":[], "pieces":{}}
+	var poses:Array=[]
+	var state:={"poses":poses, "pieces":{}}
 	fig.set_meta(&"gore_prepared",state)
+	# Capture only the array. Capturing state here would form a reference
+	# cycle through state.keep, retaining every prepared execution after release.
 	var keep:=func()->void:
-		var poses:Array=state.poses
 		poses.resize(skel.get_bone_count())
 		for i in skel.get_bone_count():poses[i]=skel.get_bone_global_pose(i)
 	skel.skeleton_updated.connect(keep)

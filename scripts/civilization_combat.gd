@@ -139,7 +139,9 @@ static func _whole_people(mc:Variant)->Dictionary:
 	# while bands away stand above it. None of them rises.
 	var serving:=maxi(Watch.manpower(mc),maxi(0,int(mc._mobilized_count())))
 	var adults:=maxf(0.0,float(state.population_cohorts.get("working_age",float(state.population_exact)*0.60))-float(away)-float(serving))
-	return {"watch":Watch.home_guard(mc),"rise_exact":RISE_SHARE*adults}
+	# Roads bring more of the countryside's people to the fight in time
+	# (built_fabric.gd ROAD_RISE).
+	return {"watch":Watch.home_guard(mc),"rise_exact":minf(adults,RISE_SHARE*adults*preload("res://scripts/built_fabric.gd").rise_factor())}
 
 ## Grown people of the people in scope who are away from their towns.
 static func _away(state:Variant)->int:

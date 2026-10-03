@@ -122,6 +122,23 @@ Against the engine's first decade on good and average land (8 runs on 4 seeds), 
 
 The surrogate keeps the people's few learners in hunger as the leaders do (`work_paths.gd LEARNERS_KEPT`, `LEARNERS_KEPT_FROM`, `LEARNERS_KEPT_MOST`, read from the game; `Surrogate._keep_learners`, the last step of the labor plan). Absent constants switch it off, so `SIM_GAME_REV=<older main>` reproduces that main.
 
+### The built fabric (2026-10-03)
+
+`tools/sim/fabric.py` mirrors `scripts/built_fabric.gd` (docs/BUILT_FABRIC.md), reading every constant from the game:
+- homes by grade, roads, fine works, work buildings and the builders' craft, with upkeep first and wear;
+- the effects the engine reads: health, cohesion, exposure and illness deaths, the crises' outbreaks and fires (`crisis.py`), stored rot, making, cutting and digging, the carriers' hauling, the infrastructure capacity, and the craft's pull on building knowledge (folded into `item_activity` once a year);
+- the defence ledger's stages as the people's council raises them: danger from the neighbours (0.2 once others are known, `contact_year`) plus the builders' wish, the watch and the builders on the walls;
+- a standard great-works policy every path runs alike: the boldest work whose collapse odds at today's assessment are at most `WORK_RISK` (12 in 100), one every `WORK_INTERVAL` (15) years when fed with 30 days in store. The policy is a surrogate stand-in.
+
+The snapshot carries the homes, roads, beauty, works cover, stone share, craft, great works, follies, renown points and standing's readings (might with the walls, splendor, awe, allure). `paths.py` prints them and counts might, awe and allure in its dominance check.
+
+Surrogate stand-ins:
+- one raw-materials pool stands for timber, clay, stone and fibre; the fabric draws only above 3 loads a head;
+- builders are halved for the fabric while the homes lag the people;
+- there are no raids or sieges, roads between towns, trade or water model, so roads act only on hauling.
+
+Without `scripts/built_fabric.gd` (`SIM_GAME_REV=<an older main>`) the fabric is off. The walls and the great works still run, with the odds as they were.
+
 ## What it models
 
 The surrogate models one aggregate society, stepped month by month. Research, adoption, effect totals, capacities and artifacts update once a month. Demography and food take four sub-steps a month (two before the people-first recalibration), using the engine's daily rates, and the leaders re-plan the work at each.

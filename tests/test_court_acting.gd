@@ -150,6 +150,40 @@ func test_a_new_reaction_crossfades_from_the_last()->void:
 	assert_float(fastest).is_less(5.0)
 
 
+func test_a_new_reaction_keeps_the_outgoing_expression_during_its_blend()->void:
+	var f:=_figure()
+	var a=Acting.of(f)
+	Acting.set_ambient(f,0.0)
+	Acting.play(f,"laugh")
+	_run(f,0.6)
+	var smile:float=a.face_now[Acting.CH_SMILE]
+	assert_float(smile).is_greater(0.8)
+	Acting.play(f,"gasp",{"blend":0.4})
+	_frame(f,a)
+	assert_float(absf(float(a.face_now[Acting.CH_SMILE])-smile)).override_failure_message("the outgoing smile popped off during the body crossfade").is_less(0.15)
+	_run(f,0.6)
+	assert_float(float(a.face_now[Acting.CH_SMILE])).is_less(0.15)
+	Acting.stop(f,0.3)
+	_run(f,0.5)
+	assert_float(float(a.face_now[Acting.CH_SMILE])).is_less(0.05)
+
+
+func test_a_speech_cue_keeps_the_face_of_the_reaction_it_interrupts()->void:
+	var f:=_figure()
+	var a=Acting.of(f)
+	Acting.set_ambient(f,0.0)
+	Acting.play(f,"laugh")
+	_run(f,0.6)
+	var smile:float=a.face_now[Acting.CH_SMILE]
+	Acting.speak(f,"Everyone!",2.0)
+	# Put a real scheduled speech gesture on this frame; it is dispatched
+	# after the reaction's body has already been sampled.
+	a._gest_t=PackedFloat32Array([0.0]);a._gest_clip=PackedStringArray(["talk_emphatic"])
+	_frame(f,a)
+	assert_str(String(a._a.clip)).is_equal("talk_emphatic")
+	assert_float(absf(float(a.face_now[Acting.CH_SMILE])-smile)).is_less(0.15)
+
+
 func test_a_sitter_keeps_their_seat_and_a_staff_its_hand()->void:
 	var sitter:=_figure("sit")
 	_run(sitter,0.3)
@@ -485,6 +519,49 @@ func test_stances_for_life_from_the_acting()->void:
 	assert_float(_bone_y(fire,"hips")).is_greater(0.8)
 
 
+func test_leaving_a_high_seat_starts_from_that_seat_without_a_drop()->void:
+	for variant:String in ["male_adult","female_old"]:
+		for height:float in [0.30,0.38,0.46]:
+			var f:=_figure("stand",variant)
+			Acting.set_ambient(f,0.0)
+			Acting.idle(f,"log",{"seat":height*f.body_height/1.72})
+			_run(f,1.0)
+			var hips:=_bone_y(f,"hips")
+			Acting.idle(f,"stand")
+			var a=Acting.of(f)
+			_frame(f,a)
+			assert_float(_bone_y(f,"hips")).override_failure_message("%s dropped from the %.2f m seat before standing" % [variant,height]).is_greater(hips-0.025)
+			_run(f,0.8)
+			assert_object(a._base_out).is_null()
+			assert_float(_bone_y(f,"hips")).is_greater(hips+0.12)
+
+
+func test_floor_sitting_never_puts_the_stool_through_the_body()->void:
+	for lit in [false,true]:
+		var f:=_figure("sit","male_old")
+		f.look["outfit"]="robe";f.look["lit"]=lit;f._dress()
+		var stool:MeshInstance3D=f._mesh_named("prop_stool")
+		assert_object(stool).is_not_null()
+		assert_bool(stool.visible).is_true()
+		Acting.idle(f,"cross")
+		_run(f,1.0)
+		assert_float(_bone_y(f,"hips")).is_less(0.4)
+		assert_bool(stool.visible).override_failure_message("the floor sitter still has the torso-height stool").is_false()
+		# Talking or redressing must not resurrect the supporting stool.
+		f.play(f.talk_clip(),0.0)
+		assert_bool(stool.visible).is_false()
+		f._dress()
+		assert_bool(stool.visible).is_false()
+		Acting.idle(f,"sit")
+		assert_bool(stool.visible).override_failure_message("ordinary seated posture lost its stool").is_true()
+		Acting.idle(f,"log",{"seat":0.38})
+		assert_bool(stool.visible).is_false()
+		Acting.idle(f,"fire")
+		assert_bool(stool.visible).is_false()
+		Acting.idle(f,"log")
+		assert_bool(stool.visible).override_failure_message("a seated pose without an external seat needs its stool").is_true()
+
+
 func test_exits_are_plans_of_clips_the_library_has()->void:
 	for style in ["bow","storm","storm_back","sober","led"]:
 		var plan:Array=Acting.exit_plan(style)
@@ -595,6 +672,42 @@ func test_walk_layers_follow_the_figure_pace_without_retiming_reactions()->void:
 	assert_float(float(a._a.t)).is_equal_approx(0.2,0.01)
 
 
+func test_authored_exits_and_executions_survive_the_fallback_walk_and_speech()->void:
+	for clip in ["bump_post","storm_stop","exec_club_batter"]:
+		var f:=_figure()
+		f.play("walk_in",0.0,0.0)
+		f.set(&"locomotion_rate",0.4)
+		Acting.play(f,clip,{"hold":false})
+		var a=Acting.of(f)
+		_run(f,0.6)
+		assert_object(a._a).override_failure_message("fallback walk cancelled %s" % clip).is_not_null()
+		if a._a==null:continue
+		assert_float(float(a._a.fade_from)).is_less(0.0)
+		# Exit beats and execution cues keep their own timeline, independent of gait.
+		assert_float(float(a._a.t)).is_equal_approx(0.6,0.01)
+		f.play("stand",0.0,0.0)
+		Acting.speak(f,"Wait!",1.5)
+		a._gest_t=PackedFloat32Array([0.0]);a._gest_clip=PackedStringArray(["talk_emphatic"])
+		_frame(f,a)
+		assert_str(String(a._a.clip)).is_equal(clip)
+		Acting.stop(f,0.1)
+		_run(f,0.2)
+		assert_object(a._a).is_null()
+
+
+func test_the_adult_run_keeps_its_gait_at_the_figure_pace()->void:
+	var f:=_figure()
+	f.play("walk_in",0.0,0.0)
+	f.set(&"locomotion_rate",0.5)
+	Acting.play(f,"run")
+	var a=Acting.of(f)
+	_run(f,0.8)
+	assert_object(a._a).is_not_null()
+	if a._a==null:return
+	assert_float(float(a._a.t)).is_equal_approx(0.4,0.01)
+	assert_float(float(a._a.fade_from)).is_less(0.0)
+
+
 func test_the_stage_calls_reach_the_acting()->void:
 	## court_stage.gd _beat: acting.play(body, act, args) and acting.set_mood(body, vector).
 	var service=Acting.service()
@@ -687,6 +800,25 @@ func test_every_act_the_director_speaks_has_a_performance()->void:
 				if not Acting.has_clip(c):missing.append("%s->%s" % [act,c])
 		if not spec.is_empty() and String(spec[0])=="gesture" and not Acting.GESTURES.has(String(spec[1])):missing.append("%s->%s" % [act,spec[1]])
 	assert_array(Array(missing)).override_failure_message("no performance for: %s" % ", ".join(missing)).is_empty()
+
+
+func test_fire_and_fright_beats_use_their_authored_body_business()->void:
+	for variant in ["male_old","female_adult","child"]:
+		var f:=_figure("stand",variant)
+		var a=Acting.of(f)
+		for beat in ["warm_hands","cough_smoke","hide_eyes"]:
+			Acting.service().play(f,beat,{"beat":beat,"fallback":"bow","dur":1.6})
+			assert_object(a._a).is_not_null()
+			if a._a==null:continue
+			var expected:="rub_hands" if beat=="warm_hands" else "cough"
+			if beat=="hide_eyes":expected="child_cover_eyes_peek" if variant=="child" else "cover_eyes_"
+			assert_str(String(a._a.clip)).starts_with(expected)
+			var before:=_hand(f)
+			var moved:=0.0
+			for i in 24:
+				_frame(f,a)
+				moved=maxf(moved,before.distance_to(_hand(f)))
+			assert_float(moved).override_failure_message("%s %s hands did not move" % [variant,beat]).is_greater(0.08)
 
 
 func test_the_new_gestures_move_the_head_and_end()->void:
@@ -856,6 +988,11 @@ func test_the_club_meets_the_head_on_the_crack()->void:
 	var victim:=_figure("stand","male_adult");var batter:=_figure("stand","male_young")
 	_place(victim,plan.roles.victim);_place(batter,plan.roles.executioner)
 	var va=Acting.of(victim);var ba=Acting.of(batter)
+	# A staged actor may still have the entrance gait underneath its acting.
+	# That fallback must neither fade the execution nor retime its impact.
+	for f in [victim,batter]:
+		f.play("walk_in",0.0,0.0)
+		f.set(&"locomotion_rate",0.4)
 	var club:Node3D=auto_free(Node3D.new());add_child(club)
 	Acting.hold(batter,club,"R")
 	var heard:=[]

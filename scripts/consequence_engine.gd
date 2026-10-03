@@ -6,6 +6,7 @@ const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
 const CUSTOM:=preload("res://scripts/custom_directive.gd")
 ## The town hall, shrines and yard (civic_building_effects.gd).
 const CIVIC:=preload("res://scripts/civic_building_effects.gd")
+const FABRIC:=preload("res://scripts/built_fabric.gd")
 const HearthCount:=preload("res://scripts/hearth_count.gd")
 ## The sickness & disaster log (hardship_log.gd): words only.
 const HARDSHIPS:=preload("res://scripts/hardship_log.gd")
@@ -797,6 +798,12 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var care_health:=FoodCare.CARE_HEALTH*FoodCare.care_cover_of(WorldSimulation.state)
 	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+fed_security*0.43+fresh_health+care_health+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")-policy_effect("disease_risk")*0.40+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
 	health_target=clampf(health_target+float(clinical.get("health_relief",0)),.02,.97)
+	# Better homes: the health the people tend toward, and against the
+	# season's cold and heat for those with a roof (built_fabric.gd).
+	if not traveling:
+		var weather:=FABRIC.weather_bonus(cold_pressure*(1.0-float(clothing.get("cold",0))),heat_pressure)
+		WorldSimulation.state.simulation_metrics["fabric_weather"]=weather
+		health_target=clampf(health_target+FABRIC.health_bonus()+weather,.02,.97)
 	WorldSimulation.state.simulation_metrics["clinical_care"]=clinical.duplicate(true)
 	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,SPAN.rate(0.022))
 	WorldSimulation.state.simulation_metrics["water_intake_ratio"]=water_intake
@@ -806,7 +813,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var admin_coverage := clampf(stewards*(1.0+CIVIC.effect("admin_reach"))/maxf(1.0,population*0.035),0.0,1.25)
 	var work_strain := clampf((food_workers+extractors+builders)/able_population,0.0,1.0)
 	var economic_social_pressure:=float(WorldSimulation.state.economy_metrics.get("social_pressure",0.0))
-	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")-maxf(0.0,policy_effect("violence"))*0.30+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+_standing_cohesion()+CIVIC.effect("cohesion")-_levy_burden()*0.6+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
+	var cohesion_target := clampf(0.24+WorldSimulation.state.food_security*0.26+housing_ratio*0.15+admin_coverage*0.20+WorldSimulation.discovery.effect("state_capacity")*0.08+WorldSimulation.discovery.effect("cohesion")*0.10+WorldSimulation.progression.effect("cohesion")*0.10+WorldSimulation.progression.effect("legitimacy")*0.06+(1.0-work_strain)*0.08-modifier_strength("divided_camp")+policy_effect("cohesion_target")-maxf(0.0,policy_effect("violence"))*0.30+WorldSimulation.state.founding_effect("cohesion_target")-administrative_load*0.10-policy_churn*0.16-directive_resistance*0.18+economic_social_pressure*0.55+_standing_cohesion()+CIVIC.effect("cohesion")+FABRIC.civic("cohesion")-_levy_burden()*0.6+float(foreign_effects.treaty_count)*0.006-float(foreign_effects.war_count)*0.018-float(foreign_effects.get("war_exhaustion",0.0))*0.12-float(foreign_effects.get("occupation_burden",0.0))*0.16+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"cohesion"),0.08,0.96)
 	cohesion_target=maxf(.08,cohesion_target-float(exchange_pressure.cohesion_cost)-float(exchange_pressure.administrative_load))
 	labor_efficiency=maxf(.25,labor_efficiency-float(exchange_pressure.labor_cost))
 	var cohesion := lerpf(prior_cohesion,cohesion_target,SPAN.rate(0.014))
@@ -836,6 +843,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if "Open Work Area" in WorldSimulation.state.settlement_completed: material_target += 0.08
 	var material_capacity := lerpf(float(previous.get("material_capacity",0.12)),material_target,SPAN.rate(0.012))
 	var logistics_target := clampf(0.05+carriers/maxf(1.0,population*0.08)*0.55+material_capacity*0.18+storage_function*0.10+WorldSimulation.discovery.effect("haul_capacity")*0.18+WorldSimulation.discovery.effect("route_speed")*0.12+WorldSimulation.progression.effect("haul_capacity")*0.14+WorldSimulation.progression.effect("route_speed")*0.10+policy_effect("logistics_target")+WorldSimulation.state.founding_effect("logistics_target")+float(foreign_effects.market_access_bonus)*0.24,0.03,0.95)
+	# Roads, storehouses and yards: the carriers' hauling (built_fabric.gd).
+	logistics_target=clampf(logistics_target+FABRIC.logistics_bonus(),0.03,0.95)
 	var logistics := lerpf(float(previous.get("logistics",0.16)),logistics_target,SPAN.rate(0.016))
 	var security_target := clampf(0.10+guards/maxf(1.0,population*0.05)*0.42+cohesion*0.24+logistics*0.12+WorldSimulation.discovery.effect("warfare_readiness")*0.14+WorldSimulation.progression.effect("warfare_readiness")*0.12+WorldSimulation.progression.effect("security_efficiency")*0.10-modifier_strength("migratory_pressure")+policy_effect("security_target")-policy_effect("violence")*0.45+WorldSimulation.state.founding_effect("security_target")+float(foreign_effects.security_support)-float(foreign_effects.hostile_pressure)*0.18+SOCIETAL_VALUES_MODEL.simulation_effect(WorldSimulation.state.societal_values,"security"),0.04,0.96)
 	var security := lerpf(float(previous.get("security",0.38)),security_target,SPAN.rate(0.016))
@@ -873,6 +882,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"Travel exhaustion":0.0,
 		"Insecurity":maxf(0.0,0.30-security)*0.025+maxf(0.0,policy_effect("violence"))*0.020
 	}
+	# Dry floors and walls: fewer die of illness (built_fabric.gd).
+	if not traveling:mortality_components["Illness"]=float(mortality_components["Illness"])*FABRIC.illness_factor()
 	# Orders that spread or check sickness shift the illness burden directly.
 	mortality_components["Illness"]=maxf(0.0,float(mortality_components["Illness"])+policy_effect("disease_risk")*0.030)
 	mortality_components["Dehydration"]=_dehydration_mortality_rate(water_intake,WorldSimulation.state.consecutive_water_shortage_days)

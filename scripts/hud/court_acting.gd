@@ -114,6 +114,11 @@ const ACT_MAP:={
 	# executions: the room's business (the acts themselves are in EXEC_PLANS)
 	"wipe_face":["clip","room_wipe_face"],"vomit":["clip","room_vomit"],"cover_eyes_peek":["clip","room_cover_eyes_peek"],
 	"applaud_alone":["clip","room_applaud_alone"],"flinch_splash":["clip","room_flinch_splash"],"wince_crunch":["clip","room_wince_crunch"],
+	"hide_eyes":["clip","cover_eyes_"],"warm_hands":["clip","rub_hands"],"cough_smoke":["clip","cough"],
+	# Supporting director words reuse the matching hand business. The timed
+	# weapon strikes themselves belong to the execution plans.
+	"windup":["clip","point_up"],"swing":["clip","swat_fly"],"squint":["face",""],"tug":["clip","tug_sleeve_"],
+	"stir":["clip","fiddle"],"taste":["clip","stroke_chin"],"retch":["clip","room_vomit"],"throw":["clip","shoo_"],
 }
 ## A child does the same words its own way (J's child body; only its library
 ## has these clips): hides behind a grown-up's legs and peeks, copies the bow
@@ -123,7 +128,8 @@ const CHILD_ACTS:={"copy":["clip","child_copy_bow"],"bow_wrong":["clip","child_c
 	"fidget":["clip","child_fidget"],"freeze":["clip","child_shushed"],"shushed":["clip","child_shushed"],
 	"stifle_laugh":["clip","child_giggle"],"giggle":["clip","child_giggle"],"laugh":["clip","child_giggle"],
 	"run_to":["clip","child_run"],"cling":["clip","child_cling_"],"sit_down":["clip","sit_cross"],"wave":["clip","child_wave"],
-	"hide_behind":["clip","child_hide_behind_"],"peek_out":["clip","child_peek_out_"],"cover_eyes_peek":["clip","child_cover_eyes_peek"]}
+	"hide_behind":["clip","child_hide_behind_"],"peek_out":["clip","child_peek_out_"],"cover_eyes_peek":["clip","child_cover_eyes_peek"],
+	"hide_eyes":["clip","child_cover_eyes_peek"]}
 ## And any clip asked for by name: a child's own version where it has one.
 const CHILD_CLIPS:={"hide_behind_l":"child_hide_behind_l","hide_behind_r":"child_hide_behind_r","peek_out_l":"child_peek_out_l",
 	"peek_out_r":"child_peek_out_r","wave":"child_wave","laugh_stifled":"child_giggle","run":"child_run","sit_floor":"sit_cross",
@@ -739,6 +745,7 @@ var base_stance:=""
 var _base:Layer
 var _base_hi:Layer
 var _base_out:Layer
+var _base_out_hi:Layer
 var _base_mix:=0.0
 
 # procedural state
@@ -1138,6 +1145,7 @@ func rest_in(stance_id:String,opts:={})->void:
 	rebind_face()
 	var own:=String(OWN_STANCES.get(stance_id,""))
 	var under:=own if not own.is_empty() else stance_id
+	if fig.get(&"floor_seated")!=null:fig.set(&"floor_seated",stance_id=="cross")
 	# a seat from the set's mark: the figure's own stool only when none is given
 	if stance_id=="log" and opts.has("seat"):under="stand"
 	if fig.get(&"stance")!=null and under in (_consts.get("STANCES",[]) as Array):
@@ -1151,6 +1159,11 @@ func _set_base(stance_id:String,opts:Dictionary)->void:
 	base_stance=""
 	if _base!=null:
 		_base_out=_base;_base_out.fade_from=_base_out.t;_base_out.fade_len=0.6
+		# Keep the actual seat height through the transition. Dropping the
+		# higher twin here would snap an elder down onto the lowest seat.
+		_base_out_hi=_base_hi
+		if _base_out_hi!=null:
+			_base_out_hi.fade_from=_base_out_hi.t;_base_out_hi.fade_len=0.6
 		_base=null;_base_hi=null
 	if not OWN_STANCES.has(stance_id):return
 	var clip:="stance_"+stance_id
@@ -1180,7 +1193,11 @@ func owns(clip:String)->bool:
 	return has_clip(clip) and library(variant).has(clip)
 
 func _is_walk(layer:Layer)->bool:
-	return layer!=null and String(clip_meta(layer.clip).get("kind",""))=="walk"
+	# The older adult run is labelled idle in the shared manifest.
+	return layer!=null and (layer.clip=="run" or String(clip_meta(layer.clip).get("kind",""))=="walk")
+
+func _owns_movement(layer:Layer)->bool:
+	return layer!=null and (_is_walk(layer) or String(clip_meta(layer.clip).get("kind","")) in WALKED_KINDS)
 
 func _walking()->bool:
 	return String(fig.get(&"clip")).begins_with("walk") or _is_walk(_a)
@@ -1192,7 +1209,7 @@ func _layer_rate(layer:Layer)->float:
 
 func let_go(blend:=-1.0,keep_walks:=false)->void:
 	for layer in [_a,_b]:
-		if keep_walks and _is_walk(layer):continue
+		if keep_walks and _owns_movement(layer):continue
 		if layer!=null and (layer as Layer).fade_from<0.0:
 			(layer as Layer).fade_from=(layer as Layer).t
 			(layer as Layer).fade_len=blend if blend>0.0 else (layer as Layer).blend_out
@@ -1332,8 +1349,8 @@ func _step(delta:float)->void:
 	_hips_move=Vector3.ZERO
 	var walking:=_walking()
 	if String(fig.get(&"clip")).begins_with("walk"):
-		# Walking releases a stale reaction, but an authored walk over the
-		# fallback gait owns its legs until the stage changes or stops it.
+		# Walking releases stale reactions. Authored walks, exits and executions
+		# still own the body over that fallback until the stage stops them.
 		let_go(0.3,true)
 	_moods(dt)
 	# the stance of their own under it all, then the reactions, the fading one first
@@ -1341,13 +1358,16 @@ func _step(delta:float)->void:
 		_base_out.t+=dt
 		if _base_out.done():_base_out=null
 		else:_sample(_base_out)
+	if _base_out_hi!=null:
+		_base_out_hi.t+=dt
+		if _base_out_hi.done():_base_out_hi=null
+		else:_sample(_base_out_hi)
 	if _base!=null and not walking:
 		_base.t+=dt
 		_sample(_base)
 		if _base_hi!=null:
 			_base_hi.t=_base.t
 			_sample(_base_hi)
-	var face_w:=0.0
 	if _b!=null:
 		_b.t+=dt*_b.speed*_layer_rate(_b)
 		if _b.done():_b=null
@@ -1358,7 +1378,6 @@ func _step(delta:float)->void:
 		if _a.done():_a=null
 		else:
 			_sample(_a)
-			face_w=_a.weight()
 	# an execution's clip plays as written: no glances, no weight shifts on top
 	if _a!=null and _a.exec and _a.weight()>0.3:walking=true
 	# the staff stays planted: its hand is held where the clips put it
@@ -1372,7 +1391,7 @@ func _step(delta:float)->void:
 	_look(dt,walking)
 	for s in 2:
 		if _pin_on[s]==1:_pin_hand(s)
-	_face_out(dt,face_w)
+	_face_out(dt)
 	if _held[0]!=null or _held[1]!=null:_drive_props()
 	if not capture_bones.is_empty():
 		captured.resize(capture_bones.size())
@@ -1667,9 +1686,9 @@ func _speech(dt:float)->void:
 	_add(b_head,0.0,2.0*sin(_speech_t*1.3+_seed*6.0),1.5*sin(_speech_t*0.9))
 	while _gest_i<_gest_t.size() and _speech_t>=_gest_t[_gest_i]:
 		var held:=_a!=null and _a.hold
-		# A speech gesture must not take over the legs during an entrance or
-		# an authored exit. The voice and face continue as they walk.
-		if not held and not _walking():act(_gest_clip[_gest_i])
+		# The voice and face continue over staged movement, but a speech gesture
+		# must not replace an entrance, authored exit or timed execution.
+		if not held and not _walking() and not _owns_movement(_a):act(_gest_clip[_gest_i])
 		_gest_i+=1
 
 func _has_visemes()->bool:
@@ -1841,7 +1860,7 @@ func _pick_glance()->Vector3:
 	return at+fwd*1.2*sc+left*signf(side)*1.6*sc+Vector3.DOWN*0.2*sc
 
 ## The face: mood, the clip's face, the words and blinks, onto bones and morphs.
-func _face_out(dt:float,face_w:float)->void:
+func _face_out(dt:float)->void:
 	var joy:=_mood[M_JOY];var fear:=_mood[M_FEAR];var anger:=_mood[M_ANGER];var scorn:=_mood[M_SCORN];var awe:=_mood[M_AWE];var tired:=_mood[M_TIRED]
 	_mood_face[CH_JAW]=0.2*awe
 	_mood_face[CH_SMILE]=0.8*joy
@@ -1855,11 +1874,18 @@ func _face_out(dt:float,face_w:float)->void:
 	_mood_face[CH_EYES_X]=_saccade.x
 	_mood_face[CH_EYES_Y]=_saccade.y
 	_mood_face[CH_FROWN]=0.35*fear+0.3*tired
+	# Faces crossfade with their bodies. Read the weights now: a speech cue
+	# can start a new reaction after this frame's skeleton sampling.
+	var outgoing_w:=_b.weight() if _b!=null else 0.0
+	var incoming_w:=_a.weight() if _a!=null else 0.0
 	for ch in CH_COUNT:
 		var v:=_mood_face[ch]
-		if _a!=null and face_w>0.0:
+		if _b!=null and outgoing_w>0.0:
+			var curve:PackedFloat32Array=_b.face[ch]
+			if not curve.is_empty():v=lerpf(v,_b.face_value(ch,FACE_REST[ch]),outgoing_w)
+		if _a!=null and incoming_w>0.0:
 			var curve:PackedFloat32Array=_a.face[ch]
-			if not curve.is_empty():v=lerpf(v,_a.face_value(ch,FACE_REST[ch]),face_w)
+			if not curve.is_empty():v=lerpf(v,_a.face_value(ch,FACE_REST[ch]),incoming_w)
 		v+=_beat_face[ch]*_beat_w
 		if ch==CH_JAW:v=maxf(v,0.0)+_face[CH_JAW]
 		elif ch==CH_LIDS:v*=_face[CH_LIDS]

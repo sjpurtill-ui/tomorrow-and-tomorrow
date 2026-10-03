@@ -847,14 +847,14 @@ def _mantle(f):
 
 # --- what the clothes cover ----------------------------------------------------------
 
-def coverage(body, pieces, strict=None, margin=0.010, reach=0.016, edge=0.014, objs=None, tight_m=0.005, share=0.35):
+def coverage(body, pieces, strict=None, margin=0.010, reach=0.016, edge=0.014, objs=None, share=0.50):
     """For each body vertex: True where these pieces hide it.
     Skin inside a piece is hidden; skin poking up to `reach` out through it is
     hidden too (the cloth is drawn there), but never within `edge` of a hem,
     cuff or neckline. strict (per vertex, e.g. arms) only hides what is inside.
     objs (the built, bound pieces): skin is hidden only where the cloth nearest
-    it moves with it (their bone weights share at least `share`), or where it
-    lies within `tight_m` under the cloth: legs under a skirt that stays behind,
+    it moves with it (their bone weights share at least `share`): legs under a
+    skirt that stays behind,
     or an arm under a strap that stays on the shoulder, show as legs and arms
     when they come out, never as a hole through the body."""
     co = np.array([v.co[:] for v in body.data.vertices], dtype=np.float32)
@@ -879,12 +879,17 @@ def coverage(body, pieces, strict=None, margin=0.010, reach=0.016, edge=0.014, o
             hit = pc.solid(P) < -margin
         covered[idx[hit]] = True
     if objs:
-        covered &= _moves_with(body, objs, co, covered, tight_m, pieces, reach)
+        covering_names = {pc.name for pc in pieces if pc.cover}
+        covered &= _moves_with(body, [obj for obj in objs if obj.name in covering_names], co, covered, share)
     return covered
 
 
-def _moves_with(body, objs, co, covered, tight, pieces, reach):
-    """Which covered skin the cloth over it follows (or that lies tight under it)."""
+def _moves_with(body, objs, co, covered, share):
+    """Only discard skin when the overlying cloth shares its main bone weights.
+
+    Distance at rest is no guarantee: a close sleeve or hem can move away on
+    the very next pose. Keeping that skin prevents missing forearms and knees.
+    """
     from mathutils.kdtree import KDTree
     import cf_rig
     cloth = []
@@ -901,24 +906,20 @@ def _moves_with(body, objs, co, covered, tight, pieces, reach):
         kd.insert(c, i)
     kd.balance()
     skin = cf_rig._weights_table(body)
-    depth = np.full(len(co), -1.0, dtype=np.float32)
-    for pc in pieces:
-        if not pc.cover or pc.outer is None:
-            continue
-        inside = np.all((co >= pc.lo) & (co <= pc.hi), axis=-1)
-        if inside.any():
-            o = pc.outer(co[inside])
-            idx = np.nonzero(inside)[0]
-            depth[idx] = np.maximum(depth[idx], o)
     keep = np.ones(len(co), dtype=bool)
     for i in np.nonzero(covered)[0]:
-        if depth[i] > -tight:
-            continue
         found = kd.find_n(Vector(co[i].tolist()), 4)
         best = 0.0
         sw = skin[i]
         for _c, j, _d in found:
             cw = cloth[j][1]
             best = max(best, sum(min(sw.get(b, 0.0), cw.get(b, 0.0)) for b in sw))
-        keep[i] = best >= 0.35
+        # Sleeves can turn through a large angle in one gesture. A shared
+        # torso contribution is not enough to erase the arm underneath them.
+        arm = sum(value for bone, value in sw.items()
+                  if bone.split('.')[0] in ('upper_arm', 'forearm', 'hand', 'thumb', 'index', 'fingers'))
+        leg = sum(value for bone, value in sw.items()
+                  if bone.split('.')[0] in ('thigh', 'shin', 'foot', 'toe'))
+        required = max(share, 0.80 if arm > 0.35 else (0.65 if leg > 0.50 else share))
+        keep[i] = best >= required
     return keep

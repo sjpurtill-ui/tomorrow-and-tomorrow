@@ -15,12 +15,21 @@ const Executions:=preload("res://scripts/hud/court_executions.gd")
 
 var only:="club"
 var tier:=0
+var frame_dir:=""
+var frame_index:=0
+var review_stage:Control
+var saw_execution:=false
+var seen_things:Dictionary={}
 
 func _ready()->void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--only="):only=arg.trim_prefix("--only=")
 		if arg.begins_with("--tier="):tier=int(arg.trim_prefix("--tier="))
+		if arg=="--capture-frames":frame_dir="res://reports/court_execution_review/"
 	capture=DisplayServer.get_name()!="headless"
+	if not frame_dir.is_empty():
+		frame_dir=ProjectSettings.globalize_path(frame_dir+"%s-tier%d/" % [only,tier])
+		DirAccess.make_dir_recursive_absolute(frame_dir)
 	Backdrop.tier_override=tier
 	_setup_world()
 	if only=="behead" and not GameState.known_discoveries.has("bronze_alloying"):GameState.known_discoveries.append("bronze_alloying")
@@ -37,7 +46,18 @@ func _ready()->void:
 	get_tree().quit(0 if failures.is_empty() else 1)
 
 func _wait(seconds:float)->void:
-	await get_tree().create_timer(seconds).timeout
+	var deadline:=Time.get_ticks_msec()+int(seconds*1000.0)
+	while Time.get_ticks_msec()<deadline:
+		await get_tree().create_timer(0.25).timeout
+		if is_instance_valid(review_stage):
+			var current:Node=review_stage.get_node_or_null("Execution")
+			if current!=null:
+				saw_execution=true
+				for key in current._things:seen_things[key]=true
+			if not frame_dir.is_empty() and capture:
+				await RenderingServer.frame_post_draw
+				review_stage.view3d.get_texture().get_image().save_png(frame_dir+"frame_%04d.png" % frame_index)
+				frame_index+=1
 
 func _execute(director:Node)->void:
 	var audience:=Hall.debug_force("petition")
@@ -45,8 +65,11 @@ func _execute(director:Node)->void:
 	var id:=String(audience.id)
 	var modal:Control=director.open_audience(id)
 	await _wait_scene(modal,id,1)
+	review_stage=modal.court_stage
 	print("MARK opened")
 	await _wait(4.0)
+	# This diagnostic reviews the full scene without changing saved preferences.
+	Executions.gore="full"
 	var name:=String((Hall.find(id).get("speaker",{}) as Dictionary).get("name",""))
 	var order:="Put %s to death %s." % [name,String(Executions.ORDER_WORDS.get(only,"before the court"))]
 	print("MARK order ",order)
@@ -59,4 +82,15 @@ func _execute(director:Node)->void:
 	await _wait(2.0)
 	print("EXEC method=",modal.court_stage.exec_method if is_instance_valid(modal.court_stage) else "")
 	await _wait(16.5)
+	# Entering cast members can delay the first beat. Wait for the actual end,
+	# then record recovery as well, instead of truncating a longer arrival.
+	var finish_deadline:=Time.get_ticks_msec()+30000
+	while not bool(review_stage.exec_done) and Time.get_ticks_msec()<finish_deadline:
+		await _wait(0.25)
+	await _wait(3.0)
 	print("MARK end")
+	print("EXEC REVIEW saw_execution=",saw_execution," done=",review_stage.exec_done," things=",seen_things.keys())
+	if not saw_execution:_fail("the order never started an execution")
+	if not bool(review_stage.exec_done):_fail("the execution never finished")
+	if only in ["club","behead"] and not seen_things.has("head:main"):_fail("the execution never reached its impact")
+	if not frame_dir.is_empty():print("COURT_EXECUTION_REVIEW wrote ",frame_index," frames to ",frame_dir)

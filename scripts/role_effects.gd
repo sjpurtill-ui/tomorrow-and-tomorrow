@@ -129,18 +129,16 @@ static func construction()->Dictionary:
 		var name:=String(project.name)
 		if pace<=0.0:return _row("Nobody builds: the %s stands unfinished." % name,"Ten more: done in %s." % Impact._days(left/maxf(0.0001,faster)))
 		return _row("The %s: %s left." % [name,Impact._days(left/pace)],"Ten more: done %s sooner." % Impact._days(left/pace-left/maxf(0.0001,faster)))
-	if Construction.housing_under_way():
+	if Construction.housing_under_way() and Construction.housing()["short"]>0:
 		var homes:=Construction.housing_work_per_day()
 		var homes_more:=homes+homes/maxf(0.01,builders)*_ten("Construction") if builders>0.0 else homes
 		var batch:=Construction.HOUSING_BATCH_WORK
 		return _row("New homes: %d places every %s." % [Construction.housing_batch_places(),Impact._days(batch/maxf(0.0001,homes))],
 			"Ten more: each batch %s sooner." % Impact._days(batch/maxf(0.0001,homes)-batch/maxf(0.0001,homes_more)))
-	# Upkeep: builders at 5 in 100 of the people mend the town's monthly wear.
-	var pop:=_pop()
-	var mending:float=Mechanics.mending_factor()
-	var monthly:=func(people:float)->float:return Impact.BUILD_MEND*clampf(people/maxf(1.0,pop*Impact.BUILD_UPKEEP_SHARE),0.0,1.0)*mending-Impact.BUILD_WEAR
-	return _row("No work waits; repair moves %s points a month." % Impact._signed(float(monthly.call(builders))*100.0),
-		"Ten more: %s points a month." % Impact._signed((float(monthly.call(builders+_ten("Construction")))-float(monthly.call(builders)))*100.0))
+	# Once the people are housed, builders raise quality, not count: the
+	# town's built fabric (built_fabric.gd role_line).
+	var line:Dictionary=preload("res://scripts/built_fabric.gd").role_line(_ten("Construction"))
+	return _row(String(line.now),String(line.plus_ten))
 
 # --- Making -------------------------------------------------------------------------
 
@@ -161,7 +159,7 @@ static func logistics()->Dictionary:
 	var km:=float(water.get("source_distance_km",-1.0))
 	var walk:=maxf(0.0,km)*Mechanics.water_walk_factor()
 	var labor:=clampf(float(state.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)
-	var each:=Impact.CARRIER_WATER*labor/(1.0+walk*0.16)*(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5)) if km>=0.0 else 0.0
+	var each:=Impact.CARRIER_WATER*labor/(1.0+walk*0.16)*(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5))*preload("res://scripts/built_fabric.gd").water_factor() if km>=0.0 else 0.0
 	var needed:=float(water.get("total_required_today",water.get("required_today",0.0)))
 	var collected:=float(water.get("collected_today",0.0))
 	var lift:=func(people:float)->float:return people/maxf(1.0,pop*Impact.CARRIER_SHARE)*Impact.CARRIER_POINTS*100.0
