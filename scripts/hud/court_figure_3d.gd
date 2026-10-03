@@ -192,17 +192,17 @@ func _make_gaze()->void:
 		_looks.append(look)
 
 ## Attend to a point in the hall (world space); null: look where the body faces.
-func look_at_point(target:Variant,time:=0.45)->void:
+func look_at_point(target:Variant,time:=0.45,weight:=1.0)->void:
 	if _looks.is_empty() or gaze==null:return
 	if _gaze_tween and _gaze_tween.is_valid():_gaze_tween.kill()
 	_gaze_on=target!=null
 	if target!=null:
 		gaze.global_position=(target as Vector3)+Vector3(0.0,-_mood_drop(),0.0)*global_transform.basis.get_scale().y
 	if not is_inside_tree() or time<=0.0:
-		for look in _looks:look.influence=float(look.get_meta("weight")) if _gaze_on else 0.0
+		for look in _looks:look.influence=float(look.get_meta("weight"))*weight if _gaze_on else 0.0
 		return
 	_gaze_tween=create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE)
-	for look in _looks:_gaze_tween.tween_property(look,"influence",float(look.get_meta("weight")) if _gaze_on else 0.0,time)
+	for look in _looks:_gaze_tween.tween_property(look,"influence",float(look.get_meta("weight"))*clampf(weight,0.0,1.0) if _gaze_on else 0.0,time)
 
 func _mood_drop()->float:
 	## The head lowers in fear and lifts in defiance: the gaze point moves.
