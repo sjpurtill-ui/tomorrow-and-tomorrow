@@ -141,7 +141,9 @@ static func alerts(mc:Node=null)->Array[Dictionary]:
 	# Trade turned against us, and trade news, told once (hud/trade_alerts.gd).
 	out.append_array(preload("res://scripts/hud/trade_alerts.gd").alerts())
 	if not gear.is_empty(): out.append({"id":"gear","glyph":"gear","tone":"amber","count":gear.size(),"title":"Short of gear","lines":gear,"page":"support"})
-	if not thin.is_empty(): out.append({"id":"men","glyph":"men","tone":"amber","count":thin.size(),"title":"Under strength","lines":thin,"page":"recruitment"})
+	# Drafts come from the watch (watch_military.gd): the War screen's
+	# manpower is where more are set to keep watch.
+	if not thin.is_empty(): out.append({"id":"men","glyph":"men","tone":"amber","count":thin.size(),"title":"Under strength","lines":thin,"page":"war"})
 	if not fought.is_empty(): out.append({"id":"fought","war":"feud","tone":"amber","count":fought.size(),"title":"Battles just fought","lines":fought,"page":"wars"})
 	# Spies and assassins: an agent caught or killed, a strike done, their spy
 	# caught (covert_ops.gd). Told here, never as a pop-up.

@@ -14,6 +14,9 @@ extends GdUnitTestSuite
 ## - "Disband the army" was not read at all ("dismiss the army" even read as
 ##   demoting someone); a stand-down took the watch, which the watch's own
 ##   drill then made again, and the army's share called the rest up again.
+## KEEPING WATCH IS THE MILITARY (watch_military.gd): the watch share is the
+## army's size; standing people down lowers it, so nobody is called up in
+## their place.
 
 const Council:=preload("res://scripts/war_council.gd")
 const WAR:=preload("res://scripts/war_loop.gd")
@@ -197,20 +200,23 @@ func test_disbanding_the_army_sends_everyone_home_and_nobody_is_called_up_again(
 	var done:=HomeOrders.perform(HomeOrders.read("Disband the army"))
 	assert_bool(bool(done.ok)).override_failure_message(str(done)).is_true()
 	# The band resting at home folded back and went home with the rest; the
-	# watch stays; the band away goes home when it comes back.
+	# watch is the army, so nobody is left keeping it; the band away goes
+	# home when it comes back.
 	assert_dict(_army(resting)).is_empty()
-	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(10)
+	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(0)
 	assert_dict(_army(away)).is_not_empty()
-	assert_str(Law.reading(MilitaryCampaign).level).is_equal("none")
+	assert_int(MilitaryCampaign.watch_manpower()).is_equal(0)
+	assert_str(Law.reading(MilitaryCampaign).name).is_equal("0%")
 	var says:=String(done.says)
-	for words in ["go home","10 more are away","on the watch stay","keeps no army"]: assert_str(says).contains(words)
-	# Nobody is called up again, the watch is not drilled again.
-	assert_dict(Law.keep(MilitaryCampaign,int(GameState.elapsed_days),true)).is_empty()
+	for words in ["go home","turn for home","Nobody keeps watch"]: assert_str(says).contains(words)
+	# Nobody is called up again.
+	assert_int(int(Law.keep(MilitaryCampaign,int(GameState.elapsed_days),true).joined)).is_equal(0)
 	MilitaryCampaign._ensure_automatic_basic_training()
 	assert_int(MilitaryCampaign._automatic_basic_trainees()).is_equal(0)
 	_days(12)
 	assert_int(MilitaryCampaign.aggregate_recruits).is_equal(0)
-	for order in MilitaryCampaign.training_queue: assert_bool(bool((order as Dictionary).get("automated_basic",false))).is_true()
+	assert_bool(MilitaryCampaign.training_queue.is_empty()).is_true()
+	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(0)
 	# The band away comes home and its men go back to work too.
 	_army(away)["status"]="stationed"; _army(away)["location_id"]="player_home"
 	Law.keep(MilitaryCampaign,10,true)
@@ -221,17 +227,20 @@ func test_disbanding_the_army_sends_everyone_home_and_nobody_is_called_up_again(
 
 func test_sending_some_home_lowers_the_share_to_what_is_left()->void:
 	_train(37)
-	MilitaryCampaign.army_levy_level="some"
+	Law.choose(MilitaryCampaign,"some")
 	var people:=int(WorldSimulation.state.population_total)
 	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("some",people))
 	var done:=HomeOrders.perform(HomeOrders.read("send 7 of the soldiers home"))
 	assert_int(int(done.count)).is_equal(7)
 	var left:=Law.under_arms(MilitaryCampaign)
 	assert_int(left).is_equal(Law.target_men("some",people)-7)
+	# The watch fell by them: those sent home are not called up again.
+	assert_int(MilitaryCampaign.watch_manpower()).is_equal(left)
 	assert_str(Law.reading(MilitaryCampaign).level).starts_with("share:")
-	assert_str(String(done.says)).contains("The army is now kept at")
+	assert_str(String(done.says)).contains("%d keep watch" % left)
 	# The war leader neither calls up nor sends home anyone on its account.
-	assert_dict(Law.keep(MilitaryCampaign,int(GameState.elapsed_days),true)).is_empty()
+	var kept:=Law.keep(MilitaryCampaign,int(GameState.elapsed_days),true)
+	assert_int(int(kept.joined)+int(kept.released)).is_equal(0)
 	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(left)
 
 func test_one_band_named_is_disbanded_whole()->void:
@@ -250,10 +259,14 @@ func test_one_band_named_is_disbanded_whole()->void:
 	assert_str(String(out.says)).contains("turns for home")
 	assert_str(String(_army(host).get("destination_id",""))).is_equal("player_home")
 
-func test_a_band_is_never_formed_from_the_watch_when_a_share_is_kept()->void:
+func test_a_band_is_never_formed_from_the_home_guard()->void:
 	_train(10)
+	MilitaryCampaign.keep_watch()
+	MilitaryCampaign.set_watch_split(0.5)
 	assert_int(int(Council._forces().free)).is_greater(0)
-	MilitaryCampaign.army_levy_level="none"
+	assert_int(int(Council._forces().keep)).is_equal(int(MilitaryCampaign.watch_reading().guard))
+	# All of the watch kept at home: nobody is free for a band.
+	MilitaryCampaign.set_watch_split(1.0)
 	assert_int(int(Council._forces().free)).is_equal(0)
 
 func test_a_band_resting_with_scattered_empty_places_is_ready_again()->void:
@@ -278,7 +291,7 @@ func test_the_army_size_has_none_and_reads_a_share_left_by_a_stand_down()->void:
 	assert_int(Law.target_men("none",900)).is_equal(0)
 	assert_str(Law.level_name("share:0.0222")).is_equal("2%")
 	assert_str(Law.level_name("share:0.004")).is_equal("0.4%")
-	assert_dict(Law.level("share:0.9")).is_empty()
+	assert_dict(Law.level("share:1.5")).is_empty()
 	# The level survives a save.
 	MilitaryCampaign.army_levy_level="share:0.02222"
 	var saved:Dictionary=MilitaryCampaign.export_state()

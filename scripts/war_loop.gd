@@ -850,6 +850,8 @@ static func _commit_watch(fight:Dictionary,defender:Dictionary,civ_id:String,key
 	result["home_side"]="defender"
 	result["home_force_kind"]="field"
 	result["militia_id"]=int(defender.get("emergency_militia_id",-1))
+	# The home guard posted in our other towns stood there (watch_military.gd).
+	result["posted_guard"]=(defender.get("posted_guard",{}) as Dictionary).duplicate(true)
 	result["campaign_mode"]="defensive"
 	result["threat"]={"source_civ_id":civ_id,"source_name":_name(civ_id),"incident_kind":"raid","campaign_mode":"defensive","war_loop":key}
 	mc._commit_campaign_battle(result)

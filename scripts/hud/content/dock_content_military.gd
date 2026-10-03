@@ -39,15 +39,16 @@ func tab(sub:int)->Dictionary:
 	var army:Dictionary=MilitaryCampaign.campaign_army_snapshot()
 	var capabilities:Dictionary=MilitaryCampaign.military_capabilities()
 	var troops:=maxi(0,int(army.get("troops",0)))
-	var watch:=int(GameState.population_allocations.get("Defense",0))
-	var mobilized:=MilitaryCampaign._mobilized_count()
-	var mobilization_cap:=int(capabilities.get("recruitment_capacity",0))
 	var organization:=clampf(float(army.get("readiness",0.0)),0.0,1.0)
 	var upkeep:=float(army.get("provisions_required_today",0.0))
-	var ledger:=MilitaryCampaign.personnel_ledger()
+	var watch:Dictionary=MilitaryCampaign.watch_reading()
+	# KEEPING WATCH IS THE MILITARY (watch_military.gd): the watch share of
+	# the people is the manpower; of it the home guard stays home and the
+	# rest are the offensive troops.
+	var Watch:=preload("res://scripts/watch_military.gd")
 	var kpis:Array=[
-		{"label":"TOTAL PERSONNEL","value":str(ledger.total),"live_value":func()->String: return str(MilitaryCampaign.personnel_ledger().total),"live_delta":func()->String: return "%d training" % int(MilitaryCampaign.personnel_ledger().training),"delta":"%d training" % int(ledger.training),"delta_color":Tokens.MUTED,"accent":Tokens.RED,"tip":"Everyone in military service, including reserves, trainees, deployed soldiers, and recovery pools. Deployment does not change this total."},
-		{"label":"FIELD SOLDIERS","value":str(ledger.field),"live_value":func()->String: return str(MilitaryCampaign.personnel_ledger().field),"live_delta":func()->String: return "%d active armies" % MilitaryCampaign.field_armies.filter(func(force:Dictionary)->bool:return int(force.get("troops",0))>0).size(),"delta":"%d active armies" % MilitaryCampaign.field_armies.filter(func(force:Dictionary)->bool:return int(force.get("troops",0))>0).size(),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"Deployed maneuver armies vs command capacity"},
+		{"label":"MANPOWER","value":str(int(watch.watch)),"live_value":func()->String: return str(MilitaryCampaign.watch_manpower()),"live_delta":func()->String: return "%s of the people" % Watch.percent(float(MilitaryCampaign.watch_reading().share)),"delta":"%s of the people" % Watch.percent(float(watch.share)),"delta_color":Tokens.MUTED,"accent":Tokens.RED,"tip":"Everyone keeping watch. The watch is the army: raising its share of the people raises the manpower, and they drill within the watch over time."},
+		{"label":"HOME GUARD","value":str(int(watch.guard)),"live_value":func()->String: return str(int(MilitaryCampaign.watch_reading().guard)),"live_delta":func()->String: return "%d for the bands" % int(MilitaryCampaign.watch_reading().offensive),"delta":"%d for the bands" % int(watch.offensive),"delta_color":Tokens.MUTED,"accent":Tokens.BLUE,"tip":"The share of the watch that guards home and the towns, led by the war leader at home. The rest are the offensive troops, in bands led by the generals."},
 		{"label":"READINESS","value":"%d%%" % roundi(organization*100.0),"live_value":func()->String: return "%d%%" % roundi(float(MilitaryCampaign.home_army.get("readiness",0))*100),"delta":"","accent":Tokens.AMBER,"tip":"Organization and condition of the home force"},
 		{"label":"UPKEEP","value":"%.1f" % upkeep,"live_value":func()->String: return "%.1f" % float(MilitaryCampaign.campaign_army_snapshot().get("provisions_required_today",0)),"delta":"rations/day","delta_color":Tokens.MUTED,"accent":Tokens.TEAL,"tip":"Daily provision cost of everyone under arms"},
 	]
@@ -72,7 +73,7 @@ func _command_brief()->Dictionary:
 	if not MilitaryCampaign.threat_snapshot().is_empty() or not MilitaryCampaign.engagement_snapshot().is_empty() or not MilitaryCampaign.pending_aftermath.is_empty():
 		return {"tone":"danger","title":"A war decision awaits","why":"A threat, battle, or aftermath needs your order.","action_label":"WAR PLANNING","on_action":func()->void: terrain._open_war_planning()}
 	if MilitaryCampaign.field_armies.is_empty() and int(MilitaryCampaign.campaign_army_snapshot().get("troops",0))<=0:
-		return {"tone":"info","title":"No field force exists","why":"Compose an army build, train it as one order, then deploy it. Every soldier is absent from food and construction."}
+		return {"tone":"info","title":"Nobody keeps watch","why":"The watch is the army. Set more of the people to keep watch on the War screen or in the People view; they join the watch at home at once and drill over time. Everyone keeping watch is absent from food and building."}
 	return {"tone":"info","title":"How to engage from the map","why":"SCOUTS: click their counter and choose CAPTURE or ATTACK. ENEMY ARMIES: select your field army, click the red enemy counter, then choose MOVE TO INTERCEPT. Battle opens automatically at contact.","action_label":"WAR PLANNING","on_action":func()->void: terrain._open_war_planning()}
 
 func _unit_label(unit:String)->String:
@@ -116,7 +117,7 @@ func _formation_blocks(army:Dictionary)->Array:
 			"tip":"Click to select this army on the map. Right-click charted land for a normal march; click a red enemy counter to order an intercept. Reports travel home by runner until signal-era development.",
 		})
 	if army_items.is_empty():
-		blocks.append({"type":"text","heading":"FIELD ARMIES","text":"No army is deployed. Compose and train a build in ARMY BUILDS, then deploy it."})
+		blocks.append({"type":"text","heading":"FIELD ARMIES","text":"No band is out. The war council forms bands from the watch at home when a stance needs them."})
 	else:
 		blocks.append({"type":"rows","heading":"FIELD ARMIES · CLICK TO SHOW ON MAP","note":"new armies assemble at home","items":army_items})
 		var selected_active:bool=int(terrain.selected_army_id)!=-1
@@ -151,25 +152,25 @@ func _formation_blocks(army:Dictionary)->Array:
 			"tip":"Completed instruction; drill skill is proficiency, not unfinished course progress. Equipment %d of %d · ammunition %d of %d" % [int(formation.get("equipment",0)),int(formation.get("equipment_required",0)),int(formation.get("ammunition",0)),int(formation.get("ammunition_required",0))],
 		})
 	if formation_items.is_empty():
-		blocks.append({"type":"text","heading":"HOME FORCE","text":"No trained formations are at home. Train an army build to create them."})
+		blocks.append({"type":"text","heading":"HOME FORCE","text":"Nobody keeps watch at home. Set more of the people to keep watch on the War screen; they join at once and drill at home."})
 	else:
 		blocks.append({"type":"rows","heading":"HOME FORCE","note":"grouped by unit and equipment","items":formation_items})
 	var releasable:=maxi(0,int(army.get("troops",0)))+maxi(0,MilitaryCampaign.aggregate_recruits)
 	if releasable>0:
 		blocks.append({"type":"actions","items":[
-			{"label":"STAND DOWN 10","sub":"release to labor",
+			{"label":"10 FEWER ON WATCH","sub":"back to their work",
 			"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.demobilize(10)),
-			"tip":"Return up to 10 recruits or home troops to the civilian labor pool; their equipment goes back to stores"},
-			{"label":"STAND DOWN ALL","sub":"disband the home force",
+			"tip":"10 fewer keep watch: the watch share falls by them and they go back to their work; their weapons go back to the store"},
+			{"label":"NOBODY AT HOME ON WATCH","sub":"all at home back to work",
 			"on_press":func()->void: terrain._report_military_action(MilitaryCampaign.demobilize(releasable)),
-			"tip":"Return every recruit and home formation to the civilian labor pool; equipment goes back to stores. Field armies are untouched."},
+			"tip":"Everyone keeping watch at home goes back to their work and the watch share falls by them; weapons go back to the store. Bands in the field are untouched."},
 		]})
 	var defense:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
 	var stores:Dictionary=MilitaryCampaign.store_protection()
 	blocks.append({"type":"tiles","heading":"SETTLEMENT DEFENSE","items":[
 		{"label":"WORKS","value":String(defense.get("short","Open ground")),"note":"integrity %d%%" % roundi(float(defense.get("integrity",0.0))*100.0),"note_color":Tokens.RED if float(defense.get("integrity",0.0))<0.4 else Tokens.MUTED,"tip":String(defense.get("description",""))},
 		{"label":"LOOKOUT","value":"%.0f km" % float(defense.get("observation_radius_km",0.0)),"note":"observation reach","note_color":Tokens.MUTED,"tip":"How far approaching forces are seen"},
-		{"label":"GARRISON","value":"%d/%d" % [int(defense.get("garrison_guard",defense.get("garrison_personnel",0))),int(defense.get("garrison_required",0))],"note":"%d trained · %d on watch · %d townsfolk" % [int(defense.get("garrison_trained",0)),int(defense.get("garrison_watch",0)),int(defense.get("garrison_townsfolk",0))],"note_color":Tokens.GREEN if float(defense.get("garrison_coverage",0.0))>=1.0 else Tokens.AMBER,"tip":"The guard at home: the trained fighters and the watch (those on Defense work, who get basic training by turns). When raiders come, about 1 in 10 of the town's grown people also take up arms; they are untrained and not counted as the guard."},
+		{"label":"GARRISON","value":"%d/%d" % [int(defense.get("garrison_guard",defense.get("garrison_personnel",0))),int(defense.get("garrison_required",0))],"note":"%d home guard · %d for the bands · %d townsfolk" % [int(defense.get("garrison_watch",0)),int(defense.get("garrison_trained",0)),int(defense.get("garrison_townsfolk",0))],"note_color":Tokens.GREEN if float(defense.get("garrison_coverage",0.0))>=1.0 else Tokens.AMBER,"tip":"The guard at home: the watch at home, its home guard and those free for the bands (the home guard posted in our other towns stands there). When raiders come, about 1 in 10 of the town's grown people also take up arms; they are untrained and not counted as the guard."},
 		{"label":"STORES","value":"%d%%" % roundi(float(stores.seizure_reduction)*100.0),"note":"out of raiders' reach","note_color":Tokens.MUTED,"tip":store_protection_tip(stores,defense)},
 	]})
 	return blocks
@@ -370,7 +371,7 @@ func _personnel_block()->Dictionary:
 
 func _personnel_text()->String:
 	var ledger:=MilitaryCampaign.personnel_ledger()
-	return "%d total = %d home reserve + %d in field armies + %d occupation + %d recruits + %d in training + %d recovering + %d missing or captured + %d naval and air crew.\nDefense workers are a labor allocation, not additional soldiers." % [ledger.total,ledger.home,ledger.field,ledger.occupation,ledger.recruits,ledger.training,ledger.recovering,ledger.missing,ledger.naval_air]
+	return "%d total = %d at home + %d in field armies + %d occupation + %d joining + %d in a drill course + %d recovering + %d missing or captured + %d naval and air crew.\nThe watch is the army: everyone keeping watch (%d) serves under arms, counted once." % [ledger.total,ledger.home,ledger.field,ledger.occupation,ledger.recruits,ledger.training,ledger.recovering,ledger.missing,ledger.naval_air,MilitaryCampaign.watch_manpower()]
 
 func _training_blocks()->Array:
 	var policy:Dictionary=MilitaryCampaign.training_staff.snapshot("army")
@@ -434,7 +435,7 @@ func _open_build(id:int)->void:
 	hud.open_detail(preload("res://scripts/hud/content/army_preparation.gd").new(terrain,hud,self,id))
 
 func _forces_overview()->Array:
-	return [{"type":"actions","heading":"COMMAND","items":[{"label":"PREPARE AN ARMY","sub":"Compose, recruit, train and deploy","primary":true,"on_press":jump("military",1)},focused_action("FIELD ARMIES","Select an army and give map orders",_force_report.bind("field")),focused_action("HOME RESERVE","Condition, equipment and standing down",_force_report.bind("home")),focused_action("CITY GARRISONS","Occupation forces and their control",_force_report.bind("garrisons")),focused_action("HOME DEFENSE","Watch, fortifications and protected stores",_force_report.bind("defense")),focused_action("PERSONNEL ACCOUNT","Every military person, counted once",func()->Dictionary:return {"blocks":[_personnel_block()]})]},
+	return [{"type":"actions","heading":"COMMAND","items":[{"label":"THE WATCH","sub":"How many keep watch, the home guard and the bands","primary":true,"on_press":func():MilitaryCampaign.open_roster("army")},focused_action("FIELD ARMIES","Select an army and give map orders",_force_report.bind("field")),focused_action("HOME RESERVE","Condition, equipment and standing down",_force_report.bind("home")),focused_action("CITY GARRISONS","Occupation forces and their control",_force_report.bind("garrisons")),focused_action("HOME DEFENSE","Watch, fortifications and protected stores",_force_report.bind("defense")),focused_action("PERSONNEL ACCOUNT","Every military person, counted once",func()->Dictionary:return {"blocks":[_personnel_block()]})]},
 		{"type":"text","heading":"SIZE MATTERS","text":"A small force can patrol or fight another small force. Occupying a city needs enough supplied, ready soldiers to hold its population; a siege also needs coverage of the approaches. Winning a fight alone does not grant control."}]
 
 func _force_report(kind:String)->Dictionary:

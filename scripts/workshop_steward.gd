@@ -110,7 +110,8 @@ func army_demands()->Array[Dictionary]:
 		var needed:=maxi(0,host._equipment_required_for(String(order.get("unit","levy")),int(order.get("count",0)))-int(order.get("reserved_equipment",0)))
 		totals[item]=int(totals.get(item,0))+needed
 	if not explicit_recruitment:
-		var watch_gap:=maxi(0,host._home_garrison_target()-int(host.home_army.get("troops",0))-host._automatic_basic_trainees())
+		# The watch not yet under arms (watch_military.gd): they join at home.
+		var watch_gap:=maxi(0,int(host.watch_manpower())-int(host._mobilized_count()))
 		totals.improvised=int(totals.get("improvised",0))+mini(watch_gap,maxi(0,host.training_capacity()-host._queued_trainees()))
 	# Serving troops need replacement and initial equipment even when no new
 	# recruitment template has been requested. Demand is only their missing gear;
