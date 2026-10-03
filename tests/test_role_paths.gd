@@ -389,6 +389,70 @@ func test_the_hands_food_does_not_need_go_by_the_path()->void:
 ## The people's own ambitions do not smuggle learning in: bringing people
 ## together (which asks a little learning) stays near the balanced share; a
 ## people set on ideas learns more, still short of the learning path.
+## A town the ruler turns to research is the ruler's word: its leader puts
+## the hands on learning past any path's share, day after day.
+func test_a_town_turned_to_research_learns_past_the_paths_share()->void:
+	_world()
+	_food_needs_a_third()
+	var id:=String(GameState.player_settlements[0].id)
+	assert_bool(bool(GovernmentPeopleSystem.set_settlement_focus(id,"research").get("ok",false))).is_true()
+	_delegate()
+	_food_needs_a_third()
+	_delegate()
+	var learning:=float(GameState.population_allocation_percentages.Knowledge)
+	assert_float(learning).override_failure_message("research focus learning %.1f" % learning).is_greater(float(Paths.LEARNING_CAP.balanced)*100.0+3.0)
+
+## The leaders' tip says why learning sits where it does, with the engine's
+## number, and that the ruler's own split has no such limit.
+func test_the_leaders_say_why_learning_is_low()->void:
+	_world()
+	var tip:=String(Paths.leaders_line().tip)
+	assert_str(tip).contains("at most 3.5 in 100 of the people on learning").contains("no such limit")
+	assert_str(tip).not_contains("wish to learn")
+	PeopleDirection.work_path={"id":"learning","since":0,"reviewed":int(GameState.elapsed_days),"why":"scholarly","score":.8,"by":"leaders"}
+	assert_str(String(Paths.leaders_line().tip)).contains("at most 15 in 100")
+	# On a path, one sentence says what they put on and the limit on learning.
+	PeopleDirection.work_path.id="war"
+	var war:=String(Paths.leaders_line().tip)
+	assert_int(war.split("They put").size()-1).override_failure_message(war).is_equal(1)
+	assert_str(war).contains("more on keeping watch and making arms, and at most 3.5 in 100 of the people on learning, the share for war;")
+	# A people set on ideas: the number is raised, and the tip says why.
+	Culture.record(PeopleDirection.cultural_memory,"century:0","inquiry",0,10.0)
+	var raised:=String(Paths.leaders_line().tip)
+	assert_str(raised).contains("at most %s in 100" % Paths._share_words(Paths.learning_cap()*100.0)).contains("the share for war, raised by their wish to learn")
+	assert_float(Paths.learning_cap()).is_greater(float(Paths.LEARNING_CAP.war))
+
+## Ores want someone who knows the craft, not five scholars: a people that
+## knows a deposit's own practice works it with a learner or two, whatever
+## its path; one that knows none of them still needs five.
+func test_a_people_that_knows_the_craft_opens_its_ores()->void:
+	_world()
+	var copper:Dictionary=ResourceSystem.catalog["Copper Ore"]
+	GameState.known_discoveries.erase("pit_firing");GameState.known_discoveries.erase("charcoal")
+	GameState.population_allocations.Knowledge=3
+	assert_bool(ResourceSystem.specialists_ready(copper)).is_false()
+	GameState.population_allocations.Knowledge=5
+	assert_bool(ResourceSystem.specialists_ready(copper)).is_true()
+	GameState.known_discoveries.append("pit_firing")
+	for learners:int in [1,3]:
+		GameState.population_allocations.Knowledge=learners
+		assert_bool(ResourceSystem.specialists_ready(copper)).override_failure_message("%d learners" % learners).is_true()
+	GameState.population_allocations.Knowledge=0
+	assert_bool(ResourceSystem.specialists_ready(copper)).is_false()
+	# A great people (about 3000 at work): knowing the craft never asks more
+	# learners than not knowing it (five at most).
+	GameState.ensure_population_total(4400)
+	var able:=int(GameState.able_population())
+	assert_int(able).override_failure_message("%d at work" % able).is_greater(2500)
+	for learners:int in range(0,9):
+		GameState.population_allocations.Knowledge=learners
+		GameState.known_discoveries.erase("pit_firing")
+		var unknown:=ResourceSystem.specialists_ready(copper)
+		GameState.known_discoveries.append("pit_firing")
+		var known:=ResourceSystem.specialists_ready(copper)
+		assert_bool(known or not unknown).override_failure_message("%d learners: knowing the craft is harder" % learners).is_true()
+		assert_bool(known).is_equal(learners>=ResourceSystem.SPECIALIST_LEARNERS)
+
 func test_ambitions_do_not_make_a_people_of_scholars()->void:
 	_world()
 	_food_needs_a_third()

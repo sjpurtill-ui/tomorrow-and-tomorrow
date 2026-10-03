@@ -510,6 +510,8 @@ func active_investigation_records()->Array[Dictionary]:
 		discovery["trial_share"]=Research600.trial_share(progress)
 		discovery["years_ahead"]=research_years_ahead(discovery)
 		discovery["work_factor"]=research_early_factor(discovery)
+		# A young people's slow learning, beside the clock ("" at the usual pace).
+		discovery["founding_note"]=founding_words()
 		discovery["opens"]=questions_opened(id)
 		discovery["channels"]=channels
 		records.append(discovery)
@@ -2000,6 +2002,22 @@ func learning_goods_today(place:String)->Dictionary:
 	var taken:=float(_learning_day.places.get(place,0.0))
 	return {"taken":taken/span,"wanted":_learning_day.need*span if place.is_empty() else taken}
 
+## A young people's slow learning in plain words, from the engine's own number
+## at the people's own age (Research600.founding_work): "A young people learns
+## slowly: every question takes 2.2 times the work until year 15, easing to
+## normal by year 30." Years are the calendar's (the people's lead counted).
+## "" once it learns at the usual pace.
+func founding_words()->String:
+	var age:=learning_year()
+	var factor:=Research600.founding_work(age)
+	if factor<=1.0001: return ""
+	var lead:=maxf(0.0,learning_lead)
+	var times:=("%.1f" % factor).trim_suffix(".0")
+	var normal:=maxi(1,roundi(Research600.FOUNDING_FADE_YEARS-lead))
+	if age<Research600.FOUNDING_HOLD_YEARS:
+		return "A young people learns slowly: every question takes %s times the work until year %d, easing to normal by year %d." % [times,maxi(1,roundi(Research600.FOUNDING_HOLD_YEARS-lead)),normal]
+	return "A young people learns slowly: every question takes %s times the work now, easing to normal by year %d." % [times,normal]
+
 ## Share of the able people the age can spare as full-time learners
 ## (society_model.gd SUSTAINABLE_SPECIALISTS). It reads what the economy has
 ## reached (SocietyModel.economy_era: the calendar or the knowledge frontier,
@@ -2251,6 +2269,10 @@ func research_difficulty(discovery:Dictionary,civilization_seed:int,level:float=
 	# Each age's questions ask the work of the learners a people of that age
 	# usually keeps (Research600.age_work: research from learners, not size).
 	var age_work:=Research600.age_work(float(discovery.get("design_year",discovery_era(String(discovery.get("id","")))))) if known==null else 1.0
+	# A young people learns slowly, whatever the question (Research600.founding_work):
+	# the acting people at its own age, another people's research (`known`
+	# given) at the calendar's.
+	age_work*=Research600.founding_work(learning_year() if known==null else float(WorldSimulation.state.elapsed_days)/365.0)
 	if known==null: known=WorldSimulation.state.known_discoveries
 	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)*stale*age_work*research_early_factor(discovery)
 

@@ -2,8 +2,12 @@
  "_doc": "Surrogate constants that cannot be parsed from the game (aggregate stand-ins for systems the surrogate omits) or that calibrate.py fits. Each entry names its source. Constants that CAN be parsed (effect limits, era ceilings, adoption pace, life table, cohort durations, early-care categories, conception rates, food yields, artifact constants...) are read live from GDScript by gamedata.py and are deliberately absent here. 'fit': true marks free constants calibrate.py adjusts; its results are written to the 'calibrated' section which overrides the defaults.",
  "time": {
   "substeps_per_month": {
-   "value": 2,
-   "source": "surrogate: demography/food sub-steps per month (game: daily)"
+   "value": 4,
+   "source": "surrogate: demography/food sub-steps per month (game: daily); 4 since the people-first truth (2026-10-02): the leaders re-plan the work each sub-step, and a coarser step lags the seasons and overshoots the food work"
+  },
+  "replan_each_substep": {
+   "value": true,
+   "source": "GovernmentPeopleSystem re-plans the daily work every day; the surrogate re-plans at each sub-step"
   }
  },
  "site": {
@@ -196,6 +200,11 @@
    "value": 600.0,
    "source": "research_3000 surrogate player model: daughter settlements from this year (the 0-600 balance was fitted to one territory, BENCHMARKS_600)",
    "fit": false
+  },
+  "harvest_mult": {
+   "value": 1.0,
+   "source": "lumped: what the engine's daily harvest gets that the surrogate leaves out (founding traditions' food_yield, progression food_output, abundant-game and lean-harvest modifiers, the gathering lever, seed-selection coverage); fitted to the truth's food work",
+   "fit": true
   }
  },
  "research": {
@@ -353,45 +362,76 @@
   }
  },
  "calibrated": {
-  "disease_pressure": 0.15,
+  "disease_pressure": 0.094,
   "storage_base_rations": 3341.25,
-  "knowledge_gain_mult": 2.75,
-  "_fitted": "2026-09-25 00:55 score 107.7 on 7 truth runs",
+  "knowledge_gain_mult": 2.05,
+  "_fitted": "2026-10-03 merged: builder A's fit on the young-people pace (knowledge_gain_mult, throughput_growth, the discovery multiplier modelled) with balance P2's (harvest_mult 1.1; food_adjust_rate held at 1); re-checked on P2 truth",
   "fresh_spoil_mult": 0.675,
-  "other_mortality": 0.00345,
-  "throughput_growth": 0.19875,
-  "throughput": 0.53625,
-  "food_adjust_rate": 0.7175,
-  "cohesion_offset": 0.0,
+  "other_mortality": 0.00275,
+  "throughput_growth": -0.01125,
+  "throughput": 0.76375,
+  "food_adjust_rate": 1.0,
+  "cohesion_offset": 0.07,
   "housing_build_rate": 0.0255,
   "institution_offset": 0.1,
   "accessible_deposits_per_decade": 2.05,
   "signal_scale": 0.125,
-  "food_buffer": 1.485
+  "food_buffer": 1.485,
+  "harvest_mult": 1.1
  },
  "_formula_hashes": {
   "scripts/discovery_system.gd::var probability: float = discovery.chance": "2cfcfb6316",
   "scripts/discovery_system.gd::team_scale=float(teams.work)/float(sharing)": "bc79a4e4a6",
   "scripts/discovery_system.gd::var support_multiplier:=": "ea46c43dc5",
   "scripts/discovery_system.gd::return (0.45+0.55*staffing)": "94899d3878",
-  "scripts/discovery_system.gd::return (0.85+_research_draw": "4906352fb5",
-  "scripts/society_model.gd::var spread:=(0.00035+teaching+practice+directed)": "882c82810d",
-  "scripts/society_model.gd::var combined:=clampf(": "b5c2d68c2f",
-  "scripts/consequence_engine.gd::var food_security_target := clampf(": "fae8d061d4",
-  "scripts/consequence_engine.gd::var health_target := clampf(": "c4174cdea1",
-  "scripts/consequence_engine.gd::var cohesion_target := clampf(": "79c6a5db6f",
-  "scripts/consequence_engine.gd::var material_target := clampf(": "1e728709fc",
+  "scripts/discovery_system.gd::return (0.85+_research_draw": "96fee594d1",
+  "scripts/consequence_engine.gd::return clampf(0.40+float(WorldSimulation.state.simulation_metrics.get(\"knowledge\"": "421958d056",
+  "scripts/society_model.gd::var spread:=(common_spread+practice+directed)": "7a253ba314",
+  "scripts/society_model.gd::var teaching:=observers/population*0.055": "73adbe5a3d",
+  "scripts/society_model.gd::base=clampf((0.18+keepers*0.22+health*0.14": "464a82f0cd",
+  "scripts/consequence_engine.gd::var food_security_target := clampf(": "d650ed9984",
+  "scripts/food_care.gd::var eaten:=0.05+minf(1.15,production_ratio)*0.25": "fe7228fc71",
+  "scripts/consequence_engine.gd::var process_health_cost:=": "c28fa9eac4",
+  "scripts/consequence_engine.gd::var health_target := clampf(": "e121faea6c",
+  "scripts/consequence_engine.gd::var cohesion_target := clampf(": "00281788a2",
+  "scripts/consequence_engine.gd::var material_target := clampf(": "3b1d511350",
   "scripts/consequence_engine.gd::var knowledge_gain := observers": "648299359f",
   "scripts/consequence_engine.gd::mortality_components[\"Hunger\"]=maxf(": "afc1fb14bc",
   "scripts/game_state.gd::var factor:=lerpf(0.12,1.08,health)": "2880437273",
   "scripts/game_state.gd::var multiplier:=1.0+maxf(0.0,0.72-health)": "cc53241ad3",
-  "scripts/game_state.gd::var neonatal_rate:=clampf(": "becf7bd895",
-  "scripts/game_state.gd::var maternal_rate:=clampf(": "08d14e81e2",
+  "scripts/game_state.gd::var neonatal_rate:=clampf(": "609ed12587",
+  "scripts/game_state.gd::var maternal_rate:=clampf(": "71fa63935e",
   "scripts/game_state.gd::var health_factor:=lerpf(1.90,0.64": "0f5cfd02e2",
-  "scripts/food_system.gd::result[\"Fresh plants\"]=workers*gathering_weight": "54ed5a9113",
+  "scripts/food_system.gd::result[\"Fresh plants\"]=workers*gathering_weight": "f499f3248f",
   "scripts/food_system.gd::var early:=clampf(0.06+": "98e46ed813",
   "scripts/food_system.gd::var burden_target:=clampf(": "86ea4669e3",
   "scripts/artifact_collection.gd::return {\"weight\":weight,\"total_weight\":total": "b06f2af677",
-  "scripts/artifact_culture.gd::var collection:=ALLURE_COLLECTION": "456d96ffc6"
+  "scripts/artifact_culture.gd::var collection:=ALLURE_COLLECTION": "456d96ffc6",
+  "scripts/government_people_system.gd::for role in changes: weights[role]=": "962b91166d",
+  "scripts/government_people_system.gd::if housing_ratio<0.96:": "82e4f516f6",
+  "scripts/government_people_system.gd::var wanted:=eats*(1.05+RESERVE_MARGIN*gap)": "989c591970",
+  "scripts/work_paths.gd::for role:String in work:weights[role]=": "01a139277a",
+  "scripts/work_paths.gd::var most:=learning_cap()*total": "87d55bc912",
+  "scripts/resource_system.gd::return r/(r+LAND_HALF)": "9344797a93",
+  "scripts/resource_system.gd::var rate:=clampf(LAND_RISE_YEAR*land_ratio(searchers,people),0.0,LAND_RISE_MAX)": "99b1fab7d9",
+  "scripts/resource_system.gd::var daily_yield:=assigned*float(profile.base_yield)": "baa1b029c6",
+  "scripts/consequence_engine.gd::return clampf(0.18+float(WorldSimulation.state.simulation_metrics.get(\"material_capacity\"": "e236c6bf04",
+  "scripts/civilian_goods.gd::var rate:=BASE_RATE*technique_output()*pace*specialization()": "c05d98ed9d",
+  "scripts/civilian_goods.gd::var need:=maxf(0.0,float(report.target)*1.20": "0639ab608b",
+  "scripts/civilian_goods.gd::return target()*1.20+capital_reserve()+maxf(1.0,WorldSimulation.state.population_exact)*SURPLUS_PER_HEAD": "b1ed316ab6",
+  "scripts/weapons_stock.gd::var work:=makers*share*efficiency*span": "aae15e37e6",
+  "scripts/watch_military.gd::var ceiling:=(float(mc._training_quality(": "bad344fc54",
+  "scripts/watch_military.gd::var rate:=float(mc._training_rate())": "860d1fef55",
+  "scripts/military_campaign.gd::return clampf(base+float(commander.get(\"command\",0.5))*0.12": "f9f0e6f8fc",
+  "scripts/military_campaign.gd::return (0.42+security*0.55)*(1.0+_adoption(\"formation_drill\")*0.35": "2b5c6a2684",
+  "scripts/early_life_conditions.gd::var eased:=crowding*(1.0-CARER_CROWDING*carers)": "37c8905ce6",
+  "scripts/early_life_conditions.gd::var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE": "1b808104d0",
+  "scripts/society_model.gd::watch_excess=watch_over()/maxf(1.0,float(WorldSimulation.state.able_population()))": "48ea4a4a85",
+  "scripts/society_model.gd::return maxi(ceili(people*WATCH_FREE_SHARE),guard)": "ea83fd29cd",
+  "scripts/watch_military.gd::total+=maxi(GUARD_MIN,ceili(maxf(1.0,float(WorldSimulation.settlements._settlement_population(city)))*GUARD_SHARE))": "3e066e7371",
+  "scripts/society_model.gd::return float(SPECIALIST_UPKEEP.get(key,0.0))*maxf(0.0,excess)*WATCH_UPKEEP if key in WATCH_UPKEEP_KEYS else 0.0": "0e9e1d8a17",
+  "scripts/food_system.gd::result[\"Dry staples\"]=workers*cultivation_weight*CULTIVATION_YIELD*": "adcff96ecf",
+  "scripts/food_system.gd::return lerpf(1.0,HARVEST_SETTLED,clampf(year/HARVEST_SETTLED_YEAR,0.0,1.0))": "9bde0c614a",
+  "scripts/food_system.gd::var wild_yield:=BASE_SUBSISTENCE_YIELD_CALIBRATION*harvest_settled(": "1a5f2fe6fe"
  }
 }

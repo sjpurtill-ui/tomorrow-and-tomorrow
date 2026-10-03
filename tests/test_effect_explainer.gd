@@ -227,9 +227,9 @@ func test_totals_follow_the_engine_ledger()->void:
 		var slot:Dictionary=raw.get(key,{"sum":0.0,"by":{}})
 		var ceiling:Vector2=model.era_ceiling(key)
 		var expected:=clampf(float(slot.sum),ceiling.x,ceiling.y)
-		if Society.SPECIALIST_UPKEEP.has(key) and model.specialist_excess>0.0:
+		if Society.SPECIALIST_UPKEEP.has(key) and (model.specialist_excess>0.0 or model.watch_excess>0.0):
 			var limit:Vector2=Society.EFFECT_LIMITS.get(key,Vector2(-0.5,0.8))
-			expected=clampf(expected+float(Society.SPECIALIST_UPKEEP[key])*model.specialist_excess,limit.x,limit.y)
+			expected=clampf(expected+float(model.upkeep_of(key)),limit.x,limit.y)
 		assert_float(float(model.effect(key))).override_failure_message("%s total" % key).is_equal_approx(expected,0.000001)
 		var parts:=0.0
 		for id:Variant in slot.by:parts+=float(slot.by[id])

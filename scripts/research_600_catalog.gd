@@ -149,6 +149,23 @@ const QUESTION_EXPONENT:=0.85
 ## pace is measured in (PACE_BY_YEAR). At 1, a founding band with its usual few
 ## learners paces docs/research/BENCHMARKS_600.md exactly as before.
 const LEARNER_PACE:=1.0
+## A young people learns slowly (2026-10-02): no tallies, no teachers, no habit
+## of inquiry yet. Through its first FOUNDING_HOLD_YEARS years every question it
+## works asks FOUNDING_WORK times the usual work, whatever the question's age;
+## the extra fades over the next generation, gone at FOUNDING_FADE_YEARS
+## (founding_work, read at the people's own age). Per learner the engine had
+## not changed since before the learning overhaul (a fresh village with 3
+## learners: 110 ways by year 16 against 106), but a fresh balanced village
+## knew 117 ways by year 16 (the engine's truth probe, its 10 at the start
+## counted), well past the typical 65 in 100 of the first 50 years' 259
+## questions (BENCHMARKS_600). With it: balanced 57, growth 44, making, war
+## and building about 42, the learning path 167 (2.9 times balanced; it was
+## 1.9). The age, not the question, sets it: a people that lags is back to the
+## usual pace once it is a generation old, and a learning people pays it on
+## every question it reaches early.
+const FOUNDING_WORK:=2.2
+const FOUNDING_HOLD_YEARS:=15.0
+const FOUNDING_FADE_YEARS:=30.0
 ## Each age's questions are measured against the learners a people of that age
 ## usually keeps (AGE_WORK_BY_YEAR, by the question's own year: the work a
 ## sensible people of that age does, in tools/sim, over what the older capped
@@ -178,7 +195,10 @@ const GOODS_FLOOR:=0.5
 ## goods again to each learner's need (instruments, writing stuff and schooling
 ## of a later age, kept by the economy of this one). The makers must keep up or
 ## the learners slow, and households hold less: a lead is paid for in goods.
-const LEAD_GOODS_YEARS:=20.0
+## 60 (balance P2, was 20): at 20 a people a century ahead asked six times the
+## goods a learner and its learning starved for want of them; at 60 a century
+## ahead asks under three times, still dear.
+const LEAD_GOODS_YEARS:=60.0
 ## And the people carry it: every LEAD_UPKEEP_YEARS ahead adds the usual
 ## upkeep of learners past the share the age can spare again (SocietyModel
 ## specialist upkeep: work, weariness, cohesion, births and stores).
@@ -676,6 +696,15 @@ static func _build_relevance()->void:
 ## a people of its age does, so it never holds back a people that presses on.
 static func pace_for(design_year:float)->float:
 	return _curve(PACE_BY_YEAR,design_year)
+
+
+## Work multiplier for a people of `age` years (its own age, the calendar plus
+## its lead): FOUNDING_WORK through FOUNDING_HOLD_YEARS, then back to 1 by
+## FOUNDING_FADE_YEARS.
+static func founding_work(age:float)->float:
+	if age<=FOUNDING_HOLD_YEARS: return FOUNDING_WORK
+	if age>=FOUNDING_FADE_YEARS: return 1.0
+	return lerpf(FOUNDING_WORK,1.0,(age-FOUNDING_HOLD_YEARS)/(FOUNDING_FADE_YEARS-FOUNDING_HOLD_YEARS))
 
 
 ## The work a question of `question_year` asks, against the older capped rule

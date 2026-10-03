@@ -43,7 +43,7 @@ Read first: `AGENTS.md`, `docs/ADJUDICATION.md` (one ledger, stated odds, seeded
 - **Work.** `Research600.team_capacity(learners)` comes from the number of people on the research lines alone, never from the people's size. The learners work `teams_at` questions at once (+4 per tenfold, no cap), each team at people^0.85: 200 learners do 1.83 times the work of 100, 1,000 about 7.5 times the work of 100. The research_3000 parallel capacity, which multiplied research by a people's size, is gone. Diffusion stays off. The artifact, leader, figure, scholar-visit and education factors only multiply learners' work: with nobody learning, nothing is learned (fast sim: 0 discoveries in 150 years at no learners, for 120 or 2,000 people).
 - **One pace constant.** `LEARNER_PACE` = 1: a founding band with its usual few learners paces BENCHMARKS_600 exactly as before. Each age's questions ask the work of the learners a people of that age usually keeps (`AGE_WORK_BY_YEAR`, by the question's own year, fitted in tools/sim from the sensible run: 1 up to year 250, 3 at year 600, 12 at 1200, 55 at 3000). A sensible people therefore paces as before, a small people with few learners falls behind, and only more learners run ahead.
 - **Goods.** Learners use 1 goods-unit per 20 learner-days, read and taken through one accessor (`Research600.learning_goods`): home stores first, then the towns' stores in proportion to what each holds. Makers keep what the learners will take before the next step (`civilian_goods.gd`; a 10-day step keeps its learners covered). The goods report and screens show the learners' take. Short of goods: progress × (0.5 + 0.5 × cover).
-- **The people's own age.** Learners on the lines beyond the share the age can spare (`SUSTAINABLE_SPECIALISTS`, read at the economy's real age) earn a lead over the calendar: 0.06 years a year per doubling of that share, falling back the same way below it. Questions, foundations and teams are dated from the calendar plus the lead (`DiscoverySystem.learning_year`). Effect ceilings follow min(own age, knowledge frontier). `pace_for(design_year)` is the question's own size and never reads the calendar.
+- **The people's own age.** Learners on the lines beyond the share the age can spare (`SUSTAINABLE_SPECIALISTS`, 4% at the founding, read at the economy's real age) earn a lead over the calendar: 0.06 years a year per doubling of that share, falling back the same way below it. Questions, foundations and teams are dated from the calendar plus the lead (`DiscoverySystem.learning_year`). Effect ceilings follow min(own age, knowledge frontier). `pace_for(design_year)` is the question's own size and never reads the calendar.
 - **A lead is paid for.** Goods per learner rise by the usual amount again for every 20 years ahead. The upkeep of learners past the sustainable share (work, weariness, cohesion, births, stores) rises by the usual amount again for every 300 years ahead. What the economy can spare and the artifact cap read the economy's real age, never the lead.
 - **Fast sim, 3 seeds to year 600** (base = main 97a32dd2, head = this branch; learning share in brackets; writing / bronze / place value years; population at 150 / 300 / 600):
 
@@ -60,6 +60,35 @@ Read first: `AGENTS.md`, `docs/ADJUDICATION.md` (one ledger, stated odds, seeded
   - **Growth, then 30% learning from year 200.** Knows 323 at the switch, catches sensible's knowledge by 300 (743 against 743) and passes it by 600 (1,148 against 1,120), with 2,791 people at 600 (sensible: 3,634). Under the old rule it never caught up (723 at 300, 1,103 at 600).
   - **35% learning, then growth from year 200.** Knows 638 at the switch with a 29-year lead, and 158 people. Its population then grows to 482 at 300, 1,527 at 400 and 3,551 at 600, nearly level with sensible. Its knowledge falls behind (985 at 600) as its few learners keep up less, and its lead falls back to the calendar.
   - **Growth only (2% learning).** Lags further than before (bronze 421, against 379 under the old rule): few learners, slow learning.
+
+**A recalibrated (2026-10-02, the learning pace; PR #121).** The user's new game learned about 20 ways a year from its founding. That came from 7 learners (10.6%) under the leaders' old split, which #116 now caps (a balanced split puts 3.5% on learning, the learning path 15%), and from cheap founding questions.
+- **Per learner, the engine was unchanged.** A fresh good village with learners held at 3 learned 110 ways by year 16 on main, against 106 on the engine before the learning overhaul (97a32dd2). With 7 learners: 206 against 203.
+  - Only when goods ran out was main slower. On a poor site, 7 learners learned 88 by year 16 against 165, because goods cover halves learning.
+- **What changed: a young people learns slowly** (`Research600.founding_work`). Through its first 15 years every question asks 2.2 times the usual work, whatever the question's age. The extra fades back to the usual work by year 30, read at the people's own age.
+  - The questions' own pace (`PACE_BY_YEAR`) and the share the age can spare (`SUSTAINABLE_SPECIALISTS`, 4% at the founding) are as on main.
+  - A first try cut the founding questions' own pace and raised the spare share to 6.5%. The pace cut slowed a lagging people at any date, and the spare share made heavy learning cheaper. Both are gone.
+- **Engine (truth probe, a fresh world, seed 74119, main d7544488).** Known by year 16, including the 10 a people starts with:
+
+| Path | Main | This branch |
+|---|---|---|
+| balanced | 117 | 57 |
+| growth | 93 | 44 |
+| making | 82 | 42 |
+| war | 82 | 41 |
+| building | 82 | 42 |
+| learning | 226 | 167 |
+
+  - The learning path learns 2.9 times balanced (1.9 on main) with three times the learners (9 against 3 at year 16).
+- **Fast sim (#120's recalibrated sim, 3 seeds; main → this branch).** Known by year 16 / 150; pit firing, copper and writing years; population at 60 / 150 / 300:
+
+| Scenario | Known 16 / 150 | Pit / copper / writing | Population 60 / 150 / 300 |
+|---|---|---|---|
+| path_balanced | 95 / 525 → 48 / 524 | 20 / 61 / 210 → 34 / 65 / 210 | 237 / 601 / 1,162 → 219 / 596 / 1,162 |
+| path_learning | 209 / 573 → 131 / 572 | 16 / 50 / 181 → 16 / 49 / 181 | 227 / 564 / 1,133 → 221 / 561 / 1,133 |
+| poor | 41 / 207 → 24 / 196 | 71 / 163 / 295 → 98 / 177 / 360 | 61 / 77 / 112 → 61 / 76 / 112 |
+
+  - **Learning path against balanced in people:** about level at year 60 (221 against 219), 6% fewer at 150, 2.5% fewer at 300. It is far ahead in knowledge at 50 (356 against 234).
+  - **The poor people** is back at the usual pace from year 30. Its knowledge is 5% short at 150 and 3% short at 300. Its first milestones come later: pit firing by about 27 years, copper by 14, writing by about 65 (one seed in three unchanged). Bronze stays out of reach by 600 in two seeds of three, as on main.
 
 ### B. Fresh food, small stores, keepers and carers (owner: `food_system.gd`, `consequence_engine.gd` food-security/health/early-life targets, `early_life_conditions.gd` care coverage, `realm_purse.gd LEVY_KEEP_DAYS`)
 - **No more giant stores.**
@@ -160,6 +189,71 @@ What the sims show:
 - **Balanced peoples** stay at or above the best historical figure and below the typical one.
 - **Learning path.** It now puts the freed food work into learning. The specialists' upkeep (`society_model.gd SPECIALIST_UPKEEP`) then lowers its births, which is learning's price.
 
+#### Frontier growth (codex/frontier-growth)
+"How am I shrinking at these numbers?" A healthy, fed founding people lost about 1.5% a year for its first decade. In the engine, a band of 120 was at 97 by year 12, and the fast sim did not see 120 again until year 38. Two things caused it.
+
+1. **The founders were old.** A quarter of them were past 45 (18% aged 45–60, 8% older), so the first decades' deaths were mostly founders growing old.
+   - Founders are now young families (`game_state.gd FOUNDING_AGE_MIX`: children 36%, 14–25 21%, 25–35 17%, 35–45 12%, 45–60 10%, older 4%). That is close to the mix a growing pre-modern people settles into.
+   - Older saves keep their people as they are.
+2. **Open land did nothing for births.** Now, while the whole people is under `FRONTIER_ONSET` (0.6, where crowding begins) of what one home land carries, couples set up house younger. Conception rises by up to `FRONTIER_CONCEPTION` (0.30), tapering to none as the land fills (`early_life_conditions.gd frontier_of`, `home_capacity`).
+   - A new band of 120 gets +10%.
+   - A people of 107 in its eighth year gets about +15%.
+   - The frontier reads the home land alone, never the town count. Founding towns widens the land a people can fill (`carrying_capacity`), never the births of those already there; one people of 150 in one town or in three is equally near its frontier.
+
+Birth-spacing customs were checked and are not the cause. They add a little maternal and newborn safety and take nothing from births.
+
+Random afflictions (crisis outbreaks, hunger seasons, fires, drowning) are untouched. They are the setbacks against this growth.
+
+**On screen.** Once a whole year has been counted, the People tile reads "born 4 · buried 5" (the last year, the engine's own count), amber when more are buried than born. In the first year it keeps its old note, and its card says "so far".
+
+When the people shrank, the card says what took them:
+- If deaths outside the ordinary toll cover the shortfall, it names the largest by cause (`GameState.rolling_death_causes`), for example "More are buried than born: 8 lost to fire."
+  - The card always uses plain words, never the ledger's raw cause (`dwindling_cause.gd misfortune_words`). A god's order that killed reads "the god's word"; a collapse or accident at work reads "accidents at work". Other causes read "the sea", "the road", "captivity", "war" and so on. A cause with no plain word reads "8 died by misfortune".
+  - Each day's deaths are booked under that day's largest cause, but the natural share of the day is kept as natural (`consequence_engine.gd`, `GameState.reclassify_death_cause`), so a long fever season does not swallow ordinary old age.
+- Otherwise it explains the ordinary toll by the winter tally's rule (`dwindling_cause.gd short_reason`), for example "fevers among the old".
+
+The note has room for about 19 letters (every top-strip value must fit at 1280 wide), so where the people live and whether all are fed are on the card's first lines; a hungry day still takes the note.
+
+**Engine, headless, one town for these 12 years** (`tools/sim/demography_probe.tscn`):
+
+| Seed 74119, leaders' split | Main | This branch |
+|---|---|---|
+| People at year 12 | 97 | 113 |
+| Born / died over 12 years | 49 / 71 | 64 / 71 |
+| Natural deaths | 56 | 53 |
+| Misfortune deaths | 12 | 13 |
+
+- **Seed 5150:** 108 at year 12 (63 born, 75 died, 18 of them by misfortune).
+- **Without misfortune** a founding band now grows about 0.4% a year in its first decade.
+
+**Fast sim, 2 seeds, 600 years.** People at years 10 / 100 / 300 / 600, main → this branch:
+
+| | Main | This branch |
+|---|---|---|
+| balanced scenario | 107 / 205 / 1,107 / 3,726 | 123 / 338 / 1,108 / 3,726 |
+| balanced temper (founds towns) | 107 / 162 / 1,347 / 27,982 | 123 / 289 / 2,658 / 28,408 |
+| growth path (cautious-caring temper) | 110 / 238 / 3,059 / 30,481 | 127 / 390 / 4,914 / 30,493 |
+| learning path (open-scholarly temper) | 105 / 176 / 978 / 19,409 | 121 / 289 / 1,688 / 26,972 |
+
+- **Balanced scenario growth** (% a year, 0–10 / 0–30 / 30–100): −1.15 / −0.33 / +0.91 → +0.23 / +0.57 / +1.23.
+- **Growth path** at year 300 has 1.85 times the balanced people's number. It stays under the best historical figure for a founders' society (6,000).
+- **Year 600** is unchanged: crowding sets the long run.
+
+**People-first suite after the #120 recalibration** (`tools/sim/paths.py`, 3 seeds, 1200 years), main 5d38acce → this branch:
+
+| | Main | This branch |
+|---|---|---|
+| Founding years, path_balanced (people at 0 / 7.5 / 15 / 30 / 60) | 120 / 111 / 109 / 118 / 161 | 120 / 124 / 131 / 155 / 236 |
+| path_growth, same years | 120 / 112 / 112 / 124 / 173 | 120 / 126 / 134 / 162 / 252 |
+| path_learning, same years | 120 / 110 / 108 / 117 / 154 | 120 / 122 / 130 / 154 / 227 |
+| towns_balanced / growth / learning at year 300 | 3,627 / 4,844 / 2,270 | 5,453 / 6,154 / 3,647 |
+| towns_balanced / growth / learning at year 600 | 30,239 / 30,858 / 30,769 | 30,250 / 30,861 / 30,767 |
+
+- One-town paths meet at their land's limit by year 300 (path_balanced 1,162 on both).
+- The branch raises no flag that main does not: 62 flags here, 64 on main. All are the same rows, mostly the food-labor share and the towns' year-600 numbers.
+
+**Calibration.** The engine truth runs were regenerated on this branch. With the younger founders, the two balanced seeds now disagree by more than the tolerance in two places: known practices at year 5 (26 versus 33) and discoveries by year 15 (72 versus 98). The surrogate lies between them, and `check.py` marks those rows "seed" (see docs/research/SURROGATE_SIM.md).
+
 ### C. Searching the land (owner: `resource_system.gd` survey/deposit/extraction yield, survey scripts)
 - **Searched land.** Each people (each town in its own scope) keeps `survey_cover` (0..1).
   - It rises with searcher-days over the land worked: about 1 searcher per 60 people keeps it near 0.6 over a few years.
@@ -210,6 +304,22 @@ What the sims show:
   - building
   
   The same rules apply to all peoples; only the tendencies differ. No ruler goes all in on learning unless its temperament is scholarly. Log and test the spread of paths across a world's peoples.
+
+## Balance P2 (2026-10-03)
+
+Each path gets a clear payoff and a real cost; balanced is never at least as good as another path on every measure; balanced peoples stay in the historical bands and all-in paths go a little extra. Tested on the fast sim (`tools/sim/paths.py`, recalibrated to engine truth on this branch).
+
+| Item | Change | Why |
+|---|---|---|
+| Learners' births upkeep | `society_model.gd SPECIALIST_UPKEEP.conception_support` −1.0 → −0.7 | A third-learning people sat at the births limit for centuries (a fifth of balanced by 1200); now about an eighth smaller. At −0.5 the learning path paid nothing in people before year 150 under the new learning pace (#121); at −0.7 it pays from about its hundredth year. |
+| A lead's goods | `research_600_catalog.gd LEAD_GOODS_YEARS` 20 → 60 | A century ahead asked six times the goods a learner; now under three. |
+| Carers ease crowding | `early_life_conditions.gd CARER_CROWDING` 0.5 | Full carer cover lifts half of crowding's toll on deaths and births: the growth path fills its land further (+17% people). |
+| The watch's upkeep | `society_model.gd WATCH_FREE_SHARE` 0.05, `WATCH_UPKEEP` 1.0, `WATCH_UPKEEP_KEYS` | Up to 5 in 100 of the people keep watch at no extra cost, or the towns' guard if more (`watch_military.gd guard_needed`: 3.5 in 100 of each town, at least 8), so standing the guard the screen asks for is never charged. Past it, each person costs as a learner past the age's share does in work, weariness, births and stores; not cohesion (`standing.gd` levy burden charges that). The People view says it in heads ("Up to 9 can keep watch at no extra cost … 4 over now: about 3.6 in 100 fewer births"), read live; the capacity history gives it its own key. |
+| Learning caps | `work_paths.gd LEARNING_CAP` growth/making/war/building .03 → .035 | Every path but learning learns as balanced does, so balanced no longer wins on knowledge; no free learners. |
+| Daughter towns' land | `early_life_conditions.gd TERRITORY_SLOPE` 1.6 → 0.85 | A people founding a town every generation reaches about 19,000 by year 600 (high 20,000), not 30,000. |
+| Food yields | `food_system.gd harvest_settled`: the founding yields (1.34, `CULTIVATION_YIELD` 5.65) settle to `HARVEST_SETTLED` 0.77 of them by `HARVEST_SETTLED_YEAR` 200 | The founding decades keep the age's usual food share (the same as before, on good and average land); from year 300 the leaders keep 35–40% on food (was 27–30%, under the plausible floor of 35). |
+
+Still open (the user's decisions): building has no payoff the engine's numbers reach (no great works or splendor in the measure; it trails every path), and making's goods have no sink (the barter ceiling holds every path's goods near 4–5 a head).
 
 ## Integration rules (every builder)
 - Work only in your worktree, on your `codex/<task>` branch. Never use `git stash`, never merge main yourself, never launch the player game, never remove a worktree.

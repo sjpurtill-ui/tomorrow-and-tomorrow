@@ -572,10 +572,10 @@ static func knowledge()->Dictionary:
 	var excess:=float(model.specialist_excess) if model!=null else 0.0
 	if excess>0.0:
 		lines.append(_line("Too many learners","%s over" % _whole(excess*able),
-			"The people can spare %d in 100 of the workers as full-time learners at this age (%s people). Past that the extra ones cost more work for everyone, weariness, cohesion and births." % [roundi(sustainable*100.0),_whole(sustainable*able)],"bad"))
+			"The people can spare %d in 100 of the workers as full-time learners at this age (%s people). Past that the extra ones cost more work for everyone, weariness, cohesion and births. A watch past 5 in 100 of the people costs much the same." % [roundi(sustainable*100.0),_whole(sustainable*able)],"bad"))
 	else:
 		lines.append(_line("Learners the people can spare","up to %s" % _whole(sustainable*able),
-			"The people can spare %d in 100 of the workers as full-time learners at this age. Past that the extra ones cost more work for everyone, weariness, cohesion and births." % roundi(sustainable*100.0),"plain"))
+			"The people can spare %d in 100 of the workers as full-time learners at this age. Past that the extra ones cost more work for everyone, weariness, cohesion and births. A watch past 5 in 100 of the people costs much the same." % roundi(sustainable*100.0),"plain"))
 	# Teaching: keepers spread practices to the rest (society_model.gd teaching).
 	var teaching:=_raw("Knowledge")/pop*0.055
 	var all_teaching:=teaching+_raw("Administration")/pop*0.018+_raw("Crafting")/pop*0.012
@@ -650,7 +650,7 @@ static func defense()->Dictionary:
 	var lift:=watch/maxf(1.0,pop*WATCH_SHARE)*WATCH_SAFETY
 	var safety:=clampf(float(state.simulation_metrics.get("security",0.38)),0.0,1.0)
 	lines.append(_line("Safety","+%d points" % roundi(lift*100.0),
-		"The watch lifts the safety the people settle toward by %d points for every 5 in 100 of them on watch (%s would). Safety is %d of 100 and moves toward its mark a little each day." % [roundi(WATCH_SAFETY*100.0),_count(ceili(pop*WATCH_SHARE)),roundi(safety*100.0)],"good" if lift>0.0 else "bad"))
+		"The watch lifts the safety the people settle toward by %d points for every %s keeping watch (5 in 100 of the people). Safety is %d of 100 and moves toward its mark a little each day." % [roundi(WATCH_SAFETY*100.0),_count(ceili(pop*WATCH_SHARE)),roundi(safety*100.0)],"good" if lift>0.0 else "bad"))
 	var lawless:=maxf(0.0,LAWLESS_BELOW-safety)*LAWLESS_DEATHS
 	lines.append(_line("Deaths from lawlessness","%s a year" % _one(lawless*pop) if lawless>0.0 else "none",
 		("Below %d of 100 safety people are killed in quarrels and theft: about %s a year now." % [roundi(LAWLESS_BELOW*100.0),_one(lawless*pop)]) if lawless>0.0 else "Below %d of 100 safety people start dying in quarrels and theft; safety is above that now." % roundi(LAWLESS_BELOW*100.0),
@@ -660,10 +660,11 @@ static func defense()->Dictionary:
 	# settlement_defense_snapshot). The townsfolk who rise are told apart:
 	# they fight when raiders come, but they are no guard.
 	var walls:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
-	var required:=int(walls.get("garrison_required",maxi(8,ceili(pop*0.035))))
+	var Watch:=preload("res://scripts/watch_military.gd")
+	var required:=int(walls.get("garrison_required",maxi(Watch.GUARD_MIN,ceili(pop*Watch.GUARD_SHARE))))
 	var guard:=int(walls.get("garrison_guard",roundi(watch)))
 	lines.append(_line("Guard at home","%d of %d" % [guard,required],
-		"The watch at home is home's guard (the watch is the army): in a raid or siege they defend it; the home guard posted in our other towns stands there. A town needs 3.5 in 100 of its people on guard, at least 8.","good" if guard>=required else "bad"))
+		"The watch at home is home's guard (the watch is the army): in a raid or siege they defend it; the home guard posted in our other towns stands there. Home needs %s on guard (3.5 in 100 of its people, at least %d)." % [_count(required),Watch.GUARD_MIN],"good" if guard>=required else "bad"))
 	var townsfolk:=int(walls.get("garrison_townsfolk",0))
 	lines.append(_line("Townsfolk who would fight","%s at home" % _count(townsfolk) if townsfolk>0 else "none",
 		"When raiders come, about 1 in 10 of the town's grown people take up arms beside the watch. They are untrained and are not counted as the guard.","plain"))
@@ -671,6 +672,7 @@ static func defense()->Dictionary:
 	var drill:Dictionary=preload("res://scripts/watch_military.gd").role_effect(MilitaryCampaign)
 	lines.append(_line("Drill of the watch","%d in 100" % roundi(float(drill.drill)*100.0),
 		"Everyone keeping watch is under arms and drills at home every day%s. Ten more: %s" % [(", most of a newcomer's drill in about %d days" % int(drill.drill_days)) if int(drill.drill_days)>0 else "",String(drill.ten_more).trim_prefix("Ten more: ")],"good" if watch>0.0 else "plain"))
+	lines.append(watch_upkeep_line())
 	# Walls and ditches: only the watch builds them (military_campaign.gd).
 	var project:Dictionary=walls.get("construction",{}) if walls.get("construction") is Dictionary else {}
 	if bool(project.get("active",false)):
@@ -694,6 +696,26 @@ static func defense()->Dictionary:
 	lines.append(_cost_line("Defense"))
 	return {"lead":"The watch guards the town day and night: it keeps the peace, stands as the home guard, trains soldiers and builds the defences.","lines":lines}
 
+
+## Too many on watch: past the free watch (society_model.gd watch_free: 5 in
+## 100 of the people, or the towns' guard if more), each one costs as an extra
+## learner does, in work, weariness, births and stores. Read live from the
+## watch as it stands; the engine counts the cost from its next daily
+## reckoning of the whole people (society_model.gd settle_watch), and the line
+## says "from tomorrow" until that reckoning matches the watch.
+static func watch_upkeep_line()->Dictionary:
+	var model=WorldSimulation.discovery.society_model if WorldSimulation.discovery!=null else null
+	var free:=Society.watch_free()
+	var over:=Society.watch_over()
+	var why:="5 in 100 of the people, or the guard the towns need if that is more"
+	if over>=0.5:
+		var births:=-Society.watch_upkeep_for("conception_support",over/_able())
+		var counted:=float(model.watch_excess)*_able() if model!=null else over
+		var when:="" if absf(counted-over)<0.5 else " from tomorrow"
+		return _line("Too many on watch","%s over" % _whole(over),
+			"Up to %s can keep watch at no extra cost (%s). %s over now: about %s in 100 fewer births%s, and more work and weariness for everyone, as many learners past the age's share would cost." % [_whole(float(free)),why,_whole(over),_one(births*100.0),when],"bad")
+	return _line("Watch the people can spare","up to %s" % _whole(float(free)),
+		"Up to %s can keep watch at no extra cost (%s). Past that each one costs fewer births and more work and weariness, as a learner past the age's share does." % [_whole(float(free)),why],"plain")
 
 # --- Shared lines ----------------------------------------------------------------------
 

@@ -86,7 +86,7 @@ const WORK:={
 	"balanced":{},
 }
 ## The most of the people at work each path puts on learning.
-const LEARNING_CAP:={"balanced":.035,"growth":.03,"making":.03,"war":.03,"building":.03,"learning":.15}
+const LEARNING_CAP:={"balanced":.035,"growth":.035,"making":.035,"war":.035,"building":.035,"learning":.15}
 ## A people set on ideas (the inquiry ambition) may put this much more of the
 ## people on learning on any other path, times the ambition's share.
 const INQUIRY_CAP:=.04
@@ -289,11 +289,21 @@ static func leaders_line()->Dictionary:
 	var id:=held() if held()!="" else "balanced"
 	var kept:=record_of()
 	var tip:="The leaders lean the work by the people's ways (the values they live by), on the same rule as every ruler. They look again each month."
+	# Why learning sits where it does: the path's share (raised by a wish to
+	# learn, the inquiry ambition), the engine's number.
+	var cap:=learning_cap()
+	var whose:="the share for %s" % String(NAMES[id])
+	if cap>float(LEARNING_CAP.get(id,LEARNING_CAP.balanced))+0.0001:whose+=", raised by their wish to learn"
+	var limit:="at most %s in 100 of the people on learning, %s; when you set the work yourself there is no such limit." % [_share_words(cap*100.0),whose]
 	if id=="balanced":
-		return {"text":"Our leaders keep the work balanced, favouring no one task.","tip":tip}
+		return {"text":"Our leaders keep the work balanced, favouring no one task.","tip":"%s They put %s" % [tip,limit]}
 	var since:=int(kept.get("since",int(WorldSimulation.state.elapsed_days)))
 	return {"text":"Our leaders lean the work toward %s." % String(NAMES[id]),
-		"tip":"%s They put %s. The people's ways are %s. Since year %d." % [tip,String(LEANS[id]),String(kept.get("why",TEMPERS[id])),since/365+1]}
+		"tip":"%s They put %s, and %s The people's ways are %s. Since year %d." % [tip,String(LEANS[id]),limit,String(kept.get("why",TEMPERS[id])),since/365+1]}
+
+## "3.5", "15": a share in 100 as the tip says it.
+static func _share_words(value:float)->String:
+	return str(roundi(value)) if is_equal_approx(value,roundf(value)) else "%.1f" % value
 
 ## A people's path as the Standing page names it: "their work is set on war";
 ## "" for a people not simulated or still balanced.

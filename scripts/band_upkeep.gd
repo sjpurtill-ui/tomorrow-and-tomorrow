@@ -125,7 +125,7 @@ func _re_form(army:Dictionary,today:int)->void:
 		if spare>0:
 			var weapon:=String(formation.get("weapon","improvised"))
 			formation["equipment"]=int(formation.equipment)-spare
-			host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+spare
+			preload("res://scripts/watch_military.gd").return_weapons(host,spare,weapon)
 			host.gear_sent_out-=spare
 		formation["ammunition_required"]=host._ammunition_required_for(String(formation.get("weapon","improvised")),int(formation.equipment_required))
 		formations[index]=formation

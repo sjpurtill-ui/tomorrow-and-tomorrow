@@ -78,7 +78,20 @@ static func tally(field:String,count:int)->void:
 ## death rate itself comes from (cohort size x age hazard with the early-care
 ## multipliers), which is what the LIVES and babes figures show the player.
 static func tally_ages(count:int)->void:
-	if count<=0:return
+	var split:=age_split(count)
+	if split.is_empty():return
+	var state:=WorldSimulation.state
+	var s:Dictionary=state.hearth_season
+	_open(s,int(state.elapsed_days))
+	var year:Dictionary=s.get_or_add("year",{})
+	for band:String in split:year[band]=float(year.get(band,0.0))+float(split[band])
+
+
+## `count` ordinary deaths split {young, grown, old} by today's life table
+## (cohort size x age hazard with the early-care multipliers); {} when the
+## table expects none. Pure: tally_ages and the People card both read it.
+static func age_split(count:int)->Dictionary:
+	if count<=0:return {}
 	var state:=WorldSimulation.state
 	var hazards:Dictionary=state._natural_cohort_hazards()
 	var expected:Dictionary={}
@@ -87,16 +100,11 @@ static func tally_ages(count:int)->void:
 		var deaths:=float(state.population_cohorts.get(key,0.0))*float(hazards[key])
 		expected[key]=deaths
 		total+=deaths
-	if total<=0.0:return
-	var s:Dictionary=state.hearth_season
-	_open(s,int(state.elapsed_days))
-	var year:Dictionary=s.get_or_add("year",{})
+	if total<=0.0:return {}
 	var scale:=float(count)/total
 	var grown:=0.0
 	for key in ["youth","early_adults","established_adults","mature_adults"]:grown+=float(expected.get(key,0.0))
-	year["young"]=float(year.get("young",0.0))+float(expected.get("children",0.0))*scale
-	year["grown"]=float(year.get("grown",0.0))+grown*scale
-	year["old"]=float(year.get("old",0.0))+float(expected.get("elders",0.0))*scale
+	return {"young":float(expected.get("children",0.0))*scale,"grown":grown*scale,"old":float(expected.get("elders",0.0))*scale}
 
 
 static func _open(s:Dictionary,day:int)->void:
