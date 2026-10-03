@@ -190,5 +190,7 @@
   "sweat_baths": "res://assets/ui/research/subjects/sweat_baths-v2.png",
   "timber_seasoning": "res://assets/ui/research/subjects/timber_seasoning-v2.png",
   "crop_calendars": "res://assets/ui/research/subjects/crop_calendars-v2.png",
-  "threshing_frames": "res://assets/ui/research/subjects/threshing_frames-v2.png"
+  "threshing_frames": "res://assets/ui/research/subjects/threshing_frames-v2.png",
+  "fiber_retting": "res://assets/ui/research/subjects/fiber_retting-v2.png",
+  "winnowing_practice": "res://assets/ui/research/subjects/winnowing_practice-v2.png"
 }

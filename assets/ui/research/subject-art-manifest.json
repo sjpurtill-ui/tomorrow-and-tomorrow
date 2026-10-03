@@ -6593,17 +6593,17 @@
     ]
   },
   "banishment_sentence": {
-    "path": "res://assets/ui/research/subjects/banishment_sentence-v1.png",
+    "path": "res://assets/ui/research/subjects/banishment_sentence-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.3
     ]
   },
   "indicator_plants": {
-    "path": "res://assets/ui/research/subjects/indicator_plants-v1.png",
+    "path": "res://assets/ui/research/subjects/indicator_plants-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.2
     ]
   },
   "wild_honey_smoking": {
@@ -10114,6 +10114,42 @@
     "opening_focus": [
       0.5,
       0.35
+    ]
+  },
+  "repeated_recitation_training": {
+    "path": "res://assets/ui/research/subjects/repeated_recitation_training-v2.png",
+    "focus": [
+      0.5,
+      0.38
+    ]
+  },
+  "pottery_style_identity": {
+    "path": "res://assets/ui/research/subjects/pottery_style_identity-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "fiber_retting": {
+    "path": "res://assets/ui/research/subjects/fiber_retting-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "winnowing_practice": {
+    "path": "res://assets/ui/research/subjects/winnowing_practice-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   }
 }

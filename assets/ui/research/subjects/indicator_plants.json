@@ -1,12 +1,56 @@
 {
   "id": "indicator_plants",
   "line": "ecology",
-  "game_year": 30,
-  "approx_historical_year": -4800,
-  "prompt": "c. 4800 BCE: Adults compare lush broadleaf plants on fertile moist ground with sparse thorny plants on dry poor ground; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d657dd1a-e06d-4017-a993-d0fb04407192.png",
-  "asset": "res://assets/ui/research/subjects/indicator_plants-v1.png",
-  "sha256": "30764a73a98e4941127fa568e0e29d31fc739ba5ef1dbbc0f0a87804094eee72",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; contrasting plant and soil indicators clear in crop."
+  "status": "new",
+  "name": "Indicator Plants for Good and Poor Ground",
+  "one_liner": "Indicator plants for good and poor ground",
+  "observation": "Indicator plants for good and poor ground.",
+  "key_threshold": false,
+  "target_year": 30,
+  "proposed_year": 30,
+  "band_low": 18,
+  "band_high": 42,
+  "min_year": 18,
+  "research_years": 3,
+  "requires_all": [
+    "topsoil_depth_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "herbal_classification"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Land health",
+  "signals": [
+    "nature",
+    "survey"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/indicator_plants-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "version": 2,
+  "year": 30,
+  "focus": [
+    0.5,
+    0.2
+  ],
+  "binding_style": "ecology: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/ecology-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established ecology medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: Two adults crouch comparing a green broad-leaf patch over dark deep soil and a sparse pale grass patch over exposed stony ground; one lifts a small plant with roots and clinging earth. Botanical foreground and flat plant-pigment landscape, olive/earth/ivory. Clear soil/plant contrast, no labeled chart, written map, measuring instrument or modern agronomy equipment.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-97e2cc13-9925-466e-9717-af694d6304e8.png",
+  "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/indicator_plants-v2.png",
+  "sha256": "0a4c43aa93090a2edfacac51d3ee7e29603480d70255727e1ebb6065f3476c4a",
+  "mode": "built-in image_gen / edit"
 }

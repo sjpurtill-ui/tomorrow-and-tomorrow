@@ -1,0 +1,57 @@
+{
+  "id": "pottery_style_identity",
+  "line": "culture",
+  "status": "new",
+  "name": "Pottery Motifs That Mark a People",
+  "one_liner": "Pottery motifs that mark a people",
+  "observation": "Pottery motifs that mark a people.",
+  "key_threshold": false,
+  "target_year": 30,
+  "proposed_year": 30,
+  "band_low": 16,
+  "band_high": 45,
+  "min_year": 16,
+  "research_years": 3,
+  "requires_all": [
+    "pit_firing",
+    "kin_body_ornament"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [
+    "production"
+  ],
+  "subcategory": "Social cohesion",
+  "signals": [
+    "society",
+    "information"
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/pottery_style_identity.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+      "tile_index": 0,
+      "caption": "Pottery motifs that mark a people (Year 30)",
+      "style": "silhouette_ochre"
+    },
+    "subject": null
+  },
+  "version": 2,
+  "year": 30,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "culture: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/culture-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established culture medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: Two adults compare TWO squat handmade fired-clay pots, each bearing a DIFFERENT simple scratched zigzag/dot band, at a modest earthen shelter. Tapestry-inspired PAINTING: flat interlocking indigo/rose/gold planes, not literal cloth. Small body ornaments and hide garments, no wheel-thrown identical vessels, glaze, written symbols or woven clothing.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b685ddc2-2b98-404c-9e6d-021b1794f841.png",
+  "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/pottery_style_identity-v2.png",
+  "sha256": "4b14db761fde721ebf35a41da821499427ed32bb16cf2d8bfab0546764bbac50",
+  "mode": "built-in image_gen / edit"
+}
