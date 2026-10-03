@@ -85,6 +85,10 @@ func op(name:String,args:Dictionary)->void:
 		"vanish":_vanish(String(args.get("who",victim)))
 		"caption":_caption(String(args.get("text","")))
 		"blow","noise":pass
+		"plan":_plan_start(args)
+		"pack_come":_pack_come(args)
+		"pack_crunch":_pack_crunch(args)
+		"pack_fetch":_pack_fetch(args)
 		"end":finish()
 
 # --- people ---------------------------------------------------------------------------
@@ -407,6 +411,217 @@ func _throw(args:Dictionary)->void:
 			if is_instance_valid(node) and is_instance_valid(target):
 				var keep:=node.global_transform
 				node.get_parent().remove_child(node);target.add_child(node);node.global_transform=keep)
+
+# --- the acting's plans (K: court_acting.gd EXEC_PLANS) -----------------------------
+# Where a plan exists for the act, its clips perform it (the batter's swing,
+# the headsman's three strokes, the dogs' victim clawing at the floor), its
+# props are put in hands and on the floor where it says, and its clips'
+# events (split, spray, geyser) bring the split body (J) and the blood (M).
+
+const PROPS_PATH:="res://scripts/hud/court_exec_props.gd"
+## The plan's props by the set's names (court_exec_props.gd).
+const PLAN_PROPS:={"club":"club","axe":"axe_bronze","ladle":"cook_ladle","lid":"lid","pot":"cook","block":"block","bone":"bone"}
+var _plan:Dictionary={}
+var _plan_frame:=Transform3D.IDENTITY
+var _plan_keys:Dictionary={}
+var _pot_name:="cook_pot"
+var _drag_scale:=1.0
+
+static func _props_kit()->Script:
+	return load(PROPS_PATH) if ResourceLoader.exists(PROPS_PATH) else null
+
+## A thing for the plan: the set's own (M) when it has it, else a stand-in.
+func _plan_thing(name:String)->Node3D:
+	var kit:=_props_kit()
+	var court:=_court()
+	if kit!=null:
+		var tags:Array=(court.get("facts") as Dictionary).get("era_tags",[]) if court!=null and court.get("facts") is Dictionary else []
+		var role:=String(PLAN_PROPS.get(name,name))
+		var made_name:=String(kit.call("pick",role,tags))
+		if role=="lid":made_name=String(kit.call("lid_for",_pot_name))
+		if made_name!="":
+			var made:Variant=kit.call("make",made_name,court)
+			if made is Node3D:
+				(made as Node3D).set_meta("prop",made_name)
+				if role=="cook":_pot_name=made_name
+				return made
+	var mine:=String({"ladle":"club","lid":"lid","pot":"pot","block":"block","axe":"axe","club":"club","bone":"bone"}.get(name,name))
+	return _make(mine)
+
+## A local point of the plan (the victim at its origin, the god toward +Z) in the hall.
+func _plan_at(at:Variant)->Vector3:
+	if at is Array and (at as Array).size()>=3:return _plan_frame*Vector3(float(at[0]),float(at[1]),float(at[2]))
+	return _plan_frame.origin
+
+## The plan starts: everyone to their place, things in hand and on the floor,
+## the clips running. args: act (the plan's name), victim, ex, cook.
+func _plan_start(args:Dictionary)->void:
+	var plan:=Acting.exec_plan(String(args.get("act","")))
+	var v:=_body(victim)
+	var court:=_court()
+	if plan.is_empty() or v==null or court==null:return
+	_plan=plan
+	var yaw:=v.global_rotation.y
+	_plan_frame=Transform3D(Basis(Vector3.UP,yaw),Vector3(v.global_position.x,0.0,v.global_position.z))
+	# Dragged off behind the windbreak: the plan's "behind" is turned toward
+	# the hall's own windbreak (or its door), and the drag is as long as the
+	# way there, never through the fire.
+	_drag_scale=1.0
+	if (plan.get("things",{}) as Dictionary).has("windbreak"):
+		var wb:=point("windbreak")
+		var to:=Vector3(wb.x-v.global_position.x,0.0,wb.z-v.global_position.z)
+		if to.length()>0.6:
+			yaw=atan2(-to.x,-to.z)
+			_plan_frame=Transform3D(Basis(Vector3.UP,yaw),_plan_frame.origin)
+			v.rotation.y=yaw-v.get_parent_node_3d().global_rotation.y
+			var planned:=0.0
+			for c:Dictionary in ((plan.roles as Dictionary).get("victim",{}) as Dictionary).get("clips",[]):
+				if c.has("move") and c.has("until"):planned+=Vector3(float(c.move[0]),float(c.move[1]),float(c.move[2])).length()*(float(c.until)-float(c.t))
+			if planned>0.1:_drag_scale=maxf(to.length()-0.2,0.5)/planned
+	_plan_keys={"victim":victim,"executioner":String(args.get("ex","")),"cook":String(args.get("cook",""))}
+	# things on the floor
+	var things:Dictionary=plan.get("things",{})
+	for name:String in things:
+		if not name in ["pot","block"]:continue
+		var thing:=_plan_thing(name)
+		court.add_child(thing);_made.append(thing)
+		_things[name]=thing
+		thing.global_position=_plan_at((things[name] as Dictionary).get("at",[0,0,0]))
+		thing.rotation.y=yaw
+	# everyone to their place, facing the plan's way, things in hand, clips on
+	for role:String in plan.roles:
+		var r:Dictionary=plan.roles[role]
+		var key:=String(_plan_keys.get(role,""))
+		var b:=_body(key)
+		if b==null:continue
+		if role!="victim":
+			var f:Variant=_fig(key)
+			var to:=_plan_at(r.get("at",[0,0,0]))
+			if f!=null and f.spot!=null:
+				var local:Vector3=f.spot.to_local(to)-f._path_at(f.stroll);local.y=0.0
+				f.nudge=local
+			b.rotation.y=yaw+deg_to_rad(float(r.get("yaw",0.0)))-b.get_parent_node_3d().global_rotation.y
+		for side:String in (r.get("props",{}) as Dictionary):
+			var name:=String(r.props[side])
+			var prop:=_plan_thing(name)
+			_made.append(prop)
+			_things[name]=prop
+			var kit:=_props_kit()
+			var held:=false
+			if kit!=null and prop.has_meta("prop"):held=bool(kit.call("hold",prop,b,"hand."+side))
+			if not held:
+				var hand:=_hand(key,side)
+				if hand!=null:hand.add_child(prop)
+				else:court.add_child(prop)
+		if r.has("clip"):Acting.play(b,String(r.clip),{"blend":0.3})
+		if r.has("clips"):_plan_sequence(key,r.clips as Array)
+	# the victim's clips tell when the body splits and the blood flies; the
+	# cook's, when the lid goes on
+	var actor:=Acting.of(v)
+	if actor!=null and actor.has_signal("cue"):actor.connect("cue",_on_plan_cue)
+	var cook_body:=_body(String(_plan_keys.get("cook","")))
+	if cook_body!=null:
+		var cook_actor:=Acting.of(cook_body)
+		if cook_actor!=null and cook_actor.has_signal("cue"):cook_actor.connect("cue",_on_cook_cue)
+
+func _on_cook_cue(_fig:Node3D,event:Dictionary)->void:
+	if _ended or String(event.get("name",""))!="lid":return
+	var lid:=_things.get("lid") as Node3D
+	var pot:=_things.get("pot") as Node3D
+	if lid==null or pot==null or not is_instance_valid(lid) or not is_instance_valid(pot):return
+	var kit:=_props_kit()
+	if kit!=null and lid.has_meta("prop") and pot.has_meta("prop"):
+		kit.call("let_go",lid,_court())
+		if bool(kit.call("seat",lid,pot,"lid_seat")):return
+	var keep:=lid.global_transform
+	lid.get_parent().remove_child(lid);_court().add_child(lid)
+	lid.global_transform=Transform3D(Basis(),pot.global_position+Vector3(0.0,0.45,0.0))
+
+## A run of clips (the dogs' victim): each at its time, and moving while it says.
+func _plan_sequence(key:String,clips:Array)->void:
+	var b:=_body(key)
+	if b==null:return
+	for c:Dictionary in clips:
+		var t:=_tween()
+		t.tween_interval(float(c.get("t",0.0)))
+		t.tween_callback(func()->void:if is_instance_valid(b):Acting.play(b,String(c.clip),{"blend":0.12}))
+		if c.has("move") and c.has("until"):
+			var per_second:Array=c.move
+			var seconds:=float(c.until)-float(c.t)
+			var step:=_plan_frame.basis*Vector3(float(per_second[0]),float(per_second[1]),float(per_second[2]))*seconds*_drag_scale
+			t.tween_callback(func()->void:_move_to(key,b.global_position+step,seconds,Tween.TRANS_LINEAR))
+
+## A clip's event: the split at the blow, the blood.
+func _on_plan_cue(fig:Node3D,event:Dictionary)->void:
+	if _ended or fig!=_body(victim):return
+	var name:=String(event.get("name",""))
+	match name:
+		"split":
+			if style!="full":return
+			var part:={}
+			for p:Dictionary in _plan.get("parts",[]):
+				if String(p.get("part",""))=="head":part=p
+			var to:Variant=part.get("to","floor")
+			var args:={"who":victim,"time":float(part.get("t1",1.4))-float(part.get("t0",0.0)),"arc":float(part.get("apex",1.2)),"spin":float(part.get("spins",2.0))}
+			if to is Array:
+				_things["roll_to"]=_point_node(_plan_at(to))
+				args["fly"]="roll_to";args["land_y"]=0.11;args["arc"]=0.4
+				args["face_god"]=true;args["blink"]=true
+				args["blink_at"]=float(part.get("blink_t",float(part.get("t1",1.0))+0.8))-float(part.get("t0",0.0))
+			else:
+				args["fly"]="pot";args["land_y"]=0.7
+			_behead(args)
+		"spray","geyser":
+			if style!="full":return
+			var dir_local:Array=event.get("dir",[0,1,0])
+			var dir:=fig.global_transform.basis*Vector3(float(dir_local[0]),float(dir_local[1]),float(dir_local[2]))
+			var neck:Vector3=_necks.get(victim,fig.global_position+Vector3(0,1.3,0))
+			var court:=_court()
+			if court!=null and court.has_method("blood"):
+				var blood:Node=court.call("blood")
+				if name=="geyser":blood.call("geyser",neck,dir,2.0,1.0)
+				else:
+					var front:=[]
+					for key in stage.get("cast_order"):
+						var b:=_body(String(key))
+						if b!=null and String(key)!=victim and b.global_position.distance_to(fig.global_position)<2.6:front.append(b)
+					blood.call("spray",neck,front if not front.is_empty() else [neck+dir*1.5],1.0)
+			else:
+				_spray_at({"at":"neck:"+victim,"dir":"camera" if name=="geyser" else "up","seconds":1.6 if name=="geyser" else 0.6})
+
+## A point in the hall as a node (for a part flying to a spot on the floor).
+func _point_node(at:Vector3)->Node3D:
+	var n:=Node3D.new();n.name="ExecPoint"
+	_court().add_child(n);_made.append(n)
+	n.global_position=at
+	return n
+
+## The dogs (M's pack): to the victim's ankles; along as they are dragged off;
+## crunching behind the windbreak; one back with the thighbone.
+func _pack_come(args:Dictionary)->void:
+	var court:=_court()
+	if court==null:return
+	if court.has_method("dog_pack"):_pack=court.call("dog_pack",int(args.get("more",2)))
+	else:_dogs(args);return
+	var v:=_body(victim)
+	for i in _pack.size():
+		var dog:Node3D=_pack[i]
+		if is_instance_valid(dog) and v!=null:dog.call("go_to",v.global_position-v.global_transform.basis.z*0.9+v.global_transform.basis.x*(0.25 if i%2==0 else -0.25),"trot")
+
+func _pack_crunch(args:Dictionary)->void:
+	for dog in _pack:
+		if is_instance_valid(dog) and dog.has_method("crunch"):dog.call("crunch",float(args.get("seconds",3.0)))
+
+func _pack_fetch(args:Dictionary)->void:
+	if _pack.is_empty():return
+	var dog:Node3D=_pack[0]
+	if not is_instance_valid(dog):return
+	var bone:=_plan_thing("bone")
+	_court().add_child(bone);_made.append(bone)
+	bone.global_position=point("windbreak")
+	if style!="full":bone.hide()
+	if dog.has_method("fetch"):dog.call("fetch",bone,point(String(args.get("to","god_feet"))))
+	else:_fetch(args)
 
 # --- the head, and blood --------------------------------------------------------------
 

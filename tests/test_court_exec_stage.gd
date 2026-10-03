@@ -69,12 +69,14 @@ func test_a_club_home_run_takes_the_head_into_the_pot_and_a_click_ends_it()->voi
 	# run it to just after the blow
 	for i in 40:await await_idle_frame()
 	var exec:Node=stage.get_node("Execution")
-	for t in stage._beat_sets:
-		if t is Tween and (t as Tween).is_valid():(t as Tween).custom_step(3.2)
-	await await_idle_frame()
-	assert_int(_named(stage,"Exec_pot")).is_equal(1)
-	assert_int(_named(stage,"ExecHead")).is_equal(1)
-	assert_int(_named(stage,"ExecBlood")).is_greater_equal(1)
+	# to just after the blow (the plan's clips run on their own clock)
+	for i in 4:
+		for t in stage._beat_sets:
+			if t is Tween and (t as Tween).is_valid():(t as Tween).custom_step(1.4)
+		for j in 30:await await_idle_frame()
+	await get_tree().create_timer(3.0).timeout
+	assert_bool(exec._things.has("pot")).is_true()
+	assert_bool(exec._things.has("head:main")).override_failure_message("no head came off by %s" % str(exec._things.keys())).is_true()
 	# a click: everything to its end
 	stage.skip_execution()
 	await await_idle_frame()
@@ -82,8 +84,7 @@ func test_a_club_home_run_takes_the_head_into_the_pot_and_a_click_ends_it()->voi
 	assert_bool(stage.executing()).is_false()
 	assert_bool(main.leaving).is_true()
 	assert_bool(main.body3d.visible).is_false()
-	assert_int(_named(stage,"ExecHead")).is_equal(0)
-	assert_int(_named(stage,"Exec_club")).is_equal(0)
+	assert_bool(is_instance_valid(exec)).is_false()
 	assert_str(String(stage._caption.label.text) if is_instance_valid(stage._caption) else "").contains("cooking pot")
 	# the leave-taking does not play the sober fall again
 	stage.conclude(0.0,"fall")
@@ -99,9 +100,11 @@ func test_mild_makes_no_blood_and_no_flying_head()->void:
 		for t in stage._beat_sets:
 			if t is Tween and (t as Tween).is_valid():(t as Tween).custom_step(2.0)
 		await await_idle_frame()
+		var exec:Node=stage.get_node_or_null("Execution")
+		if exec!=null:assert_bool(exec._things.has("head:main")).is_false()
 		assert_int(_named(stage,"ExecBlood")).is_equal(0)
-		assert_int(_named(stage,"ExecHead")).is_equal(0)
 		assert_int(_named(stage,"ExecPool")).is_equal(0)
+		assert_int(_named(stage,"Piece_")).is_equal(0)
 
 func test_never_on_a_child_and_never_under_off()->void:
 	if not _ready_or_skip():return

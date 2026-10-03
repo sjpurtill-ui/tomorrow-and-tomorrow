@@ -101,6 +101,11 @@ const ACTS:={
 	"wipe_face":{"clip":"raise_hand","mood":"","face":{"eyes_narrow":0.7,"lips_pressed":0.6},"dur":1.4,"look":"","desc":"wipes the spatter from their face"},
 	"retch":{"clip":"bow","mood":"afraid","face":{"jaw_open":0.4,"eyes_narrow":0.6},"dur":1.3,"look":"","desc":"is sick into the nearest pot"},
 	"hide_eyes":{"clip":"raise_hand","mood":"afraid","face":{"eyes_narrow":0.9},"dur":1.6,"look":"","desc":"hides their eyes"},
+	"vomit":{"clip":"bow","mood":"afraid","face":{"jaw_open":0.4,"eyes_narrow":0.6},"dur":3.6,"look":"","desc":"is sick into the nearest pot"},
+	"applaud_alone":{"clip":"raise_hand","mood":"warm","face":{"smile":0.7},"dur":3.6,"look":"god","desc":"applauds, alone, and keeps on a beat too long"},
+	"cover_eyes_peek":{"clip":"raise_hand","mood":"afraid","face":{"eyes_narrow":0.8},"dur":3.2,"look":"","desc":"covers their eyes, then peeks through their fingers"},
+	"flinch_splash":{"clip":"","mood":"afraid","face":{"eyes_wide":0.8},"dur":2.6,"look":"","desc":"flinches from the splash"},
+	"wince_crunch":{"clip":"","mood":"","face":{"lips_pressed":0.8,"eyes_narrow":0.7},"dur":2.6,"look":"","desc":"winces at each crunch"},
 	"throw":{"clip":"point","mood":"defiant","face":{"brows_down":0.4},"dur":0.5,"look":"at","desc":"throws"},
 	"warm_hands":{"clip":"bow","mood":"warm","face":{"smile":0.3},"dur":1.6,"look":"","desc":"warms their hands at the embers"},
 	"cough_smoke":{"clip":"","mood":"","face":{"jaw_open":0.5,"eyes_narrow":0.6},"dur":1.0,"look":"","desc":"coughs a ring of smoke"},
@@ -2273,6 +2278,13 @@ static func _execution(ctx:Dictionary,out:Array)->void:
 	var style:=String(event.get("style","full"))
 	var roles:=_exec_roles(ctx,victim,String(event.get("ex","")))
 	var length:=9.5
+	var plan:=_exec_plan_of(method)
+	if not plan.is_empty():
+		length=_exec_planned(ctx,out,victim,roles,method,plan)
+		_exec(out,length-0.6,"caption",{"text":String(event.get("caption",""))})
+		_exec(out,length,"end",{})
+		if style=="mild":_exec_mild(out,ctx,victim,roles)
+		return
 	match method:
 		"club":length=_exec_club(ctx,out,victim,roles)
 		"behead":length=_exec_behead(ctx,out,victim,roles)
@@ -2334,6 +2346,7 @@ static func _exec_after(ctx:Dictionary,out:Array,at:float,victim:String,roles:Di
 	_snd(out,at,"crowd_gasp",0.9)
 	if splash:
 		for key in roles.front:
+			_beat(out,at-0.1,String(key),"flinch_splash",{},"reaction")
 			_beat(out,t_wipe+rng.randf()*0.3,String(key),"wipe_face",{},"reaction")
 			used.append(String(key))
 	var jumpy:Array=_jumpiest(_people(ctx,used).filter(func(m:Dictionary)->bool:return String(m.kind)!="child"))
@@ -2348,22 +2361,87 @@ static func _exec_after(ctx:Dictionary,out:Array,at:float,victim:String,roles:Di
 	var queasy:Array=_people(ctx,used).filter(func(m:Dictionary)->bool:return not String(m.kind) in ["child","scribe"] and float(m.courage)<0.6)
 	if not queasy.is_empty():
 		var sick:=String((_pick(ctx,queasy) as Dictionary).key)
-		_beat(out,t_retch,sick,"retch",{"sound":"retch","gain":0.7},"reaction")
+		_beat(out,t_retch,sick,"vomit",{},"reaction")
 		used.append(sick)
 	for child:Dictionary in _of_kind(ctx,["child"]):
-		_beat(out,at+0.3,String(child.key),"hide_eyes",{},"reaction")
-		if not dread:_beat(out,at+2.0,String(child.key),"peek_out",{},"reaction")
+		if dread:_beat(out,at+0.3,String(child.key),"hide_eyes",{"dur":3.0},"reaction")
+		else:_beat(out,at+0.3,String(child.key),"cover_eyes_peek",{},"reaction")
 	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,at+0.6,String(scribe.key),"scribble",{"dur":3.0},"reaction")
 	for guard:Dictionary in _of_kind(ctx,["guard"],used):_beat(out,at+0.9,String(guard.key),"gulp",{},"reaction")
 	if not dread:
 		for m:Dictionary in _people(ctx,used):
 			if String(m.get("quirk",""))=="flatterer":
-				_beat(out,t_clap,String(m.key),"soft_clap",{"dur":1.6},"reaction")
+				_beat(out,t_clap,String(m.key),"applaud_alone",{},"reaction")
 				# nobody joins in
 				var other:=_nearest(ctx,m,["official","hearth_chief","elder","commoner"],used+[String(m.key)])
 				if not other.is_empty():_beat(out,t_clap+0.8,String(other.key),"side_eye",{"at":String(m.key)},"reaction")
 				_shot(out,t_clap+0.1,"reaction",{"target":String(m.key)})
 				break
+
+## The acting's plans for an act (K: court_acting.gd EXEC_PLANS), by method.
+const PLAN_OF:={"club":"club_home_run","behead":"three_swing_beheading","dogs":"dog_dinner"}
+static func _exec_plan_of(method:String)->Dictionary:
+	var act:=String(PLAN_OF.get(method,""))
+	if act.is_empty() or not ResourceLoader.exists("res://scripts/hud/court_acting.gd"):return {}
+	var plan:Variant=load("res://scripts/hud/court_acting.gd").call("exec_plan",act)
+	return plan if plan is Dictionary else {}
+
+static func _plan_cue(plan:Dictionary,name:String,otherwise:float)->float:
+	for c:Dictionary in plan.get("cues",[]):
+		if String(c.get("cue",""))==name:return float(c.get("t",otherwise))
+	return otherwise
+
+## An act the acting has a plan for: the one who does it and the cook step
+## up, the plan plays (its clips, props, the split and the blood on its own
+## clips' events), and the room reacts on the plan's moments.
+static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionary,method:String,plan:Dictionary)->float:
+	var ex:=String(roles.ex);var cook:=String(roles.cook)
+	var act:=String(PLAN_OF.get(method,""))
+	var start:=1.3
+	var length:=start+float(plan.get("length",10.0))+0.6
+	var impact:=start+_plan_cue(plan,"impact",_plan_cue(plan,"grab",0.0))
+	_exec_before(ctx,out,victim,roles,length)
+	var has_ex:=(plan.get("roles",{}) as Dictionary).has("executioner")
+	var has_cook:=(plan.get("roles",{}) as Dictionary).has("cook")
+	if has_ex:
+		_shot(out,0.0,"two_shot",{"a":victim,"b":ex,"weight":5})
+		_exec(out,0.2,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.9,"time":1.0})
+	else:
+		_shot(out,0.0,"frame",{"on":[victim,"windbreak"],"weight":5})
+	if has_cook and cook!="":_exec(out,0.3,"approach",{"who":cook,"to":victim,"side":1.0,"dist":1.6,"time":1.0})
+	_exec(out,start,"plan",{"act":act,"ex":ex if has_ex else "","cook":cook if has_cook else ""})
+	_exec(out,impact,"blow",{})
+	match method:
+		"club":
+			var plop:=start+_plan_cue(plan,"plop",3.62+1.4)
+			_shot(out,start+0.2,"frame",{"on":[victim,ex,"pot"],"time":0.8})
+			_shot(out,impact+0.1,"shake",{"strength":0.4})
+			_shot(out,plop-0.2,"frame",{"on":[cook,"pot"],"time":0.6})
+			var not_cook:=roles.duplicate();not_cook["front"]=(roles.front as Array).filter(func(k:String)->bool:return k!=cook)
+			_exec_after(ctx,out,impact+0.2,victim,not_cook,true,
+				{"wipe":impact+0.5,"faint":impact+0.6,"retch":start+_plan_cue(plan,"after",8.0)+0.3,"clap":start+_plan_cue(plan,"after",8.0)})
+		"behead":
+			_shot(out,start+0.2,"frame",{"on":[victim,ex,"block"],"time":0.8})
+			_shot(out,start+_plan_cue(plan,"clang",5.5)+0.05,"reaction",{"target":ex})
+			_shot(out,start+_plan_cue(plan,"glare",6.75),"frame",{"on":[victim,ex,"block"],"time":0.6})
+			_shot(out,impact+0.15,"frame",{"on":[victim,ex,"front:"+victim+":1.9"],"time":0.5})
+			for m:Dictionary in _people(ctx,[victim,ex]):
+				if float(m.courage)<0.5:_beat(out,start+_plan_cue(plan,"thunk",1.95)+0.1,String(m.key),"flinch",{"dur":0.4},"reaction")
+			_exec_after(ctx,out,impact+0.1,victim,roles,true,
+				{"wipe":start+_plan_cue(plan,"splash",8.75)+0.4,"faint":impact+0.5,"retch":start+_plan_cue(plan,"after",11.0)+0.3,"clap":start+_plan_cue(plan,"after",11.0)})
+			for m:Dictionary in _people(ctx,[victim,ex]).slice(0,2):_beat(out,start+_plan_cue(plan,"head_blink",10.9)+0.15,String(m.key),"double_take",{},"reaction")
+		"dogs":
+			var gone:=start+_plan_cue(plan,"out_of_sight",6.6)
+			_exec(out,start,"pack_come",{"more":2})
+			_exec(out,gone-0.05,"vanish",{"who":victim})
+			_exec(out,gone+0.2,"pack_crunch",{"seconds":2.4})
+			_exec(out,start+_plan_cue(plan,"bone_dropped",10.6)-2.4,"pack_fetch",{"to":"god_feet"})
+			_shot(out,gone+0.4,"shake",{"strength":0.1})
+			_shot(out,start+_plan_cue(plan,"bone_dropped",10.6)-1.2,"frame",{"on":["god_feet","windbreak"],"time":0.8})
+			for m:Dictionary in _people(ctx,[victim]):
+				if float(m.courage)<0.7:_beat(out,gone+0.4,String(m.key),"wince_crunch",{},"reaction")
+			_exec_after(ctx,out,gone+0.2,victim,roles,false,{"faint":start+_plan_cue(plan,"grab",0.0)+0.8,"retch":gone+1.6,"clap":start+_plan_cue(plan,"after",11.0)})
+	return length
 
 ## Mild: the blow lands off screen. The camera turns to the room's faces at
 ## the moment; no blood, no parts; they are simply gone when it turns back.
@@ -2371,9 +2449,9 @@ static func _exec_mild(out:Array,ctx:Dictionary,victim:String,roles:Dictionary)-
 	var impact:=INF
 	var kept:Array=[]
 	for beat:Dictionary in out:
-		if String(beat.who)=="exec" and String(beat.act) in ["behead","spray","pool","char","crumble","fall"]:
+		if String(beat.who)=="exec" and String(beat.act) in ["behead","spray","pool","char","crumble","fall","blow"]:
 			impact=minf(impact,float(beat.t))
-			continue
+			if String(beat.act)!="blow":continue
 		kept.append(beat)
 	out.clear();out.append_array(kept)
 	if impact==INF:return

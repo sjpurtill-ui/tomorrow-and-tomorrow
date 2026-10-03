@@ -117,8 +117,10 @@ func test_every_staged_method_plays_as_a_scene()->void:
 		assert_bool(drum).override_failure_message(id+": no drum roll").is_true()
 		assert_bool(caption).override_failure_message(id+": no caption").is_true()
 		assert_float(end).override_failure_message(id+": no end").is_greater(5.0)
-		assert_float(end).override_failure_message(id+": too long").is_less_equal(13.0)
-		assert_bool(ops.has("vanish") or ops.has("behead") or ops.has("crumble") or ops.has("fall")).override_failure_message(id+": nobody dies on stage").is_true()
+		# the design's 6-12 s, the acting's longest plan (the dogs, 12 s) and the walk up
+		assert_float(end).override_failure_message(id+": too long").is_less_equal(14.5)
+		assert_bool(ops.has("vanish") or ops.has("behead") or ops.has("crumble") or ops.has("fall") or ops.has("plan")).override_failure_message(id+": nobody dies on stage").is_true()
+		if id in ["club","behead","dogs"]:assert_bool(ops.has("blow")).override_failure_message(id+": no blow for the sound to land on").is_true()
 
 func test_mild_shows_no_blood_and_no_parts_and_cuts_to_the_room()->void:
 	var cast:=DirectorTests.home_cast()
@@ -134,15 +136,18 @@ func test_mild_shows_no_blood_and_no_parts_and_cuts_to_the_room()->void:
 		assert_bool(cut).is_true()
 
 func test_the_club_home_run_plays_its_beats_in_order()->void:
+	# With the acting's plan (K): the batter steps up, the plan plays, the
+	# blow lands on the plan's impact, the room after, the caption, the end.
 	var beats:=Director.beats_for({"kind":"execution","method":"club","victim":"main","style":"full","caption":"x"},DirectorTests.home_cast(),DirectorTests.full_facts(60),3)
 	var at:={}
 	for beat:Dictionary in beats:
 		var key:=("%s:%s" % [beat.who,beat.act]) if String(beat.who)=="exec" else String(beat.act)
 		if not at.has(key):at[key]=float(beat.t)
-	assert_float(float(at["exec:prop"])).is_less(float(at["windup"]))
-	assert_float(float(at["windup"])).is_less(float(at["exec:behead"]))
-	assert_float(float(at["exec:behead"])).is_less(float(at["stir"]))
-	assert_float(float(at["stir"])).is_less(float(at["exec:end"]))
-	# the head goes into the pot
+	assert_float(float(at["exec:approach"])).is_less(float(at["exec:plan"]))
+	assert_float(float(at["exec:plan"])).is_less(float(at["exec:blow"]))
+	assert_float(float(at["exec:blow"])).is_less(float(at["exec:caption"]))
+	assert_float(float(at["exec:caption"])).is_less(float(at["exec:end"]))
 	for beat:Dictionary in beats:
-		if String(beat.who)=="exec" and String(beat.act)=="behead":assert_str(String((beat.args as Dictionary).fly)).is_equal("pot")
+		if String(beat.who)=="exec" and String(beat.act)=="plan":assert_str(String((beat.args as Dictionary).act)).is_equal("club_home_run")
+	# the blow lands on the plan's impact
+	assert_float(float(at["exec:blow"])-float(at["exec:plan"])).is_equal_approx(3.62,0.05)
