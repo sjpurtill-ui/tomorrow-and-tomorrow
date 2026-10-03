@@ -117,3 +117,24 @@ func test_never_on_a_child_and_never_under_off()->void:
 	main.person["age"]=9
 	assert_bool(stage.execute("club",Stage.MAIN)).is_false()
 	assert_bool(stage.executing()).is_false()
+
+func test_parked_methods_cannot_start_or_leave_an_execution_running()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	var prior_done:bool=stage.exec_done
+	var prior_method:String=stage.exec_method
+	var prior_events:int=stage._event_index
+	for id:String in Executions.ids()+["", "not_a_method"]:
+		if Executions.is_staged(id):continue
+		assert_bool(stage.execute(id,Stage.MAIN)).override_failure_message(id).is_false()
+		# Direct events must not queue the parked method's sound or reactions.
+		stage.event("execution",{"method":id,"victim":Stage.MAIN,"style":"full"})
+		assert_object(stage.get_node_or_null("Execution")).is_null()
+		assert_bool(stage.executing()).is_false()
+		assert_bool(stage.exec_done).is_equal(prior_done)
+		assert_str(stage.exec_method).is_equal(prior_method)
+		assert_int(stage._event_index).is_equal(prior_events)
+		assert_bool(main.leaving).is_false()
+		assert_bool(main.body3d.visible).is_true()

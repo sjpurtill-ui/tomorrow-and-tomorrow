@@ -58,6 +58,7 @@ extends RefCounted
 ## cast and the fact sheet. Static helpers; preload.
 
 const Asides:=preload("res://scripts/hud/court_asides.gd")
+const Executions:=preload("res://scripts/hud/court_executions.gd")
 
 ## Muttered lines may be turned off (a setting; CourtStage.mutters_enabled
 ## forwards here). The fact sheet's "mutters": false does the same.
@@ -2274,6 +2275,7 @@ static func _agree(out:Array,ctx:Dictionary)->Array:
 static func _execution(ctx:Dictionary,out:Array)->void:
 	var event:Dictionary=ctx.event
 	var method:=String(event.get("method","club"))
+	if not Executions.is_staged(method):return
 	var victim:=String(event.get("victim",ctx.main))
 	var style:=String(event.get("style","full"))
 	var roles:=_exec_roles(ctx,victim,String(event.get("ex","")))

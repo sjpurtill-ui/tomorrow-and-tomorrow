@@ -56,13 +56,16 @@ const METHODS:=[
 	{"id":"boulder","n":1,"name":"Boulder drop","words":"boulder|crush|crushed|flatten|a rock on","done":"flattened under a boulder","seconds":10.0},
 ]
 
-## Methods the stage can play now (the rest wait for their props, animals or
-## bodies; the director never picks them, and the god's words for them fall
-## back to a method that can).
-static var staged:Array=["club","behead","dogs","fire","spears","stoning","boulder","boil","arrows","stake"]
+## Current release scope: the user's selected acts 2, 3, 4 and 10.
+## Keep the other catalog entries and assets for later, but do not offer,
+## choose or stage them. Words naming a parked method use an active fallback.
+static var staged:Array=["club","fire","dogs","behead"]
 
 static var _by_id:Dictionary={}
 static var _res:Dictionary={}
+
+static func is_staged(id:String)->bool:
+	return id in staged and not method(id).is_empty()
 
 static func method(id:String)->Dictionary:
 	if _by_id.is_empty():
@@ -99,7 +102,7 @@ static func available(facts:Dictionary,staged_only:=true)->Array:
 	for n in range(1,26):
 		for m:Dictionary in METHODS:
 			if int(m.n)!=n:continue
-			if staged_only and not String(m.id) in staged:continue
+			if staged_only and not is_staged(String(m.id)):continue
 			if knows(m,facts):out.append(String(m.id))
 	return out
 
@@ -139,7 +142,7 @@ static func choose(facts:Dictionary,seed_value:int,last:="")->String:
 ## can stage, else the director's pick.
 static func pick(words:String,facts:Dictionary,seed_value:int,last:="")->String:
 	var named:=parse(words,facts)
-	if not named.is_empty() and named in staged:return named
+	if is_staged(named):return named
 	return choose(facts,seed_value,last)
 
 ## The narrator's words for what the picture shows.

@@ -69,10 +69,38 @@ func test_the_directors_pick_is_seeded_and_never_twice_running()->void:
 		assert_str(Executions.choose(facts,seed,first)).is_not_equal(first)
 	var seen:={}
 	for seed in 200:seen[Executions.choose(facts,seed)]=true
-	assert_int(seen.size()).is_greater_equal(4)
+	assert_int(seen.size()).is_equal(3)
 	# the god's words win when the people can stage them
 	assert_str(Executions.pick("feed him to the dogs",facts,3,"dogs")).is_equal("dogs")
 	assert_bool(Executions.pick("hang him",facts,3) in Executions.available(facts)).is_true()
+
+func test_only_the_four_selected_acts_are_offered_or_picked()->void:
+	assert_array(Executions.available(stone_age())).is_equal(["club","fire","dogs"])
+	assert_array(Executions.available(bronze_age())).is_equal(["club","fire","dogs","behead"])
+	var without_dogs:=bronze_age();without_dogs["dogs"]=false
+	assert_array(Executions.available(without_dogs)).is_equal(["club","fire","behead"])
+	for facts in [stone_age(),bronze_age(),without_dogs]:
+		var allowed:=Executions.available(facts)
+		var offered:=[]
+		for item:Dictionary in Executions.menu(facts,"Heha"):
+			offered.append(String(item.id))
+			assert_str(Executions.pick(String(item.order),facts,3)).is_equal(String(item.id))
+		assert_array(offered).is_equal(allowed)
+		for seed in 200:
+			assert_bool(allowed.has(Executions.choose(facts,seed))).is_true()
+		# The parked descriptions still parse, but cannot select their old scene.
+		for id:String in Executions.ids():
+			var words:="Put Heha to death %s." % Executions.ORDER_WORDS[id]
+			assert_bool(allowed.has(Executions.pick(words,facts,14,id))).override_failure_message(id).is_true()
+	assert_int(Executions.METHODS.size()).is_equal(25)
+	assert_bool(Executions.available(bronze_age(),false).has("pigs")).is_true()
+
+func test_parked_and_unknown_methods_have_no_director_scene()->void:
+	var methods:=Executions.ids()+["", "not_a_method"]
+	for id:String in methods:
+		if Executions.is_staged(id):continue
+		var beats:=Director.beats_for({"kind":"execution","method":id,"victim":"main","style":"full"},DirectorTests.home_cast(),DirectorTests.full_facts(60),11)
+		assert_array(beats).override_failure_message(id).is_empty()
 
 func test_the_caption_names_what_the_picture_shows()->void:
 	assert_str(Executions.caption("behead","Heha Bikatmat")).is_equal("Heha Bikatmat is beheaded at the third stroke before the whole court.")
@@ -124,7 +152,7 @@ func test_every_staged_method_plays_as_a_scene()->void:
 
 func test_mild_shows_no_blood_and_no_parts_and_cuts_to_the_room()->void:
 	var cast:=DirectorTests.home_cast()
-	for id:String in ["club","behead","boulder"]:
+	for id:String in ["club","fire","dogs","behead"]:
 		var beats:=Director.beats_for({"kind":"execution","method":id,"victim":"main","style":"mild","caption":"x"},cast,DirectorTests.full_facts(60),5)
 		var vanished:=false;var cut:=false
 		for beat:Dictionary in beats:

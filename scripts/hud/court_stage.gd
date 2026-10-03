@@ -629,6 +629,7 @@ func executing()->bool:
 ## method (court_executions.gd). Returns false when it is not to be shown so
 ## (no modelled hall, a child, gore "off"): the caller keeps the sober exit.
 func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")->bool:
+	if not Executions.is_staged(method_id):return false
 	var f:=figure(victim_key)
 	if f==null or f.leaving or f.body3d==null or court_set==null or executing():return false
 	var person:=f.person.duplicate()
@@ -987,6 +988,7 @@ static func mood_of(regard:Dictionary,envoy_mood:=0.0)->String:
 ## stage's own acting has already run; a director, when installed, adds its
 ## beats on top.
 func event(kind:String,data:Dictionary={})->void:
+	if kind=="execution" and not Executions.is_staged(String(data.get("method","club"))):return
 	_event_index+=1
 	_last_beats=[]
 	if _sound!=null and is_instance_valid(_sound):_sound.call("on_event",kind,data)
