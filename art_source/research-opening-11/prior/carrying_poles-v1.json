@@ -1,0 +1,12 @@
+{
+  "id": "carrying_poles",
+  "line": "logistics",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: One adult balances a long wooden shoulder pole with two reed baskets tied at opposite ends while another adjusts a load; sparse travel watercolor. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-7a6273a2-724b-4106-ae67-b0a5d453f9f9.png",
+  "asset": "res://assets/ui/research/subjects/carrying_poles-v1.png",
+  "sha256": "4db29e5c29aa6c3d68f6c9407ab4631beb269ba3a72d5f3040dbe283b94114fd",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation selected over retry with more later-looking attire; pole and two loads clear in wide crop."
+}

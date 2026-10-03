@@ -1,0 +1,12 @@
+{
+  "id": "seasonal_work_round",
+  "line": "labor",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: Adults plant seeds and stack timber as elder points to bare and leafing trees, coordinating seasonal work; expressive charcoal and red ochre. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f4ee04ee-2743-4372-8edd-64897a7a88fe.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_work_round-v1.png",
+  "sha256": "789a25f0f8aa214e3654629f6c48f060dca2fee1d16dc39550e95c69c653bde5",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too fresco-like; labor-direction charcoal style and two seasonal tasks clear in crop."
+}

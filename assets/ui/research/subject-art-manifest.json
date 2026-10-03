@@ -83,8 +83,12 @@
     ]
   },
   "joinery": {
-    "path": "res://assets/ui/research/subjects/joinery-v2.png",
+    "path": "res://assets/ui/research/subjects/joinery-v3.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -133,7 +137,7 @@
     ]
   },
   "tallies": {
-    "path": "res://assets/ui/research/subjects/tallies-v1.png",
+    "path": "res://assets/ui/research/subjects/tallies-v2.png",
     "focus": [
       0.5,
       0.5
@@ -791,10 +795,14 @@
     ]
   },
   "household_councils": {
-    "path": "res://assets/ui/research/subjects/household_councils-v1.png",
+    "path": "res://assets/ui/research/subjects/household_councils-v2.png",
     "focus": [
       0.5,
-      0.4
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "census_rolls": {
@@ -5983,14 +5991,14 @@
     ]
   },
   "carrying_poles": {
-    "path": "res://assets/ui/research/subjects/carrying_poles-v1.png",
+    "path": "res://assets/ui/research/subjects/carrying_poles-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "hide_smoke_curing": {
-    "path": "res://assets/ui/research/subjects/hide_smoke_curing-v1.png",
+    "path": "res://assets/ui/research/subjects/hide_smoke_curing-v2.png",
     "focus": [
       0.5,
       0.5
@@ -6004,42 +6012,42 @@
     ]
   },
   "infant_carrying_slings": {
-    "path": "res://assets/ui/research/subjects/infant_carrying_slings-v1.png",
+    "path": "res://assets/ui/research/subjects/infant_carrying_slings-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "midden_siting_away_from_water": {
-    "path": "res://assets/ui/research/subjects/midden_siting_away_from_water-v1.png",
+    "path": "res://assets/ui/research/subjects/midden_siting_away_from_water-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "seasonal_work_round": {
-    "path": "res://assets/ui/research/subjects/seasonal_work_round-v1.png",
+    "path": "res://assets/ui/research/subjects/seasonal_work_round-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "sparring_customs": {
-    "path": "res://assets/ui/research/subjects/sparring_customs-v1.png",
+    "path": "res://assets/ui/research/subjects/sparring_customs-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "splint_and_bracing_technique": {
-    "path": "res://assets/ui/research/subjects/splint_and_bracing_technique-v1.png",
+    "path": "res://assets/ui/research/subjects/splint_and_bracing_technique-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "varied_forage_rotation": {
-    "path": "res://assets/ui/research/subjects/varied_forage_rotation-v1.png",
+    "path": "res://assets/ui/research/subjects/varied_forage_rotation-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9830,6 +9838,24 @@
   },
   "house_floor_burial": {
     "path": "res://assets/ui/research/subjects/house_floor_burial-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "percussion_fire_ignition": {
+    "path": "res://assets/ui/research/subjects/percussion_fire_ignition-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "ochre_grave_goods": {
+    "path": "res://assets/ui/research/subjects/ochre_grave_goods-v1.png",
     "focus": [
       0.5,
       0.5
