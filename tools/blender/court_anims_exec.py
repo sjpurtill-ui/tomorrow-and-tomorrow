@@ -127,9 +127,11 @@ def make_exec(clips):
 
 
 # =====================================================================================
-# 2. Club home run: the victim kneels; the batter, behind them, taps the club on
-#    their head twice, calls the shot at the cook's pot, winds up with a leg kick,
-#    CRACK; the head sails into the pot; the cook looks in, stirs, puts the lid on
+# 2. Club home run: the victim kneels facing the god; the batter, at their right
+#    side and side on to the god, taps the club on their head twice, calls the
+#    shot at the cook's pot at the far end of the hall, winds up with a leg kick,
+#    CRACK; the head sails up and away into the pot; the cook looks in, looks at
+#    the god, stirs, puts the lid on
 # =====================================================================================
 
 T_CRACK = 3.62
@@ -150,9 +152,9 @@ def act_club(clips):
     duck = dict(up, neck=(4, 0, 0), head=(4, 0, 3), chest=(-2, 0, 0))
     look_up = dict(up, neck=(-8, 0, 0), head=(-22, 0, 3))
     over_sh = dict(up, chest=(-5, 0, -8), neck=(-4, 0, -14), head=(-14, 0, -32))
-    to_pot = dict(up, chest=(-5, 0, 6), neck=(-4, 0, 14), head=(-10, 0, 34))
+    to_pot = dict(up, chest=(-5, 0, 12), neck=(-4, 0, 22), head=(-14, 0, 55))
     braced = dict(up, spine=(4, 0, 0), chest=(4, 0, 0), neck=(6, 0, 0), head=(10, 0, 0))
-    hit = dict(braced, hips_loc=(0.03, 0.07, -0.41), spine=(4, 0, 6), chest=(2, 6, 16), neck=(0, 0, 10))
+    hit = dict(braced, hips_loc=(0.0, 0.11, -0.41), spine=(-4, 0, 2), chest=(-10, 4, 4), neck=(-8, 0, 0))
     headless = dict(up, spine=(0, 0, 2), chest=(-3, 0, 4))
     slump_legs = both_knees(a, lean=70)
     slump = dict(hips=(72, 0, 4), hips_loc=(0, 0.04, -0.43), spine=(16, 0, 2), chest=(10, 0, 0), neck=(10, 0, 0), head=(10, 0, 0))
@@ -184,10 +186,11 @@ def act_club(clips):
     clips["exec_club_victim"] = clip(
         "exec_club_victim", 6.8, a, kind="exec", hold=True, tags=["exec", "victim"], bodies=ADULTS, blend_in=0.4, blend_out=0.6,
         events=[ev(0.45, "tap"), ev(0.95, "tap"), ev(T_CRACK, "impact"), ev(T_CRACK, "split", part="head", bone="neck"),
-                ev(T_CRACK, "spray", bone="neck", dir=(0.85, 0.5, 0.15)), ev(6.02, "thud")])
+                ev(T_CRACK, "spray", bone="neck", dir=(0.1, 0.55, -0.85)), ev(6.02, "thud")])
 
-    # ---- the batter (behind the victim, both facing the god): the victim's head is
-    #      at (0.20, -0.95, 1.19) in his frame (Blender axes, 1.72 m bodies)
+    # ---- the batter (at the victim's right, turned to face the victim's side):
+    #      the victim's head is at (0.20, -0.95, 1.19) in his frame (Blender axes,
+    #      1.72 m bodies); his swing carries it out to his left, the victim's back
     a = Act(7.0, drag=0.5)
     a.arm_drag = 0.0
     tool = Tool(a, -0.11)
@@ -283,7 +286,7 @@ def act_club(clips):
     stir_t = dict(spine=(10, 0, 0), chest=(8, 0, 0), neck=(4, 0, 0), head=(14, 0, 0))
     peer_t = dict(hips=(10, 0, 0), spine=(22, 0, 0), chest=(18, 0, 0), neck=(12, 0, 0), head=(30, 0, 0), hips_loc=(0, 0.0, -0.02))
     up_t = dict(stir_t, neck=(-4, 0, 0), head=(-8, 0, 0))
-    glance_t = dict(stir_t, neck=(-2, 0, -6), head=(-6, 0, -14))
+    glance_t = dict(stir_t, neck=(-4, 0, 0), head=(-10, 0, 4))
     lid_t = dict(hips=(14, 0, 4), hips_loc=(0, 0.03, -0.03), spine=(16, 0, 4), chest=(12, 0, 6), neck=(6, 0, 0), head=(16, 0, 0))
     ladle_u = (0.05, -0.12, -0.99)
     fo_R = (0.3, -0.7, -0.4)
