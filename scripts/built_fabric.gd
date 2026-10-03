@@ -214,6 +214,16 @@ static func data()->Dictionary:
 	if int(f.get("v",0))<1:_found(f)
 	return f
 
+## This town's fabric for a reading (screens, the court): the stored one, or
+## before the first reckoning, the one it would begin with, not stored (a
+## reading never changes the ledger it reads).
+static func peek()->Dictionary:
+	var f:Dictionary=WorldSimulation.state.built_fabric
+	if int(f.get("v",0))>=1:return f
+	var fresh:={}
+	_found(fresh,false)
+	return fresh
+
 ## The whole people's record.
 static func realm_data()->Dictionary:
 	var r:Dictionary=WorldSimulation.state.fabric_realm
@@ -230,8 +240,8 @@ static func realm_data()->Dictionary:
 ## lean-tos; an older save's places stand at the grades the people could
 ## build at their present craft (no sudden fall), with roads, works and fine
 ## works at what the town's age would have given.
-static func _found(f:Dictionary)->void:
-	realm_data()
+static func _found(f:Dictionary,store:bool=true)->void:
+	if store:realm_data()
 	var homes:=[1.0,0.0,0.0,0.0,0.0]
 	var settled:=float(WorldSimulation.state.elapsed_days)-float(maxi(0,int(WorldSimulation.state.settlement_founded_day)))
 	if settled>365.0*3.0:
@@ -762,7 +772,7 @@ static func realm_beauty()->float:return float(realm().beauty)
 ## The best grade the people can build now (by knowledge and craft), and the
 ## plainest grade with room to rise: {best, next, caps} (next -1 when none).
 static func grade_reach(f:Dictionary={})->Dictionary:
-	if f.is_empty():f=data()
+	if f.is_empty():f=peek()
 	var caps:=grade_caps()
 	var homes:Array=f.homes
 	var best:=0
@@ -779,7 +789,7 @@ static func grade_reach(f:Dictionary={})->Dictionary:
 
 ## Everything the town's fabric is now, for the screens.
 static func report()->Dictionary:
-	var f:=data()
+	var f:=peek()
 	var e:Dictionary=f.get("effects",{})
 	var pop:=maxf(1.0,float(WorldSimulation.state.population_exact))
 	var reach:=grade_reach(f)

@@ -66,10 +66,10 @@ The share of a town's places in each grade:
 - **What the homes' quality q (0..1) does** (consequence_engine.gd, crisis_system.gd):
   - deaths of exposure × (1 − 0.5q);
   - illness deaths × (1 − 0.2q);
-  - outbreaks of sickness × e^(−0.4q);
+  - outbreaks of sickness × e^(−0.3q);
   - fires × e^(−q);
-  - health target +0.04q;
-  - cohesion target +0.05q.
+  - health target +0.03q;
+  - cohesion target +0.04q.
 - **At q = 0 nothing changes:** the founding years and the 15-year truth runs are untouched by the homes.
 
 ### 2. Roads and paths
@@ -187,4 +187,85 @@ The share of a town's places in each grade:
 
 ## Fast sim
 
-`tools/sim/fabric.py` mirrors all of it (the constants are parsed from the game) with a standard great-works policy that every path runs alike. `paths.py` reports the fabric, might, awe, allure and great works, and counts might, awe and allure in its dominance check. The tables are in the PR.
+`tools/sim/fabric.py` mirrors all of it (the constants are parsed from the game) with a standard great-works policy that every path runs alike. `paths.py` reports the fabric, might, awe, allure and great works, and counts might, awe and allure in its dominance check.
+
+**Main → this branch** (`python tools/sim/paths.py`, 3 seeds, 600 years; main read with `SIM_GAME_REV=ba77e964`, where the fabric is off but the walls and the standard great works run as they did).
+
+How to read the columns:
+- **might, awe, allure:** standing's readings (might counts the watch at the ready and, on this branch, the walls).
+- **defence:** the defences' bonus.
+- **out/wk:** output per worker.
+- **per cutter:** loads cut a day.
+- **maker cap:** goods a maker could make a day.
+- **homes:** the homes' quality.
+- **IMR:** infant deaths per 1,000.
+- **works:** great works standing.
+- **renown:** their allure points.
+
+| Path | Year | people | known | might | defence | awe | allure | out/wk | per cutter | maker cap | homes | IMR | works | renown |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| balanced | 100 | 360 → 379 | 446 → 448 | 0.19 → 0.21 | 0.04 → 0.04 | 0.22 → 0.31 | 0.27 → 0.35 | 1.84 → 2.02 | 0.53 → 0.55 | 1.384 → 1.464 | 0.00 → 0.57 | 188 → 190 | 5.0 → 5.7 | 34 → 46 |
+| balanced | 300 | 1,292 → 1,279 | 760 → 761 | 0.17 → 0.26 | 0.04 → 0.14 | 0.29 → 0.40 | 0.26 → 0.38 | 1.99 → 2.00 | 0.51 → 0.55 | 1.426 → 1.561 | 0.00 → 0.67 | 198 → 198 | 18.7 → 19.7 | 153 → 186 |
+| balanced | 600 | 4,297 → 4,413 | 1,130 → 1,130 | 0.17 → 0.26 | 0.04 → 0.15 | 0.28 → 0.40 | 0.26 → 0.37 | 1.98 → 1.98 | 0.51 → 0.56 | 1.434 → 1.602 | 0.00 → 0.68 | 194 → 195 | 36.7 → 39.7 | 305 → 389 |
+| growth | 100 | 420 → 407 | 455 → 454 | 0.16 → 0.18 | 0.04 → 0.04 | 0.20 → 0.29 | 0.31 → 0.39 | 1.84 → 2.00 | 0.53 → 0.54 | 1.369 → 1.429 | 0.00 → 0.49 | 162 → 163 | 4.3 → 5.7 | 31 → 45 |
+| growth | 300 | 1,385 → 1,385 | 763 → 763 | 0.14 → 0.23 | 0.04 → 0.13 | 0.27 → 0.37 | 0.32 → 0.42 | 1.97 → 1.97 | 0.50 → 0.53 | 1.413 → 1.518 | 0.00 → 0.62 | 173 → 172 | 18.0 → 19.7 | 150 → 182 |
+| growth | 600 | 4,836 → 4,834 | 1,133 → 1,134 | 0.15 → 0.23 | 0.04 → 0.13 | 0.28 → 0.37 | 0.32 → 0.41 | 1.79 → 1.80 | 0.54 → 0.58 | 1.399 → 1.560 | 0.00 → 0.63 | 168 → 169 | 36.0 → 39.7 | 302 → 381 |
+| making | 100 | 364 → 367 | 445 → 447 | 0.16 → 0.19 | 0.04 → 0.04 | 0.21 → 0.29 | 0.26 → 0.34 | 2.05 → 2.06 | 0.52 → 0.54 | 1.356 → 1.431 | 0.00 → 0.52 | 192 → 192 | 5.0 → 5.7 | 32 → 45 |
+| making | 300 | 1,244 → 1,256 | 759 → 759 | 0.16 → 0.24 | 0.04 → 0.13 | 0.28 → 0.38 | 0.26 → 0.37 | 1.99 → 2.01 | 0.57 → 0.53 | 1.413 → 1.503 | 0.00 → 0.63 | 198 → 200 | 18.7 → 19.7 | 151 → 183 |
+| making | 600 | 4,237 → 4,218 | 1,130 → 1,129 | 0.15 → 0.24 | 0.04 → 0.14 | 0.28 → 0.38 | 0.26 → 0.36 | 1.98 → 1.99 | 0.51 → 0.56 | 1.424 → 1.574 | 0.00 → 0.65 | 195 → 195 | 36.0 → 38.7 | 298 → 373 |
+| war | 100 | 350 → 347 | 445 → 445 | 0.63 → 0.66 | 0.04 → 0.04 | 0.42 → 0.50 | 0.20 → 0.28 | 2.00 → 2.00 | 0.52 → 0.54 | 1.350 → 1.422 | 0.00 → 0.51 | 192 → 192 | 5.0 → 5.3 | 32 → 43 |
+| war | 300 | 1,258 → 1,222 | 760 → 760 | 0.60 → 0.69 | 0.04 → 0.13 | 0.48 → 0.58 | 0.21 → 0.31 | 1.97 → 1.97 | 0.50 → 0.53 | 1.400 → 1.495 | 0.00 → 0.62 | 200 → 199 | 18.7 → 19.3 | 151 → 180 |
+| war | 600 | 4,187 → 4,180 | 1,129 → 1,129 | 0.58 → 0.67 | 0.04 → 0.13 | 0.47 → 0.57 | 0.21 → 0.30 | 1.95 → 1.95 | 0.52 → 0.55 | 1.416 → 1.556 | 0.00 → 0.62 | 195 → 195 | 36.3 → 39.0 | 300 → 375 |
+| learning | 100 | 394 → 386 | 511 → 511 | 0.16 → 0.18 | 0.04 → 0.04 | 0.24 → 0.32 | 0.29 → 0.36 | 1.85 → 2.03 | 0.55 → 0.55 | 1.331 → 1.400 | 0.00 → 0.50 | 193 → 193 | 5.0 → 5.3 | 34 → 49 |
+| learning | 300 | 1,212 → 1,240 | 814 → 813 | 0.15 → 0.24 | 0.04 → 0.13 | 0.31 → 0.41 | 0.29 → 0.39 | 1.82 → 1.83 | 0.54 → 0.57 | 1.409 → 1.518 | 0.00 → 0.60 | 197 → 197 | 18.7 → 19.3 | 153 → 187 |
+| learning | 600 | 4,274 → 4,326 | 1,176 → 1,176 | 0.15 → 0.23 | 0.04 → 0.13 | 0.30 → 0.39 | 0.27 → 0.37 | 1.97 → 1.99 | 0.53 → 0.57 | 1.417 → 1.551 | 0.00 → 0.61 | 195 → 196 | 36.7 → 39.3 | 305 → 386 |
+| building | 100 | 366 → 376 | 445 → 447 | 0.17 → 0.24 | 0.04 → 0.15 | 0.21 → 0.36 | 0.27 → 0.39 | 1.88 → 1.89 | 0.53 → 0.55 | 1.337 → 1.484 | 0.00 → 0.70 | 192 → 197 | 4.7 → 5.7 | 30 → 50 |
+| building | 300 | 1,263 → 1,234 | 759 → 759 | 0.15 → 0.46 | 0.04 → 0.49 | 0.28 → 0.52 | 0.26 → 0.40 | 2.01 → 1.87 | 0.50 → 0.58 | 1.407 → 1.602 | 0.00 → 0.81 | 200 → 202 | 18.3 → 19.3 | 149 → 195 |
+| building | 600 | 4,186 → 4,317 | 1,129 → 1,129 | 0.15 → 0.44 | 0.04 → 0.50 | 0.28 → 0.50 | 0.26 → 0.39 | 1.99 → 1.99 | 0.51 → 0.58 | 1.416 → 1.659 | 0.00 → 0.84 | 195 → 200 | 35.7 → 38.7 | 297 → 411 |
+
+**The fabric on this branch:**
+
+| Path | Year | Builders % of workers | Craft | Homes | Stone share | Roads | Beauty | Work buildings | Defences |
+|---|---|---|---|---|---|---|---|---|---|
+| balanced | 300 | 14.5 | 3.6 | 0.67 | 0.10 | 0.39 | 0.53 | 0.45 | 0.14 |
+| balanced | 600 | 13.9 | 3.7 | 0.68 | 0.12 | 0.43 | 0.48 | 0.54 | 0.15 |
+| growth | 300 | 12.3 | 3.1 | 0.62 | 0.03 | 0.38 | 0.44 | 0.36 | 0.13 |
+| growth | 600 | 12.5 | 3.2 | 0.63 | 0.03 | 0.34 | 0.41 | 0.45 | 0.13 |
+| making | 300 | 12.9 | 3.2 | 0.63 | 0.05 | 0.38 | 0.46 | 0.38 | 0.13 |
+| making | 600 | 12.4 | 3.5 | 0.65 | 0.07 | 0.38 | 0.44 | 0.50 | 0.14 |
+| war | 300 | 12.5 | 3.1 | 0.62 | 0.03 | 0.37 | 0.44 | 0.36 | 0.13 |
+| war | 600 | 11.9 | 3.3 | 0.62 | 0.04 | 0.36 | 0.42 | 0.47 | 0.13 |
+| learning | 300 | 13.2 | 3.1 | 0.60 | 0.02 | 0.39 | 0.45 | 0.35 | 0.13 |
+| learning | 600 | 11.9 | 3.2 | 0.61 | 0.04 | 0.38 | 0.42 | 0.45 | 0.13 |
+| building | 300 | 21.9 | 5.1 | 0.81 | 0.35 | 0.46 | 0.72 | 0.77 | 0.49 |
+| building | 600 | 19.8 | 5.4 | 0.84 | 0.38 | 0.62 | 0.65 | 0.89 | 0.50 |
+
+**What it shows**
+
+- **The building path pays off in its own measures.** Against balanced at year 600 it has:
+  - might 0.44 against 0.26, and defences 0.50 against 0.15 (walled districts and a stone town);
+  - awe 0.50 against 0.40, and allure 0.39 against 0.37;
+  - homes 0.84 against 0.68, with 38 in 100 of its places stone against 12;
+  - its cutters 4% and its makers 4% more productive;
+  - great-work renown 411 against 389.
+- **It is no longer dominated.** On main the extended dominance check found it dominated by balanced and by making.
+- **It pays real costs:**
+  - 2% fewer people than balanced at year 600, and 4% fewer at year 300;
+  - infant deaths 200 against 195 (fewer carers);
+  - a field force 30% smaller (fewer on the watch);
+  - fewer goods a head (4.6 against 5.0).
+- **It does not dominate.** War keeps far more might (0.67) and awe (0.57); growth keeps more people and allure (0.41) and fewer infant deaths.
+- **Balanced peoples change little.** People and knowledge stay within seed noise of main, and infant deaths and life expectancy are unchanged.
+  - Every path gains a modest fabric (homes 0.6–0.7) because about 14 in 100 of every people's workers build.
+  - Those builders had nothing to do before.
+- **Flags.** The suite has 27 flags here and 26 on main. This branch clears main's two "building dominated" flags. Its new flags are:
+  - **The 600-year population of towns_balanced is 20,027, against the band high of 20,000.**
+    - 6 seeds: 20,223 here, 19,949 on main.
+    - The seed spread is about ±700, and main already sits on the band's edge.
+    - Better homes add about 1%. No single fabric effect carries it: switching off the homes, the works, the beauty or the roads one at a time each leaves it within ±150.
+  - Two single-sample food-share dips at year 300, on growth and building. The food share averaged over years 200–400 is 34.6 here against 35.0 on main, over 3 seeds.
+  - A milestone exactly on its band's low (split_balanced alphabet at 520).
+- **Calibration.**
+  - The truth runs were re-recorded on this branch: seven 15-year runs, the six before plus a new `path_building` run, one engine at a time, 80–127 s each.
+  - `check.py --strict` passes: 7 runs within tolerance, score 38.2, only the listed food-days gaps.
+  - `path_building` at year 15, engine against surrogate: people 133 / 128, infant deaths 258 / 267, discoveries 50 / 45, cohesion 0.84 / 0.86.
