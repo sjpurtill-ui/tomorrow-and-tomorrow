@@ -323,3 +323,82 @@ func test_a_survivor_turns_smoothly_back_after_walking_home()->void:
 	body._yaw_tween.custom_step(0.11)
 	assert_float(absf(angle_difference(body.rotation.y,deg_to_rad(179.0)))).is_less(0.001)
 	stage.skip_execution()
+func test_weapon_plans_face_the_camera_after_arbitrary_previous_turns()->void:
+	if not _ready_or_skip():return
+	for method:String in ["club","behead"]:
+		for prior:float in [-179.0,108.0]:
+			var modal:Control=await _open(_home_audience())
+			var stage:Control=modal.court_stage
+			var body:Node3D=stage.figure(Stage.MAIN).body3d
+			body.face(prior,0.0)
+			var before:=body.rotation.y
+			var camera_before:Transform3D=stage.camera.transform
+			assert_bool(stage.execute(method,Stage.MAIN,"","","mild")).is_true()
+			for t:Tween in stage._beat_sets:t.kill()
+			stage._beat_sets.clear()
+			var exec:Node=stage.get_node("Execution")
+			var act:="club_home_run" if method=="club" else "three_swing_beheading"
+			exec.call("_plan_start",{"act":act})
+			var expected:=deg_to_rad(float(stage.rig.base_yaw)+15.0)
+			assert_float(absf(angle_difference(exec._plan_frame.basis.get_euler().y,expected))).is_less(0.001)
+			assert_float(body.rotation.y).is_equal_approx(before,0.001)
+			var delta_yaw:=angle_difference(before,expected-body.get_parent_node_3d().global_rotation.y)
+			body._yaw_tween.custom_step(0.175)
+			assert_float(body.rotation.y).is_equal_approx(before+delta_yaw*0.5,0.01)
+			body._yaw_tween.custom_step(0.18)
+			assert_float(absf(angle_difference(body.global_rotation.y,expected))).is_less(0.001)
+			assert_bool(stage.camera.transform.is_equal_approx(camera_before)).is_true()
+			# The prop target shares the same frame as the authored head trajectory.
+			var name:="pot" if method=="club" else "block"
+			var at:Array=Acting.exec_plan(act).things[name].at
+			assert_vector(exec._things[name].global_position).is_equal_approx(exec.call("_plan_at",at),Vector3.ONE*0.001)
+			stage.skip_execution()
+			modal.queue_free()
+			await await_idle_frame()
+
+func test_dogs_still_align_to_the_windbreak_instead_of_the_camera()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	var body:Node3D=stage.figure(Stage.MAIN).body3d
+	body.face(108.0,0.0)
+	assert_bool(stage.execute("dogs",Stage.MAIN,"","","mild")).is_true()
+	for t:Tween in stage._beat_sets:t.kill()
+	stage._beat_sets.clear()
+	var exec:Node=stage.get_node("Execution")
+	var away:Vector3=exec.call("point","windbreak")-body.global_position
+	away.y=0.0
+	assert_float(away.length()).is_greater(0.6)
+	var expected:=atan2(-away.x,-away.z)
+	exec.call("_plan_start",{"act":"dog_dinner"})
+	assert_float(absf(angle_difference(exec._plan_frame.basis.get_euler().y,expected))).is_less(0.001)
+	assert_float(absf(angle_difference(body.global_rotation.y,expected))).is_less(0.001)
+	var travel:Vector3=exec._plan_frame.basis*Vector3(0,0,-1)
+	assert_float(travel.normalized().dot(away.normalized())).is_equal_approx(1.0,0.001)
+	stage.skip_execution()
+func test_execution_waits_for_its_plan_actors_before_taking_their_marks()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	var key:=""
+	for candidate:String in stage.cast_order:
+		if candidate!=Stage.MAIN and stage.figure(candidate).body3d!=null:key=candidate;break
+	var actor:Stage.Figure=stage.figure(key)
+	# A long entrance exceeds the old seven-second event cap. Neither the
+	# victim nor the executioner has to appear as beat.who in an authored plan.
+	for f:Stage.Figure in [main,actor]:
+		if f._move and f._move.is_valid():f._move.kill()
+		f.stroll=0.6
+		f.walk_total=9.0 if f==main else 13.0
+		f._move=stage.create_tween()
+		f._move.tween_interval(f.walk_total)
+	assert_bool(stage.execute("club",Stage.MAIN,key)).is_true()
+	var first:=INF
+	var start:=0.0
+	for beat:Dictionary in stage._last_beats:
+		first=minf(first,float(beat.t))
+		if String(beat.get("act",""))=="plan":start=float(beat.t)
+	assert_float(first).is_equal_approx(13.3,0.01)
+	assert_float(start).is_greater(14.5)
+	stage.skip_execution()

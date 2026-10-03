@@ -1023,7 +1023,7 @@ func event(kind:String,data:Dictionary={})->void:
 	# gift accepted while the bearer is still on the way in is set down at
 	# their mark, not in the doorway).
 	if not kind in ["enter","exit","open","close"]:
-		var wait:=_still_arriving(all)
+		var wait:=_still_arriving(all,String(data.get("victim",MAIN)) if kind=="execution" else "")
 		if wait>0.0:
 			var later:Array=[]
 			for beat in all:
@@ -1041,14 +1041,26 @@ func event(kind:String,data:Dictionary={})->void:
 	if not all.is_empty():run_beats(all)
 
 ## How long until everyone the beats name has finished walking in (0: all here).
-func _still_arriving(beats:Array)->float:
+func _still_arriving(beats:Array,execution_victim:="")->float:
 	var wait:=0.0
+	var people:Array[String]=[]
+	if not execution_victim.is_empty():people.append(execution_victim)
 	for beat in beats:
 		if not beat is Dictionary:continue
-		var f:=figure(String((beat as Dictionary).get("who","")))
+		var who:=String(beat.get("who",""))
+		people.append(who)
+		# Authored plans name their actors inside an exec beat. They need to
+		# reach their marks too, before the plan takes a fixed world origin.
+		if not execution_victim.is_empty() and who=="exec":
+			var args:Dictionary=beat.get("args",{})
+			for role:String in ["who","to","ex","cook"]:
+				if args.has(role):people.append(String(args[role]))
+	for key:String in people:
+		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.stroll<=0.0:continue
 		wait=maxf(wait,f.arriving_in())
-	return clampf(wait+(0.3 if wait>0.0 else 0.0),0.0,7.0)
+	wait+=0.3 if wait>0.0 else 0.0
+	return minf(wait,7.0) if execution_victim.is_empty() else wait
 
 ## An execution's beats and the sound's whole-act track (N: play_act) in
 ## step: the track's blow lands `lead` seconds after it starts; the scene's
