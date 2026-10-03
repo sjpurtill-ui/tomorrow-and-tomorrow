@@ -34,90 +34,90 @@
     },
     "petitioner": {
      "pos": [
-      0.2,
+      -1.15,
       0,
-      2.15
+      2.05
      ],
      "face": "throne",
      "sit": false
     },
     "officials_0": {
      "pos": [
-      -1.75,
+      -2.35,
       0,
-      1.55
+      1.35
      ],
      "face": "throne",
      "sit": false
     },
     "officials_1": {
      "pos": [
-      1.95,
+      1.55,
       0,
-      1.2
+      1.75
      ],
      "face": "throne",
      "sit": false
     },
     "officials_2": {
      "pos": [
-      -2.85,
+      -3.36,
       0,
-      0.15
+      0.4
      ],
      "face": "throne",
      "sit": false
     },
     "officials_3": {
      "pos": [
-      3.05,
+      3.4,
       0,
-      -0.25
+      0.25
      ],
      "face": "throne",
      "sit": false
     },
     "officials_4": {
      "pos": [
-      -1.2,
+      -2.95,
       0,
-      -1.75
+      -2.05
      ],
      "face": "throne",
      "sit": false
     },
     "officials_5": {
      "pos": [
-      1.45,
+      1.55,
       0,
-      -2.0
+      -3.2
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_0": {
      "pos": [
-      -0.55,
+      -1.25,
       0,
-      2.3
+      2.2
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_1": {
      "pos": [
-      -1.75,
+      -2.45,
       0,
-      2.75
+      2.6
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_2": {
      "pos": [
-      0.75,
+      -0.1,
       0,
-      2.85
+      3.0
      ],
      "face": "throne",
      "sit": false
@@ -162,101 +162,82 @@
     },
     "crowd_2": {
      "pos": [
-      -0.872,
+      -2.364,
       0.0,
-      -2.396
-     ],
-     "face": "fire",
-     "sit": true,
-     "seat": 0.455
-    },
-    "crowd_3": {
-     "pos": [
-      -2.272,
-      0.0,
-      -1.158
+      -0.955
      ],
      "face": "fire",
      "sit": true,
      "seat": 0.437
     },
+    "crowd_3": {
+     "pos": [
+      0.5,
+      0.0,
+      -3.55
+     ],
+     "face": "fire",
+     "sit": false
+    },
     "crowd_4": {
      "pos": [
-      -1.521,
+      2.29,
       0.0,
-      -3.263
+      -3.37
      ],
      "face": "fire",
      "sit": false
     },
     "crowd_5": {
      "pos": [
-      1.775,
+      3.14,
       0.0,
-      -3.074
+      -1.96
      ],
      "face": "fire",
      "sit": false
     },
     "crowd_6": {
      "pos": [
-      -2.758,
+      -3.55,
       0.0,
-      -2.155
-     ],
-     "face": "fire",
-     "sit": false
-    },
-    "crowd_7": {
-     "pos": [
-      3.138,
-      0.0,
-      -1.961
-     ],
-     "face": "fire",
-     "sit": false
-    },
-    "crowd_8": {
-     "pos": [
-      0.136,
-      0.0,
-      -3.898
+      -0.75
      ],
      "face": "fire",
      "sit": false
     },
     "animal_0": {
      "pos": [
-      1.028,
+      1.55,
       0.0,
-      1.226
+      0.55
      ],
      "face": "fire",
      "sit": false
     },
     "animal_1": {
      "pos": [
-      2.242,
+      2.6,
       0.0,
-      -2.49
+      -2.6
      ],
      "face": "fire",
      "sit": false
     },
     "animal_2": {
      "pos": [
-      3.622,
+      -1.85,
       0.0,
-      0.971
+      0.45
      ],
      "face": "fire",
      "sit": false
     },
     "animal_3": {
      "pos": [
-      -1.606,
+      0.35,
       0.0,
-      1.784
+      3.4
      ],
      "face": "fire",
      "sit": false
@@ -346,17 +327,7 @@
     ]
    },
    "ink": [
-    "Hearth",
-    "Seats",
-    "Windbreak",
-    "Store",
-    "Rack",
-    "HideFrame",
-    "Tools",
-    "Firewood",
-    "Debris",
-    "Trees",
-    "Shrubs",
+    "StaticInked",
     "food_",
     "rack_",
     "spear_",
@@ -364,23 +335,19 @@
     "trays_"
    ],
    "door_side": -1,
+   "merged": {
+    "StaticInked": 9,
+    "StaticPlain": 0
+   },
    "glb": "court_set_fire_ring.glb",
-   "triangles": 55427,
+   "triangles": 55201,
    "objects": [
-    "Debris",
     "Far0",
     "Far1",
     "Far2",
-    "Firewood",
     "Grass",
     "Ground",
-    "Hearth",
-    "HideFrame",
-    "Rack",
-    "Seats",
-    "Store",
-    "Tools",
-    "Windbreak",
+    "StaticInked",
     "food_0",
     "food_1",
     "food_2",
@@ -464,7 +431,7 @@
     },
     "petitioner": {
      "pos": [
-      0.25,
+      -1.2,
       0,
       1.75
      ],
@@ -473,27 +440,27 @@
     },
     "officials_0": {
      "pos": [
-      -1.65,
+      -2.45,
       0,
-      1.35
+      1.2
      ],
      "face": "throne",
      "sit": false
     },
     "officials_1": {
      "pos": [
-      2.05,
+      1.5,
       0,
-      1.05
+      1.55
      ],
      "face": "throne",
      "sit": false
     },
     "officials_2": {
      "pos": [
-      -2.95,
+      -3.35,
       0,
-      0.35
+      0.1
      ],
      "face": "throne",
      "sit": false
@@ -502,16 +469,16 @@
      "pos": [
       3.35,
       0,
-      0.15
+      0.3
      ],
      "face": "throne",
      "sit": false
     },
     "officials_4": {
      "pos": [
-      -1.35,
+      -2.35,
       0,
-      -1.3
+      -1.45
      ],
      "face": "throne",
      "sit": false
@@ -527,27 +494,27 @@
     },
     "envoy_0": {
      "pos": [
-      -0.55,
+      -1.3,
       0,
-      2.0
+      1.95
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_1": {
      "pos": [
-      -1.8,
+      -2.5,
       0,
-      2.55
+      2.45
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_2": {
      "pos": [
-      0.85,
+      -0.15,
       0,
-      2.6
+      2.7
      ],
      "face": "throne",
      "sit": false
@@ -574,7 +541,7 @@
     },
     "crowd_1": {
      "pos": [
-      -1.25,
+      0.95,
       0.0,
       -3.2
      ],
@@ -584,7 +551,7 @@
     },
     "crowd_2": {
      "pos": [
-      2.2,
+      2.6,
       0.0,
       -3.15
      ],
@@ -658,9 +625,9 @@
     },
     "animal_0": {
      "pos": [
-      1.35,
+      1.6,
       0,
-      1.3
+      0.95
      ],
      "face": "fire",
      "sit": false
@@ -754,7 +721,9 @@
        5.1000000000000005,
        -0.45
       ],
-      "radius": 0.62
+      "radius": 0.62,
+      "strength": 0.4,
+      "soft": 0.5
      }
     ],
     "dust": {
@@ -802,21 +771,10 @@
     ]
    },
    "ink": [
-    "Hearth",
-    "Frame",
-    "Rafters",
-    "Benches",
-    "HighSeat",
-    "Store",
-    "Firewood",
-    "Board",
-    "Shields",
-    "Mats",
-    "Trees",
+    "StaticInked",
     "food_",
     "rack_",
     "spear_",
-    "Gables",
     "pots_",
     "weave_",
     "loom_",
@@ -827,29 +785,21 @@
     "ShadowCaster"
    ],
    "door_side": -1,
+   "merged": {
+    "StaticInked": 12,
+    "StaticPlain": 2
+   },
    "glb": "court_set_longhouse.glb",
    "triangles": 66900,
    "objects": [
-    "Benches",
-    "Board",
     "Far0",
     "Far1",
     "Far2",
-    "Firewood",
-    "Frame",
-    "Gables",
     "Grass",
     "Ground",
-    "Hearth",
-    "HighSeat",
-    "Mats",
-    "Rafters",
-    "Roof",
     "ShadowCaster",
-    "Shields",
-    "Store",
-    "Trees",
-    "Walls",
+    "StaticInked",
+    "StaticPlain",
     "board_0",
     "board_1",
     "board_2",
@@ -941,90 +891,90 @@
     },
     "petitioner": {
      "pos": [
-      0.2,
+      -1.15,
       0,
-      2.15
+      2.05
      ],
      "face": "throne",
      "sit": false
     },
     "officials_0": {
      "pos": [
-      -1.75,
+      -2.35,
       0,
-      1.55
+      1.35
      ],
      "face": "throne",
      "sit": false
     },
     "officials_1": {
      "pos": [
-      1.95,
+      1.55,
       0,
-      1.2
+      1.75
      ],
      "face": "throne",
      "sit": false
     },
     "officials_2": {
      "pos": [
-      -2.85,
+      -3.36,
       0,
-      0.15
+      0.4
      ],
      "face": "throne",
      "sit": false
     },
     "officials_3": {
      "pos": [
-      3.05,
+      3.4,
       0,
-      -0.25
+      0.25
      ],
      "face": "throne",
      "sit": false
     },
     "officials_4": {
      "pos": [
-      -1.2,
+      -1.3,
       0,
-      -1.75
+      0.75
      ],
      "face": "throne",
      "sit": false
     },
     "officials_5": {
      "pos": [
-      1.45,
+      0.87,
       0,
-      -2.0
+      -1.52
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_0": {
      "pos": [
-      -0.55,
+      -1.25,
       0,
-      2.3
+      2.2
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_1": {
      "pos": [
-      -1.75,
+      -2.45,
       0,
-      2.75
+      2.6
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_2": {
      "pos": [
-      0.75,
+      -0.1,
       0,
-      2.85
+      3.0
      ],
      "face": "throne",
      "sit": false
@@ -1049,6 +999,16 @@
     },
     "crowd_0": {
      "pos": [
+      1.74,
+      0.0,
+      -1.932
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.47
+    },
+    "crowd_1": {
+     "pos": [
       0.974,
       0.0,
       -2.411
@@ -1057,21 +1017,11 @@
      "sit": true,
      "seat": 0.47
     },
-    "crowd_1": {
-     "pos": [
-      0.0,
-      0.0,
-      -2.6
-     ],
-     "face": "fire",
-     "sit": true,
-     "seat": 0.47
-    },
     "crowd_2": {
      "pos": [
-      -0.974,
+      -2.252,
       0.0,
-      -2.411
+      -1.3
      ],
      "face": "fire",
      "sit": true,
@@ -1089,82 +1039,63 @@
     },
     "crowd_4": {
      "pos": [
-      -2.247,
+      2.4,
       0.0,
-      -1.096
+      -2.48
      ],
      "face": "fire",
-     "sit": true,
-     "seat": 0.419
+     "sit": false
     },
     "crowd_5": {
      "pos": [
-      2.121,
+      -3.1,
       0.0,
-      -2.528
+      -1.6
      ],
      "face": "fire",
      "sit": false
     },
     "crowd_6": {
      "pos": [
-      -2.121,
+      0.8,
       0.0,
-      -2.528
-     ],
-     "face": "fire",
-     "sit": false
-    },
-    "crowd_7": {
-     "pos": [
-      0.81,
-      0.0,
-      -3.25
-     ],
-     "face": "fire",
-     "sit": false
-    },
-    "crowd_8": {
-     "pos": [
-      -0.937,
-      0.0,
-      -3.268
+      -3.2
      ],
      "face": "fire",
      "sit": false
     },
     "animal_0": {
      "pos": [
-      1.028,
+      1.55,
       0.0,
-      1.226
+      0.55
      ],
      "face": "fire",
      "sit": false
     },
     "animal_1": {
      "pos": [
-      1.891,
+      2.3,
       0.0,
-      -1.478
+      0.5
      ],
      "face": "fire",
      "sit": false
     },
     "animal_2": {
      "pos": [
-      3.477,
+      -1.85,
       0.0,
-      0.932
+      0.45
      ],
      "face": "fire",
      "sit": false
     },
     "animal_3": {
      "pos": [
-      -1.606,
+      0.35,
       0.0,
-      1.784
+      3.4
      ],
      "face": "fire",
      "sit": false
@@ -1255,21 +1186,7 @@
     ]
    },
    "ink": [
-    "Hearth",
-    "Seats",
-    "ElderSeats",
-    "Frame",
-    "Rafters",
-    "Roof",
-    "Screens",
-    "Stones",
-    "Store",
-    "Rack",
-    "Firewood",
-    "Debris",
-    "Trees",
-    "Shrubs",
-    "Mats",
+    "StaticInked",
     "food_",
     "rack_",
     "spear_",
@@ -1281,28 +1198,20 @@
     "ShadowCaster"
    ],
    "door_side": -1,
+   "merged": {
+    "StaticInked": 13,
+    "StaticPlain": 0
+   },
    "glb": "court_set_shelter.glb",
-   "triangles": 54220,
+   "triangles": 55304,
    "objects": [
-    "Debris",
-    "ElderSeats",
     "Far0",
     "Far1",
     "Far2",
-    "Firewood",
-    "Frame",
     "Grass",
     "Ground",
-    "Hearth",
-    "Mats",
-    "Rack",
-    "Rafters",
-    "Roof",
-    "Screens",
-    "Seats",
     "ShadowCaster",
-    "Stones",
-    "Store",
+    "StaticInked",
     "food_0",
     "food_1",
     "food_2",
@@ -1379,7 +1288,9 @@
        4.3999999999999995,
        -1.25
       ],
-      "radius": 0.85
+      "radius": 0.85,
+      "strength": 0.34,
+      "soft": 0.5
      }
     ],
     "dust": {
@@ -1421,90 +1332,90 @@
     },
     "petitioner": {
      "pos": [
-      0.2,
+      -1.15,
       0,
-      2.15
+      2.05
      ],
      "face": "throne",
      "sit": false
     },
     "officials_0": {
      "pos": [
-      -1.75,
+      -2.35,
       0,
-      1.55
+      1.35
      ],
      "face": "throne",
      "sit": false
     },
     "officials_1": {
      "pos": [
-      1.95,
+      1.55,
       0,
-      1.2
+      1.75
      ],
      "face": "throne",
      "sit": false
     },
     "officials_2": {
      "pos": [
-      -2.85,
+      -3.36,
       0,
-      0.15
+      0.4
      ],
      "face": "throne",
      "sit": false
     },
     "officials_3": {
      "pos": [
-      3.05,
+      3.4,
       0,
-      -0.25
+      0.25
      ],
      "face": "throne",
      "sit": false
     },
     "officials_4": {
      "pos": [
-      -1.2,
+      -1.75,
       0,
-      -1.75
+      -1.85
      ],
      "face": "throne",
      "sit": false
     },
     "officials_5": {
      "pos": [
-      1.45,
+      1.7,
       0,
-      -2.0
+      -1.95
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_0": {
      "pos": [
-      -0.55,
+      -1.25,
       0,
-      2.3
+      2.2
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_1": {
      "pos": [
-      -1.75,
+      -2.45,
       0,
-      2.75
+      2.6
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_2": {
      "pos": [
-      0.75,
+      -0.1,
       0,
-      2.85
+      3.0
      ],
      "face": "throne",
      "sit": false
@@ -1615,9 +1526,9 @@
     },
     "animal_0": {
      "pos": [
-      1.45,
+      1.65,
       0,
-      1.25
+      0.95
      ],
      "face": "fire",
      "sit": false
@@ -1718,17 +1629,7 @@
     ]
    },
    "ink": [
-    "Hearth",
-    "Columns",
-    "Dais",
-    "Table",
-    "Scribes",
-    "Store",
-    "Benches",
-    "Shields",
-    "Mats",
-    "Frame",
-    "Roof",
+    "StaticInked",
     "food_",
     "rack_",
     "spear_",
@@ -1741,27 +1642,21 @@
     "ShadowCaster"
    ],
    "door_side": -1,
+   "merged": {
+    "StaticInked": 11,
+    "StaticPlain": 1
+   },
    "glb": "court_set_mudbrick_hall.glb",
    "triangles": 38536,
    "objects": [
-    "Benches",
-    "Columns",
-    "Dais",
     "Far0",
     "Far1",
     "Far2",
-    "Frame",
     "Grass",
     "Ground",
-    "Hearth",
-    "Mats",
-    "Roof",
-    "Scribes",
     "ShadowCaster",
-    "Shields",
-    "Store",
-    "Table",
-    "Walls",
+    "StaticInked",
+    "StaticPlain",
     "food_0",
     "food_1",
     "food_2",
@@ -1839,8 +1734,9 @@
        -0.62,
        0.24
       ],
-      "radius": 0.42,
-      "strength": 0.045
+      "radius": 0.5,
+      "strength": 0.16,
+      "soft": 1.0
      },
      {
       "top": [
@@ -1853,9 +1749,33 @@
        -0.62,
        0.24
       ],
-      "radius": 0.42,
-      "strength": 0.045
+      "radius": 0.5,
+      "strength": 0.16,
+      "soft": 1.0
      }
+    ],
+    "fill": [
+     [
+      0.0,
+      3.8,
+      -4.6,
+      1.1,
+      9.0
+     ],
+     [
+      -5.0,
+      3.0,
+      -2.0,
+      0.5,
+      7.0
+     ],
+     [
+      5.0,
+      3.0,
+      -2.0,
+      0.5,
+      7.0
+     ]
     ],
     "dust": {
      "pos": [
@@ -1896,7 +1816,7 @@
     },
     "petitioner": {
      "pos": [
-      0.2,
+      -1.2,
       0,
       2.3
      ],
@@ -1905,45 +1825,45 @@
     },
     "officials_0": {
      "pos": [
-      -1.75,
+      -2.35,
       0,
-      1.55
+      1.35
      ],
      "face": "throne",
      "sit": false
     },
     "officials_1": {
      "pos": [
-      1.95,
+      1.55,
       0,
-      1.2
+      1.75
      ],
      "face": "throne",
      "sit": false
     },
     "officials_2": {
      "pos": [
-      -2.85,
+      -3.36,
       0,
-      0.15
+      0.4
      ],
      "face": "throne",
      "sit": false
     },
     "officials_3": {
      "pos": [
-      3.05,
+      3.4,
       0,
-      -0.25
+      0.25
      ],
      "face": "throne",
      "sit": false
     },
     "officials_4": {
      "pos": [
-      -1.6,
+      -2.6,
       0,
-      -1.9
+      -1.7
      ],
      "face": "throne",
      "sit": false
@@ -1959,27 +1879,27 @@
     },
     "envoy_0": {
      "pos": [
-      -0.55,
+      -1.25,
       0,
-      2.3
+      2.2
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_1": {
      "pos": [
-      -1.75,
+      -2.45,
       0,
-      2.75
+      2.6
      ],
      "face": "throne",
      "sit": false
     },
     "envoy_2": {
      "pos": [
-      0.75,
+      -0.1,
       0,
-      2.85
+      3.0
      ],
      "face": "throne",
      "sit": false
@@ -2090,9 +2010,9 @@
     },
     "animal_0": {
      "pos": [
-      1.55,
+      1.75,
       0,
-      1.35
+      1.0
      ],
      "face": "fire",
      "sit": false
@@ -2166,10 +2086,12 @@
      -0.62,
      0.24
     ],
-    "sun_energy": 1.9,
-    "fire_energy": 1.5,
-    "fire_range": 8.0,
-    "fog": 0.008
+    "sun_energy": 0.7,
+    "fire_energy": 1.6,
+    "fire_range": 8.5,
+    "fog": 0.006,
+    "brazier_energy": 2.2,
+    "brazier_range": 6.5
    },
    "camera": {
     "yaw": 16.0,
@@ -2186,16 +2108,7 @@
     ]
    },
    "ink": [
-    "Hearth",
-    "Columns",
-    "Dais",
-    "Canopy",
-    "Table",
-    "Benches",
-    "Shields",
-    "Braziers",
-    "Carpet",
-    "Roof",
+    "StaticInked",
     "food_",
     "spear_",
     "weave_"
@@ -2204,26 +2117,20 @@
     "ShadowCaster"
    ],
    "door_side": -1,
+   "merged": {
+    "StaticInked": 10,
+    "StaticPlain": 2
+   },
    "glb": "court_set_grand_hall.glb",
-   "triangles": 44800,
+   "triangles": 45072,
    "objects": [
-    "Benches",
-    "Braziers",
-    "Canopy",
-    "Carpet",
-    "Columns",
-    "Dais",
     "Far0",
     "Far1",
     "Far2",
-    "Floor",
     "Ground",
-    "Hearth",
-    "Roof",
     "ShadowCaster",
-    "Shields",
-    "Table",
-    "Walls",
+    "StaticInked",
+    "StaticPlain",
     "food_0",
     "food_1",
     "food_2",

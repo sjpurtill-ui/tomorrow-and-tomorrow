@@ -58,6 +58,11 @@ const SHOTS:=[
 	{"tag":"fire-strip","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","size":STRIP,"insets":[40,40]},
 	{"tag":"fire-war-hungry","era":"hearth_council","facts":{"food_days":1,"war":{"enemy":"x"},"tier":0,"era_tags":[]},"cast":"band","camera":"wide"},
 	{"tag":"fire-push","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"push_in","who":"petitioner"},
+	{"tag":"fire-reaction","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"reaction","who":"officials_0"},
+	{"tag":"fire-winter","era":"hearth_council","facts":{"food":0.4,"tier":0,"era_tags":[],"season":"winter"},"cast":"band","camera":"wide"},
+	{"tag":"fire-winter-strip","era":"hearth_council","facts":{"food":0.4,"tier":0,"era_tags":[],"season":"winter"},"cast":"band","camera":"wide","size":STRIP,"insets":[40,40]},
+	{"tag":"shelter-summer","era":"elders_circle","facts":{"food":0.8,"tier":1,"era_tags":["pottery","farming"],"season":"summer"},"cast":"band","camera":"wide"},
+	{"tag":"shelter-autumn-strip","era":"elders_circle","facts":{"food":0.8,"tier":1,"era_tags":["pottery","farming"],"season":"autumn"},"cast":"band","camera":"wide","size":STRIP,"insets":[40,40]},
 	{"tag":"shelter-wide","era":"elders_circle","facts":{"food":0.7,"tier":1,"era_tags":["pottery","farming"]},"cast":"band","camera":"wide"},
 	{"tag":"shelter-strip","era":"elders_circle","facts":{"food":0.7,"tier":1,"era_tags":["pottery","farming"]},"cast":"band","camera":"wide","size":STRIP,"insets":[40,40]},
 	{"tag":"hall-wide","era":"chiefs_hall","facts":{"food":0.85,"tier":1,"era_tags":["pottery","weaving","baking"]},"cast":"hall","camera":"wide"},
@@ -72,15 +77,25 @@ const SHOTS:=[
 ]
 const DOG_CLIPS:=["idle","sniff","walk","trot","sit_idle","scratch","lie_idle","cower_idle","tilt","bark","grab","wag"]
 
+const PERF_SETS:=[["hearth_council",0,"band"],["elders_circle",1,"band"],["chiefs_hall",1,"hall"],["temple_palace",2,"court"],["imperial_court",3,"court"]]
+
 var capture:=false
 var out_dir:=""
 var only:=""
+## --toon: leave the figures on J's own toon (to measure the lit twin's cost)
+var toon:=false
+var noshaft:=false
+## --one=<era>: measure only that court
+var one:=""
 var failures:Array[String]=[]
 
 func _ready()->void:
 	capture=DisplayServer.get_name()!="headless"
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--only="):only=arg.trim_prefix("--only=")
+		if arg=="--toon":toon=true
+		if arg=="--noshaft":noshaft=true
+		if arg.begins_with("--one="):one=arg.trim_prefix("--one=")
 	out_dir=ProjectSettings.globalize_path("res://reports/court_set/")
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	if capture:get_window().size=Vector2i(W,H)
@@ -89,6 +104,8 @@ func _ready()->void:
 		_fail("no court sets under %s" % CourtSet.DIR)
 	elif only=="clip":
 		if capture:await _clip()
+	elif only=="perf":
+		if capture:await _perf()
 	else:
 		for spec:Dictionary in SHOTS:
 			if not only.is_empty() and not String(spec.tag).contains(only):continue
@@ -141,6 +158,8 @@ func _stage(spec:Dictionary)->Array:
 	add_child(view)
 	var court:Node3D=CourtSet.build(String(spec.era),spec.get("facts",{}))
 	view.add_child(court)
+	if noshaft:
+		for node in court.find_children("SunShaft*","MeshInstance3D",false,false):(node as Node3D).visible=false
 	var cast:Array=CASTS.get(String(spec.get("cast","band")),[])
 	var bodies:Dictionary={}
 	Figure3D.set_key_light(court.call("key_dir"))
@@ -165,9 +184,9 @@ func _stage(spec:Dictionary)->Array:
 		for node in fig.find_children("*","MeshInstance3D",true,false):
 			(node as MeshInstance3D).cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		fig.add_child(CourtSet.contact_shadow(0.85,0.6,0.5))
+		if not toon:court.call("add_breath",fig)
 		bodies[mark_name]=fig
 		index+=1
-	CourtSet.light_figures(Figure3D._materials)
 	var insets:Array=spec.get("insets",[0,0])
 	var rig:Node=court.get("rig")
 	await _frames(2)
@@ -225,6 +244,32 @@ func _check_marks(court:Node3D,tag:String)->void:
 	for needed in ["throne_gaze","petitioner","fire","door","officials_0","crowd_0","envoy_0","animal_0"]:
 		if not court.call("has_mark",needed):_fail("%s: no mark %s" % [tag,needed])
 
+## Draw calls and frame times for every set in the court's strip, with its
+## people, at high and low quality (printed as PERF lines).
+func _perf()->void:
+	for entry:Array in PERF_SETS:
+		if not one.is_empty() and String(entry[0])!=one:continue
+		for run in [["high",entry[2]],["low",entry[2]],["high","none"]]:
+			var q:String=run[0]
+			var spec:={"tag":"perf","era":entry[0],"facts":{"food":0.8,"tier":entry[1]},"cast":run[1],"size":STRIP,"insets":[40,40]}
+			var made:=await _stage(spec)
+			var view:SubViewport=made[0];var court:Node3D=made[1]
+			court.call("set_quality",q,"perf")
+			RenderingServer.viewport_set_measure_render_time(view.get_viewport_rid(),true)
+			for i in 30:await get_tree().process_frame
+			var gpu:=0.0;var cpu:=0.0;var n:=0
+			for i in 60:
+				await get_tree().process_frame
+				gpu+=RenderingServer.viewport_get_measured_render_time_gpu(view.get_viewport_rid())
+				cpu+=RenderingServer.viewport_get_measured_render_time_cpu(view.get_viewport_rid())
+				n+=1
+			var draws:=view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)
+			var prims:=view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME)
+			var objects:=view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_OBJECTS_IN_FRAME)
+			print("PERF %s %s %s draws=%d objects=%d primitives=%d gpu_ms=%.2f cpu_ms=%.2f fps=%d" % [court.get("kind"),q,"people" if run[1]!="none" else "set-only",draws,objects,prims,gpu/float(n),cpu/float(n),Engine.get_frames_per_second()])
+			view.queue_free()
+			await _frames(2)
+
 ## The god's wrath in the court's strip, a frame for every frame at a fixed
 ## rate (run with --fixed-fps 24): the room, the god speaks and the camera
 ## pushes in on the petitioner, the wrath lands (a jolt, the petitioner goes
@@ -237,7 +282,8 @@ func _clip()->void:
 	var dog:Node3D=court.call("animal","dog")
 	if dog!=null:
 		dog.call("hold",30.0)
-		dog.position=Vector3(1.0,0.0,1.5);dog.rotation.y=deg_to_rad(-25.0)
+		var spot:Marker3D=court.call("mark","animal_0")
+		dog.position=spot.position;dog.rotation.y=deg_to_rad(-35.0)
 		dog.call("play","sit_idle",0.0,0.4)
 	var dir:=out_dir+"clip/"
 	DirAccess.make_dir_recursive_absolute(dir)

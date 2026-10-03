@@ -19,6 +19,11 @@ const DIR:="res://assets/court_sets/animals/"
 const MANIFEST:=DIR+"court_animals.json"
 const TOON:=preload("res://assets/court_sets/shaders/court_set_toon.gdshader")
 const INK:=preload("res://assets/court_sets/shaders/court_set_ink.gdshader")
+## N (court sound): the open court's sound hears the beast's own clips. Looked
+## up, not preloaded, so the set stands on its own where the sound is not built.
+const SOUND_PATH:="res://scripts/hud/court_sound.gd"
+static var _sound:Script
+static var _sound_checked:=false
 ## Each species' paint by slot.
 const PALETTE:={
 	"dog":{"COAT":"a06c3b","COAT_LIGHT":"e0c99e","COAT_DARK":"5f4027","NOSE":"1d1612","EYE":"150f0c","EYE_SHINE":"fbf6ea"},
@@ -176,7 +181,19 @@ func play(clip_name:String,blend:=0.25,at:=-1.0)->void:
 	if clip_name==clip and at<0.0 and player.is_playing():return
 	clip=clip_name
 	player.play(clip_name,blend)
+	# N (court sound): heard doing what it does (sniff, scratch, bark, lie, wag, walk...)
+	var sound:=_court_sound()
+	if sound!=null:sound.call("animal",species,clip_name,self)
 	if at>=0.0:player.seek(fmod(at,player.get_animation(clip_name).length),true)
+
+static func _court_sound()->Object:
+	if not _sound_checked:
+		_sound_checked=true
+		if ResourceLoader.exists(SOUND_PATH):_sound=load(SOUND_PATH) as Script
+	if _sound==null:return null
+	var current:Variant=_sound.get("current")
+	if typeof(current)!=TYPE_OBJECT or not is_instance_valid(current):return null
+	return current if (current as Object).has_method("animal") else null
 
 func _on_finished(finished:StringName)->void:
 	var next:=String(AFTER.get(String(finished),""))
