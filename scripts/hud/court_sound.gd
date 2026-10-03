@@ -144,6 +144,7 @@ const SOUND_NAMES:={
 	"snort_wake":["snort_wake",0.0,-1],"reed_scratch":["scribble",0.0,-1],"soft_clap":["soft_clap",0.0,-1],"yelp_small":["yelp_small",0.0,-1],
 	"snatch":["snatch",0.0,-1],"shoo":["shoo",0.0,-1],"laugh":["laugh",0.0,-1],"sigh":["sigh",0.0,-1],"hum_yes":["hum_yes",0.0,-1],
 	"rustle":["rustle",0.0,-1],"scuff":["scuff",0.0,-1],"whoosh":["whoosh",0.0,-1],"hmph":["hmph",0.0,-1],
+	"stir":["spoon_stir",0.0,-1],
 }
 ## Footsteps by pace: [seconds, steps a second, cue, dB].
 const PACES:={"walk":[1.6,1.8,"step",0.0],"shuffle":[1.1,2.6,"scuff",-2.0],"hurry":[1.0,2.8,"step",0.0],"stomp":[1.4,2.2,"step",4.0],"run":[0.9,3.6,"step",1.0]}
@@ -798,7 +799,7 @@ func sound(args:Dictionary,body:Node3D=null,who:="")->bool:
 	if SOUND_NAMES.has(name):
 		var m:Array=SOUND_NAMES[name]
 		cue_name=String(m[0]);db+=float(m[1]);variant=int(m[2])
-	elif not Foley.CUES.has(name):return false
+	elif not Foley.CUES.has(name) and not Gore.has(name):return false
 	var opts:={"db":db,"delay":float(args.get("delay",0.0))}
 	if variant>=0:opts["variant"]=variant
 	if cue_name in ["gasp","snort_laugh","laugh","cough","cough_fought","ahem","hmph","yawn","sigh","hum_yes","oof","grunt","yelp_small"]:

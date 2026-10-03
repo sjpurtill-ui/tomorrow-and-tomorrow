@@ -188,19 +188,67 @@ func _approach(key:String,to:String,side:float,dist:float,time:float)->void:
 ## A short scene move still needs facing and a matching stride.
 func _walk_to(key:String,to:Vector3,time:float,arrive_clip:="")->void:
 	var b:=_body(key);var f:Variant=_fig(key)
-	if b==null or f==null:return
+	if b==null or f==null or f.spot==null:return
 	_remember(key)
-	var way:=to-b.global_position;way.y=0.0
-	if way.length()<0.02:return
+	var path:=_walk_path(key,to)
+	if _walk_length(path)<0.02:return
+	var old:Variant=_moving.get(key)
+	if old is Tween and (old as Tween).is_valid():(old as Tween).kill()
 	Acting.stop(b,0.1)
-	b.face(rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),0.18)
 	b.play("walk_in",0.15,0.0)
-	var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
-	b.set_locomotion_rate(way.length()/maxf(time*pace,0.05))
-	_move_to(key,to,time,Tween.TRANS_LINEAR)
-	var t:=_tween();t.tween_interval(time)
+	var t:=_tween();_moving[key]=t
+	_queue_walk(t,f,b,path,maxf(time,0.05))
 	t.tween_callback(func()->void:
 		if is_instance_valid(b):b.play(arrive_clip if not arrive_clip.is_empty() else String(f.rest_clip),0.2);b.set_locomotion_rate(1.0))
+
+## Execution approaches use the same floor map as ordinary court walks.
+## Current bodies, including a person already nudged by this scene, are blockers.
+func _walk_path(key:String,to:Vector3)->PackedVector3Array:
+	var b:=_body(key)
+	if b==null:return PackedVector3Array()
+	var from:=b.global_position
+	var court:=_court()
+	if court==null:return PackedVector3Array([from,to])
+	var room:=Paths.room_of(court)
+	if room==null:return PackedVector3Array([from,to])
+	var start:=court.to_local(from);var goal:=court.to_local(to)
+	var people:=[]
+	var cast:Variant=stage.get("cast_order")
+	if cast is Array:
+		for other_key:String in cast:
+			if other_key==key:continue
+			var other:Variant=_fig(other_key);var body:=_body(other_key)
+			if other==null or body==null or other.leaving or not body.visible:continue
+			var at:=court.to_local(body.global_position)
+			people.append(Vector3(at.x,at.z,0.3))
+	var route:=Paths.route(room,Vector2(start.x,start.z),Vector2(goal.x,goal.z),people)
+	var out:=PackedVector3Array()
+	for at:Vector2 in route:out.append(court.to_global(Vector3(at.x,start.y,at.y)))
+	# An obstructed/no-route result must not turn into a straight hearth crossing.
+	return out
+
+static func _walk_length(path:PackedVector3Array)->float:
+	var length:=0.0
+	for i in range(1,path.size()):length+=path[i-1].distance_to(path[i])
+	return length
+
+## One constant-speed journey: segment times and foot cadence use total length.
+## Static callbacks also remain valid while a stage-owned return outlives us.
+static func _queue_walk(t:Tween,f:Variant,b:Node3D,path:PackedVector3Array,seconds:float)->void:
+	var length:=_walk_length(path)
+	var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
+	b.set_locomotion_rate(length/maxf(seconds*pace,0.05))
+	for i in range(1,path.size()):
+		var way:=path[i]-path[i-1]
+		var duration:=seconds*way.length()/maxf(length,0.001)
+		if duration<=0.00001:continue
+		var yaw:=rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y)
+		var turn:=minf(0.18,duration)
+		if i==1:b.face(yaw,turn)
+		t.tween_callback(func()->void:if is_instance_valid(b):b.face(yaw,turn))
+		var local:Vector3=f.spot.to_local(path[i])-f._path_at(f.stroll)
+		local.y=0.0
+		t.tween_property(f,"nudge",local,duration).set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)
 
 func _heave(args:Dictionary)->void:
 	var key:=String(args.get("who",victim));var f:Variant=_fig(key)
@@ -240,14 +288,16 @@ func _restore_survivors()->void:
 				if is_instance_valid(prop.node):prop.node.visible=bool(prop.visible)
 		var distance:float=(f.nudge as Vector3).distance_to(saved.nudge)
 		if _skipped or distance<0.05:restore.call();continue
-		var way:Vector3=f.spot.global_transform.basis*((saved.nudge as Vector3)-f.nudge)
-		b.face(rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),0.2)
+		var home:Vector3=f.spot.to_global(f._path_at(f.stroll)+(saved.nudge as Vector3))
+		var path:=_walk_path(key,home)
+		if _walk_length(path)<0.02:
+			# No safe route: retain this floor position instead of crossing a solid.
+			saved.nudge=f.nudge
+			restore.call();continue
 		b.play("walk_in",0.2,0.0)
 		var seconds:=clampf(distance/1.15,0.3,2.5)
-		var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
-		b.set_locomotion_rate(distance/maxf(seconds*pace,0.05))
 		var t:=stage.create_tween()
-		t.tween_property(f,"nudge",saved.nudge,seconds)
+		_queue_walk(t,f,b,path,seconds)
 		t.tween_callback(restore)
 	_survivors.clear()
 
@@ -583,6 +633,12 @@ func _plan_start(args:Dictionary)->void:
 		_things[name]=thing
 		thing.global_position=_plan_at((things[name] as Dictionary).get("at",[0,0,0]))
 		thing.rotation.y=yaw
+		if name=="block" and (things[name] as Dictionary).has("top"):
+			var kit:=_props_kit()
+			if kit!=null and thing.has_meta("prop"):
+				var size:Array=(kit.call("info",String(thing.get_meta("prop"))) as Dictionary).get("size",[])
+				if size.size()>=2 and float(size[1])>0.0:
+					thing.scale.y=float(things[name].top)*float(v.body_height)/Figure3D.REFERENCE_HEIGHT/float(size[1])
 	# everyone to their place, facing the plan's way, things in hand, clips on
 	for role:String in plan.roles:
 		var r:Dictionary=plan.roles[role]
@@ -599,7 +655,12 @@ func _plan_start(args:Dictionary)->void:
 				walk=clampf(far/1.2,0.35,1.4)
 				# The authored act takes over empty-handed; do not resume the old staff/bowl pose.
 				_walk_to(key,to,walk,"stand")
-			b.face(rad_to_deg(yaw)+float(r.get("yaw",0.0))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),maxf(walk,0.2))
+			var heading:=rad_to_deg(yaw)+float(r.get("yaw",0.0))-rad_to_deg(b.get_parent_node_3d().global_rotation.y)
+			if walk>0.0:
+				# A routed approach owns facing until its last step.
+				var turn:=_tween();turn.tween_interval(walk)
+				turn.tween_callback(func()->void:if is_instance_valid(b):b.face(heading,0.2))
+			else:b.face(heading,0.2)
 		for side:String in (r.get("props",{}) as Dictionary):
 			var name:=String(r.props[side])
 			var prop:=_plan_thing(name)
@@ -607,7 +668,38 @@ func _plan_start(args:Dictionary)->void:
 			_things[name]=prop
 			var kit:=_props_kit()
 			var held:=false
-			if kit!=null and prop.has_meta("prop"):held=bool(kit.call("hold",prop,b,"hand."+side))
+			if Acting.of(b)!=null:
+				# These clips aim the tool from the closed fist, not the generic
+				# hand-bone socket. Keep the asset's grip at that authored origin.
+				var grip:=Node3D.new();grip.name="PlanGrip_"+side
+				court.add_child(grip);_made.append(grip);grip.add_child(prop)
+				if kit!=null and prop.has_meta("prop"):
+					var spec:Dictionary=kit.call("info",String(prop.get_meta("prop")))
+					var at:Array=spec.get("grip",[0,0,0])
+					var anchor:=Vector3(float(at[0]),float(at[1]),float(at[2]))
+					var tool_basis:=Basis.IDENTITY
+					if act=="three_swing_beheading" and name=="axe" and spec.has("edge"):
+						# The authored tool aims its edge 0.66m along the fist.
+						# This asset's blade projects sideways from its haft.
+						var edge:Array=spec.edge
+						var reach:=Vector3(edge[0],edge[1],edge[2])-anchor
+						var size:=0.66*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
+						tool_basis=Basis(Quaternion(reach.normalized(),Vector3.UP)).scaled(Vector3.ONE*size/reach.length())
+					prop.transform=Transform3D(tool_basis,-(tool_basis*anchor))
+				grip.global_transform=Acting.of(b).fist_frame(1 if side=="R" else 0)
+				if r.has(name+"_rests"):
+					var rest:Array=r[name+"_rests"]
+					var facing:=Basis(Vector3.UP,yaw+deg_to_rad(float(r.get("yaw",0.0))))
+					grip.global_transform=Transform3D(facing,_plan_at(r.get("at",[0,0,0]))+facing*Vector3(rest[0],rest[1],rest[2]))
+					if walk>0.0:
+						var pickup:=_tween();pickup.tween_interval(walk)
+						pickup.tween_callback(func()->void:if is_instance_valid(b) and is_instance_valid(grip):Acting.hold(b,grip,side))
+					else:Acting.hold(b,grip,side)
+				else:Acting.hold(b,grip,side)
+				for own in ["prop_staff","prop_bowl"]:
+					for node in b.find_children(own,"MeshInstance3D",true,false):(node as Node3D).visible=false
+				held=true
+			elif kit!=null and prop.has_meta("prop"):held=bool(kit.call("hold",prop,b,"hand."+side))
 			if not held:
 				var hand:=_hand(key,side)
 				if hand!=null:hand.add_child(prop)

@@ -2982,8 +2982,12 @@ class Figure extends Control:
 		if body3d!=null and spot!=null and not body3d.visible and _move!=null and _move.is_valid():
 			_move.kill();_vanish();return
 		# Off the staff (or up from the fire) before they walk.
-		if not acting_stance.is_empty() and Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():
-			Self.Acting.idle(body3d,String(body3d.stance))
+		var from_floor:=body3d!=null and is_instance_valid(body3d) and bool(body3d.get(&"floor_seated"))
+		if (not acting_stance.is_empty() or from_floor) and Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():
+			# The cross-legged pose borrows sit underneath. Returning to that
+			# fallback would put a stool through them while they rise and wait.
+			if from_floor:rest_clip="stand"
+			Self.Acting.idle(body3d,"stand" if from_floor else String(body3d.stance))
 			acting_stance=""
 		if spot==null:
 			if style.begins_with("backward"):style="bow"
