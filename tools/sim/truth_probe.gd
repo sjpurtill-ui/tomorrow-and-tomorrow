@@ -23,6 +23,9 @@ func _scenarios()->Dictionary:
 	var sensible_research:={"demography":2,"nutrition":3,"health":3,"labor":2,"knowledge":2,"production":3,"infrastructure":2,"logistics":1,"ecology":1,"institutions":1,"security":1,"culture":1}
 	return {
 		"sensible":{"site":"good","focus":"","policies":[],"research":sensible_research},
+		# The same people on an average site (between good and poor): the
+		# founding-years check that a new people does not starve.
+		"average":{"site":"average","focus":"","policies":[],"research":sensible_research},
 		"poor":{"site":"poor","focus":"development","policies":["foraging_drive","labor_mobilization"],"research":{"demography":0,"nutrition":0,"health":0,"labor":2,"knowledge":5,"production":6,"infrastructure":2,"logistics":1,"ecology":0,"institutions":2,"security":5,"culture":1}},
 		"research":{"site":"good","focus":"research","policies":[],"research":{"demography":1,"nutrition":2,"health":2,"labor":1,"knowledge":8,"production":4,"infrastructure":1,"logistics":1,"ecology":1,"institutions":3,"security":0,"culture":2}},
 		"ai":{"site":"good","focus":"","policies":[],"ai":true,"research":{}},
@@ -36,6 +39,8 @@ func _site_profile(origin:Vector2,site:String)->Dictionary:
 	var profile:Dictionary=PlanetEnvironment.profile_at(origin).duplicate(true)
 	if site=="poor":
 		profile.merge({"forage":0.26,"game":0.22,"fertility":0.22,"growing_season":0.34,"water_access":0.12,"rainfall_variability":0.62,"precipitation":0.30},true)
+	elif site=="average":
+		profile.merge({"forage":0.44,"game":0.37,"fertility":0.40,"growing_season":0.48,"water_access":0.37,"rainfall_variability":0.46,"precipitation":0.43},true)
 	else:
 		profile.merge({"forage":0.62,"game":0.52,"fertility":0.58,"growing_season":0.62,"water_access":0.62,"rainfall_variability":0.30,"precipitation":0.55},true)
 	return profile
