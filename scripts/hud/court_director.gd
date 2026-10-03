@@ -2434,8 +2434,8 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 			var gone:=start+_plan_cue(plan,"out_of_sight",6.6)
 			_exec(out,start,"pack_come",{"more":2})
 			_exec(out,gone-0.05,"vanish",{"who":victim})
-			_exec(out,gone+0.2,"pack_crunch",{"seconds":2.4})
-			_exec(out,start+_plan_cue(plan,"bone_dropped",10.6)-2.4,"pack_fetch",{"to":"god_feet"})
+			_exec(out,gone-1.4,"pack_crunch",{"seconds":2.4})
+			_exec(out,start+_plan_cue(plan,"bone_dropped",10.6)-4.0,"pack_fetch",{"to":"god_feet"})
 			_shot(out,gone+0.4,"shake",{"strength":0.1})
 			_shot(out,start+_plan_cue(plan,"bone_dropped",10.6)-1.2,"frame",{"on":["god_feet","windbreak"],"time":0.8})
 			for m:Dictionary in _people(ctx,[victim]):
