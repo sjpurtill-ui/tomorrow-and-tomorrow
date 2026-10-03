@@ -18,6 +18,8 @@ var tier:=0
 var frame_dir:=""
 var frame_index:=0
 var review_stage:Control
+var saw_execution:=false
+var seen_things:Dictionary={}
 
 func _ready()->void:
 	for arg in OS.get_cmdline_user_args():
@@ -44,16 +46,18 @@ func _ready()->void:
 	get_tree().quit(0 if failures.is_empty() else 1)
 
 func _wait(seconds:float)->void:
-	if frame_dir.is_empty() or not capture:
-		await get_tree().create_timer(seconds).timeout
-		return
 	var deadline:=Time.get_ticks_msec()+int(seconds*1000.0)
 	while Time.get_ticks_msec()<deadline:
 		await get_tree().create_timer(0.25).timeout
 		if is_instance_valid(review_stage):
-			await RenderingServer.frame_post_draw
-			review_stage.view3d.get_texture().get_image().save_png(frame_dir+"frame_%04d.png" % frame_index)
-			frame_index+=1
+			var current:Node=review_stage.get_node_or_null("Execution")
+			if current!=null:
+				saw_execution=true
+				for key in current._things:seen_things[key]=true
+			if not frame_dir.is_empty() and capture:
+				await RenderingServer.frame_post_draw
+				review_stage.view3d.get_texture().get_image().save_png(frame_dir+"frame_%04d.png" % frame_index)
+				frame_index+=1
 
 func _execute(director:Node)->void:
 	var audience:=Hall.debug_force("petition")
@@ -64,6 +68,8 @@ func _execute(director:Node)->void:
 	review_stage=modal.court_stage
 	print("MARK opened")
 	await _wait(4.0)
+	# This diagnostic reviews the full scene without changing saved preferences.
+	Executions.gore="full"
 	var name:=String((Hall.find(id).get("speaker",{}) as Dictionary).get("name",""))
 	var order:="Put %s to death %s." % [name,String(Executions.ORDER_WORDS.get(only,"before the court"))]
 	print("MARK order ",order)
@@ -77,4 +83,8 @@ func _execute(director:Node)->void:
 	print("EXEC method=",modal.court_stage.exec_method if is_instance_valid(modal.court_stage) else "")
 	await _wait(16.5)
 	print("MARK end")
+	print("EXEC REVIEW saw_execution=",saw_execution," done=",review_stage.exec_done," things=",seen_things.keys())
+	if not saw_execution:_fail("the order never started an execution")
+	if not bool(review_stage.exec_done):_fail("the execution never finished")
+	if only in ["club","behead"] and not seen_things.has("head:main"):_fail("the execution never reached its impact")
 	if not frame_dir.is_empty():print("COURT_EXECUTION_REVIEW wrote ",frame_index," frames to ",frame_dir)
