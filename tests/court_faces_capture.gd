@@ -122,6 +122,31 @@ func _ready()->void:
 		for i in 20:await get_tree().process_frame
 		await RenderingServer.frame_post_draw
 		if capture:view.get_texture().get_image().save_png(dir+"faces_pushin.png")
+		# chest up, and a true close-up of the face, three-quarter: a man of
+		# the deepest people, a woman of the fairest, a man between
+		var sitters:=[["kilnfold","male",38,"Odu Kiln"],["thornbank","female",31,"Sela Thorn"],["ochrestep","male",44,"Tamo Ochre"]]
+		var row:=0
+		for sitter:Array in sitters:
+			var person:={"name":String(sitter[3]),"person_id":9600+row,"sex":String(sitter[1]),"age":int(sitter[2]),"appearance_civ_id":owners[String(sitter[0])],"appearance_world_seed":4242}
+			var look:Dictionary=Stage.figure_look(person,{}).duplicate()
+			look["years"]=int(sitter[2]);look["lit"]=true;look["stance"]="clasped";look["keep_stance"]=true
+			main.setup(look)
+			court.call("place",main,"petitioner")
+			main.play(main.rest_clip(),0.0,0.5)
+			main.set_light(float(court.call("light_at",main.global_position)))
+			await _frames(3)
+			main.look_at_point(court.call("god_point"),0.0)
+			var head:Vector3=main.head_top()
+			var front:=main.global_transform.basis.z.normalized()
+			var side:=main.global_transform.basis.x.normalized()
+			var yaw:=rad_to_deg(atan2(front.x,front.z))+24.0
+			for shot in [["chestup",0.62,0.30],["closeup",0.27,0.13]]:
+				var down:=float(shot[1]);var wide:=float(shot[2])
+				cam.call("frame_points",PackedVector3Array([head+Vector3.UP*0.03,head-Vector3.UP*down,head-Vector3.UP*down*0.5+side*wide,head-Vector3.UP*down*0.5-side*wide]),yaw,-3.0)
+				for i in 12:await get_tree().process_frame
+				await RenderingServer.frame_post_draw
+				if capture:view.get_texture().get_image().save_png(dir+"faces_%s_%s.png" % [String(shot[0]),String(sitter[0])])
+			row+=1
 		print("CAPTURE ",dir+"faces_sheet.png")
 	if failures.is_empty():
 		print("COURT_FACES PASS");get_tree().quit(0)

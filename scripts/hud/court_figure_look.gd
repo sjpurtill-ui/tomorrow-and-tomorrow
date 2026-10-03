@@ -22,8 +22,8 @@ const Self:=preload("res://scripts/hud/court_figure_look.gd")
 
 const BUILDS:=["average","average","average","stocky","lanky","round","slight"]
 ## The model's scale for a build: (width, height, depth).
-const BUILD_SCALE:={"average":Vector3(1.0,1.0,1.0),"stocky":Vector3(1.07,0.975,1.06),"lanky":Vector3(0.94,1.035,0.95),
-	"round":Vector3(1.11,0.99,1.12),"slight":Vector3(0.93,0.985,0.93)}
+const BUILD_SCALE:={"average":Vector3(1.0,1.0,1.0),"stocky":Vector3(1.045,0.98,1.04),"lanky":Vector3(0.955,1.03,0.96),
+	"round":Vector3(1.05,0.99,1.08),"slight":Vector3(0.955,0.985,0.95)}
 ## The stances taken instead of the polite clasp (each person keeps theirs).
 const OWN_STANCES:=["hip","folded","hip","folded","stand","belt"]
 ## How often a person the clasp falls to keeps it.

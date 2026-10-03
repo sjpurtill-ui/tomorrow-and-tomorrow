@@ -22,6 +22,7 @@ const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
 const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
+const Merge:=preload("res://scripts/hud/court_figure_merge.gd")
 
 var _root_size:=Vector2i.ZERO
 
@@ -137,33 +138,48 @@ func test_they_walk_in_from_the_door_and_out_by_it_never_through_the_fire()->voi
 	assert_bool(main.body3d.visible).is_false()
 
 
-func test_they_are_lit_by_the_set_and_their_eyes_roll_inside_the_lids()->void:
+func test_they_are_lit_by_the_set_merged_into_few_pieces_and_their_eyes_roll()->void:
 	if not _ready_or_skip():return
 	var modal:Control=await _open(_home_audience())
 	var stage:Control=modal.court_stage
 	var body:Node3D=stage.figure(Stage.MAIN).body3d
-	var eyes:MeshInstance3D=null
-	var body_mesh:MeshInstance3D=null
+	# In a lit court a person is a few merged pieces (court_figure_merge.gd):
+	# skinning and morphs cost per piece, so one person is not fifteen.
+	var pieces:={}
 	for node in body.find_children("*","MeshInstance3D",true,false):
-		if node.name=="Eyes":eyes=node
-		if node.name=="Body":body_mesh=node
-	assert_object(body_mesh).is_not_null()
-	var skin:ShaderMaterial=body_mesh.get_surface_override_material(0)
-	assert_object(skin.shader).is_same(Figure3D.TOON_LIT)
-	assert_int(body_mesh.cast_shadow).is_equal(GeometryInstance3D.SHADOW_CASTING_SETTING_ON)
-	assert_object(eyes).is_not_null()
+		var mi:=node as MeshInstance3D
+		if mi.visible and mi.get_parent().name=="Merged":pieces[String(mi.name)]=mi
+	assert_bool(pieces.has("Body")).is_true()
+	assert_bool(pieces.has("Eyes")).is_true()
+	var surfaces:=0
+	for node in body.find_children("*","MeshInstance3D",true,false):
+		var mi:=node as MeshInstance3D
+		if mi.visible and mi.is_visible_in_tree() and mi.mesh!=null:surfaces+=mi.mesh.get_surface_count()
+	assert_int(surfaces).override_failure_message("%d surfaces drawn" % surfaces).is_less_equal(7)
+	var skin:ShaderMaterial=(pieces.Body as MeshInstance3D).get_surface_override_material(0)
+	assert_object(skin.shader).is_same(Merge.UBER)
+	assert_int((pieces.Body as MeshInstance3D).cast_shadow).is_equal(GeometryInstance3D.SHADOW_CASTING_SETTING_ON)
+	# the person's own face is baked in: no face_* morph is left to drive
+	var body_mesh:Mesh=(pieces.Body as MeshInstance3D).mesh
+	for i in body_mesh.get_blend_shape_count():assert_bool(String(body_mesh.get_blend_shape_name(i)).begins_with("face_")).is_false()
+	# the eyes: the whites write the stencil, the iris and pupil read it, and they roll
+	var eyes:MeshInstance3D=pieces.Eyes
 	assert_int(eyes.cast_shadow).is_equal(GeometryInstance3D.SHADOW_CASTING_SETTING_OFF)
-	# The gaze morphs are there when the bodies have them (built with them).
+	assert_bool((eyes.get_surface_override_material(0) as ShaderMaterial).shader.code.contains("stencil_mode write")).is_true()
+	if eyes.mesh.get_surface_count()>1:assert_bool((eyes.get_surface_override_material(1) as ShaderMaterial).shader.code.contains("stencil_mode read")).is_true()
 	if eyes.find_blend_shape_by_name(&"eyes_left")>=0:
 		for key in ["eyes_left","eyes_right","eyes_up","eyes_down"]:assert_int(eyes.find_blend_shape_by_name(StringName(key))).is_greater_equal(0)
-	var read:=false;var wrote:=false
-	for i in eyes.mesh.get_surface_count():
-		var made:ShaderMaterial=eyes.get_surface_override_material(i)
-		if made==null:continue
-		if made.shader.code.contains("stencil_mode read"):read=true
-		if made.shader.code.contains("stencil_mode write"):wrote=true
-	assert_bool(wrote).is_true()
-	if eyes.mesh.get_surface_count()>3:assert_bool(read).is_true()
+
+
+func test_without_a_set_the_figure_keeps_its_parts()->void:
+	if not _ready_or_skip():return
+	var fig:=Figure3D.new();auto_free(fig);add_child(fig)
+	fig.setup({"variant":"male_adult","outfit":"tunic","hair":"cropped","stance":"stand"})
+	for node in fig.find_children("*","MeshInstance3D",true,false):
+		if (node as MeshInstance3D).get_parent().name=="Merged":assert_bool((node as MeshInstance3D).visible).is_false()
+	var body:MeshInstance3D=fig.model.find_child("Body",true,false)
+	assert_bool(body.visible).is_true()
+	assert_object((body.get_surface_override_material(0) as ShaderMaterial).shader).is_same(Figure3D.TOON)
 
 
 func test_wrath_jolts_the_frame_and_the_dog_cowers()->void:

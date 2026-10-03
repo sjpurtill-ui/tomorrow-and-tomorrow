@@ -133,7 +133,7 @@ class Frame:
         return Vector((x, y + self.head_offset.y, self.face(u)))
 
     def hand_frame(self, side):
-        """Hand axes: along the fingers, toward the thumb (front), out of the back of the hand."""
+        """Hand axes: along the fingers, toward the thumb (front), out of the palm."""
         along = (self.knuckle[side] - self.wrist[side]).normalized()
         front = Vector((0.0, -1.0, 0.0))
         front = (front - along * front.dot(along)).normalized()
@@ -200,18 +200,18 @@ def build_body(f, name="Body", voxel=0.003):
                                 (0.058 * k, 0.028 * k * p["pecs"] + 0.008, 0.044 * k)), 0.030 * k)
     # shoulder blades and the slope of the shoulders into the neck
     for side, s in (("L", 1), ("R", -1)):
-        fld.union(Ellipsoid(f.chest + Vector((s * 0.060 * k, 0.068 * k + 0.012 * st, 0.060 * k)), (0.058 * k, 0.030 * k, 0.070 * k)), 0.040 * k)
-        fld.union(RoundCone(Vector((s * 0.040 * k, f.neck.y + 0.010, f.z_shoulder + 0.026 * k)),
-                            Vector((s * (p["shoulder"] - 0.024 * k), f.shoulder[side].y + 0.006, f.shoulder_z + 0.010 * k)),
-                            0.036 * k, 0.034 * k), 0.035 * k)
+        fld.union(Ellipsoid(f.chest + Vector((s * 0.060 * k, 0.064 * k + 0.012 * st, 0.060 * k)), (0.056 * k, 0.024 * k, 0.066 * k)), 0.034 * k)
+        fld.union(RoundCone(Vector((s * 0.040 * k, f.neck.y + 0.010, f.z_shoulder + 0.020 * k)),
+                            Vector((s * (p["shoulder"] - 0.030 * k), f.shoulder[side].y + 0.006, f.shoulder_z + 0.004 * k)),
+                            0.031 * k, 0.029 * k), 0.028 * k)
     nr = (0.050 if not fem else 0.043) * k
     fld.union(RoundCone(f.neck + Vector((0, 0.006, -0.050 * k)), f.head_base + Vector((0, 0.016, -0.006)), nr, nr * 0.84), 0.022 * k)
     build_head(fld, f)
     for side, s in (("L", 1.0), ("R", -1.0)):
         sh, el, wr = f.shoulder[side], f.elbow[side], f.wrist[side]
         arm_dir = (el - sh).normalized()
-        fld.union(Ellipsoid(sh + arm_dir * 0.030 * k + Vector((s * 0.006 * k, 0, 0.004)),
-                            (p["arm"] * 1.22, p["arm"] * 1.18, 0.074 * k), rot=_up_to(arm_dir)), 0.030 * k)
+        fld.union(Ellipsoid(sh + arm_dir * 0.032 * k + Vector((s * 0.004 * k, 0, 0.002)),
+                            (p["arm"] * 1.10, p["arm"] * 1.06, 0.068 * k), rot=_up_to(arm_dir)), 0.024 * k)
         fld.union(RoundCone(sh, el, p["arm"] * 1.02, p["arm"] * 0.80), 0.016 * k)
         fld.union(Ellipsoid(sh.lerp(el, 0.50) + Vector((0, -0.004, 0)), (p["arm"] * 1.00, p["arm"] * 1.04, (el - sh).length * 0.34),
                             rot=_up_to(el - sh)), 0.020 * k)
@@ -644,7 +644,7 @@ def build_face(f, body):
 SLOT_DEFAULTS = {
     "SKIN": (0.62, 0.42, 0.30), "HAIR": (0.10, 0.07, 0.05), "CLOTH_A": (0.55, 0.42, 0.28),
     "CLOTH_B": (0.40, 0.27, 0.18), "CLOTH_C": (0.66, 0.30, 0.20), "EYES": (0.035, 0.026, 0.020),
-    "EYE_SHINE": (0.95, 0.92, 0.85), "EYE_WHITE": (0.90, 0.86, 0.78), "IRIS": (0.20, 0.12, 0.07), "PUPIL": (0.02, 0.015, 0.01), "STUBBLE": (0.30, 0.22, 0.17),
+    "EYE_SHINE": (0.95, 0.92, 0.85), "EYE_WHITE": (0.90, 0.86, 0.78), "IRIS": (0.20, 0.12, 0.07), "PUPIL": (0.02, 0.015, 0.01), "HAIR_CARD": (0.10, 0.07, 0.05), "STUBBLE": (0.30, 0.22, 0.17),
     "WOOD": (0.36, 0.24, 0.14), "CLAY": (0.55, 0.32, 0.20), "MOUTH": (0.24, 0.08, 0.07), "LEATHER": (0.30, 0.19, 0.11),
 }
 

@@ -43,7 +43,9 @@ import cf_anim
 import cf_dress
 
 OUTFIT_CHANNEL = {"hide": 1, "tunic": 2, "robe": 3}
-BUDGET = {"body": 14000, "piece": 5000, "hair": 3200, "small": 1600}
+# Triangles a part may keep (the court shows eight to twenty people at once;
+# a person should come to about 10-12 thousand triangles all told).
+BUDGET = {"body": 8000, "piece": 2800, "hair": 2000, "small": 700}
 
 
 def args():
@@ -115,6 +117,8 @@ def build_variant(variant, quick=False, ao=True):
         o.name = o.data.name = pc.name if pc.name.startswith(("hair_", "beard_")) else "hair_" + pc.name
         if st.startswith("beard"):
             o.name = o.data.name = st
+        else:
+            o = _hair_cards(o, st, f, body)
         cf_rig.bind_head_hair(o, rig, f)
         sets[o.name] = [o]
     log(variant, "hair", round(time.time() - t0, 1), "s")
@@ -149,6 +153,7 @@ def build_variant(variant, quick=False, ao=True):
         _bake_ao(sets, body)
     _write_masks(body, masks)
     _write_hair_edges(sets, body)
+    _write_face_uv(body, f)
     # each person's own face, and their mood, as morph targets
     heads = [body, eyes, brows, mouth] + [o for key, objs in sets.items() if key.startswith(("hair_", "beard_")) for o in objs]
     cf_body.face_morphs(f, heads)
@@ -581,6 +586,173 @@ HAIR_EDGE = {"hair_cropped": 0.0075, "hair_balding": 0.0040, "hair_shaved": 0.00
 HAIR_STIPPLE_ALL = {"hair_shaved": 0.42, "beard_stubble": 0.50}
 
 
+# Hair cards: thin strips of painted strands laid over a hair shell, so the
+# hair's outline breaks into wisps and its hairline into a fringe, never a
+# helmet's edge. Per style: [count, length range (m), width (m), lift, flow,
+# fringe count, flyaways]. flow: "crown" (out from the crown), "down"
+# (hanging), "back" (pulled back to a knot or tail).
+CARD_STYLE = {
+    "cropped": [170, (0.012, 0.022), 0.0070, 0.45, "crown", 30, 6],
+    "balding": [90, (0.010, 0.016), 0.0065, 0.40, "crown", 0, 4],
+    "long": [240, (0.040, 0.090), 0.0130, 0.18, "down", 26, 10],
+    "long_framed": [240, (0.040, 0.090), 0.0130, 0.18, "down", 34, 10],
+    "bun": [120, (0.016, 0.028), 0.0080, 0.30, "back", 22, 10],
+    "topknot": [120, (0.016, 0.028), 0.0080, 0.30, "back", 20, 10],
+    "tail": [120, (0.016, 0.028), 0.0080, 0.30, "back", 22, 10],
+    "braids": [100, (0.016, 0.028), 0.0080, 0.30, "back", 24, 10],
+}
+
+
+def _hair_cards(shell, style, f, body):
+    """Lays cards of strands over a hair shell and joins them into it (their
+    own material slot HAIR_CARD; point attribute is_card marks them)."""
+    import bmesh
+    import random
+    spec = CARD_STYLE.get(style)
+    if spec is None:
+        return shell
+    count, (l0, l1), width, lift, flow, fringe, flyaways = spec
+    k = f.H / 1.72
+    s = f.head_h / 0.282
+    rnd = random.Random(hash(style) & 0xffff)
+    me = shell.data
+    me.calc_loop_triangles()
+    c = Vector((0.0, f.head_base.y + 0.004, f.z_chin + 0.62 * f.head_h))
+    crown = Vector((0.0, c.y + 0.020 * s, f.z_top - 0.01 * s))
+    knot = Vector((0.0, c.y + 0.11 * s, f.z_chin + 0.62 * f.head_h))
+    # the outer surface: faces whose normal looks away from the head
+    cands = []
+    for poly in me.polygons:
+        q = poly.center
+        n = poly.normal
+        rel = q - c
+        if rel.length < 1e-4 or n.dot(rel.normalized()) < 0.35:
+            continue
+        cands.append((q.copy(), n.copy(), poly.area))
+    if not cands:
+        return shell
+    zs = [q.z for q, n, a in cands]
+    z_min = min(zs)
+    weights = [a for q, n, a in cands]
+    bm = bmesh.new()
+    made = 0
+    from mathutils.bvhtree import BVHTree
+    surface = BVHTree.FromObject(shell, bpy.context.evaluated_depsgraph_get())
+
+    def card(root, n, along, length, w, rise):
+        """A card of strands laid ON the hair: each row is walked along the
+        hair's own surface (never out into the air), lying a hair's breadth
+        above it; only the very tip may lift, a little."""
+        nonlocal made
+        rows = []
+        here, nor = root, n
+        step = length / 2.0
+        for j, t in enumerate((0.0, 0.5, 1.0)):
+            if j > 0:
+                want = here + along * step
+                hit = surface.find_nearest(want)
+                if hit[0] is not None:
+                    here, nor = hit[0], hit[1]
+                    along = (want - here + along * step)
+                    along = (along - nor * along.dot(nor))
+                    if along.length < 1e-6:
+                        break
+                    along.normalize()
+                else:
+                    here = want
+            side = nor.cross(along)
+            if side.length < 1e-5:
+                break
+            side.normalize()
+            centre = here + nor * (0.0009 * s + rise * 0.0025 * s * t * t)
+            half = w * (1.0 - 0.55 * t) * 0.5
+            rows.append((bm.verts.new(centre - side * half), bm.verts.new(centre + side * half), t))
+        if len(rows) < 3:
+            for a0, a1, _ in rows:
+                bm.verts.remove(a0)
+                bm.verts.remove(a1)
+            return
+        for (a0, a1, ta), (b0, b1, tb) in zip(rows, rows[1:]):
+            face = bm.faces.new((a0, a1, b1, b0))
+            face.smooth = True
+        made += 1
+
+    def flow_at(q, n):
+        if flow == "down":
+            want = Vector((0.0, 0.25 * (q.y - c.y), -1.0))
+        elif flow == "back":
+            want = knot - q
+        else:
+            want = q - crown
+        want = want - n * want.dot(n)
+        if want.length < 1e-5:
+            want = Vector((0.0, 0.0, -1.0)) - n * (-n.z)
+        return want.normalized()
+
+    picks = rnd.choices(cands, weights=weights, k=count)
+    for q, n, a in picks:
+        jitter = n.cross(Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-1, 1)))) * 0.002 * s
+        root = q + jitter - n * 0.0012 * s
+        along = flow_at(q, n)
+        # a little turn, so the strands do not lie like combed rows
+        turn = n.cross(along) * rnd.uniform(-0.35, 0.35)
+        along = (along + turn).normalized()
+        card(root, n, along, rnd.uniform(l0, l1) * k, width * k * rnd.uniform(0.8, 1.2), lift * rnd.uniform(0.6, 1.4))
+    # a fringe at the hairline: short locks falling forward over the brow and temples
+    front = [x for x in cands if x[0].y < c.y - 0.03 * s and x[0].z > f.face(0.62) and x[0].z < f.face(0.86)]
+    for i in range(fringe if front else 0):
+        q, n, a = rnd.choice(front)
+        down = Vector((rnd.uniform(-0.25, 0.25), -0.25, -1.0))
+        down = (down - n * down.dot(n)).normalized()
+        card(q - n * 0.001 * s, n, down, rnd.uniform(0.012, 0.024) * k * (1.6 if flow == "down" else 1.0), width * k, 0.18)
+    # (no strands standing out from the head: those read as quills)
+    if made == 0:
+        bm.free()
+        return shell
+    cm = bpy.data.meshes.new(shell.name + "_cards")
+    bm.to_mesh(cm)
+    bm.free()
+    uv = cm.uv_layers.new(name="UVMap")
+    for poly in cm.polygons:
+        for li in poly.loop_indices:
+            vi = cm.loops[li].vertex_index
+            row = (vi % 6) // 2
+            uv.data[li].uv = (float(vi % 2), row * 0.5)
+    flag = cm.attributes.new("is_card", 'BOOLEAN', 'POINT')
+    for i in range(len(cm.vertices)):
+        flag.data[i].value = True
+    cards = bpy.data.objects.new(shell.name + "_cards", cm)
+    bpy.context.scene.collection.objects.link(cards)
+    cf_body.set_material(cards, "HAIR_CARD")
+    if "is_card" not in shell.data.attributes:
+        shell.data.attributes.new("is_card", 'BOOLEAN', 'POINT')
+    if not shell.data.uv_layers:
+        shell.data.uv_layers.new(name="UVMap")
+    name = shell.name
+    joined = cf_body.join([shell, cards], name)
+    log(name, "cards", made)
+    return joined
+
+
+def _write_face_uv(body, f):
+    """The body's face coordinates for the game's painted face (UV: across
+    and up the face from the chin, in a 0.282 m head's metres; UV2: how much
+    the skin faces forward, and whether it is the head or neck)."""
+    me = body.data
+    s = f.head_h / 0.282
+    while len(me.uv_layers) < 2:
+        me.uv_layers.new(name="UVMap" if not me.uv_layers else "Face2")
+    a = me.uv_layers[0].data
+    b = me.uv_layers[1].data
+    z_lo = f.z_shoulder + 0.010 * s
+    for loop in me.loops:
+        v = me.vertices[loop.vertex_index]
+        co, n = v.co, v.normal
+        a[loop.index].uv = (co.x / s, (co.z - f.z_chin) / s)
+        on = 1.0 if (co.z > z_lo and abs(co.x) < 0.11 * s) else 0.0
+        b[loop.index].uv = (max(0.0, -n.y), on)
+
+
 def _write_hair_edges(sets, body):
     """Vertex colour G of hair and beards: how near the edge where they meet
     the skin (1 at the edge), and a UV of the rest position, so the game's
@@ -604,7 +776,9 @@ def _write_hair_edges(sets, body):
                     continue
                 loc, nor = hit[0], hit[1]
                 signed[i] = (c - loc).dot(nor)
-            rim = [i for i in range(n) if signed[i] < 0.0008 * k]
+            flags = me.attributes.get("is_card")
+            is_card = [bool(flags.data[i].value) for i in range(n)] if flags is not None else [False] * n
+            rim = [i for i in range(n) if signed[i] < 0.0008 * k and not is_card[i]]
             edge = np.zeros(n, dtype=np.float32)
             width = HAIR_EDGE.get(o.name, 0.0045) * k
             if rim and len(rim) < n:
@@ -617,18 +791,26 @@ def _write_hair_edges(sets, body):
                     x = min(max(dist / width, 0.0), 1.0)
                     edge[i] = 1.0 - x * x * (3.0 - 2.0 * x)
             edge = np.maximum(edge, HAIR_STIPPLE_ALL.get(o.name, 0.0))
+            card_id = np.zeros(n, dtype=np.float32)
+            for i in range(n):
+                if is_card[i]:
+                    edge[i] = 0.0
+                    card_id[i] = ((i // 6) * 0.618034) % 1.0
             attr = me.color_attributes.get("Col")
             if attr is None:
                 continue
             vals = np.zeros(n * 4, dtype=np.float32)
             attr.data.foreach_get("color", vals)
             vals[1::4] = edge
+            vals[2::4] = card_id
             attr.data.foreach_set("color", vals)
             # the rest position as a UV: across the head and down it
             if not me.uv_layers:
                 me.uv_layers.new(name="UVMap")
             uv = me.uv_layers.active.data
             for loop in me.loops:
+                if is_card[loop.vertex_index]:
+                    continue
                 c = co[loop.vertex_index]
                 uv[loop.index].uv = (c.x * 0.8 + c.y * 0.6, c.z)
 
