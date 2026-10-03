@@ -1,8 +1,8 @@
 {
  "spec": "path_learning:74119:15",
- "commit": "857b250aeb6a3cbf0c017813080acd22d9e79909",
+ "commit": "9c648197eb6d57fb7fc38b78c7140d386505cf2a",
  "sources_at_launch": {
-  "scripts/discovery_system.gd": "89076eda6a9b",
+  "scripts/discovery_system.gd": "41f6f346c8fa",
   "scripts/society_model.gd": "b61ebddbf637",
   "scripts/game_state.gd": "a5ad24315aef",
   "scripts/early_life_conditions.gd": "98edd883a637",
@@ -21,7 +21,7 @@
   "scripts/watch_military.gd": "b9811b70a2cd",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 164.9,
+ "wall_seconds": 112.9,
  "returncode": 0,
- "generated": "2026-10-03 01:43:53"
+ "generated": "2026-10-03 02:33:21"
 }
