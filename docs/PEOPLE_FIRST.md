@@ -160,6 +160,71 @@ What the sims show:
 - **Balanced peoples** stay at or above the best historical figure and below the typical one.
 - **Learning path.** It now puts the freed food work into learning. The specialists' upkeep (`society_model.gd SPECIALIST_UPKEEP`) then lowers its births, which is learning's price.
 
+#### Frontier growth (codex/frontier-growth)
+"How am I shrinking at these numbers?" A healthy, fed founding people lost about 1.5% a year for its first decade. In the engine, a band of 120 was at 97 by year 12, and the fast sim did not see 120 again until year 38. Two things caused it.
+
+1. **The founders were old.** A quarter of them were past 45 (18% aged 45–60, 8% older), so the first decades' deaths were mostly founders growing old.
+   - Founders are now young families (`game_state.gd FOUNDING_AGE_MIX`: children 36%, 14–25 21%, 25–35 17%, 35–45 12%, 45–60 10%, older 4%). That is close to the mix a growing pre-modern people settles into.
+   - Older saves keep their people as they are.
+2. **Open land did nothing for births.** Now, while the whole people is under `FRONTIER_ONSET` (0.6, where crowding begins) of what one home land carries, couples set up house younger. Conception rises by up to `FRONTIER_CONCEPTION` (0.30), tapering to none as the land fills (`early_life_conditions.gd frontier_of`, `home_capacity`).
+   - A new band of 120 gets +10%.
+   - A people of 107 in its eighth year gets about +15%.
+   - The frontier reads the home land alone, never the town count. Founding towns widens the land a people can fill (`carrying_capacity`), never the births of those already there; one people of 150 in one town or in three is equally near its frontier.
+
+Birth-spacing customs were checked and are not the cause. They add a little maternal and newborn safety and take nothing from births.
+
+Random afflictions (crisis outbreaks, hunger seasons, fires, drowning) are untouched. They are the setbacks against this growth.
+
+**On screen.** Once a whole year has been counted, the People tile reads "born 4 · buried 5" (the last year, the engine's own count), amber when more are buried than born. In the first year it keeps its old note, and its card says "so far".
+
+When the people shrank, the card says what took them:
+- If deaths outside the ordinary toll cover the shortfall, it names the largest by cause (`GameState.rolling_death_causes`), for example "More are buried than born: 8 lost to fire."
+  - The card always uses plain words, never the ledger's raw cause (`dwindling_cause.gd misfortune_words`). A god's order that killed reads "the god's word"; a collapse or accident at work reads "accidents at work". Other causes read "the sea", "the road", "captivity", "war" and so on. A cause with no plain word reads "8 died by misfortune".
+  - Each day's deaths are booked under that day's largest cause, but the natural share of the day is kept as natural (`consequence_engine.gd`, `GameState.reclassify_death_cause`), so a long fever season does not swallow ordinary old age.
+- Otherwise it explains the ordinary toll by the winter tally's rule (`dwindling_cause.gd short_reason`), for example "fevers among the old".
+
+The note has room for about 19 letters (every top-strip value must fit at 1280 wide), so where the people live and whether all are fed are on the card's first lines; a hungry day still takes the note.
+
+**Engine, headless, one town for these 12 years** (`tools/sim/demography_probe.tscn`):
+
+| Seed 74119, leaders' split | Main | This branch |
+|---|---|---|
+| People at year 12 | 97 | 113 |
+| Born / died over 12 years | 49 / 71 | 64 / 71 |
+| Natural deaths | 56 | 53 |
+| Misfortune deaths | 12 | 13 |
+
+- **Seed 5150:** 108 at year 12 (63 born, 75 died, 18 of them by misfortune).
+- **Without misfortune** a founding band now grows about 0.4% a year in its first decade.
+
+**Fast sim, 2 seeds, 600 years.** People at years 10 / 100 / 300 / 600, main → this branch:
+
+| | Main | This branch |
+|---|---|---|
+| balanced scenario | 107 / 205 / 1,107 / 3,726 | 123 / 338 / 1,108 / 3,726 |
+| balanced temper (founds towns) | 107 / 162 / 1,347 / 27,982 | 123 / 289 / 2,658 / 28,408 |
+| growth path (cautious-caring temper) | 110 / 238 / 3,059 / 30,481 | 127 / 390 / 4,914 / 30,493 |
+| learning path (open-scholarly temper) | 105 / 176 / 978 / 19,409 | 121 / 289 / 1,688 / 26,972 |
+
+- **Balanced scenario growth** (% a year, 0–10 / 0–30 / 30–100): −1.15 / −0.33 / +0.91 → +0.23 / +0.57 / +1.23.
+- **Growth path** at year 300 has 1.85 times the balanced people's number. It stays under the best historical figure for a founders' society (6,000).
+- **Year 600** is unchanged: crowding sets the long run.
+
+**People-first suite after the #120 recalibration** (`tools/sim/paths.py`, 3 seeds, 1200 years), main 5d38acce → this branch:
+
+| | Main | This branch |
+|---|---|---|
+| Founding years, path_balanced (people at 0 / 7.5 / 15 / 30 / 60) | 120 / 111 / 109 / 118 / 161 | 120 / 124 / 131 / 155 / 236 |
+| path_growth, same years | 120 / 112 / 112 / 124 / 173 | 120 / 126 / 134 / 162 / 252 |
+| path_learning, same years | 120 / 110 / 108 / 117 / 154 | 120 / 122 / 130 / 154 / 227 |
+| towns_balanced / growth / learning at year 300 | 3,627 / 4,844 / 2,270 | 5,453 / 6,154 / 3,647 |
+| towns_balanced / growth / learning at year 600 | 30,239 / 30,858 / 30,769 | 30,250 / 30,861 / 30,767 |
+
+- One-town paths meet at their land's limit by year 300 (path_balanced 1,162 on both).
+- The branch raises no flag that main does not: 62 flags here, 64 on main. All are the same rows, mostly the food-labor share and the towns' year-600 numbers.
+
+**Calibration.** The engine truth runs were regenerated on this branch. With the younger founders, the two balanced seeds now disagree by more than the tolerance in two places: known practices at year 5 (26 versus 33) and discoveries by year 15 (72 versus 98). The surrogate lies between them, and `check.py` marks those rows "seed" (see docs/research/SURROGATE_SIM.md).
+
 ### C. Searching the land (owner: `resource_system.gd` survey/deposit/extraction yield, survey scripts)
 - **Searched land.** Each people (each town in its own scope) keeps `survey_cover` (0..1).
   - It rises with searcher-days over the land worked: about 1 searcher per 60 people keeps it near 0.6 over a few years.

@@ -288,3 +288,87 @@ func test_decades_at_billion_scale_keep_constant_state_shape() -> void:
 	assert_int(state.demographic_remainders.keys().size()).is_equal(6)
 	assert_bool(state.population_total > 0).is_true()
 	assert_float(_cohort_sum(state)).is_equal_approx(state.population_exact, 2.0)
+
+
+## Frontier growth (docs/PEOPLE_FIRST.md B): those who found a people are young
+## families, close to the mix a growing pre-modern people settles into, so a
+## healthy, fed band is not thinned for decades by its founders growing old.
+func test_founders_are_young_families() -> void:
+	var mix: Dictionary = state.FOUNDING_AGE_MIX
+	var total := 0.0
+	for cohort in AGE_COHORTS: total += float(mix[cohort])
+	assert_float(total).is_equal_approx(1.0, 0.000001)
+	for cohort in AGE_COHORTS:
+		assert_float(float(state.population_cohorts[cohort]) / state.population_exact).is_equal_approx(float(mix[cohort]), 0.000001)
+	# A third children; few past 45 (the old mix had a quarter there).
+	assert_float(float(mix.children)).is_greater_equal(0.33)
+	assert_float(float(mix.mature_adults) + float(mix.elders)).is_less_equal(0.15)
+	# A save that already holds its people keeps them as they are.
+	state.population_cohorts["elders"] = 30.0
+	state.initialize_population_model()
+	assert_float(float(state.population_cohorts.elders)).is_greater(20.0)
+
+
+## A healthy, fed founding band on its first land, with no misfortune, is
+## born into faster than it buries: the year's expected births (the engine's
+## own conception, gestation and birth losses under the founders' care
+## profile, frontier included) outrun its expected deaths (the age-specific
+## life table under the same profile).
+func test_a_healthy_fed_founding_band_grows() -> void:
+	var discovery: Node = auto_free(_PlainDiscovery.new())
+	state.population_health = 0.97
+	state.food_security = 0.95
+	state.housing_capacity = 135
+	state.early_care_blend = 1.0
+	for day in 120: state.food_history.append({"day": day, "diet_quality": 0.66})
+	state.early_care = preload("res://scripts/early_life_conditions.gd").profile(state, discovery)
+	var context := {"health": 0.97, "food_security": 0.95, "housing_ratio": 1.1, "cohesion": 0.6,
+		"conception_care": float(state.early_care.conception), "neonatal_care": preload("res://scripts/early_life_conditions.gd").neonatal_factor(state.early_care),
+		"maternal_care": preload("res://scripts/early_life_conditions.gd").maternal_factor(state.early_care)}
+	var result: Dictionary = state.process_reproduction_day(context)
+	var births := float(result.projected_birth_rate)
+	var deaths := float(state.current_natural_mortality_rate(1.1))
+	print("founding band: births %.1f, deaths %.1f in 1,000 a year (frontier %.2f)" % [births * 1000.0, deaths * 1000.0, float(state.early_care.get("frontier", 0.0))])
+	assert_float(float(state.early_care.get("frontier", 0.0))).is_greater(0.0)
+	assert_float(births).is_greater(deaths)
+	# Modest: well under the two in a hundred a year no pre-modern people kept up.
+	assert_float(births - deaths).is_less(0.02)
+
+
+class _PlainDiscovery extends Node:
+	func adoption(_id: String) -> float: return 1.0
+	func effect(_id: String) -> float: return 0.0
+	func discovery_definition(id: String) -> Dictionary: return {"id": id, "name": id.capitalize()}
+
+
+## Every death the people registers is kept by cause for a year, whatever took
+## it (the People card reads it), and the record stays small.
+func test_deaths_are_kept_by_cause_for_a_year() -> void:
+	state.elapsed_days = 50.0
+	state.register_population_deaths(2, "Fire")
+	state.register_population_deaths(1, "Natural causes")
+	state.register_population_deaths(1, "Fire")
+	var causes: Dictionary = state.rolling_death_causes(365)
+	assert_int(int(causes.get("Fire", 0))).is_equal(3)
+	assert_int(int(causes.get("Natural causes", 0))).is_equal(1)
+	state.elapsed_days = 50.0 + 500.0
+	state.register_population_deaths(1, "Natural causes")
+	causes = state.rolling_death_causes(365)
+	assert_bool(causes.has("Fire")).is_false()
+	assert_int(state.death_cause_days.size()).is_less_equal(2)
+
+
+## A hungry day's deaths are told under hunger, but the life table's share of
+## them is kept as natural deaths (the card does not overstate hunger).
+func test_a_days_natural_share_is_kept_as_natural() -> void:
+	state.elapsed_days = 80.0
+	state.register_population_deaths(3, "Hunger")
+	state.reclassify_death_cause("Hunger", "Natural causes", 2)
+	var causes: Dictionary = state.rolling_death_causes(365)
+	assert_int(int(causes.get("Hunger", 0))).is_equal(1)
+	assert_int(int(causes.get("Natural causes", 0))).is_equal(2)
+	# Never more than were kept under the cause.
+	state.reclassify_death_cause("Hunger", "Natural causes", 5)
+	causes = state.rolling_death_causes(365)
+	assert_bool(causes.has("Hunger")).is_false()
+	assert_int(int(causes.get("Natural causes", 0))).is_equal(3)

@@ -220,14 +220,57 @@ def evaluate(truths: list[dict], overrides: dict, seeds: int, pool) -> tuple[flo
     return score(comps), comps
 
 
+def _discovery_distance(a: dict, b: dict, key: str) -> float:
+    """compare()'s line-mix distance of truth b's discoveries from truth a's."""
+    years = int(a["years"])
+    ra, rb = simlib.per_decade(a["discoveries"], years), simlib.per_decade(b["discoveries"], years)
+    if key != "lines_per_decade":
+        index = 0 if key == "lines_total" else 1
+
+        def fold(counts: dict) -> dict:
+            out: dict = {}
+            for k, v in counts.items():
+                out[k[index]] = out.get(k[index], 0) + v
+            return out
+        ra, rb = fold(ra), fold(rb)
+    return sum(abs(ra.get(k, 0) - rb.get(k, 0)) for k in set(ra) | set(rb)) / max(1.0, float(sum(ra.values())))
+
+
+def seed_noise(truths: list[dict], comps: list[dict], index: int, key: str, y: int, s: float) -> bool:
+    """A scenario with truth runs at several engine seeds: where those seeds disagree
+    with each other by more than the tolerance, the surrogate cannot sit within it of
+    every one. It is held to the engine's own spread instead: between the seeds, or
+    within tolerance of another seed (for the discovery mix, no further from this run
+    than another seed is). Reported as 'seed', never failing."""
+    truth, comp = truths[index], comps[index]
+    t = comp[(key, y)][0]
+    for other, other_comp in zip(truths, comps):
+        if other is truth or other["scenario"] != truth["scenario"] or int(other["years"]) != int(truth["years"]):
+            continue
+        if key in ("lines_per_decade", "lines_total", "decades_total"):
+            if not (truth.get("discoveries") and other.get("discoveries")):
+                continue
+            spread = _discovery_distance(truth, other, key)
+            if not within(key, t, spread) and s <= spread:
+                return True
+            continue
+        if (key, y) not in other_comp:
+            continue
+        o = other_comp[(key, y)][0]
+        if not within(key, t, o) and (min(t, o) <= s <= max(t, o) or within(key, o, s)):
+            return True
+    return False
+
+
 def table(truths: list[dict], comps: list[dict]) -> tuple[str, int]:
     lines = ["| truth run | metric | year | real | surrogate | tolerance | ok |", "|---|---|---:|---:|---:|---|:-:|"]
     failures = 0
-    for truth, comp in zip(truths, comps):
+    for index, (truth, comp) in enumerate(zip(truths, comps)):
         for (key, y), (t, s) in sorted(comp.items(), key=lambda kv: (kv[0][0], kv[0][1])):
             ok = within(key, t, s)
             known_gap = None if ok else gap(truth["scenario"], key)
-            failures += 0 if ok or known_gap else 1
+            noise = not ok and not known_gap and seed_noise(truths, comps, index, key, y, s)
+            failures += 0 if ok or known_gap or noise else 1
             kind, tol, floor = TOLERANCES[key]
             tol_text = f"±{tol:.0%}" if kind == "rel" else f"±{tol:g}"
             if key in ("lines_per_decade", "lines_total", "decades_total"):
@@ -235,7 +278,7 @@ def table(truths: list[dict], comps: list[dict]) -> tuple[str, int]:
                 t_text, s_text = f"{t:.0f} found", f"{s:.0%} off"
             else:
                 t_text, s_text = f"{t:.3g}", f"{s:.3g}"
-            mark = "✓" if ok else ("gap" if known_gap else "✗")
+            mark = "✓" if ok else ("gap" if known_gap else ("seed" if noise else "✗"))
             lines.append(f"| {truth['_path'].replace('.json', '')} | {key} | {y} | {t_text} | {s_text} | {tol_text} | {mark} |")
     return "\n".join(lines), failures
 

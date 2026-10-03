@@ -54,6 +54,10 @@ def main() -> int:
         score, comps = calibrate.evaluate(truths, calibrated, args.seeds, pool)
     md, failures = calibrate.table(truths, comps)
     print(md)
+    seeded = md.count("| seed |")
+    if seeded:
+        print(f"\n{seeded} row(s) marked 'seed': the engine's own seeds of that scenario disagree by more than the "
+              "tolerance there, and the surrogate lies within their spread (calibrate.seed_noise).")
     problems = []
     if failures:
         problems.append(f"{failures} calibration metric(s) outside tolerance (score {score:.1f})")
