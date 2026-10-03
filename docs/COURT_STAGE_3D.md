@@ -106,6 +106,15 @@ A look is a Dictionary: `{variant, outfit, hair, beard, skin, hair_colour, cloth
 
 **Hair cards:** strips of painted strands laid along each hair shell (`HAIR_CARD`, point attribute `is_card`), walked along the hair's own surface so they never stand out from the head; their strands thin toward their ends.
 
+**Executions (gore; `scripts/hud/court_figure_gore.gd`, figures):** the person's own merged figure, so the gore keeps their skin, hair, clothes and face. Never on a child (`gore_allowed()` false; every call does nothing; cut away instead).
+- `fig.gore_prepare()` when the act starts: cuts the merged meshes by region and side, and keeps the pose each frame (the acting's pose exists only inside `skeleton_updated`). `Gore.release(fig)` lets go.
+- `fig.gore_split(cut) -> {name: Node3D}` at the blow, instant: `"head"` (head, torso_limbs), `"limbs"` (torso_head, arm.L/R, leg.L/R), `"all"` (head, torso, arm.L/R, leg.L/R), `"halves"` (left, right: sawn lengthwise). Each piece is a Node3D at its own middle (the head's centre, a forearm, a shin, the spine), on a skeleton copy frozen at the blow (no per-frame cost), with a red `Stump` disc and a white `BoneEnd` at each cut and red flesh inside where open. The figure hides. Pieces (`court_figure_piece.gd`): `blink(times)`, `look("up"|"down"|"left"|"right"|"")`, `mouth(0..1)` on a head or a half.
+- `Gore.bones(fig, on)`: a clean skeleton (dog-bone limbs, ribs, pelvis, skull with dark sockets and teeth) skinned to their skeleton, so it plays their clips (stand up, shrug, collapse).
+- `Gore.char(fig, on)`: soot-black, embers breathing in the cracks; their eyes stay white and blink. `Gore.crumble(fig, 0..1)`: falls to ash from the top down (no ink).
+- `Gore.rug(fig, on)`: pressed flat on their back, spread, on the floor (pose let go; no ink, no shadow). `Gore.rug_roll(fig, 0..1)`: rolled up from the feet.
+- `Gore.bronze(fig, on)`: freezes the pose as it is (`Gore.freeze`) and turns them to gleaming bronze, eyes and all.
+- All are uniforms on the person's own copies of their materials (`gore_inside`, `charred`, `crumble`, `bronze`, `rug`, `rug_roll` in `court_figure_uber.gdshader`); nobody else is touched.
+
 **Looks in a set:** `look.lit = true` dresses the figure with `court_figure_lit.gdshader` (the set's sun, fire and bounce light it in two soft tones, the shade side keeping a warm tint; both sides drawn, so an open cape or sleeve shows its inside; the sun's shadows fall on a person at 60%) and turns its shadows on. This is the one lit figure shader: M's `court_set_3d.light_figures()` (swapping every shared material to M's twin) must not be called, as it would undo the stencilled eyes (never for the paint on the skin). Without a set, `court_figure_toon.gdshader` paints its own light. Hair has strands and a sheen in both; beards have no inked edge; the darkest hair keeps a little tone (`readable_hair`).
 
 **Rules:**
