@@ -4993,7 +4993,8 @@ func settlement_defense_snapshot()->Dictionary:
 	var trained_troops:=mini(at_home,preload("res://scripts/watch_military.gd").offensive_at_home(self))
 	var troops:=at_home+int(militia.count)
 	var guard:=at_home
-	var garrison_required:=maxi(8,ceili(maxf(1.0,WorldSimulation.settlements.primary_population_exact())*0.035))
+	var Watch:=preload("res://scripts/watch_military.gd")
+	var garrison_required:=maxi(Watch.GUARD_MIN,ceili(maxf(1.0,WorldSimulation.settlements.primary_population_exact())*Watch.GUARD_SHARE))
 	var garrison_coverage:=clampf(float(guard)/float(garrison_required),0.0,1.0)
 	var integrity:=float(settlement_defense.integrity)
 	var construction:Dictionary={}

@@ -106,9 +106,13 @@ FORMULA_ANCHORS = [
     # Balance P2: carers ease crowding, the watch's upkeep, daughter towns' land, the fields' yield.
     ("scripts/early_life_conditions.gd", "var eased:=crowding*(1.0-CARER_CROWDING*carers)"),
     ("scripts/early_life_conditions.gd", "var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE"),
-    ("scripts/society_model.gd", "watch_excess=maxf(0.0,watch_share()-WATCH_SUSTAINABLE)"),
-    ("scripts/society_model.gd", "return float(SPECIALIST_UPKEEP.get(key,0.0))*(specialist_excess*specialist_burden+watch_excess*WATCH_UPKEEP)"),
+    ("scripts/society_model.gd", "watch_excess=watch_over()/able"),
+    ("scripts/society_model.gd", "return maxi(ceili(people*WATCH_FREE_SHARE),guard)"),
+    ("scripts/watch_military.gd", "total+=maxi(GUARD_MIN,ceili(maxf(1.0,float(WorldSimulation.settlements._settlement_population(city)))*GUARD_SHARE))"),
+    ("scripts/society_model.gd", "return float(SPECIALIST_UPKEEP.get(key,0.0))*maxf(0.0,excess)*WATCH_UPKEEP if key in WATCH_UPKEEP_KEYS else 0.0"),
     ("scripts/food_system.gd", "result[\"Dry staples\"]=workers*cultivation_weight*CULTIVATION_YIELD*"),
+    ("scripts/food_system.gd", "return lerpf(1.0,HARVEST_SETTLED,clampf(year/HARVEST_SETTLED_YEAR,0.0,1.0))"),
+    ("scripts/food_system.gd", "var wild_yield:=BASE_SUBSISTENCE_YIELD_CALIBRATION*harvest_settled("),
 ]
 
 

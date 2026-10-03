@@ -43,6 +43,7 @@ const PARTS:={
 	"values":["What we value","What we value helping more","What we value helping less"],
 	"limit":["What our age allows","Our age allows more","Held back by our age"],
 	"upkeep":["Feeding full-time lore keepers","Fewer full-time keepers to feed","More full-time keepers to feed"],
+	"watch_upkeep":["Keeping a large watch","A smaller watch to keep","A larger watch to keep"],
 	"common":["What every people knows","",""],
 	"preserved":["What we remember and keep","",""],
 	"communication":["Sharing what we know","",""],

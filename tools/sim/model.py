@@ -79,6 +79,14 @@ TERRITORY_SLOPE = float(g.const("scripts/early_life_conditions.gd", "TERRITORY_S
 CARER_CROWDING = float(g.const("scripts/early_life_conditions.gd", "CARER_CROWDING", default=0.0, optional=True))
 # FoodSystem CULTIVATION_YIELD: rations a worker-day from the fields, before soil, seed and season.
 CULTIVATION_YIELD = float(g.const("scripts/food_system.gd", "CULTIVATION_YIELD", default=5.65, optional=True))
+# FoodSystem.harvest_settled: the founding yields settle to HARVEST_SETTLED by HARVEST_SETTLED_YEAR (absent: 1).
+HARVEST_SETTLED = float(g.const("scripts/food_system.gd", "HARVEST_SETTLED", default=1.0, optional=True))
+HARVEST_SETTLED_YEAR = float(g.const("scripts/food_system.gd", "HARVEST_SETTLED_YEAR", default=200.0, optional=True))
+
+
+def harvest_settled(year: float) -> float:
+    """FoodSystem.harvest_settled."""
+    return 1.0 + (HARVEST_SETTLED - 1.0) * clamp(year / max(1e-9, HARVEST_SETTLED_YEAR), 0.0, 1.0)
 CROWDING_ONSET = float(g.const("scripts/early_life_conditions.gd", "CROWDING_ONSET", default=0.8, optional=True))
 CROWDING_MORTALITY = float(g.const("scripts/early_life_conditions.gd", "CROWDING_MORTALITY", default=0.0, optional=True))
 CROWDING_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "CROWDING_CONCEPTION", default=0.0, optional=True))
@@ -93,10 +101,14 @@ _MIX = g.const("scripts/game_state.gd", "FOUNDING_AGE_MIX", default={}, optional
 FOUNDING_AGE_MIX = np.array([float(_MIX[k]) for k in ("children", "youth", "early_adults", "established_adults", "mature_adults", "elders")]) if _MIX     else np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08])
 SUSTAINABLE_SPECIALISTS = g.const("scripts/society_model.gd", "SUSTAINABLE_SPECIALISTS", default=[], optional=True)
 SPECIALIST_UPKEEP = g.const("scripts/society_model.gd", "SPECIALIST_UPKEEP", default={}, optional=True)
-# SocietyModel watch upkeep (balance P2): a watch past WATCH_SUSTAINABLE of the
-# able costs WATCH_UPKEEP x SPECIALIST_UPKEEP for each share past it (0: none).
-WATCH_SUSTAINABLE = float(g.const("scripts/society_model.gd", "WATCH_SUSTAINABLE", default=1.0, optional=True))
+# SocietyModel watch upkeep (balance P2): a watch past the free one (WATCH_FREE_SHARE
+# of the people, or the towns' guard: watch_military.gd GUARD_MIN a town, GUARD_SHARE
+# of its people) costs WATCH_UPKEEP x SPECIALIST_UPKEEP on WATCH_UPKEEP_KEYS for each
+# share of the able past it (absent: none).
+WATCH_FREE_SHARE = float(g.const("scripts/society_model.gd", "WATCH_FREE_SHARE", default=1.0, optional=True))
 WATCH_UPKEEP = float(g.const("scripts/society_model.gd", "WATCH_UPKEEP", default=0.0, optional=True))
+WATCH_UPKEEP_KEYS = g.const("scripts/society_model.gd", "WATCH_UPKEEP_KEYS", default=[], optional=True) or []
+GUARD = {k: float(g.const("scripts/watch_military.gd", k, default=d, optional=True)) for k, d in {"GUARD_SHARE": 0.035, "GUARD_MIN": 8.0}.items()}
 DECREE_COVER = g.const("scripts/early_life_conditions.gd", "DECREE_COVER", default={}, optional=True)
 FOOD_LABOR_FLOOR = g.const("scripts/government_people_system.gd", "FOOD_LABOR_FLOOR", default=[], optional=True)
 FOOD_FLOOR_OF_TYPICAL = float(g.const("scripts/government_people_system.gd", "FOOD_FLOOR_OF_TYPICAL", default=1.0, optional=True))
@@ -856,10 +868,17 @@ class Surrogate:
         # SocietyModel._apply_specialist_upkeep (Phase 3 R3): Knowledge workers
         # beyond the era's sustainable share cost labor, stores, cohesion and births.
         self.specialist_excess = 0.0
-        # SocietyModel watch upkeep: everyone set to keep watch, against the able.
-        self.watch_excess = max(0.0, clamp(self.alloc_pct["Defense"] / 100.0, 0.0, 1.0) - WATCH_SUSTAINABLE) if WATCH_UPKEEP > 0.0 else 0.0
+        # SocietyModel watch upkeep: the watch past the free one (heads), over the able.
+        self.watch_excess = 0.0
+        if WATCH_UPKEEP > 0.0 and self.able > 0:
+            pop = max(1.0, self.population)
+            towns = max(1, int(self.territory_settlements))
+            free = max(math.ceil(pop * WATCH_FREE_SHARE), towns * GUARD["GUARD_MIN"], math.ceil(pop * GUARD["GUARD_SHARE"]))
+            self.watch_excess = max(0.0, self.able * self.alloc_pct["Defense"] / 100.0 - free) / self.able
         if self.watch_excess > 0.0:
             for key, k in SPECIALIST_UPKEEP.items():
+                if key not in WATCH_UPKEEP_KEYS:
+                    continue
                 lim = self.c.effect_limits.get(key, (-0.5, 0.8)) if hasattr(self.c, "effect_limits") else (-0.5, 0.8)
                 self._eff[key] = clamp(self._eff.get(key, 0.0) + float(k) * self.watch_excess * WATCH_UPKEEP, float(lim[0]), float(lim[1]))
         if SUSTAINABLE_SPECIALISTS and self.able > 0:
@@ -1341,7 +1360,7 @@ class Surrogate:
         # harvest_mult (fitted, params.json): what the engine's harvest gets that the
         # surrogate leaves out (founding traditions' food_yield, progression food_output,
         # season and game modifiers, the gathering lever, seed coverage).
-        harvest = float(p.get("harvest_mult", 1.0))
+        harvest = float(p.get("harvest_mult", 1.0)) * harvest_settled(day / YEAR)
         cal = c.yield_calibration * harvest
         raw = {
             "plants": W * adapted["plants"] * 4.55 * cal * tg * season["plants"] * eff_f * ecol * sh["gather"] * practice * weather,

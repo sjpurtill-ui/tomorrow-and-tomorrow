@@ -2,8 +2,9 @@ extends GdUnitTestSuite
 ## Balance P2 (docs/PEOPLE_FIRST.md, "Balance P2"): extra learners cost 0.7
 ## of the births they did; a lead asks a third of the goods it did; a watch past 6 in 100 of the workers costs as extra
 ## learners do; carers ease crowding; daughter towns claim less new land; every
-## non-learning path learns as the balanced one does; food takes about half the
-## people's work. The same rules for every people.
+## non-learning path learns as the balanced one does; the harvest settles from
+## the founding yields so the leaders keep 34-39 in 100 on food from year 300.
+## The same rules for every people.
 const Society:=preload("res://scripts/society_model.gd")
 const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
 const Paths:=preload("res://scripts/work_paths.gd")
@@ -36,11 +37,10 @@ func before_test()->void:
 func after_test()->void:
 	WorldSimulation.clear()
 
-## Learners within the age's share, and a watch of `share` of the able.
-func _watch(share:float)->void:
-	var able:=float(GameState.able_population())
+## No learners, and `heads` keeping watch.
+func _watch(heads:int)->void:
 	GameState.population_allocations["Knowledge"]=0
-	GameState.population_allocations["Defense"]=roundi(able*share)
+	GameState.population_allocations["Defense"]=maxi(0,heads)
 	DiscoverySystem.society_model._rebuild_effect_totals(DiscoverySystem.catalog)
 
 # --- 1. The learning trap ------------------------------------------------------------
@@ -62,49 +62,86 @@ func test_extra_learners_cost_fewer_births_than_they_did()->void:
 
 # --- 4. The watch's upkeep ------------------------------------------------------------
 
-func test_a_watch_within_six_in_100_costs_nothing_more()->void:
+## The free watch: 5 in 100 of the people, or the towns' guard if more.
+func test_the_free_watch_is_five_in_100_of_the_people_or_the_towns_guard()->void:
+	assert_float(Society.WATCH_FREE_SHARE).is_equal(0.05)
+	var people:=float(GameState.population_exact)
+	assert_int(Society.watch_free()).is_equal(maxi(ceili(people*0.05),preload("res://scripts/watch_military.gd").guard_needed()))
+	# A band of 120: 5 in 100 is 6, but home needs a guard of 8, so 8 stand free.
+	GameState.ensure_population_total(120)
+	GameState.synchronize_population_allocations()
+	assert_int(Society.watch_free()).is_equal(8)
+
+func test_a_watch_within_the_free_one_costs_nothing_more()->void:
 	var model=DiscoverySystem.society_model
-	_watch(0.0)
+	_watch(0)
 	var births:=float(model.effect("conception_support"))
 	var work:=float(model.effect("labor_demand"))
-	_watch(0.055)
+	_watch(Society.watch_free())
 	assert_float(float(model.watch_excess)).is_equal(0.0)
 	assert_float(float(model.effect("conception_support"))).is_equal_approx(births,0.000001)
 	assert_float(float(model.effect("labor_demand"))).is_equal_approx(work,0.000001)
 
-func test_a_watch_past_six_in_100_costs_as_extra_learners_do()->void:
+## A band of 120 that stands the guard the screen asks for is never charged.
+func test_a_band_standing_its_guard_is_not_charged()->void:
+	GameState.ensure_population_total(120)
+	GameState.synchronize_population_allocations()
+	_watch(8)
+	assert_float(float(DiscoverySystem.society_model.watch_excess)).is_equal(0.0)
+	assert_str(String(Impact.watch_upkeep_line().label)).is_equal("Watch the people can spare")
+
+func test_a_watch_past_the_free_one_costs_as_extra_learners_do_but_cohesion()->void:
 	var model=DiscoverySystem.society_model
-	_watch(0.0)
+	_watch(0)
 	var before:={}
 	for key:String in Society.SPECIALIST_UPKEEP:before[key]=float(model.effect(key))
-	_watch(0.14)
+	var able:=float(GameState.able_population())
+	_watch(Society.watch_free()+20)
 	var over:=float(model.watch_excess)
-	assert_float(over).is_equal_approx(Society.watch_share()-Society.WATCH_SUSTAINABLE,0.000001)
-	assert_float(over).is_between(0.07,0.09)
+	assert_float(over).is_equal_approx(20.0/able,0.000001)
 	for key:String in Society.SPECIALIST_UPKEEP:
 		var limit:Vector2=Society.EFFECT_LIMITS.get(key,Vector2(-0.5,0.8))
-		var expected:=clampf(float(before[key])+float(Society.SPECIALIST_UPKEEP[key])*over*Society.WATCH_UPKEEP,limit.x,limit.y)
+		var charged:=key in Society.WATCH_UPKEEP_KEYS
+		var expected:=clampf(float(before[key])+(float(Society.SPECIALIST_UPKEEP[key])*over*Society.WATCH_UPKEEP if charged else 0.0),limit.x,limit.y)
 		assert_float(float(model.effect(key))).override_failure_message(key).is_equal_approx(expected,0.000001)
-		assert_float(float(model.upkeep_of(key))).is_equal_approx(float(Society.SPECIALIST_UPKEEP[key])*over*Society.WATCH_UPKEEP,0.000001)
-	# Bands away still count: the share reads everyone set to keep watch.
-	assert_float(Society.watch_share()).is_equal_approx(float(GameState.population_allocations.Defense)/float(GameState.able_population()),0.000001)
+	# Cohesion is standing.gd's to charge (a heavy levy), not twice.
+	assert_bool("cohesion" in Society.WATCH_UPKEEP_KEYS).is_false()
+	assert_float(float(model.effect("cohesion"))).is_equal_approx(float(before.cohesion),0.000001)
+	# Bands away still count: everyone set to keep watch.
+	assert_float(Society.watch_heads()).is_equal(float(GameState.population_allocations.Defense))
 
-## The People view says it plainly, with the engine's number.
-func test_the_people_view_tells_the_watchs_upkeep()->void:
-	_watch(0.04)
+## The People view says it in heads, with the engine's number, live.
+func test_the_people_view_tells_the_watchs_upkeep_in_heads()->void:
+	var free:=Society.watch_free()
+	_watch(free-2)
 	var calm:Dictionary=Impact.watch_upkeep_line()
 	assert_str(String(calm.label)).is_equal("Watch the people can spare")
-	assert_str(String(calm.words)).contains("6 in 100 of the workers")
-	_watch(0.14)
+	assert_str(String(calm.value)).is_equal("up to %s" % Impact._whole(float(free)))
+	assert_str(String(calm.words)).contains("Up to %s can keep watch at no extra cost" % Impact._whole(float(free)))
+	_watch(free+12)
 	var over:Dictionary=Impact.watch_upkeep_line()
 	assert_str(String(over.label)).is_equal("Too many on watch")
-	var births:=-float(Society.SPECIALIST_UPKEEP.conception_support)*float(DiscoverySystem.society_model.watch_excess)*100.0
-	assert_str(String(over.words)).contains("about %s in 100 fewer births" % Impact._one(births))
+	assert_str(String(over.value)).is_equal("12 over")
+	var births:=-Society.watch_upkeep_for("conception_support",12.0/float(GameState.able_population()))*100.0
+	assert_str(String(over.words)).contains("12 over now: about %s in 100 fewer births" % Impact._one(births))
 	assert_str(String(over.tone)).is_equal("bad")
+	# Read live: the watch moves and the line follows before the next reckoning.
+	GameState.population_allocations["Defense"]=free+20
+	assert_str(String(Impact.watch_upkeep_line().value)).is_equal("20 over")
+	assert_str(String(Impact.watch_upkeep_line().words)).contains("from tomorrow")
 	# It stands in the watch's own lines on the People view.
 	var labels:=[]
 	for line:Dictionary in Impact.defense().lines:labels.append(String(line.label))
 	assert_array(labels).contains(["Too many on watch"])
+
+## The capacity history tells the watch's cost apart from the lore keepers'.
+func test_the_capacity_history_keeps_the_watch_apart()->void:
+	var model=DiscoverySystem.society_model
+	_watch(Society.watch_free()+20)
+	var basis:Dictionary=model.practice_basis()
+	assert_float(float(basis.watch)).is_equal_approx(float(model.watch_excess),0.000001)
+	assert_float(float(basis.excess)).is_equal_approx(float(model.specialist_excess)*float(model.specialist_burden),0.000001)
+	assert_bool(preload("res://scripts/hud/capacity_words.gd").PARTS.has("watch_upkeep")).is_true()
 
 # --- 3. Carers ease crowding --------------------------------------------------------------
 
@@ -158,13 +195,20 @@ func test_every_path_but_learning_keeps_the_balanced_share_of_learners()->void:
 		assert_float(float(Paths.LEARNING_CAP[path])).override_failure_message(path).is_equal(float(Paths.LEARNING_CAP.balanced))
 	assert_float(float(Paths.LEARNING_CAP.learning)).is_greater(float(Paths.LEARNING_CAP.balanced)*3.0)
 
-# --- 7. Food takes about half the work ----------------------------------------------------
+# --- 7. The harvest settles from the founding yields --------------------------------------
 
-func test_food_yields_ask_about_half_the_peoples_work()->void:
-	assert_float(Food.BASE_SUBSISTENCE_YIELD_CALIBRATION).is_equal_approx(1.07,0.000001)
-	assert_float(Food.CULTIVATION_YIELD).is_equal_approx(4.52,0.000001)
+## The founding decades keep the founding yields; the harvest settles to
+## 0.8 of them by year 200 (the leaders then keep 34-39 in 100 on food).
+func test_the_harvest_settles_from_the_founding_yields_by_year_200()->void:
+	assert_float(Food.BASE_SUBSISTENCE_YIELD_CALIBRATION).is_equal_approx(1.34,0.000001)
+	assert_float(Food.CULTIVATION_YIELD).is_equal_approx(5.65,0.000001)
+	assert_float(Food.harvest_settled(0.0)).is_equal(1.0)
+	assert_float(Food.harvest_settled(50.0)).is_equal_approx(0.95,0.000001)
+	assert_float(Food.harvest_settled(200.0)).is_equal_approx(0.8,0.000001)
+	assert_float(Food.harvest_settled(900.0)).is_equal_approx(0.8,0.000001)
 	var source:=FileAccess.get_file_as_string("res://scripts/food_system.gd")
-	assert_str(source).contains("workers*cultivation_weight*CULTIVATION_YIELD*")
+	assert_str(source).contains("workers*cultivation_weight*CULTIVATION_YIELD*harvest_settled(")
+	assert_str(source).contains("var wild_yield:=BASE_SUBSISTENCE_YIELD_CALIBRATION*harvest_settled(")
 
 # --- 2. A lead is dear in goods, not ruinous -------------------------------------------------
 

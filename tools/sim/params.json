@@ -402,7 +402,7 @@
   "scripts/game_state.gd::var neonatal_rate:=clampf(": "609ed12587",
   "scripts/game_state.gd::var maternal_rate:=clampf(": "71fa63935e",
   "scripts/game_state.gd::var health_factor:=lerpf(1.90,0.64": "0f5cfd02e2",
-  "scripts/food_system.gd::result[\"Fresh plants\"]=workers*gathering_weight": "54ed5a9113",
+  "scripts/food_system.gd::result[\"Fresh plants\"]=workers*gathering_weight": "f499f3248f",
   "scripts/food_system.gd::var early:=clampf(0.06+": "98e46ed813",
   "scripts/food_system.gd::var burden_target:=clampf(": "86ea4669e3",
   "scripts/artifact_collection.gd::return {\"weight\":weight,\"total_weight\":total": "b06f2af677",
@@ -426,8 +426,12 @@
   "scripts/military_campaign.gd::return (0.42+security*0.55)*(1.0+_adoption(\"formation_drill\")*0.35": "2b5c6a2684",
   "scripts/early_life_conditions.gd::var eased:=crowding*(1.0-CARER_CROWDING*carers)": "37c8905ce6",
   "scripts/early_life_conditions.gd::var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE": "1b808104d0",
-  "scripts/society_model.gd::watch_excess=maxf(0.0,watch_share()-WATCH_SUSTAINABLE)": "c94e90e40c",
-  "scripts/society_model.gd::return float(SPECIALIST_UPKEEP.get(key,0.0))*(specialist_excess*specialist_burden+watch_excess*WATCH_UPKEEP)": "be23381279",
-  "scripts/food_system.gd::result[\"Dry staples\"]=workers*cultivation_weight*CULTIVATION_YIELD*": "9fdc59941f"
+  "scripts/society_model.gd::watch_excess=watch_over()/able": "6ad46d90bb",
+  "scripts/society_model.gd::return maxi(ceili(people*WATCH_FREE_SHARE),guard)": "ea83fd29cd",
+  "scripts/watch_military.gd::total+=maxi(GUARD_MIN,ceili(maxf(1.0,float(WorldSimulation.settlements._settlement_population(city)))*GUARD_SHARE))": "3e066e7371",
+  "scripts/society_model.gd::return float(SPECIALIST_UPKEEP.get(key,0.0))*maxf(0.0,excess)*WATCH_UPKEEP if key in WATCH_UPKEEP_KEYS else 0.0": "0e9e1d8a17",
+  "scripts/food_system.gd::result[\"Dry staples\"]=workers*cultivation_weight*CULTIVATION_YIELD*": "adcff96ecf",
+  "scripts/food_system.gd::return lerpf(1.0,HARVEST_SETTLED,clampf(year/HARVEST_SETTLED_YEAR,0.0,1.0))": "9bde0c614a",
+  "scripts/food_system.gd::var wild_yield:=BASE_SUBSISTENCE_YIELD_CALIBRATION*harvest_settled(": "1a5f2fe6fe"
  }
 }
