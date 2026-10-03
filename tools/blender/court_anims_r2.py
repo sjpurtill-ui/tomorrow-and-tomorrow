@@ -155,20 +155,22 @@ def make_r2(clips):
         a.foot(s_, 0.0).foot(s_, 0.30, (0.28 * sd, -0.08, 0.0), "out", lift=0.06, rot=(0, 0, 20 * sd)).foot(s_, 2.6, (0.28 * sd, -0.08, 0.0), rot=(0, 0, 20 * sd))
         a.foot(o_, 0.0).foot(o_, 0.42).foot(o_, 0.62, (0.10 * sd, -0.02, 0.0), "out", lift=0.04).foot(o_, 2.6, (0.10 * sd, -0.02, 0.0))
 
-        def under(z, torso):
-            # near hand under the near armpit, palm up; the far hand across their front
-            # the near hand behind her, under the far armpit; the far hand under the near one, in front
-            near = arm_at(s_, w=body_pt(0.58, 0.10, z - 0.10), along=(0.45, 0.35, 0.80), palm=(0.6, 0.2, 0.75), pole=(0.3, 0.7, -0.6), curl=(35, 25, 10))
-            far = arm_at(o_, w=body_pt(-0.46, -0.18, z - 0.10), along=(-0.55, 0.15, 0.80), palm=(-0.7, 0.1, 0.7), pole=(0.2, 0.2, -1.0), curl=(35, 25, 10))
+        def under(z, torso, mid):
+            # z: her armpits' height; mid: her chest's middle (metres toward her).
+            # The near hand goes behind her, under the far armpit; the far hand
+            # crosses in front, under the near one. Palms up into the pits,
+            # fingers up her sides: the hands are where they take her weight.
+            near = arm_at(s_, w=body_pt(mid + 0.15, 0.07, z - 0.13), along=(0.10, 0.05, 0.99), palm=(-0.95, 0.0, 0.25), pole=(0.3, 0.8, -0.5), curl=(30, 22, 10))
+            far = arm_at(o_, w=body_pt(-(mid - 0.16), -0.10, z - 0.13), along=(-0.10, -0.05, 0.99), palm=(-0.95, 0.0, 0.25), pole=(0.2, 0.1, -1.0), curl=(30, 22, 10))
             return near, far
-        n1, f1 = under(1.10, reach_t)
+        n1, f1 = under(1.18, reach_t, 0.66)
         a.rest(s_, 0.0).world(s_, 0.40, reach_t, n1.copy(arc=(0.04, -0.08, 0.0)), "out")
         a.rest(o_, 0.0).world(o_, 0.44, reach_t, f1.copy(arc=(0.0, -0.10, 0.03)), "out")
-        n2, f2 = under(1.04, catch_t)
+        n2, f2 = under(1.06, catch_t, 0.60)
         a.world(s_, 0.62, catch_t, n2, "in").world(o_, 0.62, catch_t, f2, "in")
-        n3, f3 = under(0.86, sag_t)
+        n3, f3 = under(0.84, sag_t, 0.56)
         a.world(s_, 1.0, sag_t, n3).world(o_, 1.0, sag_t, f3)
-        n4, f4 = under(0.56, low_t)
+        n4, f4 = under(0.52, low_t, 0.58)
         a.world(s_, 1.55, low_t, n4, "in").world(o_, 1.55, low_t, f4, "in").world(s_, 1.75, low_t, n4).world(o_, 1.75, low_t, f4)
         back = arm_at(o_, w=body_pt(0.13, 0.15, z_waist - 0.06), along=(-0.5, 0.2, -0.8), palm=(0.0, -1.0, 0.0), pole=(1.0, 0.6, 0.0), curl=(20, 14, 8))
         a.world(o_, 2.15, up_t, back.copy(arc=(0.06, 0.06, 0.0)), "out").world(o_, 2.6, up_t, back)
@@ -265,17 +267,19 @@ def make_stances(clips):
     # ---- fidgeting with a cord: hands together at the waist, turning it; eyes on
     #      the hands, now and then up
     a = Act(6.0, drag=1.0)
-    down_t = dict(chest=(2, 0, 0), neck=(3, 0, 0), head=(10, 0, -2))
+    down_t = dict(chest=(4, 0, 0), neck=(5, 0, 0), head=(16, 0, -3))
     a.t(0.0, "ease", **down_t).t(2.0, "ease", **dict(down_t, head=(8, 0, -3))).t(3.1, "ease", chest=(0, 0, 0), head=(-2, 0, 2))
     a.t(4.2, "ease", chest=(0, 0, 0), head=(-1, 0, 3)).t(5.0, "ease", **down_t).t(6.0, "ease", **down_t)
-    for i in range(9):
-        t = i * 0.75
+    for i in range(13):
+        t = i * 0.5
         tw = 1.0 if i % 2 == 0 else -1.0
+        pull = 0.045 if i % 4 in (1, 2) else 0.0
         for s_ in "LR":
             sg = 1.0 if s_ == "L" else -1.0
-            along = Vector((-0.75, -0.55, 0.35)).normalized()
-            palm = L.scale_q(L.Quaternion(along, math.radians(28 * tw * sg)), 1.0) @ Vector((-0.1, -0.2, 0.97))
-            key = arm_at(s_, w=body_pt(0.035, -0.21, z_waist - 0.04 + 0.006 * tw * sg), along=along, palm=palm, pole=(0.8, 0.4, -0.5), curl=(55, 45 + 6 * tw, 30))
+            along = Vector((-0.75, -0.5, 0.45)).normalized()
+            palm = L.Quaternion(along, math.radians(42 * tw * sg)) @ Vector((-0.1, -0.2, 0.97))
+            key = arm_at(s_, w=body_pt(0.045 + pull, -0.25, z_waist + 0.06 + 0.012 * tw * sg), along=along, palm=palm, pole=(1.0, 0.3, -0.3),
+                         curl=(60, 50 + 8 * tw, 30), sh=(0, -6, -3))
             a.arm(s_, t, key, "ease")
     a.f(0.0, "ease", lids=0.75, tight=0.2, worry=0.25).f(2.0, "ease", lids=0.78, tight=0.25, worry=0.25).f(3.1, "ease", lids=1.0, worry=0.35, brows=0.2)
     a.f(4.2, "ease", lids=1.0, worry=0.3).f(5.0, "ease", lids=0.75, tight=0.2, worry=0.25).f(6.0, "ease", lids=0.75, tight=0.2, worry=0.25)
@@ -337,8 +341,8 @@ def make_stances(clips):
     a.t(6.0, "ease")
     crouch_t = {}
     for s_ in "LR":
-        warm = arm_at(s_, w=body_pt(0.12, -0.50, 0.58), along=(0.05, -0.35, 0.94), palm=(0.0, -0.85, -0.5), pole=(0.8, 0.4, -0.6), curl=(14, 8, 2))
-        together = arm_at(s_, w=body_pt(0.03, -0.44, 0.60), along=(-0.5, -0.4, 0.75), palm=(-0.95, 0.0, 0.2), pole=(0.8, 0.4, -0.6), curl=(10, 4, 0))
+        warm = arm_at(s_, w=body_pt(0.075, -0.40, 0.50), along=(0.08, -0.86, 0.50), palm=(0.0, -0.45, -0.89), pole=(0.7, 0.3, -0.7), curl=(16, 10, 4))
+        together = arm_at(s_, w=body_pt(0.03, -0.38, 0.56), along=(-0.5, -0.5, 0.7), palm=(-0.95, 0.0, 0.2), pole=(0.7, 0.3, -0.7), curl=(10, 4, 0))
         a.world(s_, 0.0, crouch_t, warm).world(s_, 2.3, crouch_t, warm).world(s_, 2.6, crouch_t, together, "out")
         for i in range(5):
             up_ = 0.025 * (1 if (i % 2 == 0) == (s_ == "L") else -1)
@@ -430,19 +434,22 @@ def make_ambient(clips):
         clips[nm] = clip(nm, 1.4, a, kind="ambient", hold=True, tags=["sick", "disgust"], blend_in=0.15, blend_out=0.6)
 
     # ---- the stomach rumbles: a start, a look down, a rub of the belly, a guilty look round
-    a = Act(2.4, drag=0.9)
-    a.t(0.0).t(0.1, "snap", chest=(-2, 0, 0), hips_loc=(0, 0, 0.004)).t(0.4, "out", chest=(4, 0, 0), neck=(4, 0, 0), head=(16, 0, 0))
-    a.t(1.5, "ease", chest=(4, 0, 0), neck=(4, 0, 0), head=(15, 0, 0)).t(1.7, "out", chest=(1, 0, 0), head=(-2, 0, 14))
-    a.t(2.05, "out", chest=(1, 0, 0), head=(-2, 0, -12)).t(2.4, "ease")
-    hb = hand_belly("L")
-    a.rest("L", 0.0).arm("L", 0.45, hb, "out")
+    a = Act(2.6, drag=0.9)
+    look_down = dict(hips_loc=(0, 0.01, -0.01), spine=(6, 0, 0), chest=(8, 0, 2), neck=(6, 0, 0), head=(24, 0, 4))
+    a.t(0.0).t(0.1, "snap", chest=(-4, 0, 0), head=(-5, 0, 0), hips_loc=(0, 0, 0.008)).t(0.42, "out", **look_down)
+    a.t(1.65, "ease", **look_down).t(1.85, "out", chest=(1, 0, 0), head=(-2, 0, 18)).t(2.2, "out", chest=(1, 0, 0), head=(-2, 0, -16)).t(2.6, "ease")
+    hb = hand_belly("L").copy(pole=mv((1.0, 0.2, -0.3), "L"), curl=(10, 6, 2))
+    other = arm_at("R", w=None, contact=landmarks()["belly"] + Vector((0.07 * k, 0.0, 0.05 * k)), along=(-0.9, -0.1, -0.3), palm=(0.0, 1.0, 0.0),
+                   pole=(1.0, 0.2, -0.3), curl=(12, 8, 4))
+    a.rest("L", 0.0).world("L", 0.45, look_down, hb, "out")
     for i in range(8):
         ang = i * math.pi / 2
-        a.arm("L", 0.6 + 0.13 * i, hb.copy(w=hb.w + Vector((0.025 * k * math.cos(ang), 0.0, 0.025 * k * math.sin(ang)))), "ease")
-    a.arm("L", 1.9, hb).rest("L", 2.4, "ease")
+        a.world("L", 0.6 + 0.14 * i, look_down, hb.copy(w=hb.w + Vector((0.05 * k * math.cos(ang), 0.0, 0.045 * k * math.sin(ang)))), "ease")
+    a.world("L", 1.75, look_down, hb).rest("L", 2.6, "ease")
+    a.rest("R", 0.0).rest("R", 0.3).world("R", 0.6, look_down, other, "out").world("R", 1.7, look_down, other).rest("R", 2.5, "ease")
     a.f(0.0).f(0.1, "snap", lids=1.3, brows=0.6).f(0.4, "ease", worry=0.4, tight=0.3, eyes_y=-0.8).f(1.5, "ease", worry=0.4, tight=0.35, eyes_y=-0.6)
     a.f(1.7, "out", eyes_x=0.8, tight=0.5, brows=0.5, smile=0.15).f(2.05, "out", eyes_x=-0.8, tight=0.5, brows=0.5).f(2.4, "ease")
-    clips["rub_belly"] = clip("rub_belly", 2.4, a, kind="ambient", tags=["hungry", "comic"], hands="L", groups=upper, blend_in=0.12, blend_out=0.5)
+    clips["rub_belly"] = clip("rub_belly", 2.6, a, kind="ambient", tags=["hungry", "comic"], hands="LR", groups=upper, blend_in=0.12, blend_out=0.5)
 
     # ---- a pat of a full belly, content
     a = Act(1.4, drag=1.0)
@@ -521,16 +528,18 @@ def make_ambient(clips):
 
     # ---- a stretch: arms up, back arched, a twist each way, arms down and out, a breath out
     a = Act(2.6, drag=1.0)
-    up_t = dict(hips_loc=(0, 0, 0.01), spine=(-5, 0, 0), chest=(-9, 0, 0), neck=(-3, 0, 0), head=(-10, 0, 0))
+    up_t = dict(hips_loc=(0, -0.03, 0.035), spine=(-8, 0, 0), chest=(-14, 0, 0), neck=(-5, 0, 0), head=(-14, 0, 0))
+    for s_ in "LR":
+        a.foot(s_, 0.0).foot(s_, 0.3).foot(s_, 0.9, (0, 0, 0.035), "out", rot=(25, 0, 0)).foot(s_, 1.6, (0, 0, 0.035), rot=(25, 0, 0)).foot(s_, 1.95, (0, 0, 0), "in")
     a.t(0.0).t(0.3, "out", chest=(3, 0, 0), head=(3, 0, 0)).t(0.9, "out", **up_t).t(1.3, "ease", **dict(up_t, chest=(-9, 0, 6), head=(-8, 0, 6)))
     a.t(1.6, "ease", **dict(up_t, chest=(-9, 0, -6), head=(-8, 0, -6))).t(1.95, "out", chest=(-3, 0, 0), head=(-3, 0, 0)).t(2.6, "ease")
     for s_ in "LR":
-        overhead = arm_at(s_, w=body_pt(0.10, 0.02, z_chest + 0.60), along=(-0.3, 0.0, 0.95), palm=(-0.2, -0.95, 0.0), pole=(0.9, 0.1, 0.2), curl=(30, 20, 10), sh=(0, -12, 0))
-        wide = arm_at(s_, w=body_pt(0.56, -0.06, z_chest + 0.18), along=(0.95, -0.1, 0.2), palm=(0.0, 0.0, 1.0), pole=(0.0, 0.6, -0.8), curl=(6, 0, -6))
+        overhead = arm_at(s_, w=body_pt(0.20, 0.04, z_chest + 0.66), along=(0.25, 0.05, 0.97), palm=(-0.3, -0.95, 0.0), pole=(0.9, 0.1, 0.2), curl=(10, 0, -6), sh=(0, -16, 0))
+        wide = arm_at(s_, w=body_pt(0.62, 0.02, z_chest + 0.26), along=(0.95, 0.0, 0.3), palm=(0.0, 0.0, 1.0), pole=(0.0, 0.6, -0.8), curl=(6, 0, -6))
         a.rest(s_, 0.0).rest(s_, 0.3).arm(s_, 0.9, overhead.copy(arc=(0.06, -0.08, 0.0)), "out").arm(s_, 1.6, overhead)
         a.arm(s_, 1.95, wide, "out").rest(s_, 2.5, "ease")
-    a.f(0.0).f(0.9, "out", lids=0.2, jaw=0.5, brows=0.4).f(1.6, "ease", lids=0.3, jaw=0.35).f(2.0, "out", puff=0.4, lids=0.7, smile=0.3).f(2.6, "ease")
-    clips["stretch"] = clip("stretch", 2.6, a, kind="ambient", tags=["tired", "content"], hands="LR", blend_in=0.2, blend_out=0.5, groups=dict(upper, legs=0.6))
+    a.f(0.0).f(0.9, "out", lids=0.15, jaw=0.95, brows=0.6).f(1.6, "ease", lids=0.2, jaw=0.8, brows=0.5).f(2.0, "out", puff=0.5, lids=0.7, smile=0.4).f(2.6, "ease")
+    clips["stretch"] = clip("stretch", 2.6, a, kind="ambient", tags=["tired", "content"], hands="LR", blend_in=0.2, blend_out=0.5)
 
     # ---- whisper to the neighbour on side sd: lean in, a hand cupped by the mouth,
     #      a dart of the eyes up to the god, lean back
@@ -551,21 +560,23 @@ def make_ambient(clips):
         clips[nm] = face_plus(c, lambda t: {"jaw": 0.18 * max(0.0, math.sin(2 * math.pi * 5.5 * t)) * L.clamp01((t - 0.4) / 0.1) * (1 - L.clamp01((t - 1.15) / 0.05))})
 
     # ---- wring the hands (dread): hands together at the waist, twisting, shoulders up
-    a = Act(1.6, drag=1.0)
-    a.t(0.0).t(0.3, "out", chest=(4, 0, 0), head=(5, 0, 0)).t(1.3, "ease", chest=(4, 0, 0), head=(5, 0, 0)).t(1.6, "ease")
-    for i in range(6):
+    a = Act(1.8, drag=1.0)
+    a.t(0.0).t(0.3, "out", chest=(6, 0, 0), neck=(3, 0, 0), head=(8, 0, 0)).t(0.8, "ease", chest=(8, 0, 2), head=(10, 0, 4))
+    a.t(1.3, "ease", chest=(6, 0, -2), head=(8, 0, -4)).t(1.8, "ease")
+    for i in range(7):
         t = 0.3 + i * 0.2
         tw = 1.0 if i % 2 == 0 else -1.0
         for s_ in "LR":
             sg = 1.0 if s_ == "L" else -1.0
-            along = Vector((-0.75, -0.5, 0.4)).normalized()
-            palm = L.Quaternion(along, math.radians(32 * tw * sg)) @ Vector((-0.9, 0.0, 0.3))
-            a.arm(s_, t, arm_at(s_, w=body_pt(0.04, -0.23, z_waist + 0.02), along=along, palm=palm, pole=(0.8, 0.4, -0.5), curl=(45, 40, 25), sh=(0, -8, -4)))
+            along = Vector((-0.75, -0.45, 0.5)).normalized()
+            palm = L.Quaternion(along, math.radians(50 * tw * sg)) @ Vector((-0.9, 0.0, 0.3))
+            a.arm(s_, t, arm_at(s_, w=body_pt(0.05, -0.26, z_chest - 0.10 + 0.015 * tw * sg), along=along, palm=palm, pole=(1.0, 0.2, -0.3),
+                                curl=(50, 45, 30), sh=(0, -14, -8)))
     for s_ in "LR":
         a.arm_keys[s_].insert(0, (0.0, a.rest_arm[s_], "ease"))
-        a.rest(s_, 1.6, "ease")
-    a.f(0.0).f(0.3, "out", worry=0.8, brows=0.7, tight=0.4).f(1.3, "ease", worry=0.8, brows=0.7, tight=0.4).f(1.6, "ease")
-    clips["wring_hands"] = clip("wring_hands", 1.6, a, kind="ambient", tags=["dread"], hands="", groups=upper, blend_in=0.2, blend_out=0.4)
+        a.rest(s_, 1.8, "ease")
+    a.f(0.0).f(0.3, "out", worry=0.95, brows=0.8, tight=0.5, lids=1.15).f(1.5, "ease", worry=0.95, brows=0.8, tight=0.5, lids=1.15).f(1.8, "ease")
+    clips["wring_hands"] = clip("wring_hands", 1.8, a, kind="ambient", tags=["dread"], hands="", groups=upper, blend_in=0.2, blend_out=0.4)
 
     # ---- shush the neighbour on side sd: finger to the lips, turned to them
     for sd, nm in ((1.0, "shush_l"), (-1.0, "shush_r")):
@@ -578,15 +589,19 @@ def make_ambient(clips):
         clips[nm] = clip(nm, 1.1, a, kind="ambient", tags=["comic"], hands="R", groups=upper, blend_in=0.1, blend_out=0.35)
 
     # ---- fan themselves: a hand flapping before the face, head back, eyes half shut
-    a = Act(1.6, drag=0.8)
-    a.t(0.0).t(0.25, "out", chest=(-2, 0, 0), head=(-6, 0, 3)).t(1.3, "ease", chest=(-2, 0, 0), head=(-6, 0, 3)).t(1.6, "ease")
-    fan0 = arm_at("R", w=body_pt(0.12, -0.24, z_chest + 0.18), along=(-0.1, -0.2, 0.97), palm=(-0.2, 0.95, 0.0), pole=(0.9, 0.3, -0.4), curl=(6, 0, -4))
+    a = Act(1.8, drag=0.8)
+    a.t(0.0).t(0.25, "out", chest=(-4, 0, 0), neck=(-3, 0, 0), head=(-12, 4, 6)).t(1.5, "ease", chest=(-4, 0, 0), neck=(-3, 0, 0), head=(-12, 4, 6)).t(1.8, "ease")
+    fan0 = arm_at("R", w=body_pt(0.16, -0.26, z_chest + 0.20), along=(-0.1, -0.2, 0.97), palm=(-0.2, 0.95, 0.0), pole=(1.0, 0.3, -0.2), curl=(6, 0, -4), sh=(0, -6, 0))
     a.rest("R", 0.0).arm("R", 0.25, fan0, "out")
-    for i in range(6):
-        a.arm("R", 0.38 + 0.15 * i, fan0.copy(along=(L.Quaternion(Vector((0, 0, 1)), math.radians(-28 if i % 2 == 0 else 8)) @ fan0.along)), "ease")
-    a.rest("R", 1.6, "ease")
-    a.f(0.0).f(0.25, "out", lids=0.6, puff=0.4, worry=0.2).f(1.3, "ease", lids=0.6, puff=0.3).f(1.6, "ease")
-    clips["fan_self"] = clip("fan_self", 1.6, a, kind="ambient", tags=["hot"], hands="R", groups=upper, blend_in=0.12, blend_out=0.4)
+    for i in range(8):
+        sweep = -1.0 if i % 2 == 0 else 1.0
+        a.arm("R", 0.38 + 0.14 * i, fan0.copy(w=fan0.w + Vector((0.06 * k * sweep, 0, 0)),
+                                              along=(L.Quaternion(Vector((0, 1, 0)), math.radians(32 * sweep)) @ fan0.along)), "ease")
+    a.rest("R", 1.8, "ease")
+    hip_l = L.key_to_world(cf_anim.stance_pose("hip"), stance_arm("hip", "L"))
+    a.rest("L", 0.0).world("L", 0.4, {}, hip_l, "out").world("L", 1.5, {}, hip_l).rest("L", 1.8, "ease")
+    a.f(0.0).f(0.25, "out", lids=0.5, puff=0.5, worry=0.3, jaw=0.15).f(1.5, "ease", lids=0.5, puff=0.4, jaw=0.15).f(1.8, "ease")
+    clips["fan_self"] = clip("fan_self", 1.8, a, kind="ambient", tags=["hot"], hands="LR", groups=upper, blend_in=0.12, blend_out=0.4)
 
 
 # =====================================================================================

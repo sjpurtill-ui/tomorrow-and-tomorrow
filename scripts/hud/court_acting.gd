@@ -56,8 +56,10 @@ const FIGURE_MOODS:={"warm":{"joy":0.55},"neutral":{},"afraid":{"fear":0.7},"def
 const SEATED:=["sit","crouch"]
 ## The arms a held prop keeps busy (they do not drop the bowl to gasp).
 const PROP_ARMS:={"staff":["arm_R"],"bowl":["arm_L","arm_R"]}
-const GESTURES:=["nod","nod_eager","shake","tilt","shrug","double_take","jolt","settle","flinch_small","gulp","tremble","freeze","straighten","shift"]
-const GESTURE_LEN:=[0.65,1.35,1.25,1.7,1.5,1.3,0.8,1.6,0.7,0.7,1.6,0.9,0.9,0.2]
+const GESTURES:=["nod","nod_eager","shake","tilt","shrug","double_take","jolt","settle","flinch_small","gulp","tremble","freeze","straighten","shift",
+	"nod_slow","look_round","deflate","lean_in","nod_proud","jerk_head","nod_on"]
+const GESTURE_LEN:=[0.65,1.35,1.25,1.7,1.5,1.3,0.8,1.6,0.7,0.7,1.6,0.9,0.9,0.2,
+	1.8,1.6,2.0,1.6,1.4,0.7,2.2]
 ## The director's acts (court_director.gd ACTS) as this layer performs them:
 ## [kind, name, amount]. kind: "clip" (a library clip; a name ending "_" takes
 ## _l or _r from where args.at stands), "gesture" (procedural, on top of
@@ -65,8 +67,8 @@ const GESTURE_LEN:=[0.65,1.35,1.25,1.7,1.5,1.3,0.8,1.6,0.7,0.7,1.6,0.9,0.9,0.2]
 ## Anything else falls back to the figure's own clip the beat names.
 const ACT_MAP:={
 	"kneel":["clip","kneel"],"kneel_bound":["clip","kneel_bound"],"prostrate":["clip","kneel"],
-	"bow":["clip","bow_deep"],"bow_deep":["clip","bow_overdeep"],"bow_small":["clip","bow_shallow"],"bow_early":["clip","bow_shallow"],
-	"double_bow":["clip","bow_shallow"],"copy":["clip","bow_shallow"],"plead":["clip","talk_plead"],
+	"bow":["clip","bow_deep"],"bow_deep":["clip","bow_overdeep"],"bow_small":["clip","bow_shallow",1.0,"speed"],"bow_early":["clip","bow_shallow",1.0,"speed"],
+	"double_bow":["clip","bow_shallow",1.0,"speed"],"copy":["clip","bow_shallow",1.0,"speed"],"plead":["clip","talk_plead"],
 	"stand_firm":["clip","defiant"],"cross_arms":["clip","defiant"],"stiffen":["gesture","straighten"],"straighten":["gesture","straighten"],
 	"recover":["gesture","straighten"],"gulp":["gesture","gulp"],"exhale":["gesture","settle"],"pretend_calm":["gesture","settle",0.6],
 	"freeze":["gesture","freeze"],"flinch":["clip","flinch"],"knees_knock":["clip","knees_knock"],"tremble":["gesture","tremble"],
@@ -87,6 +89,26 @@ const ACT_MAP:={
 	"sharpen_spear":["clip","sharpen_spear"],"rub_hands":["clip","rub_hands"],"stamp_feet":["clip","stamp_feet"],"swat_fly":["clip","swat_fly"],
 	"stretch":["clip","stretch"],"whisper":["clip","whisper_"],"wring_hands":["clip","wring_hands"],"shush":["clip","shush_"],
 	"fan_self":["clip","fan_self"],"bored":["clip","stance_guard"],"stand_guard":["gesture","straighten"],"hurry":["gesture","jolt",0.6],
+	# round 3: the rest of the director's words
+	"cover_eyes":["clip","cover_eyes_"],"make_room":["clip","make_room_"],"grab":["clip","grab_"],"count_fingers":["clip","count_fingers"],
+	"point":["clip","point_"],"point_up":["clip","point_up"],"raise_finger":["clip","raise_finger"],"lower_finger":["clip","lower_finger"],
+	"nod_along":["gesture","nod_slow"],"soft_clap":["clip","clap_soft"],"clap_soft":["clip","clap_soft"],"edge_forward":["clip","edge_forward"],
+	"check_room":["gesture","look_round"],"shoo":["clip","shoo_"],"tug_sleeve":["clip","tug_sleeve_"],"over_thank":["clip","over_thank"],
+	"deflate_polite":["gesture","deflate"],"nod_too_much":["gesture","nod_on"],"clear_throat":["clip","clear_throat"],
+	"smooth_clothes":["clip","smooth_clothes"],"catch_eye":["gesture","lean_in"],"sit_down":["clip","sit_floor"],"doze_off":["clip","doze"],
+	"glum":["gesture","deflate",0.7],"enter_wrong":["gesture","look_round"],"hurry_round":["gesture","jolt",0.6],"gape":["face",""],
+	"wave":["clip","wave"],"nudge":["clip","elbow_"],"gawk":["face",""],"wipe_hands":["clip","wipe_hands"],"bow_wrong":["clip","bow_deep"],
+	"mortified":["clip","mortified"],"nod_proud":["gesture","nod_proud"],"count_heads":["clip","count_heads"],"study_posts":["clip","stroke_chin"],
+	"turn_stone":["clip","fiddle"],"study_roof":["clip","thumb_measure"],"work_knot":["clip","fiddle"],"eye_stores":["face",""],
+	"watch_guards":["face",""],"watch_god":["face",""],"line_up":["clip","arrange_floor"],"tend_hurt":["gesture","tilt",0.6],
+	"back_out_bowing":["clip","back_out"],"bump_post":["clip","bump_post"],"bow_to_post":["clip","bow_shallow"],"storm_off":["clip","storm_walk"],
+	"stop_short":["clip","storm_stop"],"come_back":["clip","storm_walk"],"come_back_for":["clip","storm_walk"],"hurry_after":["gesture","jolt",0.6],
+	"snore":["clip","doze"],"snatch_up":["clip","snatch_up"],"jerk_head":["gesture","jerk_head"],"sniff_disdain":["clip","sniff_disdain"],
+	"brush_sleeve":["clip","brush_sleeve"],"bow_curt":["clip","bow_shallow",1.0,"speed"],"startle":["gesture","jolt"],"appraise":["clip","stroke_chin"],
+	"rub_hands_greedy":["clip","rub_hands_greedy"],"stare_down":["gesture","straighten"],"blink_first":["face",""],"breath":["gesture","settle",0.6],
+	"swat_miss":["clip","swat_fly"],"scribble":["clip","scribble"],"shake_hand":["clip","shake_hand"],"scratch_out":["clip","scribble"],
+	"stomach_growl":["clip","rub_belly"],"floor_creak":["gesture","freeze"],"swallow_loud":["gesture","gulp"],"stifle_cough":["clip","stifle_cough"],
+	"bubble":["face",""],"giggle":["clip","laugh_stifled"],
 }
 ## The director's face words (docs/COURT_STAGE_3D.md section 3) on this layer's
 ## channels: [channel, gain, second channel or -1, gain].
@@ -374,7 +396,9 @@ static func perform(fig:Node3D,args:Dictionary,stage:Object=null)->float:
 	var other:Variant=resolve(fig,at_key,stage) if not at_key.is_empty() else null
 	var spec:Array=ACT_MAP.get(act,["clip",act] if has_clip(act) else [])
 	var opts:={}
-	if args.has("speed"):opts["speed"]=float(args.speed)
+	# the acting's clips keep their own timing; the director's speed only where
+	# the act is about it (a curt bow, a hurried one)
+	if args.has("speed") and spec.size()>3 and String(spec[3])=="speed":opts["speed"]=float(args.speed)
 	if bool(args.get("hold",false)):opts["hold"]=true
 	if spec.is_empty():
 		var fallback:=String(args.get("fallback",""))
@@ -384,11 +408,12 @@ static func perform(fig:Node3D,args:Dictionary,stage:Object=null)->float:
 		"clip":
 			var clip:=String(spec[1])
 			if clip.ends_with("_"):clip+=a.side_of(other)
-			if clip.begins_with("half_catch") and other is Node3D:a.catch(other as Node3D)
 			if not has_clip(clip):
 				clip=String(args.get("fallback",""))
 				if args.has("blend"):opts["blend"]=float(args.blend)
-			return a.act(clip,opts)
+			var secs:float=a.act(clip,opts)
+			if clip.begins_with("half_catch") and other is Node3D:a.catch(other as Node3D)
+			return secs
 		"gesture":
 			var gname:=String(spec[1])
 			a.do_gesture(gname,float(spec[2]) if spec.size()>2 else 1.0,1.0 if a.side_of(other)=="l" else -1.0)
@@ -617,6 +642,11 @@ var _mood_face:=PackedFloat32Array()
 var _vis_amt:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0])
 ## The jaw_open, brows_up, brows_down, eyes_wide and blink morphs (-1: the bones do it).
 var _x_key:=PackedInt32Array([-1,-1,-1,-1,-1])
+var _vis_from:=PackedInt32Array()
+var _vis_to:=PackedInt32Array()
+var _x_from:=PackedInt32Array()
+var _x_to:=PackedInt32Array()
+var _x_amt:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0])
 var _refresh:=0.0
 var _beat_mood:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0])
 var _beat_face:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
@@ -693,12 +723,22 @@ func _axis_along(bone:int,dir:Vector3)->int:
 		if d>score:score=d;best=i
 	return best
 
+## The face's morphs again (the figure was dressed again: other hair, a beard).
+func rebind_face()->void:
+	_sk_mesh.clear();_sk_index.clear();_sk_value.clear();_sk_last.clear()
+	_sk_from_ch.clear();_sk_from_key.clear();_sk_from_gain.clear()
+	_vis_from.clear();_vis_to.clear();_x_from.clear();_x_to.clear()
+	_vis_key.fill(-1);_x_key.fill(-1)
+	_bind_face()
+
 func _bind_face()->void:
 	var meshes:Array=[]
 	var listed:Variant=fig.get(&"_meshes")
 	if listed is Array:
 		for m in listed:
-			if m is MeshInstance3D and String((m as MeshInstance3D).name) in ["Mouth","Brows","Eyes","Body"]:meshes.append(m)
+			if not m is MeshInstance3D:continue
+			var part:=String((m as MeshInstance3D).name)
+			if part in ["Mouth","Brows","Eyes","Body"] or ((part.begins_with("beard_") or part.begins_with("hair_")) and (m as MeshInstance3D).visible):meshes.append(m)
 	var keys:={}
 	for ch:String in SHAPES:
 		for pair:Array in SHAPES[ch]:
@@ -724,21 +764,23 @@ func _bind_face()->void:
 				_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
 			_sk_from_ch.append(int(e[1]));_sk_from_key.append(int(keys[key]));_sk_from_gain.append(float(e[2]))
 			break
+	# every mesh that carries the morph moves with it: the painted mouth, the
+	# skin under it, and a beard riding the jaw
 	for v in VISEMES.size():
 		for m:MeshInstance3D in meshes:
 			var idx:=m.find_blend_shape_by_name(StringName(VISEMES[v]))
 			if idx<0:continue
 			_vis_key[v]=_sk_mesh.size()
+			_vis_from.append(v);_vis_to.append(_sk_mesh.size())
 			_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
-			break
 	# J's expression morphs for the jaw, the brows and the lids (else the bones do it)
 	for pair:Array in [["jaw_open",0],["brows_up",1],["brows_down",2],["eyes_wide",3],["blink",4]]:
 		for m:MeshInstance3D in meshes:
 			var idx:=m.find_blend_shape_by_name(StringName(String(pair[0])))
 			if idx<0:continue
 			_x_key[int(pair[1])]=_sk_mesh.size()
+			_x_from.append(int(pair[1]));_x_to.append(_sk_mesh.size())
 			_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
-			break
 	for name:String in OWNED_ZERO:
 		for m:MeshInstance3D in meshes:
 			var idx:=m.find_blend_shape_by_name(StringName(name))
@@ -846,6 +888,9 @@ func catch(other:Node3D)->void:
 	if not has_clip(caught):return
 	var at:float=them._a.t
 	them.act(caught,{"at":at,"blend":0.15})
+	# and the catch meets the fall where it is (they were already going down)
+	if _a!=null and String(_a.clip).begins_with("half_catch") and at<0.45:
+		_a.t=at;_a.born=at
 
 ## Which way another stands from this person: "l" (their left) or "r".
 func side_of(other:Variant)->String:
@@ -858,6 +903,7 @@ func side_of(other:Variant)->String:
 
 func rest_in(stance_id:String,opts:={})->void:
 	let_go(0.45)
+	rebind_face()
 	var own:=String(OWN_STANCES.get(stance_id,""))
 	var under:=own if not own.is_empty() else stance_id
 	# a seat from the set's mark: the figure's own stool only when none is given
@@ -1267,6 +1313,35 @@ func _gesture(dt:float)->void:
 			_add(b_sh[0],0.0,3.0*a*env,0.0);_add(b_sh[1],0.0,-3.0*a*env,0.0)
 		13: # shift the weight now
 			_shift_wait=0.0
+		14: # two slow grave nods (agreeing, as if they had said it)
+			var p:=pow(maxf(0.0,sin(TAU*u*2.0)),1.3)*env
+			_add(b_head,8.0*a*p,0.0,0.0);_add(b_neck,3.0*a*p,0.0,0.0);_add(b_chest,1.5*a*p,0.0,0.0)
+			_face[CH_STERN]+=0.35*a*env;_face[CH_TIGHT]+=0.35*a*env
+		15: # a look round the room: one way, the other, back
+			var y:=sin(TAU*u)*(1.0-smoothstep(0.85,1.0,u))
+			_add(b_head,-2.0*a*env,0.0,22.0*a*y*_g_dir);_add(b_neck,0.0,0.0,8.0*a*y*_g_dir);_add(b_chest,0.0,0.0,4.0*a*y*_g_dir)
+			_face[CH_BROWS]+=0.4*a*env;_face[CH_EYES_X]+=0.8*y*_g_dir
+		16: # deflate: the shoulders sink, the chest drops, the head goes down a little
+			var d:=smoothstep(0.0,0.4,u)*(1.0-smoothstep(0.75,1.0,u))
+			_add(b_chest,6.0*a*d,0.0,0.0);_add(b_spine,3.0*a*d,0.0,0.0);_add(b_head,6.0*a*d,0.0,0.0)
+			_add(b_sh[0],0.0,3.0*a*d,-6.0*a*d);_add(b_sh[1],0.0,-3.0*a*d,6.0*a*d)
+			_face[CH_WORRY]+=0.5*a*d;_face[CH_LIDS]-=0.15*a*d
+		17: # lean in, eager, to catch an eye
+			_add(b_spine,4.0*a*env,0.0,0.0);_add(b_chest,3.0*a*env,0.0,0.0);_add(b_head,-6.0*a*env,0.0,-4.0*a*env*_g_dir)
+			_hips_move+=Vector3(0.0,0.0,0.02*a*env*body_k)
+			_face[CH_BROWS]+=0.5*a*env;_face[CH_SMILE]+=0.3*a*env;_face[CH_LIDS]+=0.12*a*env
+		18: # a proud nod: chest up, one slow nod
+			var n:=pow(maxf(0.0,sin(PI*clampf((u-0.2)/0.6,0.0,1.0))),1.2)
+			_add(b_chest,-4.0*a*env,0.0,0.0);_add(b_head,-3.0*a*env+9.0*a*n,0.0,0.0)
+			_face[CH_SMILE]+=0.4*a*env
+		19: # a jerk of the head toward a side: come on
+			var j:=sin(PI*clampf(u/0.45,0.0,1.0))
+			_add(b_head,-3.0*a*j,0.0,18.0*a*j*_g_dir);_add(b_neck,0.0,0.0,6.0*a*j*_g_dir)
+			_face[CH_STERN]+=0.4*a*env;_face[CH_BROWS]-=0.3*a*env
+		20: # nodding, and nodding, and nodding
+			var p:=maxf(0.0,sin(TAU*4.5*u))*env
+			_add(b_head,9.0*a*p,0.0,0.0);_add(b_neck,3.0*a*p,0.0,0.0)
+			_face[CH_SMILE]+=0.4*a*env;_face[CH_BROWS]+=0.3*a*env
 
 ## The mouth on the words, beats of the head, and gestures on cue.
 func _speech(dt:float)->void:
@@ -1539,19 +1614,19 @@ func _face_out(dt:float,face_w:float)->void:
 		skel.set_bone_pose_position(b,skel.get_bone_pose_position(b)+_brow_up[s]*lift)
 	# the morphs
 	_sk_value.fill(0.0)
-	for v in VISEMES.size():
-		if _vis_key[v]>=0:_sk_value[_vis_key[v]]+=_vis_amt[v]
+	for i in _vis_from.size():_sk_value[_vis_to[i]]+=_vis_amt[_vis_from[i]]
 	_vis_amt.fill(0.0)
 	for i in _sk_from_ch.size():
 		var ch:=_sk_from_ch[i]
 		if ch<0:continue
 		_sk_value[_sk_from_key[i]]+=face_now[ch]*_sk_from_gain[i]
 	# the jaw, brows and lids on their morphs (J's: eyes_wide is 1.28 open, blink 0.06)
-	if _x_key[0]>=0:_sk_value[_x_key[0]]+=clampf(face_now[CH_JAW]*(0.45 if speaking and _has_visemes() else 1.0),0.0,1.0)
-	if _x_key[1]>=0:_sk_value[_x_key[1]]+=maxf(0.0,face_now[CH_BROWS])
-	if _x_key[2]>=0:_sk_value[_x_key[2]]+=maxf(0.0,-face_now[CH_BROWS])
-	if _x_key[3]>=0:_sk_value[_x_key[3]]+=maxf(0.0,(lids-1.0)/0.28)
-	if _x_key[4]>=0:_sk_value[_x_key[4]]+=maxf(0.0,(1.0-lids)/0.94)
+	_x_amt[0]=clampf(face_now[CH_JAW]*(0.45 if speaking and _has_visemes() else 1.0),0.0,1.0)
+	_x_amt[1]=maxf(0.0,face_now[CH_BROWS])
+	_x_amt[2]=maxf(0.0,-face_now[CH_BROWS])
+	_x_amt[3]=maxf(0.0,(lids-1.0)/0.28)
+	_x_amt[4]=maxf(0.0,(1.0-lids)/0.94)
+	for i in _x_from.size():_sk_value[_x_to[i]]+=_x_amt[_x_from[i]]
 	# now and then every morph is written again (anything else that set one is undone)
 	_refresh-=dt
 	if _refresh<=0.0:
