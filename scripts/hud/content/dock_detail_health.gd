@@ -155,20 +155,39 @@ func _city_health()->Dictionary:
 		})
 		if changes.size()>=6: break
 	if not changes.is_empty(): blocks.append({"type":"rows","heading":"Why lives grew longer or shorter","note":"latest changes","items":changes})
-	var mortality:Dictionary=GameState.simulation_metrics.get("mortality_components",{})
-	var mortality_items:Array=[]
-	var peak:=0.000001
-	for cause in mortality: peak=maxf(peak,float(mortality[cause]))
-	for cause in mortality:
-		var amount:=float(mortality[cause])
-		if amount<=0.0: continue
-		mortality_items.append({"name":String(cause).replace("_"," ").capitalize(),"value":_per_year_words(amount),"ratio":amount/peak,"color":Tokens.RED,"tip":"How many people this is killing each year at present"})
-	if not mortality_items.is_empty(): blocks.append({"type":"bars","heading":"What is killing people now","note":"deaths each year, at the present rate","items":mortality_items})
+	var killing:=mortality_block("How many people this is killing each year at present")
+	if not killing.is_empty(): blocks.append(killing)
 	blocks.append({"type":"tiles","heading":"How people live now","items":[
 		{"label":"Enough to drink","value":"%d in 10" % roundi(water_intake/10.0),"note":"everyone drinks enough" if water_intake>=98 else "some go thirsty","note_color":Tokens.GREEN_TEXT if water_intake>=98 else Tokens.RED_TEXT,"tip":"Out of every ten people, how many drink as much as they need each day"},
 		{"label":"A roof at night","value":"%d in 10" % mini(10,roundi(housing/10.0)),"note":"everyone is sheltered" if housing>=95 else "some sleep in the open","note_color":Tokens.GREEN_TEXT if housing>=95 else Tokens.RED_TEXT,"tip":"Out of every ten people, how many have shelter"},
 	]})
 	return {"kpis":kpis,"brief":brief,"blocks":blocks}
+
+## The hard times' bar on "What is killing people now" (crisis_background.gd).
+const HARD_TIMES_NAME:="Sickness, floods and lean seasons (a usual year)"
+const HARD_TIMES_TIP:="Hard times come in bursts. This is what they take in an ordinary year. When one strikes, its dead are counted under its own cause."
+const HARD_TIMES_NOTE:="deaths each year at the present rate, hard times averaged in"
+
+## "What is killing people now" (this view and the population ledger): each of
+## the day's causes at the present rate, and, muted beside them, what the hard
+## times take in a usual year (GameState.usual_hardship_rate, kept with the
+## day's metrics), so in a calm year too the bars add up to the rate behind
+## LIVES. `tip` is each cause's tooltip. {} with nothing to show.
+static func mortality_block(tip:String)->Dictionary:
+	var metrics:Dictionary=GameState.simulation_metrics
+	var mortality:Dictionary=metrics.get("mortality_components",{}) if metrics.get("mortality_components") is Dictionary else {}
+	var usual:=maxf(0.0,float(metrics.get("usual_hardship_rate",0.0)))
+	var peak:=maxf(0.000001,usual)
+	for cause in mortality: peak=maxf(peak,float(mortality[cause]))
+	var items:Array=[]
+	for cause in mortality:
+		var amount:=float(mortality[cause])
+		if amount<=0.0: continue
+		items.append({"name":String(cause).replace("_"," ").capitalize(),"value":_per_year_words(amount),"ratio":amount/peak,"color":Tokens.RED,"tip":tip})
+	if items.is_empty(): return {}
+	if usual>0.0:
+		items.append({"name":HARD_TIMES_NAME,"value":_per_year_words(usual),"ratio":usual/peak,"color":Tokens.MUTED,"tip":HARD_TIMES_TIP})
+	return {"type":"bars","heading":"What is killing people now","note":HARD_TIMES_NOTE if usual>0.0 else "deaths each year, at the present rate","items":items}
 
 static func _per_year_words(rate:float)->String:
 	if rate<=0.0:return "none"
@@ -236,4 +255,4 @@ func signature()->Array:
 func _city_signature()->Array:
 	var history:Array[Dictionary]=GameState.health_history_snapshot()
 	var latest:Dictionary=history[-1] if not history.is_empty() else {}
-	return [GameState.selected_player_settlement_id,GameState.civilian_care.duplicate(true),roundi(GameState.projected_life_expectancy()*10.0),roundi(Indicators.infant_mortality_per_1000()),roundi(float(GameState.early_care.get("under5",1.0))*100.0),roundi(float(GameState.early_care.get("diet",0.0))*100.0),GameState.lifetime_deaths,latest.duplicate(true),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),roundi(float(GameState.simulation_metrics.get("housing_ratio",0.0))*1000.0),roundi(float(GameState.water_metrics.get("intake_ratio",0.0))*1000.0)]
+	return [GameState.selected_player_settlement_id,GameState.civilian_care.duplicate(true),roundi(GameState.projected_life_expectancy()*10.0),roundi(Indicators.infant_mortality_per_1000()),roundi(float(GameState.early_care.get("under5",1.0))*100.0),roundi(float(GameState.early_care.get("diet",0.0))*100.0),GameState.lifetime_deaths,latest.duplicate(true),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),float(GameState.simulation_metrics.get("usual_hardship_rate",0.0)),roundi(float(GameState.simulation_metrics.get("housing_ratio",0.0))*1000.0),roundi(float(GameState.water_metrics.get("intake_ratio",0.0))*1000.0)]

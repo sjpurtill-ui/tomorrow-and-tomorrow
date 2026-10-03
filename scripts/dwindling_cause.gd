@@ -92,7 +92,7 @@ static func _worst_category(care:Dictionary,band:String,infant_share:float,mothe
 ## People card ("fevers among the old"), by the same rule as the winter tally
 ## (explain). `year` is the hearth tally (hearth_count.gd: born, buried, young,
 ## grown, old, infants, mothers); with no deaths told by age yet, `buried` is
-## split by today's life table (hearth_count.gd age_split).
+## split as the ledger takes ordinary deaths (hearth_count.gd age_split).
 static func short_reason(year:Dictionary,care:Dictionary,people:int)->String:
 	var tally:=year.duplicate()
 	if float(tally.get("young",0.0))+float(tally.get("grown",0.0))+float(tally.get("old",0.0))<=0.0:

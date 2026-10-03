@@ -17,9 +17,12 @@ extends RefCounted
 ## the same odds, tolls, timing, named dead and orders. A calm decade grows;
 ## a bad one is felt; a better order still saves lives.
 ##
-## The screens read the all-cause table (life expectancy, infant mortality,
-## the hearth count's expected deaths): the background plus the crises'
-## expected share, so they show life as it is lived, crises included.
+## Life expectancy and infant mortality read the whole table (the background
+## plus the crises' expected share), so they show life as it is lived, crises
+## included. "What is killing people now" shows the background as natural
+## causes and the share as its own bar, hard times averaged in
+## (GameState.usual_hardship_rate). The winter tally tells the ages the ledger
+## took (hearth_count.gd tally_ages, age_split by the background).
 ##
 ## Measured by tools/sim/crisis_share.py (the surrogate's balanced path on good
 ## and average land, the engine's crisis hazards and tolls, many seeds); re-run

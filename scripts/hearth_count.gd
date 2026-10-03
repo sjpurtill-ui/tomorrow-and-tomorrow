@@ -74,11 +74,11 @@ static func tally(field:String,count:int)->void:
 
 
 ## The ages of the day's ordinary dead, so the winter tally can say whether
-## the small, the grown or the old are dying. Split by the life table the
-## death rate itself comes from (cohort size x age hazard with the early-care
-## multipliers), which is what the LIVES and babes figures show the player.
-static func tally_ages(count:int)->void:
-	var split:=age_split(count)
+## the small, the grown or the old are dying: the ages the ledger took
+## (`removed`, register_population_deaths' affected_cohorts), or, without
+## them, the split the day's ordinary deaths are taken by (age_split).
+static func tally_ages(count:int,removed:Dictionary={})->void:
+	var split:=split_removed(count,removed) if not removed.is_empty() else age_split(count)
 	if split.is_empty():return
 	var state:=WorldSimulation.state
 	var s:Dictionary=state.hearth_season
@@ -87,24 +87,31 @@ static func tally_ages(count:int)->void:
 	for band:String in split:year[band]=float(year.get(band,0.0))+float(split[band])
 
 
-## `count` ordinary deaths split {young, grown, old} by today's life table
-## (cohort size x age hazard with the early-care multipliers); {} when the
-## table expects none. Pure: tally_ages and the People card both read it.
+## `count` ordinary deaths split {young, grown, old} as the ledger takes
+## them: cohort size x the age table's background hazard
+## (GameState._background_cohort_hazards: the whole table less the crises'
+## share, crisis_background.gd), the weights register_population_deaths uses
+## for natural deaths; {} when the table expects none. Pure: tally_ages and
+## the People card both read it.
 static func age_split(count:int)->Dictionary:
 	if count<=0:return {}
 	var state:=WorldSimulation.state
-	var hazards:Dictionary=state._natural_cohort_hazards()
+	var hazards:Dictionary=state._background_cohort_hazards()
 	var expected:Dictionary={}
+	for key:String in hazards:expected[key]=float(state.population_cohorts.get(key,0.0))*float(hazards[key])
+	return split_removed(count,expected)
+
+## `count` deaths split {young, grown, old} in proportion to `by_cohort`
+## ({cohort: deaths or weight}); {} when it holds none.
+static func split_removed(count:int,by_cohort:Dictionary)->Dictionary:
+	if count<=0:return {}
 	var total:=0.0
-	for key:String in hazards:
-		var deaths:=float(state.population_cohorts.get(key,0.0))*float(hazards[key])
-		expected[key]=deaths
-		total+=deaths
+	for key in ["children","youth","early_adults","established_adults","mature_adults","elders"]:total+=maxf(0.0,float(by_cohort.get(key,0.0)))
 	if total<=0.0:return {}
 	var scale:=float(count)/total
 	var grown:=0.0
-	for key in ["youth","early_adults","established_adults","mature_adults"]:grown+=float(expected.get(key,0.0))
-	return {"young":float(expected.get("children",0.0))*scale,"grown":grown*scale,"old":float(expected.get("elders",0.0))*scale}
+	for key in ["youth","early_adults","established_adults","mature_adults"]:grown+=maxf(0.0,float(by_cohort.get(key,0.0)))
+	return {"young":maxf(0.0,float(by_cohort.get("children",0.0)))*scale,"grown":grown*scale,"old":maxf(0.0,float(by_cohort.get("elders",0.0)))*scale}
 
 
 static func _open(s:Dictionary,day:int)->void:

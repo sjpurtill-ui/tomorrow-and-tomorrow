@@ -7,6 +7,8 @@ extends GdUnitTestSuite
 const GAME_STATE_SCRIPT:=preload("res://scripts/game_state.gd")
 const Background:=preload("res://scripts/crisis_background.gd")
 const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
+const HearthCount:=preload("res://scripts/hearth_count.gd")
+const Health:=preload("res://scripts/hud/content/dock_detail_health.gd")
 
 class FakeDiscovery extends Node:
 	var effects:Dictionary={}
@@ -87,3 +89,73 @@ func test_the_screens_show_life_as_lived_crises_included()->void:
 	assert_float(state.life_expectancy_from(inputs)).is_between(18.0,33.0)
 	var infants:float=preload("res://scripts/civilization_indicators.gd").infant_mortality_per_1000(state,discovery)
 	assert_float(infants).is_between(160.0,400.0)
+
+func after_test()->void:
+	GameState.reset_for_new_world(74017)
+
+## The people's own state (GameState, what HearthCount and the screens read),
+## fed and healthy, with the founders' early care.
+func _home()->void:
+	GameState.reset_for_new_world(184271)
+	GameState.initialize_population_model()
+	GameState.population_health=0.97
+	GameState.food_security=0.97
+	GameState.housing_capacity=135
+	GameState.early_care_blend=1.0
+	for day in 120:GameState.food_history.append({"day":day,"diet_quality":0.66})
+	GameState.early_care=EarlyCare.profile(GameState,discovery)
+
+## The winter tally (and the Steward's word on who is dying) tells the ages the
+## ledger took, not the whole table's: ordinary deaths fall by the background.
+func test_the_winter_tally_tells_the_ages_the_ledger_took()->void:
+	_home()
+	var split:=HearthCount.age_split(10)
+	var removed:Dictionary=GameState.register_population_deaths(10,"Natural causes").affected_cohorts
+	var grown:=0.0
+	for key in ["youth","early_adults","established_adults","mature_adults"]:grown+=float(removed.get(key,0.0))
+	assert_float(float(split.young)).is_equal_approx(float(removed.children),0.0001)
+	assert_float(float(split.grown)).is_equal_approx(grown,0.0001)
+	assert_float(float(split.old)).is_equal_approx(float(removed.elders),0.0001)
+	# The day's tally counts what the ledger removed.
+	GameState.hearth_season={}
+	HearthCount.tally_ages(10,removed)
+	var year:Dictionary=GameState.hearth_season.year
+	assert_float(float(year.young)).is_equal_approx(float(removed.children),0.0001)
+	assert_float(float(year.old)).is_equal_approx(float(removed.elders),0.0001)
+	# Not the whole table's split: the crises take more of the young's share.
+	var whole:Dictionary=GameState._natural_cohort_hazards()
+	var whole_young:=float(GameState.population_cohorts.children)*float(whole.children)
+	var whole_total:=0.0
+	for key:String in whole:whole_total+=float(GameState.population_cohorts[key])*float(whole[key])
+	assert_float(float(HearthCount.age_split(10).young)).is_less(whole_young/whole_total*10.0)
+
+## "What is killing people now": the day's causes, and the hard times' usual
+## year beside them, muted, so in a calm year the bars add up to the whole table.
+func test_the_killing_bars_add_up_to_the_whole_table()->void:
+	_home()
+	var natural:float=GameState.current_natural_mortality_rate(1.1)
+	var usual:float=GameState.usual_hardship_rate(1.1)
+	GameState.simulation_metrics["mortality_components"]={"Natural causes":natural,"Illness":0.0011}
+	GameState.simulation_metrics["usual_hardship_rate"]=usual
+	assert_float(natural+usual).is_equal_approx(GameState._natural_rate(1.1,false),0.000001)
+	assert_float(usual).is_greater(0.0)
+	var block:=Health.mortality_block("tip")
+	assert_str(String(block.heading)).is_equal("What is killing people now")
+	assert_str(String(block.note)).is_equal("deaths each year at the present rate, hard times averaged in")
+	var last:Dictionary=(block.items as Array)[-1]
+	assert_str(String(last.name)).is_equal("Sickness, floods and lean seasons (a usual year)")
+	assert_str(String(last.tip)).is_equal("Hard times come in bursts. This is what they take in an ordinary year. When one strikes, its dead are counted under its own cause.")
+	assert_str(String(last.value)).is_equal(Health._per_year_words(usual))
+	assert_int((block.items as Array).size()).is_equal(3)
+	# Before the first day's reckoning there is no usual year to show.
+	GameState.simulation_metrics.erase("usual_hardship_rate")
+	var plain:=Health.mortality_block("tip")
+	assert_int((plain.items as Array).size()).is_equal(2)
+	assert_str(String(plain.note)).is_equal("deaths each year, at the present rate")
+
+## A save from before the mortality components keeps only its whole death rate:
+## the life projection takes the whole table out of it, not the share twice.
+func test_an_old_saves_rate_never_counts_the_share_twice()->void:
+	_home()
+	GameState.simulation_metrics={"annual_death_rate":GameState._natural_rate(-1.0,false)+0.004}
+	assert_float(GameState._current_exceptional_mortality_rate()).is_equal_approx(0.004,0.000001)
