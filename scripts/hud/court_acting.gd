@@ -1,4 +1,3 @@
-class_name CourtActing
 extends SkeletonModifier3D
 ## Court acting (K): how each person of the court moves, looks and speaks.
 ##
@@ -26,16 +25,17 @@ extends SkeletonModifier3D
 ## vocabulary and the performance.
 ##
 ## Use (static, on a CourtFigure3D):
-##   CourtActing.play(fig, "gasp", {blend, loop, speed, hold, out})  -> seconds
-##   CourtActing.look_at(fig, Vector3 | figure Node3D | null, weight)
-##   CourtActing.set_mood(fig, {joy, fear, anger, scorn, awe, tired})
-##   CourtActing.speak(fig, text, seconds)
-##   CourtActing.idle(fig, stance_id)
-##   CourtActing.gesture(fig, "nod" | "nod_eager" | "shake" | "tilt" | "shrug" | "double_take" | "jolt" | "settle" | "flinch_small")
-##   CourtActing.hush(fig, true)    the god speaks: stillness
-##   CourtActing.stop(fig)          let go of a held reaction
+##   Self.play(fig, "gasp", {blend, loop, speed, hold, out})  -> seconds
+##   Self.look_toward(fig, Vector3 | figure Node3D | null, weight)   (look_at on the hook)
+##   Self.set_mood(fig, {joy, fear, anger, scorn, awe, tired})
+##   Self.speak(fig, text, seconds)
+##   Self.idle(fig, stance_id)
+##   Self.gesture(fig, "nod" | "nod_eager" | "shake" | "tilt" | "shrug" | "double_take" | "jolt" | "settle" | "flinch_small")
+##   Self.hush(fig, true)    the god speaks: stillness
+##   Self.stop(fig)          let go of a held reaction
 ## Figure axes (skeleton space): +X the figure's left, +Y up, +Z its front.
 
+const Self:=preload("res://scripts/hud/court_acting.gd")
 const DIR:="res://assets/court_figures/anims/"
 const MANIFEST_PATH:=DIR+"court_anims.json"
 enum {CH_JAW,CH_SMILE,CH_TIGHT,CH_WORRY,CH_STERN,CH_BROWS,CH_LIDS,CH_PUFF,CH_SNEER,CH_EYES_X,CH_EYES_Y,CH_FROWN,CH_COUNT}
@@ -48,8 +48,38 @@ const FIGURE_MOODS:={"warm":{"joy":0.55},"neutral":{},"afraid":{"fear":0.7},"def
 const SEATED:=["sit","crouch"]
 ## The arms a held prop keeps busy (they do not drop the bowl to gasp).
 const PROP_ARMS:={"staff":["arm_R"],"bowl":["arm_L","arm_R"]}
-const GESTURES:=["nod","nod_eager","shake","tilt","shrug","double_take","jolt","settle","flinch_small"]
-const GESTURE_LEN:=[0.65,1.35,1.25,1.7,1.5,1.3,0.8,1.6,0.7]
+const GESTURES:=["nod","nod_eager","shake","tilt","shrug","double_take","jolt","settle","flinch_small","gulp","tremble","freeze","straighten","shift"]
+const GESTURE_LEN:=[0.65,1.35,1.25,1.7,1.5,1.3,0.8,1.6,0.7,0.7,1.6,0.9,0.9,0.2]
+## The director's acts (court_director.gd ACTS) as this layer performs them:
+## [kind, name, amount]. kind: "clip" (a library clip; a name ending "_" takes
+## _l or _r from where args.at stands), "gesture" (procedural, on top of
+## anything), "look" or "face" (only the look and face the beat carries).
+## Anything else falls back to the figure's own clip the beat names.
+const ACT_MAP:={
+	"kneel":["clip","kneel"],"kneel_bound":["clip","kneel_bound"],"prostrate":["clip","kneel"],
+	"bow":["clip","bow_deep"],"bow_deep":["clip","bow_overdeep"],"bow_small":["clip","bow_shallow"],"bow_early":["clip","bow_shallow"],
+	"double_bow":["clip","bow_shallow"],"copy":["clip","bow_shallow"],"plead":["clip","talk_plead"],
+	"stand_firm":["clip","defiant"],"cross_arms":["clip","defiant"],"stiffen":["gesture","straighten"],"straighten":["gesture","straighten"],
+	"recover":["gesture","straighten"],"gulp":["gesture","gulp"],"exhale":["gesture","settle"],"pretend_calm":["gesture","settle",0.6],
+	"freeze":["gesture","freeze"],"flinch":["clip","flinch"],"knees_knock":["clip","knees_knock"],"tremble":["gesture","tremble"],
+	"step_back":["clip","step_back"],"gasp":["clip","gasp"],"hand_to_mouth":["clip","gasp"],"nod":["gesture","nod"],
+	"shake_head":["gesture","shake"],"side_eye":["clip","side_eye_"],"exchange_look":["gesture","tilt",0.6],"stifle_laugh":["clip","laugh_stifled"],
+	"elbow":["clip","elbow_"],"wobble":["clip","wobble"],"double_take":["gesture","double_take"],"hide_behind":["clip","hide_behind_"],
+	"peek_out":["clip","peek_out_"],"faint":["clip","faint_"],"half_catch":["clip","half_catch_"],"drop_bowl":["clip","drop_bowl"],
+	"doze":["clip","doze"],"jerk_awake":["clip","jerk_awake"],"yawn":["clip","yawn"],"snap_alert":["clip","snap_alert"],
+	"hesitate":["gesture","tilt",0.7],"sympathetic_look":["gesture","tilt",0.5],"face_fall":["gesture","settle",1.2],"bolt":["clip","bolt_"],
+	"shrug":["gesture","shrug",0.55],"struggle_bundle":["clip","struggle_bundle"],"set_down_bundle":["clip","set_down_bundle"],
+	"lift_bundle":["clip","lift_bundle"],"scratch":["clip","scratch_head"],"fidget":["gesture","settle",0.7],"shift_weight":["gesture","shift"],
+	"glance_up":["gesture","flinch_small",0.4],"laugh":["clip","laugh"],"look_up":["look",""],"hold_gaze":["look",""],"look_at":["look",""],
+	"look_away":["look",""],"watch_go":["look",""],"look_wrong_way":["look",""],"late_lift":["look",""],"glance_door":["look",""],
+	"eye_food":["look",""],"beam":["face",""],"smile_warm":["face",""],"smirk":["face",""],"grimace":["face",""],"eyes_narrow":["face",""],
+	"lips_pressed":["face",""],"stricken":["face",""],"head_down":["face",""],"lean_in":["face",""],"mutter":["face",""],"lick_lips":["face",""],
+}
+## The director's face words (docs/COURT_STAGE_3D.md section 3) on this layer's
+## channels: [channel, gain, second channel or -1, gain].
+const FACE_WORDS:={"brows_up":[5,1.0,-1,0.0],"brows_down":[4,0.8,5,-0.6],"brows_worried":[3,1.0,-1,0.0],"lips_pressed":[2,1.0,-1,0.0],
+	"eyes_wide":[6,0.35,-1,0.0],"eyes_narrow":[6,-0.45,-1,0.0],"jaw_open":[0,1.0,-1,0.0],"smile":[1,1.0,-1,0.0],"sneer":[8,1.0,-1,0.0],
+	"cheeks_puff":[7,1.0,-1,0.0],"blink":[6,-0.95,-1,0.0],"frown":[11,1.0,-1,0.0]}
 ## Shape keys each face channel can drive, best first (J's contract names, then the mood morphs).
 const SHAPES:={
 	"smile":[["smile",1.0],["mood_smile",1.0]],
@@ -70,6 +100,9 @@ static var _manifest:Dictionary={}
 static var _anims:Dictionary={}
 static var _maps:Dictionary={}
 static var _faces:Dictionary={}
+static var _rests:Dictionary={}       # variant -> {bone: the library rig's local rest}
+static var _corr:Dictionary={}        # variant -> Array[Quaternion] by the figure's bone: library rest -> figure rest
+static var _hips_off:Dictionary={}    # variant -> Vector3
 ## The whole court is out of sight (its window closed): nobody is moved.
 static var paused_all:=false
 
@@ -88,6 +121,8 @@ class Layer:
 	var blend_in:=0.15
 	var blend_out:=0.5
 	var weights:PackedFloat32Array
+	var corr:Array[Quaternion]=[]
+	var hips_off:=Vector3.ZERO
 	var fade_from:=-1.0
 	var fade_len:=0.4
 	var gain:=1.0
@@ -143,25 +178,69 @@ static func library(variant:String)->Dictionary:
 	if _anims.has(variant):return _anims[variant]
 	var out:={}
 	var file:=String((manifest().get("files",{}) as Dictionary).get(variant,"court_anims_%s.glb" % variant))
-	var path:=DIR+file
-	if ResourceLoader.exists(path):
-		var packed:=load(path) as PackedScene
-		var made:Node=packed.instantiate() if packed!=null else null
-		if made!=null:
-			for node in made.find_children("*","AnimationPlayer",true,false):
-				var player:=node as AnimationPlayer
-				for name:StringName in player.get_animation_list():
-					var clean:=String(name).get_slice("/",String(name).get_slice_count("/")-1)
-					out[clean]=player.get_animation(name)
-			made.free()
+	var made:=load_glb(DIR+file)
+	var rests:={}
+	if made!=null:
+		for node in made.find_children("*","Skeleton3D",true,false):
+			var sk:=node as Skeleton3D
+			for i in sk.get_bone_count():rests[sk.get_bone_name(i)]=sk.get_bone_rest(i)
+		for node in made.find_children("*","AnimationPlayer",true,false):
+			var player:=node as AnimationPlayer
+			for name in player.get_animation_list():
+				var clean:=String(name).get_slice("/",String(name).get_slice_count("/")-1)
+				out[clean]=player.get_animation(name)
+		made.free()
 	_anims[variant]=out
+	_rests[variant]=rests
 	return out
 
-## The AnimationLibrary of one body, for anyone who wants to play the clips on an AnimationPlayer.
+## How the library's rig sits on a figure's own skeleton: each bone's rest
+## turned onto the figure's (identity while they match), the hips' offset.
+## A body rebuilt since the library was made still takes its clips.
+static func _fit(variant:String,skel:Skeleton3D)->void:
+	if _corr.has(variant):return
+	library(variant)
+	var rests:Dictionary=_rests.get(variant,{})
+	var corr:Array[Quaternion]=[]
+	corr.resize(skel.get_bone_count())
+	var off:=Vector3.ZERO
+	for i in skel.get_bone_count():
+		corr[i]=Quaternion.IDENTITY
+		var name:=skel.get_bone_name(i)
+		if not rests.has(name):continue
+		var mine:Transform3D=rests[name]
+		var theirs:=skel.get_bone_rest(i)
+		corr[i]=theirs.basis.get_rotation_quaternion()*mine.basis.get_rotation_quaternion().inverse()
+		if name=="hips":off=theirs.origin-mine.origin
+	_corr[variant]=corr
+	_hips_off[variant]=off
+
+## A library file read as it is (no import step: the same data in every
+## checkout and in the player's game); an imported copy only if that fails.
+static func load_glb(path:String)->Node:
+	if FileAccess.file_exists(path):
+		var doc:=GLTFDocument.new()
+		var state:=GLTFState.new()
+		if doc.append_from_file(path,state)==OK:
+			var made:=doc.generate_scene(state)
+			if made!=null:return made
+	if ResourceLoader.exists(path):
+		var packed:=load(path) as PackedScene
+		if packed!=null:return packed.instantiate()
+	return null
+
+## The AnimationLibrary of one body, for anyone who wants to play the clips
+## on an AnimationPlayer ("act/<clip>" on a figure's player).
+static var _libraries:Dictionary={}
 static func animation_library(variant:String)->AnimationLibrary:
+	return _shared_library(variant)
+
+static func _shared_library(variant:String)->AnimationLibrary:
+	if _libraries.has(variant):return _libraries[variant]
 	var lib:=AnimationLibrary.new()
 	var anims:=library(variant)
 	for name:String in anims:lib.add_animation(StringName(name),anims[name])
+	_libraries[variant]=lib
 	return lib
 
 ## [track, bone, kind(0 rotation, 1 position, 2 scale)] for a clip on a skeleton of a body.
@@ -199,60 +278,147 @@ static func _face_for(clip:String)->Array:
 
 # --- the static API ------------------------------------------------------------------
 
+## What the stage plugs in (docs/COURT_STAGE_3D.md §5: CourtStage.acting):
+## an object whose play / look_at / mood / set_mood / speak / gesture / idle /
+## hush / stop take the figure first.
+static func service()->RefCounted:
+	return Service.new()
+
+## Each takes the figure first, then either the plain arguments or the
+## director's lowered beat args (court_director.gd lower(): play {clip,
+## fallback, hold, speed, blend, at}, mood {vector, name, face, dur, hold},
+## look_at {target: "god", "god_up", "away" or a cast key, weight}) and the
+## stage (court_stage.gd), which finds the god's point and the cast by key.
+class Service extends RefCounted:
+	func play(fig:Node3D,what:Variant="",opts:Variant=null,stage:Object=null)->float:
+		if what is Dictionary:return Self.perform(fig,what,opts if opts is Object else stage)
+		return Self.play(fig,String(what),opts if opts is Dictionary else {})
+	func look_at(fig:Node3D,target:Variant=null,weight:Variant=1.0,stage:Object=null)->void:
+		if target is Dictionary:
+			var st:Object=weight if weight is Object else stage
+			Self.look_toward(fig,Self.resolve(fig,(target as Dictionary).get("target",null),st),float((target as Dictionary).get("weight",0.8)))
+		else:Self.look_toward(fig,Self.resolve(fig,target,stage),float(weight) if not weight is Object else 1.0)
+	func set_mood(fig:Node3D,mood_value:Variant=null,_stage:Object=null)->void:Self.set_mood(fig,mood_value)
+	func mood(fig:Node3D,mood_value:Variant=null,_stage:Object=null)->void:Self.set_mood(fig,mood_value)
+	func speak(fig:Node3D,text:Variant="",seconds:Variant=2.0,opts:Variant=null)->void:
+		if text is Dictionary:
+			Self.speak(fig,String((text as Dictionary).get("text","")),float((text as Dictionary).get("seconds",2.0)),text)
+		else:Self.speak(fig,String(text),float(seconds) if not seconds is Object else 2.0,opts if opts is Dictionary else {})
+	func gesture(fig:Node3D,what:Variant="",amount:Variant=1.0,toward:=1.0)->void:
+		if what is Dictionary:Self.perform(fig,what,amount if amount is Object else null)
+		else:Self.gesture(fig,String(what),float(amount) if not amount is Object else 1.0,toward)
+	func idle(fig:Node3D,stance_id:Variant="",_stage:Object=null)->void:
+		Self.idle(fig,String((stance_id as Dictionary).get("stance","")) if stance_id is Dictionary else String(stance_id))
+	func hush(fig:Node3D,on:Variant=true,_stage:Object=null)->void:Self.hush(fig,bool(on) if not on is Dictionary else true)
+	func stop(fig:Node3D,blend:Variant=-1.0,_stage:Object=null)->void:Self.stop(fig,float(blend) if not blend is Dictionary else -1.0)
+
+## A point or figure to look at from the director's words: "god", "god_up"
+## (the voice above), "away" (off to one side and down), a cast key, or
+## anything look_toward takes.
+static func resolve(fig:Node3D,target:Variant,stage:Object)->Variant:
+	if not (target is String or target is StringName):return target
+	var word:=String(target)
+	if word.is_empty():return null
+	if word=="god" or word=="god_up":
+		if stage!=null and stage.has_method(&"god_point"):return stage.call(&"god_point",word=="god_up")
+		return fig.global_position+fig.global_transform.basis*Vector3(0.0,2.6,3.0)
+	if word=="away":
+		var away:=-1.0 if (hash(String(fig.name))&1)==0 else 1.0
+		return fig.global_position+fig.global_transform.basis*Vector3(2.5*away,0.6,0.4)
+	if stage!=null and stage.has_method(&"figure"):
+		var other:Variant=stage.call(&"figure",word)
+		if other is Object and is_instance_valid(other) and (other as Object).get(&"body3d") is Node3D:return (other as Object).get(&"body3d")
+	return null
+
+## A beat of the director's, performed: its act as a clip, a gesture or only
+## its look and face, else the figure's own clip it names; returns seconds.
+static func perform(fig:Node3D,args:Dictionary,stage:Object=null)->float:
+	var a=of(fig)
+	if a==null:return 0.0
+	var act:=String(args.get("beat",args.get("clip","")))
+	var at_key:=String(args.get("at",""))
+	var other:Variant=resolve(fig,at_key,stage) if not at_key.is_empty() else null
+	var spec:Array=ACT_MAP.get(act,["clip",act] if has_clip(act) else [])
+	var opts:={}
+	if args.has("speed"):opts["speed"]=float(args.speed)
+	if bool(args.get("hold",false)):opts["hold"]=true
+	if spec.is_empty():
+		var fallback:=String(args.get("fallback",""))
+		if not fallback.is_empty():return a.act(fallback,{"blend":float(args.get("blend",0.25))})
+		return 0.0
+	match String(spec[0]):
+		"clip":
+			var clip:=String(spec[1])
+			if clip.ends_with("_"):clip+=a.side_of(other)
+			if not has_clip(clip):
+				clip=String(args.get("fallback",""))
+				if args.has("blend"):opts["blend"]=float(args.blend)
+			return a.act(clip,opts)
+		"gesture":
+			var gname:=String(spec[1])
+			a.do_gesture(gname,float(spec[2]) if spec.size()>2 else 1.0,1.0 if a.side_of(other)=="l" else -1.0)
+			return float(GESTURE_LEN[GESTURES.find(gname)]) if GESTURES.has(gname) else 0.0
+	return float(args.get("dur",0.8))
+
 ## The acting on a figure (made the first time it is asked for).
-static func of(fig:Node3D)->CourtActing:
+static func of(fig:Node3D)->Node:
 	if fig==null or not is_instance_valid(fig):return null
-	var existing:Variant=fig.get_meta(&"court_acting",null)
+	var existing:Variant=fig.get_meta(&"court_acting") if fig.has_meta(&"court_acting") else null
 	var skel:=fig.get(&"skeleton") as Skeleton3D
-	if existing is CourtActing and is_instance_valid(existing) and (existing as CourtActing).skel==skel:return existing
+	if existing is Node and is_instance_valid(existing) and (existing as Node).get_script()==Self and (existing as Node).get(&"skel")==skel:return existing
 	if skel==null:return null
-	var actor:=CourtActing.new()
+	var actor:Node=Self.new()
 	actor.name="Acting"
-	actor._bind(fig,skel)
+	actor.call(&"_bind",fig,skel)
 	skel.add_child(actor)
 	fig.set_meta(&"court_acting",actor)
 	return actor
 
 static func play(fig:Node3D,clip:String,opts:={})->float:
-	var a:=of(fig)
+	var a=of(fig)
 	return a.act(clip,opts) if a!=null else 0.0
 
-static func look_at(fig:Node3D,target:Variant,weight:=1.0)->void:
-	var a:=of(fig)
+## (look_at on the stage's hook; here it may not shadow Node3D.look_at)
+static func look_toward(fig:Node3D,target:Variant,weight:=1.0)->void:
+	var a=of(fig)
 	if a!=null:a.look(target,weight)
 
-static func set_mood(fig:Node3D,mood:Dictionary)->void:
-	var a:=of(fig)
-	if a!=null:a.feel(mood)
+## mood: {joy, fear, anger, scorn, awe, tired} (0..1 each), or one of the
+## figure's mood words (warm, neutral, afraid, defiant, grieved).
+static func set_mood(fig:Node3D,mood:Variant)->void:
+	var a=of(fig)
+	if a==null:return
+	if mood is Dictionary:a.feel(mood)
+	elif mood is String or mood is StringName:a.feel(FIGURE_MOODS.get(String(mood),{}))
 
 static func speak(fig:Node3D,text:String,seconds:float,opts:={})->void:
-	var a:=of(fig)
+	var a=of(fig)
 	if a!=null:a.talk(text,seconds,opts)
 
 static func idle(fig:Node3D,stance_id:String)->void:
-	var a:=of(fig)
+	var a=of(fig)
 	if a!=null:a.rest_in(stance_id)
 
 static func gesture(fig:Node3D,name:String,amount:=1.0,toward:=1.0)->void:
-	var a:=of(fig)
+	var a=of(fig)
 	if a!=null:a.do_gesture(name,amount,toward)
 
 static func hush(fig:Node3D,on:=true)->void:
-	var a:=of(fig)
+	var a=of(fig)
 	if a!=null:a.hushed=on
 
 static func stop(fig:Node3D,blend:=-1.0)->void:
-	var a:=of(fig)
+	var a=of(fig)
 	if a!=null:a.let_go(blend)
 
 ## How lively the idle life is (fidgets, glances, shifts): 0 still .. 1 as people are.
 static func set_ambient(fig:Node3D,level:float)->void:
-	var a:=of(fig)
+	var a=of(fig)
 	if a!=null:a.ambient=clampf(level,0.0,1.0)
 
 ## Points in the hall an idle glance may fall on (neighbours, the fire, a gift).
 static func set_glance_points(fig:Node3D,points:PackedVector3Array)->void:
-	var a:=of(fig)
+	var a=of(fig)
 	if a!=null:a.glance_points=points
 
 # --- one figure ----------------------------------------------------------------------
@@ -372,6 +538,13 @@ var _view_container:CanvasItem
 var _consts:Dictionary={}
 var _mood_face:=PackedFloat32Array()
 var _vis_amt:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0])
+var _beat_mood:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0])
+var _beat_face:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
+var _beat_t:=-1.0
+var _beat_len:=1.0
+var _beat_hold:=false
+var _beat_w:=0.0
+var _still:=1.0
 
 func _bind(figure:Node3D,skeleton:Skeleton3D)->void:
 	fig=figure;skel=skeleton
@@ -422,6 +595,8 @@ func _bind(figure:Node3D,skeleton:Skeleton3D)->void:
 	_fidget_wait=rng.randf_range(18.0,45.0)
 	_glance_wait=rng.randf_range(0.5,2.5)
 	_bind_face()
+	if fig.has_method(&"add_library") and not library(variant).is_empty():
+		fig.call(&"add_library","act",_shared_library(variant))
 	# J's head-turn modifiers give way: this turns the head (and follows their gaze point).
 	var looks:Variant=fig.get(&"_looks")
 	if looks is Array:
@@ -491,6 +666,9 @@ func act(clip:String,opts:={})->float:
 	layer.anim=library(variant).get(clip)
 	if layer.anim==null:return 0.0
 	layer.map=_map_for(variant,clip,skel)
+	_fit(variant,skel)
+	layer.corr=_corr[variant]
+	layer.hips_off=_hips_off[variant]
 	layer.face=_face_for(clip)
 	layer.face_fps=float(manifest().get("face_fps",15.0))
 	layer.length=float(meta.get("length",layer.anim.length))
@@ -535,8 +713,36 @@ func look(target:Variant,weight:=1.0)->void:
 		_look_kind=3 if (target as Node3D).has_method(&"head_top") else 2
 
 func feel(mood:Dictionary)->void:
+	if mood.has("vector") or mood.has("face") or mood.has("dur"):
+		_beat_feel(mood);return
 	_mood_explicit=true
 	for i in M_COUNT:_mood_target[i]=clampf(float(mood.get(MOODS[i],0.0)),0.0,1.0)
+
+## A beat's mood and face (the director's): eased in, held for its seconds
+## (or until the next one, when it holds), eased out; on top of the person's own mood.
+func _beat_feel(args:Dictionary)->void:
+	var vector:Dictionary=args.get("vector",{}) if args.get("vector") is Dictionary else {}
+	for i in M_COUNT:_beat_mood[i]=clampf(float(vector.get(MOODS[i],0.0)),0.0,1.0)
+	_beat_face.fill(0.0)
+	var words:Dictionary=args.get("face",{}) if args.get("face") is Dictionary else {}
+	for w:String in words:
+		var map:Array=FACE_WORDS.get(w,[])
+		if map.is_empty():continue
+		var v:=clampf(float(words[w]),0.0,1.0)
+		_beat_face[int(map[0])]+=v*float(map[1])
+		if int(map[2])>=0:_beat_face[int(map[2])]+=v*float(map[3])
+	_beat_t=0.0
+	_beat_len=maxf(0.2,float(args.get("dur",1.0)))
+	_beat_hold=bool(args.get("hold",false))
+
+## Which way another stands from this person: "l" (their left) or "r".
+func side_of(other:Variant)->String:
+	var at:=Vector3.ZERO
+	if other is Node3D and is_instance_valid(other):at=(other as Node3D).global_position
+	elif other is Vector3:at=other
+	else:return "l" if (hash(String(fig.name))&1)==0 else "r"
+	var local:=fig.global_transform.affine_inverse()*at
+	return "l" if local.x>=0.0 else "r"
 
 func rest_in(stance_id:String)->void:
 	let_go(0.45)
@@ -551,9 +757,13 @@ func let_go(blend:=-1.0)->void:
 			(layer as Layer).fade_from=(layer as Layer).t
 			(layer as Layer).fade_len=blend if blend>0.0 else (layer as Layer).blend_out
 
+## A gesture: one of GESTURES (procedural, on top of anything), else a clip
+## of the library, else one of the figure's own clips.
 func do_gesture(name:String,amount:=1.0,toward:=1.0)->void:
 	var i:=GESTURES.find(name)
-	if i<0:return
+	if i<0:
+		act(name)
+		return
 	_g=i;_g_t=0.0;_g_amount=amount;_g_dir=signf(toward) if toward!=0.0 else 1.0
 
 ## The words as the mouth will say them: syllables spread over the seconds the
@@ -566,8 +776,7 @@ func talk(text:String,seconds:float,opts:={})->void:
 	var stress:=PackedFloat32Array()
 	var mark:=""
 	var index:=0
-	for raw in text.replace("
-"," ").split(" ",false):
+	for raw in text.replace("\n"," ").split(" ",false):
 		var word:=raw.strip_edges()
 		var tail:=""
 		while not word.is_empty() and ",.;:!?-–—\"')".contains(word[word.length()-1]):
@@ -646,8 +855,12 @@ static func _syllables(word:String)->PackedInt32Array:
 		if v and not in_vowel:
 			out.append(0 if c=="a" else (1 if c in ["e","i","y"] else 2))
 		in_vowel=v
-	# a final silent e
-	if w.length()>3 and w.ends_with("e") and out.size()>2:out.remove_at(out.size()-1)
+	# a final silent e, and -es and -ed that add no beat (stores, loved; not boxes, wanted)
+	var n:=w.length()
+	if n>3 and out.size()>1:
+		if w.ends_with("e") and not w.ends_with("le"):out.remove_at(out.size()-1)
+		elif w.ends_with("es") and not "sxzh".contains(w[n-3]):out.remove_at(out.size()-1)
+		elif w.ends_with("ed") and not "td".contains(w[n-3]):out.remove_at(out.size()-1)
 	if out.is_empty():out.append(0)
 	return out
 
@@ -717,10 +930,10 @@ func _sample(layer:Layer)->void:
 		if gw>0.001:
 			match map[i+2]:
 				0:
-					var q:=anim.rotation_track_interpolate(map[i],at)
+					var q:=layer.corr[b]*anim.rotation_track_interpolate(map[i],at)
 					skel.set_bone_pose_rotation(b,skel.get_bone_pose_rotation(b).slerp(q,gw))
 				1:
-					var p:=anim.position_track_interpolate(map[i],at)
+					var p:=anim.position_track_interpolate(map[i],at)+(layer.hips_off if b==b_hips else Vector3.ZERO)
 					skel.set_bone_pose_position(b,skel.get_bone_pose_position(b).lerp(p,gw))
 				2:
 					var s:=anim.scale_track_interpolate(map[i],at)
@@ -749,14 +962,26 @@ func _moods(dt:float)->void:
 			_fig_mood=m
 			var d:Dictionary=FIGURE_MOODS.get(m,{})
 			for i in M_COUNT:_mood_target[i]=float(d.get(MOODS[i],0.0))
+	# a beat's mood comes in quickly, stays its time, goes
+	if _beat_t>=0.0:
+		_beat_t+=dt
+		var w:=smoothstep(0.0,0.15,_beat_t)
+		if not _beat_hold:w*=1.0-smoothstep(_beat_len,_beat_len+0.35,_beat_t)
+		_beat_w=w
+		if not _beat_hold and _beat_t>_beat_len+0.35:
+			_beat_t=-1.0;_beat_w=0.0
 	var k:=1.0-exp(-dt*2.2)
-	for i in M_COUNT:_mood[i]=lerpf(_mood[i],_mood_target[i],k)
+	var kb:=1.0-exp(-dt*9.0)
+	for i in M_COUNT:
+		var want:=maxf(_mood_target[i],_beat_mood[i]*_beat_w)
+		_mood[i]=lerpf(_mood[i],want,kb if want>_mood[i] and _beat_w>0.0 else k)
 
 ## Breathing, a weight shift now and then, sway, the set of a mood, trembling,
 ## idle fidgets and glances.
 func _life(dt:float,walking:bool)->void:
 	var fear:=_mood[M_FEAR];var joy:=_mood[M_JOY];var anger:=_mood[M_ANGER];var scorn:=_mood[M_SCORN];var awe:=_mood[M_AWE];var tired:=_mood[M_TIRED]
-	var still:=0.45 if hushed else 1.0
+	var still:=(0.45 if hushed else 1.0)*_still
+	_still=minf(1.0,_still+dt*2.0)
 	# breath: faster and shallower in fear, slow and deep when tired, held when hushed
 	var period:=_breath_period*(1.0-0.35*fear+0.30*tired)*(1.25 if hushed else 1.0)
 	_breath=fmod(_breath+dt/period,1.0)
@@ -773,10 +998,14 @@ func _life(dt:float,walking:bool)->void:
 		_shift_u=minf(1.0,_shift_u+dt/1.5)
 		_shift=lerpf(_shift_from,_shift_to,smoothstep(0.0,1.0,_shift_u))
 	var s:=_shift+0.35*scorn
-	_hips_move+=_hips_side*(0.011*s*body_k)
-	_add(b_hips,0.0,1.0*s,-1.6*s)
-	_add(b_thigh[0],0.0,0.0,1.6*s);_add(b_thigh[1],0.0,0.0,1.6*s)
-	_add(b_spine,0.0,-0.4*s,1.0*s);_add(b_chest,0.0,-0.3*s,0.8*s);_add(b_head,0.0,0.3*s,-0.5*s)
+	if String(fig.get(&"stance")) in SEATED:
+		# a sitter shifts on the seat: the body leans a little, the hips stay
+		_add(b_spine,0.0,-0.5*s,1.4*s);_add(b_chest,0.0,-0.4*s,0.8*s);_add(b_head,0.0,0.4*s,-0.6*s)
+	else:
+		_hips_move+=_hips_side*(0.011*s*body_k)
+		_add(b_hips,0.0,1.0*s,-1.6*s)
+		_add(b_thigh[0],0.0,0.0,1.6*s);_add(b_thigh[1],0.0,0.0,1.6*s)
+		_add(b_spine,0.0,-0.4*s,1.0*s);_add(b_chest,0.0,-0.3*s,0.8*s);_add(b_head,0.0,0.3*s,-0.5*s)
 	# a slow sway nobody chooses
 	var c:=_clock+_seed*40.0
 	var n1:=sin(c*0.71)*0.6+sin(c*1.13+1.7)*0.4
@@ -859,6 +1088,21 @@ func _gesture(dt:float)->void:
 			var f:=(1.0-smoothstep(0.1,1.0,u))*smoothstep(0.0,0.06,u)
 			_add(b_head,-5.0*a*f,6.0*a*f*_g_dir,0.0);_add(b_sh[0],0.0,0.0,7.0*a*f);_add(b_sh[1],0.0,0.0,-7.0*a*f)
 			_face[CH_LIDS]-=0.6*a*f;_face[CH_TIGHT]+=0.5*a*f
+		9: # a hard swallow: the chin dips and comes up, the shoulders rise a little
+			var g:=sin(PI*smoothstep(0.1,0.55,u))
+			_add(b_head,4.0*a*g,0.0,0.0);_add(b_neck,2.0*a*g,0.0,0.0)
+			_add(b_sh[0],0.0,0.0,3.0*a*g);_add(b_sh[1],0.0,0.0,-3.0*a*g)
+			_face[CH_TIGHT]+=0.6*a*env;_face[CH_WORRY]+=0.4*a*env;_face[CH_LIDS]+=0.15*a*g
+		10: # trembling all over
+			_tremble=maxf(_tremble,a*env)
+		11: # freeze: no breath, no sway, eyes wide
+			_still=minf(_still,1.0-env)
+			_face[CH_LIDS]+=0.3*a*env
+		12: # straighten up: chest out, chin up, shoulders back
+			_add(b_chest,-4.0*a*env,0.0,0.0);_add(b_spine,-2.0*a*env,0.0,0.0);_add(b_head,-3.0*a*env,0.0,0.0)
+			_add(b_sh[0],0.0,3.0*a*env,0.0);_add(b_sh[1],0.0,-3.0*a*env,0.0)
+		13: # shift the weight now
+			_shift_wait=0.0
 
 ## The mouth on the words, beats of the head, and gestures on cue.
 func _speech(dt:float)->void:
@@ -1018,6 +1262,7 @@ func _face_out(dt:float,face_w:float)->void:
 		if _a!=null and face_w>0.0:
 			var curve:PackedFloat32Array=_a.face[ch]
 			if not curve.is_empty():v=lerpf(v,_a.face_value(ch,FACE_REST[ch]),face_w)
+		v+=_beat_face[ch]*_beat_w
 		if ch==CH_JAW:v=maxf(v,0.0)+_face[CH_JAW]
 		elif ch==CH_LIDS:v*=_face[CH_LIDS]
 		else:v+=_face[ch]

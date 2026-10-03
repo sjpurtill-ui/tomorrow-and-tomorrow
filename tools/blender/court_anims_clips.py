@@ -81,10 +81,10 @@ class Act:
     """One clip being written: a torso timeline, an arm timeline per side,
     face keys, things merged on top (beats, trembling), and planted feet."""
 
-    def __init__(self, length, drag=1.0, feet=True):
+    def __init__(self, length, drag=1.0, feet=True, base_pose=None):
         self.length = length
         self.drag = drag
-        self.B = base()
+        self.B = base_pose if base_pose is not None else base()
         self.torso_keys = []
         self.arm_keys = {"L": [], "R": []}
         self.face_keys = []
@@ -106,6 +106,8 @@ class Act:
             self.FOOT[s] = L.R(Ft)
         self.rest_arm = {s: arm_fk(self.B, s) for s in "LR"}
         self.lags = None
+        self.foot_keys = {"L": [], "R": []}
+        self.knee_fn = None
 
     # torso: a delta on the base stance
     def t(self, at, kind="ease", **bones):
@@ -128,6 +130,12 @@ class Act:
         self.face_keys.append((at, face(**ch), kind))
         return self
 
+    def foot(self, s, at, off=(0.0, 0.0, 0.0), kind="ease", lift=0.0):
+        """A planted foot moved (metres for a 1.72 m body, figure axes), with a
+        lift of the foot through the step into this key."""
+        self.foot_keys[s].append((at, (Vector(off) * L.K, lift * L.K), kind))
+        return self
+
     def legs(self, keys):
         """Leg keys (FK, for kneeling or stepping): [(t, {bone: rot}, kind)]."""
         self.leg_keys = Seq(keys)
@@ -141,6 +149,7 @@ class Act:
         tseq = Seq(self.torso_keys if self.torso_keys else [(0.0, torso_of(self.B))])
         aseq = {s: ArmSeq(s, ks) for s, ks in self.arm_keys.items() if ks}
         fseq = Seq(self.face_keys if self.face_keys else [(0.0, {})])
+        fseqs = {s: (Seq(ks) if ks else None) for s, ks in self.foot_keys.items()}
         B = self.B
         drag = self.drag
 
@@ -158,7 +167,17 @@ class Act:
             if self.leg_keys is not None:
                 p.update(pose_seq(self.leg_keys, t, drag))
             elif self.feet:
-                plant(p, self.FEET, self.KNEES, self.FOOT)
+                feet = {}
+                for s in "LR":
+                    feet[s] = self.FEET[s]
+                    if fseqs.get(s) is not None:
+                        a_, b_, u_ = fseqs[s].seg(t)
+                        off = a_[1][0].lerp(b_[1][0], u_)
+                        if a_ is not b_ and b_[1][1] > 0.0:
+                            off = off + Vector((0.0, 0.0, b_[1][1] * math.sin(math.pi * L.clamp01(u_))))
+                        feet[s] = feet[s] + off
+                knees = self.knee_fn(t) if self.knee_fn is not None else self.KNEES
+                plant(p, feet, knees, self.FOOT)
             return p
 
         def face_fn(t):
@@ -306,7 +325,7 @@ def make_clips():
     a.f(1.05, "out", lids=0.75, tight=0.45, worry=0.85, brows=0.7, jaw=0.08, eyes_y=0.5)
     a.f(1.6, "ease", lids=1.0, worry=0.5, brows=0.4)
     a.on_top(lambda t: tremble(t, 1.0 * L.clamp01((t - 0.15) / 0.1) * (1 - L.clamp01((t - 1.0) / 0.5)), 1.2, 0.4))
-    clips["flinch"] = clip("flinch", 1.6, a, tags=["fear"], blend_in=0.06, blend_out=0.6)
+    clips["flinch"] = clip("flinch", 1.6, a, tags=["fear"], blend_in=0.09, blend_out=0.6)
 
     # ---- laugh: a breath in, then it bursts out of them and doubles them over
     a = Act(2.8, drag=1.0)
@@ -627,7 +646,20 @@ def make_clips():
     a.f(0.0).f(0.6, "out", worry=0.4, brows=0.3, tight=0.4, lids=0.85).f(2.2, "ease", worry=0.35, brows=0.25, tight=0.45).f(3.0)
     clips["scratch_head"] = clip("scratch_head", 3.0, a, kind="fidget", groups={"legs": 0.0, "torso": 0.5, "head": 0.8, "arm_L": 0.0, "arm_R": 1.0},
                                  hands="R", blend_in=0.3, blend_out=0.5, tags=["puzzled"])
+    import court_anims_more
+    court_anims_more.make_more(clips)
     return clips
+
+
+def hang(a, s, pitch, sh=(0, 0, 0), curl=None):
+    """An arm of Act a hanging under gravity while the chest pitches by `pitch`."""
+    r = a.rest_arm[s]
+    piv = L.FRAME.shoulder[s]
+    q = L.Q((-pitch, 0, 0))
+    k = r.copy(w=piv + q @ (r.w - piv), along=q @ r.along, palm=q @ r.palm, sh=sh, pole=q @ r.pole)
+    if curl is not None:
+        k.curl = curl
+    return k
 
 
 CLIPS = None

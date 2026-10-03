@@ -30,12 +30,18 @@ func _figure(stance:="stand",variant:="male_adult")->Node3D:
 	return f
 
 
-## Frames by hand: the stance clip, then the acting (as the skeleton runs it).
+## Frames by hand: the stance clip, then the acting (as the skeleton runs it;
+## the skeleton puts its poses back after each frame's modifiers).
 func _run(f:Node3D,seconds:float)->void:
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	for i in int(round(seconds/DT)):
-		f.player.advance(DT)
-		a.step(DT)
+		_frame(f,a)
+
+
+func _frame(f:Node3D,a)->void:
+	f.skeleton.reset_bone_poses()
+	f.player.advance(DT)
+	a.step(DT)
 
 
 func _hand(f:Node3D,side:="R")->Vector3:
@@ -60,17 +66,19 @@ func test_every_body_has_the_shared_clip_library()->void:
 
 
 func test_the_library_is_built_on_each_bodys_own_skeleton()->void:
-	## The clips carry bone rotations from their own armature: it must be the
-	## figure's (same bones, same rests), or every pose would be bent wrong.
+	## The clips carry bone rotations from their own armature: it should be the
+	## figure's (same bones, same rests). The acting fits a stale library onto a
+	## rebuilt body, but hands then miss what they reach for: this says rebuild
+	## (tools/blender/court_anims.py) after the bodies change.
 	for variant in Figure3D.VARIANTS:
-		var packed:=load(Acting.DIR+"court_anims_%s.glb" % variant) as PackedScene
-		var lib_root:=packed.instantiate()
+		var lib_root:=Acting.load_glb(Acting.DIR+"court_anims_%s.glb" % variant)
 		var lib_skel:Skeleton3D=lib_root.find_children("*","Skeleton3D",true,false)[0]
-		var body_root:=Figure3D.scene_for(variant).instantiate()
+		# the body as this checkout has it (the shared import cache may hold another's newer build)
+		var body_root:=Acting.load_glb(Figure3D.DIR+"court_figure_%s.glb" % variant)
 		var body_skel:Skeleton3D=body_root.find_children("*","Skeleton3D",true,false)[0]
 		for i in body_skel.get_bone_count():
 			var name:=body_skel.get_bone_name(i)
-			if name in ["jaw","eye.L","eye.R","brow.L","brow.R","root"]:continue
+			if name in ["jaw","eye.L","eye.R","brow.L","brow.R","root"] or name.begins_with("neutral"):continue
 			var j:=lib_skel.find_bone(name)
 			assert_int(j).override_failure_message("%s: the library has no bone %s" % [variant,name]).is_greater_equal(0)
 			if j<0:continue
@@ -89,7 +97,7 @@ func test_a_gasp_brings_a_hand_to_the_heart_and_lets_go()->void:
 	var length:=Acting.play(f,"gasp")
 	assert_float(length).is_greater(1.0)
 	_run(f,0.6)
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	assert_float(_hand(f).y-rest_hand.y).override_failure_message("the hand did not come up to the breast").is_greater(0.22)
 	assert_float(a.face_now[Acting.CH_JAW]).is_greater(0.25)
 	assert_float(a.face_now[Acting.CH_BROWS]).is_greater(0.4)
@@ -114,13 +122,19 @@ func test_a_kneel_holds_until_let_go()->void:
 func test_a_new_reaction_crossfades_from_the_last()->void:
 	var f:=_figure()
 	_run(f,0.3)
-	Acting.play(f,"gasp")
-	_run(f,0.5)
+	Acting.play(f,"bow_deep")
+	_run(f,1.2)
 	var before:=_hand(f)
-	Acting.play(f,"flinch")
-	_run(f,DT)
-	# one frame later the hand has not jumped
-	assert_float(_hand(f).distance_to(before)).is_less(0.05)
+	Acting.play(f,"defiant")
+	var a=Acting.of(f)
+	var fastest:=0.0
+	var last:=before
+	for i in 12:
+		_frame(f,a)
+		fastest=maxf(fastest,_hand(f).distance_to(last)/DT)
+		last=_hand(f)
+	# the hands travel from the bow to the folded arms, never jumping: under 3 m/s
+	assert_float(fastest).is_less(3.0)
 
 
 func test_a_sitter_keeps_their_seat_and_a_staff_its_hand()->void:
@@ -140,14 +154,14 @@ func test_a_sitter_keeps_their_seat_and_a_staff_its_hand()->void:
 
 func test_they_blink_every_few_seconds()->void:
 	var f:=_figure()
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	var blinks:=0
 	var shut:=false
 	var longest:=0.0
 	var closed_for:=0.0
 	for i in int(12.0/DT):
-		f.player.advance(DT);a.step(DT)
-		var now:=a.lids_now<0.35
+		_frame(f,a)
+		var now:bool=a.lids_now<0.35
 		if now and not shut:blinks+=1
 		closed_for=closed_for+DT if now else 0.0
 		longest=maxf(longest,closed_for)
@@ -160,29 +174,30 @@ func test_the_head_turns_to_what_they_look_at_within_limits()->void:
 	var f:=_figure()
 	_run(f,0.3)
 	var head:int=f.skeleton.find_bone("head")
-	var at:=f.skeleton.global_transform*f.skeleton.get_bone_global_pose(head).origin
+	var skel:Skeleton3D=f.skeleton
+	var at:Vector3=skel.global_transform*skel.get_bone_global_pose(head).origin
 	# three metres to their left, at their own height
-	Acting.look_at(f,at+f.global_transform.basis*Vector3(3.0,0.0,0.3),1.0)
+	Acting.look_toward(f,at+f.global_transform.basis*Vector3(3.0,0.0,0.3),1.0)
 	_run(f,1.2)
-	var a:=Acting.of(f)
-	var fwd:=f.skeleton.get_bone_global_pose(head).basis.get_rotation_quaternion()*a._rest_gi[head]*Vector3.BACK
+	var a=Acting.of(f)
+	var fwd:Vector3=skel.get_bone_global_pose(head).basis.get_rotation_quaternion()*a._rest_gi[head]*Vector3.BACK
 	assert_float(rad_to_deg(atan2(fwd.x,fwd.z))).override_failure_message("the head did not turn left").is_greater(45.0)
 	# right behind them: they turn as far as a person can, no further
-	Acting.look_at(f,at+f.global_transform.basis*Vector3(0.2,0.0,-3.0),1.0)
+	Acting.look_toward(f,at+f.global_transform.basis*Vector3(0.2,0.0,-3.0),1.0)
 	_run(f,1.2)
 	assert_float(absf(a.look_yaw)).is_less_equal(75.01)
 
 
 func test_idle_eyes_never_stare_out_at_the_viewer()->void:
 	var f:=_figure()
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	var head:int=f.skeleton.find_bone("head")
 	var ahead:=0
 	var frames:=0
 	for i in int(20.0/DT):
-		f.player.advance(DT);a.step(DT)
+		_frame(f,a)
 		if i%15!=0:continue
-		var fwd:=f.skeleton.get_bone_global_pose(head).basis.get_rotation_quaternion()*a._rest_gi[head]*Vector3.BACK
+		var fwd:Vector3=(f.skeleton as Skeleton3D).get_bone_global_pose(head).basis.get_rotation_quaternion()*a._rest_gi[head]*Vector3.BACK
 		frames+=1
 		# straight out at the viewer: level and within a few degrees of dead ahead
 		if absf(rad_to_deg(atan2(fwd.x,fwd.z)))<6.0 and absf(rad_to_deg(asin(clampf(fwd.y,-1.0,1.0))))<4.0:ahead+=1
@@ -191,7 +206,7 @@ func test_idle_eyes_never_stare_out_at_the_viewer()->void:
 
 func test_the_mouth_follows_the_words_and_the_head_beats()->void:
 	var f:=_figure()
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	var line:="Count the stores again before the moon is full, and let the scribes write what they find."
 	Acting.speak(f,line,4.0,{"gestures":false})
 	assert_int(a._beats.size()).is_greater(0)
@@ -199,7 +214,7 @@ func test_the_mouth_follows_the_words_and_the_head_beats()->void:
 	var hi:=0.0
 	var lo:=1.0
 	for i in int(3.6/DT):
-		f.player.advance(DT);a.step(DT)
+		_frame(f,a)
 		hi=maxf(hi,a.face_now[Acting.CH_JAW]);lo=minf(lo,a.face_now[Acting.CH_JAW])
 	assert_float(hi).is_greater(0.6)
 	assert_float(lo).is_less(0.05)
@@ -212,12 +227,12 @@ func test_the_mouth_follows_the_words_and_the_head_beats()->void:
 
 func test_a_long_line_brings_a_gesture_where_a_hand_is_free()->void:
 	var f:=_figure("stand")
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	Acting.speak(f,"We will not give them the ford! Send every spear we have!",4.0)
 	assert_int(a._gest_clip.size()).is_greater(0)
 	assert_str(a._gest_clip[0]).is_equal("talk_emphatic")
 	var folded:=_figure("folded")
-	var b:=Acting.of(folded)
+	var b=Acting.of(folded)
 	Acting.speak(folded,"We will not give them the ford! Send every spear we have!",4.0)
 	# arms folded: no hand free, so the words come from the head alone
 	assert_int(b._gest_clip.size()).is_equal(0)
@@ -225,7 +240,7 @@ func test_a_long_line_brings_a_gesture_where_a_hand_is_free()->void:
 
 func test_moods_show_in_the_face_eased()->void:
 	var f:=_figure()
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	Acting.set_mood(f,{"fear":1.0})
 	_run(f,DT)
 	assert_float(a.face_now[Acting.CH_WORRY]).override_failure_message("fear popped onto the face").is_less(0.2)
@@ -239,7 +254,7 @@ func test_moods_show_in_the_face_eased()->void:
 
 func test_the_figures_own_mood_word_is_followed()->void:
 	var f:=_figure()
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	f.set_mood("warm")
 	_run(f,2.5)
 	assert_float(a.face_now[Acting.CH_SMILE]).is_greater(0.3)
@@ -247,9 +262,9 @@ func test_the_figures_own_mood_word_is_followed()->void:
 
 func test_nothing_moves_while_the_court_is_out_of_sight()->void:
 	var f:=_figure()
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	_run(f,0.2)
-	var clock:=a._clock
+	var clock:float=a._clock
 	f.visible=false
 	_run(f,1.0)
 	assert_float(a._clock).is_equal(clock)
@@ -262,13 +277,13 @@ func test_nothing_moves_while_the_court_is_out_of_sight()->void:
 
 func test_a_frame_of_acting_makes_no_objects()->void:
 	var f:=_figure()
-	var a:=Acting.of(f)
+	var a=Acting.of(f)
 	Acting.play(f,"laugh")
 	Acting.speak(f,"So the river has eaten the lower field again.",3.0,{"gestures":false})
 	_run(f,0.2)
 	var before:=Performance.get_monitor(Performance.OBJECT_COUNT)
 	for i in 60:
-		f.player.advance(DT);a.step(DT)
+		_frame(f,a)
 	assert_float(Performance.get_monitor(Performance.OBJECT_COUNT)).is_equal(before)
 
 
@@ -277,3 +292,69 @@ func test_acting_is_presentation_only()->void:
 	var text:=FileAccess.get_file_as_string("res://scripts/hud/court_acting.gd")
 	for name in ["GameState","GovernmentPeopleSystem","SaveSystem","DiscoverySystem","HistoricalFigures","MilitaryCampaign","get_node(\"/root"]:
 		assert_bool(text.contains(name)).override_failure_message("court_acting.gd reaches into %s" % name).is_false()
+
+
+func test_the_stage_hook_takes_the_figure_first()->void:
+	## CourtStage.acting (docs/COURT_STAGE_3D.md §5) calls act(figure, ...args).
+	var service:=Acting.service()
+	for method in ["play","look_at","mood","set_mood","speak","gesture","idle","hush","stop"]:
+		assert_bool(service.has_method(method)).override_failure_message("the hook has no %s" % method).is_true()
+	var f:=_figure()
+	service.callv("play",[f,"bow_shallow"])
+	service.callv("mood",[f,"afraid"])
+	service.callv("gesture",[f,"nod"])
+	var a=Acting.of(f)
+	assert_str(a._a.clip).is_equal("bow_shallow")
+	assert_float(a._mood_target[Acting.M_FEAR]).is_greater(0.5)
+	assert_int(a._g).is_equal(Acting.GESTURES.find("nod"))
+	# the clips also play plainly on the figure's own player
+	assert_bool(f.player.has_animation("act/gasp")).is_true()
+
+
+func test_real_frames_run_the_acting_and_nothing_piles_up()->void:
+	## In the engine the skeleton runs the acting after the clip every frame
+	## and restores its poses after drawing: what acting adds never accumulates.
+	var f:Node3D=auto_free(Figure3D.new())
+	add_child(f)
+	f.setup({"variant":"female_adult","outfit":"hide","hair":"braids","stance":"sit"})
+	f.play(f.rest_clip(),0.0,0.0)
+	f.player.stop()
+	var a=Acting.of(f)
+	var hips:int=f.skeleton.find_bone("hips")
+	var start:Vector3=(f.skeleton as Skeleton3D).get_bone_pose_position(hips)
+	var clock:float=a._clock
+	for i in 40:await get_tree().process_frame
+	assert_float(a._clock).override_failure_message("the skeleton never ran the acting").is_greater(clock)
+	assert_float(f.skeleton.get_bone_pose_position(hips).distance_to(start)).is_less(0.02)
+
+
+func test_the_directors_acts_are_performed()->void:
+	## court_director.gd lowers its beats to {act:"play", args:{clip, fallback,
+	## hold, at, ...}} and {act:"mood", args:{vector, face, dur, hold}}: each act
+	## the director asked for first has a performance here.
+	var service=Acting.service()
+	var f:=_figure()
+	var a=Acting.of(f)
+	for act in ["faint","half_catch","knees_knock","bow_deep","hide_behind","peek_out","yawn","doze","jerk_awake","snap_alert",
+			"stifle_laugh","elbow","struggle_bundle","set_down_bundle","lift_bundle","drop_bowl","stand_firm","kneel_bound","bolt","flinch","wobble","step_back"]:
+		var spec:Array=Acting.ACT_MAP.get(act,[])
+		assert_bool(spec.is_empty()).override_failure_message("no performance for %s" % act).is_false()
+		if String(spec[0])=="clip":
+			var clip:=String(spec[1])
+			for c in ([clip+"l",clip+"r"] if clip.ends_with("_") else [clip]):
+				assert_bool(Acting.has_clip(c)).override_failure_message("%s wants %s, not in the library" % [act,c]).is_true()
+	for act in ["gulp","shrug","tremble","freeze","straighten"]:
+		assert_str(String(Acting.ACT_MAP[act][0])).is_equal("gesture")
+	service.play(f,{"clip":"faint","beat":"faint","fallback":"kneel","hold":true,"speed":1.0,"blend":0.25,"at":""})
+	assert_str(String(a._a.clip)).starts_with("faint_")
+	assert_bool(a._a.hold).is_true()
+	# a beat's face comes and goes: worried brows for the flinch's time
+	service.mood(f,{"vector":{"fear":0.8},"name":"afraid","face":{"brows_worried":0.9,"eyes_wide":0.6},"dur":0.6,"hold":false,"beat":"flinch"})
+	_run(f,0.3)
+	assert_float(a.face_now[Acting.CH_WORRY]).is_greater(0.6)
+	_run(f,1.5)
+	assert_float(a._beat_w).is_less(0.05)
+	# an unknown act plays the figure's own clip the director named
+	var g:=_figure()
+	service.play(g,{"clip":"no_such_act","beat":"no_such_act","fallback":"bow","hold":false,"speed":1.0,"blend":0.25})
+	assert_str(String(g.clip)).is_equal("bow")
