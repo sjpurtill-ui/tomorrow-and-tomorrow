@@ -21,12 +21,10 @@ func _ready()->void:
 	stage.settle()
 	_report(stage,"before")
 	stage.execute("club","main","","Heha")
-	await get_tree().create_timer(1.2).timeout
-	stage.rig.call("settle")
-	_report(stage,"t1.2")
-	await get_tree().create_timer(2.0).timeout
-	stage.rig.call("settle")
-	_report(stage,"t3.2")
+	for t in [0.5,1.4,2.0,4.0,6.0]:
+		await get_tree().create_timer(t if t==0.5 else 0.6 if t==1.4 else t-(1.4 if t==2.0 else 2.0 if t==4.0 else 4.0)).timeout
+		stage.rig.call("settle")
+		_report(stage,"t%.1f" % t)
 	get_tree().quit(0)
 
 func _report(stage:Control,label:String)->void:
@@ -39,4 +37,9 @@ func _report(stage:Control,label:String)->void:
 		var head:Vector3=f.body3d.global_position+Vector3(0,1.5,0)
 		var px:=cam.unproject_position(head)
 		var inside:=Rect2(Vector2.ZERO,view).has_point(px) and not cam.is_position_behind(head)
-		print("  %s role=%s mark=%s at=%s screen=%s inside=%s vis=%s" % [key,f.role,f.mark_name,f.body3d.global_position.snapped(Vector3(0.01,0.01,0.01)),px.round(),inside,f.body3d.visible])
+		print("  %s role=%s mark=%s at=%s screen=%s inside=%s vis=%s nudge=%s" % [key,f.role,f.mark_name,f.body3d.global_position.snapped(Vector3(0.01,0.01,0.01)),px.round(),inside,f.body3d.visible,f.nudge.snapped(Vector3(0.01,0.01,0.01))])
+	var exec:Node=stage.get_node_or_null("Execution")
+	if exec!=null:
+		for name in exec._things:
+			var n:Variant=exec._things[name]
+			if n is Node3D and is_instance_valid(n):print("  thing %s at=%s screen=%s" % [name,(n as Node3D).global_position.snapped(Vector3(0.01,0.01,0.01)),cam.unproject_position((n as Node3D).global_position).round()])

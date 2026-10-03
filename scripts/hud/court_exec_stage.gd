@@ -33,6 +33,8 @@ var _tweens:Array=[]
 var _made:Array=[]
 ## Named things brought in: "club", "axe", "block", "pot", "lid", "bone", "head:<key>"...
 var _things:Dictionary={}
+## Each person's move under way (one at a time).
+var _moving:Dictionary={}
 ## Bones drawn in (a body without its head, a head without its body).
 var _shrinks:Array=[]
 var _ended:=false
@@ -114,6 +116,9 @@ func _tween()->Tween:
 ## floor before the god), "windbreak" (behind the hides, or the door).
 func point(name:String)->Vector3:
 	if _things.has(name) and is_instance_valid(_things[name]):return (_things[name] as Node3D).global_position
+	if name.begins_with("above:"):
+		var bits:=name.split(":")
+		return point(bits[1] if bits.size()>1 else victim)+Vector3.UP*(float(bits[2]) if bits.size()>2 else 1.0)
 	if name.begins_with("front:"):
 		var parts:=name.split(":")
 		var from:=point(parts[1]) if parts.size()>1 else Vector3.ZERO
@@ -144,7 +149,11 @@ func _move_to(key:String,world:Vector3,time:float,trans:=Tween.TRANS_SINE)->void
 	if f==null or f.spot==null:return
 	var local:Vector3=f.spot.to_local(world)-f._path_at(f.stroll)
 	local.y=0.0
+	# one move at a time for each person (a new one takes over from the last)
+	var old:Variant=_moving.get(key)
+	if old is Tween and (old as Tween).is_valid():(old as Tween).kill()
 	var t:=_tween()
+	_moving[key]=t
 	t.tween_property(f,"nudge",local,maxf(time,0.05)).set_trans(trans).set_ease(Tween.EASE_IN_OUT)
 
 func _approach(key:String,to:String,side:float,dist:float,time:float)->void:
@@ -494,13 +503,17 @@ func _plan_start(args:Dictionary)->void:
 		var key:=String(_plan_keys.get(role,""))
 		var b:=_body(key)
 		if b==null:continue
+		var walk:=0.0
 		if role!="victim":
-			var f:Variant=_fig(key)
+			# to their place (a few steps if they are not there yet), turned the plan's way
 			var to:=_plan_at(r.get("at",[0,0,0]))
-			if f!=null and f.spot!=null:
-				var local:Vector3=f.spot.to_local(to)-f._path_at(f.stroll);local.y=0.0
-				f.nudge=local
-			b.rotation.y=yaw+deg_to_rad(float(r.get("yaw",0.0)))-b.get_parent_node_3d().global_rotation.y
+			var far:=Vector2(to.x-b.global_position.x,to.z-b.global_position.z).length()
+			if far>0.25:
+				walk=clampf(far/1.2,0.35,1.4)
+				_move_to(key,to,walk,Tween.TRANS_LINEAR)
+				b.play("walk_in",0.2,0.0)
+			var face:=_tween()
+			face.tween_property(b,"rotation:y",yaw+deg_to_rad(float(r.get("yaw",0.0)))-b.get_parent_node_3d().global_rotation.y,maxf(walk,0.2))
 		for side:String in (r.get("props",{}) as Dictionary):
 			var name:=String(r.props[side])
 			var prop:=_plan_thing(name)
@@ -513,7 +526,14 @@ func _plan_start(args:Dictionary)->void:
 				var hand:=_hand(key,side)
 				if hand!=null:hand.add_child(prop)
 				else:court.add_child(prop)
-		if r.has("clip"):Acting.play(b,String(r.clip),{"blend":0.3})
+		if r.has("clip"):
+			# the clip runs on the plan's clock, from where it is when they arrive
+			if walk<=0.0:Acting.play(b,String(r.clip),{"blend":0.3})
+			else:
+				var later:=_tween()
+				later.tween_interval(walk)
+				var clip:=String(r.clip)
+				later.tween_callback(func()->void:if is_instance_valid(b):Acting.play(b,clip,{"blend":0.2,"at":walk}))
 		if r.has("clips"):_plan_sequence(key,r.clips as Array)
 	# the victim's clips tell when the body splits and the blood flies; the
 	# cook's, when the lid goes on

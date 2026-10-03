@@ -2408,7 +2408,6 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 		_exec(out,0.2,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.9,"time":1.0})
 	else:
 		_shot(out,0.0,"frame",{"on":[victim,"windbreak"],"weight":5})
-	if has_cook and cook!="":_exec(out,0.3,"approach",{"who":cook,"to":victim,"side":1.0,"dist":1.6,"time":1.0})
 	_exec(out,start,"plan",{"act":act,"ex":ex if has_ex else "","cook":cook if has_cook else ""})
 	_exec(out,impact,"blow",{})
 	match method:
@@ -2416,6 +2415,7 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 			var plop:=start+_plan_cue(plan,"plop",3.62+1.4)
 			_shot(out,start+0.2,"frame",{"on":[victim,ex,"pot"],"time":0.8})
 			_shot(out,impact+0.1,"shake",{"strength":0.4})
+			_shot(out,impact+0.15,"frame",{"on":[victim,"pot","above:"+victim+":1.2"],"time":0.5})
 			_shot(out,plop-0.2,"frame",{"on":[cook,"pot"],"time":0.6})
 			var not_cook:=roles.duplicate();not_cook["front"]=(roles.front as Array).filter(func(k:String)->bool:return k!=cook)
 			_exec_after(ctx,out,impact+0.2,victim,not_cook,true,
