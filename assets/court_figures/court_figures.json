@@ -6,7 +6,7 @@
    "file": "court_figure_male_adult.glb",
    "height": 1.72,
    "head_top": 1.72,
-   "chin": 1.438,
+   "chin": 1.478,
    "outfits": {
     "hide": [
      "hide_wrap",
@@ -54,7 +54,7 @@
    "file": "court_figure_female_adult.glb",
    "height": 1.62,
    "head_top": 1.62,
-   "chin": 1.35,
+   "chin": 1.385,
    "outfits": {
     "hide": [
      "hide_wrap",
@@ -95,7 +95,7 @@
    "file": "court_figure_male_old.glb",
    "height": 1.66,
    "head_top": 1.64,
-   "chin": 1.368,
+   "chin": 1.399,
    "outfits": {
     "hide": [
      "hide_wrap",
@@ -143,7 +143,7 @@
    "file": "court_figure_female_old.glb",
    "height": 1.55,
    "head_top": 1.53,
-   "chin": 1.267,
+   "chin": 1.302,
    "outfits": {
     "hide": [
      "hide_wrap",
@@ -182,9 +182,9 @@
   {
    "variant": "male_young",
    "file": "court_figure_male_young.glb",
-   "height": 1.62,
-   "head_top": 1.62,
-   "chin": 1.341,
+   "height": 1.64,
+   "head_top": 1.64,
+   "chin": 1.399,
    "outfits": {
     "hide": [
      "hide_wrap",
@@ -230,9 +230,9 @@
   {
    "variant": "female_young",
    "file": "court_figure_female_young.glb",
-   "height": 1.54,
-   "head_top": 1.54,
-   "chin": 1.27,
+   "height": 1.56,
+   "head_top": 1.56,
+   "chin": 1.324,
    "outfits": {
     "hide": [
      "hide_wrap",
@@ -463,6 +463,27 @@
   "mood_tight",
   "mood_worry",
   "mood_stern"
+ ],
+ "expressions": [
+  "smile",
+  "frown",
+  "brows_up",
+  "brows_down",
+  "brows_worried",
+  "eyes_wide",
+  "eyes_narrow",
+  "blink",
+  "jaw_open",
+  "lips_pressed",
+  "sneer",
+  "cheeks_puff"
+ ],
+ "visemes": [
+  "v_aa",
+  "v_ee",
+  "v_oo",
+  "v_mm",
+  "v_fv"
  ],
  "slots": [
   "SKIN",

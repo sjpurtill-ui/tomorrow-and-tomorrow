@@ -104,7 +104,10 @@ static func material(slot:String,colour:Color,cover:=0)->ShaderMaterial:
 	if slot in FLAT_SLOTS:
 		made.set_shader_parameter("flat_colour",true)
 	else:
-		if slot=="SKIN":made.set_shader_parameter("shade_tint",Color(0.66,0.50,0.46))
+		if slot=="SKIN":
+			made.set_shader_parameter("shade_tint",Color(0.70,0.52,0.47))
+			made.set_shader_parameter("band_soft",0.24)
+			made.set_shader_parameter("terminator",Color(0.62,0.20,0.10))
 		if slot=="HAIR":made.set_shader_parameter("rim_amount",0.22)
 		if not slot in ["BROW","STUBBLE"]:made.next_pass=_ink(cover)
 	_materials[key]=made
@@ -189,17 +192,17 @@ func _make_gaze()->void:
 		_looks.append(look)
 
 ## Attend to a point in the hall (world space); null: look where the body faces.
-func look_at_point(target:Variant,time:=0.45)->void:
+func look_at_point(target:Variant,time:=0.45,weight:=1.0)->void:
 	if _looks.is_empty() or gaze==null:return
 	if _gaze_tween and _gaze_tween.is_valid():_gaze_tween.kill()
 	_gaze_on=target!=null
 	if target!=null:
 		gaze.global_position=(target as Vector3)+Vector3(0.0,-_mood_drop(),0.0)*global_transform.basis.get_scale().y
 	if not is_inside_tree() or time<=0.0:
-		for look in _looks:look.influence=float(look.get_meta("weight")) if _gaze_on else 0.0
+		for look in _looks:look.influence=float(look.get_meta("weight"))*weight if _gaze_on else 0.0
 		return
 	_gaze_tween=create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE)
-	for look in _looks:_gaze_tween.tween_property(look,"influence",float(look.get_meta("weight")) if _gaze_on else 0.0,time)
+	for look in _looks:_gaze_tween.tween_property(look,"influence",float(look.get_meta("weight"))*clampf(weight,0.0,1.0) if _gaze_on else 0.0,time)
 
 func _mood_drop()->float:
 	## The head lowers in fear and lifts in defiance: the gaze point moves.
@@ -220,10 +223,40 @@ func set_mood(name:String)->void:
 func _face()->void:
 	var face:Dictionary=look.get("face",{})
 	for mesh_node in _meshes:
-		if not mesh_node.visible or mesh_node.mesh==null:continue
+		if mesh_node.mesh==null:continue
+		# Every morph starts at rest; only this person's own are set.
+		for index in mesh_node.get_blend_shape_count():mesh_node.set_blend_shape_value(index,0.0)
+		if not mesh_node.visible:continue
 		for shape:String in FACE_SHAPES:
 			var index:=mesh_node.find_blend_shape_by_name(StringName("face_"+shape))
 			if index>=0:mesh_node.set_blend_shape_value(index,clampf(float(face.get(shape,0.0)),-1.0,1.0))
+
+## Expressions and visemes (docs/COURT_STAGE_3D.md §3): drives the named
+## morph targets where the body has them, else their nearest stand-ins.
+const EXPRESSION_STANDINS:={"smile":{"mood_smile":1.0},"lips_pressed":{"mood_tight":1.0},"frown":{"mood_tight":0.6,"mood_stern":0.5},
+	"brows_worried":{"mood_worry":1.0},"brows_down":{"mood_stern":1.0},"brows_up":{"mood_worry":0.5},"sneer":{"mood_stern":0.6,"mood_tight":0.4}}
+func set_expression(values:Dictionary)->void:
+	var standins:={}
+	for name in values:
+		var value:=clampf(float(values[name]),0.0,1.0)
+		var found:=false
+		for mesh_node in _meshes:
+			if mesh_node.mesh==null:continue
+			var index:=mesh_node.find_blend_shape_by_name(StringName(name))
+			if index>=0:mesh_node.set_blend_shape_value(index,value);found=true
+		if not found and EXPRESSION_STANDINS.has(name):
+			for key in EXPRESSION_STANDINS[name]:standins[key]=maxf(float(standins.get(key,0.0)),value*float(EXPRESSION_STANDINS[name][key]))
+	for key in standins:
+		for mesh_node in _meshes:
+			if mesh_node.name!="Mouth" and mesh_node.name!="Brows":continue
+			var index:=mesh_node.find_blend_shape_by_name(StringName(key))
+			if index>=0:mesh_node.set_blend_shape_value(index,float(standins[key]))
+
+## Another library of clips (K's): its clips play as "<name>/<clip>".
+func add_library(name:String,library:AnimationLibrary)->void:
+	if player==null or library==null:return
+	if player.has_animation_library(name):player.remove_animation_library(name)
+	player.add_animation_library(name,library)
 
 ## The clip a stance rests in, and the one it talks in.
 func rest_clip()->String:

@@ -40,6 +40,7 @@ const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Motion:=preload("res://scripts/hud/motion.gd")
 ## The hall as a stage: the people present stand in it and speak in bubbles.
 const Stage:=preload("res://scripts/hud/court_stage.gd")
+const Directing:=preload("res://scripts/hud/court_director.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
@@ -543,8 +544,21 @@ func _build_stage(audience:Dictionary)->Control:
 	if not civic_settlement.is_empty():_add_civic_record()
 	return stage
 
+## The room around the audience: the director's bystanders (and, with the
+## set, its animals) and the room's own idle life, which shows only facts.
+func _add_room()->void:
+	if Stage.director==null or not is_instance_valid(court_stage):return
+	for entry in Directing.extras(court_stage.facts,hash(audience_id),{}):court_stage.add_extra(entry)
+	court_stage.start_ambient()
+
 func _new_stage(parent:Control,kind:String)->Control:
 	var made:=Stage.new();made.layout_kind=kind;made.compact=_compact();made.registry=scene_portraits
+	made.audience_key=audience_id
+	made.facts={"era":Backdrop.current_tier(),"layout":kind}
+	# The director (L) acts out the room: one per court, its memory its own.
+	if Stage.directing:
+		if Stage.director==null or not Stage.director.get_script()==Directing:Stage.director=Directing.new()
+		made.facts.merge(Directing.facts_now(Hall.find(audience_id)),true)
 	parent.add_child(made);made.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	made.advance_requested.connect(advance)
 	made.history_requested.connect(show_history_at)
@@ -572,6 +586,7 @@ func _cast_home(audience:Dictionary)->void:
 	for official:Dictionary in Hall.court(String(audience.get("id",""))):
 		var pid:=int(official.get("person_id",0))
 		court_stage.add_figure("p%d" % pid,official,"court",String(official.get("name","")).get_slice(" ",0),_short_title(String(official.get("office_title",""))),false,_bubble_accent(_person_color(pid)))
+	_add_room()
 	court_stage.arrive([Stage.MAIN])
 
 func _stage_key(line:Dictionary)->String:
@@ -646,7 +661,9 @@ func _refresh_regard()->void:
 	var risky:=String(regard.get("id","")) in ["hates_dread","terror","fear","war"]
 	regard_label.add_theme_color_override("font_color",Color("f0a08e") if risky else Color("f6ecd6"))
 	# Their face and bearing show it: fond, afraid or defiant.
-	if is_instance_valid(court_stage):court_stage.set_mood(Stage.MAIN,Stage.mood_of(regard,float(audience.get("mood",0.0)) if foreign else 0.0))
+	if is_instance_valid(court_stage):
+		court_stage.set_mood(Stage.MAIN,Stage.mood_of(regard,float(audience.get("mood",0.0)) if foreign else 0.0))
+		court_stage.facts.merge({"love":float(regard.get("love",0.0)),"dread":float(regard.get("dread",0.0)),"mood":float(audience.get("mood",0.0))},true)
 	var strip:=regard_label.get_parent().get_parent() as Control
 	strip.tooltip_text=regard_label.text+". "
 	strip.tooltip_text+="From their opinion of you, their ruler's trust, border tension and remembered terror." if foreign else "Dread buys obedience and costs honesty; love buys candour. Dread soured by resentment shows first in their words, then in their work, and at last in flight."
@@ -1068,9 +1085,11 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 		_show_toast(String(result.get("outcome","")))
 		return result
 	if voice_reacts and _voice_ok() and voice.has_method("divine_reaction"):voice.divine_reaction(audience_id,result)
-	# The one before the god kneels under wrath and bows under favour.
-	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)):
+	# The one before the god kneels under wrath and bows under favour (the
+	# director does it when it is in, so it never plays twice).
+	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)) and Stage.director==null:
 		court_stage.react(Stage.MAIN,Stage.divine_mood(action,String(result.get("response",""))))
+	if is_instance_valid(court_stage):court_stage.event("divine",{"result":result,"action":action,"response":String(result.get("response",""))})
 	_refresh_regard()
 	_update_mood(Hall.find(audience_id))
 	if bool(result.get("terminal",false)):_show_outcome(result)
@@ -1086,8 +1105,9 @@ func act_on_envoy(act_id:String,words:String="")->Dictionary:
 	if not bool(result.get("handled",false)):
 		_show_toast(String(result.get("outcome","")))
 		return result
-	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)):
+	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)) and Stage.director==null:
 		court_stage.react(Stage.MAIN,Stage.divine_mood(act_id,String(result.get("response",""))))
+	if is_instance_valid(court_stage):court_stage.event("divine",{"result":result,"action":act_id,"response":String(result.get("response",""))})
 	_after_command(result)
 	return result
 
@@ -1492,6 +1512,7 @@ func _route_live_command(id:String,text:String,command:Dictionary)->bool:
 ## actor's answer as decided, a witness), then the outcome line and receipt.
 func _after_command(result:Dictionary)->void:
 	_settle_card(result)
+	if is_instance_valid(court_stage):court_stage.event("command",{"result":result})
 	# Carried out only as a vague standing order: the closest real orders are
 	# offered, so the god can pick instead of rephrasing.
 	if String(result.get("route",""))=="custom_directive" and _last_words!="":_offer_closest(_last_words)
@@ -1549,6 +1570,9 @@ func choose(option_id:String)->Dictionary:
 		var decree:=String((audience.get("petition",{}) as Dictionary).get("suggested_decree",""))
 		if not decree.is_empty() and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 			terrain.issue_civic_directive_text(decree)
+	if is_instance_valid(court_stage):
+		var happened:Dictionary=Directing.event_from_resolution(audience,option_id,result)
+		if not happened.is_empty():court_stage.event(String(happened.get("kind","decree")),happened)
 	if _voice_ok():voice.closing(audience_id,result)
 	if _order_card>0:
 		Tracker.done(_order_card,Tracker._why(String(result.get("outcome","")),"Answered"))
@@ -2078,6 +2102,7 @@ func _cast_envoy(audience:Dictionary)->void:
 		var official:Dictionary=looking_on[index]
 		var pid:=int(official.get("person_id",0))
 		court_stage.add_figure("p%d" % pid,official,"court",String(official.get("name","")).get_slice(" ",0),_short_title(String(official.get("office_title",""))),false,_bubble_accent(_person_color(pid)))
+	_add_room()
 	court_stage.arrive([Stage.MAIN,"att0","att1"])
 
 static func _place(node:Control,anchors:Vector4,offsets:Vector4)->void:

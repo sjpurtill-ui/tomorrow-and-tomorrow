@@ -64,6 +64,8 @@ const ENVOY_COURT_X:=[0.88,0.70,0.54,0.96]
 ## How far back each slot stands when the figures are modelled (0 nearest).
 const ARC_DEPTH_HOME:=[1,1,0,2,2,3]
 const ARC_DEPTH_ENVOY:=[1,2,0,2]
+## Bystanders stand at the back and the sides, behind the court.
+const CROWD_X:=[0.07,0.95,0.20,0.82,0.50]
 ## A figure's width for its height: a standing person, not the whole painting.
 const FIGURE_ASPECT:=0.60
 ## The modelled figures: a stage pixel is this many metres of the 3D world,
@@ -126,6 +128,28 @@ var _caption:Bubble
 var _caption_age:=0
 var _laid_out:=false
 var _arrivals:Array[String]=[]
+## The seams others plug into (docs/COURT_STAGE_3D.md §5). While a hook is
+## null the stage's own behaviour stands in. Presentation only.
+static var set_builder:Object     # M: build(era, facts) -> Node3D with marks
+static var camera_rig:Object      # M: attach(stage, camera, set_root); shot(name, args)
+static var acting:Object          # K: play / look_at / set_mood / speak / idle
+static var director:Object        # L: beats / ambient / asides
+## The Court installs L's director while this is on (tests may turn it off).
+static var directing:=true
+## What the engine says about the hall now (the Court fills it): era, season,
+## stores_days, hungry, sick, at_war, love, dread, mood, offer.
+var facts:Dictionary={}
+## Which audience this is (seeds the director: the same audience plays the same).
+var audience_key:=""
+var _event_index:=0
+var _beats:Tween
+## The room's own life (L's ambient loops), paused while the room is hushed.
+var _hush_until:=0.0
+var _ambient:Array=[]
+var _ambient_timer:Timer
+var _ambient_rng:=RandomNumberGenerator.new()
+## Bystanders and animals the director brings (no game person behind them).
+var extras:Dictionary={}
 ## The modelled figures' layer: one SubViewport for the whole stage.
 var three_d:=false
 var view_container:SubViewportContainer
@@ -395,7 +419,7 @@ func _embody(f:Figure)->void:
 	var body:=Figure3D.new();body.name="Body_"+node_key(f.key)
 	var look:=figure_look(f.person,registry).duplicate()
 	# The one before the god, and an envoy's company, stand.
-	if f.role!="court" and String(look.get("stance","")) in ["sit","crouch"]:look.stance="clasped"
+	if f.role in [MAIN,"attendant"] and String(look.get("stance","")) in ["sit","crouch"]:look.stance="clasped"
 	if f.role==MAIN and String(look.get("stance",""))=="bowl" and layout_kind=="home":look.stance="clasped"
 	if not body.setup(look):
 		body.free();return
@@ -455,9 +479,168 @@ static func mood_of(regard:Dictionary,envoy_mood:=0.0)->String:
 	if float(regard.get("love",0.0))>=0.62 or envoy_mood>=0.45:return "warm"
 	return "neutral"
 
+# --- Events: the one door for what happens in the hall ---------------------------
+
+## Every happening on the stage passes here (docs/COURT_STAGE_3D.md §5): the
+## stage's own acting has already run; a director, when installed, adds its
+## beats on top.
+func event(kind:String,data:Dictionary={})->void:
+	_event_index+=1
+	if director==null or not director.has_method("beats"):return
+	var happened:=data.duplicate();happened["kind"]=kind
+	var cast:=cast_list()
+	var seed_value:=hash("%s|%d" % [audience_key,_event_index])
+	var beats:Variant=director.call("beats",happened,cast,facts,seed_value)
+	var lines:Variant=director.call("asides",happened,facts,cast,seed_value) if director.has_method("asides") else []
+	var all:Array=[]
+	if beats is Array:all.append_array(beats)
+	if lines is Array:all.append_array(lines)
+	if not all.is_empty():run_beats(all)
+
+## Who stands here, as the director and the acting see them.
+func cast_list()->Array:
+	var out:=[]
+	for key in cast_order:
+		var f:=figure(key)
+		if f==null or f.leaving:continue
+		if extras.has(key):
+			var entry:Dictionary=(extras[key] as Dictionary).duplicate();entry["figure"]=f.body3d
+			out.append(entry)
+		else:
+			out.append({"key":key,"role":f.role,"person":f.person,"figure":f.body3d,"mood":String(f.body3d.mood) if f.body3d!=null else "neutral"})
+	# Animals the set has not stood up yet are still in the room for the director.
+	for key in extras:
+		if not has_figure(key):out.append(extras[key])
+	return out
+
+## A bystander the director brings (an elder, a child, someone with a bowl):
+## a figure of our people with no plate. Animals wait for the set's beasts.
+func add_extra(entry:Dictionary)->void:
+	var key:=String(entry.get("key",""))
+	if key.is_empty() or extras.has(key):return
+	extras[key]=entry.duplicate()
+	if String(entry.get("role",""))!="crowd":return
+	var person:={"name":String(entry.get("name","someone")),"person_id":0,"sex":String(entry.get("sex","")),"age":int(entry.get("age",30))}
+	var f:=add_figure(key,person,"crowd")
+	if f!=null and f.body3d!=null and String(entry.get("stance",""))!="":
+		var look:Dictionary=f.body3d.look.duplicate();look["stance"]=String(entry.stance)
+		f.body3d.setup(look);f.rest_clip=f.body3d.rest_clip();f.body3d.play(f.rest_clip,0.0)
+
+## A bystander's muttered line: a small, quiet bubble beside them that goes on
+## its own, never ages the main bubbles and never enters the history.
+func mutter(who:String,text:String)->void:
+	var f:=figure(who)
+	if f==null or f.leaving or text.strip_edges().is_empty():return
+	var bubble:=Bubble.new();bubble.name="Mutter";bubble.kind="mutter";bubble.speaker=who
+	bubble_layer.add_child(bubble)
+	bubble.setup(text,HudTokens.voice_font(true),14 if compact else 15,Color("4a3d2c"),Color(0.96,0.93,0.86,0.92),Color("9a8566"),minf(260.0,size.x*.24),false,"",12)
+	var head:=head_point(f)
+	var right:=head.x<size.x*.5
+	bubble.position=Vector2(clampf(head.x+(18.0 if right else -18.0-bubble.size.x),6.0,maxf(6.0,size.x-bubble.size.x-6.0)),clampf(head.y-bubble.size.y*.2,top_inset+4.0,maxf(top_inset+4.0,size.y-bubble.size.y-6.0))).round()
+	bubble.tail_side="none"
+	bubble.modulate.a=0.0
+	var tw:=bubble.create_tween()
+	tw.tween_property(bubble,"modulate:a",0.92,Motion.duration(Motion.FAST))
+	tw.tween_interval(hold_time(text)+1.0)
+	tw.tween_property(bubble,"modulate:a",0.0,Motion.duration(Motion.BASE))
+	tw.tween_callback(bubble.queue_free)
+
+## The room's own life: the director's loops of idle business, each seeded,
+## driven by one quarter-second timer (nothing per frame), paused while hushed.
+func start_ambient()->void:
+	if director==null or not director.has_method("ambient") or not is_inside_tree():return
+	var specs:Variant=director.call("ambient",cast_list(),facts,hash("%s|ambient" % audience_key))
+	_ambient.clear()
+	_ambient_rng.seed=hash("%s|room" % audience_key)
+	var now:=_now()
+	if specs is Array:
+		for spec in specs:
+			if not spec is Dictionary:continue
+			var item:=(spec as Dictionary).duplicate()
+			if bool(item.get("hold",false)):_ambient_beat(item)
+			else:
+				item["next"]=now+float(item.get("start",0.0))+1.0
+				_ambient.append(item)
+	if _ambient_timer==null:
+		_ambient_timer=Timer.new();_ambient_timer.name="RoomLife";_ambient_timer.wait_time=0.25
+		add_child(_ambient_timer);_ambient_timer.timeout.connect(_ambient_tick)
+	if not _ambient.is_empty():_ambient_timer.start()
+
+func _now()->float:
+	return float(Time.get_ticks_msec())/1000.0
+
+func _ambient_tick()->void:
+	if not is_visible_in_tree():return
+	var now:=_now()
+	if now<_hush_until:return
+	for item:Dictionary in _ambient:
+		if now<float(item.next):continue
+		_ambient_beat(item)
+		var every:Array=item.get("every",[8.0,14.0])
+		item["next"]=now+_ambient_rng.randf_range(float(every[0]),float(every[1] if every.size()>1 else every[0]))
+
+func _ambient_beat(item:Dictionary)->void:
+	if not has_figure(String(item.get("who",""))) or director==null:return
+	var lowered:Variant=director.call("lower",[{"t":0.0,"who":String(item.who),"act":String(item.act),"args":item.get("args",{})}]) if director.has_method("lower") else []
+	if lowered is Array:
+		for beat in lowered:_beat(beat)
+
+## Plays a set of beats [{t, who, act, args}] on one tween, in time order.
+func run_beats(beats:Array)->void:
+	if not is_inside_tree() or beats.is_empty():return
+	if _beats and _beats.is_valid():_beats.kill()
+	var ordered:=beats.duplicate()
+	ordered.sort_custom(func(a:Variant,b:Variant)->bool:return float((a as Dictionary).get("t",0.0))<float((b as Dictionary).get("t",0.0)))
+	_beats=create_tween()
+	var at:=0.0
+	for beat in ordered:
+		var t:=maxf(float((beat as Dictionary).get("t",0.0)),at)
+		if t>at:_beats.tween_interval(t-at)
+		at=t
+		_beats.tween_callback(_beat.bind(beat))
+
+## One beat of the director's, as the stage plays it (K's acting first where
+## it has the act; else the figures' own clips, moods and gaze).
+func _beat(beat:Dictionary)->void:
+	var who:=String(beat.get("who",""))
+	var f:=figure(who)
+	var body:Node3D=f.body3d if f!=null and not f.leaving else null
+	var args:Dictionary=beat.get("args",{}) if beat.get("args") is Dictionary else {}
+	match String(beat.get("act","")):
+		"shot":
+			if camera_rig!=null and camera_rig.has_method("shot"):camera_rig.call("shot",String(args.get("name","wide")),args)
+		"hush":
+			_hush_until=maxf(_hush_until,_now()+float(args.get("dur",2.0)))
+		"aside":
+			mutter(who,String(args.get("text","")))
+		"play":
+			if body==null:return
+			if acting!=null and acting.has_method("play"):
+				acting.call("play",body,String(args.get("clip","")),args);return
+			f.perform(String(args.get("clip","")),String(args.get("fallback","")),bool(args.get("hold",false)),float(args.get("dur",0.8)),float(args.get("speed",1.0)))
+		"mood":
+			if body==null:return
+			if acting!=null and acting.has_method("set_mood"):acting.call("set_mood",body,args.get("vector",{}))
+			f.feel(String(args.get("name","")),args.get("face",{}) as Dictionary,bool(args.get("hold",false)),float(args.get("dur",0.8)))
+		"look_at":
+			if body==null:return
+			var target:=String(args.get("target",""))
+			var weight:=float(args.get("weight",0.8))
+			match target:
+				"god":body.look_at_point(god_point(),0.35,weight)
+				"god_up":body.look_at_point(god_point(true),0.35,weight)
+				"away":
+					body.look_at_point(null,0.3);body.face(f.rest_yaw+(40.0 if _ambient_rng.randf()<0.5 else -40.0),0.4)
+				_:
+					var other:=figure(target)
+					if other!=null and other.body3d!=null:body.look_at_point(other.body3d.head_top(),0.35,weight)
+		"gesture":
+			if f!=null:f.gesture(String(args.get("clip","bow")),bool(args.get("hold",false)))
+
 ## Someone's mood shows on their face and in the set of their head.
 func set_mood(key:String,mood:String)->void:
 	var f:=figure(key)
+	if f!=null:f.own_mood=mood
 	if f!=null and f.body3d!=null:f.body3d.set_mood(mood)
 
 ## What the god's wrath or favour looks like on the one before the god, as
@@ -520,6 +703,7 @@ func subject_of(words:String,about:="")->String:
 
 ## They walk in from the side (the threshold) once the stage has a size.
 func arrive(keys:Array)->void:
+	for key in keys:event("enter",{"who":String(key)})
 	for key in keys:
 		if has_figure(String(key)) and not String(key) in _arrivals:_arrivals.append(String(key))
 	if _laid_out:_run_arrivals()
@@ -546,6 +730,7 @@ func _run_arrivals()->void:
 ##  "stay"  nobody leaves.
 func conclude(delay:float=1.4,style:="bow")->void:
 	if style=="stay":return
+	event("exit",{"who":MAIN,"style":style})
 	var index:=0
 	for key in cast_order.duplicate():
 		var f:=figure(key)
@@ -593,7 +778,7 @@ func layout(animate:bool)->void:
 	var back:=h-foot_room-room*.07
 	var usable:=_usable_width()
 	var slots:Array=HOME_COURT_X if layout_kind=="home" else ENVOY_COURT_X
-	var court_index:=0;var attendant_index:=0
+	var court_index:=0;var attendant_index:=0;var crowd_index:=0
 	for key in cast_order:
 		var f:=figure(key)
 		if f==null or f.leaving:continue
@@ -604,6 +789,13 @@ func layout(animate:bool)->void:
 			"attendant":
 				x=float(ENVOY_ATTENDANT_X[attendant_index%ENVOY_ATTENDANT_X.size()])*w;fh=main_h*.78;foot=back-room*.03
 				attendant_index+=1
+			"crowd":
+				var index:=crowd_index
+				crowd_index+=1
+				x=float(CROWD_X[index%CROWD_X.size()])*usable
+				fh=court_h*.86;foot=back-room*.10
+				# a child stands about two-thirds as tall
+				if int((extras.get(f.key,{}) as Dictionary).get("age",30))<13:fh*=.64
 			_:
 				var row:=court_index/slots.size()
 				x=float(slots[court_index%slots.size()])*(w if layout_kind=="home" else usable)
@@ -661,7 +853,10 @@ func say(key:String,text:String,aside:=false,animate:=true,ref:=-1)->Label:
 	if is_instance_valid(_caption) and _caption.get_rect().intersects(bubble.get_rect()):
 		_drop(_caption,animate);_caption=null
 	_talks+=1
-	_turn_to(key,reveal_time(text)+0.5 if animate else 0.9)
+	# An aside is said quietly to the god: the room does not turn for it.
+	if aside:f.speak(reveal_time(text)+0.5 if animate else 0.9,false)
+	else:_turn_to(key,reveal_time(text)+0.5 if animate else 0.9)
+	event("line",{"who":key,"text":text,"seconds":reveal_time(text),"aside":aside})
 	if animate:bubble.pop_in()
 	return bubble.label
 
@@ -689,6 +884,7 @@ func god_says(text:String,animate:=true,ref:=-1)->Label:
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null and not f.leaving:f.look_up()
+	event("god",{"text":text,"seconds":reveal_time(text)})
 	if animate:
 		_god.descend()
 		_rays.modulate.a=0.0
@@ -719,6 +915,7 @@ func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="",abou
 		var mood:=gesture_in(words)
 		var who:=subject_of(words,about)
 		if not mood.is_empty() and not who.is_empty():react(who,mood)
+		event("direction",{"who":who,"mood":mood,"text":words})
 	return _caption.label
 
 ## Everything shown at once (a test, or the player skipping ahead): no tween
@@ -788,7 +985,7 @@ func _age_bubbles(fresh:Bubble,animate:bool)->void:
 	var rect:=fresh.get_rect()
 	for child in bubble_layer.get_children():
 		var old:=child as Bubble
-		if old==null or old==fresh or old.dropping:continue
+		if old==null or old==fresh or old.dropping or old.kind=="mutter":continue
 		old.age+=1
 		if old.age>=2 or old.speaker==fresh.speaker or old.get_rect().intersects(rect.grow(-4.0)):_drop(old,animate)
 		else:old.fade_to(.42,animate)
@@ -946,6 +1143,8 @@ class Figure extends Control:
 	var _stage:WeakRef
 	## What they do when nothing is asked of them, and which way they face.
 	var rest_clip:="stand"
+	## The mood the engine gives them (a beat's mood returns to it).
+	var own_mood:="neutral"
 	var rest_yaw:=0.0
 	## How far they have sunk (put to death where they stood), in metres.
 	var sink:=0.0:
@@ -1019,6 +1218,32 @@ class Figure extends Control:
 		if _act and _act.is_valid():_act.kill()
 		if not is_inside_tree():return
 		_act=create_tween();_act.tween_interval(maxf(seconds,0.0));_act.tween_callback(what)
+
+	## A director's act: its clip if the figure has it, else the fallback
+	## clip, else nothing; back to their stance after dur unless held.
+	func perform(clip:String,fallback:String,hold:bool,dur:float,speed:=1.0)->void:
+		if body3d==null or leaving:return
+		var name:=clip if body3d.player!=null and body3d.player.has_animation(clip) else fallback
+		if name.is_empty() or body3d.player==null or not body3d.player.has_animation(name):return
+		if _act and _act.is_valid():_act.kill()
+		_clip(name,0.25,0.0)
+		body3d.player.speed_scale=clampf(speed,0.25,3.0)
+		if not hold:_later(maxf(dur,0.3),func()->void:
+			body3d.player.speed_scale=1.0;_clip(rest_clip,0.4))
+
+	## A director's mood beat: the face and bearing for a while, then their own.
+	func feel(mood_name:String,face:Dictionary,hold:bool,dur:float)->void:
+		if body3d==null or leaving:return
+		if not mood_name.is_empty():body3d.set_mood(mood_name)
+		if not face.is_empty():body3d.set_expression(face)
+		if hold:return
+		var cleared:={}
+		for key in face:cleared[key]=0.0
+		var back:=create_tween();back.tween_interval(maxf(dur,0.3))
+		back.tween_callback(func()->void:
+			if not is_instance_valid(body3d):return
+			body3d.set_mood(own_mood)
+			if not cleared.is_empty():body3d.set_expression(cleared))
 
 	## A gesture now: "bow", "point", "raise_hand" (then back to rest), or
 	## "kneel" (hold: they stay down until something else is asked of them).
