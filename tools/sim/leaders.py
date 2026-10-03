@@ -23,7 +23,8 @@ the GDScript so they cannot drift):
 * the path the work leans toward: work_paths.gd choose by temper (no war or
   neighbours' pull here); each role takes the larger of the path's WORK and
   the ambitions' labor bias, and the reserve the larger of the two leans
-  (work_paths.gd lean: one temper's two asks never stack);
+  (work_paths.gd lean: one temper's two asks never stack); learning holds at
+  most the path's LEARNING_CAP of the people at work (model.py);
 * research: the ruler's emphasis (preferences research weights plus the
   controller's culture weights, research_plan in ATTENTION_STEPS steps)
   and the ambition's pace (PeopleDirection.research_multiplier);
@@ -76,6 +77,8 @@ PATH_WORK = g.const("scripts/work_paths.gd", "WORK")
 PATH_FOOD_LEAN = g.const("scripts/work_paths.gd", "FOOD_LEAN")
 SCHOLARLY = float(g.const("scripts/work_paths.gd", "SCHOLARLY"))
 BALANCED_BELOW = float(g.const("scripts/work_paths.gd", "BALANCED_BELOW"))
+LEARNING_CAP = g.const("scripts/work_paths.gd", "LEARNING_CAP")
+INQUIRY_CAP = float(g.const("scripts/work_paths.gd", "INQUIRY_CAP"))
 ESTABLISHMENT_DAYS = float(g.const("scripts/civilization_strategy.gd", "ESTABLISHMENT_DAYS"))
 EXPANSIONIST_DRIVE = float(g.const("scripts/civilization_strategy.gd", "EXPANSIONIST_DRIVE"))
 LONGEST_LOOK = int(g.const("scripts/civilization_strategy.gd", "LONGEST_LOOK_MONTHS"))
@@ -325,6 +328,9 @@ class LeaderSurrogate(Surrogate):
             bias[role] = max(bias.get(role, 0.0), float(v))
         self.culture_bias = bias
         self.reserve_lean = clamp(max(food_wish / RESERVE_FOOD_WISH, float(PATH_FOOD_LEAN.get(path, 0.0))), 0.0, 1.0)
+        # work_paths.gd learning_cap: the path's most on learning, raised by the
+        # inquiry ambition's share on any other path.
+        self.learning_cap = float(LEARNING_CAP.get(path, LEARNING_CAP["balanced"])) + (INQUIRY_CAP * share.get("inquiry", 0.0) if path != "learning" else 0.0)
         relevant = {line: sum(s for c, s in share.items() if line in AMBITIONS[c]["domains"]) for line in gd.LINES}
         mult = np.array([.95 + .30 * relevant[line] for line in gd.LINES])
         self.chance = self.base_chance * mult[self.cat.line]

@@ -37,6 +37,15 @@ extends RefCounted
 ## larger of its ask and the ambition's), and the Food page says so
 ## (GovernmentPeopleSystem.reserve_plan reads food_lean()).
 ##
+## The hands food does not need go by the path. A path leans the leaders'
+## split (WORK), and learning never holds more than the path's LEARNING_CAP
+## of the people at work (cap_learning: what is cut goes to the other work
+## besides food, in proportion), so food needing fewer hands does not turn a
+## people into scholars: a balanced split keeps learning at about 3 to 4 in
+## 100, and only the learning path goes high (about 10 to 15). Where food
+## takes most hands the split stays as it was. The inquiry ambition, a people
+## set on ideas, raises any other path's cap by INQUIRY_CAP times its share.
+##
 ## Kept on PeopleDirection.work_path, saved with each people:
 ## {id, since, reviewed, why, score, by ("ruler" | "leaders")}.
 
@@ -69,18 +78,23 @@ const NEED_PULL:=.03
 ## Planning weight each path adds to its work in the leaders' split (the base
 ## split, GovernmentPeopleSystem.BASE_ALLOCATIONS, adds up to 100).
 const WORK:={
-	"growth":{"Administration":9.0,"Logistics":2.0},
+	"growth":{"Administration":9.0,"Logistics":4.0},
 	"making":{"Crafting":8.0,"Logistics":4.0,"Extraction":4.0},
-	"war":{"Defense":12.0,"Crafting":2.0},
+	"war":{"Defense":12.0,"Crafting":4.0},
 	"learning":{"Knowledge":9.0,"Survey":2.0},
 	"building":{"Construction":10.0,"Extraction":4.0},
 	"balanced":{},
 }
+## The most of the people at work each path puts on learning.
+const LEARNING_CAP:={"balanced":.035,"growth":.03,"making":.03,"war":.03,"building":.03,"learning":.15}
+## A people set on ideas (the inquiry ambition) may put this much more of the
+## people on learning on any other path, times the ambition's share.
+const INQUIRY_CAP:=.04
 ## The deeper food reserve a path asks the planners for (reserve_lean, 0..1).
 const FOOD_LEAN:={"growth":.5}
 const NAMES:={"growth":"growth","making":"making and trade","war":"war","learning":"learning","building":"building","balanced":"a balanced split"}
 ## The work each path leans toward, in the People view's words.
-const LEANS:={"growth":"more on keeping and caring, and a deeper food reserve","making":"more on making, carrying, cutting and digging","war":"more on keeping watch",
+const LEANS:={"growth":"more on keeping and caring and carrying, and a deeper food reserve","making":"more on making, carrying, cutting and digging","war":"more on keeping watch and making arms",
 	"learning":"more on learning","building":"more on building, cutting and digging","balanced":"no one task more than the rest"}
 ## The temper each path suits, in a few words.
 const TEMPERS:={"growth":"caring and careful","making":"open and steady","war":"proud and hard","learning":"scholarly","building":"disciplined and careful","balanced":"even"}
@@ -223,6 +237,36 @@ static func lean(weights:Dictionary,bias:Dictionary,reserve_lean:float)->float:
 	var work:Dictionary=WORK.get(path,{})
 	for role:String in work:weights[role]=float(weights.get(role,0.0))+maxf(0.0,float(work[role])-maxf(0.0,float(bias.get(role,0.0))))
 	return clampf(maxf(reserve_lean,food_lean()),0.0,1.0)
+
+## The most of the people at work this people puts on learning: the path's
+## LEARNING_CAP, raised on any other path by the inquiry ambition's share.
+static func learning_cap()->float:
+	var path:=held() if held()!="" else "balanced"
+	var cap:=float(LEARNING_CAP.get(path,LEARNING_CAP.balanced))
+	if path=="learning" or WorldSimulation.direction==null:return cap
+	var Culture:=preload("res://scripts/cultural_inheritance.gd")
+	var choices:=Culture.choice_weights(WorldSimulation.direction.cultural_memory,int(WorldSimulation.state.elapsed_days))
+	var total:=0.0
+	for weight in choices.values():total+=float(weight)
+	return cap+(INQUIRY_CAP*float(choices.get("inquiry",0.0))/total if total>0.0 else 0.0)
+
+## Holds learning to learning_cap() of the leaders' planning weights, food
+## included (in place). What is cut goes to the other work besides food in
+## proportion, so the hands on food stay as the planners worked them out.
+static func cap_learning(weights:Dictionary)->void:
+	var total:=0.0
+	var others:=0.0
+	for role:String in weights:
+		total+=maxf(0.0,float(weights[role]))
+		if role!="Food" and role!="Knowledge":others+=maxf(0.0,float(weights[role]))
+	var learning:=maxf(0.0,float(weights.get("Knowledge",0.0)))
+	var most:=learning_cap()*total
+	if learning<=most:return
+	var cut:=learning-most
+	weights.Knowledge=most
+	if others<=0.0:return
+	for role:String in weights:
+		if role!="Food" and role!="Knowledge":weights[role]=float(weights[role])+cut*maxf(0.0,float(weights[role]))/others
 
 ## The deeper food reserve the path held asks for (0..1).
 static func food_lean()->float:
