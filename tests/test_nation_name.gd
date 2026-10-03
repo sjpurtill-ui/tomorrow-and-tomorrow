@@ -134,8 +134,11 @@ func test_the_second_founding_asks_and_its_card_names_the_nation()->void:
 	Card.founding_heading(column,"Reedmouth")
 	var input:=Card.add_field(column)
 	assert_str(input.text).is_equal("")
-	var heard:=NationName.suggestions(4)
+	var heard:=NationName.suggestions(5)
 	assert_int(heard.size()).is_greater_equal(3)
+	# Our own name for ourselves comes first and the towns together still fit.
+	assert_str(String(heard[0])).is_equal("The "+preload("res://scripts/people_language.gd").people_name("player",int(GameState.world_seed)))
+	assert_bool(heard.has("The Two Hearths") or heard.has("The Two Towns")).override_failure_message(str(heard)).is_true()
 	for name in heard:
 		assert_int(name.length()).is_less_equal(NationName.MAX_LENGTH)
 		assert_bool(name.to_lower().contains("esurai") or name.to_lower().contains("varesh")).is_false()
@@ -217,9 +220,9 @@ func test_the_names_heard_are_graded_by_what_the_people_know()->void:
 	# Never a name already ours or another people's.
 	CV.knowledge_override["player"]=[]
 	NationName.give_name(land,"screen")
-	assert_bool(NationName.suggestions(4).has(land)).is_false()
+	assert_bool(NationName.suggestions(5).has(land)).is_false()
 	CivilizationSystem.civilizations[1]["name"]="Folk of Seanstone"
-	assert_bool(NationName.suggestions(4).has("The Folk of Seanstone")).is_false()
+	assert_bool(NationName.suggestions(5).has("The Folk of Seanstone")).is_false()
 
 
 func test_skipping_names_nothing_and_only_the_next_founding_asks_again()->void:

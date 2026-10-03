@@ -413,7 +413,7 @@ static func _people_names(count:int,salt:String,woman_bias:float=0.5)->Array[Str
 		if who.is_empty(): continue
 		var given:=String(who.given)
 		# The second name the people give, in their own tongue.
-		var second:=preload("res://scripts/people_language.gd").second("player",int(GameState.world_seed),"crisis:%d" % int(s.serial),bool(who.woman),"",living)
+		var second:=EraNames.second_name("player",int(GameState.world_seed),"crisis:%d" % int(s.serial),bool(who.woman),living)
 		var name:=("%s %s" % [given,second]).strip_edges()
 		taken["given:"+given]=true
 		_remember_name(given)

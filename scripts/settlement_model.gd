@@ -20,7 +20,6 @@ const FOUNDING_MATERIAL_VALUE:={"Timber":1.0,"Fiber Plants":1.0,"Clay":0.75,"Sto
 ## Old shared town-name roots: only the last resort now (towns are named in
 ## each people's own tongue, suggested_settlement_name).
 const SETTLEMENT_NAME_ROOTS:=["Alder","Ash","Bright","Cairn","Dawn","Deep","Elm","Fair","Flint","Green","High","Iron","Lake","Long","North","Oak","Red","River","Stone","Sun","Vale","West","Willow","Wind"]
-const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","haven","hearth","holm","landing","march","meadow","rest","ridge","stead","vale","watch","wick"]
 
 const CITY_RESOURCE_DEFAULTS:={
 	"civilian_care":{"enabled":true,"staff_share":0.25,"episodes":[],"next_id":1,"last_day":-1,"history":[],"report":{}},

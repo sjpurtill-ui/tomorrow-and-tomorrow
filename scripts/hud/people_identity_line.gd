@@ -9,6 +9,7 @@ const Kit:=preload("res://scripts/hud/paper_kit.gd")
 const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Lang:=preload("res://scripts/people_language.gd")
 const Looks:=preload("res://scripts/people_appearance.gd")
+const EraNames:=preload("res://scripts/era_names.gd")
 
 ## The line for a people (owner: "player" or a people's id), added to parent.
 static func build(parent:Node,owner:String)->VBoxContainer:
@@ -17,7 +18,8 @@ static func build(parent:Node,owner:String)->VBoxContainer:
 	box.add_theme_constant_override("separation",3)
 	box.mouse_filter=Control.MOUSE_FILTER_PASS
 	if parent!=null:parent.add_child(box)
-	var line:=Kit.label(box,Lang.card_line(owner),"note")
+	# Names as that people give them now (bynames before writing).
+	var line:=Kit.label(box,Lang.card_line(owner,Lang.NO_SEED,EraNames.stage(owner)),"note")
 	line.name="TongueLine"
 	var look:=Looks.profile(owner)
 	var chips:=HBoxContainer.new()

@@ -63,7 +63,8 @@ const COUNT_DEFAULTS:={"syl":"1 2","famsyl":"1 2","lexsyl":"1 1 2","gv":"2 3"}
 ## a space); pattern: family, patronym (the father's name) or clan;
 ## mode "syllabic": names built of whole syllables (Sinitic, Koreanic);
 ## gsyl: the syllables given names are made of, two at a time (Koreanic);
-## gem: doubled consonants allowed; maxc/maxv: longest consonant/vowel run.
+## gem: doubled consonants allowed; maxc/maxv: longest consonant/vowel run;
+## avoid: endings that would read as English ("-ing", "-ed", "-ly").
 const FAMILIES:={
 	"west_african":{"on":"k k t t m m b d f s n l w y j ch kw ny _ _","mid":"b d f g k l m n s t w y j ch kw ny nk nt nd mb ng","v":"a a e i o o u","f":"a a e ya ola ike oma ua esi efa ina","m":"o u e i emi ade edu ka nna eku ofi","syl":"1 2 2","gv":"2 3","fam":"u wu or ah eng ola ide yi ama ekwe ike ong eme","famsyl":"1 2 2","place":"si ma ugu ta oko ra ado ani ena","folk":"_ a e","tongue":"%sgbe %s"},
 	"bantu":{"on":"b ch d f g h j k l m n p s sh t v w y z mb nd ng nj nz mw kw ny _","mid":"b ch d f g h j k l m n p s sh t v w y z mb nd ng nk nt nz ny mw kw","v":"a a a e i i o u u","f":"a i e iwe ile ana ela isa ani ima eza ita","m":"o u i a ani ela ezi ika ende ongo uli","syl":"1 2 2","gv":"2 3","fam":"a e o i wa we ana ezi ombe ulu ira","famsyl":"1 2","place":"ma ni ngo ombe ezi oro ani we ala","folkt":"Wa%s Ba%s Ama%s","tongue":"Ki%s Chi%s Isi%s Si%s Lu%s"},
@@ -83,11 +84,11 @@ const FAMILIES:={
 	"iranic":{"on":"b d f g h j k kh l m n p r s sh t v z _","mid":"b d f g h j k kh l m n p r s sh t v z zh","v":"a a e i o u","cod":"n r m s sh d z b h","pc":0.4,"fin":"n r m s sh d z b","pf":0.5,"fs":"CaCiCa CiCiC CaCeh CiCa CoCa CaCaC aCaCeh","ms":"aCaC CaCaC CaCiC CaCCaC CaCeh oCiC CaCuC","ps":0.7,"f":"in eh a ar az ana","m":"ash ad an am ar id","syl":"1 2","gv":"2 3","fam":"i ian zadeh pour far vand","famsyl":"1 2","place":"abad shahr an gerd kand dasht","folk":"an i","tongue":"%si"},
 	"indo_aryan":{"on":"b ch d g h j k l m n p r s sh t v y _ b d k m n p r s v","mid":"b ch d g h j k l m n p r s sh t v y dh kh","v":"a a a i i u e o","cod":"n m r s l t k","pc":0.3,"fin":"n m r l t k","pf":0.45,"f":"a i ika ita ini ya ali","m":"esh it an ay av ul endra","syl":"1 2 2","gv":"2 3","fam":"a i ar wal kar ani ra","famsyl":"1 2","place":"pur abad nagar garh ganj","folk":"i a","tongue":"%si"},
 	"dravidian":{"on":"k ch t p m n v y r l s j _ _","mid":"k ch t th p m n v y r l s j nd nn tt mm ll kk ng nj","v":"a a i u e o ai","cod":"n m l r","pc":0.2,"fin":"n m l r","pf":0.4,"f":"a i athi itha ya ani avi","m":"an am esh ar u appa","syl":"1 2 2","gv":"2 4","place":"ur palli patti pettai puram kottai","folk":"ar","tongue":"%su %sam","pattern":"patronym","gem":1},
-	"slavic":{"on":"b v g d z k l m n p r s t ch sh br dr gr kr pr tr st sv zl vl _ b v d k l m n p r s t","mid":"b v g d zh z k l m n p r s t ch sh","v":"a a o o e i u","cod":"n r l s v k m t","pc":0.25,"fin":"n r l s v k m t sh d","pf":0.45,"f":"a ana ina ena ka ya ica ava ila","m":"an ek or slav mir ko ir","syl":"1 1 2","gv":"2 3","fam":"ov ev in ski ich enko ak ek uk","famf":"ov:ova ev:eva in:ina ski:ska","famsyl":"1 2","place":"grad ovo ava ets sk ica in ov","folk":"ane ichi","tongue":"%sski"},
-	"germanic":{"on":"b d f g h j k l m n p r s t v w br dr fr gr kr st sv sk tr _","mid":"b d f g h j k l m n p r s t v w","v":"a a e e i o u o","dip":"ei ie oo aa","pd":0.06,"cod":"n l r s t k m d","pc":0.3,"fin":"n l r s t k m d rs ns ls ts ks lt nt nk rk rn rt st ld","pf":0.65,"clu":"lt nk nn ll rt rn nd ns lk lm rd tt ss mm rk ng lv","fs":"CVKe CVCa CVCVC VKa CVKa CVCe VCVn CiCa CVKa","ms":"CVQ CVQ CVCVQ VCVC CVKe CVC CVCeQ VKeQ","ps":0.85,"f":"a e ke je ine ie","m":"_ e o en er ar","syl":"1 1 2","gv":"1 3","lexsyl":"1","fam":"sen berg strom dal gaard ma stra inga er holm lund vik","famsyl":"1 1 2","place":"by stad heim dorp hus vik holm","folk":"ar ingar","tongue":"%ssk %sisk"},
-	"romance":{"on":"b c d f g l m n p r s t v _ b c d l m p s t br tr","mid":"b c d f g l m n p r s t v ll tt nz","v":"a a e i o o u","dip":"ia io ie au","pd":0.08,"cod":"n l r s","pc":0.2,"fin":"n l r s","pf":0.3,"clu":"rl lv nz nt rc rt ld nd lb rm ll tt ss rg","fs":"CVCia CVCVa CVKa VCVna CVCina CVKia VKa CVCVla","ms":"CVCo CVKo CVCVCo VCVCo CVKio CVCVs CVCiel CVKiel","ps":0.85,"f":"a ia ina ella etta ine elle","m":"o io ino el an or e","syl":"1 1 2","gv":"2 3","fam":"i ini elli etti ez ero ard ier escu eanu one","famsyl":"1 2","place":"ano ella ac ona esa ia ento","folk":"ani esi ois","tongue":"%sano %sais","gem":1},
-	"celtic":{"on":"b c d f g gw ll m n p r rh s t br gl _","mid":"b c d f g m n r s t w l dd th","v":"a a e i o y","dip":"ae ai ei ia io","pd":0.1,"cod":"n l r s","pc":0.2,"fin":"n l r s th d","pf":0.5,"clu":"rw nw lw ff dd ll rd nd rn","fs":"CeCyQ CVCa eiCa CVCwen CVCen VCVn CiCa CVKen CVCi","ms":"CeCiQ VCeQ CVCan CVQ CVCin VCyQ CoCan CVKin CVCyn","ps":0.85,"f":"a en wen ys ia ine","m":"_ an ed in og","syl":"1 1 2","gv":"1 3","lexsyl":"1","fam":"an en og ec in","famt":"Tre%s Pen%s Ker%s Lan%s %s %s %s","famsyl":"1 2","placet":"Aber%s Bryn%s Caer%s Dun%s Kil%s Tre%s Pen%s Llan%s","tongue":"%seg %sek"},
-	"hellenic":{"on":"p t k b d g f th kh m n l r s z pl pr tr kl kr st sp _","v":"a a e i o o i","dip":"ia io ou ei ai","pd":0.12,"cod":"n s r l","pc":0.2,"fin":"s n","pf":0.1,"f":"a i ia ou ini ina","m":"os is as on ias","syl":"1 2 2","gv":"2 3","fam":"opoulos akis idis atos as","famf":"opoulos:opoulou akis:aki idis:idou atos:atou as:a","famsyl":"1 2","place":"polis ia os ion ada ini","folk":"ites","tongue":"%sika"},
+	"slavic":{"on":"b v g d z k l m n p r s t ch sh br dr gr kr pr tr st sv zl vl _ b v d k l m n p r s t","mid":"b v g d zh z k l m n p r s t ch sh","v":"a a o o e i u","cod":"n r l s v k m t","pc":0.25,"fin":"n r l s v k m t sh d","pf":0.45,"f":"a ana ina ena ka ya ica ava ila","m":"an ek or slav mir ko ir","syl":"1 1 2","gv":"2 3","fam":"ov ev in ski ich enko ak ek uk","famf":"ov:ova ev:eva in:ina ski:ska","famsyl":"1 2","place":"grad ovo ava ets sk ica in ov","folk":"ane ichi","tongue":"%sski","avoid":"ing ed"},
+	"germanic":{"on":"b d f g h j k l m n p r s t v w br dr fr gr kr st sv sk tr _","mid":"b d f g h j k l m n p r s t v w","v":"a a e e i o u o","dip":"ei ie oo aa","pd":0.06,"cod":"n l r s t k m d","pc":0.3,"fin":"n l r s t k m d rs ns ls ts ks lt nt nk rk rn rt st ld","pf":0.65,"clu":"lt nk nn ll rt rn nd ns lk lm rd tt ss mm rk ng lv","fs":"CVKe CVCa CVCVC VKa CVKa CVCe VCVn CiCa CVKa","ms":"CVQ CVQ CVCVQ VCVC CVKe CVC CVCeQ VKeQ","ps":0.85,"f":"a e ke je ine ie","m":"_ e o en er ar","syl":"1 1 2","gv":"1 3","lexsyl":"1","fam":"sen berg strom dal gaard ma stra inga er holm lund vik","famsyl":"1 1 2","place":"by stad heim dorp hus vik holm","folk":"ar ingar","tongue":"%ssk %sisk","avoid":"ing ed ly ness ment tion ful less ish"},
+	"romance":{"on":"b c d f g l m n p r s t v _ b c d l m p s t br tr","mid":"b c d f g l m n p r s t v ll tt nz","v":"a a e i o o u","dip":"ia io ie au","pd":0.08,"cod":"n l r s","pc":0.2,"fin":"n l r s","pf":0.3,"clu":"rl lv nz nt rc rt ld nd lb rm ll tt ss rg","fs":"CVCia CVCVa CVKa VCVna CVCina CVKia VKa CVCVla","ms":"CVCo CVKo CVCVCo VCVCo CVKio CVCVs CVCiel CVKiel","ps":0.85,"f":"a ia ina ella etta ine elle","m":"o io ino el an or e","syl":"1 1 2","gv":"2 3","fam":"i ini elli etti ez ero ard ier escu eanu one","famsyl":"1 2","place":"ano ella ac ona esa ia ento","folk":"ani esi ois","tongue":"%sano %sais","gem":1,"avoid":"ing ed ly tion ment"},
+	"celtic":{"on":"b c d f g gw ll m n p r rh s t br gl _","mid":"b c d f g m n r s t w l dd th","v":"a a e i o y","dip":"ae ai ei ia io","pd":0.1,"cod":"n l r s","pc":0.2,"fin":"n l r s th d","pf":0.5,"clu":"rw nw lw ff dd ll rd nd rn","fs":"CeCyQ CVCa eiCa CVCwen CVCen VCVn CiCa CVKen CVCi","ms":"CeCiQ VCeQ CVCan CVQ CVCin VCyQ CoCan CVKin CVCyn","ps":0.85,"f":"a en wen ys ia ine","m":"_ an ed in og","syl":"1 1 2","gv":"1 3","lexsyl":"1","fam":"an en og ec in","famt":"Tre%s Pen%s Ker%s Lan%s %s %s %s","famsyl":"1 2","placet":"Aber%s Bryn%s Caer%s Dun%s Kil%s Tre%s Pen%s Llan%s","tongue":"%seg %sek","avoid":"ing ed ly"},
+	"hellenic":{"on":"p t k b d g f th kh m n l r s z pl pr tr kl kr st sp _","v":"a a e i o o i","dip":"ia io ou ei ai","pd":0.12,"cod":"n s r l","pc":0.2,"fin":"s n","pf":0.1,"f":"a i ia ou ini ina","m":"os is as on ias","syl":"1 2 2","gv":"2 3","fam":"opoulos akis idis atos as","famf":"opoulos:opoulou akis:aki idis:idou atos:atou as:a","famsyl":"1 2","place":"polis ia os ion ada ini","folk":"ites","tongue":"%sika","avoid":"ing ed"},
 	"finnic":{"on":"h j k l m n p r s t v _ _","mid":"h j k l m n p r s t v kk tt pp ll nn mm ss","v":"a a e i o u","dip":"aa ee ii oo uu ai ei oi ui au ou ie uo","pd":0.2,"cod":"n l r s t k","pc":0.3,"fin":"n s","pf":0.2,"f":"a i o ina ja ka","m":"o i a u ri","syl":"1 2 2","gv":"2 3","fam":"nen la lainen o sto mets saar","famsyl":"1 2","place":"la lahti joki jarvi maa salo niemi koski","folk":"_ t","tongue":"%s+Kieli","gem":1},
 	"inuit":{"on":"k q t p s m n l v j _ _ ng","mid":"k q t p s m n ng l v j r g kk qq tt mm nn ll","v":"a a i i u","dip":"aa ii uu","pd":0.15,"cod":"q k t p m n l r","pc":0.25,"fin":"q k t n","pf":0.45,"f":"aq uk ik a i ut juaq","m":"aq uk ik a i ut juaq","syl":"1 2 2","gv":"2 3","place":"vik juaq tuuq lik","folkt":"%smiut","tongue":"%stitut %stun","pattern":"patronym","gem":1},
 	"athabaskan":{"on":"b ch d dz g h j k l n s sh t tl ts y zh _","v":"a a e i o","dip":"aa ii oo ee ai ei","pd":0.2,"cod":"n l sh s d h","pc":0.25,"fin":"n l sh s d h zh","pf":0.4,"f":"ni ba ah oni i","m":"kai iil ish eh an","syl":"1 2 2","gv":"2 3","fam":"nii ii tsoh ah","famsyl":"1 2","place":"tah ito yi kai","tongue":"%s+Bizaad","pattern":"clan"},
@@ -211,7 +212,7 @@ static func _base(family:String)->Dictionary:
 	if _bases.has(family):return _bases[family]
 	var raw:Dictionary=FAMILIES.get(family,FAMILIES.west_african)
 	var p:={"family":family}
-	for k in ["on","mid","v","dip","cod","fin","clu","oni","vi","gsyl","fs","ms","ft","mt","f","m","fam","famt","place","placet","folk","folkt","tongue"]:
+	for k in ["on","mid","v","dip","cod","fin","clu","oni","vi","gsyl","fs","ms","ft","mt","f","m","fam","famt","place","placet","folk","folkt","tongue","avoid"]:
 		p[k]=_list(String(raw.get(k,"")))
 	if (p.mid as Array).is_empty():p.mid=(p.on as Array).duplicate()
 	for k in ["syl","famsyl","lexsyl","gv"]:
@@ -343,11 +344,46 @@ static func second(owner:String,seed_value:int,key:String,woman:bool,family:Stri
 	for attempt in 48:
 		var word:=_family_word(p,rng)
 		if word=="":continue
+		# Both forms must pass ("Stas" is a name, "Sta" is not).
+		var other:=gendered(p,word,not woman)
 		word=gendered(p,word,woman)
+		if Blocklist.blocks(word) or Blocklist.blocks(other) or word.length()<int(p.fam_min):continue
 		if fallback=="":fallback=word
 		if taken.has(word) or taken.has("byname:"+word):continue
 		return word
 	return fallback
+
+## A byname: what a person is called before writing or lasting institutions,
+## when nothing is handed down. A plain word of the tongue (often a place word
+## or two of it), never with a family-name ending ("-ov", "-zadeh",
+## "-shvili", "-sen", "-opoulos") or a family-name prefix ("Ou-", "Tre-").
+## A people that names by the father calls a person by the father's name.
+static func byname(owner:String,seed_value:int,key:String,woman:bool,taken:Dictionary={})->String:
+	var p:=profile(owner,seed_value)
+	if String(p.pattern)=="patronym":return _given(p,key+":father",false,taken)
+	var rng:=_rng(p,"byname:"+key)
+	var fallback:=""
+	for attempt in 64:
+		var word:=_byname_word(p,rng)
+		if word=="":continue
+		if fallback=="":fallback=word
+		if taken.has(word) or taken.has("byname:"+word):continue
+		return word
+	return fallback
+
+## True when a word ends or begins as this people's family names do.
+static func has_family_mark(p:Dictionary,word:String)->bool:
+	var low:=word.to_lower()
+	var base:=_base(String(p.family))
+	for ending in base.fam:
+		if String(ending).length()>=2 and low.ends_with(String(ending)):return true
+	for pair:Array in base.famf:
+		for form in pair:
+			if String(form).length()>=2 and low.ends_with(String(form)):return true
+	for form in base.famt:
+		var before:=String(form).get_slice("%s",0).to_lower()
+		if before!="" and low.begins_with(before):return true
+	return false
 
 ## A family name in a woman's or a man's form ("Dunavlova", "Dunavlov"), where
 ## the tongue has two.
@@ -359,12 +395,14 @@ static func gendered(p:Dictionary,family:String,woman:bool)->String:
 	return family
 
 ## A whole name, given and second: {name, given, second}. At most FULL_MAX
-## letters where the tongue allows.
-static func person(owner:String,seed_value:int,key:String,woman:bool,taken:Dictionary={},family:String="")->Dictionary:
+## letters where the tongue allows. `stage` (era_names.gd): before 2 the
+## second name is a byname, unless a kinsman's name (`family`) is given.
+static func person(owner:String,seed_value:int,key:String,woman:bool,taken:Dictionary={},family:String="",stage:int=2)->Dictionary:
 	var first:=given(owner,seed_value,key,woman,taken)
 	var best:={}
 	for attempt in 10:
-		var other:=second(owner,seed_value,key if attempt==0 else "%s~%d" % [key,attempt],woman,family,taken)
+		var turn:=key if attempt==0 else "%s~%d" % [key,attempt]
+		var other:=byname(owner,seed_value,turn,woman,taken) if stage<2 and family.strip_edges()=="" else second(owner,seed_value,turn,woman,family,taken)
 		var full:=("%s %s" % [first,other]).strip_edges()
 		if best.is_empty() or (full.length()<String(best.name).length() and String(best.name).length()>FULL_MAX):best={"name":full,"given":first,"second":other}
 		if full.length()<=FULL_MAX and not taken.has(full):return {"name":full,"given":first,"second":other}
@@ -415,24 +453,26 @@ static func sex_of(owner:String,seed_value:int,name:String)->Variant:
 	return null
 
 ## A small sample of the tongue for a people's card: {tongue, people,
-## persons (three whole names), towns (three)}.
-static func sample(owner:String="player",seed_value:int=NO_SEED)->Dictionary:
+## persons (three whole names, as the people name people at `stage`), towns
+## (three)}.
+static func sample(owner:String="player",seed_value:int=NO_SEED,stage:int=2)->Dictionary:
 	var p:=profile(owner,seed_value)
-	if p.has("sample"):return p.sample
+	var slot:="sample_%d" % mini(stage,2)
+	if p.has(slot):return p[slot]
 	var persons:Array=[];var towns:Array=[];var taken:={}
 	for i in 3:
-		var made:=person(owner,int(p.world_seed),"sample:%d" % i,i!=1,taken)
+		var made:=person(owner,int(p.world_seed),"sample:%d" % i,i!=1,taken,"",stage)
 		persons.append(String(made.name));taken["given:"+String(made.given)]=true
 	for i in 3:
 		var place:=town(owner,int(p.world_seed),"sample:%d" % i,taken)
 		towns.append(place);taken[place.to_lower()]=true
-	p["sample"]={"tongue":String(p.tongue_name),"people":String(p.people),"persons":persons,"towns":towns,"family":String(p.family)}
-	return p.sample
+	p[slot]={"tongue":String(p.tongue_name),"people":String(p.people),"persons":persons,"towns":towns,"family":String(p.family)}
+	return p[slot]
 
 ## One plain line for a people's card: "Tongue: Kikumbe · names like Hakima
 ## Nzesiza, Tonika Sizashali · towns like Ndimwa, Noshezi".
-static func card_line(owner:String="player",seed_value:int=NO_SEED)->String:
-	var s:=sample(owner,seed_value)
+static func card_line(owner:String="player",seed_value:int=NO_SEED,stage:int=2)->String:
+	var s:=sample(owner,seed_value,stage)
 	return "Tongue: %s · names like %s · towns like %s" % [String(s.tongue),", ".join(PackedStringArray((s.persons as Array).slice(0,2))),", ".join(PackedStringArray((s.towns as Array).slice(0,2)))]
 
 ## The world's other peoples as the world is made: civ_01..civ_36, each
@@ -497,6 +537,17 @@ static func _given_word(p:Dictionary,rng:RandomNumberGenerator,woman:bool)->Stri
 	if not forms.is_empty():word=_template(String(_pick(forms,rng)),word)
 	word=word.to_lower()
 	return _cap(word) if _valid(word,p,int(p.given_min),9,int((p.gv as Array).front()),int((p.gv as Array).back())) else ""
+
+static func _byname_word(p:Dictionary,rng:RandomNumberGenerator)->String:
+	var lex:Dictionary=p.lex
+	var word:=""
+	var roll:=rng.randf()
+	if roll<0.35 and lex.size()>=2:word=_join(_lex_word(lex,rng,""),_lex_word(lex,rng,""),p)
+	elif roll<0.55 and not lex.is_empty():word=_join(_root(p,rng,1,false),_lex_word(lex,rng,""),p)
+	else:word=_root(p,rng,[1,2,2][rng.randi_range(0,2)],true)
+	word=word.to_lower()
+	if has_family_mark(p,word):return ""
+	return _cap(word) if _valid(word,p,3,10,1,3) else ""
 
 static func _family_word(p:Dictionary,rng:RandomNumberGenerator)->String:
 	var lex:Dictionary=p.lex
@@ -625,6 +676,16 @@ static func _groups(word:String)->int:
 		before=vowel
 	return count
 
+## A word that stutters ("Kiki", "Haha", "Tzitzi", "Kalala"): it begins or
+## ends with the same few letters twice over.
+static func stutters(word:String)->bool:
+	var low:=word.to_lower()
+	for n in [2,3,4]:
+		if low.length()>=2*n and low.substr(0,n)==low.substr(n,n):return true
+	for n in [2,3]:
+		if low.length()>=2*n+1 and low.substr(low.length()-n)==low.substr(low.length()-2*n,n) and not VOWELS.contains(low.substr(low.length()-n,1)):return true
+	return false
+
 ## Pronounceable in its own tongue, of the right size and no real or
 ## offensive word.
 static func _valid(word:String,p:Dictionary,shortest:int,longest:int,fewest_groups:int,most_groups:int)->bool:
@@ -638,9 +699,16 @@ static func _valid(word:String,p:Dictionary,shortest:int,longest:int,fewest_grou
 	if groups<fewest_groups or groups>most_groups:return false
 	for part in lower.split(" ",false):
 		var text:=String(part)
+		if stutters(text):return false
+		# English endings read as English words ("Hunting", "Baged").
+		for ending in p.get("avoid",[]):
+			if text.length()>String(ending).length()+2 and text.ends_with(String(ending)):return false
+		if String(p.mode)!="syllabic" and text.length()>=6 and text.ends_with("ing"):return false
 		var units:=_units(text)
 		var run_c:=0;var run_v:=0
 		for i in units.size():
+			# A sound written with two letters, twice running ("Akhkhad").
+			if i>0 and String(units[i]).length()>1 and units[i]==units[i-1]:return false
 			if _vowel_unit(units,i):
 				run_v+=String(units[i]).length();run_c=0
 			else:

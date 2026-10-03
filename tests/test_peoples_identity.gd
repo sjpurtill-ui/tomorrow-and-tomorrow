@@ -284,3 +284,110 @@ func test_a_peoples_card_shows_its_tongue_and_look()->void:
 	var look:=Looks.profile("civ_03")
 	assert_int(swatches).is_equal((look.skin as Array).size()+(look.hair as Array).size()+(look.cloth as Array).size())
 	line.free()
+
+func test_reviewed_words_slurs_and_jokes_never_become_names()->void:
+	for word in ["Niga","Injun","Kunto","Kuntah","Abo","Pus","Bum","Tit","Gay","Die","Nun","Dad","Dunce","Sushi","Tofu","Ramen","Nacho","Judo","Sumo","Sumogo",
+			"Haha","Jaja","Kiki","Mandela","Borgia","Cato","Jochi","Walid","Mamun","Rumi","Temur","Takasaki","Nikon","Sanyo","Atlan","Sony","Toyota","Nike","Lisa","Steve","Daddy"]:
+		assert_bool(Blocklist.blocks(word)).override_failure_message(word).is_true()
+	# Slurs anywhere in a word; some only where they begin one.
+	for word in ["Kaniga","Akuntu","Bonazir","Injunar","Spicora","Tasexa"]:
+		assert_bool(Blocklist.blocks(word)).override_failure_message(word).is_true()
+	for word in ["Minjun","Acumo"]:
+		assert_bool(Blocklist.blocks(word)).override_failure_message(word).is_false()
+	# Common English words in general, not only the ones the probe met.
+	for word in ["Water","People","Little","Great","Friend","Money","Number"]:
+		assert_bool(Blocklist.blocks(word)).override_failure_message(word).is_true()
+
+
+func test_names_never_stutter_nor_double_a_two_letter_sound()->void:
+	for word in ["Haha","Jaja","Kiki","Lala","Tzitzi","Kalala","Sasak","Besabesa"]:
+		assert_bool(Lang.stutters(word)).override_failure_message(word).is_true()
+	for word in ["Kaleo","Amani","Tzutum","Minjun","Rukungun"]:
+		assert_bool(Lang.stutters(word)).override_failure_message(word).is_false()
+	var by_family:=_one_per_family(SEED)
+	for family:String in by_family:
+		var owner:String=by_family[family]
+		for i in 150:
+			for word in [Lang.given(owner,SEED,"st:%d" % i,i%2==0),Lang.byname(owner,SEED,"st:%d" % i,i%2==0),Lang.town(owner,SEED,"st:%d" % i)]:
+				var low:=String(word).to_lower()
+				assert_bool(Lang.stutters(low)).override_failure_message("%s: %s" % [family,word]).is_false()
+				var units:=Lang._units(low)
+				for u in range(1,units.size()):
+					if String(units[u]).length()>1:assert_str(String(units[u])).override_failure_message("%s: %s" % [family,word]).is_not_equal(String(units[u-1]))
+
+
+func test_bynames_before_writing_carry_no_family_endings()->void:
+	var CV:=preload("res://scripts/character_voice.gd")
+	var by_family:=_one_per_family(SEED)
+	for family in ["slavic","iranic","kartvelian","germanic","hellenic","amazigh","celtic","turkic","japonic"]:
+		var owner:String=by_family[family]
+		var p:=Lang.profile(owner,SEED)
+		for i in 200:
+			var word:=Lang.byname(owner,SEED,"by:%d" % i,i%2==0)
+			assert_bool(Lang.has_family_mark(p,word)).override_failure_message("%s byname %s" % [family,word]).is_false()
+		CV.knowledge_override[owner]=[]
+		for i in 40:
+			var made:=EraNames.make(SEED,500+i,i%2==0,owner,{})
+			assert_str(String(made.family)).is_empty()
+			assert_bool(Lang.has_family_mark(p,String(made.byname))).override_failure_message("%s band name %s" % [family,made.name]).is_false()
+		CV.knowledge_override.erase(owner)
+	# A family name does carry them, once there is writing.
+	var slavic:String=by_family.slavic
+	var marked:=0
+	for i in 60:if Lang.has_family_mark(Lang.profile(slavic,SEED),Lang.second(slavic,SEED,"fam:%d" % i,false)):marked+=1
+	assert_int(marked).is_greater(40)
+
+
+func test_kin_take_the_right_parents_name()->void:
+	var CV:=preload("res://scripts/character_voice.gd")
+	var by_family:=_one_per_family(SEED)
+	var ethiopic:String=by_family.ethiopic
+	var slavic:String=by_family.slavic
+	CV.knowledge_override[ethiopic]=["pictographic_records"]
+	CV.knowledge_override[slavic]=["pictographic_records"]
+	# Named by the father: a child takes the father's given name, a sibling
+	# shares it, a mother passes on her husband's, cousins start afresh.
+	var father:={"name":"Hamet Kebu","family":"Kebu","sex":"male"}
+	assert_str(EraNames.kin_family(father,"son",ethiopic)).is_equal("Hamet")
+	assert_str(EraNames.kin_family(father,"daughter",ethiopic)).is_equal("Hamet")
+	assert_str(EraNames.kin_family(father,"brother",ethiopic)).is_equal("Kebu")
+	assert_str(EraNames.kin_family(father,"cousin",ethiopic)).is_empty()
+	var mother:={"name":"Finot Zet","family":"Zet","sex":"female","household":{"spouse":{"name":"Gawet"}}}
+	assert_str(EraNames.kin_family(mother,"child",ethiopic)).is_equal("Gawet")
+	assert_str(EraNames.kin_family({"name":"Finot Zet","sex":"female"},"child",ethiopic)).is_empty()
+	var son:=EraNames.make(SEED,71,false,ethiopic,{},{"family":EraNames.kin_family(father,"son",ethiopic)})
+	assert_str(String(son.byname)).is_equal("Hamet")
+	# A family name is shared, in the child's own form.
+	var kin:={"name":"Vlana Stamova","family":"Stamova","sex":"female"}
+	assert_str(EraNames.kin_family(kin,"son",slavic)).is_equal("Stamova")
+	assert_str(String(EraNames.make(SEED,72,false,slavic,{},{"family":EraNames.kin_family(kin,"son",slavic)}).family)).is_equal("Stamov")
+	# Before writing nothing is handed down.
+	CV.knowledge_override[ethiopic]=[]
+	assert_str(EraNames.kin_family(father,"son",ethiopic)).is_empty()
+	CV.knowledge_override.erase(ethiopic)
+	CV.knowledge_override.erase(slavic)
+
+
+func test_later_faces_of_a_deep_skinned_people_are_varied()->void:
+	GameState.elapsed_days=400*365
+	var deep:=""
+	for i in 13:
+		if float(Looks.profile(_owner(i),SEED).depth[0])>=0.75 and Looks.late_fitting(_owner(i),SEED).size()==1:deep=_owner(i);break
+	assert_str(deep).is_not_empty()
+	# Six people of that people: the one face that fits, six different ways.
+	var looks:={}
+	for id in range(1,7):
+		var v:=Portrait.late_variant({"name":"Deep %d" % id,"person_id":id,"civilization_id":deep})
+		assert_int(int(v[0])).is_equal(0)
+		looks[str([v[1],v[2]])]=true
+	assert_int(looks.size()).is_equal(6)
+	# On one screen: the fitting face in each of its crops before a lighter face.
+	var people:Array=[]
+	for id in range(11,15):people.append({"name":"Screen %d" % id,"person_id":id,"civilization_id":deep})
+	var slots:=Portrait.distinct_slots(people)
+	var crops:={}
+	var on_face:=0
+	for slot:Array in slots:
+		if int(slot[0])==0:on_face+=1;crops[int(slot[2])]=true
+	assert_int(on_face).is_equal(3)
+	assert_int(crops.size()).is_equal(3)

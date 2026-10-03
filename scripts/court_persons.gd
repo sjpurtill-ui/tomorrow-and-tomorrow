@@ -286,7 +286,9 @@ static func create(desc:Dictionary,key:String="")->Dictionary:
 	if sid=="" or _settlement(sid).is_empty(): sid=String(_settlement("").get("id",""))
 	var kin_of:Dictionary=desc.get("kin_of",{}) if desc.get("kin_of") is Dictionary else {}
 	var family:=""
-	if not kin_of.is_empty(): family=preload("res://scripts/era_names.gd").family_of(GovernmentPeopleSystem.person_snapshot(int(kin_of.get("pid",0))))
+	# A kinsman's second name as their people hand it on: a child of a people
+	# that names by the father takes the father's given name (era_names.gd).
+	if not kin_of.is_empty(): family=preload("res://scripts/era_names.gd").kin_family(GovernmentPeopleSystem.person_snapshot(int(kin_of.get("pid",0))),String(kin_of.get("relation","child")))
 	var n:=_name_for(sex,rng,family)
 	var children:=0
 	var quals:=String(desc.get("quality","")).split("+",false)

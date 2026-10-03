@@ -103,10 +103,42 @@ static func make(seed_value:int,serial:int,woman:bool,owner:String,used:Dictiona
 	## kinsman's, kept in this person's form), stage}.
 	if owner=="": owner="player"
 	var st:=int(hint.get("stage",stage(owner)))
-	var made:=Lang.person(owner,seed_value,"%s:%d" % [owner,serial],woman,used,String(hint.get("family","")))
+	var made:=Lang.person(owner,seed_value,"%s:%d" % [owner,serial],woman,used,String(hint.get("family","")),st)
 	var second:=String(made.get("second",""))
 	return {"name":String(made.get("name","")),"given":String(made.get("given","")),"byname":second,"family":second if st>=2 else "","stage":st,
 		"tradition":tradition(owner,seed_value),"tongue_name":Lang.tongue_name(owner,seed_value)}
+
+static func second_name(owner:String,seed_value:int,key:String,woman:bool,taken:Dictionary={})->String:
+	## A second name for an ordinary person of this people, as they are named
+	## now: a byname before writing or institutions, else a family, father's or
+	## clan name.
+	if owner=="": owner="player"
+	if stage(owner)<2: return Lang.byname(owner,seed_value,key,woman,taken)
+	return Lang.second(owner,seed_value,key,woman,"",taken)
+
+static func kin_family(kin:Dictionary,relation:String="child",owner:String="player")->String:
+	## The second name a kinsman hands to a relation (a court person's kin, a
+	## ruler's heir), for make()'s hint. Before writing or institutions nothing
+	## is handed down (""). A people that names by the father gives a child the
+	## father's given name (the kinsman's own when he is the father, his
+	## wife's husband's when she is the mother, "" when unknown) and a brother
+	## or sister the same father's name; nephews, nieces, cousins and parents
+	## are named afresh. Every other people shares its family or clan name.
+	if owner=="": owner="player"
+	if stage(owner)<2: return ""
+	if Lang.pattern(owner)!="patronym": return family_of(kin)
+	match relation:
+		"brother","sister","sibling": return family_of(kin)
+		"child","son","daughter":
+			if not _is_woman(kin): return given_of(String(kin.get("name","")))
+			var household:Variant=kin.get("household",{})
+			var spouse:Variant=(household as Dictionary).get("spouse",{}) if household is Dictionary else {}
+			if spouse is Dictionary and String((spouse as Dictionary).get("name",""))!="": return given_of(String((spouse as Dictionary).name))
+	return ""
+
+static func _is_woman(person:Dictionary)->bool:
+	if person.has("woman"): return bool(person.woman)
+	return String(person.get("sex",person.get("gender",""))) in ["female","woman"]
 
 static func given_for(seed_value:int,key:String,woman:bool,owner:String,taken:Dictionary)->String:
 	## One given name in this people's tongue and of the person's sex (a
