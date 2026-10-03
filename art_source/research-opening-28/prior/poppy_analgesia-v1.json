@@ -1,0 +1,12 @@
+{
+  "id": "poppy_analgesia",
+  "line": "health",
+  "game_year": 45,
+  "approx_historical_year": -4700,
+  "prompt": "c. 4700 BCE: Poppy pods prepared near a resting adult for pain relief; sparse watercolor and ink. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-97afbab4-c304-4f5d-bc13-42a2a60600c0.png",
+  "asset": "res://assets/ui/research/subjects/poppy_analgesia-v1.png",
+  "sha256": "31d082c4093a1e8099af87eb738f4dc4dafb2d1d2098dba63783db36ad3ea1c7",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Poppy pods and resting patient clear in crop."
+}

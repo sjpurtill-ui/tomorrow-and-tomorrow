@@ -1,12 +1,50 @@
 {
   "id": "firebreaks",
   "line": "ecology",
-  "game_year": 28,
-  "approx_historical_year": -4813,
-  "prompt": "c. 4813 BCE: Adults clear broad fuel-free strip around reed camp and fields before distant grassfire; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1b3e4481-337c-4565-8854-65ca985b8b2b.png",
-  "asset": "res://assets/ui/research/subjects/firebreaks-v1.png",
-  "sha256": "7fb109add319af1d5b93cd3df0dc18e29b9966c50acff38e8633076b81ad6898",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; bare-earth firebreak between huts and low fire clear."
+  "status": "new",
+  "name": "Firebreaks Cleared Around Camps and Fields",
+  "one_liner": "Firebreaks cleared around camps and fields",
+  "observation": "Firebreaks cleared around camps and fields.",
+  "key_threshold": false,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 17,
+  "band_high": 39,
+  "min_year": 17,
+  "research_years": 3,
+  "requires_all": [
+    "controlled_undergrowth_burning"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Land health",
+  "signals": [
+    "nature",
+    "survey"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/firebreaks-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.35
+  ],
+  "binding_style": "ecology: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/ecology-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established ecology medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults clear dry brush along a narrow bare-earth strip between a hide camp and low scrub, using wooden digging sticks and gathering removed branches aside. Botanical plant-pigment foreground with flat landscape, green resprouting plants beyond cleared strip. No wildfire, metal shovel, bulldozer, trench machinery, military wall or instructional diagram.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4ead5420-13f2-440d-a169-d43e43a936cc.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/firebreaks-v2.png",
+  "sha256": "3002e8ecbf9ffa2844cbb3be5923849b0c906cdae48592955c32070f8c47e7f0",
+  "mode": "built-in image_gen / edit"
 }

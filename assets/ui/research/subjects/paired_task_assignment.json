@@ -1,12 +1,17 @@
 {
   "id": "paired_task_assignment",
   "line": "labor",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/paired_task_assignment-v1.png",
+  "prompt": "Edit this CURRENT GAME WIDE charcoal over ochre painting, preserve approximately 2059x764 canvas and expressive flat charcoal strokes. Keep pointing coordinator and two adults lifting the SAME rough fallen log together. REMOVE finished timber/reed building completely; background becomes only one low ragged hide windbreak on two crooked untrimmed branches. All wear crude torn animal hides. Scale three figures smaller so complete heads, coordinator pointing hand, both carriers' gripping hands and both ends of log fit inside central 65 percent height, with ochre breathing space above and below. Log looks naturally fallen irregular bark-covered wood, no sawn squared beam. No baskets, pots, woven cloth, neat walls, farm or metal. Preserve charcoal drawing, no photographic/CGI/3D treatment. Wide canvas, no text or border.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-34f5c694-030b-4af7-8735-0073c24348de.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 5,
-  "approx_historical_year": -4967,
-  "prompt": "c. 4967 BCE: two adults jointly move one heavy timber beam for shelter repair as an elder assigns the shared task. Mature expressive charcoal over flat ochre wash with smears and rough grain; no cart, metal saw, writing or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-30a14901-1f3a-4e36-b6db-9c84cea076d0.png",
-  "asset": "res://assets/ui/research/subjects/paired_task_assignment-v1.png",
-  "sha256": "f0d1b93300aaa25c97581ae6ef331c2fb31f642a390df1f26d317f50aeb24716",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; heavy beam and coordinated pair clear. Accepted after visual 3.37:1 crop and subject/period check."
+  "review": "Expressive charcoal/ochre retained. Coordinator points while two adults share same irregular bark-covered fallen log. Finished building removed, raw-hide windbreak substituted; complete heads and grips visible.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/paired_task_assignment-v2.png",
+  "sha256": "f6ef944b317729e5809b38973d44adbb0babbeac6870e0aa069df0d30b75ceeb"
 }

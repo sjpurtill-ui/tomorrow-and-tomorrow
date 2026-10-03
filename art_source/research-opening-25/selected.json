@@ -1,0 +1,426 @@
+[
+  {
+    "id": "part_time_specialists",
+    "line": "labor",
+    "status": "new",
+    "name": "Part-time Craft Specialists Within Households",
+    "one_liner": "Part-time craft specialists within households",
+    "observation": "Part-time craft specialists within households.",
+    "key_threshold": true,
+    "target_year": 36,
+    "proposed_year": 36,
+    "band_low": 18,
+    "band_high": 48,
+    "min_year": 18,
+    "research_years": 4,
+    "requires_all": [
+      "skill_recognition",
+      "seasonal_work_round"
+    ],
+    "requires_any": [
+      [
+        "food_drying",
+        "smoking"
+      ]
+    ],
+    "precedents": [],
+    "conditions": {
+      "min_population": 30
+    },
+    "shared_with": [],
+    "subcategory": "Work efficiency",
+    "signals": [
+      "administration",
+      "training"
+    ],
+    "version": 2,
+    "year": 36,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "labor: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/part_time_specialists-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/labor-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established labor painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: A modest camp divides seasonal work: ONE seated skilled maker shapes a crude clay bowl, a second adult prepares a flint tool nearby, and two others return carrying gathered branches. No permanent specialist workshop, factory or markets. Labor charcoal drawing over ochre, distinctly loose shaded pigment.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bfb63be7-b712-45d7-be0d-3e6999ddaaa3.png",
+    "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600."
+  },
+  {
+    "id": "charcoal",
+    "line": "production",
+    "status": "catalog",
+    "name": "Charcoal Burned in Covered Stacks",
+    "one_liner": "Charcoal burned in covered stacks",
+    "observation": "Charcoal burned in covered stacks.",
+    "key_threshold": false,
+    "target_year": 36,
+    "proposed_year": 36,
+    "band_low": 20,
+    "band_high": 48,
+    "min_year": 20,
+    "research_years": 4,
+    "requires_all": [
+      "earth_oven_cooking"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "pit_firing"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 36,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "binding_style": "production: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/charcoal-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/production-v1.png",
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/charcoal.png",
+      "focus": [
+        0.58,
+        0.74
+      ]
+    },
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established production painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: TWO adults inspect cooled blackened branch pieces beside a SMALL partly opened earth-covered burn pit; one lifts a cooled charcoal fragment on a bark tray. Earth and leafy cover, faint background haze, no active handling of flames, no industrial kiln or metal. Production flat angular palette-knife painting copper/ember/soot/umber, no photographic relief.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8422aa48-1991-4a08-af50-816bdc7ac2dc.png",
+    "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600."
+  },
+  {
+    "id": "flood_house_mounds",
+    "line": "infrastructure",
+    "status": "new",
+    "name": "House Mounds Raised Above Flood",
+    "one_liner": "House mounds raised above flood",
+    "observation": "House mounds raised above flood.",
+    "key_threshold": false,
+    "target_year": 36,
+    "proposed_year": 36,
+    "band_low": 18,
+    "band_high": 45,
+    "min_year": 18,
+    "research_years": 3,
+    "requires_all": [
+      "flood_mark_reading"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "adobe_wall_construction"
+    ],
+    "conditions": {
+      "environment": [
+        "river"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Resilience",
+    "signals": [
+      "construction",
+      "materials"
+    ],
+    "version": 2,
+    "year": 36,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "infrastructure: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/flood_house_mounds-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/infrastructure-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established infrastructure painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: TWO adults add baskets of earth to a LOW raised earthen mound beneath a modest reed/hide shelter beside a floodplain; show a flood debris line below the mound and shallow seasonal water. Simple sticks and baskets, no monumental embankment, stilt house or later village architecture. Infrastructure matte casein mineral blue/limestone.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1be532d8-ec76-46d3-af28-faccb8415a02.png",
+    "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600."
+  },
+  {
+    "id": "deliberate_milk_souring",
+    "line": "nutrition",
+    "status": "era",
+    "name": "Soured Milk Kept as a Thick Curd",
+    "one_liner": "Soured milk kept as a thick curd",
+    "observation": "Soured milk kept as a thick curd.",
+    "key_threshold": false,
+    "target_year": 36,
+    "proposed_year": 36,
+    "band_low": 26,
+    "band_high": 51,
+    "min_year": 26,
+    "research_years": 2,
+    "requires_all": [
+      "milking"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "pit_firing"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 36,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "nutrition: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/deliberate_milk_souring-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established nutrition painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: ONE adult tilts a rough clay bowl to examine separated pale curds and thin liquid, with another modest clay milk pot under reed shade nearby and a small goat in the background. Hide clothing, no commercial dairy, cheese wheel, modern culture jars, metal strainer or precise recipe. Nutrition opaque botanical egg-tempera olive/gold/cream/earth.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-22eea31a-0ac9-445b-b348-28c5b0d0bab1.png",
+    "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600."
+  },
+  {
+    "id": "maternal_recovery",
+    "line": "demography",
+    "status": "catalog",
+    "name": "Food and Lighter Work After Childbirth",
+    "one_liner": "Food and lighter work after childbirth",
+    "observation": "Food and lighter work after childbirth.",
+    "key_threshold": false,
+    "target_year": 37,
+    "proposed_year": 37,
+    "band_low": 27,
+    "band_high": 52,
+    "min_year": 27,
+    "research_years": 3,
+    "requires_all": [
+      "postpartum_seclusion_care",
+      "dietary_healing_regimens"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 37,
+    "focus": [
+      0.5,
+      0.3
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "demography: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/demography-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established demography painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: A clothed mother rests seated under a modest hide shelter, holding a swaddled infant in soft HIDE; a caregiver offers a clay bowl of nourishing food while another quietly brings water. Calm dignity and support, no birth scene, blood, medical procedure or claimed cure. Demography angular chalk/pastel cut-paper terracotta/rust/ivory/slate.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-df072826-912f-44d8-a0e9-e21f76960f3e.png",
+    "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600."
+  },
+  {
+    "id": "first_fruits_offering",
+    "line": "culture",
+    "status": "new",
+    "name": "First Fruits Offered to the God Before the Harvest Is Eaten",
+    "one_liner": "First fruits offered to the god before the harvest is eaten",
+    "observation": "First fruits offered to the god before the harvest is eaten.",
+    "key_threshold": false,
+    "target_year": 38,
+    "proposed_year": 38,
+    "band_low": 22,
+    "band_high": 55,
+    "min_year": 22,
+    "research_years": 2,
+    "requires_all": [
+      "hearth_shrine_offerings",
+      "seed_selection"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "festival_calendar"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Shared legitimacy",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "version": 2,
+    "year": 38,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "binding_style": "culture: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/first_fruits_offering.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 3,
+        "caption": "First fruits offered to the god before the harvest is eaten (Year 38)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/culture-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established culture painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: TWO adults respectfully place a handful of early seed heads and small wild fruits on a simple stone beside a modest HEARTH SHRINE, before sharing a basket of harvest. The offering addresses the player as living god OFFSCREEN; no depicted deity, idol, monarch, later temple or text. Culture flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, not literal cloth.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e1f35e38-2b05-43b3-a764-4a013784a21f.png",
+    "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600."
+  },
+  {
+    "id": "paired_measure_checking",
+    "line": "production",
+    "status": "era",
+    "name": "Two Keepers Check Each Measure",
+    "one_liner": "Two keepers check each measure",
+    "observation": "Two keepers check each measure.",
+    "key_threshold": false,
+    "target_year": 38,
+    "proposed_year": 38,
+    "band_low": 20,
+    "band_high": 50,
+    "min_year": 20,
+    "research_years": 1.5,
+    "requires_all": [
+      "notched_measuring_rods"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "witnessed_agreement_customs",
+      "knot_tally_cross_check"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "knowledge"
+    ],
+    "version": 2,
+    "year": 38,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "production: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/paired_measure_checking-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established production painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: TWO adults kneel comparing TWO rough notched wooden rods aligned side by side against the width of a branch bundle; one indicates an irregular notch while the other checks the matching span. Only crude cuts, NO numbers, writing, ruler markings, graduated metal gauges or finished carpentry. Production flat angular palette-knife painting copper/ember/soot/umber.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.\nCorrection: Edit the supplied painting, preserving its exact extra-wide canvas, flat angular copper/ember painting style, people and setting. Correct the central measurement mechanism: exactly TWO rough notched wooden rods parallel side by side, each held/checkable between the two adults. Remove the third rod entirely. Keep the branch bundle below, irregular crude notches, no modern ruler numbers, no refined carpentry. Keep whole heads and hands.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1c604cb7-e12b-46b6-b2db-2e79c990d31e.png",
+    "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600."
+  },
+  {
+    "id": "disability_care",
+    "line": "health",
+    "status": "new",
+    "name": "Lifelong Care for the Lame and Disabled",
+    "one_liner": "Lifelong care for the lame and disabled",
+    "observation": "Lifelong care for the lame and disabled.",
+    "key_threshold": false,
+    "target_year": 38,
+    "proposed_year": 38,
+    "band_low": 28,
+    "band_high": 53,
+    "min_year": 28,
+    "research_years": 3,
+    "requires_all": [
+      "kin_care_widows_orphans"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "splint_and_bracing_technique"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "General health",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "version": 2,
+    "year": 38,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "binding_style": "health: established field painting",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/disability_care-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/health-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established health painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: A seated older adult with limited mobility is INCLUDED in a small camp activity, sorting seeds on a bark tray while a younger companion offers a hand and a crude branch walking staff rests nearby. Everyday support and participation, dignity, no miraculous cure, medical gear, visible deformity, injury or infantile depiction. Health sage/celadon ink-watercolor on cream.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bcfd9730-d2e5-46c5-828a-0b4769f2ec40.png",
+    "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600."
+  }
+]

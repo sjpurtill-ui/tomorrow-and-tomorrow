@@ -1,0 +1,12 @@
+{
+  "id": "paired_carrier_balancing",
+  "line": "logistics",
+  "game_year": 4,
+  "approx_historical_year": -4973,
+  "prompt": "c. 4973 BCE: two adults balance a heavy load of gathered roots suspended from the center of a timber carrying pole supported at both ends. Mature flat panoramic travel watercolor, faded indigo and sand-gold washes, no cart, wheel, metal or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5e238461-a677-4bd0-855e-ac74bb9db80e.png",
+  "asset": "res://assets/ui/research/subjects/paired_carrier_balancing-v1.png",
+  "sha256": "3dda5fd00ef21af97a940cd3c05d9aabb1f9e982a0a775f4083ee01a2bdcf7e0",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first had camera-like landscape. Accepted after visual 3.37:1 crop and subject/period check."
+}

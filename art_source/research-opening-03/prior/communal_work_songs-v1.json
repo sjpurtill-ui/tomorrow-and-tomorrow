@@ -1,0 +1,18 @@
+{
+  "id": "communal_work_songs",
+  "line": "culture",
+  "game_year": 2,
+  "version": 1,
+  "focus": [
+    0.5,
+    0.38
+  ],
+  "replace_art600": true,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8301acad-a26d-458a-8d06-5be6c620d8e4.png",
+  "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-cba600e8-9a7c-4490-8717-642b764a7218.png",
+  "prompt": "Create a distinct opening-era research painting for Communal Work Songs, game year 2. Use the supplied painting ONLY for its mature tapestry-inspired paint medium and indigo/dusty rose/warm gold/dusk violet palette, interlocking flat angular shapes and visible coarse fiber-like pigment grain. Do not copy the hearth, seated circle or fire. New scene: four dignified adults in ragged unstitched hide wraps jointly lift and move a rough fallen branch trunk, their grips and alternating stepping postures creating a visible shared rhythm. One adult at the left sings a work call, mouth subtly open and free hand raised in time; others look toward that cue as they lift together. Crude natural timber, bare ground and flat landscape bands, no saw-cut log ends. No written music, symbols or soundwave graphics. Wide panorama approx 3:1, faces/hands/trunk/call gesture across the middle horizontal band for 3.37:1 crop. Adult angular proportions, tactile flat paint, restrained expressive profiles. No physical tapestry, woven clothes, baskets, pottery, sewn tunics, refined tools, metal, wheels, buildings, furniture, borders, captions, watermarks, photographic lighting, smooth digital volume or childlike illustration.",
+  "review": "Full image inspected: four hide-clad adults jointly lift a rough naturally branched trunk, left singer's open mouth and raised rhythmic hand cue the group; all grips and alternating steps visible. Interlocking flat culture painting with coarse pigment grain and indigo/rose/gold/violet palette. No saw-cut logs, later tools or woven objects. Full image and wide card crop inspected. Raised gesture requires focus [.5,.38] to retain the cue and all four grips in narrow card crops.",
+  "asset": "res://assets/ui/research/subjects/communal_work_songs-v1.png",
+  "sha256": "e9f762df5712068962d9b402dc3f304ffc402387b91bee76247719c375669fd2",
+  "mode": "built-in image_gen / edit"
+}

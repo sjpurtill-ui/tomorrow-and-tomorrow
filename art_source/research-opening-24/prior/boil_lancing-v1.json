@@ -1,0 +1,12 @@
+{
+  "id": "boil_lancing",
+  "line": "health",
+  "game_year": 34,
+  "approx_historical_year": -4773,
+  "prompt": "c. 4773 BCE: Caregiver holds simple chipped flint near small raised boil on adults forearm while helper steadies them; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d3d4559f-c143-45aa-a7fb-732c049fa69f.png",
+  "asset": "res://assets/ui/research/subjects/boil_lancing-v1.png",
+  "sha256": "7386385604d8fdc597c86c7503d1884ee72a89b8b0efbc312ca7863d26de295a",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first lacked visible ailment; selected small boil, flint and care clear without graphic instruction."
+}

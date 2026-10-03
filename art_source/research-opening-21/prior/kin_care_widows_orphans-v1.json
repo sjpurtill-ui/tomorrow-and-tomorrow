@@ -1,0 +1,12 @@
+{
+  "id": "kin_care_widows_orphans",
+  "line": "demography",
+  "game_year": 28,
+  "approx_historical_year": -4813,
+  "prompt": "c. 4813 BCE: Extended kin welcome widowed adult and orphaned children with food and shelter; mature chalk pastel and torn-paper collage. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c93c4f8a-dcfa-44be-84b4-112dc5291ca1.png",
+  "asset": "res://assets/ui/research/subjects/kin_care_widows_orphans-v1.png",
+  "sha256": "1c915ae67430967e867f1cf049f61397ae9a70673872c99321e4053dba8bdec6",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; family welcome and children clear in crop."
+}

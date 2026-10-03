@@ -1,0 +1,33 @@
+{
+  "id": "stone_sorting",
+  "line": "production",
+  "game_year": 2,
+  "version": 1,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/stone_sorting.png",
+    "source": "EARLY_SUBJECTS",
+    "focus": [
+      0.64,
+      0.72
+    ],
+    "later_fallback": {
+      "path": "res://assets/ui/research/stone-selection-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2f2b131d-0d6e-4ec9-b486-6ef8667358e7.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/raw_material_prestaging-v2.png",
+  "prompt": "Create a new mature handmade 2D game research painting: prehistoric stone sorting, two adults wearing ragged unstitched animal hides compare three unworked stones by grain and fresh fracture on a natural flat rock. One adult raises a small round hammer pebble close to a rough flint to hear its ring; the other points to a pale fresh fracture. No finished axe, metal, pottery, baskets, weaving, linen, writing, polished architecture. Medium: chunky palette-knife impasto painting in copper, ember, soot and umber, thick expressive flat pigment planes and scraped edges; clearly painted, never photorealistic or 3D, never children's illustration. Reference image is for pigment handling and palette ONLY; create a different stone-comparison scene, no copied arrangement. Wide panoramic composition within a landscape image, keep BOTH faces, examining hands, hammer pebble and contrasting stones within the central horizontal band so a 3.7:1 card crop remains understandable. Quiet serious observational scene, warm mineral ground, minimal rough vegetation. No letters, captions, borders or diagrams.",
+  "mode": "built-in image_gen / new image with medium reference",
+  "review": "Full original inspected: two adult hide-clad figures compare dark flint, granular stone and pale fractured stone; small hammer pebble and pointing gesture remain distinct. Chunky copper/ember/soot/umber impasto pigment, no refined tools, containers, weaving or photorealism. Full original and 3.77:1 crop inspected; both faces, hammer pebble, pointing fingers and all three stones remain visible.",
+  "asset": "res://assets/ui/research/subjects/stone_sorting-v1.png",
+  "sha256": "5088188e891d56b6f9bf246996e8368305eff3bcb3f73ef30c992d22b6300e2c"
+}

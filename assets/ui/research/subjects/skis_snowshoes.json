@@ -1,12 +1,58 @@
 {
   "id": "skis_snowshoes",
   "line": "logistics",
-  "game_year": 32,
-  "approx_historical_year": -4787,
-  "prompt": "c. 4787 BCE: Regional winter travelers cross snow on simple broad wooden skis and fiber-laced bent-wood snowshoes; sparse travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-92457ae0-6094-4c18-873e-accaf4a7edf6.png",
-  "asset": "res://assets/ui/research/subjects/skis_snowshoes-v1.png",
-  "sha256": "c3205e4b31a15c69cc4cd56b1e04e66fcefed2b277bcb31ea9166079f4504aed",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; skis, snowshoes and tracks clear in crop; regional winter setting."
+  "status": "new",
+  "name": "Skis and Snowshoes for Winter Travel",
+  "one_liner": "Skis and snowshoes for winter travel (regional)",
+  "observation": "Skis and snowshoes for winter travel (regional).",
+  "key_threshold": false,
+  "target_year": 32,
+  "proposed_year": 32,
+  "band_low": 19,
+  "band_high": 45,
+  "min_year": 19,
+  "research_years": 3,
+  "requires_all": [
+    "cordage",
+    "timber_grading"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "timber_seasoning",
+    "bone_needle_sewing"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Carrying capacity",
+  "signals": [
+    "travel",
+    "logistics"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/skis_snowshoes-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "version": 2,
+  "year": 32,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "logistics: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/logistics-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established logistics medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: Two adults cross a modest snow-covered valley: one uses TWO broad raw wooden skis with simple hide foot loops, the other wears TWO oval bent-branch snowshoes with coarse cord webbing. Sand/slate/indigo travel watercolor. Keep all FOUR complete foot devices inside central action band, simple natural branch walking poles, hide/fur clothes. No modern ski boot, poles with baskets, metal edges or goggles.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-22f1e445-aaad-4e92-a4bb-1118a65474bc.png",
+  "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/skis_snowshoes-v2.png",
+  "sha256": "05155e463b19c7f6a0fe8fabed68bd501e905647eb1557982e36fe692e65eb6b",
+  "mode": "built-in image_gen / edit"
 }

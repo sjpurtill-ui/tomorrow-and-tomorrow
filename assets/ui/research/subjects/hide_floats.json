@@ -1,9 +1,18 @@
 {
   "id": "hide_floats",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Hide Floats. Several visibly inflated animal-hide bladders lashed beneath a light wooden platform support bundles and one traveler on quiet shallow water. Handmade buoyancy, not a canoe or plank boat.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-fbbfd4c0-0de6-48bb-82d9-ba6cd14e2982.png",
-  "asset": "res://assets/ui/research/subjects/hide_floats-v1.png",
-  "sha256": "f512d1e7f136fd21bcc6bb22643d8f91635f7733bcaae87135997010eb8f9a18",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "logistics",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/vermin_deterrent_placement-v2.png",
+  "prompt": "Create current-game Tomorrow and Tomorrow logistics research banner. Preserve supplied WIDE approximately 2055x765 canvas. Strict handmade panoramic travel watercolor sand/slate/indigo. One small coarse raft of THREE naturally fallen bark-covered logs lashed with crude plant cord with TWO bulging sewn rough-hide floats tied alongside. Seated adult uses crooked branch paddle while shore helper steadies raft at shallow stream; no planks, boat hull, sail, metal or squared beam. Raft clearly meets water. Entire heads, hands and discovery mechanism within central 60 percent height, smaller adults with breathing room above/below for actual 3.37:1 card crop. Portable wild camp and irregular animal hides only. No text, borders, photography, CGI, sculpted relief, woven cloth, pottery, baskets or permanent buildings. Reference medium and width ONLY, replace subject.",
+  "replace_first300": true,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-737b9ea1-ba0e-4259-984a-76b2a0522679.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 7,
+  "review": "Sand/slate travel watercolor. Coarse log raft lashed with plant cord, two bulging stitched hide floats at sides, branch paddle and shore helper contact water.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/hide_floats-v2.png",
+  "sha256": "884f4c916f91be7e6e204992be09f80fd2f56b9c448732db43fd962331fb63c0"
 }

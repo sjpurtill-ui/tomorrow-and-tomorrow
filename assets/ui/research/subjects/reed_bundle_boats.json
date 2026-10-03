@@ -1,12 +1,61 @@
 {
   "id": "reed_bundle_boats",
   "line": "logistics",
-  "game_year": 58,
-  "approx_historical_year": -4613,
-  "prompt": "c. 4613 BCE: River crew lashes reed bundles into boat and smears bitumen at seams, finished boat afloat; travel watercolor and ink. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-d94d1e1d-f588-4c4a-823b-57be94e12e6a.png",
-  "asset": "res://assets/ui/research/subjects/reed_bundle_boats-v1.png",
-  "sha256": "2d9709050a528012ed4489cd098dc8107f8f8754a2854113af4d84d98d699d76",
-  "mode": "built-in image_gen / new image",
-  "review": "Reed boat construction and river use clear."
+  "status": "new",
+  "name": "Reed-bundle Boats Sealed with Bitumen",
+  "one_liner": "Reed-bundle boats sealed with bitumen (regional)",
+  "observation": "Reed-bundle boats sealed with bitumen (regional).",
+  "key_threshold": false,
+  "target_year": 36,
+  "proposed_year": 58,
+  "band_low": 44,
+  "band_high": 72,
+  "min_year": 44,
+  "research_years": 4,
+  "requires_all": [
+    "hide_floats",
+    "basketry",
+    "bitumen_sealing"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "river_craft"
+  ],
+  "conditions": {
+    "environment": [
+      "river"
+    ]
+  },
+  "shared_with": [],
+  "subcategory": "Trade reach",
+  "signals": [
+    "travel",
+    "logistics"
+  ],
+  "version": 2,
+  "year": 44,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/reed_bundle_boats-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/logistics-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established logistics painting medium and EXACT EXTRA-WIDE canvas width/aspect. Full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two adults work beside ONE small boat formed from thick lashed REED BUNDLES at a quiet river edge. One applies a small dark bitumen smear to the seam using a crude wood scrap; another secures a fiber lashing. Bundle ends and boat form clearly visible, NO wooden plank hull, sail, oars with metal, industrial tar pot, giant reed ship or modern vessel. Regional gameyear44 prerequisite bitumen sealing. Medium panoramic travel watercolor sand/slate/indigo. Zoom out so ALL heads, hands and mechanisms fit central y170..590 on a765px banner for the actual3.37:1 card. Gameyears42\u201344, modest prehistoric materials: wood, reed, stone, raw hides/fur, clay, bast fibers. Do not copy reference's unrelated village or river subject. No metal, woven clothing, ornate later technology or photographic lighting.\nCorrection after material research: Preserve this exact extra-wide watercolor painting, the two adults, reed bundle boat, lashings and whole composition. Correct the waterproofing: bitumen is a rough continuous dark coating over the LOWER OUTER SURFACE of the reed-bundle hull, rather than only a thin seam line. Show the adult spreading this dark coating onto the lower reed hull with the same crude wood scrap. Keep upper reed bundles, open reed ends and fiber lashings clearly visible. No wooden planks, modern tar vessel, sail or industrial technology. Matte watercolor, no photographic rendering.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9b5e5b83-91ce-4201-a627-643f33ad0cf6.png",
+  "review": "Full original inspected; accepted subject and established field painting medium. Actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/reed_bundle_boats-v2.png",
+  "sha256": "18cc41cbc602a169c3d013d47b8d20e99afe1493ef29bac851ceed1ebd522d8f",
+  "mode": "built-in image_gen / edit"
 }

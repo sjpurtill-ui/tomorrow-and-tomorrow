@@ -1,0 +1,59 @@
+{
+  "id": "drop_spindles",
+  "line": "production",
+  "status": "catalog",
+  "name": "Spliced Fiber Spun on Whorled Spindles",
+  "one_liner": "Spliced fiber spun on whorled spindles",
+  "observation": "Spliced fiber spun on whorled spindles.",
+  "key_threshold": false,
+  "target_year": 32,
+  "proposed_year": 32,
+  "band_low": 18,
+  "band_high": 42,
+  "min_year": 18,
+  "research_years": 3,
+  "requires_all": [
+    "cordage",
+    "fiber_retting"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "bow_drill_drive"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/paper/drop_spindles.png",
+      "focus": [
+        0.5,
+        0.65
+      ]
+    }
+  },
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/drop_spindles.png",
+    "focus": [
+      0.67,
+      0.71
+    ]
+  },
+  "version": 2,
+  "year": 32,
+  "focus": [
+    0.5,
+    0.35
+  ],
+  "binding_style": "production: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/production-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established production medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: ONE seated adult spins spliced flax fibers: upper hand gently draws loose fibers from a small bundle, lower hand guides ONE fine yarn strand to ONE slender wooden drop spindle with a small irregular clay whorl hanging freely below. Copper/ember/soot flat angular palette-knife painting. Exactly2hands, unwoven fibers, spindle/strand complete in center; no spinning wheel, loom, fabric or modern bobbin.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-715bbb11-9e5a-472f-88c6-1ce95a401a12.png",
+  "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/drop_spindles-v2.png",
+  "sha256": "a1099e271eed75252f629c1f6c88a4381481e2b359cafc431867f2ddd18f0d80",
+  "mode": "built-in image_gen / edit"
+}

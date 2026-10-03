@@ -1,0 +1,21 @@
+{
+  "id": "friction_fire_ignition",
+  "line": "nutrition",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/food_drying-v2.png",
+  "medium": "opaque botanical egg tempera olive gold cream earth",
+  "prompt": "Create NEW Tomorrow and Tomorrow year-eight research painting. Match supplied WIDE approximately2055x765 proportions and opaque botanical egg tempera olive gold cream earth. Seated adult rolls a straight vertical hand-drill spindle between two open palms above a rough wooden hearthboard. Spindle bottom in notch beside tiny dark ember dust; helper holds airy dry tinder nest nearby. ONE spindle, coherent opposed palms, tiny smoke not huge flame, no bowdrill. Rough hide garments and portable wild camp only. Complete heads, hands and subject mechanism within central60percentheight, smaller people with breathing space for actual3.37:1crop. Full bleed wide mature handmade2D art. No captions, text, border, photography, CGI, cinematiclighting or cultivatedfields. Replace reference subject, retain medium and width.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-aa852d53-ef8a-4804-a1c2-67e012b2dc8f.png",
+  "version": 1,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 8,
+  "replace_art600": false,
+  "replace_first300": true,
+  "binding_style": "nutrition: opaque botanical egg tempera olive gold cream earth",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/friction_fire_ignition-v1.png",
+  "sha256": "d6ea00113117d1fa2b3134bceab0817cd12ef5a20d7cc64b6f2c390c815d5fbe"
+}

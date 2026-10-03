@@ -1,12 +1,56 @@
 {
   "id": "banishment_sentence",
   "line": "institutions",
-  "game_year": 30,
-  "approx_historical_year": -4800,
-  "prompt": "c. 4800 BCE: Community elders publicly cast out an adult who departs with bundle past boundary cairn while kin remain; archaic civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-60a157b0-d4a3-4105-85cc-f03b445b5eec.png",
-  "asset": "res://assets/ui/research/subjects/banishment_sentence-v1.png",
-  "sha256": "af0acc0f827320504dc9633e8e5da1ce17807fc0cf9271e67b45b6a30cb55099",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; social separation and nonviolent departure clear."
+  "status": "new",
+  "name": "Casting Out as the Gravest Sentence",
+  "one_liner": "Casting out as the gravest sentence",
+  "observation": "Casting out as the gravest sentence.",
+  "key_threshold": false,
+  "target_year": 30,
+  "proposed_year": 30,
+  "band_low": 18,
+  "band_high": 45,
+  "min_year": 18,
+  "research_years": 3,
+  "requires_all": [
+    "elder_council_assent"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "blood_price"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Administration",
+  "signals": [
+    "administration",
+    "society"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/banishment_sentence-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "version": 2,
+  "year": 30,
+  "focus": [
+    0.5,
+    0.3
+  ],
+  "binding_style": "institutions: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/institutions-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established institutions medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: Three sober elders stand inside a tiny camp boundary while a solitary adult with one small hide bundle walks away along an open path, looking back. Dusty-plum limestone matte fresco planes. Clear separation between community and departing adult, no violence, chains, throne, prison, royal insignia or crowd punishment.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8a43dea8-89da-4a54-8e7e-e07d0c453c44.png",
+  "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/banishment_sentence-v2.png",
+  "sha256": "597838f2201c28f9ce0d2cd18e0103f3483975d5bff8bacfa5427d2c246813eb",
+  "mode": "built-in image_gen / edit"
 }

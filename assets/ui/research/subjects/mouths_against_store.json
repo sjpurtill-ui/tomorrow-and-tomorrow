@@ -1,12 +1,22 @@
 {
   "id": "mouths_against_store",
   "line": "demography",
-  "game_year": 20,
-  "approx_historical_year": -4867,
-  "prompt": "c. 4867 BCE: Adults compare household members to remaining grain baskets and count plain pebbles by each person; chalk pastel and cut-paper. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f638c823-7908-4ee8-9c61-dadfb68c72c7.png",
-  "asset": "res://assets/ui/research/subjects/mouths_against_store-v1.png",
-  "sha256": "857402be5a6495842cf49814266ed8e64d15756be9fa8360731b57dba31e076f",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; family, pebble count and limited store clear in crop; no writing."
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/mouths_against_store-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/artifacts/field-style-references/demography-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established demography field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: At a small earth-walled food shelter, an elder compares one modest seed basket with three plain tally sticks while several family members wait; heads and baskets visible, oral accounting of mouths and stores. Angular chalk/pastel cut-paper terracotta, rust, ivory and slate. No written numerals, ledger, monumental granary or woven robes.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-58cb850e-6bbe-47aa-9c4d-98e76770c76f.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/demography-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/mouths_against_store-v2.png",
+  "sha256": "95833430f2e825276213815930d3d05530863de54e300e54ef5100baee2ec9fc",
+  "mode": "built-in image_gen / edit"
 }

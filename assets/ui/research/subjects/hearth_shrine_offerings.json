@@ -1,0 +1,17 @@
+{
+  "id": "hearth_shrine_offerings",
+  "line": "culture",
+  "prompt": "Create ONE finished research painting. Preserve reference widecanvas about2055x765 fullbleed and field medium ONLY, change subject completely. Tapestry-inspired PAINTING flatinterlocking indigo rose gold violet. Two fullyclothed adults place tiny woodendish of berries beside humble lowstone hearthshrine with one rough uncarved upright stone, thirdadult seatedcalmlywatches. Modestsharedhearth offering, no templeidol formalpriest crown metal text supernaturalapparition. Allwholeheads hands and mainobjects fit central y170..610, modestfigure scale with ampleskyandground foractual3.37:1card. Mature handmade flat2D pigmentpapergrain; simplehideclothing. No photography CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-13/assets/ui/research/subjects/kin_body_ornament-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b08b7505-4cb3-4c26-be48-6ae94697280a.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "replace_art600": true,
+  "asset": "res://assets/ui/research/subjects/hearth_shrine_offerings-v2.png",
+  "sha256": "4679f2971fc7c4d8d70e2c5c2c7a5f60ac54f45e16d3632ecfc5f457b002884d",
+  "mode": "built-in image_gen / edit"
+}

@@ -1,9 +1,18 @@
 {
   "id": "hafted_weapons",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Hafted Weapons. Show a concrete, visually clear scene demonstrating this exact practice: Tool hafting is adapted into balanced thrusting weapons whose bindings survive repeated impact. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-240c65f3-d840-466c-8a8a-059f3fb3c0f9.png",
-  "asset": "res://assets/ui/research/subjects/hafted_weapons-v1.png",
-  "sha256": "1259fbd4df3772b73067563451bddb4afd2f1a09f765fca578602569f3d677a4",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "security",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/refuge_point_marking-v2.png",
+  "prompt": "Create current-game Tomorrow and Tomorrow security research banner. Preserve supplied WIDE approximately 2055x765 canvas. Strict handmade handcut layered woodblock vermilion/charcoal/parchment. Two smaller adults assemble ONE primitive thrusting spear: an irregular chipped stone point sits in split end of long crooked raw wood shaft with dark resin and coarse cord; one steadies shaft while other wraps cord directly around point/shaft junction. Entire stone tip, hands and junction central, spare crude flint beside. No violence, metal, polished blade or formal drill ground. Entire heads, hands and discovery mechanism within central 60 percent height, smaller adults with breathing room above/below for actual 3.37:1 card crop. Portable wild camp and irregular animal hides only. No text, borders, photography, CGI, sculpted relief, woven cloth, pottery, baskets or permanent buildings. Reference medium and width ONLY, replace subject.",
+  "replace_first300": true,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0aba5819-072c-4e42-8aa4-0133073c2837.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 7,
+  "review": "Vermilion/charcoal woodblock. Adults bind irregular chipped stone point at split raw shaft junction; full point and contacting hands visible.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/hafted_weapons-v2.png",
+  "sha256": "1626f72ae4d78867b50939b133944d015f12142ce1a1cbf0a00681868c86f539"
 }

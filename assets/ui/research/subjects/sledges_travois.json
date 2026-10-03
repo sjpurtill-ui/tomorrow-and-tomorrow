@@ -1,12 +1,20 @@
 {
   "id": "sledges_travois",
   "line": "logistics",
-  "game_year": 18,
-  "approx_historical_year": -4880,
-  "prompt": "c. 4880 BCE: Two adults pull simple wooden travois loaded with bundles over dirt track beside smaller flat sledge; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f2513c4b-e461-4c92-9392-85bbbd5cbde6.png",
-  "asset": "res://assets/ui/research/subjects/sledges_travois-v1.png",
-  "sha256": "cecdd3a4f45cb40ea9fa2784f5f9cc9853487819ed9c951b0e6dae6d6c2923bb",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; hand-pulled load, two poles and tracks clear; no wheels or animals."
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/sledges_travois-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/logistics-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: Two adults manually pull one rough forked-pole travois bearing a modest tied hide bundle across dry open ground; poles visibly trail on the earth, rope harness held in hands. Panoramic sand, slate and indigo travel watercolor. No draft animals, wheels, cart, metal or impossible huge load.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b5a9949c-3c15-4336-b0fd-a021186b6692.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/sledges_travois-v2.png",
+  "sha256": "994993abebfe16c3d93712da8bccb7d94c91be5f21622eec62fe155df312d9b7",
+  "mode": "built-in image_gen / edit"
 }

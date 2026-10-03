@@ -1,0 +1,7 @@
+# Artifact batch18
+
+Twelve fictional prehistoric experiments, IDs1520–1531; baseca5a389c591bf2594970bbf2b5aa8f50352a95bb, branch codex/artifact-production-active-18. Established square ivory matte gouache reference supplies painting medium only. Imagined preserved fragments, not claims of excavated finds. An incomplete attempt accompanies each usable raw-material experiment: net weight, pinched clay bird, ochre hoof tracks, rubbing fork, shell pigment holder, split bone/sinew carrier, bark tinder cover, hollow joint-bone sound experiment, hand traces, thorn hide repair, fungus ember carrier and fiber-bound tooth.
+
+Full originals inspected. Hoof markings corrected to three paired cloven impressions including one partial trace; fork/stone composition corrected to retain the entire grouping in ivory margins. Exact generation/edit prompts and original source paths preserved in reviewed.json. Final editor import clean. Headless/private GPU ARTIFACT_RECOVERY18_PASS count=12; approved runtime lookup, unique hashes,512px limits and prehistoric/living-origin separation pass. All twelve actual240px tiles reviewed; bank audit errors=[]; exact12 bank rows/12 approved bindings changed. Probe exited; captures/logs remain ignored in artifacts.
+
+No simulation/save changes; save compatible. Shared bank manifest/index require selective integration of1520–1531. Canonical player/editor untouched. Unrelated generated imports/UIDs excluded. Player inclusion awaits designated integration.

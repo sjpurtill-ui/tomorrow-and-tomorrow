@@ -1,9 +1,22 @@
 {
   "id": "festival_calendar",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Festival Calendar. A seasonal village celebration brings separate households together around harvest bundles and a communal meal; joyful coordinated gathering, no written calendar or storyteller focal point.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-818a793e-32ff-44d1-bcc3-f4682e83f769.png",
-  "asset": "res://assets/ui/research/subjects/festival_calendar-v1.png",
-  "sha256": "a8392ea202c7884a10dc3ebf33a1c1eba09e07a72fdc2d28ca7d1659e78f93cb",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "culture",
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": true,
+  "prior_effective_source": "res://assets/ui/research/discovery-600/festival_calendar.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/artifacts/field-style-references/culture-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established culture field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Six fully clothed adults in rough hide garments gather for a seasonal celebration around a modest hearth at a portable camp, one elder points to a seasonal flowering branch beside them. Flat tapestry-inspired PAINTING with indigo, rose, gold and violet interlocking shapes; no literal tapestry, permanent temple, written calendar or later robes.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8af7c09f-5ab5-4278-aa5d-7340e5dd97b4.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/culture-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/festival_calendar-v2.png",
+  "sha256": "af985be2425bb1094251e3e737f86e8b0b4dc24c2997659a8be54b0504e0d3ac",
+  "mode": "built-in image_gen / edit"
 }

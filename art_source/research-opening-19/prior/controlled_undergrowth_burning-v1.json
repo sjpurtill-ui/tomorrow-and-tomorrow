@@ -1,0 +1,12 @@
+{
+  "id": "controlled_undergrowth_burning",
+  "line": "ecology",
+  "game_year": 20,
+  "approx_historical_year": -4867,
+  "prompt": "c. 4867 BCE: Adults manage narrow low undergrowth burn for future forage and game as others watch safe boundary; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-42b613cf-7653-4a32-a649-e19216162aa5.png",
+  "asset": "res://assets/ui/research/subjects/controlled_undergrowth_burning-v1.png",
+  "sha256": "0e48a1d78d0098e7bdf6e746422813dc12af9d2b48da5434006c8aeeb795114c",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; bounded fire, thin smoke and grazing animals clear in crop."
+}

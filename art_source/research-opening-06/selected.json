@@ -1,0 +1,223 @@
+[
+  {
+    "id": "counting_words",
+    "line": "knowledge",
+    "version": 1,
+    "replace_art600": true,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/route_memory-v2.png",
+    "prompt": "Make exactly one tiny correction: the row between the two seated adults currently has SIX pebbles. Remove one pebble and evenly space the remaining FIVE pebbles in the same place. Exactly FIVE, matching five fingers. Keep absolutely everything else unchanged: wide 2172x724 canvas, same blue-black ink/lapis/parchment medium, people, heads, hand gestures and landscape. No text or other changes.",
+    "initial_prompt": "Create a new Tomorrow and Tomorrow KNOWLEDGE research banner using the supplied current-game painting as strict medium and WIDE canvas reference, approximately 2172x724 (3:1). Blue-black ink crosshatching, muted lapis washes on warm parchment, mature adult drawing, no photographic realism. Subject: counting words and finger counts. A seated rough-hide-clad adult holds up one open hand with five clearly separate fingers, touches each fingertip with the other index finger while speaking to a second adult who repeats the gesture; five small pebbles in a row below reinforce matching number to objects. Whole heads, hands, fingers and pebbles fit in the central 65 percent height; smaller people with breathing space above and below. Portable wild camp, ragged hide, no thatched huts, cloth, pots, baskets, writing, numerals or border. Preserve reference's wide proportions and handmade ink medium. No visible text.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f106f3bb-5cad-4c3d-9776-7a63b964487a.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-896aed0d-a733-45c7-b1df-edc09e1e60d9.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Blue-black hatching and lapis/parchment match current knowledge banner. Two adults demonstrate five fingers, corrected row to exactly five pebbles. No text or manufactured camp structures.",
+    "mode": "built-in image_gen / reference-guided painting",
+    "binding_style": "knowledge: blue-black ink and lapis parchment"
+  },
+  {
+    "id": "leader_gift_redistribution",
+    "line": "institutions",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/leader_gift_redistribution-v1.png",
+    "prompt": "Keep this SAME wide approximately 2058x764 matte fresco image and all raw-hide/wild-root subjects, but scale the entire FOUR-person gift-giving group down to 75 percent of its current height and center it vertically. Every complete head must be below y=125, feet and gifts above y=640, within central band. Add simple limestone background above and below, preserve dusty plum/gold flat pigment, bare-hand exchange and two hide windbreaks. No baskets, bowls, houses, writing or new objects. WIDE canvas unchanged.",
+    "initial_prompt": "Edit this current-game wide fresco painting, preserve approximately 2058x764 canvas and flat matte dusty-plum/limestone/gold mineral pigment figures. Keep collective gift redistribution, center adult handing portions of gathered wild roots to two other adults. REMOVE every basket, bowl, ceramic container, cultivated grain and thatched building. Replace containers with small loose raw-hide patches holding wild roots and berries on bare earth; recipients take roots directly in cupped bare hands. Background only low ragged raw-hide windbreak on crooked branches, wild open ground. Change fringed woven garments into crude irregular untailored hides. Recompose as FOUR smaller adults with all complete heads, hands, gifts and hide patches inside central 65 percent height for a wide card crop. Same dignified flat fresco graphic shapes, no photorealism, CGI or glossy texture. No writing, labels, borders. Retain WIDE reference proportions.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a97be7f7-a296-40ad-b67d-6bedaa720ff8.png",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-dce143d4-5eb7-4f11-abc7-b0b838373c02.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Flat mineral fresco retained. Four adults exchange roots/berries bare-handed over irregular hides. Baskets, bowls, grain and houses removed. Targeted reduction preserves complete heads.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "named_landmark_lore",
+    "line": "culture",
+    "version": 1,
+    "replace_art600": true,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/oral_epics-v3.png",
+    "prompt": "Create a current-game culture banner matching supplied approximately 2170x725 WIDE tapestry-inspired PAINTING: flat interlocking indigo/rose/gold/violet pigment shapes and mature dignified adults, not literal woven fabric. Three smaller hide-clad adults seated on low rocky ridge: elder tells landmark lore with open-hand gesture toward DISTINCT split upright natural rock and crooked lone tree across valley; second adult repeats gesture to younger adult who looks at the landmarks. Keep same landmarks fully visible and storytelling mouths/gestures central. No campfire required, no sunset realism. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-bbd09ba8-5d0d-4e92-913c-87d835aa1910.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Interlocking indigo/rose/gold painted planes match wide current culture reference. Elder and repeater gesture toward split natural rock and crooked tree; no literal tapestry or buildings.",
+    "mode": "built-in image_gen / reference-guided painting",
+    "binding_style": "culture: tapestry-inspired painting"
+  },
+  {
+    "id": "paired_task_assignment",
+    "line": "labor",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/paired_task_assignment-v1.png",
+    "prompt": "Edit this CURRENT GAME WIDE charcoal over ochre painting, preserve approximately 2059x764 canvas and expressive flat charcoal strokes. Keep pointing coordinator and two adults lifting the SAME rough fallen log together. REMOVE finished timber/reed building completely; background becomes only one low ragged hide windbreak on two crooked untrimmed branches. All wear crude torn animal hides. Scale three figures smaller so complete heads, coordinator pointing hand, both carriers' gripping hands and both ends of log fit inside central 65 percent height, with ochre breathing space above and below. Log looks naturally fallen irregular bark-covered wood, no sawn squared beam. No baskets, pots, woven cloth, neat walls, farm or metal. Preserve charcoal drawing, no photographic/CGI/3D treatment. Wide canvas, no text or border.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-34f5c694-030b-4af7-8735-0073c24348de.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Expressive charcoal/ochre retained. Coordinator points while two adults share same irregular bark-covered fallen log. Finished building removed, raw-hide windbreak substituted; complete heads and grips visible.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "edge_resharpening_rounds",
+    "line": "production",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/edge_resharpening_rounds-v1.png",
+    "prompt": "Reframe this current-game WIDE flat angular copper/ember/umber palette-knife painting while preserving approximately 2055x765 canvas and visibly painted simple hands. Show THREE smaller seated adults taking turns resharpening used flint edges: central adult holds rough flint on raw hide and touches raw antler tine to its worn edge with fresh small flakes below; two adults observe with their own used stones. Every complete head, all working hands, stone-antler contact and flakes fit in central 65 percent height, ample ochre space above and below. Remove oversized cropped foreground figures; keep compact group. Crude hide wraps, open temporary camp. No metal, polished handles, baskets, pots, woven cloth or structures. Flat angular pigment planes, not photographic anatomy or 3D relief. Preserve current reference's WIDE proportions, no writing or border.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4783d7bf-27d4-483f-ae9c-893d91684706.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Flat angular copper/umber palette-knife medium retained. Three smaller adults resharpen used flints in turn, central antler touches edge with flakes below; heads and working hands visible.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "food_pounding_mortars",
+    "line": "nutrition",
+    "version": 1,
+    "replace_first300": true,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/hearth_heat_retention-v1.png",
+    "prompt": "Create a current-game nutrition painting matching supplied wide opaque botanical egg-tempera banner, olive/gold/cream/earth pigments, broad matte painted shapes and mature figures. Two kneeling adults process gathered wild roots in a NATURALLY hollow weathered stone: one holds a short rounded stone pestle vertically with both hands, its lower end touching roots in the hollow; other lays whole roots nearby on an irregular hide. A little crushed pulp at hollow edge. No huge carved wooden mortar or tall manufactured pestle. Keep root-pounding mechanism exceptionally clear. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9530126b-9b54-4569-8b03-93b7fa9871c4.png",
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "game_year": 5,
+    "review": "Matte olive/gold egg-tempera treatment. Short rounded stone pestle visibly contacts root pulp inside weathered stone hollow. Raw roots and irregular hide; no tall carved wooden mortar or cultivated field.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "nut_kernel_shelling",
+    "line": "nutrition",
+    "version": 1,
+    "replace_first300": true,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/hearth_heat_retention-v1.png",
+    "prompt": "ONLY correct framing of this painting: shrink the entire foreground human-and-working-object group to 75 percent current size and center vertically, with ALL complete heads below y=130 and ALL working hands, infant if present, food/shell piles or stone-covering action above y=635. Preserve the SAME wide approximately 2055x765 canvas, SAME existing painted medium/palette/people/action/materials. Extend existing simple background pigment above and below. No new objects, text, baskets, pots, buildings, photography or 3D. Entire working group must occupy central 65 percent height so no heads or discovery cues get cut in wide banner crop.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-3e06d5c8-a7af-4a80-be01-6816e716989f.png",
+    "initial_prompt": "Create a current-game nutrition painting matching supplied wide opaque botanical egg-tempera banner, olive/gold/cream/earth pigments, broad matte painted shapes and mature figures. Two small seated adults shell gathered wild hazelnuts: one holds a rounded hammer pebble just over ONE nut resting on a flat anvil stone, other picks pale kernels out of cracked brown shells. Clear separate small groups of whole nuts, empty jagged shells and cream kernels lie on an irregular raw hide. Keep striking hand, pebble/nut/anvil relationship and kernel-picking fingers readable. Wild hazel leaves at one edge, no orchard. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-48ee2e14-05ca-4882-b4eb-8d877d4016e6.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Matte olive/gold egg-tempera treatment. Hammer pebble above nut on stone, other adult picks kernel; whole nuts/empty shells/kernels separated on raw hide. Targeted reduction keeps complete heads and piles visible.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "turbidity_judging",
+    "line": "health",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/turbidity_judging-v1.png",
+    "prompt": "Replace the subject objects in this current-game WIDE watercolor and restrained ink banner, keeping approximately 2059x764 canvas, sage/celadon/cream pigments and visible paper. Earliest turbidity judging: close view of an adult's two cupped bare hands each holding a little water, left hand cloudy with obvious suspended muddy particles and right hand clearer with visible palm lines underneath. Another adult index finger points toward murky water without touching it. These hands sit side by side above shallow rocky stream; all complete hand contours and visible muddy-versus-clear water inside central 65 percent height. REMOVE both bowls, basket, cloth robe, thatched houses and fence; background becomes wild riverbank stones and sparse plants only, small portion of rough-hide clothing allowed. No manufactured vessels. Water painted as translucent sage wash, no photographic glints or CGI. Turbidity comparison only, do not imply clear water guarantees safety. No text, labels, border; preserve current WIDE proportions.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-079d2f45-b540-4c80-a649-ee2ab0e6d522.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Watercolor/ink sage paper retained. Two pairs of cupped hands compare murky particle-filled water and clearer water with visible palm below; third pointing hand indicates murky sample. Bowls/basket/houses removed. No safety claim.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "infant_swaddling_practice",
+    "line": "demography",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/fever_watch_customs-v2.png",
+    "prompt": "ONLY correct framing of this painting: shrink the entire foreground human-and-working-object group to 75 percent current size and center vertically, with ALL complete heads below y=130 and ALL working hands, infant if present, food/shell piles or stone-covering action above y=635. Preserve the SAME wide approximately 2055x765 canvas, SAME existing painted medium/palette/people/action/materials. Extend existing simple background pigment above and below. No new objects, text, baskets, pots, buildings, photography or 3D. Entire working group must occupy central 65 percent height so no heads or discovery cues get cut in wide banner crop.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1c13ef1a-1f3c-40e2-9aaf-76ccd81edb9b.png",
+    "initial_prompt": "Create a new current-game demography research banner STRICTLY matching supplied wide 2056x765 reference, flat angular chalk-pastel/cut-paper pigment planes in terracotta/rust/ivory/slate. Two smaller seated adult caregivers gently fold a soft irregular animal hide around an infant held by one caregiver; second caregiver secures overlapping hide with bare hands, no pins or cord. Infant face unobstructed, arms snug within wrap, no medical distress. Both complete adult heads, all folding/supporting hands and infant face fit within central 65 percent height, breathing space above and below for wide card crop. One low raw-hide windbreak on crooked branches behind, sleeping hide below, tiny safely separated ember glow far side. No woven cloth, reed panels, pottery, baskets, tailored garments or finished house. Match reference's flat mature painting, not photographic anatomy, CGI, glossy relief or cartoon. Canvas remains WIDE approximately 2.7:1, full bleed, no text or border.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f0362fc0-e8c9-420b-b6f3-e7c116609c23.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Flat angular terracotta/slate pigment planes match current demography reference. Two caregivers fold irregular soft hide around infant with face unobstructed. Cloth/pins/cord absent; targeted smaller composition preserves heads and hands.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "common_path_alignment",
+    "line": "logistics",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/common_path_alignment-v1.png",
+    "prompt": "Edit this current-game WIDE panoramic travel watercolor banner retaining approximately 2051x767 proportions, sand/slate/indigo palette, quiet flat wash landscape and mature hand-drawn adults. REMOVE ALL thatched buildings, fences, cultivated land, cloth garments and neat construction. Replace background with two very low ragged hide windbreaks on crooked branches amid wild grass. Reduce crowd to four small raw-hide-clad adults establishing ONE continuous common footpath between portable camp and rocky waterbank: two crouch removing loose stones, one pulls a fallen branch clear, one gestures down the aligned natural route. Keep continuous dirt path visible left-to-right across middle, every head and working hand within central 65 percent height. No paving, shovel, baskets, pots, domestic stock or formal infrastructure. Preserve WIDE canvas and subtle watercolor medium, no photorealism, cinematic sunset, CGI or oil impasto. No writing or border.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8b5b11fe-5f6d-403f-810e-b8c58c8ae37b.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Sand/slate panoramic watercolor retained. Four adults remove stones and branch and gesture along common natural path. Thatched houses/fences replaced by low ragged hide windbreaks; no paving or manufactured tools.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "guest_host_reciprocity",
+    "line": "logistics",
+    "version": 1,
+    "replace_art600": true,
+    "binding_style": "logistics: travel watercolor",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/paired_carrier_balancing-v2.png",
+    "prompt": "Create a current-game logistics banner matching supplied approximately 2059x764 WIDE panoramic travel watercolor, sand/slate/indigo wash shapes and simplified mature adults. A traveling rough-hide-clad guest at left offers a small handful of wild roots to a host at right, host reciprocates by pointing with open hand to an available irregular sleeping hide under one LOW ragged hide windbreak on crooked branches. Bare hands clearly extend gifts and hospitality, two complete smaller adult figures fit central band. Guest carries a small folded raw-hide bundle over shoulder, no basket or net. Quiet wild camp beside natural trail. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0509586a-0d3f-4e16-a669-9033f2fb4641.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Sand/indigo travel watercolor matches current logistics reference. Traveler offers roots, host gestures toward available sleeping hide under raw-hide windbreak; shoulder bundle raw hide, no basket/net.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "quarry_reading",
+    "line": "ecology",
+    "version": 2,
+    "replace_first300": true,
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/quarry_reading.png",
+      "focus": [
+        0.5,
+        0.51
+      ]
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/fiber_grading-v2.png",
+    "prompt": "Create a current-game ecology banner matching supplied approximately 2060x763 WIDE detailed botanical foreground and flat landscape bands, plant-pigment greens ochres muted blue, matte hand-painted mature figures. Two small kneeling hide-clad adults READ a natural rocky outcrop: one points directly to a visible crack/fracture line in gray stone while holding a loose angular flint fragment beside it for comparison; other examines coarse crumbly reddish layer adjacent. Distinct usable fine gray fracture versus crumbly layer, sparse wild plants beside stone. No developed quarry pit, masonry, hammer, metal, sawn blocks or tools beyond loose stone fragments. FULL-BLEED WIDE banner approximately 2.7:1, preserve reference canvas proportions. Whole heads, hands, tools and discovery action within central 65 percent height, smaller figures and breathing space above/below for 3.37:1 game crop. No written text, border, photography, CGI, cinematic lighting, baskets, pottery, woven cloth, cultivated crops or permanent buildings. Crude irregular animal hides and portable wild camp only.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-95306cb7-dfcb-4ebc-bf5a-a7062afa18f0.png",
+    "focus": [
+      0.5,
+      0.25
+    ],
+    "game_year": 5,
+    "review": "Botanical foreground and flat plant-pigment landscape match current ecology reference. Adult points at gray stone fracture holding loose flint; other examines crumbly reddish layer. No developed quarry or metal tooling.",
+    "mode": "built-in image_gen / reference-guided painting"
+  },
+  {
+    "id": "emergency_food_caching",
+    "line": "security",
+    "version": 2,
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/emergency_food_caching-v1.png",
+    "prompt": "ONLY correct framing of this painting: shrink the entire foreground human-and-working-object group to 75 percent current size and center vertically, with ALL complete heads below y=130 and ALL working hands, infant if present, food/shell piles or stone-covering action above y=635. Preserve the SAME wide approximately 2055x765 canvas, SAME existing painted medium/palette/people/action/materials. Extend existing simple background pigment above and below. No new objects, text, baskets, pots, buildings, photography or 3D. Entire working group must occupy central 65 percent height so no heads or discovery cues get cut in wide banner crop.",
+    "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-65eda6ed-1fe3-4aee-9e12-3847297f7324.png",
+    "initial_prompt": "Edit current-game WIDE vermilion/charcoal/parchment HANDCUT WOODBLOCK banner keeping approximately 2057x764 proportions and carved ink marks. Two smaller raw-hide-clad adults conceal emergency wild roots and nuts in a shallow EARTH hollow under broad flat stones: left adult places an irregular RAW-HIDE wrapped food parcel into shallow hollow, right adult slides broad rough stone over it. REMOVE ALL woven baskets, regular reed pit lining, big cylindrical store, thatched hut, pottery and woven clothing. Hollow is crude bare soil only; small raw-hide parcel visible under half-covering stone. Background only wild reeds and simple flat water/hill bands, no buildings. Complete two heads, both pairs of working hands, parcel and covering stone inside central 65 percent height, breathing space above/below for crop. No writing, border, photograph, CGI or glossy relief. Preserve WIDE canvas and reference's woodblock medium.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7588e4be-8efd-46fa-97db-938250ac59ec.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "game_year": 5,
+    "review": "Ver milion/charcoal handcut woodblock medium retained. Raw-hide parcel placed in bare earth hollow and rough flat stone slid over it. Baskets, pit lining, thatched building removed; targeted smaller group preserves heads/hands.",
+    "mode": "built-in image_gen / reference-guided painting"
+  }
+]

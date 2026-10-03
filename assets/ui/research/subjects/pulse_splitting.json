@@ -1,0 +1,22 @@
+{
+  "id": "pulse_splitting",
+  "line": "nutrition",
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/pulse_splitting.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established nutrition field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Two adults split dried wild peas or lentils with rough stones on a natural slab, open pods and split pale halves visibly distinct in small baskets. Botanical egg tempera olive/gold/cream/earth. No milling machine, iron implement, later seed crop, written recipe or woven robe.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1557cded-c12c-4b5c-b36b-29e145865841.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/nutrition-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/pulse_splitting-v2.png",
+  "sha256": "6aebc99f45c336570be52d40233514d0228b233403791db5dd8bcffb667f9237",
+  "mode": "built-in image_gen / edit"
+}

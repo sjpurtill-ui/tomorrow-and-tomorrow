@@ -1,9 +1,17 @@
 {
   "id": "smoking",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Smoke Preservation. Strips of fish hang well above a small smoldering smoky wood fire in a simple open shelter; visible cool smoke curls around drying food, no roasting spit or kiln.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-f9a8628a-3de1-44e4-91d8-c70813c3615e.png",
-  "asset": "res://assets/ui/research/subjects/smoking-v1.png",
-  "sha256": "3793baf1258e906459d1123a2140bdef3b2ec202f4addb91da3b9735f4ebbc05",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "nutrition",
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Opaque botanical egg-tempera olive gold cream earth. Two crouching adults tend a SMALL smoky low hearth beneath roughly tied open branch rack with three modest strips of meat high above smouldering embers. Gentle smoke rises through meat, no vigorousflames or cookingpot. Simple portable camp, not hut or smokeroven. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-09/assets/ui/research/subjects/hearth_roasting_control-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1a63b8bd-610b-4c83-86b5-2bc991e93a00.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and actual final3.37:1 Godot card visually reviewed: field medium, early materials, heads and action retained.",
+  "replace_first300": true,
+  "asset": "res://assets/ui/research/subjects/smoking-v2.png",
+  "sha256": "11324552627e6f66340eadde2a09b2e78d2c6531b41a618d9256d2040813b4c4",
+  "mode": "built-in image_gen / edit"
 }

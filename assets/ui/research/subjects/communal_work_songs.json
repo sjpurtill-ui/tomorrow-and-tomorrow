@@ -1,0 +1,20 @@
+{
+  "id": "communal_work_songs",
+  "line": "culture",
+  "game_year": 2,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.43
+  ],
+  "replace_art600": true,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2552990d-4193-4867-9b03-f70777a0059b.png",
+  "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8301acad-a26d-458a-8d06-5be6c620d8e4.png",
+  "prompt": "Make one precise composition correction to this Communal Work Songs painting, preserving the four adult hide-clad figures, open singing mouth, group grips on rough branched trunk, flat tapestry-inspired culture painting and all landscape details. Lower the lead singer's raised free arm: bend it into an outward cue at about shoulder height, with the OPEN HAND no higher than the top of his head. Keep a clear rhythmic cue toward the group. His head, cueing hand and all four grips on the trunk must fit within the same compact middle horizontal band for very wide 3.37:1 and 3.77:1 game-card crops. No other change, no new technology, text, borders, photo lighting or 3D.",
+  "review": "Full corrected image inspected: lead singer cues at shoulder height with open mouth, all four adults grip naturally branched trunk in shared rhythmic lift. Flat culture medium preserved, no later technology. Initial high hand did not fit narrow crops; corrected before final approval. Focus [.5,.43] checked for wide and narrow cards.",
+  "initial_prompt": "Create a distinct opening-era research painting for Communal Work Songs, game year 2. Use the supplied painting ONLY for its mature tapestry-inspired paint medium and indigo/dusty rose/warm gold/dusk violet palette, interlocking flat angular shapes and visible coarse fiber-like pigment grain. Do not copy the hearth, seated circle or fire. New scene: four dignified adults in ragged unstitched hide wraps jointly lift and move a rough fallen branch trunk, their grips and alternating stepping postures creating a visible shared rhythm. One adult at the left sings a work call, mouth subtly open and free hand raised in time; others look toward that cue as they lift together. Crude natural timber, bare ground and flat landscape bands, no saw-cut log ends. No written music, symbols or soundwave graphics. Wide panorama approx 3:1, faces/hands/trunk/call gesture across the middle horizontal band for 3.37:1 crop. Adult angular proportions, tactile flat paint, restrained expressive profiles. No physical tapestry, woven clothes, baskets, pottery, sewn tunics, refined tools, metal, wheels, buildings, furniture, borders, captions, watermarks, photographic lighting, smooth digital volume or childlike illustration.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8301acad-a26d-458a-8d06-5be6c620d8e4.png",
+  "asset": "res://assets/ui/research/subjects/communal_work_songs-v2.png",
+  "sha256": "a7b3d88eea79e2463e74d745397fa778cfec133cf7cd597ce5e50652411540ba",
+  "mode": "built-in image_gen / edit"
+}

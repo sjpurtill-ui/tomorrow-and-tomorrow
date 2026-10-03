@@ -1,12 +1,16 @@
 {
   "id": "pest_deterrent_storage_herbs",
   "line": "nutrition",
-  "game_year": 13,
-  "approx_historical_year": -4913,
-  "prompt": "c. 4913 BCE: Adults layer aromatic herbs among dried food in reed storage baskets to repel insects and rodents; matte egg tempera panel painting. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b51ea14d-71dd-48e3-96e7-5fbf40ac38c6.png",
-  "asset": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v1.png",
-  "sha256": "8093b7a0a68745b6b700e691dbc12a4778c0034e3b67db0b309fa9836f3af1cd",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; herb placement and storage action clear in crop."
+  "prompt": "Create ONE finished research painting. Reference supplies WIDE canvas and field medium only, change subject completely. Preserve wide2055x765 fullbleed, NEVER3:2. Opaque botanical eggtempera olive gold cream earth. Two seated adults lay simple leafy herb sprigs between dried food portions in shallow open rough reed baskets under temporary hide shelter. Herbs and food plainly visible; no elaborategranary glass ceramic metal, no magical vapors. All whole heads hands and primary objects CENTRAL y170..610 with ample landscape top/bottom for3.37:1 gamecard. Adults simplehideclothing, maturehandmade flat2D pigmentpapergrain, no photorealism CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-12/assets/ui/research/subjects/smoking-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fe4093be-f692-4549-80f5-570640990575.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual3.37:1 Godot card visually reviewed; complete heads, hands, mechanism and field medium retained.",
+  "asset": "res://assets/ui/research/subjects/pest_deterrent_storage_herbs-v2.png",
+  "sha256": "196ba38f1db0645f77d3ae847944e14bd4da3fe69c617e8c52526bec05b582b7",
+  "mode": "built-in image_gen / edit"
 }

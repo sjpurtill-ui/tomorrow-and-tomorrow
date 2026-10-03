@@ -1,0 +1,12 @@
+{
+  "id": "seasonal_tribute_counts",
+  "line": "institutions",
+  "game_year": 14,
+  "approx_historical_year": -4907,
+  "prompt": "c. 4907 BCE: Households bring grain, reed bundles and baskets to communal store while adults count plain pebbles by contribution; archaic mineral fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a585e999-3e14-4069-b21b-ad0e5764f450.png",
+  "asset": "res://assets/ui/research/subjects/seasonal_tribute_counts-v1.png",
+  "sha256": "cb55ebafc4222f44401d8bc35555ad920b43adb1f9aedd54f3fbf84bf4ff73ac",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; household goods and pebble tally clear; no writing in crop."
+}

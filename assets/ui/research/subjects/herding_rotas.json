@@ -1,12 +1,55 @@
 {
   "id": "herding_rotas",
   "line": "labor",
-  "game_year": 25,
-  "approx_historical_year": -4833,
-  "prompt": "c. 4833 BCE: Herders hand communal sheep and goats to next pair for pasture duty at settlement edge; charcoal and red ochre drawing. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9716a6c8-57ec-4d8c-b52e-4395699e8e14.png",
-  "asset": "res://assets/ui/research/subjects/herding_rotas-v1.png",
-  "sha256": "ce98869981ef63f1ed4a1c53aafd31ab9fcb1eda47db38243db4b33afcc3a5f0",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; handoff and shared flock clear in crop."
+  "status": "new",
+  "name": "Herding Rotas for Common Flocks",
+  "one_liner": "Herding rotas for common flocks",
+  "observation": "Herding rotas for common flocks.",
+  "key_threshold": false,
+  "target_year": 25,
+  "proposed_year": 25,
+  "band_low": 10,
+  "band_high": 35,
+  "min_year": 10,
+  "research_years": 2,
+  "requires_all": [
+    "labor_rotations",
+    "animal_taming"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "herd_size_limits"
+  ],
+  "conditions": {},
+  "shared_with": [
+    "nutrition"
+  ],
+  "subcategory": "Coordination",
+  "signals": [
+    "administration",
+    "training"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/herding_rotas-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "year": 25,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "labor: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-20/art_source/research-opening-20/style-reference/labor-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium/palette and EXACT EXTRA-WIDE canvas. Preserve its width and aspect, full bleed, no frame/text/grid/3:2 output. NEW SUBJECT: Two adults exchange a plain shepherding staff at the margin of a small goat flock while one former herder sits resting near a hide shelter. Charcoal marks over ochre, strong gestural silhouettes. No cultivated fenced ranch, horses, carts, written rota or later uniform.\nCRITICAL composition: complete main heads, hands, working mechanism all within central y170..590 on a 765px-high banner; zoom out to fit actual 3.37:1 research card crop. Background only above and below that band. Game years23\u201325: hides, cordage, baskets, early pottery, modest earthen huts; plain weaving comes later. Do not borrow later reference technology.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-66936c8b-708c-45f7-864e-dfb797d4f31d.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and practical mechanism retained. Clean import, headless/GPU PASS14.",
+  "asset": "res://assets/ui/research/subjects/herding_rotas-v2.png",
+  "sha256": "50814396b8587a2923ff80bb1eeb93843a1ea720d6da51df0b3857a7e40722dc",
+  "mode": "built-in image_gen / edit"
 }

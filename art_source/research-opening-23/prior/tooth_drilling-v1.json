@@ -1,0 +1,12 @@
+{
+  "id": "tooth_drilling",
+  "line": "health",
+  "game_year": 31,
+  "approx_historical_year": -4793,
+  "prompt": "c. 4793 BCE: Caregiver tends adult tooth with simple hand-turned stone drill and prepares beeswax filling in plain bowl; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-6badebbf-a20e-48dd-8f84-85b23282e0b3.png",
+  "asset": "res://assets/ui/research/subjects/tooth_drilling-v1.png",
+  "sha256": "6bdff3f3cb086162cef67d9607d373a9fd6c32ae56631bec7f9428c93006e8eb",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; period dental craft shown without graphic detail or medical instruction."
+}

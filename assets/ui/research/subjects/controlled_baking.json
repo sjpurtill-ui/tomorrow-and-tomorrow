@@ -1,0 +1,43 @@
+{
+  "id": "controlled_baking",
+  "line": "nutrition",
+  "status": "catalog",
+  "name": "Flatbread Baked on Hot Stones and Griddles",
+  "one_liner": "Flatbread baked on hot stones and griddles",
+  "observation": "Flatbread baked on hot stones and griddles.",
+  "key_threshold": false,
+  "target_year": 42,
+  "proposed_year": 42,
+  "band_low": 27,
+  "band_high": 62,
+  "min_year": 27,
+  "research_years": 3,
+  "requires_all": [
+    "hand_dough_forming",
+    "hearth_roasting_control"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 42,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": "res://assets/ui/research/paper/first300-cards/controlled_baking.tres",
+    "art600": null,
+    "subject": null
+  },
+  "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established nutrition painting medium and EXACT EXTRA-WIDE canvas width/aspect. Full bleed, no frame/grid/text/3:2. NEW SUBJECT: One adult checks a small flat hand-formed dough cake beside a clay-covered hearth with warm coals; another tends a DIFFERENT small browned cake on a flat stone. Clear controlled heat and different baking stages, rough dough and early pottery, NO bread loaf, bakery oven, metal utensil, modern tray or written recipe. Medium opaque botanical egg-tempera olive/gold/cream/earth. Zoom out so ALL heads, hands and mechanisms fit central y170..590 on a765px banner for the actual3.37:1 card. Gameyears42\u201344, modest prehistoric materials: wood, reed, stone, raw hides/fur, clay, bast fibers. Do not copy reference's unrelated village or river subject. No metal, woven clothing, ornate later technology or photographic lighting.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-767a8412-73e3-4b90-8803-95a4e22cb1df.png",
+  "review": "Full original inspected; accepted subject and established field painting medium. Actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/controlled_baking-v2.png",
+  "sha256": "4b9208612d01f2dfb795a0b4f2626031cef4b851c2882d846cc1e57441f4b475",
+  "mode": "built-in image_gen / edit"
+}

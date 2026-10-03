@@ -1,12 +1,17 @@
 {
   "id": "turbidity_judging",
   "line": "health",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/turbidity_judging-v1.png",
+  "prompt": "Replace the subject objects in this current-game WIDE watercolor and restrained ink banner, keeping approximately 2059x764 canvas, sage/celadon/cream pigments and visible paper. Earliest turbidity judging: close view of an adult's two cupped bare hands each holding a little water, left hand cloudy with obvious suspended muddy particles and right hand clearer with visible palm lines underneath. Another adult index finger points toward murky water without touching it. These hands sit side by side above shallow rocky stream; all complete hand contours and visible muddy-versus-clear water inside central 65 percent height. REMOVE both bowls, basket, cloth robe, thatched houses and fence; background becomes wild riverbank stones and sparse plants only, small portion of rough-hide clothing allowed. No manufactured vessels. Water painted as translucent sage wash, no photographic glints or CGI. Turbidity comparison only, do not imply clear water guarantees safety. No text, labels, border; preserve current WIDE proportions.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-079d2f45-b540-4c80-a649-ee2ab0e6d522.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 5,
-  "approx_historical_year": -4967,
-  "prompt": "c. 4967 BCE: caregiver compares a cloudy bowl of river water against a clear settled bowl and rejects the muddy one. Mature transparent sage/celadon watercolor with sparse ink, flat hands and open paper; no glassware, scientific device, written sign or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-352248ac-244c-4e0a-8f21-5ff4ba12d966.png",
-  "asset": "res://assets/ui/research/subjects/turbidity_judging-v1.png",
-  "sha256": "e5ff0971f701f71027666b674f57f9628c75f149fa77a42be687b151bea71f09",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; sediment and rejection gesture clear. Accepted after visual 3.37:1 crop and subject/period check."
+  "review": "Watercolor/ink sage paper retained. Two pairs of cupped hands compare murky particle-filled water and clearer water with visible palm below; third pointing hand indicates murky sample. Bowls/basket/houses removed. No safety claim.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/turbidity_judging-v2.png",
+  "sha256": "0208c0830c18cf4fce99be8d52765177651e96e7add882620d318bfe2ca23ff1"
 }

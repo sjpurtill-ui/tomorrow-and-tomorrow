@@ -1,12 +1,18 @@
 {
   "id": "children_light_tasks",
   "line": "labor",
-  "game_year": 16,
-  "approx_historical_year": -4893,
-  "prompt": "c. 4893 BCE: Older children scare birds and glean loose stalks while adults supervise nearby; expressive charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-710c51e6-1a3b-4d0c-9625-4aaf08660023.png",
-  "asset": "res://assets/ui/research/subjects/children_light_tasks-v1.png",
-  "sha256": "45f7f538c87a9469aa762794273a7ea9861a0a3e54f56906cd6f72eff3b7b97f",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; light tasks and adult supervision clear in crop; mature art style."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies labor medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: Two fully clothed children in rough hide tunics sort small dry twigs and edible nuts beside a seated supervising adult at a portable camp, doing light safe tasks. Charcoal marks over ochre ground, sketchy angular drawing, midday neutral light. No crop field, sickle, dangerous tool, heavy load or staged agricultural harvest.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas, hands and central action y350..590. Zoom out enough that actual3.37:1 card keeps heads and mechanism. Top/bottom peripheral bands background only. Varied scene, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and small earthen dwellings, but plain weaving is later. Never introduce later tools/buildings from reference.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/labor-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-307a57af-9ed3-4a55-8be9-891fc9a1546a.png",
+  "replace_first300": false,
+  "replace_art600": false,
+  "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+  "asset": "res://assets/ui/research/subjects/children_light_tasks-v2.png",
+  "sha256": "57a3bd116854eaefffaff181311cac53e065dbb11dd8f58e97e90e4eba3b8759",
+  "mode": "built-in image_gen / edit"
 }

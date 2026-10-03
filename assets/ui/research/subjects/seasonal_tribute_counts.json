@@ -1,12 +1,16 @@
 {
   "id": "seasonal_tribute_counts",
   "line": "institutions",
-  "game_year": 14,
-  "approx_historical_year": -4907,
-  "prompt": "c. 4907 BCE: Households bring grain, reed bundles and baskets to communal store while adults count plain pebbles by contribution; archaic mineral fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a585e999-3e14-4069-b21b-ad0e5764f450.png",
-  "asset": "res://assets/ui/research/subjects/seasonal_tribute_counts-v1.png",
-  "sha256": "cb55ebafc4222f44401d8bc35555ad920b43adb1f9aedd54f3fbf84bf4ff73ac",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; household goods and pebble tally clear; no writing in crop."
+  "prompt": "Create ONE finished research painting. Preserve reference widecanvas about2055x765 fullbleed and field medium ONLY, change subject completely. Matte fresco dustyplum limestone palegold. Three seated adults compare three household contributions of driedfood and branchbundles, one moves EXACTLYfive small pebbles tocount while otherspoint at their modestbundles. Temporaryhidecanopy notpalace taxationbureaucracy coins document. Allwholeheads hands and mainobjects fit central y170..610, modestfigure scale with ampleskyandground foractual3.37:1card. Mature handmade flat2D pigmentpapergrain; simplehideclothing. No photography CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-13/assets/ui/research/subjects/elder_council_assent-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9637d967-9dd6-4c36-b6bf-d8ce749c46b6.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "asset": "res://assets/ui/research/subjects/seasonal_tribute_counts-v2.png",
+  "sha256": "bd89986c3303654941c05ba838c77adf4e0162e7908c5d874e1e8beffde63dc3",
+  "mode": "built-in image_gen / edit"
 }

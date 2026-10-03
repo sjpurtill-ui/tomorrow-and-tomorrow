@@ -1,0 +1,12 @@
+{
+  "id": "birth_spacing_customs",
+  "line": "demography",
+  "game_year": 6,
+  "approx_historical_year": -4960,
+  "prompt": "c. 4960 BCE: caregiver guides an older weaned child to food from an earthenware bowl while another adult cradles a younger infant, showing birth spacing by weaning and custom. Mature flat chalk pastel and torn cut-paper collage, terracotta and warm ivory; no writing, medical diagram, later dress or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f8f37dbc-3660-4a41-b8d9-716e97fede9d.png",
+  "asset": "res://assets/ui/research/subjects/birth_spacing_customs-v1.png",
+  "sha256": "603d6be793926e276238273d11574a1c3337b5a2e7b5f1437786a91b07d98beb",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first was too lifelike. Accepted after visual 3.37:1 crop and subject/period check."
+}

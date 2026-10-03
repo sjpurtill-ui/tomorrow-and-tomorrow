@@ -1,0 +1,51 @@
+{
+  "id": "winnowing_practice",
+  "line": "nutrition",
+  "status": "catalog",
+  "name": "Winnowing Chaff in the Wind",
+  "one_liner": "Winnowing chaff in the wind",
+  "observation": "Winnowing chaff in the wind.",
+  "key_threshold": false,
+  "target_year": 30,
+  "proposed_year": 30,
+  "band_low": 20,
+  "band_high": 45,
+  "min_year": 20,
+  "research_years": 2,
+  "requires_all": [
+    "threshing_frames",
+    "basketry"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": null
+  },
+  "version": 2,
+  "year": 30,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "nutrition: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-22/art_source/research-opening-22/style-reference/nutrition-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established nutrition medium/palette and exact EXTRA-WIDE WIDTH/aspect. Preserve canvas width full bleed, no frame, text, grid or 3:2. NEW SUBJECT: ONE adult crouches slightly and tilts a shallow handwoven basket, a short stream of grain falling into a second basket on the ground while a SMALL distinct cloud of light chaff drifts sideways in the breeze. Olive/gold/cream opaque egg-tempera botanical painting. Both baskets and complete head/hands/action within central band, no machine, giant airborne grain spray, metal or woven clothing.\nZoom out enough that COMPLETE principal heads/hands/tools/actions fit y170..590 on a765px-high banner; background only outside. Must survive actual3.37:1 game card. Gameyear30 chronology: hide clothing, baskets, early handmade clay vessels and cordage allowed; wovencloth, metal, monumental buildings and later reference technology excluded.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ffec3172-8e3f-4670-86c6-489c6d31571a.png",
+  "review": "Full original and actual 3.37:1 private-GPU card inspected against established field medium and prerequisites. Complete principal heads/actions retained. Corrected headless/GPU PASS6 effective source/focus year0..600, distinct hashes, hidden gating and crop bounds.",
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/winnowing_practice.png",
+    "focus": [
+      0.5,
+      0.73
+    ]
+  },
+  "asset": "res://assets/ui/research/subjects/winnowing_practice-v2.png",
+  "sha256": "8c8280b19601c7b798311e7a8f093f62f481d80fb9c9e11356fcc24d302bf90d",
+  "mode": "built-in image_gen / edit"
+}

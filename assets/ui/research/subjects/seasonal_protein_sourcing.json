@@ -1,12 +1,21 @@
 {
   "id": "seasonal_protein_sourcing",
   "line": "nutrition",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-09/assets/ui/research/subjects/hearth_roasting_control-v1.png",
+  "medium": "opaque botanical eggtempera olive gold cream earth",
+  "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match supplied WIDE approximately2055x765 proportions and opaque botanical eggtempera olive gold cream earth. Two adults observe migrating fish visible below clear shallow stream surface. One carries TWO small caught fish on simple twig, other points upstream to fish run; distant wild waterbirds. Main subject seasonal food opportunity. No boat, net, cultivatedfields or livestock. Rough hide garments, mature readable handmade2D art. Entire people and subject action MUST be smaller and within y=170..620 central band, all heads hands and objects intact for3.37:1crop. Fullbleedwide, no text, labels, borders, photography, CGI or cinematiclight. Reference medium and width only, replace subject.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-77a859fc-2d19-43a8-83c9-29ad63dd5c91.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.55
+  ],
   "game_year": 9,
-  "approx_historical_year": -4940,
-  "prompt": "c. 4940 BCE: Adults compare gathered river fish and mussels with legumes and nuts at seasonal hearth; flat egg tempera on wood panel. No text, photorealism, CGI or childlike style.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-fbfe5cea-844e-47dd-8427-5581911ca4a0.png",
-  "asset": "res://assets/ui/research/subjects/seasonal_protein_sourcing-v1.png",
-  "sha256": "41b7e310da5e6f84d755c6c5335996cbf5fa05243ac24f70e7b265f87a8f6a06",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; first too lifelike; food sources and dry landscape clear in crop."
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "opaque botanical eggtempera olive gold cream earth",
+  "mode": "built-in image_gen / reference-guided painting",
+  "review": "Full source reviewed, actual wide card review pending",
+  "asset": "res://assets/ui/research/subjects/seasonal_protein_sourcing-v2.png",
+  "sha256": "0ba70de7f44c9c6ff5e09e92c822d2b3ff401ce0df7530ee37b48760583d37bd"
 }

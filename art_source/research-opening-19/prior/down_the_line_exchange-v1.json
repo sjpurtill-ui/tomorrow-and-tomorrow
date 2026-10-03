@@ -1,0 +1,12 @@
+{
+  "id": "down_the_line_exchange",
+  "line": "logistics",
+  "game_year": 20,
+  "approx_historical_year": -4867,
+  "prompt": "c. 4867 BCE: River communities pass flint, obsidian and shells from one trading pair to the next; sparse travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-9545e8ae-ef61-49a9-b65e-6acd9a75e004.png",
+  "asset": "res://assets/ui/research/subjects/down_the_line_exchange-v1.png",
+  "sha256": "6a5e34b7eb205d1bb935608016dfafac892a5b2d79463470ff38fbcf0be3bd16",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; relay exchange and varied goods clear in crop."
+}

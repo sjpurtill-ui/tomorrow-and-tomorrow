@@ -1,0 +1,7 @@
+# Artifact batch17 — ready for integration
+
+Twelve fictional prehistoric experiments, IDs1508–1519, base893df16071961ee3b881a088be2ea8c0bb2bf644, branch codex/artifact-production-active-17. Established square ivory matte gouache reference supplies medium only. Imagined preserved fragments, not claims about excavated finds. Raw mechanisms: twig-release knot, charcoal shadow tracing, repaired shell edge, fire-starting curls, ochre grip traces, shell fastener, stone fat lamp, two-hole reed, three-knot cord, resin-held flint, hide-wrapped warmth stone and thorn-pinned water pouch. Subordinate incomplete/support fragments show the catalogue's less-material experiment.
+
+Full originals and actual240px tiles inspected. Knot corrected to remove oversized log; shadow contour corrected to match the cast edge; extraneous cord removed so exactly three knots remain. Exact generation/edit prompts and original sources retained. Final editor import clean; headless/private GPU ARTIFACT_RECOVERY17_PASS count=12. Approved runtime lookup, unique hashes,512px limits and prehistoric/living-origin separation pass. Bank audit errors=[]; exact12 bank rows/12 index bindings changed. Probe exited; captures/logs ignored in artifacts.
+
+No simulation/save changes; save compatible. Canonical player/editor untouched. Shared bank manifest/index require selective merge of1508–1519. Unrelated generated imports/UIDs excluded. Player inclusion awaits designated integration.

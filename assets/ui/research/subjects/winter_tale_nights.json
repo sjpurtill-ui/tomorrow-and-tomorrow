@@ -1,0 +1,54 @@
+{
+  "id": "winter_tale_nights",
+  "line": "culture",
+  "status": "new",
+  "name": "Winter Tale Nights",
+  "one_liner": "Winter tale nights",
+  "observation": "Winter tale nights.",
+  "key_threshold": false,
+  "target_year": 40,
+  "proposed_year": 40,
+  "band_low": 25,
+  "band_high": 60,
+  "min_year": 25,
+  "research_years": 2,
+  "requires_all": [
+    "oral_epics",
+    "festival_calendar"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Social cohesion",
+  "signals": [
+    "society",
+    "information"
+  ],
+  "version": 2,
+  "year": 40,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+      "tile_index": 4,
+      "caption": "Winter tale nights (Year 40)",
+      "style": "silhouette_ochre"
+    },
+    "subject": null
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/culture-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established culture painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Inside a modest hide-and-branch shelter in winter, one seated storyteller gestures while four listeners, including an older adult and child, attend around a small hearth. Snow outside the doorway, warm interior; no grand hall, theatrical stage, text or literal cloth texture. Medium: flat tapestry-inspired PAINTING, interlocking indigo/rose/gold/violet, never actual cloth. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ce1eddaf-45e4-423a-85d1-5cb69deae977.png",
+  "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600.",
+  "asset": "res://assets/ui/research/subjects/winter_tale_nights-v2.png",
+  "sha256": "4e8847f8a5029cff7153569e4501531316e9b56969f17ace0d65b7ee0a598f7b",
+  "mode": "built-in image_gen / edit"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "joinery",
+  "prompt": "Correct this early Wood Joinery illustration by removing the metal chisel or blade in the foreground. Replace it with one simple loose chipped flint scraper lying on the bench. Preserve the precisely fitted mortise and tenon, the carpenter's working hands, wooden mallet, natural light and beautiful wood grain. Simplify the distant background to a modest settlement of earth and timber homes, no medieval stone towers. No metal tools or fittings anywhere.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-2e8f8a42-893c-403b-98f8-46ba8e5f384b.png",
+  "version": 2,
+  "mode": "built-in image_gen / edit",
+  "asset": "res://assets/ui/research/subjects/joinery-v2.png",
+  "sha256": "ffeea7e227870e194e117784cfa12e4b11f4dc50746ca7483b77de4d794ae004",
+  "review": "source checked; banner pending"
+}

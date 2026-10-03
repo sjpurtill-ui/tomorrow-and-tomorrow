@@ -1,9 +1,17 @@
 {
   "id": "woven_carriers",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Woven Carriers. A traveler adjusts an ergonomic woven back basket and broad shoulder sling loaded with provisions, hands then free to walk along a path; no cart or pack animal.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-7da4f0e8-66b4-49ec-996c-342c245e3a64.png",
-  "asset": "res://assets/ui/research/subjects/woven_carriers-v1.png",
-  "sha256": "611670aa6d07800502c3aacb9156568b776086a1d2335c69b9b969dfc202f044",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "prompt": "Create ONE finished research painting. Preserve reference widecanvas about2055x765 fullbleed and field medium ONLY, change subject completely. Flat angular matte paletteknife copper ember soot umber. Two seated adults interlace coarse reed strips into uneven open carrierbasket and conical fishtrap; rough unfinished mat lies foreground. Hands threadingdistinct crossingstrips, primitivebasketry firstsimpleforms, no loom cloth metal formalworkshop. Allwholeheads hands and mainobjects fit central y170..610, modestfigure scale with ampleskyandground foractual3.37:1card. Mature handmade flat2D pigmentpapergrain; simplehideclothing. No photography CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-14/assets/ui/research/subjects/clay_shaping-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-040ae11b-57fe-443f-8448-9bb1aee1944a.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "replace_first300": true,
+  "asset": "res://assets/ui/research/subjects/woven_carriers-v2.png",
+  "sha256": "fe29a6d390c0d6e56bf6e665893bebb22ecac67addc0524e7382682bdc83b116",
+  "mode": "built-in image_gen / edit"
 }

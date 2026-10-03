@@ -1,12 +1,22 @@
 {
   "id": "wound_packing",
   "line": "health",
-  "game_year": 20,
-  "approx_historical_year": -4867,
-  "prompt": "c. 4867 BCE: Caregiver tends adult arm wound with moss, plant lint and leaves under reed shelter; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cfeec6ea-754d-4303-a447-6294923405f6.png",
-  "asset": "res://assets/ui/research/subjects/wound_packing-v1.png",
-  "sha256": "aced84f9d4bd7ba40bb6ede472fd1874461c069e85ad062c10e1290d3a453f8a",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; period care custom depicted without graphic injury or instructional labels."
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/wound_packing-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/artifacts/field-style-references/health-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established health field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Non-graphic quiet care scene at a reed shade: a seated adult's forearm already covered by a simple clean hide/fiber dressing; companion calmly offers water in a wood cup while another prepares loose plant fibers separately. Sage/celadon ink-watercolor on cream. No exposed wound, blood, procedural steps, insertion, forceful action or claim of remedy effectiveness.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-15ebb4e1-7b34-4ec6-834c-9c42b6434d0e.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/health-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/wound_packing-v2.png",
+  "sha256": "5f7baef5b5926c91beb977a914bcb731fc7968c9005d48b99a765fe9264d8b14",
+  "mode": "built-in image_gen / edit"
 }

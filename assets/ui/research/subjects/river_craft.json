@@ -1,9 +1,24 @@
 {
   "id": "river_craft",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: River Craft. A small framed wooden river boat with paddlers travels alongside a wooded bank; frame ribs and practical shallow-draft hull visible, no sail, open ocean or gunship.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-6eb67655-164d-45aa-957f-d48ac1830421.png",
-  "asset": "res://assets/ui/research/subjects/river_craft-v1.png",
-  "sha256": "7d3a2061fcc8523be60fdb406569f656443d2212fa55d9673b3274a206b6998a",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "logistics",
+  "prompt": "Create ONE finished research painting. Preserve reference widecanvas about2055x765 fullbleed and field medium ONLY, change subject completely. Panoramic travelwatercolor sand slate indigo. Small rough dugoutcanoe seen side-on at shallowriveredge, adult seated inside gently holdsplainwoodenpaddle, anotheradult onshore pushescanoebow. Clear hollow singlelog hull lowwoodensides, no sail metalplanks motor sails formalharbor. Allwholeheads hands and mainobjects fit central y170..610, modestfigure scale with ampleskyandground foractual3.37:1card. Mature handmade flat2D pigmentpapergrain; simplehideclothing. No photography CGI cartoon frame text logo.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-13/assets/ui/research/subjects/trail_waymarking-v2.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-29600b14-b2fe-4336-92aa-19d838997e98.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Reviewed full original and actual 3.37:1 Godot card: field medium, action, heads, material chronology and focus remain legible. Corrected headless and isolated GPU checks pass all nine effective bindings.",
+  "replace_first300": true,
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/river_craft.png",
+    "focus": [
+      0.5,
+      0.55
+    ]
+  },
+  "asset": "res://assets/ui/research/subjects/river_craft-v2.png",
+  "sha256": "64a75b817f5a71d1fcb81bd2ac23f3b521795575ecc6f5dcec82191f80a7aa9f",
+  "mode": "built-in image_gen / edit"
 }

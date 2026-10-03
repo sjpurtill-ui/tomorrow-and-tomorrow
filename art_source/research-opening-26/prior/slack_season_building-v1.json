@@ -1,0 +1,12 @@
+{
+  "id": "slack_season_building",
+  "line": "labor",
+  "game_year": 40,
+  "approx_historical_year": -4733,
+  "prompt": "c. 4733 BCE: Adults raise reed-and-timber shelter frame during post-harvest slack season with empty field stubble and stores; charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f1f408e3-1d6a-4228-9fb6-accef66bd159.png",
+  "asset": "res://assets/ui/research/subjects/slack_season_building-v1.png",
+  "sha256": "6d372e01334d2e021ed1abb30f7ac6aade7ae784d09cbaa1e8a0a3f84bbeddbb",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; seasonal pause in field work and building clear."
+}

@@ -1,12 +1,20 @@
 {
   "id": "throwing_spears",
   "line": "security",
-  "game_year": 18,
-  "approx_historical_year": -4880,
-  "prompt": "c. 4880 BCE: Neolithic adults practice casting light wooden throwing spears with chipped-stone points toward plain straw bundles; hand-carved woodblock print, black and ochre. Mature handmade 2D; no metal, writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-436024a5-6899-441a-9c03-d7f62b7f7ffb.png",
-  "asset": "res://assets/ui/research/subjects/throwing_spears-v1.png",
-  "sha256": "60f46ef9f2431bb5b3b1dceaf93c4a5831f17bff43146f0f81a946e41b95c95d",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; light spear in flight, stone points and target clear in wide crop."
+  "year": 18,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/throwing_spears-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/security-v1.png",
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies ONLY field medium, palette and EXACT EXTRA-WIDE CANVAS. Preserve its width/height and panoramic aspect, full bleed edge to edge; never default 3:2 or square. No text/frame/collage. NEW SUBJECT: One fully clothed adult practices throwing a light stone-tipped wood spear at a distant plain straw bundle, another waits behind the thrower holding a single spare spear. Flat hand-cut woodblock vermilion, charcoal and parchment. Complete extended arm and spear visible centrally; no blood, enemy, armor, metal or modern target markings.\nFraming: zoom out; complete primary heads and all important hands/objects must lie between y170 and y610 of a765px-high canvas, preserving the actual3.37:1 game card. Top/bottom peripheral bands background only. Game years17\u201319: worked hides, cordage, baskets, early pottery and small earthen dwellings; plain woven textiles arrive later. Do not copy later capabilities from the style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-14b2d5b9-d634-4c67-af37-351700b31273.png",
+  "review": "Full original and actual3.37:1 game card visually reviewed: established field medium, complete primary heads, visible action and inherited material capabilities. Clean import, headless and isolated GPU fourteen-item checks passed.",
+  "asset": "res://assets/ui/research/subjects/throwing_spears-v2.png",
+  "sha256": "d061a5bd38891c2f78ba4856fd7252998f11d9f27e3dabf4f8d3075fbe65e39e",
+  "mode": "built-in image_gen / edit"
 }

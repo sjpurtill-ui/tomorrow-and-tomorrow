@@ -2,11 +2,16 @@
   "id": "fever_watch_customs",
   "line": "demography",
   "game_year": 4,
-  "approx_historical_year": -4973,
-  "prompt": "c. 4973 BCE: adult keeps night watch over a feverish infant on a plain reed mat by a stone-ring hearth, gently checking the childs forehead. Mature flat chalk pastel and cut-paper collage, terracotta and slate, no bedframe, later medical equipment or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0cfd5c14-13bb-4a20-9216-154a89925322.png",
-  "asset": "res://assets/ui/research/subjects/fever_watch_customs-v1.png",
-  "sha256": "f09448810a2a8652bf88957cc373e74db6e697fa08b8bf74b9290ae231f06700",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation selected for flatter handmade rendering. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-b1953cf5-6444-498e-83e7-188aa015a048.png",
+  "prompt": "Edit this current-game WIDE demography research banner, preserving approximately 2056x765 proportions and its flat angular chalk-pastel/cut-paper painted figures, terracotta/rust/warm ivory/slate palette. Keep caregiver checking a feverish infant's forehead during a night watch, dignified quiet gesture, infant wrapped in rough hide at center-right. Replace ALL regular tied reed-wall panels with ONE low ragged hide windbreak draped on crooked natural branches. Replace the neatly tied reed sleeping mat with an irregular thick raw hide on bare earth. Reduce large flame at far right to a small banked ember glow safely separated from infant. Keep night opening visible with slate sky. Make caregiver complete head and hand, infant face and sleeping hide visible inside central 70 percent height for a 3.37:1 crop; move scene slightly inward if needed. No pottery, woven cloth, baskets, finished house or fence. Preserve current flat handmade aesthetic, no photography, no CGI or dramatic light. No text or border. Canvas remains wide.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/fever_watch_customs-v1.png",
+  "focus": [
+    0.5,
+    0.4
+  ],
+  "review": "Full 2056x765 wide original inspected. Current flat angular terracotta/slate medium retained; regular reed walls and mat replaced by ragged hide windbreak and sleeping hide. Caregiver forehead contact with infant visible, fire reduced to safe small separated banked glow. Focus raised to retain caregiver face and infant in card.",
+  "asset": "res://assets/ui/research/subjects/fever_watch_customs-v2.png",
+  "sha256": "f5d4084e9c5c2c99f84476086aeda154d3589e162e4b642d9171511a48837c43",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,0 +1,9 @@
+{
+  "id": "customary_law",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Customary Law. An elder mediates a calm disagreement between two households in an open village circle while other elders listen and recall earlier judgments; oral precedent, no crown, courthouse or written lawbook.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-7c4910a7-e0be-4ec9-ab8b-a71d31bbb846.png",
+  "asset": "res://assets/ui/research/subjects/customary_law-v1.png",
+  "sha256": "3c5030d73e53efaaae2a10a0790e19934c102169e12f7a9dfba505ccd739f87c",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

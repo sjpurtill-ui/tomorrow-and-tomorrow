@@ -1,0 +1,56 @@
+{
+  "id": "pit_pebble_game",
+  "line": "culture",
+  "status": "new",
+  "name": "Pit-and-pebble Counting Game",
+  "one_liner": "Pit-and-pebble counting game",
+  "observation": "Pit-and-pebble counting game.",
+  "key_threshold": false,
+  "target_year": 35,
+  "proposed_year": 35,
+  "band_low": 20,
+  "band_high": 50,
+  "min_year": 20,
+  "research_years": 2,
+  "requires_all": [
+    "counting_words"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "shared_hearth_gatherings"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Inquiry breadth",
+  "signals": [
+    "society",
+    "information"
+  ],
+  "version": 2,
+  "year": 35,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "binding_style": "culture: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/pit_pebble_game.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+      "tile_index": 2,
+      "caption": "Pit-and-pebble counting game (Year 35)",
+      "style": "silhouette_ochre"
+    },
+    "subject": null
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/culture-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established culture painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: TWO adults face one another over TWO uneven rows of small pits pressed into bare dirt, moving natural pebbles by hand. Pits and pebbles dominate foreground, simple campsite behind. Culture flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, not fabric or cloth texture. No wooden board, polished counters or chess.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-abfcc100-0828-475a-9c5a-b66c6cd780b4.png",
+  "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/pit_pebble_game-v2.png",
+  "sha256": "c026df91f116b1bff7fa2f9730e85d57c514f1c798653152def8f4985eeeeab1",
+  "mode": "built-in image_gen / edit"
+}

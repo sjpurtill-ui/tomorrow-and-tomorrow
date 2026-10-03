@@ -1,0 +1,12 @@
+{
+  "id": "leaf_fodder_pollarding",
+  "line": "ecology",
+  "game_year": 45,
+  "approx_historical_year": -4700,
+  "prompt": "c. 4700 BCE: Villagers cut leafy branches from a pollarded tree to feed goats; plant-pigment naturalist illustration. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-c8cda413-ac55-4cd5-afa1-538f5fd27e03.png",
+  "asset": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v1.png",
+  "sha256": "c21bd34b6c521d341c44a349d859f2956edcee7031752818e046a63f10b42676",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; Pollarded tree, cut foliage and goats clear in crop."
+}

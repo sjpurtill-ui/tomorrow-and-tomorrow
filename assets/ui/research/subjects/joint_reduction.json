@@ -1,12 +1,18 @@
 {
   "id": "joint_reduction",
   "line": "health",
-  "game_year": 16,
-  "approx_historical_year": -4893,
-  "prompt": "c. 4893 BCE: Skilled adult supports injured persons dislocated shoulder and guides arm while helper steadies torso; sparse ink and watercolor. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5564b5a2-ba30-43de-87fd-084ceb21dee4.png",
-  "asset": "res://assets/ui/research/subjects/joint_reduction-v1.png",
-  "sha256": "968cd634cf3bab86f8a3492339c45841c332aadb7514035edb2df4b398a92e83",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; careful shoulder treatment reads in crop without graphic injury or instructional text."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies health medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: A covered seated adult rests a sore shoulder against a folded hide cushion after care, with two attendants calmly supporting the arm and offering water in an opaque rough wooden cup. Sage/celadon ink and restrained watercolor, cream and muted earth. Non-graphic quiet care, all clothed in simple hide garments. No forceful maneuver, tutorial steps, exposed wound, modern splint hardware or medical efficacy claim.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas; hands and central action y350..590. Zoom out to preserve heads and mechanism in actual3.37:1 card. Peripheral top/bottom bands only background. Different setting and viewpoint, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and earthen shelters; woven cloth is later. No later tools or clothes copied from reference.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/health-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6d3d8fde-b8c7-4374-8937-ffb489c4a4f4.png",
+  "replace_first300": false,
+  "replace_art600": false,
+  "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+  "asset": "res://assets/ui/research/subjects/joint_reduction-v2.png",
+  "sha256": "d95bf67baf3d0f889960227fc374bd06be5adaf06456751211202ba003fcbd15",
+  "mode": "built-in image_gen / edit"
 }

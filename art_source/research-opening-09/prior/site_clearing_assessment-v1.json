@@ -1,0 +1,12 @@
+{
+  "id": "site_clearing_assessment",
+  "line": "infrastructure",
+  "game_year": 8,
+  "approx_historical_year": -4947,
+  "prompt": "Adults examine slope, stones, brush and drainage before clearing a new shelter site; flat matte casein gouache in muted earth colors.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-8f76a9a3-0e8d-4b3c-a26f-16632b16cb14.png",
+  "asset": "res://assets/ui/research/subjects/site_clearing_assessment-v1.png",
+  "sha256": "119d3c10aa725a22a0a1a1d45948c5d17daed373fdb9a5898d67e9e2eab24c5b",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first was too lifelike; ground assessment clear in wide crop."
+}

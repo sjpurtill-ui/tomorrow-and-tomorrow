@@ -8,8 +8,11 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Civic:=preload("res://scripts/hud/court_civic.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
-const GROUPS:=["council","settlement","scouts","builders","generals","gifted","folk"]
-const GROUP_WORDS:={"council":"THE COUNCIL","settlement":"LEADERS OF SETTLEMENTS","scouts":"SCOUTS","builders":"MASTER BUILDERS","generals":"WAR LEADERS","gifted":"THE GIFTED","folk":"PEOPLE YOU HAVE CALLED"}
+const GROUPS:=["council","settlement","scouts","builders","generals","gifted","folk","prisoners","won_over"]
+const GROUP_WORDS:={"council":"THE COUNCIL","settlement":"LEADERS OF SETTLEMENTS","scouts":"SCOUTS","builders":"MASTER BUILDERS","generals":"WAR LEADERS","gifted":"THE GIFTED","folk":"PEOPLE YOU HAVE CALLED",
+	"prisoners":"HELD UNDER GUARD","won_over":"WON OVER FROM OTHER PEOPLES"}
+## Spies and assassins our watch took (captured_agents.gd).
+const Prisoners:=preload("res://scripts/captured_agents.gd")
 const MAX_FOLK:=6
 const MAX_GENERALS:=3
 ## The form of court follows discoveries (data/civic/civic_stages.json): how
@@ -121,6 +124,13 @@ static func people()->Array[Dictionary]:
 		var target2:={"known_id":String(known.id)}
 		result.append({"key":_key(target2),"target":target2,"name":String(known.name),"title":Persons.title_of(known),"group":"folk","matters":0,
 			"person":{"name":String(known.name),"person_id":0},"regard":{},"settlement_id":""})
+	# Those held under guard (and those won over from them): brought in only
+	# when the god sends for them.
+	for p in Prisoners.held(12):
+		var rec:Dictionary=p
+		var target3:={"prisoner_id":String(rec.id)}
+		result.append({"key":_key(target3),"target":target3,"name":String(rec.name),"title":Prisoners.title_of(rec),"group":"won_over" if String(rec.status)=="joined" else "prisoners","matters":0,
+			"person":{"name":String(rec.name),"person_id":0,"appearance_civ_id":String(rec.civ_id)},"regard":{},"settlement_id":""})
 	return result
 
 static func grouped()->Dictionary:
@@ -130,6 +140,7 @@ static func grouped()->Dictionary:
 	return groups
 
 static func _key(target:Dictionary)->String:
+	if String(target.get("prisoner_id",""))!="": return "prisoner:"+String(target.prisoner_id)
 	if String(target.get("known_id",""))!="": return "known:"+String(target.known_id)
 	if int(target.get("person_id",0))>0: return "person:%d" % int(target.person_id)
 	if String(target.get("figure_id",""))!="": return "figure:"+String(target.figure_id)

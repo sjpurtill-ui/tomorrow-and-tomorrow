@@ -2,11 +2,18 @@
   "id": "raw_material_prestaging",
   "line": "production",
   "game_year": 1,
-  "approx_historical_year": -4993,
-  "prompt": "Early Neolithic workers sort flint, rough branches, reeds and clay into distinct ready-to-use piles. Mature flat handmade palette-knife impasto on coarse paper, umber and burnt orange, no later technology, no photorealism, no writing. Wide central card crop.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f473182d-35ca-45d2-a834-71ceb6ed5de5.png",
-  "asset": "res://assets/ui/research/subjects/raw_material_prestaging-v1.png",
-  "sha256": "2417213543f0ecc496f0ab385c67d70dfefac6cb3e8d56385db8bea60c83c071",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation selected; first rejected as photorealistic. Accepted after visual 3.37:1 crop and subject/period check."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9dcf34d2-48c1-49b9-90b4-aecdf8c860c9.png",
+  "reference": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-abe235d5-5be6-4c59-a366-bf52486daa91.png",
+  "prompt": "Make one precise historical correction to this painting, preserving the adult figures, arrangement of stone/wood/reed/clay raw heaps, absence of baskets, hide lean-to, flat copper and ember-orange palette-knife impasto style and wide composition. Change the few round clean cut ends of the wood logs in the central raw-stock pile to irregular jagged broken branch ends with crude splinters and uneven fracture faces. No circular saw-cut discs or neatly standardized logs. Keep raw bark, crooked lengths and all other scene details. No new tools, pottery, weaving, metal, text, frame or photographic rendering.",
+  "initial_prompt": "Edit this existing research painting for Raw Stock Set Out Before a Work Session, game year 1. Keep its mature palette-knife impasto oil aesthetic, scraped chunky flat paint planes, copper/ember orange/soot/umber palette, adult hide-clad figures and broad horizontal composition. Preserve the visible action of laying out rough stones, wood, reeds and clay for later work. Remove every woven basket, woven fence or structured reed container in the background, at both far edges and anywhere else. Replace those only with loose ragged bundles of raw reeds resting on earth; no weaving or lattice. The hide lean-to may remain crude and minimal. Preserve rough stone material heaps and natural irregular wood. No finished tools, pottery, metal, standardized carpentry, writing, labels, frame, photorealism or CGI. Keep all hands and piles legible in wide card crop.",
+  "initial_reference": "C:/Users/sjpur/tt-research-art-opening-chronology-02/assets/ui/research/subjects/raw_material_prestaging-v1.png",
+  "review": "Full corrected image inspected: four hide-clad adults lay out rough stone, broken wood, loose reeds and clay. Woven containers/fences removed, central wood ends made jagged and irregular. Mature chunky flat impasto pigment and copper/ember/soot palette preserved. No saw-cut stock, metal, pottery or woven objects. Full image and 3.37:1 crop inspected; sorting hands and all four raw heaps remain legible.",
+  "asset": "res://assets/ui/research/subjects/raw_material_prestaging-v2.png",
+  "sha256": "d1d1847dabd762a52b0519b96c054624388ce34c09b43c410e712039e6aa1bee",
+  "mode": "built-in image_gen / edit"
 }

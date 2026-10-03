@@ -1,0 +1,12 @@
+{
+  "id": "hide_smoke_curing",
+  "line": "production",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: Adults scrape a stretched hide with stone and smoke-cure another hide over low hearth; thick matte impasto oil painting. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-be5bad19-5cca-466d-9f00-b102f0424de0.png",
+  "asset": "res://assets/ui/research/subjects/hide_smoke_curing-v1.png",
+  "sha256": "c869884a161baea8c16bb63af2c724157d3c72ff1f0f6ef6969f9151fa0f4bc6",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; scraping, stretched hide and smoke clear in wide crop."
+}

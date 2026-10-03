@@ -1,0 +1,12 @@
+{
+  "id": "council_messenger_duty",
+  "line": "institutions",
+  "game_year": 3,
+  "approx_historical_year": -4980,
+  "prompt": "c. 4980 BCE: a messenger summons households to a council gathering beneath a tree. Flat 2D mineral-pigment civic fresco on coarse plaster, dusty plum, limestone and muted gold; early Neolithic hide and fiber wraps, no written messages, classical robes or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0d914918-6fb6-409d-8869-26f2b5513ee9.png",
+  "asset": "res://assets/ui/research/subjects/council_messenger_duty-v1.png",
+  "sha256": "0c3e73c0c30511db55c225e8add4d8d3d5dd970d33c24623a5106503c4f8bd30",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first had Classical-looking clothing. Accepted after visual 3.37:1 crop and subject/period check."
+}

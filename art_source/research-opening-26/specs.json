@@ -1,0 +1,491 @@
+[
+  {
+    "id": "solstice_horizon_markers",
+    "line": "knowledge",
+    "status": "new",
+    "name": "Horizon Sunrise Markers for the Solstices",
+    "one_liner": "Horizon sunrise markers for the solstices",
+    "observation": "Horizon sunrise markers for the solstices.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25.0,
+    "band_high": 60.0,
+    "min_year": 25.0,
+    "research_years": 6.0,
+    "requires_all": [
+      "moon_counting"
+    ],
+    "requires_any": [
+      [
+        "cairn_sightline_marking",
+        "sightline_staking"
+      ]
+    ],
+    "precedents": [
+      "seasonal_patterns"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Observers",
+    "signals": [
+      "information",
+      "research"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/solstice_horizon_markers.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+        "tile_index": 4,
+        "caption": "Horizon sunrise markers for the solstices (Year 40)",
+        "style": "paper_gouache"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/knowledge-v1.png"
+  },
+  {
+    "id": "public_stores",
+    "line": "institutions",
+    "status": "catalog",
+    "name": "Common Store Kept Under Watch",
+    "one_liner": "Common store kept under watch",
+    "observation": "Common store kept under watch.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25.0,
+    "band_high": 55.0,
+    "min_year": 25.0,
+    "research_years": 4.0,
+    "requires_all": [
+      "clay_lined_storage_pits",
+      "leader_gift_redistribution"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "watch_rotation",
+      "seasonal_tribute_counts"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "nutrition"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/public_stores-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/institutions-v1.png"
+  },
+  {
+    "id": "winter_tale_nights",
+    "line": "culture",
+    "status": "new",
+    "name": "Winter Tale Nights",
+    "one_liner": "Winter tale nights",
+    "observation": "Winter tale nights.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25.0,
+    "band_high": 60.0,
+    "min_year": 25.0,
+    "research_years": 2.0,
+    "requires_all": [
+      "oral_epics",
+      "festival_calendar"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Social cohesion",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/winter_tale_nights.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 4,
+        "caption": "Winter tale nights (Year 40)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/culture-v1.png"
+  },
+  {
+    "id": "slack_season_building",
+    "line": "labor",
+    "status": "new",
+    "name": "Building Work Kept for the Slack Season",
+    "one_liner": "Building work kept for the slack season",
+    "observation": "Building work kept for the slack season.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 20.0,
+    "band_high": 52.0,
+    "min_year": 20.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "seasonal_work_round",
+      "framed_construction"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Able workforce",
+    "signals": [
+      "administration",
+      "training"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/slack_season_building-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/labor-v1.png"
+  },
+  {
+    "id": "warp_weighted_looms",
+    "line": "production",
+    "status": "catalog",
+    "name": "Warp-weighted Loom",
+    "one_liner": "Warp-weighted loom",
+    "observation": "Warp-weighted loom.",
+    "key_threshold": true,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 22.0,
+    "band_high": 55.0,
+    "min_year": 22.0,
+    "research_years": 5.0,
+    "requires_all": [
+      "drop_spindles",
+      "framed_construction"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "clay_shaping"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": "res://assets/ui/research/paper/first300-cards/warp_weighted_looms.tres",
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/warp_weighted_looms.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 02_08_26 PM.png",
+        "tile_index": 5,
+        "caption": "Woven textiles (Year 310)",
+        "style": "paper_gouache",
+        "match": "milestone"
+      },
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/production-v1.png"
+  },
+  {
+    "id": "stone_wall_footings",
+    "line": "infrastructure",
+    "status": "new",
+    "name": "Stone Footings Under Earthen Walls",
+    "one_liner": "Stone footings under earthen walls",
+    "observation": "Stone footings under earthen walls.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 20.0,
+    "band_high": 50.0,
+    "min_year": 20.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "dry_stone_walls"
+    ],
+    "requires_any": [
+      [
+        "adobe_wall_construction",
+        "wattle_and_daub_walls"
+      ]
+    ],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public works",
+    "signals": [
+      "construction",
+      "materials"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/stone_wall_footings-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/infrastructure-v1.png"
+  },
+  {
+    "id": "food_steaming_vessels",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Steaming Food Over Boiling Pots",
+    "one_liner": "Steaming food over boiling pots",
+    "observation": "Steaming food over boiling pots.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25.0,
+    "band_high": 55.0,
+    "min_year": 25.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "pit_firing",
+      "clay_tempering"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "earth_oven_cooking"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/nutrition-v1.png"
+  },
+  {
+    "id": "brushwood_trackways",
+    "line": "logistics",
+    "status": "new",
+    "name": "Brushwood Mats Laid Over Soft Ground",
+    "one_liner": "Brushwood mats laid over soft ground",
+    "observation": "Brushwood mats laid over soft ground.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25.0,
+    "band_high": 55.0,
+    "min_year": 25.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "trail_waymarking",
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "basketry"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Carrying capacity",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/brushwood_trackways-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/logistics-v1.png"
+  },
+  {
+    "id": "swidden_cycle",
+    "line": "ecology",
+    "status": "new",
+    "name": "Swidden Cycle",
+    "one_liner": "Swidden cycle: clear, crop, leave to regrow",
+    "observation": "Swidden cycle: clear, crop, leave to regrow.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25.0,
+    "band_high": 55.0,
+    "min_year": 25.0,
+    "research_years": 4.0,
+    "requires_all": [
+      "fallow_thicket_regrowth",
+      "controlled_undergrowth_burning"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "seed_selection",
+      "ground_stone_axes"
+    ],
+    "conditions": {
+      "environment": [
+        "woodland"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Natural recovery",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/swidden_cycle-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/ecology-v1.png"
+  },
+  {
+    "id": "raid_scouting",
+    "line": "security",
+    "status": "new",
+    "name": "Scouts Sent Ahead of a Raiding Party",
+    "one_liner": "Scouts sent ahead of a raiding party",
+    "observation": "Scouts sent ahead of a raiding party.",
+    "key_threshold": false,
+    "target_year": 40,
+    "proposed_year": 40,
+    "band_low": 25.0,
+    "band_high": 55.0,
+    "min_year": 25.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "ambush_raids"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "distance_call_signals"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public safety",
+    "signals": [
+      "defense",
+      "warfare"
+    ],
+    "version": 2,
+    "year": 40,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/raid_scouting-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/security-v1.png"
+  }
+]

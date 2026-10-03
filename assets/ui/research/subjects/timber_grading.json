@@ -1,10 +1,33 @@
 {
   "id": "timber_grading",
-  "prompt": "Correct this early Timber Grading illustration by removing the metal axe on the stump at far left. Leave a plain wooden mallet and a loose rough stone there instead. Preserve the comparison of wood samples, distinct grain and bark, the worker examining a branch, composition and realistic light. This is a pre-metal community; no metal implements or fittings anywhere.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-63efedd4-9e81-4b0e-bb9a-721efbf0eb49.png",
-  "version": 2,
-  "mode": "built-in image_gen / edit",
-  "asset": "res://assets/ui/research/subjects/timber_grading-v2.png",
-  "sha256": "9d7dbfa7c3e8b493b8104e0c0e83d8072364d7c43fc7caa956d0496b2d62e77e",
-  "review": "source checked; banner pending"
+  "line": "ecology",
+  "game_year": 3,
+  "version": 3,
+  "focus": [
+    0.5,
+    0.45
+  ],
+  "replace_first300": true,
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/timber_grading.png",
+    "source": "EARLY_SUBJECTS",
+    "focus": [
+      0.5,
+      0.6
+    ],
+    "later_fallback": {
+      "path": "res://assets/ui/research/subjects/timber_grading-v2.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-340b27cc-8a1d-4e97-9e04-056e2e054fc1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-03/assets/ui/research/subjects/seasonal_patterns-v2.png",
+  "prompt": "Create a completely NEW year-3 game research painting for Timber Grading: choosing wood by straightness, knots and soundness. Reference supplies ONLY mature naturalist field painting in layered plant pigments, botanical foreground detail, flat moss/fern/earth/muted-sky landscape bands, visible dry-brush grain. Copy none of its seasonal comparison composition or migrating birds. New scene: two adult gatherers wearing ragged unstitched hide wraps compare three natural fallen branch lengths resting on rough earth: one relatively straight sound young branch with bark, one crooked knotty limb, and one rotten broken branch showing crumbly decayed fibers. An adult sight-lines along the sound branch held horizontally at chest height; the other points directly to knots and rot in the rejected branches. Ends MUST be irregular naturally broken fractures, no saw-cut discs, uniform beams or planed surfaces. Wild woodland edge with recognizable living leaves and coarse bark, no planted forest rows. Wide panorama approx 3:1; adult faces, horizontal sighting branch, pointing hand and all three contrasting wood types tightly grouped in middle horizontal band for 3.77:1 crop. Flat botanical field pigment painting, dignified adults, no photographic skin or digital volume. No metal, axe, saw, mallet, standardized carpentry, vessel, basket, woven cloth, writing, ruler, labels, frame or watermark. Selection before woodworking, not a workshop.",
+  "mode": "built-in image_gen / new image with medium reference",
+  "review": "Full original inspected: adult sights along sound natural branch; second points at knots and crumbly rotten fibers in rejected lengths. Ragged hides, irregular broken branch ends, detailed wild plants and coarse bark against flat landscape bands in layered field pigments. No saw-cut stock, refined tool, modern clothing or copied seasonal-comparison subject. Wood-property comparison is artistic interpretation informed by primary raw-material selection research, not specific-site reconstruction. Full original and 3.77:1 crop inspected; sighting branch, both faces, pointing fingers, knots and rotten fibers remain visible.",
+  "asset": "res://assets/ui/research/subjects/timber_grading-v3.png",
+  "sha256": "02a6104628c90470e50c183e12a14eb97a66251b16b6d1b7a0ae259f3b966336"
 }

@@ -1,12 +1,20 @@
 {
   "id": "birth_spacing_customs",
   "line": "demography",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/infant_swaddling_practice-v2.png",
+  "prompt": "Create current-game demography research banner preserving WIDE 2055x765 proportions. Strict flat chalk pastel and torn cut-paper shapes: terracotta/rust/ivory/slate blue, broad angular matte planes, chalk-smudged paper, minimal charcoal contours. Three adults fully clothed in rough animal-hide wraps discuss household childcare: one holds a fully covered infant bundle with only small face showing; another sits beside clothed toddler; third gestures supportively between them. Wild camp and low ragged hide windbreak, no houses, woven fabric, baskets, pottery or writing. Entire group small within central 60 percent height for wide crop. Mature dignified stylized faces, flat pigment, no impasto ridges, photography, 3D or dramatic light. Reference medium/palette and wide canvas only.",
+  "replace_first300": false,
+  "initial_prompt": "Create a new current-game Tomorrow and Tomorrow demography research banner. Strictly preserve supplied WIDE painting canvas proportions approximately 2055x765. Match chalk pastel and cut-paper angular terracotta/rust/ivory/slate painting. Three smaller adults discuss care around seated mother nursing infant discreetly behind ragged hide fold, toddler beside older caregiver; supportive open-handed conversation. Whole heads and infant central with space. Wild temporary camp, raw-hide windbreak only, no woven garment, reed walls, baskets or pots. Mature handmade 2D art, rough irregular animal hides, wild portable camp. Entire heads, hands and subject action within central 65 percent height, people 70 percent normal scale for 3.37:1 card crop. Full bleed wide panoramic painting, no text, borders, photography, CGI, cinematic light, cloth, ceramic pots or cultivated crops. Reference is MEDIUM and WIDTH only, replace its subject completely.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-9155e79e-47ba-4906-a971-02247da617f8.png",
+  "review": "Covered infant and toddler care with three hide-clad adults. Matte angular terracotta/slate/ivory pigment shapes, distinct from photographic rejected audit imagery. Full heads/hands central; no pots, baskets or houses.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e4d56692-438e-4b00-8faa-f08bbd127792.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 6,
-  "approx_historical_year": -4960,
-  "prompt": "c. 4960 BCE: caregiver guides an older weaned child to food from an earthenware bowl while another adult cradles a younger infant, showing birth spacing by weaning and custom. Mature flat chalk pastel and torn cut-paper collage, terracotta and warm ivory; no writing, medical diagram, later dress or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f8f37dbc-3660-4a41-b8d9-716e97fede9d.png",
-  "asset": "res://assets/ui/research/subjects/birth_spacing_customs-v1.png",
-  "sha256": "603d6be793926e276238273d11574a1c3337b5a2e7b5f1437786a91b07d98beb",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation selected; first was too lifelike. Accepted after visual 3.37:1 crop and subject/period check."
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/birth_spacing_customs-v2.png",
+  "sha256": "266fab8ea098071af1f81bcbb4c785643bc8cd61c8c6d1b3b172ab22ec924e4e"
 }

@@ -1,12 +1,17 @@
 {
   "id": "rest_break_timing",
   "line": "labor",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/rest_break_timing-v1.png",
+  "prompt": "Edit current-game WIDE approximately 2054x766 charcoal-over-ochre painting. Preserve expressive flat charcoal strokes and three hide-clad adult figures resting in shade. REMOVE regular reed building, SAWN squared foreground beam and hafted axe. Replace building with low ragged hide windbreak on crooked branches; replace sawn beam with naturally fallen rough bark-covered log; axe becomes loose unhafted pebble and crooked digging stick. Standing coordinator points at the shadow cast by ONE crooked branch stuck in ground, sun position indicating time to pause; two tired adults rest on raw hide in shade. Scale all figures to 70 percent prior size, every complete head, pointing hand and branch-shadow cue inside central 65 percent height, plenty ochre sky above/below. No baskets, pottery, woven cloth or permanent construction. Preserve WIDE canvas, no photograph/CGI/3D, writing or border.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-072660ea-1c6c-49bf-8a0c-fffe9693092f.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 6,
-  "approx_historical_year": -4960,
-  "prompt": "c. 4960 BCE: workers set down a timber beam and rest in shelter shade when a short midday shadow signals an agreed break. Mature expressive charcoal over flat ochre wash, angular figures and rough grain; no clock, sundial, written schedule or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-294797e5-ef00-48c7-9fa4-3fc2eb473686.png",
-  "asset": "res://assets/ui/research/subjects/rest_break_timing-v1.png",
-  "sha256": "2228e2e5622c5fe6257d2e4cf3a9b79bf97a89e32d4dffaf8918343b5f783338",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; beam and resting work group clear. Accepted after visual 3.37:1 crop and subject/period check."
+  "review": "Charcoal on ochre. Two adults rest in hide-windbreak shade; coordinator points toward rough branch shadow. No house, axe or sawn beam.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/rest_break_timing-v2.png",
+  "sha256": "8cae529bead20f011d19707353a2382f1b7eda2ddb17a47913e5c1b4e01380c2"
 }

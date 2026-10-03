@@ -1,0 +1,9 @@
+{
+  "id": "drainage",
+  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Ground Drainage. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. Low oblique view of two early workers cutting a shallow drainage channel around a simple earthen dwelling after rain. Water visibly follows a gently sloped channel away from muddy occupied ground toward a lower patch of reeds. Warm light on wet soil, strong legible water path. No well, aqueduct, pipe, brick sewer or modern machinery. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-0b40f499-373a-4a85-8375-46872455e283.png",
+  "asset": "res://assets/ui/research/subjects/drainage-v1.png",
+  "sha256": "2eccf3adde3d0cc7c1d8e2014bb1765bb2e04fa7f78c10657703b1b39bab90ae",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

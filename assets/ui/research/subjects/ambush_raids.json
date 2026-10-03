@@ -1,12 +1,22 @@
 {
   "id": "ambush_raids",
   "line": "security",
-  "game_year": 22,
-  "approx_historical_year": -4853,
-  "prompt": "c. 4853 BCE: Scouts rehearse dawn ambush with hidden group in brush and approach group on trail; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-85e2653c-1e4b-4b46-bf8b-908bf013d026.png",
-  "asset": "res://assets/ui/research/subjects/ambush_raids-v1.png",
-  "sha256": "77a6dfbdec2ed67337ecb1222804ae95144c55a6beb83de75df7c1e7ff818381",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; dawn concealment and rehearsal clear, no actual injury."
+  "year": 22,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/subjects/ambush_raids-v1.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/security-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established security field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: Non-graphic scene: three fully clothed scouts crouch behind brush watching a small rival party farther away on a path; one signals silence, simple wood/stone spears kept low. Layered hand-cut woodblock vermilion/charcoal/parchment. No attack contact, blood, guns, metal armor, uniform army or modern tactical diagram.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-5a9d17fd-b06c-48bb-9bc7-3273518e2d18.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/security-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/ambush_raids-v2.png",
+  "sha256": "08ac3e8d26005b8e229a883811e006c7c165f25e018b0ae07a09002dfe144df3",
+  "mode": "built-in image_gen / edit"
 }
