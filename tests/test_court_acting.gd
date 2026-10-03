@@ -463,9 +463,9 @@ func test_stances_for_life_from_the_acting()->void:
 	assert_float((hi-lo).length()).override_failure_message("the staff hand wandered %.3f m" % (hi-lo).length()).is_less(0.012)
 	# an elder on a low seat sits lower than on a high one
 	var low:=_figure()
-	Acting.idle(low,"log",{"seat":0.30})
+	Acting.idle(low,"log",{"seat":0.30*low.body_height/1.72})
 	var high:=_figure()
-	Acting.idle(high,"log",{"seat":0.46})
+	Acting.idle(high,"log",{"seat":0.46*high.body_height/1.72})
 	_run(low,1.0);_run(high,1.0)
 	assert_float(_bone_y(high,"hips")-_bone_y(low,"hips")).is_between(0.08,0.24)
 	# seated, a gasp does not stand them up

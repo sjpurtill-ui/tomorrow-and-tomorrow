@@ -143,7 +143,7 @@ func _row(title:String,specs:Array,file:String,gap:=0.95)->void:
 		f.position=Vector3(float(spec.get("x",(float(i)-(n-1)*0.5)*gap)),0.0,float(spec.get("z",0.0)))
 		f.rotation_degrees.y=float(spec.get("yaw",-6.0+12.0*float(i)/maxf(1.0,float(n-1))))
 		if own:Acting.idle(f,stance,{"seat":float(spec.seat)} if spec.has("seat") else {})
-		if stance=="log":_prop("log",f.position+Vector3(0.0,float(spec.get("seat",0.43))*f.body_height/1.72-0.13,0.05),1.0)
+		if stance=="log":_prop("log",f.position+Vector3(0.0,float(spec.get("seat",0.43))-0.13,0.05),1.0)
 		if stance=="fire":_prop("fire",f.position+Vector3(0.0,0.10,0.75))
 	_step_all(0.6)
 	for i in n:
@@ -280,7 +280,7 @@ func _room2()->void:
 		var f:=_person(who[i],"")
 		f.position=Vector3(float(p[0]),0.0,float(p[1]));f.rotation_degrees.y=float(p[2])
 		if not String(p[3]).is_empty():Acting.idle(f,String(p[3]),{"seat":0.40} if String(p[3])=="log" else {})
-		if String(p[3])=="log":_prop("log",f.position+Vector3(0.0,0.40*f.body_height/1.72-0.13,0.05))
+		if String(p[3])=="log":_prop("log",f.position+Vector3(0.0,0.40-0.13,0.05))
 		cast.append(f)
 	_prop("fire",Vector3(0.5,0.1,-0.35))
 	camera.position=Vector3(0.0,1.9,6.6);camera.rotation_degrees=Vector3(-8.0,0.0,0.0)

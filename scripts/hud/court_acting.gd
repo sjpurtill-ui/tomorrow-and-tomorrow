@@ -432,9 +432,10 @@ static func speak(fig:Node3D,text:String,seconds:float,opts:={})->void:
 
 ## stance_id: one of the figure's own (stand, hip, folded, clasped, belt,
 ## staff, bowl, sit, crouch) or one of the acting's: cord, bundle, guard (on
-## the figure's staff), log (an elder seated; opts.seat: the seat's height in
-## metres from the floor for a 1.72 m body, from the set's mark), fire
-## (crouched by the fire, warming their hands).
+## the figure's staff), log (seated, an elder's way; opts.seat: the seat's
+## height in the hall's metres, from the set's mark: the body sits on it
+## whatever its size, so the stage need not lift them), fire (crouched by
+## the fire, warming their hands).
 static func idle(fig:Node3D,stance_id:String,opts:={})->void:
 	var a=of(fig)
 	if a!=null:a.rest_in(stance_id,opts)
@@ -881,7 +882,9 @@ func _set_base(stance_id:String,opts:Dictionary)->void:
 		clip="stance_log_low";hi="stance_log_high"
 		var low:=float(clip_meta("stance_log_low").get("seat",0.30))
 		var high:=float(clip_meta("stance_log_high").get("seat",0.46))
-		var seat:=float(opts.get("seat",0.43))
+		# the mark's seat is in the hall's metres: for this body as a 1.72 m one
+		var tall:=body_k*maxf(fig.global_transform.basis.get_scale().y if fig.is_inside_tree() else fig.scale.y,0.01)
+		var seat:=float(opts.get("seat",0.43*tall))/tall
 		_base_mix=clampf((seat-low)/maxf(high-low,0.01),0.0,1.0)
 	if not has_clip(clip):return
 	base_stance=stance_id
