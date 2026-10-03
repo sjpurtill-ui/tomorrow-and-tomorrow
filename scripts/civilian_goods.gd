@@ -173,14 +173,19 @@ static func advance()->Dictionary:
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	var worn:=stock()*(1.0-pow(1.0-daily_wear(),elapsed))
 	if worn>0.0:stocks[GOODS]=stock()-worn
-	var report:Dictionary={"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":""}
+	# Learning (research_600_catalog.gd learners_goods, builder A): the learners
+	# took their goods before the makers' day; the report shows it ("learners",
+	# a day) and the makers make it good below.
+	var learners:=preload("res://scripts/research_600_catalog.gd").learners_goods()
+	var report:Dictionary={"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":"","learners":float(learners.taken)}
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:
 		report.reason="Needs a settled workplace"
 	else:
 		var labor:=maxf(0.0,WorldSimulation.state.effective_workers("Crafting")*CRAFT_SHARE)*WorldSimulation.span
 		# Techniques, and how well the business sector works (enterprise.gd).
 		var rate:=BASE_RATE*technique_output()*preload("res://scripts/enterprise.gd").factor()
-		var wanted:=maxf(0.0,float(report.target)*1.20+capital_reserve()-stock())
+		# Makers also keep what the learners will take before the next step.
+		var wanted:=maxf(0.0,float(report.target)*1.20+capital_reserve()+float(learners.wanted)-stock())
 		var reserve:=workshop_input_reserve()
 		var spendable:Dictionary={}
 		var raw_available:=0.0

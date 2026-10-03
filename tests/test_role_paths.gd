@@ -211,11 +211,13 @@ func test_ten_more_is_always_the_gain()->void:
 	var now:=clampf(keepers/(pop*0.035),0.0,1.25)
 	var more:=clampf((keepers+ten)/(pop*0.035),0.0,1.25)
 	assert_str(String(Effects.administration().plus_ten)).is_equal("Ten more: cohesion +%d, trust +%d." % [roundi((more-now)*20.0),roundi((more-now)*10.0)])
-	# Learning: the knowing and the research strength they add.
+	# Learning: the knowing they add and how much faster the research goes, from
+	# the engine's own reading (discovery_system.gd role_effect).
 	var learners:=float(GameState.effective_workers("Knowledge"))
 	var raw_learners:=float(GameState.population_allocations.get("Knowledge",0))
-	var strength:=Research600.team_capacity(learners+10.0*(learners/raw_learners if raw_learners>0.0 else 1.0))-Research600.team_capacity(learners)
-	assert_str(String(Effects.knowledge().plus_ten)).contains("+%s learners' worth" % preload("res://scripts/task_impact.gd")._one(strength))
+	var research:=DiscoverySystem.role_effect("Knowledge",10.0*(learners/raw_learners if raw_learners>0.0 else 1.0))
+	assert_float(float(research.pace_gain)).is_greater(0.0)
+	assert_str(String(Effects.knowledge().plus_ten)).contains("research %s" % Effects.faster(float(research.pace_gain)))
 	# Building: how much sooner, not when.
 	assert_str(String(Effects.construction().plus_ten)).contains("sooner")
 	# The watch: the guard ten more add at home, by the home's share of the

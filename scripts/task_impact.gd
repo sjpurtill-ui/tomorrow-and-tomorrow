@@ -533,19 +533,32 @@ static func knowledge()->Dictionary:
 	var gain:=keepers*labor*fit/maxf(3000.0,pop*92.0)*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))*lerpf(0.55,1.45,float(state.combined_intelligence))
 	lines.append(_line("What the people know","+%s points a year" % _two(gain*365.0*100.0),
 		"Learners add to what the people know, which speeds every discovery. It stands at %d of 100; the learners add about %s points a year at today's pace." % [roundi(float(state.simulation_metrics.get("knowledge",0.18))*100.0),_two(gain*365.0*100.0)],"good" if gain>0.0 else "bad"))
-	# Research teams: full strength up to 12 keepers, less for each beyond
-	# (research_600_catalog.gd team_capacity).
-	var team:=Research600.team_capacity(keepers)
-	if keepers<=float(Research600.RESEARCH_TEAMS):
-		lines.append(_line("Research strength","full strength" if keepers>0.0 else "none",
-			"Up to %d learners work at full strength on the research; past that each one adds less." % Research600.RESEARCH_TEAMS,"good" if keepers>0.0 else "bad"))
+	# Every learner counts, without a cap (research_600_catalog.gd team_capacity;
+	# discovery_system.gd role_effect reads the engine's numbers).
+	var now:Dictionary=WorldSimulation.discovery.role_effect("Knowledge",1.0)
+	var ten:Dictionary=WorldSimulation.discovery.role_effect("Knowledge",10.0)
+	if keepers<=0.0:
+		lines.append(_line("One more learner","starts the research",
+			"Nobody is learning, so no research moves. Every learner counts; there is no cap on how many learn.","bad"))
 	else:
-		lines.append(_line("Research strength","%s learners' worth" % _one(team),
-			"Up to %d learners work at full strength on the research; past that each adds less, so %s learners work as %s." % [Research600.RESEARCH_TEAMS,_whole(keepers),_one(team)],"good"))
+		lines.append(_line("One more learner",_gain_value(float(now.pace_gain)),
+			"Every learner counts; there is no cap. %s learners work %s questions at once. One more makes the research go %s; ten more, %s (%s questions at once). On one question, twice the people do about 1.8 times the work." % [_whole(keepers),_count(int(now.teams)),_faster(float(now.pace_gain)),_faster(float(ten.pace_gain)),_count(int(ten.teams_more))],"good"))
+	# Learners use goods: tallies, writing stuff, tools (Research600.goods_cover).
+	var cover:=float(now.goods_cover)
+	lines.append(_line("Goods for the learners","%d of 100 covered" % roundi(cover*100.0) if keepers>0.0 else "none asked",
+		"Learners use goods: tallies, writing stuff and tools, one for each %d days of learning, and the same again for every %d years our learning runs ahead of the calendar. %s learners ask %s goods a day and our stores hold %s. Makers make them; short of goods, learning slows, to half its pace with none. Now it goes at %d in 100." % [roundi(Research600.LEARNER_DAYS_PER_GOOD),roundi(Research600.LEAD_GOODS_YEARS),_whole(keepers),_two(float(now.goods_a_day)),_one(float(now.goods_held)),roundi(float(now.goods_factor)*100.0)],"good" if cover>=0.99 else "bad"))
+	# Our own age: learners past what the age can spare carry it ahead of the
+	# calendar (Research600.lead_rate, discovery_system.gd learning_lead).
+	var lead:=float(now.lead_years)
+	var rate:=float(now.lead_rate)
+	var drift:="ahead about %s years every ten years" % _one(rate*10.0) if rate>0.0 else ("back toward the calendar about %s years every ten years" % _one(-rate*10.0) if rate<0.0 and lead>0.0 else "level with the calendar")
+	lines.append(_line("Ahead of the calendar","%s years" % _one(lead) if lead>=0.5 else "level",
+		"The age can spare %d in 100 of the able as learners; %d in 100 learn. Past that, our learning runs ahead of the calendar; below it the calendar catches up. Ours is moving %s. Questions are dated from our own age, and what we know pays off to the age our knowledge has reached." % [roundi(float(now.sustainable_share)*100.0),roundi(float(now.share)*100.0),drift],"good" if lead>=0.5 or rate>0.0 else "plain"))
 	# Too many keepers: past the share the age can spare, each costs work,
 	# weariness, cohesion and births (society_model.gd specialist upkeep).
-	var model=DiscoverySystem.society_model
-	var era:=float(model.ceiling_era) if model!=null else 0.0
+	var model=WorldSimulation.discovery.society_model
+	# What the economy can spare follows its real age, not the learners' lead.
+	var era:=float(model.economy_era()) if model!=null else 0.0
 	var sustainable:=Society._rise(Society.SUSTAINABLE_SPECIALISTS,era)
 	var able:=_able()
 	var excess:=float(model.specialist_excess) if model!=null else 0.0
@@ -566,7 +579,7 @@ static func knowledge()->Dictionary:
 			"The Shrine House does its full good only while learners tend it, 1 in 100 of the people (%s would)." % _count(ceili(pop*CIVIC.SHRINE_KEEPERS_SHARE)),"good" if tended>=1.0 else "bad"))
 	_great_work_line(lines,"Knowledge")
 	lines.append(_cost_line("Knowledge",keepers))
-	return {"lead":"Learners watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else.","lines":lines}
+	return {"lead":"Learners watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else. Every learner counts; they eat, use goods and make no food.","lines":lines}
 
 
 # --- Keeping and caring -------------------------------------------------------------
@@ -757,6 +770,20 @@ static func _one(value:float)->String:
 
 static func _two(value:float)->String:
 	return "%.2f" % value
+
+## A pace gain in words: "about 12 in 100 faster", "about twice as fast".
+static func _faster(gain:float)->String:
+	if gain>=0.995:return "about %s times as fast" % _one(1.0+gain)
+	if gain>=0.01:return "about %d in 100 faster" % roundi(gain*100.0)
+	if gain>=0.0005:return "about %d in 1000 faster" % maxi(1,roundi(gain*1000.0))
+	return "less than 1 in 1000 faster"
+
+## A pace gain as a short value: "+12 in 100", "+4 in 1000", "2 times as fast".
+static func _gain_value(gain:float)->String:
+	if gain>=0.995:return "%s times as fast" % _one(1.0+gain)
+	if gain>=0.01:return "+%d in 100" % roundi(gain*100.0)
+	if gain>=0.0005:return "+%d in 1000" % maxi(1,roundi(gain*1000.0))
+	return "+less than 1 in 1000"
 
 static func _cap(text:String)->String:
 	return text.left(1).to_upper()+text.substr(1)

@@ -39,6 +39,28 @@ Read first: `AGENTS.md`, `docs/ADJUDICATION.md` (one ledger, stated odds, seeded
   - The existing material support from making stays. Learners eat but make no food or goods.
 - The People view's learning row says plainly what one more learner does now.
 
+**A as built (PR #102).** The allocation is the budget: every unit of learning is paid for in people taken from other work, plus their food and goods.
+- **Work.** `Research600.team_capacity(learners)` comes from the number of people on the research lines alone, never from the people's size. The learners work `teams_at` questions at once (+4 per tenfold, no cap), each team at people^0.85: 200 learners do 1.83 times the work of 100, 1,000 about 7.5 times the work of 100. The research_3000 parallel capacity, which multiplied research by a people's size, is gone. Diffusion stays off. The artifact, leader, figure, scholar-visit and education factors only multiply learners' work: with nobody learning, nothing is learned (fast sim: 0 discoveries in 150 years at no learners, for 120 or 2,000 people).
+- **One pace constant.** `LEARNER_PACE` = 1: a founding band with its usual few learners paces BENCHMARKS_600 exactly as before. Each age's questions ask the work of the learners a people of that age usually keeps (`AGE_WORK_BY_YEAR`, by the question's own year, fitted in tools/sim from the sensible run: 1 up to year 250, 3 at year 600, 12 at 1200, 55 at 3000). A sensible people therefore paces as before, a small people with few learners falls behind, and only more learners run ahead.
+- **Goods.** Learners use 1 goods-unit per 20 learner-days, read and taken through one accessor (`Research600.learning_goods`): home stores first, then the towns' stores in proportion to what each holds. Makers keep what the learners will take before the next step (`civilian_goods.gd`; a 10-day step keeps its learners covered). The goods report and screens show the learners' take. Short of goods: progress × (0.5 + 0.5 × cover).
+- **The people's own age.** Learners on the lines beyond the share the age can spare (`SUSTAINABLE_SPECIALISTS`, read at the economy's real age) earn a lead over the calendar: 0.06 years a year per doubling of that share, falling back the same way below it. Questions, foundations and teams are dated from the calendar plus the lead (`DiscoverySystem.learning_year`). Effect ceilings follow min(own age, knowledge frontier). `pace_for(design_year)` is the question's own size and never reads the calendar.
+- **A lead is paid for.** Goods per learner rise by the usual amount again for every 20 years ahead. The upkeep of learners past the sustainable share (work, weariness, cohesion, births, stores) rises by the usual amount again for every 300 years ahead. What the economy can spare and the artifact cap read the economy's real age, never the lead.
+- **Fast sim, 3 seeds to year 600** (base = main 97a32dd2, head = this branch; learning share in brackets; writing / bronze / place value years; population at 150 / 300 / 600):
+
+| Path | Base | Head |
+|---|---|---|
+| sensible (5%) | 218 / 327 / 483; 287 / 1,054 / 3,633 | 219 / 328 / 482; 288 / 1,054 / 3,634 |
+| balanced (5%) | 219 / 327 / 483; 260 / 1,038 / 3,613 | 220 / 327 / 482; 259 / 1,037 / 3,612 |
+| research (17.6%) | 215 / 325 / 478; 272 / 968 / 3,499 | 196 / 297 / 441; 272 / 975 / 3,508 |
+| research_heavy (35%) | 215 / 326 / 480; 160 / 344 / 2,350 | 188 / 289 / 430; 158 / 319 / 1,717 |
+
+  - **Research path (17.6%).** About 20-30 years before the band floors (215 / 320 / 470), with a lead of 33 years by 600. Its population matches its own base and stays below sensible.
+  - **All-in learning (35%).** About 25-40 years before the floors, with a lead of 61 years by 600. It pays for it: 7% fewer people than its old self at 300 and 27% fewer at 600 (half of sensible's), households stripped of goods, and lower making capacity and guard than sensible (0.83 and 0.44 against 0.96 and 0.53 at 300).
+- **Switching paths (3 seeds).** Growth = heavy food and keeping/caring with 2% learning.
+  - **Growth, then 30% learning from year 200.** Knows 323 at the switch, catches sensible's knowledge by 300 (743 against 743) and passes it by 600 (1,148 against 1,120), with 2,791 people at 600 (sensible: 3,634). Under the old rule it never caught up (723 at 300, 1,103 at 600).
+  - **35% learning, then growth from year 200.** Knows 638 at the switch with a 29-year lead, and 158 people. Its population then grows to 482 at 300, 1,527 at 400 and 3,551 at 600, nearly level with sensible. Its knowledge falls behind (985 at 600) as its few learners keep up less, and its lead falls back to the calendar.
+  - **Growth only (2% learning).** Lags further than before (bronze 421, against 379 under the old rule): few learners, slow learning.
+
 ### B. Fresh food, small stores, keepers and carers (owner: `food_system.gd`, `consequence_engine.gd` food-security/health/early-life targets, `early_life_conditions.gd` care coverage, `realm_purse.gd LEVY_KEEP_DAYS`)
 - **No more giant stores.**
   - Food security no longer counts store days up to 45. It counts a lean buffer: `min(1, food_days / LEAN_DAYS)` with LEAN_DAYS = 20, "enough to carry the people through a lean spell".

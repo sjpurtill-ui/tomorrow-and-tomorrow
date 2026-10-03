@@ -127,6 +127,10 @@ The user allows play to run ahead of history "within a reasonable deviation", as
   - **One line.** Maximizing one line leaves the other lines unlearned.
   - **Early bonuses.** Early care or military emphasis comes at the expense of stores or tools.
   - The line-maximization matrix and the mixed-allocation sweep (`docs/research/LINE_MAX_MATRIX.md`) check this.
+- **A chosen learning path (2026-10-02, docs/PEOPLE_FIRST.md A).** The user: the fun is in the extreme scenarios, so history need not bind them. Not wild, "a little extra". A people that keeps more learners than its age can spare earns a slow lead over the calendar and may beat these milestone floors by a modest margin. Every such lead is paid for in people, goods and upkeep. Sensible and balanced peoples stay inside the bands.
+  - **Fast sim, 3 seeds.** A sixth of the workers learning reaches writing / bronze / place value at 196 / 297 / 441, about 20-30 years before the floors. A third learning reaches them at 188 / 289 / 430, about 25-40 years before.
+  - **Its price.** The third-learning people has 7% fewer people than its old self at 300 and 27% fewer at 600, about half a sensible people's. Its households are stripped of goods, and its making and guard are below sensible.
+  - **The usual share.** Sensible and balanced runs are unchanged within a year and within 0.1% of population.
 
 ## What the game must never show before year 600
 
