@@ -162,7 +162,7 @@ func _build_strip()->void:
 	(chips.gear.chip as Control).gui_input.connect(func(event:InputEvent):
 		if _clicked(event) and bool(chips.gear.get("short",false)):_open_production())
 	(chips.training.chip as Control).gui_input.connect(func(event:InputEvent):
-		if _clicked(event):page_wanted.emit("recruitment"))
+		if _clicked(event):page_wanted.emit("war"))
 	(chips.training.chip as Control).mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
 	# Hot feuds, as HOI4 keeps the wars in sight: a click opens the Feuds page.
 	var feuds:=HBoxContainer.new();feuds.name="Chip_feuds";feuds.add_theme_constant_override("separation",7);feuds.mouse_filter=Control.MOUSE_FILTER_STOP;flow.add_child(feuds)
@@ -205,7 +205,7 @@ func _update_strip(sum:Dictionary)->void:
 	chips.fed.value.add_theme_color_override("font_color",T.RED_TEXT)
 	chips.fed.chip.tooltip_text=("Short of food: "+", ".join(hungry)+".\nThe Readiness & supply tab says why.") if not hungry.is_empty() else "Every band is fed."
 	chips.training.value.text=EraWords.grouped(int(sum.training))
-	chips.training.chip.tooltip_text="%s drilling or called up and waiting.\nClick for Recruit & deploy." % EraWords.grouped(int(sum.training))
+	chips.training.chip.tooltip_text="%s in a drill course or joining the watch.\nClick for the War screen: how many keep watch." % EraWords.grouped(int(sum.training))
 	if is_instance_valid(policy_button):policy_button.text="Training: %s" % String(MilitaryCampaign.training_staff.policy("army").label).to_lower()
 	var hot:=preload("res://scripts/hud/war_ledger_model.gd").entries().filter(func(e:Dictionary)->bool: return String(e.kind)!="ended" and bool(e.get("hot",false)))
 	chips.feuds.chip.visible=not hot.is_empty()
@@ -266,7 +266,7 @@ func _rebuild(shown:Array)->void:
 	for child in list.get_children():list.remove_child(child);child.queue_free()
 	live.clear()
 	if rows.is_empty():
-		_empty("No one is under arms yet.",true)
+		_empty("Nobody keeps watch yet.",true)
 		return
 	if shown.is_empty():
 		_empty("No force matches this filter.",false)
@@ -282,7 +282,7 @@ func _empty(words:String,recruit:bool)->void:
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);panel.add_child(row)
 	_glyph(row,Icons.command_texture("men",T.INK_MUTED,48),22.0)
 	var text:=_text(row,words,14,T.INK_MUTED);text.size_flags_horizontal=Control.SIZE_EXPAND_FILL;_whole(text)
-	if recruit:_button(row,"Recruit & deploy",func():page_wanted.emit("recruitment"),Icons.command_texture("drill",T.INK,40),"Raise and drill a band.")
+	if recruit:_button(row,"Keep watch",func():page_wanted.emit("war"),Icons.command_texture("guard",T.INK,40),"The watch is the army: set more of the people to keep watch on the War screen.")
 
 
 func _update_values(shown:Array)->void:
@@ -531,9 +531,10 @@ func talk_to(id:String)->void:
 	close_wanted.emit()
 
 
-## The call-up for the levy at home: free adults into the recruit reserve,
-## then into the empty places (MilitaryCampaign.reinforce_formation). They
-## drill a few days before they stand in the line.
+## The call-up for the levy at home: more of the people set to keep watch
+## (the watch share rises, watch_military.gd), then into the empty places
+## (MilitaryCampaign.reinforce_formation). They drill a few days before they
+## stand in the line.
 func call_up_home()->String:
 	var sent:=0;var refusal:=""
 	for f in (MilitaryCampaign.home_army.get("formations",[]) as Array).duplicate(true):
@@ -544,7 +545,7 @@ func call_up_home()->String:
 		var result:Dictionary=MilitaryCampaign.reinforce_formation(int(formation.id),gap)
 		if result.has("error"):refusal=String(result.error);continue
 		sent+=int(result.get("accepted",0))
-	var words:=("%s called up to fill the levy" % EraWords.grouped(sent)) if sent>0 else "No one could be called up"
+	var words:=("%s more keep watch to fill the levy" % EraWords.grouped(sent)) if sent>0 else "No one more could be set to keep watch"
 	if is_instance_valid(feedback):
 		feedback.text=words;feedback.show()
 		feedback.tooltip_text="They drill for a few days, then take the empty places." if sent>0 else refusal

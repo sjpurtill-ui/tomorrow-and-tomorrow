@@ -145,7 +145,8 @@ static func tell_started(stage_index:int,by:String)->Dictionary:
 	var parts:PackedStringArray=[]
 	for material:String in stage.materials:parts.append("%d %s" % [roundi(float(stage.materials[material])),_material(material)])
 	var daily:float=mc.settlement_defense_daily_work(stage_index)
-	var hands:=int(WorldSimulation.state.population_allocations.get("Defense",0))
+	# Those of the watch at home raise them, not its bands away.
+	var hands:=int(mc.watch_at_home())
 	var pace:=("%d on the watch raise them in %s." % [hands,preload("res://scripts/hud/production_plain.gd").duration_text(float(stage.work)/daily)]) if daily>0.0 else "Nobody keeps the watch yet, so no one works on them."
 	var who:String={"people":"The people judged the danger worth it.","ruler":"At your word.","court":"At your word in the court."}.get(by,"")
 	return chronicle.record({"key":"defense_start:%d:%d" % [stage_index,int(WorldSimulation.state.elapsed_days)],"title":"Work begins on the %s" % name,
@@ -187,7 +188,7 @@ static func reading(people_plan:Dictionary={})->Dictionary:
 	var snap:Dictionary=mc.settlement_defense_snapshot()
 	var stages:Array=mc.SETTLEMENT_DEFENSE_STAGES
 	var stage:=int(snap.stage)
-	var out:={"word":word(),"stage":stage,"short":String(snap.short),"workers":int(state.population_allocations.get("Defense",0)),
+	var out:={"word":word(),"stage":stage,"short":String(snap.short),"workers":int(_mc().watch_at_home()),
 		"now":{"defense_bonus":float(snap.defense_bonus),"lookout_km":float(snap.observation_radius_km),"stores_safe":float(snap.store_protection),"integrity":float(snap.integrity)},
 		"next":{},"building":{},"decision":{},"danger":{},"blockers":[],"incoming":{},"status":"calm","next_council":next_council(int(state.elapsed_days))}
 	if not bool(state.settlement_site_committed):
@@ -268,7 +269,7 @@ static func watch_fix(stage_index:int)->int:
 	var mc=_mc()
 	if stage_index<0 or stage_index>=mc.SETTLEMENT_DEFENSE_STAGES.size():return 0
 	var state=WorldSimulation.state
-	var now:=int(state.population_allocations.get("Defense",0))
+	var now:=int(mc.watch_at_home())
 	var full:int=mc.settlement_defense_full_pace_workers(stage_index)
 	var per_hand:float=mc.settlement_defense_daily_work(stage_index,1.0)
 	var work:=float(mc.SETTLEMENT_DEFENSE_STAGES[stage_index].work)

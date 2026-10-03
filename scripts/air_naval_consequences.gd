@@ -574,7 +574,9 @@ static func strike_town_guard(city_id:String,hits:int)->Dictionary:
 	var trained_killed:=roundi(float(trained_hit)*.35)
 	var militia_killed:=roundi(float(militia_hit)*.35)
 	if trained_hit>0:remove_home_troops(trained_hit,trained_killed)
-	if militia_killed>0:WorldSimulation.military._apply_town_watch_result(city_id,{},[{"defender_casualties":{"killed":militia_killed}}],"defender")
+	# The home guard among them is the watch at home (watch_military.gd): its
+	# share of the dead and the hurt comes off the watch.
+	if militia_hit>0:WorldSimulation.military._apply_town_watch_result(city_id,{},[{"defender_casualties":{"killed":militia_killed,"wounded":militia_hit-militia_killed}}],"defender",{"watch":int(guard.watch),"rise":int(guard.rise)})
 	return {"hit":trained_hit+militia_hit,"killed":trained_killed+militia_killed}
 
 static func _remove_field_army_troops(army:Dictionary,count:int,killed:int)->void:

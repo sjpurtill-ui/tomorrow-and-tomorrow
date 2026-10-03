@@ -41,9 +41,10 @@ const BINS:=[[1.29,5,4],[1.42,4,3],[1.75,3,2],[2.5,2,1],[4.0,3,1],[6.0,5,1]]
 ##  raw (ours over theirs), walls} or {} when there is nothing to weigh.
 ## A host met in the open (`open_field`) has no walls, and its readiness is
 ## what our scouts made of it (`their_ready`, when given). `untrained` is the
-## share of their men our scouts saw were no soldiers (a town's watch and
-## townsfolk who rise, civilization_combat.guard_ledger): they stand as the
-## battle stands them, one levy block with what comes to hand.
+## share of their men our scouts saw were no soldiers (a town's townsfolk who
+## rise, civilization_combat.guard_ledger; its home guard is the watch,
+## drilled and armed): they stand as the battle stands them, one levy block
+## with what comes to hand.
 static func of(force:Dictionary,formations:Array,going:int,their_men:float,fortification:float,their_arms:Array=[],civ_id:String="",open_field:bool=false,their_ready:float=-1.0,untrained:float=0.0)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	var n:=heads(formations)

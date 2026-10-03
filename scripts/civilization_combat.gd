@@ -1,9 +1,11 @@
 extends RefCounted
 ## Contact views resolve back to the actual owner. Both sides commit the same
 ## battle result through MilitaryCampaign, including injuries, gear and captives.
-## Every town has its guards: home its levy, its watch and its townsfolk, a
-## band its men, and any other town its own watch and townsfolk (town_watch),
-## whose losses are that town's own (guard_ledger).
+## Every town has its guards: the watch is the military (watch_military.gd);
+## its home guard is spread over home and the towns by their people, home
+## also keeps the offensive troops not out in a band, a band its men, and
+## every town its townsfolk who rise (town_watch); a town's losses are its
+## own and its guard's come off the watch (guard_ledger).
 static func owner(id:String)->String:return "player" if id=="human" else id
 ## The id of home's watch-and-townsfolk block when another people's battle
 ## musters it (force_for): far above any formation id a people allocates.
@@ -40,22 +42,31 @@ static func force_for(incident:Dictionary)->Dictionary:
 		return force
 	)
 
-## A town's own defenders when it is attacked: its share of the watch and
-## its townsfolk who rise (guard_ledger), with whatever comes to hand, as one
-## untrained block. {} when nobody would stand. Run in the town's owner's
-## scope.
+## A town's own defenders when it is attacked: its share of the home guard
+## (the watch posted there, drilled as the watch at home is and carrying its
+## share of the watch's arms: guard_kit) and its townsfolk who rise
+## (guard_ledger) with whatever comes to hand, two blocks side by side. {}
+## when nobody would stand. Run in the town's owner's scope.
 static func town_watch(city_id:String)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	var guard:Dictionary=guard_ledger(mc).get(city_id,{})
-	var count:=int(guard.get("watch",0))+int(guard.get("rise",0))
-	if count<=0: return {}
-	var formation:={"id":-1,"unit":"levy","weapon":"improvised","count":count,"authorized_count":count,"equipment":0,"equipment_required":count,"ammunition":0,"ammunition_required":0,
-		"training":militia_training(int(guard.get("watch",0)),int(guard.get("rise",0))),"experience":0.0,"personnel_condition":float(mc._trainee_condition()),"emergency_militia":true}
-	var force:Dictionary=mc.simulator.create_formation_force("%s watch" % String(city.get("name","the town")),[formation],float(mc._campaign_morale()),0.18)
+	var watch:=int(guard.get("watch",0));var rise:=int(guard.get("rise",0))
+	if watch+rise<=0: return {}
+	var formations:Array=[]
+	var condition:=float(mc._trainee_condition())
+	if watch>0:
+		var kit:=guard_kit(mc,watch)
+		formations.append({"id":-1,"unit":String(kit.unit),"weapon":String(kit.weapon),"count":watch,"authorized_count":watch,"equipment":int(kit.equipment),"equipment_required":int(kit.equipment_required),"ammunition":0,"ammunition_required":0,
+			"training":guard_drill(mc),"experience":0.0,"personnel_condition":condition,"emergency_militia":true})
+	if rise>0:
+		formations.append({"id":-2,"unit":"levy","weapon":"improvised","count":rise,"authorized_count":rise,"equipment":0,"equipment_required":rise,"ammunition":0,"ammunition_required":0,
+			"training":RISE_TRAINING,"experience":0.0,"personnel_condition":condition,"emergency_militia":true})
+	var force:Dictionary=mc.simulator.create_formation_force("%s watch" % String(city.get("name","the town")),formations,float(mc._campaign_morale()),0.18)
 	force["commander"]=mc.simulator.create_commander("TOWN WATCH",0.35,0.35,0.35,0.45)
 	force["supply_level"]=1.0
 	force["town_watch"]=city_id
+	force["guard_part"]=watch
 	return force
 
 ## THE TOWNSFOLK RISE. When raiders come, a town's able grown people take up
@@ -66,26 +77,26 @@ static func town_watch(city_id:String)->Dictionary:
 ## town of hundreds unopposed without making every farmer a soldier.
 const RISE_SHARE:=0.10
 ## How well each kind of defender is drilled (combat_simulator training):
-## the watch rotates through basic drill; the townsfolk have none. The
-## simulator holds every block at 0.25 drill at the least, so today both
-## fight at that floor; they differ in battle only if the floor moves.
+## the home guard posted in a town is drilled as the watch at home is
+## (guard_drill), this when nobody is at home to tell; the townsfolk have
+## none. The simulator holds every block at 0.25 drill at the least.
 const WATCH_TRAINING:=0.20
 const RISE_TRAINING:=0.10
 
 ## THE GUARD LEDGER, one for every people: who would defend each of its
 ## towns if it were attacked now. {city_id: {watch, rise}} for every town of
-## the owner (0 where none); home also stands with its trained levy
-## (home_defenders). One pass over the towns; run in the owner's scope,
-## outside any one town's. `mc` is the owner's MilitaryCampaign.
-##  - The watch. Those set to Defense work (D, _home_garrison_target) who are
-##    not already the trained levy at home (T, home_army.troops, as
-##    _home_defense_force has always netted them) keep the watch,
-##    W = max(0, D - T), each in the town they live in.
-##  - The rise. Of the grown people (working age) not already on defence
-##    work or under arms (everyone mobilized counts against the Defense share
-##    first, then against other work: personnel_ledger), RISE_SHARE take up
-##    arms, each in the town they live in. No one rises twice, and no one
-##    both rises and keeps the watch.
+## the owner (0 where none). One pass over the towns; run in the owner's
+## scope, outside any one town's. `mc` is the owner's MilitaryCampaign.
+## KEEPING WATCH IS THE MILITARY (watch_military.gd):
+##  - The watch here is the HOME GUARD: the share of the watch the ruler
+##    keeps at home (home_share), as many as stand at home today, spread
+##    over home and the towns by their people, each in the town they live
+##    in. They are the watch at home (home_army), counted once: those posted
+##    in the other towns stand there, not in home's battle (posted_away).
+##    Offensive troops at home stand at home; bands away defend nothing.
+##  - The rise. Of the grown people (working age) not keeping watch or under
+##    arms (personnel_ledger), RISE_SHARE take up arms, each in the town they
+##    live in. No one rises twice, and no one both rises and keeps watch.
 ## Each is shared out by people among the towns that keep a guard (lived
 ## in, and not held by another people), home included, in whole people that
 ## add up exactly (largest remainder). Before any town is founded all of
@@ -114,27 +125,21 @@ static func guard_ledger(mc:Variant=null)->Dictionary:
 	for id:String in people:out[id]={"watch":int(watches.get(id,0)),"rise":int(rises.get(id,0))}
 	return out
 
-## The people's whole watch W and its townsfolk who would rise (unrounded),
-## before they are shared out among the towns.
+## The people's whole home guard (standing at home today) and its
+## townsfolk who would rise (unrounded), before they are shared out among
+## the towns.
 static func _whole_people(mc:Variant)->Dictionary:
 	var state=WorldSimulation.state
+	var Watch:=preload("res://scripts/watch_military.gd")
 	# Grown people away from home (caravans, convoys, scouts, envoys, scholars
 	# abroad) cannot rise, as they cannot enlist (recruitment_capacity). Read
 	# first: reading them settles the people's counts, as enlisting does.
 	var away:=_away(state)
-	var defense:=maxi(0,int(mc._home_garrison_target()))
-	# Everyone under arms anywhere (_mobilized_count): the levy at home and
-	# its hurt, scattered and taken, recruits and those in drill, bands in the
-	# field, garrisons in taken towns, crews. A band marching out is still
-	# under arms: it is never counted again as the watch. Only the watch's
-	# own basic drill, at home, stays the watch (settlement_defense_snapshot:
-	# Defense labour serves in the watch while its drill rotates).
-	var mobilized:=maxi(0,int(mc._mobilized_count()))
-	var arms:=maxi(0,mobilized-maxi(0,int(mc._automatic_basic_trainees())))
-	var watch:=maxi(0,defense-arms)
-	var serving:=maxi(defense,mobilized)
+	# Everyone keeping watch or under arms anywhere: the watch share, or more
+	# while bands away stand above it. None of them rises.
+	var serving:=maxi(Watch.manpower(mc),maxi(0,int(mc._mobilized_count())))
 	var adults:=maxf(0.0,float(state.population_cohorts.get("working_age",float(state.population_exact)*0.60))-float(away)-float(serving))
-	return {"watch":watch,"rise_exact":RISE_SHARE*adults}
+	return {"watch":Watch.home_guard(mc),"rise_exact":RISE_SHARE*adults}
 
 ## Grown people of the people in scope who are away from their towns.
 static func _away(state:Variant)->int:
@@ -171,30 +176,54 @@ static func _apportion(amount:int,people:Dictionary,total:float,taken:Dictionary
 		out[id]=int(out[id])+1;left-=1
 	return out
 
-## {city_id: watch}: each town's share of the watch alone (guard_ledger).
+## {city_id: watch}: each town's share of the home guard alone (guard_ledger).
 static func watch_ledger(mc:Variant=null)->Dictionary:
 	var out:={}
 	var ledger:=guard_ledger(mc)
 	for id in ledger:out[id]=int((ledger[id] as Dictionary).get("watch",0))
 	return out
 
-## The training of a block of `watch` watchmen and `rise` townsfolk who
-## stand together.
-static func militia_training(watch:int,rise:int)->float:
-	if watch+rise<=0:return WATCH_TRAINING
-	return (WATCH_TRAINING*float(watch)+RISE_TRAINING*float(rise))/float(watch+rise)
+## The drill of the home guard: the watch at home's, by its men
+## (watch_military.gd drill_of); WATCH_TRAINING when nobody is at home.
+static func guard_drill(mc:Variant=null)->float:
+	if mc==null:mc=WorldSimulation.military
+	if mc==null:return WATCH_TRAINING
+	var formations:Array=mc.home_army.get("formations",[])
+	if formations.is_empty():return WATCH_TRAINING
+	return preload("res://scripts/watch_military.gd").drill_of(formations)
+
+## What `men` of the home guard posted in a town carry: the kit most of the
+## watch at home carries, and its share of the sets in hand there (the same
+## share the fight at home leaves behind for them: MilitaryCampaign
+## _take_posted_guard). {unit, weapon, equipment, equipment_required}.
+static func guard_kit(mc:Variant,men:int)->Dictionary:
+	var unit:="levy";var weapon:="improvised";var most:=-1
+	for f in mc.home_army.get("formations",[]):
+		if not f is Dictionary:continue
+		var formation:Dictionary=f
+		if int(formation.get("count",0))>most:most=int(formation.get("count",0));unit=String(formation.get("unit","levy"));weapon=String(formation.get("weapon","improvised"))
+	var required:=int(mc._equipment_required_for(unit,men))
+	var armed:=preload("res://scripts/watch_military.gd").armed_of(mc.home_army.get("formations",[]))
+	return {"unit":unit,"weapon":weapon,"equipment":roundi(float(required)*armed),"equipment_required":required}
+
+## The training of a block of `watch` of the home guard and `rise`
+## townsfolk who stand together (`drill`: the guard's own).
+static func militia_training(watch:int,rise:int,drill:float=WATCH_TRAINING)->float:
+	if watch+rise<=0:return drill
+	return (drill*float(watch)+RISE_TRAINING*float(rise))/float(watch+rise)
 
 ## Whether a town keeps a guard of ours: lived in (dry_towns.gd) and not held
 ## by another people (siege_recovery capture, a town taken).
 static func keeps_watch(city:Dictionary)->bool:
 	return not city.is_empty() and String(city.get("occupied_by","")).is_empty() and not WorldSimulation.settlements.abandoned(city)
 
-## Home's untrained defenders, who stand with its levy when it is attacked
-## (_home_defense_force): its share of the watch and its townsfolk who rise,
-## as one block. {watch, rise, count, training}.
+## Home's own defenders beside its host: {watch (home's own share of the
+## home guard; it stands in the host's formations), rise (its townsfolk who
+## rise), count (the untrained block that stands with the host: the rise),
+## training (the rise's)}.
 static func home_militia(mc:Variant=null)->Dictionary:
 	if mc==null:mc=WorldSimulation.military
-	if mc==null:return {"watch":0,"rise":0,"count":0,"training":WATCH_TRAINING}
+	if mc==null:return {"watch":0,"rise":0,"count":0,"training":RISE_TRAINING}
 	var home:=_home_record()
 	var watch:=0;var rise:=0
 	if home.is_empty():
@@ -204,19 +233,32 @@ static func home_militia(mc:Variant=null)->Dictionary:
 	else:
 		var guard:Dictionary=guard_ledger(mc).get(String(home.get("id","")),{})
 		watch=int(guard.get("watch",0));rise=int(guard.get("rise",0))
-	return {"watch":watch,"rise":rise,"count":watch+rise,"training":militia_training(watch,rise)}
+	return {"watch":watch,"rise":rise,"count":rise,"training":RISE_TRAINING}
 
-## Home's own share of the watch alone.
+## Home's own share of the home guard alone.
 static func home_watch(mc:Variant=null)->int:
 	return int(home_militia(mc).watch)
+
+## The home guard posted in our towns other than home: they stand there,
+## not in home's battle (MilitaryCampaign._home_defense_force).
+static func posted_away(mc:Variant=null)->int:
+	if mc==null:mc=WorldSimulation.military
+	if mc==null:return 0
+	var home:=_home_record()
+	var out:=0
+	var ledger:=guard_ledger(mc)
+	for id in ledger:
+		if not home.is_empty() and String(id)==String(home.get("id","")):continue
+		out+=int((ledger[id] as Dictionary).get("watch",0))
+	return out
 
 static func _home_record()->Dictionary:
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)):return city
 	return {}
 
-## A town's share of the watch alone (guard_ledger). 0 for no town. Run in
-## the town's owner's scope, outside any one town's.
+## A town's share of the home guard alone (guard_ledger). 0 for no town.
+## Run in the town's owner's scope, outside any one town's.
 static func watch_count(city_id:String)->int:
 	return int((guard_ledger().get(city_id,{}) as Dictionary).get("watch",0))
 
@@ -225,17 +267,23 @@ static func watch_of(city:Dictionary)->int:
 	return 0 if city.is_empty() else watch_count(String(city.get("id","")))
 
 ## Who stands at home when it is attacked, as _home_defense_force musters
-## them: the trained levy, home's share of the watch and its townsfolk who
-## rise. {trained, watch, rise}. Run in the owner's scope.
+## them: the offensive troops at home not in a band (trained), home's own
+## share of the home guard (watch) and its townsfolk who rise. {trained,
+## watch, rise}. Run in the owner's scope.
 static func home_defenders()->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	if mc==null:return {"trained":0,"watch":0,"rise":0}
 	var militia:=home_militia(mc)
-	return {"trained":maxi(0,int(mc.home_army.get("troops",0))),"watch":int(militia.watch),"rise":int(militia.rise)}
+	return {"trained":_beyond_guard(mc),"watch":int(militia.watch),"rise":int(militia.rise)}
+
+## Those at home beyond the home guard: the offensive troops at home.
+static func _beyond_guard(mc:Variant)->int:
+	return 0 if mc==null else int(preload("res://scripts/watch_military.gd").offensive_at_home(mc))
 
 ## Who would defend one of the owner's towns if it were attacked now, part
-## by part: {trained, watch, rise} (trained only at home). A town another
-## people holds has none; a home left empty keeps only its levy.
+## by part: {trained, watch, rise} (trained, the offensive troops at home,
+## only at home). A town another people holds has none; a home left empty
+## keeps only those at home.
 static func guard_of(city:Dictionary)->Dictionary:
 	var out:={"trained":0,"watch":0,"rise":0}
 	if city.is_empty() or not String(city.get("occupied_by","")).is_empty():return out
@@ -246,15 +294,15 @@ static func guard_of(city:Dictionary)->Dictionary:
 	return out
 
 static func _trained()->int:
-	var mc:Variant=WorldSimulation.military
-	return 0 if mc==null else maxi(0,int(mc.home_army.get("troops",0)))
+	return _beyond_guard(WorldSimulation.military)
 
 ## How many of the owner's people defend one of its towns if it is attacked
-## now, as force_for musters them: at home the levy, its share of the watch
-## and its townsfolk who rise; anywhere else the town's share of the watch
-## and its townsfolk. 0 for a town another people holds (home included:
-## siege_recovery capture) and for a place that is not the owner's. The
-## count a town's page, badge and drawing show, and a scout's.
+## now, as force_for musters them: at home the offensive troops at home, its
+## share of the home guard and its townsfolk who rise; anywhere else the
+## town's share of the home guard and its townsfolk. 0 for a town another
+## people holds (home included: siege_recovery capture) and for a place that
+## is not the owner's. The count a town's page, badge and drawing show, and
+## a scout's.
 static func defenders(city_id:String)->int:
 	return defenders_of(WorldSimulation.settlements.settlement_record(city_id))
 
@@ -273,7 +321,7 @@ static func guards_by_town()->Dictionary:
 		var id:=String(city.get("id",""))
 		var guard:Dictionary=ledger.get(id,{})
 		var trained:=0
-		if bool(city.get("primary",false)) and String(city.get("occupied_by","")).is_empty() and mc!=null:trained=maxi(0,int(mc.home_army.get("troops",0)))
+		if bool(city.get("primary",false)) and String(city.get("occupied_by","")).is_empty() and mc!=null:trained=_beyond_guard(mc)
 		out[id]={"trained":trained,"watch":int(guard.get("watch",0)),"rise":int(guard.get("rise",0))}
 	return out
 
@@ -300,6 +348,10 @@ static func commit_enemy(result:Dictionary)->void:
 	# Home's watch and townsfolk who stood with its levy go back to their
 	# work after (MilitaryCampaign._dismiss_watch_militia).
 	if String(mirrored.home_force_kind)=="field":mirrored["militia_id"]=MILITIA_ID
+	# The home guard posted in its other towns stood there, not at home
+	# (MilitaryCampaign._home_defense_force): back in its formations after.
+	var mustered:Variant=(result.get("threat",{}) as Dictionary).get("enemy_force",{})
+	if String(mirrored.home_force_kind)=="field" and mustered is Dictionary:mirrored["posted_guard"]=((mustered as Dictionary).get("posted_guard",{}) as Dictionary).duplicate(true)
 	mirrored.command_participants=[]
 	mirrored.commander_managed=id!="player"
 	WorldSimulation.scoped(id,func()->void:WorldSimulation.military._commit_campaign_battle(mirrored))

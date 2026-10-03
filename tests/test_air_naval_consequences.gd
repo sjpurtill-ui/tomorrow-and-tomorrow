@@ -460,8 +460,14 @@ func test_an_opposed_landing_costs_both_sides_and_a_strong_beach_throws_it_back(
 	assert_int(lost).is_between(20,350)
 	assert_int(int(weak.troops)).is_equal(1000-lost)
 	assert_int(int(outcome.defender_hit)).is_greater(0)
-	var trained_hit:=roundi(float(outcome.defender_hit)*400.0/float(everyone))
-	assert_int(int(WorldSimulation.actors.beta.systems.MilitaryCampaign.home_army.troops)).is_equal(400-trained_hit)
+	# Those free for the bands are hit by their share; the home guard among
+	# the watch and townsfolk by its share of theirs (watch_military.gd).
+	var hit:=int(outcome.defender_hit)
+	var trained_hit:=mini(int(stood.trained),roundi(float(hit)*float(int(stood.trained))/float(everyone)))
+	var militia_hit:=hit-trained_hit
+	var militia_killed:=roundi(float(militia_hit)*.35)
+	var guard_share:=float(int(stood.watch))/float(maxi(1,int(stood.watch)+int(stood.rise)))
+	assert_int(int(WorldSimulation.actors.beta.systems.MilitaryCampaign.home_army.troops)).is_equal(400-trained_hit-roundi(float(militia_killed)*guard_share)-roundi(float(militia_hit-militia_killed)*guard_share))
 	var small:={"army_id":2,"name":"Raid","troops":30,"formations":[{"count":30}]}
 	var thrown:Dictionary=WorldSimulation.scoped("alpha",func()->Dictionary:return AN.opposed_landing(small,convoy,0.0))
 	assert_bool(bool(thrown.repulsed)).is_true()

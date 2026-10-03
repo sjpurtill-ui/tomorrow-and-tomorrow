@@ -693,7 +693,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var carriers := float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var observers := float(WorldSimulation.state.effective_workers("Knowledge"))
 	var stewards := float(WorldSimulation.state.effective_workers("Administration"))
-	var guards := float(WorldSimulation.state.population_allocations.get("Defense",0))
+	# Keeping order at home: the watch at home, not its bands away
+	# (watch_military.gd: the watch is the army).
+	var guards := float(WorldSimulation.military.watch_at_home()) if WorldSimulation.military!=null else float(WorldSimulation.state.population_allocations.get("Defense",0))
 	var dynamics:=WorldSimulation.state.society_capacities
 	var governance:=governance_metrics()
 	var administrative_load:=float(governance.administrative_load)

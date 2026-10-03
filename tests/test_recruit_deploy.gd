@@ -11,16 +11,20 @@ func before_test()->void:
 	FoodSystem.reset_for_new_world();FoodSystem.receive_external_food(100000)
 func test_draft_has_no_discovery_percentage_cap_and_displaces_labor()->void:
 	var adults:=roundi(float(GameState.population_cohorts.working_age))
-	var food_workers:=GameState.effective_workers("Food")
 	var raised:=MilitaryCampaign.raise_recruits(adults)
 	assert_int(int(raised.raised)).is_equal(adults)
 	assert_int(int(MilitaryCampaign.raise_recruits(100).raised)).is_equal(0)
-	assert_int(int(MilitaryCampaign.population_commitment_snapshot().excess_beyond_defense)).is_greater(0)
+	# Every adult keeps watch (watch_military.gd): the watch share holds them
+	# all, one ledger, and nobody is left at other work.
+	assert_int(MilitaryCampaign.watch_manpower()).is_equal(adults)
+	assert_int(int(MilitaryCampaign.population_commitment_snapshot().excess_beyond_defense)).is_equal(0)
 	assert_int(GameState.population_total).is_equal(1000)
 	assert_float(GameState.effective_workers("Food")).is_equal(0.0)
 	assert_float(GameState.effective_workers("Crafting")).is_equal(0.0)
 	MilitaryCampaign.demobilize(adults)
-	assert_float(GameState.effective_workers("Food")).is_equal(food_workers)
+	# Stood down, they are back at their work and nobody keeps watch.
+	assert_float(GameState.effective_workers("Food")).is_greater(0.0)
+	assert_int(MilitaryCampaign.watch_manpower()).is_equal(0)
 	assert_int(MilitaryCampaign._mobilized_count()).is_equal(0)
 func test_away_scouts_cannot_be_drafted_twice()->void:
 	var baseline:=MilitaryCampaign.recruitment_capacity()
