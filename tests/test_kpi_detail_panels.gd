@@ -172,27 +172,45 @@ func test_header_refreshes_without_legacy_interface_or_navigation()->void:
 
 
 
-## The People tile says births against burials a year, the engine's own count
-## (GameState.rolling_vital_balance), and the card says why when more are
-## buried than born, by the winter tally's rule (dwindling_cause.gd).
+## The People tile says births against burials over the last whole year, the
+## engine's own count (GameState.rolling_vital_balance), and the card says why
+## when more are buried than born: a misfortune that covers the shortfall by
+## name (the people's deaths by cause), else the ordinary toll by the winter
+## tally's rule (dwindling_cause.gd). The first year is "so far", never amber.
 func test_people_tile_says_born_and_buried_and_why_it_shrinks()->void:
 	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0,"food_eaten":10.0}
-	GameState.elapsed_days=400.0
-	GameState.vital_statistics_history=[{"day":300,"births":4,"deaths":5}]
-	GameState.vital_statistics_tracking_start_day=0
 	var header=auto_free(LiveHeader.new())
 	header.terrain=auto_free(HeaderTerrain.new())
 	add_child(header)
 	header.set_process(false)
+	# The first year: the old note, no amber, counts "so far".
+	GameState.elapsed_days=100.0
+	GameState.vital_statistics_history=[{"day":60,"births":1,"deaths":2}]
+	GameState.vital_statistics_tracking_start_day=0
 	header._refresh_kpis()
-	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("born 4 · buried 5 a year")
+	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("all fed")
+	var early:=Data.card("population")
+	assert_str(String(early.tone)).is_not_equal("warning")
+	assert_str(JSON.stringify(early.facts)).contains("so far")
+	# A whole year of the ordinary toll: the count, amber, and its reason.
+	GameState.elapsed_days=400.0
+	GameState.vital_statistics_history=[{"day":300,"births":4,"deaths":5}]
+	GameState.death_cause_days=[{"day":300,"cause":"Natural causes","count":5}]
+	header._refresh_kpis()
+	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("born 4 · buried 5")
 	var card:=Data.card("population")
 	assert_str(String(card.tone)).is_equal("warning")
-	print("People card: "+String(card.headline))
 	assert_str(String(card.headline)).starts_with("More are buried than born: ")
-	assert_str(String(card.headline)).not_contains("%")
+	assert_str(String(card.headline)).not_contains("lost to").not_contains("%").not_contains(": too few are born:")
+	# A fire took eight: the card names the fire, not cuts and fevers.
+	GameState.vital_statistics_history=[{"day":300,"births":5,"deaths":12}]
+	GameState.death_cause_days=[{"day":300,"cause":"Natural causes","count":4},{"day":310,"cause":"Fire","count":8}]
+	header._refresh_kpis()
+	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("born 5 · buried 12")
+	assert_str(String(Data.card("population").headline)).is_equal("More are buried than born: 8 lost to fire.")
 	# Growing: the plain count, no warning.
 	GameState.vital_statistics_history=[{"day":300,"births":6,"deaths":4}]
+	GameState.death_cause_days=[{"day":300,"cause":"Natural causes","count":4}]
 	header._refresh_kpis()
-	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("born 6 · buried 4 a year")
+	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("born 6 · buried 4")
 	assert_str(String(Data.card("population").headline)).contains("more are born than buried")

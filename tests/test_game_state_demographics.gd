@@ -339,3 +339,20 @@ class _PlainDiscovery extends Node:
 	func adoption(_id: String) -> float: return 1.0
 	func effect(_id: String) -> float: return 0.0
 	func discovery_definition(id: String) -> Dictionary: return {"id": id, "name": id.capitalize()}
+
+
+## Every death the people registers is kept by cause for a year, whatever took
+## it (the People card reads it), and the record stays small.
+func test_deaths_are_kept_by_cause_for_a_year() -> void:
+	state.elapsed_days = 50.0
+	state.register_population_deaths(2, "Fire")
+	state.register_population_deaths(1, "Natural causes")
+	state.register_population_deaths(1, "Fire")
+	var causes: Dictionary = state.rolling_death_causes(365)
+	assert_int(int(causes.get("Fire", 0))).is_equal(3)
+	assert_int(int(causes.get("Natural causes", 0))).is_equal(1)
+	state.elapsed_days = 50.0 + 500.0
+	state.register_population_deaths(1, "Natural causes")
+	causes = state.rolling_death_causes(365)
+	assert_bool(causes.has("Fire")).is_false()
+	assert_int(state.death_cause_days.size()).is_less_equal(2)

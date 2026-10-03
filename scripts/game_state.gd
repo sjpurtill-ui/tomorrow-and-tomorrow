@@ -437,6 +437,12 @@ var lifetime_deaths := 0
 ## saves fall back to their demographic ledger until new tracking begins.
 var vital_statistics_history: Array[Dictionary] = []
 var vital_statistics_tracking_start_day := -1
+## Deaths by cause, the whole people's, a row a day and cause ({day, cause,
+## count}) for the last DEATH_CAUSE_DAYS (rolling_death_causes): every death
+## the people registers, ordinary or not (fires, war, executions, the road),
+## so the People card names what really took them. Not swapped into a town's
+## scope: a town's deaths are the people's.
+var death_cause_days: Array[Dictionary] = []
 ## Monthly life-expectancy observations. Meaningful changes carry either the
 ## health discovery that occurred in the interval or an explicit conditions
 ## marker, so the chart never implies that every change came from research.
@@ -654,6 +660,7 @@ func reset_for_new_world(new_seed:int)->void:
 	lifetime_deaths=0
 	vital_statistics_history=[]
 	vital_statistics_tracking_start_day=-1
+	death_cause_days=[]
 	health_history=[]
 	capacity_history={}
 	lifetime_departures=0
@@ -762,7 +769,7 @@ func initialize_population_model() -> void:
 		return
 	var total:=maxf(1.0,population_exact)
 	population_cohorts={}
-	for key in POPULATION_AGE_COHORTS:population_cohorts[key]=total*float(FOUNDING_AGE_MIX[key])
+	for key in POPULATION_AGE_COHORTS:population_cohorts[key]=total*float(FOUNDING_AGE_MIX.get(key,0.0))
 	var reproductive_population:=_reproductive_age_population()
 	# fun-pop: the founders arrive already carrying the pregnancies of their
 	# usual conception rate, about FOUNDING_PREGNANCY_SHARE of the baseline
@@ -1082,6 +1089,7 @@ func register_population_deaths(count:int,cause:String) -> Dictionary:
 	var affected_cohorts:=last_population_removal_by_cohort.duplicate(true)
 	lifetime_deaths+=emitted
 	_record_vital_statistics(0,emitted)
+	record_death_cause(cause,emitted)
 	synchronize_population_allocations()
 	return {"count":emitted,"cause":cause,"affected_cohorts":affected_cohorts,"population_after":population_total}
 
@@ -1101,6 +1109,31 @@ func _record_vital_statistics(births:int,deaths:int)->void:
 	var retention_cutoff:=day-730
 	while not vital_statistics_history.is_empty() and int(vital_statistics_history[0].get("day",day))<retention_cutoff:
 		vital_statistics_history.pop_front()
+
+## Days of deaths by cause kept (death_cause_days).
+const DEATH_CAUSE_DAYS:=400
+
+## Counts `count` deaths of `cause` today (death_cause_days).
+func record_death_cause(cause:String,count:int)->void:
+	if count<=0:return
+	var day:=floori(elapsed_days)
+	var name:=cause if cause!="" else "Hardship"
+	if not death_cause_days.is_empty():
+		var last:Dictionary=death_cause_days[-1]
+		if int(last.get("day",-1))==day and String(last.get("cause",""))==name:
+			last["count"]=int(last.get("count",0))+count
+			return
+	death_cause_days.append({"day":day,"cause":name,"count":count})
+	while not death_cause_days.is_empty() and int(death_cause_days[0].get("day",day))<day-DEATH_CAUSE_DAYS:death_cause_days.pop_front()
+
+## Deaths by cause in the trailing `days` ({cause: count}).
+func rolling_death_causes(days:int=365)->Dictionary:
+	var cutoff:=floori(elapsed_days)-maxi(1,days)+1
+	var out:={}
+	for row:Dictionary in death_cause_days:
+		if int(row.get("day",-1))<cutoff:continue
+		out[String(row.cause)]=int(out.get(String(row.cause),0))+int(row.get("count",0))
+	return out
 
 func rolling_vital_balance(days:int=365)->Dictionary:
 	## Actual births and deaths during the trailing window. For an older save,
@@ -1218,6 +1251,7 @@ func register_directive_population_deaths(count:int,directive_id:String,descript
 	_refresh_population_summary()
 	lifetime_deaths+=emitted
 	_record_vital_statistics(0,emitted)
+	record_death_cause(cause,emitted)
 	synchronize_population_allocations()
 	var result:Dictionary={"count":emitted,"cause":cause,"affected_cohorts":last_population_removal_by_cohort.duplicate(true),"population_after":population_total}
 	var actual:=int(result.get("count",0))
@@ -1265,6 +1299,7 @@ func register_population_deaths_by_cell(cells:Array,directive_id:String,descript
 	_refresh_population_summary()
 	lifetime_deaths+=total
 	_record_vital_statistics(0,total)
+	record_death_cause(cause,total)
 	synchronize_population_allocations()
 	var result:={"count":total,"cells":done,"cause":cause,"population_after":population_total}
 	if total<=0: return result
@@ -1396,6 +1431,8 @@ func process_reproduction_day(context:Dictionary) -> Dictionary:
 	lifetime_neonatal_deaths+=neonatal_count
 	lifetime_deaths+=maternal_count+neonatal_count
 	_record_vital_statistics(births_count,maternal_count+neonatal_count)
+	record_death_cause("Complications of childbirth",maternal_count)
+	record_death_cause("Neonatal complications",neonatal_count)
 	synchronize_population_allocations()
 	return {
 		"births_count":births_count,

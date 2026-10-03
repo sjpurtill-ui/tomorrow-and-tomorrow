@@ -166,42 +166,47 @@ What the sims show:
 1. **The founders were old.** A quarter of them were past 45 (18% aged 45–60, 8% older), so the first decades' deaths were mostly founders growing old.
    - Founders are now young families (`game_state.gd FOUNDING_AGE_MIX`: children 36%, 14–25 21%, 25–35 17%, 35–45 12%, 45–60 10%, older 4%). That is close to the mix a growing pre-modern people settles into.
    - Older saves keep their people as they are.
-2. **Open land did nothing for births.** Now, while the whole people works less than `FRONTIER_ONSET` (0.6, where crowding begins) of its carrying capacity, couples set up house younger. Conception rises by up to `FRONTIER_CONCEPTION` (0.30), tapering to none as the land fills (`early_life_conditions.gd frontier_of`).
-   - A new band of 120 on its first land gets +10%.
-   - A people of two towns that works a tenth of its land gets +24%.
-   - This is the historical frontier effect (Shennan 2018, the LBK front), judged against the whole people's land like crowding.
+2. **Open land did nothing for births.** Now, while the whole people is under `FRONTIER_ONSET` (0.6, where crowding begins) of what one home land carries, couples set up house younger. Conception rises by up to `FRONTIER_CONCEPTION` (0.30), tapering to none as the land fills (`early_life_conditions.gd frontier_of`, `home_capacity`).
+   - A new band of 120 gets +10%.
+   - A people of 107 in its eighth year gets about +15%.
+   - The frontier reads the home land alone, never the town count. Founding towns widens the land a people can fill (`carrying_capacity`), never the births of those already there; one people of 150 in one town or in three is equally near its frontier.
 
 Birth-spacing customs were checked and are not the cause. They add a little maternal and newborn safety and take nothing from births.
 
 Random afflictions (crisis outbreaks, hunger seasons, fires, drowning) are untouched. They are the setbacks against this growth.
 
-**On screen.** The People tile reads "born 4 · buried 5 a year" (the last year, the engine's own count), amber when more are buried than born. Its card then says why, by the winter tally's rule (`dwindling_cause.gd short_reason`), for example "More are buried than born: fevers among the old."
+**On screen.** Once a whole year has been counted, the People tile reads "born 4 · buried 5" (the last year, the engine's own count), amber when more are buried than born. In the first year it keeps its old note, and its card says "so far".
 
-**Engine, headless, seed 74119, leaders' split** (`tools/sim/demography_probe.tscn`):
+When the people shrank, the card says what took them:
+- If deaths outside the ordinary toll cover the shortfall, it names the largest by cause (`GameState.rolling_death_causes`), for example "More are buried than born: 8 lost to fire."
+- Otherwise it explains the ordinary toll by the winter tally's rule (`dwindling_cause.gd short_reason`), for example "fevers among the old".
 
-| | Main | This branch |
+The note has room for about 19 letters (every top-strip value must fit at 1280 wide), so where the people live and whether all are fed are on the card's first lines; a hungry day still takes the note.
+
+**Engine, headless, one town for these 12 years** (`tools/sim/demography_probe.tscn`):
+
+| Seed 74119, leaders' split | Main | This branch |
 |---|---|---|
 | People at year 12 | 97 | 113 |
 | Born / died over 12 years | 49 / 71 | 64 / 71 |
 | Natural deaths | 56 | 53 |
-| Misfortune deaths (unattended hunger, illness and the like) | 12 | 13 |
+| Misfortune deaths | 12 | 13 |
 
 - **Seed 5150:** 108 at year 12 (63 born, 75 died, 18 of them by misfortune).
-- **Computer ruler, seed 74119** (run with frontier strength 0.25): 99.6 → 115.3.
 - **Without misfortune** a founding band now grows about 0.4% a year in its first decade.
 
-**Fast sim, 2 seeds, 600 years.** Main → this branch:
+**Fast sim, 2 seeds, 600 years.** People at years 10 / 100 / 300 / 600, main → this branch:
 
-| | Year 10 | Year 30 | Year 100 | Year 300 | Year 600 |
-|---|---|---|---|---|---|
-| balanced scenario | 107 → 123 | 109 → 143 | 205 → 338 | 1,107 → 1,108 | 3,726 → 3,726 |
-| growth path (cautious-caring temper) | 110 → 127 | — | 238 → 506 | 3,059 → 6,271 | 30,481 → 30,495 |
-| balanced temper | 107 → 123 | — | 162 → 366 | 1,347 → 5,501 | 27,982 → 28,369 |
+| | Main | This branch |
+|---|---|---|
+| balanced scenario | 107 / 205 / 1,107 / 3,726 | 123 / 338 / 1,108 / 3,726 |
+| balanced temper (founds towns) | 107 / 162 / 1,347 / 27,982 | 123 / 289 / 2,658 / 28,408 |
+| growth path (cautious-caring temper) | 110 / 238 / 3,059 / 30,481 | 127 / 390 / 4,914 / 30,493 |
+| learning path (open-scholarly temper) | 105 / 176 / 978 / 19,409 | 121 / 289 / 1,688 / 26,972 |
 
-- **Balanced scenario growth** (% a year, 0–10 / 0–30 / 30–100): −1.15 / −0.33 / +0.91 → +0.23 / +0.57 / +1.23. Births and deaths per 1,000 at year 5: 39/50 → 47/44.
-- **Long run:** where crowding binds, the long run is unchanged (year 300 and 600 for the scenarios, year 600 for the paths), inside the benchmarks.
-- **Growth path:** it gets a little extra: 0.54% a year in its first decade and 1.69% over years 30–100.
-
+- **Balanced scenario growth** (% a year, 0–10 / 0–30 / 30–100): −1.15 / −0.33 / +0.91 → +0.23 / +0.57 / +1.23.
+- **Growth path** at year 300 has 1.85 times the balanced people's number. It stays under the best historical figure for a founders' society (6,000).
+- **Year 600** is unchanged: crowding sets the long run.
 
 ### C. Searching the land (owner: `resource_system.gd` survey/deposit/extraction yield, survey scripts)
 - **Searched land.** Each people (each town in its own scope) keeps `survey_cover` (0..1).

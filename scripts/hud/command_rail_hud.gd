@@ -1443,11 +1443,15 @@ func _refresh_kpis()->void:
 	var hungry:=population-fed if fed>=0 else 0
 	var place_note:=EraWords.places(t.cities.size()) if modern or t.cities.size()>1 else ""
 	var people_note:=EraWords.went_without(hungry,"hungry") if hungry>0 else ((place_note+" · " if place_note!="" else "")+"all fed" if fed>=0 else place_note)
-	# Births against burials in the last year, the people's own count; amber
-	# when more are buried than born (the card says why).
+	# Births against burials over the last whole year, the people's own count,
+	# amber when more are buried than born (the card says why). The note has
+	# room for about 19 letters (test_era_words: every value fits at 1280), so
+	# where they live and that all are fed go on the card's first lines; a
+	# hungry day still takes the note. In the first year: the old note.
 	var born:=int(t.get("born",0));var buried:=int(t.get("buried",0))
-	if hungry<=0 and born+buried>0:people_note="born %d · buried %d a year" % [born,buried]
-	_update_kpi("population",EraWords.people(population) if not modern else EraWords.grouped(population),people_note,Tokens.RED if hungry>0 else (Tokens.AMBER if buried>born else Tokens.MUTED),"")
+	var counted:=hungry<=0 and bool(t.get("full_year",false)) and born+buried>0
+	if counted:people_note="born %d · buried %d" % [born,buried]
+	_update_kpi("population",EraWords.people(population) if not modern else EraWords.grouped(population),people_note,Tokens.RED if hungry>0 else (Tokens.AMBER if counted and buried>born else Tokens.MUTED),"")
 	for id:String in ["food","water"]:
 		var shortage:=int(t[id+"_shortages"])
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()

@@ -76,6 +76,7 @@ SPARE_LAND_HEALTH = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAN
 # The frontier (EarlyLifeConditions.frontier_of) and the young founders (GameState.FOUNDING_AGE_MIX).
 FRONTIER_ONSET = float(g.const("scripts/early_life_conditions.gd", "FRONTIER_ONSET", default=0.5, optional=True))
 FRONTIER_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "FRONTIER_CONCEPTION", default=0.0, optional=True))
+FRONTIER_HOME = "static func home_capacity(" in g.source("scripts/early_life_conditions.gd")
 _MIX = g.const("scripts/game_state.gd", "FOUNDING_AGE_MIX", default={}, optional=True)
 FOUNDING_AGE_MIX = np.array([float(_MIX[k]) for k in ("children", "youth", "early_adults", "established_adults", "mature_adults", "elders")]) if _MIX     else np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08])
 SUSTAINABLE_SPECIALISTS = g.const("scripts/society_model.gd", "SUSTAINABLE_SPECIALISTS", default=[], optional=True)
@@ -1304,7 +1305,9 @@ class Surrogate:
         age_keys = ("under5", "child", "adult", "elder")
         care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief) * ((1.0 - spare * SPARE_LAND_HEALTH) if k in age_keys else 1.0) * (1.0 - carers * float(CARER_BURDEN.get(k, 0.0))))
                           * ((1.0 + crowding * CROWDING_MORTALITY) if k in age_keys else 1.0) for k, v in ERA_BURDEN.items()}
-        frontier = clamp((FRONTIER_ONSET - self.population / max(1.0, self.carrying_capacity)) / FRONTIER_ONSET, 0.0, 1.0) if TERRITORY_CAPACITY else 0.0
+        # EarlyLifeConditions.frontier_of against home_capacity: the home land alone, no town count.
+        home = self.carrying_capacity / max(1e-6, self.territory_factor) if FRONTIER_HOME else self.carrying_capacity
+        frontier = clamp((FRONTIER_ONSET - self.population / max(1.0, home)) / FRONTIER_ONSET, 0.0, 1.0) if TERRITORY_CAPACITY else 0.0
         self.frontier = frontier
         care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION) * (1.0 + frontier * FRONTIER_CONCEPTION)
         care["excess_weight"] = {k: float(v) for k, v in EXCESS_WEIGHT.items()}
