@@ -57,6 +57,7 @@ func _ready()->void:
 	elif mode=="r3":await _sheets_r3()
 	elif mode=="r4":await _sheets_r4()
 	elif mode=="exec":await _exec_all()
+	elif mode.begins_with("bodies:"):await _bodies_row(mode.trim_prefix("bodies:"))
 	elif mode.begins_with("exec:"):await _exec(mode.trim_prefix("exec:"))
 	else:await _sheets()
 	print("COURT_ACTING_CAPTURE DONE ",out_dir)
@@ -649,6 +650,44 @@ func _exec(act:String)->void:
 		get_viewport().get_texture().get_image().save_png(out_dir+dir+"/frame_%04d.png" % k)
 	print("COURT_ACTING_CAPTURE exec ",act," frames ",frames)
 	_clear_bits()
+
+## One clip at one moment on every body, side by side, in each outfit: for
+## checking a clip on all seven (the faint that came apart on the old woman).
+## mode "bodies:<clip>@<t>[,<clip>@<t>...]" writes bodies_<clip>_<t>.png.
+const BODY_ROW:=[["male_adult","1b1511"],["female_adult","4a2a1a"],["male_old","a8a49c"],["female_old","b5b0a6"],
+	["male_young","2a1c12"],["female_young","0f0d0c"],["child","3a2a1c"]]
+func _bodies_row(spec:String)->void:
+	for item0 in spec.split(","):
+		var stance:=item0.get_slice("#",1) if item0.contains("#") else "stand"
+		var item:=item0.get_slice("#",0)
+		var clip:=item.get_slice("@",0)
+		var t:=float(item.get_slice("@",1)) if item.contains("@") else Acting.clip_length(clip)
+		for outfit in ["hide","tunic","robe"]:
+			_clear()
+			var n:=BODY_ROW.size()
+			for i in n:
+				var f:Node3D=Figure3D.new()
+				f.set_meta(&"person_name","row %d" % i)
+				world.add_child(f)
+				f.setup({"variant":BODY_ROW[i][0],"outfit":outfit,"hair":"bun" if String(BODY_ROW[i][0]).begins_with("female") else "cropped",
+					"skin":Color("bd8659"),"hair_colour":Color(String(BODY_ROW[i][1])),"stance":stance})
+				f.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+				f.play(f.rest_clip(),0.0,0.0)
+				Acting.of(f).active=false
+				f.position=Vector3((float(i)-(n-1)*0.5)*1.25,0.0,0.0)
+				f.rotation_degrees.y=-35.0
+				figures.append(f)
+			_step_all(0.3)
+			for f in figures:
+				if Acting.library(String(f.variant)).has(clip):Acting.play(f,clip,{"blend":0.05})
+			var k:=0.0
+			while k<t-0.001:
+				for f in figures:_frame(f)
+				k+=DT
+			camera.fov=30.0;camera.position=Vector3(0.0,1.6,9.6);camera.rotation_degrees=Vector3(-8.0,0.0,0.0)
+			_title("%s at %.2f s on every body (%s)" % [clip,t,outfit])
+			for i in n:_label(String(BODY_ROW[i][0]).replace("_"," "),figures[i].position+Vector3(0.0,-0.25,0.6),15)
+			await _shot("bodies_%s_%s_%s_%s.png" % [clip,String.num(t,2),outfit,stance])
 
 ## Round 4: the child (J's child body) beside grown-ups, the floor seat, the mirrored twins.
 func _sheets_r4()->void:
