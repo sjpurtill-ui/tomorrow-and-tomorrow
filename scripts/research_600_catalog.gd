@@ -85,15 +85,7 @@ const DAILY_SCALE:=0.12
 ## question of the classical age and after takes years, not decades, once its
 ## team takes it up; refitted with tools/sim so the 1200-3000 milestones land in
 ## their bands (they were mostly late).
-## Learning pace (2026-10-02): the founding ages' small practices ask more work
-## than they did (4.2 at year 0, was 7.0; full pace again by year 150). The
-## engine at the same learner count learned as fast as before the learning
-## overhaul (a fresh world, 3 learners: 110 against 106 known by year 16), but
-## that pace made a balanced village of a hundred learn some 75 ways in its
-## first 16 years; BENCHMARKS_600 asks about 65 in 100 of the first 50 years'
-## 259 questions for a typical people. Now a balanced people learns some 45 in
-## 16 years and the learning path about two and a half times that.
-const PACE_BY_YEAR:Array=[[0.0,4.2],[60.0,3.9],[150.0,3.95],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.55],[1200.0,0.38],[1800.0,0.30],[2400.0,0.25],[3000.0,0.16]]
+const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.55],[1200.0,0.38],[1800.0,0.30],[2400.0,0.25],[3000.0,0.16]]
 ## (research_3000 parallel capacity, which multiplied research with a people's
 ## size alone, is gone: a large people runs many investigations at once only by
 ## putting many people to learning, docs/PEOPLE_FIRST.md A.)
@@ -157,6 +149,23 @@ const QUESTION_EXPONENT:=0.85
 ## pace is measured in (PACE_BY_YEAR). At 1, a founding band with its usual few
 ## learners paces docs/research/BENCHMARKS_600.md exactly as before.
 const LEARNER_PACE:=1.0
+## A young people learns slowly (2026-10-02): no tallies, no teachers, no habit
+## of inquiry yet. Through its first FOUNDING_HOLD_YEARS years every question it
+## works asks FOUNDING_WORK times the usual work, whatever the question's age;
+## the extra fades over the next generation, gone at FOUNDING_FADE_YEARS
+## (founding_work, read at the people's own age). Per learner the engine had
+## not changed since before the learning overhaul (a fresh village with 3
+## learners: 110 ways by year 16 against 106), but a fresh balanced village
+## knew 117 ways by year 16 (the engine's truth probe, its 10 at the start
+## counted), well past the typical 65 in 100 of the first 50 years' 259
+## questions (BENCHMARKS_600). With it: balanced 57, growth 44, making, war
+## and building about 42, the learning path 167 (2.9 times balanced; it was
+## 1.9). The age, not the question, sets it: a people that lags is back to the
+## usual pace once it is a generation old, and a learning people pays it on
+## every question it reaches early.
+const FOUNDING_WORK:=2.2
+const FOUNDING_HOLD_YEARS:=15.0
+const FOUNDING_FADE_YEARS:=30.0
 ## Each age's questions are measured against the learners a people of that age
 ## usually keeps (AGE_WORK_BY_YEAR, by the question's own year: the work a
 ## sensible people of that age does, in tools/sim, over what the older capped
@@ -684,6 +693,15 @@ static func _build_relevance()->void:
 ## a people of its age does, so it never holds back a people that presses on.
 static func pace_for(design_year:float)->float:
 	return _curve(PACE_BY_YEAR,design_year)
+
+
+## Work multiplier for a people of `age` years (its own age, the calendar plus
+## its lead): FOUNDING_WORK through FOUNDING_HOLD_YEARS, then back to 1 by
+## FOUNDING_FADE_YEARS.
+static func founding_work(age:float)->float:
+	if age<=FOUNDING_HOLD_YEARS: return FOUNDING_WORK
+	if age>=FOUNDING_FADE_YEARS: return 1.0
+	return lerpf(FOUNDING_WORK,1.0,(age-FOUNDING_HOLD_YEARS)/(FOUNDING_FADE_YEARS-FOUNDING_HOLD_YEARS))
 
 
 ## The work a question of `question_year` asks, against the older capped rule

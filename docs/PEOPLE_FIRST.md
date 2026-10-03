@@ -43,7 +43,7 @@ Read first: `AGENTS.md`, `docs/ADJUDICATION.md` (one ledger, stated odds, seeded
 - **Work.** `Research600.team_capacity(learners)` comes from the number of people on the research lines alone, never from the people's size. The learners work `teams_at` questions at once (+4 per tenfold, no cap), each team at people^0.85: 200 learners do 1.83 times the work of 100, 1,000 about 7.5 times the work of 100. The research_3000 parallel capacity, which multiplied research by a people's size, is gone. Diffusion stays off. The artifact, leader, figure, scholar-visit and education factors only multiply learners' work: with nobody learning, nothing is learned (fast sim: 0 discoveries in 150 years at no learners, for 120 or 2,000 people).
 - **One pace constant.** `LEARNER_PACE` = 1: a founding band with its usual few learners paces BENCHMARKS_600 exactly as before. Each age's questions ask the work of the learners a people of that age usually keeps (`AGE_WORK_BY_YEAR`, by the question's own year, fitted in tools/sim from the sensible run: 1 up to year 250, 3 at year 600, 12 at 1200, 55 at 3000). A sensible people therefore paces as before, a small people with few learners falls behind, and only more learners run ahead.
 - **Goods.** Learners use 1 goods-unit per 20 learner-days, read and taken through one accessor (`Research600.learning_goods`): home stores first, then the towns' stores in proportion to what each holds. Makers keep what the learners will take before the next step (`civilian_goods.gd`; a 10-day step keeps its learners covered). The goods report and screens show the learners' take. Short of goods: progress × (0.5 + 0.5 × cover).
-- **The people's own age.** Learners on the lines beyond the share the age can spare (`SUSTAINABLE_SPECIALISTS`, read at the economy's real age) earn a lead over the calendar: 0.06 years a year per doubling of that share, falling back the same way below it. Questions, foundations and teams are dated from the calendar plus the lead (`DiscoverySystem.learning_year`). Effect ceilings follow min(own age, knowledge frontier). `pace_for(design_year)` is the question's own size and never reads the calendar.
+- **The people's own age.** Learners on the lines beyond the share the age can spare (`SUSTAINABLE_SPECIALISTS`, 4% at the founding, read at the economy's real age) earn a lead over the calendar: 0.06 years a year per doubling of that share, falling back the same way below it. Questions, foundations and teams are dated from the calendar plus the lead (`DiscoverySystem.learning_year`). Effect ceilings follow min(own age, knowledge frontier). `pace_for(design_year)` is the question's own size and never reads the calendar.
 - **A lead is paid for.** Goods per learner rise by the usual amount again for every 20 years ahead. The upkeep of learners past the sustainable share (work, weariness, cohesion, births, stores) rises by the usual amount again for every 300 years ahead. What the economy can spare and the artifact cap read the economy's real age, never the lead.
 - **Fast sim, 3 seeds to year 600** (base = main 97a32dd2, head = this branch; learning share in brackets; writing / bronze / place value years; population at 150 / 300 / 600):
 
@@ -61,34 +61,34 @@ Read first: `AGENTS.md`, `docs/ADJUDICATION.md` (one ledger, stated odds, seeded
   - **35% learning, then growth from year 200.** Knows 638 at the switch with a 29-year lead, and 158 people. Its population then grows to 482 at 300, 1,527 at 400 and 3,551 at 600, nearly level with sensible. Its knowledge falls behind (985 at 600) as its few learners keep up less, and its lead falls back to the calendar.
   - **Growth only (2% learning).** Lags further than before (bronze 421, against 379 under the old rule): few learners, slow learning.
 
-**A recalibrated (2026-10-02, the learning pace).** The user's new game learned about 20 ways a year from its founding. That came from 7 learners (10.6%) under the leaders' old split, which #116 now caps (a balanced split puts 3.5% on learning, the learning path 15%).
+**A recalibrated (2026-10-02, the learning pace; PR #121).** The user's new game learned about 20 ways a year from its founding. That came from 7 learners (10.6%) under the leaders' old split, which #116 now caps (a balanced split puts 3.5% on learning, the learning path 15%), and from cheap founding questions.
 - **Per learner, the engine was unchanged.** A fresh good village with learners held at 3 learned 110 ways by year 16 on main, against 106 on the engine before the learning overhaul (97a32dd2). With 7 learners: 206 against 203.
   - Only when goods ran out was main slower. On a poor site, 7 learners learned 88 by year 16 against 165, because goods cover halves learning.
-- **What changed.**
-  - **The founding ages' questions ask more work.** `PACE_BY_YEAR` is 4.2 at year 0 (was 7.0) and 3.9 at 60, back to full pace by 150, with years 200 and later unchanged.
-  - **The age can spare more learners at its founding:** 6.5% (`SUSTAINABLE_SPECIALISTS`, was 4%). A balanced people, capped at 3.5% on learning, now banks no lead. The lead stays 0.06 years a year per doubling: at 0.03 the fast sim's learning path fell within 3% of balanced knowledge at 600 and counted as dominated.
-- **Engine (truth probe, a fresh world, seed 74119, with #116's caps).** Known by year 16, including the 10 a people starts with:
+- **What changed: a young people learns slowly** (`Research600.founding_work`). Through its first 15 years every question asks 2.2 times the usual work, whatever the question's age. The extra fades back to the usual work by year 30, read at the people's own age.
+  - The questions' own pace (`PACE_BY_YEAR`) and the share the age can spare (`SUSTAINABLE_SPECIALISTS`, 4% at the founding) are as on main.
+  - A first try cut the founding questions' own pace and raised the spare share to 6.5%. The pace cut slowed a lagging people at any date, and the spare share made heavy learning cheaper. Both are gone.
+- **Engine (truth probe, a fresh world, seed 74119, main d7544488).** Known by year 16, including the 10 a people starts with:
 
-| Path | Main | Recalibrated |
+| Path | Main | This branch |
 |---|---|---|
-| balanced | 86 | 54 |
-| growth | 95 | 59 |
-| making | 84 | 53 |
-| war | 86 | 54 |
-| building | 84 | 53 |
-| learning | 223 | 190 |
+| balanced | 117 | 57 |
+| growth | 93 | 44 |
+| making | 82 | 42 |
+| war | 82 | 41 |
+| building | 82 | 42 |
+| learning | 226 | 167 |
 
-  - The learning path learns about 3.5 times a balanced people. It keeps 4 times the learners (8 against 2 at year 16), and every learner counts.
-- **Fast sim (#120's recalibrated sim; main → recalibrated).**
+  - The learning path learns 2.9 times balanced (1.9 on main) with three times the learners (9 against 3 at year 16).
+- **Fast sim (#120's recalibrated sim, 3 seeds; main → this branch).** Known by year 16 / 150; pit firing, copper and writing years; population at 60 / 150 / 300:
 
-| Scenario | Ways learned by year 16 | Writing / bronze / place value | Population at 150 / 300 / 600 |
+| Scenario | Known 16 / 150 | Pit / copper / writing | Population 60 / 150 / 300 |
 |---|---|---|---|
-| sensible (5%), 2 seeds | 77 → 46 | 212 / 324 / 475 → 213 / 324 / 475 | 516 / 1,166 / 3,893 → 466 / 1,166 / 3,893 |
-| research (17.6%) | — | 172 / 277 / 420 → 171 / 274 / 425 | 335 / 1,069 / 3,639 → 361 / 1,073 / 3,636 |
-| research_heavy (35%) | — | 168 / 279 / 418 → 175 / 280 / 421 | 123 / 166 / 308 → 135 / 195 / 390 |
+| path_balanced | 95 / 525 → 48 / 524 | 20 / 61 / 210 → 34 / 65 / 210 | 237 / 601 / 1,162 → 219 / 596 / 1,162 |
+| path_learning | 209 / 573 → 131 / 572 | 16 / 50 / 181 → 16 / 49 / 181 | 227 / 564 / 1,133 → 221 / 561 / 1,133 |
+| poor | 41 / 207 → 24 / 196 | 71 / 163 / 295 → 98 / 177 / 360 | 61 / 77 / 112 → 61 / 76 / 112 |
 
-  - Pit firing and copper come later for sensible, but copper stays in its band (60-125).
-  - **Path suite (3 seeds, 600 years).** Balanced and growth are unchanged at 300 and 600. Growth-then-learning catches up as before (1,175 known by 600, against 1,178 on main). Learning-then-growth reaches 3,853 people by 600 (3,846 on main).
+  - **Learning path against balanced in people:** about level at year 60 (221 against 219), 6% fewer at 150, 2.5% fewer at 300. It is far ahead in knowledge at 50 (356 against 234).
+  - **The poor people** is back at the usual pace from year 30. Its knowledge is 5% short at 150 and 3% short at 300. Its first milestones come later: pit firing by about 27 years, copper by 14, writing by about 65 (one seed in three unchanged). Bronze stays out of reach by 600 in two seeds of three, as on main.
 
 ### B. Fresh food, small stores, keepers and carers (owner: `food_system.gd`, `consequence_engine.gd` food-security/health/early-life targets, `early_life_conditions.gd` care coverage, `realm_purse.gd LEVY_KEEP_DAYS`)
 - **No more giant stores.**

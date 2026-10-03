@@ -1088,13 +1088,13 @@ func knowledge_frontier()->float:
 	return float(_today.frontier)
 
 ## Research is never free. Full-time specialists (the Knowledge role) beyond what
-## the era's surplus could keep (about 6.5% of workers at year 0, 10% by year 600:
+## the era's surplus could keep (about 4% of workers at year 0, 10% by year 600:
 ## shamans and elders, then temple scribes) are fed, housed and served by the
 ## other workers, and a large separate class strains the community. The excess
 ## share adds labor demand and fatigue, draws on the stores, costs cohesion and
 ## lowers births (temple and scribal households married late or not at all),
 ## whatever the research buys (docs/research/BENCHMARKS_600.md, "Allowed lead").
-const SUSTAINABLE_SPECIALISTS:Array=[[0.0,0.065],[300.0,0.07],[600.0,0.10],[2400.0,0.16],[2800.0,0.25],[3000.0,0.30]]
+const SUSTAINABLE_SPECIALISTS:Array=[[0.0,0.04],[300.0,0.07],[600.0,0.10],[2400.0,0.16],[2800.0,0.25],[3000.0,0.30]]
 const SPECIALIST_UPKEEP:={"labor_demand":1.4,"fatigue":0.6,"cohesion":-1.0,"conception_support":-1.0,"food_storage":-0.6}
 ## Latest excess specialist share (0 when research staffing is sustainable).
 var specialist_excess:=0.0

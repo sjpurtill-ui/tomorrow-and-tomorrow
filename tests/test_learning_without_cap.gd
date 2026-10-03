@@ -415,23 +415,34 @@ func test_a_lead_is_paid_for_in_the_extra_learners_upkeep()->void:
 
 # --- The first ways come at a village's pace (2026-10-02 recalibration) -------------
 
-## A founding people's small practices ask more work than they did (pace 4.2 at
-## year 0, was 7.0), back to the full pace by year 150; the later ages are as
-## they were. Per learner the engine had not changed (a fresh village with 3
-## learners: 110 ways by year 16 on main, 106 before the overhaul), but a
-## balanced village learned some 75 ways in 16 years; now about 45.
+## A young people learns slowly: through its first FOUNDING_HOLD_YEARS years
+## every question asks FOUNDING_WORK times the work, whatever the question's
+## age, back to the usual work by FOUNDING_FADE_YEARS. Per learner the engine
+## had not changed (a fresh village with 3 learners: 110 ways by year 16 on
+## main, 106 before the overhaul), but a balanced village learned some 76 ways
+## in 16 years; now about 45.
 func test_the_first_ways_come_at_a_village_pace()->void:
-	assert_float(R.pace_for(0.0)).is_equal_approx(4.2,0.0001)
-	assert_float(R.pace_for(60.0)).is_equal_approx(3.9,0.0001)
-	assert_float(R.pace_for(150.0)).is_equal_approx(3.95,0.0001)
-	# Year 200 and after: unchanged.
+	assert_float(R.founding_work(0.0)).is_equal_approx(R.FOUNDING_WORK,0.0001)
+	assert_float(R.founding_work(R.FOUNDING_HOLD_YEARS)).is_equal_approx(R.FOUNDING_WORK,0.0001)
+	assert_float(R.founding_work((R.FOUNDING_HOLD_YEARS+R.FOUNDING_FADE_YEARS)*0.5)).is_equal_approx((R.FOUNDING_WORK+1.0)*0.5,0.0001)
+	assert_float(R.founding_work(R.FOUNDING_FADE_YEARS)).is_equal(1.0)
+	assert_float(R.founding_work(300.0)).is_equal(1.0)
+	assert_float(R.FOUNDING_WORK).is_greater(1.4)
+	# The questions' own pace is the one it always was.
+	assert_float(R.pace_for(0.0)).is_equal_approx(7.0,0.0001)
 	assert_float(R.pace_for(200.0)).is_equal_approx(2.4,0.0001)
-	assert_float(R.pace_for(300.0)).is_equal_approx(1.0,0.0001)
-	# A founding question takes more than half again the work it did.
-	assert_float(7.0/R.pace_for(0.0)).is_greater(1.6)
-	# The age can spare a little more at its founding (a balanced people's
-	# learners, capped at 3.5 in 100, bank no lead).
+	# It reads the people's own age: a young people pays it on a question of
+	# any age, a people a generation old on none, though it lag far behind.
+	var old_question:={"id":"founding_test_old","name":"Old","dynamic":"culture","subcategory":"Social cohesion","earliest_year":0.0,"signals":[]}
+	DiscoverySystem.learning_lead=0.0
+	GameState.elapsed_days=5.0*365.0
+	var young:=float(DiscoverySystem.research_difficulty(old_question,GameState.world_seed))
+	GameState.elapsed_days=float(int(R.FOUNDING_FADE_YEARS)*365+365)
+	var grown:=float(DiscoverySystem.research_difficulty(old_question,GameState.world_seed))
+	assert_float(young/grown).is_equal_approx(R.FOUNDING_WORK,0.01)
+	# The share the age can spare stays 4 in 100 at the founding: a lead never
+	# makes learning cheaper for the people who press it.
+	assert_float(Society._rise(Society.SUSTAINABLE_SPECIALISTS,0.0)).is_equal_approx(0.04,0.0001)
 	assert_float(R.LEAD_YEARS_PER_DOUBLING).is_equal_approx(0.06,0.0001)
-	assert_float(Society._rise(Society.SUSTAINABLE_SPECIALISTS,0.0)).is_equal_approx(0.065,0.0001)
 	# More learners still give more work: no cap.
 	assert_float(R.team_capacity(8.0)).is_greater(R.team_capacity(2.0)*3.5)
