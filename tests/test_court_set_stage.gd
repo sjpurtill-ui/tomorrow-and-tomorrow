@@ -347,3 +347,19 @@ func test_two_sent_in_together_walk_in_single_file()->void:
 		var pa:Vector3=a.body3d.global_position;var pb:Vector3=b.body3d.global_position
 		closest=minf(closest,Vector2(pa.x-pb.x,pa.z-pb.z).length())
 	assert_float(closest).override_failure_message("they came within %.2f m of each other" % closest).is_greater(0.5)
+
+
+func test_a_scene_waits_for_those_still_walking_in()->void:
+	# A beat for someone still on their way in waits until they stand on
+	# their mark (a gift is set down there, not in the doorway).
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var late:Stage.Figure=stage.add_figure("late_c",{"name":"Late Cass","person_id":0,"age":37},"court","Cass","",true)
+	await await_idle_frame()
+	if late.spot==null:return
+	var beats:=[{"t":0.0,"who":"late_c","act":"play","args":{"beat":"bow_small"}}]
+	assert_float(stage._still_arriving(beats)).is_greater(0.5)
+	stage.settle()
+	assert_float(stage._still_arriving(beats)).is_equal(0.0)

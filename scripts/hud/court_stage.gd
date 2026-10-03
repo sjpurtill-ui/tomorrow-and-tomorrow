@@ -890,6 +890,19 @@ func event(kind:String,data:Dictionary={})->void:
 	var all:Array=[]
 	if beats is Array:all.append_array(beats)
 	if lines is Array:all.append_array(lines)
+	# Those the scene is about finish walking in before it plays on them (a
+	# gift accepted while the bearer is still on the way in is set down at
+	# their mark, not in the doorway).
+	if not kind in ["enter","exit","open","close"]:
+		var wait:=_still_arriving(all)
+		if wait>0.0:
+			var later:Array=[]
+			for beat in all:
+				if beat is Dictionary:
+					var moved:Dictionary=(beat as Dictionary).duplicate()
+					moved["t"]=float(moved.get("t",0.0))+wait
+					later.append(moved)
+			all=later
 	_last_beats=all
 	_event_weight=_weight_of(kind,data)
 	var span:=0.0
@@ -897,6 +910,16 @@ func event(kind:String,data:Dictionary={})->void:
 		if beat is Dictionary:span=maxf(span,float((beat as Dictionary).get("t",0.0))+float(((beat as Dictionary).get("args",{}) as Dictionary).get("dur",0.8)))
 	_event_end=_now()+span
 	if not all.is_empty():run_beats(all)
+
+## How long until everyone the beats name has finished walking in (0: all here).
+func _still_arriving(beats:Array)->float:
+	var wait:=0.0
+	for beat in beats:
+		if not beat is Dictionary:continue
+		var f:=figure(String((beat as Dictionary).get("who","")))
+		if f==null or f.leaving or f.spot==null or f.stroll<=0.0:continue
+		wait=maxf(wait,f.arriving_in())
+	return clampf(wait+(0.3 if wait>0.0 else 0.0),0.0,7.0)
 
 ## How weighty an event is for the camera.
 static func _weight_of(kind:String,data:Dictionary)->int:
@@ -1965,6 +1988,12 @@ class Figure extends Control:
 	## The mood the engine gives them (a beat's mood returns to it).
 	var own_mood:="neutral"
 	var rest_yaw:=0.0
+	## How long their walk in takes, waiting at the door included (seconds).
+	var walk_total:=0.0
+	## Seconds until they stand on their mark (0: there, or not walking in).
+	func arriving_in()->float:
+		if leaving or stroll<=0.0 or _move==null or not _move.is_valid():return 0.0
+		return maxf(walk_total-_move.get_total_elapsed_time(),0.0)
 	## One of the acting's own stances they keep (K: "guard", "fire"), or "".
 	var acting_stance:=""
 	## How far they have sunk (put to death where they stood), in metres.
@@ -2117,6 +2146,7 @@ class Figure extends Control:
 			stroll=0.0;_settle_in();return
 		var pace:float=float(Self.Figure3D.WALK_SPEED.walk_in)*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
 		var time:=clampf(_path_length()/maxf(pace,0.1),1.0,6.5)
+		walk_total=maxf(delay,0.0)+time
 		var first:=_path_at(0.98)-_path_at(1.0)
 		body3d.rotation.y=atan2(first.x,first.z)
 		_clip("walk_in",0.0,0.0)
@@ -2150,6 +2180,7 @@ class Figure extends Control:
 		var first:=_path_at(0.98)-_path_at(1.0)
 		body3d.rotation.y=atan2(first.x,first.z)
 		_clip("walk_in",0.0,0.0)
+		walk_total=maxf(delay,0.0)+clampf(_path_length()*0.4/maxf(pace,0.1),0.6,3.0)+3.0
 		_move=create_tween()
 		if delay>0.0:_move.tween_interval(delay)
 		var lost:=0.6
