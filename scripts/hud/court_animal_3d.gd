@@ -29,6 +29,13 @@ const PALETTE:={
 	"dog":{"COAT":"a06c3b","COAT_LIGHT":"e0c99e","COAT_DARK":"5f4027","NOSE":"1d1612","EYE":"150f0c","EYE_SHINE":"fbf6ea"},
 	"goat":{"COAT":"e6d6b4","COAT_DARK":"3e2c20","NOSE":"3a2c26","HOOF":"2c241e","HORN":"8c8070","EYE":"120c08","EYE_AMBER":"b8862e"},
 }
+## The camp dogs' coats (a pack is never one dog painted five times).
+const COATS:={
+	"black":{"COAT":"2a2420","COAT_LIGHT":"8a7a66","COAT_DARK":"151210"},
+	"grey":{"COAT":"7c7670","COAT_LIGHT":"d6d0c4","COAT_DARK":"3e3a36"},
+	"cream":{"COAT":"cdb48a","COAT_LIGHT":"efe4cc","COAT_DARK":"8a6a44"},
+	"brindle":{"COAT":"6e4a2a","COAT_LIGHT":"c2a274","COAT_DARK":"2e2016"},
+}
 ## A species' own clip for each of the court's animal acts (the dog's names).
 const CLIP_MAP:={
 	"goat":{"sniff":"graze","sit":"lie","sit_idle":"lie_idle","scratch":"graze","cower":"startle","cower_idle":"look",
@@ -93,7 +100,12 @@ static func available(species_name:String)->bool:
 	return scene_for(species_name)!=null
 
 ## Make this animal for a set. seed_value keeps its ways the same each time.
-func setup(species_name:String,court_set:Node3D,seed_value:=0)->bool:
+var coat:=""
+## What it has in its mouth (a thighbone, a head...), or null.
+var carried:Node3D
+
+func setup(species_name:String,court_set:Node3D,seed_value:=0,coat_name:="")->bool:
+	coat=coat_name
 	var packed:=scene_for(species_name)
 	if packed==null:return false
 	species=species_name
@@ -118,7 +130,8 @@ func setup(species_name:String,court_set:Node3D,seed_value:=0)->bool:
 	return true
 
 func _dress()->void:
-	var paint:Dictionary=PALETTE.get(species,{})
+	var paint:Dictionary=(PALETTE.get(species,{}) as Dictionary).duplicate()
+	for slot in (COATS.get(coat,{}) as Dictionary).keys():paint[slot]=COATS[coat][slot]
 	for node in model.find_children("*","MeshInstance3D",true,false):
 		var mesh_node:=node as MeshInstance3D
 		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON
@@ -215,7 +228,7 @@ func clip_length(clip_name:String)->float:
 ## Walk (or trot) to a point on the ground, round the fire, then do `then`.
 func go_to(point:Vector3,gait:="walk",then:=Callable())->void:
 	_arrive=then
-	_gait=gait if gait in ["walk","trot"] else "walk"
+	_gait=gait if gait in ["walk","trot","carry"] else "walk"
 	_speed=float((info.get("speeds",{}) as Dictionary).get(_gait,0.8))
 	_path=_route(position,Vector3(point.x,0.0,point.z))
 	if is_down():
@@ -447,6 +460,73 @@ func _run_off(out:Vector3)->void:
 func _gone()->void:
 	visible=false
 	_held=0.0;hold(9999.0)
+
+## Take something in the mouth (a thighbone, a head): it rides the jaw.
+func carry(prop:Node3D)->bool:
+	if prop==null or model==null:return false
+	var skels:=model.find_children("*","Skeleton3D",true,false)
+	if skels.is_empty():return false
+	var skel:=skels[0] as Skeleton3D
+	var bone:="jaw" if skel.find_bone("jaw")>=0 else "head"
+	var attach:=skel.get_node_or_null("Mouth") as BoneAttachment3D
+	if attach==null:
+		attach=BoneAttachment3D.new();attach.name="Mouth";attach.bone_name=bone
+		skel.add_child(attach)
+	if prop.get_parent()!=null:prop.get_parent().remove_child(prop)
+	attach.add_child(prop)
+	# crosswise in the teeth, a little ahead of the jaw's root
+	prop.transform=Transform3D(Basis.IDENTITY,Vector3(0.0,0.06,0.02))
+	carried=prop
+	return true
+
+## Let go of what it carries, onto the ground in front of it.
+func drop_carried()->Node3D:
+	if carried==null or not is_instance_valid(carried):return null
+	var thing:=carried;carried=null
+	var where:=global_position+global_transform.basis.z*0.45
+	var cs:=court_set()
+	thing.get_parent().remove_child(thing)
+	(cs if cs!=null else get_parent()).add_child(thing)
+	thing.global_transform=Transform3D(Basis(Vector3.UP,rotation.y),Vector3(where.x,0.04,where.z))
+	return thing
+
+## Go and bring something back: trot to it, take it, trot to `to`, drop it
+## there and wag (the dog with the thighbone at the god's feet).
+func fetch(thing:Node3D,to:Vector3)->void:
+	if thing==null:return
+	hold(60.0)
+	go_to(thing.global_position,"trot",_fetch_take.bind(thing,to))
+
+func _fetch_take(thing:Node3D,to:Vector3)->void:
+	play("grab",0.1)
+	carry(thing)
+	_held=0.0;hold(clip_length("grab"),_fetch_bring.bind(to))
+
+func _fetch_bring(to:Vector3)->void:
+	hold(60.0)
+	go_to(to,"carry",_fetch_drop)
+
+func _fetch_drop()->void:
+	drop_carried()
+	_held=0.0;wag(3.0)
+
+## Off out of the door at a trot, and gone (the pack, when it is done).
+func leave(exit_mark:="door_out")->void:
+	var cs:=court_set()
+	var out:=Vector3(-6.0,0.0,1.0)
+	if cs!=null and cs.call("has_mark",exit_mark):out=(cs.call("mark",exit_mark) as Marker3D).position
+	_held=0.0;hold(30.0)
+	go_to(out,"trot",_gone)
+
+## Pull at something, braced, head wrenching (dragging a body off): seconds.
+func tug(seconds:=2.5)->void:
+	hold(seconds,_idle_here)
+	play("tug",0.15)
+
+## Down over something, gnawing (the crunching behind the windbreak): seconds.
+func crunch(seconds:=3.0)->void:
+	hold(seconds,_recover)
+	play("crunch",0.2)
 
 ## The god acts: "speaks" (ears up, a tilt), "wrath" (it cowers), "favour" (a wag).
 func on_god(kind:String)->void:

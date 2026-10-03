@@ -73,11 +73,24 @@
     "stand_up": {
      "seconds": 0.6,
      "loop": false
+    },
+    "tug": {
+     "seconds": 0.84,
+     "loop": true
+    },
+    "crunch": {
+     "seconds": 0.72,
+     "loop": true
+    },
+    "carry": {
+     "seconds": 0.5,
+     "loop": true
     }
    },
    "speeds": {
     "walk": 0.78,
-    "trot": 1.7
+    "trot": 1.7,
+    "carry": 1.7
    }
   },
   "goat": {

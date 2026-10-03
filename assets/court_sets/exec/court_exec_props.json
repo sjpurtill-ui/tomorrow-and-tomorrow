@@ -1,0 +1,209 @@
+{
+ "generator": "tools/blender/court_exec_props.py",
+ "glb": "court_exec_props.glb",
+ "props": {
+  "cook_pot": {
+   "size": [
+    0.95,
+    0.85,
+    0.95
+   ],
+   "lid_seat": [
+    0.0,
+    0.78,
+    0.0
+   ],
+   "head_seat": [
+    0.0,
+    0.656,
+    0.0
+   ],
+   "needs": [
+    "pottery"
+   ],
+   "acts": [
+    2,
+    14
+   ],
+   "triangles": 986
+  },
+  "cook_pot_lid": {
+   "size": [
+    0.75,
+    0.12,
+    0.75
+   ],
+   "needs": [
+    "pottery"
+   ],
+   "acts": [
+    2
+   ],
+   "triangles": 200
+  },
+  "cook_ladle": {
+   "size": [
+    0.1,
+    1.25,
+    0.02
+   ],
+   "grip": [
+    0.0,
+    1.0,
+    0.0
+   ],
+   "acts": [
+    2,
+    14
+   ],
+   "triangles": 242
+  },
+  "cook_bag": {
+   "size": [
+    1.3,
+    1.6,
+    1.3
+   ],
+   "lid_seat": [
+    0.0,
+    0.98,
+    0.0
+   ],
+   "head_seat": [
+    0.0,
+    0.88,
+    0.0
+   ],
+   "acts": [
+    2,
+    14
+   ],
+   "triangles": 1750
+  },
+  "cook_bag_lid": {
+   "size": [
+    0.62,
+    0.08,
+    0.62
+   ],
+   "acts": [
+    2
+   ],
+   "triangles": 152
+  },
+  "club": {
+   "size": [
+    0.16,
+    0.92,
+    0.16
+   ],
+   "grip": [
+    0.0,
+    0.1,
+    0.0
+   ],
+   "head": [
+    0.0,
+    0.78,
+    0.0
+   ],
+   "acts": [
+    2
+   ],
+   "triangles": 260
+  },
+  "block": {
+   "size": [
+    0.6,
+    0.45,
+    0.6
+   ],
+   "neck_seat": [
+    0.0,
+    0.45,
+    0.12
+   ],
+   "axe_bite": [
+    0.0,
+    0.44,
+    0.02
+   ],
+   "acts": [
+    10
+   ],
+   "triangles": 262
+  },
+  "axe_bronze": {
+   "size": [
+    0.06,
+    0.96,
+    0.3
+   ],
+   "grip": [
+    0.0,
+    0.08,
+    0.0
+   ],
+   "edge": [
+    0.0,
+    0.82,
+    0.24
+   ],
+   "needs": [
+    "metal"
+   ],
+   "acts": [
+    10
+   ],
+   "triangles": 246
+  },
+  "thighbone": {
+   "size": [
+    0.45,
+    0.07,
+    0.1
+   ],
+   "bite": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "acts": [
+    4
+   ],
+   "triangles": 380
+  },
+  "skull": {
+   "size": [
+    0.18,
+    0.2,
+    0.2
+   ],
+   "acts": [
+    4,
+    10
+   ],
+   "triangles": 320
+  },
+  "skull_stake": {
+   "size": [
+    0.2,
+    1.7,
+    0.2
+   ],
+   "acts": [],
+   "triangles": 416
+  },
+  "boulder": {
+   "size": [
+    1.0,
+    0.9,
+    0.9
+   ],
+   "acts": [
+    1
+   ],
+   "triangles": 320
+  }
+ }
+}
