@@ -32,11 +32,14 @@ Every people runs the same code in its own scope. Only how many build differs.
 
 Every `TICK_DAYS` (10) a town reckons its fabric. `settlement_construction.gd process_day` calls it, so the day's cost is one comparison.
 
-1. **Free builders.** These are the builders the town counts: a great work's crew and military works are already out (`effective_workers`).
-   - Their days are halved while a civic work or new homes go up.
-   - While a defence stage rises at home, `WALL_SHARE` (40 in 100) of them work on the walls.
-2. **Their work.** Builders × working pace × days × (1 + `CRAFT_WORK` a level of craft) × (1 + `KILN_BUILDING` × kiln cover).
-3. **Upkeep first,** in `UPKEEP_ORDER`: homes, then work buildings, roads, and fine works last.
+1. **Every builder works one job** (`crews`). These are the builders the town counts: a great work's crew and military works are already out (`effective_workers`). In order:
+   - **homes:** every builder while some sleep without a roof; `HOMES_AHEAD` (30 in 100) while new homes go up ahead of need (`housing_work_per_day` reads this crew);
+   - **civic:** `CIVIC_SHARE` (half) of the rest while a civic work is in hand (`daily_work` reads this crew);
+   - **repair:** what the town's civic works need to be kept in repair, at most `REPAIR_SHARE` (5 in 100) of the people, and half that once in full repair (`settlement_model.gd _advance_city_form` reads this crew);
+   - **walls:** at home, `WALL_SHARE` (40 in 100) of the rest while a stage goes up or the walls are mended after a fight;
+   - **fabric:** everyone left.
+2. **Their work.** Fabric builders × working pace × days × (1 + `CRAFT_WORK` a level of craft) × (1 + `KILN_BUILDING` × kiln cover).
+3. **Upkeep first,** in `UPKEEP_ORDER`: homes, the walls (`WALL_UPKEEP`, 1 in 100 of the standing stage's work a year), then work buildings, roads, and fine works last.
    - Upkeep that is not done wears the account down:
      - homes fall a grade (`GRADE_WEAR`, 30 in 100 a year for huts, 3 for stone);
      - roads roughen (`ROAD_WEAR`, 8 in 100);
@@ -64,7 +67,7 @@ The share of a town's places in each grade:
 - New places (a new batch of homes) go up as huts, or as lean-tos before huts are known.
 - Places lost to fire or flood are lost from every grade alike.
 - **What the homes' quality q (0..1) does** (consequence_engine.gd, crisis_system.gd):
-  - deaths of exposure × (1 − 0.5q);
+  - the health target +`HOME_WEATHER` (0.03) × (the season's cold + ¾ of its heat) × q, the weather's toll on those who have a roof (the housing shortfall's own exposure deaths are the homes' count, untouched);
   - illness deaths × (1 − 0.2q);
   - outbreaks of sickness × e^(−0.3q);
   - fires × e^(−q);
@@ -105,13 +108,14 @@ The share of a town's places in each grade:
 - **Builders on the walls.**
   - They work beside the watch at `BUILDER_WALL_WEIGHT` (1.5) a watchman's share, × (1 + 0.05 a level of craft).
   - On stone stages (walled districts, bastions) the watch alone works at `STONE_WATCH` (0.35): stone needs builders' skill.
-  - The defence ledger (`military_campaign.gd settlement_defense_daily_work`), the people's council (which now counts the builders' work in its days), sieges and town battles read the same numbers.
+  - The defence ledger (`military_campaign.gd settlement_defense_daily_work`), sieges and town battles read the same numbers.
+  - **The council and the screens judge the next stage with the walls crew that would go to it** (`wall_builders_ready`, recorded at each reckoning). A watchman's own rate never includes the builders, and the watch the council asks for is what remains after the builders' work (`settlement_defense_full_pace_workers`, `home_defense.gd watch_fix`).
 - **The council.** Skilled builders want walls: the council weighs danger plus `WALL_WISH` (0.14 a level of craft past 2, at most 0.6).
 - **Stronger walls.**
   - Walls kept by skilled builders hold × (1 + 0.02 a level of craft).
   - The home town's stone houses add +0.15 × their share to the defences and +0.10 to the stores raiders cannot reach.
   - Sieges and town battles read the snapshot's `defense_bonus`.
-- **Wear.** Walls wear 3 in 100 of their integrity a year unless kept (`WALL_KEEPERS`, 2 in 100 of the people building).
+- **Wear.** Walls wear 3 in 100 of their integrity a year while their upkeep goes undone; the walls crew mends them after a fight (with a fifth of the watch).
 - **Might** (standing.gd) gets +0.40 × the defences over the strongest works' bonus.
 - **Other peoples** weigh our fighting strength × (1 + 0.8 × the defences' bonus): awe, contempt and war deterrence.
 
@@ -145,11 +149,13 @@ The share of a town's places in each grade:
 
 - **The odds** (`wonder_concept.gd assess`). Capability adds:
   - 0.025 a level of craft;
-  - up to 0.05 for the crews at work (full at 40 builders);
+  - up to 0.05 for the crew on the work (full at 15 builders on it; a work not yet begun counts the fifth of the builders it would get);
   - 0.06 × (cover − 0.5) for the materials in store.
   - The "Builders" factor names them.
+- **The roll reads the whole people's craft** even while one town's count is in scope (`craft_of`), so it uses the odds and payoff the screen states.
+- **Materials.** The fabric never takes what a great work under way has still to use (`great_bills`).
 - **The payoff** (`undertaking_system.gd apply_outcome`). A work that stands has its strength, rewards and renown × (1 + 0.05 a level of craft), and × 1.15 more under a gifted master builder (geniuses.gd). The work records it as `payoff`.
-- **Stated plainly.** The assessment's `stated` text is shown on the great work's screen and in the order's reply, for example: "With 14 builders at craft 3.0 and 400 stone in store (100 in 100 of the materials), the odds it stands are 83 in 100 (a triumph 18, flawed 12, it falls 17); if it stands, its strength, rewards and renown count x1.15 for the builders' craft and Ama, a gifted master builder."
+- **Stated plainly.** The assessment's `stated` text is shown on the great work's screen and in the order's reply, for example: "With 14 builders on the work at craft 3.0 and 400 stone in store (100 in 100 of the materials), the odds it stands are 83 in 100 (a triumph 18, flawed 12, it falls 17); if it stands, its strength, rewards and renown count x1.15 for the builders' craft and Ama, a gifted master builder."
 
 ### Costs
 
@@ -166,7 +172,10 @@ The share of a town's places in each grade:
 | `discovery_system.gd` | one factor in the two leader-factor chains, marked `[built-fabric]` |
 | `settlement_model.gd` | one default key; trade speed and range; convoy speed |
 
-**Saves.** Older saves load. A town's fabric is made on its first reckoning, at the grades the people could build at the craft its present builders would have given it (no sudden fall). The craft starts at what the present builders would have built up.
+**Saves.** Older saves load.
+- A town's fabric is made on its first day, at the grades the people could build at the craft its present builders would have given it (no sudden fall); every reader sees it from that day, and the realm hears of the town at once.
+- Its roads start at the kind its map already drew for what the people know (`settlement_roads.gd known_tier`), so maps and marches lose nothing.
+- The craft starts at what the present builders, read for the whole people, would have built up.
 
 ## On screen
 

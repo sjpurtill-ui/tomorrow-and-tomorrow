@@ -1,19 +1,19 @@
 {
  "spec": "path_learning:74119:15",
- "commit": "3da9de1c7989884616aea07e1cb7763b9a83c3f5",
+ "commit": "36cc33512c2b5b5bf9e30dfc045411c4dae1ff30",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "f309d9311627",
   "scripts/society_model.gd": "1b3e35dc26d7",
-  "scripts/game_state.gd": "eeafbf7d5787",
+  "scripts/game_state.gd": "2b5debee71ef",
   "scripts/early_life_conditions.gd": "98edd883a637",
   "scripts/food_system.gd": "5d8727a83c0e",
-  "scripts/consequence_engine.gd": "23b7a05af9ed",
+  "scripts/consequence_engine.gd": "edb873ac637c",
   "scripts/research_600_catalog.gd": "64f4b5035937",
   "scripts/technology_eras.gd": "c0bbf4054a38",
   "scripts/artifact_collection.gd": "9195657cdf5b",
   "data/research/research_600.json": "47ba727954f5",
   "scripts/food_care.gd": "36539b3afc49",
-  "scripts/government_people_system.gd": "47bb8e484a70",
+  "scripts/government_people_system.gd": "03495db7ac51",
   "scripts/work_paths.gd": "d50f7aa9d6ee",
   "scripts/civilian_goods.gd": "f1e474bca48a",
   "scripts/resource_system.gd": "fa9c69410d99",
@@ -22,11 +22,11 @@
   "scripts/crisis_background.gd": "138760ec064e",
   "scripts/crisis_system.gd": "926859b2ad37",
   "scripts/crisis_unattended.gd": "fc93b9e75847",
-  "scripts/built_fabric.gd": "b36069a3909f",
-  "scripts/settlement_construction.gd": "4fb6da847acc",
+  "scripts/built_fabric.gd": "e493cfc38232",
+  "scripts/settlement_construction.gd": "55bb3fda4014",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 114.1,
+ "wall_seconds": 100.1,
  "returncode": 0,
- "generated": "2026-10-03 12:23:22"
+ "generated": "2026-10-03 13:42:38"
 }
