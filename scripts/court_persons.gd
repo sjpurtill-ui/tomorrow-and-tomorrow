@@ -508,6 +508,10 @@ static func categories()->Array[Dictionary]:
 	for f in HistoricalFigures.people:
 		if f is Dictionary and String((f as Dictionary).get("role",""))=="General" and String((f as Dictionary).get("status",""))!="dead":
 			out.append({"label":"the war leader %s" % String((f as Dictionary).get("name","")),"desc":{"figure":String((f as Dictionary).get("id",""))}}); break
+	# The gifted grown (geniuses.gd): one the court can name.
+	for f2 in HistoricalFigures.people:
+		if f2 is Dictionary and (f2 as Dictionary).get("genius") is Dictionary and String((f2 as Dictionary).get("status",""))=="living":
+			out.append({"label":"the %s %s" % [preload("res://scripts/geniuses.gd").court_title(f2).to_lower(),String((f2 as Dictionary).get("name",""))],"desc":{"figure":String((f2 as Dictionary).get("id",""))}}); break
 	if not GameState.discovery_log.is_empty():
 		var d:Dictionary=GameState.discovery_log[0]
 		out.append({"label":"whoever made the last discovery","desc":{"discovery":String(d.get("id","")),"deed":"found %s" % String(d.get("name","a new way")).to_lower(),"trade":_fit_trade(["gatherer","flint-knapper","potter","healer"]),"settlement_id":sid}})
@@ -1382,6 +1386,8 @@ static func slots_for(ref:Dictionary)->Dictionary:
 		"figure":
 			var f:=HistoricalFigures.by_id(String(ref.id))
 			out.merge({"role":"war leader" if String(f.get("role",""))=="General" else String(f.get("role","")).to_lower(),"trade":String(f.get("role","")).to_lower(),"village":String(f.get("origin","")),"detail":String(f.get("temperament","")),"household":"","he":"she" if String(f.get("gender",""))=="woman" else "he","his":"her" if String(f.get("gender",""))=="woman" else "his"},true)
+			# The gifted: their gift and what it does now (geniuses.gd).
+			if f.get("genius") is Dictionary: out.merge({"role":preload("res://scripts/geniuses.gd").court_title(f).to_lower(),"detail":"%s; %s" % [String(f.get("temperament","")),preload("res://scripts/geniuses.gd").gift_words(f)]},true)
 	return out
 
 static func _household_words(p:Dictionary)->String:

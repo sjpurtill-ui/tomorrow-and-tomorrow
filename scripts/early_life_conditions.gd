@@ -20,6 +20,8 @@ extends RefCounted
 ## All results are aggregate factors for one numeric population; the profile is
 ## O(practices) and independent of population size.
 
+const FoodCare:=preload("res://scripts/food_care.gd")
+
 ## Each category removes the listed excess once fully covered. Coverage comes
 ## from the best of the listed practices (weights sum, capped at 1) and the
 ## general effect channels (value / scale, summed, capped at 1).
@@ -206,6 +208,30 @@ static func _decree_cover(category_id:String)->float:
 	if not DECREE_COVER.has(category_id) or WorldSimulation.consequences==null:return 0.0
 	return maxf(0.0,float(WorldSimulation.consequences.policy_effect(String(DECREE_COVER[category_id]))))
 
+## Carers (keeping and caring, food_care.gd): people who watch the small
+## children, nurse the sick, keep the water clean and dress wounds cover this
+## share of each category's missing practice at full cover (CARE_SHARE of the
+## people, food_care.gd CARE_SHARE). They cannot replace birth attendants,
+## cooking or stores, and they lift only part of the pre-modern burden
+## (CARER_BURDEN).
+const CARER_COVER:={"childcare":0.60,"remedies":0.50,"water":0.40,"wounds":0.45}
+## Tending lifts part of the pre-modern burden of the young and of mothers
+## even where every practice is known: a sick child fed, kept warm and
+## watched, a mother nursed after the birth. Share of each band's burden
+## lifted at full cover; the rest stays (no modern medicine). A people that
+## leans hard on caring (the growth path: keepers and carers near 8 in 100
+## of the people) may run a little ahead of history, as a learning people
+## may in knowledge: about a fifth fewer infant deaths than the best
+## documented pre-modern societies at year 150, never wildly so; a people
+## with the usual 4 in 100 stays inside docs/research/BENCHMARKS_600.md
+## (as built: docs/PEOPLE_FIRST.md B).
+const CARER_BURDEN:={"under5":0.45,"child":0.25,"neonatal":0.50,"maternal":0.40}
+
+## The carers' cover a profile uses: the day's (context), else the settled
+## cover kept with the town's care (state.early_care), else none.
+static func _carer_cover(state:Node,context:Dictionary)->float:
+	return clampf(float(context.get("carer_cover",(state.early_care as Dictionary).get("carer_cover",0.0))),0.0,1.0)
+
 ## Share (0..1) of the pre-modern burden lifted by general health knowledge.
 static func burden_relief(discovery:Node)->float:
 	var total:=0.0
@@ -227,7 +253,17 @@ static func refresh(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		# moves to them gradually instead of losing people on the day it loads.
 		blend=1.0 if float(state.elapsed_days)<30.0 else minf(1.0,blend+float(WorldSimulation.span)/BLEND_DAYS)
 		state.early_care_blend=blend
-	var result:=profile(state,discovery,context)
+	# Carers' cover settles toward the hands on keeping and caring (context
+	# "carer_cover", food_care.gd): care is learned by doing, and an older save
+	# without it starts from none instead of saving lives on the day it loads.
+	var day:=context.duplicate()
+	if context.has("carer_cover"):
+		var kept:Dictionary=state.early_care
+		var target:=clampf(float(context.carer_cover),0.0,1.0)
+		var before:=float(kept.get("carer_cover",target if float(state.elapsed_days)<30.0 else 0.0))
+		day["carer_cover"]=FoodCare.settle_care(before,target)
+	var result:=profile(state,discovery,day)
+	result["carer_cover_target"]=clampf(float(context.get("carer_cover",result.carer_cover)),0.0,1.0)
 	state.early_care=result
 	# Tomorrow's conception uses today's first-year loss (weaning cut short).
 	result["infant_loss_estimate"]=CivilizationIndicators.infant_mortality_per_1000(state,discovery)/1000.0
@@ -241,6 +277,7 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	var blend:=clampf(float(state.early_care_blend),0.0,1.0)
 	var excess:={"under5":0.0,"child":0.0,"adult":0.0,"neonatal":0.0,"maternal":0.0}
 	var categories:Array[Dictionary]=[]
+	var carers:=_carer_cover(state,context)
 	for category:Dictionary in CATEGORIES:
 		var practice_cover:=0.0
 		var named:Array[String]=[]
@@ -264,12 +301,14 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		for channel:String in channels:
 			var scale:=float(channels[channel])
 			channel_cover+=maxf(0.0,discovery.effect(channel)/scale)
-		# research_600: organized care decrees cover part of a missing practice.
-		var coverage:=clampf(maxf(practice_cover,channel_cover)+_decree_cover(String(category.id)),0.0,1.0)
+		# research_600: organized care decrees cover part of a missing practice,
+		# and so do the carers (food_care.gd), each up to the whole of it.
+		var known_cover:=clampf(maxf(practice_cover,channel_cover)+_decree_cover(String(category.id)),0.0,1.0)
+		var coverage:=clampf(known_cover+carers*float(CARER_COVER.get(String(category.id),0.0)),0.0,1.0)
 		for key:String in excess:
 			var amount:=float(category.get(key,0.0))
 			excess[key]=float(excess[key])+amount*(1.0-coverage)
-		categories.append({"id":category.id,"label":category.label,"coverage":coverage,"known":named,"next":missing_names,"missing":String(category.missing)})
+		categories.append({"id":category.id,"label":category.label,"coverage":coverage,"carers":coverage-known_cover,"known":named,"next":missing_names,"missing":String(category.missing)})
 	var diet:=diet_window(state)
 	var malnutrition:=clampf(float(state.malnutrition_burden),0.0,1.0)
 	# Children feel a thin, monotonous diet long before adults starve.
@@ -288,7 +327,7 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	var conception:=lerpf(0.80,1.05,clampf((diet-0.35)/0.45,0.0,1.0))
 	if conception>PREMODERN_FECUNDITY_KNEE:conception=PREMODERN_FECUNDITY_KNEE+(conception-PREMODERN_FECUNDITY_KNEE)*PREMODERN_FECUNDITY_SLOPE
 	conception*=(1.0-overwork*0.16)*(1.0+maxf(0.0,infant_loss-REFERENCE_INFANT_LOSS)*INFANT_LOSS_REPLACEMENT)
-	var result:={"blend":blend,"diet":diet,"nutrition_factor":nutrition,"overwork":overwork,"infant_loss":infant_loss,"categories":categories}
+	var result:={"blend":blend,"diet":diet,"nutrition_factor":nutrition,"overwork":overwork,"infant_loss":infant_loss,"categories":categories,"carer_cover":carers}
 	for key:String in raw:result[key]=lerpf(1.0,float(raw[key]),blend)
 	result["conception"]=lerpf(1.0,conception,blend)
 	# research_3000: modern medicine clears the burden on top of general knowledge.
@@ -310,7 +349,8 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		var by_age:=key in ["under5","child","adult","elder"]
 		var crowd:=1.0+crowding*CROWDING_MORTALITY if by_age else 1.0
 		var remnant:=1.0-spare*SPARE_LAND_HEALTH if by_age else 1.0
-		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief)*remnant)*crowd,blend)
+		var tended:=1.0-carers*float(CARER_BURDEN.get(key,0.0))
+		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief)*remnant*tended)*crowd,blend)
 	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION),blend)
 	result["carrying_capacity"]=capacity
 	result["crowding"]=crowding
@@ -382,8 +422,12 @@ static func explanation(care:Dictionary)->Array[Dictionary]:
 		var next:=", ".join(PackedStringArray(category.get("next",[])))
 		var status:="Established" if coverage>=0.95 else ("Not yet practiced" if coverage<=0.02 else "Partly practiced")
 		var detail:=""
-		if coverage>=0.95:detail="In practice: %s." % known if known!="" else "Covered by later knowledge."
-		elif known=="":detail=String(category.get("missing",""))+(" To learn: %s." % next if next!="" else "")
-		else:detail="In practice: %s.%s" % [known," To learn: %s." % next if next!="" else ""]
+		# What the carers cover of it (food_care.gd), told apart from what is known.
+		var carers:=float(category.get("carers",0.0))
+		var tended:=" Carers cover %d in 100 of it." % roundi(carers*100.0) if carers>=0.005 else ""
+		if coverage>=0.95 and known=="" and carers>=0.005:detail="Carers cover %d in 100 of it." % roundi(carers*100.0)+(" To learn: %s." % next if next!="" else "")
+		elif coverage>=0.95:detail="In practice: %s." % known if known!="" else "Covered by later knowledge."
+		elif known=="":detail=String(category.get("missing",""))+tended+(" To learn: %s." % next if next!="" else "")
+		else:detail="In practice: %s.%s%s" % [known,tended," To learn: %s." % next if next!="" else ""]
 		rows.append({"name":String(category.get("label","")),"coverage":coverage,"status":status,"detail":detail})
 	return rows

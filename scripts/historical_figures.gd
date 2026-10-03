@@ -2,12 +2,19 @@ extends Node
 
 # Exceptional figures only. The population remains numerical cohorts.
 const NAMES=preload("res://scripts/historical_name_generator.gd")
+## Gifted children born among the people (geniuses.gd): their births, notice,
+## coming of age and the effect they have while they live.
+const GENIUSES=preload("res://scripts/geniuses.gd")
+## Ordinary figures alive at once; gifted ones (geniuses.gd) have their own cap.
 const MAX_LIVING:=12
 const MAX_RECORDS:=512
-const ROLES:={"General":"security","Admiral":"security","Air Commander":"security","Scholar":"knowledge","Physician":"health","Engineer":"infrastructure","Agronomist":"nutrition","Organizer":"institutions","Artist":"culture","Explorer":"logistics","Architect":"monuments"}
-const CALLINGS:={"General":"training formations and keeping troops together","Admiral":"keeping ships at sea and crews fit to fight","Air Commander":"training aircrews and keeping aircraft flying","Scholar":"testing explanations and teaching apprentices","Physician":"comparing treatments and training healers","Engineer":"improving structures and teaching builders","Agronomist":"comparing harvests and preserving practical knowledge","Organizer":"improving public administration and teaching officials","Artist":"developing a shared artistic tradition","Explorer":"recording routes and teaching navigators","Architect":"designing great works and training master builders"}
+const ROLES:={"General":"security","Admiral":"security","Air Commander":"security","Scholar":"knowledge","Physician":"health","Engineer":"infrastructure","Agronomist":"nutrition","Organizer":"institutions","Artist":"culture","Explorer":"logistics","Architect":"monuments","Quarrier":"production","Maker":"production","Carrier":"logistics"}
+const CALLINGS:={"General":"training formations and keeping troops together","Admiral":"keeping ships at sea and crews fit to fight","Air Commander":"training aircrews and keeping aircraft flying","Scholar":"testing explanations and teaching apprentices","Physician":"comparing treatments and training healers","Engineer":"improving structures and teaching builders","Agronomist":"comparing harvests and preserving practical knowledge","Organizer":"improving public administration and teaching officials","Artist":"developing a shared artistic tradition","Explorer":"recording routes and teaching navigators","Architect":"designing great works and training master builders","Quarrier":"finding the good stone, timber and ore and teaching cutters and diggers","Maker":"making better things from what is cut and carried, and teaching makers","Carrier":"getting loads where they are needed before they spoil, and teaching carriers"}
+## Callings only a gifted child grows into (geniuses.gd): never emerging on
+## their own, like the commissioned roles.
+const BORN_ROLES:=["Quarrier","Maker","Carrier"]
 const UPBRINGINGS:=["a household of craftspeople, where mistakes had immediate costs","a farming family that kept careful accounts of good and bad years","a family of traveling traders, learning to listen before bargaining","a crowded household where sharing work mattered more than rank","a settlement on a trade route, surrounded by unfamiliar languages","a family of practical teachers who expected every claim to be demonstrated"]
-const TURNING_POINTS:={"General":["Watching a poorly organized withdrawal convinced them that preparation saves lives.","An early dispute with a superior left them determined to earn loyalty rather than assume it."],"Admiral":["A ship lost on a lee shore through a captain's pride taught them to respect weather over courage.","Years as a junior officer on a crowded deck taught them that a crew fights as well as it is fed."],"Air Commander":["Watching crews fly into weather they had been told to ignore taught them to trust their airmen's judgment.","An early crash in training convinced them that careful maintenance saves more lives than bravery."],"Scholar":["Two teachers offered incompatible explanations of the same observation; they began keeping their own records.","A failed demonstration taught them to separate a pleasing explanation from a dependable one."],"Physician":["Conflicting advice during a household illness led them to compare treatments methodically.","They began by assisting an experienced healer and questioning which routines actually helped."],"Engineer":["Repeated repairs to the same structure led them to ask why it kept failing.","Their apprenticeship taught them that an elegant design is useless if nobody can maintain it."],"Agronomist":["Different harvests on neighboring plots inspired a habit of careful comparison.","A poor growing season made the preservation of practical knowledge a personal concern."],"Organizer":["A dispute over shared stores showed them how weak records can turn neighbors against one another.","They learned administration by reconciling promises with the work a community could actually perform."],"Artist":["The same story told differently by neighboring communities became a lasting source of fascination.","An exacting teacher demanded imitation; they became more interested in finding a voice of their own."],"Explorer":["An unreliable route description convinced them that knowledge must be usable by the next traveler.","Early journeys taught them to value local knowledge over confident guesses."],"Architect":["A collapsed granary roof taught them that ambition without measurement kills.","They carried stone for a master builder who never explained anything, and swore to teach differently."]}
+const TURNING_POINTS:={"General":["Watching a poorly organized withdrawal convinced them that preparation saves lives.","An early dispute with a superior left them determined to earn loyalty rather than assume it."],"Admiral":["A ship lost on a lee shore through a captain's pride taught them to respect weather over courage.","Years as a junior officer on a crowded deck taught them that a crew fights as well as it is fed."],"Air Commander":["Watching crews fly into weather they had been told to ignore taught them to trust their airmen's judgment.","An early crash in training convinced them that careful maintenance saves more lives than bravery."],"Scholar":["Two teachers offered incompatible explanations of the same observation; they began keeping their own records.","A failed demonstration taught them to separate a pleasing explanation from a dependable one."],"Physician":["Conflicting advice during a household illness led them to compare treatments methodically.","They began by assisting an experienced healer and questioning which routines actually helped."],"Engineer":["Repeated repairs to the same structure led them to ask why it kept failing.","Their apprenticeship taught them that an elegant design is useless if nobody can maintain it."],"Agronomist":["Different harvests on neighboring plots inspired a habit of careful comparison.","A poor growing season made the preservation of practical knowledge a personal concern."],"Organizer":["A dispute over shared stores showed them how weak records can turn neighbors against one another.","They learned administration by reconciling promises with the work a community could actually perform."],"Artist":["The same story told differently by neighboring communities became a lasting source of fascination.","An exacting teacher demanded imitation; they became more interested in finding a voice of their own."],"Explorer":["An unreliable route description convinced them that knowledge must be usable by the next traveler.","Early journeys taught them to value local knowledge over confident guesses."],"Architect":["A collapsed granary roof taught them that ambition without measurement kills.","They carried stone for a master builder who never explained anything, and swore to teach differently."],"Quarrier":["A wall of stone that split along the wrong line taught them to read the grain before striking.","They watched diggers open the same poor pit year after year and went looking for a better one."],"Maker":["A tool that broke in a careless hand taught them that a thing is only as good as its weakest part.","They sat beside an old maker who never wasted a scrap, and learned to see the thing inside the stuff."],"Carrier":["A load of food spoiled on a slow road while people went hungry at its end.","They learned every path and ford by carrying for others, and how much a back can bear."]}
 const TEMPERAMENTS:=["patient and exacting","bold and impatient","generous but proud","skeptical and persistent","eloquent but restless","quiet and uncompromising","inventive and stubborn","disciplined but suspicious"]
 const MOTIVES:=["make useful knowledge available beyond a privileged few","prove that inherited methods can be improved","protect communities from the failures witnessed in youth","build a tradition that can survive its founder","earn recognition through work that others can verify","train successors capable of questioning their teacher"]
 ## Roles that appear only when a society commissions them (never by emergence).
@@ -60,17 +67,45 @@ var last_day:=0
 var last_emergence:=0
 var panel:Control
 var layer:CanvasLayer
+## Gifted children and the gifted grown (geniuses.gd): the children as their
+## own records, the grown as an index to their figure in `people`.
+var geniuses:Array[Dictionary]=[]
+## Each work's share more that its gifted add today (geniuses.gd refresh):
+## {role: 0..0.40}, read by GameState.effective_workers.
+var genius_bonus:Dictionary={}
+var genius_serial:=0
+## The day the gifted births were last counted (-1: not yet, as in an older
+## save: counting starts on its first day, so nobody is born retroactively),
+## and the people's births then.
+var genius_since:=-1
+var genius_births_seen:=0
+## How many were born, noticed, missed (grew up ordinary), lost as children
+## and grown: the engine's own tally, for tests and tuning.
+var genius_tally:Dictionary={}
 
 func ensure()->void:
 	if initialized and seed_value==WorldSimulation.state.world_seed: return
 	reset_for_new_world()
 	initialized=true; seed_value=WorldSimulation.state.world_seed; last_day=int(WorldSimulation.state.elapsed_days); last_emergence=last_day
 	for role in ROLES:
-		if role not in COMMISSIONED_ROLES: _create(String(role),last_day)
+		if role not in COMMISSIONED_ROLES and role not in BORN_ROLES: _create(String(role),last_day)
 
 func reset_for_new_world()->void:
 	people.clear(); used.clear(); assignments.clear(); serial=0; initialized=false; last_day=0; last_emergence=0; _ids.map={}
+	geniuses.clear(); genius_bonus={}; genius_serial=0; genius_since=-1; genius_births_seen=0; genius_tally={}
 	if is_instance_valid(panel): panel.queue_free()
+
+## A figure's name: the one place every figure's name comes from, the realm's
+## own names for its era (era_names.gd), else the old traditions. `key` seeds
+## the draw; `hint` is era_names' ({skill}). Another builder is giving each
+## people its own language: re-point this and every figure follows.
+func name_identity(key:int,woman:bool,tradition:String,hint:Dictionary={})->Dictionary:
+	var owner:=String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player"
+	var taken:Dictionary=preload("res://scripts/era_names.gd").used_in_court() if owner=="player" else {}
+	for known in used: taken[known]=true
+	var made:Dictionary=preload("res://scripts/era_names.gd").make(seed_value,key,woman,owner,taken,hint)
+	if String(made.get("name",""))=="" or used.has(String(made.get("name",""))): made=NAMES.make(seed_value,key,woman,tradition,used)
+	return made
 
 func _create(role:String,day:int)->Dictionary:
 	if people.size()>=MAX_RECORDS or living_count()>=MAX_LIVING: return {}
@@ -78,11 +113,7 @@ func _create(role:String,day:int)->Dictionary:
 	var traditions:Array=NAMES.POOLS.keys()
 	var tradition:=String(traditions[posmod(seed_value+serial/8,traditions.size())])
 	# The realm's own great figures carry the realm's names for its era.
-	var owner:=String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player"
-	var taken:Dictionary=preload("res://scripts/era_names.gd").used_in_court() if owner=="player" else {}
-	for known in used: taken[known]=true
-	var identity:Dictionary=preload("res://scripts/era_names.gd").make(seed_value,serial,serial%2==0,owner,taken)
-	if String(identity.get("name",""))=="" or used.has(String(identity.get("name",""))): identity=NAMES.make(seed_value,serial,serial%2==0,tradition,used)
+	var identity:Dictionary=name_identity(serial,serial%2==0,tradition)
 	serial+=1
 	if identity.is_empty(): return {}
 	used[identity.name]=true
@@ -94,10 +125,11 @@ func _create(role:String,day:int)->Dictionary:
 	_event(p,day,"Entered public life as a %s." % role.to_lower())
 	return p
 
+## Ordinary figures alive (the gifted grown have their own cap, geniuses.gd).
 func living_count()->int:
 	var count:=0
 	for p in people:
-		if p.status!="dead": count+=1
+		if p.status!="dead" and not p.has("genius"): count+=1
 	return count
 
 ## An id index over the roster, held in an object so the save's reflection
@@ -141,7 +173,8 @@ func skills_of(p:Dictionary)->Dictionary:
 ## and the realm's renowned soldiers.
 func general_skill(p:Dictionary,skill:String,base:Dictionary)->float:
 	var own:=float(skills_of(p).get(skill,float(p.get("talent",.8))*0.6))
-	return clampf(own*OWN_WEIGHT+float(base.get(skill,.5))*(1.0-OWN_WEIGHT)+living_bonus(p)*.2+(multiplier("security")-1.0)*.1,0,1)
+	# A war leader of rare gift (geniuses.gd) leads above their own drawn skill.
+	return clampf(own*OWN_WEIGHT+float(base.get(skill,.5))*(1.0-OWN_WEIGHT)+living_bonus(p)*.2+(multiplier("security")-1.0)*.1+GENIUSES.command_bonus(p),0,1)
 
 ## Adds to a general's record (RECORD_KEYS).
 func note_record(id:String,key:String,amount:float)->void:
@@ -217,13 +250,15 @@ func advance(day:int)->void:
 		last_emergence=day
 		var counts:Dictionary={}
 		for role in ROLES:
-			if role not in COMMISSIONED_ROLES: counts[role]=0
+			if role not in COMMISSIONED_ROLES and role not in BORN_ROLES: counts[role]=0
 		for p in people:
-			if p.status!="dead" and counts.has(p.role): counts[p.role]+=1
+			if p.status!="dead" and counts.has(p.role) and not p.has("genius"): counts[p.role]+=1
 		var chosen:="General"
 		for role in counts:
 			if counts[role]<counts[chosen]: chosen=role
 		_create(chosen,day)
+	# Gifted children: born, noticed, grown, lost; and what the grown add.
+	GENIUSES.advance(self,day)
 
 func support(id:String)->Dictionary:
 	ensure()
@@ -238,7 +273,13 @@ func support(id:String)->Dictionary:
 	return {"ok":true}
 
 func living_bonus(p:Dictionary)->float:
-	return (.12+float(p.talent)*.18) if p.status=="living" and p.supported else 0.0
+	return patron_lift(p) if p.status=="living" and p.supported else 0.0
+
+## What the god's patronage adds while a figure lives: research in their
+## field that much quicker (multiplier: a field gains at most 0.4 from all it
+## supports) and a fifth of it to a supported general's skills.
+func patron_lift(p:Dictionary)->float:
+	return .12+float(p.get("talent",.8))*.18
 
 func multiplier(domain:String)->float:
 	ensure()
@@ -265,17 +306,27 @@ func commission_architect(day:int,slot:String)->Dictionary:
 	ensure()
 	var p:=by_id(String(assignments.get(slot,"")))
 	if not p.is_empty() and p.status=="living": return p
-	p={}
-	for candidate in people:
-		if candidate.role=="Architect" and candidate.status=="living" and not candidate.id in assignments.values(): p=candidate; break
+	# A master builder of rare gift (geniuses.gd) is asked first.
+	p=_free_gifted("Architect")
+	if p.is_empty():
+		for candidate in people:
+			if candidate.role=="Architect" and candidate.status=="living" and not candidate.id in assignments.values(): p=candidate; break
 	if p.is_empty(): p=_create("Architect",day)
 	if p.is_empty():
 		for candidate in people:
 			if candidate.role=="Engineer" and candidate.status=="living" and not candidate.id in assignments.values(): p=candidate; break
 	if p.is_empty(): return {}
 	assignments[slot]=p.id
+	if p.get("genius") is Dictionary: (p.genius as Dictionary)["led"]=day
 	_event(p,day,"Commissioned as master builder of a great work.")
 	return p
+
+## A living, unassigned grown genius of this calling, or {}.
+func _free_gifted(role:String)->Dictionary:
+	var busy:=assignments.values()
+	for candidate in people:
+		if candidate.role==role and candidate.status=="living" and candidate.has("genius") and not candidate.id in busy: return candidate
+	return {}
 
 func release_assignment(slot:String)->void:
 	assignments.erase(slot)
@@ -298,9 +349,11 @@ func commander(base:Dictionary,slot:String)->Dictionary:
 	ensure()
 	var p:=by_id(String(assignments.get(slot,"")))
 	if p.is_empty() or p.status!="living":
-		p={}
-		for candidate in people:
-			if candidate.role=="General" and candidate.status=="living" and not candidate.id in assignments.values(): p=candidate; break
+		# A war leader of rare gift (geniuses.gd) is sent first.
+		p=_free_gifted("General")
+		if p.is_empty():
+			for candidate in people:
+				if candidate.role=="General" and candidate.status=="living" and not candidate.id in assignments.values(): p=candidate; break
 		if p.is_empty(): p=_create("General",int(WorldSimulation.state.elapsed_days))
 		if p.is_empty(): return base.duplicate(true)
 		assignments[slot]=p.id
@@ -403,9 +456,49 @@ func resolve_captive(id:String,policy:String)->void:
 		p.status="living"; _event(p,int(WorldSimulation.state.elapsed_days),"Returned from captivity through %s." % policy)
 
 func biography(p:Dictionary)->String:
+	if p.get("genius") is Dictionary: return GENIUSES.biography(p)
 	var pronoun:="She" if p.gender=="woman" else "He"
 	return "%s grew up near %s, in %s. %s entered public life at age %d.\n\n%s\n\n%s is %s, with an ambition to %s. Their work centers on %s." % [p.name,p.origin,p.get("upbringing","a working household"),pronoun,(int(p.emerged)-int(p.born))/365,p.get("turning_point","Early experience shaped a practical vocation."),pronoun,p.temperament,p.motive,CALLINGS[p.role]]
 
+
+## A noticed gifted child comes of age (geniuses.gd): a figure of the work's
+## calling, born when they were born, in public life from today. {} when the
+## roster has no room left.
+func create_genius(g:Dictionary,day:int,home_name:String)->Dictionary:
+	if people.size()>=MAX_RECORDS: _forget_gifted_dead()
+	if people.size()>=MAX_RECORDS: return {}
+	var layer_id:=String(g.get("layer",""))
+	var role:=String(GENIUSES.FIGURE_ROLE.get(layer_id,""))
+	if not ROLES.has(role): return {}
+	var rng:=RandomNumberGenerator.new(); rng.seed=hash("%d:genius_figure:%s" % [seed_value,String(g.get("id",""))])
+	var traditions:Array=NAMES.POOLS.keys()
+	var tradition:=String(traditions[posmod(seed_value+int(g.get("serial",0)),traditions.size())])
+	serial+=1
+	var gift:=clampf(float(g.get("gift",0.5)),0.0,1.0)
+	var p:Dictionary={"id":"figure_%d_%d" % [seed_value,serial],"name":String(g.name),"tradition":tradition,"gender":"woman" if bool(g.get("female",false)) else "man","role":role,"domain":ROLES[role],
+		"born":int(g.born),"emerged":day,"death_day":-1,"natural_death":int(g.born)+GENIUSES.OLDEST_YEARS*365,"status":"living","talent":GENIUSES.talent_of(gift),
+		"temperament":TEMPERAMENTS[rng.randi_range(0,TEMPERAMENTS.size()-1)],"motive":MOTIVES[rng.randi_range(0,MOTIVES.size()-1)],"origin":home_name,"upbringing":"","turning_point":TURNING_POINTS[role][rng.randi_range(0,1)],
+		"supported":false,"work_days":0,"renown":4,"legacy":0.0,"events":[],"battle_keys":[],"recover_day":-1,
+		"genius":{"layer":layer_id,"gift":gift,"home":String(g.get("home","")),"noticed":int(g.get("noticed",day)),"grown":day,"pitched":-1,"led":-1}}
+	used[String(p.name)]=true
+	people.append(p)
+	_ids.map={}
+	skills_of(p)
+	_event(p,int(g.get("noticed",day)),"Noticed as a child for a rare gift for %s." % String(GENIUSES.GIFT.get(layer_id,"their work")))
+	_event(p,day,"Came of age and took up %s." % String(GENIUSES.GIFT.get(layer_id,"their work")))
+	return p
+
+## Makes room in a full roster: the longest-dead gifted figures nobody is
+## assigned to are forgotten first (geniuses.gd KEEP_DEAD).
+func _forget_gifted_dead()->void:
+	var dead:Array=[]
+	for p in people:
+		if p.has("genius") and p.status=="dead" and not String(p.id) in assignments.values(): dead.append(p)
+	if dead.size()<=0: return
+	dead.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.death_day)<int(b.death_day))
+	var keep:=mini(GENIUSES.KEEP_DEAD,dead.size()-1)
+	for i in dead.size()-keep: people.erase(dead[i])
+	_ids.map={}
 
 func export_state()->Dictionary:
 	ensure()
@@ -414,7 +507,7 @@ func export_state()->Dictionary:
 func import_state(state:Dictionary)->Dictionary:
 	if int(state.get("version",0))!=1 or int(state.get("seed",0))!=WorldSimulation.state.world_seed: return {"error":"Figure save has an incompatible version or world seed."}
 	if not state.get("people",[]) is Array or state.people.size()>MAX_RECORDS: return {"error":"Invalid historical figure roster."}
-	var ids:Dictionary={}; var names:Dictionary={}; var alive:=0
+	var ids:Dictionary={}; var names:Dictionary={}; var alive:=0; var gifted:=0
 	for p in state.people:
 		if not p is Dictionary or not p.has_all(["id","name","role","status","born","emerged","natural_death","death_day","talent","temperament","motive","origin","gender","domain","supported","work_days","renown","legacy","events","battle_keys","recover_day","tradition"]): return {"error":"Incomplete historical figure."}
 		if ids.has(p.id) or names.has(p.name) or not ROLES.has(p.role) or p.status not in ["living","dead","captured","wounded"]: return {"error":"Invalid or duplicate historical figure."}
@@ -435,13 +528,20 @@ func import_state(state:Dictionary)->Dictionary:
 				if not String(key) in RECORD_KEYS or not (p.record[key] is float or p.record[key] is int) or not is_finite(float(p.record[key])) or float(p.record[key])<0.0: return {"error":"Invalid figure record entry."}
 		for count_key in ["battles_won","battles_lost"]:
 			if p.has(count_key) and (not (p[count_key] is int or p[count_key] is float) or int(p[count_key])<0): return {"error":"Invalid figure battle count."}
-		if p.status!="dead": alive+=1
+		# A grown genius (optional: older saves have none; geniuses.gd).
+		if p.has("genius") and not GENIUSES.valid_figure(p): return {"error":"Invalid gifted figure."}
+		if p.status!="dead":
+			if p.has("genius"): gifted+=1
+			else: alive+=1
 		ids[p.id]=true; names[p.name]=true
-	if alive>MAX_LIVING or int(state.get("serial",0))<state.people.size(): return {"error":"Invalid figure count."}
+	if alive>MAX_LIVING or gifted>GENIUSES.MAX_LIVING or int(state.get("serial",0))<state.people.size(): return {"error":"Invalid figure count."}
 	if not state.get("assignments",{}) is Dictionary: return {"error":"Invalid figure assignments."}
 	for id in state.get("assignments",{}).values():
 		if not ids.has(id): return {"error":"Unknown assigned figure."}
 	people.assign(state.people.duplicate(true)); used=names; assignments=state.get("assignments",{}).duplicate(true)
+	# Gifted children already named keep their names reserved.
+	for g in geniuses:
+		if String(g.get("name",""))!="": used[String(g.name)]=true
 	serial=int(state.get("serial",people.size())); last_day=int(state.get("last_day",0)); last_emergence=int(state.get("last_emergence",0)); seed_value=WorldSimulation.state.world_seed; initialized=true
 	_ids.map={}
 	# Commanders saved before they had skills of their own draw them now, from

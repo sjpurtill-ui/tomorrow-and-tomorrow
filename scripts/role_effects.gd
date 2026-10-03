@@ -35,7 +35,8 @@ static var _cache:Dictionary={}
 ## {role: {now, plus_ten}}.
 static func all_cached()->Dictionary:
 	var state=_state()
-	var key:="%s|%d|%d|%d|%d" % [String(WorldSimulation.actor_id),int(state.world_seed),int(state.elapsed_days)/CACHE_DAYS,int(state.population_total),state.population_allocations.hash()]
+	# A gifted person coming of age or dying changes the work at once (geniuses.gd).
+	var key:="%s|%d|%d|%d|%d|%d" % [String(WorldSimulation.actor_id),int(state.world_seed),int(state.elapsed_days)/CACHE_DAYS,int(state.population_total),state.population_allocations.hash(),WorldSimulation.figures.genius_bonus.hash() if WorldSimulation.figures!=null else 0]
 	if key!=_cache_key:
 		var fresh:={}
 		for role:String in ROLES:fresh[role]=of(role)

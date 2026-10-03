@@ -66,11 +66,13 @@ func _city_tab()->Dictionary:
 			{"label":"Change who builds","sub":"The People: how many build, make and carry","on_press":jump("overview",0)}]}]}
 
 ## Who builds: the builders set to it, those on the town's own works, and the
-## share a landmark or military works take (GameState.effective_workers).
+## share a landmark or military works take, in heads (GameState.workers_at:
+## a great work's favour or a gifted builder makes each count for more, not
+## more of them).
 func _crews()->Dictionary:
 	var heads:=maxi(0,int(GameState.population_allocations.get("Construction",0)))
-	var town:=maxf(0.0,GameState.effective_workers("Construction"))
-	var with_military:=maxf(town,GameState.effective_workers("Construction",true))
+	var town:=maxf(0.0,GameState.workers_at("Construction"))
+	var with_military:=maxf(town,GameState.effective_workers("Construction",true,false,false,false,false))
 	var landmark_share:=clampf(preload("res://scripts/undertaking_system.gd").share(GameState),0.0,0.95)
 	return {"heads":heads,"town":town,"military":with_military-town,"landmark":with_military*landmark_share/(1.0-landmark_share)}
 

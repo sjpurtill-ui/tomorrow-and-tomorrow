@@ -385,8 +385,12 @@ static func labor()->Array:
 	# worked out again only when the work changes or a week has passed.
 	var effects:=RoleEffects.all_cached()
 	for role:String in Manual.ROLES:
+		var effect:=(effects.get(role,{}) as Dictionary).duplicate()
+		# A gifted person of this work, grown or growing (geniuses.gd).
+		var gifted:=preload("res://scripts/geniuses.gd").row_words(role)
+		if gifted!="":effect["genius"]=gifted
 		out.append({"id":role,"label":Manual.task_words(role),"count":int(counts[role]),"icon":String(ROLE_TASK.get(role,"gather")),"mix":mix if role=="Food" else [],
-			"effect":(effects.get(role,{}) as Dictionary).duplicate()})
+			"effect":effect})
 	return out
 
 

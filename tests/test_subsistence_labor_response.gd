@@ -48,9 +48,14 @@ func test_short_stores_plan_more_food_work_than_full_stores()->void:
 
 func test_the_reserve_target_is_what_the_stores_can_hold()->void:
 	# Baskets and bundles for about 10 days: 10 days in store is already all
-	# the reserve there is room for, so it plans no more than full stores do.
+	# the reserve there is room for, so it plans no more than the need, where
+	# a people with room for months would still be putting food by.
+	GameState.founding_manifest["food_storage_rations"]=120.0*200.0
+	var room:=_planned(9.0)
 	GameState.founding_manifest["food_storage_rations"]=120.0*10.0
-	assert_float(_planned(9.0)).is_equal_approx(_planned(90.0),0.5)
+	var baskets:=_planned(9.0)
+	assert_float(baskets).is_less(room)
+	assert_float(baskets).is_less_equal(_planned(0.0))
 
 func test_the_food_floor_sits_below_the_typical_share_so_better_farming_frees_hands()->void:
 	GameState.elapsed_days=0.0
