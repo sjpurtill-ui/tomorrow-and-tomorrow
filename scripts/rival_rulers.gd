@@ -192,7 +192,8 @@ static func rival_character(civ_id:String)->Dictionary:
 static func portrait_person(civ_id:String)->Dictionary:
 	## The ruler as a portrait subject: the same picture for life.
 	var c:=character(civ_id)
-	var person:={"name":ruler_name(civ_id),"person_id":0}
+	# Drawn as one of their own people (people_appearance.gd).
+	var person:={"name":ruler_name(civ_id),"person_id":0,"civilization_id":civ_id,"appearance_civ_id":civ_id}
 	if not c.is_empty(): person["early_art_index"]=int(c.portrait)
 	return person
 
@@ -393,7 +394,10 @@ static func _succeed(civ_id:String,day:int)->void:
 	var serial:=posmod(hash("%s:heir:%d" % [civ_id,generation]),90000)+20000
 	var heir_woman:=serial%2==0
 	var used:={old_name:true,"given:"+old_name.get_slice(" ",0):true}
-	var identity:Dictionary=EraNames.make(int(GameState.world_seed),serial,heir_woman,civ_id,used)
+	# The heir is the ruler's child: their people's family name, or the
+	# father's name where they name by the father (era_names.kin_family).
+	var lineage_name:=EraNames.kin_family({"name":old_name,"woman":bool(old.get("woman",false))},"child",civ_id)
+	var identity:Dictionary=EraNames.make(int(GameState.world_seed),serial,heir_woman,civ_id,used,{"family":lineage_name} if lineage_name!="" else {})
 	var heir_name:=String(identity.get("name",""))
 	if heir_name.is_empty() or heir_name==old_name: heir_name=old_name.get_slice(" ",0)+" the Younger"
 	var reign:=maxi(1,floori(float(day-int(old.get("since",day)))/365.0))

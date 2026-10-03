@@ -51,7 +51,7 @@ func test_learned_custom_still_counts()->void:
 	assert_str(Crisis._default_choice(_sickness(),"open")).is_equal("apart")
 
 func _palette()->Array:
-	return EraNames.PALETTES[EraNames.tradition("player",int(GameState.world_seed))]
+	return EraNames.palette("player",int(GameState.world_seed))
 
 func _living(names:Array)->void:
 	for n in names:

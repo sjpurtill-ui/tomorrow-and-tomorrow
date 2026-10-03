@@ -99,7 +99,7 @@ static func _line(column:VBoxContainer,prefill:String)->LineEdit:
 	input.custom_minimum_size=Vector2(0,44)
 	input.add_theme_font_size_override("font_size",18)
 	column.add_child(input)
-	var heard:=NationName.suggestions(4)
+	var heard:=NationName.suggestions(5)
 	if heard.is_empty(): return input
 	var row:=HFlowContainer.new()
 	row.name="NationNameSuggestions"
