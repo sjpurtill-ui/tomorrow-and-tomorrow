@@ -715,6 +715,15 @@ func _battle_links(copy:VBoxContainer,entry:Dictionary)->void:
 ## A moment about a person or a people at court offers the court.
 func _court_link(copy:VBoxContainer,entry:Dictionary)->void:
 	var action:Dictionary=entry.get("action",{}) if entry.get("action") is Dictionary else {}
+	# One held under guard (captured_agents.gd): "Bring them before you".
+	if String(action.get("kind",""))=="prisoner":
+		var id:=String(action.get("prisoner_id",""))
+		if not preload("res://scripts/captured_agents.gd").is_held(id):return
+		var bring:=Button.new();bring.name="BringPrisoner";bring.text="Bring them before you";bring.flat=true;bring.alignment=HORIZONTAL_ALIGNMENT_LEFT
+		bring.add_theme_color_override("font_color",T.GOLD);bring.add_theme_font_size_override("font_size",13)
+		bring.pressed.connect(func()->void:preload("res://scripts/audience_director.gd").open_court_for({"prisoner_id":id}))
+		copy.add_child(bring)
+		return
 	if String(action.get("kind",""))!="court":return
 	var go:=Button.new();go.name="ToCourt";go.text="Go to the court";go.flat=true;go.alignment=HORIZONTAL_ALIGNMENT_LEFT
 	go.add_theme_color_override("font_color",T.GOLD);go.add_theme_font_size_override("font_size",13)
