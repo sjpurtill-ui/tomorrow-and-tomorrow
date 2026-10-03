@@ -1899,7 +1899,7 @@ class Surrogate:
                          - self.malnutrition * 0.28 - env_cost - process_cost + self.policy("health_target") + float(p["health_offset"]), 0.02, 0.97)
         fab = self.fabric
         # built_fabric.gd health_bonus: better homes (consequence_engine.gd).
-        h_target = clamp(h_target + fabric_model.K["HOME_HEALTH"] * fab.quality, 0.02, 0.97)
+        h_target = clamp(h_target + fabric_model.K["HOME_HEALTH"] * fab.quality + fab.weather(float(p["cold_pressure"])), 0.02, 0.97)
         self.health = lag(self.health, h_target, 0.022, days)
         stewards = self.able * self.alloc_pct["Administration"] / 100.0
         admin_cov = clamp(stewards / max(1.0, pop * 0.035), 0.0, 1.25)
@@ -1939,6 +1939,10 @@ class Surrogate:
         # work in hand takes its share of the crew first (undertaking_system.gd
         # advance_record; leaders.py sets construction_diverted).
         builders = self.able * self.alloc_pct["Construction"] / 100.0 * (1.0 - getattr(self, "construction_diverted", 0.0))
+        # built_fabric.gd crews: all builders while some sleep without a roof,
+        # HOMES_AHEAD of them while homes go up ahead of need.
+        if fabric_model.ON and self.housing_capacity >= pop:
+            builders *= fabric_model.K["HOMES_AHEAD"]
         if self.housing_capacity < pop * float(p["housing_target_ratio"]):
             self.housing_capacity += builders * labor_eff * float(p["housing_build_rate"]) * (1.0 + e("construction_rate") + e("housing_output")) * days
         # Founding works (Hearth, Lean-to, Open Work Area, Gathering Yard, Storage Pits)
@@ -1960,8 +1964,7 @@ class Surrogate:
                      # disaster_risk - mine_safety); about 1 in the calibration runs.
                      # research_3000: x the adult modern factor (occupational safety, trauma care).
                      "Other": float(p["other_mortality"]) * max(0.15, 1.0 + e("disaster_risk") - e("mine_safety")) * self._modern_adult}
-        # built_fabric.gd: better homes keep out cold, wet and sickness.
-        mortality["Exposure"] *= 1.0 - fabric_model.K["HOME_EXPOSURE"] * fab.quality
+        # built_fabric.gd: dry floors and walls, fewer illness deaths.
         mortality["Illness"] *= 1.0 - fabric_model.K["HOME_ILLNESS"] * fab.quality
         if intake < 0.98 or self.malnutrition > 0.05:
             ramp = clamp((self.shortage_days - 5.0) / 45.0, 0.0, 1.0)

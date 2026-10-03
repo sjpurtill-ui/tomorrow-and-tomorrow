@@ -118,7 +118,9 @@ static func _current_settlement_project() -> Dictionary:
 ## A day's work on the current project at today's crews: builders set the
 ## pace, carriers and makers help, and so do health, knowledge and policy.
 static func daily_work()->float:
-	var builders:=float(WorldSimulation.state.effective_workers("Construction"))
+	# The civic work's own crew (built_fabric.gd crews): never the builders
+	# raising homes, keeping repair, on the walls or on the fabric.
+	var builders:=float(Fabric.crews().civic_if)
 	var carriers:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var makers:=float(WorldSimulation.state.population_allocations.get("Crafting",0))
 	# Crews the realm's purse pays work faster (realm_purse.gd crews_bonus).
@@ -131,7 +133,9 @@ static func craft_pace()->float:
 
 ## A day's work on new homes at today's crews (HOUSING_BATCH_WORK a batch).
 static func housing_work_per_day()->float:
-	return float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+preload("res://scripts/realm_purse.gd").crews_bonus())*craft_pace()
+	# The homes' own crew (built_fabric.gd crews): all builders while some
+	# sleep without a roof, HOMES_AHEAD of them while homes go up ahead of need.
+	return float(Fabric.crews().homes_if)/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+preload("res://scripts/realm_purse.gd").crews_bonus())*craft_pace()
 
 ## The places one batch of new homes adds, with what the people know of
 ## building (housing_output: framing, room division; the Framed Hall's share

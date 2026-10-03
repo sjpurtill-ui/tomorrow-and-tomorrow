@@ -4920,13 +4920,14 @@ const DEFENSE_WORDS:=["people","build","hold"]
 ## (or `workers` of them): workers x labour efficiency x DEFENSE_WORK_PER_HAND,
 ## never more than DEFENSE_DAILY_SHARE of the stage a day. The daily work, the
 ## people's council and the screens all read this.
-func settlement_defense_daily_work(stage_index:int,workers:float=-1.0)->float:
+func settlement_defense_daily_work(stage_index:int,workers:float=-1.0,builders:bool=true)->float:
 	if stage_index<0 or stage_index>=SETTLEMENT_DEFENSE_STAGES.size(): return 0.0
 	if workers<0.0: workers=maxf(0.0,float(watch_at_home()))
 	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
 	# [built-fabric] The builders on the walls work beside the watch; stone
-	# stages need their skill (built_fabric.gd wall_hands).
-	workers=preload("res://scripts/built_fabric.gd").wall_hands(workers,stage_index)
+	# stages need their skill (built_fabric.gd wall_hands). `builders` false:
+	# the watch alone (a watchman's rate).
+	workers=preload("res://scripts/built_fabric.gd").wall_hands(workers,stage_index,builders)
 	return minf(float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE,workers*efficiency*DEFENSE_WORK_PER_HAND)
 
 
@@ -4939,7 +4940,11 @@ const DEFENSE_WORK_PER_HAND:=0.38
 func settlement_defense_full_pace_workers(stage_index:int)->int:
 	if stage_index<0 or stage_index>=SETTLEMENT_DEFENSE_STAGES.size(): return 0
 	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
-	return ceili(float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE/(efficiency*DEFENSE_WORK_PER_HAND)-0.0001)
+	# [built-fabric] Less the builders' own hands, at a watchman's rate on that stage.
+	var Fabric:=preload("res://scripts/built_fabric.gd")
+	var watchman:=Fabric.wall_hands(1.0,stage_index,false)
+	var needed:=float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE/(efficiency*DEFENSE_WORK_PER_HAND)-Fabric.wall_builder_hands(stage_index)
+	return maxi(0,ceili(needed/maxf(0.01,watchman)-0.0001))
 
 
 func settlement_defense_upgrade_availability()->Dictionary:
@@ -5046,7 +5051,8 @@ func _process_settlement_defense_day()->void:
 		if worn>0.0:settlement_defense["integrity"]=clampf(float(settlement_defense.integrity)-worn,0.0,1.0);changed=true
 	var integrity:=float(settlement_defense.integrity)
 	if integrity<1.0 and not _home_battle_running():
-		var repair_workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))+maxf(0.0,float(watch_at_home()))*0.20
+		# [built-fabric] The walls crew mends them (built_fabric.gd crews), with a fifth of the watch.
+		var repair_workers:=preload("res://scripts/built_fabric.gd").wall_builders()+maxf(0.0,float(watch_at_home()))*0.20
 		if repair_workers>0.0:
 			settlement_defense["integrity"]=move_toward(integrity,1.0,minf(0.006,repair_workers*0.00012)*WorldSimulation.span)
 			changed=true

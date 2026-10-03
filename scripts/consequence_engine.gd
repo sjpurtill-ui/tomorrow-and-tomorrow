@@ -798,8 +798,12 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var care_health:=FoodCare.CARE_HEALTH*FoodCare.care_cover_of(WorldSimulation.state)
 	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+fed_security*0.43+fresh_health+care_health+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")-policy_effect("disease_risk")*0.40+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
 	health_target=clampf(health_target+float(clinical.get("health_relief",0)),.02,.97)
-	# Better homes: the health the people tend toward (built_fabric.gd).
-	if not traveling:health_target=clampf(health_target+FABRIC.health_bonus(),.02,.97)
+	# Better homes: the health the people tend toward, and against the
+	# season's cold and heat for those with a roof (built_fabric.gd).
+	if not traveling:
+		var weather:=FABRIC.weather_bonus(cold_pressure*(1.0-float(clothing.get("cold",0))),heat_pressure)
+		WorldSimulation.state.simulation_metrics["fabric_weather"]=weather
+		health_target=clampf(health_target+FABRIC.health_bonus()+weather,.02,.97)
 	WorldSimulation.state.simulation_metrics["clinical_care"]=clinical.duplicate(true)
 	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,SPAN.rate(0.022))
 	WorldSimulation.state.simulation_metrics["water_intake_ratio"]=water_intake
@@ -878,10 +882,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"Travel exhaustion":0.0,
 		"Insecurity":maxf(0.0,0.30-security)*0.025+maxf(0.0,policy_effect("violence"))*0.020
 	}
-	# Better homes keep out cold, wet and sickness (built_fabric.gd).
-	if not traveling:
-		mortality_components["Exposure"]=float(mortality_components["Exposure"])*FABRIC.exposure_factor()
-		mortality_components["Illness"]=float(mortality_components["Illness"])*FABRIC.illness_factor()
+	# Dry floors and walls: fewer die of illness (built_fabric.gd).
+	if not traveling:mortality_components["Illness"]=float(mortality_components["Illness"])*FABRIC.illness_factor()
 	# Orders that spread or check sickness shift the illness burden directly.
 	mortality_components["Illness"]=maxf(0.0,float(mortality_components["Illness"])+policy_effect("disease_risk")*0.030)
 	mortality_components["Dehydration"]=_dehydration_mortality_rate(water_intake,WorldSimulation.state.consecutive_water_shortage_days)

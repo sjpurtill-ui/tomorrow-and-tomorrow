@@ -272,9 +272,11 @@ static func watch_fix(stage_index:int)->int:
 	var state=WorldSimulation.state
 	var now:=int(mc.watch_at_home())
 	var full:int=mc.settlement_defense_full_pace_workers(stage_index)
-	var per_hand:float=mc.settlement_defense_daily_work(stage_index,1.0)
+	# A watchman's own rate; the builders' work on the walls first (built_fabric.gd).
+	var per_hand:float=mc.settlement_defense_daily_work(stage_index,1.0,false)
+	var by_builders:float=mc.settlement_defense_daily_work(stage_index,0.0,true)
 	var work:=float(mc.SETTLEMENT_DEFENSE_STAGES[stage_index].work)
-	var rule_least:=ceili(work/(float(_controller().DEFENSE_MAX_DAYS)*per_hand)-0.0001) if per_hand>0.0 else 1
+	var rule_least:=ceili((work/float(_controller().DEFENSE_MAX_DAYS)-by_builders)/per_hand-0.0001) if per_hand>0.0 else 1
 	var base:=ceili(float(state.able_population())*float(WorldSimulation.government.BASE_ALLOCATIONS.get("Defense",4.0))/100.0)
 	return maxi(0,maxi(maxi(1,rule_least),mini(full,base))-now)
 

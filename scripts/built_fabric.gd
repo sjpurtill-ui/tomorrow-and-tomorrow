@@ -60,14 +60,16 @@ const GRADE_CRAFT_FULL:=[0.0,1.0,3.0,5.5,9.0]
 
 ## What the homes' quality (0..1, the places' mean GRADE_Q) does in full:
 ##   health        added to the health the people tend toward
+##   weather       added to it again for each unit of the season's cold and
+##                 heat (the toll of the weather on those who have a roof:
+##                 the shortfall's own exposure deaths are the homes' count)
 ##   cohesion      added to cohesion's target (contentment under a good roof)
-##   exposure      deaths of cold, wet and heat x (1 - this x quality)
 ##   illness       illness deaths x (1 - this x quality)
 ##   sickness      outbreaks of sickness x exp(-this x quality) (crisis_system.gd)
 ##   fire          fires x exp(-this x quality) (crisis_system.gd)
 const HOME_HEALTH:=0.03
 const HOME_COHESION:=0.04
-const HOME_EXPOSURE:=0.5
+const HOME_WEATHER:=0.03
 const HOME_ILLNESS:=0.2
 const HOME_SICKNESS:=0.3
 const HOME_FIRE:=1.0
@@ -78,8 +80,9 @@ const HOME_FIRE:=1.0
 const ROAD_FULL:=300.0
 ## Share of the roads' work lost a year without upkeep (ruts, washouts, weeds).
 const ROAD_WEAR:=0.08
-## Road kinds: [what the people must know, the most the road index can reach].
-const ROAD_KINDS:=[["",0.35],["graded_roads",0.7],["paved_haul_roads",1.0]]
+## Road kinds: [what the people must know (any one), the most the road index
+## can reach]. The kinds the map draws (settlement_roads.gd) read the same.
+const ROAD_KINDS:=[[[],0.35],[["graded_roads","drained_intertown_roads","road_stations"],0.7],[["paved_haul_roads","aggregate_road_foundations","turnpike_trust_roads"],1.0]]
 const ROAD_WORDS:=["paths and tracks","graded roads","paved roads"]
 ## Stone a builder-day on graded and paved roads (loads).
 const ROAD_STONE:=0.12
@@ -91,6 +94,8 @@ const ROAD_REACH:=0.5        # trade reach x (1 + this x roads) (trade_ledger.gd
 const ROAD_RISE:=0.3         # townsfolk who reach the fight x (1 + this x roads) (civilization_combat.gd)
 ## The road index at which the map draws each kind (settlement_roads.gd).
 const ROAD_DRAW:=[0.0,0.32,0.62]
+## An older save's roads start this far past the kind the map drew.
+const ROAD_SEED_MARGIN:=0.03
 
 # --- Beauty --------------------------------------------------------------------------
 
@@ -139,10 +144,26 @@ const WATERWORKS_WATER:=0.30     # water each carrier brings x (1 + this) (resou
 ## account cannot use goes to the others in proportion, fine works last.
 const SPLIT:={"homes":0.35,"roads":0.15,"works":0.20,"beauty":0.30}
 ## Who is kept first when there are too few builders for all the upkeep.
-const UPKEEP_ORDER:=["homes","works","roads","beauty"]
-## Share of the home town's free builders who work on the walls while a
-## defence stage is going up (military_campaign.gd settlement_defense).
+const UPKEEP_ORDER:=["homes","walls","works","roads","beauty"]
+## THE TOWN'S BUILDERS, EACH ON ONE THING (crews): every builder the town
+## counts (a great work's crew and military works are already out,
+## game_state.gd effective_workers) is on one of these, in this order:
+##   homes   all of them while some sleep without a roof; HOMES_AHEAD of them
+##           while new homes go up ahead of need (settlement_construction.gd)
+##   civic   CIVIC_SHARE of the rest while a civic work is in hand
+##   repair  what the town's civic works need to be kept in repair: REPAIR_SHARE
+##           of the people at most (half that once in full repair), as
+##           settlement_model.gd _advance_city_form counts its builders
+##   walls   at home, WALL_SHARE of the rest while a defence stage goes up or
+##           the walls are being mended (military_campaign.gd settlement_defense)
+##   fabric  the rest: the upkeep and improvement of the town's fabric
+const HOMES_AHEAD:=0.3
+const CIVIC_SHARE:=0.5
+const REPAIR_SHARE:=0.05
 const WALL_SHARE:=0.4
+## The walls' upkeep a year, as a share of their stage's work; unkept, they
+## wear WALL_WEAR of their integrity a year.
+const WALL_UPKEEP:=0.01
 
 # --- Craft -----------------------------------------------------------------------------
 
@@ -174,10 +195,9 @@ const STONE_STORES:=0.10
 const BUILDER_WALL_WEIGHT:=1.5
 const STONE_STAGE:=4
 const STONE_WATCH:=0.35
-## Walls wear WALL_WEAR of their integrity a year unless kept: kept in full
-## with WALL_KEEPERS of the people building.
+## Walls wear WALL_WEAR of their integrity a year while their upkeep goes
+## undone (the town's fabric keeps them, after its homes: UPKEEP_ORDER).
 const WALL_WEAR:=0.03
-const WALL_KEEPERS:=0.02
 ## Might (standing.gd): + FORT_MIGHT x the defences (bonus over BASTION_BONUS);
 ## our fighting strength as others weigh it x (1 + FORT_STRENGTH x bonus).
 const FORT_MIGHT:=0.4
@@ -193,11 +213,14 @@ const WALL_WISH_MAX:=0.6
 # --- Great works -------------------------------------------------------------------------
 
 ## Capability a great work's builders bring (wonder_concept.gd assess): this a
-## level of craft, and up to GREAT_BUILDERS with the crews at work (full at
-## GREAT_CREW builders) and GREAT_MATERIALS x (cover - 0.5) of the bill in store.
+## level of craft, and up to GREAT_BUILDERS with the crew on the work (full at
+## GREAT_CREW builders on it) and GREAT_MATERIALS x (cover - 0.5) of the bill
+## in store. A work not yet begun counts the crew it would get
+## (GREAT_CREW_SHARE of the builders, undertaking_system.gd advance_record).
 const GREAT_CRAFT:=0.025
 const GREAT_BUILDERS:=0.05
-const GREAT_CREW:=40.0
+const GREAT_CREW:=15.0
+const GREAT_CREW_SHARE:=0.20
 const GREAT_MATERIALS:=0.06
 ## The payoff (strength, rewards and allure of a work that stands) x (1 +
 ## GREAT_PAYOFF a level of craft).
@@ -220,6 +243,9 @@ static func data()->Dictionary:
 static func peek()->Dictionary:
 	var f:Dictionary=WorldSimulation.state.built_fabric
 	if int(f.get("v",0))>=1:return f
+	# The people's craft is seeded as any first reading of an older save seeds
+	# it (realm_data); the town's own record waits for its first day.
+	realm_data()
 	var fresh:={}
 	_found(fresh,false)
 	return fresh
@@ -228,10 +254,11 @@ static func peek()->Dictionary:
 static func realm_data()->Dictionary:
 	var r:Dictionary=WorldSimulation.state.fabric_realm
 	if int(r.get("v",0))<1:
-		r.merge({"v":1,"xp":0.0,"decay_day":int(WorldSimulation.state.elapsed_days),"towns":{},"wall_builders":0.0},true)
+		r.merge({"v":1,"xp":0.0,"decay_day":int(WorldSimulation.state.elapsed_days),"towns":{},"wall_builders":0.0,"wall_ready":0.0,"walls_kept":1.0},true)
 		# An older save: the builders already have the experience their
-		# present work would have given them, without the founding years.
-		var builders:=_all_builders()
+		# present work would have given them, without the founding years
+		# (this town's builders read for the whole people).
+		var builders:=_all_builders()*_national()/maxf(1.0,float(WorldSimulation.state.population_exact))
 		var years:=minf(CRAFT_YEARS,maxf(0.0,float(WorldSimulation.state.elapsed_days)/365.0))
 		r.xp=builders*_labor()*365.0*CRAFT_YEARS*(1.0-exp(-years/CRAFT_YEARS))
 	return r
@@ -253,9 +280,19 @@ static func _found(f:Dictionary,store:bool=true)->void:
 		var placed:=0.0
 		for g in range(1,GRADES.size()):placed+=float(homes[g])
 		homes[0]=maxf(0.0,1.0-placed)
+	# An older save's roads stand at the kind the map already drew for what
+	# the people know (settlement_roads.gd known_tier), so its map and its
+	# marches lose nothing.
+	var roads:=0.0
+	if settled>365.0*3.0:
+		var drawn:=int((load("res://scripts/settlement_roads.gd") as GDScript).call("known_tier",WorldSimulation.state))
+		if drawn>0:roads=minf(road_cap(),float(ROAD_DRAW[mini(drawn,ROAD_DRAW.size()-1)])+ROAD_SEED_MARGIN)*ROAD_FULL*maxf(1.0,float(WorldSimulation.state.population_exact))
 	f.merge({"v":1,"day":int(WorldSimulation.state.elapsed_days),"homes":homes,"places":maxi(0,int(WorldSimulation.state.housing_capacity)),
-		"roads":0.0,"beauty":0.0,"works":0.0,"spent":{},"paid":1.0,"effects":{}},true)
+		"roads":roads,"beauty":0.0,"works":0.0,"spent":{},"paid":1.0,"effects":{}},true)
 	_cache(f)
+	# The realm reads every town's fabric from its first day, not its first
+	# reckoning (built_fabric realm readings: roads, beauty, stone).
+	if store:_report_town(f,realm_data())
 
 ## The day: nothing until TICK_DAYS have passed, then the town's reckoning.
 ## settlement_construction.gd process_day calls it in every town's scope.
@@ -273,8 +310,11 @@ static func reckon(f:Dictionary,days:float)->void:
 	var years:=days/365.0
 	_grow_craft(realm,days)
 	_follow_places(f)
-	var builders:=free_builders()
-	var budget:=builders*_labor()*days*(1.0+CRAFT_WORK*craft())*(1.0+KILN_BUILDING*works_cover("kilns",f))
+	var crew:=crews()
+	if _is_home():
+		realm.wall_builders=float(crew.walls)
+		realm.wall_ready=float(crew.walls_ready)
+	var budget:=float(crew.fabric)*_labor()*days*(1.0+CRAFT_WORK*craft())*(1.0+KILN_BUILDING*works_cover("kilns",f))
 	var pop:=maxf(1.0,float(WorldSimulation.state.population_exact))
 	var places:=maxf(1.0,float(f.places))
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
@@ -286,12 +326,13 @@ static func reckon(f:Dictionary,days:float)->void:
 	var road_need:=float(f.roads)*ROAD_WEAR*years
 	var works_need:=float(f.works)*WORKS_WEAR*years
 	var beauty_need:=float(f.beauty)*BEAUTY_WEAR*years/maxf(1.0,artistry())
-	var need:=home_need+road_need+works_need+beauty_need
-	# Upkeep in UPKEEP_ORDER: homes, then work buildings, roads, and fine
-	# works last; what is not kept wears.
+	var walls_need:=_walls_upkeep()*years
+	var need:=home_need+walls_need+road_need+works_need+beauty_need
+	# Upkeep in UPKEEP_ORDER: homes, the walls, then work buildings, roads,
+	# and fine works last; what is not kept wears.
 	var kept:={}
 	var upkeep:=0.0
-	var wants:={"homes":home_need,"works":works_need,"roads":road_need,"beauty":beauty_need}
+	var wants:={"homes":home_need,"walls":walls_need,"works":works_need,"roads":road_need,"beauty":beauty_need}
 	for key:String in UPKEEP_ORDER:
 		var want:=float(wants[key])
 		var pay:=minf(budget,want)
@@ -299,6 +340,7 @@ static func reckon(f:Dictionary,days:float)->void:
 		kept[key]=clampf(pay/want,0.0,1.0) if want>0.0 else 1.0
 	f.paid=clampf(upkeep/need,0.0,1.0) if need>0.0 else 1.0
 	f.kept=kept
+	if _is_home():realm.walls_kept=float(kept.walls)
 	for g in range(GRADES.size()-1,0,-1):
 		var fall:=float(homes[g])*minf(1.0,float(GRADE_WEAR[g])*years*(1.0-float(kept.homes)))
 		homes[g]=float(homes[g])-fall;homes[g-1]=float(homes[g-1])+fall
@@ -306,7 +348,7 @@ static func reckon(f:Dictionary,days:float)->void:
 	f.works=float(f.works)*(1.0-minf(1.0,WORKS_WEAR*years*(1.0-float(kept.works))))
 	f.beauty=float(f.beauty)*(1.0-minf(1.0,BEAUTY_WEAR*years*(1.0-float(kept.beauty))))
 	# Then the improvements.
-	var spent:={"upkeep":upkeep,"homes":0.0,"roads":0.0,"works":0.0,"beauty":0.0,"walls":wall_builders()*_labor()*days}
+	var spent:={"upkeep":upkeep,"homes":0.0,"roads":0.0,"works":0.0,"beauty":0.0,"walls":float(crew.walls)*_labor()*days}
 	var shares:Dictionary=SPLIT.duplicate()
 	for round_index in 3:
 		if budget<=0.001:break
@@ -407,17 +449,32 @@ static func _take_any(work:float,loads:float,avail:Dictionary,stocks:Dictionary)
 
 ## Materials above what the town keeps back for its other works: RESERVE a
 ## person of each, or the bills of the civic works, arms and plants it is
-## gathering for (local_material_reserves.gd) and, at home, the next defence
-## stage's (home_defense.gd material_targets), whichever is more.
+## gathering for (local_material_reserves.gd), what its great works under way
+## have still to use (great_bills) and, at home, the next defence stage's
+## (home_defense.gd material_targets), whichever is more.
 const RESERVE:=1.0
 const MATERIALS:=["Timber","Clay","Stone","Fiber Plants"]
 static func _spare(pop:float,stocks:Dictionary)->Dictionary:
 	var kept:Dictionary=preload("res://scripts/local_material_reserves.gd").calculate()
 	var walls:Dictionary=preload("res://scripts/home_defense.gd").material_targets() if _is_home() and WorldSimulation.military!=null else {}
+	var works:=great_bills()
 	var out:={}
 	for item:String in MATERIALS:
-		var reserve:=maxf(RESERVE*pop,float(kept.get(item,0.0))+float(walls.get(item,0.0)))
+		var reserve:=maxf(RESERVE*pop,float(kept.get(item,0.0))+float(walls.get(item,0.0))+float(works.get(item,0.0)))
 		out[item]=maxf(0.0,float(stocks.get(item,0.0))-reserve)
+	return out
+
+## What the great works under way in this town have still to use, {material:
+## loads}: each one's bill for the work not yet done (undertaking_system.gd
+## _spend draws it as the work goes).
+static func great_bills()->Dictionary:
+	var U=preload("res://scripts/undertaking_system.gd")
+	var out:={}
+	for r:Dictionary in U.current_city(WorldSimulation.state).get("undertakings",[]):
+		if String(r.get("status","")) not in ["building","stalled"]:continue
+		var cost:Dictionary=preload("res://scripts/undertaking_catalog.gd").get_definition(String(r.id)).get("cost",{})
+		var left:=1.0-U.fraction(r)
+		for item:String in cost:out[item]=float(out.get(item,0.0))+float(cost[item])*left
 	return out
 
 static func _affordable(bill:Dictionary,per:float,avail:Dictionary)->float:
@@ -438,25 +495,72 @@ static func _take(bill:Dictionary,amount:float,avail:Dictionary,stocks:Dictionar
 # Builders and craft
 # ===========================================================================================
 
-## The town's builders free for the fabric today: the builders the town
-## counts (a great work's crew and military works already out), half while a
-## civic work or new homes go up, and less those on the walls.
-static func free_builders()->float:
-	var builders:=maxf(0.0,float(WorldSimulation.state.effective_workers("Construction")))
-	if not Construction._current_settlement_project().is_empty():builders*=0.5
-	if Construction.housing_under_way():builders*=0.5
-	var walls:=_wall_share()
-	if _is_home():realm_data().wall_builders=builders*walls
-	return builders*(1.0-walls)
+## The town's builders, each on one thing (see HOMES_AHEAD ... WALL_SHARE):
+## {builders, homes, homes_if (the homes' crew were new homes going up),
+## civic, civic_if, repair, repair_want, walls, walls_ready (the walls' crew
+## were a stage going up), fabric}. Every consumer reads its own crew here,
+## so no builder works two jobs in a day. `extra`: that many more builders
+## (what more builders would do, for the screens).
+static func crews(extra:float=0.0)->Dictionary:
+	var state=WorldSimulation.state
+	var builders:=maxf(0.0,float(state.effective_workers("Construction"))+extra)
+	var short:=int(state.population_total)>int(state.housing_capacity)
+	var homes_if:=builders if short else builders*HOMES_AHEAD
+	var homes:=homes_if if Construction.housing_under_way() else 0.0
+	var rest:=builders-homes
+	var civic_if:=rest*CIVIC_SHARE
+	var civic:=civic_if if not Construction._current_settlement_project().is_empty() else 0.0
+	rest-=civic
+	var want:=repair_want()
+	var repair:=minf(rest,want)
+	rest-=repair
+	var walls_ready:=rest*WALL_SHARE if _is_home() else 0.0
+	var walls:=walls_ready if _walls_at_work() else 0.0
+	rest-=walls
+	return {"builders":builders,"homes":homes,"homes_if":homes_if,"civic":civic,"civic_if":civic_if,"repair":repair,"repair_want":want,"walls":walls,"walls_ready":walls_ready,"fabric":maxf(0.0,rest)}
 
-## The home town's builders on the walls (military_campaign.gd reads it).
+## Builders the town's civic works need to be kept in repair: REPAIR_SHARE of
+## its people while its repair is short, half that once full (the monthly
+## wear, settlement_model.gd _advance_city_form), less with repair skill.
+static func repair_want()->float:
+	if WorldSimulation.settlements==null or not WorldSimulation.settlements.has_method("city_form"):return 0.0
+	var condition:=float(WorldSimulation.settlements.city_form().get("condition",1.0))
+	var people:=maxf(1.0,float(WorldSimulation.state.population_total))
+	var mending:float=maxf(0.5,float(preload("res://scripts/research_mechanics.gd").mending_factor()))
+	return people*REPAIR_SHARE*(1.0 if condition<0.995 else 0.5/mending)
+
+## settlement_model.gd _advance_city_form: the repair crew's share of the
+## builders the town's repair can use (1 = REPAIR_SHARE of its people).
+static func repair_share()->float:
+	var people:=maxf(1.0,float(WorldSimulation.state.population_total))
+	return clampf(float(crews().repair)/(people*REPAIR_SHARE),0.0,1.0)
+
+## Whether the home town's builders are on the walls: a stage going up, or
+## walls being mended after a fight.
+static func _walls_at_work()->bool:
+	if not _is_home() or WorldSimulation.military==null:return false
+	var ledger:Dictionary=WorldSimulation.military.settlement_defense
+	if int(ledger.get("project_stage",-1))>=0:return true
+	return int(ledger.get("stage",0))>0 and float(ledger.get("integrity",1.0))<0.999
+
+## The home town's builders on the walls now (military_campaign.gd reads it):
+## its walls crew at the last reckoning.
 static func wall_builders()->float:
 	return float(WorldSimulation.state.fabric_realm.get("wall_builders",0.0))
 
-static func _wall_share()->float:
+## The builders who would go to the walls were a stage begun (the council
+## and the screens judge the next stage with them).
+static func wall_builders_ready()->float:
+	return float(WorldSimulation.state.fabric_realm.get("wall_ready",0.0))
+
+## The walls' upkeep a year in builder-days: WALL_UPKEEP of the standing
+## stage's work, at home only.
+static func _walls_upkeep()->float:
 	if not _is_home() or WorldSimulation.military==null:return 0.0
-	var ledger:Dictionary=WorldSimulation.military.settlement_defense
-	return WALL_SHARE if int(ledger.get("project_stage",-1))>=0 else 0.0
+	var mc=WorldSimulation.military
+	var stage:=int(mc.settlement_defense.get("stage",0))
+	if stage<=0:return 0.0
+	return float((mc.SETTLEMENT_DEFENSE_STAGES[clampi(stage,0,mc.SETTLEMENT_DEFENSE_STAGES.size()-1)] as Dictionary).work)*WALL_UPKEEP
 
 static func _is_home()->bool:
 	var id:=String(WorldSimulation.state.resource_settlement_id)
@@ -468,6 +572,11 @@ static func _labor()->float:
 
 static func _all_builders()->float:
 	return maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))
+
+## The whole people's number, inside a town's count too.
+static func _national()->float:
+	if WorldSimulation.settlements!=null and WorldSimulation.settlements.has_method("national_population"):return maxf(1.0,float(WorldSimulation.settlements.national_population()))
+	return maxf(1.0,float(WorldSimulation.state.population_exact))
 
 ## Experience: every builder of the town adds a builder-day a day; the
 ## people's experience fades e-fold over CRAFT_YEARS (once for the realm,
@@ -483,13 +592,17 @@ static func _grow_craft(realm:Dictionary,days:float)->void:
 ## The builders' craft, 0..CRAFT_MAX: living experience a person of the people.
 static func craft()->float:
 	var realm:Dictionary=WorldSimulation.state.fabric_realm
-	var pop:=maxf(1.0,float(WorldSimulation.settlements.national_population()) if WorldSimulation.settlements!=null else float(WorldSimulation.state.population_exact))
-	return clampf(float(realm.get("xp",0.0))/pop/CRAFT_PER_LEVEL,0.0,CRAFT_MAX)
+	return clampf(float(realm.get("xp",0.0))/_national()/CRAFT_PER_LEVEL,0.0,CRAFT_MAX)
 
 ## Where the craft is heading at today's builders: the level it settles at.
+## Every town's builders count (their builder-days a day at each town's last
+## reckoning), against the whole people.
 static func craft_settles()->float:
-	var pop:=maxf(1.0,float(WorldSimulation.settlements.national_population()) if WorldSimulation.settlements!=null else float(WorldSimulation.state.population_exact))
-	return clampf(_all_builders()*_labor()*365.0*CRAFT_YEARS/pop/CRAFT_PER_LEVEL,0.0,CRAFT_MAX)
+	var towns:Dictionary=WorldSimulation.state.fabric_realm.get("towns",{})
+	var rate:=0.0
+	for town:Dictionary in towns.values():rate+=float(town.get("builder_days",0.0))
+	if towns.is_empty():rate=_all_builders()*_labor()*_national()/maxf(1.0,float(WorldSimulation.state.population_exact))
+	return clampf(rate*365.0*CRAFT_YEARS/_national()/CRAFT_PER_LEVEL,0.0,CRAFT_MAX)
 
 
 # ===========================================================================================
@@ -518,7 +631,7 @@ static func grade_caps()->Array:
 static func road_kind()->int:
 	var kind:=0
 	for k in range(1,ROAD_KINDS.size()):
-		if _knows([ROAD_KINDS[k][0]]):kind=k
+		if _knows(ROAD_KINDS[k][0]):kind=k
 	return kind
 
 static func road_cap()->float:
@@ -549,6 +662,10 @@ static func _cache(f:Dictionary)->void:
 
 static func _effects()->Dictionary:
 	var f:Dictionary=WorldSimulation.state.built_fabric
+	if int(f.get("v",0))<1:
+		# A loaded older save's first day: the town as it stands, founded now.
+		if not bool(WorldSimulation.state.settlement_site_committed):return {}
+		f=data()
 	var e:Variant=f.get("effects",{})
 	return e if e is Dictionary else {}
 
@@ -573,8 +690,9 @@ static func works_cover(kind:String,f:Dictionary={})->float:
 
 ## consequence_engine.gd: health target.
 static func health_bonus()->float:return HOME_HEALTH*quality()
-## consequence_engine.gd: Exposure deaths x this.
-static func exposure_factor()->float:return 1.0-HOME_EXPOSURE*quality()
+## consequence_engine.gd: the toll of the season's cold and heat on those who
+## have a roof, lifted by good homes (0 in windbreaks).
+static func weather_bonus(cold:float,heat:float)->float:return HOME_WEATHER*clampf(cold+heat*0.75,0.0,2.0)*quality()
 ## consequence_engine.gd: Illness deaths x this.
 static func illness_factor()->float:return 1.0-HOME_ILLNESS*quality()
 ## consequence_engine.gd: added to the carriers' hauling target.
@@ -634,15 +752,25 @@ static func stone_stores()->float:return STONE_STORES*home_stone()
 ## military_campaign.gd settlement_defense_daily_work: the hands on the
 ## walls, in a watchman's share: the watch (at STONE_WATCH on stone stages)
 ## and the builders on the walls (BUILDER_WALL_WEIGHT, more with craft).
-static func wall_hands(watch:float,stage_index:int)->float:
-	var builders:=wall_builders()*BUILDER_WALL_WEIGHT*(1.0+CRAFT_WALLS*craft())
-	return watch*(STONE_WATCH if stage_index>=STONE_STAGE else 1.0)+builders
+## The builders' share is the walls crew at work on that stage, else the crew
+## that would go to it were it begun (wall_builders_ready). `builders`
+## false: the watch's hands alone (a watchman's rate, home_defense.gd).
+static func wall_hands(watch:float,stage_index:int,builders:bool=true)->float:
+	var hands:=watch*(STONE_WATCH if stage_index>=STONE_STAGE else 1.0)
+	if builders:hands+=wall_builder_hands(stage_index)
+	return hands
+
+## The builders' hands on stage `stage_index`, in a watchman's share.
+static func wall_builder_hands(stage_index:int)->float:
+	var working:=false
+	if WorldSimulation.military!=null:working=int(WorldSimulation.military.settlement_defense.get("project_stage",-1))==stage_index
+	var crew:=wall_builders() if working else wall_builders_ready()
+	return crew*BUILDER_WALL_WEIGHT*(1.0+CRAFT_WALLS*craft())
 
 ## military_campaign.gd: integrity lost today to wear (span days), less as
 ## builders keep the walls.
 static func wall_wear(span:float)->float:
-	var pop:=maxf(1.0,float(WorldSimulation.state.population_exact))
-	var kept:=clampf(_all_builders()/(pop*WALL_KEEPERS),0.0,1.0)
+	var kept:=clampf(float(WorldSimulation.state.fabric_realm.get("walls_kept",1.0)),0.0,1.0)
 	return WALL_WEAR*span/365.0*(1.0-kept)
 
 ## civilization_controller.gd defense_decision: how much the builders want
@@ -671,9 +799,27 @@ static func defense_bonus_now()->float:
 # Great works (wonder_concept.gd assess, undertaking_system.gd apply_outcome)
 # ===========================================================================================
 
+## The builders on the town's great work: the crew of the works under way
+## (undertaking_system.gd share), else the crew a new work would get
+## (GREAT_CREW_SHARE), of every builder the town counts.
+static func great_crew(s:Object)->float:
+	if s==null or not s.has_method("effective_workers"):return 0.0
+	var U=preload("res://scripts/undertaking_system.gd")
+	var on_works:=clampf(float(U.share(s)),0.0,0.95)
+	var free:=maxf(0.0,float(s.effective_workers("Construction")))
+	var all:=free/(1.0-on_works)
+	var building:=false
+	for r:Dictionary in U.current_city(s).get("undertakings",[]):
+		if String(r.get("status","")) in ["building","stalled"]:building=true
+	return all*(on_works if building else GREAT_CREW_SHARE)
+
 ## A people's craft read from its own state (assess may be asked about any owner).
+## The live state reads craft() (the whole people's number, even while one
+## town's count is in scope, as when a great work is resolved); another
+## people's state, read from outside its scope, holds its whole number.
 static func craft_of(s:Object)->float:
 	if s==null:return 0.0
+	if s==WorldSimulation.state:return craft()
 	var realm:Variant=s.get("fabric_realm")
 	var xp:=float((realm as Dictionary).get("xp",0.0)) if realm is Dictionary else 0.0
 	return clampf(xp/maxf(1.0,float(s.get("population_exact")))/CRAFT_PER_LEVEL,0.0,CRAFT_MAX)
@@ -683,8 +829,7 @@ static func craft_of(s:Object)->float:
 ## bill.
 static func great_capability(s:Object,cost:Dictionary)->Dictionary:
 	var level:=craft_of(s)
-	var builders:=0.0
-	if s!=null and s.has_method("effective_workers"):builders=maxf(0.0,float(s.effective_workers("Construction",false,false,false,false,true)))
+	var builders:=great_crew(s)
 	var stocks:Dictionary=s.get("resource_stockpiles") if s!=null and s.get("resource_stockpiles") is Dictionary else {}
 	var cover:=1.0
 	var stone:=0.0
@@ -695,7 +840,7 @@ static func great_capability(s:Object,cost:Dictionary)->Dictionary:
 	var from_crews:=GREAT_BUILDERS*clampf(builders/GREAT_CREW,0.0,1.0)
 	var from_materials:=GREAT_MATERIALS*(cover-0.5)
 	var total:=from_craft+from_crews+from_materials
-	var words:="Builders' craft %.1f of %d (%+d), %d builders at work (%+d), %d in 100 of the materials in store (%+d)" % [level,roundi(CRAFT_MAX),roundi(from_craft*140.0),roundi(builders),roundi(from_crews*140.0),roundi(cover*100.0),roundi(from_materials*140.0)]
+	var words:="Builders' craft %.1f of %d (%+d), %d builders on the work (%+d), %d in 100 of the materials in store (%+d)" % [level,roundi(CRAFT_MAX),roundi(from_craft*140.0),roundi(builders),roundi(from_crews*140.0),roundi(cover*100.0),roundi(from_materials*140.0)]
 	return {"craft":level,"builders":builders,"cover":cover,"stone":stone,"from_craft":from_craft,"from_crews":from_crews,"from_materials":from_materials,"total":total,"words":words+"."}
 
 ## What a work that stands is worth for the builders who raised it:
@@ -708,7 +853,7 @@ static func great_payoff(s:Object,gifted:bool)->float:
 ## The stated odds and payoff in plain words, for the order and the screen.
 static func great_words(built:Dictionary,payoff:float,odds:Dictionary,architect:String)->String:
 	var stands:=roundi((1.0-float(odds.get("collapse",0.0)))*100.0)
-	var text:="With %d builders at craft %.1f and %d stone in store (%d in 100 of the materials), the odds it stands are %d in 100 (a triumph %d, flawed %d, it falls %d)" % [roundi(float(built.builders)),float(built.craft),roundi(float(built.get("stone",0.0))),roundi(float(built.cover)*100.0),stands,roundi(float(odds.get("triumph",0.0))*100.0),roundi(float(odds.get("flawed",0.0))*100.0),roundi(float(odds.get("collapse",0.0))*100.0)]
+	var text:="With %d builders on the work at craft %.1f and %d stone in store (%d in 100 of the materials), the odds it stands are %d in 100 (a triumph %d, flawed %d, it falls %d)" % [roundi(float(built.builders)),float(built.craft),roundi(float(built.get("stone",0.0))),roundi(float(built.cover)*100.0),stands,roundi(float(odds.get("triumph",0.0))*100.0),roundi(float(odds.get("flawed",0.0))*100.0),roundi(float(odds.get("collapse",0.0))*100.0)]
 	text+="; if it stands, its strength, rewards and renown count x%.2f for the builders' craft" % payoff
 	if not architect.is_empty():text+=" and %s, a gifted master builder" % architect
 	return text+"."
@@ -724,7 +869,7 @@ static func _town_key()->String:
 static func _report_town(f:Dictionary,realm:Dictionary)->void:
 	var e:Dictionary=f.effects
 	var towns:Dictionary=realm.towns
-	towns[_town_key()]={"day":int(WorldSimulation.state.elapsed_days),"pop":float(WorldSimulation.state.population_exact),"places":int(f.places),
+	towns[_town_key()]={"day":int(WorldSimulation.state.elapsed_days),"pop":float(WorldSimulation.state.population_exact),"places":int(f.places),"builder_days":_all_builders()*_labor(),
 		"quality":float(e.quality),"roads":float(e.roads),"beauty_points":float(f.beauty),"beauty":float(e.beauty),"cover":float(e.cover),"stone":float(e.stone)}
 	# A town not reckoned for two months is gone (left, lost or taken).
 	for key:String in towns.keys():
@@ -798,17 +943,11 @@ static func report()->Dictionary:
 	var spent:Dictionary=f.get("spent") if f.get("spent") is Dictionary else {}
 	var defense:Dictionary={}
 	if WorldSimulation.military!=null and _is_home():defense=WorldSimulation.military.settlement_defense_snapshot()
+	var crew:=crews()
 	return {"homes":(f.homes as Array).duplicate(),"places":int(f.get("places",0)),"quality":float(e.get("quality",0.0)),"best":int(reach.best),"next":int(reach.next),"caps":reach.caps,
 		"roads":float(e.get("roads",0.0)),"road_cap":road_cap(),"road_kind":road_kind(),"beauty":float(e.get("beauty",0.0)),"beauty_points":float(f.beauty)/pop,"artistry":artistry(),
 		"cover":float(e.get("cover",0.0)),"stone":float(e.get("stone",0.0)),"craft":craft(),"craft_settles":craft_settles(),"kept":kept,"paid":float(f.get("paid",1.0)),
-		"spent":spent,"idle":float(f.get("idle",0.0)),"budget":float(f.get("budget",0.0)),"days":TICK_DAYS,"free_builders":free_builders_now(),"defense":defense,"home":_is_home()}
-
-## The builders free for the fabric as the town reads today (no ledger change).
-static func free_builders_now()->float:
-	var builders:=maxf(0.0,float(WorldSimulation.state.effective_workers("Construction")))
-	if not Construction._current_settlement_project().is_empty():builders*=0.5
-	if Construction.housing_under_way():builders*=0.5
-	return builders*(1.0-_wall_share())
+		"spent":spent,"idle":float(f.get("idle",0.0)),"budget":float(f.get("budget",0.0)),"days":TICK_DAYS,"free_builders":float(crew.fabric),"crews":crew,"defense":defense,"home":_is_home()}
 
 ## What wears now for want of hands, in plain words ([] when all is kept).
 static func decline_words(r:Dictionary={})->PackedStringArray:
@@ -821,9 +960,12 @@ static func decline_words(r:Dictionary={})->PackedStringArray:
 	if float(kept.get("beauty",1.0))<0.99:out.append("fine works weather")
 	return out
 
-## Builder-days a year that `more` builders add now, at today's pace.
+## Builder-days a year that `more` builders add to the fabric now, at today's
+## pace: the part of them the homes, civic works, repair and walls leave it
+## (crews).
 static func _more_days(more:float)->float:
-	return more*_labor()*365.0*(1.0+CRAFT_WORK*craft())*(1.0+KILN_BUILDING*works_cover("kilns"))
+	var added:=maxf(0.0,float(crews(more).fabric)-float(crews().fabric))
+	return added*_labor()*365.0*(1.0+CRAFT_WORK*craft())*(1.0+KILN_BUILDING*works_cover("kilns"))
 
 ## What `more` builders would buy now, in the engine's numbers: {days,
 ## upkeep, places, grade, roads, cover, beauty, craft_settles, craft_then,
@@ -879,54 +1021,57 @@ static func role_line(more:float=10.0)->Dictionary:
 static func _one(x:float)->String:
 	return str(roundi(x)) if absf(x)>=10.0 else "%.1f" % x
 
-static func _add_line(lines:Array,label:String,value:String,words:String,tone:String="good")->void:
-	lines.append({"label":label,"value":value,"words":words,"tone":tone})
+## One line for the screens: {label, value, words, tone, src}. The words are
+## plain; `src` names the rule (file and constant) for designers and tests,
+## never shown to the player.
+static func _add_line(lines:Array,label:String,value:String,words:String,tone:String="good",src:String="")->void:
+	lines.append({"label":label,"value":value,"words":words,"tone":tone,"src":src})
 
-## What the fabric does now, line by line, with the engine's numbers and the
-## rule each comes from: [{label, value, words, tone}].
+## What the fabric does now, line by line, with the engine's numbers:
+## [{label, value, words, tone, src}].
 static func effect_lines(r:Dictionary={})->Array:
 	if r.is_empty():r=report()
 	var q:=float(r.quality)
 	var roads_now:=float(r.roads)
 	var beauty_now:=float(r.beauty)
 	var lines:Array=[]
-	_add_line(lines,"Deaths of cold and wet","x%.2f" % exposure_factor(),"Homes %d of 100 good: deaths of exposure x%.2f (x%.2f if every place were stone). consequence_engine.gd, HOME_EXPOSURE." % [roundi(q*100.0),exposure_factor(),1.0-HOME_EXPOSURE])
-	_add_line(lines,"Illness deaths","x%.2f" % illness_factor(),"Dry floors and walls: illness deaths x%.2f. consequence_engine.gd, HOME_ILLNESS." % illness_factor())
-	_add_line(lines,"Sickness breaking out","x%.2f" % exp(-HOME_SICKNESS*q),"Outbreaks of sickness come x%.2f as often as among windbreaks. crisis_system.gd, HOME_SICKNESS." % exp(-HOME_SICKNESS*q))
-	_add_line(lines,"Fire","x%.2f" % exp(-HOME_FIRE*q),"Mudbrick and stone do not catch as thatch does: fires x%.2f. crisis_system.gd, HOME_FIRE." % exp(-HOME_FIRE*q))
-	_add_line(lines,"Health","+%s points" % _one(health_bonus()*100.0),"The health the people tend toward rises %s points under good roofs. consequence_engine.gd, HOME_HEALTH." % _one(health_bonus()*100.0))
-	_add_line(lines,"Holding together","+%s points" % _one(civic("cohesion")*100.0),"Good homes (+%s) and fine works (+%s) raise cohesion's target. consequence_engine.gd." % [_one(HOME_COHESION*q*100.0),_one(BEAUTY_COHESION*beauty_now*100.0)])
-	_add_line(lines,"Love of the god","+%s points" % _one(devotion()*100.0),"Works raised to the god in every town: the people's love of the god. divine_regard.gd, BEAUTY_DEVOTION.")
-	_add_line(lines,"Hauling","+%s points" % _one(logistics_bonus()*100.0),"Roads %d of 100 and storehouses: the carriers' hauling target. consequence_engine.gd, ROAD_LOGISTICS." % roundi(roads_now*100.0))
-	_add_line(lines,"Hauls from deposits","x%.2f" % haul_factor(),"Each carrier brings x%.2f from the cutting grounds. resource_system.gd, ROAD_HAUL." % haul_factor())
-	_add_line(lines,"Between towns","x%.2f speed" % speed_factor(),"Goods, caravans and founding parties go x%.2f as fast; trade reaches x%.2f as far; x%.2f of the townsfolk reach a fight in time. settlement_model.gd, trade_ledger.gd, civilization_combat.gd." % [speed_factor(),reach_factor(),rise_factor()])
-	_add_line(lines,"Makers' goods","x%.2f" % making_factor(),"Workshops cover %d of 100 of the town: each maker makes x%.2f. civilian_goods.gd, WORKSHOP_MAKING." % [roundi(works_cover("workshops")*100.0),making_factor()],"good" if works_cover("workshops")>0.0 else "plain")
-	_add_line(lines,"Stored food rots","x%.2f" % granary_factor(),"Granaries: stored food rots x%.2f. food_system.gd, GRANARY_ROT." % granary_factor(),"good" if works_cover("granaries")>0.0 else "plain")
-	_add_line(lines,"Cutting and digging","+%d%%" % roundi(extraction_bonus()*100.0),"Storehouses and yards: every deposit worked gives %d%% more. resource_system.gd, STOREHOUSE_EXTRACTION." % roundi(extraction_bonus()*100.0),"good" if extraction_bonus()>0.0 else "plain")
-	_add_line(lines,"Water carried","x%.2f" % water_factor(),"Wells and water works: each water carrier brings x%.2f.%s" % [water_factor(),"" if works_cover("water")>0.0 else " Needs well siting known."],"good" if works_cover("water")>0.0 else "plain")
-	_add_line(lines,"Kilns","x%.2f builders" % (1.0+KILN_BUILDING*works_cover("kilns")),"Fired brick and lime: the builders' own work x%.2f.%s" % [1.0+KILN_BUILDING*works_cover("kilns"),"" if works_cover("kilns")>0.0 else " Needs kiln control known."],"good" if works_cover("kilns")>0.0 else "plain")
-	_add_line(lines,"Splendor","+%d" % roundi(BEAUTY_SPLENDOR*realm_beauty()*100.0),"Fine works in every town: Splendor, and through it pride and awe. standing.gd, BEAUTY_SPLENDOR.")
-	_add_line(lines,"Allure abroad","+%d" % roundi(BEAUTY_CULTURE*realm_beauty()*100.0),"What others hear of our fine works draws families, traders and envoys; their respect +%d. standing.gd, BEAUTY_CULTURE." % roundi(BEAUTY_RESPECT*realm_beauty()*100.0))
+	var weather:=float(WorldSimulation.state.simulation_metrics.get("fabric_weather",0.0))
+	_add_line(lines,"Health","+%s points" % _one((health_bonus()+weather)*100.0),"Homes %d of 100 good: the health the people tend toward rises %s points under good roofs, %s of them against this season's cold and heat." % [roundi(q*100.0),_one((health_bonus()+weather)*100.0),_one(weather*100.0)],"good","consequence_engine.gd HOME_HEALTH, HOME_WEATHER")
+	_add_line(lines,"Illness deaths","x%.2f" % illness_factor(),"Dry floors and walls: illness deaths x%.2f (x%.2f if every place were stone)." % [illness_factor(),1.0-HOME_ILLNESS],"good","consequence_engine.gd HOME_ILLNESS")
+	_add_line(lines,"Sickness breaking out","x%.2f" % exp(-HOME_SICKNESS*q),"Outbreaks of sickness come x%.2f as often as among windbreaks." % exp(-HOME_SICKNESS*q),"good","crisis_system.gd HOME_SICKNESS")
+	_add_line(lines,"Fire","x%.2f" % exp(-HOME_FIRE*q),"Mudbrick and stone do not catch as thatch does: fires x%.2f." % exp(-HOME_FIRE*q),"good","crisis_system.gd HOME_FIRE")
+	_add_line(lines,"Holding together","+%s points" % _one(civic("cohesion")*100.0),"Good homes (+%s) and fine works (+%s) raise how well the people hold together." % [_one(HOME_COHESION*q*100.0),_one(BEAUTY_COHESION*beauty_now*100.0)],"good","consequence_engine.gd HOME_COHESION, BEAUTY_COHESION")
+	_add_line(lines,"Love of the god","+%s points" % _one(devotion()*100.0),"Works raised to the god in every town draw the people's love.","good","divine_regard.gd BEAUTY_DEVOTION")
+	_add_line(lines,"Hauling","+%s points" % _one(logistics_bonus()*100.0),"Roads %d of 100, and storehouses: the carriers haul more." % roundi(roads_now*100.0),"good","consequence_engine.gd ROAD_LOGISTICS, STOREHOUSE_LOGISTICS")
+	_add_line(lines,"Hauls from deposits","x%.2f" % haul_factor(),"Each carrier brings x%.2f from the cutting grounds." % haul_factor(),"good","resource_system.gd ROAD_HAUL")
+	_add_line(lines,"Between towns","x%.2f speed" % speed_factor(),"Goods, caravans and founding parties go x%.2f as fast; trade reaches x%.2f as far; x%.2f of the townsfolk reach a fight in time." % [speed_factor(),reach_factor(),rise_factor()],"good","settlement_model.gd, trade_ledger.gd, caravan_system.gd, civilization_combat.gd ROAD_SPEED, ROAD_REACH, ROAD_RISE")
+	_add_line(lines,"Makers' goods","x%.2f" % making_factor(),"Workshops cover %d of 100 of the town: each maker makes x%.2f." % [roundi(works_cover("workshops")*100.0),making_factor()],"good" if works_cover("workshops")>0.0 else "plain","civilian_goods.gd WORKSHOP_MAKING")
+	_add_line(lines,"Stored food rots","x%.2f" % granary_factor(),"Granaries: stored food rots x%.2f." % granary_factor(),"good" if works_cover("granaries")>0.0 else "plain","food_system.gd GRANARY_ROT")
+	_add_line(lines,"Cutting and digging","+%d%%" % roundi(extraction_bonus()*100.0),"Storehouses and yards: every deposit worked gives %d%% more." % roundi(extraction_bonus()*100.0),"good" if extraction_bonus()>0.0 else "plain","resource_system.gd STOREHOUSE_EXTRACTION")
+	_add_line(lines,"Water carried","x%.2f" % water_factor(),"Wells and water works: each water carrier brings x%.2f.%s" % [water_factor(),"" if works_cover("water")>0.0 else " The people must first learn to site wells."],"good" if works_cover("water")>0.0 else "plain","resource_system.gd WATERWORKS_WATER")
+	_add_line(lines,"Kilns","x%.2f builders" % (1.0+KILN_BUILDING*works_cover("kilns")),"Fired brick and lime: the builders' own work x%.2f.%s" % [1.0+KILN_BUILDING*works_cover("kilns"),"" if works_cover("kilns")>0.0 else " The people must first learn to fire a kiln."],"good" if works_cover("kilns")>0.0 else "plain","built_fabric.gd KILN_BUILDING")
+	_add_line(lines,"Splendor","+%d" % roundi(BEAUTY_SPLENDOR*realm_beauty()*100.0),"Fine works in every town add to Splendor, and through it to pride and awe.","good","standing.gd BEAUTY_SPLENDOR")
+	_add_line(lines,"Allure abroad","+%d" % roundi(BEAUTY_CULTURE*realm_beauty()*100.0),"What others hear of our fine works draws families, traders and envoys; their respect +%d." % roundi(BEAUTY_RESPECT*realm_beauty()*100.0),"good","standing.gd BEAUTY_CULTURE, BEAUTY_RESPECT")
 	if bool(r.home):
 		var d:Dictionary=r.defense
-		_add_line(lines,"Defences","+%d%%" % roundi(float(d.get("defense_bonus",0.0))*100.0),"Walls %d%% (x%.2f for the builders' craft) and the town's stone houses +%d%%: defenders fight better and a siege needs more men. military_campaign.gd." % [roundi(float(d.get("works_bonus",0.0))*100.0),wall_quality(),roundi(stone_defense()*100.0)])
-		_add_line(lines,"Might","+%d" % roundi(FORT_MIGHT*fort_reading()*100.0),"Walls and stone count toward Might, and others weigh our fighting strength x%.2f. standing.gd, FORT_MIGHT." % (1.0+FORT_STRENGTH*float(d.get("defense_bonus",0.0))))
-	_add_line(lines,"Building knowledge","x%.2f" % research_multiplier("infrastructure"),"Skilled builders learn building ways faster (the infrastructure line x%.2f), and every building question reads a construction signal of %.2f. discovery_system.gd, civilization_day.gd." % [research_multiplier("infrastructure"),construction_signal()])
-	_add_line(lines,"Great works","+%d odds" % roundi(GREAT_CRAFT*craft()*140.0),"The craft adds %d points to a great work's engineering, and a work that stands pays x%.2f. wonder_concept.gd, undertaking_system.gd." % [roundi(GREAT_CRAFT*craft()*140.0),1.0+GREAT_PAYOFF*craft()])
+		_add_line(lines,"Defences","+%d%%" % roundi(float(d.get("defense_bonus",0.0))*100.0),"Walls %d%% (x%.2f for the builders' craft) and the town's stone houses +%d%%: defenders fight better and a siege needs more men." % [roundi(float(d.get("works_bonus",0.0))*100.0),wall_quality(),roundi(stone_defense()*100.0)],"good","military_campaign.gd settlement_defense_snapshot CRAFT_WALL_QUALITY, STONE_DEFENSE")
+		_add_line(lines,"Might","+%d" % roundi(FORT_MIGHT*fort_reading()*100.0),"Walls and stone count toward Might, and others weigh our fighting strength x%.2f." % (1.0+FORT_STRENGTH*float(d.get("defense_bonus",0.0))),"good","standing.gd FORT_MIGHT, FORT_STRENGTH")
+	_add_line(lines,"Building knowledge","x%.2f" % research_multiplier("infrastructure"),"Skilled builders learn new ways of building faster (x%.2f), and learn some by doing." % research_multiplier("infrastructure"),"good","discovery_system.gd CRAFT_RESEARCH; civilization_day.gd CRAFT_SIGNAL")
+	_add_line(lines,"Great works","+%d odds" % roundi(GREAT_CRAFT*craft()*140.0),"The builders' craft adds %d points to a great work's odds, and a work that stands is worth x%.2f." % [roundi(GREAT_CRAFT*craft()*140.0),1.0+GREAT_PAYOFF*craft()],"good","wonder_concept.gd, undertaking_system.gd GREAT_CRAFT, GREAT_PAYOFF")
 	return lines
 
 ## What `more` builders would buy now, as lines for the Buildings page.
 static func plus_lines(more:float=10.0)->Array:
 	var p:=plus_builders(more)
 	var lines:Array=[]
-	_add_line(lines,"Their work","%d days a year" % roundi(float(p.days)),"%d more builders give about %d builder-days a year at today's pace and craft." % [roundi(more),roundi(float(p.days))],"plain")
-	if float(p.upkeep)>1.0:_add_line(lines,"Upkeep","%d days" % roundi(float(p.upkeep)),"First they keep what now wears for want of hands.")
-	if int(p.grade)>0:_add_line(lines,"Better homes","%d places a year" % roundi(float(p.places)),"Places raised to %s each year." % GRADE_WORDS[int(p.grade)])
-	if float(p.roads)>0.0:_add_line(lines,"Roads","+%s a decade" % _one(float(p.roads)*1000.0),"Points of road (of 100) each ten years, before wear.")
-	if float(p.cover)>0.0:_add_line(lines,"Work buildings","+%s a decade" % _one(float(p.cover)*1000.0),"Points of cover (of 100) each ten years.")
-	if float(p.beauty)>0.0:_add_line(lines,"Beauty","+%s in a year" % _one(float(p.beauty)*100.0),"Fine works: points of beauty (of 100) in the first year.")
-	_add_line(lines,"Craft","%s to %s" % [_one(float(p.craft_settles)),_one(float(p.craft_then))],"Where the builders' craft settles over a working life, now and with them.")
-	if bool(p.short):_add_line(lines,"Materials","short","Some builders stand idle for want of timber, clay and stone: more cutters and diggers, or carriers bringing them from our other towns.","bad")
+	_add_line(lines,"Their work","%d days a year" % roundi(float(p.days)),"%d more builders give the town's fabric about %d builder-days a year at today's pace and craft, after their share of new homes, civic works, repair and walls." % [roundi(more),roundi(float(p.days))],"plain","built_fabric.gd plus_builders, crews")
+	if float(p.upkeep)>1.0:_add_line(lines,"Upkeep","%d days" % roundi(float(p.upkeep)),"First they keep what now wears for want of hands.","good","built_fabric.gd UPKEEP_ORDER")
+	if int(p.grade)>0:_add_line(lines,"Better homes","%d places a year" % roundi(float(p.places)),"Places raised to %s each year." % GRADE_WORDS[int(p.grade)],"good","built_fabric.gd GRADE_BUILD")
+	if float(p.roads)>0.0:_add_line(lines,"Roads","+%s a decade" % _one(float(p.roads)*1000.0),"Points of road (of 100) each ten years, before wear.","good","built_fabric.gd ROAD_FULL")
+	if float(p.cover)>0.0:_add_line(lines,"Work buildings","+%s a decade" % _one(float(p.cover)*1000.0),"Points of cover (of 100) each ten years.","good","built_fabric.gd WORKS_FULL")
+	if float(p.beauty)>0.0:_add_line(lines,"Beauty","+%s in a year" % _one(float(p.beauty)*100.0),"Fine works: points of beauty (of 100) in the first year.","good","built_fabric.gd BEAUTY_SCALE")
+	_add_line(lines,"Craft","%s to %s" % [_one(float(p.craft_settles)),_one(float(p.craft_then))],"Where the builders' craft settles over a working life, now and with them.","good","built_fabric.gd CRAFT_YEARS, CRAFT_PER_LEVEL")
+	if bool(p.short):_add_line(lines,"Materials","short","Some builders stand idle for want of timber, clay and stone: more cutters and diggers, or carriers bringing them from our other towns.","bad","built_fabric.gd _spare")
 	return lines
 
 

@@ -1642,9 +1642,10 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 func _advance_city_form(month_day:int)->void:
 	var form:=city_form()
 	var supported:=float(_supported_fabric_tier(month_day))
-	var builders:=WorldSimulation.state.effective_workers("Construction")
 	var population:=maxf(1.0,float(_primary_population()))
-	var building_share:=clampf(builders/maxf(1.0,population*0.05),0.0,1.0)
+	# The repair crew alone (built_fabric.gd crews): the town's other builders
+	# raise homes, civic works, walls and its fabric.
+	var building_share:=preload("res://scripts/built_fabric.gd").repair_share()
 	# Upkeep and renewal draw a monthly basket of building materials sized by
 	# population and era; the share actually paid limits repair and progress.
 	var need:=population*0.02*(1.0+0.25*float(form.tier))*building_share

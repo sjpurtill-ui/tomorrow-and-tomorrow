@@ -44,8 +44,8 @@ GRADE_KNOW = _c("GRADE_KNOW", [[]])
 GRADE_CRAFT = [float(x) for x in _c("GRADE_CRAFT", [0.0])]
 GRADE_CRAFT_FULL = [float(x) for x in _c("GRADE_CRAFT_FULL", [0.0])]
 K = {k: float(_c(k, 0.0)) for k in (
-    "TICK_DAYS", "HOME_HEALTH", "HOME_COHESION", "HOME_EXPOSURE", "HOME_ILLNESS", "HOME_SICKNESS", "HOME_FIRE",
-    "ROAD_FULL", "ROAD_WEAR", "ROAD_STONE", "ROAD_LOGISTICS", "BEAUTY_SCALE", "BEAUTY_WEAR", "ARTISTRY_EACH", "BEAUTY_MATERIALS",
+    "TICK_DAYS", "HOME_HEALTH", "HOME_COHESION", "HOME_ILLNESS", "HOME_SICKNESS", "HOME_FIRE",
+    "ROAD_FULL", "ROAD_WEAR", "ROAD_STONE", "ROAD_LOGISTICS", "HOME_WEATHER", "HOMES_AHEAD", "CIVIC_SHARE", "REPAIR_SHARE", "WALL_UPKEEP", "WALL_WEAR", "GREAT_CREW_SHARE", "BEAUTY_SCALE", "BEAUTY_WEAR", "ARTISTRY_EACH", "BEAUTY_MATERIALS",
     "BEAUTY_COHESION", "BEAUTY_SPLENDOR", "BEAUTY_CULTURE", "WORKS_FULL", "WORKS_WEAR", "WORKSHOP_MAKING", "GRANARY_ROT",
     "KILN_BUILDING", "STOREHOUSE_LOGISTICS", "STOREHOUSE_EXTRACTION", "WALL_SHARE", "CRAFT_YEARS", "CRAFT_PER_LEVEL", "CRAFT_MAX", "CRAFT_WORK",
     "CRAFT_RESEARCH", "CRAFT_SIGNAL", "CRAFT_WALLS", "CRAFT_WALL_QUALITY", "STONE_DEFENSE", "BUILDER_WALL_WEIGHT", "STONE_STAGE",
@@ -56,7 +56,7 @@ ARTISTRY = _c("ARTISTRY", [])
 WORKS_LOADS = float(_c("WORKS_LOADS", 0.25))
 WORKS_KNOW = _c("WORKS_KNOW", {})
 SPLIT = _c("SPLIT", {})
-UPKEEP_ORDER = _c("UPKEEP_ORDER", ["homes", "works", "roads", "beauty"])
+UPKEEP_ORDER = _c("UPKEEP_ORDER", ["homes", "walls", "works", "roads", "beauty"])
 FABRIC_RESERVE = 3.0     # loads a head of the one raw pool held back (four materials at RESERVE each, about)
 
 MC = "scripts/military_campaign.gd"
@@ -156,7 +156,8 @@ class Fabric:
         cap = float(ROAD_KINDS[0][1])
         kind = 0
         for k in range(1, len(ROAD_KINDS)):
-            if self.knows([ROAD_KINDS[k][0]]):
+            ids = ROAD_KINDS[k][0]
+            if self.knows(ids if isinstance(ids, list) else [ids]):
                 cap, kind = float(ROAD_KINDS[k][1]), k
         self.road_kind = kind
         return cap
@@ -185,26 +186,47 @@ class Fabric:
         # Craft: experience fades e-fold over CRAFT_YEARS.
         self.xp = self.xp * math.exp(-days / (K["CRAFT_YEARS"] * 365.0)) + builders_all * labor * days
         self.craft = clamp(self.xp / pop / K["CRAFT_PER_LEVEL"], 0.0, K["CRAFT_MAX"])
-        builders = builders_all * (1.0 - crew_share)
-        if s.housing_capacity < pop * float(s.p["housing_target_ratio"]):
-            builders *= 0.5
-        walls = K["WALL_SHARE"] if self.project >= 0 else 0.0
-        self.wall_builders = builders * walls
-        builders *= 1.0 - walls
+        # built_fabric.gd crews: homes, the civic works, repair, the walls, then the fabric.
+        crews = self.crews(builders_all * (1.0 - crew_share), pop)
+        self.wall_builders = crews["walls"]
+        self.wall_ready = crews["walls_ready"]
+        builders = crews["fabric"]
         budget = builders * labor * days * (1.0 + K["CRAFT_WORK"] * self.craft) * (1.0 + K["KILN_BUILDING"] * self.works_on("kilns"))
         self._reckon(budget, days, pop)
         self._walls(days, labor)
         self._great_works(days)
 
+    def crews(self, builders: float, pop: float) -> dict:
+        """built_fabric.gd crews. The surrogate's homes go up while the places lag
+        the people (housing_target_ratio stands in for the engine's 80% trigger);
+        its civic works are the founding works; its town is in full repair."""
+        s = self.sim
+        if not ON:
+            return {"homes": builders, "fabric": 0.0, "walls": 0.0, "walls_ready": 0.0}
+        short = s.housing_capacity < pop
+        ahead = s.housing_capacity < pop * float(s.p["housing_target_ratio"])
+        homes = builders if short else builders * K["HOMES_AHEAD"] if ahead else 0.0
+        rest = builders - homes
+        civic = rest * K["CIVIC_SHARE"] if s.completed < float(s.p["founding_works"]) else 0.0
+        rest -= civic
+        repair = min(rest, pop * K["REPAIR_SHARE"] * 0.5)
+        rest -= repair
+        ready = rest * K["WALL_SHARE"]
+        walls = ready if self.project >= 0 else 0.0
+        rest -= walls
+        return {"homes": homes, "civic": civic, "repair": repair, "walls": walls, "walls_ready": ready, "fabric": max(0.0, rest)}
+
     def _reckon(self, budget: float, days: float, pop: float) -> None:
         s = self.sim
         years = days / 365.0
         places = max(1.0, s.housing_capacity)
-        raw_spare = max(0.0, s.raw - FABRIC_RESERVE * pop)
+        bills = self.work["bill"] * (1.0 - self.work["progress"] / self.work["total"]) if self.work is not None else 0.0
+        raw_spare = max(0.0, s.raw - FABRIC_RESERVE * pop - bills)
         avail = [raw_spare]
         homes = self.homes
         home_need = sum(homes[gi] * places * GRADE_UPKEEP[gi] * years for gi in range(len(GRADES)))
-        wants = {"homes": home_need, "works": self.works * K["WORKS_WEAR"] * years, "roads": self.roads * K["ROAD_WEAR"] * years,
+        walls_need = float(STAGES[self.stage]["work"]) * K["WALL_UPKEEP"] * years if STAGES and self.stage > 0 else 0.0
+        wants = {"homes": home_need, "walls": walls_need, "works": self.works * K["WORKS_WEAR"] * years, "roads": self.roads * K["ROAD_WEAR"] * years,
                  "beauty": self.beauty * K["BEAUTY_WEAR"] * years / max(1.0, self.artistry())}
         need = sum(wants.values())
         kept, upkeep = {}, 0.0
@@ -213,7 +235,9 @@ class Fabric:
             budget -= pay
             upkeep += pay
             kept[key] = clamp(pay / wants[key], 0.0, 1.0) if wants[key] > 0.0 else 1.0
+        need += walls_need
         self.paid = clamp(upkeep / need, 0.0, 1.0) if need > 0.0 else 1.0
+        self.walls_kept = kept.get("walls", 1.0)
         for gi in range(len(GRADES) - 1, 0, -1):
             fall = homes[gi] * min(1.0, GRADE_WEAR[gi] * years * (1.0 - kept["homes"]))
             homes[gi] -= fall
@@ -296,6 +320,10 @@ class Fabric:
             self.homes[base] += (now - before) / now
 
     # -------------------------------------------------------------------- effects
+    def weather(self, cold: float) -> float:
+        """built_fabric.gd weather_bonus (the surrogate's sites have cold, no heat)."""
+        return K["HOME_WEATHER"] * clamp(cold, 0.0, 2.0) * self.quality
+
     def making(self) -> float:
         return 1.0 + K["WORKSHOP_MAKING"] * self.works_on("workshops")
 
@@ -349,7 +377,7 @@ class Fabric:
         bill = sum(float(v) for v in (stage.get("materials") or {}).values())
         if s.raw < bill * SPARE:
             return
-        hands = watch * (K["STONE_WATCH"] if ON and nxt >= K["STONE_STAGE"] else 1.0) + (s.able * s.alloc_pct["Construction"] / 100.0 * K["WALL_SHARE"] * 0.5 * K["BUILDER_WALL_WEIGHT"] if ON else 0.0)
+        hands = watch * (K["STONE_WATCH"] if ON and nxt >= K["STONE_STAGE"] else 1.0) + (getattr(self, "wall_ready", 0.0) * K["BUILDER_WALL_WEIGHT"] * (1.0 + K["CRAFT_WALLS"] * self.craft) if ON else 0.0)
         daily = min(float(stage["work"]) * DAILY_SHARE, hands * clamp(float(getattr(s, "labor_eff", 0.9)), 0.15, 1.25) * WORK_PER_HAND)
         if daily <= 0.0 or float(stage["work"]) / daily > DEFENSE_MAX_DAYS:
             return
@@ -436,7 +464,7 @@ class Fabric:
         capability = .35 + .08 * t + .10 * STONE_QUALITY + .10 * TALENT + .08 * min(1.0, crafters / 10.0) + .05 * min(1.0, builders / 20.0)
         if ON:
             cover = clamp(s.raw / max(1.0, bill), 0.0, 1.0)
-            capability += K["GREAT_CRAFT"] * self.craft + K["GREAT_BUILDERS"] * clamp(builders / K["GREAT_CREW"], 0.0, 1.0) + K["GREAT_MATERIALS"] * (cover - 0.5)
+            capability += K["GREAT_CRAFT"] * self.craft + K["GREAT_BUILDERS"] * clamp(builders * K["GREAT_CREW_SHARE"] / K["GREAT_CREW"], 0.0, 1.0) + K["GREAT_MATERIALS"] * (cover - 0.5)
         engineering = clamp(.5 + (capability - float(AMBITION_DEMAND[ambition])) * 1.4, 0.0, 1.0)
         social = s.cohesion * .35 + s.legitimacy * .25 + clamp(s.last.get("intake", 1.0), 0.0, 1.0) * .25 + .15
         score = clamp(engineering * .6 + social * .4, .02, .98)
