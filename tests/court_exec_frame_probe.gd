@@ -4,9 +4,13 @@ extends "res://tests/audience_modal_probe.gd"
 ## maths need no drawing).
 const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 
+var method:="club"
 func _ready()->void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--method="):method=arg.trim_prefix("--method=")
 	Backdrop.tier_override=0
 	_setup_world()
+	if method=="behead" and not GameState.known_discoveries.has("bronze_alloying"):GameState.known_discoveries.append("bronze_alloying")
 	var terrain:=TerrainDouble.new();terrain.name="TerrainDouble";add_child(terrain)
 	var director:=Director.new();director.terrain=terrain;add_child(director)
 	if "force_offline" in director.voice:director.voice.force_offline=true
@@ -20,9 +24,15 @@ func _ready()->void:
 	var stage:Control=modal.court_stage
 	stage.settle()
 	_report(stage,"before")
-	stage.execute("club","main","","Heha")
-	for t in [0.5,1.4,2.0,4.0,6.0]:
-		await get_tree().create_timer(t if t==0.5 else 0.6 if t==1.4 else t-(1.4 if t==2.0 else 2.0 if t==4.0 else 4.0)).timeout
+	stage.execute(method,"main","","Heha")
+	var exec:Node=stage.get_node_or_null("Execution")
+	var victim:Node3D=stage.figure("main").body3d
+	var acting:Node=preload("res://scripts/hud/court_acting.gd").of(victim)
+	if acting!=null:acting.cue.connect(func(_f:Node3D,e:Dictionary)->void:print("CUE ",e.get("name","")," t=",e.get("t","")))
+	var last:=0.0
+	for t in [1.4,3.0,6.0,9.0,10.5,12.0]:
+		await get_tree().create_timer(t-last).timeout
+		last=t
 		stage.rig.call("settle")
 		_report(stage,"t%.1f" % t)
 	get_tree().quit(0)
