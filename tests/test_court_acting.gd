@@ -536,6 +536,32 @@ func test_leaving_a_high_seat_starts_from_that_seat_without_a_drop()->void:
 			assert_float(_bone_y(f,"hips")).is_greater(hips+0.12)
 
 
+func test_floor_sitting_never_puts_the_stool_through_the_body()->void:
+	for lit in [false,true]:
+		var f:=_figure("sit","male_old")
+		f.look["outfit"]="robe";f.look["lit"]=lit;f._dress()
+		var stool:MeshInstance3D=f._mesh_named("prop_stool")
+		assert_object(stool).is_not_null()
+		assert_bool(stool.visible).is_true()
+		Acting.idle(f,"cross")
+		_run(f,1.0)
+		assert_float(_bone_y(f,"hips")).is_less(0.4)
+		assert_bool(stool.visible).override_failure_message("the floor sitter still has the torso-height stool").is_false()
+		# Talking or redressing must not resurrect the supporting stool.
+		f.play(f.talk_clip(),0.0)
+		assert_bool(stool.visible).is_false()
+		f._dress()
+		assert_bool(stool.visible).is_false()
+		Acting.idle(f,"sit")
+		assert_bool(stool.visible).override_failure_message("ordinary seated posture lost its stool").is_true()
+		Acting.idle(f,"log",{"seat":0.38})
+		assert_bool(stool.visible).is_false()
+		Acting.idle(f,"fire")
+		assert_bool(stool.visible).is_false()
+		Acting.idle(f,"log")
+		assert_bool(stool.visible).override_failure_message("a seated pose without an external seat needs its stool").is_true()
+
+
 func test_exits_are_plans_of_clips_the_library_has()->void:
 	for style in ["bow","storm","storm_back","sober","led"]:
 		var plan:Array=Acting.exit_plan(style)

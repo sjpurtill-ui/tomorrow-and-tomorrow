@@ -1145,6 +1145,7 @@ func rest_in(stance_id:String,opts:={})->void:
 	rebind_face()
 	var own:=String(OWN_STANCES.get(stance_id,""))
 	var under:=own if not own.is_empty() else stance_id
+	if fig.get(&"floor_seated")!=null:fig.set(&"floor_seated",stance_id=="cross")
 	# a seat from the set's mark: the figure's own stool only when none is given
 	if stance_id=="log" and opts.has("seat"):under="stand"
 	if fig.get(&"stance")!=null and under in (_consts.get("STANCES",[]) as Array):
