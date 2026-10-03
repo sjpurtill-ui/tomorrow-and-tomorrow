@@ -29,8 +29,17 @@ extends RefCounted
 ## share and a repayment in another good as the only adjustments; the live
 ## model (envoy_request_ai.gd) reads what this cannot, validated the same way.
 ##
+## Fair deals (envoy_deals.gd, deal_value.gd): every request that asks
+## something of us is weighed on both sides as each people counts it, so a
+## people with deep stores is not paid in what it is drowning in; the card
+## and the deal block say both sides' worth; a courteous decline and two
+## counters (another good, or half again) stand beside the old answers; and
+## turning a request down costs in proportion to how fair and needed it was.
+## Hands sent abroad (a teacher, healers, hunters) are away from our work
+## until they come home (lent_hands.gd).
+##
 ## State: AudienceHall.state().envoy_requests = {recent:[{d,c,t}], pledges:[...], took_in:{civ:n},
-##   answers:{civ:[{a,d,t,o,x,told}]}}.
+##   answers:{civ:[{a,d,t,o,x,told}]}, lent:[{n,until,why}]}.
 ## Static helpers; the hall loads this lazily.
 
 const Hall:=preload("res://scripts/audience_hall.gd")
@@ -48,12 +57,17 @@ const Answer:=preload("res://scripts/world_answer.gd")
 
 const RECENT_MAX:=40
 const PLEDGES_MAX:=16
+const LENT_MAX:=16
 const TICK:=10
 ## What goods are worth when a people trades or repays in kind: the one price
 ## table (trade_prices.gd, the economy's own prices).
 const PRICES:=preload("res://scripts/trade_prices.gd")
 static func _value(res:String)->float:
 	return PRICES.value(res,"player")
+## What each side gives and gets, counted as each people counts it
+## (deal_value.gd), and the deals' offers, refusals and counters (envoy_deals.gd).
+const DV:=preload("res://scripts/deal_value.gd")
+const Deals:=preload("res://scripts/envoy_deals.gd")
 const PLACES:=["north woods","east ridge","river bend","upper valley","south marsh","west hills","old ford","far meadows"]
 
 ## Each request: its herald headline and its family (variety is judged by
@@ -129,6 +143,7 @@ static func store()->Dictionary:
 	if not e.get("recent") is Array: e["recent"]=[]
 	if not e.get("pledges") is Array: e["pledges"]=[]
 	if not e.get("took_in") is Dictionary: e["took_in"]={}
+	if not e.get("lent") is Array: e["lent"]=[]
 	return e
 
 static func valid_state(data:Variant)->bool:
@@ -139,8 +154,11 @@ static func valid_state(data:Variant)->bool:
 		if not r is Dictionary or not Hall._num(r.get("d")) or not r.get("t","") is String or not r.get("c","") is String: return false
 	if not d.get("pledges",[]) is Array or (d.get("pledges",[]) as Array).size()>PLEDGES_MAX: return false
 	for p in d.get("pledges",[]):
-		if not p is Dictionary or not Hall._num(p.get("amt")) or not Hall._num(p.get("due")) or not String(p.get("res","")) in Hall.RESOURCES or JSON.stringify(p).length()>800: return false
+		if not p is Dictionary or not Hall._num(p.get("amt")) or not Hall._num(p.get("due")) or not String(p.get("res","")) in DV.GOODS or JSON.stringify(p).length()>800: return false
 	if not d.get("took_in",{}) is Dictionary or (d.get("took_in",{}) as Dictionary).size()>256: return false
+	if not d.get("lent",[]) is Array or (d.get("lent",[]) as Array).size()>LENT_MAX: return false
+	for l in d.get("lent",[]):
+		if not l is Dictionary or not Hall._num(l.get("n")) or not Hall._num(l.get("until")) or JSON.stringify(l).length()>200: return false
 	if not d.get("answers",{}) is Dictionary or (d.get("answers",{}) as Dictionary).size()>ANSWER_CIVS_MAX: return false
 	for list in (d.get("answers",{}) as Dictionary).values():
 		if not list is Array or (list as Array).size()>ANSWERS_PER_CIV: return false
@@ -276,6 +294,23 @@ static func _surplus(civ_id:String,exclude:Array,min_stock:float=30.0)->Dictiona
 		if worth>best_value: best_value=worth; best={"res":String(res),"stock":stock}
 	return best
 
+static func _lacked(civ_id:String,worth_to_them:float,share:float)->Dictionary:
+	## A gift of about `worth_to_them` (what parting with it costs them), in
+	## the good they hold that is worth most to us: {res, amt}; {} when they
+	## hold nothing we can use. Every people is weighed alike (deal_value.gd).
+	if not DV.simulated(civ_id): return {}
+	var best:={}
+	var best_worth:=0.0
+	for good:String in DV.GOODS:
+		if not DV.usable("player",good): continue
+		var r:=DV.reading(civ_id,good)
+		if float(r.h)<20.0: continue
+		var q:=Hall._nice(DV.qty_for_cost(r,worth_to_them,float(r.h)*share))
+		if q<1.0 or q>float(r.h)*share+0.5: continue
+		var worth:=DV.worth_in("player",good,q)
+		if worth>best_worth: best_worth=worth; best={"res":good,"amt":q}
+	return best
+
 static func _pick(list:Array,rng:RandomNumberGenerator)->String:
 	return String(list[rng.randi_range(0,list.size()-1)])
 
@@ -356,9 +391,12 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			var have:=Hall.player_stock("Food")
 			var amount:=Hall._nice(minf(pop*rng.randf_range(0.35,0.55),have*0.25))
 			if amount<10.0 or amount>have: return {}
-			var repay:=_surplus(civ_id,["Food"],20.0)
+			# Repaid in what we lack most against what it costs them, a little
+			# more for the waiting (Deals.offer); in kind when they hold nothing else.
+			var needed:=Deals.need("food_loan",civ_id)
+			var repay:=Deals.offer(civ_id,"player",DV.worth_out("player","Food",amount),DV.worth_in(civ_id,"Food",amount),Deals.temper(civ_id,needed)*1.15,["Food"],[],0.5)
 			var repay_res:=String(repay.get("res","Food"))
-			var repay_amt:=Hall._nice(amount*1.3*_value("Food")/_value(String(repay_res)))
+			var repay_amt:=float(repay.amt) if not repay.is_empty() else Hall._nice(amount*1.3)
 			var episode:=int(data.get("episode",floori(day/365.0)))
 			s.ask="er:food_loan:%d" % episode
 			req={"amount":amount,"repay_res":repay_res,"repay_amt":repay_amt,"due_in":rng.randi_range(240,360)}
@@ -372,7 +410,12 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			var workers:=clampi(roundi(pop*0.08),4,30)
 			var place0:=_pick(PLACES,rng)
 			var yields:={"Timber":"woods","Stone":"quarries","Clay":"clay pits","Fiber Plants":"reed beds"}
+			# Their hands gather what our stores lack most (ties by the dice).
 			var goods:=_pick(yields.keys(),rng)
+			var lack:=DV.unit_worth("player",goods)/_value(goods)
+			for g:String in yields:
+				var f:=DV.unit_worth("player",g)/_value(g)
+				if f>lack+0.05: lack=f; goods=g
 			var amount0:=Hall._nice(float(workers)*60.0*0.12*_value("Food")/_value(String(goods))*rng.randf_range(0.9,1.2))
 			s.ask="er:labour:%d" % floori(day/365.0)
 			req={"food":food,"workers":workers,"res":goods,"amount":amount0,"where":"%s in the %s" % [String(yields[goods]),place0],"days":60}
@@ -391,15 +434,14 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 					var theirs:=maxf(1.0,Hall.foreign_stock(civ_id,String(res)))
 					if mine>=30.0 and mine/theirs>best: best=mine/theirs; want=String(res)
 			if want=="": return {}
-			var offer:=_surplus(civ_id,[want],40.0)
-			if offer.is_empty(): return {}
 			var give:=Hall._nice(minf(pop*(0.5 if want=="Food" else 0.15)*rng.randf_range(0.8,1.2),Hall.player_stock(want)*0.2))
 			if give<8.0: return {}
-			var receive:=Hall._nice(give*_value(String(want))/_value(String(offer.res))*rng.randf_range(1.0,1.2))
-			var cap:=float(offer.stock)*0.35
-			if receive>cap:
-				give=Hall._nice(give*cap/receive); receive=Hall._nice(cap)
-			if give<8.0 or receive<5.0: return {}
+			# They pay in what we lack most against what it costs them, about
+			# even for both sides (Deals.offer), from no more than a third of a stock.
+			var offer:=Deals.offer(civ_id,"player",DV.worth_out("player",want,give),DV.worth_in(civ_id,want,give),Deals.temper(civ_id,Deals.need("barter",civ_id)),[want],[],0.35,40.0)
+			if offer.is_empty(): return {}
+			var receive:=float(offer.amt)
+			if receive<5.0: return {}
 			s.ask="er:barter:%s:%s" % [want,String(offer.res)]
 			req={"give_res":want,"give_amt":give,"get_res":String(offer.res),"get_amt":receive}
 			terms={"resource":want,"amount":give}
@@ -420,30 +462,39 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			if r!=null and not (r.call("has_bond",civ_id,["hunting"]) as Dictionary).is_empty(): return {}
 			var place:=_pick(PLACES,rng)
 			var monthly:=Hall._nice(clampf(pop*0.02,2.0,maxf(2.0,player_pop*0.03)))
-			var pay:=_surplus(civ_id,["Food"],30.0)
+			var taken:=monthly*6.0
+			var pay:=Deals.offer(civ_id,"player",DV.worth_out("player","Food",taken),DV.worth_in(civ_id,"Food",taken),Deals.temper(civ_id,Deals.need("forage_leave",civ_id)),["Food"],[],0.2,20.0)
 			s.ask="er:forage:%s" % place
-			req={"place":place,"monthly":monthly,"months":6}
-			if not pay.is_empty(): req.merge({"pay_res":String(pay.res),"pay_amt":Hall._nice(minf(float(pay.stock)*0.2,monthly*6.0*0.7/_value(String(pay.res))))})
-			s.summary="%s's hunters ask leave to hunt and gather in your %s for half a year; they would take about %d Food a month from that country." % [name,place,roundi(monthly)]
+			req={"place":place,"monthly":monthly,"months":6,"offered":true}
+			if not pay.is_empty(): req.merge({"pay_res":String(pay.res),"pay_amt":float(pay.amt)})
+			s.summary="%s's hunters ask leave to hunt and gather in your %s for half a year; they would take about %d Food a month from that country%s." % [name,place,roundi(monthly),(", and offer %d %s for it" % [roundi(float(pay.amt)),String(pay.res)]) if not pay.is_empty() else ""]
 		"craft_teaching":
 			if opinion<-0.1 or r==null: return {}
 			var craft:Dictionary=r.call("_craft",civ_id)
 			if craft.is_empty() or used.has("er:craft:"+String(craft.id)): return {}
-			var pay2:=_surplus(civ_id,[],20.0)
+			# Priced by what it costs us (a teacher's days away) and what it saves
+			# them (Deals.TEACH_GAIN times that), paid in what we lack.
+			var teach:=float(Deals.TEACH_DAYS)
+			var pay2:=Deals.offer(civ_id,"player",teach*DV.day_of_work("player"),teach*Deals.TEACH_GAIN*DV.day_of_work(civ_id),Deals.temper(civ_id,Deals.need("craft_teaching",civ_id)),[],[],0.3,20.0)
 			if pay2.is_empty(): return {}
-			var amt:=Hall._nice(minf(clampf(pop*0.15,8.0,60.0),float(pay2.stock)*0.3))
-			if amt<5.0: return {}
+			var amt:=float(pay2.amt)
+			if amt<3.0: return {}
 			s.ask="er:craft:"+String(craft.id)
 			req={"craft":String(craft.id),"craft_name":String(craft.name),"pay_res":String(pay2.res),"pay_amt":amt}
-			s.summary="%s wants a teacher of %s from your people, and offers %d %s for the teaching." % [name,String(craft.name),roundi(amt),String(pay2.res)]
+			s.summary="%s wants a teacher of %s from your people for %d days, and offers %d %s for the teaching." % [name,String(craft.name),Deals.TEACH_DAYS,roundi(amt),String(pay2.res)]
 		"healer_plea":
 			var health:=float(civ.get("health",0.7))
 			if health>=0.55: return {}
 			var herbs:=Hall._nice(clampf(pop*0.05,5.0,30.0))
+			var healers:=clampi(roundi(player_pop*0.01),1,4)
 			s.ask="er:healers:%d" % floori(day/365.0)
-			req={"herbs":herbs,"risk":rng.randf()<0.45}
+			req={"herbs":herbs,"healers":healers,"risk":rng.randf()<Deals.HEAL_RISK}
 			terms={"resource":"Fiber Plants","amount":herbs}
-			s.summary="Sickness is running through %s's camps. %s asks for your healers and %d Fiber Plants for poultices." % [name,who,roundi(herbs)]
+			# A sick people brings what it can spare for the healers' work.
+			var weighed:=Deals.weigh("healer_plea",req,civ_id)
+			var thanks:=Deals.offer(civ_id,"player",float(weighed.get("us_give",0.0)),float(weighed.get("them_get",0.0)),Deals.temper(civ_id,Deals.need("healer_plea",civ_id)),[],[],0.25,20.0)
+			if not thanks.is_empty(): req.merge({"pay_res":String(thanks.res),"pay_amt":float(thanks.amt)})
+			s.summary="Sickness is running through %s's camps. %s asks for %d of your healers and %d Fiber Plants for poultices%s." % [name,who,healers,roundi(herbs),(", and brings %d %s for their work" % [roundi(float(thanks.amt)),String(thanks.res)]) if not thanks.is_empty() else ""]
 		"mediation":
 			var third:=_third_tense(civ)
 			if third.is_empty() or used.has("er:judge:"+String(third.id)): return {}
@@ -488,21 +539,23 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			elif float(civ.get("health",0.7))<0.6: what="their sick"
 			elif float(civ.get("food_days",30))>preload("res://scripts/food_care.gd").store_gate(45.0): what="their planting" if CV.era_tags(civ_id).has("farming") else "their hunt"
 			else: what="the child born to %s's house" % who
-			var offer2:=_surplus(civ_id,[],20.0)
+			var offer2:=_lacked(civ_id,clampf(pop*0.1,5.0,40.0)*_value("Food"),0.25)
 			if offer2.is_empty(): return {}
-			var amt2:=Hall._nice(minf(clampf(pop*0.1,5.0,40.0),float(offer2.stock)*0.25))
+			var amt2:=float(offer2.amt)
 			s.ask="er:bless:%d" % floori(day/365.0)
 			req={"what":what,"offer_res":String(offer2.res),"offer_amt":amt2}
 			s.summary="%s asks the god of your people to bless %s, and has brought %d %s as an offering." % [name,what,roundi(amt2),String(offer2.res)]
 		"war_supplies":
 			var enemy:=_third_war(civ,String(data.get("enemy","")))
 			if enemy.is_empty() or used.has("er:supplies:"+String(enemy.id)): return {}
-			var res:="Timber" if Hall.player_stock("Timber")>=Hall.player_stock("Stone") else "Stone"
+			# Whichever of timber and stone our stores miss the less.
+			var res:="Timber" if DV.unit_worth("player","Timber")/_value("Timber")<=DV.unit_worth("player","Stone")/_value("Stone") else "Stone"
+			if Hall.player_stock(res)<50.0: res="Stone" if res=="Timber" else "Timber"
 			var amount2:=Hall._nice(minf(pop*0.2,Hall.player_stock(res)*0.2))
 			if amount2<10.0: return {}
-			var pay3:=_surplus(civ_id,[res],20.0)
+			var pay3:=Deals.offer(civ_id,"player",DV.worth_out("player",res,amount2),DV.worth_in(civ_id,res,amount2)*1.5,Deals.temper(civ_id,Deals.need("war_supplies",civ_id)),[res],[],0.3,20.0)
 			req={"enemy":String(enemy.id),"enemy_name":String(enemy.name),"res":res,"amount":amount2}
-			if not pay3.is_empty(): req.merge({"pay_res":String(pay3.res),"pay_amt":Hall._nice(minf(float(pay3.stock)*0.3,amount2*0.8*_value(String(res))/_value(String(pay3.res))))})
+			if not pay3.is_empty(): req.merge({"pay_res":String(pay3.res),"pay_amt":float(pay3.amt)})
 			s.ask="er:supplies:"+String(enemy.id)
 			terms={"resource":res,"amount":amount2}
 			var offer_text:=" and offers %d %s for them" % [roundi(float(req.pay_amt)),String(req.pay_res)] if req.has("pay_res") else ""
@@ -525,10 +578,10 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			if r!=null and not (r.call("has_bond",civ_id,["pilgrimage"]) as Dictionary).is_empty(): return {}
 			var what2:=_pick(["the graves of its ancestors","a spring its healers hold sacred","a standing stone where its elders are named"],rng)
 			var place4:=_pick(PLACES,rng)
-			var toll:=_surplus(civ_id,[],20.0)
+			var toll:=_lacked(civ_id,clampf(pop*0.08,5.0,30.0)*_value("Food"),0.15)
 			s.ask="er:sacred:"+place4
 			req={"what":what2,"place":place4}
-			if not toll.is_empty(): req.merge({"toll_res":String(toll.res),"toll_amt":Hall._nice(minf(float(toll.stock)*0.15,clampf(pop*0.08,5.0,30.0)))})
+			if not toll.is_empty(): req.merge({"toll_res":String(toll.res),"toll_amt":float(toll.amt)})
 			s.summary="%s says %s lies in your %s. It asks leave for its people to visit it each spring." % [name,what2,place4]
 		"captive_scouts":
 			var held:=_captives(civ_id)
@@ -544,20 +597,23 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 				s.ask="er:captives:theirs:%d" % int(held.theirs_day)
 				s.headline="asks for its captured scouts back"
 				req={"side":"theirs","count":m}
-				var ransom:=_surplus(civ_id,[],20.0)
-				if not ransom.is_empty(): req.merge({"pay_res":String(ransom.res),"pay_amt":Hall._nice(minf(float(ransom.stock)*0.25,clampf(float(m)*10.0,8.0,60.0)))})
+				var ransom:=_lacked(civ_id,clampf(float(m)*10.0,8.0,60.0)*_value("Food"),0.25)
+				if not ransom.is_empty(): req.merge({"pay_res":String(ransom.res),"pay_amt":float(ransom.amt)})
 				s.summary="Your people have held %d of %s's scouts since they were caught in your country %s. %s asks for them back." % [m,name,_ago(day-int(held.theirs_day)),who]
 		"rite_keeper":
 			var regard2:=DIVINE.foreign_regard(civ_id)
 			if regard2.is_empty() or not (float(regard2.love)>=0.62 or float(regard2.dread)>=0.5): return {}
 			if r!=null and not (r.call("has_bond",civ_id,["rites"]) as Dictionary).is_empty(): return {}
 			var fear:=float(regard2.dread)>=0.5 and float(regard2.love)<0.62
-			var keep:=_surplus(civ_id,[],20.0)
+			# One of ours gone to them for good: a year of a person's work to us,
+			# more to them (Deals.RITE_GAIN); they bring its worth in what we lack.
+			var keep:=Deals.offer(civ_id,"player",DV.person("player"),DV.person(civ_id)*Deals.RITE_GAIN,Deals.temper(civ_id,Deals.need("rite_keeper",civ_id)),[],[],0.3,20.0)
 			s.ask="er:rites:%d" % floori(day/1095.0)
 			req={"fear":fear}
-			if not keep.is_empty(): req.merge({"gift_res":String(keep.res),"gift_amt":Hall._nice(minf(float(keep.stock)*0.15,clampf(pop*0.06,5.0,25.0)))})
-			if fear: s.summary="%s fears your god and does not know what angers it. %s asks for one of your people who keeps your rites to live among them and teach them what is owed." % [name,who]
-			else: s.summary="%s wants to honour your god as your own people do. %s asks for one of your people who keeps your rites to live among them and teach them." % [name,who]
+			if not keep.is_empty(): req.merge({"gift_res":String(keep.res),"gift_amt":float(keep.amt)})
+			var brings:=(" They bring %d %s for the keeper's upkeep." % [roundi(float(keep.amt)),String(keep.res)]) if not keep.is_empty() else ""
+			if fear: s.summary="%s fears your god and does not know what angers it. %s asks for one of your people who keeps your rites to live among them and teach them what is owed.%s" % [name,who,brings]
+			else: s.summary="%s wants to honour your god as your own people do. %s asks for one of your people who keeps your rites to live among them and teach them.%s" % [name,who,brings]
 		"boundary_cairn":
 			if r!=null and not (r.call("has_bond",civ_id,["cairn"]) as Dictionary).is_empty(): return {}
 			var tension2:=float(relation.get("border_tension",0.0))
@@ -577,19 +633,33 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			var hunters:=clampi(roundi(player_pop*0.04),3,15)
 			var place6:=_pick(PLACES,rng)
 			s.ask="er:hunt:%d" % floori(day/365.0)
-			req={"hunters":hunters,"meat":Hall._nice(float(hunters)*rng.randf_range(6.0,10.0)),"place":place6,"days":20,"risk":rng.randf()<0.2}
-			s.summary="%s's hunters have found a great herd moving through the %s, too many for them to drive alone. %s asks for %d of your hunters to join the drive; the meat would be shared, about %d Food for your people." % [name,place6,who,hunters,roundi(float(req.meat))]
+			req={"hunters":hunters,"meat":Hall._nice(float(hunters)*rng.randf_range(6.0,10.0)),"place":place6,"days":20,"risk":rng.randf()<Deals.HUNT_RISK}
+			# A people with meat to spare is offered our share's worth in what it
+			# lacks instead, and the hunters' people keep the meat.
+			var share:={}
+			var meat:=float(req.meat)
+			if DV.unit_worth("player","Food")<0.5*_value("Food"):
+				var cost:=float(Deals.weigh("joint_hunt",req,civ_id).get("us_give",0.0))
+				share=Deals.offer(civ_id,"player",cost,DV.worth_in(civ_id,"Food",meat*1.5),Deals.temper(civ_id,Deals.need("joint_hunt",civ_id)),["Food"],[],0.3,20.0)
+				if not share.is_empty() and float(share.worth)<=DV.worth_in("player","Food",meat): share={}
+			if not share.is_empty(): req.merge({"share_res":String(share.res),"share_amt":float(share.amt)})
+			if share.is_empty(): s.summary="%s's hunters have found a great herd moving through the %s, too many for them to drive alone. %s asks for %d of your hunters to join the drive; the meat would be shared, about %d Food for your people." % [name,place6,who,hunters,roundi(meat)]
+			else: s.summary="%s's hunters have found a great herd moving through the %s, too many for them to drive alone. %s asks for %d of your hunters to join the drive, and would give %d %s for your share, keeping the meat." % [name,place6,who,hunters,roundi(float(share.amt)),String(share.res)]
 		"safe_passage":
 			if r!=null and not (r.call("has_bond",civ_id,["passage"]) as Dictionary).is_empty(): return {}
 			if not (float(relation.get("trade",0.0))>0.03 or String(civ.get("strategy",""))=="commerce" or opinion>=0.15): return {}
 			var dest:=_destination(civ)
 			if dest.is_empty(): return {}
-			var toll2:=_surplus(civ_id,[],20.0)
+			# The shortcut is worth its saved days to them; the crossing gifts, in
+			# what we lack, share that about evenly (nothing leaves our stores).
+			var seasons:=8
+			var saved:=float(seasons*Deals.PASSAGE_PARTY*Deals.PASSAGE_SAVED)*DV.day_of_work(civ_id)
+			var toll2:=Deals.offer(civ_id,"player",0.0,saved,Deals.temper(civ_id,Deals.need("safe_passage",civ_id)),[],[],0.3,20.0)
 			if toll2.is_empty(): return {}
-			var toll_amt:=Hall._nice(minf(float(toll2.stock)*0.08,clampf(pop*0.05,4.0,20.0)))
-			if toll_amt<3.0: return {}
+			var toll_amt:=Hall._nice(float(toll2.amt)/float(seasons))
+			if toll_amt<1.0: return {}
 			s.ask="er:passage:"+String(dest.id)
-			req={"dest":String(dest.id),"dest_name":String(dest.name),"toll_res":String(toll2.res),"toll_amt":toll_amt,"seasons":8,"carriers":_carriers(civ_id)}
+			req={"dest":String(dest.id),"dest_name":String(dest.name),"toll_res":String(toll2.res),"toll_amt":toll_amt,"seasons":seasons,"carriers":_carriers(civ_id)}
 			s.summary="%s's %s want to cross your country on the way to %s, a party each season for two years, and would leave %d %s at each crossing." % [name,String(req.carriers),String(dest.name),roundi(toll_amt),String(toll2.res)]
 	if String(s.get("ask",""))=="": return {}
 	# Business born of a famine leaves the same mark in the ledger as a plea
@@ -598,10 +668,20 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 	if String(occasion.get("type",""))=="their_famine" or situation_type=="food_loan":
 		s.ask="request:Food:%s:%d" % [situation_type,int(data.get("episode",floori(day/365.0)))]
 	if used.has(String(s.ask)): return {}
+	# Both sides of the deal, as each people counts it, and the counters open
+	# on it (envoy_deals.gd): kept on the request, said on the card.
+	var deal:=Deals.summarize(situation_type,req,civ_id)
+	if not deal.is_empty():
+		req["deal"]=deal
+		var counters:=Deals.build_counters(situation_type,req,civ_id,deal)
+		if not counters.is_empty(): req["counters"]=counters
 	s["req"]=req
 	s.summary=_fix(String(s.get("summary","")))
 	var out:={"kind":"request","situation":s}
 	if not terms.is_empty(): out["terms"]=terms
+	# A deal poor for us comes less often (a people drowning in food is
+	# seldom offered food): it weighs as fair as it is, from 0.3 of the odds.
+	if not deal.is_empty() and not bool(deal.get("plea",false)) and float(deal.get("us_give",0.0))>=1.0: out["appeal"]=clampf(0.3+0.7*float(deal.get("us_get",0.0))/float(deal.us_give),0.3,1.0)
 	return out
 
 # --------------------------------------------------------------------------
@@ -643,24 +723,27 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			var short2:=Hall._short(String(p.give_res),float(p.give_amt))
 			o.append(Hall._option("accept","Make the trade","Give %d %s; receive %d %s." % [_n(p.give_amt),String(p.give_res),_n(p.get_amt),String(p.get_res)],"warm",short2=="",short2))
 			o.append(Hall._option("bargain","Ask for more","Hold out for about a third more %s. They may agree, or walk away." % String(p.get_res),"neutral",short2=="",short2))
-			o.append(Hall._option("refuse","Decline","No trade this time.","hostile"))
+			o.append(Hall._option("refuse","Refuse the trade","No trade, and no thanks for the offer.","hostile"))
 		"refuge":
 			var n:=int(p.people)
 			o.append(Hall._option("accept","Take them in","%d people join your people; more mouths now, more hands later." % n,"warm"))
 			o.append(Hall._option("partial","Take the children and their mothers","About %d join you; the rest go home." % maxi(1,n/2),"neutral"))
 			o.append(Hall._option("refuse","Turn them away","They go back to %s." % {"hunger":"their hunger","sickness":"the sickness","war":"the war"}.get(String(p.reason),"their troubles"),"hostile"))
 		"forage_leave":
-			o.append(Hall._option("accept","Grant the leave","Their hunters take about %d Food a month from your %s for half a year." % [_n(p.monthly),String(p.place)],"warm"))
-			if p.has("pay_res"): o.append(Hall._option("bargain","Grant it for a price","Ask %d %s now for the leave. They may pay, or go home offended." % [_n(p.pay_amt),String(p.pay_res)],"neutral"))
+			var offered:=p.has("pay_res") and bool(p.get("offered",false))
+			o.append(Hall._option("accept","Grant the leave","Their hunters take about %d Food a month from your %s for half a year.%s" % [_n(p.monthly),String(p.place),(" They pay %d %s now." % [_n(p.pay_amt),String(p.pay_res)]) if offered else ""],"warm"))
+			if p.has("pay_res") and not offered: o.append(Hall._option("bargain","Grant it for a price","Ask %d %s now for the leave. They may pay, or go home offended." % [_n(p.pay_amt),String(p.pay_res)],"neutral"))
 			o.append(Hall._option("refuse","Keep them out","The %s stays yours alone. The frontier grows a little tenser." % String(p.place),"hostile"))
 		"craft_teaching":
-			o.append(Hall._option("accept","Teach it for the price","Receive %d %s; a teacher of %s goes to them." % [_n(p.pay_amt),String(p.pay_res),String(p.craft_name)],"warm"))
-			o.append(Hall._option("gift","Teach it freely","A teacher goes, and nothing is asked. They will think well of you.","warm"))
+			o.append(Hall._option("accept","Teach it for the price","Receive %d %s; a teacher of %s goes to them for %d days, away from our work." % [_n(p.pay_amt),String(p.pay_res),String(p.craft_name),Deals.TEACH_DAYS],"warm"))
+			o.append(Hall._option("gift","Teach it freely","A teacher goes for %d days, and nothing is asked. They will think well of you." % Deals.TEACH_DAYS,"warm"))
 			o.append(Hall._option("refuse","Keep the craft","%s stays your people's own." % Hall._cap_first(String(p.craft_name)),"hostile"))
 		"healer_plea":
 			var short3:=Hall._short("Fiber Plants",float(p.herbs))
-			o.append(Hall._option("accept","Send healers and plants","Give %d Fiber Plants and send healers. The healers may bring the sickness home." % _n(p.herbs),"warm",short3=="",short3))
-			o.append(Hall._option("partial","Send the plants only","Give %d Fiber Plants; your healers stay home and safe." % _n(p.herbs),"neutral",short3=="",short3))
+			var thanks:=(" They give %d %s for the healers' work." % [_n(p.pay_amt),String(p.pay_res)]) if p.has("pay_res") else ""
+			var half_thanks:=(" They give %d %s." % [_n(Hall._nice(float(p.pay_amt)*0.5)),String(p.pay_res)]) if p.has("pay_res") else ""
+			o.append(Hall._option("accept","Send healers and plants","Give %d Fiber Plants and send %d healers for %d days. About %d in 100 that they bring the sickness home.%s" % [_n(p.herbs),int(p.get("healers",2)),Deals.HEAL_DAYS,roundi(Deals.HEAL_RISK*100.0),thanks],"warm",short3=="",short3))
+			o.append(Hall._option("partial","Send the plants only","Give %d Fiber Plants; your healers stay home and safe.%s" % [_n(p.herbs),half_thanks],"neutral",short3=="",short3))
 			o.append(Hall._option("refuse","Close the paths to them","Nothing goes. Your people are safe from it; %s is not." % name,"hostile"))
 		"mediation":
 			o.append(Hall._option("accept","Judge for %s" % name,"The %s is theirs. %s will resent it." % [String(p.place),String(p.third_name)],"warm"))
@@ -726,18 +809,86 @@ static func options(audience:Dictionary)->Array[Dictionary]:
 			o.append(Hall._option("partial","Let them raise it","They set the stones where they like. The border calms a little.","neutral"))
 			o.append(Hall._option("refuse","No stones on that line","The line stays unmarked. They will read it as a claim.","hostile"))
 		"joint_hunt":
-			o.append(Hall._option("accept","Send your hunters","%d of your hunters join the drive for about twenty days; about %d Food comes home. A drive can kill a hunter." % [int(p.hunters),_n(p.meat)],"warm"))
+			if p.has("share_res"): o.append(Hall._option("accept","Send your hunters","%d of your hunters join the drive for about twenty days; they give %d %s for your share and keep the meat. About 1 in %d that a hunter is killed." % [int(p.hunters),_n(p.share_amt),String(p.share_res),roundi(1.0/Deals.HUNT_RISK)],"warm"))
+			else: o.append(Hall._option("accept","Send your hunters","%d of your hunters join the drive for about twenty days; about %d Food comes home. About 1 in %d that a hunter is killed." % [int(p.hunters),_n(p.meat),roundi(1.0/Deals.HUNT_RISK)],"warm"))
 			o.append(Hall._option("gift","Send them, and give up your share","Your hunters help and the meat goes to %s. They will remember it." % name,"warm"))
 			o.append(Hall._option("refuse","Keep your hunters home","They drive the herd alone and take what they can.","hostile"))
 		"safe_passage":
 			o.append(Hall._option("accept","Grant passage for the crossing gift","Their %s cross your country each season for two years and leave %d %s each time." % [String(p.carriers),_n(p.toll_amt),String(p.toll_res)],"warm"))
 			o.append(Hall._option("gift","Grant it freely","They cross freely. %s will think well of you, and so may %s." % [name,String(p.dest_name)],"warm"))
 			o.append(Hall._option("refuse","Close your country to them","They must go the long way round to %s." % String(p.dest_name),"hostile"))
+	_deal_options(audience,type,p,o)
 	for option in o:
 		option["label"]=_fix(String(option.label)); option["sub"]=_fix(String(option.sub))
 		# Every answer states what it costs or risks; the card shows this line.
-		if bool(option.get("enabled",true)): option["cost"]=("Risk: " if String(option.id)=="bargain" else "Cost: ")+String(option.sub)
+		if bool(option.get("enabled",true)): option["cost"]=("Risk: " if String(option.id) in ["bargain","counter_good","counter_more"] else "Cost: ")+String(option.sub)
 	return o
+
+## How far past the first terms each old "ask for more" answer reaches, for
+## its odds (envoy_deals.odds): a third more goods, twice the offering, a toll.
+const BARGAIN_OVER:={"barter":0.3,"blessing_rite":0.3,"sacred_site":0.15,"forage_leave":0.2}
+
+static func _deal_options(audience:Dictionary,type:String,p:Dictionary,o:Array[Dictionary])->void:
+	## The fair-deal answers (envoy_deals.gd): what taking it is worth to us,
+	## the counters with their odds, a courteous decline, and what a blunt
+	## refusal costs. Every "ask for more" says its odds.
+	var d:=Deals.deal_of(audience) if type in Deals.DEALS or type=="blessing_rite" else {}
+	for option in o:
+		var id:=String(option.id)
+		if id=="bargain":
+			var chance:=Deals.odds(audience,float(BARGAIN_OVER.get(type,0.0)))
+			option["odds"]=snappedf(chance,0.01)
+			option["sub"]=String(option.sub)+" %s." % Hall._cap_first(Deals.odds_words(chance))
+		elif id=="accept" and not d.is_empty() and float(d.get("us_give",0.0))+float(d.get("us_get",0.0))>=1.0:
+			if float(d.us_give)<1.0: option["sub"]=String(option.sub)+" Nothing leaves our stores; we get about %d." % roundi(float(d.us_get))
+			else: option["sub"]=String(option.sub)+" We give about %d, get about %d." % [roundi(float(d.us_give)),roundi(float(d.us_get))]
+	if not type in Deals.DEALS: return
+	var at:=o.size()
+	for i in o.size():
+		if String(o[i].id)=="refuse": at=i; break
+	var extra:Array[Dictionary]=[]
+	var gives:=String((Deals.PAY_FIELDS.get(type,["",""]) as Array)[1])
+	var listed:Array=(p.get("counters",[]) as Array).duplicate()
+	# A counter the god asked in words (typed_choice / the live reading),
+	# weighed by the same rule; it stands first, in place of the card's own.
+	var typed:Dictionary=Hall._situation(audience).get("typed",{}) if Hall._situation(audience).get("typed") is Dictionary else {}
+	if String(typed.get("counter","")).begins_with("counter_"):
+		var asked:=Deals.counter_terms(audience,String(typed.counter),String(typed.get("ask_res","")),float(typed.get("ask_amt",0.0)))
+		if not asked.is_empty():
+			listed=listed.filter(func(x:Variant)->bool:return x is Dictionary and String((x as Dictionary).get("id",""))!=String(asked.id))
+			listed.push_front(asked)
+	for c in listed:
+		if not c is Dictionary: continue
+		var chance:=Deals.odds(audience,float(c.get("over",0.0)))
+		var lost:="if not, they go home without a deal and a little cooler (their regard falls about %d point)" % roundi(Deals.COUNTER_LOST*100.0)
+		var was:=_n(p.get(gives,0))
+		var opt:Dictionary
+		if String(c.id)=="counter_good":
+			var label:="Ask for %s instead" % String(c.res)
+			var sub:="Ask %d %s instead of %d %s: worth about %d to us, not %d. %s; %s." % [_n(c.amt),String(c.res),was,String(p.get((Deals.PAY_FIELDS[type] as Array)[0],"")),roundi(float(c.worth)),roundi(float(c.get("was",0.0))),Hall._cap_first(Deals.odds_words(chance)),lost]
+			if type=="work_for_food": label="Have them gather %s instead" % String(c.res)
+			opt=Hall._option("counter_good",label,sub,"neutral")
+		else:
+			var label2:="Ask half again as much"
+			var sub2:="Ask %d %s, not %d: worth about %d to us. %s; %s." % [_n(c.amt),String(c.res),was,roundi(float(c.worth)),Hall._cap_first(Deals.odds_words(chance)),lost]
+			if type=="work_for_food":
+				label2="Ask a third month of work"
+				sub2="Their workers stay three months for the same Food and bring about %d %s, not %d. %s; %s." % [_n(c.amt),String(c.res),was,Hall._cap_first(Deals.odds_words(chance)),lost]
+			opt=Hall._option("counter_more",label2,sub2,"neutral")
+		opt["odds"]=snappedf(chance,0.01)
+		extra.append(opt)
+	# No more than six answers on a card: the counters give way first.
+	var room:=6-o.size()-1
+	while extra.size()>maxi(0,room): extra.pop_back()
+	var soft:=Deals.refusal(audience,true)
+	var reason:=Deals.refusal_reason(audience)
+	extra.append(Hall._option("decline","Decline courteously","Thank them and send them home with no deal: %s%s." % [Deals.refusal_words(soft),("; "+reason) if reason!="" else ""],"neutral"))
+	for i in extra.size(): o.insert(at+i,extra[i])
+	for option in o:
+		if String(option.id)=="refuse":
+			var hard:=Deals.refusal(audience,false)
+			var words:=Deals.refusal_words(hard)
+			option["sub"]=String(option.sub)+" "+words.substr(0,1).to_upper()+words.substr(1)+"."
 
 # ---- effects ----
 
@@ -787,18 +938,54 @@ static func _bond(civ_id:String,kind:String,text:String,until:int,data:Dictionar
 	var r:=_rivals()
 	if r!=null: r.call("bond",civ_id,kind,text,until,data)
 
-static func _bargain_holds(audience:Dictionary)->bool:
-	## Whether they take the harder terms: warm, trusting, needy peoples
-	## bend; proud and assertive ones walk away.
+static func _bargain_holds(audience:Dictionary,option_id:String="bargain")->bool:
+	## Whether they take the harder terms, at the odds the card states
+	## (envoy_deals.odds): warm, trusting, needy peoples bend; proud and
+	## assertive ones walk away. A seeded roll, never rolled twice.
+	var chance:=Deals.odds(audience,float(BARGAIN_OVER.get(Hall._situation_type(audience),0.0)))
+	return Deals.agrees(audience,option_id,chance)
+
+static func _lend(n:int,days:int,why:String)->void:
+	## Hands of ours away on their business until they come home (lent_hands.gd).
+	if n<=0 or days<=0: return
+	var list:Array=store().lent
+	list.append({"n":n,"until":_day()+days,"why":why.substr(0,60)})
+	while list.size()>LENT_MAX: list.pop_front()
+
+static func soft_refusal(audience:Dictionary)->bool:
+	## Whether a blunt refusal of this request is light enough that its people
+	## come back cooler, not with a demand (audience_hall._add_sequel).
+	return Hall._situation_type(audience) in Deals.DEALS and bool(Deals.refusal(audience,false).get("soft",false))
+
+static func stakes(audience:Dictionary)->Dictionary:
+	## The deal block above the answers (proposal_stakes rows), {} for
+	## business that is no deal.
+	if String(audience.get("status",""))!="waiting" or String(audience.get("origin",""))!="foreign": return {}
+	return Deals.stakes(audience)
+
+static func _turn_down(audience:Dictionary,type:String,courteous:bool,p:Dictionary)->Dictionary:
+	## Turns the request down with the weight envoy_deals.refusal gives it,
+	## and returns that weight.
 	var civ_id:=String(audience.civ_id)
-	var civ:=ForeignDiplomacy.civilization(civ_id)
-	var p:=Hall._personality(civ_id)
-	var opinion:=float((civ.get("player_relation",{}) as Dictionary).get("opinion",0.0))
-	var trust:=float(ForeignDiplomacy.leader(civ_id).get("trust",0.0))
-	var chance:=0.45+opinion*0.3+trust*0.15-(float(p.assertiveness)-0.5)*0.5+(0.15 if Hall._hungry(civ) else 0.0)
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=hash("%d:bargain:%s" % [int(GameState.world_seed),String(audience.get("id",""))])
-	return rng.randf()<clampf(chance,0.15,0.85)
+	var r:=Deals.refusal(audience,courteous)
+	Hall._shift_relation(civ_id,float(r.o)+Hall._mood_opinion(audience),float(r.x))
+	if float(r.t)!=0.0: Hall._leader_trust(civ_id,float(r.t))
+	if float(r.g)>0.0:
+		var why:=String((Deals.REFUSAL.get(type,{}) as Dictionary).get("why","how you turned us away"))
+		_grudge(civ_id,why.replace("{what}",String(p.get("what","our sacred place")).replace("its ","our ")),float(r.g),"turned_down:%s:%s" % [type,String(audience.get("id",""))])
+	if float(r.d)>0.0: DIVINE.add_civ_dread(civ_id,float(r.d))
+	return r
+
+static func _counter(audience:Dictionary,p:Dictionary,option_id:String,typed:Dictionary)->Dictionary:
+	## The counter asked: the card's, or the god's own words (a good named,
+	## a number named) through the same rules (envoy_deals.counter_terms).
+	var card:={}
+	for c in p.get("counters",[]):
+		if c is Dictionary and String(c.get("id",""))==option_id: card=c
+	var ask_res:=String(typed.get("ask_res",""))
+	var ask_amt:=float(typed.get("ask_amt",0.0))
+	if ask_res=="" and ask_amt<=0.0: return card
+	return Deals.counter_terms(audience,option_id,ask_res if ask_res!="" else String(card.get("res","")),ask_amt)
 
 static func _pledge(civ_id:String,res:String,amount:float,due_in:int,text:String,audience_key:String="")->void:
 	var list:Array=store().pledges
@@ -827,6 +1014,47 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 	var typed:Dictionary=Hall._situation(audience).get("typed",{}) if Hall._situation(audience).get("typed") is Dictionary else {}
 	var k:=clampf(float(typed.get("share",1.0)),0.1,1.0)
 	var facts:Dictionary=p.duplicate()
+	facts.erase("deal"); facts.erase("counters")
+	var answered:=option_id
+	# A courteous decline: half a blunt refusal's weight, scaled by how fair
+	# and how needed the request was (envoy_deals.refusal).
+	if option_id=="decline" and type in Deals.DEALS:
+		var soft:=_turn_down(audience,type,true,p)
+		var why:=Deals.refusal_reason(audience)
+		outcome="You thanked %s's envoy and declined%s. %s." % [name,(": "+why) if why!="" else "",Hall._cap_first(Deals.refusal_words(soft))]
+		memory="The ruler heard our request and declined it courteously."
+		ForeignDiplomacy.remember(civ_id,memory)
+		_note_answer(audience,type,option_id,facts)
+		return {"outcome":_fix(outcome),"reaction":"neutral"}
+	# A counter: their ruler agrees at the odds the card states (a seeded
+	# roll), or their envoy goes home without a deal, a little cooler.
+	if option_id.begins_with("counter_") and type in Deals.DEALS:
+		var c:=_counter(audience,p,option_id,typed)
+		if c.is_empty(): return {"error":"They cannot meet that: they hold too little of it, or it is no use to us."}
+		var chance:=Deals.odds(audience,float(c.over))
+		facts.merge({"ask_res":String(c.res),"ask_amt":float(c.amt)},true)
+		if not Deals.agrees(audience,option_id,chance):
+			var needed:=float(Deals.deal_of(audience).get("need",0.0))
+			var cooler:=Deals.COUNTER_LOST+0.01*needed
+			Hall._shift_relation(civ_id,-cooler+mood,0.0)
+			Hall._leader_trust(civ_id,-0.01)
+			outcome="You asked %s for %d %s. Their envoy would not agree (%s) and went home without a deal; their regard fell about %d point%s." % [name,_n(c.amt),String(c.res),Deals.odds_words(chance),roundi(cooler*100.0),"" if roundi(cooler*100.0)==1 else "s"]
+			memory="The ruler asked more than we would give, and we went home without a deal."
+			ForeignDiplomacy.remember(civ_id,memory)
+			facts["agreed"]=false
+			_note_answer(audience,type,option_id,facts)
+			return {"outcome":_fix(outcome),"reaction":"neutral"}
+		facts["agreed"]=true
+		p=p.duplicate(true)
+		var fields:Array=Deals.PAY_FIELDS[type]
+		p[String(fields[0])]=String(c.res)
+		p[String(fields[1])]=float(c.amt)
+		if type=="work_for_food" and option_id=="counter_more": p["days"]=roundi(float(p.get("days",60))*Deals.MORE)
+		if type=="forage_leave": p["offered"]=true
+		option_id="accept"
+		typed={}
+		k=1.0
+	var turned:={}
 	match "%s:%s" % [type,option_id]:
 		"food_loan:accept","food_loan:partial":
 			var lend:=float(p.amount)*(k if option_id=="accept" else 0.5)
@@ -834,9 +1062,11 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			var repay_full:=float(p.repay_amt)
 			var note:=""
 			var asked:=String(typed.get("repay_res",""))
-			if asked!="" and asked!=repay_res and asked in Hall.RESOURCES:
-				var need:=Hall._nice(float(p.amount)*1.3*_value("Food")/_value(String(asked)))
-				if Hall.foreign_stock(civ_id,asked)>=need*0.5: repay_res=asked; repay_full=need
+			if asked!="" and asked!=repay_res and asked in DV.GOODS:
+				# The same cost to them in the good asked, by the counters' rule
+				# (envoy_deals.terms): only a good they hold enough of.
+				var swap:=Deals.terms("food_loan",p,civ_id,Deals.deal_of(audience),"counter_good",asked,0.0)
+				if not swap.is_empty(): repay_res=asked; repay_full=float(swap.amt)
 				else: note=" They have too little %s to promise it, and will repay in %s." % [asked,repay_res]
 			var sent:=_give(civ_id,"Food",Hall._nice(lend))
 			var back:=Hall._nice(repay_full*sent/maxf(1.0,float(p.amount)))
@@ -860,11 +1090,9 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			outcome="You gave %d Food to %s and asked nothing back. %s will count your people as friends in hard times." % [_n(sent2),name,who]
 			memory="The ruler gave us %d Food in our hunger and asked nothing back." % _n(sent2)
 		"food_loan:refuse":
-			var hard:=float(Hall._personality(civ_id).assertiveness)>0.55
-			Hall._shift_relation(civ_id,-0.04+mood,0.06 if hard else 0.0)
-			Hall._leader_trust(civ_id,-0.04)
-			_grudge(civ_id,"how you would not lend us food when we were hungry",0.4,"refused_loan:"+key)
-			reaction="offended"
+			turned=_turn_down(audience,type,false,p)
+			var hard:=float(turned.x)>0.0
+			reaction="neutral" if bool(turned.soft) else "offended"
 			outcome="You refused to lend %s food.%s" % [name," They are hungry and proud; the border grew tenser." if hard else ""]
 			memory="We asked the ruler for a loan of food in our hunger and were refused."
 		"work_for_food:accept","work_for_food:partial":
@@ -891,9 +1119,8 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			outcome="You gave %d Food to %s and sent their workers home to their own fields." % [_n(fed2),name]
 			memory="The ruler fed our families and would take no work for it."
 		"work_for_food:refuse":
-			Hall._shift_relation(civ_id,-0.03+mood,0.02)
-			Hall._leader_trust(civ_id,-0.03)
-			reaction="offended"
+			turned=_turn_down(audience,type,false,p)
+			reaction="neutral" if bool(turned.soft) else "offended"
 			outcome="You refused %s's workers. They went home hungry." % name
 			memory="The ruler would not trade food for our work."
 		"barter:accept","barter:bargain":
@@ -920,7 +1147,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			if got+0.5<get_amt*gave/maxf(1.0,float(p.give_amt)): outcome+=" Less arrived than was promised."
 			memory="We traded %d %s for the ruler's %d %s." % [_n(got),String(p.get_res),_n(gave),String(p.give_res)]
 		"barter:refuse":
-			Hall._shift_relation(civ_id,-0.01+mood,0.0)
+			turned=_turn_down(audience,type,false,p)
 			reaction="neutral"
 			outcome="You declined %s's trade. Their envoy took the %s home." % [name,String(p.get_res)]
 			memory="The ruler declined our trade."
@@ -940,17 +1167,18 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			outcome="%d people of %s settled among your people. There are more mouths to feed this season." % [came,name]
 			memory="The ruler took in %d of our people when we could not keep them." % came
 		"refuge:refuse":
-			Hall._shift_relation(civ_id,-0.03+mood,0.0)
-			Hall._leader_trust(civ_id,-0.03)
-			reaction="neutral" if p_emp<0.4 else "offended"
+			turned=_turn_down(audience,type,false,p)
+			reaction="neutral" if p_emp<0.4 or bool(turned.soft) else "offended"
 			outcome="You turned %s's families away. They went home to %s." % [name,{"hunger":"their hunger","sickness":"the sickness","war":"the war"}.get(String(p.reason),"their troubles")]
 			memory="The ruler turned our families away."
 		"forage_leave:accept":
 			_bond(civ_id,"hunting","their hunters' leave to hunt your %s" % String(p.place),_day()+int(p.months)*30,{"monthly":float(p.monthly),"last":_day()})
+			var leave_paid:=_take_from(civ_id,String(p.pay_res),float(p.pay_amt)) if p.has("pay_res") and bool(p.get("offered",false)) else 0.0
 			Hall._shift_relation(civ_id,0.05+mood,-0.04)
 			Hall._leader_trust(civ_id,0.03)
 			reaction="pleased"
-			outcome="%s's hunters may hunt your %s for half a year, taking about %d Food a month." % [name,String(p.place),_n(p.monthly)]
+			outcome="%s's hunters may hunt your %s for half a year, taking about %d Food a month.%s" % [name,String(p.place),_n(p.monthly),(" They paid %d %s for it." % [_n(leave_paid),String(p.pay_res)]) if leave_paid>0.0 else ""]
+			facts["paid"]=leave_paid
 			memory="The ruler let our hunters into the %s." % String(p.place)
 		"forage_leave:bargain":
 			if not _bargain_holds(audience):
@@ -966,13 +1194,14 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 				outcome="%s paid %d %s for half a year's hunting in your %s." % [name,_n(paid),String(p.pay_res),String(p.place)]
 				memory="We paid the ruler %d %s for leave to hunt." % [_n(paid),String(p.pay_res)]
 		"forage_leave:refuse":
-			Hall._shift_relation(civ_id,-0.02+mood,0.03)
-			reaction="offended" if Hall._hungry(civ) else "neutral"
+			turned=_turn_down(audience,type,false,p)
+			reaction="offended" if Hall._hungry(civ) and not bool(turned.soft) else "neutral"
 			outcome="You kept %s's hunters out of the %s. The frontier grew a little tenser." % [name,String(p.place)]
 			memory="The ruler kept our hunters out of the %s." % String(p.place)
 		"craft_teaching:accept","craft_teaching:gift":
 			var r:=_rivals()
 			if r!=null: r.call("_share_craft",civ_id,String(p.craft),String(p.craft_name))
+			_lend(1,Deals.TEACH_DAYS,"a teacher of %s" % String(p.craft_name))
 			if option_id=="accept":
 				var paid2:=_take_from(civ_id,String(p.pay_res),float(p.pay_amt))
 				Hall._shift_relation(civ_id,0.04+mood,-0.02)
@@ -986,28 +1215,31 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 				reaction="delighted"
 				outcome="A teacher of %s went to %s, and you asked nothing for it." % [String(p.craft_name),name]
 				memory="The ruler sent us a teacher of %s and asked nothing." % String(p.craft_name)
-			outcome+=" They must still learn it."
+			outcome+=" They must still learn it. The teacher is away from our work for %d days." % Deals.TEACH_DAYS
 		"craft_teaching:refuse":
-			Hall._shift_relation(civ_id,-0.02+mood,0.0)
+			turned=_turn_down(audience,type,false,p)
 			reaction="neutral"
 			outcome="You kept %s to your own people." % String(p.craft_name)
 			memory="The ruler kept the secret of %s from us." % String(p.craft_name)
 		"healer_plea:accept","healer_plea:partial":
 			var herbs:=_give(civ_id,"Fiber Plants",Hall._nice(float(p.herbs)*k))
 			var healers:=option_id=="accept"
+			if healers: _lend(int(p.get("healers",2)),Deals.HEAL_DAYS,"healers")
+			var thanked:=_take_from(civ_id,String(p.pay_res),Hall._nice(float(p.pay_amt)*(1.0 if healers else 0.5))) if p.has("pay_res") else 0.0
 			_civ_field(civ_id,"health",(0.06 if healers else 0.03)*herbs/maxf(1.0,float(p.herbs)),0.05,0.98)
 			Hall._shift_relation(civ_id,(0.1 if healers else 0.04)+mood,-0.03)
 			Hall._leader_trust(civ_id,0.07 if healers else 0.03)
 			reaction="delighted" if healers else "pleased"
-			outcome="You sent %d Fiber Plants%s to %s." % [_n(herbs)," and your healers" if healers else "",name]
+			outcome="You sent %d Fiber Plants%s to %s.%s" % [_n(herbs)," and %d of your healers, away for %d days" % [int(p.get("healers",2)),Deals.HEAL_DAYS] if healers else "",name,(" They gave %d %s for it." % [_n(thanked),String(p.pay_res)]) if thanked>0.0 else ""]
+			facts["paid"]=thanked
 			memory="The ruler sent us %s in our sickness." % ("healers and plants" if healers else "plants for poultices")
 			var r2:=_rivals()
 			if healers and bool(p.get("risk",false)) and r2!=null:
 				((r2.call("character",civ_id) as Dictionary).get("later",[]) as Array).append({"day":_day()+30,"kind":"sickness","text":"The healers you sent to %s came home coughing, and the sickness came with them." % name})
 				outcome+=" Some of the healers look unwell."
 		"healer_plea:refuse":
-			Hall._shift_relation(civ_id,-0.03+mood,0.0)
-			reaction="neutral" if p_emp>0.55 else "offended"
+			turned=_turn_down(audience,type,false,p)
+			reaction="neutral" if p_emp>0.55 or bool(turned.soft) else "offended"
 			outcome="You closed the paths to %s. The sickness stays with them." % name
 			memory="The ruler shut us out in our sickness."
 		"mediation:accept":
@@ -1150,7 +1382,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			outcome="You sent %d %s to %s for its war with %s%s. %s counts you its enemy now." % [_n(sent3),String(p.res),name,String(p.enemy_name),(", and received %d %s" % [_n(got3),String(p.pay_res)]) if got3>0.0 else "",String(p.enemy_name)]
 			memory="The ruler sent us %d %s for our war with %s." % [_n(sent3),String(p.res),String(p.enemy_name)]
 		"war_supplies:refuse":
-			Hall._shift_relation(civ_id,-0.02+mood,0.0)
+			turned=_turn_down(audience,type,false,p)
 			reaction="neutral"
 			outcome="You kept out of %s's war with %s." % [name,String(p.enemy_name)]
 			memory="The ruler kept out of our war with %s." % String(p.enemy_name)
@@ -1228,9 +1460,8 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 				outcome="%s would not pay to visit %s. The envoy went home bitter." % [name,String(p.what).replace("its ","their ")]
 				memory="The ruler wanted payment for our own dead."
 		"sacred_site:refuse":
-			Hall._shift_relation(civ_id,-0.05+mood,0.03)
-			_grudge(civ_id,"how you barred us from %s" % String(p.what).replace("its ","our "),0.3,"sacred:"+key)
-			reaction="offended"
+			turned=_turn_down(audience,type,false,p)
+			reaction="neutral" if bool(turned.soft) else "offended"
 			outcome="You barred %s from the %s. They will not forgive it soon." % [name,String(p.place)]
 			memory="The ruler barred us from %s." % String(p.what).replace("its ","our ")
 		"captive_scouts:accept","captive_scouts:partial","captive_scouts:refuse","captive_scouts:bargain":
@@ -1324,10 +1555,8 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			outcome="The keeper you sent teaches %s what angers you first. They will obey you more readily, and love you less." % name
 			memory="The ruler's keeper taught us what angers their god."
 		"rite_keeper:refuse":
-			DIVINE.add_civ_dread(civ_id,0.03)
-			Hall._shift_relation(civ_id,-0.04+mood,0.0)
-			_grudge(civ_id,"how you would not teach us your ways",0.15,"rites:"+key)
-			reaction="offended"
+			turned=_turn_down(audience,type,false,p)
+			reaction="neutral" if bool(turned.soft) else "offended"
 			outcome="You refused to teach %s your ways. The envoy went home unsure what you want of them." % name
 			memory="The ruler would not teach us their ways."
 		"boundary_cairn:accept":
@@ -1351,18 +1580,24 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			memory="The ruler would not mark the border with us at the %s." % String(p.place)
 		"joint_hunt:accept","joint_hunt:gift":
 			var share2:=option_id=="accept"
+			# Our share in their goods when they offered it: they keep the meat.
+			var in_goods:=share2 and p.has("share_res")
 			var list2:Array=store().pledges
-			list2.append({"civ":civ_id,"res":"Food","amt":float(p.meat) if share2 else 0.0,"theirs":Hall._nice(float(p.meat)*(0.5 if share2 else 1.5)),"due":_day()+int(p.days),"day":_day(),
-				"text":"the drive in the %s" % String(p.place),"tries":0,"kind":"hunt","risk":bool(p.get("risk",false)),"a":key})
+			var hunt:={"civ":civ_id,"res":String(p.share_res) if in_goods else "Food","amt":(float(p.share_amt) if in_goods else float(p.meat)) if share2 else 0.0,"theirs":Hall._nice(float(p.meat)*(1.5 if in_goods or not share2 else 0.5)),"due":_day()+int(p.days),"day":_day(),
+				"text":"the drive in the %s" % String(p.place),"tries":0,"kind":"hunt","risk":bool(p.get("risk",false)),"a":key}
+			if in_goods: hunt["from_them"]=true
+			list2.append(hunt)
 			while list2.size()>PLEDGES_MAX: list2.pop_front()
+			_lend(int(p.hunters),int(p.days),"hunters on the drive")
 			_bond(civ_id,"hunt_partner","the great drive our hunters made together in the %s" % String(p.place),_day()+730)
 			Hall._shift_relation(civ_id,(0.04 if share2 else 0.08)+mood,-0.03)
 			Hall._leader_trust(civ_id,0.03 if share2 else 0.06)
 			reaction="pleased" if share2 else "delighted"
 			outcome=("%d of your hunters went to join %s's drive in the %s. They will be back in about twenty days with your share." if share2 else "%d of your hunters went to join %s's drive in the %s, and the meat is theirs.") % [int(p.hunters),name,String(p.place)]
+			if in_goods: outcome+=" Your share comes as %d %s from their stores." % [_n(p.share_amt),String(p.share_res)]
 			memory="The ruler's hunters joined our drive in the %s%s." % [String(p.place),"" if share2 else " and took none of the meat"]
 		"joint_hunt:refuse":
-			Hall._shift_relation(civ_id,-0.01+mood,0.0)
+			turned=_turn_down(audience,type,false,p)
 			reaction="neutral"
 			outcome="You kept your hunters home. %s will drive the herd alone." % name
 			memory="The ruler would not send hunters for our drive."
@@ -1376,14 +1611,16 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 			outcome=("%s's %s may cross your country to %s for two years, leaving %d %s at each crossing." % [name,String(p.carriers),String(p.dest_name),_n(toll3),String(p.toll_res)]) if toll3>0.0 else ("%s's %s may cross your country freely to %s for two years." % [name,String(p.carriers),String(p.dest_name)])
 			memory="The ruler lets our %s cross their country to %s%s." % [String(p.carriers),String(p.dest_name),"" if toll3>0.0 else " and asks nothing"]
 		"safe_passage:refuse":
-			Hall._shift_relation(civ_id,-0.02+mood,0.01)
+			turned=_turn_down(audience,type,false,p)
 			reaction="neutral"
 			outcome="You closed your country to %s's %s. They will go the long way round to %s." % [name,String(p.carriers),String(p.dest_name)]
 			memory="The ruler would not let our %s cross their country." % String(p.carriers)
 		_:
 			return {"error":"That answer is not open to you here."}
+	if not turned.is_empty(): outcome+=" %s." % Hall._cap_first(Deals.refusal_words(turned))
+	if answered.begins_with("counter_"): outcome+=" They agreed to your terms."
 	if memory!="": ForeignDiplomacy.remember(civ_id,memory)
-	_note_answer(audience,type,option_id,facts)
+	_note_answer(audience,type,answered,facts)
 	return {"outcome":_fix(outcome),"reaction":reaction}
 
 # --------------------------------------------------------------------------
@@ -1423,7 +1660,7 @@ const ANSWER_CIVS_MAX:=32
 ## Facts kept for the next envoy's words (numbers and names only).
 const FACT_KEYS:=["amount","sent","back","bres","repay_res","repay_amt","food","workers","where","res","give_res","give_amt","get_res","get_amt","people","reason","place","monthly","craft_name",
 	"pay_res","pay_amt","herbs","third_name","heir","woman","timber","name","why","price","what","offer_res","offer_amt","enemy_name","ruler","parent","toll_res","toll_amt","side","count",
-	"stone","laid","hunters","meat","dest_name","carriers","fear","gift_res","gift_amt","paid","freed","failed","resource"]
+	"stone","laid","hunters","meat","dest_name","carriers","fear","gift_res","gift_amt","paid","freed","failed","resource","ask_res","ask_amt","agreed","share_res","share_amt"]
 
 static func _answers()->Dictionary:
 	var e:=store()
@@ -1538,6 +1775,20 @@ const RECALL_WORDS:={
 	"safe_passage:accept":"{When} you let our {carriers} cross your country to {dest_name}.",
 	"safe_passage:gift":"{When} you let our {carriers} cross your country freely.",
 	"safe_passage:refuse":"{When} you closed your country to our {carriers}.",
+	"food_loan:decline":"{When} we came hungry, you heard us out and declined with courtesy.",
+	"work_for_food:decline":"{When} you declined our workers, courteously.",
+	"barter:decline":"{When} you declined our trade, courteously.",
+	"refuge:decline":"{When} you declined to take in our families, with courtesy.",
+	"forage_leave:decline":"{When} you declined to let our hunters into your {place}, courteously.",
+	"craft_teaching:decline":"{When} you declined to send a teacher of {craft_name}, courteously.",
+	"healer_plea:decline":"{When} you declined to send your healers, courteously.",
+	"war_supplies:decline":"{When} you declined to send supplies for our war with {enemy_name}.",
+	"sacred_site:decline":"{When} you declined us leave to visit {what}, courteously.",
+	"rite_keeper:decline":"{When} you declined to send a keeper of your rites, courteously.",
+	"joint_hunt:decline":"{When} you declined to send hunters for our drive, courteously.",
+	"safe_passage:decline":"{When} you declined passage to our {carriers}, courteously.",
+	"counter:agreed":"{When} you asked {ask_amt} {ask_res} of us instead, and we paid it.",
+	"counter:refused":"{When} you asked {ask_amt} {ask_res} of us, and we went home without a deal.",
 	"request:grant":"{When} you gave us {amount} {resource} when we asked for it.",
 	"request:grant_half":"{When} you gave us {amount} {resource}, half of what we asked.",
 	"request:refuse":"{When} we asked you for {resource} and went home with nothing.",
@@ -1558,6 +1809,7 @@ static func _when(days:int)->String:
 
 static func recall_text(civ_id:String,entry:Dictionary,day:int)->String:
 	var key:="%s:%s" % [String(entry.get("t","")),String(entry.get("o",""))]
+	if String(entry.get("o","")).begins_with("counter_"): key="counter:%s" % ("agreed" if bool((entry.get("x",{}) as Dictionary).get("agreed",false)) else "refused")
 	var template:=String(RECALL_WORDS.get(key,RECALL_WORDS.get("%s:%s" % [String(entry.get("k","")),String(entry.get("o",""))],"")))
 	if template=="": return ""
 	var x:Dictionary=entry.get("x",{}) if entry.get("x") is Dictionary else {}
@@ -1629,7 +1881,12 @@ static func attach_followup(audience:Dictionary)->void:
 # Typed answers (online): the god's own words onto the same bounded answers
 # --------------------------------------------------------------------------
 
-const RESOURCE_WORDS:={"Food":["food","meat","grain","fish"],"Timber":["timber","wood","logs"],"Stone":["stone","stones","flint","rock"],"Clay":["clay"],"Fiber Plants":["fiber","fibre","reeds","flax","plants"]}
+const RESOURCE_WORDS:={"Food":["food","meat","grain","fish"],"Timber":["timber","wood","logs"],"Stone":["stone","stones","rock"],"Clay":["clay"],"Fiber Plants":["fiber","fibre","reeds","flax","plants"],
+	"Flint":["flint"],"Salt":["salt"],"Medicinal Plants":["herbs","medicine","medicinal"],"Copper Ore":["copper"],"Tin Ore":["tin"],"Iron Ore":["iron"],"Coal":["coal"],"Civilian Goods":["goods","wares","pots","baskets"]}
+## Words that turn a request down with courtesy, and that counter it
+## (envoy_deals.gd): another good named, or more of the same.
+const DEAL_PHRASES:={"decline":["politely","courteously","with thanks","thank them","with respect","decline"],
+	"counter_good":["instead","rather than","in place of"],"counter_more":["half again","more","a better price","too little","not enough","double"]}
 const YES_WORDS:=["yes","agree","agreed","accept","very well","do it","so be it","granted","grant it","gladly"]
 const NO_WORDS:=["no","refuse","decline","never","go home","send them away","turn them away","reject","not this time","nothing"]
 const NEGATIONS:=["not","don't","do not","never","won't","will not","no","cannot","can't","shall not"]
@@ -1720,6 +1977,9 @@ static func typed_choice(audience:Dictionary,text:String)->Dictionary:
 	var open:Array=[]
 	for option in options(audience):
 		if bool(option.get("enabled",true)): open.append(String(option.id))
+	# A counter may be asked in words even where the card offers none.
+	if type in Deals.COUNTER_GOOD and not "counter_good" in open: open.append("counter_good")
+	if type in Deals.COUNTER_MORE and not "counter_more" in open: open.append("counter_more")
 	var table:Dictionary=ANSWER_PHRASES.get(type if type!="captive_scouts" else "captive_scouts:"+String(p.get("side","ours")),{})
 	var fill:={"{civ}":String(audience.get("civ_name","")).to_lower(),"{third}":String(p.get("third_name","")).to_lower(),"{heir}":String(p.get("heir","")).to_lower(),
 		"{name}":String(p.get("name","")).to_lower(),"{ruler}":String(p.get("ruler","")).to_lower()}
@@ -1731,7 +1991,10 @@ static func typed_choice(audience:Dictionary,text:String)->Dictionary:
 	if not phrases.has("accept"): phrases["accept"]=[]
 	if not phrases.has("refuse"): phrases["refuse"]=[]
 	(phrases.accept as Array).append_array(YES_WORDS)
-	(phrases.refuse as Array).append_array(NO_WORDS)
+	# Where a courteous decline is open, "decline" is it, not a blunt refusal.
+	(phrases.refuse as Array).append_array(NO_WORDS.filter(func(w:String)->bool:return not ("decline" in open and w=="decline")))
+	for id in DEAL_PHRASES:
+		if id in open: phrases[id]=(phrases.get(id,[]) as Array)+(DEAL_PHRASES[id] as Array)
 	for id in phrases:
 		for phrase in phrases[id]:
 			var words:=String(phrase)
@@ -1759,6 +2022,20 @@ static func typed_choice(audience:Dictionary,text:String)->Dictionary:
 	if type=="food_loan" and String(out.option) in ["accept","partial"]:
 		var res:=typed_resource(raw,"Food")
 		if res!="": out["repay_res"]=res
+	if String(out.option)=="counter_good" and typed_resource(raw,String(p.get(String((Deals.PAY_FIELDS.get(type,["",""]) as Array)[0]),"")))=="":
+		var card:=false
+		for c in p.get("counters",[]):
+			if c is Dictionary and String((c as Dictionary).get("id",""))=="counter_good": card=true
+		if not card: return {}
+	if String(out.option).begins_with("counter_"):
+		# The good and the number the god names, read by the same rules as the
+		# card's counter (envoy_deals.terms): validated when it is answered.
+		var fields:Array=Deals.PAY_FIELDS.get(type,["",""])
+		var asked:=typed_resource(raw,String(p.get(String(fields[0]),"")))
+		if asked!="": out["ask_res"]=asked
+		var number:=RegEx.new(); number.compile("\\b(\\d+)\\b")
+		var m:=number.search(_norm(raw))
+		if m!=null and float(m.get_string(1))>0.0: out["ask_amt"]=float(m.get_string(1))
 	return out
 
 static func apply_typed(audience:Dictionary,terms:Dictionary)->void:
@@ -1766,7 +2043,10 @@ static func apply_typed(audience:Dictionary,terms:Dictionary)->void:
 	var situation:Dictionary=audience.get("situation",{}) if audience.get("situation") is Dictionary else {}
 	var typed:={}
 	if terms.has("share"): typed["share"]=clampf(float(terms.share),0.1,1.0)
-	if String(terms.get("repay_res","")) in Hall.RESOURCES: typed["repay_res"]=String(terms.repay_res)
+	if String(terms.get("repay_res","")) in DV.GOODS: typed["repay_res"]=String(terms.repay_res)
+	if String(terms.get("ask_res","")) in DV.GOODS: typed["ask_res"]=String(terms.ask_res)
+	if String(terms.get("option","")).begins_with("counter_") and (typed.has("ask_res") or terms.has("ask_amt")): typed["counter"]=String(terms.option)
+	if float(terms.get("ask_amt",0.0))>0.0: typed["ask_amt"]=clampf(float(terms.ask_amt),1.0,100000.0)
 	if typed.is_empty(): situation.erase("typed")
 	else: situation["typed"]=typed
 	audience["situation"]=situation
@@ -1870,6 +2150,9 @@ static func open_lines(audience:Dictionary)->Array:
 
 static func daily(day:int)->void:
 	if day%TICK!=0 or WorldSimulation.actor_id!="player": return
+	var lent:Array=store().lent
+	for l in lent.duplicate():
+		if not l is Dictionary or int((l as Dictionary).get("until",0))<=day: lent.erase(l)
 	_passages(day)
 	_broken_word(day)
 	var list:Array=store().pledges
@@ -1927,12 +2210,16 @@ static func daily(day:int)->void:
 static func _finish_hunt(civ_id:String,civ:Dictionary,pledge:Dictionary)->void:
 	## The drive is over: meat for both peoples, and sometimes a hunter lost.
 	var name:=String(civ.get("name",civ_id))
-	var brought:=EXCHANGE.receive("player","Food",float(pledge.amt)) if float(pledge.amt)>0.0 else 0.0
+	var res:=String(pledge.get("res","Food"))
+	var brought:=0.0
+	if float(pledge.amt)>0.0: brought=_take_from(civ_id,res,float(pledge.amt)) if bool(pledge.get("from_them",false)) else EXCHANGE.receive("player","Food",float(pledge.amt))
 	if float(pledge.get("theirs",0.0))>0.0: Hall._credit_civ(civ_id,"Food",float(pledge.theirs))
 	var lost:=bool(pledge.get("risk",false))
 	if lost: _people(-1)
 	var text:="Your hunters came back from the drive with %s in %s." % [name,_narrate(String(pledge.text)).replace("the drive in ","the ")]
-	text+=(" They brought %d Food." % roundi(brought)) if brought>0.0 else " They left the meat with %s, as you told them." % name
+	if brought>0.0: text+=" They brought %d %s." % [roundi(brought),res]
+	elif bool(pledge.get("from_them",false)): text+=" %s could not pay your share." % name
+	else: text+=" They left the meat with %s, as you told them." % name
 	if lost: text+=" One of them was killed when the herd turned."
 	_record("Back From the Drive",text,civ_id)
 

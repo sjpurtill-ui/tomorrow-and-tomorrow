@@ -167,13 +167,15 @@ static func mix(civ_id:String)->Dictionary:
 # --------------------------------------------------------------------------
 
 static func _surplus(civ_id:String,min_stock:float=20.0)->Dictionary:
+	## What they would offer: of the stores they could part with, the one a
+	## third of which is worth most to us (deal_value.gd), so a people drowning
+	## in food is not offered food when there is anything else.
 	var best:={}
 	var best_value:=0.0
-	var values:={"Food":1.0,"Timber":1.4,"Stone":1.8,"Clay":1.3,"Fiber Plants":1.5}
 	for res in Hall.RESOURCES:
 		var stock:=Hall.foreign_stock(civ_id,String(res))
 		if stock<min_stock: continue
-		var worth:=stock*float(values.get(res,1.0))
+		var worth:=preload("res://scripts/deal_value.gd").worth_in("player",String(res),stock*0.3)
 		if worth>best_value: best_value=worth; best={"res":String(res),"stock":stock}
 	return best
 

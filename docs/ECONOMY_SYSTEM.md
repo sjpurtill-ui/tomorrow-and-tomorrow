@@ -187,6 +187,53 @@ are the first currency, and a making people can buy and make arms.
   draft's gear, an army build's and a deployment line's reserve and a
   general's resupply all draw through `take_weapons`.
 
+## Fair deals on an envoy's business (2026-10-03)
+
+The user: "I have a ton of food, and my neighbors will come by and ask for a
+favor and give me food in return. If I decline them, it ruins our
+relationship, but if I accept it, I'm giving them way too much for something
+that has zero impact on me at all."
+
+- **Worth to the receiver** (`deal_value.gd`, every people alike): a unit of
+  a good is worth its price on the one table (`trade_prices.gd`) times
+  wanted / held, between a tenth and twice its price. `wanted` is the
+  economy's own wanted holding (`_desired_stock`: 30 days of food a head, a
+  timber and a half, ...). With 150 days of food against 30 wanted, 100 Food
+  is worth about 20 rations; giving it costs about as little. A good the
+  economy does not know is worth a tenth (unless basic). A person-day is a
+  day of output a head (`trade_ledger.person_worth / 365`); a person gone for
+  good is a year of it.
+- **What they offer** (`envoy_deals.gd offer`): the good we lack most against
+  what it costs them, in the amount that leaves both sides about equally
+  better off (worth to us + cost to them = cost to us + worth to them), times
+  the ruler's temper (0.7 to 1.35: need raises it, assertiveness and pride
+  lower it), never more than the thing is worth to them nor a share of their
+  stock (a fifth to a half by request). A people pays in food only when it
+  holds nothing else we can use.
+- **What we give, priced by the ledger**: goods at their worth to us; hands
+  lent abroad (a teacher 60 days, healers 30, hunters on a drive) are away
+  from work until they come home (`lent_hands.gd`, counted in
+  `civilian_workforce_fraction`); a keeper of rites leaves for good; stated
+  risks at their odds (a hunter killed 1 in 5, a sickness home 45 in 100).
+- **The card**: the deal block ("The deal, as each side counts it") states
+  the balance, what we give, risk and get with our stores' depth, their
+  side and their need; the accept card says "We give about X, get about Y".
+- **Turning it down**: a refusal weighs (0.35 + 0.65 x need) x fairness
+  (what we get over what we give, or for a plea what it means to them over
+  what it costs us; 0.1 to 1.2) times the old fixed cost. "Decline
+  courteously" weighs half of that; a blunt refusal at least 0.35 of it;
+  harming the envoy (the hall's envoy acts) costs most. Below 0.4 there is
+  no grudge, and the people comes back cooler, never with a demand.
+- **Counters**: the same cost to them in a good we lack more (shown when it
+  is worth a quarter more to us), or half again as much. Each states its
+  odds (0.45 + regard x 0.3 + trust x 0.15 - (assertiveness - 0.5) x 0.5 +
+  need x 0.25 - reach past the first terms x 0.4, within 1 to 9 in 10) and
+  what a refusal does (no deal, regard 1 point lower). A seeded roll decides.
+  Typed counters ("ask for 30 flint instead") and the live reading's go
+  through the same rule (`envoy_deals.terms`).
+- **Variety**: a deal poor for us is brought less often (its appeal, 0.3 to
+  1, weighs the hall's choice); gifts are chosen by their worth to us.
+
 ## Exchange stages
 
 1. **Barter** (id `subsistence`) — barter of goods for food and materials,
