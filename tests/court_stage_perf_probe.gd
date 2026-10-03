@@ -50,8 +50,8 @@ func _measure(director:Node,label:String,audience:Dictionary)->void:
 		process+=Performance.get_monitor(Performance.TIME_PROCESS)*1000.0
 		n+=1
 	var wall:=float(Time.get_ticks_usec()-start)/1000.0/float(n)
-	var draws:=stage.view3d.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)
-	var objects:=stage.view3d.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_OBJECTS_IN_FRAME)
+	var draws:int=stage.view3d.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)
+	var objects:int=stage.view3d.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_OBJECTS_IN_FRAME)
 	var people:=0
 	for key in stage.cast_order:
 		var f:Variant=stage.figure(key)
