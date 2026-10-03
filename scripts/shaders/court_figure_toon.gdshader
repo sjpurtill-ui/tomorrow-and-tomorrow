@@ -20,6 +20,9 @@ uniform int cover_channel = 0;
 // Skin: the edge between light and shade warms, as light does under skin.
 uniform vec3 terminator : source_color = vec3(0.0, 0.0, 0.0);
 uniform bool flat_colour = false;
+// Hair and beards: fine strands down the fall of the hair, and a soft sheen.
+uniform float strands = 0.0;
+uniform float sheen = 0.0;
 // Per figure: the speaker a little in the light, listeners a little back.
 instance uniform float dim = 1.0;
 
@@ -54,6 +57,10 @@ void fragment() {
 		discard;
 	}
 	vec3 base = albedo * mix(1.0, v_ao, ao_amount);
+	if (strands > 0.0) {
+		float s = noise3(vec3(v_obj.x * 210.0, v_obj.y * 16.0, v_obj.z * 210.0)) * 0.65 + noise3(vec3(v_obj.x * 90.0, v_obj.y * 7.0, v_obj.z * 90.0)) * 0.35;
+		base *= 1.0 + (s - 0.5) * strands * 2.0;
+	}
 	if (flat_colour) {
 		ALBEDO = albedo * min(dim, 1.0);
 	} else {
@@ -69,6 +76,11 @@ void fragment() {
 		col += base * terminator * edge * 0.35;
 		float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 		col += rim_color * rim_amount * fres * (0.35 + 0.65 * lit);
+		if (sheen > 0.0) {
+			vec3 key_view = normalize((VIEW_MATRIX * vec4(key_dir, 0.0)).xyz);
+			float band = smoothstep(0.55, 0.85, dot(normalize(NORMAL), normalize(key_view + VIEW)));
+			col += albedo * key_color * band * sheen * 1.4;
+		}
 		ALBEDO = col * dim;
 	}
 }
