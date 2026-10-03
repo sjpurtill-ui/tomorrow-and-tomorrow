@@ -565,7 +565,7 @@ func measure(w:Dictionary,audience_id:String)->Dictionary:
 	m["auto_found"]=1 if bool(PeopleDirection.auto_settlement) else 0
 	# Who sets the daily work, and how many are at each task (manual_work.gd).
 	m["manual_work"]=0 if bool(PeopleDirection.automatic_work) else 1
-	for pair in [["work_food","Food"],["work_build","Construction"],["work_carry","Logistics"],["work_learn","Knowledge"],["work_watch","Defense"]]: m[String(pair[0])]=int(GameState.population_allocations.get(String(pair[1]),0))
+	for pair in [["work_food","Food"],["work_build","Construction"],["work_carry","Logistics"],["work_learn","Knowledge"],["work_watch","Defense"],["work_make","Crafting"],["work_care","Administration"]]: m[String(pair[0])]=int(GameState.population_allocations.get(String(pair[1]),0))
 	var audience:=Hall.find(audience_id)
 	var pending:Dictionary=audience.get("pending_command",{}) if audience.get("pending_command") is Dictionary else {}
 	m["pending_ask"]=String(pending.get("ask",""))
@@ -662,7 +662,7 @@ static func _material(m:Dictionary)->String:
 		"people_love_x100","people_dread_x100","legitimacy_x100","cohesion_x100","settlement_name","nation_name","known","known_gone","known_bound","summoned","waiting","varesh_dread_x100","opinion_x100",
 		"speaker_known_status","speaker_known_role","speaker_known_marks","works","home_morale_x100","auto_found","violated","army_level",
 		# Who sets the daily work and the people at each task (manual_work.gd).
-		"manual_work","work_food","work_build","work_carry","work_learn","work_watch",
+		"manual_work","work_food","work_build","work_carry","work_learn","work_watch","work_make","work_care",
 		# Trade with other peoples (trade_stances.gd) and what a gift reached.
 		"trade_esurai","trade_good_esurai","trade_varesh","esurai_food",
 		# A band sent out in a feud (war_loop.gd), and whether the feud is on.

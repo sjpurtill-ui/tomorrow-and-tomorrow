@@ -243,9 +243,8 @@ const KEYS:={
 		"feeds":[
 			{"chain":"spread","src":"society_model.gd:147","guards":[["society_model.gd",'clampf(effect("adoption_rate")+WorldSimulation.state.founding_effect("adoption_rate")+WorldSimulation.progression.effect("adoption_rate"),-0.35,0.80)']]}]},
 	"literacy":{"label":"Reading and writing","good":1,
-		"what":"The share of adults who read. A large, literate people runs more research questions at once; past 55 in 100 readers, schooling also leads couples to choose smaller families.",
+		"what":"The share of adults who read. Past 55 in 100 readers, schooling leads couples to choose smaller families. (Research comes from the people at learning, never from a people's size or reading alone.)",
 		"feeds":[
-			{"chain":"parallel","src":"discovery_system.gd:1023","guards":[["discovery_system.gd",'parallel_capacity(float(WorldSimulation.state.population_exact),institutional_capacity,effect("literacy"))']]},
 			{"text":"Once more than 55 in 100 read, each point beyond adds 0.22 of a point to the births couples choose not to have.","src":"early_life_conditions.gd:152","guards":[["early_life_conditions.gd",'var literacy:=clampf(discovery.effect("literacy"),0.0,1.0)']]}]},
 	"survey_speed":{"label":"Surveying speed","good":1,
 		"what":"Knowing how to read the ground. Surveyors learn the extent of known deposits sooner.",
@@ -838,13 +837,6 @@ static func _chain_line(key:String,feed:Dictionary,now:float)->String:
 			var moved:=now*float(feed.get("per",0.0))
 			var pace:=lerpf(0.55,1.45,clampf(education+moved,0.0,1.0))/lerpf(0.55,1.45,education)-1.0
 			return "%s, so every research line moves %s." % [quantity("How well learning is taught",moved,"pts"),("about %s%% %s" % [number(absf(pace)*100.0),"faster" if pace>=0.0 else "slower"]) if absf(pace)>0.0000000001 else "at the same pace"]
-		"parallel":
-			var population:=float(state.population_exact)
-			var institutions:=clampf(float(state.society_capacities.get("institutions",0.25)),0.0,1.0)
-			var literacy:=float(_model().effect("literacy")) if _model()!=null else 0.0
-			var before:=Research600.parallel_capacity(population,institutions,literacy)
-			if population<=Research600.PARALLEL_POPULATION_REF: return "Questions researched at once: no change until the people number more than %s." % thousands(Research600.PARALLEL_POPULATION_REF)
-			return quantity("Questions researched at once",Research600.parallel_capacity(population,institutions,literacy+now)/before-1.0,"pct")
 		"industry_health":
 			var industry:=_industry()
 			if industry<=0.0: return "The health the people settle toward: no change while nothing is mined or quarried (it counts in proportion to mining and quarrying)."

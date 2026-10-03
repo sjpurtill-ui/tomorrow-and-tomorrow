@@ -217,6 +217,8 @@ static func survey()->Dictionary:
 			return 0.55*effort*_method(deposit,"survey")*speed)
 		lines.append(_line("Measuring what is found","next in %s" % _days(measure),
 			"%s found and waiting to be measured (%s). Searchers work on all of them at once; more searchers measure each sooner, and nobody else can do it." % [_cap(_count(found.size())),_names(found)],"good"))
+	# Searched land and finds (resource_system.gd land_survey): its own rule and odds.
+	_land_lines(lines)
 	# The claim: survey share × 16 points of reach (settlement_model.gd).
 	var able:=_able()
 	var share:=clampf(searchers/maxf(1.0,able*CLAIM_SEARCHERS),0.0,1.0)
@@ -230,6 +232,23 @@ static func survey()->Dictionary:
 		"Four tenths of the cunning shown on the Standing page comes from people out watching and finding, full when %s search; the rest is the chief scout's skill. It changes nothing else yet." % _count(ceili(pop*CUNNING_SEARCHERS)),"good" if watching>0.0 else "plain"))
 	lines.append(_cost_line("Survey",searchers))
 	return {"lead":"Searchers walk the country for useful materials and measure what they find, so carriers and builders can open it for work. They do not scout for strangers; scouting parties are sent from court.","lines":lines}
+
+## The searched land's two lines, for the whole people as every line here is
+## (resource_system.gd realm_land_reading: each town's own land, averaged by
+## its people): how well it is searched and what it gives cutting and
+## digging, and the chance of a find in the next month; each with what ten
+## more searchers would do.
+static func _land_lines(lines:Array)->void:
+	var R=WorldSimulation.resources
+	var land:Dictionary=R.realm_land_reading()
+	if not bool(land.get("settled",false)):return
+	var plus:Dictionary=land.plus_ten
+	var cover:=roundi(float(land.cover)*100.0)
+	lines.append(_line("Searched land","%d in 100" % cover,
+		"Cutters and diggers get %s from it (×0.75 unsearched, up to ×1.25). One searcher for every 60 people holds it near 60; it is %s. Ten more searching would take it toward %d (×%s)." % [String(R.land_yield_words(land)),String(R.land_heading(land)),roundi(float(plus.target)*100.0),_two(float(plus.yield))],"good" if cover>=50 else "plain"))
+	var odds:=String(R.odds_words(float(land.find_month)))
+	lines.append(_line("Finds","%s a month" % odds,
+		"A find in the next month: %s. A find is a deposit not yet measured, new ground, or a richer part of one being worked. Ten more searching: %s." % [odds,String(R.odds_words(float(plus.find_month)))],"good" if float(land.find_month)>0.0 else "plain"))
 
 ## The deposits by what searchers can still do: hidden ones the people could
 ## recognise, and found ones waiting to be measured.
@@ -296,6 +315,11 @@ static func extraction()->Dictionary:
 	var tool_factor:=0.55+tools*0.75
 	lines.append(_line("Tools in hand","×%s" % _two(tool_factor),
 		"Each cutter's work goes ×%s with today's tools: ×0.69 with the poorest, up to ×1.38 with the best. Makers raise it." % _two(tool_factor),"good" if tool_factor>=1.0 else "plain"))
+	# Searched land: × (0.75 + 0.5 × how well it is searched) (resource_system.gd land_yield).
+	var land:Dictionary=WorldSimulation.resources.realm_land_reading()
+	if bool(land.get("settled",false)):
+		lines.append(_line("Searched land","×%s" % _two(float(land.applied)),
+			"Cutters and diggers get %s from land searched %d in 100: ×0.75 where nobody has searched, up to ×1.25 where all of it is known. Searchers raise it." % [String(WorldSimulation.resources.land_yield_words(land)),roundi(float(land.cover)*100.0)],"good" if float(land.applied)>=1.0 else "bad"))
 	var waiting:=0
 	for deposit:Dictionary in _deposits_by_stage().measured:
 		if String(deposit.get("resource",""))!="Freshwater":waiting+=1
@@ -380,7 +404,7 @@ static func construction()->Dictionary:
 	return {"lead":"Builders raise the town's works and homes, keep the town and its walls in repair, and lay the water lines and roads.","lines":lines}
 
 
-# --- Making tools -------------------------------------------------------------------
+# --- Making -------------------------------------------------------------------------
 
 static func crafting()->Dictionary:
 	var state=WorldSimulation.state
@@ -463,7 +487,7 @@ static func logistics()->Dictionary:
 	# Stores: built storage works as carriers staff it; the Public Stores need
 	# carriers at 4 in 100 and stewards at 2 in 100 (settlement_model.gd, civilian_goods.gd).
 	var staffing:=clampf(carriers/maxf(1.0,pop*0.10),0.15,1.0)
-	lines.append(_line("Keeping the stores","%d of 100 staffed" % roundi(staffing*100.0),
+	lines.append(_line("Staffing the stores","%d of 100 staffed" % roundi(staffing*100.0),
 		"Built storage holds its full share only when carriers staff it, full at a tenth of the people (%s would).%s" % [_count(ceili(pop*0.10))," The Public Stores also need carriers at 4 in 100 of the people." if "Public Stores" in state.settlement_completed else ""],"good" if staffing>=1.0 else "plain"))
 	lines.append(_line("Putting food by","%s rations a day" % _one(carriers*CARRIER_PRESERVE*(1.0+WorldSimulation.discovery.effect("food_storage"))),
 		"Carriers help dry and store the day's fresh surplus: each can put by about %s rations a day." % _two(CARRIER_PRESERVE),"good" if carriers>0.0 else "plain"))
@@ -494,54 +518,67 @@ static func knowledge()->Dictionary:
 	var lines_followed:=roundi(asked/2.0)
 	var fit:=1.0 if asked<=maxf(1.0,floorf(keepers)) else clampf(keepers/maxf(1.0,asked),0.15,1.0)
 	if asked<=0.0:
-		lines.append(_line("Keepers for the research","no lines followed","No research line is followed, so the keepers only watch and remember; set the research to give them lines to carry.","plain"))
+		lines.append(_line("Learners for the research","no lines followed","No research line is followed, so the learners only watch and remember; set the research to give them lines to carry.","plain"))
 	else:
-		lines.append(_line("Keepers for the research","%s of %s" % [_whole(keepers),_whole(asked)],
-			"Two lore keepers are asked for each research line followed (%s lines). With %s, learning runs at %d in 100 of full attention." % [_count(lines_followed),_whole(keepers),roundi(fit*100.0)],"good" if fit>=1.0 else "bad"))
+		lines.append(_line("Learners for the research","%s of %s" % [_whole(keepers),_whole(asked)],
+			"Two learners are asked for each research line followed (%s lines). With %s, learning runs at %d in 100 of full attention." % [_count(lines_followed),_whole(keepers),roundi(fit*100.0)],"good" if fit>=1.0 else "bad"))
 	# Learning: keepers × work pace × attention ÷ (92 × people, at least 3000)
 	# a day, times what helps it (consequence_engine.gd knowledge_gain).
 	var pop:=maxf(1.0,float(state.population_exact))
 	var labor:=float(state.simulation_metrics.get("labor_efficiency",0.72))
 	var gain:=keepers*labor*fit/maxf(3000.0,pop*92.0)*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))*lerpf(0.55,1.45,float(state.combined_intelligence))
 	lines.append(_line("What the people know","+%s points a year" % _two(gain*365.0*100.0),
-		"Lore keepers add to what the people know, which speeds every discovery. It stands at %d of 100; the keepers add about %s points a year at today's pace." % [roundi(float(state.simulation_metrics.get("knowledge",0.18))*100.0),_two(gain*365.0*100.0)],"good" if gain>0.0 else "bad"))
-	# Research teams: full strength up to 12 keepers, less for each beyond
-	# (research_600_catalog.gd team_capacity).
-	var team:=Research600.team_capacity(keepers)
-	if keepers<=float(Research600.RESEARCH_TEAMS):
-		lines.append(_line("Research strength","full strength" if keepers>0.0 else "none",
-			"Up to %d keepers work at full strength on the research; past that each one adds less." % Research600.RESEARCH_TEAMS,"good" if keepers>0.0 else "bad"))
+		"Learners add to what the people know, which speeds every discovery. It stands at %d of 100; the learners add about %s points a year at today's pace." % [roundi(float(state.simulation_metrics.get("knowledge",0.18))*100.0),_two(gain*365.0*100.0)],"good" if gain>0.0 else "bad"))
+	# Every learner counts, without a cap (research_600_catalog.gd team_capacity;
+	# discovery_system.gd role_effect reads the engine's numbers).
+	var now:Dictionary=WorldSimulation.discovery.role_effect("Knowledge",1.0)
+	var ten:Dictionary=WorldSimulation.discovery.role_effect("Knowledge",10.0)
+	if keepers<=0.0:
+		lines.append(_line("One more learner","starts the research",
+			"Nobody is learning, so no research moves. Every learner counts; there is no cap on how many learn.","bad"))
 	else:
-		lines.append(_line("Research strength","%s keepers' worth" % _one(team),
-			"Up to %d keepers work at full strength on the research; past that each adds less, so %s keepers work as %s." % [Research600.RESEARCH_TEAMS,_whole(keepers),_one(team)],"good"))
+		lines.append(_line("One more learner",_gain_value(float(now.pace_gain)),
+			"Every learner counts; there is no cap. %s learners work %s questions at once. One more makes the research go %s; ten more, %s (%s questions at once). On one question, twice the people do about 1.8 times the work." % [_whole(keepers),_count(int(now.teams)),_faster(float(now.pace_gain)),_faster(float(ten.pace_gain)),_count(int(ten.teams_more))],"good"))
+	# Learners use goods: tallies, writing stuff, tools (Research600.goods_cover).
+	var cover:=float(now.goods_cover)
+	lines.append(_line("Goods for the learners","%d of 100 covered" % roundi(cover*100.0) if keepers>0.0 else "none asked",
+		"Learners use goods: tallies, writing stuff and tools, one for each %d days of learning, and the same again for every %d years our learning runs ahead of the calendar. %s learners ask %s goods a day and our stores hold %s. Makers make them; short of goods, learning slows, to half its pace with none. Now it goes at %d in 100." % [roundi(Research600.LEARNER_DAYS_PER_GOOD),roundi(Research600.LEAD_GOODS_YEARS),_whole(keepers),_two(float(now.goods_a_day)),_one(float(now.goods_held)),roundi(float(now.goods_factor)*100.0)],"good" if cover>=0.99 else "bad"))
+	# Our own age: learners past what the age can spare carry it ahead of the
+	# calendar (Research600.lead_rate, discovery_system.gd learning_lead).
+	var lead:=float(now.lead_years)
+	var rate:=float(now.lead_rate)
+	var drift:="ahead about %s years every ten years" % _one(rate*10.0) if rate>0.0 else ("back toward the calendar about %s years every ten years" % _one(-rate*10.0) if rate<0.0 and lead>0.0 else "level with the calendar")
+	lines.append(_line("Ahead of the calendar","%s years" % _one(lead) if lead>=0.5 else "level",
+		"The age can spare %d in 100 of the able as learners; %d in 100 learn. Past that, our learning runs ahead of the calendar; below it the calendar catches up. Ours is moving %s. Questions are dated from our own age, and what we know pays off to the age our knowledge has reached." % [roundi(float(now.sustainable_share)*100.0),roundi(float(now.share)*100.0),drift],"good" if lead>=0.5 or rate>0.0 else "plain"))
 	# Too many keepers: past the share the age can spare, each costs work,
 	# weariness, cohesion and births (society_model.gd specialist upkeep).
-	var model=DiscoverySystem.society_model
-	var era:=float(model.ceiling_era) if model!=null else 0.0
+	var model=WorldSimulation.discovery.society_model
+	# What the economy can spare follows its real age, not the learners' lead.
+	var era:=float(model.economy_era()) if model!=null else 0.0
 	var sustainable:=Society._rise(Society.SUSTAINABLE_SPECIALISTS,era)
 	var able:=_able()
 	var excess:=float(model.specialist_excess) if model!=null else 0.0
 	if excess>0.0:
-		lines.append(_line("Too many keepers","%s over" % _whole(excess*able),
-			"The people can spare %d in 100 of the workers as full-time keepers at this age (%s people). Past that the extra ones cost more work for everyone, weariness, cohesion and births." % [roundi(sustainable*100.0),_whole(sustainable*able)],"bad"))
+		lines.append(_line("Too many learners","%s over" % _whole(excess*able),
+			"The people can spare %d in 100 of the workers as full-time learners at this age (%s people). Past that the extra ones cost more work for everyone, weariness, cohesion and births." % [roundi(sustainable*100.0),_whole(sustainable*able)],"bad"))
 	else:
-		lines.append(_line("Keepers the people can spare","up to %s" % _whole(sustainable*able),
-			"The people can spare %d in 100 of the workers as full-time keepers at this age. Past that the extra ones cost more work for everyone, weariness, cohesion and births." % roundi(sustainable*100.0),"plain"))
+		lines.append(_line("Learners the people can spare","up to %s" % _whole(sustainable*able),
+			"The people can spare %d in 100 of the workers as full-time learners at this age. Past that the extra ones cost more work for everyone, weariness, cohesion and births." % roundi(sustainable*100.0),"plain"))
 	# Teaching: keepers spread practices to the rest (society_model.gd teaching).
 	var teaching:=_raw("Knowledge")/pop*0.055
 	var all_teaching:=teaching+_raw("Administration")/pop*0.018+_raw("Crafting")/pop*0.012
 	lines.append(_line("Teaching new ways","%d in 100 of the teaching" % roundi(teaching/maxf(0.000001,all_teaching)*100.0) if all_teaching>0.0 else "none",
-		"New practices spread to more households each month as people teach them; keepers teach most, stewards and makers some.","good" if teaching>0.0 else "plain"))
+		"New practices spread to more households each month as people teach them; learners teach most, stewards and makers some.","good" if teaching>0.0 else "plain"))
 	if CIVIC.SHRINE_HOUSE in state.settlement_completed:
 		var tended:=CIVIC.keepers_ratio()
 		lines.append(_line("Tending the Shrine House","%d of 100" % roundi(minf(1.0,tended)*100.0),
-			"The Shrine House does its full good only while lore keepers tend it, 1 in 100 of the people (%s would)." % _count(ceili(pop*CIVIC.SHRINE_KEEPERS_SHARE)),"good" if tended>=1.0 else "bad"))
+			"The Shrine House does its full good only while learners tend it, 1 in 100 of the people (%s would)." % _count(ceili(pop*CIVIC.SHRINE_KEEPERS_SHARE)),"good" if tended>=1.0 else "bad"))
 	_great_work_line(lines,"Knowledge")
 	lines.append(_cost_line("Knowledge",keepers))
-	return {"lead":"Lore keepers watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else.","lines":lines}
+	return {"lead":"Learners watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else. Every learner counts; they eat, use goods and make no food.","lines":lines}
 
 
-# --- Keeping the stores -------------------------------------------------------------
+# --- Keeping and caring -------------------------------------------------------------
 
 static func administration()->Dictionary:
 	var state=WorldSimulation.state
@@ -582,7 +619,7 @@ static func administration()->Dictionary:
 		"How many standing orders the court can keep in force: one, more as government grows, and up to two more when 4 in 100 of the people are stewards.","plain"))
 	_great_work_line(lines,"Administration")
 	lines.append(_cost_line("Administration",stewards))
-	return {"lead":"Stewards keep the stores and tallies, settle quarrels, take in newcomers and carry the chiefs' word.","lines":lines}
+	return {"lead":"Keepers keep the stores and tallies, settle quarrels, take in newcomers and carry the chiefs' word.","lines":lines}
 
 
 # --- Keeping watch ------------------------------------------------------------------
@@ -729,6 +766,20 @@ static func _one(value:float)->String:
 
 static func _two(value:float)->String:
 	return "%.2f" % value
+
+## A pace gain in words: "about 12 in 100 faster", "about twice as fast".
+static func _faster(gain:float)->String:
+	if gain>=0.995:return "about %s times as fast" % _one(1.0+gain)
+	if gain>=0.01:return "about %d in 100 faster" % roundi(gain*100.0)
+	if gain>=0.0005:return "about %d in 1000 faster" % maxi(1,roundi(gain*1000.0))
+	return "less than 1 in 1000 faster"
+
+## A pace gain as a short value: "+12 in 100", "+4 in 1000", "2 times as fast".
+static func _gain_value(gain:float)->String:
+	if gain>=0.995:return "%s times as fast" % _one(1.0+gain)
+	if gain>=0.01:return "+%d in 100" % roundi(gain*100.0)
+	if gain>=0.0005:return "+%d in 1000" % maxi(1,roundi(gain*1000.0))
+	return "+less than 1 in 1000"
 
 static func _cap(text:String)->String:
 	return text.left(1).to_upper()+text.substr(1)

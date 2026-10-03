@@ -140,7 +140,7 @@ func _people(v:Dictionary,our:Dictionary)->Dictionary:
 		if memories.size()>=4: break
 		memories.append({"tone":"good","text":String(bond.text).trim_suffix(".")+"."})
 	return {"civ_id":civ_id,"name":String(v.civ_name),"accent":identity.get("accent",Tokens.GOLD),"emblem":Identity.emblem(civ_id),
-		"relation":_relation_words(civ_id,relation),"ruler":_ruler_words(character),"headline":Standing.view_words(v),
+		"relation":_relation_words(civ_id,relation),"ruler":_with_path(_ruler_words(character),civ_id),"headline":Standing.view_words(v),
 		"views":views,"envy":float(v.envy),"contempt":float(v.contempt),"envy_why":String((v.why as Dictionary).get("envy","")),"contempt_why":String((v.why as Dictionary).get("contempt","")),
 		"strength":_strength_words(float(v.strength_ratio)),"ratio":float(v.strength_ratio),
 		"consequences":Standing.consequences(civ_id,v),"memories":memories,
@@ -174,6 +174,13 @@ static func _ruler_words(character:Dictionary)->String:
 	if name=="": return ""
 	var trait_words:=String(character.get("trait_words",""))
 	return "Ruled by %s, who %s" % [name,trait_words] if trait_words!="" else "Ruled by %s" % name
+
+## The ruler's line with the path their people's work is set on
+## (work_paths.gd): "Ruled by Arun, who ...; their work is set on war".
+static func _with_path(ruler:String,civ_id:String)->String:
+	var path:=preload("res://scripts/work_paths.gd").people_words(civ_id)
+	if path=="": return ruler
+	return "%s; %s" % [ruler,path] if ruler!="" else path.substr(0,1).to_upper()+path.substr(1)
 
 ## Their fighting strength against ours, as the page says it.
 static func _strength_words(ratio:float)->String:

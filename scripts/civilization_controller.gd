@@ -140,7 +140,7 @@ static func order_steps(id:String)->Array:
 		return review
 	]]
 	var parts:Array=review
-	for kind:String in ["research","military","purse","business","defense","civilian","foreign","great_works","expansion"]:
+	for kind:String in ["research","work_path","military","purse","business","defense","civilian","foreign","great_works","expansion"]:
 		if kind in ["civilian","expansion"]:
 			var kind_parts:=civilian_order_steps(id,func()->Dictionary:return shared.plan) if kind=="civilian" else expansion_order_steps(id,func()->Dictionary:return shared.plan)
 			for part:Array in kind_parts:
@@ -152,6 +152,7 @@ static func order_steps(id:String)->Array:
 			if not shared.has("plan"):return
 			match kind:
 				"research":research_orders(id,shared.plan)
+				"work_path":work_path_orders(id,shared.plan)
 				"military":military_orders(id,shared.plan)
 				"purse":purse_orders(id,shared.plan)
 				"business":business_orders(id,shared.plan)
@@ -160,6 +161,16 @@ static func order_steps(id:String)->Array:
 				"great_works":great_work_orders(id,shared.plan)
 		])
 	return first
+
+## The path the ruler lays the people's work out toward (work_paths.gd), by
+## its temper and the people's situation, reviewed with the month's plan:
+## growth, making and trade, war, learning (a scholarly temper only) or
+## building, else a balanced split. Only a change is ordered.
+static func work_path_orders(id:String,plan:Dictionary)->void:
+	var Paths:=preload("res://scripts/work_paths.gd")
+	var held:=Paths.held()
+	var pick:=Paths.choose(plan.get("personality",{}),Paths.situation(),held)
+	if String(pick.id)!=held:WorldSimulation.submit(id,{"kind":"work_path","path":String(pick.id),"why":String(pick.why),"score":float(pick.score)})
 
 ## The ruler's purse by their nature, with the levers the god has
 ## (realm_purse.gd), reviewed with the month's plan. A forceful or disciplined

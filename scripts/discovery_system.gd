@@ -14,6 +14,23 @@ const Research600=preload("res://scripts/research_600_catalog.gd")
 ## The name is older: saves hold it.
 var _research_600_return_day:=-100000
 var society_model = SocietyModelScript.new()
+## Years this people's own learning has run ahead of the calendar (0 at a
+## normal pace): keeping more learners than the age can spare carries it ahead,
+## fewer let the calendar catch up (Research600.lead_rate). Questions are dated
+## against learning_year(), the calendar plus this lead. Saved with the system;
+## an older save starts at 0, where it always stood.
+var learning_lead:=0.0
+## Today's learning goods (transient, never saved: an Object): the day, the
+## share of the learners' goods the stores covered, the goods a day they ask,
+## the step's length and what they took from each place ("" home, else a town).
+## The day's makers read it after the learners (civilian_goods.gd).
+class LearningDay extends RefCounted:
+	var day:=-1
+	var cover:=1.0
+	var need:=0.0
+	var span:=1.0
+	var places:Dictionary={}
+var _learning_day:=LearningDay.new()
 
 var rng := RandomNumberGenerator.new()
 var initialized := false
@@ -116,6 +133,8 @@ func reset_for_new_world()->void:
 	_candidate_index=preload("res://scripts/research_candidate_index.gd").new()
 	_scan=ResearchScan.new()
 	_team_memo=TeamMemo.new()
+	learning_lead=0.0
+	_learning_day=LearningDay.new()
 	# The teams' look days start afresh with the world (a save restores its own).
 	_switch_checked={}
 	_research_600_return_day=-100000
@@ -312,6 +331,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
 	var current_day := int(floor(WorldSimulation.state.elapsed_days))
 	WorldSimulation.state.scholarship_level=scholarship_level()+scholarship_rate()*float(WorldSimulation.span)/365.0
+	_advance_learning(current_day)
 	_refresh_active_investigations()
 	var teams:=research_teams()
 	# A field's leadership factor is read once for all its lines, and each
@@ -584,6 +604,8 @@ func _investigation_bottleneck(discovery:Dictionary,allocation:int,leader_factor
 	if material_evidence<0.78: return "MATERIAL BASIS — survey or work the required resource"
 	if era_cost_multiplier(discovery)>=2.0: return "BEYOND OUR SCHOLARSHIP — broader learning must mature before this question can be answered quickly"
 	if leader_factor<0.72: return "LEADERSHIP — the responsible office is weak or vacant"
+	var goods:=Research600.goods_factor(learning_goods_cover())
+	if goods<0.9: return "LEARNING GOODS — the learners lack tallies, writing stuff and tools: learning goes at %d in 100 of its pace" % roundi(goods*100.0)
 	if float(research_capacity.get("support_multiplier",1.0))<0.82: return "RESEARCH SUPPORT — food, tools, records, or administration are constraining the program"
 	match Research600.stage(progress):
 		0: return "EARLY EVIDENCE — gathering the first cases"
@@ -1353,7 +1375,7 @@ const NEAR_AGE_YEARS:=5.0
 func _channel_has_candidate(channel:String,current_day:int)->bool:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
-	var year:=float(current_day)/365.0
+	var year:=learning_year(current_day)
 	# _scan_eligible, inlined for the channel's many candidates.
 	var scanning:=_scan_active()
 	var memo:Dictionary=_scan.eligible
@@ -1424,7 +1446,7 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 				open=_discovery_is_eligible(chosen,current_day,judged_known)
 				if scanning: memo[target]=open
 			if open: return chosen
-	var year:=float(WorldSimulation.state.elapsed_days)/365.0
+	var year:=learning_year()
 	var by_age:=_channel_by_age(channel,candidates)
 	var index:=0
 	for tier in range(0,max_tier+1):
@@ -1870,9 +1892,11 @@ func _subcategory_allocation(dynamic_id:String,subcategory:String)->int:
 # each on one question until proof (Research600.team_count of them), so the same
 # researchers make the same total progress under any emphasis and any ruler: a
 # line's share sets how often it gets a team, never how much work there is.
-# Logarithmic returns prevent a billion people from completing every discovery
-# in a single tick, while knowledge, institutions, materials, and food compound
-# the civilization's ability to use that scale.
+# Every learner counts (no cap) and only learners count: research comes from
+# the number of people at learning, never from the people's size. One
+# question's people work at about n^0.85, so a billion learners never prove
+# everything in a tick; knowledge, institutions, materials, goods and food
+# compound the civilization's ability to use that scale.
 #
 # For a channel: "researchers" and "workforce_share" are the people its own
 # steps of attention follow it with; "team_people" the people on a team working
@@ -1896,6 +1920,10 @@ func research_capacity_for(dynamic_id:String,subcategory:String,teams:Dictionary
 		team_people=float(teams.on_lines)/float(sharing)
 	elif weight==0 and subcategory==_diffusion_subcategory(dynamic_id):
 		team_scale=Research600.DIFFUSION_TEAM # research_3000: diffusion
+	# Learners use goods (tallies, writing stuff, tools): short of them, learning
+	# slows, to half at none (Research600.goods_factor).
+	var goods_cover:=learning_goods_cover()
+	var goods_factor:=Research600.goods_factor(goods_cover)
 	var food_support:=lerpf(0.62,1.08,clampf(float(WorldSimulation.state.food_security),0.0,1.0))
 	var material_capacity:=clampf(float(WorldSimulation.state.simulation_metrics.get("material_capacity",WorldSimulation.state.society_capacities.get("production",0.12))),0.0,1.2)
 	var material_support:=lerpf(0.72,1.12,material_capacity/1.2)
@@ -1903,14 +1931,15 @@ func research_capacity_for(dynamic_id:String,subcategory:String,teams:Dictionary
 	# Each people is taught by its own schooling (the one being simulated).
 	var education:=preload("res://scripts/civilization_indicators.gd").education_index(WorldSimulation.state)
 	var support_multiplier:=food_support*material_support*lerpf(0.78,1.18,institutional_capacity)*lerpf(0.55,1.45,education)
-	# research_3000: a large, literate, well-governed society runs many investigations at once.
-	var parallel:=preload("res://scripts/research_600_catalog.gd").parallel_capacity(float(WorldSimulation.state.population_exact),institutional_capacity,effect("literacy"))
+	# A large people runs many investigations at once only by putting many
+	# people to learning (team_count): nothing multiplies research with size alone.
 	return {
 		"weight":weight,"total_weight":total_weight,"total_researchers":total_researchers,
 		"workforce_share":workforce_share,"researchers":researchers,"team_scale":team_scale,"team_people":team_people,
 		"teams":int(teams.count),"placed":int(teams.placed),
-		"education":education,"science_capacity":researchers*education,"parallel":parallel,
-		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*parallel*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))*preload("res://scripts/realm_purse.gd").scholars_factor()
+		"education":education,"science_capacity":researchers*education,
+		"goods_cover":goods_cover,"goods_factor":goods_factor,
+		"support_multiplier":support_multiplier,"progress_multiplier":team_scale*support_multiplier*goods_factor*(1.0+preload("res://scripts/artifact_collection.gd").bonus(dynamic_id))*preload("res://scripts/realm_purse.gd").scholars_factor()
 	}
 
 
@@ -1929,6 +1958,103 @@ func research_teams()->Dictionary:
 	var on_lines:=per_step*float(staffed)
 	return {"total_weight":total_weight,"researchers":researchers,"on_lines":on_lines,"work":Research600.team_capacity(on_lines),
 		"count":Research600.team_count(on_lines) if staffed>0 else 0,"placed":WorldSimulation.state.active_investigations.size()}
+
+
+# --- Learning without a cap (docs/PEOPLE_FIRST.md A) ----------------------------
+# Every learner counts (Research600.team_capacity), learners use goods, and a
+# people that keeps more learners than its age can spare runs ahead of the
+# calendar: its questions are dated against its own age (learning_year) and
+# what it knows pays off to the age its knowledge reached (SocietyModel
+# society_era). The same rules for every people, each in its own scope.
+
+## The people's own age for research, in game years: the calendar on `day`
+## (today when -1) plus the lead its learning has earned (learning_lead).
+func learning_year(day:int=-1)->float:
+	var calendar:=float(WorldSimulation.state.elapsed_days) if day<0 else float(day)
+	return calendar/365.0+maxf(0.0,learning_lead)
+
+## The day's learning: every learner takes goods from the realm's stores
+## (Research600.goods_draw: home first, then the towns) and the lead moves with
+## the learning done: the learners on the research lines, a learner without
+## goods counting half, against the share the age can spare
+## (Research600.lead_rate). A multi-day step covers `span` days.
+func _advance_learning(current_day:int)->void:
+	var learners:=maxf(0.0,float(WorldSimulation.state.effective_workers("Knowledge")))
+	var span:=float(maxi(1,WorldSimulation.span))
+	var drawn:=Research600.goods_draw(learners,span,true,learning_lead)
+	_learning_day.day=current_day
+	_learning_day.cover=float(drawn.cover)
+	_learning_day.need=Research600.goods_need(learners,1.0,learning_lead)
+	_learning_day.span=span
+	_learning_day.places=drawn.places
+	var on_lines:=float(research_teams().on_lines)
+	learning_lead=maxf(0.0,learning_lead+learning_lead_rate(on_lines*Research600.goods_factor(float(drawn.cover)))*span/365.0)
+
+## What the learners took from the place `place` ("" home, else a town id) in
+## today's step, a day, and the goods its makers should keep for them before
+## the next step: the home stores the realm learners' whole need for a step, a
+## town what they took from it ({taken, wanted}; nothing on another day).
+func learning_goods_today(place:String)->Dictionary:
+	if _learning_day.day!=int(floor(WorldSimulation.state.elapsed_days)): return {"taken":0.0,"wanted":0.0}
+	var span:=maxf(1.0,_learning_day.span)
+	var taken:=float(_learning_day.places.get(place,0.0))
+	return {"taken":taken/span,"wanted":_learning_day.need*span if place.is_empty() else taken}
+
+## Share of the able people the age can spare as full-time learners
+## (society_model.gd SUSTAINABLE_SPECIALISTS). It reads what the economy has
+## reached (SocietyModel.economy_era: the calendar or the knowledge frontier,
+## whichever is earlier), never the learners' own lead: a lead never pays for
+## itself by making more learners sustainable. Past it learners cost upkeep and
+## earn a lead.
+func sustainable_learning_share()->float:
+	return SocietyModelScript._rise(SocietyModelScript.SUSTAINABLE_SPECIALISTS,float(society_model.economy_era()))
+
+## Years a year the lead moves with `learners` on the research lines (goods
+## counted).
+func learning_lead_rate(learners:float)->float:
+	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
+	return Research600.lead_rate(maxf(0.0,learners)/able,sustainable_learning_share())
+
+## Share of the learners' goods the stores covered today (before today's step,
+## what they would cover now).
+func learning_goods_cover()->float:
+	if _learning_day.day==int(floor(WorldSimulation.state.elapsed_days)): return _learning_day.cover
+	return Research600.goods_cover(maxf(0.0,float(WorldSimulation.state.effective_workers("Knowledge"))),1.0,false,learning_lead)
+
+## What learning does now and what `extra` more learners would add, in the
+## engine's own numbers (the People view's learning row reads them):
+## learners and teams (questions at once) now and with more; the work
+## (team_capacity) now and with more, and the pace gain as a share;
+## goods asked a day now and with more, the share the stores cover and the pace
+## it allows; the lead in years and how it moves a year now and with more; the
+## share of the able at learning and the share the age can spare.
+func role_effect(role:String="Knowledge",extra:float=1.0)->Dictionary:
+	if role!="Knowledge": return {}
+	extra=maxf(0.0,extra)
+	var teams:=research_teams()
+	var learners:=float(teams.researchers)
+	# More learners join the lines in the share the plan gives them now.
+	var on_share:=float(teams.on_lines)/learners if learners>0.0 else (1.0 if int(teams.total_weight)>0 else 0.0)
+	var more_on:=float(teams.on_lines)+extra*on_share
+	var cover:=learning_goods_cover()
+	var factor:=Research600.goods_factor(cover)
+	var taken:=cover*Research600.goods_need(learners,1.0,learning_lead) if _learning_day.day==int(floor(WorldSimulation.state.elapsed_days)) else 0.0
+	var held:=Research600.goods_held()
+	var need_more:=Research600.goods_need(learners+extra,1.0,learning_lead)
+	var cover_more:=clampf((held+taken)/need_more,0.0,1.0) if need_more>0.0 else 1.0
+	var factor_more:=Research600.goods_factor(cover_more)
+	var work:=float(teams.work)
+	var work_more:=Research600.team_capacity(more_on)
+	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
+	return {"role":role,"extra":extra,"learners":learners,
+		"teams":int(teams.count),"teams_more":Research600.team_count(more_on) if more_on>0.0 else 0,
+		"work":work,"work_more":work_more,
+		"pace_gain":(work_more*factor_more)/(work*factor)-1.0 if work*factor>0.0 else (1.0 if work_more>0.0 else 0.0),
+		"goods_a_day":Research600.goods_need(learners,1.0,learning_lead),"goods_a_day_more":need_more,
+		"goods_per_learner":Research600.goods_per_learner_day(learning_lead),
+		"goods_cover":cover,"goods_factor":factor,"goods_held":held,
+		"lead_years":maxf(0.0,learning_lead),"lead_rate":learning_lead_rate(float(teams.on_lines)*factor),"lead_rate_more":learning_lead_rate(more_on*factor_more),
+		"share":learners/able,"sustainable_share":sustainable_learning_share(),"learning_year":learning_year()}
 
 
 func research_emphasis_total()->int:
@@ -2122,8 +2248,11 @@ func select_research_target(discovery_id:String)->Dictionary:
 func research_difficulty(discovery:Dictionary,civilization_seed:int,level:float=NAN,known:Variant=null)->float:
 	# research_3000: the society's own superseded practices are slower to take up.
 	var stale:=Research600.stale_factor(String(discovery.get("id","")),society_model.ceiling_era) if known==null else 1.0
+	# Each age's questions ask the work of the learners a people of that age
+	# usually keeps (Research600.age_work: research from learners, not size).
+	var age_work:=Research600.age_work(float(discovery.get("design_year",discovery_era(String(discovery.get("id","")))))) if known==null else 1.0
 	if known==null: known=WorldSimulation.state.known_discoveries
-	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)*stale*research_early_factor(discovery)
+	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)*stale*age_work*research_early_factor(discovery)
 
 
 ## Game-year equivalent of a discovery's historical period (TechnologyEras).
@@ -2147,7 +2276,8 @@ func discovery_era(id:String,visiting:Dictionary={})->float:
 ## more. Nothing is granted by age: knowledge still needs its foundations,
 ## evidence and researchers. `level` defaults to the acting society's own.
 func era_cost_multiplier(discovery:Dictionary,level:float=NAN)->float:
-	if is_nan(level): level=scholarship_level()
+	# A people's learning lead carries its scholarship with it.
+	if is_nan(level): level=scholarship_level()+maxf(0.0,learning_lead)
 	return TechnologyEras.cost_multiplier(discovery_era(String(discovery.get("id",""))),level)
 
 
@@ -2421,16 +2551,17 @@ var _open_year_cache:Dictionary={}
 var _open_year_seed:=0
 
 
-## Years `discovery` stands ahead of its age at `year` (0 once its age has come).
+## Years `discovery` stands ahead of its age at `year` (0 once its age has
+## come); `year` is the people's own age, learning_year() by default.
 func research_years_ahead(discovery:Dictionary,year:float=NAN)->float:
-	if is_nan(year): year=float(WorldSimulation.state.elapsed_days)/365.0
+	if is_nan(year): year=learning_year()
 	return maxf(0.0,research_open_year(discovery)-year)
 
 
 ## Work multiplier for `discovery` before its age: proportional to the years
-## ahead (1 once its age has come). Never a wall.
+## ahead of the people's own age (1 once its age has come). Never a wall.
 func research_early_factor(discovery:Dictionary,year:float=NAN)->float:
-	if is_nan(year): year=float(WorldSimulation.state.elapsed_days)/365.0
+	if is_nan(year): year=learning_year()
 	return Research600.early_factor(research_open_year(discovery),year)
 
 
@@ -2441,7 +2572,8 @@ func research_early_factor(discovery:Dictionary,year:float=NAN)->float:
 ## `day` (>=0) evaluates the calendar at that simulated day instead of today.
 func research_600_open(discovery:Dictionary,society:Dictionary={},day:int=-1,horizon_years:float=-1.0)->bool:
 	if horizon_years>=0.0:
-		var year:=float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0))
+		# The acting people's own age; a rival society snapshot carries its year.
+		var year:=learning_year(day) if society.is_empty() else (float(day)/365.0 if day>=0 else float(society.get("year",float(WorldSimulation.state.elapsed_days)/365.0)))
 		if research_open_year(discovery)-year>horizon_years: return false
 	if (discovery.get("conditions",{}) as Dictionary).is_empty(): return true
 	return Research600.conditions_met(String(discovery.get("id","")),society if not society.is_empty() else _player_society())
@@ -2566,7 +2698,7 @@ func _research_600_foundation_ids(dynamic_id:String,current_day:int)->Array[Stri
 			if foundation.is_empty() or not research_600_open(foundation,{},current_day): continue
 			if _scan_eligible(foundation,current_day,known):
 				# Foundation work keeps near its age: no more than NEAR_AGE_YEARS ahead.
-				if research_years_ahead(foundation,float(current_day)/365.0)<NEAR_AGE_YEARS: found[id]=research_open_year(foundation)
+				if research_years_ahead(foundation,learning_year(current_day))<NEAR_AGE_YEARS: found[id]=research_open_year(foundation)
 			else: next.append_array(_research_600_missing_parents(foundation,known))
 		frontier=next
 		depth+=1
@@ -2619,7 +2751,7 @@ func _years_recorded(entries:Array,known:Dictionary)->bool:
 ## within FOUNDATION_HORIZON_YEARS of `day` (a question in a later year opens
 ## beyond the horizon, as does every question after it).
 func _foundation_horizon_entries(table:Dictionary,entries:Array,day:int)->Array:
-	var year:=float(day)/365.0
+	var year:=learning_year(day)
 	var buckets:Dictionary=table.buckets
 	var indices:Array=[]
 	for bucket in int(table.last)+1:
