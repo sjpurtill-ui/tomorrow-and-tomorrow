@@ -1,0 +1,53 @@
+{
+  "id": "childrens_question_circles",
+  "line": "knowledge",
+  "status": "era",
+  "name": "Children's Question Circles",
+  "one_liner": "Children's question circles",
+  "observation": "Children's question circles.",
+  "key_threshold": false,
+  "target_year": 35,
+  "proposed_year": 35,
+  "band_low": 20,
+  "band_high": 50,
+  "min_year": 20,
+  "research_years": 3,
+  "requires_all": [
+    "curious_questioning_custom"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "shared_hearth_gatherings"
+  ],
+  "conditions": {},
+  "shared_with": [
+    "culture"
+  ],
+  "version": 2,
+  "year": 35,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "binding_style": "knowledge: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/childrens_question_circles.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+      "tile_index": 3,
+      "caption": "Children's question circles (Year 35)",
+      "style": "paper_gouache"
+    },
+    "subject": null
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-24/art_source/research-opening-24/style-reference/knowledge-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference provides established knowledge painting medium/palette ONLY and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed. No frame, grid, text or 3:2 crop. NEW SUBJECT: An adult crouches in a circle with THREE children, pointing to a beetle on a fallen branch while one child raises a questioning hand. Curious faces and a second child examines a leaf. Knowledge medium: blue-black crosshatched ink, lapis/parchment, clearly drawn hatching. No writing, school desks or books.\nZoom out: whole heads/hands/working tools within y170..590 of a765px banner, background only beyond, so actual3.37:1 card retains subject. Gameyears34\u201335: hide/fur garments, raw wood/stone/flint/cordage, early clay pots and modest shelters. Plain weaving is later: no woven clothing, loom, metal or later architecture borrowed from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-0322325f-8467-40fe-9ce5-d93e7793671e.png",
+  "review": "Accepted full original and actual3.37:1 GPU card; chronology, source, focus, provenance and hidden gating pass",
+  "asset": "res://assets/ui/research/subjects/childrens_question_circles-v2.png",
+  "sha256": "cacadda4f96fc73a562c14878c5319808929868c601c86cfb3fad3b7ded046d9",
+  "mode": "built-in image_gen / edit"
+}

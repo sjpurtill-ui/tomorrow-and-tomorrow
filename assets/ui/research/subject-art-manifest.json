@@ -185,10 +185,14 @@
     ]
   },
   "customary_law": {
-    "path": "res://assets/ui/research/subjects/customary_law-v1.png",
+    "path": "res://assets/ui/research/subjects/customary_law-v2.png",
     "focus": [
       0.5,
-      0.39
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "public_stores": {
@@ -6653,28 +6657,28 @@
     ]
   },
   "boil_lancing": {
-    "path": "res://assets/ui/research/subjects/boil_lancing-v1.png",
+    "path": "res://assets/ui/research/subjects/boil_lancing-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "grip_wrapping_practice": {
-    "path": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png",
+    "path": "res://assets/ui/research/subjects/grip_wrapping_practice-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "breeding_stock_sparing": {
-    "path": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png",
+    "path": "res://assets/ui/research/subjects/breeding_stock_sparing-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.3
     ]
   },
   "clay_sling_bullets": {
-    "path": "res://assets/ui/research/subjects/clay_sling_bullets-v1.png",
+    "path": "res://assets/ui/research/subjects/clay_sling_bullets-v2.png",
     "focus": [
       0.5,
       0.5
@@ -10159,6 +10163,42 @@
   "ancestor_figurines": {
     "path": "res://assets/ui/research/subjects/ancestor_figurines-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "cereal_dehulling": {
+    "path": "res://assets/ui/research/subjects/cereal_dehulling-v2.png",
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "opening_focus": [
+      0.5,
+      0.4
+    ]
+  },
+  "childrens_question_circles": {
+    "path": "res://assets/ui/research/subjects/childrens_question_circles-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "pit_pebble_game": {
+    "path": "res://assets/ui/research/subjects/pit_pebble_game-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "hand_dough_forming": {
+    "path": "res://assets/ui/research/subjects/hand_dough_forming-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]

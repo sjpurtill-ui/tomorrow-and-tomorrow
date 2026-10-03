@@ -139,11 +139,12 @@
       "style": "paper_gouache"
     },
     "childrens_question_circles": {
-      "path": "res://assets/ui/research/discovery-600/childrens_question_circles.png",
-      "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
-      "tile_index": 3,
-      "caption": "Children's question circles (Year 35)",
-      "style": "paper_gouache"
+      "path": "res://assets/ui/research/subjects/childrens_question_circles-v2.png",
+      "style": "knowledge: established field painting",
+      "focus": [
+        0.5,
+        0.5
+      ]
     },
     "circle_dances": {
       "path": "res://assets/ui/research/subjects/circle_dances-v1.png",
@@ -820,11 +821,12 @@
       "match": "milestone"
     },
     "pit_pebble_game": {
-      "path": "res://assets/ui/research/discovery-600/pit_pebble_game.png",
-      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
-      "tile_index": 2,
-      "caption": "Pit-and-pebble counting game (Year 35)",
-      "style": "silhouette_ochre"
+      "path": "res://assets/ui/research/subjects/pit_pebble_game-v2.png",
+      "style": "culture: established field painting",
+      "focus": [
+        0.5,
+        0.5
+      ]
     },
     "place_value": {
       "path": "res://assets/ui/research/discovery-600/place_value.png",
