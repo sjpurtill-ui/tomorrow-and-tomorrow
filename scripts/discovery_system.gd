@@ -2251,6 +2251,10 @@ func research_difficulty(discovery:Dictionary,civilization_seed:int,level:float=
 	# Each age's questions ask the work of the learners a people of that age
 	# usually keeps (Research600.age_work: research from learners, not size).
 	var age_work:=Research600.age_work(float(discovery.get("design_year",discovery_era(String(discovery.get("id","")))))) if known==null else 1.0
+	# A young people learns slowly, whatever the question (Research600.founding_work):
+	# the acting people at its own age, another people's research (`known`
+	# given) at the calendar's.
+	age_work*=Research600.founding_work(learning_year() if known==null else float(WorldSimulation.state.elapsed_days)/365.0)
 	if known==null: known=WorldSimulation.state.known_discoveries
 	return (0.85+_research_draw(String(discovery.id),civilization_seed,"cost")*0.30)*era_cost_multiplier(discovery,level)/Research600.precedent_factor(String(discovery.id),known)*stale*age_work*research_early_factor(discovery)
 

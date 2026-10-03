@@ -152,6 +152,21 @@ GOODS_MODEL = LEARNER_GOODS["LEARNER_DAYS_PER_GOOD"] > 0.0
 # Research600.AGE_WORK_BY_YEAR: each age's questions ask the work of the
 # learners a people of that age usually keeps (absent -> 1).
 AGE_WORK = g.const("scripts/research_600_catalog.gd", "AGE_WORK_BY_YEAR", default=[], optional=True) or []
+# Research600.founding_work: a young people's questions ask FOUNDING_WORK times
+# the work through FOUNDING_HOLD_YEARS, back to 1 by FOUNDING_FADE_YEARS (its own age).
+FOUNDING = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True)) for k in ("FOUNDING_WORK", "FOUNDING_HOLD_YEARS", "FOUNDING_FADE_YEARS")}
+
+
+def founding_work(age: float) -> float:
+    """Research600.founding_work (1 when absent)."""
+    if FOUNDING["FOUNDING_WORK"] <= 0.0:
+        return 1.0
+    if age <= FOUNDING["FOUNDING_HOLD_YEARS"]:
+        return FOUNDING["FOUNDING_WORK"]
+    if age >= FOUNDING["FOUNDING_FADE_YEARS"]:
+        return 1.0
+    t = (age - FOUNDING["FOUNDING_HOLD_YEARS"]) / (FOUNDING["FOUNDING_FADE_YEARS"] - FOUNDING["FOUNDING_HOLD_YEARS"])
+    return FOUNDING["FOUNDING_WORK"] + (1.0 - FOUNDING["FOUNDING_WORK"]) * t
 GOODS_K = {k: float(g.const("scripts/civilian_goods.gd", k, default=0.0, optional=True))
            for k in ("BASE_TARGET_PER_PERSON", "DAILY_WEAR", "CRAFT_SHARE", "BASE_RATE", "TECHNIQUE_OUTPUT")}
 GOODS_TARGETS = g.const("scripts/civilian_goods.gd", "TARGET_PER_PERSON", default={}, optional=True) or {}
@@ -1969,7 +1984,7 @@ class Surrogate:
                 if known_ext is None:
                     known_ext = np.concatenate([self.known, [False, False]])
                 precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
-            difficulty = self.cost_draw[item] * self._age_work(item) * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
+            difficulty = self.cost_draw[item] * self._age_work(item) * founding_work(year + self.lead) * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 # Research600.stale_factor (research_3000)
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
@@ -2297,7 +2312,7 @@ class Surrogate:
                 if known_ext is None:
                     known_ext = np.concatenate([self.known, [False, False]])
                 precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
-            difficulty = self.cost_draw[item] * self._age_work(item) * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, age))) / precedent
+            difficulty = self.cost_draw[item] * self._age_work(item) * founding_work(age) * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, age))) / precedent
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
             prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace \
