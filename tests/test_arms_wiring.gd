@@ -157,3 +157,87 @@ func test_an_old_armourys_kits_of_another_kind_are_never_sold_and_never_stand_fo
 	assert_int(Watch.weapons_held(MilitaryCampaign,item)).is_equal(0)
 	assert_int(Arms.arms_wanted()).is_equal(watch)
 	assert_float(Arms.trade_holding()).is_equal_approx(0.0,0.0001)
+
+
+## Knowledge held at an adoption.
+func _know(id:String,adoption:float)->void:
+	if id not in GameState.known_discoveries:GameState.known_discoveries.append(id)
+	GameState.discovery_adoption[id]=adoption
+
+func test_the_kit_follows_the_makers_age_never_a_weapon_merely_known()->void:
+	# Stone age: spears.
+	assert_str(_kit()).is_equal("spear")
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("stone")
+	# Rifles and muskets merely understood (known, practice not learned): the
+	# kit stays what the makers make, never a prototype cohort.
+	_know("metallic_cartridges",0.05)
+	_know("matchlock_drill",0.05)
+	assert_str(_kit()).is_equal("spear")
+	var watch:=_watch(0.05)
+	for f in MilitaryCampaign.home_army.formations:
+		assert_str(String((f as Dictionary).weapon)).is_equal("spear")
+		assert_bool(bool((f as Dictionary).get("prototype",false))).is_false()
+		assert_int(int((f as Dictionary).get("ammunition_required",0))).is_equal(0)
+	assert_int(watch).is_greater(0)
+	# Bronze learned: the makers make bronze arms, and the kit is a bronze weapon.
+	_know("bronze_weaponry",1.0)
+	GameState.elapsed_days=3
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("bronze")
+	assert_bool(_kit() in ["sword_shield","axe"]).is_true()
+	assert_float(float(Arms.cost_per_fighter().maker_days)).is_equal(16.0)
+
+
+func test_spearmen_with_no_gear_are_armed_by_bronze_age_makers()->void:
+	# The probe: twenty spearmen at home, none armed; bronze learned; twenty made sets.
+	MilitaryCampaign._rebuild_home_army_with([{"id":41,"unit":"spearman","weapon":"spear","count":20,"authorized_count":20,"equipment":0,"equipment_required":20,"ammunition":0,"ammunition_required":0,"training":0.4,"experience":0.0,"personnel_condition":1.0}])
+	_know("bronze_weaponry",1.0)
+	GameState.elapsed_days=4
+	assert_bool(_kit()!="spear").is_true()
+	# Their gap is one made sets can fill (an older smith still makes spears).
+	assert_float(Arms.arms_gaps()).is_greater_equal(20.0)
+	GameState.resource_stockpiles[Arms.GOOD]=20.0
+	var delivered:=MilitaryCampaign._deliver_inventory_replacements(1000.0)
+	assert_int(delivered).is_equal(20)
+	assert_int(_carried_at_home()).is_equal(20)
+	assert_float(Arms.stock()).is_equal_approx(0.0,0.0001)
+
+
+func test_an_older_saves_levy_with_what_comes_to_hand_takes_up_made_arms()->void:
+	# An older save: twenty levy at home with improvised arms, nothing else.
+	MilitaryCampaign.military_inventory["improvised"]=0
+	MilitaryCampaign._rebuild_home_army_with([{"id":42,"unit":"levy","weapon":"improvised","count":20,"authorized_count":20,"equipment":20,"equipment_required":20,"ammunition":0,"ammunition_required":0,"training":0.3,"experience":0.0,"personnel_condition":1.0}])
+	MilitaryCampaign.set_watch_share(20.0/float(GameState.population_total))
+	# The makers see them as wanting arms (no deadlock): all twenty.
+	assert_int(Arms.arms_wanted()).is_greater_equal(20)
+	GameState.elapsed_days=6
+	assert_int(int(Arms.plan_day().wanted)).is_greater_equal(20)
+	# Made sets come: the levy takes up the made kit, its old arms to the armoury.
+	GameState.resource_stockpiles[Arms.GOOD]=8.0
+	var men:=Watch.rekit_for_made(MilitaryCampaign)
+	assert_int(men).is_equal(20)
+	var levy:Dictionary=MilitaryCampaign.home_army.formations[0]
+	assert_str(String(levy.weapon)).is_equal(_kit())
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(20)
+	MilitaryCampaign._deliver_inventory_replacements(1000.0)
+	assert_int(_carried_at_home()).is_equal(8)
+	assert_int(Arms.weapons_issued()).is_equal(8)
+	# Still wanted: the twelve they lack, nothing tradeable meanwhile.
+	assert_int(Arms.arms_wanted()).is_equal(12)
+	assert_float(Arms.trade_holding()).is_equal_approx(0.0,0.0001)
+
+
+func test_gear_reserved_for_drill_and_on_the_road_is_not_wanted_again()->void:
+	var watch:=_watch(0.05)
+	var before:=Arms.arms_gaps()
+	# A drill order whose twenty sets are reserved: no more are wanted for it.
+	MilitaryCampaign.training_queue.append({"id":901,"mode":"new","unit":"spearman","weapon":"spear","count":20,"initial_count":20,"reserved_equipment":20,"progress_days":0.0,"required_days":30.0})
+	assert_float(Arms.arms_gaps()).is_equal_approx(before,0.0001)
+	# Half reserved: ten more wanted.
+	(MilitaryCampaign.training_queue.back() as Dictionary)["reserved_equipment"]=10
+	assert_float(Arms.arms_gaps()).is_equal_approx(before+10.0,0.0001)
+	MilitaryCampaign.training_queue.pop_back()
+	# Sets on the road to a band cover its gap.
+	MilitaryCampaign.field_drafts.append({"weapon":"spear","equipment":5,"count":5})
+	assert_float(Arms.arms_gaps()).is_equal_approx(maxf(0.0,before-5.0),0.0001)
+	MilitaryCampaign.field_drafts.pop_back()
+	assert_int(watch).is_greater(0)

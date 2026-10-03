@@ -5347,6 +5347,8 @@ func _process_military_day()->void:
 	# A multi-day step (day_span.gd) delivers `span` days of convoy capacity.
 	var delivery_bank_cap:=maxf(10.0,daily_delivery_capacity*maxf(3.0,WorldSimulation.span))
 	var available_delivery_load:=minf(delivery_bank_cap,maxf(0.0,float(home_army.get("delivery_load_bank",0.0)))+daily_delivery_capacity*WorldSimulation.span)
+	# Those at home with what comes to hand take up the made kit as made sets come.
+	preload("res://scripts/watch_military.gd").rekit_for_made(self)
 	var delivered:=_deliver_inventory_replacements(available_delivery_load)
 	var equipment_load_used:=float(home_army.get("equipment_delivery_load_used",0.0))
 	var remaining_delivery_load:=maxf(0.0,available_delivery_load-equipment_load_used)
@@ -5640,7 +5642,7 @@ func _next_equipment_delivery_load()->float:
 	var next_load:=INF
 	for formation in home_army.get("formations",[]):
 		var item:=String(formation.get("weapon","improvised"))
-		if int(military_inventory.get(item,0))<=0: continue
+		if int(preload("res://scripts/watch_military.gd").weapons_held(self,item))<=0: continue
 		var required:=int(formation.get("equipment_required",formation.get("authorized_count",formation.get("count",0))))
 		if int(formation.get("equipment",0))<required: next_load=minf(next_load,_equipment_delivery_load(item))
 	return 0.0 if is_inf(next_load) else next_load

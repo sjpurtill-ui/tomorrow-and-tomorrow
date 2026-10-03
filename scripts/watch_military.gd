@@ -199,11 +199,19 @@ static func armed_of(formations:Array)->float:
 # Arms: the one accessor (workstream D's weapons stock)
 # --------------------------------------------------------------------------
 
-## The kit the war leader arms the watch with: {unit, item} (Law.kit, the
-## best line foot our people can train and arm, the makers' arms counted:
-## weapons_stock.gd makes the sets that become it; the plain levy otherwise).
+## The kit the war leader arms the watch with: {unit, item}. The best line
+## kit in store (Law.kit) while some of it is held and it is no worse than
+## what the makers make; else what the makers make, when it arms a line unit
+## of ours with its practice learned (weapons_stock.gd made_kit: tied to the
+## makers' age, never a prototype); else Law.kit (what the workshops arm);
+## the plain levy otherwise.
 static func arms_kit(mc:Variant)->Dictionary:
-	var kit:Dictionary=Law.kit(mc,{"made":true})
+	var made:Dictionary=_arms().call("made_kit",mc)
+	var kit:Dictionary=Law.kit(mc)
+	var stored:=String(kit.get("item",""))
+	if not made.is_empty():
+		var in_store:=stored!="" and stored!="improvised" and int((mc.military_inventory as Dictionary).get(stored,0))>0
+		if not in_store or Law.Kit.preference(mc,stored,{})<Law.Kit.preference(mc,String(made.item),{}):return made
 	if String(kit.get("item",""))=="":kit={"unit":"levy","item":"improvised"}
 	return kit
 
@@ -227,25 +235,53 @@ static func _arms()->GDScript:
 ## armoury's kits of it.
 static func weapons_held(mc:Variant,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
-	return int(_arms().call("weapons_held",item))
+	return int(_arms().call("weapons_held",item,mc))
 
 ## Takes up to `n` sets of the watch's kit (or the kit named) for the watch:
 ## made sets first, then the armoury's; returns how many were taken.
 static func take_weapons(mc:Variant,n:int,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
-	return int(_arms().call("take_weapons",maxi(0,n),item))
+	return int(_arms().call("take_weapons",maxi(0,n),item,mc))
 
 ## `n` sets the watch hands back as its people go back to work: to the
 ## armoury, as the kit they are; returns how many went back.
 static func return_weapons(mc:Variant,n:int,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
-	return int(_arms().call("return_weapons",maxi(0,n),item))
+	return int(_arms().call("return_weapons",maxi(0,n),item,mc))
 
 ## `n` sets the watch lost with its fallen or in a rout (already gone from
 ## the formations that carried them): kept on the arms record. Returns n.
 static func lose_weapons(mc:Variant,n:int,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
-	return int(_arms().call("lose_weapons",maxi(0,n),item))
+	return int(_arms().call("lose_weapons",maxi(0,n),item,mc))
+
+## Formations at home with what comes to hand take up the made kit as made
+## sets come: their unit must carry it with its practice learned; what they
+## held goes back to the armoury, and they are armed from the made sets by
+## the day's delivery (MilitaryCampaign._deliver_inventory_replacements).
+## So an older save's levy is armed as the makers work, never left waiting.
+## Returns the men re-kitted.
+static func rekit_for_made(mc:Variant)->int:
+	var kit:Dictionary=_arms().call("made_kit",mc)
+	if kit.is_empty() or float(_arms().call("store_exact"))<1.0:return 0
+	var item:=String(kit.item)
+	var men:=0
+	var formations:Array=mc.home_army.get("formations",[])
+	for index in formations.size():
+		var formation:Dictionary=formations[index]
+		if String(formation.get("weapon","improvised"))!="improvised" or not bool(_arms().call("_rekits",mc,formation,item)):continue
+		var unit:=String(formation.get("unit","levy"))
+		var authorized:=int(formation.get("authorized_count",formation.get("count",0)))
+		return_weapons(mc,maxi(0,int(formation.get("equipment",0))),"improvised")
+		formation["weapon"]=item
+		formation["equipment"]=0
+		formation["equipment_required"]=mc._equipment_required_for(unit,authorized)
+		formation["ammunition"]=0
+		formation["ammunition_required"]=mc._ammunition_required_for(item,int(formation.equipment_required))
+		formations[index]=formation
+		men+=int(formation.get("count",0))
+	mc.home_army["formations"]=formations
+	return men
 
 ## Sets the watch carries now, read from its formations wherever they stand
 ## (home, bands, garrisons): one ledger, never a counter kept apart.
@@ -661,7 +697,7 @@ static func fold(mc:Variant)->int:
 		var count:=maxi(0,int(drill.get("count",0)))
 		mc.training_queue.erase(order)
 		if count<=0:
-			mc.military_inventory[String(drill.get("weapon","improvised"))]=int(mc.military_inventory.get(String(drill.get("weapon","improvised")),0))+maxi(0,int(drill.get("reserved_equipment",0)))
+			return_weapons(mc,maxi(0,int(drill.get("reserved_equipment",0))),String(drill.get("weapon","improvised")))
 			continue
 		var done:=clampf(float(drill.get("progress_days",0.0))/maxf(1.0,float(drill.get("required_days",1.0))),0.0,1.0)
 		var as_drilled:=drill.duplicate(true)

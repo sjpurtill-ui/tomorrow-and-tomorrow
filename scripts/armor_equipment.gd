@@ -110,9 +110,7 @@ static func selection(host:Node,unit:String,plan:Dictionary)->String:
 	var best:="";var score:=-INF
 	for item:String in host.UnitCatalog.equipment_for(unit):
 		if host._training_gate(unit,item).has("error"):continue
-		# A kit none of which is in store and no workshop can start is out, unless
-		# the makers' arms can be it (plan.made: weapons_stock.gd).
-		if not bool(plan.get("made",false)) and int(host.military_inventory.get(item,0))<=0 and not host.PersistentProduction.startup_blockers(host,item).is_empty():continue
+		if int(host.military_inventory.get(item,0))<=0 and not host.PersistentProduction.startup_blockers(host,item).is_empty():continue
 		if unit not in ["line_infantry","spearman"]:return item
 		var value:=preference(host,item,plan)
 		if value>score:best=item;score=value
