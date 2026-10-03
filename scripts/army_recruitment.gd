@@ -77,8 +77,8 @@ func enroll(template_id:int,retain_order:bool)->Dictionary:
 		if result.has("error"):continue
 		var order:Dictionary=host.training_queue[-1]
 		order.recruitment_template=template_id
-		var gear:int=mini(host._equipment_required_for(batch.unit,int(result.accepted)),maxi(0,int(host.military_inventory.get(batch.weapon,0))))
+		# Reserved from what is held for the kit (watch_military.gd: made sets, then the armoury).
+		var gear:int=preload("res://scripts/watch_military.gd").take_weapons(host,host._equipment_required_for(batch.unit,int(result.accepted)),String(batch.weapon))
 		order.reserved_equipment=gear
-		host.military_inventory[batch.weapon]=int(host.military_inventory.get(batch.weapon,0))-gear
 		queued+=int(result.accepted)
 	return {"ok":true,"queued":queued,"message":"%d recruits started training. %d soldiers remain at home. %d still to recruit; staff handle the next group automatically." % [queued,int(view.home),maxi(0,int(view.missing)-queued)]}

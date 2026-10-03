@@ -382,9 +382,9 @@ func _finish_step()->void:
 		for formation:Dictionary in a.get("formations",[]):
 			var weapon:=String(formation.get("weapon","improvised"))
 			var need:=maxi(0,int(formation.get("authorized_count",formation.count))-int(formation.get("equipment",0)))
-			var issued:=mini(need,int(WorldSimulation.military.military_inventory.get(weapon,0)))
+			# What is held for the kit (watch_military.gd: made sets, then the armoury).
+			var issued:=int(preload("res://scripts/watch_military.gd").take_weapons(WorldSimulation.military,need,weapon))
 			formation.equipment=int(formation.get("equipment",0))+issued
-			WorldSimulation.military.military_inventory[weapon]=int(WorldSimulation.military.military_inventory.get(weapon,0))-issued
 		var medical:Dictionary=preload("res://scripts/field_medicine.gd").provide(a,clampf(food_days(),0,1))
 		var prepared:Dictionary=WorldSimulation.military.simulator.advance_preparation_day(a,{"medical_recovery":medical.recovery,"equipment_replacements":0,"manpower_replacements":0,"doctrine_levels":preload("res://scripts/combined_arms_doctrine.gd").levels(),"doctrine_supply":clampf(food_days(),0,1)})
 		WorldSimulation.military.field_armies[WorldSimulation.military._field_army_index(int(state.army_id))]=prepared.force
