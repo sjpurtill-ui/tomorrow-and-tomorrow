@@ -10,6 +10,7 @@ const Sound:=preload("res://scripts/hud/court_sound.gd")
 const Voice:=preload("res://scripts/hud/court_voice.gd")
 const Foley:=preload("res://scripts/hud/court_foley.gd")
 const Synth:=preload("res://scripts/hud/court_synth.gd")
+const Music:=preload("res://scripts/hud/court_music.gd")
 
 var out_dir:=""
 
@@ -110,6 +111,52 @@ func _run()->void:
 			lr[(at+i)*2+1]+=x*rv+x*(1.0-lv)
 		k_at+=1
 	_save_stereo("11_left_middle_right",lr)
+	# the musician, by what the people know (each age), in our people's own way
+	var ages:={"hum":[],"flute_drum":["bone_flutes_drums"],"reed_rattle":["bone_flutes_drums","rattles_drums_pipes"],
+		"lyre":["bone_flutes_drums","rattles_drums_pipes","harps_and_lyres"],"temple":["bone_flutes_drums","rattles_drums_pipes","harps_and_lyres","temple_choirs"]}
+	for age in ages:
+		var mk:=Sound.register_music(tongue_key,ages[age])
+		var tune:Array=[];var at:=0.3
+		for k in [0,1,2]:
+			tune.append({"t":at,"music":"music@"+mk,"variant":k})
+			at+=Sound.stream_for("music@"+mk,k).get_length()+1.2
+		_save("12_music_%s" % age,Sound.render_scene(tune,at+0.3))
+	# two other peoples, the same age: their own scales and beats
+	var pieces:Array=[];var at2:=0.3
+	# two other peoples whose beat differs from ours and each other's
+	var players:Array=["player"]
+	var beats:={String(Music.METERS.get(String(Voice.phonology("player",seed_value).family),"four")):true}
+	for k in range(1,30):
+		var other:="civ_%02d" % k
+		var beat:=String(Music.METERS.get(String(Voice.phonology(other,seed_value).family),"four"))
+		if beats.has(beat):continue
+		beats[beat]=true;players.append(other)
+		if players.size()>=3:break
+	for owner in players:
+		var fam:=String(Voice.phonology(owner,seed_value).family)
+		var mk2:=Sound.register_music(Sound.register_tongue(owner,seed_value),["bone_flutes_drums"])
+		for k in [0,4]:
+			pieces.append({"t":at2,"music":"music@"+mk2,"variant":k})
+			at2+=Sound.stream_for("music@"+mk2,k).get_length()+0.6
+		at2+=1.2
+		print("music of %s (%s): %s, %s" % [owner,fam,str(Sound.music_spec(mk2).scale),String(Sound.music_spec(mk2).meter)])
+	_save("13_music_three_peoples",Sound.render_scene(pieces,at2))
+	# the god's wrath lands mid-phrase: the music stops dead (squeak, a stray
+	# tap), silence but the fire; it creeps back, tentatively, then plays on
+	var mk3:=Sound.register_music(tongue_key,["bone_flutes_drums"])
+	var p2:=Sound.stream_for("music@"+mk3,2).get_length()
+	var stop_scene:=[{"t":0.0,"bed":"fire","until":24.0,"db":-4.0},{"t":0.0,"talk":tongue_key,"until":3.0,"release":0.06,"seed":6},
+		{"t":0.3,"music":"music@"+mk3,"variant":0,"until":3.0,"release":0.03},
+		{"t":2.97,"cue":"god_wrath_boom","variant":0,"db":-4.0},{"t":3.02,"cue":"room_gasp","variant":1},
+		{"t":3.0,"god":"god_swell_wrath","until":6.6,"release":2.2,"attack":0.8,"level":-11.0},
+		{"t":3.0,"music":"musicstop@"+mk3,"variant":0,"db":5.0},{"t":3.29,"music":"musictap@"+mk3,"db":3.0},
+		{"t":9.0,"talk":tongue_key,"until":24.0,"attack":1.5,"seed":7},
+		{"t":11.0,"music":"music@"+mk3,"variant":1,"until":12.6,"release":0.6,"db":-9.0},
+		{"t":15.5,"music":"music@"+mk3,"variant":2}]
+	_save("14_music_wrath_stops_it_dead",Sound.render_scene(stop_scene,minf(24.0,15.8+p2)))
+	# a gift taken: the musician plays it in
+	var p3:=Sound.stream_for("music@"+mk3,3).get_length()
+	_save("15_gift_flourish",Sound.render_scene([{"t":0.3,"music":"music@"+mk3,"variant":3},{"t":0.9+p3,"music":"musicfl@"+mk3,"db":3.0}],2.6+p3+Sound.stream_for("musicfl@"+mk3,0).get_length()))
 	if args.has("all"):
 		DirAccess.make_dir_recursive_absolute(out_dir.path_join("cues"))
 		for name in Foley.CUES:
@@ -118,6 +165,7 @@ func _run()->void:
 				s.save_to_wav(out_dir.path_join("cues/%s_%d.wav" % [name,v]))
 		for name in Foley.BEDS:
 			Sound.stream_for(name,0).save_to_wav(out_dir.path_join("cues/bed_%s.wav" % name))
+	# a measure of the music's own character: each people's scale and beat
 	var index:=FileAccess.open(out_dir.path_join("index.txt"),FileAccess.WRITE)
 	if index!=null:
 		index.store_string("""The court's sounds (all synthesized; levels as in the game, before the Court bus).
@@ -133,6 +181,14 @@ func _run()->void:
 09_sustained_*         a held "aah" (man, woman): for measuring the voice, not for listening
 10_crowd_5_minutes     five minutes of the crowd by the fire as the court plays it (it never loops)
 11_left_middle_right   stereo: the same gasp from the left edge, the middle and the right edge
+12_music_<age>         the court musician, three phrases, by what our people know: hum (nothing yet),
+                       flute_drum (bone flute, frame drum), reed_rattle (reed pipe, clay drum, rattle),
+                       lyre, temple (lyre and small cymbals)
+13_music_three_peoples the same age (bone flute, frame drum) played by our people and two others with
+                       other beats: each its own scale, beat, key and tunes
+14_music_wrath_stops_it_dead  music by the fire; wrath lands mid-phrase: squeak, a stray tap, silence;
+                       a tentative few notes later; then it plays on
+15_gift_flourish       a phrase, then a gift taken: a run and a roll
 cues/                  every one-shot and bed on its own (name_variant.wav)
 """)
 		index.close()
