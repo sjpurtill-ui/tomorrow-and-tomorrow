@@ -91,6 +91,20 @@ const COMIC_ACTS:=["stifle_laugh","elbow","wobble","drop_bowl","jerk_awake","loo
 ## stays until something else is asked; look: "god", "god_up", "at" (args.at),
 ## "away" or ""; desc: how the screenplay tells it.
 const ACTS:={
+	# executions (the acting's clips by these names when it has them)
+	"windup":{"clip":"raise_hand","mood":"defiant","face":{"brows_down":0.6,"lips_pressed":0.7},"dur":0.9,"hold":true,"look":"at","desc":"winds up a great blow"},
+	"swing":{"clip":"point","mood":"defiant","face":{"jaw_open":0.5,"brows_down":0.6},"dur":0.5,"look":"","desc":"swings"},
+	"squint":{"clip":"","mood":"","face":{"eyes_narrow":0.8,"lips_pressed":0.6},"dur":0.5,"look":"at","desc":"takes aim with one eye"},
+	"tug":{"clip":"point","mood":"","face":{"lips_pressed":0.8,"eyes_narrow":0.5},"dur":0.9,"look":"","desc":"tugs at the stuck blade"},
+	"stir":{"clip":"point","mood":"","face":{"eyes_narrow":0.3},"dur":1.0,"look":"","desc":"stirs the pot"},
+	"taste":{"clip":"raise_hand","mood":"","face":{"lips_pressed":0.4,"brows_up":0.3},"dur":0.9,"look":"","desc":"tastes, considers, adds salt"},
+	"wipe_face":{"clip":"raise_hand","mood":"","face":{"eyes_narrow":0.7,"lips_pressed":0.6},"dur":1.4,"look":"","desc":"wipes the spatter from their face"},
+	"retch":{"clip":"bow","mood":"afraid","face":{"jaw_open":0.4,"eyes_narrow":0.6},"dur":1.3,"look":"","desc":"is sick into the nearest pot"},
+	"hide_eyes":{"clip":"raise_hand","mood":"afraid","face":{"eyes_narrow":0.9},"dur":1.6,"look":"","desc":"hides their eyes"},
+	"throw":{"clip":"point","mood":"defiant","face":{"brows_down":0.4},"dur":0.5,"look":"at","desc":"throws"},
+	"warm_hands":{"clip":"bow","mood":"warm","face":{"smile":0.3},"dur":1.6,"look":"","desc":"warms their hands at the embers"},
+	"cough_smoke":{"clip":"","mood":"","face":{"jaw_open":0.5,"eyes_narrow":0.6},"dur":1.0,"look":"","desc":"coughs a ring of smoke"},
+	"stroke_chin":{"clip":"","mood":"","face":{"eyes_narrow":0.4},"dur":1.6,"look":"","desc":"watches, stroking their chin"},
 	# Before the god.
 	"look_up":{"clip":"","mood":"","face":{"brows_up":0.4},"dur":0.9,"look":"god_up","desc":"lifts their face to the voice"},
 	"kneel":{"clip":"kneel","mood":"afraid","face":{"brows_worried":0.7},"dur":2.6,"hold":true,"look":"","desc":"goes down on one knee"},
@@ -302,7 +316,8 @@ const SOUNDS:={
 	"swat_miss":["slap",0.8,"slap"],"yawn":["yawn",0.7,"yawn"],"knees_knock":["knees_knock",0.6,""],"kneel":["kneel_cloth",0.6,""],
 	"kneel_bound":["kneel_cloth",0.8,""],"prostrate":["body_floor",0.7,""],"elbow":["oof",0.5,""],"shush":["shh",0.6,""],
 	"clear_throat":["throat_clear",0.7,""],"sniff_disdain":["sniff",0.6,""],"jerk_awake":["snort_wake",0.7,"snort"],
-	"scribble":["reed_scratch",0.5,""],"scratch_out":["reed_scratch",0.6,""],"count_fingers":["babble_count",0.4,""],
+	"scribble":["reed_scratch",0.5,""],"swing":["whoosh",0.9,""],"throw":["whoosh",0.6,""],"retch":["retch",0.7,""],
+	"wipe_face":["wipe",0.4,""],"cough_smoke":["cough",0.8,"cough"],"stir":["stir",0.5,""],"taste":["slurp",0.6,""],"scratch_out":["reed_scratch",0.6,""],"count_fingers":["babble_count",0.4,""],
 	"whisper":["whisper_babble",0.4,""],"over_thank":["babble_thanks",0.7,""],"soft_clap":["soft_clap",0.6,"clap"],
 	"raise_finger":["babble_ahem",0.5,""],"startle":["yelp_small",0.7,"gasp"],"snatch_up":["snatch",0.6,""],"wave":["",0.0,""],
 	"shoo":["shoo",0.6,""],"nibble":["goat_nibble",0.4,""],"tail_wag":["",0.0,""],"bow_to_post":["",0.0,""],"scratch":["",0.0,""],
@@ -920,6 +935,7 @@ static func _direct(ctx:Dictionary)->Array:
 		"exit":_exit(ctx,out)
 		"terrify_envoy":_terrify_envoy(ctx,out)
 		"envoy_insulted":_insulted(ctx,out)
+		"execution":_execution(ctx,out)
 	return out
 
 ## The god speaks: the room stills and every face lifts toward the voice, a
@@ -2224,7 +2240,7 @@ static func _agree(out:Array,ctx:Dictionary)->Array:
 	for beat:Dictionary in out:
 		var who:=String(beat.who)
 		var act:=String(beat.act)
-		if not who in ["camera","room"] and not (ctx.by as Dictionary).has(who):continue
+		if not who in ["camera","room","exec"] and not (ctx.by as Dictionary).has(who):continue
 		# One who stood firm never goes down (bound and forced, they kneel
 		# as the engine says, chin up: kneel_bound).
 		if who==firm and not firm.is_empty() and act in KNEEL_LIKE:continue
@@ -2239,6 +2255,418 @@ static func _agree(out:Array,ctx:Dictionary)->Array:
 		if season!="summer" and act in SUMMER_ACTS:continue
 		kept.append(beat)
 	return kept
+
+# =============================================================================
+# Executions: the engine has put someone to death; how the hall sees it
+# (court_executions.gd chose the method; court_exec_stage.gd plays the "exec"
+# beats). Comic gore, Monty Python and the cartoons, perfectly timed, the
+# whole room reacting. Gore "mild": the blow lands off screen (the camera on
+# the room's faces), no blood and no parts. A child, or gore "off", never
+# comes here: the stage keeps the old sober kneel and sink.
+
+## event: {kind: "execution", method, victim ("main"), ex (who carries it out,
+## "" for the director to choose), style ("full"/"mild"), name, caption}.
+static func _execution(ctx:Dictionary,out:Array)->void:
+	var event:Dictionary=ctx.event
+	var method:=String(event.get("method","club"))
+	var victim:=String(event.get("victim",ctx.main))
+	var style:=String(event.get("style","full"))
+	var roles:=_exec_roles(ctx,victim,String(event.get("ex","")))
+	var length:=9.5
+	match method:
+		"club":length=_exec_club(ctx,out,victim,roles)
+		"behead":length=_exec_behead(ctx,out,victim,roles)
+		"dogs":length=_exec_dogs(ctx,out,victim,roles)
+		"fire":length=_exec_fire(ctx,out,victim,roles)
+		"spears":length=_exec_spears(ctx,out,victim,roles)
+		"stoning":length=_exec_stoning(ctx,out,victim,roles)
+		"boulder":length=_exec_boulder(ctx,out,victim,roles)
+		"boil":length=_exec_boil(ctx,out,victim,roles)
+		"arrows":length=_exec_arrows(ctx,out,victim,roles)
+		"stake":length=_exec_stake(ctx,out,victim,roles)
+		_:length=_exec_club(ctx,out,victim,roles)
+	# The caption names the method; then it is over.
+	_exec(out,length-1.0,"caption",{"text":String(event.get("caption",""))})
+	_exec(out,length,"end",{})
+	if style=="mild":_exec_mild(out,ctx,victim,roles)
+
+## Who does what: the one who carries it out (the engine's actor, else the
+## boldest of our people), the cook (by the fire), the front row.
+static func _exec_roles(ctx:Dictionary,victim:String,ex_in:String)->Dictionary:
+	var ex:=ex_in
+	if ex=="" or ex==victim or _m(ctx,ex).is_empty():
+		var bold:Array=_people(ctx,[victim]).filter(func(m:Dictionary)->bool:return String(m.kind) in ["official","hearth_chief","guard","commoner"])
+		bold.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.courage)>float(b.courage) if not is_equal_approx(float(a.courage),float(b.courage)) else int(a.index)<int(b.index))
+		ex=String((bold[0] as Dictionary).key) if not bold.is_empty() else ""
+	var cook:Array=_of_kind(ctx,["commoner","elder"],[victim,ex])
+	if cook.is_empty():cook=_people(ctx,[victim,ex])
+	var front:Array=_people(ctx,[victim,ex]).filter(func(m:Dictionary)->bool:return not String(m.kind) in ["child","scribe"])
+	var v:=_m(ctx,victim)
+	front.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return absf(_where(a)-_where(v))<absf(_where(b)-_where(v)))
+	return {"ex":ex,"cook":String((cook[0] as Dictionary).key) if not cook.is_empty() else "","front":front.slice(0,2).map(func(m:Dictionary)->String:return String(m.key))}
+
+static func _exec(out:Array,t:float,op:String,args:Dictionary={})->void:
+	_beat(out,t,"exec",op,args,"action")
+
+static func _snd(out:Array,t:float,name:String,gain:=0.9,glyph:="")->void:
+	_beat(out,t,"exec","noise",{"sound":name,"gain":gain,"glyph":glyph},"action")
+
+## Before: the drum roll, everyone holding their breath.
+static func _exec_before(ctx:Dictionary,out:Array,victim:String,roles:Dictionary,length:float)->void:
+	var rng:RandomNumberGenerator=ctx.rng
+	_beat(out,0.0,"room","hush",{"dur":length,"bubbles":"dim"},"anticipation")
+	_snd(out,0.0,"drum_roll",0.8)
+	for m:Dictionary in _people(ctx,[victim,String(roles.ex)]):
+		if rng.randf()<0.55:_beat(out,0.1+rng.randf()*0.4,String(m.key),"freeze",{"dur":1.6},"anticipation")
+	if people_dread(ctx.facts)>=DREAD_HIGH:
+		for m:Dictionary in _people(ctx,[victim,String(roles.ex)]):_beat(out,0.4,String(m.key),"tremble",{"dur":length*0.6},"anticipation")
+
+## After: the front row splattered and wiping, someone faints, someone is
+## sick, the child hides their eyes and then peeks, the flatterer applauds
+## alone, the scribe keeps writing, the envoy's guard gulps. A terrified room
+## does it all in silence and shaking (no applause, no peeking).
+static func _exec_after(ctx:Dictionary,out:Array,at:float,victim:String,roles:Dictionary,splash:=true)->void:
+	var rng:RandomNumberGenerator=ctx.rng
+	var dread:=people_dread(ctx.facts)>=DREAD_HIGH
+	var used:=[victim,String(roles.ex)]
+	_snd(out,at,"crowd_gasp",0.9)
+	if splash:
+		for key in roles.front:
+			_beat(out,at+0.5+rng.randf()*0.3,String(key),"wipe_face",{},"reaction")
+			used.append(String(key))
+	var jumpy:Array=_jumpiest(_people(ctx,used).filter(func(m:Dictionary)->bool:return String(m.kind)!="child"))
+	if not jumpy.is_empty():
+		var fainter:=String((jumpy[0] as Dictionary).key)
+		_beat(out,at+0.8,fainter,"faint",{},"reaction")
+		used.append(fainter)
+		var catcher:=_nearest(ctx,jumpy[0],["official","hearth_chief","commoner","elder"],used)
+		if not catcher.is_empty() and rng.randf()<0.5:_beat(out,at+1.2,String(catcher.key),"half_catch",{"at":fainter},"reaction");used.append(String(catcher.key))
+	var queasy:Array=_people(ctx,used).filter(func(m:Dictionary)->bool:return not String(m.kind) in ["child","scribe"] and float(m.courage)<0.6)
+	if not queasy.is_empty():
+		var sick:=String((_pick(ctx,queasy) as Dictionary).key)
+		_beat(out,at+1.4,sick,"retch",{"sound":"retch","gain":0.7},"reaction")
+		used.append(sick)
+	for child:Dictionary in _of_kind(ctx,["child"]):
+		_beat(out,at+0.3,String(child.key),"hide_eyes",{},"reaction")
+		if not dread:_beat(out,at+2.0,String(child.key),"peek_out",{},"reaction")
+	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,at+0.6,String(scribe.key),"scribble",{"dur":3.0},"reaction")
+	for guard:Dictionary in _of_kind(ctx,["guard"],used):_beat(out,at+0.9,String(guard.key),"gulp",{},"reaction")
+	if not dread:
+		for m:Dictionary in _people(ctx,used):
+			if String(m.get("quirk",""))=="flatterer":
+				_beat(out,at+2.2,String(m.key),"soft_clap",{"dur":1.6},"reaction")
+				# nobody joins in
+				var other:=_nearest(ctx,m,["official","hearth_chief","elder","commoner"],used+[String(m.key)])
+				if not other.is_empty():_beat(out,at+3.0,String(other.key),"side_eye",{"at":String(m.key)},"reaction")
+				_shot(out,at+2.3,"reaction",{"target":String(m.key)})
+				break
+
+## Mild: the blow lands off screen. The camera turns to the room's faces at
+## the moment; no blood, no parts; they are simply gone when it turns back.
+static func _exec_mild(out:Array,ctx:Dictionary,victim:String,roles:Dictionary)->void:
+	var impact:=INF
+	var kept:Array=[]
+	for beat:Dictionary in out:
+		if String(beat.who)=="exec" and String(beat.act) in ["behead","spray","pool","char","crumble","fall"]:
+			impact=minf(impact,float(beat.t))
+			continue
+		kept.append(beat)
+	out.clear();out.append_array(kept)
+	if impact==INF:return
+	var faces:Array=_people(ctx,[victim,String(roles.ex)])
+	if not faces.is_empty():_shot(out,impact-0.15,"reaction",{"target":String((_pick(ctx,faces) as Dictionary).key)})
+	_exec(out,impact+0.3,"vanish",{"who":victim})
+	_shot(out,impact+2.6,"wide")
+
+# --- the acts -------------------------------------------------------------------------
+
+## 2. Club home run: a huge wind-up, CRACK, the head sails in a long arc into
+## the cooking pot; the cook looks in, stirs, and puts the lid on.
+static func _exec_club(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var ex:=String(roles.ex);var cook:=String(roles.cook)
+	var length:=10.0
+	_exec_before(ctx,out,victim,roles,length)
+	_exec(out,0.0,"prop",{"name":"pot","at":"fire","toward_camera":1.15,"offset":Vector3(0.75,0,0)})
+	_beat(out,0.2,victim,"kneel",{"dur":3.0,"hold":true},"anticipation")
+	_shot(out,0.0,"two_shot",{"a":victim,"b":ex,"weight":5})
+	_exec(out,0.3,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.85,"time":1.0})
+	_exec(out,1.3,"prop",{"name":"club","to":ex,"hand":"R"})
+	_beat(out,1.5,ex,"windup",{"dur":1.1,"hold":true},"anticipation")
+	_exec(out,1.5,"twist",{"who":ex,"yaw":-80.0,"time":0.9})
+	_beat(out,2.45,ex,"squint",{"dur":0.4},"anticipation")
+	# CRACK
+	_exec(out,2.75,"twist",{"who":ex,"yaw":165.0,"time":0.11})
+	_exec(out,2.75,"lunge",{"who":ex,"dist":0.22,"time":0.1})
+	_beat(out,2.75,ex,"swing",{"dur":0.6},"action")
+	_snd(out,2.82,"club_crack",1.0,"crack")
+	_shot(out,2.82,"shake",{"strength":0.45})
+	_exec(out,2.84,"behead",{"who":victim,"fly":"pot","time":1.25,"arc":2.4,"spin":2.5})
+	_exec(out,2.86,"spray",{"at":"neck:"+victim,"dir":"up","seconds":0.9,"amount":70,"speed":3.0})
+	_shot(out,2.9,"wide",{"time":0.6})
+	_exec(out,3.3,"fall",{"who":victim,"kind":"forward","time":0.55})
+	_snd(out,3.85,"thud",0.7)
+	_snd(out,4.1,"plop",0.9,"plop")
+	_exec(out,4.12,"spray",{"at":"pot","y":0.45,"dir":"up","seconds":0.25,"amount":28,"speed":1.8,"pool":false})
+	# the cook
+	if cook!="":
+		_beat(out,4.4,cook,"double_take",{"at":ex},"reaction")
+		_exec(out,4.9,"approach",{"who":cook,"to":"pot","side":1.0,"dist":0.55,"time":0.9})
+		_shot(out,5.2,"reaction",{"target":cook})
+		_beat(out,5.9,cook,"lean_in",{"dur":0.8},"action")
+		_beat(out,6.6,cook,"stir",{"dur":1.0},"action")
+		_snd(out,6.6,"stir",0.6)
+		_exec(out,7.5,"prop",{"name":"lid","id":"lid","at":"pot","y":0.44})
+		_exec(out,7.5,"drop",{"id":"lid","at":"pot","offset":Vector3(0,0.44,0),"height":0.35,"time":0.2})
+		_snd(out,7.7,"lid_clank",0.8,"clatter")
+		_beat(out,7.9,cook,"wipe_hands",{},"reaction")
+	_exec_after(ctx,out,3.0,victim,roles,true)
+	_shot(out,8.3,"wide",{"time":0.8})
+	return length
+
+## 10. Three-swing beheading: the first stroke sticks in the block, the second
+## bounces off, the third pops the head off; it rolls, stops facing the god,
+## and blinks; a geyser soaks the front row.
+static func _exec_behead(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var ex:=String(roles.ex)
+	var length:=12.0
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"two_shot",{"a":victim,"b":ex,"weight":5})
+	_exec(out,0.1,"prop",{"name":"block","at":victim,"front":0.5,"of":victim})
+	_beat(out,0.3,victim,"kneel",{"dur":10.0,"hold":true},"anticipation")
+	_exec(out,0.3,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.8,"time":1.0})
+	_exec(out,1.2,"lean",{"who":victim,"pitch":36.0,"time":0.6})
+	_exec(out,1.3,"prop",{"name":"axe","id":"axe","to":ex,"hand":"R"})
+	# one: it sticks in the block
+	_beat(out,1.7,ex,"windup",{"dur":0.8,"hold":true},"anticipation")
+	_exec(out,1.7,"twist",{"who":ex,"yaw":-70.0,"time":0.7})
+	_exec(out,2.5,"twist",{"who":ex,"yaw":120.0,"time":0.1})
+	_beat(out,2.5,ex,"swing",{"dur":0.5},"action")
+	_snd(out,2.58,"thunk",1.0,"thump")
+	_exec(out,2.6,"stick",{"id":"axe","in":"block"})
+	_beat(out,2.9,ex,"tug",{"dur":0.9},"action")
+	_exec(out,3.0,"lunge",{"who":ex,"dist":-0.12,"time":0.12})
+	_exec(out,3.35,"lunge",{"who":ex,"dist":-0.14,"time":0.12})
+	_snd(out,3.1,"creak",0.6,"creak")
+	_beat(out,3.2,victim,"side_eye",{"at":ex,"dur":0.9},"reaction")
+	_exec(out,3.8,"retrieve",{"id":"axe","who":ex})
+	_exec(out,3.8,"lunge",{"who":ex,"dist":-0.3,"time":0.18})
+	_snd(out,3.8,"wood_pop",0.7)
+	# two: it bounces off
+	_exec(out,4.3,"twist",{"who":ex,"yaw":-120.0,"time":0.7})
+	_beat(out,4.3,ex,"windup",{"dur":0.7,"hold":true},"anticipation")
+	_exec(out,5.0,"twist",{"who":ex,"yaw":120.0,"time":0.1})
+	_beat(out,5.0,ex,"swing",{"dur":0.4},"action")
+	_snd(out,5.08,"clang",1.0,"clatter")
+	_exec(out,5.12,"twist",{"who":ex,"yaw":-60.0,"time":0.12})
+	_beat(out,5.15,ex,"wobble",{"dur":0.8},"reaction")
+	_beat(out,5.2,victim,"flinch",{},"reaction")
+	_shot(out,5.3,"reaction",{"target":ex})
+	# three: off it comes
+	_exec(out,6.2,"twist",{"who":ex,"yaw":-90.0,"time":0.85})
+	_beat(out,6.2,ex,"windup",{"dur":0.85,"hold":true},"anticipation")
+	_shot(out,6.4,"two_shot",{"a":victim,"b":ex})
+	_exec(out,7.05,"twist",{"who":ex,"yaw":150.0,"time":0.1})
+	_exec(out,7.05,"lunge",{"who":ex,"dist":0.25,"time":0.1})
+	_beat(out,7.05,ex,"swing",{"dur":0.6},"action")
+	_snd(out,7.12,"chop",1.0,"crack")
+	_exec(out,7.14,"behead",{"who":victim,"fly":"roll","roll_dist":1.5,"time":1.1,"arc":0.45,"spin":2.0,"face_god":true,"blink":true})
+	_exec(out,7.16,"spray",{"at":"neck:"+victim,"dir":"camera","seconds":1.8,"amount":120,"speed":4.4,"spread":18.0,"pool_r":0.7})
+	_snd(out,7.2,"geyser",0.9)
+	_exec(out,7.7,"fall",{"who":victim,"kind":"forward","time":0.5})
+	_shot(out,7.2,"wide",{"time":0.5})
+	_exec_after(ctx,out,7.4,victim,roles,true)
+	for dog:Dictionary in _of_kind(ctx,["dog"]):_beat(out,9.0,String(dog.key),"sniff",{"at":victim},"reaction")
+	return length
+
+## 4. Dog dinner: the camp dogs drag them behind the windbreak; loud
+## crunching; a dog trots back with a thighbone, drops it at the god's feet
+## and wags.
+static func _exec_dogs(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var length:=11.0
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"wide",{"weight":5})
+	_beat(out,0.2,victim,"look_wrong_way",{"dur":0.8},"anticipation")
+	_snd(out,0.4,"dog_bark",0.8,"bark")
+	_exec(out,0.4,"dogs",{"to":victim,"more":2})
+	_beat(out,1.0,victim,"double_take",{"dur":0.7},"reaction")
+	_beat(out,1.5,victim,"flinch",{},"reaction")
+	_snd(out,2.0,"dog_snarl",0.9)
+	_exec(out,2.1,"fall",{"who":victim,"kind":"back","time":0.4})
+	_snd(out,2.4,"thud",0.7,"thump")
+	_exec(out,2.8,"drag",{"who":victim,"to":"windbreak","time":2.6})
+	_snd(out,2.8,"drag_scrape",0.6)
+	_exec(out,5.4,"vanish",{"who":victim})
+	_snd(out,5.6,"crunch_loop",1.0,"crunch")
+	_shot(out,5.6,"shake",{"strength":0.12})
+	_exec_after(ctx,out,5.8,victim,roles,false)
+	_exec(out,8.0,"fetch",{"to":"god_feet"})
+	_snd(out,9.4,"bone_drop",0.7,"clatter")
+	return length
+
+## 3. Into the fire: heaved onto the hearth, WHOOMPH; a charred figure walks
+## two steps out, coughs a ring of smoke, and crumbles to ash; the elder
+## warms their hands at the heap.
+static func _exec_fire(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var ex:=String(roles.ex)
+	var length:=10.0
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"wide",{"weight":5})
+	_exec(out,0.3,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.6,"time":0.9})
+	_beat(out,1.2,ex,"grab",{"at":victim},"action")
+	_exec(out,1.5,"drag",{"who":victim,"to":"fire","time":0.9})
+	_snd(out,2.4,"whoomph",1.0)
+	_exec(out,2.4,"char",{"who":victim,"time":0.4})
+	_exec(out,3.2,"drag",{"who":victim,"to":"petitioner","time":1.4})
+	_beat(out,3.4,victim,"cough_smoke",{},"action")
+	_exec(out,5.2,"crumble",{"who":victim,"time":1.0})
+	_snd(out,5.3,"ash_collapse",0.8)
+	_exec_after(ctx,out,5.4,victim,roles,false)
+	for elder:Dictionary in _of_kind(ctx,["elder"]):
+		_exec(out,7.0,"approach",{"who":String(elder.key),"to":"petitioner","side":1.0,"dist":0.5,"time":1.0})
+		_beat(out,8.1,String(elder.key),"warm_hands",{"dur":1.6},"reaction")
+		break
+	return length
+
+## 5. Spear pincushion: the watch hurls spears; they wobble; the child's
+## spear hits the hide wall; the last one thunks in and they topple.
+static func _exec_spears(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var length:=10.0
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"wide",{"weight":5})
+	var throwers:Array=_people(ctx,[victim]).filter(func(m:Dictionary)->bool:return String(m.kind) in ["official","hearth_chief","guard","commoner"])
+	var t:=1.0
+	for i in mini(5,maxi(throwers.size(),1)*2):
+		var who:=String((throwers[i%throwers.size()] as Dictionary).key) if not throwers.is_empty() else String(roles.ex)
+		_beat(out,t,who,"throw",{"dur":0.5},"action")
+		_exec(out,t+0.1,"throw",{"name":"spear","from":who,"to":victim,"time":0.35,"arc":0.3,"height":0.9+0.12*(i%3)})
+		_snd(out,t+0.45,"spear_thunk",0.9,"thump")
+		_beat(out,t+0.5,victim,"wobble",{"dur":0.4},"reaction")
+		t+=0.75
+	for child:Dictionary in _of_kind(ctx,["child"]):
+		_exec(out,t,"throw",{"name":"spear","from":String(child.key),"to":victim,"time":0.5,"arc":0.5,"miss":Vector3(1.6,0.3,-0.8)})
+		_snd(out,t+0.5,"spear_thunk",0.5,"thump")
+		_beat(out,t+0.6,String(child.key),"mortified",{},"reaction")
+		t+=0.8
+		break
+	_exec(out,t+0.4,"throw",{"name":"spear","from":String(roles.ex),"to":victim,"time":0.3,"arc":0.2})
+	_snd(out,t+0.7,"spear_thunk",1.0,"thump")
+	_exec(out,t+1.1,"fall",{"who":victim,"kind":"back","time":0.9})
+	_snd(out,t+2.0,"timber_fall",0.8,"thump")
+	_exec(out,t+1.2,"pool",{"at":victim,"r":0.5})
+	_exec_after(ctx,out,t+2.0,victim,roles,false)
+	return maxf(length,t+5.0)
+
+## 6. Stoned by the whole court: everyone throws; they become a cairn; the
+## child's stone bonks an official.
+static func _exec_stoning(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var length:=10.0
+	var rng:RandomNumberGenerator=ctx.rng
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"wide",{"weight":5})
+	var all:Array=_people(ctx,[victim])
+	var t:=1.0
+	for round in 3:
+		for m:Dictionary in all:
+			if String(m.kind)=="child":continue
+			var at:=t+rng.randf()*0.6
+			_beat(out,at,String(m.key),"throw",{"dur":0.5},"action")
+			_exec(out,at+0.1,"throw",{"name":"stone","from":String(m.key),"to":victim,"time":0.45,"arc":0.7,"height":0.4+0.3*round,"stick":false})
+			_snd(out,at+0.55,"stone_bonk",0.6,"thump")
+		t+=1.1
+	_beat(out,2.0,victim,"flinch",{},"reaction")
+	_exec(out,3.5,"fall",{"who":victim,"kind":"side","time":0.6})
+	for child:Dictionary in _of_kind(ctx,["child"]):
+		var official:=_nearest(ctx,child,["official","hearth_chief"],[victim])
+		if official.is_empty():break
+		_exec(out,t,"throw",{"name":"stone","from":String(child.key),"to":String(official.key),"time":0.4,"arc":0.5,"height":1.6,"stick":false})
+		_snd(out,t+0.4,"stone_bonk",0.9,"thump")
+		_beat(out,t+0.45,String(official.key),"double_take",{"at":String(child.key)},"reaction")
+		_beat(out,t+0.9,String(child.key),"hide_behind",{"at":_nearest(ctx,child,["elder","commoner","official"],[victim,String(official.key)]).get("key","")},"reaction")
+		break
+	_exec(out,t+0.5,"vanish",{"who":victim})
+	_exec_after(ctx,out,t+0.6,victim,roles,false)
+	return maxf(length,t+4.5)
+
+## 1. Boulder drop: two of them tip a boulder; SPLAT; a hand waves feebly.
+static func _exec_boulder(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var length:=10.0
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"wide",{"weight":5})
+	_beat(out,0.4,victim,"look_up",{"dur":1.2},"anticipation")
+	_exec(out,0.2,"prop",{"name":"boulder","id":"boulder","at":victim,"y":3.2})
+	_exec(out,1.6,"drop",{"id":"boulder","at":victim,"height":3.2,"time":0.45})
+	_snd(out,2.05,"splat",1.0,"thump")
+	_shot(out,2.05,"shake",{"strength":0.55})
+	_exec(out,2.07,"vanish",{"who":victim})
+	_exec(out,2.1,"pool",{"at":victim,"r":0.9,"time":0.6})
+	_exec_after(ctx,out,2.3,victim,roles,true)
+	return length
+
+## 14. Boiled in the pot: in they go; bubbles; the cook adds herbs, tastes,
+## adds salt; a skull bobs up.
+static func _exec_boil(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var ex:=String(roles.ex);var cook:=String(roles.cook)
+	var length:=11.0
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"wide",{"weight":5})
+	_exec(out,0.0,"prop",{"name":"pot","id":"pot","at":"fire","toward_camera":1.0,"offset":Vector3(0.6,0,0)})
+	_exec(out,0.3,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.6,"time":0.8})
+	_beat(out,1.1,ex,"grab",{"at":victim},"action")
+	_exec(out,1.4,"drag",{"who":victim,"to":"pot","time":1.0})
+	_snd(out,2.4,"big_splash",1.0)
+	_exec(out,2.45,"vanish",{"who":victim})
+	_exec(out,2.5,"spray",{"at":"pot","y":0.45,"dir":"up","seconds":0.3,"amount":40,"speed":2.2,"pool":false})
+	_snd(out,2.8,"bubbling",0.7)
+	if cook!="":
+		_exec(out,3.4,"approach",{"who":cook,"to":"pot","side":1.0,"dist":0.55,"time":0.8})
+		_beat(out,4.4,cook,"stir",{"dur":1.0},"action")
+		_beat(out,5.6,cook,"taste",{"dur":0.9},"action")
+		_beat(out,6.6,cook,"stir",{"dur":0.8},"action")
+		_shot(out,4.5,"reaction",{"target":cook})
+	if starving(ctx.facts):
+		var hungry_one:Array=_of_kind(ctx,["commoner","elder"],[victim,ex,cook])
+		if not hungry_one.is_empty():_beat(out,7.4,String((hungry_one[0] as Dictionary).key),"lean_in",{},"reaction")
+	_exec_after(ctx,out,2.6,victim,roles,false)
+	return length
+
+## 16. Volley of arrows: archers loose until they look like a porcupine; the
+## last arrow knocks off their hat.
+static func _exec_arrows(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var length:=10.0
+	var rng:RandomNumberGenerator=ctx.rng
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"wide",{"weight":5})
+	var archers:Array=_people(ctx,[victim]).filter(func(m:Dictionary)->bool:return String(m.kind) in ["official","hearth_chief","guard","commoner"]).slice(0,3)
+	var t:=1.2
+	for volley in 3:
+		for m:Dictionary in archers:
+			_exec(out,t,"throw",{"name":"arrow","from":String(m.key),"to":victim,"time":0.25,"arc":0.15,"height":0.7+rng.randf()*0.6})
+		_snd(out,t,"bow_twang",0.8)
+		_snd(out,t+0.25,"arrow_thunks",0.9,"thump")
+		_beat(out,t+0.3,victim,"wobble",{"dur":0.4},"reaction")
+		t+=1.0
+	_exec(out,t+0.6,"fall",{"who":victim,"kind":"back","time":0.8})
+	_exec(out,t+0.7,"pool",{"at":victim,"r":0.55})
+	_exec_after(ctx,out,t+1.2,victim,roles,false)
+	return maxf(length,t+4.5)
+
+## 15. The stake: hoisted up, they slide slowly down to eye level with the
+## scribe or the elder, who keeps writing.
+static func _exec_stake(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
+	var length:=10.0
+	_exec_before(ctx,out,victim,roles,length)
+	_shot(out,0.0,"wide",{"weight":5})
+	_exec(out,0.2,"prop",{"name":"stake","id":"stake","at":victim,"front":-0.4,"of":victim})
+	_exec(out,1.4,"pool",{"at":victim,"r":0.45,"time":4.0})
+	_beat(out,1.0,victim,"wobble",{"dur":1.0},"action")
+	_snd(out,1.2,"squelch",0.9)
+	_exec(out,1.6,"fall",{"who":victim,"kind":"side","time":3.5})
+	for watcher:Dictionary in _of_kind(ctx,["scribe","elder"]):
+		_beat(out,3.0,String(watcher.key),"scribble" if String(watcher.kind)=="scribe" else "stroke_chin",{"dur":3.0},"reaction")
+		break
+	_exec(out,6.0,"vanish",{"who":victim})
+	_exec_after(ctx,out,2.0,victim,roles,false)
+	return length
 
 # =============================================================================
 # Ambient: the room's own business, from the facts alone
@@ -2968,7 +3396,7 @@ static func lower(list:Array)->Array:
 		if beat.get("sound") is Dictionary:
 			var heard:Dictionary=(beat.sound as Dictionary).duplicate()
 			out.append({"t":t,"who":who,"act":"sound","args":heard})
-		if who=="room":
+		if who=="room" or who=="exec":
 			out.append({"t":t,"who":who,"act":act,"args":args.duplicate()});continue
 		if act=="bubble":
 			out.append({"t":t,"who":who,"act":"bubble","args":args.duplicate()});continue

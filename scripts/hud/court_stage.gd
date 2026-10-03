@@ -39,6 +39,8 @@ const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
 const Prewarm:=preload("res://scripts/hud/court_prewarm.gd")
+const Executions:=preload("res://scripts/hud/court_executions.gd")
+const ExecStage:=preload("res://scripts/hud/court_exec_stage.gd")
 
 const MAIN:="main"
 const BUBBLE_PAPER:=Color("fbf4e4")
@@ -593,8 +595,56 @@ func _layer(layer_name:String)->Control:
 
 func _gui_input(event:InputEvent)->void:
 	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:
+		# A click during an execution brings it to its end at once.
+		if executing():
+			skip_execution()
+			accept_event()
+			return
 		advance_requested.emit()
 		accept_event()
+
+# --- Executions -------------------------------------------------------------------
+
+## The execution playing now (court_exec_stage.gd), if any.
+var _exec:Node
+## The method last played here (the caption follows it).
+var exec_method:=""
+var exec_victim:=""
+
+func executing()->bool:
+	return is_instance_valid(_exec)
+
+## The engine has put someone here to death: the hall sees it done by this
+## method (court_executions.gd). Returns false when it is not to be shown so
+## (no modelled hall, a child, gore "off"): the caller keeps the sober exit.
+func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")->bool:
+	var f:=figure(victim_key)
+	if f==null or f.leaving or f.body3d==null or court_set==null or executing():return false
+	var person:=f.person.duplicate()
+	person["kind"]=String(person.get("kind",""))
+	var style:=how if how!="" else Executions.style(person)
+	if style=="off" or Executions.is_child(person):return false
+	_exec=ExecStage.new();_exec.name="Execution"
+	add_child(_exec)
+	_exec.begin(self,method_id,victim_key,style)
+	exec_method=method_id;exec_victim=victim_key
+	var who:=name_text if name_text!="" else String(person.get("name",""))
+	event("execution",{"method":method_id,"victim":victim_key,"ex":ex_key,"style":style,"name":who,"caption":Executions.caption(method_id,who)})
+	return true
+
+## A click: the execution to its end now (the head where it lands, the
+## person gone, the caption said).
+func skip_execution()->void:
+	if not executing():return
+	for t in _beat_sets:
+		if t is Tween and (t as Tween).is_valid():(t as Tween).kill()
+	_beat_sets.clear()
+	var caption_text:=Executions.caption(exec_method,String(figure(exec_victim).person.get("name","")) if figure(exec_victim)!=null else "")
+	_exec.call("skip")
+	caption(caption_text,"narration",false)
+	hush(0.0)
+	_shot_until=0.0
+	_frame_all(0.6)
 
 # --- The cast -------------------------------------------------------------------
 
@@ -971,6 +1021,7 @@ func _still_arriving(beats:Array)->float:
 ## How weighty an event is for the camera.
 static func _weight_of(kind:String,data:Dictionary)->int:
 	match kind:
+		"execution":return 5
 		"divine","terrify_envoy","command":return 4
 		"god":return 3
 		"enter","exit","gift","decree","promise","dismiss","defer":return 2
@@ -1265,6 +1316,10 @@ func _beat(beat:Dictionary)->void:
 	var args:Dictionary=beat.get("args",{}) if beat.get("args") is Dictionary else {}
 	var act:=String(beat.get("act",""))
 	if _sound!=null and is_instance_valid(_sound):_sound.call("on_beat",beat,body)
+	# The execution's own beats (props, the blow, blood): to its player.
+	if who=="exec" and act!="sound":
+		if is_instance_valid(_exec):_exec.call("op",act,args)
+		return
 	if f==null and court_set!=null and String((extras.get(who,{}) as Dictionary).get("role",""))=="animal":
 		if act=="play":_animal_beat(who,beat)
 		return
@@ -1572,6 +1627,16 @@ var _next_arrival_at:=0.0
 ##  "stay"  nobody leaves.
 func conclude(delay:float=1.4,style:="bow",reaction:="")->void:
 	if style=="stay":return
+	var main_f:=figure(MAIN)
+	if main_f!=null and main_f.leaving and (executing() or exec_victim==MAIN):
+		# Already put to death before the hall: only their company goes, led.
+		var index0:=0
+		for key in cast_order.duplicate():
+			var f0:=figure(key)
+			if f0==null or f0.leaving or f0.role!="attendant":continue
+			f0.leave(-1.0,f0.home.x+f0.size.x,delay+2.0+index0*FILE_GAP,"led")
+			index0+=1
+		return
 	event("exit",{"who":MAIN,"style":style,"reaction":reaction})
 	# How the director has them go: backing out bowing (into the door post),
 	# or storming off and coming back for what they left (the bearer, who
