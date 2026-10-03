@@ -1415,8 +1415,12 @@
     ]
   },
   "household_space_planning": {
-    "path": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+    "path": "res://assets/ui/research/subjects/household_space_planning-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -2424,10 +2428,14 @@
     ]
   },
   "plain_weaving": {
-    "path": "res://assets/ui/research/paper/plain_weaving.png",
+    "path": "res://assets/ui/research/subjects/plain_weaving-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.1
+    ],
+    "opening_focus": [
+      0.5,
+      0.1
     ]
   },
   "spinning_wheels": {
@@ -6763,10 +6771,10 @@
     ]
   },
   "flat_clay_roofs": {
-    "path": "res://assets/ui/research/subjects/flat_clay_roofs-v1.png",
+    "path": "res://assets/ui/research/subjects/flat_clay_roofs-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.25
     ]
   },
   "household_mediators": {
@@ -6938,7 +6946,7 @@
     ]
   },
   "reed_bundle_boats": {
-    "path": "res://assets/ui/research/subjects/reed_bundle_boats-v1.png",
+    "path": "res://assets/ui/research/subjects/reed_bundle_boats-v2.png",
     "focus": [
       0.5,
       0.5
@@ -10245,6 +10253,17 @@
   },
   "food_steaming_vessels": {
     "path": "res://assets/ui/research/subjects/food_steaming_vessels-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "controlled_baking": {
+    "path": "res://assets/ui/research/subjects/controlled_baking-v2.png",
     "focus": [
       0.5,
       0.5
