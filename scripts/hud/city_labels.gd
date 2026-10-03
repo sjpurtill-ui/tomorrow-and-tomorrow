@@ -82,6 +82,10 @@ var styles:Dictionary={}
 ## open after a click or tap until the player clicks elsewhere.
 var hover_id:=""
 var hover_elapsed:=0.0
+## The town whose guard badge the pointer rests on: its plain words open
+## after HOVER_DELAY (_draw_badge_tip).
+var badge_hover_id:=""
+var badge_elapsed:=0.0
 var pinned_id:=""
 var last_bounds:=Rect2()
 ## Per-city measured card text, keyed by what the text depends on.
@@ -229,7 +233,7 @@ func refresh()->void:
 		# day or era; the anchor moves every frame the camera does. Measure once.
 		# Our town's guard is part of the key: its badge follows the Defense
 		# share the moment it changes, even while the days stand still.
-		var guard:=0 if bool(source.foreign) else int(town_guards.get(String(id),0))
+		var guard:Dictionary={} if bool(source.foreign) else town_guards.get(String(id),NO_GUARD)
 		var text_key:=hash([label.text,String(label.get_meta("map_status","")),affiliation,bool(source.foreign),flag!=null,bounds.size.x,int(GameState.elapsed_days),hash(record),EraWords.stage(),String(ownership.get("note","")),int(ownership.get("garrison",0)),guard])
 		var text:Dictionary=measured.get(id,{})
 		if int(text.get("key",0))!=text_key:
@@ -239,7 +243,7 @@ func refresh()->void:
 		# The founding convoy is a prompt, not a city: it keeps its readout open.
 		var compact:=kind!="founding_convoy"
 		var detail:Vector2=text.detail
-		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":T.INK_MUTED if bool(text.get("left",false)) else label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail,"clearance":float(label.get_meta("glyph_clearance",GLYPH_CLEARANCE)),"note":text.note,"badge":text.badge,"ours":String(ownership.get("kind",""))=="occupied"})
+		entries.append({"id":String(id),"kind":kind,"status":text.status,"foreign":source.foreign,"anchor":anchor,"title":text.title,"lines":text.lines,"population":text.count,"affiliation":affiliation,"color":T.INK_MUTED if bool(text.get("left",false)) else label.modulate,"flag":flag.texture if flag else null,"compact":compact,"detail_extent":detail,"extent":Vector2(text.name_width,float(text.lines.size())*20+10) if compact else detail,"clearance":float(label.get_meta("glyph_clearance",GLYPH_CLEARANCE)),"note":text.note,"badge":text.badge,"rise":text.rise,"badge_tip":text.badge_tip,"name_width":text.name_width,"ours":String(ownership.get("kind",""))=="occupied"})
 		if not (text.summary as Dictionary).is_empty():entries.back()["summary"]=text.summary
 		signature+=str(text_key)+String(id)+str(anchor)+str(label.modulate)+str(flag.texture.get_instance_id() if flag and flag.texture else 0)
 	var work_entries:=_work_entries(camera,viewport_size)
@@ -264,8 +268,9 @@ static func affiliation_of(civ_id:String,foreign:bool,kind:String="city")->Strin
 ## Text, wrapped lines and sizes of one city's card (see refresh's cache key).
 ## `city_id` is the place's id as the layer registered it (the home town's
 ## label carries none of its own); without it, the label's own id. `guard`
-## is our town's guard when already read (refresh's _guards), else -1.
-static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2,ownership:Dictionary={},city_id:String="",guard:int=-1)->Dictionary:
+## is our town's guard in its parts when already read (refresh's _guards),
+## else {} and it is read here (guard_parts).
+static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliation:String,has_flag:bool,font:Font,bounds:Rect2,ownership:Dictionary={},city_id:String="",guard:Dictionary={})->Dictionary:
 	var id:=city_id if city_id!="" else String(label.get_meta("city_map_id",""))
 	var parts:=label.text.split("  •  ",true,1)
 	var title:=chart_name(String(parts[0]));var count:=String(parts[1]) if parts.size()>1 else "Population unknown"
@@ -296,55 +301,172 @@ static func _measure_card(label:Label3D,record:Dictionary,foreign:bool,affiliati
 	var name_width:=54.0
 	for line:String in lines:name_width=maxf(name_width,font.get_string_size(line,HORIZONTAL_ALIGNMENT_LEFT,-1,NAME_SIZE).x+(56 if has_flag else 22))
 	var note:=String(ownership.get("note",""))
+	# A town we hold: the count of ours holding it beside its name.
 	var badge:=int(ownership.get("garrison",0))
-	# Our own town: those guarding it beside its name (home_guard). Home
+	var rise:=0
+	var badge_tip:=held_words(badge) if badge>0 else ""
+	# Our own town: those keeping watch there beside its name, and in lighter
+	# ink the townsfolk who would rise beside them (guard_parts). Home
 	# defence is not an army, so it has no counter of its own on the map.
-	if not foreign and badge<=0 and not left:badge=guard if guard>=0 else home_guard(id)
+	if not foreign and badge<=0 and not left:
+		var stands:=guard if not guard.is_empty() else guard_parts(id)
+		badge=maxi(0,int(stands.get("watch",0)));rise=maxi(0,int(stands.get("rise",0)))
+		badge_tip=guard_words(badge,rise,int(stands.get("bands",0))) if badge+rise>0 else ""
 	if not note.is_empty():width=maxf(width,ui.get_string_size(note,HORIZONTAL_ALIGNMENT_LEFT,-1,POP_SIZE).x+20)
-	# A town we hold carries its guard's count beside the name.
-	if badge>0:name_width+=badge_width(badge)+6
+	if badge+rise>0:name_width+=badge_width(badge,rise)+6
 	# The open card is never narrower than its name tag: the badge keeps its
 	# place beside the name instead of landing on its last letters.
 	var detail:=Vector2(ceilf(maxf(135,maxf(width,name_width))),float(lines.size())*20+25+(18 if not affiliation.is_empty() else 0)+(20 if not status.is_empty() else 0)+(18 if not note.is_empty() else 0))
 	if not summary.is_empty():detail=Vector2(maxf(260,maxf(width,name_width)),float(lines.size())*20+130+(18 if not note.is_empty() else 0))
-	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail,"note":note,"badge":badge,"left":left}
+	return {"title":title,"count":count,"status":status,"summary":summary,"lines":lines,"name_width":ceilf(name_width),"detail":detail,"note":note,"badge":badge,"rise":rise,"badge_tip":badge_tip,"left":left}
 
-## Those who would defend one of our towns if it were attacked now, as its
-## battle musters them (civilization_combat.gd defenders): at home the levy
-## and the watch, anywhere else the town's own watch. The same count as the
-## town page's "Fighters here". 0 for a place that is not one of our towns.
-static func home_guard(settlement_id:String)->int:
-	if settlement_id=="" or settlement_id.begins_with("__"):return 0
-	return maxi(0,COMBAT.defenders(settlement_id))
+## No guard of ours: a place that is not one of our towns.
+const NO_GUARD:={"watch":0,"rise":0,"bands":0}
 
-## Every town of ours's guard by id (home_guard for each), read in one pass
-## and again only when what it rests on changes: the day, the Defense share,
-## the levy at home, those under arms, our people and our towns. refresh
-## runs every frame.
+## Who would defend one of our towns if it were attacked now, as its battle
+## musters them (civilization_combat.gd guard_of), in the two parts its
+## badge shows apart: {watch: those keeping watch there (at home the home
+## guard and those free for the bands alike), rise: its townsfolk who would
+## take up arms, bands: those of the watch free for the bands}. watch + rise
+## is the town's battle, a stranger scout's count and the town page's
+## "Fighters here". NO_GUARD for a place that is not one of our towns.
+static func guard_parts(settlement_id:String)->Dictionary:
+	if settlement_id=="" or settlement_id.begins_with("__"):return NO_GUARD.duplicate()
+	return _parts_of(COMBAT.guard_of(SettlementModel.settlement_record(settlement_id)))
+
+## A town's guard (civilization_combat.gd {trained, watch, rise}) in the
+## badge's parts.
+static func _parts_of(guard:Dictionary)->Dictionary:
+	var bands:=maxi(0,int(guard.get("trained",0)))
+	return {"watch":bands+maxi(0,int(guard.get("watch",0))),"rise":maxi(0,int(guard.get("rise",0))),"bands":bands}
+
+## Every town of ours's guard by id, in the badge's parts (guard_parts for
+## each), read in one pass and again only when what it rests on changes:
+## the day, the Defense share, the levy at home, those under arms, our
+## people and our towns. refresh runs every frame.
 func _guards()->Dictionary:
 	var key:=hash([int(GameState.elapsed_days),float(GameState.population_allocations.get("Defense",0.0)),int(MilitaryCampaign.home_army.get("troops",0)),
 		int(MilitaryCampaign._mobilized_count()),float(GameState.population_exact),GameState.player_settlements.size(),MilitaryCampaign.watch_split()])
 	if key!=guards_key:
-		guards=COMBAT.defenders_by_town()
+		var by_town:=COMBAT.guards_by_town()
+		guards={}
+		for id in by_town:guards[id]=_parts_of(by_town[id])
 		guards_key=key
 	return guards
 
-## The width of the small garrison badge: a shield and the count holding it.
-static func badge_width(count:int)->float:
-	return T.font("ui").get_string_size(EraWords.grouped(count),HORIZONTAL_ALIGNMENT_LEFT,-1,12).x+19.0
+## The badge's hover words, in plain speech with the engine's numbers: who
+## keeps watch in the town, and the townsfolk who would rise beside them
+## if it were attacked (civilization_combat.gd RISE_SHARE). `bands` of the
+## watch are free for the bands (at home only): a general may lead them off.
+static func guard_words(watch:int,rise:int,bands:int=0)->String:
+	var said:PackedStringArray=[]
+	if watch>0:said.append("%s keep%s watch here." % [EraWords.grouped(watch),"s" if watch==1 else ""])
+	else:said.append("No one keeps watch here.")
+	if rise>0:said.append("If the town is attacked, about %s of its grown townsfolk would take up whatever is at hand and fight%s (1 in %d of the grown people)." % [EraWords.grouped(rise)," beside them" if watch>0 else "",roundi(1.0/COMBAT.RISE_SHARE)])
+	bands=mini(bands,watch)
+	if bands>0 and bands>=watch:said.append("None of them is kept as the home guard: a general may lead them away in a band.")
+	elif bands>0:said.append("%s of them are the home guard and stay; a general may lead the other %s away in a band." % [EraWords.grouped(watch-bands),EraWords.grouped(bands)])
+	return " ".join(said)
 
-## A small shield in ink and the number of our fighters holding the town,
-## on a sunk paper chip with a gold rule: ours, and how well guarded.
+## The badge's hover words for a town we took: how many of ours hold it.
+static func held_words(count:int)->String:
+	return "%s of our fighters hold this town." % EraWords.grouped(count)
+
+## The badge's figures: the count beside the shield, and the townsfolk who
+## would rise set after it in lighter ink.
+const BADGE_SIZE:=12
+const BADGE_RISE_GAP:=4.0
+
+## "+5": the townsfolk who would rise, as the badge sets them.
+static func rise_text(rise:int)->String:
+	return "+"+EraWords.grouped(rise)
+
+## The width of the small guard badge: a shield, the count keeping watch,
+## and the townsfolk who would rise when there are any.
+static func badge_width(count:int,rise:int=0)->float:
+	var ui:=T.font("ui")
+	var width:=ui.get_string_size(EraWords.grouped(count),HORIZONTAL_ALIGNMENT_LEFT,-1,BADGE_SIZE).x+19.0
+	if rise>0:width+=BADGE_RISE_GAP+ui.get_string_size(rise_text(rise),HORIZONTAL_ALIGNMENT_LEFT,-1,BADGE_SIZE).x
+	return width
+
+## Where a card's badge sits in `box` (its name tag, or its open card): at the
+## end of the name line, so it stays put when the card opens under the
+## pointer.
+static func badge_rect(card:Dictionary,box:Rect2)->Rect2:
+	var w:=badge_width(int(card.get("badge",0)),int(card.get("rise",0)))
+	var right:=box.position.x+minf(box.size.x,float(card.get("name_width",box.size.x)))
+	return Rect2(Vector2(right-w-5,box.position.y+5),Vector2(w,16))
+
+## A small shield in ink and the number keeping watch (or of ours holding a
+## town we took), then in lighter ink "+N" for the townsfolk who would rise,
+## on a sunk paper chip with a gold rule. A hollow shield when no one keeps
+## watch: the townsfolk alone would stand.
 func _draw_badge(card:Dictionary,box:Rect2,fade:float)->void:
-	var count:=int(card.get("badge",0))
-	if count<=0 or fade<=0.01:return
-	var w:=badge_width(count)
-	var chip:=Rect2(Vector2(box.end.x-w-5,box.position.y+5),Vector2(w,16))
+	var count:=int(card.get("badge",0));var rise:=int(card.get("rise",0))
+	if count+rise<=0 or fade<=0.01:return
+	var chip:=badge_rect(card,box)
 	draw_rect(chip,Color(T.TRACK,.55*fade))
 	draw_rect(chip,Color(T.GOLD,.9*fade),false,1.0)
 	var o:=chip.position+Vector2(5,3)
-	draw_colored_polygon(PackedVector2Array([o,o+Vector2(8,0),o+Vector2(8,5),o+Vector2(4,10),o+Vector2(0,5)]),Color(T.INK,fade))
-	draw_string(T.font("ui"),Vector2(chip.position.x+15,chip.end.y-4),EraWords.grouped(count),HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color(T.INK,fade))
+	var shield:=PackedVector2Array([o,o+Vector2(8,0),o+Vector2(8,5),o+Vector2(4,10),o+Vector2(0,5)])
+	if count>0:draw_colored_polygon(shield,Color(T.INK,fade))
+	else:
+		shield.append(o)
+		draw_polyline(shield,Color(T.INK_MUTED,fade),1.0,true)
+	var ui:=T.font("ui")
+	var number:=EraWords.grouped(count)
+	var baseline:=chip.end.y-4
+	draw_string(ui,Vector2(chip.position.x+15,baseline),number,HORIZONTAL_ALIGNMENT_LEFT,-1,BADGE_SIZE,Color(T.INK,fade))
+	if rise>0:
+		var x:=chip.position.x+15+ui.get_string_size(number,HORIZONTAL_ALIGNMENT_LEFT,-1,BADGE_SIZE).x+BADGE_RISE_GAP
+		draw_string(ui,Vector2(x,baseline),rise_text(rise),HORIZONTAL_ALIGNMENT_LEFT,-1,BADGE_SIZE,Color(T.INK_MUTED,fade))
+
+## The badge's hover words: the width they wrap at and their size, a
+## step smaller than the HUD's hover clues to sit with the chart's letters.
+const TIP_WIDTH:=300.0
+const TIP_SIZE:=14
+
+## The town whose badge is under `point`, as it is drawn now (on its name
+## tag, or on its open card above the others), or "".
+func badge_at(point:Vector2)->String:
+	var open:=expanded_id()
+	for card:Dictionary in cards:
+		if String(card.id)!=open or not bool(card.get("compact",false)):continue
+		var box:=detail_rect(card)
+		if not box.has_point(point):break
+		return String(card.id) if _has_tip(card) and badge_rect(card,box).grow(2).has_point(point) else ""
+	for card:Dictionary in cards:
+		if _has_tip(card) and badge_rect(card,card.rect).grow(2).has_point(point):return String(card.id)
+	return ""
+
+static func _has_tip(card:Dictionary)->bool:
+	return not String(card.get("badge_tip","")).is_empty()
+
+## Where the badge's hover words open: just under the card the badge is on
+## (`box`), at the badge's left edge, or above the card when there is no
+## room below; kept on screen.
+static func badge_tip_rect(chip:Rect2,box:Rect2,extent:Vector2,screen:Rect2)->Rect2:
+	var pos:=Vector2(chip.position.x,box.end.y+6)
+	if pos.y+extent.y>screen.end.y-8:pos.y=box.position.y-extent.y-6
+	pos.x=clampf(pos.x,screen.position.x+8,maxf(screen.position.x+8,screen.end.x-extent.x-8))
+	pos.y=clampf(pos.y,screen.position.y+8,maxf(screen.position.y+8,screen.end.y-extent.y-8))
+	return Rect2(pos,extent)
+
+## The hovered badge's words, on the paper of the game's hover clues.
+func _draw_badge_tip()->void:
+	var card:Dictionary={}
+	for each:Dictionary in cards:
+		if String(each.id)==badge_hover_id:card=each;break
+	if not _has_tip(card):return
+	var text:=String(card.badge_tip)
+	var box:Rect2=detail_rect(card) if String(card.id)==expanded_id() and bool(card.get("compact",false)) else card.rect
+	var ui:=T.font("ui")
+	var style:=T.tooltip_panel_style()
+	var inner:=ui.get_multiline_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,TIP_SIZE)
+	var extent:=Vector2(ceilf(inner.x)+style.content_margin_left+style.content_margin_right,ceilf(inner.y)+style.content_margin_top+style.content_margin_bottom)
+	var place:=badge_tip_rect(badge_rect(card,box),box,extent,Rect2(Vector2.ZERO,get_viewport_rect().size))
+	draw_style_box(style,place)
+	draw_multiline_string(ui,place.position+Vector2(style.content_margin_left,style.content_margin_top+ui.get_ascent(TIP_SIZE)),text,HORIZONTAL_ALIGNMENT_LEFT,TIP_WIDTH,TIP_SIZE,-1,T.INK)
 
 ## A place name as the chart letters it: names kept in capitals elsewhere
 ## ("SEANSTONE", "FOUNDING CAMP") are set in title case here.
@@ -660,6 +782,9 @@ func _process(delta:float)->void:
 	var waiting:=not hover_id.is_empty() and hover_elapsed<HOVER_DELAY
 	hover_elapsed+=delta
 	if waiting and hover_elapsed>=HOVER_DELAY:queue_redraw()
+	var tip_waiting:=not badge_hover_id.is_empty() and badge_elapsed<HOVER_DELAY
+	badge_elapsed+=delta
+	if tip_waiting and badge_elapsed>=HOVER_DELAY:queue_redraw()
 	var before:=layout_signature
 	refresh()
 	_watch_foundings(delta)
@@ -681,6 +806,10 @@ func expanded_id()->String:
 	return hover_id if hover_elapsed>=HOVER_DELAY else ""
 
 func hover_at(point:Vector2)->void:
+	var badge:=badge_at(point)
+	if badge!=badge_hover_id:
+		if not badge_hover_id.is_empty() and badge_elapsed>=HOVER_DELAY:queue_redraw()
+		badge_hover_id=badge;badge_elapsed=0.0
 	var id:=String(city_at(point).get("id",""))
 	if id==hover_id:return
 	if not hover_id.is_empty() and expanded_id()==hover_id:queue_redraw()
@@ -779,6 +908,8 @@ func _draw()->void:
 		else:_draw_card(card,card.rect)
 	# The open card draws last, over its neighbours, on a solid ground.
 	if not opened.is_empty():_draw_card(opened,detail_rect(opened),true)
+	# The hovered badge's words go over everything.
+	if not badge_hover_id.is_empty() and badge_elapsed>=HOVER_DELAY:_draw_badge_tip()
 
 ## A name tag in the chart's paper: raised paper, a hairline rule, and the
 ## owner's colour only as a fine rule along the top (never a fill).

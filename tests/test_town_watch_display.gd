@@ -8,7 +8,9 @@ extends GdUnitTestSuite
 ## (civilization_combat.gd guard_ledger). KEEPING WATCH IS THE MILITARY
 ## (watch_military.gd): the watch is everyone under arms; its home guard is
 ## spread over home and the towns by their people, and the rest stand at
-## home until the war council sends them out in bands.
+## home until the war council sends them out in bands. The map badge shows
+## that count in its two parts, never as one sum that reads as soldiers:
+## those keeping watch, and in lighter ink "+N" townsfolk who would rise.
 
 const Combat:=preload("res://scripts/civilization_combat.gd")
 const Model:=preload("res://scripts/hud/own_town_model.gd")
@@ -136,9 +138,13 @@ func test_a_second_town_shows_the_watch_and_the_townsfolk_who_fight_there()->voi
 	row["marks"]=[]
 	var tip:=Model._tip(row,facts)
 	assert_str(tip).contains("about 1 in 10 of the town's grown people take up arms beside the watch. They are untrained.")
-	# The map badge is the same count, and the battle's, and a scout's.
-	assert_int(Labels.home_guard(TOWN)).is_equal(fights)
-	assert_int(int(_card(TOWN,"Valebridge").badge)).is_equal(fights)
+	# The map badge is the same count, and the battle's, and a scout's, in
+	# its two parts: the five on watch, then the townsfolk.
+	assert_dict(Labels.guard_parts(TOWN)).is_equal({"watch":5,"rise":int(parts.rise),"bands":0})
+	var card:=_card(TOWN,"Valebridge")
+	assert_int(int(card.badge)).is_equal(5)
+	assert_int(int(card.rise)).is_equal(int(parts.rise))
+	assert_int(int(card.badge)+int(card.rise)).is_equal(fights)
 	assert_float(float(CivilizationSystem.city_intelligence.truth(TOWN).values.garrison)).is_equal(float(fights))
 	# The drawing puts them at the gate.
 	var sketch:=Model.sketch_data({"id":TOWN,"population":100,"places":120,"broken":0.0,"food_reported":false,"food_days":-1.0,"material":0.0,"logistics":0.0,"water":{},"completed":[],"strength":strong},"")
@@ -247,13 +253,56 @@ func test_a_town_with_no_one_on_watch_still_has_its_townsfolk()->void:
 	var row:=Model.row_for("garrison",{"strength":Model.strength(false,TOWN)})
 	assert_int(int(row.number)).is_equal(int(parts.rise))
 	assert_str(String(row.value)).is_equal("%d would take up arms" % int(parts.rise))
-	assert_int(Labels.home_guard(TOWN)).is_equal(int(parts.rise))
-	assert_int(int(_card(TOWN,"Valebridge").badge)).is_equal(int(parts.rise))
+	# The badge never shows the townsfolk as a bare count: none on watch,
+	# then "+N", and its words say no one keeps watch.
+	assert_int(int(Labels.guard_parts(TOWN).watch)).is_equal(0)
+	var card:=_card(TOWN,"Valebridge")
+	assert_int(int(card.badge)).is_equal(0)
+	assert_int(int(card.rise)).is_equal(int(parts.rise))
+	assert_str(String(card.badge_tip)).starts_with("No one keeps watch here. If the town is attacked, about %d of its grown townsfolk" % int(parts.rise))
 	# Every grown person already called up: nobody is left to rise.
 	MilitaryCampaign.aggregate_recruits=100_000
 	assert_dict(Combat.town_watch(TOWN)).is_empty()
 	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).value)).is_equal("no one")
-	assert_int(int(_card(TOWN,"Valebridge").badge)).is_equal(0)
+	# Nobody at all: no badge.
+	card=_card(TOWN,"Valebridge")
+	assert_int(int(card.badge)+int(card.rise)).is_equal(0)
+	assert_str(String(card.badge_tip)).is_empty()
+
+
+func test_two_on_watch_read_as_two_not_as_seven()->void:
+	# The player's question: "why do these show 7 and 3 when I only have 2
+	# people assigned to keeping watch?" Two keep watch, both at home; the
+	# split keeps a fifth of the watch as the home guard, none of two, so both
+	# are free for the bands and stand at home until a general takes them.
+	_levy(2,0.2)
+	var home:=_home_id()
+	var at_home:=_parts(home);var there:=_parts(TOWN)
+	assert_int(int(at_home.watch)).is_equal(0)
+	assert_int(int(there.watch)).is_equal(0)
+	assert_int(int(at_home.rise)).is_greater(0)
+	assert_int(int(there.rise)).is_greater(0)
+	# Home: "2 +N", never the sum; Valebridge: "0 +N", never a bare N.
+	var ours:=_card(home,"SEANSTONE")
+	assert_int(int(ours.badge)).is_equal(2)
+	assert_int(int(ours.rise)).is_equal(int(at_home.rise))
+	assert_int(int(ours.badge)+int(ours.rise)).is_equal(Combat.defenders(home))
+	var town:=_card(TOWN,"Valebridge")
+	assert_int(int(town.badge)).is_equal(0)
+	assert_int(int(town.rise)).is_equal(int(there.rise))
+	assert_int(int(town.rise)).is_equal(Combat.defenders(TOWN))
+	# Every town's watch adds up to the two keeping watch.
+	var on_watch:=0
+	for city:Dictionary in GameState.player_settlements:on_watch+=int(Labels.guard_parts(String(city.id)).watch)
+	assert_int(on_watch).is_equal(2)
+	# Its words, with the engine's numbers.
+	assert_str(String(ours.badge_tip)).is_equal("2 keep watch here. If the town is attacked, about %d of its grown townsfolk would take up whatever is at hand and fight beside them (1 in 10 of the grown people). None of them is kept as the home guard: a general may lead them away in a band." % int(at_home.rise))
+	assert_str(String(town.badge_tip)).is_equal("No one keeps watch here. If the town is attacked, about %d of its grown townsfolk would take up whatever is at hand and fight (1 in 10 of the grown people)." % int(there.rise))
+	# The town page says the same, in the same words.
+	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(true,home)}).value)).is_equal("2 on watch, %d would take up arms" % int(at_home.rise))
+	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).value)).is_equal("%d would take up arms" % int(there.rise))
+	var strong:=Model.strength(true,home)
+	assert_str(Model._tip(Model.row_for("garrison",{"strength":strong}),{"strength":strong})).contains("None of the 2 on watch is kept as the home guard")
 
 
 func test_a_town_someone_else_holds_keeps_no_guard_of_ours()->void:
@@ -261,7 +310,7 @@ func test_a_town_someone_else_holds_keeps_no_guard_of_ours()->void:
 	assert_int(int(Model.strength(false,TOWN).defenders)).is_equal(0)
 	assert_int(Combat.defenders(TOWN)).is_equal(0)
 	assert_dict(Combat.town_watch(TOWN)).is_empty()
-	assert_int(Labels.home_guard(TOWN)).is_equal(0)
+	assert_dict(Labels.guard_parts(TOWN)).is_equal(Labels.NO_GUARD)
 	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(false,TOWN)}).value)).is_equal("none of ours")
 
 
@@ -283,8 +332,9 @@ func test_home_taken_by_another_people_shows_none_of_ours_everywhere()->void:
 		assert_int(int(row.number)).is_equal(0)
 		assert_str(String(row.value)).is_equal("none of ours")
 		assert_bool((_sketch(strong).fields as Dictionary).has("garrison")).is_false()
-	assert_int(Labels.home_guard(home)).is_equal(0)
-	assert_int(int(_card(home,"SEANSTONE").badge)).is_equal(0)
+	assert_dict(Labels.guard_parts(home)).is_equal(Labels.NO_GUARD)
+	var card:=_card(home,"SEANSTONE")
+	assert_int(int(card.badge)+int(card.rise)).is_equal(0)
 
 
 func test_the_capital_is_spelled_as_the_map_spells_it()->void:
@@ -313,19 +363,20 @@ func test_the_map_reads_every_guard_in_one_pass_and_again_only_on_change()->void
 	var home:=_home_id()
 	var probe:Probe=auto_free(Probe.new())
 	var guards:Dictionary=probe._guards()
-	assert_int(int(guards[home])).is_equal(Labels.home_guard(home))
-	assert_int(int(guards[TOWN])).is_equal(Labels.home_guard(TOWN))
+	assert_dict(guards[home]).is_equal(Labels.guard_parts(home))
+	assert_dict(guards[TOWN]).is_equal(Labels.guard_parts(TOWN))
 	# Forty keep watch, twenty of them the home guard: a quarter of the guard
 	# in Valebridge beside a quarter of the townsfolk; at home the other
 	# fifteen of the guard and the twenty free for the bands.
-	assert_int(int(guards[TOWN])).is_equal(5+int(_parts(TOWN).rise))
-	assert_int(int(guards[home])).is_equal(20+15+int(_parts(home).rise))
+	assert_dict(guards[TOWN]).is_equal({"watch":5,"rise":int(_parts(TOWN).rise),"bands":0})
+	assert_dict(guards[home]).is_equal({"watch":20+15,"rise":int(_parts(home).rise),"bands":20})
 	# Unchanged: the same reading, not a new one.
 	assert_bool(is_same(probe._guards(),guards)).is_true()
 	# The home guard changes while the day stands still: read again.
 	MilitaryCampaign.set_watch_split(1.0)
-	assert_int(int(probe._guards()[TOWN])).is_equal(10+int(_parts(TOWN).rise))
-	assert_int(int(probe._guards()[home])).is_equal(30+int(_parts(home).rise))
+	assert_int(int(probe._guards()[TOWN].watch)).is_equal(10)
+	assert_int(int(probe._guards()[home].watch)).is_equal(30)
+	assert_int(int(probe._guards()[home].bands)).is_equal(0)
 
 
 func test_home_shows_its_levy_watch_and_townsfolk_as_its_battle_musters_them()->void:
@@ -343,29 +394,36 @@ func test_home_shows_its_levy_watch_and_townsfolk_as_its_battle_musters_them()->
 	assert_int(int(strong.defenders)).is_equal(musters)
 	var row:=Model.row_for("garrison",{"strength":strong})
 	assert_int(int(row.number)).is_equal(musters)
-	assert_str(String(row.value)).is_equal("%d fighters" % musters)
+	# Those keeping watch and the townsfolk apart, never one count of
+	# "fighters" that reads as soldiers.
+	assert_str(String(row.value)).is_equal("35 on watch, %d would take up arms" % int(parts.rise))
 	assert_str(String(row.note)).is_equal("20 for the bands")
-	assert_str(Model._tip(row,{"strength":strong})).contains("20 for the bands, 15 on watch, %d would take up arms." % int(parts.rise))
+	assert_str(Model._tip(row,{"strength":strong})).contains("Of the 35 on watch, 20 are free for the bands and 15 are the home guard.")
 	# The Military ledger's garrison at home, and a scout's count, are the same muster.
 	assert_int(int(MilitaryCampaign.settlement_defense_snapshot().garrison_personnel)).is_equal(musters)
 	assert_float(float(CivilizationSystem.city_intelligence.truth(home).values.garrison)).is_equal(float(musters))
-	# Home's badge appears, though its label carries no id of its own.
-	assert_int(Labels.home_guard(home)).is_equal(musters)
-	assert_int(int(_card(home,"SEANSTONE").badge)).is_equal(musters)
+	# Home's badge appears, though its label carries no id of its own: the
+	# thirty-five on watch, then its townsfolk.
+	var card:=_card(home,"SEANSTONE")
+	assert_int(int(card.badge)).is_equal(35)
+	assert_int(int(card.rise)).is_equal(int(parts.rise))
+	assert_int(int(card.badge)+int(card.rise)).is_equal(musters)
+	assert_str(String(card.badge_tip)).contains("15 of them are the home guard and stay; a general may lead the other 20 away in a band.")
 	# With no home guard kept, everyone keeping watch is for the bands and
 	# stands at home until sent; the towns keep only their townsfolk.
 	_levy(55,0.0)
 	var rise:=int(_parts(home).rise)
 	assert_int(int(_parts(home).watch)).is_equal(0)
 	assert_int(int(_parts(TOWN).watch)).is_equal(0)
-	assert_int(Labels.home_guard(home)).is_equal(55+rise)
+	assert_dict(Labels.guard_parts(home)).is_equal({"watch":55,"rise":rise,"bands":55})
 	assert_int(int(MilitaryCampaign._home_defense_force(false).troops)).is_equal(55+rise)
-	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(true,home)}).value)).is_equal("%d fighters" % (55+rise))
+	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(true,home)}).value)).is_equal("55 on watch, %d would take up arms" % rise)
 
 
 func test_an_open_card_fits_its_name_and_badge_and_draws_one_badge()->void:
+	# No one on watch there yet: "0 +N", the townsfolk alone.
 	var card:=_card(TOWN,"Valebridge")
-	assert_int(int(card.badge)).is_greater(0)
+	assert_int(int(card.badge)+int(card.rise)).is_greater(0)
 	# The open card is at least as wide as the name tag with its badge.
 	assert_float(float((card.detail as Vector2).x)).is_greater_equal(float(card.name_width))
 	var probe:Probe=auto_free(Probe.new())
@@ -378,6 +436,10 @@ func test_an_open_card_fits_its_name_and_badge_and_draws_one_badge()->void:
 	# The open town is drawn once, as its card; its name tag is not under it.
 	assert_array(probe.frames).contains_exactly(["other"])
 	assert_array(probe.opened).contains_exactly([[TOWN,true]])
+	# The badge stays where it was on the name tag when the card opens under
+	# the pointer, at the end of the name line.
+	tag["rise"]=card.rise;tag["name_width"]=card.name_width
+	assert_bool(Labels.badge_rect(tag,probe.detail_rect(tag))==Labels.badge_rect(tag,tag.rect)).is_true()
 
 
 # --------------------------------------------------------------------------
@@ -425,7 +487,7 @@ func test_the_watch_and_the_townsfolk_are_shared_out_once_among_seven_towns()->v
 	var intel=CivilizationSystem.city_intelligence
 	assert_int(int(MilitaryCampaign._home_defense_force(false).troops)).is_equal(int(by_town[home]))
 	assert_int(int(Model.strength(true,home).defenders)).is_equal(int(by_town[home]))
-	assert_int(Labels.home_guard(home)).is_equal(int(by_town[home]))
+	assert_int(int(Labels.guard_parts(home).watch)+int(Labels.guard_parts(home).rise)).is_equal(int(by_town[home]))
 	assert_float(float(intel.truth(home).values.garrison)).is_equal(float(by_town[home]))
 	# Every other town's battle, card, badge and a scout's count: its share.
 	for id:String in ids.slice(1):
@@ -434,8 +496,10 @@ func test_the_watch_and_the_townsfolk_are_shared_out_once_among_seven_towns()->v
 		var fights:=int(Combat.town_watch(id).get("troops",0))
 		assert_int(fights).override_failure_message(id).is_equal(share)
 		assert_int(int(Model.strength(false,id).defenders)).override_failure_message(id).is_equal(share)
-		assert_int(Labels.home_guard(id)).override_failure_message(id).is_equal(share)
-		assert_int(int(_card(id,"Town").badge)).override_failure_message(id).is_equal(share)
+		assert_dict(Labels.guard_parts(id)).override_failure_message(id).is_equal({"watch":int(_parts(id).watch),"rise":int(_parts(id).rise),"bands":0})
+		var card:=_card(id,"Town")
+		assert_int(int(card.badge)).override_failure_message(id).is_equal(int(_parts(id).watch))
+		assert_int(int(card.rise)).override_failure_message(id).is_equal(int(_parts(id).rise))
 		assert_float(float(intel.truth(id).values.garrison)).override_failure_message(id).is_equal(float(share))
 	# No home guard kept: no one is posted in the towns, and the townsfolk
 	# still rise.
