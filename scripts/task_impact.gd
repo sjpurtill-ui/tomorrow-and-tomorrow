@@ -399,7 +399,8 @@ static func construction()->Dictionary:
 	var walls:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
 	var integrity:=float(walls.get("integrity",1.0))
 	if int(walls.get("stage",0))>0 and integrity<1.0:
-		var menders:=_raw("Construction")+_raw("Defense")*WATCH_REPAIR
+		# Those of the watch at home mend them, not its bands away.
+		var menders:=_raw("Construction")+float(MilitaryCampaign.watch_at_home())*WATCH_REPAIR
 		lines.append(_line("Mending the walls","+%s points a day" % _two(minf(0.006,menders*0.00012)*100.0),
 			"The %s stand at %d of 100. Builders and a fifth of the watch mend them, faster with more hands." % [String(walls.get("name","defences")).to_lower(),roundi(integrity*100.0)],"good" if menders>0.0 else "bad"))
 	# Great works take their crews from the builders (undertaking_system.gd).
@@ -639,7 +640,9 @@ static func administration()->Dictionary:
 
 static func defense()->Dictionary:
 	var state=WorldSimulation.state
-	var watch:=_raw("Defense")
+	# The watch at home keeps order (consequence_engine.gd reads the same):
+	# its bands away and garrisons do not (watch_military.gd at_home).
+	var watch:=float(WorldSimulation.military.watch_at_home())
 	var pop:=maxf(1.0,float(state.population_exact))
 	var lines:Array=[]
 	# Safety: + watch ÷ (5 in 100 of the people) × 42 points, the whole held

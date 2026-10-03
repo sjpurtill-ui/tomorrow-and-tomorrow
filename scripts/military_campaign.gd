@@ -5170,11 +5170,25 @@ func _apply_town_watch_result(city_id:String,side:Dictionary,rounds:Array,home_s
 	# the people.
 	var guard:Dictionary=stood if stood.has("watch") else preload("res://scripts/civilization_combat.gd").guard_ledger(self).get(city_id,{})
 	var share:=float(int(guard.get("watch",0)))/float(maxi(1,int(guard.get("watch",0))+int(guard.get("rise",0))))
+	var taken_all:=maxi(0,int(side.get("captured_in_battle",0)))
+	# Each block's losses are its own: the guard's block (id -1,
+	# civilization_combat.gd town_watch) lost those of it no longer standing,
+	# and its share of the dead, hurt, scattered and taken is theirs among
+	# everyone the town lost. With no blocks told (a strike from the air),
+	# by their numbers.
+	var blocks:Array=side.get("formations",[]) if side.get("formations") is Array else []
+	if not blocks.is_empty():
+		var standing:=0
+		for f in blocks:
+			if f is Dictionary and int((f as Dictionary).get("id",0))==-1: standing+=maxi(0,int((f as Dictionary).get("count",0)))
+		var guard_lost:=maxi(0,int(guard.get("watch",0))-standing)
+		var lost_all:=killed+hurt+scattered+taken_all
+		share=clampf(float(guard_lost)/float(lost_all),0.0,1.0) if lost_all>0 else 0.0
 	if killed>0 and city_id!="":
 		WorldSimulation.settlements.with_city_resources(city_id,func()->int:
 			return WorldSimulation.settlements.with_local_population(func()->int:return int(WorldSimulation.state.register_population_deaths(killed,"Killed defending the town").get("count",0)),true)
 		)
-	var taken:=maxi(0,int(side.get("captured_in_battle",0)))
+	var taken:=taken_all
 	if share>0.0:
 		# While a fight at home is still being fought, the guard posted in our
 		# other towns stands apart from it (watch_military.gd

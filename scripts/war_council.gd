@@ -982,6 +982,10 @@ static func _idle(army:Dictionary)->bool:
 	if mc.command_hierarchy.controls_army(army_id): return false
 	if WorldSimulation.campaign!=null and bool(WorldSimulation.campaign.active) and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)): return false
 	if _at_post(army): return false
+	# The ruler's own word stands: a band formed by an order (realm_orders.gd
+	# _form_band) waits for the ruler, and a band guarding a town of ours is
+	# its guard.
+	if bool(army.get("by_order",false)) or _guards_ours(army): return false
 	return true
 
 ## A band at work or on watch where the ruler put it: waiting on the ground

@@ -461,9 +461,12 @@ static func interim_watch(campaign:Node,target:int,plan:Dictionary)->void:
 	var path_share:=float(campaign.watch_path_share)
 	var path:=roundi(path_share*float(able)) if path_share>=0.0 else int(campaign.watch_manpower())
 	var slack:=maxi(2,ceili(float(target)*0.02))
-	if target>path+slack:
+	var held:=float(campaign.watch_work_share)>=0.0
+	# A gap between holding and letting go, so a path near the temper's share
+	# does not hold one month and let go the next.
+	if target>path+slack or (held and target>path):
 		if absi(target-int(campaign.watch_manpower()))>=slack:campaign.set_watch_share(float(target)/maxf(1.0,float(state.population_total)))
-	elif float(campaign.watch_work_share)>=0.0:
+	elif held:
 		# The path keeps as many: the leaders' own watch stands from their
 		# next laying of the work.
 		campaign.watch_work_share=-1.0
@@ -608,7 +611,8 @@ static func defense_decision(plan:Dictionary)->Dictionary:
 		var stored:=float(state.resource_stockpiles.get(material,0.0))
 		result.materials[material]={"have":stored,"need":float(works.materials[material]),"spare":float(works.materials[material])*DEFENSE_SPARE}
 		if stored<float(works.materials[material])*DEFENSE_SPARE:result.blockers.append("%s %.0f in store, %.0f needed to spare it" % [material,stored,float(works.materials[material])*DEFENSE_SPARE])
-	var workers:=float(state.population_allocations.get("Defense",0))
+	# Those of the watch at home build them, not its bands away.
+	var workers:=float(campaign.watch_at_home())
 	# The same daily work _process_settlement_defense_day gives the project.
 	var daily:float=campaign.settlement_defense_daily_work(stage)
 	var days:=float(works.work)/daily if daily>0.0 else INF

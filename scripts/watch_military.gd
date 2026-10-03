@@ -275,8 +275,12 @@ static func set_split(mc:Variant,share:float)->Dictionary:
 ## The home guard asks for more than stand at home: bands with nothing to do
 ## come home to guard it, those at home at once (they fold into the host),
 ## those out on the road home, until enough are home or coming. Bands on an
-## errand stay out. Returns the men called.
+## errand stay out; so do bands the ruler formed by an order ("stand ready
+## at the camp": by_order) and bands guarding a town of ours (war_council
+## _guards_ours). Nothing is called while a fight at home is still being
+## fought: its result replaces the host's formations. Returns the men called.
 static func recall_for_guard(mc:Variant)->int:
+	if home_fight_pending(mc):return 0
 	var short:=home_guard_target(mc)-maxi(0,int(mc.home_army.get("troops",0)))
 	if short<=0:return 0
 	var council:=load(Law.COUNCIL_PATH) as GDScript
@@ -287,6 +291,7 @@ static func recall_for_guard(mc:Variant)->int:
 		var band:Dictionary=army
 		var men:=int(band.get("troops",0))
 		if men<=0:continue
+		if bool(band.get("by_order",false)) or bool(council.call("_guards_ours",band)):continue
 		if Law.home_band(mc,band):
 			if not mc.disband_field_army(int(band.get("army_id",0))).has("error"):short-=men;called+=men
 			continue
@@ -397,6 +402,8 @@ static func role_effect(mc:Variant=null)->Dictionary:
 	var Impact:=preload("res://scripts/task_impact.gd")
 	var pop:=maxf(1.0,float(WorldSimulation.state.population_exact))
 	var lift:=func(people:float)->int:return roundi(people/maxf(1.0,pop*Impact.WATCH_SHARE)*Impact.WATCH_SAFETY*100.0)
+	# Order is kept by the watch at home (consequence_engine.gd), not its bands away.
+	var keeping:=float(at_home(mc))
 	var short_now:="%s keep watch: %s guard home, %s for bands." % [EraWords.grouped(int(r.watch)),EraWords.grouped(int(r.guard)),EraWords.grouped(maxi(0,int(r.watch)-int(r.guard)))]
 	# Ten more join at home: the home guard's share of them is spread over
 	# the towns by their people, the rest stand at home until sent out.
@@ -412,7 +419,7 @@ static func role_effect(mc:Variant=null)->Dictionary:
 			if String(city.get("id",""))==String(home.get("id","")):at_home=n
 		if people>0.0:here=at_home/people
 	var home_more:=roundi(10.0*(1.0-float(r.home_share))+10.0*float(r.home_share)*here)
-	var short_more:="Ten more: safety +%d points; guard at home +%d." % [int(lift.call(float(r.watch)+10.0))-int(lift.call(float(r.watch))),home_more]
+	var short_more:="Ten more: safety +%d points; guard at home +%d." % [int(lift.call(keeping+10.0))-int(lift.call(keeping)),home_more]
 	return {"role":"Defense","now":short_now,"plus_ten":short_more,"detail":now,"ten_more":more,"watch":int(r.watch),"guard":int(r.guard),"offensive":int(r.offensive),"drill":float(r.drill),"armed":float(r.armed),"drill_days":days}
 
 
@@ -482,7 +489,10 @@ static func _their_fights_at_home(mc:Variant)->Array:
 		if id==me:continue
 		var military:Variant=MilitaryCampaign if id=="player" else (WorldSimulation.actors[id] as Dictionary).systems.get("MilitaryCampaign")
 		if military==null or military==mc:continue
-		for operation in military.own_battles():
+		# Every battle they fight, their generals' too (MilitaryCampaign
+		# engagements: their own and command_hierarchy's).
+		for operation in military.engagements.values():
+			if not operation is Dictionary:continue
 			var threat:Dictionary=(operation as Dictionary).get("threat",{}) if (operation as Dictionary).get("threat") is Dictionary else {}
 			var target:Dictionary=threat.get("owned_target",{}) if threat.get("owned_target") is Dictionary else {}
 			if String(target.get("actor",""))!=me or int(target.get("field_id",0))!=0:continue

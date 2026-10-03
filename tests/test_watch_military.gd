@@ -361,6 +361,73 @@ func test_more_at_home_calls_idle_bands_home()->void:
 	assert_int(int(MilitaryCampaign.watch_reading().guard)).is_equal(watch)
 
 
+func test_no_band_is_called_home_while_home_fights()->void:
+	var watch:=_watch(0.10)
+	MilitaryCampaign.set_watch_split(0.2)
+	assert_bool(MilitaryCampaign.create_field_army(30).has("ok")).is_true()
+	MilitaryCampaign.own_engagements["home_fight"]={"id":"home_fight","home_force_kind":"field","home_force_id":0,"home_side":"defender","defender":MilitaryCampaign._home_defense_force(true),"attacker":{},"status":"active"}
+	# The fight's result replaces the host's formations: nobody folds in now.
+	assert_int(int(MilitaryCampaign.set_watch_split(1.0).called)).is_equal(0)
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(1)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(watch-30)
+	# The fight over, the idle band comes home to guard it.
+	MilitaryCampaign.own_engagements.erase("home_fight")
+	assert_int(Watch.recall_for_guard(MilitaryCampaign)).is_equal(30)
+
+
+func test_the_rulers_own_band_and_a_towns_guard_are_never_called_home()->void:
+	_second_town()
+	_watch(0.10)
+	MilitaryCampaign.set_watch_split(0.2)
+	# "Form a band of 10": it stands ready at the camp until the ruler sends it.
+	var formed:Dictionary=preload("res://scripts/realm_orders.gd")._form_band({"count":10})
+	assert_bool(bool(formed.ok)).is_true()
+	# A band standing guard in our other town.
+	assert_bool(MilitaryCampaign.create_field_army(8).has("ok")).is_true()
+	var guard:Dictionary=MilitaryCampaign.field_armies[1]
+	guard["location_id"]=TOWN;guard["status"]="stationed"
+	assert_int(int(MilitaryCampaign.set_watch_split(1.0).called)).is_equal(0)
+	assert_int(MilitaryCampaign.field_armies.size()).is_equal(2)
+	assert_bool(bool(MilitaryCampaign.field_armies[0].get("by_order",false))).is_true()
+	# Nor does the war leader fold them when the watch is lowered.
+	assert_bool(Council._idle(MilitaryCampaign.field_armies[0])).is_false()
+	assert_bool(Council._idle(guard)).is_false()
+
+
+func test_a_rivals_fight_at_our_home_holds_our_watch_still()->void:
+	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":.1,"surface_water_recognized":true}
+	WorldSimulation.create_actor("alpha",777,Vector2.ZERO)
+	var watch:=_watch(0.05)
+	assert_bool(Watch.home_fight_pending(MilitaryCampaign)).is_false()
+	# Their battle against our home host, still being fought.
+	var theirs:Node=WorldSimulation.actors.alpha.systems.MilitaryCampaign
+	theirs.own_engagements["raid"]={"id":"raid","home_force_kind":"field","home_side":"attacker","threat":{"owned_target":{"actor":"player","field_id":0,"city_id":""},"enemy_force":{}},"status":"active"}
+	assert_bool(Watch.home_fight_pending(MilitaryCampaign)).is_true()
+	GameState.population_allocations["Defense"]=watch+10
+	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(0)
+	theirs.own_engagements.clear()
+	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(10)
+
+
+func test_each_block_of_a_towns_defenders_takes_its_own_losses()->void:
+	_second_town()
+	var watch:=_watch(0.10)
+	MilitaryCampaign.set_watch_split(1.0)
+	var parts:Dictionary=Combat.guard_ledger()[TOWN]
+	var guard:=int(parts.watch);var rise:=int(parts.rise)
+	assert_int(rise).is_greater_equal(5)
+	# Every one of the three who fell was of the townsfolk: the guard stood.
+	MilitaryCampaign._apply_town_watch_result(TOWN,{"formations":[{"id":-1,"count":guard},{"id":-2,"count":rise-3}]},[{"defender_casualties":{"killed":2,"wounded":1}}],"defender")
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(watch)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(watch)
+	# Half of the next four were of the guard: two of theirs are off the
+	# watch at home, one dead and one hurt.
+	MilitaryCampaign._apply_town_watch_result(TOWN,{"formations":[{"id":-1,"count":guard-2},{"id":-2,"count":rise-5}]},[{"defender_casualties":{"killed":2,"wounded":2}}],"defender")
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(watch-2)
+	assert_int(int(MilitaryCampaign.home_army.get("wounded_pool",0))).is_equal(1)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(watch-1)
+
+
 func test_a_swing_of_one_moves_nobody()->void:
 	var watch:=_watch(0.05)
 	GameState.population_allocations["Defense"]=watch+1
