@@ -88,6 +88,38 @@ static func _worst_category(care:Dictionary,band:String,infant_share:float,mothe
 			best=id
 	return best
 
+## The main reason the people are fewer this year, in a few plain words for the
+## People tile and its card ("fevers among the old"), by the same rule as the
+## winter tally (explain). `year` is the hearth tally (hearth_count.gd: born,
+## buried, young, grown, old, infants, mothers); with no deaths told by age
+## yet, `buried` is split by the life table the death rate comes from.
+static func short_reason(year:Dictionary,care:Dictionary,people:int)->String:
+	var tally:=year.duplicate()
+	if float(tally.get("young",0.0))+float(tally.get("grown",0.0))+float(tally.get("old",0.0))<=0.0:tally.merge(_split_by_life_table(int(tally.get("buried",0))),true)
+	var why:=explain(tally,care,people)
+	var who:=String({"young":"the small children","grown":"the grown","old":"the old"}.get(String(why.band),"the people"))
+	match String(why.cause):
+		"age":return "the old die, and too few young follow"
+		"births":return "too few are born"+_birth_reason(care)
+		"fevers":return "fevers among %s" % who
+	return "%s, taken by %s" % [who,String(CAUSE_WORDS.get(String(why.cause),"the fevers every people suffers"))]
+
+## `count` deaths split young / grown / old by today's life table (cohort size
+## x age hazard with the early-care multipliers), as hearth_count.tally_ages.
+static func _split_by_life_table(count:int)->Dictionary:
+	var state=WorldSimulation.state
+	var hazards:Dictionary=state._natural_cohort_hazards()
+	var by:={"young":0.0,"grown":0.0,"old":0.0}
+	var total:=0.0
+	for key:String in hazards:
+		var deaths:=float(state.population_cohorts.get(key,0.0))*float(hazards[key])
+		total+=deaths
+		var band:="young" if key=="children" else ("old" if key=="elders" else "grown")
+		by[band]=float(by[band])+deaths
+	if total<=0.0:return by
+	for band:String in by:by[band]=float(by[band])*float(count)/total
+	return by
+
 static func _birth_reason(care:Dictionary)->String:
 	if float(care.get("overwork",0.0))>=0.3:return ": the women are worked too hard to carry children"
 	if float(care.get("diet",0.62))<0.55:return ": the food is too thin for the women to conceive"

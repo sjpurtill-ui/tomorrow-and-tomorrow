@@ -88,7 +88,13 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 			if hungry>0:
 				c.tone="warning"
 				c.headline="%s went hungry today: the food eaten fell short of what all of us need." % EraWords.grouped(hungry)
-			elif fed>=0:c.headline="Everyone ate their fill today; %s this year." % ("more are born than buried" if net>0 else "as many are buried as born" if net==0 else "more are buried than born")
+			elif net<0:
+				# Fewer this year: the main reason, by the winter tally's rule (dwindling_cause.gd).
+				var year:Dictionary=(GameState.hearth_season.get("year",{}) as Dictionary).duplicate()
+				year["born"]=int(vitals.get("births",0));year["buried"]=int(vitals.get("deaths",0))
+				c.tone="warning"
+				c.headline="More are buried than born: %s." % preload("res://scripts/dwindling_cause.gd").short_reason(year,GameState.early_care,population)
+			elif fed>=0:c.headline="Everyone ate their fill today; %s this year." % ("more are born than buried" if net>0 else "as many are buried as born")
 			else:c.headline="The people are counted; what they ate today is not yet told."
 			c.facts.append({"text":"%d born, %d buried since this time last year" % [int(vitals.get("births",0)),int(vitals.get("deaths",0))],"trend":signi(net),"good":net>=0})
 			if fed>=0:

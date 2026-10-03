@@ -23,6 +23,9 @@ static func snapshot()->Dictionary:
 	totals.food_days=totals.food_stock/totals.food_use if totals.food_use>0 else -1.0
 	totals.water_days=totals.water_stock/totals.water_need if totals.water_need>0 else -1.0
 	totals.goods_coverage=clampf(totals.goods_stock/totals.goods_target,0.0,1.0) if totals.goods_target>0 else 0.0
+	# Born and buried in the last year, the whole people (GameState.rolling_vital_balance).
+	var vitals:=GameState.rolling_vital_balance(365)
+	totals.born=int(vitals.get("births",0));totals.buried=int(vitals.get("deaths",0))
 	return totals
 static func _local()->Dictionary:
 	var m:Dictionary=GameState.simulation_metrics;var w:Dictionary=GameState.water_metrics

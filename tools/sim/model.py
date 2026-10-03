@@ -73,6 +73,11 @@ CROWDING_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "CROWDIN
 SPARE_LAND_ONSET = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAND_ONSET", default=0.0, optional=True))
 SPARE_LAND_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAND_CONCEPTION", default=0.0, optional=True))
 SPARE_LAND_HEALTH = float(g.const("scripts/early_life_conditions.gd", "SPARE_LAND_HEALTH", default=0.0, optional=True))
+# The frontier (EarlyLifeConditions.frontier_of) and the young founders (GameState.FOUNDING_AGE_MIX).
+FRONTIER_ONSET = float(g.const("scripts/early_life_conditions.gd", "FRONTIER_ONSET", default=0.5, optional=True))
+FRONTIER_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "FRONTIER_CONCEPTION", default=0.0, optional=True))
+_MIX = g.const("scripts/game_state.gd", "FOUNDING_AGE_MIX", default={}, optional=True)
+FOUNDING_AGE_MIX = np.array([float(_MIX[k]) for k in ("children", "youth", "early_adults", "established_adults", "mature_adults", "elders")]) if _MIX     else np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08])
 SUSTAINABLE_SPECIALISTS = g.const("scripts/society_model.gd", "SUSTAINABLE_SPECIALISTS", default=[], optional=True)
 SPECIALIST_UPKEEP = g.const("scripts/society_model.gd", "SPECIALIST_UPKEEP", default={}, optional=True)
 DECREE_COVER = g.const("scripts/early_life_conditions.gd", "DECREE_COVER", default={}, optional=True)
@@ -435,7 +440,7 @@ class Surrogate:
             self.cohort_mean[ci, a:b] = 1.0 / max(1, b - a)
         # --- population --------------------------------------------------------
         total = float(scenario.start_population)
-        self.coh = np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08]) * total   # initialize_population_model
+        self.coh = FOUNDING_AGE_MIX * total   # initialize_population_model
         self._sync()
         repro = self._reproductive()
         # fun-pop: founding pregnancies = FOUNDING_PREGNANCY_SHARE x baseline annual conceptions
@@ -1299,7 +1304,9 @@ class Surrogate:
         age_keys = ("under5", "child", "adult", "elder")
         care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief) * ((1.0 - spare * SPARE_LAND_HEALTH) if k in age_keys else 1.0) * (1.0 - carers * float(CARER_BURDEN.get(k, 0.0))))
                           * ((1.0 + crowding * CROWDING_MORTALITY) if k in age_keys else 1.0) for k, v in ERA_BURDEN.items()}
-        care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION)
+        frontier = clamp((FRONTIER_ONSET - self.population / max(1.0, self.carrying_capacity)) / FRONTIER_ONSET, 0.0, 1.0) if TERRITORY_CAPACITY else 0.0
+        self.frontier = frontier
+        care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION) * (1.0 + frontier * FRONTIER_CONCEPTION)
         care["excess_weight"] = {k: float(v) for k, v in EXCESS_WEIGHT.items()}
         if MODERN_SURVIVAL_WEIGHT:
             # EarlyLifeConditions.modern_factors / fertility_transition (research_3000).
@@ -2419,7 +2426,7 @@ class Surrogate:
         self.adoption = np.where(self.known, np.array([float(adoption.get(i, 0.8)) for i in cat.ids]), 0.0)
         self.discovered_day = np.full(cat.n, -1.0)
         self.scholarship = float(scholarship)
-        self.coh = np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08]) * float(population)
+        self.coh = FOUNDING_AGE_MIX * float(population)
         self._sync()
         repro = self._reproductive()
         self.preg = np.array([0.34, 0.33, 0.33]) * repro * 0.045

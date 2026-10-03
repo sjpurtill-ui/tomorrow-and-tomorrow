@@ -116,6 +116,20 @@ const SPARE_LAND_CONCEPTION:=2.0
 ## Crowd diseases need numbers: a remnant band sheds part of the era's excess
 ## mortality burden (about -18% at 37 people, -30% for a handful).
 const SPARE_LAND_HEALTH:=1.0
+## The frontier: while the whole people works less land than it holds, land is
+## easy to come by, couples set up house younger and more children are born:
+## up to FRONTIER_CONCEPTION more at an empty land, tapering to none at
+## FRONTIER_ONSET of the carrying capacity, where crowding begins (one line:
+## below it the frontier, above it crowding). About 10 in 100 more for a new
+## band of 120 on its first land, 24 in 100 for a people of two towns that
+## works a tenth of its land: the frontier effect of colonial and early farming
+## peoples (Shennan 2018 on the LBK front; docs/research/BENCHMARKS_600.md
+## growth "high" for a well-fed frontier people). Judged against the whole
+## people's land, like crowding; the remnant rule above is the small-numbers
+## rescue on top. FRONTIER_ONSET is CROWDING_ONSET, kept a plain number for the
+## fast sim (test_early_life_conditions checks they agree).
+const FRONTIER_ONSET:=0.6
+const FRONTIER_CONCEPTION:=0.30
 
 ## --- research_3000 modern transition (Phase 4 balance) ---
 ## The baseline life table is the floor of pre-modern survival; research only
@@ -197,6 +211,11 @@ static func carrying_capacity(state:Node,discovery:Node)->float:
 	for key:Variant in sources:grounds+=float(sources[key])
 	grounds=clampf(grounds/maxf(1.0,float(sources.size())),0.4,1.0) if not sources.is_empty() else 1.0
 	return base*territory*methods*lerpf(0.6,1.0,grounds)
+
+## 0..1: how open the land is to a people of `people` on land that carries
+## `capacity` (FRONTIER_ONSET of it worked: 0; none worked: 1).
+static func frontier_of(people:float,capacity:float)->float:
+	return clampf((FRONTIER_ONSET-people/maxf(1.0,capacity))/FRONTIER_ONSET,0.0,1.0)
 
 ## Care decrees (government_policy_catalog.gd) organize people to do what a
 ## missing practice would: fetch and store clean water, tend the sick and
@@ -351,10 +370,12 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		var remnant:=1.0-spare*SPARE_LAND_HEALTH if by_age else 1.0
 		var tended:=1.0-carers*float(CARER_BURDEN.get(key,0.0))
 		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief)*remnant*tended)*crowd,blend)
-	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION),blend)
+	var frontier:=frontier_of(people,capacity)
+	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION)*(1.0+frontier*FRONTIER_CONCEPTION),blend)
 	result["carrying_capacity"]=capacity
 	result["crowding"]=crowding
 	result["spare_land"]=spare
+	result["frontier"]=frontier
 	var weights:Dictionary={}
 	for key:String in EXCESS_WEIGHT:weights[key]=lerpf(1.0,float(EXCESS_WEIGHT[key]),blend)
 	result["burden"]=burden

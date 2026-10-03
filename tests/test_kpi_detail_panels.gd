@@ -171,3 +171,28 @@ func test_header_refreshes_without_legacy_interface_or_navigation()->void:
 	assert_str(header.time_text.text).contains(preload("res://scripts/hud/era_words.gd").when(100))
 
 
+
+## The People tile says births against burials a year, the engine's own count
+## (GameState.rolling_vital_balance), and the card says why when more are
+## buried than born, by the winter tally's rule (dwindling_cause.gd).
+func test_people_tile_says_born_and_buried_and_why_it_shrinks()->void:
+	GameState.simulation_metrics={"food_days":12.0,"food_consumption":10.0,"food_eaten":10.0}
+	GameState.elapsed_days=400.0
+	GameState.vital_statistics_history=[{"day":300,"births":4,"deaths":5}]
+	GameState.vital_statistics_tracking_start_day=0
+	var header=auto_free(LiveHeader.new())
+	header.terrain=auto_free(HeaderTerrain.new())
+	add_child(header)
+	header.set_process(false)
+	header._refresh_kpis()
+	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("born 4 · buried 5 a year")
+	var card:=Data.card("population")
+	assert_str(String(card.tone)).is_equal("warning")
+	print("People card: "+String(card.headline))
+	assert_str(String(card.headline)).starts_with("More are buried than born: ")
+	assert_str(String(card.headline)).not_contains("%")
+	# Growing: the plain count, no warning.
+	GameState.vital_statistics_history=[{"day":300,"births":6,"deaths":4}]
+	header._refresh_kpis()
+	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("born 6 · buried 4 a year")
+	assert_str(String(Data.card("population").headline)).contains("more are born than buried")

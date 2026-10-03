@@ -9,6 +9,14 @@ const TRACE:=preload("res://scripts/performance_trace.gd")
 ## conceptions: about 0.65 of the baseline is conceived in ordinary founding
 ## conditions, and a pregnancy lasts about three quarters of a year.
 const FOUNDING_PREGNANCY_SHARE:=0.5
+## The founders' ages: those who set out to found a people are young families
+## (children, and parents in their twenties and thirties), not a settled
+## village's full mix. Close to the mix a growing pre-modern people settles
+## into (life expectancy about 28, growth about half a percent): a third
+## children, a few of the old. The older mix (a fifth past 45, 18% of them
+## 45-60) made the first decades' deaths those of founders growing old, and a
+## healthy, fed band shrank for twenty years. Shares of POPULATION_AGE_COHORTS.
+const FOUNDING_AGE_MIX:={"children":0.36,"youth":0.21,"early_adults":0.17,"established_adults":0.12,"mature_adults":0.10,"elders":0.04}
 ## Girls among the newborn, and women among the grown of a people nobody has
 ## culled: the share the birth model reads its mothers against.
 const BIRTH_FEMALE_SHARE:=0.495
@@ -753,14 +761,8 @@ func initialize_population_model() -> void:
 		_normalize_population_cohorts()
 		return
 	var total:=maxf(1.0,population_exact)
-	population_cohorts={
-		"children":total*0.32,
-		"youth":total*0.15,
-		"early_adults":total*0.14,
-		"established_adults":total*0.13,
-		"mature_adults":total*0.18,
-		"elders":total*0.08
-	}
+	population_cohorts={}
+	for key in POPULATION_AGE_COHORTS:population_cohorts[key]=total*float(FOUNDING_AGE_MIX[key])
 	var reproductive_population:=_reproductive_age_population()
 	# fun-pop: the founders arrive already carrying the pregnancies of their
 	# usual conception rate, about FOUNDING_PREGNANCY_SHARE of the baseline

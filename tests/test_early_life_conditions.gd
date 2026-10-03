@@ -180,3 +180,24 @@ func test_a_hamlet_of_a_large_people_is_judged_by_the_whole_people()->void:
 	SettlementModel._national_population_in_scope=saved_national
 	GameState.population_exact=saved_pop
 
+
+
+## The frontier: on open land couples set up house younger and more children
+## are born, tapering to none where crowding begins (one line), judged by the
+## whole people against its land.
+func test_open_land_raises_conception_until_crowding_begins()->void:
+	assert_float(EarlyCare.FRONTIER_ONSET).is_equal(EarlyCare.CROWDING_ONSET)
+	assert_float(EarlyCare.frontier_of(0.0,1000.0)).is_equal(1.0)
+	assert_float(EarlyCare.frontier_of(300.0,1000.0)).is_equal_approx(0.5,0.000001)
+	assert_float(EarlyCare.frontier_of(600.0,1000.0)).is_equal(0.0)
+	assert_float(EarlyCare.frontier_of(900.0,1000.0)).is_equal(0.0)
+	var open:=_profile()
+	var capacity:=float(open.carrying_capacity)
+	assert_float(float(open.frontier)).is_equal_approx(EarlyCare.frontier_of(state.population_exact,capacity),0.000001)
+	# The same people on land that is already well worked: no frontier.
+	state.ensure_population_total(roundi(capacity*0.62))
+	var worked:=_profile()
+	assert_float(float(worked.frontier)).is_equal(0.0)
+	assert_float(float(open.conception)).is_greater(float(worked.conception))
+	# At most FRONTIER_CONCEPTION more, never a boom.
+	assert_float(float(open.conception)/float(worked.conception)).is_less_equal(1.0+EarlyCare.FRONTIER_CONCEPTION+0.0001)
