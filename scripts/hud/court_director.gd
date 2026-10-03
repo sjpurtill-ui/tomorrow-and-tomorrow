@@ -2409,7 +2409,8 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 		_shot(out,0.0,"two_shot",{"a":victim,"b":ex,"weight":5})
 		_exec(out,0.2,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.9,"time":1.0})
 	else:
-		_shot(out,0.0,"frame",{"on":[victim,"windbreak"],"weight":5})
+		# The prone body extends toward the camera beyond its standing mark.
+		_shot(out,0.0,"frame",{"on":[victim,"windbreak","front:"+victim+":1.9"],"weight":5})
 	_exec(out,start,"plan",{"act":act,"ex":ex if has_ex else "","cook":cook if has_cook else ""})
 	_exec(out,impact,"blow",{})
 	match method:
@@ -2434,9 +2435,9 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 			for m:Dictionary in _people(ctx,[victim,ex]).slice(0,2):_beat(out,start+_plan_cue(plan,"head_blink",10.9)+0.15,String(m.key),"double_take",{},"reaction")
 		"dogs":
 			var gone:=start+_plan_cue(plan,"out_of_sight",6.6)
-			_exec(out,start,"pack_come",{"more":2})
+			_exec(out,0.0,"pack_come",{"more":2})
 			_exec(out,gone-0.05,"vanish",{"who":victim})
-			_exec(out,gone-1.4,"pack_crunch",{"seconds":2.4})
+			_exec(out,gone,"pack_crunch",{"seconds":2.4})
 			_exec(out,start+_plan_cue(plan,"bone_dropped",10.6)-4.0,"pack_fetch",{"to":"god_feet"})
 			_shot(out,gone+0.4,"shake",{"strength":0.1})
 			_shot(out,start+_plan_cue(plan,"bone_dropped",10.6)-1.2,"frame",{"on":["god_feet","windbreak"],"time":0.8})
