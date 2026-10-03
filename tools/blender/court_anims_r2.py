@@ -146,7 +146,7 @@ def make_r2(clips):
         reach_t = dict(hips=(6, 0, 22 * sd), hips_loc=(0.12 * sd, -0.02, -0.08), spine=(6, 0, 8 * sd), chest=(9, 0, 10 * sd), neck=(2, 0, 0), head=(-6, 0, 8 * sd))
         catch_t = dict(hips=(10, 0, 26 * sd), hips_loc=(0.16 * sd, -0.03, -0.17), spine=(8, 0, 10 * sd), chest=(8, 0, 12 * sd), neck=(4, 0, 0), head=(-8, 0, 8 * sd))
         sag_t = dict(catch_t, hips_loc=(0.14 * sd, -0.03, -0.23), chest=(12, 0, 8 * sd))
-        low_t = dict(hips=(26, 0, 26 * sd), hips_loc=(0.17 * sd, -0.02, -0.40), spine=(18, 0, 8 * sd), chest=(14, 0, 10 * sd), neck=(0, 0, 0), head=(-12, 0, 6 * sd))
+        low_t = dict(hips=(20, 0, 26 * sd), hips_loc=(0.16 * sd, -0.02, -0.24), spine=(14, 0, 8 * sd), chest=(12, 0, 10 * sd), neck=(0, 0, 0), head=(-12, 0, 6 * sd))
         up_t = dict(hips=(0, 0, 6 * sd), hips_loc=(0.10 * sd, 0.0, -0.03), spine=(-4, 0, 2 * sd), chest=(-7, 0, 3 * sd), neck=(-2, 0, 0), head=(-6, 0, 4 * sd))
         a.t(0.0).t(0.10, "snap", chest=(-2, 0, 3 * sd), head=(-4, 0, 10 * sd))
         a.t(0.38, "out", **reach_t).t(0.62, "in", **catch_t).t(0.76, "settle", **dict(catch_t, hips_loc=(0.13 * sd, -0.03, -0.15)))
@@ -168,9 +168,9 @@ def make_r2(clips):
         a.rest(o_, 0.0).world(o_, 0.44, reach_t, f1.copy(arc=(0.0, -0.10, 0.03)), "out")
         n2, f2 = under(1.06, catch_t, 0.60)
         a.world(s_, 0.62, catch_t, n2, "in").world(o_, 0.62, catch_t, f2, "in")
-        n3, f3 = under(0.84, sag_t, 0.56)
+        n3, f3 = under(0.98, sag_t, 0.56)
         a.world(s_, 1.0, sag_t, n3).world(o_, 1.0, sag_t, f3)
-        n4, f4 = under(0.52, low_t, 0.58)
+        n4, f4 = under(0.84, low_t, 0.58)
         a.world(s_, 1.55, low_t, n4, "in").world(o_, 1.55, low_t, f4, "in").world(s_, 1.75, low_t, n4).world(o_, 1.75, low_t, f4)
         back = arm_at(o_, w=body_pt(0.13, 0.15, z_waist - 0.06), along=(-0.5, 0.2, -0.8), palm=(0.0, -1.0, 0.0), pole=(1.0, 0.6, 0.0), curl=(20, 14, 8))
         a.world(o_, 2.15, up_t, back.copy(arc=(0.06, 0.06, 0.0)), "out").world(o_, 2.6, up_t, back)
@@ -182,61 +182,71 @@ def make_r2(clips):
         clips[nm] = clip(nm, 2.6, a, kind="react", tags=["comic", "care", "strain"], blend_in=0.08, blend_out=0.5)
 
     # =================================================================================
-    # The faint: the eyes go, the knees buckle, they sit down hard on the floor
-    # and keel over to one side (feet planted, then sliding out; nothing goes
-    # through the floor). Holds.
+    # The faint: the eyes go, the knees give and they drop straight down onto
+    # both knees, wobble there a moment, and keel over sideways onto the floor,
+    # the legs going out straight with the body. The thighs never come up in
+    # front of the hips (a skirt or a robe would leave them bare and the legs
+    # would seem cut off at the knee). Holds.
     # =================================================================================
+    import court_anims_more as X
     for sd, nm in ((1.0, "faint_l"), (-1.0, "faint_r")):
-        a = Act(2.0, drag=1.3)
-        down = dict(hips=(-18, 8 * sd, 6 * sd), hips_loc=(0.05 * sd, 0.07, -0.745), spine=(-4, 4 * sd, 6 * sd), chest=(-5, 5 * sd, 6 * sd),
-                    neck=(-3, 3 * sd, 9 * sd), head=(-8, 14 * sd, 24 * sd))
-        a.t(0.0).t(0.14, "out", hips_loc=(0.010 * sd, 0, 0), spine=(0, 0, 2 * sd), head=(-7, 0, 6 * sd))
-        a.t(0.42, "in", hips_loc=(0.020 * sd, 0.02, -0.22), spine=(9, 0, 3 * sd), chest=(5, 0, 3 * sd), neck=(6, 0, 0), head=(16, 4 * sd, 10 * sd))
-        a.t(0.78, "in", **dict(down, hips_loc=(0.05 * sd, 0.07, -0.77)))
-        a.t(0.92, "settle", **down).t(2.0, "ease", **down)
+        a = Act(2.2, drag=1.1, feet=False, base_pose=X.square())
+        legs0 = X._legs0(a)
+        kneel = X.both_knees(a)
+        # the knees buckle forward first (the feet stay under), then the seat drops
+        buckle = merge(legs0, {"thigh.L": {"rot": (-25, 0, -2)}, "shin.L": {"rot": (50, 0, 0)}, "foot.L": {"rot": (-22, 0, 0)},
+                               "thigh.R": {"rot": (-25, 0, 2)}, "shin.R": {"rot": (50, 0, 0)}, "foot.R": {"rot": (-22, 0, 0)}})
+        sway = dict(hips_loc=(0.010 * sd, 0, 0), spine=(0, 0, 2 * sd), neck=(0, 0, 4 * sd), head=(-7, 0, 6 * sd))
+        on_knees = dict(hips=(6, 0, 3 * sd), hips_loc=(0.0, 0.07, -0.41), spine=(10, 0, 4 * sd), chest=(8, 0, 4 * sd), neck=(12, 0, 6 * sd), head=(20, 6 * sd, 14 * sd))
+        wobble = dict(on_knees, spine=(8, 0, -3 * sd), chest=(6, 0, -3 * sd), head=(16, -4 * sd, -6 * sd))
+        lying = dict(hips=(0, 84 * sd, 0), hips_loc=(0.20 * sd, 0.02, -0.71), spine=(6, 0, 4 * sd), chest=(4, 0, 4 * sd), neck=(0, 0, 12 * sd), head=(-4, 8 * sd, 16 * sd))
+        a.t(0.0).t(0.14, "out", **sway).t(0.30, "in", hips=(-4, 0, 2 * sd), hips_loc=(0.0, -0.02, -0.12), spine=(6, 0, 3 * sd), neck=(6, 0, 4 * sd), head=(10, 4 * sd, 10 * sd))
+        a.t(0.41, "ease", hips=(2, 0, 2 * sd), hips_loc=(0.0, 0.04, -0.31), spine=(8, 0, 3 * sd), neck=(8, 0, 5 * sd), head=(14, 5 * sd, 12 * sd))
+        a.t(0.48, "in", **dict(on_knees, hips_loc=(0.0, 0.07, -0.415))).t(0.58, "settle", **dict(on_knees, hips_loc=(0.0, 0.07, -0.40))).t(0.80, "ease", **dict(wobble, hips_loc=(0.0, 0.07, -0.40)))
+        # the roll pivots on the downhill knee: the seat stays up until the body is half over
+        a.t(0.98, "in", **dict(lying, hips=(0, 40 * sd, 0), hips_loc=(0.10 * sd, 0.05, -0.40), spine=(8, 0, 4 * sd)))
+        a.t(1.12, "in", **lying).t(1.24, "settle", **dict(lying, hips_loc=(0.20 * sd, 0.02, -0.70))).t(2.2, "ease", **lying)
+        # keeling over with the knees still folded: the legs turn with the hips
+        # (no swing through the floor, and a skirt stays over the thighs)
+        half = merge(legs0, {"thigh.L": {"rot": (-6, 0, -3)}, "shin.L": {"rot": (78, 0, 0)}, "foot.L": {"rot": (-72, 0, 0)},
+                             "thigh.R": {"rot": (-6, 0, 3)}, "shin.R": {"rot": (78, 0, 0)}, "foot.R": {"rot": (-72, 0, 0)}})
+        a.legs([(0.0, legs0), (0.14, legs0), (0.30, buckle, "in"), (0.41, half, "ease"), (0.48, kneel, "out"), (2.2, kneel)])
+        s_dn = "L" if sd > 0 else "R"
+        s_up = "R" if sd > 0 else "L"
+        under_head = arm_at(s_dn, w=body_pt(0.16, -0.06, f.z_shoulder / k + 0.36), along=(0.1, -0.1, 0.99), palm=(-0.9, 0.0, 0.0), pole=(0.9, 0.3, -0.2),
+                            curl=(30, 20, 10))
+        draped = arm_at(s_up, w=body_pt(0.04, -0.34, z_waist + 0.04), along=(-0.2, -0.4, -0.9), palm=(0.0, 0.3, -0.95), pole=(0.9, 0.6, 0.0),
+                        curl=(40, 30, 14))
         for s_ in "LR":
-            out_ = 1.0 if s_ == "L" else -1.0
-            a.foot(s_, 0.0).foot(s_, 0.42, (0.0, -0.02, 0.0)).foot(s_, 0.80, (0.06 * out_, -0.34, 0.0), "in", rot=(-35, 0, 12 * out_))
-            a.foot(s_, 2.0, (0.06 * out_, -0.34, 0.0), rot=(-35, 0, 12 * out_))
-        seated_knees = {"L": Vector((0.45, -0.45, 0.77)).normalized(), "R": Vector((-0.45, -0.45, 0.77)).normalized()}
+            limp = hang(a, s_, 10, curl=(40, 30, 14))
+            a.rest(s_, 0.0).rest(s_, 0.14).arm(s_, 0.5, limp, "in").arm(s_, 0.8, limp)
+        a.arm(s_dn, 1.12, under_head, "in").arm(s_dn, 2.2, under_head)
+        a.arm(s_up, 1.16, draped, "in").arm(s_up, 2.2, draped)
+        a.f(0.0).f(0.14, "out", lids=0.45, eyes_y=1.0, brows=0.5, worry=0.3).f(0.48, "ease", lids=0.08, eyes_y=0.6, jaw=0.25, brows=0.2)
+        a.f(1.1, "ease", lids=0.04, jaw=0.35).f(2.2, "ease", lids=0.04, jaw=0.32)
+        clips[nm] = clip(nm, 2.2, a, kind="react", hold=True, tags=["fear", "comic"], blend_in=0.12, blend_out=0.8)
 
-        def knees(t, K0=dict(a.KNEES), S=seated_knees):
-            u = L.curve("ease", (t - 0.3) / 0.5)
-            return {s2: K0[s2].lerp(S[s2], u).normalized() for s2 in "LR"}
-        a.knee_fn = knees
-        for s_ in "LR":
-            limp = hang(a, s_, -10, curl=(40, 30, 14))
-            # the hand flops onto the floor beside the hip
-            out_ = 1.0 if s_ == "L" else -1.0
-            floor_hand = arm_at(s_, w=body_pt(0.30, 0.02, 0.06), along=(0.35, -0.6, -0.2), palm=(0.0, 0.1, -1.0), pole=(0.6, 0.6, 0.2), curl=(40, 30, 14))
-            a.rest(s_, 0.0).rest(s_, 0.14).arm(s_, 0.45, limp, "in").world(s_, 0.86, down, floor_hand, "in")
-            a.world(s_, 2.0, down, floor_hand)
-        a.f(0.0).f(0.14, "out", lids=0.45, eyes_y=1.0, brows=0.5, worry=0.3).f(0.42, "ease", lids=0.08, eyes_y=0.6, jaw=0.25, brows=0.2)
-        a.f(0.9, "ease", lids=0.04, jaw=0.35).f(2.0, "ease", lids=0.04, jaw=0.32)
-        clips[nm] = clip(nm, 2.0, a, kind="react", hold=True, tags=["fear", "comic"], blend_in=0.12, blend_out=0.8)
-
+    # caught: the knees give, the catcher's hands under the arms; down onto both
+    # knees and slumped against the hands, the head lolling (holds, kneeling)
     for sd, nm in ((1.0, "faint_caught_l"), (-1.0, "faint_caught_r")):
-        a = Act(2.4, drag=1.3)
-        seat = dict(hips=(-12, 6 * sd, 4 * sd), hips_loc=(0.08 * sd, 0.05, -0.74), spine=(-6, 6 * sd, 4 * sd), chest=(-8, 8 * sd, 4 * sd),
-                    neck=(-6, 4 * sd, 6 * sd), head=(-16, 12 * sd, 16 * sd))
+        a = Act(2.4, drag=1.1, feet=False, base_pose=X.square())
+        legs0 = X._legs0(a)
+        kneel = X.both_knees(a)
+        sag = dict(hips=(-4, 0, 2 * sd), hips_loc=(0.02 * sd, -0.02, -0.11), spine=(-2, 6 * sd, 4 * sd), chest=(-4, 8 * sd, 4 * sd), neck=(-4, 4 * sd, 4 * sd), head=(-12, 10 * sd, 12 * sd))
+        down = dict(hips=(6, 0, 4 * sd), hips_loc=(0.03 * sd, 0.07, -0.41), spine=(4, 6 * sd, 8 * sd), chest=(2, 8 * sd, 8 * sd), neck=(6, 4 * sd, 10 * sd), head=(14, 10 * sd, 18 * sd))
+        slump = dict(down, spine=(10, 6 * sd, 10 * sd), chest=(8, 8 * sd, 10 * sd), neck=(14, 4 * sd, 12 * sd), head=(24, 10 * sd, 22 * sd))
         a.t(0.0).t(0.14, "out", hips_loc=(0.010 * sd, 0, 0), spine=(0, 0, 2 * sd), head=(-7, 0, 6 * sd))
-        a.t(0.50, "in", hips_loc=(0.05 * sd, 0.02, -0.16), spine=(-2, 8 * sd, 2 * sd), chest=(-4, 10 * sd, 2 * sd), neck=(-4, 4 * sd, 0), head=(-12, 10 * sd, 12 * sd))
-        a.t(1.0, "ease", hips_loc=(0.07 * sd, 0.03, -0.40), hips=(-6, 6 * sd, 2 * sd), spine=(-5, 9 * sd, 3 * sd), chest=(-7, 10 * sd, 3 * sd), neck=(-6, 4 * sd, 4 * sd), head=(-18, 12 * sd, 14 * sd))
-        a.t(1.6, "ease", **seat).t(2.4, "ease", **seat)
-        for s_ in "LR":
-            out_ = 1.0 if s_ == "L" else -1.0
-            a.foot(s_, 0.0).foot(s_, 0.5, (0.0, -0.02, 0.0)).foot(s_, 1.6, (0.07 * out_, -0.32, 0.0), "ease", rot=(-35, 0, 12 * out_))
-            a.foot(s_, 2.4, (0.07 * out_, -0.32, 0.0), rot=(-35, 0, 12 * out_))
-        seated_knees = {"L": Vector((0.45, -0.45, 0.77)).normalized(), "R": Vector((-0.45, -0.45, 0.77)).normalized()}
-
-        def knees_c(t, K0=dict(a.KNEES), S=seated_knees):
-            u = L.curve("ease", (t - 0.4) / 1.0)
-            return {s2: K0[s2].lerp(S[s2], u).normalized() for s2 in "LR"}
-        a.knee_fn = knees_c
+        a.t(0.60, "in", **sag).t(0.86, "ease", **dict(sag, hips=(2, 0, 3 * sd), hips_loc=(0.03 * sd, 0.04, -0.28)))
+        a.t(1.0, "out", **dict(down, hips_loc=(0.03 * sd, 0.07, -0.395))).t(1.12, "settle", **dict(down, hips_loc=(0.03 * sd, 0.07, -0.40)))
+        a.t(1.6, "ease", **slump).t(2.4, "ease", **slump)
+        buckle = merge(legs0, {"thigh.L": {"rot": (-25, 0, -2)}, "shin.L": {"rot": (50, 0, 0)}, "foot.L": {"rot": (-22, 0, 0)},
+                               "thigh.R": {"rot": (-25, 0, 2)}, "shin.R": {"rot": (50, 0, 0)}, "foot.R": {"rot": (-22, 0, 0)}})
+        half = merge(legs0, {"thigh.L": {"rot": (-6, 0, -3)}, "shin.L": {"rot": (78, 0, 0)}, "foot.L": {"rot": (-72, 0, 0)},
+                             "thigh.R": {"rot": (-6, 0, 3)}, "shin.R": {"rot": (78, 0, 0)}, "foot.R": {"rot": (-72, 0, 0)}})
+        a.legs([(0.0, legs0), (0.14, legs0), (0.6, buckle, "in"), (0.86, half, "ease"), (1.0, kneel, "out"), (2.4, kneel)])
         for s_ in "LR":
             limp = hang(a, s_, -8, curl=(40, 30, 14))
-            floor_hand = arm_at(s_, w=body_pt(0.30, 0.02, 0.06), along=(0.35, -0.6, -0.2), palm=(0.0, 0.1, -1.0), pole=(0.6, 0.6, 0.2), curl=(40, 30, 14))
-            a.rest(s_, 0.0).rest(s_, 0.14).arm(s_, 0.6, limp, "ease").world(s_, 1.7, seat, floor_hand, "ease").world(s_, 2.4, seat, floor_hand)
+            a.rest(s_, 0.0).rest(s_, 0.14).arm(s_, 0.6, limp.copy(sh=(0, -14, 0)), "ease").arm(s_, 1.0, limp.copy(sh=(0, -18, 0)), "ease").arm(s_, 2.4, limp.copy(sh=(0, -16, 0)))
         a.f(0.0).f(0.14, "out", lids=0.45, eyes_y=1.0, brows=0.5, worry=0.3).f(0.5, "ease", lids=0.08, eyes_y=0.6, jaw=0.25, brows=0.2)
         a.f(1.2, "ease", lids=0.04, jaw=0.35).f(2.4, "ease", lids=0.04, jaw=0.32)
         clips[nm] = clip(nm, 2.4, a, kind="react", hold=True, tags=["fear", "comic"], blend_in=0.12, blend_out=0.8)

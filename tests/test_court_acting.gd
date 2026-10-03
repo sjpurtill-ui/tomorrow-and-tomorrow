@@ -499,6 +499,33 @@ func test_exits_are_plans_of_clips_the_library_has()->void:
 		assert_float(float(Acting.clip_meta(clip).get("speed_mps",0.0))).is_greater(0.3)
 
 
+func test_a_walk_of_the_actings_own_runs_over_the_figures_walk()->void:
+	## The stage puts the figure's own walk underneath and plays the acting's
+	## walk over it (court_stage.gd _acted: storm_walk over walk_in, walk_led
+	## over walk_out): the acting's walk runs on until the stage stops it. A
+	## reaction left on when the figure sets off still lets go.
+	for pair in [["storm_walk","walk_in"],["walk_led","walk_out"],["walk_sober","walk_out"],["back_out","walk_in"]]:
+		var f:=_figure()
+		var a=Acting.of(f)
+		f.play(String(pair[1]),0.25,0.0)
+		Acting.play(f,String(pair[0]),{"blend":0.25,"loop":true})
+		_run(f,2.5)
+		assert_object(a._a).override_failure_message("%s was let go under the figure's %s" % pair).is_not_null()
+		assert_str(String(a._a.clip)).is_equal(String(pair[0]))
+		assert_float(a._a.weight()).is_greater(0.95)
+		Acting.stop(f,0.2)
+		_run(f,0.5)
+		assert_object(a._a).is_null()
+	var g:=_figure()
+	var ga=Acting.of(g)
+	Acting.play(g,"kneel",{"blend":0.1})
+	_run(g,0.4)
+	assert_object(ga._a).is_not_null()
+	g.play("walk_in",0.25,0.0)
+	_run(g,0.6)
+	assert_object(ga._a).override_failure_message("a kneel stayed on while the figure walked off").is_null()
+
+
 func test_the_stage_calls_reach_the_acting()->void:
 	## court_stage.gd _beat: acting.play(body, act, args) and acting.set_mood(body, vector).
 	var service=Acting.service()
