@@ -334,6 +334,19 @@ On the engine (10 years, the balanced path, 4 seeds each): good land grows +0.57
 
 On the fast sim (48 seeds a land): the first decade grows +0.41% a year on good land and +0.35% on average land (calm quarter +0.7, bad quarter about 0, 1 in 10 shrinking); the first 30 years +0.68% and +0.59% (were +0.11% and 0.0%). Poor land still shrinks: its stores run out in the first decade and the wild grounds wear thin, so hunger, not the crises' count, sets its course (see the limits in the PR).
 
+
+## Poor land: the few learners are kept in hunger (2026-10-03)
+
+A people on poor land starved slowly. On main, a food worker there brings in about 2.25 rations a day, against 4.4 on good land. The wild ground's daily limit binds there, and good land barely feels it. So the leaders had four in five on food in every lean season, at their 85% ceiling, and still emptied the stores by year 9. With the food work that high, learning fell to one person, and sowing kept seed (`seed_selection`, the way to fields) never came: still unknown at year 14, against year 6–8 on good and average land.
+
+- **The leaders keep their few learners.** However short the food, they keep `work_paths.gd LEARNERS_KEPT` (3.5 in 100, the balanced path's share, never more than the path's own cap) of the people at work on learning (`keep_learners`, the last step of `GovernmentPeopleSystem._allocations_for_focus`).
+  - The hands come from building, making, carrying and the watch, in proportion, never from food. At most half of that work is taken, and never the watch while the ruler holds its share.
+  - The food work is exactly what the planners asked for, so a short lean season on good land starves no one more.
+- **The wild ground's limit is unchanged.** Poor land stays poor: about three in four on food, little building, little growth.
+- **On screen:** the People view's leaders line says it ("They keep their few learners even in this hunger."), and its tip always gives the rule.
+
+The seed table is in the PR. On the engine, poor land learns to sow kept seed by year 7–8 and holds its numbers (it lost about one in ten by year 12 before); good and average land are unchanged.
+
 ## Integration rules (every builder)
 - Work only in your worktree, on your `codex/<task>` branch. Never use `git stash`, never merge main yourself, never launch the player game, never remove a worktree.
 - Edit files other than your own only in small, local hunks, and list them. Shared hotspots: `game_state.gd`, `consequence_engine.gd` (B owns), `military_campaign.gd` (E owns), `discovery_system.gd` (A owns), `economy_system.gd` (D owns), `world_simulation.gd`, `local_terrain.gd`, `save_system.gd`.

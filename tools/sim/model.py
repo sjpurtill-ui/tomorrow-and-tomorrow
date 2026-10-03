@@ -75,6 +75,12 @@ FOCUS_CHANGES = g.literal_after("scripts/government_people_system.gd", "var chan
 # LEARNING_CAP; the inquiry ambition raises it by INQUIRY_CAP x its share).
 # The leaders' own split (no focus set by hand) is capped.
 LEARNING_CAP = g.const("scripts/work_paths.gd", "LEARNING_CAP", default={}, optional=True)
+# Hunger never takes the people's few learners (work_paths.gd keep_learners):
+# the leaders keep LEARNERS_KEPT of the people at work on learning, from
+# building, crafting, carrying and the watch, never from food. Absent: off.
+LEARNERS_KEPT = g.const("scripts/work_paths.gd", "LEARNERS_KEPT", default=0.0, optional=True)
+LEARNERS_KEPT_FROM = g.const("scripts/work_paths.gd", "LEARNERS_KEPT_FROM", default=["Construction", "Crafting", "Logistics", "Defense"], optional=True)
+LEARNERS_KEPT_MOST = g.const("scripts/work_paths.gd", "LEARNERS_KEPT_MOST", default=0.5, optional=True)
 INQUIRY_CAP = float(g.const("scripts/work_paths.gd", "INQUIRY_CAP", default=0.0, optional=True))
 LABOR_EXTRAS = g.literal_after("scripts/food_system.gd", "var extras:=", default={"Food": 0.17, "Extraction": 0.18, "Construction": 0.18, "Defense": 0.12, "Survey": 0.13, "Logistics": 0.14, "Crafting": 0.08, "Knowledge": 0.04, "Administration": 0.04})
 # Optional Phase 3 pre-modern burden (early_life_conditions.gd); absent -> 1.
@@ -1112,12 +1118,34 @@ class Surrogate:
                     for r in list(w):
                         if r not in ("Food", "Knowledge"):
                             w[r] += cut * w[r] / others
+        if LEARNERS_KEPT:
+            self._keep_learners(w, cap)
         total = sum(w.values())
         target = {r: w[r] / total * 100.0 for r in ROLES}
         # The engine re-plans labor daily; a month with any shortfall moves at once.
         rate = 1.0 if food_risk else float(self.p["food_adjust_rate"])
         for r in ROLES:
             self.alloc_pct[r] = lerp(self.alloc_pct[r], target[r], rate)
+
+    def _keep_learners(self, w: dict, cap) -> float:
+        """work_paths.gd keep_learners: learning at LEARNERS_KEPT of the plan at
+        least, taken from LEARNERS_KEPT_FROM in proportion, never from food."""
+        total = sum(max(0.0, v) for v in w.values())
+        if total <= 0:
+            return 0.0
+        keep = min(float(LEARNERS_KEPT), float(cap) if cap is not None else float(LEARNERS_KEPT)) * total
+        have = max(0.0, w["Knowledge"])
+        if have >= keep:
+            return 0.0
+        pool = sum(max(0.0, w.get(r, 0.0)) for r in LEARNERS_KEPT_FROM)
+        if pool <= 0:
+            return 0.0
+        moved = min(keep - have, pool * float(LEARNERS_KEPT_MOST))
+        for r in LEARNERS_KEPT_FROM:
+            w[r] = max(0.0, w.get(r, 0.0)) * (1.0 - moved / pool)
+        w["Knowledge"] = have + moved
+        self.learners_kept = moved / total
+        return moved / total
 
     def _auto_focus(self) -> str:
         """GovernmentPeopleSystem._focus_decision_for_settlement (water always
