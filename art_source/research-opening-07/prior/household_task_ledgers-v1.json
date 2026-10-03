@@ -1,0 +1,12 @@
+{
+  "id": "household_task_ledgers",
+  "line": "institutions",
+  "game_year": 10,
+  "approx_historical_year": -4933,
+  "prompt": "c. 4933 BCE: Household adults allocate work by grouped plain pebbles and unmarked tally sticks on flat stone amid weaving, carrying and cooking; archaic mineral fresco. Flat mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-0c09a556-4e13-49cb-83c4-f227f0c4b4f5.png",
+  "asset": "res://assets/ui/research/subjects/household_task_ledgers-v1.png",
+  "sha256": "c1c1dd531aefb4fafccd4c7a788eff191a3689d84c9ef68bfc4b3ea98bf18e59",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; no writing or later ledger; tactile tally and household work clear in wide crop."
+}

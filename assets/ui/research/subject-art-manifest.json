@@ -18,8 +18,12 @@
     ]
   },
   "food_drying": {
-    "path": "res://assets/ui/research/subjects/food_drying-v1.png",
+    "path": "res://assets/ui/research/subjects/food_drying-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -32,8 +36,12 @@
     ]
   },
   "cordage": {
-    "path": "res://assets/ui/research/subjects/cordage-v1.png",
+    "path": "res://assets/ui/research/subjects/cordage-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -5821,28 +5829,28 @@
     ]
   },
   "birth_spacing_customs": {
-    "path": "res://assets/ui/research/subjects/birth_spacing_customs-v1.png",
+    "path": "res://assets/ui/research/subjects/birth_spacing_customs-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "delousing": {
-    "path": "res://assets/ui/research/subjects/delousing-v1.png",
+    "path": "res://assets/ui/research/subjects/delousing-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "refuge_point_marking": {
-    "path": "res://assets/ui/research/subjects/refuge_point_marking-v1.png",
+    "path": "res://assets/ui/research/subjects/refuge_point_marking-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "rest_break_timing": {
-    "path": "res://assets/ui/research/subjects/rest_break_timing-v1.png",
+    "path": "res://assets/ui/research/subjects/rest_break_timing-v2.png",
     "focus": [
       0.5,
       0.5
@@ -5863,7 +5871,7 @@
     ]
   },
   "vermin_deterrent_placement": {
-    "path": "res://assets/ui/research/subjects/vermin_deterrent_placement-v1.png",
+    "path": "res://assets/ui/research/subjects/vermin_deterrent_placement-v2.png",
     "focus": [
       0.5,
       0.5
@@ -5961,7 +5969,7 @@
     ]
   },
   "household_task_ledgers": {
-    "path": "res://assets/ui/research/subjects/household_task_ledgers-v1.png",
+    "path": "res://assets/ui/research/subjects/household_task_ledgers-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9720,6 +9728,31 @@
   "guest_host_reciprocity": {
     "path": "res://assets/ui/research/subjects/guest_host_reciprocity-v1.png",
     "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "weather_sign_reading": {
+    "path": "res://assets/ui/research/subjects/weather_sign_reading-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "curious_questioning_custom": {
+    "path": "res://assets/ui/research/subjects/curious_questioning_custom-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "fuel_air_drying": {
+    "path": "res://assets/ui/research/subjects/fuel_air_drying-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]

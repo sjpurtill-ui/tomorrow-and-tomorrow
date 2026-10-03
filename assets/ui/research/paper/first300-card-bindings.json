@@ -151,5 +151,8 @@
   "controlled_flaking": "res://assets/ui/research/subjects/controlled_flaking-v2.png",
   "fiber_grading": "res://assets/ui/research/subjects/fiber_grading-v2.png",
   "hearth_heat_retention": "res://assets/ui/research/subjects/hearth_heat_retention-v1.png",
-  "quarry_reading": "res://assets/ui/research/subjects/quarry_reading-v2.png"
+  "quarry_reading": "res://assets/ui/research/subjects/quarry_reading-v2.png",
+  "cordage": "res://assets/ui/research/subjects/cordage-v2.png",
+  "food_drying": "res://assets/ui/research/subjects/food_drying-v2.png",
+  "fuel_air_drying": "res://assets/ui/research/subjects/fuel_air_drying-v1.png"
 }

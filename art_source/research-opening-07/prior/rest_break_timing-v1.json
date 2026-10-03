@@ -1,0 +1,12 @@
+{
+  "id": "rest_break_timing",
+  "line": "labor",
+  "game_year": 6,
+  "approx_historical_year": -4960,
+  "prompt": "c. 4960 BCE: workers set down a timber beam and rest in shelter shade when a short midday shadow signals an agreed break. Mature expressive charcoal over flat ochre wash, angular figures and rough grain; no clock, sundial, written schedule or photorealism.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-294797e5-ef00-48c7-9fa4-3fc2eb473686.png",
+  "asset": "res://assets/ui/research/subjects/rest_break_timing-v1.png",
+  "sha256": "2228e2e5622c5fe6257d2e4cf3a9b79bf97a89e32d4dffaf8918343b5f783338",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation selected; beam and resting work group clear. Accepted after visual 3.37:1 crop and subject/period check."
+}
