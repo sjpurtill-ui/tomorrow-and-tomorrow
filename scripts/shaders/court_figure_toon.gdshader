@@ -18,6 +18,8 @@ uniform float band_soft = 0.10;
 uniform float grain = 0.05;
 uniform int cover_channel = 0;
 uniform bool flat_colour = false;
+// Per figure: the speaker a little in the light, listeners a little back.
+instance uniform float dim = 1.0;
 
 varying float v_ao;
 varying float v_cover;
@@ -51,7 +53,7 @@ void fragment() {
 	}
 	vec3 base = albedo * mix(1.0, v_ao, ao_amount);
 	if (flat_colour) {
-		ALBEDO = albedo;
+		ALBEDO = albedo * min(dim, 1.0);
 	} else {
 		vec3 n = normalize(v_world_normal);
 		float ndl = dot(n, normalize(key_dir));
@@ -63,6 +65,6 @@ void fragment() {
 		vec3 col = mix(base * shade_tint, base * key_color, tone);
 		float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 		col += rim_color * rim_amount * fres * (0.35 + 0.65 * lit);
-		ALBEDO = col;
+		ALBEDO = col * dim;
 	}
 }

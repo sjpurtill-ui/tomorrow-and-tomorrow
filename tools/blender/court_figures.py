@@ -237,8 +237,22 @@ def _bind_garment(obj, pc, body, proxy, rig, f):
         cf_rig.bind_from_body(obj, proxy if name != "hide_cape" else body, rig, ease=None)
     if hangs:
         cf_rig._ease_weights(obj, ease)
+        _skirt_off_shins(obj, in_sleeve)
         cf_rig._normalize(obj)
         cf_rig.smooth_weights(obj, repeat=6, factor=0.5)
+
+
+def _skirt_off_shins(obj, in_sleeve):
+    """A skirt hangs from the hips and thighs: what the shins and feet held
+    goes to the thigh above them, so a knee bent forward never splits the hem."""
+    table = cf_rig._weights_table(obj)
+    for i, w in enumerate(table):
+        if in_sleeve is not None and in_sleeve[i]:
+            continue
+        for low in [n for n in w if n.split(".")[0] in ("shin", "foot", "toe")]:
+            thigh = "thigh." + low.split(".")[-1]
+            w[thigh] = w.get(thigh, 0.0) + w.pop(low)
+    cf_rig._write_table(obj, table)
 
 
 def _sleeve_vertices(obj, pc):

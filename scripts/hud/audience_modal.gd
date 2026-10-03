@@ -1066,6 +1066,9 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 		_show_toast(String(result.get("outcome","")))
 		return result
 	if voice_reacts and _voice_ok() and voice.has_method("divine_reaction"):voice.divine_reaction(audience_id,result)
+	# The one before the god kneels under wrath and bows under favour.
+	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)):
+		court_stage.react(Stage.MAIN,Stage.divine_mood(action))
 	_refresh_regard()
 	_update_mood(Hall.find(audience_id))
 	if bool(result.get("terminal",false)):_show_outcome(result)
@@ -1081,6 +1084,8 @@ func act_on_envoy(act_id:String,words:String="")->Dictionary:
 	if not bool(result.get("handled",false)):
 		_show_toast(String(result.get("outcome","")))
 		return result
+	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)):
+		court_stage.react(Stage.MAIN,Stage.divine_mood(String(result.get("action",act_id))))
 	_after_command(result)
 	return result
 

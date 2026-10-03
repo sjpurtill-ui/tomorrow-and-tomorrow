@@ -194,21 +194,36 @@ class Head:
         return (c[0] - 0.14 * s - wide, c[1] - 0.15 * s, c[2] - 0.40 * s - below), (c[0] + 0.14 * s + wide, c[1] + 0.15 * s + wide, c[2] + 0.14 * s)
 
 
-def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back=0.0):
+def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back=0.0, puff=0.0, temples=0.0):
+    """Hair lying on the scalp inside the hairline.
+    part: strands fall to each side of a parting (else they are combed back);
+    puff: extra volume over the ears and at the back, so it stands off the skull;
+    temples: how far the hair comes down over the temples (softens the line)."""
     s = head.s
 
     def fn(P):
         h = head.sdf(P)
         th, Z = head.coords(P)
-        H = head.hairline(th)
+        H = head.hairline(th) - temples * np.exp(-((th - 42.0) / 22.0) ** 2)
         above_line = Z - H
-        thick = t * (0.30 + 0.70 * sm(above_line / edge)) + lift_back * sm((th - 100.0) / 60.0)
-        ang = np.radians(th) * grooves * 0.5
-        thick = thick - depth * s * (0.5 - 0.5 * np.cos(ang)) * sm((Z + 0.2) / 0.6)
+        side = sm((th - 35.0) / 70.0)
+        thick = t * (0.30 + 0.70 * sm(above_line / edge)) * (1.0 + puff * side * sm((0.55 - Z) / 0.6))
+        thick = thick + lift_back * sm((th - 100.0) / 60.0)
+        if part:
+            # strands run down from the parting: grooves are spaced front to back
+            # on the top and sides, and side to side at the back of the head
+            ry = (P[..., 1] - head.c[1]) / head.r[1]
+            rx = (P[..., 0] - head.c[0]) / head.r[0]
+            back = sm((th - 115.0) / 40.0)
+            g_side = 0.5 - 0.5 * np.cos(ry * grooves * 0.55 + 0.6 * np.sin(rx * 5.0))
+            g_back = 0.5 - 0.5 * np.cos(rx * grooves * 0.45)
+            g = g_side * (1.0 - back) + g_back * back
+        else:
+            g = 0.5 - 0.5 * np.cos(np.radians(th) * grooves * 0.5)
+        thick = thick - depth * s * g * sm((Z + 0.2) / 0.6)
         d = np.maximum(h - thick, -(h + 0.004 * s))
         d = S.smax(d, (H - Z) * head.r[2], 0.004 * s)
         if part:
-            # a parting line from the brow toward the crown
             groove = 0.0020 * s - np.abs(P[..., 0] - head.c[0])
             groove = np.where((P[..., 1] < head.c[1] + 0.02 * s) & (Z > 0.15), groove, -1.0)
             d = S.smax(d, groove, 0.0015 * s)
@@ -231,29 +246,31 @@ def hair_style(f, style):
     if style == "cropped":
         shell = hair_cap(head, 0.007 * s, grooves=56, depth=0.0012)
     elif style in ("long", "long_framed"):
-        cap = hair_cap(head, 0.011 * s, part=True)
+        cap = hair_cap(head, 0.010 * s, grooves=34, depth=0.0030, part=True, puff=0.9, temples=0.16 if style == "long_framed" else 0.08)
         parts = [cap]
         z_end = f.z_shoulder + 0.030 * s
-        for i in range(15):
-            th = 78.0 + i * (204.0 / 14.0)
+        count = 17
+        for i in range(count):
+            th = 74.0 + i * (212.0 / (count - 1))
             back = max(0.0, -math.cos(math.radians(th)))
-            a = head.point(th, 0.22, 0.010 * s)
-            m = head.point(th, -0.62, 0.030 * s + 0.010 * s * back)
+            wob = math.sin(i * 2.3) * 0.5 + 0.5
+            a = head.point(th, 0.42, 0.004 * s)
+            m = head.point(th, -0.50, 0.026 * s + 0.012 * s * back)
             e = head.point(th, -0.9, 0.050 * s)
-            e.z = z_end - 0.09 * s * back * back - 0.022 * s * (0.5 + 0.5 * math.sin(i * 2.3))
-            # the ends rest a little outward on the shoulders and back
+            e.z = z_end - 0.10 * s * back * back - 0.035 * s * wob
             outward = (Vector((e.x - float(head.c[0]), e.y - float(head.c[1]), 0.0))).normalized()
-            e += outward * (0.026 * s + 0.01 * s * back)
-            parts.append(lock(a, m, e, 0.021 * s, 0.019 * s, 0.011 * s))
+            e += outward * (0.022 * s + 0.012 * s * back)
+            r0 = (0.017 + 0.006 * wob) * s
+            parts.append(lock(a, m, e, r0, r0 * 0.95, 0.0045 * s))
         if style == "long_framed":
             for sd in (1, -1):
-                th = 64.0 * sd
-                a = head.point(abs(th), 0.26, 0.008 * s)
-                a = Vector((sd * abs(a.x), a.y, a.z))
-                m = head.point(abs(th), -0.35, 0.020 * s)
-                m = Vector((sd * abs(m.x), m.y, m.z))
-                e = Vector((sd * (abs(m.x) + 0.012 * s), m.y + 0.010 * s, f.z_chin - 0.010 * s))
-                parts.append(lock(a, m, e, 0.016 * s, 0.015 * s, 0.010 * s))
+                for j, th in enumerate((58.0, 68.0)):
+                    a = head.point(th, 0.34 - 0.06 * j, 0.006 * s)
+                    m = head.point(th, -0.30, 0.020 * s)
+                    a = Vector((sd * abs(a.x), a.y, a.z))
+                    m = Vector((sd * abs(m.x), m.y, m.z))
+                    e = Vector((sd * (abs(m.x) + 0.014 * s), m.y + 0.012 * s, f.z_chin - (0.020 + 0.030 * j) * s))
+                    parts.append(lock(a, m, e, 0.015 * s, 0.014 * s, 0.0040 * s))
         shell = union_fn(*parts, k=k_lock)
         lo = (lo[0] - 0.04, lo[1], f.z_shoulder - 0.10)
         hi = (hi[0] + 0.04, hi[1] + 0.06, hi[2])
@@ -282,19 +299,23 @@ def hair_style(f, style):
         lo = (lo[0], lo[1], f.z_chest - 0.08)
         hi = (hi[0], hi[1] + 0.10, hi[2])
     elif style == "braids":
-        cap = hair_cap(head, 0.010 * s, part=True)
+        cap = hair_cap(head, 0.010 * s, grooves=34, depth=0.0026, part=True, puff=0.3, temples=0.06)
         parts = [cap]
         for sd in (1.0, -1.0):
             p0 = head.point(112.0, -0.45, 0.010 * s)
             p0 = Vector((sd * abs(p0.x), p0.y, p0.z))
-            p1 = Vector((sd * 0.100 * s / 1.0, f.neck.y + 0.030, f.z_shoulder + 0.036))
-            zc = f.z_chest + 0.040
+            p1 = Vector((sd * 0.112, f.neck.y + 0.004, f.z_shoulder + 0.058))
+            zm = f.z_shoulder - 0.050
+            bw, bf, bb, cy = profile_at(f, zm)
+            xm = sd * min(0.122, bw * 0.80)
+            pm = Vector((xm, cy - bf * math.sqrt(max(0.0, 1 - (xm / bw) ** 2)) - 0.026, zm))
+            zc = f.z_chest + 0.020
             bw, bf, bb, cy = profile_at(f, zc)
             x2 = sd * min(0.118, bw * 0.78)
-            y2 = cy - bf * math.sqrt(max(0.0, 1 - (x2 / bw) ** 2)) - 0.020 * s
+            y2 = cy - bf * math.sqrt(max(0.0, 1 - (x2 / bw) ** 2)) - 0.024 * s
             p2 = Vector((x2, y2, zc))
             pts = []
-            for seg in ((p0, p1), (p1, p2)):
+            for seg in ((p0, p1), (p1, pm), (pm, p2)):
                 n = max(2, int((seg[1] - seg[0]).length / (0.017 * s)))
                 for j in range(n):
                     pts.append(seg[0].lerp(seg[1], j / n))

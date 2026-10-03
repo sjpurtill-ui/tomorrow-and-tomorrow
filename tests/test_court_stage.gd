@@ -539,3 +539,181 @@ func test_what_you_know_never_spills_off_a_short_stage()->void:
 	var holder:=pop.get_parent() as Control
 	assert_bool(pop.visible).is_true()
 	assert_float(pop.position.y+pop.size.y).is_less_equal(holder.size.y+1.0)
+
+
+# --- Modelled figures (tools/blender/court_figures.py, hud/court_figure_3d.gd) ----
+
+const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
+const Looks:=preload("res://scripts/people_appearance.gd")
+const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
+
+
+func _clip_of(modal:Control,key:String)->String:
+	var f:Stage.Figure=modal.court_stage.figure(key)
+	return String(f.body3d.clip) if f!=null and f.body3d!=null else ""
+
+
+func test_the_people_on_the_stage_are_modelled_figures_in_one_hall()->void:
+	assert_bool(Figure3D.available()).override_failure_message("the court figures did not load from assets/court_figures").is_true()
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var stage:Control=modal.court_stage
+	assert_bool(stage.three_d).is_true()
+	# One SubViewport for the whole stage; every figure's body stands in it.
+	assert_int(stage.find_children("*","SubViewport",true,false).size()).is_equal(1)
+	assert_bool(_cast(modal).is_empty()).is_false()
+	for key in _cast(modal):
+		var f:Stage.Figure=stage.figure(key)
+		assert_object(f.body3d).is_not_null()
+		assert_object(f.body3d.get_parent()).is_same(stage.view3d)
+		assert_bool(f.painting.visible).is_false()
+		# Their feet stand on the stage where the layout put them.
+		var feet:Vector2=stage.world_to_stage(f.body3d.global_position)
+		assert_float(feet.distance_to(f.home+Vector2(f.walk,0.0))).is_less(3.0)
+	# Nothing runs per frame: the figures move by clips and tweens alone.
+	assert_bool(stage.figure(Stage.MAIN).body3d.has_method("_process")).is_false()
+	assert_bool(stage.has_method("_process")).is_false()
+
+
+func test_each_person_wears_their_peoples_look()->void:
+	var registry:={}
+	var ours:={"name":"Hena","person_id":0,"sex":"female","age":34}
+	var look:=Stage.figure_look(ours,registry)
+	var people:=Looks.profile(EarlyArt.owner(ours))
+	assert_str(String(look.variant)).is_equal("female_adult")
+	# Skin within the people's range; cloth of the people's three dyes.
+	var lightest:=Color(String(people.skin[0]));var deepest:=Color(String(people.skin[2]))
+	var skin:Color=look.skin
+	assert_float(skin.get_luminance()).is_between(deepest.get_luminance()-0.01,lightest.get_luminance()+0.01)
+	var dyes:=PackedStringArray()
+	for hex in people.cloth:dyes.append(String(hex).to_lower())
+	if String(look.outfit)!="hide":
+		for c in look.cloth:assert_bool(dyes.has((c as Color).to_html(false))).is_true()
+	# The same person always looks the same; old men grey.
+	assert_str(var_to_str(Stage.figure_look(ours,{}))).is_equal(var_to_str(Stage.figure_look(ours,{})))
+	var elder:=Stage.figure_look({"name":"Old Mether","person_id":0,"sex":"male","age":71},{})
+	assert_str(String(elder.variant)).is_equal("male_old")
+	assert_float((elder.hair_colour as Color).get_luminance()).is_greater(0.35)
+	# On one screen nobody is dressed and coloured just like another.
+	var keys:={}
+	for index in 12:
+		var other:=Stage.figure_look({"name":"Twin","person_id":4000+index,"sex":"male","age":30},registry)
+		keys[Stage._look_key(other)]=true
+	assert_int(keys.size()).is_greater_equal(10)
+	# Their dress is the dress of the age their people have reached.
+	var tier:int=Stage._era_tier(EarlyArt.owner(ours))
+	if tier!=2:assert_str(String(look.outfit)).is_equal(String(Stage.ERA_DRESS[clampi(tier,0,3)]))
+
+
+func test_the_room_acts_out_what_is_said()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var court:Array[Dictionary]=Hall.court(id)
+	assert_bool(court.is_empty()).is_false()
+	var witness:="p%d" % int(court[0].person_id)
+	var speaker:Dictionary=Hall.find(id).speaker
+	_say(id,{"speaker":String(speaker.name),"role":"official","person_id":int(speaker.get("person_id",0)),"text":"The ford is low; the herds can cross before the rains come down."})
+	modal._pump()
+	await await_idle_frame()
+	# The speaker talks with their hands; the others turn and listen.
+	assert_str(_clip_of(modal,Stage.MAIN)).starts_with("talk")
+	var w:Stage.Figure=modal.court_stage.figure(witness)
+	var main:Stage.Figure=modal.court_stage.figure(Stage.MAIN)
+	assert_str(_clip_of(modal,witness)).is_equal("listen_l" if main.home.x>w.home.x else "listen_r")
+	modal.skip_reveal()
+	# The god speaks: every face lifts.
+	_say(id,{"speaker":"You","role":"ruler","text":"Then cross."})
+	modal.skip_reveal()
+	await await_idle_frame()
+	for key in _cast(modal):assert_str(_clip_of(modal,key)).is_equal("look_up")
+	# What the hall shows, the one before the god does.
+	_say(id,{"role":"narrator","text":"[%s kneels before you.]" % String(speaker.name)})
+	modal.skip_reveal()
+	await await_idle_frame()
+	assert_str(_clip_of(modal,Stage.MAIN)).is_equal("kneel")
+
+
+func test_wrath_brings_them_down_and_favour_brings_a_bow()->void:
+	assert_str(Stage.divine_mood("terrify")).is_equal("dread")
+	assert_str(Stage.divine_mood("penance")).is_equal("dread")
+	assert_str(Stage.divine_mood("bless")).is_equal("reverence")
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	modal.court_stage.react(Stage.MAIN,"dread")
+	assert_str(_clip_of(modal,Stage.MAIN)).is_equal("kneel")
+	modal.court_stage.react(Stage.MAIN,"reverence")
+	assert_str(_clip_of(modal,Stage.MAIN)).is_equal("bow")
+	assert_str(Stage.gesture_in("The headman bows and sends for the tally-keeper.")).is_equal("reverence")
+	assert_str(Stage.gesture_in("She falls to her knees.")).is_equal("dread")
+
+
+func test_they_walk_in_and_walk_out_as_people_do()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var stage:Control=modal.court_stage
+	var f:Stage.Figure=stage.add_figure("late",{"name":"Late Tamsa","person_id":0},"court","Tamsa","",true)
+	await await_idle_frame()
+	# Walking in from beyond the edge, turned the way they go.
+	assert_str(String(f.body3d.clip)).is_equal("walk_in")
+	assert_float(absf(f.walk)).is_greater(0.0)
+	assert_float(absf(f.body3d.rotation_degrees.y)).is_greater(60.0)
+	stage.settle()
+	assert_float(f.walk).is_equal(0.0)
+	assert_bool(String(f.body3d.clip) in ["idle","idle_clasped"]).override_failure_message("at rest: "+String(f.body3d.clip)).is_true()
+	# Taking their leave: a bow first, then they are gone.
+	stage.conclude(0.0,"bow")
+	await await_idle_frame()
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	assert_bool(main.leaving).is_true()
+	assert_str(String(main.body3d.clip)).is_equal("bow")
+	stage.settle()
+	assert_bool(main.body3d.visible).is_false()
+
+
+func test_bubbles_hang_over_the_modelled_head()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	_main_line(id,"Count them again.")
+	modal.skip_reveal()
+	await await_idle_frame()
+	var stage:Control=modal.court_stage
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	var head:Vector2=stage.world_to_stage(main.body3d.head_top())
+	var bubble:Stage.Bubble=_bubbles(modal)[-1]
+	var tip:Vector2=bubble.position+bubble.tip
+	assert_float(absf(tip.x-head.x)).is_less(main.size.x*.35)
+	assert_float(tip.y).is_less_equal(head.y+main.size.y*.2)
+	# The name plate stands under their feet, not over them.
+	assert_float(main.plate.position.y).is_greater_equal(main.size.y)
+
+
+func test_without_the_models_the_painted_figures_stand()->void:
+	Figure3D.enabled=false
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var stage:Control=modal.court_stage
+	assert_bool(stage.three_d).is_false()
+	assert_int(stage.find_children("*","SubViewport",true,false).size()).is_equal(0)
+	for key in _cast(modal):
+		var f:Stage.Figure=stage.figure(key)
+		assert_object(f.body3d).is_null()
+		assert_object(f.painting.texture).is_not_null()
+	Figure3D.enabled=true
+
+
+func test_figures_of_one_colour_share_their_materials()->void:
+	var a:=Figure3D.new();var b:=Figure3D.new()
+	auto_free(a);auto_free(b)
+	var look:={"variant":"female_adult","outfit":"tunic","hair":"bun","skin":Color("9f6a43"),"hair_colour":Color("2b2018"),"cloth":[Color("a8432f"),Color("5b4130"),Color("c9a43c")]}
+	assert_bool(a.setup(look)).is_true()
+	assert_bool(b.setup(look)).is_true()
+	var body_a:=a.model.find_child("Body",true,false) as MeshInstance3D
+	var body_b:=b.model.find_child("Body",true,false) as MeshInstance3D
+	assert_object(body_a.get_surface_override_material(0)).is_same(body_b.get_surface_override_material(0))
+	# One hair, one outfit shown; the rest hidden.
+	var shown:=0
+	for mesh in a.model.find_children("hair_*","MeshInstance3D",true,false):
+		if (mesh as MeshInstance3D).visible:shown+=1
+	assert_int(shown).is_equal(1)
+	for mesh in a.model.find_children("robe_*","MeshInstance3D",true,false):assert_bool((mesh as MeshInstance3D).visible).is_false()
+	for clip in Figure3D.CLIPS:assert_bool(a.player.has_animation(clip)).override_failure_message("missing clip "+clip).is_true()

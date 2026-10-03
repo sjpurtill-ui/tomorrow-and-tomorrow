@@ -269,14 +269,15 @@ def build_hand(fld, f, side):
     L = f.hand_len
     q = _quat_from_axes(along, front)
     fld.union(RoundBox(wr + along * (L * 0.34), (L * 0.27, 0.036 * hs, 0.012 * hs), 0.011 * hs, rot=q), 0.012 * hs)
-    base = wr + along * (L * 0.56)
-    for i, (offset, length, r) in enumerate(((0.025, 0.064, 1.0), (0.004, 0.070, 1.06), (-0.014, 0.064, 1.04), (-0.029, 0.052, 0.94))):
+    base = wr + along * (L * 0.55)
+    for i, (offset, spread, length, r) in enumerate(((0.026, 0.010, 0.062, 1.0), (0.0075, 0.003, 0.068, 1.04),
+                                                      (-0.0105, -0.003, 0.063, 1.0), (-0.027, -0.009, 0.050, 0.90))):
         a = base + front * (offset * hs) - out * (0.002 * hs)
-        b = a + along * (length * hs) - out * (0.010 * hs) + front * (offset * 0.15 * hs)
-        fld.union(RoundCone(a, b, 0.0105 * hs * r, 0.0090 * hs * r), 0.004 * hs if i > 1 else 0.003 * hs)
-    tb = wr + along * (L * 0.20) + front * (0.028 * hs) - out * (0.006 * hs)
-    tt = tb + along * (0.040 * hs) + front * (0.020 * hs) - out * (0.016 * hs)
-    fld.union(RoundCone(tb, tt, 0.0135 * hs, 0.0105 * hs), 0.010 * hs)
+        b = a + along * (length * hs) - out * (0.011 * hs) + front * (spread * hs)
+        fld.union(RoundCone(a, b, 0.0092 * hs * r, 0.0074 * hs * r), 0.0018 * hs)
+    tb = wr + along * (L * 0.18) + front * (0.028 * hs) - out * (0.006 * hs)
+    tt = tb + along * (0.044 * hs) + front * (0.024 * hs) - out * (0.016 * hs)
+    fld.union(RoundCone(tb, tt, 0.0140 * hs, 0.0100 * hs), 0.008 * hs)
 
 
 def build_foot(fld, f, side):
@@ -381,23 +382,34 @@ def decal(name, body, outline, centre, offset, rings=3):
     return obj
 
 
-def _eye_outline(cx, cz, sd, s, female):
-    W = 0.033 * s
-    hu = (0.0090 if female else 0.0082) * s
-    hl = 0.0060 * s
-    tilt = 0.10
+EYE = {"w": 0.037, "up": 0.0100, "up_f": 0.0108, "low": 0.0070, "tilt": 0.08}
+
+
+def _eye_curves(cx, cz, sd, s, female, n=12):
+    """Upper and lower lid lines (inner corner first) of one eye."""
+    W = EYE["w"] * s
+    hu = (EYE["up_f"] if female else EYE["up"]) * s
+    hl = EYE["low"] * s
     up, lo = [], []
-    N = 12
-    for i in range(N + 1):
-        u = i / N
+    for i in range(n + 1):
+        u = i / n
         x = cx + sd * (u - 0.5) * W
-        zt = cz + tilt * (u - 0.5) * W
+        zt = cz + EYE["tilt"] * (u - 0.5) * W
         up.append((x, zt + hu * math.sin(math.pi * u) ** 0.80 * (1.0 + 0.30 * (u - 0.45))))
         lo.append((x, zt - hl * math.sin(math.pi * u) ** 1.15))
+    return up, lo
+
+
+def _eye_outline(cx, cz, sd, s, female):
+    up, lo = _eye_curves(cx, cz, sd, s, female)
     outline = up + lo[-2:0:-1]
     if sd < 0:
         outline = outline[::-1]
     return outline
+
+
+def _oval(cx, cz, rx, rz, n=14):
+    return [(cx + rx * math.cos(2 * math.pi * i / n), cz + rz * math.sin(2 * math.pi * i / n)) for i in range(n)]
 
 
 def _stroke_outline(points, widths):
@@ -426,15 +438,27 @@ def build_face(f, body):
     for side, sd in (("L", 1.0), ("R", -1.0)):
         cx = sd * FACE["eye_x"] * s
         cz = f.face(FACE["eye_u"])
-        eye = decal("Eye_" + side, body, _eye_outline(cx, cz, sd, s, fem), (cx, cz), 0.0011 * s)
-        eye["bone"] = "eye." + side
-        out["eyes"].append(eye)
+        white = decal("EyeWhite_" + side, body, _eye_outline(cx, cz, sd, s, fem), (cx, cz), 0.0010 * s)
+        white["bone"] = "eye." + side
+        out["eyes"].append(white)
+        ix, iz = cx + sd * 0.0010 * s, cz + 0.0010 * s
+        iris = decal("Eye_" + side, body, _oval(ix, iz, 0.0066 * s, 0.0074 * s), (ix, iz), 0.0016 * s, rings=2)
+        iris["bone"] = "eye." + side
+        out["eyes"].append(iris)
+        # the upper lid: a firm line that runs a little past the outer corner
+        up, lo = _eye_curves(cx, cz, sd, s, fem)
+        lid = [(x, z + 0.0004 * s) for x, z in up]
+        lid.append((up[-1][0] + sd * 0.0030 * s, up[-1][1] - 0.0012 * s))
+        widths = [(0.0012 + 0.0016 * math.sin(math.pi * min(1.0, i / (len(lid) - 1) * 1.1))) * s for i in range(len(lid))]
+        lidm = decal("EyeLid_" + side, body, _stroke_outline(lid, widths), lid[len(lid) // 2], 0.0020 * s, rings=1)
+        lidm["bone"] = "eye." + side
+        out["eyes"].append(lidm)
         hit, nor = surface_hit(body, Vector((cx, -1.0, cz)), Vector((0, 1, 0)))
         out["eye_center"][side] = hit if hit is not None else Vector((cx, -0.09 * s, cz))
-        r = 0.0025 * s
-        sx, sz = cx + sd * 0.0050 * s, cz + 0.0026 * s
+        r = 0.0020 * s
+        sx, sz = ix + sd * 0.0026 * s, iz + 0.0030 * s
         ring = [(sx + r * math.cos(a * math.pi / 6), sz + r * math.sin(a * math.pi / 6)) for a in range(12)]
-        shine = decal("EyeShine_" + side, body, ring, (sx, sz), 0.0017 * s, rings=1)
+        shine = decal("EyeShine_" + side, body, ring, (sx, sz), 0.0024 * s, rings=1)
         shine["bone"] = "eye." + side
         shines.append(shine)
         # the brow: thick at the nose end, thinning outward, a slight arch
@@ -445,7 +469,7 @@ def build_face(f, body):
             x = sd * (0.011 + 0.050 * u) * s
             arch = (0.0060 if fem else 0.0042) * math.sin(math.pi * min(1.0, u * 1.15)) - 0.0030 * u
             line.append((x, bz + arch * s))
-            widths.append(((0.0052 if not fem else 0.0040) * (1.0 - u) + 0.0016 * u) * s)
+            widths.append(((0.0072 if not fem else 0.0056) * (1.0 - u) + 0.0022 * u) * s)
         brow = decal("Brow_" + side, body, _stroke_outline(line, widths), line[3], 0.0011 * s, rings=2)
         brow["bone"] = "brow." + side
         out["brows"].append(brow)
@@ -453,7 +477,8 @@ def build_face(f, body):
         out["brow_center"][side] = hb if hb is not None else Vector((line[3][0], -0.088 * s, line[3][1]))
     out["eyes"] += shines
     for e in out["eyes"]:
-        set_material(e, "EYES" if e.name.startswith("Eye_") else "EYE_SHINE")
+        slot = "EYE_WHITE" if e.name.startswith("EyeWhite_") else ("EYE_SHINE" if e.name.startswith("EyeShine_") else "EYES")
+        set_material(e, slot)
     for b in out["brows"]:
         set_material(b, "HAIR")
     # the mouth: lips just parted at rest; the jaw bone opens it
@@ -482,7 +507,7 @@ def build_face(f, body):
 SLOT_DEFAULTS = {
     "SKIN": (0.62, 0.42, 0.30), "HAIR": (0.10, 0.07, 0.05), "CLOTH_A": (0.55, 0.42, 0.28),
     "CLOTH_B": (0.40, 0.27, 0.18), "CLOTH_C": (0.66, 0.30, 0.20), "EYES": (0.035, 0.026, 0.020),
-    "EYE_SHINE": (0.95, 0.92, 0.85), "MOUTH": (0.24, 0.08, 0.07), "LEATHER": (0.30, 0.19, 0.11),
+    "EYE_SHINE": (0.95, 0.92, 0.85), "EYE_WHITE": (0.90, 0.86, 0.78), "MOUTH": (0.24, 0.08, 0.07), "LEATHER": (0.30, 0.19, 0.11),
 }
 
 

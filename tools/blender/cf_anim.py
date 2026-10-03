@@ -202,26 +202,28 @@ def _mouth(t, rate=1.0, amount=1.0, seed=0.0):
 
 
 def clip_talk(t):
-    """Speaking with the right hand: open palm, beats on the words, nods."""
+    """Speaking with the right hand: it comes up open before the chest and
+    beats on the words; the head nods with them and the body leans in."""
     T = 4.0
     p = relaxed()
-    beat = 0.5 + 0.5 * wave(t, T / 3.0, 0.0)
-    small = wave(t, T / 6.0, 0.25)
-    # the right hand comes up, palm open and half up
-    side(p, "upper_arm", "R", rot=(-12 - 4 * beat, 2, -20))
-    side(p, "forearm", "R", rot=(-86 - 12 * beat - 3 * small, -6, 0))
-    side(p, "hand", "R", rot=(10 + 6 * beat, -4, 40 + 8 * small))
-    side(p, "fingers", "R", rot=(0, -26 + 6 * beat, 0))
-    side(p, "index", "R", rot=(0, -20 + 4 * beat, 0))
-    side(p, "thumb", "R", rot=(0, -10, 0))
-    # the body leans a little into it
-    add(p, "spine", rot=(2.0, 0, -3.0 - 1.5 * beat))
-    add(p, "chest", rot=(1.5, 0, -2.0 - 1.5 * beat))
-    nod = max(0.0, wave(t, T / 3.0, 0.1))
-    add(p, "neck", rot=(1.5 * nod, 0, 0))
-    add(p, "head", rot=(4.0 * nod - 1.0, 2.0 * wave(t, T, 0.2), 4.0 * wave(t, T / 2.0, 0.6)))
-    both(p, "brow", lift=0.0025 * beat)
-    return merge(p, breath(t, 4.0, 0.6), weight_shift(t, T, 0.5), _mouth(t), eyes(t, (2.6,)))
+    beat = 0.5 + 0.5 * wave(t, T / 4.0, 0.0)
+    swing = wave(t, T / 2.0, 0.15)
+    side(p, "shoulder", "R", rot=(-4, 4, 0))
+    side(p, "upper_arm", "R", rot=(-30 - 8 * beat, 10 + 6 * swing, -26))
+    side(p, "forearm", "R", rot=(-92 - 18 * beat, -10, 0))
+    side(p, "hand", "R", rot=(18 + 14 * beat, -6, 58 + 14 * swing))
+    side(p, "fingers", "R", rot=(0, -30 + 10 * beat, 0))
+    side(p, "index", "R", rot=(0, -26 + 8 * beat, 0))
+    side(p, "thumb", "R", rot=(0, -16, 0))
+    # the other hand rests, a little forward
+    side(p, "forearm", "L", rot=(-14, 0, 0))
+    add(p, "spine", rot=(3.0, 0, -4.0 - 2.5 * swing))
+    add(p, "chest", rot=(2.5 + 1.5 * beat, 0, -3.5 - 2.0 * swing))
+    nod = max(0.0, wave(t, T / 4.0, 0.12)) ** 1.5
+    add(p, "neck", rot=(2.5 * nod, 0, 0))
+    add(p, "head", rot=(7.0 * nod - 2.0, 3.0 * wave(t, T, 0.2), 6.0 * wave(t, T / 2.0, 0.6)))
+    both(p, "brow", lift=0.0035 * beat)
+    return merge(p, breath(t, 4.0, 0.6), weight_shift(t, T, 0.5), _mouth(t, 1.0, 1.15), eyes(t, (2.6,)))
 
 
 def clip_talk_both(t):
@@ -231,9 +233,9 @@ def clip_talk_both(t):
     beat = 0.5 + 0.5 * wave(t, T / 2.0, 0.0)
     for s, ph in (("L", 0.0), ("R", 0.08)):
         b = 0.5 + 0.5 * wave(t, T / 2.0, ph)
-        side(p, "upper_arm", s, rot=(-16 - 6 * b, 6 + 4 * b, 0))
-        side(p, "forearm", s, rot=(-55 - 14 * b, 8, 0))
-        side(p, "hand", s, rot=(14, 0, 50))
+        side(p, "upper_arm", s, rot=(-22 - 8 * b, 10 + 6 * b, -6))
+        side(p, "forearm", s, rot=(-70 - 18 * b, 8, 0))
+        side(p, "hand", s, rot=(16, 0, 60))
         side(p, "fingers", s, rot=(0, -22, 0))
         side(p, "index", s, rot=(0, -18, 0))
         side(p, "thumb", s, rot=(0, -12, 0))

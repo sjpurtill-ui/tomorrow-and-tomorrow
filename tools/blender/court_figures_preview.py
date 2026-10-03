@@ -196,7 +196,7 @@ def dress(rig, objs, spec, idx):
     skin = skin_at(depth)
     old = variant.endswith("_old")
     cols = {
-        "SKIN": skin, "HAIR": srgb(hair_col), "EYES": srgb("1c140f"), "EYE_SHINE": srgb("f4ead8"),
+        "SKIN": skin, "HAIR": srgb(hair_col), "EYES": srgb("22170f"), "EYE_SHINE": srgb("fbf6ea"), "EYE_WHITE": srgb("e9dfca"),
         "MOUTH": tuple(c * 0.45 for c in skin_at(min(1.0, depth + 0.25))),
         "LEATHER": srgb("5b3b24"),
     }
@@ -207,7 +207,7 @@ def dress(rig, objs, spec, idx):
         cols.update({"CLOTH_A": srgb(dyes[0]), "CLOTH_B": srgb(dyes[1]), "CLOTH_C": srgb(dyes[2])})
     mats = {}
     for slot, c in cols.items():
-        flat = slot in ("EYES", "EYE_SHINE", "MOUTH")
+        flat = slot in ("EYES", "EYE_SHINE", "EYE_WHITE", "MOUTH")
         shade = (0.62, 0.48, 0.44) if slot == "SKIN" else (0.48, 0.40, 0.40)
         mats[slot] = toon("%s_%d" % (slot, idx), c, shade=shade, ao=not flat, flat=flat)
     keep_prefix = {"Body", "Eyes", "Brows", "Mouth", hair, beard}

@@ -1,13 +1,18 @@
 extends Control
-## The court as a stage: the people present stand in the hall as painted
-## figures, and what is said pops up above the one who says it.
+## The court as a stage: the people present stand in the hall as modelled,
+## animated figures, and what is said pops up above the one who says it.
 ## Presentation only. Nothing here decides anything: the hall
 ## (audience_hall.gd) and the court's engines decide, and the Court
 ## (audience_modal.gd) hands each line that was said to this stage.
-##  - Figures: each person's painting (person_portrait.gd art, read through
-##    figure_picture() alone) in a soft arched vignette, standing on the hall
-##    floor. They breathe, turn a little toward whoever speaks, step forward
-##    to speak, walk in when summoned and walk out when they take their leave.
+##  - Figures: each person as a modelled figure (court_figure_3d.gd, made in
+##    Blender by tools/blender/court_figures.py) in their people's colours and
+##    their age's dress, all in one SubViewport behind the stage's plates and
+##    bubbles. How a person looks is read through figure_look() alone (their
+##    people's appearance profile, their sex and age, their people's era).
+##    They breathe, turn to whoever speaks and listen, talk with their hands,
+##    lift their faces when the god speaks, walk in when summoned, kneel in
+##    dread, bow in reverence, and walk out when they take their leave. Where
+##    the models cannot be shown the painted figures of before stand instead.
 ##  - Speech: a paper bubble above the speaker with its tail on them. The
 ##    words come at a reading pace; a click finishes them, a second moves on.
 ##    The bubble before it fades and the one before that goes.
@@ -23,6 +28,11 @@ signal history_requested(ref:int)
 const Self:=preload("res://scripts/hud/court_stage.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
 const Motion:=preload("res://scripts/hud/motion.gd")
+const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
+const Studio:=preload("res://scripts/hud/court_figure_studio.gd")
+const Looks:=preload("res://scripts/people_appearance.gd")
+const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
+const Voice:=preload("res://scripts/character_voice.gd")
 
 const MAIN:="main"
 const BUBBLE_PAPER:=Color("fbf4e4")
@@ -53,6 +63,18 @@ const ENVOY_ATTENDANT_X:=[0.09,0.42]
 const ENVOY_COURT_X:=[0.88,0.70,0.54,0.96]
 ## A figure's width for its height: a standing person, not the whole painting.
 const FIGURE_ASPECT:=0.60
+## The modelled figures: a stage pixel is this many metres of the 3D world,
+## the camera looks a little down, and a figure's box holds a person of
+## Figure3D.REFERENCE_HEIGHT (shorter people stand shorter in it).
+const PX_M:=0.01
+const CAMERA_PITCH:=-7.0
+const FIGURE_FILL:=0.95
+## Room under the feet for the name plate when the figures are modelled.
+const FOOT_ROOM:=40.0
+## The dress of each age of a people (Voice.era_tier): hides, then woven
+## tunics, then robes for those of rank and later for all.
+const ERA_DRESS:=["hide","tunic","tunic","robe"]
+const HIGH_TITLES:=["chief","king","queen","ruler","lord","lady","elder","priest","speaker","steward","envoy","high","prince","headman","headwoman"]
 
 const FIGURE_SHADER:="""
 shader_type canvas_item;
@@ -101,6 +123,12 @@ var _caption:Bubble
 var _caption_age:=0
 var _laid_out:=false
 var _arrivals:Array[String]=[]
+## The modelled figures' layer: one SubViewport for the whole stage.
+var three_d:=false
+var view_container:SubViewportContainer
+var view3d:SubViewport
+var camera:Camera3D
+var _talks:=0
 
 static func figure_shader()->Shader:
 	if _shader==null:
@@ -114,11 +142,104 @@ static func figure_picture(person:Dictionary,screen_registry:Dictionary)->Dictio
 	var slot:Array=Portrait.claim(screen_registry,person)
 	return {"texture":Portrait.slot_texture(person,slot),"flip":slot.size()>1 and bool(slot[1]),"slot":slot}
 
+## The one place the court reads how a person looks as a modelled figure:
+## their people's appearance profile (people_appearance.gd: skin range, hair
+## colours, three dyes), their sex and age, and their people's era for their
+## dress. The same person always looks the same; on one screen (the
+## registry) no two people are dressed and coloured alike.
+static var _era_cache:Dictionary={}
+static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictionary:
+	var owner:=EarlyArt.owner(person)
+	var seed_value:=int(person.get("appearance_world_seed",GameState.world_seed if GameState!=null else 0))
+	var people:Dictionary=Looks.profile(owner,seed_value)
+	var identity:="%s|%d|%s" % [owner,int(person.get("person_id",0)),String(person.get("name","someone"))]
+	var h:=absi(identity.hash())
+	var sex:=String(person.get("sex",""))
+	if not sex in ["male","female"]:sex="female" if (h>>2)%2==1 else "male"
+	var years:=_age_years(person,h)
+	var band:="young" if years<24 else ("old" if years>=56 else "adult")
+	var title:=String(person.get("office_title",person.get("title",""))).to_lower()
+	var high:=false
+	for word:String in HIGH_TITLES:
+		if title.contains(word):high=true;break
+	var tier:=_era_tier(owner)
+	var outfit:=String(ERA_DRESS[clampi(tier,0,ERA_DRESS.size()-1)])
+	if tier==2 and (high or band=="old"):outfit="robe"
+	# Skin within the people's range, hair of their colours, greying with age.
+	var skins:Array=people.get("skin",["bd8659","9f6a43","7d4e2f"])
+	var t:=float((h>>3)%97)/96.0
+	var skin:=Color(String(skins[0])).lerp(Color(String(skins[2])),t) if skins.size()>=3 else Color("bd8659")
+	var hairs:Array=people.get("hair",["2b2018"])
+	var hair_colour:=Color(String(hairs[(h>>5)%maxi(1,hairs.size())]))
+	if years>=56:hair_colour=hair_colour.lerp(Color("b8b2a6"),clampf(float(years-50)/22.0,0.45,0.9))
+	elif years>=44:hair_colour=hair_colour.lerp(Color("8f8a82"),0.22)
+	var words:=String(people.get("hair_words","")).to_lower()
+	var coiled:=words.contains("coil") or words.contains("curl") or words.contains("spring")
+	var styles:Array
+	if sex=="female":styles=["curls","bun","braids","long_framed"] if coiled else ["long_framed","braids","bun","long","tail"]
+	else:styles=["curls","cropped","topknot"] if coiled else ["cropped","long","tail","topknot","cropped"]
+	if band=="old" and sex=="male":styles=["cropped","cropped","long"] if not coiled else ["curls","cropped"]
+	var beard:=""
+	if sex=="male":
+		var roll:=(h>>9)%100
+		if band=="old":beard="beard_long" if roll<45 else ("beard_full" if roll<85 else "")
+		elif band=="adult":beard="beard_full" if roll<30 else ("beard_short" if roll<62 else "")
+		elif roll<12:beard="beard_short"
+	# Each person wears the people's three dyes in their own order.
+	var dyes:Array=people.get("cloth",["a8432f","2f4a6e","c9a43c"])
+	var order:Array=[[0,1,2],[1,2,0],[2,0,1],[0,2,1],[1,0,2],[2,1,0]][(h>>11)%6]
+	var cloth:Array=[]
+	for i in 3:cloth.append(Color(String(dyes[int(order[i])%dyes.size()])))
+	var without:Array=[]
+	if outfit=="hide":
+		# Hides are hides: the dye shows as a stain and in the cord.
+		cloth[0]=Color("9c7a52").lerp(cloth[0],0.28);cloth[1]=Color("6e5541").lerp(cloth[1],0.12)
+		if not (high or band=="old" or (h>>13)%3==0):without.append("hide_cape")
+	var look:={"variant":"%s_%s" % [sex,band],"outfit":outfit,"hair":String(styles[(h>>7)%styles.size()]),"beard":beard,
+		"skin":skin,"hair_colour":hair_colour,"cloth":cloth,"leather":Color("5b3b24").lerp(cloth[1],0.15),"without":without}
+	# Two people on one screen are never dressed and coloured alike.
+	if screen_registry!=null:
+		var taken:Dictionary=screen_registry.get("_look_of",{})
+		if taken.has(identity):return taken[identity]
+		var used:Dictionary=screen_registry.get("_looks",{})
+		var turn:=0
+		while used.has(_look_key(look)) and turn<6:
+			turn+=1
+			look.hair=String(styles[((h>>7)+turn)%styles.size()])
+			look.cloth=[cloth[turn%3],cloth[(turn+1)%3],cloth[(turn+2)%3]]
+		used[_look_key(look)]=true;taken[identity]=look
+		screen_registry["_looks"]=used;screen_registry["_look_of"]=taken
+	return look
+
+static func _look_key(look:Dictionary)->String:
+	return "%s|%s|%s|%s" % [look.variant,look.hair,look.outfit,(look.cloth[0] as Color).to_html(false)]
+
+static func _age_years(person:Dictionary,h:int)->int:
+	var raw:Variant=person.get("age",null)
+	if raw is int or raw is float:return int(raw)
+	match String(raw if raw!=null else "").to_lower():
+		"child","young","youth":return 18
+		"old","oldest","elder","aged":return 66
+		"adult","grown":return 35
+	return 24+(h>>17)%30
+
+static func _era_tier(owner:String)->int:
+	var day:=int(GameState.elapsed_days) if GameState!=null else 0
+	var key:="%s|%d" % [owner,day]
+	if not _era_cache.has(key):
+		if _era_cache.size()>32:_era_cache.clear()
+		_era_cache[key]=Voice.era_tier(Voice.era_tags(owner))
+	return int(_era_cache[key])
+
 ## A small picture of a person (rosters, the history, the envoy channel),
-## read through the same seam as the figures.
+## read through the same seam as the figures: a still of their modelled
+## figure where it can be drawn, their painting where it cannot.
 static func picture_rect(person:Dictionary,screen_registry:Dictionary,width:float,height:float)->TextureRect:
 	var picture:=figure_picture(person,screen_registry)
-	var image:=TextureRect.new();image.name="Portrait";image.texture=picture.texture;image.flip_h=bool(picture.flip)
+	var image:=TextureRect.new();image.name="Portrait";image.flip_h=bool(picture.flip)
+	if Studio.available():
+		image.texture=Studio.still(figure_look(person,screen_registry),"bust",picture.texture);image.flip_h=false
+	else:image.texture=picture.texture
 	image.custom_minimum_size=Vector2(width,height);image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
 	image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;image.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	image.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
@@ -126,12 +247,17 @@ static func picture_rect(person:Dictionary,screen_registry:Dictionary,width:floa
 	image.set_meta("figure_slot",picture.slot)
 	return image
 
-## A standing figure on its own (the court at rest seats them about the fire).
+## A standing figure on its own (the court at rest seats them about the fire):
+## a still of their modelled figure where it can be drawn, else their painting.
 static func make_figure(person:Dictionary,screen_registry:Dictionary,name_text:String="",title_text:String="",big:=false)->Figure:
 	var made:=Figure.new()
 	made.person=person
 	var picture:=figure_picture(person,screen_registry)
-	made.painting.texture=picture.texture;made.painting.flip=bool(picture.flip)
+	if Studio.available():
+		made.painting.cutout=true
+		made.painting.texture=Studio.still(figure_look(person,screen_registry),"full",picture.texture)
+	else:
+		made.painting.texture=picture.texture;made.painting.flip=bool(picture.flip)
 	made.set_names(name_text,title_text,big)
 	return made
 
@@ -149,8 +275,44 @@ func _init()->void:
 	name="CourtStage"
 	mouse_filter=Control.MOUSE_FILTER_STOP
 	clip_contents=true
+	three_d=Figure3D.available()
+	if three_d:_make_view()
 	figure_layer=_layer("Figures");god_layer=_layer("FromAbove");bubble_layer=_layer("Bubbles");caption_layer=_layer("Captions")
 	resized.connect(_on_resized)
+
+## One transparent SubViewport under the plates and bubbles: every modelled
+## figure on this stage stands in it, seen by one camera that maps the
+## stage's pixels onto the hall (layout() still decides where people stand).
+func _make_view()->void:
+	view_container=SubViewportContainer.new();view_container.name="Figures3D";view_container.stretch=true
+	view_container.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	add_child(view_container);view_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	view3d=SubViewport.new();view3d.name="Hall3D";view3d.transparent_bg=true;view3d.own_world_3d=true
+	view3d.msaa_3d=Viewport.MSAA_4X;view3d.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE
+	view3d.size=Vector2i(64,64)
+	view_container.add_child(view3d)
+	camera=Camera3D.new();camera.name="Camera";camera.projection=Camera3D.PROJECTION_ORTHOGONAL
+	camera.near=0.5;camera.far=200.0;camera.current=true
+	view3d.add_child(camera)
+	_frame_camera()
+
+func _frame_camera()->void:
+	if camera==null:return
+	var w:=maxf(size.x,64.0);var h:=maxf(size.y,64.0)
+	camera.size=h*PX_M
+	camera.rotation_degrees=Vector3(CAMERA_PITCH,0.0,0.0)
+	camera.position=Vector3(w*.5*PX_M,-h*.5*PX_M,0.0)+camera.basis.z*80.0
+
+## Where a stage pixel lies in the hall, this far from the camera.
+func stage_to_world(px:Vector2,depth:float)->Vector3:
+	if camera==null or not camera.is_inside_tree():
+		return Vector3(px.x*PX_M,-px.y*PX_M,80.0-depth)
+	return camera.project_position(px,depth)
+
+## Where a point of the hall shows on the stage.
+func world_to_stage(point:Vector3)->Vector2:
+	if camera==null or not camera.is_inside_tree():return Vector2(point.x/PX_M,-point.y/PX_M)
+	return camera.unproject_position(point)
 
 func _layer(layer_name:String)->Control:
 	var layer:=Control.new();layer.name=layer_name;layer.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -191,12 +353,67 @@ func add_figure(key:String,person:Dictionary,role:String,name_text:String="",tit
 	var tip:=name_text if title_text.is_empty() else "%s · %s" % [name_text,title_text]
 	f.tooltip_text=tip if not tip.is_empty() else String(person.get("name",""))
 	figure_layer.add_child(f)
+	if three_d:_embody(f)
 	figures[key]=f;cast_order.append(key)
 	if enter:_arrivals.append(key)
 	if _laid_out:
 		layout(true)
 		_run_arrivals()
 	return f
+
+## Gives a figure its modelled body in the hall (and its shade on the floor).
+func _embody(f:Figure)->void:
+	var body:=Figure3D.new();body.name="Body_"+node_key(f.key)
+	if not body.setup(figure_look(f.person,registry)):
+		body.free();return
+	view3d.add_child(body)
+	var shade:=MeshInstance3D.new();shade.name="Shade_"+node_key(f.key)
+	shade.mesh=_shade_mesh();shade.material_override=_shade_material()
+	shade.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	view3d.add_child(shade)
+	f.attach_body(body,shade,self)
+
+static var _shade_quad:QuadMesh
+static var _shade_mat:ShaderMaterial
+static func _shade_mesh()->QuadMesh:
+	if _shade_quad==null:
+		_shade_quad=QuadMesh.new();_shade_quad.size=Vector2(0.95,0.26)
+	return _shade_quad
+
+static func _shade_material()->ShaderMaterial:
+	## A soft pool of shade where a figure stands, under it on the floor.
+	if _shade_mat==null:
+		_shade_mat=ShaderMaterial.new();_shade_mat.shader=Shader.new()
+		_shade_mat.shader.code="shader_type spatial;render_mode unshaded,blend_mix,depth_draw_never,cull_disabled;void fragment(){vec2 p=(UV-0.5)*2.0;float d=length(p);ALBEDO=vec3(0.16,0.11,0.07);ALPHA=0.40*(1.0-smoothstep(0.2,1.0,d));}"
+	return _shade_mat
+
+## The one before the god (or anyone here) shows what they feel at once:
+## "dread" they go down on one knee and stay there; "reverence" they bow;
+## "point" and "order" a gesture. The engine decided what happened; this is
+## only how it looks.
+func react(key:String,mood:String)->void:
+	var f:=figure(key)
+	if f==null or f.leaving:return
+	match mood:
+		"dread":f.gesture("kneel",true)
+		"reverence":f.gesture("bow")
+		"point":f.gesture("point")
+		"order":f.gesture("raise_hand")
+
+## What the god's wrath or favour looks like on the one before the god.
+static func divine_mood(action:String)->String:
+	if action in ["terrify","penance","rebuke","threaten"]:return "dread"
+	if action in ["bless","boon","raise_up","honour","honor","reward"]:return "reverence"
+	return ""
+
+## A direction in the hall ("[He bows and sends for the tally-keeper.]") is
+## acted out by the one before the god.
+static func gesture_in(words:String)->String:
+	var low:=words.to_lower()
+	for pair:Array in [["kneel","dread"],["on his knees","dread"],["on her knees","dread"],["prostrat","dread"],["falls to","dread"],["cower","dread"],["trembl","dread"],
+			["bows","reverence"],["bow ","reverence"],["bowing","reverence"],["points","point"],["raises a hand","order"],["lifts a hand","order"]]:
+		if low.contains(String(pair[0])):return String(pair[1])
+	return ""
 
 ## They walk in from the side (the threshold) once the stage has a size.
 func arrive(keys:Array)->void:
@@ -210,7 +427,10 @@ func _run_arrivals()->void:
 		var f:=figure(key)
 		if f==null:continue
 		var side:=-1.0 if f.home.x<size.x*.6 else 1.0
-		f.enter_from(side,maxf(size.x*.35,f.size.x*1.6),index*0.18)
+		# A modelled figure walks in from beyond the edge of the stage.
+		var distance:=maxf(size.x*.35,f.size.x*1.6)
+		if f.body3d!=null:distance=(f.home.x+f.size.x) if side<0.0 else (size.x-f.home.x+f.size.x)
+		f.enter_from(side,distance,index*0.18)
 		index+=1
 	_arrivals.clear()
 
@@ -229,7 +449,9 @@ func conclude(delay:float=1.4,style:="bow")->void:
 		if f==null or f.leaving or not f.role in [MAIN,"attendant"]:continue
 		# Their company is not struck down with them: they are sent away.
 		var own:=style if f.role==MAIN or style!="fall" else "led"
-		f.leave(-1.0,maxf(size.x*.4,f.size.x*2.0),delay+index*0.2,own)
+		var distance:=maxf(size.x*.4,f.size.x*2.0)
+		if f.body3d!=null:distance=f.home.x+f.size.x
+		f.leave(-1.0,distance,delay+index*0.2,own)
 		index+=1
 	var thought:=thinking
 	if is_instance_valid(thought):thought.visible=false
@@ -244,6 +466,7 @@ func set_insets(top:float,right:float)->void:
 
 func _on_resized()->void:
 	if size.x<40 or size.y<40:return
+	_frame_camera()
 	layout(false)
 	var first:=not _laid_out
 	_laid_out=true
@@ -256,11 +479,15 @@ func _on_resized()->void:
 func layout(animate:bool)->void:
 	var w:=size.x;var h:=size.y
 	if w<40 or h<40:return
-	var room:=maxf(h-top_inset,60.0)
-	var main_h:=clampf(room*(.78 if layout_kind=="home" else .74),70.0,600.0)
+	# Modelled figures stand above their name plates, not behind them.
+	var foot_room:=FOOT_ROOM if three_d else 0.0
+	var room:=maxf(h-top_inset-foot_room,60.0)
+	# A modelled figure has no painted ground about it: it may fill more.
+	var fill:=(.88 if layout_kind=="home" else .84) if three_d else (.78 if layout_kind=="home" else .74)
+	var main_h:=clampf(room*fill,70.0,600.0)
 	var court_h:=main_h*.74
-	var front:=h-6.0
-	var back:=h-room*.07
+	var front:=h-6.0-foot_room
+	var back:=h-foot_room-room*.07
 	var usable:=_usable_width()
 	var slots:Array=HOME_COURT_X if layout_kind=="home" else ENVOY_COURT_X
 	var court_index:=0;var attendant_index:=0
@@ -285,6 +512,9 @@ func layout(animate:bool)->void:
 				court_index+=1
 		var fw:=fh*FIGURE_ASPECT
 		x=clampf(x,fw*.5+4.0,maxf(fw*.5+4.0,usable-fw*.5-4.0))
+		# Those standing about turn a little toward the middle of the hall.
+		var lean:=clampf((usable*.5-x)/maxf(usable,1.0),-.5,.5)
+		f.rest_yaw=lean*(36.0 if f.role==MAIN else 64.0)
 		f.place(Vector2(x,foot),Vector2(fw,fh),animate)
 	# The nearer stand in front of the further.
 	var ordered:Array=figure_layer.get_children()
@@ -321,7 +551,8 @@ func say(key:String,text:String,aside:=false,animate:=true,ref:=-1)->Label:
 		_drop(_god,animate);_drop(_rays,animate);_god=null;_rays=null
 	if is_instance_valid(_caption) and _caption.get_rect().intersects(bubble.get_rect()):
 		_drop(_caption,animate);_caption=null
-	_turn_to(key)
+	_talks+=1
+	_turn_to(key,reveal_time(text)+0.5 if animate else 0.9)
 	if animate:bubble.pop_in()
 	return bubble.label
 
@@ -373,6 +604,10 @@ func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="")->La
 	_fit_bubble(_caption)
 	_place_caption()
 	if animate:_caption.rise_in()
+	# What the hall shows ("he kneels", "she bows") the one before the god does.
+	if kind=="direction":
+		var mood:=gesture_in(words)
+		if not mood.is_empty():react(MAIN,mood)
 	return _caption.label
 
 ## Everything shown at once (a test, or the player skipping ahead): no tween
@@ -426,13 +661,14 @@ func _fit_bubble(bubble:Bubble)->void:
 		"caption":bubble.fit(_caption_widths(),maxf(free*.38,48.0))
 		_:bubble.fit(_bubble_widths(bubble),free)
 
-func _turn_to(key:String)->void:
+func _turn_to(key:String,talk_time:=1.5)->void:
 	var speaker:=figure(key)
 	if speaker==null:return
 	for other_key in cast_order:
 		var f:=figure(other_key)
 		if f==null or f.leaving:continue
-		if other_key==key:f.speak()
+		# Long words come with both hands now and then.
+		if other_key==key:f.speak(talk_time,_talks%3==0 and talk_time>2.2)
 		else:f.listen_toward(speaker.home.x)
 
 func _age_bubbles(fresh:Bubble,animate:bool)->void:
@@ -477,7 +713,11 @@ func _drop(item:Control,animate:bool)->void:
 # --- Placement ------------------------------------------------------------------
 
 func head_point(f:Figure)->Vector2:
-	## Just over the head: the paintings put faces in their upper part.
+	## Just over the head: a modelled figure's own head as it stands now; the
+	## paintings put faces in their upper part.
+	if f.body3d!=null and is_instance_valid(f.body3d) and f.body3d.is_inside_tree():
+		# Where they will stand: words said while walking in hang over their place.
+		return world_to_stage(f.body3d.head_top())+Vector2(-f.walk,-4.0)
 	return Vector2(f.home.x,f.home.y-f.size.y*.94)
 
 func _place_bubble(bubble:Bubble)->void:
@@ -495,13 +735,24 @@ func _place_bubble(bubble:Bubble)->void:
 		bubble.position=Vector2(x,above)
 		bubble.tail_side="down";bubble.tip=Vector2(head.x-x,bs.y+TAIL)
 	else:
-		# No room above: beside the head, toward the middle of the stage.
-		var face:=Vector2(head.x,f.home.y-f.size.y*.80)
+		# No room above: beside the head, toward the middle of the stage, or
+		# the other way if that side would hide someone else's face.
+		var face:=Vector2(head.x,head.y+f.size.y*.14)
 		var to_right:=face.x<right*.5
 		var reach:=f.size.x*.30
-		var x:=face.x+reach+TAIL if to_right else face.x-reach-TAIL-bs.x
-		x=clampf(x,8.0,maxf(8.0,right-bs.x-8.0))
-		var y:=clampf(face.y-bs.y*.5,top_min,maxf(top_min,h-bs.y-8.0))
+		var x:=0.0;var y:=0.0
+		var best:=INF
+		for side_right:bool in [to_right,not to_right]:
+			var cx:=face.x+reach+TAIL if side_right else face.x-reach-TAIL-bs.x
+			cx=clampf(cx,8.0,maxf(8.0,right-bs.x-8.0))
+			var cy:=clampf(face.y-bs.y*.5,top_min,maxf(top_min,h-bs.y-8.0))
+			# Lift it clear of faces it would cover, as far as the room allows.
+			for face_rect:Rect2 in _faces_except(bubble.speaker):
+				if Rect2(Vector2(cx,cy),bs).intersects(face_rect):cy=maxf(top_min,minf(cy,face_rect.position.y-bs.y-4.0))
+			var hidden:=0.0
+			for face_rect:Rect2 in _faces_except(bubble.speaker):hidden+=Rect2(Vector2(cx,cy),bs).intersection(face_rect).get_area()
+			if hidden<best-1.0:
+				best=hidden;x=cx;y=cy;to_right=side_right
 		bubble.position=Vector2(x,y)
 		bubble.tail_side="left" if to_right else "right"
 		bubble.tip=Vector2(face.x+reach-x,face.y-y) if to_right else Vector2(face.x-reach-x,face.y-y)
@@ -510,6 +761,16 @@ func _place_bubble(bubble:Bubble)->void:
 	bubble.pivot_offset=bubble.tip.clamp(Vector2.ZERO,bs)
 	bubble.home_y=0.0
 	bubble.queue_redraw()
+
+## The faces of everyone standing here but one, as stage rectangles.
+func _faces_except(key:String)->Array[Rect2]:
+	var out:Array[Rect2]=[]
+	for other in cast_order:
+		var o:=figure(other)
+		if o==null or o.leaving or other==key:continue
+		var top:=head_point(o)
+		out.append(Rect2(top.x-o.size.x*.22,top.y,o.size.x*.44,o.size.y*.24))
+	return out
 
 func _place_god()->void:
 	if not is_instance_valid(_god):return
@@ -530,7 +791,8 @@ func _place_thinking()->void:
 	if f==null or f.leaving:
 		thinking.position=Vector2((_usable_width()-thinking.size.x)*.5,size.y-thinking.size.y-12.0).round();return
 	# Beside their face, so it never sits on the words they just said.
-	var face:=Vector2(f.home.x+f.size.x*.36,f.home.y-f.size.y*.80)
+	var head:=head_point(f)
+	var face:=Vector2(head.x+f.size.x*.36,head.y+f.size.y*.14)
 	thinking.position=Vector2(clampf(face.x,8.0,maxf(8.0,_usable_width()-thinking.size.x-8.0)),clampf(face.y-thinking.size.y*.5,top_inset+6.0,maxf(top_inset+6.0,size.y-thinking.size.y-8.0))).round()
 
 ## The stage changed size: every bubble is fitted again to the new room and
@@ -563,9 +825,21 @@ class Figure extends Control:
 	## Where layout puts them, and how far off it they are while walking in or
 	## out: a relayout and a walk never fight over the position.
 	var base_pos:=Vector2.ZERO:
-		set(value):base_pos=value;position=base_pos+Vector2(walk,0.0)
+		set(value):base_pos=value;position=base_pos+Vector2(walk,0.0);_sync()
 	var walk:=0.0:
-		set(value):walk=value;position=base_pos+Vector2(walk,0.0)
+		set(value):walk=value;position=base_pos+Vector2(walk,0.0);_sync()
+	## The modelled body this figure moves (null: the painting stands instead),
+	## its shade on the floor and the stage that maps pixels to the hall.
+	var body3d:Node3D
+	var shade3d:MeshInstance3D
+	var _stage:WeakRef
+	## What they do when nothing is asked of them, and which way they face.
+	var rest_clip:="idle"
+	var rest_yaw:=0.0
+	## How far they have sunk (put to death where they stood), in metres.
+	var sink:=0.0:
+		set(value):sink=value;_sync()
+	var _act:Tween
 	var _shift:Tween
 	var _idle:Tween
 	var _sway:Tween
@@ -590,6 +864,63 @@ class Figure extends Control:
 	func _ready()->void:
 		_fit()
 		if idle:start_idle()
+
+	## The figure moves a modelled body from now on; the painting steps aside.
+	func attach_body(body:Node3D,shade:MeshInstance3D,stage:Control)->void:
+		body3d=body;shade3d=shade;_stage=weakref(stage)
+		painting.visible=false
+		var h:=absi(String(person.get("name",key)).hash())
+		rest_clip="idle_clasped" if role=="court" and h%3!=0 else "idle"
+		body3d.play(rest_clip,0.0,float(h%600)/100.0)
+		_sync();queue_redraw()
+
+	func _sync()->void:
+		## Puts the body where the layout puts this figure: feet on the foot
+		## point, as tall as the box holds a person, nearer when lower.
+		if body3d==null or not is_instance_valid(body3d) or _stage==null:return
+		var stage:=_stage.get_ref() as Control
+		if stage==null or size.y<2.0:return
+		var foot:=position+Vector2(size.x*.5,size.y)
+		var depth:=80.0+(stage.size.y*.5-foot.y)*0.06
+		var at:Vector3=stage.stage_to_world(foot,depth)
+		var fill:=size.y*Self.FIGURE_FILL*Self.PX_M/(Self.Figure3D.REFERENCE_HEIGHT*cos(deg_to_rad(Self.CAMERA_PITCH)))
+		body3d.position=at+Vector3(0.0,-sink*fill,0.0)
+		body3d.scale=Vector3.ONE*fill
+		if is_instance_valid(shade3d):
+			shade3d.position=at+Vector3(0.0,0.02*fill,-0.35*fill)
+			shade3d.rotation_degrees.x=Self.CAMERA_PITCH
+			shade3d.scale=Vector3.ONE*fill
+
+	func _clip(name:String,blend:=0.3,at:=-1.0)->void:
+		if body3d!=null and is_instance_valid(body3d):body3d.play(name,blend,at)
+
+	func _light(amount:float)->void:
+		if body3d!=null and is_instance_valid(body3d):body3d.set_light(amount)
+
+	func _settle_in()->void:
+		## Back to standing at rest, facing the hall.
+		if body3d==null or leaving:return
+		body3d.face(rest_yaw,0.35)
+		_clip(rest_clip,0.45)
+
+	func _later(seconds:float,what:Callable)->void:
+		## One thing after a while (it replaces whatever was waiting).
+		if _act and _act.is_valid():_act.kill()
+		if not is_inside_tree():return
+		_act=create_tween();_act.tween_interval(maxf(seconds,0.0));_act.tween_callback(what)
+
+	## A gesture now: "bow", "point", "raise_hand" (then back to rest), or
+	## "kneel" (hold: they stay down until something else is asked of them).
+	func gesture(clip:String,hold:=false)->void:
+		if leaving:return
+		if body3d==null:
+			# The painting dips: down for dread, a nod for reverence.
+			_pose(0.0,0.0,0.92 if clip=="kneel" else 0.98,Color(.95,.93,.9))
+			return
+		if _act and _act.is_valid():_act.kill()
+		body3d.face(rest_yaw*.5,0.25)
+		_clip(clip,0.3,0.0)
+		if not hold:_later(body3d.clip_length(clip)+0.1,_settle_in)
 
 	func set_names(name_text:String,title_text:String,big:=false)->void:
 		for child in plate_box.get_children():plate_box.remove_child(child);child.queue_free()
@@ -620,10 +951,17 @@ class Figure extends Control:
 
 	func _place_plate()->void:
 		plate.size=plate.get_combined_minimum_size()
-		plate.position=Vector2((size.x-plate.size.x)*.5,size.y-plate.size.y-2.0).round()
+		# A still of a modelled figure stands above its plate, not behind it.
+		if painting.cutout and plate.visible:
+			painting.size=Vector2(size.x,maxf(size.y-plate.size.y-4.0,size.y*.5))
+			painting.pivot_offset=Vector2(painting.size.x*.5,painting.size.y)
+		# Under a modelled figure's feet; over a painting's lower edge.
+		var y:=size.y+4.0 if body3d!=null else size.y-plate.size.y-2.0
+		plate.position=Vector2((size.x-plate.size.x)*.5,y).round()
 
 	func _draw()->void:
-		if _shadow.size()>2:draw_colored_polygon(_shadow,Color(0,0,0,.30))
+		# A modelled figure has its own shade on the floor of the hall.
+		if body3d==null and _shadow.size()>2:draw_colored_polygon(_shadow,Color(0,0,0,.30))
 
 	## Stand at a place: feet at `foot` (the parent's pixels), this tall.
 	func place(foot:Vector2,box:Vector2,animate:bool)->void:
@@ -636,10 +974,13 @@ class Figure extends Control:
 			_shift=create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 			_shift.tween_property(self,"base_pos",target,Motion.duration(Motion.SLOW))
 		else:base_pos=target
+		if body3d!=null and not leaving and walk==0.0:body3d.face(rest_yaw,0.3 if animate else 0.0)
+		_sync()
 
 	func start_idle()->void:
-		## Breathing and a slow sway, a little different for each.
-		if Motion.reduced() or not is_inside_tree():return
+		## Breathing and a slow sway, a little different for each (a modelled
+		## figure breathes in its own clip).
+		if body3d!=null or Motion.reduced() or not is_inside_tree():return
 		var seed_value:=float(absi(String(person.get("name",key)).hash())%997)/997.0
 		var breath:=1.8+seed_value*.7
 		_idle=create_tween().set_loops()
@@ -662,9 +1003,17 @@ class Figure extends Control:
 		_lean.tween_property(rig,"modulate",light,time)
 
 	## They speak: a step forward into the light and a small lift, as with a
-	## gesture on the first words.
-	func speak()->void:
+	## gesture on the first words. A modelled figure talks with its hands and
+	## mouth for as long as the words take, then stands at rest again.
+	func speak(seconds:=1.5,both_hands:=false)->void:
 		if leaving:return
+		if body3d!=null:
+			body3d.face(rest_yaw*.4,0.3)
+			_clip("talk_both" if both_hands else "talk",0.3)
+			_light(1.06)
+			_later(seconds,func()->void:
+				_clip(rest_clip,0.5);_light(1.0))
+			return
 		_pose(0.0,0.0,1.035,Color(1.07,1.05,1.0))
 		if not is_inside_tree() or Motion.reduced():return
 		if _bob and _bob.is_valid():_bob.kill()
@@ -677,12 +1026,25 @@ class Figure extends Control:
 	## Someone else speaks: they turn a little toward them and listen.
 	func listen_toward(x:float)->void:
 		if leaving:return
+		if body3d!=null:
+			if _act and _act.is_valid():_act.kill()
+			# Facing the hall, the speaker on the right is on their left.
+			body3d.face(rest_yaw,0.3)
+			_clip("listen_l" if x>home.x else "listen_r",0.4)
+			_light(0.93)
+			return
 		var side:=signf(x-home.x)
 		_pose(deg_to_rad(1.6)*side,4.0*side,1.0,Color(.90,.89,.87))
 
 	## The god speaks: every face lifts toward the voice.
 	func look_up()->void:
 		if leaving:return
+		if body3d!=null:
+			if _act and _act.is_valid():_act.kill()
+			body3d.face(rest_yaw*.3,0.4)
+			_clip("look_up",0.5)
+			_light(1.03)
+			return
 		_pose(0.0,0.0,1.0,Color(1.03,1.02,.98))
 		if not is_inside_tree() or Motion.reduced():return
 		if _bob and _bob.is_valid():_bob.kill()
@@ -694,6 +1056,8 @@ class Figure extends Control:
 	func enter_from(side:float,distance:float,delay:float=0.0)->void:
 		if not is_inside_tree():return
 		if _move and _move.is_valid():_move.kill()
+		if body3d!=null:
+			_walk_in(side,distance,delay);return
 		modulate.a=0.0
 		if Motion.reduced():
 			walk=0.0
@@ -718,6 +1082,8 @@ class Figure extends Control:
 		if _move and _move.is_valid():_move.kill()
 		if _lean and _lean.is_valid():_lean.kill()
 		if _bob and _bob.is_valid():_bob.kill()
+		if body3d!=null:
+			_walk_out(side,distance,delay,style);return
 		_move=create_tween()
 		if delay>0.0:_move.tween_interval(delay)
 		if Motion.reduced():
@@ -754,6 +1120,75 @@ class Figure extends Control:
 	func finish_moves()->void:
 		for tween in [_shift,_move,_bob,_lean]:
 			if tween!=null and (tween as Tween).is_valid():(tween as Tween).custom_step(30.0)
+		if body3d!=null and is_instance_valid(body3d):
+			if leaving:
+				if exit_style!="fall":walk=-maxf(home.x+size.x,1.0)
+				body3d.visible=false
+				if is_instance_valid(shade3d):shade3d.visible=false
+			elif walk!=0.0:
+				walk=0.0;_settle_in()
+
+	func _vanish()->void:
+		if body3d!=null and is_instance_valid(body3d):body3d.visible=false
+		if is_instance_valid(shade3d):shade3d.visible=false
+
+	## A modelled figure walks in from beyond the edge, turned the way it
+	## goes, at its walking pace; then turns to the hall and stands at rest.
+	func _walk_in(side:float,distance:float,delay:float)->void:
+		modulate.a=0.0
+		walk=side*distance
+		if Motion.reduced():
+			walk=0.0;_settle_in()
+			_move=create_tween();_move.tween_property(self,"modulate:a",1.0,Motion.duration(Motion.BASE))
+			return
+		var pace:=maxf(size.y*Self.FIGURE_FILL/Self.Figure3D.REFERENCE_HEIGHT*float(Self.Figure3D.WALK_SPEED.walk_in),1.0)
+		var time:=clampf(distance/pace,0.8,3.6)
+		body3d.face(-82.0*side,0.0)
+		_clip("walk_in",0.0,0.0)
+		_move=create_tween()
+		if delay>0.0:_move.tween_interval(delay)
+		_move.tween_property(self,"walk",0.0,time)
+		_move.parallel().tween_property(self,"modulate:a",1.0,Motion.SLOW)
+		_move.tween_callback(_settle_in)
+
+	## How each leaves: "bow" bows, then turns and walks out; "storm" turns on
+	## the spot and strides off; "led" goes down on one knee, then is taken out
+	## head bowed and in shadow; "fall" goes down where they stand and sinks.
+	func _walk_out(side:float,distance:float,delay:float,style:String)->void:
+		if _act and _act.is_valid():_act.kill()
+		_move=create_tween()
+		if delay>0.0:_move.tween_interval(delay)
+		if Motion.reduced():
+			_move.tween_property(self,"modulate:a",0.0,Motion.duration(Motion.BASE))
+			_move.tween_callback(_vanish)
+			return
+		var pace:=maxf(size.y*Self.FIGURE_FILL/Self.Figure3D.REFERENCE_HEIGHT,1.0)
+		match style:
+			"fall":
+				_move.tween_callback(func()->void:body3d.face(rest_yaw*.3,0.3);_clip("kneel",0.3,0.0))
+				_move.tween_interval(1.3)
+				_move.tween_callback(func()->void:_light(0.55))
+				_move.tween_property(self,"sink",0.55,1.1).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+				_move.parallel().tween_property(self,"modulate:a",0.0,0.8)
+				_move.tween_callback(_vanish)
+				return
+			"led":
+				_move.tween_callback(func()->void:_clip("kneel",0.3,0.0);_light(0.78))
+				_move.tween_interval(1.1)
+				_move.tween_callback(func()->void:body3d.face(82.0*side,0.25);_clip("walk_out",0.3,0.0);_light(0.66))
+				pace*=float(Self.Figure3D.WALK_SPEED.walk_out)*1.25
+			"storm":
+				_move.tween_callback(func()->void:body3d.face(82.0*side,0.2);_clip("walk_in",0.25,0.0))
+				pace*=float(Self.Figure3D.WALK_SPEED.walk_in)*1.2
+			_:
+				_move.tween_callback(func()->void:body3d.face(rest_yaw*.2,0.25);_clip("bow",0.3,0.0))
+				_move.tween_interval(2.35)
+				_move.tween_callback(func()->void:body3d.face(82.0*side,0.35);_clip("walk_out",0.35,0.0))
+				pace*=float(Self.Figure3D.WALK_SPEED.walk_out)
+		var time:=clampf(distance/maxf(pace,1.0),0.9,4.0)
+		_move.tween_property(self,"walk",side*distance,time)
+		_move.parallel().tween_property(self,"modulate:a",0.0,0.4).set_delay(maxf(time-0.4,0.0))
+		_move.tween_callback(_vanish)
 
 	func _steps(delay:float,time:float)->void:
 		## The small rise and fall of walking.
@@ -776,6 +1211,9 @@ class Painting extends Control:
 		set(value):flip=value;queue_redraw()
 	## Which part of the picture to keep when it must be cropped.
 	var focus:=Vector2(.5,.16)
+	## A still of a modelled figure: drawn whole, feet on the floor, no vignette.
+	var cutout:=false:
+		set(value):cutout=value;material=null if cutout else _material;queue_redraw()
 	var _material:ShaderMaterial
 
 	func _init()->void:
@@ -791,6 +1229,11 @@ class Painting extends Control:
 		if texture==null or size.x<2.0 or size.y<2.0:return
 		var tex:=texture.get_size()
 		if tex.x<=0.0 or tex.y<=0.0:return
+		if cutout:
+			var fit:=minf(size.x/tex.x,size.y/tex.y)
+			var shown:=tex*fit
+			draw_texture_rect(texture,Rect2(Vector2((size.x-shown.x)*.5,size.y-shown.y),shown),false)
+			return
 		var aspect:=size.x/size.y
 		var source:=Rect2(Vector2.ZERO,tex)
 		if tex.x/tex.y>aspect:
