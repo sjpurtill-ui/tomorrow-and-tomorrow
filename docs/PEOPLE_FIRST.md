@@ -79,14 +79,16 @@ Read first: `AGENTS.md`, `docs/ADJUDICATION.md` (one ledger, stated odds, seeded
 | learning | 223 | 190 |
 
   - The learning path learns about 3.5 times a balanced people. It keeps 4 times the learners (8 against 2 at year 16), and every learner counts.
-- **Fast sim (leaders' tempers, 3 seeds; main / recalibrated).** Ways learned by year 16, then pit firing, copper, writing, bronze and place value years, then population at 150 / 300 / 600:
+- **Fast sim (#120's recalibrated sim; main → recalibrated).**
 
-| Temper | Main | Recalibrated |
-|---|---|---|
-| balanced | 50; 65 / 129 / 221 / 328 / 473; 262 / 1,380 / 28,128 | 30; 103 / 188 / 238 / 334 / 476; 199 / 921 / 25,399 |
-| open-scholarly (learning) | 180; 17 / 54 / 189 / 295 / 429; 266 / 998 / 20,659 | 126; 18 / 60 / 199 / 308 / 445; 274 / 1,058 / 21,989 |
+| Scenario | Ways learned by year 16 | Writing / bronze / place value | Population at 150 / 300 / 600 |
+|---|---|---|---|
+| sensible (5%), 2 seeds | 77 → 46 | 212 / 324 / 475 → 213 / 324 / 475 | 516 / 1,166 / 3,893 → 466 / 1,166 / 3,893 |
+| research (17.6%) | — | 172 / 277 / 420 → 171 / 274 / 425 | 335 / 1,069 / 3,639 → 361 / 1,073 / 3,636 |
+| research_heavy (35%) | — | 168 / 279 / 418 → 175 / 280 / 421 | 123 / 166 / 308 → 135 / 195 / 390 |
 
-  - Writing, bronze and place value hold their bands. Pit firing and copper come later, and the first centuries grow more slowly. The fast sim's early research runs about 1.5 times slower than the engine's (balanced: 50 against 76 learned by year 16 on main), so it shows the early cost larger than the game will.
+  - Pit firing and copper come later for sensible, but copper stays in its band (60-125).
+  - **Path suite (3 seeds, 600 years).** Balanced and growth are unchanged at 300 and 600. Growth-then-learning catches up as before (1,175 known by 600, against 1,178 on main). Learning-then-growth reaches 3,853 people by 600 (3,846 on main).
 
 ### B. Fresh food, small stores, keepers and carers (owner: `food_system.gd`, `consequence_engine.gd` food-security/health/early-life targets, `early_life_conditions.gd` care coverage, `realm_purse.gd LEVY_KEEP_DAYS`)
 - **No more giant stores.**
