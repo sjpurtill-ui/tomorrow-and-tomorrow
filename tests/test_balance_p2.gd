@@ -35,12 +35,15 @@ func before_test()->void:
 	DiscoverySystem.learning_lead=0.0
 
 func after_test()->void:
+	SettlementModel.reset_for_new_world()
 	WorldSimulation.clear()
 
-## No learners, and `heads` keeping watch.
+## No learners, and `heads` keeping watch: the day's reckoning of the watch
+## (society_model.gd settle_watch), then a recompute.
 func _watch(heads:int)->void:
 	GameState.population_allocations["Knowledge"]=0
 	GameState.population_allocations["Defense"]=maxi(0,heads)
+	DiscoverySystem.society_model.settle_watch()
 	DiscoverySystem.society_model._rebuild_effect_totals(DiscoverySystem.catalog)
 
 # --- 1. The learning trap ------------------------------------------------------------
@@ -133,6 +136,45 @@ func test_the_people_view_tells_the_watchs_upkeep_in_heads()->void:
 	var labels:=[]
 	for line:Dictionary in Impact.defense().lines:labels.append(String(line.label))
 	assert_array(labels).contains(["Too many on watch"])
+
+## The watch is reckoned once a day for the whole people. A recompute inside
+## a daughter town's view, where the head count and the people are the town's
+## own, reuses that number (it charged nothing there before), and the line
+## agrees with it instead of saying "from tomorrow" for ever.
+func test_a_recompute_in_a_daughter_towns_view_keeps_the_whole_peoples_watch()->void:
+	GameState.settlement_site_committed=true;GameState.settlement_completed=["Hearth Circle"];GameState.settlement_name="SEANSTONE"
+	SettlementModel.ensure_founded()
+	var town:Dictionary={"id":"settlement_002","sequence":2,"primary":false,"name":"Valebridge","position":Vector2(100,0),"population_share":.25,"founded_day":0,"status":"established","territory_context":{},"environment_profile":{}}
+	GameState.player_settlements.append(town);GameState.next_player_settlement_id=3;SettlementModel._ensure_city_resources(town)
+	var model=DiscoverySystem.society_model
+	var free:=Society.watch_free()
+	var able:=float(GameState.able_population())
+	_watch(free+20)
+	var births:=float(model.effect("conception_support"))
+	assert_float(float(model.watch_excess)).is_equal_approx(20.0/able,0.000001)
+	# The daughter town's own recompute, as settlement_model.gd's daily round runs it.
+	var seen:={}
+	SettlementModel.with_city_resources("settlement_002",func()->void:
+		SettlementModel.with_local_population(func()->void:
+			seen["over"]=Society.watch_over()
+			model.settle_watch()
+			model._rebuild_effect_totals(DiscoverySystem.catalog)
+		)
+	)
+	# Inside the town's view its own count reads fewer than 20 over.
+	assert_float(float(seen.over)).is_less(20.0)
+	assert_float(float(model.watch_excess)).is_equal_approx(20.0/able,0.000001)
+	assert_float(float(model.upkeep_of("conception_support"))).is_equal_approx(Society.watch_upkeep_for("conception_support",20.0/able),0.000001)
+	assert_float(float(model.effect("conception_support"))).is_equal_approx(births,0.000001)
+	var line:Dictionary=Impact.watch_upkeep_line()
+	assert_str(String(line.value)).is_equal("20 over")
+	assert_str(String(line.words)).not_contains("from tomorrow")
+	# The next day's reckoning follows the watch, once, for the whole people.
+	GameState.population_allocations["Defense"]=free+30
+	assert_str(String(Impact.watch_upkeep_line().words)).contains("from tomorrow")
+	model.settle_watch()
+	assert_float(float(model.watch_excess)).is_equal_approx(30.0/able,0.000001)
+	assert_str(String(Impact.watch_upkeep_line().words)).not_contains("from tomorrow")
 
 ## The capacity history tells the watch's cost apart from the lore keepers'.
 func test_the_capacity_history_keeps_the_watch_apart()->void:

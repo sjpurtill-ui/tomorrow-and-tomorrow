@@ -106,7 +106,7 @@ FORMULA_ANCHORS = [
     # Balance P2: carers ease crowding, the watch's upkeep, daughter towns' land, the fields' yield.
     ("scripts/early_life_conditions.gd", "var eased:=crowding*(1.0-CARER_CROWDING*carers)"),
     ("scripts/early_life_conditions.gd", "var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE"),
-    ("scripts/society_model.gd", "watch_excess=watch_over()/able"),
+    ("scripts/society_model.gd", "watch_excess=watch_over()/maxf(1.0,float(WorldSimulation.state.able_population()))"),
     ("scripts/society_model.gd", "return maxi(ceili(people*WATCH_FREE_SHARE),guard)"),
     ("scripts/watch_military.gd", "total+=maxi(GUARD_MIN,ceili(maxf(1.0,float(WorldSimulation.settlements._settlement_population(city)))*GUARD_SHARE))"),
     ("scripts/society_model.gd", "return float(SPECIALIST_UPKEEP.get(key,0.0))*maxf(0.0,excess)*WATCH_UPKEEP if key in WATCH_UPKEEP_KEYS else 0.0"),

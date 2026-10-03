@@ -131,6 +131,8 @@ func process_day(catalog:Array[Dictionary],context:Dictionary)->void:
 	var day:=int(WorldSimulation.state.elapsed_days)
 	if day==last_processed_day: return
 	last_processed_day=day
+	# The watch's upkeep for the whole day, before any recompute uses it.
+	settle_watch()
 	if definitions_by_id.size()!=catalog.size():
 		definitions_by_id.clear()
 		for definition in catalog: definitions_by_id[String(definition.get("id",""))]=definition
@@ -1117,6 +1119,8 @@ const WATCH_UPKEEP_KEYS:=["labor_demand","fatigue","conception_support","food_st
 var specialist_excess:=0.0
 ## Latest watch past the free watch, as a share of those who can work (the
 ## learners' measure, so a person costs the same on either), 0 within it.
+## Reckoned once a day for the whole people (settle_watch) and reused by every
+## recompute that day, inside any one town's view too.
 var watch_excess:=0.0
 ## The upkeep's weight now: 1, more while the people's learning runs ahead of
 ## the calendar (Research600.LEAD_UPKEEP_YEARS: a lead is carried by the rest).
@@ -1133,14 +1137,24 @@ func _apply_specialist_upkeep()->void:
 	var owner:Variant=WorldSimulation.discovery
 	var lead:=maxf(0.0,float(owner.learning_lead)) if owner!=null and is_same(owner.society_model,self) else 0.0
 	specialist_burden=1.0+lead/preload("res://scripts/research_600_catalog.gd").LEAD_UPKEEP_YEARS
-	# The watch: everyone set to keep watch, at home or away (watch_military.gd manpower).
-	watch_excess=watch_over()/able
+	# The watch's share is the day's whole-people reckoning (settle_watch).
 	if specialist_excess<=0.0 and watch_excess<=0.0: return
 	for key:String in SPECIALIST_UPKEEP:
 		var limit:Vector2=EFFECT_LIMITS.get(key,Vector2(-0.5,0.8))
 		effect_totals[key]=clampf(float(effect_totals.get(key,0.0))+upkeep_of(key),limit.x,limit.y)
 
 const WATCH_PATH:="res://scripts/watch_military.gd"
+
+## The watch past the free one as a share of those who can work, reckoned once
+## a day (process_day, before the day's recomputes) from the whole people:
+## everyone on watch, the whole people's able, and every town's guard
+## (guard_needed). Inside one town's view (settlement_model.gd
+## with_local_population) the head count and the people are that town's own,
+## so the reckoning is kept as it stands there.
+func settle_watch()->void:
+	var settlements:Variant=WorldSimulation.settlements
+	if settlements!=null and bool(settlements._local_population_scope): return
+	watch_excess=watch_over()/maxf(1.0,float(WorldSimulation.state.able_population()))
 
 ## Everyone set to keep watch, at home or away (the watch is the army).
 static func watch_heads()->float:

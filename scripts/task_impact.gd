@@ -700,8 +700,9 @@ static func defense()->Dictionary:
 ## Too many on watch: past the free watch (society_model.gd watch_free: 5 in
 ## 100 of the people, or the towns' guard if more), each one costs as an extra
 ## learner does, in work, weariness, births and stores. Read live from the
-## watch as it stands; the engine counts the cost from its next reckoning
-## (that day, or at once when the share is set).
+## watch as it stands; the engine counts the cost from its next daily
+## reckoning of the whole people (society_model.gd settle_watch), and the line
+## says "from tomorrow" until that reckoning matches the watch.
 static func watch_upkeep_line()->Dictionary:
 	var model=WorldSimulation.discovery.society_model if WorldSimulation.discovery!=null else null
 	var free:=Society.watch_free()

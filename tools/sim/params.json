@@ -426,7 +426,7 @@
   "scripts/military_campaign.gd::return (0.42+security*0.55)*(1.0+_adoption(\"formation_drill\")*0.35": "2b5c6a2684",
   "scripts/early_life_conditions.gd::var eased:=crowding*(1.0-CARER_CROWDING*carers)": "37c8905ce6",
   "scripts/early_life_conditions.gd::var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE": "1b808104d0",
-  "scripts/society_model.gd::watch_excess=watch_over()/able": "6ad46d90bb",
+  "scripts/society_model.gd::watch_excess=watch_over()/maxf(1.0,float(WorldSimulation.state.able_population()))": "48ea4a4a85",
   "scripts/society_model.gd::return maxi(ceili(people*WATCH_FREE_SHARE),guard)": "ea83fd29cd",
   "scripts/watch_military.gd::total+=maxi(GUARD_MIN,ceili(maxf(1.0,float(WorldSimulation.settlements._settlement_population(city)))*GUARD_SHARE))": "3e066e7371",
   "scripts/society_model.gd::return float(SPECIALIST_UPKEEP.get(key,0.0))*maxf(0.0,excess)*WATCH_UPKEEP if key in WATCH_UPKEEP_KEYS else 0.0": "0e9e1d8a17",
