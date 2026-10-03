@@ -695,6 +695,29 @@ func test_the_room_lifts_its_faces_when_the_god_speaks()->void:
 	assert_int(lifted.size()).is_greater_equal(6)
 	assert_bool(lifted.has("goat")).is_false()
 
+func test_angry_words_still_the_room_and_kind_words_warm_it()->void:
+	# The stage passes the tone of the god's line (wrath / favour, either
+	# spelling of favour). Under wrath nobody smiles, the one it falls on goes
+	# still and someone flinches; under favour, in a loving room, someone
+	# leans in.
+	for seed in range(12):
+		var angry:=Director.beats_for({"kind":"god_speaks","text":"You come to me only now?","tone":"wrath"},home_cast(),full_facts(60),seed)
+		var acts:={}
+		for beat:Dictionary in angry:acts["%s:%s" % [beat.who,beat.act]]=true
+		assert_bool(acts.has("main:freeze")).is_true()
+		var flinched:=false
+		for beat:Dictionary in angry:
+			assert_str(String(beat.act)).is_not_equal("smile_warm")
+			if String(beat.act)=="flinch":flinched=true
+		assert_bool(flinched).is_true()
+	var warm_facts:=full_facts(60);warm_facts["people_love"]=0.9
+	for spelling in ["favour","favor"]:
+		var leaned:=false
+		for seed in range(6):
+			for beat:Dictionary in Director.beats_for({"kind":"god_speaks","text":"Well done.","tone":spelling},home_cast(),warm_facts,seed):
+				if String(beat.act)=="lean_in":leaned=true
+		assert_bool(leaned).override_failure_message("favour spelled %s" % spelling).is_true()
+
 func test_the_sleeper_wakes_and_stays_awake_a_while()->void:
 	var memory:={}
 	var woke_at:=-1

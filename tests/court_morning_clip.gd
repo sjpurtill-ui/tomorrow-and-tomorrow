@@ -38,7 +38,17 @@ func _wait(seconds:float)->void:
 	await get_tree().create_timer(seconds).timeout
 
 func _wrath(director:Node)->void:
-	var audience:=Hall.debug_force("petition")
+	# The engine decides how they take it; for the morning reel, the hall
+	# films someone the engine has cowering under the god's wrath, when the
+	# court has one (else whoever comes).
+	var audience:={}
+	for i in 10:
+		var made:=Hall.debug_force("petition")
+		if made.is_empty():continue
+		audience=made
+		var person:Dictionary=Hall._official(int((made.get("speaker",{}) as Dictionary).get("person_id",0)))
+		if not person.is_empty() and preload("res://scripts/divine_regard.gd").response_to("terrify",person)=="cower":break
+		Hall.defer(String(made.id))
 	if audience.is_empty():_fail("no petition");return
 	var id:=String(audience.id)
 	var modal:Control=director.open_audience(id)

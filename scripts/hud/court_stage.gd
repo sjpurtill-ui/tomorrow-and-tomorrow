@@ -452,12 +452,16 @@ func frame_cast(time:=0.0)->void:
 	if rig==null:return
 	rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
 	var subjects:=[]
+	var lead:Variant=null
 	for key in cast_order:
 		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.role=="crowd":continue
 		subjects.append(f.spot)
+		if f.role==MAIN:lead=f.spot
 	if subjects.is_empty():subjects.append(set_point("petitioner"))
-	rig.call("wide",subjects,time)
+	# The one before the god leads the frame (the rest are kept around them).
+	if lead!=null:rig.call("wide",subjects,time,lead)
+	else:rig.call("wide",subjects,time)
 
 ## Where a newcomer stands in the set: the one before the god on the
 ## petitioner's mark (an envoy on the envoy's), their company on the marks
@@ -578,7 +582,10 @@ func add_figure(key:String,person:Dictionary,role:String,name_text:String="",tit
 	# An envoy's gift of food is carried in by the first of their company.
 	if f.role=="attendant" and f.body3d!=null and not _bearer_chosen and String((facts.get("gift",{}) as Dictionary).get("resource","")).to_lower()=="food":
 		_bearer_chosen=true
-		f.body3d.carry("bundle",true)
+		# (once the body stands in the hall: the bundle rides between its hands)
+		var bearer:=f.body3d
+		if bearer.is_inside_tree():bearer.carry("bundle",true)
+		else:bearer.ready.connect(func()->void:if is_instance_valid(bearer):bearer.carry("bundle",true),CONNECT_ONE_SHOT)
 	figures[key]=f;cast_order.append(key)
 	if enter:_arrivals.append(key)
 	if _laid_out:
@@ -641,7 +648,9 @@ func _embody(f:Figure)->void:
 		if not mark.is_empty():
 			var m:Marker3D=court_set.call("mark",mark)
 			var holder:=m.get_parent() as Node3D
-			spot.transform=(holder.transform if holder!=null else Transform3D.IDENTITY)*m.transform
+			# A mark's -Z is the way a person there faces; a figure's front is +Z
+			# (M's place() turns them the same way).
+			spot.transform=(holder.transform if holder!=null else Transform3D.IDENTITY)*m.transform*Transform3D(Basis(Vector3.UP,PI),Vector3.ZERO)
 		else:
 			# every mark is taken: at the back, along the far side
 			var extra:=_marks.size()+cast_order.size()
