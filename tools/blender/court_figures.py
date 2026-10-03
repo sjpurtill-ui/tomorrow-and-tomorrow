@@ -124,6 +124,7 @@ def build_variant(variant, quick=False, ao=True):
     log(variant, "hair", round(time.time() - t0, 1), "s")
     # clothes
     proxy = _armless_proxy(body)
+    arm_proxy = _armless_proxy(body, arms=True)
     arms = _arm_vertices(body)
     masks = {}
     for kind in cf_dress.OUTFITS:
@@ -138,13 +139,14 @@ def build_variant(variant, quick=False, ao=True):
                 continue
             small = pc.name.endswith(("_belt", "_sash", "_cord", "_shoes", "_footwraps", "_trim", "_edge"))
             cf_sdf.finish_mesh(o, BUDGET["small"] if small else BUDGET["piece"], 1)
-            _bind_garment(o, pc, body, proxy, rig, f)
+            _bind_garment(o, pc, body, proxy, rig, f, arm_proxy)
             objs.append(o)
         sets[kind] = objs
         masks[kind] = cf_dress.coverage(body, pieces, strict=arms)
         log(variant, kind, [o.name for o in objs], "covers", int(masks[kind].sum()), "skin vertices",
             round(time.time() - t0, 1), "s")
     bpy.data.objects.remove(proxy, do_unlink=True)
+    bpy.data.objects.remove(arm_proxy, do_unlink=True)
     # occlusion and coverage into vertex colour
     for objs in sets.values():
         for o in objs:
@@ -401,11 +403,14 @@ def _arm_vertices(body):
     return out
 
 
-def _armless_proxy(body):
-    """The body without arms and hands: skirts and mantles copy weights from it."""
+def _armless_proxy(body, arms=False):
+    """The body without arms and hands: skirts and mantles copy weights from it.
+    With arms: the arms and hands alone, which sleeves copy weights from (a
+    sleeve that took the torso's weights where it hangs near the side stayed
+    behind when the arm rose, tearing the sleeve open into a dark sheet)."""
     proxy = body.copy()
     proxy.data = body.data.copy()
-    proxy.name = "ArmlessProxy"
+    proxy.name = "ArmProxy" if arms else "ArmlessProxy"
     bpy.context.scene.collection.objects.link(proxy)
     arm_groups = {g.index for g in proxy.vertex_groups if g.name.split(".")[0] in
                   ("upper_arm", "forearm", "hand", "thumb", "index", "fingers")}
@@ -416,7 +421,7 @@ def _armless_proxy(body):
     kill = []
     for v in bm.verts:
         w = sum(val for gi, val in v[deform].items() if gi in arm_groups)
-        if w > 0.35:
+        if (w > 0.35) != arms:
             kill.append(v)
     bmesh.ops.delete(bm, geom=kill, context='VERTS')
     bm.to_mesh(proxy.data)
@@ -424,10 +429,13 @@ def _armless_proxy(body):
     return proxy
 
 
-def _bind_garment(obj, pc, body, proxy, rig, f):
+def _bind_garment(obj, pc, body, proxy, rig, f, arm_proxy=None):
     name = pc.name
     hangs = any(t in name for t in ("robe_body", "robe_trim", "tunic_body", "tunic_trim", "hide_wrap", "mantle"))
     in_sleeve = _sleeve_vertices(obj, pc)
+    # a robe's front follows the legs (a seated or kneeling elder's knees stay
+    # under the cloth instead of coming through it); its back and sides hang
+    front = _front_of_legs(obj, f) if hangs and name.startswith("robe_") and "mantle" not in name else None
 
     def ease(co, i):
         if in_sleeve is not None and in_sleeve[i]:
@@ -440,33 +448,50 @@ def _bind_garment(obj, pc, body, proxy, rig, f):
         if hangs and z < f.z_hip:
             # below the hips a skirt moves with the hips more than either leg
             t = min(1.0, max(0.0, (f.z_hip - z) / 0.20))
-            return [("hips", 0.55 * t)]
+            return [("hips", 0.55 * t * (1.0 - 0.8 * (front[i] if front is not None else 0.0)))]
         return []
 
     if in_sleeve is not None:
         # sleeves take the arms' weights; the rest of the garment the armless body's
         cf_rig.bind_from_body(obj, body, rig, ease=None)
         _retransfer(obj, proxy, ~in_sleeve)
+        if arm_proxy is not None:
+            _retransfer(obj, arm_proxy, in_sleeve)
     else:
         cf_rig.bind_from_body(obj, proxy if name != "hide_cape" else body, rig, ease=None)
     if hangs:
         cf_rig._ease_weights(obj, ease)
-        _skirt_off_shins(obj, in_sleeve)
+        _skirt_off_shins(obj, in_sleeve, front)
         cf_rig._normalize(obj)
         cf_rig.smooth_weights(obj, repeat=6, factor=0.5)
 
 
-def _skirt_off_shins(obj, in_sleeve):
+def _skirt_off_shins(obj, in_sleeve, front=None):
     """A skirt hangs from the hips and thighs: what the shins and feet held
-    goes to the thigh above them, so a knee bent forward never splits the hem."""
+    goes to the thigh above them, so a knee bent forward never splits the hem.
+    Where `front` (0..1 a vertex) is given, that share stays on the shins: the
+    front of a robe lies over the shins of someone kneeling or sitting."""
     table = cf_rig._weights_table(obj)
     for i, w in enumerate(table):
         if in_sleeve is not None and in_sleeve[i]:
             continue
+        keep = front[i] if front is not None else 0.0
         for low in [n for n in w if n.split(".")[0] in ("shin", "foot", "toe")]:
-            thigh = "thigh." + low.split(".")[-1]
-            w[thigh] = w.get(thigh, 0.0) + w.pop(low)
+            side = low.split(".")[-1]
+            val = w.pop(low)
+            w["thigh." + side] = w.get("thigh." + side, 0.0) + val * (1.0 - keep)
+            if keep > 0.0:
+                w["shin." + side] = w.get("shin." + side, 0.0) + val * keep
     cf_rig._write_table(obj, table)
+
+
+def _front_of_legs(obj, f):
+    """How much each vertex is the garment's front (1 straight ahead of the
+    legs, fading to 0 by the sides), below the hips only."""
+    co = np.array([v.co[:] for v in obj.data.vertices], dtype=np.float32)
+    th = np.arctan2(co[:, 0], -(co[:, 1] - f.pelvis.y))
+    below = np.clip((f.z_hip - co[:, 2]) / 0.10, 0.0, 1.0)
+    return np.clip(1.5 * np.cos(th) - 0.2, 0.0, 1.0) * below
 
 
 def _sleeve_vertices(obj, pc):
