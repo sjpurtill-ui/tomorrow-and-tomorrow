@@ -41,10 +41,12 @@ const VERSION:=1
 ## How drilled a person is on the day they join the watch: the least the
 ## combat engine knows (combat_simulator holds every block at 0.25).
 const START_DRILL:=0.25
-## The watch is filled or emptied to the share when it is off by this share
-## of it (at least one person), so a day's small swing in who can work does
-## not send many to and fro.
-const SLACK:=0.01
+## The watch is filled or emptied to the share only when it is off by this
+## share of it, and by at least SLACK_MIN people, so a day's swing of one in
+## who can work does not send people to and fro (the ruler's own word is kept
+## to the person: keep's `exact`).
+const SLACK:=0.02
+const SLACK_MIN:=2
 ## The player's split until they choose one: a fifth of the watch stays home,
 ## as the war council has always kept at home (war_council.gd WATCH_SHARE);
 ## the offensive troops at home stand with them until they are sent out.
@@ -75,6 +77,13 @@ const MARTIAL_PACE:=0.25
 ## manpower.
 static func manpower(mc:Variant=null)->int:
 	return maxi(0,int(WorldSimulation.state.population_allocations.get("Defense",0)))
+
+## Those keeping watch who are at home: the watch less everyone serving
+## away from it (bands and their hurt, garrisons, crews, the scattered and
+## taken, drafts on the road).
+static func at_home(mc:Variant)->int:
+	var away:=maxi(0,serving(mc)-maxi(0,int(mc.home_army.get("troops",0)))-maxi(0,int(mc.home_army.get("wounded_pool",0)))-maxi(0,int(mc.aggregate_recruits))-maxi(0,int(mc._queued_trainees()))-maxi(0,int(mc.training_injury_pool)))
+	return maxi(0,manpower(mc)-away)
 
 ## Everyone under arms, anywhere (the personnel ledger's total).
 static func serving(mc:Variant)->int:
@@ -258,10 +267,35 @@ static func set_split(mc:Variant,share:float)->Dictionary:
 	mc.set("watch_home_share",clampf(share,0.0,1.0))
 	var guard:=home_guard_target(mc)
 	# Fewer at home: nothing moves now; the war council may send more.
-	# More at home: idle bands come home and fold into the home guard.
-	if offensive_at_home(mc)<=0 and guard>home_guard(mc):(load(Law.COUNCIL_PATH) as GDScript).call("fold_idle_bands")
-	return {"ok":true,"home_share":home_share(mc),"guard":guard,
+	# More at home than stand there: idle bands come home to guard it.
+	var called:=recall_for_guard(mc)
+	return {"ok":true,"home_share":home_share(mc),"guard":guard,"called":called,
 		"said":"%d%% of the watch guard home and the towns: %s of %s. The rest, %s, are for the bands." % [roundi(home_share(mc)*100.0),EraWords.grouped(guard),EraWords.grouped(manpower(mc)),EraWords.grouped(maxi(0,manpower(mc)-guard))]}
+
+## The home guard asks for more than stand at home: bands with nothing to do
+## come home to guard it, those at home at once (they fold into the host),
+## those out on the road home, until enough are home or coming. Bands on an
+## errand stay out. Returns the men called.
+static func recall_for_guard(mc:Variant)->int:
+	var short:=home_guard_target(mc)-maxi(0,int(mc.home_army.get("troops",0)))
+	if short<=0:return 0
+	var council:=load(Law.COUNCIL_PATH) as GDScript
+	var called:=0
+	for army in (mc.field_armies as Array).duplicate():
+		if short<=0:break
+		if not army is Dictionary:continue
+		var band:Dictionary=army
+		var men:=int(band.get("troops",0))
+		if men<=0:continue
+		if Law.home_band(mc,band):
+			if not mc.disband_field_army(int(band.get("army_id",0))).has("error"):short-=men;called+=men
+			continue
+		if String(band.get("destination_id",""))=="player_home" and String(band.get("status",""))=="moving":short-=men;continue
+		if not bool(council.call("_idle",band)):continue
+		if bool(council.call("_at_home",band)):
+			if not mc.disband_field_army(int(band.get("army_id",0))).has("error"):short-=men;called+=men
+		elif bool(council.call("_send_home",band)):short-=men;called+=men
+	return called
 
 ## Moves `n` people onto the watch (n<0: off it, back to other work), and
 ## keeps them there. When the ruler sets the daily work by hand
@@ -311,6 +345,11 @@ static func _set_defense(state:Variant,target:int)->void:
 static func hold_share(percentages:Dictionary)->void:
 	var mc:Variant=WorldSimulation.military
 	if mc==null:return
+	# The leaders' own choice for the watch before any share the ruler set
+	# (their path's weight: work_paths.gd), for a computer ruler to read.
+	var sum:=0.0
+	for role in percentages:sum+=maxf(0.0,float(percentages[role]))
+	if sum>0.0:mc.set("watch_path_share",maxf(0.0,float(percentages.get("Defense",0.0)))/sum)
 	var held:Variant=mc.get("watch_work_share")
 	if held==null or float(held)<0.0:return
 	var want:=clampf(float(held),0.0,0.9)*100.0
@@ -352,7 +391,29 @@ static func role_effect(mc:Variant=null)->Dictionary:
 	var now:="%s keep watch: they are the army. %s guard home and the towns; %s are for the bands. Drilled %d in 100, armed %d in 100." % [EraWords.grouped(int(r.watch)),EraWords.grouped(int(r.guard)),EraWords.grouped(int(r.offensive)),roundi(float(r.drill)*100.0),roundi(float(r.armed)*100.0)]
 	if float(r.martial)>0.0:now+=" Given to war: their drill reaches %d in 100 higher." % roundi(float(r.martial_drill)*100.0)
 	var more:="Ten more: 10 more under arms at once (%d to the home guard, %d for the bands), raw at first%s; 10 fewer at other work." % [guard_more,10-guard_more,(", most of their drill in about %d days" % days) if days>0 else ", not drilled while drill is stopped"]
-	return {"role":"Defense","now":now,"ten_more":more,"watch":int(r.watch),"guard":int(r.guard),"offensive":int(r.offensive),"drill":float(r.drill),"armed":float(r.armed),"drill_days":days}
+	# The People view's row (role_effects.gd), twelve words or fewer each:
+	# the army, and the safety ten more lift the people toward
+	# (consequence_engine.gd: +42 points for every 5 in 100 on watch).
+	var Impact:=preload("res://scripts/task_impact.gd")
+	var pop:=maxf(1.0,float(WorldSimulation.state.population_exact))
+	var lift:=func(people:float)->int:return roundi(people/maxf(1.0,pop*Impact.WATCH_SHARE)*Impact.WATCH_SAFETY*100.0)
+	var short_now:="%s keep watch: %s guard home, %s for bands." % [EraWords.grouped(int(r.watch)),EraWords.grouped(int(r.guard)),EraWords.grouped(maxi(0,int(r.watch)-int(r.guard)))]
+	# Ten more join at home: the home guard's share of them is spread over
+	# the towns by their people, the rest stand at home until sent out.
+	var Combat:=preload("res://scripts/civilization_combat.gd")
+	var home:=Combat._home_record()
+	var here:=1.0
+	if not home.is_empty():
+		var people:=0.0;var at_home:=0.0
+		for city:Dictionary in WorldSimulation.state.player_settlements:
+			if not Combat.keeps_watch(city):continue
+			var n:=maxf(0.0,float(WorldSimulation.settlements._settlement_population(city)))
+			people+=n
+			if String(city.get("id",""))==String(home.get("id","")):at_home=n
+		if people>0.0:here=at_home/people
+	var home_more:=roundi(10.0*(1.0-float(r.home_share))+10.0*float(r.home_share)*here)
+	var short_more:="Ten more: safety +%d points; guard at home +%d." % [int(lift.call(float(r.watch)+10.0))-int(lift.call(float(r.watch))),home_more]
+	return {"role":"Defense","now":short_now,"plus_ten":short_more,"detail":now,"ten_more":more,"watch":int(r.watch),"guard":int(r.guard),"offensive":int(r.offensive),"drill":float(r.drill),"armed":float(r.armed),"drill_days":days}
 
 
 ## A share in plain words: "6%", "0.4%" below one in a hundred.
@@ -372,31 +433,89 @@ static func percent(share:float)->String:
 static func keep(mc:Variant,day:int,exact:=false)->Dictionary:
 	var out:={"joined":0,"released":0,"folded":0}
 	if mc.recovery.home_unavailable():return out
+	# Nothing moves at home while any fight against our home is still being
+	# fought, ours or another people's: those mustered for it, the guard
+	# posted in our other towns among them, come back to it after.
+	if home_fight_pending(mc):return out
 	if not bool(mc.get("watch_folded")):out.folded=fold(mc)
 	# A computer people's split follows its ruler's temper until set (its
 	# ruler's orders keep it to the plan: civilization_controller
-	# military_orders).
+	# military_orders), with its own wars in its own scope.
 	if WorldSimulation.actor_id!="player" and float(mc.get("watch_home_share"))<0.0 and float(mc.get("watch_home_auto"))<0.0:
 		var personality:Dictionary=preload("res://scripts/leader_personality.gd").of_owner(WorldSimulation.actor_id)
 		mc.set("watch_home_auto",default_home_share(personality,_at_war()))
-	if mc._home_battle_running():return out
 	# Nobody waits to be called up: whoever is waiting joins the watch.
 	if int(mc.aggregate_recruits)>0:out.folded=int(out.folded)+join_waiting(mc)
 	var watch:=manpower(mc)
 	var have:=serving(mc)
-	var slack:=0 if exact else maxi(1,ceili(float(watch)*SLACK))
-	if watch-have>=maxi(1,slack) or (watch>have and have==0):
+	var slack:=1 if exact else maxi(SLACK_MIN,ceili(float(watch)*SLACK))
+	if watch-have>=slack or (watch>have and have==0):
 		out.joined=join(mc,watch-have)
-	elif have-watch>=maxi(1,slack):
+	elif have-watch>=slack:
 		out.released=release(mc,have-watch)
 	return out
 
+## Whether the people in scope is at war with anyone, by its own world's
+## record (each people's world holds its own relations).
 static func _at_war()->bool:
 	var world=WorldSimulation.world
 	if world==null:return false
 	for civ in world.civilizations:
 		if civ is Dictionary and bool(((civ as Dictionary).get("player_relation",{}) as Dictionary).get("at_war",false)):return true
 	return false
+
+## Whether a fight against our home is still being fought: ours (the home
+## host's battle) or another people's against our home town.
+static func home_fight_pending(mc:Variant)->bool:
+	if mc._home_battle_running():return true
+	return not _their_fights_at_home(mc).is_empty()
+
+## Another people's battles still being fought against our home town: their
+## engagements whose target (civilization_combat.force_for owned_target) is
+## our home host.
+static func _their_fights_at_home(mc:Variant)->Array:
+	var out:Array=[]
+	var me:=WorldSimulation.actor_id
+	var home_id:=String(preload("res://scripts/civilization_combat.gd")._home_record().get("id",""))
+	var ids:Array=WorldSimulation.actors.keys();ids.append("player")
+	for id:String in ids:
+		if id==me:continue
+		var military:Variant=MilitaryCampaign if id=="player" else (WorldSimulation.actors[id] as Dictionary).systems.get("MilitaryCampaign")
+		if military==null or military==mc:continue
+		for operation in military.own_battles():
+			var threat:Dictionary=(operation as Dictionary).get("threat",{}) if (operation as Dictionary).get("threat") is Dictionary else {}
+			var target:Dictionary=threat.get("owned_target",{}) if threat.get("owned_target") is Dictionary else {}
+			if String(target.get("actor",""))!=me or int(target.get("field_id",0))!=0:continue
+			var city:=String(target.get("city_id",""))
+			if city!="" and city!=home_id:continue
+			out.append(operation)
+	return out
+
+## The home guard posted in our other towns for each fight at home still
+## being fought: the posted_guard records those fights give back to home's
+## formations after (MilitaryCampaign._return_posted_guard). While one is
+## pending, a town's guard losses come off it, not off the host at home
+## (whose formations the fight's result replaces).
+static func pending_home_postings(mc:Variant)->Array:
+	var out:Array=[]
+	for engagement in mc.own_battles():
+		var fight:Dictionary=engagement
+		if String(fight.get("home_force_kind","field"))!="field":continue
+		var side:Dictionary=fight.get(String(fight.get("home_side","defender")),{}) if fight.get(String(fight.get("home_side","defender"))) is Dictionary else {}
+		if side.get("posted_guard") is Dictionary and not (side.posted_guard as Dictionary).is_empty():out.append(side.posted_guard)
+	for operation in _their_fights_at_home(mc):
+		var force:Variant=((operation as Dictionary).get("threat",{}) as Dictionary).get("enemy_force",{})
+		if force is Dictionary and (force as Dictionary).get("posted_guard") is Dictionary and not ((force as Dictionary).posted_guard as Dictionary).is_empty():out.append((force as Dictionary).posted_guard)
+	return out
+
+## Men of a posted guard record (MilitaryCampaign._take_posted_guard), its
+## pools aside.
+static func posted_men(posted:Dictionary)->int:
+	var men:=0
+	for key in posted:
+		if String(key)=="_pools" or not posted[key] is Dictionary:continue
+		men+=maxi(0,int((posted[key] as Dictionary).get("count",0)))
+	return men
 
 ## `n` people join the watch at home, raw, armed from the stock as far as it
 ## goes. Returns those who joined.

@@ -405,13 +405,7 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 	# day; the ruler arms it (below) and splits it between the home guard and
 	# the bands (MilitaryCampaign.set_watch_split; by temper until set).
 	campaign.watch_home_auto=preload("res://scripts/watch_military.gd").default_home_share(plan.get("personality",{}),bool(plan.get("at_war",false)))
-	# Until its ruler's path is laid (docs/PEOPLE_FIRST.md F), a computer
-	# ruler raises its watch to the share of its people its temper has always
-	# kept under arms (target, above), as its recruiting did; it never sends
-	# its watch home on that account, and a hungry people at peace raises none.
-	if String(WorldSimulation.actor_id)!="player":
-		var watch:=int(campaign.watch_manpower())
-		if target-watch>=maxi(1,ceili(float(watch)*0.02)):campaign.set_watch_share(float(target)/maxf(1.0,float(WorldSimulation.state.population_total)))
+	if String(WorldSimulation.actor_id)!="player":interim_watch(campaign,target,plan)
 	land_training_orders(id,chosen,weapon,int(campaign.watch_manpower()),plan)
 	# The army stands at home, where it defends the town; the war council
 	# (war_council.gd, the same for every people) forms the bands an errand
@@ -449,6 +443,29 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 			WorldSimulation.submit(id,{"kind":"commission","base":int(base.id),"unit":candidate,"count":1})
 	service_orders(id,plan)
 
+## A COMPUTER RULER'S WATCH (watch_military.gd: the watch is the army). Its
+## leaders' daily split keeps the watch its path weighs (work_paths.gd WORK:
+## the war path +12; watch_path_share, the leaders' own choice before any
+## hold). The ruler holds the watch at its temper's share of the people
+## (`target`: recruit_share, more at war) only where that is more than the
+## path keeps, and lets the hold go once the path asks as much, so after a
+## war the watch falls back to what the path keeps, both ways and never past
+## it. A hungry people at peace holds what it has: hunger_stand_down sends
+## the surplus home. Small swings (under 2, or 2 in 100) move nobody.
+static func interim_watch(campaign:Node,target:int,plan:Dictionary)->void:
+	var state=WorldSimulation.state
+	if bool(plan.get("hungry",false)) and not bool(plan.get("at_war",false)):return
+	var able:=maxi(1,int(state.able_population()))
+	var path_share:=float(campaign.watch_path_share)
+	var path:=roundi(path_share*float(able)) if path_share>=0.0 else int(campaign.watch_manpower())
+	var slack:=maxi(2,ceili(float(target)*0.02))
+	if target>path+slack:
+		if absi(target-int(campaign.watch_manpower()))>=slack:campaign.set_watch_share(float(target)/maxf(1.0,float(state.population_total)))
+	elif float(campaign.watch_work_share)>=0.0:
+		# The path keeps as many: the leaders' own watch stands from their
+		# next laying of the work.
+		campaign.watch_work_share=-1.0
+
 ## Whether a ruler may put `crew` more people into a new ship or wing:
 ## never while the people is hungry, and never past the share of the people
 ## its army may take (`share_cap`, the land army's own bound) nor past the
@@ -463,15 +480,16 @@ static func may_commission(mobilized:int,crew:int,share_cap:int,capacity:int,hun
 ## empty, and with no hands left for food the whole people starved. While a
 ## people is short of food (leader_personality.food_constraints) its ruler
 ## lets waiting recruits go, calls ships and wings home, and lays up those
-## standing at their home base until no more are under arms than `keep` (at
-## peace only the people's own watch, the Defense share; at war the ordinary
-## share). The same orders the court can give. {released, laid_up, recalled}.
+## standing at their home base until no more are under arms than `keep`: its
+## peacetime share of the people at peace (the watch is the army, so a
+## famine sends the watch above that share home and the watch share falls by
+## them: MilitaryCampaign.demobilize), the ordinary share at war. The same
+## orders the court can give. {released, laid_up, recalled}.
 static func hunger_stand_down(id:String,plan:Dictionary,keep:int)->Dictionary:
 	var out:={"released":0,"laid_up":0,"recalled":0,"stood_down":0}
 	if not bool(plan.get("food_shortage",false)):return out
 	var campaign=WorldSimulation.military
 	var at_war:=bool(plan.get("at_war",false))
-	if not at_war:keep=int(WorldSimulation.state.population_allocations.get("Defense",0))
 	var waiting:=int(campaign.aggregate_recruits)
 	if waiting>0 and not WorldSimulation.submit(id,{"kind":"demobilize","count":waiting}).has("error"):out.released+=waiting
 	# At peace, bands standing at home go back to the fires too: their men

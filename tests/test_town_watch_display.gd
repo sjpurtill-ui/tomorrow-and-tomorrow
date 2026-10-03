@@ -147,19 +147,25 @@ func test_a_second_town_shows_the_watch_and_the_townsfolk_who_fight_there()->voi
 
 func test_the_townsfolk_rise_untrained_one_in_ten_of_those_not_already_serving()->void:
 	assert_float(Combat.RISE_SHARE).is_equal(0.10)
-	# The block that fights: the home guard posted there, drilled as the
-	# watch at home is, and the townsfolk with none, by their numbers (the
-	# combat simulator holds any block at its least drill, 0.25, at the least).
+	# Two blocks fight side by side: the home guard posted there, drilled as
+	# the watch at home is and carrying its share of the watch's arms, and the
+	# townsfolk with none and what comes to hand (the combat simulator holds
+	# any block at its least drill, 0.25, at the least).
 	_levy(40)
 	var parts:=_parts(TOWN)
-	var drill:=Combat.militia_training(int(parts.watch),int(parts.rise),Combat.guard_drill())
 	assert_float(Combat.guard_drill()).is_equal_approx(0.6,0.0001)
-	assert_float(drill).is_less(Combat.guard_drill())
-	assert_float(drill).is_greater(Combat.RISE_TRAINING)
-	var block:Dictionary=(Combat.town_watch(TOWN).formations as Array)[0]
-	assert_float(float(block.training)).is_equal_approx(clampf(drill,0.25,1.25),0.0001)
-	assert_int(int(block.equipment)).is_equal(0)
-	assert_str(String(block.weapon)).is_equal("improvised")
+	var blocks:Array=Combat.town_watch(TOWN).formations
+	assert_int(blocks.size()).is_equal(2)
+	var guard:Dictionary=blocks[0]
+	assert_int(int(guard.count)).is_equal(int(parts.watch))
+	assert_float(float(guard.training)).is_equal_approx(Combat.guard_drill(),0.0001)
+	# The watch at home is fully armed here, and so is the guard it posted.
+	assert_int(int(guard.equipment)).is_equal(int(guard.equipment_required))
+	var rise:Dictionary=blocks[1]
+	assert_int(int(rise.count)).is_equal(int(parts.rise))
+	assert_float(float(rise.training)).is_equal_approx(clampf(Combat.RISE_TRAINING,0.25,1.25),0.0001)
+	assert_int(int(rise.equipment)).is_equal(0)
+	assert_str(String(rise.weapon)).is_equal("improvised")
 	# Those called up beyond the Defense share are under arms already: fewer
 	# townsfolk are left to rise.
 	var before:=_rises()
@@ -515,15 +521,16 @@ func test_a_rivals_other_town_is_counted_fought_and_landed_on_by_its_guard()->vo
 	assert_int(int(landed.defenders)).is_equal(roundi(float(guard)*.3+200.0*.02))
 	# Their scouts' truth of our Valebridge is ours, read in our own scope.
 	assert_float(float(CivilizationSystem.city_intelligence.truth(TOWN).values.garrison)).is_equal(float(Combat.defenders(TOWN)))
-	# Our scouts see how many of them are no soldiers, and the stated odds arm
-	# those as the battle does: a levy with what comes to hand.
-	assert_float(float(truth.values.garrison_untrained)).is_equal(float(guard))
+	# Our scouts see how many of them are no soldiers: the townsfolk only, the
+	# home guard being their watch, drilled and armed; the stated odds arm the
+	# townsfolk as the battle does: a levy with what comes to hand.
+	assert_float(float(truth.values.garrison_untrained)).is_equal(float(int(parts.rise)))
 	var intel=CivilizationSystem.city_intelligence
 	var day:=int(GameState.elapsed_days)
 	intel.publish("player",intel.capture("player",region_id,.9,day,"test","t"),day)
 	var estimate:Dictionary=preload("res://scripts/court_war_orders.gd").enemy_estimate(region_id)
 	assert_bool(bool(estimate.known)).is_true()
-	assert_float(float(estimate.untrained)).is_equal(1.0)
+	assert_float(float(estimate.untrained)).is_equal_approx(snappedf(float(int(parts.rise))/float(guard),0.1),0.051)
 	WorldSimulation.context_provider=Callable()
 
 

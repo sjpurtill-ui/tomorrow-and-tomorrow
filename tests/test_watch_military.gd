@@ -12,6 +12,7 @@ const Watch:=preload("res://scripts/watch_military.gd")
 const Combat:=preload("res://scripts/civilization_combat.gd")
 const Council:=preload("res://scripts/war_council.gd")
 const DAY:=preload("res://scripts/civilization_day.gd")
+const Controller:=preload("res://scripts/civilization_controller.gd")
 
 const TOWN:="settlement_002"
 
@@ -279,6 +280,105 @@ func test_the_home_guard_defends_home_and_the_towns_by_their_people()->void:
 	assert_int(counted).is_equal(watch)
 
 
+func test_the_guard_posted_away_leaves_home_as_well_armed_as_before()->void:
+	_second_town()
+	GameState.population_allocations["Defense"]=40
+	# Forty spearmen at home, half of them with spears in hand.
+	var sets:int=MilitaryCampaign._equipment_required_for("spearman",40)
+	MilitaryCampaign._rebuild_home_army_with([{"id":5,"unit":"spearman","weapon":"spear","count":40,"authorized_count":40,"equipment":sets/2,"equipment_required":sets,"ammunition":0,"ammunition_required":0,"training":0.5,"experience":0.0,"personnel_condition":1.0}])
+	MilitaryCampaign.next_formation_id=6
+	MilitaryCampaign.set_watch_split(0.5)
+	var posted:=Combat.posted_away()
+	assert_int(posted).is_greater(0)
+	var force:=MilitaryCampaign._home_defense_force(true)
+	for f in force.formations:
+		var formation:Dictionary=f
+		if int(formation.get("id",0))!=5:continue
+		# Those left at home keep the same share of their gear in hand: the
+		# places of those posted away went with them.
+		assert_int(int(formation.count)).is_equal(40-posted)
+		assert_int(int(formation.authorized_count)).is_equal(40-posted)
+		assert_float(float(formation.equipment)/float(formation.equipment_required)).is_equal_approx(0.5,0.08)
+	# Back after the fight: the same places, gear and men.
+	var fought:Array=(force.formations as Array).filter(func(f:Dictionary)->bool:return int(f.get("id",0))==5).map(func(f:Dictionary)->Dictionary:return f.duplicate(true))
+	MilitaryCampaign.home_army["formations"]=fought
+	MilitaryCampaign.home_army["troops"]=40-posted
+	MilitaryCampaign._return_posted_guard(force.posted_guard)
+	var home:Dictionary=MilitaryCampaign.home_army.formations[0]
+	assert_int(int(home.count)).is_equal(40)
+	assert_int(int(home.authorized_count)).is_equal(40)
+	assert_int(int(home.equipment)).is_equal(sets/2)
+	assert_int(int(home.equipment_required)).is_equal(sets)
+	# The guard in the town carries its share of the arms too.
+	var town:=Combat.town_watch(TOWN)
+	var guard_block:Dictionary=(town.formations as Array)[0]
+	assert_str(String(guard_block.weapon)).is_equal("spear")
+	assert_float(float(guard_block.equipment)/float(guard_block.equipment_required)).is_equal_approx(0.5,0.15)
+
+
+func test_a_town_fight_while_home_fights_takes_its_guard_off_that_fight()->void:
+	_second_town()
+	var watch:=_watch(0.10)
+	MilitaryCampaign.set_watch_split(1.0)
+	var mustered:=MilitaryCampaign._home_defense_force(true)
+	var posted:=Watch.posted_men(mustered.posted_guard)
+	assert_int(posted).is_greater(0)
+	# A fight at home is still being fought.
+	MilitaryCampaign.own_engagements["home_fight"]={"id":"home_fight","home_force_kind":"field","home_force_id":0,"home_side":"defender","defender":mustered,"attacker":{},"status":"active"}
+	assert_bool(Watch.home_fight_pending(MilitaryCampaign)).is_true()
+	# Nothing moves at home meanwhile, whatever the share says.
+	GameState.population_allocations["Defense"]=watch+20
+	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(0)
+	GameState.population_allocations["Defense"]=watch
+	var parts:Dictionary=Combat.guard_ledger()[TOWN]
+	var share:=float(int(parts.watch))/float(int(parts.watch)+int(parts.rise))
+	MilitaryCampaign._apply_town_watch_result(TOWN,{},[{"defender_casualties":{"killed":4,"wounded":2}}],"defender")
+	var dead:=roundi(4.0*share);var hurt:=roundi(2.0*share)
+	# The host at home is untouched; what the fight gives back lost them.
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(watch)
+	assert_int(Watch.posted_men(mustered.posted_guard)).is_equal(posted-dead-hurt)
+	# The fight at home ends with no loss: the host is those who fought and
+	# the posted guard given back; the dead stay dead, the hurt mend.
+	MilitaryCampaign.own_engagements.erase("home_fight")
+	var fought:Array=(mustered.formations as Array).filter(func(f:Dictionary)->bool:return int(f.get("id",-1))!=int(mustered.get("emergency_militia_id",-2))).map(func(f:Dictionary)->Dictionary:return f.duplicate(true))
+	MilitaryCampaign.home_army["formations"]=fought
+	MilitaryCampaign.home_army["troops"]=watch-posted
+	MilitaryCampaign._return_posted_guard(mustered.posted_guard)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(watch-dead-hurt)
+	assert_int(int(MilitaryCampaign.home_army.get("wounded_pool",0))).is_equal(hurt)
+	assert_int(MilitaryCampaign._mobilized_count()).is_equal(watch-dead)
+
+
+func test_more_at_home_calls_idle_bands_home()->void:
+	var watch:=_watch(0.10)
+	MilitaryCampaign.set_watch_split(0.2)
+	assert_bool(MilitaryCampaign.create_field_army(30).has("ok")).is_true()
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(watch-30)
+	# All of the watch kept home: the idle band at home folds back into it.
+	var result:=MilitaryCampaign.set_watch_split(1.0)
+	assert_int(int(result.called)).is_equal(30)
+	assert_bool(MilitaryCampaign.field_armies.is_empty()).is_true()
+	assert_int(int(MilitaryCampaign.watch_reading().guard)).is_equal(watch)
+
+
+func test_a_swing_of_one_moves_nobody()->void:
+	var watch:=_watch(0.05)
+	GameState.population_allocations["Defense"]=watch+1
+	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(0)
+	GameState.population_allocations["Defense"]=watch+2
+	assert_int(int(MilitaryCampaign.keep_watch().joined)).is_equal(2)
+	GameState.population_allocations["Defense"]=watch+1
+	assert_int(int(MilitaryCampaign.keep_watch().released)).is_equal(0)
+
+
+func test_those_away_do_not_build_walls_or_keep_order_at_home()->void:
+	var watch:=_watch(0.10)
+	assert_int(MilitaryCampaign.watch_at_home()).is_equal(watch)
+	assert_bool(MilitaryCampaign.create_field_army(15).has("ok")).is_true()
+	MilitaryCampaign.field_armies[0]["location_id"]="the_marches"
+	assert_int(MilitaryCampaign.watch_at_home()).is_equal(watch-15)
+
+
 func test_a_towns_guard_losses_come_off_the_watch()->void:
 	_second_town()
 	var watch:=_watch(0.10)
@@ -370,6 +470,38 @@ func test_a_new_save_keeps_the_split()->void:
 # ---------------------------------------------------------------------------
 # Every people the same
 # ---------------------------------------------------------------------------
+
+func test_a_hungry_computer_people_at_peace_sends_its_watch_home_and_the_path_takes_it_back()->void:
+	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":.1,"surface_water_recognized":true}
+	WorldSimulation.create_actor("alpha",777,Vector2.ZERO)
+	WorldSimulation.actors.alpha.systems.CivilizationSystem.scout_land_authority=func(_point:Vector2)->bool:return true
+	WorldSimulation.actors.alpha.controller="manual"
+	assert_bool(WorldSimulation.submit("alpha",{"kind":"found"}).get("ok",false)).is_true()
+	var out:Dictionary=WorldSimulation.scoped("alpha",func()->Dictionary:
+		var mc:Variant=WorldSimulation.military
+		var pop:=int(WorldSimulation.state.population_total)
+		mc.set_watch_share(0.10)
+		var before:=int(mc._mobilized_count())
+		# A famine at peace: the watch above its peacetime share goes home.
+		var keep:=roundi(float(pop)*0.03)
+		Controller.hunger_stand_down("alpha",{"hungry":true,"food_shortage":true,"at_war":false},keep)
+		var hungry:=int(mc._mobilized_count())
+		var watch_hungry:=int(mc.watch_manpower())
+		# The famine over: the ruler's temper keeps more than the path, so the
+		# watch is held at the temper's share again.
+		mc.watch_path_share=0.0
+		Controller.interim_watch(mc,roundi(float(pop)*0.06),{})
+		var held:=int(mc.watch_manpower())
+		# The path keeps as many as the temper: the hold goes.
+		mc.watch_path_share=0.5
+		Controller.interim_watch(mc,roundi(float(pop)*0.06),{})
+		return {"pop":pop,"before":before,"hungry":hungry,"watch_hungry":watch_hungry,"keep":keep,"held":held,"hold":float(mc.watch_work_share)})
+	assert_int(int(out.before)).is_greater(int(out.keep))
+	assert_int(int(out.hungry)).is_less_equal(int(out.keep))
+	assert_int(int(out.watch_hungry)).is_less_equal(int(out.keep)+1)
+	assert_int(int(out.held)).is_equal(roundi(float(out.pop)*0.06))
+	assert_float(float(out.hold)).is_equal(-1.0)
+
 
 func test_a_computer_people_keeps_its_watch_by_the_same_rules()->void:
 	WorldSimulation.context_provider=func(_origin:Vector2)->Dictionary:return {"environment_profile":PlanetEnvironment.profile_at(Vector2.ZERO),"surface_water_distance_km":.1,"surface_water_recognized":true}

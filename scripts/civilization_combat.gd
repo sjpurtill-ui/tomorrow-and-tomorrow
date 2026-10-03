@@ -43,19 +43,26 @@ static func force_for(incident:Dictionary)->Dictionary:
 	)
 
 ## A town's own defenders when it is attacked: its share of the home guard
-## (the watch posted there, drilled as the watch at home is) and its
-## townsfolk who rise (guard_ledger), with whatever comes to hand, as one
-## block. {} when nobody would stand. Run in the town's owner's scope.
+## (the watch posted there, drilled as the watch at home is and carrying its
+## share of the watch's arms: guard_kit) and its townsfolk who rise
+## (guard_ledger) with whatever comes to hand, two blocks side by side. {}
+## when nobody would stand. Run in the town's owner's scope.
 static func town_watch(city_id:String)->Dictionary:
 	var mc:Variant=WorldSimulation.military
 	var city:=WorldSimulation.settlements.settlement_record(city_id)
 	var guard:Dictionary=guard_ledger(mc).get(city_id,{})
 	var watch:=int(guard.get("watch",0));var rise:=int(guard.get("rise",0))
-	var count:=watch+rise
-	if count<=0: return {}
-	var formation:={"id":-1,"unit":"levy","weapon":"improvised","count":count,"authorized_count":count,"equipment":0,"equipment_required":count,"ammunition":0,"ammunition_required":0,
-		"training":militia_training(watch,rise,guard_drill(mc)),"experience":0.0,"personnel_condition":float(mc._trainee_condition()),"emergency_militia":true}
-	var force:Dictionary=mc.simulator.create_formation_force("%s watch" % String(city.get("name","the town")),[formation],float(mc._campaign_morale()),0.18)
+	if watch+rise<=0: return {}
+	var formations:Array=[]
+	var condition:=float(mc._trainee_condition())
+	if watch>0:
+		var kit:=guard_kit(mc,watch)
+		formations.append({"id":-1,"unit":String(kit.unit),"weapon":String(kit.weapon),"count":watch,"authorized_count":watch,"equipment":int(kit.equipment),"equipment_required":int(kit.equipment_required),"ammunition":0,"ammunition_required":0,
+			"training":guard_drill(mc),"experience":0.0,"personnel_condition":condition,"emergency_militia":true})
+	if rise>0:
+		formations.append({"id":-2,"unit":"levy","weapon":"improvised","count":rise,"authorized_count":rise,"equipment":0,"equipment_required":rise,"ammunition":0,"ammunition_required":0,
+			"training":RISE_TRAINING,"experience":0.0,"personnel_condition":condition,"emergency_militia":true})
+	var force:Dictionary=mc.simulator.create_formation_force("%s watch" % String(city.get("name","the town")),formations,float(mc._campaign_morale()),0.18)
 	force["commander"]=mc.simulator.create_commander("TOWN WATCH",0.35,0.35,0.35,0.45)
 	force["supply_level"]=1.0
 	force["town_watch"]=city_id
@@ -184,6 +191,20 @@ static func guard_drill(mc:Variant=null)->float:
 	var formations:Array=mc.home_army.get("formations",[])
 	if formations.is_empty():return WATCH_TRAINING
 	return preload("res://scripts/watch_military.gd").drill_of(formations)
+
+## What `men` of the home guard posted in a town carry: the kit most of the
+## watch at home carries, and its share of the sets in hand there (the same
+## share the fight at home leaves behind for them: MilitaryCampaign
+## _take_posted_guard). {unit, weapon, equipment, equipment_required}.
+static func guard_kit(mc:Variant,men:int)->Dictionary:
+	var unit:="levy";var weapon:="improvised";var most:=-1
+	for f in mc.home_army.get("formations",[]):
+		if not f is Dictionary:continue
+		var formation:Dictionary=f
+		if int(formation.get("count",0))>most:most=int(formation.get("count",0));unit=String(formation.get("unit","levy"));weapon=String(formation.get("weapon","improvised"))
+	var required:=int(mc._equipment_required_for(unit,men))
+	var armed:=preload("res://scripts/watch_military.gd").armed_of(mc.home_army.get("formations",[]))
+	return {"unit":unit,"weapon":weapon,"equipment":roundi(float(required)*armed),"equipment_required":required}
 
 ## The training of a block of `watch` of the home guard and `rise`
 ## townsfolk who stand together (`drill`: the guard's own).

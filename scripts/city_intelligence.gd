@@ -71,7 +71,9 @@ func truth(city_id:String)->Dictionary:
 		# (world_simulation project).
 		var guard:Dictionary=WorldSimulation.scoped("player",func()->Dictionary:return preload("res://scripts/civilization_combat.gd").guard_of(WorldSimulation.settlements.settlement_record(city_id)))
 		values["garrison"]=float(int(guard.trained)+int(guard.watch)+int(guard.rise))
-		values["garrison_untrained"]=float(int(guard.watch)+int(guard.rise))
+		# The home guard is the watch, drilled and armed as it is; only the
+		# townsfolk who rise are untrained (watch_military.gd).
+		values["garrison_untrained"]=float(int(guard.rise))
 		if bool(city.get("primary",false)):
 			values["fortification"]=clampf(float(WorldSimulation.military.settlement_defense.get("stage",0))/5.0,0,1)
 		place["controller"]=String(city.get("occupied_by","player"))

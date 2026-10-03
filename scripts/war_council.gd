@@ -210,7 +210,11 @@ static func day(today:int)->void:
 	if WorldSimulation.military.recovery.home_unavailable(): return
 	# The god lowered the watch: bands with nothing to do come home to be sent
 	# back to work (on the levy law's own days, army_levy_law.gd KEEP_EVERY).
-	if _player() and today%int(LAW.KEEP_EVERY)==0: fold_idle_bands()
+	if _player() and today%int(LAW.KEEP_EVERY)==0:
+		fold_idle_bands()
+		# The home guard asks for more than stand at home: idle bands come
+		# home to guard it (watch_military.gd recall_for_guard).
+		preload("res://scripts/watch_military.gd").recall_for_guard(_mc())
 	var s:=state()
 	var every:=LIVE_DAYS if bool(s.get("live",false)) else (WAIT_DAYS if bool(s.get("waiting",false)) else PEACE_DAYS)
 	if today-int(s.get("last",-99999))<every: return

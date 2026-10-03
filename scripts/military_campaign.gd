@@ -101,6 +101,9 @@ var watch_folded:=true
 ## people's leaders choose it in their daily split). watch_military.gd move
 ## sets it; GovernmentPeopleSystem's daily split keeps it (hold_share).
 var watch_work_share:=-1.0
+## The leaders' own choice for the watch before any share the ruler set
+## (their path's weight; watch_military.gd hold_share records it daily).
+var watch_path_share:=-1.0
 var training_queue:Array[Dictionary]=[]
 var training_injury_pool:=0
 var training_injury_recovery_accumulator:=0.0
@@ -241,6 +244,7 @@ func reset_for_new_world()->void:
 	watch_home_auto=-1.0
 	watch_folded=true
 	watch_work_share=-1.0
+	watch_path_share=-1.0
 	training_queue.clear()
 	training_injury_pool=0
 	training_injury_recovery_accumulator=0.0
@@ -297,6 +301,12 @@ func muster_home_army(requested_strength:=-1)->Dictionary:
 ## The watch: those set to keep watch, the military's manpower.
 func watch_manpower()->int:
 	return preload("res://scripts/watch_military.gd").manpower(self)
+
+## Those keeping watch who are at home to build its walls, guard its
+## prisoners, drill and keep order: the watch less those away in bands,
+## holding towns, crewing boats and wings, scattered or taken.
+func watch_at_home()->int:
+	return preload("res://scripts/watch_military.gd").at_home(self)
 
 ## The watch in the engine's numbers (watch_military.gd reading).
 func watch_reading()->Dictionary:
@@ -2972,8 +2982,12 @@ func _home_defense_force(allocate_id:bool=true)->Dictionary:
 
 ## Takes `count` of the home guard posted in our other towns out of home's
 ## formations for a fight at home, from each formation by its men (never its
-## last man, so every formation still stands), with their share of its gear.
-## {formation id (String): {count, equipment, spec}}: what to give back.
+## last man, so every formation still stands), with their places, their share
+## of its gear and rounds: those left keep the same share of their gear in
+## hand (the simulator arms a formation by gear over places). {formation id
+## (String): {count, authorized, equipment, ammunition, spec}}: what to give
+## back; "_pools" (added while the fight is pending) holds the posted guard's
+## hurt, scattered and taken from fights in their towns.
 func _take_posted_guard(formations:Array,count:int)->Dictionary:
 	var out:={}
 	if count<=0: return out
@@ -2989,10 +3003,17 @@ func _take_posted_guard(formations:Array,count:int)->Dictionary:
 		var off:=mini(mini(left,ceili(float(men)*share)),men-1)
 		if off<=0: continue
 		var gear:=mini(int(formation.get("equipment",0)),roundi(float(int(formation.get("equipment",0)))*float(off)/maxf(1.0,float(men))))
+		var rounds:=mini(int(formation.get("ammunition",0)),roundi(float(int(formation.get("ammunition",0)))*float(off)/maxf(1.0,float(men))))
+		var places:=maxi(men,int(formation.get("authorized_count",men)))
 		var spec:=formation.duplicate(true)
+		var unit:=String(formation.get("unit","levy"))
 		formation["count"]=men-off
+		formation["authorized_count"]=places-off
 		formation["equipment"]=int(formation.get("equipment",0))-gear
-		out[str(int(formation.get("id",-1)))]={"count":off,"equipment":gear,"spec":spec}
+		formation["equipment_required"]=_equipment_required_for(unit,places-off)
+		formation["ammunition"]=int(formation.get("ammunition",0))-rounds
+		formation["ammunition_required"]=_ammunition_required_for(String(formation.get("weapon","improvised")),int(formation.equipment_required))
+		out[str(int(formation.get("id",-1)))]={"count":off,"authorized":off,"equipment":gear,"ammunition":rounds,"spec":spec}
 		left-=off
 	return out
 
@@ -3006,23 +3027,34 @@ func _return_posted_guard(posted:Variant)->void:
 	var formations:Array=(home_army.get("formations",[]) as Array).duplicate(true)
 	var back:=0
 	for key in posted:
+		if String(key)=="_pools": continue
 		var part:Dictionary=posted[key] if posted[key] is Dictionary else {}
 		var men:=maxi(0,int(part.get("count",0)))
-		if men<=0: continue
+		var places:=maxi(men,int(part.get("authorized",men)))
+		if places<=0: continue
 		var found:=false
 		for f in formations:
 			var formation:Dictionary=f
 			if str(int(formation.get("id",-1)))!=String(key): continue
 			formation["count"]=int(formation.get("count",0))+men
-			formation["authorized_count"]=maxi(int(formation.get("authorized_count",0)),int(formation.count))
+			formation["authorized_count"]=maxi(int(formation.get("authorized_count",0))+places,int(formation.count))
 			formation["equipment"]=int(formation.get("equipment",0))+maxi(0,int(part.get("equipment",0)))
+			formation["equipment_required"]=_equipment_required_for(String(formation.get("unit","levy")),int(formation.authorized_count))
+			formation["ammunition"]=int(formation.get("ammunition",0))+maxi(0,int(part.get("ammunition",0)))
+			formation["ammunition_required"]=_ammunition_required_for(String(formation.get("weapon","improvised")),int(formation.equipment_required))
 			found=true;break
-		if not found:
+		if not found and men>0:
 			var spec:Dictionary=(part.get("spec",{}) as Dictionary).duplicate(true)
-			spec["count"]=men;spec["authorized_count"]=men;spec["equipment"]=maxi(0,int(part.get("equipment",0)))
+			spec["count"]=men;spec["authorized_count"]=places;spec["equipment"]=maxi(0,int(part.get("equipment",0)));spec["ammunition"]=maxi(0,int(part.get("ammunition",0)))
+			spec["equipment_required"]=_equipment_required_for(String(spec.get("unit","levy")),places)
+			spec["ammunition_required"]=_ammunition_required_for(String(spec.get("weapon","improvised")),int(spec.equipment_required))
 			formations.append(spec)
 		back+=men
-	if back<=0: return
+	# The posted guard's hurt, scattered and taken in their towns' fights
+	# while this one was fought (_apply_town_watch_result).
+	var pools:Dictionary=posted.get("_pools",{}) if posted.get("_pools") is Dictionary else {}
+	for pool in pools: home_army[String(pool)]=int(home_army.get(String(pool),0))+maxi(0,int(pools[pool]))
+	if back<=0 and pools.is_empty(): return
 	home_army["formations"]=formations
 	home_army["troops"]=int(home_army.get("troops",0))+back
 	_rebuild_home_army_with([])
@@ -3909,7 +3941,7 @@ func _record_daily_provisions(required:float,delivered:float,air_delivery:Dictio
 
 
 func prisoner_custody_snapshot()->Dictionary:
-	var guards:=float(WorldSimulation.state.population_allocations.get("Defense",0))*0.18
+	var guards:=float(watch_at_home())*0.18
 	var coverage:=clampf(guards/maxf(1.0,float(foreign_prisoners)+float(held_generals.size())*2.0),0.0,1.0)
 	return {"prisoners":foreign_prisoners,"held_generals":held_generals.size(),"custody_days":prisoner_custody_days,"guard_coverage":coverage,"food_demand":prisoner_food_demand(),"escape_risk":maxf(0.0,1.0-coverage),"escaped_total":escaped_prisoners_total}
 
@@ -4012,6 +4044,7 @@ func export_state()->Dictionary:
 		"watch_home_auto":watch_home_auto,
 		"watch_folded":watch_folded,
 		"watch_work_share":watch_work_share,
+		"watch_path_share":watch_path_share,
 		"training_queue":training_queue.duplicate(true),
 		"training_strategy":training_staff.data.duplicate(true),
 		"recruit_deploy":recruit_deploy.data.duplicate(true),
@@ -4412,6 +4445,8 @@ func _apply_imported_state(payload:Dictionary)->void:
 	watch_folded=payload.has("watch_version") and bool(payload.get("watch_folded",true))
 	var held:Variant=payload.get("watch_work_share",-1.0)
 	watch_work_share=clampf(float(held),0.0,1.0) if (held is float or held is int) and is_finite(float(held)) and float(held)>=0.0 else -1.0
+	var path:Variant=payload.get("watch_path_share",-1.0)
+	watch_path_share=clampf(float(path),0.0,1.0) if (path is float or path is int) and is_finite(float(path)) and float(path)>=0.0 else -1.0
 	training_queue.assign(payload.get("training_queue",[]))
 	for order in training_queue:
 		order.erase("soldier_ids")
@@ -4887,7 +4922,7 @@ const DEFENSE_WORDS:=["people","build","hold"]
 ## people's council and the screens all read this.
 func settlement_defense_daily_work(stage_index:int,workers:float=-1.0)->float:
 	if stage_index<0 or stage_index>=SETTLEMENT_DEFENSE_STAGES.size(): return 0.0
-	if workers<0.0: workers=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))
+	if workers<0.0: workers=maxf(0.0,float(watch_at_home()))
 	var efficiency:=clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.15,1.25)
 	return minf(float(SETTLEMENT_DEFENSE_STAGES[stage_index].work)*DEFENSE_DAILY_SHARE,workers*efficiency*DEFENSE_WORK_PER_HAND)
 
@@ -5000,7 +5035,7 @@ func _process_settlement_defense_day()->void:
 				WorldSimulation.state.simulation_events.push_front({"day":int(WorldSimulation.state.elapsed_days),"title":"%s completed" % String(project.name).capitalize(),"description":String(project.description),"domain":"security","severity":"notice"})
 	var integrity:=float(settlement_defense.integrity)
 	if integrity<1.0 and not _home_battle_running():
-		var repair_workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))+maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))*0.20
+		var repair_workers:=maxf(0.0,float(WorldSimulation.state.population_allocations.get("Construction",0)))+maxf(0.0,float(watch_at_home()))*0.20
 		if repair_workers>0.0:
 			settlement_defense["integrity"]=move_toward(integrity,1.0,minf(0.006,repair_workers*0.00012)*WorldSimulation.span)
 			changed=true
@@ -5141,13 +5176,42 @@ func _apply_town_watch_result(city_id:String,side:Dictionary,rounds:Array,home_s
 		)
 	var taken:=maxi(0,int(side.get("captured_in_battle",0)))
 	if share>0.0:
-		_home_guard_losses(roundi(float(killed)*share),"")
-		_home_guard_losses(roundi(float(hurt)*share),"wounded_pool")
-		_home_guard_losses(roundi(float(scattered)*share),"scattered_pool")
+		# While a fight at home is still being fought, the guard posted in our
+		# other towns stands apart from it (watch_military.gd
+		# pending_home_postings): its losses come off what that fight gives
+		# back, never off the host whose formations its result replaces.
+		var postings:Array=preload("res://scripts/watch_military.gd").pending_home_postings(self)
+		var posting:Dictionary=postings[0] if not postings.is_empty() else {}
+		_guard_losses(posting,roundi(float(killed)*share),"")
+		_guard_losses(posting,roundi(float(hurt)*share),"wounded_pool")
+		_guard_losses(posting,roundi(float(scattered)*share),"scattered_pool")
 		var guard_taken:=roundi(float(taken)*share)
-		_home_guard_losses(guard_taken,"captured_pool")
+		_guard_losses(posting,guard_taken,"captured_pool")
 		taken-=guard_taken
 	if taken>0: home_army["captured_pool"]=int(home_army.get("captured_pool",0))+taken
+
+
+## A town's guard losses: off the home host, or, while a fight at home is
+## pending, off the posted guard that fight gives back (its pools kept with
+## it until then).
+func _guard_losses(posting:Dictionary,count:int,pool:String)->int:
+	if posting.is_empty(): return _home_guard_losses(count,pool)
+	var total:=preload("res://scripts/watch_military.gd").posted_men(posting)
+	var lost:=mini(maxi(0,count),total)
+	if lost<=0: return 0
+	var left:=lost
+	for key in posting:
+		if left<=0: break
+		if String(key)=="_pools" or not posting[key] is Dictionary: continue
+		var part:Dictionary=posting[key]
+		var men:=int(part.get("count",0))
+		var off:=mini(left,ceili(float(men)*float(lost)/float(total)))
+		part["count"]=men-off
+		left-=off
+	if pool!="":
+		if not posting.get("_pools") is Dictionary: posting["_pools"]={}
+		(posting._pools as Dictionary)[pool]=int((posting._pools as Dictionary).get(pool,0))+lost
+	return lost
 
 
 ## `count` of the watch at home lost from the ranks: into `pool` (the hurt,
@@ -6098,7 +6162,7 @@ func _training_rate()->float:
 
 
 func training_capacity()->int:
-	var defense_workers:=float(WorldSimulation.state.population_allocations.get("Defense",0))
+	var defense_workers:=float(watch_at_home())
 	var commander:Dictionary=home_army.get("commander",_marshal_commander())
 	var command:=clampf(float(commander.get("command",0.5)),0.0,1.0)
 	var base:=3.0+defense_workers*0.30+command*3.0
