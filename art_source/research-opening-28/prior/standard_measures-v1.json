@@ -1,0 +1,9 @@
+{
+  "id": "standard_measures",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Shared Measures. Two makers compare grain scoops against one plain reference vessel and align simple wooden measuring rods; agreement on the same volume and length, no written numerals or modern rulers.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-1c461a5e-72dc-449a-b315-93c70b238872.png",
+  "asset": "res://assets/ui/research/subjects/standard_measures-v1.png",
+  "sha256": "54be3201c5418260c45144f3578b1182b702a7e1a47f76eae38754e0f544f9ba",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

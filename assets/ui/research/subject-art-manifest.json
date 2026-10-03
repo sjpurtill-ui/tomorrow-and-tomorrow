@@ -111,13 +111,7 @@
       0.5
     ]
   },
-  "standard_measures": {
-    "path": "res://assets/ui/research/subjects/standard_measures-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "standard_measures": {"path": "res://assets/ui/research/subjects/standard_measures-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "route_memory": {
     "path": "res://assets/ui/research/subjects/route_memory-v1.png",
     "focus": [
@@ -3805,11 +3799,11 @@
   "stone_wall_footings": {"path": "res://assets/ui/research/subjects/stone_wall_footings-v1.png", "focus": [0.5, 0.5]},
   "swidden_cycle": {"path": "res://assets/ui/research/subjects/swidden_cycle-v1.png", "focus": [0.5, 0.5]},
   "flat_clay_roofs": {"path": "res://assets/ui/research/subjects/flat_clay_roofs-v1.png", "focus": [0.5, 0.5]},
-  "household_mediators": {"path": "res://assets/ui/research/subjects/household_mediators-v1.png", "focus": [0.5, 0.5]},
-  "leaf_fodder_pollarding": {"path": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v1.png", "focus": [0.5, 0.5]},
-  "load_backframes": {"path": "res://assets/ui/research/subjects/load_backframes-v1.png", "focus": [0.5, 0.5]},
-  "poppy_analgesia": {"path": "res://assets/ui/research/subjects/poppy_analgesia-v1.png", "focus": [0.5, 0.5]},
-  "thorn_barriers": {"path": "res://assets/ui/research/subjects/thorn_barriers-v1.png", "focus": [0.5, 0.5]},
+  "household_mediators": {"path": "res://assets/ui/research/subjects/household_mediators-v2.png", "focus": [0.5, 0.5]},
+  "leaf_fodder_pollarding": {"path": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v2.png", "focus": [0.5, 0.5]},
+  "load_backframes": {"path": "res://assets/ui/research/subjects/load_backframes-v2.png", "focus": [0.5, 0.2]},
+  "poppy_analgesia": {"path": "res://assets/ui/research/subjects/poppy_analgesia-v2.png", "focus": [0.5, 0.5]},
+  "thorn_barriers": {"path": "res://assets/ui/research/subjects/thorn_barriers-v2.png", "focus": [0.5, 0.5]},
   "burnished_slipped_wares": {"path": "res://assets/ui/research/subjects/burnished_slipped_wares-v1.png", "focus": [0.5, 0.5]},
   "drive_hunts": {"path": "res://assets/ui/research/subjects/drive_hunts-v1.png", "focus": [0.5, 0.5]},
   "boundary_exchange_sites": {"path": "res://assets/ui/research/subjects/boundary_exchange_sites-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4233,6 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "named_star_figures": {"path": "res://assets/ui/research/subjects/named_star_figures-v2.png", "focus": [0.5, 0.3]}
 }

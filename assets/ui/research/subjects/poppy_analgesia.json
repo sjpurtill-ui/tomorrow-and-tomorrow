@@ -1,12 +1,55 @@
 {
   "id": "poppy_analgesia",
   "line": "health",
-  "game_year": 45,
-  "approx_historical_year": -4700,
-  "prompt": "c. 4700 BCE: Poppy pods prepared near a resting adult for pain relief; sparse watercolor and ink. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-97afbab4-c304-4f5d-bc13-42a2a60600c0.png",
-  "asset": "res://assets/ui/research/subjects/poppy_analgesia-v1.png",
-  "sha256": "31d082c4093a1e8099af87eb738f4dc4dafb2d1d2098dba63783db36ad3ea1c7",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; Poppy pods and resting patient clear in crop."
+  "status": "new",
+  "name": "Poppy Latex to Ease Pain",
+  "one_liner": "Poppy latex to ease pain",
+  "observation": "Poppy latex to ease pain.",
+  "key_threshold": false,
+  "target_year": 45,
+  "proposed_year": 45,
+  "band_low": 30,
+  "band_high": 65,
+  "min_year": 30,
+  "research_years": 3,
+  "requires_all": [
+    "herbal_classification"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "seed_selection"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "General health",
+  "signals": [
+    "health",
+    "illness"
+  ],
+  "version": 2,
+  "year": 45,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/health-v1.png",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/poppy_analgesia-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: A quiet historical botanical-care scene: one adult observes intact poppy flowers and round seed capsules beside a resting adult on a hide mat. A small plain earthen bowl nearby. No incisions, extraction steps, dosage, ingestion, drug preparation tools, or miraculous cure imagery. Medium: sage and celadon ink-watercolor on cream. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d753c1f3-879f-49ad-8065-449ca3fd5f87.png",
+  "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/poppy_analgesia-v2.png",
+  "sha256": "0b1860c191180814edea2200cf569e4aa7528a3eb94e18ffd229f343c268d9bb",
+  "mode": "built-in image_gen / edit"
 }
