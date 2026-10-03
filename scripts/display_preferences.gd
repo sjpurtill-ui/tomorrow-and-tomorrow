@@ -11,6 +11,9 @@ var render_scale:=1.0
 var shadows:=false
 var frame_limit:=60
 var music_volume:=1.0
+## N (court sound) -> J: the court's voices, room and fire, on the "Court" bus
+## (scripts/hud/court_sound.gd). 0 mutes them; music is separate.
+var court_volume:=1.0
 var map_scroll_speed:=DEFAULT_MAP_SCROLL_SPEED
 var color_theme:="light"
 ## Shorter transitions, no camera coasting, no weather or bird motion.
@@ -26,6 +29,7 @@ func _ready()->void:
 		shadows=bool(config.get_value("display","shadows",false))
 		frame_limit=int(config.get_value("display","frame_limit",60))
 		music_volume=clampf(float(config.get_value("display","music_volume",1.0)),0.0,1.0)
+		court_volume=clampf(float(config.get_value("display","court_volume",1.0)),0.0,1.0)
 		color_theme=String(config.get_value("display","color_theme","light"))
 		if color_theme not in ["light","dark"]:color_theme="light"
 		reduce_motion=bool(config.get_value("display","reduce_motion",false))
@@ -66,6 +70,7 @@ func apply()->void:
 	Engine.max_fps=frame_limit
 	Motion.reduce_motion=reduce_motion
 	apply_music()
+	apply_court()
 	for child in get_parent().get_children():
 		if child is DirectionalLight3D:child.shadow_enabled=shadows
 	applying=false
@@ -82,9 +87,15 @@ func apply_music()->void:
 	var score:=get_parent().get_node_or_null("Score") as AudioStreamPlayer
 	if score:score.bus="Music"
 
+## N (court sound): the "Court" bus at the player's level; the court's
+## sounds are made ahead of time so it never opens silent.
+func apply_court()->void:
+	preload("res://scripts/hud/court_sound.gd").set_volume(court_volume)
+	if is_inside_tree():preload("res://scripts/hud/court_sound.gd").prewarm(self)
+
 func persist()->void:
 	var config:=ConfigFile.new()
-	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume","color_theme","reduce_motion"]:config.set_value("display",key,get(key))
+	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume","court_volume","color_theme","reduce_motion"]:config.set_value("display",key,get(key))
 	config.set_value("camera","map_scroll_speed",map_scroll_speed)
 	if config.save(config_path)!=OK:push_warning("Settings apply this session but could not be saved.")
 
@@ -132,6 +143,12 @@ func add_controls(parent:Node)->void:
 	music.tooltip_text="Music only. Zero mutes music; other sounds are unchanged."
 	music.value_changed.connect(func(value:float):music_volume=value/100;music_label.text="Music volume: %d%%"%roundi(value);apply_music();persist())
 	parent.add_child(music)
+	# N (court sound): one plain slider for the court's voices and room.
+	var court_label:=Label.new();court_label.text="Court sounds: %d%%"%roundi(court_volume*100);parent.add_child(court_label)
+	var court:=HSlider.new();court.name="CourtSounds";court.min_value=0;court.max_value=100;court.step=1;court.value=court_volume*100;court.custom_minimum_size.y=32
+	court.tooltip_text="The voices, the fire and the crowd at court. Zero mutes them; music is unchanged."
+	court.value_changed.connect(func(value:float):court_volume=value/100;court_label.text="Court sounds: %d%%"%roundi(value);apply_court();persist())
+	parent.add_child(court)
 	var hint:=Label.new();hint.text="Changes take effect at once and are remembered. A lower 3D resolution runs faster and keeps text sharp.";hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;hint.add_theme_font_size_override("font_size",14);parent.add_child(hint)
 
 func _theme_boundary(node:Node)->void:

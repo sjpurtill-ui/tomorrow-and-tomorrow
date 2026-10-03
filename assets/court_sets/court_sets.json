@@ -1,0 +1,2149 @@
+{
+ "generator": "tools/blender/court_set.py",
+ "sets": {
+  "fire_ring": {
+   "gates": {
+    "pottery": [
+     "pots_0",
+     "pots_1"
+    ],
+    "no_pottery": [
+     "trays_0",
+     "trays_1",
+     "trays_bag"
+    ]
+   },
+   "marks": {
+    "fire": {
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "throne_gaze": {
+     "pos": [
+      0.0,
+      2.3,
+      5.4
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "petitioner": {
+     "pos": [
+      -1.15,
+      0,
+      2.05
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_0": {
+     "pos": [
+      -2.35,
+      0,
+      1.35
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_1": {
+     "pos": [
+      1.55,
+      0,
+      1.75
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_2": {
+     "pos": [
+      -3.36,
+      0,
+      0.4
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_3": {
+     "pos": [
+      3.4,
+      0,
+      0.25
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_4": {
+     "pos": [
+      -2.95,
+      0,
+      -2.05
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_5": {
+     "pos": [
+      1.55,
+      0,
+      -3.2
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_0": {
+     "pos": [
+      -1.25,
+      0,
+      2.2
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_1": {
+     "pos": [
+      -2.45,
+      0,
+      2.6
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_2": {
+     "pos": [
+      -0.1,
+      0,
+      3.0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "door": {
+     "pos": [
+      -5.942,
+      0.0,
+      -0.835
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "door_out": {
+     "pos": [
+      -8.813,
+      0.0,
+      -1.239
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_0": {
+     "pos": [
+      2.252,
+      0.0,
+      -1.197
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.455
+    },
+    "crowd_1": {
+     "pos": [
+      0.872,
+      0.0,
+      -2.396
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.437
+    },
+    "crowd_2": {
+     "pos": [
+      -2.364,
+      0.0,
+      -0.955
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.437
+    },
+    "crowd_3": {
+     "pos": [
+      0.5,
+      0.0,
+      -3.55
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_4": {
+     "pos": [
+      2.29,
+      0.0,
+      -3.37
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_5": {
+     "pos": [
+      3.14,
+      0.0,
+      -1.96
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_6": {
+     "pos": [
+      -3.55,
+      0.0,
+      -0.75
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_0": {
+     "pos": [
+      1.55,
+      0.0,
+      0.55
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_1": {
+     "pos": [
+      2.6,
+      0.0,
+      -2.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_2": {
+     "pos": [
+      -1.85,
+      0.0,
+      0.45
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_3": {
+     "pos": [
+      0.35,
+      0.0,
+      3.4
+     ],
+     "face": "fire",
+     "sit": false
+    }
+   },
+   "props": {
+    "food": [
+     "food_0",
+     "food_1",
+     "food_2",
+     "food_3",
+     "food_4"
+    ],
+    "rack": [
+     "rack_0",
+     "rack_1",
+     "rack_2",
+     "rack_3",
+     "rack_4",
+     "rack_5",
+     "rack_6",
+     "rack_7",
+     "rack_8"
+    ],
+    "spears": [
+     "spear_0",
+     "spear_1",
+     "spear_2",
+     "spear_3",
+     "spear_4",
+     "spear_5",
+     "spear_6",
+     "spear_7",
+     "spear_8",
+     "spear_9"
+    ],
+    "spears_peace": 3
+   },
+   "default_tags": [],
+   "fx": {
+    "fire": {
+     "pos": [
+      0,
+      0.05,
+      0
+     ],
+     "size": 1.0
+    },
+    "smoke_top": 9.0,
+    "dust": {
+     "pos": [
+      0.0,
+      1.4,
+      1.0
+     ],
+     "extent": [
+      4.5,
+      1.4,
+      3.0
+     ]
+    }
+   },
+   "light": {
+    "open_sky": true,
+    "sun_dir": [
+     0.55,
+     -0.58,
+     -0.6
+    ],
+    "sun_energy": 1.3,
+    "fire_energy": 1.25,
+    "fire_range": 6.0,
+    "fog": 0.002
+   },
+   "camera": {
+    "yaw": 22.0,
+    "pitch": -12.0,
+    "fov": 52.0,
+    "centre": [
+     0.1,
+     0.85,
+     0.25
+    ],
+    "yaw_range": [
+     -40.0,
+     50.0
+    ]
+   },
+   "ink": [
+    "StaticInked",
+    "food_",
+    "rack_",
+    "spear_",
+    "pots_",
+    "trays_"
+   ],
+   "door_side": -1,
+   "merged": {
+    "StaticInked": 9,
+    "StaticPlain": 0
+   },
+   "glb": "court_set_fire_ring.glb",
+   "triangles": 55201,
+   "objects": [
+    "Far0",
+    "Far1",
+    "Far2",
+    "Grass",
+    "Ground",
+    "StaticInked",
+    "food_0",
+    "food_1",
+    "food_2",
+    "food_3",
+    "food_4",
+    "pots_0",
+    "pots_1",
+    "rack_0",
+    "rack_1",
+    "rack_2",
+    "rack_3",
+    "rack_4",
+    "rack_5",
+    "rack_6",
+    "rack_7",
+    "rack_8",
+    "spear_0",
+    "spear_1",
+    "spear_2",
+    "spear_3",
+    "spear_4",
+    "spear_5",
+    "spear_6",
+    "spear_7",
+    "spear_8",
+    "spear_9",
+    "trays_0",
+    "trays_1",
+    "trays_bag"
+   ]
+  },
+  "longhouse": {
+   "gates": {
+    "pottery": [
+     "pots_hearth",
+     "pots_store_0",
+     "pots_store_2",
+     "pots_store_4",
+     "pots_0",
+     "pots_1",
+     "pots_2"
+    ],
+    "weaving": [
+     "weave_bench_0_1",
+     "weave_bench_1_0",
+     "weave_bench_1_1",
+     "weave_bench_2_0",
+     "weave_bench_3_1",
+     "weave_bench_4_0",
+     "weave_bench_4_1",
+     "weave_hang_0",
+     "weave_hang_1",
+     "weave_hang_2",
+     "weave_hang_3",
+     "loom_frame"
+    ],
+    "baking": [
+     "bread_0",
+     "bread_1",
+     "bread_2"
+    ]
+   },
+   "marks": {
+    "fire": {
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "throne_gaze": {
+     "pos": [
+      0.0,
+      2.5,
+      6.2
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "petitioner": {
+     "pos": [
+      -1.2,
+      0,
+      1.75
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_0": {
+     "pos": [
+      -2.45,
+      0,
+      1.2
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_1": {
+     "pos": [
+      1.5,
+      0,
+      1.55
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_2": {
+     "pos": [
+      -3.35,
+      0,
+      0.1
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_3": {
+     "pos": [
+      3.35,
+      0,
+      0.3
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_4": {
+     "pos": [
+      -2.35,
+      0,
+      -1.45
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_5": {
+     "pos": [
+      1.6,
+      0,
+      -1.4
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_0": {
+     "pos": [
+      -1.3,
+      0,
+      1.95
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_1": {
+     "pos": [
+      -2.5,
+      0,
+      2.45
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_2": {
+     "pos": [
+      -0.15,
+      0,
+      2.7
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "high_seat": {
+     "pos": [
+      0.0,
+      0.0,
+      -3.35
+     ],
+     "face": "throne",
+     "sit": true,
+     "seat": 0.68
+    },
+    "crowd_0": {
+     "pos": [
+      -3.6,
+      0.0,
+      -3.15
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.45
+    },
+    "crowd_1": {
+     "pos": [
+      0.95,
+      0.0,
+      -3.2
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.45
+    },
+    "crowd_2": {
+     "pos": [
+      2.6,
+      0.0,
+      -3.15
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.45
+    },
+    "crowd_3": {
+     "pos": [
+      4.6,
+      0.0,
+      -3.2
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.45
+    },
+    "crowd_4": {
+     "pos": [
+      -4.9,
+      0,
+      -1.1
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_5": {
+     "pos": [
+      5.0,
+      0,
+      -0.9
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_6": {
+     "pos": [
+      -4.3,
+      0,
+      1.9
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_7": {
+     "pos": [
+      4.6,
+      0,
+      1.95
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "door": {
+     "pos": [
+      -8.4,
+      0,
+      0.5
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "door_out": {
+     "pos": [
+      -11.5,
+      0,
+      0.5
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_0": {
+     "pos": [
+      1.6,
+      0,
+      0.95
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_1": {
+     "pos": [
+      -5.2,
+      0,
+      -1.7
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_2": {
+     "pos": [
+      3.7,
+      0,
+      1.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_3": {
+     "pos": [
+      -6.8,
+      0,
+      1.0
+     ],
+     "face": "fire",
+     "sit": false
+    }
+   },
+   "props": {
+    "food": [
+     "food_0",
+     "food_1",
+     "food_2",
+     "food_3",
+     "food_4",
+     "food_5",
+     "board_0",
+     "board_1",
+     "board_2",
+     "board_3"
+    ],
+    "rack": [
+     "rack_0",
+     "rack_1",
+     "rack_2",
+     "rack_3",
+     "rack_4",
+     "rack_5",
+     "rack_6",
+     "rack_7",
+     "rack_8",
+     "rack_9",
+     "rack_spit"
+    ],
+    "spears": [
+     "spear_0",
+     "spear_1",
+     "spear_2",
+     "spear_3",
+     "spear_4",
+     "spear_5",
+     "spear_6",
+     "spear_7",
+     "spear_8",
+     "spear_9"
+    ],
+    "spears_peace": 4
+   },
+   "default_tags": [
+    "pottery",
+    "weaving"
+   ],
+   "fx": {
+    "fire": {
+     "pos": [
+      0,
+      0.05,
+      0
+     ],
+     "size": 1.25
+    },
+    "smoke_top": 5.800000000000001,
+    "shafts": [
+     {
+      "top": [
+       0.0,
+       5.1000000000000005,
+       -0.45
+      ],
+      "radius": 0.62,
+      "strength": 0.4,
+      "soft": 0.5
+     }
+    ],
+    "dust": {
+     "pos": [
+      0.0,
+      1.8,
+      0.6
+     ],
+     "extent": [
+      4.0,
+      1.6,
+      2.4
+     ]
+    },
+    "door_light": [
+     -8.8,
+     1.2,
+     0.5
+    ]
+   },
+   "light": {
+    "open_sky": false,
+    "sun_dir": [
+     0.04,
+     -0.93,
+     0.36
+    ],
+    "sun_energy": 2.2,
+    "fire_energy": 1.5,
+    "fire_range": 7.5,
+    "fog": 0.012
+   },
+   "camera": {
+    "yaw": 18.0,
+    "pitch": -11.0,
+    "fov": 52.0,
+    "centre": [
+     0.1,
+     0.9,
+     0.2
+    ],
+    "yaw_range": [
+     -35.0,
+     40.0
+    ]
+   },
+   "ink": [
+    "StaticInked",
+    "food_",
+    "rack_",
+    "spear_",
+    "pots_",
+    "weave_",
+    "loom_",
+    "board_",
+    "bread_"
+   ],
+   "shadow_only": [
+    "ShadowCaster"
+   ],
+   "door_side": -1,
+   "merged": {
+    "StaticInked": 12,
+    "StaticPlain": 2
+   },
+   "glb": "court_set_longhouse.glb",
+   "triangles": 66900,
+   "objects": [
+    "Far0",
+    "Far1",
+    "Far2",
+    "Grass",
+    "Ground",
+    "ShadowCaster",
+    "StaticInked",
+    "StaticPlain",
+    "board_0",
+    "board_1",
+    "board_2",
+    "board_3",
+    "bread_0",
+    "bread_1",
+    "bread_2",
+    "food_0",
+    "food_1",
+    "food_2",
+    "food_3",
+    "food_4",
+    "food_5",
+    "loom_frame",
+    "pots_0",
+    "pots_1",
+    "pots_2",
+    "pots_hearth",
+    "pots_store_0",
+    "pots_store_2",
+    "pots_store_4",
+    "rack_0",
+    "rack_1",
+    "rack_2",
+    "rack_3",
+    "rack_4",
+    "rack_5",
+    "rack_6",
+    "rack_7",
+    "rack_8",
+    "rack_9",
+    "rack_spit",
+    "spear_0",
+    "spear_1",
+    "spear_2",
+    "spear_3",
+    "spear_4",
+    "spear_5",
+    "spear_6",
+    "spear_7",
+    "spear_8",
+    "spear_9",
+    "weave_bench_0_1",
+    "weave_bench_1_0",
+    "weave_bench_1_1",
+    "weave_bench_2_0",
+    "weave_bench_3_1",
+    "weave_bench_4_0",
+    "weave_bench_4_1",
+    "weave_hang_0",
+    "weave_hang_1",
+    "weave_hang_2",
+    "weave_hang_3"
+   ]
+  },
+  "shelter": {
+   "gates": {
+    "pottery": [
+     "pots_0",
+     "pots_1",
+     "pots_2"
+    ],
+    "no_pottery": [
+     "trays_0",
+     "trays_1"
+    ],
+    "farming": [
+     "quern_0"
+    ]
+   },
+   "marks": {
+    "fire": {
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "throne_gaze": {
+     "pos": [
+      0.0,
+      2.3,
+      5.4
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "petitioner": {
+     "pos": [
+      -1.15,
+      0,
+      2.05
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_0": {
+     "pos": [
+      -2.35,
+      0,
+      1.35
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_1": {
+     "pos": [
+      1.55,
+      0,
+      1.75
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_2": {
+     "pos": [
+      -3.36,
+      0,
+      0.4
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_3": {
+     "pos": [
+      3.4,
+      0,
+      0.25
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_4": {
+     "pos": [
+      -1.3,
+      0,
+      0.75
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_5": {
+     "pos": [
+      0.87,
+      0,
+      -1.52
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_0": {
+     "pos": [
+      -1.25,
+      0,
+      2.2
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_1": {
+     "pos": [
+      -2.45,
+      0,
+      2.6
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_2": {
+     "pos": [
+      -0.1,
+      0,
+      3.0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "door": {
+     "pos": [
+      -4.797,
+      0.0,
+      0.168
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "door_out": {
+     "pos": [
+      -8.495,
+      0.0,
+      0.297
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_0": {
+     "pos": [
+      1.74,
+      0.0,
+      -1.932
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.47
+    },
+    "crowd_1": {
+     "pos": [
+      0.974,
+      0.0,
+      -2.411
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.47
+    },
+    "crowd_2": {
+     "pos": [
+      -2.252,
+      0.0,
+      -1.3
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.47
+    },
+    "crowd_3": {
+     "pos": [
+      2.247,
+      0.0,
+      -1.096
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.437
+    },
+    "crowd_4": {
+     "pos": [
+      2.4,
+      0.0,
+      -2.48
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_5": {
+     "pos": [
+      -3.1,
+      0.0,
+      -1.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_6": {
+     "pos": [
+      0.8,
+      0.0,
+      -3.2
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_0": {
+     "pos": [
+      1.55,
+      0.0,
+      0.55
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_1": {
+     "pos": [
+      2.3,
+      0.0,
+      0.5
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_2": {
+     "pos": [
+      -1.85,
+      0.0,
+      0.45
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_3": {
+     "pos": [
+      0.35,
+      0.0,
+      3.4
+     ],
+     "face": "fire",
+     "sit": false
+    }
+   },
+   "props": {
+    "food": [
+     "food_0",
+     "food_1",
+     "food_2",
+     "food_3"
+    ],
+    "rack": [
+     "rack_0",
+     "rack_1",
+     "rack_2",
+     "rack_3",
+     "rack_4",
+     "rack_5",
+     "rack_6",
+     "rack_7"
+    ],
+    "spears": [
+     "spear_0",
+     "spear_1",
+     "spear_2",
+     "spear_3",
+     "spear_4",
+     "spear_5",
+     "spear_6",
+     "spear_7",
+     "spear_8",
+     "spear_9"
+    ],
+    "spears_peace": 3
+   },
+   "default_tags": [
+    "pottery",
+    "farming"
+   ],
+   "fx": {
+    "fire": {
+     "pos": [
+      0,
+      0.05,
+      0
+     ],
+     "size": 1.0
+    },
+    "smoke_top": 9.0,
+    "dust": {
+     "pos": [
+      0.0,
+      1.4,
+      0.8
+     ],
+     "extent": [
+      4.0,
+      1.4,
+      2.8
+     ]
+    }
+   },
+   "light": {
+    "open_sky": true,
+    "sun_dir": [
+     0.62,
+     -0.62,
+     -0.48
+    ],
+    "sun_energy": 1.3,
+    "fire_energy": 1.35,
+    "fire_range": 6.5,
+    "fog": 0.002
+   },
+   "camera": {
+    "yaw": 22.0,
+    "pitch": -12.0,
+    "fov": 52.0,
+    "centre": [
+     0.1,
+     0.85,
+     0.25
+    ],
+    "yaw_range": [
+     -40.0,
+     50.0
+    ]
+   },
+   "ink": [
+    "StaticInked",
+    "food_",
+    "rack_",
+    "spear_",
+    "pots_",
+    "trays_",
+    "quern_"
+   ],
+   "shadow_only": [
+    "ShadowCaster"
+   ],
+   "door_side": -1,
+   "merged": {
+    "StaticInked": 13,
+    "StaticPlain": 0
+   },
+   "glb": "court_set_shelter.glb",
+   "triangles": 55304,
+   "objects": [
+    "Far0",
+    "Far1",
+    "Far2",
+    "Grass",
+    "Ground",
+    "ShadowCaster",
+    "StaticInked",
+    "food_0",
+    "food_1",
+    "food_2",
+    "food_3",
+    "pots_0",
+    "pots_1",
+    "pots_2",
+    "quern_0",
+    "rack_0",
+    "rack_1",
+    "rack_2",
+    "rack_3",
+    "rack_4",
+    "rack_5",
+    "rack_6",
+    "rack_7",
+    "spear_0",
+    "spear_1",
+    "spear_2",
+    "spear_3",
+    "spear_4",
+    "spear_5",
+    "spear_6",
+    "spear_7",
+    "spear_8",
+    "spear_9",
+    "trays_0",
+    "trays_1"
+   ]
+  },
+  "mudbrick_hall": {
+   "gates": {
+    "weaving": [
+     "weave_seat",
+     "weave_back",
+     "weave_runner"
+    ],
+    "candles": [
+     "lamp_0",
+     "lamp_1"
+    ],
+    "writing": [
+     "tablet_0",
+     "tablet_1",
+     "tablet_2",
+     "tablet_3",
+     "tablet_4",
+     "tablet_5",
+     "tablet_stack_0",
+     "tablet_stack_1",
+     "tablet_stack_2",
+     "tablet_stack_3"
+    ],
+    "pottery": [
+     "pots_store_0",
+     "pots_store_1",
+     "pots_store_2"
+    ]
+   },
+   "fx": {
+    "fire": {
+     "pos": [
+      0,
+      0.27,
+      0
+     ],
+     "size": 0.95
+    },
+    "smoke_top": 4.8999999999999995,
+    "shafts": [
+     {
+      "top": [
+       0.0,
+       4.3999999999999995,
+       -1.25
+      ],
+      "radius": 0.85,
+      "strength": 0.34,
+      "soft": 0.5
+     }
+    ],
+    "dust": {
+     "pos": [
+      0.0,
+      1.8,
+      -0.6
+     ],
+     "extent": [
+      3.6,
+      1.6,
+      2.4
+     ]
+    },
+    "door_light": [
+     -7.1000000000000005,
+     1.2,
+     0.75
+    ]
+   },
+   "marks": {
+    "fire": {
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "throne_gaze": {
+     "pos": [
+      0.0,
+      2.5,
+      6.2
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "petitioner": {
+     "pos": [
+      -1.15,
+      0,
+      2.05
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_0": {
+     "pos": [
+      -2.35,
+      0,
+      1.35
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_1": {
+     "pos": [
+      1.55,
+      0,
+      1.75
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_2": {
+     "pos": [
+      -3.36,
+      0,
+      0.4
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_3": {
+     "pos": [
+      3.4,
+      0,
+      0.25
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_4": {
+     "pos": [
+      -1.75,
+      0,
+      -1.85
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_5": {
+     "pos": [
+      1.7,
+      0,
+      -1.95
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_0": {
+     "pos": [
+      -1.25,
+      0,
+      2.2
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_1": {
+     "pos": [
+      -2.45,
+      0,
+      2.6
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_2": {
+     "pos": [
+      -0.1,
+      0,
+      3.0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "seat_place": {
+     "pos": [
+      0.0,
+      0.0,
+      -3.9
+     ],
+     "face": "throne",
+     "sit": true,
+     "seat": 1.07
+    },
+    "crowd_0": {
+     "pos": [
+      -6.75,
+      0.0,
+      -3.0
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.46
+    },
+    "crowd_1": {
+     "pos": [
+      -6.75,
+      0.0,
+      -1.6
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.46
+    },
+    "crowd_2": {
+     "pos": [
+      6.75,
+      0.0,
+      0.0
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.46
+    },
+    "crowd_3": {
+     "pos": [
+      6.75,
+      0.0,
+      1.6
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.46
+    },
+    "crowd_4": {
+     "pos": [
+      -4.4,
+      0,
+      -2.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_5": {
+     "pos": [
+      4.4,
+      0,
+      -1.2
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_6": {
+     "pos": [
+      -4.6,
+      0,
+      1.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_7": {
+     "pos": [
+      2.6,
+      0,
+      -3.3
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "door": {
+     "pos": [
+      -6.7,
+      0,
+      0.75
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "door_out": {
+     "pos": [
+      -9.7,
+      0,
+      0.75
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_0": {
+     "pos": [
+      1.65,
+      0,
+      0.95
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_1": {
+     "pos": [
+      -4.6,
+      0,
+      -2.0
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_2": {
+     "pos": [
+      3.7,
+      0,
+      1.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_3": {
+     "pos": [
+      -6.0,
+      0,
+      1.2
+     ],
+     "face": "fire",
+     "sit": false
+    }
+   },
+   "props": {
+    "food": [
+     "food_0",
+     "food_1",
+     "food_2",
+     "food_3",
+     "food_4",
+     "food_5",
+     "food_6",
+     "food_7"
+    ],
+    "rack": [
+     "rack_0",
+     "rack_1",
+     "rack_2",
+     "rack_3",
+     "rack_4",
+     "rack_5",
+     "rack_6"
+    ],
+    "spears": [
+     "spear_0",
+     "spear_1",
+     "spear_2",
+     "spear_3",
+     "spear_4",
+     "spear_5",
+     "spear_6",
+     "spear_7",
+     "spear_8",
+     "spear_9"
+    ],
+    "spears_peace": 4
+   },
+   "default_tags": [
+    "pottery",
+    "weaving",
+    "writing",
+    "farming",
+    "baking"
+   ],
+   "light": {
+    "open_sky": false,
+    "sun_dir": [
+     0.05,
+     -0.92,
+     0.38
+    ],
+    "sun_energy": 2.3,
+    "fire_energy": 1.3,
+    "fire_range": 7.0,
+    "fog": 0.01
+   },
+   "camera": {
+    "yaw": 16.0,
+    "pitch": -10.0,
+    "fov": 52.0,
+    "centre": [
+     0.1,
+     0.9,
+     0.0
+    ],
+    "yaw_range": [
+     -30.0,
+     36.0
+    ]
+   },
+   "ink": [
+    "StaticInked",
+    "food_",
+    "rack_",
+    "spear_",
+    "pots_",
+    "weave_",
+    "tablet_",
+    "lamp_"
+   ],
+   "shadow_only": [
+    "ShadowCaster"
+   ],
+   "door_side": -1,
+   "merged": {
+    "StaticInked": 11,
+    "StaticPlain": 1
+   },
+   "glb": "court_set_mudbrick_hall.glb",
+   "triangles": 38536,
+   "objects": [
+    "Far0",
+    "Far1",
+    "Far2",
+    "Grass",
+    "Ground",
+    "ShadowCaster",
+    "StaticInked",
+    "StaticPlain",
+    "food_0",
+    "food_1",
+    "food_2",
+    "food_3",
+    "food_4",
+    "food_5",
+    "food_6",
+    "food_7",
+    "lamp_0",
+    "lamp_1",
+    "pots_store_0",
+    "pots_store_1",
+    "pots_store_2",
+    "rack_0",
+    "rack_1",
+    "rack_2",
+    "rack_3",
+    "rack_4",
+    "rack_5",
+    "rack_6",
+    "spear_0",
+    "spear_1",
+    "spear_2",
+    "spear_3",
+    "spear_4",
+    "spear_5",
+    "spear_6",
+    "spear_7",
+    "spear_8",
+    "spear_9",
+    "tablet_0",
+    "tablet_1",
+    "tablet_2",
+    "tablet_3",
+    "tablet_4",
+    "tablet_5",
+    "tablet_stack_0",
+    "tablet_stack_1",
+    "tablet_stack_2",
+    "tablet_stack_3",
+    "weave_back",
+    "weave_runner",
+    "weave_seat"
+   ]
+  },
+  "grand_hall": {
+   "gates": {
+    "weaving": [
+     "weave_throne",
+     "weave_banner_0",
+     "weave_banner_1",
+     "weave_banner_2",
+     "weave_banner_3"
+    ]
+   },
+   "fx": {
+    "fire": {
+     "pos": [
+      0,
+      0.05,
+      0
+     ],
+     "size": 1.15
+    },
+    "smoke_top": 7.2,
+    "shafts": [
+     {
+      "top": [
+       -3.6,
+       5.4,
+       -6.6000000000000005
+      ],
+      "radius": 0.5,
+      "strength": 0.6,
+      "soft": 0.55
+     },
+     {
+      "top": [
+       3.6,
+       5.4,
+       -6.6000000000000005
+      ],
+      "radius": 0.5,
+      "strength": 0.6,
+      "soft": 0.55
+     }
+    ],
+    "fill": [
+     [
+      0.0,
+      3.8,
+      -4.6,
+      1.1,
+      9.0
+     ],
+     [
+      -5.0,
+      3.0,
+      -2.0,
+      0.5,
+      7.0
+     ],
+     [
+      5.0,
+      3.0,
+      -2.0,
+      0.5,
+      7.0
+     ]
+    ],
+    "dust": {
+     "pos": [
+      -3.0,
+      3.0,
+      -1.6
+     ],
+     "extent": [
+      4.0,
+      2.5,
+      2.4
+     ]
+    },
+    "door_light": [
+     -8.9,
+     1.3,
+     1.6
+    ]
+   },
+   "marks": {
+    "fire": {
+     "pos": [
+      0,
+      0,
+      0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "throne_gaze": {
+     "pos": [
+      0.0,
+      2.7,
+      7.0
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "petitioner": {
+     "pos": [
+      -1.2,
+      0,
+      2.3
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_0": {
+     "pos": [
+      -2.35,
+      0,
+      1.35
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_1": {
+     "pos": [
+      1.55,
+      0,
+      1.75
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_2": {
+     "pos": [
+      -3.36,
+      0,
+      0.4
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_3": {
+     "pos": [
+      3.4,
+      0,
+      0.25
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_4": {
+     "pos": [
+      -2.6,
+      0,
+      -1.7
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "officials_5": {
+     "pos": [
+      1.7,
+      0,
+      -2.2
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_0": {
+     "pos": [
+      -1.25,
+      0,
+      2.2
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_1": {
+     "pos": [
+      -2.45,
+      0,
+      2.6
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "envoy_2": {
+     "pos": [
+      -0.1,
+      0,
+      3.0
+     ],
+     "face": "throne",
+     "sit": false
+    },
+    "seat_place": {
+     "pos": [
+      0.0,
+      0.0,
+      -5.6
+     ],
+     "face": "throne",
+     "sit": true,
+     "seat": 1.27
+    },
+    "crowd_0": {
+     "pos": [
+      -8.45,
+      0.0,
+      -4.6
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.48
+    },
+    "crowd_1": {
+     "pos": [
+      -8.45,
+      0.0,
+      -3.0
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.48
+    },
+    "crowd_2": {
+     "pos": [
+      8.45,
+      0.0,
+      -4.4
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.48
+    },
+    "crowd_3": {
+     "pos": [
+      8.45,
+      0.0,
+      1.6
+     ],
+     "face": "fire",
+     "sit": true,
+     "seat": 0.48
+    },
+    "crowd_4": {
+     "pos": [
+      -4.4,
+      0,
+      -3.4
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_5": {
+     "pos": [
+      4.4,
+      0,
+      -3.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_6": {
+     "pos": [
+      -4.2,
+      0,
+      0.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "crowd_7": {
+     "pos": [
+      4.6,
+      0,
+      0.2
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "door": {
+     "pos": [
+      -8.4,
+      0,
+      1.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "door_out": {
+     "pos": [
+      -11.5,
+      0,
+      1.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_0": {
+     "pos": [
+      1.75,
+      0,
+      1.0
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_1": {
+     "pos": [
+      -4.6,
+      0,
+      -2.0
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_2": {
+     "pos": [
+      3.9,
+      0,
+      1.8
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "animal_3": {
+     "pos": [
+      6.0,
+      0,
+      1.6
+     ],
+     "face": "fire",
+     "sit": false
+    }
+   },
+   "props": {
+    "food": [
+     "food_0",
+     "food_1",
+     "food_2",
+     "food_3",
+     "food_4"
+    ],
+    "rack": [],
+    "spears": [
+     "spear_0",
+     "spear_1",
+     "spear_2",
+     "spear_3",
+     "spear_4",
+     "spear_5",
+     "spear_6",
+     "spear_7",
+     "spear_8",
+     "spear_9",
+     "spear_10",
+     "spear_11"
+    ],
+    "spears_peace": 5
+   },
+   "default_tags": [
+    "pottery",
+    "weaving",
+    "writing",
+    "farming",
+    "baking",
+    "metal",
+    "masonry"
+   ],
+   "light": {
+    "open_sky": false,
+    "sun_dir": [
+     0.22,
+     -0.8,
+     0.56
+    ],
+    "sun_energy": 1.5,
+    "fire_energy": 1.6,
+    "fire_range": 8.5,
+    "fog": 0.006,
+    "brazier_energy": 2.2,
+    "brazier_range": 6.5
+   },
+   "camera": {
+    "yaw": 16.0,
+    "pitch": -10.0,
+    "fov": 52.0,
+    "centre": [
+     0.1,
+     1.0,
+     -0.2
+    ],
+    "yaw_range": [
+     -30.0,
+     36.0
+    ]
+   },
+   "ink": [
+    "StaticInked",
+    "food_",
+    "spear_",
+    "weave_"
+   ],
+   "shadow_only": [
+    "ShadowCaster"
+   ],
+   "door_side": -1,
+   "merged": {
+    "StaticInked": 10,
+    "StaticPlain": 2
+   },
+   "glb": "court_set_grand_hall.glb",
+   "triangles": 45540,
+   "objects": [
+    "Far0",
+    "Far1",
+    "Far2",
+    "Ground",
+    "ShadowCaster",
+    "StaticInked",
+    "StaticPlain",
+    "food_0",
+    "food_1",
+    "food_2",
+    "food_3",
+    "food_4",
+    "spear_0",
+    "spear_1",
+    "spear_10",
+    "spear_11",
+    "spear_2",
+    "spear_3",
+    "spear_4",
+    "spear_5",
+    "spear_6",
+    "spear_7",
+    "spear_8",
+    "spear_9",
+    "weave_banner_0",
+    "weave_banner_1",
+    "weave_banner_2",
+    "weave_banner_3",
+    "weave_throne"
+   ]
+  }
+ }
+}

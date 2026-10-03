@@ -3297,6 +3297,8 @@ static func append_line(id:String,line:Dictionary)->void:
 		"day":int(line.get("day",_day())) if (line.get("day") is int or line.get("day") is float) else _day(),
 		"aside":bool(line.get("aside",false)),
 	}
+	# Who a stage direction is about (the court stage acts it out on them).
+	if String(line.get("about",""))!="":clean["about"]=String(line.about).substr(0,80)
 	if clean.text=="": return
 	var lines:Array=audience.lines
 	lines.append(clean)

@@ -627,6 +627,11 @@ func _make_court_button()->Button:
 	button.add_theme_stylebox_override("pressed",gold_hover)
 	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
 	button.pressed.connect(open_court)
+	# COURT PREWARM (L): the modelled court's people, place and clips load in
+	# the background a few seconds after the rail is up, or at once on the
+	# first hover, so the first audience opens without a stall
+	# (scripts/hud/court_prewarm.gd; never blocks the frame or the sim).
+	preload("res://scripts/hud/court_prewarm.gd").attach(button)
 	var content:=VBoxContainer.new()
 	content.set_anchors_preset(Control.PRESET_FULL_RECT)
 	content.alignment=BoxContainer.ALIGNMENT_CENTER

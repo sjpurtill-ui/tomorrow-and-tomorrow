@@ -1884,7 +1884,7 @@ func _deliver(s:Dictionary,stage:String,extra:Dictionary,lines:Array[Dictionary]
 			if not staged.is_empty(): ordered.push_front(staged)
 	for line in ordered:
 		if String(line.key)=="narrator":
-			h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":String(line.text),"day":_day(),"aside":false})
+			h.append_line(String(s.id),{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":String(line.text),"day":_day(),"aside":false,"about":String(line.get("about",""))})
 			if String(line.text).begins_with("["): _mark_said(String(line.get("tkey","")),String(line.text))
 			continue
 		var member:=_member(s,String(line.key))
@@ -3095,7 +3095,11 @@ func _stage_line(s:Dictionary,result:Dictionary,rng:RandomNumberGenerator)->Dict
 	# appended once on delivery; staging it too said it twice.
 	if pool.is_empty(): return {}
 	var chosen:=String(pool[rng.randi_range(0,pool.size()-1)])
-	return {"key":"narrator","text":_fill(chosen,tokens),"tkey":_template_key(chosen)}
+	# Who the direction is about: the one it opens with ({actor} or {target}).
+	var about:=""
+	if chosen.begins_with("[{actor}"):about=String(tokens.get("actor",""))
+	elif chosen.begins_with("[{target}"):about=String(tokens.get("target",""))
+	return {"key":"narrator","text":_fill(chosen,tokens),"tkey":_template_key(chosen),"about":about}
 
 const COMMAND_WITNESS:={"maim":"witness_execution","kill":"witness_execution","exile":"witness_exile","detain":"witness_exile","terrify":"witness_shaken","penance":"witness_shaken",
 	"hesitate":"witness_shaken","refuse_flee":"witness_shaken","refuse_seized":"witness_shaken","prostrate":"witness_shaken","demote":"witness_shaken",
