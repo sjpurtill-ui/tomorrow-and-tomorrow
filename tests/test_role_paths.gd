@@ -18,6 +18,7 @@ const Answers:=preload("res://scripts/court_answers.gd")
 const Effects:=preload("res://scripts/role_effects.gd")
 const Paths:=preload("res://scripts/work_paths.gd")
 const Research600:=preload("res://scripts/research_600_catalog.gd")
+const Culture:=preload("res://scripts/cultural_inheritance.gd")
 const Personality:=preload("res://scripts/leader_personality.gd")
 const People:=preload("res://scripts/hud/people_model.gd")
 const Overview:=preload("res://scripts/hud/content/dock_content_overview.gd")
@@ -340,6 +341,68 @@ func _shares(counts:Dictionary,n:int)->String:
 	for path:String in ["growth","making","war","learning","building","balanced"]:
 		parts.append("%s %d (%d in 100)" % [path,int(counts.get(path,0)),roundi(float(counts.get(path,0))*100.0/maxf(1.0,n))])
 	return ", ".join(parts)
+
+## Food needs about a third of the hands (the lean stores full, the harvest
+## meeting the need): the count the leaders read before laying the work.
+func _food_needs_a_third()->void:
+	GameState.simulation_metrics.merge({"food_labor_share":0.32,"food_production":100.0,"food_consumption":100.0,"food_days":200.0,"food_projected_days":9999.0,"food_net":0.0,"food_intake_ratio":1.0},true)
+
+## The leaders' split, as shares of the people, for a path held (and the
+## people's own ambitions, if any).
+func _split_for(path:String)->Dictionary:
+	PeopleDirection.work_path={"id":path,"since":0,"reviewed":int(GameState.elapsed_days),"why":"","score":.7,"by":"leaders"}
+	var city:Dictionary=GameState.player_settlements[0]
+	var leader:=GovernmentPeopleSystem._person_record(int(city.get("leader_person_id",0)))
+	return SettlementModel.with_city_resources(String(city.id),func()->Dictionary:return GovernmentPeopleSystem._allocations_for_focus("balanced",leader,true))
+
+## THE FREED FOOD HANDS GO BY THE PATH (the player, year 16: "HOW do I have
+## 227 ways discovered!? I'm not prioritizing knowledge"). With food needing a
+## third of the hands, a balanced split keeps learning at 3 to 4 in 100 and
+## puts the rest on making, carrying, building, keeping and caring, searching
+## and cutting; only the learning path goes high on learning.
+func test_the_hands_food_does_not_need_go_by_the_path()->void:
+	_world()
+	_food_needs_a_third()
+	var shares:={}
+	for path:String in ["balanced","growth","making","war","learning","building"]:shares[path]=_split_for(path)
+	var table:PackedStringArray=[]
+	for path:String in shares:
+		var parts:PackedStringArray=[]
+		for role:String in ROLES:parts.append("%s %.1f" % [role,float(shares[path][role])])
+		table.append("%s: %s" % [path,", ".join(parts)])
+	print("[role_paths] food at a third, the leaders' split by path (in 100):\n  "+"\n  ".join(table))
+	var base:Dictionary=shares.balanced
+	assert_float(float(base.Food)).is_between(24.0,40.0)
+	assert_float(float(base.Knowledge)).override_failure_message("balanced learning %.1f" % float(base.Knowledge)).is_between(2.5,4.2)
+	# The rest goes to the other work, each above learning.
+	for role:String in ["Survey","Extraction","Construction","Crafting","Logistics","Administration"]:
+		assert_float(float(base[role])).override_failure_message("balanced %s %.1f" % [role,float(base[role])]).is_greater(float(base.Knowledge))
+	# Each path's own work rises; only the learning path goes high on learning.
+	for pair:Array in [["growth",["Administration","Logistics"]],["making",["Crafting","Logistics","Extraction"]],["war",["Defense","Crafting"]],["building",["Construction","Extraction"]]]:
+		for role:String in pair[1]:
+			assert_float(float(shares[pair[0]][role])).override_failure_message("%s does not lean to %s" % [pair[0],role]).is_greater(float(base[role]))
+		assert_float(float(shares[pair[0]].Knowledge)).override_failure_message("%s learning %.1f" % [pair[0],float(shares[pair[0]].Knowledge)]).is_less_equal(4.0)
+	assert_float(float(shares.learning.Knowledge)).override_failure_message("learning path %.1f" % float(shares.learning.Knowledge)).is_between(10.0,15.0)
+	# Food is as the planners worked it out, whatever the path.
+	for path:String in shares:assert_float(float(shares[path].Food)).is_equal_approx(float(base.Food),0.6)
+
+## The people's own ambitions do not smuggle learning in: bringing people
+## together (which asks a little learning) stays near the balanced share; a
+## people set on ideas learns more, still short of the learning path.
+func test_ambitions_do_not_make_a_people_of_scholars()->void:
+	_world()
+	_food_needs_a_third()
+	Culture.record(PeopleDirection.cultural_memory,"century:0","gathering",0,10.0)
+	var gathering:=float(_split_for("balanced").Knowledge)
+	assert_float(gathering).override_failure_message("gathering %.1f" % gathering).is_less_equal(4.2)
+	PeopleDirection.reset_for_new_world();PeopleDirection.ensure()
+	Culture.record(PeopleDirection.cultural_memory,"century:0","inquiry",0,10.0)
+	var ideas:=float(_split_for("balanced").Knowledge)
+	var scholars:=float(_split_for("learning").Knowledge)
+	print("[role_paths] learning in 100 at food a third: gathering %.1f, inquiry on a balanced split %.1f, inquiry on the learning path %.1f" % [gathering,ideas,scholars])
+	assert_float(ideas).is_greater(gathering)
+	assert_float(ideas).is_less(scholars)
+	assert_float(scholars).is_less_equal(15.5)
 
 ## The leaders' split leans toward the path; food comes first all the same.
 func test_the_path_leans_the_leaders_split()->void:

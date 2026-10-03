@@ -40,6 +40,11 @@ MATERNAL_W = np.array([_W[k] for k in COH])
 BASE_ALLOC = g.const("scripts/government_people_system.gd", "BASE_ALLOCATIONS",
                      default={"Food": 42.0, "Survey": 8.0, "Extraction": 11.0, "Construction": 11.0, "Crafting": 7.0, "Logistics": 7.0, "Knowledge": 6.0, "Administration": 4.0, "Defense": 4.0})
 FOCUS_CHANGES = g.literal_after("scripts/government_people_system.gd", "var changes:Dictionary=(", default={})
+# The most of the people at work a path puts on learning (work_paths.gd
+# LEARNING_CAP; the inquiry ambition raises it by INQUIRY_CAP x its share).
+# The leaders' own split (no focus set by hand) is capped.
+LEARNING_CAP = g.const("scripts/work_paths.gd", "LEARNING_CAP", default={}, optional=True)
+INQUIRY_CAP = float(g.const("scripts/work_paths.gd", "INQUIRY_CAP", default=0.0, optional=True))
 LABOR_EXTRAS = g.literal_after("scripts/food_system.gd", "var extras:=", default={"Food": 0.17, "Extraction": 0.18, "Construction": 0.18, "Defense": 0.12, "Survey": 0.13, "Logistics": 0.14, "Crafting": 0.08, "Knowledge": 0.04, "Administration": 0.04})
 # Optional Phase 3 pre-modern burden (early_life_conditions.gd); absent -> 1.
 # fun-pop: pregnancies under way at founding (game_state.gd initialize_population_model).
@@ -905,6 +910,23 @@ class Surrogate:
             w["Administration"] += 50 * 0.025
             w["Logistics"] += 50 * 0.018
             w["Knowledge"] += 50 * 0.012
+        # work_paths.gd cap_learning: the leaders' own split (no focus set by
+        # hand) puts at most the path's cap of the people on learning; what is
+        # cut goes to the other work besides food in proportion, so food is as
+        # planned.
+        cap = getattr(self, "learning_cap", None)
+        if cap is None and LEARNING_CAP:
+            cap = float(LEARNING_CAP.get("balanced", 1.0))
+        if cap is not None and not self.s.labor and not self.s.focus:
+            most = cap * sum(w.values())
+            if w["Knowledge"] > most:
+                others = sum(v for r, v in w.items() if r not in ("Food", "Knowledge"))
+                cut = w["Knowledge"] - most
+                w["Knowledge"] = most
+                if others > 0:
+                    for r in list(w):
+                        if r not in ("Food", "Knowledge"):
+                            w[r] += cut * w[r] / others
         total = sum(w.values())
         target = {r: w[r] / total * 100.0 for r in ROLES}
         # The engine re-plans labor daily; a month with any shortfall moves at once.
