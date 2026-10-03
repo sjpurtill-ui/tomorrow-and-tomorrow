@@ -126,6 +126,19 @@ var _caption:Bubble
 var _caption_age:=0
 var _laid_out:=false
 var _arrivals:Array[String]=[]
+## The seams others plug into (docs/COURT_STAGE_3D.md §5). While a hook is
+## null the stage's own behaviour stands in. Presentation only.
+static var set_builder:Object     # M: build(era, facts) -> Node3D with marks
+static var camera_rig:Object      # M: attach(stage, camera, set_root); shot(name, args)
+static var acting:Object          # K: play / look_at / set_mood / speak / idle
+static var director:Object        # L: beats / ambient / asides
+## What the engine says about the hall now (the Court fills it): era, season,
+## stores_days, hungry, sick, at_war, love, dread, mood, offer.
+var facts:Dictionary={}
+## Which audience this is (seeds the director: the same audience plays the same).
+var audience_key:=""
+var _event_index:=0
+var _beats:Tween
 ## The modelled figures' layer: one SubViewport for the whole stage.
 var three_d:=false
 var view_container:SubViewportContainer
@@ -455,6 +468,55 @@ static func mood_of(regard:Dictionary,envoy_mood:=0.0)->String:
 	if float(regard.get("love",0.0))>=0.62 or envoy_mood>=0.45:return "warm"
 	return "neutral"
 
+# --- Events: the one door for what happens in the hall ---------------------------
+
+## Every happening on the stage passes here (docs/COURT_STAGE_3D.md §5): the
+## stage's own acting has already run; a director, when installed, adds its
+## beats on top.
+func event(kind:String,data:Dictionary={})->void:
+	_event_index+=1
+	if director==null or not director.has_method("beats"):return
+	var beats:Variant=director.call("beats",{"kind":kind,"data":data},cast_list(),facts,hash("%s|%d" % [audience_key,_event_index]))
+	if beats is Array:run_beats(beats)
+
+## Who stands here, as the director and the acting see them.
+func cast_list()->Array:
+	var out:=[]
+	for key in cast_order:
+		var f:=figure(key)
+		if f==null or f.leaving:continue
+		out.append({"key":key,"role":f.role,"person":f.person,"figure":f.body3d,"mood":String(f.body3d.mood) if f.body3d!=null else "neutral"})
+	return out
+
+## Plays a set of beats [{t, who, act, args}] on one tween, in time order.
+func run_beats(beats:Array)->void:
+	if not is_inside_tree() or beats.is_empty():return
+	if _beats and _beats.is_valid():_beats.kill()
+	var ordered:=beats.duplicate()
+	ordered.sort_custom(func(a:Variant,b:Variant)->bool:return float((a as Dictionary).get("t",0.0))<float((b as Dictionary).get("t",0.0)))
+	_beats=create_tween()
+	var at:=0.0
+	for beat in ordered:
+		var t:=maxf(float((beat as Dictionary).get("t",0.0)),at)
+		if t>at:_beats.tween_interval(t-at)
+		at=t
+		_beats.tween_callback(_beat.bind(beat))
+
+func _beat(beat:Dictionary)->void:
+	var who:=String(beat.get("who",""))
+	var f:=figure(who)
+	var body:Node3D=f.body3d if f!=null else null
+	var args:Dictionary=beat.get("args",{}) if beat.get("args") is Dictionary else {}
+	match String(beat.get("act","")):
+		"play","look_at","mood","speak","gesture","idle":
+			if acting!=null and body!=null and acting.has_method(String(beat.act)):
+				acting.callv(String(beat.act),[body]+(args.get("call",[]) as Array))
+			elif body!=null and String(beat.act)=="gesture":f.gesture(String(args.get("clip","bow")),bool(args.get("hold",false)))
+		"shot":
+			if camera_rig!=null and camera_rig.has_method("shot"):camera_rig.call("shot",String(args.get("name","wide")),args)
+		"aside":
+			if f!=null and not String(args.get("text","")).is_empty():say(who,String(args.text),true)
+
 ## Someone's mood shows on their face and in the set of their head.
 func set_mood(key:String,mood:String)->void:
 	var f:=figure(key)
@@ -520,6 +582,7 @@ func subject_of(words:String,about:="")->String:
 
 ## They walk in from the side (the threshold) once the stage has a size.
 func arrive(keys:Array)->void:
+	for key in keys:event("enter",{"who":String(key)})
 	for key in keys:
 		if has_figure(String(key)) and not String(key) in _arrivals:_arrivals.append(String(key))
 	if _laid_out:_run_arrivals()
@@ -546,6 +609,7 @@ func _run_arrivals()->void:
 ##  "stay"  nobody leaves.
 func conclude(delay:float=1.4,style:="bow")->void:
 	if style=="stay":return
+	event("exit",{"who":MAIN,"style":style})
 	var index:=0
 	for key in cast_order.duplicate():
 		var f:=figure(key)
@@ -661,7 +725,10 @@ func say(key:String,text:String,aside:=false,animate:=true,ref:=-1)->Label:
 	if is_instance_valid(_caption) and _caption.get_rect().intersects(bubble.get_rect()):
 		_drop(_caption,animate);_caption=null
 	_talks+=1
-	_turn_to(key,reveal_time(text)+0.5 if animate else 0.9)
+	# An aside is said quietly to the god: the room does not turn for it.
+	if aside:f.speak(reveal_time(text)+0.5 if animate else 0.9,false)
+	else:_turn_to(key,reveal_time(text)+0.5 if animate else 0.9)
+	event("line",{"who":key,"text":text,"seconds":reveal_time(text),"aside":aside})
 	if animate:bubble.pop_in()
 	return bubble.label
 
@@ -689,6 +756,7 @@ func god_says(text:String,animate:=true,ref:=-1)->Label:
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null and not f.leaving:f.look_up()
+	event("god",{"text":text,"seconds":reveal_time(text)})
 	if animate:
 		_god.descend()
 		_rays.modulate.a=0.0
@@ -719,6 +787,7 @@ func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="",abou
 		var mood:=gesture_in(words)
 		var who:=subject_of(words,about)
 		if not mood.is_empty() and not who.is_empty():react(who,mood)
+		event("direction",{"who":who,"mood":mood,"text":words})
 	return _caption.label
 
 ## Everything shown at once (a test, or the player skipping ahead): no tween

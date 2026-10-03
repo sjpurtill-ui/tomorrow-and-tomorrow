@@ -809,3 +809,37 @@ func test_figures_of_one_colour_share_their_materials()->void:
 	assert_int(shown).is_equal(1)
 	for mesh in a.model.find_children("robe_*","MeshInstance3D",true,false):assert_bool((mesh as MeshInstance3D).visible).is_false()
 	for clip in Figure3D.CLIPS:assert_bool(a.player.has_animation(clip)).override_failure_message("missing clip "+clip).is_true()
+
+
+# --- The seams (docs/COURT_STAGE_3D.md): a director's beats reach the stage --------
+
+class StubDirector extends RefCounted:
+	var seen:Array=[]
+	func beats(event:Dictionary,cast:Array,_facts:Dictionary,_seed:int)->Array:
+		seen.append(String(event.kind))
+		if String(event.kind)!="line":return []
+		var other:=""
+		for member in cast:
+			if String(member.key)!="main":other=String(member.key)
+		return [{"t":0.0,"who":"main","act":"gesture","args":{"clip":"bow"}},
+			{"t":0.0,"who":other,"act":"aside","args":{"text":"He says that every spring."}}]
+
+
+func test_a_directors_beats_play_on_the_stage()->void:
+	var stub:=StubDirector.new()
+	Stage.director=stub
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	modal.court_stage.say(Stage.MAIN,"Count them again.")
+	modal.court_stage._beats.custom_step(1.0)
+	Stage.director=null
+	assert_bool(stub.seen.has("line")).is_true()
+	assert_str(_clip_of(modal,Stage.MAIN)).is_equal("bow")
+	var asides:=[]
+	for b in _bubbles(modal):
+		if (b as Stage.Bubble).kind=="aside":asides.append(b)
+	assert_int(asides.size()).is_greater_equal(1)
+	# The cast the director sees is who stands here, with their bodies.
+	var cast:Array=modal.court_stage.cast_list()
+	assert_bool(cast.is_empty()).is_false()
+	assert_object((cast[0] as Dictionary).figure).is_not_null()
