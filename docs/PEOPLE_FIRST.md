@@ -345,7 +345,7 @@ A people on poor land starved slowly. On main, a food worker there brings in abo
 - **The wild ground's limit is unchanged.** Poor land stays poor: about three in four on food, little building, little growth.
 - **On screen:** the People view's leaders line says it ("They keep their few learners even in this hunger."), and its tip always gives the rule.
 
-The seed table is in the PR. On the engine, poor land learns to sow kept seed by year 7–8 and holds its numbers (it lost about one in ten by year 12 before); good and average land are unchanged.
+On the engine (12 years, the balanced path, 4 seeds on poor land), poor land now learns to sow kept seed by year 7–12. It holds its numbers: 120 on average at year 12, against 110 before, with hunger deaths down from 69 to 35 across the four seeds. Good and average land are unchanged: the same people, food work, stores and hunger. The seed table is in the PR.
 
 ## Integration rules (every builder)
 - Work only in your worktree, on your `codex/<task>` branch. Never use `git stash`, never merge main yourself, never launch the player game, never remove a worktree.
