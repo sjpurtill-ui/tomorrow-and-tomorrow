@@ -1411,6 +1411,10 @@ func arrive(keys:Array)->void:
 
 func _run_arrivals()->void:
 	var index:=0
+	# In the modelled hall, one after another, even when they are sent in
+	# separately (a late official behind an envoy's company).
+	var now:=_now()
+	var next:=maxf(now,_next_arrival_at)
 	for key in _arrivals:
 		var f:=figure(key)
 		if f==null:continue
@@ -1418,9 +1422,20 @@ func _run_arrivals()->void:
 		# A modelled figure walks in from beyond the edge of the stage.
 		var distance:=maxf(size.x*.35,f.size.x*1.6)
 		if f.body3d!=null:distance=(f.home.x+f.size.x) if side<0.0 else (size.x-f.home.x+f.size.x)
-		f.enter_from(side,distance,index*0.18)
+		# In the modelled hall they come in single file, a body's length or
+		# so apart (never walking into each other).
+		if f.spot!=null:
+			f.enter_from(side,distance,next-now)
+			next+=FILE_GAP
+		else:f.enter_from(side,distance,index*0.18)
 		index+=1
+	_next_arrival_at=next
 	_arrivals.clear()
+
+## Seconds between people walking in or out one behind another in the hall.
+const FILE_GAP:=0.9
+## When the next to walk in may start (single file).
+var _next_arrival_at:=0.0
 
 ## The one before the god takes their leave (the audience is concluded);
 ## those who came with them follow. style says how they go:
@@ -1455,7 +1470,7 @@ func conclude(delay:float=1.4,style:="bow",reaction:="")->void:
 			continue
 		var distance:=maxf(size.x*.4,f.size.x*2.0)
 		if f.body3d!=null:distance=f.home.x+f.size.x
-		f.leave(-1.0,distance,delay+index*0.2,own)
+		f.leave(-1.0,distance,delay+index*(FILE_GAP if f.spot!=null else 0.2),own)
 		index+=1
 	var thought:=thinking
 	if is_instance_valid(thought):thought.visible=false
@@ -2106,7 +2121,11 @@ class Figure extends Control:
 		body3d.rotation.y=atan2(first.x,first.z)
 		_clip("walk_in",0.0,0.0)
 		_move=create_tween()
-		if delay>0.0:_move.tween_interval(delay)
+		if delay>0.0:
+			# Not yet through the door: unseen until their turn.
+			body3d.visible=false
+			_move.tween_interval(delay)
+			_move.tween_callback(func()->void:if is_instance_valid(body3d):body3d.visible=true)
 		_move.tween_method(_stroll_step.bind(true),1.0,0.0,time)
 		_move.tween_callback(_settle_in)
 
@@ -2538,6 +2557,9 @@ class Figure extends Control:
 	var exit_style:=""
 	func leave(side:float,distance:float,delay:float=0.0,style:="bow")->void:
 		leaving=true;exit_style=style
+		# Sent away before their turn through the door: they simply do not come.
+		if body3d!=null and spot!=null and not body3d.visible and _move!=null and _move.is_valid():
+			_move.kill();_vanish();return
 		# Off the staff (or up from the fire) before they walk.
 		if not acting_stance.is_empty() and Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():
 			Self.Acting.idle(body3d,String(body3d.stance))
