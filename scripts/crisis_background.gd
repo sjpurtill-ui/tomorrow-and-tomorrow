@@ -42,7 +42,8 @@ const CRISIS_SHARE:Array=[
 	[1650.0,{"children":0.503,"youth":0.459,"early_adults":0.312,"established_adults":0.256,"mature_adults":0.267,"elders":0.114}],
 	[1950.0,{"children":0.487,"youth":0.445,"early_adults":0.302,"established_adults":0.247,"mature_adults":0.258,"elders":0.110}],
 	[2250.0,{"children":0.470,"youth":0.428,"early_adults":0.290,"established_adults":0.236,"mature_adults":0.247,"elders":0.105}],
-	[2550.0,{"children":0.420,"youth":0.380,"early_adults":0.258,"established_adults":0.211,"mature_adults":0.220,"elders":0.095}]
+	[2550.0,{"children":0.420,"youth":0.380,"early_adults":0.258,"established_adults":0.211,"mature_adults":0.220,"elders":0.095}],
+	[2850.0,{"children":0.323,"youth":0.294,"early_adults":0.204,"established_adults":0.171,"mature_adults":0.180,"elders":0.080}]
 ]
 
 ## Each cohort's crisis share at game year `year` ({cohort: share}).
