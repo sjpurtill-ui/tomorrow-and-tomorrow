@@ -179,6 +179,8 @@ Random afflictions (crisis outbreaks, hunger seasons, fires, drowning) are untou
 
 When the people shrank, the card says what took them:
 - If deaths outside the ordinary toll cover the shortfall, it names the largest by cause (`GameState.rolling_death_causes`), for example "More are buried than born: 8 lost to fire."
+  - The card always uses plain words, never the ledger's raw cause (`dwindling_cause.gd misfortune_words`). A god's order that killed reads "the god's word"; a collapse or accident at work reads "accidents at work". Other causes read "the sea", "the road", "captivity", "war" and so on. A cause with no plain word reads "8 died by misfortune".
+  - Each day's deaths are booked under that day's largest cause, but the natural share of the day is kept as natural (`consequence_engine.gd`, `GameState.reclassify_death_cause`), so a long fever season does not swallow ordinary old age.
 - Otherwise it explains the ordinary toll by the winter tally's rule (`dwindling_cause.gd short_reason`), for example "fevers among the old".
 
 The note has room for about 19 letters (every top-strip value must fit at 1280 wide), so where the people live and whether all are fed are on the card's first lines; a hungry day still takes the note.
@@ -207,6 +209,21 @@ The note has room for about 19 letters (every top-strip value must fit at 1280 w
 - **Balanced scenario growth** (% a year, 0–10 / 0–30 / 30–100): −1.15 / −0.33 / +0.91 → +0.23 / +0.57 / +1.23.
 - **Growth path** at year 300 has 1.85 times the balanced people's number. It stays under the best historical figure for a founders' society (6,000).
 - **Year 600** is unchanged: crowding sets the long run.
+
+**People-first suite after the #120 recalibration** (`tools/sim/paths.py`, 3 seeds, 1200 years), main 5d38acce → this branch:
+
+| | Main | This branch |
+|---|---|---|
+| Founding years, path_balanced (people at 0 / 7.5 / 15 / 30 / 60) | 120 / 111 / 109 / 118 / 161 | 120 / 124 / 131 / 155 / 236 |
+| path_growth, same years | 120 / 112 / 112 / 124 / 173 | 120 / 126 / 134 / 162 / 252 |
+| path_learning, same years | 120 / 110 / 108 / 117 / 154 | 120 / 122 / 130 / 154 / 227 |
+| towns_balanced / growth / learning at year 300 | 3,627 / 4,844 / 2,270 | 5,453 / 6,154 / 3,647 |
+| towns_balanced / growth / learning at year 600 | 30,239 / 30,858 / 30,769 | 30,250 / 30,861 / 30,767 |
+
+- One-town paths meet at their land's limit by year 300 (path_balanced 1,162 on both).
+- The branch raises no flag that main does not: 62 flags here, 64 on main. All are the same rows, mostly the food-labor share and the towns' year-600 numbers.
+
+**Calibration.** The engine truth runs were regenerated on this branch. With the younger founders, the two balanced seeds now disagree by more than the tolerance in two places: known practices at year 5 (26 versus 33) and discoveries by year 15 (72 versus 98). The surrogate lies between them, and `check.py` marks those rows "seed" (see docs/research/SURROGATE_SIM.md).
 
 ### C. Searching the land (owner: `resource_system.gd` survey/deposit/extraction yield, survey scripts)
 - **Searched land.** Each people (each town in its own scope) keeps `survey_cover` (0..1).
