@@ -93,12 +93,14 @@ NEONATAL_CLAMP = (0.1, 0.0008) if MODERN_BIRTH_CLAMPS else (0.5, 0.004)
 # Fresh food, small stores, keepers and carers (food_care.gd; docs/PEOPLE_FIRST.md B).
 # The defaults are the rules before it: food security counted 45 days of store.
 FOOD_CARE = {k: float(g.const("scripts/food_care.gd", k, default=d, optional=True)) for k, d in {
-    "LEAN_DAYS": 45.0, "LEAN_WEIGHT": 0.30, "FRESH_HEALTH": 0.0, "FRESH_EVEN": 0.5, "CARRY_SHARE": 0.03, "CARRY_FRESH_CUT": 0.0,
+    "LEAN_DAYS": 45.0, "LEAN_WEIGHT": 0.30, "FRESH_HEALTH": 0.0, "FRESH_PENALTY": 0.0, "FRESH_EVEN": 0.5, "CARRY_SHARE": 0.03, "CARRY_FRESH_CUT": 0.0,
     "CARRY_REACH": 0.0, "KEEP_SHARE": 0.02, "KEEP_STORED_CUT": 0.0, "CARE_SHARE": 0.04, "CARE_HEALTH": 0.0, "CARE_SETTLE_DAYS": 60.0}.items()}
 CARER_COVER = g.const("scripts/early_life_conditions.gd", "CARER_COVER", default={}, optional=True)
 CARER_BURDEN = g.const("scripts/early_life_conditions.gd", "CARER_BURDEN", default={}, optional=True)
 # Deaths and sickness read what is eaten (the store counted full): GameState.fed_security.
 FED_SECURITY = "func fed_security()" in g.source("scripts/game_state.gd")
+# Planners draw stores past the reserve back down and release at it (GovernmentPeopleSystem).
+LEAN_DRAW = "if bool(guard.food):reserve_gap=maxf(0.0,reserve_gap)" in g.source("scripts/government_people_system.gd")
 MATERNAL_CLAMP = (0.02, 0.00002) if MODERN_BIRTH_CLAMPS else (0.5, 0.0008)
 FERTILITY_TRANSITION = "context.get(\"fertility_transition\"" in g.source("scripts/game_state.gd")
 # Research parity (one rule for every ruler): emphasis is shares. Research600
@@ -786,9 +788,14 @@ class Surrogate:
         target_days = (SURPLUS_RELEASE.get("RESERVE_TARGET_DAYS") or 0.0) * (1.0 + lean)
         if target_days > 0 and demand > 0:
             target_days = min(target_days, self._storage_capacity() / demand * 0.8)
-        reserve_gap = clamp((target_days - self.stored_days) / max(1.0, target_days), 0.0, 1.0) if target_days > 0 else 0.0
-        margin = float(SURPLUS_RELEASE.get("RESERVE_MARGIN") or 0.0) * (1.0 + lean) * reserve_gap
-        if demand > 0 and prev > 0 and (food_risk or reserve_gap > 0.0 or self.p.get("guard_always", False)):
+        # Signed since the lean stores (food_care.gd): past the reserve the
+        # planners plan a little under the need until the stores come back down.
+        lean_draw = LEAN_DRAW
+        reserve_gap = clamp((target_days - self.stored_days) / max(1.0, target_days), -1.0 if lean_draw else 0.0, 1.0) if target_days > 0 else 0.0
+        if food_risk:
+            reserve_gap = max(0.0, reserve_gap)
+        margin = float(SURPLUS_RELEASE.get("RESERVE_MARGIN") or 0.0) * ((1.0 + lean) * reserve_gap if reserve_gap > 0.0 else reserve_gap)
+        if demand > 0 and prev > 0 and (food_risk or reserve_gap != 0.0 or self.p.get("guard_always", False)):
             if food_risk or self.p.get("guard_always", False):
                 buffer = ((1.08 if food_risk else 1.02) + margin) * float(self.p["food_buffer"]) / 1.10
             else:
@@ -797,10 +804,15 @@ class Surrogate:
             needed = clamp(prev * demand * buffer / max(0.01, produced), 0.0, 0.85)
             other = sum(v for r, v in w.items() if r != "Food")
             w["Food"] = max(w["Food"], other * needed / max(0.01, 1.0 - needed))
-        if SURPLUS_RELEASE.get("SURPLUS_RELEASE_MARGIN") and demand > 0 and prev > 0 and not food_risk and self.stored_days >= SURPLUS_RELEASE["SURPLUS_RELEASE_DAYS"]:
+        release_at = SURPLUS_RELEASE.get("SURPLUS_RELEASE_DAYS") or 0.0
+        if lean_draw:
+            release_at = target_days   # GovernmentPeopleSystem: released once the stores hold the reserve
+        if SURPLUS_RELEASE.get("SURPLUS_RELEASE_MARGIN") and demand > 0 and prev > 0 and not food_risk and self.stored_days >= release_at:
             # GovernmentPeopleSystem surplus release (research_3000): planned food
-            # labor comes down to the needed share plus a margin.
-            needed = clamp(prev * demand * 1.02 * float(self.p["food_buffer"]) / 1.10 / max(0.01, produced), 0.0, 0.85)
+            # labor comes down to the needed share (the plan's own margin).
+            # Since the lean stores the release is the engine's own plan, with no
+            # shortage calibration (food_buffer is the alarm's response).
+            needed = clamp(prev * demand * (1.02 + margin) / max(0.01, produced), 0.0, 0.85) if lean_draw                 else clamp(prev * demand * 1.02 * float(self.p["food_buffer"]) / 1.10 / max(0.01, produced), 0.0, 0.85)
             released = clamp(needed * SURPLUS_RELEASE["SURPLUS_RELEASE_MARGIN"], 0.0, 0.85)
             other = sum(v for r, v in w.items() if r != "Food")
             w["Food"] = min(w["Food"], other * released / max(0.01, 1.0 - released))
@@ -1339,7 +1351,8 @@ class Surrogate:
         clean_water = e("health_protection") + e("water_safety") * 0.25 - e("disease_exposure") * 0.18
         env_cost = disease * max(0.18, 1.0 - e("sanitation")) * 0.045 + (float(p["cold_pressure"]) * 0.024) * max(0.0, 0.92 - housing)
         shelter = float(p["shelter_bonus"]) * clamp(self.completed / 2.0, 0.0, 1.0)
-        fresh_care = FOOD_CARE["FRESH_HEALTH"] * (self.fresh_share - FOOD_CARE["FRESH_EVEN"]) + FOOD_CARE["CARE_HEALTH"] * max(0.0, self.carer_cover)
+        past = self.fresh_share - FOOD_CARE["FRESH_EVEN"]
+        fresh_care = (FOOD_CARE["FRESH_HEALTH"] if past >= 0.0 else FOOD_CARE["FRESH_PENALTY"]) * past + FOOD_CARE["CARE_HEALTH"] * max(0.0, self.carer_cover)
         h_target = clamp(0.18 + self._fed() * 0.43 + fresh_care + food["diet"] * 0.06 + housing * 0.16 + clean_water + shelter
                          - self.malnutrition * 0.28 - env_cost + self.policy("health_target") + float(p["health_offset"]), 0.02, 0.97)
         self.health = lag(self.health, h_target, 0.022, days)

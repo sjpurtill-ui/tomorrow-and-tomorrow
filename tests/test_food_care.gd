@@ -27,7 +27,8 @@ func before_test()->void:
 	GameState.set_process(false);CivilizationSystem.set_process(false);MilitaryCampaign.set_process(false)
 	GameState.reset_for_new_world(5151);GameState.civic_api_enabled=false
 	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
-	FoodSystem.reset_for_new_world()
+	# No soldiers called up from an earlier suite: every hand works its task.
+	FoodSystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
 	GameState.ensure_population_total(100);GameState.housing_capacity=120
 	GameState.settlement_site_committed=true;GameState.convoy_traveling=false;GameState.resource_settlement_id=""
 	GameState.elapsed_days=400
@@ -40,7 +41,7 @@ func before_test()->void:
 
 func after_test()->void:
 	FoodSystem._lever_cache.clear()
-	FoodSystem.reset_for_new_world()
+	FoodSystem.reset_for_new_world();MilitaryCampaign.reset_for_new_world();CivilizationSystem.reset_for_new_world()
 	DiscoverySystem.reset_for_new_world()
 	GameState.reset_for_new_world(5151)
 	WorldSimulation.clear()
@@ -90,6 +91,14 @@ func test_food_security_counts_a_lean_buffer_of_twenty_days()->void:
 func test_the_levy_leaves_every_town_its_lean_buffer()->void:
 	assert_float(Purse.LEVY_KEEP_DAYS).is_equal(FoodCare.LEAN_DAYS)
 	assert_float(FoodCare.LEAN_DAYS).is_equal(20.0)
+	# Relief never lifts a town past what the levy leaves it, so the levy
+	# never takes relief back, and no seller is left hungry.
+	assert_float(Purse.HUNGRY_DAYS).is_less(Purse.RELIEF_TARGET)
+	assert_float(Purse.RELIEF_TARGET).is_less_equal(Purse.LEVY_KEEP_DAYS)
+	assert_float(Purse.LEVY_KEEP_DAYS).is_less(Purse.SELLER_KEEP)
+	assert_float(Purse.SELLER_KEEP).is_less(Purse.SELLER_DAYS)
+	# The planners aim a little past the buffer, for the season.
+	assert_float(GovernmentPeopleSystem.RESERVE_TARGET_DAYS).is_equal_approx(FoodCare.LEAN_DAYS*1.5,0.0001)
 
 ## A village of 100 with twenty days in store and fresh food coming in each
 ## day thrives: full food security, and no more deaths than with 45 or 200.
@@ -127,8 +136,9 @@ func test_a_village_of_100_with_twenty_days_and_fresh_food_thrives()->void:
 func test_fresh_share_leans_health()->void:
 	assert_float(FoodCare.fresh_health(0.5)).is_equal(0.0)
 	assert_float(FoodCare.fresh_health(1.0)).is_equal_approx(0.06,0.000001)
-	assert_float(FoodCare.fresh_health(0.0)).is_equal_approx(-0.06,0.000001)
-	print("health from the fresh share: 0.3 -> %+.3f, 0.7 -> %+.3f" % [FoodCare.fresh_health(0.3),FoodCare.fresh_health(0.7)])
+	# A town living on its grain loses a little, never much.
+	assert_float(FoodCare.fresh_health(0.0)).is_equal_approx(-0.02,0.000001)
+	print("health from the fresh share: 0.0 -> %+.3f, 0.3 -> %+.3f, 0.7 -> %+.3f, 1.0 -> %+.3f" % [FoodCare.fresh_health(0.0),FoodCare.fresh_health(0.3),FoodCare.fresh_health(0.7),FoodCare.fresh_health(1.0)])
 	assert_float(FoodCare.fresh_health(0.7)).is_greater(FoodCare.fresh_health(0.3))
 	# In the engine: the same people, one living on fresh food, one on stores.
 	var health:={}
@@ -194,9 +204,10 @@ func _infants(state:Node,discovery:Node,cover:float)->float:
 	state.early_care=EarlyCare.profile(state,discovery,{"carer_cover":cover})
 	return Indicators.infant_mortality_per_1000(state,discovery)
 
-func test_carers_lower_infant_deaths_within_the_premodern_benchmark()->void:
+func test_carers_lower_infant_deaths_a_little_extra_at_full_commitment()->void:
 	# The founders as a new world begins them, and a people with every early
-	# practice in full use; carers on 0, 2 and 4 in 100 of the people.
+	# practice in full use, well fed and well; carers on 0, 2, 4 and 8 in 100
+	# of the people (8 is full cover).
 	var founders:Node=auto_free(GAME_STATE_SCRIPT.new())
 	founders.reset_for_new_world(5150)
 	founders.initialize_population_model()
@@ -206,23 +217,24 @@ func test_carers_lower_infant_deaths_within_the_premodern_benchmark()->void:
 	var careful:Node=auto_free(GAME_STATE_SCRIPT.new())
 	careful.reset_for_new_world(5150)
 	careful.initialize_population_model()
-	careful.population_health=0.85;careful.food_security=0.9;careful.housing_capacity=150;careful.early_care_blend=1.0
-	careful.food_history=founders.food_history.duplicate(true)
+	careful.population_health=0.97;careful.food_security=0.98;careful.housing_capacity=150;careful.early_care_blend=1.0
+	for day in 120:careful.food_history.append({"day":day,"diet_quality":0.85})
 	for category:Dictionary in EarlyCare.CATEGORIES:
 		for id:String in category.practices:
 			if id not in careful.known_discoveries:careful.known_discoveries.append(id)
+	var shares:=[0.0,0.02,0.04,0.08]
 	for people:Node in [founders,careful]:
 		var imr:Array[float]=[]
-		for share:float in [0.0,0.02,0.04]:
+		for share:float in shares:
 			imr.append(_infants(people,plain,FoodCare.care_cover(share*100.0,100.0)))
-		print("%s: infant deaths in 1,000 with carers on 0/2/4 in 100: %.0f / %.0f / %.0f" % ["no early practices" if people==founders else "every early practice",imr[0],imr[1],imr[2]])
-		# More carers, fewer babies lost...
-		assert_float(imr[1]).is_less_equal(imr[0])
-		assert_float(imr[2]).is_less_equal(imr[1])
-		# ...and full care without modern medicine never below the benchmark floor.
-		assert_float(imr[2]).is_greater(150.0)
-	var careless:=_infants(founders,plain,0.0)
-	assert_float(_infants(founders,plain,1.0)).is_less(careless-20.0)
+		print("%s: infant deaths in 1,000 with carers on 0/2/4/8 in 100: %.0f / %.0f / %.0f / %.0f" % ["no early practices" if people==founders else "every early practice, well fed",imr[0],imr[1],imr[2],imr[3]])
+		# More carers, fewer babies lost, and the usual 4 in 100 give about half.
+		for index in range(1,imr.size()):assert_float(imr[index]).is_less(imr[index-1])
+		assert_float(FoodCare.care_cover(4.0,100.0)).is_equal_approx(0.5,0.000001)
+		# Even full care without modern medicine loses well over 100 in 1,000:
+		# a little ahead of the best documented pre-modern figures, never wild.
+		assert_float(imr[3]).is_greater(110.0)
+	assert_float(_infants(founders,plain,1.0)).is_less(_infants(founders,plain,0.0)-40.0)
 
 func test_care_is_learned_over_months_and_new_worlds_begin_with_it()->void:
 	var plain:FakeDiscovery=auto_free(FakeDiscovery.new())

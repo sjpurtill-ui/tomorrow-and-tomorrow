@@ -82,15 +82,19 @@ const REDISTRIBUTION_WEIGHT:={"relief":1.0,"crews":0.8,"army":0.5,"scholars":0.2
 ## Relief: a town is hungry under HUNGRY_DAYS of food; food is bought from
 ## towns holding more than SELLER_DAYS (down to SELLER_KEEP) to bring each
 ## hungry town to RELIEF_TARGET days, at most RELIEF_SHARE of the purse a
-## month while the line is on.
-const HUNGRY_DAYS:=20.0
+## month while the line is on. All are set from the lean buffer
+## (food_care.gd LEAN_DAYS, the store food security counts), in this order:
+## HUNGRY_DAYS < RELIEF_TARGET <= LEVY_KEEP_DAYS < SELLER_KEEP < SELLER_DAYS,
+## so relief never lifts a town past what the levy leaves it (the levy never
+## takes relief back) and no seller is left hungry.
+const LEAN_DAYS:=preload("res://scripts/food_care.gd").LEAN_DAYS
+const HUNGRY_DAYS:=LEAN_DAYS*0.75
+const RELIEF_TARGET:=LEAN_DAYS
 ## The levy takes only what a town holds beyond this many days of its
-## people's need: the lean buffer (food_care.gd LEAN_DAYS) that food security
-## counts, so the keepers never push a town below it.
-const LEVY_KEEP_DAYS:=preload("res://scripts/food_care.gd").LEAN_DAYS
-const RELIEF_TARGET:=35.0
-const SELLER_DAYS:=60.0
-const SELLER_KEEP:=45.0
+## people's need, so the keepers never push a town below the lean buffer.
+const LEVY_KEEP_DAYS:=LEAN_DAYS
+const SELLER_DAYS:=LEAN_DAYS*2.0
+const SELLER_KEEP:=LEAN_DAYS*1.5
 const RELIEF_SHARE:=0.25
 ## Old public debts are paid back at most this share of the purse a month.
 const DEBT_SHARE:=0.25

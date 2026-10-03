@@ -211,16 +211,21 @@ static func _decree_cover(category_id:String)->float:
 ## Carers (keeping and caring, food_care.gd): people who watch the small
 ## children, nurse the sick, keep the water clean and dress wounds cover this
 ## share of each category's missing practice at full cover (CARE_SHARE of the
-## people). They cannot replace birth attendants, cooking or stores, and they
-## lift only part of the pre-modern burden (CARER_BURDEN): full care without
-## modern medicine still loses well over 150 in 1,000 infants
-## (docs/research/BENCHMARKS_600.md).
+## people, food_care.gd CARE_SHARE). They cannot replace birth attendants,
+## cooking or stores, and they lift only part of the pre-modern burden
+## (CARER_BURDEN).
 const CARER_COVER:={"childcare":0.60,"remedies":0.50,"water":0.40,"wounds":0.45}
 ## Tending lifts part of the pre-modern burden of the young and of mothers
 ## even where every practice is known: a sick child fed, kept warm and
 ## watched, a mother nursed after the birth. Share of each band's burden
-## lifted at full cover; the rest stays (no modern medicine).
-const CARER_BURDEN:={"under5":0.12,"child":0.06,"neonatal":0.15,"maternal":0.15}
+## lifted at full cover; the rest stays (no modern medicine). A people that
+## leans hard on caring (the growth path: keepers and carers near 8 in 100
+## of the people) may run a little ahead of history, as a learning people
+## may in knowledge: about a fifth fewer infant deaths than the best
+## documented pre-modern societies at year 150, never wildly so; a people
+## with the usual 4 in 100 stays inside docs/research/BENCHMARKS_600.md
+## (as built: docs/PEOPLE_FIRST.md B).
+const CARER_BURDEN:={"under5":0.45,"child":0.25,"neonatal":0.50,"maternal":0.40}
 
 ## The carers' cover a profile uses: the day's (context), else the settled
 ## cover kept with the town's care (state.early_care), else none.

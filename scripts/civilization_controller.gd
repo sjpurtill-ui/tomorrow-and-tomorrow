@@ -2,6 +2,7 @@ extends RefCounted
 ## Only decisions live here. All population, equipment and technology changes
 ## must be accepted and paid for by the ordinary commands and simulation.
 const STRATEGY=preload("res://scripts/civilization_strategy.gd")
+const FoodCare=preload("res://scripts/food_care.gd")
 const GREAT_WORKS=preload("res://scripts/great_works_rivalry.gd")
 ## A year of deaths this many times the year before's is a hard year that
 ## can move a ruler to build in grief (conception_trigger).
@@ -33,7 +34,8 @@ static func current_plan(id:String,personality:Dictionary={})->Dictionary:
 	var plan:=STRATEGY.preferences(personality if not personality.is_empty() else STRATEGY.PERSONALITY.of_owner(id),situation)
 	WorldSimulation.direction._ensure_cultural_memory()
 	var drive:=preload("res://scripts/cultural_inheritance.gd").weight(WorldSimulation.direction.cultural_memory,"ambition","expansion",int(state.elapsed_days))
-	plan.expansion_food=maxf(45,float(plan.expansion_food)*(1.0-drive*.35))
+	# A founding never waits for more than full stores (food_care.gd).
+	plan.expansion_food=minf(FoodCare.RESERVE_DAYS,maxf(FoodCare.store_gate(45),float(plan.expansion_food)*(1.0-drive*.35)))
 	plan.expansion_months=STRATEGY.expansion_months(plan.personality,drive)
 	var choices:=preload("res://scripts/cultural_inheritance.gd").choice_weights(WorldSimulation.direction.cultural_memory,int(state.elapsed_days))
 	var total:=0.0
@@ -534,10 +536,11 @@ const DEFENSE_MEMORY_DAYS:=730
 ## palisade, walled districts, bastion network.
 const DEFENSE_STAGE_NEED:=[0.0,.2,.35,.5,.65,.8]
 ## A ruler commits a stage's materials only while DEFENSE_SPARE times each is
-## in store and food for DEFENSE_FOOD_DAYS, and only if its Defense workers can
+## in store and food for DEFENSE_FOOD_DAYS (half the old 30: the stores are a
+## lean buffer, food_care.gd STORE_GATE), and only if its Defense workers can
 ## raise it within DEFENSE_MAX_DAYS.
 const DEFENSE_SPARE:=2.0
-const DEFENSE_FOOD_DAYS:=30.0
+const DEFENSE_FOOD_DAYS:=15.0
 const DEFENSE_MAX_DAYS:=1095.0
 
 ## A computer ruler raises its next defence stage through the validated order
@@ -852,7 +855,7 @@ static func great_work_orders(id:String,plan:Dictionary)->void:
 			if String(item.work_id).is_empty() or bool(GREAT_WORKS.relation(id,String(item.owner)).get("treaty","none")!="none"):continue
 			WorldSimulation.submit(id,{"kind":"great_work_sabotage","target":String(item.owner),"city":String(item.local_city_id),"id":String(item.work_id)})
 			break
-	if active or free_city.is_empty() or bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)) or food_days<60:return
+	if active or free_city.is_empty() or bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)) or food_days<FoodCare.store_gate(60):return
 	if last_started>=0 and day-last_started<STRATEGY.wonder_interval_days(plan):return
 	var trigger:=conception_trigger(id,plan)
 	if trigger.is_empty():return
@@ -909,7 +912,7 @@ static func conception_trigger(id:String,plan:Dictionary)->Dictionary:
 		var age:=day-int(row.get("day",day))
 		if age>365 and age<=730:year_before+=float(row.get("deaths",0))
 	if deaths>=maxi(5,roundi(state.population_exact*.03)) and float(deaths)>=year_before*HARD_YEAR_DEATHS:found.append({"kind":"death","day":day,"text":"%d of our people died this year" % deaths})
-	if hunger>=maxi(2,roundi(state.population_exact*.005)) and float(state.simulation_metrics.get("food_days",0))>60 and not bool(plan.get("hungry",false)):
+	if hunger>=maxi(2,roundi(state.population_exact*.005)) and float(state.simulation_metrics.get("food_days",0))>FoodCare.store_gate(60) and not bool(plan.get("hungry",false)):
 		found.append({"kind":"famine","day":day,"text":"We came through a famine that took %d" % hunger})
 	var founded:=int(state.settlement_founded_day)
 	if founded>=0 and day>founded and posmod(day-founded,365*25)<30 and day-founded>=365*25:
@@ -918,7 +921,7 @@ static func conception_trigger(id:String,plan:Dictionary)->Dictionary:
 		found.append({"kind":"envy","day":int(item.day),"text":"News of %s built by %s" % [String(item.title),String(item.civ_name)],"source_owner":String(item.owner),"source_work":String(item.work_id),"source_form":String(item.form),"source_ambition":String(item.get("ambition",""))});break
 	var stock:=0.0
 	for material:String in ["Stone","Timber","Clay"]:stock+=float(state.resource_stockpiles.get(material,0))
-	if float(state.simulation_metrics.get("food_days",0))>150 and stock>=state.population_exact*3:
+	if float(state.simulation_metrics.get("food_days",0))>FoodCare.store_gate(150) and stock>=state.population_exact*3:
 		found.append({"kind":"plenty","day":day,"text":"Our stores overflow"})
 	var best:={};var strongest:=STRATEGY.WONDER_MOTIVE_THRESHOLD
 	for trigger:Dictionary in found:

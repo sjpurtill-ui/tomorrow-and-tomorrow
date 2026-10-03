@@ -197,11 +197,11 @@ func _care_rows()->Array:
 		var points:=FoodCare.fresh_health(share)*100.0
 		rows.append({"name":"Fresh food","sub":"%d in 10 of what is eaten is fresh" % roundi(share*10.0),"detail":FoodCare.fresh_sentence(share),
 			"value":("+%d" if points>=0.0 else "%d") % roundi(points)+" health","value_color":Tokens.GREEN_TEXT if points>=0.0 else Tokens.RED_TEXT,
-			"accent":Tokens.TEAL,"tip":"Health leans up to %d points when everything eaten is fresh, and down as much on stored food alone. Fresh food spoils fast: getting food and carrying bring it to mouths before it turns." % roundi(FoodCare.fresh_health(1.0)*100.0)})
+			"accent":Tokens.TEAL,"tip":"Health leans up to %d points when everything eaten is fresh, and down %d on stored food alone. Fresh food spoils fast: getting food and carrying bring it to mouths before it turns." % [roundi(FoodCare.fresh_health(1.0)*100.0),roundi(-FoodCare.fresh_health(0.0)*100.0)]})
 	var tended:=FoodCare.care_cover_of(GameState)
 	rows.append({"name":"Carers","sub":"keeping and caring: newborns, mothers, the sick","detail":FoodCare.caring_sentence(tended,float(care.get("carer_cover_target",tended)),maxf(1.0,GameState.population_exact)),
 		"value":"%d in 100" % roundi(tended*100.0),"value_color":Tokens.GREEN_TEXT if tended>=0.95 else (Tokens.AMBER_TEXT if tended>=0.35 else Tokens.RED_TEXT),
-		"accent":Tokens.GREEN if tended>=0.95 else Color(0,0,0,0),"tip":"Of full care: carers at 4 in 100 of the people cover part of what missing child care, remedies, clean water and wound care would, and lift part of the old burden of disease from babies, small children and mothers."})
+		"accent":Tokens.GREEN if tended>=0.95 else Color(0,0,0,0),"tip":"Of full care: carers at %d in 100 of the people cover part of what missing child care, remedies, clean water and wound care would, and lift part of the old burden of disease from babies, small children and mothers. A people that leans hard on caring may outdo the best the old world knew, a little." % roundi(FoodCare.CARE_SHARE*100.0)})
 	if float(care.get("overwork",0.0))>0.15:
 		rows.append({"name":"Overwork","sub":"too many at heavy work, or a labour drive","detail":"Hard work delays conception and endangers pregnancies.","value":"Heavy" if float(care.overwork)>=0.4 else "Some","value_color":Tokens.RED_TEXT,"accent":Tokens.RED,"tip":"More than about 70% of working people in food, extraction and building, or a labor mobilization, strains mothers and the young."})
 	for row:Dictionary in EarlyCare.explanation(care):

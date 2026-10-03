@@ -11,6 +11,11 @@ extends RefCounted
 ##   keeping and caring       keepers stop stored food rotting; carers tend
 ##   (Administration)         newborns, the sick, mothers and the hurt
 ##                            (early_life_conditions.gd), and lift health.
+##                            The same people keep the stores, care for the
+##                            people and do the office work (reach, records,
+##                            cohesion: consequence_engine.gd admin_coverage):
+##                            each of the three counts all of them, against
+##                            its own share of the people.
 ## A store is a lean buffer, not wealth: food security counts it only up to
 ## LEAN_DAYS, and deaths and sickness read what is eaten, never the store.
 ## Every people follows these rules; each town reads its own people.
@@ -23,9 +28,12 @@ const SPAN:=preload("res://scripts/day_span.gd")
 const LEAN_DAYS:=20.0
 ## Food-security points the lean buffer gives when it is full.
 const LEAN_WEIGHT:=0.30
-## Health leans by FRESH_HEALTH × (fresh share of what is eaten − 0.5):
-## about +0.06 on fresh food alone, −0.06 on stores alone.
+## Health leans by FRESH_HEALTH × (fresh share of what is eaten − 0.5) above
+## half fresh (up to +0.06 on fresh food alone), and by FRESH_PENALTY × the
+## same below it (at most −0.02 on stores alone): a farming town living on
+## its grain is not ruined for it, while more fresh food still pays.
 const FRESH_HEALTH:=0.12
+const FRESH_PENALTY:=0.04
 const FRESH_EVEN:=0.5
 ## Carriers: full cover at CARRY_SHARE of the people. Full cover halves fresh
 ## spoilage and widens the ground whose harvest arrives fresh by CARRY_REACH.
@@ -36,15 +44,27 @@ const CARRY_REACH:=0.25
 ## stored spoilage by KEEP_STORED_CUT (beside the Quartermaster's hand).
 const KEEP_SHARE:=0.02
 const KEEP_STORED_CUT:=0.40
-## Carers (Administration): full cover at CARE_SHARE of the people. Their
-## cover of each early-life category is early_life_conditions.gd CARER_COVER;
-## full cover also lifts health by CARE_HEALTH. Care is learned by doing: the
-## cover settles toward the hands on it over CARE_SETTLE_DAYS.
-const CARE_SHARE:=0.04
+## Carers (Administration): full cover at CARE_SHARE of the people, so the
+## usual 4 in 100 on keeping and caring give about half, and a people that
+## leans hard on caring gets the rest. Their cover of each early-life category
+## is early_life_conditions.gd CARER_COVER and CARER_BURDEN; full cover also
+## lifts health by CARE_HEALTH. Care is learned by doing: the cover settles
+## toward the hands on it over CARE_SETTLE_DAYS.
+const CARE_SHARE:=0.08
 const CARE_HEALTH:=0.03
 const CARE_SETTLE_DAYS:=60.0
 ## "What ten more would do" on the People view.
 const MORE:=10.0
+## The reserve the planners aim for (GovernmentPeopleSystem.RESERVE_TARGET_DAYS
+## keeps it as a plain number for the fast sim): the lean buffer and half again.
+const RESERVE_DAYS:=LEAN_DAYS*1.5
+## The rulers' store gates (civilization_strategy.gd preferences: founding a
+## town, marching to war, seeking peace, scouting, hard drill; a great work's
+## start, pace and extra crews; food gifts; civilization_controller.gd) were set
+## when the planners kept 60 days and the pits filled for months. The planners
+## now keep RESERVE_DAYS, so each gate asks STORE_GATE of the days it did, and
+## founding a town never asks more than full stores (RESERVE_DAYS).
+const STORE_GATE:=0.5
 
 # --- The rules -------------------------------------------------------------------------
 
@@ -63,7 +83,8 @@ static func security_targets(food_days:float,production_ratio:float,intake:float
 
 ## Health points from the fresh share (0..1) of what is eaten.
 static func fresh_health(fresh_share:float)->float:
-	return FRESH_HEALTH*(clampf(fresh_share,0.0,1.0)-FRESH_EVEN)
+	var past:=clampf(fresh_share,0.0,1.0)-FRESH_EVEN
+	return (FRESH_HEALTH if past>=0.0 else FRESH_PENALTY)*past
 
 static func carry_cover(carriers:float,people:float)->float:
 	return clampf(maxf(0.0,carriers)/maxf(1.0,people*CARRY_SHARE),0.0,1.0)
@@ -113,6 +134,10 @@ static func care_target_of(state:Node)->float:
 ## The carers' cover the engine applies today (settled, early_life_conditions.gd).
 static func care_cover_of(state:Node)->float:
 	return clampf(float((state.early_care as Dictionary).get("carer_cover",0.0)),0.0,1.0)
+
+## A ruler's store gate of `days` (set when stores ran to months), today.
+static func store_gate(days:float)->float:
+	return days*STORE_GATE
 
 ## A day's settling of the carers' cover toward `target` (a multi-day step
 ## settles for each day it covers).
@@ -233,7 +258,9 @@ static func _keeping_and_caring()->Dictionary:
 	var saved:=bare-stored_lost
 	var more_saved:=bare*(1.0-stored_spoilage_factor(more_keep))
 	var care_now:=care_cover_of(state)
-	var care_more:=care_cover(more_hands,people)
+	# Ten more raise the cover the hands are settling toward; the cover
+	# already learned stays: now + (target with ten more − target now).
+	var care_more:=clampf(care_now+care_cover(more_hands,people)-care_target_of(state),0.0,1.0)
 	var infants:=_infant_deaths(state,care_now)
 	var infants_more:=_infant_deaths(state,care_more)
 	var lines:Array=[]
@@ -281,24 +308,24 @@ static func fresh_sentence(share:float)->String:
 
 ## The carriers' hand on the fresh store.
 static func carrying_sentence(cover:float,people:float)->String:
-	var full:=_count(ceili(people*CARRY_SHARE))
+	var full:=_count(maxi(1,roundi(people*CARRY_SHARE)))
 	if cover<=0.0:return "No one is carrying, so fresh food turns before it reaches every hearth. Carriers at 3 in 100 of the people (%s) would halve its spoiling." % full
 	return "Carriers bring the day's harvest in before it turns: fresh food spoils %d in 100 less (half at most, at 3 in 100 of the people: %s)." % [roundi(CARRY_FRESH_CUT*clampf(cover,0.0,1.0)*100.0),full]
 
 ## The keepers' hand on the stored food.
 static func keeping_sentence(cover:float,people:float)->String:
-	var full:=_count(ceili(people*KEEP_SHARE))
+	var full:=_count(maxi(1,roundi(people*KEEP_SHARE)))
 	if cover<=0.0:return "No one keeps the stores, so stored food rots as it will. Keepers at 2 in 100 of the people (%s) would cut the rot by %d in 100." % [full,roundi(KEEP_STORED_CUT*100.0)]
 	return "Keepers turn, dry and guard the stored food: it rots %d in 100 less (%d at most, at 2 in 100 of the people: %s)." % [roundi(KEEP_STORED_CUT*clampf(cover,0.0,1.0)*100.0),roundi(KEEP_STORED_CUT*100.0),full]
 
 ## The carers' hand on newborns, mothers and the sick (Health page).
 static func caring_sentence(cover:float,target:float,people:float)->String:
-	var full:=_count(ceili(people*CARE_SHARE))
+	var full:=_count(maxi(1,roundi(people*CARE_SHARE)))
 	var settling:=""
 	if target>cover+0.02:settling=" More hands are learning the work; it reaches %d in 100 over the coming months." % roundi(target*100.0)
 	elif target<cover-0.02:settling=" Fewer hands are on it now; it falls toward %d in 100." % roundi(target*100.0)
-	if cover<=0.005:return "No one tends the newborns, the sick and mothers beyond their own families. Carers at 4 in 100 of the people (%s) would watch the small children, nurse the sick, keep the water clean and dress wounds.%s" % [full,settling]
-	return "Carers watch the small children, nurse the sick, keep the water clean and dress wounds where the people's own ways fall short: %d in 100 of full care (full at 4 in 100 of the people: %s), and health leans %s points for it.%s" % [roundi(cover*100.0),full,_signed(CARE_HEALTH*cover*100.0),settling]
+	if cover<=0.005:return "No one tends the newborns, the sick and mothers beyond their own families. Carers at %d in 100 of the people (%s) would watch the small children, nurse the sick, keep the water clean and dress wounds.%s" % [roundi(CARE_SHARE*100.0),full,settling]
+	return "Carers watch the small children, nurse the sick, keep the water clean and dress wounds where the people's own ways fall short: %d in 100 of full care (full at %d in 100 of the people: %s), and health leans %s points for it. The same people keep the stores and the office.%s" % [roundi(cover*100.0),roundi(CARE_SHARE*100.0),full,_signed(CARE_HEALTH*cover*100.0),settling]
 
 static func _days(days:float)->String:
 	if days>=3650.0:return "years"
@@ -312,10 +339,15 @@ static func _line(label:String,value:String,words:String,tone:String)->Dictionar
 	return {"label":label,"value":value,"words":words,"tone":tone}
 
 static func _count(n:int)->String:
-	return preload("res://scripts/hud/era_words.gd").count_word(n) if n<=12 else _whole(float(n))
+	return _words().count_word(n) if n<=12 else _whole(float(n))
 
 static func _whole(value:float)->String:
-	return preload("res://scripts/hud/era_words.gd").grouped(roundi(value))
+	return _words().grouped(roundi(value))
+
+## The people's counting words (hud/era_words.gd), loaded when first told: the
+## rulers' scripts preload this one, so it preloads nothing that reaches them.
+static func _words()->GDScript:
+	return load("res://scripts/hud/era_words.gd")
 
 static func _one(value:float)->String:
 	return str(roundi(value)) if absf(value)>=10.0 or is_equal_approx(value,roundf(value)) else "%.1f" % value

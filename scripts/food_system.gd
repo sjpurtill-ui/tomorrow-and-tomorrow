@@ -776,7 +776,7 @@ func _forecast(harvest: Dictionary,demand_breakdown: Dictionary,provision_delive
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	var last:=int(metrics.get("food_forecast_day",-100000))
 	var stored_days:=_stock_total()/maxf(0.01,float(demand_breakdown.get("total",1.0)))
-	if day-last<FORECAST_REFRESH_DAYS and day>=last and stored_days>=30.0 and metrics.get("food_forecast_90") is Dictionary and metrics.get("food_forecast_30") is Dictionary:
+	if day-last<FORECAST_REFRESH_DAYS and day>=last and stored_days>=FoodCare.LEAN_DAYS and metrics.get("food_forecast_90") is Dictionary and metrics.get("food_forecast_30") is Dictionary:
 		var aged:=day-last
 		return {"day":last,30:_aged_forecast(metrics.food_forecast_30,aged),90:_aged_forecast(metrics.food_forecast_90,aged)}
 	var environment:=_environment_mix()
