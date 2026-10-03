@@ -212,3 +212,19 @@ Your own `codex/court-motion` (turning, walk speed and foot sync, walk-cancel) o
   - Run it windowed on a private desktop with `--write-movie <dir>/f.png --fixed-fps 12` (a copy of `tools/run_isolated_gpu_probe.ps1` that passes engine arguments), then `python tools/audio/clip_avi.py <dir> <dir> --fps 12 --gain auto --scale 0.75`.
   - The last recordings of acts 2, 10 and 4 in the fire circle (before the framing fix above) are in L's worktree, `C:/Users/sjpur/tt-court-director/reports/court_clips/exec_{club,behead,dogs}_fire.avi` with `.webp` and `_sheet.jpg` (git-ignored).
   - The disk was nearly full during the night (1 GB free at worst); thin the PNG frames after making the AVI.
+
+## Addendum (after the handoff, 2026-10-03)
+
+- **`codex/court-exec-acting` moved on to `1dd5fe5b`.** It is not yet merged into this branch.
+  - `84afb096` holds K's unfinished acting for acts 3, 5, 6, 1, 14, 16 and 15 (`tools/blender/court_anims_exec2.py`). It is timed to N's tracks and sized to M's props. It is not built, previewed, audited or tested, has no `EXEC_PLANS` entries, and is not hooked into the build.
+  - `1dd5fe5b` merges main's faint and walk fix into it, so merging it later won't conflict on the clip libraries.
+- **Main now has the faint and walk fix** (#136, main `f9c6f398`):
+  - Special walks (storm off, led away, sober walk, back out bowing) are no longer cut off by the acting layer after 0.3 s. Clips of kind walk, exit and exec run until they finish or the stage stops them.
+  - The faint drops to the knees and keels over, so it no longer pulls the thighs out from under skirts.
+  - `tools/court_acting_audit.gd` (pose and cloth audit) is on main.
+  - Merge main into this branch before continuing.
+- **K's notes for whoever continues:**
+  - M's ladle has its bowl on the opposite side of the grip from the club's head. Either act 2's stirring cook holds it bowl-up, or M's ladle needs flipping.
+  - K's stake act assumes a 1.85 m stake top; M's stake is 2.68 m. Match one to the other.
+  - L's plan staging casts only victim, executioner and cook. Acts with more people (throwers, hoisters, the scribe) need more roles cast.
+  - Act 16 (arrows) has a fall at +5.0 s that would want an extra thump in N's track if kept.
