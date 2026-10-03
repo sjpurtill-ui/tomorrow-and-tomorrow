@@ -84,10 +84,14 @@
     ]
   },
   "pit_firing": {
-    "path": "res://assets/ui/research/subjects/pit_firing-v1.png",
+    "path": "res://assets/ui/research/subjects/pit_firing-v2.png",
     "focus": [
       0.5,
-      0.58
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "joinery": {
@@ -328,8 +332,12 @@
     ]
   },
   "framed_construction": {
-    "path": "res://assets/ui/research/subjects/framed_construction-v1.png",
+    "path": "res://assets/ui/research/subjects/framed_construction-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -375,8 +383,12 @@
     ]
   },
   "clay_tempering": {
-    "path": "res://assets/ui/research/subjects/clay_tempering-v1.png",
+    "path": "res://assets/ui/research/subjects/clay_tempering-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -1284,8 +1296,12 @@
     ]
   },
   "festival_calendar": {
-    "path": "res://assets/ui/research/subjects/festival_calendar-v1.png",
+    "path": "res://assets/ui/research/subjects/festival_calendar-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -1454,10 +1470,14 @@
     ]
   },
   "pulse_splitting": {
-    "path": "res://assets/ui/research/paper/pulse_splitting.png",
+    "path": "res://assets/ui/research/subjects/pulse_splitting-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "fruit_pulp_screening": {
@@ -6352,70 +6372,70 @@
     ]
   },
   "blood_price": {
-    "path": "res://assets/ui/research/subjects/blood_price-v1.png",
+    "path": "res://assets/ui/research/subjects/blood_price-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "controlled_undergrowth_burning": {
-    "path": "res://assets/ui/research/subjects/controlled_undergrowth_burning-v1.png",
+    "path": "res://assets/ui/research/subjects/controlled_undergrowth_burning-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.4
     ]
   },
   "down_the_line_exchange": {
-    "path": "res://assets/ui/research/subjects/down_the_line_exchange-v1.png",
+    "path": "res://assets/ui/research/subjects/down_the_line_exchange-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "mouths_against_store": {
-    "path": "res://assets/ui/research/subjects/mouths_against_store-v1.png",
+    "path": "res://assets/ui/research/subjects/mouths_against_store-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "stone_maceheads": {
-    "path": "res://assets/ui/research/subjects/stone_maceheads-v1.png",
+    "path": "res://assets/ui/research/subjects/stone_maceheads-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "wound_packing": {
-    "path": "res://assets/ui/research/subjects/wound_packing-v1.png",
+    "path": "res://assets/ui/research/subjects/wound_packing-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "ambush_raids": {
-    "path": "res://assets/ui/research/subjects/ambush_raids-v1.png",
+    "path": "res://assets/ui/research/subjects/ambush_raids-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "load_lashing_knots": {
-    "path": "res://assets/ui/research/subjects/load_lashing_knots-v1.png",
+    "path": "res://assets/ui/research/subjects/load_lashing_knots-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "poultices": {
-    "path": "res://assets/ui/research/subjects/poultices-v1.png",
+    "path": "res://assets/ui/research/subjects/poultices-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "rotating_heavy_tasks": {
-    "path": "res://assets/ui/research/subjects/rotating_heavy_tasks-v1.png",
+    "path": "res://assets/ui/research/subjects/rotating_heavy_tasks-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9988,6 +10008,24 @@
   "watch_duty_rotation": {
     "path": "res://assets/ui/research/subjects/watch_duty_rotation-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "moon_counting": {
+    "path": "res://assets/ui/research/subjects/moon_counting-v2.png",
+    "focus": [
+      0.5,
+      0.45
+    ]
+  },
+  "earth_oven_cooking": {
+    "path": "res://assets/ui/research/subjects/earth_oven_cooking-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]

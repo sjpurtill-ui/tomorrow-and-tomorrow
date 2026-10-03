@@ -1,0 +1,12 @@
+{
+  "id": "stone_maceheads",
+  "line": "security",
+  "game_year": 20,
+  "approx_historical_year": -4867,
+  "prompt": "c. 4867 BCE: Craftspeople drill rounded heavy stone mace head and bind another to plain wooden haft; hand-cut woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-47024ae1-7355-4de5-a991-d33b11e6e0fd.png",
+  "asset": "res://assets/ui/research/subjects/stone_maceheads-v1.png",
+  "sha256": "a018b782af74ac268a6b171d2cbfea8a4d2c014c62c76482e44be2ca0e6a11ca",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; mineral stone head and practice mace clear, no metal."
+}

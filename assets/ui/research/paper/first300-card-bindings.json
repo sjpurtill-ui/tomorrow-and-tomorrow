@@ -108,7 +108,7 @@
   "battlefield_medicine": "res://assets/ui/research/paper/first300-cards/battlefield_medicine.tres",
   "nut_kernel_shelling": "res://assets/ui/research/subjects/nut_kernel_shelling-v1.png",
   "root_grating_dewatering": "res://assets/ui/research/subjects/root_grating_dewatering-v2.png",
-  "pulse_splitting": "res://assets/ui/research/paper/pulse_splitting.png",
+  "pulse_splitting": "res://assets/ui/research/subjects/pulse_splitting-v2.png",
   "fruit_pulp_screening": "res://assets/ui/research/subjects/fruit_pulp_screening-v2.png",
   "textile_dye_fixation": "res://assets/ui/research/paper/textile_dye_fixation.png",
   "resist_dye_patterning": "res://assets/ui/research/paper/resist_dye_patterning.png",
@@ -179,5 +179,10 @@
   "clean_water": "res://assets/ui/research/subjects/clean_water-v2.png",
   "adobe_wall_construction": "res://assets/ui/research/subjects/adobe_wall_construction-v2.png",
   "mineral_pigment_preparation": "res://assets/ui/research/subjects/mineral_pigment_preparation-v2.png",
-  "acorn_leaching": "res://assets/ui/research/subjects/acorn_leaching-v2.png"
+  "acorn_leaching": "res://assets/ui/research/subjects/acorn_leaching-v2.png",
+  "festival_calendar": "res://assets/ui/research/subjects/festival_calendar-v2.png",
+  "framed_construction": "res://assets/ui/research/subjects/framed_construction-v2.png",
+  "pit_firing": "res://assets/ui/research/subjects/pit_firing-v2.png",
+  "earth_oven_cooking": "res://assets/ui/research/subjects/earth_oven_cooking-v2.png",
+  "clay_tempering": "res://assets/ui/research/subjects/clay_tempering-v2.png"
 }

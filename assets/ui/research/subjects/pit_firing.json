@@ -1,9 +1,22 @@
 {
   "id": "pit_firing",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Pit Firing. Show a concrete, visually clear scene demonstrating this exact practice: Clay exposed to sustained heat becomes permanently hard. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-a31e93f1-31bb-4f98-9255-de7c781cdb0b.png",
-  "asset": "res://assets/ui/research/subjects/pit_firing-v1.png",
-  "sha256": "14b8334c3e205b8b15a2f3035c1339ea6c111d181f75b33e7f8eadc9880f191a",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "year": 20,
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "prior_effective_source": "res://assets/ui/research/paper/pit_firing.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-19/art_source/research-opening-19/style-reference/production-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference controls ONLY established production field medium/palette and EXACT EXTRA-WIDE CANVAS; preserve reference aspect and width/height, full bleed, no3:2/square/frame/text/collage. NEW SUBJECT: One adult tends a small shallow EARTH PIT containing several uneven hand-pinched clay vessels surrounded by embers, another places a short dry twig at the pit edge. Flat angular copper/ember/soot/umber palette-knife paint. No masonry kiln, chimney, potter wheel, metal tool or glazed pot.\nFraming: complete main heads, hands and working objects ALL within y170..610 of765px-high canvas, zoom out to preserve actual3.37:1 card crop. Peripheral top/bottom only background. Game years20\u201322 inherit hides, cordage, baskets, early clay pots and small earthen dwellings; plain weaving is later. Never import later capabilities from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e4fa96e2-8fc3-42eb-8a89-d776ef9e465a.png",
+  "review": "Approved after full-canvas and actual 3.37:1 private GPU card review; complete heads and subject mechanism retained.",
+  "reference_snapshot": "res://art_source/research-opening-19/style-reference/production-v1.png",
+  "reference_commit": "7229a450e1579e391085a5bed4962ded72f49694",
+  "asset": "res://assets/ui/research/subjects/pit_firing-v2.png",
+  "sha256": "c0dabd5200b6c75318385a57c510e90937b099df549bdc171d7fc49d14bd814d",
+  "mode": "built-in image_gen / edit"
 }
