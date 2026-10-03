@@ -18,6 +18,8 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const Kit:=preload("res://scripts/hud/paper_kit.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Standing:=preload("res://scripts/standing.gd")
+## A people's tongue and look, small, under its name.
+const IdentityLine:=preload("res://scripts/hud/people_identity_line.gd")
 
 const WIDE_AT:=620.0
 const TWO_CARDS_AT:=700.0
@@ -522,6 +524,7 @@ func _people_card(p:Dictionary)->Control:
 	var refs:={"ruler":null,"badges":[],"doings":[],"memories":[],"feelings":[]}
 	refs.relation=Kit.label(title,String(p.relation),"note")
 	if String(p.get("ruler",""))!="": refs.ruler=Kit.label(title,String(p.ruler),"note")
+	IdentityLine.build(title,String(p.civ_id))
 	refs.headline=_voice(column,String(p.headline),18)
 	var grid:=GridContainer.new();grid.columns=2
 	grid.add_theme_constant_override("h_separation",16);grid.add_theme_constant_override("v_separation",6)
@@ -654,6 +657,8 @@ func _fill_home()->void:
 	var note:=Kit.label(column,String(words.note),"note")
 	note.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	_home_refs.note=note
+	# Our own tongue and look.
+	IdentityLine.build(column,"player")
 	if words.has("god"):
 		var god:=Kit.label(column,String(words.god),"note")
 		god.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER

@@ -10,6 +10,7 @@ const Kit:=preload("res://scripts/hud/artifact_gallery.gd")
 const KnownWorld:=preload("res://scripts/hud/known_world_board.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
+const IdentityLine:=preload("res://scripts/hud/people_identity_line.gd")
 const DISPLAY_FONT:=preload("res://assets/fonts/cinzel/Cinzel.ttf")
 const CHART_ART:="res://assets/ui/world/chart-tier-%d.png"
 const CHART_HEIGHT:=470.0
@@ -303,6 +304,7 @@ func _people_card(people:Dictionary)->Control:
 	var regard:=Kit.serif(regard_row,"They "+String(people.get("regard","are undecided about you")),14,regard_color(String(people.get("regard_id",""))),true);regard.name="Regard"
 	var where:=String(people.get("where",""))
 	if not where.is_empty():Kit.label(words,where+(" · "+String(people.get("met","")) if not String(people.get("met","")).is_empty() else ""),12,T.TEXT_SOFT)
+	if not String(people.get("civ_id","")).is_empty():IdentityLine.build(words,String(people.civ_id))
 	var last:=String(people.get("last_word","")).strip_edges()
 	var quote:=Kit.serif(words,("“%s”" % (last if last.length()<=150 else last.substr(0,147)+"…")) if not last.is_empty() else "No word has yet passed between you.",13,T.BODY if not last.is_empty() else T.INK_MUTED,true)
 	quote.name="LastWord"

@@ -1,26 +1,36 @@
 extends RefCounted
-## Names graded by what a people knows and by their own tradition.
+## Names graded by what a people knows, in each people's own tongue.
 ##
-## A band that has neither writing nor lasting institutions has no family
-## names: a person is one name and what the band calls them ("Tala Long-Stride",
-## "Oren Who Found the Ford"). Once villages and fields exist, people are also
-## known by the place or hearth they come from ("Tala of Reedwater"). Family
-## names arrive only with writing or institutions, and they grow out of those
-## older bynames ("Tala Reedwater"). Each people's names share one sound
-## palette, chosen from its visual ancestry (character_appearance.gd), so a
-## neighbour's envoy never sounds like one of your own. Every name is invented;
-## real history is calibration only. Given names are not repeated among the
-## living people one court can see.
+## Every people speaks its own language (people_language.gd): a sound family,
+## its own sounds and endings, and its own way of naming people (given name and
+## family name, given name and father's name, or given name and clan). A
+## neighbour's envoy never sounds like one of your own, and the names are
+## natural names of that tongue, not one shared old-fashioned palette.
+##
+## What a people knows still grades what the second name is. Before writing
+## or lasting institutions (stages 0 and 1) it is a byname only: the person is
+## known by it, but it is not handed down (family ""). Once writing or
+## institutions exist (stage 2) it is the family's name (or the father's or
+## the clan's, as that people name people) and kin share it. Every name is
+## invented; real history is calibration only. Given names are not repeated
+## among the living people one court can see while another can be found.
 ##
 ## Records already saved keep their names. Static helpers; preload.
 
 const CV:=preload("res://scripts/character_voice.gd")
 const Appearance:=preload("res://scripts/character_appearance.gd")
+const Lang:=preload("res://scripts/people_language.gd")
 
-## Stage 0: one name and an epithet. 1: a byname of place. 2: a family name.
-const STAGE_WORDS:=["name and epithet","name and place","family name"]
+## Stage 0: a name and a byname. 1: a name and a byname. 2: a family name.
+const STAGE_WORDS:=["name and byname","name and byname","family name"]
 
-## Sound palettes: [women, men]. Invented, era-neutral, short enough for a hall.
+## How many given names of each sex a people mostly uses (palette()).
+const COMMON_NAMES:=40
+
+## The sound palettes names were drawn from before each people had its own
+## tongue. Kept so names given then are still known as a woman's or a man's
+## (is_given_of_sex) and tradition() reads as before; no new name comes from
+## them. [women, men].
 const PALETTES:=[
 	[["Ama","Sela","Iri","Nuna","Vesa","Tilla","Ysa","Oda","Luma","Pira","Runa","Wenna","Esi","Tova","Mira","Anni","Lisse","Hena","Ulla","Sabe"],
 	 ["Harl","Tesk","Oru","Brim","Kael","Dunn","Vesh","Tam","Pell","Rook","Faro","Garro","Nesh","Tuk","Arvo","Bekk","Joss","Lorn","Senn","Yarro"]],
@@ -35,25 +45,6 @@ const PALETTES:=[
 	[["Cendra","Fenna","Morwe","Liseth","Brynne","Oriel","Thessa","Caelin","Merra","Evra","Sirra","Dalla","Anwe","Rhosa","Talwe","Ennis","Varra","Iwen","Selwe","Norwe"],
 	 ["Corvan","Tebb","Hollin","Mardo","Brannoc","Fenwic","Garth","Radd","Tollan","Evrin","Kerrin","Dunnor","Aldo","Brask","Callum","Derro","Emmet","Farran","Gallo","Hewin"]],
 ]
-
-## Stone age: what the band calls someone, from what they are good at.
-## Epithets stay short (at most 18 letters) so a name still fits a herald's line.
-const SKILL_EPITHETS:={
-	"Administration":["the Fair","Even-Hand","Peace-Keeper","the Patient","Oath-Holder"],
-	"Provisioning":["Full-Basket","Store-Keeper","Who Fed the Band","Berry-Finder","Deep-Pit"],
-	"Construction":["Stone-Hand","Pole-Setter","Roof-Mender","Strong-Back","Hut-Raiser"],
-	"Logistics":["Long-Stride","Who Found the Ford","Far-Walker","Load-Bearer","Swift-Foot"],
-	"Knowledge":["Owl-Sight","Star-Counter","Who Remembers","Keen-Eye","Sky-Reader"],
-	"Defense":["Spear-Arm","Who Held the Ridge","Night-Watcher","Wolf-Scarer","Hard-Heart"],
-	"Diplomacy":["Soft-Voice","Stranger-Friend","Salt-Tongue","Anger-Tamer","Friend-of-All"],
-}
-const GENERIC_EPITHETS:=["the Quiet","the Laughing","Grey-Eyes","Tall-Grass","Cold-Swimmer","Salt-Walker","Quick-Hands","the Stubborn","Bone-Setter","Early-Riser","Fire-Tender","Reed-Weaver","Who Speaks Last","Sharp-Ear","the Younger"]
-## Villages: people are known by the ground they come from.
-const PLACES:=["Reedwater","the Ford","Ashbank","the Long Meadow","the Salt Spring","Hollow Hill","the Red Cliff","Stonewash","the Birch Stand","Deepwell","the Otter Pool","Windgap","the Twin Oaks","Mossbrook","the White Stones","Fernside","the High Camp","Crowfield","the Lake Shore","Thornbrake"]
-## Family names grow out of the older bynames.
-const FAMILIES:=["Reedwater","Ford","Ashbank","Longmeadow","Saltspring","Hollowhill","Redcliff","Stonewash","Birchstand","Deepwell","Otterpool","Windgap","Twinoak","Mossbrook","Whitestone","Fernside","Highcamp","Crowfield","Lakeshore","Thornbrake",
-	"Stonehand","Longstride","Owlsight","Keeneye","Swiftfoot","Fairhand","Fullbasket","Polesetter","Nightwatch","Softvoice","Greyeyes","Tallgrass","Quickhand","Firetender","Reedweaver","Sharpear"]
-
 
 static func stage(owner:String="player")->int:
 	var tags:Array=CV.era_tags(owner)
@@ -102,112 +93,69 @@ static func family_of(person:Variant)->String:
 	var text:=String(person)
 	return text.get_slice(" ",1) if text.split(" ",false).size()==2 else ""
 
-static func _clean(options:Array,tags:Array)->Array:
-	var out:Array=[]
-	for o in options:
-		if CV.permits(String(o),tags): out.append(o)
-	return out if not out.is_empty() else options
-
-## A whole name should fit a herald's line and a portrait plate.
+## The longest whole name that fits a herald's line (people_language.gd FULL_MAX).
 const NAME_MAX:=18
 
-static func _fitting(options:Array,given:String,used:Dictionary,rng:RandomNumberGenerator)->String:
-	## A byname from options, from a seeded start: unused by anyone at court and
-	## short enough to fit with the given name, else the shortest unused one.
-	var start:=rng.randi_range(0,maxi(0,options.size()-1))
-	var fallback:=""
-	for offset in options.size():
-		var candidate:=String(options[(start+offset)%options.size()])
-		if used.has("%s %s" % [given,candidate]) or used.has("byname:"+candidate): continue
-		if given.length()+1+candidate.length()<=NAME_MAX: return candidate
-		if fallback=="" or candidate.length()<fallback.length(): fallback=candidate
-	if fallback!="": return fallback
-	return String(options[start]) if not options.is_empty() else ""
-
 static func make(seed_value:int,serial:int,woman:bool,owner:String,used:Dictionary,hint:Dictionary={})->Dictionary:
-	## {name,given,byname,family,stage,tradition}. `used` holds full names and
-	## "given:<name>" keys; a given name already in use is avoided while any
-	## other remains. hint: {skill, traits, family, stage}.
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=hash("%d:era_name:%s:%d" % [seed_value,owner,serial])
-	var palette:Array=PALETTES[tradition(owner,seed_value)]
-	var half:Array=palette[0] if woman else palette[1]
-	var pool:Array=half.duplicate()
+	## {name,given,byname,family,stage,tradition,tongue_name}, in the people's own
+	## tongue. `used` holds full names and "given:<name>" keys; a given name
+	## already in use is avoided while any other remains. hint: {family (a
+	## kinsman's, kept in this person's form), stage}.
+	if owner=="": owner="player"
 	var st:=int(hint.get("stage",stage(owner)))
-	var tags:Array=CV.era_tags(owner)
-	var start:=rng.randi_range(0,pool.size()-1)
-	var given:=""
-	for offset in pool.size():
-		var candidate:=String(pool[(start+offset)%pool.size()])
-		if not used.has("given:"+candidate): given=candidate; break
-	if given=="":
-		# Every name is taken: borrow from the other half of the palette.
-		var other:Array=palette[1] if woman else palette[0]
-		for offset in other.size():
-			var candidate2:=String(other[(start+offset)%other.size()])
-			if not used.has("given:"+candidate2): given=candidate2; break
-	if given=="": given=String(pool[start])
-	var byname:=""; var family:=""
-	match st:
-		0:
-			var skill:=String(hint.get("skill",""))
-			var own:Array=SKILL_EPITHETS.get(skill,[])
-			var options:Array=_clean(own+GENERIC_EPITHETS.slice(0,4) if not own.is_empty() else GENERIC_EPITHETS,tags)
-			byname=_fitting(options,given,used,rng)
-		1:
-			var places:Array=[]
-			for place in _clean(PLACES,tags): places.append("of "+String(place))
-			byname=_fitting(places,given,used,rng)
-		_:
-			family=String(hint.get("family",""))
-			if family=="":
-				var families:Array=_clean(FAMILIES,tags)
-				for attempt in families.size():
-					family=String(families[(rng.randi()+attempt)%families.size()])
-					if not used.has("%s %s" % [given,family]): break
-			byname=family
-	var name:=("%s %s" % [given,byname]).strip_edges()
-	return {"name":name,"given":given,"byname":byname,"family":family,"stage":st,"tradition":tradition(owner,seed_value)}
+	var made:=Lang.person(owner,seed_value,"%s:%d" % [owner,serial],woman,used,String(hint.get("family","")))
+	var second:=String(made.get("second",""))
+	return {"name":String(made.get("name","")),"given":String(made.get("given","")),"byname":second,"family":second if st>=2 else "","stage":st,
+		"tradition":tradition(owner,seed_value),"tongue_name":Lang.tongue_name(owner,seed_value)}
 
 static func given_for(seed_value:int,key:String,woman:bool,owner:String,taken:Dictionary)->String:
-	## One given name in this people's tradition and of the person's sex (a
-	## newborn, a traveller). A name in `taken` (bare or "given:<name>") is
-	## avoided while any other of that sex remains.
-	var half:Array=(PALETTES[tradition(owner,seed_value)] as Array)[0 if woman else 1]
-	var start:=posmod(hash("%d:given:%s:%s" % [seed_value,owner,key]),half.size())
-	for offset in half.size():
-		var candidate:=String(half[(start+offset)%half.size()])
+	## One given name in this people's tongue and of the person's sex (a
+	## newborn, a traveller): mostly one of the names the people commonly give.
+	## A name in `taken` (bare or "given:<name>") is avoided while any other of
+	## that sex remains.
+	if owner=="": owner="player"
+	var common:Array=Lang.palette(owner,seed_value,woman,COMMON_NAMES)
+	var start:=posmod(hash("%d:given:%s:%s" % [seed_value,owner,key]),maxi(1,common.size()))
+	for offset in common.size():
+		var candidate:=String(common[(start+offset)%common.size()])
 		if not taken.has(candidate) and not taken.has("given:"+candidate): return candidate
-	return String(half[start])
+	return Lang.given(owner,seed_value,"given:"+key,woman,taken)
 
-static func is_given_of_sex(given:String,woman:bool)->bool:
-	## True when a given name belongs to that sex in any tradition.
-	for palette in PALETTES:
-		if String(given) in ((palette as Array)[0 if woman else 1] as Array): return true
-	return false
+static func palette(owner:String="player",seed_value:int=Lang.NO_SEED)->Array:
+	## [women's names, men's names] this people most often give (COMMON_NAMES
+	## of each), the same every time.
+	if owner=="": owner="player"
+	var s:=seed_value if seed_value!=Lang.NO_SEED else int(GameState.world_seed)
+	return [Lang.palette(owner,s,true,COMMON_NAMES),Lang.palette(owner,s,false,COMMON_NAMES)]
+
+static func is_given_of_sex(given:String,woman:bool,owner:String="player")->bool:
+	## True when a given name belongs to that sex: in the people's tongue, or in
+	## the palettes older names came from.
+	for old in PALETTES:
+		if String(given) in ((old as Array)[0 if woman else 1] as Array): return true
+	var sex:Variant=Lang.sex_of(owner,int(GameState.world_seed),given)
+	return sex!=null and bool(sex)==woman
 
 static func hearth_of(seed_value:int,key:String,owner:String,taken:Dictionary={})->Dictionary:
 	## How the people name one family. A band names a hearth for its eldest
 	## ("Tesk's hearth"); villagers by where it came from ("the hearth from
-	## Reedwater"); a people with family names by that name ("the Reedwater
-	## hearth"). {name: the hearth, at: "at <the hearth>"}.
-	var tags:Array=CV.era_tags(owner)
-	var start:=posmod(hash("%d:hearth:%s:%s" % [seed_value,owner,key]),1000003)
+	## Nziforo"); a people with family names by that name ("the Kekwe
+	## hearth"), all in the people's own tongue. {name: the hearth, at:
+	## "at <the hearth>"}.
+	if owner=="": owner="player"
 	match stage(owner):
 		0:
-			var palette:Array=PALETTES[tradition(owner,seed_value)]
-			var pool:Array=(palette[0] as Array)+(palette[1] as Array)
-			var elder:=String(pool[start%pool.size()])
+			var start:=posmod(hash("%d:hearth:%s:%s" % [seed_value,owner,key]),1000003)
+			var pool:Array=(Lang.palette(owner,seed_value,true,COMMON_NAMES) as Array)+(Lang.palette(owner,seed_value,false,COMMON_NAMES) as Array)
+			var elder:=String(pool[start%pool.size()]) if not pool.is_empty() else Lang.given(owner,seed_value,"hearth:"+key,false,taken)
 			for offset in pool.size():
 				var candidate:=String(pool[(start+offset)%pool.size()])
 				if not taken.has(candidate) and not taken.has("given:"+candidate): elder=candidate; break
 			return {"name":"%s's hearth" % elder,"at":"at %s's hearth" % elder}
 		1:
-			var places:Array=_clean(PLACES,tags)
-			var place:=String(places[start%places.size()])
+			var place:=Lang.town(owner,seed_value,"hearth:"+key)
 			return {"name":"the hearth from %s" % place,"at":"of the hearth from %s" % place}
-	var families:Array=_clean(FAMILIES,tags)
-	var family:=String(families[start%families.size()])
+	var family:=Lang.second(owner,seed_value,"hearth:"+key,false)
 	return {"name":"the %s hearth" % family,"at":"of the %s hearth" % family}
 
 static func used_in_court()->Dictionary:

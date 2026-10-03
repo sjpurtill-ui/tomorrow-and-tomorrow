@@ -234,26 +234,15 @@ static func _used_names()->Dictionary:
 	return used
 
 static func _name_for(sex:String,rng:RandomNumberGenerator,family:String="")->Dictionary:
-	# Before writing or institutions nobody has a family name (era_names.gd):
-	# a commoner is a name and an epithet, or a name and a place.
+	# Named in our people's own tongue (era_names.gd, people_language.gd).
+	# Before writing or institutions the second name is a byname only and is
+	# not handed down (family ""); a kinsman's family name is kept.
 	var era_names:=preload("res://scripts/era_names.gd")
-	if era_names.stage("player")<2:
-		var taken:=era_names.used_in_court()
-		for full in _used_names(): taken[full]=true
-		var made:Dictionary=era_names.make(int(GameState.world_seed),rng.randi(),sex=="female","player",taken)
-		return {"given":String(made.given),"family":"","name":String(made.name)}
-	var pool:Array=Notables.MEN if sex=="male" else Notables.WOMEN
-	var families:Array=[]
-	for f in era_names.FAMILIES:
-		if CV.permits(String(f),tags()) and String(f).length()<=9: families.append(String(f))
-	var used:=_used_names()
-	for attempt in 60:
-		var given:=String(pool[rng.randi_range(0,pool.size()-1)])
-		var fam:=family if family!="" else String(families[rng.randi_range(0,families.size()-1)])
-		var full:="%s %s" % [given,fam]
-		if not used.has(full): return {"given":given,"family":fam,"name":full}
-	var given2:=String(pool[rng.randi_range(0,pool.size()-1)])
-	return {"given":given2,"family":"of %s" % _settlement_name(""),"name":"%s of %s" % [given2,_settlement_name("")]}
+	var taken:=era_names.used_in_court()
+	for full in _used_names(): taken[full]=true
+	var hint:Dictionary={"family":family} if family!="" else {}
+	var made:Dictionary=era_names.make(int(GameState.world_seed),rng.randi(),sex=="female","player",taken,hint)
+	return {"given":String(made.given),"family":String(made.family),"name":String(made.name)}
 
 static func desc_key(desc:Dictionary)->String:
 	return "%s|%s|%s|%s|%s|%s|%s" % [String(desc.get("trade","")),String(desc.get("sex","")),String(desc.get("age","")),String(desc.get("settlement_id","")),

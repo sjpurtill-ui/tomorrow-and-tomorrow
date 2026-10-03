@@ -4,6 +4,9 @@ extends RefCounted
 ## (court_lives.gd portrait slots): a cell of their own, then a mirrored one.
 const PATH:="res://assets/portraits/founding_leaders.png"
 const Early:=preload("res://scripts/hud/early_civ_art.gd")
+## Each people's look (skin range): after the first age everyone shares one
+## five-face painting, and a people is shown with the faces nearest its own.
+const Looks:=preload("res://scripts/people_appearance.gd")
 const LIVES_PATH:="res://scripts/court_lives.gd"
 static var sheet:Texture2D
 static var _lives:GDScript
@@ -12,10 +15,19 @@ static func cells_for(person:Dictionary)->int:
 static func natural_index(person:Dictionary)->int:
 	var count:=cells_for(person)
 	if Early.active() and person.has("early_art_index"):return posmod(int(person.early_art_index),count)
-	if person.has("portrait_index"):return posmod(int(person.portrait_index),count)
 	var identity:=int(person.get("person_id",0))
 	if identity<=0:identity=absi(String(person.get("name","Unknown")).hash())+1
+	if person.has("portrait_index"):identity=int(person.portrait_index)+1
+	if not Early.active():
+		# One of the faces that fit this person's people.
+		var fitting:=Looks.late_fitting(Early.owner(person),_seed_of(person))
+		return int(fitting[posmod(identity-1,fitting.size())])
 	return posmod(identity-1,count)
+## The later faces in the order they suit this person's people.
+static func late_order(person:Dictionary)->Array:
+	return Looks.late_cells(Early.owner(person),_seed_of(person))
+static func _seed_of(person:Dictionary)->int:
+	return int(person.get("appearance_world_seed",GameState.world_seed))
 static func court_slot(person:Dictionary)->Array:
 	if _lives==null:_lives=load(LIVES_PATH) as GDScript
 	if _lives==null:return []
@@ -23,7 +35,10 @@ static func court_slot(person:Dictionary)->Array:
 	return slot if slot is Array else []
 static func index_for(person:Dictionary)->int:
 	var slot:=court_slot(person)
-	if not slot.is_empty():return posmod(int(slot[0]),cells_for(person))
+	if not slot.is_empty():
+		# Court members keep distinct pictures; later, best-suited faces first.
+		if not Early.active():return int(late_order(person)[posmod(int(slot[0]),cells_for(person))])
+		return posmod(int(slot[0]),cells_for(person))
 	return natural_index(person)
 static func mirrored(person:Dictionary)->bool:
 	var slot:=court_slot(person)
@@ -71,7 +86,7 @@ static func claim(registry:Dictionary,person:Dictionary)->Array:
 	var family:=Early.profile(person) if Early.active() else -1
 	var base:=index_for(person);var flip:=mirrored(person)
 	var chosen:Array=[base,flip,0,family]
-	for candidate:Array in _candidates(base,flip,family):
+	for candidate:Array in _candidates(base,flip,family,[] if family>=0 else late_order(person)):
 		if not used.has(_painting_key(candidate)):chosen=candidate;break
 	used[_painting_key(chosen)]=true;people[who]=chosen
 	return chosen
@@ -80,7 +95,7 @@ static func _painting_key(slot:Array)->String:
 	return str([int(slot[3]),int(slot[0]),int(slot[2])])
 static func _cells_in(family:int)->int:
 	return 5 if family==3 or family<0 else 4
-static func _candidates(base:int,flip:bool,family:int)->Array:
+static func _candidates(base:int,flip:bool,family:int,late:Array=[])->Array:
 	var out:Array=[]
 	var sets:Array=[family]
 	if family>=0:
@@ -89,6 +104,12 @@ static func _candidates(base:int,flip:bool,family:int)->Array:
 	for crop in 3:
 		for f:int in sets:
 			var count:=_cells_in(f)
+			if f<0 and late.size()==count:
+				# The later painting: this face, then the faces nearest the people's own.
+				out.append([base,flip,crop,f])
+				for cell in late:
+					if int(cell)!=base:out.append([int(cell),flip,crop,f])
+				continue
 			for step in count:out.append([posmod(base+step,count),flip,crop,f])
 	return out
 static func _identity(person:Variant)->String:

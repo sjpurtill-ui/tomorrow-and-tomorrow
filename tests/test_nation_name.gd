@@ -201,17 +201,19 @@ func test_the_names_heard_are_graded_by_what_the_people_know()->void:
 	fx.second_town("Reedmouth")
 	var CV:=preload("res://scripts/character_voice.gd")
 	var land:="The "+String(NationName.LAND_FOLK[NationName.land_word()])
+	# First, what the people call themselves in their own tongue.
+	var own:="The "+preload("res://scripts/people_language.gd").people_name("player",int(GameState.world_seed))
 	# A band that keeps no villages: whose kin they are, the hearths they have.
 	CV.knowledge_override["player"]=[]
-	assert_array(NationName.suggestions(4)).contains_exactly([land,"The Folk of Seanstone","Kishan's Kin","The Two Hearths"])
+	assert_array(NationName.suggestions(5)).contains_exactly([own,land,"The Folk of Seanstone","Kishan's Kin","The Two Hearths"])
 	# Villages and fields: the founder's children.
 	CV.knowledge_override["player"]=["seed_selection"]
-	assert_array(NationName.suggestions(4)).contains_exactly([land,"The Folk of Seanstone","The Children of Kishan","The Two Hearths"])
+	assert_array(NationName.suggestions(5)).contains_exactly([own,land,"The Folk of Seanstone","The Children of Kishan","The Two Hearths"])
 	# Writing: a realm and its towns; a kingdom only once kingship is known.
 	CV.knowledge_override["player"]=["pictographic_records"]
-	assert_array(NationName.suggestions(4)).contains_exactly([land,"The Realm of Seanstone","The Children of Kishan","The Two Towns"])
+	assert_array(NationName.suggestions(5)).contains_exactly([own,land,"The Realm of Seanstone","The Children of Kishan","The Two Towns"])
 	CV.knowledge_override["player"]=["pictographic_records","kingship"]
-	assert_bool(NationName.suggestions(4).has("The Kingdom of Seanstone")).is_true()
+	assert_bool(NationName.suggestions(5).has("The Kingdom of Seanstone")).is_true()
 	# Never a name already ours or another people's.
 	CV.knowledge_override["player"]=[]
 	NationName.give_name(land,"screen")

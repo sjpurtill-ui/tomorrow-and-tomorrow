@@ -17,6 +17,8 @@ const MAX_BATTLE_DAMAGED_PLOTS:=24
 const SETTLEMENT_CONVOY_KM_PER_DAY:=16.0
 const COASTAL_CONTEXT_FIELDS:=["shoreline_access","marine_opportunity","salt_opportunity","storm_exposure","erosion_exposure","open_water_exposure"]
 const FOUNDING_MATERIAL_VALUE:={"Timber":1.0,"Fiber Plants":1.0,"Clay":0.75,"Stone":0.55}
+## Old shared town-name roots: only the last resort now (towns are named in
+## each people's own tongue, suggested_settlement_name).
 const SETTLEMENT_NAME_ROOTS:=["Alder","Ash","Bright","Cairn","Dawn","Deep","Elm","Fair","Flint","Green","High","Iron","Lake","Long","North","Oak","Red","River","Stone","Sun","Vale","West","Willow","Wind"]
 const SETTLEMENT_NAME_ENDINGS:=["bank","bridge","cross","field","ford","gate","haven","hearth","holm","landing","march","meadow","rest","ridge","stead","vale","watch","wick"]
 
@@ -721,19 +723,18 @@ func rename_settlement(settlement_id:String,new_name:String)->Dictionary:
 	return {"ok":false,"reason":"That settlement is not owned."}
 
 
-## A new town's name that no known town or region bears: ours, every other
-## people's (all peoples draw from the same name tables) and the regions we
-## know of theirs. The place's own seeded name comes first; a taken one tries
-## a few more roots and endings, then a number.
+## A new town's name, in the tongue of the people founding it
+## (people_language.gd), that no known town or region bears: ours, every other
+## people's and the regions we know of theirs. The place's own seeded name
+## comes first; a taken one tries others, then a number.
 func suggested_settlement_name(destination:Vector2,origin_name:String="",used:Dictionary={})->String:
-	var seed:=absi(hash("%d:place_name:%d:%d:%s" % [WorldSimulation.state.world_seed,roundi(destination.x*10.0),roundi(destination.y*10.0),origin_name]))
 	if used.is_empty():used=names_in_use()
-	var first_root:=String(SETTLEMENT_NAME_ROOTS[posmod(seed,SETTLEMENT_NAME_ROOTS.size())])
-	for attempt in 12:
-		var pick:=seed+attempt*7919
-		var root:=String(SETTLEMENT_NAME_ROOTS[posmod(pick,SETTLEMENT_NAME_ROOTS.size())])
-		var ending:=String(SETTLEMENT_NAME_ENDINGS[posmod(pick/37+11,SETTLEMENT_NAME_ENDINGS.size())])
-		if not used.has((root+ending).to_lower()): return root+ending
+	var owner:=String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player"
+	var key:="place:%d:%d:%s" % [roundi(destination.x*10.0),roundi(destination.y*10.0),origin_name]
+	var name:=preload("res://scripts/people_language.gd").town(owner,int(WorldSimulation.state.world_seed),key,used)
+	if name!="" and not used.has(name.to_lower()): return name
+	var seed:=absi(hash("%d:place_name:%d:%d:%s" % [WorldSimulation.state.world_seed,roundi(destination.x*10.0),roundi(destination.y*10.0),origin_name]))
+	var first_root:=name if name!="" else String(SETTLEMENT_NAME_ROOTS[posmod(seed,SETTLEMENT_NAME_ROOTS.size())])
 	return "%s %s" % [first_root,str(WorldSimulation.state.next_player_settlement_id)]
 
 ## The names in use, read once per expansion review (its quote cache).

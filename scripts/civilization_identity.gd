@@ -1,5 +1,14 @@
 extends RefCounted
 ## Fictional identities are selected without replacement, independently of simulation RNG.
+## Each people's name and its first five towns come from its own tongue
+## (people_language.gd): never shared across the world, no town named after
+## its people. The colours, patterns and symbols are drawn as before.
+const Lang:=preload("res://scripts/people_language.gd")
+## How many fixed identities the roster once drew from (PROFILES); the draw is
+## still taken so every world keeps the colours and emblems it had.
+const LEGACY_PROFILE_COUNT:=64
+## The fixed names peoples were given before each had its own tongue. Older
+## saves keep the names they were given; new worlds take theirs from the tongues.
 const PROFILES:=[
 	[
 		"Orathi",
@@ -528,14 +537,15 @@ static var cached:Array[Dictionary]=[]
 static func roster(seed_value:int)->Array[Dictionary]:
 	if cached_seed==seed_value and not cached.is_empty():return cached
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value^0x4271d93a
-	var names:=shuffled(PROFILES.size(),rng)
+	shuffled(LEGACY_PROFILE_COUNT,rng)
 	var colors:=shuffled(PALETTES.size(),rng)
 	var patterns:=shuffled(8,rng);var symbols:=shuffled(12,rng)
+	var tongues:Array=Lang.roster(seed_value)
 	cached=[];cached_seed=seed_value
 	for i in 36:
-		var profile:Array=PROFILES[names[i]]
+		var people:Dictionary=tongues[i]
 		var palette:Array=PALETTES[colors[i%12]]
-		cached.append({"name":profile[0],"cities":profile.slice(1),"field":palette[0],"color":palette[1],"ink":palette[2],"pattern":patterns[(i%12+i/12)%8],"symbol":symbols[(i*5+i/12)%12]})
+		cached.append({"name":String(people.name),"cities":(people.cities as Array).duplicate(),"field":palette[0],"color":palette[1],"ink":palette[2],"pattern":patterns[(i%12+i/12)%8],"symbol":symbols[(i*5+i/12)%12]})
 	return cached
 
 static func shuffled(count:int,rng:RandomNumberGenerator)->Array[int]:

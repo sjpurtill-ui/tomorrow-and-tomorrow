@@ -192,7 +192,8 @@ static func rival_character(civ_id:String)->Dictionary:
 static func portrait_person(civ_id:String)->Dictionary:
 	## The ruler as a portrait subject: the same picture for life.
 	var c:=character(civ_id)
-	var person:={"name":ruler_name(civ_id),"person_id":0}
+	# Drawn as one of their own people (people_appearance.gd).
+	var person:={"name":ruler_name(civ_id),"person_id":0,"civilization_id":civ_id,"appearance_civ_id":civ_id}
 	if not c.is_empty(): person["early_art_index"]=int(c.portrait)
 	return person
 

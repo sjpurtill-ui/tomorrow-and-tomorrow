@@ -166,6 +166,9 @@ var settlement_founded_at := Vector3.ZERO
 var settlement_name := ""
 ## What all our towns together are called, once there are two (nation_name.gd); "" until named.
 var nation_name := ""
+## What makes our people's own tongue ({family, seed, v, world_seed};
+## people_language.gd). Empty in older saves: made again from the world seed.
+var people_language:Dictionary={}
 var settlement_founded_day := -1
 var settlement_plots:Array[Dictionary]=[]
 var settlement_nuclei:Array[Dictionary]=[]

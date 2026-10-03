@@ -355,7 +355,7 @@ static func _free_given(woman:bool,start:int,living:Dictionary,taken:Dictionary,
 	## living named person's (officials, court, great figures) nor one already
 	## taken in this telling; a name the crises told lately is used again only
 	## when allowed, the longest-ago first. "" when there is none.
-	var palette:Array=EraNames.PALETTES[EraNames.tradition("player",int(GameState.world_seed))]
+	var palette:Array=EraNames.palette("player",int(GameState.world_seed))
 	var half:Array=palette[0] if woman else palette[1]
 	var recent:Array=state().get("names",[]) as Array
 	var best:=""
@@ -404,21 +404,15 @@ static func _people_names(count:int,salt:String,woman_bias:float=0.5)->Array[Str
 	var living:Dictionary=EraNames.used_in_court()
 	var taken:Dictionary={}
 	var s:=state()
-	var palette:Array=EraNames.PALETTES[EraNames.tradition("player",int(GameState.world_seed))]
 	for i in count:
 		s.serial=int(s.serial)+1
 		var rng:=_rng("name:%s:%d" % [salt,i])
 		var who:=_fresh_person(rng,rng.randf()<woman_bias,living,taken)
 		if who.is_empty(): continue
 		var given:=String(who.given)
-		# EraNames adds the era's byname; every other given name is closed to it.
-		var used:Dictionary=living.duplicate()
-		for half in palette:
-			for other in half:
-				if String(other)!=given: used["given:"+String(other)]=true
-		var made:Dictionary=EraNames.make(int(GameState.world_seed),900000+int(s.serial),bool(who.woman),"player",used,{})
-		var name:=String(made.get("name",""))
-		if name=="" or String(made.get("given",""))!=given: name=given
+		# The second name the people give, in their own tongue.
+		var second:=preload("res://scripts/people_language.gd").second("player",int(GameState.world_seed),"crisis:%d" % int(s.serial),bool(who.woman),"",living)
+		var name:=("%s %s" % [given,second]).strip_edges()
 		taken["given:"+given]=true
 		_remember_name(given)
 		out.append(name)
