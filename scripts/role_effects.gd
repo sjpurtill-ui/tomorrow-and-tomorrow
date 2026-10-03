@@ -35,7 +35,8 @@ static var _cache:Dictionary={}
 ## {role: {now, plus_ten}}.
 static func all_cached()->Dictionary:
 	var state=_state()
-	var key:="%s|%d|%d|%d|%d" % [String(WorldSimulation.actor_id),int(state.world_seed),int(state.elapsed_days)/CACHE_DAYS,int(state.population_total),state.population_allocations.hash()]
+	# A gifted person coming of age or dying changes the work at once (geniuses.gd).
+	var key:="%s|%d|%d|%d|%d|%d" % [String(WorldSimulation.actor_id),int(state.world_seed),int(state.elapsed_days)/CACHE_DAYS,int(state.population_total),state.population_allocations.hash(),WorldSimulation.figures.genius_bonus.hash() if WorldSimulation.figures!=null else 0]
 	if key!=_cache_key:
 		var fresh:={}
 		for role:String in ROLES:fresh[role]=of(role)
@@ -143,21 +144,10 @@ static func construction()->Dictionary:
 
 # --- Making -------------------------------------------------------------------------
 
-## What makers add to everyone's tools and materials (consequence_engine.gd
-## craft coverage: makers ÷ 5 in 100 of the people, up to 1.25, × 38 points)
-## and the household goods they turn out (civilian_goods.gd).
+## The goods makers make a day and their worth, arms while the watch lacks
+## them, and what ten more makers would add (civilian_goods.gd role_effect).
 static func crafting()->Dictionary:
-	var pop:=_pop()
-	var civilian:=clampf(MilitaryCampaign.civilian_crafting_fraction(),0.0,1.0)
-	var raw:=_raw("Crafting")
-	var points:=func(people:float)->float:return clampf(people*civilian/maxf(1.0,pop*Impact.MAKER_SHARE),0.0,1.25)*Impact.MAKER_POINTS*100.0
-	var now:=float(points.call(raw))
-	var more:=float(points.call(raw+MORE))
-	var each:=0.18*4.0*Goods.technique_output()
-	var stocked:=roundi(Goods.coverage()*100.0)
-	var gain:="+%d points" % roundi(more-now) if roundi(more-now)>0 else "no more points"
-	return _row("Tools and materials +%d points; homes %d of 100 stocked." % [roundi(now),stocked],
-		"Ten more: %s, about %s more goods a day." % [gain,_one(each*_ten("Crafting")*civilian)])
+	return Goods.role_effect("Crafting")
 
 # --- Carrying -----------------------------------------------------------------------
 
@@ -184,8 +174,9 @@ static func logistics()->Dictionary:
 # --- Learning -----------------------------------------------------------------------
 
 ## What the people know, a year (consequence_engine.gd knowledge gain:
-## learners × pace × attention ÷ (92 × people, at least 3000)), and research
-## strength in learners' worth (research_600_catalog.gd team_capacity).
+## learners × pace × attention ÷ (92 × people, at least 3000)), the questions
+## worked at once and how much faster ten more make the research
+## (discovery_system.gd role_effect: learning without a cap, goods counted).
 static func knowledge()->Dictionary:
 	var state=_state()
 	var learners:=_workers("Knowledge")
@@ -197,8 +188,15 @@ static func knowledge()->Dictionary:
 		var fit:=1.0 if asked<=maxf(1.0,floorf(people)) else clampf(people/maxf(1.0,asked),0.15,1.0)
 		return people*labor*fit/maxf(3000.0,pop*92.0)*rate*365.0*100.0
 	var more:=learners+_ten("Knowledge")
-	return _row("What we know: +%s points a year; research at %s learners' worth." % [_points(float(gain.call(learners))),_one(Research600.team_capacity(learners))],
-		"Ten more: +%s points a year, +%s learners' worth." % [_points(float(gain.call(more))-float(gain.call(learners))),_one(Research600.team_capacity(more)-Research600.team_capacity(learners))])
+	var research:Dictionary=WorldSimulation.discovery.role_effect("Knowledge",_ten("Knowledge"))
+	return _row("What we know: +%s points a year; %s questions at once." % [_points(float(gain.call(learners))),_count(int(research.get("teams",0)))],
+		"Ten more learners: +%s points a year, research %s." % [_points(float(gain.call(more))-float(gain.call(learners))),faster(float(research.get("pace_gain",0.0)))])
+
+## A research pace gain in a few words: "61 in 100 faster", "twice as fast".
+static func faster(gain:float)->String:
+	if gain>=0.995:return "%s times as fast" % _one(1.0+gain)
+	if gain>=0.01:return "%d in 100 faster" % roundi(gain*100.0)
+	return "a little faster" if gain>0.0 else "no faster"
 
 # --- Keeping and caring -------------------------------------------------------------
 
@@ -218,37 +216,10 @@ static func administration()->Dictionary:
 
 # --- Keeping watch ------------------------------------------------------------------
 
-## The safety the watch lifts the people toward (consequence_engine.gd: +42
-## points for every 5 in 100 on watch, the whole held between 4 and 96) and
-## the guard at home (military_campaign.gd settlement_defense_snapshot).
+## The watch is the army (watch_military.gd role_effect): how many keep
+## watch and guard home, and the safety ten more lift the people toward.
 static func defense()->Dictionary:
-	var pop:=_pop()
-	var watch:=_raw("Defense")
-	var lift:=func(people:float)->float:return people/maxf(1.0,pop*Impact.WATCH_SHARE)*Impact.WATCH_SAFETY*100.0
-	var walls:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
-	var required:=int(walls.get("garrison_required",maxi(8,ceili(pop*0.035))))
-	var guard:=int(walls.get("garrison_guard",roundi(watch)))
-	return _row("Safety +%d points; guard %d of %d at home." % [roundi(float(lift.call(watch))),guard,required],
-		"Ten more: safety +%d points, up to 96; guard at home +%d." % [roundi(float(lift.call(watch+MORE))-float(lift.call(watch))),_home_guard_gain()])
-
-## The guard ten more on watch add at home, as the defender ledger shares
-## the watch out (civilization_combat.gd guard_ledger): the watch is the
-## Defense hands past the trained levy at home, shared among the towns that
-## keep a guard by how many live in each.
-static func _home_guard_gain()->int:
-	var Combat:=preload("res://scripts/civilization_combat.gd")
-	var watch:=_raw("Defense")
-	var trained:=float(MilitaryCampaign.home_army.get("troops",0)) if MilitaryCampaign.home_army is Dictionary else 0.0
-	var added:=maxf(0.0,watch+MORE-trained)-maxf(0.0,watch-trained)
-	var home:=Combat._home_record()
-	if home.is_empty():return roundi(added)
-	var here:=0.0;var total:=0.0
-	for city:Dictionary in _state().player_settlements:
-		if not Combat.keeps_watch(city):continue
-		var people:=maxf(0.0,float(WorldSimulation.settlements._settlement_population(city)))
-		total+=people
-		if String(city.get("id",""))==String(home.get("id","")):here=people
-	return roundi(added*(here/total if total>0.0 else 1.0))
+	return preload("res://scripts/watch_military.gd").role_effect(WorldSimulation.military)
 
 # --- Helpers ------------------------------------------------------------------------
 

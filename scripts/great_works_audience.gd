@@ -242,6 +242,9 @@ static func _office_speaker(keys:Array)->Dictionary:
 static func _would_be_architect()->Dictionary:
 	## A living, unassigned master builder or engineer who might raise it.
 	var assigned:Array=HistoricalFigures.assignments.values()
+	# A master builder of rare gift first (geniuses.gd), as the commission chooses.
+	for p:Dictionary in HistoricalFigures.people:
+		if String(p.get("role",""))=="Architect" and p.get("genius") is Dictionary and String(p.get("status",""))=="living" and not String(p.id) in assigned:return p
 	for role in ["Architect","Engineer"]:
 		for p:Dictionary in HistoricalFigures.people:
 			if String(p.get("role",""))==role and String(p.get("status",""))=="living" and not String(p.id) in assigned:return p

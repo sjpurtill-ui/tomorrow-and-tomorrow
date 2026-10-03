@@ -507,6 +507,8 @@ static func _stores(out:Dictionary)->void:
 		var n:=roundi(float(state.resource_stockpiles[res]))
 		if String(res)!="Food" and n>0: stock[String(res)]=n
 	out["stock"]=stock
+	# What the makers make, and the arms in store (civilian_goods.gd, weapons_stock.gd).
+	out["making"]=String((load("res://scripts/civilian_goods.gd") as GDScript).call("court_line"))
 	out["food_days"]=snappedf(float((state.simulation_metrics as Dictionary).get("food_days",0.0)),0.1)
 	var water:Dictionary=state.water_metrics
 	out["water"]={"stored":roundi(float(water.get("stored",0.0))),"days":snappedf(float(water.get("days",0.0)),0.1),"reachable":bool(water.get("source_accessible",false))}
@@ -790,6 +792,7 @@ static func text(s:Dictionary)->String:
 		var tasks:Dictionary=s.get("workers_by_task",{})
 		for task in tasks: work.append("%s %d" % [String(task).to_lower(),int(tasks[task])])
 		if not work.is_empty(): lines.append("At work: %s." % ", ".join(work))
+		if String(s.get("making",""))!="": lines.append(String(s.making))
 		if s.get("daily_work") is Dictionary: lines.append("Who sets the daily work: %s." % ManualWork.court_words(s.daily_work,false))
 		if not (s.get("brought_home",[]) as Array).is_empty(): lines.append("Brought home from towns we took: %s." % "; ".join(PackedStringArray(s.brought_home)))
 	if (s.get("offices",[]) as Array).has("tribute"):

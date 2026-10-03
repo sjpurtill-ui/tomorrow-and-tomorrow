@@ -171,11 +171,14 @@ func test_standing_down_sends_the_recruits_then_the_fighters_home()->void:
 	assert_bool(bool(asked.ok)).is_false()
 	assert_str(String(asked.says)).contains("How many")
 	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(home_before-2)
-	# "The soldiers" are all of them: every one beside the watch goes home.
+	# "The soldiers" are all of them: the watch is the army
+	# (watch_military.gd), so every one at home goes home and nobody keeps
+	# watch.
 	var all:=HomeOrders.perform(HomeOrders.read("send the soldiers home"))
 	assert_bool(bool(all.ok)).is_true()
-	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(watch)
-	assert_str(String(all.says)).contains("on the watch stay")
+	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(0)
+	assert_int(MilitaryCampaign.watch_manpower()).is_equal(0)
+	assert_str(String(all.says)).contains("Nobody keeps watch")
 
 
 ## Founding one town (realm_orders.gd found_town): the settlers set out.

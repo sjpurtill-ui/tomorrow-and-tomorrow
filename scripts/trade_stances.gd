@@ -615,11 +615,53 @@ static func _raid(k:String,r:Dictionary,day:int)->void:
 	if raider=="player" or victim=="player": Ledger.news("raided",raider,victim,"",{"seized":snappedf(seized,0.1),"dead":dead,"road":String(road.get("id",""))})
 
 # --------------------------------------------------------------------------
+# Goods buy: what a people's leaders buy with goods at the monthly review
+# --------------------------------------------------------------------------
+
+## A ruler whose watch lacks arms buys them with goods from the partner with
+## the most to spare: at war, or when its goods to spare would pay for
+## ARMS_GOODS_SETS sets over. A people that eats its fill with a lean spell's
+## food in store (FAMILY_FOOD_DAYS) takes in families from a partner that
+## cannot feed them, on the terms every buyer meets (trade_ledger.gd
+## deal_terms: only from a hungry people, as many as its food cannot feed,
+## one deal a season). Every people by these rules, the god's people only
+## as the seller (the god buys by its own word). Returns the deals made.
+const ARMS_GOODS_SETS:=3.0
+const ARMS_BUY_MAX:=10
+const FAMILY_FOOD_DAYS:=20.0
+static func goods_buys(owner:String,day:int)->Array:
+	var made:Array=[]
+	if owner=="player" or not Ledger.simulated(owner): return made
+	var arms:=preload("res://scripts/weapons_stock.gd")
+	var need:Dictionary=WorldSimulation.scoped(owner,func()->Dictionary:
+		var cost:=arms.cost_per_fighter()
+		var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+		return {"wanted":arms.arms_wanted(),"war":arms.at_war(),"set":float(cost.worth_goods),"food_days":float(metrics.get("food_days",0.0)),"fed":float(metrics.get("food_intake_ratio",1.0))})
+	var spare:=Ledger.goods_to_spend(owner)
+	if int(need.wanted)>0 and (bool(need.war) or spare>=float(need.set)*ARMS_GOODS_SETS):
+		var best:=""; var most:=0.0
+		for row:Dictionary in Ledger.partners(owner):
+			var t:=Ledger.deal_terms(owner,String(row.id),Ledger.ARMS,1.0)
+			if bool(t.ok) and float(t.most)>most: most=float(t.most); best=String(row.id)
+		if best!="":
+			var done:=Ledger.goods_deal(owner,best,Ledger.ARMS,float(mini(int(need.wanted),ARMS_BUY_MAX)),"ai")
+			if bool(done.get("ok",false)): made.append(done); spare=Ledger.goods_to_spend(owner)
+	if float(need.food_days)>=FAMILY_FOOD_DAYS and float(need.fed)>=0.98:
+		for row:Dictionary in Ledger.partners(owner):
+			var other:=String(row.id)
+			var terms:=Ledger.deal_terms(owner,other,"families",1.0)
+			if not bool(terms.ok): continue
+			var done2:=Ledger.goods_deal(owner,other,"families",float(terms.most),"ai")
+			if bool(done2.get("ok",false)): made.append(done2); break
+	return made
+
+# --------------------------------------------------------------------------
 # Every people's own review: by its nature, rarely, with real business
 # --------------------------------------------------------------------------
 
 static func review(owner:String,day:int)->void:
 	if not Ledger.alive(owner): return
+	goods_buys(owner,day)
 	var temper:=Personality.of_owner(owner)
 	var a:=float(temper.get("assertiveness",0.5)); var e:=float(temper.get("empathy",0.5)); var d:=float(temper.get("discipline",0.5))
 	var trait_id:=trait_of(owner)

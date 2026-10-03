@@ -21,7 +21,7 @@ Each rung is reached when its knowledge is held and the people's money allows it
 | Rung | Name shown | Needs | Most of the workers it can hold | Gain per worker in it |
 |---|---|---|---|---|
 | 0 | Household crafts | none | 0 | 0 |
-| 1 | Stalls and hired workshops | weighed metal or coin, and prices kept (`economy_metrics.price_observations>0`) | 4% | 0.15 |
+| 1 | Stalls and hired workshops | prices kept (`economy_metrics.price_observations>0`) and either goods changing hands under barter (`economy_metrics.goods_traded_days>0`, from year one) or weighed metal or coin | 4% | 0.15 |
 | 2 | Merchant houses and guilds | rung 1 + any of `licensed_merchant_houses`, `large_owner_workshops`, `licensed_guilds`, `craft_guilds` | 10% | 0.25 |
 | 3 | Banking houses and long-distance partnerships | rung 2 + coin + any of `bills_of_exchange`, `branch_banking_houses`, `voyage_partnerships`, `district_royal_banks` | 16% | 0.32 |
 | 4 | Chartered companies | rung 3 + `joint_stock_company` | 28% | 0.42 |

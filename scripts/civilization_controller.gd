@@ -2,6 +2,7 @@ extends RefCounted
 ## Only decisions live here. All population, equipment and technology changes
 ## must be accepted and paid for by the ordinary commands and simulation.
 const STRATEGY=preload("res://scripts/civilization_strategy.gd")
+const FoodCare=preload("res://scripts/food_care.gd")
 const GREAT_WORKS=preload("res://scripts/great_works_rivalry.gd")
 ## A year of deaths this many times the year before's is a hard year that
 ## can move a ruler to build in grief (conception_trigger).
@@ -33,7 +34,8 @@ static func current_plan(id:String,personality:Dictionary={})->Dictionary:
 	var plan:=STRATEGY.preferences(personality if not personality.is_empty() else STRATEGY.PERSONALITY.of_owner(id),situation)
 	WorldSimulation.direction._ensure_cultural_memory()
 	var drive:=preload("res://scripts/cultural_inheritance.gd").weight(WorldSimulation.direction.cultural_memory,"ambition","expansion",int(state.elapsed_days))
-	plan.expansion_food=maxf(45,float(plan.expansion_food)*(1.0-drive*.35))
+	# A founding never waits for more than full stores (food_care.gd).
+	plan.expansion_food=minf(FoodCare.RESERVE_DAYS,maxf(FoodCare.store_gate(45),float(plan.expansion_food)*(1.0-drive*.35)))
 	plan.expansion_months=STRATEGY.expansion_months(plan.personality,drive)
 	var choices:=preload("res://scripts/cultural_inheritance.gd").choice_weights(WorldSimulation.direction.cultural_memory,int(state.elapsed_days))
 	var total:=0.0
@@ -399,14 +401,14 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 		if item.is_empty():continue
 		var value:=STRATEGY.unit_score(definition,plan)+COUNTER_WEIGHT*STRATEGY.counter_score(campaign,unit,item,threat)
 		if value>score:chosen=unit;weapon=item;score=value
-	var intake:=preload("res://scripts/military_intake_supply.gd").places(campaign,chosen,weapon)
-	var vacancies:=mini(maxi(0,target-campaign._mobilized_count()),maxi(0,intake-campaign.aggregate_recruits))
-	if String(plan.training)!="suspended" and vacancies>0:WorldSimulation.submit(id,{"kind":"recruit","count":vacancies})
-	land_training_orders(id,chosen,weapon,target,plan)
-	# Release an inherited waiting backlog; keep only one feasible intake in reserve.
-	# This count cannot stand down a serving formation.
-	var surplus:=maxi(0,campaign.aggregate_recruits-intake)
-	if surplus>0:WorldSimulation.submit(id,{"kind":"demobilize","count":surplus})
+	# KEEPING WATCH IS THE MILITARY (watch_military.gd): the ruler raises no
+	# recruits apart from the watch. Its watch share is its people's Defense
+	# work, and the war leader keeps everyone under arms equal to it every
+	# day; the ruler arms it (below) and splits it between the home guard and
+	# the bands (MilitaryCampaign.set_watch_split; by temper until set).
+	campaign.watch_home_auto=preload("res://scripts/watch_military.gd").default_home_share(plan.get("personality",{}),bool(plan.get("at_war",false)))
+	if String(WorldSimulation.actor_id)!="player":interim_watch(campaign,target,plan)
+	land_training_orders(id,chosen,weapon,int(campaign.watch_manpower()),plan)
 	# The army stands at home, where it defends the town; the war council
 	# (war_council.gd, the same for every people) forms the bands an errand
 	# needs and sends them by the land road: no standing band in a home zone.
@@ -443,6 +445,32 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 			WorldSimulation.submit(id,{"kind":"commission","base":int(base.id),"unit":candidate,"count":1})
 	service_orders(id,plan)
 
+## A COMPUTER RULER'S WATCH (watch_military.gd: the watch is the army). Its
+## leaders' daily split keeps the watch its path weighs (work_paths.gd WORK:
+## the war path +12; watch_path_share, the leaders' own choice before any
+## hold). The ruler holds the watch at its temper's share of the people
+## (`target`: recruit_share, more at war) only where that is more than the
+## path keeps, and lets the hold go once the path asks as much, so after a
+## war the watch falls back to what the path keeps, both ways and never past
+## it. A hungry people at peace holds what it has: hunger_stand_down sends
+## the surplus home. Small swings (under 2, or 2 in 100) move nobody.
+static func interim_watch(campaign:Node,target:int,plan:Dictionary)->void:
+	var state=WorldSimulation.state
+	if bool(plan.get("hungry",false)) and not bool(plan.get("at_war",false)):return
+	var able:=maxi(1,int(state.able_population()))
+	var path_share:=float(campaign.watch_path_share)
+	var path:=roundi(path_share*float(able)) if path_share>=0.0 else int(campaign.watch_manpower())
+	var slack:=maxi(2,ceili(float(target)*0.02))
+	var held:=float(campaign.watch_work_share)>=0.0
+	# A gap between holding and letting go, so a path near the temper's share
+	# does not hold one month and let go the next.
+	if target>path+slack or (held and target>path):
+		if absi(target-int(campaign.watch_manpower()))>=slack:campaign.set_watch_share(float(target)/maxf(1.0,float(state.population_total)))
+	elif held:
+		# The path keeps as many: the leaders' own watch stands from their
+		# next laying of the work.
+		campaign.watch_work_share=-1.0
+
 ## Whether a ruler may put `crew` more people into a new ship or wing:
 ## never while the people is hungry, and never past the share of the people
 ## its army may take (`share_cap`, the land army's own bound) nor past the
@@ -457,15 +485,16 @@ static func may_commission(mobilized:int,crew:int,share_cap:int,capacity:int,hun
 ## empty, and with no hands left for food the whole people starved. While a
 ## people is short of food (leader_personality.food_constraints) its ruler
 ## lets waiting recruits go, calls ships and wings home, and lays up those
-## standing at their home base until no more are under arms than `keep` (at
-## peace only the people's own watch, the Defense share; at war the ordinary
-## share). The same orders the court can give. {released, laid_up, recalled}.
+## standing at their home base until no more are under arms than `keep`: its
+## peacetime share of the people at peace (the watch is the army, so a
+## famine sends the watch above that share home and the watch share falls by
+## them: MilitaryCampaign.demobilize), the ordinary share at war. The same
+## orders the court can give. {released, laid_up, recalled}.
 static func hunger_stand_down(id:String,plan:Dictionary,keep:int)->Dictionary:
 	var out:={"released":0,"laid_up":0,"recalled":0,"stood_down":0}
 	if not bool(plan.get("food_shortage",false)):return out
 	var campaign=WorldSimulation.military
 	var at_war:=bool(plan.get("at_war",false))
-	if not at_war:keep=int(WorldSimulation.state.population_allocations.get("Defense",0))
 	var waiting:=int(campaign.aggregate_recruits)
 	if waiting>0 and not WorldSimulation.submit(id,{"kind":"demobilize","count":waiting}).has("error"):out.released+=waiting
 	# At peace, bands standing at home go back to the fires too: their men
@@ -534,10 +563,11 @@ const DEFENSE_MEMORY_DAYS:=730
 ## palisade, walled districts, bastion network.
 const DEFENSE_STAGE_NEED:=[0.0,.2,.35,.5,.65,.8]
 ## A ruler commits a stage's materials only while DEFENSE_SPARE times each is
-## in store and food for DEFENSE_FOOD_DAYS, and only if its Defense workers can
+## in store and food for DEFENSE_FOOD_DAYS (half the old 30: the stores are a
+## lean buffer, food_care.gd STORE_GATE), and only if its Defense workers can
 ## raise it within DEFENSE_MAX_DAYS.
 const DEFENSE_SPARE:=2.0
-const DEFENSE_FOOD_DAYS:=30.0
+const DEFENSE_FOOD_DAYS:=15.0
 const DEFENSE_MAX_DAYS:=1095.0
 
 ## A computer ruler raises its next defence stage through the validated order
@@ -581,7 +611,8 @@ static func defense_decision(plan:Dictionary)->Dictionary:
 		var stored:=float(state.resource_stockpiles.get(material,0.0))
 		result.materials[material]={"have":stored,"need":float(works.materials[material]),"spare":float(works.materials[material])*DEFENSE_SPARE}
 		if stored<float(works.materials[material])*DEFENSE_SPARE:result.blockers.append("%s %.0f in store, %.0f needed to spare it" % [material,stored,float(works.materials[material])*DEFENSE_SPARE])
-	var workers:=float(state.population_allocations.get("Defense",0))
+	# Those of the watch at home build them, not its bands away.
+	var workers:=float(campaign.watch_at_home())
 	# The same daily work _process_settlement_defense_day gives the project.
 	var daily:float=campaign.settlement_defense_daily_work(stage)
 	var days:=float(works.work)/daily if daily>0.0 else INF
@@ -852,7 +883,7 @@ static func great_work_orders(id:String,plan:Dictionary)->void:
 			if String(item.work_id).is_empty() or bool(GREAT_WORKS.relation(id,String(item.owner)).get("treaty","none")!="none"):continue
 			WorldSimulation.submit(id,{"kind":"great_work_sabotage","target":String(item.owner),"city":String(item.local_city_id),"id":String(item.work_id)})
 			break
-	if active or free_city.is_empty() or bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)) or food_days<60:return
+	if active or free_city.is_empty() or bool(plan.get("hungry",false)) or bool(plan.get("at_war",false)) or food_days<FoodCare.store_gate(60):return
 	if last_started>=0 and day-last_started<STRATEGY.wonder_interval_days(plan):return
 	var trigger:=conception_trigger(id,plan)
 	if trigger.is_empty():return
@@ -909,7 +940,7 @@ static func conception_trigger(id:String,plan:Dictionary)->Dictionary:
 		var age:=day-int(row.get("day",day))
 		if age>365 and age<=730:year_before+=float(row.get("deaths",0))
 	if deaths>=maxi(5,roundi(state.population_exact*.03)) and float(deaths)>=year_before*HARD_YEAR_DEATHS:found.append({"kind":"death","day":day,"text":"%d of our people died this year" % deaths})
-	if hunger>=maxi(2,roundi(state.population_exact*.005)) and float(state.simulation_metrics.get("food_days",0))>60 and not bool(plan.get("hungry",false)):
+	if hunger>=maxi(2,roundi(state.population_exact*.005)) and float(state.simulation_metrics.get("food_days",0))>FoodCare.store_gate(60) and not bool(plan.get("hungry",false)):
 		found.append({"kind":"famine","day":day,"text":"We came through a famine that took %d" % hunger})
 	var founded:=int(state.settlement_founded_day)
 	if founded>=0 and day>founded and posmod(day-founded,365*25)<30 and day-founded>=365*25:
@@ -918,8 +949,11 @@ static func conception_trigger(id:String,plan:Dictionary)->Dictionary:
 		found.append({"kind":"envy","day":int(item.day),"text":"News of %s built by %s" % [String(item.title),String(item.civ_name)],"source_owner":String(item.owner),"source_work":String(item.work_id),"source_form":String(item.form),"source_ambition":String(item.get("ambition",""))});break
 	var stock:=0.0
 	for material:String in ["Stone","Timber","Clay"]:stock+=float(state.resource_stockpiles.get(material,0))
-	if float(state.simulation_metrics.get("food_days",0))>150 and stock>=state.population_exact*3:
+	if float(state.simulation_metrics.get("food_days",0))>FoodCare.store_gate(150) and stock>=state.population_exact*3:
 		found.append({"kind":"plenty","day":day,"text":"Our stores overflow"})
+	# A grown master builder of rare gift who has led no work yet (geniuses.gd).
+	var gifted:=preload("res://scripts/geniuses.gd").architect_trigger(WorldSimulation.figures,day,false)
+	if not gifted.is_empty():found.append(gifted)
 	var best:={};var strongest:=STRATEGY.WONDER_MOTIVE_THRESHOLD
 	for trigger:Dictionary in found:
 		var motive:=STRATEGY.wonder_motive(trigger,plan)

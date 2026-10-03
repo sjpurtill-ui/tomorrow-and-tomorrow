@@ -234,26 +234,15 @@ static func _used_names()->Dictionary:
 	return used
 
 static func _name_for(sex:String,rng:RandomNumberGenerator,family:String="")->Dictionary:
-	# Before writing or institutions nobody has a family name (era_names.gd):
-	# a commoner is a name and an epithet, or a name and a place.
+	# Named in our people's own tongue (era_names.gd, people_language.gd).
+	# Before writing or institutions the second name is a byname only and is
+	# not handed down (family ""); a kinsman's family name is kept.
 	var era_names:=preload("res://scripts/era_names.gd")
-	if era_names.stage("player")<2:
-		var taken:=era_names.used_in_court()
-		for full in _used_names(): taken[full]=true
-		var made:Dictionary=era_names.make(int(GameState.world_seed),rng.randi(),sex=="female","player",taken)
-		return {"given":String(made.given),"family":"","name":String(made.name)}
-	var pool:Array=Notables.MEN if sex=="male" else Notables.WOMEN
-	var families:Array=[]
-	for f in era_names.FAMILIES:
-		if CV.permits(String(f),tags()) and String(f).length()<=9: families.append(String(f))
-	var used:=_used_names()
-	for attempt in 60:
-		var given:=String(pool[rng.randi_range(0,pool.size()-1)])
-		var fam:=family if family!="" else String(families[rng.randi_range(0,families.size()-1)])
-		var full:="%s %s" % [given,fam]
-		if not used.has(full): return {"given":given,"family":fam,"name":full}
-	var given2:=String(pool[rng.randi_range(0,pool.size()-1)])
-	return {"given":given2,"family":"of %s" % _settlement_name(""),"name":"%s of %s" % [given2,_settlement_name("")]}
+	var taken:=era_names.used_in_court()
+	for full in _used_names(): taken[full]=true
+	var hint:Dictionary={"family":family} if family!="" else {}
+	var made:Dictionary=era_names.make(int(GameState.world_seed),rng.randi(),sex=="female","player",taken,hint)
+	return {"given":String(made.given),"family":String(made.family),"name":String(made.name)}
 
 static func desc_key(desc:Dictionary)->String:
 	return "%s|%s|%s|%s|%s|%s|%s" % [String(desc.get("trade","")),String(desc.get("sex","")),String(desc.get("age","")),String(desc.get("settlement_id","")),
@@ -297,7 +286,9 @@ static func create(desc:Dictionary,key:String="")->Dictionary:
 	if sid=="" or _settlement(sid).is_empty(): sid=String(_settlement("").get("id",""))
 	var kin_of:Dictionary=desc.get("kin_of",{}) if desc.get("kin_of") is Dictionary else {}
 	var family:=""
-	if not kin_of.is_empty(): family=preload("res://scripts/era_names.gd").family_of(GovernmentPeopleSystem.person_snapshot(int(kin_of.get("pid",0))))
+	# A kinsman's second name as their people hand it on: a child of a people
+	# that names by the father takes the father's given name (era_names.gd).
+	if not kin_of.is_empty(): family=preload("res://scripts/era_names.gd").kin_family(GovernmentPeopleSystem.person_snapshot(int(kin_of.get("pid",0))),String(kin_of.get("relation","child")))
 	var n:=_name_for(sex,rng,family)
 	var children:=0
 	var quals:=String(desc.get("quality","")).split("+",false)
@@ -508,6 +499,10 @@ static func categories()->Array[Dictionary]:
 	for f in HistoricalFigures.people:
 		if f is Dictionary and String((f as Dictionary).get("role",""))=="General" and String((f as Dictionary).get("status",""))!="dead":
 			out.append({"label":"the war leader %s" % String((f as Dictionary).get("name","")),"desc":{"figure":String((f as Dictionary).get("id",""))}}); break
+	# The gifted grown (geniuses.gd): one the court can name.
+	for f2 in HistoricalFigures.people:
+		if f2 is Dictionary and (f2 as Dictionary).get("genius") is Dictionary and String((f2 as Dictionary).get("status",""))=="living":
+			out.append({"label":"the %s %s" % [preload("res://scripts/geniuses.gd").court_title(f2).to_lower(),String((f2 as Dictionary).get("name",""))],"desc":{"figure":String((f2 as Dictionary).get("id",""))}}); break
 	if not GameState.discovery_log.is_empty():
 		var d:Dictionary=GameState.discovery_log[0]
 		out.append({"label":"whoever made the last discovery","desc":{"discovery":String(d.get("id","")),"deed":"found %s" % String(d.get("name","a new way")).to_lower(),"trade":_fit_trade(["gatherer","flint-knapper","potter","healer"]),"settlement_id":sid}})
@@ -1382,6 +1377,8 @@ static func slots_for(ref:Dictionary)->Dictionary:
 		"figure":
 			var f:=HistoricalFigures.by_id(String(ref.id))
 			out.merge({"role":"war leader" if String(f.get("role",""))=="General" else String(f.get("role","")).to_lower(),"trade":String(f.get("role","")).to_lower(),"village":String(f.get("origin","")),"detail":String(f.get("temperament","")),"household":"","he":"she" if String(f.get("gender",""))=="woman" else "he","his":"her" if String(f.get("gender",""))=="woman" else "his"},true)
+			# The gifted: their gift and what it does now (geniuses.gd).
+			if f.get("genius") is Dictionary: out.merge({"role":preload("res://scripts/geniuses.gd").court_title(f).to_lower(),"detail":"%s; %s" % [String(f.get("temperament","")),preload("res://scripts/geniuses.gd").gift_words(f)]},true)
 	return out
 
 static func _household_words(p:Dictionary)->String:

@@ -163,8 +163,9 @@ func test_drafts_come_from_the_army_size_the_ruler_set()->void:
 	GameState.ensure_population_total(1000)
 	var band:=_band(7,[_formation(11,"levy","improvised",20,30)],30.0)
 	MilitaryCampaign.field_armies.assign([band])
-	# "A few of the young": 10 of 1,000. The band's 20 already stand above it.
-	MilitaryCampaign.army_levy_level="few"
+	# The watch holds just the band's 20 (the watch is the army,
+	# watch_military.gd): nobody more may be drafted.
+	GameState.population_allocations["Defense"]=20
 	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
 	assert_str(String(MilitaryCampaign.field_armies[0].draft_block)).is_equal("at_level")
 	# Men the player already called up may go.

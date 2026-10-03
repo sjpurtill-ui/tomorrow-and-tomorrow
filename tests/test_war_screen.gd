@@ -1,8 +1,10 @@
 extends GdUnitTestSuite
 ## THE WAR SCREEN (hud/war_board.gd) and HOW MANY SERVE (army_levy_law.gd):
-## grand strategy on one page. The ruler chooses a share of the people to
-## keep under arms, a stance toward each enemy, and sees the leaders; the war
-## leader does the rest. No band is ordered by hand.
+## grand strategy on one page. KEEPING WATCH IS THE MILITARY
+## (watch_military.gd): the ruler chooses the share of the people that keeps
+## watch (the army), how much of it guards home, a stance toward each enemy,
+## and sees the leaders; the war leader does the rest. No band is ordered by
+## hand.
 
 const WAR:=preload("res://scripts/war_loop.gd")
 const HallProbe:=preload("res://tests/audience_hall_probe.gd")
@@ -62,23 +64,23 @@ func after_test()->void:
 	WorldSimulation.clear()
 
 func test_the_army_is_kept_at_the_share_the_ruler_chooses()->void:
-	assert_str(Law.reading(MilitaryCampaign).level).is_equal("")
-	# Nobody is called up on its account until the ruler chooses.
-	assert_dict(Law.keep(MilitaryCampaign,10,true)).is_empty()
+	# The army's size is the watch share: read from the people's own work.
+	assert_str(Law.reading(MilitaryCampaign).level).starts_with("share:")
 	var people:=int(WorldSimulation.state.population_total)
 	var result:=Law.choose(MilitaryCampaign,"some")
 	assert_bool(bool(result.ok)).is_true()
 	var target:=Law.target_men("some",people)
 	assert_int(target).is_equal(roundi(people*0.03))
+	assert_int(MilitaryCampaign.watch_manpower()).is_equal(target)
 	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(target)
-	assert_str(String(result.said)).contains("called up")
+	assert_str(String(result.said)).contains("keep watch")
 	# Fewer: the surplus at home goes back to work.
 	Law.choose(MilitaryCampaign,"few")
 	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("few",people))
-	# The level is saved with the army.
-	assert_str(String(MilitaryCampaign.export_state().army_levy_level)).is_equal("few")
+	# The share is saved with the army, and the leaders keep it.
+	assert_float(float(MilitaryCampaign.export_state().watch_work_share)).is_greater(0.0)
 	# The same words at any size: a share, never a count.
-	assert_str(Law.cost_words("some",1_000_000_000,600_000_000)).starts_with("30,000,000 of 1,000,000,000 serve")
+	assert_str(Law.cost_words("some",1_000_000_000,600_000_000)).starts_with("30,000,000 of 1,000,000,000 keep watch")
 
 func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	WAR.blood_feud(civ_id,10,"the killing of their envoy Qira")
@@ -88,6 +90,10 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	board.setup({})
 	for id in ["few","some","many","war","all"]:assert_object(board.find_child("Level_%s" % id,true,false)).is_not_null()
 	assert_object(board.find_child("Strength",true,false)).is_not_null()
+	# Top to bottom: the manpower, the home guard, the offensive troops.
+	var order:=["ManpowerCard","GuardCard","OffenseCard","Enemies","Leaders"].map(func(n:String)->int:return (board.find_child(n,true,false) as Control).get_index() if board.find_child(n,true,false).get_parent()==board else (board.find_child(n,true,false).get_parent() as Control).get_index())
+	for i in order.size()-1:assert_int(int(order[i])).is_less(int(order[i+1]))
+	for name in ["WatchMore","WatchLess","GuardMore","GuardLess","People"]:assert_object(board.find_child(name,true,false)).is_not_null()
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
 	assert_object(row).is_not_null()
 	assert_object(row.find_child("Odds",true,false)).is_not_null()
@@ -109,7 +115,7 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	for name in ["MoveTo","PutUnder","WholeCommand","Verbs"]:assert_object(board.find_child(name,true,false)).is_null()
 
 func test_the_army_bar_reads_ready_drill_and_waiting_against_the_share()->void:
-	assert_str(Board.strength_words({"ready":327,"drill":85,"drill_days":40,"waiting":3,"away":9},424,612)).is_equal("327 ready · 85 in drill, about 40 days · 3 waiting to drill · 9 hurt or away · 188 to call up")
+	assert_str(Board.strength_words({"ready":327,"drill":85,"drill_days":40,"waiting":3,"away":9},424,612)).is_equal("327 ready · 85 in a drill course, about 40 days · 3 joining the watch · 9 hurt or away · 188 to join")
 	assert_str(Board.strength_words({"ready":30,"drill":0,"drill_days":0,"waiting":0},30,20)).is_equal("30 ready · 10 above the share")
 	assert_str(Board.strength_words({"ready":4,"drill":0,"drill_days":0,"waiting":0},4,-1)).is_equal("4 ready")
 	# Nobody out: no fed share to show.
@@ -124,10 +130,11 @@ func test_a_levy_ordered_in_court_lifts_the_share_instead_of_being_sent_home()->
 	var more:=Law.target_men("many",people)-kept
 	var answer:Dictionary=preload("res://scripts/home_orders.gd").perform({"kind":"levy","count":more,"recruit":true,"fill":false,"arm_said":true,"unit":"levy","item":""})
 	assert_int(int(answer.get("raised",0))).is_equal(more)
-	assert_str(Law.reading(MilitaryCampaign).level).is_equal("many")
-	assert_str(String(answer.get("says",""))).contains("The army is now kept at 5% of the people")
+	# Those called up keep watch: the share rises to hold them.
+	assert_str(Law.reading(MilitaryCampaign).name).is_equal("5%")
+	assert_str(String(answer.get("says",""))).contains("called up to keep watch")
 	# The war leader's next look sends nobody home.
-	assert_dict(Law.keep(MilitaryCampaign,int(WorldSimulation.state.elapsed_days),true)).is_empty()
+	assert_int(int(Law.keep(MilitaryCampaign,int(WorldSimulation.state.elapsed_days),true).released)).is_equal(0)
 	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(kept+more)
 
 func test_the_war_leader_drills_the_best_foot_our_people_can_arm()->void:
@@ -145,22 +152,22 @@ func test_each_leader_reads_by_what_they_are_best_and_worst_at()->void:
 	assert_str(CombatSimulator.fate_words("escaped")).is_equal("got away")
 	assert_str(CombatSimulator.fate_words("wounded, but escaped")).is_equal("was wounded but got away")
 
-func test_the_watch_at_home_is_not_the_army()->void:
-	# Five keep the watch: set to defence work and standing at home.
+func test_the_watch_at_home_is_the_army()->void:
+	# Five keep the watch: set to defence work and standing at home. They are
+	# the army, all of it.
 	WorldSimulation.state.population_allocations["Defense"]=5
 	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("The watch",[{"id":1,"unit":"levy","weapon":"improvised","count":5,"equipment":5,"training":0.5}],1,1)
-	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(5)
-	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(0)
+	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(5)
 	var people:=int(WorldSimulation.state.population_total)
 	Law.choose(MilitaryCampaign,"some")
 	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("some",people))
-	# Fewer: the army shrinks, the watch stays whole.
+	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_equal(Law.target_men("some",people))
+	# Fewer: the watch shrinks, the least drilled first.
 	Law.choose(MilitaryCampaign,"few")
 	assert_int(Law.under_arms(MilitaryCampaign)).is_equal(Law.target_men("few",people))
-	assert_int(int(MilitaryCampaign.home_army.get("troops",0))).is_greater_equal(5)
-	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(5)
-	assert_int(int(Board.strength(MilitaryCampaign).watch)).is_equal(5)
-	WorldSimulation.state.population_allocations.erase("Defense")
+	# The home guard is the split's share of it, standing at home.
+	assert_int(int(Law.watch(MilitaryCampaign).kept)).is_equal(mini(int(MilitaryCampaign.home_army.troops),roundi(float(MilitaryCampaign._mobilized_count())*MilitaryCampaign.watch_split())))
+	assert_int(int(Board.strength(MilitaryCampaign).watch)).is_equal(int(Law.watch(MilitaryCampaign).kept))
 
 func test_a_leader_with_bands_shows_men_will_and_fed_as_bars()->void:
 	var board:VBoxContainer=auto_free(Board.new())
@@ -214,13 +221,14 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	Law.choose(MilitaryCampaign,"some")
 	var rows:=Forces.rows(MilitaryCampaign)
 	var kinds:=rows.map(func(r:Dictionary)->String:return String(r.kind))
-	assert_array(kinds).contains(["home","drill"])
+	# Nobody waits in a drill course: they joined the watch at home at once.
+	assert_array(kinds).contains(["home"])
+	assert_array(kinds).not_contains(["drill"])
 	var home:Dictionary=rows[kinds.find("home")]
 	assert_str(String(home.title)).starts_with("At home in ")
-	assert_str(String(home.doing)).contains("keep the watch")
+	assert_str(String(home.doing)).contains("guard home")
 	assert_str(String(home.kit)).is_not_empty()
-	var drill:Dictionary=rows[kinds.find("drill")]
-	assert_int(int(drill.men)).is_equal(Law.under_arms(MilitaryCampaign))
+	assert_int(int(home.men)).is_equal(Law.under_arms(MilitaryCampaign))
 	# The board shows them as numbers: shares on the strip, and where they
 	# are on the army bar's cards (the levy at home first, with the watch
 	# and those in drill).
@@ -230,8 +238,8 @@ func test_the_army_reads_where_every_soldier_is_and_what_they_carry()->void:
 	assert_str((board.find_child("Level_some",true,false) as Button).text).is_equal("3%")
 	assert_object(board.find_child("DrawnFrom",true,false)).is_not_null()
 	var levy:Dictionary=Bar.levy_card(MilitaryCampaign)
-	assert_int(int(levy.watch)).is_equal(5)
-	assert_int(int(levy.drill)+int(levy.waiting)+int(levy.ready)).is_equal(Law.under_arms(MilitaryCampaign))
+	assert_int(int(levy.watch)).is_equal(int(Law.watch(MilitaryCampaign).kept))
+	assert_int(int(levy.drill)+int(levy.waiting)+int(levy.ready)+int(levy.watch)).is_equal(Law.under_arms(MilitaryCampaign))
 	assert_str(String(Bar.war_cards(MilitaryCampaign)[0].kind)).is_equal("levy")
 	WorldSimulation.state.population_allocations.erase("Defense")
 
@@ -310,7 +318,7 @@ func test_the_war_map_frames_the_war_and_gives_the_map_back()->void:
 	assert_str(front_tip).contains("Dead:")
 	assert_str(front_tip).contains("Odds:")
 	assert_str(String((e.tip_host as PackedStringArray)[0])).contains("under arms")
-	assert_str(String((mode.scene.levy_tip as PackedStringArray)[0])).starts_with("Our army at home")
+	assert_str(String((mode.scene.levy_tip as PackedStringArray)[0])).starts_with("The watch at home")
 	# A click on their ground or host brings their card on the War screen into view.
 	await get_tree().process_frame
 	assert_bool(mode.show_card(civ_id)).is_true()

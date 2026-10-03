@@ -249,10 +249,10 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			var value:=untrained_words(int(s.get("watch",0)),int(s.get("rise",0)))
 			if s.is_empty() or bool(s.get("town",false)):
 				return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
-					"meaning":"The watch, and the townsfolk who take up arms when raiders come. Our trained fighters stay at %s unless a general sends them." % String(s.get("capital","home"))}
+					"meaning":"The home guard posted here (the watch, shared among our towns by their people), and the townsfolk who take up arms when raiders come. The rest of the watch stay at %s unless a general sends them." % String(s.get("capital","home"))}
 			if trained>0:value="%s fighter%s" % [EraWords.grouped(guard),"" if guard==1 else "s"]
 			return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
-				"note":("%s trained" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"Our trained fighters, the watch, and the townsfolk who take up arms when raiders come."}
+				"note":("%s for the bands" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The watch at home (its home guard and those free for the bands), and the townsfolk who take up arms when raiders come."}
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
 			if s.is_empty() or int(s.wall_stage)<=0:
@@ -357,7 +357,7 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 		"garrison":
 			var s:Dictionary=f.get("strength",{})
 			if not s.is_empty() and not bool(s.get("town",false)) and int(s.fighters)>0 and int(s.get("watch",0))+int(s.get("rise",0))>0:
-				lines.append("%s trained, %s." % [EraWords.grouped(int(s.fighters)),untrained_words(int(s.get("watch",0)),int(s.get("rise",0)))])
+				lines.append("%s for the bands, %s." % [EraWords.grouped(int(s.fighters)),untrained_words(int(s.get("watch",0)),int(s.get("rise",0)))])
 			if String(s.get("held_by",""))=="":lines.append(RISE_WORDS)
 		"fortification":
 			var s:Dictionary=f.get("strength",{})

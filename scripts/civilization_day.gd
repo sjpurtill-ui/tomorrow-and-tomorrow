@@ -81,6 +81,9 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			run.result.events=WorldSimulation.settlements.with_local_population(func()->Array[Dictionary]:return WorldSimulation.consequences.process_day(daily_context),true)
 	),
 		S.step("civics",timings,func()->void:
+			# The realm's arms for the day (weapons_stock.gd): how many the watch
+			# lacks, read on the whole people before any place makes them.
+			preload("res://scripts/weapons_stock.gd").plan_day()
 			WorldSimulation.settlements.with_local_population(func()->void:preload("res://scripts/civilian_goods.gd").advance())
 			run.result.events.append_array(WorldSimulation.civics.process_day(day))
 	),

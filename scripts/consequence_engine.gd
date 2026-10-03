@@ -11,6 +11,8 @@ const HearthCount:=preload("res://scripts/hearth_count.gd")
 const HARDSHIPS:=preload("res://scripts/hardship_log.gd")
 const OfficeLevers:=preload("res://scripts/office_levers.gd")
 const Enterprise:=preload("res://scripts/enterprise.gd")
+## Fresh food, small stores, keepers and carers (docs/PEOPLE_FIRST.md B).
+const FoodCare:=preload("res://scripts/food_care.gd")
 
 # One bounded causal model drives the early civilization. Narrative systems may
 # choose from these pressures, but only this file turns them into numbers.
@@ -685,10 +687,15 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var military_campaign:=WorldSimulation.system("MilitaryCampaign")
 	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
+	# Makers on arms make no tools or materials that day (weapons_stock.gd):
+	# their share of all the makers.
+	makers*=1.0-preload("res://scripts/civilian_goods.gd").arms_fraction(WorldSimulation.state)
 	var carriers := float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var observers := float(WorldSimulation.state.effective_workers("Knowledge"))
 	var stewards := float(WorldSimulation.state.effective_workers("Administration"))
-	var guards := float(WorldSimulation.state.population_allocations.get("Defense",0))
+	# Keeping order at home: the watch at home, not its bands away
+	# (watch_military.gd: the watch is the army).
+	var guards := float(WorldSimulation.military.watch_at_home()) if WorldSimulation.military!=null else float(WorldSimulation.state.population_allocations.get("Defense",0))
 	var dynamics:=WorldSimulation.state.society_capacities
 	var governance:=governance_metrics()
 	var administrative_load:=float(governance.administrative_load)
@@ -755,8 +762,17 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		WorldSimulation.state.convoy_exposure_days+=1.0-housing_ratio
 	else:
 		WorldSimulation.state.convoy_exposure_days=maxf(0.0,WorldSimulation.state.convoy_exposure_days-1.5)
-	var food_security_target := clampf(0.05+minf(1.0,food_days/45.0)*0.30+minf(1.15,production_ratio)*0.25+intake_ratio*0.18+float(food_result.food_diet_quality)*0.12+WorldSimulation.state.nutrition_reserve*0.10-malnutrition*0.24,0.02,0.98)
+	# Food security counts the store only as a lean buffer: LEAN_DAYS of food
+	# carry the people through a lean spell, and more adds nothing
+	# (food_care.gd). What is eaten (fed) is the rest of it: deaths and
+	# sickness read that, with the buffer counted full, so the size of the
+	# store never kills or sickens anyone; going without does.
+	var targets:=FoodCare.security_targets(food_days,production_ratio,intake_ratio,float(food_result.food_diet_quality),WorldSimulation.state.nutrition_reserve,malnutrition)
+	var lean_buffer:=float(targets.lean)
+	var food_security_target := clampf(float(targets.security),0.02,0.98)
 	WorldSimulation.state.food_security = lerpf(WorldSimulation.state.food_security,food_security_target,SPAN.rate(0.055))
+	# An older save starts what is eaten from its food security (no jump).
+	var fed_security:=lerpf(float(previous.get("food_fed_security",WorldSimulation.state.food_security)),float(targets.fed),SPAN.rate(0.055))
 
 	var clean_water_bonus := WorldSimulation.discovery.effect("health_protection")+WorldSimulation.discovery.effect("water_safety")*0.25-WorldSimulation.discovery.effect("disease_exposure")*0.18
 	var water_health_penalty:=pow(1.0-water_intake,1.35)*0.62
@@ -774,7 +790,12 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var environmental_health_cost:=disease_pressure*maxf(0.18,1.0-WorldSimulation.discovery.effect("sanitation"))*0.045+(cold_pressure*0.024*(1.0-float(clothing.get("cold",0)))+heat_pressure*0.018)*maxf(0.0,0.92-housing_ratio)
 	var exchange_pressure:Dictionary=preload("res://scripts/society_exchange.gd").pressure()
 	var clinical:=preload("res://scripts/civilian_care.gd").process_day(clampf((1.0-prior_health)*.6+disease_pressure*.25+malnutrition*.15,0,1))
-	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+WorldSimulation.state.food_security*0.43+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")-policy_effect("disease_risk")*0.40+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
+	# Fresh food keeps people well (FRESH_HEALTH × the fresh share past half),
+	# and carers tending the sick lift health (food_care.gd).
+	var fresh_share:=clampf(float(food_result.get("food_fresh_share",FoodCare.FRESH_EVEN)),0.0,1.0)
+	var fresh_health:=FoodCare.fresh_health(fresh_share)
+	var care_health:=FoodCare.CARE_HEALTH*FoodCare.care_cover_of(WorldSimulation.state)
+	var health_target := clampf(-float(exchange_pressure.health_cost)+0.18+fed_security*0.43+fresh_health+care_health+float(food_result.food_diet_quality)*0.06+housing_ratio*0.16+clean_water_bonus+shelter_bonus-modifier_strength("sickly_arrival")+policy_effect("health_target")-policy_effect("disease_risk")*0.40+WorldSimulation.state.founding_effect("health_target")+WorldSimulation.progression.effect("health_protection")*0.12-WorldSimulation.progression.effect("disease_exposure")*0.08-travel_health_penalty-malnutrition*0.28-process_health_cost-water_health_penalty-environmental_health_cost,0.02,0.97)
 	health_target=clampf(health_target+float(clinical.get("health_relief",0)),.02,.97)
 	WorldSimulation.state.simulation_metrics["clinical_care"]=clinical.duplicate(true)
 	WorldSimulation.state.population_health = lerpf(WorldSimulation.state.population_health,health_target,SPAN.rate(0.022))
@@ -837,7 +858,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	# overwork set infant, child, adult, birth and conception factors today.
 	var heavy_share:=clampf((food_workers+extractors+builders)/able_population,0.0,1.2)
 	var overwork:=clampf(clampf((heavy_share-0.74)/0.22,0.0,1.0)*0.7+clampf(policy_effect("labor_multiplier")/0.03,0.0,1.0)*0.5,0.0,1.0)
-	var care:=EARLY_CARE.refresh(WorldSimulation.state,WorldSimulation.discovery,{"overwork":overwork,"infant_loss":float(WorldSimulation.state.early_care.get("infant_loss_estimate",0.0))})
+	# Carers are the hands on keeping and caring (food_care.gd), the same
+	# stewards whose office work reaches the people (admin_coverage).
+	var care:=EARLY_CARE.refresh(WorldSimulation.state,WorldSimulation.discovery,{"overwork":overwork,"infant_loss":float(WorldSimulation.state.early_care.get("infant_loss_estimate",0.0)),"carer_cover":FoodCare.care_cover(stewards,population)})
 	# --- end early care
 	var mortality_components := {
 		# Natural mortality is derived from the same age-specific life table shown
@@ -878,7 +901,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	if deaths_today>0:
 		mortality_result=WorldSimulation.state.register_population_deaths(deaths_today,dominant_cause)
 	var reproduction_context:={
-		"health":WorldSimulation.state.population_health,"food_security":WorldSimulation.state.food_security,
+		"health":WorldSimulation.state.population_health,"food_security":fed_security,
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
 		"birth_crisis":birth_crisis,"absent_adults":float(foreign_effects.get("population_absent",0))*population/maxf(1.0,float(WorldSimulation.settlements.national_population())),
 		"conception_support":WorldSimulation.discovery.effect("conception_support")+policy_effect("conception_support")+WorldSimulation.state.founding_effect("conception_support")+WorldSimulation.progression.effect("conception_support"),
@@ -945,6 +968,11 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		"annual_conceptions_expected":float(reproduction.get("annual_conceptions_expected",0.0)),"projected_live_births":float(reproduction.get("projected_live_births",0.0)),
 		"births_expected_next_year":float(reproduction.get("births_expected_next_year",0.0)),
 		"mobile_shelter_ratio":mobile_shelter_ratio,"food_shortage_days":WorldSimulation.state.consecutive_food_shortage_days,
+		# What food security is made of (food_care.gd): the lean buffer, and
+		# what is eaten, which deaths and sickness read; and what fresh food
+		# and the carers add to health today.
+		"food_lean_buffer":lean_buffer,"food_fed_security":fed_security,"fresh_health":fresh_health,"care_health":care_health,
+		"care_cover":FoodCare.care_cover_of(WorldSimulation.state),
 		"water_intake_ratio":water_intake,"water_days":float(WorldSimulation.state.water_metrics.get("days",0.0)),"water_shortage_days":WorldSimulation.state.consecutive_water_shortage_days,
 		"water_collected_today":float(WorldSimulation.state.water_metrics.get("collected_today",0.0)),"water_required_today":float(WorldSimulation.state.water_metrics.get("required_today",population)),"water_source_distance_km":float(WorldSimulation.state.water_metrics.get("source_distance_km",-1.0)),
 		"travel_speed_factor":_travel_speed_factor(WorldSimulation.state.population_health,WorldSimulation.state.food_security,production_ratio,food_stored,traveling),

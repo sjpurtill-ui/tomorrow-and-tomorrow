@@ -208,9 +208,13 @@ static func day(today:int)->void:
 	if WorldSimulation.state==null or not WorldSimulation.state.settlement_site_committed: return
 	if WorldSimulation.military==null or WorldSimulation.world==null: return
 	if WorldSimulation.military.recovery.home_unavailable(): return
-	# The god lowered the share: bands with nothing to do come home to be sent
+	# The god lowered the watch: bands with nothing to do come home to be sent
 	# back to work (on the levy law's own days, army_levy_law.gd KEEP_EVERY).
-	if _player() and today%int(LAW.KEEP_EVERY)==0: fold_idle_bands()
+	if _player() and today%int(LAW.KEEP_EVERY)==0:
+		fold_idle_bands()
+		# The home guard asks for more than stand at home: idle bands come
+		# home to guard it (watch_military.gd recall_for_guard).
+		preload("res://scripts/watch_military.gd").recall_for_guard(_mc())
 	var s:=state()
 	var every:=LIVE_DAYS if bool(s.get("live",false)) else (WAIT_DAYS if bool(s.get("waiting",false)) else PEACE_DAYS)
 	if today-int(s.get("last",-99999))<every: return
@@ -935,7 +939,7 @@ static func _send_home(band:Dictionary)->bool:
 	if index>=0: mc.field_armies[index].erase("court_order")
 	return true
 
-## The army stands above the share the god chose (army_levy_law.gd): the
+## The army stands above the watch the god keeps (watch_military.gd): the
 ## bands with no errand (no stance needs them, no march, siege, chase or
 ## fight under way) come home and fold back into the levy at home, where the
 ## law's next look sends the surplus back to work. Bands on an errand stay
@@ -943,7 +947,10 @@ static func _send_home(band:Dictionary)->bool:
 static func fold_idle_bands()->int:
 	var mc:=_mc()
 	var reading:=LAW.reading(mc)
-	if String(reading.get("level",""))=="" or int(reading.get("gap",0))>=0: return 0
+	# Above the watch by more than the war leader's slack (watch_military.gd
+	# keep sends the rest at home back to work).
+	var slack:=maxi(1,ceili(float(reading.get("target",0))*float(preload("res://scripts/watch_military.gd").SLACK)))
+	if -int(reading.get("gap",0))<=slack: return 0
 	var called:=0
 	for army in (mc.field_armies as Array).duplicate():
 		if not army is Dictionary: continue
@@ -975,6 +982,10 @@ static func _idle(army:Dictionary)->bool:
 	if mc.command_hierarchy.controls_army(army_id): return false
 	if WorldSimulation.campaign!=null and bool(WorldSimulation.campaign.active) and army_id==int(WorldSimulation.campaign.state.get("army_id",-1)): return false
 	if _at_post(army): return false
+	# The ruler's own word stands: a band formed by an order (realm_orders.gd
+	# _form_band) waits for the ruler, and a band guarding a town of ours is
+	# its guard.
+	if bool(army.get("by_order",false)) or _guards_ours(army): return false
 	return true
 
 ## A band at work or on watch where the ruler put it: waiting on the ground
@@ -1192,14 +1203,13 @@ static func _army(army_id:int)->Dictionary:
 # Forces, towns, odds, supply
 # --------------------------------------------------------------------------
 
-## Who can go: the trained at home, less the watch the war leader keeps.
+## Who can go: those at home, less the home guard (watch_military.gd).
 static func _forces()->Dictionary:
 	var mc:=_mc()
 	var home:=maxi(0,int(mc.home_army.get("troops",0)))
-	var keep:=ceili(float(home)*WATCH_SHARE) if home>=MIN_BAND*2 else 0
-	# With a size chosen for the army (army_levy_law.gd), the watch at home is
-	# not the army: no band takes its men, so none is drilled again to fill it.
-	if LAW._level_of(mc)!="": keep=maxi(keep,int(LAW.watch(mc).home))
+	# The home guard stays (watch_military.gd): the ruler's split of the
+	# watch guards home and the towns; the rest are for the bands.
+	var keep:=mini(home,int(LAW.watch(mc).home))
 	return {"home":home,"keep":keep,"free":maxi(0,home-keep),"formations":mc.home_army.get("formations",[]),"force":mc.home_army}
 
 static func _free_men()->int:

@@ -61,7 +61,7 @@ static func _maybe_onset(s:Dictionary,day:int,x:Dictionary,h:Dictionary)->bool:
 				var echoed:=_open_sickness(s,day,x,"sickness",float(echo.get("v",0.01)),String(echo.get("civ_id","")))
 				echoed["echo_count"]=int(echo.get("count",1))
 				return true
-	var hungry_now:=(float(x.shortage_days)>=10.0 and float(x.intake)<0.94) or (int(x.first_shortage)>0 and int(x.first_shortage)<=45 and float(x.food_days)<40.0)
+	var hungry_now:=(float(x.shortage_days)>=10.0 and float(x.intake)<0.94) or (int(x.first_shortage)>0 and int(x.first_shortage)<=45 and float(x.food_days)<CS.FoodCare.LEAN_DAYS)
 	if CS._active_in(s,"hunger").is_empty() and _ready_again(s,"hunger",day,300) and (hungry_now or _roll("hunger:%d" % day,float(h.hunger))):
 		_open_hunger(s,day,x,float(h.hunger_shortfall)); return true
 	if CS._active_in(s,"drought").is_empty() and _ready_again(s,"drought",day,300) and float(x.weather_season)<0.88 and float(x.season)>-0.45:
@@ -244,7 +244,7 @@ static func _advance(s:Dictionary,c:Dictionary,day:int,x:Dictionary)->void:
 				if float(c.pop0)*float(c.m)*float(c.mult)*0.6>=1.5 or bool(c.get("virgin",false)):
 					c.mid_choice="children_apart"; c.mult=float(c.mult)*float(CS.DEATH_FACTOR.children_apart); _metric("cohesion",-0.006)
 			"hunger":
-				if float(x.food_days)<25.0 or float(x.intake)<0.95:
+				if float(x.food_days)<CS.FoodCare.store_gate(25.0) or float(x.intake)<0.95:
 					c.mid_choice="roots"; c.mult=float(c.mult)*float(CS.DEATH_FACTOR.roots)
 					_policy(c,"roots",{"labor_multiplier":-0.08},30)
 					EXCHANGE.receive(WorldSimulation.actor_id,"Food",float(x.pop)*0.25)

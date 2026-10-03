@@ -103,8 +103,15 @@ const WATCH_WALL_WORK:=0.38
 const WATCH_REPAIR:=0.20
 
 
-## The task's explanation: {lead, lines}.
+## The task's explanation: {lead, lines}, with what the people's gifted add
+## and, for learning and keeping and caring, the chance a gifted child is
+## noticed (geniuses.gd).
 static func of(role:String)->Dictionary:
+	var result:=_of(role)
+	preload("res://scripts/geniuses.gd").explain(role,result)
+	return result
+
+static func _of(role:String)->Dictionary:
 	match role:
 		"Food":return food()
 		"Survey":return survey()
@@ -168,8 +175,10 @@ static func food()->Dictionary:
 		lines.append(_line("Townsfolk and births","%d in 100 townsfolk" % roundi(urban*100.0),
 			("The fewer on food, the more people live as townsfolk. Past %d in 100 of them, couples choose fewer children: %s in 100 fewer now." % [roundi(EarlyLife.URBAN_ONSET*100.0),_one(fewer*100.0)]) if fewer>0.0 else "The fewer on food, the more people live as townsfolk. Past %d in 100 of them, couples choose fewer children." % roundi(EarlyLife.URBAN_ONSET*100.0),
 			"bad" if fewer>0.0 else "plain"))
+	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
+	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Food").get("lines",[]))
 	_great_work_line(lines,"Food")
-	lines.append(_cost_line("Food",getters))
+	lines.append(_cost_line("Food"))
 	return {"lead":"Food getters gather, hunt, fish and tend the fields. What the people do not eat the same day is put by in the stores.","lines":lines}
 
 
@@ -230,7 +239,7 @@ static func survey()->Dictionary:
 	var watching:=clampf(_raw("Survey")/maxf(1.0,float(state.population_exact)*CUNNING_SEARCHERS),0.0,1.0)
 	lines.append(_line("Our cunning","%d of %d points" % [roundi(watching*CUNNING_WEIGHT*100.0),roundi(CUNNING_WEIGHT*100.0)],
 		"Four tenths of the cunning shown on the Standing page comes from people out watching and finding, full when %s search; the rest is the chief scout's skill. It changes nothing else yet." % _count(ceili(pop*CUNNING_SEARCHERS)),"good" if watching>0.0 else "plain"))
-	lines.append(_cost_line("Survey",searchers))
+	lines.append(_cost_line("Survey"))
 	return {"lead":"Searchers walk the country for useful materials and measure what they find, so carriers and builders can open it for work. They do not scout for strangers; scouting parties are sent from court.","lines":lines}
 
 ## The searched land's two lines, for the whole people as every line here is
@@ -341,7 +350,7 @@ static func extraction()->Dictionary:
 	if not wood.is_empty():lines.append(wood)
 	lines.append(_heavy_line())
 	_great_work_line(lines,"Extraction")
-	lines.append(_cost_line("Extraction",cutters))
+	lines.append(_cost_line("Extraction"))
 	return {"lead":"Cutters and diggers work the deposits the people have opened: timber, stone, clay, fibre and ore. What they bring in builds, arms and equips the town.","lines":lines}
 
 
@@ -390,7 +399,8 @@ static func construction()->Dictionary:
 	var walls:Dictionary=MilitaryCampaign.settlement_defense_snapshot()
 	var integrity:=float(walls.get("integrity",1.0))
 	if int(walls.get("stage",0))>0 and integrity<1.0:
-		var menders:=_raw("Construction")+_raw("Defense")*WATCH_REPAIR
+		# Those of the watch at home mend them, not its bands away.
+		var menders:=_raw("Construction")+float(MilitaryCampaign.watch_at_home())*WATCH_REPAIR
 		lines.append(_line("Mending the walls","+%s points a day" % _two(minf(0.006,menders*0.00012)*100.0),
 			"The %s stand at %d of 100. Builders and a fifth of the watch mend them, faster with more hands." % [String(walls.get("name","defences")).to_lower(),roundi(integrity*100.0)],"good" if menders>0.0 else "bad"))
 	# Great works take their crews from the builders (undertaking_system.gd).
@@ -400,7 +410,7 @@ static func construction()->Dictionary:
 			"Great works being raised take a fifth of the builders each (half when pressed), and each standing one keeps a few to tend it.","plain"))
 	lines.append(_heavy_line())
 	_great_work_line(lines,"Construction")
-	lines.append(_cost_line("Construction",builders))
+	lines.append(_cost_line("Construction"))
 	return {"lead":"Builders raise the town's works and homes, keep the town and its walls in repair, and lay the water lines and roads.","lines":lines}
 
 
@@ -432,7 +442,7 @@ static func crafting()->Dictionary:
 	lines.append(_line("Building faster","+%s a day" % _two(_raw("Crafting")/50.0*_pace_scale()),
 		"Makers speed the builders: each adds a fiftieth of a builder's pace to the day's work on the town.","good" if makers>0.0 else "plain"))
 	_great_work_line(lines,"Crafting")
-	lines.append(_cost_line("Crafting",makers))
+	lines.append(_cost_line("Crafting"))
 	return {"lead":"Makers turn materials into tools, household goods and stores of preserved food, and into weapons when the army needs them.","lines":lines}
 
 
@@ -501,8 +511,10 @@ static func logistics()->Dictionary:
 			"The bands away and the garrisons ask %s loads a day (bread %s, fodder, fuel and rounds %s). At their distances our carriers bring %s a day: a porter 16 loads a trip, a cart %s, a lorry %s, each out and back at its own pace. Bread goes first; stores get %d of 100." % [_whole(float(reading.demand)),_whole(float(reading.get("bread",0.0))),_whole(float(reading.get("stores_asked",0.0))),_whole(float(reading.moved)),_whole(float((reading.fleet as Dictionary).get("cart_load",250.0))),_whole(float((reading.fleet as Dictionary).get("lorry_load",2000.0))),roundi(float(reading.get("stores",1.0))*100.0)],"good" if fed>=0.8 else "bad"))
 	lines.append(_line("Building faster","+%s a day" % _two(_raw("Logistics")/30.0*_pace_scale()),
 		"Carriers speed the builders: each adds a thirtieth of a builder's pace to the day's work on the town.","good" if carriers>0.0 else "plain"))
+	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
+	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Logistics").get("lines",[]))
 	_great_work_line(lines,"Logistics")
-	lines.append(_cost_line("Logistics",carriers))
+	lines.append(_cost_line("Logistics"))
 	return {"lead":"Carriers fetch the water, haul materials from the deposits, stock and staff the stores, and keep soldiers supplied.","lines":lines}
 
 
@@ -529,19 +541,32 @@ static func knowledge()->Dictionary:
 	var gain:=keepers*labor*fit/maxf(3000.0,pop*92.0)*(1.0+WorldSimulation.discovery.effect("knowledge_rate"))*lerpf(0.55,1.45,float(state.combined_intelligence))
 	lines.append(_line("What the people know","+%s points a year" % _two(gain*365.0*100.0),
 		"Learners add to what the people know, which speeds every discovery. It stands at %d of 100; the learners add about %s points a year at today's pace." % [roundi(float(state.simulation_metrics.get("knowledge",0.18))*100.0),_two(gain*365.0*100.0)],"good" if gain>0.0 else "bad"))
-	# Research teams: full strength up to 12 keepers, less for each beyond
-	# (research_600_catalog.gd team_capacity).
-	var team:=Research600.team_capacity(keepers)
-	if keepers<=float(Research600.RESEARCH_TEAMS):
-		lines.append(_line("Research strength","full strength" if keepers>0.0 else "none",
-			"Up to %d learners work at full strength on the research; past that each one adds less." % Research600.RESEARCH_TEAMS,"good" if keepers>0.0 else "bad"))
+	# Every learner counts, without a cap (research_600_catalog.gd team_capacity;
+	# discovery_system.gd role_effect reads the engine's numbers).
+	var now:Dictionary=WorldSimulation.discovery.role_effect("Knowledge",1.0)
+	var ten:Dictionary=WorldSimulation.discovery.role_effect("Knowledge",10.0)
+	if keepers<=0.0:
+		lines.append(_line("One more learner","starts the research",
+			"Nobody is learning, so no research moves. Every learner counts; there is no cap on how many learn.","bad"))
 	else:
-		lines.append(_line("Research strength","%s learners' worth" % _one(team),
-			"Up to %d learners work at full strength on the research; past that each adds less, so %s learners work as %s." % [Research600.RESEARCH_TEAMS,_whole(keepers),_one(team)],"good"))
+		lines.append(_line("One more learner",_gain_value(float(now.pace_gain)),
+			"Every learner counts; there is no cap. %s learners work %s questions at once. One more makes the research go %s; ten more, %s (%s questions at once). On one question, twice the people do about 1.8 times the work." % [_whole(keepers),_count(int(now.teams)),_faster(float(now.pace_gain)),_faster(float(ten.pace_gain)),_count(int(ten.teams_more))],"good"))
+	# Learners use goods: tallies, writing stuff, tools (Research600.goods_cover).
+	var cover:=float(now.goods_cover)
+	lines.append(_line("Goods for the learners","%d of 100 covered" % roundi(cover*100.0) if keepers>0.0 else "none asked",
+		"Learners use goods: tallies, writing stuff and tools, one for each %d days of learning, and the same again for every %d years our learning runs ahead of the calendar. %s learners ask %s goods a day and our stores hold %s. Makers make them; short of goods, learning slows, to half its pace with none. Now it goes at %d in 100." % [roundi(Research600.LEARNER_DAYS_PER_GOOD),roundi(Research600.LEAD_GOODS_YEARS),_whole(keepers),_two(float(now.goods_a_day)),_one(float(now.goods_held)),roundi(float(now.goods_factor)*100.0)],"good" if cover>=0.99 else "bad"))
+	# Our own age: learners past what the age can spare carry it ahead of the
+	# calendar (Research600.lead_rate, discovery_system.gd learning_lead).
+	var lead:=float(now.lead_years)
+	var rate:=float(now.lead_rate)
+	var drift:="ahead about %s years every ten years" % _one(rate*10.0) if rate>0.0 else ("back toward the calendar about %s years every ten years" % _one(-rate*10.0) if rate<0.0 and lead>0.0 else "level with the calendar")
+	lines.append(_line("Ahead of the calendar","%s years" % _one(lead) if lead>=0.5 else "level",
+		"The age can spare %d in 100 of the able as learners; %d in 100 learn. Past that, our learning runs ahead of the calendar; below it the calendar catches up. Ours is moving %s. Questions are dated from our own age, and what we know pays off to the age our knowledge has reached." % [roundi(float(now.sustainable_share)*100.0),roundi(float(now.share)*100.0),drift],"good" if lead>=0.5 or rate>0.0 else "plain"))
 	# Too many keepers: past the share the age can spare, each costs work,
 	# weariness, cohesion and births (society_model.gd specialist upkeep).
-	var model=DiscoverySystem.society_model
-	var era:=float(model.ceiling_era) if model!=null else 0.0
+	var model=WorldSimulation.discovery.society_model
+	# What the economy can spare follows its real age, not the learners' lead.
+	var era:=float(model.economy_era()) if model!=null else 0.0
 	var sustainable:=Society._rise(Society.SUSTAINABLE_SPECIALISTS,era)
 	var able:=_able()
 	var excess:=float(model.specialist_excess) if model!=null else 0.0
@@ -561,8 +586,8 @@ static func knowledge()->Dictionary:
 		lines.append(_line("Tending the Shrine House","%d of 100" % roundi(minf(1.0,tended)*100.0),
 			"The Shrine House does its full good only while learners tend it, 1 in 100 of the people (%s would)." % _count(ceili(pop*CIVIC.SHRINE_KEEPERS_SHARE)),"good" if tended>=1.0 else "bad"))
 	_great_work_line(lines,"Knowledge")
-	lines.append(_cost_line("Knowledge",keepers))
-	return {"lead":"Learners watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else.","lines":lines}
+	lines.append(_cost_line("Knowledge"))
+	return {"lead":"Learners watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else. Every learner counts; they eat, use goods and make no food.","lines":lines}
 
 
 # --- Keeping and caring -------------------------------------------------------------
@@ -604,8 +629,10 @@ static func administration()->Dictionary:
 	var slots:=1+floori(institutions*6.0)+floori(clampf(_raw("Administration")/pop/0.04,0.0,1.0)*2.0)
 	lines.append(_line("Orders at once","%d" % slots,
 		"How many standing orders the court can keep in force: one, more as government grows, and up to two more when 4 in 100 of the people are stewards.","plain"))
+	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
+	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Administration").get("lines",[]))
 	_great_work_line(lines,"Administration")
-	lines.append(_cost_line("Administration",stewards))
+	lines.append(_cost_line("Administration"))
 	return {"lead":"Keepers keep the stores and tallies, settle quarrels, take in newcomers and carry the chiefs' word.","lines":lines}
 
 
@@ -613,7 +640,9 @@ static func administration()->Dictionary:
 
 static func defense()->Dictionary:
 	var state=WorldSimulation.state
-	var watch:=_raw("Defense")
+	# The watch at home keeps order (consequence_engine.gd reads the same):
+	# its bands away and garrisons do not (watch_military.gd at_home).
+	var watch:=float(WorldSimulation.military.watch_at_home())
 	var pop:=maxf(1.0,float(state.population_exact))
 	var lines:Array=[]
 	# Safety: + watch ÷ (5 in 100 of the people) × 42 points, the whole held
@@ -634,12 +663,14 @@ static func defense()->Dictionary:
 	var required:=int(walls.get("garrison_required",maxi(8,ceili(pop*0.035))))
 	var guard:=int(walls.get("garrison_guard",roundi(watch)))
 	lines.append(_line("Guard at home","%d of %d" % [guard,required],
-		"The trained fighters and the watch are home's guard: in a raid or siege they defend it, the watch untrained. A town needs 3.5 in 100 of its people on guard, at least 8.","good" if guard>=required else "bad"))
+		"The watch at home is home's guard (the watch is the army): in a raid or siege they defend it; the home guard posted in our other towns stands there. A town needs 3.5 in 100 of its people on guard, at least 8.","good" if guard>=required else "bad"))
 	var townsfolk:=int(walls.get("garrison_townsfolk",0))
 	lines.append(_line("Townsfolk who would fight","%s at home" % _count(townsfolk) if townsfolk>0 else "none",
 		"When raiders come, about 1 in 10 of the town's grown people take up arms beside the watch. They are untrained and are not counted as the guard.","plain"))
-	lines.append(_line("Training soldiers","%d at a time" % MilitaryCampaign.training_capacity(),
-		"How many can be trained at once: 3, plus 3 for every 10 on watch, plus the commander's skill, more with drill and a standing corps.","good" if watch>0.0 else "plain"))
+	# The watch is the army and drills at home (watch_military.gd).
+	var drill:Dictionary=preload("res://scripts/watch_military.gd").role_effect(MilitaryCampaign)
+	lines.append(_line("Drill of the watch","%d in 100" % roundi(float(drill.drill)*100.0),
+		"Everyone keeping watch is under arms and drills at home every day%s. Ten more: %s" % [(", most of a newcomer's drill in about %d days" % int(drill.drill_days)) if int(drill.drill_days)>0 else "",String(drill.ten_more).trim_prefix("Ten more: ")],"good" if watch>0.0 else "plain"))
 	# Walls and ditches: only the watch builds them (military_campaign.gd).
 	var project:Dictionary=walls.get("construction",{}) if walls.get("construction") is Dictionary else {}
 	if bool(project.get("active",false)):
@@ -660,7 +691,7 @@ static func defense()->Dictionary:
 	lines.append(_line("Enforcing orders","%d of 100" % roundi(enforce*100.0),
 		"Orders that need force are carried out as far as the watch and safety allow, and the court can punish at most %d people a year." % punish,"good" if enforce>=0.5 else "plain"))
 	_great_work_line(lines,"Defense")
-	lines.append(_cost_line("Defense",watch))
+	lines.append(_cost_line("Defense"))
 	return {"lead":"The watch guards the town day and night: it keeps the peace, stands as the home guard, trains soldiers and builds the defences.","lines":lines}
 
 
@@ -695,8 +726,12 @@ static func _great_work_line(lines:Array,role:String)->void:
 	if bonus<=0.0:return
 	lines.append(_line("Great works","+%d in 100" % roundi(bonus*100.0),"A great work that favours this work makes each person on it count for %d in 100 more." % roundi(bonus*100.0),"good"))
 
-## The food a task's people eat beyond the everyday ration, and what injuries leave.
-static func _cost_line(role:String,workers:float)->Dictionary:
+## The food a task's people eat beyond the everyday ration (every head set
+## to it, as food_system.gd counts them), and what injuries leave.
+static func _cost_line(role:String)->Dictionary:
+	# Food for the work is eaten by every head set to it (food_system.gd counts
+	# the role's people, not the work they get done).
+	var workers:=_raw(role)
 	var extra:=float(EXERTION.get(role,0.02))
 	var kept:Vector2=Injuries.RETAINED_CAPACITY.get(role,Vector2(.85,.65))
 	return _line("What it costs","%s rations a day" % _one(workers*extra),
@@ -751,6 +786,20 @@ static func _one(value:float)->String:
 
 static func _two(value:float)->String:
 	return "%.2f" % value
+
+## A pace gain in words: "about 12 in 100 faster", "about twice as fast".
+static func _faster(gain:float)->String:
+	if gain>=0.995:return "about %s times as fast" % _one(1.0+gain)
+	if gain>=0.01:return "about %d in 100 faster" % roundi(gain*100.0)
+	if gain>=0.0005:return "about %d in 1000 faster" % maxi(1,roundi(gain*1000.0))
+	return "less than 1 in 1000 faster"
+
+## A pace gain as a short value: "+12 in 100", "+4 in 1000", "2 times as fast".
+static func _gain_value(gain:float)->String:
+	if gain>=0.995:return "%s times as fast" % _one(1.0+gain)
+	if gain>=0.01:return "+%d in 100" % roundi(gain*100.0)
+	if gain>=0.0005:return "+%d in 1000" % maxi(1,roundi(gain*1000.0))
+	return "+less than 1 in 1000"
 
 static func _cap(text:String)->String:
 	return text.left(1).to_upper()+text.substr(1)

@@ -1,6 +1,8 @@
 extends RefCounted
 ## A ruler's preferences choose ordinary orders. These are not simulation bonuses.
 const PERSONALITY=preload("res://scripts/leader_personality.gd")
+## Store gates count the lean stores (food_care.gd).
+const FoodCare=preload("res://scripts/food_care.gd")
 const DOMAINS:=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
 ## Ambitions worth taking up only once another people is known (preferences).
 const AMBITIONS_NEEDING_OTHERS:=["military","dominion","retribution","commerce"]
@@ -40,7 +42,8 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 	var ambition:="horizons"
 	for candidate:String in ambitions:
 		if float(ambitions[candidate])>float(ambitions[ambition]):ambition=candidate
-	var training:="maintain" if discipline<.35 else ("intensive" if discipline>.68 and float(situation.get("food_days",0))>75 else "regular")
+	# Store gates count the lean stores (food_care.gd store_gate).
+	var training:="maintain" if discipline<.35 else ("intensive" if discipline>.68 and float(situation.get("food_days",0))>FoodCare.store_gate(75) else "regular")
 	if hungry:training="suspended"
 	elif war:training="maintain" if risk<.65 else "regular"
 	return {"personality":p,"goals":goals,"ambition":ambition,"research_weights":weights,"training":training,"at_war":war,"hungry":hungry,"food_shortage":constraints.food_shortage,"delivery_shortage":constraints.delivery_shortage,
@@ -49,10 +52,10 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 		# Boldness settles sooner, farther and oftener, but sends thinner rations:
 		# a bold ruler's new town may go hungry before its first harvest; a
 		# cautious one waits for full stores and sends settlers well provisioned.
-		"expansion_food":45+(1-risk)*40+empathy*15,"settle_distance":16+24*risk,"settle_margin_days":ESTABLISHMENT_DAYS*lerpf(1.35,.65,risk),"expansion_months":expansion_months(p),
-		"scout_days":180 if open>.75 and risk>.65 else (90 if open>.5 else 30),"scout_food":22+(1-risk)*30,
-		"war_opinion":-.85+assertive*.35+risk*.2-empathy*.15,"war_food":30+(1-risk)*50,
-		"trade_opinion":.25-empathy*.35-open*.15,"peace_food":12+empathy*18+(1-risk)*12,
+		"expansion_food":FoodCare.store_gate(45+(1-risk)*40+empathy*15),"settle_distance":16+24*risk,"settle_margin_days":ESTABLISHMENT_DAYS*lerpf(1.35,.65,risk),"expansion_months":expansion_months(p),
+		"scout_days":180 if open>.75 and risk>.65 else (90 if open>.5 else 30),"scout_food":FoodCare.store_gate(22+(1-risk)*30),
+		"war_opinion":-.85+assertive*.35+risk*.2-empathy*.15,"war_food":FoodCare.store_gate(30+(1-risk)*50),
+		"trade_opinion":.25-empathy*.35-open*.15,"peace_food":FoodCare.store_gate(12+empathy*18+(1-risk)*12),
 		"offensive":assertive*.55+risk*.45>empathy*.3+(1-risk)*.35+.15}
 
 ## A ruler's research emphasis, in the steps the player's own screen uses (0 to
@@ -166,8 +169,9 @@ static func preferred_mission(service:String,available:Array,plan:Dictionary)->S
 
 ## A gift is for making or mending a friendship, not for friends already won.
 const GOODWILL_CEILING:=.5
-## Food goes as a gift only from stores this full (days).
-const GOODWILL_FOOD_DAYS:=90.0
+## Food goes as a gift only from stores this full (days): half the 90 days
+## of the old full pits (food_care.gd STORE_GATE), a plain number for the sim.
+const GOODWILL_FOOD_DAYS:=45.0
 
 ## A known deterring Great Work (e.g. Crown of the Ridge) lowers the opinion at
 ## which this ruler would start a war against its holder; it never forbids war.
@@ -246,6 +250,8 @@ static func wonder_motive(trigger:Dictionary,plan:Dictionary)->float:
 		# Hearing of another people's work: envy for the proud, awe for the curious.
 		"envy":return maxf(assertive*.7+(1-empathy)*.35,open*.55+empathy*.25)
 		"plenty":return open*.3+assertive*.3+risk*.3+.15
+		# A master builder of rare gift come of age: the open and daring build.
+		"genius":return open*.3+risk*.2+assertive*.1+.45
 	return 0.0
 
 static func wonder_purpose_fit(purpose:String,trigger:Dictionary,plan:Dictionary)->float:
@@ -274,8 +280,8 @@ static func wonder_interval_days(plan:Dictionary)->int:
 static func wonder_pace(plan:Dictionary,food_days:float)->String:
 	var p:Dictionary=plan.personality
 	if bool(plan.get("food_shortage",plan.get("hungry",false))):return "careful"
-	if float(p.discipline)>.6 and food_days>90:return "press"
-	if float(p.risk_tolerance)>.75 and food_days>60:return "press"
+	if float(p.discipline)>.6 and food_days>FoodCare.store_gate(90):return "press"
+	if float(p.risk_tolerance)>.75 and food_days>FoodCare.store_gate(60):return "press"
 	return "careful"
 
 ## Prudent rulers cut their losses on a work their builders no longer believe in;
@@ -302,9 +308,10 @@ static func works_answer(key:String,facts:Dictionary,p:Dictionary)->String:
 			var bold:=assertive*.5+risk*.5
 			return "grander" if bool(facts.get("ample",false)) and float(facts.get("feasibility",0.0))>=.85-.3*bold else "practical"
 		"stores":
-			# The stores feed extra crews only when full: 120 days for an even
-			# temper, about 95 for the boldest, 143 for the most cautious.
-			return "pour" if enabled.has("pour") and float(facts.get("food_days",0.0))>=150.0-60.0*risk else "protect"
+			# The stores feed extra crews only when full: 60 days for an even
+			# temper, about 48 for the boldest, 71 for the most cautious
+			# (food_care.gd store_gate of the old 120, 95 and 143).
+			return "pour" if enabled.has("pour") and float(facts.get("food_days",0.0))>=FoodCare.store_gate(150.0-60.0*risk) else "protect"
 		"labor":
 			# Only a hard temper levies forced labor, and only from a people that
 			# accepts rank and holds together; a gentle one relies on volunteers;

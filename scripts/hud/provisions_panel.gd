@@ -24,6 +24,8 @@ func setup(block:Dictionary)->void:
 	food_row.add_child(FoodArt.picture(0,120,72))
 	var food_reading:=_reading(food_row,"","","","");food_reading.name="FoodReading";_refs.food=food_reading
 	var flow_line:=_line(self,"",13,T.BODY);flow_line.name="FlowSentence";_refs.flow=flow_line
+	# The store as a lean buffer (food_care.gd): what it is worth and no more.
+	var lean_line:=_line(self,"",13,T.BODY);lean_line.name="LeanStore";_refs.lean=lean_line
 	# Why this many hands are on food: the planners' own numbers.
 	if String(data.get("food_plan",""))!="":
 		var plan:=_line(self,"",13,T.BODY);plan.name="FoodPlan";_refs.plan=plan
@@ -94,6 +96,7 @@ func _fill()->void:
 	var food:=Words.food(float(data.food_days),flow,data.has("food_days") and float(data.food_days)>=0.0)
 	_fill_reading(_refs.food,String(food.headline),String(food.trend),String(food.cause),String(food.tone))
 	_put(_refs.flow,Words.flow_sentence(flow))
+	_put(_refs.lean,String(data.get("lean","")))
 	if _refs.has("plan"):_put(_refs.plan,String(data.food_plan))
 	var water:Dictionary=Words.water(data.water)
 	_fill_reading(_refs.water,String(water.headline),"",String(water.cause),String(water.tone))

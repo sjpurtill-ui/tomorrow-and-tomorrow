@@ -47,6 +47,8 @@ const EraNames:=preload("res://scripts/era_names.gd")
 const Lines:=preload("res://scripts/legacy_aims_lines.gd")
 const CV:=preload("res://scripts/character_voice.gd")
 const PERSONALITY:=preload("res://scripts/leader_personality.gd")
+## The lean buffer (food_care.gd): stores below it worry the court.
+const FoodCare:=preload("res://scripts/food_care.gd")
 
 const VERSION:=1
 const HISTORY_MAX:=24
@@ -80,9 +82,10 @@ const WORK_PERSON_DAYS:={"low":500.0,"typical":3000.0,"high":20000.0}
 ## Share of the builders' days an aim of stone can claim.
 const WORK_SHARE:=0.12
 const WORK_PRESSED_SHARE:=0.2
-## Stores that count as plenty, in days of eating, and the share of the aim's
-## days that must be days of plenty.
-const PLENTY_STORES:=30.0
+## Stores that count as plenty, in days of eating (full stores: the reserve the
+## planners keep, food_care.gd RESERVE_DAYS), and the share of the aim's days
+## that must be days of plenty.
+const PLENTY_STORES:=FoodCare.RESERVE_DAYS
 const PLENTY_SHARE:=0.8
 ## Cohesion at which "Keep One Fire" is an aim to hold, not to raise.
 const UNITY_HOLD:=0.7
@@ -349,7 +352,8 @@ static func daily(day:int)->void:
 static func _watch_conditions(day:int)->void:
 	var s:=state()
 	var metrics:Dictionary=GameState.simulation_metrics
-	if float(metrics.get("food_days",30.0))<18.0 or float(metrics.get("food_intake_ratio",1.0))<0.97: s.low_food_day=day
+	# A low day: half the lean buffer or less, or a real shortfall.
+	if float(metrics.get("food_days",30.0))<FoodCare.LEAN_DAYS*0.5 or float(metrics.get("food_intake_ratio",1.0))<0.97: s.low_food_day=day
 	if day%365==0 or (s.pop_samples as Array).is_empty():
 		var samples:Array=s.pop_samples
 		samples.push_front(GameState.population_total)
@@ -665,7 +669,7 @@ static func _condition_scores(day:int)->Dictionary:
 	for t in TEMPLATES: scores[t]=0.3
 	var metrics:Dictionary=GameState.simulation_metrics
 	if int(s.low_food_day)>=0 and day-int(s.low_food_day)<365: scores.plenty=2.5
-	elif float(metrics.get("food_days",30.0))<30.0: scores.plenty=1.0
+	elif float(metrics.get("food_days",30.0))<FoodCare.LEAN_DAYS: scores.plenty=1.0
 	# A shrinking band worries the court, but an aim to grow that its trend
 	# cannot meet only ends in grief; the court speaks of it less.
 	if observed_growth()< -0.2: scores.grow=0.7

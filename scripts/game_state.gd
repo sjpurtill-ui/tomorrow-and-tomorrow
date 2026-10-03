@@ -166,6 +166,9 @@ var settlement_founded_at := Vector3.ZERO
 var settlement_name := ""
 ## What all our towns together are called, once there are two (nation_name.gd); "" until named.
 var nation_name := ""
+## What makes our people's own tongue ({family, seed, v, world_seed};
+## people_language.gd). Empty in older saves: made again from the world seed.
+var people_language:Dictionary={}
 var settlement_founded_day := -1
 var settlement_plots:Array[Dictionary]=[]
 var settlement_nuclei:Array[Dictionary]=[]
@@ -1545,7 +1548,7 @@ func proportional_population_commitment(requested_count:int) -> Dictionary:
 
 func _mortality_condition_factor(housing_ratio:float=-1.0)->float:
 	var health_factor:=lerpf(1.90,0.64,clampf(population_health,0.0,1.0))
-	var food_factor:=lerpf(2.40,0.78,clampf(food_security,0.0,1.0))
+	var food_factor:=lerpf(2.40,0.78,clampf(fed_security(),0.0,1.0))
 	var resolved_housing:=clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15) if housing_ratio<0.0 else clampf(housing_ratio,0.0,1.15)
 	var shelter_factor:=lerpf(1.65,0.88,clampf(resolved_housing,0.0,1.0))
 	return health_factor*food_factor*shelter_factor
@@ -1615,6 +1618,12 @@ func smooth_exceptional_hazard(weight:float)->void:
 		var value:=maxf(0.0,float(components[cause_variant]))
 		exceptional_hazard_causes_smoothed[cause]=value if not exceptional_hazard_causes_smoothed.has(cause) else lerpf(float(exceptional_hazard_causes_smoothed[cause]),value,clampf(weight,0.0,1.0))
 
+## Food security with the store counted full: what is eaten, which deaths
+## and sickness read (food_care.gd; consequence_engine.gd keeps it with the
+## day's metrics). The size of the store never kills; going without does.
+func fed_security()->float:
+	return clampf(float(simulation_metrics.get("food_fed_security",food_security)),0.0,1.0)
+
 ## The early-care profile the day's rates use. Before the first simulated day
 ## of a new world (or of a save loaded without one) it is not yet stored, and
 ## LIVES and the babes lost read the bare life table: 46 winters at the
@@ -1633,7 +1642,7 @@ func projected_life_expectancy() -> float:
 ## not one day's luck: exceptional_hazard_smoothed), by cause.
 func life_inputs()->Dictionary:
 	var hazard:=exceptional_hazard_smoothed if exceptional_hazard_smoothed>=0.0 else _current_exceptional_mortality_rate()
-	return {"health":population_health,"food":food_security,"housing":clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15),
+	return {"health":population_health,"food":fed_security(),"housing":clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15),
 		"hazard":hazard,"hazard_causes":exceptional_hazard_causes_smoothed.duplicate()}
 
 ## Life expectancy from `inputs` (life_inputs' shape) under today's care of
@@ -1765,7 +1774,17 @@ func civilian_workforce_fraction()->float:
 	var displaced:=maxf(0,float(committed)-float(population_allocations.get("Defense",0)))
 	return clampf(1.0-displaced/civilian,0.0,1.0)
 
-func effective_workers(role:String,include_military_construction:bool=false,include_clinical_care:bool=false,include_civic_records:bool=false,include_microscopy:bool=false)->float:
+## The people at a work today, as heads: the hurt, the absent and the
+## reserved counted as effective_workers counts them, but not what makes each
+## of them count for more (a great work's favour, a gifted person). Wages and
+## head counts read this; the work's output reads effective_workers.
+func workers_at(role:String)->float:
+	return effective_workers(role,false,false,false,false,false)
+
+## The work a role does today, in workers: the people at it (the hurt count
+## less, the absent and the reserved not at all), each counting for more
+## where a great work favours it or a gifted person leads it (`include_lifts`).
+func effective_workers(role:String,include_military_construction:bool=false,include_clinical_care:bool=false,include_civic_records:bool=false,include_microscopy:bool=false,include_lifts:bool=true)->float:
 	var civilian_workers:=0.0
 	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
 	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
@@ -1776,7 +1795,15 @@ func effective_workers(role:String,include_military_construction:bool=false,incl
 	if role=="Knowledge" and not include_clinical_care and not include_microscopy:capacity=maxf(0,capacity-preload("res://scripts/microscopy_lab.gd").reserved(self,capacity))
 	if role=="Administration" and not include_civic_records:capacity=maxf(0,capacity-preload("res://scripts/civic_administration.gd").reserved(self,capacity))
 	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/technology_operations.gd").reserved_workers(self))
-	capacity*=1.0+preload("res://scripts/undertaking_system.gd").benefit(self,role)
+	var lifts:=1.0
+	if include_lifts or role=="Crafting":lifts=(1.0+preload("res://scripts/undertaking_system.gd").benefit(self,role))*(1.0+preload("res://scripts/geniuses.gd").bonus(self,role))
+	if include_lifts:
+		# A great work favouring it, and a grown genius of this work, make each
+		# person on it count for more (undertaking_system.gd, geniuses.gd).
+		capacity*=lifts
+	# Makers on arms give the whole day to them (civilian_goods.gd arms_hands,
+	# counted as the makers' day is, every lift in; as heads without them).
+	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/civilian_goods.gd").arms_hands(self)/(1.0 if include_lifts else maxf(0.0001,lifts)))
 	if role=="Construction":capacity*=1.0-preload("res://scripts/undertaking_system.gd").share(self)
 	return capacity
 

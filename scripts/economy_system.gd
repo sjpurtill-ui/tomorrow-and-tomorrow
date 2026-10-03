@@ -7,19 +7,31 @@ extends Node
 const SPAN:=preload("res://scripts/day_span.gd")
 const Purse:=preload("res://scripts/realm_purse.gd")
 const Enterprise:=preload("res://scripts/enterprise.gd")
+## The first stage is barter (its id stays "subsistence" so every save and
+## reader keeps it): from the first day goods change hands at the hearth,
+## households trade goods for food and materials and prices are kept.
 const STAGE_SUBSISTENCE := "subsistence"
 const STAGE_METAL := "weighed_metal"
 const STAGE_CURRENCY := "currency"
 const STAGE_NAMES := {
-	STAGE_SUBSISTENCE:"Direct allocation & reciprocity",
+	STAGE_SUBSISTENCE:"Barter",
 	STAGE_METAL:"Weighed-metal exchange",
 	STAGE_CURRENCY:"Currency economy"
 }
+## Arms are a fighter's set (weapons_stock.gd): about ten maker-days and the
+## wood, flint and cord for a spear and a bow, worth some 48 rations.
 const BASE_VALUES := {
 	"Food":1.0,"Timber":2.4,"Stone":1.8,"Clay":1.1,"Fiber Plants":2.0,
 	"Salt":4.0,"Medicinal Plants":5.5,"Copper Ore":8.0,"Tin Ore":11.0,
-	"Iron Ore":9.0,"Coal":3.5,"Civilian Goods":6.0,"Transport Carts":24.0,"Coin":1.0
+	"Iron Ore":9.0,"Coal":3.5,"Civilian Goods":6.0,"Transport Carts":24.0,"Coin":1.0,"Arms":48.0
 }
+## Market access from makers and carriers: each at its full share of the
+## people (MAKERS_SHARE, CARRIERS_SHARE) adds this much (carriers also lift
+## the logistics reading the market already reads).
+const MAKERS_REACH:=0.08
+const MAKERS_SHARE:=0.05
+const CARRIERS_REACH:=0.06
+const CARRIERS_SHARE:=0.05
 const METAL_VALUES := {"Copper Ore":1.0,"Tin Ore":1.4,"Iron Ore":0.7,"Coin":1.0}
 const PUBLIC_SPENDING_PRIORITIES := ["balanced","civil_first","military_first"]
 
@@ -69,6 +81,7 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	var events:Array[Dictionary]=[]
 	_update_benchmarks(events)
 	var previous_index:=float(WorldSimulation.state.economy_metrics.get("price_index",0.0))
+	var previous_metrics_goods_days:=int(WorldSimulation.state.economy_metrics.get("goods_traded_days",0))
 	# Foreign effects read relations, occupation and population commitments,
 	# none of which today's market steps below change; read them once.
 	var foreign_effects:=WorldSimulation.world.player_effects()
@@ -77,6 +90,7 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 	WorldSimulation.state.simulation_metrics["market_access"]=market_access
 	var monetization:=_monetization(market_access)
 	var trade_volume:=_trade_volume(market_access,monetization)
+	var barter:=barter_reading(market_access)
 	_update_currency_demand(trade_volume,monetization)
 	var price_index:=_update_prices(market_access,trade_volume)
 	var active_trade_partners:=maxi(0,int(foreign_effects.get("active_trade_partners",0)))
@@ -132,6 +146,11 @@ func process_day(context:Dictionary={}) -> Array[Dictionary]:
 		"private_liquidity_days":real_accounts.private_liquidity_days,"labor_return_index":real_accounts.labor_return_index,"daily_labor_income":real_accounts.daily_labor_income
 	}
 	WorldSimulation.state.economy_metrics["military_burden"]=military_burden
+	# Barter: the goods made today, their worth, the part that changed hands at
+	# home, and the days goods have changed hands (enterprise.gd rung 1 reads it).
+	var traded_days:=int(previous_metrics_goods_days)+(1 if float(barter.goods_changed)>0.0001 else 0)
+	for key:String in barter:WorldSimulation.state.economy_metrics[key]=barter[key]
+	WorldSimulation.state.economy_metrics["goods_traded_days"]=traded_days
 	WorldSimulation.state.economy_metrics["social_pressure_parts"]=_pressure_parts.duplicate()
 	WorldSimulation.state.economy_metrics["civil_upkeep"]=finance.civil_upkeep
 	WorldSimulation.state.economy_metrics["military_upkeep"]=finance.military_upkeep
@@ -238,7 +257,26 @@ func _market_access(context:Dictionary,foreign_effects:Dictionary={})->float:
 	var storage:=float(WorldSimulation.state.simulation_metrics.get("storage_function",0.0))
 	var foreign_access:=float((foreign_effects if not foreign_effects.is_empty() else WorldSimulation.world.player_effects()).market_access_bonus)
 	# Merchant houses and companies carry trade further (enterprise.gd).
-	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy()+Enterprise.market_bonus(),0.0,1.0)
+	return clampf(logistics*0.36+admin*0.14+storage*0.10+WorldSimulation.discovery.effect("trade_capacity")*0.32+WorldSimulation.discovery.effect("standardization")*0.24+WorldSimulation.state.founding_effect("trade_access")+WorldSimulation.progression.effect("trade_capacity")+foreign_access+_market_policy()+Enterprise.market_bonus()+barter_reach(),0.0,1.0)
+
+## What makers and carriers add to market access: goods to trade and hands
+## to bring them to the hearth (MAKERS_REACH, CARRIERS_REACH at their shares).
+func barter_reach()->float:
+	var population:=maxf(1.0,WorldSimulation.state.population_exact)
+	var makers:=clampf(WorldSimulation.state.effective_workers("Crafting")/maxf(1.0,population*MAKERS_SHARE),0.0,1.0)
+	var carriers:=clampf(WorldSimulation.state.effective_workers("Logistics")/maxf(1.0,population*CARRIERS_SHARE),0.0,1.0)
+	return makers*MAKERS_REACH+carriers*CARRIERS_REACH
+
+## Barter at home today: the goods the makers made, their worth in rations,
+## and the part of them that changed hands for food and materials (as far as
+## the market reaches).
+func barter_reading(market_access:float)->Dictionary:
+	var goods:=preload("res://scripts/civilian_goods.gd")
+	var record:Dictionary=WorldSimulation.state.civilian_goods
+	var today:=int(record.get("last_day",-1))==int(WorldSimulation.state.elapsed_days)
+	var made:=float((record.get("report",{}) as Dictionary).get("made",0.0)) if today else 0.0
+	var worth:=goods.worth_in_rations(made)
+	return {"goods_made":made,"goods_worth":worth,"goods_changed":made*clampf(market_access,0.0,1.0),"goods_changed_worth":worth*clampf(market_access,0.0,1.0),"goods_held":goods.stock(),"goods_spare":goods.spare()}
 
 ## A standing policy on the markets (freeing them opens them wider: the
 ## "market_access" channel, at most a third either way).
@@ -292,7 +330,16 @@ func _update_prices(market_access:float,trade_volume:float=1.0)->float:
 	return weighted/maxf(1.0,weights)
 
 
+## Prices are kept from the first barter: households weigh goods against food
+## and materials at the hearth (a price is recorded only on a day something
+## changed hands, process_day).
 func _comparison_values_observable()->bool:
+	return true
+
+## Whether this people can weigh its goods against strangers' (the trade
+## ledger's barter with another people before a meeting place is found):
+## shared measures and tallies, or money.
+func values_comparable_abroad()->bool:
 	if WorldSimulation.state.economy_stage!=STAGE_SUBSISTENCE:
 		return true
 	return WorldSimulation.discovery.adoption("standard_measures")>=0.15 and WorldSimulation.discovery.adoption("tallies")>=0.12
@@ -319,15 +366,20 @@ func _desired_stock(resource_name:String,population:float)->float:
 		"Clay","Fiber Plants": return population*0.45
 		"Transport Carts": return maxf(1.0,population/30.0)
 		"Civilian Goods": return preload("res://scripts/civilian_goods.gd").target()
+		# Made arms the stores should hold: one set for each of the watch that
+		# neither carries one nor has one in the old armoury (weapons_stock.gd).
+		"Arms": return preload("res://scripts/weapons_stock.gd").trade_wanted()
 		_: return population*0.16
 
 func _trade_volume(market_access:float,monetization:float)->float:
 	if market_access<=0.0: return 0.0
 	var delivered:=float(WorldSimulation.state.material_metrics.get("delivered_today",0.0))
 	var food_surplus:=maxf(0.0,float(WorldSimulation.state.simulation_metrics.get("food_net",float(WorldSimulation.state.simulation_metrics.get("food_production",0.0))-float(WorldSimulation.state.simulation_metrics.get("food_consumption",WorldSimulation.state.population_exact)))))
+	# The goods the makers made today, in rations' worth: barter at home.
+	var goods:=float(barter_reading(market_access).goods_worth)
 	# Only surplus and newly delivered physical goods can change hands. Ordinary
 	# subsistence production is consumption, not trade.
-	return (delivered+food_surplus)*market_access*(0.35+monetization*0.65)
+	return (delivered+food_surplus+goods)*market_access*(0.35+monetization*0.65)
 
 func _process_external_trade(market_access:float,domestic_trade:float,contract_partners_override:int=-1)->Dictionary:
 	if WorldSimulation.enabled:return preload("res://scripts/civilization_exchange.gd").quote(market_access,domestic_trade)
@@ -397,7 +449,7 @@ func _process_external_trade(market_access:float,domestic_trade:float,contract_p
 	var import_candidates:Array[Dictionary]=[]
 	for resource_name_variant in BASE_VALUES:
 		var resource_name:=String(resource_name_variant)
-		if resource_name in ["Coin","Transport Carts"]: continue
+		if resource_name in ["Coin","Transport Carts","Arms"]: continue
 		var stock:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0)))
 		if not _resource_is_economically_known(resource_name,stock): continue
 		var desired:=_desired_stock(resource_name,maxf(1.0,WorldSimulation.state.population_exact))
@@ -430,6 +482,8 @@ func _process_external_trade(market_access:float,domestic_trade:float,contract_p
 func _remove_trade_resource(resource_name:String,requested:float)->float:
 	if preload("res://scripts/abrasive_inspection.gd").unfinished(resource_name):return 0.0
 	if resource_name=="Food": return WorldSimulation.food.issue_for_obligation(requested,"trade","Food export")
+	# Made arms leave from every store of the realm, never the old armoury (weapons_stock.gd).
+	if resource_name=="Arms" and String(WorldSimulation.state.resource_settlement_id)=="": return preload("res://scripts/weapons_stock.gd").remove(requested)
 	var available:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0)))
 	var removed:=minf(available,maxf(0.0,requested))
 	WorldSimulation.state.resource_stockpiles[resource_name]=available-removed
@@ -498,7 +552,9 @@ func _real_economy_accounts(trade_volume:float,market_access:float,military_burd
 		exchangeable_surplus_value+=surplus*float(WorldSimulation.state.market_prices.get(resource_name,BASE_VALUES[resource_name]))
 	var food_output:=maxf(0.0,float(WorldSimulation.state.simulation_metrics.get("food_production",0.0)))*float(WorldSimulation.state.market_prices.get("Food",1.0))
 	var delivered_output:=maxf(0.0,float(WorldSimulation.state.material_metrics.get("delivered_today",0.0)))*2.0
-	var output_value:=food_output+delivered_output
+	# The makers' goods are output too, at what they fetch in food.
+	var goods_output:=float(barter_reading(market_access).goods_worth)*float(WorldSimulation.state.market_prices.get("Food",1.0))
+	var output_value:=food_output+delivered_output+goods_output
 	var essential_basket_cost:=food_need*float(WorldSimulation.state.market_prices.get("Food",1.0))+population*(0.006*float(WorldSimulation.state.market_prices.get("Timber",2.4))+0.004*float(WorldSimulation.state.market_prices.get("Fiber Plants",2.0))+0.002*float(WorldSimulation.state.market_prices.get("Stone",1.8))+0.002*float(WorldSimulation.state.market_prices.get("Clay",1.1)))
 	var private_liquidity_days:=WorldSimulation.state.private_currency/maxf(0.01,essential_basket_cost) if WorldSimulation.state.economy_stage==STAGE_CURRENCY else 0.0
 	var daily_labor_income:=output_value*clampf(0.68+market_access*0.12,0.62,0.82)
@@ -944,11 +1000,12 @@ func _process_mutual_risk_pool(trade_volume:float,defaulted_claims:float)->Dicti
 const WEALTH_BOUNDS:={"subsistence":[0.28,0.55,0.38],"weighed_metal":[0.32,0.65,0.45],"currency":[0.35,0.75,0.50]}
 ## How fast sharing out pulls the shares back a day (half-way in about 1.6
 ## years), stronger before money (gifts, reciprocity), and stronger still
-## with feasts when the stores hold FEAST_FOOD_DAYS of food.
+## with feasts when the stores hold FEAST_FOOD_DAYS of food (food_care.gd
+## store_gate of the old 60: a people with its usual lean stores still feasts).
 const WEALTH_REVERSION:=0.0012
 const SUBSISTENCE_SHARING:=1.5
 const FEAST_SHARING:=1.25
-const FEAST_FOOD_DAYS:=60.0
+const FEAST_FOOD_DAYS:=30.0
 ## The chief's redistribution: for each share of the realm's output the
 ## purse put back in common hands last month, the richest fifth's share falls
 ## this much a day (realm_purse.gd redistribution).
@@ -1084,7 +1141,9 @@ func _exchange_mix(monetization:float,reliability:float)->Dictionary:
 	var metal_liquidity:=clampf(WorldSimulation.state.weighed_metal_circulation/maxf(0.01,founding_weighed_metal_requirement()),0.0,1.0)
 	match WorldSimulation.state.economy_stage:
 		STAGE_SUBSISTENCE:
-			mix={"public_allocation":0.40,"reciprocity":0.34,"barter":0.26,"weighed_metal":0.0,"recorded_credit":0.0,"currency":0.0}
+			# Barter grows as the market reaches further (makers and carriers).
+			var reach:=clampf(float(WorldSimulation.state.simulation_metrics.get("market_access",0.0)),0.0,1.0)
+			mix={"public_allocation":0.40-reach*0.12,"reciprocity":0.34-reach*0.10,"barter":0.26+reach*0.22,"weighed_metal":0.0,"recorded_credit":0.0,"currency":0.0}
 		STAGE_METAL:
 			var credit_share:=clampf(WorldSimulation.state.credit_outstanding/maxf(1.0,WorldSimulation.state.credit_outstanding+WorldSimulation.state.population_exact)*0.35,0.02,0.12)
 			var potential_metal:=maxf(0.0,monetization-credit_share)
@@ -1476,7 +1535,7 @@ func settlement_medium()->String:
 	match WorldSimulation.state.economy_stage:
 		STAGE_METAL: return "resources, labor obligations, or weighed metal"
 		STAGE_CURRENCY: return "currency, weighed metal, resources, or recorded credit"
-		_: return "direct allocation of physical resources, shared reserves, labor, and reciprocal obligations"
+		_: return "barter of goods for food and materials, shared stores, labor, and gifts owed between households"
 
 func known_market_snapshot()->Array[Dictionary]:
 	initialize()

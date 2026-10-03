@@ -82,16 +82,19 @@ const REDISTRIBUTION_WEIGHT:={"relief":1.0,"crews":0.8,"army":0.5,"scholars":0.2
 ## Relief: a town is hungry under HUNGRY_DAYS of food; food is bought from
 ## towns holding more than SELLER_DAYS (down to SELLER_KEEP) to bring each
 ## hungry town to RELIEF_TARGET days, at most RELIEF_SHARE of the purse a
-## month while the line is on.
-const HUNGRY_DAYS:=20.0
+## month while the line is on. All are set from the lean buffer
+## (food_care.gd LEAN_DAYS, the store food security counts), in this order:
+## HUNGRY_DAYS < RELIEF_TARGET <= LEVY_KEEP_DAYS < SELLER_KEEP < SELLER_DAYS,
+## so relief never lifts a town past what the levy leaves it (the levy never
+## takes relief back) and no seller is left hungry.
+const LEAN_DAYS:=preload("res://scripts/food_care.gd").LEAN_DAYS
+const HUNGRY_DAYS:=LEAN_DAYS*0.75
+const RELIEF_TARGET:=LEAN_DAYS
 ## The levy takes only what a town holds beyond this many days of its
-## people's need: below it a town's food security falls (consequence_engine
-## counts food days up to 45), so the keepers never push a town there, and
-## food sent to the hungry (RELIEF_TARGET) is never taken back.
-const LEVY_KEEP_DAYS:=45.0
-const RELIEF_TARGET:=35.0
-const SELLER_DAYS:=60.0
-const SELLER_KEEP:=45.0
+## people's need, so the keepers never push a town below the lean buffer.
+const LEVY_KEEP_DAYS:=LEAN_DAYS
+const SELLER_DAYS:=LEAN_DAYS*2.0
+const SELLER_KEEP:=LEAN_DAYS*1.5
 const RELIEF_SHARE:=0.25
 ## Old public debts are paid back at most this share of the purse a month.
 const DEBT_SHARE:=0.25
@@ -669,8 +672,10 @@ static func line_cost_per_day(line:String,oph:float=-1.0)->float:
 		"army":
 			var n:=soldiers()
 			return (float(n.at_arms)*PAY_SOLDIER+float(n.reserve)*PAY_RESERVE)*oph
-		"scholars":return maxf(0.0,float(s.effective_workers("Knowledge")))*PAY_SCHOLAR*oph
-		"crews":return maxf(0.0,float(s.effective_workers("Construction")))*PAY_CREW*oph
+		# Wages are paid per head at the work (GameState.workers_at), never
+		# for the extra work a great work's favour or a gifted person adds.
+		"scholars":return maxf(0.0,float(s.workers_at("Knowledge")))*PAY_SCHOLAR*oph
+		"crews":return maxf(0.0,float(s.workers_at("Construction")))*PAY_CREW*oph
 	return 0.0
 
 ## Research pace while the scholars are kept (discovery_system progress).
@@ -1200,8 +1205,8 @@ static func forecast()->Dictionary:
 	var n:=soldiers()
 	var s=WorldSimulation.state
 	var who:={"army":"%s at arms, %s in drill" % [EraWords.grouped(int(n.at_arms)),EraWords.grouped(int(n.reserve))],
-		"scholars":"%s at research" % EraWords.grouped(roundi(float(s.effective_workers("Knowledge")))),
-		"crews":"%s builders" % EraWords.grouped(roundi(float(s.effective_workers("Construction")))),"relief":"towns under %d days of food" % int(HUNGRY_DAYS)}
+		"scholars":"%s at research" % EraWords.grouped(roundi(float(s.workers_at("Knowledge")))),
+		"crews":"%s builders" % EraWords.grouped(roundi(float(s.workers_at("Construction")))),"relief":"towns under %d days of food" % int(HUNGRY_DAYS)}
 	for line:String in LINES:
 		var on:=bool((purse.lines as Dictionary).get(line,false))
 		var per:=line_cost_per_day(line,oph)*SEASON_DAYS

@@ -16,7 +16,8 @@ extends RefCounted
 ## never change.
 ##
 ## Suggestions are invented, in the people's own words for their time
-## (era_names.gd stages): from the land the first town stands on, from that
+## (era_names.gd stages): what they call themselves in their own tongue
+## (people_language.gd), from the land the first town stands on, from that
 ## town, from the founders and from the towns together. Real history is
 ## calibration only. Static helpers; preload.
 
@@ -183,6 +184,8 @@ static func suggestions(count:int=4)->Array[String]:
 	var tags:Array=CV.era_tags("player")
 	var stage:=EraNames.stage("player")
 	var candidates:Array[String]=[]
+	# What the people call themselves in their own tongue (people_language.gd).
+	candidates.append("The %s" % preload("res://scripts/people_language.gd").people_name("player",int(GameState.world_seed)))
 	# The land.
 	candidates.append("The %s" % String(LAND_FOLK.get(land_word(),"Plainsfolk")))
 	# The first town.

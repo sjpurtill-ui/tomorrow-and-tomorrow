@@ -28,9 +28,12 @@ const RIVALS_PATH:="res://scripts/rival_rulers.gd"
 const MIGHT_FULL_SHARE:=0.07
 ## A trained, ready warrior counts as this many untrained defenders.
 const WARRIOR_WEIGHT:=3.0
-## Days of food in store that is full Wealth and full Endurance.
-const WEALTH_FOOD_DAYS:=90.0
-const ENDURANCE_FOOD_DAYS:=120.0
+## Days of food in store that is full Wealth and full Endurance: food_care.gd
+## store_gate of the old 90 and 120, as the rulers' own store gates count the
+## lean stores (plain numbers for the fast sim; test_food_care checks them).
+## Envy raids still come for a well-stocked people.
+const WEALTH_FOOD_DAYS:=45.0
+const ENDURANCE_FOOD_DAYS:=60.0
 ## Envy and Contempt start to move peoples above these.
 const ENVY_RAID_FLOOR:=0.35
 const CONTEMPT_FLOOR:=0.3

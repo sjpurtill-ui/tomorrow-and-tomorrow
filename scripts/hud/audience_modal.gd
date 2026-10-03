@@ -2719,7 +2719,7 @@ func _court_note(text:String)->void:
 
 # --- The court at rest ---------------------------------------------------------
 
-const ROSTER_ORDER:={"council":0,"settlement":1,"scouts":2,"builders":3,"generals":4,"folk":5}
+const ROSTER_ORDER:={"council":0,"settlement":1,"scouts":2,"builders":3,"generals":4,"gifted":5,"folk":6}
 const MAX_SEATED:=7
 var pending_words:=""
 var pending_matter:=""

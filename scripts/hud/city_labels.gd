@@ -323,7 +323,7 @@ static func home_guard(settlement_id:String)->int:
 ## runs every frame.
 func _guards()->Dictionary:
 	var key:=hash([int(GameState.elapsed_days),float(GameState.population_allocations.get("Defense",0.0)),int(MilitaryCampaign.home_army.get("troops",0)),
-		int(MilitaryCampaign._mobilized_count()),float(GameState.population_exact),GameState.player_settlements.size()])
+		int(MilitaryCampaign._mobilized_count()),float(GameState.population_exact),GameState.player_settlements.size(),MilitaryCampaign.watch_split()])
 	if key!=guards_key:
 		guards=COMBAT.defenders_by_town()
 		guards_key=key

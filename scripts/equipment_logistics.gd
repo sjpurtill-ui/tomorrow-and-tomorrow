@@ -130,7 +130,8 @@ static func needs(host:Node=null)->Dictionary:
 		var missing:=maxi(0,host._equipment_required_for(String(order.get("unit","levy")),int(order.get("count",0)))-int(order.get("reserved_equipment",0)))
 		_add(result,item,"training",missing,levy if bool(order.get("automated_basic",false)) else "the recruits","training")
 	if not explicit:
-		var gap:=maxi(0,host._home_garrison_target()-int(host.home_army.get("troops",0))-host._automatic_basic_trainees())
+		# The watch not yet under arms (watch_military.gd): they join at home.
+		var gap:=maxi(0,int(host.watch_manpower())-int(host._mobilized_count()))
 		gap=mini(gap,maxi(0,host.training_capacity()-host._queued_trainees()))
 		_add(result,"improvised","requisitioned",gap,levy,"called_up")
 	for formation:Dictionary in host.home_army.get("formations",[]):
