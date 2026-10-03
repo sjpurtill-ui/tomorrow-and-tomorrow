@@ -220,6 +220,29 @@ func test_old_traits_come_from_the_leaders_character()->void:
 	assert_float(float(CivilizationSystem.civilizations[0].aggression)).is_equal_approx(expected,.0001)
 	assert_array(CivilizationSystem.validate_state()).is_empty()
 
+## The hands food does not need go by the path for a computer ruler too, on
+## the leaders' one rule: a balanced split keeps learning at 3 to 4 in 100
+## while food needs a third of the hands, and only the learning path goes high.
+func test_a_computer_rulers_freed_hands_go_by_its_path()->void:
+	GameState.reset_for_new_world(777);CivilizationSystem.reset_for_new_world();CivilizationSystem.initialize()
+	WorldSimulation.create_actor("paths",777,Vector2.ZERO)
+	var learning:={}
+	WorldSimulation.scoped("paths",func()->void:
+		WorldSimulation.state.ensure_population_total(110)
+		WorldSimulation.state.simulation_metrics.merge({"food_labor_share":0.32,"food_production":100.0,"food_consumption":100.0,"food_days":200.0,"food_projected_days":9999.0,"food_net":0.0,"food_intake_ratio":1.0},true)
+		WorldSimulation.state.water_metrics={"intake_ratio":1.0,"source_accessible":true}
+		for path:String in ["balanced","war","learning"]:
+			assert_bool(Orders.execute({"kind":"work_path","path":path}).has("error")).is_false()
+			var split:Dictionary=WorldSimulation.government._allocations_for_focus("balanced",{},true)
+			learning[path]=float(split.Knowledge)
+			learning[path+"_food"]=float(split.Food)
+			learning[path+"_watch"]=float(split.Defense))
+	assert_float(float(learning.balanced_food)).is_between(24.0,40.0)
+	assert_float(float(learning.balanced)).is_between(2.5,4.2)
+	assert_float(float(learning.war)).is_less_equal(4.0)
+	assert_float(float(learning.war_watch)).is_greater(float(learning.balanced_watch)+3.0)
+	assert_float(float(learning.learning)).is_between(10.0,15.0)
+
 ## A people set on lasting abundance plans deeper stores: more hands on food
 ## while the stores are short of its larger reserve, none once they are full.
 func test_sustenance_and_wellbeing_plan_deeper_stores()->void:
