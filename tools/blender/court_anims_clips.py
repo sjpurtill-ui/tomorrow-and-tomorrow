@@ -613,9 +613,12 @@ def make_clips():
     import court_anims_more
     import court_anims_r2
     import court_anims_r3
+    import court_anims_child
     court_anims_more.make_more(clips)
     court_anims_r2.make_r2(clips)
     court_anims_r3.make_r3(clips)
+    court_anims_child.make_cross(clips)
+    court_anims_child.make_child(clips)
     return clips
 
 

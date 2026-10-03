@@ -21,6 +21,7 @@ blends, its beat and what it shows). scripts/hud/court_acting.gd plays them.
 import os
 import sys
 import json
+import math
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -29,6 +30,7 @@ sys.path.insert(0, HERE)
 sys.dont_write_bytecode = True
 
 import bpy
+import numpy as np
 from mathutils import Vector, Quaternion
 
 import cf_body
@@ -114,6 +116,8 @@ def write_clips(rig, f, clips, only=None):
         act.use_fake_user = True
         rig.animation_data.action = act
         frames = int(round(clip.length * FPS))
+        rots = {pb.name: [] for pb in bones}
+        locs = []
         for fr in range(frames + 1):
             t = fr / FPS
             if clip.meta.get("loop") and fr == frames:
@@ -121,9 +125,25 @@ def write_clips(rig, f, clips, only=None):
             pose = {b: e for b, e in clip.pose(t).items() if b not in FACE_BONES}
             poser.apply(cf_anim._scaled(pose, k))
             for pb in bones:
+                q = pb.rotation_quaternion.copy()
+                prev = rots[pb.name][-1] if rots[pb.name] else None
+                if prev is not None and prev.dot(q) < 0.0:
+                    q.negate()
+                rots[pb.name].append(q)
+            locs.append(rig.pose.bones["hips"].location.copy())
+        # each bone keeps only the keys it needs: a frame goes when the slerp of
+        # its neighbours is within a fraction of a degree of it (fingers and
+        # slow bones need few; a snap keeps every frame it moves in)
+        for pb in bones:
+            tol = TOL_FINGER if pb.name.split(".")[0] in ("fingers", "index", "thumb", "toe") else TOL_BODY
+            keep = _simplify_rot(rots[pb.name], tol)
+            for fr in keep:
+                pb.rotation_quaternion = rots[pb.name][fr]
                 pb.keyframe_insert("rotation_quaternion", frame=fr)
-                if pb.name == "hips":
-                    pb.keyframe_insert("location", frame=fr)
+        hips = rig.pose.bones["hips"]
+        for fr in _simplify_loc(locs, TOL_LOC * k):
+            hips.location = locs[fr]
+            hips.keyframe_insert("location", frame=fr)
         for fc in cf_anim._fcurves(act):
             for kp in fc.keyframe_points:
                 kp.interpolation = 'LINEAR'
@@ -138,6 +158,80 @@ def write_clips(rig, f, clips, only=None):
     return made
 
 
+# Clips whose right-hand twin the file leaves out: the game makes each from
+# its left one in a mirror at load (court_acting.gd mirrored()). Only twins
+# that are true mirrors (a whisper to the left, to the right); the manifest
+# still lists the twin, with its own face, and "mirror_of".
+# (not the faint and the catch: those two bodies meet where the clips put them,
+# and each was built against the other's own side)
+MIRRORED = ("point", "cover_eyes", "whisper", "hide_behind", "peek_out", "side_eye",
+            "elbow", "bolt", "keep_apart", "make_room", "grab", "shoo", "tug_sleeve",
+            "child_hide_behind", "child_peek_out", "child_cling")
+
+
+def mark_mirrors(clips):
+    for stem in MIRRORED:
+        if stem + "_l" in clips and stem + "_r" in clips:
+            clips[stem + "_r"].meta["mirror_of"] = stem + "_l"
+
+
+TOL_BODY = 0.35     # degrees a bone may differ from the slerp between its kept keys
+TOL_FINGER = 1.5
+TOL_LOC = 0.0015    # metres (the hips' travel), for a 1.72 m body
+
+
+def _rdp(err, n, tol):
+    """Ramer-Douglas-Peucker over frames 0..n-1: err(a, b) gives the error of
+    each frame strictly between a and b (an array) when a and b are kept."""
+    if n <= 2:
+        return list(range(n))
+    keep = {0, n - 1}
+    stack = [(0, n - 1)]
+    while stack:
+        a, b = stack.pop()
+        if b - a < 2:
+            continue
+        e = err(a, b)
+        i = int(np.argmax(e))
+        if e[i] > tol:
+            at = a + 1 + i
+            keep.add(at)
+            stack.append((a, at))
+            stack.append((at, b))
+    return sorted(keep)
+
+
+def _simplify_rot(qs, tol_deg):
+    """The frames to key so that slerping between them stays within tol_deg of
+    every frame (Ramer-Douglas-Peucker on the rotation's path)."""
+    Q = np.array([(q.w, q.x, q.y, q.z) for q in qs], dtype=np.float64)
+
+    def err(a, b):
+        qa, qb = Q[a], Q[b]
+        u = (np.arange(a + 1, b) - a) / float(b - a)
+        d = float(np.clip(np.dot(qa, qb), -1.0, 1.0))
+        th = math.acos(abs(d))
+        if th < 1e-6:
+            q = qa[None, :] * (1 - u)[:, None] + qb[None, :] * u[:, None]
+        else:
+            sb = qb if d >= 0 else -qb
+            q = (np.sin((1 - u) * th)[:, None] * qa[None, :] + np.sin(u * th)[:, None] * sb[None, :]) / math.sin(th)
+        q /= np.linalg.norm(q, axis=1)[:, None]
+        dots = np.clip(np.abs(np.sum(q * Q[a + 1:b], axis=1)), 0.0, 1.0)
+        return 2.0 * np.arccos(dots)
+    return _rdp(err, len(qs), math.radians(tol_deg))
+
+
+def _simplify_loc(ps, tol):
+    P = np.array([tuple(p) for p in ps], dtype=np.float64)
+
+    def err(a, b):
+        u = (np.arange(a + 1, b) - a) / float(b - a)
+        line = P[a][None, :] * (1 - u)[:, None] + P[b][None, :] * u[:, None]
+        return np.linalg.norm(line - P[a + 1:b], axis=1)
+    return _rdp(err, len(ps), tol)
+
+
 def export(rig, stub, path):
     for o in bpy.context.selected_objects:
         o.select_set(False)
@@ -148,7 +242,7 @@ def export(rig, stub, path):
         filepath=path, export_format='GLB', use_selection=True, export_apply=False,
         export_yup=True, export_texcoords=False, export_normals=False, export_materials='NONE',
         export_skins=True, export_influence_nb=4, export_def_bones=False,
-        export_animations=True, export_animation_mode='ACTIONS', export_force_sampling=True,
+        export_animations=True, export_animation_mode='ACTIONS', export_force_sampling=False,
         export_optimize_animation_size=True, export_reset_pose_bones=True, export_rest_position_armature=True,
         export_morph=False, export_extras=False)
 
@@ -196,6 +290,7 @@ def main():
     o = args()
     os.makedirs(o["out"], exist_ok=True)
     clips = None
+    every = {}
     for v in o["variants"]:
         t0 = time.time()
         clear_scene()
@@ -205,14 +300,18 @@ def main():
         rig = cf_rig.build_armature(f, None, name="Figure")
         rig["variant"] = v
         stub = stub_mesh(rig)
-        made = write_clips(rig, f, clips, o["only"])
+        clips = {n: c for n, c in clips.items() if v in c.meta.get("bodies", [v])}
+        mark_mirrors(clips)
+        for n, c in clips.items():
+            every.setdefault(n, c)
+        made = write_clips(rig, f, {n: c for n, c in clips.items() if not c.meta.get("mirror_of")}, o["only"])
         path = os.path.join(o["out"], "court_anims_%s.glb" % v)
         export(rig, stub, path)
         log(v, len(made), "clips", round(os.path.getsize(path) / 1024), "KB", round(time.time() - t0, 1), "s")
     # face curves and meta do not depend on the body (written on the last one;
     # --no-manifest when building one body at a time)
-    if clips is not None and not o["only"] and not o["no_manifest"]:
-        manifest(clips, list(cf_body.VARIANTS.keys()), o["out"])
+    if every and not o["only"] and not o["no_manifest"]:
+        manifest(every, list(cf_body.VARIANTS.keys()), o["out"])
     log("done")
 
 

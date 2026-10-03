@@ -35,6 +35,7 @@ SPECS = {
     "female_old": ("female_old", "hide", "hair_bun", None, 0.7, "b5b0a6", ("9c7a52", "5b4130", "c9a43c"), ()),
     "male_young": ("male_young", "tunic", "hair_curls", None, 0.9, "0f0d0c", ("4f7a68", "5b4130", "d08a2b"), ()),
     "female_young": ("female_young", "tunic", "hair_tail", None, 0.2, "6a3320", ("a8432f", "5b4130", "d9ccb0"), ()),
+    "child": ("child", "tunic", "hair_cropped", None, 0.55, "3a2a1c", ("b07a35", "6e5541", "4f7a68"), ()),
 }
 
 # moments shown for each clip (seconds); default: evenly through it
