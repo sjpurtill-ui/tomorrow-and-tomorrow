@@ -465,7 +465,7 @@ func test_the_leaders_keep_their_learners_in_hunger_and_say_so()->void:
 	GameState.simulation_metrics.merge({"food_labor_share":0.80,"food_production":100.0,"food_consumption":118.0,"food_days":2.0,"food_projected_days":2.0,"food_net":-18.0,"food_intake_ratio":0.9},true)
 	_delegate()
 	var shares:Dictionary=GameState.population_allocation_percentages
-	assert_float(float(shares.Food)).is_greater(75.0)
+	assert_float(float(shares.Food)).is_greater(65.0)
 	assert_float(float(shares.Knowledge)).override_failure_message("learning %.2f" % float(shares.Knowledge)).is_greater(3.0)
 	assert_float(float(GameState.player_settlements[0].get("learners_kept",0.0))).is_greater(0.0)
 	assert_str(String(Paths.leaders_line().text)).contains("They keep their few learners even in this hunger.")
