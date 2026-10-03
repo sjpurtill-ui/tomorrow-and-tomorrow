@@ -633,6 +633,15 @@ func _plan_start(args:Dictionary)->void:
 		_things[name]=thing
 		thing.global_position=_plan_at((things[name] as Dictionary).get("at",[0,0,0]))
 		thing.rotation.y=yaw
+		if name=="pot" and (things[name] as Dictionary).has("rim"):
+			var kit:=_props_kit()
+			if kit!=null and thing.has_meta("prop"):
+				var seat:Array=(kit.call("info",String(thing.get_meta("prop"))) as Dictionary).get("lid_seat",[])
+				var cook:=_body(String(_plan_keys.get("cook","")))
+				var height:=float(cook.body_height) if cook!=null else float(v.body_height)
+				if seat.size()>=2 and float(seat[1])>0.0:
+					# Both cookware variants must meet the rim the cook reaches.
+					thing.scale.y=float(things[name].rim)*height/Figure3D.REFERENCE_HEIGHT/float(seat[1])
 		if name=="block" and (things[name] as Dictionary).has("top"):
 			var kit:=_props_kit()
 			if kit!=null and thing.has_meta("prop"):
@@ -678,6 +687,12 @@ func _plan_start(args:Dictionary)->void:
 					var at:Array=spec.get("grip",[0,0,0])
 					var anchor:=Vector3(float(at[0]),float(at[1]),float(at[2]))
 					var tool_basis:=Basis.IDENTITY
+					if name=="lid" and kit!=null and _things.get("pot") is Node3D and (_things.pot as Node3D).has_meta("prop"):
+						# The authored fist points down to the lid; its model has
+						# the knob above its base. Hold that knob and fit its pot.
+						var size:Array=spec.get("size",[0,0,0])
+						anchor=Vector3(0,float(size[1]),0)
+						tool_basis=Basis(Vector3.RIGHT,PI).scaled((_things.pot as Node3D).scale)
 					if act=="three_swing_beheading" and name=="axe" and spec.has("edge"):
 						# The authored tool aims its edge 0.66m along the fist.
 						# This asset's blade projects sideways from its haft.
@@ -690,7 +705,13 @@ func _plan_start(args:Dictionary)->void:
 				if r.has(name+"_rests"):
 					var rest:Array=r[name+"_rests"]
 					var facing:=Basis(Vector3.UP,yaw+deg_to_rad(float(r.get("yaw",0.0))))
-					grip.global_transform=Transform3D(facing,_plan_at(r.get("at",[0,0,0]))+facing*Vector3(rest[0],rest[1],rest[2]))
+					var resting_basis:=facing.rotated(facing.x,PI) if name=="lid" else facing
+					grip.global_transform=Transform3D(resting_basis,_plan_at(r.get("at",[0,0,0]))+facing*Vector3(rest[0],rest[1],rest[2]))
+					if name=="lid" and kit!=null and _things.get("pot") is Node3D and (_things.pot as Node3D).has_meta("prop"):
+						# Its edge rests on the rim beside the opening until pickup.
+						var pot:=_things.pot as Node3D
+						var seat:Array=(kit.call("info",String(pot.get_meta("prop"))) as Dictionary).get("lid_seat",[0,0,0])
+						grip.global_position.y+=pot.to_global(Vector3(seat[0],seat[1],seat[2])).y-prop.global_position.y
 					if walk>0.0:
 						var pickup:=_tween();pickup.tween_interval(walk)
 						pickup.tween_callback(func()->void:if is_instance_valid(b) and is_instance_valid(grip):Acting.hold(b,grip,side))
@@ -727,6 +748,7 @@ func _on_cook_cue(_fig:Node3D,event:Dictionary)->void:
 	var lid:=_things.get("lid") as Node3D
 	var pot:=_things.get("pot") as Node3D
 	if lid==null or pot==null or not is_instance_valid(lid) or not is_instance_valid(pot):return
+	Acting.release(_fig,"L")
 	var kit:=_props_kit()
 	if kit!=null and lid.has_meta("prop") and pot.has_meta("prop"):
 		kit.call("let_go",lid,_court())
