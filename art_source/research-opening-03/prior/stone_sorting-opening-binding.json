@@ -1,0 +1,15 @@
+{
+  "path": "res://assets/ui/research/paper/stone_sorting.png",
+  "source": "EARLY_SUBJECTS",
+  "focus": [
+    0.64,
+    0.72
+  ],
+  "later_fallback": {
+    "path": "res://assets/ui/research/stone-selection-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  }
+}

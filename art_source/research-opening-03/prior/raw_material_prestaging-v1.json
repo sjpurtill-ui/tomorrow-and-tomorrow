@@ -1,0 +1,12 @@
+{
+  "id": "raw_material_prestaging",
+  "line": "production",
+  "game_year": 1,
+  "approx_historical_year": -4993,
+  "prompt": "Early Neolithic workers sort flint, rough branches, reeds and clay into distinct ready-to-use piles. Mature flat handmade palette-knife impasto on coarse paper, umber and burnt orange, no later technology, no photorealism, no writing. Wide central card crop.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f473182d-35ca-45d2-a834-71ceb6ed5de5.png",
+  "asset": "res://assets/ui/research/subjects/raw_material_prestaging-v1.png",
+  "sha256": "2417213543f0ecc496f0ab385c67d70dfefac6cb3e8d56385db8bea60c83c071",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation selected; first rejected as photorealistic. Accepted after visual 3.37:1 crop and subject/period check."
+}

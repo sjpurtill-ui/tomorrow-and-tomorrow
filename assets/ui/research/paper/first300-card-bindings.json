@@ -142,5 +142,7 @@
   "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
   "watch_rotation": "res://assets/ui/research/subjects/watch_rotation-v2.png",
   "wound_cleaning": "res://assets/ui/research/subjects/wound_cleaning-v2.png",
-  "edible_resource_recognition": "res://assets/ui/research/subjects/edible_resource_recognition-v2.png"
+  "edible_resource_recognition": "res://assets/ui/research/subjects/edible_resource_recognition-v2.png",
+  "seasonal_patterns": "res://assets/ui/research/subjects/seasonal_patterns-v2.png",
+  "stone_sorting": "res://assets/ui/research/subjects/stone_sorting-v1.png"
 }
