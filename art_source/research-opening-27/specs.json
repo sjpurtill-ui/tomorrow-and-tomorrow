@@ -1,0 +1,236 @@
+[
+  {
+    "id": "controlled_baking",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Flatbread Baked on Hot Stones and Griddles",
+    "one_liner": "Flatbread baked on hot stones and griddles",
+    "observation": "Flatbread baked on hot stones and griddles.",
+    "key_threshold": false,
+    "target_year": 42,
+    "proposed_year": 42,
+    "band_low": 27.0,
+    "band_high": 62.0,
+    "min_year": 27.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "hand_dough_forming",
+      "hearth_roasting_control"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 42,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": "res://assets/ui/research/paper/first300-cards/controlled_baking.tres",
+      "art600": null,
+      "subject": null
+    },
+    "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/nutrition-v1.png"
+  },
+  {
+    "id": "household_space_planning",
+    "line": "demography",
+    "status": "catalog",
+    "name": "Household Space Planned for Sleep, Air and Care",
+    "one_liner": "Household space planned for sleep, air and care",
+    "observation": "Household space planned for sleep, air and care.",
+    "key_threshold": false,
+    "target_year": 42,
+    "proposed_year": 42,
+    "band_low": 27.0,
+    "band_high": 62.0,
+    "min_year": 27.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "extended_family_room_division"
+    ],
+    "requires_any": [
+      [
+        "adobe_wall_construction",
+        "framed_construction"
+      ]
+    ],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 42,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/household_space_planning-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/demography-v1.png"
+  },
+  {
+    "id": "plain_weaving",
+    "line": "production",
+    "status": "catalog",
+    "name": "Plain-weave Linen Cloth",
+    "one_liner": "Plain-weave linen cloth",
+    "observation": "Plain-weave linen cloth.",
+    "key_threshold": false,
+    "target_year": 44,
+    "proposed_year": 44,
+    "band_low": 25.0,
+    "band_high": 60.0,
+    "min_year": 25.0,
+    "research_years": 4.0,
+    "requires_all": [
+      "warp_weighted_looms",
+      "fiber_retting"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 44,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/paper/plain_weaving.png",
+        "focus": [
+          0.5,
+          0.65
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/production-v1.png"
+  },
+  {
+    "id": "flat_clay_roofs",
+    "line": "infrastructure",
+    "status": "new",
+    "name": "Flat Roofs of Beams, Reeds and Packed Clay",
+    "one_liner": "Flat roofs of beams, reeds and packed clay",
+    "observation": "Flat roofs of beams, reeds and packed clay.",
+    "key_threshold": false,
+    "target_year": 44,
+    "proposed_year": 44,
+    "band_low": 22.0,
+    "band_high": 55.0,
+    "min_year": 22.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "framed_construction",
+      "adobe_wall_construction"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {
+      "environment": [
+        "dry"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Construction",
+    "signals": [
+      "construction",
+      "materials"
+    ],
+    "version": 2,
+    "year": 44,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/flat_clay_roofs-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/infrastructure-v1.png"
+  },
+  {
+    "id": "reed_bundle_boats",
+    "line": "logistics",
+    "status": "new",
+    "name": "Reed-bundle Boats Sealed with Bitumen",
+    "one_liner": "Reed-bundle boats sealed with bitumen (regional)",
+    "observation": "Reed-bundle boats sealed with bitumen (regional).",
+    "key_threshold": false,
+    "target_year": 36,
+    "proposed_year": 58,
+    "band_low": 44.0,
+    "band_high": 72.0,
+    "min_year": 44.0,
+    "research_years": 4.0,
+    "requires_all": [
+      "hide_floats",
+      "basketry",
+      "bitumen_sealing"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "river_craft"
+    ],
+    "conditions": {
+      "environment": [
+        "river"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Trade reach",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "version": 2,
+    "year": 44.0,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/reed_bundle_boats-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/logistics-v1.png"
+  }
+]

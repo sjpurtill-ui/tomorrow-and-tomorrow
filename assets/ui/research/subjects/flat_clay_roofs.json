@@ -1,12 +1,58 @@
 {
   "id": "flat_clay_roofs",
   "line": "infrastructure",
-  "game_year": 44,
-  "approx_historical_year": -4707,
-  "prompt": "c. 4707 BCE: Adults pack clay over reed-covered beams on a flat roof; casein gouache. Mature handmade flat 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-70af28e5-dfd7-40dd-8588-ee821357cb9a.png",
-  "asset": "res://assets/ui/research/subjects/flat_clay_roofs-v1.png",
-  "sha256": "13c6db60ef95845f4cf71ed8281fd5e9792861e78fee22b08a71c2194bb6590b",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; Roof structure and clay coating clear in crop."
+  "status": "new",
+  "name": "Flat Roofs of Beams, Reeds and Packed Clay",
+  "one_liner": "Flat roofs of beams, reeds and packed clay",
+  "observation": "Flat roofs of beams, reeds and packed clay.",
+  "key_threshold": false,
+  "target_year": 44,
+  "proposed_year": 44,
+  "band_low": 22,
+  "band_high": 55,
+  "min_year": 22,
+  "research_years": 3,
+  "requires_all": [
+    "framed_construction",
+    "adobe_wall_construction"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {
+    "environment": [
+      "dry"
+    ]
+  },
+  "shared_with": [],
+  "subcategory": "Construction",
+  "signals": [
+    "construction",
+    "materials"
+  ],
+  "version": 2,
+  "year": 44,
+  "focus": [
+    0.5,
+    0.25
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/flat_clay_roofs-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-art-production-paired-01/art_source/research-opening-27/style-reference/infrastructure-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established infrastructure painting medium and EXACT EXTRA-WIDE canvas width/aspect. Full bleed, no frame/grid/text/3:2. NEW SUBJECT: Three adults construct a modest low earthen-wall room: one supports branch roof beams, another above spreads a THIN irregular clay layer over branch/reed roof decking, another brings a small basket of clay. Clearly low flat clay roof and rough branch structure, no pyramid, giant temple, cut-stone masonry or modern building equipment. Medium matte casein mineral blue/limestone. Zoom out so ALL heads, hands and mechanisms fit central y170..590 on a765px banner for the actual3.37:1 card. Gameyears42\u201344, modest prehistoric materials: wood, reed, stone, raw hides/fur, clay, bast fibers. Do not copy reference's unrelated village or river subject. No metal, woven clothing, ornate later technology or photographic lighting.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8bd88a33-5c8f-4bbf-9988-fb4299bde980.png",
+  "review": "Full original inspected; accepted subject and established field painting medium. Actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/flat_clay_roofs-v2.png",
+  "sha256": "ee802ba58d8ad9f392fe94599344a55fd8370f944c2277176ed8c525d777cafc",
+  "mode": "built-in image_gen / edit"
 }
