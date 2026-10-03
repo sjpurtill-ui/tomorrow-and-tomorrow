@@ -12,6 +12,7 @@ extends "res://tests/audience_modal_probe.gd"
 
 const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
+const Acting:=preload("res://scripts/hud/court_acting.gd")
 
 var only:="club"
 var tier:=0
@@ -20,6 +21,8 @@ var frame_index:=0
 var review_stage:Control
 var saw_execution:=false
 var seen_things:Dictionary={}
+var checked_marks:Dictionary={}
+var bad_marks:Dictionary={}
 
 func _ready()->void:
 	for arg in OS.get_cmdline_user_args():
@@ -54,10 +57,29 @@ func _wait(seconds:float)->void:
 			if current!=null:
 				saw_execution=true
 				for key in current._things:seen_things[key]=true
+				_check_plan_marks(current)
 			if not frame_dir.is_empty() and capture:
 				await RenderingServer.frame_post_draw
 				review_stage.view3d.get_texture().get_image().save_png(frame_dir+"frame_%04d.png" % frame_index)
 				frame_index+=1
+
+func _check_plan_marks(current:Node)->void:
+	# A split alone is not proof of staging: a failed route can leave the
+	# executioner swinging several metres away while the victim still splits.
+	for role:String in current._plan.get("roles",{}):
+		if role=="victim":continue
+		var key:=String(current._plan_keys.get(role,""))
+		var body:Node3D=current.call("_body",key)
+		if body==null:continue
+		var actor=Acting.of(body)
+		if actor==null or actor._a==null:continue
+		if not String(actor._a.clip).begins_with("exec_") or float(actor._a.t)<1.6:continue
+		var expected:Vector3=current.call("_plan_at",current._plan.roles[role].at)
+		var error:=Vector2(body.global_position.x-expected.x,body.global_position.z-expected.z).length()
+		checked_marks[role]=true
+		if error>0.25 and not bad_marks.has(role):
+			bad_marks[role]=error
+			_fail("%s performs %.2f m away from its authored mark" % [role,error])
 
 func _execute(director:Node)->void:
 	var audience:=Hall.debug_force("petition")
@@ -93,4 +115,6 @@ func _execute(director:Node)->void:
 	if not saw_execution:_fail("the order never started an execution")
 	if not bool(review_stage.exec_done):_fail("the execution never finished")
 	if only in ["club","behead"] and not seen_things.has("head:main"):_fail("the execution never reached its impact")
+	if only in ["club","behead"] and not checked_marks.has("executioner"):_fail("the executioner's authored performance was not observed")
+	if only=="club" and not checked_marks.has("cook"):_fail("the cook's authored performance was not observed")
 	if not frame_dir.is_empty():print("COURT_EXECUTION_REVIEW wrote ",frame_index," frames to ",frame_dir)
