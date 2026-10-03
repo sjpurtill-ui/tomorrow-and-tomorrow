@@ -13,6 +13,8 @@ extends Node
 ##   sheet_talk.png        talking gestures at their beat
 ##   sheet_idle.png        people at rest: glances, weight, breath (nobody stares out)
 ##   room/frame_####.png   a room taking the god's wrath, 30 fps (the "room" run)
+##   r2_*.png              round 2 ("r2"): laughs, side-eye, the catch, stances, business, exits
+##   room2/frame_####.png  a fire circle hears the god ("room2")
 
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
@@ -46,6 +48,8 @@ func _ready()->void:
 	var mode:="sheets"
 	for a in OS.get_cmdline_user_args():mode=String(a)
 	if mode=="room":await _room()
+	elif mode=="room2":await _room2()
+	elif mode=="r2":await _sheets_r2()
 	else:await _sheets()
 	print("COURT_ACTING_CAPTURE DONE ",out_dir)
 	get_tree().quit(0)
@@ -97,6 +101,69 @@ func _clear()->void:
 	for f in figures:f.queue_free()
 	figures.clear()
 	for c in labels.get_children():c.queue_free()
+	for c in props:c.queue_free()
+	props.clear()
+
+var props:Array[Node3D]=[]
+
+## A plain prop for context (a log to sit on, a fire's glow): the capture's own, not the set's.
+func _prop(kind:String,at:Vector3,scale_k:=1.0)->void:
+	var m:=MeshInstance3D.new()
+	var mat:=StandardMaterial3D.new();mat.roughness=1.0
+	match kind:
+		"log":
+			var c:=CylinderMesh.new();c.top_radius=0.13*scale_k;c.bottom_radius=0.14*scale_k;c.height=0.9
+			m.mesh=c;m.rotation_degrees=Vector3(0.0,0.0,90.0);mat.albedo_color=Color("5a3e26")
+		"fire":
+			var sph:=SphereMesh.new();sph.radius=0.16;sph.height=0.22
+			m.mesh=sph;mat.albedo_color=Color("ff9a3c");mat.emission_enabled=true;mat.emission=Color("ff7a1c");mat.emission_energy_multiplier=2.5
+			var glow:=OmniLight3D.new();glow.light_color=Color("ffb060");glow.light_energy=2.0;glow.omni_range=3.0;glow.position=Vector3(0,0.4,0)
+			m.add_child(glow)
+	m.material_override=mat
+	m.position=at
+	world.add_child(m)
+	props.append(m)
+
+## Frame a row tighter (fewer people, nearer): width of the row in metres.
+func _frame_row(width:float,height:=2.05)->void:
+	var half:=tan(deg_to_rad(camera.fov*0.5))
+	var dist:=maxf(width*1.05*0.5/(half*float(W)/float(H)),height*0.62/half)
+	camera.position=Vector3(0.0,height*0.5+dist*tan(deg_to_rad(6.5)),dist)
+	camera.rotation_degrees=Vector3(-6.5,0.0,0.0)
+
+## A row of moments: each spec {clip, t, label, who, stance, seat, x, z, yaw, look_at}.
+func _row(title:String,specs:Array,file:String,gap:=0.95)->void:
+	_clear()
+	var n:=specs.size()
+	for i in n:
+		var spec:Dictionary=specs[i]
+		var stance:=String(spec.get("stance",""))
+		var own:=Acting.OWN_STANCES.has(stance)
+		var f:=_person(int(spec.get("who",i)),"" if own else stance)
+		f.position=Vector3(float(spec.get("x",(float(i)-(n-1)*0.5)*gap)),0.0,float(spec.get("z",0.0)))
+		f.rotation_degrees.y=float(spec.get("yaw",-6.0+12.0*float(i)/maxf(1.0,float(n-1))))
+		if own:Acting.idle(f,stance,{"seat":float(spec.seat)} if spec.has("seat") else {})
+		if stance=="log":_prop("log",f.position+Vector3(0.0,float(spec.get("seat",0.43))-0.13,0.05),1.0)
+		if stance=="fire":_prop("fire",f.position+Vector3(0.0,0.10,0.75))
+	_step_all(0.6)
+	for i in n:
+		var spec:Dictionary=specs[i]
+		var f:=figures[i]
+		if spec.has("look_at"):Acting.look_toward(f,figures[int(spec.look_at)],1.0)
+		if not String(spec.get("clip","")).is_empty():Acting.play(f,String(spec.clip))
+	# everyone runs together (a pair acts in time); each stops at their own moment
+	var longest:=0.0
+	for spec:Dictionary in specs:longest=maxf(longest,float(spec.get("t",0.0)))
+	var t:=0.0
+	while t<longest-0.001:
+		for i in n:
+			if t<float((specs[i] as Dictionary).get("t",0.0))-0.001:_frame(figures[i])
+		t+=DT
+	for i in n:
+		var spec:Dictionary=specs[i]
+		_label(String(spec.get("label","")),figures[i].position+Vector3(0.0,2.0*figures[i].body_height/1.72,0.0),16)
+	_title(title)
+	await _shot(file)
 
 func _step_all(seconds:float)->void:
 	for i in int(round(seconds/DT)):
@@ -169,6 +236,86 @@ func _sheets()->void:
 		["jerk_awake",0.1,"jerk awake",5],["snap_alert",0.6,"snap alert",4],["elbow_l",0.22,"elbow",6],["drop_bowl",0.45,"drop the bowl",3,"bowl"],
 		["struggle_bundle",0.5,"heave a bundle",0],["wobble",0.3,"wobble",1],["hide_behind_l",1.2,"hide behind",2]],"sheet_director_2.png")
 	await _idle_sheet()
+
+func _sheets_r2()->void:
+	camera.fov=26.0
+	_frame_row(5.0)
+	await _row("The laugh, big and polite; the side-eye",[
+		{"clip":"laugh","t":0.6,"label":"laugh: thrown back","who":0},{"clip":"laugh","t":1.58,"label":"laugh: slaps the thigh","who":0},
+		{"clip":"laugh_polite","t":0.5,"label":"polite laugh","who":1},{"clip":"side_eye_l","t":1.4,"label":"side-eye","who":4},
+		{"clip":"side_eye_r","t":1.4,"label":"side-eye","who":6}],"r2_laughs.png",1.0)
+	_frame_row(3.2)
+	await _row("She faints; he half-catches her",[
+		{"clip":"faint_caught_l","t":0.7,"label":"0.7 s","who":1,"x":-1.15,"yaw":0.0},{"clip":"half_catch_r","t":0.7,"label":"","who":0,"x":-0.42,"yaw":0.0},
+		{"clip":"faint_caught_l","t":1.25,"label":"1.25 s","who":1,"x":0.45,"yaw":0.0},{"clip":"half_catch_r","t":1.25,"label":"","who":0,"x":1.18,"yaw":0.0}],"r2_catch.png")
+	_frame_row(5.0)
+	await _row("Stances for life",[
+		{"stance":"cord","t":2.0,"label":"cord","who":3},{"stance":"bundle","t":2.0,"label":"bundle","who":1},
+		{"stance":"guard","t":3.0,"label":"guard on his staff","who":0},{"stance":"log","seat":0.38,"t":2.0,"label":"elder on a log","who":2},
+		{"stance":"fire","t":2.0,"label":"by the fire","who":4}],"r2_stances.png",1.05)
+	await _row("The room's business",[
+		{"clip":"cough","t":0.55,"label":"cough","who":5},{"clip":"keep_apart_r","t":0.9,"label":"keeps apart","who":3},
+		{"clip":"rub_belly","t":1.0,"label":"stomach rumbles","who":4},{"clip":"stamp_feet","t":0.3,"label":"cold","who":1},
+		{"clip":"whisper_l","t":0.9,"label":"whispers","who":6}],"r2_business_1.png",1.0)
+	await _row("More business",[
+		{"clip":"swat_fly","t":0.76,"label":"swats a fly","who":0},{"clip":"stretch","t":1.0,"label":"stretch","who":4},
+		{"clip":"sharpen_spear","t":0.6,"label":"sharpens","who":6,"stance":"staff"},{"clip":"rub_hands","t":1.1,"label":"blows on hands","who":3},
+		{"clip":"shush_l","t":0.6,"label":"shush","who":5}],"r2_business_2.png",1.0)
+	await _row("Ways out",[
+		{"clip":"back_out","t":0.5,"label":"backs out bowing","who":0,"yaw":0.0},{"clip":"bump_post","t":0.4,"label":"bumps a post","who":0,"yaw":0.0},
+		{"clip":"storm_stop","t":0.85,"label":"storms off: forgot!","who":6,"yaw":0.0},{"clip":"snatch_up","t":0.42,"label":"snatches it up","who":6,"yaw":0.0},
+		{"clip":"walk_led","t":0.4,"label":"led away","who":4,"yaw":40.0}],"r2_exits.png",1.0)
+
+## A fire circle when the god speaks (a demonstration of the vocabulary; the
+## director decides who does what in the game).
+func _room2()->void:
+	camera.fov=28.0
+	_clear()
+	DirAccess.make_dir_recursive_absolute(out_dir+"room2")
+	var cast:=[]
+	var places:=[[-2.0,-0.6,30.0,"guard"],[-0.8,0.0,10.0,""],[0.0,0.25,0.0,""],[1.05,0.05,-12.0,""],[2.05,-0.5,-28.0,"log"],[0.5,-1.1,0.0,"fire"]]
+	var who:=[0,1,3,4,2,5]
+	for i in places.size():
+		var p:Array=places[i]
+		var f:=_person(who[i],"")
+		f.position=Vector3(float(p[0]),0.0,float(p[1]));f.rotation_degrees.y=float(p[2])
+		if not String(p[3]).is_empty():Acting.idle(f,String(p[3]),{"seat":0.40} if String(p[3])=="log" else {})
+		if String(p[3])=="log":_prop("log",f.position+Vector3(0.0,0.40-0.13,0.05))
+		cast.append(f)
+	_prop("fire",Vector3(0.5,0.1,-0.35))
+	camera.position=Vector3(0.0,1.9,6.6);camera.rotation_degrees=Vector3(-8.0,0.0,0.0)
+	var god:=camera.global_position+Vector3(0.0,2.0,-0.5)
+	Acting.play(cast[0],"bored")
+	var frames:=int(9.0/DT)
+	var done:={}
+	for k in frames:
+		var t:=float(k)*DT
+		if t>=0.8 and not done.has("god"):
+			done.god=true
+			for f in cast:
+				Acting.look_toward(f,god,1.0);Acting.hush(f,true)
+			Acting.play(cast[0],"snap_alert")
+		if t>=2.6 and not done.has("blow"):
+			done.blow=true
+			Acting.play(cast[1],"faint_caught_l");Acting.set_mood(cast[1],{"fear":0.9})
+			Acting.play(cast[3],"flinch")
+			Acting.gesture(cast[4],"jolt")
+		if t>=2.75 and not done.has("catch"):
+			done.catch=true
+			Acting.play(cast[2],"half_catch_r");Acting.look_toward(cast[2],cast[1],1.0)
+		if t>=4.6 and not done.has("laugh"):
+			done.laugh=true
+			Acting.play(cast[3],"laugh_stifled")
+		if t>=5.2 and not done.has("eye"):
+			done.eye=true
+			Acting.look_toward(cast[4],cast[3],1.0);Acting.play(cast[4],"side_eye_r")
+		if t>=6.0 and not done.has("shush"):
+			done.shush=true
+			Acting.play(cast[5],"shush_l")
+		for f in cast:_frame(f)
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(out_dir+"room2/frame_%04d.png" % k)
+	print("COURT_ACTING_CAPTURE room2 frames ",frames)
 
 ## People at rest for a while: where are they looking?
 func _idle_sheet()->void:

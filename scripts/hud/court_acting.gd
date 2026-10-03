@@ -24,15 +24,23 @@ extends SkeletonModifier3D
 ## director (court_director.gd, L) decides who reacts and how; this is the
 ## vocabulary and the performance.
 ##
-## Use (static, on a CourtFigure3D):
-##   Self.play(fig, "gasp", {blend, loop, speed, hold, out})  -> seconds
-##   Self.look_toward(fig, Vector3 | figure Node3D | null, weight)   (look_at on the hook)
-##   Self.set_mood(fig, {joy, fear, anger, scorn, awe, tired})
-##   Self.speak(fig, text, seconds)
-##   Self.idle(fig, stance_id)
-##   Self.gesture(fig, "nod" | "nod_eager" | "shake" | "tilt" | "shrug" | "double_take" | "jolt" | "settle" | "flinch_small")
-##   Self.hush(fig, true)    the god speaks: stillness
-##   Self.stop(fig)          let go of a held reaction
+## Use (static, on a CourtFigure3D; preload this script as Acting):
+##   Acting.play(fig, "gasp", {blend, loop, speed, hold, out, at})  -> seconds
+##   Acting.look_toward(fig, Vector3 | figure Node3D | null, weight)   (look_at on the hook)
+##   Acting.set_mood(fig, {joy, fear, anger, scorn, awe, tired} | "warm"...)
+##   Acting.speak(fig, text, seconds)
+##   Acting.idle(fig, stance_id, {seat})   the figure's own stances, or cord,
+##       bundle, guard (on the staff), log (seated; seat: the mark's height), fire
+##   Acting.gesture(fig, one of GESTURES, or any clip)
+##   Acting.hush(fig, true)    the god speaks: stillness
+##   Acting.stop(fig)          let go of a held reaction
+##   Acting.exit_plan(style) -> [{clip, seconds, move, face}]   how to leave the hall
+##   Acting.service()   the object for CourtStage.acting: play(body, act, args),
+##       set_mood(body, vector) (a passing beat), mood(body, args), look_at,
+##       speak, gesture, idle, hush, stop; the director's acts (ACT_MAP) become
+##       clips, gestures or faces here, sided by where args.at stands
+## A planted staff stays planted (its hand is held by IK under the breathing),
+## and a reaction that moves the head has the head: idle glances wait.
 ## Figure axes (skeleton space): +X the figure's left, +Y up, +Z its front.
 
 const Self:=preload("res://scripts/hud/court_acting.gd")
@@ -74,6 +82,11 @@ const ACT_MAP:={
 	"look_away":["look",""],"watch_go":["look",""],"look_wrong_way":["look",""],"late_lift":["look",""],"glance_door":["look",""],
 	"eye_food":["look",""],"beam":["face",""],"smile_warm":["face",""],"smirk":["face",""],"grimace":["face",""],"eyes_narrow":["face",""],
 	"lips_pressed":["face",""],"stricken":["face",""],"head_down":["face",""],"lean_in":["face",""],"mutter":["face",""],"lick_lips":["face",""],
+	"laugh_polite":["clip","laugh_polite"],"chuckle":["clip","laugh_polite"],"cough":["clip","cough"],"cover_mouth":["clip","cough"],
+	"keep_apart":["clip","keep_apart_"],"edge_away":["clip","keep_apart_"],"rub_belly":["clip","rub_belly"],"pat_belly":["clip","pat_belly"],
+	"sharpen_spear":["clip","sharpen_spear"],"rub_hands":["clip","rub_hands"],"stamp_feet":["clip","stamp_feet"],"swat_fly":["clip","swat_fly"],
+	"stretch":["clip","stretch"],"whisper":["clip","whisper_"],"wring_hands":["clip","wring_hands"],"shush":["clip","shush_"],
+	"fan_self":["clip","fan_self"],"bored":["clip","stance_guard"],"stand_guard":["gesture","straighten"],"hurry":["gesture","jolt",0.6],
 }
 ## The director's face words (docs/COURT_STAGE_3D.md section 3) on this layer's
 ## channels: [channel, gain, second channel or -1, gain].
@@ -91,6 +104,9 @@ const SHAPES:={
 	"sneer":[["sneer",1.0],["mood_stern",0.35],["mood_smile",0.15]],
 }
 const VISEMES:=["v_aa","v_ee","v_oo","v_mm","v_fv"]
+## Morphs this layer owns and keeps at 0 (J's mood morphs: the moods come
+## through the expression morphs here, and must not be doubled).
+const OWNED_ZERO:=["mood_smile","mood_tight","mood_worry","mood_stern"]
 ## Where the eyes look, if the face has morphs for it: [morph, channel, gain].
 const EYE_SHAPES:=[["eyes_left",9,1.0],["eyes_right",9,-1.0],["eyes_up",10,1.0],["eyes_down",10,-1.0]]
 ## Talking gestures speech may use: [clip, hands it needs, what the line is like].
@@ -127,10 +143,11 @@ class Layer:
 	var fade_len:=0.4
 	var gain:=1.0
 	var face_fps:=15.0
+	var born:=0.0
 
 	func weight()->float:
 		var w:=1.0
-		if blend_in>0.0:w=smoothstep(0.0,blend_in,t)
+		if blend_in>0.0:w=smoothstep(0.0,blend_in,t-born)
 		if not hold and not loop:w*=1.0-smoothstep(length-blend_out,length,t)
 		if fade_from>=0.0:w*=1.0-smoothstep(fade_from,fade_from+fade_len,t)
 		return w*gain
@@ -292,14 +309,24 @@ static func service()->RefCounted:
 class Service extends RefCounted:
 	func play(fig:Node3D,what:Variant="",opts:Variant=null,stage:Object=null)->float:
 		if what is Dictionary:return Self.perform(fig,what,opts if opts is Object else stage)
+		# the stage's beat: play(body, act, args) with the director's args
+		if opts is Dictionary and ((opts as Dictionary).has("beat") or (opts as Dictionary).has("fallback")):
+			var args:=(opts as Dictionary).duplicate()
+			if not args.has("beat"):args["beat"]=String(what)
+			return Self.perform(fig,args,stage)
 		return Self.play(fig,String(what),opts if opts is Dictionary else {})
 	func look_at(fig:Node3D,target:Variant=null,weight:Variant=1.0,stage:Object=null)->void:
 		if target is Dictionary:
 			var st:Object=weight if weight is Object else stage
 			Self.look_toward(fig,Self.resolve(fig,(target as Dictionary).get("target",null),st),float((target as Dictionary).get("weight",0.8)))
 		else:Self.look_toward(fig,Self.resolve(fig,target,stage),float(weight) if not weight is Object else 1.0)
-	func set_mood(fig:Node3D,mood_value:Variant=null,_stage:Object=null)->void:Self.set_mood(fig,mood_value)
-	func mood(fig:Node3D,mood_value:Variant=null,_stage:Object=null)->void:Self.set_mood(fig,mood_value)
+	## From the stage a mood is a beat's (it passes and the person's own returns):
+	## a plain vector lasts a moment; a beat's args carry its face and time.
+	func set_mood(fig:Node3D,mood_value:Variant=null,_stage:Object=null)->void:
+		if mood_value is Dictionary and not (mood_value as Dictionary).has("vector") and not (mood_value as Dictionary).has("dur"):
+			Self.set_mood(fig,{"vector":mood_value,"dur":1.6,"hold":false})
+		else:Self.set_mood(fig,mood_value)
+	func mood(fig:Node3D,mood_value:Variant=null,stage:Object=null)->void:set_mood(fig,mood_value,stage)
 	func speak(fig:Node3D,text:Variant="",seconds:Variant=2.0,opts:Variant=null)->void:
 		if text is Dictionary:
 			Self.speak(fig,String((text as Dictionary).get("text","")),float((text as Dictionary).get("seconds",2.0)),text)
@@ -308,7 +335,13 @@ class Service extends RefCounted:
 		if what is Dictionary:Self.perform(fig,what,amount if amount is Object else null)
 		else:Self.gesture(fig,String(what),float(amount) if not amount is Object else 1.0,toward)
 	func idle(fig:Node3D,stance_id:Variant="",_stage:Object=null)->void:
-		Self.idle(fig,String((stance_id as Dictionary).get("stance","")) if stance_id is Dictionary else String(stance_id))
+		if stance_id is Dictionary:
+			var d:=stance_id as Dictionary
+			Self.idle(fig,String(d.get("stance","")),{"seat":float(d.seat)} if d.has("seat") else {})
+		else:Self.idle(fig,String(stance_id))
+	func clip_length(clip:String)->float:return Self.clip_length(clip)
+	func has_clip(clip:String)->bool:return Self.has_clip(clip)
+	func exit_plan(style:String)->Array:return Self.exit_plan(style)
 	func hush(fig:Node3D,on:Variant=true,_stage:Object=null)->void:Self.hush(fig,bool(on) if not on is Dictionary else true)
 	func stop(fig:Node3D,blend:Variant=-1.0,_stage:Object=null)->void:Self.stop(fig,float(blend) if not blend is Dictionary else -1.0)
 
@@ -335,6 +368,7 @@ static func resolve(fig:Node3D,target:Variant,stage:Object)->Variant:
 static func perform(fig:Node3D,args:Dictionary,stage:Object=null)->float:
 	var a=of(fig)
 	if a==null:return 0.0
+	if stage==null:stage=a.stage_of()
 	var act:=String(args.get("beat",args.get("clip","")))
 	var at_key:=String(args.get("at",""))
 	var other:Variant=resolve(fig,at_key,stage) if not at_key.is_empty() else null
@@ -350,6 +384,7 @@ static func perform(fig:Node3D,args:Dictionary,stage:Object=null)->float:
 		"clip":
 			var clip:=String(spec[1])
 			if clip.ends_with("_"):clip+=a.side_of(other)
+			if clip.begins_with("half_catch") and other is Node3D:a.catch(other as Node3D)
 			if not has_clip(clip):
 				clip=String(args.get("fallback",""))
 				if args.has("blend"):opts["blend"]=float(args.blend)
@@ -395,9 +430,39 @@ static func speak(fig:Node3D,text:String,seconds:float,opts:={})->void:
 	var a=of(fig)
 	if a!=null:a.talk(text,seconds,opts)
 
-static func idle(fig:Node3D,stance_id:String)->void:
+## stance_id: one of the figure's own (stand, hip, folded, clasped, belt,
+## staff, bowl, sit, crouch) or one of the acting's: cord, bundle, guard (on
+## the figure's staff), log (seated, an elder's way; opts.seat: the seat's
+## height in the hall's metres, from the set's mark: the body sits on it
+## whatever its size, so the stage need not lift them), fire (crouched by
+## the fire, warming their hands).
+static func idle(fig:Node3D,stance_id:String,opts:={})->void:
 	var a=of(fig)
-	if a!=null:a.rest_in(stance_id)
+	if a!=null:a.rest_in(stance_id,opts)
+
+## The acting's own stances and the figure's stance (and prop) each stands on.
+const OWN_STANCES:={"cord":"stand","bundle":"stand","guard":"staff","log":"sit","fire":"crouch"}
+
+## How a stage takes someone out of the hall, step by step (the stage moves and
+## turns the body; this says what it plays): [{clip, seconds, move, face}].
+## move: metres toward the way out for a 1.72 m body (negative: back the way
+## they came); seconds 0: as long as the move takes at the clip's own speed
+## (court_anims.json speed_mps). face: "out" turned to the way out, "back"
+## turned back the way they came, "god" facing the god. Styles: bow (bows,
+## backs away bowing, bumps a post, turns and walks out), storm, storm_back
+## (storms off, stops, comes back for what they forgot, storms off again),
+## sober (cast out: slow, head down), led (seized or condemned: bound, led).
+static func exit_plan(style:String)->Array:
+	match style:
+		"bow":return [{"clip":"bow_deep","seconds":2.2,"move":0.0,"face":"god"},{"clip":"back_out","seconds":0.0,"move":0.9,"face":"god"},
+			{"clip":"bump_post","seconds":1.7,"move":0.0,"face":"god"},{"clip":"walk_out","seconds":0.0,"move":-1.0,"face":"out"}]
+		"storm":return [{"clip":"storm_walk","seconds":0.0,"move":-1.0,"face":"out"}]
+		"storm_back":return [{"clip":"storm_walk","seconds":0.0,"move":1.4,"face":"out"},{"clip":"storm_stop","seconds":1.8,"move":0.0,"face":"out"},
+			{"clip":"storm_walk","seconds":0.0,"move":-1.4,"face":"back"},{"clip":"snatch_up","seconds":1.2,"move":0.0,"face":"back"},
+			{"clip":"storm_walk","seconds":0.0,"move":-1.0,"face":"out"}]
+		"sober":return [{"clip":"walk_sober","seconds":0.0,"move":-1.0,"face":"out"}]
+		"led":return [{"clip":"walk_led","seconds":0.0,"move":-1.0,"face":"out"}]
+	return [{"clip":"walk_out","seconds":0.0,"move":-1.0,"face":"out"}]
 
 static func gesture(fig:Node3D,name:String,amount:=1.0,toward:=1.0)->void:
 	var a=of(fig)
@@ -450,6 +515,12 @@ var b_brow:=PackedInt32Array([-1,-1])
 var b_sh:=PackedInt32Array([-1,-1])
 var b_thigh:=PackedInt32Array([-1,-1])
 var b_hand:=PackedInt32Array([-1,-1])
+var b_upper:=PackedInt32Array([-1,-1])
+var b_fore:=PackedInt32Array([-1,-1])
+## A hand held where the clips put it (a staff planted on the floor), whatever
+## the breathing, the sway and the turn of the chest do above it.
+var _pin_on:=PackedInt32Array([0,0])
+var _pin_at:Array[Transform3D]=[Transform3D.IDENTITY,Transform3D.IDENTITY]
 var _eye_axis:=PackedInt32Array([1,1])
 var _jaw_v:=1
 var _jaw_h:=0
@@ -459,6 +530,12 @@ var _groups:Dictionary={}
 
 var _a:Layer
 var _b:Layer
+## The acting's own stance under everything (and, for the seat, its higher twin).
+var base_stance:=""
+var _base:Layer
+var _base_hi:Layer
+var _base_out:Layer
+var _base_mix:=0.0
 
 # procedural state
 var _acc:=PackedVector3Array()       # per bone: degrees about X, Y, Z (figure axes, rest frame)
@@ -538,6 +615,9 @@ var _view_container:CanvasItem
 var _consts:Dictionary={}
 var _mood_face:=PackedFloat32Array()
 var _vis_amt:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0])
+## The jaw_open, brows_up, brows_down, eyes_wide and blink morphs (-1: the bones do it).
+var _x_key:=PackedInt32Array([-1,-1,-1,-1,-1])
+var _refresh:=0.0
 var _beat_mood:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0])
 var _beat_face:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
 var _beat_t:=-1.0
@@ -566,6 +646,7 @@ func _bind(figure:Node3D,skeleton:Skeleton3D)->void:
 		var sd:=".L" if s==0 else ".R"
 		b_eye[s]=skel.find_bone("eye"+sd);b_brow[s]=skel.find_bone("brow"+sd);b_sh[s]=skel.find_bone("shoulder"+sd)
 		b_thigh[s]=skel.find_bone("thigh"+sd);b_hand[s]=skel.find_bone("hand"+sd)
+		b_upper[s]=skel.find_bone("upper_arm"+sd);b_fore[s]=skel.find_bone("forearm"+sd)
 		if b_eye[s]>=0:_eye_axis[s]=_axis_along(b_eye[s],Vector3.UP)
 		if b_brow[s]>=0:
 			var head_basis:=skel.get_bone_global_rest(skel.get_bone_parent(b_brow[s])).basis
@@ -650,6 +731,19 @@ func _bind_face()->void:
 			_vis_key[v]=_sk_mesh.size()
 			_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
 			break
+	# J's expression morphs for the jaw, the brows and the lids (else the bones do it)
+	for pair:Array in [["jaw_open",0],["brows_up",1],["brows_down",2],["eyes_wide",3],["blink",4]]:
+		for m:MeshInstance3D in meshes:
+			var idx:=m.find_blend_shape_by_name(StringName(String(pair[0])))
+			if idx<0:continue
+			_x_key[int(pair[1])]=_sk_mesh.size()
+			_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
+			break
+	for name:String in OWNED_ZERO:
+		for m:MeshInstance3D in meshes:
+			var idx:=m.find_blend_shape_by_name(StringName(name))
+			if idx<0:continue
+			_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
 
 # --- instance API ----------------------------------------------------------------------
 
@@ -660,11 +754,21 @@ func act(clip:String,opts:={})->float:
 			fig.call(&"play",clip,float(opts.get("blend",0.3)),0.0)
 			return float(fig.call(&"clip_length",clip))
 		return 0.0
+	var layer:=_layer(clip,opts)
+	if layer==null:return 0.0
+	if _a!=null and not _a.done():
+		_b=_a
+		_b.fade_from=_b.t
+		_b.fade_len=maxf(layer.blend_in,0.12)
+	_a=layer
+	return layer.length/layer.speed
+
+func _layer(clip:String,opts:Dictionary)->Layer:
 	var meta:=clip_meta(clip)
 	var layer:=Layer.new()
 	layer.clip=clip
 	layer.anim=library(variant).get(clip)
-	if layer.anim==null:return 0.0
+	if layer.anim==null:return null
 	layer.map=_map_for(variant,clip,skel)
 	_fit(variant,skel)
 	layer.corr=_corr[variant]
@@ -680,12 +784,8 @@ func act(clip:String,opts:={})->float:
 	layer.gain=clampf(float(opts.get("weight",1.0)),0.0,1.0)
 	layer.t=float(opts.get("at",0.0))
 	layer.weights=_weights_for(meta,opts)
-	if _a!=null and not _a.done():
-		_b=_a
-		_b.fade_from=_b.t
-		_b.fade_len=maxf(layer.blend_in,0.12)
-	_a=layer
-	return layer.length/layer.speed
+	layer.born=layer.t
+	return layer
 
 func _weights_for(meta:Dictionary,opts:Dictionary)->PackedFloat32Array:
 	var w:=PackedFloat32Array()
@@ -693,8 +793,9 @@ func _weights_for(meta:Dictionary,opts:Dictionary)->PackedFloat32Array:
 	var groups:Dictionary=(meta.get("groups",{}) as Dictionary).duplicate()
 	for k:String in (opts.get("groups",{}) as Dictionary):groups[k]=float(opts.groups[k])
 	var stance:=String(fig.get(&"stance"))
-	if stance in SEATED and not bool(opts.get("force_legs",false)):groups["legs"]=0.0
-	if PROP_ARMS.has(stance) and not bool(opts.get("drop_prop",false)):
+	var seated:=stance in SEATED or (not base_stance.is_empty() and bool(clip_meta("stance_"+("log_low" if base_stance=="log" else base_stance)).get("seated",false)))
+	if seated and not bool(meta.get("stance",false)) and not bool(opts.get("force_legs",false)):groups["legs"]=0.0
+	if PROP_ARMS.has(stance) and not bool(meta.get("stance",false)) and String(meta.get("prop",""))!=stance and not bool(opts.get("drop_prop",false)):
 		for arm:String in PROP_ARMS[stance]:groups[arm]=0.0
 	for name:String in groups:
 		var idx:PackedInt32Array=_groups.get(name,PackedInt32Array())
@@ -735,6 +836,17 @@ func _beat_feel(args:Dictionary)->void:
 	_beat_len=maxf(0.2,float(args.get("dur",1.0)))
 	_beat_hold=bool(args.get("hold",false))
 
+## A half-catch takes the one who is fainting: their fall becomes the caught
+## fall (slower, into the catcher's arms), at the same moment of it, toward the catcher.
+func catch(other:Node3D)->void:
+	var them=of(other)
+	if them==null or them._a==null or not String(them._a.clip).begins_with("faint_"):return
+	var toward:String=them.side_of(fig)
+	var caught:="faint_caught_"+toward
+	if not has_clip(caught):return
+	var at:float=them._a.t
+	them.act(caught,{"at":at,"blend":0.15})
+
 ## Which way another stands from this person: "l" (their left) or "r".
 func side_of(other:Variant)->String:
 	var at:=Vector3.ZERO
@@ -744,12 +856,46 @@ func side_of(other:Variant)->String:
 	var local:=fig.global_transform.affine_inverse()*at
 	return "l" if local.x>=0.0 else "r"
 
-func rest_in(stance_id:String)->void:
+func rest_in(stance_id:String,opts:={})->void:
 	let_go(0.45)
-	if fig.get(&"stance")!=null and stance_id in (_consts.get("STANCES",[]) as Array):
-		fig.set(&"stance",stance_id)
+	var own:=String(OWN_STANCES.get(stance_id,""))
+	var under:=own if not own.is_empty() else stance_id
+	# a seat from the set's mark: the figure's own stool only when none is given
+	if stance_id=="log" and opts.has("seat"):under="stand"
+	if fig.get(&"stance")!=null and under in (_consts.get("STANCES",[]) as Array):
+		fig.set(&"stance",under)
 	if fig.has_method(&"rest_clip") and fig.has_method(&"play"):
 		fig.call(&"play",String(fig.call(&"rest_clip")),0.45,-1.0)
+	_set_base(stance_id,opts)
+
+## The base under everything: one of the acting's stances (or none).
+func _set_base(stance_id:String,opts:Dictionary)->void:
+	base_stance=""
+	if _base!=null:
+		_base_out=_base;_base_out.fade_from=_base_out.t;_base_out.fade_len=0.6
+		_base=null;_base_hi=null
+	if not OWN_STANCES.has(stance_id):return
+	var clip:="stance_"+stance_id
+	var hi:=""
+	_base_mix=0.0
+	if stance_id=="log":
+		clip="stance_log_low";hi="stance_log_high"
+		var low:=float(clip_meta("stance_log_low").get("seat",0.30))
+		var high:=float(clip_meta("stance_log_high").get("seat",0.46))
+		# the mark's seat is in the hall's metres: for this body as a 1.72 m one
+		var tall:=body_k*maxf(fig.global_transform.basis.get_scale().y if fig.is_inside_tree() else fig.scale.y,0.01)
+		var seat:=float(opts.get("seat",0.43*tall))/tall
+		_base_mix=clampf((seat-low)/maxf(high-low,0.01),0.0,1.0)
+	if not has_clip(clip):return
+	base_stance=stance_id
+	_base=_layer(clip,{"loop":true,"blend":0.6})
+	_base.t=rng.randf()*_base.length
+	_base.born=_base.t
+	if not hi.is_empty() and has_clip(hi):
+		_base_hi=_layer(hi,{"loop":true,"blend":0.6})
+		_base_hi.t=_base.t
+		_base_hi.born=_base.t
+		_base_hi.gain=_base_mix
 
 func let_go(blend:=-1.0)->void:
 	for layer in [_a,_b]:
@@ -820,6 +966,8 @@ func talk(text:String,seconds:float,opts:={})->void:
 	_gest_i=0
 
 func _free_hands()->String:
+	if not base_stance.is_empty():
+		return String(clip_meta("stance_"+("log_low" if base_stance=="log" else base_stance)).get("hands","LR"))
 	var hands:Dictionary=_consts.get("FREE_HANDS",{})
 	return String(hands.get(String(fig.get(&"stance")),"LR"))
 
@@ -882,11 +1030,21 @@ func step(delta:float)->void:
 	_acc.fill(Vector3.ZERO)
 	_touched.clear()
 	_hips_move=Vector3.ZERO
-	var walking:=String(fig.get(&"clip")).begins_with("walk")
-	if walking:
+	var walking:=String(fig.get(&"clip")).begins_with("walk") or (_a!=null and String(clip_meta(_a.clip).get("kind",""))=="walk")
+	if walking and String(fig.get(&"clip")).begins_with("walk"):
 		let_go(0.3)
 	_moods(dt)
-	# the reaction layers, the fading one first
+	# the stance of their own under it all, then the reactions, the fading one first
+	if _base_out!=null:
+		_base_out.t+=dt
+		if _base_out.done():_base_out=null
+		else:_sample(_base_out)
+	if _base!=null and not walking:
+		_base.t+=dt
+		_sample(_base)
+		if _base_hi!=null:
+			_base_hi.t=_base.t
+			_sample(_base_hi)
 	var face_w:=0.0
 	if _b!=null:
 		_b.t+=dt*_b.speed
@@ -898,11 +1056,17 @@ func step(delta:float)->void:
 		else:
 			_sample(_a)
 			face_w=_a.weight()
+	# the staff stays planted: its hand is held where the clips put it
+	_pin_on[1]=1 if String(fig.get(&"stance"))=="staff" and not walking and b_hand[1]>=0 and b_fore[1]>=0 and b_upper[1]>=0 else 0
+	for s in 2:
+		if _pin_on[s]==1:_pin_at[s]=skel.get_bone_global_pose(b_hand[s])
 	_life(dt,walking)
 	_gesture(dt)
 	_speech(dt)
 	_apply_acc()
 	_look(dt,walking)
+	for s in 2:
+		if _pin_on[s]==1:_pin_hand(s)
 	_face_out(dt,face_w)
 	if not capture_bones.is_empty():
 		captured.resize(capture_bones.size())
@@ -1139,6 +1303,9 @@ func _speech(dt:float)->void:
 		if not held:act(_gest_clip[_gest_i])
 		_gest_i+=1
 
+func _has_visemes()->bool:
+	return _vis_key[0]>=0
+
 func _viseme(shape:int,amount:float)->void:
 	if shape>=0 and shape<_vis_amt.size():_vis_amt[shape]=amount
 
@@ -1157,8 +1324,8 @@ func _look(dt:float,walking:bool)->void:
 	if have:
 		want=_look_weight
 	elif bool(fig.get(&"_gaze_on")) and fig.get(&"gaze") is Node3D:
-		# the stage's own gaze point (court_figure_3d look_at_point)
-		target=(fig.get(&"gaze") as Node3D).global_position;have=true;want=0.95
+		# the stage's own gaze point (court_figure_3d look_at_point), as strongly as it asks
+		target=(fig.get(&"gaze") as Node3D).global_position;have=true;want=_gaze_weight()
 	elif not walking:
 		# idle: glances about the hall, never out at the viewer
 		_glance_wait-=dt*(0.5 if hushed else 1.0)
@@ -1166,7 +1333,11 @@ func _look(dt:float,walking:bool)->void:
 			_glance_wait=rng.randf_range(2.5,7.0)
 			_glance=_pick_glance()
 		target=_glance;have=true;want=0.6*ambient
-	_look_w=lerpf(_look_w,want,1.0-exp(-dt*4.0))
+	# a reaction that moves the head has it: idle glances stop, a look asked
+	# for keeps only a little pull (a talking gesture keeps the look whole)
+	var taken:=_head_taken()
+	if taken>0.0:want*=1.0-taken*(1.0 if _look_kind==0 and not bool(fig.get(&"_gaze_on")) else 0.7)
+	_look_w=lerpf(_look_w,want,1.0-exp(-dt*(9.0 if taken>0.0 else 4.0)))
 	if not have or _look_w<0.01:
 		look_yaw=0.0;return
 	var to_skel:=skel.global_transform.affine_inverse()
@@ -1228,6 +1399,64 @@ func _look(dt:float,walking:bool)->void:
 	var qh:=Quaternion(Vector3.UP,deg_to_rad(0.47*dyaw))*Quaternion(right,deg_to_rad(0.58*dpitch))
 	skel.set_bone_pose_rotation(b_head,neck_g.inverse()*qh*neck_g*head_l)
 
+## How much the reactions playing now drive the head (0..1).
+func _head_taken()->float:
+	var w:=0.0
+	for layer:Layer in [_a,_b]:
+		if layer==null or b_head<0:continue
+		if String(clip_meta(layer.clip).get("kind",""))=="talk":continue
+		w=maxf(w,layer.weight()*layer.weights[b_head])
+	return clampf(w,0.0,1.0)
+
+func _gaze_weight()->float:
+	var looks:Variant=fig.get(&"_looks")
+	if looks is Array:
+		for m in looks:
+			if m is SkeletonModifier3D and String((m as Node).name)=="Look_head":
+				var full:=float((m as Object).get_meta("weight",0.85))
+				return clampf(float((m as Object).get(&"influence"))/maxf(full,0.01),0.0,1.0)
+	return 0.95
+
+## The stage this figure stands on (for the god's point and the cast by key).
+var _stage_ref:WeakRef
+func stage_of()->Object:
+	if _stage_ref!=null and _stage_ref.get_ref()!=null:return _stage_ref.get_ref()
+	var n:Node=fig
+	while n!=null:
+		if n.has_method(&"god_point") and n.has_method(&"figure"):
+			_stage_ref=weakref(n);return n
+		n=n.get_parent()
+	return null
+
+## Two-bone IK: the upper arm and forearm turned in their own bend plane so the
+## wrist is back on its mark, and the hand set back to its turn.
+func _pin_hand(s:int)->void:
+	var up:=b_upper[s];var fo:=b_fore[s];var ha:=b_hand[s]
+	var g_up:=skel.get_bone_global_pose(up)
+	var g_fo:=skel.get_bone_global_pose(fo)
+	var g_ha:=skel.get_bone_global_pose(ha)
+	var S:=g_up.origin;var E:=g_fo.origin;var W:=g_ha.origin
+	var T:=_pin_at[s].origin
+	if W.distance_squared_to(T)<1e-8:return
+	var a:=S.distance_to(E);var b:=E.distance_to(W)
+	var d:=clampf(S.distance_to(T),absf(a-b)+0.001,a+b-0.001)
+	var u:=(T-S).normalized()
+	var cos_a:=clampf((a*a+d*d-b*b)/(2.0*a*d),-1.0,1.0)
+	var pole:=(E-S)-u*(E-S).dot(u)
+	if pole.length_squared()<1e-10:return
+	pole=pole.normalized()
+	var E2:=S+u*(a*cos_a)+pole*(a*sqrt(maxf(0.0,1.0-cos_a*cos_a)))
+	var parent:=skel.get_bone_parent(up)
+	var g_parent:=skel.get_bone_global_pose(parent) if parent>=0 else Transform3D.IDENTITY
+	var q1:=Quaternion((E-S).normalized(),(E2-S).normalized())
+	var up_q:=q1*g_up.basis.get_rotation_quaternion()
+	skel.set_bone_pose_rotation(up,(g_parent.basis.get_rotation_quaternion().inverse()*up_q).normalized())
+	var w1:=E2+q1*(W-E)
+	var q2:=Quaternion((w1-E2).normalized(),(T-E2).normalized())
+	var fo_q:=q2*q1*g_fo.basis.get_rotation_quaternion()
+	skel.set_bone_pose_rotation(fo,(up_q.inverse()*fo_q).normalized())
+	skel.set_bone_pose_rotation(ha,(fo_q.inverse()*_pin_at[s].basis.get_rotation_quaternion()).normalized())
+
 func _pick_glance()->Vector3:
 	var at:=skel.global_transform*skel.get_bone_global_pose(b_head).origin if b_head>=0 else fig.global_position+Vector3.UP*1.5
 	var basis:=fig.global_transform.basis
@@ -1285,12 +1514,12 @@ func _face_out(dt:float,face_w:float)->void:
 	lids_now=lids
 	for s in 2:
 		var b:=b_eye[s]
-		if b<0:continue
+		if b<0 or _x_key[4]>=0:continue
 		var sc:=Vector3.ONE
 		sc[_eye_axis[s]]=maxf(lids,0.05)
 		skel.set_bone_pose_scale(b,sc)
 	# the jaw: the words' shapes, or what the clip and mood give it
-	if b_jaw>=0:
+	if b_jaw>=0 and _x_key[0]<0:
 		var cur:=skel.get_bone_pose_scale(b_jaw)
 		var jaw:=face_now[CH_JAW]
 		var sc:=Vector3.ONE
@@ -1306,7 +1535,7 @@ func _face_out(dt:float,face_w:float)->void:
 	var lift:=clampf(face_now[CH_BROWS],-1.2,1.4)*0.0045*body_k
 	for s in 2:
 		var b:=b_brow[s]
-		if b<0:continue
+		if b<0 or _x_key[1]>=0:continue
 		skel.set_bone_pose_position(b,skel.get_bone_pose_position(b)+_brow_up[s]*lift)
 	# the morphs
 	_sk_value.fill(0.0)
@@ -1317,6 +1546,17 @@ func _face_out(dt:float,face_w:float)->void:
 		var ch:=_sk_from_ch[i]
 		if ch<0:continue
 		_sk_value[_sk_from_key[i]]+=face_now[ch]*_sk_from_gain[i]
+	# the jaw, brows and lids on their morphs (J's: eyes_wide is 1.28 open, blink 0.06)
+	if _x_key[0]>=0:_sk_value[_x_key[0]]+=clampf(face_now[CH_JAW]*(0.45 if speaking and _has_visemes() else 1.0),0.0,1.0)
+	if _x_key[1]>=0:_sk_value[_x_key[1]]+=maxf(0.0,face_now[CH_BROWS])
+	if _x_key[2]>=0:_sk_value[_x_key[2]]+=maxf(0.0,-face_now[CH_BROWS])
+	if _x_key[3]>=0:_sk_value[_x_key[3]]+=maxf(0.0,(lids-1.0)/0.28)
+	if _x_key[4]>=0:_sk_value[_x_key[4]]+=maxf(0.0,(1.0-lids)/0.94)
+	# now and then every morph is written again (anything else that set one is undone)
+	_refresh-=dt
+	if _refresh<=0.0:
+		_refresh=0.25
+		_sk_last.fill(-1.0)
 	for k in _sk_value.size():
 		var v:=clampf(_sk_value[k],0.0,1.0)
 		if absf(v-_sk_last[k])>0.004:

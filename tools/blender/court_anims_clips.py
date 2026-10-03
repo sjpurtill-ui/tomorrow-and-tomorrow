@@ -108,6 +108,7 @@ class Act:
         self.lags = None
         self.foot_keys = {"L": [], "R": []}
         self.knee_fn = None
+        self.loop = False
 
     # torso: a delta on the base stance
     def t(self, at, kind="ease", **bones):
@@ -122,6 +123,12 @@ class Act:
         self.arm_keys[s].append((at, key, kind))
         return self
 
+    def world(self, s, at, torso, key, kind="ease"):
+        """An arm key written in the hall (left-side terms, mirrored for R)
+        for the body as torso (a dict for tpose) holds it at that moment."""
+        tp = torso_of(self.B, tpose(**torso))
+        return self.arm(s, at, L.world_key(tp, key), kind)
+
     def rest(self, s, at, kind="ease", **kw):
         k = self.rest_arm[s].copy(**kw) if kw else self.rest_arm[s]
         return self.arm(s, at, k, kind)
@@ -130,10 +137,11 @@ class Act:
         self.face_keys.append((at, face(**ch), kind))
         return self
 
-    def foot(self, s, at, off=(0.0, 0.0, 0.0), kind="ease", lift=0.0):
+    def foot(self, s, at, off=(0.0, 0.0, 0.0), kind="ease", lift=0.0, rot=None):
         """A planted foot moved (metres for a 1.72 m body, figure axes), with a
-        lift of the foot through the step into this key."""
-        self.foot_keys[s].append((at, (Vector(off) * L.K, lift * L.K), kind))
+        lift of the foot through the step into this key, and the foot's own
+        turn (degrees, figure axes; None keeps the stance's)."""
+        self.foot_keys[s].append((at, (Vector(off) * L.K, lift * L.K, rot), kind))
         return self
 
     def legs(self, keys):
@@ -146,10 +154,15 @@ class Act:
         return self
 
     def build(self):
-        tseq = Seq(self.torso_keys if self.torso_keys else [(0.0, torso_of(self.B))])
+        per = self.length if getattr(self, "loop", False) else None
+        tseq = Seq(self.torso_keys if self.torso_keys else [(0.0, torso_of(self.B))], per)
         aseq = {s: ArmSeq(s, ks) for s, ks in self.arm_keys.items() if ks}
-        fseq = Seq(self.face_keys if self.face_keys else [(0.0, {})])
-        fseqs = {s: (Seq(ks) if ks else None) for s, ks in self.foot_keys.items()}
+        for sq in aseq.values():
+            sq.seq.period = per
+        fseq = Seq(self.face_keys if self.face_keys else [(0.0, {})], per)
+        fseqs = {s: (Seq(ks, per) if ks else None) for s, ks in self.foot_keys.items()}
+        if self.leg_keys is not None:
+            self.leg_keys.period = per
         B = self.B
         drag = self.drag
 
@@ -168,6 +181,7 @@ class Act:
                 p.update(pose_seq(self.leg_keys, t, drag))
             elif self.feet:
                 feet = {}
+                frot = dict(self.FOOT)
                 for s in "LR":
                     feet[s] = self.FEET[s]
                     if fseqs.get(s) is not None:
@@ -176,8 +190,11 @@ class Act:
                         if a_ is not b_ and b_[1][1] > 0.0:
                             off = off + Vector((0.0, 0.0, b_[1][1] * math.sin(math.pi * L.clamp01(u_))))
                         feet[s] = feet[s] + off
+                        ra = a_[1][2] if a_[1][2] is not None else self.FOOT[s]
+                        rb = b_[1][2] if b_[1][2] is not None else self.FOOT[s]
+                        frot[s] = L.lerp3(ra, rb, u_)
                 knees = self.knee_fn(t) if self.knee_fn is not None else self.KNEES
-                plant(p, feet, knees, self.FOOT)
+                plant(p, feet, knees, frot)
             return p
 
         def face_fn(t):
@@ -327,42 +344,6 @@ def make_clips():
     a.on_top(lambda t: tremble(t, 1.0 * L.clamp01((t - 0.15) / 0.1) * (1 - L.clamp01((t - 1.0) / 0.5)), 1.2, 0.4))
     clips["flinch"] = clip("flinch", 1.6, a, tags=["fear"], blend_in=0.09, blend_out=0.6)
 
-    # ---- laugh: a breath in, then it bursts out of them and doubles them over
-    a = Act(2.8, drag=1.0)
-    a.t(0.0).t(0.16, "out", chest=(-3, 0, 0), head=(-4, 0, 0), hips_loc=(0, 0, 0.004))
-    a.t(0.36, "back", hips_loc=(0, 0.012, 0.0), spine=(-4, 0, 2), chest=(-9, 0, 3), neck=(-6, 0, 0), head=(-18, 3, 5))
-    a.t(1.05, "ease", hips_loc=(0, 0.012, -0.004), spine=(-1, 0, 2), chest=(-5, 0, 2), head=(-8, 1, 3))
-    a.t(1.55, "in", hips_loc=(0, 0.024, -0.012), spine=(7, 0, 0), chest=(11, 0, -2), neck=(5, 0, 0), head=(7, -2, -3))
-    a.t(1.75, "settle", hips_loc=(0, 0.022, -0.010), spine=(6, 0, 0), chest=(10, 0, -2), neck=(5, 0, 0), head=(5, -2, -3))
-    a.t(2.25, "ease", hips_loc=(0, 0.006, 0.0), chest=(1, 0, 0), head=(-2, 0, 1))
-    a.t(2.8, "ease")
-    a.rest("L", 0.0).rest("L", 0.16)
-    a.arm("L", 0.42, hand_belly("L"), "out").arm("L", 2.2, hand_belly("L")).rest("L", 2.8, "ease")
-    open_r = hand_heart("R").copy(sh=(0, -8, -3))
-    a.rest("R", 0.0).rest("R", 0.18).arm("R", 0.45, open_r, "out").arm("R", 1.2, open_r.copy(w=open_r.w + Vector((0.0, -0.02, 0.03))))
-    slap = hand_thigh("R")
-    a.arm("R", 1.50, open_r.copy(w=open_r.w + Vector((0.0, -0.02, 0.10 * k))), "out")
-    a.arm("R", 1.62, slap.copy(arc=(0.03, -0.10, 0.08)), "in").arm("R", 1.80, slap.copy(w=slap.w + Vector((0, -0.02, 0.05 * k))), "out")
-    a.arm("R", 2.2, slap).rest("R", 2.8, "ease")
-    ha = lambda t: pulses(t, 0.36, 0.17, 7, 0.86) + pulses(t, 1.62, 0.15, 4, 0.7) * 0.8
-
-    def laugh_beats(t):
-        b = ha(t)
-        p = {}
-        add(p, "chest", rot=(4.5 * b, 0, 0))
-        add(p, "spine", rot=(2.0 * b, 0, 0))
-        add(p, "head", rot=(4.0 * b, 0, 0))
-        add(p, "hips", loc=(0, 0, -0.006 * b))
-        both(p, "shoulder", rot=(0, -7.0 * b, 0))
-        return p
-    a.on_top(laugh_beats)
-    a.f(0.0).f(0.16, "out", jaw=0.25, smile=0.6, brows=0.35, lids=0.85)
-    a.f(0.36, "back", jaw=0.8, smile=1.0, brows=0.55, lids=0.35)
-    a.f(1.5, "ease", jaw=0.7, smile=1.0, brows=0.3, lids=0.25)
-    a.f(2.3, "ease", jaw=0.2, smile=0.8, brows=0.2, lids=0.6).f(2.8, "ease", smile=0.4, lids=0.9)
-    clips["laugh"] = clip("laugh", 2.8, a, tags=["joy"], blend_in=0.14, blend_out=0.6, face_beats="ha")
-    clips["laugh"].beats = ha
-
     # ---- stifled laugh: a snort, a hand clapped over the mouth, shoulders shaking
     a = Act(2.6, drag=0.9)
     a.t(0.0).t(0.12, "snap", spine=(2, 0, 0), chest=(4, 0, 0), head=(7, 0, 0))
@@ -390,23 +371,6 @@ def make_clips():
     a.f(2.05, "ease", lids=0.8, smile=0.3, tight=0.6).f(2.6, "ease", smile=0.15, tight=0.25)
     clips["laugh_stifled"] = clip("laugh_stifled", 2.6, a, tags=["joy", "guilt"], blend_in=0.08, blend_out=0.55, hands="R")
     clips["laugh_stifled"].beats = shake
-
-    # ---- side-eye: the eyes go first, the head a little after; a long look; snap back
-    for sd, nm in ((1.0, "side_eye_l"), (-1.0, "side_eye_r")):
-        a = Act(2.6, drag=1.2)
-        a.t(0.0).t(0.42, "out", spine=(0, 1.5 * sd, 1.5 * sd), chest=(1, 1.5 * sd, 4 * sd), neck=(3, 0, 6 * sd), head=(5, 6 * sd, 13 * sd))
-        a.t(0.62, "settle", spine=(0, 2 * sd, 2 * sd), chest=(1, 2 * sd, 5 * sd), neck=(3, 0, 7 * sd), head=(6, 7 * sd, 17 * sd))
-        a.t(1.65, "ease", spine=(0, 2 * sd, 2 * sd), chest=(1, 2 * sd, 5 * sd), neck=(3, 0, 7 * sd), head=(6, 8 * sd, 18 * sd))
-        a.t(2.0, "out", chest=(0, 0, 1 * sd), head=(1, 1 * sd, 3 * sd))
-        a.t(2.6, "ease")
-        a.f(0.0).f(0.18, "snap", eyes_x=sd, lids=0.78, tight=0.3, stern=0.2)
-        a.f(0.62, "ease", eyes_x=sd, lids=0.70, tight=0.4, stern=0.3, brows=-0.15)
-        a.f(1.65, "ease", eyes_x=sd, lids=0.68, tight=0.45, stern=0.3, brows=-0.2)
-        a.f(1.78, "snap", eyes_x=0.0, lids=0.85, tight=0.35).f(2.6, "ease")
-        a.on_top(lambda t: drift(t, 0.5, 2.3, 0.3))
-        clips[nm] = clip(nm, 2.6, a, tags=["scorn", "doubt", "conspiracy"], kind="react",
-                         groups={"legs": 0.0, "torso": 0.6, "head": 1.0, "arm_L": 0.0, "arm_R": 0.0}, hands="",
-                         blend_in=0.2, blend_out=0.5)
 
     # ---- bows ---------------------------------------------------------------------------
     def hanging(s, pitch, sh=(0, 0, 0)):
@@ -647,7 +611,9 @@ def make_clips():
     clips["scratch_head"] = clip("scratch_head", 3.0, a, kind="fidget", groups={"legs": 0.0, "torso": 0.5, "head": 0.8, "arm_L": 0.0, "arm_R": 1.0},
                                  hands="R", blend_in=0.3, blend_out=0.5, tags=["puzzled"])
     import court_anims_more
+    import court_anims_r2
     court_anims_more.make_more(clips)
+    court_anims_r2.make_r2(clips)
     return clips
 
 
