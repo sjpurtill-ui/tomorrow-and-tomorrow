@@ -26,6 +26,8 @@ func _scenarios()->Dictionary:
 		# The same people on an average site (between good and poor): the
 		# founding-years check that a new people does not starve.
 		"average":{"site":"average","focus":"","policies":[],"research":sensible_research},
+		# The same people on poor land (no development focus or decrees, unlike "poor").
+		"poorland":{"site":"poor","focus":"","policies":[],"research":sensible_research},
 		"poor":{"site":"poor","focus":"development","policies":["foraging_drive","labor_mobilization"],"research":{"demography":0,"nutrition":0,"health":0,"labor":2,"knowledge":5,"production":6,"infrastructure":2,"logistics":1,"ecology":0,"institutions":2,"security":5,"culture":1}},
 		"research":{"site":"good","focus":"research","policies":[],"research":{"demography":1,"nutrition":2,"health":2,"labor":1,"knowledge":8,"production":4,"infrastructure":1,"logistics":1,"ecology":1,"institutions":3,"security":0,"culture":2}},
 		"ai":{"site":"good","focus":"","policies":[],"ai":true,"research":{}},
@@ -270,7 +272,7 @@ func _row(year:int,tally:Dictionary,start:int)->Dictionary:
 		"cohesion":snappedf(float(metrics.get("cohesion",0.0)),0.001),"housing_ratio":snappedf(float(metrics.get("housing_ratio",0.0)),0.001),
 		"ecology":snappedf(float(metrics.get("ecology",0.0)),0.001),"labor_efficiency":snappedf(float(metrics.get("labor_efficiency",0.0)),0.001),
 		"capacities":capacities,"channels":channels,"channel_capacity":snappedf(channel_capacity,0.0001),
-		"mortality_components":metrics.get("mortality_components",{}),"water":{"intake":float(state.water_metrics.get("intake_ratio",1.0)),"days":float(state.water_metrics.get("days",0.0))},
+		"mortality_components":metrics.get("mortality_components",{}),"death_causes":state.rolling_death_causes(365),"water":{"intake":float(state.water_metrics.get("intake_ratio",1.0)),"days":float(state.water_metrics.get("days",0.0))},
 		"ceiling_era":snappedf(float(WorldSimulation.discovery.society_model.ceiling_era),0.1),
 		"known":state.known_discoveries.size(),"per_line":per_line,"effects":effects,
 		"harvest":harvest,"need":snappedf(float(metrics.get("food_consumption",0)),0.1),"source_health":source_health,

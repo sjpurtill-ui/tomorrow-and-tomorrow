@@ -888,6 +888,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		annual_death_rate+=float(component_rate)
 	WorldSimulation.state.simulation_metrics["annual_death_rate"]=annual_death_rate
 	WorldSimulation.state.simulation_metrics["mortality_components"]=mortality_components.duplicate(true)
+	# What the hard times take in a usual year (crisis_background.gd), shown
+	# beside the causes; never a death today: the crises take their own.
+	WorldSimulation.state.simulation_metrics["usual_hardship_rate"]=WorldSimulation.state.usual_hardship_rate(housing_ratio)
 	WorldSimulation.state.death_progress+=population*annual_death_rate/365.0*span
 	var deaths_today:=maxi(0,floori(WorldSimulation.state.death_progress)) # research_600: a named death already registered is a debt, never negative deaths
 	WorldSimulation.state.death_progress-=deaths_today
@@ -939,7 +942,7 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var death_record:=_record_demographic_change("death",deaths_today,dominant_cause,food_days,production_ratio,housing_ratio,mortality_result.get("affected_cohorts",{}),not ordinary_deaths)
 		if ordinary_deaths:
 			HearthCount.tally("buried",deaths_today)
-			HearthCount.tally_ages(deaths_today)
+			HearthCount.tally_ages(deaths_today,mortality_result.get("affected_cohorts",{}))
 		else:
 			# Deaths of sickness while health is failing go to the sickness &
 			# disaster log rather than the Chronicle (hardship_log.gd).

@@ -37,6 +37,8 @@ Requirements: Python 3.11 and numpy. The Godot executable is used only by `run_t
 | `gdparse.py` | Reads constants straight out of GDScript. |
 | `params.json` | Constants that cannot be parsed, each with its source. The `calibrated` section holds the fitted values. |
 | `scenarios.json` | Player-policy knobs. The `path_<p>` scenarios mirror the truth probe (`--path`); `suites` names the people-first suite. The `sensible`/`poor`/`research`/`ai`/`artifacts` scenarios mirror the pre-overhaul truth (archived). |
+| `crisis.py` | The crises: a seeded mirror of `crisis_unattended.gd` on `crisis_system.gd`'s hazards and tolls. |
+| `crisis_share.py` | Measures the crises' share of the age table by era and cohort for `scripts/crisis_background.gd` (`--apply` writes it). |
 | `paths.py` | The people-first suite and its one report: paths, extremes, switches, the founding years, milestones and flags against the benchmark bands. |
 | `truth_probe.gd/.tscn` | Real-engine recorder: a JSON row per year, every discovery with its day, and artifact study. |
 | `dump_catalog.gd` | Headless snapshot of the live catalog → `cache/live_catalog.json`. |
@@ -108,6 +110,14 @@ The surrogate reads P2 from the game: `TERRITORY_SLOPE`, `CARER_CROWDING` (crowd
 
 Truth: six 15-year runs, the five path runs plus `avg_balanced` (the probe's average site, between good and poor), recorded on the P2 branch one engine at a time (103–121 s each). A fitted `harvest_mult` (1.1, best on both sites) stands in for what the engine's harvest gets that the surrogate leaves out (founding traditions, progression and season modifiers, the gathering lever, seed coverage); the re-planning rate is held at 1. `check.py --strict` passes: 6 runs, five known gaps (food days; the first years' food work on growth, war and the average site; the learning path's line mix, production 21 against 15 of 144).
 
+### Crises and the age table's background (2026-10-03)
+
+The surrogate now has the crises (`crisis.py`): a seeded mirror of `crisis_unattended.gd` on the hazards and tolls of `crisis_system.gd`. Each sub-step rolls each crisis type at the chance of an onset over its days, in the engine's order (hunger, dry season, cold year, sickness and new pestilence, flood, fire). Two onsets never open within `ONSET_GAP` days, and two at most run at once. Deaths come at the turn (40 in 100 of the toll) and at the end, off the cohorts by the cause's own death weights, never below the shock floor. The silent official's answers apply: tending or keeping the sick apart, rationing, carrying water, children kept apart, the roots. So do the side effects: sick leave, rations on the food demand, spoiled stores and lost roofs, immunity and the people's own custom of keeping the sick apart, and echoes of a bad sickness. Strangers' sickness is left out (the surrogate has no foreign contacts), as are the dry season's water work and timber. `"crises": false` in the params turns them off.
+
+The engine counted the crises twice: the age table is all-cause (BENCHMARKS_600: life expectancy about 25, infant deaths about 260 at the founding, crises included), and the crises killed on top, about 8 in 1,000 a year at the founding. `scripts/crisis_background.gd` now holds `CRISIS_SHARE`: for each age cohort, the share of its all-cause hazard the crises take for a typical people of each era. The day's ordinary deaths emit the table less that share (`GameState._background_cohort_hazards`), and the crises take it themselves, as swings. The screens read the whole table, so life expectancy and infant deaths still show life as lived. `crisis_share.py` measures the table: the balanced path on good and average land, crises on, 48 seeds to year 200 and 8 to year 3,000. In each era window, each cohort's share is its crisis deaths over the deaths the all-cause table expects there. Re-run it (`--apply`) after changing the crises, the age table or the founding; two passes settle it. The surrogate reads the table from the game.
+
+Against the engine's first decade on good and average land (8 runs on 4 seeds), the surrogate's crises take 8.2–8.4 in 1,000 a year against the engine's 7.5–8.4, in the same mix: sickness about 4.5, hunger about 1.6, and floods, fires and dry seasons about 1 each. Its growth sits a little under the engine's: +0.41% and +0.35% a year over 48 seeds, against +0.57% and +0.51%. On poor land it starves sooner than the engine (Known gaps 2), so its poor-land crises run high, 18.6 against 13.6. The six truth runs were re-recorded on this branch (103–112 s each); `check.py --strict` passes (score 31.1). The surrogate sits about 6% under the engine's people at year 15 (128 against 136 on the balanced path), inside the 15% tolerance.
+
 ## What it models
 
 The surrogate models one aggregate society, stepped month by month. Research, adoption, effect totals, capacities and artifacts update once a month. Demography and food take four sub-steps a month (two before the people-first recalibration), using the engine's daily rates, and the leaders re-plan the work at each.
@@ -132,7 +142,7 @@ The surrogate models one aggregate society, stepped month by month. Research, ad
 - **Other societies and conflict.** There are no rivals, diplomacy, war, trade, money economy or decrees beyond the scenario's repeating ones.
 - **Construction.** Construction projects are not objects. The five founding works finish in year 1, as the truth shows, and later works follow their discovery.
 - **Resources and water.** There are no per-resource stockpiles or water logistics. Resource stages are years in `params.json`.
-- **Court and events.** There is no court, audience or events. Named settlements are simply one per `settlement_population`.
+- **Court and events.** There is no court or audience; crises are answered as the silent official would (`crisis.py`), and other events are left out. Named settlements are simply one per `settlement_population`.
 - **Scouting finds are not calibrated.** Headless probe worlds have no terrain, so the engine's parties never leave. The find model runs on the engine's constants, but its rates are an estimate. See "Known gaps".
 
 ## Calibration

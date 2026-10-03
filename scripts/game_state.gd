@@ -4,6 +4,7 @@ var civilian_injuries:Dictionary={"limited":0.0,"severe":0.0}
 
 const SOCIETAL_VALUES_MODEL:=preload("res://scripts/societal_values_model.gd")
 const EARLY_CARE:=preload("res://scripts/early_life_conditions.gd")
+const CRISIS_BACKGROUND:=preload("res://scripts/crisis_background.gd")
 const TRACE:=preload("res://scripts/performance_trace.gd")
 ## Pregnancies under way at founding, as a share of the baseline annual
 ## conceptions: about 0.65 of the baseline is conceived in ordinary founding
@@ -989,7 +990,7 @@ func _mortality_weights_for(cause:String) -> Dictionary:
 		# while projected life expectancy remained low.
 		"Natural causes":
 			# Early care changes which ages die: follow the current life table.
-			if early_care_blend>0.0 and not early_care.is_empty(): return _natural_cohort_hazards()
+			if early_care_blend>0.0 and not early_care.is_empty(): return _background_cohort_hazards()
 			return {"children":1.0,"youth":0.36,"early_adults":0.50,"established_adults":0.75,"mature_adults":2.20,"elders":10.0}
 		"Hunger": return {"children":2.2,"youth":0.8,"early_adults":0.7,"established_adults":0.8,"mature_adults":1.2,"elders":2.0}
 		"Illness","Dehydration","Exposure": return {"children":1.8,"youth":0.7,"early_adults":0.7,"established_adults":0.9,"mature_adults":1.4,"elders":2.6}
@@ -1624,16 +1625,40 @@ func _baseline_mortality_hazard_at_age(age:int)->float:
 	return 0.380
 
 func current_natural_mortality_rate(housing_ratio:float=-1.0)->float:
+	# The table is all-cause; the crises take their expected share themselves
+	# (crisis_background.gd), so the day's deaths emit only the rest.
+	return _natural_rate(housing_ratio,true)
+
+## What the hard times (sickness, floods, lean seasons: crisis_background.gd)
+## take in a usual year, per head a year: the whole age table less the
+## background the day's ordinary deaths emit, under the same conditions. The
+## "What is killing people now" bars show it, so the causes add up to the
+## rate behind LIVES in a calm year too.
+func usual_hardship_rate(housing_ratio:float=-1.0)->float:
+	return maxf(0.0,_natural_rate(housing_ratio,false)-_natural_rate(housing_ratio,true))
+
+## Yearly deaths per head by the age table: the background (`background`) or
+## the whole table, under today's conditions.
+func _natural_rate(housing_ratio:float,background:bool)->float:
 	initialize_population_model()
 	var condition_factor:=_mortality_condition_factor(housing_ratio)
 	var deaths_per_year:=0.0
 	# Average the same life-table hazards used by projected life expectancy over
 	# each fixed age band. This stays O(1) at every population scale.
-	var cohort_hazards:=_natural_cohort_hazards(condition_factor)
+	var cohort_hazards:=_background_cohort_hazards(condition_factor) if background else _natural_cohort_hazards(condition_factor)
 	for key in POPULATION_AGE_COHORTS:
 		var average_hazard:float=cohort_hazards[key]
 		deaths_per_year+=float(population_cohorts.get(key,0.0))*clampf(average_hazard*condition_factor,0.0001,0.98)
 	return deaths_per_year/maxf(1.0,population_exact)
+
+## Each cohort's age-table hazard less the crises' expected share of it
+## (crisis_background.gd): what the day's ordinary deaths take. The screens
+## read the whole table (_natural_cohort_hazards, life_expectancy_from).
+func _background_cohort_hazards(condition_factor:float=-1.0)->Dictionary:
+	var hazards:=_natural_cohort_hazards(condition_factor)
+	var kept:=CRISIS_BACKGROUND.background(elapsed_days/365.0)
+	for key in POPULATION_AGE_COHORTS:hazards[key]=float(hazards[key])*float(kept.get(key,1.0))
+	return hazards
 
 ## Mean baseline hazard of each cohort's ages, scaled by the early-care age
 ## multipliers. O(110) and independent of population.
@@ -1657,7 +1682,10 @@ func _current_exceptional_mortality_rate()->float:
 		for cause in components:
 			if String(cause)!="Natural causes": exceptional+=maxf(0.0,float(components[cause]))
 		return exceptional
-	return maxf(0.0,float(simulation_metrics.get("annual_death_rate",0.0))-current_natural_mortality_rate())
+	# Only a save from before the mortality components keeps a rate without
+	# them, and its rate holds the whole age table: take the whole table out,
+	# so the crises' share (crisis_background.gd) is never counted twice.
+	return maxf(0.0,float(simulation_metrics.get("annual_death_rate",0.0))-_natural_rate(-1.0,false))
 
 ## Counts today's exceptional risks into the month-long average the projection
 ## reads (exceptional_hazard_smoothed). `weight` is the day span's share of a
