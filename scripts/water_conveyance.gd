@@ -46,6 +46,9 @@ static func delivery(context:Dictionary,day:int,budget:float)->float:
 	if int(data().last_day)>=day:return 0.0
 	data().last_day=day
 	var total:=0.0;var lost:=0.0
+	# What the lines could bring today were the town to want it all (a dry
+	# year's arithmetic, dry_water.gd, reads it).
+	var potential:=0.0
 	var sources:Array=context.get("water_conveyance_sources",[])
 	var origin:Variant=context.get("origin")
 	for line:Dictionary in data().lines:
@@ -69,10 +72,11 @@ static func delivery(context:Dictionary,day:int,budget:float)->float:
 		# Throughput is a game service quantity, not a hydraulic engineering rating.
 		var capacity:=120.0*float(line.condition)*(1.0-float(line.obstruction))
 		var leakage:=clampf(float(line.leakage)+(1.0-float(line.condition))*.3,0,1)
+		potential+=capacity*(1.0-leakage)
 		var delivered:=minf(maxf(0.0,budget-total),capacity*(1.0-leakage))
 		line.delivered_today=delivered;total+=delivered
 		lost+=delivered*leakage/maxf(.0001,1.0-leakage)
-	data().report={"day":day,"delivered":total,"lost":lost}
+	data().report={"day":day,"delivered":total,"lost":lost,"potential":potential}
 	return total
 
 static func maintain(line_id:int,work:float,clear_obstruction:bool=false)->float:

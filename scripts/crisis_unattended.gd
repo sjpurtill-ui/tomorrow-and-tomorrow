@@ -150,7 +150,8 @@ static func _open_drought(s:Dictionary,day:int,x:Dictionary)->void:
 	var rng:=CS._rng("drought:%d" % day)
 	var sev:=maxf(clampf(1.0-float(x.weather_season),0.0,0.6),CS.drought_depth(day))
 	var c:=_new(s,"drought",day,x,{"sev":sev,"mid_day":day+rng.randi_range(30,45),"end_day":day+rng.randi_range(90,130)})
-	_plan_deaths(s,c,CS._lognormal(rng,0.002,1.0,0.0,0.05)*(1.0+4.0*sev))
+	# The same draw; it sets how deep the springs fail (dry_water.gd).
+	CS.plan_drought(c,CS._lognormal(rng,0.002,1.0,0.0,0.05)*(1.0+4.0*sev))
 	if sev>=CS.DROUGHT_COURT_DEPTH and not bool(c.severe): c.severe=true; _stat(s,"drought","severe")
 	_answer(s,c,"carry")
 
@@ -218,8 +219,9 @@ static func _answer(s:Dictionary,c:Dictionary,choice:String)->void:
 			_policy(c,"tend",{"labor_multiplier":-0.05},30)
 			_metric("cohesion",0.01)
 		"carry":
-			_policy(c,"carry",{"water_collection":0.3,"labor_multiplier":-0.06},90)
-			c.mult=float(c.mult)*float(CS.DEATH_FACTOR.carry)
+			# Through the water ledger: every strong back on the far pools.
+			_policy(c,"carry",CS.CARRY_EFFECTS,90)
+			c.mult=float(c.mult)*CS.death_factor(c,"carry")
 		"wait":
 			(s.until as Dictionary)["after_flood"]=CS._day()+75
 		"rebuild":
@@ -231,6 +233,8 @@ static func _answer(s:Dictionary,c:Dictionary,choice:String)->void:
 			_policy(c,"rebuild",{"labor_multiplier":-0.08},20)
 
 static func _advance(s:Dictionary,c:Dictionary,day:int,x:Dictionary)->void:
+	# A dry year counts who drank and the dead of thirst (the court's own rule).
+	if String(c.phase) in ["open","mid"]: CS.dry_day(c)
 	if String(c.phase)=="open" and day>=int(c.mid_day):
 		c.phase="mid"
 		var type:=String(c.type)
@@ -284,7 +288,9 @@ static func _close(s:Dictionary,c:Dictionary)->void:
 # --------------------------------------------------------------------------
 
 static func _due_deaths(s:Dictionary,c:Dictionary,share:float,salt:String)->int:
-	var expected:=float(c.pop0)*float(c.m)*float(c.mult)*share
+	if String(c.get("type",""))=="drought": CS.dry_day(c)
+	var planned:=CS.drought_toll(c) if String(c.get("type",""))=="drought" else float(c.m)
+	var expected:=float(c.pop0)*planned*float(c.mult)*share
 	return _kill(s,c,floori(expected+CS._rng("due:%s:%s" % [String(c.id),salt]).randf()))
 
 ## Deaths come out of the one aggregate population, never below the court's
@@ -298,6 +304,7 @@ static func _kill(s:Dictionary,c:Dictionary,count:int)->int:
 	var cause:=String((CS.TYPES[String(c.type)] as Dictionary).get("cause",""))
 	var n:=int((people.register_population_deaths(allowed,cause if cause!="" else "Hardship") as Dictionary).get("count",0))
 	c.deaths=int(c.deaths)+n
+	if String(c.type)=="drought": c["toll_dead"]=int(c.get("toll_dead",0))+n
 	_stat(s,String(c.type),"deaths",float(n))
 	return n
 

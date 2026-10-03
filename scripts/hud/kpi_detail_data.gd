@@ -150,12 +150,15 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 			elif days<0:c.headline="No %s has been counted yet." % ("food" if food else "water")
 			elif food:c.headline="%s at today's eating, and %s." % [_sentence_case(EraWords.store_span(days)),"more is brought in than eaten" if gaining else "we eat more than we bring in"]
 			else:c.headline="Water held for %s at today's drinking, and %s." % [EraWords.days(days),"more is drawn than drunk" if gaining else "we drink more than we draw"]
+			# A warning's own facts come first (the card shows four).
+			if not watch.is_empty() and String(watch.tone)!="calm":
+				for fact:Dictionary in watch.facts:c.facts.append(fact)
 			if need>0:
 				var brought:=("Gathered" if hearth else "Brought in") if food else "Drawn"
 				c.facts.append({"text":"%s %s today, %s %s" % [brought,_amount(produced),"eaten" if food else "drunk",_amount(need)],"trend":1 if produced>need*1.02 else -1 if produced<need*0.98 else 0,"good":gaining})
-			if not watch.is_empty():
+			if not watch.is_empty() and String(watch.tone)=="calm":
 				for fact:Dictionary in watch.facts:c.facts.append(fact)
-			elif shortages>0 and cities>1:c.facts.append({"text":"Short at %s" % EraWords.places(shortages),"trend":-1,"good":false})
+			elif watch.is_empty() and shortages>0 and cities>1:c.facts.append({"text":"Short at %s" % EraWords.places(shortages),"trend":-1,"good":false})
 			if int(t[id+"_reports"])<cities:c.facts.append({"text":"Some %s have not yet sent word" % EraWords.word("places","places")})
 			if cities<=1:
 				c.spark=_history_days(GameState.food_history if food else GameState.water_history,"stored","required")

@@ -81,6 +81,11 @@ def main() -> int:
         file, anchor = key.split("::", 1)
         if gdparse.line_hash(file, anchor) != old:
             drift.append(f"{file}: {anchor}")
+    # The dry year's water arithmetic: the surrogate's mirror against the
+    # fixture the engine's own test checks (tests/test_dry_years_drain_water.gd).
+    import dry_water  # noqa: E402
+    if dry_water.parity() != 0:
+        problems.append("dry-year water parity (python tools/sim/dry_water.py)")
     for w in gdparse.WARNINGS:
         print("WARNING (parser fallback):", w)
     if stale:

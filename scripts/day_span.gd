@@ -55,6 +55,9 @@ static func calm()->bool:
 		if String(army.get("status","stationed"))!="stationed":return false
 	if int(WorldSimulation.world.player_effects().get("war_count",0))>0:return false
 	if float(WorldSimulation.state.simulation_metrics.get("water_intake_ratio",0.0))<.98:return false
+	# A dry year drains the stores day by day (dry_water.gd): a water day
+	# covers one day, so the people step daily until it ends.
+	if not preload("res://scripts/dry_water.gd").running().is_empty():return false
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
 		var metrics:Dictionary=city.get("resource_metrics",{})
@@ -96,4 +99,6 @@ static func _town_calm(city:Dictionary)->bool:
 	var military=WorldSimulation.military
 	if not military.active_engagement.is_empty() or not military.active_threat.is_empty() or not military.active_siege.is_empty():return false
 	var metrics:Dictionary=city.get("resource_metrics",{})
+	# Its store drains a day at a time while a dry year runs (dry_water.gd).
+	if not preload("res://scripts/dry_water.gd").running().is_empty():return false
 	return float(metrics.get("water_intake_ratio",0.0))>=.98

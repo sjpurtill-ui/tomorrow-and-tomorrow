@@ -63,7 +63,7 @@ COH = ["children", "youth", "early_adults", "established_adults", "mature_adults
 # Death weights by cause (game_state.gd _mortality_weights_for).
 _W = g.literal_after("scripts/game_state.gd", '"Hunger": return', default={"children": 2.2, "youth": 0.8, "early_adults": 0.7, "established_adults": 0.8, "mature_adults": 1.2, "elders": 2.0})
 HUNGER_W = np.array([_W[k] for k in COH])
-_W = g.literal_after("scripts/game_state.gd", '"Illness","Dehydration","Exposure": return', default={"children": 1.8, "youth": 0.7, "early_adults": 0.7, "established_adults": 0.9, "mature_adults": 1.4, "elders": 2.6})
+_W = g.literal_after("scripts/game_state.gd", '"Illness","Dehydration","Drought","Exposure": return', default={"children": 1.8, "youth": 0.7, "early_adults": 0.7, "established_adults": 0.9, "mature_adults": 1.4, "elders": 2.6})
 ILL_W = np.array([_W[k] for k in COH])
 _W = g.literal_after("scripts/game_state.gd", '"Insecurity","Killed in battle": return', default={"children": 0.2, "youth": 1.2, "early_adults": 1.8, "established_adults": 1.7, "mature_adults": 1.1, "elders": 0.3})
 INSEC_W = np.array([_W[k] for k in COH])

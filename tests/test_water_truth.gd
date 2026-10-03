@@ -7,12 +7,15 @@ extends GdUnitTestSuite
 ## as thirst, while all three towns drank their fill from full stores (the
 ## dry year's toll is planned from how dry the season is, never from the
 ## store). So:
-## - a dry year's dead are written under its own cause, never thirst, with
-##   the same ages taken; an older save's are re-read once;
+## - a dry year's own toll is written under its own cause, never thirst, with
+##   the same ages taken; an older save's are re-read once, shallow spells
+##   (found in the sickness & disaster log) included; its thirst, now that it
+##   drains the water (test_dry_years_drain_water.gd), is thirst;
 ## - the People card says "lost to the dry year";
 ## - the WATER tile turns amber in a dry year and says its dead; red with the
 ##   worst town named when anyone went thirsty; amber when a town's store is
-##   nearly gone; the hover card gives the crisis's own numbers.
+##   nearly gone; the hover card gives the water forecast's own numbers and
+##   what more carriers or a cistern would save.
 ## Offline; never calls a real API.
 
 const Crisis:=preload("res://scripts/crisis_system.gd")
@@ -67,7 +70,7 @@ func _users_towns()->Dictionary:
 ## The user's dry year at its middle: 4 dead, carried by custom ("carry").
 func _springs_failed(deaths:int=4)->Dictionary:
 	return {"id":"c140","type":"drought","kind":"drought","phase":"mid","name":"the Year the Springs Failed","start":21556,"end_day":21682,
-		"deaths":deaths,"dead":[],"pop0":261,"m":0.06018884114340828,"mult":0.7,"choice":"carry","mid_choice":"hold"}
+		"deaths":deaths,"thirst":0,"dead":[],"pop0":261,"sev":0.33415129256561904,"draw":0.06018884114340828,"m":0.045,"mult":1.0,"choice":"carry","mid_choice":"hold"}
 
 
 func test_a_dry_year_kills_under_its_own_cause_not_thirst()->void:
@@ -86,10 +89,10 @@ func test_a_dry_year_kills_under_its_own_cause_not_thirst()->void:
 	assert_dict(GameState._mortality_weights_for("Drought")).is_equal(GameState._mortality_weights_for("Dehydration"))
 
 
-## The user's case through the crisis's own path: a dry year opened from
-## this world's weather and run to its end, every store full the whole time.
+## A dry year's own toll goes under its own cause: run to its end with every
+## store full, no one is written as thirst.
 func test_a_dry_year_run_to_its_end_writes_no_thirst()->void:
-	GameState.ensure_population_total(200)
+	GameState.ensure_population_total(2000)
 	GameState.settlement_founded_day=0
 	var day:=-1
 	for d in range(400,20000,17):
@@ -98,14 +101,14 @@ func test_a_dry_year_run_to_its_end_writes_no_thirst()->void:
 	GameState.elapsed_days=float(day)
 	GameState.death_cause_days.clear()
 	var x:=Crisis.inputs(day)
-	x["weather_season"]=0.87;x["pop"]=200.0
+	x["weather_season"]=0.87;x["pop"]=2000.0
 	Crisis._open_drought(day,x)
 	var c:=Crisis._active_of("drought")
-	# A toll big enough that it surely kills, as the user's did (6 in 100).
-	c.m=0.06;c.mult=0.7
+	# A dry season deep enough that its own toll surely kills among 2,000.
+	c.sev=0.5
 	for d in range(day+1,int(c.end_day)+60):
 		GameState.elapsed_days=float(d)
-		GameState.water_metrics={"stored":1100.0,"capacity":1260.0,"required_today":200.0,"intake_ratio":1.0,"days":5.5,"collected_today":280.0}
+		GameState.water_metrics={"stored":11000.0,"capacity":12600.0,"required_today":2000.0,"intake_ratio":1.0,"days":5.5,"collected_today":2800.0}
 		if (Crisis.state().active as Dictionary).has(String(c.id)):Crisis._advance(c,d,Crisis.inputs(d))
 	assert_int(int(c.deaths)).is_greater(0)
 	var causes:=GameState.rolling_death_causes(365)
@@ -118,7 +121,7 @@ func test_the_users_dry_year_is_reread_as_the_dry_year_once()->void:
 	var s:=Crisis.state()
 	(s.history as Array).push_front({"id":"c140","type":"drought","name":"the Year the Springs Failed","start":21556,"end":21682,"deaths":11})
 	(s.history as Array).push_front({"id":"c148","type":"sickness","name":"the Coughing Winter of year 60","start":21744,"end":21800,"deaths":0})
-	(s.flags as Dictionary).erase("drought_cause")
+	(s.flags as Dictionary).erase("drought_cause_v2")
 	GameState.death_cause_days.assign([
 		{"day":21600,"cause":"Dehydration","count":4},{"day":21659,"cause":"Natural causes","count":1},
 		{"day":21682,"cause":"Dehydration","count":7},{"day":21700,"cause":"Natural causes","count":1},
@@ -139,12 +142,28 @@ func test_a_dry_year_never_takes_more_than_it_killed_from_thirst()->void:
 	GameState.elapsed_days=5000.0
 	var s:=Crisis.state()
 	(s.history as Array).push_front({"id":"c3","type":"drought","name":"the Dry Year of year 12","start":4300,"end":4420,"deaths":6})
-	(s.flags as Dictionary).erase("drought_cause")
+	(s.flags as Dictionary).erase("drought_cause_v2")
 	GameState.death_cause_days.assign([{"day":4400,"cause":"Dehydration","count":9}])
 	Crisis.reconcile_drought_causes(s)
 	var all:=GameState.rolling_death_causes(1000)
 	assert_int(int(all.get("Drought",0))).is_equal(6)
 	assert_int(int(all.get("Dehydration",0))).is_equal(3)
+
+
+## A shallow dry spell closes without a history line: its dead are found in
+## the sickness & disaster log (the review's catch).
+func test_a_shallow_spells_dead_are_reread_from_the_log()->void:
+	GameState.elapsed_days=5000.0
+	var s:=Crisis.state()
+	(s.flags as Dictionary).erase("drought_cause_v2")
+	preload("res://scripts/hardship_log.gd").note("c7@4300",{"crisis":"c7","type":"drought","name":"the Dry Year of year 12","start":4300,"end":4400,"dead":2})
+	GameState.death_cause_days.assign([{"day":4350,"cause":"Dehydration","count":2},{"day":4900,"cause":"Dehydration","count":1}])
+	Crisis.reconcile_drought_causes(s)
+	var all:=GameState.rolling_death_causes(1000)
+	assert_int(int(all.get("Drought",0))).is_equal(2)
+	assert_int(int(all.get("Dehydration",0))).is_equal(1)
+	# The WATER card hears of it too.
+	assert_array(Watch.recent_droughts(1000).map(func(d:Dictionary)->String:return String(d.id))).contains(["c7"])
 
 
 func test_the_people_card_names_the_dry_year_not_thirst()->void:
@@ -155,7 +174,7 @@ func test_the_people_card_names_the_dry_year_not_thirst()->void:
 	GameState.elapsed_days=22024.0
 	var s:=Crisis.state()
 	(s.history as Array).push_front({"id":"c140","type":"drought","name":"the Year the Springs Failed","start":21556,"end":21682,"deaths":11})
-	(s.flags as Dictionary).erase("drought_cause")
+	(s.flags as Dictionary).erase("drought_cause_v2")
 	GameState.death_cause_days.assign([{"day":21600,"cause":"Dehydration","count":4},{"day":21682,"cause":"Dehydration","count":7},{"day":21700,"cause":"Natural causes","count":13}])
 	GameState.vital_statistics_tracking_start_day=20000
 	GameState.vital_statistics_history.assign([{"day":21682,"births":0,"deaths":7},{"day":21700,"births":13,"deaths":13}])
@@ -164,15 +183,20 @@ func test_the_people_card_names_the_dry_year_not_thirst()->void:
 
 
 func test_the_water_tile_in_the_users_dry_year()->void:
-	var read:=Watch.read(_users_towns(),_drought_reading(_springs_failed()),{},[])
+	GameState.elapsed_days=21600.0
+	var ahead:={"now":{"thirst":6.2,"toll":0.9,"total":7.1,"dry_day":21610},"carriers":{"total":5.0},"cistern":{"total":6.0},
+		"extra_carriers":13,"cisterns_known":false,"store_days":5.3,"today":21600.0}
+	var read:=Watch.read(_users_towns(),_drought_reading(_springs_failed()),{},[],ahead)
 	assert_str(String(read.tone)).is_equal("dry")
 	assert_str(String(read.notes[0])).is_equal("dry year: 4 dead")
 	assert_float(float(read.days)).is_equal_approx(5.28,0.01)
-	assert_str(String(read.headline)).is_equal("Everyone drank their fill today, with 5.3 days of water held. The danger is the dry year: the Year the Springs Failed has taken 4 so far.")
-	assert_str(String(read.status)).contains("Its toll is the dry year's own, not thirst. It was set at its start from how dry the season is: 6.0 in 100 of the 261 people, x0.70 for carrying water from the far pools. The water store does not change it. The water stores are full: they hold 6.3 days at most.")
+	assert_str(String(read.headline)).is_equal("Everyone drank their fill today, but the dry year is drying the springs: they give about 2 in 10 of what they did, and the stores still hold.")
 	var texts:=PackedStringArray()
 	for fact:Dictionary in read.facts:texts.append(String(fact.text))
-	assert_array(Array(texts)).contains(["About 7 more may die of it as things stand","Not thirst: the dry season sets its toll","No one died of thirst in the last year"])
+	assert_array(Array(texts)).is_equal(["The Year the Springs Failed has taken 4 so far","About 7 more may die as things stand: 6 of thirst and one of the heat and the failed forage",
+		"13 more on the water path would save about 2; cisterns, once the people learn to line them, about one","The stores run dry in about 10 days","No one died of thirst in the last year"])
+	assert_str(String(read.status)).contains("Thirst is the water ledger's own count once the stores run out: at its worst the springs give 2 in 10 of what they did")
+	assert_str(String(read.status)).contains("9.3 in 1,000 of the 261 people at this dryness, half that when everyone drinks.")
 
 
 ## The running dry year as drought_now reads it from the crisis ledger.
@@ -219,6 +243,7 @@ func test_a_store_nearly_gone_turns_amber_before_anyone_goes_thirsty()->void:
 
 
 func test_the_strip_turns_amber_in_a_dry_year_and_red_when_thirsty()->void:
+	GameState.elapsed_days=21600.0
 	var header=auto_free(LiveHeader.new())
 	header.terrain=auto_free(HeaderTerrain.new())
 	add_child(header)
@@ -251,10 +276,11 @@ func test_the_strip_turns_amber_in_a_dry_year_and_red_when_thirsty()->void:
 
 
 func test_the_water_card_gives_the_dry_years_numbers()->void:
+	GameState.elapsed_days=21600.0
 	GameState.water_metrics={"days":5.3,"required_today":10.0,"stored":53.0,"collected_today":14.0,"intake_ratio":1.0}
 	(Crisis.state().active as Dictionary)["c140"]=_springs_failed()
 	var card:=Data.card("water")
 	assert_str(String(card.tone)).is_equal("warning")
-	assert_str(String(card.headline)).starts_with("Everyone drank their fill today, with 5.3 days of water held. The danger is the dry year")
+	assert_str(String(card.headline)).starts_with("Everyone drank their fill today, but the dry year is drying the springs: they give about 2 in 10")
 	var drawer:=Data.snapshot("water")
-	assert_str(String(drawer.status)).contains("x0.70 for carrying water from the far pools")
+	assert_str(String(drawer.status)).contains("half that when everyone drinks")
