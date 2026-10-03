@@ -214,3 +214,28 @@ func test_people_tile_says_born_and_buried_and_why_it_shrinks()->void:
 	header._refresh_kpis()
 	assert_str((header.kpi_chips.population.delta as Label).text).is_equal("born 6 · buried 4")
 	assert_str(String(Data.card("population").headline)).contains("more are born than buried")
+
+## The card says what took them in plain words, never a raw cause: a
+## directive's killings are the god's word, a great work's fall an accident at
+## work, the sea, captivity, scouting and the road by name, and anything else
+## "died by misfortune".
+func test_the_card_never_prints_a_raw_cause()->void:
+	var Dwindling:=preload("res://scripts/dwindling_cause.gd")
+	var said:={
+		"Directive: Killing at the gods word":"30 lost to the god's word",
+		"Directive: Officeholder execution":"30 lost to the god's word",
+		"Directive: Great work collapse":"30 lost to accidents at work",
+		"Lost at sea":"30 lost to the sea","Drowned at sea":"30 lost to the sea",
+		"Died in captivity":"30 lost to captivity","lost on a scouting expedition":"30 lost to scouting",
+		"Killed on the trading road":"30 lost to the trading road","Bandits on the road":"30 lost to the road",
+		"killed as envoys":"30 lost to the envoys' road","Agents captured abroad":"30 lost to agents captured abroad",
+		"Died of hunger in the field":"30 lost to hunger in the field","Died when the god's own village was burned":"30 lost to the burning of the village",
+		"sacrifice":"30 lost to sacrifice","Fire":"30 lost to fire",
+		"Something no one has named":"30 died by misfortune",
+	}
+	for cause:String in said:
+		assert_str(Dwindling.misfortune({cause:30,"Natural causes":3},20)).override_failure_message(cause).is_equal(String(said[cause]))
+	# The ordinary toll is never a misfortune, and a misfortune too small for
+	# the shortfall is not blamed for it.
+	assert_str(Dwindling.misfortune({"Natural causes":30},20)).is_equal("")
+	assert_str(Dwindling.misfortune({"Fire":2,"Natural causes":30},20)).is_equal("")

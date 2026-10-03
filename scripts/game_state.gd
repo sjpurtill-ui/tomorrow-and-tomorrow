@@ -1126,6 +1126,21 @@ func record_death_cause(cause:String,count:int)->void:
 	death_cause_days.append({"day":day,"cause":name,"count":count})
 	while not death_cause_days.is_empty() and int(death_cause_days[0].get("day",day))<day-DEATH_CAUSE_DAYS:death_cause_days.pop_front()
 
+## Moves `count` of today's deaths kept under `from` to `to` (the share of a
+## day's deaths that was another cause's: consequence_engine.gd).
+func reclassify_death_cause(from:String,to:String,count:int)->void:
+	if count<=0 or death_cause_days.is_empty():return
+	var day:=floori(elapsed_days)
+	for index in range(death_cause_days.size()-1,-1,-1):
+		var row:Dictionary=death_cause_days[index]
+		if int(row.get("day",-1))!=day:break
+		if String(row.get("cause",""))!=from:continue
+		var moved:=mini(count,int(row.get("count",0)))
+		row["count"]=int(row.count)-moved
+		if int(row.count)<=0:death_cause_days.remove_at(index)
+		record_death_cause(to,moved)
+		return
+
 ## Deaths by cause in the trailing `days` ({cause: count}).
 func rolling_death_causes(days:int=365)->Dictionary:
 	var cutoff:=floori(elapsed_days)-maxi(1,days)+1

@@ -128,8 +128,31 @@ static func misfortune(causes:Dictionary,shortfall:int)->String:
 		unusual+=n
 		if n>top_count:top=cause;top_count=n
 	if top=="" or unusual<shortfall:return ""
-	var words:=String(MISFORTUNE_WORDS.get(top,top.to_lower()))
-	return "%d lost to %s" % [top_count,words]
+	var words:=misfortune_words(top)
+	return "%d lost to %s" % [top_count,words] if words!="" else "%d died by misfortune" % top_count
+
+## Words found in the causes other systems give a death, and how the card says
+## them: the sea, captivity, the trading road and the like. Checked in order.
+const MISFORTUNE_PARTS:=[["at sea","the sea"],["captivity","captivity"],["trading road","the trading road"],["on the road","the road"],
+	["scouting","scouting"],["envoy","the envoys' road"],["agents captured","agents captured abroad"],["hunger in the field","hunger in the field"],
+	["village was burned","the burning of the village"],["sacrific","sacrifice"],["independence","a failed rising"],["displaced","the flight from war"],
+	["under occupation","hunger under occupation"],["battle","war"],["in war","war"],["wounds","war"]]
+
+## A death's cause in the card's words ("" when there are none: the card then
+## says the dead died "by misfortune", never the raw cause). A directive's
+## killings and executions are the god's word; a great work's fall or its
+## builders' accidents are accidents at work.
+static func misfortune_words(cause:String)->String:
+	if cause.begins_with("Directive: "):
+		var what:=cause.trim_prefix("Directive: ").to_lower()
+		if "collapse" in what or "accident" in what:return "accidents at work"
+		if "sacrific" in what:return "sacrifice"
+		return "the god's word"
+	if MISFORTUNE_WORDS.has(cause):return String(MISFORTUNE_WORDS[cause])
+	var lower:=cause.to_lower()
+	for part:Array in MISFORTUNE_PARTS:
+		if String(part[0]) in lower:return String(part[1])
+	return ""
 
 ## How many of the year's dead were the ordinary toll (for explain's counts).
 static func ordinary_count(causes:Dictionary)->int:

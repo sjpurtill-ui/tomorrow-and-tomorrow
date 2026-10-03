@@ -356,3 +356,19 @@ func test_deaths_are_kept_by_cause_for_a_year() -> void:
 	causes = state.rolling_death_causes(365)
 	assert_bool(causes.has("Fire")).is_false()
 	assert_int(state.death_cause_days.size()).is_less_equal(2)
+
+
+## A hungry day's deaths are told under hunger, but the life table's share of
+## them is kept as natural deaths (the card does not overstate hunger).
+func test_a_days_natural_share_is_kept_as_natural() -> void:
+	state.elapsed_days = 80.0
+	state.register_population_deaths(3, "Hunger")
+	state.reclassify_death_cause("Hunger", "Natural causes", 2)
+	var causes: Dictionary = state.rolling_death_causes(365)
+	assert_int(int(causes.get("Hunger", 0))).is_equal(1)
+	assert_int(int(causes.get("Natural causes", 0))).is_equal(2)
+	# Never more than were kept under the cause.
+	state.reclassify_death_cause("Hunger", "Natural causes", 5)
+	causes = state.rolling_death_causes(365)
+	assert_bool(causes.has("Hunger")).is_false()
+	assert_int(int(causes.get("Natural causes", 0))).is_equal(3)

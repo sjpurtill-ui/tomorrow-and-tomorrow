@@ -900,6 +900,14 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var mortality_result:Dictionary={}
 	if deaths_today>0:
 		mortality_result=WorldSimulation.state.register_population_deaths(deaths_today,dominant_cause)
+		# The day's deaths are told under its heaviest cause, but on a hungry,
+		# cold or travelling day most of them are still the life table's: the
+		# deaths kept by cause (the People card) count that share as natural,
+		# its fractions carried day to day (demographic_remainders).
+		if dominant_cause!="Natural causes" and annual_death_rate>0.0:
+			var share:=clampf(float(mortality_components.get("Natural causes",0.0))/annual_death_rate,0.0,1.0)
+			var natural:=mini(int(mortality_result.get("count",0)),WorldSimulation.state._accumulate_demographic_count("natural_share",float(mortality_result.get("count",0))*share))
+			WorldSimulation.state.reclassify_death_cause(dominant_cause,"Natural causes",natural)
 	var reproduction_context:={
 		"health":WorldSimulation.state.population_health,"food_security":fed_security,
 		"housing_ratio":housing_ratio,"cohesion":cohesion,"traveling":traveling,
