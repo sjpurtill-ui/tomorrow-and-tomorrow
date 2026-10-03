@@ -19,10 +19,14 @@ extends Node3D
 
 const DIR:="res://assets/court_figures/"
 const TOON:=preload("res://scripts/shaders/court_figure_toon.gdshader")
+## Each person's own shade of their people's look (hair, skin, build, dress, stance).
+const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
 ## In a modelled court (court_set_3d.gd) the figures take the set's own light.
 const TOON_LIT:=preload("res://scripts/shaders/court_figure_lit.gdshader")
 const INK:=preload("res://scripts/shaders/court_figure_ink.gdshader")
 const VARIANTS:=["male_adult","female_adult","male_old","female_old","male_young","female_young"]
+## Every body there is: the six grown ones and a child of seven or eight.
+const BODIES:=["male_adult","female_adult","male_old","female_old","male_young","female_young","child"]
 const OUTFITS:={"hide":1,"tunic":2,"robe":3}
 const STANCES:=["stand","hip","folded","clasped","belt","staff","bowl","sit","crouch"]
 ## Which hands a stance leaves free to talk with (both: "talk_both" can be used).
@@ -44,7 +48,7 @@ const FLAT_SLOTS:=["EYES","EYE_WHITE","EYE_SHINE","MOUTH","IRIS","PUPIL"]
 const STENCIL_READ:=["IRIS","PUPIL","EYE_SHINE"]
 const STENCIL_WRITE:=["EYE_WHITE"]
 ## What a person may carry between their hands for a while (a gift of food).
-const CARRIED:={"bundle":"prop_bundle"}
+const CARRIED:={"bundle":"prop_bundle","cord":"prop_cord"}
 ## Face parts that never cast a shadow (they lie on the skin).
 const NO_SHADOW:=["Eyes","Brows","Mouth","hair_shaved","beard_stubble"]
 ## The height every clip is made for; shorter bodies are drawn shorter.
@@ -73,6 +77,7 @@ var clip:=""
 var head_bone:=-1
 var head_height:=0.28
 var body_height:=1.72
+var _base_height:=1.72
 var _meshes:Array[MeshInstance3D]=[]
 var _yaw_tween:Tween
 ## What they keep doing at rest, and the mood the engine gives them.
@@ -94,7 +99,7 @@ static func manifest()->Dictionary:
 	return _manifest
 
 static func scene_for(variant_name:String)->PackedScene:
-	if not variant_name in VARIANTS:variant_name="male_adult"
+	if not variant_name in BODIES:variant_name="male_adult"
 	if not _scenes.has(variant_name):
 		var path:=DIR+"court_figure_%s.glb" % variant_name
 		_scenes[variant_name]=load(path) as PackedScene if ResourceLoader.exists(path) else null
@@ -123,17 +128,19 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 		if slot=="SKIN":
 			made.set_shader_parameter("shade_tint",Color(0.70,0.52,0.47))
 			made.set_shader_parameter("band_soft",0.24)
-			made.set_shader_parameter("terminator",Color(0.40,0.14,0.07))
+			made.set_shader_parameter("terminator",Color(0.30,0.10,0.05))
 		if slot=="HAIR":
 			made.set_shader_parameter("rim_amount",0.22)
-			made.set_shader_parameter("strands",0.16)
+			made.set_shader_parameter("strands",0.24)
 			made.set_shader_parameter("sheen",0.22)
 			made.set_shader_parameter("band_soft",0.30)
 		if slot=="STUBBLE":made.set_shader_parameter("grain",0.35)
+		# hair breaks into strokes where it meets the skin (stubble all over)
+		if slot in ["HAIR","STUBBLE"]:made.set_shader_parameter("stipple",1.0)
 		if lit:
 			made.set_shader_parameter("fill",0.22 if slot=="SKIN" else 0.16)
 			if slot=="SKIN":made.set_shader_parameter("grain",0.025)
-		if inked and not slot in ["BROW","STUBBLE"]:made.next_pass=_ink(cover)
+		if inked and not slot in ["BROW","STUBBLE"]:made.next_pass=_ink(cover,slot=="HAIR")
 	_materials[key]=made
 	return made
 
@@ -160,12 +167,14 @@ static func readable_hair(colour:Color)->Color:
 	if colour.v>=0.20:return colour
 	return Color.from_hsv(colour.h,colour.s*0.85,lerpf(colour.v,0.20,0.6))
 
-static func _ink(cover:int)->ShaderMaterial:
-	if not _inks.has(cover):
+static func _ink(cover:int,stippled:=false)->ShaderMaterial:
+	var key:="%d|%d" % [cover,int(stippled)]
+	if not _inks.has(key):
 		var ink:=ShaderMaterial.new();ink.shader=INK
 		ink.set_shader_parameter("cover_channel",cover)
-		_inks[cover]=ink
-	return _inks[cover]
+		ink.set_shader_parameter("stipple",1.0 if stippled else 0.0)
+		_inks[key]=ink
+	return _inks[key]
 
 ## The fire moved, or a window: every figure's key light at once.
 static func set_key_light(direction:Vector3)->void:
@@ -179,9 +188,11 @@ static func height_of(variant_name:String)->float:
 
 ## Dress for a look; the body is only made again when its variant changes.
 func setup(look_in:Dictionary)->bool:
-	look=look_in
+	look=FigureLook.vary(look_in)
 	var wanted:=String(look.get("variant","male_adult"))
-	if not wanted in VARIANTS:wanted="male_adult"
+	if not wanted in BODIES:wanted="male_adult"
+	# a child's body not built yet: the slightest grown body stands in
+	if wanted=="child" and scene_for("child")==null:wanted="female_young"
 	if wanted!=variant or not is_instance_valid(model):
 		var packed:=scene_for(wanted)
 		if packed==null:return false
@@ -201,7 +212,7 @@ func setup(look_in:Dictionary)->bool:
 		for entry:Dictionary in manifest().get("variants",[]):
 			if String(entry.get("variant",""))==variant:
 				head_height=float(entry.get("head_top",1.72))-float(entry.get("chin",1.44))
-				body_height=float(entry.get("height",REFERENCE_HEIGHT))
+				_base_height=float(entry.get("height",REFERENCE_HEIGHT))
 		if player!=null:
 			for name:String in LOOP_CLIPS:
 				if player.has_animation(name):player.get_animation(name).loop_mode=Animation.LOOP_LINEAR
@@ -209,6 +220,10 @@ func setup(look_in:Dictionary)->bool:
 		clip=""
 	stance=String(look.get("stance","stand"))
 	if not stance in STANCES:stance="stand"
+	# Their build and height: the model scaled about the feet.
+	var shape:=FigureLook.scale_of(look)
+	model.scale=shape
+	body_height=_base_height*shape.y
 	_dress()
 	_face()
 	set_mood(String(look.get("mood","neutral")))
@@ -340,7 +355,8 @@ func _dress()->void:
 		mesh_node.visible=shown
 		if (not shown and not part in CARRIED.values()) or mesh_node.mesh==null:continue
 		# In a lit court they cast shadows (not the paint on the skin).
-		var shadows:=lit and not part in NO_SHADOW
+		# (hair and beards neither: their shade on the brow reads as a dark band)
+		var shadows:=lit and not part in NO_SHADOW and not part.begins_with("hair_") and not part.begins_with("beard_")
 		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		# A beard has no inked edge: it grows out of the skin, it is not pasted on.
 		var inked:=not part.begins_with("beard_")
@@ -402,7 +418,7 @@ func carrying()->bool:
 	return _carry_on
 
 func _process(_delta:float)->void:
-	if not _carry_on or _carried==null or skeleton==null or _hand_l<0 or _hand_r<0:return
+	if not _carry_on or _carried==null or skeleton==null or _hand_l<0 or _hand_r<0 or not is_inside_tree():return
 	var xf:=skeleton.global_transform
 	var pl:=xf*skeleton.get_bone_global_pose(_hand_l).origin
 	var pr:=xf*skeleton.get_bone_global_pose(_hand_r).origin
@@ -471,4 +487,4 @@ func face(yaw_degrees:float,time:=0.3)->void:
 func head_top()->Vector3:
 	if skeleton==null or head_bone<0:return global_position+Vector3.UP*body_height*global_transform.basis.get_scale().y
 	var pose:=skeleton.global_transform*skeleton.get_bone_global_pose(head_bone)
-	return pose.origin+pose.basis.y.normalized()*head_height*1.04*global_transform.basis.get_scale().y
+	return pose.origin+pose.basis.y.normalized()*head_height*1.04*global_transform.basis.get_scale().y*(model.scale.y if is_instance_valid(model) else 1.0)

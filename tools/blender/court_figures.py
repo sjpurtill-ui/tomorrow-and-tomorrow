@@ -98,7 +98,9 @@ def build_variant(variant, quick=False, ao=True):
         _bind_face_part(part, rig)
     sets = {"body": [body, eyes, brows, mouth]}
     # hair and beards
-    styles = list(cf_dress.HAIR_STYLES) + (list(cf_dress.BEARD_STYLES) if not f.p["female"] else [])
+    styles = list(cf_dress.HAIR_STYLES) + (list(cf_dress.BEARD_STYLES) if not f.p["female"] and not f.p.get("child") else [])
+    if f.p.get("child"):
+        styles = [st for st in styles if st not in ("balding", "shaved")]
     for st in styles:
         pc = cf_dress.beard_style(f, st) if st.startswith("beard") else cf_dress.hair_style(f, st)
         if pc is None:
@@ -146,6 +148,7 @@ def build_variant(variant, quick=False, ao=True):
     if ao:
         _bake_ao(sets, body)
     _write_masks(body, masks)
+    _write_hair_edges(sets, body)
     # each person's own face, and their mood, as morph targets
     heads = [body, eyes, brows, mouth] + [o for key, objs in sets.items() if key.startswith(("hair_", "beard_")) for o in objs]
     cf_body.face_morphs(f, heads)
@@ -235,6 +238,44 @@ def _bundle(rig, k):
     return bundle
 
 
+def _cord(rig, k):
+    """A short loop of knotted cord, about its middle (carried between the hands)."""
+    import bmesh
+    bm = bmesh.new()
+    pts = []
+    n = 36
+    for i in range(n):
+        a = 2.0 * math.pi * i / n
+        # a loop drooping between two hands, a knot or two along it
+        pts.append(Vector((0.11 * k * math.cos(a), 0.02 * k * math.sin(2 * a), -0.07 * k * max(0.0, math.sin(a)) + 0.01 * k * math.sin(a))))
+    ring = []
+    r = 0.0045 * k
+    segs = 6
+    for i, c in enumerate(pts):
+        t = (pts[(i + 1) % n] - pts[i - 1]).normalized()
+        u = t.cross(Vector((0, 0, 1)))
+        if u.length < 1e-4:
+            u = Vector((1, 0, 0))
+        u.normalize()
+        w = t.cross(u).normalized()
+        knot = 1.8 if i in (8, 9, 26) else 1.0
+        ring.append([bm.verts.new(c + (u * math.cos(2 * math.pi * j / segs) + w * math.sin(2 * math.pi * j / segs)) * r * knot) for j in range(segs)])
+    for i in range(n):
+        a, b = ring[i], ring[(i + 1) % n]
+        for j in range(segs):
+            bm.faces.new((a[j], a[(j + 1) % segs], b[(j + 1) % segs], b[j]))
+    me = bpy.data.meshes.new("prop_cord")
+    bm.to_mesh(me)
+    bm.free()
+    cord = bpy.data.objects.new("prop_cord", me)
+    bpy.context.scene.collection.objects.link(cord)
+    for poly in me.polygons:
+        poly.use_smooth = True
+    cf_body.set_material(cord, "CLOTH_C")
+    cord.parent = rig
+    return cord
+
+
 def build_props(rig, f):
     """What some stances hold: a staff, a bowl, a seat. Each is made where the
     stance's hands (or seat) are, then carried back to the rest pose so it
@@ -313,6 +354,8 @@ def build_props(rig, f):
     # a bundle of food wrapped in hide, tied at the neck: the game carries it
     # between the hands (court_figure_3d.gd), so it is made about its middle
     made.append(_bundle(rig, k))
+    # a knotted cord to fidget with, carried between the hands like the bundle
+    made.append(_cord(rig, k))
     poser.apply({})
     bpy.context.view_layer.update()
     for o in made:
@@ -528,6 +571,68 @@ def _bake_ao(sets, body):
         attr.data.foreach_set("color", out)
 
 
+# How far in from its edge hair thins out (metres, at a 1.72 m body): the
+# game stipples it there (vertex colour G), so a hairline or a beard's edge is
+# broken into strokes over the skin, never a cut edge of a cap.
+HAIR_EDGE = {"hair_cropped": 0.0075, "hair_balding": 0.0040, "hair_shaved": 0.004, "beard_stubble": 0.006,
+             "beard_short": 0.0100, "beard_chin": 0.0090, "beard_full": 0.0120, "beard_long": 0.0100,
+             "beard_moustache": 0.0030}
+# Hair that is stippled all over (stubble): a shadow of dots on the skin.
+HAIR_STIPPLE_ALL = {"hair_shaved": 0.42, "beard_stubble": 0.50}
+
+
+def _write_hair_edges(sets, body):
+    """Vertex colour G of hair and beards: how near the edge where they meet
+    the skin (1 at the edge), and a UV of the rest position, so the game's
+    stipple keeps still on the head as it moves."""
+    from mathutils.bvhtree import BVHTree
+    from mathutils.kdtree import KDTree
+    tree = BVHTree.FromObject(body, bpy.context.evaluated_depsgraph_get())
+    k = body.dimensions.z / 1.72 if body.dimensions.z > 0.5 else 1.0
+    for key, objs in sets.items():
+        for o in objs:
+            if o.type != 'MESH' or not o.name.startswith(("hair_", "beard_")):
+                continue
+            me = o.data
+            n = len(me.vertices)
+            co = [o.matrix_world @ v.co for v in me.vertices]
+            signed = np.zeros(n, dtype=np.float32)
+            for i, c in enumerate(co):
+                hit = tree.find_nearest(c)
+                if hit[0] is None:
+                    signed[i] = 1.0
+                    continue
+                loc, nor = hit[0], hit[1]
+                signed[i] = (c - loc).dot(nor)
+            rim = [i for i in range(n) if signed[i] < 0.0008 * k]
+            edge = np.zeros(n, dtype=np.float32)
+            width = HAIR_EDGE.get(o.name, 0.0045) * k
+            if rim and len(rim) < n:
+                kd = KDTree(len(rim))
+                for j, i in enumerate(rim):
+                    kd.insert(co[i], j)
+                kd.balance()
+                for i in range(n):
+                    _, _, dist = kd.find(co[i])
+                    x = min(max(dist / width, 0.0), 1.0)
+                    edge[i] = 1.0 - x * x * (3.0 - 2.0 * x)
+            edge = np.maximum(edge, HAIR_STIPPLE_ALL.get(o.name, 0.0))
+            attr = me.color_attributes.get("Col")
+            if attr is None:
+                continue
+            vals = np.zeros(n * 4, dtype=np.float32)
+            attr.data.foreach_get("color", vals)
+            vals[1::4] = edge
+            attr.data.foreach_set("color", vals)
+            # the rest position as a UV: across the head and down it
+            if not me.uv_layers:
+                me.uv_layers.new(name="UVMap")
+            uv = me.uv_layers.active.data
+            for loop in me.loops:
+                c = co[loop.vertex_index]
+                uv[loop.index].uv = (c.x * 0.8 + c.y * 0.6, c.z)
+
+
 def _write_masks(body, masks):
     me = body.data
     attr = me.color_attributes["Col"]
@@ -556,7 +661,7 @@ def export(rig, sets, path):
     bpy.context.view_layer.objects.active = rig
     bpy.ops.export_scene.gltf(
         filepath=path, export_format='GLB', use_selection=True, export_apply=False,
-        export_yup=True, export_texcoords=False, export_normals=True, export_materials='EXPORT',
+        export_yup=True, export_texcoords=True, export_normals=True, export_materials='EXPORT',
         export_vertex_color='ACTIVE', export_all_vertex_colors=False,
         export_skins=True, export_influence_nb=4, export_def_bones=False,
         export_animations=True, export_animation_mode='ACTIONS', export_force_sampling=True,
@@ -576,7 +681,9 @@ def manifest(entries, out_dir):
         "stances": list(cf_anim.STANCES),
         "free_hands": dict(cf_anim.FREE_HANDS),
         "props": {"staff": "prop_staff", "bowl": "prop_bowl", "sit": "prop_stool"},
-        "carried": {"bundle": "prop_bundle"},
+        "carried": {"bundle": "prop_bundle", "cord": "prop_cord"},
+        "fps": 30,
+        "walk_speed_mps": {"walk_in": 1.18, "walk_out": 0.92, "at_height": 1.72},
         "gaze": list(cf_body.GAZE.keys()),
         "face_shapes": ["face_" + n for n in cf_body.FACE_SHAPES],
         "moods": ["mood_smile", "mood_tight", "mood_worry", "mood_stern"],
@@ -609,6 +716,12 @@ def main():
     entries = []
     for v in o["variants"]:
         clear_scene()
+        # Clips are sampled at 30 a second (cf_anim.FPS); the exporter turns
+        # frames into seconds by the scene's rate, which defaults to 24: at
+        # 24 every clip played 1.25 times slow (and the walk slid).
+        sc = bpy.context.scene
+        sc.render.fps = 30
+        sc.render.fps_base = 1.0
         rig, f, sets = build_variant(v, o["quick"], o["ao"])
         path = os.path.join(o["out"], "court_figure_%s.glb" % v)
         export(rig, sets, path)
