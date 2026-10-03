@@ -25,6 +25,7 @@ const HearthCount:=preload("res://scripts/hearth_count.gd")
 const Chronicle:=preload("res://scripts/chronicle.gd")
 const Aims:=preload("res://scripts/legacy_aims.gd")
 const Manual:=preload("res://scripts/manual_work.gd")
+const RoleEffects:=preload("res://scripts/role_effects.gd")
 
 const SEASON_DAYS:=91
 ## The most figures one task's row draws; above it each figure stands for more.
@@ -35,8 +36,8 @@ const STORY_DOMAINS:=["population","demography","demographic","nutrition","food"
 ## Labor roles (population_allocation_percentages) and the task words shown.
 const TASKS:=[
 	["gather","gathering"],["hunt","hunting"],["fish","fishing"],["tend","tending fields"],
-	["build","building"],["fetch","fetching wood and stone"],["make","making tools"],["carry","carrying"],
-	["scout","scouting"],["learn","learning"],["steward","keeping the stores"],["watch","keeping watch"],
+	["build","building"],["fetch","fetching wood and stone"],["make","making"],["carry","carrying"],
+	["scout","scouting"],["learn","learning"],["steward","keeping and caring"],["watch","keeping watch"],
 ]
 const ROLE_TASK:={"Construction":"build","Extraction":"fetch","Crafting":"make","Logistics":"carry","Survey":"scout","Knowledge":"learn","Administration":"steward","Defense":"watch"}
 
@@ -357,7 +358,9 @@ static func store_cause(trend:int,food_days:float)->String:
 ## (population_allocations, manual_work.gd counts): every task in a fixed
 ## order, adding up to the people who can work. The food getters' row carries
 ## what the food came from (plants, game, fish, fields) as its mix of figures.
-## [{id: role, label, count, icon, mix:[[icon, people]]}].
+## Every row says what its work does now and what ten more would do, with the
+## engine's numbers (role_effects.gd).
+## [{id: role, label, count, icon, mix:[[icon, people]], effect:{now, plus_ten}}].
 static func labor()->Array:
 	var counts:=Manual.counts()
 	var harvest:Dictionary=GameState.simulation_metrics.get("food_harvest",{}) if GameState.simulation_metrics.get("food_harvest") is Dictionary else {}
@@ -378,8 +381,12 @@ static func labor()->Array:
 		mix[best][1]=int(mix[best][1])+1;remainders[mix[best][0]]=-1.0;given+=1
 	mix=mix.filter(func(pair:Array)->bool:return int(pair[1])>0)
 	var out:Array=[]
+	# What each work does now and what ten more would do (role_effects.gd),
+	# worked out again only when the work changes or a week has passed.
+	var effects:=RoleEffects.all_cached()
 	for role:String in Manual.ROLES:
-		out.append({"id":role,"label":Manual.task_words(role),"count":int(counts[role]),"icon":String(ROLE_TASK.get(role,"gather")),"mix":mix if role=="Food" else []})
+		out.append({"id":role,"label":Manual.task_words(role),"count":int(counts[role]),"icon":String(ROLE_TASK.get(role,"gather")),"mix":mix if role=="Food" else [],
+			"effect":(effects.get(role,{}) as Dictionary).duplicate()})
 	return out
 
 
