@@ -69,6 +69,8 @@ static func first300_manifest()->Dictionary:
 	if first300_cards.is_empty():first300_cards=JSON.parse_string(FileAccess.get_file_as_string(FIRST300_CARDS))
 	return first300_cards
 static func art(domain:String)->Texture2D:
+	var overview:=texture_at("res://assets/ui/research/%s-v1.png" % domain)
+	if is_wide(overview):return overview
 	# Field art is used only for a field overview, never as a discovery fallback.
 	if preload("res://scripts/hud/early_civ_art.gd").active():
 		if domain=="demography":return preload("res://scripts/hud/construction_art.gd").texture(7)
