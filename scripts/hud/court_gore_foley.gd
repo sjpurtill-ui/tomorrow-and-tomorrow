@@ -238,20 +238,22 @@ const ACTS:={
 	# 3. Into the fire: heaved on, WHOOMPH; a charred figure walks two steps,
 	# coughs a smoke ring, crumbles; the elder warms his hands.
 	"into_the_fire":[
-		{"t":-2.8,"cue":"roll","who":"musician"},
+		# The director's impact is at 2.4 s; these share the visible walk,
+		# cough, collapse and the elder's approach, all inside the ten-second act.
+		{"t":-2.4,"cue":"roll","who":"musician"},
 		{"t":-1.0,"cue":"heave","who":"executioner","variant":0},
 		{"t":-0.3,"cue":"swing_whoosh","who":"victim","variant":1},
 		{"t":0.0,"cue":"whoomph","who":"victim","variant":0},
 		{"t":0.4,"cue":"room_gasp","who":"room"},
 		{"t":1.2,"cue":"fire_pop","who":"victim","variant":4},
-		{"t":2.3,"cue":"step_earth","who":"victim","variant":0},
-		{"t":2.9,"cue":"step_earth","who":"victim","variant":1},
-		{"t":3.5,"cue":"cough","who":"victim","variant":0},
-		{"t":3.9,"cue":"smoke_poof","who":"victim"},
-		{"t":5.0,"cue":"crumble","who":"victim"},
-		{"t":7.0,"cue":"punch","who":"musician"},
-		{"t":7.6,"cue":"rub_hands","who":"elder","db":6.0},
-		{"t":8.4,"cue":"hum_yes","who":"elder","variant":2},
+		{"t":1.05,"cue":"step_earth","who":"victim","variant":0},
+		{"t":1.65,"cue":"step_earth","who":"victim","variant":1},
+		{"t":2.3,"cue":"cough","who":"victim","variant":0},
+		{"t":2.7,"cue":"smoke_poof","who":"victim"},
+		{"t":3.0,"cue":"crumble","who":"victim"},
+		{"t":4.9,"cue":"punch","who":"musician"},
+		{"t":5.7,"cue":"rub_hands","who":"elder","db":6.0},
+		{"t":6.3,"cue":"hum_yes","who":"elder","variant":2},
 	],
 	# 5. Spear pincushion: spear after spear; they wobble; the child's spear
 	# hits the hide wall; one last spear, and down like a felled tree.

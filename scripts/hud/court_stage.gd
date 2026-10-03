@@ -640,7 +640,9 @@ func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")
 	_exec=ExecStage.new();_exec.name="Execution"
 	add_child(_exec)
 	_exec.begin(self,method_id,victim_key,style)
-	_exec.finished.connect(func()->void:exec_done=true)
+	_exec.finished.connect(func()->void:
+		exec_done=true
+		if is_instance_valid(_sound) and _sound.has_method("stop_act"):_sound.call("stop_act"))
 	exec_done=false
 	exec_method=method_id;exec_victim=victim_key
 	var who:=name_text if name_text!="" else String(person.get("name",""))
@@ -656,7 +658,10 @@ func skip_execution()->void:
 	_beat_sets.clear()
 	var caption_text:=Executions.caption(exec_method,String(figure(exec_victim).person.get("name","")) if figure(exec_victim)!=null else "")
 	_exec.call("skip")
+	if not exec_caption_override.is_empty():caption_text=exec_caption_override
 	caption(caption_text,"narration",false)
+	_hush_until=_now();_event_end=_now();_event_weight=0
+	if is_instance_valid(_sound) and _sound.has_method("hush"):_sound.call("hush",false)
 	hush(0.0)
 	_shot_until=0.0
 	_frame_all(0.6)
@@ -1003,7 +1008,14 @@ func event(kind:String,data:Dictionary={})->void:
 	var all:Array=[]
 	if beats is Array:all.append_array(beats)
 	if lines is Array:all.append_array(lines)
-	if kind=="execution":all=_exec_in_step(all,data)
+	if kind=="execution":
+		all=_exec_in_step(all,data)
+		# Later dialogue can update _event_weight before a queued camera beat
+		# runs; every shot in this scene keeps the execution's priority.
+		for beat:Dictionary in all:
+			if String(beat.get("act",""))=="shot":
+				var shot_args:Dictionary=(beat.get("args",{}) as Dictionary).duplicate()
+				shot_args["weight"]=_weight_of(kind,data);beat["args"]=shot_args
 	# Those the scene is about finish walking in before it plays on them (a
 	# gift accepted while the bearer is still on the way in is set down at
 	# their mark, not in the doorway).
@@ -1070,9 +1082,9 @@ func _exec_in_step(beats:Array,data:Dictionary)->Array:
 	var roles:=_exec_roles(kept,data)
 	var opts:={"gore":String(data.get("style","full"))}
 	var later:=maxf(blow-lead,0.0)
-	var sound_node:=_sound
-	if later<=0.0:sound_node.call("play_act",n,roles,opts)
-	else:get_tree().create_timer(later,false).timeout.connect(func()->void:if is_instance_valid(sound_node):sound_node.call("play_act",n,roles,opts))
+	# Keep the soundtrack on the scene's clock: arrival delays move it with
+	# the action, and skipping cancels it along with the other queued beats.
+	kept.append({"t":later,"who":"exec","act":"soundtrack","args":{"number":n,"roles":roles,"opts":opts}})
 	return kept
 
 ## Who the sound comes from: the executioner (the first to step up), the
@@ -1398,6 +1410,9 @@ func _beat(beat:Dictionary)->void:
 	var body:Node3D=f.body3d if f!=null and not f.leaving else null
 	var args:Dictionary=beat.get("args",{}) if beat.get("args") is Dictionary else {}
 	var act:=String(beat.get("act",""))
+	if who=="exec" and act=="soundtrack":
+		if executing() and is_instance_valid(_sound):_sound.call("play_act",int(args.number),args.roles,args.opts)
+		return
 	if _sound!=null and is_instance_valid(_sound):_sound.call("on_beat",beat,body)
 	# The execution's own beats (props, the blow, blood): to its player.
 	if who=="exec" and act!="sound":

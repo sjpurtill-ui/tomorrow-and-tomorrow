@@ -1949,7 +1949,7 @@ func _process(delta:float)->void:
 		_civic_clock=.25
 		_sync_civic()
 	_pump()
-	if _leave_when_quiet and not revealing and is_instance_valid(court_stage):
+	if _leave_when_quiet and not revealing and is_instance_valid(court_stage) and (not _executed or bool(court_stage.exec_done)):
 		# Concluded: once everything has been said, they take their leave.
 		var said:Array=Hall.find(audience_id).get("lines",[])
 		_sync_rendered(said)

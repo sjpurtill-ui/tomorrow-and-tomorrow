@@ -203,6 +203,8 @@ var _music_side:=2
 var _music_said:=""
 ## How many acts this court has seen (each draws its own room).
 var _act_n:=0
+var _act_epoch:=0
+var _playing_act:=0
 ## The last act's reactions, for review and the tests: [{who, kind, temper, at}].
 var last_reactions:Array=[]
 var _beds:Dictionary={}       # role -> AudioStreamPlayer
@@ -349,6 +351,7 @@ func _on_visibility()->void:
 
 ## Every sound stops (the court hidden, closed, or muted).
 func stop_all()->void:
+	stop_act()
 	for p in _pool:
 		if is_instance_valid(p):p.stop()
 	for t in _slots:
@@ -360,6 +363,13 @@ func stop_all()->void:
 	if is_instance_valid(_god):_god.stop()
 	if is_instance_valid(_timer):_timer.stop()
 	_queue.clear()
+
+## Cancel only the execution track, including reactions still being rendered.
+func stop_act()->void:
+	_act_epoch+=1
+	_queue=_queue.filter(func(item:Dictionary)->bool:return not item.has("act"))
+	for p in _pool:
+		if is_instance_valid(p) and int(p.get_meta("court_act",0))>0:p.stop();p.set_meta("court_act",0)
 
 # =============================================================================
 # Streams, made once
@@ -533,6 +543,7 @@ func _play(s:AudioStream,at_body:Node3D,db:float,pitch:float,label:String,pan:=N
 	var q:=_free2d()
 	q.bus=pan_bus(clampi(k,-PAN_STEPS,PAN_STEPS))
 	q.stream=s;q.volume_db=db;q.pitch_scale=pitch
+	q.set_meta("court_act",_playing_act)
 	q.play()
 	played.append({"name":label,"at":_now(),"db":db,"pan":k})
 	if played.size()>48:played.pop_front()
@@ -601,6 +612,7 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 	if act is int and int(act)>0 and int(act)<Gore.ACT_NUMBERS.size():act=Gore.ACT_NUMBERS[int(act)]
 	var track:Array=Gore.ACTS.get(String(act),[])
 	if track.is_empty() or String(opts.get("gore","full"))=="off" or not can_play():return 0.0
+	stop_act()
 	var first:=0.0
 	for item:Dictionary in track:first=minf(first,float(item.t))
 	var lead:=-first
@@ -638,16 +650,17 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 		var o:={"db":float(item.get("db",0.0))+float(opts.get("db",0.0)),"pitch":1.0}
 		if v>=0:o["variant"]=v
 		if who=="musician":o["pan"]=_music_pan()
-		_queue.append({"at":now+lead+float(item.t),"name":cue_name,"body":body as Node3D if body is Node3D else null,"opts":o})
+		_queue.append({"at":now+lead+float(item.t),"name":cue_name,"body":body as Node3D if body is Node3D else null,"opts":o,"act":_act_epoch})
 	if not frightened and not people.is_empty() and rrng.randf()<0.75:
 		# and someone mutters an aside, in their own tongue, under their breath
 		var who:Dictionary=people[rrng.randi_range(0,people.size()-1)]
 		_job(jobs,who,"mutter",now+lead+punch_at+rrng.randf_range(0.9,1.6),rrng)
+	for job:Dictionary in jobs:job["act"]=_act_epoch
 	_render_reactions(jobs)
 	if frightened:
 		# a terrified hall: someone swallows, knees knock, nobody laughs
-		_queue.append({"at":now+lead+punch_at+0.5,"name":"swallow","body":roles.get("front_row",null) as Node3D if roles.get("front_row") is Node3D else null,"opts":{"variant":1}})
-		_queue.append({"at":now+lead+0.6,"name":"knees_knock","body":null,"opts":{"variant":0}})
+		_queue.append({"at":now+lead+punch_at+0.5,"name":"swallow","body":roles.get("front_row",null) as Node3D if roles.get("front_row") is Node3D else null,"opts":{"variant":1},"act":_act_epoch})
+		_queue.append({"at":now+lead+0.6,"name":"knees_knock","body":null,"opts":{"variant":0},"act":_act_epoch})
 	# the musician puts down their tune for the act
 	if is_instance_valid(_music) and _music.playing:
 		var tw:=create_tween();tw.tween_property(_music,"volume_db",-60.0,0.4);tw.tween_callback(_music.stop)
@@ -747,10 +760,11 @@ func _render_reactions(jobs:Array)->void:
 func _reactions_ready(jobs:Array)->void:
 	var now:=_now()
 	for job:Dictionary in jobs:
+		if int(job.get("act",_act_epoch))!=_act_epoch:continue
 		if not job.get("stream") is AudioStreamWAV:continue
 		if float(job.at)<now-0.3:continue
 		_queue.append({"at":maxf(float(job.at),now),"stream":job.stream,"body_id":int(job.body_id),
-			"db":float(Reactions.LEVELS.get(String(job.kind),-12.0)),"label":"react_"+String(job.kind)})
+			"db":float(Reactions.LEVELS.get(String(job.kind),-12.0)),"label":"react_"+String(job.kind),"act":int(job.get("act",_act_epoch))})
 	_ensure_timer()
 
 ## Whether a sound name (the director's or a cue's) is one this court can make.
@@ -1271,6 +1285,7 @@ func _tick()->void:
 		var item:Dictionary=_queue[i]
 		if now>=float(item.at):
 			_queue.remove_at(i)
+			_playing_act=int(item.get("act",0))
 			if item.has("stream"):
 				var found:Object=instance_from_id(int(item.body_id)) if int(item.body_id)!=0 else null
 				_play(item.stream,found as Node3D if found!=null and is_instance_valid(found) else null,float(item.db),1.0,String(item.label))
@@ -1278,6 +1293,7 @@ func _tick()->void:
 				var opts:Dictionary=(item.opts as Dictionary).duplicate();opts.erase("delay")
 				var body:Variant=item.body
 				cue(String(item.name),body as Node3D if is_instance_valid(body) else null,opts)
+			_playing_act=0
 		else:i+=1
 	if not _open:
 		if _queue.is_empty() and not _hushed and _tasks.is_empty():_timer.stop()

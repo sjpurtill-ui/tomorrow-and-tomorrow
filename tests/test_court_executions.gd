@@ -179,3 +179,22 @@ func test_the_club_home_run_plays_its_beats_in_order()->void:
 		if String(beat.who)=="exec" and String(beat.act)=="plan":assert_str(String((beat.args as Dictionary).act)).is_equal("club_home_run")
 	# the blow lands on the plan's impact
 	assert_float(float(at["exec:blow"])-float(at["exec:plan"])).is_equal_approx(3.62,0.05)
+
+func test_fire_has_an_impact_and_its_sound_matches_the_visible_collapse()->void:
+	var beats:=Director.beats_for({"kind":"execution","method":"fire","victim":"main","style":"full"},DirectorTests.home_cast(),DirectorTests.full_facts(60),3)
+	var impact:=-1.0;var collapse:=-1.0;var end:=-1.0
+	var walked:=false;var heaved:=false
+	for beat:Dictionary in beats:
+		if String(beat.who)!="exec":continue
+		match String(beat.act):
+			"blow":impact=float(beat.t)
+			"crumble":collapse=float(beat.t)
+			"end":end=float(beat.t)
+			"walk":walked=true
+			"heave":heaved=true
+	assert_float(impact).is_greater(0.0)
+	assert_bool(walked and heaved).is_true()
+	var track:Array=preload("res://scripts/hud/court_gore_foley.gd").ACTS.into_the_fire
+	for cue:Dictionary in track:
+		assert_float(impact+float(cue.t)).is_between(0.0,end)
+		if String(cue.cue)=="crumble":assert_float(impact+float(cue.t)).is_equal_approx(collapse,0.01)

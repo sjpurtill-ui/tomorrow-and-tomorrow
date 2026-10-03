@@ -95,6 +95,7 @@ var _set:WeakRef
 var _speed:=0.0
 var _gait:="walk"
 var _moving:=false
+var _move_epoch:=0
 var _path:PackedVector3Array=PackedVector3Array()
 var _arrive:Callable=Callable()
 var _yaw:=0.0
@@ -254,6 +255,8 @@ func clip_length(clip_name:String)->float:
 
 ## Walk (or trot) to a point on the ground, round the fire, then do `then`.
 func go_to(point:Vector3,gait:="walk",then:=Callable())->void:
+	_move_epoch+=1
+	var epoch:=_move_epoch
 	_arrive=then
 	_gait=gait if gait in ["walk","trot","carry","tug","gallop","pull"] else "walk"
 	# dragging something heavy: backwards, braced, slow
@@ -262,7 +265,8 @@ func go_to(point:Vector3,gait:="walk",then:=Callable())->void:
 	if is_down():
 		# up first, then off
 		play("stand_up",0.2)
-		var wait:=create_tween();wait.tween_interval(clip_length("stand_up")*0.8);wait.tween_callback(_set_off)
+		var wait:=create_tween();wait.tween_interval(clip_length("stand_up")*0.8)
+		wait.tween_callback(func()->void:if epoch==_move_epoch:_set_off())
 	else:
 		_set_off()
 
@@ -270,6 +274,17 @@ func _set_off()->void:
 	_moving=not _path.is_empty()
 	if _moving:play(_gait,0.25)
 	else:_finish_move()
+
+## Let an interrupted scene release its dog without leaving fetch/drag callbacks.
+func cancel_action(home:Variant=null)->void:
+	_move_epoch+=1
+	if home is Transform3D:transform=home
+	_yaw=rotation.y;_yaw_goal=_yaw
+	_moving=false;_path.clear();_arrive=Callable()
+	_held=0.0;_after_hold=Callable();_turning=false
+	drop_carried()
+	_think=2.0
+	play("idle",0.2)
 
 ## A straight line, or round the fire if the line would cross it.
 func _route(from:Vector3,to:Vector3)->PackedVector3Array:
@@ -531,6 +546,7 @@ func fetch(thing:Node3D,to:Vector3)->void:
 	go_to(thing.global_position,"trot",_fetch_take.bind(thing,to))
 
 func _fetch_take(thing:Node3D,to:Vector3)->void:
+	if not is_instance_valid(thing):cancel_action();return
 	play("grab",0.1)
 	carry(thing)
 	_held=0.0;hold(clip_length("grab"),_fetch_bring.bind(to))

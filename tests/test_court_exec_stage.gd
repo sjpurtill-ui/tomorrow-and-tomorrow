@@ -138,3 +138,112 @@ func test_parked_methods_cannot_start_or_leave_an_execution_running()->void:
 		assert_int(stage._event_index).is_equal(prior_events)
 		assert_bool(main.leaving).is_false()
 		assert_bool(main.body3d.visible).is_true()
+
+func test_approaching_a_set_mark_moves_and_skip_restores_the_survivor()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	var key:=""
+	for candidate:String in stage.cast_order:
+		if candidate!=Stage.MAIN and stage.figure(candidate).body3d!=null:key=candidate;break
+	assert_str(key).is_not_empty()
+	var f:Stage.Figure=stage.figure(key)
+	var before:=f.nudge
+	assert_bool(stage.execute("fire",Stage.MAIN)).is_true()
+	var exec:Node=stage.get_node("Execution")
+	exec.call("_approach",key,"petitioner",1.0,0.5,0.1)
+	for t in exec._tweens:
+		if t is Tween and (t as Tween).is_valid():(t as Tween).custom_step(0.11)
+	assert_float(f.nudge.distance_to(before)).is_greater(0.05)
+	stage.skip_execution()
+	assert_vector(f.nudge).is_equal(before)
+	assert_float(f.body3d.locomotion_rate).is_equal(1.0)
+	await await_idle_frame()
+	assert_bool(stage.executing()).is_false()
+
+func test_skipping_dogs_releases_the_court_dog_and_removes_the_extra_pack()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	var court:Node3D=stage.court_set
+	var dog:Node3D=court.call("animal","dog")
+	assert_object(dog).is_not_null()
+	var before:=dog.transform
+	var animals:int=court.animals.size()
+	assert_bool(stage.execute("dogs",Stage.MAIN)).is_true()
+	var exec:Node=stage.get_node("Execution")
+	exec.call("_pack_come",{"more":2})
+	assert_int(court.animals.size()).is_equal(animals+2)
+	exec.call("_pack_fetch",{"to":"god_feet"})
+	stage.skip_execution()
+	await await_idle_frame()
+	assert_int(court.animals.size()).is_equal(animals)
+	assert_bool(dog._moving).is_false()
+	assert_bool(dog._arrive.is_valid()).is_false()
+	assert_bool(dog._after_hold.is_valid()).is_false()
+	assert_object(dog.carried).is_null()
+	assert_bool(dog.transform.is_equal_approx(before)).is_true()
+	assert_float(float(dog._yaw)).is_equal_approx(dog.rotation.y,0.001)
+
+func test_soundtrack_start_is_owned_by_the_same_cancellable_beats()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	assert_object(stage._sound).is_not_null()
+	var sound:Node=stage._sound
+	var count:=int(sound.get("_act_n"))
+	var beats:Array=stage.call("_exec_in_step",[{"t":5.0,"who":"exec","act":"blow","args":{}}],{"method":"club","victim":Stage.MAIN,"style":"full"})
+	assert_int(int(sound.get("_act_n"))).is_equal(count)
+
+	var starts:=0
+	for beat:Dictionary in beats:
+		if String(beat.act)=="soundtrack":starts+=1;assert_float(float(beat.t)).is_equal_approx(1.83,0.01)
+	assert_int(starts).is_equal(1)
+	assert_bool(stage.execute("club",Stage.MAIN)).is_true()
+	stage.hush(20.0)
+	stage.exec_caption_override="The engine's exact account."
+	stage.skip_execution()
+	assert_float(stage._hush_until).is_less_equal(float(stage.call("_now")))
+	assert_str(String(stage._caption.label.text)).is_equal("The engine's exact account.")
+	await get_tree().create_timer(2.0).timeout
+	assert_int(int(sound.get("_act_n"))).is_equal(count)
+
+func test_a_terminal_order_keeps_the_victim_until_the_execution_finishes()->void:
+	if not _ready_or_skip():return
+	var audience:=Hall.debug_force("petition")
+	assert_bool(audience.is_empty()).is_false()
+	var modal:Control=await _open(String(audience.id))
+	var stage:Control=modal.court_stage
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	var order:="Put %s to death in the fire." % String(main.person.get("name",""))
+	var result:Dictionary=modal.office_order(order)
+	if not bool(result.get("removed",false)):result=modal.office_order("I said it: "+order)
+	assert_bool(bool(result.get("removed",false))).is_true()
+	assert_bool(modal._executed).is_true()
+	# Finish reading immediately, while the 1.4-second entrance delay is pending.
+	for i in 12:
+		modal.skip_reveal()
+		await await_idle_frame()
+	assert_bool(stage.exec_done).is_false()
+	assert_bool(main.leaving).is_false()
+	await get_tree().create_timer(1.6).timeout
+	assert_bool(stage.executing()).is_true()
+	assert_bool(main.leaving).is_false()
+	var shots:=0
+	var blow:=0.0
+	var finish:=0.0
+	for beat:Dictionary in stage._last_beats:
+		if String(beat.get("act",""))=="shot":
+			shots+=1
+			assert_int(int(beat.args.weight)).is_equal(5)
+		if String(beat.get("act",""))=="blow":blow=float(beat.t)
+		if String(beat.get("act",""))=="end":finish=float(beat.t)
+	assert_int(shots).is_greater(0)
+	assert_float(blow).is_greater(0.0)
+	var scene:Tween=stage._beats
+	await get_tree().create_timer(maxf(blow-scene.get_total_elapsed_time()-0.15,0.02)).timeout
+	assert_bool(main.leaving).is_false()
+	assert_bool(stage.exec_done).is_false()
+	await get_tree().create_timer(maxf(finish-scene.get_total_elapsed_time()+0.3,0.02)).timeout
+	assert_bool(stage.exec_done).is_true()
+	assert_bool(main.leaving).is_true()
