@@ -103,8 +103,15 @@ const WATCH_WALL_WORK:=0.38
 const WATCH_REPAIR:=0.20
 
 
-## The task's explanation: {lead, lines}.
+## The task's explanation: {lead, lines}, with what the people's gifted add
+## and, for learning and keeping and caring, the chance a gifted child is
+## noticed (geniuses.gd).
 static func of(role:String)->Dictionary:
+	var result:=_of(role)
+	preload("res://scripts/geniuses.gd").explain(role,result)
+	return result
+
+static func _of(role:String)->Dictionary:
 	match role:
 		"Food":return food()
 		"Survey":return survey()

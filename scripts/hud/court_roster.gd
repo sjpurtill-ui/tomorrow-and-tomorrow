@@ -8,8 +8,8 @@ const Hall:=preload("res://scripts/audience_hall.gd")
 const Divine:=preload("res://scripts/divine_regard.gd")
 const Civic:=preload("res://scripts/hud/court_civic.gd")
 const Persons:=preload("res://scripts/court_persons.gd")
-const GROUPS:=["council","settlement","scouts","builders","generals","folk"]
-const GROUP_WORDS:={"council":"THE COUNCIL","settlement":"LEADERS OF SETTLEMENTS","scouts":"SCOUTS","builders":"MASTER BUILDERS","generals":"WAR LEADERS","folk":"PEOPLE YOU HAVE CALLED"}
+const GROUPS:=["council","settlement","scouts","builders","generals","gifted","folk"]
+const GROUP_WORDS:={"council":"THE COUNCIL","settlement":"LEADERS OF SETTLEMENTS","scouts":"SCOUTS","builders":"MASTER BUILDERS","generals":"WAR LEADERS","gifted":"THE GIFTED","folk":"PEOPLE YOU HAVE CALLED"}
 const MAX_FOLK:=6
 const MAX_GENERALS:=3
 ## The form of court follows discoveries (data/civic/civic_stages.json): how
@@ -106,7 +106,7 @@ static func people()->Array[Dictionary]:
 		if seen.has(key): continue
 		seen[key]=true
 		var role:=String(figure.get("role",""))
-		var group:="builders" if role=="Architect" else "generals"
+		var group:="builders" if role=="Architect" else ("generals" if role=="General" else "gifted")
 		var title:=_figure_title(figure)
 		result.append({"key":key,"target":target,"name":String(figure.get("name","")),"title":title,"group":group,"matters":0,
 			"person":{"name":String(figure.get("name","")),"person_id":0},"regard":{},"settlement_id":"","figure":figure})
@@ -147,12 +147,16 @@ static func _figures()->Array[Dictionary]:
 		match String(figure.get("role","")):
 			"Architect": result.append(figure)
 			"General": generals.append(figure)
+			_:
+				# The gifted grown of the other works (geniuses.gd).
+				if figure.get("genius") is Dictionary: result.append(figure)
 	generals.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(assigned.has(a.id))>int(assigned.has(b.id)))
 	for index in mini(generals.size(),MAX_GENERALS): result.append(generals[index])
 	return result
 
 static func _figure_title(figure:Dictionary)->String:
 	var role:=String(figure.get("role",""))
+	if figure.get("genius") is Dictionary and not HistoricalFigures.assignments.values().has(String(figure.get("id",""))): return preload("res://scripts/geniuses.gd").court_title(figure)
 	if role=="Architect": return "Master builder"
 	if role=="General":
 		var in_field:=HistoricalFigures.assignments.values().has(String(figure.get("id","")))
