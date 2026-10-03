@@ -541,12 +541,20 @@ func _plan_at(at:Variant)->Vector3:
 ## The plan starts: everyone to their place, things in hand and on the floor,
 ## the clips running. args: act (the plan's name), victim, ex, cook.
 func _plan_start(args:Dictionary)->void:
-	var plan:=Acting.exec_plan(String(args.get("act","")))
+	var act:=String(args.get("act",""))
+	var plan:=Acting.exec_plan(act)
 	var v:=_body(victim)
 	var court:=_court()
 	if plan.is_empty() or v==null or court==null:return
 	_plan=plan
 	var yaw:=v.global_rotation.y
+	# The swing and the victim must remain side by side from the court's
+	# fixed camera, regardless of whom the victim last turned to address.
+	if act in ["club_home_run","three_swing_beheading"]:
+		var rig:Variant=stage.get("rig")
+		if rig!=null:
+			yaw=deg_to_rad(float(rig.get("base_yaw"))+15.0)
+			v.face(rad_to_deg(yaw-v.get_parent_node_3d().global_rotation.y),0.35)
 	_plan_frame=Transform3D(Basis(Vector3.UP,yaw),Vector3(v.global_position.x,0.0,v.global_position.z))
 	# Dragged off behind the windbreak: the plan's "behind" is turned toward
 	# the hall's own windbreak (or its door), and the drag is as long as the
