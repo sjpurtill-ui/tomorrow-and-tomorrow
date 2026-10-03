@@ -200,47 +200,52 @@ static func armed_of(formations:Array)->float:
 # --------------------------------------------------------------------------
 
 ## The kit the war leader arms the watch with: {unit, item} (Law.kit, the
-## best line foot our people can train and arm; the plain levy otherwise).
+## best line foot our people can train and arm, the makers' arms counted:
+## weapons_stock.gd makes the sets that become it; the plain levy otherwise).
 static func arms_kit(mc:Variant)->Dictionary:
-	var kit:Dictionary=Law.kit(mc)
+	var kit:Dictionary=Law.kit(mc,{"made":true})
 	if String(kit.get("item",""))=="":kit={"unit":"levy","item":"improvised"}
 	return kit
 
 ## THE ONE WEAPONS ACCESSOR. Every set of arms the watch takes up, hands back
-## or loses passes through these five, so they are the one seam to point at
-## workstream D's weapons stock (scripts/weapons_stock.gd, called in the
-## people's own scope): weapons_held -> weapons_held(), take_weapons ->
-## take_weapons(n), return_weapons -> return_weapons(n), lose_weapons ->
-## lose_weapons(n), weapons_carried -> weapons_issued(). Until then they are
-## the military store's count of the watch's kit (MilitaryCampaign
-## military_inventory). Fighters without a set fight with what comes to
-## hand (combat_simulator: the unarmed share of a formation).
+## or loses passes through these five, and they are workstream D's weapons
+## stock (scripts/weapons_stock.gd, called in the people's own scope):
+## weapons_held -> weapons_held(item), take_weapons -> take_weapons(n, item),
+## return_weapons -> return_weapons(n, item), lose_weapons ->
+## lose_weapons(n, item); weapons_stock.weapons_issued() reads
+## weapons_carried. A set the makers made becomes the watch's own kit
+## (arms_kit().item) in a fighter's hands; kits handed back go to the
+## armoury (MilitaryCampaign military_inventory), never traded. Fighters
+## without a set fight with what comes to hand (combat_simulator: the
+## unarmed share of a formation).
+static var _stock:GDScript
+static func _arms()->GDScript:
+	if _stock==null:_stock=load("res://scripts/weapons_stock.gd") as GDScript
+	return _stock
 
-## Sets in store for the watch's kit.
+## Sets held that arm the watch's kit (or the kit named): made sets and the
+## armoury's kits of it.
 static func weapons_held(mc:Variant,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
-	return maxi(0,int(mc.military_inventory.get(item,0)))
+	return int(_arms().call("weapons_held",item))
 
-## Takes up to `n` sets of the watch's kit from the store for the watch;
-## returns how many were taken.
+## Takes up to `n` sets of the watch's kit (or the kit named) for the watch:
+## made sets first, then the armoury's; returns how many were taken.
 static func take_weapons(mc:Variant,n:int,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
-	var taken:=mini(maxi(0,n),weapons_held(mc,item))
-	if taken>0:mc.military_inventory[item]=weapons_held(mc,item)-taken
-	return taken
+	return int(_arms().call("take_weapons",maxi(0,n),item))
 
-## `n` sets the watch hands back to the store as its people go back to work;
-## returns how many went back.
+## `n` sets the watch hands back as its people go back to work: to the
+## armoury, as the kit they are; returns how many went back.
 static func return_weapons(mc:Variant,n:int,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
-	var back:=maxi(0,n)
-	if back>0:mc.military_inventory[item]=int(mc.military_inventory.get(item,0))+back
-	return back
+	return int(_arms().call("return_weapons",maxi(0,n),item))
 
 ## `n` sets the watch lost with its fallen or in a rout (already gone from
-## the formations that carried them; the store is unchanged). Returns n.
-static func lose_weapons(_mc:Variant,n:int,_item:String="")->int:
-	return maxi(0,n)
+## the formations that carried them): kept on the arms record. Returns n.
+static func lose_weapons(mc:Variant,n:int,item:String="")->int:
+	if item=="":item=String(arms_kit(mc).item)
+	return int(_arms().call("lose_weapons",maxi(0,n),item))
 
 ## Sets the watch carries now, read from its formations wherever they stand
 ## (home, bands, garrisons): one ledger, never a counter kept apart.

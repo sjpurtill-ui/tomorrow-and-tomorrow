@@ -148,11 +148,21 @@ are the first currency, and a making people can buy and make arms.
   in a yard), priced at 48. Only made sets beyond what the watch still lacks
   are traded; the old armoury's spears and bows arm the watch and count as
   held for it, but are never traded, paid or given away, and no toll,
-  tribute or gift is paid in arms unless chosen. The military's API:
-  `weapons_held()`, `take_weapons(n)` (exact: made sets, then the armoury's
-  cheapest kits; a part set left over stays in store), `return_weapons(n)`,
-  `lose_weapons(n)`, `weapons_issued()` (0 until the military takes arms),
-  `arms_wanted()`, `cost_per_fighter()`, `weapons_quality()`.
+  tribute or gift is paid in arms unless chosen.
+  **Wired to the watch** (`watch_military.gd`, workstream E): the military's
+  five accessors are the stock's. `weapons_held(item)`, `take_weapons(n,
+  item)`, `return_weapons(n, item)` and `lose_weapons(n, item)` take the kit
+  named; a made set becomes the watch's own kit (`arms_kit().item`, the best
+  line foot the people can train and the makers arm) in a fighter's hands,
+  made sets first, then the armoury's kits of it; exact with part sets.
+  Kits handed back (a stand-down, a cancelled or retrained drill, a garrison
+  or a draft come home) go to the armoury as that kit. Losses in battle go
+  on the arms record. `weapons_issued()` reads what the formations carry
+  (`weapons_carried`), so `arms_wanted()` = the watch, less what it carries,
+  less what is held for its kit counts each set once; the record's `issued`
+  is only a statistic. Joining the watch, finishing drill, the daily
+  re-arming at home, a field draft's gear, an army build's reserve and a
+  general's resupply all draw through `take_weapons`.
 
 ## Exchange stages
 

@@ -691,8 +691,11 @@ func dispatch(order:Dictionary)->Dictionary:
 	var gap:=maxi(0,required-int(formation.get("equipment",0))-on_road)
 	var wanted:=mini(gap,host.simulator.equipment_required_for_weapon(weapon,count))
 	var reserved:=maxi(0,int(order.get("reserved_equipment",0)))
-	var issued:=mini(wanted,reserved+maxi(0,int(host.military_inventory.get(weapon,0))))
-	host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+reserved-issued
+	# The reserved gear first, then what is held for the kit (watch_military.gd:
+	# made sets for the watch's own kit, then the armoury).
+	var from_reserve:=mini(wanted,reserved)
+	var issued:=from_reserve+int(preload("res://scripts/watch_military.gd").take_weapons(host,wanted-from_reserve,weapon))
+	if reserved>from_reserve: preload("res://scripts/watch_military.gd").return_weapons(host,reserved-from_reserve,weapon)
 	host.gear_sent_out+=issued-reserved
 	var access:=clampf(float(order.get("equipment_access_sum",0.0))/maxf(0.01,float(order.get("instruction_progress_sum",order.get("required_days",1.0)))),0.0,1.0)
 	var skill:float=host._training_quality(unit,0.0)*(0.72+access*0.28)
@@ -787,7 +790,7 @@ func _join(force:Dictionary,draft:Dictionary)->bool:
 ## a formation of their own (their drill kept), their gear back to store.
 func _send_home(draft:Dictionary)->void:
 	var weapon:=String(draft.get("weapon","improvised"))
-	host.military_inventory[weapon]=int(host.military_inventory.get(weapon,0))+maxi(0,int(draft.get("equipment",0)))
+	preload("res://scripts/watch_military.gd").return_weapons(host,maxi(0,int(draft.get("equipment",0))),weapon)
 	host.gear_sent_out-=maxi(0,int(draft.get("equipment",0)))
 	var rounds:=maxi(0,int(draft.get("ammunition",0)))
 	var kind:String=host._ammunition_type_for(weapon) if rounds>0 else ""

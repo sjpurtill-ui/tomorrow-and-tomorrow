@@ -147,14 +147,14 @@ static func keep(mc:Node,day:int,now:=false)->Dictionary:
 ## best fighting kit (attack × defence, with armour) among the line kinds our
 ## people can train and can arm from store or workshop; the plain levy with
 ## whatever comes to hand when there is none.
-static func kit(mc:Node)->Dictionary:
+static func kit(mc:Node,plan:Dictionary={})->Dictionary:
 	var best:={"unit":"levy","item":""}
 	var score:=-INF
 	for unit:String in mc.UnitCatalog.ARCHETYPES:
 		if String((mc.UnitCatalog.ARCHETYPES[unit] as Dictionary).get("branch","")) not in LINE_BRANCHES:continue
-		var item:=Kit.selection(mc,unit,{})
+		var item:=Kit.selection(mc,unit,plan)
 		if item=="" or not mc.simulator.WEAPONS.has(item):continue
-		var value:=Kit.preference(mc,item,{})
+		var value:=Kit.preference(mc,item,plan)
 		if value>score:score=value;best={"unit":unit,"item":item}
 	return best
 
