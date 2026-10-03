@@ -176,15 +176,43 @@ func test_the_hush_cuts_the_murmur()->void:
 	Sound.set_volume(1.0)
 	sound.call("ambience","fire_ring","summer",{"era_tier":0,"dread":0.2})
 	var beds:Dictionary=sound.get("_beds")
-	assert_bool(beds.has("murmur")).is_true()
 	assert_bool(beds.has("fire")).is_true()
+	assert_int((sound.get("_slots") as Array).size()).is_greater_equal(3)
 	sound.call("hush",true)
 	assert_bool(sound.call("hushed")).is_true()
+	# nobody in the crowd may start talking again while the god holds the room
+	var now:float=sound.call("_now")
+	for at in (sound.get("_slot_free") as PackedFloat32Array):assert_float(at).is_greater(now+100.0)
 	sound.call("hush",false)
 	assert_bool(sound.call("hushed")).is_false()
+	# they come back one at a time, a beat late
+	var free:=sound.get("_slot_free") as PackedFloat32Array
+	var soonest:=INF;var latest:=0.0
+	for at in free:soonest=minf(soonest,at);latest=maxf(latest,at)
+	assert_float(soonest).is_greater(now+0.5)
+	assert_float(latest-soonest).is_greater(1.0)
 	# the god's words hush the room
 	sound.call("god","Be still.",1.5,"favour")
 	assert_bool(sound.call("hushed")).is_true()
+
+func test_the_crowd_never_says_the_same_thing_twice()->void:
+	# five minutes of the crowd: no run repeats another (who, from where, at
+	# what pitch), the room grows quieter and busier by turns
+	var runs:=Sound.murmur_schedule(11,300.0,"murmur")
+	assert_int(runs.size()).is_greater(80)
+	var seen:={}
+	for run:Dictionary in runs:
+		var key:="%d|%.2f|%.3f" % [int(run.talker),float(run.from),float(run.pitch)]
+		assert_bool(seen.has(key)).override_failure_message("a run repeats: "+key).is_false()
+		seen[key]=true
+	var least:=99;var most:=0
+	for second in range(10,290,2):
+		var talking:=0
+		for run:Dictionary in runs:
+			if not bool(run.aside) and float(run.t)<=second and second<float(run.t)+float(run.length)/float(run.pitch):talking+=1
+		least=mini(least,talking);most=maxi(most,talking)
+	assert_int(least).is_less_equal(1)
+	assert_int(most).is_greater_equal(4)
 
 func test_every_sound_the_director_names_is_made()->void:
 	for act in Sound.BEAT_CUES:
@@ -276,10 +304,11 @@ func test_the_dog_is_heard_now_and_then()->void:
 	assert_bool(sound.call("animal","dog","scratch",null)).is_false()
 
 class FakeStage extends Control:
-	var view3d:SubViewport
 	var extras:={}
 	var audience_key:="test"
 	func figure(_key:String)->Object:return null
+	## A camera's view of the hall: x metres to pixels across a 1536 wide stage.
+	func world_to_stage(point:Vector3)->Vector2:return Vector2(768.0+point.x*200.0,400.0)
 
 static func _balance(cap:AudioEffectCapture)->Vector2:
 	var n:=cap.get_frames_available()
@@ -288,33 +317,40 @@ static func _balance(cap:AudioEffectCapture)->Vector2:
 	for v in buf:l+=v.x*v.x;r+=v.y*v.y
 	return Vector2(sqrt(l/maxf(1.0,float(n))),sqrt(r/maxf(1.0,float(n))))
 
+func _heard(sound:Node,cap:AudioEffectCapture,body:Node3D)->Vector2:
+	cap.clear_buffer()
+	sound.call("cue","creak",body,{"variant":0,"pitch":1.0,"db":6.0})
+	await get_tree().create_timer(0.7).timeout
+	return _balance(cap)
+
 func test_sounds_come_from_where_people_stand()->void:
-	# the stage's hall listens through its camera: someone on the left of the
-	# picture is heard on the left
-	var stage:=FakeStage.new()
-	var view:=SubViewport.new();view.own_world_3d=true;view.size=Vector2i(64,64)
-	stage.add_child(view);stage.view3d=view
-	var cam:=Camera3D.new();view.add_child(cam);cam.position=Vector3(0.0,1.5,6.0);cam.current=true
-	var left:=Node3D.new();view.add_child(left);left.position=Vector3(-3.0,0.0,0.0)
-	var right:=Node3D.new();view.add_child(right);right.position=Vector3(3.0,0.0,0.0)
+	# someone at the left edge of the picture is heard 4-6 dB to the left,
+	# someone in the middle in the middle
+	var stage:=FakeStage.new();stage.size=Vector2(1536,864)
+	var left:=Node3D.new();stage.add_child(left);left.position=Vector3(-3.0,0.0,0.0)
+	var middle:=Node3D.new();stage.add_child(middle)
+	var right:=Node3D.new();stage.add_child(right);right.position=Vector3(3.0,0.0,0.0)
 	add_child(stage)
 	auto_free(stage)
+	stage.size=Vector2(1536,864)
 	var sound:Node=Sound.attach(stage)
 	Sound.set_volume(1.0)
+	for k in range(-Sound.PAN_STEPS,Sound.PAN_STEPS+1):assert_int(AudioServer.get_bus_index(Sound.pan_bus(k))).is_greater_equal(0)
+	assert_int(sound.call("pan_of",left)).is_equal(-Sound.PAN_STEPS)
+	assert_int(sound.call("pan_of",middle)).is_equal(0)
 	var cap:=AudioEffectCapture.new();cap.buffer_length=3.0
 	AudioServer.add_bus_effect(0,cap)
 	var slot:=AudioServer.get_bus_effect_count(0)-1
 	await get_tree().process_frame
-	cap.clear_buffer()
-	sound.call("cue","creak",left,{"variant":0,"pitch":1.0,"db":6.0})
-	await get_tree().create_timer(0.7).timeout
-	var from_left:=_balance(cap)
-	cap.clear_buffer()
-	sound.call("cue","creak",right,{"variant":0,"pitch":1.0,"db":6.0})
-	await get_tree().create_timer(0.7).timeout
-	var from_right:=_balance(cap)
+	var from_left:Vector2=await _heard(sound,cap,left)
+	var from_middle:Vector2=await _heard(sound,cap,middle)
+	var from_right:Vector2=await _heard(sound,cap,right)
 	AudioServer.remove_bus_effect(0,slot)
-	prints("left L/R",from_left,"right L/R",from_right)
+	var db_left:=20.0*log(from_left.x/maxf(from_left.y,0.000001))/log(10.0)
+	var db_right:=20.0*log(from_right.y/maxf(from_right.x,0.000001))/log(10.0)
+	var db_middle:=20.0*log(from_middle.x/maxf(from_middle.y,0.000001))/log(10.0)
+	prints("left %.1f dB, middle %.1f dB, right %.1f dB" % [db_left,db_middle,db_right])
 	assert_float(from_left.x+from_left.y).override_failure_message("nothing was heard").is_greater(0.0001)
-	assert_float(from_left.x).is_greater(from_left.y*1.1)
-	assert_float(from_right.y).is_greater(from_right.x*1.1)
+	assert_float(db_left).is_between(4.0,7.0)
+	assert_float(db_right).is_between(4.0,7.0)
+	assert_float(absf(db_middle)).is_less(0.5)

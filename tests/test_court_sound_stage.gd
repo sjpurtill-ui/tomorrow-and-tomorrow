@@ -64,7 +64,7 @@ func test_in_the_court_a_sound_comes_from_where_its_maker_stands()->void:
 	assert_object(sound).override_failure_message("the stage made no sound node").is_not_null()
 	assert_object(Sound.current).is_same(sound)
 	# the room has its beds (or is making them)
-	assert_bool((sound.get("_bed_list") as Array).size()>=3).is_true()
+	assert_bool((sound.get("_bed_list") as Array).size()>=2).is_true()
 	stage.settle()
 	# the leftmost and rightmost people in the picture
 	var left:Node3D=null;var right:Node3D=null
@@ -92,7 +92,11 @@ func test_in_the_court_a_sound_comes_from_where_its_maker_stands()->void:
 	await get_tree().create_timer(0.7).timeout
 	var from_right:=_balance(cap)
 	AudioServer.remove_bus_effect(0,slot)
-	prints("court: left person L/R",from_left,"at x",lx," right person L/R",from_right,"at x",rx)
+	var db_left:=20.0*log(from_left.x/maxf(from_left.y,0.000001))/log(10.0)
+	var db_right:=20.0*log(from_right.y/maxf(from_right.x,0.000001))/log(10.0)
+	prints("court: leftmost (x %d of %d) %.1f dB left; rightmost (x %d) %.1f dB right" % [lx,stage.size.x,db_left,rx,db_right])
 	assert_float(from_left.x+from_left.y).override_failure_message("nothing was heard").is_greater(0.0001)
-	assert_float(from_left.x).is_greater(from_left.y*1.05)
-	assert_float(from_right.y).is_greater(from_right.x*1.05)
+	# the further from the middle, the more to its side (4-6 dB at the edges)
+	var lw:=absf(lx/stage.size.x*2.0-1.0);var rw:=absf(rx/stage.size.x*2.0-1.0)
+	assert_float(db_left).is_greater(lw*5.0)
+	assert_float(db_right).is_greater(rw*5.0)

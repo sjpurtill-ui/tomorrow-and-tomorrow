@@ -38,12 +38,12 @@ const FRAME:=32
 ## softer), tilt (Hz: how much top the voice has), jitter, shimmer, tremor
 ## (an old voice's waver), fry (crackle: a long irregular pulse now and then).
 const REGISTERS:={
-	"man":{"f0":112.0,"fs":1.0,"range":1.0,"breath":0.02,"oq":0.58,"rd":0.85,"tilt":2300.0,"jitter":0.004,"shimmer":0.009,"tremor":0.0,"fry":0.0},
-	"woman":{"f0":204.0,"fs":1.15,"range":1.1,"breath":0.03,"oq":0.66,"rd":1.1,"tilt":2700.0,"jitter":0.0035,"shimmer":0.009,"tremor":0.0,"fry":0.0},
-	"youth_m":{"f0":136.0,"fs":1.07,"range":1.1,"breath":0.025,"oq":0.6,"rd":0.9,"tilt":2600.0,"jitter":0.004,"shimmer":0.009,"tremor":0.0,"fry":0.0},
-	"youth_f":{"f0":216.0,"fs":1.19,"range":1.15,"breath":0.03,"oq":0.66,"rd":1.1,"tilt":2900.0,"jitter":0.0035,"shimmer":0.009,"tremor":0.0,"fry":0.0},
-	"boy":{"f0":272.0,"fs":1.30,"range":1.3,"breath":0.035,"oq":0.64,"rd":1.0,"tilt":3200.0,"jitter":0.005,"shimmer":0.015,"tremor":0.0,"fry":0.0},
-	"girl":{"f0":288.0,"fs":1.34,"range":1.35,"breath":0.04,"oq":0.66,"rd":1.1,"tilt":3300.0,"jitter":0.005,"shimmer":0.015,"tremor":0.0,"fry":0.0},
+	"man":{"f0":112.0,"fs":1.0,"range":1.0,"breath":0.014,"oq":0.58,"rd":0.85,"tilt":2300.0,"jitter":0.004,"shimmer":0.009,"tremor":0.0,"fry":0.0},
+	"woman":{"f0":204.0,"fs":1.15,"range":1.1,"breath":0.017,"oq":0.66,"rd":1.1,"tilt":2700.0,"jitter":0.0035,"shimmer":0.009,"tremor":0.0,"fry":0.0},
+	"youth_m":{"f0":136.0,"fs":1.07,"range":1.1,"breath":0.018,"oq":0.6,"rd":0.9,"tilt":2600.0,"jitter":0.004,"shimmer":0.009,"tremor":0.0,"fry":0.0},
+	"youth_f":{"f0":216.0,"fs":1.19,"range":1.15,"breath":0.017,"oq":0.66,"rd":1.1,"tilt":2900.0,"jitter":0.0035,"shimmer":0.009,"tremor":0.0,"fry":0.0},
+	"boy":{"f0":272.0,"fs":1.30,"range":1.3,"breath":0.026,"oq":0.64,"rd":1.0,"tilt":3200.0,"jitter":0.005,"shimmer":0.015,"tremor":0.0,"fry":0.0},
+	"girl":{"f0":288.0,"fs":1.34,"range":1.35,"breath":0.024,"oq":0.66,"rd":1.1,"tilt":3300.0,"jitter":0.005,"shimmer":0.015,"tremor":0.0,"fry":0.0},
 	"old_man":{"f0":121.0,"fs":0.98,"range":0.85,"breath":0.08,"oq":0.62,"rd":1.25,"tilt":2000.0,"jitter":0.01,"shimmer":0.035,"tremor":0.022,"fry":0.06},
 	"old_woman":{"f0":186.0,"fs":1.10,"range":0.9,"breath":0.09,"oq":0.68,"rd":1.4,"tilt":2200.0,"jitter":0.009,"shimmer":0.03,"tremor":0.026,"fry":0.04},
 }
@@ -621,6 +621,13 @@ static func voice_score(sc:Score,voice:Dictionary,feel:Dictionary,seed_value:int
 	var k5:=Synth.reso(4500.0*fs,350.0)
 	var hpc:=1.0-exp(-TAU*1500.0/RATE)
 	var hp_y:=0.0;var y51:=0.0;var y52:=0.0
+	# presence: a broad, gentle lift about 2.2 kHz (RBJ peaking, +4.5 dB, Q 0.7),
+	# where a voice carries; nothing above 4 kHz is raised, so it is not harsh
+	var pk_a:=pow(10.0,4.5/40.0);var pk_w:=TAU*2200.0/RATE;var pk_al:=sin(pk_w)/(2.0*0.7)
+	var pk_a0:=1.0+pk_al/pk_a
+	var pb0:=(1.0+pk_al*pk_a)/pk_a0;var pb1:=(-2.0*cos(pk_w))/pk_a0;var pb2:=(1.0-pk_al*pk_a)/pk_a0
+	var pa1:=(-2.0*cos(pk_w))/pk_a0;var pa2:=(1.0-pk_al/pk_a)/pk_a0
+	var px1:=0.0;var px2:=0.0;var py1:=0.0;var py2:=0.0
 	var kn:=Synth.reso(270.0*fs,110.0)
 	var k4:=Synth.reso(3500.0*fs,300.0)
 	var lcg:=seed_value&0x7fffffff
@@ -687,7 +694,7 @@ static func voice_score(sc:Score,voice:Dictionary,feel:Dictionary,seed_value:int
 			lcg=(lcg*1103515245+12345)&0x7fffffff
 			var noise:=float(lcg)/1073741823.5-1.0
 			# breath pulses with the glottis: loud while it is open, little while shut
-			var open:=1.0 if ph<te_n else 0.25
+			var open:=1.0 if ph<te_n else 0.55
 			var voiced_w:=clampf(av*2.0,0.0,1.0)
 			var src:=glot*0.32*sh*av+noise*(ah*lerpf(1.0,open,voiced_w)+breath*av*open)*0.5
 			tilt_y+=tilt_a*(src-tilt_y)
@@ -697,7 +704,10 @@ static func voice_score(sc:Score,voice:Dictionary,feel:Dictionary,seed_value:int
 			o=k4.x*o+k4.y*y41+k4.z*y42;y42=y41;y41=o
 			o=k5.x*o+k5.y*y51+k5.z*y52;y52=y51;y51=o
 			hp_y+=hpc*(o-hp_y)
-			o+=(o-hp_y)*1.0
+			o+=(o-hp_y)*1.5
+			var pq:=pb0*o+pb1*px1+pb2*px2-pa1*py1-pa2*py2
+			px2=px1;px1=o;py2=py1;py1=pq
+			o=pq
 			if nas>0.01:
 				var m:=kn.x*tilt_y+kn.y*yn1+kn.z*yn2;yn2=yn1;yn1=m
 				o=lerpf(o,m*1.4,nas*0.55)

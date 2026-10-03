@@ -237,18 +237,54 @@ def gated(info, tag, names, without=False):
     info.setdefault("gates", {}).setdefault(key, []).extend(names)
 
 
+## Where people stand about a fire at the origin. The one before the god
+## stands to the fire's left (from the god's side), so the hearth is never
+## behind them in the view; the court stands in a loose arc at many depths.
 BASE_MARKS = {
-    "petitioner": (0.2, 0, 2.15),
-    "officials_0": (-1.75, 0, 1.55),
-    "officials_1": (1.95, 0, 1.2),
-    "officials_2": (-2.85, 0, 0.15),
-    "officials_3": (3.05, 0, -0.25),
-    "officials_4": (-1.2, 0, -1.75),
-    "officials_5": (1.45, 0, -2.0),
-    "envoy_0": (-0.55, 0, 2.3),
-    "envoy_1": (-1.75, 0, 2.75),
-    "envoy_2": (0.75, 0, 2.85),
+    "petitioner": (-1.15, 0, 2.05),
+    "officials_0": (-2.35, 0, 1.35),
+    "officials_1": (1.55, 0, 1.75),
+    "officials_2": (-3.36, 0, 0.4),
+    "officials_3": (3.4, 0, 0.25),
+    "officials_4": (-1.2, 0, -3.25),
+    "officials_5": (1.55, 0, -3.2),
+    "envoy_0": (-1.25, 0, 2.2),
+    "envoy_1": (-2.45, 0, 2.6),
+    "envoy_2": (-0.1, 0, 3.0),
 }
+
+
+## Obstacles marks must keep clear of: [(a, b, radius)] segments on the ground.
+OBSTACLES = []
+
+
+def clear_of(a, b, r):
+    OBSTACLES.append(((a[0], a[2]), (b[0], b[2]), r))
+
+
+def check_marks(kind, marks):
+    """Every standing mark keeps clear of seats, stones and the fire."""
+    import math as _m
+    bad = []
+    for name, m in marks.items():
+        if m.get("sit") or name in ("fire", "throne_gaze", "door_out") or name.startswith("seat") or name.startswith("high"):
+            continue
+        x, z = m["pos"][0], m["pos"][2]
+        need = 0.42 if name.startswith("animal") else 0.5
+        if _m.hypot(x, z) < 1.25 and name != "fire":
+            bad.append((name, "fire", round(_m.hypot(x, z), 2)))
+        for (a, b, r) in OBSTACLES:
+            ax, az = a
+            bx, bz = b
+            dx, dz = bx - ax, bz - az
+            t = max(0.0, min(1.0, ((x - ax) * dx + (z - az) * dz) / max(dx * dx + dz * dz, 1e-9)))
+            d = _m.hypot(x - (ax + t * dx), z - (az + t * dz)) - r
+            if d < need:
+                bad.append((name, (round(ax, 2), round(az, 2)), round(d, 2)))
+    for b in bad:
+        K.log("MARK CLASH", kind, *b)
+    OBSTACLES.clear()
+    return bad
 
 
 def base_marks(throne=(0.0, 2.3, 5.4)):
@@ -288,14 +324,17 @@ def build_fire_ring(bld):
     hearth_ring(bld, seed=0)
 
     # --- log seats about the fire, the front left open toward the god
-    seats = [(70, 2.0, 0.22), (118, 2.2, 0.25), (160, 1.9, 0.24), (200, 2.1, 0.25), (243, 1.9, 0.24), (290, 1.7, 0.21)]
+    # the back of the ring is left open behind the fire (where the god's eye
+    # falls through the flames), the rack and the woods seen through the gap
+    seats = [(62, 2.0, 0.22, 4.0), (118, 2.2, 0.25, R_SEAT), (160, 1.9, 0.24, R_SEAT), (248, 1.9, 0.24, R_SEAT), (292, 1.7, 0.21, 4.0)]
     seat_marks = []
-    for i, (phi, length, r) in enumerate(seats):
-        c = Vector(polar(phi, R_SEAT, r * 0.82))
+    for i, (phi, length, r, rad) in enumerate(seats):
+        c = Vector(polar(phi, rad, r * 0.82))
         tang = tangent(phi)
         a = c - tang * length * 0.5
         b = c + tang * length * 0.5
         K.log_piece(bld, "Seats", tuple(a), tuple(b), r, seed=i * 3.1, wear=0.6, flat=0.86, stubs=1 if i % 2 else 2)
+        clear_of(a, b, r)
         seat_marks.append((phi, c, r))
 
     windbreak(bld, [104, 122, 140, 158, 176, 194, 212, 230, 247], R_WALL, seed=3)
@@ -405,18 +444,20 @@ def build_fire_ring(bld):
     distance(bld)
 
     marks = base_marks()
+    marks["officials_4"] = mark((-2.95, 0, -2.05))
     marks["door"] = mark(tuple(Vector(polar(262, R_WALL + 0.6))), face="fire")
     marks["door_out"] = mark(tuple(Vector(polar(262, R_WALL + 3.5))), face="fire")
     crowd = []
     for phi, c, r in seat_marks:
         if 110 <= phi <= 250:
             crowd.append(mark((c.x, 0.0, c.z), face="fire", sit=True, seat=round(r * 1.82, 3)))
-    for phi, r in [(205, 3.6), (150, 3.55), (232, 3.5), (122, 3.7), (178, 3.9)]:
-        crowd.append(mark(polar(phi, r), face="fire"))
+    for x, z in [(0.5, -3.55), (2.29, -3.37), (3.14, -1.96), (-3.55, -0.75)]:
+        crowd.append(mark((x, 0.0, z), face="fire"))
     for i, m in enumerate(crowd):
         marks["crowd_%d" % i] = m
-    for i, (phi, r) in enumerate([(40, 1.6), (138, 3.35), (75, 3.75), (318, 2.4)]):
-        marks["animal_%d" % i] = mark(polar(phi, r), face="fire")
+    for i, (x, z) in enumerate([(1.55, 0.55), (2.6, -2.6), (-1.85, 0.45), (0.35, 3.4)]):
+        marks["animal_%d" % i] = mark((x, 0.0, z), face="fire")
+    check_marks("fire_ring", marks)
 
     info.update({
         "marks": marks,
@@ -735,25 +776,26 @@ def build_longhouse(bld):
     bld.add("ShadowCaster", fwall, "MUD")
 
     marks = base_marks((0.0, 2.5, 6.2))
-    marks["petitioner"] = mark((0.25, 0, 1.75))
-    marks["officials_0"] = mark((-1.65, 0, 1.35))
-    marks["officials_1"] = mark((2.05, 0, 1.05))
-    marks["officials_2"] = mark((-2.95, 0, 0.35))
-    marks["officials_3"] = mark((3.35, 0, 0.15))
-    marks["officials_4"] = mark((-1.35, 0, -1.3))
+    marks["petitioner"] = mark((-1.2, 0, 1.75))
+    marks["officials_0"] = mark((-2.45, 0, 1.2))
+    marks["officials_1"] = mark((1.5, 0, 1.55))
+    marks["officials_2"] = mark((-3.35, 0, 0.1))
+    marks["officials_3"] = mark((3.35, 0, 0.3))
+    marks["officials_4"] = mark((-2.35, 0, -1.45))
     marks["officials_5"] = mark((1.6, 0, -1.4))
-    marks["envoy_0"] = mark((-0.55, 0, 2.0))
-    marks["envoy_1"] = mark((-1.8, 0, 2.55))
-    marks["envoy_2"] = mark((0.85, 0, 2.6))
+    marks["envoy_0"] = mark((-1.3, 0, 1.95))
+    marks["envoy_1"] = mark((-2.5, 0, 2.45))
+    marks["envoy_2"] = mark((-0.15, 0, 2.7))
     marks["high_seat"] = mark((0.0, 0.0, -HALF_W + 0.55), face="throne", sit=True, seat=0.68)
-    for i, (x, z) in enumerate([(-3.6, -3.15), (-1.25, -3.2), (2.2, -3.15), (4.6, -3.2)]):
+    for i, (x, z) in enumerate([(-3.6, -3.15), (0.95, -3.2), (2.6, -3.15), (4.6, -3.2)]):
         marks["crowd_%d" % i] = mark((x, 0.0, z), face="fire", sit=True, seat=0.45)
     for i, (x, z) in enumerate([(-4.9, -1.1), (5.0, -0.9), (-4.3, 1.9), (4.6, 1.95)]):
         marks["crowd_%d" % (i + 4)] = mark((x, 0, z), face="fire")
     marks["door"] = mark((-HALF_L + 0.6, 0, 0.5), face="fire")
     marks["door_out"] = mark((-HALF_L - 2.5, 0, 0.5), face="fire")
-    for i, (x, z) in enumerate([(1.35, 1.3), (-5.2, -1.7), (3.7, 1.6), (-6.8, 1.0)]):
+    for i, (x, z) in enumerate([(1.6, 0.95), (-5.2, -1.7), (3.7, 1.6), (-6.8, 1.0)]):
         marks["animal_%d" % i] = mark((x, 0, z), face="fire")
+    check_marks("longhouse", marks)
 
     info.update({
         "marks": marks,
@@ -762,7 +804,7 @@ def build_longhouse(bld):
         "fx": {
             "fire": {"pos": [0, 0.05, 0], "size": 1.25},
             "smoke_top": RIDGE_H + 0.4,
-            "shafts": [{"top": [0.0, RIDGE_H - 0.3, -0.45], "radius": 0.62}],
+            "shafts": [{"top": [0.0, RIDGE_H - 0.3, -0.45], "radius": 0.62, "strength": 0.4, "soft": 0.5}],
             "dust": {"pos": [0.0, 1.8, 0.6], "extent": [4.0, 1.6, 2.4]},
             "door_light": [-HALF_L + 0.2, 1.2, 0.5],
         },
@@ -773,6 +815,45 @@ def build_longhouse(bld):
         "door_side": -1,
     })
     return info
+
+
+def merge_static(meshes, info):
+    """Join every piece the facts never toggle into two objects (inked and
+    plain), so the game draws a set in a few dozen calls, not hundreds.
+    Props the facts show or hide, the ground, the grass, the distance and the
+    shadow casters stay their own objects."""
+    toggled = set()
+    for names in info.get("props", {}).values():
+        if isinstance(names, list):
+            toggled.update(names)
+    for names in info.get("gates", {}).values():
+        toggled.update(names)
+    keep = {"Ground", "Grass", "ShadowCaster"}
+    ink = info.get("ink", [])
+    inked, plain, out = [], [], []
+    for o in meshes:
+        if o.name in toggled or o.name in keep or o.name.startswith("Far"):
+            out.append(o)
+        elif any(o.name.startswith(p) for p in ink):
+            inked.append(o)
+        else:
+            plain.append(o)
+    for group, name in ((inked, "StaticInked"), (plain, "StaticPlain")):
+        if not group:
+            continue
+        for o in bpy.context.selected_objects:
+            o.select_set(False)
+        for o in group:
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = group[0]
+        bpy.ops.object.join()
+        joined = bpy.context.active_object
+        joined.name = name
+        joined.data.name = name
+        out.append(joined)
+    info["ink"] = ["StaticInked"] + [p for p in ink if p.endswith("_")]
+    info["merged"] = {"StaticInked": len(inked), "StaticPlain": len(plain)}
+    return out
 
 
 import court_set_halls as H  # noqa: E402  (the later halls use the pieces above)
@@ -804,6 +885,7 @@ def main():
             bake = [o for o in meshes if not o.name.startswith("Far") and o.name not in ("ShadowCaster",)]
             ao = K.bake_ao(bake, distance=0.9, samples=20)
         K.write_colors(meshes, ao)
+        meshes = merge_static(meshes, info)
         path = os.path.join(OUT, "court_set_%s.glb" % kind)
         K.export_glb(meshes, path)
         info["glb"] = "court_set_%s.glb" % kind

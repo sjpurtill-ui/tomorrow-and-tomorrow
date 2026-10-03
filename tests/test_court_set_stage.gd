@@ -326,3 +326,24 @@ func _check_ways_in(id:String)->void:
 	assert_int(walked).is_greater_equal(2)
 	modal.queue_free()
 	await await_idle_frame()
+
+
+func test_two_sent_in_together_walk_in_single_file()->void:
+	# Two sent in at once (and one sent in a moment later) never walk into
+	# each other on the way to their marks.
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var a:Stage.Figure=stage.add_figure("late_a",{"name":"Late Amu","person_id":0,"age":40},"court","Amu","",true)
+	var b:Stage.Figure=stage.add_figure("late_b",{"name":"Late Benno","person_id":0,"age":33},"court","Benno","",true)
+	await await_idle_frame()
+	if a.spot==null or b.spot==null:return
+	var closest:=INF
+	for step in 120:
+		for f:Stage.Figure in [a,b]:
+			if f._move!=null and f._move.is_valid():f._move.custom_step(0.1)
+		if not (a.body3d.visible and b.body3d.visible):continue
+		var pa:Vector3=a.body3d.global_position;var pb:Vector3=b.body3d.global_position
+		closest=minf(closest,Vector2(pa.x-pb.x,pa.z-pb.z).length())
+	assert_float(closest).override_failure_message("they came within %.2f m of each other" % closest).is_greater(0.5)

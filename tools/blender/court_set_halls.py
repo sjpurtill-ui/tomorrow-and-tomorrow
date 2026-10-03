@@ -159,13 +159,13 @@ def build_shelter(bld):
 
     # log seats, and carved seats for the eldest at the back
     seat_marks = []
-    for i, (phi, length, r) in enumerate([(72, 1.9, 0.22), (116, 2.0, 0.24), (244, 1.8, 0.23), (290, 1.7, 0.21)]):
-        c = Vector(S.polar(phi, R_SEAT, r * 0.82))
+    for i, (phi, length, r, rad) in enumerate([(62, 1.9, 0.22, 4.0), (116, 2.0, 0.24, R_SEAT), (292, 1.7, 0.21, 4.0)]):
+        c = Vector(S.polar(phi, rad, r * 0.82))
         t = S.tangent(phi)
         K.log_piece(bld, "Seats", tuple(c - t * length * 0.5), tuple(c + t * length * 0.5), r, seed=i * 3.1, wear=0.6, flat=0.86, stubs=1)
         seat_marks.append((phi, c, r))
     elder_seats = []
-    for i, phi in enumerate([158, 180, 202]):
+    for i, phi in enumerate([138, 158, 240]):
         c = Vector(S.polar(phi, 2.6))
         inward = Vector((-c.x, 0, -c.z)).normalized()
         side = Vector((inward.z, 0, -inward.x))
@@ -181,14 +181,12 @@ def build_shelter(bld):
             K.rock(bld, "ElderSeats", tuple(back + Vector((0, 0.6 + k * 0.16, 0)) + inward * 0.05), (0.07, 0.02, 0.025), seed=60 + k + i, slot="OCHRE", subdiv=1)
         elder_seats.append((phi, c))
 
-    # the standing stones beyond, ochre about their middles
-    for k, phi in enumerate([140, 165, 190, 215, 236]):
-        p = Vector(S.polar(phi, 8.2 + 0.6 * math.sin(k * 2.0)))
-        h = 1.4 + 0.5 * ((k * 7) % 3) / 2
-        K.rock(bld, "Stones", tuple(p + Vector((0, h * 0.45, 0))), (0.32, h, 0.24), seed=7.7 + k, flat=1.0)
-        band = K.lathe([(0.3, 0.0), (0.33, 0.08), (0.3, 0.16)], segs=12, at=tuple(p + Vector((0, h * 0.62, 0))), cap_bottom=False)
-        K.thicken(band, 0.012)
-        bld.add("Stones", band, "OCHRE")
+    # the standing stones beyond: tall weathered slabs, leaning a little, lichened
+    for k, phi in enumerate([140, 162, 186, 210, 234]):
+        p = Vector(S.polar(phi, 8.0 + 0.7 * math.sin(k * 2.0)))
+        h = 1.9 + 0.7 * ((k * 7) % 3) / 2
+        face = Vector((-p.x, 0, -p.z)).normalized()
+        K.standing_stone(bld, "Stones", tuple(p), h, 0.36 + 0.08 * (k % 2), 0.2, face=tuple(face), seed=7.7 + k, lean=(0.04 * math.sin(k * 3.0), 0.05 * math.cos(k * 2.0)))
 
     # the store under the eaves at the back right; the rack outside at the right
     store = Vector(S.polar(128, 3.0))
@@ -236,6 +234,16 @@ def build_shelter(bld):
     S.distance(bld, seed=2.0)
 
     marks = S.base_marks()
+    marks["officials_4"] = S.mark((-1.3, 0, 0.75))
+    marks["officials_5"] = S.mark((0.87, 0, -1.52))
+    for p in [96, 122, 148, 174, 200, 226, 252]:
+        q = S.polar(p, R_POST)
+        S.clear_of(q, q, 0.1)
+    for phi, c in elder_seats:
+        S.clear_of(tuple(c), tuple(c), 0.3)
+    for phi, c, r in seat_marks:
+        t = S.tangent(phi)
+        S.clear_of(tuple(c - t * 0.95), tuple(c + t * 0.95), r)
     marks["door"] = S.mark(S.polar(272, 4.8), face="fire")
     marks["door_out"] = S.mark(S.polar(272, 8.5), face="fire")
     crowd = []
@@ -244,12 +252,13 @@ def build_shelter(bld):
     for phi, c, r in seat_marks:
         if 100 <= phi <= 260:
             crowd.append(S.mark((c.x, 0.0, c.z), face="fire", sit=True, seat=round(r * 1.82, 3)))
-    for phi, r in [(140, 3.3), (220, 3.3), (166, 3.35), (196, 3.4)]:
-        crowd.append(S.mark(S.polar(phi, r), face="fire"))
+    for x, z in [(2.4, -2.48), (-3.1, -1.6), (0.8, -3.2)]:
+        crowd.append(S.mark((x, 0.0, z), face="fire"))
     for i, m in enumerate(crowd):
         marks["crowd_%d" % i] = m
-    for i, (phi, r) in enumerate([(40, 1.6), (128, 2.4), (75, 3.6), (318, 2.4)]):
-        marks["animal_%d" % i] = S.mark(S.polar(phi, r), face="fire")
+    for i, (x, z) in enumerate([(1.55, 0.55), (2.3, 0.5), (-1.85, 0.45), (0.35, 3.4)]):
+        marks["animal_%d" % i] = S.mark((x, 0.0, z), face="fire")
+    S.check_marks("shelter", marks)
 
     info.update({
         "marks": marks,
@@ -461,14 +470,20 @@ def build_mudbrick_hall(bld):
 
     marks = S.base_marks((0.0, 2.5, 6.2))
     marks["seat_place"] = S.mark(tuple(seat_c + Vector((0, -0.6, 0.05))), face="throne", sit=True, seat=1.07)
+    marks["officials_4"] = S.mark((-1.75, 0, -1.85))
+    marks["officials_5"] = S.mark((1.7, 0, -1.95))
     for i, (x, z) in enumerate([(X0 + 0.45, -3.0), (X0 + 0.45, -1.6), (X1 - 0.45, 0.0), (X1 - 0.45, 1.6)]):
         marks["crowd_%d" % i] = S.mark((x, 0.0, z), face="fire", sit=True, seat=0.46)
     for i, (x, z) in enumerate([(-4.4, -2.6), (4.4, -1.2), (-4.6, 1.6), (2.6, -3.3)]):
         marks["crowd_%d" % (i + 4)] = S.mark((x, 0, z), face="fire")
     marks["door"] = S.mark((X0 + 0.5, 0, 0.75), face="fire")
     marks["door_out"] = S.mark((X0 - 2.5, 0, 0.75), face="fire")
-    for i, (x, z) in enumerate([(1.45, 1.25), (-4.6, -2.0), (3.7, 1.6), (-6.0, 1.2)]):
+    for i, (x, z) in enumerate([(1.65, 0.95), (-4.6, -2.0), (3.7, 1.6), (-6.0, 1.2)]):
         marks["animal_%d" % i] = S.mark((x, 0, z), face="fire")
+    for x in (-3.3, 3.3):
+        S.clear_of((x, 0, -1.6), (x, 0, -1.6), 0.2)
+    S.clear_of((-0.8, 0, -2.75), (0.8, 0, -2.75), 0.3)
+    S.check_marks("mudbrick_hall", marks)
 
     info.update({
         "marks": marks,
@@ -477,7 +492,7 @@ def build_mudbrick_hall(bld):
         "fx": {
             "fire": {"pos": [0, 0.27, 0], "size": 0.95},
             "smoke_top": H + 0.6,
-            "shafts": [{"top": [0.0, H + 0.1, -1.25], "radius": 0.85}],
+            "shafts": [{"top": [0.0, H + 0.1, -1.25], "radius": 0.85, "strength": 0.34, "soft": 0.5}],
             "dust": {"pos": [0.0, 1.8, -0.6], "extent": [3.6, 1.6, 2.4]},
             "door_light": [X0 + 0.1, 1.2, 0.75],
         },
@@ -617,7 +632,11 @@ def build_grand_hall(bld):
         K.rock(bld, "Hearth", S.polar(rng.uniform(0, 360), rng.uniform(0.05, 0.5), 0.045), (0.05, 0.03, 0.04), seed=30 + k, slot="EMBER", subdiv=1)
     for x in (-2.4, 2.4):
         brazier(bld, "Braziers", (x, 0.0, ZB + 2.4))
-        flame_spot(info, (x, 1.05, ZB + 2.4), 0.4)
+        flame_spot(info, (x, 1.05, ZB + 2.4), 0.42)
+    # lamps on the wall either side of the seat, and a hanging lamp-wheel's glow
+    for x in (-3.8, 3.8):
+        K.tray(bld, "Braziers", (x, 2.2, ZB + 0.25), 0.12, 0.05, seed=x, slot="BRONZE")
+        flame_spot(info, (x, 2.25, ZB + 0.25), 0.12)
 
     # benches along the sides; a long table of food at the right
     for x in (X0 + 0.55, X1 - 0.55):
@@ -662,8 +681,8 @@ def build_grand_hall(bld):
     S.distance(bld, arc=(230, 330), seed=8.0)
 
     marks = S.base_marks((0.0, 2.7, 7.0))
-    marks["petitioner"] = S.mark((0.2, 0, 2.3))
-    marks["officials_4"] = S.mark((-1.6, 0, -1.9))
+    marks["petitioner"] = S.mark((-1.2, 0, 2.3))
+    marks["officials_4"] = S.mark((-2.6, 0, -1.7))
     marks["officials_5"] = S.mark((1.7, 0, -2.2))
     marks["seat_place"] = S.mark(tuple(tc + Vector((0, -0.8, 0.05))), face="throne", sit=True, seat=1.27)
     for i, (x, z) in enumerate([(X0 + 0.55, -4.6), (X0 + 0.55, -3.0), (X1 - 0.55, -4.4), (X1 - 0.55, 1.6)]):
@@ -672,8 +691,14 @@ def build_grand_hall(bld):
         marks["crowd_%d" % (i + 4)] = S.mark((x, 0, z), face="fire")
     marks["door"] = S.mark((X0 + 0.6, 0, 1.6), face="fire")
     marks["door_out"] = S.mark((X0 - 2.5, 0, 1.6), face="fire")
-    for i, (x, z) in enumerate([(1.55, 1.35), (-4.6, -2.0), (3.9, 1.8), (6.0, 1.6)]):
+    for i, (x, z) in enumerate([(1.75, 1.0), (-4.6, -2.0), (3.9, 1.8), (6.0, 1.6)]):
         marks["animal_%d" % i] = S.mark((x, 0, z), face="fire")
+    for x in (-5.4, 5.4):
+        for z in (-4.4, -1.4):
+            S.clear_of((x, 0, z), (x, 0, z), 0.45)
+    for x in (-2.4, 2.4):
+        S.clear_of((x, 0, ZB + 2.4), (x, 0, ZB + 2.4), 0.35)
+    S.check_marks("grand_hall", marks)
 
     info.update({
         "marks": marks,
@@ -682,12 +707,13 @@ def build_grand_hall(bld):
         "fx": {
             "fire": {"pos": [0, 0.05, 0], "size": 1.15},
             "smoke_top": H,
-            "shafts": [{"top": [X0 - 0.2, 5.4, -4.0], "dir": [0.62, -0.62, 0.24], "radius": 0.42, "strength": 0.045},
-                       {"top": [X0 - 0.2, 5.4, -0.8], "dir": [0.62, -0.62, 0.24], "radius": 0.42, "strength": 0.045}],
+            "shafts": [{"top": [X0 - 0.2, 5.4, -4.0], "dir": [0.62, -0.62, 0.24], "radius": 0.5, "strength": 0.16, "soft": 1.0},
+                       {"top": [X0 - 0.2, 5.4, -0.8], "dir": [0.62, -0.62, 0.24], "radius": 0.5, "strength": 0.16, "soft": 1.0}],
+            "fill": [[0.0, 3.8, ZB + 1.6, 1.1, 9.0], [-5.0, 3.0, -2.0, 0.5, 7.0], [5.0, 3.0, -2.0, 0.5, 7.0]],
             "dust": {"pos": [-3.0, 3.0, -1.6], "extent": [4.0, 2.5, 2.4]},
             "door_light": [X0 + 0.1, 1.3, 1.6],
         },
-        "light": {"open_sky": False, "sun_dir": [0.62, -0.62, 0.24], "sun_energy": 1.9, "fire_energy": 1.5, "fire_range": 8.0, "fog": 0.008},
+        "light": {"open_sky": False, "sun_dir": [0.62, -0.62, 0.24], "sun_energy": 0.7, "fire_energy": 1.6, "fire_range": 8.5, "fog": 0.006, "brazier_energy": 2.2, "brazier_range": 6.5},
         "camera": {"yaw": 16.0, "pitch": -10.0, "fov": 52.0, "centre": [0.1, 1.0, -0.2], "yaw_range": [-30.0, 36.0]},
         "ink": ["Hearth", "Columns", "Dais", "Canopy", "Table", "Benches", "Shields", "Braziers", "Carpet", "Roof", "food_", "spear_", "weave_"],
         "shadow_only": ["ShadowCaster"],

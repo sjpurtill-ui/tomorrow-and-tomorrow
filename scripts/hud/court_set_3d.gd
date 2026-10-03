@@ -17,8 +17,9 @@ extends Node3D
 ##                person there faces (docs/COURT_STAGE_3D.md); place() turns a
 ##                figure (whose front is +Z) to match. Sit marks carry meta
 ##                "sit" and "seat" (the seat's height; hide the figure's stool).
-##     rig, camera  a CourtCamera (court_camera.gd) driving the set's own lens
-##                until the stage hands it the stage's camera (attach)
+##     camera     a CourtCamera (court_camera.gd, a Camera3D): the set's lens
+##                and its rig (rig is the same object); attach() lets it
+##                drive a stage's own camera instead
 ##     lights     the sun (the one shadowed light), the fire (flickering), a
 ##                warm bounce, the door's daylight in a hall, braziers
 ##     props      shown from the facts: food in the baskets, on the rack and
@@ -30,6 +31,13 @@ extends Node3D
 ## food_days or stores_days, hungry, war (a Dictionary or a bool) or at_war,
 ## era_tier, era_tags, season; or the set's own: food 0..1, war, tier, herds,
 ## fowl, dyes (the people's three cloth colours, hex), seed.
+## The season (spring, summer, autumn, winter) shows: snow lying and breath
+## in the cold, dry grass and flies about the food in summer, fallen leaves in
+## autumn, flowers in the grass in spring.
+## Quality: "high", "low" or "auto" (CourtSet.quality). Low drops the heat
+## shimmer, thins the smoke and sparks, the dust and the snow, inks only the
+## set's main pieces, shortens the shadows and the far blur. Auto starts high
+## and drops to low, once, if the frames come slow while the court is open.
 ## Presentation only: nothing here reads or changes the game's state except
 ## facts_from_game(), which only reads. Nothing is allocated per frame; the
 ## set stops processing when it is hidden (set_active).
@@ -51,8 +59,6 @@ const SHAFT:=preload("res://assets/court_sets/shaders/court_shaft.gdshader")
 const CONTACT:=preload("res://assets/court_sets/shaders/court_contact.gdshader")
 const SKY:=preload("res://assets/court_sets/shaders/court_sky.gdshader")
 const PAPER:=preload("res://assets/court_sets/shaders/court_paper.gdshader")
-## The lit twin of the figures' toon, for the stage to give them (J's call).
-const FIGURE_LIT:=preload("res://assets/court_sets/shaders/court_figure_lit.gdshader")
 
 const KIND_BY_STAGE:={
 	"hearth_council":"fire_ring","fire_circle":"fire_ring",
@@ -72,7 +78,7 @@ const KIND_BY_TIER:=["fire_ring","longhouse","mudbrick_hall","grand_hall","grand
 const PALETTE:={
 	"BARK":["4a3829","5a4634"],"WOOD":["7a5c40","957452"],"WOOD_END":["a38a66","b09572"],
 	"CHAR":["110d0a","18120e"],"ASH":["7d776f","8e877d"],"EMBER":["6a2a12","6a2a12"],
-	"STONE":["7a7266","867d70"],"STONE_DARK":["4c4640","56504a"],"STONE_BLOCK":["a39a88","aea590"],"FLAGS":["8e877a","a19886"],
+	"STONE":["7a7266","867d70"],"STONE_LICHEN":["8a8478","968f82"],"STONE_DARK":["4c4640","56504a"],"STONE_BLOCK":["a39a88","aea590"],"FLAGS":["8e877a","a19886"],
 	"HIDE":["8c6744","9c7752"],"HIDE_DARK":["5c4230","6a4e3a"],"HIDE_PALE":["9e8462","ab9170"],
 	"CORD":["4e3a29","4e3a29"],"REED":["94804f","a38e5c"],"THATCH":["6e5838","7a6340"],
 	"CLAY":["985a37","a66a45"],"MUD":["86704f","6c573d"],"PLANK":["6b5039","7f6249"],
@@ -93,7 +99,7 @@ const PATTERN:={
 	"SHIELD_A":[4,0,1.0],"SHIELD_B":[4,1,1.0],"SHIELD_C":[4,2,1.0],
 	"WEAVE_A":[5,0,1.0],"WEAVE_B":[5,0,1.0],"WEAVE_C":[5,0,1.0],"BLANKET":[5,0,1.0],"CARPET":[6,0,1.0],
 	"THATCH":[7,0,1.0],"REED":[8,0,1.0],"PLANK":[9,0,1.0],"PLASTER":[10,0,1.0],"BRICK":[11,0,1.0],"MUD":[11,0,1.0],
-	"STONE_BLOCK":[12,0,1.0],"FLAGS":[13,0,1.0],"CHAR":[14,0,1.0],
+	"STONE_BLOCK":[12,0,1.0],"FLAGS":[13,0,1.0],"CHAR":[14,0,1.0],"STONE_LICHEN":[15,0,1.0],
 }
 const DEFAULT_DYES:=["8e3b2e","3f5f6f","c39a3c"]
 ## How each kind of set is lit and aired, and its distance in three washes.
@@ -121,6 +127,12 @@ const LOOK:={
 }
 
 static var enabled:=true
+## "high", "low" or "auto" (start high, drop to low if the frames come slow).
+static var quality:="auto"
+## Auto drops to low when the frames average slower than this (seconds).
+const SLOW_FRAME:=1.0/45.0
+## Seasons, as the stage's facts name them.
+const SEASONS:=["spring","summer","autumn","winter"]
 static var _manifest:Dictionary={}
 static var _scenes:Dictionary={}
 static var _materials:Dictionary={}
@@ -156,6 +168,18 @@ var _shaft_top:=Vector3.ZERO
 var _shaft_dir:=Vector3.DOWN
 var _shaft_radius:=0.0
 var _dyes:Array=[]
+## The quality in force now ("high" or "low"), and why.
+var level:="high"
+var level_reason:=""
+var season:=""
+var shimmer:MeshInstance3D
+var flies:Array[GPUParticles3D]=[]
+var snowfall:GPUParticles3D
+var breaths:Array[GPUParticles3D]=[]
+var fill_lights:Array[OmniLight3D]=[]
+var _dressing:Array=[]
+var _frames_seen:=0
+var _slow_time:=0.0
 
 # --- Building ---------------------------------------------------------------------
 
@@ -239,16 +263,18 @@ func _build(era_id_in:String,facts_in:Dictionary)->void:
 	_make_lights()
 	_make_fires()
 	_make_air()
-	camera=Camera3D.new();camera.name="Lens"
+	# the set's camera is its own rig: shots by name (wide, push_in, reaction,
+	# two_shot, shake), view_changed while it moves, attach() to drive a stage's
+	camera=CourtCamera.new();camera.name="Lens"
 	add_child(camera)
-	rig=CourtCamera.new()
-	add_child(rig)
-	rig.call("use_lens",camera)
+	rig=camera
 	rig.call("configure",info.get("camera",{}))
 	camera.current=true
 	_make_paper()
+	_make_season_fx()
 	apply_facts(facts)
 	_place_animals()
+	set_quality(quality if quality!="auto" else "high","asked" if quality!="auto" else "start")
 	visibility_changed.connect(_on_visibility)
 	# a cheap far blur: the court is the only place that asks for it
 	RenderingServer.camera_attributes_set_dof_blur_quality(RenderingServer.DOF_BLUR_QUALITY_LOW,false)
@@ -282,6 +308,7 @@ func _dress(root:Node)->void:
 				mesh_node.set_surface_override_material(surface,_wash_material(int(part.trim_prefix("Far"))))
 			else:
 				mesh_node.set_surface_override_material(surface,_material(slot,inked))
+				_dressing.append([mesh_node,surface,slot,inked,part])
 
 func _colour(code:String,fallback:Color)->Color:
 	if code.is_empty():return fallback
@@ -542,10 +569,15 @@ func _make_lights()->void:
 	bounce.position=_vec(fire.get("pos",[0,0,0]))+Vector3(0.0,0.12,0.9)
 	for spot:Dictionary in fx.get("flames",[]):
 		var size:=float(spot.get("size",0.4))
-		if size<0.2:continue
-		var lamp:=_omni("Brazier",Color(1.0,0.6,0.32),_fire_energy*0.6,4.5,1.6)
-		lamp.position=_vec(spot.get("pos",[0,1,0]))+Vector3(0.0,0.3,0.0)
+		var small:=size<0.2
+		var lamp:=_omni("Brazier",Color(1.0,0.6,0.32),float(light.get("brazier_energy",_fire_energy*0.6))*(0.35 if small else 1.0),float(light.get("brazier_range",4.5))*(0.5 if small else 1.0),1.4)
+		lamp.position=_vec(spot.get("pos",[0,1,0]))+Vector3(0.0,0.3 if not small else 0.12,0.0)
 		flame_lights.append(lamp)
+	# soft warm fills where a hall's back would fall into darkness
+	for spec:Array in fx.get("fill",[]):
+		var fill:=_omni("Fill",Color(1.0,0.78,0.55),float(spec[3]),float(spec[4]),0.8)
+		fill.position=Vector3(float(spec[0]),float(spec[1]),float(spec[2]))
+		fill_lights.append(fill)
 	if fx.has("door_light"):
 		door_light=SpotLight3D.new();door_light.name="DoorLight"
 		var at:=_vec(fx.door_light)
@@ -570,7 +602,7 @@ func _make_fires()->void:
 	var at:=_vec(fire.get("pos",[0,0.05,0]))
 	var size:=float(fire.get("size",1.0))
 	var holder:=_flame(at,size,"Fire",3)
-	var shimmer:=MeshInstance3D.new();shimmer.name="HeatShimmer"
+	shimmer=MeshInstance3D.new();shimmer.name="HeatShimmer"
 	var quad:=QuadMesh.new();quad.size=Vector2(1.0,1.0);shimmer.mesh=quad
 	var smat:=ShaderMaterial.new();smat.shader=SHIMMER;smat.render_priority=-2
 	shimmer.material_override=smat
@@ -674,6 +706,7 @@ func _make_air()->void:
 		shaft.mesh=cyl
 		var mat:=ShaderMaterial.new();mat.shader=SHAFT
 		mat.set_shader_parameter("strength",float(spec.get("strength",0.22)))
+		mat.set_shader_parameter("soft",float(spec.get("soft",0.0)))
 		shaft.material_override=mat
 		shaft.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var y_axis:=-dir
@@ -755,6 +788,7 @@ func apply_facts(facts_in:Dictionary)->void:
 	var spears:Array=props.get("spears",[])
 	var peace:=int((info.get("props",{}) as Dictionary).get("spears_peace",3))
 	_show_first(spears,mini(spears.size(),peace+roundi(war*float(maxi(0,spears.size()-peace)))))
+	_apply_season(String(facts.get("season","")).to_lower())
 	var tags:Array=facts.get("era_tags",info.get("default_tags",[])) as Array
 	for key:String in gates.keys():
 		var without:=key.begins_with("no_")
@@ -762,6 +796,191 @@ func apply_facts(facts_in:Dictionary)->void:
 		var show:=tags.has(tag)!=without
 		for node in gates[key]:
 			if is_instance_valid(node):(node as Node3D).visible=show
+
+# --- The season -------------------------------------------------------------------
+
+## Flies over the food and the meat rack, snow falling (open sky only); both
+## made once and switched with the season.
+func _make_season_fx()->void:
+	var spots:Array[Vector3]=[]
+	for group in ["food","rack"]:
+		var list:Array=props.get(group,[])
+		if list.is_empty():continue
+		var centre:=Vector3.ZERO
+		for node in list:centre+=_centre_of(node as Node3D)
+		spots.append(centre/float(list.size()))
+	for at in spots:
+		var swarm:=GPUParticles3D.new();swarm.name="Flies"
+		swarm.amount=7;swarm.lifetime=3.0;swarm.preprocess=3.0;swarm.randomness=0.8
+		var pm:=ParticleProcessMaterial.new()
+		pm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_SPHERE;pm.emission_sphere_radius=0.35
+		pm.direction=Vector3(0,1,0);pm.spread=180.0
+		pm.initial_velocity_min=0.3;pm.initial_velocity_max=0.7
+		pm.gravity=Vector3.ZERO;pm.damping_min=0.0;pm.damping_max=0.2
+		pm.turbulence_enabled=true;pm.turbulence_noise_strength=6.0;pm.turbulence_noise_scale=0.6;pm.turbulence_noise_speed=Vector3(0.6,0.6,0.6)
+		pm.turbulence_influence_min=0.6;pm.turbulence_influence_max=0.9
+		var life:=Gradient.new();life.set_color(0,Color(1,1,1,1));life.set_color(1,Color(1,1,1,1))
+		var life_tex:=GradientTexture1D.new();life_tex.gradient=life;pm.color_ramp=life_tex
+		swarm.process_material=pm
+		var dot:=QuadMesh.new();dot.size=Vector2(0.014,0.014)
+		var mat:=StandardMaterial3D.new();mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color=Color(0.08,0.07,0.06);mat.billboard_mode=BaseMaterial3D.BILLBOARD_ENABLED
+		mat.billboard_keep_scale=true
+		dot.material=mat
+		swarm.draw_pass_1=dot
+		swarm.position=at+Vector3(0.0,0.45,0.0)
+		swarm.visibility_aabb=AABB(Vector3(-2,-1,-2),Vector3(4,3,4))
+		swarm.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		swarm.emitting=false;swarm.visible=false
+		add_child(swarm);flies.append(swarm)
+	if bool((info.get("light",{}) as Dictionary).get("open_sky",true)):
+		snowfall=GPUParticles3D.new();snowfall.name="Snowfall"
+		snowfall.amount=140;snowfall.lifetime=9.0;snowfall.preprocess=9.0;snowfall.randomness=0.4
+		var sm:=ParticleProcessMaterial.new()
+		sm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_BOX;sm.emission_box_extents=Vector3(9.0,0.5,7.0)
+		sm.direction=Vector3(0.1,-1,0.05);sm.spread=12.0
+		sm.initial_velocity_min=0.5;sm.initial_velocity_max=0.9
+		sm.gravity=Vector3(0.05,-0.15,0.0)
+		sm.turbulence_enabled=true;sm.turbulence_noise_strength=0.5;sm.turbulence_noise_scale=2.0
+		sm.scale_min=0.6;sm.scale_max=1.3
+		snowfall.process_material=sm
+		var flake:=QuadMesh.new();flake.size=Vector2(0.03,0.03)
+		var fmat:=ShaderMaterial.new();fmat.shader=MOTE
+		fmat.set_shader_parameter("colour",Color(0.95,0.96,1.0));fmat.set_shader_parameter("brightness",0.55)
+		flake.material=fmat
+		snowfall.draw_pass_1=flake
+		snowfall.position=Vector3(0.0,7.5,0.0)
+		snowfall.visibility_aabb=AABB(Vector3(-10,-9,-8),Vector3(20,10,16))
+		snowfall.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		snowfall.emitting=false;snowfall.visible=false
+		add_child(snowfall)
+
+## Where a piece of the set is, in the set's own space (it may not be in the tree yet).
+func _centre_of(node:Node3D)->Vector3:
+	var mesh_node:=node as MeshInstance3D
+	if mesh_node==null or mesh_node.mesh==null:
+		for child in node.find_children("*","MeshInstance3D",true,false):
+			if (child as MeshInstance3D).mesh!=null:mesh_node=child as MeshInstance3D;break
+	if mesh_node==null:return _to_set(node)*Vector3.ZERO
+	return _to_set(mesh_node)*mesh_node.get_aabb().get_center()
+
+func _to_set(node:Node3D)->Transform3D:
+	var xf:=Transform3D.IDENTITY
+	var at:Node=node
+	while at!=null and at!=self:
+		if at is Node3D:xf=(at as Node3D).transform*xf
+		at=at.get_parent()
+	return xf
+
+## The season in the set's materials and air.
+func _apply_season(name_in:String)->void:
+	if not name_in in SEASONS:name_in=""
+	season=name_in
+	var open:=bool((info.get("light",{}) as Dictionary).get("open_sky",true))
+	var snow:=1.0 if season=="winter" else 0.0
+	var dry:=1.0 if season=="summer" else 0.0
+	var ground:=_ground_material()
+	ground.set_shader_parameter("snow",snow*(1.0 if open else 0.0))
+	ground.set_shader_parameter("dry",dry)
+	ground.set_shader_parameter("leaves",1.0 if season=="autumn" else 0.0)
+	ground.set_shader_parameter("flowers",1.0 if season=="spring" else 0.0)
+	for entry:Array in _dressing:
+		var mat:=(entry[0] as MeshInstance3D).get_surface_override_material(int(entry[1])) as ShaderMaterial
+		if mat==null:continue
+		var outdoor:=open or String(entry[4]) in ["Grass","Trees","Shrubs","Stones"]
+		mat.set_shader_parameter("snow",snow*(1.0 if outdoor else 0.0))
+		mat.set_shader_parameter("fire_pos",_fire_at)
+		mat.set_shader_parameter("dry",dry*0.6 if String(entry[2]) in ["GRASS","LEAF","THATCH","REED"] else 0.0)
+	for layer in 3:
+		var wash:=_wash_material(layer)
+		wash.set_shader_parameter("snow",snow)
+	for swarm in flies:
+		swarm.visible=season=="summer";swarm.emitting=swarm.visible and active
+	if snowfall!=null:
+		snowfall.visible=season=="winter" and level=="high";snowfall.emitting=snowfall.visible and active
+	for puff in breaths:
+		if is_instance_valid(puff):puff.visible=season=="winter";puff.emitting=puff.visible and active
+	if world_env!=null:
+		var env:=world_env.environment
+		env.adjustment_saturation=0.94-0.12*snow+0.04*dry
+
+## Breath on a cold day: a small puff from someone's mouth every few breaths.
+## Give it a figure (anything with a "head" bone) or a node to ride; it only
+## shows in winter. Returns the emitter (or null on low quality).
+func add_breath(body:Node3D)->GPUParticles3D:
+	if body==null or not is_instance_valid(body):return null
+	var parent:Node3D=body
+	var skeletons:=body.find_children("*","Skeleton3D",true,false)
+	var offset:=Vector3(0.0,0.0,0.11)
+	if not skeletons.is_empty():
+		var skel:=skeletons[0] as Skeleton3D
+		var head:=skel.find_bone("head")
+		if head>=0:
+			var attach:=BoneAttachment3D.new();attach.name="BreathAt";attach.bone_name="head"
+			skel.add_child(attach)
+			parent=attach
+			offset=Vector3(0.0,0.07,0.1)
+	var puff:=GPUParticles3D.new();puff.name="Breath"
+	puff.amount=4;puff.lifetime=1.6;puff.explosiveness=0.7;puff.randomness=0.5
+	puff.local_coords=false
+	var pm:=ParticleProcessMaterial.new()
+	pm.direction=Vector3(0,0.3,1);pm.spread=18.0
+	pm.initial_velocity_min=0.18;pm.initial_velocity_max=0.3
+	pm.gravity=Vector3(0.0,0.05,0.0);pm.damping_min=0.2;pm.damping_max=0.4
+	pm.scale_min=0.5;pm.scale_max=0.8
+	var curve:=Curve.new();curve.add_point(Vector2(0.0,0.3));curve.add_point(Vector2(1.0,1.6))
+	var curve_tex:=CurveTexture.new();curve_tex.curve=curve;pm.scale_curve=curve_tex
+	var ramp:=Gradient.new();ramp.set_color(0,Color(1,1,1,0.0));ramp.set_color(1,Color(1,1,1,0.0));ramp.add_point(0.15,Color(1,1,1,0.9))
+	var ramp_tex:=GradientTexture1D.new();ramp_tex.gradient=ramp;pm.color_ramp=ramp_tex
+	puff.process_material=pm
+	var quad:=QuadMesh.new();quad.size=Vector2(0.16,0.16)
+	var mat:=ShaderMaterial.new();mat.shader=SMOKE
+	mat.set_shader_parameter("warm",Color(0.92,0.93,0.95));mat.set_shader_parameter("cool",Color(0.92,0.93,0.95))
+	mat.set_shader_parameter("opacity",0.32)
+	quad.material=mat
+	puff.draw_pass_1=quad
+	puff.position=offset
+	puff.visibility_aabb=AABB(Vector3(-1,-1,-1),Vector3(2,2,2))
+	puff.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	# breaths come at their own pace for each person
+	puff.speed_scale=0.8+0.4*float(absi(String(body.name).hash())%100)/100.0
+	parent.add_child(puff)
+	puff.visible=season=="winter"
+	puff.emitting=puff.visible and active
+	breaths.append(puff)
+	return puff
+
+# --- Quality ------------------------------------------------------------------------
+
+## Set the quality ("high" or "low"); the reason is kept for the report.
+func set_quality(to:String,reason:="asked")->void:
+	level="low" if to=="low" else "high"
+	level_reason=reason
+	var low:=level=="low"
+	if is_instance_valid(shimmer):shimmer.visible=not low
+	for p in particles:
+		if not is_instance_valid(p):continue
+		match String(p.name):
+			"Smoke":p.amount=12 if low else 26
+			"Embers":p.amount=8 if low else 18
+			"Dust":p.visible=not low
+	if snowfall!=null:snowfall.visible=season=="winter" and not low
+	for puff in breaths:
+		if is_instance_valid(puff):puff.amount=2 if low else 4
+	# only the set's main pieces carry the ink line on low
+	for entry:Array in _dressing:
+		var inked:=bool(entry[3]) and (not low or String(entry[4])=="StaticInked")
+		(entry[0] as MeshInstance3D).set_surface_override_material(int(entry[1]),_material(String(entry[2]),inked))
+	if sun!=null:
+		sun.directional_shadow_mode=DirectionalLight3D.SHADOW_ORTHOGONAL if low else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		sun.directional_shadow_max_distance=18.0 if low else 30.0
+		sun.shadow_blur=1.0 if low else 1.4
+	if rig!=null:rig.set("far_blur",not low)
+	if season!="":_apply_season(season)
+
+## What the auto quality found, for a report.
+func quality_report()->Dictionary:
+	return {"level":level,"reason":level_reason,"frames":_frames_seen,"mean_frame_ms":(1000.0*_slow_time/maxf(1.0,float(_frames_seen)))}
 
 ## How many of a prop group are showing (tests, the director).
 func shown(group:String)->int:
@@ -803,6 +1022,8 @@ func _place_animals()->void:
 		add_child(beast)
 		beast.call("start_at",String(spots[index].name))
 		animals.append(beast)
+		# the dog by the fire stays in the room's shot
+		if species=="dog" and rig!=null:(rig.get("also_show") as Array).append(beast)
 		index+=1
 
 func animal(species:String)->Node3D:
@@ -818,8 +1039,15 @@ func set_active(on:bool)->void:
 	set_process(on)
 	for p in particles:
 		if is_instance_valid(p):
-			p.emitting=on
+			p.emitting=on and p.visible
 			p.speed_scale=1.0 if on else 0.0
+	for p in flies+breaths:
+		if is_instance_valid(p):
+			p.emitting=on and p.visible
+			p.speed_scale=1.0 if on else 0.0
+	if snowfall!=null:
+		snowfall.emitting=on and snowfall.visible
+		snowfall.speed_scale=1.0 if on else 0.0
 	for beast in animals:
 		if is_instance_valid(beast):beast.call("set_active",on)
 
@@ -828,6 +1056,11 @@ func _ready()->void:
 
 func _process(delta:float)->void:
 	_clock+=delta
+	# auto quality: watch the first seconds the court is open, drop once if slow
+	if quality=="auto" and level=="high" and _clock>0.5 and _frames_seen<120:
+		_frames_seen+=1;_slow_time+=delta
+		if _frames_seen>=90 and _slow_time/float(_frames_seen)>SLOW_FRAME:
+			set_quality("low","slow frames (%.1f ms)" % (1000.0*_slow_time/float(_frames_seen)))
 	var n:=_noise.get_noise_1d(_clock*6.0)*0.55+_noise.get_noise_1d(_clock*17.0+40.0)*0.3+_noise.get_noise_1d(_clock*1.3+90.0)*0.15
 	fire_light.light_energy=_fire_energy*(1.0+0.22*n)
 	fire_light.position=_fire_at+Vector3(n*0.05,absf(n)*0.06,_noise.get_noise_1d(_clock*5.0+7.0)*0.05)
@@ -859,11 +1092,13 @@ func light_at(point:Vector3)->float:
 		amount+=0.18*clampf(1.0-(off-_shaft_radius*0.5)/_shaft_radius,0.0,1.0)
 	return amount
 
-## Give modelled figures the set's real light (the lit twin of their toon):
-## pass CourtFigure3D._materials; every shared figure material changes shader.
-static func light_figures(materials:Dictionary)->void:
-	for made in materials.values():
-		if made is ShaderMaterial:(made as ShaderMaterial).shader=FIGURE_LIT
+## Kept for callers of round 2: the figures now carry their own lit shader
+## (J's court_figure_lit.gdshader), so this changes no material. It only
+## points the figures' painted key light the way this set's light comes from
+## (pass the CourtFigure3D script to have it set; anything else is ignored).
+static func light_figures(_materials:Variant=null,figure_script:Variant=null,court:Node3D=null)->void:
+	if figure_script is Script and court!=null and (figure_script as Script).has_method("set_key_light"):
+		(figure_script as Object).call("set_key_light",court.call("key_dir"))
 
 ## A soft shade on the ground under someone's feet: it keeps them standing
 ## ON the ground. Lay it under a figure or an animal (a child at its feet).

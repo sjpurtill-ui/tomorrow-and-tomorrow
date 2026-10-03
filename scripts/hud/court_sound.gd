@@ -24,6 +24,14 @@ extends Node
 ##   on_beat(beat, body)                         the director's lowered beats
 ## BEAT_CUES maps the director's acts (court_director.gd ACTS) to sounds.
 ##
+## Placement: each sound is panned by where its maker stands in the picture
+## (the stage's screen x): up to about 6 dB to one side at the room's edges,
+## a dB or two near the middle; nine pan buses send to "Court".
+## The crowd's talk never loops: a few talkers at a time, each a short run
+## from somewhere in one of six people's talk, at its own pitch and side of
+## the room, with pauses, the room more and less talkative by turns.
+## Time is the game's (a clock of process frames), so a movie written with
+## --write-movie keeps every sound on its frame.
 ## Mixing: everything plays on the "Court" bus (to Master), whose volume and
 ## mute are the player's "Court sounds" setting (display_preferences.gd).
 ## Nothing plays while muted or while the court is hidden. Streams are made
@@ -57,6 +65,13 @@ static var _prewarmed:Dictionary={}
 static var keeper:Node
 const MURMUR_PEOPLE:={"murmur_small":3,"murmur":6,"murmur_hall":10}
 const MURMUR_SECONDS:=9.0
+## The live murmur: how many talk at most, and at what level (dB, a run).
+const TALK_SLOTS:={"murmur_small":3,"murmur":5,"murmur_hall":8}
+const TALK_DB:={"murmur_small":-11.0,"murmur":-13.0,"murmur_hall":-15.0}
+## Pan: buses Court-4..Court+4, AudioEffectPanner pan k*PAN_STEP (0.32 at the
+## edge: the far side about 6 dB down).
+const PAN_STEPS:=4
+const PAN_STEP:=0.08
 
 ## The director's acts (court_director.gd ACTS) as sounds: [cue, dB offset,
 ## delay seconds]. Acts of the dog and the goat sound only from an animal.
@@ -138,8 +153,18 @@ var facts:Dictionary={}
 ## What played, newest last (tests and review): [{name, at, db, key}]. Kept short.
 var played:Array=[]
 var _pool:Array[AudioStreamPlayer]=[]
-var _pool3d:Array[AudioStreamPlayer3D]=[]
-var _space:Node3D
+## The game's own clock (seconds of process time since this sound was made).
+var _clock:=0.0
+## The crowd's talkers: players, when each may start again, their fades.
+var _slots:Array[AudioStreamPlayer]=[]
+var _slot_free:=PackedFloat32Array()
+var _slot_tw:Array=[]
+var _talk_size:="murmur"
+var _talk_db:=-17.0
+var _energy:=0.7
+var _energy_at:=0.0
+var _shy_until:=0.0
+var _duck_until:=0.0
 var _beds:Dictionary={}       # role -> AudioStreamPlayer
 var _bed_db:Dictionary={}     # role -> the level it rests at
 var _bed_tweens:Dictionary={}
@@ -160,7 +185,6 @@ var _tasks:Array[int]=[]      # worker-thread jobs not yet collected
 ## The keeper (prewarm()): makes sounds ahead of time and collects jobs.
 var keeps:=false
 var _tongue_key:=""
-var _murmur_wanted:=""        # the murmur in our tongue, while a stand-in plays
 var _animal_last:Dictionary={} # cue -> when an animal last made it
 var _bed_list:Array=[]        # beds_for() of the open room, made once
 
@@ -196,31 +220,23 @@ func _ready()->void:
 		var p:=AudioStreamPlayer.new();p.bus=BUS;p.name="Sound%d" % i
 		add_child(p);_pool.append(p)
 	_god=AudioStreamPlayer.new();_god.name="God";_god.bus=BUS;add_child(_god)
+	for i in 8:
+		var t:=AudioStreamPlayer.new();t.bus=BUS;t.name="Talk%d" % i
+		add_child(t);_slots.append(t);_slot_tw.append(null)
+	_slot_free.resize(8)
 	_timer=Timer.new();_timer.name="RoomLife";_timer.wait_time=0.1
 	add_child(_timer);_timer.timeout.connect(_tick)
+	set_process(true)
 	if stage!=null:
 		if not stage.visibility_changed.is_connected(_on_visibility):stage.visibility_changed.connect(_on_visibility)
-		_join_hall()
 
-## Positional sound needs the stage's 3D hall to listen (its camera is the ear).
-func _join_hall()->void:
-	var view:Variant=stage.get("view3d") if stage!=null else null
-	if not view is SubViewport or not is_instance_valid(view):return
-	(view as SubViewport).audio_listener_enable_3d=true
-	_space=Node3D.new();_space.name="CourtSound3D"
-	(view as SubViewport).add_child(_space)
-	for i in 8:
-		var p:=AudioStreamPlayer3D.new();p.bus=BUS;p.name="Sound3D%d" % i
-		p.attenuation_model=AudioStreamPlayer3D.ATTENUATION_DISABLED
-		p.panning_strength=0.9;p.doppler_tracking=AudioStreamPlayer3D.DOPPLER_TRACKING_DISABLED
-		p.max_polyphony=2
-		_space.add_child(p);_pool3d.append(p)
+func _process(delta:float)->void:
+	_clock+=delta
 
 func _exit_tree()->void:
 	if current==self:current=null
 	if keeper==self:keeper=null
 	stop_all()
-	if is_instance_valid(_space):_space.queue_free()
 	# a court that closes does not wait for its jobs: the keeper collects them
 	if not keeps and keeper!=null and is_instance_valid(keeper) and keeper.is_inside_tree():
 		for id in _tasks:keeper.call("_track",id)
@@ -252,9 +268,21 @@ static func ensure_bus()->int:
 		var room:=AudioEffectReverb.new()
 		room.room_size=0.25;room.damping=0.7;room.wet=0.0;room.dry=1.0;room.spread=0.6;room.predelay_msec=12.0
 		AudioServer.add_bus_effect(bus,room,0)
+	for k in range(-PAN_STEPS,PAN_STEPS+1):
+		if k==0 or AudioServer.get_bus_index(pan_bus(k))>=0:continue
+		AudioServer.add_bus()
+		var b:=AudioServer.bus_count-1
+		AudioServer.set_bus_name(b,pan_bus(k))
+		AudioServer.set_bus_send(b,BUS)
+		var panner:=AudioEffectPanner.new();panner.pan=float(k)*PAN_STEP
+		AudioServer.add_bus_effect(b,panner,0)
 	AudioServer.set_bus_mute(bus,volume<=0.0)
 	AudioServer.set_bus_volume_db(bus,linear_to_db(maxf(0.0001,volume)))
 	return bus
+
+## The bus for a place across the room: k from -PAN_STEPS (left) to +PAN_STEPS.
+static func pan_bus(k:int)->String:
+	return BUS if k==0 else "%s%+d" % [BUS,k]
 
 ## The player's "Court sounds" level (0 mutes them).
 static func set_volume(value:float)->void:
@@ -282,8 +310,8 @@ func _on_visibility()->void:
 func stop_all()->void:
 	for p in _pool:
 		if is_instance_valid(p):p.stop()
-	for p in _pool3d:
-		if is_instance_valid(p):p.stop()
+	for t in _slots:
+		if is_instance_valid(t):t.stop()
 	for role in _beds:
 		var b:AudioStreamPlayer=_beds[role]
 		if is_instance_valid(b):b.stop()
@@ -303,7 +331,8 @@ static func stream_for(name:String,variant:=0)->AudioStreamWAV:
 	_lock.unlock()
 	if held!=null:return held
 	var made:AudioStreamWAV
-	if name.contains("@"):made=_murmur_stream(name.get_slice("@",0),name.get_slice("@",1))
+	if name.begins_with("talker@"):made=_talker_stream(name.trim_prefix("talker@"),variant)
+	elif name.contains("@"):made=_murmur_stream(name.get_slice("@",0),name.get_slice("@",1))
 	else:made=Foley.stream(name,variant)
 	_lock.lock();_cache[key]=made;_lock.unlock()
 	return made
@@ -324,15 +353,26 @@ static func _murmur_stream(size:String,key:String)->AudioStreamWAV:
 	var tracks:Variant=_tracks.get(key,null)
 	var tongue:Dictionary=_tongues.get(key,{})
 	_lock.unlock()
-	if tracks==null:
-		var made:=Foley.murmur_tracks(tongue,Synth.seed_of(key),MURMUR_SECONDS+0.6)
-		_lock.lock();_tracks[key]=made;_lock.unlock()
-		tracks=made
+	if tracks==null:tracks=_talkers(key)
 	var rng:=RandomNumberGenerator.new();rng.seed=Synth.seed_of(key+"|"+size)
 	var b:=Foley.murmur_mix(tracks,int(MURMUR_PEOPLE.get(size,6)),MURMUR_SECONDS,rng)
 	var top:=Synth.peak_of(b)
 	if top>0.0001:Synth.scale(b,0.6/top)
 	return Synth.to_stream(b,0.0,true)
+
+## One of the six talkers of a registered tongue (made all together, once).
+static func _talker_stream(key:String,k:int)->AudioStreamWAV:
+	return Synth.to_stream(_talkers(key)[clampi(k,0,Foley.MURMUR_VOICES.size()-1)],0.0)
+
+static func _talkers(key:String)->Array[PackedFloat32Array]:
+	_lock.lock()
+	var held:Variant=_tracks.get(key,null)
+	var tongue:Dictionary=_tongues.get(key,{})
+	_lock.unlock()
+	if held!=null:return held
+	var made:=Foley.murmur_tracks(tongue,Synth.seed_of(key),Foley.TALKER_SECONDS+0.6)
+	_lock.lock();_tracks[key]=made;_lock.unlock()
+	return made
 
 ## Makes the court's sounds ahead of time on a worker thread, so the room is
 ## never silent when the court opens: the beds, our people's murmur in their
@@ -347,7 +387,7 @@ static func prewarm(host:Node,force:=false)->void:
 	_prewarmed[key]=true
 	var list:Array=[]
 	for bed in ["fire","wind_soft","wind_hard","wind_indoor","room"]:list.append([bed,0])
-	for size in MURMUR_PEOPLE:list.append(["%s@%s" % [size,key],0])
+	for k in Foley.MURMUR_VOICES.size():list.append(["talker@"+key,k])
 	list.append(["god_swell_wrath",0]);list.append(["god_swell_favour",0])
 	for cue_name in ["gasp","room_gasp","creak","stomach_growl","snore","snort_wake","swallow","cough_fought","knees_knock","rustle","snort_laugh","fire_pop","step_earth","kneel_cloth","faint_thump","bowl_drop"]:
 		for v in Foley.variants(cue_name):list.append([cue_name,v])
@@ -403,30 +443,30 @@ func cue(name:String,at_body:Node3D=null,opts:Dictionary={})->bool:
 	var s:=stream_for(real,variant)
 	var db:=Foley.level(real)+float(opts.get("db",0.0))
 	var pitch:=float(opts.get("pitch",_rng.randf_range(0.95,1.05)))
-	return _play(s,at_body,db,pitch,name)!=null
+	return _play(s,at_body,db,pitch,name,int(opts.get("pan",NO_PAN)))!=null
 
-func _play(s:AudioStream,at_body:Node3D,db:float,pitch:float,label:String)->Node:
+const NO_PAN:=-99
+func _play(s:AudioStream,at_body:Node3D,db:float,pitch:float,label:String,pan:=NO_PAN)->Node:
 	if s==null:return null
-	var use3d:=at_body!=null and is_instance_valid(at_body) and not _pool3d.is_empty() and at_body.is_inside_tree() and is_instance_valid(_space) and at_body.get_world_3d()==_space.get_world_3d()
-	var used:Node
-	if use3d:
-		var p:=_free3d()
-		p.global_position=_head_of(at_body)
-		p.stream=s;p.volume_db=db;p.pitch_scale=pitch
-		p.play()
-		used=p
-	else:
-		var q:=_free2d()
-		q.stream=s;q.volume_db=db;q.pitch_scale=pitch
-		q.play()
-		used=q
-	played.append({"name":label,"at":_now(),"db":db})
+	var k:=pan if pan!=NO_PAN else pan_of(at_body)
+	var q:=_free2d()
+	q.bus=pan_bus(clampi(k,-PAN_STEPS,PAN_STEPS))
+	q.stream=s;q.volume_db=db;q.pitch_scale=pitch
+	q.play()
+	played.append({"name":label,"at":_now(),"db":db,"pan":k})
 	if played.size()>48:played.pop_front()
-	return used
+	return q
 
-func _head_of(body:Node3D)->Vector3:
-	if body.has_method("head_top"):return body.call("head_top")
-	return body.global_position+Vector3(0.0,1.5,0.0)
+## Where a body stands across the picture, as a pan step: its screen x on
+## the stage (world_to_stage), so what is seen on the left is heard on the left.
+## 0 for the room itself or a stage that cannot say.
+func pan_of(body:Node3D)->int:
+	if body==null or not is_instance_valid(body) or not body.is_inside_tree() or stage==null or not stage.has_method("world_to_stage"):return 0
+	var w:=maxf(1.0,stage.size.x)
+	var at:Variant=stage.call("world_to_stage",body.global_position)
+	if not at is Vector2:return 0
+	var n:=clampf(((at as Vector2).x/w*2.0-1.0)/0.7,-1.0,1.0)
+	return clampi(roundi(n*float(PAN_STEPS)),-PAN_STEPS,PAN_STEPS)
 
 ## A free player, or the one that has played longest.
 func _free2d()->AudioStreamPlayer:
@@ -437,17 +477,15 @@ func _free2d()->AudioStreamPlayer:
 		if at>longest:longest=at;best=p
 	return best
 
-func _free3d()->AudioStreamPlayer3D:
-	var best:=_pool3d[0];var longest:=-1.0
-	for p in _pool3d:
-		if not p.playing:return p
-		var at:=p.get_playback_position()
-		if at>longest:longest=at;best=p
-	return best
 
+## Seconds of the game's own time (a movie's frames, not the wall clock).
 func _now()->float:
-	return float(Time.get_ticks_msec())/1000.0
+	return _clock
 
+## Sounds are made on the spot when they must be exact: tests, and a movie
+## being written (the frames wait for them, so nothing is late).
+static func exact()->bool:
+	return sync_render or OS.has_feature("movie")
 ## Footsteps for a while at a body: earth or wood by the set; pace in steps a second.
 func footsteps(body:Node3D,seconds:float,pace:=1.8,heavy:=false,cue_name:="step",db:=0.0)->void:
 	if not can_play():return
@@ -541,7 +579,7 @@ func voice(body:Node3D,text:String,seconds:float,mood:Variant="neutral",people_i
 	var id:=body.get_instance_id() if body!=null else 0
 	_talk[id]=token
 	var started:=_now()
-	if sync_render:
+	if exact():
 		var s:=Voice.render(spec,text,seconds,feel,whisper)
 		return _voice_ready(s,id,token,started,db)
 	var job:=spec.duplicate(true)
@@ -555,16 +593,13 @@ func voice(body:Node3D,text:String,seconds:float,mood:Variant="neutral",people_i
 
 ## The crowd talks lower while someone speaks up, and comes back after.
 func _duck(seconds:float)->void:
-	var p:AudioStreamPlayer=_beds.get("murmur",null)
-	if p==null or not p.playing or _hushed:return
-	var level:=float(_bed_db.get("murmur",-16.0))
-	var old:Tween=_bed_tweens.get("murmur",null)
-	if old!=null and old.is_valid():old.kill()
-	var tw:=create_tween()
-	tw.tween_property(p,"volume_db",level-8.0,0.35).set_trans(Tween.TRANS_SINE)
-	tw.tween_interval(maxf(0.2,seconds))
-	tw.tween_property(p,"volume_db",level,1.4).set_trans(Tween.TRANS_SINE)
-	_bed_tweens["murmur"]=tw
+	if _hushed:return
+	_duck_until=maxf(_duck_until,_now()+seconds)
+	for i in _slots.size():
+		var t:=_slots[i]
+		if not t.playing:continue
+		var tw:=create_tween()
+		tw.tween_property(t,"volume_db",t.volume_db-8.0,0.35).set_trans(Tween.TRANS_SINE)
 
 func _next_token()->int:
 	_token+=1
@@ -634,18 +669,24 @@ func ambience(set_id:String,season_id:String,facts_in:Dictionary={})->void:
 		room.room_size=0.15 if open_air else (0.32 if set_kind=="longhouse" else 0.55)
 	_bed_list=beds_for(set_kind,season,facts)
 	if _tongue_key.is_empty():_tongue_key=register_tongue("player",world_seed())
-	for role in _bed_list:
-		if String(role[0])=="murmur":role[1]="%s@%s" % [String(role[1]),_tongue_key]
+	var talk:Array=talk_for(facts)
+	_talk_size=String(talk[0]);_talk_db=float(talk[1])
 	var warm_list:Array=[]
+	for k in Foley.MURMUR_VOICES.size():warm_list.append(["talker@"+_tongue_key,k])
 	for role in _bed_list:warm_list.append([String(role[1]),0])
 	warm_list.append(["god_swell_wrath",0]);warm_list.append(["god_swell_favour",0])
 	for name in ["gasp","room_gasp","creak","stomach_growl","snore","fire_pop","knees_knock","swallow","cough_fought","rustle","snort_laugh"]:
 		for v in Foley.variants(name):warm_list.append([name,v])
-	if sync_render:
-		# made here and now: only what the room needs to start
+	if exact():
+		# made here and now: the room starts complete
 		for role in _bed_list:stream_for(String(role[1]),0)
+		if OS.has_feature("movie"):
+			for item in warm_list:stream_for(String(item[0]),int(item[1]))
 	else:
 		_track(warm(warm_list))
+	# the room is already talking when the court opens, and talks a good deal at first
+	for i in _slot_free.size():_slot_free[i]=_now()+_rng.randf_range(0.0,0.6)
+	_energy=_rng.randf_range(0.75,1.0);_energy_at=_now()+_rng.randf_range(8.0,16.0)
 	_next.clear()
 	if can_play():_start_beds()
 
@@ -656,25 +697,22 @@ static func beds_for(set_id:String,season_id:String,facts_in:Dictionary)->Array:
 	out.append(["fire","fire",0.0 if open_air else -2.0])
 	if open_air:out.append(["wind","wind_hard" if season_id=="winter" else "wind_soft",-3.0 if season_id=="winter" else 0.0])
 	else:out.append(["wind","wind_indoor",6.0 if season_id=="winter" else 0.0])
-	var tier:=int(facts_in.get("era_tier",facts_in.get("tier",0)))
-	var dread:=float(facts_in.get("dread",facts_in.get("people_dread",0.2)))
-	var murmur:="murmur_small" if tier<=0 else ("murmur" if tier<=2 else "murmur_hall")
-	out.append(["murmur",murmur,-5.0 if dread>=0.55 else 0.0])
 	if not open_air:out.append(["room","room",0.0])
 	return out
+
+## The crowd's talk for the facts: [size, dB a run]. More talk as the age
+## grows; a frightened hall talks low.
+static func talk_for(facts_in:Dictionary)->Array:
+	var tier:=int(facts_in.get("era_tier",facts_in.get("tier",0)))
+	var dread:=float(facts_in.get("dread",facts_in.get("people_dread",0.2)))
+	var size:="murmur_small" if tier<=0 else ("murmur" if tier<=2 else "murmur_hall")
+	return [size,float(TALK_DB[size])-(5.0 if dread>=0.55 else 0.0)]
 
 func _start_beds()->void:
 	if not can_play():return
 	for role:Array in _bed_list:
 		var bed_role:=String(role[0]);var bed_name:=String(role[1])
-		if not cached(bed_name,0) and not sync_render:
-			# not made yet: a murmur already made (another tongue, the plain
-			# one) stands in until ours is ready; anything else waits
-			if bed_role!="murmur":continue
-			var stand_in:=_murmur_stand_in(bed_name)
-			if stand_in.is_empty():continue
-			_murmur_wanted=bed_name
-			bed_name=stand_in
+		if not cached(bed_name,0) and not exact():continue
 		var p:AudioStreamPlayer=_beds.get(bed_role,null)
 		if p==null:
 			p=AudioStreamPlayer.new();p.name="Bed_"+bed_role;p.bus=BUS;add_child(p);_beds[bed_role]=p
@@ -685,38 +723,8 @@ func _start_beds()->void:
 		if not p.playing:
 			p.volume_db=level-30.0 if not _hushed else -80.0
 			p.play(_rng.randf_range(0.0,maxf(0.0,s.get_length()-1.0)))
-			_fade(bed_role,(-80.0 if (_hushed and bed_role=="murmur") else level),1.2)
+			_fade(bed_role,level,1.2)
 	_ensure_timer()
-
-## A murmur that is made already, to stand in for `wanted` while it is made.
-func _murmur_stand_in(wanted:String)->String:
-	var size:=wanted.get_slice("@",0)
-	_lock.lock()
-	var keys:=_cache.keys()
-	_lock.unlock()
-	for k in keys:
-		var name:=String(k).get_slice("|",0)
-		if name.begins_with(size+"@") or name==size:return name
-	for k in keys:
-		if String(k).begins_with("murmur"):return String(k).get_slice("|",0)
-	return ""
-
-## Ours is ready: the stand-in gives way to it.
-func _swap_murmur()->void:
-	var p:AudioStreamPlayer=_beds.get("murmur",null)
-	var wanted:=_murmur_wanted
-	_murmur_wanted=""
-	if p==null:return
-	var level:=float(_bed_db.get("murmur",-16.0))
-	var old:Tween=_bed_tweens.get("murmur",null)
-	if old!=null and old.is_valid():old.kill()
-	var tw:=create_tween()
-	tw.tween_property(p,"volume_db",level-18.0,0.6)
-	tw.tween_callback(func()->void:
-		p.stream=stream_for(wanted,0);p.play(_rng.randf_range(0.0,5.0)))
-	tw.tween_property(p,"volume_db",-80.0 if _hushed else level,0.9)
-	_bed_tweens["murmur"]=tw
-
 func _fade(role:String,to_db:float,seconds:float)->void:
 	var p:AudioStreamPlayer=_beds.get(role,null)
 	if p==null:return
@@ -743,7 +751,7 @@ func hush(on:Variant=true)->void:
 		_hushed=true
 		_hush_began=_now()
 		# the cut is sharp: that is the joke
-		_fade("murmur",-80.0,0.06)
+		_cut_talk()
 		_fade("fire",float(_bed_db.get("fire",-20.0))-4.0,0.25)
 		_fade("wind",float(_bed_db.get("wind",-26.0))-3.0,0.4)
 		_ensure_timer()
@@ -753,21 +761,118 @@ func hush(on:Variant=true)->void:
 func _unhush()->void:
 	_hushed=false
 	_hush_until=0.0
+	var now:=_now()
 	# someone has to be first to speak again: one whisper, then the rest
-	if _open and _beds.has("murmur") and _now()-_hush_began>1.5:
+	if _open and now-_hush_began>1.5:
 		cue("mutter",_someone_in_crowd(),{"db":-3.0,"delay":0.45})
 	_fade("fire",float(_bed_db.get("fire",-17.0)),1.0)
 	_fade("wind",float(_bed_db.get("wind",-26.0)),1.5)
-	# the murmur comes back late and slowly: nobody wants to be the first
-	var p:AudioStreamPlayer=_beds.get("murmur",null)
-	if p!=null:
-		var old:Tween=_bed_tweens.get("murmur",null)
-		if old!=null and old.is_valid():old.kill()
+	# the talk comes back late and shy, one and then another: nobody wants to be first
+	_shy_until=now+3.0
+	for i in _slot_free.size():_slot_free[i]=now+0.9+float(i)*_rng.randf_range(0.35,0.8)
+
+## The crowd's talk stops dead (a hush): every talker cut in a few hundredths.
+func _cut_talk()->void:
+	for i in _slots.size():
+		var t:=_slots[i]
+		var old:Variant=_slot_tw[i]
+		if old is Tween and (old as Tween).is_valid():(old as Tween).kill()
+		_slot_free[i]=maxf(_slot_free[i],_hush_until+0.5)
+		if not t.playing:continue
 		var tw:=create_tween()
-		tw.tween_interval(0.7)
-		tw.tween_property(p,"volume_db",float(_bed_db.get("murmur",-23.0))-12.0,0.6)
-		tw.tween_property(p,"volume_db",float(_bed_db.get("murmur",-23.0)),2.2).set_trans(Tween.TRANS_SINE)
-		_bed_tweens["murmur"]=tw
+		tw.tween_property(t,"volume_db",-80.0,0.06)
+		tw.tween_callback(t.stop)
+		_slot_tw[i]=tw
+
+## The talkers' stream key: ours when made, else any tongue's already made.
+func _talk_key()->String:
+	if cached("talker@"+_tongue_key,Foley.MURMUR_VOICES.size()-1):return _tongue_key
+	_lock.lock()
+	var keys:=_cache.keys()
+	_lock.unlock()
+	for k in keys:
+		var name:=String(k)
+		if name.begins_with("talker@") and name.ends_with("|%d" % (Foley.MURMUR_VOICES.size()-1)):return name.get_slice("|",0).trim_prefix("talker@")
+	return ""
+
+## The crowd's talk, a tick at a time: the room's mood for talk drifts; each
+## talker whose turn it is starts a run (murmur_run), or keeps quiet.
+func _crowd_talk(now:float)->void:
+	var key:=_talk_key()
+	if key.is_empty():return
+	if now>=_energy_at:
+		_energy=_rng.randf_range(0.3,1.0);_energy_at=now+_rng.randf_range(6.0,16.0)
+	var most:int=int(TALK_SLOTS.get(_talk_size,5))
+	var live:=clampi(roundi(float(most)*_energy),1,most)
+	for i in mini(most,_slots.size()):
+		if now<_slot_free[i]:continue
+		if i>=live:
+			_slot_free[i]=now+_rng.randf_range(1.0,3.0);continue
+		var run:=murmur_run(_rng,_energy)
+		_slot_free[i]=now+float(run.length)/float(run.pitch)+float(run.gap)
+		var level:=_talk_db+float(run.db)-(8.0 if now<_duck_until else 0.0)-(6.0 if now<_shy_until else 0.0)
+		if bool(run.aside):
+			var what:String=["laugh","hum_yes","sigh","cough","snort_laugh"][_rng.randi_range(0,4)]
+			_play(stream_for(what,_rng.randi_range(0,Foley.variants(what)-1)),null,level-2.0,float(run.pitch),"talk_"+what,int(run.pan))
+			continue
+		var t:=_slots[i]
+		t.stream=stream_for("talker@"+key,int(run.talker))
+		t.bus=pan_bus(int(run.pan))
+		t.pitch_scale=float(run.pitch)
+		t.volume_db=level-30.0
+		t.play(float(run.from))
+		var old:Variant=_slot_tw[i]
+		if old is Tween and (old as Tween).is_valid():(old as Tween).kill()
+		var tw:=create_tween()
+		tw.tween_property(t,"volume_db",level,0.25)
+		tw.tween_interval(maxf(0.1,float(run.length)/float(run.pitch)-0.55))
+		tw.tween_property(t,"volume_db",-50.0,0.3)
+		tw.tween_callback(t.stop)
+		_slot_tw[i]=tw
+
+## One run of the crowd's talk: which of the six talks, from where in their
+## talk, for how long, at what pitch (another person, near enough), at what
+## level and from which side of the room, and the pause before that talker's
+## next turn; now and then not words but a laugh, a hum, a cough (aside).
+## energy: how talkative the room is now (0..1).
+static func murmur_run(rng:RandomNumberGenerator,energy:float)->Dictionary:
+	var length:=rng.randf_range(1.2,4.5)
+	return {"talker":rng.randi_range(0,Foley.MURMUR_VOICES.size()-1),"from":rng.randf_range(0.0,Foley.TALKER_SECONDS-length-0.3),
+		"length":length,"pitch":rng.randf_range(0.9,1.1),"db":rng.randf_range(-6.0,0.0),"pan":rng.randi_range(-3,3),
+		"gap":rng.randf_range(0.2,2.2)/maxf(0.25,energy),"aside":rng.randf()<0.05}
+
+## The crowd's talk over `seconds` as runs [{t, talker, from, length, pitch,
+## db, pan, aside}], as the court plays it (offline renders and tests).
+static func murmur_schedule(seed_value:int,seconds:float,size:="murmur",preroll:=8.0)->Array:
+	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
+	var most:int=int(TALK_SLOTS.get(size,5))
+	var free:=PackedFloat32Array();free.resize(most)
+	for i in most:free[i]=rng.randf_range(0.2,2.0)
+	# a room waiting for its god talks a good deal at first
+	var energy:=rng.randf_range(0.75,1.0);var energy_at:=-preroll+rng.randf_range(8.0,16.0)
+	var out:Array=[]
+	# the room was already talking before we came in
+	var now:=-preroll
+	for i in most:free[i]+=now
+	while now<seconds:
+		if now>=energy_at:energy=rng.randf_range(0.3,1.0);energy_at=now+rng.randf_range(6.0,16.0)
+		var live:=clampi(roundi(float(most)*energy),1,most)
+		for i in most:
+			if now<free[i]:continue
+			if i>=live:free[i]=now+rng.randf_range(1.0,3.0);continue
+			var run:=murmur_run(rng,energy)
+			run["t"]=now;run["slot"]=i
+			free[i]=now+float(run.length)/float(run.pitch)+float(run.gap)
+			var ends:=now+float(run.length)/float(run.pitch)
+			if ends<=0.0:continue
+			if now<0.0:
+				# heard from the middle of what they were saying
+				var cut:=-now*float(run.pitch)
+				run["from"]=float(run.from)+cut;run["length"]=float(run.length)-cut;run["t"]=0.0
+				if bool(run.aside):continue
+			out.append(run)
+		now+=0.1
+	return out
 
 func hushed()->bool:
 	return _hushed
@@ -801,7 +906,6 @@ func _tick()->void:
 	if keeps:
 		if _tasks.is_empty():_timer.stop()
 		return
-	if not _murmur_wanted.is_empty() and cached(_murmur_wanted,0):_swap_murmur()
 	if not can_play():
 		if _tasks.is_empty():_timer.stop()
 		return
@@ -822,8 +926,9 @@ func _tick()->void:
 	# beds made since the court opened
 	for role:Array in _bed_list:
 		var p:AudioStreamPlayer=_beds.get(String(role[0]),null)
-		if (p==null or not p.playing) and (cached(String(role[1]),0) or (String(role[0])=="murmur" and not _murmur_stand_in(String(role[1])).is_empty())):_start_beds();break
+		if (p==null or not p.playing) and cached(String(role[1]),0):_start_beds();break
 	if _hushed:return
+	_crowd_talk(now)
 	_life("fire_pop",now,0.25,1.6,0.0)
 	_life("fire_hiss",now,7.0,20.0,0.0)
 	_life("log_settle",now,18.0,45.0,0.0)
@@ -1112,6 +1217,40 @@ static func render_scene(items:Array,seconds:float)->PackedFloat32Array:
 			for i in mini(fade_in,samples.size()):samples[i]*=float(i)/float(fade_in)
 			for i in mini(tail,samples.size()):samples[samples.size()-1-i]*=float(i)/float(tail)
 			gain*=db_to_linear(Foley.level(name) if item.has("bed") else float(item.get("level",-14.0)))
+		elif item.has("talk"):
+			# the crowd's talk as the court plays it (murmur_schedule), in a tongue
+			var key:=String(item.talk)
+			var until:=float(item.get("until",seconds))
+			var count:=Synth.n_of(until)-at
+			samples=PackedFloat32Array();samples.resize(maxi(0,count))
+			var size:=String(item.get("size","murmur"))
+			var tracks:=_talkers(key)
+			for run:Dictionary in murmur_schedule(int(item.get("seed",1)),until-float(item.get("t",0.0)),size):
+				var piece:PackedFloat32Array
+				if bool(run.aside):
+					var what:String=["laugh","hum_yes","sigh","cough","snort_laugh"][int(run.talker)%5]
+					piece=Synth.samples_of(stream_for(what,0))
+					Synth.scale(piece,db_to_linear(-2.0+float(run.db)))
+				else:
+					var src:PackedFloat32Array=tracks[int(run.talker)]
+					var n:=Synth.n_of(float(run.length))
+					var start:=Synth.n_of(float(run.from))
+					var pitch:=float(run.pitch)
+					var outn:=int(float(n)/pitch)
+					piece=PackedFloat32Array();piece.resize(outn)
+					var fade:=Synth.n_of(0.25)
+					for i in outn:
+						var pos:=float(start)+float(i)*pitch
+						var j:=int(pos);var f:=pos-j
+						var v:=lerpf(src[mini(j,src.size()-1)],src[mini(j+1,src.size()-1)],f)
+						piece[i]=v*minf(1.0,minf(float(i)/fade,float(outn-i)/fade))*db_to_linear(float(run.db))
+				Synth.mix_into(samples,piece,Synth.n_of(float(run.t)),1.0)
+			# the hush: the talk cut dead at `until` already; it may start late (attack)
+			var fade_in:=Synth.n_of(float(item.get("attack",0.0)))
+			for i in mini(fade_in,samples.size()):samples[i]*=float(i)/float(maxi(1,fade_in))
+			var tail:=Synth.n_of(float(item.get("release",0.06)))
+			for i in mini(tail,samples.size()):samples[samples.size()-1-i]*=float(i)/float(tail)
+			gain*=db_to_linear(float(TALK_DB.get(size,-17.0)))
 		elif item.has("voice"):
 			samples=Voice.render_samples(item.spec,String(item.voice),float(item.get("seconds",2.0)),item.get("mood","neutral"),bool(item.get("whisper",false)))
 			var top:=Synth.peak_of(samples)

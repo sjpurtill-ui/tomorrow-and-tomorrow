@@ -142,6 +142,10 @@ static var director:Object        # L: beats / ambient / asides
 static var sound:GDScript         # N: court_sound.gd (attach(stage) -> Node; on_event; on_beat); null: a silent court
 ## The bystanders' muttered lines, a setting (the director reads it here).
 static var mutters_enabled:=true
+## Head-and-shoulders close-ups (push_in with close): off until the faces
+## hold up that near; the strongest push is then the camera's own push-in
+## (chest-up). Turn on with the camera's close_up (M).
+static var close_ups_enabled:=false
 ## The Court installs L's director while this is on (tests may turn it off).
 static var directing:=true
 ## Off for a run (tests): no modelled court, the figures stand before the
@@ -696,7 +700,7 @@ func _embody(f:Figure)->void:
 ## post steps a little aside, onto open floor (never onto the fire). The one
 ## before the god and the seated keep their places.
 const APART:=0.62
-const IN_LINE:=0.5
+const IN_LINE:=0.7
 func _space_spot(f:Figure)->void:
 	if court_set==null or f.spot==null or f.role==MAIN:return
 	var yaw:=22.0
@@ -731,6 +735,40 @@ func _space_spot(f:Figure)->void:
 			if cost<best_cost:best=at;best_cost=cost
 		if best_cost<=0.05:break
 	f.spot.position=Vector3(best.x,f.spot.position.y,best.y)
+
+## A child of the hall stands beside a grown-up standing near them (to hide
+## behind when the god speaks): on open floor at their side, not in line
+## with anyone, else where they are.
+func _beside_a_grown_up(f:Figure)->void:
+	if court_set==null or f.spot==null:return
+	var me:=Vector2(f.spot.position.x,f.spot.position.z)
+	var room:Variant=Paths.room_of(court_set)
+	var fire:Variant=Paths._mark_xz(court_set,"fire")
+	var yaw:=22.0
+	if court_set.get("rig")!=null and (court_set.get("rig") as Object).get("base_yaw")!=null:yaw=float((court_set.get("rig") as Object).get("base_yaw"))
+	var right:=Vector2(cos(deg_to_rad(yaw)),-sin(deg_to_rad(yaw)))
+	var grown:Array=[]
+	for key in cast_order:
+		var o:=figure(key)
+		if o==null or o==f or o.spot==null or o.leaving or o.role==MAIN or o.body3d==null or String(o.body3d.stance)=="sit":continue
+		if String(o.body3d.look.get("variant",""))=="child":continue
+		grown.append(o)
+	grown.sort_custom(func(a:Figure,b:Figure)->bool:return Vector2(a.spot.position.x,a.spot.position.z).distance_to(me)<Vector2(b.spot.position.x,b.spot.position.z).distance_to(me))
+	for o:Figure in grown:
+		var at0:=Vector2(o.spot.position.x,o.spot.position.z)
+		if at0.distance_to(me)<=1.0:return
+		for side:float in [1.0,-1.0]:
+			var at:Vector2=at0+right*side*0.62
+			if room!=null and Paths.solid_at(room,at):continue
+			if fire!=null and at.distance_to(fire as Vector2)<1.5:continue
+			var clear:=true
+			for key in cast_order:
+				var p:=figure(key)
+				if p==null or p==f or p==o or p.spot==null or p.leaving:continue
+				if Vector2(p.spot.position.x,p.spot.position.z).distance_to(at)<APART:clear=false;break
+			if not clear:continue
+			f.spot.position=Vector3(at.x,f.spot.position.y,at.y)
+			return
 
 ## A walk in the hall (spot-local points, from their mark to far) that goes
 ## round the set's things and everyone standing (court_paths.gd); empty: the
@@ -960,6 +998,7 @@ func add_extra(entry:Dictionary)->void:
 	if f!=null and f.body3d!=null and String(f.body3d.stance)=="sit" and court_set!=null and not f.mark_name.is_empty() and court_set.call("has_mark",f.mark_name) and bool((court_set.call("mark",f.mark_name) as Marker3D).get_meta("sit",false)):
 		(extras[key] as Dictionary)["stance"]="sit"
 		return
+	if f!=null and String(entry.get("kind",""))=="child":_beside_a_grown_up(f)
 	if f!=null and f.body3d!=null and String(entry.get("stance",""))!="":
 		var look:Dictionary=f.body3d.look.duplicate();look["stance"]=String(entry.stance)
 		f.body3d.setup(look);f.rest_clip=f.body3d.rest_clip();f.body3d.play(f.rest_clip,0.0)
@@ -1194,7 +1233,7 @@ func _moved(f:Figure,args:Dictionary)->bool:
 		"edge_forward":
 			if f.spot==null:return false
 			var front:=god_point()-f.body3d.global_position;front.y=0.0
-			f.step_to(f.body3d.global_position+front.normalized()*0.35,0.9,7.0)
+			f.step_to(f.body3d.global_position+front.normalized()*_clip_move(f,"edge_forward",0.35),_clip_time("edge_forward",0.9),7.0)
 			return false
 		"step_back":
 			if f.spot==null:return false
@@ -1204,9 +1243,22 @@ func _moved(f:Figure,args:Dictionary)->bool:
 		"make_room":
 			if f.spot==null or other==null or other.body3d==null:return false
 			var aside:=f.body3d.global_position-other.body3d.global_position;aside.y=0.0
-			f.step_to(f.body3d.global_position+aside.normalized()*0.3,0.6,4.0)
+			f.step_to(f.body3d.global_position+aside.normalized()*_clip_move(f,"make_room_l",0.3),_clip_time("make_room_l",0.6),4.0)
 			return false
 	return false
+
+## How far one of the acting's clips carries the body (K's move_m, for a
+## 1.72 m body; scaled to this one), else the given metres.
+func _clip_move(f:Figure,clip:String,otherwise:float)->float:
+	if acting==null or not Acting.has_clip(clip):return otherwise
+	var metres:=float(Acting.clip_meta(clip).get("move_m",0.0))
+	if metres<=0.0:return otherwise
+	return metres*(float(f.body3d.body_height)/1.72 if f.body3d!=null else 1.0)
+
+## How long the step of one of the acting's clips takes (most of the clip).
+func _clip_time(clip:String,otherwise:float)->float:
+	if acting==null or not Acting.has_clip(clip):return otherwise
+	return maxf(0.2,float(Acting.clip_length(clip))*0.6)
 
 ## A held thing follows the act: a dropped bowl falls and stays on the floor
 ## (they stand empty-handed after); a bundle rides between the hands while it
@@ -1276,7 +1328,7 @@ func shot(name:String,args:Dictionary={})->void:
 		"push_in":
 			# A close-up (head and shoulders) for the god's wrath on them and
 			# the big reactions: M's close_up, else the push-in.
-			if body!=null and bool(args.get("close",false)) and rig.has_method("close_up"):rig.call("close_up",body,float(args.get("seconds",1.6)))
+			if body!=null and bool(args.get("close",false)) and close_ups_enabled and rig.has_method("close_up"):rig.call("close_up",body,float(args.get("seconds",1.6)))
 			elif body!=null:rig.call("push_in",body,float(args.get("seconds",2.4)))
 		"reaction":
 			if body!=null:rig.call("reaction",body,float(args.get("time",0.0)))
@@ -1359,6 +1411,10 @@ func arrive(keys:Array)->void:
 
 func _run_arrivals()->void:
 	var index:=0
+	# In the modelled hall, one after another, even when they are sent in
+	# separately (a late official behind an envoy's company).
+	var now:=_now()
+	var next:=maxf(now,_next_arrival_at)
 	for key in _arrivals:
 		var f:=figure(key)
 		if f==null:continue
@@ -1366,9 +1422,20 @@ func _run_arrivals()->void:
 		# A modelled figure walks in from beyond the edge of the stage.
 		var distance:=maxf(size.x*.35,f.size.x*1.6)
 		if f.body3d!=null:distance=(f.home.x+f.size.x) if side<0.0 else (size.x-f.home.x+f.size.x)
-		f.enter_from(side,distance,index*0.18)
+		# In the modelled hall they come in single file, a body's length or
+		# so apart (never walking into each other).
+		if f.spot!=null:
+			f.enter_from(side,distance,next-now)
+			next+=FILE_GAP
+		else:f.enter_from(side,distance,index*0.18)
 		index+=1
+	_next_arrival_at=next
 	_arrivals.clear()
+
+## Seconds between people walking in or out one behind another in the hall.
+const FILE_GAP:=0.9
+## When the next to walk in may start (single file).
+var _next_arrival_at:=0.0
 
 ## The one before the god takes their leave (the audience is concluded);
 ## those who came with them follow. style says how they go:
@@ -1403,7 +1470,7 @@ func conclude(delay:float=1.4,style:="bow",reaction:="")->void:
 			continue
 		var distance:=maxf(size.x*.4,f.size.x*2.0)
 		if f.body3d!=null:distance=f.home.x+f.size.x
-		f.leave(-1.0,distance,delay+index*0.2,own)
+		f.leave(-1.0,distance,delay+index*(FILE_GAP if f.spot!=null else 0.2),own)
 		index+=1
 	var thought:=thinking
 	if is_instance_valid(thought):thought.visible=false
@@ -2054,7 +2121,11 @@ class Figure extends Control:
 		body3d.rotation.y=atan2(first.x,first.z)
 		_clip("walk_in",0.0,0.0)
 		_move=create_tween()
-		if delay>0.0:_move.tween_interval(delay)
+		if delay>0.0:
+			# Not yet through the door: unseen until their turn.
+			body3d.visible=false
+			_move.tween_interval(delay)
+			_move.tween_callback(func()->void:if is_instance_valid(body3d):body3d.visible=true)
 		_move.tween_method(_stroll_step.bind(true),1.0,0.0,time)
 		_move.tween_callback(_settle_in)
 
@@ -2486,6 +2557,9 @@ class Figure extends Control:
 	var exit_style:=""
 	func leave(side:float,distance:float,delay:float=0.0,style:="bow")->void:
 		leaving=true;exit_style=style
+		# Sent away before their turn through the door: they simply do not come.
+		if body3d!=null and spot!=null and not body3d.visible and _move!=null and _move.is_valid():
+			_move.kill();_vanish();return
 		# Off the staff (or up from the fire) before they walk.
 		if not acting_stance.is_empty() and Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():
 			Self.Acting.idle(body3d,String(body3d.stance))

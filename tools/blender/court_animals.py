@@ -268,7 +268,8 @@ def dog_region(P):
                 out.append(["jaw", "head"])
             else:
                 out.append(["head", "neck"])
-        elif y > 0.285 and z > 0.43:
+        elif (y > 0.285 and z > 0.43) or (y > 0.2 and z > 0.56):
+            # the tail, including its tip curled forward over the back
             out.append(["tail1", "tail2", "tail3", "pelvis"])
         elif z < 0.33 and abs(x) > 0.018 and y < 0.0:
             out.append(["upperarm." + side, "forearm." + side, "fpaw." + side, "chest"])
@@ -513,8 +514,8 @@ def sit_pose(k=1.0):
         add(p, "upperarm." + side, rot=(58 * k, 0, 0))
         add(p, "forearm." + side, rot=(-6 * k, 0, 0))
         add(p, "fpaw." + side, rot=(-4 * k, 0, 0))
-    add(p, "tail1", rot=(40 * k, 0, 0))
-    add(p, "tail2", rot=(28 * k, 0, 0))
+    add(p, "tail1", rot=(-45 * k, 0, 12 * k))
+    add(p, "tail2", rot=(-12 * k, 0, 10 * k))
     return p
 
 
@@ -574,9 +575,10 @@ def curled():
     add(p, "thigh.R", rot=(-70, -30, 0))
     add(p, "shin.R", rot=(146, 0, 0))
     add(p, "hock.R", rot=(-66, 0, 0))
-    add(p, "tail1", rot=(56, 0, 52))
-    add(p, "tail2", rot=(10, 0, 46))
-    add(p, "tail3", rot=(0, 0, 40))
+    # the tail comes down off the back and lies round the hind feet
+    add(p, "tail1", rot=(-66, 0, 58))
+    add(p, "tail2", rot=(-14, 0, 40))
+    add(p, "tail3", rot=(0, 0, 30))
     add(p, "ear.L", rot=(28, 0, -10))
     add(p, "ear.R", rot=(34, 0, 14))
     return p
@@ -616,9 +618,10 @@ def cower_pose(k=1.0):
     add(p, "head", rot=(14 * k, 0, 0))
     add(p, "ear.L", rot=(60 * k, 0, -20 * k))
     add(p, "ear.R", rot=(55 * k, 0, 20 * k))
-    add(p, "tail1", rot=(78 * k, 0, 0))
-    add(p, "tail2", rot=(50 * k, 0, 0))
-    add(p, "tail3", rot=(30 * k, 0, 0))
+    # the tail tucked down between the hind legs
+    add(p, "tail1", rot=(-150 * k, 0, 0))
+    add(p, "tail2", rot=(-25 * k, 0, 0))
+    add(p, "tail3", rot=(-15 * k, 0, 0))
     for side in ("L", "R"):
         add(p, "upperarm." + side, rot=(28 * k, 0, 0))
         add(p, "forearm." + side, rot=(-44 * k, 0, 0))

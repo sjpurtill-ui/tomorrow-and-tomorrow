@@ -12,6 +12,7 @@ shader_type spatial;
 //  9 planks (grain, seams)                 10 plaster (stains, fallen patches)
 // 11 mudbrick courses                       12 dressed stone blocks
 // 13 flagstones (by the world, not UV)  14 charred wood (cracks glow low down)
+// 15 weathered stone with lichen
 render_mode cull_back, depth_draw_opaque, specular_disabled;
 
 uniform vec3 albedo : source_color = vec3(0.5, 0.45, 0.4);
@@ -38,6 +39,11 @@ uniform float haze_start = 40.0;
 uniform float haze_end = 160.0;
 uniform float haze_max = 0.0;
 uniform float rim_amount = 0.0;
+// The season: snow lies on what faces the sky (not near the fire, not in a
+// hall), dust and dryness in summer.
+uniform float snow = 0.0;
+uniform vec3 fire_pos = vec3(0.0, 0.0, 0.0);
+uniform float dry = 0.0;
 
 varying vec4 v_col;
 varying vec3 v_world;
@@ -235,6 +241,16 @@ vec3 paint(vec3 base, vec2 uv, float seed) {
 		vec2 p = uv * vec2(26.0, 7.0);
 		col *= 0.8 + 0.4 * noise2(p + seed * 4.0);
 		col = mix(col, vec3(0.42, 0.40, 0.37), smoothstep(0.6, 0.8, noise2(uv * vec2(9.0, 3.0) + seed)) * 0.5);
+	} else if (pattern == 15) {
+		// weathered stone: streaks down the face, pale and orange lichen
+		vec2 p = uv;
+		col *= 0.86 + 0.24 * noise2(p * vec2(3.0, 0.8) + seed * 5.0);
+		col *= 0.93 + 0.1 * noise2(vec2(p.x * 22.0, p.y * 2.0));
+		float l1 = smoothstep(0.62, 0.7, noise2(p * 3.4 + seed * 9.0) * 0.7 + noise2(p * 11.0) * 0.3);
+		float l2 = smoothstep(0.7, 0.76, noise2(p * 5.1 + seed * 2.0 + 7.0));
+		col = mix(col, vec3(0.70, 0.72, 0.58), l1 * 0.75);
+		col = mix(col, vec3(0.78, 0.50, 0.22), l2 * 0.7);
+		col = mix(col, ink, (1.0 - smoothstep(0.0, 0.04, abs(noise2(p * vec2(1.2, 4.0) + seed) - 0.5))) * 0.3);
 	} else if (pattern == 13) {
 		// flagstones on the floor (by the world: no seam shows)
 		vec2 p = v_world.xz;
@@ -274,6 +290,17 @@ void fragment() {
 	}
 	float g = noise3(v_world * 38.0) * 0.6 + noise3(v_world * 11.0) * 0.4;
 	base *= 1.0 + (g - 0.5) * grain;
+	if (dry > 0.0) {
+		base = mix(base, base * vec3(1.08, 1.0, 0.82), dry);
+	}
+	if (snow > 0.0) {
+		vec3 wn = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
+		float up = smoothstep(0.35, 0.8, wn.y);
+		float near_fire = 1.0 - smoothstep(1.2, 2.6, length(v_world.xz - fire_pos.xz));
+		float patchy = smoothstep(0.3, 0.6, noise3(v_world * 1.7) + 0.25);
+		float cover = clamp(up * patchy * snow * (1.0 - near_fire), 0.0, 1.0);
+		base = mix(base, vec3(0.93, 0.95, 0.98) * (0.94 + 0.08 * g), cover);
+	}
 	float ao = mix(1.0, v_col.r, ao_amount);
 	base *= mix(1.0, ao, 0.55);
 	float dist = length(v_world - CAMERA_POSITION_WORLD);

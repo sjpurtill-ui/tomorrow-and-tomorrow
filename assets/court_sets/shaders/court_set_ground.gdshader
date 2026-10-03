@@ -19,6 +19,12 @@ uniform float band_soft = 0.30;
 uniform vec3 hearth : source_color = vec3(0.24, 0.20, 0.17);
 uniform float hearth_radius = 1.0;
 uniform vec2 hearth_scale = vec2(1.0, 1.0);
+// The season: snow lying (melted where people tread and near the fire),
+// summer's dry grass, autumn's fallen leaves, spring's flowers in the grass.
+uniform float snow = 0.0;
+uniform float dry = 0.0;
+uniform float leaves = 0.0;
+uniform float flowers = 0.0;
 
 varying vec4 v_col;
 varying vec3 v_world;
@@ -47,7 +53,8 @@ void fragment() {
 	float big = noise3(p * 0.22) * 0.6 + noise3(p * 0.61 + 7.0) * 0.4;
 	float mid = noise3(p * 1.7 + 2.0);
 	float fine = noise3(p * 9.0) * 0.5 + noise3(p * 23.0) * 0.5;
-	vec3 g = mix(grass, grass_dry, smoothstep(0.35, 0.75, big));
+	vec3 g = mix(grass, grass_dry, clamp(smoothstep(0.35, 0.75, big) + dry * 0.8, 0.0, 1.0));
+	g = mix(g, vec3(0.74, 0.64, 0.40), dry * 0.45 * smoothstep(0.3, 0.7, mid));
 	g *= 0.88 + 0.24 * mid;
 	// strokes of grass: a little streaky along one way, like a brush
 	float streak = noise3(vec3(p.x * 6.0, 0.0, p.z * 1.4));
@@ -61,11 +68,27 @@ void fragment() {
 		float st = smoothstep(0.55, 0.75, noise3(vec3(p.x * 14.0, 0.0, p.z * 3.0)));
 		col = mix(col, straw_colour * (0.85 + 0.3 * fine), st * straw);
 	}
+	if (flowers > 0.0) {
+		float fl = step(0.86, noise3(p * 7.0)) * (1.0 - edge) * flowers;
+		col = mix(col, mix(vec3(0.95, 0.92, 0.80), vec3(0.92, 0.78, 0.30), step(0.5, noise3(p * 3.0))), fl);
+	}
+	if (leaves > 0.0) {
+		float lf = step(0.72, noise3(vec3(p.x * 6.0, 0.0, p.z * 6.0)) * 0.7 + noise3(p * 17.0) * 0.3);
+		col = mix(col, mix(vec3(0.62, 0.32, 0.12), vec3(0.75, 0.55, 0.18), noise3(p * 9.0)), lf * leaves * (1.0 - edge * 0.6));
+	}
 	// the hearth's scorched ring
 	vec2 hq = p.xz / hearth_scale;
 	float hd = length(hq);
 	col = mix(col, hearth, (1.0 - smoothstep(hearth_radius * 0.55, hearth_radius * 1.25, hd)) * 0.85);
 	col *= 1.0 + (fine - 0.5) * 0.06;
+	if (snow > 0.0) {
+		float melt = 1.0 - smoothstep(hearth_radius * 1.4, hearth_radius * 2.8, hd);
+		float trod = smoothstep(0.35, 0.8, wear + (mid - 0.5) * 0.3);
+		float drift = smoothstep(0.25, 0.55, big + 0.2);
+		float cover = clamp(snow * drift * (1.0 - melt) * (1.0 - trod * 0.75), 0.0, 1.0);
+		vec3 white = vec3(0.92, 0.94, 0.97) * (0.95 + 0.07 * fine);
+		col = mix(col, mix(white, vec3(0.62, 0.58, 0.55), trod * 0.4), cover);
+	}
 	float ao = mix(1.0, v_col.r, ao_amount);
 	col *= mix(1.0, ao, 0.6);
 	float dist = length(v_world - CAMERA_POSITION_WORLD);
