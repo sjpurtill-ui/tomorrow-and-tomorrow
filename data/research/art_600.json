@@ -495,11 +495,12 @@
       "style": "silhouette_ochre"
     },
     "hearth_shrine_offerings": {
-      "path": "res://assets/ui/research/discovery-600/hearth_shrine_offerings.png",
-      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
-      "tile_index": 2,
-      "caption": "Offerings to the living god at the hearth-shrine (Year 14)",
-      "style": "silhouette_ochre"
+      "path": "res://assets/ui/research/subjects/hearth_shrine_offerings-v2.png",
+      "style": "culture: tapestry-inspired painting",
+      "focus": [
+        0.5,
+        0.5
+      ]
     },
     "heroic_song_cycle": {
       "path": "res://assets/ui/research/discovery-600/heroic_song_cycle.png",

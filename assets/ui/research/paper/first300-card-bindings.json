@@ -8,7 +8,7 @@
   "cereal_dehulling": "res://assets/ui/research/paper/first300-cards/cereal_dehulling.tres",
   "starch_washing_separation": "res://assets/ui/research/paper/first300-cards/starch_washing_separation.tres",
   "postharvest_loss_measurement": "res://assets/ui/research/paper/first300-cards/postharvest_loss_measurement.tres",
-  "woven_carriers": "res://assets/ui/research/paper/first300-cards/woven_carriers.tres",
+  "woven_carriers": "res://assets/ui/research/subjects/woven_carriers-v2.png",
   "rope_rigging": "res://assets/ui/research/paper/first300-cards/rope_rigging.tres",
   "wedges_and_levers": "res://assets/ui/research/paper/first300-cards/wedges_and_levers.tres",
   "salt_working": "res://assets/ui/research/paper/first300-cards/salt_working.tres",
@@ -171,5 +171,6 @@
   "clay_testing": "res://assets/ui/research/subjects/clay_testing-v2.png",
   "well_siting": "res://assets/ui/research/subjects/well_siting-v2.png",
   "shared_childcare": "res://assets/ui/research/subjects/shared_childcare-v2.png",
-  "clay_shaping": "res://assets/ui/research/subjects/clay_shaping-v2.png"
+  "clay_shaping": "res://assets/ui/research/subjects/clay_shaping-v2.png",
+  "river_craft": "res://assets/ui/research/subjects/river_craft-v2.png"
 }

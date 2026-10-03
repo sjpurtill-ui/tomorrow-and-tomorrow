@@ -251,8 +251,12 @@
     ]
   },
   "river_craft": {
-    "path": "res://assets/ui/research/subjects/river_craft-v1.png",
+    "path": "res://assets/ui/research/subjects/river_craft-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -334,8 +338,12 @@
     ]
   },
   "woven_carriers": {
-    "path": "res://assets/ui/research/subjects/woven_carriers-v1.png",
+    "path": "res://assets/ui/research/subjects/woven_carriers-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -6152,45 +6160,45 @@
     ]
   },
   "clay_lined_storage_pits": {
-    "path": "res://assets/ui/research/subjects/clay_lined_storage_pits-v1.png",
+    "path": "res://assets/ui/research/subjects/clay_lined_storage_pits-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "cookfire_smoke_venting_habit": {
-    "path": "res://assets/ui/research/subjects/cookfire_smoke_venting_habit-v1.png",
+    "path": "res://assets/ui/research/subjects/cookfire_smoke_venting_habit-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.45
     ]
   },
   "extended_family_room_division": {
-    "path": "res://assets/ui/research/subjects/extended_family_room_division-v1.png",
+    "path": "res://assets/ui/research/subjects/extended_family_room_division-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "midday_heat_rest": {
-    "path": "res://assets/ui/research/subjects/midday_heat_rest-v1.png",
+    "path": "res://assets/ui/research/subjects/midday_heat_rest-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "seasonal_tribute_counts": {
-    "path": "res://assets/ui/research/subjects/seasonal_tribute_counts-v1.png",
+    "path": "res://assets/ui/research/subjects/seasonal_tribute_counts-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "snakebite_treatment": {
-    "path": "res://assets/ui/research/subjects/snakebite_treatment-v1.png",
+    "path": "res://assets/ui/research/subjects/snakebite_treatment-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.57
     ]
   },
   "flood_mark_reading": {
@@ -9898,6 +9906,13 @@
   },
   "kin_body_ornament": {
     "path": "res://assets/ui/research/subjects/kin_body_ornament-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "hearth_shrine_offerings": {
+    "path": "res://assets/ui/research/subjects/hearth_shrine_offerings-v2.png",
     "focus": [
       0.5,
       0.5
