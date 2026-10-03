@@ -49,6 +49,14 @@ def main():
     audio, rate = read_wav(os.path.join(frame_dir, 'f.wav'))
     per = rate // fps
     if per * fps != rate: raise SystemExit("audio rate %d is not a whole number of samples a frame at %d fps" % (rate, fps))
+    # the movie writer's first frame or two are drawn before the scene: blank; drop them and their sound
+    skip = 0
+    while skip < min(6, len(frames) - 1):
+        px = np.asarray(Image.open(frames[skip]).convert('L').resize((64, 36)), dtype=np.float64)
+        if px.std() > 2.0: break
+        skip += 1
+    frames = frames[skip:]
+    audio = audio[skip * per:]
     # the sound for exactly as long as the frames
     need = per * len(frames)
     if len(audio) < need: audio = np.vstack([audio, np.zeros((need - len(audio), 2))])
