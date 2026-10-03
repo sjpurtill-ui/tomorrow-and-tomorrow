@@ -104,24 +104,24 @@ func test_one_who_defied_never_kneels_or_bows()->void:
 				{"kind":"divine","action":"penance","target":"main","response":"defy"},
 				{"kind":"divine","action":"terrify","target":"p3","response":"defy"},   # the eager hearth chief, of all people
 				{"kind":"divine","action":"terrify","target":"c3","response":"defy"}]:   # the one holding the bowl
-			for beat:Dictionary in Director.beats(event,home_cast(),hungry_facts(),seed_value,memory):
+			for beat:Dictionary in Director.beats_for(event,home_cast(),hungry_facts(),seed_value,memory):
 				if String(beat.who)==String(event.target):
 					assert_bool(String(beat.act) in Director.KNEEL_LIKE or String(beat.act)=="kneel_bound").override_failure_message(
 						"%s defied the god but was shown to %s (seed %d)" % [event.target,beat.act,seed_value]).is_false()
-		for beat:Dictionary in Director.beats({"kind":"terrify_envoy","response":"defy","target":"main"},envoy_cast(),hungry_facts(),seed_value,memory):
+		for beat:Dictionary in Director.beats_for({"kind":"terrify_envoy","response":"defy","target":"main"},envoy_cast(),hungry_facts(),seed_value,memory):
 			if String(beat.who)=="main":assert_bool(String(beat.act) in Director.KNEEL_LIKE).override_failure_message("the envoy defied but %s" % beat.act).is_false()
 
 func test_defiance_stands_firm_and_cowering_goes_down()->void:
-	var firm:=Director.beats({"kind":"divine","action":"terrify","target":"main","response":"defy"},home_cast(),full_facts(60),3)
-	var cowed:=Director.beats({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),full_facts(60),3)
+	var firm:=Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"defy"},home_cast(),full_facts(60),3)
+	var cowed:=Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),full_facts(60),3)
 	assert_bool(_did(firm,"main","stand_firm")).is_true()
 	assert_bool(_did(cowed,"main","kneel")).is_true()
 	assert_bool(_did(cowed,"main","stand_firm")).is_false()
 
 func test_a_refusal_never_bows_and_seized_is_forced_down_bound()->void:
 	for seed_value in 60:
-		var seized:=Director.beats({"kind":"command","verb":"detain","stage":"refuse_seized","actor":"p1","target":"main","obedience":"refuse"},home_cast(),hungry_facts(),seed_value)
-		var fled:=Director.beats({"kind":"command","verb":"exile","stage":"refuse_flee","actor":"p1","target":"main","obedience":"refuse"},home_cast(),hungry_facts(),seed_value)
+		var seized:=Director.beats_for({"kind":"command","verb":"detain","stage":"refuse_seized","actor":"p1","target":"main","obedience":"refuse"},home_cast(),hungry_facts(),seed_value)
+		var fled:=Director.beats_for({"kind":"command","verb":"exile","stage":"refuse_flee","actor":"p1","target":"main","obedience":"refuse"},home_cast(),hungry_facts(),seed_value)
 		for beat:Dictionary in seized+fled:
 			if String(beat.who)=="p1":assert_bool(String(beat.act) in Director.KNEEL_LIKE).override_failure_message("p1 refused but %s" % beat.act).is_false()
 		assert_bool(_did(seized,"p1","kneel_bound")).is_true()
@@ -132,12 +132,12 @@ func test_the_dead_do_nothing_more_and_nobody_laughs()->void:
 	var memory:={}
 	for seed_value in 80:
 		var event:={"kind":"divine","action":"strike_down","target":"main","terminal":true}
-		var list:=Director.beats(event,home_cast(),hungry_facts(),seed_value,memory)
+		var list:=Director.beats_for(event,home_cast(),hungry_facts(),seed_value,memory)
 		for beat:Dictionary in list:
 			assert_bool(String(beat.act) in Director.COMIC_ACTS).override_failure_message("comedy at a death: %s %s" % [beat.who,beat.act]).is_false()
 			if String(beat.who)=="main":assert_str(String(beat.act)).is_equal("stricken")
 		assert_bool(_did(list,"c1","cover_eyes") or _did(list,"p4","cover_eyes") or _did(list,"c3","cover_eyes")).override_failure_message("nobody covered the child's eyes").is_true()
-		assert_array(Director.asides(event,hungry_facts(),home_cast(),seed_value,memory)).is_empty()
+		assert_array(Director.asides_for(event,hungry_facts(),home_cast(),seed_value,memory)).is_empty()
 
 # --- Only what the facts hold -------------------------------------------------------
 
@@ -150,9 +150,9 @@ func test_nobody_is_hungry_while_the_stores_are_full()->void:
 				for loop:Dictionary in Director.ambient(cast,facts,seed_value):
 					assert_bool(String(loop.act) in Director.HUNGER_ACTS).override_failure_message("hunger shown with %d days of food: %s" % [days,loop.act]).is_false()
 			for event:Dictionary in [{"kind":"divine","action":"boon","target":"p4","response":"blessed","terms":{"resource":"Food","amount":12}},{"kind":"divine","action":"penance","target":"main","response":"endure"}]:
-				for beat:Dictionary in Director.beats(event,home_cast(),facts,seed_value):
+				for beat:Dictionary in Director.beats_for(event,home_cast(),facts,seed_value):
 					assert_bool(String(beat.act) in Director.HUNGER_ACTS).override_failure_message("hungry beat with %d days: %s" % [days,beat.act]).is_false()
-			for beat:Dictionary in Director.beats({"kind":"gift","accepted":true,"resource":"Food","amount":40,"who":"main"},envoy_cast(),facts,seed_value):
+			for beat:Dictionary in Director.beats_for({"kind":"gift","accepted":true,"resource":"Food","amount":40,"who":"main"},envoy_cast(),facts,seed_value):
 				assert_bool(String(beat.act) in Director.HUNGER_ACTS).is_false()
 	# No food figure in the sheet at all: nothing shows hunger either.
 	for loop:Dictionary in Director.ambient(home_cast(),{"season":"spring"},7):
@@ -174,7 +174,7 @@ func test_no_cough_without_sickness_no_spears_without_war()->void:
 			assert_bool(String(loop.act) in Director.SICK_ACTS+Director.WAR_ACTS).override_failure_message("%s with no sickness or war" % loop.act).is_false()
 		var memory:={}
 		for event:Dictionary in events():
-			for beat:Dictionary in Director.beats(event,home_cast(),calm,seed_value,memory):
+			for beat:Dictionary in Director.beats_for(event,home_cast(),calm,seed_value,memory):
 				assert_bool(String(beat.act) in Director.SICK_ACTS+Director.WAR_ACTS).override_failure_message("%s in %s with no sickness or war" % [beat.act,event.kind]).is_false()
 	var acts:={}
 	for loop:Dictionary in Director.ambient(home_cast(),hungry_facts(),4):acts[String(loop.act)]=String(loop.because)
@@ -194,8 +194,8 @@ func test_asides_cite_only_facts_present()->void:
 			for seed_value in 30:
 				var last_had:=false
 				for event:Dictionary in run[1]:
-					Director.beats(event,cast,facts,seed_value,memory)
-					var lines:=Director.asides(event,facts,cast,seed_value,memory)
+					Director.beats_for(event,cast,facts,seed_value,memory)
+					var lines:=Director.asides_for(event,facts,cast,seed_value,memory)
 					assert_int(lines.size()).is_less_equal(1)
 					assert_bool(last_had and not lines.is_empty()).override_failure_message("two muttered lines running").is_false()
 					last_had=not lines.is_empty()
@@ -277,7 +277,7 @@ func test_an_aside_needs_its_facts()->void:
 	# Food gift to a hall whose stores are not on the sheet: no line about days of food.
 	var memory:={}
 	for seed_value in 200:
-		for line:Dictionary in Director.asides({"kind":"divine","action":"boon","target":"p4","response":"blessed","terms":{"resource":"Food","amount":12}},{"season":"spring"},home_cast(),seed_value,memory):
+		for line:Dictionary in Director.asides_for({"kind":"divine","action":"boon","target":"p4","response":"blessed","terms":{"resource":"Food","amount":12}},{"season":"spring"},home_cast(),seed_value,memory):
 			assert_bool("facts.food_days" in line.cites).is_false()
 			assert_str(String(line.situation)).is_not_equal("boon_hungry")
 
@@ -285,10 +285,10 @@ func test_an_aside_needs_its_facts()->void:
 
 func test_the_same_seed_gives_the_same_beats()->void:
 	for event:Dictionary in events():
-		var a:=Director.beats(event,home_cast(),hungry_facts(),42,{})
-		var b:=Director.beats(event,home_cast(),hungry_facts(),42,{})
+		var a:=Director.beats_for(event,home_cast(),hungry_facts(),42,{})
+		var b:=Director.beats_for(event,home_cast(),hungry_facts(),42,{})
 		assert_str(JSON.stringify(a)).is_equal(JSON.stringify(b))
-		assert_str(JSON.stringify(Director.asides(event,hungry_facts(),home_cast(),42,{}))).is_equal(JSON.stringify(Director.asides(event,hungry_facts(),home_cast(),42,{})))
+		assert_str(JSON.stringify(Director.asides_for(event,hungry_facts(),home_cast(),42,{}))).is_equal(JSON.stringify(Director.asides_for(event,hungry_facts(),home_cast(),42,{})))
 	assert_str(JSON.stringify(Director.ambient(home_cast(),hungry_facts(),9))).is_equal(JSON.stringify(Director.ambient(home_cast(),hungry_facts(),9)))
 
 func test_variety_holds_over_two_hundred_events()->void:
@@ -302,7 +302,7 @@ func test_variety_holds_over_two_hundred_events()->void:
 	var aside_run:=0
 	for i in 200:
 		var event:Dictionary=pool[rng.randi_range(0,pool.size()-1)]
-		var list:=Director.beats(event,home_cast(),hungry_facts(),1000+i,memory)
+		var list:=Director.beats_for(event,home_cast(),hungry_facts(),1000+i,memory)
 		var sig:=Director._signature(list)
 		var kind:=String(event.kind)
 		if not sig.is_empty():
@@ -311,7 +311,7 @@ func test_variety_holds_over_two_hundred_events()->void:
 		signatures[sig]=true
 		for bit in memory.get("bits",{}):
 			if int(memory.bits[bit])==int(memory.n):bit_uses[bit]=int(bit_uses.get(bit,0))+1
-		var lines:=Director.asides(event,hungry_facts(),home_cast(),1000+i,memory)
+		var lines:=Director.asides_for(event,hungry_facts(),home_cast(),1000+i,memory)
 		if lines.is_empty():aside_run=0
 		else:
 			asides+=1;aside_run+=1
@@ -326,14 +326,14 @@ func test_the_same_terror_plays_differently_each_time()->void:
 	var memory:={}
 	var seen:={}
 	var event:={"kind":"divine","action":"terrify","target":"main","response":"cower"}
-	for i in 30:seen[Director._signature(Director.beats(event,home_cast(),hungry_facts(),500+i,memory))]=true
+	for i in 30:seen[Director._signature(Director.beats_for(event,home_cast(),hungry_facts(),500+i,memory))]=true
 	assert_int(seen.size()).is_greater_equal(24)
 
 # --- The shape of a moment -----------------------------------------------------------------
 
 func test_anticipation_then_action_then_reaction_then_hold()->void:
 	for seed_value in 30:
-		var list:=Director.beats({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),hungry_facts(),seed_value)
+		var list:=Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),hungry_facts(),seed_value)
 		var first:={}
 		for beat:Dictionary in list:
 			var phase:=String(beat.phase)
@@ -345,7 +345,7 @@ func test_anticipation_then_action_then_reaction_then_hold()->void:
 		assert_bool(_did(list,"camera","push_in")).is_true()
 
 func test_the_room_lifts_its_faces_when_the_god_speaks()->void:
-	var list:=Director.beats({"kind":"god_speaks","text":"Speak."},home_cast(),full_facts(60),5)
+	var list:=Director.beats_for({"kind":"god_speaks","text":"Speak."},home_cast(),full_facts(60),5)
 	var lifted:={}
 	for beat:Dictionary in list:
 		if String(beat.act) in ["look_up","late_lift"]:lifted[String(beat.who)]=true
@@ -357,7 +357,7 @@ func test_the_sleeper_wakes_and_stays_awake_a_while()->void:
 	var memory:={}
 	var woke_at:=-1
 	for i in 40:
-		var list:=Director.beats({"kind":"god_speaks","text":"Speak."},home_cast(),full_facts(60),i,memory)
+		var list:=Director.beats_for({"kind":"god_speaks","text":"Speak."},home_cast(),full_facts(60),i,memory)
 		if _did(list,"c1","jerk_awake"):
 			if woke_at>=0:assert_int(i-woke_at).is_greater_equal(Director.DOZE_AGAIN)
 			woke_at=i
@@ -405,13 +405,75 @@ func test_the_crowd_is_of_its_people_and_its_age()->void:
 func test_every_act_has_a_way_to_be_played()->void:
 	var memory:={}
 	for event:Dictionary in events():
-		for beat:Dictionary in Director.beats(event,home_cast(),hungry_facts(),8,memory):
+		for beat:Dictionary in Director.beats_for(event,home_cast(),hungry_facts(),8,memory):
 			assert_bool(Director.ACTS.has(String(beat.act))).override_failure_message("no acting entry for %s" % beat.act).is_true()
 	for loop:Dictionary in Director.ambient(home_cast(),hungry_facts(),8):assert_bool(Director.ACTS.has(String(loop.act))).is_true()
 	var kneel:=Director.performance({"act":"kneel","args":{}})
 	assert_str(String(kneel.clip)).is_equal("kneel")
 	assert_bool(bool(kneel.hold)).is_true()
 	assert_str(String(Director.performance({"act":"stand_firm","args":{}}).mood)).is_equal("defiant")
+
+# --- The stage's own shapes (docs/COURT_STAGE_3D.md section 5) -------------------------------
+
+## A cast as the stage hands it over: {key, role, person, figure, mood}.
+static func stage_cast()->Array:
+	var person:=func(pid:int,name:String,courage:float,pride:float,fear:float,extra:Dictionary={})->Dictionary:
+		var p:={"person_id":pid,"name":name,"courage":courage,"pride":pride,"age":40,"personality":{"empathy":0.5},
+			"relationships":{"sovereign":{"fear":fear,"trust":0.6,"respect":0.5,"obligation":0.4,"resentment":0.1}}}
+		p.merge(extra,true)
+		return p
+	return [
+		{"key":"main","role":"main","person":person.call(5,"Hena Tuvasi",0.9,0.9,0.05),"figure":null,"mood":"neutral"},
+		{"key":"p11","role":"court","person":person.call(11,"Orrin Vael",0.75,0.8,0.1),"figure":null,"mood":"neutral"},
+		{"key":"p12","role":"court","person":person.call(12,"Suri Danek",0.3,0.3,0.6),"figure":null,"mood":"afraid"},
+		{"key":"p13","role":"court","person":person.call(13,"Kavu Mbeli",0.35,0.2,0.4,{"office_key":"settlement","title":"Hearth chief"}),"figure":null,"mood":"neutral"},
+	]
+
+func test_the_stage_object_speaks_the_stages_primitives()->void:
+	var director:=Director.new()
+	var facts:={"era":"stone","season":"winter","stores_days":9,"hungry":true,"sick":false,"at_war":false,"love":0.4,"dread":0.3}
+	var seen:={}
+	for i in 40:
+		var list:=director.beats({"kind":"divine","action":"terrify","response":"defy"},stage_cast(),facts,i)
+		for beat:Dictionary in list:
+			seen[String(beat.act)]=true
+			assert_bool(String(beat.act) in ["play","look_at","mood","shot","hush"]).override_failure_message("not a stage primitive: %s" % beat.act).is_true()
+			if String(beat.who)=="main":
+				assert_bool(String((beat.args as Dictionary).get("beat","")) in Director.KNEEL_LIKE).override_failure_message("main defied but %s" % beat.args).is_false()
+				assert_str(String((beat.args as Dictionary).get("fallback",""))).is_not_equal("kneel")
+				assert_str(String((beat.args as Dictionary).get("fallback",""))).is_not_equal("bow")
+		var lines:=director.asides({"kind":"divine","action":"terrify","response":"defy"},facts,stage_cast(),i)
+		for line:Dictionary in lines:
+			assert_str(String(line.act)).is_equal("aside")
+			assert_str(String((line.args as Dictionary).text)).is_equal(String(line.text))
+	assert_bool(seen.has("play") and seen.has("mood") and seen.has("look_at") and seen.has("shot")).is_true()
+	# The memory is the director's own: bits rest across calls.
+	assert_int(int(director.stage_memory.get("n",0))).is_equal(40)
+
+func test_the_stages_facts_and_events_are_read()->void:
+	var facts:=Director.normal_facts({"stores_days":40,"hungry":false,"sick":true,"at_war":false,"love":0.7,"dread":0.1})
+	assert_int(int(facts.food_days)).is_equal(40)
+	assert_bool(Director.sickness(facts).is_empty()).is_false()
+	assert_bool(Director.war(facts).is_empty()).is_true()
+	assert_float(Director.people_love(facts)).is_equal(0.7)
+	assert_bool(Director.hungry(Director.normal_facts({"hungry":true}))).is_true()
+	var cast:=Director.normal_cast(stage_cast(),facts)
+	assert_str(String((cast[3] as Dictionary).kind)).is_equal("hearth_chief")
+	assert_float(float((cast[2] as Dictionary).dread)).is_equal(0.6)
+	assert_str(String(Director.normal_event({"kind":"god","text":"Speak."},cast).kind)).is_equal("god_speaks")
+	assert_str(String(Director.normal_event({"kind":"enter","who":"main"},cast).kind)).is_equal("summon")
+	var envoy_cast:=[{"key":"main","role":"main","person":{"name":"Ishkar Velu","role":"envoy","person_id":0}},{"key":"att0","role":"attendant","person":{"name":"Dov"}}]
+	var normal:=Director.normal_cast(envoy_cast,{"offer":{"resource":"Food","amount":40}})
+	assert_str(String((normal[0] as Dictionary).kind)).is_equal("envoy")
+	assert_str(String((normal[1] as Dictionary).kind)).is_equal("bearer")
+	assert_str(String(Director.normal_event({"kind":"divine","action":"terrify","response":"cower"},normal).kind)).is_equal("terrify_envoy")
+	var flog:=Director.normal_event({"kind":"divine","action":"envoy_flog"},normal)
+	assert_str(String(flog.kind)).is_equal("command")
+	assert_str(String(flog.verb)).is_equal("maim")
+	# An engine result handed over whole is read by the matching adapter.
+	var whole:=Director.normal_event({"kind":"divine","result":{"ok":true,"action":"terrify","person_id":5,"response":"defy"}},Director.normal_cast(stage_cast(),facts))
+	assert_str(String(whole.response)).is_equal("defy")
+	assert_str(String(whole.target)).is_equal("main")
 
 # --- For the coordinator: a sample screenplay ------------------------------------------------
 

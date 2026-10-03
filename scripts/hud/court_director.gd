@@ -26,9 +26,20 @@ extends RefCounted
 ## plays out identically twice in a row. Over hundreds of audiences the pool
 ## of bits, the people they fall on and their timing keep it from going stale.
 ##
-##   beats(event, cast, facts, seed, memory) -> [{t, who, act, args, phase}]
-##   ambient(cast, facts, seed)              -> [{who, act, every, dur, args, because}]
-##   asides(event, facts, cast, seed, memory)-> [{t, who, text, cites, situation}]
+## Two ways in. The stage holds one director (CourtStage.director =
+## CourtDirector.new(), docs/COURT_STAGE_3D.md section 5), which keeps its own
+## memory and speaks the stage's primitive beats:
+##   director.beats(event, cast, facts, seed)  -> [{t, who, act, args}]
+##       act: play, look_at, mood, shot, hush (args.beat names the act below)
+##   director.asides(event, facts, cast, seed) -> [{t, who, act:"aside", args:{text}, text, cites}]
+##   director.ambient(cast, facts, seed)       -> [{who, act, every, dur, args, because, hold}]
+## and the pure functions behind them, for tests and the screenplay:
+##   beats_for(event, cast, facts, seed, memory) -> [{t, who, act, args, phase}]
+##   asides_for(event, facts, cast, seed, memory)
+## Both read the stage's own shapes too: a cast entry {key, role, person,
+## figure, mood}, facts {stores_days, hungry, sick, at_war, love, dread,
+## offer}, events "god", "enter", "divine" {action, response}, and an
+## engine result passed whole as event.result.
 ##
 ## who is a cast key, "camera" (a shot: wide, push_in, reaction, two_shot,
 ## shake) or "room" (hush: everyone's idle business pauses). act names are
@@ -236,7 +247,10 @@ const ASIDE_GAP:=2
 ## The whole room's beats for one engine event. memory: the stage's own
 ## presentation memory (cooldowns, who dozes, what played last); pass the same
 ## dictionary for every event of a session, or {} for a one-off.
-static func beats(event:Dictionary,cast:Array,facts:Dictionary,rng_seed:int,memory:Dictionary={})->Array:
+static func beats_for(event_in:Dictionary,cast_in:Array,facts_in:Dictionary,rng_seed:int,memory:Dictionary={})->Array:
+	var facts:=normal_facts(facts_in)
+	var cast:=normal_cast(cast_in,facts,memory.get("voices",{}) if memory.get("voices") is Dictionary else {})
+	var event:=normal_event(event_in,cast)
 	var kind:=String(event.get("kind",""))
 	var out:Array=[]
 	var sig:=""
@@ -368,6 +382,7 @@ static func member(entry:Dictionary,index:=0)->Dictionary:
 		"dread":clampf(float(entry.get("dread",0.2)),0.0,1.0),"resentment":clampf(float(entry.get("resentment",0.0)),0.0,1.0),
 		"voice":String(entry.get("voice","")),"stance":String(entry.get("stance","")),"office":String(entry.get("office","")),
 		"x":float(entry.get("x",-1.0)),"index":index}
+	m["pos"]=float(entry.pos) if _num(entry.get("pos",null)) else (float(m.x) if float(m.x)>=0.0 else float(index)*0.12)
 	m["animal"]=kind in ["dog","goat"]
 	# How hard they flinch, and how soon: the frightened and the timid first.
 	m["jumpy"]=clampf(float(m.dread)*0.6+(1.0-float(m.courage))*0.5,0.0,1.0)
@@ -462,7 +477,7 @@ static func _pick(ctx:Dictionary,list:Array)->Dictionary:
 	return list[(ctx.rng as RandomNumberGenerator).randi_range(0,list.size()-1)]
 
 static func _where(m:Dictionary)->float:
-	return float(m.x) if float(m.x)>=0.0 else float(m.index)*0.12
+	return float(m.get("pos",float(m.index)*0.12))
 
 ## The nearest person to m (by where they stand), of the kinds given.
 static func _nearest(ctx:Dictionary,m:Dictionary,kinds:Array=[],exclude:Array=[])->Dictionary:
@@ -491,7 +506,8 @@ static func _num(value:Variant)->bool:
 	return (value is int or value is float) and is_finite(float(value))
 
 static func hungry(facts:Dictionary)->bool:
-	return _num(facts.get("food_days",null)) and float(facts.food_days)<HUNGRY_DAYS
+	if _num(facts.get("food_days",null)):return float(facts.food_days)<HUNGRY_DAYS
+	return bool(facts.get("hungry",false))
 
 static func starving(facts:Dictionary)->bool:
 	return _num(facts.get("food_days",null)) and float(facts.food_days)<STARVING_DAYS
@@ -1429,7 +1445,9 @@ static func _agree(out:Array,ctx:Dictionary)->Array:
 ## cough while a sickness runs, spears while there is a war; the dread and
 ## love of the god in the faces; the cold in winter. If a fact is not in the
 ## sheet, nothing shows it.
-static func ambient(cast:Array,facts:Dictionary,rng_seed:int)->Array:
+static func ambient(cast_in:Array,facts_in:Dictionary,rng_seed:int)->Array:
+	var facts:=normal_facts(facts_in)
+	var cast:=normal_cast(cast_in,facts)
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=hash("%d|ambient" % rng_seed)
 	var members:Array=[]
@@ -1540,6 +1558,11 @@ static func ambient(cast:Array,facts:Dictionary,rng_seed:int)->Array:
 	for m:Dictionary in people:
 		if busy.has(String(m.key)) or String(m.role)=="main" or String(m.kind) in ["child","guard"]:continue
 		if rng.randf()<0.5:_loop(out,String(m.key),["shift_weight","scratch"][rng.randi_range(0,1)],[12.0,24.0],{},"life",rng)
+	# Each firing in the stage's primitives too (lower()).
+	for spec:Dictionary in out:
+		var args:Dictionary=(spec.args as Dictionary).duplicate()
+		if float(spec.dur)>0.0:args["dur"]=float(spec.dur)
+		spec["primitives"]=lower([{"t":0.0,"who":String(spec.who),"act":String(spec.act),"args":args}])
 	return out
 
 static func _shuffled(rng:RandomNumberGenerator,list:Array)->Array:
@@ -1563,7 +1586,10 @@ static func _hold(out:Array,who:String,act:String,args:Dictionary,because:String
 ## At most one muttered line for this event, from a bystander, built only from
 ## the facts and the event; about one event in four, never two running,
 ## never at a death. [{t, who, text, cites, situation}].
-static func asides(event:Dictionary,facts:Dictionary,cast:Array,rng_seed:int,memory:Dictionary={})->Array:
+static func asides_for(event_in:Dictionary,facts_in:Dictionary,cast_in:Array,rng_seed:int,memory:Dictionary={})->Array:
+	var facts:=normal_facts(facts_in)
+	var cast:=normal_cast(cast_in,facts,memory.get("voices",{}) if memory.get("voices") is Dictionary else {})
+	var event:=normal_event(event_in,cast)
 	var ctx:=_context(event,cast,facts,rng_seed+31,memory)
 	var n:=int(memory.get("aside_events",0))+1
 	memory["aside_events"]=n
@@ -1888,6 +1914,168 @@ static func facts_now(audience:Dictionary={})->Dictionary:
 	return facts
 
 # =============================================================================
+# The stage's own shapes (docs/COURT_STAGE_3D.md section 5)
+# =============================================================================
+
+## The fact sheet in the director's words, from either shape: the stage's
+## (stores_days, hungry, sick, at_war, love, dread, offer) or facts_now()'s.
+## A plain flag without its figure shows, but no line cites a number for it.
+static func normal_facts(facts:Dictionary)->Dictionary:
+	var out:=facts.duplicate()
+	if not out.has("food_days") and _num(facts.get("stores_days",null)):out["food_days"]=roundi(float(facts.stores_days))
+	if not out.has("people_dread") and _num(facts.get("dread",null)):out["people_dread"]=float(facts.dread)
+	if not out.has("people_love") and _num(facts.get("love",null)):out["people_love"]=float(facts.love)
+	# A sickness or a war given only as a flag counts as present, unnamed.
+	if not out.get("sickness") is Dictionary:
+		if facts.get("sick") is Dictionary:out["sickness"]=(facts.sick as Dictionary).duplicate()
+		elif facts.get("sick",false) is bool and bool(facts.get("sick",false)):out["sickness"]={"present":true}
+	if not out.get("war") is Dictionary:
+		if facts.get("at_war") is Dictionary:out["war"]=(facts.at_war as Dictionary).duplicate()
+		elif facts.get("at_war",false) is bool and bool(facts.get("at_war",false)):out["war"]={"present":true}
+	if not out.get("gift") is Dictionary and facts.get("offer") is Dictionary and String((facts.offer as Dictionary).get("resource",""))!="":out["gift"]=(facts.offer as Dictionary).duplicate()
+	return out
+
+## The cast in the director's words, from either shape. A stage entry
+## {key, role, person, figure, mood} is read through cast_member(); the
+## envoy's company are their guard and, when a gift is offered, its bearer.
+## voices: person id -> lifelong voice model, read from the voice registry.
+static func normal_cast(cast:Array,facts:Dictionary={},voices:Dictionary={})->Array:
+	var attendants:=0
+	for entry in cast:
+		if entry is Dictionary and String((entry as Dictionary).get("role",""))=="attendant":attendants+=1
+	var offer:=facts.get("gift") is Dictionary or facts.get("offer") is Dictionary
+	var out:Array=[]
+	var seen_attendants:=0
+	for entry in cast:
+		if not entry is Dictionary:continue
+		var e:Dictionary=entry
+		if not e.get("person") is Dictionary:
+			out.append(e);continue
+		var person:Dictionary=e.person
+		var extra:={"key":String(e.get("key","")),"role":String(e.get("role","court"))}
+		for field in ["kind","voice","stance","x","pos","name","office","age"]:
+			if e.has(field):extra[field]=e[field]
+		var figure:Variant=e.get("figure",null)
+		if figure is Node3D and is_instance_valid(figure):
+			var stance:Variant=(figure as Object).get("stance")
+			if not extra.has("stance") and stance!=null:extra["stance"]=String(stance)
+			if not extra.has("x") and not extra.has("pos") and (figure as Node3D).is_inside_tree():extra["pos"]=(figure as Node3D).global_position.x
+		if not extra.has("kind"):
+			match String(extra.role):
+				"main":
+					if String(person.get("role",""))=="envoy":extra["kind"]="envoy"
+				"attendant":
+					if attendants==1:extra["kind"]="bearer" if offer else "guard"
+					else:extra["kind"]=["guard","bearer"][seen_attendants] if seen_attendants<2 else "attendant"
+					seen_attendants+=1
+		var pid:=int(person.get("person_id",0))
+		if not extra.has("voice") and voices.has(pid):extra["voice"]=String(voices[pid])
+		out.append(cast_member(person,extra))
+	return out
+
+## The event in the director's words, from either shape: the stage's kinds
+## ("god", "enter", "divine" with only action and response, an envoy's
+## punishment) and an engine result passed whole as event.result.
+static func normal_event(event:Dictionary,cast:Array)->Dictionary:
+	var out:=event.duplicate()
+	var kind:=String(event.get("kind",""))
+	kind=String({"god":"god_speaks","enter":"summon","order":"command"}.get(kind,kind))
+	out["kind"]=kind
+	var speaker_id:=0
+	var main_kind:=""
+	for entry in cast:
+		if entry is Dictionary and String((entry as Dictionary).get("key",""))=="main":
+			speaker_id=int((entry as Dictionary).get("person_id",0));main_kind=String((entry as Dictionary).get("kind",""))
+	var result:Dictionary=event.get("result",{}) if event.get("result") is Dictionary else {}
+	if not result.is_empty():
+		match kind:
+			"divine":out.merge(event_from_divine(result,cast,speaker_id),true)
+			"command":out.merge(event_from_command(result,cast,speaker_id),true)
+		out.erase("result")
+	kind=String(out.kind)
+	if kind=="divine":
+		if not out.has("target"):out["target"]="main"
+		var action:=String(out.get("action",""))
+		if action.begins_with("envoy_"):
+			# The god's hand on an envoy is an order the guards carry out.
+			out["kind"]="command";out["verb"]=String({"envoy_maim":"maim","envoy_flog":"maim","envoy_kill":"kill","envoy_detain":"detain","envoy_exile":"exile"}.get(action,"detain"))
+			out["stage"]=String(out.verb);out["actor"]="";out["obedience"]="obey";out["executed"]=true
+		elif action=="terrify" and String(out.target)=="main" and main_kind=="envoy":out["kind"]="terrify_envoy"
+	if String(out.kind)=="gift" and not out.has("accepted"):out["accepted"]=true
+	return out
+
+## Lowers the director's beats into the stage's primitives: play (a clip,
+## its fallback in the figures' set, held or not), mood (the acting
+## layer's vector, the figures' mood name and the face), look_at (the god,
+## the god above, a person's key, or away), shot (camera) and hush (room).
+## Every primitive keeps the director's act in args.beat, so the acting
+## layer may play the act by name once it has a clip for it.
+const MOOD_VECTOR:={"warm":{"joy":0.7},"afraid":{"fear":0.8},"defiant":{"anger":0.5,"scorn":0.3},"grieved":{"fear":0.2,"tired":0.6},"neutral":{}}
+static func lower(list:Array)->Array:
+	var out:Array=[]
+	for beat:Dictionary in list:
+		var who:=String(beat.who)
+		var act:=String(beat.act)
+		var args:Dictionary=beat.get("args",{})
+		var t:=float(beat.t)
+		if who=="camera":
+			var shot:=args.duplicate();shot["name"]=act;shot["beat"]=act
+			out.append({"t":t,"who":who,"act":"shot","args":shot});continue
+		if who=="room":
+			out.append({"t":t,"who":who,"act":act,"args":args.duplicate()});continue
+		var p:=performance(beat)
+		var mood:=String(p.mood)
+		if mood!="" or not (p.face as Dictionary).is_empty():
+			var vector:Dictionary=(MOOD_VECTOR.get(mood,{}) as Dictionary).duplicate()
+			out.append({"t":t,"who":who,"act":"mood","args":{"vector":vector,"name":mood,"face":p.face,"dur":float(p.dur),"hold":bool(p.hold),"beat":act}})
+		out.append({"t":t,"who":who,"act":"play","args":{"clip":act,"fallback":String(p.clip),"hold":bool(p.hold),"speed":float(p.speed),"dur":float(p.dur),"blend":0.25,"beat":act,
+			"at":String(p.at),"number":args.get("number",null)}})
+		match String(p.look):
+			"god","god_up":out.append({"t":t,"who":who,"act":"look_at","args":{"target":String(p.look),"weight":0.8,"beat":act}})
+			"at":
+				if String(p.at)!="":out.append({"t":t,"who":who,"act":"look_at","args":{"target":String(p.at),"weight":0.8,"beat":act}})
+			"away":out.append({"t":t,"who":who,"act":"look_at","args":{"target":"away","weight":0.6,"beat":act}})
+	return out
+
+# =============================================================================
+# The director as the stage's object
+# =============================================================================
+
+## Presentation memory for one court: which bits have rested how long, who
+## dozes, what played last, the speakers' voice models. Never saved.
+var stage_memory:Dictionary={}
+
+func beats(event:Dictionary,cast:Array,facts:Dictionary,rng_seed:int)->Array:
+	_learn_voices(cast)
+	return lower(beats_for(event,cast,facts,rng_seed,stage_memory))
+
+## Call after beats() for the same event, so a line can answer what played.
+func asides(event:Dictionary,facts:Dictionary,cast:Array,rng_seed:int)->Array:
+	var out:Array=[]
+	for line:Dictionary in asides_for(event,facts,cast,rng_seed,stage_memory):
+		var said:=line.duplicate()
+		said["act"]="aside";said["args"]={"text":String(line.text)}
+		out.append(said)
+	return out
+
+## Whether the sleeper is asleep now (the stage resumes their doze).
+func sleeper(cast:Array,facts:Dictionary)->String:
+	return asleep(normal_cast(cast,normal_facts(facts)),normal_facts(facts),stage_memory)
+
+## Each speaker's lifelong voice model, read (never assigned) from the voice
+## registry (character_voice.gd): a person who has not spoken yet speaks
+## plainly until they have one.
+func _learn_voices(cast:Array)->void:
+	if Engine.get_main_loop()==null:return
+	if not stage_memory.get("voices") is Dictionary:stage_memory["voices"]={}
+	var registry:Dictionary=preload("res://scripts/character_voice.gd").registry
+	var models:Dictionary=registry.get("models",{}) if registry.get("models") is Dictionary else {}
+	for entry in cast:
+		if not entry is Dictionary or not (entry as Dictionary).get("person") is Dictionary:continue
+		var pid:=int(((entry as Dictionary).person as Dictionary).get("person_id",0))
+		if pid>0 and models.has("person:%d" % pid):(stage_memory.voices as Dictionary)[pid]=String(models["person:%d" % pid])
+
+# =============================================================================
 # The screenplay: the beats told in words (for review and the tests)
 # =============================================================================
 
@@ -1911,8 +2099,8 @@ static func describe(beat:Dictionary,cast:Array)->String:
 
 static func screenplay(event:Dictionary,cast:Array,facts:Dictionary,rng_seed:int,memory:Dictionary={})->String:
 	var lines:PackedStringArray=PackedStringArray()
-	var list:=beats(event,cast,facts,rng_seed,memory)
-	var said:=asides(event,facts,cast,rng_seed,memory)
+	var list:=beats_for(event,cast,facts,rng_seed,memory)
+	var said:=asides_for(event,facts,cast,rng_seed,memory)
 	for beat:Dictionary in list:
 		lines.append("  %5.2fs  %-11s %s" % [float(beat.t),String(beat.phase),describe(beat,cast)])
 	var names:={}
