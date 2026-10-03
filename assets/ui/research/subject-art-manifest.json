@@ -33,8 +33,12 @@
     ]
   },
   "smoking": {
-    "path": "res://assets/ui/research/subjects/smoking-v1.png",
+    "path": "res://assets/ui/research/subjects/smoking-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -6054,21 +6058,21 @@
     ]
   },
   "batch_task_grouping": {
-    "path": "res://assets/ui/research/subjects/batch_task_grouping-v1.png",
+    "path": "res://assets/ui/research/subjects/batch_task_grouping-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "dietary_healing_regimens": {
-    "path": "res://assets/ui/research/subjects/dietary_healing_regimens-v1.png",
+    "path": "res://assets/ui/research/subjects/dietary_healing_regimens-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "topsoil_depth_reading": {
-    "path": "res://assets/ui/research/subjects/topsoil_depth_reading-v1.png",
+    "path": "res://assets/ui/research/subjects/topsoil_depth_reading-v2.png",
     "focus": [
       0.5,
       0.5

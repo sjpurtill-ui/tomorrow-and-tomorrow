@@ -1,0 +1,12 @@
+{
+  "id": "dietary_healing_regimens",
+  "line": "health",
+  "game_year": 11,
+  "approx_historical_year": -4927,
+  "prompt": "c. 4927 BCE: Caregiver offers ill adult a bowl of selected soft root-and-herb food in reed shelter; sparse ink and watercolor on fibrous paper. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e7ea24b9-246b-4ca1-bffd-303d31e467ca.png",
+  "asset": "res://assets/ui/research/subjects/dietary_healing_regimens-v1.png",
+  "sha256": "cda68a9684d17bef70eab8cc7fe582e9a0d036e280b315733f4e8a8e4995052e",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too lifelike; food as care and selected ingredients clear in crop."
+}

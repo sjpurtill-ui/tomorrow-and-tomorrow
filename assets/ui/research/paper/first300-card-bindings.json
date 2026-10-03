@@ -166,5 +166,6 @@
   "bow_craft": "res://assets/ui/research/subjects/bow_craft-v2.png",
   "household_councils": "res://assets/ui/research/subjects/household_councils-v2.png",
   "joinery": "res://assets/ui/research/subjects/joinery-v3.png",
-  "percussion_fire_ignition": "res://assets/ui/research/subjects/percussion_fire_ignition-v2.png"
+  "percussion_fire_ignition": "res://assets/ui/research/subjects/percussion_fire_ignition-v2.png",
+  "smoking": "res://assets/ui/research/subjects/smoking-v2.png"
 }
