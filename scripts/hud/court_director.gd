@@ -2325,15 +2325,22 @@ static func _exec(out:Array,t:float,op:String,args:Dictionary={})->void:
 static func _snd(out:Array,t:float,name:String,gain:=0.9,glyph:="")->void:
 	_beat(out,t,"exec","noise",{"sound":name,"gain":gain,"glyph":glyph},"action")
 
+## Authored support performances must finish before the room can recruit them.
+static func _exec_busy(victim:String,roles:Dictionary)->Array:
+	var busy:=[victim,String(roles.ex)]
+	busy.append_array(roles.get("busy",[]))
+	return busy
+
 ## Before: the drum roll, everyone holding their breath.
 static func _exec_before(ctx:Dictionary,out:Array,victim:String,roles:Dictionary,length:float)->void:
 	var rng:RandomNumberGenerator=ctx.rng
+	var busy:=_exec_busy(victim,roles)
 	_beat(out,0.0,"room","hush",{"dur":length,"bubbles":"dim"},"anticipation")
 	_snd(out,0.0,"drum_roll",0.8)
-	for m:Dictionary in _people(ctx,[victim,String(roles.ex)]):
+	for m:Dictionary in _people(ctx,busy):
 		if rng.randf()<0.55:_beat(out,0.1+rng.randf()*0.4,String(m.key),"freeze",{"dur":1.6},"anticipation")
 	if people_dread(ctx.facts)>=DREAD_HIGH:
-		for m:Dictionary in _people(ctx,[victim,String(roles.ex)]):_beat(out,0.4,String(m.key),"tremble",{"dur":length*0.6},"anticipation")
+		for m:Dictionary in _people(ctx,busy):_beat(out,0.4,String(m.key),"tremble",{"dur":length*0.6},"anticipation")
 
 ## After: the front row splattered and wiping, someone faints, someone is
 ## sick, the child hides their eyes and then peeks, the flatterer applauds
@@ -2342,12 +2349,14 @@ static func _exec_before(ctx:Dictionary,out:Array,victim:String,roles:Dictionary
 static func _exec_after(ctx:Dictionary,out:Array,at:float,victim:String,roles:Dictionary,splash:=true,times:={})->void:
 	var rng:RandomNumberGenerator=ctx.rng
 	var dread:=people_dread(ctx.facts)>=DREAD_HIGH
-	var used:=[victim,String(roles.ex)]
+	var busy:=_exec_busy(victim,roles)
+	var used:=busy.duplicate()
 	var t_wipe:=float(times.get("wipe",at+0.5));var t_faint:=float(times.get("faint",at+0.8))
 	var t_retch:=float(times.get("retch",at+1.4));var t_clap:=float(times.get("clap",at+2.2))
 	_snd(out,at,"crowd_gasp",0.9)
 	if splash:
 		for key in roles.front:
+			if String(key) in busy:continue
 			_beat(out,at-0.1,String(key),"flinch_splash",{},"reaction")
 			_beat(out,t_wipe+rng.randf()*0.3,String(key),"wipe_face",{},"reaction")
 			used.append(String(key))
@@ -2365,10 +2374,10 @@ static func _exec_after(ctx:Dictionary,out:Array,at:float,victim:String,roles:Di
 		var sick:=String((_pick(ctx,queasy) as Dictionary).key)
 		_beat(out,t_retch,sick,"vomit",{},"reaction")
 		used.append(sick)
-	for child:Dictionary in _of_kind(ctx,["child"]):
+	for child:Dictionary in _of_kind(ctx,["child"],busy):
 		if dread:_beat(out,at+0.3,String(child.key),"hide_eyes",{"dur":3.0},"reaction")
 		else:_beat(out,at+0.3,String(child.key),"cover_eyes_peek",{},"reaction")
-	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,at+0.6,String(scribe.key),"scribble",{"dur":3.0},"reaction")
+	for scribe:Dictionary in _of_kind(ctx,["scribe"],busy):_beat(out,at+0.6,String(scribe.key),"scribble",{"dur":3.0},"reaction")
 	for guard:Dictionary in _of_kind(ctx,["guard"],used):_beat(out,at+0.9,String(guard.key),"gulp",{},"reaction")
 	if not dread:
 		for m:Dictionary in _people(ctx,used):
@@ -2402,9 +2411,10 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 	var start:=1.3
 	var length:=start+float(plan.get("length",10.0))+0.6
 	var impact:=start+_plan_cue(plan,"impact",_plan_cue(plan,"grab",0.0))
-	_exec_before(ctx,out,victim,roles,length)
 	var has_ex:=(plan.get("roles",{}) as Dictionary).has("executioner")
 	var has_cook:=(plan.get("roles",{}) as Dictionary).has("cook")
+	roles["busy"]=[cook] if has_cook and not cook.is_empty() else []
+	_exec_before(ctx,out,victim,roles,length)
 	if has_ex:
 		_shot(out,0.0,"two_shot",{"a":victim,"b":ex,"weight":5})
 		_exec(out,0.2,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.9,"time":1.0})
@@ -2420,19 +2430,18 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 			_shot(out,impact+0.1,"shake",{"strength":0.4})
 			_shot(out,impact+0.15,"frame",{"on":[victim,"pot","above:"+victim+":1.2"],"time":0.5})
 			_shot(out,plop-0.2,"frame",{"on":[cook,"pot"],"time":0.6})
-			var not_cook:=roles.duplicate();not_cook["front"]=(roles.front as Array).filter(func(k:String)->bool:return k!=cook)
-			_exec_after(ctx,out,impact+0.2,victim,not_cook,true,
+			_exec_after(ctx,out,impact+0.2,victim,roles,true,
 				{"wipe":impact+0.5,"faint":impact+0.6,"retch":start+_plan_cue(plan,"after",8.0)+0.3,"clap":start+_plan_cue(plan,"after",8.0)})
 		"behead":
 			_shot(out,start+0.2,"frame",{"on":[victim,ex,"block"],"time":0.8})
 			_shot(out,start+_plan_cue(plan,"clang",5.5)+0.05,"reaction",{"target":ex})
 			_shot(out,start+_plan_cue(plan,"glare",6.75),"frame",{"on":[victim,ex,"block"],"time":0.6})
 			_shot(out,impact+0.15,"frame",{"on":[victim,ex,"front:"+victim+":1.9"],"time":0.5})
-			for m:Dictionary in _people(ctx,[victim,ex]):
+			for m:Dictionary in _people(ctx,_exec_busy(victim,roles)):
 				if float(m.courage)<0.5:_beat(out,start+_plan_cue(plan,"thunk",1.95)+0.1,String(m.key),"flinch",{"dur":0.4},"reaction")
 			_exec_after(ctx,out,impact+0.1,victim,roles,true,
 				{"wipe":start+_plan_cue(plan,"splash",8.75)+0.4,"faint":impact+0.5,"retch":start+_plan_cue(plan,"after",11.0)+0.3,"clap":start+_plan_cue(plan,"after",11.0)})
-			for m:Dictionary in _people(ctx,[victim,ex]).slice(0,2):_beat(out,start+_plan_cue(plan,"head_blink",10.9)+0.15,String(m.key),"double_take",{},"reaction")
+			for m:Dictionary in _people(ctx,_exec_busy(victim,roles)).slice(0,2):_beat(out,start+_plan_cue(plan,"head_blink",10.9)+0.15,String(m.key),"double_take",{},"reaction")
 		"dogs":
 			var gone:=start+_plan_cue(plan,"out_of_sight",6.6)
 			_exec(out,0.0,"pack_come",{"more":2})
@@ -2441,7 +2450,7 @@ static func _exec_planned(ctx:Dictionary,out:Array,victim:String,roles:Dictionar
 			_exec(out,start+_plan_cue(plan,"bone_dropped",10.6)-4.0,"pack_fetch",{"to":"god_feet"})
 			_shot(out,gone+0.4,"shake",{"strength":0.1})
 			_shot(out,start+_plan_cue(plan,"bone_dropped",10.6)-1.2,"frame",{"on":["god_feet","windbreak"],"time":0.8})
-			for m:Dictionary in _people(ctx,[victim]):
+			for m:Dictionary in _people(ctx,[victim]+roles.get("busy",[])):
 				if float(m.courage)<0.7:_beat(out,gone+0.4,String(m.key),"wince_crunch",{},"reaction")
 			_exec_after(ctx,out,gone+0.2,victim,roles,false,{"faint":start+_plan_cue(plan,"grab",0.0)+0.8,"retch":gone+1.6,"clap":start+_plan_cue(plan,"after",11.0)})
 	return length
@@ -2458,7 +2467,7 @@ static func _exec_mild(out:Array,ctx:Dictionary,victim:String,roles:Dictionary)-
 		kept.append(beat)
 	out.clear();out.append_array(kept)
 	if impact==INF:return
-	var faces:Array=_people(ctx,[victim,String(roles.ex)])
+	var faces:Array=_people(ctx,_exec_busy(victim,roles))
 	if not faces.is_empty():_shot(out,impact-0.15,"reaction",{"target":String((_pick(ctx,faces) as Dictionary).key)})
 	_exec(out,impact+0.3,"vanish",{"who":victim})
 	_shot(out,impact+2.6,"wide")
