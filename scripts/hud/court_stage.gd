@@ -464,7 +464,10 @@ func use_set(era_id:String,set_facts:Dictionary={})->bool:
 	court_set.ready.connect(func()->void:
 		if is_instance_valid(court_set):Figure3D.set_key_light(court_set.call("key_dir")))
 	visibility_changed.connect(func()->void:
-		if is_instance_valid(court_set):court_set.call("set_active",is_visible_in_tree()))
+		if not is_instance_valid(court_set):return
+		# Hidden: the god's light goes out at once (M).
+		if not is_visible_in_tree() and court_set.has_method("god_light"):court_set.call("god_light",null,"off",0.0,0.0)
+		court_set.call("set_active",is_visible_in_tree()))
 	return true
 
 ## A mark of the set in the world (the door, the fire), or the origin.
@@ -836,6 +839,7 @@ func _acting_stance(f:Figure,seat:float)->void:
 	var want:=""
 	if f.role=="attendant" and String(f.body3d.stance)=="staff" and Acting.has_clip("stance_guard"):want="guard"
 	elif f.role=="crowd" and not _warming and seat<0.0 and String(facts.get("season",""))=="winter" and Acting.has_clip("stance_fire") and _near_fire(f):want="fire"
+	if want.is_empty() and f.role=="crowd" and String(f.body3d.look.get("variant",""))=="child" and seat<0.0 and Acting.has_clip("stance_fidget"):want="fidget"
 	if want.is_empty():return
 	if want=="fire":_warming=true
 	f.acting_stance=want
@@ -989,16 +993,20 @@ func _set_answers(kind:String,data:Dictionary)->void:
 				# (the director's beats carry the jolt; without them, the stage's)
 				if director==null and rig!=null and rig.has_method("shake"):rig.call("shake",0.6)
 				for beast:Node3D in beasts:beast.call("on_god","wrath")
-				_god_light(target,"wrath",3.6)
+				_god_light(target,"wrath",3.0)
 			elif action in FAVOUR_ACTS:
 				for beast:Node3D in beasts:beast.call("on_god","favour")
-				_god_light(target,"favour",2.6)
+				_god_light(target,"favour",3.0)
 		"god":
 			for beast:Node3D in beasts:beast.call("on_god","voice")
-			# The god turns to the one before them: the light falls there for the
-			# words and the hush after them.
-			var tone:=String(data.get("tone",""))
-			_god_light(_addressed(data),tone if tone in ["wrath","favour"] else "speaks",float(data.get("seconds",2.0))+1.8)
+			# The god turns to the one before them: the light falls there with
+			# N's swell, in, held and out on the same envelope (M's god_moment).
+			if court_set.has_method("god_moment"):court_set.call("god_moment",_addressed(data),String(data.get("tone","")),float(data.get("seconds",2.0)))
+			else:
+				var tone:=String(data.get("tone",""))
+				_god_light(_addressed(data),tone if tone in ["wrath","favour"] else "speaks",float(data.get("seconds",2.0))+1.8)
+		"close":
+			if court_set.has_method("god_light"):court_set.call("god_light",null,"off",0.0,0.0)
 
 ## The body the god's words or act fall on: the one named, else the one
 ## before the god.
@@ -1102,6 +1110,7 @@ func mutter(who:String,text:String)->void:
 	bubble.tip=mouth-bubble.position
 	if (bubble.tail_side=="left" and bubble.tip.x>-4.0) or (bubble.tail_side=="right" and bubble.tip.x<bubble.size.x+4.0):bubble.tail_side="none"
 	_clear_focus(bubble)
+	_clear_of_others(bubble)
 	bubble.queue_redraw()
 	bubble.modulate.a=0.0
 	var tw:=bubble.create_tween()
@@ -1123,6 +1132,7 @@ func glyph(who:String,glyph_name:String)->void:
 	mark.position=(at-mark.size*.5).clamp(Vector2(4.0,top_inset+2.0),Vector2(maxf(4.0,size.x-mark.size.x-4.0),maxf(top_inset+2.0,size.y-mark.size.y-4.0))).round()
 	mark.pivot_offset=mark.size*.5
 	if who!=_focus_key:_clear_focus(mark)
+	_clear_of_others(mark)
 	if Motion.reduced():
 		get_tree().create_timer(1.2).timeout.connect(mark.queue_free);return
 	mark.scale=Vector2(.4,.4);mark.modulate.a=0.0
@@ -1302,7 +1312,7 @@ func _moved(f:Figure,args:Dictionary)->bool:
 			if f.spot==null or other==null or other.body3d==null or camera==null:return false
 			var away:=(other.body3d.global_position-camera.global_position)
 			away.y=0.0
-			f.step_to(other.body3d.global_position+away.normalized()*0.45+Vector3(0.18,0.0,0.0),0.5,3.6)
+			f.step_to(other.body3d.global_position+away.normalized()*0.35+Vector3(0.18,0.0,0.0),0.5,3.6)
 			return false
 		"edge_forward":
 			if f.spot==null:return false
@@ -1417,6 +1427,11 @@ func shot(name:String,args:Dictionary={})->void:
 		"reaction":
 			if body!=null:rig.call("reaction",body,float(args.get("time",0.0)))
 		"shake":rig.call("shake",float(args.get("strength",0.35)))
+	# The caption goes up out of a shot that has gone in on someone, and
+	# back down for the room; the bubbles step clear of it.
+	if name!="shake":
+		_place_caption()
+		_reclear_bubbles()
 
 ## Someone's mood shows on their face and in the set of their head.
 func set_mood(key:String,mood:String)->void:
@@ -1777,6 +1792,7 @@ func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="",abou
 	_caption_age=0
 	_fit_bubble(_caption)
 	_place_caption()
+	_reclear_bubbles()
 	if animate:_caption.rise_in()
 	# What the hall shows ("Hena kneels", "Tuk bows") the one it is about does;
 	# when nobody here is named as its subject, nobody moves.
@@ -1940,6 +1956,7 @@ func _place_bubble(bubble:Bubble)->void:
 	bubble.pivot_offset=bubble.tip.clamp(Vector2.ZERO,bs)
 	bubble.home_y=0.0
 	if bubble.speaker!=_focus_key:_clear_focus(bubble)
+	_clear_of_others(bubble)
 	bubble.queue_redraw()
 
 ## The faces of everyone standing here but one, as stage rectangles.
@@ -1966,11 +1983,62 @@ func _place_caption()->void:
 	if not is_instance_valid(_caption):return
 	var foot:=size.y-_caption.size.y-(8.0 if court_set!=null else PLATE_ROOM)
 	_caption.position=Vector2((_usable_width()-_caption.size.x)*.5,maxf(top_inset+6.0,foot)).round()
+	# When the camera has gone in on someone (a push-in, a two-shot, a
+	# reaction), they fill the lower frame: the caption goes to the top band,
+	# under the god's line, never over the one in the shot.
 	var face:=_focus_face()
-	if face.size.x>0.0 and Rect2(_caption.position,_caption.size).intersects(face):
-		var high:=top_inset+6.0+(_god.size.y+6.0 if is_instance_valid(_god) else 0.0)
+	var gone_in:=court_set!=null and not _wide_now()
+	if gone_in or (face.size.x>0.0 and Rect2(_caption.position,_caption.size).intersects(face)):
+		var high:=top_inset+6.0+(_god.size.y+6.0 if is_instance_valid(_god) and _god.visible else 0.0)
 		_caption.position.y=round(high)
 	_caption.home_y=_caption.position.y
+
+## Bubbles never lie over one another: the god's line keeps the top centre
+## and the caption its band; a speech bubble, a mutter or a noise steps down
+## below whatever it would cover (toward its speaker's side if going down
+## would cover the face the camera is on), its tail still to the speaker.
+func _clear_of_others(bubble:Control)->void:
+	if not is_instance_valid(bubble) or bubble==_god or bubble==_caption:return
+	var others:Array[Rect2]=[]
+	if is_instance_valid(_god) and _god.visible and _god.modulate.a>0.01:others.append(Rect2(_god.position,_god.size).grow(6.0))
+	if is_instance_valid(_caption) and _caption.visible and _caption.modulate.a>0.01:others.append(Rect2(_caption.position,_caption.size).grow(6.0))
+	for child in bubble_layer.get_children():
+		var other:=child as Control
+		if other==null or other==bubble or not other.visible or other.is_queued_for_deletion():continue
+		if other is Bubble and ((other as Bubble).dropping or (other as Bubble).kind=="mutter" and bubble is Bubble and (bubble as Bubble).kind!="mutter"):continue
+		others.append(Rect2(other.position,other.size).grow(4.0))
+	var start:=bubble.position
+	var rect:=Rect2(bubble.position,bubble.size)
+	var face:=_focus_face()
+	for turn in 12:
+		var hit:=Rect2()
+		for r in others:
+			if r.intersects(rect):hit=r;break
+		if hit.size.x<=0.0:break
+		var down:=Rect2(Vector2(rect.position.x,hit.end.y+2.0),rect.size)
+		if down.end.y<=size.y-4.0 and (face.size.x<=0.0 or not down.intersects(face)):
+			rect=down
+		else:
+			# beside it instead, on the side with more room
+			var left:=hit.position.x-rect.size.x-4.0
+			var right:=hit.end.x+4.0
+			rect.position.x=left if left>=4.0 and (hit.position.x>size.x-hit.end.x or right+rect.size.x>size.x-4.0) else minf(right,size.x-rect.size.x-4.0)
+	if rect.position.is_equal_approx(start):return
+	var moved:=rect.position-start
+	bubble.position=rect.position.round()
+	if bubble is Bubble:
+		var b:=bubble as Bubble
+		b.tip-=moved
+		var bs:=b.size
+		if (b.tail_side=="down" and b.tip.y<bs.y+2.0) or (b.tail_side=="left" and b.tip.x>-4.0) or (b.tail_side=="right" and b.tip.x<bs.x+4.0):b.tail_side="none"
+		b.pivot_offset=b.tip.clamp(Vector2.ZERO,bs)
+		b.queue_redraw()
+
+## Everything said steps clear again (the god's line or the caption came or moved).
+func _reclear_bubbles()->void:
+	for child in bubble_layer.get_children():
+		var c:=child as Control
+		if c!=null and c.visible and not (c is Bubble and (c as Bubble).dropping):_clear_of_others(c)
 
 ## The face the camera is pushed in on, as a stage rectangle (empty: none).
 func _focus_face()->Rect2:
@@ -2016,6 +2084,7 @@ func _replace_all()->void:
 	if is_instance_valid(_god):_fit_bubble(_god)
 	if is_instance_valid(_caption):_fit_bubble(_caption)
 	_place_god();_place_caption();_place_thinking()
+	_reclear_bubbles()
 
 # =================================================================================
 # A person standing on the stage.

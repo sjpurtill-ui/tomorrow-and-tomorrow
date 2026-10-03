@@ -394,3 +394,31 @@ func test_an_envoys_gift_is_framed_from_the_halls_side()->void:
 	if other.is_empty():return
 	stage.shot("two_shot",{"a":Stage.MAIN,"b":other,"weight":4})
 	assert_str(String(stage.rig.get("current_shot"))).is_equal("wide")
+
+
+func test_bubbles_never_lie_on_each_other_and_the_caption_keeps_off_the_shot()->void:
+	# A muttered line after the god's words steps below the god's line; when
+	# the camera goes in on the one before the god, the caption sits in the
+	# top band under the god's line, not over them.
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	stage.god_says("Two men and a boy at the ford, and you come to me only now?",false)
+	var someone:=""
+	for key in stage.cast_order:
+		if key!=Stage.MAIN and stage.figure(key)!=null and stage.figure(key).body3d!=null:someone=key;break
+	if someone.is_empty():return
+	stage.mutter(someone,"Someone woke up funny!")
+	await await_idle_frame()
+	var god:Rect2=stage._god.get_rect()
+	for child in stage.bubble_layer.get_children():
+		var c:=child as Control
+		if c==null or not c.visible:continue
+		assert_bool(c.get_rect().intersects(god)).override_failure_message("%s lies on the god's line" % c.name).is_false()
+	stage.shot("push_in",{"target":Stage.MAIN,"weight":4})
+	stage.caption("The god's fury falls on them before the whole court.","narration",false)
+	await await_idle_frame()
+	var cap:Rect2=stage._caption.get_rect()
+	assert_float(cap.position.y).override_failure_message("caption at %s during a push-in" % cap).is_less(stage.size.y*0.4)
+	assert_bool(cap.intersects(god)).is_false()
