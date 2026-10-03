@@ -153,12 +153,19 @@ const DROUGHT_COURT_DEPTH:=0.20
 const DROUGHT_FAILED_DEPTH:=0.28
 ## How far ahead the officials judge a dry spell's worst (days).
 const DROUGHT_LOOKAHEAD:=120
+## The cause a dry year's dead are written under. Its toll is planned from how
+## dry the season is (_open_drought), never from the water store, so it is not
+## thirst: "Dehydration" stays the cause of a real drinking shortfall
+## (consequence_engine.gd), and the People card and the WATER tile can tell the
+## two apart. Before this, a dry year that killed 11 while every town drank its
+## fill was told as "11 lost to thirst" beside a full water store.
+const DROUGHT_CAUSE:="Drought"
 
 const TYPES:={
 	"hunger":{"offices":["Quartermaster","Steward","settlement"],"cause":"Hunger","domain":"nutrition"},
 	"sickness":{"offices":["Scholar","Steward","settlement"],"cause":"Illness","domain":"health"},
 	"stranger":{"offices":["Envoy","Scholar","Steward","ChiefScout","settlement"],"cause":"Illness","domain":"health"},
-	"drought":{"offices":["Quartermaster","Steward","ChiefScout","settlement"],"cause":"Dehydration","domain":"ecology"},
+	"drought":{"offices":["Quartermaster","Steward","ChiefScout","settlement"],"cause":DROUGHT_CAUSE,"domain":"ecology"},
 	"cold":{"offices":["Quartermaster","Steward","settlement"],"cause":"Hunger","domain":"ecology"},
 	"flood":{"offices":["Steward","Quartermaster","settlement"],"cause":"Drowning","domain":"ecology"},
 	"fire":{"offices":["settlement","Steward","Quartermaster"],"cause":"Fire","domain":"demography"},
@@ -616,6 +623,7 @@ static func daily(day:int)->void:
 	if int(s.last_day)>=day: return
 	var first_pass:=int(s.last_day)<=0
 	s.last_day=day
+	reconcile_drought_causes(s)
 	var x:=inputs(day)
 	# Immunity fades as new generations grow up (half-life ~18 years); the
 	# disease pool drifts toward what crowding and trade support (catalog).
@@ -1112,6 +1120,45 @@ static func _kill(c:Dictionary,count:int,salt:String)->int:
 	for name in names: (c.dead as Array).append(name)
 	_stat(String(c.type),"deaths",float(n))
 	return n
+
+## Once per save: the dead of a dry year written before it had a cause of its
+## own (as "Dehydration", thirst, though no town went short) move to
+## DROUGHT_CAUSE in the death ledger, from that dry year's own days and never
+## more than it took. A real thirst death in the same weeks stays thirst once
+## the dry year's count is covered. Only the words change: no one is added,
+## removed or moved between ages.
+static func reconcile_drought_causes(s:Dictionary)->void:
+	var flags:Dictionary=s.get("flags",{}) if s.get("flags") is Dictionary else {}
+	if bool(flags.get("drought_cause",false)): return
+	flags["drought_cause"]=true
+	s["flags"]=flags
+	var today:=_day()
+	var spells:={}
+	for h in s.get("history",[]):
+		if h is Dictionary and String(h.get("type",""))=="drought" and int(h.get("deaths",0))>0:
+			spells[String(h.get("id",""))]={"start":int(h.get("start",0)),"end":int(h.get("end",today)),"deaths":int(h.deaths)}
+	for key in (s.get("active",{}) as Dictionary):
+		var c:Variant=s.active[key]
+		if c is Dictionary and String(c.get("type",""))=="drought" and int(c.get("deaths",0))>0 and not spells.has(String(c.get("id",""))):
+			spells[String(c.get("id",""))]={"start":int(c.get("start",0)),"end":today,"deaths":int(c.deaths)}
+	var rows:Array[Dictionary]=GameState.death_cause_days
+	for spell:Dictionary in spells.values():
+		var left:=int(spell.deaths)
+		for row in rows:
+			if String(row.get("cause",""))==DROUGHT_CAUSE and int(row.get("day",-1))>=int(spell.start) and int(row.get("day",-1))<=int(spell.end): left-=int(row.get("count",0))
+		var index:=0
+		while index<rows.size() and left>0:
+			var row:Dictionary=rows[index]
+			var day:=int(row.get("day",-1))
+			if String(row.get("cause",""))=="Dehydration" and day>=int(spell.start) and day<=int(spell.end):
+				var moved:=mini(left,int(row.get("count",0)))
+				left-=moved
+				if moved>=int(row.get("count",0)): row["cause"]=DROUGHT_CAUSE
+				else:
+					row["count"]=int(row.count)-moved
+					rows.insert(index+1,{"day":day,"cause":DROUGHT_CAUSE,"count":moved})
+					index+=1
+			index+=1
 
 static func _due_deaths(c:Dictionary,share:float,salt:String)->int:
 	var expected:=float(c.pop0)*float(c.m)*float(c.mult)*share

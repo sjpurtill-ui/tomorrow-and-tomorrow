@@ -111,7 +111,11 @@ static func short_reason(year:Dictionary,care:Dictionary,people:int)->String:
 ## Deaths that are no part of the ordinary toll (a fire, a flood, war, the road,
 ## an outbreak, hunger, thirst, the god's word), in the words the card uses.
 const ORDINARY_DEATHS:=["Natural causes","Neonatal complications","Complications of childbirth"]
-const MISFORTUNE_WORDS:={"Hunger":"hunger","Illness":"sickness","Dehydration":"thirst","Drowning":"floods and drowning","Fire":"fire",
+## "Dehydration" is thirst: a day when the water drawn fell short of what was
+## drunk. "Drought" is a dry year's own toll (crisis_system.gd DROUGHT_CAUSE),
+## set by how dry the season is, not by the water store, so it is never
+## called thirst.
+const MISFORTUNE_WORDS:={"Hunger":"hunger","Illness":"sickness","Dehydration":"thirst","Drought":"the dry year","Drowning":"floods and drowning","Fire":"fire",
 	"Exposure":"cold and exposure","Insecurity":"raids and the wild","Killed in battle":"war","Civilian deaths in war":"war","Killed defending the town":"war",
 	"Died of wounds":"war","Executed at the god's word":"the god's word","Work accidents":"accidents at work","Travel exhaustion":"the road","Hardship":"hard times"}
 
