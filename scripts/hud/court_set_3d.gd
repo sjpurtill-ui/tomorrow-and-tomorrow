@@ -2,27 +2,34 @@ extends Node3D
 ## The court's set: a modelled place for the people to stand before their god,
 ## made in Blender by tools/blender/court_set.py (assets/court_sets/), lit by
 ## the sky, the sun and the fire, with smoke and sparks rising and dust in the
-## light. The court grows with the people: a ring of logs about a fire under
-## the open sky for the earliest bands, a long timber hall once they have
-## chiefs, and on (kind_for maps the court's civic stage and era to a set;
-## a set not built yet falls back to the nearest one that is).
+## light. The court grows with the people:
+##   fire_ring      logs about a fire under the open sky (the earliest bands)
+##   shelter        a reed roof on posts over the fire once they settle
+##   longhouse      the chief's long timber hall
+##   mudbrick_hall  plastered mudbrick, a light well, a stepped dais
+##   grand_hall     dressed stone, columns, high windows, a canopied seat
+## kind_for maps the court's civic stage (data/civic/civic_stages.json) and
+## era tier to a set.
 ##   CourtSet.build(era_id, facts) -> this node, with
-##     marks      Marker3D under "Marks": throne_gaze (where the god's
-##                presence is), petitioner, officials_*, crowd_*, envoy_*,
-##                fire, door, door_out, animal_*. A mark's +Z faces the way a
-##                person there faces (the figures' front is +Z); sit marks
-##                carry meta "seat" (the seat's height; the figure's own stool
-##                is not needed there).
-##     camera     a CourtCamera (court_camera.gd) framed for this set
-##     lights     the sun (the one shadowed light), the fire (flickering),
-##                a warm bounce from the ground, the door's daylight in a hall
-##     props      shown from the facts: food in the baskets and on the rack
-##                with the real stores, spears racked (more in war)
-##     animals    a dog in every age; herd animals and fowl once the people
-##                keep them (court_animal_3d.gd)
-## Facts (all optional): food 0..1 (how full the stores are), war (bool or
-## 0..1), tier (the era's tier 0..4), herds (animals tamed), fowl (yard fowl
-## kept), dread 0..1, dyes (the people's three cloth colours, hex), seed.
+##     marks      Node3D (Marker3D) children of "Marks": throne_gaze (where the
+##                god's presence is), petitioner, officials_*, crowd_*, envoy_*,
+##                fire, door, door_out, animal_*. A mark's -Z is the way a
+##                person there faces (docs/COURT_STAGE_3D.md); place() turns a
+##                figure (whose front is +Z) to match. Sit marks carry meta
+##                "sit" and "seat" (the seat's height; hide the figure's stool).
+##     rig, camera  a CourtCamera (court_camera.gd) driving the set's own lens
+##                until the stage hands it the stage's camera (attach)
+##     lights     the sun (the one shadowed light), the fire (flickering), a
+##                warm bounce, the door's daylight in a hall, braziers
+##     props      shown from the facts: food in the baskets, on the rack and
+##                the board with the real stores; spears racked (all in war);
+##                pots, looms, hangings, tablets, bread and lamps only once
+##                the people know how to make them (their era tags)
+##     animals    a dog in every age; herd animals and fowl once kept
+## Facts, in the stage's words (CourtStage.facts / CourtDirector.facts_now):
+## food_days or stores_days, hungry, war (a Dictionary or a bool) or at_war,
+## era_tier, era_tags, season; or the set's own: food 0..1, war, tier, herds,
+## fowl, dyes (the people's three cloth colours, hex), seed.
 ## Presentation only: nothing here reads or changes the game's state except
 ## facts_from_game(), which only reads. Nothing is allocated per frame; the
 ## set stops processing when it is hidden (set_active).
@@ -34,7 +41,9 @@ const Animal:=preload("res://scripts/hud/court_animal_3d.gd")
 const TOON:=preload("res://assets/court_sets/shaders/court_set_toon.gdshader")
 const GROUND:=preload("res://assets/court_sets/shaders/court_set_ground.gdshader")
 const INK:=preload("res://assets/court_sets/shaders/court_set_ink.gdshader")
+const WASH:=preload("res://assets/court_sets/shaders/court_wash.gdshader")
 const FLAME:=preload("res://assets/court_sets/shaders/court_flame.gdshader")
+const SHIMMER:=preload("res://assets/court_sets/shaders/court_shimmer.gdshader")
 const SMOKE:=preload("res://assets/court_sets/shaders/court_smoke.gdshader")
 const EMBER:=preload("res://assets/court_sets/shaders/court_ember.gdshader")
 const MOTE:=preload("res://assets/court_sets/shaders/court_mote.gdshader")
@@ -42,10 +51,9 @@ const SHAFT:=preload("res://assets/court_sets/shaders/court_shaft.gdshader")
 const CONTACT:=preload("res://assets/court_sets/shaders/court_contact.gdshader")
 const SKY:=preload("res://assets/court_sets/shaders/court_sky.gdshader")
 const PAPER:=preload("res://assets/court_sets/shaders/court_paper.gdshader")
+## The lit twin of the figures' toon, for the stage to give them (J's call).
+const FIGURE_LIT:=preload("res://assets/court_sets/shaders/court_figure_lit.gdshader")
 
-## The court's civic stage (data/civic/civic_stages.json: its id or its scene)
-## to the set it stands in. Early bands in the open; a shelter once the
-## people settle; the chief's long hall; then halls of brick and stone.
 const KIND_BY_STAGE:={
 	"hearth_council":"fire_ring","fire_circle":"fire_ring",
 	"elders_circle":"shelter","elders_ring":"shelter",
@@ -56,32 +64,60 @@ const KIND_BY_STAGE:={
 	"feudal_hall":"grand_hall","great_hall":"grand_hall","chancery_court":"grand_hall","chancery":"grand_hall",
 	"chartered_commune":"grand_hall","commune_hall":"grand_hall","estates_assembly":"grand_hall","estates_hall":"grand_hall",
 }
-## When a set is not built yet, the one that stands in for it.
 const STAND_IN:={"shelter":"fire_ring","mudbrick_hall":"longhouse","grand_hall":"mudbrick_hall"}
-## The era tiers (court_backdrop.gd's) where no civic stage says otherwise.
 const KIND_BY_TIER:=["fire_ring","longhouse","mudbrick_hall","grand_hall","grand_hall"]
 
-## Each slot's paint: [colour, worn colour]. The figures' dyes tint blankets.
+## Each slot's paint: [colour, worn colour, accent a, accent b]; its pattern
+## (court_set_toon.gdshader) and motif. "dye0".."dye2" take the people's dyes.
 const PALETTE:={
 	"BARK":["4a3829","5a4634"],"WOOD":["7a5c40","957452"],"WOOD_END":["a38a66","b09572"],
-	"CHAR":["1e1712","2a2019"],"ASH":["7d776f","8e877d"],"EMBER":["6a2a12","6a2a12"],
-	"STONE":["6c655b","7a7266"],"HIDE":["8c6744","9c7752"],"HIDE_DARK":["5c4230","6a4e3a"],
+	"CHAR":["110d0a","18120e"],"ASH":["7d776f","8e877d"],"EMBER":["6a2a12","6a2a12"],
+	"STONE":["7a7266","867d70"],"STONE_DARK":["4c4640","56504a"],"STONE_BLOCK":["a39a88","aea590"],"FLAGS":["8e877a","a19886"],
+	"HIDE":["8c6744","9c7752"],"HIDE_DARK":["5c4230","6a4e3a"],"HIDE_PALE":["9e8462","ab9170"],
 	"CORD":["4e3a29","4e3a29"],"REED":["94804f","a38e5c"],"THATCH":["6e5838","7a6340"],
 	"CLAY":["985a37","a66a45"],"MUD":["86704f","6c573d"],"PLANK":["6b5039","7f6249"],
+	"PLASTER":["cdbf9f","b9a985","","a07650"],"BRICK":["9a7650","a6825c"],"TABLET":["a58a66","a58a66"],
 	"FOOD_ROOT":["8a5e38","8a5e38"],"FOOD_GRAIN":["b99a58","b99a58"],"MEAT":["5c2a1f","5c2a1f"],
-	"FISH":["948a74","948a74"],"BONE":["cfc3a6","cfc3a6"],"OCHRE":["9a4428","9a4428"],
-	"FLINT":["45424a","514e55"],"LEAF":["3b4628","485332"],"GRASS":["5b6634","70714a"],
-	"HILL_NEAR":["6d7656","6d7656"],"HILL_FAR":["8d9897","8d9897"],"BERRY":["4a2224","4a2224"],"SOOT":["4a443e","56504a"],
-	"BLANKET":["7e4230","7e4230"],
+	"FISH":["948a74","948a74"],"BONE":["cfc3a6","cfc3a6"],"OCHRE":["7a3220","7a3220"],
+	"FLINT":["45424a","514e55"],"BRONZE":["8c6430","a07a40"],"GOLD":["b08a3a","c49c48"],
+	"LEAF":["3b4628","485332"],"GRASS":["5b6634","70714a"],"BERRY":["4a2224","4a2224"],"SOOT":["4a443e","56504a"],
+	"ONION":["b89a6a","b89a6a"],"BREAD":["a8743c","b8844a"],
+	"BLANKET":["dye0","dye0"],
+	"WEAVE_A":["dye0","dye0","dye1","e3d4b0"],"WEAVE_B":["dye1","dye1","dye2","e3d4b0"],"WEAVE_C":["d8c8a4","d8c8a4","dye0","dye2"],
+	"CARPET":["dye0","dye0","dye1","d8c4a0"],
+	"SHIELD_A":["9c7a52","9c7a52","dye0","e3d4b0"],"SHIELD_B":["e0d0ac","e0d0ac","dye1","2a2018"],"SHIELD_C":["7a5a3a","7a5a3a","b08a3a","e3d4b0"],
 }
-## How each kind of set is lit and aired.
+## slot: [pattern, motif, scale]
+const PATTERN:={
+	"BARK":[1,0,1.0],"WOOD":[1,0,0.6],"WOOD_END":[2,0,1.0],"HIDE":[3,0,1.0],"HIDE_DARK":[3,0,1.0],"HIDE_PALE":[3,0,1.0],
+	"SHIELD_A":[4,0,1.0],"SHIELD_B":[4,1,1.0],"SHIELD_C":[4,2,1.0],
+	"WEAVE_A":[5,0,1.0],"WEAVE_B":[5,0,1.0],"WEAVE_C":[5,0,1.0],"BLANKET":[5,0,1.0],"CARPET":[6,0,1.0],
+	"THATCH":[7,0,1.0],"REED":[8,0,1.0],"PLANK":[9,0,1.0],"PLASTER":[10,0,1.0],"BRICK":[11,0,1.0],"MUD":[11,0,1.0],
+	"STONE_BLOCK":[12,0,1.0],"FLAGS":[13,0,1.0],"CHAR":[14,0,1.0],
+}
+const DEFAULT_DYES:=["8e3b2e","3f5f6f","c39a3c"]
+## How each kind of set is lit and aired, and its distance in three washes.
 const LOOK:={
 	"fire_ring":{"ambient":"7f8fa6","ambient_energy":0.5,"sun":"ffd9aa","fog":"b4c0c2","fog_density":0.002,
 		"grass":"5c6a36","grass_dry":"7c784a","earth":"7a634a","earth_dark":"574535","straw":0.0,"exposure":0.95,
-		"sky_top":"6f8eaa","sky_horizon":"e6dcc0","haze":"aebfc6"},
+		"sky_top":"86a6c2","sky_horizon":"efe0bd","haze":"aebfc6",
+		"far":[["4f5a3a","3a4430",0.05],["6f7c66","4a5446",0.35],["93a3ad","66727c",0.55]]},
+	"shelter":{"ambient":"7f8fa6","ambient_energy":0.5,"sun":"ffd9aa","fog":"b4c0c2","fog_density":0.002,
+		"grass":"5e6b36","grass_dry":"7f7a4a","earth":"7a634a","earth_dark":"574535","straw":0.1,"exposure":0.95,
+		"sky_top":"86a6c2","sky_horizon":"efe0bd","haze":"aebfc6",
+		"far":[["4f5a3a","3a4430",0.05],["6f7c66","4a5446",0.35],["93a3ad","66727c",0.55]]},
 	"longhouse":{"ambient":"6e5c4c","ambient_energy":0.3,"sun":"ffe2b8","fog":"4e4034","fog_density":0.012,
 		"grass":"5c6a36","grass_dry":"7c784a","earth":"6c5640","earth_dark":"4b3b2c","straw":0.22,"exposure":1.0,
-		"sky_top":"6f8eaa","sky_horizon":"d9d2bd","haze":"b9c0bd"},
+		"sky_top":"86a6c2","sky_horizon":"efe0bd","haze":"aebfc6",
+		"far":[["5a6440","3a4430",0.1],["7a8670","4a5446",0.4],["9aaab2","66727c",0.6]]},
+	"mudbrick_hall":{"ambient":"7a6a58","ambient_energy":0.34,"sun":"ffe6c0","fog":"6a5a48","fog_density":0.01,
+		"grass":"6e6a3c","grass_dry":"8c8050","earth":"8a7456","earth_dark":"64523c","straw":0.12,"exposure":1.0,
+		"sky_top":"86a6c2","sky_horizon":"efe0bd","haze":"c2c6c0",
+		"far":[["7a7650","4a4630",0.15],["948c70","5a5444",0.45],["b0b0aa","7a7c7c",0.6]]},
+	"grand_hall":{"ambient":"6e6a66","ambient_energy":0.32,"sun":"fff0d8","fog":"5c5650","fog_density":0.008,
+		"grass":"5c6a36","grass_dry":"7c784a","earth":"7a6a58","earth_dark":"5a4c3e","straw":0.0,"exposure":1.0,
+		"sky_top":"86a6c2","sky_horizon":"efe0bd","haze":"c2c6c0",
+		"far":[["5a6440","3a4430",0.1],["7a8670","4a5446",0.4],["9aaab2","66727c",0.6]]},
 }
 
 static var enabled:=true
@@ -97,26 +133,29 @@ var era_id:=""
 var info:Dictionary={}
 var facts:Dictionary={}
 var marks:Dictionary={}
+var rig:Node
 var camera:Camera3D
 var sun:DirectionalLight3D
 var fire_light:OmniLight3D
-var fire_light_b:OmniLight3D
 var bounce:OmniLight3D
 var door_light:SpotLight3D
+var flame_lights:Array[OmniLight3D]=[]
 var world_env:WorldEnvironment
 var model:Node3D
 var animals:Array=[]
 var props:Dictionary={}
+var gates:Dictionary={}
 var particles:Array[GPUParticles3D]=[]
 var active:=true
 var _noise:=FastNoiseLite.new()
 var _clock:=0.0
 var _fire_energy:=2.0
 var _fire_at:=Vector3.ZERO
-var _fire_b_at:=Vector3.ZERO
+var _flame_at:Array[Vector3]=[]
 var _shaft_top:=Vector3.ZERO
 var _shaft_dir:=Vector3.DOWN
 var _shaft_radius:=0.0
+var _dyes:Array=[]
 
 # --- Building ---------------------------------------------------------------------
 
@@ -161,13 +200,33 @@ static func build(era_id_in:String,facts_in:Dictionary={})->Node3D:
 	made.call("_build",era_id_in,facts_in)
 	return made
 
+## The stage's facts in the set's own words: food 0..1, war 0..1, tier, era
+## tags, herds, fowl. Missing facts stay missing (the set's defaults stand).
+static func normal_facts(raw:Dictionary)->Dictionary:
+	var out:=raw.duplicate()
+	if not out.has("food"):
+		var days:Variant=raw.get("food_days",raw.get("stores_days",null))
+		if days is int or days is float:out["food"]=clampf((float(days)-2.0)/45.0,0.0,1.0)
+	if bool(raw.get("hungry",false)):out["food"]=minf(float(out.get("food",0.15)),0.15)
+	var war:Variant=raw.get("war",raw.get("at_war",null))
+	if war is Dictionary:out["war"]=1.0 if not (war as Dictionary).is_empty() else 0.0
+	elif war is bool:out["war"]=1.0 if war else 0.0
+	elif war is int or war is float:out["war"]=clampf(float(war),0.0,1.0)
+	if not out.has("tier") and raw.has("era_tier"):out["tier"]=int(raw.era_tier)
+	var tags:Variant=raw.get("era_tags",null)
+	if tags is Array or tags is PackedStringArray:
+		out["era_tags"]=Array(tags)
+		if not out.has("herds"):out["herds"]=(Array(tags)).has("dairy")
+	return out
+
 func _build(era_id_in:String,facts_in:Dictionary)->void:
 	era_id=era_id_in
-	facts=facts_in.duplicate()
+	facts=normal_facts(facts_in)
 	kind=kind_for(era_id,int(facts.get("tier",-1)))
 	name="CourtSet_"+kind
 	info=(manifest().get("sets",{}) as Dictionary).get(kind,{})
 	_noise.seed=int(facts.get("seed",11));_noise.frequency=1.0
+	_dyes=facts.get("dyes",DEFAULT_DYES) if facts.get("dyes",[]) is Array and (facts.get("dyes",[]) as Array).size()>=3 else DEFAULT_DYES
 	var packed:=scene_for(kind)
 	if packed!=null:
 		model=packed.instantiate() as Node3D
@@ -178,16 +237,24 @@ func _build(era_id_in:String,facts_in:Dictionary)->void:
 	_make_marks()
 	_make_environment()
 	_make_lights()
-	_make_fire()
+	_make_fires()
 	_make_air()
-	camera=CourtCamera.new()
+	camera=Camera3D.new();camera.name="Lens"
 	add_child(camera)
-	camera.configure(info.get("camera",{}))
+	rig=CourtCamera.new()
+	add_child(rig)
+	rig.call("use_lens",camera)
+	rig.call("configure",info.get("camera",{}))
 	camera.current=true
 	_make_paper()
 	apply_facts(facts)
 	_place_animals()
-	visibility_changed.connect(func()->void:set_active(is_visible_in_tree()))
+	visibility_changed.connect(_on_visibility)
+	# a cheap far blur: the court is the only place that asks for it
+	RenderingServer.camera_attributes_set_dof_blur_quality(RenderingServer.DOF_BLUR_QUALITY_LOW,false)
+
+func _on_visibility()->void:
+	set_active(is_visible_in_tree())
 
 # --- Materials ----------------------------------------------------------------------
 
@@ -203,58 +270,84 @@ func _dress(root:Node)->void:
 		var inked:=false
 		for prefix:String in ink_prefixes:
 			if part.begins_with(prefix):inked=true;break
-		var far:=part in ["Hills","HillsFar","Trees","Shrubs"]
-		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if part in ["Ground","Grass","Hills","HillsFar","Trees","Debris"] else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		var far:=part.begins_with("Far")
+		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF if far or part in ["Ground","Grass","Debris","Floor","Carpet","Mats"] else GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		if mesh_node.mesh==null:continue
 		for surface in mesh_node.mesh.get_surface_count():
 			var source:=mesh_node.mesh.surface_get_material(surface)
 			var slot:=source.resource_name if source!=null else "WOOD"
 			if part=="Ground":
 				mesh_node.set_surface_override_material(surface,_ground_material())
+			elif far:
+				mesh_node.set_surface_override_material(surface,_wash_material(int(part.trim_prefix("Far"))))
 			else:
-				mesh_node.set_surface_override_material(surface,_material(slot,inked and not far))
+				mesh_node.set_surface_override_material(surface,_material(slot,inked))
+
+func _colour(code:String,fallback:Color)->Color:
+	if code.is_empty():return fallback
+	if code.begins_with("dye"):return Color(String(_dyes[clampi(int(code.trim_prefix("dye")),0,_dyes.size()-1)]))
+	return Color(code)
 
 func _material(slot:String,inked:bool)->ShaderMaterial:
-	var key:="%s|%s|%s|%s" % [kind,slot,inked,_dye_key()]
+	var key:="%s|%s|%s|%s" % [kind,slot,inked,",".join(PackedStringArray(_dyes))]
 	if _materials.has(key):return _materials[key]
 	var look:Dictionary=LOOK.get(kind,LOOK.fire_ring)
 	var paint:Array=PALETTE.get(slot,["8a7a66","8a7a66"])
 	var made:=ShaderMaterial.new();made.shader=TOON
-	var base:=Color(String(paint[0]));var worn:=Color(String(paint[1]))
-	if slot=="BLANKET" and facts.has("dyes") and (facts.dyes as Array).size()>0:
-		base=Color(String((facts.dyes as Array)[0])).lerp(base,0.35);worn=base
+	var base:=_colour(String(paint[0]),Color("8a7a66"))
+	var worn:=_colour(String(paint[1]),base)
 	made.set_shader_parameter("albedo",base)
 	made.set_shader_parameter("albedo_worn",worn)
+	if paint.size()>2:made.set_shader_parameter("accent_a",_colour(String(paint[2]),base.darkened(0.3)))
+	if paint.size()>3:made.set_shader_parameter("accent_b",_colour(String(paint[3]),base.lightened(0.3)))
 	made.set_shader_parameter("haze_color",Color(String(look.get("haze","cdd2cf"))))
+	if PATTERN.has(slot):
+		var p:Array=PATTERN[slot]
+		made.set_shader_parameter("pattern",int(p[0]));made.set_shader_parameter("motif",int(p[1]));made.set_shader_parameter("pattern_scale",float(p[2]))
 	match slot:
 		"EMBER":
 			made.set_shader_parameter("emission_amount",2.4);made.set_shader_parameter("emission_flicker",0.6)
+		"CHAR":
+			made.set_shader_parameter("emission_amount",2.2);made.set_shader_parameter("emission_flicker",0.5)
 		"GRASS","LEAF":
 			made.set_shader_parameter("wrap",0.35);made.set_shader_parameter("mottle",0.18);made.set_shader_parameter("variation",0.2)
-			made.set_shader_parameter("haze_max",0.6);made.set_shader_parameter("haze_start",14.0);made.set_shader_parameter("haze_end",90.0)
-		"HILL_NEAR":
-			made.set_shader_parameter("haze_max",0.55);made.set_shader_parameter("haze_start",30.0);made.set_shader_parameter("haze_end",110.0)
-			made.set_shader_parameter("mottle",0.14);made.set_shader_parameter("mottle_scale",0.05)
-		"HILL_FAR":
-			made.set_shader_parameter("haze_max",0.8);made.set_shader_parameter("haze_start",60.0);made.set_shader_parameter("haze_end",200.0)
-			made.set_shader_parameter("mottle",0.1);made.set_shader_parameter("mottle_scale",0.03)
-		"HIDE","HIDE_DARK","BLANKET":
-			made.set_shader_parameter("wrap",0.2);made.set_shader_parameter("mottle",0.16);made.set_shader_parameter("variation",0.22)
-		"THATCH","MUD","PLANK":
-			made.set_shader_parameter("mottle",0.16)
+			made.set_shader_parameter("haze_max",0.55);made.set_shader_parameter("haze_start",14.0);made.set_shader_parameter("haze_end",60.0)
+		"HIDE","HIDE_DARK","HIDE_PALE","BLANKET":
+			made.set_shader_parameter("wrap",0.2);made.set_shader_parameter("mottle",0.12);made.set_shader_parameter("variation",0.22)
+		"THATCH","MUD","PLANK","PLASTER":
+			made.set_shader_parameter("mottle",0.12)
+		"WEAVE_A","WEAVE_B","WEAVE_C","CARPET":
+			made.set_shader_parameter("wrap",0.25);made.set_shader_parameter("mottle",0.05);made.set_shader_parameter("variation",0.04)
+		"GOLD","BRONZE":
+			made.set_shader_parameter("rim_amount",0.35)
 	if slot in ["BARK","WOOD","STONE","HIDE","HIDE_DARK","REED","CLAY","PLANK","THATCH"]:
-		made.set_shader_parameter("haze_max",0.5);made.set_shader_parameter("haze_start",22.0);made.set_shader_parameter("haze_end",80.0)
+		made.set_shader_parameter("haze_max",0.45);made.set_shader_parameter("haze_start",22.0);made.set_shader_parameter("haze_end",80.0)
 	if inked:made.next_pass=_ink()
 	_materials[key]=made
 	return made
-
-func _dye_key()->String:
-	return String((facts.get("dyes",[""]) as Array)[0]) if facts.get("dyes",[]) is Array and not (facts.get("dyes",[]) as Array).is_empty() else ""
 
 static func _ink()->ShaderMaterial:
 	if _ink_material==null:
 		_ink_material=ShaderMaterial.new();_ink_material.shader=INK
 	return _ink_material
+
+func _wash_material(layer:int)->ShaderMaterial:
+	var key:="%s|FAR%d" % [kind,layer]
+	if _materials.has(key):return _materials[key]
+	var look:Dictionary=LOOK.get(kind,LOOK.fire_ring)
+	var spec:Array=(look.get("far",[]) as Array)[clampi(layer,0,2)] if (look.get("far",[]) as Array).size()>2 else ["6f7c66","4a5446",0.3]
+	var made:=ShaderMaterial.new();made.shader=WASH
+	made.set_shader_parameter("wash",Color(String(spec[0])))
+	made.set_shader_parameter("ink",Color(String(spec[1])))
+	made.set_shader_parameter("airiness",float(spec[2]))
+	made.set_shader_parameter("air",Color(String(look.get("sky_horizon","e2ddcb"))).lerp(Color(String(look.get("haze","b9c0bd"))),0.5))
+	made.set_shader_parameter("ink_width",[0.22,0.45,0.9][clampi(layer,0,2)])
+	made.set_shader_parameter("ink_amount",[0.7,0.5,0.32][clampi(layer,0,2)])
+	made.set_shader_parameter("bleed",[2.0,4.5,9.0][clampi(layer,0,2)])
+	made.set_shader_parameter("trunks",0.6 if layer==0 else 0.0)
+	made.render_priority=-1-layer
+	_materials[key]=made
+	return made
 
 func _ground_material()->ShaderMaterial:
 	var key:="%s|GROUND" % kind
@@ -267,11 +360,8 @@ func _ground_material()->ShaderMaterial:
 	made.set_shader_parameter("earth_dark",Color(String(look.earth_dark)))
 	made.set_shader_parameter("straw",float(look.straw))
 	made.set_shader_parameter("haze_color",Color(String(look.haze)))
-	var fx:Dictionary=info.get("fx",{})
-	var fire:Dictionary=fx.get("fire",{})
-	var long:=float(fire.get("long",0.0))
-	made.set_shader_parameter("hearth_radius",0.95 if long<=0.0 else 1.0)
-	made.set_shader_parameter("hearth_scale",Vector2(maxf(1.0,long*0.62),0.75 if long>0.0 else 1.0))
+	made.set_shader_parameter("hearth_radius",0.95 if kind!="longhouse" else 1.0)
+	made.set_shader_parameter("hearth_scale",Vector2(2.1,0.75) if kind=="longhouse" else Vector2(1.0,1.0))
 	_materials[key]=made
 	return made
 
@@ -280,8 +370,8 @@ func _ground_material()->ShaderMaterial:
 func _make_marks()->void:
 	var holder:=Node3D.new();holder.name="Marks";add_child(holder)
 	var raw:Dictionary=info.get("marks",{})
-	var throne:=_vec(raw.get("throne_gaze",{}).get("pos",[0,2,6]))
-	var fire:=_vec(raw.get("fire",{}).get("pos",[0,0,0]))
+	var throne:=_vec((raw.get("throne_gaze",{}) as Dictionary).get("pos",[0,2,6]))
+	var fire:=_vec((raw.get("fire",{}) as Dictionary).get("pos",[0,0,0]))
 	var names:Array=raw.keys();names.sort()
 	for mark_name:String in names:
 		var entry:Dictionary=raw[mark_name]
@@ -291,13 +381,14 @@ func _make_marks()->void:
 		if face is String:
 			match String(face):
 				"fire":target=fire
-				"door":target=_vec(raw.get("door",{}).get("pos",[0,0,0]))
+				"door":target=_vec((raw.get("door",{}) as Dictionary).get("pos",[0,0,0]))
 				_:target=throne
 		elif face is Array and (face as Array).size()>=2:target=Vector3(float(face[0]),0.0,float(face[1]))
 		var m:=Marker3D.new();m.name=mark_name
 		var dir:=Vector3(target.x-at.x,0.0,target.z-at.z)
 		var basis:=Basis.IDENTITY
-		if dir.length()>0.01:basis=Basis.looking_at(-dir.normalized(),Vector3.UP)
+		# a mark's -Z is the way a person there faces (Godot's own forward)
+		if dir.length()>0.01:basis=Basis.looking_at(dir.normalized(),Vector3.UP)
 		m.transform=Transform3D(basis,at)
 		m.set_meta("sit",bool(entry.get("sit",false)))
 		m.set_meta("seat",float(entry.get("seat",0.0)))
@@ -324,11 +415,16 @@ func marks_for(prefix:String)->Array[Marker3D]:
 	for n:String in names:out.append(marks[n])
 	return out
 
-## Stand someone (or something) on a mark, facing the way the mark faces.
+## Stand someone (or something whose front is +Z) on a mark, facing the way
+## the mark faces; on a sit mark a figure is raised to the seat.
 func place(node:Node3D,mark_name:String)->void:
 	var m:=mark(mark_name)
 	if m==null or node==null:return
-	node.global_transform=Transform3D(m.global_transform.basis.orthonormalized()*Basis.from_scale(node.global_transform.basis.get_scale()),m.global_position)
+	var turned:=m.global_transform.basis.orthonormalized().rotated(Vector3.UP,PI)
+	var at:=m.global_position
+	if bool(m.get_meta("sit",false)) and float(m.get_meta("seat",0.0))>0.0 and String(node.get("stance") if node.get("stance")!=null else "")=="sit":
+		at.y+=float(m.get_meta("seat",0.0))-0.47*node.global_transform.basis.get_scale().y
+	node.global_transform=Transform3D(turned*Basis.from_scale(node.global_transform.basis.get_scale()),at)
 
 ## Where the god's presence is (people look up to it).
 func god_point()->Vector3:
@@ -395,16 +491,17 @@ func _make_lights()->void:
 	add_child(sun)
 	var fire:Dictionary=fx.get("fire",{})
 	_fire_at=_vec(fire.get("pos",[0,0,0]))+Vector3(0.0,0.85,0.0)
-	_fire_energy=float(light.get("fire_energy",2.2))
-	var long:=float(fire.get("long",0.0))
+	_fire_energy=float(light.get("fire_energy",1.3))
 	fire_light=_omni("Fire",Color(1.0,0.58,0.30),_fire_energy,float(light.get("fire_range",7.0)),1.5)
-	if long>0.0:
-		_fire_b_at=_fire_at+Vector3(long*0.3,0.0,0.0);_fire_at-=Vector3(long*0.3,0.0,0.0)
-		fire_light_b=_omni("FireB",Color(1.0,0.58,0.30),_fire_energy*0.8,float(light.get("fire_range",7.0)),1.5)
-		fire_light_b.position=_fire_b_at
 	fire_light.position=_fire_at
 	bounce=_omni("Bounce",Color(1.0,0.72,0.48),0.45,4.8,1.0)
 	bounce.position=_vec(fire.get("pos",[0,0,0]))+Vector3(0.0,0.12,0.9)
+	for spot:Dictionary in fx.get("flames",[]):
+		var size:=float(spot.get("size",0.4))
+		if size<0.2:continue
+		var lamp:=_omni("Brazier",Color(1.0,0.6,0.32),_fire_energy*0.6,4.5,1.6)
+		lamp.position=_vec(spot.get("pos",[0,1,0]))+Vector3(0.0,0.3,0.0)
+		flame_lights.append(lamp)
 	if fx.has("door_light"):
 		door_light=SpotLight3D.new();door_light.name="DoorLight"
 		var at:=_vec(fx.door_light)
@@ -421,50 +518,34 @@ func _omni(light_name:String,colour:Color,energy:float,reach:float,falloff:float
 	add_child(made)
 	return made
 
-## The fire's flames (cards turned to the camera, drawn by a shader), its
-## smoke and its sparks.
-func _make_fire()->void:
+## The hearth fire: two layers of tongues and a hot heart, the air shaking
+## above it, smoke and sparks; and the small flames of braziers and lamps.
+func _make_fires()->void:
 	var fx:Dictionary=info.get("fx",{})
 	var fire:Dictionary=fx.get("fire",{})
 	var at:=_vec(fire.get("pos",[0,0.05,0]))
 	var size:=float(fire.get("size",1.0))
-	var long:=float(fire.get("long",0.0))
-	var holder:=Node3D.new();holder.name="Fire";add_child(holder);holder.position=at
-	var spots:Array[Vector3]=[Vector3.ZERO]
-	if long>0.0:spots=[Vector3(-long*0.32,0,0.02),Vector3(-long*0.05,0,-0.05),Vector3(long*0.22,0,0.04)]
-	var index:=0
-	for spot in spots:
-		for k in 3:
-			var card:=MeshInstance3D.new();card.name="Flame%d" % index
-			var quad:=QuadMesh.new();quad.size=Vector2(1.0,1.0);card.mesh=quad
-			var mat:=ShaderMaterial.new();mat.shader=FLAME
-			mat.set_shader_parameter("seed",float(index)*1.37)
-			mat.set_shader_parameter("speed",0.9+0.15*k)
-			mat.set_shader_parameter("strength",1.0 if k==0 else 0.75)
-			card.material_override=mat
-			card.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-			var h:=(1.05-0.22*k)*size*(0.8 if long>0.0 else 1.0)
-			var w:=(0.62-0.1*k)*size
-			card.scale=Vector3(w,h,1.0)
-			card.position=spot+Vector3((k-1)*0.09*size,h*0.5+0.02,(k%2)*0.06-0.03)
-			holder.add_child(card)
-			index+=1
+	var holder:=_flame(at,size,"Fire",3)
+	var shimmer:=MeshInstance3D.new();shimmer.name="HeatShimmer"
+	var quad:=QuadMesh.new();quad.size=Vector2(1.0,1.0);shimmer.mesh=quad
+	var smat:=ShaderMaterial.new();smat.shader=SHIMMER;smat.render_priority=-2
+	shimmer.material_override=smat
+	shimmer.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	shimmer.scale=Vector3(0.9*size,1.6*size,1.0)
+	shimmer.position=Vector3(0.0,1.35*size,0.0)
+	holder.add_child(shimmer)
 	var top:=float(fx.get("smoke_top",8.0))-at.y
-	# smoke
 	var smoke:=GPUParticles3D.new();smoke.name="Smoke"
-	smoke.amount=26 if long<=0.0 else 34
-	smoke.lifetime=7.0 if long<=0.0 else 6.0
-	smoke.preprocess=6.0
-	smoke.randomness=0.4
+	smoke.amount=26;smoke.lifetime=7.0 if top>6.0 else 4.5;smoke.preprocess=6.0;smoke.randomness=0.4
 	var sm:=ParticleProcessMaterial.new()
 	sm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	sm.emission_box_extents=Vector3(maxf(0.2,long*0.4),0.1,0.18)
+	sm.emission_box_extents=Vector3(0.25*size,0.1,0.18)
 	sm.direction=Vector3(0,1,0);sm.spread=10.0
 	sm.initial_velocity_min=0.35;sm.initial_velocity_max=0.6
-	sm.gravity=Vector3(0.06,0.10,-0.04) if long<=0.0 else Vector3(0.0,0.06,-0.08)
+	sm.gravity=Vector3(0.06,0.10,-0.04)
 	sm.damping_min=0.05;sm.damping_max=0.15
 	sm.scale_min=0.55;sm.scale_max=0.9
-	var curve:=Curve.new();curve.add_point(Vector2(0.0,0.35));curve.add_point(Vector2(1.0,2.8 if long<=0.0 else 2.2))
+	var curve:=Curve.new();curve.add_point(Vector2(0.0,0.35));curve.add_point(Vector2(1.0,2.6))
 	var curve_tex:=CurveTexture.new();curve_tex.curve=curve;sm.scale_curve=curve_tex
 	var ramp:=Gradient.new()
 	ramp.set_offset(0,0.0);ramp.set_color(0,Color(1,1,1,0.0))
@@ -478,19 +559,18 @@ func _make_fire()->void:
 	var puff:=QuadMesh.new();puff.size=Vector2(1.0,1.0)
 	var smoke_mat:=ShaderMaterial.new();smoke_mat.shader=SMOKE
 	smoke_mat.set_shader_parameter("fire_y",at.y)
-	smoke_mat.set_shader_parameter("opacity",0.2 if long<=0.0 else 0.17)
+	smoke_mat.set_shader_parameter("opacity",0.18)
 	puff.material=smoke_mat
 	smoke.draw_pass_1=puff
-	smoke.position=Vector3(0,0.75,0)
+	smoke.position=Vector3(0,0.9*size,0)
 	smoke.visibility_aabb=AABB(Vector3(-4,-1,-4),Vector3(8,maxf(top,4.0)+2.0,8))
 	smoke.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	holder.add_child(smoke);particles.append(smoke)
-	# sparks
 	var sparks:=GPUParticles3D.new();sparks.name="Embers"
 	sparks.amount=18;sparks.lifetime=2.4;sparks.preprocess=3.0;sparks.randomness=0.6
 	var em:=ParticleProcessMaterial.new()
 	em.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_BOX
-	em.emission_box_extents=Vector3(maxf(0.2,long*0.4),0.05,0.2)
+	em.emission_box_extents=Vector3(0.25,0.05,0.2)
 	em.direction=Vector3(0,1,0);em.spread=22.0
 	em.initial_velocity_min=0.6;em.initial_velocity_max=1.4
 	em.gravity=Vector3(0.0,0.25,0.0)
@@ -507,29 +587,58 @@ func _make_fire()->void:
 	sparks.visibility_aabb=AABB(Vector3(-3,-1,-3),Vector3(6,8,6))
 	sparks.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	holder.add_child(sparks);particles.append(sparks)
+	var index:=0
+	for spot:Dictionary in fx.get("flames",[]):
+		var p:=_vec(spot.get("pos",[0,1,0]))
+		_flame(p,float(spot.get("size",0.4)),"Flame%d" % index,2)
+		_flame_at.append(p)
+		index+=1
 
-## Dust in the light, and in a hall the sun's shaft through the smoke hole.
+func _flame(at:Vector3,size:float,flame_name:String,cards:int)->Node3D:
+	var holder:=Node3D.new();holder.name=flame_name;add_child(holder);holder.position=at
+	for k in cards:
+		var card:=MeshInstance3D.new();card.name="Tongues%d" % k
+		var quad:=QuadMesh.new();quad.size=Vector2(1.0,1.0);card.mesh=quad
+		var mat:=ShaderMaterial.new();mat.shader=FLAME;mat.render_priority=1
+		mat.set_shader_parameter("seed",float(k)*2.37+at.x)
+		mat.set_shader_parameter("speed",0.85+0.2*k)
+		mat.set_shader_parameter("strength",[1.0,0.7,0.9][k%3])
+		mat.set_shader_parameter("tongues",[5,4,2][k%3])
+		card.material_override=mat
+		card.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var h:float=float([1.25,1.05,0.6][k%3])*size
+		var w:float=float([0.95,1.15,0.45][k%3])*size
+		card.scale=Vector3(w,h,1.0)
+		card.position=Vector3([0.0,0.05,-0.02][k%3]*size,h*0.5-0.02,[0.0,-0.12,0.08][k%3]*size)
+		holder.add_child(card)
+	return holder
+
+## Dust in the light, and in a hall the sun's shafts through the openings.
 func _make_air()->void:
 	var fx:Dictionary=info.get("fx",{})
 	var light:Dictionary=info.get("light",{})
-	if fx.has("smoke_hole"):
-		_shaft_top=_vec(fx.smoke_hole)
-		_shaft_dir=_vec(light.get("sun_dir",[0,-1,0])).normalized()
-		_shaft_radius=0.62
-		var length:=(_shaft_top.y-0.0)/maxf(0.2,-_shaft_dir.y)
+	var sun_dir:=_vec(light.get("sun_dir",[0,-1,0])).normalized()
+	var first:=true
+	for spec:Dictionary in fx.get("shafts",[]):
+		var top:=_vec(spec.get("top",[0,5,0]))
+		var dir:=_vec(spec.get("dir",[sun_dir.x,sun_dir.y,sun_dir.z])).normalized()
+		var radius:=float(spec.get("radius",0.6))
+		var length:=(top.y-0.0)/maxf(0.2,-dir.y)
 		var shaft:=MeshInstance3D.new();shaft.name="SunShaft"
-		var cyl:=CylinderMesh.new();cyl.top_radius=_shaft_radius*0.9;cyl.bottom_radius=_shaft_radius*1.15;cyl.height=1.0
+		var cyl:=CylinderMesh.new();cyl.top_radius=radius*0.9;cyl.bottom_radius=radius*1.15;cyl.height=1.0
 		cyl.radial_segments=20;cyl.rings=1;cyl.cap_top=false;cyl.cap_bottom=false
 		shaft.mesh=cyl
 		var mat:=ShaderMaterial.new();mat.shader=SHAFT
+		mat.set_shader_parameter("strength",float(spec.get("strength",0.22)))
 		shaft.material_override=mat
 		shaft.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		# the cylinder's y runs along the shaft, top at the hole
-		var y_axis:=-_shaft_dir
-		var x_axis:=y_axis.cross(Vector3.FORWARD).normalized()
+		var y_axis:=-dir
+		var x_axis:=y_axis.cross(Vector3.FORWARD if absf(y_axis.z)<0.9 else Vector3.RIGHT).normalized()
 		var z_axis:=x_axis.cross(y_axis).normalized()
-		shaft.transform=Transform3D(Basis(x_axis,y_axis*length,z_axis),_shaft_top+_shaft_dir*length*0.5)
+		shaft.transform=Transform3D(Basis(x_axis,y_axis*length,z_axis),top+dir*length*0.5)
 		add_child(shaft)
+		if first:
+			_shaft_top=top;_shaft_dir=dir;_shaft_radius=radius;first=false
 	var dust:Dictionary=fx.get("dust",{})
 	if dust.is_empty():return
 	var motes:=GPUParticles3D.new();motes.name="Dust"
@@ -581,19 +690,34 @@ func _collect_props(root:Node)->void:
 			var found:=root.find_child(prop_name,true,false) as Node3D
 			if found!=null:list.append(found)
 		props[group]=list
+	var raw_gates:Dictionary=info.get("gates",{})
+	for key:String in raw_gates.keys():
+		var list2:Array[Node3D]=[]
+		for prop_name:String in raw_gates[key]:
+			var found2:=root.find_child(prop_name,true,false) as Node3D
+			if found2!=null:list2.append(found2)
+		gates[key]=list2
 
-## Dress the set from the facts: the stores' food in the baskets and on the
-## rack, the spears racked (a few in peace, all of them in war).
+## Dress the set from the facts: the stores' food in the baskets, on the rack
+## and the board; the spears racked (a few in peace, all in war); the things
+## the people know how to make (era tags), and nothing they do not.
 func apply_facts(facts_in:Dictionary)->void:
-	for key in facts_in.keys():facts[key]=facts_in[key]
+	var fresh:=normal_facts(facts_in)
+	for key in fresh.keys():facts[key]=fresh[key]
 	var food:=clampf(float(facts.get("food",0.6)),0.0,1.0)
-	var war_raw:Variant=facts.get("war",0.0)
-	var war:=1.0 if war_raw is bool and war_raw else (clampf(float(war_raw),0.0,1.0) if not war_raw is bool else 0.0)
+	var war:=clampf(float(facts.get("war",0.0)),0.0,1.0)
 	_show_first(props.get("food",[]),roundi(food*float((props.get("food",[]) as Array).size())))
 	_show_first(props.get("rack",[]),roundi(clampf(food*1.25-0.1,0.0,1.0)*float((props.get("rack",[]) as Array).size())))
 	var spears:Array=props.get("spears",[])
 	var peace:=int((info.get("props",{}) as Dictionary).get("spears_peace",3))
 	_show_first(spears,mini(spears.size(),peace+roundi(war*float(maxi(0,spears.size()-peace)))))
+	var tags:Array=facts.get("era_tags",info.get("default_tags",[])) as Array
+	for key:String in gates.keys():
+		var without:=key.begins_with("no_")
+		var tag:=key.trim_prefix("no_")
+		var show:=tags.has(tag)!=without
+		for node in gates[key]:
+			if is_instance_valid(node):(node as Node3D).visible=show
 
 ## How many of a prop group are showing (tests, the director).
 func shown(group:String)->int:
@@ -601,6 +725,12 @@ func shown(group:String)->int:
 	for node in props.get(group,[]):
 		if (node as Node3D).visible:count+=1
 	return count
+
+## Whether the things a tag brings are on show ("pottery", "no_pottery", ...).
+func gate_shown(key:String)->bool:
+	for node in gates.get(key,[]):
+		if is_instance_valid(node) and (node as Node3D).visible:return true
+	return false
 
 func _show_first(list:Array,count:int)->void:
 	for i in list.size():(list[i] as Node3D).visible=i<count
@@ -654,15 +784,12 @@ func _ready()->void:
 
 func _process(delta:float)->void:
 	_clock+=delta
-	# the fire breathes: two noises, a quick one and a slow one
 	var n:=_noise.get_noise_1d(_clock*6.0)*0.55+_noise.get_noise_1d(_clock*17.0+40.0)*0.3+_noise.get_noise_1d(_clock*1.3+90.0)*0.15
 	fire_light.light_energy=_fire_energy*(1.0+0.22*n)
 	fire_light.position=_fire_at+Vector3(n*0.05,absf(n)*0.06,_noise.get_noise_1d(_clock*5.0+7.0)*0.05)
-	if fire_light_b!=null:
-		var m:=_noise.get_noise_1d(_clock*6.5+300.0)
-		fire_light_b.light_energy=_fire_energy*0.8*(1.0+0.2*m)
-		fire_light_b.position=_fire_b_at+Vector3(m*0.05,absf(m)*0.05,0.0)
 	bounce.light_energy=0.45*(1.0+0.12*n)
+	for i in flame_lights.size():
+		flame_lights[i].light_energy=_fire_energy*0.6*(1.0+0.2*_noise.get_noise_1d(_clock*7.0+float(i)*50.0))
 
 ## Which way the strongest light comes from (toward it), for figures whose
 ## shading takes one key light (court_figure_3d.gd set_key_light).
@@ -670,12 +797,12 @@ func key_dir()->Vector3:
 	if sun==null:return Vector3(-0.35,0.65,0.68)
 	var to_sun:=sun.global_transform.basis.z.normalized()
 	if bool((info.get("light",{}) as Dictionary).get("open_sky",true)):return to_sun
-	# in a hall the fire and the shaft share the key: from above, a little forward
 	return (to_sun*0.6+Vector3(0.0,0.55,0.55)).normalized()
 
-## How much light falls on someone standing here, about 1 (figure dim): the
-## hall is dimmer than the open sky, the fire warms those close to it and the
-## sun's shaft lights whoever stands in it.
+## How much light falls on someone standing here, about 1 (figure dim), for
+## figures that do not take the set's lights: the hall is dimmer than the open
+## sky, the fire warms those close to it, the sun's shaft lights whoever
+## stands in it.
 func light_at(point:Vector3)->float:
 	var open:=bool((info.get("light",{}) as Dictionary).get("open_sky",true))
 	var amount:=1.0 if open else 0.84
@@ -688,8 +815,14 @@ func light_at(point:Vector3)->float:
 		amount+=0.18*clampf(1.0-(off-_shaft_radius*0.5)/_shaft_radius,0.0,1.0)
 	return amount
 
-## A soft shade on the ground under someone's feet (blend: multiply), to lay
-## under a figure or an animal: it keeps them standing ON the ground.
+## Give modelled figures the set's real light (the lit twin of their toon):
+## pass CourtFigure3D._materials; every shared figure material changes shader.
+static func light_figures(materials:Dictionary)->void:
+	for made in materials.values():
+		if made is ShaderMaterial:(made as ShaderMaterial).shader=FIGURE_LIT
+
+## A soft shade on the ground under someone's feet: it keeps them standing
+## ON the ground. Lay it under a figure or an animal (a child at its feet).
 static func contact_shadow(width:=0.9,depth:=0.62,strength:=0.55)->MeshInstance3D:
 	if _contact_material==null:
 		_contact_material=ShaderMaterial.new();_contact_material.shader=CONTACT
@@ -703,8 +836,8 @@ static func contact_shadow(width:=0.9,depth:=0.62,strength:=0.55)->MeshInstance3
 	return made
 
 ## What the stage can pass in, read from the game (read-only): how full the
-## stores are, whether the people are at war, their era's tier, and which
-## animals they keep.
+## stores are, whether the people are at war, their era's tier and tags,
+## which animals they keep, and their dyes.
 static func facts_from_game(owner:="player")->Dictionary:
 	var out:={"food":0.6,"war":false,"tier":0,"herds":false,"fowl":false,"dogs":true}
 	var loop:=Engine.get_main_loop() as SceneTree
@@ -719,5 +852,7 @@ static func facts_from_game(owner:="player")->Dictionary:
 			out.fowl=(known as Array).has("yard_fowl_eggs")
 	var voice:=load("res://scripts/character_voice.gd")
 	if voice!=null and voice.has_method("era_tier"):
-		out.tier=int(voice.call("era_tier",voice.call("era_tags",owner)))
+		var tags:Variant=voice.call("era_tags",owner)
+		out.era_tags=Array(tags) if tags is Array else []
+		out.tier=int(voice.call("era_tier",tags))
 	return out

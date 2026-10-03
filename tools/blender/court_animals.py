@@ -36,7 +36,8 @@ OUT = os.path.join(ROOT, "assets", "court_sets", "animals")
 FPS = 30
 
 SLOT_COLOURS = {"COAT": (0.62, 0.42, 0.24), "COAT_LIGHT": (0.86, 0.76, 0.58), "NOSE": (0.08, 0.06, 0.05),
-                "EYE": (0.07, 0.05, 0.04), "EYE_SHINE": (0.98, 0.96, 0.9), "COAT_DARK": (0.30, 0.20, 0.12)}
+                "EYE": (0.07, 0.05, 0.04), "EYE_SHINE": (0.98, 0.96, 0.9), "COAT_DARK": (0.30, 0.20, 0.12),
+                "HORN": (0.55, 0.5, 0.42), "HOOF": (0.2, 0.17, 0.14), "EYE_AMBER": (0.75, 0.55, 0.2)}
 
 
 def log(*a):
@@ -152,25 +153,38 @@ def dog_field(voxel):
 
 
 def dog_slot(c, n):
-    """Which paint a point of the dog's coat takes."""
+    """Which paint a point of the dog's coat takes: a tan camp dog with a dark
+    saddle and mask, cream bib, belly, socks and tail tip, a blaze up the brow."""
+    from mathutils.noise import noise as _n
     x, y, z = c
+    wob = 0.012 * _n(Vector((x * 30.0, y * 30.0, z * 30.0)))
     if y < -0.555 and z > 0.53:
         return "NOSE"
-    # cream bib, belly, muzzle underside and front, paws, the tail's tip
-    if z < 0.062:
+    # the blaze: a cream stripe up the middle of the brow
+    if abs(x) < 0.014 + wob * 0.5 and -0.47 < y < -0.37 and z > 0.6 and n[2] > 0.2:
         return "COAT_LIGHT"
-    if y < -0.47 and z < 0.575:
-        return "COAT_LIGHT"
-    if y < -0.24 and z < 0.47 and abs(x) < 0.07 and n[2] < 0.5 and y > -0.40:
-        return "COAT_LIGHT"
-    if -0.22 < y < 0.25 and z < 0.33 and abs(x) < 0.085 and n[2] < -0.2:
-        return "COAT_LIGHT"
-    if y > 0.25 and z > 0.66:
-        return "COAT_LIGHT"
-    # darker saddle along the back and the ear tips
-    if z > 0.495 and -0.2 < y < 0.24 and n[2] > 0.55:
+    # a dark mask over the top of the muzzle and about the eyes
+    if y < -0.44 and z > 0.565 + wob and n[2] > -0.1:
         return "COAT_DARK"
-    if z > 0.715:
+    if -0.48 < y < -0.42 and z > 0.6 and abs(x) > 0.03:
+        return "COAT_DARK"
+    # cream: socks, the muzzle's underside, the bib, the belly, the tail's tip
+    if z < 0.075 + wob:
+        return "COAT_LIGHT"
+    if y < -0.45 and z < 0.56:
+        return "COAT_LIGHT"
+    if y < -0.24 and z < 0.48 + wob and abs(x) < 0.075 and n[2] < 0.55 and y > -0.40:
+        return "COAT_LIGHT"
+    if -0.22 < y < 0.25 and z < 0.34 and abs(x) < 0.09 and n[2] < -0.15:
+        return "COAT_LIGHT"
+    if y > 0.25 and z > 0.655:
+        return "COAT_LIGHT"
+    # the dark saddle along the back, the ears' backs and tips
+    if z > 0.47 + wob and -0.24 < y < 0.27 and n[2] > 0.35:
+        return "COAT_DARK"
+    if z > 0.7:
+        return "COAT_DARK"
+    if y > 0.29 and z > 0.47 and n[2] > 0.3:
         return "COAT_DARK"
     return "COAT"
 
@@ -179,7 +193,7 @@ def build_dog(quick=False):
     voxel = 0.011 if quick else 0.0075
     f = dog_field(voxel)
     body = f.mesh("Dog")
-    S.finish_mesh(body, target_tris=5200, smooth=2)
+    S.finish_mesh(body, target_tris=7200, smooth=2)
     me = body.data
     for slot in ("COAT", "COAT_LIGHT", "COAT_DARK", "NOSE"):
         me.materials.append(material(slot))
@@ -538,20 +552,41 @@ def d_scratch(t):
 LIE_T = 1.2
 
 
-def lie_pose(k=1.0):
-    p = sit_pose(min(1.0, k * 1.6))
-    k2 = sm((k - 0.3) / 0.7)
-    add(p, "pelvis", rot=(48 * k2, 0, 0), loc=(0, 0.0, -0.08 * k2))
-    add(p, "spine", rot=(12 * k2, 0, 0), loc=(0, 0, -0.16 * k2))
-    add(p, "chest", rot=(14 * k2, 0, 0), loc=(0, 0, -0.18 * k2))
-    add(p, "neck", rot=(26 * k2, 0, 0))
-    add(p, "head", rot=(4 * k2, 0, 0))
-    for side in ("L", "R"):
-        add(p, "upperarm." + side, rot=(-30 * k2, 0, 0))
-        add(p, "forearm." + side, rot=(-62 * k2, 0, 0))
-        add(p, "fpaw." + side, rot=(30 * k2, 0, 0))
-        add(p, "thigh." + side, rot=(-30 * k2, 0, 18 * k2 if side == "L" else -18 * k2))
+def curled():
+    """Lying curled: belly on the ground, forelegs out in front with the head
+    laid on the paws, hind legs folded to one side, the body bent round and
+    the tail wrapped about the hind feet."""
+    p = {}
+    add(p, "pelvis", rot=(0, 16, 14), loc=(0.0, 0.0, -0.255))
+    add(p, "spine", rot=(0, -4, 10))
+    add(p, "chest", rot=(2, -8, 8))
+    add(p, "neck", rot=(54, 0, 14))
+    add(p, "head", rot=(-14, -6, 4))
+    add(p, "jaw", rot=(0, 0, 0))
+    for side, s in (("L", 1), ("R", -1)):
+        add(p, "upperarm." + side, rot=(-72, 0, 3 * s))
+        add(p, "forearm." + side, rot=(-22, 0, 0))
+        add(p, "fpaw." + side, rot=(80, 0, 0))
+    # both hind legs folded and laid over to the dog's left
+    add(p, "thigh.L", rot=(-78, -40, 0))
+    add(p, "shin.L", rot=(150, 0, 0))
+    add(p, "hock.L", rot=(-70, 0, 0))
+    add(p, "thigh.R", rot=(-70, -30, 0))
+    add(p, "shin.R", rot=(146, 0, 0))
+    add(p, "hock.R", rot=(-66, 0, 0))
+    add(p, "tail1", rot=(56, 0, 52))
+    add(p, "tail2", rot=(10, 0, 46))
+    add(p, "tail3", rot=(0, 0, 40))
+    add(p, "ear.L", rot=(28, 0, -10))
+    add(p, "ear.R", rot=(34, 0, 14))
     return p
+
+
+def lie_pose(k=1.0):
+    """From standing: down onto the haunches first, then the front, then the curl."""
+    if k < 0.45:
+        return sit_pose(sm(k / 0.45) * 0.75)
+    return mix(sit_pose(0.75), curled(), sm((k - 0.45) / 0.55))
 
 
 def d_lie(t):
@@ -559,8 +594,13 @@ def d_lie(t):
 
 
 def d_lie_idle(t):
-    p = merge(lie_pose(1.0), d_breath(t, 2.6, 1.4), d_ears(t, (2.2,), side="L"))
-    add(p, "head", rot=(4 * env(t, 1.5, 2.0, 3.2, 3.8), 0, 0))
+    """Asleep, or nearly: slow deep breaths, an ear that flicks at a fly, and
+    once in a while the head comes up off the paws to look, and goes down."""
+    p = merge(curled(), d_breath(t, 2.6, 1.6), d_ears(t, (1.1, 4.2), side="L"))
+    look = env(t, 2.4, 2.8, 3.6, 4.2)
+    add(p, "neck", rot=(-22 * look, 0, -6 * look))
+    add(p, "head", rot=(-6 * look, 0, -8 * look))
+    add(p, "tail3", rot=(0, 0, 8 * wave(t, 5.2)))
     return p
 
 
@@ -783,7 +823,12 @@ def make_dog(quick):
             "speeds": DOG_SPEEDS}
 
 
-MAKERS = {"dog": make_dog}
+def make_goat(quick):
+    import court_animals_goat as goat
+    return goat.make(quick)
+
+
+MAKERS = {"dog": make_dog, "goat": make_goat}
 
 
 def main():

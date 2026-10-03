@@ -3,7 +3,7 @@
  "species": {
   "dog": {
    "glb": "court_dog.glb",
-   "triangles": 5200,
+   "triangles": 7200,
    "height": 0.74,
    "clips": {
     "idle": {
