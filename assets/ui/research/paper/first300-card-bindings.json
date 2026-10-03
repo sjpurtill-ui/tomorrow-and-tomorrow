@@ -144,5 +144,7 @@
   "wound_cleaning": "res://assets/ui/research/subjects/wound_cleaning-v2.png",
   "edible_resource_recognition": "res://assets/ui/research/subjects/edible_resource_recognition-v2.png",
   "seasonal_patterns": "res://assets/ui/research/subjects/seasonal_patterns-v2.png",
-  "stone_sorting": "res://assets/ui/research/subjects/stone_sorting-v1.png"
+  "stone_sorting": "res://assets/ui/research/subjects/stone_sorting-v1.png",
+  "ember_tending": "res://assets/ui/research/subjects/ember_tending-v1.png",
+  "timber_grading": "res://assets/ui/research/subjects/timber_grading-v3.png"
 }

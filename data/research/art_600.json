@@ -706,13 +706,7 @@
    "caption": "Special garments and headdress for officiants (Year 430)",
    "style": "silhouette_ochre"
   },
-  "oral_epics": {
-   "path": "res://assets/ui/research/discovery-600/oral_epics.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
-   "tile_index": 2,
-   "caption": "Oral epics: trained reciters keep long accounts (Year 3)",
-   "style": "silhouette_ochre"
-  },
+  "oral_epics": {"path": "res://assets/ui/research/subjects/oral_epics-v3.png", "style": "culture: tapestry-inspired painting", "focus": [0.5, 0.45]},
   "origin_story": {
    "path": "res://assets/ui/research/discovery-600/origin_story.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
@@ -918,13 +912,7 @@
    "caption": "Clay plans of fields and towns (Year 540)",
    "style": "paper_gouache"
   },
-  "relay_call_stations": {
-   "path": "res://assets/ui/research/discovery-600/relay_call_stations.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
-   "tile_index": 1,
-   "caption": "Relay calls between camps (Year 3)",
-   "style": "paper_gouache"
-  },
+  "relay_call_stations": {"path": "res://assets/ui/research/subjects/relay_call_stations-v1.png", "style": "knowledge: blue-black ink and lapis wash", "focus": [0.5, 0.45]},
   "repeated_recitation_training": {
    "path": "res://assets/ui/research/discovery-600/repeated_recitation_training.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",

@@ -1,0 +1,19 @@
+{
+  "id": "relay_call_stations",
+  "line": "knowledge",
+  "game_year": 3,
+  "version": 1,
+  "focus": [
+    0.5,
+    0.45
+  ],
+  "replace_art600": true,
+  "binding_style": "knowledge: blue-black ink and lapis wash",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-25ff54eb-e6a1-42ee-b385-d55fca370afe.png",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-04/assets/ui/research/subjects/stored_program_computer-v1.png",
+  "prompt": "Create a completely NEW year-3 research painting for Relay Calls Between Camps. Reference supplies ONLY mature blue-black contour drawing and crosshatching with lapis wash on parchment ivory; copy NONE of its computers, furniture, modern clothing or indoor setting. Scene: three adults in ragged unstitched hide wraps stand on separate natural rocky rises at different distances across open terrain. Nearest adult at left cups both hands to mouth and calls toward middle caller, middle caller turns toward right distant caller to relay the message. Third caller at right cups hands to mouth, visibly human and clear. A continuous sequence of directed attention, no soundwave symbols or arrows. Sparse wild scrub and flat distant hill bands, no huts or constructed stations. All three heads and cupped-hand gestures inside the compact middle horizontal band for 3.77:1 crop; wide panoramic painting approximately 3:1. Precise expressive ink contour/hatching, limited flat lapis wash, open paper texture, mature restrained adult proportions. No photographic rendering, digital volume, cinematic lighting, baskets, pottery, woven garments, refined tools, metal, formal architecture, diagrams, writing, labels, borders or watermark. Different composition and medium from security alarm woodblock.",
+  "mode": "built-in image_gen / new image with medium reference",
+  "review": "Full original inspected: three hide-clad adult callers occupy successive natural rocky rises, with cupped-hand call gestures and directed attention. Blue-black ink contour/crosshatching and flat lapis wash on open parchment; no constructed stations, sound symbols, modern objects or photographic rendering. Full original and 3.77:1 crop inspected; all three callers, faces and cupped hands remain visible at their respective distances.",
+  "asset": "res://assets/ui/research/subjects/relay_call_stations-v1.png",
+  "sha256": "d468bf361c9d8f0dad1f3b1ea1f6fef8a8eb16b0f244f7f9a0051e151b2cdff1"
+}
