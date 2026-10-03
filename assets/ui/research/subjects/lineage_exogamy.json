@@ -1,12 +1,18 @@
 {
   "id": "lineage_exogamy",
   "line": "demography",
-  "game_year": 16,
-  "approx_historical_year": -4893,
-  "prompt": "c. 4893 BCE: Two adults from distinct household groups join hands before welcoming elders, signifying marriage outside lineage; chalk pastel and torn cut-paper. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-e33fe066-53d3-485d-9495-a697c5461a3c.png",
-  "asset": "res://assets/ui/research/subjects/lineage_exogamy-v1.png",
-  "sha256": "b908d446df273d1d3661aa356f6f22eee769f776db972b1dba718356808aae0b",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; two family groups and public relationship clear in crop."
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "prompt": "Generate ONE new Tomorrow and Tomorrow research painting. Reference supplies demography medium, palette and EXACT EXTRA-WIDE CANVAS ONLY. Preserve reference width/height and panoramic aspect, full bleed edge-to-edge, no frame/text/default3:2. NEW SUBJECT: Two adults from separate household groups exchange a simple shell-on-cord gift while both families stand nearby welcoming them, a peaceful meeting between kin groups in an open early settlement court. Angular chalk-pastel/cut-paper terracotta, rust, ivory and slate, flat distinct people silhouettes. Hide garments, reed/earth shelters; no white bridal dress, woven formal robes, priest, modern rings or later palace.\nFraming: ALL complete primary heads begin below y170 of765px-high canvas; hands and central action y350..590. Zoom out to preserve heads and mechanism in actual3.37:1 card. Peripheral top/bottom bands only background. Different setting and viewpoint, no obligatory sunset. Game year16 inherits basketry, cordage, worked hide and earthen shelters; woven cloth is later. No later tools or clothes copied from reference.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/demography-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-2b6f405f-0f30-40cb-82e4-c3a973bc0288.png",
+  "replace_first300": false,
+  "replace_art600": false,
+  "review": "Reviewed full original and actual 3.37:1 game card: field medium, complete primary heads, material chronology and working action retained. Clean complete import, headless and isolated GPU nine-item verification passed.",
+  "asset": "res://assets/ui/research/subjects/lineage_exogamy-v2.png",
+  "sha256": "44d470bf95345d766d1fdc22402a2befde4972ca6a8034f5a651f9c065c1af68",
+  "mode": "built-in image_gen / edit"
 }

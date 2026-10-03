@@ -212,10 +212,14 @@
     ]
   },
   "animal_taming": {
-    "path": "res://assets/ui/research/subjects/animal_taming-v1.png",
+    "path": "res://assets/ui/research/subjects/animal_taming-v2.png",
     "focus": [
       0.5,
-      0.44
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "pack_animals": {
@@ -6227,21 +6231,21 @@
     ]
   },
   "children_light_tasks": {
-    "path": "res://assets/ui/research/subjects/children_light_tasks-v1.png",
+    "path": "res://assets/ui/research/subjects/children_light_tasks-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "consensus_amendment_custom": {
-    "path": "res://assets/ui/research/subjects/consensus_amendment_custom-v1.png",
+    "path": "res://assets/ui/research/subjects/consensus_amendment_custom-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "ground_stone_axes": {
-    "path": "res://assets/ui/research/subjects/ground_stone_axes-v1.png",
+    "path": "res://assets/ui/research/subjects/ground_stone_axes-v2.png",
     "focus": [
       0.5,
       0.5
@@ -6255,24 +6259,24 @@
     ]
   },
   "joint_reduction": {
-    "path": "res://assets/ui/research/subjects/joint_reduction-v1.png",
+    "path": "res://assets/ui/research/subjects/joint_reduction-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "lineage_exogamy": {
-    "path": "res://assets/ui/research/subjects/lineage_exogamy-v1.png",
+    "path": "res://assets/ui/research/subjects/lineage_exogamy-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "trade_partner_tokens": {
-    "path": "res://assets/ui/research/subjects/trade_partner_tokens-v1.png",
+    "path": "res://assets/ui/research/subjects/trade_partner_tokens-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.45
     ]
   },
   "soil_exhaustion_recognition": {
@@ -9938,6 +9942,24 @@
     "opening_focus": [
       0.5,
       0.5
+    ]
+  },
+  "layered_clothing_design": {
+    "path": "res://assets/ui/research/subjects/layered_clothing_design-v2.png",
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "opening_focus": [
+      0.5,
+      0.4
+    ]
+  },
+  "plastered_ancestor_skulls": {
+    "path": "res://assets/ui/research/subjects/plastered_ancestor_skulls-v2.png",
+    "focus": [
+      0.5,
+      0.43
     ]
   }
 }

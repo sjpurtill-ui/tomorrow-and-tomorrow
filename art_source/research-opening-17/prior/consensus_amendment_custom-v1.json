@@ -1,0 +1,12 @@
+{
+  "id": "consensus_amendment_custom",
+  "line": "institutions",
+  "game_year": 16,
+  "approx_historical_year": -4893,
+  "prompt": "c. 4893 BCE: Community publicly revises custom through open-hand agreement in a circle with elder witness; archaic mineral fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aae3ec97-fed6-4ec8-b9e4-ae380e8de493.png",
+  "asset": "res://assets/ui/research/subjects/consensus_amendment_custom-v1.png",
+  "sha256": "d6b92ab1f00aca026e5ffc06330e10e76e43c422670199255cfc14795777a8ff",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; group assent and deliberation clear, no writing."
+}

@@ -173,5 +173,7 @@
   "shared_childcare": "res://assets/ui/research/subjects/shared_childcare-v2.png",
   "clay_shaping": "res://assets/ui/research/subjects/clay_shaping-v2.png",
   "river_craft": "res://assets/ui/research/subjects/river_craft-v2.png",
-  "bone_needle_sewing": "res://assets/ui/research/subjects/bone_needle_sewing-v2.png"
+  "bone_needle_sewing": "res://assets/ui/research/subjects/bone_needle_sewing-v2.png",
+  "layered_clothing_design": "res://assets/ui/research/subjects/layered_clothing_design-v2.png",
+  "animal_taming": "res://assets/ui/research/subjects/animal_taming-v2.png"
 }
