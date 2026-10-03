@@ -16,6 +16,8 @@ const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
+const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
+const Paths:=preload("res://scripts/hud/court_paths.gd")
 
 var _root_size:=Vector2i.ZERO
 
@@ -29,6 +31,7 @@ func before_test()->void:
 	get_tree().root.size=Vector2i(1920,1080)
 
 func after_test()->void:
+	Backdrop.tier_override=-1
 	Stage.director=null
 	Stage.acting=null
 	Executions.gore="full"
@@ -278,7 +281,12 @@ func test_planned_approach_matches_stride_and_restores_the_base_clip()->void:
 	var distance:=Vector2(to.x-from.x,to.z-from.z).length()
 	assert_float(distance).is_greater(1.68) # The approach duration is capped at 1.4 seconds.
 	var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(f.body3d.body_height)/Figure3D.REFERENCE_HEIGHT
-	assert_float(f.body3d.locomotion_rate).is_equal_approx(distance/(1.4*pace),0.001)
+	# A safe detour may be longer than the straight line. Compare the feet
+	# with actual travel at the start of the route, not that old shortcut.
+	var movement:Tween=exec._moving[key]
+	movement.custom_step(0.01)
+	var speed:=f.body3d.global_position.distance_to(from)/0.01
+	assert_float(f.body3d.locomotion_rate).is_equal_approx(speed/pace,0.01)
 	assert_str(f.body3d.clip).is_equal("walk_in")
 	for t in exec._tweens:
 		if t is Tween and (t as Tween).is_valid():(t as Tween).custom_step(1.41)
@@ -401,4 +409,68 @@ func test_execution_waits_for_its_plan_actors_before_taking_their_marks()->void:
 		if String(beat.get("act",""))=="plan":start=float(beat.t)
 	assert_float(first).is_equal_approx(13.3,0.01)
 	assert_float(start).is_greater(14.5)
+	stage.skip_execution()
+
+func test_dogs_clear_the_drag_corridor_in_both_halls_and_skip_restores_it()->void:
+	if not _ready_or_skip():return
+	for tier:int in [0,1]:
+		Backdrop.tier_override=tier
+		var modal:Control=await _open(_home_audience())
+		var stage:Control=modal.court_stage
+		var court:Node3D=stage.court_set
+		assert_bool(stage.execute("dogs",Stage.MAIN,"","","mild")).is_true()
+		for t:Tween in stage._beat_sets:t.kill()
+		stage._beat_sets.clear()
+		var exec:Node=stage.get_node("Execution")
+		var v:Node3D=stage.figure(Stage.MAIN).body3d
+		var a3:=court.to_local(v.global_position)
+		var b3:=court.to_local(exec.call("point","windbreak"))
+		var a:=Vector2(a3.x,a3.z);var end:=Vector2(b3.x,b3.z)
+		var room:=Paths.room_of(court)
+		var before:Dictionary={}
+		var in_lane:Array[String]=[]
+		for key:String in stage.cast_order:
+			var f:Stage.Figure=stage.figure(key)
+			if key==Stage.MAIN or f.body3d==null:continue
+			before[key]=f.nudge
+			var p:=court.to_local(f.body3d.global_position)
+			var at:=Vector2(p.x,p.z)
+			if Geometry2D.get_closest_point_to_segment(at,a,end).distance_to(at)<1.0:in_lane.append(key)
+		assert_int(in_lane.size()).is_greater(0)
+		exec.call("_clear_drag_lane")
+		for key:String in in_lane:
+			assert_bool(exec._survivors.has(key)).override_failure_message("tier %s left %s in the dog lane" % [tier,key]).is_true()
+		for t:Tween in exec._tweens:
+			if t.is_valid():t.custom_step(1.3)
+		for key:String in in_lane:
+			var f:Stage.Figure=stage.figure(key);f._sync()
+			var p:=court.to_local(f.body3d.global_position)
+			var at:=Vector2(p.x,p.z)
+			assert_float(Geometry2D.get_closest_point_to_segment(at,a,end).distance_to(at)).is_greater_equal(1.0)
+			assert_bool(Paths.open_at(room,at)).is_true()
+		stage.skip_execution()
+		for key:String in before:assert_vector(stage.figure(key).nudge).is_equal(before[key])
+		modal.queue_free();await await_idle_frame()
+
+func test_the_dog_pack_stays_with_both_drags_and_releases_at_the_windbreak()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	assert_bool(stage.execute("dogs",Stage.MAIN,"","","mild")).is_true()
+	for t:Tween in stage._beat_sets:t.kill()
+	stage._beat_sets.clear()
+	var exec:Node=stage.get_node("Execution")
+	exec.call("_plan_start",{"act":"dog_dinner"})
+	exec.call("_pack_come",{"more":2})
+	var f:Stage.Figure=stage.figure(Stage.MAIN)
+	exec.call("_follow_dragged_victim")
+	var follow:Tween=exec._pack_follow
+	for step:float in [1.0,0.0,1.4]:
+		f.nudge+=f.spot.global_basis.inverse()*(-exec._plan_frame.basis.z*step)
+		f._sync();follow.custom_step(0.6)
+		for dog:Node3D in exec._pack:
+			assert_float(dog.global_position.distance_to(f.body3d.global_position)).is_between(0.8,1.1)
+			assert_bool(dog._moving).is_false()
+	exec.call("_pack_crunch",{"seconds":2.4})
+	assert_bool(follow.is_valid()).is_false()
 	stage.skip_execution()
