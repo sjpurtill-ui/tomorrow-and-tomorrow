@@ -273,7 +273,13 @@ func support(id:String)->Dictionary:
 	return {"ok":true}
 
 func living_bonus(p:Dictionary)->float:
-	return (.12+float(p.talent)*.18) if p.status=="living" and p.supported else 0.0
+	return patron_lift(p) if p.status=="living" and p.supported else 0.0
+
+## What the god's patronage adds while a figure lives: research in their
+## field that much quicker (multiplier: a field gains at most 0.4 from all it
+## supports) and a fifth of it to a supported general's skills.
+func patron_lift(p:Dictionary)->float:
+	return .12+float(p.get("talent",.8))*.18
 
 func multiplier(domain:String)->float:
 	ensure()

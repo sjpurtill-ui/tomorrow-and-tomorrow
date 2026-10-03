@@ -178,7 +178,7 @@ static func food()->Dictionary:
 	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
 	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Food").get("lines",[]))
 	_great_work_line(lines,"Food")
-	lines.append(_cost_line("Food",getters))
+	lines.append(_cost_line("Food"))
 	return {"lead":"Food getters gather, hunt, fish and tend the fields. What the people do not eat the same day is put by in the stores.","lines":lines}
 
 
@@ -239,7 +239,7 @@ static func survey()->Dictionary:
 	var watching:=clampf(_raw("Survey")/maxf(1.0,float(state.population_exact)*CUNNING_SEARCHERS),0.0,1.0)
 	lines.append(_line("Our cunning","%d of %d points" % [roundi(watching*CUNNING_WEIGHT*100.0),roundi(CUNNING_WEIGHT*100.0)],
 		"Four tenths of the cunning shown on the Standing page comes from people out watching and finding, full when %s search; the rest is the chief scout's skill. It changes nothing else yet." % _count(ceili(pop*CUNNING_SEARCHERS)),"good" if watching>0.0 else "plain"))
-	lines.append(_cost_line("Survey",searchers))
+	lines.append(_cost_line("Survey"))
 	return {"lead":"Searchers walk the country for useful materials and measure what they find, so carriers and builders can open it for work. They do not scout for strangers; scouting parties are sent from court.","lines":lines}
 
 ## The searched land's two lines, for the whole people as every line here is
@@ -350,7 +350,7 @@ static func extraction()->Dictionary:
 	if not wood.is_empty():lines.append(wood)
 	lines.append(_heavy_line())
 	_great_work_line(lines,"Extraction")
-	lines.append(_cost_line("Extraction",cutters))
+	lines.append(_cost_line("Extraction"))
 	return {"lead":"Cutters and diggers work the deposits the people have opened: timber, stone, clay, fibre and ore. What they bring in builds, arms and equips the town.","lines":lines}
 
 
@@ -409,7 +409,7 @@ static func construction()->Dictionary:
 			"Great works being raised take a fifth of the builders each (half when pressed), and each standing one keeps a few to tend it.","plain"))
 	lines.append(_heavy_line())
 	_great_work_line(lines,"Construction")
-	lines.append(_cost_line("Construction",builders))
+	lines.append(_cost_line("Construction"))
 	return {"lead":"Builders raise the town's works and homes, keep the town and its walls in repair, and lay the water lines and roads.","lines":lines}
 
 
@@ -441,7 +441,7 @@ static func crafting()->Dictionary:
 	lines.append(_line("Building faster","+%s a day" % _two(_raw("Crafting")/50.0*_pace_scale()),
 		"Makers speed the builders: each adds a fiftieth of a builder's pace to the day's work on the town.","good" if makers>0.0 else "plain"))
 	_great_work_line(lines,"Crafting")
-	lines.append(_cost_line("Crafting",makers))
+	lines.append(_cost_line("Crafting"))
 	return {"lead":"Makers turn materials into tools, household goods and stores of preserved food, and into weapons when the army needs them.","lines":lines}
 
 
@@ -513,7 +513,7 @@ static func logistics()->Dictionary:
 	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
 	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Logistics").get("lines",[]))
 	_great_work_line(lines,"Logistics")
-	lines.append(_cost_line("Logistics",carriers))
+	lines.append(_cost_line("Logistics"))
 	return {"lead":"Carriers fetch the water, haul materials from the deposits, stock and staff the stores, and keep soldiers supplied.","lines":lines}
 
 
@@ -585,7 +585,7 @@ static func knowledge()->Dictionary:
 		lines.append(_line("Tending the Shrine House","%d of 100" % roundi(minf(1.0,tended)*100.0),
 			"The Shrine House does its full good only while learners tend it, 1 in 100 of the people (%s would)." % _count(ceili(pop*CIVIC.SHRINE_KEEPERS_SHARE)),"good" if tended>=1.0 else "bad"))
 	_great_work_line(lines,"Knowledge")
-	lines.append(_cost_line("Knowledge",keepers))
+	lines.append(_cost_line("Knowledge"))
 	return {"lead":"Learners watch, remember and try things out. They carry the research lines forward and teach new ways to everyone else. Every learner counts; they eat, use goods and make no food.","lines":lines}
 
 
@@ -631,7 +631,7 @@ static func administration()->Dictionary:
 	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
 	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Administration").get("lines",[]))
 	_great_work_line(lines,"Administration")
-	lines.append(_cost_line("Administration",stewards))
+	lines.append(_cost_line("Administration"))
 	return {"lead":"Keepers keep the stores and tallies, settle quarrels, take in newcomers and carry the chiefs' word.","lines":lines}
 
 
@@ -686,7 +686,7 @@ static func defense()->Dictionary:
 	lines.append(_line("Enforcing orders","%d of 100" % roundi(enforce*100.0),
 		"Orders that need force are carried out as far as the watch and safety allow, and the court can punish at most %d people a year." % punish,"good" if enforce>=0.5 else "plain"))
 	_great_work_line(lines,"Defense")
-	lines.append(_cost_line("Defense",watch))
+	lines.append(_cost_line("Defense"))
 	return {"lead":"The watch guards the town day and night: it keeps the peace, stands as the home guard, trains soldiers and builds the defences.","lines":lines}
 
 
@@ -721,8 +721,12 @@ static func _great_work_line(lines:Array,role:String)->void:
 	if bonus<=0.0:return
 	lines.append(_line("Great works","+%d in 100" % roundi(bonus*100.0),"A great work that favours this work makes each person on it count for %d in 100 more." % roundi(bonus*100.0),"good"))
 
-## The food a task's people eat beyond the everyday ration, and what injuries leave.
-static func _cost_line(role:String,workers:float)->Dictionary:
+## The food a task's people eat beyond the everyday ration (every head set
+## to it, as food_system.gd counts them), and what injuries leave.
+static func _cost_line(role:String)->Dictionary:
+	# Food for the work is eaten by every head set to it (food_system.gd counts
+	# the role's people, not the work they get done).
+	var workers:=_raw(role)
 	var extra:=float(EXERTION.get(role,0.02))
 	var kept:Vector2=Injuries.RETAINED_CAPACITY.get(role,Vector2(.85,.65))
 	return _line("What it costs","%s rations a day" % _one(workers*extra),

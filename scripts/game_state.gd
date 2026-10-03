@@ -1771,7 +1771,17 @@ func civilian_workforce_fraction()->float:
 	var displaced:=maxf(0,float(committed)-float(population_allocations.get("Defense",0)))
 	return clampf(1.0-displaced/civilian,0.0,1.0)
 
-func effective_workers(role:String,include_military_construction:bool=false,include_clinical_care:bool=false,include_civic_records:bool=false,include_microscopy:bool=false)->float:
+## The people at a work today, as heads: the hurt, the absent and the
+## reserved counted as effective_workers counts them, but not what makes each
+## of them count for more (a great work's favour, a gifted person). Wages and
+## head counts read this; the work's output reads effective_workers.
+func workers_at(role:String)->float:
+	return effective_workers(role,false,false,false,false,false)
+
+## The work a role does today, in workers: the people at it (the hurt count
+## less, the absent and the reserved not at all), each counting for more
+## where a great work favours it or a gifted person leads it (`include_lifts`).
+func effective_workers(role:String,include_military_construction:bool=false,include_clinical_care:bool=false,include_civic_records:bool=false,include_microscopy:bool=false,include_lifts:bool=true)->float:
 	var civilian_workers:=0.0
 	for value in population_allocations.values(): civilian_workers+=maxf(0,float(value))
 	var capacity:=PermanentInjuries.effective(float(population_allocations.get(role,0)),role,civilian_injuries if resource_settlement_id.is_empty() else {},civilian_workers)
@@ -1782,12 +1792,15 @@ func effective_workers(role:String,include_military_construction:bool=false,incl
 	if role=="Knowledge" and not include_clinical_care and not include_microscopy:capacity=maxf(0,capacity-preload("res://scripts/microscopy_lab.gd").reserved(self,capacity))
 	if role=="Administration" and not include_civic_records:capacity=maxf(0,capacity-preload("res://scripts/civic_administration.gd").reserved(self,capacity))
 	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/technology_operations.gd").reserved_workers(self))
-	capacity*=1.0+preload("res://scripts/undertaking_system.gd").benefit(self,role)
-	# A grown genius of this work makes each person on it count for more (geniuses.gd).
-	capacity*=1.0+preload("res://scripts/geniuses.gd").bonus(self,role)
-	# Makers on arms give the whole day to them (civilian_goods.gd arms_hands):
-	# counted as the makers' day is, every bonus in.
-	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/civilian_goods.gd").arms_hands(self))
+	var lifts:=1.0
+	if include_lifts or role=="Crafting":lifts=(1.0+preload("res://scripts/undertaking_system.gd").benefit(self,role))*(1.0+preload("res://scripts/geniuses.gd").bonus(self,role))
+	if include_lifts:
+		# A great work favouring it, and a grown genius of this work, make each
+		# person on it count for more (undertaking_system.gd, geniuses.gd).
+		capacity*=lifts
+	# Makers on arms give the whole day to them (civilian_goods.gd arms_hands,
+	# counted as the makers' day is, every lift in; as heads without them).
+	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/civilian_goods.gd").arms_hands(self)/(1.0 if include_lifts else maxf(0.0001,lifts)))
 	if role=="Construction":capacity*=1.0-preload("res://scripts/undertaking_system.gd").share(self)
 	return capacity
 
