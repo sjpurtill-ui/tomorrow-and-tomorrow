@@ -836,7 +836,7 @@ func _build_stakes()->void:
 	panel.add_theme_stylebox_override("panel",style);stakes_box.add_child(panel)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",3);panel.add_child(box)
 	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);box.add_child(head)
-	var kicker:=Tokens.make_label("WHAT YOU STAND TO GAIN",12,Tokens.INK_MUTED,.12);kicker.name="StakesKicker";kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(kicker)
+	var kicker:=Tokens.make_label(String(weighed.get("title","WHAT YOU STAND TO GAIN")),12,Tokens.INK_MUTED,.12);kicker.name="StakesKicker";kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(kicker)
 	var full:=Stakes.tip(weighed)
 	if folded:
 		# One line: all of it, as far as it fits (the whole of it a click or a
@@ -2157,6 +2157,8 @@ func _build_envoy_view(audience:Dictionary)->void:
 	column.add_child(business_label)
 	scene_note=Tokens.make_label("",13,Tokens.RED);scene_note.name="SceneNote";scene_note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;scene_note.visible=false
 	column.add_child(scene_note)
+	# The deal as each side counts it (envoy_deals.gd), just above the answers.
+	stakes_box=VBoxContainer.new();stakes_box.name="Stakes";stakes_box.visible=false;column.add_child(stakes_box)
 	options_row=HBoxContainer.new();options_row.name="Options";options_row.add_theme_constant_override("separation",12);column.add_child(options_row)
 	persons_row=HBoxContainer.new();persons_row.name="PersonsRow";persons_row.visible=false;column.add_child(persons_row)
 	outcome_box=VBoxContainer.new();outcome_box.name="Outcome";outcome_box.add_theme_constant_override("separation",8);outcome_box.visible=false;column.add_child(outcome_box)

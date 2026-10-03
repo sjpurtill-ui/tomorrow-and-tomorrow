@@ -1854,6 +1854,8 @@ func civilian_workforce_fraction()->float:
 	if civilian<=0:return 0.0
 	var committed:=WorldSimulation.military._mobilized_count() if WorldSimulation.military!=null else 0
 	var displaced:=maxf(0,float(committed)-float(population_allocations.get("Defense",0)))
+	# Hands lent abroad on an envoy's business are away from work too (lent_hands.gd).
+	if WorldSimulation.actor_id=="player":displaced+=preload("res://scripts/lent_hands.gd").away(int(elapsed_days))
 	return clampf(1.0-displaced/civilian,0.0,1.0)
 
 ## The people at a work today, as heads: the hurt, the absent and the

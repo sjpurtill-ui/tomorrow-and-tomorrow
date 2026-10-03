@@ -17,6 +17,8 @@ extends RefCounted
 const Hall:=preload("res://scripts/audience_hall.gd")
 const CV:=preload("res://scripts/character_voice.gd")
 const Plain:=preload("res://scripts/plain_speech.gd")
+const DV:=preload("res://scripts/deal_value.gd")
+const Deals:=preload("res://scripts/envoy_deals.gd")
 
 const MAX_COMPLETION_TOKENS:=420
 const TIMEOUT_SECONDS:=12.0
@@ -247,14 +249,19 @@ const ANSWER_CONFIDENCE:=0.6
 const ANSWER_SYSTEM:="""A god-ruler has answered a foreign envoy's request in their own words. Decide which of the listed ANSWERS those words give.
 - answer: the id of the answer the words clearly choose. If the words ask a question, make conversation, or do not settle the request, answer "talk".
 - share: if the ruler gives only part of the goods named in the answer, the fraction given (0.1 to 1); otherwise 1.
-- repay: if the ruler asks to be repaid in a different good, that good; otherwise "none".
+- repay: if the ruler asks to be repaid or paid in a different good (for a counter, the good asked instead), that good; otherwise "none".
+- amount: if the ruler names how much of a good they want for a counter, that number; otherwise 0.
 - confidence: 0 to 1, how sure you are.
-Reply with JSON only: {"answer":"...","share":1,"repay":"none","confidence":0.9}"""
+Reply with JSON only: {"answer":"...","share":1,"repay":"none","amount":0,"confidence":0.9}"""
 
 static func answer_ids(audience:Dictionary)->Array:
 	var ids:Array=[]
 	for option in Hall._requests().call("options",audience):
 		if bool((option as Dictionary).get("enabled",true)): ids.append(String(option.id))
+	# Counters may be asked in words where the card offers none (envoy_deals.gd).
+	var type:=Hall._situation_type(audience)
+	if type in Deals.COUNTER_GOOD and not "counter_good" in ids: ids.append("counter_good")
+	if type in Deals.COUNTER_MORE and not "counter_more" in ids: ids.append("counter_more")
 	return ids
 
 static func answer_payload(audience:Dictionary,text:String,config:Dictionary)->Dictionary:
@@ -264,16 +271,21 @@ static func answer_payload(audience:Dictionary,text:String,config:Dictionary)->D
 	lines.append("ANSWERS:")
 	for option in Hall._requests().call("options",audience):
 		if bool((option as Dictionary).get("enabled",true)): lines.append("- %s: %s. %s" % [String(option.id),String(option.label),String(option.sub)])
+	var listed:=answer_ids(audience)
+	var shown:=PackedStringArray()
+	for option in Hall._requests().call("options",audience): shown.append(String(option.id))
+	if "counter_good" in listed and not "counter_good" in shown: lines.append("- counter_good: ask to be paid in another good instead (name it in repay, and the amount if one is named).")
+	if "counter_more" in listed and not "counter_more" in shown: lines.append("- counter_more: ask for more of the same payment (the amount if one is named).")
 	lines.append("- talk: the words do not settle the request.")
-	lines.append("GOODS: "+", ".join(PackedStringArray(Hall.RESOURCES)))
+	lines.append("GOODS: "+", ".join(PackedStringArray(DV.GOODS)))
 	lines.append("THE RULER SAID: <<%s>>" % text.strip_edges().replace("\n"," ").substr(0,400))
 	var ids:=answer_ids(audience)+["talk"]
 	var payload:={"model":String(config.get("model","")),"max_completion_tokens":ANSWER_MAX_TOKENS,"messages":[
 		{"role":"system","content":ANSWER_SYSTEM},{"role":"user","content":"\n".join(lines)}]}
 	if "api.openai.com" in String(config.get("endpoint","")).to_lower(): payload["reasoning_effort"]="low"
 	if bool(config.get("structured_output",false)):
-		payload["response_format"]={"type":"json_schema","json_schema":{"name":"envoy_answer","strict":true,"schema":{"type":"object","additionalProperties":false,"required":["answer","share","repay","confidence"],
-			"properties":{"answer":{"type":"string","enum":ids},"share":{"type":"number"},"repay":{"type":"string","enum":(Hall.RESOURCES as Array)+["none"]},"confidence":{"type":"number"}}}}}
+		payload["response_format"]={"type":"json_schema","json_schema":{"name":"envoy_answer","strict":true,"schema":{"type":"object","additionalProperties":false,"required":["answer","share","repay","amount","confidence"],
+			"properties":{"answer":{"type":"string","enum":ids},"share":{"type":"number"},"repay":{"type":"string","enum":(DV.GOODS as Array)+["none"]},"amount":{"type":"number"},"confidence":{"type":"number"}}}}}
 	return payload
 
 static func read_answer(parsed:Dictionary,audience:Dictionary)->Dictionary:
@@ -287,7 +299,13 @@ static func read_answer(parsed:Dictionary,audience:Dictionary)->Dictionary:
 	var share:Variant=parsed.get("share",1.0)
 	if (share is float or share is int) and float(share)>0.0 and float(share)<0.99 and answer in ["accept","gift"]: out["share"]=clampf(float(share),0.1,1.0)
 	var repay:=String(parsed.get("repay","none"))
-	if repay in Hall.RESOURCES and Hall._situation_type(audience)=="food_loan" and answer in ["accept","partial"] and repay!="Food": out["repay_res"]=repay
+	if repay in DV.GOODS and Hall._situation_type(audience)=="food_loan" and answer in ["accept","partial"] and repay!="Food": out["repay_res"]=repay
+	# A counter read from the god's words goes through the same rules as the
+	# card's (envoy_deals.terms), checked again when it is answered.
+	if answer.begins_with("counter_"):
+		if repay in DV.GOODS: out["ask_res"]=repay
+		var amount:Variant=parsed.get("amount",0)
+		if (amount is float or amount is int) and float(amount)>0.0: out["ask_amt"]=float(amount)
 	return out
 
 static func _refresh_ledger(audience:Dictionary)->void:

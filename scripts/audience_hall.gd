@@ -109,7 +109,8 @@ const PERSON_CRISIS_GAP:=90
 const REPEAT_DAYS:=1095
 const LEDGER_MAX:=240
 const OCCASIONS_MAX:=48
-const SITUATION_JSON_MAX:=4000
+## Room for a request's deal as each side counts it (envoy_deals.gd) beside its words.
+const SITUATION_JSON_MAX:=5000
 ## Waiting audiences a legacy save keeps when it is calmed on load.
 const MIGRATION_KEEP:=2
 ## Matters: what the court would raise if summoned. Only foreign envoys come
@@ -1315,6 +1316,12 @@ static func _add_sequel(audience:Dictionary,option_id:String,day:int)->void:
 	# heard or a proposal answered is finished; their next envoy waits for new
 	# business.
 	var harmed:=option_id.begins_with("envoy_")
+	# A refusal light enough (a deal poor for us, envoy_deals.gd) brings them
+	# back cooler, as a courteous decline does, never with a demand.
+	if option_id=="refuse" and bool(_requests().call("soft_refusal",audience)): option_id="decline"
+	# A counter is what it came to: agreed, the request taken; refused, a
+	# courteous no (envoy_requests.effective_option).
+	option_id=String(_requests().call("effective_option",audience,option_id))
 	var refused:=option_id in ["refuse","rebuff","rebuke","abstain","dismiss","ignored","expired","defy","stand","decline","counter"]
 	var threat_paid:=String(audience.get("kind",""))=="threat" and option_id=="pay"
 	var aid_given:=(_situation_type(audience)=="aid_request" and option_id in ["grant","grant_half"]) or bool(_requests().call("brings_sequel",_situation_type(audience),option_id))
@@ -1523,7 +1530,9 @@ static func _foreign_candidates(civ_id:String,occasion:Dictionary,rng:RandomNumb
 			if mix.has(situation_type): continue
 			var candidate:Dictionary=er.call("candidate",situation_type,civ_id,occasion,wider,used,day)
 			if candidate.is_empty(): continue
-			candidate["w"]=float(extra[situation_type])*float(er.call("temperament",situation_type,civ_id))*float(_lives().call("dread_weight",situation_type,civ_id))
+			# A deal poor for us (a food payment to a people drowning in food) comes
+			# less often: its appeal, from envoy_deals.gd (0.3 to 1).
+			candidate["w"]=float(extra[situation_type])*float(er.call("temperament",situation_type,civ_id))*float(_lives().call("dread_weight",situation_type,civ_id))*float(candidate.get("appeal",1.0))
 			result.append(candidate)
 	# Variety: the same business (or family of business) back to back grows unlikely.
 	for candidate in result:
@@ -2022,6 +2031,9 @@ static func _gift_terms(civ_id:String,civ:Dictionary,rng:RandomNumberGenerator,u
 		var amount:=_nice(minf(stock*rng.randf_range(0.05,0.12)*scale,cap*rng.randf_range(0.7,1.2)))
 		if amount<5.0 or amount>stock: continue
 		var score:=amount/maxf(1.0,cap)*rng.randf_range(0.6,1.4)*pow(0.4,float(recent.get(String(resource),0)))
+		# A gift is chosen for what it is worth to us: food to a people drowning
+		# in food is seldom sent (deal_value.gd).
+		score*=preload("res://scripts/deal_value.gd").unit_worth("player",String(resource))/maxf(0.01,preload("res://scripts/trade_prices.gd").value(String(resource),"player"))
 		if score>best_score: best_score=score; best={"resource":resource,"amount":amount}
 	return best
 
@@ -3402,6 +3414,10 @@ static func voice_context(id:String)->Dictionary:
 			"trust":_words(float(leader.get("trust",0)),[[-0.3,"distrustful"],[0.1,"undecided"],[1e9,"trusting"]]),"character":_rivals().call("prompt_view",String(audience.civ_id))}
 		var regard:=DIVINE.foreign_regard(String(audience.civ_id))
 		if not regard.is_empty(): context["their_regard"]={"reads":"they "+String(regard.read),"reverence":_band_word(float(regard.love)),"dread":_band_word(float(regard.dread))}
+		# What the deal is worth to each side, as the engine counts it
+		# (envoy_deals.gd): a live voice states these when asked.
+		var deal:Dictionary=_stakes().call("voice_facts",stakes(id))
+		if not deal.is_empty(): context["stakes"]=deal
 	else:
 		if audience.kind in WORK_KINDS:
 			var gwa:=_great_works()

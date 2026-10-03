@@ -329,7 +329,8 @@ func test_typed_words_choose_the_same_bounded_answers()->void:
 	assert_dict(loan).is_not_empty()
 	var read:=ER.typed_choice(loan,"Lend them half and ask for flint back")
 	assert_str(String(read.get("option",""))).is_equal("partial")
-	assert_str(String(read.get("repay_res",""))).is_equal("Stone")
+	# Flint is its own good on the trade ledger (trade_prices STANDS_ON), not stone.
+	assert_str(String(read.get("repay_res",""))).is_equal("Flint")
 	assert_str(String(ER.typed_choice(loan,"Do not lend them anything.").get("option",""))).is_equal("refuse")
 	assert_str(String(ER.typed_choice(loan,"Give it to them freely, ask nothing back").get("option",""))).is_equal("gift")
 	assert_dict(ER.typed_choice(loan,"How long have they been hungry?")).is_empty()
