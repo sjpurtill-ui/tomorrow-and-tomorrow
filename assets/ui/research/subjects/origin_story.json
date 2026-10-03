@@ -1,0 +1,53 @@
+{
+  "id": "origin_story",
+  "line": "culture",
+  "status": "new",
+  "name": "Origin Story",
+  "one_liner": "Origin story: how the people and their god came to this land",
+  "observation": "Origin story: how the people and their god came to this land.",
+  "key_threshold": false,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 14,
+  "band_high": 40,
+  "min_year": 14,
+  "research_years": 4,
+  "requires_all": [
+    "oral_epics",
+    "hearth_shrine_offerings"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "named_landmark_lore"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Collective memory",
+  "signals": [
+    "society",
+    "information"
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/discovery-600/origin_story.png",
+    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+    "tile_index": 8,
+    "caption": "Origin story: how the people and their god came to this land (Year 28)",
+    "style": "silhouette_ochre"
+  },
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "culture: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/culture-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established culture medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: An elder storyteller at a small low hearth gestures toward a distinctive forked hill across a plain, three listeners sit nearby in simple hide wraps; the hill links the spoken story to the place. Tapestry-inspired PAINTING, flat interlocking indigo/rose/gold/violet shapes, not woven fabric. No text, supernatural glowing apparition, elaborate priest robes or later ornaments.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d3013398-5a72-4fef-bab8-16555a40ca4e.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/origin_story-v2.png",
+  "sha256": "70a129135baec16eb8e09ac0655dd2f01ed9a3c154860903a166d2cfe5d503c8",
+  "mode": "built-in image_gen / edit"
+}

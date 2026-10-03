@@ -1,12 +1,51 @@
 {
   "id": "dry_stone_walls",
   "line": "infrastructure",
-  "game_year": 28,
-  "approx_historical_year": -4813,
-  "prompt": "c. 4813 BCE: Adults stack irregular local stones without mortar into low goat pens and stepped terrace walls; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5ef57b11-15e2-4bb4-a412-b09e1fe72a21.png",
-  "asset": "res://assets/ui/research/subjects/dry_stone_walls-v1.png",
-  "sha256": "c44dd9ba2c8dea32127f603afe230e5886676902a9728b15c868372e8f4882ad",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; unmortared wall courses, pen and terrace clear in crop."
+  "status": "new",
+  "name": "Dry-stone Walls for Pens and Terraces",
+  "one_liner": "Dry-stone walls for pens and terraces",
+  "observation": "Dry-stone walls for pens and terraces.",
+  "key_threshold": false,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 12,
+  "band_high": 38,
+  "min_year": 12,
+  "research_years": 3,
+  "requires_all": [
+    "stone_sorting",
+    "sightline_staking"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Public works",
+  "signals": [
+    "construction",
+    "materials"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/dry_stone_walls-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "infrastructure: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/infrastructure-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established infrastructure medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults fit rough uncut field stones into a low waist-high wall around a tiny goat pen; loose small infill stones and stable broader base visible, no mortar. Matte mineral-blue/limestone casein. No ashlar, towers, battlements, lime cement, brick or sophisticated masonry.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d0c456b3-1796-4f33-88c5-4a463342e80a.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/dry_stone_walls-v2.png",
+  "sha256": "802bd969ea57e1aaea288441822de259eda3d0c8f75522947fe44e3c5e72d833",
+  "mode": "built-in image_gen / edit"
 }

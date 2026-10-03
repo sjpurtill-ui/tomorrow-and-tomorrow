@@ -1,0 +1,12 @@
+{
+  "id": "work_party_feasts",
+  "line": "labor",
+  "game_year": 28,
+  "approx_historical_year": -4813,
+  "prompt": "c. 4813 BCE: Neighbors share modest feast after completing communal reed-shelter work; expressive charcoal and red ochre. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b0bb1135-4654-4802-8054-210bf4c36c29.png",
+  "asset": "res://assets/ui/research/subjects/work_party_feasts-v1.png",
+  "sha256": "4489bf9eaba073e680c4b60315905138da689d26e8d830e4283df5912b8dc702",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; finished work and reciprocal meal clear in crop."
+}

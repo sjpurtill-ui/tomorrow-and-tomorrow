@@ -1,0 +1,12 @@
+{
+  "id": "dry_stone_walls",
+  "line": "infrastructure",
+  "game_year": 28,
+  "approx_historical_year": -4813,
+  "prompt": "c. 4813 BCE: Adults stack irregular local stones without mortar into low goat pens and stepped terrace walls; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5ef57b11-15e2-4bb4-a412-b09e1fe72a21.png",
+  "asset": "res://assets/ui/research/subjects/dry_stone_walls-v1.png",
+  "sha256": "c44dd9ba2c8dea32127f603afe230e5886676902a9728b15c868372e8f4882ad",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; unmortared wall courses, pen and terrace clear in crop."
+}

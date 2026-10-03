@@ -325,8 +325,12 @@
     ]
   },
   "timber_seasoning": {
-    "path": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
+    "path": "res://assets/ui/research/subjects/timber_seasoning-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -622,10 +626,14 @@
     ]
   },
   "crop_calendars": {
-    "path": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+    "path": "res://assets/ui/research/subjects/crop_calendars-v2.png",
     "focus": [
       0.5,
-      0.36
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "managed_fallow": {
@@ -2269,10 +2277,14 @@
     ]
   },
   "thatched_roofing": {
-    "path": "res://assets/ui/research/paper/thatched_roofing.png",
+    "path": "res://assets/ui/research/subjects/thatched_roofing-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.35
+    ],
+    "opening_focus": [
+      0.5,
+      0.35
     ]
   },
   "fired_roof_tiles": {
@@ -2494,10 +2506,14 @@
     ]
   },
   "bow_drill_drive": {
-    "path": "res://assets/ui/research/paper/bow_drill_drive.png",
+    "path": "res://assets/ui/research/subjects/bow_drill_drive-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "treadle_lathe_drive": {
@@ -6528,49 +6544,49 @@
     ]
   },
   "dry_stone_walls": {
-    "path": "res://assets/ui/research/subjects/dry_stone_walls-v1.png",
+    "path": "res://assets/ui/research/subjects/dry_stone_walls-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "firebreaks": {
-    "path": "res://assets/ui/research/subjects/firebreaks-v1.png",
+    "path": "res://assets/ui/research/subjects/firebreaks-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.35
     ]
   },
   "kin_care_widows_orphans": {
-    "path": "res://assets/ui/research/subjects/kin_care_widows_orphans-v1.png",
+    "path": "res://assets/ui/research/subjects/kin_care_widows_orphans-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "petition_speakers": {
-    "path": "res://assets/ui/research/subjects/petition_speakers-v1.png",
+    "path": "res://assets/ui/research/subjects/petition_speakers-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "portage_paths": {
-    "path": "res://assets/ui/research/subjects/portage_paths-v1.png",
+    "path": "res://assets/ui/research/subjects/portage_paths-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "purges_emetics": {
-    "path": "res://assets/ui/research/subjects/purges_emetics-v1.png",
+    "path": "res://assets/ui/research/subjects/purges_emetics-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "work_party_feasts": {
-    "path": "res://assets/ui/research/subjects/work_party_feasts-v1.png",
+    "path": "res://assets/ui/research/subjects/work_party_feasts-v2.png",
     "focus": [
       0.5,
       0.5
@@ -10069,6 +10085,35 @@
     "focus": [
       0.5,
       0.5
+    ]
+  },
+  "indirect_solar_food_drying": {
+    "path": "res://assets/ui/research/subjects/indirect_solar_food_drying-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "origin_story": {
+    "path": "res://assets/ui/research/subjects/origin_story-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "threshing_frames": {
+    "path": "res://assets/ui/research/subjects/threshing_frames-v2.png",
+    "focus": [
+      0.5,
+      0.35
+    ],
+    "opening_focus": [
+      0.5,
+      0.35
     ]
   }
 }

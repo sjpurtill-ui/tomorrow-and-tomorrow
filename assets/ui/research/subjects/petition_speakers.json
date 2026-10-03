@@ -1,12 +1,51 @@
 {
   "id": "petition_speakers",
   "line": "institutions",
-  "game_year": 28,
-  "approx_historical_year": -4813,
-  "prompt": "c. 4813 BCE: Chosen speakers carry household oral petitions to revered living spiritual leader seated on plain stone; archaic mineral civic fresco. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-cbf34ccd-206e-4504-92af-ea8baa73214e.png",
-  "asset": "res://assets/ui/research/subjects/petition_speakers-v1.png",
-  "sha256": "7bbf6724b6c783dc9d3145792e43c54e6e9bfeb15d67cb2e71d901760e65e29c",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; speaker delegation, leader and households clear; no later temple/writing."
+  "status": "new",
+  "name": "Speakers Carry Household Petitions to the Living God",
+  "one_liner": "Speakers carry household petitions to the living god",
+  "observation": "Speakers carry household petitions to the living god.",
+  "key_threshold": false,
+  "target_year": 28,
+  "proposed_year": 28,
+  "band_low": 15,
+  "band_high": 40,
+  "min_year": 15,
+  "research_years": 3,
+  "requires_all": [
+    "hearth_shrine_offerings",
+    "household_councils"
+  ],
+  "requires_any": [],
+  "precedents": [],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Institutional flexibility",
+  "signals": [
+    "administration",
+    "society"
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "path": "res://assets/ui/research/subjects/petition_speakers-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "version": 2,
+  "year": 28,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "binding_style": "institutions: established field painting",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/institutions-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established institutions medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: A household speaker addresses three listening adults beside a modest hearth shrine of three uncarved stones and small seed offering. One open-hand speaking gesture, companion holds a simple basket, quiet attentive exchange. Matte fresco dusty plum/limestone/muted gold. Their living god is addressed through this hearth setting, no giant deity, throne, temple, crown, scroll, letter or written petition.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26\u201328: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fedd0e40-5fec-427f-81d6-167a1859767a.png",
+  "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds.",
+  "asset": "res://assets/ui/research/subjects/petition_speakers-v2.png",
+  "sha256": "34f45d58e9f9f243df3a8cba336002aaa33f2628bb6fe3d6eb65e9ede4cc8158",
+  "mode": "built-in image_gen / edit"
 }

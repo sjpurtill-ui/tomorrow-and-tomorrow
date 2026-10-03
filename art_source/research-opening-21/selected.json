@@ -1,0 +1,640 @@
+[
+  {
+    "id": "timber_seasoning",
+    "line": "production",
+    "status": "catalog",
+    "name": "Timber Barked, Stacked and Seasoned",
+    "one_liner": "Timber barked, stacked and seasoned",
+    "observation": "Timber barked, stacked and seasoned.",
+    "key_threshold": false,
+    "target_year": 26,
+    "proposed_year": 26,
+    "band_low": 14,
+    "band_high": 35,
+    "min_year": 14,
+    "research_years": 3,
+    "requires_all": [
+      "timber_grading",
+      "ground_stone_axes"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/timber_seasoning-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    },
+    "version": 2,
+    "year": 26,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "production: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established production medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults scrape bark from rough felled wooden poles with blunt ground-stone tools beside a small airy stack separated by short branch spacers on dry ground. Flat angular palette-knife copper/ember/soot planes. No metal blades, saw-cut planks, lumberyard, nailed rack or factory.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-34865a4c-c262-4f85-b954-53ef0df36401.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "thatched_roofing",
+    "line": "infrastructure",
+    "status": "catalog",
+    "name": "Reed and Straw Thatch",
+    "one_liner": "Reed and straw thatch",
+    "observation": "Reed and straw thatch.",
+    "key_threshold": false,
+    "target_year": 26,
+    "proposed_year": 26,
+    "band_low": 10,
+    "band_high": 35,
+    "min_year": 10,
+    "research_years": 3,
+    "requires_all": [
+      "framed_construction",
+      "cordage"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/thatched_roofing.png",
+    "version": 2,
+    "year": 26,
+    "focus": [
+      0.5,
+      0.35
+    ],
+    "binding_style": "infrastructure: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/infrastructure-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established infrastructure medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults attach overlapping bundles of reeds with coarse cord to a low partly exposed roof frame; one kneels near roof edge while another hands up a bundle. Modest small earthen dwelling, complete main heads below upper band. Matte casein mineral blue/limestone. No tiles, metal fasteners, woven clothing, multi-storey building or ladders of finished lumber.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-891ff8df-5af0-4aa2-9c05-e7a76d57914e.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "indirect_solar_food_drying",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Shaded Drying Racks",
+    "one_liner": "Shaded drying racks",
+    "observation": "Shaded drying racks.",
+    "key_threshold": false,
+    "target_year": 26,
+    "proposed_year": 26,
+    "band_low": 16,
+    "band_high": 41,
+    "min_year": 16,
+    "research_years": 2,
+    "requires_all": [
+      "food_drying"
+    ],
+    "requires_any": [
+      [
+        "framed_construction",
+        "basketry"
+      ]
+    ],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/first300-cards/indirect_solar_food_drying.tres",
+    "version": 2,
+    "year": 26,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "nutrition: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established nutrition medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults arrange thin slices of roots and small fish on coarse reed trays inside a low open-sided branch shelter under shade; sunlight falls on surrounding ground, air moves through open sides. Opaque botanical egg-tempera olive/gold/cream. No glass solar collector, chimney, greenhouse, fan, machine or smoking fire.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-516e6095-ee19-45c9-9068-348a22774314.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "crop_calendars",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Crop Calendar for Sowing and Harvest",
+    "one_liner": "Crop calendar for sowing and harvest",
+    "observation": "Crop calendar for sowing and harvest.",
+    "key_threshold": false,
+    "target_year": 27,
+    "proposed_year": 27,
+    "band_low": 17,
+    "band_high": 42,
+    "min_year": 17,
+    "research_years": 3,
+    "requires_all": [
+      "seed_selection",
+      "moon_counting"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "phenology_signs"
+    ],
+    "conditions": {},
+    "shared_with": [
+      "ecology"
+    ],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/crop_calendars-v1.png",
+      "focus": [
+        0.5,
+        0.36
+      ]
+    },
+    "version": 2,
+    "year": 27,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "nutrition: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established nutrition medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults compare a short rough notched stick with flowering stalks and a small basket of selected seeds near a few freshly prepared planting hollows; one gestures between seedlings and ripe seed heads laid nearby. Opaque botanical egg-tempera olive/gold/cream. NO written calendar, numerals, seasonal split panels, four moons, plough, neat vast fields or modern chart.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ebeeddca-55a0-4c5d-91a0-0dbf3951c1da.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "petition_speakers",
+    "line": "institutions",
+    "status": "new",
+    "name": "Speakers Carry Household Petitions to the Living God",
+    "one_liner": "Speakers carry household petitions to the living god",
+    "observation": "Speakers carry household petitions to the living god.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 15,
+    "band_high": 40,
+    "min_year": 15,
+    "research_years": 3,
+    "requires_all": [
+      "hearth_shrine_offerings",
+      "household_councils"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Institutional flexibility",
+    "signals": [
+      "administration",
+      "society"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/petition_speakers-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    },
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "institutions: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/institutions-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established institutions medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: A household speaker addresses three listening adults beside a modest hearth shrine of three uncarved stones and small seed offering. One open-hand speaking gesture, companion holds a simple basket, quiet attentive exchange. Matte fresco dusty plum/limestone/muted gold. Their living god is addressed through this hearth setting, no giant deity, throne, temple, crown, scroll, letter or written petition.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fedd0e40-5fec-427f-81d6-167a1859767a.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "origin_story",
+    "line": "culture",
+    "status": "new",
+    "name": "Origin Story",
+    "one_liner": "Origin story: how the people and their god came to this land",
+    "observation": "Origin story: how the people and their god came to this land.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 14,
+    "band_high": 40,
+    "min_year": 14,
+    "research_years": 4,
+    "requires_all": [
+      "oral_epics",
+      "hearth_shrine_offerings"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "named_landmark_lore"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Collective memory",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/discovery-600/origin_story.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
+      "tile_index": 8,
+      "caption": "Origin story: how the people and their god came to this land (Year 28)",
+      "style": "silhouette_ochre"
+    },
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "culture: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/culture-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established culture medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: An elder storyteller at a small low hearth gestures toward a distinctive forked hill across a plain, three listeners sit nearby in simple hide wraps; the hill links the spoken story to the place. Tapestry-inspired PAINTING, flat interlocking indigo/rose/gold/violet shapes, not woven fabric. No text, supernatural glowing apparition, elaborate priest robes or later ornaments.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d3013398-5a72-4fef-bab8-16555a40ca4e.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "work_party_feasts",
+    "line": "labor",
+    "status": "new",
+    "name": "Neighbour Work Party Repaid with a Feast",
+    "one_liner": "Neighbour work party repaid with a feast",
+    "observation": "Neighbour work party repaid with a feast.",
+    "key_threshold": true,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 12,
+    "band_high": 38,
+    "min_year": 12,
+    "research_years": 3,
+    "requires_all": [
+      "labor_rotations",
+      "reciprocal_gift_exchange"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "communal_work_songs",
+      "shared_hearth_gatherings"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Able workforce",
+    "signals": [
+      "administration",
+      "training"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/work_party_feasts-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    },
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "labor: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/labor-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established labor medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Four adults seated on hides share modest bowls of cooked roots and grain after work; nearby small stack of gathered poles and digging sticks shows completed labor. One adult passes a plain clay bowl to a resting neighbor. Charcoal over ochre, gestural silhouettes. No banquet hall, throne, fancy table, alcohol, metal cutlery, textile robes or giant village.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1754593e-7c7b-47c8-ad81-4baf17e29c47.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "bow_drill_drive",
+    "line": "production",
+    "status": "catalog",
+    "name": "Bow Drill for Beads, Wood and Stone",
+    "one_liner": "Bow drill for beads, wood and stone",
+    "observation": "Bow drill for beads, wood and stone.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 15,
+    "band_high": 38,
+    "min_year": 15,
+    "research_years": 3,
+    "requires_all": [
+      "cordage"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "friction_fire_ignition",
+      "controlled_flaking"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": "res://assets/ui/research/paper/bow_drill_drive.png",
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "production: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established production medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: ONE kneeling craftsperson with EXACTLY TWO hands uses a crude bow drill to bore a small wooden piece. Upper hand presses a palm-sized stone socket on a vertical wooden spindle; other hand moves the curved branch bow horizontally, its coarse cord wound once around spindle. Workpiece supported on low stone. No fire needed. Flat angular palette-knife copper/ember/soot. No metal bit, wheel, carpentry bench, three hands, oversized hunting bow or loose unconnected spindle.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-fce20244-550b-4345-95a7-8b71538b519c.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "dry_stone_walls",
+    "line": "infrastructure",
+    "status": "new",
+    "name": "Dry-stone Walls for Pens and Terraces",
+    "one_liner": "Dry-stone walls for pens and terraces",
+    "observation": "Dry-stone walls for pens and terraces.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 12,
+    "band_high": 38,
+    "min_year": 12,
+    "research_years": 3,
+    "requires_all": [
+      "stone_sorting",
+      "sightline_staking"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public works",
+    "signals": [
+      "construction",
+      "materials"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/dry_stone_walls-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    },
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "infrastructure: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/infrastructure-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established infrastructure medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults fit rough uncut field stones into a low waist-high wall around a tiny goat pen; loose small infill stones and stable broader base visible, no mortar. Matte mineral-blue/limestone casein. No ashlar, towers, battlements, lime cement, brick or sophisticated masonry.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d0c456b3-1796-4f33-88c5-4a463342e80a.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "threshing_frames",
+    "line": "nutrition",
+    "status": "catalog",
+    "name": "Threshing on Beaten Floors",
+    "one_liner": "Threshing on beaten floors",
+    "observation": "Threshing on beaten floors.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 18,
+    "band_high": 43,
+    "min_year": 18,
+    "research_years": 3,
+    "requires_all": [
+      "seed_selection"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "grain_moisture_watch",
+      "site_clearing_assessment"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {},
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.35
+    ],
+    "binding_style": "nutrition: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established nutrition medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults use simple straight wooden beating sticks on dry grain stalks laid on a small smooth beaten-earth clearing; a third gathers loose separated grain beside a coarse basket. Opaque botanical egg-tempera olive/gold/cream. This live discovery is threshing on beaten floors, NOT a later threshing machine. No hinged flail, animal treadmill, metal tools, invented frame apparatus or plough.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-22e18f91-c8f1-4d6e-87f8-4f6ea6397f82.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "purges_emetics",
+    "line": "health",
+    "status": "new",
+    "name": "Purges and Emetics from Bitter Plants",
+    "one_liner": "Purges and emetics from bitter plants",
+    "observation": "Purges and emetics from bitter plants.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 18,
+    "band_high": 43,
+    "min_year": 18,
+    "research_years": 3,
+    "requires_all": [
+      "herbal_classification",
+      "dietary_healing_regimens"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "General health",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/purges_emetics-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    },
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "health: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/health-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established health medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Non-graphic historical herb handling and care: one adult examines coarse bitter leaves beside a plain clay bowl while another supports a tired seated adult wrapped fully in a hide. No ingestion shown, no vomiting, no recipes, no dosages, no claim of efficacy. Sage/celadon ink-watercolor on cream. Modest camp, no clinical equipment or modern medicines.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d3bbcc22-f984-4c16-9f99-df723e49df03.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "kin_care_widows_orphans",
+    "line": "demography",
+    "status": "new",
+    "name": "Widows and Orphans Taken in by Kin",
+    "one_liner": "Widows and orphans taken in by kin",
+    "observation": "Widows and orphans taken in by kin.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 18,
+    "band_high": 43,
+    "min_year": 18,
+    "research_years": 2,
+    "requires_all": [
+      "named_descent_lines",
+      "shared_childcare"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Child survival",
+    "signals": [
+      "population",
+      "society"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/kin_care_widows_orphans-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    },
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "demography: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/demography-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established demography medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: An older adult welcomes a grieving adult and two children into a modest kin household, offering a shared place by the small hearth and one food bowl. Gentle supportive gestures, no caricature or funeral violence. Angular chalk/pastel cut-paper terracotta/rust/ivory/slate. Simple hide wraps and earthen hut, no bridal imagery, woven robes or ornate furnishings.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1c01347c-a4b4-4818-bb9f-080ad03f95d8.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "portage_paths",
+    "line": "logistics",
+    "status": "new",
+    "name": "Portage Paths Between Waterways",
+    "one_liner": "Portage paths between waterways",
+    "observation": "Portage paths between waterways.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 17,
+    "band_high": 39,
+    "min_year": 17,
+    "research_years": 3,
+    "requires_all": [
+      "river_craft",
+      "trail_waymarking"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {
+      "environment": [
+        "river"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Trade reach",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/portage_paths-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    },
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "logistics: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/logistics-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established logistics medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Four adults carry ONE small hollowed wooden dugout canoe on shoulders across a short dry neck of land between two visible waterways. Clear single complete hull, bow/stern unobstructed, footpath curving toward water. Panoramic travel watercolor sand/slate/indigo. No plank hull, sail, oars with metal fittings, cart, wheels or road.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ade48982-0c3b-429c-8f00-3b6bc2abe480.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  },
+  {
+    "id": "firebreaks",
+    "line": "ecology",
+    "status": "new",
+    "name": "Firebreaks Cleared Around Camps and Fields",
+    "one_liner": "Firebreaks cleared around camps and fields",
+    "observation": "Firebreaks cleared around camps and fields.",
+    "key_threshold": false,
+    "target_year": 28,
+    "proposed_year": 28,
+    "band_low": 17,
+    "band_high": 39,
+    "min_year": 17,
+    "research_years": 3,
+    "requires_all": [
+      "controlled_undergrowth_burning"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Land health",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "path": "res://assets/ui/research/subjects/firebreaks-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    },
+    "version": 2,
+    "year": 28,
+    "focus": [
+      0.5,
+      0.35
+    ],
+    "binding_style": "ecology: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-21/art_source/research-opening-21/style-reference/ecology-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference supplies ONLY the established ecology medium/palette and EXACT EXTRA-WIDE CANVAS: preserve its width and aspect, full bleed, no frame/text/grid/3:2. NEW SUBJECT: Two adults clear dry brush along a narrow bare-earth strip between a hide camp and low scrub, using wooden digging sticks and gathering removed branches aside. Botanical plant-pigment foreground with flat landscape, green resprouting plants beyond cleared strip. No wildfire, metal shovel, bulldozer, trench machinery, military wall or instructional diagram.\nKeep COMPLETE principal heads, hands, tools and mechanism ALL within central y170..590 of a 765px-high banner. Zoom out; top/bottom background only, preserve real 3.37:1 research-card crop. Chronology game years26–28: hide clothing, cordage, baskets, early clay pots, small earthen or hide dwellings, stone and wooden tools. Plain weaving is later, never borrow later technology from style reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-4ead5420-13f2-440d-a169-d43e43a936cc.png",
+    "review": "Full extra-wide original and actual 3.37:1 private-GPU card inspected against established field reference and prerequisite chronology. Complete principal heads/actions retained, headless/GPU PASS14 effective bindings across year0..600, hashes, hidden gating and crop bounds."
+  }
+]
