@@ -71,6 +71,8 @@ const CONTACT:=preload("res://assets/court_sets/shaders/court_contact.gdshader")
 const SKY:=preload("res://assets/court_sets/shaders/court_sky.gdshader")
 const PAPER:=preload("res://assets/court_sets/shaders/court_paper.gdshader")
 const POOL:=preload("res://assets/court_sets/shaders/court_pool.gdshader")
+const Blood:=preload("res://scripts/hud/court_blood.gd")
+const ExecProps:=preload("res://scripts/hud/court_exec_props.gd")
 const INK_POST:=preload("res://assets/court_sets/shaders/court_ink_post.gdshader")
 
 const KIND_BY_STAGE:={
@@ -101,6 +103,7 @@ const PALETTE:={
 	"FLINT":["45424a","514e55"],"BRONZE":["8c6430","a07a40"],"GOLD":["b08a3a","c49c48"],
 	"LEAF":["3b4628","485332"],"GRASS":["5b6634","70714a"],"BERRY":["4a2224","4a2224"],"SOOT":["4a443e","56504a"],
 	"ONION":["b89a6a","b89a6a"],"BREAD":["a8743c","b8844a"],
+	"BROTH":["7a5634","7a5634"],"BLOOD_DRY":["5a1410","5a1410"],"SOCKET":["1c1410","1c1410"],
 	"BLANKET":["dye0","dye0"],
 	"WEAVE_A":["dye0","dye0","dye1","e3d4b0"],"WEAVE_B":["dye1","dye1","dye2","e3d4b0"],"WEAVE_C":["d8c8a4","d8c8a4","dye0","dye2"],
 	"CARPET":["dye0","dye0","dye1","d8c4a0"],
@@ -881,6 +884,7 @@ func apply_facts(facts_in:Dictionary)->void:
 	var peace:=int((info.get("props",{}) as Dictionary).get("spears_peace",3))
 	_show_first(spears,mini(spears.size(),peace+roundi(war*float(maxi(0,spears.size()-peace)))))
 	_apply_season(String(facts.get("season","")).to_lower())
+	_apply_trophies()
 	var tags:Array=facts.get("era_tags",info.get("default_tags",[])) as Array
 	for key:String in gates.keys():
 		var without:=key.begins_with("no_")
@@ -1305,6 +1309,125 @@ func _god_apply()->void:
 		mat.set_shader_parameter("wind",_god_wind)
 	if _smoke_pm!=null:_smoke_pm.gravity=_smoke_gravity.lerp(_god_wind*1.4+Vector3(0.0,0.05,0.0),gust)
 
+# --- Executions: props, blood, the pack, the hall that remembers ----------------------
+
+var blood_node:Node3D
+var _trophy_root:Node3D
+var _skull_stakes:Array[Node3D]=[]
+var _skull_heap:Array[Node3D]=[]
+## How many trophies show (tests): skulls on stakes, skulls heaped, stains.
+var trophies:={"stakes":0,"heap":0,"stains":0}
+const SKULL_STAKES:=9
+const SKULL_HEAP:=12
+const STAIN_DAYS:=5.0
+
+## Dress a prop (or anything modelled in the set's slots) in this set's own
+## paint and ink: its meshes' material names are the slots.
+func dress(root:Node)->void:
+	var nodes:=root.find_children("*","MeshInstance3D",true,false)
+	if root is MeshInstance3D:nodes.append(root)
+	for node in nodes:
+		var mesh_node:=node as MeshInstance3D
+		if mesh_node.mesh==null:continue
+		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON
+		for surface in mesh_node.mesh.get_surface_count():
+			var source:=mesh_node.mesh.surface_get_material(surface)
+			var slot:=source.resource_name if source!=null else "WOOD"
+			mesh_node.set_surface_override_material(surface,_material(slot,true))
+
+## An execution's prop, dressed in this set (court_exec_props.gd), or null.
+func exec_prop(prop_name:String)->Node3D:
+	return ExecProps.make(prop_name,self)
+
+## The court's blood (court_blood.gd), made on first use.
+func blood()->Node3D:
+	if blood_node==null:
+		blood_node=Blood.new()
+		add_child(blood_node)
+	return blood_node
+
+## The camp dogs come running (act 4): the dog of the court and `count`
+## more, each its own coat, in at the door. Returns them all (the court's own
+## dog first); they are held for the director, and stay until the set goes.
+func dog_pack(count:=3)->Array:
+	var out:Array=[]
+	var own:=animal("dog")
+	if own!=null:out.append(own)
+	var door:=mark("door")
+	var at:=door.global_position if door!=null else Vector3(-5.0,0.0,0.0)
+	for i in count:
+		if not Animal.available("dog"):break
+		var beast:Node3D=Animal.new()
+		if not beast.call("setup","dog",self,7000+i,["black","grey","cream","brindle"][i%4]):
+			beast.free();continue
+		add_child(beast)
+		beast.position=at+Vector3(float(i)*0.45-0.45,0.0,float(i%2)*0.5)
+		beast.call("start_at","door")
+		beast.position=at+Vector3(float(i)*0.45-0.45,0.0,float(i%2)*0.5)
+		beast.call("hold",2.0+float(i)*0.6)
+		animals.append(beast)
+		out.append(beast)
+	return out
+
+## The hall remembers (EXECUTIONS.md): skulls on stakes by the door, one for
+## each of the dead the ledger holds (the rest heaped at their feet), and
+## stains on the floor before the god from the last few days, fading.
+## facts: executions (how many), execution_days (days since each, newest first).
+func _apply_trophies()->void:
+	var count:=maxi(0,int(facts.get("executions",0)))
+	var days:Array=facts.get("execution_days",[]) if facts.get("execution_days",[]) is Array else []
+	if count==0 and days.is_empty() and _trophy_root==null:
+		trophies={"stakes":0,"heap":0,"stains":0};return
+	_trophy_ensure()
+	var stakes:=mini(count,SKULL_STAKES)
+	for i in _skull_stakes.size():_skull_stakes[i].visible=i<stakes
+	var heap:=clampi(count-SKULL_STAKES,0,SKULL_HEAP)
+	for i in _skull_heap.size():_skull_heap[i].visible=i<heap
+	var shown:=0
+	var b:=blood()
+	# (set-local: this runs while the set is built, before it is in a tree)
+	var centre:=mark("petitioner").position if has_mark("petitioner") else Vector3.ZERO
+	var srng:=RandomNumberGenerator.new();srng.seed=4411
+	for i in Blood.STAINS:
+		var age:=float(days[i]) if i<days.size() else 999.0
+		var at:=centre+Vector3(srng.randf_range(-0.9,0.9),0.0,srng.randf_range(-0.6,0.6))
+		b.call("stain",i,Vector3(at.x,0.0,at.z),srng.randf_range(0.9,1.5),age,STAIN_DAYS)
+		if age<STAIN_DAYS:shown+=1
+	trophies={"stakes":stakes,"heap":heap,"stains":shown}
+
+func _trophy_ensure()->void:
+	if _trophy_root!=null:return
+	_trophy_root=Node3D.new();_trophy_root.name="Trophies"
+	add_child(_trophy_root)
+	var door:=mark("door")
+	if door==null:return
+	# an avenue of them, either side of the way in from the door
+	var base:=door.position
+	var fire:=mark("fire").position if has_mark("fire") else Vector3.ZERO
+	var inward:=Vector3(fire.x-base.x,0.0,fire.z-base.z).normalized()
+	var right:=inward.cross(Vector3.UP).normalized()
+	for i in SKULL_STAKES:
+		var side:=1.0 if i%2==0 else -1.0
+		var along:=0.55+0.6*float(i/2)
+		var stake:=exec_prop("skull_stake")
+		if stake==null:return
+		stake.position=base+inward*along+right*side*(0.72+0.06*float(i%3))
+		# each leans its own way, and the skull looks into the hall
+		stake.rotation=Vector3(deg_to_rad(float(i*7%11)-5.0),atan2(inward.x,inward.z)+deg_to_rad(float(i*37%50)-25.0),deg_to_rad(float(i*5%9)-4.0))
+		stake.visible=false
+		_trophy_root.add_child(stake)
+		_skull_stakes.append(stake)
+	for i in SKULL_HEAP:
+		var sk:=exec_prop("skull")
+		if sk==null:return
+		var side2:=1.0 if i%2==0 else -1.0
+		var along2:=0.35+0.6*float((i/2)%5)
+		sk.position=base+inward*(along2+0.12*float(i%3))+right*side2*(0.95+0.12*float(i/10))
+		sk.rotation=Vector3(0.0,atan2(inward.x,inward.z)+float(i)*0.9-1.2,deg_to_rad(float(i*13%30)-15.0))
+		sk.visible=false
+		_trophy_root.add_child(sk)
+		_skull_heap.append(sk)
+
 ## How many of a prop group are showing (tests, the director).
 func shown(group:String)->int:
 	var count:=0
@@ -1437,6 +1560,20 @@ static func contact_shadow(width:=0.9,depth:=0.62,strength:=0.55)->MeshInstance3
 	made.position=Vector3(0.0,0.012,0.0)
 	return made
 
+## The executions in the ledger's deaths by cause (GameState.death_cause_days,
+## [{day, cause, count}], the last 400 days): how many were put to death at the
+## god's word, and how many days ago each of the latest was (newest first).
+static func executions_from(causes:Array,today:int)->Dictionary:
+	var count:=0;var days:Array=[]
+	for i in range(causes.size()-1,-1,-1):
+		var entry:Variant=causes[i]
+		if not entry is Dictionary:continue
+		if not String((entry as Dictionary).get("cause","")).begins_with("Executed"):continue
+		var n:=maxi(0,int((entry as Dictionary).get("count",0)))
+		count+=n
+		for k in mini(n,Blood.STAINS-days.size()):days.append(float(maxi(0,today-int((entry as Dictionary).get("day",today)))))
+	return {"executions":count,"execution_days":days}
+
 ## What the stage can pass in, read from the game (read-only): how full the
 ## stores are, whether the people are at war, their era's tier and tags,
 ## which animals they keep, and their dyes.
@@ -1452,6 +1589,13 @@ static func facts_from_game(owner:="player")->Dictionary:
 		if known is Array:
 			out.herds=(known as Array).has("animal_taming")
 			out.fowl=(known as Array).has("yard_fowl_eggs")
+	if state!=null:
+		# the dead the ledger holds as put to death at the god's word
+		var causes:Variant=state.get("death_cause_days")
+		var today:=floori(float(state.get("elapsed_days"))) if state.get("elapsed_days")!=null else 0
+		if causes is Array:
+			var dead:=executions_from(causes as Array,today)
+			out.executions=dead.executions;out.execution_days=dead.execution_days
 	var voice:=load("res://scripts/character_voice.gd")
 	if voice!=null and voice.has_method("era_tier"):
 		var tags:Variant=voice.call("era_tags",owner)
