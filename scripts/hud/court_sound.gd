@@ -32,6 +32,14 @@ extends Node
 ## the room, with pauses, the room more and less talkative by turns.
 ## Time is the game's (a clock of process frames), so a movie written with
 ## --write-movie keeps every sound on its frame.
+## A musician plays softly (court_music.gd): what the people know (a hummer,
+## bone flute and frame drum, reed pipe and clay drum and rattle, a lyre),
+## in their own scale and beat. When the god speaks or wrath lands the music
+## stops dead mid-phrase (a squeak, a stray tap, then nothing) and creeps back
+## later, one tentative phrase first; after favour it picks up brighter; a gift
+## taken gets a flourish. It drops under every line said. music_changed tells
+## a visible musician what to do: "play", "stop_dead", "tentative",
+## "flourish", "rest".
 ## Mixing: everything plays on the "Court" bus (to Master), whose volume and
 ## mute are the player's "Court sounds" setting (display_preferences.gd).
 ## Nothing plays while muted or while the court is hidden. Streams are made
@@ -44,6 +52,12 @@ const Synth:=preload("res://scripts/hud/court_synth.gd")
 const Voice:=preload("res://scripts/hud/court_voice.gd")
 const Foley:=preload("res://scripts/hud/court_foley.gd")
 const Self:=preload("res://scripts/hud/court_sound.gd")
+const Music:=preload("res://scripts/hud/court_music.gd")
+
+## The musician's state, for a visible musician (the stage's acting): "play"
+## (a phrase begins), "stop_dead" (cut off by the god), "tentative" (trying
+## again, quietly), "flourish" (a gift), "rest" (between phrases).
+signal music_changed(state:String)
 
 const BUS:="Court"
 ## The player's court volume, 0..1 (display_preferences.gd sets it).
@@ -72,6 +86,10 @@ const TALK_DB:={"murmur_small":-11.0,"murmur":-13.0,"murmur_hall":-15.0}
 ## edge: the far side about 6 dB down).
 const PAN_STEPS:=4
 const PAN_STEP:=0.08
+## The music's level (a phrase peaks at 0.6): soft, under the room.
+const MUSIC_DB:=-23.0
+## Who plays what and how, by "tongue key@ensemble" (made on the main thread).
+static var _music_specs:Dictionary={}
 
 ## The director's acts (court_director.gd ACTS) as sounds: [cue, dB offset,
 ## delay seconds]. Acts of the dog and the goat sound only from an animal.
@@ -165,6 +183,17 @@ var _energy:=0.7
 var _energy_at:=0.0
 var _shy_until:=0.0
 var _duck_until:=0.0
+## The musician.
+var _music:AudioStreamPlayer
+var _music_tw:Tween
+var _music_key:=""
+var _music_next:=INF
+var _music_until:=0.0
+var _music_last:=-1
+var _music_tentative:=false
+var _music_bright_until:=0.0
+var _music_side:=2
+var _music_said:=""
 var _beds:Dictionary={}       # role -> AudioStreamPlayer
 var _bed_db:Dictionary={}     # role -> the level it rests at
 var _bed_tweens:Dictionary={}
@@ -224,6 +253,7 @@ func _ready()->void:
 		var t:=AudioStreamPlayer.new();t.bus=BUS;t.name="Talk%d" % i
 		add_child(t);_slots.append(t);_slot_tw.append(null)
 	_slot_free.resize(8)
+	_music=AudioStreamPlayer.new();_music.name="Musician";_music.bus=BUS;add_child(_music)
 	_timer=Timer.new();_timer.name="RoomLife";_timer.wait_time=0.1
 	add_child(_timer);_timer.timeout.connect(_tick)
 	set_process(true)
@@ -312,6 +342,7 @@ func stop_all()->void:
 		if is_instance_valid(p):p.stop()
 	for t in _slots:
 		if is_instance_valid(t):t.stop()
+	if is_instance_valid(_music):_music.stop()
 	for role in _beds:
 		var b:AudioStreamPlayer=_beds[role]
 		if is_instance_valid(b):b.stop()
@@ -332,6 +363,7 @@ static func stream_for(name:String,variant:=0)->AudioStreamWAV:
 	if held!=null:return held
 	var made:AudioStreamWAV
 	if name.begins_with("talker@"):made=_talker_stream(name.trim_prefix("talker@"),variant)
+	elif name.begins_with("music"):made=_music_stream(name,variant)
 	elif name.contains("@"):made=_murmur_stream(name.get_slice("@",0),name.get_slice("@",1))
 	else:made=Foley.stream(name,variant)
 	_lock.lock();_cache[key]=made;_lock.unlock()
@@ -373,6 +405,39 @@ static func _talkers(key:String)->Array[PackedFloat32Array]:
 	var made:=Foley.murmur_tracks(tongue,Synth.seed_of(key),Foley.TALKER_SECONDS+0.6)
 	_lock.lock();_tracks[key]=made;_lock.unlock()
 	return made
+
+## Who plays what among a people with a registered tongue, from what they know
+## (discovery ids): the key their music's streams are made under.
+static func register_music(tongue_key:String,known:Array)->String:
+	_lock.lock()
+	var tongue:Dictionary=_tongues.get(tongue_key,{})
+	_lock.unlock()
+	var family:=String(tongue.get("family","west_african"))
+	var spec:=Music.people(family,Synth.seed_of(tongue_key+"|music"),known)
+	var key:="%s@%s" % [tongue_key,String((spec.ensemble as Dictionary).name)]
+	_lock.lock();_music_specs[key]=spec;_lock.unlock()
+	return key
+
+static func music_spec(key:String)->Dictionary:
+	_lock.lock()
+	var spec:Dictionary=_music_specs.get(key,{})
+	_lock.unlock()
+	return spec
+
+## A stream of the people's music: "music@<key>" a phrase (variant 0..7),
+## "musicfl@<key>" the flourish, "musicstop@<key>" the stop (variant 0..2),
+## "musictap@<key>" the drum's stray tap.
+static func _music_stream(name:String,variant:int)->AudioStreamWAV:
+	var kind:=name.get_slice("@",0)
+	var spec:=music_spec(name.substr(name.find("@")+1))
+	if spec.is_empty():return Synth.to_stream(Synth.buffer(0.05))
+	var samples:PackedFloat32Array
+	match kind:
+		"musicfl":samples=Music.flourish(spec)
+		"musicstop":samples=Music.stop(spec,variant)
+		"musictap":samples=Music.tap(spec)
+		_:samples=Music.phrase(spec,variant)
+	return Synth.to_stream(samples,0.0)
 
 ## Makes the court's sounds ahead of time on a worker thread, so the room is
 ## never silent when the court opens: the beds, our people's murmur in their
@@ -429,13 +494,16 @@ static func clear_cache()->void:
 ## Returns whether it will sound.
 func cue(name:String,at_body:Node3D=null,opts:Dictionary={})->bool:
 	if name.is_empty() or not can_play():return false
-	if not Foley.CUES.has(name) and name!="mutter":return false
+	if not Foley.CUES.has(name) and name!="mutter" and not name.begins_with("music"):return false
 	if float(opts.get("delay",0.0))>0.0:
 		_queue.append({"at":_now()+float(opts.delay),"name":name,"body":at_body,"opts":opts.duplicate()})
 		_ensure_timer()
 		return true
 	if name=="mutter":
 		return voice(at_body,_mutter_text(),1.1,"neutral","",{"whisper":true,"db":float(opts.get("db",0.0))})
+	if name.begins_with("music"):
+		var made:=stream_for(name,maxi(0,int(opts.get("variant",0))))
+		return _play(made,at_body,MUSIC_DB+float(opts.get("db",0.0)),1.0,name.get_slice("@",0),int(opts.get("pan",_music_pan())))!=null
 	var real:=name
 	var variant:=int(opts.get("variant",-1))
 	var n:=Foley.variants(real)
@@ -595,6 +663,11 @@ func voice(body:Node3D,text:String,seconds:float,mood:Variant="neutral",people_i
 func _duck(seconds:float)->void:
 	if _hushed:return
 	_duck_until=maxf(_duck_until,_now()+seconds)
+	if is_instance_valid(_music) and _music.playing:
+		var mt:=create_tween()
+		mt.tween_property(_music,"volume_db",_music.volume_db-10.0,0.3).set_trans(Tween.TRANS_SINE)
+		mt.tween_interval(maxf(0.2,seconds))
+		mt.tween_property(_music,"volume_db",_music.volume_db,1.2).set_trans(Tween.TRANS_SINE)
 	for i in _slots.size():
 		var t:=_slots[i]
 		if not t.playing:continue
@@ -672,6 +745,12 @@ func ambience(set_id:String,season_id:String,facts_in:Dictionary={})->void:
 	var talk:Array=talk_for(facts)
 	_talk_size=String(talk[0]);_talk_db=float(talk[1])
 	var warm_list:Array=[]
+	# the musician: what the people know, their own way of playing it
+	_music_key=register_music(_tongue_key,_known())
+	_music_side=[-2,2,3,-3][absi(hash(_music_key))%4]
+	for k in Music.PHRASES:warm_list.append(["music@"+_music_key,k])
+	warm_list.append(["musicstop@"+_music_key,0]);warm_list.append(["musictap@"+_music_key,0]);warm_list.append(["musicfl@"+_music_key,0])
+	_music_next=_now()+_rng.randf_range(0.8,2.5)
 	for k in Foley.MURMUR_VOICES.size():warm_list.append(["talker@"+_tongue_key,k])
 	for role in _bed_list:warm_list.append([String(role[1]),0])
 	warm_list.append(["god_swell_wrath",0]);warm_list.append(["god_swell_favour",0])
@@ -689,6 +768,16 @@ func ambience(set_id:String,season_id:String,facts_in:Dictionary={})->void:
 	_energy=_rng.randf_range(0.75,1.0);_energy_at=_now()+_rng.randf_range(8.0,16.0)
 	_next.clear()
 	if can_play():_start_beds()
+
+## What our people know (discovery ids): the fact sheet's "known" when the
+## stage gives it, else the game's own (character_voice.gd known_ids).
+func _known()->Array:
+	if facts.get("known") is Array:return facts.known
+	if ResourceLoader.exists("res://scripts/character_voice.gd") and world_seed()!=0:
+		var cv:GDScript=load("res://scripts/character_voice.gd")
+		var got:Variant=cv.call("known_ids","player")
+		if got is Array:return got
+	return []
 
 ## The beds for a set and season: [[role, bed name, dB offset]...].
 static func beds_for(set_id:String,season_id:String,facts_in:Dictionary)->Array:
@@ -752,6 +841,7 @@ func hush(on:Variant=true)->void:
 		_hush_began=_now()
 		# the cut is sharp: that is the joke
 		_cut_talk()
+		_music_stop_dead()
 		_fade("fire",float(_bed_db.get("fire",-20.0))-4.0,0.25)
 		_fade("wind",float(_bed_db.get("wind",-26.0))-3.0,0.4)
 		_ensure_timer()
@@ -770,6 +860,9 @@ func _unhush()->void:
 	# the talk comes back late and shy, one and then another: nobody wants to be first
 	_shy_until=now+3.0
 	for i in _slot_free.size():_slot_free[i]=now+0.9+float(i)*_rng.randf_range(0.35,0.8)
+	# the musician waits longer still, then tries again, quietly (after favour, at once and brighter)
+	if now<_music_bright_until:_music_next=now+_rng.randf_range(0.6,1.4);_music_tentative=false
+	else:_music_next=maxf(_music_next,now+_rng.randf_range(3.0,6.0))
 
 ## The crowd's talk stops dead (a hush): every talker cut in a few hundredths.
 func _cut_talk()->void:
@@ -783,6 +876,86 @@ func _cut_talk()->void:
 		tw.tween_property(t,"volume_db",-80.0,0.06)
 		tw.tween_callback(t.stop)
 		_slot_tw[i]=tw
+
+## The musician stops dead: the phrase cut in hundredths of a second, the
+## lead's own squeak or honk or plunk as it breaks off, the drummer's hand
+## already on its way down for one more tap, then nothing. They wait for the
+## god to finish, then try again, tentatively.
+func _music_stop_dead()->void:
+	if not is_instance_valid(_music) or _music_key.is_empty():return
+	var now:=_now()
+	_music_tentative=true
+	_music_next=maxf(_music_next,_hush_until+_rng.randf_range(3.0,6.0))
+	if not _music.playing or now>=_music_until:return
+	if _music_tw!=null and _music_tw.is_valid():_music_tw.kill()
+	var tw:=create_tween()
+	tw.tween_property(_music,"volume_db",-80.0,0.03)
+	tw.tween_callback(_music.stop)
+	_music_tw=tw
+	_music_until=now
+	var pan:=_music_pan()
+	_play(stream_for("musicstop@"+_music_key,_rng.randi_range(0,2)),null,MUSIC_DB+5.0,1.0,"music_stop",pan)
+	var spec:=music_spec(_music_key)
+	if String((spec.get("ensemble",{}) as Dictionary).get("drum",""))!="":
+		_queue.append({"at":now+_rng.randf_range(0.22,0.34),"name":"musictap@"+_music_key,"body":null,"opts":{"db":3.0,"pan":pan}})
+		_ensure_timer()
+	_say_music("stop_dead")
+
+## Where the musician sits: their figure, when the stage stands one up
+## (extras "musician"), else a place of their own off to one side.
+func _music_pan()->int:
+	var b:=_body_of("musician")
+	return pan_of(b) if b!=null else _music_side
+
+## The musician between the god's words: a phrase when it is time, a rest
+## between; the first after a stop is tentative (quiet, and given up after a
+## few notes); after favour, brighter (a little higher and quicker, sooner).
+func _music_tick(now:float)->void:
+	if _music_said in ["play","tentative","flourish"] and now>=_music_until:_say_music("rest")
+	if _music_key.is_empty() or now<_music_next:return
+	var k:=_rng.randi_range(0,Music.PHRASES-1)
+	if k==_music_last:k=(k+1)%Music.PHRASES
+	if not cached("music@"+_music_key,k) and not exact():
+		if not cached("music@"+_music_key,0):return
+		k=0
+	_music_last=k
+	var s:=stream_for("music@"+_music_key,k)
+	var bright:=now<_music_bright_until
+	var level:=MUSIC_DB+(2.0 if bright else 0.0)-(10.0 if now<_duck_until else 0.0)
+	_music.stream=s
+	_music.bus=pan_bus(_music_pan())
+	_music.pitch_scale=1.06 if bright else 1.0
+	if _music_tw!=null and _music_tw.is_valid():_music_tw.kill()
+	var length:=s.get_length()/_music.pitch_scale
+	if _music_tentative:
+		_music_tentative=false
+		_music.volume_db=level-9.0
+		_music.play()
+		var tw:=create_tween()
+		tw.tween_interval(1.3)
+		tw.tween_property(_music,"volume_db",-60.0,0.6)
+		tw.tween_callback(_music.stop)
+		_music_tw=tw
+		_music_until=now+1.9
+		_music_next=now+1.9+_rng.randf_range(2.0,3.5)
+		played.append({"name":"music_tentative","at":now,"db":level-9.0,"pan":_music_pan()})
+		_say_music("tentative")
+		return
+	_music.volume_db=level
+	_music.play()
+	_music_until=now+length
+	_music_next=_music_until+_rng.randf_range(1.0,4.0)*(0.4 if bright else 1.0)
+	played.append({"name":"music","at":now,"db":level,"pan":_music_pan()})
+	_say_music("play")
+
+func _say_music(state:String)->void:
+	_music_said=state
+	music_changed.emit(state)
+
+## The musician's state now: {key, playing, tentative_next, bright, until}.
+func music_state()->Dictionary:
+	return {"key":_music_key,"playing":is_instance_valid(_music) and _music.playing and _now()<_music_until,
+		"tentative_next":_music_tentative,"bright":_now()<_music_bright_until,"until":_music_until,"next":_music_next}
 
 ## The talkers' stream key: ours when made, else any tongue's already made.
 func _talk_key()->String:
@@ -929,6 +1102,7 @@ func _tick()->void:
 		if (p==null or not p.playing) and cached(String(role[1]),0):_start_beds();break
 	if _hushed:return
 	_crowd_talk(now)
+	_music_tick(now)
 	_life("fire_pop",now,0.25,1.6,0.0)
 	_life("fire_hiss",now,7.0,20.0,0.0)
 	_life("log_settle",now,18.0,45.0,0.0)
@@ -995,6 +1169,10 @@ func on_event(kind:String,data:Dictionary={})->void:
 				if not action.begins_with("envoy_kill"):cue("room_gasp",null,{"delay":0.35})
 			elif action in FAVOUR:
 				god("",2.0,"favour")
+				# the musician picks up again at once, brighter
+				_music_bright_until=_now()+25.0
+				_music_tentative=false
+				_music_next=minf(_music_next,_hush_until+_rng.randf_range(0.6,1.4))
 				cue("hum_yes",null,{"db":-6.0,"delay":0.9})
 		"enter":
 			var fig:=_figure(String(data.get("who","")))
@@ -1010,6 +1188,14 @@ func on_event(kind:String,data:Dictionary={})->void:
 				_:footsteps(_body(fig),1.8,1.7)
 		"decree":
 			if not bool(data.get("accepted",true)):hush(1.6)
+		"gift":
+			if bool(data.get("accepted",true)) and not _music_key.is_empty():
+				# a gift taken: the musician plays it in
+				_queue.append({"at":_now()+0.5,"name":"musicfl@"+_music_key,"body":null,"opts":{"db":3.0}})
+				_music_next=maxf(_music_next,_now()+4.0)
+				_ensure_timer()
+				_music_until=_now()+2.5
+				_say_music("flourish")
 		"close":
 			_open=false
 			for role in _beds:_fade(String(role),-80.0,0.8)
@@ -1217,6 +1403,16 @@ static func render_scene(items:Array,seconds:float)->PackedFloat32Array:
 			for i in mini(fade_in,samples.size()):samples[i]*=float(i)/float(fade_in)
 			for i in mini(tail,samples.size()):samples[samples.size()-1-i]*=float(i)/float(tail)
 			gain*=db_to_linear(Foley.level(name) if item.has("bed") else float(item.get("level",-14.0)))
+		elif item.has("music"):
+			# one of the musician's streams, cut off at `until` (a stop dead is sharp)
+			var name:=String(item.music)
+			var src:=Synth.samples_of(stream_for(name,int(item.get("variant",0))))
+			var until:=float(item.get("until",float(at)/Synth.RATE+float(src.size())/Synth.RATE))
+			var count:=mini(src.size(),Synth.n_of(until)-at)
+			samples=src.slice(0,maxi(0,count))
+			var tail:=Synth.n_of(float(item.get("release",0.0)))
+			for i in mini(tail,samples.size()):samples[samples.size()-1-i]*=float(i)/float(maxi(1,tail))
+			gain*=db_to_linear(MUSIC_DB)
 		elif item.has("talk"):
 			# the crowd's talk as the court plays it (murmur_schedule), in a tongue
 			var key:=String(item.talk)

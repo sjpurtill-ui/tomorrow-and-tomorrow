@@ -18,6 +18,7 @@ const Voice:=preload("res://scripts/hud/court_voice.gd")
 const Foley:=preload("res://scripts/hud/court_foley.gd")
 const Synth:=preload("res://scripts/hud/court_synth.gd")
 const Language:=preload("res://scripts/people_language.gd")
+const Music:=preload("res://scripts/hud/court_music.gd")
 
 const SEED:=424242
 const LINE:="Great one, the stores are thin. We ask for rain, and for patience."
@@ -354,3 +355,121 @@ func test_sounds_come_from_where_people_stand()->void:
 	assert_float(db_left).is_between(4.0,7.0)
 	assert_float(db_right).is_between(4.0,7.0)
 	assert_float(absf(db_middle)).is_less(0.5)
+
+# --- the musician -------------------------------------------------------------
+
+func test_each_age_plays_what_it_knows()->void:
+	var e:=Music.ensemble([])
+	assert_str(String(e.lead)).is_equal("hum")
+	assert_str(String(e.drum)).is_equal("")
+	e=Music.ensemble(["bone_flutes_drums"])
+	assert_str(String(e.lead)).is_equal("flute")
+	assert_str(String(e.drum)).is_equal("frame")
+	e=Music.ensemble(["bone_flutes_drums","rattles_drums_pipes"])
+	assert_str(String(e.lead)).is_equal("reed")
+	assert_str(String(e.drum)).is_equal("clay")
+	assert_bool(bool(e.rattle)).is_true()
+	e=Music.ensemble(["bone_flutes_drums","rattles_drums_pipes","harps_and_lyres","temple_choirs"])
+	assert_str(String(e.lead)).is_equal("lyre")
+	assert_bool(bool(e.cymbal)).is_true()
+	assert_bool((e.leads as Array).has("flute")).is_true()
+
+func test_each_peoples_music_is_its_own()->void:
+	var known:=["bone_flutes_drums"]
+	var a:=Music.people("sinitic",5,known)
+	var b:=Music.people("semitic",5,known)
+	assert_bool(str(a.scale)==str(b.scale)).is_false()
+	var c:=Music.people("sinitic",6,known)
+	assert_bool(str(a.motifs)==str(c.motifs) and is_equal_approx(float(a.key),float(c.key))).is_false()
+	for k in [[],["bone_flutes_drums"],["bone_flutes_drums","rattles_drums_pipes"],["bone_flutes_drums","rattles_drums_pipes","harps_and_lyres","temple_choirs"]]:
+		var spec:=Music.people("celtic",9,k)
+		var one:=Music.phrase(spec,1)
+		assert_float(float(one.size())/Synth.RATE).is_between(1.5,16.0)
+		assert_float(Synth.peak_of(one)).is_between(0.3,0.7)
+		assert_bool(_clean_edges(one)).override_failure_message("a phrase clicks: %s" % str(k)).is_true()
+		assert_bool(Music.phrase(spec,1)==one).is_true()
+		for v in 3:assert_float(Synth.peak_of(Music.stop(spec,v))).is_greater(0.1)
+		assert_float(Synth.peak_of(Music.flourish(spec))).is_greater(0.1)
+
+func _music_court(known:Array)->Node:
+	var made:=_court()
+	var sound:Node=made[1]
+	Sound.set_volume(1.0)
+	sound.call("ambience","fire_ring","summer",{"era_tier":0,"known":known})
+	return sound
+
+func _names(sound:Node)->Array:
+	var out:=[]
+	for p in (sound.get("played") as Array):out.append(String(p.name))
+	return out
+
+func test_wrath_stops_the_music_dead()->void:
+	var sound:=_music_court(["bone_flutes_drums"])
+	var now:float=sound.call("_now")
+	sound.set("_music_next",now)
+	sound.call("_music_tick",now)
+	assert_bool(bool((sound.call("music_state") as Dictionary).playing)).is_true()
+	var states:=[]
+	sound.connect("music_changed",func(state:String)->void:states.append(state))
+	sound.call("god","Enough!",2.0,"wrath")
+	assert_array(states).contains(["stop_dead"])
+	assert_array(_names(sound)).contains(["music_stop"])
+	var st:Dictionary=sound.call("music_state")
+	assert_bool(bool(st.playing)).is_false()
+	assert_bool(bool(st.tentative_next)).is_true()
+	# they wait for the god to finish, and a while after
+	assert_float(float(st.next)).is_greater(now+3.4+2.9)
+	# the drummer's hand was already on its way down: one more tap
+	var queued:=[]
+	for item in (sound.get("_queue") as Array):queued.append(String(item.name).get_slice("@",0))
+	assert_array(queued).contains(["musictap"])
+
+func test_the_music_creeps_back()->void:
+	var sound:=_music_court(["bone_flutes_drums","rattles_drums_pipes"])
+	var now:float=sound.call("_now")
+	sound.set("_music_next",now)
+	sound.call("_music_tick",now)
+	sound.call("hush",2.0)
+	sound.set("_clock",now+2.5)
+	sound.call("_tick")
+	assert_bool(sound.call("hushed")).is_false()
+	var st:Dictionary=sound.call("music_state")
+	assert_bool(bool(st.tentative_next)).is_true()
+	var first:=float(st.next)
+	assert_float(first).is_greater(now+2.5+2.9)
+	sound.set("_clock",first+0.01)
+	sound.call("_music_tick",first+0.01)
+	var last:Dictionary=(sound.get("played") as Array).back()
+	assert_str(String(last.name)).is_equal("music_tentative")
+	assert_float(float(last.db)).is_less(Sound.MUSIC_DB-8.0)
+	var then:=float((sound.call("music_state") as Dictionary).next)
+	sound.set("_clock",then+0.01)
+	sound.call("_music_tick",then+0.01)
+	last=(sound.get("played") as Array).back()
+	assert_str(String(last.name)).is_equal("music")
+	assert_float(float(last.db)).is_equal_approx(Sound.MUSIC_DB,0.01)
+
+func test_favour_brings_the_music_back_brighter_and_a_gift_a_flourish()->void:
+	var sound:=_music_court(["bone_flutes_drums"])
+	var now:float=sound.call("_now")
+	sound.set("_music_next",now)
+	sound.call("_music_tick",now)
+	sound.call("on_event","divine",{"action":"bless","response":"blessed"})
+	var st:Dictionary=sound.call("music_state")
+	assert_bool(bool(st.tentative_next)).is_false()
+	assert_bool(bool(st.bright)).is_true()
+	# a gift taken: the musician plays it in
+	sound.call("on_event","gift",{"accepted":true})
+	sound.set("_clock",now+0.6)
+	sound.call("_tick")
+	assert_array(_names(sound)).contains(["musicfl"])
+
+func test_the_music_drops_under_a_line()->void:
+	var sound:=_music_court(["bone_flutes_drums"])
+	var now:float=sound.call("_now")
+	sound.call("voice",null,LINE,2.0,"neutral","player",{})
+	sound.set("_music_next",now)
+	sound.call("_music_tick",now)
+	var last:Dictionary=(sound.get("played") as Array).back()
+	assert_str(String(last.name)).is_equal("music")
+	assert_float(float(last.db)).is_less_equal(Sound.MUSIC_DB-9.0)
