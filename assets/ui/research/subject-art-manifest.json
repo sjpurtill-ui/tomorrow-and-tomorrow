@@ -41,13 +41,7 @@
       0.5
     ]
   },
-  "charcoal": {
-    "path": "res://assets/ui/research/subjects/charcoal-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "charcoal": {"path": "res://assets/ui/research/subjects/charcoal-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
   "clay_shaping": {
     "path": "res://assets/ui/research/subjects/clay_shaping-v1.png",
     "focus": [
@@ -1252,13 +1246,7 @@
       0.5
     ]
   },
-  "maternal_recovery": {
-    "path": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "maternal_recovery": {"path": "res://assets/ui/research/subjects/maternal_recovery-v2.png", "focus": [0.5, 0.3]},
   "child_growth_records": {
     "path": "res://assets/ui/research/subjects/child_growth_records-v1.png",
     "focus": [
@@ -3794,11 +3782,11 @@
   "grip_wrapping_practice": {"path": "res://assets/ui/research/subjects/grip_wrapping_practice-v1.png", "focus": [0.5, 0.5]},
   "breeding_stock_sparing": {"path": "res://assets/ui/research/subjects/breeding_stock_sparing-v1.png", "focus": [0.5, 0.5]},
   "clay_sling_bullets": {"path": "res://assets/ui/research/subjects/clay_sling_bullets-v1.png", "focus": [0.5, 0.5]},
-  "deliberate_milk_souring": {"path": "res://assets/ui/research/subjects/deliberate_milk_souring-v1.png", "focus": [0.5, 0.5]},
-  "flood_house_mounds": {"path": "res://assets/ui/research/subjects/flood_house_mounds-v1.png", "focus": [0.5, 0.5]},
-  "part_time_specialists": {"path": "res://assets/ui/research/subjects/part_time_specialists-v1.png", "focus": [0.5, 0.5]},
-  "disability_care": {"path": "res://assets/ui/research/subjects/disability_care-v1.png", "focus": [0.5, 0.5]},
-  "paired_measure_checking": {"path": "res://assets/ui/research/subjects/paired_measure_checking-v1.png", "focus": [0.5, 0.5]},
+  "deliberate_milk_souring": {"path": "res://assets/ui/research/subjects/deliberate_milk_souring-v2.png", "focus": [0.5, 0.5]},
+  "flood_house_mounds": {"path": "res://assets/ui/research/subjects/flood_house_mounds-v2.png", "focus": [0.5, 0.5]},
+  "part_time_specialists": {"path": "res://assets/ui/research/subjects/part_time_specialists-v2.png", "focus": [0.5, 0.5]},
+  "disability_care": {"path": "res://assets/ui/research/subjects/disability_care-v2.png", "focus": [0.5, 0.5]},
+  "paired_measure_checking": {"path": "res://assets/ui/research/subjects/paired_measure_checking-v2.png", "focus": [0.5, 0.5]},
   "brushwood_trackways": {"path": "res://assets/ui/research/subjects/brushwood_trackways-v1.png", "focus": [0.5, 0.5]},
   "raid_scouting": {"path": "res://assets/ui/research/subjects/raid_scouting-v1.png", "focus": [0.5, 0.5]},
   "slack_season_building": {"path": "res://assets/ui/research/subjects/slack_season_building-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4227,6 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "first_fruits_offering": {"path": "res://assets/ui/research/subjects/first_fruits_offering-v2.png", "focus": [0.5, 0.5]}
 }

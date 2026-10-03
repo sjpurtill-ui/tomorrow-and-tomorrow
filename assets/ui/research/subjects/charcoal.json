@@ -1,9 +1,58 @@
 {
   "id": "charcoal",
-  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Charcoal Production. A woodland charcoal burner opens a small earth-covered mound to reveal black charred wood; controlled faint smoke escapes the earthen cover, glowing wood glimpsed, no metal furnace or pottery.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-ff769c9f-845b-44cf-a796-ba98fb9867a2.png",
-  "asset": "res://assets/ui/research/subjects/charcoal-v1.png",
-  "sha256": "04acf4784f91c0b2bb8c5b9b5604de3d3a9da3ebd226b8446244b51b29232dc4",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "status": "catalog",
+  "name": "Charcoal Burned in Covered Stacks",
+  "one_liner": "Charcoal burned in covered stacks",
+  "observation": "Charcoal burned in covered stacks.",
+  "key_threshold": false,
+  "target_year": 36,
+  "proposed_year": 36,
+  "band_low": 20,
+  "band_high": 48,
+  "min_year": 20,
+  "research_years": 4,
+  "requires_all": [
+    "earth_oven_cooking"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "pit_firing"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "version": 2,
+  "year": 36,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": true,
+  "replace_art600": false,
+  "binding_style": "production: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/charcoal-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/production-v1.png",
+  "prior_effective_binding": {
+    "path": "res://assets/ui/research/paper/charcoal.png",
+    "focus": [
+      0.58,
+      0.74
+    ]
+  },
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established production painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: TWO adults inspect cooled blackened branch pieces beside a SMALL partly opened earth-covered burn pit; one lifts a cooled charcoal fragment on a bark tray. Earth and leafy cover, faint background haze, no active handling of flames, no industrial kiln or metal. Production flat angular palette-knife painting copper/ember/soot/umber, no photographic relief.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-8422aa48-1991-4a08-af50-816bdc7ac2dc.png",
+  "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600.",
+  "asset": "res://assets/ui/research/subjects/charcoal-v2.png",
+  "sha256": "9a568c25b65e42867ed114f1dd8f29d1b0129bda97b20178ca6adc61248b53e5",
+  "mode": "built-in image_gen / edit"
 }
