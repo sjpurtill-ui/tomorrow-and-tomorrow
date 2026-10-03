@@ -108,28 +108,51 @@ are the first currency, and a making people can buy and make arms.
 - **Goods buy** (`trade_ledger.gd deal_terms` / `goods_deal`): between two
   peoples who barter (past their first seasons of gifts), goods buy what the
   other has to spare (beyond 1.1 x its wanted holding) at the seller's price
-  x 1.2; **arms** the same way; **families who come to work** (a season's food,
-  90 rations, a head in goods; at most 2 in 100 of the seller's people a
-  deal, only from a people that thinks well of us); and **our own taken
-  captive** (120 rations a head; counted from the war's record). Goods and
-  the good or the grown people move through the one ledger (move, the pair's
-  flows, kinds and `deals`); counts add up on both sides. The Trade page's
-  "Buy with goods" menu states each term. Computer rulers buy arms when their
-  watch lacks them (at war, or with three sets' worth of goods to spare) and
-  take in families from a hungry partner when their own food is plenty
-  (`trade_stances.gd goods_buys`). Goods for goods stays the season's coarse
-  barter.
+  x 1.2, and made **arms** the same way. Every buyer, the god included, meets
+  the same terms:
+  - **Families who come to work** (children with them, every one counted):
+    only from a people that goes hungry (eating under 90 in 100 of its need)
+    or is broken by war; only as many as its food cannot feed, at most 2 in
+    100 of its people in one deal, never leaving it under 30; one families
+    deal a pair a season (92 days: four a year at most); only from a people
+    that holds the buyer at 0 or better. The price is a person's year of work:
+    365 days of the seller's output a head (a year's food at least), in goods.
+    Families moving warm no one, so a repeat is never easier.
+  - **Our own taken captive**: each raid that takes ours records them with the
+    holder, ages as taken (`war_loop.gd _our_captives_lost` ->
+    `note_captives`, the pair's `captives` record). A ransom (120 rations a
+    head in goods) brings them home from that record, children and grown as
+    they were taken, and takes none of the holder's own people. An older save
+    has no record: those taken before it cannot be ransomed, and the terms
+    say so.
+
+  Goods and the good or the people move through the one ledger (move, the
+  pair's flows, kinds and `deals`); counts add up on both sides. The Trade
+  page's "Buy with goods" menu states each term (read once a day for each
+  people, `deal_offers`). Computer rulers buy arms when their watch lacks them
+  (at war, or with three sets' worth of goods to spare) and, when fed, take in
+  families on the same terms (`trade_stances.gd goods_buys`). Goods for goods
+  stays the season's coarse barter.
 - **Arms** (`weapons_stock.gd`): one set arms one fighter. A spear and a bow
   take **10 maker-days** and 1.4 timber, 0.3 flint, 0.4 plant fiber (about 8
   goods, 48 rations); bronze 16 maker-days with copper and tin; iron 14;
-  muskets 18; rifles 9; automatic rifles 7, with metals and coal. While the
-  watch lacks arms, 1 in 5 of the makers make them (2 in 5 at war) and make
-  no goods that day. The stock is "Arms" in every town's stores (worn like
-  durable things in a yard) plus the old armoury's spears and bows, priced at
-  48 and traded as a good. The military's API: `weapons_held()`,
-  `take_weapons(n)`, `return_weapons(n)`, `lose_weapons(n)`,
-  `weapons_issued()`, `arms_wanted()`, `cost_per_fighter()`,
-  `weapons_quality()`.
+  muskets 18; rifles 9; automatic rifles 7, with metals and coal. The goods a
+  set forgoes are the household goods its maker-days make at full pace (a
+  slower people takes more days but makes fewer goods a day: the pace
+  cancels). While the watch lacks arms (at war on either side of a war or
+  feud: 2 in 5), 1 in 5 of the makers make them and give the whole day to
+  it: no goods, and none of the makers' other work (`game_state.gd
+  effective_workers("Crafting")` and the tools-and-materials count leave
+  them out).
+  The made stock is "Arms" in every town's stores (worn like durable things
+  in a yard), priced at 48. Only made sets beyond what the watch still lacks
+  are traded; the old armoury's spears and bows arm the watch and count as
+  held for it, but are never traded, paid or given away, and no toll,
+  tribute or gift is paid in arms unless chosen. The military's API:
+  `weapons_held()`, `take_weapons(n)` (exact: made sets, then the armoury's
+  cheapest kits; a part set left over stays in store), `return_weapons(n)`,
+  `lose_weapons(n)`, `weapons_issued()` (0 until the military takes arms),
+  `arms_wanted()`, `cost_per_fighter()`, `weapons_quality()`.
 
 ## Exchange stages
 

@@ -366,10 +366,9 @@ func _desired_stock(resource_name:String,population:float)->float:
 		"Clay","Fiber Plants": return population*0.45
 		"Transport Carts": return maxf(1.0,population/30.0)
 		"Civilian Goods": return preload("res://scripts/civilian_goods.gd").target()
-		# Arms the store should hold: one set for each of the watch not yet armed.
-		"Arms":
-			var arms:=preload("res://scripts/weapons_stock.gd")
-			return maxf(0.0,arms.watch()*arms.ARMS_PER_WATCHER-float(arms.weapons_issued()))
+		# Made arms the stores should hold: one set for each of the watch that
+		# neither carries one nor has one in the old armoury (weapons_stock.gd).
+		"Arms": return preload("res://scripts/weapons_stock.gd").trade_wanted()
 		_: return population*0.16
 
 func _trade_volume(market_access:float,monetization:float)->float:
@@ -483,7 +482,7 @@ func _process_external_trade(market_access:float,domestic_trade:float,contract_p
 func _remove_trade_resource(resource_name:String,requested:float)->float:
 	if preload("res://scripts/abrasive_inspection.gd").unfinished(resource_name):return 0.0
 	if resource_name=="Food": return WorldSimulation.food.issue_for_obligation(requested,"trade","Food export")
-	# Arms leave from every store of the realm and the old armoury (weapons_stock.gd).
+	# Made arms leave from every store of the realm, never the old armoury (weapons_stock.gd).
 	if resource_name=="Arms" and String(WorldSimulation.state.resource_settlement_id)=="": return preload("res://scripts/weapons_stock.gd").remove(requested)
 	var available:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(resource_name,0.0)))
 	var removed:=minf(available,maxf(0.0,requested))

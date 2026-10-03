@@ -1,40 +1,48 @@
 extends RefCounted
 ## WEAPONS: arms for one fighter a set, made by makers from what is cut, dug
 ## and carried, and kept in store until the watch takes them up
-## (docs/PEOPLE_FIRST.md D, docs/ECONOMY_SYSTEM.md "Goods and arms").
+## (docs/PEOPLE_FIRST.md D, docs/ECONOMY_SYSTEM.md "Goods, barter and arms").
 ##
 ## Arms are always dear. A set costs a maker many days and real materials
 ## (AGES: a spear and a bow early, bronze, iron, muskets and rifles later).
 ## Makers turn to arms only while the watch lacks them: ARMS_SHARE of the
 ## makers in peace, WAR_SHARE at war (every people by the same rule). Those
-## hands make no household goods that day (civilian_goods.gd advance), so a
-## people pays for its arms in goods it did not make.
+## makers give the whole day to arms: they make no household goods, and the
+## rest of the makers' work (tools and materials, putting food by, the
+## workshops) is short of them too (game_state.gd effective_workers reads
+## civilian_goods.gd arms_hands).
 ##
 ## The store is "Arms" in each place's own stores (resource_stockpiles), one
 ## unit a set: the capital's and every town's. It wears as other durable
 ## things in a yard do (resource_system.gd's mineral rate, about 5 in 100 a
-## year), passes between peoples through the trade ledger like any good
-## (trade_ledger.gd GOODS), and is priced by the economy (economy_system.gd
-## BASE_VALUES). The old armoury (military_campaign.gd military_inventory:
-## spears, bows and the like not yet issued) counts as arms in store too, so
-## an older save keeps every arm it had: nothing is moved on load.
+## year), and is priced by the economy (economy_system.gd BASE_VALUES). Only
+## these made sets pass to other peoples (trade_ledger.gd GOODS), and only
+## those beyond what the watch still lacks. The old armoury
+## (military_campaign.gd military_inventory: spears, bows and the like not yet
+## issued) arms the watch and counts as held for it, so an older save keeps
+## every arm it had and nothing is moved on load; it is never traded, given
+## or paid away.
 ##
 ## THE MILITARY'S API (call in the people's own scope, outside a town's day):
-##   weapons_held()->int       whole sets in store, realm-wide.
-##   take_weapons(n)->int      takes up to n sets from store for the watch
-##                             (the capital's first, then the towns', then the
-##                             old armoury); returns how many were taken.
+##   weapons_held()->int       whole sets held for the watch, realm-wide (made
+##                             sets in every store, and the old armoury).
+##   take_weapons(n)->int      takes up to n sets for the watch (made sets: the
+##                             capital's first, then the towns'; then the old
+##                             armoury, the cheapest kits first); exact: a part
+##                             set left over stays in store. Returns how many.
 ##   return_weapons(n)->int    sets carried back into store (fighters stand
 ##                             down); never more than were taken.
 ##   lose_weapons(n)->int      sets lost with the fallen or in a rout.
 ##   weapons_issued()->int     sets the watch carries now (taken, less returned
-##                             and lost).
+##                             and lost). Stays 0 until the military calls
+##                             take_weapons (workstream E).
 ##   cost_per_fighter()->Dictionary  what one set costs now: kind, maker_days,
-##                             materials, worth_goods, worth_rations, quality.
+##                             materials, goods_forgone, worth_goods,
+##                             worth_rations, quality.
 ##   weapons_quality()->float  how good the arms our makers make now: 1 for a
 ##                             spear and a bow, up to 4 for automatic rifles.
 ##   arms_wanted()->int        sets still to be made: the watch, less what it
-##                             carries and what is in store.
+##                             carries and what is held.
 ## A fighter with no set fights with improvised arms. Static; preload.
 
 const GOOD:="Arms"
@@ -53,6 +61,7 @@ const AGES:=[
 ## Spear-and-bow arms take what is at hand: a missing one of these is made up
 ## from the others (flint from stone, cord from wood), as household goods are.
 const STONE_BASKET:=["Timber","Flint","Stone","Fiber Plants"]
+const STONE_WEIGHTS:={"Timber":1.4,"Flint":0.3,"Stone":0.15,"Fiber Plants":0.4}
 ## Sets the people want for each of the watch.
 const ARMS_PER_WATCHER:=1.0
 ## The share of the makers on arms while the watch lacks them: in peace, at war.
@@ -136,11 +145,15 @@ static func making_age()->Dictionary:
 	return AGES[0]
 
 ## What arming one fighter costs now, in the engine's numbers: the maker-days
-## at full pace, the materials, and its worth in goods (the household goods
-## those maker-days would have made, and the materials at today's prices).
+## at full pace, the materials, and its worth in goods. goods_forgone is the
+## household goods those maker-days would have made (a slower people takes
+## more days for a set but makes fewer goods a day: the pace cancels); the
+## makers' other work lost that day (tools and materials, food put by, the
+## workshops) is a cost beside it, not counted in goods.
 static func cost_per_fighter()->Dictionary:
 	var age:=known_age()
-	var goods_rate:=float((load("res://scripts/civilian_goods.gd") as GDScript).call("goods_per_maker_day"))
+	var goods:=load("res://scripts/civilian_goods.gd") as GDScript
+	var goods_rate:=float(goods.call("goods_per_maker_day_at_full_pace"))
 	var goods_price:=_price("Civilian Goods")
 	var materials_worth:=0.0
 	for item:String in age.materials:materials_worth+=float(age.materials[item])*_price(item)
@@ -157,7 +170,7 @@ static func _price(item:String)->float:
 
 # --- The store ------------------------------------------------------------------
 
-## Sets in the stores of the place in scope (fractions count toward the next).
+## Made sets in the stores of the place in scope (fractions count toward the next).
 static func stock()->float:
 	return _stock_of(GOOD)
 
@@ -165,8 +178,7 @@ static func stock()->float:
 ## own through stock()).
 static func _town_stores()->Array:
 	var out:Array=[]
-	var settlements=WorldSimulation.settlements
-	if settlements==null:return out
+	if WorldSimulation.settlements==null:return out
 	for record_:Variant in WorldSimulation.state.player_settlements:
 		if not record_ is Dictionary or bool((record_ as Dictionary).get("primary",false)):continue
 		var local:Variant=(record_ as Dictionary).get("local_resources")
@@ -175,6 +187,14 @@ static func _town_stores()->Array:
 		if is_same(stores,WorldSimulation.state.resource_stockpiles):continue
 		out.append(stores)
 	return out
+
+## Made sets in every store of the realm (the capital's and the towns'); in a
+## town's own day, that town's.
+static func store_exact()->float:
+	if String(WorldSimulation.state.resource_settlement_id)!="":return stock()
+	var total:=stock()
+	for stores:Dictionary in _town_stores():total+=maxf(0.0,float(stores.get(GOOD,0.0)))
+	return total
 
 ## Sets in the old armoury not yet issued (kits that arm a fighter).
 static func armoury_sets()->int:
@@ -192,12 +212,9 @@ static func _arms_kit(item:String)->bool:
 	if item.ends_with("_spear"):return true
 	return String(_ledger().call("family",item)) in ARMOURY_FAMILIES
 
-## Every set in store, realm-wide, as a float.
+## Every set held for the watch, realm-wide, as a float: made sets and the old armoury.
 static func held_exact()->float:
-	if String(WorldSimulation.state.resource_settlement_id)!="":return stock()
-	var total:=stock()
-	for stores:Dictionary in _town_stores():total+=maxf(0.0,float(stores.get(GOOD,0.0)))
-	return total+float(armoury_sets())
+	return store_exact()+float(armoury_sets())
 
 static func weapons_held()->int:
 	return floori(held_exact()+0.000001)
@@ -206,8 +223,19 @@ static func weapons_issued()->int:
 	var r:Variant=WorldSimulation.state.civilian_goods.get("arms")
 	return maxi(0,roundi(float((r as Dictionary).get("issued",0.0)))) if r is Dictionary else 0
 
-## Takes up to n whole sets for the watch: the capital's store first, then
-## the towns', then the old armoury. Returns how many were taken.
+## Made sets another people could have: those beyond what the watch still
+## lacks once the armoury and what it carries are counted (the trade ledger's
+## holding of "Arms" and the economy's wanted holding read these two).
+static func trade_holding()->float:
+	return store_exact()
+
+static func trade_wanted()->float:
+	return maxf(0.0,watch()*ARMS_PER_WATCHER-float(weapons_issued())-float(armoury_sets()))
+
+## Takes up to n whole sets for the watch, exactly: made sets first (the
+## capital's, then the towns'), then the old armoury's kits, the cheapest
+## first. A part set left when a kit makes up the last of it goes into the
+## capital's store, so nothing is lost. Returns how many were taken.
 static func take_weapons(n:int)->int:
 	var want:=mini(maxi(0,n),weapons_held())
 	if want<=0:return 0
@@ -216,12 +244,16 @@ static func take_weapons(n:int)->int:
 	for stores:Dictionary in _town_stores():
 		if left<=0.000001:break
 		left-=_take_from(stores,left)
-	if left>0.000001:left-=float(_take_from_armoury(ceili(left-0.000001)))
-	var taken:=want-maxi(0,ceili(left-0.000001))
+	if left>0.000001:
+		var kits:=ceili(left-0.000001)
+		var got:=_take_from_armoury(kits)
+		left-=float(got)
+		# A whole kit covered a part set: the rest of it stays in store.
+		if left<-0.000001:WorldSimulation.state.resource_stockpiles[GOOD]=stock()-left
 	var r:=record()
-	r.issued=float(r.issued)+taken
-	r.taken=float(r.taken)+taken
-	return taken
+	r.issued=float(r.issued)+want
+	r.taken=float(r.taken)+want
+	return want
 
 static func _take_from(stores:Dictionary,amount:float)->float:
 	var have:=maxf(0.0,float(stores.get(GOOD,0.0)))
@@ -229,33 +261,40 @@ static func _take_from(stores:Dictionary,amount:float)->float:
 	if out>0.0:stores[GOOD]=have-out
 	return out
 
+## A kit's worth for the order of drawing (its materials and its workshop days).
+static func _kit_worth(item:String)->float:
+	var row:Dictionary=_ledger().call("row",item)
+	var worth:=float(row.get("days",1.0))*6.0
+	var materials:Variant=row.get("materials",{})
+	if materials is Dictionary:
+		for material:String in (materials as Dictionary):worth+=float(materials[material])*preload("res://scripts/trade_prices.gd").base(material)
+	return worth
+
 static func _take_from_armoury(count:int)->int:
 	var military=WorldSimulation.military
 	if military==null or count<=0:return 0
 	var inventory:Dictionary=military.military_inventory
+	var items:Array=inventory.keys().filter(func(item:String)->bool:return _arms_kit(item) and int(inventory[item])>0)
+	items.sort_custom(func(a:String,b:String)->bool:return _kit_worth(a)<_kit_worth(b) or (_kit_worth(a)==_kit_worth(b) and a<b))
 	var taken:=0
-	var items:Array=inventory.keys()
-	items.sort()
 	for item:String in items:
 		if taken>=count:break
-		if not _arms_kit(item):continue
 		var out:=mini(count-taken,maxi(0,int(inventory[item])))
 		inventory[item]=int(inventory[item])-out
 		taken+=out
 	return taken
 
-## Sets that leave the stores for another people (traded, given, seized):
-## the capital's first, then the towns', then the old armoury. Not counted
-## as carried by the watch. Returns what left.
+## Made sets that leave for another people (traded): the capital's first, then
+## the towns'. Never the old armoury, never sets the watch carries. Returns
+## what left.
 static func remove(amount:float)->float:
-	var want:=minf(maxf(0.0,amount),held_exact())
+	var want:=minf(maxf(0.0,amount),store_exact())
 	if want<=0.000001:return 0.0
 	var left:=want
 	left-=_take_from(WorldSimulation.state.resource_stockpiles,left)
 	for stores:Dictionary in _town_stores():
 		if left<=0.000001:break
 		left-=_take_from(stores,left)
-	if left>0.000001:left-=float(_take_from_armoury(floori(left+0.000001)))
 	return want-maxf(0.0,left)
 
 ## Sets carried back into the capital's store.
@@ -276,31 +315,25 @@ static func lose_weapons(n:int)->int:
 	r.lost=float(r.lost)+gone
 	return gone
 
-## Sets put into the capital's store from elsewhere (bought, given).
-static func add(amount:float)->float:
-	if amount<=0.0:return 0.0
-	WorldSimulation.state.resource_stockpiles[GOOD]=stock()+amount
-	return amount
-
 # --- The plan: how many to make, and how many hands -------------------------------
 
 ## The watch: the people on keeping watch (the military's manpower).
 static func watch()->float:
 	return maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))
 
+## At war or in a feud with any people, read the same from either side (the
+## trade ledger's own test, trade_ledger.gd blocked: a war, or a feud hot on
+## either side of it).
 static func at_war()->bool:
-	if WorldSimulation.world==null:return false
-	var civs:Array=WorldSimulation.world.civilizations
-	for civ:Variant in civs:
-		if civ is Dictionary and bool(((civ as Dictionary).get("player_relation",{}) as Dictionary).get("at_war",false)):return true
-	if _owner()=="player":
-		var war:=load("res://scripts/war_loop.gd") as GDScript
-		if war!=null:
-			for civ:Variant in civs:
-				if civ is Dictionary and bool(war.call("hot",String((civ as Dictionary).get("id","")),int(WorldSimulation.state.elapsed_days))):return true
+	var ledger:=load("res://scripts/trade_ledger.gd") as GDScript
+	if ledger==null:return false
+	var owner:=_owner()
+	for other:Variant in ledger.call("owners"):
+		if String(other)==owner:continue
+		if String(ledger.call("blocked",owner,String(other))) in ["war","feud"]:return true
 	return false
 
-## Sets still wanted: the watch's arms, less what it carries and what is in store.
+## Sets still wanted: the watch's arms, less what it carries and what is held.
 static func arms_wanted()->int:
 	return maxi(0,ceili(watch()*ARMS_PER_WATCHER-0.000001)-weapons_issued()-weapons_held())
 
@@ -328,7 +361,7 @@ static func plan()->Dictionary:
 
 ## One place's day of arms-making, from its own makers and stores (less what
 ## the workshops' standing orders have claimed: `reserve`). Returns {hands,
-## sets, kind, inputs, reason}: `hands` makers spent the day on arms.
+## sets, kind, inputs, reason}: `hands` makers spent the whole day on arms.
 static func make(makers:float,efficiency:float,reserve:Dictionary={})->Dictionary:
 	_reserved=reserve
 	var out:=_make(makers,efficiency)
@@ -358,10 +391,11 @@ static func _make(makers:float,efficiency:float)->Dictionary:
 		sets=minf(sets,raw/_raw_per_set(age))
 	else:
 		for item:String in age.materials:sets=minf(sets,_usable(item)/float(age.materials[item]))
+	# Only what the materials really drawn make.
+	if sets>0.000001:sets=_draw(age,sets,out.inputs)
 	if sets<=0.000001:
 		out.reason="Needs %s" % _needs_words(age)
 		return out
-	_draw(age,sets,out.inputs)
 	WorldSimulation.state.resource_stockpiles[GOOD]=stock()+sets
 	p["made"]=float(p.get("made",0.0))+sets
 	out.sets=sets/span
@@ -376,39 +410,33 @@ static func _needs_words(age:Dictionary)->String:
 	for item:String in (STONE_BASKET if String(age.id)=="stone" else (age.materials as Dictionary).keys()):names.append(String(item).to_lower())
 	return ", ".join(names)
 
-static func _draw(age:Dictionary,sets:float,inputs:Dictionary)->void:
+## Draws the materials for `sets` sets from the stores in scope; returns the
+## sets they make (fewer when a material ran short).
+static func _draw(age:Dictionary,sets:float,inputs:Dictionary)->float:
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	if String(age.id)!="stone":
+		for item:String in age.materials:sets=minf(sets,_usable(item)/float(age.materials[item]))
 		for item:String in age.materials:
 			var used:=float(age.materials[item])*sets
 			stocks[item]=maxf(0.0,_stock_of(item)-used)
 			inputs[item]=float(inputs.get(item,0.0))+used
-		return
+		return sets
 	# Spear and bow: each by its weight in the set, a short one made up by the rest.
-	var weights:={"Timber":1.4,"Flint":0.3,"Stone":0.15,"Fiber Plants":0.4}
-	var needed:=sets*_raw_per_set(age)
+	var per_set:=_raw_per_set(age)
+	var needed:=sets*per_set
+	var drawn_all:=0.0
 	for pass_index in 3:
 		var weight_total:=0.0
 		for item:String in STONE_BASKET:
-			if _usable(item)>0.000001:weight_total+=float(weights[item])
+			if _usable(item)>0.000001:weight_total+=float(STONE_WEIGHTS[item])
 		if weight_total<=0.0 or needed<=0.000001:break
 		var drawn_total:=0.0
 		for item:String in STONE_BASKET:
 			if _usable(item)<=0.000001:continue
-			var drawn:=minf(_usable(item),needed*float(weights[item])/weight_total)
+			var drawn:=minf(_usable(item),needed*float(STONE_WEIGHTS[item])/weight_total)
 			stocks[item]=_stock_of(item)-drawn
 			inputs[item]=float(inputs.get(item,0.0))+drawn
 			drawn_total+=drawn
 		needed-=drawn_total
-
-# --- Words -----------------------------------------------------------------------
-
-## The arms line for the Wealth and Trade pages: what is in store, what the
-## watch carries, what is being made and what a set costs.
-static func summary()->Dictionary:
-	var cost:=cost_per_fighter()
-	var r:Dictionary=WorldSimulation.state.civilian_goods.get("arms",{}) if WorldSimulation.state.civilian_goods.get("arms") is Dictionary else {}
-	var plan_:Dictionary=r.get("plan",{}) if r.get("plan") is Dictionary else {}
-	var made:=float(((WorldSimulation.state.civilian_goods.get("report",{}) as Dictionary).get("arms_made",0.0)))
-	return {"held":weapons_held(),"issued":weapons_issued(),"watch":roundi(watch()),"wanted":int(plan_.get("wanted",arms_wanted())),"share":float(plan_.get("share",0.0)),"war":bool(plan_.get("war",false)),
-		"made_day":made,"cost":cost,"quality":float(cost.quality)}
+		drawn_all+=drawn_total
+	return drawn_all/per_set

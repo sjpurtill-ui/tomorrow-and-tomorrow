@@ -109,11 +109,32 @@ static func efficiency()->float:
 ## Goods one maker makes a day now: CRAFT_SHARE of the day x BASE_RATE x
 ## techniques x how well people work.
 static func goods_per_maker_day()->float:
-	return CRAFT_SHARE*BASE_RATE*technique_output()*efficiency()*specialization()
+	return goods_per_maker_day_at_full_pace()*efficiency()
+
+## The same at full pace (working efficiency 1): what a maker-day of arms
+## forgoes in goods (weapons_stock.gd cost_per_fighter).
+static func goods_per_maker_day_at_full_pace()->float:
+	return CRAFT_SHARE*BASE_RATE*technique_output()*specialization()
+
+## Makers on arms in the place in scope (its latest day's making): they give
+## the whole day to arms, so game_state.gd effective_workers("Crafting") leaves
+## them out of every other making work. A record older than a week counts
+## none.
+static func arms_hands(state:Variant)->float:
+	var goods:Variant=state.civilian_goods
+	if not goods is Dictionary:return 0.0
+	var report:Variant=(goods as Dictionary).get("report",{})
+	if not report is Dictionary:return 0.0
+	if int(state.elapsed_days)-int((goods as Dictionary).get("last_day",-99999))>7:return 0.0
+	return maxf(0.0,float((report as Dictionary).get("arms_hands",0.0)))
+
+## Every maker in scope, those on arms included.
+static func makers()->float:
+	return maxf(0.0,WorldSimulation.state.effective_workers("Crafting"))+arms_hands(WorldSimulation.state)
 
 ## The share of the people who make (Crafting).
 static func makers_share()->float:
-	return clampf(WorldSimulation.state.effective_workers("Crafting")/maxf(1.0,WorldSimulation.state.population_exact),0.0,1.0)
+	return clampf(makers()/maxf(1.0,WorldSimulation.state.population_exact),0.0,1.0)
 
 ## How much more each maker makes when many make: 1 up to 1 + SPECIALIZATION.
 static func specialization()->float:
@@ -256,13 +277,13 @@ static func advance()->Dictionary:
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:
 		report.reason="Needs a settled workplace"
 	else:
-		var makers:=maxf(0.0,WorldSimulation.state.effective_workers("Crafting"))
+		var all_makers:=makers()
 		var pace:=efficiency()
 		var reserve:=workshop_input_reserve()
 		# Arms first, while the watch lacks them: those hands make no goods today.
-		var arms:=Arms.make(makers,pace,reserve)
+		var arms:=Arms.make(all_makers,pace,reserve)
 		report.arms_made=float(arms.sets);report.arms_hands=float(arms.hands);report.arms_kind=String(arms.kind);report.arms_inputs=arms.inputs
-		var labor:=maxf(0.0,makers-float(arms.hands))*CRAFT_SHARE*WorldSimulation.span
+		var labor:=maxf(0.0,all_makers-float(arms.hands))*CRAFT_SHARE*WorldSimulation.span
 		# Techniques, and how well people work (the business sector's factor included).
 		var rate:=BASE_RATE*technique_output()*pace*specialization()
 		report.per_maker=CRAFT_SHARE*rate

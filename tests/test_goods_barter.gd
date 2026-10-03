@@ -311,44 +311,100 @@ func test_goods_buy_arms_from_a_people_with_arms_to_spare()->void:
 	assert_str(String(done.said)).contains("Arms for 15 fighters")
 
 
-func test_goods_bring_families_who_come_to_work()->void:
+## Their people eat this share of what they need.
+func _eats(owner:String,share:float)->void:
+	WorldSimulation.scoped(owner,func()->void:WorldSimulation.state.simulation_metrics["food_intake_ratio"]=share)
+
+func test_families_come_only_from_a_people_that_cannot_feed_them()->void:
 	var a:=String(ids[0])
 	WorldSimulation.scoped(a,func()->void:WorldSimulation.state.ensure_population_total(500))
-	_stores("player",{Goods.GOODS:400.0})
+	_stores("player",{Goods.GOODS:3000.0})
 	_barter_pair("player",a)
+	# A well-fed people lets no one go, whatever we offer, all year.
+	_eats(a,1.0)
 	var t:=Ledger.deal_terms("player",a,"families",50.0)
+	assert_bool(bool(t.ok)).is_false()
+	assert_str(String(t.why)).contains("feed their own")
+	var theirs:=_pop(a)
+	for season in 4:
+		GameState.elapsed_days=10+season*Ledger.FAMILY_DAYS
+		assert_bool(bool(Ledger.goods_deal("player",a,"families",50.0).ok)).is_false()
+	assert_int(_pop(a)).is_equal(theirs)
+	# Hungry (eating 80 in 100 of their need): only as many as their food
+	# cannot feed, at most 2 in 100 of them a deal, at a person's year of work.
+	_eats(a,0.8)
+	GameState.elapsed_days=400
+	t=Ledger.deal_terms("player",a,"families",50.0)
 	assert_bool(bool(t.ok)).override_failure_message(String(t.why)).is_true()
-	# At most 2 in 100 of their people in one deal; a season's food a head, in goods.
+	assert_float(float(t.most)).is_equal(floorf(minf(500.0*(Ledger.FAMILY_HUNGRY-0.8),500.0*Ledger.FAMILY_SHARE)))
 	assert_float(float(t.most)).is_equal(10.0)
-	assert_float(float(t.each)).is_equal_approx(Ledger.FAMILY_RATIONS*Prices.value("Food",a)/Prices.value(Goods.GOODS,a),0.0001)
-	var ours:=_pop("player"); var theirs:=_pop(a)
+	assert_float(float(t.each)).is_equal_approx(Ledger.person_worth(a)/Prices.value(Goods.GOODS,a),0.0001)
+	assert_float(float(t.each)).is_greater_equal(Ledger.FAMILY_YEAR_DAYS*Prices.value("Food",a)/Prices.value(Goods.GOODS,a)-0.0001)
+	assert_str(String(t.words)).contains("children with them")
+	var ours:=_pop("player")
+	theirs=_pop(a)
+	var opinion:=Ledger.opinion(a,"player")
 	var done:=Ledger.goods_deal("player",a,"families",50.0)
 	assert_bool(bool(done.ok)).is_true()
 	# The same people leave them and arrive among us: counts add up.
-	assert_int(_pop("player")-ours).is_equal(int(done.count))
-	assert_int(theirs-_pop(a)).is_equal(int(done.count))
 	assert_int(int(done.count)).is_equal(10)
-	assert_float(400.0-_stock("player",Goods.GOODS)).is_equal_approx(10.0*float(t.each),0.0001)
+	assert_int(_pop("player")-ours).is_equal(10)
+	assert_int(theirs-_pop(a)).is_equal(10)
+	assert_float(3000.0-_stock("player",Goods.GOODS)).is_equal_approx(10.0*float(t.each),0.0001)
+	# Families moving warm no one: a repeat is no easier.
+	assert_float(Ledger.opinion(a,"player")).is_equal_approx(opinion,0.000001)
+	# One families deal a pair a season.
+	t=Ledger.deal_terms("player",a,"families",50.0)
+	assert_bool(bool(t.ok)).is_false()
+	assert_str(String(t.why)).contains("this season")
+	# A year from the first deal, from a people that stays hungry: four deals
+	# at most, each at most 2 in 100 of them.
+	var came:=10
+	var deals:=1
+	for day in range(401,765):
+		GameState.elapsed_days=day
+		var more:=Ledger.goods_deal("player",a,"families",50.0)
+		if bool(more.ok):
+			came+=int(more.count)
+			deals+=1
+	assert_int(deals).is_equal(4)
+	assert_int(came).is_less_equal(40)
+	assert_int(_pop(a)).is_greater_equal(Ledger.FAMILY_KEEP)
 	# A people that thinks ill of us keeps its families.
+	GameState.elapsed_days=2000
 	(CivilizationSystem.civilizations[0].player_relation as Dictionary)["opinion"]=-0.2
 	assert_bool(bool(Ledger.deal_terms("player",a,"families",1.0).ok)).is_false()
 
 
-func test_goods_ransom_our_people_taken_captive()->void:
+func test_goods_ransom_our_people_taken_captive_from_the_record()->void:
 	var a:=String(ids[0])
 	_stores("player",{Goods.GOODS:400.0})
 	_barter_pair("player",a)
 	assert_bool(bool(Ledger.deal_terms("player",a,"captives",1.0).ok)).is_false()
-	# Their raid took three of ours (the war's own record).
+	# An older save: the war's log tells of three taken, but no count was kept.
 	(War.state().log as Array).push_front({"day":0,"civ":a,"kind":"raid","text":"","captives":3})
+	var old:=Ledger.deal_terms("player",a,"captives",3.0)
+	assert_bool(bool(old.ok)).is_false()
+	assert_str(String(old.why)).contains("before any count was kept")
+	# Their raid takes three of ours now: kept with them, ages as taken.
+	var ours:=_pop("player")
+	var theirs:=_pop(a)
+	var taken:=War._our_captives_lost(3,a)
+	assert_int(taken).is_equal(3)
+	assert_int(ours-_pop("player")).is_equal(3)
 	assert_int(Ledger.captives_held(a,"player")).is_equal(3)
+	var ages:Dictionary=Ledger.captive_pool(a,"player").c
+	var counted:=0.0
+	for key in ages: counted+=float(ages[key])
+	assert_float(counted).is_equal_approx(3.0,0.0001)
 	var t:=Ledger.deal_terms("player",a,"captives",3.0)
 	assert_bool(bool(t.ok)).override_failure_message(String(t.why)).is_true()
 	assert_float(float(t.each)).is_equal_approx(Ledger.RANSOM_RATIONS*Prices.value("Food",a)/Prices.value(Goods.GOODS,a),0.0001)
-	var ours:=_pop("player")
 	var done:=Ledger.goods_deal("player",a,"captives",3.0)
 	assert_bool(bool(done.ok)).is_true()
-	assert_int(_pop("player")-ours).is_equal(3)
+	# Home again; none of their own people left them.
+	assert_int(_pop("player")).is_equal(ours)
+	assert_int(_pop(a)).is_equal(theirs)
 	assert_int(Ledger.captives_held(a,"player")).is_equal(0)
 	assert_str(String(done.said)).contains("3 of ours ransomed home")
 
@@ -362,7 +418,12 @@ func test_arms_cost_per_fighter_is_high_and_rises_with_the_age()->void:
 	assert_float(float((cost.materials as Dictionary).Timber)).is_equal(1.4)
 	# Ten days of a maker's goods and the materials: worth some eight goods,
 	# near fifty rations (a month and a half of a person's food).
-	assert_float(float(cost.goods_forgone)).is_equal_approx(10.0*Goods.goods_per_maker_day(),0.0001)
+	# What the engine forgoes: the goods ten maker-days make at full pace (a
+	# slower people takes more days and makes fewer goods a day: it cancels).
+	assert_float(float(cost.goods_forgone)).is_equal_approx(10.0*Goods.goods_per_maker_day_at_full_pace(),0.0001)
+	GameState.simulation_metrics["labor_efficiency"]=0.4
+	assert_float(float(Arms.cost_per_fighter().goods_forgone)).is_equal_approx(float(cost.goods_forgone),0.0001)
+	GameState.simulation_metrics["labor_efficiency"]=0.8
 	assert_float(float(cost.worth_goods)).is_greater(8.0)
 	assert_float(float(cost.worth_rations)).is_between(40.0,80.0)
 	assert_float(Arms.weapons_quality()).is_equal(1.0)
@@ -376,29 +437,51 @@ func test_arms_cost_per_fighter_is_high_and_rises_with_the_age()->void:
 func test_the_weapons_stock_api_for_the_military()->void:
 	_work("player","Defense",30)
 	_stores("player",{Arms.GOOD:12.0})
-	# The old armoury's spears and bows count as arms in store: nothing moved.
+	# The old armoury's spears and bows count as held for the watch: nothing moved.
 	MilitaryCampaign.military_inventory["spear"]=5
+	MilitaryCampaign.military_inventory["bow"]=2
 	MilitaryCampaign.military_inventory["improvised"]=40
-	assert_int(Arms.weapons_held()).is_equal(17)
-	assert_int(Arms.arms_wanted()).is_equal(13)
-	# Taken: the capital's store first, then the old armoury; counted as carried.
-	assert_int(Arms.take_weapons(14)).is_equal(14)
+	assert_int(Arms.weapons_held()).is_equal(19)
+	assert_int(Arms.arms_wanted()).is_equal(11)
+	# Until the military takes any, the watch carries none.
+	assert_int(Arms.weapons_issued()).is_equal(0)
+	# Taken: made sets first, then the old armoury, the cheapest kit first.
+	var cheaper:="spear" if Arms._kit_worth("spear")<Arms._kit_worth("bow") else "bow"
+	var dearer:="bow" if cheaper=="spear" else "spear"
+	var dearer_count:=int(MilitaryCampaign.military_inventory[dearer])
+	assert_int(Arms.take_weapons(12+int(MilitaryCampaign.military_inventory[cheaper]))).is_equal(12+(5 if cheaper=="spear" else 2))
 	assert_float(_stock("player",Arms.GOOD)).is_equal(0.0)
-	assert_int(int(MilitaryCampaign.military_inventory.spear)).is_equal(3)
+	assert_int(int(MilitaryCampaign.military_inventory[cheaper])).is_equal(0)
+	assert_int(int(MilitaryCampaign.military_inventory[dearer])).is_equal(dearer_count)
 	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(40)
-	assert_int(Arms.weapons_issued()).is_equal(14)
-	assert_int(Arms.weapons_held()).is_equal(3)
-	assert_int(Arms.arms_wanted()).is_equal(13)
+	var issued:=Arms.weapons_issued()
+	assert_int(Arms.weapons_held()).is_equal(dearer_count)
+	assert_int(Arms.arms_wanted()).is_equal(11)
 	# Never more than is held.
-	assert_int(Arms.take_weapons(50)).is_equal(3)
+	assert_int(Arms.take_weapons(50)).is_equal(dearer_count)
 	assert_int(Arms.weapons_held()).is_equal(0)
+	assert_int(Arms.weapons_issued()).is_equal(19)
 	# Back into store, or lost with the fallen.
 	assert_int(Arms.return_weapons(5)).is_equal(5)
 	assert_int(Arms.weapons_held()).is_equal(5)
 	assert_int(Arms.lose_weapons(4)).is_equal(4)
-	assert_int(Arms.weapons_issued()).is_equal(8)
-	assert_int(Arms.return_weapons(100)).is_equal(8)
+	assert_int(Arms.weapons_issued()).is_equal(10)
+	assert_int(Arms.return_weapons(100)).is_equal(10)
 	assert_int(Arms.weapons_issued()).is_equal(0)
+	assert_int(issued).is_greater(0)
+
+
+func test_taking_arms_is_exact_with_part_sets()->void:
+	_work("player","Defense",30)
+	_stores("player",{Arms.GOOD:2.6})
+	MilitaryCampaign.military_inventory["spear"]=3
+	var before:=Arms.held_exact()
+	assert_float(before).is_equal_approx(5.6,0.0001)
+	assert_int(Arms.take_weapons(3)).is_equal(3)
+	# 2.6 made sets and one spear: the 0.6 left of the spear stays in store.
+	assert_float(Arms.held_exact()).is_equal_approx(before-3.0,0.0001)
+	assert_int(int(MilitaryCampaign.military_inventory.spear)).is_equal(2)
+	assert_float(Arms.stock()).is_equal_approx(0.6,0.0001)
 
 
 func test_makers_arm_the_watch_at_a_high_cost_in_goods()->void:
@@ -414,12 +497,17 @@ func test_makers_arm_the_watch_at_a_high_cost_in_goods()->void:
 	assert_float(float(report.arms_made)).is_equal_approx(20.0*Arms.ARMS_SHARE*0.8/10.0,0.0001)
 	assert_float(float(report.arms_hands)).is_equal_approx(20.0*Arms.ARMS_SHARE,0.0001)
 	assert_float(Arms.stock()).is_equal_approx(float(report.arms_made),0.0001)
-	# Those hands made no goods today.
+	# Those hands made no goods today, and are out of every other making work
+	# while they make arms (the workshops, tools and materials).
 	assert_float(float(report.made)).is_equal_approx((20.0-20.0*Arms.ARMS_SHARE)*Goods.CRAFT_SHARE*Goods.BASE_RATE*0.8*Goods.technique_output()*Goods.specialization(),0.0001)
-	# At war, twice the makers.
+	assert_float(GameState.effective_workers("Crafting")).is_equal_approx(20.0-20.0*Arms.ARMS_SHARE,0.0001)
+	assert_float(Goods.makers()).is_equal_approx(20.0,0.0001)
+	# At war, twice the makers; and the war is read the same from their side.
 	(CivilizationSystem.civilizations[0].player_relation as Dictionary)["at_war"]=true
 	GameState.elapsed_days=51
 	assert_float(float(Arms.plan_day().share)).is_equal(Arms.WAR_SHARE)
+	assert_bool(bool(WorldSimulation.scoped(String(ids[0]),func()->bool:return Arms.at_war()))).is_true()
+	assert_bool(bool(WorldSimulation.scoped(String(ids[1]),func()->bool:return Arms.at_war()))).is_false()
 	(CivilizationSystem.civilizations[0].player_relation as Dictionary)["at_war"]=false
 	# The watch armed: no more arms are made.
 	_stores("player",{Arms.GOOD:10.0})
@@ -440,6 +528,19 @@ func test_arms_trade_as_a_good_between_peoples()->void:
 	# They offer what they hold over their watch's need; we want what ours lacks.
 	assert_float(Ledger.offer_of(Ledger.report(a).g,Arms.GOOD)).is_greater(0.0)
 	assert_float(Ledger.want_of(Ledger.report("player").g,Arms.GOOD)).is_equal_approx(20.0,0.0001)
+	# The old armoury arms the watch and is never traded, paid or given away.
+	WorldSimulation.scoped(a,func()->void:WorldSimulation.military.military_inventory["spear"]=500)
+	_stores(a,{Arms.GOOD:0.0})
+	assert_float(Ledger.spare_of(a,Arms.GOOD)).is_equal(0.0)
+	_barter_pair("player",a)
+	_stores("player",{Goods.GOODS:900.0})
+	assert_bool(bool(Ledger.deal_terms("player",a,Arms.GOOD,5.0).ok)).is_false()
+	# Paying in kind (tolls, tribute, terms) never takes arms unless chosen.
+	_stores(a,{Arms.GOOD:30.0,Goods.GOODS:0.0,"Timber":0.0,"Stone":0.0,"Flint":0.0,"Clay":0.0,"Fiber Plants":0.0,"Salt":0.0})
+	Ledger._refresh_report(a,1)
+	Ledger.pay_in_kind(a,"player",50.0,"","tribute")
+	assert_float(_stock(a,Arms.GOOD)).is_equal(30.0)
+	assert_int(int(WorldSimulation.scoped(a,func()->int:return int(WorldSimulation.military.military_inventory.spear)))).is_equal(500)
 
 
 # --- 5. Stalls and workshops under barter ---------------------------------------------
@@ -488,7 +589,7 @@ func test_a_computer_people_buys_arms_with_goods_by_the_same_rules()->void:
 func test_a_fed_people_takes_in_families_from_a_hungry_one_for_goods()->void:
 	var a:=String(ids[0]); var b:=String(ids[1])
 	_work(a,"Defense",0)
-	_stores(a,{Goods.GOODS:600.0})
+	_stores(a,{Goods.GOODS:3000.0})
 	WorldSimulation.scoped(b,func()->void:WorldSimulation.state.ensure_population_total(400))
 	for id:String in ids+["player"]:
 		WorldSimulation.scoped(id,func()->void:
@@ -498,16 +599,21 @@ func test_a_fed_people_takes_in_families_from_a_hungry_one_for_goods()->void:
 	Ledger.pair(a,b)["meet"]=0
 	# Both fed: nobody leaves.
 	assert_int(Stances.goods_buys(a,30).size()).is_equal(0)
-	# Their people go hungry: some come to work for our goods.
-	WorldSimulation.scoped(b,func()->void:WorldSimulation.state.simulation_metrics["food_intake_ratio"]=0.7)
-	var theirs:=_pop(b); var ours:=_pop(a)
+	# Their people go hungry: as many as the god's people could take, on the same terms.
+	_eats(b,0.7)
+	var theirs:=_pop(b)
+	var ours:=_pop(a)
+	var terms:=Ledger.deal_terms(a,b,"families",1000.0)
 	var made:=Stances.goods_buys(a,60)
 	assert_int(made.size()).is_equal(1)
 	assert_str(String((made[0] as Dictionary).what)).is_equal("families")
 	var came:=int((made[0] as Dictionary).count)
-	assert_int(came).is_equal(Stances.FAMILY_BUY_MAX)
+	assert_int(came).is_equal(int(terms.count))
+	assert_int(came).is_equal(8)
 	assert_int(theirs-_pop(b)).is_equal(came)
 	assert_int(_pop(a)-ours).is_equal(came)
+	# Not again this season.
+	assert_int(Stances.goods_buys(a,61).size()).is_equal(0)
 
 
 func test_older_saves_keep_their_goods_and_arms_without_a_jump()->void:

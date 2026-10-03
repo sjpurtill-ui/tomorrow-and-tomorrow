@@ -685,6 +685,8 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	var military_campaign:=WorldSimulation.system("MilitaryCampaign")
 	if military_campaign!=null and military_campaign.has_method("civilian_crafting_fraction"):
 		makers*=clampf(float(military_campaign.civilian_crafting_fraction()),0.0,1.0)
+	# Makers on arms make no tools or materials that day (weapons_stock.gd).
+	makers=maxf(0.0,makers-preload("res://scripts/civilian_goods.gd").arms_hands(WorldSimulation.state))
 	var carriers := float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var observers := float(WorldSimulation.state.effective_workers("Knowledge"))
 	var stewards := float(WorldSimulation.state.effective_workers("Administration"))

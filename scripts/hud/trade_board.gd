@@ -81,7 +81,6 @@ static func reading_signature()->String:
 	parts.append(str(s.get("tributes",{})))
 	parts.append(str((s.get("news",[]) as Array).size()))
 	parts.append(str(int(GameState.elapsed_days)/7))
-	parts.append(str([roundi(Goods.spare()),Arms.weapons_held()]))
 	return str(hash("|".join(parts)))
 
 
@@ -293,20 +292,18 @@ func _squeeze_goods(civ_id:String)->Array:
 ## watch, what they have to spare, families who come to work, our own taken
 ## captive. Choosing one carries it out (trade_ledger.gd goods_deal).
 func _buy_menu(civ_id:String)->Control:
+	# The terms are read once a day for each people (trade_ledger.gd deal_offers).
 	var offers:=Ledger.deal_offers("player",civ_id)
 	var pick:=MenuButton.new();pick.name="BuyWithGoods";pick.flat=false;pick.focus_mode=Control.FOCUS_NONE
 	pick.text="Buy with goods ▾"
 	if offers.is_empty():
-		var why:=Ledger.deal_terms("player",civ_id,Ledger.ARMS,1.0)
-		pick.disabled=true;pick.tooltip_text=String(why.get("why","They have nothing to spare for our goods."))
+		pick.disabled=true;pick.tooltip_text="They have nothing to spare for our goods."
 		return pick
 	var popup:=pick.get_popup()
-	var terms:Array=[]
+	var terms:Array=offers
 	for i in offers.size():
-		var offer:Dictionary=offers[i]
-		var what:=String(offer.what)
-		var t:=Ledger.deal_terms("player",civ_id,what,_deal_count(offer))
-		terms.append(t)
+		var t:Dictionary=offers[i]
+		var what:=String(t.what)
 		if bool(t.ok):popup.add_item(_short(_cap(String(t.words))),i)
 		else:
 			popup.add_item(_short("%s · %s" % [_deal_name(what),String(t.why)]),i)
@@ -315,16 +312,6 @@ func _buy_menu(civ_id:String)->Control:
 	pick.tooltip_text="Our goods buy what they have to spare, at their prices."
 	popup.id_pressed.connect(func(index:int)->void:_deal(civ_id,terms[index] as Dictionary))
 	return pick
-
-
-## How many to ask for: the arms the watch lacks, all of ours they hold, a
-## few families, ten loads of a good.
-func _deal_count(offer:Dictionary)->float:
-	match String(offer.what):
-		Ledger.ARMS:return float(maxi(1,mini(Arms.arms_wanted(),20)))
-		"captives":return float(offer.most)
-		"families":return minf(float(offer.most),5.0)
-	return 10.0
 
 
 func _deal_name(what:String)->String:

@@ -622,14 +622,13 @@ static func _raid(k:String,r:Dictionary,day:int)->void:
 ## the most to spare: at war, or when its goods to spare would pay for
 ## ARMS_GOODS_SETS sets over. A people that eats its fill with a lean spell's
 ## food in store (FAMILY_FOOD_DAYS) takes in families from a partner that
-## goes hungry (eating under HUNGRY_INTAKE of its need), who come to work for
-## goods. Every people by these rules, the god's people only as the seller
-## (the god buys by its own word). Returns the deals made.
+## cannot feed them, on the terms every buyer meets (trade_ledger.gd
+## deal_terms: only from a hungry people, as many as its food cannot feed,
+## one deal a season). Every people by these rules, the god's people only
+## as the seller (the god buys by its own word). Returns the deals made.
 const ARMS_GOODS_SETS:=3.0
 const ARMS_BUY_MAX:=10
 const FAMILY_FOOD_DAYS:=20.0
-const HUNGRY_INTAKE:=0.9
-const FAMILY_BUY_MAX:=5
 static func goods_buys(owner:String,day:int)->Array:
 	var made:Array=[]
 	if owner=="player" or not Ledger.simulated(owner): return made
@@ -650,9 +649,9 @@ static func goods_buys(owner:String,day:int)->Array:
 	if float(need.food_days)>=FAMILY_FOOD_DAYS and float(need.fed)>=0.98:
 		for row:Dictionary in Ledger.partners(owner):
 			var other:=String(row.id)
-			var eats:=float(WorldSimulation.scoped(other,func()->float:return float(WorldSimulation.state.simulation_metrics.get("food_intake_ratio",1.0)))) if Ledger.simulated(other) else 1.0
-			if eats>=HUNGRY_INTAKE: continue
-			var done2:=Ledger.goods_deal(owner,other,"families",float(FAMILY_BUY_MAX),"ai")
+			var terms:=Ledger.deal_terms(owner,other,"families",1.0)
+			if not bool(terms.ok): continue
+			var done2:=Ledger.goods_deal(owner,other,"families",float(terms.most),"ai")
 			if bool(done2.get("ok",false)): made.append(done2); break
 	return made
 
