@@ -289,13 +289,17 @@ static func leaders_line()->Dictionary:
 	var id:=held() if held()!="" else "balanced"
 	var kept:=record_of()
 	var tip:="The leaders lean the work by the people's ways (the values they live by), on the same rule as every ruler. They look again each month."
-	# Why learning sits where it does: the path's share, the engine's number.
-	tip+=" They put at most %s in 100 of the people on learning, the share for %s; when you set the work yourself there is no such limit." % [_share_words(learning_cap()*100.0),String(NAMES[id])]
+	# Why learning sits where it does: the path's share (raised by a wish to
+	# learn, the inquiry ambition), the engine's number.
+	var cap:=learning_cap()
+	var whose:="the share for %s" % String(NAMES[id])
+	if cap>float(LEARNING_CAP.get(id,LEARNING_CAP.balanced))+0.0001:whose+=", raised by their wish to learn"
+	var limit:="at most %s in 100 of the people on learning, %s; when you set the work yourself there is no such limit." % [_share_words(cap*100.0),whose]
 	if id=="balanced":
-		return {"text":"Our leaders keep the work balanced, favouring no one task.","tip":tip}
+		return {"text":"Our leaders keep the work balanced, favouring no one task.","tip":"%s They put %s" % [tip,limit]}
 	var since:=int(kept.get("since",int(WorldSimulation.state.elapsed_days)))
 	return {"text":"Our leaders lean the work toward %s." % String(NAMES[id]),
-		"tip":"%s They put %s. The people's ways are %s. Since year %d." % [tip,String(LEANS[id]),String(kept.get("why",TEMPERS[id])),since/365+1]}
+		"tip":"%s They put %s, and %s The people's ways are %s. Since year %d." % [tip,String(LEANS[id]),limit,String(kept.get("why",TEMPERS[id])),since/365+1]}
 
 ## "3.5", "15": a share in 100 as the tip says it.
 static func _share_words(value:float)->String:
