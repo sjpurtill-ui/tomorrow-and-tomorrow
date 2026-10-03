@@ -1,0 +1,9 @@
+{
+  "id": "maternal_recovery",
+  "prompt": "One standalone finished illustration for Tomorrow and Tomorrow, a civilization strategy game. Sophisticated realistic painterly game art, wide 3:2 landscape composition, tactile natural materials, carefully observed mechanisms, atmospheric light. Make the specific subject and action instantly recognizable in a wide central banner crop. Match the technical stage of the named discovery; earliest-practice imagery for early methods, appropriately later industrial equipment only when the discovery itself calls for it. Use varied composition and environments, not the same standing artisan on the same background. No invented national identity, flag, emblem, text labels, title, logo, watermark, border, UI, montage, voxel geometry or cartoon. Specific discovery: Maternal Recovery Care. Show a concrete, visually clear scene demonstrating this exact practice: Food and relief from heavy work support recovery after birth rather than an immediate return to full workloads. Focus on the distinctive activity or equipment named in the discovery, not a generic field or another invention. Depict the early practice in a small pre-metal community: simple timber, earth, natural fiber and stone tools. No steel, iron or bronze implements, forge, complex masonry city, medieval castle, tall sailing ship, modern clothes, written alphabet or printed paper. Any records use simple marks or clay tokens if the named practice calls for them.",
+  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-6eb22423-fb43-4fcc-8c9a-4abfa6127b9b.png",
+  "asset": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+  "sha256": "ce52c1e4dcff5b040c3fc75898ed49842db05b7be9ba1f5112077c1e6ab12149",
+  "mode": "built-in image_gen / new image",
+  "review": "pending visual audit"
+}

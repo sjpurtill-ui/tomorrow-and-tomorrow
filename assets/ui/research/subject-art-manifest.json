@@ -66,8 +66,12 @@
     ]
   },
   "charcoal": {
-    "path": "res://assets/ui/research/subjects/charcoal-v1.png",
+    "path": "res://assets/ui/research/subjects/charcoal-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -1393,10 +1397,10 @@
     ]
   },
   "maternal_recovery": {
-    "path": "res://assets/ui/research/subjects/maternal_recovery-v1.png",
+    "path": "res://assets/ui/research/subjects/maternal_recovery-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.3
     ]
   },
   "child_growth_records": {
@@ -6685,35 +6689,35 @@
     ]
   },
   "deliberate_milk_souring": {
-    "path": "res://assets/ui/research/subjects/deliberate_milk_souring-v1.png",
+    "path": "res://assets/ui/research/subjects/deliberate_milk_souring-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "flood_house_mounds": {
-    "path": "res://assets/ui/research/subjects/flood_house_mounds-v1.png",
+    "path": "res://assets/ui/research/subjects/flood_house_mounds-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "part_time_specialists": {
-    "path": "res://assets/ui/research/subjects/part_time_specialists-v1.png",
+    "path": "res://assets/ui/research/subjects/part_time_specialists-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "disability_care": {
-    "path": "res://assets/ui/research/subjects/disability_care-v1.png",
+    "path": "res://assets/ui/research/subjects/disability_care-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "paired_measure_checking": {
-    "path": "res://assets/ui/research/subjects/paired_measure_checking-v1.png",
+    "path": "res://assets/ui/research/subjects/paired_measure_checking-v2.png",
     "focus": [
       0.5,
       0.5
@@ -10199,6 +10203,13 @@
       0.5
     ],
     "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "first_fruits_offering": {
+    "path": "res://assets/ui/research/subjects/first_fruits_offering-v2.png",
+    "focus": [
       0.5,
       0.5
     ]

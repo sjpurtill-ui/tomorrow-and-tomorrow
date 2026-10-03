@@ -1,12 +1,60 @@
 {
   "id": "flood_house_mounds",
   "line": "infrastructure",
-  "game_year": 36,
-  "approx_historical_year": -4760,
-  "prompt": "c. 4760 BCE: Adults pile and tamp earth into raised house mound above wet floodplain before reed-and-timber shelter; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f59771dc-efd6-4f13-a7ff-2b0d4530c9f6.png",
-  "asset": "res://assets/ui/research/subjects/flood_house_mounds-v1.png",
-  "sha256": "4ebc856396a5034756f187a7cbf760c21e76e94fe1ebba803bfbe1d9580604a5",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation; elevation above floodwater and construction clear."
+  "status": "new",
+  "name": "House Mounds Raised Above Flood",
+  "one_liner": "House mounds raised above flood",
+  "observation": "House mounds raised above flood.",
+  "key_threshold": false,
+  "target_year": 36,
+  "proposed_year": 36,
+  "band_low": 18,
+  "band_high": 45,
+  "min_year": 18,
+  "research_years": 3,
+  "requires_all": [
+    "flood_mark_reading"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "adobe_wall_construction"
+  ],
+  "conditions": {
+    "environment": [
+      "river"
+    ]
+  },
+  "shared_with": [],
+  "subcategory": "Resilience",
+  "signals": [
+    "construction",
+    "materials"
+  ],
+  "version": 2,
+  "year": 36,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "binding_style": "infrastructure: established field painting",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/flood_house_mounds-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-25/art_source/research-opening-25/style-reference/infrastructure-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY the established infrastructure painting medium/palette and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: TWO adults add baskets of earth to a LOW raised earthen mound beneath a modest reed/hide shelter beside a floodplain; show a flood debris line below the mound and shallow seasonal water. Simple sticks and baskets, no monumental embankment, stilt house or later village architecture. Infrastructure matte casein mineral blue/limestone.\nZoom out: whole heads/hands/mechanisms inside y170..590 of a765px banner, background outside, so actual3.37:1 card retains subjects. Gameyears36\u201338: hide/fur garments, wood/flint/stone/fiber tools, modest shelters and early clay pots. Plain weaving is later: NO woven garments, loom, metal or later architecture copied from reference.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1be532d8-ec76-46d3-af28-faccb8415a02.png",
+  "review": "Full original and actual 3.37:1 Godot card reviewed. Established field painting, prerequisite-era materials, whole heads, hands and central mechanisms retained. Paired measures corrected to two rods; maternal recovery focus .30 retains standing caregiver. Clean import, headless and private GPU PASS8 at years 0,1,3,299,300,600.",
+  "asset": "res://assets/ui/research/subjects/flood_house_mounds-v2.png",
+  "sha256": "64d9ac0fd8ffd6b6d3657726fbb396281e790dfb4e0b07af886c6df1554b8ba7",
+  "mode": "built-in image_gen / edit"
 }

@@ -1,0 +1,12 @@
+{
+  "id": "flood_house_mounds",
+  "line": "infrastructure",
+  "game_year": 36,
+  "approx_historical_year": -4760,
+  "prompt": "c. 4760 BCE: Adults pile and tamp earth into raised house mound above wet floodplain before reed-and-timber shelter; matte casein gouache. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-f59771dc-efd6-4f13-a7ff-2b0d4530c9f6.png",
+  "asset": "res://assets/ui/research/subjects/flood_house_mounds-v1.png",
+  "sha256": "4ebc856396a5034756f187a7cbf760c21e76e94fe1ebba803bfbe1d9580604a5",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; elevation above floodwater and construction clear."
+}
