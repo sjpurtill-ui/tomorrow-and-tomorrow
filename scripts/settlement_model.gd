@@ -25,6 +25,8 @@ const CITY_RESOURCE_DEFAULTS:={
 	"civilian_care":{"enabled":true,"staff_share":0.25,"episodes":[],"next_id":1,"last_day":-1,"history":[],"report":{}},
 	"household_clothing":{"last_day":-1,"report":{}},
 	"city_form":{"tier":-1.0,"condition":-1.0},
+	# Each town's built fabric (built_fabric.gd), made on its first reckoning.
+	"built_fabric":{},
 	"water_conveyance":{"lines":[],"next_id":1,"last_day":-1,"report":{}},
 	"water_waste_works":{"works":[],"next_id":1,"last_day":-1,"report":{}},
 	"food_batches":{"tools":{},"lots":[],"next_id":1,"last_day":-1,"report":{}},
@@ -371,7 +373,12 @@ func city_trade_capacity()->Dictionary:
 	var institutions:=clampf(float(WorldSimulation.state.society_capacities.get("institutions",0.0)),0.0,1.0)
 	var transport:=maxf(0.0,WorldSimulation.discovery.effect("route_speed")+WorldSimulation.progression.effect("route_speed"))
 	var hauling:=maxf(0.0,WorldSimulation.discovery.effect("haul_capacity")+WorldSimulation.progression.effect("haul_capacity"))
-	return {"ready":logistics>=0.30 and institutions>=0.20,"logistics":logistics,"speed_km_per_day":8.0*(1.0+logistics+transport),"range_km":12.0+logistics*120.0+transport*180.0,"capacity_per_worker":(4.0+logistics*24.0)*(1.0+hauling),"reason":"Leaders need 30% logistics and 20% institutions to organize regular intercity deliveries."}
+	var capacity:={"ready":logistics>=0.30 and institutions>=0.20,"logistics":logistics,"speed_km_per_day":8.0*(1.0+logistics+transport),"range_km":12.0+logistics*120.0+transport*180.0,"capacity_per_worker":(4.0+logistics*24.0)*(1.0+hauling),"reason":"Leaders need 30% logistics and 20% institutions to organize regular intercity deliveries."}
+	# The roads between our towns (built_fabric.gd ROAD_SPEED, ROAD_REACH).
+	var Fabric:=preload("res://scripts/built_fabric.gd")
+	capacity.speed_km_per_day=float(capacity.speed_km_per_day)*Fabric.speed_factor()
+	capacity.range_km=float(capacity.range_km)*Fabric.reach_factor()
+	return capacity
 
 func _city_stores(record:Dictionary)->Dictionary:
 	if bool(record.get("primary",false)): return WorldSimulation.state.resource_stockpiles
@@ -1260,7 +1267,7 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 	founders=mini(founders,maxi(0,roundi(available_primary)-80))
 	if founders<40:
 		return {"ok":false,"reason":"At least 80 people must remain at the source settlement after a 40-person founding party is organized."}
-	var duration:=maxf(0.5,maxf(duration_days,origin_distance/SETTLEMENT_CONVOY_KM_PER_DAY))
+	var duration:=maxf(0.5,maxf(duration_days,origin_distance/(SETTLEMENT_CONVOY_KM_PER_DAY*preload("res://scripts/built_fabric.gd").speed_factor())))
 	# The road's rations and about 45 days for the new town's first weeks; the
 	# leaders who send the settlers may judge those weeks thinner or fuller
 	# (civilization_strategy.gd settle_margin_days).

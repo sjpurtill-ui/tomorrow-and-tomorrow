@@ -1,5 +1,5 @@
 {
- "spec": "path_balanced:74119:15",
+ "spec": "path_building:74119:15",
  "commit": "3da9de1c7989884616aea07e1cb7763b9a83c3f5",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "f309d9311627",
@@ -26,7 +26,7 @@
   "scripts/settlement_construction.gd": "4fb6da847acc",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 126.8,
+ "wall_seconds": 110.0,
  "returncode": 0,
- "generated": "2026-10-03 12:09:05"
+ "generated": "2026-10-03 12:33:00"
 }

@@ -393,7 +393,7 @@
   "scripts/food_care.gd::var eaten:=0.05+minf(1.15,production_ratio)*0.25": "fe7228fc71",
   "scripts/consequence_engine.gd::var process_health_cost:=": "c28fa9eac4",
   "scripts/consequence_engine.gd::var health_target := clampf(": "e121faea6c",
-  "scripts/consequence_engine.gd::var cohesion_target := clampf(": "00281788a2",
+  "scripts/consequence_engine.gd::var cohesion_target := clampf(": "e7e75b01bf",
   "scripts/consequence_engine.gd::var material_target := clampf(": "3b1d511350",
   "scripts/consequence_engine.gd::var knowledge_gain := observers": "648299359f",
   "scripts/consequence_engine.gd::mortality_components[\"Hunger\"]=maxf(": "afc1fb14bc",

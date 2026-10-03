@@ -82,7 +82,7 @@ const WORK:={
 	"making":{"Crafting":8.0,"Logistics":4.0,"Extraction":4.0},
 	"war":{"Defense":12.0,"Crafting":4.0},
 	"learning":{"Knowledge":9.0,"Survey":2.0},
-	"building":{"Construction":10.0,"Extraction":4.0},
+	"building":{"Construction":22.0,"Extraction":8.0},
 	"balanced":{},
 }
 ## The most of the people at work each path puts on learning.

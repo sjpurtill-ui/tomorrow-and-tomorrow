@@ -39,7 +39,7 @@ DEFAULT_GODOT = r"C:\Users\sjpur\leviathan\tools\godot\Godot_v4.7-stable_mono_wi
 DEFAULT_RUNS = [
     "path_balanced:74119:15", "path_balanced:5150:15",
     "path_growth:74119:15", "path_war:74119:15", "path_learning:74119:15",
-    "avg_balanced:74119:15",
+    "avg_balanced:74119:15", "path_building:74119:15",
 ]
 WATCHED = [
     "scripts/discovery_system.gd", "scripts/society_model.gd", "scripts/game_state.gd",
@@ -49,6 +49,7 @@ WATCHED = [
     "scripts/food_care.gd", "scripts/government_people_system.gd", "scripts/work_paths.gd",
     "scripts/civilian_goods.gd", "scripts/resource_system.gd", "scripts/weapons_stock.gd", "scripts/watch_military.gd",
     "scripts/crisis_background.gd", "scripts/crisis_system.gd", "scripts/crisis_unattended.gd",
+    "scripts/built_fabric.gd", "scripts/settlement_construction.gd",
 ]
 
 

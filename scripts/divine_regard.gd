@@ -339,7 +339,7 @@ static func people_regard(officials:Array)->Dictionary:
 	# What is still told of the god a generation on (deeds.gd): the long memory
 	# under the fresh talk. Cruelty remembered cools love as well as feeding dread.
 	var told:Dictionary=preload("res://scripts/deeds.gd").home()
-	love=clampf(love+clampf(warmth,-0.2,0.15)+civic.effect("devotion")+preload("res://scripts/office_levers.gd").value("HighPriest")+float(told.love)*0.5-float(told.dread)*0.25,0.0,1.0)
+	love=clampf(love+clampf(warmth,-0.2,0.15)+civic.effect("devotion")+preload("res://scripts/built_fabric.gd").devotion()+preload("res://scripts/office_levers.gd").value("HighPriest")+float(told.love)*0.5-float(told.dread)*0.25,0.0,1.0)
 	var dread:=clampf((dread_sum/n if n>0 else 0.1)*0.75+minf(0.3,echo)+float(told.dread)*0.8-civic.effect("dread_eased"),0.0,1.0)
 	var resentment:=res_sum/n if n>0 else 0.0
 	var out:=read(clampf(love,0.0,1.0),dread,resentment)

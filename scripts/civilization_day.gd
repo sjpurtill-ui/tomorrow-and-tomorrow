@@ -20,7 +20,9 @@ static func context(origin:Vector2,traveling:bool=false)->Dictionary:
 	for key in ["biome","temperature","precipitation","fertility"]:result[key]=result.environment_profile.get(key,0)
 	result.foraging=maxf(float(result.foraging),float(result.environment_profile.get("forage",0)))
 	if float(result.get("surface_water_distance_km",INF))<=6:result.freshwater=1.0
-	if "Hearth Circle" in WorldSimulation.state.settlement_completed:result.merge({"construction":1.0,"storage":.8,"timber":.7})
+	# Knowledge comes by doing: skilled builders raise the construction signal
+	# every building question reads (built_fabric.gd construction_signal).
+	if "Hearth Circle" in WorldSimulation.state.settlement_completed:result.merge({"construction":preload("res://scripts/built_fabric.gd").construction_signal(),"storage":.8,"timber":.7})
 	result.merge(WorldSimulation.state.active_field_observation_signals(int(WorldSimulation.state.elapsed_days)))
 	return result
 
