@@ -65,7 +65,7 @@
   "clay_levigation": "res://assets/ui/research/paper/first300-cards/clay_levigation.tres",
   "grog_preparation": "res://assets/ui/research/paper/first300-cards/grog_preparation.tres",
   "fiber_combing": "res://assets/ui/research/paper/first300-cards/fiber_combing.tres",
-  "warp_weighted_looms": "res://assets/ui/research/paper/first300-cards/warp_weighted_looms.tres",
+  "warp_weighted_looms": "res://assets/ui/research/subjects/warp_weighted_looms-v2.png",
   "woven_dressings": "res://assets/ui/research/paper/first300-cards/woven_dressings.tres",
   "clay_record_tablets": "res://assets/ui/research/paper/first300-cards/clay_record_tablets.tres",
   "knotted_record_systems": "res://assets/ui/research/paper/first300-cards/knotted_record_systems.tres",
@@ -139,5 +139,7 @@
   "shield_equipment_fitting": "res://assets/ui/research/paper/shield_equipment_fitting.png",
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
-  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png"
+  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
+  "public_stores": "res://assets/ui/research/subjects/public_stores-v2.png",
+  "food_steaming_vessels": "res://assets/ui/research/subjects/food_steaming_vessels-v2.png"
 }

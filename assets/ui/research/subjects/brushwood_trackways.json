@@ -1,12 +1,56 @@
 {
   "id": "brushwood_trackways",
   "line": "logistics",
-  "game_year": 40,
-  "approx_historical_year": -4733,
-  "prompt": "c. 4733 BCE: Adults lay overlapping brushwood mats across boggy ground and traveler crosses with basket; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-90b844fc-c59a-43c7-a268-b95e43179cee.png",
-  "asset": "res://assets/ui/research/subjects/brushwood_trackways-v1.png",
-  "sha256": "d2a35d1382ae66a848360be11f381e4a62065e436903d25fa59dd3b4a919a066",
-  "mode": "built-in image_gen / new image",
-  "review": "Second generation; first too lifelike; brushwood track, mud and crossing clear."
+  "status": "new",
+  "name": "Brushwood Mats Laid Over Soft Ground",
+  "one_liner": "Brushwood mats laid over soft ground",
+  "observation": "Brushwood mats laid over soft ground.",
+  "key_threshold": false,
+  "target_year": 40,
+  "proposed_year": 40,
+  "band_low": 25,
+  "band_high": 55,
+  "min_year": 25,
+  "research_years": 3,
+  "requires_all": [
+    "trail_waymarking",
+    "hafted_tools"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "basketry"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Carrying capacity",
+  "signals": [
+    "travel",
+    "logistics"
+  ],
+  "version": 2,
+  "year": 40,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "replace_first300": false,
+  "replace_art600": false,
+  "prior_effective_source": {
+    "opening": null,
+    "art600": null,
+    "subject": {
+      "path": "res://assets/ui/research/subjects/brushwood_trackways-v1.png",
+      "focus": [
+        0.5,
+        0.5
+      ]
+    }
+  },
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-26/art_source/research-opening-26/style-reference/logistics-v1.png",
+  "prompt": "Create ONE Tomorrow and Tomorrow research painting. Reference ONLY supplies established logistics painting medium and EXACT EXTRA-WIDE canvas width/aspect. Preserve full bleed, no frame/grid/text/3:2. NEW SUBJECT: Two adults lay loose interwoven branch bundles across a small boggy gap; another carrying a bark basket crosses the finished low brushwood section. Rough branches directly on soft ground, no sawn-plank bridge or giant engineering structure. Medium: panoramic travel watercolor sand/slate/indigo. Zoom out to keep whole heads, hands and mechanism in central y170..590 on a765px canvas so actual3.37:1 card retains subjects. Year40 prerequisite-era wood, stone, hides/fur, baskets, early rough clay. No metal, woven clothing, later monumental architecture, modern equipment or generic river scene replacing the specified action.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a039eb37-e462-46f2-892e-d4174a69499c.png",
+  "review": "Full original and actual3.37:1 Godot card reviewed: established field painting, prerequisite-era materials and clear action. Whole loom reframed; public-store focus .30, swidden .10, horizon .30 and seasonal-building .40 retain heads, hands and mechanism. Clean import, headless/private GPU PASS10 across years0/1/3/299/300/600.",
+  "asset": "res://assets/ui/research/subjects/brushwood_trackways-v2.png",
+  "sha256": "83848774fea1d61b0552181deb85ff0d5b56facc1dca9cd94b02a48f80771822",
+  "mode": "built-in image_gen / edit"
 }

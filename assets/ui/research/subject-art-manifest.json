@@ -139,13 +139,7 @@
       0.39
     ]
   },
-  "public_stores": {
-    "path": "res://assets/ui/research/subjects/public_stores-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
+  "public_stores": {"path": "res://assets/ui/research/subjects/public_stores-v2.png", "focus": [0.5, 0.3], "opening_focus": [0.5, 0.3]},
   "watch_rotation": {
     "path": "res://assets/ui/research/subjects/watch_rotation-v1.png",
     "focus": [
@@ -3799,11 +3793,11 @@
   "part_time_specialists": {"path": "res://assets/ui/research/subjects/part_time_specialists-v1.png", "focus": [0.5, 0.5]},
   "disability_care": {"path": "res://assets/ui/research/subjects/disability_care-v1.png", "focus": [0.5, 0.5]},
   "paired_measure_checking": {"path": "res://assets/ui/research/subjects/paired_measure_checking-v1.png", "focus": [0.5, 0.5]},
-  "brushwood_trackways": {"path": "res://assets/ui/research/subjects/brushwood_trackways-v1.png", "focus": [0.5, 0.5]},
-  "raid_scouting": {"path": "res://assets/ui/research/subjects/raid_scouting-v1.png", "focus": [0.5, 0.5]},
-  "slack_season_building": {"path": "res://assets/ui/research/subjects/slack_season_building-v1.png", "focus": [0.5, 0.5]},
-  "stone_wall_footings": {"path": "res://assets/ui/research/subjects/stone_wall_footings-v1.png", "focus": [0.5, 0.5]},
-  "swidden_cycle": {"path": "res://assets/ui/research/subjects/swidden_cycle-v1.png", "focus": [0.5, 0.5]},
+  "brushwood_trackways": {"path": "res://assets/ui/research/subjects/brushwood_trackways-v2.png", "focus": [0.5, 0.5]},
+  "raid_scouting": {"path": "res://assets/ui/research/subjects/raid_scouting-v2.png", "focus": [0.5, 0.5]},
+  "slack_season_building": {"path": "res://assets/ui/research/subjects/slack_season_building-v2.png", "focus": [0.5, 0.4]},
+  "stone_wall_footings": {"path": "res://assets/ui/research/subjects/stone_wall_footings-v2.png", "focus": [0.5, 0.5]},
+  "swidden_cycle": {"path": "res://assets/ui/research/subjects/swidden_cycle-v2.png", "focus": [0.5, 0.1]},
   "flat_clay_roofs": {"path": "res://assets/ui/research/subjects/flat_clay_roofs-v1.png", "focus": [0.5, 0.5]},
   "household_mediators": {"path": "res://assets/ui/research/subjects/household_mediators-v1.png", "focus": [0.5, 0.5]},
   "leaf_fodder_pollarding": {"path": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v1.png", "focus": [0.5, 0.5]},
@@ -4239,5 +4233,9 @@
   "fattened_geese_ducks": {"path": "res://assets/ui/research/subjects/fattened_geese_ducks-v1.png", "focus": [0.5, 0.5]},
   "paved_haul_roads": {"path": "res://assets/ui/research/subjects/paved_haul_roads-v1.png", "focus": [0.5, 0.5]},
   "standing_relief_stores": {"path": "res://assets/ui/research/subjects/standing_relief_stores-v1.png", "focus": [0.5, 0.5]},
-  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]}
+  "wadi_dams": {"path": "res://assets/ui/research/subjects/wadi_dams-v1.png", "focus": [0.5, 0.5]},
+  "solstice_horizon_markers": {"path": "res://assets/ui/research/subjects/solstice_horizon_markers-v2.png", "focus": [0.5, 0.3]},
+  "winter_tale_nights": {"path": "res://assets/ui/research/subjects/winter_tale_nights-v2.png", "focus": [0.5, 0.5]},
+  "warp_weighted_looms": {"path": "res://assets/ui/research/subjects/warp_weighted_looms-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]},
+  "food_steaming_vessels": {"path": "res://assets/ui/research/subjects/food_steaming_vessels-v2.png", "focus": [0.5, 0.5], "opening_focus": [0.5, 0.5]}
 }
