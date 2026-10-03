@@ -9,6 +9,7 @@ const Stage:=preload("res://scripts/hud/court_stage.gd")
 
 class Court extends Node3D:
 	var facts:={"era_tags":["metal","pottery"]}
+	var kind:="execution_contact_test"
 class Rig extends RefCounted:
 	var base_yaw:=-15.0
 class TestStage extends Control:

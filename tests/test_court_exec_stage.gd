@@ -281,7 +281,12 @@ func test_planned_approach_matches_stride_and_restores_the_base_clip()->void:
 	var distance:=Vector2(to.x-from.x,to.z-from.z).length()
 	assert_float(distance).is_greater(1.68) # The approach duration is capped at 1.4 seconds.
 	var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(f.body3d.body_height)/Figure3D.REFERENCE_HEIGHT
-	assert_float(f.body3d.locomotion_rate).is_equal_approx(distance/(1.4*pace),0.001)
+	# A safe detour may be longer than the straight line. Compare the feet
+	# with actual travel at the start of the route, not that old shortcut.
+	var movement:Tween=exec._moving[key]
+	movement.custom_step(0.01)
+	var speed:=f.body3d.global_position.distance_to(from)/0.01
+	assert_float(f.body3d.locomotion_rate).is_equal_approx(speed/pace,0.01)
 	assert_str(f.body3d.clip).is_equal("walk_in")
 	for t in exec._tweens:
 		if t is Tween and (t as Tween).is_valid():(t as Tween).custom_step(1.41)
