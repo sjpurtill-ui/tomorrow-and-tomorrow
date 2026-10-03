@@ -56,6 +56,8 @@ func _ready()->void:
 	elif mode=="mouth":await _mouth_test()
 	elif mode=="r3":await _sheets_r3()
 	elif mode=="r4":await _sheets_r4()
+	elif mode=="exec":await _exec_all()
+	elif mode.begins_with("exec:"):await _exec(mode.trim_prefix("exec:"))
 	else:await _sheets()
 	print("COURT_ACTING_CAPTURE DONE ",out_dir)
 	get_tree().quit(0)
@@ -393,6 +395,260 @@ func _sheets_r3()->void:
 		{"clip":"faint_caught_l","t":0.65,"label":"0.65 s","who":1,"x":-1.6,"yaw":0.0},{"clip":"half_catch_r","t":0.65,"label":"","who":0,"x":-0.85,"yaw":0.0},
 		{"clip":"faint_caught_l","t":1.1,"label":"1.1 s","who":1,"x":0.25,"yaw":0.0},{"clip":"half_catch_r","t":1.1,"label":"","who":0,"x":1.0,"yaw":0.0},
 		{"stance":"fire","t":2.0,"label":"by the fire","who":4,"x":2.0,"yaw":-20.0}],"r3_catch_fire.png")
+
+# --- executions: a timing test of each act on the test stage ----------------------------
+# Stand-in props, head and blood (M and J make the real ones); the plan, the
+# clips, the held props and the cues are the real ones (court_acting.gd).
+# Frames to exec_<act>/frame_####.png at 30 a second.
+
+var _bits:Array[Node]=[]
+
+func _mat(col:Color,glow:=0.0)->StandardMaterial3D:
+	var m:=StandardMaterial3D.new();m.albedo_color=col;m.roughness=0.9
+	if glow>0.0:
+		m.emission_enabled=true;m.emission=col;m.emission_energy_multiplier=glow
+	return m
+
+func _bit(mesh:Mesh,col:Color,at:=Vector3.ZERO)->MeshInstance3D:
+	var m:=MeshInstance3D.new();m.mesh=mesh;m.material_override=_mat(col);m.position=at
+	world.add_child(m);_bits.append(m)
+	return m
+
+func _cyl(r:float,h:float)->CylinderMesh:
+	var c:=CylinderMesh.new();c.top_radius=r;c.bottom_radius=r;c.height=h
+	return c
+
+## A held stand-in: origin at the grip, +Y along the handle, +Z the blade.
+func _held(kind:String)->Node3D:
+	var root:=Node3D.new();world.add_child(root);_bits.append(root)
+	var wood:=Color("6b4a2e")
+	match kind:
+		"club":
+			var h:=MeshInstance3D.new();h.mesh=_cyl(0.022,0.74);h.position=Vector3(0,0.25,0);h.material_override=_mat(wood);root.add_child(h)
+			var s:=MeshInstance3D.new();var sm:=SphereMesh.new();sm.radius=0.075;sm.height=0.24;s.mesh=sm;s.position=Vector3(0,0.72,0);s.material_override=_mat(wood);root.add_child(s)
+		"axe":
+			var h:=MeshInstance3D.new();h.mesh=_cyl(0.02,0.84);h.position=Vector3(0,0.34,0);h.material_override=_mat(wood);root.add_child(h)
+			var b:=MeshInstance3D.new();var bm:=BoxMesh.new();bm.size=Vector3(0.03,0.15,0.16);b.mesh=bm;b.position=Vector3(0,0.66,0.07);b.material_override=_mat(Color("8a8f96"));root.add_child(b)
+		"ladle":
+			var h:=MeshInstance3D.new();h.mesh=_cyl(0.012,0.47);h.position=Vector3(0,0.185,0);h.material_override=_mat(wood);root.add_child(h)
+			var s:=MeshInstance3D.new();var sm:=SphereMesh.new();sm.radius=0.055;sm.height=0.11;s.mesh=sm;s.position=Vector3(0,0.47,0);s.material_override=_mat(wood);root.add_child(s)
+		"lid":
+			var d:=MeshInstance3D.new();d.mesh=_cyl(0.20,0.02);d.position=Vector3(0,0.05,0);d.material_override=_mat(Color("8a6a4a"));root.add_child(d)
+			var k:=MeshInstance3D.new();k.mesh=_cyl(0.02,0.06);k.material_override=_mat(Color("8a6a4a"));root.add_child(k)
+	return root
+
+## A stand-in dog: a body, a head, ears and a tail, +Z its nose.
+func _stand_in_dog()->Node3D:
+	var root:=Node3D.new();world.add_child(root);_bits.append(root)
+	var fur:=Color("6d4f33")
+	var body:=MeshInstance3D.new();var cm:=CapsuleMesh.new();cm.radius=0.13;cm.height=0.72;body.mesh=cm
+	body.rotation_degrees=Vector3(90,0,0);body.position=Vector3(0,0.36,0);body.material_override=_mat(fur);root.add_child(body)
+	var head:=MeshInstance3D.new();var hm:=SphereMesh.new();hm.radius=0.11;hm.height=0.2;head.mesh=hm;head.position=Vector3(0,0.46,0.40);head.material_override=_mat(fur);root.add_child(head)
+	var snout:=MeshInstance3D.new();var sn:=BoxMesh.new();sn.size=Vector3(0.08,0.07,0.12);snout.mesh=sn;snout.position=Vector3(0,0.42,0.52);snout.material_override=_mat(fur.darkened(0.3));root.add_child(snout)
+	for x in [-1.0,1.0]:
+		var leg:=MeshInstance3D.new();leg.mesh=_cyl(0.035,0.3);leg.position=Vector3(0.08*x,0.15,0.22);leg.material_override=_mat(fur);root.add_child(leg)
+		var leg2:=MeshInstance3D.new();leg2.mesh=_cyl(0.035,0.3);leg2.position=Vector3(0.08*x,0.15,-0.22);leg2.material_override=_mat(fur);root.add_child(leg2)
+	var tail:=MeshInstance3D.new();tail.mesh=_cyl(0.02,0.25);tail.rotation_degrees=Vector3(-50,0,0);tail.position=Vector3(0,0.48,-0.42);tail.material_override=_mat(fur);root.add_child(tail)
+	return root
+
+## A stand-in head: a skin ball with a cap of hair and two dark eyes, +Z its face.
+func _stand_in_head(f:Node3D)->Node3D:
+	var root:=Node3D.new();world.add_child(root);_bits.append(root)
+	var skin:=Color("9f6a43")
+	var b:=MeshInstance3D.new();var sm:=SphereMesh.new();sm.radius=0.10;sm.height=0.24;b.mesh=sm;b.material_override=_mat(skin);root.add_child(b)
+	var hair:=MeshInstance3D.new();var hm:=SphereMesh.new();hm.radius=0.105;hm.height=0.16;hm.is_hemisphere=true;hair.mesh=hm;hair.position=Vector3(0,0.03,-0.01);hair.material_override=_mat(Color("1b1511"));root.add_child(hair)
+	for x in [-0.035,0.035]:
+		var e:=MeshInstance3D.new();var em:=SphereMesh.new();em.radius=0.014;em.height=0.028;e.mesh=em;e.position=Vector3(x,0.01,0.09);e.material_override=_mat(Color("120c08"));root.add_child(e)
+	var red:=MeshInstance3D.new();red.mesh=_cyl(0.05,0.01);red.position=Vector3(0,-0.11,0);red.material_override=_mat(Color("b0141a"),0.3);root.add_child(red)
+	return root
+
+## Stand-in blood: a burst (spray) or a fountain (geyser) of red drops.
+func _blood(at:Vector3,dir:Vector3,kind:String)->void:
+	var p:=CPUParticles3D.new()
+	world.add_child(p);_bits.append(p)
+	p.position=at
+	var drop:=SphereMesh.new();drop.radius=0.022;drop.height=0.044
+	p.mesh=drop;p.material_override=_mat(Color("c0141c"),0.25)
+	p.direction=dir.normalized() if dir.length()>0.01 else Vector3.UP
+	p.gravity=Vector3(0,-9.8,0)
+	p.lifetime=1.4
+	p.local_coords=false
+	if kind=="geyser":
+		p.amount=260;p.explosiveness=0.0;p.spread=14.0;p.initial_velocity_min=4.5;p.initial_velocity_max=6.0
+		p.one_shot=true
+	else:
+		p.amount=90;p.explosiveness=0.95;p.spread=35.0;p.initial_velocity_min=2.5;p.initial_velocity_max=4.5;p.one_shot=true
+	p.scale_amount_min=0.6;p.scale_amount_max=1.6
+	p.emitting=true
+
+func _clear_bits()->void:
+	for b in _bits:
+		if is_instance_valid(b):b.queue_free()
+	_bits.clear()
+
+func _exec_all()->void:
+	for act in ["club_home_run","three_swing_beheading","dog_dinner"]:
+		await _exec(act)
+
+func _exec(act:String)->void:
+	_clear();_clear_bits()
+	var plan:=Acting.exec_plan(act)
+	var dir:="exec_"+act
+	DirAccess.make_dir_recursive_absolute(out_dir+dir)
+	var cast:={}
+	var who:={"victim":0,"executioner":4,"cook":2}
+	for role:String in plan.roles:
+		var r:Dictionary=plan.roles[role]
+		var f:=_person(int(who.get(role,1)),"stand")
+		var at:Array=r.get("at",[0,0,0])
+		f.position=Vector3(float(at[0]),float(at[1]),float(at[2]));f.rotation_degrees.y=float(r.get("yaw",0.0))
+		cast[role]=f
+		for side:String in (r.get("props",{}) as Dictionary):
+			var prop:=_held(String(r.props[side]))
+			Acting.hold(f,prop,side)
+			if String(r.props[side])=="lid":
+				var rest:Array=r.get("lid_rests",[0.30,0.62,0.28])
+				prop.global_transform=Transform3D(Basis(Vector3.RIGHT,PI),f.to_global(Vector3(float(rest[0]),float(rest[1]),float(rest[2]))))
+	# the room: a front row at the sides, a child among them
+	var row:=[[-1.6,0.0,1.1,110.0,1],[-2.2,0.0,1.7,120.0,7],[1.6,0.0,1.3,-120.0,5],[2.1,0.0,0.5,-100.0,6],[-1.0,0.0,2.1,150.0,3]]
+	if act=="club_home_run":row=[[-2.0,0.0,1.4,110.0,1],[-2.2,0.0,2.2,120.0,7],[1.6,0.0,1.4,-120.0,5],[2.2,0.0,0.4,-100.0,6],[-1.3,0.0,2.5,150.0,3]]
+	var room:=[]
+	for p in row:
+		var f:=_person(int(p[4]),"")
+		f.position=Vector3(float(p[0]),0.0,float(p[2]));f.rotation_degrees.y=float(p[3])
+		Acting.look_toward(f,cast.victim,1.0)
+		room.append(f)
+	var things:Dictionary=plan.get("things",{})
+	if things.has("block"):
+		var bm:=BoxMesh.new();bm.size=Vector3(0.40,float(things.block.top),0.40)
+		_bit(bm,Color("7a5a3a"),Vector3(float(things.block.at[0]),float(things.block.top)*0.5,float(things.block.at[2])))
+	if things.has("pot"):
+		_bit(_cyl(0.26,0.55),Color("4a2f22"),Vector3(float(things.pot.at[0]),0.275,float(things.pot.at[2])))
+	var wall_at:=-1.6
+	var dogs:=[]
+	var bone:MeshInstance3D=null
+	if act=="dog_dinner":
+		var wb:=BoxMesh.new();wb.size=Vector3(3.2,1.5,0.06)
+		_bit(wb,Color("9a7b55"),Vector3(0.0,0.75,wall_at))
+		for i in 2:dogs.append(_stand_in_dog())
+		bone=_bit(_cyl(0.025,0.42),Color("efe6d2"))
+		bone.visible=false
+	# the camera: the god's view
+	var cam:Dictionary=plan.get("camera",{"from":[0.0,2.0,6.4],"at":[0.0,0.7,-0.2]})
+	camera.fov=36.0
+	camera.position=Vector3(float(cam.from[0]),float(cam.from[1]),float(cam.from[2]))
+	camera.look_at(Vector3(float(cam.at[0]),float(cam.at[1]),float(cam.at[2])))
+	var god:=camera.global_position
+	# the victim's beats: the split, the blood
+	var victim:Node3D=cast.victim
+	var va=Acting.of(victim)
+	var state:={"split":-1.0,"head":null,"part":{}}
+	var on_cue:=func(_f:Node3D,e:Dictionary)->void:
+		var nm:=String(e.name)
+		var neck:Vector3=victim.skeleton.global_transform*victim.skeleton.get_bone_global_pose(victim.skeleton.find_bone("neck")).origin
+		if nm=="split":
+			state.split=1.0
+			var h:=_stand_in_head(victim)
+			h.global_position=neck+Vector3(0,0.12,0)
+			state.head=h
+			state.from=neck+Vector3(0,0.12,0)
+		elif nm=="spray" or nm=="geyser":
+			var d:Array=e.get("dir",[0,1,0])
+			_blood(neck,victim.global_transform.basis*Vector3(float(d[0]),float(d[1]),float(d[2])),nm)
+	va.cue.connect(on_cue)
+	# play
+	var t:=0.0
+	var clips_at:={}
+	for role:String in plan.roles:
+		var r:Dictionary=plan.roles[role]
+		if r.has("clip"):Acting.play(cast[role],String(r.clip),{"blend":0.3})
+	var parts:Array=plan.get("parts",[])
+	var cues:Array=plan.get("cues",[])
+	var cue_i:=0
+	var frames:=int((float(plan.length)+0.8)/DT)
+	var head_b:int=victim.skeleton.find_bone("head")
+	var seq:Array=(plan.roles.victim as Dictionary).get("clips",[])
+	var seq_i:=0
+	var moving:=Vector3.ZERO
+	var labels_made:=false
+	for k in frames:
+		t=float(k)*DT
+		# the victim's run of clips (the dogs)
+		while seq_i<seq.size() and float(seq[seq_i].t)<=t+0.0001:
+			var c:Dictionary=seq[seq_i]
+			Acting.play(victim,String(c.clip),{"blend":0.12 if seq_i>0 else 0.05})
+			var mv:Array=c.get("move",[0,0,0])
+			moving=Vector3(float(mv[0]),float(mv[1]),float(mv[2]))
+			state.until=float(c.get("until",1e9))
+			seq_i+=1
+		if moving!=Vector3.ZERO and t<float(state.get("until",1e9)):victim.position+=moving*DT
+		# stand-in dogs at the ankles, out of sight, then one back with a bone
+		for i in dogs.size():
+			var d:Node3D=dogs[i]
+			if t<6.6:
+				var feet:=0.52*clampf((t-0.1)/0.5,0.0,1.0)
+				d.position=victim.position+Vector3(0.13 if i==0 else -0.13,0.0,-feet-0.62)
+				d.rotation_degrees=Vector3(-6.0,8.0*sin(t*14.0+float(i)*1.7),0.0)
+			elif i==0 and t>=9.0:
+				var path:=[d.get_meta(&"from",d.position),Vector3(1.9,0.0,-1.4),Vector3(1.2,0.0,0.6),Vector3(0.0,0.0,1.45)]
+				if not d.has_meta(&"from"):d.set_meta(&"from",d.position)
+				var u:=clampf((t-9.0)/1.6,0.0,1.0)*3.0
+				var seg:=mini(int(u),2)
+				var a:Vector3=path[seg];var b:Vector3=path[seg+1]
+				d.position=a.lerp(b,u-float(seg))
+				if u<3.0:d.look_at(d.position+(a-b),Vector3.UP)
+				else:d.rotation_degrees=Vector3(0.0,0.0+10.0*sin(t*18.0),0.0)
+				bone.visible=true
+				if t<10.6:bone.global_transform=Transform3D(Basis(Vector3.FORWARD,PI*0.5),d.to_global(Vector3(0.0,0.28,0.48)))
+				else:bone.global_transform=Transform3D(Basis(Vector3.FORWARD,PI*0.5),Vector3(0.0,0.03,1.62))
+		# the room on its cues
+		while cue_i<cues.size() and float(cues[cue_i].t)<=t+0.0001:
+			var cue:=String(cues[cue_i].cue)
+			match cue:
+				"impact","clang","thunk":
+					Acting.play(room[0],"room_flinch_splash" if cue=="impact" else "flinch")
+					if cue=="impact":
+						Acting.play(room[2],"faint_r");Acting.play(room[1],"room_cover_eyes_peek")
+				"splash":
+					Acting.play(room[0],"room_wipe_face")
+				"plop":
+					var pot_at:=Vector3(float(plan.things.pot.at[0]),0.6,float(plan.things.pot.at[2]))
+					for f in room:Acting.look_toward(f,pot_at,1.0)
+				"crunch":
+					for i in [0,2,3]:Acting.play(room[i],"room_wince_crunch")
+				"grab":
+					Acting.play(room[3],"gasp")
+				"bone_dropped":
+					for f in room:Acting.look_toward(f,Vector3(0,0.0,1.6),1.0)
+				"after":
+					Acting.play(room[3],"room_applaud_alone");Acting.play(room[4],"room_vomit")
+					if act!="dog_dinner":Acting.play(room[0],"room_wipe_face")
+					Acting.perform(room[1],{"beat":"cover_eyes_peek"})
+			cue_i+=1
+		for role:String in cast:_frame(cast[role])
+		for f in room:_frame(f)
+		# the head gone from the body; the stand-in where the plan sends it
+		if float(state.split)>0.0:
+			victim.skeleton.set_bone_pose_scale(head_b,Vector3.ONE*0.001)
+			var h:Node3D=state.head
+			for part:Dictionary in parts:
+				if t<float(part.t0):continue
+				var to:Vector3
+				var target:Variant=part.get("to","pot")
+				if target is Array:to=Vector3(float(target[0]),float(target[1])+0.11,float(target[2]))
+				else:to=Vector3(float(plan.things.pot.at[0]),0.62,float(plan.things.pot.at[2]))
+				h.global_transform=Acting.part_at(part,state.from,to,t,(god-to)*Vector3(1,0,1))
+				if String(part.get("then",""))=="in_pot" and t>=float(part.t1):
+					h.visible=false
+					if not state.has("splash"):
+						state.splash=true;_blood(to,Vector3.UP,"spray")
+		if not labels_made:
+			labels_made=true
+			_title("%s  (timing test: stand-in props, head and blood; the real ones are J's and M's)" % act.replace("_"," "))
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(out_dir+dir+"/frame_%04d.png" % k)
+	print("COURT_ACTING_CAPTURE exec ",act," frames ",frames)
+	_clear_bits()
 
 ## Round 4: the child (J's child body) beside grown-ups, the floor seat, the mirrored twins.
 func _sheets_r4()->void:
