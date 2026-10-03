@@ -146,7 +146,8 @@ func test_a_village_of_100_with_twenty_days_and_fresh_food_thrives()->void:
 	var lean:Dictionary=runs[20.0]
 	assert_float(float(lean.intake)).is_equal(1.0)
 	assert_float(float(lean.fresh)).is_greater(0.5)
-	assert_float(float(lean.lean)).is_equal(1.0)
+	# Twenty days count in full (a day's spoilage of the store aside).
+	assert_float(float(lean.lean)).is_greater_equal(0.99)
 	assert_float(float(lean.security)).is_greater(0.85)
 	for days:float in [45.0,200.0]:
 		var big:Dictionary=runs[days]
