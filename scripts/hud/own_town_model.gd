@@ -46,8 +46,9 @@ const TEENS:=["ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen",
 ## of the watch and its townsfolk who rise, with the home walls; any other
 ## town of ours its share of the watch and its townsfolk, and no walls; a
 ## town another people holds (home too, once taken) none of ours.
-## `defenders` is the one count its map badge and a scout show too. Read
-## unscoped, as the Military ledger does.
+## `defenders` is the one count a scout shows too; its map badge shows it
+## in two parts, those keeping watch and "+N" townsfolk. Read unscoped, as
+## the Military ledger does.
 static func strength(primary:bool,settlement_id:String="")->Dictionary:
 	var record:=SettlementModel.settlement_record(settlement_id)
 	if record.is_empty() and primary:
@@ -239,7 +240,7 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 				"number":keepers,"own":education,"capacity":true,"note":kept_words(education,stage),
 				"meaning":"Who keeps what we know, and how well it is passed on."}
 		"garrison":
-			# Everyone who would fight here today: the count on the map badge.
+			# Everyone who would fight here today: the map badge's two figures.
 			var s:Dictionary=f.get("strength",{})
 			var guard:=maxi(0,int(s.get("defenders",0)))
 			if String(s.get("held_by",""))!="":
@@ -250,7 +251,9 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 			if s.is_empty() or bool(s.get("town",false)):
 				return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
 					"meaning":"The home guard posted here (the watch, shared among our towns by their people), and the townsfolk who take up arms when raiders come. The rest of the watch stay at %s unless a general sends them." % String(s.get("capital","home"))}
-			if trained>0:value="%s fighter%s" % [EraWords.grouped(guard),"" if guard==1 else "s"]
+			# Those free for the bands keep watch too: never one count with the
+			# townsfolk, who are no soldiers (the map badge sets them apart).
+			if trained>0:value=untrained_words(trained+int(s.get("watch",0)),int(s.get("rise",0)))
 			return {"key":key,"name":"Fighters here","value":value,"number":guard,"own":float(guard),"relative":true,
 				"note":("%s for the bands" % EraWords.grouped(trained)) if trained>0 and guard>trained else "","meaning":"The watch at home (its home guard and those free for the bands), and the townsfolk who take up arms when raiders come."}
 		"fortification":
@@ -356,8 +359,10 @@ static func _tip(row:Dictionary,f:Dictionary)->String:
 	match key:
 		"garrison":
 			var s:Dictionary=f.get("strength",{})
-			if not s.is_empty() and not bool(s.get("town",false)) and int(s.fighters)>0 and int(s.get("watch",0))+int(s.get("rise",0))>0:
-				lines.append("%s for the bands, %s." % [EraWords.grouped(int(s.fighters)),untrained_words(int(s.get("watch",0)),int(s.get("rise",0)))])
+			if not s.is_empty() and not bool(s.get("town",false)) and int(s.fighters)>0:
+				var bands:=int(s.fighters);var kept:=int(s.get("watch",0))
+				if kept>0:lines.append("Of the %s on watch, %s are free for the bands and %s are the home guard." % [EraWords.grouped(bands+kept),EraWords.grouped(bands),EraWords.grouped(kept)])
+				else:lines.append("None of the %s on watch is kept as the home guard: a general may lead them away in a band." % EraWords.grouped(bands))
 			if String(s.get("held_by",""))=="":lines.append(RISE_WORDS)
 		"fortification":
 			var s:Dictionary=f.get("strength",{})
