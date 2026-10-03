@@ -89,12 +89,18 @@ A look is a Dictionary: `{variant, outfit, hair, beard, skin, hair_colour, cloth
 | `add_library(name, lib)` | §2. |
 | `head_top() -> Vector3` | Where speech bubbles hang. |
 
-| `carry("bundle", on)` | A carried prop (`prop_bundle`, a hide sack of food) rides between the hands each frame, whatever the clip does, until `set_down()` leaves it on the floor where it is. |
+| `carry("bundle" or "cord", on)` | A carried prop (`prop_bundle`, a hide sack of food; `prop_cord`, a knotted cord to fidget with) rides between the hands each frame, whatever the clip does, until `set_down()` leaves it on the floor where it is. The acting calls it when a clip or stance needs the thing in hand. |
 | `drop_held(empty_stance)` | The held bowl (or staff) falls from the hand to the floor and stays there; the figure takes an empty-handed stance. Returns the fallen node. |
 
 **Members:** `skeleton`, `player`, `model`, `stance`, `mood`, `body_height`, `clip`, `seat_height` (a seat the set gives: no stool).
 
-**Looks in a set:** `look.lit = true` dresses the figure with `court_figure_lit.gdshader` (the set's sun, fire and bounce light it in two soft tones; the sun's shadows fall on a person at 60%) and turns its shadows on (never for the paint on the skin). Without a set, `court_figure_toon.gdshader` paints its own light. Hair has strands and a sheen in both; beards have no inked edge; the darkest hair keeps a little tone (`readable_hair`).
+**Each person's own shade** (`scripts/hud/court_figure_look.gd`, figures): `setup()` passes every look through `FigureLook.vary(look)` once (a varied look carries `varied`). Within the people's profile it spreads hair (fair children darken as they grow, near-black runs blue-black to dark brown, the old stay grey), skin (a few percent), dress (fresh or worn and faded), build (`average/stocky/lanky/round/slight`, drawn as the model's scale about the feet) and height (±4.5%), and moves most of those the polite clasp falls to into a stance of their own. Keys the stage's accessor should add (figure_look): `years` (else read from the body and face; a child is under 13 and gets the `child` body, no beard), `seed` (else read from the face), and `keep_stance: true` for anyone whose stance the stage sets on purpose (the one before the god). For a hard cap of one clasp a room, the stage calls `FigureLook.room_stance(look, taken)` with one `taken` Dictionary per room.
+
+**Bodies:** the six grown ones (`VARIANTS`) and `child` (1.24 m, `BODIES`); a missing child body falls back to `female_young`. Clips are exported at 30 frames a second (the walk's 1.18 m/s and 0.92 m/s at 1.72 m match the feet).
+
+**Hair:** cropped and balding hair lie in tufts; a bun is a coil high on the back of the head with its knot. Where hair and beards meet the skin they break into strokes over it (vertex colour G, baked by `court_figures.py`, read by the `stipple` uniform of all three figure shaders; UV is the rest position so the strokes keep still); stubble is strokes all over. No ink is drawn round those strokes.
+
+**Looks in a set:** `look.lit = true` dresses the figure with `court_figure_lit.gdshader` (the set's sun, fire and bounce light it in two soft tones, the shade side keeping a warm tint; both sides drawn, so an open cape or sleeve shows its inside; the sun's shadows fall on a person at 60%) and turns its shadows on. This is the one lit figure shader: M's `court_set_3d.light_figures()` (swapping every shared material to M's twin) must not be called, as it would undo the stencilled eyes (never for the paint on the skin). Without a set, `court_figure_toon.gdshader` paints its own light. Hair has strands and a sheen in both; beards have no inked edge; the darkest hair keeps a little tone (`readable_hair`).
 
 **Rules:**
 - Nothing runs per frame in this node except while it carries something between its hands; LookAt and AnimationPlayer do the work.

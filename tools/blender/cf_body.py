@@ -49,6 +49,11 @@ VARIANTS = {
                      "pelvis": 0.152, "waist": 0.102, "chest_w": 0.124, "chest_d": 0.090, "bust": 0.6, "pecs": 0.0,
                      "arm": 0.035, "forearm": 0.030, "thigh": 0.068, "shin": 0.041, "hand": 1.0,
                      "jaw": 0.76, "brow_ridge": 0.35},
+    # a child of seven or eight: a big head on a slight body, no brow, a soft jaw
+    "child": {"height": 1.24, "head_ratio": 5.8, "neck": 0.040, "shoulder": 0.116, "hip_joint": 0.062,
+              "pelvis": 0.108, "waist": 0.096, "chest_w": 0.100, "chest_d": 0.080, "bust": 0.0, "pecs": 0.0,
+              "arm": 0.028, "forearm": 0.024, "thigh": 0.049, "shin": 0.034, "hand": 1.0,
+              "jaw": 0.55, "brow_ridge": 0.10, "belly": 0.3, "arm_angle": 20.0},
 }
 
 
@@ -58,7 +63,8 @@ def params(variant):
     p["variant"] = variant
     p["female"] = variant.startswith("female")
     p["old"] = variant.endswith("_old")
-    p["young"] = variant.endswith("_young")
+    p["young"] = variant.endswith("_young") or variant == "child"
+    p["child"] = variant == "child"
     return p
 
 
