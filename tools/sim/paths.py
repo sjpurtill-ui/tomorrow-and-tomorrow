@@ -22,8 +22,9 @@ field strength, infant deaths, life expectancy and growth; the founding years
 (0-60); milestone years against their bands; and flags: the balanced peoples
 outside the historical bands (docs/research/benchmarks_*.json), extreme paths
 past "a little extra" (more than 25% of the typical-to-high gap beyond the
-high value), and dominated paths (another at least as good on people,
-knowledge, might and output, and better on one).
+high value), and dominated paths (another of the same kind - the leaders'
+paths, the computer peoples with towns, the ruler's splits - at least as good
+on people, knowledge, field strength and output per worker, better by 3% on one).
 """
 from __future__ import annotations
 
@@ -59,9 +60,9 @@ def run_job(job):
     return {"name": name, "seed": seed, "rows": res["rows"], "milestones": {k: found.get(v) for k, v in MILESTONES.items()}}
 
 
-def at(rows, year):
+def at(rows, year, tol=1.0):
     best = min(rows, key=lambda r: abs(r["year"] - year))
-    return best if abs(best["year"] - year) <= 1.0 else None
+    return best if abs(best["year"] - year) <= tol else None
 
 
 def mean(values):
@@ -70,7 +71,7 @@ def mean(values):
 
 
 def growth(rows, a, b):
-    ra, rb = at(rows, a), at(rows, b)
+    ra, rb = at(rows, a, 5.5), at(rows, b, 5.5)
     if not ra or not rb or ra["population"] <= 0 or rb["population"] <= 0:
         return None
     return math.log(rb["population"] / ra["population"]) / (b - a) * 100.0
@@ -99,7 +100,7 @@ def summarize(runs: list, years: int) -> dict:
     """Mean over seeds of each reported metric at each check year."""
     out = {}
     for y in [c for c in CHECK_YEARS if c <= years]:
-        rows = [at(r["rows"], y) for r in runs]
+        rows = [at(r["rows"], y, 5.5) for r in runs]
         if any(x is None for x in rows):
             continue
         prev = {300: 150, 600: 300, 1200: 600, 1800: 1200, 2400: 1800}[y]
@@ -246,9 +247,10 @@ def main() -> int:
     final = max(y for y in years if all(summary[n].get(y) for n in names)) if years else None
     if final:
         keys = ["people", "known", "field_strength", "output_per_worker"]
+        group = lambda n: "split" if n.startswith(("split_", "switch_")) else n.split("_", 1)[0]
         for a in names:
             for b in names:
-                if a == b:
+                if a == b or group(a) != group(b):
                     continue
                 ma, mb = summary[a][final], summary[b][final]
                 better = sum(1 for k in keys if ma[k] > mb[k] * 1.03)
