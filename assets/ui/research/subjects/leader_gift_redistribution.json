@@ -1,12 +1,19 @@
 {
   "id": "leader_gift_redistribution",
   "line": "institutions",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/leader_gift_redistribution-v1.png",
+  "prompt": "Keep this SAME wide approximately 2058x764 matte fresco image and all raw-hide/wild-root subjects, but scale the entire FOUR-person gift-giving group down to 75 percent of its current height and center it vertically. Every complete head must be below y=125, feet and gifts above y=640, within central band. Add simple limestone background above and below, preserve dusty plum/gold flat pigment, bare-hand exchange and two hide windbreaks. No baskets, bowls, houses, writing or new objects. WIDE canvas unchanged.",
+  "initial_prompt": "Edit this current-game wide fresco painting, preserve approximately 2058x764 canvas and flat matte dusty-plum/limestone/gold mineral pigment figures. Keep collective gift redistribution, center adult handing portions of gathered wild roots to two other adults. REMOVE every basket, bowl, ceramic container, cultivated grain and thatched building. Replace containers with small loose raw-hide patches holding wild roots and berries on bare earth; recipients take roots directly in cupped bare hands. Background only low ragged raw-hide windbreak on crooked branches, wild open ground. Change fringed woven garments into crude irregular untailored hides. Recompose as FOUR smaller adults with all complete heads, hands, gifts and hide patches inside central 65 percent height for a wide card crop. Same dignified flat fresco graphic shapes, no photorealism, CGI or glossy texture. No writing, labels, borders. Retain WIDE reference proportions.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-a97be7f7-a296-40ad-b67d-6bedaa720ff8.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-dce143d4-5eb7-4f11-abc7-b0b838373c02.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 5,
-  "approx_historical_year": -4967,
-  "prompt": "c. 4967 BCE: a household brings gathered food to a headman who shares portions back out to other adults, including the giver. Mature flat civic fresco on rough plaster, dusty plum and limestone; no throne, ledger, coins, classical robes or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aa1abfc3-0dd2-44cc-a643-7bc3e8e4985f.png",
-  "asset": "res://assets/ui/research/subjects/leader_gift_redistribution-v1.png",
-  "sha256": "52f218af93e9d473bda0082716779ecc84f7c690cd7db1f4ed1ca84d9d72ede7",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; reciprocal hand-to-hand distribution visible. Accepted after visual 3.37:1 crop and subject/period check."
+  "review": "Flat mineral fresco retained. Four adults exchange roots/berries bare-handed over irregular hides. Baskets, bowls, grain and houses removed. Targeted reduction preserves complete heads.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/leader_gift_redistribution-v2.png",
+  "sha256": "c13bb16afc1f400466e112bc6a03babe85d24737148168fd329ae2333e139481"
 }

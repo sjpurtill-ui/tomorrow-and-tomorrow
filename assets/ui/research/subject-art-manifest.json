@@ -332,10 +332,14 @@
     ]
   },
   "quarry_reading": {
-    "path": "res://assets/ui/research/subjects/quarry_reading-v1.png",
+    "path": "res://assets/ui/research/subjects/quarry_reading-v2.png",
     "focus": [
       0.5,
-      0.4
+      0.25
+    ],
+    "opening_focus": [
+      0.5,
+      0.25
     ]
   },
   "wedges_and_levers": {
@@ -1333,10 +1337,14 @@
     ]
   },
   "nut_kernel_shelling": {
-    "path": "res://assets/ui/research/paper/nut_kernel_shelling.png",
+    "path": "res://assets/ui/research/subjects/nut_kernel_shelling-v1.png",
     "focus": [
       0.5,
-      0.65
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "acorn_leaching": {
@@ -5764,49 +5772,49 @@
     ]
   },
   "common_path_alignment": {
-    "path": "res://assets/ui/research/subjects/common_path_alignment-v1.png",
+    "path": "res://assets/ui/research/subjects/common_path_alignment-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "edge_resharpening_rounds": {
-    "path": "res://assets/ui/research/subjects/edge_resharpening_rounds-v1.png",
+    "path": "res://assets/ui/research/subjects/edge_resharpening_rounds-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "emergency_food_caching": {
-    "path": "res://assets/ui/research/subjects/emergency_food_caching-v1.png",
+    "path": "res://assets/ui/research/subjects/emergency_food_caching-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "infant_swaddling_practice": {
-    "path": "res://assets/ui/research/subjects/infant_swaddling_practice-v1.png",
+    "path": "res://assets/ui/research/subjects/infant_swaddling_practice-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "leader_gift_redistribution": {
-    "path": "res://assets/ui/research/subjects/leader_gift_redistribution-v1.png",
+    "path": "res://assets/ui/research/subjects/leader_gift_redistribution-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "paired_task_assignment": {
-    "path": "res://assets/ui/research/subjects/paired_task_assignment-v1.png",
+    "path": "res://assets/ui/research/subjects/paired_task_assignment-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "turbidity_judging": {
-    "path": "res://assets/ui/research/subjects/turbidity_judging-v1.png",
+    "path": "res://assets/ui/research/subjects/turbidity_judging-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9679,6 +9687,38 @@
   },
   "genealogical_recitation": {
     "path": "res://assets/ui/research/subjects/genealogical_recitation-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "counting_words": {
+    "path": "res://assets/ui/research/subjects/counting_words-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "named_landmark_lore": {
+    "path": "res://assets/ui/research/subjects/named_landmark_lore-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "food_pounding_mortars": {
+    "path": "res://assets/ui/research/subjects/food_pounding_mortars-v1.png",
+    "focus": [
+      0.5,
+      0.4
+    ],
+    "opening_focus": [
+      0.5,
+      0.4
+    ]
+  },
+  "guest_host_reciprocity": {
+    "path": "res://assets/ui/research/subjects/guest_host_reciprocity-v1.png",
     "focus": [
       0.5,
       0.5

@@ -1,12 +1,19 @@
 {
   "id": "infant_swaddling_practice",
   "line": "demography",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-05/assets/ui/research/subjects/fever_watch_customs-v2.png",
+  "prompt": "ONLY correct framing of this painting: shrink the entire foreground human-and-working-object group to 75 percent current size and center vertically, with ALL complete heads below y=130 and ALL working hands, infant if present, food/shell piles or stone-covering action above y=635. Preserve the SAME wide approximately 2055x765 canvas, SAME existing painted medium/palette/people/action/materials. Extend existing simple background pigment above and below. No new objects, text, baskets, pots, buildings, photography or 3D. Entire working group must occupy central 65 percent height so no heads or discovery cues get cut in wide banner crop.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-1c13ef1a-1f3c-40e2-9aaf-76ccd81edb9b.png",
+  "initial_prompt": "Create a new current-game demography research banner STRICTLY matching supplied wide 2056x765 reference, flat angular chalk-pastel/cut-paper pigment planes in terracotta/rust/ivory/slate. Two smaller seated adult caregivers gently fold a soft irregular animal hide around an infant held by one caregiver; second caregiver secures overlapping hide with bare hands, no pins or cord. Infant face unobstructed, arms snug within wrap, no medical distress. Both complete adult heads, all folding/supporting hands and infant face fit within central 65 percent height, breathing space above and below for wide card crop. One low raw-hide windbreak on crooked branches behind, sleeping hide below, tiny safely separated ember glow far side. No woven cloth, reed panels, pottery, baskets, tailored garments or finished house. Match reference's flat mature painting, not photographic anatomy, CGI, glossy relief or cartoon. Canvas remains WIDE approximately 2.7:1, full bleed, no text or border.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-f0362fc0-e8c9-420b-b6f3-e7c116609c23.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 5,
-  "approx_historical_year": -4967,
-  "prompt": "c. 4967 BCE: caregivers wrap an infant against cold in an undyed woven-fiber swaddle beside a stone-ring hearth. Mature flat chalk pastel and cut-paper collage, terracotta and warm ivory; no patterned blanket, cradle, later dress or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-1ab26be5-ad1c-4041-bd8b-da0ae052a98d.png",
-  "asset": "res://assets/ui/research/subjects/infant_swaddling_practice-v1.png",
-  "sha256": "091f9760ef4a2da340c2f05365e703caefeb6249aef3503add6627a73dddbe77",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; infant and protective wrap legible in banner crop. Accepted after visual 3.37:1 crop and subject/period check."
+  "review": "Flat angular terracotta/slate pigment planes match current demography reference. Two caregivers fold irregular soft hide around infant with face unobstructed. Cloth/pins/cord absent; targeted smaller composition preserves heads and hands.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/infant_swaddling_practice-v2.png",
+  "sha256": "e665aac49d1c7e7b5e8c1616698e579a00329488008df8d633fead75a362ea79"
 }

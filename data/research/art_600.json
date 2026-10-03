@@ -199,13 +199,7 @@
    "caption": "Cooperative harvest gatherings (Year 75)",
    "style": "silhouette_ochre"
   },
-  "counting_words": {
-   "path": "res://assets/ui/research/discovery-600/counting_words.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
-   "tile_index": 2,
-   "caption": "Counting words and finger counts to twenty (Year 5)",
-   "style": "paper_gouache"
-  },
+  "counting_words": {"path": "res://assets/ui/research/subjects/counting_words-v1.png", "style": "knowledge: blue-black ink and lapis parchment", "focus": [0.5, 0.5]},
   "craft_lineage_naming": {
    "path": "res://assets/ui/research/discovery-600/craft_lineage_naming.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_27_50 PM.png",
@@ -460,14 +454,7 @@
    "caption": "Guest-friendship between houses of different towns (Year 290)",
    "style": "silhouette_ochre"
   },
-  "guest_host_reciprocity": {
-   "path": "res://assets/ui/research/discovery-600/guest_host_reciprocity.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",
-   "tile_index": 6,
-   "caption": "Guest-right: a stranger fed and protected for three days (Year 22)",
-   "style": "silhouette_ochre",
-   "match": "alias"
-  },
+  "guest_host_reciprocity": {"path": "res://assets/ui/research/subjects/guest_host_reciprocity-v1.png", "style": "logistics: travel watercolor", "focus": [0.5, 0.5]},
   "harps_and_lyres": {
    "path": "res://assets/ui/research/discovery-600/harps_and_lyres.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_29_51 PM.png",
@@ -644,13 +631,7 @@
    "caption": "Mutual aid customs (Year 100)",
    "style": "silhouette_ochre"
   },
-  "named_landmark_lore": {
-   "path": "res://assets/ui/research/discovery-600/named_landmark_lore.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
-   "tile_index": 4,
-   "caption": "Every notable rock and spring has a naming story (Year 5)",
-   "style": "silhouette_ochre"
-  },
+  "named_landmark_lore": {"path": "res://assets/ui/research/subjects/named_landmark_lore-v1.png", "style": "culture: tapestry-inspired painting", "focus": [0.5, 0.5]},
   "named_star_figures": {
    "path": "res://assets/ui/research/discovery-600/named_star_figures.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",

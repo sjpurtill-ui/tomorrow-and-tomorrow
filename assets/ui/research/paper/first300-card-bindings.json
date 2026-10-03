@@ -2,7 +2,7 @@
   "labor_rotations": "res://assets/ui/research/subjects/labor_rotations-v3.png",
   "grain_malting": "res://assets/ui/research/paper/first300-cards/grain_malting.tres",
   "grain_parboiling": "res://assets/ui/research/paper/first300-cards/grain_parboiling.tres",
-  "food_pounding_mortars": "res://assets/ui/research/paper/first300-cards/food_pounding_mortars.tres",
+  "food_pounding_mortars": "res://assets/ui/research/subjects/food_pounding_mortars-v1.png",
   "hand_dough_forming": "res://assets/ui/research/paper/first300-cards/hand_dough_forming.tres",
   "controlled_baking": "res://assets/ui/research/paper/first300-cards/controlled_baking.tres",
   "cereal_dehulling": "res://assets/ui/research/paper/first300-cards/cereal_dehulling.tres",
@@ -106,7 +106,7 @@
   "elephant_training": "res://assets/ui/research/paper/first300-cards/elephant_training.tres",
   "professional_corps": "res://assets/ui/research/paper/first300-cards/professional_corps.tres",
   "battlefield_medicine": "res://assets/ui/research/paper/first300-cards/battlefield_medicine.tres",
-  "nut_kernel_shelling": "res://assets/ui/research/paper/nut_kernel_shelling.png",
+  "nut_kernel_shelling": "res://assets/ui/research/subjects/nut_kernel_shelling-v1.png",
   "root_grating_dewatering": "res://assets/ui/research/paper/root_grating_dewatering.png",
   "pulse_splitting": "res://assets/ui/research/paper/pulse_splitting.png",
   "fruit_pulp_screening": "res://assets/ui/research/paper/fruit_pulp_screening.png",
@@ -150,5 +150,6 @@
   "drainage": "res://assets/ui/research/subjects/drainage-v2.png",
   "controlled_flaking": "res://assets/ui/research/subjects/controlled_flaking-v2.png",
   "fiber_grading": "res://assets/ui/research/subjects/fiber_grading-v2.png",
-  "hearth_heat_retention": "res://assets/ui/research/subjects/hearth_heat_retention-v1.png"
+  "hearth_heat_retention": "res://assets/ui/research/subjects/hearth_heat_retention-v1.png",
+  "quarry_reading": "res://assets/ui/research/subjects/quarry_reading-v2.png"
 }

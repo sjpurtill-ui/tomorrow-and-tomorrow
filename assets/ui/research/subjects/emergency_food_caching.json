@@ -1,12 +1,19 @@
 {
   "id": "emergency_food_caching",
   "line": "security",
+  "version": 2,
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-06/assets/ui/research/subjects/emergency_food_caching-v1.png",
+  "prompt": "ONLY correct framing of this painting: shrink the entire foreground human-and-working-object group to 75 percent current size and center vertically, with ALL complete heads below y=130 and ALL working hands, infant if present, food/shell piles or stone-covering action above y=635. Preserve the SAME wide approximately 2055x765 canvas, SAME existing painted medium/palette/people/action/materials. Extend existing simple background pigment above and below. No new objects, text, baskets, pots, buildings, photography or 3D. Entire working group must occupy central 65 percent height so no heads or discovery cues get cut in wide banner crop.",
+  "initial_source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-65eda6ed-1fe3-4aee-9e12-3847297f7324.png",
+  "initial_prompt": "Edit current-game WIDE vermilion/charcoal/parchment HANDCUT WOODBLOCK banner keeping approximately 2057x764 proportions and carved ink marks. Two smaller raw-hide-clad adults conceal emergency wild roots and nuts in a shallow EARTH hollow under broad flat stones: left adult places an irregular RAW-HIDE wrapped food parcel into shallow hollow, right adult slides broad rough stone over it. REMOVE ALL woven baskets, regular reed pit lining, big cylindrical store, thatched hut, pottery and woven clothing. Hollow is crude bare soil only; small raw-hide parcel visible under half-covering stone. Background only wild reeds and simple flat water/hill bands, no buildings. Complete two heads, both pairs of working hands, parcel and covering stone inside central 65 percent height, breathing space above/below for crop. No writing, border, photograph, CGI or glossy relief. Preserve WIDE canvas and reference's woodblock medium.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-7588e4be-8efd-46fa-97db-938250ac59ec.png",
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 5,
-  "approx_historical_year": -4967,
-  "prompt": "c. 4967 BCE: adults lower baskets of dried food into a lined earth pit and conceal the reserve beneath stones and brush. Mature layered hand-cut woodblock print, charcoal and vermilion on warm parchment; no lock, masonry granary, writing or photorealism.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-2f775c04-2e05-40d9-b10d-df20c64caf84.png",
-  "asset": "res://assets/ui/research/subjects/emergency_food_caching-v1.png",
-  "sha256": "a2a7394eeb5e823ed10bb3339c28c2218118fd264f3d7e2b13dcde5771b2a1a0",
-  "mode": "built-in image_gen / new image",
-  "review": "First generation selected; cache pit and cover clear. Accepted after visual 3.37:1 crop and subject/period check."
+  "review": "Ver milion/charcoal handcut woodblock medium retained. Raw-hide parcel placed in bare earth hollow and rough flat stone slid over it. Baskets, pit lining, thatched building removed; targeted smaller group preserves heads/hands.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/emergency_food_caching-v2.png",
+  "sha256": "a314db792827b67dc866b5a03a684ee96299271fbb3489f234e27dd6768db0f8"
 }
