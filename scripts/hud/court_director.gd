@@ -1044,9 +1044,10 @@ static func _wrath(ctx:Dictionary,out:Array,action:String,target:String,response
 	var rng:RandomNumberGenerator=ctx.rng
 	var t_m:=_m(ctx,target)
 	var big:=action=="terrify"
-	# Anticipation: the room stills, the camera goes in on them.
+	# Anticipation: the room stills, the camera goes in on them (close, head
+	# and shoulders, when it is the god's terror).
 	_beat(out,0.0,"room","hush",{"dur":3.6 if big else 2.4},"anticipation")
-	if not t_m.is_empty():_shot(out,0.0,"push_in",{"target":target})
+	if not t_m.is_empty():_shot(out,0.0,"push_in",{"target":target,"close":true} if big else {"target":target})
 	var sleeper:=_asleep(ctx)
 	for m:Dictionary in _people(ctx,[target,sleeper]):
 		if rng.randf()<(0.75 if big else 0.4):_beat(out,0.08+rng.randf()*0.2,String(m.key),"freeze",{},"anticipation")
@@ -1235,7 +1236,7 @@ static func _command(ctx:Dictionary,out:Array)->void:
 	if not a_m.is_empty():
 		match ob:
 			"refuse":
-				_shot(out,0.0,"push_in",{"target":actor})
+				_shot(out,0.0,"push_in",{"target":actor,"close":true})
 				_beat(out,0.5,actor,"shake_head",{},"action")
 				_beat(out,1.0,actor,"stand_firm",{},"action")
 				_gasp(ctx,out,1.1,[actor],_rested(ctx,"gasp_pretend"))
@@ -1635,7 +1636,7 @@ static func _terrify_envoy(ctx:Dictionary,out:Array)->void:
 	var response:=String(ctx.event.get("response",""))
 	var temper:=String(_m(ctx,envoy).get("temper",""))
 	_beat(out,0.0,"room","hush",{"dur":3.4},"anticipation")
-	_shot(out,0.0,"push_in",{"target":envoy})
+	_shot(out,0.0,"push_in",{"target":envoy,"close":true})
 	_shot(out,0.55,"shake",{"strength":0.3})
 	if response in ["defy","defiant"]:
 		_beat(out,0.55,envoy,"stand_firm",{},"action")

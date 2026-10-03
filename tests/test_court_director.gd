@@ -718,6 +718,18 @@ func test_angry_words_still_the_room_and_kind_words_warm_it()->void:
 				if String(beat.act)=="lean_in":leaned=true
 		assert_bool(leaned).override_failure_message("favour spelled %s" % spelling).is_true()
 
+func test_the_gods_terror_is_shot_close()->void:
+	# Head and shoulders for the god's terror on the one before the god (and
+	# on an envoy, and a refusal); a lesser rebuke is the ordinary push-in.
+	var cast:=home_cast()
+	var close:=func(list:Array)->bool:
+		for beat:Dictionary in list:
+			if String(beat.who)=="camera" and String(beat.act)=="push_in" and bool((beat.get("args",{}) as Dictionary).get("close",false)):return true
+		return false
+	assert_bool(close.call(Director.beats_for({"kind":"divine","action":"terrify","response":"cower","target":"main"},cast,full_facts(60),3))).is_true()
+	assert_bool(close.call(Director.beats_for({"kind":"divine","action":"penance","response":"endure","target":"main"},cast,full_facts(60),3))).is_false()
+	assert_bool(close.call(Director.beats_for({"kind":"divine","action":"terrify","response":"cower","target":"main"},envoy_cast("haughty"),full_facts(60),3))).is_true()
+
 func test_the_sleeper_wakes_and_stays_awake_a_while()->void:
 	var memory:={}
 	var woke_at:=-1
