@@ -1,4 +1,4 @@
-extends Node
+extends Camera3D
 ## The court's camera: the lens on the set (scripts/hud/court_set_3d.gd),
 ## three-quarter from a little above, never a flat lineup. The director
 ## (court_director.gd) calls shots; nothing here decides anything.
@@ -13,8 +13,8 @@ extends Node
 ## A subject is a figure (anything with head_top(), as court_figure_3d.gd
 ## has), any Node3D, or a point. Shots keep clear of the UI laid over the
 ## stage (set_insets) and keep the far background softly out of focus.
-## It drives one Camera3D (lens): the set's own, or the stage's once the stage
-## hands it over (docs/COURT_STAGE_3D.md section 5):
+## It is the set's own lens and drives itself; once the stage hands over its
+## own camera it drives that one instead (docs/COURT_STAGE_3D.md section 5):
 ##   CourtStage.camera_rig = preload("res://scripts/hud/court_camera.gd").new()
 ##   camera_rig.attach(stage, stage.camera, set_root)   # then
 ##   camera_rig.shot("push_in", {"target": key})        # keys of the stage's cast
@@ -79,6 +79,7 @@ enum {EASE_INOUT,EASE_OUT,EASE_SLOW}
 
 func _init()->void:
 	name="CourtCamera"
+	use_lens(self)
 	_noise.seed=7
 	_noise.frequency=1.0
 	_noise.noise_type=FastNoiseLite.TYPE_SIMPLEX_SMOOTH
@@ -119,11 +120,11 @@ func configure(info:Dictionary)->void:
 ## The UI laid over the stage, in pixels of the view (the stage's top strip of
 ## buttons, the name plates under the feet, a plinth at the right).
 func set_insets(top_px:float,bottom_px:float,left_px:=0.0,right_px:=0.0)->void:
-	var size:=_view_size()
-	inset_top=clampf(top_px/size.y,0.0,0.6)
-	inset_bottom=clampf(bottom_px/size.y,0.0,0.6)
-	inset_left=clampf(left_px/size.x,0.0,0.6)
-	inset_right=clampf(right_px/size.x,0.0,0.6)
+	var vs:=_view_size()
+	inset_top=clampf(top_px/vs.y,0.0,0.6)
+	inset_bottom=clampf(bottom_px/vs.y,0.0,0.6)
+	inset_left=clampf(left_px/vs.x,0.0,0.6)
+	inset_right=clampf(right_px/vs.x,0.0,0.6)
 
 # --- The stage's seam (docs/COURT_STAGE_3D.md section 5) --------------------------
 
@@ -141,7 +142,11 @@ func attach(stage:Node,camera:Camera3D,set_root:Node3D)->void:
 	_set=weakref(set_root) if set_root!=null else null
 	var old:Camera3D=lens
 	use_lens(camera)
-	if old!=null and old!=camera and is_instance_valid(old):old.current=false
+	if old!=null and old!=camera and is_instance_valid(old):
+		old.current=false
+		# the paper the court is painted on goes with the lens in use
+		var paper:=old.get_node_or_null("Paper")
+		if paper!=null and camera!=null:paper.reparent(camera,false)
 	if camera!=null:camera.current=true
 	if set_root!=null and set_root.get("info") is Dictionary:configure((set_root.get("info") as Dictionary).get("camera",{}))
 	_insets_from_stage()
@@ -225,13 +230,13 @@ func wide(subjects:Array=[],time:=0.9,main_subject:Variant=null)->void:
 	var who:Array=cast if not cast.is_empty() else [centre]
 	var t:=clampf((_aspect()-1.9)/1.3,0.0,1.0)
 	var pitch:=lerpf(base_pitch,base_pitch*0.55,t)
-	var fov:=lerpf(base_fov,base_fov*0.7,t)
+	var fv:=lerpf(base_fov,base_fov*0.7,t)
 	var room:=lerpf(headroom,headroom*0.3,t)
 	var lead:Variant=null
 	if _alive(main):lead=main
 	if lead==null:lead=_nearest_to_god(who)
 	var pts:=_room_points(who,lead,t,base_yaw,pitch)
-	_go(frame(pts,base_yaw,pitch,fov,room),fov,time,EASE_INOUT,"wide",_focus_for(who,lead))
+	_go(frame(pts,base_yaw,pitch,fv,room),fv,time,EASE_INOUT,"wide",_focus_for(who,lead))
 
 ## Two people: the camera swings a little to favour the line between them and
 ## comes lower and closer (knees up).
@@ -259,10 +264,10 @@ func push_in(fig:Variant,seconds:=5.0)->void:
 func reaction(fig:Variant,time:=0.0)->void:
 	var yaw:=clampf(lerpf(base_yaw,_facing_yaw(fig),0.6),yaw_range.x,yaw_range.y)
 	var pts:=_head_points(fig,0.7)
-	var basis:=Basis.from_euler(Vector3(0.0,deg_to_rad(yaw),0.0))
+	var yb:=Basis.from_euler(Vector3(0.0,deg_to_rad(yaw),0.0))
 	var looks:=_facing_dir(fig)
 	# they look toward screen right: stand them on the left third, and so on
-	var anchor:=-0.34 if looks.dot(basis.x)>0.0 else 0.34
+	var anchor:=-0.34 if looks.dot(yb.x)>0.0 else 0.34
 	_go(frame(pts,yaw,-2.5,base_fov*0.6,0.06,anchor),base_fov*0.6,time,EASE_OUT,"reaction",_foot_of(fig))
 
 ## Back to the room.
@@ -304,8 +309,8 @@ func settle()->void:
 ## The transform that sees every point from this yaw and pitch through this
 ## field (across the width), inside the free part of the view, headroom left.
 func frame(points:PackedVector3Array,yaw:float,pitch:float,fov_deg:float,head_frac:=0.0,anchor_x:=0.0)->Transform3D:
-	var basis:=Basis.from_euler(Vector3(deg_to_rad(pitch),deg_to_rad(yaw),0.0))
-	var right:=basis.x;var up:=basis.y;var back:=basis.z
+	var fb:=Basis.from_euler(Vector3(deg_to_rad(pitch),deg_to_rad(yaw),0.0))
+	var right:=fb.x;var up:=fb.y;var back:=fb.z
 	if points.is_empty():points=PackedVector3Array([centre])
 	var aspect:=_aspect()
 	var tan_h:=tan(deg_to_rad(fov_deg)*0.5)
@@ -341,7 +346,7 @@ func frame(points:PackedVector3Array,yaw:float,pitch:float,fov_deg:float,head_fr
 		var want:=Vector2((left_n+right_n)*0.5+anchor_x*(right_n-left_n)*0.5,(bottom_n+top_n)*0.5)
 		var shift:=(lo+hi)*0.5-want
 		target+=right*shift.x*dist*tan_h+up*shift.y*dist*tan_v
-	return Transform3D(basis,target+back*dist)
+	return Transform3D(fb,target+back*dist)
 
 ## A subject that can still be framed: a point, or a node that has not been freed.
 static func _alive(subject:Variant)->bool:

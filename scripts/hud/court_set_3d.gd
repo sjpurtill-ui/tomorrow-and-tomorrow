@@ -17,8 +17,9 @@ extends Node3D
 ##                person there faces (docs/COURT_STAGE_3D.md); place() turns a
 ##                figure (whose front is +Z) to match. Sit marks carry meta
 ##                "sit" and "seat" (the seat's height; hide the figure's stool).
-##     rig, camera  a CourtCamera (court_camera.gd) driving the set's own lens
-##                until the stage hands it the stage's camera (attach)
+##     camera     a CourtCamera (court_camera.gd, a Camera3D): the set's lens
+##                and its rig (rig is the same object); attach() lets it
+##                drive a stage's own camera instead
 ##     lights     the sun (the one shadowed light), the fire (flickering), a
 ##                warm bounce, the door's daylight in a hall, braziers
 ##     props      shown from the facts: food in the baskets, on the rack and
@@ -262,11 +263,11 @@ func _build(era_id_in:String,facts_in:Dictionary)->void:
 	_make_lights()
 	_make_fires()
 	_make_air()
-	camera=Camera3D.new();camera.name="Lens"
+	# the set's camera is its own rig: shots by name (wide, push_in, reaction,
+	# two_shot, shake), view_changed while it moves, attach() to drive a stage's
+	camera=CourtCamera.new();camera.name="Lens"
 	add_child(camera)
-	rig=CourtCamera.new()
-	add_child(rig)
-	rig.call("use_lens",camera)
+	rig=camera
 	rig.call("configure",info.get("camera",{}))
 	camera.current=true
 	_make_paper()

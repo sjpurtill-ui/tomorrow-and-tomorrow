@@ -60,8 +60,10 @@ void fragment() {
 	col = mix(col, ink, line);
 	if (snow > 0.0) {
 		// snow on the ridges and the tops of the far woods
-		float cap = (1.0 - smoothstep(0.0, 1.4 + 1.6 * noise2(vec2(along * 0.04, 1.0)), d)) * snow;
-		col = mix(col, vec3(0.88, 0.90, 0.94), cap * 0.75);
+		// a thin crust of snow on the crowns and the ridge, and the wash paler and cooler
+		float cap = (1.0 - smoothstep(0.08, 0.32 + 0.18 * noise2(vec2(along * 0.3, 1.0)), d)) * snow;
+		col = mix(col, mix(col, vec3(0.80, 0.84, 0.88), 0.35), snow);
+		col = mix(col, vec3(0.90, 0.92, 0.95), cap * 0.8);
 	}
 	col = mix(col, air, airiness);
 	ALBEDO = col;
