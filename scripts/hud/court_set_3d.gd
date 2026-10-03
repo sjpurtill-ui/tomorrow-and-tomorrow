@@ -34,10 +34,21 @@ extends Node3D
 ## The season (spring, summer, autumn, winter) shows: snow lying and breath
 ## in the cold, dry grass and flies about the food in summer, fallen leaves in
 ## autumn, flowers in the grass in spring.
+## Ink: "screen" (one pass over the whole stage, from depth: the figures and
+## the set need no inked shells, half their drawing) or "hull" (each piece
+## carries its own inked shell, as before; the fallback). CourtSet.ink.
 ## Quality: "high", "low" or "auto" (CourtSet.quality). Low drops the heat
 ## shimmer, thins the smoke and sparks, the dust and the snow, inks only the
 ## set's main pieces, shortens the shadows and the far blur. Auto starts high
 ## and drops to low, once, if the frames come slow while the court is open.
+## The god's presence, made visible: god_light(body, tone) lets a light fall
+## on the one the god addresses: "speaks" (soft gold from above, the room a
+## touch dimmer, dust glittering in the beam, the fire leaning and dipping),
+## "wrath" (cold and harsh, the shadows sharp and long toward them, the fire
+## guttering, a gust in the hides driving the smoke sideways), "favour" (warm
+## gold, the fire brightening, motes rising), "off" (all eased back). Under the
+## open sky it falls from the sky; in a hall through the smoke hole or the
+## window. One unshadowed spot, the shaft effect and one small dust emitter.
 ## Presentation only: nothing here reads or changes the game's state except
 ## facts_from_game(), which only reads. Nothing is allocated per frame; the
 ## set stops processing when it is hidden (set_active).
@@ -59,6 +70,7 @@ const SHAFT:=preload("res://assets/court_sets/shaders/court_shaft.gdshader")
 const CONTACT:=preload("res://assets/court_sets/shaders/court_contact.gdshader")
 const SKY:=preload("res://assets/court_sets/shaders/court_sky.gdshader")
 const PAPER:=preload("res://assets/court_sets/shaders/court_paper.gdshader")
+const INK_POST:=preload("res://assets/court_sets/shaders/court_ink_post.gdshader")
 
 const KIND_BY_STAGE:={
 	"hearth_council":"fire_ring","fire_circle":"fire_ring",
@@ -129,6 +141,9 @@ const LOOK:={
 static var enabled:=true
 ## "high", "low" or "auto" (start high, drop to low if the frames come slow).
 static var quality:="auto"
+## "screen" or "hull" (see above). The stage asks uses_screen_ink() before it
+## dresses its figures: with screen ink they need no shells of their own.
+static var ink:="screen"
 ## Auto drops to low when the frames average slower than this (seconds).
 const SLOW_FRAME:=1.0/45.0
 ## Seasons, as the stage's facts name them.
@@ -162,17 +177,52 @@ var active:=true
 var _noise:=FastNoiseLite.new()
 var _clock:=0.0
 var _fire_energy:=2.0
+## The god's light: its parts (made on first use) and where it stands.
+const GOD_KEYS:=["energy","angle","shaft","dim","fire","fire_h","lean","gust","sharp","sat","sun_turn","rise"]
+const GOD_NEUTRAL:=[0.0,15.0,0.0,0.0,1.0,1.0,0.0,0.0,0.0,0.0,0.0,0.0]
+const GOD_TONES:={
+	"speaks":{"colour":Color(1.0,0.86,0.58),"p":[7.0,15.0,0.55,0.22,0.78,0.85,0.22,0.0,0.0,0.0,0.0,0.15]},
+	"wrath":{"colour":Color(0.66,0.78,1.0),"p":[5.5,11.0,0.6,0.35,0.32,0.42,0.6,1.0,1.0,-0.18,1.0,0.0]},
+	"favour":{"colour":Color(1.0,0.76,0.42),"p":[6.0,21.0,0.5,0.1,1.35,1.25,0.0,0.0,0.0,0.06,0.0,1.0]},
+}
+var god_tone:="off"
+var god_spot:SpotLight3D
+var god_shaft:MeshInstance3D
+var god_dust:GPUParticles3D
+var _god_shaft_mat:ShaderMaterial
+var _god_dust_mat:ShaderMaterial
+var _god_dust_pm:ParticleProcessMaterial
+var _god_cur:=PackedFloat32Array(GOD_NEUTRAL)
+var _god_from:=PackedFloat32Array(GOD_NEUTRAL)
+var _god_to:=PackedFloat32Array(GOD_NEUTRAL)
+var _god_col_from:=Color(1,1,1)
+var _god_col_to:=Color(1,1,1)
+var _god_col:=Color(1,1,1)
+var _god_tween:Tween
+var _god_base:={}
+var _god_target:=Vector3.ZERO
+var _god_wind:=Vector3(1.0,0.1,0.35)
+var _sun_wrath:=Quaternion.IDENTITY
+var _fire_mul:=1.0
+var _flame_mats:Array[ShaderMaterial]=[]
+var _gust_mats:Array[ShaderMaterial]=[]
+var _smoke_pm:ParticleProcessMaterial
+var _smoke_gravity:=Vector3.ZERO
 var _fire_at:=Vector3.ZERO
 var _flame_at:Array[Vector3]=[]
 var _shaft_top:=Vector3.ZERO
 var _shaft_dir:=Vector3.DOWN
 var _shaft_radius:=0.0
 var _dyes:Array=[]
+var _rack_at:=Vector3.ZERO
 ## The quality in force now ("high" or "low"), and why.
 var level:="high"
 var level_reason:=""
 var season:=""
 var shimmer:MeshInstance3D
+var ink_pass:MeshInstance3D
+## The ink in force for this set: "screen" or "hull".
+var ink_mode:="screen"
 var flies:Array[GPUParticles3D]=[]
 var snowfall:GPUParticles3D
 var breaths:Array[GPUParticles3D]=[]
@@ -245,6 +295,8 @@ static func normal_facts(raw:Dictionary)->Dictionary:
 
 func _build(era_id_in:String,facts_in:Dictionary)->void:
 	era_id=era_id_in
+	ink_mode="hull" if ink=="hull" else "screen"
+	Animal.hull_ink=ink_mode=="hull"
 	facts=normal_facts(facts_in)
 	kind=kind_for(era_id,int(facts.get("tier",-1)))
 	name="CourtSet_"+kind
@@ -307,8 +359,10 @@ func _dress(root:Node)->void:
 			elif far:
 				mesh_node.set_surface_override_material(surface,_wash_material(int(part.trim_prefix("Far"))))
 			else:
-				mesh_node.set_surface_override_material(surface,_material(slot,inked))
+				var made_mat:=_material(slot,inked)
+				mesh_node.set_surface_override_material(surface,made_mat)
 				_dressing.append([mesh_node,surface,slot,inked,part])
+				if slot in ["HIDE","HIDE_DARK","HIDE_PALE"] and not made_mat in _gust_mats:_gust_mats.append(made_mat)
 
 func _colour(code:String,fallback:Color)->Color:
 	if code.is_empty():return fallback
@@ -316,6 +370,7 @@ func _colour(code:String,fallback:Color)->Color:
 	return Color(code)
 
 func _material(slot:String,inked:bool)->ShaderMaterial:
+	inked=inked and ink_mode=="hull"
 	var key:="%s|%s|%s|%s" % [kind,slot,inked,",".join(PackedStringArray(_dyes))]
 	if _materials.has(key):return _materials[key]
 	var look:Dictionary=LOOK.get(kind,LOOK.fire_ring)
@@ -327,7 +382,7 @@ func _material(slot:String,inked:bool)->ShaderMaterial:
 	made.set_shader_parameter("albedo_worn",worn)
 	if paint.size()>2:made.set_shader_parameter("accent_a",_colour(String(paint[2]),base.darkened(0.3)))
 	if paint.size()>3:made.set_shader_parameter("accent_b",_colour(String(paint[3]),base.lightened(0.3)))
-	made.set_shader_parameter("haze_color",Color(String(look.get("haze","cdd2cf"))))
+	made.set_shader_parameter("haze_color",_air())
 	if PATTERN.has(slot):
 		var p:Array=PATTERN[slot]
 		made.set_shader_parameter("pattern",int(p[0]));made.set_shader_parameter("motif",int(p[1]));made.set_shader_parameter("pattern_scale",float(p[2]))
@@ -367,11 +422,13 @@ func _wash_material(layer:int)->ShaderMaterial:
 	made.set_shader_parameter("wash",Color(String(spec[0])))
 	made.set_shader_parameter("ink",Color(String(spec[1])))
 	made.set_shader_parameter("airiness",float(spec[2]))
-	made.set_shader_parameter("air",Color(String(look.get("sky_horizon","e2ddcb"))).lerp(Color(String(look.get("haze","b9c0bd"))),0.5))
+	made.set_shader_parameter("air",_air())
+	made.set_shader_parameter("foot_from",[2.5,5.0,9.0][clampi(layer,0,2)])
+	made.set_shader_parameter("foot_to",[7.5,15.0,26.0][clampi(layer,0,2)])
 	made.set_shader_parameter("ink_width",[0.22,0.45,0.9][clampi(layer,0,2)])
 	made.set_shader_parameter("ink_amount",[0.7,0.5,0.32][clampi(layer,0,2)])
 	made.set_shader_parameter("bleed",[2.0,4.5,9.0][clampi(layer,0,2)])
-	made.set_shader_parameter("trunks",0.6 if layer==0 else 0.0)
+	made.set_shader_parameter("trunks",0.3 if layer==0 else 0.0)
 	made.render_priority=-1-layer
 	_materials[key]=made
 	return made
@@ -386,7 +443,10 @@ func _ground_material()->ShaderMaterial:
 	made.set_shader_parameter("earth",Color(String(look.earth)))
 	made.set_shader_parameter("earth_dark",Color(String(look.earth_dark)))
 	made.set_shader_parameter("straw",float(look.straw))
-	made.set_shader_parameter("haze_color",Color(String(look.haze)))
+	made.set_shader_parameter("haze_color",_air())
+	made.set_shader_parameter("haze_start",24.0)
+	made.set_shader_parameter("haze_end",60.0)
+	made.set_shader_parameter("haze_max",0.85)
 	made.set_shader_parameter("hearth_radius",0.95 if kind!="longhouse" else 1.0)
 	made.set_shader_parameter("hearth_scale",Vector2(2.1,0.75) if kind=="longhouse" else Vector2(1.0,1.0))
 	_materials[key]=made
@@ -532,7 +592,7 @@ func _make_environment()->void:
 	env.glow_blend_mode=Environment.GLOW_BLEND_MODE_SOFTLIGHT
 	env.fog_enabled=true
 	env.fog_mode=Environment.FOG_MODE_EXPONENTIAL
-	env.fog_light_color=Color(String(look.fog))
+	env.fog_light_color=Color(String(look.fog)) if not bool((info.get("light",{}) as Dictionary).get("open_sky",true)) else _air()
 	env.fog_density=float(light.get("fog",look.fog_density))
 	env.fog_sky_affect=0.0
 	env.fog_sun_scatter=0.0
@@ -632,6 +692,7 @@ func _make_fires()->void:
 	var seeds_tex:=GradientTexture1D.new();seeds_tex.gradient=seeds;sm.color_initial_ramp=seeds_tex
 	sm.turbulence_enabled=true;sm.turbulence_noise_strength=0.35;sm.turbulence_noise_scale=3.0;sm.turbulence_noise_speed_random=0.2
 	smoke.process_material=sm
+	_smoke_pm=sm;_smoke_gravity=sm.gravity
 	var puff:=QuadMesh.new();puff.size=Vector2(1.0,1.0)
 	var smoke_mat:=ShaderMaterial.new();smoke_mat.shader=SMOKE
 	smoke_mat.set_shader_parameter("fire_y",at.y)
@@ -680,6 +741,7 @@ func _flame(at:Vector3,size:float,flame_name:String,cards:int)->Node3D:
 		mat.set_shader_parameter("speed",0.85+0.2*k)
 		mat.set_shader_parameter("strength",[1.0,0.7,0.9][k%3])
 		mat.set_shader_parameter("tongues",[5,4,2][k%3])
+		_flame_mats.append(mat)
 		card.material_override=mat
 		card.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		var h:float=float([1.25,1.05,0.6][k%3])*size
@@ -756,6 +818,28 @@ func _make_paper()->void:
 	quad.extra_cull_margin=16384.0
 	quad.position=Vector3(0.0,0.0,-0.5)
 	camera.add_child(quad)
+	if ink_mode=="screen":_make_ink()
+
+## The colour of the air at the horizon: the sky's own, so the land, the
+## far woods and the fog all fade into the same haze.
+func _air()->Color:
+	var look:Dictionary=LOOK.get(kind,LOOK.fire_ring)
+	return Color(String(look.get("sky_horizon","e2ddcb"))).lerp(Color(String(look.get("haze","b9c0bd"))),0.25)
+
+## The ink line, once over the whole stage (court_ink_post.gdshader).
+func _make_ink()->void:
+	ink_pass=MeshInstance3D.new();ink_pass.name="Ink"
+	var mesh:=QuadMesh.new();mesh.size=Vector2(1.0,1.0);ink_pass.mesh=mesh
+	var mat:=ShaderMaterial.new();mat.shader=INK_POST;mat.render_priority=90
+	ink_pass.material_override=mat
+	ink_pass.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ink_pass.extra_cull_margin=16384.0
+	ink_pass.position=Vector3(0.0,0.0,-0.5)
+	camera.add_child(ink_pass)
+
+## Whether the stage's figures should go without their own inked shells.
+static func uses_screen_ink()->bool:
+	return ink!="hull"
 
 # --- Props from the facts -----------------------------------------------------------
 
@@ -803,32 +887,35 @@ func apply_facts(facts_in:Dictionary)->void:
 ## made once and switched with the season.
 func _make_season_fx()->void:
 	var spots:Array[Vector3]=[]
-	for group in ["food","rack"]:
+	for group in ["rack","food"]:
 		var list:Array=props.get(group,[])
 		if list.is_empty():continue
 		var centre:=Vector3.ZERO
 		for node in list:centre+=_centre_of(node as Node3D)
 		spots.append(centre/float(list.size()))
+	_rack_at=spots[0] if not spots.is_empty() else Vector3(0.0,1.0,-3.0)
 	for at in spots:
 		var swarm:=GPUParticles3D.new();swarm.name="Flies"
-		swarm.amount=7;swarm.lifetime=3.0;swarm.preprocess=3.0;swarm.randomness=0.8
+		# short, darting lives about the meat: each fly a little dark streak
+		# along its flight, so they read as moving, not as dust
+		swarm.amount=8;swarm.lifetime=1.6;swarm.preprocess=2.0;swarm.randomness=0.6
 		var pm:=ParticleProcessMaterial.new()
-		pm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_SPHERE;pm.emission_sphere_radius=0.35
-		pm.direction=Vector3(0,1,0);pm.spread=180.0
-		pm.initial_velocity_min=0.3;pm.initial_velocity_max=0.7
-		pm.gravity=Vector3.ZERO;pm.damping_min=0.0;pm.damping_max=0.2
-		pm.turbulence_enabled=true;pm.turbulence_noise_strength=6.0;pm.turbulence_noise_scale=0.6;pm.turbulence_noise_speed=Vector3(0.6,0.6,0.6)
-		pm.turbulence_influence_min=0.6;pm.turbulence_influence_max=0.9
-		var life:=Gradient.new();life.set_color(0,Color(1,1,1,1));life.set_color(1,Color(1,1,1,1))
-		var life_tex:=GradientTexture1D.new();life_tex.gradient=life;pm.color_ramp=life_tex
+		pm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_SPHERE;pm.emission_sphere_radius=0.3
+		pm.direction=Vector3(0,0.2,1);pm.spread=180.0
+		pm.initial_velocity_min=0.9;pm.initial_velocity_max=1.6
+		pm.gravity=Vector3.ZERO;pm.damping_min=0.3;pm.damping_max=0.8
+		pm.turbulence_enabled=true;pm.turbulence_noise_strength=9.0;pm.turbulence_noise_scale=0.35;pm.turbulence_noise_speed=Vector3(1.2,1.0,1.2)
+		pm.turbulence_influence_min=0.7;pm.turbulence_influence_max=1.0
+		pm.particle_flag_align_y=true
+		var size:=Curve.new();size.add_point(Vector2(0.0,0.0));size.add_point(Vector2(0.12,1.0));size.add_point(Vector2(0.88,1.0));size.add_point(Vector2(1.0,0.0))
+		var size_tex:=CurveTexture.new();size_tex.curve=size;pm.scale_curve=size_tex
 		swarm.process_material=pm
-		var dot:=QuadMesh.new();dot.size=Vector2(0.014,0.014)
+		var body:=CapsuleMesh.new();body.radius=0.006;body.height=0.034;body.radial_segments=4;body.rings=1
 		var mat:=StandardMaterial3D.new();mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.albedo_color=Color(0.08,0.07,0.06);mat.billboard_mode=BaseMaterial3D.BILLBOARD_ENABLED
-		mat.billboard_keep_scale=true
-		dot.material=mat
-		swarm.draw_pass_1=dot
-		swarm.position=at+Vector3(0.0,0.45,0.0)
+		mat.albedo_color=Color(0.06,0.05,0.045)
+		body.material=mat
+		swarm.draw_pass_1=body
+		swarm.position=at+Vector3(0.0,0.35,0.0)
 		swarm.visibility_aabb=AABB(Vector3(-2,-1,-2),Vector3(4,3,4))
 		swarm.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		swarm.emitting=false;swarm.visible=false
@@ -894,8 +981,18 @@ func _apply_season(name_in:String)->void:
 	for layer in 3:
 		var wash:=_wash_material(layer)
 		wash.set_shader_parameter("snow",snow)
-	for swarm in flies:
-		swarm.visible=season=="summer";swarm.emitting=swarm.visible and active
+	# flies about the meat in summer; a cloud of them when the stores are so
+	# full the meat is spoiling; a few in a mild autumn with full stores
+	var food:=clampf(float(facts.get("food",0.6)),0.0,1.0)
+	var count:=0
+	if season=="summer":count=22 if food>0.8 else (12 if food>0.5 else 6)
+	elif season=="autumn" and food>0.9:count=5
+	for i in flies.size():
+		var swarm:=flies[i]
+		var want:=count if i==0 else count/2
+		swarm.visible=want>0
+		if want>0 and swarm.amount!=want:swarm.amount=want
+		swarm.emitting=swarm.visible and active
 	if snowfall!=null:
 		snowfall.visible=season=="winter" and level=="high";snowfall.emitting=snowfall.visible and active
 	for puff in breaths:
@@ -982,6 +1079,182 @@ func set_quality(to:String,reason:="asked")->void:
 func quality_report()->Dictionary:
 	return {"level":level,"reason":level_reason,"frames":_frames_seen,"mean_frame_ms":(1000.0*_slow_time/maxf(1.0,float(_frames_seen)))}
 
+## Where the meat rack (or the stores) stands: where the flies gather.
+func rack_centre()->Vector3:
+	return _rack_at
+
+# --- The god's light ----------------------------------------------------------------
+
+## The god turns to someone: a light falls on them. tone: "speaks", "wrath",
+## "favour" or "off". target: the body (or a point) addressed; null keeps
+## the last. hold: seconds the light stays before easing back by itself (0:
+## until "off"). fade: seconds to come in (-1: the tone's own). The camera's
+## jolt for wrath is the director's (shot "shake"), not this.
+func god_light(target:Variant=null,tone:="speaks",hold:=0.0,fade:=-1.0)->void:
+	if not GOD_TONES.has(tone):tone="off"
+	if typeof(target)==TYPE_VECTOR3:_god_target=target
+	elif typeof(target)==TYPE_OBJECT and is_instance_valid(target) and target is Node3D:_god_target=(target as Node3D).global_position
+	elif tone!="off" and god_tone=="off" and has_mark("petitioner"):_god_target=mark("petitioner").global_position
+	if tone!="off":_god_make();_god_aim()
+	if god_tone=="off" and tone!="off":_god_baseline()
+	god_tone=tone
+	_god_from=_god_cur.duplicate();_god_col_from=_god_col
+	_god_to=PackedFloat32Array(GOD_NEUTRAL) if tone=="off" else PackedFloat32Array((GOD_TONES[tone] as Dictionary).p)
+	_god_col_to=_god_col if tone=="off" else Color((GOD_TONES[tone] as Dictionary).colour)
+	var time:float=fade if fade>=0.0 else float({"speaks":1.2,"wrath":0.25,"favour":1.0,"off":1.4}[tone])
+	if _god_tween and _god_tween.is_valid():_god_tween.kill()
+	if time<=0.0 or not is_inside_tree():
+		_god_step(1.0)
+	else:
+		_god_tween=create_tween()
+		_god_tween.tween_method(_god_step,0.0,1.0,time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	if hold>0.0 and tone!="off":
+		if _god_tween==null or not _god_tween.is_valid():_god_tween=create_tween()
+		_god_tween.tween_interval(hold)
+		_god_tween.tween_callback(god_light.bind(null,"off",0.0,-1.0))
+
+## The tone in force and how far in it is (tests, the director).
+func god_state()->Dictionary:
+	var out:={"tone":god_tone,"colour":_god_col}
+	for i in GOD_KEYS.size():out[GOD_KEYS[i]]=_god_cur[i]
+	return out
+
+func _god_make()->void:
+	if god_spot!=null:return
+	god_spot=SpotLight3D.new();god_spot.name="GodLight"
+	god_spot.shadow_enabled=false;god_spot.light_specular=0.0
+	god_spot.spot_attenuation=0.6;god_spot.spot_angle_attenuation=1.6
+	god_spot.light_energy=0.0;god_spot.visible=false
+	add_child(god_spot)
+	god_shaft=MeshInstance3D.new();god_shaft.name="GodShaft"
+	var cyl:=CylinderMesh.new();cyl.top_radius=0.42;cyl.bottom_radius=0.78;cyl.height=1.0
+	cyl.radial_segments=20;cyl.rings=1;cyl.cap_top=false;cyl.cap_bottom=false
+	god_shaft.mesh=cyl
+	_god_shaft_mat=ShaderMaterial.new();_god_shaft_mat.shader=SHAFT
+	_god_shaft_mat.set_shader_parameter("strength",0.0);_god_shaft_mat.set_shader_parameter("soft",0.6)
+	god_shaft.material_override=_god_shaft_mat
+	god_shaft.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	god_shaft.visible=false
+	add_child(god_shaft)
+	god_dust=GPUParticles3D.new();god_dust.name="GodDust"
+	god_dust.amount=36;god_dust.lifetime=5.0;god_dust.randomness=0.5
+	_god_dust_pm=ParticleProcessMaterial.new()
+	_god_dust_pm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_BOX
+	_god_dust_pm.emission_box_extents=Vector3(0.55,1.1,0.55)
+	_god_dust_pm.direction=Vector3(0,1,0);_god_dust_pm.spread=180.0
+	_god_dust_pm.initial_velocity_min=0.02;_god_dust_pm.initial_velocity_max=0.08
+	_god_dust_pm.gravity=Vector3(0,0.02,0)
+	_god_dust_pm.scale_min=0.8;_god_dust_pm.scale_max=1.6
+	_god_dust_pm.turbulence_enabled=true;_god_dust_pm.turbulence_noise_strength=0.4;_god_dust_pm.turbulence_noise_scale=3.0
+	var ramp:=Gradient.new()
+	ramp.set_color(0,Color(1,1,1,0));ramp.set_color(1,Color(1,1,1,0))
+	ramp.add_point(0.2,Color(1,1,1,1));ramp.add_point(0.75,Color(1,1,1,1))
+	var ramp_tex:=GradientTexture1D.new();ramp_tex.gradient=ramp;_god_dust_pm.color_ramp=ramp_tex
+	god_dust.process_material=_god_dust_pm
+	var dot:=QuadMesh.new();dot.size=Vector2(0.02,0.02)
+	_god_dust_mat=ShaderMaterial.new();_god_dust_mat.shader=MOTE
+	_god_dust_mat.set_shader_parameter("brightness",1.3)
+	dot.material=_god_dust_mat
+	god_dust.draw_pass_1=dot
+	god_dust.local_coords=false
+	god_dust.visibility_aabb=AABB(Vector3(-3,-3,-3),Vector3(6,8,6))
+	god_dust.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	god_dust.emitting=false
+	add_child(god_dust)
+
+## Where the light comes from: the open sky above (a little from the god's
+## side), or the hall's smoke hole or window nearest the one addressed.
+func _god_source()->Vector3:
+	var open:=bool((info.get("light",{}) as Dictionary).get("open_sky",true))
+	var t:=_god_target
+	if open:
+		var toward:=Vector3(god_point().x-t.x,0.0,god_point().z-t.z)
+		if toward.length()>0.01:toward=toward.normalized()
+		return t+Vector3(0.0,9.0,0.0)+toward*2.2
+	var best:=t+Vector3(0.0,5.0,0.0);var best_d:=INF
+	for spec:Dictionary in (info.get("fx",{}) as Dictionary).get("shafts",[]):
+		var top:=_vec(spec.get("top",[0,5,0]))
+		var d:=Vector2(top.x-t.x,top.z-t.z).length()
+		if d<best_d:best_d=d;best=top
+	return best
+
+func _god_aim()->void:
+	var s:=_god_source()
+	var t:=_god_target
+	var aim:=t+Vector3(0.0,1.0,0.0)
+	# the lamp itself hangs a few metres up the beam, so nobody nearer the
+	# hole than the one addressed is burnt white by it
+	var from:=aim+(s-aim).normalized()*3.6
+	god_spot.global_transform=Transform3D(Basis.looking_at((aim-from).normalized(),Vector3.UP if absf((aim-from).normalized().y)<0.98 else Vector3.FORWARD),from)
+	god_spot.spot_range=from.distance_to(t)+2.5
+	var dir:=(t-s).normalized();var length:=s.distance_to(t)
+	var y_axis:=-dir
+	var x_axis:=y_axis.cross(Vector3.FORWARD if absf(y_axis.z)<0.9 else Vector3.RIGHT).normalized()
+	var z_axis:=x_axis.cross(y_axis).normalized()
+	god_shaft.transform=Transform3D(Basis(x_axis,y_axis*length,z_axis),s+dir*length*0.5)
+	god_dust.global_position=t+Vector3(0.0,1.25,0.0)
+	_god_dust_mat.set_shader_parameter("shaft_top",s)
+	_god_dust_mat.set_shader_parameter("shaft_dir",dir)
+	_god_dust_mat.set_shader_parameter("shaft_radius",0.7)
+	# the wind comes from the god's side, across the one addressed
+	var across:=Vector3(t.x-god_point().x,0.0,t.z-god_point().z)
+	_god_wind=(across.normalized() if across.length()>0.01 else Vector3(1,0,0))+Vector3(0.0,0.08,0.0)
+	if sun!=null:
+		# wrath: a low cold sun from the god's side; shadows run long toward them
+		var flat:=Vector3(t.x-god_point().x,0.0,t.z-god_point().z)
+		if flat.length()<0.01:flat=Vector3(0,0,-1)
+		var down:=(flat.normalized()*cos(deg_to_rad(24.0))+Vector3.DOWN*sin(deg_to_rad(24.0))).normalized()
+		_sun_wrath=Basis.looking_at(down,Vector3.UP).get_rotation_quaternion()
+
+func _god_baseline()->void:
+	var env:=world_env.environment if world_env!=null else null
+	_god_base={"ambient":env.ambient_light_energy if env!=null else 0.5,"sat":env.adjustment_saturation if env!=null else 1.0,
+		"sun_energy":sun.light_energy if sun!=null else 1.0,"sun_rot":sun.transform.basis.get_rotation_quaternion() if sun!=null else Quaternion.IDENTITY,
+		"sun_blur":sun.shadow_blur if sun!=null else 1.0,"sun_colour":sun.light_color if sun!=null else Color.WHITE,"bounce":bounce.light_energy if bounce!=null else 0.45}
+
+## One step of the god's light toward its tone (k 0..1 of the way).
+func _god_step(k:float)->void:
+	for i in _god_cur.size():_god_cur[i]=lerpf(_god_from[i],_god_to[i],k)
+	_god_col=_god_col_from.lerp(_god_col_to,k)
+	_god_apply()
+
+func _god_apply()->void:
+	var energy:=_god_cur[0];var angle:=_god_cur[1];var shaft_s:=_god_cur[2];var dim:=_god_cur[3]
+	var fire:=_god_cur[4];var fire_h:=_god_cur[5];var lean:=_god_cur[6];var gust:=_god_cur[7]
+	var sharp:=_god_cur[8];var sat:=_god_cur[9];var sun_turn:=_god_cur[10];var rise:=_god_cur[11]
+	var on:=energy>0.02
+	var open_sky:=bool((info.get("light",{}) as Dictionary).get("open_sky",true))
+	if god_spot!=null:
+		# under the open sky the beam must stand out against daylight
+		god_spot.visible=on;god_spot.light_energy=energy*(1.3 if open_sky else 0.65);god_spot.spot_angle=angle;god_spot.light_color=_god_col
+		god_shaft.visible=shaft_s>0.01
+		# in a hall the sun's own shaft already stands in the room: the god's is fainter
+		_god_shaft_mat.set_shader_parameter("strength",shaft_s*(2.4 if open_sky else 0.45));_god_shaft_mat.set_shader_parameter("colour",_god_col)
+		_god_dust_mat.set_shader_parameter("colour",_god_col.lerp(Color(1,1,1),0.3))
+		god_dust.emitting=on and active and level=="high"
+		_god_dust_pm.gravity=Vector3(0.0,0.02+0.3*rise,0.0)+_god_wind*1.6*gust
+	if _god_base.is_empty():return
+	var env:=world_env.environment if world_env!=null else null
+	if env!=null:
+		env.ambient_light_energy=float(_god_base.ambient)*(1.0-dim)
+		env.adjustment_saturation=float(_god_base.sat)+sat
+	if sun!=null:
+		var open:=bool((info.get("light",{}) as Dictionary).get("open_sky",true))
+		var turn:=sun_turn*(1.0 if open else 0.5)
+		sun.light_energy=float(_god_base.sun_energy)*(1.0-dim*(1.1 if open else 0.5))*(1.0+0.25*sharp)
+		sun.transform.basis=Basis((_god_base.sun_rot as Quaternion).slerp(_sun_wrath,turn))
+		sun.shadow_blur=lerpf(float(_god_base.sun_blur),0.2,sharp)
+		sun.light_color=(_god_base.sun_colour as Color).lerp(Color(0.78,0.86,1.0),sharp*0.7)
+	if bounce!=null:bounce.light_energy=float(_god_base.bounce)*fire
+	_fire_mul=fire
+	for mat in _flame_mats:
+		mat.set_shader_parameter("height_mul",fire_h)
+		mat.set_shader_parameter("lean",lean)
+	for mat in _gust_mats:
+		mat.set_shader_parameter("gust",gust)
+		mat.set_shader_parameter("wind",_god_wind)
+	if _smoke_pm!=null:_smoke_pm.gravity=_smoke_gravity.lerp(_god_wind*1.4+Vector3(0.0,0.05,0.0),gust)
+
 ## How many of a prop group are showing (tests, the director).
 func shown(group:String)->int:
 	var count:=0
@@ -1062,7 +1335,7 @@ func _process(delta:float)->void:
 		if _frames_seen>=90 and _slow_time/float(_frames_seen)>SLOW_FRAME:
 			set_quality("low","slow frames (%.1f ms)" % (1000.0*_slow_time/float(_frames_seen)))
 	var n:=_noise.get_noise_1d(_clock*6.0)*0.55+_noise.get_noise_1d(_clock*17.0+40.0)*0.3+_noise.get_noise_1d(_clock*1.3+90.0)*0.15
-	fire_light.light_energy=_fire_energy*(1.0+0.22*n)
+	fire_light.light_energy=_fire_energy*_fire_mul*(1.0+0.22*n)
 	fire_light.position=_fire_at+Vector3(n*0.05,absf(n)*0.06,_noise.get_noise_1d(_clock*5.0+7.0)*0.05)
 	bounce.light_energy=0.45*(1.0+0.12*n)
 	for i in flame_lights.size():

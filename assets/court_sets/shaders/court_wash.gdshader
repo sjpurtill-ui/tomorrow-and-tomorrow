@@ -20,6 +20,9 @@ uniform float trunks = 0.0;
 // how far below the ridge the wash takes to come in (metres): a soft edge
 uniform float feather = 0.35;
 uniform float snow = 0.0;
+// the foot of each layer sinks into the haze at the horizon (metres below the ridge)
+uniform float foot_from = 3.0;
+uniform float foot_to = 9.0;
 
 float hash2(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
@@ -66,6 +69,8 @@ void fragment() {
 		col = mix(col, vec3(0.90, 0.92, 0.95), cap * 0.8);
 	}
 	col = mix(col, air, airiness);
+	// atmospheric perspective: the lower the land, the more air between
+	col = mix(col, air, smoothstep(foot_from, foot_to, d) * 0.9);
 	ALBEDO = col;
 	// the top of the wash comes in softly, unevenly, like wet paint
 	float edge = feather * (0.7 + 0.6 * noise2(vec2(along * 0.15, 2.0)));

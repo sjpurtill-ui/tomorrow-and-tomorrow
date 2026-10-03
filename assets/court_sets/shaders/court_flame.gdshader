@@ -10,6 +10,9 @@ uniform float seed = 0.0;
 uniform float speed = 1.0;
 uniform float strength = 1.0;
 uniform int tongues = 4;
+// the god's presence: the fire leans (+ toward the card's right) and dips
+uniform float lean = 0.0;
+uniform float height_mul = 1.0;
 uniform vec3 core : source_color = vec3(1.0, 0.86, 0.52);
 uniform vec3 mid : source_color = vec3(1.0, 0.50, 0.12);
 uniform vec3 edge : source_color = vec3(0.70, 0.17, 0.04);
@@ -23,7 +26,10 @@ void vertex() {
 	vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), cam));
 	float sx = length(MODEL_MATRIX[0].xyz);
 	float sy = length(MODEL_MATRIX[1].xyz);
-	vec3 world = MODEL_MATRIX[3].xyz + right * VERTEX.x * sx + vec3(0.0, 1.0, 0.0) * VERTEX.y * sy;
+	// the card's foot stays on the fire; its height and lean change above it
+	float up = (VERTEX.y + 0.5) * sy * height_mul;
+	vec3 foot = MODEL_MATRIX[3].xyz - vec3(0.0, 0.5 * sy, 0.0);
+	vec3 world = foot + right * (VERTEX.x * sx + lean * up * (VERTEX.y + 0.5)) + vec3(0.0, up, 0.0);
 	POSITION = PROJECTION_MATRIX * VIEW_MATRIX * vec4(world, 1.0);
 	v_uv = UV;
 }
@@ -61,10 +67,10 @@ void fragment() {
 		// each tongue rises and falls on its own beat
 		float beat = 0.62 + 0.38 * noise2(vec2(t * (1.6 + hash1(fi + 7.0)), fi * 5.3 + seed));
 		float h = mix(0.45, 1.0, hash1(fi + 11.0 + seed)) * beat;
-		float lean = (noise2(vec2(t * 0.8, fi + seed * 2.0)) - 0.5) * 0.6;
+		float tlean = (noise2(vec2(t * 0.8, fi + seed * 2.0)) - 0.5) * 0.6;
 		float yy = yw / max(h, 0.05);
 		float w = mix(0.42, 0.02, pow(clamp(yy, 0.0, 1.0), 0.7)) * mix(0.8, 1.2, hash1(fi + 3.0));
-		float dx = abs(xw - ox - lean * yy * yy);
+		float dx = abs(xw - ox - tlean * yy * yy);
 		float tongue = (1.0 - smoothstep(w * 0.45, w, dx)) * (1.0 - smoothstep(0.75, 1.0, yy));
 		heat = max(heat, tongue * (1.0 - yy * 0.55));
 	}

@@ -421,6 +421,86 @@ func test_the_season_shows()->void:
 	assert_float(float((made.call("_ground_material") as ShaderMaterial).get_shader_parameter("flowers"))).is_equal(1.0)
 
 
+func test_screen_ink_replaces_the_shells()->void:
+	CourtSet.ink="screen"
+	var made:=_built("chiefs_hall")
+	assert_str(String(made.get("ink_mode"))).is_equal("screen")
+	assert_object(made.get("ink_pass")).is_not_null()
+	# no piece of the set carries an inked shell of its own
+	for node in (made.get("model") as Node3D).find_children("*","MeshInstance3D",true,false):
+		var mesh_node:=node as MeshInstance3D
+		if mesh_node.mesh==null:continue
+		for surface in mesh_node.mesh.get_surface_count():
+			var mat:=mesh_node.get_surface_override_material(surface) as ShaderMaterial
+			if mat!=null:assert_object(mat.next_pass).override_failure_message("%s keeps a shell" % mesh_node.name).is_null()
+	CourtSet.ink="hull"
+	var old:=_built("chiefs_hall")
+	assert_object(old.get("ink_pass")).is_null()
+	var shells:=0
+	for node in (old.get("model") as Node3D).find_children("StaticInked","MeshInstance3D",true,false):
+		var mat:=(node as MeshInstance3D).get_surface_override_material(0) as ShaderMaterial
+		if mat!=null and mat.next_pass!=null:shells+=1
+	assert_int(shells).is_greater(0)
+	CourtSet.ink="screen"
+
+
+func test_flies_follow_the_season_and_the_stores()->void:
+	var made:=_built("hearth_council",{"season":"summer","food":0.95})
+	var flies:Array=made.get("flies")
+	var thick:=(flies[0] as GPUParticles3D).amount
+	assert_bool((flies[0] as Node3D).visible).is_true()
+	made.call("apply_facts",{"food":0.3})
+	assert_int((flies[0] as GPUParticles3D).amount).is_less(thick)
+	made.call("apply_facts",{"season":"winter"})
+	assert_bool((flies[0] as Node3D).visible).is_false()
+
+
+func test_the_god_s_light_falls_on_the_one_addressed()->void:
+	for era in ["hearth_council","chiefs_hall"]:
+		var made:=_built(era)
+		var body:=Node3D.new();made.add_child(body)
+		made.call("place",body,"petitioner")
+		var env:Environment=(made.get("world_env") as WorldEnvironment).environment
+		var ambient:=env.ambient_light_energy
+		var blur:=(made.get("sun") as DirectionalLight3D).shadow_blur
+		made.call("god_light",body,"speaks",0.0,0.0)
+		var spot:SpotLight3D=made.get("god_spot")
+		assert_bool(spot.visible).is_true()
+		assert_bool(spot.shadow_enabled).is_false()
+		assert_float(spot.light_color.r).is_greater(spot.light_color.b)
+		assert_float(env.ambient_light_energy).is_less(ambient)
+		# it points at them
+		var to_body:=(body.global_position+Vector3.UP-spot.global_position).normalized()
+		assert_float((-spot.global_transform.basis.z).dot(to_body)).is_greater(0.99)
+		# from the open sky above, or from the hall's smoke hole: the beam's top
+		var beam:MeshInstance3D=made.get("god_shaft")
+		var top:=beam.global_transform*Vector3(0.0,0.5,0.0)
+		if era=="hearth_council":assert_float(top.y).is_greater(7.0)
+		else:
+			assert_float(top.y).is_between(4.5,5.5)
+			assert_float(Vector2(top.x,top.z).length()).is_less(1.0)
+		assert_float(spot.global_position.y).is_greater(body.global_position.y+3.0)
+		made.call("god_light",body,"wrath",0.0,0.0)
+		var st:Dictionary=made.call("god_state")
+		assert_str(String(st.tone)).is_equal("wrath")
+		assert_float(spot.light_color.b).is_greater(spot.light_color.r)
+		assert_float(float(st.fire)).is_less(0.5)
+		assert_float(float(st.gust)).is_equal(1.0)
+		assert_float((made.get("sun") as DirectionalLight3D).shadow_blur).is_less(blur)
+		made.call("god_light",body,"favour",0.0,0.0)
+		assert_float(float((made.call("god_state") as Dictionary).fire)).is_greater(1.0)
+		assert_float(float((made.call("god_state") as Dictionary).rise)).is_equal(1.0)
+		made.call("god_light",null,"off",0.0,0.0)
+		assert_bool(spot.visible).is_false()
+		assert_float(env.ambient_light_energy).is_equal_approx(ambient,0.001)
+		assert_float((made.get("sun") as DirectionalLight3D).shadow_blur).is_equal_approx(blur,0.001)
+		# no new shadowed light was added
+		var shadowed:=0
+		for node in made.find_children("*","Light3D",true,false):
+			if (node as Light3D).shadow_enabled:shadowed+=1
+		assert_int(shadowed).is_equal(1)
+
+
 func test_set_rests_when_hidden()->void:
 	var made:=_built("chiefs_hall")
 	made.call("set_active",false)

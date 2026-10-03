@@ -73,6 +73,16 @@ const SHOTS:=[
 	{"tag":"grand-wide","era":"imperial_court","facts":{"food":0.9,"tier":3,"era_tags":TAGS_LATE},"cast":"court","camera":"wide"},
 	{"tag":"grand-strip","era":"imperial_court","facts":{"food":0.9,"tier":3,"era_tags":TAGS_LATE},"cast":"court","camera":"wide","size":STRIP,"insets":[40,40]},
 	{"tag":"dog","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"dog"},
+	{"tag":"goat-herds","era":"elders_circle","facts":{"food":0.8,"tier":1,"era_tags":["pottery","farming","dairy"]},"cast":"band","camera":"goat","clip":"graze","at":0.8,"frame":"wide"},
+	{"tag":"goat-startle","era":"elders_circle","facts":{"food":0.8,"tier":1,"era_tags":["pottery","farming","dairy"]},"cast":"band","camera":"goat","clip":"startle","at":0.12},
+	{"tag":"shelter-summer-spoil","era":"elders_circle","facts":{"food":0.95,"tier":1,"era_tags":["pottery","farming"],"season":"summer"},"cast":"band","camera":"rack"},
+	{"tag":"fire-hull","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","ink":"hull"},
+	{"tag":"god-fire-speaks","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","god":"speaks"},
+	{"tag":"god-fire-wrath","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","god":"wrath"},
+	{"tag":"god-fire-favour","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","god":"favour"},
+	{"tag":"god-hall-speaks","era":"chiefs_hall","facts":{"food":0.85,"tier":1,"era_tags":["pottery","weaving"]},"cast":"hall","camera":"wide","god":"speaks"},
+	{"tag":"god-hall-wrath","era":"chiefs_hall","facts":{"food":0.85,"tier":1,"era_tags":["pottery","weaving"]},"cast":"hall","camera":"wide","god":"wrath"},
+	{"tag":"god-hall-favour","era":"chiefs_hall","facts":{"food":0.85,"tier":1,"era_tags":["pottery","weaving"]},"cast":"hall","camera":"wide","god":"favour"},
 	{"tag":"dogsheet","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"none","camera":"dogsheet"},
 ]
 const DOG_CLIPS:=["idle","sniff","walk","trot","sit_idle","scratch","lie_idle","cower_idle","tilt","bark","grab","wag"]
@@ -85,6 +95,10 @@ var only:=""
 ## --toon: leave the figures on J's own toon (to measure the lit twin's cost)
 var toon:=false
 var noshaft:=false
+## --hull: the old inked shells on every figure and piece, for comparison
+var hull:=false
+var inkdebug:=false
+var nomsaa:=false
 ## --one=<era>: measure only that court
 var one:=""
 var failures:Array[String]=[]
@@ -95,6 +109,9 @@ func _ready()->void:
 		if arg.begins_with("--only="):only=arg.trim_prefix("--only=")
 		if arg=="--toon":toon=true
 		if arg=="--noshaft":noshaft=true
+		if arg=="--hull":hull=true
+		if arg=="--inkdebug":inkdebug=true
+		if arg=="--nomsaa":nomsaa=true
 		if arg.begins_with("--one="):one=arg.trim_prefix("--one=")
 	out_dir=ProjectSettings.globalize_path("res://reports/court_set/")
 	DirAccess.make_dir_recursive_absolute(out_dir)
@@ -104,6 +121,10 @@ func _ready()->void:
 		_fail("no court sets under %s" % CourtSet.DIR)
 	elif only=="clip":
 		if capture:await _clip()
+	elif only=="godclip":
+		if capture:await _god_clip()
+	elif only=="goatclip":
+		if capture:await _goat_clip()
 	elif only=="perf":
 		if capture:await _perf()
 	else:
@@ -147,17 +168,21 @@ func _look(raw:Dictionary,index:int)->Dictionary:
 		face[shape]=float(absi(("%d|%s" % [index,shape]).hash())%101)/50.0-1.0
 	if String(raw.get("variant","")).ends_with("old"):face["aged"]=0.7
 	look["face"]=face
+	# in a modelled court the figures take the set's light (as the stage asks)
+	look["lit"]=true
 	return look
 
 ## A set with its people on the marks, in a SubViewport of the capture's size.
 func _stage(spec:Dictionary)->Array:
 	var size:Array=spec.get("size",[W,H])
 	var view:=SubViewport.new();view.name="Stage";view.size=Vector2i(int(size[0]),int(size[1]))
-	view.own_world_3d=true;view.msaa_3d=Viewport.MSAA_2X
+	view.own_world_3d=true;view.msaa_3d=Viewport.MSAA_DISABLED if nomsaa else Viewport.MSAA_2X
 	view.render_target_update_mode=SubViewport.UPDATE_ALWAYS
 	add_child(view)
+	CourtSet.ink="hull" if hull or String(spec.get("ink",""))=="hull" else "screen"
 	var court:Node3D=CourtSet.build(String(spec.era),spec.get("facts",{}))
 	view.add_child(court)
+	if inkdebug and court.get("ink_pass")!=null:((court.get("ink_pass") as MeshInstance3D).material_override as ShaderMaterial).set_shader_parameter("debug",1)
 	if noshaft:
 		for node in court.find_children("SunShaft*","MeshInstance3D",false,false):(node as Node3D).visible=false
 	var cast:Array=CASTS.get(String(spec.get("cast","band")),[])
@@ -184,6 +209,7 @@ func _stage(spec:Dictionary)->Array:
 		for node in fig.find_children("*","MeshInstance3D",true,false):
 			(node as MeshInstance3D).cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON
 		fig.add_child(CourtSet.contact_shadow(0.85,0.6,0.5))
+		if CourtSet.uses_screen_ink():_strip_shells(fig)
 		if not toon:court.call("add_breath",fig)
 		bodies[mark_name]=fig
 		index+=1
@@ -196,6 +222,24 @@ func _stage(spec:Dictionary)->Array:
 		if String(key).begins_with("petitioner") or String(key).begins_with("officials_"):subjects.append(bodies[key])
 	rig.call("wide",subjects,0.0,bodies.get("petitioner"))
 	return [view,court,bodies]
+
+## TEST ONLY, until J's figures take the screen ink themselves: the figure's
+## own inked shells are taken off (the stage ink draws their line instead).
+func _strip_shells(fig:Node3D)->void:
+	for node in fig.find_children("*","MeshInstance3D",true,false):
+		var mesh_node:=node as MeshInstance3D
+		if mesh_node.mesh==null:continue
+		for surface in mesh_node.mesh.get_surface_count():
+			var mat:=mesh_node.get_surface_override_material(surface) as ShaderMaterial
+			if mat==null or mat.next_pass==null:continue
+			var bare:ShaderMaterial=_bare.get(mat)
+			if bare==null:
+				bare=mat.duplicate() as ShaderMaterial
+				bare.next_pass=null
+				_bare[mat]=bare
+			mesh_node.set_surface_override_material(surface,bare)
+
+var _bare:Dictionary={}
 
 func _shot(spec:Dictionary)->void:
 	var made:=await _stage(spec)
@@ -216,6 +260,18 @@ func _shot(spec:Dictionary)->void:
 				dog.position=Vector3(0.9,0.0,2.9);dog.rotation.y=deg_to_rad(25.0)
 				dog.call("play","lie_idle",0.0,0.5)
 				rig.call("frame_animal",dog)
+		"rack":
+			# close on the meat rack, where the flies are
+			var spot:Vector3=court.call("rack_centre")
+			rig.call("frame_points",PackedVector3Array([spot+Vector3(-1.4,-1.4,0.4),spot+Vector3(1.4,0.6,-0.4)]),18.0,-6.0)
+		"goat":
+			var goat:Node3D=court.call("animal","goat")
+			if goat==null:_fail("no goat in %s" % spec.tag)
+			else:
+				goat.call("set_active",false)
+				goat.rotation.y=deg_to_rad(-40.0)
+				goat.call("play",String(spec.get("clip","idle")),0.0,float(spec.get("at",0.5)))
+				if String(spec.get("frame","animal"))=="animal":rig.call("frame_animal",goat)
 		"dogsheet":
 			var first:Node3D=court.call("animal","dog")
 			if first!=null:first.visible=false
@@ -230,6 +286,13 @@ func _shot(spec:Dictionary)->void:
 				beast.call("play",clip_name,0.0,0.3)
 				index+=1
 			rig.call("frame_points",PackedVector3Array([Vector3(-2.6,0,5.1),Vector3(2.6,0,5.1),Vector3(-2.6,0.75,2.3),Vector3(2.6,0.75,2.3),Vector3(-2.6,0,1.9),Vector3(2.6,0,1.9)]),8.0,-22.0)
+	if spec.has("god"):
+		court.call("god_light",bodies.get("petitioner"),String(spec.god),0.0,0.0)
+		if String(spec.god)=="wrath":
+			var p:Node3D=bodies.get("petitioner")
+			if p!=null:p.call("play","kneel",0.0,5.0)
+			var dog:Node3D=court.call("animal","dog")
+			if dog!=null:dog.call("cower",30.0)
 	for i in 40:await get_tree().process_frame
 	if capture:
 		var image:=view.get_texture().get_image()
@@ -244,14 +307,90 @@ func _check_marks(court:Node3D,tag:String)->void:
 	for needed in ["throne_gaze","petitioner","fire","door","officials_0","crowd_0","envoy_0","animal_0"]:
 		if not court.call("has_mark",needed):_fail("%s: no mark %s" % [tag,needed])
 
+## The god's wrath in the court's strip, at a fixed rate (8 s): the room; the
+## god speaks to the petitioner (gold from the sky, the camera pushes in);
+## wrath lands (cold light, a jolt, the fire gutters, the hides and the smoke
+## are thrown aside, the petitioner goes down, the dog cowers); the hush; the
+## light eases back and the camera returns to the room.
+func _god_clip()->void:
+	var spec:={"tag":"godclip","era":"hearth_council","facts":{"food":0.7,"tier":0,"era_tags":[]},"cast":"band","size":STRIP,"insets":[40,40]}
+	var made:=await _stage(spec)
+	var view:SubViewport=made[0];var court:Node3D=made[1];var bodies:Dictionary=made[2]
+	var rig:Node=court.get("rig")
+	var dog:Node3D=court.call("animal","dog")
+	var p:Node3D=bodies.get("petitioner")
+	if dog!=null:
+		dog.call("hold",30.0)
+		var spot:Marker3D=court.call("mark","animal_0")
+		dog.position=spot.position;dog.rotation.y=deg_to_rad(-35.0)
+		dog.call("play","sit_idle",0.0,0.4)
+	var dir:=out_dir+"godclip/"
+	DirAccess.make_dir_recursive_absolute(dir)
+	for f in DirAccess.get_files_at(dir):DirAccess.remove_absolute(dir+f)
+	for frame in 192:
+		match frame:
+			24:
+				court.call("god_light",p,"speaks",0.0,1.2)
+				rig.call("push_in",p,3.0)
+				if dog!=null:dog.call("on_god","speaks")
+			96:
+				court.call("god_light",p,"wrath",0.0,0.25)
+				rig.call("shake",0.8)
+				if p!=null:p.call("play","kneel",0.15)
+				for key in ["officials_2","officials_3"]:
+					var o:Node3D=bodies.get(key)
+					if o!=null:o.call("play","bow",0.25)
+				if dog!=null:dog.call("cower",6.0)
+			160:
+				court.call("god_light",null,"off",0.0,1.4)
+				rig.call("wide",[],1.4)
+		await get_tree().process_frame
+		view.get_texture().get_image().save_png(dir+"frame_%03d.png" % frame)
+	print("CLIP ",dir)
+	view.queue_free()
+	await _frames(2)
+
+## The goat at the god's wrath: it is grazing by the fire when the wrath
+## lands, jumps on the spot and stands there staring (4 s at a fixed rate).
+func _goat_clip()->void:
+	var spec:={"tag":"goatclip","era":"elders_circle","facts":{"food":0.8,"tier":1,"era_tags":["pottery","farming","dairy"]},"cast":"band","size":STRIP,"insets":[40,40]}
+	var made:=await _stage(spec)
+	var view:SubViewport=made[0];var court:Node3D=made[1];var bodies:Dictionary=made[2]
+	var rig:Node=court.get("rig")
+	var goat:Node3D=court.call("animal","goat")
+	var dog:Node3D=court.call("animal","dog")
+	if goat==null:
+		_fail("no goat");view.queue_free();return
+	goat.call("hold",30.0)
+	goat.rotation.y=deg_to_rad(-40.0)
+	goat.call("play","graze",0.0,0.3)
+	if dog!=null:
+		dog.call("hold",30.0)
+		dog.position=Vector3(-0.3,0.0,1.0);dog.rotation.y=deg_to_rad(20.0)
+		dog.call("play","sit_idle",0.0,0.4)
+	rig.call("wide",[bodies.get("petitioner"),goat],0.0,bodies.get("petitioner"))
+	var dir:=out_dir+"goatclip/"
+	DirAccess.make_dir_recursive_absolute(dir)
+	for f in DirAccess.get_files_at(dir):DirAccess.remove_absolute(dir+f)
+	for frame in 96:
+		if frame==24:
+			rig.call("shake",0.8)
+			goat.call("on_god","wrath")
+			if dog!=null:dog.call("cower",6.0)
+		await get_tree().process_frame
+		view.get_texture().get_image().save_png(dir+"frame_%03d.png" % frame)
+	print("CLIP ",dir)
+	view.queue_free()
+	await _frames(2)
+
 ## Draw calls and frame times for every set in the court's strip, with its
 ## people, at high and low quality (printed as PERF lines).
 func _perf()->void:
 	for entry:Array in PERF_SETS:
 		if not one.is_empty() and String(entry[0])!=one:continue
-		for run in [["high",entry[2]],["low",entry[2]],["high","none"]]:
+		for run in [["high",entry[2],"screen"],["high",entry[2],"hull"],["low",entry[2],"screen"],["high","none","screen"]]:
 			var q:String=run[0]
-			var spec:={"tag":"perf","era":entry[0],"facts":{"food":0.8,"tier":entry[1]},"cast":run[1],"size":STRIP,"insets":[40,40]}
+			var spec:={"tag":"perf","era":entry[0],"facts":{"food":0.8,"tier":entry[1]},"cast":run[1],"size":STRIP,"insets":[40,40],"ink":run[2]}
 			var made:=await _stage(spec)
 			var view:SubViewport=made[0];var court:Node3D=made[1]
 			court.call("set_quality",q,"perf")
@@ -266,7 +405,7 @@ func _perf()->void:
 			var draws:=view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME)
 			var prims:=view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME)
 			var objects:=view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_OBJECTS_IN_FRAME)
-			print("PERF %s %s %s draws=%d objects=%d primitives=%d gpu_ms=%.2f cpu_ms=%.2f fps=%d" % [court.get("kind"),q,"people" if run[1]!="none" else "set-only",draws,objects,prims,gpu/float(n),cpu/float(n),Engine.get_frames_per_second()])
+			print("PERF %s %s %s ink=%s draws=%d objects=%d primitives=%d gpu_ms=%.2f cpu_ms=%.2f fps=%d" % [court.get("kind"),q,"people" if run[1]!="none" else "set-only",run[2],draws,objects,prims,gpu/float(n),cpu/float(n),Engine.get_frames_per_second()])
 			view.queue_free()
 			await _frames(2)
 

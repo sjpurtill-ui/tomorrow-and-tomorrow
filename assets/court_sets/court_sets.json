@@ -1725,33 +1725,23 @@
     "shafts": [
      {
       "top": [
-       -9.2,
+       -3.6,
        5.4,
-       -4.0
-      ],
-      "dir": [
-       0.62,
-       -0.62,
-       0.24
+       -6.6000000000000005
       ],
       "radius": 0.5,
-      "strength": 0.16,
-      "soft": 1.0
+      "strength": 0.6,
+      "soft": 0.55
      },
      {
       "top": [
-       -9.2,
+       3.6,
        5.4,
-       -0.8
-      ],
-      "dir": [
-       0.62,
-       -0.62,
-       0.24
+       -6.6000000000000005
       ],
       "radius": 0.5,
-      "strength": 0.16,
-      "soft": 1.0
+      "strength": 0.6,
+      "soft": 0.55
      }
     ],
     "fill": [
@@ -2082,11 +2072,11 @@
    "light": {
     "open_sky": false,
     "sun_dir": [
-     0.62,
-     -0.62,
-     0.24
+     0.22,
+     -0.8,
+     0.56
     ],
-    "sun_energy": 0.7,
+    "sun_energy": 1.5,
     "fire_energy": 1.6,
     "fire_range": 8.5,
     "fog": 0.006,
@@ -2122,7 +2112,7 @@
     "StaticPlain": 2
    },
    "glb": "court_set_grand_hall.glb",
-   "triangles": 45072,
+   "triangles": 45540,
    "objects": [
     "Far0",
     "Far1",
