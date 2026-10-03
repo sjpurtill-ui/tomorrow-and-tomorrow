@@ -56,6 +56,7 @@ func _init()->void:
 	name="Blood"
 	rng.seed=1931
 	_splat_mat=ShaderMaterial.new();_splat_mat.shader=SPLAT
+	_splat_mat.set_shader_parameter("ragged",ragged_noise())
 	_mm=_make_mm(SPLATS)
 	_mm_node=MultiMeshInstance3D.new();_mm_node.name="Splats";_mm_node.multimesh=_mm
 	_mm_node.material_override=_splat_mat;_mm_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -78,6 +79,24 @@ func _init()->void:
 	stain_alpha.resize(STAINS);stain_alpha.fill(0.0)
 	set_process(false)
 
+## The splats' rim wobble: a small tiling noise, made once.
+static var _ragged:ImageTexture
+static func ragged_noise()->ImageTexture:
+	if _ragged==null:
+		var noise:=FastNoiseLite.new();noise.seed=7;noise.frequency=0.09
+		noise.noise_type=FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+		var img:=Image.create(64,64,false,Image.FORMAT_L8)
+		for y in 64:
+			for x in 64:
+				# tiling: blend the field with its own wrap
+				var fx:=float(x)/64.0;var fy:=float(y)/64.0
+				var a:=noise.get_noise_2d(x,y);var b:=noise.get_noise_2d(x-64,y)
+				var c:=noise.get_noise_2d(x,y-64);var d:=noise.get_noise_2d(x-64,y-64)
+				var v:=lerpf(lerpf(a,b,fx),lerpf(c,d,fx),fy)
+				img.set_pixel(x,y,Color(0.5+0.9*v,0.5+0.9*v,0.5+0.9*v))
+		_ragged=ImageTexture.create_from_image(img)
+	return _ragged
+
 func _make_mm(count:int)->MultiMesh:
 	var mm:=MultiMesh.new()
 	mm.transform_format=MultiMesh.TRANSFORM_3D
@@ -85,6 +104,8 @@ func _make_mm(count:int)->MultiMesh:
 	var plane:=PlaneMesh.new();plane.size=Vector2(1.0,1.0)
 	mm.mesh=plane
 	mm.instance_count=count
+	# none are drawn until blood lands (splat() raises it, clear() drops it)
+	mm.visible_instance_count=0
 	for i in count:
 		mm.set_instance_transform(i,Transform3D(Basis.from_scale(Vector3(0.001,0.001,0.001)),Vector3(0.0,-50.0,0.0)))
 		mm.set_instance_custom_data(i,Color(0,0,0,0))
@@ -135,6 +156,7 @@ func _make_emitter(i:int)->GPUParticles3D:
 ## spreads out over a moment. Returns its index.
 func splat(at:Vector3,size:=0.4,alpha:=1.0,dry:=0.0,splash:=0.7,normal:=Vector3.UP,grow:=0.18)->int:
 	var i:=_next;_next=(_next+1)%SPLATS
+	_mm.visible_instance_count=maxi(_mm.visible_instance_count,i+1)
 	var seed_value:=rng.randf()
 	_set_splat(_mm,i,at,size*(0.25 if grow>0.0 else 1.0),normal,rng.randf()*TAU)
 	spots[i]=at
@@ -172,6 +194,7 @@ func stain(index:int,at:Vector3,size:=1.1,age_days:=0.0,fade_days:=5.0)->void:
 	if index<0 or index>=STAINS:return
 	var alpha:=clampf(1.0-age_days/fade_days,0.0,1.0)
 	stain_alpha[index]=alpha
+	_stain_mm.visible_instance_count=STAINS
 	if alpha<=0.0:
 		_stain_mm.set_instance_transform(index,Transform3D(Basis.from_scale(Vector3(0.001,0.001,0.001)),Vector3(0.0,-50.0,0.0)))
 		return
@@ -398,6 +421,7 @@ func clear()->void:
 	for i in SPLATS:
 		_mm.set_instance_transform(i,Transform3D(Basis.from_scale(Vector3(0.001,0.001,0.001)),Vector3(0.0,-50.0,0.0)))
 	spots.fill(Vector3(0.0,-50.0,0.0))
+	_mm.visible_instance_count=0;_next=0
 	for s in _stickers:
 		if is_instance_valid(s):s.visible=false
 	for e in _emitters:e.emitting=false

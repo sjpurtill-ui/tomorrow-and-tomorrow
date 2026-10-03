@@ -429,14 +429,16 @@ def _rear_pose(k):
     """Up on its hind legs, forepaws raised (k 0..1)."""
     a = A()
     p = {}
-    a.add(p, "pelvis", loc=(0, 0.02 * k, 0.08 * k), rot=(62 * k, 0, 0))
-    a.add(p, "spine", rot=(8 * k, 0, 0))
-    a.add(p, "neck", rot=(-40 * k, 0, 0))
-    a.add(p, "head", rot=(-14 * k, 0, 0))
+    # (for the forward-pointing spine bones -x lifts the front; the hind legs
+    # turn back the other way so the feet stay planted under it)
+    a.add(p, "pelvis", loc=(0, 0.02 * k, 0.08 * k), rot=(-62 * k, 0, 0))
+    a.add(p, "spine", rot=(-8 * k, 0, 0))
+    a.add(p, "neck", rot=(40 * k, 0, 0))
+    a.add(p, "head", rot=(14 * k, 0, 0))
     for side in ("L", "R"):
-        a.add(p, "thigh." + side, rot=(-62 * k, 0, 0))
-        a.add(p, "upperarm." + side, rot=(-70 * k, 0, 18 * k * (1 if side == "L" else -1)))
-        a.add(p, "forearm." + side, rot=(-40 * k, 0, 0))
+        a.add(p, "thigh." + side, rot=(62 * k, 0, 0))
+        a.add(p, "upperarm." + side, rot=(-40 * k, 0, 18 * k * (1 if side == "L" else -1)))
+        a.add(p, "forearm." + side, rot=(-30 * k, 0, 0))
     return p
 
 
