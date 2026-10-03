@@ -1675,7 +1675,10 @@ func _apply_survival_guard(weights:Dictionary,reserve_lean:float=0.0)->Dictionar
 	if demand>0.0 and previous_share>0.0:
 		# Planners keep a reserve against the lean season and bad years: while
 		# the stores hold less than RESERVE_TARGET_DAYS they plan for more than
-		# today's need, in proportion to how far short the stores are.
+		# today's need, in proportion to how far short the stores are; past
+		# it they plan a little less than the need, so the stores come back
+		# down to it (up to RESERVE_MARGIN less at twice the reserve) instead
+		# of filling every pit: a store is a lean buffer, not wealth.
 		# Never more than the stores can hold: before storage pits a camp keeps
 		# only what its baskets and bundles carry.
 		# A people set on lasting abundance keeps up to twice the store, with
@@ -1683,29 +1686,38 @@ func _apply_survival_guard(weights:Dictionary,reserve_lean:float=0.0)->Dictionar
 		var lean:=clampf(reserve_lean,0.0,1.0)
 		var target:=RESERVE_TARGET_DAYS*(1.0+lean)
 		if WorldSimulation.food!=null and WorldSimulation.food.has_method("_food_storage_capacity"):target=minf(target,float(WorldSimulation.food._food_storage_capacity())/demand*0.8)
-		var reserve_gap:=clampf((target-float(metrics.get("food_days",target)))/maxf(1.0,target),0.0,1.0)
-		var buffer:=(1.08 if bool(guard.food) else 1.02)+RESERVE_MARGIN*(1.0+lean)*reserve_gap
+		var days:=float(metrics.get("food_days",target))
+		var reserve_gap:=clampf((target-days)/maxf(1.0,target),-1.0,1.0)
+		# With a shortfall or a lean season ahead the stores are never drawn down.
+		if bool(guard.food):reserve_gap=maxf(0.0,reserve_gap)
+		var buffer:=(1.08 if bool(guard.food) else 1.02)+RESERVE_MARGIN*((1.0+lean)*reserve_gap if reserve_gap>0.0 else reserve_gap)
 		var ceiling:=.72 if bool(guard.water) else .85
 		var needed:=clampf(previous_share*demand*buffer/maxf(.01,produced),0.0,ceiling)
 		var other:=0.0
 		for role:String in weights:
 			if role!="Food":other+=maxf(0.0,float(weights[role]))
 		weights.Food=maxf(float(weights.get("Food",0)),other*needed/maxf(.01,1.0-needed))
-		# research_3000: once food workers comfortably out-produce the need and
-		# the stores hold, the planned food labor comes down to what is needed
-		# (with a margin); _apply_food_labor_floor still holds the era's floor.
-		if not bool(guard.food) and float(metrics.get("food_projected_days",0.0))>=SURPLUS_RELEASE_DAYS:
+		# Once the stores hold the reserve and no shortfall or lean season is
+		# ahead, the planned food labor comes down to what is needed, no more
+		# (its margin is the plan's own); _apply_food_labor_floor still holds
+		# the safety net under it.
+		if not bool(guard.food) and days>=target:
 			var released:=clampf(needed*SURPLUS_RELEASE_MARGIN,0.0,ceiling)
 			weights.Food=minf(float(weights.get("Food",0)),other*released/maxf(.01,1.0-released))
 	return guard
 
-## research_3000: stores (days) and margin over the needed share at which
-## planners move surplus food workers to other work.
-const SURPLUS_RELEASE_DAYS:=45.0
-const SURPLUS_RELEASE_MARGIN:=1.15
+## The share of the needed food work the planners keep once the stores hold
+## the reserve (1: exactly the plan, which already counts today's need and the
+## reserve's margin).
+const SURPLUS_RELEASE_MARGIN:=1.0
 ## The reserve planners aim to hold (days of food), and how much more than
-## today's need they plan for when the stores are empty.
-const RESERVE_TARGET_DAYS:=60.0
+## today's need they plan for when the stores are empty. A store is a lean
+## buffer (food_care.gd LEAN_DAYS, 20 days: all that food security counts);
+## the planners aim half again past it for the season's swings, 30 days.
+## A people set on lasting abundance, or on the growth path, deepens it
+## (reserve_lean: up to twice, 60 days). Kept a plain number for the fast
+## sim (tools/sim reads it); test_food_care checks it is LEAN_DAYS x 1.5.
+const RESERVE_TARGET_DAYS:=30.0
 const RESERVE_MARGIN:=0.15
 ## The food work a people wholly set on lasting abundance asks for
 ## (cultural_inheritance.gd WORK sustenance "Food"): that wish doubles the
@@ -1720,16 +1732,19 @@ static func reserve_lean_of(food_wish:float)->float:
 
 ## research_600 balance: getting, grinding, cooking and storing food took most
 ## of a pre-modern household's working time (docs/research/BENCHMARKS_600.md,
-## typical: 62% at year 0, 52% by year 600). Planned labor keeps at least that
-## share on food; the surplus fills the stores. A society focused on food and
+## typical: 62% at year 0, 52% by year 600). A society focused on food and
 ## labor research needs less (up to a quarter), and decrees that claim labor
 ## (care rotas, watches, levies) leave less time for everything, so food takes more.
 ## research_3000: the floor follows the benchmark's typical share of labor on
 ## food through 3000 (docs/research/benchmarks_*.json food_labor_share).
-## The planned floor is this share of the era's typical food labour: a safety
-## net under the planners' own reckoning of need, low enough that a people
-## ahead in farming frees hands for other work and one behind must find more.
-const FOOD_FLOOR_OF_TYPICAL:=0.9
+## People first (docs/PEOPLE_FIRST.md B): the stores are a lean buffer, so
+## the planners' own reckoning sets the food work: the day's need and the
+## margin toward RESERVE_TARGET_DAYS (_apply_survival_guard), with the food
+## alarm when a shortfall or a lean season comes. The floor is only a safety
+## net under that reckoning, this share of the era's typical food labour, so
+## the work left over goes where the people's path leans it instead of into
+## stores of months.
+const FOOD_FLOOR_OF_TYPICAL:=0.35
 const FOOD_LABOR_FLOOR:Array=[[0.0,0.62],[100.0,0.60],[300.0,0.56],[600.0,0.52],[1200.0,0.47],[1800.0,0.45],[2400.0,0.38],[2500.0,0.36],[2600.0,0.33],[2700.0,0.28],[2800.0,0.22],[2900.0,0.13],[3000.0,0.08]]
 
 func _apply_food_labor_floor(weights:Dictionary)->void:
@@ -1761,7 +1776,8 @@ func food_floor_share()->float:
 	return clampf(floor_share,0.0,0.85)
 
 ## The reserve this people's planners aim for, as _apply_survival_guard reckons
-## it: {target_days, food_days, gap (0..1 short), margin (planned above need)}.
+## it: {target_days, food_days, gap (0..1 short), margin (planned above need),
+## over (0..1 past the reserve), draw (planned below need to come back to it)}.
 func reserve_plan()->Dictionary:
 	var lean:=0.0
 	if WorldSimulation.direction!=null:
@@ -1777,7 +1793,10 @@ func reserve_plan()->Dictionary:
 	if WorldSimulation.food!=null and WorldSimulation.food.has_method("_food_storage_capacity"):target=minf(target,float(WorldSimulation.food._food_storage_capacity())/demand*0.8)
 	var days:=float(metrics.get("food_days",target))
 	var gap:=clampf((target-days)/maxf(1.0,target),0.0,1.0)
-	return {"target_days":target,"food_days":days,"gap":gap,"margin":RESERVE_MARGIN*(1.0+lean)*gap}
+	var over:=clampf((days-target)/maxf(1.0,target),0.0,1.0)
+	# The engine plans 1.02 + the margin times the need: past the reserve that
+	# is under the need only once RESERVE_MARGIN x over passes the 0.02.
+	return {"target_days":target,"food_days":days,"gap":gap,"margin":RESERVE_MARGIN*(1.0+lean)*gap,"over":over,"draw":maxf(0.0,RESERVE_MARGIN*over-0.02)}
 
 ## Why this many hands are on food, in plain words with the planners' own
 ## numbers (the Food page reads it).
@@ -1796,6 +1815,8 @@ func food_plan_words()->String:
 	var plan:=reserve_plan()
 	if float(plan.gap)>0.01:
 		line+="; while the stores hold %d of the %d days they aim for, they plan %d%% more than is eaten." % [roundi(float(plan.food_days)),roundi(float(plan.target_days)),maxi(1,roundi(float(plan.margin)*100.0))]
+	elif float(plan.draw)>0.01 and not bool(_survival_guard().food):
+		line+="; the stores hold %d days, past the %d they aim for, so they plan %d%% less than is eaten until the stores come back down." % [roundi(float(plan.food_days)),roundi(float(plan.target_days)),maxi(1,roundi(float(plan.draw)*100.0))]
 	else:
 		line+="; the stores hold what they aim for, so no one works food beyond the need."
 	return line
@@ -1988,8 +2009,9 @@ func _lay_ruler_split()->void:
 
 
 ## A leader keeps feeding a town past the ruler's split until its stores hold
-## this many days of eating again, once the food alarm made them step in.
-const RULER_RELEASE_DAYS:=120.0
+## this many days of eating again, once the food alarm made them step in:
+## half again the reserve the planners aim for (RESERVE_TARGET_DAYS).
+const RULER_RELEASE_DAYS:=45.0
 ## No leader puts more than this share of a town's hands on food.
 const FOOD_CEILING_SHARE:=85.0
 

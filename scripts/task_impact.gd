@@ -168,6 +168,8 @@ static func food()->Dictionary:
 		lines.append(_line("Townsfolk and births","%d in 100 townsfolk" % roundi(urban*100.0),
 			("The fewer on food, the more people live as townsfolk. Past %d in 100 of them, couples choose fewer children: %s in 100 fewer now." % [roundi(EarlyLife.URBAN_ONSET*100.0),_one(fewer*100.0)]) if fewer>0.0 else "The fewer on food, the more people live as townsfolk. Past %d in 100 of them, couples choose fewer children." % roundi(EarlyLife.URBAN_ONSET*100.0),
 			"bad" if fewer>0.0 else "plain"))
+	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
+	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Food").get("lines",[]))
 	_great_work_line(lines,"Food")
 	lines.append(_cost_line("Food",getters))
 	return {"lead":"Food getters gather, hunt, fish and tend the fields. What the people do not eat the same day is put by in the stores.","lines":lines}
@@ -501,6 +503,8 @@ static func logistics()->Dictionary:
 			"The bands away and the garrisons ask %s loads a day (bread %s, fodder, fuel and rounds %s). At their distances our carriers bring %s a day: a porter 16 loads a trip, a cart %s, a lorry %s, each out and back at its own pace. Bread goes first; stores get %d of 100." % [_whole(float(reading.demand)),_whole(float(reading.get("bread",0.0))),_whole(float(reading.get("stores_asked",0.0))),_whole(float(reading.moved)),_whole(float((reading.fleet as Dictionary).get("cart_load",250.0))),_whole(float((reading.fleet as Dictionary).get("lorry_load",2000.0))),roundi(float(reading.get("stores",1.0))*100.0)],"good" if fed>=0.8 else "bad"))
 	lines.append(_line("Building faster","+%s a day" % _two(_raw("Logistics")/30.0*_pace_scale()),
 		"Carriers speed the builders: each adds a thirtieth of a builder's pace to the day's work on the town.","good" if carriers>0.0 else "plain"))
+	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
+	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Logistics").get("lines",[]))
 	_great_work_line(lines,"Logistics")
 	lines.append(_cost_line("Logistics",carriers))
 	return {"lead":"Carriers fetch the water, haul materials from the deposits, stock and staff the stores, and keep soldiers supplied.","lines":lines}
@@ -617,6 +621,8 @@ static func administration()->Dictionary:
 	var slots:=1+floori(institutions*6.0)+floori(clampf(_raw("Administration")/pop/0.04,0.0,1.0)*2.0)
 	lines.append(_line("Orders at once","%d" % slots,
 		"How many standing orders the court can keep in force: one, more as government grows, and up to two more when 4 in 100 of the people are stewards.","plain"))
+	# Fresh food, carrying, keeping and caring (food_care.gd role_effect).
+	lines.append_array(preload("res://scripts/food_care.gd").role_effect("Administration").get("lines",[]))
 	_great_work_line(lines,"Administration")
 	lines.append(_cost_line("Administration",stewards))
 	return {"lead":"Keepers keep the stores and tallies, settle quarrels, take in newcomers and carry the chiefs' word.","lines":lines}

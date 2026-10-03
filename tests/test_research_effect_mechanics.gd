@@ -266,7 +266,9 @@ func test_seafaring_widens_sea_fishing_and_open_water_crossings()->void:
 	for naval:float in [0.0,0.5]:
 		_total("naval_capacity",naval)
 		grounds.append(float(FoodSystem.wild_food_capacity().Fishing.rations))
-	var reach:=sqrt(maxf(1.0,GameState.population_exact)/120.0)
+	# Carriers widen the ground whose catch arrives fresh (food_care.gd).
+	var FoodCare:=preload("res://scripts/food_care.gd")
+	var reach:=sqrt(maxf(1.0,GameState.population_exact)/120.0)*FoodCare.reach_factor(FoodCare.carry_cover_of(GameState))
 	assert_float(grounds[1]-grounds[0]).is_equal_approx(40.0*0.5*reach,0.0001)
 	# An inland home gains nothing from boats.
 	GameState.player_settlements=[{"id":"home","primary":true,"territory_context":{}}]

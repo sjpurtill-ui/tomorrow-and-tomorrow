@@ -82,6 +82,15 @@ LONGEST_LOOK = int(g.const("scripts/civilization_strategy.gd", "LONGEST_LOOK_MON
 WONDER_PAYOFF = g.const("scripts/civilization_strategy.gd", "WONDER_PAYOFF")
 MOTIVE_THRESHOLD = float(g.const("scripts/civilization_strategy.gd", "WONDER_MOTIVE_THRESHOLD"))
 GOODWILL_FOOD_DAYS = float(g.const("scripts/civilization_strategy.gd", "GOODWILL_FOOD_DAYS"))
+# The rulers' store gates count the lean stores (food_care.gd store_gate; founding
+# never asks more than full stores, RESERVE_DAYS). 1 and none before them.
+STORE_GATE = float(g.const("scripts/food_care.gd", "STORE_GATE", default=1.0, optional=True))
+FULL_STORES = 30.0 if STORE_GATE < 1.0 else math.inf
+
+
+def gate(days: float) -> float:
+    """food_care.gd store_gate."""
+    return days * STORE_GATE
 AMBITION_RISK = g.const("scripts/wonder_concept.gd", "AMBITION_RISK")
 AMBITION_PAY = g.const("scripts/wonder_concept.gd", "AMBITION_PAY")
 AMBITION_TRIUMPH = g.const("scripts/wonder_concept.gd", "AMBITION_TRIUMPH")
@@ -209,7 +218,7 @@ def expansion_months(p: dict, drive: float) -> int:
 
 def expansion_plan(p: dict, drive: float) -> dict:
     """civilization_strategy.gd preferences expansion fields, with the controller's drive."""
-    return {"food": max(45.0, (45 + (1 - p["risk_tolerance"]) * 40 + p["empathy"] * 15) * (1.0 - drive * .35)),
+    return {"food": min(FULL_STORES, max(gate(45.0), gate(45 + (1 - p["risk_tolerance"]) * 40 + p["empathy"] * 15) * (1.0 - drive * .35))),
             "distance": 16 + 24 * p["risk_tolerance"], "margin": ESTABLISHMENT_DAYS * lerp(1.35, .65, p["risk_tolerance"]),
             "months": expansion_months(p, drive)}
 
@@ -221,7 +230,7 @@ def works_answer(key: str, facts: dict, p: dict) -> str:
     if key == "design":
         return "grander" if facts.get("ample", True) and facts["feasibility"] >= .85 - .3 * (a * .5 + r * .5) else "practical"
     if key == "stores":
-        return "pour" if "pour" in enabled and facts["food_days"] >= 150.0 - 60.0 * r else "protect"
+        return "pour" if "pour" in enabled and facts["food_days"] >= gate(150.0 - 60.0 * r) else "protect"
     if key == "labor":
         if a * .5 + (1 - e) * .5 >= .65 and facts.get("hierarchy", .5) >= .65 and facts.get("cohesion", .5) >= .65:
             return "levy"
@@ -404,13 +413,13 @@ class LeaderSurrogate(Surrogate):
         self.construction_diverted = 0.0
         # civilization_controller.great_work_orders: not hungry, 60 days in store,
         # the ruler's interval since the last work, a motive strong enough.
-        if self.completed < 1.0 or self._hungry() or food_days < 60 or self.day - self.last_started < wonder_interval_days(p):
+        if self.completed < 1.0 or self._hungry() or food_days < gate(60) or self.day - self.last_started < wonder_interval_days(p):
             return
         pop = self.population
         found = []
         if year >= 25 and int(year) % 25 == 0 and (self.day % YEAR) < MONTH:
             found.append("anniversary")
-        if food_days > 150:
+        if food_days > gate(150):
             found.append("plenty")
         if self.day - self.victory_day < YEAR:
             found.append("victory")
@@ -446,7 +455,7 @@ class LeaderSurrogate(Surrogate):
 
     def _build(self, p: dict, food_days: float) -> None:
         w = self.work
-        press = (p["discipline"] > .6 and food_days > 90) or (p["risk_tolerance"] > .75 and food_days > 60)
+        press = (p["discipline"] > .6 and food_days > gate(90)) or (p["risk_tolerance"] > .75 and food_days > gate(60))
         share = .5 if press else .2
         self.construction_diverted = share
         crew = self.workers("Construction") * share * w["speed"]

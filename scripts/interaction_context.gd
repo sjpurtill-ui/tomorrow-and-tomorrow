@@ -27,8 +27,10 @@ static func metric_band(value:float)->String:
 	return "high"
 
 static func food_band(food_days:float)->String:
-	if food_days<10.0: return "scarce"
-	if food_days<45.0: return "lean"
+	# Below the lean buffer (food_care.gd LEAN_DAYS) is lean; half of it, scarce.
+	var buffer:=float(preload("res://scripts/food_care.gd").LEAN_DAYS)
+	if food_days<buffer*0.5: return "scarce"
+	if food_days<buffer: return "lean"
 	return "ample"
 
 ## Writable decree metrics as RD defines them; guarded so a renamed or missing

@@ -15,6 +15,8 @@ const SPAN=preload("res://scripts/day_span.gd")
 const Goods=preload("res://scripts/civilian_goods.gd")
 const Operations=preload("res://scripts/technology_operations.gd")
 const Mechanics=preload("res://scripts/research_mechanics.gd")
+## Fresh food, small stores, carriers and keepers (docs/PEOPLE_FIRST.md B).
+const FoodCare=preload("res://scripts/food_care.gd")
 const KCAL_PER_RATION := 2400.0
 const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.34
 ## Share of a food worker's day spent getting food. The rest goes to carrying,
@@ -77,11 +79,17 @@ var initialized := false
 var _access_cache:Dictionary={}
 ## Technique levers per city and day; see _technique_levers.
 var _lever_cache:Dictionary={}
+## Carriers' and keepers' covers per city and day; see _covers. An Object
+## field, so saves never capture it.
+class CoverCache extends RefCounted:
+	var entries:Dictionary={}
+var _cover_cache:=CoverCache.new()
 
 func reset_for_new_world()->void:
 	initialized=false
 	_access_cache.clear()
 	_lever_cache.clear()
+	_cover_cache.entries.clear()
 
 func initialize() -> void:
 	if initialized and not WorldSimulation.state.food_stocks.is_empty():
@@ -124,6 +132,18 @@ func process_day(context: Dictionary,labor_efficiency: float,ecology: float) -> 
 ## Total strength of one lever from adopted food techniques, 0 when none.
 func technique_lever(lever:String)->float:
 	return float(_technique_levers()[lever])
+
+## The carriers' and keepers' covers in the current city today (food_care.gd),
+## resolved once a day for the hands on each: {carry, keep}.
+func _covers()->Dictionary:
+	var state=WorldSimulation.state
+	var key:=[WorldSimulation.actor_id,state.resource_settlement_id,int(state.elapsed_days),state.population_exact,state.population_allocations.get("Logistics",0),state.population_allocations.get("Administration",0)]
+	var cached:Variant=_cover_cache.entries.get(key)
+	if cached!=null:return cached
+	var covers:={"carry":FoodCare.carry_cover_of(state),"keep":FoodCare.keep_cover_of(state)}
+	if _cover_cache.entries.size()>=256:_cover_cache.entries.clear()
+	_cover_cache.entries[key]=covers
+	return covers
 
 ## All levers for the current city, resolved once per day. Adoption and goods
 ## coverage change at most once a day for a city, outside the food step.
@@ -261,6 +281,11 @@ func _process_local_day(context: Dictionary,labor_efficiency: float,ecology: flo
 		"food_forecast_30":forecast[30],
 		"food_forecast_90":forecast[90],
 		"food_diet_quality":diet_quality,
+		# The fresh share of what was eaten leans health (food_care.gd FRESH_HEALTH),
+		# and the covers that kept food from spoiling today.
+		"food_fresh_share":float(consumed[FRESH])/eaten if eaten>0.0 else 0.0,
+		"food_carry_cover":float(_covers().carry),
+		"food_keep_cover":float(_covers().keep),
 		"fire_practice":fire_report,
 		"food_weather_factor":weather_factor,
 		"nutrition_reserve":WorldSimulation.state.nutrition_reserve,
@@ -587,8 +612,14 @@ func _spoilage_rates(traveling:bool)->Array:
 	# The keeper of stores' hand on what rots (office_levers.gd: x1.15 to x0.80).
 	storage_multiplier*=preload("res://scripts/office_levers.gd").value("Quartermaster")
 	var cooling:=Operations.refrigeration_multiplier(Operations.service("cold_storage") if not traveling else 0.0,stocks)
-	var fresh_rate:=float(SPOILAGE[FRESH])*storage_multiplier*fresh_preservation*cooling*(1.0-technique_lever("fresh_spoilage"))
-	var stored_rate:=float(SPOILAGE[STORED])*storage_multiplier*stored_preservation*(1.0-technique_lever("stored_spoilage"))
+	# Carriers bring the day's harvest in before it turns (up to half less
+	# fresh spoilage); keepers turn, dry and guard the stores at home (up to
+	# 40 in 100 less rot). food_care.gd holds both rules.
+	var covers:=_covers()
+	var carried:=FoodCare.fresh_spoilage_factor(float(covers.carry))
+	var kept:=1.0 if traveling else FoodCare.stored_spoilage_factor(float(covers.keep))
+	var fresh_rate:=float(SPOILAGE[FRESH])*storage_multiplier*fresh_preservation*cooling*(1.0-technique_lever("fresh_spoilage"))*carried
+	var stored_rate:=float(SPOILAGE[STORED])*storage_multiplier*stored_preservation*(1.0-technique_lever("stored_spoilage"))*kept
 	return [fresh_rate,stored_rate]
 
 func _spoil(traveling: bool,fresh_arrived:float=0.0) -> Dictionary:
@@ -704,7 +735,8 @@ func _update_source_health(harvest: Dictionary,workers: float,traveling: bool) -
 func wild_food_capacity()->Dictionary:
 	var environment:=_environment_mix()
 	var ecology:=clampf(float(WorldSimulation.state.simulation_metrics.get("ecology",0.88)),0.04,1.0)
-	var reach:=sqrt(maxf(1.0,WorldSimulation.state.population_exact)/120.0)
+	# Carriers widen the ground whose harvest still arrives fresh (food_care.gd).
+	var reach:=sqrt(maxf(1.0,WorldSimulation.state.population_exact)/120.0)*FoodCare.reach_factor(float(_covers().carry))
 	var coastal:=_coastal_food_profile(false)
 	var regrowth:=lerpf(0.55,1.15,ecology)*(1.0+maxf(0.0,WorldSimulation.discovery.effect("ecology_recovery")))
 	var water:=maxf(clampf(float(environment.get("water_access",0.0)),0.0,1.0),float(coastal.marine_opportunity))
@@ -744,7 +776,7 @@ func _forecast(harvest: Dictionary,demand_breakdown: Dictionary,provision_delive
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	var last:=int(metrics.get("food_forecast_day",-100000))
 	var stored_days:=_stock_total()/maxf(0.01,float(demand_breakdown.get("total",1.0)))
-	if day-last<FORECAST_REFRESH_DAYS and day>=last and stored_days>=30.0 and metrics.get("food_forecast_90") is Dictionary and metrics.get("food_forecast_30") is Dictionary:
+	if day-last<FORECAST_REFRESH_DAYS and day>=last and stored_days>=FoodCare.LEAN_DAYS and metrics.get("food_forecast_90") is Dictionary and metrics.get("food_forecast_30") is Dictionary:
 		var aged:=day-last
 		return {"day":last,30:_aged_forecast(metrics.food_forecast_30,aged),90:_aged_forecast(metrics.food_forecast_90,aged)}
 	var environment:=_environment_mix()

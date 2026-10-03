@@ -1545,7 +1545,7 @@ func proportional_population_commitment(requested_count:int) -> Dictionary:
 
 func _mortality_condition_factor(housing_ratio:float=-1.0)->float:
 	var health_factor:=lerpf(1.90,0.64,clampf(population_health,0.0,1.0))
-	var food_factor:=lerpf(2.40,0.78,clampf(food_security,0.0,1.0))
+	var food_factor:=lerpf(2.40,0.78,clampf(fed_security(),0.0,1.0))
 	var resolved_housing:=clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15) if housing_ratio<0.0 else clampf(housing_ratio,0.0,1.15)
 	var shelter_factor:=lerpf(1.65,0.88,clampf(resolved_housing,0.0,1.0))
 	return health_factor*food_factor*shelter_factor
@@ -1615,6 +1615,12 @@ func smooth_exceptional_hazard(weight:float)->void:
 		var value:=maxf(0.0,float(components[cause_variant]))
 		exceptional_hazard_causes_smoothed[cause]=value if not exceptional_hazard_causes_smoothed.has(cause) else lerpf(float(exceptional_hazard_causes_smoothed[cause]),value,clampf(weight,0.0,1.0))
 
+## Food security with the store counted full: what is eaten, which deaths
+## and sickness read (food_care.gd; consequence_engine.gd keeps it with the
+## day's metrics). The size of the store never kills; going without does.
+func fed_security()->float:
+	return clampf(float(simulation_metrics.get("food_fed_security",food_security)),0.0,1.0)
+
 ## The early-care profile the day's rates use. Before the first simulated day
 ## of a new world (or of a save loaded without one) it is not yet stored, and
 ## LIVES and the babes lost read the bare life table: 46 winters at the
@@ -1633,7 +1639,7 @@ func projected_life_expectancy() -> float:
 ## not one day's luck: exceptional_hazard_smoothed), by cause.
 func life_inputs()->Dictionary:
 	var hazard:=exceptional_hazard_smoothed if exceptional_hazard_smoothed>=0.0 else _current_exceptional_mortality_rate()
-	return {"health":population_health,"food":food_security,"housing":clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15),
+	return {"health":population_health,"food":fed_security(),"housing":clampf(float(housing_capacity)/maxf(1.0,population_exact),0.0,1.15),
 		"hazard":hazard,"hazard_causes":exceptional_hazard_causes_smoothed.duplicate()}
 
 ## Life expectancy from `inputs` (life_inputs' shape) under today's care of

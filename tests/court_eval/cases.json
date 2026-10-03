@@ -862,11 +862,11 @@
    "variants": ["put five more on making tools"]},
 
   {"id": "work.leaders_again", "domain": "home_orders", "fixture": "home_peace", "speaker": "headman", "source": "design",
-   "note": "Set by hand, then handed back: the leaders share out the work again at once, and the headman says what they put first and who is at work now.",
+   "note": "Set by hand, then handed back: the leaders share out the work again at once (their own split, not the hand-set one: with lean stores they may put more or fewer on building), and the headman says what they put first and who is at work now.",
    "steps": [
     {"say": "Put 10 more on building", "ideal": {"kind": "order", "action": "order", "type": "none", "details": {"count": 10}, "confidence": 0.9}, "expect": {"state": {"manual_work": "==1"}}},
     {"say": "Let the headman decide the work again", "ideal": {"kind": "order", "action": "order", "type": "none", "confidence": 0.9},
-     "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==0", "work_build": "<before", "modifiers": "==before"}, "reply_has": ["share out the daily work again", "{work_food} getting food"]}}],
+     "expect": {"handled": true, "verb": "order", "state": {"manual_work": "==0", "work_build": "!=before", "modifiers": "==before"}, "reply_has": ["share out the daily work again", "{work_food} getting food"]}}],
    "variants": [{"say": "Our leaders may set the work again"}, {"say": "Hand the work back to the leaders"}]},
 
   {"id": "work.more_building.war", "domain": "home_orders", "fixture": "war_not_held", "speaker": "suri", "source": "design",

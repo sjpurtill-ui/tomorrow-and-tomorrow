@@ -79,6 +79,87 @@ Read first: `AGENTS.md`, `docs/ADJUDICATION.md` (one ledger, stated odds, seeded
   - This is the population lever: more keepers and carers, more children survive.
 - Every number goes on the People view and the food/health tiles (show the engine's numbers).
 
+#### B as built (PR #103)
+All the shared numbers are in `scripts/food_care.gd`.
+
+**Stores**
+- `LEAN_DAYS` = 20. Food security counts the store up to 20 days.
+- Deaths, sickness, births and life expectancy read `GameState.fed_security()`. That is food security with the store counted as full, so a small store never kills; going without food does.
+- The realm's purse is set in this order:
+
+  | `HUNGRY_DAYS` | `RELIEF_TARGET` | `LEVY_KEEP_DAYS` | `SELLER_KEEP` | `SELLER_DAYS` |
+  |---|---|---|---|---|
+  | 15 | 20 | 20 | 30 | 40 |
+
+  Relief never lifts a town above what the levy leaves it, so the levy never takes relief back.
+
+**The planners** (`government_people_system.gd`)
+- They aim for `RESERVE_TARGET_DAYS` = 30 days, which is `LEAN_DAYS` × 1.5. A food wish or the growth path raises this, up to twice as much.
+- Below the target they plan above the day's need. Above it they plan up to 15% below the need, until the stores come back down.
+- Once the stores hold the target, they plan exactly the need.
+- The era's food floor (`FOOD_FLOOR_OF_TYPICAL` 0.35, was 0.9) is only a safety net. The food alarm still adds hands when a shortfall or lean season comes.
+- `RULER_RELEASE_DAYS` is 45 (was 120).
+
+**The rulers' store gates**
+- These cover founding a town, war, peace, scouting, hard drill, a great work's start, pace and extra crews, and food gifts.
+- In `civilization_strategy.gd` and `civilization_controller.gd`, each gate now asks half the days it did (`STORE_GATE`).
+- A founding never waits for more than full stores (30 days).
+- `DEFENSE_FOOD_DAYS` is 15 and `GOODWILL_FOOD_DAYS` is 45.
+
+**Fresh food**
+- Health gets `+0.12 × (fresh share − 0.5)` above half fresh, up to +0.06.
+- Below half fresh it gets `0.04 × (fresh share − 0.5)`, at most −0.02, so a town living on its grain is not ruined.
+
+**Carriers** (3 in 100 of the people for full cover)
+- Fresh spoilage is halved.
+- The wild harvest reaches 25% more ground.
+
+**Keepers and carers.** The same Administration people keep the stores, care for the people and do the office work. Each of the three counts all of them, against its own share of the people:
+- Keepers: full at 2 in 100 of the people. Full cover cuts stored rot by 40%.
+- Carers: full at 8 in 100 of the people, so the usual 4 in 100 give half. Full cover:
+  - covers 40–60% of what missing child care, remedies, clean water and wound care would leave;
+  - lifts part of the pre-modern burden: 45% for under-fives, 50% for newborns, 40% for mothers and 25% for children;
+  - adds +0.03 health.
+- The carers' cover builds up over about 60 days, and older saves start from none.
+
+**A chosen path may run a little ahead of history, as learning may.** A people that leans hard into growth (keepers and carers near 8 in 100, plenty of fresh food and carrying) beats the best documented pre-modern figures by a modest margin. The extra costs real labour. A balanced people stays inside `docs/research/BENCHMARKS_600.md`.
+
+**Infant deaths per 1,000 in the engine** (test setup: health 0.85 for the founders, 0.97 and well fed for the people with every practice):
+
+| Carers (in 100 of the people) | 0 | 2 | 4 | 8 |
+|---|---|---|---|---|
+| Founders, no early practices | 317 | 290 | 264 | 214 |
+| Every early practice, well fed | 225 | 207 | 189 | 152 |
+
+**Fast sim, 2 seeds, good site, 600 years** (`tools/sim`). Paths are the leaders.py tempers, and the leader runs include daughter towns. Each cell reads main → this branch.
+
+Food share of the workers (%) and days of food in store, at years 50 and 150:
+
+| | Food share y50 | Food share y150 | Stores y50 | Stores y150 |
+|---|---|---|---|---|
+| growth (cautious-caring) | 51.5 → 36.8 | 49.8 → 40.0 | 244 → 61 | 227 → 61 |
+| war (disciplined-warlike) | 54.2 → 42.8 | 52.3 → 39.5 | 243 → 38 | 232 → 41 |
+| learning (open-scholarly) | 54.9 → 36.4 | 53.1 → 38.6 | 245 → 31 | 229 → 41 |
+| balanced (temper) | 54.3 → 38.7 | 52.5 → 39.6 | 183 → 37 | 231 → 40 |
+| balanced scenario | 54.9 → 40.4 | 53.1 → 39.8 | 183 → 34 | 229 → 44 |
+| sensible scenario | 54.5 → 40.6 | 52.7 → 39.8 | 182 → 34 | 228 → 44 |
+
+Population, infant deaths, life expectancy and growth at years 150, 300 and 600:
+
+| | Population | Infant deaths per 1,000 | Life expectancy (years) | Growth, % per year (0–150 / 150–300 / 300–600) |
+|---|---|---|---|---|
+| growth | 349 / 1,900 / 29,322 → 481 / 3,255 / 30,451 | 210 / 205 / 211 → **152 / 159 / 159** | 27.6 / 28.0 / 27.4 → 31.6 / 31.1 / 31.0 | 0.71 / 1.13 / 0.91 → 0.93 / 1.27 / 0.75 |
+| balanced (temper) | 212 / 989 / 26,173 → 322 / 1,686 / 28,243 | 211 / 204 / 207 → 189 / 188 / 193 | 27.5 / 28.1 / 27.9 → 29.0 / 29.2 / 28.8 | 0.38 / 1.03 / 1.09 → 0.66 / 1.10 / 0.94 |
+| balanced scenario | 261 / 1,036 / 3,593 → 358 / 1,106 / 3,724 | 211 / 212 / 208 → 187 / 193 / 185 | 27.5 / 27.1 / 27.7 → 29.1 / 28.3 / 29.3 | 0.52 / 0.92 / 0.41 → 0.73 / 0.75 / 0.40 |
+| sensible scenario | 288 / 1,052 / 3,612 → 372 / 1,112 / 3,744 | 210 / 212 / 208 → 187 / 193 / 184 | 27.6 / 27.1 / 27.8 → 29.1 / 28.3 / 29.3 | 0.58 / 0.86 / 0.41 → 0.75 / 0.73 / 0.40 |
+| learning | 252 / 905 / 18,235 → 225 / 712 / 11,216 | 210 / 203 / 200 → 188 / 185 / 183 | 27.6 / 28.2 / 28.7 → 29.1 / 29.4 / 30.1 | 0.50 / 0.85 / 1.00 → 0.42 / 0.77 / 0.92 |
+
+What the sims show:
+- **No hunger.** No run went short of food: the lowest month's intake was 1.0, and no month fell below 0.95.
+- **Growth path.** It runs about a fifth under the best historical infant deaths at year 150 (about 187) and 12% under at year 300 (180). At year 600 it matches the best (160).
+- **Balanced peoples** stay at or above the best historical figure and below the typical one.
+- **Learning path.** It now puts the freed food work into learning. The specialists' upkeep (`society_model.gd SPECIALIST_UPKEEP`) then lowers its births, which is learning's price.
+
 ### C. Searching the land (owner: `resource_system.gd` survey/deposit/extraction yield, survey scripts)
 - **Searched land.** Each people (each town in its own scope) keeps `survey_cover` (0..1).
   - It rises with searcher-days over the land worked: about 1 searcher per 60 people keeps it near 0.6 over a few years.
