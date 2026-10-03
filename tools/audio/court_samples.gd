@@ -16,7 +16,7 @@ var out_dir:=""
 func _init()->void:
 	call_deferred("_run")
 
-func _save(name:String,samples:PackedFloat32Array,peak:=0.0)->void:
+func _save(name:String,samples:PackedFloat32Array,peak:=0.7)->void:
 	var s:=Synth.to_stream(samples,peak)
 	var path:=out_dir.path_join(name+".wav")
 	s.save_to_wav(path)

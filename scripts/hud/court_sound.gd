@@ -74,6 +74,36 @@ const BEAT_CUES:={
 	"bleat":["goat_bleat",0.0,0.0],"chew":["goat_chew",0.0,0.0],"nibble":["goat_chew",-2.0,0.0],"lie_down":["rustle",-8.0,0.3],
 	"bark":["dog_bark",0.0,0.0],
 }
+## The sounds the director's beats name (court_director.gd SOUNDS: a beat
+## lowered to {act: "sound", args: {name, gain, pace?, people?, words?, who}}),
+## as cues: [cue, dB offset, variant (-1 any)]. Any cue name of
+## court_foley.gd CUES is also heard as itself. footsteps, murmur_cut and the
+## babble_* names are handled on their own (footsteps(), hush(), voice()).
+const SOUND_NAMES:={
+	"snore":["snore",0.0,-1],"growl":["stomach_growl",0.0,-1],"cough_fought":["cough_fought",0.0,-1],"cough":["cough",0.0,-1],
+	"creak":["creak",0.0,-1],"swallow":["swallow",0.0,-1],"gasp":["gasp",0.0,-1],"gasp_room":["room_gasp",0.0,-1],
+	"snort_laugh":["snort_laugh",0.0,-1],"bowl_clatter":["bowl_drop",0.0,-1],"bundle_thud_grunt":["bundle_thud",0.0,-1],
+	"grunt":["grunt",0.0,-1],"faint_thump":["faint_thump",0.0,-1],"body_floor":["faint_thump",-4.0,-1],
+	"dog_whimper":["dog_whimper",0.0,-1],"dog_sniff":["dog_sniff",0.0,-1],"dog_flop":["dog_flop",0.0,-1],"dog_bark":["dog_bark",0.0,-1],
+	"goat_bleat":["goat_bleat",0.0,-1],"goat_chew":["goat_chew",0.0,-1],"goat_nibble":["goat_chew",-3.0,-1],
+	"thud_wood":["bump",0.0,1],"stamp":["stamp",0.0,-1],"breath_out":["breath_out",0.0,-1],"slap_air":["whoosh",0.0,-1],"slap":["slap",0.0,-1],
+	"yawn":["yawn",0.0,-1],"knees_knock":["knees_knock",0.0,-1],"kneel_cloth":["kneel_cloth",0.0,-1],"oof":["oof",0.0,-1],
+	"shh":["shush",0.0,-1],"throat_clear":["ahem",0.0,-1],"babble_ahem":["ahem",0.0,-1],"sniff":["sniff",0.0,-1],
+	"snort_wake":["snort_wake",0.0,-1],"reed_scratch":["scribble",0.0,-1],"soft_clap":["soft_clap",0.0,-1],"yelp_small":["yelp_small",0.0,-1],
+	"snatch":["snatch",0.0,-1],"shoo":["shoo",0.0,-1],"laugh":["laugh",0.0,-1],"sigh":["sigh",0.0,-1],"hum_yes":["hum_yes",0.0,-1],
+	"rustle":["rustle",0.0,-1],"scuff":["scuff",0.0,-1],"whoosh":["whoosh",0.0,-1],"hmph":["hmph",0.0,-1],
+}
+## Footsteps by pace: [seconds, steps a second, cue, dB].
+const PACES:={"walk":[1.6,1.8,"step",0.0],"shuffle":[1.1,2.6,"scuff",-2.0],"hurry":[1.0,2.8,"step",0.0],"stomp":[1.4,2.2,"step",4.0],"run":[0.9,3.6,"step",1.0]}
+## The babble a beat may ask for: [whisper, mood, seconds a word].
+const BABBLES:={"babble_mutter":[true,"neutral",0.28],"whisper_babble":[true,"neutral",0.26],"babble_count":[true,"neutral",0.3],
+	"babble_thanks":[false,"warm",0.22]}
+## When the director names its own sounds, the stage's acts it leaves silent
+## may still rustle: cloth and hands only, never a voice (the director
+## decides who is heard; the room's gasp is heard once).
+const QUIET_ACTS:=["bow","bow_deep","bow_small","double_bow","copy","sit_down","smooth_clothes","brush_sleeve","flinch","rub_hands","wring_hands",
+	"sharpen_spear","shake_hand","tremble"]
+
 ## Acts that are walking: footsteps for their length.
 const WALK_ACTS:={"storm_off":1.6,"bolt":1.0,"hurry":0.9,"hurry_round":1.2,"enter_wrong":1.0,"come_back":1.4,"come_back_for":1.4,"hurry_after":0.9,
 	"back_out_bowing":2.0,"walk_in":2.0,"walk_out":2.0,"step_back":0.5,"make_room":0.6}
@@ -336,15 +366,65 @@ func _now()->float:
 	return float(Time.get_ticks_msec())/1000.0
 
 ## Footsteps for a while at a body: earth or wood by the set; pace in steps a second.
-func footsteps(body:Node3D,seconds:float,pace:=1.8,heavy:=false)->void:
+func footsteps(body:Node3D,seconds:float,pace:=1.8,heavy:=false,cue_name:="step",db:=0.0)->void:
 	if not can_play():return
-	var name:="step_wood" if set_kind in WOOD_FLOORS else "step_earth"
+	var name:=cue_name
+	if cue_name=="step":name="step_wood" if set_kind in WOOD_FLOORS else "step_earth"
 	var t:=0.0
 	var k:=0
 	while t<seconds:
-		_queue.append({"at":_now()+t,"name":name,"body":body,"opts":{"variant":k%4,"db":(3.0 if heavy else 0.0)+_rng.randf_range(-2.0,1.0)}})
+		_queue.append({"at":_now()+t,"name":name,"body":body,"opts":{"variant":k%4,"db":db+(3.0 if heavy else 0.0)+_rng.randf_range(-2.0,1.0)}})
 		t+=1.0/pace*_rng.randf_range(0.92,1.08);k+=1
 	_ensure_timer()
+
+## Footsteps at one of the director's paces: walk, shuffle, hurry, stomp, run.
+func steps_at_pace(body:Node3D,pace:String,db:=0.0)->void:
+	var p:Array=PACES.get(pace,PACES.walk)
+	footsteps(body,float(p[0]),float(p[1]),false,String(p[2]),float(p[3])+db)
+
+## Whether a sound name (the director's or a cue's) is one this court can make.
+static func knows(name:String)->bool:
+	return SOUND_NAMES.has(name) or Foley.CUES.has(name) or BABBLES.has(name) or name in ["footsteps","murmur_cut","snort_wake","mutter"]
+
+## One of the director's sounds by name ({name, gain, pace?, people?,
+## words?, dur?, text?}) at a body. Returns whether it will sound.
+func sound(args:Dictionary,body:Node3D=null,who:="")->bool:
+	var name:=String(args.get("name",""))
+	if name.is_empty():return false
+	var db:=clampf(linear_to_db(maxf(0.05,float(args.get("gain",0.8))))+2.0,-18.0,4.0)
+	if name=="murmur_cut":
+		hush(float(args.get("dur",2.0)))
+		return true
+	if not can_play():return false
+	if name=="footsteps":
+		steps_at_pace(body,String(args.get("pace","walk")),db)
+		return true
+	if BABBLES.has(name):
+		var spec:Array=BABBLES[name]
+		var words:=maxi(1,int(args.get("words",4)))
+		var text:=String(args.get("text",""))
+		if text.is_empty():text=_babble_text(words)
+		var fig:=_figure(who)
+		var secs:=clampf(float(words)*float(spec[2]),0.6,3.0)
+		var mood:String=String(spec[1]) if not bool(spec[0]) else _mood_of(fig)
+		return voice(body,text,secs,mood,String(args.get("people","")),{"person":_person(fig),"whisper":bool(spec[0]),"db":db,"kind":_kind_of(who)})
+	var cue_name:=name
+	var variant:=-1
+	if SOUND_NAMES.has(name):
+		var m:Array=SOUND_NAMES[name]
+		cue_name=String(m[0]);db+=float(m[1]);variant=int(m[2])
+	elif not Foley.CUES.has(name):return false
+	var opts:={"db":db,"delay":float(args.get("delay",0.0))}
+	if variant>=0:opts["variant"]=variant
+	if cue_name in ["gasp","snort_laugh","laugh","cough","cough_fought","ahem","hmph","yawn","sigh","hum_yes","oof","grunt","yelp_small"]:
+		opts["variant"]=_register_variant(cue_name,who)
+	return cue(cue_name,body,opts)
+
+func _babble_text(words:int)->String:
+	var out:PackedStringArray=PackedStringArray()
+	var pool:=["ka","lo","mena","ti","sura","na","re","vo","bado","di"]
+	for i in words:out.append(pool[_rng.randi_range(0,pool.size()-1)])
+	return " ".join(out)
 
 # =============================================================================
 # Voices
@@ -373,6 +453,7 @@ func voice(body:Node3D,text:String,seconds:float,mood:Variant="neutral",people_i
 	# Our people at a god's temper: dread puts fear in every voice.
 	if owner=="player" and facts.has("dread"):
 		feel["fear"]=maxf(float(feel.fear),clampf((float(facts.dread)-0.5)*0.8,0.0,0.4))
+	if not whisper:_duck(seconds)
 	var token:=_next_token()
 	var id:=body.get_instance_id() if body!=null else 0
 	_talk[id]=token
@@ -388,6 +469,19 @@ func voice(body:Node3D,text:String,seconds:float,mood:Variant="neutral",people_i
 		if still!=null:still.call_deferred("_voice_ready",s,id,token,started,db)
 	,false,"court voice"))
 	return true
+
+## The crowd talks lower while someone speaks up, and comes back after.
+func _duck(seconds:float)->void:
+	var p:AudioStreamPlayer=_beds.get("murmur",null)
+	if p==null or not p.playing or _hushed:return
+	var level:=float(_bed_db.get("murmur",-16.0))
+	var old:Tween=_bed_tweens.get("murmur",null)
+	if old!=null and old.is_valid():old.kill()
+	var tw:=create_tween()
+	tw.tween_property(p,"volume_db",level-8.0,0.35).set_trans(Tween.TRANS_SINE)
+	tw.tween_interval(maxf(0.2,seconds))
+	tw.tween_property(p,"volume_db",level,1.4).set_trans(Tween.TRANS_SINE)
+	_bed_tweens["murmur"]=tw
 
 func _next_token()->int:
 	_token+=1
@@ -524,7 +618,7 @@ func hush(on:Variant=true)->void:
 		_hush_began=_now()
 		# the cut is sharp: that is the joke
 		_fade("murmur",-80.0,0.06)
-		_fade("fire",float(_bed_db.get("fire",-17.0))-5.0,0.25)
+		_fade("fire",float(_bed_db.get("fire",-20.0))-4.0,0.25)
 		_fade("wind",float(_bed_db.get("wind",-26.0))-3.0,0.4)
 		_ensure_timer()
 	elif _hush_until<=_now() and _hushed:
@@ -660,9 +754,12 @@ func on_event(kind:String,data:Dictionary={})->void:
 					tw.tween_property(wind,"volume_db",level+7.0,0.8).set_trans(Tween.TRANS_SINE)
 					tw.tween_property(wind,"volume_db",level-3.0,2.4).set_trans(Tween.TRANS_SINE)
 					_bed_tweens["wind"]=tw
+				# the swell under it darkens to wrath
+				god("",2.6,"wrath")
 				cue("god_wrath_boom",null,{"db":0.0 if action in ["strike_down","cast_out","smite"] else -6.0})
 				if not action.begins_with("envoy_kill"):cue("room_gasp",null,{"delay":0.35})
 			elif action in FAVOUR:
+				god("",2.0,"favour")
 				cue("hum_yes",null,{"db":-6.0,"delay":0.9})
 		"enter":
 			var fig:=_figure(String(data.get("who","")))
@@ -703,13 +800,30 @@ func on_beat(beat:Dictionary,body:Node3D=null)->void:
 		"aside":
 			var fig:=_figure(who)
 			var text:=String(args.get("text",""))
+			var heard:Dictionary=args.get("sound",{}) if args.get("sound") is Dictionary else {}
 			if fig!=null and not text.is_empty():
-				voice(body if body!=null else _body(fig),text,clampf(text.length()*0.03,0.8,2.6),_mood_of(fig),"",{"person":_person(fig),"whisper":true,"kind":_kind_of(who)})
+				var db:=clampf(linear_to_db(maxf(0.05,float(heard.get("gain",0.6))))+2.0,-12.0,3.0) if not heard.is_empty() else 0.0
+				voice(body if body!=null else _body(fig),text,clampf(text.length()*0.03,0.8,2.6),_mood_of(fig),String(heard.get("people","")),{"person":_person(fig),"whisper":true,"kind":_kind_of(who),"db":db})
+			return
+		"sound":
+			sound(args,body if body!=null else _body_of(who),who)
 			return
 		"play":pass
 		_:return
 	var name:=String(args.get("beat",args.get("clip","")))
-	sound_for_act(name,who,body,args)
+	# The director that names its sounds is the one who decides who is heard.
+	if director_names_sounds() and not name in QUIET_ACTS:return
+	sound_for_act(name,who,body if body!=null else _body_of(who),args)
+
+## Whether the installed director lowers its own "sound" beats (court_director.gd SOUNDS).
+static var _names_sounds:=-1
+static func director_names_sounds()->bool:
+	if _names_sounds<0:
+		_names_sounds=0
+		if ResourceLoader.exists("res://scripts/hud/court_director.gd"):
+			var script:GDScript=load("res://scripts/hud/court_director.gd")
+			if script!=null and script.get_script_constant_map().has("SOUNDS"):_names_sounds=1
+	return _names_sounds==1
 
 ## The sound of one of the director's acts by `who` at `body`.
 func sound_for_act(act:String,who:String,body:Node3D,args:Dictionary={})->bool:
@@ -761,6 +875,17 @@ func _someone_in_crowd()->Node3D:
 func _figure(who:String)->Object:
 	if stage==null or who.is_empty() or not stage.has_method("figure"):return null
 	return stage.call("figure",who)
+
+## Where `who` stands: their figure, or the set's beast for an animal.
+func _body_of(who:String)->Node3D:
+	var b:=_body(_figure(who))
+	if b!=null:return b
+	var kind:=_kind_of(who)
+	var court_set:Variant=stage.get("court_set") if stage!=null else null
+	if kind in ["dog","goat","hen"] and court_set is Node3D and is_instance_valid(court_set) and (court_set as Node3D).has_method("animal"):
+		var beast:Variant=(court_set as Node3D).call("animal",kind)
+		if beast is Node3D and is_instance_valid(beast):return beast
+	return null
 
 func _body(fig:Object)->Node3D:
 	if fig==null:return null

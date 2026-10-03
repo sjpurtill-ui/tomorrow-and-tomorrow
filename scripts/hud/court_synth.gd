@@ -126,6 +126,10 @@ static func lowpass(buf:PackedFloat32Array,cutoff:float)->void:
 	for i in buf.size():
 		y+=a*(buf[i]-y);buf[i]=y
 
+## Two-pole low-pass (two one-poles), in place: a thump stays a thump.
+static func lowpass2(buf:PackedFloat32Array,cutoff:float)->void:
+	lowpass(buf,cutoff);lowpass(buf,cutoff)
+
 ## One-pole high-pass, in place.
 static func highpass(buf:PackedFloat32Array,cutoff:float)->void:
 	var a:=1.0-exp(-TAU*clampf(cutoff,10.0,NYQUIST)/RATE)

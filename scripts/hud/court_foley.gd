@@ -78,17 +78,27 @@ const CUES:={
 	"bird":{"variants":6,"db":-24.0,"kind":"weather"},
 	"crow":{"variants":2,"db":-26.0,"kind":"weather"},
 	"god_wrath_boom":{"variants":2,"db":-6.0,"kind":"god"},
+	"grunt":{"variants":3,"db":-12.0,"kind":"voice"},
+	"dog_flop":{"variants":2,"db":-15.0,"kind":"animal"},
+	"whoosh":{"variants":3,"db":-16.0,"kind":"thing"},
+	"kneel_cloth":{"variants":3,"db":-14.0,"kind":"thing"},
+	"sniff":{"variants":2,"db":-14.0,"kind":"voice"},
+	"soft_clap":{"variants":2,"db":-13.0,"kind":"thing"},
+	"yelp_small":{"variants":3,"db":-12.0,"kind":"voice"},
+	"snatch":{"variants":2,"db":-14.0,"kind":"thing"},
+	"shoo":{"variants":2,"db":-13.0,"kind":"voice"},
+	"scuff":{"variants":4,"db":-19.0,"kind":"thing"},
 }
 
 ## Beds that loop under the room: seconds long, seamless.
 const BEDS:={
-	"fire":{"seconds":7.0,"db":-17.0},
-	"wind_soft":{"seconds":11.0,"db":-26.0},
-	"wind_hard":{"seconds":11.0,"db":-17.0},
-	"wind_indoor":{"seconds":11.0,"db":-27.0},
-	"murmur_small":{"seconds":9.0,"db":-27.0},
-	"murmur":{"seconds":9.0,"db":-23.0},
-	"murmur_hall":{"seconds":9.0,"db":-20.0},
+	"fire":{"seconds":7.0,"db":-20.0},
+	"wind_soft":{"seconds":11.0,"db":-28.0},
+	"wind_hard":{"seconds":11.0,"db":-19.0},
+	"wind_indoor":{"seconds":11.0,"db":-29.0},
+	"murmur_small":{"seconds":9.0,"db":-19.0},
+	"murmur":{"seconds":9.0,"db":-16.0},
+	"murmur_hall":{"seconds":9.0,"db":-14.0},
 	"room":{"seconds":6.0,"db":-38.0},
 }
 
@@ -174,6 +184,16 @@ static func make(name:String,variant:=0)->PackedFloat32Array:
 		"bird":b=bird(v,rng)
 		"crow":b=crow(v,rng)
 		"god_wrath_boom":b=god_boom(v,rng)
+		"grunt":b=grunt(v,rng)
+		"dog_flop":b=dog_flop(v,rng)
+		"whoosh":b=whoosh(v,rng)
+		"kneel_cloth":b=kneel_cloth(v,rng)
+		"sniff":b=sniff(v,rng)
+		"soft_clap":b=soft_clap(v,rng)
+		"yelp_small":b=yelp_small(v,rng)
+		"snatch":b=snatch(v,rng)
+		"shoo":b=shoo(v,rng)
+		"scuff":b=scuff(v,rng)
 		"god_swell_wrath":b=god_swell(true,rng)
 		"god_swell_favour":b=god_swell(false,rng)
 		"god_swell":b=god_swell(false,rng)
@@ -307,9 +327,10 @@ static func cough(v:int,rng:RandomNumberGenerator,fought:bool)->PackedFloat32Arr
 	if fought:
 		Synth.lowpass(b,900.0)
 		# the cheeks puff
-		var thump:=Synth.white(0.03,rng)
-		Synth.lowpass(thump,200.0)
-		Synth.mix_into(b,thump,Synth.n_of(0.02),2.0)
+		var thump:=Synth.white(0.04,rng)
+		Synth.lowpass2(thump,220.0)
+		Synth.shape(thump,[[0.0,0.0],[0.006,1.0],[0.04,0.0]])
+		Synth.mix_into(b,thump,Synth.n_of(0.02),3.0)
 	return b
 
 ## A swallow you can hear across the room: a wet click, the gulp, a smaller click.
@@ -343,18 +364,18 @@ static func knees_knock(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 static func faint_thump(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	var b:=Synth.buffer(1.0)
 	var cloth:=rustle(v,rng,0.25)
-	Synth.mix_into(b,cloth,0,0.4)
+	Synth.mix_into(b,cloth,0,0.2)
 	var thud:=Synth.tone(Synth.track(0.4,[[0.0,62.0],[0.4,38.0]]),[1.0,0.4])
 	Synth.shape(thud,[[0.0,0.0],[0.006,1.0],[0.06,0.5],[0.4,0.0]])
 	Synth.mix_into(b,thud,Synth.n_of(0.2),1.0)
 	var dirt:=Synth.white(0.08,rng)
-	Synth.lowpass(dirt,600.0)
+	Synth.lowpass2(dirt,450.0)
 	Synth.shape(dirt,[[0.0,1.0],[0.08,0.0]])
 	Synth.mix_into(b,dirt,Synth.n_of(0.2),0.6)
 	var voice:=_room_voice(v,61)
 	var huff:=Voice.gesture(voice,[[0.02,"y",0.0,0.0,1.0],[0.12,"y",0.0,0.5,1.0],[0.05,"y",0.0,0.0,1.0]],rng.randi())
 	Synth.mix_into(b,huff,Synth.n_of(0.24),0.35)
-	Synth.mix_into(b,rustle(v+1,rng,0.3),Synth.n_of(0.5),0.25)
+	Synth.mix_into(b,rustle(v+1,rng,0.3),Synth.n_of(0.5),0.1)
 	return b
 
 ## Cloth moving: a soft rustle of a few rubs.
@@ -396,9 +417,10 @@ static func creak(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 		t+=period
 	for k in modes.size():
 		var ring:=imp.duplicate()
-		Synth.resonate(ring,float(modes[k]),18.0+k*14.0)
-		Synth.mix_into(b,ring,0,[1.0,0.7,0.45,0.25][k]*float(modes[k])/400.0)
+		Synth.bandpass(ring,float(modes[k]),[14.0,16.0,18.0,20.0][k])
+		Synth.mix_into(b,ring,0,[1.0,0.65,0.35,0.15][k])
 	Synth.highpass(b,150.0)
+	Synth.lowpass(b,4500.0)
 	return b
 
 ## A wooden bowl hits the earth floor, bounces, then rolls on its rim faster
@@ -437,10 +459,10 @@ static func bundle_thud(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	Synth.shape(thud,[[0.0,0.0],[0.005,1.0],[0.05,0.6],[0.35,0.0]])
 	Synth.mix_into(b,thud,Synth.n_of(0.17),1.0)
 	var dirt:=Synth.white(0.1,rng)
-	Synth.lowpass(dirt,900.0)
+	Synth.lowpass2(dirt,500.0)
 	Synth.shape(dirt,[[0.0,1.0],[0.1,0.0]])
-	Synth.mix_into(b,dirt,Synth.n_of(0.17),0.5)
-	Synth.mix_into(b,rustle(v,rng,0.4),Synth.n_of(0.2),0.3)
+	Synth.mix_into(b,dirt,Synth.n_of(0.17),1.2)
+	Synth.mix_into(b,rustle(v,rng,0.4),Synth.n_of(0.2),0.12)
 	return b
 
 ## Straining under a load: "nnnngh", shaking.
@@ -459,7 +481,7 @@ static func heave(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 static func step(v:int,rng:RandomNumberGenerator,wood:bool)->PackedFloat32Array:
 	var b:=Synth.buffer(0.3)
 	var heel:=Synth.white(0.07,rng)
-	Synth.lowpass(heel,260.0 if not wood else 500.0)
+	Synth.lowpass2(heel,240.0 if not wood else 420.0)
 	Synth.shape(heel,[[0.0,0.0],[0.004,1.0],[0.07,0.0]])
 	Synth.mix_into(b,heel,Synth.n_of(0.005),1.0)
 	if wood:
@@ -468,11 +490,11 @@ static func step(v:int,rng:RandomNumberGenerator,wood:bool)->PackedFloat32Array:
 		# grit under the sole
 		var t:=0.02
 		while t<0.09:
-			Synth.burst(b,t,0.002,rng.randf_range(2500.0,5000.0),2.0,rng.randf_range(0.03,0.09),rng)
+			Synth.burst(b,t,0.002,rng.randf_range(2500.0,4500.0),2.0,rng.randf_range(0.015,0.045),rng)
 			t+=rng.randf_range(0.004,0.015)
 	# the toe comes down a breath later
 	var toe:=Synth.white(0.04,rng)
-	Synth.lowpass(toe,400.0)
+	Synth.lowpass2(toe,320.0)
 	Synth.shape(toe,[[0.0,0.0],[0.003,1.0],[0.04,0.0]])
 	Synth.mix_into(b,toe,Synth.n_of(0.07+0.01*v),0.5)
 	return b
@@ -489,8 +511,8 @@ static func dog_whimper(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 		var p:=Synth.track(d,[[0.0,720.0+v*40.0],[d*0.4,1050.0+rng.randf_range(-40,60)],[d,800.0]])
 		for i in p.size():p[i]*=1.0+0.035*sin(TAU*6.5*float(i)/RATE)
 		var w:=Synth.tone(p,[1.0,0.35,0.12])
-		var air:=Synth.white(d,rng,0.15)
-		Synth.bandpass(air,1600.0,1.0)
+		var air:=Synth.white(d,rng,0.05)
+		Synth.bandpass(air,1400.0,1.5)
 		for i in w.size():w[i]+=air[i]
 		Synth.shape(w,[[0.0,0.0],[0.05,1.0],[d*0.7,0.8],[d,0.0]])
 		Synth.mix_into(b,w,Synth.n_of(0.02+k*0.48),0.8 if k==0 else 1.0)
@@ -609,9 +631,94 @@ static func breath_out(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	var voice:=_room_voice(v,163)
 	return Voice.gesture(voice,[[0.04,"a",0.0,0.3,1.0],[0.4,"y",0.0,0.6,1.0],[0.15,"y",0.0,0.0,1.0]],rng.randi())
 
+## An effort: "hnh" (0), a longer strained "nnnh" (1), a woman's (2).
+static func grunt(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var voice:=_room_voice(1 if v==2 else 0,181)
+	voice["oq"]=0.44;voice["breath"]=0.25
+	if v==1:voice["tremor"]=0.04;voice["tremor_hz"]=9.0
+	var hold:=0.12 if v!=1 else 0.38
+	return Voice.gesture(voice,[[0.015,"y",0.0,0.0,1.0],[0.03,"y",0.0,0.7,1.0],[hold,"y",0.85,0.25,1.1 if v!=1 else 1.2,0.5],[0.08,"y",0.0,0.5,0.85],[0.04,"y",0.0,0.0,0.8]],rng.randi())
+
+## A frightened little yelp: "ip!"
+static func yelp_small(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var voice:=_room_voice([1,0,2][v],191)
+	voice["breath"]=0.3
+	return Voice.gesture(voice,[[0.01,"i",0.0,0.0,1.0],[0.02,"i",0.0,0.6,1.3],[0.07,"i",1.0,0.2,1.65],[0.04,"i",0.0,0.1,1.5]],rng.randi())
+
+## A sniff through the nose (a person's: disdain, a cold).
+static func sniff(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.35)
+	var s:=Synth.white(0.16+0.06*v,rng)
+	Synth.bandpass(s,1500.0+v*300.0,1.1)
+	Synth.shape(s,[[0.0,0.0],[0.03,1.0],[0.12,0.6],[0.16+0.06*v,0.0]])
+	Synth.mix_into(b,s,Synth.n_of(0.01),1.0)
+	return b
+
+## Shooing an animal off: "sh! sh!" with a flap of the hand.
+static func shoo(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.7)
+	for k in 2:
+		var d:=0.14
+		var s:=Synth.white(d,rng)
+		Synth.bandpass(s,2900.0+v*200.0,1.6)
+		Synth.shape(s,[[0.0,0.0],[0.015,1.0],[d*0.6,0.7],[d,0.0]])
+		Synth.mix_into(b,s,Synth.n_of(0.02+k*0.24),1.0 if k==0 else 0.8)
+	Synth.mix_into(b,whoosh(v,rng),Synth.n_of(0.05),0.4)
+	return b
+
 # =============================================================================
 # Small business of hands and things
 # =============================================================================
+
+## Air moved by a hand or a sleeve: a swat that misses, a wave, a quick turn.
+static func whoosh(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=0.18+0.05*v
+	var b:=Synth.pink(d,rng,1.0)
+	var c:=Synth.track(d,[[0.0,500.0],[d*0.5,1400.0+v*300.0],[d,700.0]])
+	Synth.bandpass_track(b,_frames(c),1.2)
+	Synth.shape(b,[[0.0,0.0],[d*0.5,1.0],[d,0.0]])
+	return b
+
+## Going down on a knee: the cloth, then the knee on the floor.
+static func kneel_cloth(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.8)
+	Synth.mix_into(b,rustle(v,rng,0.45),0,0.7)
+	var knee:=Synth.white(0.06,rng)
+	Synth.lowpass(knee,300.0)
+	Synth.shape(knee,[[0.0,0.0],[0.004,1.0],[0.06,0.0]])
+	Synth.mix_into(b,knee,Synth.n_of(0.32+0.04*v),1.2)
+	var bone:=Synth.tone(Synth.track(0.08,[[0.0,140.0],[0.08,95.0]]))
+	Synth.shape(bone,[[0.0,0.0],[0.004,1.0],[0.08,0.0]])
+	Synth.mix_into(b,bone,Synth.n_of(0.32+0.04*v),0.4)
+	return b
+
+## A quiet clap or two: hands that mean well.
+static func soft_clap(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.9)
+	for k in 2+v:
+		Synth.burst(b,0.02+k*0.27,0.014,rng.randf_range(1100.0,1500.0),0.9,rng.randf_range(0.7,1.0),rng)
+		var cup:=Synth.tone(Synth.track(0.03,[[0.0,420.0],[0.03,380.0]]))
+		Synth.shape(cup,[[0.0,0.0],[0.002,1.0],[0.03,0.0]])
+		Synth.mix_into(b,cup,Synth.n_of(0.02+k*0.27),0.25)
+	return b
+
+## Something snatched up: a quick sleeve and a grab.
+static func snatch(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.45)
+	Synth.mix_into(b,whoosh(v,rng),0,0.8)
+	Synth.burst(b,0.16,0.01,900.0+v*300.0,0.8,0.6,rng)
+	Synth.mix_into(b,rustle(v+2,rng,0.2),Synth.n_of(0.17),0.4)
+	return b
+
+## Feet shuffled over earth.
+static func scuff(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=0.22+0.04*v
+	var b:=Synth.white(d,rng)
+	Synth.lowpass(b,1400.0)
+	var grit:=Synth.wander(d,0.006,rng,0.3,1.0)
+	for i in b.size():b[i]*=grit[i]
+	Synth.shape(b,[[0.0,0.0],[0.03,1.0],[d*0.7,0.6],[d,0.0]])
+	return b
 
 ## A stone worked along a spear point: three slow strokes, "shhk".
 static func spear_sharpen(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
@@ -687,6 +794,19 @@ static func bump(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	Synth.mix_into(b,thud,Synth.n_of(0.005),1.0)
 	if v==1:Synth.modal(b,0.005,[Vector3(240,0.5,0.08),Vector3(620,0.25,0.04)],rng)
 	Synth.mix_into(b,rustle(v,rng,0.2),0,0.3)
+	return b
+
+## The dog flops down: a soft weight on the earth and a sigh through the nose.
+static func dog_flop(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.9)
+	var thud:=Synth.white(0.12,rng)
+	Synth.lowpass(thud,250.0)
+	Synth.shape(thud,[[0.0,0.0],[0.006,1.0],[0.12,0.0]])
+	Synth.mix_into(b,thud,Synth.n_of(0.02),1.0)
+	var huff:=Synth.white(0.35,rng)
+	Synth.bandpass(huff,900.0+v*200.0,1.0)
+	Synth.shape(huff,[[0.0,0.0],[0.05,1.0],[0.35,0.0]])
+	Synth.mix_into(b,huff,Synth.n_of(0.3),0.35)
 	return b
 
 # =============================================================================
@@ -874,7 +994,7 @@ static func bed(name:String,rng:RandomNumberGenerator)->PackedFloat32Array:
 ## fine crackle in it (the pops and hisses come on top, at random).
 static func fire_bed(d:float,rng:RandomNumberGenerator)->PackedFloat32Array:
 	var roar:=Synth.pink(d,rng,1.0)
-	Synth.lowpass(roar,700.0)
+	Synth.lowpass2(roar,600.0)
 	Synth.highpass(roar,60.0)
 	var flutter:=Synth.wander(d,0.11,rng,0.35,1.0)
 	var slow:=Synth.wander(d,1.3,rng,0.6,1.0)
@@ -920,7 +1040,7 @@ static func murmur_bed(d:float,rng:RandomNumberGenerator,people:int)->PackedFloa
 		var turns:=Synth.wander(d,rng.randf_range(1.2,2.6),rng,0.0,1.0)
 		for i in mini(talk.size(),turns.size()):talk[i]*=smoothstep(0.35,0.7,turns[i])
 		Synth.mix_into(b,talk,0,rng.randf_range(0.5,1.0))
-	Synth.lowpass(b,1300.0)
+	Synth.lowpass(b,2000.0)
 	var air:=Synth.pink(d,rng,0.04)
 	Synth.lowpass(air,800.0)
 	for i in b.size():b[i]+=air[i]

@@ -184,31 +184,46 @@ func test_the_hush_cuts_the_murmur()->void:
 	sound.call("god","Be still.",1.5,"favour")
 	assert_bool(sound.call("hushed")).is_true()
 
-func test_the_directors_heard_acts_have_sounds()->void:
+func test_every_sound_the_director_names_is_made()->void:
 	for act in Sound.BEAT_CUES:
 		var name:=String(Sound.BEAT_CUES[act][0])
 		if name.is_empty() or name in ["mutter","snort_wake"]:continue
 		assert_bool(Foley.CUES.has(name)).override_failure_message("%s -> %s is not a sound" % [act,name]).is_true()
-	if ResourceLoader.exists("res://scripts/hud/court_director.gd"):
-		var consts:Dictionary=(load("res://scripts/hud/court_director.gd") as GDScript).get_script_constant_map()
-		var acts:Dictionary=consts.get("ACTS",{}) if consts.get("ACTS") is Dictionary else {}
-		if not acts.is_empty():
-			# the director's silent-room bits are all heard
-			for act in ["snore","stomach_growl","floor_creak","swallow_loud","stifle_cough","drop_bowl","gasp","knees_knock","faint","bleat","whimper","sniff","set_down_bundle","stifle_laugh"]:
-				assert_bool(acts.has(act)).override_failure_message("director has no %s" % act).is_true()
-				assert_bool(Sound.BEAT_CUES.has(act)).is_true()
+	for key in Sound.SOUND_NAMES:
+		var cue:=String(Sound.SOUND_NAMES[key][0])
+		assert_bool(Foley.CUES.has(cue) or cue=="snort_wake").override_failure_message("%s -> %s is not a sound" % [key,cue]).is_true()
+	if not ResourceLoader.exists("res://scripts/hud/court_director.gd"):return
+	var consts:Dictionary=(load("res://scripts/hud/court_director.gd") as GDScript).get_script_constant_map()
+	var sounds:Dictionary=consts.get("SOUNDS",{}) if consts.get("SOUNDS") is Dictionary else {}
+	for act in sounds:
+		var name:=String(sounds[act][0])
+		if name.is_empty():continue
+		assert_bool(Sound.knows(name)).override_failure_message("the director's %s (for %s) is not made" % [name,act]).is_true()
+	if consts.has("HUSH_SOUND"):assert_bool(Sound.knows(String(consts.HUSH_SOUND))).is_true()
+	for name in ["gasp_room","babble_mutter"]:assert_bool(Sound.knows(name)).is_true()
 
-func test_a_beat_plays_its_sound()->void:
+func test_a_sound_beat_plays_its_sound()->void:
 	var made:=_court()
 	var sound:Node=made[1]
 	Sound.set_volume(1.0)
-	sound.call("on_beat",{"t":0.0,"who":"main","act":"play","args":{"clip":"stomach_growl","beat":"stomach_growl"}},null)
+	sound.call("on_beat",{"t":0.0,"who":"main","act":"sound","args":{"name":"growl","gain":0.8,"who":"main"}},null)
 	var heard:Array=sound.get("played")
 	assert_int(heard.size()).is_equal(1)
 	assert_str(String(heard[0].name)).is_equal("stomach_growl")
-	# the mood and the look of the same act are silent
+	# the mood and the look of an act are silent; with a director that names
+	# its sounds, so is the act itself (its sound came as its own beat)
 	sound.call("on_beat",{"t":0.0,"who":"main","act":"mood","args":{"beat":"stomach_growl"}},null)
+	if Sound.director_names_sounds():
+		sound.call("on_beat",{"t":0.0,"who":"main","act":"play","args":{"clip":"stomach_growl","beat":"stomach_growl"}},null)
 	assert_int((sound.get("played") as Array).size()).is_equal(1)
 	# a person does not bleat
-	sound.call("on_beat",{"t":0.0,"who":"main","act":"play","args":{"beat":"bleat"}},null)
+	sound.call("sound_for_act","bleat","main",null,{})
 	assert_int((sound.get("played") as Array).size()).is_equal(1)
+	# the room's hush is a murmur cut
+	sound.call("on_beat",{"t":0.0,"who":"room","act":"sound","args":{"name":"murmur_cut","dur":2.0,"who":"room"}},null)
+	assert_bool(sound.call("hushed")).is_true()
+	# footsteps at a pace are queued, a mutter is a whispered voice
+	sound.call("on_beat",{"t":0.0,"who":"main","act":"sound","args":{"name":"footsteps","pace":"stomp","gain":0.9}},null)
+	assert_int((sound.get("_queue") as Array).size()).is_greater(1)
+	sound.call("on_beat",{"t":0.0,"who":"main","act":"sound","args":{"name":"babble_mutter","words":5,"people":"player","gain":0.5}},null)
+	assert_str(String((sound.get("played") as Array).back().name)).is_equal("voice")
