@@ -1,12 +1,12 @@
 {
  "spec": "path_balanced:74119:15",
- "commit": "5593764e4bd4d5ec87a9e03f72084051699750d3",
+ "commit": "e0201466e5a568ac2964e74a3b453f8101adf546",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "41f6f346c8fa",
   "scripts/society_model.gd": "57748f7541e9",
   "scripts/game_state.gd": "a5ad24315aef",
   "scripts/early_life_conditions.gd": "98edd883a637",
-  "scripts/food_system.gd": "a0b580ac3cb2",
+  "scripts/food_system.gd": "b10391587c2c",
   "scripts/consequence_engine.gd": "9d6098ac7cfe",
   "scripts/research_600_catalog.gd": "64f4b5035937",
   "scripts/technology_eras.gd": "c0bbf4054a38",
@@ -21,7 +21,7 @@
   "scripts/watch_military.gd": "ec1cd7d0af11",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 108.9,
+ "wall_seconds": 109.2,
  "returncode": 0,
- "generated": "2026-10-03 03:43:28"
+ "generated": "2026-10-03 04:36:36"
 }
