@@ -135,6 +135,15 @@ static func ensure(convoy:Dictionary)->Dictionary:
 
 # --------------------------------------------------------------- daily march
 
+## Our roads speed a party while it is still near our towns (within
+## ROADS_KM of one): built_fabric.gd ROAD_SPEED on the realm's roads.
+const ROADS_KM:=25.0
+static func _roads(here:Vector2)->float:
+	for city:Dictionary in WorldSimulation.state.player_settlements:
+		var at:Variant=city.get("position",Vector2.ZERO)
+		if at is Vector2 and (at as Vector2).distance_to(here)<=ROADS_KM:return preload("res://scripts/built_fabric.gd").speed_factor()
+	return 1.0
+
 static func situation(record:Dictionary,days:float)->Dictionary:
 	var population:=maxf(1.0,float(record.get("population",1)))
 	var here:=Leader.position(record)
@@ -147,7 +156,7 @@ static func situation(record:Dictionary,days:float)->Dictionary:
 		"population":population,"water_days":float(record.get("water",0.0))/population,
 		"water_capacity_days":maxf(0.5,float(record.get("water_capacity",population*VESSEL_DAYS))/population),
 		"supported_days":supported,"food_days":food_days,"health":health,
-		"daily_km":SPEED_KM_DAY*float(record.get("speed_scale",1.0))*factor,"days":days,"day":float(WorldSimulation.state.elapsed_days),
+		"daily_km":SPEED_KM_DAY*float(record.get("speed_scale",1.0))*factor*_roads(here),"days":days,"day":float(WorldSimulation.state.elapsed_days),
 	}
 
 ## One calendar step for the owner's expansion caravan. Returns the founding

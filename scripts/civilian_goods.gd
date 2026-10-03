@@ -114,7 +114,8 @@ static func goods_per_maker_day()->float:
 ## The same at full pace (working efficiency 1): what a maker-day of arms
 ## forgoes in goods (weapons_stock.gd cost_per_fighter).
 static func goods_per_maker_day_at_full_pace()->float:
-	return CRAFT_SHARE*BASE_RATE*technique_output()*specialization()
+	# Workshops the builders raised and keep (built_fabric.gd WORKSHOP_MAKING).
+	return CRAFT_SHARE*BASE_RATE*technique_output()*specialization()*preload("res://scripts/built_fabric.gd").making_factor()
 
 ## Makers on arms in the place in scope (its latest day's making): they give
 ## the whole day to arms, so game_state.gd effective_workers("Crafting") leaves

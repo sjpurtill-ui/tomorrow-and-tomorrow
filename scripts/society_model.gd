@@ -440,6 +440,9 @@ func capacity_inputs()->Dictionary:
 		"stewards":float(state.population_allocations.get("Administration",0))/maxf(1.0,population*0.06),
 		"works":float(state.settlement_completed.size()),
 		"treasures":preload("res://scripts/artifact_collection.gd").bonus("culture"),
+		# The built fabric (built_fabric.gd): how good the homes are and the roads.
+		"homes_quality":preload("res://scripts/built_fabric.gd").quality(),
+		"roads":preload("res://scripts/built_fabric.gd").roads(),
 	}
 	for key:String in CAPACITY_EFFECTS: inputs["fx:"+key]=effect(key)
 	# An office holder changes execution, judgment and coordination in the same
@@ -489,8 +492,10 @@ static func capacity_value(dynamic_id:String,inputs:Dictionary,parts:Variant=nul
 			if named: parts.merge({"materials":materials*0.45,"labor":labor*0.30,"fx:tool_quality":tools*0.14,"fx:task_coordination":coordination*0.11})
 		"infrastructure":
 			var housing:=float(inputs.housing);var works:=float(inputs.works);var building:=_fx(inputs,"construction_rate");var resilience:=_fx(inputs,"disaster_resilience")
-			base=clampf(housing*0.38+works/10.0*0.32+building*0.18+resilience*0.12,0.01,1.0)
-			if named: parts.merge({"housing":housing*0.38,"works":works/10.0*0.32,"fx:construction_rate":building*0.18,"fx:disaster_resilience":resilience*0.12})
+			# The built fabric adds (built_fabric.gd INFRA_HOMES, INFRA_ROADS).
+			var homes_quality:=float(inputs.get("homes_quality",0.0));var roads:=float(inputs.get("roads",0.0))
+			base=clampf(housing*0.38+works/10.0*0.32+building*0.18+resilience*0.12+homes_quality*0.10+roads*0.08,0.01,1.0)
+			if named: parts.merge({"housing":housing*0.38,"works":works/10.0*0.32,"fx:construction_rate":building*0.18,"fx:disaster_resilience":resilience*0.12,"homes_quality":homes_quality*0.10,"roads":roads*0.08})
 		"logistics":
 			var hauling:=float(inputs.hauling);var haul:=_fx(inputs,"haul_capacity");var routes:=_fx(inputs,"route_speed");var loss:=_fx(inputs,"storage_loss")
 			base=clampf(hauling*0.55+haul*0.22+routes*0.16+loss*-0.07,0.01,1.0)

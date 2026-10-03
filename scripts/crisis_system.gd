@@ -510,6 +510,8 @@ static func inputs(day:int)->Dictionary:
 	var carrying:=maxf(1.0,float(EARLY_CARE.carrying_capacity(WorldSimulation.state,WorldSimulation.discovery)))
 	return {
 		"pop":pop,"crowd":pop/cap,"dens":clampf(pop/5000.0,0.02,1.0),
+		# How good the homes are (built_fabric.gd): fewer outbreaks and fires.
+		"homes_q":preload("res://scripts/built_fabric.gd").quality(),
 		"health":float(WorldSimulation.state.population_health),"food_days":float(m.get("food_days",30.0)),
 		"intake":float(m.get("food_intake_ratio",1.0)),"shortage_days":float(m.get("food_shortage_days",0.0)),
 		"first_shortage":int(forecast.get("first_shortage_day",-1)),
@@ -578,6 +580,8 @@ static func hazards(day:int,x:Dictionary={},s:Dictionary={})->Dictionary:
 	var sick:=BASE_SICKNESS*exp(1.6*(float(x.crowd)-CROWD_REF)+water_term(float(x.water_q))+1.5*(HEALTH_REF-float(x.health))+0.8*hunger_on+0.6*(float(s.pool)-POOL_REF))*(1.0-0.5*float(x.med))*season_factor
 	if day<int((s.until as Dictionary).get("after_flood",-1)): sick*=2.0
 	if drought_on>0.0: sick*=1.3
+	# Better homes, drier and less crowded within (built_fabric.gd HOME_SICKNESS).
+	sick*=exp(-preload("res://scripts/built_fabric.gd").HOME_SICKNESS*float(x.get("homes_q",0.0)))
 	if bool(flags.get("apart_custom",false)) or (WorldSimulation.actor_id=="player" and unlocked("sickness:apart_plus")): sick*=0.85
 	out["sickness"]=clampf(sick,0.0,3.0)
 	# Emergence of a truly new pestilence (catalog pandemic_emerge), era-scaled.
@@ -587,6 +591,8 @@ static func hazards(day:int,x:Dictionary={},s:Dictionary={})->Dictionary:
 	if _knows(["ember_tending","cookfire_smoke_venting_habit"]): fire*=0.75
 	if bool(flags.get("spaced",false)): fire*=SPACED_FIRE_FACTOR
 	if bool(flags.get("earth",false)): fire*=EARTH_FIRE_FACTOR
+	# Mudbrick and stone do not catch as thatch and timber do (built_fabric.gd HOME_FIRE).
+	fire*=exp(-preload("res://scripts/built_fabric.gd").HOME_FIRE*float(x.get("homes_q",0.0)))
 	if day<int((s.until as Dictionary).get("burn",-1)): fire*=2.0
 	out["fire"]=clampf(fire,0.0,2.0)
 	# Flood: river camps, wet years.

@@ -640,6 +640,8 @@ func _spoilage_rates(traveling:bool)->Array:
 	var covers:=_covers()
 	var carried:=FoodCare.fresh_spoilage_factor(float(covers.carry))
 	var kept:=1.0 if traveling else FoodCare.stored_spoilage_factor(float(covers.keep))
+	# Granaries the builders raised and keep (built_fabric.gd GRANARY_ROT).
+	if not traveling:kept*=preload("res://scripts/built_fabric.gd").granary_factor()
 	var fresh_rate:=float(SPOILAGE[FRESH])*storage_multiplier*fresh_preservation*cooling*(1.0-technique_lever("fresh_spoilage"))*carried
 	var stored_rate:=float(SPOILAGE[STORED])*storage_multiplier*stored_preservation*(1.0-technique_lever("stored_spoilage"))*kept
 	return [fresh_rate,stored_rate]

@@ -1,6 +1,8 @@
 extends Node
 
 const Pathways=preload("res://scripts/knowledge_pathways.gd")
+## [built-fabric] Builders' craft speeds building knowledge (built_fabric.gd).
+const BUILT_FABRIC:=preload("res://scripts/built_fabric.gd")
 const Exchange=preload("res://scripts/society_exchange.gd")
 const OpeningOpportunities=preload("res://scripts/opening_opportunities.gd")
 const ResourceKnowledgeCatalog = preload("res://scripts/resource_knowledge_catalog.gd")
@@ -1847,7 +1849,7 @@ func research_leadership(direction:String)->Dictionary:
 
 func _leader_factor(direction:String)->float:
 	var leadership:=research_leadership(direction)
-	return WorldSimulation.advisors.execution_modifier(leadership.requested_office,leadership.skills)*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)
+	return WorldSimulation.advisors.execution_modifier(leadership.requested_office,leadership.skills)*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)*BUILT_FABRIC.research_multiplier(direction)
 
 ## _leader_factor inside the day's research loop, where no office changes
 ## until a question is answered (which clears `offices`). `offices` keeps each
@@ -1863,7 +1865,7 @@ func _loop_leader_factor(direction:String,offices:Dictionary)->float:
 	var advisor:Dictionary=WorldSimulation.state.leadership_positions.get(executing,{})
 	var execution:float=WorldSimulation.advisors.execution_modifier_for_advisor(advisor,executing,(assignment[1] as Array).duplicate())
 	if executing!=requested: execution*=0.84
-	return clampf(execution,0.28,1.12)*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)
+	return clampf(execution,0.28,1.12)*WorldSimulation.diplomacy.multiplier(direction)*WorldSimulation.figures.multiplier(direction)*WorldSimulation.direction.research_multiplier(direction)*WorldSimulation.communities.multiplier(direction)*BUILT_FABRIC.research_multiplier(direction)
 
 func research_assignment(discovery:Dictionary)->Dictionary:
 	# Read the same assignment and capacity used by the daily simulation. Opening

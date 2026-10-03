@@ -342,6 +342,8 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var household_collection:=total_required*household_access_ratio
 	var organized_collection:=collection_workers*28.0*clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)*distance_factor*(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5))
 	organized_collection*=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("water_collection"))
+	# Wells and water works the builders raised and keep (built_fabric.gd WATERWORKS_WATER).
+	organized_collection*=preload("res://scripts/built_fabric.gd").water_factor()
 	var collection_capacity:=household_collection+organized_collection
 	var flow_factor:=clampf(0.75+accessible_quality*0.25,0.0,1.08)
 	var collected:=minf(total_required*1.35,collection_capacity)*flow_factor if accessible_quality>0.0 else 0.0
@@ -729,6 +731,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var mining_effect:float=preload("res://scripts/research_mechanics.gd").mining_bonus()
 	# The Gathering Yard organises digging and cutting at every deposit (civic_building_effects.gd).
 	var output_bonus:=1.0+WorldSimulation.state.founding_effect("resource_output")+WorldSimulation.progression.effect("extraction_yield")+preload("res://scripts/civic_building_effects.gd").effect("extraction")
+	# Storehouses and yards the builders raised and keep (built_fabric.gd STOREHOUSE_EXTRACTION).
+	output_bonus+=preload("res://scripts/built_fabric.gd").extraction_bonus()
 	var tool_factor:=0.55+float(context.get("tools",0.25))*0.75
 	# Searched land: × (0.75 + 0.5 × cover), an older save's blended in (land_yield_factor).
 	var land_factor:=land_yield_factor()
@@ -811,6 +815,8 @@ func _process_material_flow(context:Dictionary)->Array[Dictionary]:
 	var route_speed_effect:=WorldSimulation.discovery.effect("route_speed")
 	var haul_effect:=1.0+WorldSimulation.discovery.effect("haul_capacity")
 	var travel_effect:=1.0+WorldSimulation.discovery.effect("travel_speed")
+	# Roads the builders lay and keep carry more on every haul (built_fabric.gd ROAD_HAUL).
+	haul_effect*=preload("res://scripts/built_fabric.gd").haul_factor()
 	# As with extraction, each deposit's hauling priority is read once.
 	var haul_priorities:=PackedFloat64Array()
 	haul_priorities.resize(material_deposits.size())

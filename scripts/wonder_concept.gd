@@ -466,6 +466,11 @@ static func assess(concept:Dictionary,owner:String="player",extra:Dictionary={})
 	var builders:=float(s.population_allocations.get("Construction",0))
 	var t:=int(p.tier)
 	var capability:=.35+.08*t+.10*float(MATERIALS[p.material].quality)+.10*talent+.08*minf(1,crafters/10.0)+.05*minf(1,builders/20.0)
+	# The builders' craft, the crews at work and the materials in store
+	# (built_fabric.gd great_capability).
+	var Fabric:=preload("res://scripts/built_fabric.gd")
+	var built:Dictionary=Fabric.great_capability(s,d.cost,extra.get("record",{}))
+	capability+=float(built.total)
 	# A master builder of rare gift (geniuses.gd): their strength x 0.6 more.
 	var gifted:=preload("res://scripts/geniuses.gd").architect_capability(architect)
 	capability+=gifted
@@ -474,6 +479,7 @@ static func assess(concept:Dictionary,owner:String="player",extra:Dictionary={})
 	var ungifted:=clampf(.5+(capability-gifted-demand)*1.4,0,1)
 	factors.append({"name":"Engineering","effect":snappedf(ungifted-.5,.01),"text":"Our builders' knowledge (%s era), %s materials and a %s master builder against a %s design." % [String(ERA_BY_TIER[t]),String(MATERIALS[p.material].word),"gifted" if talent>=.8 else "capable",String(p.ambition)]})
 	if gifted>0.0:factors.append({"name":"Gift","effect":snappedf(engineering-ungifted,.01),"text":"%s has a rare gift for building." % String(architect.get("name","Our master builder"))})
+	factors.append({"name":"Builders","effect":snappedf(float(built.total)*1.4,.01),"text":String(built.words)})
 	var cohesion:=float(m.get("cohesion",.5));var legitimacy:=float(m.get("legitimacy",.5))
 	var fed:=clampf(float(m.get("food_intake_ratio",1.0)),0,1)
 	var war:=_at_war(owner)
@@ -489,7 +495,9 @@ static func assess(concept:Dictionary,owner:String="player",extra:Dictionary={})
 	if absf(shift)>.001:factors.append({"name":"Construction so far","effect":snappedf(shift,.01),"text":"What has happened at the site %s the odds." % ("improved" if shift>0 else "worsened")})
 	var score:=clampf(engineering*.6+social*.4+shift,.02,.98)
 	var daily:=maxf(.1,builders*.2*.8)
-	return {"score":snappedf(score,.001),"engineering":snappedf(engineering,.001),"social":snappedf(social,.001),"factors":factors,"spoken":spoken(score,String(p.ambition),factors,String(architect.get("name",""))),"costs":d.cost,"work":float(d.work),"duration_estimate":roundi(float(d.work)/daily),"odds":odds(score,String(p.ambition))}
+	var payoff:=Fabric.great_payoff(s,gifted>0.0)
+	return {"score":snappedf(score,.001),"engineering":snappedf(engineering,.001),"social":snappedf(social,.001),"factors":factors,"spoken":spoken(score,String(p.ambition),factors,String(architect.get("name",""))),"costs":d.cost,"work":float(d.work),"duration_estimate":roundi(float(d.work)/daily),"odds":odds(score,String(p.ambition)),
+		"builders":built,"payoff":payoff,"stated":Fabric.great_words(built,payoff,odds(score,String(p.ambition)),String(architect.get("name","")) if gifted>0.0 else "")}
 
 static func _at_war(owner:String)->bool:
 	if owner!="player" and not WorldSimulation.actors.has(owner):return false

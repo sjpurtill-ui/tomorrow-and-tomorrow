@@ -209,6 +209,13 @@ var settlement_network_revision:=0
 ## A city's construction era (fabric tier) and overall condition; its built
 ## capacities derive from these and its population (SettlementModel.city_form).
 var city_form:Dictionary={"tier":-1.0,"condition":-1.0}
+## [built-fabric] The town's built fabric (built_fabric.gd): its homes by
+## grade, roads, fine works and work buildings; each town its own
+## (settlement_model.gd CITY_RESOURCE_DEFAULTS). {} until first reckoned.
+var built_fabric:Dictionary={}
+## [built-fabric] The whole people's builders' craft and each town's last
+## fabric reading (built_fabric.gd realm_data); never swapped per town.
+var fabric_realm:Dictionary={}
 var morphology_revision:=0
 var last_morphology_day:=-1
 var resource_deposits: Array[Dictionary] = []
@@ -576,6 +583,8 @@ func reset_for_new_world(new_seed:int)->void:
 	settlement_convoy={}
 	settlement_network_revision=0
 	city_form={"tier":-1.0,"condition":-1.0}
+	built_fabric={}
+	fabric_realm={}
 	morphology_revision=0
 	last_morphology_day=-1
 	resource_deposits=[]
