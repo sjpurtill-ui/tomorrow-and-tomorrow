@@ -390,8 +390,9 @@ func test_steps_start_trial_use_and_a_proof_starts_in_fifteen_households_of_a_hu
 	assert_str(channel).is_not_empty()
 	var id:=String(GameState.active_investigations[channel])
 	var effects:Dictionary=DiscoverySystem.discovery_definition(id).get("effects",{})
-	# A day's work carries it past a third of the evidence: its first cases.
-	GameState.discovery_progress[id]=float(R.STAGES[0])-0.001
+	# A day's work carries it past a third of the evidence: its first cases (a
+	# young people's day is slow: Research600.founding_work).
+	GameState.discovery_progress[id]=float(R.STAGES[0])-0.0002
 	DiscoverySystem.process_day({})
 	var steps:=DiscoverySystem.take_research_steps()
 	var reached:={}

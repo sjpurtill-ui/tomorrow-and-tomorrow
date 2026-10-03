@@ -131,6 +131,11 @@ The user allows play to run ahead of history "within a reasonable deviation", as
   - **Fast sim, 3 seeds.** A sixth of the workers learning reaches writing / bronze / place value at 196 / 297 / 441, about 20-30 years before the floors. A third learning reaches them at 188 / 289 / 430, about 25-40 years before.
   - **Its price.** The third-learning people has 7% fewer people than its old self at 300 and 27% fewer at 600, about half a sensible people's. Its households are stripped of goods, and its making and guard are below sensible.
   - **The usual share.** Sensible and balanced runs are unchanged within a year and within 0.1% of population.
+- **The first ways (2026-10-02 recalibration, PR #121).** A young people learns slowly. Through its first 15 years every question asks 2.2 times the usual work, back to the usual work by year 30 (`Research600.founding_work`).
+  - **Year 16 in the engine:** a fresh balanced village knows about 57 ways, including the 10 it starts with, against 117 before. The learning path knows about 167.
+  - **The first 50-year block:** this puts it nearer the typical 65 in 100 than the high 85.
+  - **Later milestones:** writing, bronze and place value keep their years.
+  - **A lagging people:** it is back at the usual pace from year 30. Its first milestones (pit firing, copper) still come some 15-30 years later in the fast sim.
 
 ## What the game must never show before year 600
 
