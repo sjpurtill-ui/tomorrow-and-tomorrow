@@ -47,8 +47,8 @@ func test_needs_split_fielded_training_and_called_up()->void:
 	assert_int(int(spears.training)).is_equal(4)
 	assert_int(int(spears.deficit)).is_equal(3)
 	assert_int(Logistics.deficit("spear")).is_equal(3)
-	# Called-up watch: the Defense allocation not yet in drill wants clubs.
-	GameState.population_allocations.Defense=25
+	# The watch not yet under arms (watch_military.gd) wants clubs.
+	GameState.population_allocations.Defense=40
 	var called:=Logistics.row("improvised")
 	assert_int(int(called.requisitioned)).is_greater(0)
 	assert_int(int(called.needed)).is_equal(int(called.fielded)+int(called.training)+int(called.requisitioned))

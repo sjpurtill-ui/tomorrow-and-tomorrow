@@ -672,8 +672,10 @@ static func line_cost_per_day(line:String,oph:float=-1.0)->float:
 		"army":
 			var n:=soldiers()
 			return (float(n.at_arms)*PAY_SOLDIER+float(n.reserve)*PAY_RESERVE)*oph
-		"scholars":return maxf(0.0,float(s.effective_workers("Knowledge")))*PAY_SCHOLAR*oph
-		"crews":return maxf(0.0,float(s.effective_workers("Construction")))*PAY_CREW*oph
+		# Wages are paid per head at the work (GameState.workers_at), never
+		# for the extra work a great work's favour or a gifted person adds.
+		"scholars":return maxf(0.0,float(s.workers_at("Knowledge")))*PAY_SCHOLAR*oph
+		"crews":return maxf(0.0,float(s.workers_at("Construction")))*PAY_CREW*oph
 	return 0.0
 
 ## Research pace while the scholars are kept (discovery_system progress).
@@ -1203,8 +1205,8 @@ static func forecast()->Dictionary:
 	var n:=soldiers()
 	var s=WorldSimulation.state
 	var who:={"army":"%s at arms, %s in drill" % [EraWords.grouped(int(n.at_arms)),EraWords.grouped(int(n.reserve))],
-		"scholars":"%s at research" % EraWords.grouped(roundi(float(s.effective_workers("Knowledge")))),
-		"crews":"%s builders" % EraWords.grouped(roundi(float(s.effective_workers("Construction")))),"relief":"towns under %d days of food" % int(HUNGRY_DAYS)}
+		"scholars":"%s at research" % EraWords.grouped(roundi(float(s.workers_at("Knowledge")))),
+		"crews":"%s builders" % EraWords.grouped(roundi(float(s.workers_at("Construction")))),"relief":"towns under %d days of food" % int(HUNGRY_DAYS)}
 	for line:String in LINES:
 		var on:=bool((purse.lines as Dictionary).get(line,false))
 		var per:=line_cost_per_day(line,oph)*SEASON_DAYS

@@ -1,5 +1,9 @@
 # Recruitment, training and deployment
 
+## Superseded for the player — October 2, 2026: keeping watch is the military
+
+`docs/PEOPLE_FIRST.md` section E. The share of the people set to keep watch (the Defense work) is the military's manpower; `scripts/watch_military.gd` keeps everyone under arms equal to it every day, for every people. There is no recruit step: raising the watch share (War screen, People view, or a court levy) sets more people to keep watch and they join the watch at home at once, raw; lowering it sends the least drilled at home back to work; bands away count against the share until they come home. Drill happens within the watch over time (`drill_day`). The watch splits into the home guard (spread over home and the towns by their people: the defender ledger in `civilization_combat.gd`) and the offensive troops the war council forms into bands. An older save's recruits and trainees fold into the watch on its first day, and the share rises to hold them. The Recruit & Deploy queue below is no longer the player's lever; its engine code remains for older saves and drill courses (a court levy's named kit, retraining, field drafts).
+
 ## Governing rule — September 20, 2026
 
 The user explicitly rejects predetermined manpower percentages, conscription-law ceilings and technology gates on how many people a nation may draft. Recruitment can consume every actual available working-age person. It cannot duplicate troops, draft away scouts/envoys/convoys, create population, or create equipment. Military knowledge still determines which kinds of formations and equipment are understood; unfamiliar practices remain slower and riskier. Prototype headcount and one-cohort limits are removed.

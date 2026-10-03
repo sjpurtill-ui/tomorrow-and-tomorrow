@@ -447,7 +447,9 @@ func project(civ:Dictionary)->void:
 		region.fortification=clampf(float(military.settlement_defense.get("stage",0))/5.0,0,1) if primary else 0.0
 		var guard:Dictionary=guards.get(String(city.id),{})
 		region.garrison=int(guard.get("trained",0))+int(guard.get("watch",0))+int(guard.get("rise",0))
-		region["garrison_untrained"]=int(guard.get("watch",0))+int(guard.get("rise",0))
+		# Only the townsfolk who rise are untrained: the home guard is the
+		# watch, drilled and armed (watch_military.gd).
+		region["garrison_untrained"]=int(guard.get("rise",0))
 		region["stores"]=local.stores.duplicate(true)
 		for occupied:Dictionary in military.recovery.data.occupied:
 			if String(occupied.city_id)==String(city.id) and not bool(occupied.get("liberated",false)):

@@ -487,6 +487,11 @@ static func _form_band(reading:Dictionary)->Dictionary:
 	var made:Dictionary=mc.create_field_army(n,"")
 	if made.has("error"): return _no("deploy",_plain(String(made.error)))
 	var band:Dictionary=made.get("army",{}) if made.get("army") is Dictionary else {}
+	# Formed by the ruler's word: the war leader never folds it back nor
+	# calls it home on his own account (watch_military.gd recall_for_guard,
+	# war_council.gd _idle).
+	var formed_at:int=mc._field_army_index(int(band.get("army_id",0)))
+	if formed_at>=0: mc.field_armies[formed_at]["by_order"]=true
 	var troops:=int(band.get("troops",n))
 	var short:=(" Only %d trained are at home." % home) if asked>home else ""
 	var keep:=home-troops

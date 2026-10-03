@@ -7,7 +7,8 @@ extends GdUnitTestSuite
 ## gone, a third fed and hungry, was still out after losing at Eldwick; Hewin's
 ## band sat at 4 of 20. Now a band below the strength line or the one break
 ## line comes back to rest, the drafts and the reserve at home refill it from
-## the size the ruler set, weak bands in one place join, hunger wears will
+## the watch the ruler keeps (watch_military.gd: the watch is the army), weak
+## bands in one place join, hunger wears will
 ## down without pinning it, the country round a long camp is eaten out, a
 ## garrison takes only what its town needs, every town has guards, and home
 ## is never given away by pulling back.
@@ -97,12 +98,18 @@ func _people_under_arms()->int:
 	return int(MilitaryCampaign.personnel_ledger().total)
 
 
+## The watch kept at a level's share of the people (army_levy_law LEVELS):
+## the army's size is the watch share (watch_military.gd).
+func _keep(level:String)->void:
+	GameState.population_allocations["Defense"]=Levy.target_men(level,int(GameState.population_total))
+
+
 # --- 1. A band below strength refills from the size the ruler set ------------
 
 func test_a_band_below_strength_refills_from_the_army_size_the_ruler_set()->void:
 	# Hewin's band: 4 of 20, out in the field. The ruler keeps "a levy from
-	# every hearth" (5%): 27 of 535.
-	MilitaryCampaign.army_levy_level="many"
+	# every hearth" (5%) on watch: 27 of 535.
+	_keep("many")
 	MilitaryCampaign.field_armies.assign([_band(7,[_formation(11,"levy","improvised",4,20)])])
 	var read:Dictionary=Levy.reading(MilitaryCampaign)
 	assert_int(int(read.target)).is_equal(27)
@@ -126,29 +133,29 @@ func test_a_band_below_strength_refills_from_the_army_size_the_ruler_set()->void
 
 
 func test_drafts_stop_at_the_size_the_ruler_set_and_say_so()->void:
-	# A few of the young (1%): 5 of 535. The band of 4 of 20 already holds
-	# almost all of it: one more may come, no more.
-	MilitaryCampaign.army_levy_level="few"
+	# A few of the young (1%) keep watch: 5 of 535. The band of 4 of 20
+	# already holds almost all of it: one more may come, no more.
+	_keep("few")
 	MilitaryCampaign.field_armies.assign([_band(7,[_formation(11,"levy","improvised",4,20)])])
 	assert_int(MilitaryCampaign.sustainment.levy_room()).is_equal(1)
 	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(0)
 	# Fewer than the smallest draft (three men) could come: the places stay
 	# open, and the block says why in words the ruler can act on.
 	assert_str(String(MilitaryCampaign.field_armies[0].get("draft_block",""))).is_equal("at_level")
-	assert_str(Sustainment.block_words("at_level")).contains("Raise how many serve")
+	assert_str(Sustainment.block_words("at_level")).contains("Raise the watch share")
 	# Never "+0 coming": nothing is coming, and the screens get the reason.
 	var coming:Dictionary=MilitaryCampaign.sustainment.drafts_for(7)
 	assert_int(int(coming.on_road)+int(coming.in_training)).is_equal(0)
 	assert_str(String(coming.block)).is_not_equal("no_people")
-	assert_str(String(coming.block_words)).contains("the size you set")
-	# The ruler raises the share: the drafts come.
-	MilitaryCampaign.army_levy_level="war"
+	assert_str(String(coming.block_words)).contains("everyone keeping watch")
+	# The ruler raises the watch share: the drafts come.
+	_keep("war")
 	assert_int(MilitaryCampaign.sustainment.draft_day().size()).is_equal(1)
 	assert_str(String(MilitaryCampaign.field_armies[0].get("draft_block",""))).is_equal("")
 
 
-func test_without_a_size_set_the_bands_are_kept_at_the_strength_they_were_formed_with()->void:
-	MilitaryCampaign.army_levy_level=""
+func test_a_watch_with_room_keeps_the_bands_at_the_strength_they_were_formed_with()->void:
+	GameState.population_allocations["Defense"]=20
 	MilitaryCampaign.field_armies.assign([_band(7,[_formation(11,"levy","improvised",4,20)])])
 	var started:Array=MilitaryCampaign.sustainment.draft_day()
 	assert_int(started.size()).is_equal(1)
@@ -156,8 +163,9 @@ func test_without_a_size_set_the_bands_are_kept_at_the_strength_they_were_formed
 
 
 func test_a_band_at_home_takes_trained_men_from_the_reserve_at_once()->void:
-	MilitaryCampaign.army_levy_level="many"
-	# Twelve trained spearmen in the levy at home (no watch kept: Defense 0).
+	_keep("many")
+	# Twelve trained spearmen at home, none of them kept as the home guard.
+	MilitaryCampaign.set_watch_split(0.0)
 	MilitaryCampaign._rebuild_home_army_with([_formation(40,"levy","improvised",12)])
 	assert_int(MilitaryCampaign.sustainment.home_reserve()).is_equal(12)
 	MilitaryCampaign.field_armies.assign([_band(7,[_formation(11,"levy","improvised",4,13)],0.0)])
@@ -175,7 +183,7 @@ func test_a_band_at_home_takes_trained_men_from_the_reserve_at_once()->void:
 # --- 2. A garrison is refilled --------------------------------------------------
 
 func test_a_garrison_is_refilled()->void:
-	MilitaryCampaign.army_levy_level="war"
+	_keep("war")
 	var garrison:Dictionary=MilitaryCampaign.simulator.create_formation_force("OCCUPATION • Tsaren",[_formation(21,"levy","improvised",10,20)],0.8,0.8)
 	var town:=_home()+Vector2(20.0,0.0)
 	garrison.merge({"civ_id":"rival","region_id":"tsaren","region_name":"Tsaren","required":4.0,"supply_level":1.0,"provision_ratio":1.0,"position":{"x":town.x,"z":town.y},"commander":MilitaryCampaign._garrison_captain()},true)
@@ -318,7 +326,7 @@ func test_forage_runs_out_on_a_long_camp()->void:
 func test_a_broken_band_out_in_the_field_comes_back_to_rest_and_refills()->void:
 	# Ennis's band: 4 of 13, will gone, a third fed and hungry, still out
 	# where it lost.
-	MilitaryCampaign.army_levy_level="many"
+	_keep("many")
 	var ennis:=_band(12,[_formation(121,"levy","improvised",4,13)],30.0,_general("Ennis Vale","figure_12",0.5))
 	ennis["morale"]=0.0;ennis["provision_ratio"]=0.37;ennis["hungry_days"]=14.0
 	MilitaryCampaign.field_armies.assign([ennis])
@@ -331,7 +339,7 @@ func test_a_broken_band_out_in_the_field_comes_back_to_rest_and_refills()->void:
 	assert_str(String(band.command_status)).is_equal(MilitaryCampaign.upkeep.WITHDRAWING)
 	# It is not sent to fight meanwhile.
 	assert_bool(Lines.unfit(band)).is_true()
-	# Home: fed by hand, the drafts come from the size the ruler set.
+	# Home: fed by hand, the drafts come from the watch the ruler keeps.
 	var at:=_home()
 	band.merge({"status":"stationed","location_id":"player_home","position":{"x":at.x,"z":at.y},"destination_id":""},true)
 	band["hungry_days"]=0.0;band["provision_ratio"]=1.0
@@ -401,11 +409,14 @@ func test_a_garrison_takes_only_what_its_town_needs_and_leaves_no_army_of_nobody
 # --- 9. Every town has guards ---------------------------------------------------
 
 func test_a_town_that_is_not_home_has_its_own_watch()->void:
+	# Forty keep watch, all of them the home guard (watch_military.gd).
 	GameState.population_allocations["Defense"]=40
+	MilitaryCampaign.keep_watch()
+	MilitaryCampaign.set_watch_split(1.0)
 	var second:Dictionary={"id":"settlement_002","sequence":2,"primary":false,"name":"Harbor","position":Vector2(100,0),"population_share":.25,"founded_day":0,"status":"established","territory_context":{},"environment_profile":{}}
 	GameState.player_settlements.append(second);GameState.next_player_settlement_id=3;SettlementModel._ensure_city_resources(second)
 	var watch:Dictionary=Combat.town_watch("settlement_002")
-	# A quarter of the people live there: a quarter of the forty on defence,
+	# A quarter of the people live there: a quarter of the forty on guard,
 	# beside a quarter of the townsfolk who rise (civilization_combat
 	# guard_ledger).
 	var parts:Dictionary=Combat.guard_ledger().get("settlement_002",{})
@@ -413,12 +424,15 @@ func test_a_town_that_is_not_home_has_its_own_watch()->void:
 	assert_int(int(parts.rise)).is_greater(0)
 	assert_int(int(watch.troops)).is_equal(10+int(parts.rise))
 	assert_str(String(watch.town_watch)).is_equal("settlement_002")
-	# Their fight is the town's own: its dead die there, home's levy is untouched.
+	# Their fight is the town's own: its dead die there. The guard posted there
+	# is the watch at home: its share of the dead, the hurt and the taken
+	# comes off the watch; the townsfolk's go back to their work or are held.
 	var people:=GameState.population_total
 	var levy_before:=int(MilitaryCampaign.home_army.troops)
+	var share:=10.0/float(10+int(parts.rise))
 	MilitaryCampaign._apply_town_watch_result("settlement_002",{"captured_in_battle":2},[{"defender_casualties":{"killed":3,"wounded":2}}],"defender")
 	assert_int(GameState.population_total).is_equal(people-3)
-	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(levy_before)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(levy_before-roundi(3.0*share)-roundi(2.0*share)-roundi(2.0*share))
 	assert_int(int(MilitaryCampaign.home_army.captured_pool)).is_equal(2)
 
 

@@ -3,9 +3,12 @@ extends GdUnitTestSuite
 ## towns stood undefended, while in battle each fights with its own watch; the
 ## map badge used a third count, home had none, and an open card drew its
 ## badge twice. Now one count: a town's page, its map badge, its battle and
-## a stranger's scout muster the same defenders: the trained at home, each
-## town's share of the watch and its townsfolk who rise
-## (civilization_combat.gd guard_ledger).
+## a stranger's scout muster the same defenders: the watch at home, each
+## town's share of the home guard and its townsfolk who rise
+## (civilization_combat.gd guard_ledger). KEEPING WATCH IS THE MILITARY
+## (watch_military.gd): the watch is everyone under arms; its home guard is
+## spread over home and the towns by their people, and the rest stand at
+## home until the war council sends them out in bands.
 
 const Combat:=preload("res://scripts/civilization_combat.gd")
 const Model:=preload("res://scripts/hud/own_town_model.gd")
@@ -61,14 +64,22 @@ func _home_id()->String:
 	return ""
 
 
-## Home's levy, trained and drilled: `count` levymen in one formation.
-func _levy(count:int)->void:
+## The watch at home, drilled: `count` keep watch (the Defense work), all at
+## home in one formation, and `split` of them the home guard.
+func _levy(count:int,split:float=0.5)->void:
 	var sim=MilitaryCampaign.simulator
 	var sets:int=sim.equipment_required_for_weapon("improvised",count)
 	var army:=MilitaryCampaign._empty_home_army()
 	army["formations"]=[{"id":1,"unit":"levy","weapon":"improvised","count":count,"authorized_count":count,"equipment":sets,"equipment_required":sets,"ammunition":0,"ammunition_required":0,"training":0.6,"experience":0.1,"personnel_condition":1.0}]
 	army["troops"]=count
 	MilitaryCampaign.home_army=army
+	GameState.population_allocations["Defense"]=count
+	MilitaryCampaign.set_watch_split(split)
+
+
+## The forty keeping watch join it at home (the war leader's keeping).
+func _fill()->void:
+	MilitaryCampaign.keep_watch()
 
 
 ## The map card of one of our towns, measured as the layer measures it. The
@@ -101,10 +112,14 @@ func _rises()->int:
 
 
 func test_a_second_town_shows_the_watch_and_the_townsfolk_who_fight_there()->void:
-	# A quarter of the people live there: a quarter of the forty on defence,
-	# and a quarter of the townsfolk who rise.
+	# Forty keep watch, half of them the home guard. A quarter of the people
+	# live there: a quarter of the twenty, and a quarter of the townsfolk who
+	# rise.
+	_fill()
+	MilitaryCampaign.set_watch_split(0.5)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(40)
 	var parts:=_parts(TOWN)
-	assert_int(int(parts.watch)).is_equal(10)
+	assert_int(int(parts.watch)).is_equal(5)
 	assert_int(int(parts.rise)).is_greater(0)
 	assert_int(_rises()).is_equal(_rise_expected())
 	var fights:=int(Combat.town_watch(TOWN).troops)
@@ -114,7 +129,7 @@ func test_a_second_town_shows_the_watch_and_the_townsfolk_who_fight_there()->voi
 	var facts:={"strength":strong}
 	var row:=Model.row_for("garrison",facts)
 	assert_int(int(row.number)).is_equal(fights)
-	assert_str(String(row.value)).is_equal("10 on watch, %d would take up arms" % int(parts.rise))
+	assert_str(String(row.value)).is_equal("5 on watch, %d would take up arms" % int(parts.rise))
 	assert_str(String(row.value)).not_contains("none of its own")
 	# Plain words: who they are, and that the trained stay home.
 	assert_str(String(row.meaning)).contains("townsfolk who take up arms").contains("Seanstone").not_contains("levy at home guards")
@@ -132,17 +147,25 @@ func test_a_second_town_shows_the_watch_and_the_townsfolk_who_fight_there()->voi
 
 func test_the_townsfolk_rise_untrained_one_in_ten_of_those_not_already_serving()->void:
 	assert_float(Combat.RISE_SHARE).is_equal(0.10)
-	# The block that fights is untrained: the watch's drill and the townsfolk's
-	# none, by their numbers (the combat simulator holds any block at its
-	# least drill, 0.25, at the least).
+	# Two blocks fight side by side: the home guard posted there, drilled as
+	# the watch at home is and carrying its share of the watch's arms, and the
+	# townsfolk with none and what comes to hand (the combat simulator holds
+	# any block at its least drill, 0.25, at the least).
+	_levy(40)
 	var parts:=_parts(TOWN)
-	var drill:=Combat.militia_training(int(parts.watch),int(parts.rise))
-	assert_float(drill).is_less(Combat.WATCH_TRAINING)
-	assert_float(drill).is_greater(Combat.RISE_TRAINING)
-	var block:Dictionary=(Combat.town_watch(TOWN).formations as Array)[0]
-	assert_float(float(block.training)).is_equal_approx(clampf(drill,0.25,1.25),0.0001)
-	assert_int(int(block.equipment)).is_equal(0)
-	assert_str(String(block.weapon)).is_equal("improvised")
+	assert_float(Combat.guard_drill()).is_equal_approx(0.6,0.0001)
+	var blocks:Array=Combat.town_watch(TOWN).formations
+	assert_int(blocks.size()).is_equal(2)
+	var guard:Dictionary=blocks[0]
+	assert_int(int(guard.count)).is_equal(int(parts.watch))
+	assert_float(float(guard.training)).is_equal_approx(Combat.guard_drill(),0.0001)
+	# The watch at home is fully armed here, and so is the guard it posted.
+	assert_int(int(guard.equipment)).is_equal(int(guard.equipment_required))
+	var rise:Dictionary=blocks[1]
+	assert_int(int(rise.count)).is_equal(int(parts.rise))
+	assert_float(float(rise.training)).is_equal_approx(clampf(Combat.RISE_TRAINING,0.25,1.25),0.0001)
+	assert_int(int(rise.equipment)).is_equal(0)
+	assert_str(String(rise.weapon)).is_equal("improvised")
 	# Those called up beyond the Defense share are under arms already: fewer
 	# townsfolk are left to rise.
 	var before:=_rises()
@@ -157,51 +180,61 @@ func test_the_townsfolk_rise_untrained_one_in_ten_of_those_not_already_serving()
 
 
 func test_a_band_marching_out_is_still_under_arms_not_the_watch()->void:
-	_levy(30)
+	_levy(40)
 	var home:=_home_id()
-	# Forty on defence work, thirty of them the levy: ten keep the watch.
-	assert_int(_sum(Combat.watch_ledger())).is_equal(10)
+	# Forty keep watch, twenty of them the home guard over home and the town.
+	assert_int(_sum(Combat.watch_ledger())).is_equal(20)
 	var rise:=_rises()
 	var home_before:=Combat.defenders(home)
 	var town_before:=Combat.defenders(TOWN)
 	var formed:=MilitaryCampaign.create_field_army(20)
 	assert_bool(formed.has("error")).override_failure_message(str(formed)).is_false()
-	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(10)
-	# The twenty who marched are under arms still: the watch and the
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(20)
+	# The twenty who marched are under arms still: the home guard and the
 	# townsfolk who rise are the same, and home stands with twenty fewer.
-	assert_int(_sum(Combat.watch_ledger())).is_equal(10)
+	assert_int(_sum(Combat.watch_ledger())).is_equal(20)
 	assert_int(_rises()).is_equal(rise)
 	assert_int(Combat.defenders(TOWN)).is_equal(town_before)
 	assert_int(Combat.defenders(home)).is_equal(home_before-20)
 	assert_int(int(MilitaryCampaign._home_defense_force(false).troops)).is_equal(home_before-20)
-	# The hurt, the scattered and the taken are no watch either.
-	MilitaryCampaign.home_army["wounded_pool"]=5
-	assert_int(_sum(Combat.watch_ledger())).is_equal(5)
+	# The hurt, the scattered and the taken are no guard: only those standing
+	# at home are.
+	var standing:=int(MilitaryCampaign.home_army.troops)
+	MilitaryCampaign._home_guard_losses(5,"wounded_pool")
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(standing-5)
+	assert_int(_sum(Combat.watch_ledger())).is_equal(standing-5)
 	# Those away from home (caravans, convoys, scholars) do not rise.
 	assert_int(_rises()).is_equal(_rise_expected())
 
 
 func test_a_landing_hits_the_guard_where_it_stands()->void:
 	var AN:=preload("res://scripts/air_naval_consequences.gd")
-	_levy(12)
+	_levy(40)
 	var home:=_home_id()
-	# At Valebridge only its watch and townsfolk stand: its own people fall.
+	# At Valebridge its share of the home guard and its townsfolk stand: its
+	# own people fall, and the guard's share comes off the watch at home.
 	var people:=GameState.population_total
 	var levy:=int(MilitaryCampaign.home_army.troops)
+	var here:=_parts(TOWN)
+	var share:=float(int(here.watch))/float(int(here.watch)+int(here.rise))
 	var town:=AN.strike_town_guard(TOWN,6)
 	assert_int(int(town.hit)).is_equal(6)
 	assert_int(int(town.killed)).is_equal(2)
 	assert_int(people-GameState.population_total).is_equal(2)
-	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(levy)
-	# At home the hits fall on the levy and on the watch and townsfolk by
-	# their share of those who stood.
+	assert_int(levy-int(MilitaryCampaign.home_army.troops)).is_equal(roundi(2.0*share)+roundi(4.0*share))
+	# At home the hits fall on those free for the bands, and on home's guard
+	# and townsfolk by their share of those who stood.
+	levy=int(MilitaryCampaign.home_army.troops)
 	var parts:=Combat.guard_of(SettlementModel.settlement_record(home))
 	var stood:=int(parts.trained)+int(parts.watch)+int(parts.rise)
 	people=GameState.population_total
 	var at_home:=AN.strike_town_guard(home,20)
 	assert_int(int(at_home.hit)).is_equal(20)
-	var trained_hit:=roundi(20.0*12.0/float(stood))
-	assert_int(levy-int(MilitaryCampaign.home_army.troops)).is_equal(trained_hit)
+	var trained_hit:=roundi(20.0*float(int(parts.trained))/float(stood))
+	var militia_hit:=20-trained_hit
+	var militia_killed:=roundi(float(militia_hit)*.35)
+	var guard_share:=float(int(parts.watch))/float(int(parts.watch)+int(parts.rise))
+	assert_int(levy-int(MilitaryCampaign.home_army.troops)).is_equal(trained_hit+roundi(float(militia_killed)*guard_share)+roundi(float(militia_hit-militia_killed)*guard_share))
 	assert_int(people-GameState.population_total).is_equal(int(at_home.killed))
 	# No more are hit than stood there.
 	assert_int(int(AN.strike_town_guard(TOWN,10_000).hit)).is_equal(Combat.defenders(TOWN))
@@ -276,52 +309,55 @@ func test_scouted_towns_are_counted_like_for_like_without_a_caveat()->void:
 
 
 func test_the_map_reads_every_guard_in_one_pass_and_again_only_on_change()->void:
-	_levy(12)
+	_levy(40)
 	var home:=_home_id()
 	var probe:Probe=auto_free(Probe.new())
 	var guards:Dictionary=probe._guards()
 	assert_int(int(guards[home])).is_equal(Labels.home_guard(home))
 	assert_int(int(guards[TOWN])).is_equal(Labels.home_guard(TOWN))
-	# Twelve trained at home; the other 28 of the forty keep the watch, a
-	# quarter of them in Valebridge, beside a quarter of the townsfolk.
-	assert_int(int(guards[TOWN])).is_equal(7+int(_parts(TOWN).rise))
-	assert_int(int(guards[home])).is_equal(12+21+int(_parts(home).rise))
+	# Forty keep watch, twenty of them the home guard: a quarter of the guard
+	# in Valebridge beside a quarter of the townsfolk; at home the other
+	# fifteen of the guard and the twenty free for the bands.
+	assert_int(int(guards[TOWN])).is_equal(5+int(_parts(TOWN).rise))
+	assert_int(int(guards[home])).is_equal(20+15+int(_parts(home).rise))
 	# Unchanged: the same reading, not a new one.
 	assert_bool(is_same(probe._guards(),guards)).is_true()
-	# The Defense share changes while the day stands still: read again.
-	GameState.population_allocations["Defense"]=80
-	assert_int(int(probe._guards()[TOWN])).is_equal(17+int(_parts(TOWN).rise))
-	assert_int(int(probe._guards()[home])).is_equal(12+51+int(_parts(home).rise))
+	# The home guard changes while the day stands still: read again.
+	MilitaryCampaign.set_watch_split(1.0)
+	assert_int(int(probe._guards()[TOWN])).is_equal(10+int(_parts(TOWN).rise))
+	assert_int(int(probe._guards()[home])).is_equal(30+int(_parts(home).rise))
 
 
 func test_home_shows_its_levy_watch_and_townsfolk_as_its_battle_musters_them()->void:
-	_levy(12)
+	_levy(40)
 	var home:=_home_id()
 	var parts:=_parts(home)
-	# Home's battle: twelve trained, home's share of the 28 others on defence
-	# work (three in four of the people live at home): 21, and its townsfolk.
-	assert_int(int(parts.watch)).is_equal(21)
+	# Home's battle: the twenty free for the bands, home's share of the twenty
+	# in the home guard (three in four of the people live at home): 15, and
+	# its townsfolk. The five posted in Valebridge stand there.
+	assert_int(int(parts.watch)).is_equal(15)
 	var musters:=int(MilitaryCampaign._home_defense_force(false).troops)
-	assert_int(musters).is_equal(12+21+int(parts.rise))
+	assert_int(musters).is_equal(20+15+int(parts.rise))
 	assert_int(Combat.defenders(home)).is_equal(musters)
 	var strong:=Model.strength(true,home)
 	assert_int(int(strong.defenders)).is_equal(musters)
 	var row:=Model.row_for("garrison",{"strength":strong})
 	assert_int(int(row.number)).is_equal(musters)
 	assert_str(String(row.value)).is_equal("%d fighters" % musters)
-	assert_str(String(row.note)).is_equal("12 trained")
-	assert_str(Model._tip(row,{"strength":strong})).contains("12 trained, 21 on watch, %d would take up arms." % int(parts.rise))
+	assert_str(String(row.note)).is_equal("20 for the bands")
+	assert_str(Model._tip(row,{"strength":strong})).contains("20 for the bands, 15 on watch, %d would take up arms." % int(parts.rise))
 	# The Military ledger's garrison at home, and a scout's count, are the same muster.
 	assert_int(int(MilitaryCampaign.settlement_defense_snapshot().garrison_personnel)).is_equal(musters)
 	assert_float(float(CivilizationSystem.city_intelligence.truth(home).values.garrison)).is_equal(float(musters))
 	# Home's badge appears, though its label carries no id of its own.
 	assert_int(Labels.home_guard(home)).is_equal(musters)
 	assert_int(int(_card(home,"SEANSTONE").badge)).is_equal(musters)
-	# With more trained than the Defense share, no one is left for the watch;
-	# the townsfolk still rise.
-	_levy(55)
+	# With no home guard kept, everyone keeping watch is for the bands and
+	# stands at home until sent; the towns keep only their townsfolk.
+	_levy(55,0.0)
 	var rise:=int(_parts(home).rise)
 	assert_int(int(_parts(home).watch)).is_equal(0)
+	assert_int(int(_parts(TOWN).watch)).is_equal(0)
 	assert_int(Labels.home_guard(home)).is_equal(55+rise)
 	assert_int(int(MilitaryCampaign._home_defense_force(false).troops)).is_equal(55+rise)
 	assert_str(String(Model.row_for("garrison",{"strength":Model.strength(true,home)}).value)).is_equal("%d fighters" % (55+rise))
@@ -370,10 +406,9 @@ func _sum(values:Dictionary)->int:
 func test_the_watch_and_the_townsfolk_are_shared_out_once_among_seven_towns()->void:
 	var ids:=_seven_towns()
 	var home:=_home_id()
-	GameState.population_allocations["Defense"]=60
-	_levy(12)
-	# Sixty on defence work, twelve of them the levy at home: 48 keep the
-	# watch, each in the town they live in.
+	# Sixty keep watch, 48 of them the home guard, each in the town they live
+	# in; twelve stand at home for the bands.
+	_levy(60,0.8)
 	var ledger:=Combat.watch_ledger()
 	assert_int(_sum(ledger)).is_equal(48)
 	# The townsfolk who rise: one in ten of the grown people not serving.
@@ -402,9 +437,9 @@ func test_the_watch_and_the_townsfolk_are_shared_out_once_among_seven_towns()->v
 		assert_int(Labels.home_guard(id)).override_failure_message(id).is_equal(share)
 		assert_int(int(_card(id,"Town").badge)).override_failure_message(id).is_equal(share)
 		assert_float(float(intel.truth(id).values.garrison)).override_failure_message(id).is_equal(float(share))
-	# More trained at home than on defence work: no one is left for a watch,
-	# and the townsfolk still rise.
-	_levy(75)
+	# No home guard kept: no one is posted in the towns, and the townsfolk
+	# still rise.
+	_levy(75,0.0)
 	assert_int(_sum(Combat.watch_ledger())).is_equal(0)
 	assert_int(_sum(Combat.defenders_by_town())).is_equal(75+_rises())
 	assert_int(int(Combat.defenders_by_town()[TOWN])).is_equal(int(_parts(TOWN).rise))
@@ -413,8 +448,7 @@ func test_the_watch_and_the_townsfolk_are_shared_out_once_among_seven_towns()->v
 
 func test_a_town_left_or_taken_gives_its_watch_to_the_towns_still_ours()->void:
 	_seven_towns()
-	GameState.population_allocations["Defense"]=60
-	_levy(12)
+	_levy(60,0.8)
 	SettlementModel.settlement_record("settlement_003")["status"]="abandoned"
 	SettlementModel.settlement_record("settlement_004")["occupied_by"]="civ_03"
 	var ledger:=Combat.watch_ledger()
@@ -433,8 +467,7 @@ func test_a_town_left_or_taken_gives_its_watch_to_the_towns_still_ours()->void:
 
 func test_our_towns_are_counted_by_a_strangers_scout_as_their_battle_musters_them()->void:
 	_seven_towns()
-	GameState.population_allocations["Defense"]=60
-	_levy(12)
+	_levy(60,0.8)
 	var intel=CivilizationSystem.city_intelligence
 	var guards:=Combat.defenders_by_town()
 	for city:Dictionary in GameState.player_settlements:
@@ -459,14 +492,17 @@ func test_a_rivals_other_town_is_counted_fought_and_landed_on_by_its_guard()->vo
 		WorldSimulation.state.player_settlements.append(second);WorldSimulation.state.next_player_settlement_id=3;WorldSimulation.settlements._ensure_city_resources(second)
 		WorldSimulation.state.population_allocations["Defense"]=50
 		WorldSimulation.military.home_army=WorldSimulation.military._empty_home_army()
+		# The fifty keeping watch stand at home, all of them the home guard.
+		WorldSimulation.military.keep_watch()
+		WorldSimulation.military.set_watch_split(1.0)
 	)
 	var civ:=CivilizationSystem.civilizations[0].duplicate(true)
 	civ.id="alpha";civ.name="Alpha"
 	WorldSimulation.scoped("alpha",func()->void:WorldSimulation.project(civ))
 	CivilizationSystem.civilizations[0]=civ
 	var parts:Dictionary=WorldSimulation.scoped("alpha",func()->Dictionary:return Combat.guard_ledger().get(local,{}))
-	# Fifty on their defence work, three in ten of their people in Alphaford,
-	# and three in ten of their townsfolk who rise.
+	# Fifty keep their watch, all the home guard; three in ten of their people
+	# in Alphaford, and three in ten of their townsfolk who rise.
 	assert_int(int(parts.watch)).is_equal(15)
 	assert_int(int(parts.rise)).is_greater(0)
 	var guard:=int(parts.watch)+int(parts.rise)
@@ -485,15 +521,16 @@ func test_a_rivals_other_town_is_counted_fought_and_landed_on_by_its_guard()->vo
 	assert_int(int(landed.defenders)).is_equal(roundi(float(guard)*.3+200.0*.02))
 	# Their scouts' truth of our Valebridge is ours, read in our own scope.
 	assert_float(float(CivilizationSystem.city_intelligence.truth(TOWN).values.garrison)).is_equal(float(Combat.defenders(TOWN)))
-	# Our scouts see how many of them are no soldiers, and the stated odds arm
-	# those as the battle does: a levy with what comes to hand.
-	assert_float(float(truth.values.garrison_untrained)).is_equal(float(guard))
+	# Our scouts see how many of them are no soldiers: the townsfolk only, the
+	# home guard being their watch, drilled and armed; the stated odds arm the
+	# townsfolk as the battle does: a levy with what comes to hand.
+	assert_float(float(truth.values.garrison_untrained)).is_equal(float(int(parts.rise)))
 	var intel=CivilizationSystem.city_intelligence
 	var day:=int(GameState.elapsed_days)
 	intel.publish("player",intel.capture("player",region_id,.9,day,"test","t"),day)
 	var estimate:Dictionary=preload("res://scripts/court_war_orders.gd").enemy_estimate(region_id)
 	assert_bool(bool(estimate.known)).is_true()
-	assert_float(float(estimate.untrained)).is_equal(1.0)
+	assert_float(float(estimate.untrained)).is_equal_approx(snappedf(float(int(parts.rise))/float(guard),0.1),0.051)
 	WorldSimulation.context_provider=Callable()
 
 
@@ -527,9 +564,9 @@ func test_the_defence_page_counts_the_guard_and_names_the_townsfolk_apart()->voi
 	assert_str(String(rows["Guard at home"].words)).not_contains("The watch is the town's guard")
 	assert_str(String(rows["Townsfolk who would fight"].words)).contains("1 in 10")
 	assert_float(float(defense.garrison_coverage)).is_equal(0.0)
-	# The levy and the watch are the guard; the townsfolk are not.
-	_levy(12)
-	GameState.population_allocations["Defense"]=40
+	# The watch at home is the guard; the townsfolk are not.
+	_levy(40)
 	defense=MilitaryCampaign.settlement_defense_snapshot()
-	assert_int(int(defense.garrison_guard)).is_equal(12+int(defense.garrison_watch))
+	assert_int(int(defense.garrison_guard)).is_equal(int(defense.garrison_trained)+int(defense.garrison_watch))
+	assert_int(int(defense.garrison_guard)).is_equal(40-Combat.posted_away())
 	assert_int(int(defense.garrison_personnel)).is_equal(int(defense.garrison_guard)+int(defense.garrison_townsfolk))

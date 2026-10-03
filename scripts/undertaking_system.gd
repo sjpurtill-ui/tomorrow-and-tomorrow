@@ -271,7 +271,10 @@ static func _commission_architect(city_id:String,id:String,day:int)->Dictionary:
 	var vision:=.25+float(h%700)/1000.0
 	var ego:=.15+float((h/700)%800)/1000.0
 	var style:String=["austere","soaring","ornate","practical","daring","severe","harmonious","monumental"][(h/560000)%8]
-	return {"id":String(p.id),"name":String(p.name),"vision":vision,"ego":ego,"talent":float(p.get("talent",.7)),"style":style,"temperament":String(p.get("temperament","")),"mood":0,"since":day}
+	var architect:={"id":String(p.id),"name":String(p.name),"vision":vision,"ego":ego,"talent":float(p.get("talent",.7)),"style":style,"temperament":String(p.get("temperament","")),"mood":0,"since":day}
+	# A master builder of rare gift: their strength lifts the work's odds (geniuses.gd).
+	if p.get("genius") is Dictionary:architect["genius"]=snappedf(preload("res://scripts/geniuses.gd").strength(p),.001)
+	return architect
 
 # --- Player/AI directions ------------------------------------------------------
 static func direct(city_id:String,id:String,order:String)->void:
@@ -329,7 +332,7 @@ static func advance_all(day:int)->void:
 ## anniversary, envy, plenty). One pitch at a time, 3–6 years apart, never while
 ## hungry, desperate at war or already building. State lives on the primary
 ## settlement as `great_works_pitch` {last_day, seen:{kind:day}, pending?}.
-const PITCH_KINDS:=["victory","death","famine","anniversary","envy","plenty"]
+const PITCH_KINDS:=["victory","death","famine","anniversary","envy","plenty","genius"]
 const PITCH_EXPIRY_DAYS:=180
 static func pitch_state(state:Node)->Dictionary:
 	for city:Dictionary in state.player_settlements:
@@ -361,11 +364,16 @@ static func detect_pitch(state:Node,day:int)->void:
 	seen[String(trigger.kind)]=day
 	pitch.seen=seen
 	pitch.last_day=day
-	pitch.pending={"id":"pitch:%d:%s" % [day,String(trigger.kind)],"day":day,"trigger":trigger,"proposer":_pitch_proposer(state)}
+	# A gifted master builder brings their own pitch (geniuses.gd).
+	var proposer:Dictionary={"figure_id":String(trigger.figure_id)} if String(trigger.get("figure_id",""))!="" else _pitch_proposer(state)
+	pitch.pending={"id":"pitch:%d:%s" % [day,String(trigger.kind)],"day":day,"trigger":trigger,"proposer":proposer}
 
 ## The strongest thing this people is living through, not already answered.
 static func pitch_trigger(state:Node,day:int,seen:Dictionary)->Dictionary:
 	var fresh:=func(kind:String)->bool:return day-int(seen.get(kind,-99999))>365*3
+	# A grown master builder of rare gift asks once to raise a work (geniuses.gd).
+	var gifted:=preload("res://scripts/geniuses.gd").architect_trigger(WorldSimulation.figures,day)
+	if not gifted.is_empty():return gifted
 	var military=WorldSimulation.military
 	if fresh.call("victory") and military!=null:
 		for battle:Dictionary in military.battle_history:

@@ -89,7 +89,7 @@ const SYLLABLES:={
 const NUMBERS:=["Seven","Nine","Twelve","Ninety","Hundred","Ten Thousand"]
 ## The purpose a trigger asks for first; later concepts follow the people's values.
 const TRIGGER_PURPOSE:={"famine":"feed_people","flood":"tame_flood","war":"awe_rivals","victory":"mark_triumph","death":"honor_dead","anniversary":"bind_tribes","founding":"bind_tribes","discovery":"watch_heavens","envy":"awe_rivals","plenty":"give_thanks"}
-const TRIGGER_WORDS:={"famine":"the hungry years","flood":"the great flood","war":"the war","victory":"the victory","death":"the death of a beloved leader","anniversary":"the founding's anniversary","discovery":"a new understanding","envy":"news of a rival's wonder","plenty":"a season of plenty","expand":"the old work's long service","founding":"the founding of the settlement"}
+const TRIGGER_WORDS:={"famine":"the hungry years","flood":"the great flood","war":"the war","victory":"the victory","death":"the death of a beloved leader","anniversary":"the founding's anniversary","discovery":"a new understanding","envy":"news of a rival's wonder","plenty":"a season of plenty","genius":"a master builder of rare gift come of age","expand":"the old work's long service","founding":"the founding of the settlement"}
 
 # --- Identity -----------------------------------------------------------------
 static func _state(owner:String)->Node:return preload("res://scripts/society_exchange.gd").owner_state(owner)
@@ -230,6 +230,7 @@ static func purpose_weights(owner:String,trigger:Dictionary={})->Dictionary:
 		"discovery":weights.watch_heavens+=6.0;weights.master_craft+=6.0;weights.remember_knowledge+=2.0
 		"envy":weights.awe_rivals+=6.0;weights.master_craft+=4.0;weights.defy_gods+=4.0
 		"plenty":weights.give_thanks+=12.0;weights.feed_people+=2.0
+		"genius":weights.master_craft+=6.0;weights.defy_gods+=3.0;weights.awe_rivals+=2.0
 	var wanted:=String(trigger.get("purpose",""))
 	if PURPOSES.has(wanted):weights[wanted]=float(weights[wanted])+20.0
 	return weights
@@ -465,9 +466,14 @@ static func assess(concept:Dictionary,owner:String="player",extra:Dictionary={})
 	var builders:=float(s.population_allocations.get("Construction",0))
 	var t:=int(p.tier)
 	var capability:=.35+.08*t+.10*float(MATERIALS[p.material].quality)+.10*talent+.08*minf(1,crafters/10.0)+.05*minf(1,builders/20.0)
+	# A master builder of rare gift (geniuses.gd): their strength x 0.6 more.
+	var gifted:=preload("res://scripts/geniuses.gd").architect_capability(architect)
+	capability+=gifted
 	var demand:=float(AMBITION_DEMAND[p.ambition])+(.05 if bool(FORMS[p.form].get("heavy",false)) else 0.0)
 	var engineering:=clampf(.5+(capability-demand)*1.4,0,1)
-	factors.append({"name":"Engineering","effect":snappedf(engineering-.5,.01),"text":"Our builders' knowledge (%s era), %s materials and a %s master builder against a %s design." % [String(ERA_BY_TIER[t]),String(MATERIALS[p.material].word),"gifted" if talent>=.8 else "capable",String(p.ambition)]})
+	var ungifted:=clampf(.5+(capability-gifted-demand)*1.4,0,1)
+	factors.append({"name":"Engineering","effect":snappedf(ungifted-.5,.01),"text":"Our builders' knowledge (%s era), %s materials and a %s master builder against a %s design." % [String(ERA_BY_TIER[t]),String(MATERIALS[p.material].word),"gifted" if talent>=.8 else "capable",String(p.ambition)]})
+	if gifted>0.0:factors.append({"name":"Gift","effect":snappedf(engineering-ungifted,.01),"text":"%s has a rare gift for building." % String(architect.get("name","Our master builder"))})
 	var cohesion:=float(m.get("cohesion",.5));var legitimacy:=float(m.get("legitimacy",.5))
 	var fed:=clampf(float(m.get("food_intake_ratio",1.0)),0,1)
 	var war:=_at_war(owner)
