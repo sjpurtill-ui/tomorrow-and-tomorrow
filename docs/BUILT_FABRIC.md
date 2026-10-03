@@ -213,68 +213,64 @@ How to read the columns:
 
 | Path | Year | people | known | might | defence | awe | allure | out/wk | per cutter | maker cap | homes | IMR | works | renown |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| balanced | 100 | 360 → 379 | 446 → 448 | 0.19 → 0.21 | 0.04 → 0.04 | 0.22 → 0.31 | 0.27 → 0.35 | 1.84 → 2.02 | 0.53 → 0.55 | 1.384 → 1.464 | 0.00 → 0.57 | 188 → 190 | 5.0 → 5.7 | 34 → 46 |
-| balanced | 300 | 1,292 → 1,279 | 760 → 761 | 0.17 → 0.26 | 0.04 → 0.14 | 0.29 → 0.40 | 0.26 → 0.38 | 1.99 → 2.00 | 0.51 → 0.55 | 1.426 → 1.561 | 0.00 → 0.67 | 198 → 198 | 18.7 → 19.7 | 153 → 186 |
-| balanced | 600 | 4,297 → 4,413 | 1,130 → 1,130 | 0.17 → 0.26 | 0.04 → 0.15 | 0.28 → 0.40 | 0.26 → 0.37 | 1.98 → 1.98 | 0.51 → 0.56 | 1.434 → 1.602 | 0.00 → 0.68 | 194 → 195 | 36.7 → 39.7 | 305 → 389 |
-| growth | 100 | 420 → 407 | 455 → 454 | 0.16 → 0.18 | 0.04 → 0.04 | 0.20 → 0.29 | 0.31 → 0.39 | 1.84 → 2.00 | 0.53 → 0.54 | 1.369 → 1.429 | 0.00 → 0.49 | 162 → 163 | 4.3 → 5.7 | 31 → 45 |
-| growth | 300 | 1,385 → 1,385 | 763 → 763 | 0.14 → 0.23 | 0.04 → 0.13 | 0.27 → 0.37 | 0.32 → 0.42 | 1.97 → 1.97 | 0.50 → 0.53 | 1.413 → 1.518 | 0.00 → 0.62 | 173 → 172 | 18.0 → 19.7 | 150 → 182 |
-| growth | 600 | 4,836 → 4,834 | 1,133 → 1,134 | 0.15 → 0.23 | 0.04 → 0.13 | 0.28 → 0.37 | 0.32 → 0.41 | 1.79 → 1.80 | 0.54 → 0.58 | 1.399 → 1.560 | 0.00 → 0.63 | 168 → 169 | 36.0 → 39.7 | 302 → 381 |
-| making | 100 | 364 → 367 | 445 → 447 | 0.16 → 0.19 | 0.04 → 0.04 | 0.21 → 0.29 | 0.26 → 0.34 | 2.05 → 2.06 | 0.52 → 0.54 | 1.356 → 1.431 | 0.00 → 0.52 | 192 → 192 | 5.0 → 5.7 | 32 → 45 |
-| making | 300 | 1,244 → 1,256 | 759 → 759 | 0.16 → 0.24 | 0.04 → 0.13 | 0.28 → 0.38 | 0.26 → 0.37 | 1.99 → 2.01 | 0.57 → 0.53 | 1.413 → 1.503 | 0.00 → 0.63 | 198 → 200 | 18.7 → 19.7 | 151 → 183 |
-| making | 600 | 4,237 → 4,218 | 1,130 → 1,129 | 0.15 → 0.24 | 0.04 → 0.14 | 0.28 → 0.38 | 0.26 → 0.36 | 1.98 → 1.99 | 0.51 → 0.56 | 1.424 → 1.574 | 0.00 → 0.65 | 195 → 195 | 36.0 → 38.7 | 298 → 373 |
-| war | 100 | 350 → 347 | 445 → 445 | 0.63 → 0.66 | 0.04 → 0.04 | 0.42 → 0.50 | 0.20 → 0.28 | 2.00 → 2.00 | 0.52 → 0.54 | 1.350 → 1.422 | 0.00 → 0.51 | 192 → 192 | 5.0 → 5.3 | 32 → 43 |
-| war | 300 | 1,258 → 1,222 | 760 → 760 | 0.60 → 0.69 | 0.04 → 0.13 | 0.48 → 0.58 | 0.21 → 0.31 | 1.97 → 1.97 | 0.50 → 0.53 | 1.400 → 1.495 | 0.00 → 0.62 | 200 → 199 | 18.7 → 19.3 | 151 → 180 |
-| war | 600 | 4,187 → 4,180 | 1,129 → 1,129 | 0.58 → 0.67 | 0.04 → 0.13 | 0.47 → 0.57 | 0.21 → 0.30 | 1.95 → 1.95 | 0.52 → 0.55 | 1.416 → 1.556 | 0.00 → 0.62 | 195 → 195 | 36.3 → 39.0 | 300 → 375 |
-| learning | 100 | 394 → 386 | 511 → 511 | 0.16 → 0.18 | 0.04 → 0.04 | 0.24 → 0.32 | 0.29 → 0.36 | 1.85 → 2.03 | 0.55 → 0.55 | 1.331 → 1.400 | 0.00 → 0.50 | 193 → 193 | 5.0 → 5.3 | 34 → 49 |
-| learning | 300 | 1,212 → 1,240 | 814 → 813 | 0.15 → 0.24 | 0.04 → 0.13 | 0.31 → 0.41 | 0.29 → 0.39 | 1.82 → 1.83 | 0.54 → 0.57 | 1.409 → 1.518 | 0.00 → 0.60 | 197 → 197 | 18.7 → 19.3 | 153 → 187 |
-| learning | 600 | 4,274 → 4,326 | 1,176 → 1,176 | 0.15 → 0.23 | 0.04 → 0.13 | 0.30 → 0.39 | 0.27 → 0.37 | 1.97 → 1.99 | 0.53 → 0.57 | 1.417 → 1.551 | 0.00 → 0.61 | 195 → 196 | 36.7 → 39.3 | 305 → 386 |
-| building | 100 | 366 → 376 | 445 → 447 | 0.17 → 0.24 | 0.04 → 0.15 | 0.21 → 0.36 | 0.27 → 0.39 | 1.88 → 1.89 | 0.53 → 0.55 | 1.337 → 1.484 | 0.00 → 0.70 | 192 → 197 | 4.7 → 5.7 | 30 → 50 |
-| building | 300 | 1,263 → 1,234 | 759 → 759 | 0.15 → 0.46 | 0.04 → 0.49 | 0.28 → 0.52 | 0.26 → 0.40 | 2.01 → 1.87 | 0.50 → 0.58 | 1.407 → 1.602 | 0.00 → 0.81 | 200 → 202 | 18.3 → 19.3 | 149 → 195 |
-| building | 600 | 4,186 → 4,317 | 1,129 → 1,129 | 0.15 → 0.44 | 0.04 → 0.50 | 0.28 → 0.50 | 0.26 → 0.39 | 1.99 → 1.99 | 0.51 → 0.58 | 1.416 → 1.659 | 0.00 → 0.84 | 195 → 200 | 35.7 → 38.7 | 297 → 411 |
+| balanced | 100 | 360 → 387 | 446 → 448 | 0.19 → 0.22 | 0.04 → 0.04 | 0.22 → 0.30 | 0.27 → 0.33 | 1.84 → 1.86 | 0.53 → 0.55 | 1.384 → 1.452 | 0.00 → 0.55 | 188 → 190 | 5.0 → 5.7 | 34 → 46 |
+| balanced | 300 | 1,292 → 1,255 | 760 → 759 | 0.17 → 0.27 | 0.04 → 0.15 | 0.29 → 0.38 | 0.26 → 0.34 | 1.99 → 2.00 | 0.51 → 0.53 | 1.426 → 1.519 | 0.00 → 0.68 | 198 → 197 | 18.7 → 19.7 | 153 → 186 |
+| balanced | 600 | 4,297 → 4,368 | 1,130 → 1,131 | 0.17 → 0.26 | 0.04 → 0.14 | 0.28 → 0.39 | 0.26 → 0.36 | 1.98 → 1.97 | 0.51 → 0.56 | 1.434 → 1.559 | 0.00 → 0.66 | 194 → 194 | 36.7 → 39.3 | 305 → 385 |
+| growth | 100 | 420 → 394 | 455 → 453 | 0.16 → 0.19 | 0.04 → 0.04 | 0.20 → 0.28 | 0.31 → 0.37 | 1.84 → 1.83 | 0.53 → 0.55 | 1.369 → 1.373 | 0.00 → 0.49 | 162 → 159 | 4.3 → 5.7 | 31 → 45 |
+| growth | 300 | 1,385 → 1,393 | 763 → 763 | 0.14 → 0.23 | 0.04 → 0.13 | 0.27 → 0.35 | 0.32 → 0.38 | 1.97 → 1.97 | 0.50 → 0.51 | 1.413 → 1.479 | 0.00 → 0.58 | 173 → 173 | 18.0 → 19.7 | 150 → 182 |
+| growth | 600 | 4,836 → 4,730 | 1,133 → 1,139 | 0.15 → 0.24 | 0.04 → 0.13 | 0.28 → 0.37 | 0.32 → 0.39 | 1.79 → 1.79 | 0.54 → 0.56 | 1.399 → 1.501 | 0.00 → 0.61 | 168 → 166 | 36.0 → 39.7 | 302 → 381 |
+| making | 100 | 364 → 366 | 445 → 447 | 0.16 → 0.19 | 0.04 → 0.04 | 0.21 → 0.27 | 0.26 → 0.31 | 2.05 → 2.03 | 0.52 → 0.53 | 1.356 → 1.409 | 0.00 → 0.50 | 192 → 192 | 5.0 → 5.3 | 32 → 43 |
+| making | 300 | 1,244 → 1,232 | 759 → 759 | 0.16 → 0.25 | 0.04 → 0.13 | 0.28 → 0.36 | 0.26 → 0.34 | 1.99 → 1.85 | 0.57 → 0.55 | 1.413 → 1.498 | 0.00 → 0.63 | 198 → 197 | 18.7 → 19.3 | 151 → 181 |
+| making | 600 | 4,237 → 4,270 | 1,130 → 1,129 | 0.15 → 0.25 | 0.04 → 0.14 | 0.28 → 0.37 | 0.26 → 0.35 | 1.98 → 1.85 | 0.51 → 0.57 | 1.424 → 1.526 | 0.00 → 0.64 | 195 → 194 | 36.0 → 38.7 | 298 → 374 |
+| war | 100 | 350 → 352 | 445 → 446 | 0.63 → 0.67 | 0.04 → 0.04 | 0.42 → 0.49 | 0.20 → 0.25 | 2.00 → 1.99 | 0.52 → 0.53 | 1.350 → 1.399 | 0.00 → 0.49 | 192 → 192 | 5.0 → 5.3 | 32 → 43 |
+| war | 300 | 1,258 → 1,233 | 760 → 759 | 0.60 → 0.69 | 0.04 → 0.13 | 0.48 → 0.56 | 0.21 → 0.27 | 1.97 → 1.97 | 0.50 → 0.51 | 1.400 → 1.470 | 0.00 → 0.62 | 200 → 199 | 18.7 → 19.3 | 151 → 180 |
+| war | 600 | 4,187 → 4,275 | 1,129 → 1,130 | 0.58 → 0.66 | 0.04 → 0.13 | 0.47 → 0.56 | 0.21 → 0.28 | 1.95 → 1.96 | 0.52 → 0.54 | 1.416 → 1.505 | 0.00 → 0.63 | 195 → 196 | 36.3 → 38.7 | 300 → 373 |
+| learning | 100 | 394 → 388 | 511 → 512 | 0.16 → 0.19 | 0.04 → 0.04 | 0.24 → 0.32 | 0.29 → 0.34 | 1.85 → 1.86 | 0.55 → 0.56 | 1.331 → 1.385 | 0.00 → 0.50 | 193 → 192 | 5.0 → 5.7 | 34 → 52 |
+| learning | 300 | 1,212 → 1,287 | 814 → 814 | 0.15 → 0.21 | 0.04 → 0.10 | 0.31 → 0.37 | 0.29 → 0.34 | 1.82 → 1.99 | 0.54 → 0.54 | 1.409 → 1.457 | 0.00 → 0.61 | 197 → 199 | 18.7 → 19.7 | 153 → 189 |
+| learning | 600 | 4,274 → 4,324 | 1,176 → 1,176 | 0.15 → 0.23 | 0.04 → 0.13 | 0.30 → 0.38 | 0.27 → 0.35 | 1.97 → 1.98 | 0.53 → 0.55 | 1.417 → 1.508 | 0.00 → 0.63 | 195 → 196 | 36.7 → 39.7 | 305 → 388 |
+| building | 100 | 366 → 357 | 445 → 445 | 0.17 → 0.24 | 0.04 → 0.15 | 0.21 → 0.34 | 0.27 → 0.36 | 1.88 → 1.89 | 0.53 → 0.53 | 1.337 → 1.440 | 0.00 → 0.68 | 192 → 196 | 4.7 → 5.7 | 30 → 49 |
+| building | 300 | 1,263 → 1,235 | 759 → 759 | 0.15 → 0.41 | 0.04 → 0.44 | 0.28 → 0.48 | 0.26 → 0.38 | 2.01 → 2.00 | 0.50 → 0.61 | 1.407 → 1.546 | 0.00 → 0.83 | 200 → 201 | 18.3 → 19.0 | 149 → 191 |
+| building | 600 | 4,186 → 4,285 | 1,129 → 1,129 | 0.15 → 0.44 | 0.04 → 0.49 | 0.28 → 0.49 | 0.26 → 0.37 | 1.99 → 2.00 | 0.51 → 0.55 | 1.416 → 1.574 | 0.00 → 0.79 | 195 → 200 | 35.7 → 39.0 | 297 → 413 |
 
 **The fabric on this branch:**
 
 | Path | Year | Builders % of workers | Craft | Homes | Stone share | Roads | Beauty | Work buildings | Defences |
 |---|---|---|---|---|---|---|---|---|---|
-| balanced | 300 | 14.5 | 3.6 | 0.67 | 0.10 | 0.39 | 0.53 | 0.45 | 0.14 |
-| balanced | 600 | 13.9 | 3.7 | 0.68 | 0.12 | 0.43 | 0.48 | 0.54 | 0.15 |
-| growth | 300 | 12.3 | 3.1 | 0.62 | 0.03 | 0.38 | 0.44 | 0.36 | 0.13 |
-| growth | 600 | 12.5 | 3.2 | 0.63 | 0.03 | 0.34 | 0.41 | 0.45 | 0.13 |
-| making | 300 | 12.9 | 3.2 | 0.63 | 0.05 | 0.38 | 0.46 | 0.38 | 0.13 |
-| making | 600 | 12.4 | 3.5 | 0.65 | 0.07 | 0.38 | 0.44 | 0.50 | 0.14 |
-| war | 300 | 12.5 | 3.1 | 0.62 | 0.03 | 0.37 | 0.44 | 0.36 | 0.13 |
-| war | 600 | 11.9 | 3.3 | 0.62 | 0.04 | 0.36 | 0.42 | 0.47 | 0.13 |
-| learning | 300 | 13.2 | 3.1 | 0.60 | 0.02 | 0.39 | 0.45 | 0.35 | 0.13 |
-| learning | 600 | 11.9 | 3.2 | 0.61 | 0.04 | 0.38 | 0.42 | 0.45 | 0.13 |
-| building | 300 | 21.9 | 5.1 | 0.81 | 0.35 | 0.46 | 0.72 | 0.77 | 0.49 |
-| building | 600 | 19.8 | 5.4 | 0.84 | 0.38 | 0.62 | 0.65 | 0.89 | 0.50 |
+| balanced | 300 | 14.5 | 3.7 | 0.68 | 0.12 | 0.33 | 0.35 | 0.31 | 0.15 |
+| balanced | 600 | 13.9 | 3.8 | 0.66 | 0.10 | 0.26 | 0.42 | 0.39 | 0.14 |
+| growth | 300 | 12.2 | 3.1 | 0.58 | 0.02 | 0.23 | 0.28 | 0.24 | 0.13 |
+| growth | 600 | 12.5 | 3.2 | 0.61 | 0.04 | 0.17 | 0.34 | 0.30 | 0.13 |
+| making | 300 | 13.8 | 3.3 | 0.63 | 0.04 | 0.25 | 0.30 | 0.26 | 0.13 |
+| making | 600 | 13.2 | 3.4 | 0.64 | 0.06 | 0.19 | 0.36 | 0.32 | 0.14 |
+| war | 300 | 12.5 | 3.1 | 0.62 | 0.03 | 0.24 | 0.29 | 0.24 | 0.13 |
+| war | 600 | 11.9 | 3.2 | 0.63 | 0.03 | 0.18 | 0.34 | 0.29 | 0.13 |
+| learning | 300 | 12.4 | 3.0 | 0.61 | 0.01 | 0.24 | 0.29 | 0.23 | 0.10 |
+| learning | 600 | 11.9 | 3.2 | 0.63 | 0.04 | 0.19 | 0.34 | 0.30 | 0.13 |
+| building | 300 | 20.7 | 5.2 | 0.83 | 0.37 | 0.44 | 0.61 | 0.59 | 0.44 |
+| building | 600 | 19.7 | 5.3 | 0.79 | 0.33 | 0.43 | 0.59 | 0.68 | 0.49 |
 
-**What it shows**
+**What it shows** (after the review fixes: one crew per builder, the council judging the next stage with the walls crew, great works keeping their bills)
 
-- **The building path pays off in its own measures.** Against balanced at year 600 it has:
-  - might 0.44 against 0.26, and defences 0.50 against 0.15 (walled districts and a stone town);
-  - awe 0.50 against 0.40, and allure 0.39 against 0.37;
-  - homes 0.84 against 0.68, with 38 in 100 of its places stone against 12;
-  - its cutters 4% and its makers 4% more productive;
-  - great-work renown 411 against 389.
+- **The building path pays off in its own measures.** Against balanced at year 600:
+  - might 0.44 against 0.26, and defences 0.49 against 0.14 (walled districts and a stone town);
+  - awe 0.49 against 0.39, and allure 0.37 against 0.36;
+  - homes 0.79 against 0.66, with 33 in 100 of its places stone against 10;
+  - roads 0.43 against 0.26, and work buildings 0.68 against 0.39;
+  - its cutters about 2% and its makers about 1% more productive;
+  - great-work renown 413 against 385.
 - **It is no longer dominated.** On main the extended dominance check found it dominated by balanced and by making.
 - **It pays real costs:**
-  - 2% fewer people than balanced at year 600, and 4% fewer at year 300;
-  - infant deaths 200 against 195 (fewer carers);
-  - a field force 30% smaller (fewer on the watch);
-  - fewer goods a head (4.6 against 5.0).
-- **It does not dominate.** War keeps far more might (0.67) and awe (0.57); growth keeps more people and allure (0.41) and fewer infant deaths.
-- **Balanced peoples change little.** People and knowledge stay within seed noise of main, and infant deaths and life expectancy are unchanged.
-  - Every path gains a modest fabric (homes 0.6–0.7) because about 14 in 100 of every people's workers build.
-  - Those builders had nothing to do before.
-- **Flags.** The suite has 27 flags here and 26 on main. This branch clears main's two "building dominated" flags. Its new flags are:
-  - **The 600-year population of towns_balanced is 20,027, against the band high of 20,000.**
-    - 6 seeds: 20,223 here, 19,949 on main.
-    - The seed spread is about ±700, and main already sits on the band's edge.
-    - Better homes add about 1%. No single fabric effect carries it: switching off the homes, the works, the beauty or the roads one at a time each leaves it within ±150.
-  - Two single-sample food-share dips at year 300, on growth and building. The food share averaged over years 200–400 is 34.6 here against 35.0 on main, over 3 seeds.
-  - A milestone exactly on its band's low (split_balanced alphabet at 520).
+  - 2% fewer people than balanced at year 600;
+  - infant deaths 200 against 194 (fewer carers);
+  - a field force about 30% smaller (fewer on the watch);
+  - fewer goods a head.
+- **It does not dominate.** War keeps far more might (0.66) and awe (0.56); growth keeps more people and allure (0.39) and fewer infant deaths.
+- **Balanced peoples change little.** People, knowledge, infant deaths and life expectancy stay within seed noise of main.
+- **Flags.** The paths suite has 9 flags (main: 11, with building dominated):
+  - the food-share flags of main;
+  - balanced's early writing and bronze;
+  - making dominated by balanced (as on main) and, at the 3% line (output per worker 1.85 against 1.79), by growth.
+  - Making's goods still have no sink (docs/PEOPLE_FIRST.md).
 - **Calibration.**
-  - The truth runs were re-recorded on this branch: seven 15-year runs, the six before plus a new `path_building` run, one engine at a time, 80–127 s each.
-  - `check.py --strict` passes: 7 runs within tolerance, score 38.2, only the listed food-days gaps.
-  - `path_building` at year 15, engine against surrogate: people 133 / 128, infant deaths 258 / 267, discoveries 50 / 45, cohesion 0.84 / 0.86.
+  - The truth runs were re-recorded on this branch after the fixes: seven 15-year runs, including `path_building`, one engine at a time, 90–140 s each.
+  - `check.py --strict` passes: 7 runs within tolerance, score 38.0, only the listed food-days gaps.
