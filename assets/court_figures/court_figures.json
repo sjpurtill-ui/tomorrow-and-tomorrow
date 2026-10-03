@@ -32,6 +32,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -80,6 +81,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -121,6 +123,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -169,6 +172,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -210,6 +214,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -258,6 +263,47 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
+    "hair_long",
+    "hair_long_framed",
+    "hair_bun",
+    "hair_braids",
+    "hair_tail",
+    "hair_curls",
+    "hair_topknot"
+   ],
+   "beards": []
+  },
+  {
+   "variant": "child",
+   "file": "court_figure_child.glb",
+   "height": 1.24,
+   "head_top": 1.24,
+   "chin": 1.026,
+   "outfits": {
+    "hide": [
+     "hide_wrap",
+     "hide_cape",
+     "hide_cord",
+     "hide_footwraps"
+    ],
+    "tunic": [
+     "tunic_body",
+     "tunic_trim",
+     "tunic_belt",
+     "tunic_shoes"
+    ],
+    "robe": [
+     "robe_body",
+     "robe_trim",
+     "robe_sash",
+     "robe_mantle",
+     "robe_mantle_edge",
+     "robe_shoes"
+    ]
+   },
+   "hair": [
+    "hair_cropped",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -272,6 +318,7 @@
  "hair": [
   "cropped",
   "shaved",
+  "balding",
   "long",
   "long_framed",
   "bun",
@@ -444,6 +491,22 @@
   "bowl": "prop_bowl",
   "sit": "prop_stool"
  },
+ "carried": {
+  "bundle": "prop_bundle",
+  "cord": "prop_cord"
+ },
+ "fps": 30,
+ "walk_speed_mps": {
+  "walk_in": 1.18,
+  "walk_out": 0.92,
+  "at_height": 1.72
+ },
+ "gaze": [
+  "eyes_left",
+  "eyes_right",
+  "eyes_up",
+  "eyes_down"
+ ],
  "face_shapes": [
   "face_jaw",
   "face_chin",
@@ -494,6 +557,8 @@
   "EYES",
   "EYE_SHINE",
   "EYE_WHITE",
+  "IRIS",
+  "PUPIL",
   "STUBBLE",
   "WOOD",
   "CLAY",

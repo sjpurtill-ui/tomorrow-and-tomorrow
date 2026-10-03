@@ -49,6 +49,11 @@ VARIANTS = {
                      "pelvis": 0.152, "waist": 0.102, "chest_w": 0.124, "chest_d": 0.090, "bust": 0.6, "pecs": 0.0,
                      "arm": 0.035, "forearm": 0.030, "thigh": 0.068, "shin": 0.041, "hand": 1.0,
                      "jaw": 0.76, "brow_ridge": 0.35},
+    # a child of seven or eight: a big head on a slight body, no brow, a soft jaw
+    "child": {"height": 1.24, "head_ratio": 5.8, "neck": 0.040, "shoulder": 0.116, "hip_joint": 0.062,
+              "pelvis": 0.108, "waist": 0.096, "chest_w": 0.100, "chest_d": 0.080, "bust": 0.0, "pecs": 0.0,
+              "arm": 0.028, "forearm": 0.024, "thigh": 0.049, "shin": 0.034, "hand": 1.0,
+              "jaw": 0.55, "brow_ridge": 0.10, "belly": 0.3, "arm_angle": 20.0},
 }
 
 
@@ -58,7 +63,8 @@ def params(variant):
     p["variant"] = variant
     p["female"] = variant.startswith("female")
     p["old"] = variant.endswith("_old")
-    p["young"] = variant.endswith("_young")
+    p["young"] = variant.endswith("_young") or variant == "child"
+    p["child"] = variant == "child"
     return p
 
 
@@ -471,6 +477,51 @@ def _clip_to_eye(points, up, lo, sd):
     return out
 
 
+# Where the eyes look: the iris, pupil and shine slide inside the white
+# (morphs eyes_left/right/up/down; the figure's left is +X). Across, the iris
+# reaches the corner; up and down, about half of it hides under a lid.
+GAZE = {"eyes_left": (1.0, 0.0), "eyes_right": (-1.0, 0.0), "eyes_up": (0.0, 1.0), "eyes_down": (0.0, -1.0)}
+GAZE_REACH = (0.0082, 0.0036)
+
+
+def _gaze_keys(obj, make, s):
+    """Stores where each vertex of an eye part goes for each gaze as a point
+    attribute (gz_<key>), which survives joining; gaze_morphs() turns them into
+    shape keys. make(dx, dz) builds the part again, moved; None: it stays."""
+    me = obj.data
+    for key, (gx, gz) in GAZE.items():
+        if make is None:
+            co = [v.co.copy() for v in me.vertices]
+        else:
+            tmp = make(gx * GAZE_REACH[0] * s, gz * GAZE_REACH[1] * s)
+            co = [v.co.copy() for v in tmp.data.vertices]
+            bpy.data.objects.remove(tmp, do_unlink=True)
+            if len(co) != len(me.vertices):
+                co = [v.co.copy() for v in me.vertices]
+        attr = me.attributes.new("gz_" + key, 'FLOAT_VECTOR', 'POINT')
+        for i, c in enumerate(co):
+            attr.data[i].vector = c
+
+
+def gaze_morphs(eyes):
+    """The gaze attributes of the joined eyes as shape keys (then dropped)."""
+    me = eyes.data
+    if me.shape_keys is None:
+        eyes.shape_key_add(name="Basis", from_mix=False)
+    for key in GAZE:
+        attr = me.attributes.get("gz_" + key)
+        if attr is None:
+            continue
+        sk = eyes.shape_key_add(name=key, from_mix=False)
+        for i, d in enumerate(attr.data):
+            sk.data[i].co = d.vector
+        sk.value = 0.0
+    for key in GAZE:
+        attr = me.attributes.get("gz_" + key)
+        if attr is not None:
+            me.attributes.remove(attr)
+
+
 def _oval(cx, cz, rx, rz, n=14):
     return [(cx + rx * math.cos(2 * math.pi * i / n), cz + rz * math.sin(2 * math.pi * i / n)) for i in range(n)]
 
@@ -505,11 +556,22 @@ def build_face(f, body):
         white["bone"] = "eye." + side
         out["eyes"].append(white)
         ix, iz = cx + sd * 0.0006 * s, cz + 0.0006 * s
-        up_c, lo_c = _eye_curves(cx, cz, sd, s, fem, n=24)
-        iris_pts = _clip_to_eye(_oval(ix, iz, 0.0074 * s, 0.0080 * s, n=24), up_c, lo_c, sd)
-        iris = decal("Eye_" + side, body, iris_pts, (ix, iz), 0.0016 * s, rings=2)
+        # The iris and pupil are whole discs: the game draws them only over
+        # the white (a stencil), so they can roll about inside the lids.
+        def iris_at(dx, dz, ix=ix, iz=iz):
+            return decal("Eye_" + side, body, _oval(ix + dx, iz + dz, 0.0074 * s, 0.0080 * s, n=24), (ix + dx, iz + dz), 0.0016 * s, rings=2)
+
+        def pupil_at(dx, dz, ix=ix, iz=iz):
+            return decal("EyePupil_" + side, body, _oval(ix + dx, iz + dz, 0.0034 * s, 0.0037 * s, n=16), (ix + dx, iz + dz), 0.0019 * s, rings=1)
+        iris = iris_at(0.0, 0.0)
+        _gaze_keys(iris, iris_at, s)
         iris["bone"] = "eye." + side
         out["eyes"].append(iris)
+        pupil = pupil_at(0.0, 0.0)
+        _gaze_keys(pupil, pupil_at, s)
+        pupil["bone"] = "eye." + side
+        out["eyes"].append(pupil)
+        _gaze_keys(white, None, s)
         # the upper lid: a firm line that runs a little past the outer corner
         up, lo = _eye_curves(cx, cz, sd, s, fem)
         lid = [(x, z + 0.0004 * s) for x, z in up]
@@ -517,13 +579,18 @@ def build_face(f, body):
         widths = [(0.0014 + 0.0018 * math.sin(math.pi * min(1.0, i / (len(lid) - 1) * 1.1))) * s for i in range(len(lid))]
         lidm = decal("EyeLid_" + side, body, _stroke_outline(lid, widths), lid[len(lid) // 2], 0.0020 * s, rings=1)
         lidm["bone"] = "eye." + side
+        _gaze_keys(lidm, None, s)
         out["eyes"].append(lidm)
         hit, nor = surface_hit(body, Vector((cx, -1.0, cz)), Vector((0, 1, 0)))
         out["eye_center"][side] = hit if hit is not None else Vector((cx, -0.09 * s, cz))
         r = 0.0017 * s
         sx, sz = ix + sd * 0.0024 * s, iz + 0.0018 * s
-        ring = [(sx + r * math.cos(a * math.pi / 6), sz + r * math.sin(a * math.pi / 6)) for a in range(12)]
-        shine = decal("EyeShine_" + side, body, ring, (sx, sz), 0.0024 * s, rings=1)
+
+        def shine_at(dx, dz, sx=sx, sz=sz):
+            ring = [(sx + dx + r * math.cos(a * math.pi / 6), sz + dz + r * math.sin(a * math.pi / 6)) for a in range(12)]
+            return decal("EyeShine_" + side, body, ring, (sx + dx, sz + dz), 0.0024 * s, rings=1)
+        shine = shine_at(0.0, 0.0)
+        _gaze_keys(shine, shine_at, s)
         shine["bone"] = "eye." + side
         shines.append(shine)
         # the brow: thick at the nose end, thinning outward, a slight arch
@@ -542,7 +609,11 @@ def build_face(f, body):
         out["brow_center"][side] = hb if hb is not None else Vector((line[3][0], -0.088 * s, line[3][1]))
     out["eyes"] += shines
     for e in out["eyes"]:
-        slot = "EYE_WHITE" if e.name.startswith("EyeWhite_") else ("EYE_SHINE" if e.name.startswith("EyeShine_") else "EYES")
+        slot = "EYES"
+        for prefix, named in (("EyeWhite_", "EYE_WHITE"), ("EyeShine_", "EYE_SHINE"), ("EyePupil_", "PUPIL"), ("Eye_", "IRIS")):
+            if e.name.startswith(prefix):
+                slot = named
+                break
         set_material(e, slot)
     for b in out["brows"]:
         set_material(b, "HAIR")
@@ -573,7 +644,7 @@ def build_face(f, body):
 SLOT_DEFAULTS = {
     "SKIN": (0.62, 0.42, 0.30), "HAIR": (0.10, 0.07, 0.05), "CLOTH_A": (0.55, 0.42, 0.28),
     "CLOTH_B": (0.40, 0.27, 0.18), "CLOTH_C": (0.66, 0.30, 0.20), "EYES": (0.035, 0.026, 0.020),
-    "EYE_SHINE": (0.95, 0.92, 0.85), "EYE_WHITE": (0.90, 0.86, 0.78), "STUBBLE": (0.30, 0.22, 0.17),
+    "EYE_SHINE": (0.95, 0.92, 0.85), "EYE_WHITE": (0.90, 0.86, 0.78), "IRIS": (0.20, 0.12, 0.07), "PUPIL": (0.02, 0.015, 0.01), "STUBBLE": (0.30, 0.22, 0.17),
     "WOOD": (0.36, 0.24, 0.14), "CLAY": (0.55, 0.32, 0.20), "MOUTH": (0.24, 0.08, 0.07), "LEATHER": (0.30, 0.19, 0.11),
 }
 

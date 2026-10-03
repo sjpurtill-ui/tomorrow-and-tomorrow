@@ -20,11 +20,20 @@ uniform int cover_channel = 0;
 // Skin: the edge between light and shade warms, as light does under skin.
 uniform vec3 terminator : source_color = vec3(0.0, 0.0, 0.0);
 uniform bool flat_colour = false;
+// Hair and beards: fine strands down the fall of the hair, and a soft sheen.
+uniform float strands = 0.0;
+uniform float sheen = 0.0;
+// Hair and beards: where they meet the skin (vertex colour G, baked by
+// court_figures.py) they break into strokes over it, never a cut edge;
+// stubble is strokes all over. UV is the rest position, so it keeps still.
+uniform float stipple = 0.0;
 // Per figure: the speaker a little in the light, listeners a little back.
 instance uniform float dim = 1.0;
 
 varying float v_ao;
 varying float v_cover;
+varying float v_edge;
+varying vec2 v_rest;
 varying vec3 v_world_normal;
 varying vec3 v_obj;
 
@@ -33,6 +42,8 @@ void vertex() {
 	v_cover = cover_channel == 1 ? COLOR.g : (cover_channel == 2 ? COLOR.b : (cover_channel == 3 ? COLOR.a : 0.0));
 	v_world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	v_obj = VERTEX;
+	v_edge = COLOR.g;
+	v_rest = UV;
 }
 
 float hash3(vec3 p) {
@@ -53,7 +64,17 @@ void fragment() {
 	if (v_cover > 0.5) {
 		discard;
 	}
+	if (stipple > 0.0) {
+		float st = noise3(vec3(v_rest.x * 900.0, v_rest.y * 330.0, 0.5)) * 0.7 + noise3(vec3(v_rest.x * 2100.0, v_rest.y * 700.0, 3.1)) * 0.3;
+		if (st < v_edge * 1.1 * stipple - 0.1) {
+			discard;
+		}
+	}
 	vec3 base = albedo * mix(1.0, v_ao, ao_amount);
+	if (strands > 0.0) {
+		float s = noise3(vec3(v_obj.x * 210.0, v_obj.y * 16.0, v_obj.z * 210.0)) * 0.65 + noise3(vec3(v_obj.x * 90.0, v_obj.y * 7.0, v_obj.z * 90.0)) * 0.35;
+		base *= 1.0 + (s - 0.5) * strands * 2.0;
+	}
 	if (flat_colour) {
 		ALBEDO = albedo * min(dim, 1.0);
 	} else {
@@ -69,6 +90,11 @@ void fragment() {
 		col += base * terminator * edge * 0.35;
 		float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 		col += rim_color * rim_amount * fres * (0.35 + 0.65 * lit);
+		if (sheen > 0.0) {
+			vec3 key_view = normalize((VIEW_MATRIX * vec4(key_dir, 0.0)).xyz);
+			float band = smoothstep(0.55, 0.85, dot(normalize(NORMAL), normalize(key_view + VIEW)));
+			col += albedo * key_color * band * sheen * 1.4;
+		}
 		ALBEDO = col * dim;
 	}
 }

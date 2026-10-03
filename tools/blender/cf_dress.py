@@ -194,11 +194,14 @@ class Head:
         return (c[0] - 0.14 * s - wide, c[1] - 0.15 * s, c[2] - 0.40 * s - below), (c[0] + 0.14 * s + wide, c[1] + 0.15 * s + wide, c[2] + 0.14 * s)
 
 
-def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back=0.0, puff=0.0, temples=0.0, ragged=0.0):
+def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back=0.0, puff=0.0, temples=0.0, ragged=0.0, crown=None, clumps=0.0):
     """Hair lying on the scalp inside the hairline.
     part: strands fall to each side of a parting (else they are combed back);
     puff: extra volume over the ears and at the back, so it stands off the skull;
-    temples: how far the hair comes down over the temples (softens the line)."""
+    temples: how far the hair comes down over the temples (softens the line);
+    crown: (angles, heights) of a line above which no hair grows (a bald crown
+    with a fringe round the sides and back);
+    clumps: how much the hair lies in tufts (a fraction of its thickness)."""
     s = head.s
 
     def fn(P):
@@ -224,8 +227,18 @@ def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back
         else:
             g = 0.5 - 0.5 * np.cos(np.radians(th) * grooves * 0.5)
         thick = thick - depth * s * g * sm((Z + 0.2) / 0.6)
+        if clumps:
+            # tufts: a lumpy lie, never a smooth shell
+            tuft = (np.sin(np.radians(th) * 17.0 + Z * 9.0) * np.sin(Z * 21.0 - np.radians(th) * 5.0) * 0.6
+                    + np.sin(np.radians(th) * 37.0 - Z * 13.0) * 0.4)
+            thick = thick * (1.0 + clumps * tuft)
         d = np.maximum(h - thick, -(h + 0.004 * s))
         d = S.smax(d, (H - Z) * head.r[2], 0.004 * s)
+        if crown is not None:
+            top = np.interp(th, crown[0], crown[1])
+            if ragged:
+                top = top + 0.6 * ragged * np.sin(np.radians(th) * 31.0 + 0.4)
+            d = S.smax(d, (Z - top) * head.r[2], 0.006 * s)
         if part:
             groove = 0.0020 * s - np.abs(P[..., 0] - head.c[0])
             groove = np.where((P[..., 1] < head.c[1] + 0.02 * s) & (Z > 0.15), groove, -1.0)
@@ -247,7 +260,11 @@ def hair_style(f, style):
     if style == "bald":
         return None
     if style == "cropped":
-        shell = hair_cap(head, 0.0048 * s, grooves=60, depth=0.0012, edge=0.45, ragged=0.05, puff=0.15)
+        shell = hair_cap(head, 0.0058 * s, grooves=60, depth=0.0020, edge=0.55, ragged=0.10, puff=0.20, temples=0.10, clumps=0.35)
+    elif style == "balding":
+        # the crown bare, a fringe of short hair round the sides and the back
+        shell = hair_cap(head, 0.0045 * s, grooves=60, depth=0.0016, edge=0.40, ragged=0.08, puff=0.30, clumps=0.30,
+                         crown=([0.0, 55.0, 80.0, 120.0, 150.0, 180.0], [-0.9, 0.02, 0.16, 0.30, 0.40, 0.44]))
     elif style == "shaved":
         shell = hair_cap(head, 0.0019 * s, grooves=0, depth=0.0, edge=0.10, ragged=0.03)
         return Piece("hair_shaved", "STUBBLE", shell, shell, lo, hi, voxel=0.0010 * s, cover=False)
@@ -281,12 +298,19 @@ def hair_style(f, style):
         lo = (lo[0] - 0.04, lo[1], f.z_shoulder - 0.10)
         hi = (hi[0] + 0.04, hi[1] + 0.06, hi[2])
     elif style == "bun":
-        cap = hair_cap(head, 0.010 * s, grooves=60, depth=0.0018)
-        bun_c = head.point(180.0, 0.05, 0.030 * s)
-        bun = prim(S.Ellipsoid(bun_c, (0.040 * s, 0.034 * s, 0.036 * s)))
-        band = prim(S.Ellipsoid(head.point(180.0, 0.08, 0.008 * s), (0.026 * s, 0.020 * s, 0.024 * s)))
-        shell = union_fn(cap, bun, band, k=0.008 * s)
-        hi = (hi[0], hi[1] + 0.06, hi[2])
+        cap = hair_cap(head, 0.010 * s, grooves=60, depth=0.0024, clumps=0.12)
+        # the coil: three turns of hair wound round, high on the back of the head
+        bun_c = head.point(180.0, 0.30, 0.038 * s)
+        coil = []
+        for i in range(7):
+            a = i * 2.0 * math.pi / 7.0
+            r = (0.030 - 0.0016 * i) * s
+            q = bun_c + Vector((math.cos(a) * 0.020 * s, 0.006 * s * math.sin(a * 0.5), math.sin(a) * 0.018 * s))
+            coil.append(prim(S.Ellipsoid(q, (r * 1.05, r * 0.95, r * 0.90))))
+        knot = prim(S.Sphere(bun_c + Vector((0.008 * s, 0.022 * s, 0.010 * s)), 0.017 * s))
+        band = prim(S.Ellipsoid(head.point(180.0, 0.24, 0.010 * s), (0.028 * s, 0.020 * s, 0.022 * s)))
+        shell = union_fn(cap, *coil, knot, band, k=0.006 * s)
+        hi = (hi[0], hi[1] + 0.08, hi[2] + 0.02)
     elif style == "topknot":
         cap = hair_cap(head, 0.007 * s, grooves=60, depth=0.0016)
         knot = prim(S.Sphere(head.point(0.0, 0.93, 0.024 * s), 0.026 * s))
@@ -441,7 +465,7 @@ def beard_style(f, style):
     return Piece(style, slot, fn, fn, lo, hi, voxel=voxel, cover=False)
 
 
-HAIR_STYLES = ("cropped", "shaved", "long", "long_framed", "bun", "braids", "tail", "curls", "topknot")
+HAIR_STYLES = ("cropped", "shaved", "balding", "long", "long_framed", "bun", "braids", "tail", "curls", "topknot")
 BEARD_STYLES = ("beard_stubble", "beard_short", "beard_chin", "beard_moustache", "beard_full", "beard_long")
 
 
