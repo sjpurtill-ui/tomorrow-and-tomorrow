@@ -51,9 +51,10 @@ They live on `Body`, `Eyes`, `Brows`, `Mouth`, and every `hair_*` and `beard_*` 
   - `face_brow, face_lips, face_ears, face_long, face_round, face_aged`
   - `CourtStage.figure_look()` mixes a people's family face with each person's own.
 - **Mood: present now, on `Mouth` and `Brows`.** `mood_smile, mood_tight, mood_worry, mood_stern`.
-- **Expressions: J adds these next, 0..1.** `smile, frown, brows_up, brows_down, brows_worried, eyes_wide, eyes_narrow, blink, jaw_open, lips_pressed, sneer, cheeks_puff`.
-- **Visemes: J adds these next, 0..1.** `v_aa, v_ee, v_oo, v_mm, v_fv`.
-- **Until they exist:** call `CourtFigure3D.set_expression({name: value})`. It drives whatever keys exist and maps missing ones onto the nearest present key:
+- **Expressions: present, 0..1.** `smile, frown, brows_up, brows_down, brows_worried, eyes_wide, eyes_narrow, blink, jaw_open, lips_pressed, sneer, cheeks_puff`.
+- **Visemes: present, 0..1.** `v_aa, v_ee, v_oo, v_mm, v_fv`.
+- **Gaze: present on `Eyes`, 0..1.** `eyes_left, eyes_right, eyes_up, eyes_down` (the figure's own left is +X). The iris, pupil and catch of light are whole discs that slide inside the white: the white's material writes stencil 1 and theirs read it, drawn after everything solid, so the lids always cut them, however far they roll and however far the lids close (K's eye-bone scale or `blink`). Eyes are not eyeballs on bones: the paint stays on the face, and only what shows through the white moves.
+- **Without K's acting:** call `CourtFigure3D.set_expression({name: value})`. It drives whatever keys exist and maps missing ones onto the nearest present key:
   - `smile` → `mood_smile`;
   - `lips_pressed` → `mood_tight`;
   - `brows_worried` → `mood_worry`;
@@ -88,16 +89,21 @@ A look is a Dictionary: `{variant, outfit, hair, beard, skin, hair_colour, cloth
 | `add_library(name, lib)` | §2. |
 | `head_top() -> Vector3` | Where speech bubbles hang. |
 
-**Members:** `skeleton`, `player`, `model`, `stance`, `mood`, `body_height`, `clip`.
+| `carry("bundle", on)` | A carried prop (`prop_bundle`, a hide sack of food) rides between the hands each frame, whatever the clip does, until `set_down()` leaves it on the floor where it is. |
+| `drop_held(empty_stance)` | The held bowl (or staff) falls from the hand to the floor and stays there; the figure takes an empty-handed stance. Returns the fallen node. |
+
+**Members:** `skeleton`, `player`, `model`, `stance`, `mood`, `body_height`, `clip`, `seat_height` (a seat the set gives: no stool).
+
+**Looks in a set:** `look.lit = true` dresses the figure with `court_figure_lit.gdshader` (the set's sun, fire and bounce light it in two soft tones; the sun's shadows fall on a person at 60%) and turns its shadows on (never for the paint on the skin). Without a set, `court_figure_toon.gdshader` paints its own light. Hair has strands and a sheen in both; beards have no inked edge; the darkest hair keeps a little tone (`readable_hair`).
 
 **Rules:**
-- Nothing runs per frame in this node; LookAt and AnimationPlayer do the work.
-- K's `CourtActing` drives figures **only** through this API and the AnimationPlayer it exposes.
+- Nothing runs per frame in this node except while it carries something between its hands; LookAt and AnimationPlayer do the work.
+- **K's acting owns the face and the head turn once bound.** `CourtActing` (a `SkeletonModifier3D` on the skeleton, meta `court_acting` on the figure) switches off this node's two `LookAtModifier3D`s and follows `gaze` (the point `look_at_point` sets) itself, reads `mood`, and writes face morphs directly by cached index (no per-frame Dictionary). While it is bound, `set_mood()` only records the mood and `set_expression()` does nothing: route faces through the acting (`mood` beats).
 - Hidden figures must stop their player (`player.stop()`) and set `process_mode = DISABLED`.
 
 ## 5. How the stage hosts a set, a camera and directed beats
 
-`CourtStage` (`scripts/hud/court_stage.gd`) is the one stage. It has one transparent `SubViewport` (`view3d`, MSAA 2×) behind the name plates and bubbles. The figures, the set and the camera all live in that viewport.
+`CourtStage` (`scripts/hud/court_stage.gd`) is the one stage. It has one `SubViewport` (`view3d`, MSAA 2×) behind the name plates and bubbles. The figures, the set and the camera all live in that viewport.
 
 **The hooks** are static, so the stage stays one file and each builder's code is optional. While a hook is null, the current built-in behaviour stays as the fallback.
 
@@ -108,14 +114,18 @@ CourtStage.acting        # K: Object with play/look_at/set_mood/speak/idle (the 
 CourtStage.director      # L: Object with beats(event, cast, facts, seed) / ambient(cast, facts, seed) / asides(event, facts, cast, seed)
 ```
 
-**Without a set** (today), the stage maps its own pixels onto the hall with an orthographic camera, and `layout()` decides where people stand.
+**Without a set** (tests, or a machine without the set models; `CourtStage.use_sets = false`), the viewport is transparent over the painted backdrop, the stage maps its own pixels onto the hall with an orthographic camera, and `layout()` decides where people stand.
 
-**With a set**, the stage:
-- adds `set_builder.build(era, facts)` to `view3d`;
-- stands people on the set's marks: `petitioner` for the one before the god, `officials_0..n`, `envoy_0..n`, `crowd_*`;
-- hands the camera to `camera_rig`.
+**With a set** (`court_set_3d.gd`, M), the Court calls `stage.use_set(Backdrop.current_stage(), facts)` before anyone is added (`audience_modal._new_stage`); the painted backdrop is hidden and kept as the fallback. The stage then:
+- puts `CourtSet.build(era, facts)` in `view3d` (not transparent) and uses its `CourtCamera`;
+- gives each person a `Spot` on a mark (placed from the mark's own transform, so it works before the stage is in the tree): the one before the god on `petitioner` (an envoy on `envoy_0`), their company on `envoy_1/2`, officials on `officials_*` then the standing `crowd_*` marks, onlookers on `crowd_*` (on a log mark they sit, on the set's seat: `seat_height`, no stool);
+- turns officials about half way and onlookers a little toward the one before the god (`rest_yaw`), and takes the light where each stands (`light_at`);
+- frames everyone standing (not the seated onlookers) with `camera.wide(spots)`, inset for the button strip (`top_inset`), the plates and the offered object's plinth (`right_reserve`); `view_changed` re-tracks every figure's control and re-places the bubbles;
+- walks people in from `door` and out by `door_out` along a way that bends round the fire (`Figure._route`, `stroll` 0 on the mark, 1 at the door);
+- answers the god: wrath (`WRATH_ACTS`) shakes the frame and sends the dog cowering; favour sets it wagging; the god's voice makes it look up;
+- shows name plates only for the one before the god and whoever is speaking (and under the pointer), so the hall is not a crowd of labels.
 
-Name plates and bubbles always project from 3D through whichever camera is current (`world_to_stage`), so they follow any shot. Marks are `Node3D` children named exactly `throne_gaze`, `petitioner`, `officials_<i>`, `crowd_<i>`, `envoy_<i>`, `fire`, `door` and `animal_<i>`; each mark's -Z axis is the way the person faces.
+Name plates and bubbles always project from 3D through whichever camera is current (`world_to_stage`), so they follow any shot. Marks are `Marker3D` children of the set's `Marks` node named `throne_gaze`, `petitioner`, `officials_<i>`, `crowd_<i>`, `envoy_<i>`, `fire`, `door`, `door_out` and `animal_<i>`; each mark's +Z axis is the way the person faces (the figures' front is +Z); sit marks carry meta `sit` and `seat`.
 
 **Events.** Every stage event goes through one function, `CourtStage.event(kind:String, data:Dictionary)`. These are the events and their data:
 
@@ -134,10 +144,14 @@ Name plates and bubbles always project from 3D through whichever camera is curre
 
 - **Cast:** `[{key, role: main/court/attendant, person, figure: CourtFigure3D, mood}]`.
 - **Facts:** `CourtStage.facts`, a Dictionary the Court fills from the engine. It holds `era, season, stores_days, hungry, sick, at_war, love, dread, mood, offer`. Show nothing that isn't in it.
-- **With a director installed:** the stage's own acting (below) still runs first, and the director's beats then layer on top. `beats = director.beats(event, cast, facts, seed)`. Each beat is `{t, who, act, args}`. The stage runs a beat set on one Tween, sending each beat to:
-  - `acting`: `play`, `look_at`, `mood`, `speak`, `gesture`;
-  - `camera_rig.shot`: `shot`;
+- **With a director installed:** the stage's own acting (below) still runs first, and the director's beats then layer on top. `beats = director.beats(event, cast, facts, seed)`. Each beat is `{t, who, act, args}` (lowered by `director.lower`). The stage runs a beat set on one Tween, sending each beat to:
+  - the acting, by the act's name: `acting.call(act, body, args, stage)` for `play`, `look_at`, `mood`, `gesture` and anything else the acting has a method for (K resolves `args.beat` to its clip, gesture or face; an act it has no clip for falls back to the figure's own clip in `args.fallback`, else to its mood and look);
+  - the set's camera: `shot` (`wide`, `two_shot` a/b, `push_in` target, `reaction` target, `shake` strength);
+  - the room: `hush` stills everyone's idle business (`acting.hush(body, true)`, released after its seconds) and pauses the room's own loops;
+  - the set's animals: a beat for the director's `dog` or `goat` plays on the set's beast (`perk_up`, `whimper`, `hide_under`, `sniff`, `tail_wag`, `lie_down`, `scratch`, `bark`);
   - its own bubble: `aside`, whose text must come from `director.asides`.
+- **Props follow the acts:** `drop_bowl` drops the held bowl to the floor (they stand clasped after); `struggle_bundle`, `lift_bundle` put the bundle between the hands; `set_down_bundle` leaves it on the floor. In a food gift the envoy's first attendant carries the bundle in.
+- **Words:** `say()` also calls `acting.speak(body, text, reveal_time(text))`, so the mouth shapes the words as the bubble reveals them.
 - **Seed:** `hash(audience_id + event index)`, so the same audience plays the same way.
 - **Built-in behaviour** (always runs; it is all there is without a director):
   - the speaker talks and the others look at them;
@@ -153,8 +167,9 @@ Name plates and bubbles always project from 3D through whichever camera is curre
   - `tests/test_court_stage.gd` must stay green after each merge.
   - Each builder brings their own suite (`test_court_acting.gd`, `test_court_director.gd`, `test_court_set*.gd`), which runs headless with no network and no save writes.
 - **Captures.** `tests/court_stage_capture.tscn` on the private desktop (`tools/run_isolated_gpu_probe.ps1`), at 1536×864.
+- **Clips.** `tests/court_morning_clip.tscn` (`--only=wrath|gift --tier=0|1`) runs the real Court with the director, the acting and the set, under Godot's movie writer at a fixed 12 frames a second; `tools/court_clip_gif.py` makes the GIF.
 - **Machine etiquette.** Follow PLAN.md:
-  - take the shared lock (`mkdir C:/Users/sjpur/tt-court-lock`) before any Godot or Blender run, and remove it right after;
+  - take the shared lock only when nobody holds it (`mkdir C:/Users/sjpur/tt-court-lock` fails if it exists: wait, never write into it), write your owner line, and remove it right after, only if the owner line is still yours; `tools/blender/build_all.sh` takes it once for a whole build;
   - one process at a time;
   - never touch the user's game;
   - no `git stash`;

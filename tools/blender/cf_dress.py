@@ -194,11 +194,13 @@ class Head:
         return (c[0] - 0.14 * s - wide, c[1] - 0.15 * s, c[2] - 0.40 * s - below), (c[0] + 0.14 * s + wide, c[1] + 0.15 * s + wide, c[2] + 0.14 * s)
 
 
-def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back=0.0, puff=0.0, temples=0.0, ragged=0.0):
+def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back=0.0, puff=0.0, temples=0.0, ragged=0.0, crown=None):
     """Hair lying on the scalp inside the hairline.
     part: strands fall to each side of a parting (else they are combed back);
     puff: extra volume over the ears and at the back, so it stands off the skull;
-    temples: how far the hair comes down over the temples (softens the line)."""
+    temples: how far the hair comes down over the temples (softens the line);
+    crown: (angles, heights) of a line above which no hair grows (a bald crown
+    with a fringe round the sides and back)."""
     s = head.s
 
     def fn(P):
@@ -226,6 +228,11 @@ def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back
         thick = thick - depth * s * g * sm((Z + 0.2) / 0.6)
         d = np.maximum(h - thick, -(h + 0.004 * s))
         d = S.smax(d, (H - Z) * head.r[2], 0.004 * s)
+        if crown is not None:
+            top = np.interp(th, crown[0], crown[1])
+            if ragged:
+                top = top + 0.6 * ragged * np.sin(np.radians(th) * 31.0 + 0.4)
+            d = S.smax(d, (Z - top) * head.r[2], 0.006 * s)
         if part:
             groove = 0.0020 * s - np.abs(P[..., 0] - head.c[0])
             groove = np.where((P[..., 1] < head.c[1] + 0.02 * s) & (Z > 0.15), groove, -1.0)
@@ -248,6 +255,10 @@ def hair_style(f, style):
         return None
     if style == "cropped":
         shell = hair_cap(head, 0.0048 * s, grooves=60, depth=0.0012, edge=0.45, ragged=0.05, puff=0.15)
+    elif style == "balding":
+        # the crown bare, a fringe of short hair round the sides and the back
+        shell = hair_cap(head, 0.0040 * s, grooves=60, depth=0.0010, edge=0.40, ragged=0.04, puff=0.30,
+                         crown=([0.0, 55.0, 80.0, 120.0, 150.0, 180.0], [-0.9, 0.02, 0.16, 0.30, 0.40, 0.44]))
     elif style == "shaved":
         shell = hair_cap(head, 0.0019 * s, grooves=0, depth=0.0, edge=0.10, ragged=0.03)
         return Piece("hair_shaved", "STUBBLE", shell, shell, lo, hi, voxel=0.0010 * s, cover=False)
@@ -441,7 +452,7 @@ def beard_style(f, style):
     return Piece(style, slot, fn, fn, lo, hi, voxel=voxel, cover=False)
 
 
-HAIR_STYLES = ("cropped", "shaved", "long", "long_framed", "bun", "braids", "tail", "curls", "topknot")
+HAIR_STYLES = ("cropped", "shaved", "balding", "long", "long_framed", "bun", "braids", "tail", "curls", "topknot")
 BEARD_STYLES = ("beard_stubble", "beard_short", "beard_chin", "beard_moustache", "beard_full", "beard_long")
 
 

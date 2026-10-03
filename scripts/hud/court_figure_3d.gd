@@ -19,6 +19,8 @@ extends Node3D
 
 const DIR:="res://assets/court_figures/"
 const TOON:=preload("res://scripts/shaders/court_figure_toon.gdshader")
+## In a modelled court (court_set_3d.gd) the figures take the set's own light.
+const TOON_LIT:=preload("res://scripts/shaders/court_figure_lit.gdshader")
 const INK:=preload("res://scripts/shaders/court_figure_ink.gdshader")
 const VARIANTS:=["male_adult","female_adult","male_old","female_old","male_young","female_young"]
 const OUTFITS:={"hide":1,"tunic":2,"robe":3}
@@ -35,7 +37,16 @@ const MOODS:={"warm":[{"mood_smile":0.55},-2.0],"neutral":[{},0.0],"afraid":[{"m
 	"defiant":[{"mood_stern":0.65,"mood_tight":0.25},-9.0],"grieved":[{"mood_worry":0.8},8.0]}
 const FACE_PARTS:=["Body","Eyes","Brows","Mouth"]
 ## Slots drawn flat (no light): the painted eyes and mouth.
-const FLAT_SLOTS:=["EYES","EYE_WHITE","EYE_SHINE","MOUTH"]
+const FLAT_SLOTS:=["EYES","EYE_WHITE","EYE_SHINE","MOUTH","IRIS","PUPIL"]
+## The iris, pupil and catch of light are drawn only over the white of the
+## eye (a stencil the white writes), so they roll inside the lids (morphs
+## eyes_left/right/up/down) and the lids cut them as they close.
+const STENCIL_READ:=["IRIS","PUPIL","EYE_SHINE"]
+const STENCIL_WRITE:=["EYE_WHITE"]
+## What a person may carry between their hands for a while (a gift of food).
+const CARRIED:={"bundle":"prop_bundle"}
+## Face parts that never cast a shadow (they lie on the skin).
+const NO_SHADOW:=["Eyes","Brows","Mouth","hair_shaved","beard_stubble"]
 ## The height every clip is made for; shorter bodies are drawn shorter.
 const REFERENCE_HEIGHT:=1.72
 ## How fast the walk clips carry a 1.72 m body, in metres a second.
@@ -45,6 +56,7 @@ const WALK_SPEED:={"walk_in":1.18,"walk_out":0.92}
 const MATERIAL_LIMIT:=256
 static var _scenes:Dictionary={}
 static var _materials:Dictionary={}
+static var _shaders:Dictionary={}
 static var _inks:Dictionary={}
 static var _manifest:Dictionary={}
 static var key_dir:=Vector3(-0.35,0.65,0.68)
@@ -71,6 +83,8 @@ var gaze:Node3D
 var _looks:Array[LookAtModifier3D]=[]
 var _gaze_tween:Tween
 var _gaze_on:=false
+## A seat the set gives them (its height): their own stool is not shown.
+var seat_height:=-1.0
 
 static func manifest()->Dictionary:
 	if _manifest.is_empty():
@@ -90,14 +104,16 @@ static func scene_for(variant_name:String)->PackedScene:
 static func available()->bool:
 	return enabled and scene_for("male_adult")!=null
 
-## The shared material for a slot in a colour (skin also knows which outfit hides it).
-static func material(slot:String,colour:Color,cover:=0)->ShaderMaterial:
+## The shared material for a slot in a colour (skin also knows which outfit
+## hides it). lit: in a modelled court, under its lights; inked: an outline.
+static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->ShaderMaterial:
 	# Colours are kept to a few steps a channel, so the cache stays small.
 	colour=Color(snappedf(colour.r,1.0/48.0),snappedf(colour.g,1.0/48.0),snappedf(colour.b,1.0/48.0))
-	var key:="%s|%s|%d" % [slot,colour.to_html(false),cover]
+	var key:="%s|%s|%d|%d|%d" % [slot,colour.to_html(false),cover,int(lit),int(inked)]
 	if _materials.has(key):return _materials[key]
 	if _materials.size()>=MATERIAL_LIMIT:_materials.erase(_materials.keys()[0])
-	var made:=ShaderMaterial.new();made.shader=TOON
+	var made:=ShaderMaterial.new()
+	made.shader=shader_for(lit,"read" if slot in STENCIL_READ else ("write" if slot in STENCIL_WRITE else ""))
 	made.set_shader_parameter("albedo",colour)
 	made.set_shader_parameter("cover_channel",cover)
 	made.set_shader_parameter("key_dir",key_dir)
@@ -107,11 +123,42 @@ static func material(slot:String,colour:Color,cover:=0)->ShaderMaterial:
 		if slot=="SKIN":
 			made.set_shader_parameter("shade_tint",Color(0.70,0.52,0.47))
 			made.set_shader_parameter("band_soft",0.24)
-			made.set_shader_parameter("terminator",Color(0.62,0.20,0.10))
-		if slot=="HAIR":made.set_shader_parameter("rim_amount",0.22)
-		if not slot in ["BROW","STUBBLE"]:made.next_pass=_ink(cover)
+			made.set_shader_parameter("terminator",Color(0.40,0.14,0.07))
+		if slot=="HAIR":
+			made.set_shader_parameter("rim_amount",0.22)
+			made.set_shader_parameter("strands",0.16)
+			made.set_shader_parameter("sheen",0.22)
+			made.set_shader_parameter("band_soft",0.30)
+		if slot=="STUBBLE":made.set_shader_parameter("grain",0.35)
+		if lit:
+			made.set_shader_parameter("fill",0.22 if slot=="SKIN" else 0.16)
+			if slot=="SKIN":made.set_shader_parameter("grain",0.025)
+		if inked and not slot in ["BROW","STUBBLE"]:made.next_pass=_ink(cover)
 	_materials[key]=made
 	return made
+
+## The figure shader: unshaded (painted light) or lit by a set; for the eyes,
+## the white writes a stencil and the iris, pupil and catch of light read it
+## (drawn after everything solid, so the white is always there first).
+static func shader_for(lit:bool,stencil:="")->Shader:
+	var base:Shader=TOON_LIT if lit else TOON
+	if stencil.is_empty():return base
+	var key:="%d|%s" % [int(lit),stencil]
+	if _shaders.has(key):return _shaders[key]
+	var code:=base.code
+	if stencil=="write":
+		code=code.replace("render_mode ","stencil_mode write, compare_always, 1;\nrender_mode ")
+	else:
+		code=code.replace("depth_draw_opaque","depth_draw_never").replace("render_mode ","stencil_mode read, compare_equal, 1;\nrender_mode blend_mix, shadows_disabled, ")
+		code=code.replace("void fragment() {","void fragment() {\n\tALPHA = 1.0;")
+	var made:=Shader.new();made.code=code
+	_shaders[key]=made
+	return made
+
+## The darkest hair keeps a little tone, so its strands and sheen still read.
+static func readable_hair(colour:Color)->Color:
+	if colour.v>=0.20:return colour
+	return Color.from_hsv(colour.h,colour.s*0.85,lerpf(colour.v,0.20,0.6))
 
 static func _ink(cover:int)->ShaderMaterial:
 	if not _inks.has(cover):
@@ -212,6 +259,8 @@ func _mood_drop()->float:
 func set_mood(name:String)->void:
 	if not MOODS.has(name):name="neutral"
 	mood=name
+	# K's acting reads `mood` and owns the face morphs once it is bound.
+	if has_meta(&"court_acting"):return
 	var keys:Dictionary=(MOODS[name] as Array)[0]
 	for mesh_node in _meshes:
 		if mesh_node.name!="Mouth" and mesh_node.name!="Brows":continue
@@ -236,6 +285,7 @@ func _face()->void:
 const EXPRESSION_STANDINS:={"smile":{"mood_smile":1.0},"lips_pressed":{"mood_tight":1.0},"frown":{"mood_tight":0.6,"mood_stern":0.5},
 	"brows_worried":{"mood_worry":1.0},"brows_down":{"mood_stern":1.0},"brows_up":{"mood_worry":0.5},"sneer":{"mood_stern":0.6,"mood_tight":0.4}}
 func set_expression(values:Dictionary)->void:
+	if has_meta(&"court_acting"):return
 	var standins:={}
 	for name in values:
 		var value:=clampf(float(values[name]),0.0,1.0)
@@ -273,10 +323,12 @@ func _dress()->void:
 	if not beard.is_empty() and not beard.begins_with("beard_"):beard="beard_"+beard
 	var hidden_pieces:Array=look.get("without",[])
 	var skin:=Color(look.get("skin",Color("bd8659")))
-	var hair_colour:=Color(look.get("hair_colour",Color("2b2018")))
+	var hair_colour:=readable_hair(Color(look.get("hair_colour",Color("2b2018"))))
+	var lit:=bool(look.get("lit",false))
 	var colours:={
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
 		"EYES":Color("22170f"),"EYE_WHITE":Color("e6dbc6"),"EYE_SHINE":Color("fbf6ea"),
+		"IRIS":Color(look.get("eye_colour",Color("5a3a22"))),"PUPIL":Color("140d08"),
 		"MOUTH":skin.darkened(0.62),"LEATHER":Color(look.get("leather",Color("5b3b24"))),
 		"STUBBLE":skin.lerp(hair_colour,0.42).darkened(0.08),"WOOD":Color("6b4a2e"),"CLAY":Color("a0603a"),
 	}
@@ -286,21 +338,108 @@ func _dress()->void:
 		var part:=String(mesh_node.name)
 		var shown:=part in FACE_PARTS or part==hair or part==beard or (part.begins_with(outfit+"_") and not part in hidden_pieces) or part==String(PROPS.get(stance,"-"))
 		mesh_node.visible=shown
-		if not shown or mesh_node.mesh==null:continue
-		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		if (not shown and not part in CARRIED.values()) or mesh_node.mesh==null:continue
+		# In a lit court they cast shadows (not the paint on the skin).
+		var shadows:=lit and not part in NO_SHADOW
+		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		# A beard has no inked edge: it grows out of the skin, it is not pasted on.
+		var inked:=not part.begins_with("beard_")
 		for surface in mesh_node.mesh.get_surface_count():
 			var source:=mesh_node.mesh.surface_get_material(surface)
 			var slot:=source.resource_name if source!=null else "CLOTH_A"
 			if part=="Brows":slot="BROW"
 			var cover:=int(OUTFITS.get(outfit,0)) if part=="Body" else 0
-			mesh_node.set_surface_override_material(surface,material(slot,colours.get(slot,Color("8a7a66")),cover))
+			mesh_node.set_surface_override_material(surface,material(slot,colours.get(slot,Color("8a7a66")),cover,lit,inked))
 
 ## A prop shows only in the stance that holds it (not while walking or bowing).
 func _props_for(name:String)->void:
 	var held:=String(PROPS.get(stance,""))
 	var holding:=name==stance or name==stance+"_talk"
 	for mesh_node in _meshes:
-		if String(mesh_node.name).begins_with("prop_"):mesh_node.visible=holding and String(mesh_node.name)==held
+		var part:=String(mesh_node.name)
+		if part.begins_with("prop_") and not part in CARRIED.values():mesh_node.visible=holding and part==held and not (part=="prop_stool" and seat_height>=0.0)
+
+func _mesh_named(part:String)->MeshInstance3D:
+	for mesh_node in _meshes:
+		if String(mesh_node.name)==part:return mesh_node
+	return null
+
+# --- Carrying and dropping ------------------------------------------------------
+
+var _carried:MeshInstance3D
+var _carry_on:=false
+var _hand_l:=-1
+var _hand_r:=-1
+var _dropped:Array[Node3D]=[]
+
+func _ready()->void:
+	set_process(_carry_on)
+
+## They carry something between their hands (a bundle of food): it rides
+## between the hands, whatever the clip does with them, until set down.
+func carry(what:String,on:=true)->void:
+	var node:=_mesh_named(String(CARRIED.get(what,"")))
+	if node==null:return
+	if _carried!=null and _carried!=node:_carried.visible=false
+	_carried=node
+	node.visible=on
+	node.top_level=on
+	_carry_on=on
+	if skeleton!=null:
+		_hand_l=skeleton.find_bone("hand.L");_hand_r=skeleton.find_bone("hand.R")
+	set_process(on)
+	if on:_process(0.0)
+
+## What they carry is set down where it is, on the ground, and stays there.
+func set_down()->void:
+	if _carried==null or not _carry_on:return
+	_carry_on=false;set_process(false)
+	var at:=_carried.global_position
+	_carried.global_position=Vector3(at.x,global_position.y+0.115*body_height/REFERENCE_HEIGHT,at.z)
+
+## Is it in their hands?
+func carrying()->bool:
+	return _carry_on
+
+func _process(_delta:float)->void:
+	if not _carry_on or _carried==null or skeleton==null or _hand_l<0 or _hand_r<0:return
+	var xf:=skeleton.global_transform
+	var pl:=xf*skeleton.get_bone_global_pose(_hand_l).origin
+	var pr:=xf*skeleton.get_bone_global_pose(_hand_r).origin
+	var basis:=global_transform.basis.orthonormalized()
+	var k:=body_height/REFERENCE_HEIGHT
+	_carried.global_transform=Transform3D(basis*Basis.from_scale(Vector3.ONE*global_transform.basis.get_scale().x),(pl+pr)*0.5+basis.z*0.07*k-Vector3(0.0,0.05*k,0.0))
+
+## They drop what they hold (the bowl): it falls from the hand to the floor
+## and lies there; they stand empty-handed from then on.
+func drop_held(empty_stance:="stand")->Node3D:
+	var held:=String(PROPS.get(stance,""))
+	if held.is_empty() or held=="prop_stool":return null
+	var node:=_mesh_named(held)
+	if node==null or skeleton==null:return null
+	var hand:=skeleton.find_bone("hand.R")
+	var fallen:=MeshInstance3D.new();fallen.name="Dropped_"+held
+	fallen.mesh=node.mesh
+	for surface in node.mesh.get_surface_count():fallen.set_surface_override_material(surface,node.get_surface_override_material(surface))
+	fallen.cast_shadow=node.cast_shadow
+	# where the hand holds it now: the bone's pose against its rest
+	var rel:=skeleton.global_transform.affine_inverse()*node.global_transform
+	var posed:=skeleton.global_transform*skeleton.get_bone_global_pose(hand)*skeleton.get_bone_global_rest(hand).affine_inverse()*rel
+	var holder:Node=get_parent() if get_parent()!=null else self
+	holder.add_child(fallen)
+	fallen.global_transform=posed
+	_dropped.append(fallen)
+	node.visible=false
+	stance=empty_stance if empty_stance in STANCES else "stand"
+	play(rest_clip(),0.3)
+	if is_inside_tree():
+		var floor_y:=global_position.y+0.03*body_height/REFERENCE_HEIGHT
+		var fall:=fallen.create_tween()
+		fall.tween_property(fallen,"global_position:y",floor_y,0.34).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		fall.parallel().tween_property(fallen,"rotation:z",fallen.rotation.z+deg_to_rad(28.0),0.34)
+		fall.tween_property(fallen,"global_position:y",floor_y+0.035,0.09).set_ease(Tween.EASE_OUT)
+		fall.tween_property(fallen,"global_position:y",floor_y,0.09).set_ease(Tween.EASE_IN)
+	return fallen
 
 ## Play a clip, blending from the last one; once-only clips hold their end.
 ## at: start this far in (a different breath for each person at rest).
