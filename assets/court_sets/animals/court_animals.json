@@ -1,0 +1,84 @@
+{
+ "generator": "tools/blender/court_animals.py",
+ "species": {
+  "dog": {
+   "glb": "court_dog.glb",
+   "triangles": 5200,
+   "height": 0.74,
+   "clips": {
+    "idle": {
+     "seconds": 4.2,
+     "loop": true
+    },
+    "wag": {
+     "seconds": 1.28,
+     "loop": true
+    },
+    "sniff": {
+     "seconds": 2.0,
+     "loop": true
+    },
+    "walk": {
+     "seconds": 0.9,
+     "loop": true
+    },
+    "trot": {
+     "seconds": 0.5,
+     "loop": true
+    },
+    "sit": {
+     "seconds": 0.8,
+     "loop": false
+    },
+    "sit_idle": {
+     "seconds": 6.0,
+     "loop": true
+    },
+    "scratch": {
+     "seconds": 0.64,
+     "loop": true
+    },
+    "lie": {
+     "seconds": 1.2,
+     "loop": false
+    },
+    "lie_idle": {
+     "seconds": 5.2,
+     "loop": true
+    },
+    "cower": {
+     "seconds": 0.5,
+     "loop": false
+    },
+    "cower_idle": {
+     "seconds": 2.4,
+     "loop": true
+    },
+    "look_up": {
+     "seconds": 0.6,
+     "loop": false
+    },
+    "tilt": {
+     "seconds": 2.6,
+     "loop": false
+    },
+    "bark": {
+     "seconds": 0.5,
+     "loop": false
+    },
+    "grab": {
+     "seconds": 0.7,
+     "loop": false
+    },
+    "stand_up": {
+     "seconds": 0.6,
+     "loop": false
+    }
+   },
+   "speeds": {
+    "walk": 0.78,
+    "trot": 1.7
+   }
+  }
+ }
+}

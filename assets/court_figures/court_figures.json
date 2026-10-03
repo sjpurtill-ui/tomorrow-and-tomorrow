@@ -32,6 +32,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -80,6 +81,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -121,6 +123,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -169,6 +172,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -210,6 +214,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -258,6 +263,7 @@
    "hair": [
     "hair_cropped",
     "hair_shaved",
+    "hair_balding",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -272,6 +278,7 @@
  "hair": [
   "cropped",
   "shaved",
+  "balding",
   "long",
   "long_framed",
   "bun",
@@ -444,6 +451,15 @@
   "bowl": "prop_bowl",
   "sit": "prop_stool"
  },
+ "carried": {
+  "bundle": "prop_bundle"
+ },
+ "gaze": [
+  "eyes_left",
+  "eyes_right",
+  "eyes_up",
+  "eyes_down"
+ ],
  "face_shapes": [
   "face_jaw",
   "face_chin",
@@ -494,6 +510,8 @@
   "EYES",
   "EYE_SHINE",
   "EYE_WHITE",
+  "IRIS",
+  "PUPIL",
   "STUBBLE",
   "WOOD",
   "CLAY",

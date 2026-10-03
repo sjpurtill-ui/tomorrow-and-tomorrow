@@ -27,6 +27,9 @@ func before_test()->void:
 	# The stage's own acting, without the director's (its own suite covers it).
 	Stage.directing=false
 	Stage.director=null
+	Stage.acting=null
+	# The flat hall (no modelled court): test_court_set_stage covers the set.
+	Stage.use_sets=false
 	Fixtures.new(self).base(false)
 	_root_size=get_tree().root.size
 	get_tree().root.size=Vector2i(1920,1080)
@@ -35,6 +38,8 @@ func before_test()->void:
 func after_test()->void:
 	Stage.directing=true
 	Stage.director=null
+	Stage.acting=null
+	Stage.use_sets=true
 	get_tree().root.size=_root_size
 	Tokens.set_color_mode("light")
 
@@ -555,7 +560,13 @@ const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
 
 func _clip_of(modal:Control,key:String)->String:
 	var f:Stage.Figure=modal.court_stage.figure(key)
-	return String(f.body3d.clip) if f!=null and f.body3d!=null else ""
+	if f==null or f.body3d==null:return ""
+	# The acting layer's own clip, when it plays one over the stance.
+	if f.body3d.has_meta(&"court_acting"):
+		var actor:Variant=f.body3d.get_meta(&"court_acting")
+		var layer:Variant=actor.get("_a") if actor is Object and is_instance_valid(actor) else null
+		if layer!=null and not String(layer.clip).is_empty():return String(layer.clip)
+	return String(f.body3d.clip)
 
 
 func test_the_people_on_the_stage_are_modelled_figures_in_one_hall()->void:
@@ -575,8 +586,9 @@ func test_the_people_on_the_stage_are_modelled_figures_in_one_hall()->void:
 		# Their feet stand on the stage where the layout put them.
 		var feet:Vector2=stage.world_to_stage(f.body3d.global_position)
 		assert_float(feet.distance_to(f.home+Vector2(f.walk,0.0))).is_less(3.0)
-	# Nothing runs per frame: the figures move by clips and tweens alone.
-	assert_bool(stage.figure(Stage.MAIN).body3d.has_method("_process")).is_false()
+	# Nothing runs per frame: the figures move by clips and tweens alone (only
+	# someone carrying a bundle between their hands follows them each frame).
+	assert_bool(stage.figure(Stage.MAIN).body3d.is_processing()).is_false()
 	assert_bool(stage.has_method("_process")).is_false()
 
 
@@ -876,6 +888,6 @@ func test_with_the_director_the_room_lives_and_agrees_with_the_engine()->void:
 		var clip:=_clip_of(modal,Stage.MAIN)
 		var response:=String(result.get("response",""))
 		if response=="defy":assert_str(clip).is_not_equal("kneel")
-		elif response=="cower":assert_bool(clip in ["kneel","bow"] or clip.begins_with("kneel")).override_failure_message("cowering but "+clip).is_true()
+		elif response=="cower":assert_bool(clip.begins_with("kneel") or clip.begins_with("bow")).override_failure_message("cowering but "+clip).is_true()
 	Stage.directing=false
 	Stage.director=null
