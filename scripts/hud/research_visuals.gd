@@ -101,6 +101,9 @@ static func focus_for(item:Dictionary)->Vector2:
 	if art600_manifest().has(id):return Vector2(.5,.5)
 	if preload("res://scripts/hud/early_civ_art.gd").active() and first300_manifest().has(id):
 		if id=="labor_rotations":return Vector2(.5,.30)
+		if id in ["watch_rotation","wound_cleaning","edible_resource_recognition"]:
+			var opening_focus:Array=manifest().get(id,{}).get("focus",[.5,.5])
+			return Vector2(float(opening_focus[0]),float(opening_focus[1]))
 		return Vector2(.5,.5) if String(first300_manifest()[id]).ends_with(".tres") else Vector2(.5,.72)
 	if preload("res://scripts/hud/early_civ_art.gd").active() and EARLY_SUBJECTS.has(id):return EARLY_SUBJECTS[id]
 	var point:Array=manifest().get(String(item.get("id","")),{}).get("focus",[.5,.5])

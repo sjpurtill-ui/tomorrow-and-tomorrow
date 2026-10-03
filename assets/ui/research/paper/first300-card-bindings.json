@@ -139,5 +139,8 @@
   "shield_equipment_fitting": "res://assets/ui/research/paper/shield_equipment_fitting.png",
   "textile_armor_layering": "res://assets/ui/research/paper/textile_armor_layering.png",
   "lamellar_armor_assembly": "res://assets/ui/research/paper/lamellar_armor_assembly.png",
-  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png"
+  "bow_drill_drive": "res://assets/ui/research/paper/bow_drill_drive.png",
+  "watch_rotation": "res://assets/ui/research/subjects/watch_rotation-v2.png",
+  "wound_cleaning": "res://assets/ui/research/subjects/wound_cleaning-v2.png",
+  "edible_resource_recognition": "res://assets/ui/research/subjects/edible_resource_recognition-v2.png"
 }
