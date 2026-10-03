@@ -456,6 +456,30 @@ func _merge_parts(colours:Dictionary,cover:int,beard:String)->void:
 		if String(mesh_node.name).begins_with("prop_"):_meshes.append(mesh_node)
 		else:mesh_node.visible=false
 
+# --- Put to death (court_figure_gore.gd: the court's executions) ---------------------
+
+const Gore:=preload("res://scripts/hud/court_figure_gore.gd")
+
+## Can gore be shown on this person (never a child)?
+func gore_allowed()->bool:
+	return Gore.allowed(self)
+
+## When an execution starts: cut the meshes and keep the pose for the blow.
+func gore_prepare()->void:
+	Gore.prepare(self)
+
+## The body comes apart now ("head", "limbs", "all", "halves"): {name: piece}.
+func gore_split(cut:="head")->Dictionary:
+	return Gore.split(self,cut)
+
+## Gone from the hall, the pieces in its place: nothing of it runs.
+func _vanish_for_gore()->void:
+	visible=false
+	if player!=null:player.stop()
+	set_process(false)
+	for node in skeleton.get_children():
+		if node is SkeletonModifier3D:(node as SkeletonModifier3D).active=false
+
 ## Back to the parts as they are (no lit court: the studio, the flat stage).
 func _unmerge()->void:
 	for node in _merged.values():

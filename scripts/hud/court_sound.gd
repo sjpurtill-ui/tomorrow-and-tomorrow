@@ -53,6 +53,13 @@ const Voice:=preload("res://scripts/hud/court_voice.gd")
 const Foley:=preload("res://scripts/hud/court_foley.gd")
 const Self:=preload("res://scripts/hud/court_sound.gd")
 const Music:=preload("res://scripts/hud/court_music.gd")
+## The executions' comic gore sounds (court_gore_foley.gd): cue them by name
+## like any other, or play an act's whole sound track with play_act().
+const Gore:=preload("res://scripts/hud/court_gore_foley.gd")
+## The hall's own reactions, in the voices of the people standing there.
+const Reactions:=preload("res://scripts/hud/court_reactions.gd")
+## The track's room noises, and the moment each one is for the people present.
+const REACT_MOMENTS:={"room_gasp":"shock","crowd_groan":"disgust","snort_laugh":"amusement","lone_clap":"applause","retch":"sick"}
 
 ## The musician's state, for a visible musician (the stage's acting): "play"
 ## (a phrase begins), "stop_dead" (cut off by the god), "tentative" (trying
@@ -194,6 +201,10 @@ var _music_tentative:=false
 var _music_bright_until:=0.0
 var _music_side:=2
 var _music_said:=""
+## How many acts this court has seen (each draws its own room).
+var _act_n:=0
+## The last act's reactions, for review and the tests: [{who, kind, temper, at}].
+var last_reactions:Array=[]
 var _beds:Dictionary={}       # role -> AudioStreamPlayer
 var _bed_db:Dictionary={}     # role -> the level it rests at
 var _bed_tweens:Dictionary={}
@@ -362,7 +373,8 @@ static func stream_for(name:String,variant:=0)->AudioStreamWAV:
 	_lock.unlock()
 	if held!=null:return held
 	var made:AudioStreamWAV
-	if name.begins_with("talker@"):made=_talker_stream(name.trim_prefix("talker@"),variant)
+	if Gore.has(name):made=Gore.stream(name,variant)
+	elif name.begins_with("talker@"):made=_talker_stream(name.trim_prefix("talker@"),variant)
 	elif name.begins_with("music"):made=_music_stream(name,variant)
 	elif name.contains("@"):made=_murmur_stream(name.get_slice("@",0),name.get_slice("@",1))
 	else:made=Foley.stream(name,variant)
@@ -494,7 +506,7 @@ static func clear_cache()->void:
 ## Returns whether it will sound.
 func cue(name:String,at_body:Node3D=null,opts:Dictionary={})->bool:
 	if name.is_empty() or not can_play():return false
-	if not Foley.CUES.has(name) and name!="mutter" and not name.begins_with("music"):return false
+	if not Foley.CUES.has(name) and not Gore.has(name) and name!="mutter" and not name.begins_with("music"):return false
 	if float(opts.get("delay",0.0))>0.0:
 		_queue.append({"at":_now()+float(opts.delay),"name":name,"body":at_body,"opts":opts.duplicate()})
 		_ensure_timer()
@@ -506,10 +518,11 @@ func cue(name:String,at_body:Node3D=null,opts:Dictionary={})->bool:
 		return _play(made,at_body,MUSIC_DB+float(opts.get("db",0.0)),1.0,name.get_slice("@",0),int(opts.get("pan",_music_pan())))!=null
 	var real:=name
 	var variant:=int(opts.get("variant",-1))
-	var n:=Foley.variants(real)
+	var gore:=Gore.has(real)
+	var n:=Gore.variants(real) if gore else Foley.variants(real)
 	if variant<0:variant=_rng.randi_range(0,n-1)
 	var s:=stream_for(real,variant)
-	var db:=Foley.level(real)+float(opts.get("db",0.0))
+	var db:=(Gore.level(real) if gore else Foley.level(real))+float(opts.get("db",0.0))
 	var pitch:=float(opts.get("pitch",_rng.randf_range(0.95,1.05)))
 	return _play(s,at_body,db,pitch,name,int(opts.get("pan",NO_PAN)))!=null
 
@@ -571,9 +584,178 @@ func steps_at_pace(body:Node3D,pace:String,db:=0.0)->void:
 	var p:Array=PACES.get(pace,PACES.walk)
 	footsteps(body,float(p[0]),float(p[1]),false,String(p[2]),float(p[3])+db)
 
+## An execution's sound track (court_gore_foley.gd ACTS: "club_home_run",
+## "three_swing_beheading", "dog_dinner", ...), played from now: the
+## musician's roll first, then each sound at its time, at the body that makes
+## it (roles: {executioner, victim, cook, dog, front_row, flatterer, room:
+## Node3D or null}). The act's own moment (t = 0: the blow) falls `lead`
+## seconds from now; returns that lead, so the scene can line its picture up
+## with it. opts: gore ("full", "mild": the same sounds over the cutaway;
+## "off": nothing, the sober exit is the stage's own), db (added to all),
+## dread (0..1, else the fact sheet's): at 0.7 and over the hall is too
+## frightened to gasp, groan, laugh or clap; it swallows and its knees knock.
+## act may also be the act's number (1..25, EXECUTIONS.md).
+## The roll and the punchline are what the people can play: hands on a log
+## before any drum, a drum, and small cymbals only in a temple age.
+func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
+	if act is int and int(act)>0 and int(act)<Gore.ACT_NUMBERS.size():act=Gore.ACT_NUMBERS[int(act)]
+	var track:Array=Gore.ACTS.get(String(act),[])
+	if track.is_empty() or String(opts.get("gore","full"))=="off" or not can_play():return 0.0
+	var first:=0.0
+	for item:Dictionary in track:first=minf(first,float(item.t))
+	var lead:=-first
+	var e:=Music.ensemble(_known())
+	var roll:="log_roll" if String(e.drum)=="" else "drum_roll"
+	var roll_v:=1 if String(e.drum)=="clay" else 0
+	var punch:="punch_cymbal" if bool(e.cymbal) else ("punch_log" if String(e.drum)=="" else "punch_drum")
+	var now:=_now()
+	var dread:=float(opts.get("dread",facts.get("dread",facts.get("people_dread",0.0))))
+	var frightened:=dread>=0.7
+	var stores:=float(facts.get("stores_days",facts.get("food_days",99.0)))
+	var hungry:=bool(facts.get("hungry",false)) and stores<16.0 or stores<7.0
+	var punch_at:=0.0
+	_act_n+=1
+	var people:=_room_people(roles)
+	var rrng:=RandomNumberGenerator.new()
+	rrng.seed=hash("%s|%s|%d|react" % [String(stage.get("audience_key")) if stage!=null and stage.get("audience_key")!=null else "court",String(act),_act_n])
+	var jobs:Array=[]
+	last_reactions=[]
+	for item:Dictionary in track:
+		var cond:=String(item.get("if",""))
+		if (cond=="hungry" and not hungry) or (cond=="not_hungry" and hungry):continue
+		var cue_name:=String(item.cue)
+		if cue_name=="punch":punch_at=float(item.t)
+		if frightened and cue_name in Gore.ROOM_NOISE:continue
+		# the room's noises come from the people present, each in their own voice
+		if not frightened and REACT_MOMENTS.has(cue_name) and not people.is_empty():
+			var keep_clap:=_react(jobs,people,String(REACT_MOMENTS[cue_name]),now+lead+float(item.t),roles,rrng)
+			if not keep_clap:continue
+		var v:=int(item.get("variant",-1))
+		if cue_name=="roll":cue_name=roll;v=roll_v
+		elif cue_name=="punch":cue_name=punch;v=roll_v if punch=="punch_drum" else 0
+		var who:=String(item.get("who","room"))
+		var body:Variant=roles.get(who,null)
+		var o:={"db":float(item.get("db",0.0))+float(opts.get("db",0.0)),"pitch":1.0}
+		if v>=0:o["variant"]=v
+		if who=="musician":o["pan"]=_music_pan()
+		_queue.append({"at":now+lead+float(item.t),"name":cue_name,"body":body as Node3D if body is Node3D else null,"opts":o})
+	if not frightened and not people.is_empty() and rrng.randf()<0.75:
+		# and someone mutters an aside, in their own tongue, under their breath
+		var who:Dictionary=people[rrng.randi_range(0,people.size()-1)]
+		_job(jobs,who,"mutter",now+lead+punch_at+rrng.randf_range(0.9,1.6),rrng)
+	_render_reactions(jobs)
+	if frightened:
+		# a terrified hall: someone swallows, knees knock, nobody laughs
+		_queue.append({"at":now+lead+punch_at+0.5,"name":"swallow","body":roles.get("front_row",null) as Node3D if roles.get("front_row") is Node3D else null,"opts":{"variant":1}})
+		_queue.append({"at":now+lead+0.6,"name":"knees_knock","body":null,"opts":{"variant":0}})
+	# the musician puts down their tune for the act
+	if is_instance_valid(_music) and _music.playing:
+		var tw:=create_tween();tw.tween_property(_music,"volume_db",-60.0,0.4);tw.tween_callback(_music.stop)
+	_music_next=maxf(_music_next,now+lead+12.0)
+	_ensure_timer()
+	return lead
+
+## The people standing in the hall who can react (not the one put to death,
+## not the executioner, no animals): [{key, body, person, entry, role}].
+func _room_people(roles:Dictionary)->Array:
+	var out:Array=[]
+	if stage==null or not stage.has_method("figure"):return out
+	var skip:={}
+	for r in ["victim","executioner"]:
+		if roles.get(r) is Node3D:skip[(roles[r] as Node3D).get_instance_id()]=true
+	var order:Variant=stage.get("cast_order")
+	var extras:Dictionary=stage.get("extras") if stage.get("extras") is Dictionary else {}
+	if not order is Array:return out
+	for key in order:
+		var f:Object=stage.call("figure",String(key))
+		if f==null:continue
+		var leaving:Variant=f.get("leaving")
+		if leaving is bool and leaving:continue
+		var body:=_body(f)
+		if body!=null and skip.has(body.get_instance_id()):continue
+		var entry:Dictionary=extras.get(key,{}) if extras.get(key) is Dictionary else {}
+		if String(entry.get("role",""))=="animal" or String(entry.get("kind","")) in ["dog","goat"]:continue
+		var role:=""
+		for r in roles:
+			if body!=null and roles[r] is Node3D and roles[r]==body:role=String(r)
+		out.append({"key":String(key),"body":body,"person":_person(f),"entry":entry,"role":role})
+	return out
+
+## The people's reactions at one moment of an act: a few of them (who, and
+## how many, drawn from the event's seed), each as their temper has it, a
+## little apart. Returns whether the generic clap should still sound (the
+## flatterer's "oh!" comes with their clap).
+func _react(jobs:Array,people:Array,moment:String,at:float,roles:Dictionary,rng:RandomNumberGenerator)->bool:
+	var pool:=people.duplicate()
+	for i in range(pool.size()-1,0,-1):
+		var j:=rng.randi_range(0,i);var held:Variant=pool[i];pool[i]=pool[j];pool[j]=held
+	match moment:
+		"applause":
+			for who:Dictionary in pool:
+				if String(who.role)=="flatterer" or Reactions.temper_of(who.person,who.entry,String(who.role))=="flatterer":
+					_job(jobs,who,Reactions.pick("flatterer","applause",rng),at-0.15,rng)
+					return true
+			return true
+		"sick":
+			# the front row retches (the director shows it), in their own voice;
+			# a neighbour answers as their temper has it
+			var sick:Dictionary=pool[0]
+			for who:Dictionary in pool:
+				if String(who.role)=="front_row":sick=who
+			_job(jobs,sick,"retch",at,rng)
+			for who:Dictionary in pool:
+				if who==sick:continue
+				var kind:=Reactions.pick(Reactions.temper_of(who.person,who.entry,String(who.role)),"sick",rng)
+				if kind!="" and kind!="retch":_job(jobs,who,kind,at+rng.randf_range(0.35,0.7),rng)
+				break
+			return false
+	var count:int=int({"shock":rng.randi_range(2,4),"disgust":rng.randi_range(2,3),"amusement":rng.randi_range(1,2)}.get(moment,1))
+	var t:=at+rng.randf_range(-0.05,0.15)
+	for k in mini(count,pool.size()):
+		var who:Dictionary=pool[k]
+		var kind:=Reactions.pick(Reactions.temper_of(who.person,who.entry,String(who.role)),moment,rng)
+		if kind!="":_job(jobs,who,kind,t,rng)
+		t+=rng.randf_range(0.05,0.3)
+	return false
+
+func _job(jobs:Array,who:Dictionary,kind:String,at:float,rng:RandomNumberGenerator)->void:
+	var person:Dictionary=who.person
+	var extra:={"kind":String((who.entry as Dictionary).get("kind",""))}
+	var body:Node3D=who.body
+	if body!=null and body.get("variant")!=null:extra["variant"]=String(body.get("variant"))
+	var spec:=voice_for(person,_owner_of(person),extra)
+	jobs.append({"at":at,"kind":kind,"spec":spec,"seed":rng.randi(),"body_id":body.get_instance_id() if body!=null else 0,"key":String(who.key),
+		"temper":Reactions.temper_of(person,who.entry,String(who.role))})
+	last_reactions.append({"who":String(who.key),"kind":kind,"temper":Reactions.temper_of(person,who.entry,String(who.role)),"at":at})
+
+## The reactions made (on a worker thread, or here when exact) and queued at
+## their times, each at its person.
+func _render_reactions(jobs:Array)->void:
+	if jobs.is_empty():return
+	if exact():
+		for job:Dictionary in jobs:job["stream"]=Synth.to_stream(Reactions.make(String(job.kind),job.spec,int(job.seed)))
+		_reactions_ready(jobs)
+		return
+	var work:=jobs.duplicate(true)
+	var me:WeakRef=weakref(self)
+	_track(WorkerThreadPool.add_task(func()->void:
+		for job:Dictionary in work:job["stream"]=Synth.to_stream(Reactions.make(String(job.kind),job.spec,int(job.seed)))
+		var still:Object=me.get_ref()
+		if still!=null:still.call_deferred("_reactions_ready",work)
+	,false,"court reactions"))
+
+func _reactions_ready(jobs:Array)->void:
+	var now:=_now()
+	for job:Dictionary in jobs:
+		if not job.get("stream") is AudioStreamWAV:continue
+		if float(job.at)<now-0.3:continue
+		_queue.append({"at":maxf(float(job.at),now),"stream":job.stream,"body_id":int(job.body_id),
+			"db":float(Reactions.LEVELS.get(String(job.kind),-12.0)),"label":"react_"+String(job.kind)})
+	_ensure_timer()
+
 ## Whether a sound name (the director's or a cue's) is one this court can make.
 static func knows(name:String)->bool:
-	return SOUND_NAMES.has(name) or Foley.CUES.has(name) or BABBLES.has(name) or name in ["footsteps","murmur_cut","snort_wake","mutter"]
+	return SOUND_NAMES.has(name) or Foley.CUES.has(name) or Gore.has(name) or BABBLES.has(name) or name in ["footsteps","murmur_cut","snort_wake","mutter"]
 
 ## One of the director's sounds by name ({name, gain, pace?, people?,
 ## words?, dur?, text?}) at a body. Returns whether it will sound.
@@ -1089,9 +1271,13 @@ func _tick()->void:
 		var item:Dictionary=_queue[i]
 		if now>=float(item.at):
 			_queue.remove_at(i)
-			var opts:Dictionary=(item.opts as Dictionary).duplicate();opts.erase("delay")
-			var body:Variant=item.body
-			cue(String(item.name),body as Node3D if is_instance_valid(body) else null,opts)
+			if item.has("stream"):
+				var found:Object=instance_from_id(int(item.body_id)) if int(item.body_id)!=0 else null
+				_play(item.stream,found as Node3D if found!=null and is_instance_valid(found) else null,float(item.db),1.0,String(item.label))
+			else:
+				var opts:Dictionary=(item.opts as Dictionary).duplicate();opts.erase("delay")
+				var body:Variant=item.body
+				cue(String(item.name),body as Node3D if is_instance_valid(body) else null,opts)
 		else:i+=1
 	if not _open:
 		if _queue.is_empty() and not _hushed and _tasks.is_empty():_timer.stop()
@@ -1389,7 +1575,7 @@ static func render_scene(items:Array,seconds:float)->PackedFloat32Array:
 		if item.has("cue"):
 			var name:=String(item.cue)
 			samples=Synth.samples_of(stream_for(name,int(item.get("variant",0))))
-			gain*=db_to_linear(Foley.level(name))
+			gain*=db_to_linear(Gore.level(name) if Gore.has(name) else Foley.level(name))
 		elif item.has("bed") or item.has("god"):
 			var name:=String(item.get("bed",item.get("god","")))
 			var src:=stream_for(name,0)
@@ -1450,6 +1636,9 @@ static func render_scene(items:Array,seconds:float)->PackedFloat32Array:
 			var tail:=Synth.n_of(float(item.get("release",0.06)))
 			for i in mini(tail,samples.size()):samples[samples.size()-1-i]*=float(i)/float(tail)
 			gain*=db_to_linear(float(TALK_DB.get(size,-17.0)))
+		elif item.has("stream"):
+			# a sound already made (a person's reaction, as the queue holds it)
+			samples=Synth.samples_of(item.stream)
 		elif item.has("voice"):
 			samples=Voice.render_samples(item.spec,String(item.voice),float(item.get("seconds",2.0)),item.get("mood","neutral"),bool(item.get("whisper",false)))
 			var top:=Synth.peak_of(samples)

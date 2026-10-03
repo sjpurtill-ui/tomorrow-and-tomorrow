@@ -140,6 +140,15 @@
      "face": "fire",
      "sit": false
     },
+    "behind_windbreak": {
+     "pos": [
+      -5.472,
+      0.0,
+      -3.691
+     ],
+     "face": "fire",
+     "sit": false
+    },
     "crowd_0": {
      "pos": [
       2.252,
@@ -623,6 +632,15 @@
      "face": "fire",
      "sit": false
     },
+    "behind_windbreak": {
+     "pos": [
+      -10.4,
+      0,
+      -1.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
     "animal_0": {
      "pos": [
       1.6,
@@ -993,6 +1011,15 @@
       -8.495,
       0.0,
       0.297
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "behind_windbreak": {
+     "pos": [
+      -5.716,
+      0.0,
+      -3.3
      ],
      "face": "fire",
      "sit": false
@@ -1524,6 +1551,15 @@
      "face": "fire",
      "sit": false
     },
+    "behind_windbreak": {
+     "pos": [
+      -8.6,
+      0,
+      -1.2
+     ],
+     "face": "fire",
+     "sit": false
+    },
     "animal_0": {
      "pos": [
       1.65,
@@ -1994,6 +2030,15 @@
       -11.5,
       0,
       1.6
+     ],
+     "face": "fire",
+     "sit": false
+    },
+    "behind_windbreak": {
+     "pos": [
+      -10.4,
+      0,
+      -0.4
      ],
      "face": "fire",
      "sit": false

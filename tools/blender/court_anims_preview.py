@@ -57,6 +57,13 @@ MOMENTS = {
     "talk_one": (0.0, 0.4, 0.62, 0.8, 1.4, 1.9),
     "talk_dismiss": (0.0, 0.25, 0.43, 0.6, 1.0, 1.5),
     "scratch_head": (0.0, 0.62, 0.8, 1.2, 2.2, 2.8),
+    "exec_club_victim": (0.45, 1.85, 2.9, 3.66, 4.8, 6.4),
+    "exec_club_batter": (0.45, 1.8, 3.0, 3.3, 3.62, 3.85, 4.6, 5.2),
+    "exec_cook_lid": (2.0, 5.05, 5.7, 6.6, 7.6, 7.9),
+    "exec_block_victim": (0.5, 2.6, 5.6, 7.0, 8.75, 10.6),
+    "exec_axe_headsman": (1.7, 1.95, 3.1, 3.55, 5.55, 7.1, 8.5, 8.75, 10.3),
+    "exec_dog_down": (0.0, 0.1, 0.3, 0.5, 0.7, 1.2),
+    "exec_dog_grip": (0.2, 0.5, 1.7, 1.95, 2.2, 2.6),
 }
 
 
@@ -131,6 +138,98 @@ def face_pose(fc, k):
     return p
 
 
+# --- stand-ins for the props an execution holds (M makes the real ones) -----------
+
+def fist_frame(r, s):
+    """Where a closed fist holds a handle, from the posed bones alone (the same
+    sum court_acting.gd fist_frame does): origin in the curled fingers, +Y out
+    of the thumb side along the handle, +Z where the knuckles point."""
+    from mathutils import Matrix
+    mw = r.matrix_world
+    W = mw @ r.pose.bones["hand." + s].head
+    P = mw @ r.pose.bones["fingers." + s].head
+    I = mw @ r.pose.bones["index." + s].head
+    u = (I - P).normalized()
+    a = (P - W) - u * (P - W).dot(u)
+    a.normalize()
+    n = a.cross(u) if s == "L" else u.cross(a)
+    d = (I - P).length
+    C = P - a * (0.39 * d) + n * (0.65 * d)
+    x = u.cross(a)
+    m = Matrix((x, u, a)).transposed().to_4x4()
+    m.translation = C
+    return m
+
+
+def _mat(name, hexcol):
+    m = bpy.data.materials.get(name)
+    if m is None:
+        m = P.toon(name, P.srgb(hexcol), shade=(0.6, 0.5, 0.45), ao=False)
+    return m
+
+
+def make_prop(kind):
+    """A stand-in prop: origin at the grip, +Y along the handle, +Z the blade."""
+    import bmesh
+    me = bpy.data.meshes.new("standin_" + kind)
+    bm = bmesh.new()
+    from mathutils import Matrix
+
+    def cyl(r, y0, y1, seg=12):
+        g = bmesh.ops.create_cone(bm, cap_ends=True, segments=seg, radius1=r, radius2=r, depth=y1 - y0)
+        bmesh.ops.transform(bm, verts=g["verts"], matrix=Matrix.Translation((0, (y0 + y1) / 2, 0)) @ Matrix.Rotation(math.radians(-90), 4, 'X'))
+
+    def ball(r, y, sy=1.0):
+        g = bmesh.ops.create_uvsphere(bm, u_segments=14, v_segments=8, radius=r)
+        bmesh.ops.transform(bm, verts=g["verts"], matrix=Matrix.Translation((0, y, 0)) @ Matrix.Diagonal((1, sy, 1, 1)))
+
+    def box(cx, cy, cz, sx, sy, sz):
+        g = bmesh.ops.create_cube(bm, size=1.0)
+        bmesh.ops.transform(bm, verts=g["verts"], matrix=Matrix.Translation((cx, cy, cz)) @ Matrix.Diagonal((sx, sy, sz, 1)))
+    col = "6b4a2e"
+    if kind == "club":
+        cyl(0.022, -0.12, 0.62)
+        ball(0.075, 0.72, 1.6)
+    elif kind == "axe":
+        cyl(0.02, -0.08, 0.76)
+        box(0.0, 0.66, 0.07, 0.03, 0.15, 0.16)
+        col = "8a8f96"
+    elif kind == "ladle":
+        cyl(0.012, -0.05, 0.42)
+        ball(0.055, 0.47)
+    elif kind == "lid":
+        cyl(0.02, -0.03, 0.03)
+        g = bmesh.ops.create_cone(bm, cap_ends=True, segments=24, radius1=0.20, radius2=0.20, depth=0.02)
+        bmesh.ops.transform(bm, verts=g["verts"], matrix=Matrix.Translation((0, 0.05, 0)) @ Matrix.Rotation(math.radians(-90), 4, 'X'))
+        col = "8a6a4a"
+    else:
+        cyl(0.02, -0.1, 0.6)
+    bm.to_mesh(me)
+    bm.free()
+    ob = bpy.data.objects.new("standin_" + kind, me)
+    bpy.context.scene.collection.objects.link(ob)
+    me.materials.append(_mat("PROP_" + kind, col))
+    return ob
+
+
+def stage_thing(kind, at_godot, r, k, top=None):
+    """The block or the pot for a preview, in figure r's frame."""
+    from mathutils import Matrix
+    x, y, z = at_godot
+    pos = r.matrix_world @ Vector((x * k, -z * k, 0.0))
+    if kind == "block":
+        h = (top if top is not None else 0.45) * k
+        bpy.ops.mesh.primitive_cube_add(size=1.0, location=(pos.x, pos.y, h / 2))
+        ob = bpy.context.object
+        ob.scale = (0.40, 0.40, h)
+        ob.data.materials.append(_mat("PROP_block", "7a5a3a"))
+    else:
+        bpy.ops.mesh.primitive_cylinder_add(radius=0.26, depth=0.55, location=(pos.x, pos.y, 0.275))
+        ob = bpy.context.object
+        ob.data.materials.append(_mat("PROP_pot", "5a3a2a"))
+    return ob
+
+
 def label(text, at, size=0.09):
     cu = bpy.data.curves.new("lbl", 'FONT')
     cu.body = text
@@ -183,6 +282,8 @@ def main():
     posers = [cf_anim.Poser(r, k) for r, _ in people]
     gap = 0.80
     labels = []
+    standins = {}
+    things = []
     for name in names:
         clip = clips.get(name)
         if clip is None:
@@ -190,9 +291,17 @@ def main():
             continue
         times = MOMENTS.get(name) or tuple(round(clip.length * i / 5.0, 2) for i in range(6))
         n = len(times)
-        for lb in labels:
+        for lb in labels + things:
             bpy.data.objects.remove(lb, do_unlink=True)
         labels = []
+        things = []
+        for ob in standins.values():
+            ob.hide_render = True
+        held = dict(clip.meta.get("props", {}) or {})
+        held_from = dict(clip.meta.get("props_from", {}) or {})
+        held_until = dict(clip.meta.get("props_until", {}) or {})
+        splits = [e["t"] for e in clip.meta.get("events", []) if e.get("name") == "split" and e.get("part") == "head"]
+        stage = clip.meta.get("stage", {}) or {}
         for i, (r, ms) in enumerate(people):
             show = i < n
             r.location = Vector(((i - (n - 1) / 2.0) * gap, 0.0, 0.0))
@@ -207,7 +316,33 @@ def main():
             pose = dict(clip.pose(t))
             pose.update(face_pose(fc, k))
             posers[i].apply(cf_anim._scaled(pose, k))
+            if splits and t >= splits[0] - 1e-4:
+                r.pose.bones["head"].scale = Vector((0.001, 0.001, 0.001))
             set_face(ms, fc)
+            bpy.context.view_layer.update()
+            for s_, kind in held.items():
+                key = (i, s_, kind)
+                if key not in standins:
+                    standins[key] = make_prop(kind)
+                ob = standins[key]
+                if t >= float(held_until.get(s_, 1e9)) and "pot" in stage:
+                    from mathutils import Matrix
+                    gx, gy, gz = stage["pot"]
+                    on = r.matrix_world @ Vector((gx * k, -gz * k, 0.0))
+                    ob.matrix_world = Matrix.Translation((on.x, on.y, 0.62)) @ Matrix.Rotation(math.radians(90), 4, 'X')
+                    ob.hide_render = False
+                elif t >= float(held_from.get(s_, -1.0)):
+                    ob.matrix_world = fist_frame(r, s_)
+                    ob.hide_render = False
+                elif kind == "lid":
+                    from mathutils import Matrix
+                    side_at = r.matrix_world @ Vector((0.34 * k, -0.30 * k, 0.03))
+                    ob.matrix_world = Matrix.Translation(side_at) @ Matrix.Rotation(math.radians(180), 4, 'X') @ Matrix.Translation((0, -0.05, 0))
+                    ob.hide_render = False
+            if "block_top" in stage and "neck" in stage:
+                things.append(stage_thing("block", stage["neck"], r, k, stage["block_top"]))
+            if "pot" in stage:
+                things.append(stage_thing("pot", stage["pot"], r, k))
             labels.append(label("%.2fs" % t, (r.location.x, -0.2, f.H + 0.16)))
         labels.append(label(name.replace("_", " "), (0.0, -0.2, f.H + 0.42), 0.14))
         bpy.context.view_layer.update()
