@@ -109,8 +109,12 @@
     ]
   },
   "well_siting": {
-    "path": "res://assets/ui/research/subjects/well_siting-v1.png",
+    "path": "res://assets/ui/research/subjects/well_siting-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -340,8 +344,12 @@
     ]
   },
   "clay_testing": {
-    "path": "res://assets/ui/research/subjects/clay_testing-v1.png",
+    "path": "res://assets/ui/research/subjects/clay_testing-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -652,8 +660,12 @@
     ]
   },
   "birth_attendants": {
-    "path": "res://assets/ui/research/subjects/birth_attendants-v1.png",
+    "path": "res://assets/ui/research/subjects/birth_attendants-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -1322,8 +1334,12 @@
     ]
   },
   "shared_childcare": {
-    "path": "res://assets/ui/research/subjects/shared_childcare-v1.png",
+    "path": "res://assets/ui/research/subjects/shared_childcare-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -1403,10 +1419,14 @@
     ]
   },
   "root_grating_dewatering": {
-    "path": "res://assets/ui/research/paper/root_grating_dewatering.png",
+    "path": "res://assets/ui/research/subjects/root_grating_dewatering-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
     ]
   },
   "pulse_splitting": {
@@ -6079,28 +6099,28 @@
     ]
   },
   "elder_council_assent": {
-    "path": "res://assets/ui/research/subjects/elder_council_assent-v1.png",
+    "path": "res://assets/ui/research/subjects/elder_council_assent-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "task_sequencing_habits": {
-    "path": "res://assets/ui/research/subjects/task_sequencing_habits-v1.png",
+    "path": "res://assets/ui/research/subjects/task_sequencing_habits-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "trail_waymarking": {
-    "path": "res://assets/ui/research/subjects/trail_waymarking-v1.png",
+    "path": "res://assets/ui/research/subjects/trail_waymarking-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "war_slings": {
-    "path": "res://assets/ui/research/subjects/war_slings-v1.png",
+    "path": "res://assets/ui/research/subjects/war_slings-v2.png",
     "focus": [
       0.5,
       0.5
@@ -6184,7 +6204,7 @@
     ]
   },
   "browse_line_monitoring": {
-    "path": "res://assets/ui/research/subjects/browse_line_monitoring-v1.png",
+    "path": "res://assets/ui/research/subjects/browse_line_monitoring-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9860,6 +9880,20 @@
   },
   "ochre_grave_goods": {
     "path": "res://assets/ui/research/subjects/ochre_grave_goods-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "distance_call_signals": {
+    "path": "res://assets/ui/research/subjects/distance_call_signals-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "kin_body_ornament": {
+    "path": "res://assets/ui/research/subjects/kin_body_ornament-v2.png",
     "focus": [
       0.5,
       0.5

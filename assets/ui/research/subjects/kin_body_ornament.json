@@ -1,0 +1,18 @@
+{
+  "id": "kin_body_ornament",
+  "line": "culture",
+  "prompt": "Create ONE finished research-card painting. Preserve reference WIDE canvas and field medium ONLY; change scene completely. Wide full-bleed landscape about2055x765, never3:2. Tapestry-inspired PAINTING interlocking flat indigo rose gold violet pigmentplanes, not literal fabric. Three fully clothed adults each wear a SIMPLE short cord carrying two uncarved natural shells; one adult lightly touches small red ochre mark on another's upper forearm. Repeated similar plain shells and small paint marks communicate kin group. No writing formal crests ornate beads metal jewellery pottery ritual building; portable hide shelter farbehind. All whole heads, hands and important objects fit central horizontal strip y170..610; small figures with ample landscape above and below for actual3.37:1 crop. Mature handmade flat2D pigment, paper grain, no photorealism CGI cartoon frame text logo. Adults in simple unornamented hide clothing; no later technologies beyond named practice. Reference supplies aesthetic, not its subject.",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-11/assets/ui/research/subjects/ochre_grave_goods-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-475719eb-9885-4b20-9aab-7f06307e351b.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "review": "Full original and final actual3.37:1 Godot card visually reviewed; primary heads, hands and subject action retained, field medium and chronology checked.",
+  "replace_art600": true,
+  "binding_style": "Tapestry-inspired PAINTING interlocking flat indigo rose gold violet pigmentplanes, not literal fabric",
+  "asset": "res://assets/ui/research/subjects/kin_body_ornament-v2.png",
+  "sha256": "40695ba069d0bf66c08d2df7d8478bebbec6d9e8507154dc3a6d4005228ca1a2",
+  "mode": "built-in image_gen / edit"
+}
