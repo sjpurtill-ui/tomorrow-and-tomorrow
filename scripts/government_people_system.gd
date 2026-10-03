@@ -1877,6 +1877,9 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 		weights.Administration=float(weights.Administration)+float(skills.get("Administration",50))*0.025
 		weights.Logistics=float(weights.Logistics)+float(skills.get("Logistics",50))*0.018
 		weights.Knowledge=float(weights.Knowledge)+float(skills.get("Knowledge",50))*0.012
+	# The hands food does not need go by the path: only the learning path (or
+	# a people set on ideas) puts many on learning (work_paths.gd cap_learning).
+	if cultural:preload("res://scripts/work_paths.gd").cap_learning(weights)
 	var total:=0.0
 	for role in GameState.POPULATION_ROLES: total+=maxf(0.0,float(weights.get(role,0.0)))
 	for role in GameState.POPULATION_ROLES: weights[role]=maxf(0.0,float(weights.get(role,0.0)))/maxf(0.001,total)*100.0

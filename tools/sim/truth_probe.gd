@@ -10,6 +10,9 @@ extends Node
 ## the society at game year Y with P people and the known discoveries, adoption
 ## and scholarship in the seed file ({"known":[ids],"adoption":{id:level},
 ## "scholarship":S}, written by tools/sim/spot_check.py), then runs --years.
+## --path=<growth|making|war|learning|building|balanced> lays the leaders' work
+## toward that path (work_paths.gd) as a ruler's order would; --water_km=<km>
+## sets the surface water's distance (default 0.2 good, 2.2 poor).
 const Day=preload("res://scripts/civilization_day.gd")
 const Indicators=preload("res://scripts/civilization_indicators.gd")
 const DOMAINS:Array[String]=["demography","nutrition","health","labor","knowledge","production","infrastructure","logistics","ecology","institutions","security","culture"]
@@ -73,7 +76,7 @@ func _ready()->void:
 func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Dictionary:
 	WorldSimulation.clear()
 	var site:=String(scenario.site)
-	var water_km:=2.2 if site=="poor" else 0.2
+	var water_km:=float(_arg("water_km","2.2" if site=="poor" else "0.2"))
 	WorldSimulation.context_provider=func(origin:Vector2)->Dictionary:
 		var wood:={"position":Vector3(origin.x,0,origin.y),"density":0.55,"area_km2":9.0}
 		return {"environment_profile":_site_profile(origin,site),"surface_water_distance_km":water_km,"surface_water_recognized":true,"woodland_catchment":wood,"surface_material_catchments":{"Timber":wood,"Stone":{"position":Vector3(origin.x,0,origin.y),"density":0.35,"area_km2":9.0},"Fiber Plants":{"position":Vector3(origin.x,0,origin.y),"density":0.5,"area_km2":9.0}}}
@@ -86,6 +89,7 @@ func _run(scenario_name:String,scenario:Dictionary,seed_value:int,years:int)->Di
 	)
 	WorldSimulation.submit("ec",{"kind":"ambition","id":"makers"})
 	WorldSimulation.submit("ec",{"kind":"found"})
+	if _arg("path","")!="":WorldSimulation.submit("ec",{"kind":"work_path","path":_arg("path",""),"why":"probe"})
 	for domain in DOMAINS if not bool(scenario.get("ai",false)) else []:
 		WorldSimulation.submit("ec",{"kind":"research_emphasis","domain":domain,"weight":int((scenario.research as Dictionary).get(domain,0))})
 	if scenario.has("scouting"):WorldSimulation.submit("ec",{"kind":"scouting_policy","share":float(scenario.scouting),"focus":"exploration"})
