@@ -415,7 +415,7 @@ func test_the_leaders_say_why_learning_is_low()->void:
 	PeopleDirection.work_path.id="war"
 	var war:=String(Paths.leaders_line().tip)
 	assert_int(war.split("They put").size()-1).override_failure_message(war).is_equal(1)
-	assert_str(war).contains("more on keeping watch and making arms, and at most 3 in 100 of the people on learning, the share for war;")
+	assert_str(war).contains("more on keeping watch and making arms, and at most 3.5 in 100 of the people on learning, the share for war;")
 	# A people set on ideas: the number is raised, and the tip says why.
 	Culture.record(PeopleDirection.cultural_memory,"century:0","inquiry",0,10.0)
 	var raised:=String(Paths.leaders_line().tip)

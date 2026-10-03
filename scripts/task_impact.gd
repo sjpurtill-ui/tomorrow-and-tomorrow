@@ -572,10 +572,10 @@ static func knowledge()->Dictionary:
 	var excess:=float(model.specialist_excess) if model!=null else 0.0
 	if excess>0.0:
 		lines.append(_line("Too many learners","%s over" % _whole(excess*able),
-			"The people can spare %d in 100 of the workers as full-time learners at this age (%s people). Past that the extra ones cost more work for everyone, weariness, cohesion and births." % [roundi(sustainable*100.0),_whole(sustainable*able)],"bad"))
+			"The people can spare %d in 100 of the workers as full-time learners at this age (%s people). Past that the extra ones cost more work for everyone, weariness, cohesion and births. A watch past %d in 100 of the workers costs the same way." % [roundi(sustainable*100.0),_whole(sustainable*able),roundi(Society.WATCH_SUSTAINABLE*100.0)],"bad"))
 	else:
 		lines.append(_line("Learners the people can spare","up to %s" % _whole(sustainable*able),
-			"The people can spare %d in 100 of the workers as full-time learners at this age. Past that the extra ones cost more work for everyone, weariness, cohesion and births." % roundi(sustainable*100.0),"plain"))
+			"The people can spare %d in 100 of the workers as full-time learners at this age. Past that the extra ones cost more work for everyone, weariness, cohesion and births. A watch past %d in 100 of the workers costs the same way." % [roundi(sustainable*100.0),roundi(Society.WATCH_SUSTAINABLE*100.0)],"plain"))
 	# Teaching: keepers spread practices to the rest (society_model.gd teaching).
 	var teaching:=_raw("Knowledge")/pop*0.055
 	var all_teaching:=teaching+_raw("Administration")/pop*0.018+_raw("Crafting")/pop*0.012
@@ -671,6 +671,7 @@ static func defense()->Dictionary:
 	var drill:Dictionary=preload("res://scripts/watch_military.gd").role_effect(MilitaryCampaign)
 	lines.append(_line("Drill of the watch","%d in 100" % roundi(float(drill.drill)*100.0),
 		"Everyone keeping watch is under arms and drills at home every day%s. Ten more: %s" % [(", most of a newcomer's drill in about %d days" % int(drill.drill_days)) if int(drill.drill_days)>0 else "",String(drill.ten_more).trim_prefix("Ten more: ")],"good" if watch>0.0 else "plain"))
+	lines.append(watch_upkeep_line())
 	# Walls and ditches: only the watch builds them (military_campaign.gd).
 	var project:Dictionary=walls.get("construction",{}) if walls.get("construction") is Dictionary else {}
 	if bool(project.get("active",false)):
@@ -694,6 +695,22 @@ static func defense()->Dictionary:
 	lines.append(_cost_line("Defense"))
 	return {"lead":"The watch guards the town day and night: it keeps the peace, stands as the home guard, trains soldiers and builds the defences.","lines":lines}
 
+
+## Too many on watch: past the share the age can spare, each one costs as an
+## extra learner does (society_model.gd WATCH_SUSTAINABLE, WATCH_UPKEEP, the
+## learners' SPECIALIST_UPKEEP): work, weariness, cohesion, births and stores.
+## Everyone set to keep watch counts, at home or away.
+static func watch_upkeep_line()->Dictionary:
+	var model=WorldSimulation.discovery.society_model if WorldSimulation.discovery!=null else null
+	var able:=_able()
+	var free:=Society.WATCH_SUSTAINABLE
+	var over:=float(model.watch_excess) if model!=null else maxf(0.0,Society.watch_share()-free)
+	if over>0.0:
+		var births:=-float(Society.SPECIALIST_UPKEEP.get("conception_support",0.0))*over*Society.WATCH_UPKEEP
+		return _line("Too many on watch","%s over" % _whole(over*able),
+			"The people can keep %d in 100 of the workers on watch (%s people) at no extra cost, as with learners. Past that each one costs more work for everyone, weariness, cohesion, stores and births: the watch past it now means about %s in 100 fewer births." % [roundi(free*100.0),_whole(free*able),_one(births*100.0)],"bad")
+	return _line("Watch the people can spare","up to %s" % _whole(free*able),
+		"The people can keep %d in 100 of the workers on watch at no extra cost. Past that each one costs more work for everyone, weariness, cohesion, stores and births, as a learner past the age's share does." % roundi(free*100.0),"plain")
 
 # --- Shared lines ----------------------------------------------------------------------
 

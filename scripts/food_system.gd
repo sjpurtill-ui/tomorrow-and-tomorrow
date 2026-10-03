@@ -18,7 +18,15 @@ const Mechanics=preload("res://scripts/research_mechanics.gd")
 ## Fresh food, small stores, carriers and keepers (docs/PEOPLE_FIRST.md B).
 const FoodCare=preload("res://scripts/food_care.gd")
 const KCAL_PER_RATION := 2400.0
-const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.34
+## What a food worker gets from the wild (BASE_SUBSISTENCE_YIELD_CALIBRATION)
+## and from the fields (CULTIVATION_YIELD, before soil, seed and season), in
+## rations a worker-day. Set (balance P2: 1.34 and 5.65 x 0.8) so the leaders
+## keep about half of the people at work on food through the first 600 years,
+## as the documented peoples of each age did (benchmarks_*.json
+## food_labor_share: 56 typical at year 300, 45 high, 35 the least plausible);
+## at the old yields they kept 29-33.
+const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.07
+const CULTIVATION_YIELD:=4.52
 ## Share of a food worker's day spent getting food. The rest goes to carrying,
 ## grinding, cooking, drying and storing it: the historical share of labour on
 ## food (docs/research/benchmarks_*.json food_labor_share, 62% at year 0)
@@ -454,7 +462,7 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	result["Fish"]=workers*fishing_weight*5.00*BASE_SUBSISTENCE_YIELD_CALIBRATION*fish_season*efficiency*float(WorldSimulation.state.food_source_health.get("Fishing",0.9))*(0.76+fishing_access*0.34)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))*_food_type_weather_multiplier("Fish",weather_factor)
 	if cultivation_weight>0.0 and not traveling:
 		var agronomy:Dictionary=preload("res://scripts/agronomy_knowledge.gd").factors(traveling)
-		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*float(agronomy["yield"])*preload("res://scripts/agronomy_knowledge.gd").weather_factor(_food_type_weather_multiplier("Dry staples",weather_factor),agronomy)*(1.0+technique_lever("cultivation"))*(1.0+maxf(0.0,WorldSimulation.discovery.effect("farm_mechanization"))) # research_3000: machines, fertilizer, bred seed
+		result["Dry staples"]=workers*cultivation_weight*CULTIVATION_YIELD*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*float(agronomy["yield"])*preload("res://scripts/agronomy_knowledge.gd").weather_factor(_food_type_weather_multiplier("Dry staples",weather_factor),agronomy)*(1.0+technique_lever("cultivation"))*(1.0+maxf(0.0,WorldSimulation.discovery.effect("farm_mechanization"))) # research_3000: machines, fertilizer, bred seed
 	if not traveling:
 		# A day's wild harvest cannot exceed what the surrounding land holds in
 		# season. Hands that find nothing more to gather or hunt go to the fields

@@ -108,6 +108,19 @@ const TERRITORY_CAPACITY:Array=[[0.0,320.0],[100.0,420.0],[200.0,650.0],[300.0,8
 const CROWDING_ONSET:=0.6
 const CROWDING_MORTALITY:=0.3
 const CROWDING_CONCEPTION:=1.2
+## Carers ease crowding (docs/PEOPLE_FIRST.md, balance P2): in a crowded land
+## the sick tended and the young fed die less and marry less late. Full carer
+## cover (food_care.gd care cover) lifts CARER_CROWDING of crowding's toll on
+## deaths and on births; half cover, half of that. A people that keeps many
+## carers fills its land further before crowding holds it (the growth path's
+## payoff in people, not only in children who live); with none it is as before.
+const CARER_CROWDING:=0.5
+## Each town past the first claims less new land than the one before: the land
+## a people holds is its home land times 1 + TERRITORY_SLOPE x sqrt(towns - 1).
+## 0.85 (was 1.6): a people that founds a town every generation stays near the
+## documented sizes of its age (docs/research/BENCHMARKS_600.md population
+## "high", 20,000 by year 600), not half again past them.
+const TERRITORY_SLOPE:=0.85
 ## A remnant far below the founding territory's capacity finds land plentiful:
 ## couples marry earlier (the preventive check relaxes), so a thinned-out band
 ## recovers instead of dying out.
@@ -196,7 +209,7 @@ static func carrying_capacity(state:Node,discovery:Node)->float:
 	# Only towns people live in work land (settlement_model.lived_in).
 	var settlements:=maxi(1,WorldSimulation.settlements.lived_in(state.player_settlements).size())
 	# Daughter settlements claim less new land each than the first.
-	var territory:=1.0+sqrt(float(settlements-1))*1.6
+	var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE
 	return home_capacity(state,discovery)*territory
 
 ## People one home land can carry now, whatever the number of towns: the era's
@@ -372,19 +385,22 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 	# people recovers while a large but slow-growing society gets no boost.
 	var founding:=float((TERRITORY_CAPACITY[0] as Array)[1])
 	var spare:=maxf(0.0,SPARE_LAND_ONSET-people/founding)
+	# Carers ease crowding's toll on deaths and births (CARER_CROWDING).
+	var eased:=crowding*(1.0-CARER_CROWDING*carers)
 	var burden:Dictionary={}
 	for key:String in ERA_BURDEN:
 		var by_age:=key in ["under5","child","adult","elder"]
-		var crowd:=1.0+crowding*CROWDING_MORTALITY if by_age else 1.0
+		var crowd:=1.0+eased*CROWDING_MORTALITY if by_age else 1.0
 		var remnant:=1.0-spare*SPARE_LAND_HEALTH if by_age else 1.0
 		var tended:=1.0-carers*float(CARER_BURDEN.get(key,0.0))
 		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief)*remnant*tended)*crowd,blend)
 	# The frontier reads the home land alone: founding towns does not raise births.
 	var home:=home_capacity(state,discovery)
 	var frontier:=frontier_of(people,home)
-	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION)*(1.0+frontier*FRONTIER_CONCEPTION),blend)
+	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-eased*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION)*(1.0+frontier*FRONTIER_CONCEPTION),blend)
 	result["carrying_capacity"]=capacity
 	result["crowding"]=crowding
+	result["crowding_eased"]=eased
 	result["spare_land"]=spare
 	result["frontier"]=frontier
 	result["home_capacity"]=home

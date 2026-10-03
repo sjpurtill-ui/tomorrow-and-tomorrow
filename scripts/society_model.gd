@@ -607,7 +607,7 @@ func practice_basis()->Dictionary:
 		var level:=_practice_level(id,adoption,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id))
 		levels.resize(levels.size()+2)
 		levels.encode_u16(levels.size()-2,clampi(roundi(level*65535.0),0,65535))
-	return {"n":known.size(),"hash":known.hash(),"levels":levels,"focus":line_focus.duplicate(),"max_focus":_max_focus,"excess":specialist_excess}
+	return {"n":known.size(),"hash":known.hash(),"levels":levels,"focus":line_focus.duplicate(),"max_focus":_max_focus,"excess":specialist_excess*specialist_burden+watch_excess*WATCH_UPKEEP}
 
 ## What each known practice adds to each of the given totals under a basis:
 ## {effect: {index in known_discoveries: amount}}, the same sum
@@ -1095,9 +1095,19 @@ func knowledge_frontier()->float:
 ## lowers births (temple and scribal households married late or not at all),
 ## whatever the research buys (docs/research/BENCHMARKS_600.md, "Allowed lead").
 const SUSTAINABLE_SPECIALISTS:Array=[[0.0,0.04],[300.0,0.07],[600.0,0.10],[2400.0,0.16],[2800.0,0.25],[3000.0,0.30]]
-const SPECIALIST_UPKEEP:={"labor_demand":1.4,"fatigue":0.6,"cohesion":-1.0,"conception_support":-1.0,"food_storage":-0.6}
+const SPECIALIST_UPKEEP:={"labor_demand":1.4,"fatigue":0.6,"cohesion":-1.0,"conception_support":-0.5,"food_storage":-0.6}
+## The watch past what the age can spare costs as learners past theirs do
+## (balance P2): WATCH_SUSTAINABLE of those who can work keep watch at no extra
+## cost (pre-modern peoples kept 3 to 7 in 100 under arms, army_levy_law.gd);
+## each share past it costs WATCH_UPKEEP times SPECIALIST_UPKEEP, the same
+## work, weariness, cohesion, births and stores. Every people, the same rule.
+const WATCH_SUSTAINABLE:=0.06
+const WATCH_UPKEEP:=1.0
 ## Latest excess specialist share (0 when research staffing is sustainable).
 var specialist_excess:=0.0
+## Latest share of the able keeping watch past WATCH_SUSTAINABLE (0 when the
+## watch is within what the age can spare).
+var watch_excess:=0.0
 ## The upkeep's weight now: 1, more while the people's learning runs ahead of
 ## the calendar (Research600.LEAD_UPKEEP_YEARS: a lead is carried by the rest).
 var specialist_burden:=1.0
@@ -1113,8 +1123,20 @@ func _apply_specialist_upkeep()->void:
 	var owner:Variant=WorldSimulation.discovery
 	var lead:=maxf(0.0,float(owner.learning_lead)) if owner!=null and is_same(owner.society_model,self) else 0.0
 	specialist_burden=1.0+lead/preload("res://scripts/research_600_catalog.gd").LEAD_UPKEEP_YEARS
-	if specialist_excess<=0.0: return
+	# The watch: everyone set to keep watch, at home or away (watch_military.gd manpower).
+	watch_excess=maxf(0.0,watch_share()-WATCH_SUSTAINABLE)
+	if specialist_excess<=0.0 and watch_excess<=0.0: return
 	for key:String in SPECIALIST_UPKEEP:
 		var limit:Vector2=EFFECT_LIMITS.get(key,Vector2(-0.5,0.8))
-		effect_totals[key]=clampf(float(effect_totals.get(key,0.0))+float(SPECIALIST_UPKEEP[key])*specialist_excess*specialist_burden,limit.x,limit.y)
+		effect_totals[key]=clampf(float(effect_totals.get(key,0.0))+upkeep_of(key),limit.x,limit.y)
+
+## The share of those who can work set to keep watch (the watch is the army).
+static func watch_share()->float:
+	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
+	return clampf(maxf(0.0,float(WorldSimulation.state.population_allocations.get("Defense",0)))/able,0.0,1.0)
+
+## What the extra learners and the extra watch take from one effect total now
+## (the engine's own number, read by every screen that explains a total).
+func upkeep_of(key:String)->float:
+	return float(SPECIALIST_UPKEEP.get(key,0.0))*(specialist_excess*specialist_burden+watch_excess*WATCH_UPKEEP)
 # --- research_600 era ceilings (end) ------------------------------------------

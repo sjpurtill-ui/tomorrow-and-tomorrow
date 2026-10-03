@@ -86,7 +86,7 @@ const WORK:={
 	"balanced":{},
 }
 ## The most of the people at work each path puts on learning.
-const LEARNING_CAP:={"balanced":.035,"growth":.03,"making":.03,"war":.03,"building":.03,"learning":.15}
+const LEARNING_CAP:={"balanced":.035,"growth":.035,"making":.035,"war":.035,"building":.035,"learning":.15}
 ## A people set on ideas (the inquiry ambition) may put this much more of the
 ## people on learning on any other path, times the ambition's share.
 const INQUIRY_CAP:=.04
