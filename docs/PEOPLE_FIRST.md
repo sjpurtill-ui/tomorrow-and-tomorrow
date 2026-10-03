@@ -321,6 +321,19 @@ Each path gets a clear payoff and a real cost; balanced is never at least as goo
 
 Still open (the user's decisions): building has no payoff the engine's numbers reach (no great works or splendor in the measure; it trails every path), and making's goods have no sink (the barter ceiling holds every path's goods near 4–5 a head).
 
+## Crises' share of the age table (2026-10-03)
+
+"How am I shrinking?" came back on average land: a fed people went from 120 to 115 by year 10 on main, with deaths outrunning births from year 4. Every death had its cause in the ledger, but the same deaths were counted twice. The age table (`game_state.gd BASELINE_HAZARD_BY_AGE` with the early-care multipliers) is all-cause: it gives life expectancy of about 25 and about 260 of 1,000 babies lost at the founding (BENCHMARKS_600.md), and both include epidemics and accidents. The crises (`crisis_system.gd`, `crisis_unattended.gd`) then killed on top: sickness flare-ups, lean seasons, floods and fires, about 8 in 1,000 a year at the founding.
+
+- **The age table gives up the crises' share.** `crisis_background.gd CRISIS_SHARE` is the share of each age cohort's all-cause hazard the crises take for a typical people of each era. It follows the crises' own death weights: sickness and hunger take the most from children and youths; drowning and fire fall on the default row, heaviest on the old. The day's ordinary deaths emit the table less that share (`GameState._background_cohort_hazards`).
+- **The crises are untouched.** Their odds, tolls, timing, named dead and the court's orders are as before. A calm decade grows, a bad one is felt, and a better order still saves lives.
+- **The screens read the whole table**, the background plus the crises' expected share: life expectancy and infant deaths show life as lived, crises included (about 25 years and about 260 at the founding, as before). "What is killing people now" shows the day's ordinary deaths; the crises appear in the deaths by cause when they strike.
+- `tools/sim/crisis_share.py` measures the table with the fast sim's crises (`tools/sim/crisis.py`); re-run it after changing the crises, the age table or the founding.
+
+On the engine (10 years, the balanced path, 4 seeds each): good land grows +0.57% a year (+0.49 to +0.65; was −0.08 and −0.17 on the two seeds run both ways), average land +0.51% (+0.41 to +0.65; was −0.42 and −0.17), poor land −0.31% (−0.51 to −0.08; was −0.69 and −0.96). Deaths fall from about 50 to about 42 in 1,000 a year on good and average land, the benchmark's typical 40; births stay about 47. Every year the people shrank, a crisis took them (a lean season, a sickness, a flood or a fire). Life expectancy and infant deaths read 25.5 and 254 at year 10 on good land, 25.2 and 262 on average land, as before.
+
+On the fast sim (48 seeds a land): the first decade grows +0.41% a year on good land and +0.35% on average land (calm quarter +0.7, bad quarter about 0, 1 in 10 shrinking); the first 30 years +0.68% and +0.59% (were +0.11% and 0.0%). Poor land still shrinks: its stores run out in the first decade and the wild grounds wear thin, so hunger, not the crises' count, sets its course (see the limits in the PR).
+
 ## Integration rules (every builder)
 - Work only in your worktree, on your `codex/<task>` branch. Never use `git stash`, never merge main yourself, never launch the player game, never remove a worktree.
 - Edit files other than your own only in small, local hunks, and list them. Shared hotspots: `game_state.gd`, `consequence_engine.gd` (B owns), `military_campaign.gd` (E owns), `discovery_system.gd` (A owns), `economy_system.gd` (D owns), `world_simulation.gd`, `local_terrain.gd`, `save_system.gd`.

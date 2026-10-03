@@ -56,12 +56,22 @@ class Recorder(Surrogate):
         self.edges = sorted(edges)
         self.marks = {}
 
+    def _mark(self, year: int) -> None:
+        crisis = self.crises.cohort_deaths.copy() if self.crises is not None else np.zeros(6)
+        self.marks[year] = (crisis, self.allcause_coh.copy(), self.person_years_coh.copy())
+
     def snapshot(self):
         year = round(self.day / YEAR)
         if year in self.edges and year not in self.marks:
-            crisis = self.crises.cohort_deaths.copy() if self.crises is not None else np.zeros(6)
-            self.marks[year] = (crisis, self.allcause_coh.copy(), self.person_years_coh.copy())
+            self._mark(year)
         return super().snapshot()
+
+    def run(self, years: int, record_every: float = 1.0) -> dict:
+        out = super().run(years, record_every)
+        # The last edge: the run's end, whatever the calendar's rounding.
+        if years in self.edges and years not in self.marks:
+            self._mark(years)
+        return out
 
 
 def run(job):

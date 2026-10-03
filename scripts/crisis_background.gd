@@ -28,16 +28,21 @@ extends RefCounted
 const COHORTS:Array[String]=["children","youth","early_adults","established_adults","mature_adults","elders"]
 ## [game year, {cohort: share of its all-cause hazard the crises take}].
 const CRISIS_SHARE:Array=[
-	[0.0,{"children":0.296,"youth":0.307,"early_adults":0.223,"established_adults":0.193,"mature_adults":0.212,"elders":0.095}],
-	[20.0,{"children":0.267,"youth":0.269,"early_adults":0.198,"established_adults":0.174,"mature_adults":0.194,"elders":0.089}],
-	[45.0,{"children":0.233,"youth":0.217,"early_adults":0.158,"established_adults":0.138,"mature_adults":0.156,"elders":0.072}],
-	[80.0,{"children":0.203,"youth":0.182,"early_adults":0.133,"established_adults":0.118,"mature_adults":0.134,"elders":0.063}],
-	[150.0,{"children":0.195,"youth":0.175,"early_adults":0.127,"established_adults":0.112,"mature_adults":0.128,"elders":0.060}],
-	[275.0,{"children":0.267,"youth":0.240,"early_adults":0.168,"established_adults":0.143,"mature_adults":0.159,"elders":0.072}],
-	[425.0,{"children":0.320,"youth":0.290,"early_adults":0.200,"established_adults":0.167,"mature_adults":0.181,"elders":0.080}],
-	[600.0,{"children":0.375,"youth":0.342,"early_adults":0.236,"established_adults":0.196,"mature_adults":0.211,"elders":0.092}],
-	[825.0,{"children":0.458,"youth":0.418,"early_adults":0.285,"established_adults":0.235,"mature_adults":0.247,"elders":0.106}],
-	[1075.0,{"children":0.477,"youth":0.435,"early_adults":0.297,"established_adults":0.244,"mature_adults":0.257,"elders":0.110}]
+	[0.0,{"children":0.293,"youth":0.305,"early_adults":0.221,"established_adults":0.191,"mature_adults":0.210,"elders":0.094}],
+	[20.0,{"children":0.258,"youth":0.261,"early_adults":0.193,"established_adults":0.169,"mature_adults":0.189,"elders":0.087}],
+	[45.0,{"children":0.229,"youth":0.213,"early_adults":0.156,"established_adults":0.137,"mature_adults":0.155,"elders":0.072}],
+	[80.0,{"children":0.203,"youth":0.183,"early_adults":0.134,"established_adults":0.119,"mature_adults":0.135,"elders":0.063}],
+	[150.0,{"children":0.190,"youth":0.171,"early_adults":0.124,"established_adults":0.109,"mature_adults":0.125,"elders":0.059}],
+	[275.0,{"children":0.259,"youth":0.234,"early_adults":0.164,"established_adults":0.139,"mature_adults":0.154,"elders":0.070}],
+	[425.0,{"children":0.322,"youth":0.292,"early_adults":0.202,"established_adults":0.169,"mature_adults":0.183,"elders":0.081}],
+	[600.0,{"children":0.386,"youth":0.352,"early_adults":0.243,"established_adults":0.202,"mature_adults":0.218,"elders":0.096}],
+	[825.0,{"children":0.467,"youth":0.427,"early_adults":0.290,"established_adults":0.238,"mature_adults":0.249,"elders":0.107}],
+	[1075.0,{"children":0.489,"youth":0.446,"early_adults":0.304,"established_adults":0.249,"mature_adults":0.262,"elders":0.112}],
+	[1350.0,{"children":0.483,"youth":0.441,"early_adults":0.300,"established_adults":0.246,"mature_adults":0.259,"elders":0.111}],
+	[1650.0,{"children":0.503,"youth":0.459,"early_adults":0.312,"established_adults":0.256,"mature_adults":0.267,"elders":0.114}],
+	[1950.0,{"children":0.487,"youth":0.445,"early_adults":0.302,"established_adults":0.247,"mature_adults":0.258,"elders":0.110}],
+	[2250.0,{"children":0.470,"youth":0.428,"early_adults":0.290,"established_adults":0.236,"mature_adults":0.247,"elders":0.105}],
+	[2550.0,{"children":0.420,"youth":0.380,"early_adults":0.258,"established_adults":0.211,"mature_adults":0.220,"elders":0.095}]
 ]
 
 ## Each cohort's crisis share at game year `year` ({cohort: share}).
