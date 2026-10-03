@@ -194,8 +194,10 @@ static func _card_words(record:Dictionary)->Dictionary:
 	# Who works it and its clock: "A team of about 3 people; about 1½ years to proof".
 	var team:=Words.team(researchers,int(record.get("teams_on",1)))
 	var clock:=Words.clock(float(record.get("estimated_days",0.0)))
+	# A young people's slow learning, beside the clock (DiscoverySystem.founding_words).
+	var founding:=String(record.get("founding_note",""))
 	return {"progress":progress,"evidence":team+("; "+clock if not clock.is_empty() else ""),"step":step,"phase":phase,"why":why,"restated":restated,"would":would,
-		"tooltip":(goal+"\n\n" if not goal.is_empty() else "")+holdup+brings+"\n\nClick to review this field, its current investigations and what they would do."}
+		"tooltip":(goal+"\n\n" if not goal.is_empty() else "")+holdup+("\n\n"+founding if not founding.is_empty() else "")+brings+"\n\nClick to review this field, its current investigations and what they would do."}
 
 ## The price of the furthest lead among the questions under way, once teams
 ## work five years or more ahead of the age: "Our learning runs ahead of its

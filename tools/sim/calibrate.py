@@ -61,6 +61,7 @@ FORMULA_ANCHORS = [
     ("scripts/discovery_system.gd", "var support_multiplier:="),
     ("scripts/discovery_system.gd", "return (0.45+0.55*staffing)"),
     ("scripts/discovery_system.gd", "return (0.85+_research_draw"),
+    ("scripts/consequence_engine.gd", "return clampf(0.40+float(WorldSimulation.state.simulation_metrics.get(\"knowledge\""),
     ("scripts/society_model.gd", "var spread:=(common_spread+practice+directed)"),
     ("scripts/society_model.gd", "var teaching:=observers/population*0.055"),
     ("scripts/society_model.gd", "base=clampf((0.18+keepers*0.22+health*0.14"),

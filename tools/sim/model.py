@@ -2011,7 +2011,7 @@ class Surrogate:
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 # Research600.stale_factor (research_3000)
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
-            prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace \
+            prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace * self._discovery_multiplier() \
                 * kr * 0.12 * 1.0055
             noise = 1.0 + self.rng.normal(0.0, 0.16 / math.sqrt(max(1.0, days)))
             self.progress[item] += prob * days * noise
@@ -2338,7 +2338,7 @@ class Surrogate:
             difficulty = self.cost_draw[item] * self._age_work(item) * founding_work(age) * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, age))) / precedent
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
-            prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace \
+            prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace * self._discovery_multiplier() \
                 * kr * 0.12 * 1.0055
             noise = 1.0 + self.rng.normal(0.0, 0.16 / math.sqrt(max(1.0, days)))
             self.progress[item] += prob * days * noise
@@ -2351,6 +2351,18 @@ class Surrogate:
         for item in found:
             self._learn(item)
         return found
+
+    def _discovery_multiplier(self) -> float:
+        """ConsequenceEngine.discovery_multiplier over its value for a founding band
+        (knowledge 0.18, labor 0.72, intelligence 0.2: about 0.80), so the fitted
+        throughput keeps its meaning: a people whose knowledge, work and minds
+        have grown learns faster (a learning people most). Off without
+        FOUNDING (the older lumped throughput)."""
+        if FOUNDING["FOUNDING_WORK"] <= 0.0:
+            return 1.0
+        dm = clamp(0.40 + self.knowledge_metric * 0.45 + float(getattr(self, "labor_eff", 0.72)) * 0.18
+                   + float(self.capacities.get("knowledge", 0.2)) * 0.55 + self.eff("observation_rate") * 0.20, 0.35, 1.65)
+        return dm / 0.8026
 
     def _age_work(self, i: int) -> float:
         """Research600.age_work of question ``i`` (its design year, else its era)."""

@@ -446,3 +446,31 @@ func test_the_first_ways_come_at_a_village_pace()->void:
 	assert_float(R.LEAD_YEARS_PER_DOUBLING).is_equal_approx(0.06,0.0001)
 	# More learners still give more work: no cap.
 	assert_float(R.team_capacity(8.0)).is_greater(R.team_capacity(2.0)*3.5)
+
+## The research pages say a young people learns slowly, with the engine's own
+## number at the people's own age, beside each question's clock; nothing once
+## it learns at the usual pace.
+func test_the_research_pages_say_a_young_people_learns_slowly()->void:
+	DiscoverySystem.learning_lead=0.0
+	GameState.elapsed_days=5.0*365.0
+	assert_str(DiscoverySystem.founding_words()).is_equal("A young people learns slowly: every question takes 2.2 times the work until year 15, easing to normal by year 30.")
+	# Easing: the number now.
+	GameState.elapsed_days=22.5*365.0
+	var easing:=DiscoverySystem.founding_words()
+	assert_str(easing).starts_with("A young people learns slowly: every question takes %s times the work now" % ("%.1f" % R.founding_work(22.5)))
+	assert_str(easing).ends_with("easing to normal by year 30.")
+	# Back to the usual pace: nothing said.
+	GameState.elapsed_days=31.0*365.0
+	assert_str(DiscoverySystem.founding_words()).is_empty()
+	# On the cards: each question's record carries it and its tip says it.
+	GameState.elapsed_days=5.0*365.0
+	DiscoverySystem.refresh_investigations()
+	var records:=DiscoverySystem.active_investigation_records()
+	assert_int(records.size()).is_greater(0)
+	for record:Dictionary in records:
+		assert_str(String(record.founding_note)).is_equal(DiscoverySystem.founding_words())
+	var words:Dictionary=preload("res://scripts/hud/inquiry_board.gd")._card_words(records[0])
+	assert_str(String(words.tooltip)).contains("A young people learns slowly")
+	var grown:Dictionary=records[0].duplicate(true)
+	grown["founding_note"]=""
+	assert_str(String(preload("res://scripts/hud/inquiry_board.gd")._card_words(grown).tooltip)).not_contains("young people")
