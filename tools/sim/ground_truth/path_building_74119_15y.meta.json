@@ -1,6 +1,6 @@
 {
  "spec": "path_building:74119:15",
- "commit": "36cc33512c2b5b5bf9e30dfc045411c4dae1ff30",
+ "commit": "4bf93a4842dee0946fb302abccb6a2420c1914e9",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "f309d9311627",
   "scripts/society_model.gd": "1b3e35dc26d7",
@@ -22,11 +22,11 @@
   "scripts/crisis_background.gd": "138760ec064e",
   "scripts/crisis_system.gd": "926859b2ad37",
   "scripts/crisis_unattended.gd": "fc93b9e75847",
-  "scripts/built_fabric.gd": "e493cfc38232",
+  "scripts/built_fabric.gd": "fe92161c61b7",
   "scripts/settlement_construction.gd": "55bb3fda4014",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 97.9,
+ "wall_seconds": 110.8,
  "returncode": 0,
- "generated": "2026-10-03 13:46:13"
+ "generated": "2026-10-03 14:25:52"
 }
