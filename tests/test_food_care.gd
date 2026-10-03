@@ -100,6 +100,28 @@ func test_the_levy_leaves_every_town_its_lean_buffer()->void:
 	# The planners aim a little past the buffer, for the season.
 	assert_float(GovernmentPeopleSystem.RESERVE_TARGET_DAYS).is_equal_approx(FoodCare.LEAN_DAYS*1.5,0.0001)
 
+## Every reading of "days in store" counts the lean stores: the rulers' gates,
+## standing, feasts and the court's words ask store_gate of the old days, so
+## envy raids, feasts and great works still come to a people with normal stores.
+func test_store_readings_count_the_lean_stores()->void:
+	var Standing:=preload("res://scripts/standing.gd")
+	assert_float(Standing.WEALTH_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(90.0),0.0001)
+	assert_float(Standing.ENDURANCE_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(120.0),0.0001)
+	assert_float(preload("res://scripts/economy_system.gd").FEAST_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(60.0),0.0001)
+	assert_float(preload("res://scripts/civilization_strategy.gd").GOODWILL_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(90.0),0.0001)
+	assert_float(preload("res://scripts/civilization_controller.gd").DEFENSE_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(30.0),0.0001)
+	# The planners' usual stores read as ample, not lean; under the buffer, lean.
+	var Context:=preload("res://scripts/interaction_context.gd")
+	assert_str(Context.food_band(GovernmentPeopleSystem.RESERVE_TARGET_DAYS)).is_equal("ample")
+	assert_str(Context.food_band(FoodCare.LEAN_DAYS-1.0)).is_equal("lean")
+	assert_str(Context.food_band(3.0)).is_equal("scarce")
+	# The Food page's words match the plan: 1.02 - 0.15 x how far past the reserve.
+	GameState.simulation_metrics={"food_consumption":100.0,"food_days":GovernmentPeopleSystem.RESERVE_TARGET_DAYS*1.5}
+	var plan:=GovernmentPeopleSystem.reserve_plan()
+	var over:=float(plan.over)
+	assert_float(float(plan.draw)).is_equal_approx(maxf(0.0,GovernmentPeopleSystem.RESERVE_MARGIN*over-0.02),0.000001)
+	assert_float(1.0-float(plan.draw)).is_equal_approx(1.02-GovernmentPeopleSystem.RESERVE_MARGIN*over,0.000001)
+
 ## A village of 100 with twenty days in store and fresh food coming in each
 ## day thrives: full food security, and no more deaths than with 45 or 200.
 func test_a_village_of_100_with_twenty_days_and_fresh_food_thrives()->void:

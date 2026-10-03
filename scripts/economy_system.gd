@@ -944,11 +944,12 @@ func _process_mutual_risk_pool(trade_volume:float,defaulted_claims:float)->Dicti
 const WEALTH_BOUNDS:={"subsistence":[0.28,0.55,0.38],"weighed_metal":[0.32,0.65,0.45],"currency":[0.35,0.75,0.50]}
 ## How fast sharing out pulls the shares back a day (half-way in about 1.6
 ## years), stronger before money (gifts, reciprocity), and stronger still
-## with feasts when the stores hold FEAST_FOOD_DAYS of food.
+## with feasts when the stores hold FEAST_FOOD_DAYS of food (food_care.gd
+## store_gate of the old 60: a people with its usual lean stores still feasts).
 const WEALTH_REVERSION:=0.0012
 const SUBSISTENCE_SHARING:=1.5
 const FEAST_SHARING:=1.25
-const FEAST_FOOD_DAYS:=60.0
+const FEAST_FOOD_DAYS:=30.0
 ## The chief's redistribution: for each share of the realm's output the
 ## purse put back in common hands last month, the richest fifth's share falls
 ## this much a day (realm_purse.gd redistribution).

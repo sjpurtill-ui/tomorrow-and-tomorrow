@@ -65,8 +65,10 @@ func test_inequality_falls_back_within_the_ages_bounds()->void:
 	var total:=0.0
 	for share in GameState.wealth_shares: total+=float(share)
 	assert_float(total).is_equal_approx(1.0,0.0001)
-	# Feasts when the stores are full share it out faster.
+	# Feasts when the stores are full share it out faster (full: FEAST_FOOD_DAYS,
+	# counted against the lean stores).
 	GameState.wealth_shares.assign([0.05,0.10,0.18,0.22,0.45])
+	GameState.simulation_metrics["food_days"]=EconomySystem.FEAST_FOOD_DAYS-10.0
 	for day in 180: EconomySystem._update_wealth_distribution(0.0,0.0,0.0,0.0,{"labor_return_index":1.0})
 	var lean:=float(GameState.wealth_shares[4])
 	GameState.wealth_shares.assign([0.05,0.10,0.18,0.22,0.45])

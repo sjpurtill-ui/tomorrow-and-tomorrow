@@ -1794,7 +1794,9 @@ func reserve_plan()->Dictionary:
 	var days:=float(metrics.get("food_days",target))
 	var gap:=clampf((target-days)/maxf(1.0,target),0.0,1.0)
 	var over:=clampf((days-target)/maxf(1.0,target),0.0,1.0)
-	return {"target_days":target,"food_days":days,"gap":gap,"margin":RESERVE_MARGIN*(1.0+lean)*gap,"over":over,"draw":RESERVE_MARGIN*over}
+	# The engine plans 1.02 + the margin times the need: past the reserve that
+	# is under the need only once RESERVE_MARGIN x over passes the 0.02.
+	return {"target_days":target,"food_days":days,"gap":gap,"margin":RESERVE_MARGIN*(1.0+lean)*gap,"over":over,"draw":maxf(0.0,RESERVE_MARGIN*over-0.02)}
 
 ## Why this many hands are on food, in plain words with the planners' own
 ## numbers (the Food page reads it).
