@@ -212,14 +212,16 @@ static func material(colours:Dictionary,cover:int,key_dir:Vector3,stencil:="")->
 		made.next_pass=ink
 	return made
 
-## [band_soft, rim, strands, sheen], [grain, fill, stipple, card], [flat, skin, cover, -].
+## [band_soft, rim, strands, sheen], [grain, fill, stipple, card], [flat, skin, glow (shines of itself), -].
 static func _params(slot:String)->Array:
 	match slot:
-		"SKIN":return [Vector4(0.34,0.14,0.0,0.0),Vector4(0.025,0.22,0.0,0.0),Vector4(0.0,1.0,1.0,0.0)]
+		"SKIN":return [Vector4(0.34,0.14,0.0,0.0),Vector4(0.025,0.22,0.0,0.0),Vector4(0.0,1.0,0.0,0.0)]
 		"HAIR":return [Vector4(0.30,0.22,0.24,0.22),Vector4(0.05,0.16,1.0,0.0),Vector4.ZERO]
 		"HAIR_CARD":return [Vector4(0.30,0.30,0.0,0.18),Vector4(0.0,0.16,0.0,1.0),Vector4.ZERO]
 		"STUBBLE":return [Vector4(0.10,0.14,0.0,0.0),Vector4(0.35,0.16,1.0,0.0),Vector4.ZERO]
-		"MOUTH","EYES","IRIS","PUPIL","EYE_SHINE","EYE_WHITE":return [Vector4(0.10,0.0,0.0,0.0),Vector4(0.0,0.16,0.0,0.0),Vector4(1.0,0.0,0.0,0.0)]
+		"EYE_SHINE":return [Vector4(0.10,0.0,0.0,0.0),Vector4(0.0,0.16,0.0,0.0),Vector4(1.0,0.0,0.9,0.0)]
+		"EYE_WHITE":return [Vector4(0.10,0.0,0.0,0.0),Vector4(0.0,0.16,0.0,0.0),Vector4(1.0,0.0,0.22,0.0)]
+		"MOUTH","EYES","IRIS","PUPIL":return [Vector4(0.10,0.0,0.0,0.0),Vector4(0.0,0.16,0.0,0.0),Vector4(1.0,0.0,0.0,0.0)]
 	return [Vector4(0.10,0.14,0.0,0.0),Vector4(0.05,0.16,0.0,0.0),Vector4.ZERO]
 
 static func _shader(stencil:String)->Shader:

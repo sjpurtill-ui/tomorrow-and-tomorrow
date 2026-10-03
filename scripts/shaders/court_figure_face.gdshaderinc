@@ -40,13 +40,24 @@ vec3 paint_face(vec3 base, vec2 F, vec2 G, vec4 fa, vec4 fb, float depth) {
 	c *= mix(vec3(1.0), vec3(0.83, 0.77, 0.80), clamp(sock * 0.75 + inner * 0.55, 0.0, 1.0));
 	float under = face_ell(vec2(ax - 0.036, y - 0.121), vec2(0.020, 0.008)) * front;
 	c *= 1.0 - under * (0.06 + 0.12 * fa.x);
-	// the brow ridge catches the light
-	c *= 1.0 + face_ell(vec2(ax - 0.034, y - 0.167), vec2(0.030, 0.010)) * front * 0.05;
+	// the planes of the head: a lit brow and forehead, the cheekbone high,
+	// the hollow under it, the temple and the side of the jaw turned away
+	c *= 1.0 + face_ell(vec2(ax - 0.034, y - 0.167), vec2(0.030, 0.010)) * front * (0.06 + 0.08 * depth);
+	c *= 1.0 + face_ell(vec2(ax, y - 0.205), vec2(0.050, 0.035)) * front * 0.05;
+	c *= 1.0 + face_ell(vec2(ax - 0.046, y - 0.106), vec2(0.022, 0.011)) * (0.08 + 0.06 * depth);
+	c *= 1.0 - face_ell(vec2(ax - 0.052, y - 0.074), vec2(0.020, 0.017)) * 0.10;
+	c *= 1.0 - face_ell(vec2(ax - 0.064, y - 0.150), vec2(0.014, 0.026)) * 0.06;
+	c *= 1.0 - smoothstep(0.040, 0.062, ax) * smoothstep(0.075, 0.035, y) * smoothstep(-0.01, 0.01, y) * 0.08;
+	// the bridge of the nose catches the light (most on deep skin)
+	c *= 1.0 + face_ell(vec2(ax, y - 0.123), vec2(0.0045, 0.024)) * front * (0.05 + 0.08 * depth);
 	// the nose: shade down its sides, the nostrils dark, shade under it
 	float nside = face_ell(vec2(ax - 0.014, y - 0.112), vec2(0.006, 0.022)) * front;
 	float nostril = face_ell(vec2(ax - 0.0080, y - 0.0890), vec2(0.0034, 0.0022)) * (1.0 - smoothstep(0.25, 0.65, G.x));
 	float under_nose = face_ell(vec2(F.x, y - 0.082), vec2(0.011, 0.0045));
-	c *= 1.0 - nside * 0.08 - under_nose * 0.06;
+	c *= 1.0 - nside * 0.08 - under_nose * 0.04;
+	// the underside of the nose is a mid tone, not a hole: only the nostrils are dark
+	float nose_under = face_ell(vec2(ax - 0.004, y - 0.0895), vec2(0.016, 0.006)) * (1.0 - smoothstep(0.20, 0.60, G.x));
+	c *= 1.0 + nose_under * 0.55;
 	c *= 1.0 - nostril * 0.38;
 	// warm cheeks (most on fair skin)
 	float cheek = face_ell(vec2(ax - 0.046, y - 0.098), vec2(0.026, 0.020)) * front;
@@ -56,7 +67,7 @@ vec3 paint_face(vec3 base, vec2 F, vec2 G, vec4 fa, vec4 fb, float depth) {
 	float lower = face_ell(vec2(F.x, y - 0.0485), vec2(0.0190, 0.0064));
 	vec3 lip = mix(c * vec3(0.86, 0.50, 0.50), c * vec3(0.64, 0.42, 0.52), depth);
 	c = mix(c, lip, clamp((upper + lower) * 1.4, 0.0, 1.0));
-	c = mix(c, c * vec3(1.10, 1.04, 1.02), face_ell(vec2(F.x, y - 0.0465), vec2(0.010, 0.0024)) * 0.35);
+	c = mix(c, c * vec3(1.10, 1.04, 1.02), face_ell(vec2(F.x, y - 0.0465), vec2(0.010, 0.0024)) * (0.35 + 0.35 * depth));
 	float corner = face_ell(vec2(ax - 0.0185, y - 0.0548), vec2(0.0032, 0.0034));
 	c *= 1.0 - corner * 0.60;
 	// shade under the line of the jaw and down the throat
