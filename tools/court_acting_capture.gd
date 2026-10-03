@@ -15,6 +15,7 @@ extends Node
 ##   room/frame_####.png   a room taking the god's wrath, 30 fps (the "room" run)
 ##   r2_*.png              round 2 ("r2"): laughs, side-eye, the catch, stances, business, exits
 ##   room2/frame_####.png  a fire circle hears the god ("room2")
+##   r4_*.png              round 4 ("r4"): a child at court, sitting cross-legged, mirrored twins
 
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
@@ -31,6 +32,7 @@ const PEOPLE:=[
 	["male_young","tunic","tail","","e8c3a5","2a1c12",["4f7a68","5b4130","d08a2b"],"belt"],
 	["female_old","hide","bun","","bd8659","b5b0a6",["9c7a52","5b4130","c9a43c"],"clasped"],
 	["male_adult","tunic","topknot","beard_short","bd8659","3a2a1c",["6d4b6b","2f4a6e","c9a43c"],"folded"],
+	["child","tunic","cropped","","c98d62","3a2a1c",["b07a35","6e5541","4f7a68"],"stand"],
 ]
 
 var out_dir:=""
@@ -53,6 +55,7 @@ func _ready()->void:
 	elif mode=="face":await _face_close()
 	elif mode=="mouth":await _mouth_test()
 	elif mode=="r3":await _sheets_r3()
+	elif mode=="r4":await _sheets_r4()
 	else:await _sheets()
 	print("COURT_ACTING_CAPTURE DONE ",out_dir)
 	get_tree().quit(0)
@@ -153,7 +156,10 @@ func _row(title:String,specs:Array,file:String,gap:=0.95)->void:
 		var spec:Dictionary=specs[i]
 		var f:=figures[i]
 		if spec.has("look_at"):Acting.look_toward(f,figures[int(spec.look_at)],1.0)
-		if not String(spec.get("clip","")).is_empty():Acting.play(f,String(spec.clip))
+		var c:=String(spec.get("clip",""))
+		# a clip by name, else one of the director's words
+		if Acting.has_clip(c):Acting.play(f,c)
+		elif not c.is_empty():Acting.perform(f,{"beat":c})
 	# everyone runs together (a pair acts in time); each stops at their own moment
 	var longest:=0.0
 	for spec:Dictionary in specs:longest=maxf(longest,float(spec.get("t",0.0)))
@@ -387,6 +393,32 @@ func _sheets_r3()->void:
 		{"clip":"faint_caught_l","t":0.65,"label":"0.65 s","who":1,"x":-1.6,"yaw":0.0},{"clip":"half_catch_r","t":0.65,"label":"","who":0,"x":-0.85,"yaw":0.0},
 		{"clip":"faint_caught_l","t":1.1,"label":"1.1 s","who":1,"x":0.25,"yaw":0.0},{"clip":"half_catch_r","t":1.1,"label":"","who":0,"x":1.0,"yaw":0.0},
 		{"stance":"fire","t":2.0,"label":"by the fire","who":4,"x":2.0,"yaw":-20.0}],"r3_catch_fire.png")
+
+## Round 4: the child (J's child body) beside grown-ups, the floor seat, the mirrored twins.
+func _sheets_r4()->void:
+	camera.fov=26.0
+	_frame_row(5.0)
+	await _row("A child at court: hides behind a grown-up, peeks out, copies the bow, waves at the god",[
+		{"clip":"","t":0.6,"label":"","who":0,"x":-1.75,"z":0.0,"yaw":0.0},
+		{"clip":"hide_behind_l","t":0.9,"label":"hides","who":7,"x":-2.0,"z":-0.38,"yaw":0.0},
+		{"clip":"","t":0.6,"label":"","who":2,"x":-0.35,"z":0.0,"yaw":0.0},
+		{"clip":"peek_out_l","t":0.75,"label":"peeks out","who":7,"x":-0.6,"z":-0.38,"yaw":0.0},
+		{"clip":"bow_deep","t":1.1,"label":"","who":1,"x":0.75,"z":0.0,"yaw":0.0},
+		{"clip":"copy","t":1.2,"label":"copies the bow","who":7,"x":1.35,"z":0.05,"yaw":0.0},
+		{"clip":"wave","t":0.75,"label":"waves at the god","who":7,"x":2.2,"z":0.1,"yaw":0.0}],"r4_child_1.png")
+	await _row("Giggles; shushed and frozen; clings to its mother; sits cross-legged",[
+		{"clip":"giggle","t":0.7,"label":"giggles","who":7,"x":-2.2,"z":0.1,"yaw":0.0},
+		{"clip":"shush_r","t":0.6,"label":"","who":5,"x":-0.95,"z":0.0,"yaw":-10.0},
+		{"clip":"shushed","t":0.9,"label":"shushed","who":7,"x":-1.55,"z":0.15,"yaw":15.0},
+		{"clip":"","t":0.6,"label":"","who":1,"x":0.15,"z":0.0,"yaw":0.0},
+		{"clip":"child_cling_r","t":0.9,"label":"clings","who":7,"x":0.45,"z":0.06,"yaw":0.0},
+		{"clip":"sit_cross","t":1.6,"label":"sits cross-legged","who":7,"x":1.35,"z":0.2,"yaw":0.0},
+		{"stance":"cross","t":2.0,"label":"and an elder too","who":2,"x":2.2,"z":0.0,"yaw":-10.0}],"r4_child_2.png")
+	_frame_row(4.6)
+	await _row("Right-hand twins made from their left ones in a mirror (the file keeps only the left)",[
+		{"clip":"hide_behind_l","t":0.9,"label":"hide behind, left","who":3},{"clip":"hide_behind_r","t":0.9,"label":"right (mirrored)","who":3},
+		{"clip":"point_l","t":0.7,"label":"point, left","who":6},{"clip":"point_r","t":0.7,"label":"right (mirrored)","who":6},
+		{"clip":"whisper_r","t":0.8,"label":"whisper, right (mirrored)","who":1}],"r4_mirrors.png",0.95)
 
 ## The mouth's morphs by hand (no acting): rest, jaw_open, v_aa, v_oo, smile.
 func _mouth_test()->void:

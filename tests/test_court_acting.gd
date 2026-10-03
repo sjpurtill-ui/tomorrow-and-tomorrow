@@ -623,3 +623,84 @@ func test_a_catch_meets_the_fall_where_it_is()->void:
 	ca.catch(faller)
 	assert_str(String(fa._a.clip)).starts_with("faint_caught_")
 	assert_float(absf(ca._a.t-fa._a.t)).is_less(0.05)
+
+
+func test_a_child_does_the_words_its_own_way()->void:
+	var c:=_figure("stand","child")
+	var a=Acting.of(c)
+	for pair in [["wave","child_wave"],["giggle","child_giggle"],["copy","child_copy_bow"],["shushed","child_shushed"],
+			["freeze","child_shushed"],["fidget","child_fidget"],["sit_down","sit_cross"],["run_to","child_run"]]:
+		Acting.perform(c,{"beat":pair[0]})
+		_frame(c,a)
+		assert_str(String(a._a.clip) if a._a!=null else "").override_failure_message("a child's %s is not %s" % pair).is_equal(String(pair[1]))
+	Acting.play(c,"hide_behind_l")
+	assert_str(String(a._a.clip)).is_equal("child_hide_behind_l")
+	Acting.play(c,"peek_out_r")
+	assert_str(String(a._a.clip)).is_equal("child_peek_out_r")
+	# a grown-up asked for a child's clip plays the grown-up's; the same words, the grown-up's way
+	var g:=_figure()
+	var ga=Acting.of(g)
+	Acting.play(g,"child_wave")
+	assert_str(String(ga._a.clip)).is_equal("wave")
+	Acting.perform(g,{"beat":"giggle"})
+	assert_str(String(ga._a.clip)).is_equal("laugh_stifled")
+	# the child fidgets for life; a grown-up asked to fidget keeps its own stance
+	Acting.idle(c,"fidget")
+	assert_str(String(a.base_stance)).is_equal("fidget")
+	Acting.idle(g,"fidget")
+	assert_str(String(ga.base_stance)).is_empty()
+	_run(c,1.0);_run(g,1.0)
+	assert_float(float(Acting.clip_meta("child_run").get("speed_mps",0.0))).is_greater(1.0)
+
+
+func test_a_child_hides_and_waves_without_leaving_the_floor()->void:
+	for clip in ["child_hide_behind_l","child_copy_bow","child_wave","child_giggle","child_shushed","child_cling_r","child_fidget"]:
+		var c:=_figure("stand","child")
+		var a=Acting.of(c)
+		_run(c,0.3)
+		Acting.play(c,clip)
+		var lowest:=10.0;var highest:=-10.0
+		for i in int(minf(Acting.clip_length(clip),3.0)/DT):
+			_frame(c,a)
+			for bone in ["foot.L","foot.R","toe.L","toe.R"]:
+				lowest=minf(lowest,_bone_y(c,bone));highest=maxf(highest,_bone_y(c,bone))
+		assert_float(lowest).override_failure_message("%s: a foot %.3f m into the floor" % [clip,-lowest]).is_greater(-0.02)
+		assert_float(highest).override_failure_message("%s: a foot %.3f m up" % [clip,highest]).is_less(0.25)
+
+
+func test_sitting_cross_legged_is_on_the_floor_not_in_it()->void:
+	for variant in ["male_adult","female_old","child"]:
+		var f:=_figure("stand",variant)
+		var a=Acting.of(f)
+		_run(f,0.3)
+		Acting.play(f,"sit_cross")
+		var lowest:=10.0
+		for i in int(1.8/DT):
+			_frame(f,a)
+			for bone in ["foot.L","foot.R","shin.L","shin.R","toe.L","toe.R"]:lowest=minf(lowest,_bone_y(f,bone))
+		var k:float=f.body_height/1.72
+		assert_float(lowest).override_failure_message("%s: a foot %.3f m into the floor" % [variant,-lowest]).is_greater(-0.02)
+		assert_float(_bone_y(f,"hips")).override_failure_message("%s not down on the floor" % variant).is_less(0.32*k)
+		assert_float(_bone_y(f,"hips")).override_failure_message("%s sat through the floor" % variant).is_greater(0.04)
+		# and kept for life: the seat stays down
+		Acting.idle(f,"cross")
+		assert_str(String(a.base_stance)).is_equal("cross")
+		_run(f,2.0)
+		assert_float(_bone_y(f,"hips")).is_less(0.32*k)
+
+
+func test_a_right_hand_twin_is_its_left_in_a_mirror()->void:
+	## The file keeps only the left of a mirrored pair; the game makes the right.
+	for pair in [["hide_behind_l","hide_behind_r"],["point_l","point_r"],["whisper_l","whisper_r"]]:
+		assert_str(String(Acting.clip_meta(pair[1]).get("mirror_of",""))).is_equal(String(pair[0]))
+		assert_object(Acting.library("male_adult").get(pair[1])).is_not_null()
+		var lf:=_figure();var rf:=_figure()
+		Acting.set_ambient(lf,0.0);Acting.set_ambient(rf,0.0)
+		var la=Acting.of(lf);var ra=Acting.of(rf)
+		Acting.play(lf,String(pair[0]));Acting.play(rf,String(pair[1]))
+		for i in int(0.9/DT):_frame(lf,la);_frame(rf,ra)
+		for bone in ["upper_arm","forearm","hand"]:
+			var ql:Quaternion=lf.skeleton.get_bone_pose_rotation(lf.skeleton.find_bone(bone+".L"))
+			var qr:Quaternion=rf.skeleton.get_bone_pose_rotation(rf.skeleton.find_bone(bone+".R"))
+			var off:=rad_to_deg(Quaternion(ql.x,-ql.y,-ql.z,ql.w).angle_to(qr))
+			assert_float(off).override_failure_message("%s %s is %.1f deg off its mirror" % [pair[1],bone,off]).is_less(6.0)

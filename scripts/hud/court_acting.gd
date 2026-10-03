@@ -109,7 +109,21 @@ const ACT_MAP:={
 	"swat_miss":["clip","swat_fly"],"scribble":["clip","scribble"],"shake_hand":["clip","shake_hand"],"scratch_out":["clip","scribble"],
 	"stomach_growl":["clip","rub_belly"],"floor_creak":["gesture","freeze"],"swallow_loud":["gesture","gulp"],"stifle_cough":["clip","stifle_cough"],
 	"bubble":["face",""],"giggle":["clip","laugh_stifled"],
+	# round 4: a child's words (anyone can take them; a child does them its own way)
+	"shushed":["gesture","freeze"],"run_to":["clip","run"],"cling":["clip","hide_behind_"],"sit_cross":["clip","sit_cross"],
 }
+## A child does the same words its own way (J's child body; only its library
+## has these clips): hides behind a grown-up's legs and peeks, copies the bow
+## badly, fidgets, waves at the god with both arms, giggles into its hands,
+## freezes stiff when shushed, runs to a parent and clings, sits cross-legged.
+const CHILD_ACTS:={"copy":["clip","child_copy_bow"],"bow_wrong":["clip","child_copy_bow"],"bow_early":["clip","child_copy_bow"],
+	"fidget":["clip","child_fidget"],"freeze":["clip","child_shushed"],"shushed":["clip","child_shushed"],
+	"stifle_laugh":["clip","child_giggle"],"giggle":["clip","child_giggle"],"laugh":["clip","child_giggle"],
+	"run_to":["clip","child_run"],"cling":["clip","child_cling_"],"sit_down":["clip","sit_cross"],"wave":["clip","child_wave"],
+	"hide_behind":["clip","child_hide_behind_"],"peek_out":["clip","child_peek_out_"]}
+## And any clip asked for by name: a child's own version where it has one.
+const CHILD_CLIPS:={"hide_behind_l":"child_hide_behind_l","hide_behind_r":"child_hide_behind_r","peek_out_l":"child_peek_out_l",
+	"peek_out_r":"child_peek_out_r","wave":"child_wave","laugh_stifled":"child_giggle","run":"child_run","sit_floor":"sit_cross"}
 ## The director's face words (docs/COURT_STAGE_3D.md section 3) on this layer's
 ## channels: [channel, gain, second channel or -1, gain].
 const FACE_WORDS:={"brows_up":[5,1.0,-1,0.0],"brows_down":[4,0.8,5,-0.6],"brows_worried":[3,1.0,-1,0.0],"lips_pressed":[2,1.0,-1,0.0],
@@ -143,6 +157,18 @@ static var _corr:Dictionary={}        # variant -> Array[Quaternion] by the figu
 static var _hips_off:Dictionary={}    # variant -> Vector3
 ## The whole court is out of sight (its window closed): nobody is moved.
 static var paused_all:=false
+## Time spent acting (microseconds, all figures) and how many figure-frames: for profiling.
+static var prof_usec:=0
+static var prof_steps:=0
+## Blend-shape writes made (for profiling: each one may re-deform a mesh).
+static var prof_morph_writes:=0
+## A morph below this weight is set to 0; a change smaller than MORPH_STEP is not written.
+const MORPH_FLOOR:=0.03
+const MORPH_STEP:=0.01
+## The face's detail by its height on screen (pixels): below FACE_NONE no
+## morphs at all (the body still acts), below FACE_LOW only the lids and the jaw.
+const FACE_NONE:=26.0
+const FACE_LOW:=80.0
 
 # --- a reaction being played -----------------------------------------------------
 
@@ -229,9 +255,40 @@ static func library(variant:String)->Dictionary:
 				var clean:=String(name).get_slice("/",String(name).get_slice_count("/")-1)
 				out[clean]=player.get_animation(name)
 		made.free()
+	# the right-hand twins the file leaves out, each its left one in a mirror
+	for clip:String in (manifest().get("clips",{}) as Dictionary):
+		var from:=String(clip_meta(clip).get("mirror_of",""))
+		if from.is_empty() or out.has(clip) or not out.has(from):continue
+		out[clip]=mirrored(out[from] as Animation,clip)
 	_anims[variant]=out
 	_rests[variant]=rests
 	return out
+
+## A clip turned into its mirror image (left for right): each .L bone's track
+## goes to its .R twin and back; a rotation (x, y, z, w) in a bone's own frame
+## becomes (x, -y, -z, w) (J's rig is symmetric: its left and right rests are
+## mirrors this way to 0.01 degrees) and the hips move -x for x.
+static func mirrored(src:Animation,name:String)->Animation:
+	var m:=src.duplicate(true) as Animation
+	m.resource_name=name
+	for tr in m.get_track_count():
+		var path:=m.track_get_path(tr)
+		if path.get_subname_count()<1:continue
+		var bone:=String(path.get_subname(0))
+		var twin:=bone
+		if bone.ends_with(".L"):twin=bone.left(-2)+".R"
+		elif bone.ends_with(".R"):twin=bone.left(-2)+".L"
+		if twin!=bone:m.track_set_path(tr,NodePath(String(path.get_concatenated_names())+":"+twin))
+		match m.track_get_type(tr):
+			Animation.TYPE_ROTATION_3D:
+				for k in m.track_get_key_count(tr):
+					var q:Quaternion=m.track_get_key_value(tr,k)
+					m.track_set_key_value(tr,k,Quaternion(q.x,-q.y,-q.z,q.w))
+			Animation.TYPE_POSITION_3D:
+				for k in m.track_get_key_count(tr):
+					var v:Vector3=m.track_get_key_value(tr,k)
+					m.track_set_key_value(tr,k,Vector3(-v.x,v.y,v.z))
+	return m
 
 ## How the library's rig sits on a figure's own skeleton: each bone's rest
 ## turned onto the figure's (identity while they match), the hips' offset.
@@ -395,6 +452,7 @@ static func perform(fig:Node3D,args:Dictionary,stage:Object=null)->float:
 	var at_key:=String(args.get("at",""))
 	var other:Variant=resolve(fig,at_key,stage) if not at_key.is_empty() else null
 	var spec:Array=ACT_MAP.get(act,["clip",act] if has_clip(act) else [])
+	if a.variant=="child" and CHILD_ACTS.has(act):spec=CHILD_ACTS[act]
 	var opts:={}
 	# the acting's clips keep their own timing; the director's speed only where
 	# the act is about it (a curt bow, a hurried one)
@@ -466,7 +524,7 @@ static func idle(fig:Node3D,stance_id:String,opts:={})->void:
 	if a!=null:a.rest_in(stance_id,opts)
 
 ## The acting's own stances and the figure's stance (and prop) each stands on.
-const OWN_STANCES:={"cord":"stand","bundle":"stand","guard":"staff","log":"sit","fire":"crouch"}
+const OWN_STANCES:={"cord":"stand","bundle":"stand","guard":"staff","log":"sit","fire":"crouch","cross":"sit","fidget":"stand"}
 
 ## How a stage takes someone out of the hall, step by step (the stage moves and
 ## turns the body; this says what it plays): [{clip, seconds, move, face}].
@@ -647,6 +705,10 @@ var _vis_to:=PackedInt32Array()
 var _x_from:=PackedInt32Array()
 var _x_to:=PackedInt32Array()
 var _x_amt:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0])
+var _sk_low:=PackedByteArray()     # 1: kept on a low-detail face (lids, jaw)
+var _lod:=2
+var _lod_wait:=0.0
+var face_px:=0.0                   # the face's height on screen at the last look
 var _refresh:=0.0
 var _beat_mood:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0])
 var _beat_face:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
@@ -706,6 +768,7 @@ func _bind(figure:Node3D,skeleton:Skeleton3D)->void:
 	_fidget_wait=rng.randf_range(18.0,45.0)
 	_glance_wait=rng.randf_range(0.5,2.5)
 	_bind_face()
+	_mark_low()
 	if fig.has_method(&"add_library") and not library(variant).is_empty():
 		fig.call(&"add_library","act",_shared_library(variant))
 	# J's head-turn modifiers give way: this turns the head (and follows their gaze point).
@@ -730,6 +793,38 @@ func rebind_face()->void:
 	_vis_from.clear();_vis_to.clear();_x_from.clear();_x_to.clear()
 	_vis_key.fill(-1);_x_key.fill(-1)
 	_bind_face()
+	_mark_low()
+
+func _mark_low()->void:
+	_sk_low.resize(_sk_mesh.size());_sk_low.fill(0)
+	for i in _x_from.size():
+		if _x_from[i] in [0,3,4]:_sk_low[_x_to[i]]=1
+
+## How much of the face to drive: 2 all, 1 the lids and jaw, 0 none (by the
+## head's height on screen, checked a few times a second).
+func _face_lod(dt:float)->int:
+	# a face at rest (small or out of the camera's view) looks again every
+	# frame, so one the camera cuts to has its expression from the first frame
+	_lod_wait-=dt
+	if _lod_wait>0.0 and _lod!=0:return _lod
+	_lod_wait=0.3
+	var vp:=get_viewport()
+	var cam:=vp.get_camera_3d() if vp!=null else null
+	if cam==null or b_head<0:
+		_lod=2;return _lod
+	var head:=skel.global_transform*skel.get_bone_global_pose(b_head).origin
+	if not cam.is_position_in_frustum(head):
+		face_px=0.0;_lod=0;return _lod
+	var tall:=float(fig.get(&"head_height")) if fig.get(&"head_height")!=null else 0.25
+	tall*=fig.global_transform.basis.get_scale().y
+	var h:=float(vp.get_visible_rect().size.y)
+	if cam.projection==Camera3D.PROJECTION_ORTHOGONAL:
+		face_px=tall/maxf(cam.size,0.001)*h
+	else:
+		var d:=maxf((head-cam.global_position).dot(-cam.global_transform.basis.z),0.05)
+		face_px=tall/(2.0*d*tan(deg_to_rad(cam.fov*0.5)))*h
+	_lod=0 if face_px<FACE_NONE else (1 if face_px<FACE_LOW else 2)
+	return _lod
 
 func _bind_face()->void:
 	var meshes:Array=[]
@@ -790,7 +885,13 @@ func _bind_face()->void:
 # --- instance API ----------------------------------------------------------------------
 
 func act(clip:String,opts:={})->float:
-	if not has_clip(clip):
+	# a child's own version; a child's clip asked of a grown-up: the grown-up's
+	if variant=="child" and CHILD_CLIPS.has(clip) and owns(String(CHILD_CLIPS[clip])):clip=String(CHILD_CLIPS[clip])
+	elif has_clip(clip) and not owns(clip):
+		for k:String in CHILD_CLIPS:
+			if String(CHILD_CLIPS[k])==clip and owns(k):
+				clip=k;break
+	if not has_clip(clip) or not owns(clip):
 		# not ours: the figure's own clip, on its own player
 		if fig.has_method(&"play") and fig.get(&"player")!=null and (fig.get(&"player") as AnimationPlayer).has_animation(clip):
 			fig.call(&"play",clip,float(opts.get("blend",0.3)),0.0)
@@ -932,16 +1033,20 @@ func _set_base(stance_id:String,opts:Dictionary)->void:
 		var tall:=body_k*maxf(fig.global_transform.basis.get_scale().y if fig.is_inside_tree() else fig.scale.y,0.01)
 		var seat:=float(opts.get("seat",0.43*tall))/tall
 		_base_mix=clampf((seat-low)/maxf(high-low,0.01),0.0,1.0)
-	if not has_clip(clip):return
+	if not owns(clip):return
 	base_stance=stance_id
 	_base=_layer(clip,{"loop":true,"blend":0.6})
 	_base.t=rng.randf()*_base.length
 	_base.born=_base.t
-	if not hi.is_empty() and has_clip(hi):
+	if not hi.is_empty() and owns(hi):
 		_base_hi=_layer(hi,{"loop":true,"blend":0.6})
 		_base_hi.t=_base.t
 		_base_hi.born=_base.t
 		_base_hi.gain=_base_mix
+
+## Whether this body's library has the clip (a child's clips are only on the child).
+func owns(clip:String)->bool:
+	return has_clip(clip) and library(variant).has(clip)
 
 func let_go(blend:=-1.0)->void:
 	for layer in [_a,_b]:
@@ -1071,6 +1176,12 @@ func _process_modification_with_delta(delta:float)->void:
 func step(delta:float)->void:
 	if skel==null or fig==null or not is_instance_valid(fig):return
 	if paused_all or not is_visible_in_tree() or not _view_shown():return
+	var t0:=Time.get_ticks_usec()
+	_step(delta)
+	prof_usec+=Time.get_ticks_usec()-t0
+	prof_steps+=1
+
+func _step(delta:float)->void:
 	var dt:=clampf(delta,0.0,0.1)
 	_clock+=dt
 	_acc.fill(Vector3.ZERO)
@@ -1621,20 +1732,27 @@ func _face_out(dt:float,face_w:float)->void:
 		if ch<0:continue
 		_sk_value[_sk_from_key[i]]+=face_now[ch]*_sk_from_gain[i]
 	# the jaw, brows and lids on their morphs (J's: eyes_wide is 1.28 open, blink 0.06)
-	_x_amt[0]=clampf(face_now[CH_JAW]*(0.45 if speaking and _has_visemes() else 1.0),0.0,1.0)
+	_x_amt[0]=clampf(face_now[CH_JAW],0.0,1.0) if not (speaking and _has_visemes() and _lod==2) else 0.0
 	_x_amt[1]=maxf(0.0,face_now[CH_BROWS])
 	_x_amt[2]=maxf(0.0,-face_now[CH_BROWS])
 	_x_amt[3]=maxf(0.0,(lids-1.0)/0.28)
 	_x_amt[4]=maxf(0.0,(1.0-lids)/0.94)
 	for i in _x_from.size():_sk_value[_x_to[i]]+=_x_amt[_x_from[i]]
-	# now and then every morph is written again (anything else that set one is undone)
+	# A face too small on screen to read keeps its morphs at rest: every morph
+	# at any weight costs a pass over its mesh each frame. Small weights snap
+	# to 0 for the same reason; only real changes are written; now and then
+	# what the meshes hold is compared (anything else that set one is undone).
+	var lod:=_face_lod(dt)
 	_refresh-=dt
-	if _refresh<=0.0:
-		_refresh=0.25
-		_sk_last.fill(-1.0)
+	var check:=_refresh<=0.0
+	if check:_refresh=0.5
 	for k in _sk_value.size():
 		var v:=clampf(_sk_value[k],0.0,1.0)
-		if absf(v-_sk_last[k])>0.004:
-			_sk_last[k]=v
+		if v<MORPH_FLOOR or lod==0 or (lod==1 and not _sk_low[k]):v=0.0
+		if absf(v-_sk_last[k])>MORPH_STEP or (v==0.0 and _sk_last[k]!=0.0) or check:
 			var m:=_sk_mesh[k]
-			if is_instance_valid(m):m.set_blend_shape_value(_sk_index[k],v)
+			if not is_instance_valid(m):continue
+			if check and absf(m.get_blend_shape_value(_sk_index[k])-v)<=MORPH_STEP*0.5 and _sk_last[k]>=0.0:continue
+			_sk_last[k]=v
+			m.set_blend_shape_value(_sk_index[k],v)
+			prof_morph_writes+=1
