@@ -87,9 +87,11 @@ func apply_music()->void:
 	var score:=get_parent().get_node_or_null("Score") as AudioStreamPlayer
 	if score:score.bus="Music"
 
-## N (court sound): the "Court" bus at the player's level.
+## N (court sound): the "Court" bus at the player's level; the court's
+## sounds are made ahead of time so it never opens silent.
 func apply_court()->void:
 	preload("res://scripts/hud/court_sound.gd").set_volume(court_volume)
+	if is_inside_tree():preload("res://scripts/hud/court_sound.gd").prewarm(self)
 
 func persist()->void:
 	var config:=ConfigFile.new()
