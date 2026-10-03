@@ -76,7 +76,8 @@ func labor_block(hearth:bool,modern:bool)->Dictionary:
 	return {"heading":"WHAT THE PEOPLE ARE DOING TODAY" if hearth else ("TODAY'S LABOUR, FROM THE ROLLS" if not modern else "LABOR FORCE BY TASK"),
 		"tasks":tasks,"per_figure":maxi(1,ceili(float(most)/float(People.FIGURES_MAX))),"able":able,
 		"note":"%s; the rest are children, the old and the sick." % register if hearth else "%s of working age at work." % EraWords.grouped(able),
-		"manual":manual,"who":Manual.leaders_lines() if not manual else [],"warnings":Manual.outlook().lines if manual else [],
+		# Our leaders' lines, then the path they lean the work toward (work_paths.gd).
+		"manual":manual,"who":Manual.leaders_lines()+[preload("res://scripts/work_paths.gd").leaders_line()] if not manual else [],"warnings":Manual.outlook().lines if manual else [],
 		"leaders_tip":Manual.LEADERS_TIP,"ruler_tip":Manual.RULER_TIP,"on_leaders":set_work.bind(false),"on_ruler":set_work.bind(true),"on_move":move_work,
 		# What a task does, with today's numbers: asked for only for the task
 		# the player has opened (people_screen.gd), not all nine every day.

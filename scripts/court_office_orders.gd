@@ -191,7 +191,7 @@ static func _stores()->Array:
 
 # --- The headman -----------------------------------------------------------------
 
-const TASKS:=[["food","food"],["building","building"],["making","making"],["carrying","carrying"],["the watch","the watch"],["learning","learning"]]
+const TASKS:=[["food","food"],["building","building"],["making","making"],["carrying","carrying"],["keeping and caring","keeping and caring"],["the watch","the watch"],["learning","learning"]]
 
 static func _town()->Array:
 	var out:Array=[]

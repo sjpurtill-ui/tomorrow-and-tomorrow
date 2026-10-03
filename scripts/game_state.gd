@@ -206,6 +206,9 @@ var opening_opportunities:Dictionary=preload("res://scripts/opening_opportunitie
 var resource_events: Array[Dictionary] = []
 var resource_practice: Dictionary = {}
 var resource_priorities: Dictionary = {}
+## The land searched (resource_system.gd land_survey): its cover, the month
+## of the last find roll and the finds told. Kept per town (settlement_model).
+var land_survey:Dictionary={}
 var founding_manifest:Dictionary={}
 var economy_stage := "subsistence"
 var economy_benchmarks:Dictionary={"subsistence":{"day":0,"from":"founding"}}
@@ -563,6 +566,7 @@ func reset_for_new_world(new_seed:int)->void:
 	resource_events=[]
 	resource_practice={}
 	resource_priorities={}
+	land_survey={}
 	founding_manifest={}
 	economy_stage="subsistence"
 	economy_benchmarks={"subsistence":{"day":0,"from":"founding"}}
