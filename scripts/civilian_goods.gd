@@ -330,10 +330,11 @@ static func _make_from(spendable:Dictionary,amount:float,inputs:Dictionary)->flo
 		needed-=drawn_total
 	return amount-maxf(0.0,needed)/RAW_PER_UNIT
 
-## WHAT MAKING DOES, in the engine's numbers (for the People view): what the
-## makers make now, and what ten more would make. {role, now, ten_more,
-## numbers}: numbers are goods a day now and with ten more, their worth in
-## rations, goods per maker, arms a day and with ten more, a set's cost.
+## WHAT MAKING DOES, in the engine's numbers (for the People view,
+## role_effects.gd): what the makers make now, and what ten more would make.
+## {now, plus_ten} in twelve words or fewer each (the People view's lines),
+## and `numbers`: goods a day now and with ten more, their worth in rations,
+## goods per maker, arms a day now and with ten more, a set's cost.
 static func role_effect(role:String="Crafting")->Dictionary:
 	if role!="Crafting":return {}
 	var report:Dictionary=data().get("report",{})
@@ -345,12 +346,12 @@ static func role_effect(role:String="Crafting")->Dictionary:
 	var arms_ten:=10.0*float(plan.get("share",0.0))*efficiency()/maxf(.01,float(cost.maker_days)) if int(plan.get("wanted",0))>0 else 0.0
 	var room:=maxf(0.0,ceiling()-stock())
 	var goods_ten:=minf(10.0*per,room) if String(report.get("reason",""))!="Needs timber, fiber, clay, stone or flint" else 0.0
-	var now:="Makers make %s goods a day, worth %s rations" % [_n(made),_n(worth_in_rations(made))]
-	if arms_now>0.001:now+=", and arms for %s fighters a day" % _n(arms_now)
-	var ten:="Ten more makers: +%s goods a day (worth %s rations)" % [_n(goods_ten),_n(worth_in_rations(goods_ten))]
-	if arms_ten>0.001:ten+=", or arms for +%s fighters a day while the watch lacks them" % _n(arms_ten)
-	if goods_ten<=.001 and room<=0.0:ten="Ten more makers: nothing more; homes and the market hold all the goods they can"
-	return {"role":"Crafting","now":now+".","ten_more":ten+".","numbers":{"goods_day":made,"goods_day_ten_more":made+goods_ten,"worth_day":worth_in_rations(made),"per_maker":per,
+	var now:="%s goods a day, worth %s rations." % [_n(made),_n(worth_in_rations(made))]
+	if arms_now>0.001:now="%s goods and arms for %s a day." % [_n(made),_n(arms_now)]
+	var ten:="Ten more: about %s more goods a day." % _n(goods_ten)
+	if arms_ten>0.001:ten="Ten more: %s more goods, or arms for %s more." % [_n(goods_ten),_n(arms_ten)]
+	if goods_ten<=.001 and room<=0.0:ten="Ten more: nothing; homes and market hold all they can."
+	return {"role":"Crafting","now":now,"plus_ten":ten,"ten_more":ten,"numbers":{"goods_day":made,"goods_day_ten_more":made+goods_ten,"worth_day":worth_in_rations(made),"per_maker":per,
 		"arms_day":arms_now,"arms_day_ten_more":arms_now+arms_ten,"arms_cost_maker_days":float(cost.maker_days),"arms_cost_goods":float(cost.worth_goods),"stock":stock(),"spare":spare()}}
 
 ## The keeper's line of fact on making (court_facts.gd): goods made today and

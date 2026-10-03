@@ -182,7 +182,9 @@ func test_goods_scale_with_makers_and_how_well_people_work()->void:
 	var n:Dictionary=effect.numbers
 	assert_float(float(n.per_maker)).is_equal_approx(0.72*Goods.technique_output(),0.0001)
 	assert_float(float(n.goods_day_ten_more)-float(n.goods_day)).is_equal_approx(7.2*Goods.technique_output(),0.0001)
-	assert_str(String(effect.ten_more)).contains("Ten more makers")
+	assert_str(String(effect.plus_ten)).starts_with("Ten more")
+	# The People view's lines: twelve words or fewer.
+	for line:String in [String(effect.now),String(effect.plus_ten)]:assert_int(line.split(" ",false).size()).override_failure_message(line).is_less_equal(12)
 
 
 func test_a_people_all_in_on_making_gets_a_little_extra()->void:
