@@ -86,9 +86,9 @@ func _run()->void:
 	var index:=FileAccess.open(out_dir.path_join("index.txt"),FileAccess.WRITE)
 	if index!=null:
 		var lines:="The executions' sounds (all synthesized; mixed at the game's levels, then lifted for listening).\n"
-		lines+="20_act02_club_home_run          drum roll; wind-up; whoosh; CRACK; the head's whistle; plop in the pot; gasp; stir; lid; ba-DUM; a lone clap\n"
-		lines+="21_act10_three_swing_beheading  roll; THUNK (stuck), creak, pull; CLANG (bounced), \"ow!\"; CHOP, pop, the roll across the floor, the geyser, gasp, patter on the front row, the blink; ba-dum-TSS (a temple age); retching\n"
-		lines+="22_act04_dog_dinner             roll; snarls; dragged off; crunching behind the windbreak; groans; one more crunch; paws trotting back; the bone dropped; tail thumping; ba-DUM\n"
+		lines+="20_act02_club_home_run          (K's clip) tap, tap; drum roll; wind-up; whoosh; CRACK; the head's whistle; plop in the pot, the broth in the cook's face; gasps; the body falls; lid; pat (a lone clap) pat; ba-DUM; someone is sick\n"
+		lines+="21_act10_three_swing_beheading  (K's clip) roll; the executioner spits on his hands; THUNK (stuck), grunts, it comes free; CLANG (bounced), \"ow!\"; a glaring silence; CHOP, the geyser, gasps, patter on the front row; the head lands and rolls; the blink; a clap; ba-dum-TSS (a temple age); retching\n"
+		lines+="22_act04_dog_dinner             (K's clip) roll; the grab, knocked down; a growl, three tugs, fingers slipping, let go; dragged off; crunching behind the windbreak; groans; paws trotting back; the bone dropped; tail thumping; ba-DUM\n"
 		lines+="actNN_<name>                    each of the 25 acts by number (the roll on a log before drums, a frame or clay drum after; cymbals from act 17 on)\n"
 		lines+="23_every_execution_sound        every sound once, in this order: %s\n" % ", ".join(PackedStringArray(order))
 		lines+="24_room_reactions_every_kind    each reaction (%s) in four voices: a girl of eight, a fawning courtier, an old woman, a young man of another people\n" % ", ".join(PackedStringArray(Reactions.KINDS))

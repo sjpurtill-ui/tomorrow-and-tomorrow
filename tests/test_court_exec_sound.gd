@@ -66,7 +66,8 @@ func _queued(sound:Node)->Array:
 func test_an_act_plays_its_roll_and_its_punchline_by_the_age()->void:
 	var sound:=_court(["bone_flutes_drums"])
 	var lead:float=sound.call("play_act","club_home_run",{},{})
-	assert_float(lead).is_equal_approx(2.4,0.01)
+	# K's clip: the club's first tap 3.17 s before the crack
+	assert_float(lead).is_equal_approx(3.17,0.01)
 	var names:=_queued(sound)
 	assert_array(names).contains(["drum_roll","gore_crack","pot_plop","lid_clank","punch_drum"])
 	assert_array(names).not_contains(["punch_cymbal","log_roll"])
@@ -80,14 +81,14 @@ func test_an_act_plays_its_roll_and_its_punchline_by_the_age()->void:
 	assert_array(_queued(temple)).contains(["punch_cymbal","axe_thunk","axe_clang","gore_chop","blood_geyser","blood_patter"])
 	var early:=_court([])
 	early.call("play_act","dog_dinner",{},{})
-	assert_array(_queued(early)).contains(["log_roll","punch_log","crunch_loop","bone_drop"])
+	assert_array(_queued(early)).contains(["log_roll","punch_log","tug","slip","crunch","bone_drop"])
 
 func test_with_gore_off_nothing_plays_and_mild_keeps_the_sounds()->void:
 	var sound:=_court(["bone_flutes_drums"])
 	assert_float(float(sound.call("play_act","dog_dinner",{},{"gore":"off"}))).is_equal(0.0)
 	assert_int((sound.get("_queue") as Array).size()).is_equal(0)
 	sound.call("play_act","dog_dinner",{},{"gore":"mild"})
-	assert_array(_queued(sound)).contains(["crunch_loop"])
+	assert_array(_queued(sound)).contains(["crunch"])
 
 func test_the_queued_sounds_play_when_their_time_comes()->void:
 	var sound:=_court(["bone_flutes_drums"])
@@ -111,10 +112,10 @@ func test_all_twenty_five_acts_have_a_track()->void:
 			if absf(float(item.t))<0.3 and String(item.cue) not in ["roll","punch"]:at_blow=true
 			if String(item.cue)=="punch" and float(item.t)>0.5:punch_after=true
 		assert_bool(at_blow and punch_after).override_failure_message("act %d lacks a blow or a late punchline" % n).is_true()
-		# 6-12 s from the blow to the room's last word, and no longer before it than the roll
+		# 2.5-11.5 s from the blow to the room's last word (the dog's walk back is long)
 		var last:=0.0
 		for item:Dictionary in track:last=maxf(last,float(item.t))
-		assert_float(last).override_failure_message("act %d runs %.1f s after the blow" % [n,last]).is_between(2.5,9.5)
+		assert_float(last).override_failure_message("act %d runs %.1f s after the blow" % [n,last]).is_between(2.5,11.5)
 
 func test_a_terrified_hall_is_silent_and_the_hungry_eye_the_pot()->void:
 	var sound:=_court(["bone_flutes_drums","rattles_drums_pipes"])
