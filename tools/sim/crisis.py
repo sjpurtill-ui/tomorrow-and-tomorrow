@@ -425,6 +425,8 @@ class Crises:
             self._policy({"labor_multiplier": -0.03}, 20)
         self.active.remove(c)
         self.history.append({"type": c["type"], "start": c["start"], "deaths": c["deaths"], "m": c["m"], "severe": c["severe"]})
+        if len(self.history) > 400:
+            del self.history[:-400]
 
     # ---------------------------------------------------------------- effects
     def _due(self, c: dict, share: float) -> None:
