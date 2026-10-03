@@ -37,7 +37,8 @@ FPS = 30
 
 SLOT_COLOURS = {"COAT": (0.62, 0.42, 0.24), "COAT_LIGHT": (0.86, 0.76, 0.58), "NOSE": (0.08, 0.06, 0.05),
                 "EYE": (0.07, 0.05, 0.04), "EYE_SHINE": (0.98, 0.96, 0.9), "COAT_DARK": (0.30, 0.20, 0.12),
-                "HORN": (0.55, 0.5, 0.42), "HOOF": (0.2, 0.17, 0.14), "EYE_AMBER": (0.75, 0.55, 0.2)}
+                "HORN": (0.55, 0.5, 0.42), "HOOF": (0.2, 0.17, 0.14), "EYE_AMBER": (0.75, 0.55, 0.2),
+                "TUSK": (0.9, 0.86, 0.74)}
 
 
 def log(*a):
@@ -880,7 +881,14 @@ def make_goat(quick):
     return goat.make(quick)
 
 
-MAKERS = {"dog": make_dog, "goat": make_goat}
+def _herd(species):
+    def make(quick):
+        import court_animals_herd as herd
+        return herd.make(species, quick)
+    return make
+
+
+MAKERS = {"dog": make_dog, "goat": make_goat, "pig": _herd("pig"), "cattle": _herd("cattle"), "bear": _herd("bear"), "elephant": _herd("elephant")}
 
 
 def main():

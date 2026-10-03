@@ -56,6 +56,9 @@ def args():
             i += 1
         elif a[i] == "--no-ao":
             opts["ao"] = False
+        elif a[i] == "--marks-only":
+            # only the marks are written into the manifest; the glbs are left alone
+            opts["marks_only"] = True
         i += 1
     return opts
 
@@ -447,6 +450,8 @@ def build_fire_ring(bld):
     marks["officials_4"] = mark((-2.95, 0, -2.05))
     marks["door"] = mark(tuple(Vector(polar(262, R_WALL + 0.6))), face="fire")
     marks["door_out"] = mark(tuple(Vector(polar(262, R_WALL + 3.5))), face="fire")
+    # out of the court's sight behind the hide windbreak (the dogs drag the dead there)
+    marks["behind_windbreak"] = mark(tuple(Vector(polar(236, R_WALL + 1.2))), face="fire")
     crowd = []
     for phi, c, r in seat_marks:
         if 110 <= phi <= 250:
@@ -793,6 +798,8 @@ def build_longhouse(bld):
         marks["crowd_%d" % (i + 4)] = mark((x, 0, z), face="fire")
     marks["door"] = mark((-HALF_L + 0.6, 0, 0.5), face="fire")
     marks["door_out"] = mark((-HALF_L - 2.5, 0, 0.5), face="fire")
+    # out of sight past the end wall, beside the door
+    marks["behind_windbreak"] = mark((-HALF_L - 1.4, 0, -1.6), face="fire")
     for i, (x, z) in enumerate([(1.6, 0.95), (-5.2, -1.7), (3.7, 1.6), (-6.8, 1.0)]):
         marks["animal_%d" % i] = mark((x, 0, z), face="fire")
     check_marks("longhouse", marks)
@@ -878,6 +885,10 @@ def main():
         K.clear_scene()
         bld = K.Builder(seed=sum(ord(c) for c in kind))
         info = BUILDERS[kind](bld)
+        if opts.get("marks_only") and kind in manifest["sets"]:
+            manifest["sets"][kind]["marks"] = info["marks"]
+            K.log(kind, "marks only", len(info["marks"]), "%.1fs" % (time.time() - t0))
+            continue
         objs = list(bld.finish().values())
         meshes = [o for o in objs if o.type == 'MESH']
         ao = None

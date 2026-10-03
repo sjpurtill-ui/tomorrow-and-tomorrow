@@ -28,6 +28,17 @@ static var _sound_checked:=false
 const PALETTE:={
 	"dog":{"COAT":"a06c3b","COAT_LIGHT":"e0c99e","COAT_DARK":"5f4027","NOSE":"1d1612","EYE":"150f0c","EYE_SHINE":"fbf6ea"},
 	"goat":{"COAT":"e6d6b4","COAT_DARK":"3e2c20","NOSE":"3a2c26","HOOF":"2c241e","HORN":"8c8070","EYE":"120c08","EYE_AMBER":"b8862e"},
+	"pig":{"COAT":"c48f78","COAT_DARK":"4a3428","NOSE":"d99a8a","HOOF":"3a2c24","EYE":"120c08","EYE_SHINE":"fbf6ea"},
+	"cattle":{"COAT":"8a4a2a","COAT_DARK":"2e211a","COAT_LIGHT":"e2d4b8","NOSE":"2a1c18","HOOF":"2a221c","HORN":"d8ccb0","EYE":"120c08","EYE_SHINE":"fbf6ea"},
+	"bear":{"COAT":"5e3f26","COAT_DARK":"3a2616","COAT_LIGHT":"9a7650","NOSE":"161010","EYE":"0e0a08","EYE_SHINE":"fbf6ea"},
+	"elephant":{"COAT":"7c7672","COAT_DARK":"615b57","HOOF":"4a4542","TUSK":"eee6d2","EYE":"120c08","EYE_SHINE":"fbf6ea"},
+}
+## Each herd beast's own coats (a herd is never one beast painted ten times).
+const SPECIES_COATS:={
+	"pig":{"pink":{"COAT":"d9a090","COAT_DARK":"b9786a"},"black":{"COAT":"3a2c26","COAT_DARK":"231a16"},
+		"spotted":{"COAT":"d4a48e","COAT_DARK":"2e221c"},"bristly":{"COAT":"7a5a44","COAT_DARK":"4a3428"}},
+	"cattle":{"red":{"COAT":"8a4a2a","COAT_DARK":"5a2e1a"},"black":{"COAT":"2a2220","COAT_DARK":"1a1412","COAT_LIGHT":"d8cbb0"},
+		"dun":{"COAT":"b89a6e","COAT_DARK":"8a6e4a"},"pied":{"COAT":"e4dacb","COAT_DARK":"2a2220"}},
 }
 ## The camp dogs' coats (a pack is never one dog painted five times).
 const COATS:={
@@ -40,10 +51,23 @@ const COATS:={
 const CLIP_MAP:={
 	"goat":{"sniff":"graze","sit":"lie","sit_idle":"lie_idle","scratch":"graze","cower":"startle","cower_idle":"look",
 		"wag":"bleat","tilt":"look","look_up":"look","bark":"bleat","grab":"graze","trot":"walk"},
+	"pig":{"sniff":"idle","sit":"idle","sit_idle":"idle","scratch":"idle","lie":"idle","lie_idle":"idle","stand_up":"idle",
+		"cower":"squeal","cower_idle":"idle","wag":"squeal","tilt":"idle","look_up":"idle","bark":"squeal","grab":"eat",
+		"tug":"eat","crunch":"eat","carry":"trot"},
+	"cattle":{"sniff":"idle","sit":"idle","sit_idle":"idle","scratch":"idle","lie":"idle","lie_idle":"idle","stand_up":"idle",
+		"cower":"look","cower_idle":"look","wag":"idle","tilt":"look","look_up":"look","bark":"look","grab":"idle",
+		"trot":"gallop","tug":"pull","crunch":"idle","carry":"walk"},
+	"bear":{"sniff":"idle","sit":"idle","sit_idle":"idle","scratch":"idle","lie":"idle","lie_idle":"idle","stand_up":"idle",
+		"cower":"idle","cower_idle":"idle","wag":"idle","tilt":"idle","look_up":"rear","bark":"burp","grab":"gulp",
+		"trot":"walk","tug":"walk","crunch":"gulp","carry":"walk"},
+	"elephant":{"sniff":"idle","sit":"idle","sit_idle":"idle","scratch":"idle","lie":"idle","lie_idle":"idle","stand_up":"idle",
+		"cower":"trumpet","cower_idle":"idle","wag":"idle","tilt":"idle","look_up":"trumpet","bark":"trumpet","grab":"stomp",
+		"trot":"walk","tug":"walk","crunch":"stomp","carry":"walk"},
 }
 ## What a one-off clip settles into when it ends.
 const AFTER:={"sit":"sit_idle","lie":"lie_idle","cower":"cower_idle","stand_up":"idle","look_up":"idle","bark":"idle","grab":"idle","tilt":"idle",
-	"bleat":"idle","startle":"look","look":"idle"}
+	"bleat":"idle","startle":"look","look":"idle",
+	"squeal":"idle","shake_hoof":"idle","gulp":"idle","burp":"idle","spit":"idle","stomp":"idle","shake_foot":"idle","trumpet":"idle"}
 ## Clips the animal is down in (it must stand up before it walks).
 const DOWN:=["sit","sit_idle","scratch","lie","lie_idle"]
 ## Keep clear of the fire by this much when walking past it.
@@ -125,13 +149,16 @@ func setup(species_name:String,court_set:Node3D,seed_value:=0,coat_name:="")->bo
 				player.get_animation(clip_name).loop_mode=Animation.LOOP_LINEAR if bool(clips[clip_name].get("loop",false)) else Animation.LOOP_NONE
 		player.animation_finished.connect(_on_finished)
 	_dress()
-	shade=load("res://scripts/hud/court_set_3d.gd").call("contact_shadow",0.42,0.78,0.5)
+	# its shadow pool sized to the beast (the dog's is 0.42 x 0.78)
+	var k:=float(info.get("height",0.74))/0.74
+	shade=load("res://scripts/hud/court_set_3d.gd").call("contact_shadow",0.42*k,0.78*k,0.5)
 	add_child(shade)
 	return true
 
 func _dress()->void:
 	var paint:Dictionary=(PALETTE.get(species,{}) as Dictionary).duplicate()
-	for slot in (COATS.get(coat,{}) as Dictionary).keys():paint[slot]=COATS[coat][slot]
+	var coats:Dictionary=SPECIES_COATS.get(species,COATS)
+	for slot in (coats.get(coat,{}) as Dictionary).keys():paint[slot]=coats[coat][slot]
 	for node in model.find_children("*","MeshInstance3D",true,false):
 		var mesh_node:=node as MeshInstance3D
 		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON
@@ -228,8 +255,9 @@ func clip_length(clip_name:String)->float:
 ## Walk (or trot) to a point on the ground, round the fire, then do `then`.
 func go_to(point:Vector3,gait:="walk",then:=Callable())->void:
 	_arrive=then
-	_gait=gait if gait in ["walk","trot","carry"] else "walk"
-	_speed=float((info.get("speeds",{}) as Dictionary).get(_gait,0.8))
+	_gait=gait if gait in ["walk","trot","carry","tug","gallop","pull"] else "walk"
+	# dragging something heavy: backwards, braced, slow
+	_speed=0.55 if _gait=="tug" else float((info.get("speeds",{}) as Dictionary).get(_gait,0.8))
 	_path=_route(position,Vector3(point.x,0.0,point.z))
 	if is_down():
 		# up first, then off
@@ -288,13 +316,16 @@ func _step(delta:float)->void:
 			_moving=false;_finish_move()
 		return
 	var want:=atan2(to.x,to.z)
-	_yaw=rotate_toward(_yaw,want,delta*4.5)
+	# dragging, it backs along the way with its head to what it pulls
+	var back:=_gait=="tug"
+	var face_want:=want+PI if back else want
+	_yaw=rotate_toward(_yaw,face_want,delta*4.5)
 	rotation.y=_yaw
 	# slow in the turns and as it comes up to the spot
-	var facing:=cos(angle_difference(_yaw,want))
+	var facing:=cos(angle_difference(_yaw,face_want))
 	var pace:=_speed*clampf(facing,0.15,1.0)*clampf(d/0.35,0.35,1.0)
 	var step:=minf(d,pace*delta)
-	position+=Vector3(sin(_yaw),0.0,cos(_yaw))*step
+	position+=Vector3(sin(_yaw),0.0,cos(_yaw))*step*(-1.0 if back else 1.0)
 
 func _finish_move()->void:
 	var then:=_arrive;_arrive=Callable()
@@ -312,6 +343,8 @@ func face_toward(point:Vector3)->void:
 func _decide()->void:
 	var cs:=court_set()
 	if cs==null:return
+	if herded:
+		_think=99.0;return
 	if mood=="afraid":
 		# it stays low a while, then gets up again
 		mood="calm";play("stand_up",0.3);_think=rng.randf_range(3.0,5.0);return
@@ -510,6 +543,41 @@ func _fetch_drop()->void:
 	drop_carried()
 	_held=0.0;wag(3.0)
 
+## Brought in for an act: it stands where it is put until the director moves it.
+var herded:=false
+
+## One of its own acts, start to end, then back to standing: the bear's
+## "rear", "gulp", "burp", "spit"; the ox's "shake_hoof"; the elephant's
+## "stomp", "shake_foot", "trumpet"; the pig's "squeal". `then` when done.
+func perform(clip_name:String,then:=Callable())->float:
+	var seconds:=clip_length(clip_name)
+	if seconds<=0.0:
+		if then.is_valid():then.call()
+		return 0.0
+	_moving=false;_path.clear()
+	_held=0.0;hold(seconds,then if then.is_valid() else _idle_here)
+	clip="";play(clip_name,0.15)
+	return seconds
+
+## Go to a spot and feed there (the pigs at the pen, act 9): trot over,
+## then eat in a frenzy for `seconds`.
+func feed_at(point:Vector3,seconds:=6.0)->void:
+	_held=0.0;hold(60.0)
+	var cs:=court_set()
+	var local:=cs.to_local(point) if cs!=null and cs.is_inside_tree() else point
+	go_to(local,"trot",_feed_here.bind(seconds,point))
+
+func _feed_here(seconds:float,point:Vector3)->void:
+	face_toward(point)
+	_held=0.0;hold(seconds,_idle_here)
+	play("eat",0.2)
+
+## Run (a stampede, act 8) to `point` at the gallop.
+func stampede_to(point:Vector3,then:=Callable())->void:
+	_held=0.0;hold(60.0)
+	var cs:=court_set()
+	go_to(cs.to_local(point) if cs!=null and cs.is_inside_tree() else point,"gallop",then)
+
 ## Off out of the door at a trot, and gone (the pack, when it is done).
 func leave(exit_mark:="door_out")->void:
 	var cs:=court_set()
@@ -517,6 +585,23 @@ func leave(exit_mark:="door_out")->void:
 	if cs!=null and cs.call("has_mark",exit_mark):out=(cs.call("mark",exit_mark) as Marker3D).position
 	_held=0.0;hold(30.0)
 	go_to(out,"trot",_gone)
+
+## Drag something off along `points` (global; the set's drag_route()), backing
+## away with it braced in its jaws; at the end it lies down to it (crunch).
+func drag_off(points:Array,then:=Callable())->void:
+	_held=0.0;hold(120.0)
+	_drag_next(points.duplicate(),then)
+
+func _drag_next(points:Array,then:Callable)->void:
+	if points.is_empty():
+		_held=0.0
+		if then.is_valid():then.call()
+		else:crunch(6.0)
+		return
+	var p:Vector3=points.pop_front()
+	var cs:=court_set()
+	var local:=cs.to_local(p) if cs!=null and cs.is_inside_tree() else p
+	go_to(local,"tug",_drag_next.bind(points,then))
 
 ## Pull at something, braced, head wrenching (dragging a body off): seconds.
 func tug(seconds:=2.5)->void:
