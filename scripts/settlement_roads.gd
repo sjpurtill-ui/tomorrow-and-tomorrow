@@ -62,7 +62,10 @@ static func material()->ShaderMaterial:
 static var _knowledge_key:=-1
 static var _knowledge:Dictionary={}
 static func knowledge()->Dictionary:
-	var size_key:=GameState.discovery_log.size()*100003+GameState.known_discoveries.size()
+	# The roads drawn follow the roads the builders have laid and keep
+	# (built_fabric.gd: the road index), never better than what is known.
+	var laid:=preload("res://scripts/built_fabric.gd").drawn_road_tier(GameState)
+	var size_key:=GameState.discovery_log.size()*100003+GameState.known_discoveries.size()*7+laid
 	if size_key==_knowledge_key:return _knowledge
 	_knowledge_key=size_key
 	var ids:Dictionary={}
@@ -76,6 +79,7 @@ static func knowledge()->Dictionary:
 	var tier:=0
 	if any.call(["solid_wheel_assembly","cart_running_gear","cart_bed_framing","transport_cart","spoked_wheel_assembly","brushwood_trackways","plank_trackways"]):tier=1
 	if any.call(["graded_roads","drained_intertown_roads","paved_haul_roads","aggregate_road_foundations","road_stations","turnpike_trust_roads"]):tier=2
+	tier=mini(tier,laid)
 	var bridge:=0
 	if any.call(["timber_bridges"]):bridge=1
 	if any.call(["stone_arch_bridges"]):bridge=2

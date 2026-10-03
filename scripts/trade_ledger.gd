@@ -453,6 +453,8 @@ static func capacity(a:String,b:String,form:String,period:int,ra:Dictionary={},r
 static func reach(a:String,b:String,ra:Dictionary,rb:Dictionary)->float:
 	var logistics:=clampf((float(ra.get("log",0.16))+float(rb.get("log",0.16)))*0.5,0.0,1.0)
 	var km:=REACH_KM*(1.0+logistics)
+	# Each side's roads carry the trade further (built_fabric.gd ROAD_REACH).
+	km*=1.0+preload("res://scripts/built_fabric.gd").ROAD_REACH*(float(ra.get("roads",0.0))+float(rb.get("roads",0.0)))*0.5
 	if bool(ra.get("boats",false)) and bool(rb.get("boats",false)): km*=BOAT_REACH*clampf(minf(float(ra.get("sea",1.0)),float(rb.get("sea",1.0))),0.2,1.0)
 	return 1.0/(1.0+distance_km(a,b)/maxf(1.0,km))
 
@@ -840,7 +842,7 @@ static func _read(owner:String,day:int,prev:Dictionary)->Dictionary:
 		var boats:=false
 		for id in BOATS:
 			if st.known_discoveries.has(id): boats=true; break
-		return {"day":day,"fresh":day,"pop":pop,"stage":String(st.economy_stage),"cmp":bool(eco.values_comparable_abroad()),"log":float(st.simulation_metrics.get("logistics",0.16)),
+		return {"day":day,"fresh":day,"pop":pop,"stage":String(st.economy_stage),"cmp":bool(eco.values_comparable_abroad()),"log":float(st.simulation_metrics.get("logistics",0.16)),"roads":float(preload("res://scripts/built_fabric.gd").realm_roads()),
 			"tc":float(WorldSimulation.discovery.effect("trade_capacity")),"gw":float((load("res://scripts/great_works_rivalry.gd") as GDScript).call("trade_routing",owner)),"boats":boats,"sea":float(WorldSimulation.military.joint_operations.sea_trade_factor()) if WorldSimulation.military!=null and WorldSimulation.military.get("joint_operations")!=null else 1.0,
 			"sim":true,"g":goods,"acc_in":{},"acc_out":{}})
 

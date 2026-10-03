@@ -34,7 +34,8 @@ const WORD_TIPS:={
 const STANDS:=["stands","stand","stands","stands","stand","stands"]
 ## Plain names for the parts of the danger the people read (DEFENSE_DANGER).
 const DANGER_WORDS:={"war":"at war or under attack","attacked":"attacked at home in the last two years","fear":"the people fear war",
-	"hostile":"a neighbour is hostile","tempting":"rich stores and few guards","neighbours":"other peoples are known"}
+	"hostile":"a neighbour is hostile","tempting":"rich stores and few guards","neighbours":"other peoples are known",
+	"builders":"skilled builders want walls"}
 
 static func _controller()->GDScript:
 	return load("res://scripts/civilization_controller.gd")

@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 import crisis as crisis_model
+import fabric as fabric_model
 import gamedata as gd
 import gdparse as g
 
@@ -638,6 +639,10 @@ class Surrogate:
         self.maker_capacity = 0.0
         self.drill = WATCH["START_DRILL"]
         self.armed = 0.0
+        # The built fabric, the walls and the standard great works (fabric.py:
+        # built_fabric.gd, settlement_defense, wonder_concept.gd).
+        self.fabric = fabric_model.Fabric(self)
+        self._fabric_places = 150.0
         self.edge = 0.0
         self._watch_prev = 0.0
         self.daughters = 0
@@ -983,7 +988,8 @@ class Surrogate:
             "health": clamp(self.health + e("health_protection") * 0.22 - e("disease_exposure") * 0.18 - e("health_risk") * 0.15, 0.02, 1.0),
             "labor": labor, "knowledge": combined,
             "production": clamp(self.material * 0.45 + labor * 0.30 + e("tool_quality") * 0.14 + e("task_coordination") * 0.11, 0.02, 1.0),
-            "infrastructure": clamp(housing * 0.38 + self.completed / 10.0 * 0.32 + e("construction_rate") * 0.18 + e("disaster_resilience") * 0.12, 0.01, 1.0),
+            "infrastructure": clamp(housing * 0.38 + self.completed / 10.0 * 0.32 + e("construction_rate") * 0.18 + e("disaster_resilience") * 0.12
+                                    + (self.fabric.quality * 0.10 + self.fabric.road * 0.08 if hasattr(self, "fabric") and fabric_model.ON else 0.0), 0.01, 1.0),
             "logistics": clamp(self.logistics * 0.55 + e("haul_capacity") * 0.22 + e("route_speed") * 0.16 + e("storage_loss") * -0.07, 0.01, 1.0),
             "ecology": clamp(self.ecology + e("ecology_recovery") * 0.20 - e("ecological_pressure") * 0.18 - e("pollution") * 0.12, 0.01, 1.0),
             "institutions": clamp(inst_support + e("state_capacity") * 0.22 + e("legitimacy") * 0.12 + float(self.p["institution_offset"]), 0.02, 1.0),
@@ -1231,6 +1237,7 @@ class Surrogate:
         tools = clamp(0.18 + self.material * 0.92, 0.18, 1.10)      # ConsequenceEngine.tools_factor
         labor_eff = float(getattr(self, "labor_eff", GOODS_X["REFERENCE_EFFICIENCY"]))
         self.per_cutter = BASKET_YIELD * (0.55 + tools * 0.75) * labor_eff * (1.0 + self.eff("extraction_yield")) * self.land_yield()
+        self.per_cutter *= self.fabric.extraction()   # built_fabric.gd extraction_bonus (resource_system.gd)
         got = cutters * self.per_cutter * days
         builders = self.able * self.alloc_pct["Construction"] / 100.0
         self.raw = min(max(0.0, self.raw + got - builders * BUILD_DRAW * days), pop * RAW_PER_HEAD_HELD)
@@ -1250,6 +1257,33 @@ class Surrogate:
         self.drill = self.drill + (ceiling - self.drill) * (1.0 - (1.0 - step) ** days) if self.drill < ceiling else ceiling
         if self.s.expand == "leaders":
             self._found_town(self.day / YEAR, 30.0, ESTABLISHMENT_DAYS, 28.0, self.found_rng)
+
+    def _fabric_month(self, year: float) -> None:
+        """built_fabric.gd: the places come and gone, then a month of the fabric,
+        the walls and the standard great work (fabric.py). Each year the craft's
+        pull on building knowledge is laid on the questions: the construction
+        signal (civilization_day.gd context) and the infrastructure line's pace
+        (discovery_system.gd leader factor), folded into item_activity."""
+        fab = self.fabric
+        if getattr(self, "temper", None) is not None:
+            return   # leaders.py runs its own great works
+        fab.follow_places(self._fabric_places, self.housing_capacity)
+        self._fabric_places = self.housing_capacity
+        fab.step(MONTH)
+        if fabric_model.ON and int(self.day // MONTH) % 12 == 0 and self.completed >= 1.0:
+            # The hearth's activity with the construction signal at the craft's
+            # value instead of 1 (each item counts its construction signals).
+            if not hasattr(self, "_fabric_base"):
+                scale = float(self.p.get("signal_scale", 1.0))
+                base = float(self.ctx.get("construction", 1.0))
+                count = np.array([sum(1 for x in sig if x == "construction") for sig in self.cat.signals], dtype=float)
+                infra = gd.LINES.index("infrastructure") if "infrastructure" in gd.LINES else -1
+                self._fabric_base = (self.activity_sum.copy(), self.signal_score.copy(), count * scale, base * scale, self.cat.line == infra)
+            act, score, count, base, infra_mask = self._fabric_base
+            sig = fab.signal() * float(self.p.get("signal_scale", 1.0))
+            self.activity_sum = act + count * (sig - base)
+            self.item_activity = (0.65 + self.activity_sum * 0.22) * np.where(infra_mask, fab.research("infrastructure"), 1.0)
+            self.signal_score = score + count * (min(4.0, sig) - min(4.0, base)) * 13.0
 
     def _found_town(self, year: float, gate_days: float, margin: float, distance: float, rng) -> bool:
         """civilization_controller.expansion_order_steps by the shared rule
@@ -1471,6 +1505,7 @@ class Surrogate:
         spoil_mult = (0.72 if self.completed_names("Storage Pits") else 1.0) * max(0.30, 1.0 + e("food_spoilage"))
         fresh_rate = c.spoilage_fresh * spoil_mult * float(p["fresh_spoil_mult"]) * (1.0 - FOOD_CARE["CARRY_FRESH_CUT"] * self._cover("Logistics", FOOD_CARE["CARRY_SHARE"]))
         stored_rate = c.spoilage_stored * spoil_mult * (1.0 - FOOD_CARE["KEEP_STORED_CUT"] * self._cover("Administration", FOOD_CARE["KEEP_SHARE"]))
+        stored_rate *= self.fabric.granary()   # built_fabric.gd granary_factor (food_system.gd)
         eat_fresh = min(fresh_in + self.fresh / days, need)
         surplus = max(0.0, fresh_in - eat_fresh)
         preserve_cap = (self.workers("Logistics") * 0.16 + self.workers("Crafting") * 0.18) * (1.0 + e("food_storage"))
@@ -1862,13 +1897,17 @@ class Surrogate:
         process_cost = (e("health_risk") + e("pollution") * 0.22 + e("water_pollution") * 0.18) * industry
         h_target = clamp(0.18 + self._fed() * 0.43 + fresh_care + food["diet"] * 0.06 + housing * 0.16 + clean_water + shelter
                          - self.malnutrition * 0.28 - env_cost - process_cost + self.policy("health_target") + float(p["health_offset"]), 0.02, 0.97)
+        fab = self.fabric
+        # built_fabric.gd health_bonus: better homes (consequence_engine.gd).
+        h_target = clamp(h_target + fabric_model.K["HOME_HEALTH"] * fab.quality, 0.02, 0.97)
         self.health = lag(self.health, h_target, 0.022, days)
         stewards = self.able * self.alloc_pct["Administration"] / 100.0
         admin_cov = clamp(stewards / max(1.0, pop * 0.035), 0.0, 1.25)
         heavy = (self.alloc_pct["Food"] + self.alloc_pct["Extraction"] + self.alloc_pct["Construction"]) / 100.0
         work_strain = clamp(heavy, 0.0, 1.0)
         coh_target = clamp(0.24 + self.food_security * 0.26 + housing * 0.15 + admin_cov * 0.20 + e("state_capacity") * 0.08 + e("cohesion") * 0.10
-                           + (1.0 - work_strain) * 0.08 + self.policy("cohesion_target") + float(p["cohesion_offset"]), 0.08, 0.96)
+                           + (1.0 - work_strain) * 0.08 + self.policy("cohesion_target") + float(p["cohesion_offset"])
+                           + fabric_model.K["HOME_COHESION"] * fab.quality + fabric_model.K["BEAUTY_COHESION"] * fab.beauty_r, 0.08, 0.96)
         self.cohesion = lag(self.cohesion, coh_target, 0.014, days)
         observers = self.workers("Knowledge")
         inquiry = keepers_asked(self.s_research) if PARITY else sum(float(v) for v in self.s_research.values())
@@ -1883,6 +1922,7 @@ class Surrogate:
         self.material = lag(self.material, mat_target, 0.012, days)
         carriers = self.able * self.alloc_pct["Logistics"] / 100.0
         log_target = clamp(0.05 + carriers / max(1.0, pop * 0.08) * 0.55 + self.material * 0.18 + e("haul_capacity") * 0.18 + e("route_speed") * 0.12, 0.03, 0.95)
+        log_target = clamp(log_target + fabric_model.K["ROAD_LOGISTICS"] * fab.road + fabric_model.K["STOREHOUSE_LOGISTICS"] * fab.works_on("storehouses"), 0.03, 0.95)
         self.logistics = lag(self.logistics, log_target, 0.016, days)
         guards = self.able * self.alloc_pct["Defense"] / 100.0
         sec_target = clamp(0.10 + guards / max(1.0, pop * 0.05) * 0.42 + self.cohesion * 0.24 + self.logistics * 0.12 + e("warfare_readiness") * 0.14, 0.04, 0.96)
@@ -1920,6 +1960,9 @@ class Surrogate:
                      # disaster_risk - mine_safety); about 1 in the calibration runs.
                      # research_3000: x the adult modern factor (occupational safety, trauma care).
                      "Other": float(p["other_mortality"]) * max(0.15, 1.0 + e("disaster_risk") - e("mine_safety")) * self._modern_adult}
+        # built_fabric.gd: better homes keep out cold, wet and sickness.
+        mortality["Exposure"] *= 1.0 - fabric_model.K["HOME_EXPOSURE"] * fab.quality
+        mortality["Illness"] *= 1.0 - fabric_model.K["HOME_ILLNESS"] * fab.quality
         if intake < 0.98 or self.malnutrition > 0.05:
             ramp = clamp((self.shortage_days - 5.0) / 45.0, 0.0, 1.0)
             mortality["Hunger"] = max(0.0, 1.0 - intake) * (0.08 + ramp * 0.90) + self.malnutrition * 0.42
@@ -2499,6 +2542,7 @@ class Surrogate:
         many = clamp((makers / max(1.0, self.population) - GOODS_X["MAKERS_START"]) / max(1e-9, GOODS_X["MAKERS_FULL"] - GOODS_X["MAKERS_START"]), 0.0, 1.0)
         pace = clamp(float(getattr(self, "labor_eff", GOODS_X["REFERENCE_EFFICIENCY"])), 0.2, 1.6) if GOODS_X["SURPLUS_PER_HEAD"] > 0 else 1.0
         rate = GOODS_K["BASE_RATE"] * output * pace * (1.0 + GOODS_X["SPECIALIZATION"] * many)
+        rate *= self.fabric.making()   # built_fabric.gd making_factor (civilian_goods.gd)
         # weapons_stock.gd make: arms first while the watch lacks them (ARMS_SHARE of
         # the makers, the whole day); a set wears at the store's mineral rate.
         self.arms *= (1.0 - ARMS_WEAR_DAY) ** days
@@ -2943,6 +2987,7 @@ class Surrogate:
             self._allocate_labor()
             self._monthly(year)
             self._people_first(MONTH)
+            self._fabric_month(year)
             heavy = (self.alloc_pct["Food"] + self.alloc_pct["Extraction"] + self.alloc_pct["Construction"]) / 100.0
             overwork = clamp(clamp((heavy - 0.74) / 0.22, 0, 1) * 0.7 + (0.5 if "labor_mobilization" in self.s.policies else 0.0), 0.0, 1.0)
             care = self._care(overwork)
@@ -3033,4 +3078,5 @@ class Surrogate:
             "conception_support": e("conception_support"), "able": self.able,
             "crisis_deaths": self.crises.total_deaths if self.crises is not None else 0.0,
             "crisis_by_cause": dict(self.crises.deaths_by_cause) if self.crises is not None else {},
+            **(self.fabric.snapshot() if hasattr(self, "fabric") else {}),
         }

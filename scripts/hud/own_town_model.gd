@@ -25,11 +25,11 @@ const Labels:=preload("res://scripts/hud/city_labels.gd")
 
 ## The page's groups and their rows, in order. The foreign page's groups,
 ## plus what only we can know.
-const GROUPS:=[["THE PEOPLE",["population","life_expectancy","infant_mortality","learning"]],["STRENGTH",["garrison","fortification","damage"]],["LIVELIHOOD",["supply","water","production","logistics"]],["HOMES AND WORKS",["roofs","works","building"]]]
+const GROUPS:=[["THE PEOPLE",["population","life_expectancy","infant_mortality","learning"]],["STRENGTH",["garrison","fortification","damage"]],["LIVELIHOOD",["supply","water","production","logistics"]],["HOMES AND WORKS",["roofs","fabric","craft","works","building"]]]
 ## The dock that owns each figure: [section, sub]. "population" opens the
 ## town's own ages and families.
 const OWNERS:={"life_expectancy":["health",0,"Health"],"infant_mortality":["health",0,"Health"],"learning":["inquiry",0,"Research"],"garrison":["military",0,"Military"],"fortification":["military",0,"Military"],"damage":["construction",0,"Buildings"],
-	"supply":["economy",0,"Food"],"water":["economy",0,"Food"],"production":["production",0,"Production"],"logistics":["economy",1,"Materials"],"roofs":["construction",0,"Buildings"],"works":["construction",1,"Buildings"],"building":["construction",1,"Buildings"]}
+	"supply":["economy",0,"Food"],"water":["economy",0,"Food"],"production":["production",0,"Production"],"logistics":["economy",1,"Materials"],"roofs":["construction",0,"Buildings"],"fabric":["construction",0,"Buildings"],"craft":["construction",0,"Buildings"],"works":["construction",1,"Buildings"],"building":["construction",1,"Buildings"]}
 ## Foreign towns drawn for comparison, most recently seen first.
 const MAX_TOWNS:=3
 ## The foreign field each of our rows is compared with.
@@ -119,7 +119,7 @@ static func facts(settlement:Dictionary,strong:Dictionary={})->Dictionary:
 		"hauling":GameState.material_metrics.get("flow_ratio",null),"goods":Goods.coverage(),
 		"condition":float(SettlementModel.city_form().get("condition",1.0)),"broken":broken_share(),
 		"completed":(GameState.settlement_completed as Array).duplicate(),"works_known":maxi(known,GameState.settlement_completed.size()),
-		"building":building,"strength":strong.duplicate()}
+		"building":building,"strength":strong.duplicate(),"fabric":preload("res://scripts/built_fabric.gd").report()}
 	return out
 
 ## The share of the town's buildings standing damaged or in ruins, from its
@@ -308,6 +308,25 @@ static func row_for(key:String,f:Dictionary)->Dictionary:
 				"own":float(mini(people,places))/float(maxi(1,people)),"capacity":true,
 				"note":"%s sleep out" % EraWords.grouped(outside) if outside>0 else "a roof for all","note_tone":"bad" if outside>0 else "good",
 				"meaning":String(f.shelter.detail)}
+		"fabric":
+			# The built fabric (built_fabric.gd): how good the homes are, the
+			# roads, beauty and work buildings, and whether they are kept.
+			var r:Dictionary=f.get("fabric",{})
+			if r.is_empty():return {}
+			var Fabric:=preload("res://scripts/built_fabric.gd")
+			var q:=float(r.quality)
+			var kept:=float(r.paid)>=0.99
+			return {"key":key,"name":"Homes and streets","value":"%d of 100 good" % roundi(q*100.0),"number":q,"own":q,"capacity":true,
+				"note":("roads %d, beauty %d" % [roundi(float(r.roads)*100.0),roundi(float(r.beauty)*100.0)]) if kept else "falling into disrepair","note_tone":"good" if kept else "bad",
+				"meaning":"Homes %d of 100 good (the best they build now: %s), roads %d of 100, fine works %d of 100, work buildings %d of 100. Unkept, homes fall a grade, roads roughen and fine works weather." % [roundi(q*100.0),String(Fabric.GRADE_WORDS[int(r.best)]),roundi(float(r.roads)*100.0),roundi(float(r.beauty)*100.0),roundi(float(r.cover)*100.0)]}
+		"craft":
+			var r:Dictionary=f.get("fabric",{})
+			if r.is_empty():return {}
+			var Fabric:=preload("res://scripts/built_fabric.gd")
+			var level:=float(r.craft)
+			return {"key":key,"name":"Builders' craft","value":"%s of %d" % [Fabric._one(level),roundi(Fabric.CRAFT_MAX)],"number":level,"own":level/Fabric.CRAFT_MAX,"capacity":true,
+				"note":"settles at %s" % Fabric._one(float(r.craft_settles)),"note_tone":"good" if float(r.craft_settles)>=level else "bad",
+				"meaning":"The builders' living experience: it lets them raise better homes and walls, learn building ways faster and give a great work better odds. More builders raise it; it fades as old builders die."}
 		"works":
 			var built:=(f.completed as Array).size()
 			var known:=maxi(built,int(f.works_known))

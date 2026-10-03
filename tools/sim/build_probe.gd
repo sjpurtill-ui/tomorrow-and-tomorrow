@@ -41,4 +41,15 @@ func _row(year:int,tally:Dictionary,start:int)->Dictionary:
 		"health":snappedf(state.population_health,0.001),"cohesion":snappedf(float(state.simulation_metrics.get("cohesion",0.0)),0.001),
 		"standing_splendor":snappedf(float(state.simulation_metrics.get("standing_splendor",0.0)),0.001),"standing_might":snappedf(float(state.simulation_metrics.get("standing_might",0.0)),0.001),
 		"standing_awe":snappedf(float(state.simulation_metrics.get("standing_awe",0.0)),0.001),"standing_allure":snappedf(float(state.simulation_metrics.get("standing_allure",0.0)),0.001),
-		"known":state.known_discoveries.size(),"seconds":(Time.get_ticks_msec()-start)/1000.0}
+		"fabric":_fabric(),"known":state.known_discoveries.size(),"seconds":(Time.get_ticks_msec()-start)/1000.0}
+
+func _fabric()->Dictionary:
+	var F:=preload("res://scripts/built_fabric.gd")
+	var f:Dictionary=WorldSimulation.state.built_fabric
+	if f.is_empty():return {}
+	var homes:Array=[]
+	for v in (f.homes as Array):homes.append(snappedf(float(v),0.001))
+	var spent:Dictionary={}
+	for k in (f.get("spent",{}) as Dictionary):spent[k]=snappedf(float(f.spent[k]),0.1)
+	return {"homes":homes,"quality":snappedf(F.quality(),0.001),"roads":snappedf(F.roads(),0.001),"beauty":snappedf(F.beauty(),0.001),"cover":snappedf(float((f.effects as Dictionary).get("cover",0.0)),0.001),
+		"craft":snappedf(F.craft(),0.01),"craft_settles":snappedf(F.craft_settles(),0.01),"paid":snappedf(float(f.get("paid",1.0)),0.01),"spent":spent,"idle":snappedf(float(f.get("idle",0.0)),0.1),"caps":F.grade_caps()}

@@ -19,6 +19,7 @@ const LEAN_TO_PLACES:=90
 ## the housing ledger in GameState.reset_for_new_world. Read only to explain
 ## saves made before the carried places were recorded.
 const STARTING_SHELTER_PLACES:=150
+const Fabric:=preload("res://scripts/built_fabric.gd")
 
 static func _settlement_definitions() -> Array[Dictionary]:
 	return [
@@ -121,11 +122,16 @@ static func daily_work()->float:
 	var carriers:=float(WorldSimulation.state.population_allocations.get("Logistics",0))
 	var makers:=float(WorldSimulation.state.population_allocations.get("Crafting",0))
 	# Crews the realm's purse pays work faster (realm_purse.gd crews_bonus).
-	return (builders/8.0)*(.82+carriers/30.0+makers/50.0)*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate")+WorldSimulation.consequences.policy_effect("construction_rate")+preload("res://scripts/realm_purse.gd").crews_bonus())
+	return (builders/8.0)*(.82+carriers/30.0+makers/50.0)*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+WorldSimulation.discovery.effect("construction_rate")+WorldSimulation.progression.effect("construction_rate")+WorldSimulation.consequences.policy_effect("construction_rate")+preload("res://scripts/realm_purse.gd").crews_bonus())*craft_pace()
+
+## Skilled builders work faster: x (1 + CRAFT_WORK a level of the builders'
+## craft, built_fabric.gd).
+static func craft_pace()->float:
+	return 1.0+Fabric.CRAFT_WORK*Fabric.craft()
 
 ## A day's work on new homes at today's crews (HOUSING_BATCH_WORK a batch).
 static func housing_work_per_day()->float:
-	return float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+preload("res://scripts/realm_purse.gd").crews_bonus())
+	return float(WorldSimulation.state.effective_workers("Construction"))/8.0*float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",.72))*(1.0+preload("res://scripts/realm_purse.gd").crews_bonus())*craft_pace()
 
 ## The places one batch of new homes adds, with what the people know of
 ## building (housing_output: framing, room division; the Framed Hall's share
@@ -197,6 +203,9 @@ static func process_day()->Array[Dictionary]:
 	var events:Array[Dictionary]=[]
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:return events
 	record_carried_places()
+	# The town's built fabric: its builders' upkeep and improvements, every
+	# few days (built_fabric.gd).
+	Fabric.process_day()
 	if housing_under_way():
 		# A multi-day step (day_span.gd) covers `span` days of building.
 		WorldSimulation.state.housing_progress+=housing_work_per_day()*WorldSimulation.span

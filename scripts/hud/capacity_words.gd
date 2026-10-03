@@ -39,6 +39,8 @@ const PARTS:={
 	"stewards":["Stewards","More stewards","Fewer stewards"],
 	"works":["Public works","New public works","Public works lost"],
 	"treasures":["Treasured works","More treasured works","Fewer treasured works"],
+	"homes_quality":["How good our homes are","Better homes","Homes falling into disrepair"],
+	"roads":["Roads and paths","Better roads","Roads roughening"],
 	"officials":["Office holders","Office holders helping more","Office holders helping less"],
 	"values":["What we value","What we value helping more","What we value helping less"],
 	"limit":["What our age allows","Our age allows more","Held back by our age"],

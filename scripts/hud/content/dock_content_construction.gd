@@ -6,6 +6,8 @@ const Upkeep:=preload("res://scripts/upkeep_warnings.gd")
 const Tasks:=preload("res://scripts/manual_work.gd")
 ## What each building does, in the engine's numbers.
 const Impact:=preload("res://scripts/building_impact.gd")
+## The town's built fabric: homes by grade, roads, beauty, works, craft.
+const Fabric:=preload("res://scripts/built_fabric.gd")
 var selected_project:=""
 var history_filter:=""
 var history:RefCounted
@@ -58,7 +60,7 @@ func _city_tab()->Dictionary:
 	going_up.append(_new_homes_row(housing,crews))
 	return {"brief":_now_brief(city,project,housing,crews),"blocks":[
 		{"type":"town_works","heading":town,"note":_count(int(crews.heads),"builder"),"cards":going_up},
-		{"type":"town_works","heading":"The town now","note":_count(int(housing.people),"person","people"),"cards":[_home_row(housing),_builders_row(crews),_condition_row(),_era_row(crews),_workshops_row()]},
+		{"type":"town_works","heading":"The town now","note":_count(int(housing.people),"person","people"),"cards":[_home_row(housing),_builders_row(crews),_condition_row(),_era_row(crews),_workshops_row()]}]+_fabric_blocks()+[
 		{"type":"impact_lines","heading":"What the buildings do","compact":true,"columns":3,"lines":Impact.summary()},
 		{"type":"impact_lines","heading":"What the homes do","note":"%s places a person" % Impact._two(float(homes.ratio)),"compact":true,"columns":3,"lines":homes.lines},
 		{"type":"actions","items":[
@@ -710,3 +712,83 @@ func _filter_history(id:String)->void:
 	history_filter=id
 	if history!=null:history.pages[0]=0
 	hud.request_immediate_dock_refresh()
+
+
+# --------------------------------------------------------------------------
+# The built fabric (built_fabric.gd): what the builders have made of the town
+# --------------------------------------------------------------------------
+
+## Dwelling grades, plainest to best, as the homes bar paints them.
+const GRADE_INKS:=["#a08a6c","#8f7a52","#8a6a3e","#9b6a4a","#6f7378"]
+
+## The town's fabric at a glance: the homes by grade (one bar), its roads,
+## beauty, work buildings, walls and stone, the builders' craft and upkeep
+## (bars), what it does now and what ten more builders would buy, every
+## number the engine's own (built_fabric.gd report, effect_lines,
+## plus_lines). Says plainly when the builders are too few to keep it all.
+func _fabric_blocks()->Array:
+	if not GameState.settlement_site_committed:return []
+	var r:Dictionary=Fabric.report()
+	var homes:Array=r.homes
+	var items:Array=[]
+	for g in Fabric.GRADES.size():
+		var share:=float(homes[g])
+		if share<0.005:continue
+		items.append({"share":share,"value":"%d%%" % roundi(share*100.0),"label":String(Fabric.GRADE_SHORT[g]),"color":Color(String(GRADE_INKS[g])),
+			"tip":"%d of every 100 places are %s." % [roundi(share*100.0),String(Fabric.GRADE_WORDS[g])]})
+	var best:=int(r.best)
+	var caps:Array=r.caps
+	var legend:="Homes %d of 100 good. The best they can build now: %s, at most %d in 100 of the places at the builders' craft %s." % [roundi(float(r.quality)*100.0),String(Fabric.GRADE_WORDS[best]),roundi(float(caps[best])*100.0),Fabric._one(float(r.craft))]
+	if best<Fabric.GRADES.size()-1:
+		var g:=best+1
+		legend+=" %s need %s known and craft %s." % [String(Fabric.GRADE_WORDS[g]).capitalize(),_any_words(Fabric.GRADE_KNOW[g]),Fabric._one(float(Fabric.GRADE_CRAFT[g]))]
+	legend+=" New places go up plain; builders raise them as they have hands, and unkept homes fall a grade."
+	var declining:=Fabric.decline_words(r)
+	var road_words:=String(Fabric.ROAD_WORDS[int(r.road_kind)])
+	var d:Dictionary=r.defense
+	var bars:Array=[
+		{"name":"Homes","ratio":float(r.quality),"value":"%d/100" % roundi(float(r.quality)*100.0),"color":Tokens.GREEN,"tip":"The places' mean quality: windbreaks 0, huts 30, timber 55, mudbrick 75, stone 100."},
+		{"name":"Roads","ratio":float(r.roads),"value":"%d/%d" % [roundi(float(r.roads)*100.0),roundi(float(r.road_cap)*100.0)],"color":Tokens.TEAL,"tip":"The road index: %s are the best the people know (up to %d). Roads wear %d in 100 a year unkept." % [road_words,roundi(float(r.road_cap)*100.0),roundi(Fabric.ROAD_WEAR*100.0)]},
+		{"name":"Beauty","ratio":float(r.beauty),"value":"%d/100" % roundi(float(r.beauty)*100.0),"color":Tokens.GOLD,"tip":"Fine works a person: carved posts, plazas, painted halls, monuments. Each builder-day of fine work is worth %s with what the people know of the arts. Unkept, they weather %d in 100 a year." % [Fabric._one(float(r.artistry)),roundi(Fabric.BEAUTY_WEAR*100.0)]},
+		{"name":"Work buildings","ratio":float(r.cover),"value":"%d/100" % roundi(float(r.cover)*100.0),"color":Tokens.BLUE,"tip":"How fully workshops, granaries, kilns, storehouses and water works serve the town."},
+		{"name":"Craft","ratio":float(r.craft)/Fabric.CRAFT_MAX,"value":"%s of %d" % [Fabric._one(float(r.craft)),roundi(Fabric.CRAFT_MAX)],"color":Tokens.VIOLET,"tip":"The builders' living experience. At today's builders it settles at %s over a working life; it fades as the old builders die." % Fabric._one(float(r.craft_settles))},
+		{"name":"Upkeep kept","ratio":float(r.paid),"value":"%d%%" % roundi(float(r.paid)*100.0),"color":Tokens.GREEN if float(r.paid)>=0.99 else Tokens.RED,"tip":("Every home, road, work building and fine work is kept." if declining.is_empty() else "Too few builders: "+", ".join(declining)+".")}]
+	if bool(r.home):
+		var bonus:=float(d.get("defense_bonus",0.0))
+		bars.insert(4,{"name":"Walls and stone","ratio":clampf(bonus/Fabric.BASTION_BONUS,0.0,1.0),"value":"+%d%%" % roundi(bonus*100.0),"color":Tokens.RED,"tip":"%s at %d%% repair, and %d in 100 of the places stone." % [String(d.get("short","Open ground")),roundi(float(d.get("integrity",1.0))*100.0),roundi(float(r.stone)*100.0)]})
+	var spent:Dictionary=r.spent
+	var note:="%s free builders" % Fabric._one(float(r.free_builders))
+	var blocks:Array=[
+		{"type":"segments","heading":"Homes by kind","note":"%d places" % int(r.places),"items":items,"legend":legend},
+		{"type":"bars","heading":"The built fabric","note":note,"items":bars}]
+	if not declining.is_empty():
+		blocks.append({"type":"impact_lines","heading":"Falling into disrepair","compact":false,"lines":[{"label":"Too few builders","value":"%d%% kept" % roundi(float(r.paid)*100.0),
+			"words":"The builders keep homes first, then work buildings, roads and fine works. Now %s. More builders, or fewer works to keep." % ", ".join(declining),"tone":"bad"}]})
+	if float(spent.get("upkeep",0.0))+float(spent.get("homes",0.0))+float(spent.get("roads",0.0))+float(spent.get("works",0.0))+float(spent.get("beauty",0.0))>0.0:
+		blocks.append({"type":"segments","heading":"Where the builders' days go","note":"last %d days" % int(r.days),"items":_spent_items(spent,float(r.idle)),"legend":"Upkeep first, then homes, roads, work buildings and fine works by their share; what one cannot use goes to fine works. Idle: no materials to work with."})
+	blocks.append({"type":"impact_lines","heading":"What the built fabric does","compact":true,"columns":3,"lines":Fabric.effect_lines(r)})
+	blocks.append({"type":"impact_lines","heading":"What ten more builders would buy now","compact":true,"columns":3,"lines":Fabric.plus_lines(10.0)})
+	return blocks
+
+func _spent_items(spent:Dictionary,idle:float)->Array:
+	var out:Array=[]
+	var parts:=[["upkeep","upkeep",Tokens.MUTED],["homes","homes",Tokens.GREEN],["roads","roads",Tokens.TEAL],["works","work buildings",Tokens.BLUE],["beauty","fine works",Tokens.GOLD],["walls","walls",Tokens.RED]]
+	var total:=idle
+	for part in parts:total+=float(spent.get(String(part[0]),0.0))
+	if total<=0.0:return out
+	for part in parts:
+		var days:=float(spent.get(String(part[0]),0.0))
+		if days/total<0.02:continue
+		out.append({"share":days/total,"value":"%d" % roundi(days),"label":String(part[1]),"color":part[2],"tip":"%d builder-days on %s." % [roundi(days),String(part[1])]})
+	if idle/total>=0.02:out.append({"share":idle/total,"value":"%d" % roundi(idle),"label":"idle","color":Tokens.RED,"tip":"%d builder-days with no timber, clay or stone to work." % roundi(idle)})
+	return out
+
+## "framed construction or timber post-beam connections", from discovery ids.
+func _any_words(ids:Array)->String:
+	var names:PackedStringArray=[]
+	for id in ids:names.append(String(_discovery_name(String(id))))
+	return " or ".join(names) if not names.is_empty() else "nothing"
+
+func _discovery_name(id:String)->String:
+	var entry:Dictionary=WorldSimulation.discovery.discovery_definition(id) if WorldSimulation.discovery!=null else {}
+	return String(entry.get("name",id.replace("_"," "))).to_lower()
