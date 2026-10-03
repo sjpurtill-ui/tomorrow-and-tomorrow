@@ -136,13 +136,7 @@
    "caption": "Children's question circles (Year 35)",
    "style": "paper_gouache"
   },
-  "circle_dances": {
-   "path": "res://assets/ui/research/discovery-600/circle_dances.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
-   "tile_index": 7,
-   "caption": "Circle dances at gatherings (Year 8)",
-   "style": "silhouette_ochre"
-  },
+  "circle_dances": {"path": "res://assets/ui/research/subjects/circle_dances-v1.png", "style": "culture: flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric", "focus": [0.5, 0.54]},
   "city_laments": {
    "path": "res://assets/ui/research/discovery-600/city_laments.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_35_59 PM.png",
@@ -641,13 +635,7 @@
    "caption": "New-year festival of the god's renewal of the land (Year 320)",
    "style": "silhouette_ochre"
   },
-  "novice_task_shadowing": {
-   "path": "res://assets/ui/research/discovery-600/novice_task_shadowing.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 01_17_16 PM.png",
-   "tile_index": 4,
-   "caption": "Novices shadow an experienced hand (Year 8)",
-   "style": "paper_gouache"
-  },
+  "novice_task_shadowing": {"path": "res://assets/ui/research/subjects/novice_task_shadowing-v1.png", "style": "knowledge: blue-black ink crosshatching with muted lapis on parchment", "focus": [0.5, 0.5]},
   "ochre_grave_goods": {
    "path": "res://assets/ui/research/discovery-600/ochre_grave_goods.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 03_11_20 PM.png",

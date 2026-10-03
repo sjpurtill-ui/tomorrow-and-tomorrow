@@ -158,5 +158,9 @@
   "hafted_tools": "res://assets/ui/research/subjects/hafted_tools-v2.png",
   "seed_selection": "res://assets/ui/research/subjects/seed_selection-v2.png",
   "hide_floats": "res://assets/ui/research/subjects/hide_floats-v2.png",
-  "hafted_weapons": "res://assets/ui/research/subjects/hafted_weapons-v2.png"
+  "hafted_weapons": "res://assets/ui/research/subjects/hafted_weapons-v2.png",
+  "herbal_classification": "res://assets/ui/research/subjects/herbal_classification-v3.png",
+  "basketry": "res://assets/ui/research/subjects/basketry-v2.png",
+  "friction_fire_ignition": "res://assets/ui/research/subjects/friction_fire_ignition-v1.png",
+  "hearth_roasting_control": "res://assets/ui/research/subjects/hearth_roasting_control-v1.png"
 }

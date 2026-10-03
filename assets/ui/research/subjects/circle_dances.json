@@ -1,0 +1,21 @@
+{
+  "id": "circle_dances",
+  "line": "culture",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/bone_flutes_drums-v1.png",
+  "medium": "flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric",
+  "prompt": "Create a NEW Tomorrow and Tomorrow year-eight research painting. Reference controls wide approximately 2055x765 proportions and flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric. Six smaller fully hide-clothed adults form low broad oval ring holding neighbours hands while gently stepping together around small hearth; distinct feet, intelligible joined hands. No modern costume or ceremony borrowed from specific living culture. Portable wild camp, rough irregular hide garments. Complete heads, hands and mechanism within central60percentheight with smaller people for actual3.37:1 crop. Full-bleed wide mature handmade2D painting. No text, labels, border, photography, CGI, cinematic light, pottery, permanent houses, cropfields or domesticated livestock. Replace subject while retaining field medium and width.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-46b969d8-2d44-46ad-84bf-469c73ecd7a1.png",
+  "version": 1,
+  "focus": [
+    0.5,
+    0.54
+  ],
+  "game_year": 8,
+  "replace_art600": true,
+  "replace_first300": false,
+  "binding_style": "culture: flat interlocking indigo rose gold violet tapestry-inspired PAINTING, not fabric",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/circle_dances-v1.png",
+  "sha256": "3017e8f362e76f38b05d016b844926b9fd57fe27ff62d0e80cafcf00bc017118"
+}

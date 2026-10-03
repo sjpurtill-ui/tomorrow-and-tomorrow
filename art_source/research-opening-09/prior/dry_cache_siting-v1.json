@@ -1,0 +1,12 @@
+{
+  "id": "dry_cache_siting",
+  "line": "logistics",
+  "game_year": 8,
+  "approx_historical_year": -4947,
+  "prompt": "Adults select a raised dry cache site above damp marshy ground in a Neolithic landscape; mature travel watercolor on paper.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-a27ac3f9-eec6-4736-b7a2-c1542f01bf17.png",
+  "asset": "res://assets/ui/research/subjects/dry_cache_siting-v1.png",
+  "sha256": "d5d6a02ed8010f82e8c6267418c2efc9cfb9411b5c93a020dda7f64337902b19",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; raised dry land and marsh context clear; crop reviewed."
+}

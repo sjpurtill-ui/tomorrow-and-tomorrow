@@ -1,9 +1,21 @@
 {
   "id": "basketry",
-  "prompt": "Historical-scene. One standalone finished game illustration for the specific discovery Basketry. Wide 3:2 landscape, sophisticated realistic painterly art, nuanced natural light, tactile materials, restrained ochre and teal accents. Make its unique subject instantly recognizable in a wide cropped research card, with main action in the center horizontal band. Close-up of a craftsperson weaving an unfinished reed basket, upright ribs and the over-under weave perfectly readable, hands adding one flexible reed, finished plain baskets set beside it on a mat in a riverside workshop. Soft side light across beautiful woven fiber texture. No loom, rope twisting, pottery, writing or metal tools. Neutral early human community, no national identity. Not a montage or UI screenshot. No text, labels, logos, borders, watermark, cartoon, voxel geometry or anachronistic equipment.",
-  "source": "/Users/seanpurtill/.codex/generated_images/01a07ddf-a570-7333-ac08-6cb7cdf5f898/exec-46911b61-18f2-4a5c-9256-cac2230e5fc6.png",
-  "asset": "res://assets/ui/research/subjects/basketry-v1.png",
-  "sha256": "6e82e7234934217438bbf8ef06170aead1f3b257937582d63a5aa524c4a712a7",
-  "mode": "built-in image_gen / new image",
-  "review": "pending visual audit"
+  "line": "production",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/cordage-v2.png",
+  "medium": "flat angular palette-knife copper ember soot umber painted shapes, not raised3Drelief",
+  "prompt": "Create NEW Tomorrow and Tomorrow year-eight research painting. Match supplied WIDE approximately2055x765 proportions and flat angular palette-knife copper ember soot umber painted shapes, not raised3Drelief. Adult threads two flexible reeds around upright stakes of an incomplete small basket; another coils coarse plant strands into low rounded base. Clear interlaced fibres and working hands. Basketmaking is newly available; no pottery. Rough hide garments and portable wild camp only. Complete heads, hands and subject mechanism within central60percentheight, smaller people with breathing space for actual3.37:1crop. Full bleed wide mature handmade2D art. No captions, text, border, photography, CGI, cinematiclighting or cultivatedfields. Replace reference subject, retain medium and width.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-d454357c-e360-4dc7-a8e8-f1e487bdaaf3.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 8,
+  "replace_art600": false,
+  "replace_first300": true,
+  "binding_style": "production: flat angular palette-knife copper ember soot umber painted shapes, not raised3Drelief",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/basketry-v2.png",
+  "sha256": "595f200c334b82329bf7b1efe480e79eeef1dd496dba7d477edf0004f3d61061"
 }

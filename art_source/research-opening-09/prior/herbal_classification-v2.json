@@ -1,0 +1,21 @@
+{
+  "id": "herbal_classification",
+  "line": "health",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-07/assets/ui/research/subjects/delousing-v2.png",
+  "medium": "restrained fine ink and sage celadon watercolor on cream paper",
+  "prompt": "Create NEW Tomorrow and Tomorrow early research painting. Match reference WIDE approximately2055x765 proportions and restrained fine ink and sage celadon watercolor on cream paper. Two adults compare visibly different leaf shapes in three separated piles on pale flat rocks. One holds serrated leaf, other points at rounded leaf and third spiny sprig set apart. No consumption, recipes, dosage or implied cures. An interpretive plant-sorting scene. Rough irregular hide garments and natural open camp. Whole heads hands and mechanism in central60percentheight; smallpeople breathingroomabovebelow for actual3.37:1crop. Fullbleed wide mature handmade2D painting. No text, border, labels, photography, CGI, cinematiclight, pottery or houses. Reference medium and width only, replace subject.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-db2ca320-deb7-46ee-bca6-2bfb8c5e8297.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
+  "game_year": 8,
+  "replace_art600": false,
+  "replace_first300": true,
+  "binding_style": "health: restrained fine ink and sage celadon watercolor on cream paper",
+  "review": "Full generated painting reviewed; actual card crop review pending",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/herbal_classification-v2.png",
+  "sha256": "de80fa82616d345d98044c946864d7579403f7209fbb3f057bd58e41272979ac"
+}

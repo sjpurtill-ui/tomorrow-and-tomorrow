@@ -1,0 +1,12 @@
+{
+  "id": "hazard_memory_recitation",
+  "line": "security",
+  "game_year": 8,
+  "approx_historical_year": -4947,
+  "prompt": "Elder orally recounts a remembered river hazard to younger adults beside low hearth; hand-cut woodblock print in black and ochre.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-5362e1b7-97f7-436b-87a0-e9a97853c76e.png",
+  "asset": "res://assets/ui/research/subjects/hazard_memory_recitation-v1.png",
+  "sha256": "f425f7bfea649cee30c086143927f586d2db38c5d63b52818e405eb0c11f05e7",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; oral recitation and hazardous bank clear; crop reviewed."
+}

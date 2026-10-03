@@ -1,12 +1,21 @@
 {
   "id": "elder_consultation_rites",
   "line": "institutions",
+  "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-08/assets/ui/research/subjects/witnessed_agreement_customs-v2.png",
+  "medium": "matte mineral fresco dusty plum limestone gold",
+  "prompt": "Create a NEW Tomorrow and Tomorrow year-eight research painting. Reference controls wide approximately 2055x765 proportions and matte mineral fresco dusty plum limestone gold. Two grey-haired elders seated on rough rocks listen to two adults describing alternative routes with open gestures toward distant river fork. Consultation before difficult choice, no king, throne, documents or seal. Portable wild camp, rough irregular hide garments. Complete heads, hands and mechanism within central60percentheight with smaller people for actual3.37:1 crop. Full-bleed wide mature handmade2D painting. No text, labels, border, photography, CGI, cinematic light, pottery, permanent houses, cropfields or domesticated livestock. Replace subject while retaining field medium and width.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-e4fb269d-a38c-4ea7-8432-f9e8f4d330f9.png",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.5
+  ],
   "game_year": 8,
-  "approx_historical_year": -4947,
-  "prompt": "An elder seated on stone advises adult community members on where to place shelters by river; stylized archaic civic fresco.",
-  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-4afdc4f3-bc92-4eab-9a8d-de4939a6e62c.png",
-  "asset": "res://assets/ui/research/subjects/elder_consultation_rites-v1.png",
-  "sha256": "cd6e215534700537e72446958740a2dff5c3748a937d2b47cf5a4d81706fea2b",
-  "mode": "built-in image_gen / new image",
-  "review": "Later flat fresco generation selected; rejected lifelike prior version; gesture, listeners and river visible in crop."
+  "replace_art600": false,
+  "replace_first300": false,
+  "binding_style": "institutions: matte mineral fresco dusty plum limestone gold",
+  "review": "Full original and actual wide card visually reviewed; field medium and subject mechanism readable.",
+  "mode": "built-in image_gen / reference-guided painting",
+  "asset": "res://assets/ui/research/subjects/elder_consultation_rites-v2.png",
+  "sha256": "fddaf5ee1b5945645ee2d2eb6e4764cd552d298aef7c6fa3509e04ec452712e0"
 }

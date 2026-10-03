@@ -51,8 +51,12 @@
     ]
   },
   "basketry": {
-    "path": "res://assets/ui/research/subjects/basketry-v1.png",
+    "path": "res://assets/ui/research/subjects/basketry-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -111,8 +115,12 @@
     ]
   },
   "herbal_classification": {
-    "path": "res://assets/ui/research/subjects/herbal_classification-v1.png",
+    "path": "res://assets/ui/research/subjects/herbal_classification-v3.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -5908,35 +5916,35 @@
     ]
   },
   "dry_cache_siting": {
-    "path": "res://assets/ui/research/subjects/dry_cache_siting-v1.png",
+    "path": "res://assets/ui/research/subjects/dry_cache_siting-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "elder_consultation_rites": {
-    "path": "res://assets/ui/research/subjects/elder_consultation_rites-v1.png",
+    "path": "res://assets/ui/research/subjects/elder_consultation_rites-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "hazard_memory_recitation": {
-    "path": "res://assets/ui/research/subjects/hazard_memory_recitation-v1.png",
+    "path": "res://assets/ui/research/subjects/hazard_memory_recitation-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "shared_work_signals": {
-    "path": "res://assets/ui/research/subjects/shared_work_signals-v1.png",
+    "path": "res://assets/ui/research/subjects/shared_work_signals-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "site_clearing_assessment": {
-    "path": "res://assets/ui/research/subjects/site_clearing_assessment-v1.png",
+    "path": "res://assets/ui/research/subjects/site_clearing_assessment-v2.png",
     "focus": [
       0.5,
       0.5
@@ -6188,10 +6196,10 @@
     ]
   },
   "herd_size_limits": {
-    "path": "res://assets/ui/research/subjects/herd_size_limits-v1.png",
+    "path": "res://assets/ui/research/subjects/herd_size_limits-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.39
     ]
   },
   "joint_reduction": {
@@ -9776,6 +9784,42 @@
   "bone_flutes_drums": {
     "path": "res://assets/ui/research/subjects/bone_flutes_drums-v1.png",
     "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "novice_task_shadowing": {
+    "path": "res://assets/ui/research/subjects/novice_task_shadowing-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "circle_dances": {
+    "path": "res://assets/ui/research/subjects/circle_dances-v1.png",
+    "focus": [
+      0.5,
+      0.54
+    ]
+  },
+  "friction_fire_ignition": {
+    "path": "res://assets/ui/research/subjects/friction_fire_ignition-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "hearth_roasting_control": {
+    "path": "res://assets/ui/research/subjects/hearth_roasting_control-v1.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
