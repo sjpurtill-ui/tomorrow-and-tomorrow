@@ -642,7 +642,12 @@ func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")
 	_exec.begin(self,method_id,victim_key,style)
 	_exec.finished.connect(func()->void:
 		exec_done=true
-		if is_instance_valid(_sound) and _sound.has_method("stop_act"):_sound.call("stop_act"))
+		if is_instance_valid(_sound) and _sound.has_method("stop_act"):_sound.call("stop_act")
+		# The props are gone and their scene is over; return to the surviving court.
+		_shot_until=0.0;_shot_weight=0
+		if rig!=null:rig.set("main",null)
+		_frame_all(0.6)
+		_place_caption();_reclear_bubbles())
 	exec_done=false
 	exec_method=method_id;exec_victim=victim_key
 	var who:=name_text if name_text!="" else String(person.get("name",""))
@@ -663,8 +668,6 @@ func skip_execution()->void:
 	_hush_until=_now();_event_end=_now();_event_weight=0
 	if is_instance_valid(_sound) and _sound.has_method("hush"):_sound.call("hush",false)
 	hush(0.0)
-	_shot_until=0.0
-	_frame_all(0.6)
 
 # --- The cast -------------------------------------------------------------------
 

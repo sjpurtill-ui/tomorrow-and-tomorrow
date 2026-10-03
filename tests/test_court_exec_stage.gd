@@ -244,9 +244,20 @@ func test_a_terminal_order_keeps_the_victim_until_the_execution_finishes()->void
 	await get_tree().create_timer(maxf(blow-scene.get_total_elapsed_time()-0.15,0.02)).timeout
 	assert_bool(main.leaving).is_false()
 	assert_bool(stage.exec_done).is_false()
-	await get_tree().create_timer(maxf(finish-scene.get_total_elapsed_time()+0.3,0.02)).timeout
+	assert_int(stage._shot_weight).is_equal(5)
+	assert_float(stage._shot_until).is_greater(float(stage.call("_now")))
+	await get_tree().create_timer(maxf(finish-scene.get_total_elapsed_time()-0.15,0.02)).timeout
+	var caption_before:=String(stage._caption.label.text)
+	assert_str(caption_before).is_not_empty()
+	await get_tree().create_timer(0.45).timeout
 	assert_bool(stage.exec_done).is_true()
 	assert_bool(main.leaving).is_true()
+	assert_str(stage._shot_name).is_equal("wide")
+	assert_int(stage._shot_weight).is_equal(0)
+	assert_float(stage._shot_until).is_less_equal(float(stage.call("_now")))
+	assert_str(String(stage.rig.current_shot)).is_equal("wide")
+	assert_float(float(stage.rig._duration)).is_equal_approx(0.6,0.001)
+	assert_str(String(stage._caption.label.text)).is_equal(caption_before)
 
 func test_planned_approach_matches_stride_and_restores_the_base_clip()->void:
 	if not _ready_or_skip():return
