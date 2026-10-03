@@ -148,6 +148,8 @@ static var use_sets:=true
 ## The court's modelled place (court_set_3d.gd, M) when there is one: the
 ## people stand on its marks, its camera frames them, its lights fall on them.
 var court_set:Node3D
+## The set's camera rig (M): shots, insets, the view's changes.
+var rig:Node
 ## Which mark each person holds (mark name -> cast key).
 var _marks:Dictionary={}
 var _hush_tween:Tween
@@ -365,6 +367,14 @@ func _ready()->void:
 		var made:Variant=sound.call("attach",self)
 		if made is Node:_sound=made
 	_ambience()
+	_attach_rig()
+
+## The set's rig takes the stage's lens once everyone stands in the tree.
+var _rig_attached:=false
+func _attach_rig()->void:
+	if _rig_attached or rig==null or rig==camera or court_set==null or not court_set.is_inside_tree():return
+	if rig.has_method("attach"):rig.call("attach",self,camera,court_set)
+	_rig_attached=true
 
 ## The room's own sound for this place and season (N): the beds and the
 ## room's life, from the facts.
@@ -404,7 +414,12 @@ func use_set(era_id:String,set_facts:Dictionary={})->bool:
 	if is_instance_valid(camera) and camera!=lens:camera.queue_free()
 	camera=lens
 	camera.current=true
-	camera.connect("view_changed",_on_view_changed)
+	# M's camera rig drives the set's lens (round 2); the round-1 camera was
+	# the lens itself. Shots, insets and the view's changes go through it.
+	var made_rig:Variant=court_set.get("rig")
+	rig=made_rig if made_rig is Node else camera
+	if rig.has_signal("view_changed"):rig.connect("view_changed",_on_view_changed)
+	if is_inside_tree():_attach_rig()
 	# The set's light is known once it stands in the tree.
 	court_set.ready.connect(func()->void:
 		if is_instance_valid(court_set):Figure3D.set_key_light(court_set.call("key_dir")))
@@ -434,14 +449,15 @@ func frame_cast(time:=0.0)->void:
 	# back to everyone by a newcomer or a resize.
 	if _now()<_shot_until and _shot_weight>=2 and time>0.0:return
 	_focus_key=""
-	camera.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
+	if rig==null:return
+	rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
 	var subjects:=[]
 	for key in cast_order:
 		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.role=="crowd":continue
 		subjects.append(f.spot)
 	if subjects.is_empty():subjects.append(set_point("petitioner"))
-	camera.call("wide",subjects,time)
+	rig.call("wide",subjects,time)
 
 ## Where a newcomer stands in the set: the one before the god on the
 ## petitioner's mark (an envoy on the envoy's), their company on the marks
@@ -756,7 +772,7 @@ func _set_answers(kind:String,data:Dictionary)->void:
 		"divine":
 			var action:=String(data.get("action",""))
 			if action in WRATH_ACTS:
-				if camera!=null and camera.has_method("shake"):camera.call("shake",0.6)
+				if rig!=null and rig.has_method("shake"):rig.call("shake",0.6)
 				for beast:Node3D in beasts:beast.call("on_god","wrath")
 			elif action in FAVOUR_ACTS:
 				for beast:Node3D in beasts:beast.call("on_god","favour")
@@ -896,7 +912,7 @@ func _style_bubble(who:String,args:Dictionary)->void:
 ## The room's own life: the director's loops of idle business, each seeded,
 ## driven by one quarter-second timer (nothing per frame), paused while hushed.
 func start_ambient()->void:
-	_glances()
+	if is_inside_tree():_glances()
 	if director==null or not director.has_method("ambient") or not is_inside_tree():return
 	var specs:Variant=director.call("ambient",cast_list(),facts,hash("%s|ambient" % audience_key))
 	_ambient.clear()
@@ -923,7 +939,7 @@ func _glances()->void:
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null and f.body3d!=null and not f.leaving and f.body3d.is_inside_tree():heads.append([key,f.body3d.head_top()])
-	var fire:=set_point("fire") if court_set!=null else Vector3.ZERO
+	var fire:=set_point("fire") if court_set!=null and court_set.is_inside_tree() else Vector3.ZERO
 	for row:Array in heads:
 		var f:=figure(String(row[0]))
 		var near:=heads.filter(func(o:Array)->bool:return String(o[0])!=String(row[0]))
@@ -1113,7 +1129,7 @@ func hush(seconds:float,dim:=false)->void:
 ## A shot of the director's on the set's camera: wide, two_shot (a, b),
 ## push_in (target), reaction (target), shake (strength), home.
 func shot(name:String,args:Dictionary={})->void:
-	if court_set==null or camera==null:
+	if court_set==null or rig==null:
 		if camera_rig!=null and camera_rig.has_method("shot"):camera_rig.call("shot",name,args)
 		return
 	# A lighter event does not cut a weightier event's shot short (a shake
@@ -1127,15 +1143,15 @@ func shot(name:String,args:Dictionary={})->void:
 	var target:=figure(String(args.get("target","")))
 	var body:Node3D=target.body3d if target!=null and target.body3d!=null else null
 	match name:
-		"wide","home":camera.call("wide",[],float(args.get("time",0.9)))
+		"wide","home":rig.call("wide",[],float(args.get("time",0.9)))
 		"two_shot":
 			var a:=figure(String(args.get("a","")));var b:=figure(String(args.get("b","")))
-			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:camera.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
+			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
-			if body!=null:camera.call("push_in",body,float(args.get("seconds",2.4)))
+			if body!=null:rig.call("push_in",body,float(args.get("seconds",2.4)))
 		"reaction":
-			if body!=null:camera.call("reaction",body,float(args.get("time",0.0)))
-		"shake":camera.call("shake",float(args.get("strength",0.35)))
+			if body!=null:rig.call("reaction",body,float(args.get("time",0.0)))
+		"shake":rig.call("shake",float(args.get("strength",0.35)))
 
 ## Someone's mood shows on their face and in the set of their head.
 func set_mood(key:String,mood:String)->void:
@@ -1370,7 +1386,9 @@ func _layout_set(animate:bool)->void:
 
 ## Is the set's camera on everyone (not pushed in on someone)?
 func _wide_now()->bool:
-	return camera==null or String(camera.get("shot")) in ["wide","still",""]
+	if rig==null:return true
+	var now:Variant=rig.get("current_shot") if rig.get("current_shot")!=null else rig.get("shot")
+	return now==null or String(now) in ["wide","still",""]
 
 ## Which name plates show in the modelled court: the one before the god's,
 ## and the one speaking now.
@@ -1492,7 +1510,7 @@ func settle()->void:
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null:f.finish_moves()
-	if court_set!=null and camera!=null and camera.has_method("settle"):camera.call("settle")
+	if court_set!=null and rig!=null and rig.has_method("settle"):rig.call("settle")
 	for layer in [bubble_layer,god_layer,caption_layer]:
 		for child in (layer as Control).get_children():
 			var item:=child as Control
