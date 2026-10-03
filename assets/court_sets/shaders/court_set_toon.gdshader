@@ -44,6 +44,10 @@ uniform float rim_amount = 0.0;
 uniform float snow = 0.0;
 uniform vec3 fire_pos = vec3(0.0, 0.0, 0.0);
 uniform float dry = 0.0;
+// a gust (the god's wrath) moves the hides: they billow along the wind,
+// more toward their tops, as a stretched skin does between its stakes
+uniform float gust = 0.0;
+uniform vec3 wind = vec3(1.0, 0.0, 0.3);
 
 varying vec4 v_col;
 varying vec3 v_world;
@@ -51,6 +55,13 @@ varying vec3 v_world;
 void vertex() {
 	v_col = COLOR;
 	v_world = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	if (gust > 0.0) {
+		float lift = smoothstep(0.15, 1.5, v_world.y);
+		float flap = 0.55 + 0.45 * sin(TIME * 9.0 + v_world.x * 3.1 + v_world.z * 2.3);
+		vec3 d = wind * gust * 0.09 * lift * flap;
+		VERTEX += inverse(mat3(MODEL_MATRIX)) * d;
+		v_world += d;
+	}
 }
 
 float hash3(vec3 p) {

@@ -77,6 +77,12 @@ const SHOTS:=[
 	{"tag":"goat-startle","era":"elders_circle","facts":{"food":0.8,"tier":1,"era_tags":["pottery","farming","dairy"]},"cast":"band","camera":"goat","clip":"startle","at":0.12},
 	{"tag":"shelter-summer-spoil","era":"elders_circle","facts":{"food":0.95,"tier":1,"era_tags":["pottery","farming"],"season":"summer"},"cast":"band","camera":"rack"},
 	{"tag":"fire-hull","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","ink":"hull"},
+	{"tag":"god-fire-speaks","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","god":"speaks"},
+	{"tag":"god-fire-wrath","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","god":"wrath"},
+	{"tag":"god-fire-favour","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"band","camera":"wide","god":"favour"},
+	{"tag":"god-hall-speaks","era":"chiefs_hall","facts":{"food":0.85,"tier":1,"era_tags":["pottery","weaving"]},"cast":"hall","camera":"wide","god":"speaks"},
+	{"tag":"god-hall-wrath","era":"chiefs_hall","facts":{"food":0.85,"tier":1,"era_tags":["pottery","weaving"]},"cast":"hall","camera":"wide","god":"wrath"},
+	{"tag":"god-hall-favour","era":"chiefs_hall","facts":{"food":0.85,"tier":1,"era_tags":["pottery","weaving"]},"cast":"hall","camera":"wide","god":"favour"},
 	{"tag":"dogsheet","era":"hearth_council","facts":{"food":0.75,"tier":0,"era_tags":[]},"cast":"none","camera":"dogsheet"},
 ]
 const DOG_CLIPS:=["idle","sniff","walk","trot","sit_idle","scratch","lie_idle","cower_idle","tilt","bark","grab","wag"]
@@ -115,6 +121,8 @@ func _ready()->void:
 		_fail("no court sets under %s" % CourtSet.DIR)
 	elif only=="clip":
 		if capture:await _clip()
+	elif only=="godclip":
+		if capture:await _god_clip()
 	elif only=="goatclip":
 		if capture:await _goat_clip()
 	elif only=="perf":
@@ -278,6 +286,13 @@ func _shot(spec:Dictionary)->void:
 				beast.call("play",clip_name,0.0,0.3)
 				index+=1
 			rig.call("frame_points",PackedVector3Array([Vector3(-2.6,0,5.1),Vector3(2.6,0,5.1),Vector3(-2.6,0.75,2.3),Vector3(2.6,0.75,2.3),Vector3(-2.6,0,1.9),Vector3(2.6,0,1.9)]),8.0,-22.0)
+	if spec.has("god"):
+		court.call("god_light",bodies.get("petitioner"),String(spec.god),0.0,0.0)
+		if String(spec.god)=="wrath":
+			var p:Node3D=bodies.get("petitioner")
+			if p!=null:p.call("play","kneel",0.0,5.0)
+			var dog:Node3D=court.call("animal","dog")
+			if dog!=null:dog.call("cower",30.0)
 	for i in 40:await get_tree().process_frame
 	if capture:
 		var image:=view.get_texture().get_image()
@@ -291,6 +306,49 @@ func _shot(spec:Dictionary)->void:
 func _check_marks(court:Node3D,tag:String)->void:
 	for needed in ["throne_gaze","petitioner","fire","door","officials_0","crowd_0","envoy_0","animal_0"]:
 		if not court.call("has_mark",needed):_fail("%s: no mark %s" % [tag,needed])
+
+## The god's wrath in the court's strip, at a fixed rate (8 s): the room; the
+## god speaks to the petitioner (gold from the sky, the camera pushes in);
+## wrath lands (cold light, a jolt, the fire gutters, the hides and the smoke
+## are thrown aside, the petitioner goes down, the dog cowers); the hush; the
+## light eases back and the camera returns to the room.
+func _god_clip()->void:
+	var spec:={"tag":"godclip","era":"hearth_council","facts":{"food":0.7,"tier":0,"era_tags":[]},"cast":"band","size":STRIP,"insets":[40,40]}
+	var made:=await _stage(spec)
+	var view:SubViewport=made[0];var court:Node3D=made[1];var bodies:Dictionary=made[2]
+	var rig:Node=court.get("rig")
+	var dog:Node3D=court.call("animal","dog")
+	var p:Node3D=bodies.get("petitioner")
+	if dog!=null:
+		dog.call("hold",30.0)
+		var spot:Marker3D=court.call("mark","animal_0")
+		dog.position=spot.position;dog.rotation.y=deg_to_rad(-35.0)
+		dog.call("play","sit_idle",0.0,0.4)
+	var dir:=out_dir+"godclip/"
+	DirAccess.make_dir_recursive_absolute(dir)
+	for f in DirAccess.get_files_at(dir):DirAccess.remove_absolute(dir+f)
+	for frame in 192:
+		match frame:
+			24:
+				court.call("god_light",p,"speaks",0.0,1.2)
+				rig.call("push_in",p,3.0)
+				if dog!=null:dog.call("on_god","speaks")
+			96:
+				court.call("god_light",p,"wrath",0.0,0.25)
+				rig.call("shake",0.8)
+				if p!=null:p.call("play","kneel",0.15)
+				for key in ["officials_2","officials_3"]:
+					var o:Node3D=bodies.get(key)
+					if o!=null:o.call("play","bow",0.25)
+				if dog!=null:dog.call("cower",6.0)
+			160:
+				court.call("god_light",null,"off",0.0,1.4)
+				rig.call("wide",[],1.4)
+		await get_tree().process_frame
+		view.get_texture().get_image().save_png(dir+"frame_%03d.png" % frame)
+	print("CLIP ",dir)
+	view.queue_free()
+	await _frames(2)
 
 ## The goat at the god's wrath: it is grazing by the fire when the wrath
 ## lands, jumps on the spot and stands there staring (4 s at a fixed rate).
