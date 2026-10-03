@@ -193,6 +193,8 @@ KNOWN_GAPS = {
     ("poor", "food_security"): "the poor site's food-labor floor surplus (GovernmentPeopleSystem._apply_food_labor_floor) is not carried into the surrogate's coarse poor-site harvest; the engine's food security runs ~0.1 higher",
     ("path_growth", "food_labor"): "first years: the engine's harvest per food worker runs ~10-15% above the surrogate's (founding traditions' food_yield, the abundant-game modifier and the gathering lever are not modelled), so its leaders need fewer on food; within tolerance from year 10",
     ("path_war", "food_labor"): "as path_growth: the first years' harvest per food worker (founding traditions, modifiers) is not modelled",
+    ("path_learning", "lines_total"): "the engine's learners put more on production questions than the surrogate's (21 against 15 of 144 in 15 years: the makers' activity signals), 15-17% off by line on one engine seed; the total is within 4%",
+    ("avg_balanced", "food_labor"): "as path_growth, on the average site: the first years' harvest per food worker (founding traditions, modifiers) is not modelled; within tolerance from year 10",
     ("*", "food_days"): "the engine's leaders hold the store near 20 days (LEAN_DAYS) while the surrogate's monthly-to-weekly re-planning keeps 28-44; food security counts only the first 20 days, so deaths, births and health are unaffected",
 }
 

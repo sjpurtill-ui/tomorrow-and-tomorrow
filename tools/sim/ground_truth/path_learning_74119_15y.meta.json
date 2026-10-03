@@ -1,12 +1,12 @@
 {
  "spec": "path_learning:74119:15",
- "commit": "9c648197eb6d57fb7fc38b78c7140d386505cf2a",
+ "commit": "5593764e4bd4d5ec87a9e03f72084051699750d3",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "41f6f346c8fa",
-  "scripts/society_model.gd": "b61ebddbf637",
+  "scripts/society_model.gd": "57748f7541e9",
   "scripts/game_state.gd": "a5ad24315aef",
   "scripts/early_life_conditions.gd": "98edd883a637",
-  "scripts/food_system.gd": "df522369720b",
+  "scripts/food_system.gd": "a0b580ac3cb2",
   "scripts/consequence_engine.gd": "9d6098ac7cfe",
   "scripts/research_600_catalog.gd": "64f4b5035937",
   "scripts/technology_eras.gd": "c0bbf4054a38",
@@ -18,10 +18,10 @@
   "scripts/civilian_goods.gd": "cf735b80d85e",
   "scripts/resource_system.gd": "57c02961ea0d",
   "scripts/weapons_stock.gd": "4add78acd046",
-  "scripts/watch_military.gd": "b9811b70a2cd",
+  "scripts/watch_military.gd": "ec1cd7d0af11",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 112.9,
+ "wall_seconds": 121.0,
  "returncode": 0,
- "generated": "2026-10-03 02:33:21"
+ "generated": "2026-10-03 03:50:52"
 }
