@@ -693,6 +693,9 @@ static func refresh_contradictions()->void:
 			match String(s.get("topic","")):
 				"strength":
 					for l in learned:
+						# Only a true report shows a word false (a pretender's own false
+						# word from among them shows nothing).
+						if bool((l as Dictionary).get("false",false)): continue
 						if String((l as Dictionary).get("civ_id",""))==civ_id and int((l as Dictionary).get("day",0))>=said_day:
 							s["found_false"]=true; s["found_by"]="our watcher's count: about %s fighters" % EraWords.grouped(_nice(float(fact(rec,"strength").get("value",0))))
 							break
@@ -1450,8 +1453,11 @@ const SEND_RE:="\\b(send (him|her|them) (back|home)|let (him|her|them) go( home)
 const HARM_RE:="\\b(flog|whip|beat|maim|torture|brand|cut|break) (him|her|them)\\b|\\b(break|cut off|take) (his|her|their) (fingers|hand|hands|ear|ears|nose)\\b"
 const TURN_RE:="\\b(turn (him|her|them)|win (him|her|them) over|convert (him|her|them)|make (him|her|them) one of us|teach (him|her|them) our ways|care for (him|her|them)|propaganda|nurse (him|her|them)|feed (him|her|them) and teach|show (him|her|them) our ways)\\b"
 const KEEP_RE:="\\b(keep (him|her|them) (under guard|bound|locked|here|prisoner)|take (him|her|them) away|lock (him|her|them) up|throw (him|her|them) in|back to (his|her|their) (cell|pit|hut)|hold (him|her|them))\\b"
-## Words aimed at others than the one before the god ("find the others and
-## kill them"): never read as their death, their keeping or their turning.
+## Others than the one before the god. A line whose object is the ambiguous
+## "them" (or "their") AFTER a mention of others ("find the others and kill
+## them") is about the others, never the prisoner's death, keeping, turning
+## or harm. A singular him or her (a name reads as him or her) always means
+## the prisoner: "kill him as a warning to the others" kills them.
 const OTHERS_RE:="\\b(the others|others|the rest|accomplices?|anyone else|whoever|all of them|every one of them|the spies|their spies|(their|his|her) (chief|ruler|people|men|kin|family|spies|friends))\\b"
 const DOUBLE_RE:="\\b(send (him|her|them) back as (our|my) (eyes|spy|agent)|spy for us|be our eyes|go back and spy)\\b"
 
@@ -1466,11 +1472,9 @@ static func read(text:String)->Dictionary:
 		if RegEx.create_from_string(SEND_RE).search(lower)!=null:
 			var kind:=classify_message(text)
 			return {"kind":"fate","option":"pr_send:"+kind,"words":text.strip_edges(),"message":kind}
-		var others:=RegEx.create_from_string(OTHERS_RE).search(lower)!=null
-		if not others:
-			if RegEx.create_from_string(EXECUTE_RE).search(lower)!=null and not lower.ends_with("?"): return {"kind":"fate","option":"pr_execute","words":text.strip_edges()}
-			if RegEx.create_from_string(TURN_RE).search(lower)!=null: return {"kind":"fate","option":"pr_turn","words":text.strip_edges()}
-			if RegEx.create_from_string(KEEP_RE).search(lower)!=null: return {"kind":"fate","option":"pr_keep","words":text.strip_edges()}
+		if _aimed_at_prisoner(EXECUTE_RE,lower) and not lower.ends_with("?"): return {"kind":"fate","option":"pr_execute","words":text.strip_edges()}
+		if _aimed_at_prisoner(TURN_RE,lower): return {"kind":"fate","option":"pr_turn","words":text.strip_edges()}
+		if _aimed_at_prisoner(KEEP_RE,lower): return {"kind":"fate","option":"pr_keep","words":text.strip_edges()}
 	for topic in TOPICS:
 		if RegEx.create_from_string(String(Q_RE[topic])).search(lower)!=null:
 			var manner:="firm"
@@ -1478,6 +1482,15 @@ static func read(text:String)->Dictionary:
 			elif RegEx.create_from_string(GENTLE_RE).search(lower)!=null: manner="gentle"
 			return {"kind":"question","topic":topic,"manner":manner}
 	return {}
+
+static func _aimed_at_prisoner(pattern:String,lower:String)->bool:
+	## The pattern's act falls on the prisoner: it matches, and its object is
+	## not the ambiguous "them"/"their" following a mention of others.
+	var found:=RegEx.create_from_string(pattern).search(lower)
+	if found==null: return false
+	var plural:=RegEx.create_from_string("\\b(them|their)\\b").search(found.get_string())!=null
+	if not plural: return true
+	return RegEx.create_from_string(OTHERS_RE).search(lower.substr(0,found.get_start()))==null
 
 static func _as_pronoun(p:Dictionary,text:String)->String:
 	## "Put Gavo Tesh to death" reads as "put him to death".
@@ -1502,7 +1515,7 @@ static func hear(audience_id:String,text:String)->Dictionary:
 		a["prisoner_words"]=text.strip_edges()
 		return {"handled":true,"option":String(r.option),"words":text.strip_edges()}
 	var act:=Hall.divine_intent(audience_id,text)
-	if act=="" and RegEx.create_from_string(HARM_RE).search(_as_pronoun(p,text).to_lower())!=null and RegEx.create_from_string(NOT_RE).search(text.to_lower())==null and RegEx.create_from_string(OTHERS_RE).search(text.to_lower())==null: act="terrify"
+	if act=="" and _aimed_at_prisoner(HARM_RE,_as_pronoun(p,text).to_lower()) and RegEx.create_from_string(NOT_RE).search(text.to_lower())==null: act="terrify"
 	if act!="": return {"handled":true,"divine":act}
 	# A question the prisoner was not asked in any form they can answer, or
 	# talk: they hold their tongue, and the questions they can be asked are
@@ -1652,21 +1665,14 @@ static func _our_agent_dies(op:Dictionary,agent:Dictionary,civ_id:String)->void:
 	if source=="person" and pid>0:
 		var person:=GovernmentPeopleSystem.person_snapshot(pid)
 		if not person.is_empty() and String(person.get("status",""))=="active":
-			# Their offices pass as on a dismissal (the god did not kill them:
-			# no "sovereign order", no cost to our own legitimacy); then they
-			# are dead of the foreign ruler's hand, as who they are.
-			var office:=String(person.get("office_key",""))
-			if office!="" and office!="settlement": GovernmentPeopleSystem.remove_central_officeholder(office,"dismiss")
-			if String(GovernmentPeopleSystem.person_snapshot(pid).get("local_leader_of",""))!="":
-				GovernmentPeopleSystem.remove_settlement_leader(String(GovernmentPeopleSystem.person_snapshot(pid).local_leader_of),"dismiss")
-			for i in GovernmentPeopleSystem.people.size():
-				var rec:Dictionary=GovernmentPeopleSystem.people[i]
-				if int(rec.get("person_id",0))==pid:
-					rec["status"]="deceased"; rec["died_day"]=_day(); rec["removal_reason"]="executed_abroad"; rec["death_cause"]=reason
-					var age:=floori(float(_day()-int(rec.get("born_day",_day()-30*365)))/365.0)
-					var dead:Dictionary=GameState.register_population_deaths_by_cell([{"cohort":_cohort_of(age),"sex":String(rec.get("sex","male")),"count":1}],"put_to_death_abroad","%s was put to death by %s." % [String(rec.get("name","")),_name(civ_id)],String(rec.get("name","")))
-					done=int(dead.get("count",0))>0
-					break
+			# The government's own quiet path: dead first (no succession names
+			# them again), their offices passed on, one truthful event, and no
+			# cost to our legitimacy or cohesion: the god did not kill them.
+			var gone:Dictionary=GovernmentPeopleSystem.person_died_abroad(pid,reason)
+			if bool(gone.get("ok",false)):
+				var age:=floori(float(_day()-int(person.get("born_day",_day()-30*365)))/365.0)
+				var dead:Dictionary=GameState.register_population_deaths_by_cell([{"cohort":_cohort_of(age),"sex":String(person.get("sex","male")),"count":1}],"put_to_death_abroad","%s was put to death by %s." % [String(person.get("name","")),_name(civ_id)],String(person.get("name","")))
+				done=int(dead.get("count",0))>0
 	elif source=="figure" and String(agent.get("figure_id",""))!="":
 		HistoricalFigures.record_death(String(agent.figure_id),_day(),reason)
 	elif source=="known" and String(agent.get("known_id",""))!="":
