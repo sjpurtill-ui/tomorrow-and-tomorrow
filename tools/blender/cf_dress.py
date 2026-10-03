@@ -194,7 +194,7 @@ class Head:
         return (c[0] - 0.14 * s - wide, c[1] - 0.15 * s, c[2] - 0.40 * s - below), (c[0] + 0.14 * s + wide, c[1] + 0.15 * s + wide, c[2] + 0.14 * s)
 
 
-def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back=0.0, puff=0.0, temples=0.0):
+def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back=0.0, puff=0.0, temples=0.0, ragged=0.0):
     """Hair lying on the scalp inside the hairline.
     part: strands fall to each side of a parting (else they are combed back);
     puff: extra volume over the ears and at the back, so it stands off the skull;
@@ -205,6 +205,9 @@ def hair_cap(head, t, grooves=44, depth=0.0016, part=False, edge=0.30, lift_back
         h = head.sdf(P)
         th, Z = head.coords(P)
         H = head.hairline(th) - temples * np.exp(-((th - 42.0) / 22.0) ** 2)
+        if ragged:
+            # a hairline that is not drawn with a rule: little points and gaps
+            H = H + ragged * (np.sin(np.radians(th) * 23.0) * 0.6 + np.sin(np.radians(th) * 41.0 + 1.3) * 0.4)
         above_line = Z - H
         side = sm((th - 35.0) / 70.0)
         thick = t * (0.30 + 0.70 * sm(above_line / edge)) * (1.0 + puff * side * sm((0.55 - Z) / 0.6))
@@ -244,9 +247,12 @@ def hair_style(f, style):
     if style == "bald":
         return None
     if style == "cropped":
-        shell = hair_cap(head, 0.007 * s, grooves=56, depth=0.0012)
+        shell = hair_cap(head, 0.0048 * s, grooves=60, depth=0.0012, edge=0.45, ragged=0.05, puff=0.15)
+    elif style == "shaved":
+        shell = hair_cap(head, 0.0019 * s, grooves=0, depth=0.0, edge=0.10, ragged=0.03)
+        return Piece("hair_shaved", "STUBBLE", shell, shell, lo, hi, voxel=0.0010 * s, cover=False)
     elif style in ("long", "long_framed"):
-        cap = hair_cap(head, 0.010 * s, grooves=34, depth=0.0030, part=True, puff=0.9, temples=0.16 if style == "long_framed" else 0.08)
+        cap = hair_cap(head, 0.010 * s, grooves=34, depth=0.0030, part=True, puff=0.9, temples=0.16 if style == "long_framed" else 0.08, edge=0.42, ragged=0.03)
         parts = [cap]
         z_end = f.z_shoulder + 0.030 * s
         count = 17
@@ -358,65 +364,85 @@ def hair_style(f, style):
 
 
 def beard_style(f, style):
+    """Beards that follow the jaw with clean edges, each its own shape:
+    stubble (a shadow on the skin), short (trimmed close), chin (around the
+    mouth and on the chin), moustache, full (thick but trimmed), long (an
+    elder's beard, braided below the chin)."""
     head = Head(f)
     s = head.s
     mouth_u = FACE["mouth_u"]
+    mc = getattr(f, "mouth_center", None)
+    my = float(mc.y) if mc is not None else float(head.c[1]) - 0.10 * s
+    t = {"beard_stubble": 0.0011, "beard_short": 0.0042, "beard_chin": 0.0055, "beard_full": 0.0085,
+         "beard_long": 0.0065, "beard_moustache": 0.0}[style] * s
 
     def u_of(P):
         return (P[..., 2] - f.z_chin) / f.head_h
 
-    full = style in ("beard_full", "beard_long")
-    t = (0.016 if full else 0.008) * s
-    mc = getattr(f, "mouth_center", None)
-    my = float(mc.y) if mc is not None else float(head.c[1]) - 0.10 * s
-
     def region(P):
         th, Z = head.coords(P)
         u = u_of(P)
-        top = np.interp(th, [0, 22, 55, 92, 110], [0.135, 0.235, 0.40, 0.46, 0.40])
-        lowest = -0.10 if not full else -0.40
+        if style == "beard_chin":
+            # around the mouth and down the chin only
+            top = np.interp(th, [0, 18, 30, 40], [0.16, 0.24, 0.24, -0.5])
+            lowest = -0.06
+        else:
+            top = np.interp(th, [0, 22, 55, 92, 110], [0.135, 0.235, 0.39, 0.45, 0.38])
+            lowest = {"beard_full": -0.12, "beard_long": -0.07}.get(style, -0.035)
         g = np.maximum(u - top, lowest - u) * f.head_h
-        g = np.maximum(g, (th - 104.0) * 0.001)
-        return g
+        return np.maximum(g, (th - 104.0) * 0.001)
 
     def mouth_hole(P):
-        e = S.Ellipsoid((0.0, my, f.face(mouth_u)), (0.026 * s, 0.024 * s, 0.013 * s))
-        return e.eval(P)
+        return S.Ellipsoid((0.0, my, f.face(mouth_u)), (0.024 * s, 0.024 * s, 0.011 * s)).eval(P)
 
-    hang = None
-    if full:
-        hang = S.Ellipsoid(Vector((0, my + 0.030 * s, f.z_chin - 0.012 * s)), (0.046 * s, 0.040 * s, 0.050 * s))
-    point = None
+    hang = S.Ellipsoid(Vector((0, my + 0.028 * s, f.z_chin - 0.004 * s)), (0.040 * s, 0.034 * s, 0.034 * s)) if style == "beard_full" else None
+    braid = []
     if style == "beard_long":
-        point = S.RoundCone(Vector((0, my + 0.026 * s, f.z_chin - 0.030 * s)),
-                            Vector((0, my + 0.006 * s, f.z_chin - 0.200 * s)), 0.040 * s, 0.010 * s)
+        top = Vector((0.0, my + 0.020 * s, f.z_chin - 0.016 * s))
+        bottom = Vector((0.0, my + 0.004 * s, f.z_chin - 0.20 * s))
+        n = 9
+        for i in range(n):
+            q = top.lerp(bottom, i / (n - 1))
+            r = (0.019 - 0.010 * i / (n - 1)) * s
+            side = (1 if i % 2 else -1) * 0.004 * s
+            braid.append(S.Ellipsoid(q + Vector((side, 0, 0)), (r * 1.1, r * 0.85, r * 0.95)))
+        braid.append(S.Sphere(bottom + Vector((0, 0, -0.010 * s)), 0.007 * s))
+
+    def moustache(P, thick, droop):
+        d = None
+        for sd in (1.0, -1.0):
+            a = Vector((sd * 0.004 * s, my - 0.005 * s, f.face(mouth_u + 0.052)))
+            b = Vector((sd * 0.025 * s, my + 0.004 * s, f.face(mouth_u - 0.010 - droop)))
+            v = S.RoundCone(a, b, thick * s, 0.0026 * s).eval(P)
+            d = v if d is None else np.minimum(d, v)
+        return d
 
     def fn(P):
+        if style == "beard_moustache":
+            return moustache(P, 0.0062, 0.040)
         h = head.sdf(P)
-        d = np.maximum(h - t, -(h + 0.003 * s))
-        d = S.smax(d, region(P), 0.006 * s)
+        d = np.maximum(h - t, -(h + 0.0025 * s))
+        d = S.smax(d, region(P), 0.0018 * s)
         if hang is not None:
-            hv = hang.eval(P)
-            hv = np.maximum(hv, P[..., 2] - (f.z_chin + 0.02 * s))
-            d = S.smin(d, hv, 0.012 * s)
-        if point is not None:
-            d = S.smin(d, point.eval(P), 0.016 * s)
-        d = S.smax(d, -mouth_hole(P), 0.004 * s)
-        # a moustache over the lip
-        for sd in (1.0, -1.0):
-            a = Vector((sd * 0.004 * s, my - 0.004 * s, f.face(mouth_u + 0.055)))
-            b = Vector((sd * 0.027 * s, my + 0.006 * s, f.face(mouth_u - 0.012)))
-            d = S.smin(d, S.RoundCone(a, b, 0.0062 * s, 0.0036 * s).eval(P), 0.004 * s)
+            hv = np.maximum(hang.eval(P), P[..., 2] - (f.z_chin + 0.015 * s))
+            d = S.smin(d, hv, 0.008 * s)
+        for part in braid:
+            d = S.smin(d, part.eval(P), 0.003 * s)
+        d = S.smax(d, -mouth_hole(P), 0.002 * s)
+        if style != "beard_stubble":
+            d = S.smin(d, moustache(P, 0.0040 if style == "beard_short" else 0.0052, 0.0), 0.003 * s)
         return d
 
     c = head.c
-    lo = (c[0] - 0.13 * s, c[1] - 0.16 * s, f.z_chin - (0.24 if style == "beard_long" else 0.09) * s)
+    lo = (c[0] - 0.13 * s, c[1] - 0.16 * s, f.z_chin - (0.24 if style == "beard_long" else 0.07) * s)
     hi = (c[0] + 0.13 * s, c[1] + 0.10 * s, f.face(0.62))
-    return Piece(style, "HAIR", fn, fn, lo, hi, voxel=0.0022 * s, cover=False)
+    slot = "STUBBLE" if style == "beard_stubble" else "HAIR"
+    voxel = 0.0012 * s if style == "beard_stubble" else 0.0020 * s
+    return Piece(style, slot, fn, fn, lo, hi, voxel=voxel, cover=False)
 
 
-HAIR_STYLES = ("cropped", "long", "long_framed", "bun", "braids", "tail", "curls", "topknot")
-BEARD_STYLES = ("beard_short", "beard_full", "beard_long")
+HAIR_STYLES = ("cropped", "shaved", "long", "long_framed", "bun", "braids", "tail", "curls", "topknot")
+BEARD_STYLES = ("beard_stubble", "beard_short", "beard_chin", "beard_moustache", "beard_full", "beard_long")
 
 
 # =====================================================================================

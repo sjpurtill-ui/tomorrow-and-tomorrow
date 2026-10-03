@@ -645,6 +645,8 @@ func _refresh_regard()->void:
 	regard_label.text=("%s %s" % [who,String(regard.get("read",""))]).strip_edges()
 	var risky:=String(regard.get("id","")) in ["hates_dread","terror","fear","war"]
 	regard_label.add_theme_color_override("font_color",Color("f0a08e") if risky else Color("f6ecd6"))
+	# Their face and bearing show it: fond, afraid or defiant.
+	if is_instance_valid(court_stage):court_stage.set_mood(Stage.MAIN,Stage.mood_of(regard,float(audience.get("mood",0.0)) if foreign else 0.0))
 	var strip:=regard_label.get_parent().get_parent() as Control
 	strip.tooltip_text=regard_label.text+". "
 	strip.tooltip_text+="From their opinion of you, their ruler's trust, border tension and remembered terror." if foreign else "Dread buys obedience and costs honesty; love buys candour. Dread soured by resentment shows first in their words, then in their work, and at last in flight."
@@ -1068,7 +1070,7 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 	if voice_reacts and _voice_ok() and voice.has_method("divine_reaction"):voice.divine_reaction(audience_id,result)
 	# The one before the god kneels under wrath and bows under favour.
 	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)):
-		court_stage.react(Stage.MAIN,Stage.divine_mood(action))
+		court_stage.react(Stage.MAIN,Stage.divine_mood(action,String(result.get("response",""))))
 	_refresh_regard()
 	_update_mood(Hall.find(audience_id))
 	if bool(result.get("terminal",false)):_show_outcome(result)
@@ -1085,7 +1087,7 @@ func act_on_envoy(act_id:String,words:String="")->Dictionary:
 		_show_toast(String(result.get("outcome","")))
 		return result
 	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)):
-		court_stage.react(Stage.MAIN,Stage.divine_mood(String(result.get("action",act_id))))
+		court_stage.react(Stage.MAIN,Stage.divine_mood(act_id,String(result.get("response",""))))
 	_after_command(result)
 	return result
 
@@ -1828,7 +1830,7 @@ func _stage_line(line:Dictionary,animate:bool,ref:int=-1)->Label:
 	if text.is_empty():return null
 	match String(line.get("role","")):
 		"ruler":return court_stage.god_says(text,animate,ref)
-		"narrator":return court_stage.caption(text,"narration",animate,ref)
+		"narrator":return court_stage.caption(text,"narration",animate,ref,"",String(line.get("about","")))
 	return court_stage.say(_stage_key(line),text,bool(line.get("aside",false)),animate,ref)
 
 ## "more" on words cut short: Earlier opens at that entry.

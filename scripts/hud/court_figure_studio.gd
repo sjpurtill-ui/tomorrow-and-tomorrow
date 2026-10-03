@@ -28,7 +28,8 @@ static func available()->bool:
 
 ## A still of a look in a framing. fallback: the painting to show if the
 ## model cannot be drawn. Returns a texture at once.
-static func still(look:Dictionary,framing:String,fallback:Texture2D=null,pose:="idle_clasped")->Texture2D:
+static func still(look:Dictionary,framing:String,fallback:Texture2D=null,pose:="")->Texture2D:
+	if pose.is_empty():pose=String(look.get("stance","clasped"))
 	if not available():return fallback
 	var key:="%s|%s|%s" % [framing,pose,var_to_str(look).hash()]
 	if _cache.has(key):return _cache[key]
@@ -88,6 +89,7 @@ func _render(job:Dictionary)->Image:
 		view.add_child(fig)
 		figures[variant]=fig
 	for other:Node3D in figures.values():other.visible=other==fig
+	fig.process_mode=Node.PROCESS_MODE_INHERIT
 	if not fig.setup(look):return null
 	fig.rotation_degrees.y=10.0
 	fig.play(String(job.pose),0.0,1.2)
@@ -105,4 +107,8 @@ func _render(job:Dictionary)->Image:
 	view.render_target_update_mode=SubViewport.UPDATE_ONCE
 	await RenderingServer.frame_post_draw
 	var texture:=view.get_texture()
-	return texture.get_image() if texture!=null else null
+	var image:=texture.get_image() if texture!=null else null
+	# The sitter holds still until the next still: no clip runs between them.
+	if fig.player!=null:fig.player.pause()
+	fig.process_mode=Node.PROCESS_MODE_DISABLED
+	return image

@@ -10,15 +10,29 @@ extends Node3D
 ## Materials are shared between figures of the same colours; nothing here
 ## runs per frame.
 ## A look: {variant, outfit, hair, beard, skin, hair_colour, cloth:[a,b,c],
-## leather, without:[pieces not worn]}.
+## leather, without:[pieces not worn], stance, face:{shape: -1..1}}.
+## Every person keeps a stance for life (standing easy, hand on hip, arms
+## folded, hands clasped, thumbs in the belt, leaning on a staff, holding a
+## bowl, seated on a log, crouched); their face is their own (morph targets
+## from their people's family face); their head turns to whoever they attend
+## to (look_at), and their mood shows in brows, mouth and the set of the head.
 
 const DIR:="res://assets/court_figures/"
 const TOON:=preload("res://scripts/shaders/court_figure_toon.gdshader")
 const INK:=preload("res://scripts/shaders/court_figure_ink.gdshader")
 const VARIANTS:=["male_adult","female_adult","male_old","female_old","male_young","female_young"]
 const OUTFITS:={"hide":1,"tunic":2,"robe":3}
-const LOOP_CLIPS:=["idle","idle_clasped","talk","talk_both","listen_l","listen_r","look_up","walk_in","walk_out"]
-const CLIPS:=["idle","idle_clasped","talk","talk_both","listen_l","listen_r","look_up","bow","kneel","point","raise_hand","walk_in","walk_out"]
+const STANCES:=["stand","hip","folded","clasped","belt","staff","bowl","sit","crouch"]
+## Which hands a stance leaves free to talk with (both: "talk_both" can be used).
+const FREE_HANDS:={"stand":"LR","hip":"R","folded":"","clasped":"LR","belt":"R","staff":"L","bowl":"","sit":"LR","crouch":"R"}
+const PROPS:={"staff":"prop_staff","bowl":"prop_bowl","sit":"prop_stool"}
+const LOOP_CLIPS:=["stand","hip","folded","clasped","belt","staff","bowl","sit","crouch",
+	"stand_talk","hip_talk","folded_talk","clasped_talk","belt_talk","staff_talk","bowl_talk","sit_talk","crouch_talk","talk_both","walk_in","walk_out"]
+const CLIPS:=["stand","hip","folded","clasped","belt","staff","bowl","sit","crouch","stand_talk","talk_both","bow","kneel","point","raise_hand","walk_in","walk_out"]
+const FACE_SHAPES:=["jaw","chin","cheek","nose","bridge","nose_wide","brow","lips","ears","long","round","aged"]
+## Moods the engine's regard and posture show: [mouth/brow morphs, head pitch (deg, + is down)].
+const MOODS:={"warm":[{"mood_smile":0.55},-2.0],"neutral":[{},0.0],"afraid":[{"mood_tight":0.55,"mood_worry":0.7},12.0],
+	"defiant":[{"mood_stern":0.65,"mood_tight":0.25},-9.0],"grieved":[{"mood_worry":0.8},8.0]}
 const FACE_PARTS:=["Body","Eyes","Brows","Mouth"]
 ## Slots drawn flat (no light): the painted eyes and mouth.
 const FLAT_SLOTS:=["EYES","EYE_WHITE","EYE_SHINE","MOUTH"]
@@ -27,6 +41,8 @@ const REFERENCE_HEIGHT:=1.72
 ## How fast the walk clips carry a 1.72 m body, in metres a second.
 const WALK_SPEED:={"walk_in":1.18,"walk_out":0.92}
 
+## Shared materials kept at most (oldest let go; figures already dressed keep theirs).
+const MATERIAL_LIMIT:=256
 static var _scenes:Dictionary={}
 static var _materials:Dictionary={}
 static var _inks:Dictionary={}
@@ -47,6 +63,14 @@ var head_height:=0.28
 var body_height:=1.72
 var _meshes:Array[MeshInstance3D]=[]
 var _yaw_tween:Tween
+## What they keep doing at rest, and the mood the engine gives them.
+var stance:="stand"
+var mood:="neutral"
+## Where they look: a point in the hall, eased toward by the head and neck.
+var gaze:Node3D
+var _looks:Array[LookAtModifier3D]=[]
+var _gaze_tween:Tween
+var _gaze_on:=false
 
 static func manifest()->Dictionary:
 	if _manifest.is_empty():
@@ -68,8 +92,11 @@ static func available()->bool:
 
 ## The shared material for a slot in a colour (skin also knows which outfit hides it).
 static func material(slot:String,colour:Color,cover:=0)->ShaderMaterial:
+	# Colours are kept to a few steps a channel, so the cache stays small.
+	colour=Color(snappedf(colour.r,1.0/48.0),snappedf(colour.g,1.0/48.0),snappedf(colour.b,1.0/48.0))
 	var key:="%s|%s|%d" % [slot,colour.to_html(false),cover]
 	if _materials.has(key):return _materials[key]
+	if _materials.size()>=MATERIAL_LIMIT:_materials.erase(_materials.keys()[0])
 	var made:=ShaderMaterial.new();made.shader=TOON
 	made.set_shader_parameter("albedo",colour)
 	made.set_shader_parameter("cover_channel",cover)
@@ -79,7 +106,7 @@ static func material(slot:String,colour:Color,cover:=0)->ShaderMaterial:
 	else:
 		if slot=="SKIN":made.set_shader_parameter("shade_tint",Color(0.66,0.50,0.46))
 		if slot=="HAIR":made.set_shader_parameter("rim_amount",0.22)
-		if slot!="BROW":made.next_pass=_ink(cover)
+		if not slot in ["BROW","STUBBLE"]:made.next_pass=_ink(cover)
 	_materials[key]=made
 	return made
 
@@ -128,9 +155,83 @@ func setup(look_in:Dictionary)->bool:
 		if player!=null:
 			for name:String in LOOP_CLIPS:
 				if player.has_animation(name):player.get_animation(name).loop_mode=Animation.LOOP_LINEAR
+		_make_gaze()
 		clip=""
+	stance=String(look.get("stance","stand"))
+	if not stance in STANCES:stance="stand"
 	_dress()
+	_face()
+	set_mood(String(look.get("mood","neutral")))
 	return true
+
+## The head and neck turn toward a point in the hall (LookAtModifier3D after
+## the clip), so a person attends to whoever speaks without leaving their stance.
+func _make_gaze()->void:
+	_looks.clear()
+	if skeleton==null:return
+	gaze=Node3D.new();gaze.name="Gaze";gaze.top_level=true
+	add_child(gaze)
+	for pair:Array in [["neck",0.40,40.0,22.0],["head",0.85,62.0,34.0]]:
+		if skeleton.find_bone(String(pair[0]))<0:continue
+		var look:=LookAtModifier3D.new();look.name="Look_"+String(pair[0])
+		look.bone_name=String(pair[0])
+		look.forward_axis=SkeletonModifier3D.BONE_AXIS_PLUS_Z
+		look.primary_rotation_axis=Vector3.AXIS_Y
+		look.use_secondary_rotation=true
+		look.duration=0.45;look.transition_type=Tween.TRANS_SINE;look.ease_type=Tween.EASE_IN_OUT
+		look.use_angle_limitation=true;look.symmetry_limitation=true
+		look.primary_limit_angle=deg_to_rad(float(pair[2]));look.secondary_limit_angle=deg_to_rad(float(pair[3]))
+		look.primary_damp_threshold=0.85;look.secondary_damp_threshold=0.85
+		look.influence=0.0
+		look.set_meta("weight",float(pair[1]))
+		skeleton.add_child(look)
+		look.target_node=look.get_path_to(gaze)
+		_looks.append(look)
+
+## Attend to a point in the hall (world space); null: look where the body faces.
+func look_at_point(target:Variant,time:=0.45)->void:
+	if _looks.is_empty() or gaze==null:return
+	if _gaze_tween and _gaze_tween.is_valid():_gaze_tween.kill()
+	_gaze_on=target!=null
+	if target!=null:
+		gaze.global_position=(target as Vector3)+Vector3(0.0,-_mood_drop(),0.0)*global_transform.basis.get_scale().y
+	if not is_inside_tree() or time<=0.0:
+		for look in _looks:look.influence=float(look.get_meta("weight")) if _gaze_on else 0.0
+		return
+	_gaze_tween=create_tween().set_parallel(true).set_trans(Tween.TRANS_SINE)
+	for look in _looks:_gaze_tween.tween_property(look,"influence",float(look.get_meta("weight")) if _gaze_on else 0.0,time)
+
+func _mood_drop()->float:
+	## The head lowers in fear and lifts in defiance: the gaze point moves.
+	return tan(deg_to_rad(float((MOODS.get(mood,MOODS.neutral) as Array)[1])))*2.0
+
+## Their mood shows: "warm", "neutral", "afraid", "defiant", "grieved".
+func set_mood(name:String)->void:
+	if not MOODS.has(name):name="neutral"
+	mood=name
+	var keys:Dictionary=(MOODS[name] as Array)[0]
+	for mesh_node in _meshes:
+		if mesh_node.name!="Mouth" and mesh_node.name!="Brows":continue
+		for key in ["mood_smile","mood_tight","mood_worry","mood_stern"]:
+			var index:=mesh_node.find_blend_shape_by_name(StringName(key))
+			if index>=0:mesh_node.set_blend_shape_value(index,float(keys.get(key,0.0)))
+
+## Their own face: the morph targets of their people's family face and theirs.
+func _face()->void:
+	var face:Dictionary=look.get("face",{})
+	for mesh_node in _meshes:
+		if not mesh_node.visible or mesh_node.mesh==null:continue
+		for shape:String in FACE_SHAPES:
+			var index:=mesh_node.find_blend_shape_by_name(StringName("face_"+shape))
+			if index>=0:mesh_node.set_blend_shape_value(index,clampf(float(face.get(shape,0.0)),-1.0,1.0))
+
+## The clip a stance rests in, and the one it talks in.
+func rest_clip()->String:
+	return stance
+
+func talk_clip(both_hands:=false)->String:
+	if both_hands and FREE_HANDS.get(stance,"")=="LR" and not stance in ["sit","crouch"]:return "talk_both"
+	return stance+"_talk"
 
 func _dress()->void:
 	var outfit:=String(look.get("outfit","tunic"))
@@ -142,14 +243,15 @@ func _dress()->void:
 	var hair_colour:=Color(look.get("hair_colour",Color("2b2018")))
 	var colours:={
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
-		"EYES":Color("22170f"),"EYE_WHITE":Color("e9dfca"),"EYE_SHINE":Color("fbf6ea"),
+		"EYES":Color("22170f"),"EYE_WHITE":Color("e6dbc6"),"EYE_SHINE":Color("fbf6ea"),
 		"MOUTH":skin.darkened(0.62),"LEATHER":Color(look.get("leather",Color("5b3b24"))),
+		"STUBBLE":skin.lerp(hair_colour,0.42).darkened(0.08),"WOOD":Color("6b4a2e"),"CLAY":Color("a0603a"),
 	}
 	var cloth:Array=look.get("cloth",[Color("b07a35"),Color("6e5541"),Color("a8432f")])
 	for i in 3:colours["CLOTH_"+"ABC"[i]]=Color(cloth[i]) if i<cloth.size() else Color("8a7a66")
 	for mesh_node in _meshes:
 		var part:=String(mesh_node.name)
-		var shown:=part in FACE_PARTS or part==hair or part==beard or (part.begins_with(outfit+"_") and not part in hidden_pieces)
+		var shown:=part in FACE_PARTS or part==hair or part==beard or (part.begins_with(outfit+"_") and not part in hidden_pieces) or part==String(PROPS.get(stance,"-"))
 		mesh_node.visible=shown
 		if not shown or mesh_node.mesh==null:continue
 		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
@@ -160,12 +262,20 @@ func _dress()->void:
 			var cover:=int(OUTFITS.get(outfit,0)) if part=="Body" else 0
 			mesh_node.set_surface_override_material(surface,material(slot,colours.get(slot,Color("8a7a66")),cover))
 
+## A prop shows only in the stance that holds it (not while walking or bowing).
+func _props_for(name:String)->void:
+	var held:=String(PROPS.get(stance,""))
+	var holding:=name==stance or name==stance+"_talk"
+	for mesh_node in _meshes:
+		if String(mesh_node.name).begins_with("prop_"):mesh_node.visible=holding and String(mesh_node.name)==held
+
 ## Play a clip, blending from the last one; once-only clips hold their end.
 ## at: start this far in (a different breath for each person at rest).
 func play(name:String,blend:=0.25,at:=-1.0)->void:
 	if player==null or not player.has_animation(name):return
 	if name==clip and at<0.0 and player.is_playing():return
 	clip=name
+	_props_for(name)
 	player.play(name,blend)
 	if at>=0.0:player.seek(fmod(at,player.get_animation(name).length),true)
 

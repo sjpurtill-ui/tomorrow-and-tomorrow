@@ -615,18 +615,24 @@ func test_the_room_acts_out_what_is_said()->void:
 	_say(id,{"speaker":String(speaker.name),"role":"official","person_id":int(speaker.get("person_id",0)),"text":"The ford is low; the herds can cross before the rains come down."})
 	modal._pump()
 	await await_idle_frame()
-	# The speaker talks with their hands; the others turn and listen.
-	assert_str(_clip_of(modal,Stage.MAIN)).starts_with("talk")
-	var w:Stage.Figure=modal.court_stage.figure(witness)
+	# The speaker talks with their hands, in their own stance.
 	var main:Stage.Figure=modal.court_stage.figure(Stage.MAIN)
-	assert_str(_clip_of(modal,witness)).is_equal("listen_l" if main.home.x>w.home.x else "listen_r")
+	assert_str(_clip_of(modal,Stage.MAIN)).contains("talk")
+	# The others keep their stance and look at the one speaking.
+	var w:Stage.Figure=modal.court_stage.figure(witness)
+	assert_str(_clip_of(modal,witness)).is_equal(w.body3d.rest_clip())
+	assert_bool(w.body3d._gaze_on).is_true()
+	assert_float(w.body3d.gaze.global_position.distance_to(main.body3d.head_top())).is_less(0.5*main.body3d.scale.y)
 	modal.skip_reveal()
-	# The god speaks: every face lifts.
+	# The god speaks: every face lifts toward the voice, above them all.
 	_say(id,{"speaker":"You","role":"ruler","text":"Then cross."})
 	modal.skip_reveal()
 	await await_idle_frame()
-	for key in _cast(modal):assert_str(_clip_of(modal,key)).is_equal("look_up")
-	# What the hall shows, the one before the god does.
+	for key in _cast(modal):
+		var f:Stage.Figure=modal.court_stage.figure(key)
+		assert_bool(f.body3d._gaze_on).is_true()
+		assert_float(f.body3d.gaze.global_position.y).is_greater(f.body3d.head_top().y)
+	# What the hall shows of the one it names, they do.
 	_say(id,{"role":"narrator","text":"[%s kneels before you.]" % String(speaker.name)})
 	modal.skip_reveal()
 	await await_idle_frame()
@@ -659,8 +665,8 @@ func test_they_walk_in_and_walk_out_as_people_do()->void:
 	assert_float(absf(f.body3d.rotation_degrees.y)).is_greater(60.0)
 	stage.settle()
 	assert_float(f.walk).is_equal(0.0)
-	assert_bool(String(f.body3d.clip) in ["idle","idle_clasped"]).override_failure_message("at rest: "+String(f.body3d.clip)).is_true()
-	# Taking their leave: a bow first, then they are gone.
+	assert_str(String(f.body3d.clip)).is_equal(f.body3d.rest_clip())
+	# Taking their leave: a bow first, then they are gone and still.
 	stage.conclude(0.0,"bow")
 	await await_idle_frame()
 	var main:Stage.Figure=stage.figure(Stage.MAIN)
@@ -668,6 +674,92 @@ func test_they_walk_in_and_walk_out_as_people_do()->void:
 	assert_str(String(main.body3d.clip)).is_equal("bow")
 	stage.settle()
 	assert_bool(main.body3d.visible).is_false()
+	assert_bool(main.body3d.player.is_playing()).is_false()
+	assert_int(main.body3d.process_mode).is_equal(Node.PROCESS_MODE_DISABLED)
+
+
+# --- Review fixes: directions act on whom they name, the engine's defiance --------
+
+func test_directions_move_only_the_one_they_are_about()->void:
+	# Real lines the hall writes (rival_rulers.gd, upkeep_warnings.gd, court_commands.gd).
+	assert_str(Stage.gesture_in("[The envoy comes in with a guard of spearmen and keeps a hand near their knife; nobody from Varrow kneels.]")).is_equal("")
+	assert_str(Stage.gesture_in("[Tamsa comes in with mud to the elbows.]")).is_equal("")
+	assert_str(Stage.gesture_in("[Kel takes up a flint blade, then freezes; the point trembles a hand's breadth from Oru, and every eye turns to you.]")).is_equal("")
+	assert_str(Stage.gesture_in("[Kel steps toward Oru with a club, stops, and falls to their knees instead, the club still in hand.]")).is_equal("dread")
+	assert_str(Stage.gesture_in("[Kel bows and goes out to see it done; word of the order runs ahead of them through the camp.]")).is_equal("reverence")
+	assert_str(Stage.gesture_in("[The envoy will not bow to you.]")).is_equal("")
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var court:Array[Dictionary]=Hall.court(id)
+	assert_bool(court.is_empty()).is_false()
+	var other:Dictionary=court[0]
+	var key:="p%d" % int(other.person_id)
+	var main_before:=_clip_of(modal,Stage.MAIN)
+	# Another official bows: they bow; the one before the god does not.
+	_say(id,{"role":"narrator","text":"[%s bows and goes out to see it done.]" % String(other.name),"about":String(other.name)})
+	modal.skip_reveal()
+	await await_idle_frame()
+	assert_str(_clip_of(modal,key)).is_equal("bow")
+	assert_str(_clip_of(modal,Stage.MAIN)).is_equal(main_before)
+	# Someone not standing here kneels: nobody moves.
+	_say(id,{"role":"narrator","text":"[Oru falls to their knees.]","about":"Oru"})
+	modal.skip_reveal()
+	await await_idle_frame()
+	assert_str(_clip_of(modal,Stage.MAIN)).is_equal(main_before)
+	# A defiant envoy's entrance moves nobody.
+	_say(id,{"role":"narrator","text":"[The envoy comes in with a guard of spearmen and keeps a hand near their knife; nobody from Varrow kneels.]"})
+	modal.skip_reveal()
+	await await_idle_frame()
+	assert_str(_clip_of(modal,Stage.MAIN)).is_equal(main_before)
+
+
+func test_the_defiant_stand_their_ground()->void:
+	# The engine decides who defies (divine_regard.gd response_to); the stage agrees.
+	assert_str(Stage.divine_mood("terrify","defy")).is_equal("defy")
+	assert_str(Stage.divine_mood("terrify","cower")).is_equal("dread")
+	assert_str(Stage.divine_mood("penance","endure")).is_equal("endure")
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var main:Stage.Figure=modal.court_stage.figure(Stage.MAIN)
+	modal.court_stage.react(Stage.MAIN,Stage.divine_mood("terrify","defy"))
+	assert_str(_clip_of(modal,Stage.MAIN)).is_not_equal("kneel")
+	assert_str(String(main.body3d.mood)).is_equal("defiant")
+	# Moods from the engine's regard and an envoy's temper.
+	assert_str(Stage.mood_of({"id":"terror","dread":0.9})).is_equal("afraid")
+	assert_str(Stage.mood_of({"love":0.8})).is_equal("warm")
+	assert_str(Stage.mood_of({},-0.7)).is_equal("defiant")
+
+
+func test_an_envoys_punishment_shows_on_them()->void:
+	assert_str(Stage.divine_mood("envoy_flog")).is_equal("dread")
+	assert_str(Stage.divine_mood("envoy_detain")).is_equal("dread")
+	assert_str(Stage.divine_mood("envoy_flog","defy")).is_equal("defy")
+
+
+func test_the_hall_runs_lean()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	assert_int(modal.court_stage.view3d.msaa_3d).is_equal(Viewport.MSAA_2X)
+	# Many colours never grow the shared materials past their limit.
+	for index in Figure3D.MATERIAL_LIMIT+40:
+		Figure3D.material("CLOTH_A",Color(float(index%97)/96.0,float(index%13)/12.0,0.5))
+	assert_int(Figure3D._materials.size()).is_less_equal(Figure3D.MATERIAL_LIMIT)
+
+
+func test_each_person_keeps_a_stance_and_a_face_of_their_own()->void:
+	var registry:={}
+	var a:=Stage.figure_look({"name":"Hena","person_id":11,"sex":"female","age":34},registry)
+	var b:=Stage.figure_look({"name":"Tuk","person_id":12,"sex":"male","age":40},registry)
+	assert_bool(String(a.stance) in Figure3D.STANCES).is_true()
+	assert_bool((a.face as Dictionary).size()>=10).is_true()
+	assert_bool(var_to_str(a.face)!=var_to_str(b.face)).is_true()
+	# Most men go shaven or stubbled; a beard is one of several shapes.
+	var bare:=0
+	for index in 60:
+		var man:=Stage.figure_look({"name":"Man %d" % index,"person_id":5000+index,"sex":"male","age":35},{})
+		if String(man.beard) in ["","beard_stubble"]:bare+=1
+		else:assert_bool(String(man.beard) in ["beard_short","beard_chin","beard_moustache","beard_full"]).is_true()
+	assert_int(bare).is_greater(30)
 
 
 func test_bubbles_hang_over_the_modelled_head()->void:

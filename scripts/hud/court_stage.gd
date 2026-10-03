@@ -61,13 +61,16 @@ const HOME_COURT_X:=[0.66,0.14,0.80,0.93,0.27,0.53]
 const ENVOY_MAIN_X:=0.26
 const ENVOY_ATTENDANT_X:=[0.09,0.42]
 const ENVOY_COURT_X:=[0.88,0.70,0.54,0.96]
+## How far back each slot stands when the figures are modelled (0 nearest).
+const ARC_DEPTH_HOME:=[1,1,0,2,2,3]
+const ARC_DEPTH_ENVOY:=[1,2,0,2]
 ## A figure's width for its height: a standing person, not the whole painting.
 const FIGURE_ASPECT:=0.60
 ## The modelled figures: a stage pixel is this many metres of the 3D world,
 ## the camera looks a little down, and a figure's box holds a person of
 ## Figure3D.REFERENCE_HEIGHT (shorter people stand shorter in it).
 const PX_M:=0.01
-const CAMERA_PITCH:=-7.0
+const CAMERA_PITCH:=-12.0
 const FIGURE_FILL:=0.95
 ## Room under the feet for the name plate when the figures are modelled.
 const FOOT_ROOM:=40.0
@@ -179,12 +182,14 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictio
 	if sex=="female":styles=["curls","bun","braids","long_framed"] if coiled else ["long_framed","braids","bun","long","tail"]
 	else:styles=["curls","cropped","topknot"] if coiled else ["cropped","long","tail","topknot","cropped"]
 	if band=="old" and sex=="male":styles=["cropped","cropped","long"] if not coiled else ["curls","cropped"]
+	if sex=="male" and not coiled and (h>>15)%7==0:styles=["shaved"]
+	# Most men are shaven or stubbled; a few wear one of the beards of their age.
 	var beard:=""
 	if sex=="male":
 		var roll:=(h>>9)%100
-		if band=="old":beard="beard_long" if roll<45 else ("beard_full" if roll<85 else "")
-		elif band=="adult":beard="beard_full" if roll<30 else ("beard_short" if roll<62 else "")
-		elif roll<12:beard="beard_short"
+		if band=="old":beard="beard_long" if roll<28 else ("beard_short" if roll<50 else ("beard_full" if roll<62 else ("beard_moustache" if roll<70 else "")))
+		elif band=="adult":beard="beard_stubble" if roll<22 else ("beard_short" if roll<34 else ("beard_chin" if roll<42 else ("beard_moustache" if roll<48 else ("beard_full" if roll<52 else ""))))
+		elif roll<18:beard="beard_stubble"
 	# Each person wears the people's three dyes in their own order.
 	var dyes:Array=people.get("cloth",["a8432f","2f4a6e","c9a43c"])
 	var order:Array=[[0,1,2],[1,2,0],[2,0,1],[0,2,1],[1,0,2],[2,1,0]][(h>>11)%6]
@@ -195,8 +200,25 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictio
 		# Hides are hides: the dye shows as a stain and in the cord.
 		cloth[0]=Color("9c7a52").lerp(cloth[0],0.28);cloth[1]=Color("6e5541").lerp(cloth[1],0.12)
 		if not (high or band=="old" or (h>>13)%3==0):without.append("hide_cape")
+	# A stance kept for life: the old sit or lean on a staff, the young crouch
+	# or stand easy, those of rank stand clasped, folded or with a staff.
+	var stances:Array=["stand","hip","folded","clasped","belt","bowl"]
+	if band=="old":stances=["sit","staff","clasped","folded","sit"]
+	elif band=="young":stances=["stand","hip","crouch","belt","stand"]
+	if high:stances=["staff","clasped","folded","stand"]
+	# A family face: the people share a look, and each person differs within it.
+	var face:={}
+	var family_seed:=absi(String(people.get("family","stoneweft")).hash())
+	for index in Figure3D.FACE_SHAPES.size():
+		var shape:String=Figure3D.FACE_SHAPES[index]
+		if shape=="aged":continue
+		var family:=float((family_seed>>(index%20))%101)/50.0-1.0
+		var own:=float(absi(("%s|%s" % [identity,shape]).hash())%101)/50.0-1.0
+		face[shape]=clampf(family*0.55+own*0.45,-1.0,1.0)
+	if years>=46:face["aged"]=clampf(float(years-46)/24.0,0.0,1.0)
 	var look:={"variant":"%s_%s" % [sex,band],"outfit":outfit,"hair":String(styles[(h>>7)%styles.size()]),"beard":beard,
-		"skin":skin,"hair_colour":hair_colour,"cloth":cloth,"leather":Color("5b3b24").lerp(cloth[1],0.15),"without":without}
+		"skin":skin,"hair_colour":hair_colour,"cloth":cloth,"leather":Color("5b3b24").lerp(cloth[1],0.15),"without":without,
+		"stance":String(stances[(h>>19)%stances.size()]),"face":face,"mood":"neutral"}
 	# Two people on one screen are never dressed and coloured alike.
 	if screen_registry!=null:
 		var taken:Dictionary=screen_registry.get("_look_of",{})
@@ -288,7 +310,7 @@ func _make_view()->void:
 	view_container.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	add_child(view_container);view_container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	view3d=SubViewport.new();view3d.name="Hall3D";view3d.transparent_bg=true;view3d.own_world_3d=true
-	view3d.msaa_3d=Viewport.MSAA_4X;view3d.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE
+	view3d.msaa_3d=Viewport.MSAA_2X;view3d.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE
 	view3d.size=Vector2i(64,64)
 	view_container.add_child(view3d)
 	camera=Camera3D.new();camera.name="Camera";camera.projection=Camera3D.PROJECTION_ORTHOGONAL
@@ -308,6 +330,13 @@ func stage_to_world(px:Vector2,depth:float)->Vector3:
 	if camera==null or not camera.is_inside_tree():
 		return Vector3(px.x*PX_M,-px.y*PX_M,80.0-depth)
 	return camera.project_position(px,depth)
+
+## Where the god is, for those who answer or look up: before the hall,
+## a little above the eye.
+func god_point(up:=false)->Vector3:
+	if camera==null:return Vector3.ZERO
+	var at:=stage_to_world(Vector2(size.x*.5,size.y*(.05 if up else .30)),60.0)
+	return at
 
 ## Where a point of the hall shows on the stage.
 func world_to_stage(point:Vector3)->Vector2:
@@ -364,7 +393,11 @@ func add_figure(key:String,person:Dictionary,role:String,name_text:String="",tit
 ## Gives a figure its modelled body in the hall (and its shade on the floor).
 func _embody(f:Figure)->void:
 	var body:=Figure3D.new();body.name="Body_"+node_key(f.key)
-	if not body.setup(figure_look(f.person,registry)):
+	var look:=figure_look(f.person,registry).duplicate()
+	# The one before the god, and an envoy's company, stand.
+	if f.role!="court" and String(look.get("stance","")) in ["sit","crouch"]:look.stance="clasped"
+	if f.role==MAIN and String(look.get("stance",""))=="bowl" and layout_kind=="home":look.stance="clasped"
+	if not body.setup(look):
 		body.free();return
 	view3d.add_child(body)
 	var shade:=MeshInstance3D.new();shade.name="Shade_"+node_key(f.key)
@@ -395,24 +428,94 @@ func react(key:String,mood:String)->void:
 	var f:=figure(key)
 	if f==null or f.leaving:return
 	match mood:
-		"dread":f.gesture("kneel",true)
-		"reverence":f.gesture("bow")
+		"dread":
+			f.gesture("kneel",true)
+			if f.body3d!=null:f.body3d.set_mood("afraid")
+		"defy":
+			# They stand their ground: no bow, chin up, a hard set to the brows.
+			if f.body3d!=null:
+				f.body3d.set_mood("defiant")
+				f.body3d.face(f.rest_yaw*.3,0.35)
+			else:f.gesture("stand")
+		"endure":
+			if f.body3d!=null:f.body3d.set_mood("grieved")
+		"reverence":
+			f.gesture("bow")
+			if f.body3d!=null:f.body3d.set_mood("warm")
 		"point":f.gesture("point")
 		"order":f.gesture("raise_hand")
 
-## What the god's wrath or favour looks like on the one before the god.
-static func divine_mood(action:String)->String:
-	if action in ["terrify","penance","rebuke","threaten"]:return "dread"
+## How the one before the god feels, from the engine's regard (Hall.regard_of)
+## or an envoy's mood: "warm", "neutral", "afraid", "defiant".
+static func mood_of(regard:Dictionary,envoy_mood:=0.0)->String:
+	var id:=String(regard.get("id",""))
+	if id in ["war","defiant","hates"]:return "defiant"
+	if id in ["terror","fear","hates_dread"] or float(regard.get("dread",0.0))>=0.62:return "afraid"
+	if envoy_mood<=-0.45:return "defiant"
+	if float(regard.get("love",0.0))>=0.62 or envoy_mood>=0.45:return "warm"
+	return "neutral"
+
+## Someone's mood shows on their face and in the set of their head.
+func set_mood(key:String,mood:String)->void:
+	var f:=figure(key)
+	if f!=null and f.body3d!=null:f.body3d.set_mood(mood)
+
+## What the god's wrath or favour looks like on the one before the god, as
+## the engine adjudicated it (divine_regard.gd response_to): the cowed go
+## down, the defiant stand with their chin up, the enduring bow their head,
+## the blessed and the relieved bow.
+static func divine_mood(action:String,response:="")->String:
+	match response:
+		"defy","defiant","refuse":return "defy"
+		"cower","shaken","break":return "dread"
+		"endure":return "endure"
+		"relief","blessed":return "reverence"
+	if action in ["terrify","penance","rebuke","threaten","envoy_flog","envoy_maim","envoy_detain"]:return "dread"
 	if action in ["bless","boon","raise_up","honour","honor","reward"]:return "reverence"
 	return ""
 
-## A direction in the hall ("[He bows and sends for the tally-keeper.]") is
-## acted out by the one before the god.
+## What a direction in the hall shows its subject doing: "dread" (kneels,
+## falls to their knees, prostrates), "reverence" (bows), "point", "order",
+## or "" — whole words only, and nothing where the clause says it is not done
+## ("nobody kneels", "will not bow", "refuses to kneel").
+static var _gesture_res:Array=[]
+static var _negation_re:RegEx
 static func gesture_in(words:String)->String:
-	var low:=words.to_lower()
-	for pair:Array in [["kneel","dread"],["on his knees","dread"],["on her knees","dread"],["prostrat","dread"],["falls to","dread"],["cower","dread"],["trembl","dread"],
-			["bows","reverence"],["bow ","reverence"],["bowing","reverence"],["points","point"],["raises a hand","order"],["lifts a hand","order"]]:
-		if low.contains(String(pair[0])):return String(pair[1])
+	if _gesture_res.is_empty():
+		for pair:Array in [["\\b(kneels?|kneeling|knelt)\\b","dread"],["\\b(falls?|sinks?|sank|drops?) to (their|his|her) knees\\b","dread"],
+				["\\bon (their|his|her) knees\\b","dread"],["\\b(prostrates?|prostrated)\\b","dread"],["\\bfalls? on (their|his|her|its) face\\b","dread"],
+				["\\b(bows?|bowed|bowing)\\b(?! and arrows?)(?!string)","reverence"],["\\bpoints? (at|to|toward)\\b","point"],["\\b(raises|lifts) a hand\\b","order"]]:
+			var re:=RegEx.new();re.compile(String(pair[0]))
+			_gesture_res.append([re,String(pair[1])])
+		_negation_re=RegEx.new()
+		_negation_re.compile("\\b(nobody|no one|none|not|never|neither|nor|won't|will not|does not|doesn't|did not|didn't|refuses? to|without|instead of)\\b")
+	for clause:String in words.to_lower().replace(";",".").replace(",",".").split("."):
+		for pair:Array in _gesture_res:
+			var hit:=(pair[0] as RegEx).search(clause)
+			if hit==null:continue
+			# A refusal or a "nobody" before the verb in the same clause: not done.
+			if _negation_re.search(clause.substr(0,hit.get_start()))!=null:continue
+			return String(pair[1])
+	return ""
+
+## Who a direction is about: the person the engine named (about), else the
+## figure whose name opens the line. "" when it is about nobody standing here.
+func subject_of(words:String,about:="")->String:
+	var named:=about.strip_edges()
+	if not named.is_empty():
+		var key:=key_for_name(named)
+		if not key.is_empty():return key
+		for other in cast_order:
+			var f:=figure(other)
+			if f!=null and not f.leaving and String(f.person.get("name","")).get_slice(" ",0)==named.get_slice(" ",0):return other
+		return ""
+	var opening:=words.strip_edges().trim_prefix("[")
+	for other in cast_order:
+		var f:=figure(other)
+		if f==null or f.leaving:continue
+		var full:=String(f.person.get("name",""))
+		var given:=full.get_slice(" ",0)
+		if not full.is_empty() and (opening.begins_with(full+" ") or opening.begins_with(given+" ") or opening.begins_with(given+"'")):return other
 	return ""
 
 ## They walk in from the side (the threshold) once the stage has a size.
@@ -504,6 +607,10 @@ func layout(animate:bool)->void:
 			_:
 				var row:=court_index/slots.size()
 				x=float(slots[court_index%slots.size()])*(w if layout_kind=="home" else usable)
+				if three_d:
+					# A loose arc about the fire: some nearer, some further back.
+					var depth:=int((ARC_DEPTH_HOME if layout_kind=="home" else ARC_DEPTH_ENVOY)[court_index%slots.size()])
+					fh*=pow(.93,depth);foot-=room*.055*depth
 				# A court too large for the slots stands further back, between
 				# the ones in front.
 				if row>0:
@@ -512,9 +619,11 @@ func layout(animate:bool)->void:
 				court_index+=1
 		var fw:=fh*FIGURE_ASPECT
 		x=clampf(x,fw*.5+4.0,maxf(fw*.5+4.0,usable-fw*.5-4.0))
-		# Those standing about turn a little toward the middle of the hall.
-		var lean:=clampf((usable*.5-x)/maxf(usable,1.0),-.5,.5)
-		f.rest_yaw=lean*(36.0 if f.role==MAIN else 64.0)
+		# The one before the god turns three-quarter to the god; the others
+		# turn toward them, some in three-quarter, those at the edges in profile.
+		var focus:=(HOME_MAIN_X if layout_kind=="home" else ENVOY_MAIN_X)*w
+		if f.role==MAIN:f.rest_yaw=clampf((usable*.5-x)/maxf(usable,1.0)*60.0,-22.0,22.0)
+		else:f.rest_yaw=clampf((focus-x)/maxf(usable,1.0)*150.0,-72.0,72.0)
 		f.place(Vector2(x,foot),Vector2(fw,fh),animate)
 	# The nearer stand in front of the further.
 	var ordered:Array=figure_layer.get_children()
@@ -588,7 +697,7 @@ func god_says(text:String,animate:=true,ref:=-1)->Label:
 
 ## What the engine decided, or what happens in the hall: a caption at the
 ## foot of the stage. kind: "narration", "direction", "receipt" or "warn".
-func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="")->Label:
+func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="",about:="")->Label:
 	if is_instance_valid(_caption):_drop(_caption,animate)
 	var words:=text.strip_edges()
 	if kind=="direction" or (words.begins_with("[") and words.ends_with("]")):
@@ -604,10 +713,12 @@ func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="")->La
 	_fit_bubble(_caption)
 	_place_caption()
 	if animate:_caption.rise_in()
-	# What the hall shows ("he kneels", "she bows") the one before the god does.
+	# What the hall shows ("Hena kneels", "Tuk bows") the one it is about does;
+	# when nobody here is named as its subject, nobody moves.
 	if kind=="direction":
 		var mood:=gesture_in(words)
-		if not mood.is_empty():react(MAIN,mood)
+		var who:=subject_of(words,about)
+		if not mood.is_empty() and not who.is_empty():react(who,mood)
 	return _caption.label
 
 ## Everything shown at once (a test, or the player skipping ahead): no tween
@@ -669,7 +780,7 @@ func _turn_to(key:String,talk_time:=1.5)->void:
 		if f==null or f.leaving:continue
 		# Long words come with both hands now and then.
 		if other_key==key:f.speak(talk_time,_talks%3==0 and talk_time>2.2)
-		else:f.listen_toward(speaker.home.x)
+		else:f.listen_to(speaker)
 
 func _age_bubbles(fresh:Bubble,animate:bool)->void:
 	## The line before stays faintly; the one before that goes, and so does
@@ -834,7 +945,7 @@ class Figure extends Control:
 	var shade3d:MeshInstance3D
 	var _stage:WeakRef
 	## What they do when nothing is asked of them, and which way they face.
-	var rest_clip:="idle"
+	var rest_clip:="stand"
 	var rest_yaw:=0.0
 	## How far they have sunk (put to death where they stood), in metres.
 	var sink:=0.0:
@@ -870,7 +981,7 @@ class Figure extends Control:
 		body3d=body;shade3d=shade;_stage=weakref(stage)
 		painting.visible=false
 		var h:=absi(String(person.get("name",key)).hash())
-		rest_clip="idle_clasped" if role=="court" and h%3!=0 else "idle"
+		rest_clip=body3d.rest_clip()
 		body3d.play(rest_clip,0.0,float(h%600)/100.0)
 		_sync();queue_redraw()
 
@@ -1008,11 +1119,15 @@ class Figure extends Control:
 	func speak(seconds:=1.5,both_hands:=false)->void:
 		if leaving:return
 		if body3d!=null:
-			body3d.face(rest_yaw*.4,0.3)
-			_clip("talk_both" if both_hands else "talk",0.3)
+			if _act and _act.is_valid():_act.kill()
+			# They turn a little to the god they answer and speak with their hands.
+			body3d.face(rest_yaw*.55,0.35)
+			var stage:=_stage.get_ref() as Control if _stage!=null else null
+			if stage!=null:body3d.look_at_point(stage.god_point(),0.5)
+			_clip(body3d.talk_clip(both_hands),0.35)
 			_light(1.06)
 			_later(seconds,func()->void:
-				_clip(rest_clip,0.5);_light(1.0))
+				_clip(rest_clip,0.5);_light(1.0);body3d.face(rest_yaw,0.5))
 			return
 		_pose(0.0,0.0,1.035,Color(1.07,1.05,1.0))
 		if not is_inside_tree() or Motion.reduced():return
@@ -1023,6 +1138,19 @@ class Figure extends Control:
 		_bob.tween_property(rig,"position:y",-3.0,.14).set_ease(Tween.EASE_OUT)
 		_bob.tween_property(rig,"position:y",0.0,.18).set_ease(Tween.EASE_IN_OUT)
 
+	## Someone else speaks: they look at them, half turned toward them,
+	## still in their own stance.
+	func listen_to(speaker:Figure)->void:
+		if leaving:return
+		if body3d==null or speaker==null or speaker.body3d==null:
+			listen_toward(speaker.home.x if speaker!=null else home.x);return
+		if _act and _act.is_valid():_act.kill()
+		var toward:=clampf((speaker.home.x-home.x)/maxf(size.x*3.0,1.0)*90.0,-55.0,55.0)
+		body3d.face(lerpf(rest_yaw,toward,.45),0.5)
+		body3d.look_at_point(speaker.body3d.head_top()+Vector3(0.0,-0.10*speaker.body3d.scale.y,0.0),0.45)
+		_clip(rest_clip,0.45)
+		_light(0.95)
+
 	## Someone else speaks: they turn a little toward them and listen.
 	func listen_toward(x:float)->void:
 		if leaving:return
@@ -1030,7 +1158,7 @@ class Figure extends Control:
 			if _act and _act.is_valid():_act.kill()
 			# Facing the hall, the speaker on the right is on their left.
 			body3d.face(rest_yaw,0.3)
-			_clip("listen_l" if x>home.x else "listen_r",0.4)
+			_clip(rest_clip,0.4)
 			_light(0.93)
 			return
 		var side:=signf(x-home.x)
@@ -1041,8 +1169,11 @@ class Figure extends Control:
 		if leaving:return
 		if body3d!=null:
 			if _act and _act.is_valid():_act.kill()
-			body3d.face(rest_yaw*.3,0.4)
-			_clip("look_up",0.5)
+			# Every face lifts to the god's voice, from where they stand.
+			body3d.face(rest_yaw*.5,0.45)
+			var stage:=_stage.get_ref() as Control if _stage!=null else null
+			if stage!=null:body3d.look_at_point(stage.god_point(true),0.5)
+			_clip(rest_clip,0.5)
 			_light(1.03)
 			return
 		_pose(0.0,0.0,1.0,Color(1.03,1.02,.98))
@@ -1123,13 +1254,16 @@ class Figure extends Control:
 		if body3d!=null and is_instance_valid(body3d):
 			if leaving:
 				if exit_style!="fall":walk=-maxf(home.x+size.x,1.0)
-				body3d.visible=false
-				if is_instance_valid(shade3d):shade3d.visible=false
+				_vanish()
 			elif walk!=0.0:
 				walk=0.0;_settle_in()
 
 	func _vanish()->void:
-		if body3d!=null and is_instance_valid(body3d):body3d.visible=false
+		## Gone from the hall: hidden, and their clip no longer runs.
+		if body3d!=null and is_instance_valid(body3d):
+			body3d.visible=false
+			if body3d.player!=null:body3d.player.stop()
+			body3d.process_mode=Node.PROCESS_MODE_DISABLED
 		if is_instance_valid(shade3d):shade3d.visible=false
 
 	## A modelled figure walks in from beyond the edge, turned the way it

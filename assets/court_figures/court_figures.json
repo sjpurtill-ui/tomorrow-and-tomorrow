@@ -31,6 +31,7 @@
    },
    "hair": [
     "hair_cropped",
+    "hair_shaved",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -40,7 +41,10 @@
     "hair_topknot"
    ],
    "beards": [
+    "beard_stubble",
     "beard_short",
+    "beard_chin",
+    "beard_moustache",
     "beard_full",
     "beard_long"
    ]
@@ -75,6 +79,7 @@
    },
    "hair": [
     "hair_cropped",
+    "hair_shaved",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -115,6 +120,7 @@
    },
    "hair": [
     "hair_cropped",
+    "hair_shaved",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -124,7 +130,10 @@
     "hair_topknot"
    ],
    "beards": [
+    "beard_stubble",
     "beard_short",
+    "beard_chin",
+    "beard_moustache",
     "beard_full",
     "beard_long"
    ]
@@ -159,6 +168,7 @@
    },
    "hair": [
     "hair_cropped",
+    "hair_shaved",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -199,6 +209,7 @@
    },
    "hair": [
     "hair_cropped",
+    "hair_shaved",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -208,7 +219,10 @@
     "hair_topknot"
    ],
    "beards": [
+    "beard_stubble",
     "beard_short",
+    "beard_chin",
+    "beard_moustache",
     "beard_full",
     "beard_long"
    ]
@@ -243,6 +257,7 @@
    },
    "hair": [
     "hair_cropped",
+    "hair_shaved",
     "hair_long",
     "hair_long_framed",
     "hair_bun",
@@ -256,6 +271,7 @@
  ],
  "hair": [
   "cropped",
+  "shaved",
   "long",
   "long_framed",
   "bun",
@@ -265,7 +281,10 @@
   "topknot"
  ],
  "beards": [
+  "beard_stubble",
   "beard_short",
+  "beard_chin",
+  "beard_moustache",
   "beard_full",
   "beard_long"
  ],
@@ -297,32 +316,80 @@
   "robe": "a"
  },
  "clips": {
-  "idle": {
+  "stand": {
    "seconds": 6.0,
    "loop": true
   },
-  "idle_clasped": {
+  "stand_talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "hip": {
    "seconds": 6.0,
    "loop": true
   },
-  "talk": {
+  "hip_talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "folded": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "folded_talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "clasped": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "clasped_talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "belt": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "belt_talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "staff": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "staff_talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "bowl": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "bowl_talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "sit": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "sit_talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "crouch": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "crouch_talk": {
    "seconds": 4.0,
    "loop": true
   },
   "talk_both": {
    "seconds": 4.0,
-   "loop": true
-  },
-  "listen_l": {
-   "seconds": 6.0,
-   "loop": true
-  },
-  "listen_r": {
-   "seconds": 6.0,
-   "loop": true
-  },
-  "look_up": {
-   "seconds": 6.0,
    "loop": true
   },
   "bow": {
@@ -350,6 +417,53 @@
    "loop": true
   }
  },
+ "stances": [
+  "stand",
+  "hip",
+  "folded",
+  "clasped",
+  "belt",
+  "staff",
+  "bowl",
+  "sit",
+  "crouch"
+ ],
+ "free_hands": {
+  "stand": "LR",
+  "hip": "R",
+  "folded": "",
+  "clasped": "LR",
+  "belt": "R",
+  "staff": "L",
+  "bowl": "",
+  "sit": "LR",
+  "crouch": "R"
+ },
+ "props": {
+  "staff": "prop_staff",
+  "bowl": "prop_bowl",
+  "sit": "prop_stool"
+ },
+ "face_shapes": [
+  "face_jaw",
+  "face_chin",
+  "face_cheek",
+  "face_nose",
+  "face_bridge",
+  "face_nose_wide",
+  "face_brow",
+  "face_lips",
+  "face_ears",
+  "face_long",
+  "face_round",
+  "face_aged"
+ ],
+ "moods": [
+  "mood_smile",
+  "mood_tight",
+  "mood_worry",
+  "mood_stern"
+ ],
  "slots": [
   "SKIN",
   "HAIR",
@@ -359,6 +473,9 @@
   "EYES",
   "EYE_SHINE",
   "EYE_WHITE",
+  "STUBBLE",
+  "WOOD",
+  "CLAY",
   "MOUTH",
   "LEATHER"
  ]

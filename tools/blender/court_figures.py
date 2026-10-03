@@ -146,12 +146,99 @@ def build_variant(variant, quick=False, ao=True):
     if ao:
         _bake_ao(sets, body)
     _write_masks(body, masks)
-    cf_anim.write_actions(rig, k)
+    # each person's own face, and their mood, as morph targets
+    heads = [body, eyes, brows, mouth] + [o for key, objs in sets.items() if key.startswith(("hair_", "beard_")) for o in objs]
+    cf_body.face_morphs(f, heads)
+    cf_body.mood_morphs(f, mouth, brows)
+    cf_anim.write_actions(rig, k, frame=f)
+    sets["props"] = build_props(rig, f)
     log(variant, "clips", len(cf_anim.CLIPS), round(time.time() - t0, 1), "s")
     rig["variant"] = variant
     rig["height"] = f.H
     rig["head_top"] = f.z_top
     return rig, f, sets
+
+
+def build_props(rig, f):
+    """What some stances hold: a staff, a bowl, a seat. Each is made where the
+    stance's hands (or seat) are, then carried back to the rest pose so it
+    rides that hand in the clip."""
+    import bmesh
+    k = f.H / 1.72
+    poser = cf_anim.Poser(rig, k)
+    made = []
+
+    def posed(stance):
+        cf_anim.FRAME = f
+        poser.apply(cf_anim._scaled(cf_anim.clip_stance(stance, 0.0), k))
+        bpy.context.view_layer.update()
+
+    def to_rest(obj, bone):
+        pb = rig.pose.bones[bone]
+        m = pb.bone.matrix_local @ pb.matrix.inverted()
+        for v in obj.data.vertices:
+            v.co = m @ v.co
+        g = obj.vertex_groups.new(name=bone)
+        g.add(list(range(len(obj.data.vertices))), 1.0, 'REPLACE')
+        cf_rig._armature_parent(obj, rig)
+
+    def cylinder(name, a, b, r1, r2, segs=10, caps=True):
+        bm = bmesh.new()
+        d = (Vector(b) - Vector(a))
+        bmesh.ops.create_cone(bm, cap_ends=caps, cap_tris=False, segments=segs, radius1=r1, radius2=r2, depth=d.length)
+        q = Vector((0, 0, 1)).rotation_difference(d.normalized())
+        for v in bm.verts:
+            v.co = q @ v.co + (Vector(a) + Vector(b)) * 0.5
+        me = bpy.data.meshes.new(name)
+        bm.to_mesh(me)
+        bm.free()
+        obj = bpy.data.objects.new(name, me)
+        bpy.context.scene.collection.objects.link(obj)
+        for poly in me.polygons:
+            poly.use_smooth = True
+        return obj
+
+    # a staff in the right hand, its foot on the ground
+    posed("staff")
+    pb = rig.pose.bones["hand.R"]
+    grip = pb.matrix @ Vector((0.0, f.hand_len * 0.42, 0.0))
+    staff = cylinder("prop_staff", (grip.x, grip.y, 0.0), (grip.x, grip.y + 0.004, grip.z + 0.30 * k), 0.016 * k, 0.019 * k)
+    knob = cylinder("knob", (grip.x, grip.y + 0.004, grip.z + 0.29 * k), (grip.x, grip.y + 0.004, grip.z + 0.36 * k), 0.026 * k, 0.012 * k)
+    staff = cf_body.join([staff, knob], "prop_staff")
+    cf_body.set_material(staff, "WOOD")
+    to_rest(staff, "hand.R")
+    made.append(staff)
+    # a bowl held in both hands before the waist (it rides the right)
+    posed("bowl")
+    pl = rig.pose.bones["hand.L"].matrix @ Vector((0.0, f.hand_len * 0.40, 0.0))
+    pr = rig.pose.bones["hand.R"].matrix @ Vector((0.0, f.hand_len * 0.40, 0.0))
+    c = (pl + pr) * 0.5 + Vector((0.0, 0.0, 0.028 * k))
+    bowl = cylinder("prop_bowl", c + Vector((0, 0, -0.030 * k)), c + Vector((0, 0, 0.030 * k)), 0.050 * k, 0.090 * k, segs=16, caps=False)
+    sol = bowl.modifiers.new("wall", 'SOLIDIFY')
+    sol.thickness = 0.008 * k
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    bpy.context.view_layer.objects.active = bowl
+    bowl.select_set(True)
+    bpy.ops.object.modifier_apply(modifier=sol.name)
+    bottom = cylinder("bowl_base", c + Vector((0, 0, -0.034 * k)), c + Vector((0, 0, -0.026 * k)), 0.050 * k, 0.050 * k, segs=16)
+    bowl = cf_body.join([bowl, bottom], "prop_bowl")
+    cf_body.set_material(bowl, "CLAY")
+    to_rest(bowl, "hand.R")
+    made.append(bowl)
+    # a log to sit on, under the seated hips (it does not move)
+    posed("sit")
+    hips = rig.pose.bones["hips"].matrix.translation
+    seat = hips.z - 0.085 * k
+    stool = cylinder("prop_stool", (0.0, hips.y + 0.020 * k, 0.0), (0.0, hips.y + 0.020 * k, seat), 0.165 * k, 0.155 * k, segs=14)
+    cf_body.set_material(stool, "WOOD")
+    stool.parent = rig
+    made.append(stool)
+    poser.apply({})
+    bpy.context.view_layer.update()
+    for o in made:
+        _ensure_color(o)
+    return made
 
 
 def _bind_face_part(obj, rig):
@@ -388,7 +475,7 @@ def export(rig, sets, path):
         export_skins=True, export_influence_nb=4, export_def_bones=False,
         export_animations=True, export_animation_mode='ACTIONS', export_force_sampling=True,
         export_optimize_animation_size=True, export_reset_pose_bones=True, export_rest_position_armature=True,
-        export_morph=False, export_extras=True)
+        export_morph=True, export_morph_normal=True, export_morph_animation=False, export_extras=True)
 
 
 def manifest(entries, out_dir):
@@ -400,6 +487,11 @@ def manifest(entries, out_dir):
         "outfits": {k: [] for k in cf_dress.OUTFITS},
         "outfit_mask_channel": {k: "rgba"[v] for k, v in OUTFIT_CHANNEL.items()},
         "clips": {n: {"seconds": d, "loop": n in cf_anim.LOOP_CLIPS} for n, (d, _) in cf_anim.CLIPS.items()},
+        "stances": list(cf_anim.STANCES),
+        "free_hands": dict(cf_anim.FREE_HANDS),
+        "props": {"staff": "prop_staff", "bowl": "prop_bowl", "sit": "prop_stool"},
+        "face_shapes": ["face_" + n for n in cf_body.FACE_SHAPES],
+        "moods": ["mood_smile", "mood_tight", "mood_worry", "mood_stern"],
         "slots": list(cf_body.SLOT_DEFAULTS.keys()),
     }
     for e in entries:

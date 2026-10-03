@@ -48,6 +48,7 @@ LINEUP = [
 def args():
     a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     o = {"figures": os.path.join(ROOT, "assets", "court_figures"), "out": os.path.join(ROOT, "reports", "court_figures")}
+    a = [x for x in a if x != "--faces16"]
     for i in range(0, len(a) - 1, 2):
         key = a[i].lstrip("-").replace("-", "_")
         o[key] = a[i + 1] if key == "force_variant" else os.path.abspath(a[i + 1])
@@ -198,7 +199,8 @@ def dress(rig, objs, spec, idx):
     cols = {
         "SKIN": skin, "HAIR": srgb(hair_col), "EYES": srgb("22170f"), "EYE_SHINE": srgb("fbf6ea"), "EYE_WHITE": srgb("e9dfca"),
         "MOUTH": tuple(c * 0.45 for c in skin_at(min(1.0, depth + 0.25))),
-        "LEATHER": srgb("5b3b24"),
+        "LEATHER": srgb("5b3b24"), "WOOD": srgb("6b4a2e"), "CLAY": srgb("a0603a"),
+        "STUBBLE": tuple(0.55 * a + 0.45 * b for a, b in zip(skin, srgb(hair_col))),
     }
     if kind == "hide":
         cols.update({"CLOTH_A": srgb(HIDE[0]), "CLOTH_B": srgb(HIDE[1]), "CLOTH_C": srgb(dyes[2])})
@@ -210,7 +212,7 @@ def dress(rig, objs, spec, idx):
         flat = slot in ("EYES", "EYE_SHINE", "EYE_WHITE", "MOUTH")
         shade = (0.62, 0.48, 0.44) if slot == "SKIN" else (0.48, 0.40, 0.40)
         mats[slot] = toon("%s_%d" % (slot, idx), c, shade=shade, ao=not flat, flat=flat)
-    keep_prefix = {"Body", "Eyes", "Brows", "Mouth", hair, beard}
+    keep_prefix = {"Body", "Eyes", "Brows", "Mouth", hair, beard} | set(spec[8] if len(spec) > 8 else ())
     for o in objs:
         if o.type != 'MESH':
             continue
@@ -437,5 +439,97 @@ def _sheet(paths, out, cols=4):
     print("[preview] wrote", out, flush=True)
 
 
+# --- Sixteen faces from three peoples ---------------------------------------------
+
+# A people's family face (the game makes these from each people's appearance
+# profile); each person then differs within it.
+PEOPLES = {
+    "kilnfold": {"depth": (0.80, 0.92), "hair": ("1b1511", "2b2018"), "coiled": True,
+                 "face": {"nose_wide": 0.6, "lips": 0.6, "jaw": 0.15, "cheek": 0.35, "brow": 0.2}},
+    "thornbank": {"depth": (0.04, 0.14), "hair": ("0e1016", "1a1c24"), "coiled": False,
+                  "face": {"nose": 0.2, "bridge": 0.55, "long": 0.35, "cheek": -0.25, "lips": -0.35, "nose_wide": -0.4}},
+    "ochrestep": {"depth": (0.58, 0.72), "hair": ("c2a878", "a88d5e"), "coiled": False,
+                  "face": {"cheek": 0.7, "nose": 0.3, "round": -0.15, "brow": 0.35, "jaw": 0.25, "lips": 0.1}},
+}
+
+SIXTEEN = [
+    # people, variant, hair, beard, outfit, mood
+    ("kilnfold", "male_adult", "hair_curls", None, "hide", "mood_smile"),
+    ("kilnfold", "male_old", "hair_shaved", "beard_short", "tunic", None),
+    ("kilnfold", "male_young", "hair_cropped", None, "tunic", None),
+    ("thornbank", "male_adult", "hair_tail", "beard_moustache", "tunic", None),
+    ("thornbank", "male_old", "hair_long", "beard_long", "robe", "mood_worry"),
+    ("thornbank", "male_young", "hair_topknot", "beard_stubble", "hide", "mood_smile"),
+    ("ochrestep", "male_adult", "hair_cropped", "beard_chin", "robe", "mood_stern"),
+    ("ochrestep", "male_adult", "hair_long", "beard_stubble", "hide", None),
+    ("kilnfold", "female_adult", "hair_braids", None, "tunic", "mood_smile"),
+    ("kilnfold", "female_old", "hair_bun", None, "robe", None),
+    ("kilnfold", "female_young", "hair_curls", None, "hide", None),
+    ("thornbank", "female_adult", "hair_long_framed", None, "robe", None),
+    ("thornbank", "female_young", "hair_braids", None, "tunic", "mood_smile"),
+    ("ochrestep", "female_adult", "hair_bun", None, "tunic", "mood_worry"),
+    ("ochrestep", "female_old", "hair_long", None, "hide", None),
+    ("ochrestep", "female_young", "hair_tail", None, "robe", "mood_smile"),
+]
+
+
+def _person_face(people, idx):
+    import random
+    rnd = random.Random(idx * 7919 + 13)
+    face = dict(PEOPLES[people]["face"])
+    for name in ("jaw", "chin", "cheek", "nose", "bridge", "nose_wide", "brow", "lips", "ears", "long", "round"):
+        face[name] = max(-1.0, min(1.0, face.get(name, 0.0) + rnd.uniform(-0.55, 0.55)))
+    return face
+
+
+def faces16(figures, out):
+    for ob in list(bpy.data.objects):
+        bpy.data.objects.remove(ob, do_unlink=True)
+    cam = stage()
+    shots = []
+    for idx, (people, variant, hair, beard, outfit, mood) in enumerate(SIXTEEN):
+        import random
+        rnd = random.Random(idx)
+        look = PEOPLES[people]
+        depth = rnd.uniform(*look["depth"])
+        hair_col = rnd.choice(look["hair"])
+        if variant.endswith("_old"):
+            hair_col = "b8b2a6"
+        dyes = (("a8432f", "5b4130", "c9a43c"), ("2f4a6e", "8e2f3a", "d9ccb0"), ("4f7a68", "6d4b6b", "d08a2b"))[idx % 3]
+        path = os.path.join(figures, "court_figure_%s.glb" % variant)
+        if not os.path.exists(path):
+            path = os.path.join(figures, "court_figure_male_adult.glb")
+        rig, objs, acts = import_figure(path)
+        dress(rig, objs, (variant, outfit, hair, beard, depth, hair_col, dyes, ("hide_cape",)), 100 + idx)
+        face = _person_face(people, idx)
+        for o in objs:
+            keys = o.data.shape_keys if o.type == 'MESH' else None
+            if keys is None:
+                continue
+            for kb in keys.key_blocks:
+                n = kb.name
+                if n.startswith("face_"):
+                    kb.slider_min = -1.0
+                    kb.value = face.get(n[5:], 0.0)
+                elif n == mood:
+                    kb.value = 0.8
+        stance = ("stand", "folded", "clasped", "hip", "belt")[idx % 5]
+        pose(rig, acts, stance, 1.0)
+        top = 1.62 if not variant.endswith(("_young", "_old")) else 1.52
+        rig.location = (0, 0, 0)
+        look_at(cam, (0.0, 0.0, top - 0.06), (0.42, -1.25, top + 0.02))
+        cam.data.lens = 85
+        path = os.path.join(out, "_f16_%d.png" % idx)
+        render(path, 360, 420)
+        shots.append(path)
+        for ob in objs:
+            bpy.data.objects.remove(ob, do_unlink=True)
+    _sheet(shots, os.path.join(out, "preview_faces16.png"), cols=8)
+
+
 if __name__ == "__main__":
-    main()
+    if "--faces16" in sys.argv:
+        o = args()
+        faces16(o["figures"], o["out"])
+    else:
+        main()

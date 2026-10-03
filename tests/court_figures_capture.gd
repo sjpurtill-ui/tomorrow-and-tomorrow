@@ -23,18 +23,18 @@ const SCENES:=[
 	{"tag":"fire","tier":0,"stage":"hearth_council","speaker":0,
 	 "words":"The watch is too thin. Varrow's men cross at the ford by night, and we see them only at dawn.",
 	 "people":[
-		["Zola Tall-Grass","Hearth Chief",{"variant":"male_adult","outfit":"hide","hair":"long","beard":"beard_full","depth":0.86,"hair_colour":"1b1511","cloth":["a8782a","6e5541","a8432f"]},-0.75,0.55,"talk",1.1,12.0],
-		["Diru","Pathfinder",{"variant":"female_adult","outfit":"hide","hair":"braids","depth":0.30,"hair_colour":"4a2a1a","cloth":["b07a35","6e5541","8e2f3a"],"without":["hide_cape"]},1.15,-0.35,"listen_r",2.0,-22.0],
-		["Old Tamsa","Keeper of Tales",{"variant":"female_old","outfit":"hide","hair":"bun","depth":0.60,"hair_colour":"b5b0a6","cloth":["9c7a52","5b4130","c9a43c"]},2.35,-0.9,"idle_clasped",1.6,-30.0],
-		["Kel","Hunter",{"variant":"male_young","outfit":"hide","hair":"tail","depth":0.48,"hair_colour":"1d1813","cloth":["a8782a","6e5541","4f7a68"],"without":["hide_cape"]},-2.35,-0.75,"listen_l",3.1,28.0],
+		["Zola Tall-Grass","Hearth Chief",{"variant":"male_adult","outfit":"hide","hair":"long","beard":"beard_full","depth":0.86,"hair_colour":"1b1511","cloth":["a8782a","6e5541","a8432f"]},-0.75,0.55,"stand_talk",1.1,12.0],
+		["Diru","Pathfinder",{"variant":"female_adult","outfit":"hide","hair":"braids","depth":0.30,"hair_colour":"4a2a1a","cloth":["b07a35","6e5541","8e2f3a"],"without":["hide_cape"]},1.15,-0.35,"hip",2.0,-22.0],
+		["Old Tamsa","Keeper of Tales",{"variant":"female_old","outfit":"hide","hair":"bun","depth":0.60,"hair_colour":"b5b0a6","cloth":["9c7a52","5b4130","c9a43c"]},2.35,-0.9,"clasped",1.6,-30.0],
+		["Kel","Hunter",{"variant":"male_young","outfit":"hide","hair":"tail","depth":0.48,"hair_colour":"1d1813","cloth":["a8782a","6e5541","4f7a68"],"without":["hide_cape"]},-2.35,-0.75,"stand",3.1,28.0],
 	]},
 	{"tag":"hall","tier":2,"stage":"temple_palace","speaker":1,
 	 "words":"Count the stores again before the moon is full, and let the scribes write what they find.",
 	 "people":[
-		["Ama Reedwake","Steward",{"variant":"female_adult","outfit":"robe","hair":"long_framed","depth":0.40,"hair_colour":"8a6a48","cloth":["d9ccb0","4f7a68","a8432f"]},-1.55,-0.4,"listen_r",0.7,24.0],
+		["Ama Reedwake","Steward",{"variant":"female_adult","outfit":"robe","hair":"long_framed","depth":0.40,"hair_colour":"8a6a48","cloth":["d9ccb0","4f7a68","a8432f"]},-1.55,-0.4,"folded",0.7,24.0],
 		["Hosk the Elder","High Speaker",{"variant":"male_old","outfit":"robe","hair":"cropped","beard":"beard_long","depth":0.52,"hair_colour":"a8a49c","cloth":["2f4a6e","8e2f3a","c9a43c"]},0.15,0.55,"raise_hand",1.2,0.0],
-		["Neru","Scribe",{"variant":"male_young","outfit":"tunic","hair":"curls","depth":0.95,"hair_colour":"0f0d0c","cloth":["c9a43c","5b4130","2f4a6e"]},1.85,-0.55,"listen_l",1.9,-26.0],
-		["Ilse","Keeper of Stores",{"variant":"female_young","outfit":"tunic","hair":"tail","depth":0.12,"hair_colour":"6a3320","cloth":["a8432f","5b4130","d9ccb0"]},-2.75,-1.0,"idle_clasped",2.6,30.0],
+		["Neru","Scribe",{"variant":"male_young","outfit":"tunic","hair":"curls","depth":0.95,"hair_colour":"0f0d0c","cloth":["c9a43c","5b4130","2f4a6e"]},1.85,-0.55,"belt",1.9,-26.0],
+		["Ilse","Keeper of Stores",{"variant":"female_young","outfit":"tunic","hair":"tail","depth":0.12,"hair_colour":"6a3320","cloth":["a8432f","5b4130","d9ccb0"]},-2.75,-1.0,"clasped",2.6,30.0],
 	]},
 ]
 
@@ -111,7 +111,7 @@ func _scene(spec:Dictionary)->void:
 			_fail("%s did not load" % raw[0]);continue
 		fig.position=Vector3(float(raw[3]),0.0,float(raw[4]))
 		fig.rotation_degrees.y=float(raw[7])
-		for clip:String in ["idle","talk","listen_l","listen_r","bow","kneel","walk_in","raise_hand"]:
+		for clip:String in ["stand","stand_talk","clasped","sit","bow","kneel","walk_in","raise_hand"]:
 			if fig.player==null or not fig.player.has_animation(clip):_fail("%s has no clip %s" % [raw[0],clip])
 		fig.play(String(raw[5]),0.0,float(raw[6]))
 		view.add_child(_shadow(fig.position))

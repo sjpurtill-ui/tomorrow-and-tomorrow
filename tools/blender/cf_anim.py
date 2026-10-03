@@ -11,16 +11,24 @@ into its own action, so loops close exactly. A pose maps a bone to a dict:
 Left-side poses mirror to the right with mirror(); clips write both sides.
 
 Clips (loop or not):
-  idle, idle_clasped, talk, talk_both, listen_l, listen_r, look_up (loops);
+  a stance each person keeps for life, and the same stance talking (loops):
+    stand, hip, folded, clasped, belt, staff, bowl, sit, crouch, and
+    <stance>_talk (talking with whichever hands are free);
+  talk_both (loop: pleading or insisting with both hands);
   bow, kneel, point, raise_hand (play once and hold the last frame);
   walk_in, walk_out (loops, in place: the stage moves the figure).
+Where a head turns (to whoever speaks, up to the god) the game turns it.
 """
 import math
 import bpy
 from mathutils import Euler, Quaternion, Vector
 
 FPS = 30
-LOOP_CLIPS = ("idle", "idle_clasped", "talk", "talk_both", "listen_l", "listen_r", "look_up", "walk_in", "walk_out")
+STANCES = ("stand", "hip", "folded", "clasped", "belt", "staff", "bowl", "sit", "crouch")
+LOOP_CLIPS = STANCES + tuple(st + "_talk" for st in STANCES) + ("talk_both", "walk_in", "walk_out")
+ARM_BONES = ("shoulder", "upper_arm", "forearm", "hand", "fingers", "index", "thumb")
+# The hands each stance leaves free to talk with.
+FREE_HANDS = {"stand": "LR", "hip": "R", "folded": "", "clasped": "LR", "belt": "R", "staff": "L", "bowl": "", "sit": "LR", "crouch": "R"}
 
 
 # --- helpers ---------------------------------------------------------------------
@@ -117,17 +125,216 @@ def merge(*poses):
 # --- base stances ------------------------------------------------------------------
 
 def relaxed(k=1.0):
-    """Arms down at the sides, hands soft: the stance every clip starts from."""
+    """Standing easy: weight on the right leg, the left knee soft, the hip
+    out, shoulders tilted against it, elbows soft, hands loose."""
     p = {}
+    add(p, "hips", rot=(0, 7.0, -6), loc=(-0.034, 0.0, -0.014))
+    add(p, "thigh.R", rot=(0, -7.0, 4))
+    add(p, "thigh.L", rot=(-9, -7.0, 8))
+    add(p, "shin.L", rot=(22, 0, 0))
+    add(p, "foot.L", rot=(-6, 0, 0))
+    add(p, "spine", rot=(1, -3.5, 3))
+    add(p, "chest", rot=(1, -4.0, 4))
+    add(p, "neck", rot=(0, 1.5, -3))
+    add(p, "head", rot=(2, 5.0, -6))
     both(p, "shoulder", rot=(0, 3, 0))
-    both(p, "upper_arm", rot=(2, 15, 0))
-    both(p, "forearm", rot=(-10, 2, 0))
-    both(p, "hand", rot=(0, 4, -4))
-    both(p, "fingers", rot=(0, 26, 0))
-    both(p, "index", rot=(0, 18, 0))
-    both(p, "thumb", rot=(0, 8, 0))
+    both(p, "upper_arm", rot=(3, 15, -4))
+    side(p, "forearm", "R", rot=(-16, 0, 0))
+    side(p, "forearm", "L", rot=(-26, 2, 0))
+    both(p, "hand", rot=(0, 4, 8))
+    both(p, "fingers", rot=(0, 32, 0))
+    both(p, "index", rot=(0, 22, 0))
+    both(p, "thumb", rot=(0, 10, 0))
     add(p, "jaw", open_=1.0)
     return p
+
+
+# The body the clips are being written for (set by write_actions); stances
+# that put a hand on the body reach for it with two-bone IK on its own measure.
+FRAME = None
+
+
+def arm_ik(p, s_, wrist, pole):
+    """Points the arm on side s_ so the wrist lands at `wrist` (figure axes,
+    metres), the elbow bending toward `pole`; replaces that arm's rotations."""
+    f = FRAME
+    if f is None:
+        return p
+    S, E0, W0 = f.shoulder[s_], f.elbow[s_], f.wrist[s_]
+    a, b = (E0 - S).length, (W0 - E0).length
+    T = Vector(wrist)
+    d = min((T - S).length, a + b - 0.002)
+    u = (T - S).normalized()
+    T = S + u * d
+    cos_a = max(-1.0, min(1.0, (a * a + d * d - b * b) / (2 * a * d)))
+    sin_a = math.sqrt(max(0.0, 1.0 - cos_a * cos_a))
+    v = Vector(pole) - u * Vector(pole).dot(u)
+    v = v.normalized() if v.length > 1e-6 else Vector((0, 0, -1))
+    E = S + u * (a * cos_a) + v * (a * sin_a)
+    q1 = (E0 - S).normalized().rotation_difference((E - S).normalized())
+    q2 = (W0 - E0).normalized().rotation_difference(q1.inverted() @ (T - E).normalized())
+    p["upper_arm." + s_] = {"rot": tuple(math.degrees(x) for x in q1.to_euler('XYZ'))}
+    p["forearm." + s_] = {"rot": tuple(math.degrees(x) for x in q2.to_euler('XYZ'))}
+    p["shoulder." + s_] = {"rot": (0.0, 0.0, 0.0)}
+    return p
+
+
+def _mirror_x(v, s_):
+    return (v[0] if s_ == "L" else -v[0], v[1], v[2])
+
+
+def stance_pose(name):
+    """The body of a stance at rest (no breathing)."""
+    p = relaxed()
+    f = FRAME
+    k = f.H / 1.72 if f else 1.0
+    if name == "hip" and f:
+        arm_ik(p, "L", (f.p["pelvis"] * 0.98, -0.020 * k, f.z_hip + 0.105 * k), (1.0, 0.8, 0.0))
+        side(p, "hand", "L", rot=(-30, 30, -60))
+        side(p, "fingers", "L", rot=(0, -12, 0))
+        side(p, "index", "L", rot=(0, -10, 0))
+    elif name == "folded":
+        if f:
+            front = -(f.p["chest_d"] + 0.050 * k)
+            arm_ik(p, "L", (-0.075 * k, front, f.z_chest - 0.045 * k), (0.6, -0.2, -1.0))
+            arm_ik(p, "R", (0.080 * k, front + 0.012, f.z_chest - 0.085 * k), (-0.6, -0.2, -1.0))
+        both(p, "hand", rot=(0, 0, 22))
+        both(p, "fingers", rot=(0, 12, 0))
+        add(p, "chest", rot=(-2, 0, 0))
+        add(p, "head", rot=(-3, 0, 0))
+    elif name == "clasped":
+        if f:
+            for s_ in "LR":
+                arm_ik(p, s_, _mirror_x((0.030 * k, -(f.p["waist"] * 0.80 + 0.050 * k), f.z_hip + 0.050 * k), s_), _mirror_x((1.0, 0.3, -0.6), s_))
+        both(p, "hand", rot=(4, -4, 16))
+        both(p, "fingers", rot=(0, 8, 0))
+        both(p, "index", rot=(0, 12, 0))
+        both(p, "thumb", rot=(0, 10, 0))
+    elif name == "belt":
+        if f:
+            for s_ in "LR":
+                arm_ik(p, s_, _mirror_x((f.p["waist"] * 0.85, -(0.070 * k), f.z_waist - 0.035 * k), s_), _mirror_x((1.0, 0.5, -0.3), s_))
+        both(p, "hand", rot=(-10, 6, 24))
+        both(p, "fingers", rot=(0, 13, 0))
+        both(p, "thumb", rot=(0, -30, 0))
+    elif name == "staff":
+        if f:
+            arm_ik(p, "R", (-0.215 * k, -0.150 * k, f.z_waist + 0.140 * k), (-0.8, 0.5, -0.6))
+        side(p, "hand", "R", rot=(0, -18, 72))
+        side(p, "fingers", "R", rot=(0, 52, 0))
+        side(p, "index", "R", rot=(0, 62, 0))
+        side(p, "thumb", "R", rot=(0, 30, 0))
+    elif name == "bowl":
+        if f:
+            for s_ in "LR":
+                arm_ik(p, s_, _mirror_x((0.085 * k, -(f.p["waist"] + 0.120 * k), f.z_waist + 0.020 * k), s_), _mirror_x((1.0, 0.2, -0.8), s_))
+        both(p, "hand", rot=(10, 0, 70))
+        both(p, "fingers", rot=(0, -10, 0))
+        both(p, "index", rot=(0, -8, 0))
+        both(p, "thumb", rot=(0, -12, 0))
+        add(p, "head", rot=(4, 0, 0))
+    elif name == "sit":
+        p = {}
+        add(p, "hips", rot=(-6, 0, 0), loc=(0.0, 0.050, -0.395))
+        both(p, "thigh", rot=(-88, -6, 0))
+        both(p, "shin", rot=(90, 0, 0))
+        both(p, "foot", rot=(-4, 0, 0))
+        add(p, "spine", rot=(9, 0, 0))
+        add(p, "chest", rot=(5, 0, 2))
+        add(p, "neck", rot=(-4, 0, 0))
+        add(p, "head", rot=(-5, 2, -3))
+        both(p, "shoulder", rot=(0, 3, 0))
+        both(p, "upper_arm", rot=(-30, 14, -10))
+        both(p, "forearm", rot=(-44, 0, 0))
+        both(p, "hand", rot=(16, 0, 34))
+        both(p, "fingers", rot=(0, 26, 0))
+        both(p, "index", rot=(0, 20, 0))
+        add(p, "jaw", open_=1.0)
+    elif name == "crouch":
+        p = {}
+        add(p, "hips", rot=(10, 0, 0), loc=(0.0, 0.110, -0.470))
+        both(p, "thigh", rot=(-124, -12, 0))
+        both(p, "shin", rot=(140, 0, 0))
+        both(p, "foot", rot=(-14, 0, 0))
+        both(p, "toe", rot=(-20, 0, 0))
+        add(p, "spine", rot=(16, 0, 0))
+        add(p, "chest", rot=(10, 0, 0))
+        add(p, "neck", rot=(-12, 0, 0))
+        add(p, "head", rot=(-14, 0, 0))
+        both(p, "shoulder", rot=(-4, 3, 0))
+        both(p, "upper_arm", rot=(-54, 10, -14))
+        both(p, "forearm", rot=(-34, 0, 0))
+        both(p, "hand", rot=(24, 0, 10))
+        both(p, "fingers", rot=(0, 30, 0))
+        add(p, "jaw", open_=1.0)
+    return p
+
+
+def clip_stance(name, t):
+    T = 6.0
+    seed = STANCES.index(name) * 0.13
+    p = stance_pose(name)
+    parts = [p, breath(t, 3.0 + seed, 1.0), eyes(t, (1.4 + seed, 4.6 - seed)),
+             {"head": {"rot": (1.2 * wave(t, T, 0.1 + seed), 0, 2.2 * wave(t, T, 0.3 + seed))}}]
+    if name not in ("sit", "crouch"):
+        parts.append(weight_shift(t, T, 0.45))
+    else:
+        parts.append({"spine": {"rot": (0.8 * wave(t, T, seed), 0, 1.0 * wave(t, T, 0.5 + seed))}})
+    return merge(*parts)
+
+
+def talk_upper(t, sides, amount=1.0):
+    """Talking: both hands loose and open before the body, beating on the
+    words out of step with each other; shoulders, chest and head in it."""
+    T = 4.0
+    p = {}
+    for s_, ph, k in (("R", 0.0, 1.0), ("L", 0.37, 0.75)):
+        if s_ not in sides:
+            continue
+        b = 0.5 + 0.5 * wave(t, T / 3.0, ph)
+        sw = wave(t, T / 2.0, ph + 0.2)
+        side(p, "shoulder", s_, rot=(-2.0 * b * k, 2.0 + 3.0 * b * k, 0))
+        side(p, "upper_arm", s_, rot=(-12 - 14 * b * k * amount, 13 + 5 * sw * k, -20))
+        side(p, "forearm", s_, rot=(-60 - 24 * b * k * amount, -4, 0))
+        side(p, "hand", s_, rot=(10 + 12 * b, -2, 48 + 18 * sw))
+        side(p, "fingers", s_, rot=(0, -20 + 12 * b, 0))
+        side(p, "index", s_, rot=(0, -16 + 10 * b, 0))
+        side(p, "thumb", s_, rot=(0, -14, 0))
+    beat = 0.5 + 0.5 * wave(t, T / 3.0, 0.1)
+    add(p, "spine", rot=(1.5 * beat * amount, 0, 2.0 * wave(t, T / 2.0, 0.3)))
+    add(p, "chest", rot=(2.0 + 1.5 * beat, 0, 3.0 * wave(t, T / 2.0, 0.4)))
+    nod = max(0.0, wave(t, T / 3.0, 0.15)) ** 1.5
+    add(p, "neck", rot=(2.0 * nod, 0, 0))
+    add(p, "head", rot=(5.0 * nod - 1.5, 3.5 * wave(t, T, 0.25), 4.0 * wave(t, T / 2.0, 0.6)))
+    both(p, "brow", lift=0.0030 * beat)
+    return p
+
+
+def _over(base, over, sides):
+    """The stance, with the talking arms taking over the free hands and the
+    rest of the talking added on top."""
+    out = {k: dict(v) for k, v in base.items()}
+    for bone, e in over.items():
+        root = bone.split(".")[0]
+        if root in ARM_BONES:
+            if bone.split(".")[-1] in sides:
+                out[bone] = dict(e)
+        else:
+            add(out, bone, rot=e.get("rot"), loc=e.get("loc"), open_=e.get("open"), lift=e.get("lift"))
+    return out
+
+
+def clip_stance_talk(name, t):
+    sides = FREE_HANDS[name]
+    base = stance_pose(name)
+    body = _over(base, talk_upper(t, sides if sides else "", 1.0), sides)
+    parts = [body, breath(t, 4.0, 0.6), _mouth(t, 1.0, 1.15), eyes(t, (2.6,))]
+    if name not in ("sit", "crouch"):
+        parts.append(weight_shift(t, 4.0, 0.4))
+    if not sides:
+        # hands busy: the head and shoulders carry it
+        parts.append({"head": {"rot": (3.0 * max(0.0, wave(t, 1.33, 0.1)), 0, 0)}, "chest": {"rot": (1.5, 0, 0)}})
+    return merge(*parts)
 
 
 def breath(t, period=3.2, amount=1.0):
@@ -408,21 +615,19 @@ def clip_walk_out(t):
     return merge(_walk(t, T, 17.0, 38.0, 0.016, head_down=14.0, swing=0.6), eyes(t, ()))
 
 
-CLIPS = {
-    "idle": (6.0, clip_idle),
-    "idle_clasped": (6.0, clip_idle_clasped),
-    "talk": (4.0, clip_talk),
+CLIPS = {}
+for _st in STANCES:
+    CLIPS[_st] = (6.0, (lambda n: lambda t: clip_stance(n, t))(_st))
+    CLIPS[_st + "_talk"] = (4.0, (lambda n: lambda t: clip_stance_talk(n, t))(_st))
+CLIPS.update({
     "talk_both": (4.0, clip_talk_both),
-    "listen_l": (6.0, lambda t: clip_listen(t, "l")),
-    "listen_r": (6.0, lambda t: clip_listen(t, "r")),
-    "look_up": (6.0, clip_look_up),
     "bow": (2.8, clip_bow),
     "kneel": (2.6, clip_kneel),
     "point": (2.0, clip_point),
     "raise_hand": (1.8, clip_raise_hand),
     "walk_in": (1.1, clip_walk_in),
     "walk_out": (1.3, clip_walk_out),
-}
+})
 
 
 # --- writing actions -----------------------------------------------------------------
@@ -476,7 +681,9 @@ class Poser:
             pb.keyframe_insert("scale", frame=frame)
 
 
-def write_actions(rig, k=1.0, only=None):
+def write_actions(rig, k=1.0, only=None, frame=None):
+    global FRAME
+    FRAME = frame
     poser = Poser(rig, k)
     if rig.animation_data is None:
         rig.animation_data_create()

@@ -233,31 +233,76 @@ def build_body(f, name="Body", voxel=0.003):
 FACE = {"eye_u": 0.470, "eye_x": 0.035, "brow_u": 0.565, "nose_u": 0.335, "mouth_u": 0.195}
 
 
-def build_head(fld, f):
+# A face's own shape, each from -1 to 1 (0 the variant's own face). The
+# game mixes these per person as morph targets (face_<name>), so a people
+# shares a family look and every person differs within it.
+FACE_SHAPES = ("jaw", "chin", "cheek", "nose", "bridge", "nose_wide", "brow", "lips", "ears", "long", "round", "aged")
+
+
+def build_head(fld, f, shape=None):
     p = f.p
+    sh = shape or {}
+    g = lambda k: float(sh.get(k, 0.0))
     s = f.head_h / 0.282
     hp = lambda x, y, u: f.head_point(x * s, y * s, u)
-    jaw = p["jaw"]
+    jaw = p["jaw"] * (1.0 + 0.20 * g("jaw"))
     fem = p["female"]
+    long_ = g("long")
+    aged = max(0.0, g("aged")) + (0.55 if p.get("old") else 0.0)
+    rnd = g("round")
     # cranium: round, the back of the head full
     fld.union(Ellipsoid(hp(0, 0.014, 0.640), (0.087 * s, 0.097 * s, 0.100 * s)), 0.03 * s)
     # the face: an egg narrowing to the chin
-    fld.union(Ellipsoid(hp(0, -0.030, 0.410), (0.069 * s, 0.066 * s, 0.104 * s)), 0.034 * s)
-    fld.union(Ellipsoid(hp(0, -0.040, 0.185), (0.049 * s * (0.88 + 0.16 * jaw), 0.054 * s, 0.062 * s)), 0.030 * s)
-    fld.union(Sphere(hp(0, -0.066, 0.070), 0.020 * s * (0.88 + 0.16 * jaw)), 0.016 * s)
+    fld.union(Ellipsoid(hp(0, -0.030, 0.410 - 0.010 * long_), (0.069 * s * (1.0 + 0.06 * rnd - 0.02 * long_), 0.066 * s, 0.104 * s * (1.0 + 0.06 * long_))), 0.034 * s)
+    fld.union(Ellipsoid(hp(0, -0.040, 0.185 - 0.025 * long_ - 0.012 * aged),
+                        (0.049 * s * (0.88 + 0.16 * jaw) * (1.0 + 0.05 * rnd), 0.054 * s, 0.062 * s * (1.0 + 0.10 * long_))), 0.030 * s)
+    fld.union(Sphere(hp(0, -0.066 - 0.010 * g("chin"), 0.070 - 0.030 * long_ - 0.006 * g("chin")),
+                     0.020 * s * (0.88 + 0.16 * jaw) * (1.0 + 0.22 * g("chin"))), 0.016 * s)
     for sd in (1, -1):
-        if jaw > 0.9:
-            fld.union(Ellipsoid(hp(sd * 0.044, -0.008, 0.200), (0.018 * s, 0.026 * s, 0.022 * s)), 0.020 * s)
-        fld.union(Sphere(hp(sd * 0.046, -0.050, 0.405), 0.021 * s), 0.020 * s)
-        fld.union(Ellipsoid(hp(sd * 0.084, 0.014, 0.445), (0.011 * s, 0.019 * s, 0.028 * s),
-                            rot=Quaternion((0, 0, 1), math.radians(sd * 22))), 0.007 * s)
-        fld.union(RoundCone(hp(sd * 0.012, -0.085, FACE["brow_u"]), hp(sd * 0.054, -0.071, FACE["brow_u"] - 0.012),
-                            0.011 * s * (0.6 + 0.4 * p["brow_ridge"]), 0.008 * s), 0.014 * s)
+        if jaw > 0.9 or g("jaw") > 0.3:
+            fld.union(Ellipsoid(hp(sd * 0.044 * (1.0 + 0.10 * g("jaw")), -0.008, 0.200 - 0.030 * aged - 0.02 * long_),
+                                (0.018 * s * (1.0 + 0.4 * max(0.0, g("jaw"))), 0.026 * s, 0.022 * s)), 0.020 * s)
+        # cheekbones: higher and fuller, or soft; the old lose the flesh under them
+        fld.union(Sphere(hp(sd * (0.046 + 0.006 * g("cheek")), -0.050 - 0.004 * g("cheek"), 0.405 + 0.02 * g("cheek")),
+                         0.021 * s * (1.0 + 0.25 * g("cheek") + 0.15 * rnd)), 0.020 * s)
+        if aged > 0.05:
+            fld.subtract(Ellipsoid(hp(sd * 0.044, -0.058, 0.300), (0.016 * s, 0.010 * s, 0.024 * s)), 0.012 * s * min(1.0, aged))
+        fld.union(Ellipsoid(hp(sd * 0.084, 0.014, 0.445), (0.011 * s * (1 + 0.2 * g("ears")), 0.019 * s * (1 + 0.3 * g("ears")),
+                                                            0.028 * s * (1 + 0.3 * g("ears"))),
+                            rot=Quaternion((0, 0, 1), math.radians(sd * (22 + 8 * g("ears"))))), 0.007 * s)
+        fld.union(RoundCone(hp(sd * 0.012, -0.085 - 0.004 * g("brow"), FACE["brow_u"]), hp(sd * 0.054, -0.071, FACE["brow_u"] - 0.012),
+                            0.011 * s * (0.6 + 0.4 * p["brow_ridge"]) * (1.0 + 0.45 * g("brow")), 0.008 * s), 0.014 * s)
         fld.subtract(Sphere(hp(sd * FACE["eye_x"], -0.099, FACE["eye_u"]), 0.0110 * s), 0.008 * s)
-        fld.union(Sphere(hp(sd * 0.012, -0.093, FACE["nose_u"] - 0.004), 0.0085 * s), 0.006 * s)
-    fld.union(RoundCone(hp(0, -0.087, 0.505), hp(0, -0.102, FACE["nose_u"] + 0.015), 0.0070 * s, 0.0098 * s), 0.010 * s)
-    fld.union(Sphere(hp(0, -0.100, FACE["nose_u"]), 0.0130 * s * (0.92 if fem else 1.0)), 0.008 * s)
-    fld.union(Ellipsoid(hp(0, -0.078, FACE["mouth_u"] + 0.006), (0.022 * s, 0.011 * s, 0.016 * s)), 0.010 * s)
+        # the wings of the nose
+        fld.union(Sphere(hp(sd * 0.012 * (1.0 + 0.30 * g("nose_wide")), -0.093, FACE["nose_u"] - 0.004),
+                         0.0085 * s * (1.0 + 0.25 * g("nose_wide") + 0.15 * g("nose"))), 0.006 * s)
+        if aged > 0.05:
+            # the lines from the nose to the mouth, and at the eyes' corners
+            fld.subtract(RoundCone(hp(sd * 0.020, -0.090, FACE["nose_u"] - 0.012), hp(sd * 0.030, -0.078, FACE["mouth_u"] - 0.015),
+                                   0.0016 * s * min(1.0, aged), 0.0012 * s * min(1.0, aged)), 0.002 * s)
+            fld.subtract(RoundCone(hp(sd * 0.054, -0.080, FACE["eye_u"] + 0.010), hp(sd * 0.062, -0.074, FACE["eye_u"] - 0.020),
+                                   0.0010 * s * min(1.0, aged), 0.0008 * s * min(1.0, aged)), 0.0015 * s)
+    nose = 1.0 + 0.28 * g("nose")
+    fld.union(RoundCone(hp(0, -0.087 - 0.006 * g("bridge"), 0.505), hp(0, -0.102 - 0.010 * g("nose") - 0.006 * g("bridge"), FACE["nose_u"] + 0.015),
+                        0.0070 * s * (1.0 + 0.2 * g("bridge")), 0.0098 * s * nose), 0.010 * s)
+    if g("bridge") > 0.05:
+        fld.union(Sphere(hp(0, -0.096 - 0.008 * g("bridge"), 0.445), 0.0080 * s * g("bridge")), 0.008 * s)
+    fld.union(Sphere(hp(0, -0.100 - 0.010 * g("nose"), FACE["nose_u"] - 0.004 * g("nose")), 0.0130 * s * (0.92 if fem else 1.0) * nose), 0.008 * s)
+    lips = 1.0 + 0.35 * g("lips")
+    fld.union(Ellipsoid(hp(0, -0.078 - 0.003 * g("lips"), FACE["mouth_u"] + 0.006), (0.022 * s * (1.0 + 0.08 * g("lips")), 0.011 * s * lips, 0.016 * s * lips)), 0.010 * s)
+    if aged > 0.05:
+        # lines across the brow
+        for i in range(2):
+            fld.subtract(RoundCone(hp(-0.030, -0.092, 0.645 + 0.03 * i), hp(0.030, -0.092, 0.648 + 0.03 * i),
+                                   0.0009 * s * min(1.0, aged), 0.0009 * s * min(1.0, aged)), 0.0015 * s)
+
+
+def head_recipe(f, shape=None):
+    """The head alone as a signed distance (for face morphs)."""
+    from cf_sdf import Recipe
+    r = Recipe(far=0.05)
+    build_head(r, f, shape)
+    return r
 
 
 def build_hand(fld, f, side):
@@ -382,7 +427,7 @@ def decal(name, body, outline, centre, offset, rings=3):
     return obj
 
 
-EYE = {"w": 0.037, "up": 0.0100, "up_f": 0.0108, "low": 0.0070, "tilt": 0.08}
+EYE = {"w": 0.034, "up": 0.0072, "up_f": 0.0080, "low": 0.0056, "tilt": 0.06}
 
 
 def _eye_curves(cx, cz, sd, s, female, n=12):
@@ -406,6 +451,24 @@ def _eye_outline(cx, cz, sd, s, female):
     if sd < 0:
         outline = outline[::-1]
     return outline
+
+
+def _clip_to_eye(points, up, lo, sd):
+    """Keeps a shape inside the lids (the iris is cut by them, never on the skin)."""
+    xs = [q[0] for q in up]
+    out = []
+    for x, z in points:
+        if sd > 0:
+            x = min(max(x, xs[0]), xs[-1])
+        else:
+            x = max(min(x, xs[0]), xs[-1])
+        t = (x - xs[0]) / (xs[-1] - xs[0]) if xs[-1] != xs[0] else 0.0
+        i = min(int(t * (len(up) - 1)), len(up) - 2)
+        k = t * (len(up) - 1) - i
+        zt = up[i][1] * (1 - k) + up[i + 1][1] * k - 0.0003
+        zb = lo[i][1] * (1 - k) + lo[i + 1][1] * k + 0.0003
+        out.append((x, min(max(z, zb), zt)))
+    return out
 
 
 def _oval(cx, cz, rx, rz, n=14):
@@ -441,28 +504,30 @@ def build_face(f, body):
         white = decal("EyeWhite_" + side, body, _eye_outline(cx, cz, sd, s, fem), (cx, cz), 0.0010 * s)
         white["bone"] = "eye." + side
         out["eyes"].append(white)
-        ix, iz = cx + sd * 0.0010 * s, cz + 0.0010 * s
-        iris = decal("Eye_" + side, body, _oval(ix, iz, 0.0066 * s, 0.0074 * s), (ix, iz), 0.0016 * s, rings=2)
+        ix, iz = cx + sd * 0.0006 * s, cz + 0.0006 * s
+        up_c, lo_c = _eye_curves(cx, cz, sd, s, fem, n=24)
+        iris_pts = _clip_to_eye(_oval(ix, iz, 0.0074 * s, 0.0080 * s, n=24), up_c, lo_c, sd)
+        iris = decal("Eye_" + side, body, iris_pts, (ix, iz), 0.0016 * s, rings=2)
         iris["bone"] = "eye." + side
         out["eyes"].append(iris)
         # the upper lid: a firm line that runs a little past the outer corner
         up, lo = _eye_curves(cx, cz, sd, s, fem)
         lid = [(x, z + 0.0004 * s) for x, z in up]
         lid.append((up[-1][0] + sd * 0.0030 * s, up[-1][1] - 0.0012 * s))
-        widths = [(0.0012 + 0.0016 * math.sin(math.pi * min(1.0, i / (len(lid) - 1) * 1.1))) * s for i in range(len(lid))]
+        widths = [(0.0014 + 0.0018 * math.sin(math.pi * min(1.0, i / (len(lid) - 1) * 1.1))) * s for i in range(len(lid))]
         lidm = decal("EyeLid_" + side, body, _stroke_outline(lid, widths), lid[len(lid) // 2], 0.0020 * s, rings=1)
         lidm["bone"] = "eye." + side
         out["eyes"].append(lidm)
         hit, nor = surface_hit(body, Vector((cx, -1.0, cz)), Vector((0, 1, 0)))
         out["eye_center"][side] = hit if hit is not None else Vector((cx, -0.09 * s, cz))
-        r = 0.0020 * s
-        sx, sz = ix + sd * 0.0026 * s, iz + 0.0030 * s
+        r = 0.0017 * s
+        sx, sz = ix + sd * 0.0024 * s, iz + 0.0018 * s
         ring = [(sx + r * math.cos(a * math.pi / 6), sz + r * math.sin(a * math.pi / 6)) for a in range(12)]
         shine = decal("EyeShine_" + side, body, ring, (sx, sz), 0.0024 * s, rings=1)
         shine["bone"] = "eye." + side
         shines.append(shine)
         # the brow: thick at the nose end, thinning outward, a slight arch
-        bz = f.face(FACE["brow_u"] + 0.018)
+        bz = f.face(FACE["brow_u"] + 0.006)
         line, widths = [], []
         for i in range(9):
             u = i / 8.0
@@ -490,10 +555,11 @@ def build_face(f, body):
         u = i / N
         x = (u - 0.5) * Wm
         bow = 0.0010 * s * math.exp(-((u - 0.5) / 0.12) ** 2)  # the dip of the upper lip
-        up.append((x, mz + 0.0018 * s * math.sin(math.pi * u) ** 0.9 - bow * 0.6))
-        lo.append((x, mz - 0.0024 * s * math.sin(math.pi * u) ** 0.8))
+        lift = 0.0009 * s * (2.0 * abs(u - 0.5)) ** 2
+        up.append((x, mz + lift + 0.0016 * s * math.sin(math.pi * u) ** 0.9 - bow * 0.6))
+        lo.append((x, mz + lift - 0.0022 * s * math.sin(math.pi * u) ** 0.8))
     outline = up + lo[-2:0:-1]
-    mouth = decal("Mouth", body, outline[::-1], (0.0, mz), 0.0007 * s, rings=2)
+    mouth = decal("Mouth", body, outline[::-1], (0.0, mz), 0.0012 * s, rings=2)
     mouth["bone"] = "jaw"
     set_material(mouth, "MOUTH")
     out["mouth"].append(mouth)
@@ -507,7 +573,8 @@ def build_face(f, body):
 SLOT_DEFAULTS = {
     "SKIN": (0.62, 0.42, 0.30), "HAIR": (0.10, 0.07, 0.05), "CLOTH_A": (0.55, 0.42, 0.28),
     "CLOTH_B": (0.40, 0.27, 0.18), "CLOTH_C": (0.66, 0.30, 0.20), "EYES": (0.035, 0.026, 0.020),
-    "EYE_SHINE": (0.95, 0.92, 0.85), "EYE_WHITE": (0.90, 0.86, 0.78), "MOUTH": (0.24, 0.08, 0.07), "LEATHER": (0.30, 0.19, 0.11),
+    "EYE_SHINE": (0.95, 0.92, 0.85), "EYE_WHITE": (0.90, 0.86, 0.78), "STUBBLE": (0.30, 0.22, 0.17),
+    "WOOD": (0.36, 0.24, 0.14), "CLAY": (0.55, 0.32, 0.20), "MOUTH": (0.24, 0.08, 0.07), "LEATHER": (0.30, 0.19, 0.11),
 }
 
 
@@ -529,3 +596,106 @@ def material(slot):
 def set_material(obj, slot):
     obj.data.materials.clear()
     obj.data.materials.append(material(slot))
+
+
+# --- Morph targets ----------------------------------------------------------------
+
+def _head_mask(f, z):
+    lo, hi = f.z_chin - 0.07 * f.H / 1.72, f.z_chin - 0.015 * f.H / 1.72
+    t = (z - lo) / (hi - lo)
+    return 0.0 if t <= 0 else (1.0 if t >= 1 else t * t * (3 - 2 * t))
+
+
+def face_morphs(f, objs):
+    """Adds face_<shape> morph targets to every object near the head: each
+    point moves as the skin under it moves when that one shape is pushed
+    to 1. Hair, beards and the painted features ride the skin."""
+    import numpy as np
+    from mathutils.kdtree import KDTree
+    base = head_recipe(f)
+    eps = 0.0006
+    skin = {}   # the body's own movement per shape, for features painted on it
+    painted = [o for o in objs if o.name.split(".")[0] in ("Eyes", "Brows", "Mouth")]
+    objs = [o for o in objs if o not in painted]
+    for o in objs:
+        me = o.data
+        if not me.vertices:
+            continue
+        co = np.array([v.co[:] for v in me.vertices], dtype=np.float32)
+        mask = np.array([_head_mask(f, z) for z in co[:, 2]], dtype=np.float32)
+        near = mask > 0.0
+        if not near.any():
+            continue
+        P = co[near]
+        d0 = base.eval(P)
+        grad = np.zeros_like(P)
+        for axis in range(3):
+            dp = np.zeros(3, dtype=np.float32)
+            dp[axis] = eps
+            grad[:, axis] = (base.eval(P + dp) - base.eval(P - dp)) / (2 * eps)
+        grad /= np.maximum(np.linalg.norm(grad, axis=1, keepdims=True), 1e-6)
+        if o.data.shape_keys is None:
+            o.shape_key_add(name="Basis", from_mix=False)
+        for name in FACE_SHAPES:
+            var = head_recipe(f, {name: 1.0})
+            delta = var.eval(P) - d0
+            # only where the skin is near: far points (a long beard) follow less
+            reach = np.clip(1.0 - np.abs(d0) / 0.05, 0.0, 1.0)
+            move = -(delta * reach * mask[near])[:, None] * grad
+            key = o.shape_key_add(name="face_" + name, from_mix=False)
+            flat = co.copy()
+            flat[near] += move
+            key.data.foreach_set("co", flat.ravel())
+            if o.name.split(".")[0] == "Body":
+                skin[name] = flat - co
+        if o.name.split(".")[0] == "Body":
+            skin["_co"] = co
+    # what is painted on the skin moves exactly as the skin under it
+    if "_co" in skin and painted:
+        tree = KDTree(len(skin["_co"]))
+        for i, c in enumerate(skin["_co"]):
+            tree.insert(c, i)
+        tree.balance()
+        for o in painted:
+            me = o.data
+            co = np.array([v.co[:] for v in me.vertices], dtype=np.float32)
+            near = [tree.find_n(Vector(c), 4) for c in co]
+            if o.data.shape_keys is None:
+                o.shape_key_add(name="Basis", from_mix=False)
+            for name in FACE_SHAPES:
+                move = np.zeros_like(co)
+                for i, hits in enumerate(near):
+                    wsum = 0.0
+                    for (_, idx, dist) in hits:
+                        w = 1.0 / (dist + 1e-4)
+                        move[i] += skin[name][idx] * w
+                        wsum += w
+                    move[i] /= max(wsum, 1e-6)
+                key = o.shape_key_add(name="face_" + name, from_mix=False)
+                key.data.foreach_set("co", (co + move).ravel())
+
+
+def mood_morphs(f, mouth, brows):
+    """Mood on the painted features: the mouth smiles or tightens, the brows
+    worry (inner ends up) or set hard (inner ends down)."""
+    s = f.head_h / 0.282
+    mz = f.face(FACE["mouth_u"])
+    hw = 0.0165 * s
+    for o, keys in ((mouth, ("mood_smile", "mood_tight")), (brows, ("mood_worry", "mood_stern"))):
+        if o.data.shape_keys is None:
+            o.shape_key_add(name="Basis", from_mix=False)
+        for name in keys:
+            k = o.shape_key_add(name=name, from_mix=False)
+            for v, kv in zip(o.data.vertices, k.data):
+                x, y, z = v.co
+                if name == "mood_smile":
+                    t = min(1.0, abs(x) / hw)
+                    kv.co = Vector((x * 1.06, y, z + 0.0024 * s * t * t - 0.0004 * s * (1 - t)))
+                elif name == "mood_tight":
+                    kv.co = Vector((x * 0.88, y, mz + (z - mz) * 0.45 - 0.0004 * s))
+                else:
+                    inner = max(0.0, 1.0 - (abs(x) - 0.011 * s) / (0.050 * s))
+                    if name == "mood_worry":
+                        kv.co = Vector((x, y, z + 0.0034 * s * inner * inner - 0.0006 * s * (1 - inner)))
+                    else:
+                        kv.co = Vector((x - math.copysign(0.0010 * s * inner, x), y, z - 0.0026 * s * inner * inner + 0.0004 * s * (1 - inner)))
