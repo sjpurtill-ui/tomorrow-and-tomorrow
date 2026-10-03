@@ -209,7 +209,8 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	assert_int(int(rows.garrison.number)).is_equal(int(defense.garrison_personnel))
 	assert_int(int(rows.garrison.number)).is_equal(37+int(home_guard.rise))
 	assert_int(int(rows.garrison.number)).is_equal(Combat.defenders(id))
-	assert_str(String(rows.garrison.value)).is_equal("%d fighters" % int(rows.garrison.number))
+	# Those keeping watch and the townsfolk who would rise, apart.
+	assert_str(String(rows.garrison.value)).is_equal("37 on watch, %d would take up arms" % int(home_guard.rise))
 	assert_str(String(rows.fortification.value)).is_equal(String(defense.short))
 	assert_int(int(rows.fortification.number)).is_equal(int(defense.stage))
 	assert_str(String(rows.fortification.note)).is_equal("needs repair")
