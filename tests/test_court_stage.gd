@@ -47,11 +47,13 @@ func _envoy_audience()->String:
 	return ""
 
 
-func _open(id:String)->Control:
+func _open(id:String,view:=Vector2i.ZERO)->Control:
 	## The real Court, with no voice: every line here is put in by the test.
+	## view: a screen of that size (a viewport of its own), else the root.
 	var modal:Control=auto_free(Modal.new())
 	modal.audience_id=id
-	add_child(modal)
+	if view!=Vector2i.ZERO:_screen(view).add_child(modal)
+	else:add_child(modal)
 	await await_idle_frame()
 	await await_idle_frame()
 	await await_idle_frame()
@@ -59,6 +61,18 @@ func _open(id:String)->Control:
 	modal.skip_reveal()
 	await await_idle_frame()
 	return modal
+
+
+var _viewport:SubViewport
+
+func _screen(view:Vector2i)->SubViewport:
+	## A screen of a given size: the court measures itself against its viewport.
+	if not is_instance_valid(_viewport):
+		_viewport=auto_free(SubViewport.new())
+		_viewport.disable_3d=true;_viewport.gui_disable_input=false
+		add_child(_viewport)
+	_viewport.size=view
+	return _viewport
 
 
 func _say(id:String,line:Dictionary)->void:
@@ -309,3 +323,219 @@ func test_one_accessor_gives_each_person_their_picture()->void:
 	assert_object(first.texture).is_not_null()
 	assert_array(first.slot).is_equal(again.slot)
 	assert_array(first.slot).is_not_equal(other.slot)
+
+
+# --- Review fixes: long lines, one picture seam, resizing, the 60-line hall ----
+
+const LONG_LINE:="The herders came down from the high meadow two days early because the ford was already rising, and they say the second flock is still above the gorge with only the boy Teren and two dogs, and the rain on the ridge has not stopped since the moon was new, so either we send ten strong men with ropes before nightfall or we count those sheep as lost."
+
+func _main_line(id:String,text:String)->void:
+	var speaker:Dictionary=Hall.find(id).speaker
+	_say(id,{"speaker":String(speaker.name),"role":"official","person_id":int(speaker.get("person_id",0)),"text":text})
+
+
+func _assert_inside(bubble:Control,stage:Control)->void:
+	var room:=Rect2(Vector2.ZERO,stage.size).grow(1.0)
+	assert_bool(room.encloses(bubble.get_rect())).override_failure_message("words spill off the stage: %s in %s" % [bubble.get_rect(),stage.size]).is_true()
+
+
+func test_a_long_line_stays_whole_on_the_players_screen()->void:
+	## The user's screen: 1920x1080 at 125% is 1536x864 to the game.
+	var id:=_home_audience()
+	var modal:Control=await _open(id,Vector2i(1536,864))
+	for frame in 3:await await_idle_frame()
+	# The hall keeps a real height; the stakes fold before it gets too short.
+	assert_float(modal.court_stage.size.y).is_greater_equal(Modal.HALL_FLOOR.y)
+	for text in [LONG_LINE.substr(0,216),LONG_LINE,LONG_LINE+" "+LONG_LINE.substr(0,90)]:
+		_main_line(id,text)
+		modal.skip_reveal()
+		await await_idle_frame()
+		var bubble:Stage.Bubble=_bubbles(modal)[-1]
+		_assert_inside(bubble,modal.court_stage)
+		# Whole, or cut at a word with a way to the rest in Earlier.
+		if bubble.truncated:
+			assert_str(bubble.label.text).ends_with("…")
+			assert_bool(text.begins_with(bubble.label.text.trim_suffix("…"))).is_true()
+			assert_bool((bubble.find_child("More",false,false) as Control).visible).is_true()
+		else:
+			assert_str(bubble.label.text).is_equal(text)
+	# The card fits the screen at any of the small sizes.
+	for view in [Vector2i(1280,720),Vector2i(1138,640),Vector2i(1024,640)]:
+		_screen(view)
+		for frame in 4:await await_idle_frame()
+		var shown:Rect2=modal.card.get_global_rect()
+		assert_bool(Rect2(Vector2.ZERO,Vector2(view)).grow(1.0).encloses(shown)).override_failure_message("the card spills off a %s screen: %s" % [view,shown]).is_true()
+		_assert_inside(_bubbles(modal)[-1],modal.court_stage)
+
+
+func test_more_on_cut_words_opens_earlier_at_that_line()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	# A short hall: the words cannot all fit even wide and small.
+	modal.court_stage.size=Vector2(640,240)
+	var text:=LONG_LINE+" "+LONG_LINE+" "+LONG_LINE
+	_main_line(id,text)
+	modal.skip_reveal()
+	await await_idle_frame()
+	var bubble:Stage.Bubble=_bubbles(modal)[-1]
+	assert_bool(bubble.truncated).is_true()
+	(bubble.find_child("More",false,false) as Button).pressed.emit()
+	await await_idle_frame()
+	assert_bool(modal.transcript_scroll.visible).is_true()
+	var row:Control=modal._history_rows[bubble.ref]
+	var kept:=""
+	for label in row.find_children("*","Label",true,false):kept+=(label as Label).text
+	assert_str(kept).contains(text)
+
+
+func test_bubbles_fit_again_when_the_stage_changes_size()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	_main_line(id,LONG_LINE)
+	modal.skip_reveal()
+	await await_idle_frame()
+	var bubble:Stage.Bubble=_bubbles(modal)[-1]
+	var before:=bubble.size
+	modal.court_stage.size=Vector2(520,260)
+	await await_idle_frame()
+	assert_float(bubble.size.x).is_less_equal(520.0-16.0)
+	assert_bool(bubble.size!=before).is_true()
+	_assert_inside(bubble,modal.court_stage)
+
+
+func test_every_portrait_goes_through_the_one_seam()->void:
+	## Roster rows, the court at rest, the history and the envoy channel all
+	## read pictures through CourtStage.figure_picture.
+	var modal:Control=auto_free(Modal.new())
+	add_child(modal)
+	await await_idle_frame()
+	await await_idle_frame()
+	var portraits:Array[Node]=modal.card.find_children("Portrait","TextureRect",true,false)
+	assert_bool(portraits.is_empty()).is_false()
+	for picture in portraits:assert_bool(picture.has_meta("figure_slot")).override_failure_message("a portrait skips the seam: %s" % picture.get_path()).is_true()
+	var civ:=""
+	for entry in preload("res://scripts/hud/court_roster.gd").foreign_peoples():
+		if not ForeignDiplomacy.leader(String(entry.civ_id)).is_empty():civ=String(entry.civ_id);break
+	if civ.is_empty():return
+	assert_bool(modal.show_foreign(civ)).is_true()
+	await await_idle_frame()
+	for picture in modal.card.find_children("Portrait","TextureRect",true,false):
+		assert_bool(picture.has_meta("figure_slot")).override_failure_message("a foreign portrait skips the seam: %s" % picture.get_path()).is_true()
+
+
+func test_new_lines_keep_showing_after_the_hall_drops_its_oldest()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	for index in Hall.LINES_MAX+12:
+		_main_line(id,"Count %d." % index)
+		modal.skip_reveal()
+	assert_int((Hall.find(id).lines as Array).size()).is_equal(Hall.LINES_MAX)
+	_main_line(id,"And the last of them.")
+	modal._pump()
+	assert_str((modal._reveal_label as Label).text).is_equal("And the last of them.")
+	modal.skip_reveal()
+	var kept:=0
+	for row in modal._history_rows:
+		for label in row.find_children("LineText","Label",true,false):
+			if (label as Label).text.begins_with("Count ") or (label as Label).text=="And the last of them.":kept+=1
+	assert_int(kept).is_equal(Hall.LINES_MAX+13)
+
+
+func test_words_after_they_have_gone_are_a_caption()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	modal.court_stage.conclude(0.0)
+	var before:=_bubbles(modal).size()
+	_main_line(id,"I will come back when the rain stops.")
+	modal.skip_reveal()
+	await await_idle_frame()
+	assert_int(_bubbles(modal).size()).is_less_equal(before)
+	var shown:=modal.court_stage._caption as Control
+	assert_str((shown.find_child("Said",true,false) as Label).text).contains("I will come back when the rain stops.")
+
+
+func test_the_condemned_do_not_bow_out()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var pid:=int(Hall.find(id).speaker.get("person_id",0))
+	assert_str(modal.exit_style_for({"action":"strike_down","terminal":true,"removed":true,"person_id":pid})).is_equal("fall")
+	assert_str(modal.exit_style_for({"action":"cast_out","terminal":true,"removed":true,"person_id":pid})).is_equal("led")
+	assert_str(modal.exit_style_for({"verb":"kill","terminal":true,"target":{"key":"someone_else","person_id":pid+999}})).is_not_equal("fall")
+	assert_str(modal.exit_style_for({"ok":true,"reaction":"offended"})).is_equal("storm")
+	assert_str(modal.exit_style_for({"ok":true,"reaction":"pleased"})).is_equal("bow")
+	modal._show_outcome({"ok":true,"outcome":"They are put to death.","action":"strike_down","terminal":true,"removed":true,"person_id":pid,"reaction":"furious"})
+	await await_idle_frame()
+	await await_idle_frame()
+	assert_str(String(modal.court_stage.figure(Stage.MAIN).exit_style)).is_equal("fall")
+
+
+func test_a_warning_waits_for_the_words_being_revealed()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	_say(id,{"role":"narrator","text":"The herders count the flock twice and come up four short."})
+	modal._pump()
+	assert_bool(modal.revealing).is_true()
+	var telling:=modal.court_stage._caption as Control
+	modal._show_toast("That cannot be done now.")
+	assert_object(modal.court_stage._caption).is_same(telling)
+	modal.advance()
+	modal.advance()
+	var shown:=modal.court_stage._caption as Control
+	assert_str((shown.find_child("Said",true,false) as Label).text).is_equal("That cannot be done now.")
+
+
+func test_older_words_never_cover_the_gods()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id)
+	var witness:Dictionary=Hall.court(id)[0]
+	_say(id,{"speaker":String(witness.name),"role":"official","person_id":int(witness.person_id),"text":LONG_LINE})
+	_main_line(id,LONG_LINE.substr(0,120))
+	_say(id,{"speaker":"You","role":"ruler","text":"Send the ten men with ropes before dark."})
+	modal.skip_reveal()
+	await await_idle_frame()
+	var band:Rect2=(modal.court_stage._god as Control).get_rect()
+	for bubble in _bubbles(modal):
+		assert_bool((bubble as Control).get_rect().intersects(band)).override_failure_message("an old bubble covers the god's words").is_false()
+
+
+func test_an_envoys_words_keep_clear_of_the_offered_object()->void:
+	var id:=_envoy_audience()
+	var modal:Control=await _open(id)
+	var stage:Control=modal.court_stage
+	if stage.right_reserve<=0.0:return
+	var speaker:Dictionary=Hall.find(id).speaker
+	_say(id,{"speaker":String(speaker.name),"role":"envoy","text":LONG_LINE})
+	modal.skip_reveal()
+	await await_idle_frame()
+	var bubble:Stage.Bubble=_bubbles(modal)[-1]
+	assert_float(bubble.get_rect().end.x).is_less_equal(stage.size.x-stage.right_reserve+1.0)
+	for key in stage.cast_order:
+		var f:Control=stage.figure(key)
+		assert_float(f.home.x+f.size.x*.5).is_less_equal(stage.size.x-stage.right_reserve+4.0)
+
+
+func test_a_large_court_still_stands_inside_an_envoys_stage()->void:
+	var stage:Control=auto_free(Stage.new())
+	stage.layout_kind="envoy";stage.right_reserve=320.0
+	add_child(stage)
+	stage.size=Vector2(1300,420)
+	stage.add_figure(Stage.MAIN,{"name":"Esi"},Stage.MAIN,"Esi")
+	for index in 7:stage.add_figure("p%d" % index,{"name":"Official %d" % index,"person_id":900+index},"court","Official %d" % index)
+	await await_idle_frame()
+	var first:Control=stage.figure("p0")
+	for index in 7:
+		var f:Control=stage.figure("p%d" % index)
+		assert_float(f.home.x+f.size.x*.5).is_less_equal(1300.0-320.0+4.0)
+		if index>=Stage.ENVOY_COURT_X.size():assert_float(f.size.y).is_less(first.size.y)
+
+
+func test_what_you_know_never_spills_off_a_short_stage()->void:
+	var id:=_home_audience()
+	var modal:Control=await _open(id,Vector2i(1138,640))
+	modal.toggle_popover("WhatYouKnow")
+	await await_idle_frame()
+	await await_idle_frame()
+	var pop:=modal.envoy_popovers["WhatYouKnow"] as Control
+	var holder:=pop.get_parent() as Control
+	assert_bool(pop.visible).is_true()
+	assert_float(pop.position.y+pop.size.y).is_less_equal(holder.size.y+1.0)

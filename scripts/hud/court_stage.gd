@@ -17,6 +17,8 @@ extends Control
 ## Per frame it does nothing: every movement is a tween made once.
 
 signal advance_requested
+## "more" was pressed on words cut short: show that entry of the history.
+signal history_requested(ref:int)
 
 const Self:=preload("res://scripts/hud/court_stage.gd")
 const Portrait:=preload("res://scripts/hud/person_portrait.gd")
@@ -112,6 +114,18 @@ static func figure_picture(person:Dictionary,screen_registry:Dictionary)->Dictio
 	var slot:Array=Portrait.claim(screen_registry,person)
 	return {"texture":Portrait.slot_texture(person,slot),"flip":slot.size()>1 and bool(slot[1]),"slot":slot}
 
+## A small picture of a person (rosters, the history, the envoy channel),
+## read through the same seam as the figures.
+static func picture_rect(person:Dictionary,screen_registry:Dictionary,width:float,height:float)->TextureRect:
+	var picture:=figure_picture(person,screen_registry)
+	var image:=TextureRect.new();image.name="Portrait";image.texture=picture.texture;image.flip_h=bool(picture.flip)
+	image.custom_minimum_size=Vector2(width,height);image.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+	image.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_COVERED;image.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	image.texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	image.tooltip_text=String(person.get("name",""));image.set_meta("person_id",int(person.get("person_id",0)))
+	image.set_meta("figure_slot",picture.slot)
+	return image
+
 ## A standing figure on its own (the court at rest seats them about the fire).
 static func make_figure(person:Dictionary,screen_registry:Dictionary,name_text:String="",title_text:String="",big:=false)->Figure:
 	var made:=Figure.new()
@@ -201,13 +215,21 @@ func _run_arrivals()->void:
 	_arrivals.clear()
 
 ## The one before the god takes their leave (the audience is concluded);
-## those who came with them follow.
-func conclude(delay:float=1.4)->void:
+## those who came with them follow. style says how they go:
+##  "bow"   a small bow, then out the way they came;
+##  "storm" no bow, out briskly (an insulted guest);
+##  "led"   no bow, darkened, taken out quickly (cast out, seized, maimed);
+##  "fall"  put to death: they sink and are gone where they stood;
+##  "stay"  nobody leaves.
+func conclude(delay:float=1.4,style:="bow")->void:
+	if style=="stay":return
 	var index:=0
 	for key in cast_order.duplicate():
 		var f:=figure(key)
 		if f==null or f.leaving or not f.role in [MAIN,"attendant"]:continue
-		f.leave(-1.0,maxf(size.x*.4,f.size.x*2.0),delay+index*0.2)
+		# Their company is not struck down with them: they are sent away.
+		var own:=style if f.role==MAIN or style!="fall" else "led"
+		f.leave(-1.0,maxf(size.x*.4,f.size.x*2.0),delay+index*0.2,own)
 		index+=1
 	var thought:=thinking
 	if is_instance_valid(thought):thought.visible=false
@@ -229,7 +251,8 @@ func _on_resized()->void:
 	_replace_all()
 
 ## Where everyone stands: the one before the god in front, larger; the court
-## further back at the sides; an envoy's attendants just behind them.
+## further back at the sides; an envoy's attendants just behind them. Nobody
+## stands in the strip kept for the offered object.
 func layout(animate:bool)->void:
 	var w:=size.x;var h:=size.y
 	if w<40 or h<40:return
@@ -238,7 +261,8 @@ func layout(animate:bool)->void:
 	var court_h:=main_h*.74
 	var front:=h-6.0
 	var back:=h-room*.07
-	var usable:=maxf(w-right_reserve,w*.4)
+	var usable:=_usable_width()
+	var slots:Array=HOME_COURT_X if layout_kind=="home" else ENVOY_COURT_X
 	var court_index:=0;var attendant_index:=0
 	for key in cast_order:
 		var f:=figure(key)
@@ -251,55 +275,77 @@ func layout(animate:bool)->void:
 				x=float(ENVOY_ATTENDANT_X[attendant_index%ENVOY_ATTENDANT_X.size()])*w;fh=main_h*.78;foot=back-room*.03
 				attendant_index+=1
 			_:
-				if layout_kind=="home":x=float(HOME_COURT_X[court_index%HOME_COURT_X.size()])*w
-				else:x=float(ENVOY_COURT_X[court_index%ENVOY_COURT_X.size()])*usable
-				# A court too large for the slots stands further back.
-				if court_index>=HOME_COURT_X.size():fh*=.86;foot-=room*.04
+				var row:=court_index/slots.size()
+				x=float(slots[court_index%slots.size()])*(w if layout_kind=="home" else usable)
+				# A court too large for the slots stands further back, between
+				# the ones in front.
+				if row>0:
+					fh*=pow(.86,row);foot-=room*.04*row
+					x+=(.06 if layout_kind=="home" else .05)*usable*(1.0 if row%2==1 else -1.0)
 				court_index+=1
 		var fw:=fh*FIGURE_ASPECT
-		x=clampf(x,fw*.5+4.0,w-fw*.5-4.0)
+		x=clampf(x,fw*.5+4.0,maxf(fw*.5+4.0,usable-fw*.5-4.0))
 		f.place(Vector2(x,foot),Vector2(fw,fh),animate)
 	# The nearer stand in front of the further.
 	var ordered:Array=figure_layer.get_children()
 	ordered.sort_custom(func(a:Node,b:Node)->bool:return (a as Figure).home.y<(b as Figure).home.y if absf((a as Figure).home.y-(b as Figure).home.y)>.5 else (a as Figure).size.y<(b as Figure).size.y)
 	for index in ordered.size():figure_layer.move_child(ordered[index],index)
 
+## The stage's width left of the offered object's strip.
+func _usable_width()->float:
+	return maxf(size.x-right_reserve,size.x*.4)
+
 # --- What is said -----------------------------------------------------------------
 
 ## A character speaks: a bubble above them, and the room turns to them.
-## Returns the label whose words are revealed.
-func say(key:String,text:String,aside:=false,animate:=true)->Label:
+## Returns the label whose words are revealed. ref: their history entry.
+## Words from someone already on their way out are told as a caption, not a
+## bubble over the place where they stood.
+func say(key:String,text:String,aside:=false,animate:=true,ref:=-1)->Label:
 	var f:=figure(key)
-	if f==null:return null
+	if f==null or f.leaving:
+		var who:=String(f.person.get("name","")).get_slice(" ",0) if f!=null else ""
+		return caption("“%s”" % text.strip_edges(),"narration",animate,ref,("%s, going out" % who) if not who.is_empty() else "")
 	speaking_key=key
-	var bubble:=Bubble.new();bubble.name="Speech";bubble.kind="aside" if aside else "speech";bubble.speaker=key
+	var bubble:=Bubble.new();bubble.name="Speech";bubble.kind="aside" if aside else "speech";bubble.speaker=key;bubble.ref=ref
 	# In the tree first: its words are measured with the theme they will use.
 	bubble_layer.add_child(bubble)
-	bubble.setup(text,HudTokens.voice_font(aside),17 if compact else 19,BUBBLE_INK,ASIDE_PAPER if aside else BUBBLE_PAPER,f.accent,_bubble_width(),false,"aside to you" if aside else "")
+	bubble.setup(text,HudTokens.voice_font(aside),17 if compact else 19,BUBBLE_INK,ASIDE_PAPER if aside else BUBBLE_PAPER,f.accent,_bubble_widths(bubble)[0],false,"aside to you" if aside else "",14)
+	bubble.more_pressed.connect(_on_more.bind(bubble))
+	_fit_bubble(bubble)
 	_place_bubble(bubble)
 	_age_bubbles(bubble,animate)
 	_age_god(animate);_age_caption(animate)
+	# The newest words are never under older ones.
+	if is_instance_valid(_god) and _god.get_rect().intersects(bubble.get_rect()):
+		_drop(_god,animate);_drop(_rays,animate);_god=null;_rays=null
+	if is_instance_valid(_caption) and _caption.get_rect().intersects(bubble.get_rect()):
+		_drop(_caption,animate);_caption=null
 	_turn_to(key)
 	if animate:bubble.pop_in()
 	return bubble.label
 
 ## The god's own words, from above.
-func god_says(text:String,animate:=true)->Label:
+func god_says(text:String,animate:=true,ref:=-1)->Label:
 	if is_instance_valid(_god):_drop(_god,false)
 	if is_instance_valid(_rays):_drop(_rays,false)
+	speaking_key="god"
+	_rays=Rays.new();_rays.name="Light";god_layer.add_child(_rays);_rays.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_god=Bubble.new();_god.name="VoiceFromAbove";_god.kind="god";_god.ref=ref
+	god_layer.add_child(_god)
+	_god.setup(text,HudTokens.voice_font(true),18 if compact else 20,GOD_INK,GOD_PAPER,GOD_GOLD,_god_widths()[0],true,"",14)
+	_god.more_pressed.connect(_on_more.bind(_god))
+	_god_age=0
+	_fit_bubble(_god)
+	_place_god()
+	# Older words give way: none of them covers the god's.
+	var band:=_god.get_rect().grow(4.0)
 	for child in bubble_layer.get_children():
 		var old:=child as Bubble
 		if old==null or old.dropping:continue
 		old.age+=1
-		if old.age>=2:_drop(old,animate)
+		if old.age>=2 or old.get_rect().intersects(band):_drop(old,animate)
 		else:old.fade_to(.4,animate)
-	speaking_key="god"
-	_rays=Rays.new();_rays.name="Light";god_layer.add_child(_rays);_rays.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_god=Bubble.new();_god.name="VoiceFromAbove";_god.kind="god"
-	god_layer.add_child(_god)
-	_god.setup(text,HudTokens.voice_font(true),18 if compact else 20,GOD_INK,GOD_PAPER,GOD_GOLD,minf(640.0,size.x*.62),true)
-	_god_age=0
-	_place_god()
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null and not f.leaving:f.look_up()
@@ -311,18 +357,20 @@ func god_says(text:String,animate:=true)->Label:
 
 ## What the engine decided, or what happens in the hall: a caption at the
 ## foot of the stage. kind: "narration", "direction", "receipt" or "warn".
-func caption(text:String,kind:="narration",animate:=true)->Label:
+func caption(text:String,kind:="narration",animate:=true,ref:=-1,kicker:="")->Label:
 	if is_instance_valid(_caption):_drop(_caption,animate)
 	var words:=text.strip_edges()
-	var kicker:=""
 	if kind=="direction" or (words.begins_with("[") and words.ends_with("]")):
 		words=words.trim_prefix("[").trim_suffix("]").strip_edges();kind="direction"
 	if words.begins_with("RECEIPT · "):
 		words=words.trim_prefix("RECEIPT · ");kicker="RECEIPT";kind="receipt"
-	_caption=Bubble.new();_caption.name="Caption";_caption.kind="caption"
+	_caption=Bubble.new();_caption.name="Caption";_caption.kind="caption";_caption.ref=ref
+	_caption.set_meta("caption_kind",kind)
 	caption_layer.add_child(_caption)
-	_caption.setup(words,HudTokens.voice_font(kind!="receipt"),15 if compact else 17,WARN_INK if kind=="warn" else CAPTION_INK,CAPTION_PAPER,CAPTION_RULE,minf(720.0,size.x*.66),true,kicker)
+	_caption.setup(words,HudTokens.voice_font(kind!="receipt"),15 if compact else 17,WARN_INK if kind=="warn" else CAPTION_INK,CAPTION_PAPER,CAPTION_RULE,_caption_widths()[0],true,kicker,13)
+	_caption.more_pressed.connect(_on_more.bind(_caption))
 	_caption_age=0
+	_fit_bubble(_caption)
 	_place_caption()
 	if animate:_caption.rise_in()
 	return _caption.label
@@ -348,8 +396,35 @@ func attach_thinking(label:Label)->void:
 	label.visibility_changed.connect(_place_thinking)
 	label.resized.connect(_place_thinking)
 
-func _bubble_width()->float:
-	return clampf(size.x*.40,220.0,460.0)
+func _on_more(bubble:Bubble)->void:
+	history_requested.emit(bubble.ref)
+
+## The room a speech bubble may take: its usual width, then a wide one.
+func _bubble_widths(bubble:Bubble)->Array:
+	var f:=figure(bubble.speaker)
+	var across:=_usable_width() if f==null or f.home.x<_usable_width() else size.x
+	var usual:=minf(clampf(across*.40,220.0,460.0),across-16.0)
+	var wide:=maxf(usual,minf(minf(760.0,across*.72),across-16.0))
+	return [usual,wide]
+
+func _god_widths()->Array:
+	var across:=_usable_width()
+	var usual:=minf(minf(640.0,across*.62),across-16.0)
+	return [usual,maxf(usual,minf(880.0,across-16.0))]
+
+func _caption_widths()->Array:
+	var across:=_usable_width()
+	var usual:=minf(minf(720.0,across*.66),across-16.0)
+	return [usual,maxf(usual,minf(900.0,across-16.0))]
+
+## Fits a bubble's words to the free height of the stage now.
+func _fit_bubble(bubble:Bubble)->void:
+	if not is_instance_valid(bubble):return
+	var free:=maxf(size.y-top_inset-14.0,40.0)
+	match bubble.kind:
+		"god":bubble.fit(_god_widths(),maxf(free*.46,60.0))
+		"caption":bubble.fit(_caption_widths(),maxf(free*.38,48.0))
+		_:bubble.fit(_bubble_widths(bubble),free)
 
 func _turn_to(key:String)->void:
 	var speaker:=figure(key)
@@ -411,19 +486,21 @@ func _place_bubble(bubble:Bubble)->void:
 	var head:=head_point(f)
 	var top_min:=top_inset+6.0
 	var bs:=bubble.size
-	var w:=size.x;var h:=size.y
+	var h:=size.y
+	# Clear of the offered object's strip, unless the speaker stands in it.
+	var right:=_usable_width() if f.home.x<_usable_width() and bs.x<_usable_width()-16.0 else size.x
 	var above:=head.y-TAIL-bs.y
 	if above>=top_min:
-		var x:=clampf(head.x-bs.x*.5,8.0,maxf(8.0,w-bs.x-8.0))
+		var x:=clampf(head.x-bs.x*.5,8.0,maxf(8.0,right-bs.x-8.0))
 		bubble.position=Vector2(x,above)
 		bubble.tail_side="down";bubble.tip=Vector2(head.x-x,bs.y+TAIL)
 	else:
 		# No room above: beside the head, toward the middle of the stage.
 		var face:=Vector2(head.x,f.home.y-f.size.y*.80)
-		var to_right:=face.x<w*.5
+		var to_right:=face.x<right*.5
 		var reach:=f.size.x*.30
 		var x:=face.x+reach+TAIL if to_right else face.x-reach-TAIL-bs.x
-		x=clampf(x,8.0,maxf(8.0,w-bs.x-8.0))
+		x=clampf(x,8.0,maxf(8.0,right-bs.x-8.0))
 		var y:=clampf(face.y-bs.y*.5,top_min,maxf(top_min,h-bs.y-8.0))
 		bubble.position=Vector2(x,y)
 		bubble.tail_side="left" if to_right else "right"
@@ -431,11 +508,12 @@ func _place_bubble(bubble:Bubble)->void:
 		# A bubble pushed back over its speaker has no side to point from.
 		if (to_right and bubble.tip.x>-4.0) or (not to_right and bubble.tip.x<bs.x+4.0):bubble.tail_side="none"
 	bubble.pivot_offset=bubble.tip.clamp(Vector2.ZERO,bs)
+	bubble.home_y=0.0
 	bubble.queue_redraw()
 
 func _place_god()->void:
 	if not is_instance_valid(_god):return
-	_god.position=Vector2(((size.x-_god.size.x)*.5),top_inset+10.0).round()
+	_god.position=Vector2(((_usable_width()-_god.size.x)*.5),top_inset+10.0).round()
 	_god.home_y=_god.position.y
 	if is_instance_valid(_rays):
 		_rays.target=Rect2(_god.position,_god.size);_rays.queue_redraw()
@@ -443,22 +521,27 @@ func _place_god()->void:
 func _place_caption()->void:
 	## Low on the stage like a line under a picture, but above the name plates.
 	if not is_instance_valid(_caption):return
-	_caption.position=Vector2((size.x-_caption.size.x)*.5,maxf(top_inset+6.0,size.y-_caption.size.y-PLATE_ROOM)).round()
+	_caption.position=Vector2((_usable_width()-_caption.size.x)*.5,maxf(top_inset+6.0,size.y-_caption.size.y-PLATE_ROOM)).round()
 	_caption.home_y=_caption.position.y
 
 func _place_thinking()->void:
 	if not is_instance_valid(thinking) or not thinking.visible:return
 	var f:=figure(MAIN)
-	if f==null:
-		thinking.position=Vector2((size.x-thinking.size.x)*.5,size.y-thinking.size.y-12.0);return
+	if f==null or f.leaving:
+		thinking.position=Vector2((_usable_width()-thinking.size.x)*.5,size.y-thinking.size.y-12.0).round();return
 	# Beside their face, so it never sits on the words they just said.
 	var face:=Vector2(f.home.x+f.size.x*.36,f.home.y-f.size.y*.80)
-	thinking.position=Vector2(clampf(face.x,8.0,maxf(8.0,size.x-thinking.size.x-8.0)),clampf(face.y-thinking.size.y*.5,top_inset+6.0,maxf(top_inset+6.0,size.y-thinking.size.y-8.0))).round()
+	thinking.position=Vector2(clampf(face.x,8.0,maxf(8.0,_usable_width()-thinking.size.x-8.0)),clampf(face.y-thinking.size.y*.5,top_inset+6.0,maxf(top_inset+6.0,size.y-thinking.size.y-8.0))).round()
 
+## The stage changed size: every bubble is fitted again to the new room and
+## put back over its speaker.
 func _replace_all()->void:
 	for child in bubble_layer.get_children():
 		var bubble:=child as Bubble
-		if bubble!=null and not bubble.dropping:_place_bubble(bubble)
+		if bubble!=null and not bubble.dropping:
+			_fit_bubble(bubble);_place_bubble(bubble)
+	if is_instance_valid(_god):_fit_bubble(_god)
+	if is_instance_valid(_caption):_fit_bubble(_caption)
 	_place_god();_place_caption();_place_thinking()
 
 # =================================================================================
@@ -625,23 +708,48 @@ class Figure extends Control:
 		_move.tween_property(self,"modulate:a",1.0,Motion.SLOW)
 		_steps(delay,time)
 
-	## Take their leave: a small bow, then out the way they came.
-	func leave(side:float,distance:float,delay:float=0.0)->void:
-		leaving=true
+	## Take their leave. "bow": a small bow, then out the way they came;
+	## "storm": out briskly, no bow; "led": darkened and taken out quickly;
+	## "fall": put to death, they sink and are gone where they stood.
+	var exit_style:=""
+	func leave(side:float,distance:float,delay:float=0.0,style:="bow")->void:
+		leaving=true;exit_style=style
 		if not is_inside_tree():return
 		if _move and _move.is_valid():_move.kill()
 		if _lean and _lean.is_valid():_lean.kill()
+		if _bob and _bob.is_valid():_bob.kill()
 		_move=create_tween()
 		if delay>0.0:_move.tween_interval(delay)
 		if Motion.reduced():
 			_move.tween_property(self,"modulate:a",0.0,Motion.duration(Motion.BASE))
 			return
-		_move.tween_property(rig,"scale",Vector2(1.0,.965),.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-		_move.tween_property(rig,"scale",Vector2.ONE,.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-		var time:=Motion.SCENE*1.3
-		_move.tween_property(self,"walk",side*distance,time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-		_move.parallel().tween_property(self,"modulate:a",0.0,time*.9).set_delay(time*.1)
-		_steps(delay+.58,time)
+		match style:
+			"fall":
+				# No walk: they sink, darken and are gone.
+				_move.set_parallel(true).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+				_move.tween_property(rig,"scale",Vector2(1.0,.86),.9)
+				_move.tween_property(rig,"rotation",deg_to_rad(-4.0 if side<0.0 else 4.0),.9)
+				_move.tween_property(rig,"modulate",Color(.45,.40,.38),.7)
+				_move.tween_property(self,"modulate:a",0.0,.8).set_delay(.5)
+			"led":
+				# Taken out: no bow, darkened, hurried off.
+				_move.tween_property(rig,"modulate",Color(.62,.58,.55),.25)
+				var quick:=Motion.SCENE*.8
+				_move.tween_property(self,"walk",side*distance,quick).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+				_move.parallel().tween_property(self,"modulate:a",0.0,quick*.8).set_delay(quick*.2)
+				_steps(delay+.25,quick)
+			"storm":
+				var brisk:=Motion.SCENE
+				_move.tween_property(self,"walk",side*distance,brisk).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+				_move.parallel().tween_property(self,"modulate:a",0.0,brisk*.9).set_delay(brisk*.1)
+				_steps(delay,brisk)
+			_:
+				_move.tween_property(rig,"scale",Vector2(1.0,.965),.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+				_move.tween_property(rig,"scale",Vector2.ONE,.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+				var time:=Motion.SCENE*1.3
+				_move.tween_property(self,"walk",side*distance,time).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
+				_move.parallel().tween_property(self,"modulate:a",0.0,time*.9).set_delay(time*.1)
+				_steps(delay+.58,time)
 
 	func finish_moves()->void:
 		for tween in [_shift,_move,_bob,_lean]:
@@ -697,7 +805,10 @@ class Painting extends Control:
 
 class Bubble extends Control:
 	## A paper bubble with its tail on the speaker; also the god's band and
-	## the caption slip (no tail). Sized from its words before it is shown.
+	## the caption slip (no tail). It keeps its words and fits them to the room
+	## the stage gives it: wider first, then a smaller letter, and only at the
+	## last the words that fit, with "more" leading to the rest in Earlier.
+	signal more_pressed
 	var label:Label
 	var kind:="speech"
 	var speaker:=""
@@ -708,47 +819,113 @@ class Bubble extends Control:
 	var home_y:=0.0
 	var fill:=Color.WHITE
 	var rule:=Color.BLACK
+	## The history entry these words belong to (-1: none).
+	var ref:=-1
+	## The whole of what was said; label.text may hold only the start of it.
+	var text:=""
+	var truncated:=false
+	var sizes:Array[int]=[19]
+	var _font:Font
+	var _pad:=Vector2(16.0,10.0)
+	var _top:=10.0
+	var _more:Button
 	var _style:StyleBoxFlat
 	var _tween:Tween
 
 	func _init()->void:
 		mouse_filter=Control.MOUSE_FILTER_IGNORE
 
-	func setup(text:String,font:Font,font_size:int,ink:Color,paper:Color,rule_color:Color,max_width:float,centred:=false,kicker:="")->void:
-		fill=paper;rule=rule_color
+	func setup(words:String,font:Font,font_size:int,ink:Color,paper:Color,rule_color:Color,max_width:float,centred:=false,kicker:="",smallest:int=-1)->void:
+		text=words;fill=paper;rule=rule_color;_font=font
+		sizes=[font_size]
+		var floor_size:=smallest if smallest>0 else font_size-4
+		for step in range(font_size-2,floor_size-1,-2):sizes.append(step)
+		if sizes[-1]!=floor_size and floor_size<font_size:sizes.append(floor_size)
 		_style=StyleBoxFlat.new();_style.bg_color=paper;_style.border_color=rule_color
 		_style.shadow_color=Color(0,0,0,.28);_style.shadow_size=6;_style.shadow_offset=Vector2(0,2)
-		var pad:=Vector2(16.0,10.0)
 		match kind:
 			"god":
 				_style.set_corner_radius_all(3);_style.border_width_top=2;_style.border_width_bottom=2;_style.border_width_left=1;_style.border_width_right=1
-				pad=Vector2(22.0,10.0)
+				_pad=Vector2(22.0,10.0)
 			"caption":
 				_style.set_corner_radius_all(3);_style.border_width_top=1;_style.border_width_bottom=1
-				_style.shadow_size=4;pad=Vector2(16.0,7.0)
+				_style.shadow_size=4;_pad=Vector2(16.0,7.0)
 			_:
 				_style.set_corner_radius_all(12);_style.set_border_width_all(2)
-		var top:=pad.y
+		_top=_pad.y
 		if not kicker.is_empty():
 			var note:=HudTokens.make_label(kicker.to_upper() if kind!="aside" else kicker,12,Self.KICKER_INK,.1 if kind!="aside" else 0.0)
 			note.name="Kicker";note.mouse_filter=Control.MOUSE_FILTER_IGNORE
 			if kind=="aside":note.add_theme_font_override("font",HudTokens.voice_font(true))
-			add_child(note);note.position=Vector2(pad.x,pad.y-2.0)
-			top+=note.get_combined_minimum_size().y-2.0
-		label=Label.new();label.name="Said";label.text=text;label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+			add_child(note);note.position=Vector2(_pad.x,_pad.y-2.0)
+			_top+=note.get_combined_minimum_size().y-2.0
+		label=Label.new();label.name="Said";label.text=words;label.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		label.add_theme_font_override("font",font);label.add_theme_font_size_override("font_size",font_size)
 		label.add_theme_color_override("font_color",ink)
 		label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 		label.visible_characters_behavior=TextServer.VC_CHARS_AFTER_SHAPING
 		if centred:label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-		var natural:=font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x+4.0
-		var inner:=clampf(natural,minf(110.0,max_width-pad.x*2.0),maxf(60.0,max_width-pad.x*2.0))
 		add_child(label)
-		label.position=Vector2(pad.x,top)
+		label.position=Vector2(_pad.x,_top)
+		fit([max_width],1.0e6)
+
+	## Fits the words to the room: each width in turn at each letter size,
+	## largest letter first; failing all, the words that fit and "more".
+	func fit(widths:Array,max_height:float)->void:
+		for font_size in sizes:
+			for width in widths:
+				if _try(float(width),font_size,max_height,false):return
+		_try(float(widths[-1]),sizes[-1],max_height,true)
+
+	func _measure(words:String,inner:float)->float:
+		label.text=words
 		label.size=Vector2(inner,1.0)
-		var tall:=label.get_minimum_size().y
+		return label.get_minimum_size().y
+
+	func _try(width:float,font_size:int,max_height:float,cut:bool)->bool:
+		label.add_theme_font_size_override("font_size",font_size)
+		var room_w:=width-_pad.x*2.0
+		var natural:=_font.get_string_size(text,HORIZONTAL_ALIGNMENT_LEFT,-1,font_size).x+4.0
+		var inner:=clampf(natural,minf(110.0,room_w),maxf(60.0,room_w))
+		var room_h:=max_height-_top-_pad.y
+		var tall:=_measure(text,inner)
+		if tall<=room_h:
+			_settle(inner,tall,false);return true
+		if not cut:return false
+		# The words that fit, then "more": the rest is in Earlier.
+		var more_h:=24.0
+		var words:=text.split(" ",false)
+		var lo:=1;var hi:=maxi(1,words.size()-1);var best:=1
+		while lo<=hi:
+			var mid:=(lo+hi)/2
+			if _measure(" ".join(words.slice(0,mid))+"…",inner)<=room_h-more_h:
+				best=mid;lo=mid+1
+			else:hi=mid-1
+		tall=_measure(" ".join(words.slice(0,best))+"…",inner)
+		_settle(inner,tall,true)
+		return true
+
+	func _settle(inner:float,tall:float,cut:bool)->void:
+		truncated=cut
+		if not cut and label.text!=text:label.text=text
 		label.size=Vector2(inner,tall)
-		size=Vector2(inner+pad.x*2.0,top+tall+pad.y)
+		var more_h:=0.0
+		if cut:
+			if _more==null:
+				_more=Button.new();_more.name="More";_more.text="more in Earlier ›";_more.flat=true;_more.focus_mode=Control.FOCUS_NONE
+				_more.mouse_filter=Control.MOUSE_FILTER_STOP;_more.mouse_default_cursor_shape=Control.CURSOR_POINTING_HAND
+				_more.add_theme_font_size_override("font_size",12)
+				for state in ["font_color","font_hover_color","font_pressed_color","font_focus_color"]:_more.add_theme_color_override(state,Self.KICKER_INK)
+				_more.tooltip_text="Read all of it in Earlier."
+				_more.pressed.connect(func()->void:more_pressed.emit())
+				add_child(_more)
+			_more.visible=true
+			_more.size=_more.get_combined_minimum_size()
+			more_h=_more.size.y
+		elif _more!=null:_more.visible=false
+		size=Vector2(inner+_pad.x*2.0,_top+tall+_pad.y+more_h)
+		if cut:_more.position=Vector2(size.x-_pad.x-_more.size.x+6.0,_top+tall+_pad.y*.4).round()
+		queue_redraw()
 
 	func _draw()->void:
 		if _style==null:return

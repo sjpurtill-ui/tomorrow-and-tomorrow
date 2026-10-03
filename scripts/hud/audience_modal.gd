@@ -117,7 +117,17 @@ var _leave_when_quiet:=false
 var envoy_color:=Color.WHITE
 var speaker_person_id:=0
 var accent:=Color.WHITE
+## How many of the hall's present lines have been shown. The hall keeps only
+## its last lines (audience_hall.gd LINES_MAX) and drops the oldest, so the
+## last line shown is remembered by identity and the count is found again
+## from it (_sync_rendered) before it is used.
 var rendered_lines:=0
+var _last_line:Dictionary={}
+## History entries, in order: the "more" link on a cut-short bubble opens
+## Earlier at its entry.
+var _history_rows:Array[Control]=[]
+## Warnings that came while words were still being revealed: shown after.
+var _pending_toasts:Array[String]=[]
 var revealing:=false
 var reveal_tweens:Array[Tween]=[]
 var follow_scroll:=0.0
@@ -188,22 +198,53 @@ func _ready()->void:
 func _exit_tree()->void:
 	pause.release()
 
+## The least the card is drawn at when a small screen cannot hold it whole
+## (only a window far smaller than any real screen comes near it).
+const MIN_CARD_SCALE:=0.5
+## The least height the hall keeps before "What you stand to gain" folds to
+## one line (normal and compact screens).
+const HALL_FLOOR:=Vector2(280.0,240.0)
+
 func _fit()->void:
 	if not is_instance_valid(card):return
 	var view:=get_viewport().get_visible_rect().size
-	var target:=Vector2(minf(DESIGN_SIZE.x,view.x-40),minf(DESIGN_SIZE.y,view.y-40))
+	var room:=Vector2(minf(DESIGN_SIZE.x,view.x-40),minf(DESIGN_SIZE.y,view.y-40)).max(Vector2(160,160))
+	_fold_stakes_if_cramped()
+	# When the card cannot fit the screen whole, it is drawn smaller rather
+	# than spilling off it (1024x640 and the like).
+	var need:=card.get_combined_minimum_size()
+	var scale_now:=card.scale.x
+	var wanted:=1.0
+	if need.x>room.x+.5 or need.y>room.y+.5:
+		wanted=clampf(minf(room.x/maxf(need.x,1.0),room.y/maxf(need.y,1.0)),MIN_CARD_SCALE,1.0)
+	if absf(wanted-scale_now)>.01:scale_now=wanted
+	if not is_equal_approx(card.scale.x,scale_now):card.scale=Vector2(scale_now,scale_now)
 	# Autowrapped labels report inflated heights before their first sort and a
 	# container never shrinks by itself; re-assert the stage size every frame.
+	var target:=(room/scale_now).floor().min(DESIGN_SIZE.max(room))
 	if card.size!=target:card.size=target
-	var place:=((view-card.size)*.5).round()
+	var place:=((view-card.size*scale_now)*.5).round()
 	if card.position!=place:card.position=place
+
+## "What you stand to gain" folds to one line when the hall would be too
+## short for the people in it to be seen speaking.
+func _fold_stakes_if_cramped()->void:
+	if _stakes_compact or _stakes_opened or not is_instance_valid(stakes_box) or not stakes_box.visible:return
+	if not is_instance_valid(court_stage) or court_stage.size.y<=1.0:return
+	var floor_h:=HALL_FLOOR.y if _compact() else HALL_FLOOR.x
+	var need:=card.get_combined_minimum_size().y
+	var room:=minf(DESIGN_SIZE.y,get_viewport().get_visible_rect().size.y-40)
+	if court_stage.size.y<floor_h or need>room+.5:
+		_stakes_compact=true
+		_build_stakes()
 
 # --- Building ---------------------------------------------------------------
 
 func _reset_card(next_mode:String)->void:
 	## Clear the stage for another view of the court.
 	for tween in reveal_tweens:if tween and tween.is_valid():tween.kill()
-	reveal_tweens.clear();revealing=false;rendered_lines=0;resolved_result={}
+	reveal_tweens.clear();revealing=false;rendered_lines=0;resolved_result={};_last_line={};_history_rows.clear();_pending_toasts.clear()
+	_stakes_compact=false;_stakes_opened=false
 	court_stage=null;_reveal_label=null;_leave_when_quiet=false;scene_portraits.clear()
 	rest_seats.clear();foreign_refs.clear();rest_signature=[];foreign_count=-1
 	civic_settlement="";civic_seen.clear();civic_signature=""
@@ -313,7 +354,7 @@ func _finish_audience(id:String,audience:Dictionary)->void:
 	# the latest words are played again on the stage.
 	var said:Array=audience.get("lines",[]) if audience.get("lines") is Array else []
 	while rendered_lines<said.size()-1:
-		_add_line(said[rendered_lines],false);rendered_lines+=1
+		_show_line(said[rendered_lines],false)
 	if String(audience.get("status",""))=="resolved":
 		_show_outcome({"ok":true,"outcome":String(audience.get("outcome","")),"reaction":"neutral"},false)
 	else:
@@ -463,14 +504,17 @@ func _build_stage(audience:Dictionary)->Control:
 	## small buttons on the stage.
 	var stage:=HBoxContainer.new();stage.name="Stage";stage.size_flags_vertical=Control.SIZE_EXPAND_FILL;stage.add_theme_constant_override("separation",16)
 	# A floor of height: the stakes take their room from the hall, never the card.
-	stage.custom_minimum_size.y=236.0 if _compact() else 316.0
+	# (The hall's own floor plus the most the stakes block takes.)
+	stage.custom_minimum_size.y=260.0 if _compact() else 330.0
 	var center:=VBoxContainer.new();center.name="StageColumn";center.size_flags_horizontal=Control.SIZE_EXPAND_FILL;center.add_theme_constant_override("separation",6);stage.add_child(center)
 	if not civic_settlement.is_empty():center.add_child(_build_civic_strip())
 	var hall_panel:=PanelContainer.new();hall_panel.name="HallPanel";hall_panel.size_flags_vertical=Control.SIZE_EXPAND_FILL;hall_panel.clip_contents=true
 	var frame:=Tokens.flat(Tokens.PAPER_SUNK,Tokens.RULE_STRONG,1,Tokens.RADIUS_CARD,0)
 	frame.set_content_margin_all(1)
 	hall_panel.add_theme_stylebox_override("panel",frame);center.add_child(hall_panel)
-	var stack:=Control.new();stack.name="StageStack";stack.clip_contents=true;stack.custom_minimum_size.y=120.0;stack.mouse_filter=Control.MOUSE_FILTER_PASS
+	var stack:=Control.new();stack.name="StageStack";stack.clip_contents=true;stack.mouse_filter=Control.MOUSE_FILTER_PASS
+	# The hall never goes below this; the stakes fold and the card shrinks first.
+	stack.custom_minimum_size.y=150.0 if _compact() else 190.0
 	hall_panel.add_child(stack)
 	_add_backdrop(stack)
 	court_stage=_new_stage(stack,"home")
@@ -503,6 +547,8 @@ func _new_stage(parent:Control,kind:String)->Control:
 	var made:=Stage.new();made.layout_kind=kind;made.compact=_compact();made.registry=scene_portraits
 	parent.add_child(made);made.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	made.advance_requested.connect(advance)
+	made.history_requested.connect(show_history_at)
+	made.resized.connect(_refit_popovers)
 	speech_box=made.bubble_layer
 	return made
 
@@ -699,24 +745,51 @@ func _build_options()->void:
 
 const PERSONS_GROUPS:=[["ask","Ask ▾"],["summon","Summon ▾"],["question","Question ▾"],["confront","Confront ▾"],["judge","Judge ▾"],["war","War ▾"],["garrison","Garrison ▾"]]
 
+## "What you stand to gain" shown as one line (the hall was too short), and
+## whether the player opened it again by hand.
+var _stakes_compact:=false
+var _stakes_opened:=false
+
 func _build_stakes()->void:
 	## WHAT YOU STAND TO GAIN: the proposal's gain, cost, odds and what saying
 	## no costs, from the engine (proposal_stakes.gd), just above the answers.
+	## When the hall is short it folds to its first line and a button.
 	if not is_instance_valid(stakes_box):return
-	for child in stakes_box.get_children():child.queue_free()
+	for child in stakes_box.get_children():stakes_box.remove_child(child);child.queue_free()
 	var weighed:Dictionary=Hall.stakes(audience_id) if resolved_result.is_empty() else {}
 	var rows:=Stakes.lines(weighed)
 	stakes_box.visible=not rows.is_empty()
 	if rows.is_empty():return
 	var compact:=_compact()
 	if compact and rows.size()>3:rows=rows.slice(0,3)
+	var folded:=_stakes_compact and not _stakes_opened and rows.size()>1
 	var panel:=PanelContainer.new();panel.name="StakesPanel"
 	var style:=Tokens.flat(Tokens.PAPER_RAISED,Tokens.RULE,1,Tokens.RADIUS_CARD,0)
-	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=8;style.content_margin_bottom=9
+	style.content_margin_left=16;style.content_margin_right=16;style.content_margin_top=8 if not folded else 5;style.content_margin_bottom=9 if not folded else 5
 	panel.add_theme_stylebox_override("panel",style);stakes_box.add_child(panel)
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",3);panel.add_child(box)
-	var kicker:=Tokens.make_label("WHAT YOU STAND TO GAIN",12,Tokens.INK_MUTED,.12);kicker.name="StakesKicker";box.add_child(kicker)
+	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",12);box.add_child(head)
+	var kicker:=Tokens.make_label("WHAT YOU STAND TO GAIN",12,Tokens.INK_MUTED,.12);kicker.name="StakesKicker";kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(kicker)
 	var full:=Stakes.tip(weighed)
+	if folded:
+		# One line: the first of it, the rest a click away.
+		var first:Dictionary=rows[0]
+		var gist:=Tokens.make_label("%s: %s" % [String(first.get("key","")),String(first.get("text",""))],13,Tokens.BODY);gist.name="StakesGist"
+		gist.size_flags_horizontal=Control.SIZE_EXPAND_FILL;gist.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		gist.clip_text=true;gist.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;gist.tooltip_text=full;gist.mouse_filter=Control.MOUSE_FILTER_PASS
+		head.add_child(gist)
+	else:
+		var spacer:=Control.new();spacer.size_flags_horizontal=Control.SIZE_EXPAND_FILL;head.add_child(spacer)
+	if _stakes_compact and rows.size()>1:
+		var toggle:=Button.new();toggle.name="StakesToggle";toggle.focus_mode=Control.FOCUS_NONE;toggle.flat=true
+		toggle.text="All of it ▾" if folded else "Fold ▴"
+		toggle.tooltip_text="Show everything you stand to gain or lose." if folded else "Fold it to one line, so the hall has room."
+		toggle.add_theme_font_size_override("font_size",13)
+		toggle.pressed.connect(func()->void:
+			_stakes_opened=folded
+			_build_stakes())
+		head.add_child(toggle)
+	if folded:return
 	for row:Dictionary in rows:
 		var line:=HBoxContainer.new();line.name="StakesRow";line.add_theme_constant_override("separation",12);box.add_child(line)
 		var tone:=String(row.get("tone",""))
@@ -916,7 +989,7 @@ func _after_persons(result:Dictionary)->void:
 	var audience:=Hall.find(audience_id)
 	_update_mood(audience)
 	if String(audience.get("status","waiting"))!="waiting":
-		_show_outcome({"ok":true,"outcome":String(result.get("outcome","")),"reaction":"furious" if String(result.get("action","")) in ["execute","exile"] else "neutral","terminal":true})
+		_show_outcome({"ok":true,"outcome":String(result.get("outcome","")),"reaction":"furious" if String(result.get("action","")) in ["execute","exile"] else "neutral","terminal":true,"action":String(result.get("action",""))})
 	else:
 		# The outcome is already one plain note in the hall (the voice's staging
 		# or the narration above); a red copy of it would say it twice.
@@ -1476,10 +1549,37 @@ func choose(option_id:String)->Dictionary:
 	_show_outcome(result)
 	return result
 
+## How the one before you leaves once the audience is concluded.
+var _exit_style:="bow"
+const FALL_VERBS:=["kill","strike_down","execute","envoy_kill","death"]
+const LED_VERBS:=["exile","cast_out","detain","seize","envoy_detain","envoy_exile","envoy_maim","envoy_flog","maim","mutilate","beat","humiliate","flog","arrest","bind","banish"]
+
+## Read from what the engine did, and only when it was done to them: put to
+## death they fall where they stand; cast out, seized or maimed they are led
+## away; insulted they leave without a bow; otherwise a bow and out.
+func exit_style_for(result:Dictionary)->String:
+	var acts:PackedStringArray=PackedStringArray()
+	for key in ["verb","action","act","id"]:
+		if result.get(key) is String:acts.append(String(result[key]).to_lower())
+	var target:Dictionary=result.get("target",{}) if result.get("target") is Dictionary else {}
+	var aimed_elsewhere:=false
+	if not target.is_empty():
+		var pid:=int(target.get("person_id",0))
+		var key:=String(target.get("key",""))
+		aimed_elsewhere=not (bool(target.get("speaker",false)) or key in ["envoy",""] or (pid>0 and pid==speaker_person_id))
+	elif int(result.get("person_id",0))>0 and int(result.get("person_id",0))!=speaker_person_id:aimed_elsewhere=true
+	var done_to_them:=not aimed_elsewhere and (bool(result.get("terminal",false)) or bool(result.get("removed",false)) or String(Hall.find(audience_id).get("origin",""))=="foreign")
+	for act in acts:
+		if done_to_them and act in FALL_VERBS:return "fall"
+		if done_to_them and act in LED_VERBS:return "led"
+	if String(result.get("reaction","")) in ["offended","furious"]:return "storm"
+	return "bow"
+
 func _show_outcome(result:Dictionary,leave:=true)->void:
 	resolved_result=result
 	# Once everything has been said, the one before you takes their leave.
 	_leave_when_quiet=leave and is_instance_valid(court_stage)
+	_exit_style=exit_style_for(result)
 	for child in options_row.get_children():child.queue_free()
 	options_row.visible=false
 	if is_instance_valid(stakes_box):stakes_box.visible=false
@@ -1573,8 +1673,10 @@ func _show_toast(text:String)->void:
 	if is_instance_valid(scene_note):
 		scene_note.text=text;scene_note.visible=true
 	elif is_instance_valid(court_stage):
-		# Said where the player is looking: on the stage, in red ink.
-		court_stage.caption(text,"warn")
+		# Said where the player is looking: on the stage, in red ink; never
+		# over a caption whose words are still coming.
+		if revealing:_pending_toasts.append(text)
+		else:court_stage.caption(text,"warn")
 	if not is_instance_valid(transcript):
 		_court_note(text);return
 	var note:=Tokens.make_label(text,13,Tokens.RED);note.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -1606,6 +1708,7 @@ func advance()->void:
 		hold.finished.connect(_on_reveal_done.bind(hold))
 		return
 	revealing=false;_reveal_label=null
+	_flush_toasts()
 	_pump()
 
 ## Everything said so far, shown at once (the player skipping ahead, or a test).
@@ -1616,9 +1719,11 @@ func skip_reveal()->void:
 	if is_instance_valid(_reveal_label):_reveal_label.visible_ratio=1.0
 	_reveal_label=null
 	var lines:Array=Hall.find(audience_id).get("lines",[])
+	_sync_rendered(lines)
 	while rendered_lines<lines.size():
-		_add_line(lines[rendered_lines],false);rendered_lines+=1
+		_show_line(lines[rendered_lines],false)
 	if is_instance_valid(court_stage):court_stage.settle()
+	_flush_toasts()
 	follow_scroll=.5
 
 func _process(delta:float)->void:
@@ -1651,9 +1756,10 @@ func _process(delta:float)->void:
 	if _leave_when_quiet and not revealing and is_instance_valid(court_stage):
 		# Concluded: once everything has been said, they take their leave.
 		var said:Array=Hall.find(audience_id).get("lines",[])
+		_sync_rendered(said)
 		if rendered_lines>=said.size() and not (_voice_ok() and voice.busy(audience_id)):
 			_leave_when_quiet=false
-			court_stage.conclude(.6)
+			court_stage.conclude(.6,_exit_style)
 	if not pending_words.is_empty():_deliver_pending_words()
 	if not pending_matter.is_empty() and mode=="audience" and is_instance_valid(speech_input):
 		speech_input.placeholder_text=pending_matter;pending_matter=""
@@ -1678,9 +1784,23 @@ func _process(delta:float)->void:
 func _pump()->void:
 	if revealing or not is_instance_valid(transcript):return
 	var lines:Array=Hall.find(audience_id).get("lines",[])
+	_sync_rendered(lines)
 	if rendered_lines>=lines.size():return
-	var line:Dictionary=lines[rendered_lines];rendered_lines+=1
-	_add_line(line,true)
+	_show_line(lines[rendered_lines],true)
+
+## Shows the next of the hall's lines and remembers it as the last shown.
+func _show_line(line:Dictionary,animate:bool)->void:
+	_last_line=line;rendered_lines+=1
+	_add_line(line,animate)
+
+## Finds the count of lines shown again after the hall dropped its oldest:
+## everything up to the last line shown, wherever it now stands.
+func _sync_rendered(lines:Array)->void:
+	if _last_line.is_empty():return
+	for index in range(lines.size()-1,-1,-1):
+		if is_same(lines[index],_last_line):
+			rendered_lines=index+1;return
+	rendered_lines=mini(rendered_lines,lines.size())
 
 # --- What is said ------------------------------------------------------------
 ## Each line is played on the stage (a bubble over the one who says it, the
@@ -1689,19 +1809,36 @@ func _pump()->void:
 
 func _add_line(line:Dictionary,animate:bool)->void:
 	var kept:=_history_row(line)
+	var ref:=-1
+	if not kept.is_empty():
+		_history_rows.append(kept[0]);ref=_history_rows.size()-1
 	if is_instance_valid(court_stage):
-		_reveal_stage(_stage_line(line,animate),animate)
+		_reveal_stage(_stage_line(line,animate,ref),animate)
 		follow_scroll=.6
 	elif not kept.is_empty():
 		_reveal(kept[0],kept[1],animate)
 
-func _stage_line(line:Dictionary,animate:bool)->Label:
+func _stage_line(line:Dictionary,animate:bool,ref:int=-1)->Label:
 	var text:=String(line.get("text","")).strip_edges()
 	if text.is_empty():return null
 	match String(line.get("role","")):
-		"ruler":return court_stage.god_says(text,animate)
-		"narrator":return court_stage.caption(text,"narration",animate)
-	return court_stage.say(_stage_key(line),text,bool(line.get("aside",false)),animate)
+		"ruler":return court_stage.god_says(text,animate,ref)
+		"narrator":return court_stage.caption(text,"narration",animate,ref)
+	return court_stage.say(_stage_key(line),text,bool(line.get("aside",false)),animate,ref)
+
+## "more" on words cut short: Earlier opens at that entry.
+func show_history_at(ref:int)->void:
+	if not envoy_popovers.has("WhatWasSaid"):return
+	_show_popover("WhatWasSaid",true)
+	follow_scroll=0.0
+	if ref<0 or ref>=_history_rows.size() or not is_instance_valid(_history_rows[ref]):return
+	var row:=_history_rows[ref]
+	_scroll_to_row.call_deferred(row)
+	row.modulate=Color(1.25,1.15,.85)
+	row.create_tween().tween_property(row,"modulate",Color.WHITE,Motion.duration(Motion.SCENE))
+
+func _scroll_to_row(row:Control)->void:
+	if is_instance_valid(transcript_scroll) and is_instance_valid(row):transcript_scroll.ensure_control_visible(row)
 
 func _reveal_stage(label:Label,animate:bool)->void:
 	## The words come at a reading pace, then stay a moment before the next.
@@ -1719,6 +1856,12 @@ func _on_reveal_done(tween:Tween)->void:
 	reveal_tweens.erase(tween)
 	if reveal_tweens.is_empty():
 		revealing=false;_reveal_label=null
+		_flush_toasts()
+
+## Warnings held while words were revealed, said now in red on the stage.
+func _flush_toasts()->void:
+	if revealing or _pending_toasts.is_empty() or not is_instance_valid(court_stage):return
+	court_stage.caption(_pending_toasts.pop_front(),"warn")
 
 func _history_row(line:Dictionary)->Array:
 	## One entry of the history: [row, its words label]. Empty without a history.
@@ -1785,10 +1928,7 @@ func _line_note(line:Dictionary)->String:
 ## same in both.
 var scene_portraits:Dictionary={}
 func _scene_picture(person:Dictionary,width:float,height:float)->TextureRect:
-	var picture:=Stage.figure_picture(person,scene_portraits)
-	var image:=Portrait.picture(person,width,height)
-	image.texture=picture.texture;image.flip_h=bool(picture.flip)
-	return image
+	return Stage.picture_rect(person,scene_portraits,width,height)
 
 func _avatar(line:Dictionary)->Control:
 	var frame:=PanelContainer.new();frame.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
@@ -1877,7 +2017,7 @@ func _build_envoy_view(audience:Dictionary)->void:
 	column.add_child(_build_envoy_talk(audience))
 
 func _build_envoy_stage(audience:Dictionary)->Control:
-	var stage:=Control.new();stage.name="EnvoyStage";stage.custom_minimum_size.y=ENVOY_STAGE_MIN_H;stage.size_flags_vertical=Control.SIZE_EXPAND_FILL;stage.clip_contents=true
+	var stage:=Control.new();stage.name="EnvoyStage";stage.custom_minimum_size.y=ENVOY_STAGE_MIN_H*(.75 if _compact() else 1.0);stage.size_flags_vertical=Control.SIZE_EXPAND_FILL;stage.clip_contents=true
 	stage.mouse_filter=Control.MOUSE_FILTER_PASS
 	envoy_stage=stage
 	var offer:=_envoy_offer(audience)
@@ -2096,9 +2236,35 @@ func _show_popover(node_name:String,on:bool)->void:
 		var pop:=envoy_popovers[key] as Control
 		if not is_instance_valid(pop):continue
 		pop.visible=on and key==node_name
+		if pop.visible:_fit_popover(pop)
 		var button:=card.find_child("Open"+String(key),true,false) as Button if is_instance_valid(card) else null
 		if button and button.button_pressed!=pop.visible:button.set_pressed_no_signal(pop.visible)
 	if on and node_name=="WhatWasSaid":follow_scroll=.4
+
+## A popover with a scrolling body takes the height its words need, but no
+## more than the stage has below its top: the rest scrolls.
+func _fit_popover(pop:Control)->void:
+	var body_scroll:=pop.find_child("PopoverScroll",false,false) as ScrollContainer
+	var holder:=pop.get_parent() as Control
+	if body_scroll==null or holder==null or body_scroll.get_child_count()==0:return
+	var content:=(body_scroll.get_child(0) as Control).get_combined_minimum_size().y
+	var style:=pop.get_theme_stylebox("panel")
+	var margins:=style.get_margin(SIDE_TOP)+style.get_margin(SIDE_BOTTOM) if style!=null else 24.0
+	var room:=maxf(holder.size.y-pop.offset_top-12.0-margins,60.0)
+	body_scroll.custom_minimum_size.y=minf(content,room)
+	pop.size.y=0.0
+	pop.reset_size()
+
+func _refit_popovers()->void:
+	for key in envoy_popovers:
+		var pop:=envoy_popovers[key] as Control
+		if is_instance_valid(pop) and pop.visible:_fit_popover(pop)
+
+func _popover_body(pop:PanelContainer)->VBoxContainer:
+	var body_scroll:=ScrollContainer.new();body_scroll.name="PopoverScroll";body_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	pop.add_child(body_scroll)
+	var box:=VBoxContainer.new();box.size_flags_horizontal=Control.SIZE_EXPAND_FILL;body_scroll.add_child(box)
+	return box
 
 func toggle_popover(node_name:String)->void:
 	var pop:=envoy_popovers.get(node_name) as Control
@@ -2117,7 +2283,7 @@ func _envoy_transcript_popover()->Control:
 func _dossier_popover(audience:Dictionary,anchors:Vector4,offsets:Vector4)->Control:
 	## What your court knows of them, and how the room feels.
 	var pop:=_envoy_popover("WhatYouKnow",anchors,offsets)
-	var box:=VBoxContainer.new();box.name="Dossier";box.add_theme_constant_override("separation",5);pop.add_child(box)
+	var box:=_popover_body(pop);box.name="Dossier";box.add_theme_constant_override("separation",5)
 	box.add_child(Tokens.make_label("WHAT YOU KNOW",12,Tokens.INK_MUTED,.12))
 	for row:Array in _dossier_rows(audience):
 		var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);box.add_child(line)
@@ -2133,7 +2299,7 @@ func _dossier_popover(audience:Dictionary,anchors:Vector4,offsets:Vector4)->Cont
 
 func _envoy_settings_popover()->Control:
 	var pop:=_envoy_popover("CourtSettings",Vector4(1,0,1,0),Vector4(-356,72,-26,72))
-	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);pop.add_child(box)
+	var box:=_popover_body(pop);box.add_theme_constant_override("separation",8)
 	box.add_child(Tokens.make_label("THE COURT",11,Tokens.TEXT_DIM,.12))
 	wait_button=Button.new();wait_button.name="MakeThemWait";wait_button.text="Make them wait";wait_button.custom_minimum_size=Vector2(0,34)
 	wait_button.tooltip_text="Send them to the antechamber. Guests kept waiting too long leave insulted."
@@ -2759,7 +2925,7 @@ func _roster_row(entry:Dictionary)->Control:
 	row.add_theme_stylebox_override("panel",Tokens.row_style(_person_color(pid) if pid>0 else Tokens.GOLD))
 	var line:=HBoxContainer.new();line.add_theme_constant_override("separation",10);row.add_child(line)
 	var frame:=PanelContainer.new();frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color(0,0,0,0),0,3,1));frame.size_flags_vertical=Control.SIZE_SHRINK_CENTER;line.add_child(frame)
-	frame.add_child(Portrait.picture(entry.get("person",{}) as Dictionary,34,40))
+	frame.add_child(_scene_picture(entry.get("person",{}) as Dictionary,34,40))
 	var words:=VBoxContainer.new();words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.add_theme_constant_override("separation",0);line.add_child(words)
 	var who:=Tokens.make_label(String(entry.name),14,Tokens.INK);who.add_theme_font_override("font",_bold);who.clip_text=true;who.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;words.add_child(who)
 	var regard:Dictionary=entry.get("regard",{})
@@ -2932,6 +3098,7 @@ func _deliver_pending_words()->void:
 	if _voice_ok() and voice.busy(audience_id):return
 	if not is_instance_valid(speech_input) or not resolved_result.is_empty():pending_words="";return
 	var lines:Array=Hall.find(audience_id).get("lines",[])
+	_sync_rendered(lines)
 	if rendered_lines<lines.size():return
 	speech_input.text=pending_words;pending_words=""
 	if is_instance_valid(speak_button):speak_button.disabled=false
@@ -3201,7 +3368,7 @@ func _build_foreign_herald(civ_id:String,civ:Dictionary,leader:Dictionary)->Cont
 		seat.tooltip_text="%s · %s" % [String(person.get("name","")),String(person.get("office_title",""))]
 		var stack:=VBoxContainer.new();stack.add_theme_constant_override("separation",2);stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;seat.add_child(stack)
 		var face:=PanelContainer.new();face.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),Color(0,0,0,0),0,3,1));face.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(face)
-		face.add_child(Portrait.picture(person,48,52))
+		face.add_child(_scene_picture(person,48,52))
 		var who:=Tokens.make_label(String(person.get("name","")).get_slice(" ",0),11,Color("f6ecd6"));who.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;who.clip_text=true;who.custom_minimum_size.x=50;stack.add_child(who)
 		benches.add_child(seat)
 	if not officials.is_empty():row.add_child(seats)
@@ -3220,7 +3387,7 @@ func _build_foreign_speaker(civ_id:String,civ:Dictionary,leader:Dictionary)->Con
 	speaker_frame=PanelContainer.new();speaker_frame.name="SpeakerFrame"
 	speaker_frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),envoy_color,2,8,6));column.add_child(speaker_frame)
 	var holder:=Control.new();holder.custom_minimum_size=Vector2(222,_portrait_height());holder.clip_contents=true;speaker_frame.add_child(holder)
-	var portrait:=Portrait.picture(_foreign_leader_person(civ_id,leader),222,_portrait_height());portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);holder.add_child(portrait)
+	var portrait:=_scene_picture(_foreign_leader_person(civ_id,leader),222,_portrait_height());portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);holder.add_child(portrait)
 	var flag:=TextureRect.new();flag.texture=Identity.foreign(civ_id).texture;flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	flag.mouse_filter=Control.MOUSE_FILTER_IGNORE;flag.position=Vector2(166,6);flag.size=Vector2(50,50);holder.add_child(flag)
 	var regard:=Divine.foreign_regard(civ_id)
@@ -3446,7 +3613,7 @@ func _foreign_line(turn:Dictionary,leader_name:String,leader_person:Dictionary)-
 	else:
 		var frame:=PanelContainer.new();frame.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 		frame.add_theme_stylebox_override("panel",Tokens.flat(Color("eee7d8"),colour,1,6,2))
-		frame.add_child(Portrait.picture(leader_person if role!="envoy" else {"name":"Your envoy","person_id":0},44,52))
+		frame.add_child(_scene_picture(leader_person if role!="envoy" else {"name":"Your envoy","person_id":0},44,52))
 		line_row.add_child(frame)
 	var bubble:=PanelContainer.new();bubble.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var bubble_style:=Tokens.flat(colour.lerp(Tokens.PANEL_BG_SOLID,.90 if Tokens.is_light() else .86),colour,1,10,0)
