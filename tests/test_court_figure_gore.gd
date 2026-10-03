@@ -47,6 +47,34 @@ func _has_morph(node:Node,name:String)->bool:
 	return false
 
 
+## A prepared state's contents must die when that state is released. The
+## weak marker detects a callable/dictionary cycle without counting engine caches.
+func _prepared_owner_probe(fig:Node3D)->WeakRef:
+	Gore.prepare(fig)
+	var state:Dictionary=fig.get_meta(&"gore_prepared")
+	var marker:=RefCounted.new()
+	state["owner_probe"]=marker
+	return weakref(marker)
+
+
+func test_releasing_a_prepared_figure_releases_its_state()->void:
+	if not _ok():return
+	var fig:=_adult()
+	var owner:=_prepared_owner_probe(fig)
+	assert_bool(owner.get_ref()!=null).is_true()
+	Gore.release(fig)
+	assert_bool(fig.has_meta(&"gore_prepared")).is_false()
+	assert_object(owner.get_ref()).override_failure_message("the prepared pose callback retained its own state after release").is_null()
+
+
+func test_freeing_a_prepared_figure_releases_its_state()->void:
+	if not _ok():return
+	var fig:=_adult()
+	var owner:=_prepared_owner_probe(fig)
+	fig.free()
+	assert_object(owner.get_ref()).override_failure_message("an abandoned execution retained its prepared state after the figure was freed").is_null()
+
+
 func test_a_head_comes_off_with_stumps_and_still_blinks()->void:
 	if not _ok():return
 	var fig:=_adult()
