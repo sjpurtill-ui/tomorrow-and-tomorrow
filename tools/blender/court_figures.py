@@ -1,0 +1,419 @@
+"""Build the court figures and export them for Godot.
+
+Run headless with Blender 5.2 (never opens a window):
+  blender --background --factory-startup --python tools/blender/court_figures.py -- [options]
+Options:
+  --variants male_adult,female_adult,...   (default: all six bodies)
+  --out assets/court_figures               where the .glb files go
+  --quick                                  coarser fields, for trying things
+  --no-ao                                  skip the ambient-occlusion bake
+
+Each body variant becomes one court_figure_<variant>.glb holding:
+  one armature "Figure" (bones listed in cf_rig.py) with every clip in
+  cf_anim.CLIPS as its own animation;
+  meshes: Body, Eyes, Brows, Mouth; hair_<style> for every style in
+  cf_dress.HAIR_STYLES; beard_<style> (male bodies); and the pieces of each
+  outfit (hide_*, tunic_*, robe_*). Godot shows one hair, at most one beard
+  and one outfit's pieces per person, and hides the rest.
+Materials are named by slot (SKIN, HAIR, CLOTH_A, CLOTH_B, CLOTH_C, LEATHER,
+EYES, EYE_SHINE, MOUTH) so the game recolours them per people.
+Vertex colour (COLOR_0): R is baked ambient occlusion; on the Body, G, B and A
+are 1 where the hide, tunic and robe outfits cover the skin (the game's skin
+shader discards what the worn outfit covers, so skin never shows through).
+"""
+import os
+import sys
+import time
+import json
+import math
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, HERE)
+sys.dont_write_bytecode = True
+
+import bpy
+import numpy as np
+from mathutils import Vector
+
+import cf_body
+import cf_sdf
+import cf_rig
+import cf_anim
+import cf_dress
+
+OUTFIT_CHANNEL = {"hide": 1, "tunic": 2, "robe": 3}
+BUDGET = {"body": 14000, "piece": 5000, "hair": 3200, "small": 1600}
+
+
+def args():
+    a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    opts = {"variants": list(cf_body.VARIANTS.keys()), "out": os.path.join(ROOT, "assets", "court_figures"),
+            "quick": False, "ao": True}
+    i = 0
+    while i < len(a):
+        if a[i] == "--variants":
+            opts["variants"] = a[i + 1].split(",")
+            i += 1
+        elif a[i] == "--out":
+            opts["out"] = os.path.abspath(a[i + 1])
+            i += 1
+        elif a[i] == "--quick":
+            opts["quick"] = True
+        elif a[i] == "--no-ao":
+            opts["ao"] = False
+        i += 1
+    return opts
+
+
+def clear_scene():
+    for o in list(bpy.data.objects):
+        bpy.data.objects.remove(o, do_unlink=True)
+    for coll in (bpy.data.meshes, bpy.data.armatures, bpy.data.actions, bpy.data.materials):
+        for d in list(coll):
+            coll.remove(d)
+
+
+def log(*a):
+    print("[court_figures]", *a, flush=True)
+
+
+def build_variant(variant, quick=False, ao=True):
+    t0 = time.time()
+    f = cf_body.Frame(cf_body.params(variant))
+    k = f.H / 1.72
+    body = cf_body.build_body(f, "Body", voxel=0.0045 if quick else 0.003)
+    cf_sdf.finish_mesh(body, BUDGET["body"], 2)
+    cf_body.set_material(body, "SKIN")
+    face = cf_body.build_face(f, body)
+    eyes = cf_body.join(face["eyes"], "Eyes")
+    brows = cf_body.join(face["brows"], "Brows")
+    mouth = face["mouth"][0]
+    log(variant, "body", len(body.data.polygons), "faces", round(time.time() - t0, 1), "s")
+    rig = cf_rig.build_armature(f, face, name="Figure")
+    missing = cf_rig.bind_body(body, rig)
+    if missing:
+        log("WARNING bones without weights:", missing)
+    for part in (eyes, brows, mouth):
+        _bind_face_part(part, rig)
+    sets = {"body": [body, eyes, brows, mouth]}
+    # hair and beards
+    styles = list(cf_dress.HAIR_STYLES) + (list(cf_dress.BEARD_STYLES) if not f.p["female"] else [])
+    for st in styles:
+        pc = cf_dress.beard_style(f, st) if st.startswith("beard") else cf_dress.hair_style(f, st)
+        if pc is None:
+            continue
+        if quick:
+            pc.voxel *= 1.5
+        o = pc.build()
+        if o is None:
+            log("WARNING empty", st)
+            continue
+        cf_sdf.finish_mesh(o, BUDGET["hair"], 1)
+        o.name = o.data.name = pc.name if pc.name.startswith(("hair_", "beard_")) else "hair_" + pc.name
+        if st.startswith("beard"):
+            o.name = o.data.name = st
+        cf_rig.bind_head_hair(o, rig, f)
+        sets[o.name] = [o]
+    log(variant, "hair", round(time.time() - t0, 1), "s")
+    # clothes
+    proxy = _armless_proxy(body)
+    arms = _arm_vertices(body)
+    masks = {}
+    for kind in cf_dress.OUTFITS:
+        pieces = cf_dress.outfit(f, kind)
+        objs = []
+        for pc in pieces:
+            if quick:
+                pc.voxel *= 1.5
+            o = pc.build()
+            if o is None:
+                log("WARNING empty", pc.name)
+                continue
+            small = pc.name.endswith(("_belt", "_sash", "_cord", "_shoes", "_footwraps", "_trim", "_edge"))
+            cf_sdf.finish_mesh(o, BUDGET["small"] if small else BUDGET["piece"], 1)
+            _bind_garment(o, pc, body, proxy, rig, f)
+            objs.append(o)
+        sets[kind] = objs
+        masks[kind] = cf_dress.coverage(body, pieces, strict=arms)
+        log(variant, kind, [o.name for o in objs], "covers", int(masks[kind].sum()), "skin vertices",
+            round(time.time() - t0, 1), "s")
+    bpy.data.objects.remove(proxy, do_unlink=True)
+    # occlusion and coverage into vertex colour
+    for objs in sets.values():
+        for o in objs:
+            _ensure_color(o)
+    if ao:
+        _bake_ao(sets, body)
+    _write_masks(body, masks)
+    cf_anim.write_actions(rig, k)
+    log(variant, "clips", len(cf_anim.CLIPS), round(time.time() - t0, 1), "s")
+    rig["variant"] = variant
+    rig["height"] = f.H
+    rig["head_top"] = f.z_top
+    return rig, f, sets
+
+
+def _bind_face_part(obj, rig):
+    """Joined face parts keep each source's bone in its own vertex group."""
+    groups = {}
+    for v in obj.data.vertices:
+        pass
+    # parts were tagged per object before joining: rebuild from positions
+    bones = {}
+    for v in obj.data.vertices:
+        x = v.co.x
+        if obj.name == "Mouth":
+            b = "jaw"
+        elif obj.name == "Eyes":
+            b = "eye.L" if x > 0 else "eye.R"
+        else:
+            b = "brow.L" if x > 0 else "brow.R"
+        bones.setdefault(b, []).append(v.index)
+    obj.vertex_groups.clear()
+    for b, idx in bones.items():
+        g = obj.vertex_groups.new(name=b)
+        g.add(idx, 1.0, 'REPLACE')
+    cf_rig._armature_parent(obj, rig)
+
+
+def _arm_vertices(body):
+    """Vertices that belong to the arms and hands (more than half their weight)."""
+    groups = {g.index for g in body.vertex_groups if g.name.split(".")[0] in
+              ("upper_arm", "forearm", "hand", "thumb", "index", "fingers")}
+    out = np.zeros(len(body.data.vertices), dtype=bool)
+    for v in body.data.vertices:
+        out[v.index] = sum(ge.weight for ge in v.groups if ge.group in groups) > 0.5
+    return out
+
+
+def _armless_proxy(body):
+    """The body without arms and hands: skirts and mantles copy weights from it."""
+    proxy = body.copy()
+    proxy.data = body.data.copy()
+    proxy.name = "ArmlessProxy"
+    bpy.context.scene.collection.objects.link(proxy)
+    arm_groups = {g.index for g in proxy.vertex_groups if g.name.split(".")[0] in
+                  ("upper_arm", "forearm", "hand", "thumb", "index", "fingers")}
+    import bmesh
+    bm = bmesh.new()
+    bm.from_mesh(proxy.data)
+    deform = bm.verts.layers.deform.active
+    kill = []
+    for v in bm.verts:
+        w = sum(val for gi, val in v[deform].items() if gi in arm_groups)
+        if w > 0.35:
+            kill.append(v)
+    bmesh.ops.delete(bm, geom=kill, context='VERTS')
+    bm.to_mesh(proxy.data)
+    bm.free()
+    return proxy
+
+
+def _bind_garment(obj, pc, body, proxy, rig, f):
+    name = pc.name
+    hangs = any(t in name for t in ("robe_body", "robe_trim", "tunic_body", "tunic_trim", "hide_wrap", "mantle"))
+    in_sleeve = _sleeve_vertices(obj, pc)
+
+    def ease(co, i):
+        if in_sleeve is not None and in_sleeve[i]:
+            return []
+        z = co.z
+        if "mantle" in name:
+            # the mantle rides the shoulders and falls from them
+            t = min(1.0, max(0.0, (f.z_shoulder - 0.08 - z) / 0.25))
+            return [("chest", 0.75 * t)] if t > 0 else []
+        if hangs and z < f.z_hip:
+            # below the hips a skirt moves with the hips more than either leg
+            t = min(1.0, max(0.0, (f.z_hip - z) / 0.20))
+            return [("hips", 0.55 * t)]
+        return []
+
+    if in_sleeve is not None:
+        # sleeves take the arms' weights; the rest of the garment the armless body's
+        cf_rig.bind_from_body(obj, body, rig, ease=None)
+        _retransfer(obj, proxy, ~in_sleeve)
+    else:
+        cf_rig.bind_from_body(obj, proxy if name != "hide_cape" else body, rig, ease=None)
+    if hangs:
+        cf_rig._ease_weights(obj, ease)
+        cf_rig._normalize(obj)
+        cf_rig.smooth_weights(obj, repeat=6, factor=0.5)
+
+
+def _sleeve_vertices(obj, pc):
+    """Which vertices of a garment belong to its sleeves (None: it has none)."""
+    if pc.sleeve is None or pc.trunk is None:
+        return None
+    co = np.array([v.co[:] for v in obj.data.vertices], dtype=np.float32)
+    return pc.sleeve(co) < pc.trunk(co)
+
+
+def _near_arm(co, f, reach=0.085):
+    """Whether a point lies within a sleeve's reach of either arm."""
+    for side in ("L", "R"):
+        for a, b in ((f.shoulder[side], f.elbow[side]), (f.elbow[side], f.wrist[side])):
+            ab = b - a
+            t = max(0.0, min(1.0, (co - a).dot(ab) / ab.length_squared))
+            if (a + ab * t - co).length < reach:
+                return True
+    return False
+
+
+def _retransfer(obj, proxy, mask):
+    """Vertices in mask take weights from the armless proxy's nearest surface."""
+    names = [g.name for g in proxy.vertex_groups]
+    pw = []
+    for v in proxy.data.vertices:
+        pw.append({names[ge.group]: ge.weight for ge in v.groups if ge.weight > 1e-4})
+    polys = proxy.data.polygons
+    table = cf_rig._weights_table(obj)
+    for i, v in enumerate(obj.data.vertices):
+        if not mask[i]:
+            continue
+        ok, loc, nor, fi = proxy.closest_point_on_mesh(v.co)
+        if not ok:
+            continue
+        acc = {}
+        tot = 0.0
+        for vid in polys[fi].vertices:
+            wt = 1.0 / ((proxy.data.vertices[vid].co - loc).length + 1e-5)
+            tot += wt
+            for n, val in pw[vid].items():
+                acc[n] = acc.get(n, 0.0) + val * wt
+        if tot > 0 and acc:
+            table[i] = {n: val / tot for n, val in acc.items()}
+    for n in names:
+        if obj.vertex_groups.get(n) is None:
+            obj.vertex_groups.new(name=n)
+    cf_rig._write_table(obj, table)
+
+
+def _ensure_color(obj):
+    me = obj.data
+    if "Col" not in me.color_attributes:
+        me.color_attributes.new("Col", 'FLOAT_COLOR', 'POINT')
+    attr = me.color_attributes["Col"]
+    me.color_attributes.active_color = attr
+    me.color_attributes.render_color_index = me.color_attributes.find("Col")
+    n = len(me.vertices)
+    vals = np.zeros(n * 4, dtype=np.float32)
+    vals[0::4] = 1.0
+    attr.data.foreach_set("color", vals)
+
+
+def _bake_ao(sets, body):
+    sc = bpy.context.scene
+    sc.render.engine = 'CYCLES'
+    sc.cycles.device = 'CPU'
+    sc.cycles.samples = 48
+    if sc.world is None:
+        sc.world = bpy.data.worlds.new("World")
+    sc.world.light_settings.distance = 0.14
+    every = [o for objs in sets.values() for o in objs]
+    for key, objs in sets.items():
+        meshes = [o for o in objs if o.type == 'MESH' and o.name not in ("Eyes", "Brows", "Mouth")]
+        if not meshes:
+            continue
+        others = set(sets["body"][:1]) | set(objs)
+        for o in every:
+            o.hide_render = o not in others
+        for o in bpy.context.selected_objects:
+            o.select_set(False)
+        for o in meshes:
+            o.select_set(True)
+        bpy.context.view_layer.objects.active = meshes[0]
+        # the armature deforms at rest; bake the rest pose
+        try:
+            bpy.ops.object.bake(type='AO', target='VERTEX_COLORS', use_clear=True)
+        except Exception as e:
+            log("AO bake failed for", key, e)
+    for o in every:
+        o.hide_render = False
+    # keep AO in red only; soften it so it reads as painted shade, not grime
+    for o in every:
+        me = o.data
+        attr = me.color_attributes.get("Col")
+        if attr is None:
+            continue
+        n = len(me.vertices)
+        vals = np.zeros(n * 4, dtype=np.float32)
+        attr.data.foreach_get("color", vals)
+        ao = vals[0::4].copy()
+        if o.name in ("Eyes", "Brows", "Mouth"):
+            ao[:] = 1.0
+        ao = 0.35 + 0.65 * np.clip(ao, 0.0, 1.0) ** 0.8
+        out = np.zeros(n * 4, dtype=np.float32)
+        out[0::4] = ao
+        attr.data.foreach_set("color", out)
+
+
+def _write_masks(body, masks):
+    me = body.data
+    attr = me.color_attributes["Col"]
+    n = len(me.vertices)
+    vals = np.zeros(n * 4, dtype=np.float32)
+    attr.data.foreach_get("color", vals)
+    for kind, cov in masks.items():
+        vals[OUTFIT_CHANNEL[kind]::4] = cov.astype(np.float32)
+    attr.data.foreach_set("color", vals)
+
+
+def export(rig, sets, path):
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    rig.select_set(True)
+    for objs in sets.values():
+        for o in objs:
+            o.select_set(True)
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.export_scene.gltf(
+        filepath=path, export_format='GLB', use_selection=True, export_apply=False,
+        export_yup=True, export_texcoords=False, export_normals=True, export_materials='EXPORT',
+        export_vertex_color='ACTIVE', export_all_vertex_colors=False,
+        export_skins=True, export_influence_nb=4, export_def_bones=False,
+        export_animations=True, export_animation_mode='ACTIONS', export_force_sampling=True,
+        export_optimize_animation_size=True, export_reset_pose_bones=True, export_rest_position_armature=True,
+        export_morph=False, export_extras=True)
+
+
+def manifest(entries, out_dir):
+    data = {
+        "generator": "tools/blender/court_figures.py",
+        "variants": entries,
+        "hair": list(cf_dress.HAIR_STYLES),
+        "beards": list(cf_dress.BEARD_STYLES),
+        "outfits": {k: [] for k in cf_dress.OUTFITS},
+        "outfit_mask_channel": {k: "rgba"[v] for k, v in OUTFIT_CHANNEL.items()},
+        "clips": {n: {"seconds": d, "loop": n in cf_anim.LOOP_CLIPS} for n, (d, _) in cf_anim.CLIPS.items()},
+        "slots": list(cf_body.SLOT_DEFAULTS.keys()),
+    }
+    for e in entries:
+        for kind, names in e.get("outfits", {}).items():
+            data["outfits"][kind] = sorted(set(data["outfits"][kind]) | set(names))
+    with open(os.path.join(out_dir, "court_figures.json"), "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=1)
+
+
+def main():
+    o = args()
+    os.makedirs(o["out"], exist_ok=True)
+    entries = []
+    for v in o["variants"]:
+        clear_scene()
+        rig, f, sets = build_variant(v, o["quick"], o["ao"])
+        path = os.path.join(o["out"], "court_figure_%s.glb" % v)
+        export(rig, sets, path)
+        size = os.path.getsize(path)
+        log("exported", path, round(size / 1024), "KB")
+        entries.append({"variant": v, "file": os.path.basename(path), "height": round(f.H, 3),
+                        "head_top": round(f.z_top, 3), "chin": round(f.z_chin, 3),
+                        "outfits": {k: [ob.name for ob in sets[k]] for k in cf_dress.OUTFITS},
+                        "hair": [k for k in sets if k.startswith("hair_")],
+                        "beards": [k for k in sets if k.startswith("beard_")]})
+    manifest(entries, o["out"])
+    log("done", len(entries), "variants")
+
+
+if __name__ == "__main__":
+    main()

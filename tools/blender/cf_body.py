@@ -1,0 +1,506 @@
+"""Court figures: body proportions, the clay body and its face.
+
+One set of landmarks (Frame) drives the body mesh, the armature, the clothes
+and the hair, so they always line up. Units are metres, Z up, the figure
+faces -Y (its left hand is +X), feet on Z=0.
+
+The body is modelled as clay: signed-distance forms (cf_sdf) melted together
+with a chosen fillet radius and meshed as one watertight surface. Eyes,
+brows and the mouth are separate small meshes so the rig can blink, lift
+the brows and open the mouth.
+"""
+import math
+import bpy
+import bmesh
+from mathutils import Vector, Quaternion, Matrix
+
+from cf_sdf import Field, Loft, Ellipsoid, RoundCone, Sphere, RoundBox, finish_mesh
+
+# --- Variants ---------------------------------------------------------------------
+
+BASE = {
+    # overall
+    "height": 1.72, "head_ratio": 6.1, "neck": 0.050,
+    # half widths (metres)
+    "shoulder": 0.186, "hip_joint": 0.086, "pelvis": 0.150, "waist": 0.128,
+    "chest_w": 0.156, "chest_d": 0.108, "belly": 0.0, "bust": 0.0, "pecs": 1.0,
+    # limb radii
+    "arm": 0.046, "forearm": 0.039, "thigh": 0.074, "shin": 0.048, "hand": 1.15,
+    # posture and face
+    "stoop": 0.0, "arm_angle": 24.0, "jaw": 1.0, "brow_ridge": 1.0,
+}
+
+VARIANTS = {
+    "male_adult": {},
+    "female_adult": {"height": 1.62, "head_ratio": 6.0, "neck": 0.056, "shoulder": 0.160, "hip_joint": 0.090,
+                     "pelvis": 0.164, "waist": 0.108, "chest_w": 0.132, "chest_d": 0.096, "bust": 1.0, "pecs": 0.0,
+                     "arm": 0.038, "forearm": 0.032, "thigh": 0.074, "shin": 0.044, "hand": 1.06,
+                     "jaw": 0.80, "brow_ridge": 0.45},
+    "male_old": {"height": 1.66, "stoop": 1.0, "belly": 0.8, "arm": 0.042, "forearm": 0.036, "thigh": 0.066,
+                 "shin": 0.044, "chest_w": 0.150, "waist": 0.136, "pelvis": 0.150, "pecs": 0.4, "arm_angle": 20.0},
+    "female_old": {"height": 1.55, "head_ratio": 5.9, "neck": 0.050, "shoulder": 0.154, "hip_joint": 0.090,
+                   "pelvis": 0.164, "waist": 0.124, "chest_w": 0.134, "chest_d": 0.098, "bust": 0.8, "pecs": 0.0,
+                   "arm": 0.037, "forearm": 0.032, "thigh": 0.068, "shin": 0.042, "hand": 1.05,
+                   "jaw": 0.80, "brow_ridge": 0.45, "stoop": 1.0, "belly": 0.5, "arm_angle": 20.0},
+    "male_young": {"height": 1.62, "head_ratio": 5.8, "neck": 0.054, "shoulder": 0.168, "hip_joint": 0.082,
+                   "pelvis": 0.140, "waist": 0.116, "chest_w": 0.138, "chest_d": 0.096, "pecs": 0.4,
+                   "arm": 0.040, "forearm": 0.034, "thigh": 0.066, "shin": 0.044, "jaw": 0.86, "brow_ridge": 0.6},
+    "female_young": {"height": 1.54, "head_ratio": 5.7, "neck": 0.056, "shoulder": 0.150, "hip_joint": 0.086,
+                     "pelvis": 0.152, "waist": 0.102, "chest_w": 0.124, "chest_d": 0.090, "bust": 0.6, "pecs": 0.0,
+                     "arm": 0.035, "forearm": 0.030, "thigh": 0.068, "shin": 0.041, "hand": 1.0,
+                     "jaw": 0.76, "brow_ridge": 0.35},
+}
+
+
+def params(variant):
+    p = dict(BASE)
+    p.update(VARIANTS[variant])
+    p["variant"] = variant
+    p["female"] = variant.startswith("female")
+    p["old"] = variant.endswith("_old")
+    p["young"] = variant.endswith("_young")
+    return p
+
+
+# --- Landmarks -------------------------------------------------------------------
+
+class Frame:
+    """Every joint and landmark of one body, in metres."""
+
+    def __init__(self, p):
+        self.p = p
+        H = p["height"]
+        self.H = H
+        k = H / 1.72
+        hh = H / p["head_ratio"]
+        self.head_h = hh
+        st = p["stoop"]
+        drop = 0.020 * st
+        self.z_top = H - drop
+        self.z_chin = H - hh - drop
+        self.z_shoulder = H - hh - p["neck"] - 0.6 * drop
+        self.z_hip = 0.505 * H
+        self.z_knee = 0.275 * H
+        self.z_ankle = 0.045 * H
+        self.z_waist = self.z_hip + 0.40 * (self.z_shoulder - self.z_hip)
+        self.z_chest = self.z_hip + 0.73 * (self.z_shoulder - self.z_hip)
+        # The spine (pelvis, waist, chest, neck base, head base). An old back
+        # rounds: the shoulders go back (+Y) and the head comes forward (-Y).
+        self.pelvis = Vector((0.0, 0.004, self.z_hip + 0.045 * k))
+        self.waist = Vector((0.0, 0.004 + 0.008 * st, self.z_waist))
+        self.chest = Vector((0.0, 0.006 + 0.028 * st, self.z_chest))
+        self.neck = Vector((0.0, 0.012 + 0.050 * st, self.z_shoulder + 0.004))
+        self.head_base = Vector((0.0, 0.006 + 0.010 * st, self.z_chin + 0.035 * k))
+        # the face sits this far forward of the frame's head line
+        self.head_offset = Vector((0.0, -0.020 * st, 0.0))
+        sw = p["shoulder"]
+        self.shoulder_z = self.z_shoulder - 0.012 * k
+        self.clavicle, self.shoulder, self.elbow, self.wrist, self.knuckle = {}, {}, {}, {}, {}
+        self.hip, self.knee, self.ankle, self.ball, self.toe = {}, {}, {}, {}, {}
+        a = math.radians(p["arm_angle"])
+        upper = 0.186 * H
+        fore = 0.150 * H
+        self.hand_len = 0.062 * H * p["hand"]
+        for side, s in (("L", 1.0), ("R", -1.0)):
+            sh = Vector((s * sw, 0.000 + 0.040 * st, self.shoulder_z))
+            self.clavicle[side] = Vector((s * 0.030 * k, -0.010 + 0.040 * st, self.z_shoulder - 0.010 * k))
+            self.shoulder[side] = sh
+            d1 = Vector((s * math.sin(a), 0.0, -math.cos(a)))
+            el = sh + d1 * upper
+            # the forearm hangs a little forward and in, as arms do at rest
+            d2 = Vector((s * math.sin(a * 0.70), -0.16, -math.cos(a * 0.70))).normalized()
+            wr = el + d2 * fore
+            self.elbow[side] = el
+            self.wrist[side] = wr
+            self.knuckle[side] = wr + d2 * self.hand_len
+            self.hip[side] = Vector((s * p["hip_joint"], 0.004, self.z_hip))
+            self.knee[side] = Vector((s * p["hip_joint"] * 0.92, -0.010, self.z_knee))
+            self.ankle[side] = Vector((s * p["hip_joint"] * 0.88, 0.014, self.z_ankle))
+            self.ball[side] = Vector((s * p["hip_joint"] * 1.00, -0.100 * k, 0.020 * k))
+            self.toe[side] = Vector((s * p["hip_joint"] * 1.04, -0.158 * k, 0.016 * k))
+
+    def face(self, u):
+        """A height on the head, 0 at the chin and 1 at the crown."""
+        return self.z_chin + u * self.head_h
+
+    def head_point(self, x, y, u):
+        return Vector((x, y + self.head_offset.y, self.face(u)))
+
+    def hand_frame(self, side):
+        """Hand axes: along the fingers, toward the thumb (front), out of the back of the hand."""
+        along = (self.knuckle[side] - self.wrist[side]).normalized()
+        front = Vector((0.0, -1.0, 0.0))
+        front = (front - along * front.dot(along)).normalized()
+        out = along.cross(front) if side == "L" else front.cross(along)
+        return along, front, out.normalized()
+
+
+def _quat_from_axes(x_axis, y_axis):
+    x = Vector(x_axis).normalized()
+    y = (Vector(y_axis) - x * Vector(y_axis).dot(x)).normalized()
+    z = x.cross(y)
+    m = Matrix((x, y, z)).transposed()
+    return m.to_quaternion()
+
+
+def _up_to(d):
+    """Rotate a form whose long axis is Z to lie along d."""
+    return Vector((0, 0, 1)).rotation_difference(Vector(d).normalized())
+
+
+# --- The body --------------------------------------------------------------------
+
+def torso_profile(f):
+    """Trunk sections: (z, half width, front depth, back depth, centre y)."""
+    p = f.p
+    k = f.H / 1.72
+    fem = p["female"]
+    st = p["stoop"]
+    zc = f.z_hip - 0.070 * k
+    zs = f.z_shoulder
+    belly = p["belly"]
+    return [
+        (zc, p["pelvis"] * 0.78, 0.062 * k, 0.078 * k, 0.004),
+        (f.z_hip, p["pelvis"], 0.080 * k + 0.010 * belly * k, 0.102 * k + (0.010 if fem else 0.0), 0.004),
+        (f.z_hip + 0.115 * k, p["pelvis"] * 0.92, 0.086 * k + 0.030 * belly * k, 0.084 * k, 0.002),
+        (f.z_waist, p["waist"], 0.086 * k + 0.040 * belly * k, 0.076 * k, 0.002 + 0.006 * st),
+        (f.z_waist + 0.085 * k, (p["waist"] + p["chest_w"]) * 0.5, 0.092 * k + 0.022 * belly * k, 0.082 * k, 0.004 + 0.016 * st),
+        (f.z_chest, p["chest_w"], p["chest_d"], 0.092 * k, 0.006 + 0.030 * st),
+        (zs - 0.072 * k, p["chest_w"] * 1.02, p["chest_d"] * 0.88, 0.094 * k, 0.008 + 0.042 * st),
+        (zs + 0.006, p["shoulder"] * 0.60, 0.056 * k, 0.062 * k, 0.012 + 0.052 * st),
+    ]
+
+
+def build_body(f, name="Body", voxel=0.003):
+    """The clay body for a frame, as one watertight mesh."""
+    p = f.p
+    H = f.H
+    k = H / 1.72
+    fem = p["female"]
+    st = p["stoop"]
+    reach = max(abs(f.knuckle["L"].x), abs(f.shoulder["L"].x) + 0.08) + 0.07
+    fld = Field((-reach, -0.26 * k, -0.01), (reach, 0.22 * k, f.z_top + 0.02), voxel)
+    keys = torso_profile(f)
+    fld.union(Loft([q[0] for q in keys], [q[1] for q in keys], [q[2] for q in keys], [q[3] for q in keys],
+                   [q[4] for q in keys], cap_round=0.035 * k))
+    if p["bust"] > 0:
+        b = p["bust"]
+        for s in (1, -1):
+            fld.union(Sphere(f.chest + Vector((s * 0.054 * k, -p["chest_d"] * 0.58 + 0.014 * st, 0.008 * k - 0.026 * st)),
+                             0.048 * k * (0.70 + 0.30 * b)), 0.030 * k)
+    if p["pecs"] > 0:
+        for s in (1, -1):
+            fld.union(Ellipsoid(f.chest + Vector((s * 0.058 * k, -p["chest_d"] * 0.60 + 0.012 * st, 0.044 * k)),
+                                (0.058 * k, 0.028 * k * p["pecs"] + 0.008, 0.044 * k)), 0.030 * k)
+    # shoulder blades and the slope of the shoulders into the neck
+    for side, s in (("L", 1), ("R", -1)):
+        fld.union(Ellipsoid(f.chest + Vector((s * 0.060 * k, 0.068 * k + 0.012 * st, 0.060 * k)), (0.058 * k, 0.030 * k, 0.070 * k)), 0.040 * k)
+        fld.union(RoundCone(Vector((s * 0.040 * k, f.neck.y + 0.010, f.z_shoulder + 0.026 * k)),
+                            Vector((s * (p["shoulder"] - 0.024 * k), f.shoulder[side].y + 0.006, f.shoulder_z + 0.010 * k)),
+                            0.036 * k, 0.034 * k), 0.035 * k)
+    nr = (0.050 if not fem else 0.043) * k
+    fld.union(RoundCone(f.neck + Vector((0, 0.006, -0.050 * k)), f.head_base + Vector((0, 0.016, -0.006)), nr, nr * 0.84), 0.022 * k)
+    build_head(fld, f)
+    for side, s in (("L", 1.0), ("R", -1.0)):
+        sh, el, wr = f.shoulder[side], f.elbow[side], f.wrist[side]
+        arm_dir = (el - sh).normalized()
+        fld.union(Ellipsoid(sh + arm_dir * 0.030 * k + Vector((s * 0.006 * k, 0, 0.004)),
+                            (p["arm"] * 1.22, p["arm"] * 1.18, 0.074 * k), rot=_up_to(arm_dir)), 0.030 * k)
+        fld.union(RoundCone(sh, el, p["arm"] * 1.02, p["arm"] * 0.80), 0.016 * k)
+        fld.union(Ellipsoid(sh.lerp(el, 0.50) + Vector((0, -0.004, 0)), (p["arm"] * 1.00, p["arm"] * 1.04, (el - sh).length * 0.34),
+                            rot=_up_to(el - sh)), 0.020 * k)
+        fld.union(RoundCone(el, wr, p["forearm"] * 0.98, p["forearm"] * 0.66), 0.014 * k)
+        fld.union(Ellipsoid(el.lerp(wr, 0.28), (p["forearm"] * 1.14, p["forearm"] * 1.04, (wr - el).length * 0.30),
+                            rot=_up_to(wr - el)), 0.020 * k)
+        build_hand(fld, f, side)
+    for side, s in (("L", 1.0), ("R", -1.0)):
+        hp, kn, an = f.hip[side], f.knee[side], f.ankle[side]
+        th = p["thigh"]
+        fld.union(RoundCone(hp + Vector((s * 0.006, 0.004, 0.025)), kn, th * 1.10, p["shin"] * 1.04), 0.040 * k)
+        fld.union(Ellipsoid(hp.lerp(kn, 0.36) + Vector((s * 0.006, -0.006, 0)), (th * 0.98, th * 1.02, (kn - hp).length * 0.36),
+                            rot=_up_to(kn - hp)), 0.030 * k)
+        fld.union(Sphere(kn + Vector((0, -0.008, 0)), p["shin"] * 1.04), 0.016 * k)
+        fld.union(RoundCone(kn, an, p["shin"] * 0.96, p["shin"] * 0.66), 0.014 * k)
+        fld.union(Ellipsoid(kn.lerp(an, 0.30) + Vector((s * 0.003, 0.016 * k, 0)), (p["shin"] * 1.12, p["shin"] * 1.16, (an - kn).length * 0.30),
+                            rot=_up_to(an - kn)), 0.020 * k)
+        build_foot(fld, f, side)
+    return fld.mesh(name)
+
+
+# Face layout, as heights on the head (0 chin, 1 crown) and offsets in metres
+# for a head 0.282 m tall. A figurine's face: eyes a little low and wide set,
+# a small nose, a soft jaw.
+FACE = {"eye_u": 0.470, "eye_x": 0.035, "brow_u": 0.565, "nose_u": 0.335, "mouth_u": 0.195}
+
+
+def build_head(fld, f):
+    p = f.p
+    s = f.head_h / 0.282
+    hp = lambda x, y, u: f.head_point(x * s, y * s, u)
+    jaw = p["jaw"]
+    fem = p["female"]
+    # cranium: round, the back of the head full
+    fld.union(Ellipsoid(hp(0, 0.014, 0.640), (0.087 * s, 0.097 * s, 0.100 * s)), 0.03 * s)
+    # the face: an egg narrowing to the chin
+    fld.union(Ellipsoid(hp(0, -0.030, 0.410), (0.069 * s, 0.066 * s, 0.104 * s)), 0.034 * s)
+    fld.union(Ellipsoid(hp(0, -0.040, 0.185), (0.049 * s * (0.88 + 0.16 * jaw), 0.054 * s, 0.062 * s)), 0.030 * s)
+    fld.union(Sphere(hp(0, -0.066, 0.070), 0.020 * s * (0.88 + 0.16 * jaw)), 0.016 * s)
+    for sd in (1, -1):
+        if jaw > 0.9:
+            fld.union(Ellipsoid(hp(sd * 0.044, -0.008, 0.200), (0.018 * s, 0.026 * s, 0.022 * s)), 0.020 * s)
+        fld.union(Sphere(hp(sd * 0.046, -0.050, 0.405), 0.021 * s), 0.020 * s)
+        fld.union(Ellipsoid(hp(sd * 0.084, 0.014, 0.445), (0.011 * s, 0.019 * s, 0.028 * s),
+                            rot=Quaternion((0, 0, 1), math.radians(sd * 22))), 0.007 * s)
+        fld.union(RoundCone(hp(sd * 0.012, -0.085, FACE["brow_u"]), hp(sd * 0.054, -0.071, FACE["brow_u"] - 0.012),
+                            0.011 * s * (0.6 + 0.4 * p["brow_ridge"]), 0.008 * s), 0.014 * s)
+        fld.subtract(Sphere(hp(sd * FACE["eye_x"], -0.099, FACE["eye_u"]), 0.0110 * s), 0.008 * s)
+        fld.union(Sphere(hp(sd * 0.012, -0.093, FACE["nose_u"] - 0.004), 0.0085 * s), 0.006 * s)
+    fld.union(RoundCone(hp(0, -0.087, 0.505), hp(0, -0.102, FACE["nose_u"] + 0.015), 0.0070 * s, 0.0098 * s), 0.010 * s)
+    fld.union(Sphere(hp(0, -0.100, FACE["nose_u"]), 0.0130 * s * (0.92 if fem else 1.0)), 0.008 * s)
+    fld.union(Ellipsoid(hp(0, -0.078, FACE["mouth_u"] + 0.006), (0.022 * s, 0.011 * s, 0.016 * s)), 0.010 * s)
+
+
+def build_hand(fld, f, side):
+    p = f.p
+    k = f.H / 1.72
+    hs = p["hand"] * k
+    along, front, out = f.hand_frame(side)
+    wr = f.wrist[side]
+    L = f.hand_len
+    q = _quat_from_axes(along, front)
+    fld.union(RoundBox(wr + along * (L * 0.34), (L * 0.27, 0.036 * hs, 0.012 * hs), 0.011 * hs, rot=q), 0.012 * hs)
+    base = wr + along * (L * 0.56)
+    for i, (offset, length, r) in enumerate(((0.025, 0.064, 1.0), (0.004, 0.070, 1.06), (-0.014, 0.064, 1.04), (-0.029, 0.052, 0.94))):
+        a = base + front * (offset * hs) - out * (0.002 * hs)
+        b = a + along * (length * hs) - out * (0.010 * hs) + front * (offset * 0.15 * hs)
+        fld.union(RoundCone(a, b, 0.0105 * hs * r, 0.0090 * hs * r), 0.004 * hs if i > 1 else 0.003 * hs)
+    tb = wr + along * (L * 0.20) + front * (0.028 * hs) - out * (0.006 * hs)
+    tt = tb + along * (0.040 * hs) + front * (0.020 * hs) - out * (0.016 * hs)
+    fld.union(RoundCone(tb, tt, 0.0135 * hs, 0.0105 * hs), 0.010 * hs)
+
+
+def build_foot(fld, f, side):
+    k = f.H / 1.72
+    an, ball, toe = f.ankle[side], f.ball[side], f.toe[side]
+    heel = Vector((an.x, an.y + 0.026 * k, 0.034 * k))
+    fld.union(Sphere(heel, 0.036 * k), 0.016 * k)
+    fld.union(RoundCone(heel + Vector((0, -0.01, 0.004)), ball + Vector((0, 0, 0.016)), 0.034 * k, 0.030 * k), 0.012 * k)
+    fld.union(Ellipsoid(ball.lerp(toe, 0.35) + Vector((0, 0, 0.012)), (0.044 * k, 0.040 * k, 0.020 * k)), 0.010 * k)
+
+
+# --- Face parts -----------------------------------------------------------------
+
+def surface_hit(obj, origin, direction, dist=2.0):
+    """First hit on obj's surface from origin along direction (world)."""
+    mw = obj.matrix_world
+    inv = mw.inverted()
+    o = inv @ Vector(origin)
+    d = (inv.to_3x3() @ Vector(direction)).normalized()
+    ok, loc, nor, _ = obj.ray_cast(o, d, distance=dist)
+    if not ok:
+        return None, None
+    return mw @ loc, (mw.to_3x3() @ nor).normalized()
+
+
+def ellipsoid_mesh(name, center, semi, rot=None, segs=16, rings=10):
+    bm = bmesh.new()
+    bmesh.ops.create_uvsphere(bm, u_segments=segs, v_segments=rings, radius=1.0)
+    for v in bm.verts:
+        v.co = Vector((v.co.x * semi[0], v.co.y * semi[1], v.co.z * semi[2]))
+        if rot is not None:
+            v.co = rot @ v.co
+        v.co += Vector(center)
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    obj = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(obj)
+    for poly in me.polygons:
+        poly.use_smooth = True
+    return obj
+
+
+def join(objs, name):
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    for o in objs:
+        o.select_set(True)
+    bpy.context.view_layer.objects.active = objs[0]
+    if len(objs) > 1:
+        bpy.ops.object.join()
+    out = bpy.context.view_layer.objects.active
+    out.name = name
+    out.data.name = name
+    return out
+
+
+def decal(name, body, outline, centre, offset, rings=3):
+    """A painted mark on the skin: a flat outline (x, z pairs, world) filled
+    with rings about its centre, each point dropped onto the body along +Y
+    and lifted off it by `offset`."""
+    bm = bmesh.new()
+    cx, cz = centre
+    n = len(outline)
+    grid = []
+    centre_v = None
+    pts = []
+    for r in range(rings + 1):
+        t = r / rings
+        if r == 0:
+            pts.append([(cx, cz)])
+        else:
+            pts.append([(cx + (x - cx) * t, cz + (z - cz) * t) for x, z in outline])
+    made = []
+    for ring in pts:
+        row = []
+        for x, z in ring:
+            hit, nor = surface_hit(body, Vector((x, -1.0, z)), Vector((0, 1, 0)))
+            if hit is None:
+                hit, nor = Vector((x, -0.09, z)), Vector((0, -1, 0))
+            row.append(bm.verts.new(hit + nor * offset))
+        made.append(row)
+    c = made[0][0]
+    for i in range(n):
+        bm.faces.new((c, made[1][i], made[1][(i + 1) % n]))
+    for r in range(1, rings):
+        a, b = made[r], made[r + 1]
+        for i in range(n):
+            j = (i + 1) % n
+            bm.faces.new((a[i], b[i], b[j], a[j]))
+    bm.normal_update()
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    obj = bpy.data.objects.new(name, me)
+    bpy.context.scene.collection.objects.link(obj)
+    for poly in me.polygons:
+        poly.use_smooth = True
+    # face the viewer (out of the skin)
+    if me.polygons and me.polygons[0].normal.y > 0:
+        me.flip_normals()
+    return obj
+
+
+def _eye_outline(cx, cz, sd, s, female):
+    W = 0.033 * s
+    hu = (0.0090 if female else 0.0082) * s
+    hl = 0.0060 * s
+    tilt = 0.10
+    up, lo = [], []
+    N = 12
+    for i in range(N + 1):
+        u = i / N
+        x = cx + sd * (u - 0.5) * W
+        zt = cz + tilt * (u - 0.5) * W
+        up.append((x, zt + hu * math.sin(math.pi * u) ** 0.80 * (1.0 + 0.30 * (u - 0.45))))
+        lo.append((x, zt - hl * math.sin(math.pi * u) ** 1.15))
+    outline = up + lo[-2:0:-1]
+    if sd < 0:
+        outline = outline[::-1]
+    return outline
+
+
+def _stroke_outline(points, widths):
+    """A tapered stroke along points (x, z) with widths; returns its outline."""
+    top, bot = [], []
+    for i, (p, w) in enumerate(zip(points, widths)):
+        a = points[max(i - 1, 0)]
+        b = points[min(i + 1, len(points) - 1)]
+        dx, dz = b[0] - a[0], b[1] - a[1]
+        L = math.hypot(dx, dz) or 1.0
+        nx, nz = -dz / L, dx / L
+        top.append((p[0] + nx * w * 0.5, p[1] + nz * w * 0.5))
+        bot.append((p[0] - nx * w * 0.5, p[1] - nz * w * 0.5))
+    return top + bot[::-1]
+
+
+def build_face(f, body):
+    """Painted eyes (with a catch of light), brows and a mouth that opens.
+
+    Returns {part: [objects], 'eye_center': {L,R}, 'brow_center': {L,R}};
+    each object carries custom property 'bone' naming the bone that moves it."""
+    s = f.head_h / 0.282
+    fem = f.p["female"]
+    out = {"eyes": [], "brows": [], "mouth": [], "eye_center": {}, "brow_center": {}}
+    shines = []
+    for side, sd in (("L", 1.0), ("R", -1.0)):
+        cx = sd * FACE["eye_x"] * s
+        cz = f.face(FACE["eye_u"])
+        eye = decal("Eye_" + side, body, _eye_outline(cx, cz, sd, s, fem), (cx, cz), 0.0011 * s)
+        eye["bone"] = "eye." + side
+        out["eyes"].append(eye)
+        hit, nor = surface_hit(body, Vector((cx, -1.0, cz)), Vector((0, 1, 0)))
+        out["eye_center"][side] = hit if hit is not None else Vector((cx, -0.09 * s, cz))
+        r = 0.0025 * s
+        sx, sz = cx + sd * 0.0050 * s, cz + 0.0026 * s
+        ring = [(sx + r * math.cos(a * math.pi / 6), sz + r * math.sin(a * math.pi / 6)) for a in range(12)]
+        shine = decal("EyeShine_" + side, body, ring, (sx, sz), 0.0017 * s, rings=1)
+        shine["bone"] = "eye." + side
+        shines.append(shine)
+        # the brow: thick at the nose end, thinning outward, a slight arch
+        bz = f.face(FACE["brow_u"] + 0.018)
+        line, widths = [], []
+        for i in range(9):
+            u = i / 8.0
+            x = sd * (0.011 + 0.050 * u) * s
+            arch = (0.0060 if fem else 0.0042) * math.sin(math.pi * min(1.0, u * 1.15)) - 0.0030 * u
+            line.append((x, bz + arch * s))
+            widths.append(((0.0052 if not fem else 0.0040) * (1.0 - u) + 0.0016 * u) * s)
+        brow = decal("Brow_" + side, body, _stroke_outline(line, widths), line[3], 0.0011 * s, rings=2)
+        brow["bone"] = "brow." + side
+        out["brows"].append(brow)
+        hb, nb = surface_hit(body, Vector((line[3][0], -1.0, line[3][1])), Vector((0, 1, 0)))
+        out["brow_center"][side] = hb if hb is not None else Vector((line[3][0], -0.088 * s, line[3][1]))
+    out["eyes"] += shines
+    for e in out["eyes"]:
+        set_material(e, "EYES" if e.name.startswith("Eye_") else "EYE_SHINE")
+    for b in out["brows"]:
+        set_material(b, "HAIR")
+    # the mouth: lips just parted at rest; the jaw bone opens it
+    mz = f.face(FACE["mouth_u"])
+    Wm = 0.033 * s
+    up, lo = [], []
+    N = 14
+    for i in range(N + 1):
+        u = i / N
+        x = (u - 0.5) * Wm
+        bow = 0.0010 * s * math.exp(-((u - 0.5) / 0.12) ** 2)  # the dip of the upper lip
+        up.append((x, mz + 0.0018 * s * math.sin(math.pi * u) ** 0.9 - bow * 0.6))
+        lo.append((x, mz - 0.0024 * s * math.sin(math.pi * u) ** 0.8))
+    outline = up + lo[-2:0:-1]
+    mouth = decal("Mouth", body, outline[::-1], (0.0, mz), 0.0007 * s, rings=2)
+    mouth["bone"] = "jaw"
+    set_material(mouth, "MOUTH")
+    out["mouth"].append(mouth)
+    hit, nor = surface_hit(body, Vector((0, -1.0, mz)), Vector((0, 1, 0)))
+    f.mouth_center = hit.copy() if hit is not None else Vector((0, -0.10 * s, mz))
+    return out
+
+
+# --- Materials ------------------------------------------------------------------
+
+SLOT_DEFAULTS = {
+    "SKIN": (0.62, 0.42, 0.30), "HAIR": (0.10, 0.07, 0.05), "CLOTH_A": (0.55, 0.42, 0.28),
+    "CLOTH_B": (0.40, 0.27, 0.18), "CLOTH_C": (0.66, 0.30, 0.20), "EYES": (0.035, 0.026, 0.020),
+    "EYE_SHINE": (0.95, 0.92, 0.85), "MOUTH": (0.24, 0.08, 0.07), "LEATHER": (0.30, 0.19, 0.11),
+}
+
+
+def material(slot):
+    """The one export material for a slot (flat colour; Godot recolours it)."""
+    m = bpy.data.materials.get(slot)
+    if m is not None:
+        return m
+    col = SLOT_DEFAULTS.get(slot, (0.5, 0.5, 0.5))
+    m = bpy.data.materials.new(slot)
+    m.diffuse_color = (*col, 1.0)
+    m.use_nodes = True
+    bsdf = m.node_tree.nodes.get("Principled BSDF")
+    bsdf.inputs["Base Color"].default_value = (*col, 1.0)
+    bsdf.inputs["Roughness"].default_value = 0.85
+    return m
+
+
+def set_material(obj, slot):
+    obj.data.materials.clear()
+    obj.data.materials.append(material(slot))

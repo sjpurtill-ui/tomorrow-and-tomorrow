@@ -1,0 +1,364 @@
+{
+ "generator": "tools/blender/court_figures.py",
+ "variants": [
+  {
+   "variant": "male_adult",
+   "file": "court_figure_male_adult.glb",
+   "height": 1.72,
+   "head_top": 1.72,
+   "chin": 1.438,
+   "outfits": {
+    "hide": [
+     "hide_wrap",
+     "hide_cape",
+     "hide_cord",
+     "hide_footwraps"
+    ],
+    "tunic": [
+     "tunic_body",
+     "tunic_trim",
+     "tunic_belt",
+     "tunic_shoes"
+    ],
+    "robe": [
+     "robe_body",
+     "robe_trim",
+     "robe_sash",
+     "robe_mantle",
+     "robe_mantle_edge",
+     "robe_shoes"
+    ]
+   },
+   "hair": [
+    "hair_cropped",
+    "hair_long",
+    "hair_long_framed",
+    "hair_bun",
+    "hair_braids",
+    "hair_tail",
+    "hair_curls",
+    "hair_topknot"
+   ],
+   "beards": [
+    "beard_short",
+    "beard_full",
+    "beard_long"
+   ]
+  },
+  {
+   "variant": "female_adult",
+   "file": "court_figure_female_adult.glb",
+   "height": 1.62,
+   "head_top": 1.62,
+   "chin": 1.35,
+   "outfits": {
+    "hide": [
+     "hide_wrap",
+     "hide_cape",
+     "hide_cord",
+     "hide_footwraps"
+    ],
+    "tunic": [
+     "tunic_body",
+     "tunic_trim",
+     "tunic_belt",
+     "tunic_shoes"
+    ],
+    "robe": [
+     "robe_body",
+     "robe_trim",
+     "robe_sash",
+     "robe_mantle",
+     "robe_mantle_edge",
+     "robe_shoes"
+    ]
+   },
+   "hair": [
+    "hair_cropped",
+    "hair_long",
+    "hair_long_framed",
+    "hair_bun",
+    "hair_braids",
+    "hair_tail",
+    "hair_curls",
+    "hair_topknot"
+   ],
+   "beards": []
+  },
+  {
+   "variant": "male_old",
+   "file": "court_figure_male_old.glb",
+   "height": 1.66,
+   "head_top": 1.64,
+   "chin": 1.368,
+   "outfits": {
+    "hide": [
+     "hide_wrap",
+     "hide_cape",
+     "hide_cord",
+     "hide_footwraps"
+    ],
+    "tunic": [
+     "tunic_body",
+     "tunic_trim",
+     "tunic_belt",
+     "tunic_shoes"
+    ],
+    "robe": [
+     "robe_body",
+     "robe_trim",
+     "robe_sash",
+     "robe_mantle",
+     "robe_mantle_edge",
+     "robe_shoes"
+    ]
+   },
+   "hair": [
+    "hair_cropped",
+    "hair_long",
+    "hair_long_framed",
+    "hair_bun",
+    "hair_braids",
+    "hair_tail",
+    "hair_curls",
+    "hair_topknot"
+   ],
+   "beards": [
+    "beard_short",
+    "beard_full",
+    "beard_long"
+   ]
+  },
+  {
+   "variant": "female_old",
+   "file": "court_figure_female_old.glb",
+   "height": 1.55,
+   "head_top": 1.53,
+   "chin": 1.267,
+   "outfits": {
+    "hide": [
+     "hide_wrap",
+     "hide_cape",
+     "hide_cord",
+     "hide_footwraps"
+    ],
+    "tunic": [
+     "tunic_body",
+     "tunic_trim",
+     "tunic_belt",
+     "tunic_shoes"
+    ],
+    "robe": [
+     "robe_body",
+     "robe_trim",
+     "robe_sash",
+     "robe_mantle",
+     "robe_mantle_edge",
+     "robe_shoes"
+    ]
+   },
+   "hair": [
+    "hair_cropped",
+    "hair_long",
+    "hair_long_framed",
+    "hair_bun",
+    "hair_braids",
+    "hair_tail",
+    "hair_curls",
+    "hair_topknot"
+   ],
+   "beards": []
+  },
+  {
+   "variant": "male_young",
+   "file": "court_figure_male_young.glb",
+   "height": 1.62,
+   "head_top": 1.62,
+   "chin": 1.341,
+   "outfits": {
+    "hide": [
+     "hide_wrap",
+     "hide_cape",
+     "hide_cord",
+     "hide_footwraps"
+    ],
+    "tunic": [
+     "tunic_body",
+     "tunic_trim",
+     "tunic_belt",
+     "tunic_shoes"
+    ],
+    "robe": [
+     "robe_body",
+     "robe_trim",
+     "robe_sash",
+     "robe_mantle",
+     "robe_mantle_edge",
+     "robe_shoes"
+    ]
+   },
+   "hair": [
+    "hair_cropped",
+    "hair_long",
+    "hair_long_framed",
+    "hair_bun",
+    "hair_braids",
+    "hair_tail",
+    "hair_curls",
+    "hair_topknot"
+   ],
+   "beards": [
+    "beard_short",
+    "beard_full",
+    "beard_long"
+   ]
+  },
+  {
+   "variant": "female_young",
+   "file": "court_figure_female_young.glb",
+   "height": 1.54,
+   "head_top": 1.54,
+   "chin": 1.27,
+   "outfits": {
+    "hide": [
+     "hide_wrap",
+     "hide_cape",
+     "hide_cord",
+     "hide_footwraps"
+    ],
+    "tunic": [
+     "tunic_body",
+     "tunic_trim",
+     "tunic_belt",
+     "tunic_shoes"
+    ],
+    "robe": [
+     "robe_body",
+     "robe_trim",
+     "robe_sash",
+     "robe_mantle",
+     "robe_mantle_edge",
+     "robe_shoes"
+    ]
+   },
+   "hair": [
+    "hair_cropped",
+    "hair_long",
+    "hair_long_framed",
+    "hair_bun",
+    "hair_braids",
+    "hair_tail",
+    "hair_curls",
+    "hair_topknot"
+   ],
+   "beards": []
+  }
+ ],
+ "hair": [
+  "cropped",
+  "long",
+  "long_framed",
+  "bun",
+  "braids",
+  "tail",
+  "curls",
+  "topknot"
+ ],
+ "beards": [
+  "beard_short",
+  "beard_full",
+  "beard_long"
+ ],
+ "outfits": {
+  "hide": [
+   "hide_cape",
+   "hide_cord",
+   "hide_footwraps",
+   "hide_wrap"
+  ],
+  "tunic": [
+   "tunic_belt",
+   "tunic_body",
+   "tunic_shoes",
+   "tunic_trim"
+  ],
+  "robe": [
+   "robe_body",
+   "robe_mantle",
+   "robe_mantle_edge",
+   "robe_sash",
+   "robe_shoes",
+   "robe_trim"
+  ]
+ },
+ "outfit_mask_channel": {
+  "hide": "g",
+  "tunic": "b",
+  "robe": "a"
+ },
+ "clips": {
+  "idle": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "idle_clasped": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "talk": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "talk_both": {
+   "seconds": 4.0,
+   "loop": true
+  },
+  "listen_l": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "listen_r": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "look_up": {
+   "seconds": 6.0,
+   "loop": true
+  },
+  "bow": {
+   "seconds": 2.8,
+   "loop": false
+  },
+  "kneel": {
+   "seconds": 2.6,
+   "loop": false
+  },
+  "point": {
+   "seconds": 2.0,
+   "loop": false
+  },
+  "raise_hand": {
+   "seconds": 1.8,
+   "loop": false
+  },
+  "walk_in": {
+   "seconds": 1.1,
+   "loop": true
+  },
+  "walk_out": {
+   "seconds": 1.3,
+   "loop": true
+  }
+ },
+ "slots": [
+  "SKIN",
+  "HAIR",
+  "CLOTH_A",
+  "CLOTH_B",
+  "CLOTH_C",
+  "EYES",
+  "EYE_SHINE",
+  "MOUTH",
+  "LEATHER"
+ ]
+}
