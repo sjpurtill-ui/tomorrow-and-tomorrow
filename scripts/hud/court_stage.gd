@@ -156,6 +156,7 @@ var _sound:Node
 ## The beats the director gave for the last event (an exit or an arrival
 ## reads them: backing out bowing, coming back, the wrong side).
 var _last_beats:Array=[]
+var _beat_sets:Array=[]
 ## What the engine says about the hall now (the Court fills it): era, season,
 ## stores_days, hungry, sick, at_war, love, dread, mood, offer.
 var facts:Dictionary={}
@@ -887,10 +888,13 @@ func _ambient_beat(item:Dictionary)->void:
 ## Plays a set of beats [{t, who, act, args}] on one tween, in time order.
 func run_beats(beats:Array)->void:
 	if not is_inside_tree() or beats.is_empty():return
-	if _beats and _beats.is_valid():_beats.kill()
+	# Each event's beats play out on their own: the caption that follows the
+	# god's wrath in the same moment must not cut the wrath short.
+	_beat_sets=_beat_sets.filter(func(t:Variant)->bool:return t is Tween and (t as Tween).is_valid())
 	var ordered:=beats.duplicate()
 	ordered.sort_custom(func(a:Variant,b:Variant)->bool:return float((a as Dictionary).get("t",0.0))<float((b as Dictionary).get("t",0.0)))
 	_beats=create_tween()
+	_beat_sets.append(_beats)
 	var at:=0.0
 	for beat in ordered:
 		var t:=maxf(float((beat as Dictionary).get("t",0.0)),at)
@@ -1051,7 +1055,7 @@ func shot(name:String,args:Dictionary={})->void:
 			var a:=figure(String(args.get("a","")));var b:=figure(String(args.get("b","")))
 			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:camera.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
-			if body!=null:camera.call("push_in",body,float(args.get("seconds",4.0)))
+			if body!=null:camera.call("push_in",body,float(args.get("seconds",2.4)))
 		"reaction":
 			if body!=null:camera.call("reaction",body,float(args.get("time",0.0)))
 		"shake":camera.call("shake",float(args.get("strength",0.35)))
@@ -1193,8 +1197,9 @@ func set_insets(top:float,right:float)->void:
 func _on_resized()->void:
 	if size.x<40 or size.y<40:return
 	_frame_camera()
-	# The set's lens frames by the view's own size, which follows a frame later.
-	if court_set!=null:call_deferred("frame_cast",0.0)
+	# The set's lens frames by the view's own size, which follows a frame later
+	# (a push-in or a reaction shot keeps going: the next wide takes the new size).
+	if court_set!=null and _wide_now():call_deferred("frame_cast",0.0)
 	layout(false)
 	var first:=not _laid_out
 	_laid_out=true
@@ -1283,8 +1288,12 @@ func _layout_set(animate:bool)->void:
 		if f.spot.is_inside_tree():
 			f.light_base=float(court_set.call("light_at",f.spot.global_position))
 			f._light(1.0)
-	frame_cast(0.9 if animate and _laid_out else 0.0)
+	if not _laid_out or _wide_now():frame_cast(0.9 if animate and _laid_out else 0.0)
 	_track_all()
+
+## Is the set's camera on everyone (not pushed in on someone)?
+func _wide_now()->bool:
+	return camera==null or String(camera.get("shot")) in ["wide","still",""]
 
 ## Which name plates show in the modelled court: the one before the god's,
 ## and the one speaking now.
