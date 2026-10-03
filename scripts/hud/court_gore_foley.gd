@@ -70,7 +70,7 @@ const CUES:={
 	"cannon_boom":{"variants":1,"db":-3.0,"kind":"thing"},
 	"axe_thunk":{"variants":2,"db":-6.0,"kind":"thing"},
 	"axe_clang":{"variants":2,"db":-8.0,"kind":"thing"},
-	"axe_pull":{"variants":1,"db":-10.0,"kind":"thing"},
+	"axe_pull":{"variants":2,"db":-10.0,"kind":"thing"},
 	"head_roll":{"variants":2,"db":-9.0,"kind":"thing"},
 	# people
 	"windup":{"variants":2,"db":-10.0,"kind":"voice"},
@@ -110,6 +110,12 @@ const CUES:={
 	"fuse":{"variants":1,"db":-13.0,"kind":"thing"},
 	"wipe":{"variants":1,"db":-15.0,"kind":"thing"},
 	"flick":{"variants":1,"db":-10.0,"kind":"gore"},
+	# K's clips (acts 2, 4, 10)
+	"club_tap":{"variants":2,"db":-13.0,"kind":"thing"},
+	"face_splash":{"variants":1,"db":-10.0,"kind":"gore"},
+	"lid_pat":{"variants":2,"db":-13.0,"kind":"thing"},
+	"tug":{"variants":3,"db":-11.0,"kind":"thing"},
+	"slip":{"variants":3,"db":-14.0,"kind":"thing"},
 }
 
 ## Each act's sound, as L's scene will play it (seconds from the act's moment;
@@ -135,53 +141,78 @@ const ACTS:={
 	# 2. Club home run: the wind-up, CRACK, the head's arc into the pot, the
 	# cook looks, stirs, puts the lid on. Ba-dum.
 	"club_home_run":[
+		# timed to K's clip (EXEC_PLANS): the impact at 3.62 s is t = 0
+		{"t":-3.17,"cue":"club_tap","who":"executioner","variant":0},
+		{"t":-2.67,"cue":"club_tap","who":"executioner","variant":1},
 		{"t":-2.4,"cue":"roll","who":"musician"},
-		{"t":-0.9,"cue":"windup","who":"executioner"},
+		{"t":-0.95,"cue":"windup","who":"executioner"},
 		{"t":-0.12,"cue":"swing_whoosh","who":"executioner","variant":0},
 		{"t":0.0,"cue":"gore_crack","who":"victim"},
 		{"t":0.06,"cue":"head_whistle","who":"victim"},
-		{"t":1.25,"cue":"pot_plop","who":"cook"},
-		{"t":1.5,"cue":"room_gasp","who":"room"},
-		{"t":3.0,"cue":"spoon_stir","who":"cook"},
-		{"t":4.6,"cue":"lid_clank","who":"cook","variant":0},
-		{"t":5.15,"cue":"punch","who":"musician"},
-		{"t":6.0,"cue":"lone_clap","who":"flatterer"},
+		{"t":1.38,"cue":"pot_plop","who":"cook"},
+		{"t":1.43,"cue":"face_splash","who":"cook"},
+		{"t":1.75,"cue":"room_gasp","who":"room"},
+		{"t":2.38,"cue":"faint_thump","who":"victim","variant":0},
+		{"t":3.98,"cue":"lid_clank","who":"cook","variant":0},
+		{"t":4.26,"cue":"lid_pat","who":"cook","variant":0},
+		{"t":4.38,"cue":"lone_clap","who":"flatterer"},
+		{"t":4.53,"cue":"lid_pat","who":"cook","variant":1},
+		{"t":4.66,"cue":"punch","who":"musician"},
+		{"t":4.75,"cue":"retch","who":"front_row","variant":1},
 	],
 	# 10. Three-swing beheading: stuck in the block; bounced off; off it pops,
 	# rolls to face the god, blinks; the geyser soaks the front row.
 	"three_swing_beheading":[
-		{"t":-2.4,"cue":"roll","who":"musician"},
-		{"t":-0.2,"cue":"swing_whoosh","who":"executioner","variant":1},
-		{"t":0.0,"cue":"axe_thunk","who":"executioner","variant":0},
-		{"t":0.9,"cue":"axe_pull","who":"executioner"},
-		{"t":2.3,"cue":"swing_whoosh","who":"executioner","variant":2},
-		{"t":2.5,"cue":"axe_clang","who":"executioner","variant":0},
-		{"t":3.15,"cue":"ow","who":"executioner","variant":0},
-		{"t":4.6,"cue":"swing_whoosh","who":"executioner","variant":0},
-		{"t":4.8,"cue":"gore_chop","who":"victim","variant":0},
-		{"t":4.86,"cue":"bone_pop","who":"victim","variant":1},
-		{"t":5.05,"cue":"head_roll","who":"victim","variant":0},
-		{"t":5.1,"cue":"blood_geyser","who":"victim","variant":0},
-		{"t":5.4,"cue":"room_gasp","who":"room"},
-		{"t":5.9,"cue":"blood_patter","who":"front_row","variant":0},
-		{"t":7.0,"cue":"blink","who":"victim"},
-		{"t":7.35,"cue":"punch","who":"musician"},
-		{"t":8.1,"cue":"retch","who":"front_row","variant":0},
+		# timed to K's clip (EXEC_PLANS): the third swing's chop at 8.7 s is t = 0;
+		# the roll comes before the first swing
+		{"t":-9.15,"cue":"roll","who":"musician"},
+		{"t":-8.28,"cue":"spit","who":"executioner","db":-3.0},
+		{"t":-6.85,"cue":"swing_whoosh","who":"executioner","variant":1},
+		{"t":-6.75,"cue":"axe_thunk","who":"executioner","variant":0},
+		{"t":-6.25,"cue":"strain","who":"executioner","variant":0},
+		{"t":-6.05,"cue":"axe_pull","who":"executioner","variant":1},
+		{"t":-5.85,"cue":"strain","who":"executioner","variant":1},
+		{"t":-3.28,"cue":"swing_whoosh","who":"executioner","variant":2},
+		{"t":-3.2,"cue":"axe_clang","who":"executioner","variant":0},
+		{"t":-2.85,"cue":"ow","who":"executioner","variant":0},
+		{"t":-0.12,"cue":"swing_whoosh","who":"executioner","variant":0},
+		{"t":0.0,"cue":"gore_chop","who":"victim","variant":0},
+		{"t":0.04,"cue":"bone_pop","who":"victim","variant":1},
+		{"t":0.05,"cue":"blood_geyser","who":"victim","variant":0},
+		{"t":0.35,"cue":"room_gasp","who":"room"},
+		{"t":0.8,"cue":"blood_patter","who":"front_row","variant":0},
+		{"t":1.45,"cue":"head_roll","who":"victim","variant":1},
+		{"t":2.2,"cue":"blink","who":"victim"},
+		{"t":2.3,"cue":"lone_clap","who":"flatterer","variant":1},
+		{"t":2.42,"cue":"punch","who":"musician"},
+		{"t":2.6,"cue":"retch","who":"front_row","variant":0},
 	],
 	# 4. Dog dinner: dragged behind the windbreak, snarls, loud crunching; the
 	# dog trots back, drops a thighbone at the god's feet, wags.
 	"dog_dinner":[
-		{"t":-2.0,"cue":"roll","who":"musician"},
+		# timed to K's clip (EXEC_PLANS): the grab is t = 0
+		{"t":-2.2,"cue":"roll","who":"musician"},
 		{"t":0.0,"cue":"dog_snarl","who":"dog","variant":0},
-		{"t":0.2,"cue":"drag","who":"victim","variant":0},
-		{"t":1.6,"cue":"dog_snarl","who":"dog","variant":1},
-		{"t":2.0,"cue":"crunch_loop","who":"dog","variant":0},
-		{"t":2.4,"cue":"crowd_groan","who":"room","variant":0},
-		{"t":5.3,"cue":"crunch","who":"dog","variant":2},
-		{"t":6.6,"cue":"paws","who":"dog"},
-		{"t":7.6,"cue":"bone_drop","who":"dog","variant":0},
-		{"t":8.0,"cue":"dog_thump","who":"dog"},
-		{"t":8.3,"cue":"punch","who":"musician"},
+		{"t":0.6,"cue":"faint_thump","who":"victim","variant":1},
+		{"t":2.6,"cue":"dog_snarl","who":"dog","variant":1,"db":-3.0},
+		{"t":2.7,"cue":"tug","who":"victim","variant":0},
+		{"t":3.12,"cue":"tug","who":"victim","variant":1},
+		{"t":3.52,"cue":"tug","who":"victim","variant":2},
+		{"t":3.8,"cue":"slip","who":"victim","variant":0},
+		{"t":4.0,"cue":"slip","who":"victim","variant":1},
+		{"t":4.15,"cue":"slip","who":"victim","variant":2},
+		{"t":4.35,"cue":"drag","who":"victim","variant":0},
+		{"t":5.4,"cue":"drag","who":"victim","variant":1,"db":-6.0},
+		{"t":6.8,"cue":"crunch","who":"dog","variant":1,"db":-5.0},
+		{"t":7.0,"cue":"crunch","who":"dog","variant":0},
+		{"t":7.25,"cue":"crowd_groan","who":"room","variant":0},
+		{"t":7.6,"cue":"crunch","who":"dog","variant":1},
+		{"t":8.2,"cue":"crunch","who":"dog","variant":2},
+		{"t":8.75,"cue":"crunch","who":"dog","variant":0,"db":-5.0},
+		{"t":9.6,"cue":"paws","who":"dog"},
+		{"t":10.6,"cue":"bone_drop","who":"dog","variant":0},
+		{"t":10.85,"cue":"dog_thump","who":"dog"},
+		{"t":11.0,"cue":"punch","who":"musician"},
 	],
 	# 1. Boulder drop: tipped off the log, SPLAT; a feeble wave; rolled off, the
 	# person peeled off the floor like a hide, rolled up and carried out.
@@ -631,6 +662,11 @@ static func make(name:String,variant:=0)->PackedFloat32Array:
 		"fuse":b=fuse(v,rng)
 		"wipe":b=wipe(v,rng)
 		"flick":b=flick(v,rng)
+		"club_tap":b=club_tap(v,rng)
+		"face_splash":b=face_splash(v,rng)
+		"lid_pat":b=lid_pat(v,rng)
+		"tug":b=tug(v,rng)
+		"slip":b=slip(v,rng)
 		_:b=Synth.buffer(0.05)
 	Synth.fade_edges(b,0.002,0.02)
 	var top:=Synth.peak_of(b)
@@ -1164,15 +1200,18 @@ static func axe_clang(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	return b
 
 ## Working the stuck axe free: a strain, the wood creaking, a pop.
+## Variant 1 is the wood alone (the grunts are the executioner's own strain):
+## the creak working loose, and the pop as it comes free at 0.75 s.
 static func axe_pull(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	var b:=Synth.buffer(1.3)
-	var man:=Voice.plain("man",61)
-	man["oq"]=0.44;man["tremor"]=0.05;man["tremor_hz"]=9.0
-	var g:=Voice.gesture(man,[[0.02,"y",0.0,0.0,1.0],[0.6,"y",0.7,0.2,1.2,0.8],[0.08,"y",0.0,0.3,1.0]],rng.randi())
-	Synth.mix_into(b,g,0,0.7)
+	if v==0:
+		var man:=Voice.plain("man",61)
+		man["oq"]=0.44;man["tremor"]=0.05;man["tremor_hz"]=9.0
+		var g:=Voice.gesture(man,[[0.02,"y",0.0,0.0,1.0],[0.6,"y",0.7,0.2,1.2,0.8],[0.08,"y",0.0,0.3,1.0]],rng.randi())
+		Synth.mix_into(b,g,0,0.7)
 	var creak:=_sweep(0.6,300.0,340.0,[1.0,0.6,0.4,0.25])
 	for i in creak.size():creak[i]*=0.4+0.6*pow(0.5+0.5*sin(TAU*38.0*float(i)/RATE),3.0)
-	Synth.mix_into(b,creak,Synth.n_of(0.1),0.25)
+	Synth.mix_into(b,creak,Synth.n_of(0.1),0.25 if v==0 else 0.45)
 	Synth.modal(b,0.75,[Vector3(420.0,0.8,0.05),Vector3(1100.0,0.4,0.02)],rng,1.0)
 	return b
 
@@ -1586,4 +1625,77 @@ static func flick(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
 	for k in 2:
 		Synth.mix_into(b,_wet(0.12,[[0.0,700.0],[0.12,1500.0]],2.0,rng,[[0.0,0.0],[0.03,1.0],[0.12,0.0]]),Synth.n_of(0.02+k*0.25),0.8)
 		for j in 5:Synth.burst(b,0.08+k*0.25+rng.randf_range(0.0,0.15),0.003,rng.randf_range(2000.0,4000.0),1.5,0.2,rng)
+	return b
+
+# =============================================================================
+# K's clips: the club's taps, the soup in the cook's face, the pats on the lid,
+# the dog's tugs and the fingers slipping
+# =============================================================================
+
+## The club tapped on the floor, like a batter at the plate: a dry wooden
+## knock on packed earth.
+static func club_tap(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.35)
+	_thud(b,0.0,150.0+v*20.0,0.5,rng)
+	Synth.modal(b,0.0,[Vector3(780.0+v*90.0,0.9,0.035),Vector3(1650.0+v*120.0,0.45,0.02),Vector3(2900.0,0.2,0.01)],rng,1.0)
+	for k in 6:Synth.burst(b,rng.randf_range(0.004,0.05),0.002,rng.randf_range(2000.0,4000.0),1.5,rng.randf_range(0.05,0.15),rng)
+	return b
+
+## The pot's broth in the cook's face: a wet slap, drips, and a spluttered "pff".
+static func face_splash(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.0)
+	Synth.mix_into(b,_wet(0.16,[[0.0,2600.0],[0.16,900.0]],1.2,rng,[[0.0,0.0],[0.004,1.0],[0.16,0.0]]),0,1.0)
+	Synth.mix_into(b,_sweep(0.06,260.0,170.0,[1.0,0.3]),0,0.35)
+	_bubbles(b,0.12,0.55,7,900.0,2200.0,0.25,rng)
+	# the cook blows it off his lips
+	var pff:=Synth.white(0.18,rng)
+	Synth.bandpass(pff,1100.0,0.9)
+	Synth.shape(pff,[[0.0,0.0],[0.01,1.0],[0.05,0.6],[0.18,0.0]])
+	for i in pff.size():pff[i]*=0.6+0.4*sin(TAU*31.0*float(i)/RATE)
+	Synth.mix_into(b,pff,Synth.n_of(0.6),0.5)
+	return b
+
+## A hand patting a clay lid: a soft palm thump with the pot's short ring.
+static func lid_pat(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.4)
+	_thud(b,0.0,190.0+v*15.0,0.6,rng)
+	Synth.modal(b,0.0,[Vector3(520.0+v*30.0,0.5,0.06),Vector3(1310.0,0.25,0.03)],rng,0.6)
+	var palm:=Synth.white(0.03,rng)
+	Synth.bandpass(palm,900.0,0.8)
+	Synth.shape(palm,[[0.0,1.0],[0.03,0.0]])
+	Synth.mix_into(b,palm,0,0.5)
+	return b
+
+## The dog's tug: a jerk of cloth and a body dragged a hand's breadth, a growl in it.
+static func tug(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=0.42
+	var b:=Synth.pink(d,rng,1.0)
+	Synth.lowpass(b,1500.0)
+	var scrape:=Synth.white(d,rng,0.5)
+	Synth.bandpass(scrape,1900.0+v*200.0,1.4)
+	for i in b.size():b[i]+=scrape[i]
+	Synth.shape(b,[[0.0,0.0],[0.015,1.0],[0.12,0.7],[d,0.0]])
+	# the cloth snapping taut
+	var snap:=Synth.white(0.04,rng)
+	Synth.bandpass(snap,3200.0,1.0)
+	Synth.shape(snap,[[0.0,1.0],[0.04,0.0]])
+	Synth.mix_into(b,snap,0,0.5)
+	# the growl through teeth: a low buzz, rough
+	var growl:=_sweep(0.3,95.0+v*8.0,80.0,[1.0,0.7,0.5,0.35,0.25],0.02)
+	for i in growl.size():growl[i]*=0.5+0.5*absf(sin(TAU*27.0*float(i)/RATE))
+	Synth.mix_into(b,growl,Synth.n_of(0.02),0.45)
+	return b
+
+## Fingers slipping on the floor: a squeak and a short scrape of nails.
+static func slip(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.3)
+	var f0:=1500.0+v*260.0
+	var squeak:=_sweep(0.12,f0,f0*1.35,[1.0,0.3],0.01)
+	for i in squeak.size():squeak[i]*=0.6+0.4*sin(TAU*55.0*float(i)/RATE)
+	Synth.mix_into(b,squeak,0,0.6)
+	var nails:=Synth.white(0.2,rng)
+	Synth.bandpass(nails,3400.0+v*300.0,1.6)
+	Synth.shape(nails,[[0.0,0.0],[0.02,1.0],[0.2,0.0]])
+	for i in nails.size():nails[i]*=0.5+0.5*pow(absf(sin(TAU*40.0*float(i)/RATE)),2.0)
+	Synth.mix_into(b,nails,Synth.n_of(0.06),0.5)
 	return b
