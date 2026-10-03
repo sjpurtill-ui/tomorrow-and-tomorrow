@@ -28522,10 +28522,16 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1351.png",
       "prompt": "Use case: historical-scene. Artifact 1351: The shell stack that clicked · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Three unmatched unpolished shells loosely caught on coarse fiber through natural openings, tangled rather than a finished necklace. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Contact between suspended hard pieces makes a portable sound. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Contact between suspended hard pieces makes a portable sound. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "1fec99a4ceb1e99a2b57292363524445cebaa82dc4a92658257326ac9453c6c8",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-21716435-5491-4d4e-b183-2de1d4f0bf40.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Three unmatched shells contact along coarse frayed fiber through natural holes; twig splint at fiber junction, no finished necklace.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Three unmatched unpolished shells loosely hang on coarse frayed fiber through natural openings and touch one another, tangled sound experiment, not finished necklace. One short raw twig splint braces only a fraying fiber junction. Diagonal suspended cluster on ivory paper, no human hand. Upper 40 percent blank ivory, artifact legible lower half, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1352,
@@ -28538,10 +28544,16 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1352.png",
       "prompt": "Use case: historical-scene. Artifact 1352: The charred end that hardened · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A short crooked stick with a scorched rubbed point and a broken pale end beside ashes, no finished spear. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Heat changes a material before it is completely consumed. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Heat changes a material before it is completely consumed. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "15ccd3cfbecc6ebc63b3e6da4ce84f849db0060697e4093e147e113b6013c44c",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-712cc7d9-1ee1-4cf6-a0e9-f644c822460a.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Short charred crooked stick with longitudinal split, short bound twig splint and pale broken end. No finished spear.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Short crooked stick with scorched rubbed point and broken pale end beside few ash crumbs. Tiny raw twig splint with sparse root binding supports only a longitudinal split near middle; rest unsupported. Low long diagonal silhouette, no finished spear or metal. Upper 40 percent blank ivory, artifact legible lower half, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1353,
@@ -28554,10 +28566,16 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1353.png",
       "prompt": "Use case: historical-scene. Artifact 1353: The reed bundle that floated · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A small broken bundle of hollow reed lengths loosely bound twice with roots at the edge of shallow water; no boat or sail. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Combining light hollow pieces changes how a load meets water. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Combining light hollow pieces changes how a load meets water. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "6e97f340e9798442b5266d98d8563acfb07ba018adc49735117227a74441402d",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-61a1c0bb-a474-4c70-9f1c-9f81dac444e1.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Hollow broken reed bundle, two rough root bindings, short local twig brace and shallow water contact. No boat platform.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Small broken bundle of hollow reed lengths loosely bound twice with roots at tiny patch of shallow water. Tiny crooked twig brace supports ONLY cracked reed at one binding. Floating reed ends and water contact visible. No boat, sail, raft platform, people or scenery. Upper 40 percent blank ivory, artifact legible lower half, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1354,
@@ -28570,10 +28588,16 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1354.png",
       "prompt": "Use case: historical-scene. Artifact 1354: The stone ring without a hole · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A cord follows a shallow irregular groove pecked around a natural cobble, binding intact, no drilled aperture. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): An external channel can hold a fastening without penetrating the object. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "An external channel can hold a fastening without penetrating the object. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "bf64730b41320303660503bbb3f9332d796824cba08be5387abe5c79bca68cfa",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-9a0e03f4-468a-4320-a786-a02f5f75160f.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Cord follows irregular groove around undrilled cobble; small natural stone supports cracked edge. No artificial stand.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Natural lumpy cobble with shallow irregular pecked groove around circumference, coarse frayed cord follows groove tightly with NO drilled hole. A small natural flat stone beneath supports ONLY cracked edge; no complex stand. Three-quarter asymmetrical specimen, no polished ring or ornament. Upper 40 percent blank ivory, artifact legible lower half, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1355,
@@ -28586,10 +28610,16 @@
       "discovery_id": "charcoal",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1355.png",
       "prompt": "Use case: historical-scene. Artifact 1355: The fungus that took a spark · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A torn dry bracket-fungus fragment with a tiny charred patch beside a rough chipped stone and dark mineral chunk. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): The same heat affects loose porous material differently from solid rock. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "The same heat affects loose porous material differently from solid rock. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "2bfa0e258eda7091a4eca645ef2fdd4d2e314b9c7d273a9ca339ea0fc0d3ef28",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-39d987d4-79b9-4202-b5d6-02e9d5224785.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Torn bracket fungus with charred patch, rough flint and dark mineral; branch supports weak folded edge.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Torn dry bracket-fungus fragment with one tiny charred black patch beside rough chipped flint and dark mineral chunk. A natural short branch supports just a weak folded fungus edge, rest loose. No fire or sparks flying, no firestarter machinery. Upper 40 percent blank ivory, artifact legible lower half with broad margins, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1356,
@@ -28602,10 +28632,16 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1356.png",
       "prompt": "Use case: historical-scene. Artifact 1356: A shelter map made by touch · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A tiny preserved patch of dried sand with one finger-drawn hollow and three natural pebbles marking an opening, no formal cartography. Distinct experiment for this specimen (takes precedence over the base arrangement): Show a trace interrupted by a ridge and resumed on a small adjacent surface, using the natural division to organize it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A small arrangement can help someone describe a larger place. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A small arrangement can help someone describe a larger place. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "6cf35f871526e5af657749ddba55547d28643ff5426ae394d1d4922fc7e614a9",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-e2a58e7b-7f94-4c1a-bb6b-aa5ed1b7397b.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Corrected: camp and people removed. Exactly three pebbles at finger hollow; trace stops at natural ridge and resumes on adjacent sand patch.",
+      "generation_prompt": "Replace entire camp scene: absolutely REMOVE ALL PEOPLE, trees, landscape, huts and drying rack. Only a tiny irregular dried SAND PATCH on ivory paper in lower half. One shallow finger-drawn hollow, EXACTLY THREE uneven natural pebbles along its opening. One short trace stops at raised natural sand ridge and resumes on small adjacent sand patch. No image depicted in sand, no symbols, writing or geometric map. Flat matte gouache of sand and pebbles ONLY, upper half blank ivory. Preserve square canvas."
     },
     {
       "catalogue_id": 1357,
@@ -28618,10 +28654,16 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1357.png",
       "prompt": "Use case: historical-scene. Artifact 1357: The claw that teased a knot · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A loose curved animal claw hooked beneath one strand of a tangled coarse fiber knot. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A curved point reaches under material that a straight point cannot easily lift. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A curved point reaches under material that a straight point cannot easily lift. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "0d16dcd878e8814acb34b4beaf9c9b63f52e2f90191c1b62430f9e9ec5f7982c",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-e5e5e90a-5098-4b84-88f4-1fcc4a63b2bb.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Corrected: loose horizontal claw curves upward directly beneath one lifted strand at knot; visible ivory gap and short local splint. No long mounted handle.",
+      "generation_prompt": "ONE square matte gouache artifact illustration on ivory paper. Only two objects: a small tangled coarse plant-fiber knot resting on pale dust and ONE loose curved animal claw. The claw lies almost HORIZONTALLY, curved tip pointing UP through one loose strand at knot center. That strand is visibly raised above knot, with ivory gap under raised strand; tip contacts underside of strand. Claw base has tiny short raw twig splint tied with sparse root turns, local brace only, no long handle or mounting. All action lower half, upper40percentblankivory. Broken drybrush ochre/charcoal/ivory, flat matte painted shapes. No people, workshop, text, border, photography, CGI, bone skull, jewelry or ornate craft. Reference medium only, ignore reference scene."
     },
     {
       "catalogue_id": 1358,
@@ -28634,10 +28676,16 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1358.png",
       "prompt": "Use case: historical-scene. Artifact 1358: The shell that strained a mixture · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A naturally pitted shell with two irregular openings holding coarse wet plant pulp, a few drops underneath. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): An opening passes liquid while holding back larger pieces. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "An opening passes liquid while holding back larger pieces. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "a440b675e4e63791e79e1efa6717833039512db588fc07ca6ffa30a35e7b172a",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-810fbc41-c566-4a74-a1dd-4012fd09afb9.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Pitted shell with two rough openings, wet green pulp and drops beneath; raw twig braces cracking lip. Illustrative straining, not tested apparatus.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Naturally pitted broken shell with TWO irregular openings containing coarse wet green plant pulp; two drops directly under openings and coarse pulp remains above. Short raw twig splint braces only cracking shell lip with sparse root turn. No polished strainer or invented metal frame. Side-oblique view exposes openings. Upper 40 percent blank ivory, artifact legible lower half with broad margins, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1359,
@@ -28650,10 +28698,16 @@
       "discovery_id": "clay_shaping",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1359.png",
       "prompt": "Use case: historical-scene. Artifact 1359: The clay plug with a pull tab · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: An irregular clay plug in a hollow branch end with a short grass loop trapped in its center. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A small projecting loop gives a way to remove a tightly fitted stopper. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A small projecting loop gives a way to remove a tightly fitted stopper. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "bf0e3a37b220452c4a99734c50e68f0b1980a077e1c5cff31cb5c6810482724e",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-7e9aca9f-d66e-45e5-ba76-530c9a54b0ff.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Unfired clay plug at hollow broken branch end; rough grass pull loop projects from clay. Local splint at split lip.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Irregular unfired clay plug tightly fitted in hollow broken branch end, short coarse grass loop trapped in clay center projects upward as pull tab. Tiny raw twig splint with sparse root turn supports only cracked branch lip. No pottery or manufactured handle. End-on oblique view makes plug/hollow branch contact visible. Upper 40 percent blank ivory, artifact legible lower half with broad margins, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1360,
@@ -28666,10 +28720,16 @@
       "discovery_id": "controlled_flaking",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1360.png",
       "prompt": "Use case: historical-scene. Artifact 1360: The stone flakes sorted by feel · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: Three distinctly different crude flakes placed apart: thick blunt, thin sharp, pointed; no neat tray or labels. Distinct experiment for this specimen (takes precedence over the base arrangement): Show a trace interrupted by a ridge and resumed on a small adjacent surface, using the natural division to organize it. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Comparing edges makes selection purposeful instead of accidental. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Comparing edges makes selection purposeful instead of accidental. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "f4e2fabb0a12fb35b75a05ef55a2e32651001c5083aef3503ffa7c7c1d00695f",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-e9659ec5-c123-41b9-94ce-be8d33b1ff53.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Corrected: three separated crude flake shapes. Red comparison trace visibly stops before bare raised ridge and resumes as short separate segment on adjoining face; no writing.",
+      "generation_prompt": "Keep exactly same THREE crude stone flakes, matte gouache and square ivory canvas. One tiny correction on upper thick flake: red ochre trace MUST STOP before raised pale stone ridge, leave an obvious UNPAINTED pale gap across ridge, then RESUME as separate short red segment on small adjoining face. Make two separate red segments with bare ridge between, not one continuous red line. No other additions or changes."
     },
     {
       "catalogue_id": 1361,
@@ -28682,10 +28742,16 @@
       "discovery_id": "stone_sorting",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1361.png",
       "prompt": "Use case: historical-scene. Artifact 1361: The stick that reached a crevice · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A thin twig with sticky resin on its tip holding a tiny pale pebble near a narrow rock crack. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): Adhesion extends reach into places a hand cannot enter. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "Adhesion extends reach into places a hand cannot enter. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "733bf8082df8f3ddd54b2652fc803ed062e9d941233822545b8296c586265c14",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-91d6424a-810b-4caf-bfed-cba07f87df60.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Sticky dark resin at thin twig tip holds one pale pebble at narrow natural rock crack; tiny local splint at base.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Thin crooked twig reaches narrow crack in two natural rock fragments; its tip has dark sticky resin visibly holding ONE tiny pale pebble just outside crack. Tiny short raw splint with sparse fiber turn braces only split twig base. No human hand, tool handle or modern adhesive. Side view exposes resin/pebble contact. Upper 40 percent blank ivory, artifact legible lower half with broad margins, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1362,
@@ -28698,10 +28764,16 @@
       "discovery_id": "oral_epics",
       "path": "res://assets/ui/artifacts/prehistoric-v1/artifact-1362.png",
       "prompt": "Use case: historical-scene. Artifact 1362: The leaf bundle bound to breathe · braced at the weak point.\nThe supplied references guide painting medium ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, restrained ochre, charcoal, muted olive and earth colors. These are FICTIONAL PREHISTORIC FINDS: ingenious but crude handmade experiments, never later finished technology. Follow the specified mechanism and materials. No generic river decoration, alphabets, ornate craftsmanship, metal, modern components, polished 3D, photographic lighting, labels, captions, frames or grids. One distinct square illustration. Keep the object legible with generous ivory negative space. Vary viewpoint and silhouette as specified; no repeated centered rock template. Organic remains are imagined preserved fragments, not modern reconstructions. Do not add people or workshops.\nSubject: A loose bundle of broad dried leaves tied only at the base, leaving separated overlapping tips open around dry herbs. Distinct experiment for this specimen (takes precedence over the base arrangement): Add one short rough brace only where the object is bending or splitting; the rest remains unsupported and crude. Preserve the recognizable underlying practical idea. Keep all additions crudely made from raw prehistoric materials; no refined later invention. For a one-piece object, a support means the natural surface touching it, not an invented complex mechanism.\nUnderlying idea (communicate visually, NO TEXT): A covering can shelter material while leaving gaps for air. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "status": "pending",
+      "status": "approved",
       "art_collection": "prehistoric-v1",
       "insight": "A covering can shelter material while leaving gaps for air. Recognizing a weak or obstructed point suggests where a small change matters most.",
-      "creative_direction": "prehistoric ingenuity"
+      "creative_direction": "prehistoric ingenuity",
+      "sha256": "de070935c420128b27e17ef548e643fc1281bf4f10808cebe2546f9df1666f56",
+      "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0f4c4-02b2-7ff1-94f2-4f15da9174e1\\exec-dcc7595e-602a-413a-9a74-38b817e05feb.png",
+      "width": 1254,
+      "height": 1254,
+      "review": "Fan of dried leaves tied only at base around dry herbs; separated open tips show air gaps, short local brace.",
+      "generation_prompt": "Create ONE square fictional prehistoric game artifact painting. Reference for MEDIUM ONLY: ivory fibrous paper, matte gouache, broken dry-brush edges, ochre/charcoal/muted olive, handmade flat pigment. Loose broad dried leaves tied ONLY at base with crude root turn, separated overlapping tips stay OPEN around small dry herb sprigs with visible air gaps. One tiny raw twig splint braces only tearing basal leaf fold. No woven container, finished bag, fabric or pottery. Asymmetric fan silhouette. Upper 40 percent blank ivory, artifact legible lower half with broad margins, distinct silhouette. No writing, frame, labels, workshop, people, refined craft, photography, CGI or glossy 3D. Organic preservation imagined for gameplay."
     },
     {
       "catalogue_id": 1363,
