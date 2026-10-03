@@ -73,11 +73,24 @@
     "stand_up": {
      "seconds": 0.6,
      "loop": false
+    },
+    "tug": {
+     "seconds": 0.84,
+     "loop": true
+    },
+    "crunch": {
+     "seconds": 0.72,
+     "loop": true
+    },
+    "carry": {
+     "seconds": 0.5,
+     "loop": true
     }
    },
    "speeds": {
     "walk": 0.78,
-    "trot": 1.7
+    "trot": 1.7,
+    "carry": 1.7
    }
   },
   "goat": {
@@ -124,6 +137,137 @@
    },
    "speeds": {
     "walk": 0.6
+   }
+  },
+  "pig": {
+   "glb": "court_pig.glb",
+   "triangles": 5200,
+   "height": 0.7,
+   "clips": {
+    "idle": {
+     "seconds": 2.7,
+     "loop": true
+    },
+    "walk": {
+     "seconds": 0.6,
+     "loop": true
+    },
+    "trot": {
+     "seconds": 0.36,
+     "loop": true
+    },
+    "eat": {
+     "seconds": 1.32,
+     "loop": true
+    },
+    "squeal": {
+     "seconds": 1.0,
+     "loop": false
+    }
+   },
+   "speeds": {
+    "walk": 0.7,
+    "trot": 1.9
+   }
+  },
+  "cattle": {
+   "glb": "court_cattle.glb",
+   "triangles": 6400,
+   "height": 1.45,
+   "clips": {
+    "idle": {
+     "seconds": 3.4,
+     "loop": true
+    },
+    "walk": {
+     "seconds": 1.2,
+     "loop": true
+    },
+    "gallop": {
+     "seconds": 0.5,
+     "loop": true
+    },
+    "pull": {
+     "seconds": 1.6,
+     "loop": true
+    },
+    "shake_hoof": {
+     "seconds": 1.4,
+     "loop": false
+    },
+    "look": {
+     "seconds": 0.6,
+     "loop": false
+    }
+   },
+   "speeds": {
+    "walk": 1.1,
+    "gallop": 5.5,
+    "pull": 0.6
+   }
+  },
+  "bear": {
+   "glb": "court_bear.glb",
+   "triangles": 6400,
+   "height": 1.15,
+   "clips": {
+    "idle": {
+     "seconds": 3.2,
+     "loop": true
+    },
+    "walk": {
+     "seconds": 1.1,
+     "loop": true
+    },
+    "rear": {
+     "seconds": 2.0,
+     "loop": false
+    },
+    "gulp": {
+     "seconds": 1.7,
+     "loop": false
+    },
+    "burp": {
+     "seconds": 1.2,
+     "loop": false
+    },
+    "spit": {
+     "seconds": 0.7,
+     "loop": false
+    }
+   },
+   "speeds": {
+    "walk": 1.0
+   }
+  },
+  "elephant": {
+   "glb": "court_elephant.glb",
+   "triangles": 7000,
+   "height": 3.1,
+   "clips": {
+    "idle": {
+     "seconds": 4.2,
+     "loop": true
+    },
+    "walk": {
+     "seconds": 1.8,
+     "loop": true
+    },
+    "stomp": {
+     "seconds": 1.5,
+     "loop": false
+    },
+    "shake_foot": {
+     "seconds": 1.7,
+     "loop": false
+    },
+    "trumpet": {
+     "seconds": 1.5,
+     "loop": false
+    }
+   },
+   "speeds": {
+    "walk": 1.1
    }
   }
  }

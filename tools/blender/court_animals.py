@@ -37,7 +37,8 @@ FPS = 30
 
 SLOT_COLOURS = {"COAT": (0.62, 0.42, 0.24), "COAT_LIGHT": (0.86, 0.76, 0.58), "NOSE": (0.08, 0.06, 0.05),
                 "EYE": (0.07, 0.05, 0.04), "EYE_SHINE": (0.98, 0.96, 0.9), "COAT_DARK": (0.30, 0.20, 0.12),
-                "HORN": (0.55, 0.5, 0.42), "HOOF": (0.2, 0.17, 0.14), "EYE_AMBER": (0.75, 0.55, 0.2)}
+                "HORN": (0.55, 0.5, 0.42), "HOOF": (0.2, 0.17, 0.14), "EYE_AMBER": (0.75, 0.55, 0.2),
+                "TUSK": (0.9, 0.86, 0.74)}
 
 
 def log(*a):
@@ -706,6 +707,54 @@ def d_stand_up(t):
     return merge(sit_pose(k), d_breath(t, 1.2, 1.0 - k))
 
 
+def d_tug(t):
+    """Braced and pulling back at something held in the teeth: haunches down,
+    forelegs planted forward, head low and wrenching side to side, tail up."""
+    p = d_breath(t, 0.5, 0.6)
+    yank = wave(t, 0.42)
+    add(p, "pelvis", rot=(-14, 0, 4 * yank), loc=(0, 0.05, -0.07))
+    add(p, "chest", rot=(10, 0, -3 * yank), loc=(0, 0.02, -0.04))
+    add(p, "neck", rot=(30, 0, 18 * yank))
+    add(p, "head", rot=(14, 22 * yank, 8 * yank))
+    add(p, "jaw", rot=(3, 0, 0))
+    for side in ("L", "R"):
+        add(p, "upperarm." + side, rot=(-32, 0, 0))
+        add(p, "forearm." + side, rot=(-8, 0, 0))
+        add(p, "fpaw." + side, rot=(20, 0, 0))
+        add(p, "thigh." + side, rot=(-34, 0, 0))
+        add(p, "shin." + side, rot=(52, 0, 0))
+        add(p, "hock." + side, rot=(-22, 0, 0))
+    add(p, "tail1", rot=(-30, 0, 20 * wave(t, 0.21)))
+    add(p, "tail2", rot=(0, 0, 14 * wave(t, 0.21, -0.1)))
+    add(p, "ear.L", rot=(20, 0, 0))
+    add(p, "ear.R", rot=(20, 0, 0))
+    return p
+
+
+def d_crunch(t):
+    """Lying on its front over something, gnawing: head down and sideways,
+    the jaw working, the whole head jerking with each bite."""
+    p = cower_pose(0.55)
+    bite = abs(wave(t, 0.36))
+    add(p, "tail1", rot=(-80, 0, 10 * wave(t, 1.1)))
+    add(p, "neck", rot=(20, 0, -10))
+    add(p, "head", rot=(16 + 6 * bite, -28, -6 + 4 * bite))
+    add(p, "jaw", rot=(18 * bite, 0, 0))
+    add(p, "ear.L", rot=(-30, 0, 10))
+    add(p, "ear.R", rot=(-30, 0, -10))
+    return p
+
+
+def d_carry(t):
+    """Trotting proudly with something in the mouth: head high, tail up."""
+    p = d_trot(t)
+    add(p, "neck", rot=(-14, 0, 0))
+    add(p, "head", rot=(-6, 0, 0))
+    add(p, "jaw", rot=(7, 0, 0))
+    add(p, "tail1", rot=(-30, 0, 0))
+    return p
+
+
 DOG_CLIPS = {
     "idle": (4.2, d_idle), "wag": (1.28, d_wag), "sniff": (2.0, d_sniff),
     "walk": (0.9, d_walk), "trot": (0.5, d_trot),
@@ -714,9 +763,10 @@ DOG_CLIPS = {
     "cower": (COWER_T, d_cower), "cower_idle": (2.4, d_cower_idle),
     "look_up": (0.6, d_look_up), "tilt": (2.6, d_tilt), "bark": (0.5, d_bark),
     "grab": (0.7, d_grab), "stand_up": (0.6, d_stand_up),
+    "tug": (0.84, d_tug), "crunch": (0.72, d_crunch), "carry": (0.5, d_carry),
 }
-DOG_LOOPS = {"idle", "wag", "sniff", "walk", "trot", "sit_idle", "scratch", "lie_idle", "cower_idle"}
-DOG_SPEEDS = {"walk": 0.78, "trot": 1.7}
+DOG_LOOPS = {"idle", "wag", "sniff", "walk", "trot", "sit_idle", "scratch", "lie_idle", "cower_idle", "tug", "crunch", "carry"}
+DOG_SPEEDS = {"walk": 0.78, "trot": 1.7, "carry": 1.7}
 
 
 def write_actions(rig, clips, loops):
@@ -831,7 +881,14 @@ def make_goat(quick):
     return goat.make(quick)
 
 
-MAKERS = {"dog": make_dog, "goat": make_goat}
+def _herd(species):
+    def make(quick):
+        import court_animals_herd as herd
+        return herd.make(species, quick)
+    return make
+
+
+MAKERS = {"dog": make_dog, "goat": make_goat, "pig": _herd("pig"), "cattle": _herd("cattle"), "bear": _herd("bear"), "elephant": _herd("elephant")}
 
 
 def main():

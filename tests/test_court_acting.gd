@@ -731,3 +731,144 @@ func test_a_right_hand_twin_is_its_left_in_a_mirror()->void:
 			var qr:Quaternion=rf.skeleton.get_bone_pose_rotation(rf.skeleton.find_bone(bone+".R"))
 			var off:=rad_to_deg(Quaternion(ql.x,-ql.y,-ql.z,ql.w).angle_to(qr))
 			assert_float(off).override_failure_message("%s %s is %.1f deg off its mirror" % [pair[1],bone,off]).is_less(6.0)
+
+
+# --- executions (court_night/EXECUTIONS.md): slapstick timed to the frame ---------------
+
+func _adults()->Array:
+	var out:=[]
+	for v in Figure3D.VARIANTS:
+		if String(v)!="child":out.append(String(v))
+	return out
+
+
+func _place(f:Node3D,role:Dictionary)->void:
+	var at:Array=role.get("at",[0.0,0.0,0.0])
+	f.position=Vector3(float(at[0]),float(at[1]),float(at[2]))
+	f.rotation_degrees.y=float(role.get("yaw",0.0))
+
+
+func _head_middle(f:Node3D)->Vector3:
+	var p:Transform3D=f.skeleton.global_transform*f.skeleton.get_bone_global_pose(f.skeleton.find_bone("head"))
+	return p.origin+p.basis.y.normalized()*0.11*f.body_height/1.72
+
+
+func test_every_execution_is_clips_every_adult_body_has()->void:
+	for act:String in Acting.EXEC_PLANS:
+		var plan:Dictionary=Acting.exec_plan(act)
+		var roles:Dictionary=plan.roles
+		assert_bool(roles.has("victim")).is_true()
+		for role:String in roles:
+			var r:Dictionary=roles[role]
+			var clips:=[]
+			if r.has("clip"):clips.append(String(r.clip))
+			for c:Dictionary in r.get("clips",[]):clips.append(String(c.clip))
+			for clip:String in clips:
+				assert_bool(Acting.has_clip(clip)).override_failure_message("%s: no clip %s" % [act,clip]).is_true()
+				assert_float(Acting.clip_length(clip)).is_less_equal(float(plan.length)+0.01)
+				for v in _adults():
+					assert_bool(Acting.library(v).has(clip)).override_failure_message("%s has no %s" % [v,clip]).is_true()
+				# no gore is ever acted on a child: the child's body has none of it
+				assert_bool(Acting.library("child").has(clip)).override_failure_message("the child has %s" % clip).is_false()
+		# a part that flies or rolls leaves the victim's body at that moment
+		for part:Dictionary in plan.parts:
+			var victim:=String(roles.victim.get("clip",""))
+			var split:=false
+			for e:Dictionary in Acting.events(victim):
+				if String(e.name)=="split" and String(e.get("part",""))==String(part.part) and absf(float(e.t)-float(part.t0))<0.05:split=true
+			assert_bool(split).override_failure_message("%s: %s never splits off at %.2f" % [act,part.part,part.t0]).is_true()
+	for clip in ["room_wipe_face","room_vomit","room_cover_eyes_peek","room_applaud_alone","room_flinch_splash","room_wince_crunch"]:
+		assert_bool(Acting.has_clip(clip)).is_true()
+		assert_bool(Acting.library("male_old").has(clip)).is_true()
+
+
+func test_the_club_meets_the_head_on_the_crack()->void:
+	var plan:=Acting.exec_plan("club_home_run")
+	var victim:=_figure("stand","male_adult");var batter:=_figure("stand","male_young")
+	_place(victim,plan.roles.victim);_place(batter,plan.roles.executioner)
+	var va=Acting.of(victim);var ba=Acting.of(batter)
+	var club:Node3D=auto_free(Node3D.new());add_child(club)
+	Acting.hold(batter,club,"R")
+	var heard:=[]
+	ba.cue.connect(func(_f,e):heard.append(String(e.name)))
+	Acting.play(victim,"exec_club_victim",{"blend":0.05});Acting.play(batter,"exec_club_batter",{"blend":0.05})
+	for i in int(round(3.62/DT)):
+		_frame(victim,va);_frame(batter,ba)
+	var head:=_head_middle(victim)
+	var sweet:=club.global_transform*Vector3(0.0,0.70,0.0)
+	assert_float(sweet.distance_to(head)).override_failure_message("the club's head is %.2f m from the victim's head at the crack" % sweet.distance_to(head)).is_less(0.25)
+	for want in ["tap","call_shot","kick","impact"]:
+		assert_bool(want in heard).override_failure_message("no %s cue (%s)" % [want,heard]).is_true()
+	assert_int(heard.find("tap")).is_less(heard.find("impact"))
+	# the follow-through carries the club round over the left shoulder, high
+	for i in int(0.3/DT):
+		_frame(victim,va);_frame(batter,ba)
+	assert_float((club.global_transform*Vector3(0.0,0.70,0.0)).y).is_greater(1.6)
+
+
+func test_the_axe_sticks_bounces_and_lands_on_the_neck()->void:
+	var plan:=Acting.exec_plan("three_swing_beheading")
+	var victim:=_figure("stand","female_adult");var man:=_figure("stand","male_adult")
+	_place(victim,plan.roles.victim);_place(man,plan.roles.executioner)
+	var va=Acting.of(victim);var ma=Acting.of(man)
+	var axe:Node3D=auto_free(Node3D.new());add_child(axe)
+	Acting.hold(man,axe,"R")
+	Acting.play(victim,"exec_block_victim",{"blend":0.05});Acting.play(man,"exec_axe_headsman",{"blend":0.05})
+	var block:Dictionary=plan.things.block
+	var top:=Vector3(float(block.at[0]),float(block.top),float(block.at[2]))
+	var t:=0.0
+	var blade_at:={}
+	for moment in [1.95,5.5,8.7]:
+		while t<moment-0.001:
+			_frame(victim,va);_frame(man,ma);t+=DT
+		blade_at[moment]=axe.global_transform*Vector3(0.0,0.66,0.07)
+	var neck:Vector3=victim.skeleton.global_transform*victim.skeleton.get_bone_global_pose(victim.skeleton.find_bone("neck")).origin
+	# the first sticks in the block, short of the neck; the second and third land on the neck
+	assert_float((blade_at[1.95] as Vector3).distance_to(top)).override_failure_message("swing one lands %.2f m from the block" % (blade_at[1.95] as Vector3).distance_to(top)).is_less(0.30)
+	assert_float((blade_at[8.7] as Vector3).distance_to(neck)).override_failure_message("the last swing lands %.2f m from the neck" % (blade_at[8.7] as Vector3).distance_to(neck)).is_less(0.25)
+	assert_float(neck.y).is_between(float(block.top)-0.05,float(block.top)+0.20)
+
+
+func test_the_cook_lids_the_pot_and_lets_go()->void:
+	var cook:=_figure()
+	var ca=Acting.of(cook)
+	var lid:Node3D=auto_free(Node3D.new());add_child(lid)
+	lid.global_position=Vector3(0.3,0.03,0.3)
+	Acting.hold(cook,lid,"L")
+	Acting.play(cook,"exec_cook_lid",{"blend":0.05})
+	var t:=0.0
+	while t<7.0:
+		_frame(cook,ca);t+=DT
+	assert_vector(lid.global_position).is_equal(Vector3(0.3,0.03,0.3))
+	while t<7.65:
+		_frame(cook,ca);t+=DT
+	var put:=lid.global_position
+	assert_float(put.y).is_between(0.45,0.85)
+	while t<8.5:
+		_frame(cook,ca);t+=DT
+	assert_vector(lid.global_position).is_equal(put)
+
+
+func test_parts_fly_and_roll_to_where_the_plan_says()->void:
+	var arc:Dictionary=(Acting.exec_plan("club_home_run").parts as Array)[0]
+	var from:=Vector3(0.0,1.2,0.0);var to:=Vector3(3.4,0.6,0.8)
+	assert_vector(Acting.part_at(arc,from,to,float(arc.t0)).origin).is_equal_approx(from,Vector3.ONE*0.01)
+	assert_vector(Acting.part_at(arc,from,to,float(arc.t1)).origin).is_equal_approx(to,Vector3.ONE*0.01)
+	assert_float(Acting.part_at(arc,from,to,(float(arc.t0)+float(arc.t1))*0.5).origin.y).is_greater(2.0)
+	var roll:Dictionary=(Acting.exec_plan("three_swing_beheading").parts as Array)[0]
+	var end:=Acting.part_at(roll,Vector3(0,0.58,0.4),Vector3(0,0.11,1.9),float(roll.t1),Vector3(0,0,1))
+	# at rest upright, its face (+Z) toward the god
+	assert_float(end.basis.y.normalized().dot(Vector3.UP)).is_greater(0.95)
+	assert_float(end.basis.z.normalized().dot(Vector3(0,0,1))).is_greater(0.95)
+
+
+func test_a_child_covers_its_eyes_its_own_way()->void:
+	var c:=_figure("stand","child")
+	var a=Acting.of(c)
+	Acting.perform(c,{"beat":"cover_eyes_peek"})
+	_frame(c,a)
+	assert_str(String(a._a.clip)).is_equal("child_cover_eyes_peek")
+	var g:=_figure()
+	var ga=Acting.of(g)
+	Acting.perform(g,{"beat":"cover_eyes_peek"})
+	assert_str(String(ga._a.clip)).is_equal("room_cover_eyes_peek")

@@ -35,6 +35,20 @@ uniform float front_fill = 0.30;
 // The fire's light thrown back up from the floor, warm, under the chin and nose.
 uniform vec3 bounce_color : source_color = vec3(1.0, 0.60, 0.32);
 uniform float bounce = 0.16;
+// The court's executions (court_figure_gore.gd): what a person becomes. All 0
+// on the living, and set only on the materials of someone being put to death.
+// gore_inside: a cut-open piece shows red flesh inside its skin (the back faces).
+uniform float gore_inside = 0.0;
+// charred: soot-black with embers glowing in the cracks; crumble: falls to ash, top down.
+uniform float charred = 0.0;
+uniform float crumble = 0.0;
+// bronze: a gleaming statue (the pose is frozen by the figure).
+uniform float bronze = 0.0;
+// rug: flattened to a hide on the floor, lying on their back (the figure is
+// stilled in its rest pose); rug_roll: rolled up from the feet, 0..1.
+uniform float rug = 0.0;
+uniform float rug_roll = 0.0;
+uniform float rug_height = 1.72;
 instance uniform vec4 face_a = vec4(0.0);
 instance uniform vec4 face_b = vec4(0.0);
 instance uniform float dim = 1.0;
@@ -48,8 +62,27 @@ varying vec2 v_face2;
 varying vec2 v_face;
 varying float v_card;
 varying vec3 v_obj;
+varying float v_height;
 
 void vertex() {
+	v_height = VERTEX.y;
+	if (rug > 0.0) {
+		// lying on their back, head away from the feet, pressed flat and spread
+		float h = rug_height;
+		vec3 v = VERTEX;
+		vec3 flat_pos = vec3(v.x * 1.32, 0.012 + (v.z + 0.16) * 0.045, h * 0.5 - v.y * 1.04);
+		// rolled up from the feet (+z end): wound round a cylinder
+		float r = 0.07;
+		float rolled = rug_roll * h * 1.04;
+		float front = h * 0.5 - rolled;
+		if (rug_roll > 0.0 && flat_pos.z > front) {
+			float u = flat_pos.z - front;
+			float a = u / r;
+			flat_pos = vec3(flat_pos.x, r - cos(a) * (r - flat_pos.y), front + sin(a) * (r - flat_pos.y));
+		}
+		VERTEX = mix(VERTEX, flat_pos, rug);
+		NORMAL = normalize(mix(NORMAL, vec3(0.0, 1.0, 0.0), rug * 0.85));
+	}
 	v_slot = int(CUSTOM0.r + 0.5);
 	v_ao = COLOR.r;
 	v_cover = 0.0;
@@ -91,6 +124,14 @@ void fragment() {
 	if (v_cover > 0.5) {
 		discard;
 	}
+	if (crumble > 0.0) {
+		// ash falls from the top down, in flakes
+		float flake = noise3(v_obj * 55.0) * 0.6 + noise3(v_obj * 13.0) * 0.4;
+		float top = clamp(v_height / max(rug_height, 0.5), 0.0, 1.0);
+		if (flake + (1.0 - top) * 0.9 < crumble * 1.9) {
+			discard;
+		}
+	}
 	vec4 pa = slot_a[s];
 	vec4 pb = slot_b[s];
 	vec4 pc = slot_c[s];
@@ -124,6 +165,23 @@ void fragment() {
 		float sn = noise3(vec3(v_obj.x * 210.0, v_obj.y * 16.0, v_obj.z * 210.0)) * 0.65 + noise3(vec3(v_obj.x * 90.0, v_obj.y * 7.0, v_obj.z * 90.0)) * 0.35;
 		base *= 1.0 + (sn - 0.5) * pa.z * 2.0;
 	}
+	if (gore_inside > 0.0 && !FRONT_FACING && s != S_HAIR && s != S_CARD) {
+		// cut open: red, wet flesh inside the skin (cloth stays cloth inside)
+		float meat = noise3(v_obj * 70.0) * 0.6 + noise3(v_obj * 18.0) * 0.4;
+		vec3 flesh = mix(vec3(0.42, 0.02, 0.02), vec3(0.78, 0.10, 0.08), meat);
+		if (s == S_SKIN) {
+			base = flesh;
+		}
+	}
+	if (bronze > 0.0) {
+		// cast bronze: warm metal, greener in the hollows (vertex shade), polished on the high places
+		vec3 metal = mix(vec3(0.20, 0.30, 0.20), vec3(0.62, 0.40, 0.16), smoothstep(0.35, 0.9, v_ao));
+		metal *= 0.92 + 0.16 * noise3(v_obj * 9.0);
+		base = mix(base, metal, bronze);
+	}
+	if (charred > 0.0) {
+		base = mix(base, vec3(0.035, 0.028, 0.024) * (0.8 + 0.4 * noise3(v_obj * 30.0)), charred);
+	}
 	ALBEDO = base * dim;
 	ROUGHNESS = 1.0;
 	AO = mix(1.0, v_ao, 0.5);
@@ -147,6 +205,18 @@ void fragment() {
 		vec3 key_view = normalize((VIEW_MATRIX * vec4(key_dir, 0.0)).xyz);
 		float band = smoothstep(0.55, 0.85, dot(n, normalize(key_view + VIEW)));
 		glow += albedo * key_color * band * pa.w * 1.4;
+	}
+	if (gore_inside > 0.0 && !FRONT_FACING && s == S_SKIN) {
+		glow += base * 0.35;
+	}
+	if (bronze > 0.0) {
+		glow = mix(glow, base * 0.10 + vec3(1.0, 0.82, 0.50) * pow(fres, 1.5) * 0.45, bronze);
+	}
+	if (charred > 0.0) {
+		// embers in the cracks, breathing
+		float crack = noise3(v_obj * 38.0 + vec3(0.0, TIME * 0.15, 0.0));
+		float ember = smoothstep(0.66, 0.74, crack) * (0.65 + 0.35 * sin(TIME * 6.0 + v_obj.y * 30.0));
+		glow = mix(glow, vec3(1.0, 0.36, 0.06) * ember * 1.6, charred);
 	}
 	EMISSION = glow;
 }
@@ -188,5 +258,10 @@ void light() {
 			term = skin_terminator;
 		}
 		DIFFUSE_LIGHT += lc * (tint * tone + term * edge * 0.30) / PI;
+		if (bronze > 0.0) {
+			vec3 h = normalize(LIGHT + VIEW);
+			float spec = pow(clamp(dot(NORMAL, h), 0.0, 1.0), 40.0) * att;
+			SPECULAR_LIGHT += LIGHT_COLOR * vec3(1.0, 0.85, 0.55) * spec * 1.6 * bronze;
+		}
 	}
 }
