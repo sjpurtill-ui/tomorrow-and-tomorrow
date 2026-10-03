@@ -84,13 +84,31 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 			var hungry:=population-fed if fed>=0 else 0
 			var vitals:=GameState.rolling_vital_balance(365)
 			var net:=int(vitals.get("net",0))
+			# A whole year counted: before it the counts are "so far", never "a year".
+			var whole_year:=float(GameState.elapsed_days)>=365.0
 			c.value=EraWords.people(population) if not modern else EraWords.grouped(population)
 			if hungry>0:
 				c.tone="warning"
 				c.headline="%s went hungry today: the food eaten fell short of what all of us need." % EraWords.grouped(hungry)
-			elif fed>=0:c.headline="Everyone ate their fill today; %s this year." % ("more are born than buried" if net>0 else "as many are buried as born" if net==0 else "more are buried than born")
+			elif net<0 and whole_year:
+				# Fewer over the last whole year: what took them. A misfortune that
+				# covers the shortfall is named (a fire, war, an outbreak: the
+				# people's deaths by cause); else the ordinary toll is explained by
+				# the winter tally's rule (dwindling_cause.gd).
+				var Dwindling:=preload("res://scripts/dwindling_cause.gd")
+				var causes:=GameState.rolling_death_causes(365)
+				var born:=int(vitals.get("births",0));var buried:=int(vitals.get("deaths",0))
+				var reason:=Dwindling.misfortune(causes,buried-born)
+				if reason=="":
+					var year:Dictionary=(GameState.hearth_season.get("year",{}) as Dictionary).duplicate()
+					year["born"]=born;year["buried"]=Dwindling.ordinary_count(causes) if not causes.is_empty() else buried
+					reason=Dwindling.short_reason(year,GameState.early_care,population)
+				c.tone="warning"
+				c.headline="More are buried than born: %s." % reason
+				if fed>=0:c.facts.append({"text":"Everyone ate their fill today"})
+			elif fed>=0:c.headline="Everyone ate their fill today; %s." % (("more are born than buried" if net>0 else "as many are buried as born" if net==0 else "more are buried than born")+" this year" if whole_year else "this is the people's first year")
 			else:c.headline="The people are counted; what they ate today is not yet told."
-			c.facts.append({"text":"%d born, %d buried since this time last year" % [int(vitals.get("births",0)),int(vitals.get("deaths",0))],"trend":signi(net),"good":net>=0})
+			c.facts.append({"text":("%d born, %d buried since this time last year" if whole_year else "%d born, %d buried so far") % [int(vitals.get("births",0)),int(vitals.get("deaths",0))],"trend":signi(net),"good":net>=0})
 			if fed>=0:
 				c.meter=float(fed)/maxf(1.0,float(population))
 				c.meter_label="%s of %s fed in full today" % [EraWords.grouped(fed),EraWords.grouped(population)]

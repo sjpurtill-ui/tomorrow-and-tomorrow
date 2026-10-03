@@ -116,6 +116,21 @@ const SPARE_LAND_CONCEPTION:=2.0
 ## Crowd diseases need numbers: a remnant band sheds part of the era's excess
 ## mortality burden (about -18% at 37 people, -30% for a handful).
 const SPARE_LAND_HEALTH:=1.0
+## The frontier: while the whole people is few for its home land, land is easy
+## to come by, couples set up house younger and more children are born: up to
+## FRONTIER_CONCEPTION more at an empty land, tapering to none at
+## FRONTIER_ONSET of what one home land carries (home_capacity), where crowding
+## begins (one line: below it the frontier, above it crowding). About 10 in 100
+## more for a new band of 120, 15 for a people of 107 in its eighth year: the
+## frontier effect of colonial and early farming peoples (Shennan 2018 on the
+## LBK front; docs/research/BENCHMARKS_600.md growth "high" for a well-fed
+## frontier people). Judged by the whole people against its home land alone:
+## founding more towns widens the land it can fill (carrying_capacity), never
+## the births of the people already there. The remnant rule above is the
+## small-numbers rescue on top. FRONTIER_ONSET is CROWDING_ONSET, kept a plain
+## number for the fast sim (test_early_life_conditions checks they agree).
+const FRONTIER_ONSET:=0.6
+const FRONTIER_CONCEPTION:=0.30
 
 ## --- research_3000 modern transition (Phase 4 balance) ---
 ## The baseline life table is the floor of pre-modern survival; research only
@@ -175,10 +190,22 @@ static func people_on_the_land(state:Node)->float:
 		return maxf(0.0,float(settlements.call("national_population")))
 	return maxf(0.0,float(state.population_exact))
 
-## People the society's settled land can carry now: territory by era and
-## settlement count, raised by (era-capped) cultivation, soil and storage
-## knowledge and lowered by worn-out wild grounds.
+## People the society's settled land can carry now: its home land
+## (home_capacity) widened by the land its other towns claim.
 static func carrying_capacity(state:Node,discovery:Node)->float:
+	# Only towns people live in work land (settlement_model.lived_in).
+	var settlements:=maxi(1,WorldSimulation.settlements.lived_in(state.player_settlements).size())
+	# Daughter settlements claim less new land each than the first.
+	var territory:=1.0+sqrt(float(settlements-1))*1.6
+	return home_capacity(state,discovery)*territory
+
+## People one home land can carry now, whatever the number of towns: the era's
+## territory, raised by (era-capped) cultivation, soil and storage knowledge
+## and lowered by worn-out wild grounds. The frontier is judged against it, so
+## founding more towns widens the land the people can fill, never the births of
+## those already there (one people of 300 in one town or in three is as close
+## to its frontier).
+static func home_capacity(state:Node,discovery:Node)->float:
 	var era:=float(state.elapsed_days)/365.0
 	var base:=float(TERRITORY_CAPACITY[TERRITORY_CAPACITY.size()-1][1])
 	for index in range(1,TERRITORY_CAPACITY.size()):
@@ -187,16 +214,17 @@ static func carrying_capacity(state:Node,discovery:Node)->float:
 			var low:Array=TERRITORY_CAPACITY[index-1]
 			base=lerpf(float(low[1]),float(high[1]),(era-float(low[0]))/(float(high[0])-float(low[0])))
 			break
-	# Only towns people live in work land (settlement_model.lived_in).
-	var settlements:=maxi(1,WorldSimulation.settlements.lived_in(state.player_settlements).size())
-	# Daughter settlements claim less new land each than the first.
-	var territory:=1.0+sqrt(float(settlements-1))*1.6
 	var methods:=1.0+maxf(0.0,discovery.effect("cultivation_yield"))+maxf(0.0,discovery.effect("soil_productivity"))*0.6+maxf(0.0,discovery.effect("food_output"))*0.5+maxf(0.0,discovery.effect("food_storage"))*0.25
 	var grounds:=0.0
 	var sources:Dictionary=state.food_source_health
 	for key:Variant in sources:grounds+=float(sources[key])
 	grounds=clampf(grounds/maxf(1.0,float(sources.size())),0.4,1.0) if not sources.is_empty() else 1.0
-	return base*territory*methods*lerpf(0.6,1.0,grounds)
+	return base*methods*lerpf(0.6,1.0,grounds)
+
+## 0..1: how open the land is to a people of `people` on home land that
+## carries `capacity` (home_capacity; FRONTIER_ONSET of it worked: 0, none: 1).
+static func frontier_of(people:float,capacity:float)->float:
+	return clampf((FRONTIER_ONSET-people/maxf(1.0,capacity))/FRONTIER_ONSET,0.0,1.0)
 
 ## Care decrees (government_policy_catalog.gd) organize people to do what a
 ## missing practice would: fetch and store clean water, tend the sick and
@@ -351,10 +379,15 @@ static func profile(state:Node,discovery:Node,context:Dictionary={})->Dictionary
 		var remnant:=1.0-spare*SPARE_LAND_HEALTH if by_age else 1.0
 		var tended:=1.0-carers*float(CARER_BURDEN.get(key,0.0))
 		burden[key]=lerpf(1.0,(1.0+(float(ERA_BURDEN[key])-1.0)*(1.0-relief)*remnant*tended)*crowd,blend)
-	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION),blend)
+	# The frontier reads the home land alone: founding towns does not raise births.
+	var home:=home_capacity(state,discovery)
+	var frontier:=frontier_of(people,home)
+	result["conception"]=float(result.conception)*lerpf(1.0,maxf(0.3,1.0-crowding*CROWDING_CONCEPTION)*(1.0+spare*SPARE_LAND_CONCEPTION)*(1.0+frontier*FRONTIER_CONCEPTION),blend)
 	result["carrying_capacity"]=capacity
 	result["crowding"]=crowding
 	result["spare_land"]=spare
+	result["frontier"]=frontier
+	result["home_capacity"]=home
 	var weights:Dictionary={}
 	for key:String in EXCESS_WEIGHT:weights[key]=lerpf(1.0,float(EXCESS_WEIGHT[key]),blend)
 	result["burden"]=burden

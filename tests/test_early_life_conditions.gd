@@ -180,3 +180,44 @@ func test_a_hamlet_of_a_large_people_is_judged_by_the_whole_people()->void:
 	SettlementModel._national_population_in_scope=saved_national
 	GameState.population_exact=saved_pop
 
+
+
+## The frontier: on open land couples set up house younger and more children
+## are born, tapering to none where crowding begins (one line), judged by the
+## whole people against its land.
+func test_open_land_raises_conception_until_crowding_begins()->void:
+	assert_float(EarlyCare.FRONTIER_ONSET).is_equal(EarlyCare.CROWDING_ONSET)
+	assert_float(EarlyCare.frontier_of(0.0,1000.0)).is_equal(1.0)
+	assert_float(EarlyCare.frontier_of(300.0,1000.0)).is_equal_approx(0.5,0.000001)
+	assert_float(EarlyCare.frontier_of(600.0,1000.0)).is_equal(0.0)
+	assert_float(EarlyCare.frontier_of(900.0,1000.0)).is_equal(0.0)
+	var open:=_profile()
+	var capacity:=float(open.carrying_capacity)
+	assert_float(float(open.frontier)).is_equal_approx(EarlyCare.frontier_of(state.population_exact,capacity),0.000001)
+	# The same people on land that is already well worked: no frontier.
+	state.ensure_population_total(roundi(capacity*0.62))
+	var worked:=_profile()
+	assert_float(float(worked.frontier)).is_equal(0.0)
+	assert_float(float(open.conception)).is_greater(float(worked.conception))
+	# At most FRONTIER_CONCEPTION more, never a boom.
+	assert_float(float(open.conception)/float(worked.conception)).is_less_equal(1.0+EarlyCare.FRONTIER_CONCEPTION+0.0001)
+
+
+## The frontier is the home land's (#91, whole people): the same people in one
+## town or in three is exactly as near its frontier, and as many children are
+## born. Founding towns widens the land the people can fill (carrying_capacity),
+## never the births of those already there (below crowding in both: crowding
+## does read the whole land).
+func test_founding_towns_does_not_raise_the_frontier()->void:
+	state.ensure_population_total(150)
+	state.player_settlements.assign([{"id":"home","name":"Home","primary":true}])
+	var one:=_profile()
+	state.player_settlements.assign([{"id":"home","name":"Home","primary":true},{"id":"b","name":"B"},{"id":"c","name":"C"}])
+	var three:=_profile()
+	assert_float(float(three.carrying_capacity)).is_greater(float(one.carrying_capacity))
+	assert_float(float(three.home_capacity)).is_equal_approx(float(one.home_capacity),0.000001)
+	assert_float(float(one.crowding)).is_equal(0.0)
+	assert_float(float(one.frontier)).is_greater(0.0)
+	assert_float(float(three.frontier)).is_equal_approx(float(one.frontier),0.000001)
+	assert_float(float(three.conception)).is_equal_approx(float(one.conception),0.000001)
+	state.player_settlements.clear()
