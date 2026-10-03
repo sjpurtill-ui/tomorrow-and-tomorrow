@@ -30,56 +30,6 @@ def make_more(clips):
     z_waist = f.z_waist / k
     z_hip = f.z_hip / k
 
-    # ---- faint: the eyes go, the knees buckle, down in a heap on the floor (holds)
-    for sd, nm in ((1.0, "faint_l"), (-1.0, "faint_r")):
-        a = Act(2.0, drag=1.3, feet=False)
-        a.t(0.0).t(0.14, "out", hips_loc=(0.010 * sd, 0, 0), spine=(0, 0, 2 * sd), head=(-7, 0, 6 * sd))
-        a.t(0.42, "in", hips_loc=(0.020 * sd, 0.015, -0.20), spine=(9, 0, 3 * sd), chest=(5, 0, 3 * sd), neck=(6, 0, 0), head=(16, 4 * sd, 10 * sd))
-        down = dict(hips=(-16, 8 * sd, 6 * sd), hips_loc=(0.06 * sd, 0.10, -0.72), spine=(-5, 4 * sd, 6 * sd), chest=(-5, 3 * sd, 6 * sd), neck=(-3, 0, 9 * sd), head=(-8, 13 * sd, 24 * sd))
-        a.t(0.80, "in", **dict(down, hips=(-18, 8 * sd, 6 * sd), hips_loc=(0.06 * sd, 0.10, -0.74)))
-        a.t(0.93, "settle", **down).t(2.0, "ease", **down)
-        legs0 = _legs0(a)
-        buckle = merge(legs0, {"thigh.L": {"rot": (-34, 0, 0)}, "shin.L": {"rot": (62, 0, 0)}, "foot.L": {"rot": (-22, 0, 0)},
-                               "thigh.R": {"rot": (-30, 0, 0)}, "shin.R": {"rot": (58, 0, 0)}, "foot.R": {"rot": (-24, 0, 0)}})
-        heap = merge(legs0, {"thigh.L": {"rot": (-62, 0, 14)}, "shin.L": {"rot": (34, 0, 0)}, "foot.L": {"rot": (-10, 0, 8)},
-                             "thigh.R": {"rot": (-70, 0, -10)}, "shin.R": {"rot": (52, 0, 0)}, "foot.R": {"rot": (-14, 0, -6)}})
-        a.legs([(0.0, legs0), (0.14, legs0), (0.42, buckle, "in"), (0.80, heap, "in"), (2.0, heap)])
-        for s_ in "LR":
-            limp = hang(a, s_, -10, curl=(40, 30, 14))
-            r = a.rest_arm[s_]
-            flop = r.copy(w=r.w + mv((0.10 * k, -0.10 * k, 0.02 * k), s_), curl=(46, 36, 16), sh=(0, 4, 0))
-            a.rest(s_, 0.0).rest(s_, 0.14).arm(s_, 0.45, limp, "in").arm(s_, 0.86, flop, "in")
-            a.arm(s_, 0.98, flop.copy(w=flop.w + Vector((0, 0, 0.02 * k))), "settle").arm(s_, 2.0, flop)
-        a.f(0.0).f(0.14, "out", lids=0.45, eyes_y=1.0, brows=0.5, worry=0.3).f(0.42, "ease", lids=0.08, eyes_y=0.6, jaw=0.25, brows=0.2)
-        a.f(0.9, "ease", lids=0.04, jaw=0.35).f(2.0, "ease", lids=0.04, jaw=0.32)
-        clips[nm] = clip(nm, 2.0, a, kind="react", hold=True, tags=["fear", "comic"], blend_in=0.12, blend_out=0.8)
-
-    # ---- half-catch: a lunge to the side, arms under the falling one, takes the weight, sags
-    for sd, nm in ((1.0, "half_catch_l"), (-1.0, "half_catch_r")):
-        s_ = "L" if sd > 0 else "R"
-        o_ = "R" if sd > 0 else "L"
-        a = Act(1.7, drag=0.9)
-        a.t(0.0).t(0.10, "snap", chest=(-3, 0, 0), head=(-5, 6 * sd, 0))
-        a.t(0.36, "out", hips=(10, 16 * sd, -4 * sd), hips_loc=(0.10 * sd, 0.02, -0.07), spine=(8, 4 * sd, -6 * sd), chest=(12, 6 * sd, -6 * sd), neck=(4, 0, 0), head=(4, 10 * sd, 0))
-        low = dict(hips=(14, 18 * sd, -6 * sd), hips_loc=(0.12 * sd, 0.05, -0.16), spine=(12, 4 * sd, -8 * sd), chest=(14, 6 * sd, -8 * sd), neck=(5, 0, 0), head=(-2, 12 * sd, 0))
-        a.t(0.62, "in", **low).t(0.80, "settle", **dict(low, hips_loc=(0.12 * sd, 0.05, -0.15), head=(-4, 12 * sd, 0)))
-        a.t(1.25, "ease", **dict(low, hips_loc=(0.12 * sd, 0.05, -0.15), head=(-6, 10 * sd, 0)))
-        a.t(1.7, "ease", hips_loc=(0.03 * sd, 0.0, -0.02), chest=(2, 2 * sd, 0), head=(0, 4 * sd, 0))
-        a.foot(s_, 0.0).foot(s_, 0.32, (0.20 * sd, -0.04, 0.0), "out", lift=0.06).foot(s_, 1.7, (0.20 * sd, -0.04, 0.0))
-        # the near arm reaches out to its side; the far arm crosses in front toward it
-        reach_n = arm_at(s_, w=body_pt(0.56, -0.26, z_chest - 0.12), along=(0.75, -0.55, 0.0), palm=(-0.3, 0.2, 0.95),
-                         pole=(0.6, 0.3, -1.0), curl=(30, 22, 10), sh=(0, -4, -6))
-        reach_f = arm_at(o_, w=body_pt(-0.38, -0.42, z_chest - 0.14), along=(-0.8, -0.55, 0.0), palm=(0.2, 0.3, 0.95),
-                         pole=(0.3, 0.6, -1.0), curl=(30, 22, 10), sh=(0, -4, -8))
-        sag_n = reach_n.copy(w=reach_n.w + Vector((0, 0, -0.10 * k)))
-        sag_f = reach_f.copy(w=reach_f.w + Vector((0, 0, -0.10 * k)))
-        a.rest(s_, 0.0).arm(s_, 0.34, reach_n.copy(arc=(0.04, -0.08, 0.0)), "out").arm(s_, 0.62, sag_n, "in").arm(s_, 1.25, sag_n).rest(s_, 1.7, "ease")
-        a.rest(o_, 0.0).arm(o_, 0.38, reach_f.copy(arc=(0.0, -0.10, 0.02)), "out").arm(o_, 0.62, sag_f, "in").arm(o_, 1.25, sag_f).rest(o_, 1.7, "ease")
-        a.f(0.0).f(0.10, "snap", lids=1.35, brows=1.0, jaw=0.4).f(0.62, "ease", puff=0.6, worry=0.7, brows=0.8, lids=1.1, jaw=0.2)
-        a.f(1.25, "ease", puff=0.4, worry=0.7, brows=0.7).f(1.7, "ease", worry=0.3)
-        a.on_top(lambda t: tremble(t, 0.8 * L.clamp01((t - 0.62) / 0.1) * (1 - L.clamp01((t - 1.2) / 0.3)), 1.1, 0.2))
-        clips[nm] = clip(nm, 1.7, a, kind="react", tags=["comic", "care"], blend_in=0.08, blend_out=0.5)
-
     # ---- knees knock: knees bent and banging together, hands clutched at the breast (loops)
     a = Act(1.2, drag=0.6)
     kk = dict(hips_loc=(0.0, 0.01, -0.055), spine=(3, 0, 0), chest=(5, 0, 0), neck=(3, 0, 0), head=(7, 0, 0))
