@@ -111,6 +111,9 @@ const ACT_MAP:={
 	"bubble":["face",""],"giggle":["clip","laugh_stifled"],
 	# round 4: a child's words (anyone can take them; a child does them its own way)
 	"shushed":["gesture","freeze"],"run_to":["clip","run"],"cling":["clip","hide_behind_"],"sit_cross":["clip","sit_cross"],
+	# executions: the room's business (the acts themselves are in EXEC_PLANS)
+	"wipe_face":["clip","room_wipe_face"],"vomit":["clip","room_vomit"],"cover_eyes_peek":["clip","room_cover_eyes_peek"],
+	"applaud_alone":["clip","room_applaud_alone"],"flinch_splash":["clip","room_flinch_splash"],"wince_crunch":["clip","room_wince_crunch"],
 }
 ## A child does the same words its own way (J's child body; only its library
 ## has these clips): hides behind a grown-up's legs and peeks, copies the bow
@@ -120,10 +123,93 @@ const CHILD_ACTS:={"copy":["clip","child_copy_bow"],"bow_wrong":["clip","child_c
 	"fidget":["clip","child_fidget"],"freeze":["clip","child_shushed"],"shushed":["clip","child_shushed"],
 	"stifle_laugh":["clip","child_giggle"],"giggle":["clip","child_giggle"],"laugh":["clip","child_giggle"],
 	"run_to":["clip","child_run"],"cling":["clip","child_cling_"],"sit_down":["clip","sit_cross"],"wave":["clip","child_wave"],
-	"hide_behind":["clip","child_hide_behind_"],"peek_out":["clip","child_peek_out_"]}
+	"hide_behind":["clip","child_hide_behind_"],"peek_out":["clip","child_peek_out_"],"cover_eyes_peek":["clip","child_cover_eyes_peek"]}
 ## And any clip asked for by name: a child's own version where it has one.
 const CHILD_CLIPS:={"hide_behind_l":"child_hide_behind_l","hide_behind_r":"child_hide_behind_r","peek_out_l":"child_peek_out_l",
-	"peek_out_r":"child_peek_out_r","wave":"child_wave","laugh_stifled":"child_giggle","run":"child_run","sit_floor":"sit_cross"}
+	"peek_out_r":"child_peek_out_r","wave":"child_wave","laugh_stifled":"child_giggle","run":"child_run","sit_floor":"sit_cross",
+	"room_cover_eyes_peek":"child_cover_eyes_peek"}
+## Executions (court_night/EXECUTIONS.md): cartoon slapstick, timed to the
+## frame. Each act is a plan the director stages: its roles (a clip each, all
+## starting at the act's 0), where each stands and faces in the victim's frame
+## (x the victim's left, z the victim's front, toward the god; metres for a
+## 1.72 m victim: scale by the victim's height), the props a hand holds (drive
+## them with hold()), the fixed things (block, pot) the clips are built round,
+## the body parts that fly or roll (part_at() moves them; J's pre-split parts:
+## origin at the part's middle, +Z its face's front, +Y up), and the room's
+## cues: when the hall should flinch, wipe, be sick, applaud. The clips' own
+## events (cue signal) carry the same moments for blood (M), sound (N) and the
+## split body (J). The engine has already put the person to death; this only
+## shows it, and never on a child.
+const EXEC_PLANS:={
+	"club_home_run":{"length":8.6,"needs":[],
+		"roles":{
+			"victim":{"clip":"exec_club_victim","at":[0.0,0.0,0.0],"yaw":0.0,"kneels":true},
+			"executioner":{"clip":"exec_club_batter","at":[-0.20,0.0,-0.95],"yaw":0.0,"props":{"R":"club"}},
+			"cook":{"clip":"exec_cook_lid","at":[3.4,0.0,0.3],"yaw":0.0,"props":{"R":"ladle","L":"lid"}}},
+		"things":{"pot":{"at":[3.4,0.0,0.82],"rim":0.55},"lid":{"at":[3.74,0.0,0.6],"on_floor":true}},
+		"parts":[{"part":"head","of":"victim","t0":3.62,"t1":5.0,"kind":"arc","to":"pot","apex":2.4,"spins":2.5,"then":"in_pot"}],
+		"cues":[{"t":0.0,"cue":"hush"},{"t":0.45,"cue":"tap"},{"t":0.95,"cue":"tap"},{"t":1.6,"cue":"call_shot"},{"t":3.25,"cue":"held_breath"},
+			{"t":3.62,"cue":"impact"},{"t":5.0,"cue":"plop"},{"t":6.0,"cue":"thud"},{"t":7.6,"cue":"lid"},{"t":8.0,"cue":"after"}],
+		"room":{"call_shot":["look_at:pot"],"impact":["flinch_splash","gasp","faint_"],"plop":["look_at:pot"],"after":["applaud_alone","vomit","cover_eyes_peek","gulp"]}},
+	"three_swing_beheading":{"length":11.6,"needs":["bronze"],
+		"roles":{
+			"victim":{"clip":"exec_block_victim","at":[0.0,0.0,0.0],"yaw":0.0,"kneels":true},
+			"executioner":{"clip":"exec_axe_headsman","at":[0.70,0.0,0.36],"yaw":-90.0,"props":{"R":"axe"}}},
+		"things":{"block":{"at":[0.0,0.0,0.41],"top":0.575}},
+		"parts":[{"part":"head","of":"victim","t0":8.7,"t1":10.1,"kind":"roll","to":[0.0,0.0,1.9],"face":"god","then":"blink","blink_t":10.9}],
+		"cues":[{"t":0.0,"cue":"hush"},{"t":1.95,"cue":"thunk"},{"t":3.4,"cue":"free"},{"t":5.5,"cue":"clang"},{"t":6.75,"cue":"glare"},
+			{"t":8.7,"cue":"impact"},{"t":8.75,"cue":"splash"},{"t":10.9,"cue":"head_blink"},{"t":11.0,"cue":"after"}],
+		"room":{"thunk":["flinch_small"],"clang":["wince"],"impact":["flinch_splash","faint_"],"splash":["wipe_face"],"head_blink":["double_take"],
+			"after":["applaud_alone","vomit","cover_eyes_peek","gulp"]}},
+	"dog_dinner":{"length":12.0,"needs":["dogs"],
+		"roles":{
+			"victim":{"clips":[{"clip":"exec_dog_down","t":0.0},{"clip":"exec_dog_claw","t":1.2,"move":[0.0,0.0,-0.9],"until":2.2},
+				{"clip":"exec_dog_grip","t":2.2},{"clip":"exec_dog_claw","t":5.0,"move":[0.0,0.0,-0.9],"until":6.6}],"at":[0.0,0.0,0.0],"yaw":0.0}},
+		"things":{"grip":{"at":[0.0,0.1,1.12],"note":"what the hands clamp on at 2.2 s: a post's foot, the hearth stone, or nothing"}},
+		"parts":[],
+		"cues":[{"t":0.0,"cue":"grab"},{"t":0.6,"cue":"thud"},{"t":2.95,"cue":"tug"},{"t":3.8,"cue":"slip"},{"t":4.35,"cue":"wave_goodbye"},
+			{"t":6.6,"cue":"out_of_sight"},{"t":7.0,"cue":"crunch"},{"t":7.6,"cue":"crunch"},{"t":8.2,"cue":"crunch"},{"t":10.6,"cue":"bone_dropped"},{"t":11.0,"cue":"after"}],
+		"room":{"grab":["gasp"],"out_of_sight":["look_at:windbreak"],"crunch":["wince_crunch"],"bone_dropped":["look_at:bone","look_at:god"],
+			"after":["applaud_alone","vomit","gulp"]}},
+}
+## The beats in a clip for the stage (time order): court_anims.json "events".
+static func events(clip:String)->Array:
+	if _events.has(clip):return _events[clip]
+	var out:Array=(clip_meta(clip).get("events",[]) as Array).duplicate()
+	out.sort_custom(func(x,y):return float(x.get("t",0.0))<float(y.get("t",0.0)))
+	_events[clip]=out
+	return out
+static var _events:Dictionary={}
+
+## One execution's plan (EXEC_PLANS), or {}.
+static func exec_plan(act:String)->Dictionary:
+	return EXEC_PLANS.get(act,{})
+
+## Where a flying or rolling part is at act time t: "arc" from `from` to `to`
+## over the plan's t0..t1, as high as `apex` metres, turning over `spins`
+## times; "roll" along the floor from `from` to `to`, bumping, and coming to
+## rest upright with its face toward `face` (a direction). Presentation only.
+static func part_at(spec:Dictionary,from:Vector3,to:Vector3,t:float,face:=Vector3.FORWARD)->Transform3D:
+	var t0:=float(spec.get("t0",0.0));var t1:=float(spec.get("t1",t0+1.0))
+	var u:=clampf((t-t0)/maxf(t1-t0,0.01),0.0,1.0)
+	var travel:=Vector3(to.x-from.x,0.0,to.z-from.z)
+	var side:=travel.cross(Vector3.UP).normalized() if travel.length()>0.01 else Vector3.RIGHT
+	if String(spec.get("kind","arc"))=="roll":
+		var e:=1.0-pow(1.0-u,2.2)
+		var pos:=from.lerp(to,e)
+		pos.y+=absf(sin(e*PI*3.0))*0.10*(1.0-e)*(1.0 if u<1.0 else 0.0)
+		var turns:=maxf(1.0,roundf(travel.length()/(TAU*0.11)))
+		var rolled:=Basis(side,-turns*TAU*e)
+		var rest:=Basis.looking_at(-face.normalized() if face.length()>0.01 else Vector3.FORWARD,Vector3.UP)
+		var settle:=smoothstep(0.82,1.0,u)
+		return Transform3D(Basis(rolled.get_rotation_quaternion().slerp(rest.get_rotation_quaternion(),settle)),pos)
+	var apex:=float(spec.get("apex",2.0))
+	var mid_y:=lerpf(from.y,to.y,0.5)
+	var h:=maxf(apex-mid_y,0.0)
+	var p:=from.lerp(to,u)
+	p.y+=4.0*h*u*(1.0-u)
+	return Transform3D(Basis(side,-float(spec.get("spins",2.0))*TAU*u),p)
+
 ## The director's face words (docs/COURT_STAGE_3D.md section 3) on this layer's
 ## channels: [channel, gain, second channel or -1, gain].
 const FACE_WORDS:={"brows_up":[5,1.0,-1,0.0],"brows_down":[4,0.8,5,-0.6],"brows_worried":[3,1.0,-1,0.0],"lips_pressed":[2,1.0,-1,0.0],
@@ -192,6 +278,11 @@ class Layer:
 	var gain:=1.0
 	var face_fps:=15.0
 	var born:=0.0
+	var exec:=false
+	var events:Array=[]
+	var ev_i:=0
+	var held_from:=PackedFloat32Array([-1e9,-1e9])
+	var held_until:=PackedFloat32Array([1e9,1e9])
 
 	func weight()->float:
 		var w:=1.0
@@ -547,6 +638,18 @@ static func exit_plan(style:String)->Array:
 		"led":return [{"clip":"walk_led","seconds":0.0,"move":-1.0,"face":"out"}]
 	return [{"clip":"walk_out","seconds":0.0,"move":-1.0,"face":"out"}]
 
+## A prop held in a fist (side "R" or "L"): drawn every frame where the fist
+## closes (fist_frame). M's props: origin at the grip, +Y along the handle to
+## the head, +Z the blade's edge (a lid: +Y down to the lid).
+static func hold(fig:Node3D,node:Node3D,side:="R")->void:
+	var a=of(fig)
+	if a!=null:a._held[1 if side=="R" else 0]=node
+
+## Let go of what that hand holds: it stays where it is.
+static func release(fig:Node3D,side:="R")->void:
+	var a=of(fig)
+	if a!=null:a._held[1 if side=="R" else 0]=null
+
 static func gesture(fig:Node3D,name:String,amount:=1.0,toward:=1.0)->void:
 	var a=of(fig)
 	if a!=null:a.do_gesture(name,amount,toward)
@@ -598,6 +701,15 @@ var b_brow:=PackedInt32Array([-1,-1])
 var b_sh:=PackedInt32Array([-1,-1])
 var b_thigh:=PackedInt32Array([-1,-1])
 var b_hand:=PackedInt32Array([-1,-1])
+var b_fingers:=PackedInt32Array([-1,-1])
+var b_index:=PackedInt32Array([-1,-1])
+## The props the hands hold (0 the left, 1 the right): each drawn at its fist
+## every frame (fist_frame), between the playing clip's props_from and
+## props_until for that hand; let go, a prop stays where it was.
+var _held:Array=[null,null]
+## An execution's beats as the playing clip passes them (its court_anims.json
+## events: {t, name, part, bone, dir...}): for blood, sound and the split body.
+signal cue(fig:Node3D,event:Dictionary)
 var b_upper:=PackedInt32Array([-1,-1])
 var b_fore:=PackedInt32Array([-1,-1])
 ## A hand held where the clips put it (a staff planted on the floor), whatever
@@ -738,6 +850,7 @@ func _bind(figure:Node3D,skeleton:Skeleton3D)->void:
 		var sd:=".L" if s==0 else ".R"
 		b_eye[s]=skel.find_bone("eye"+sd);b_brow[s]=skel.find_bone("brow"+sd);b_sh[s]=skel.find_bone("shoulder"+sd)
 		b_thigh[s]=skel.find_bone("thigh"+sd);b_hand[s]=skel.find_bone("hand"+sd)
+		b_fingers[s]=skel.find_bone("fingers"+sd);b_index[s]=skel.find_bone("index"+sd)
 		b_upper[s]=skel.find_bone("upper_arm"+sd);b_fore[s]=skel.find_bone("forearm"+sd)
 		if b_eye[s]>=0:_eye_axis[s]=_axis_along(b_eye[s],Vector3.UP)
 		if b_brow[s]>=0:
@@ -928,6 +1041,13 @@ func _layer(clip:String,opts:Dictionary)->Layer:
 	layer.t=float(opts.get("at",0.0))
 	layer.weights=_weights_for(meta,opts)
 	layer.born=layer.t
+	layer.exec=String(meta.get("kind",""))=="exec"
+	layer.events=events(clip)
+	while layer.ev_i<layer.events.size() and float((layer.events[layer.ev_i] as Dictionary).get("t",0.0))<layer.t:layer.ev_i+=1
+	var pf:Dictionary=meta.get("props_from",{});var pu:Dictionary=meta.get("props_until",{})
+	for s in 2:
+		var side:="L" if s==0 else "R"
+		layer.held_from[s]=float(pf.get(side,-1e9));layer.held_until[s]=float(pu.get(side,1e9))
 	return layer
 
 func _weights_for(meta:Dictionary,opts:Dictionary)->PackedFloat32Array:
@@ -937,8 +1057,10 @@ func _weights_for(meta:Dictionary,opts:Dictionary)->PackedFloat32Array:
 	for k:String in (opts.get("groups",{}) as Dictionary):groups[k]=float(opts.groups[k])
 	var stance:=String(fig.get(&"stance"))
 	var seated:=stance in SEATED or (not base_stance.is_empty() and bool(clip_meta("stance_"+("log_low" if base_stance=="log" else base_stance)).get("seated",false)))
-	if seated and not bool(meta.get("stance",false)) and not bool(opts.get("force_legs",false)):groups["legs"]=0.0
-	if PROP_ARMS.has(stance) and not bool(meta.get("stance",false)) and String(meta.get("prop",""))!=stance and not bool(opts.get("drop_prop",false)):
+	# an execution's clip moves the whole body whatever the stance under it
+	var whole:=String(meta.get("kind",""))=="exec"
+	if seated and not whole and not bool(meta.get("stance",false)) and not bool(opts.get("force_legs",false)):groups["legs"]=0.0
+	if PROP_ARMS.has(stance) and not whole and not bool(meta.get("stance",false)) and String(meta.get("prop",""))!=stance and not bool(opts.get("drop_prop",false)):
 		for arm:String in PROP_ARMS[stance]:groups[arm]=0.0
 	for name:String in groups:
 		var idx:PackedInt32Array=_groups.get(name,PackedInt32Array())
@@ -1209,10 +1331,13 @@ func _step(delta:float)->void:
 		else:_sample(_b)
 	if _a!=null:
 		_a.t+=dt*_a.speed
+		_cues()
 		if _a.done():_a=null
 		else:
 			_sample(_a)
 			face_w=_a.weight()
+	# an execution's clip plays as written: no glances, no weight shifts on top
+	if _a!=null and _a.exec and _a.weight()>0.3:walking=true
 	# the staff stays planted: its hand is held where the clips put it
 	_pin_on[1]=1 if String(fig.get(&"stance"))=="staff" and not walking and b_hand[1]>=0 and b_fore[1]>=0 and b_upper[1]>=0 else 0
 	for s in 2:
@@ -1225,11 +1350,44 @@ func _step(delta:float)->void:
 	for s in 2:
 		if _pin_on[s]==1:_pin_hand(s)
 	_face_out(dt,face_w)
+	if _held[0]!=null or _held[1]!=null:_drive_props()
 	if not capture_bones.is_empty():
 		captured.resize(capture_bones.size())
 		for i in capture_bones.size():
 			var b:=capture_bones[i]
 			captured[i]=skel.global_transform*skel.get_bone_global_pose(b).origin if b>=0 else Vector3.ZERO
+
+## Where a closed fist (0 left, 1 right) holds a handle, from the posed bones
+## alone: the origin in the curled fingers, +Y out of the thumb side along the
+## handle, +Z where the knuckles point (the same sum as the Blender clips'
+## court_anims_exec.fist, so a prop lands where the swing aims it).
+func fist_frame(s:int)->Transform3D:
+	if b_hand[s]<0 or b_fingers[s]<0 or b_index[s]<0:return Transform3D.IDENTITY
+	var g:=skel.global_transform
+	var w:=g*skel.get_bone_global_pose(b_hand[s]).origin
+	var p:=g*skel.get_bone_global_pose(b_fingers[s]).origin
+	var i:=g*skel.get_bone_global_pose(b_index[s]).origin
+	var u:=(i-p).normalized()
+	var a:=((p-w)-u*(p-w).dot(u)).normalized()
+	var n:=a.cross(u) if s==0 else u.cross(a)
+	var d:=(i-p).length()
+	return Transform3D(Basis(u.cross(a),u,a),p-a*(0.39*d)+n*(0.65*d))
+
+func _drive_props()->void:
+	for s in 2:
+		var node:Variant=_held[s]
+		if node==null:continue
+		if not is_instance_valid(node):
+			_held[s]=null;continue
+		if _a!=null and (_a.t<_a.held_from[s] or _a.t>_a.held_until[s]):continue
+		(node as Node3D).global_transform=fist_frame(s)
+
+func _cues()->void:
+	var layer:=_a
+	if layer==null or layer.events.is_empty() or layer.loop:return
+	while layer.ev_i<layer.events.size() and float((layer.events[layer.ev_i] as Dictionary).get("t",0.0))<=layer.t:
+		cue.emit(fig,layer.events[layer.ev_i])
+		layer.ev_i+=1
 
 func _view_shown()->bool:
 	if _view_container==null:
