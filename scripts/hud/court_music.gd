@@ -62,6 +62,41 @@ const METERS:={
 	"slavic":"seven","germanic":"four","romance":"six","celtic":"six","hellenic":"seven","finnic":"four",
 	"inuit":"four","athabaskan":"four","algonquian":"four","kartvelian":"seven","amazigh":"six","aboriginal":"four",
 }
+## How each people's music moves within its scale, so that no two sound alike
+## (the families with seven notes most of all): mode (which note of the scale
+## is home: the scale turned to start there), ornament ("plain"; "slide" up
+## into a note from the step below; "grace" a quick neighbour first;
+## "mordent" main-upper-main; "turn" upper-main-lower-main; "trill" on long
+## notes; "shake" a slow wide oscillation, a gamaka) and their own rhythm
+## cells (pulses), where the beat's own would make them sound alike.
+const STYLES:={
+	"bantu":{"mode":4,"ornament":"plain","cells":[[1,1,2],[2,1,1],[1,2,1]]},
+	"turkic":{"mode":0,"ornament":"slide","cells":[[2,1,1,3],[3,2,2]]},
+	"tai_khmer":{"mode":2,"ornament":"grace","cells":[[1,1,1,1],[1,1,2]]},
+	"semitic":{"mode":0,"ornament":"mordent","cells":[[3,1],[1,1,2],[2,2]]},
+	"iranic":{"mode":3,"ornament":"trill","cells":[[3,3],[2,1,3]]},
+	"indo_aryan":{"mode":0,"ornament":"slide","cells":[[4,2,2],[2,2,1,1,2]]},
+	"dravidian":{"mode":5,"ornament":"shake","cells":[[2,1,1],[1,1,1,1]]},
+	"slavic":{"mode":5,"ornament":"turn","cells":[[2,2,3],[1,1,2,3]]},
+	"germanic":{"mode":0,"ornament":"plain","cells":[[2,2],[1,1,2],[3,1]]},
+	"romance":{"mode":1,"ornament":"grace","cells":[[1,1,1],[2,1]]},
+	"hellenic":{"mode":3,"ornament":"mordent","cells":[[2,2,3],[3,2,2]]},
+	"kartvelian":{"mode":4,"ornament":"plain","cells":[[2,2,3],[1,1,1,1,3]]},
+	"amazigh":{"mode":2,"ornament":"trill","cells":[[1,2],[2,1],[3]]},
+	"sinitic":{"mode":0,"ornament":"slide"},"japonic":{"mode":0,"ornament":"grace"},"celtic":{"mode":0,"ornament":"turn"},
+	"mongolic":{"mode":0,"ornament":"trill"},"koreanic":{"mode":0,"ornament":"shake"},"ethiopic":{"mode":0,"ornament":"slide"},
+}
+
+## The scale turned to start on its step `mode` (cents above the new home).
+static func turned(scale:Array,mode:int)->Array:
+	var n:=scale.size()
+	if n==0 or mode%n==0:return scale.duplicate()
+	var home:=float(scale[mode%n])
+	var out:Array=[]
+	for c in scale:out.append(int(posmod(roundi(float(c)-home),1200)))
+	out.sort()
+	return out
+
 ## Pulses a bar, and the drum's strokes in it: [pulse, "d" (dum) or "t" (tek), how hard].
 const BARS:={
 	"four":{"pulses":8,"drum":[[0,"d",1.0],[3,"t",0.5],[4,"d",0.75],[6,"t",0.6],[7,"t",0.35]],"cells":[[2,2],[1,1,2],[3,1],[4],[2,1,1]]},
@@ -94,13 +129,15 @@ static func ensemble(known:Array)->Dictionary:
 static func people(family:String,seed_value:int,known:Array)->Dictionary:
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value^0x6d757369
 	var meter:=String(METERS.get(family,"four"))
-	var spec:={"family":family,"scale":SCALES.get(family,[0,200,400,700,900]),"meter":meter,
+	var style:Dictionary=STYLES.get(family,{})
+	var spec:={"family":family,"scale":turned(SCALES.get(family,[0,200,400,700,900]),int(style.get("mode",0))),"meter":meter,
+		"ornament":String(style.get("ornament","plain")),
 		"bpm":rng.randf_range(72.0,104.0) if meter!="free" else rng.randf_range(56.0,70.0),
 		"key":pow(2.0,float(rng.randi_range(-3,4))/12.0),"seed":seed_value,"ensemble":ensemble(known)}
 	# a handful of motifs: scale steps (over two octaves) and lengths in pulses
 	var motifs:Array=[]
 	var n_scale:int=(spec.scale as Array).size()
-	var cells:Array=BARS[meter].cells
+	var cells:Array=style.get("cells",BARS[meter].cells)
 	for m in 4:
 		var notes:Array=[]
 		var degree:=rng.randi_range(0,n_scale)
@@ -124,7 +161,7 @@ static func pitch(spec:Dictionary,degree:int,lead:String)->float:
 	var scale:Array=spec.scale
 	var n:=scale.size()
 	var cents:=float(scale[posmod(degree,n)])+1200.0*floorf(float(degree)/float(n))
-	var base:float={"flute":466.0,"reed":330.0,"lyre":196.0,"hum":147.0}.get(lead,300.0)
+	var base:float={"flute":370.0,"reed":330.0,"lyre":196.0,"hum":147.0}.get(lead,300.0)
 	return base*float(spec.key)*pow(2.0,cents/1200.0)
 
 # =============================================================================
@@ -158,8 +195,9 @@ static func phrase(spec:Dictionary,k:int)->PackedFloat32Array:
 			if b==bars-1 and i==motif.size()-1:deg=0 if rng.randf()<0.6 else (spec.scale as Array).size()
 			var d:=float(motif[i][1])*pulse
 			if meter=="free":d*=rng.randf_range(0.85,1.25)
-			notes.append([t,d,pitch(spec,deg,lead),rng.randf_range(0.75,1.0)])
+			notes.append([t,d,pitch(spec,deg,lead),rng.randf_range(0.75,1.0),deg])
 			t+=d
+	notes=ornament(notes,spec,lead,rng)
 	var seconds:=t+(1.6 if lead=="lyre" else 0.6)
 	var out:=Synth.buffer(seconds)
 	if not drum_only:Synth.mix_into(out,play(lead,notes,seconds,rng,spec),0,1.0)
@@ -181,6 +219,48 @@ static func phrase(spec:Dictionary,k:int)->PackedFloat32Array:
 	Synth.fade_edges(out,0.002,0.15)
 	var top:=Synth.peak_of(out)
 	if top>0.0001:Synth.scale(out,0.6/top)
+	return out
+
+## The people's ornaments on a line of notes [t, seconds, Hz, how loud,
+## degree]: each note may come with its grace note, mordent, turn, trill,
+## shake or a slide up into it (a sixth field: the pitch it slides from).
+static func ornament(notes:Array,spec:Dictionary,lead:String,rng:RandomNumberGenerator)->Array:
+	var kind:=String(spec.get("ornament","plain"))
+	if kind=="plain" or lead=="hum":return notes
+	if kind=="slide" and lead=="lyre":kind="grace"
+	var out:Array=[]
+	for note in notes:
+		var t:=float(note[0]);var d:=float(note[1]);var f:=float(note[2]);var v:=float(note[3])
+		var deg:=int(note[4]) if note.size()>4 else 0
+		var up:=pitch(spec,deg+1,lead);var down:=pitch(spec,maxi(0,deg-1),lead)
+		match kind:
+			"slide":
+				if d>=0.2 and rng.randf()<0.45:out.append([t,d,f,v,deg,down]);continue
+			"grace":
+				if d>=0.16 and rng.randf()<0.35:
+					out.append([t,0.06,up,v*0.6,deg+1]);out.append([t+0.06,d-0.06,f,v,deg]);continue
+			"mordent":
+				if d>=0.25 and rng.randf()<0.3:
+					out.append([t,0.06,f,v,deg]);out.append([t+0.06,0.06,up,v*0.7,deg+1]);out.append([t+0.12,d-0.12,f,v,deg]);continue
+			"turn":
+				if d>=0.35 and rng.randf()<0.3:
+					var at:=t
+					for g in [[up,deg+1],[f,deg],[down,deg-1]]:
+						out.append([at,0.065,float(g[0]),v*0.7,int(g[1])]);at+=0.065
+					out.append([at,d-(at-t),f,v,deg]);continue
+			"trill":
+				if d>=0.5 and rng.randf()<0.5:
+					var at:=t;var hi:=false
+					while at<t+d*0.6:
+						out.append([at,0.07,up if hi else f,v*(0.75 if hi else 1.0),deg+(1 if hi else 0)]);at+=0.07;hi=not hi
+					out.append([at,d-(at-t),f,v,deg]);continue
+			"shake":
+				if d>=0.3 and rng.randf()<0.6:
+					var at:=t;var hi:=false
+					while at<t+d*0.75:
+						out.append([at,0.12,up if hi else f,v,deg+(1 if hi else 0)]);at+=0.12;hi=not hi
+					out.append([at,d-(at-t),f,v,deg]);continue
+		out.append(note)
 	return out
 
 ## A gift is taken: a quick run up the scale to the top, the drum rolling under it.
@@ -284,10 +364,18 @@ static func play(lead:String,notes:Array,seconds:float,rng:RandomNumberGenerator
 	var f0:=Synth.buffer(seconds)
 	var env:=Synth.buffer(seconds)
 	var last_f:=float(notes[0][2]) if not notes.is_empty() else 440.0
+	var bone:=lead=="flute"
 	for note in notes:
 		var a:=Synth.n_of(float(note[0]));var b:=mini(f0.size(),Synth.n_of(float(note[0])+float(note[1])))
 		var f:=float(note[2]);var vel:=float(note[3])
 		var glide:=Synth.n_of(0.035)
+		if note.size()>5:
+			# slid into from the step below
+			last_f=float(note[5]);glide=Synth.n_of(0.09)
+		if bone:
+			# a bone's holes are not true: each note a little off, scooped up to
+			f*=pow(2.0,rng.randf_range(-18.0,18.0)/1200.0)
+			if note.size()<=5:last_f=minf(last_f,f*pow(2.0,-35.0/1200.0)) if rng.randf()<0.5 else last_f
 		var held:=int(float(b-a)*0.88)
 		for i in range(a,b):
 			var j:=i-a
@@ -298,15 +386,20 @@ static func play(lead:String,notes:Array,seconds:float,rng:RandomNumberGenerator
 			env[i]=e*vel
 		last_f=f
 	if lead=="reed":return _reed(f0,env,rng)
-	var out:=_breath_tone(f0,env,rng,0.35)
-	# a chiff of air at each note's start
-	for note in notes:Synth.burst(out,float(note[0]),0.02,2800.0,1.2,0.12*float(note[3]),rng)
+	# the player's breath is not steady: the pitch wanders a little and the
+	# tone swells and thins with it
+	var wobble:=Synth.wander(seconds,0.16,rng,-1.0,1.0)
+	var puff:=Synth.wander(seconds,0.11,rng,0.82,1.0)
+	for i in f0.size():f0[i]*=1.0+0.008*wobble[i];env[i]*=puff[i]
+	var out:=_breath_tone(f0,env,rng,1.0,true)
+	# a chiff of air at each note's start, low and breathy
+	for note in notes:Synth.burst(out,float(note[0]),0.03,1800.0,0.9,0.2*float(note[3]),rng)
 	return out
 
 ## Breath through a resonance at the note (a flute's jet on its bore): noise
 ## made into a whistle by a narrow band at the pitch, a little pure tone under
 ## it to steady it, and the air itself around it. noisy: how airy (0..1).
-static func _breath_tone(f0:PackedFloat32Array,env:PackedFloat32Array,rng:RandomNumberGenerator,noisy:float)->PackedFloat32Array:
+static func _breath_tone(f0:PackedFloat32Array,env:PackedFloat32Array,rng:RandomNumberGenerator,noisy:float,bone:=false)->PackedFloat32Array:
 	var n:=f0.size()
 	var jet:=Synth.white(float(n)/RATE,rng)
 	for i in n:jet[i]*=env[i]
@@ -316,11 +409,16 @@ static func _breath_tone(f0:PackedFloat32Array,env:PackedFloat32Array,rng:Random
 	var whistle:=jet.duplicate()
 	Synth.bandpass_track(whistle,frames,30.0)
 	Synth.bandpass_track(whistle,frames,30.0)
-	var tone:=Synth.tone(f0,[1.0,0.1,0.04])
+	var tone:=Synth.tone(f0,[1.0,0.05,0.012] if bone else [1.0,0.1,0.04])
 	var air:=jet.duplicate()
-	Synth.bandpass(air,3500.0,0.7)
+	Synth.bandpass(air,2400.0 if bone else 3500.0,0.6)
 	var out:=Synth.buffer(float(n)/RATE)
-	for i in n:out[i]=whistle[i]*10.0+tone[i]*env[i]*0.5+air[i]*0.06*noisy
+	# a bone or wooden flute is mostly breath with the note inside it
+	var w_whistle:=8.0 if bone else 10.0
+	var w_tone:=0.3 if bone else 0.5
+	var w_air:=0.22 if bone else 0.06*noisy
+	for i in n:out[i]=whistle[i]*w_whistle+tone[i]*env[i]*w_tone+air[i]*w_air
+	Synth.lowpass(out,4200.0 if bone else 6000.0)
 	Synth.lowpass(out,6000.0)
 	return out
 

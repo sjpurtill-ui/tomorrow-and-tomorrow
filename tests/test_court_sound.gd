@@ -473,3 +473,34 @@ func test_the_music_drops_under_a_line()->void:
 	var last:Dictionary=(sound.get("played") as Array).back()
 	assert_str(String(last.name)).is_equal("music")
 	assert_float(float(last.db)).is_less_equal(Sound.MUSIC_DB-9.0)
+
+func test_seven_note_peoples_do_not_sound_alike()->void:
+	var seen:={}
+	for family in Music.SCALES:
+		if (Music.SCALES[family] as Array).size()<7:continue
+		var spec:=Music.people(String(family),3,["bone_flutes_drums"])
+		var style:Dictionary=Music.STYLES.get(family,{})
+		var sig:="%s|%s|%s" % [str(spec.scale),String(spec.ornament),str(style.get("cells",[]))]
+		assert_bool(seen.has(sig)).override_failure_message("%s plays like %s" % [family,seen.get(sig,"")]).is_false()
+		seen[sig]=family
+	assert_int(seen.size()).is_greater_equal(10)
+	# where a people ornaments, a plain line gains notes
+	var rng:=RandomNumberGenerator.new();rng.seed=4
+	var plain:=[]
+	for i in 8:plain.append([float(i)*0.8,0.8,440.0,1.0,2+i%3])
+	for family in ["iranic","semitic","slavic","dravidian"]:
+		var spec:=Music.people(family,3,["bone_flutes_drums"])
+		assert_int(Music.ornament(plain,spec,"flute",rng).size()).override_failure_message(family).is_greater(plain.size())
+
+func test_wrath_lands_a_beat_after_the_music_stops()->void:
+	var sound:=_music_court(["bone_flutes_drums"])
+	var now:float=sound.call("_now")
+	sound.set("_music_next",now)
+	sound.call("_music_tick",now)
+	sound.call("on_event","divine",{"action":"terrify","response":"cower"})
+	assert_array(_names(sound)).contains(["music_stop"])
+	assert_array(_names(sound)).not_contains(["god_wrath_boom"])
+	var boom_at:=-1.0
+	for item in (sound.get("_queue") as Array):
+		if String(item.name)=="god_wrath_boom":boom_at=float(item.at)
+	assert_float(boom_at).is_between(now+0.3,now+0.6)
