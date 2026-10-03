@@ -511,7 +511,7 @@ func test_acted_walks_keep_their_gait_until_explicitly_stopped()->void:
 		assert_str(String(a._a.clip)).is_equal(String(pair[0]))
 		assert_float(float(a._a.fade_from)).is_less(0.0)
 		var foot:int=f.skeleton.find_bone("foot.L")
-		var first:=f.skeleton.get_bone_global_pose(foot).origin
+		var first:Vector3=f.skeleton.get_bone_global_pose(foot).origin
 		var reach:=0.0
 		for i in 15:
 			_frame(f,a)
