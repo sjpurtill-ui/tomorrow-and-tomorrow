@@ -472,7 +472,9 @@ static func _tell_noticed(state:Node,g:Dictionary,day:int,chance:float)->void:
 	var town:=home_name(state,String(g.home))
 	var share:=strength_of_gift(float(g.gift))*(COMMAND_SHARE if layer=="Defense" else reach(state,layer))
 	var years:=maxi(1,ADULT_YEARS-age)
-	var text:="%s, a %s of %s in %s, shows a rare gift for %s. Grown, in %s %s, %s. Our carers and learners notice about %d in 100 such children; the rest grow up ordinary." % [String(g.name),"girl" if bool(g.female) else "boy",number_word(age),town,String(GIFT[layer]),number_word(years),"year" if years==1 else "years",hint(layer,share,she,false),roundi(chance*100.0)]
+	# The odds in plain words: of the children born with such a gift, how many
+	# our carers and learners spot (notice_parts), and what more of them would do.
+	var text:="%s, a %s of %s in %s, shows a rare gift for %s. Grown, in %s %s, %s. We were lucky to see it: with the carers and learners we have now, about %d in 100 gifted children are spotted, and the ones we miss grow up ordinary, their gift lost. More carers or learners would spot more." % [String(g.name),"girl" if bool(g.female) else "boy",number_word(age),town,String(GIFT[layer]),number_word(years),"year" if years==1 else "years",hint(layer,share,she,false),roundi(chance*100.0)]
 	_chronicle().record({"key":"genius:%s" % String(g.id),"day":day,"title":"A gifted child in %s" % town,"text":text,"tier":"moment","kind":"birth","domain":String(ART_DOMAIN[layer]),"art":{"domain":String(ART_DOMAIN[layer])},"fold":false})
 
 static func _tell_grown(figures:Node,state:Node,p:Dictionary,day:int)->void:
@@ -569,7 +571,7 @@ static func explain(role:String,result:Dictionary)->void:
 		var per_year:=expected_per_year(births)
 		var born:="A gifted child is born about once in %d years among our %d births a year." % [roundi(1.0/per_year),roundi(births)] if per_year>0.0 else "No child was born to us this past year, so no gifted one either."
 		lines.append(_line("Gifted children noticed","%d in 100" % roundi(float(now.chance)*100.0),
-			"%s With carers giving %d in 100 of full care and %d learners at work, about %d in 100 are noticed; the rest grow up ordinary. Ten more here: %d in 100." % [born,roundi(float(now.care)*100.0),roundi(float(now.learners)),roundi(float(now.chance)*100.0),roundi(float(more.chance)*100.0)],"plain"))
+			"%s With carers giving %d in 100 of full care and %d learners at work, about %d in 100 gifted children are spotted; the ones we miss grow up ordinary, their gift lost. With ten more on this work: %d in 100." % [born,roundi(float(now.care)*100.0),roundi(float(now.learners)),roundi(float(now.chance)*100.0),roundi(float(more.chance)*100.0)],"plain"))
 	result["lines"]=lines
 
 static func _years(n:int)->String:
