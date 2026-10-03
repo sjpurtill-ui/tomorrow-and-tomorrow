@@ -2401,10 +2401,14 @@
     ]
   },
   "drop_spindles": {
-    "path": "res://assets/ui/research/paper/drop_spindles.png",
+    "path": "res://assets/ui/research/subjects/drop_spindles-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.35
+    ],
+    "opening_focus": [
+      0.5,
+      0.35
     ]
   },
   "plain_weaving": {
@@ -6614,35 +6618,35 @@
     ]
   },
   "tooth_drilling": {
-    "path": "res://assets/ui/research/subjects/tooth_drilling-v1.png",
+    "path": "res://assets/ui/research/subjects/tooth_drilling-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "festival_rest_days": {
-    "path": "res://assets/ui/research/subjects/festival_rest_days-v1.png",
+    "path": "res://assets/ui/research/subjects/festival_rest_days-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "lined_well_shafts": {
-    "path": "res://assets/ui/research/subjects/lined_well_shafts-v1.png",
+    "path": "res://assets/ui/research/subjects/lined_well_shafts-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "saddle_quern_grinding": {
-    "path": "res://assets/ui/research/subjects/saddle_quern_grinding-v1.png",
+    "path": "res://assets/ui/research/subjects/saddle_quern_grinding-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "skis_snowshoes": {
-    "path": "res://assets/ui/research/subjects/skis_snowshoes-v1.png",
+    "path": "res://assets/ui/research/subjects/skis_snowshoes-v2.png",
     "focus": [
       0.5,
       0.5
@@ -10148,6 +10152,13 @@
       0.5
     ],
     "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "ancestor_figurines": {
+    "path": "res://assets/ui/research/subjects/ancestor_figurines-v2.png",
+    "focus": [
       0.5,
       0.5
     ]

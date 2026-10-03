@@ -192,5 +192,6 @@
   "crop_calendars": "res://assets/ui/research/subjects/crop_calendars-v2.png",
   "threshing_frames": "res://assets/ui/research/subjects/threshing_frames-v2.png",
   "fiber_retting": "res://assets/ui/research/subjects/fiber_retting-v2.png",
-  "winnowing_practice": "res://assets/ui/research/subjects/winnowing_practice-v2.png"
+  "winnowing_practice": "res://assets/ui/research/subjects/winnowing_practice-v2.png",
+  "drop_spindles": "res://assets/ui/research/subjects/drop_spindles-v2.png"
 }

@@ -1,0 +1,387 @@
+[
+  {
+    "id": "tooth_drilling",
+    "line": "health",
+    "status": "new",
+    "name": "Tooth Drilling and Beeswax Fillings",
+    "one_liner": "Tooth drilling and beeswax fillings",
+    "observation": "Tooth drilling and beeswax fillings.",
+    "key_threshold": false,
+    "target_year": 31,
+    "proposed_year": 31,
+    "band_low": 21,
+    "band_high": 46,
+    "min_year": 21,
+    "research_years": 3,
+    "requires_all": [
+      "bow_drill_drive",
+      "wild_honey_smoking"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "General health",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/tooth_drilling-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "version": 2,
+    "year": 31,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "health: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/health-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established health medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: A seated adult holds one cheek while a caregiver examines a tiny piece of pale beeswax on a bark scrap beside a small raw branch-bow drill resting unused on the ground. No drilling in a mouth, blood, exposed wound, instructions, modern instruments or claimed cure. Celadon/sage ink-watercolor on cream. Calm historical care preparation, simple hide shelter, flint/wood/fiber materials.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-10d8b599-2030-449c-a31d-7e9b1e3aa596.png",
+    "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "ancestor_figurines",
+    "line": "culture",
+    "status": "new",
+    "name": "Clay Figurines of Ancestors",
+    "one_liner": "Clay figurines of ancestors",
+    "observation": "Clay figurines of ancestors.",
+    "key_threshold": false,
+    "target_year": 32,
+    "proposed_year": 32,
+    "band_low": 18,
+    "band_high": 48,
+    "min_year": 18,
+    "research_years": 3,
+    "requires_all": [
+      "clay_shaping"
+    ],
+    "requires_any": [
+      [
+        "plastered_ancestor_skulls",
+        "house_floor_burial"
+      ]
+    ],
+    "precedents": [
+      "pit_firing"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Collective memory",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/ancestor_figurines.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 1,
+        "caption": "Clay figurines of ancestors (Year 32)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    },
+    "version": 2,
+    "year": 32,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "culture: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/culture-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established culture medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: Two adults gently shape two palm-sized crude clay ancestor figurines with simplified rounded heads and pinched bodies beside a hearth; one elder studies the small figures. Tapestry-inspired PAINTING, flat interlocking indigo/rose/gold planes, not cloth. Figurines rough undecorated, no monumental idol, painted portrait, crown, letters or polished sculpture.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-c8569bc8-8f05-4fb0-a868-aa72d9d788e2.png",
+    "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "festival_rest_days",
+    "line": "labor",
+    "status": "new",
+    "name": "Festival Rest Days",
+    "one_liner": "Festival rest days",
+    "observation": "Festival rest days.",
+    "key_threshold": false,
+    "target_year": 32,
+    "proposed_year": 32,
+    "band_low": 15,
+    "band_high": 42,
+    "min_year": 15,
+    "research_years": 2,
+    "requires_all": [
+      "festival_calendar",
+      "rest_break_timing"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [
+      "culture"
+    ],
+    "subcategory": "Workload balance",
+    "signals": [
+      "administration",
+      "training"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/festival_rest_days-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "version": 2,
+    "year": 32,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "labor: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/labor-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established labor medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: Four adults rest together beside a quiet hearth after collective work, sharing roots from a modest bowl while one taps a small hide-covered hand drum. A few laid-down digging sticks signal pause from labor. Ochre/charcoal dry-brush drawing. Hide clothing, small portable camp, no kings, luxury banquet, procession or musical notation.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-ff0fa5c3-b7b6-4c05-9916-877eed588ccd.png",
+    "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "drop_spindles",
+    "line": "production",
+    "status": "catalog",
+    "name": "Spliced Fiber Spun on Whorled Spindles",
+    "one_liner": "Spliced fiber spun on whorled spindles",
+    "observation": "Spliced fiber spun on whorled spindles.",
+    "key_threshold": false,
+    "target_year": 32,
+    "proposed_year": 32,
+    "band_low": 18,
+    "band_high": 42,
+    "min_year": 18,
+    "research_years": 3,
+    "requires_all": [
+      "cordage",
+      "fiber_retting"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "bow_drill_drive"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "replace_first300": true,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/paper/drop_spindles.png",
+        "focus": [
+          0.5,
+          0.65
+        ]
+      }
+    },
+    "prior_effective_binding": {
+      "path": "res://assets/ui/research/paper/drop_spindles.png",
+      "focus": [
+        0.67,
+        0.71
+      ]
+    },
+    "version": 2,
+    "year": 32,
+    "focus": [
+      0.5,
+      0.35
+    ],
+    "binding_style": "production: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/production-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established production medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: ONE seated adult spins spliced flax fibers: upper hand gently draws loose fibers from a small bundle, lower hand guides ONE fine yarn strand to ONE slender wooden drop spindle with a small irregular clay whorl hanging freely below. Copper/ember/soot flat angular palette-knife painting. Exactly2hands, unwoven fibers, spindle/strand complete in center; no spinning wheel, loom, fabric or modern bobbin.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-715bbb11-9e5a-472f-88c6-1ce95a401a12.png",
+    "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "lined_well_shafts",
+    "line": "infrastructure",
+    "status": "new",
+    "name": "Timber- and Wattle-lined Well Shafts",
+    "one_liner": "Timber- and wattle-lined well shafts",
+    "observation": "Timber- and wattle-lined well shafts.",
+    "key_threshold": false,
+    "target_year": 32,
+    "proposed_year": 32,
+    "band_low": 15,
+    "band_high": 42,
+    "min_year": 15,
+    "research_years": 4,
+    "requires_all": [
+      "well_siting"
+    ],
+    "requires_any": [
+      [
+        "wattle_and_daub_walls",
+        "framed_construction"
+      ]
+    ],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Construction",
+    "signals": [
+      "construction",
+      "materials"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/lined_well_shafts-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "version": 2,
+    "year": 32,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "infrastructure: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/infrastructure-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established infrastructure medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: Two adults kneel beside a SMALL shallow circular well shaft whose visible inner wall has closely set rough vertical wooden poles and handwoven willow branches; one fits a branch strip by hand while another holds a raw support pole. Matte mineral-blue/limestone casein. Clear lining inside earth hole, low rim, no masonry tower, pulley, modern rope winch or metal digging tools.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-426fb12e-598c-46a1-bb86-32d08030b146.png",
+    "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "saddle_quern_grinding",
+    "line": "nutrition",
+    "status": "new",
+    "name": "Grinding Grain on Saddle Querns",
+    "one_liner": "Grinding grain on saddle querns",
+    "observation": "Grinding grain on saddle querns.",
+    "key_threshold": false,
+    "target_year": 32,
+    "proposed_year": 32,
+    "band_low": 22,
+    "band_high": 47,
+    "min_year": 22,
+    "research_years": 3,
+    "requires_all": [
+      "winnowing_practice",
+      "food_pounding_mortars"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "ground_stone_axes"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Daily supply",
+    "signals": [
+      "food",
+      "storage"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/saddle_quern_grinding-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "version": 2,
+    "year": 32,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "nutrition: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/nutrition-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established nutrition medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: ONE adult kneels at a low curved saddle-quern stone and pushes a handheld oval rubbing stone with BOTH hands across pale grain, producing a small visible meal pile below; a shallow basket holds whole grain beside it. Olive/gold/cream botanical egg tempera. Complete head,2hands, two grinding stones, grain and meal centered. No rotary mill, millwheel, metal or woven cloth.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-6ac304f7-85b2-42d0-8d7b-10185b53bbbb.png",
+    "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass"
+  },
+  {
+    "id": "skis_snowshoes",
+    "line": "logistics",
+    "status": "new",
+    "name": "Skis and Snowshoes for Winter Travel",
+    "one_liner": "Skis and snowshoes for winter travel (regional)",
+    "observation": "Skis and snowshoes for winter travel (regional).",
+    "key_threshold": false,
+    "target_year": 32,
+    "proposed_year": 32,
+    "band_low": 19,
+    "band_high": 45,
+    "min_year": 19,
+    "research_years": 3,
+    "requires_all": [
+      "cordage",
+      "timber_grading"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "timber_seasoning",
+      "bone_needle_sewing"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Carrying capacity",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/skis_snowshoes-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    },
+    "version": 2,
+    "year": 32,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "binding_style": "logistics: established field painting",
+    "reference": "C:/Users/sjpur/tt-research-art-opening-chronology-23/art_source/research-opening-23/style-reference/logistics-v1.png",
+    "prompt": "Create ONE Tomorrow and Tomorrow discovery painting. Reference supplies ONLY established logistics medium/palette and EXACT EXTRA-WIDE CANVAS WIDTH/aspect; preserve full bleed, no frame, grid, text or 3:2. NEW SUBJECT: Two adults cross a modest snow-covered valley: one uses TWO broad raw wooden skis with simple hide foot loops, the other wears TWO oval bent-branch snowshoes with coarse cord webbing. Sand/slate/indigo travel watercolor. Keep all FOUR complete foot devices inside central action band, simple natural branch walking poles, hide/fur clothes. No modern ski boot, poles with baskets, metal edges or goggles.\nZoom out; complete heads, hands, tools and mechanism ALL within y170..590 on a765px banner, background only outside, for actual3.37:1 card. Chronology gameyears31\u201332: hide/fur garments, stone and wooden tools, cordage, early clay pots and modest shelters. Plain weaving is later: NO woven clothing, loom or metal, no later architecture borrowed from reference.",
+    "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-22f1e445-aaad-4e92-a4bb-1118a65474bc.png",
+    "review": "Accepted full original and actual 3.37:1 GPU card; source, focus, provenance and hidden gating pass"
+  }
+]
