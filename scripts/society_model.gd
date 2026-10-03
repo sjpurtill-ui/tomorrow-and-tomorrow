@@ -1095,7 +1095,11 @@ func knowledge_frontier()->float:
 ## lowers births (temple and scribal households married late or not at all),
 ## whatever the research buys (docs/research/BENCHMARKS_600.md, "Allowed lead").
 const SUSTAINABLE_SPECIALISTS:Array=[[0.0,0.04],[300.0,0.07],[600.0,0.10],[2400.0,0.16],[2800.0,0.25],[3000.0,0.30]]
-const SPECIALIST_UPKEEP:={"labor_demand":1.4,"fatigue":0.6,"cohesion":-1.0,"conception_support":-0.5,"food_storage":-0.6}
+const SPECIALIST_UPKEEP:={"labor_demand":1.4,"fatigue":0.6,"cohesion":-1.0,"conception_support":-0.7,"food_storage":-0.6}
+## Births: -0.7 (balance P2, was -1.0). At -1.0 a people of a third learners
+## sat at the births limit for centuries and dwindled to a fifth of a balanced
+## people by year 1200; at -0.7 it stays about an eighth smaller, and the
+## learning path still pays in people from about its hundredth year.
 ## The watch past what the age can spare costs as learners past theirs do
 ## (balance P2): WATCH_SUSTAINABLE of those who can work keep watch at no extra
 ## cost (pre-modern peoples kept 3 to 7 in 100 under arms, army_levy_law.gd);

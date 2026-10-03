@@ -102,6 +102,12 @@ FORMULA_ANCHORS = [
     ("scripts/watch_military.gd", "var rate:=float(mc._training_rate())"),
     ("scripts/military_campaign.gd", "return clampf(base+float(commander.get(\"command\",0.5))*0.12"),
     ("scripts/military_campaign.gd", "return (0.42+security*0.55)*(1.0+_adoption(\"formation_drill\")*0.35"),
+    # Balance P2: carers ease crowding, the watch's upkeep, daughter towns' land, the fields' yield.
+    ("scripts/early_life_conditions.gd", "var eased:=crowding*(1.0-CARER_CROWDING*carers)"),
+    ("scripts/early_life_conditions.gd", "var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE"),
+    ("scripts/society_model.gd", "watch_excess=maxf(0.0,watch_share()-WATCH_SUSTAINABLE)"),
+    ("scripts/society_model.gd", "return float(SPECIALIST_UPKEEP.get(key,0.0))*(specialist_excess*specialist_burden+watch_excess*WATCH_UPKEEP)"),
+    ("scripts/food_system.gd", "result[\"Dry staples\"]=workers*cultivation_weight*CULTIVATION_YIELD*"),
 ]
 
 

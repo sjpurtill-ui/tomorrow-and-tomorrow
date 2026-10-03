@@ -1,6 +1,6 @@
 extends GdUnitTestSuite
-## Balance P2 (docs/PEOPLE_FIRST.md, "Balance P2"): extra learners cost half
-## the births they did; a watch past 6 in 100 of the workers costs as extra
+## Balance P2 (docs/PEOPLE_FIRST.md, "Balance P2"): extra learners cost 0.7
+## of the births they did; a lead asks a third of the goods it did; a watch past 6 in 100 of the workers costs as extra
 ## learners do; carers ease crowding; daughter towns claim less new land; every
 ## non-learning path learns as the balanced one does; food takes about half the
 ## people's work. The same rules for every people.
@@ -45,8 +45,8 @@ func _watch(share:float)->void:
 
 # --- 1. The learning trap ------------------------------------------------------------
 
-func test_extra_learners_cost_half_the_births_they_did()->void:
-	assert_float(float(Society.SPECIALIST_UPKEEP.conception_support)).is_equal(-0.5)
+func test_extra_learners_cost_fewer_births_than_they_did()->void:
+	assert_float(float(Society.SPECIALIST_UPKEEP.conception_support)).is_equal(-0.7)
 	var model=DiscoverySystem.society_model
 	GameState.population_allocations["Defense"]=0
 	GameState.population_allocations["Knowledge"]=0
@@ -56,8 +56,9 @@ func test_extra_learners_cost_half_the_births_they_did()->void:
 	model._rebuild_effect_totals(DiscoverySystem.catalog)
 	var excess:=float(model.specialist_excess)
 	assert_float(excess).is_greater(0.2)
-	# Half a point of births for every point past the age's share (the limit aside).
-	assert_float(float(model.effect("conception_support"))).is_equal_approx(maxf(-0.5,births-0.5*excess),0.000001)
+	# 0.7 of a point of births for every point past the age's share (the limit aside).
+	var floor_:=float((Society.EFFECT_LIMITS.get("conception_support",Vector2(-0.5,0.8)) as Vector2).x)
+	assert_float(float(model.effect("conception_support"))).is_equal_approx(maxf(floor_,births-0.7*excess),0.000001)
 
 # --- 4. The watch's upkeep ------------------------------------------------------------
 
@@ -97,7 +98,7 @@ func test_the_people_view_tells_the_watchs_upkeep()->void:
 	_watch(0.14)
 	var over:Dictionary=Impact.watch_upkeep_line()
 	assert_str(String(over.label)).is_equal("Too many on watch")
-	var births:=0.5*float(DiscoverySystem.society_model.watch_excess)*100.0
+	var births:=-float(Society.SPECIALIST_UPKEEP.conception_support)*float(DiscoverySystem.society_model.watch_excess)*100.0
 	assert_str(String(over.words)).contains("about %s in 100 fewer births" % Impact._one(births))
 	assert_str(String(over.tone)).is_equal("bad")
 	# It stands in the watch's own lines on the People view.
@@ -164,3 +165,11 @@ func test_food_yields_ask_about_half_the_peoples_work()->void:
 	assert_float(Food.CULTIVATION_YIELD).is_equal_approx(4.52,0.000001)
 	var source:=FileAccess.get_file_as_string("res://scripts/food_system.gd")
 	assert_str(source).contains("workers*cultivation_weight*CULTIVATION_YIELD*")
+
+# --- 2. A lead is dear in goods, not ruinous -------------------------------------------------
+
+func test_a_century_ahead_asks_under_three_times_the_goods()->void:
+	assert_float(R.LEAD_GOODS_YEARS).is_equal(60.0)
+	# Each learner's goods a day, a century ahead against level with the calendar.
+	var dearer:=R.goods_per_learner_day(100.0)/R.goods_per_learner_day(0.0)
+	assert_float(dearer).is_between(2.0,3.0)
