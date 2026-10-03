@@ -53,6 +53,9 @@ const Voice:=preload("res://scripts/hud/court_voice.gd")
 const Foley:=preload("res://scripts/hud/court_foley.gd")
 const Self:=preload("res://scripts/hud/court_sound.gd")
 const Music:=preload("res://scripts/hud/court_music.gd")
+## The executions' comic gore sounds (court_gore_foley.gd): cue them by name
+## like any other, or play an act's whole sound track with play_act().
+const Gore:=preload("res://scripts/hud/court_gore_foley.gd")
 
 ## The musician's state, for a visible musician (the stage's acting): "play"
 ## (a phrase begins), "stop_dead" (cut off by the god), "tentative" (trying
@@ -362,7 +365,8 @@ static func stream_for(name:String,variant:=0)->AudioStreamWAV:
 	_lock.unlock()
 	if held!=null:return held
 	var made:AudioStreamWAV
-	if name.begins_with("talker@"):made=_talker_stream(name.trim_prefix("talker@"),variant)
+	if Gore.has(name):made=Gore.stream(name,variant)
+	elif name.begins_with("talker@"):made=_talker_stream(name.trim_prefix("talker@"),variant)
 	elif name.begins_with("music"):made=_music_stream(name,variant)
 	elif name.contains("@"):made=_murmur_stream(name.get_slice("@",0),name.get_slice("@",1))
 	else:made=Foley.stream(name,variant)
@@ -494,7 +498,7 @@ static func clear_cache()->void:
 ## Returns whether it will sound.
 func cue(name:String,at_body:Node3D=null,opts:Dictionary={})->bool:
 	if name.is_empty() or not can_play():return false
-	if not Foley.CUES.has(name) and name!="mutter" and not name.begins_with("music"):return false
+	if not Foley.CUES.has(name) and not Gore.has(name) and name!="mutter" and not name.begins_with("music"):return false
 	if float(opts.get("delay",0.0))>0.0:
 		_queue.append({"at":_now()+float(opts.delay),"name":name,"body":at_body,"opts":opts.duplicate()})
 		_ensure_timer()
@@ -506,10 +510,11 @@ func cue(name:String,at_body:Node3D=null,opts:Dictionary={})->bool:
 		return _play(made,at_body,MUSIC_DB+float(opts.get("db",0.0)),1.0,name.get_slice("@",0),int(opts.get("pan",_music_pan())))!=null
 	var real:=name
 	var variant:=int(opts.get("variant",-1))
-	var n:=Foley.variants(real)
+	var gore:=Gore.has(real)
+	var n:=Gore.variants(real) if gore else Foley.variants(real)
 	if variant<0:variant=_rng.randi_range(0,n-1)
 	var s:=stream_for(real,variant)
-	var db:=Foley.level(real)+float(opts.get("db",0.0))
+	var db:=(Gore.level(real) if gore else Foley.level(real))+float(opts.get("db",0.0))
 	var pitch:=float(opts.get("pitch",_rng.randf_range(0.95,1.05)))
 	return _play(s,at_body,db,pitch,name,int(opts.get("pan",NO_PAN)))!=null
 
@@ -571,9 +576,65 @@ func steps_at_pace(body:Node3D,pace:String,db:=0.0)->void:
 	var p:Array=PACES.get(pace,PACES.walk)
 	footsteps(body,float(p[0]),float(p[1]),false,String(p[2]),float(p[3])+db)
 
+## An execution's sound track (court_gore_foley.gd ACTS: "club_home_run",
+## "three_swing_beheading", "dog_dinner", ...), played from now: the
+## musician's roll first, then each sound at its time, at the body that makes
+## it (roles: {executioner, victim, cook, dog, front_row, flatterer, room:
+## Node3D or null}). The act's own moment (t = 0: the blow) falls `lead`
+## seconds from now; returns that lead, so the scene can line its picture up
+## with it. opts: gore ("full", "mild": the same sounds over the cutaway;
+## "off": nothing, the sober exit is the stage's own), db (added to all),
+## dread (0..1, else the fact sheet's): at 0.7 and over the hall is too
+## frightened to gasp, groan, laugh or clap; it swallows and its knees knock.
+## act may also be the act's number (1..25, EXECUTIONS.md).
+## The roll and the punchline are what the people can play: hands on a log
+## before any drum, a drum, and small cymbals only in a temple age.
+func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
+	if act is int and int(act)>0 and int(act)<Gore.ACT_NUMBERS.size():act=Gore.ACT_NUMBERS[int(act)]
+	var track:Array=Gore.ACTS.get(String(act),[])
+	if track.is_empty() or String(opts.get("gore","full"))=="off" or not can_play():return 0.0
+	var first:=0.0
+	for item:Dictionary in track:first=minf(first,float(item.t))
+	var lead:=-first
+	var e:=Music.ensemble(_known())
+	var roll:="log_roll" if String(e.drum)=="" else "drum_roll"
+	var roll_v:=1 if String(e.drum)=="clay" else 0
+	var punch:="punch_cymbal" if bool(e.cymbal) else ("punch_log" if String(e.drum)=="" else "punch_drum")
+	var now:=_now()
+	var dread:=float(opts.get("dread",facts.get("dread",facts.get("people_dread",0.0))))
+	var frightened:=dread>=0.7
+	var stores:=float(facts.get("stores_days",facts.get("food_days",99.0)))
+	var hungry:=bool(facts.get("hungry",false)) and stores<16.0 or stores<7.0
+	var punch_at:=0.0
+	for item:Dictionary in track:
+		var cond:=String(item.get("if",""))
+		if (cond=="hungry" and not hungry) or (cond=="not_hungry" and hungry):continue
+		var cue_name:=String(item.cue)
+		if cue_name=="punch":punch_at=float(item.t)
+		if frightened and cue_name in Gore.ROOM_NOISE:continue
+		var v:=int(item.get("variant",-1))
+		if cue_name=="roll":cue_name=roll;v=roll_v
+		elif cue_name=="punch":cue_name=punch;v=roll_v if punch=="punch_drum" else 0
+		var who:=String(item.get("who","room"))
+		var body:Variant=roles.get(who,null)
+		var o:={"db":float(item.get("db",0.0))+float(opts.get("db",0.0)),"pitch":1.0}
+		if v>=0:o["variant"]=v
+		if who=="musician":o["pan"]=_music_pan()
+		_queue.append({"at":now+lead+float(item.t),"name":cue_name,"body":body as Node3D if body is Node3D else null,"opts":o})
+	if frightened:
+		# a terrified hall: someone swallows, knees knock, nobody laughs
+		_queue.append({"at":now+lead+punch_at+0.5,"name":"swallow","body":roles.get("front_row",null) as Node3D if roles.get("front_row") is Node3D else null,"opts":{"variant":1}})
+		_queue.append({"at":now+lead+0.6,"name":"knees_knock","body":null,"opts":{"variant":0}})
+	# the musician puts down their tune for the act
+	if is_instance_valid(_music) and _music.playing:
+		var tw:=create_tween();tw.tween_property(_music,"volume_db",-60.0,0.4);tw.tween_callback(_music.stop)
+	_music_next=maxf(_music_next,now+lead+12.0)
+	_ensure_timer()
+	return lead
+
 ## Whether a sound name (the director's or a cue's) is one this court can make.
 static func knows(name:String)->bool:
-	return SOUND_NAMES.has(name) or Foley.CUES.has(name) or BABBLES.has(name) or name in ["footsteps","murmur_cut","snort_wake","mutter"]
+	return SOUND_NAMES.has(name) or Foley.CUES.has(name) or Gore.has(name) or BABBLES.has(name) or name in ["footsteps","murmur_cut","snort_wake","mutter"]
 
 ## One of the director's sounds by name ({name, gain, pace?, people?,
 ## words?, dur?, text?}) at a body. Returns whether it will sound.
@@ -1389,7 +1450,7 @@ static func render_scene(items:Array,seconds:float)->PackedFloat32Array:
 		if item.has("cue"):
 			var name:=String(item.cue)
 			samples=Synth.samples_of(stream_for(name,int(item.get("variant",0))))
-			gain*=db_to_linear(Foley.level(name))
+			gain*=db_to_linear(Gore.level(name) if Gore.has(name) else Foley.level(name))
 		elif item.has("bed") or item.has("god"):
 			var name:=String(item.get("bed",item.get("god","")))
 			var src:=stream_for(name,0)
