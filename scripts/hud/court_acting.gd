@@ -1048,8 +1048,20 @@ func _set_base(stance_id:String,opts:Dictionary)->void:
 func owns(clip:String)->bool:
 	return has_clip(clip) and library(variant).has(clip)
 
-func let_go(blend:=-1.0)->void:
+func _is_walk(layer:Layer)->bool:
+	return layer!=null and String(clip_meta(layer.clip).get("kind",""))=="walk"
+
+func _walking()->bool:
+	return String(fig.get(&"clip")).begins_with("walk") or _is_walk(_a)
+
+func _layer_rate(layer:Layer)->float:
+	if not _is_walk(layer):return 1.0
+	var rate:Variant=fig.get(&"locomotion_rate")
+	return maxf(float(rate),0.0) if rate!=null else 1.0
+
+func let_go(blend:=-1.0,keep_walks:=false)->void:
 	for layer in [_a,_b]:
+		if keep_walks and _is_walk(layer):continue
 		if layer!=null and (layer as Layer).fade_from<0.0:
 			(layer as Layer).fade_from=(layer as Layer).t
 			(layer as Layer).fade_len=blend if blend>0.0 else (layer as Layer).blend_out
@@ -1187,9 +1199,11 @@ func _step(delta:float)->void:
 	_acc.fill(Vector3.ZERO)
 	_touched.clear()
 	_hips_move=Vector3.ZERO
-	var walking:=String(fig.get(&"clip")).begins_with("walk") or (_a!=null and String(clip_meta(_a.clip).get("kind",""))=="walk")
-	if walking and String(fig.get(&"clip")).begins_with("walk"):
-		let_go(0.3)
+	var walking:=_walking()
+	if String(fig.get(&"clip")).begins_with("walk"):
+		# Walking releases a stale reaction, but an authored walk over the
+		# fallback gait owns its legs until the stage changes or stops it.
+		let_go(0.3,true)
 	_moods(dt)
 	# the stance of their own under it all, then the reactions, the fading one first
 	if _base_out!=null:
@@ -1204,11 +1218,11 @@ func _step(delta:float)->void:
 			_sample(_base_hi)
 	var face_w:=0.0
 	if _b!=null:
-		_b.t+=dt*_b.speed
+		_b.t+=dt*_b.speed*_layer_rate(_b)
 		if _b.done():_b=null
 		else:_sample(_b)
 	if _a!=null:
-		_a.t+=dt*_a.speed
+		_a.t+=dt*_a.speed*_layer_rate(_a)
 		if _a.done():_a=null
 		else:
 			_sample(_a)
@@ -1486,7 +1500,9 @@ func _speech(dt:float)->void:
 	_add(b_head,0.0,2.0*sin(_speech_t*1.3+_seed*6.0),1.5*sin(_speech_t*0.9))
 	while _gest_i<_gest_t.size() and _speech_t>=_gest_t[_gest_i]:
 		var held:=_a!=null and _a.hold
-		if not held:act(_gest_clip[_gest_i])
+		# A speech gesture must not take over the legs during an entrance or
+		# an authored exit. The voice and face continue as they walk.
+		if not held and not _walking():act(_gest_clip[_gest_i])
 		_gest_i+=1
 
 func _has_visemes()->bool:

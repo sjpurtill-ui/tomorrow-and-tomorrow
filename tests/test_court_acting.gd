@@ -499,6 +499,75 @@ func test_exits_are_plans_of_clips_the_library_has()->void:
 		assert_float(float(Acting.clip_meta(clip).get("speed_mps",0.0))).is_greater(0.3)
 
 
+func test_acted_walks_keep_their_gait_until_explicitly_stopped()->void:
+	for pair:Array in [["storm_walk","walk_in"],["walk_led","walk_out"],["back_out","stand"]]:
+		var f:=_figure()
+		f.play(String(pair[1]),0.0,0.0)
+		Acting.play(f,String(pair[0]),{"loop":true})
+		var a=Acting.of(f)
+		_run(f,0.8)
+		assert_object(a._a).override_failure_message("%s stopped during its walk" % pair[0]).is_not_null()
+		if a._a==null:continue
+		assert_str(String(a._a.clip)).is_equal(String(pair[0]))
+		assert_float(float(a._a.fade_from)).is_less(0.0)
+		var foot:int=f.skeleton.find_bone("foot.L")
+		var first:=f.skeleton.get_bone_global_pose(foot).origin
+		var reach:=0.0
+		for i in 15:
+			_frame(f,a)
+			reach=maxf(reach,first.distance_to(f.skeleton.get_bone_global_pose(foot).origin))
+		assert_float(reach).override_failure_message("%s has no moving foot" % pair[0]).is_greater(0.02)
+		Acting.stop(f,0.2)
+		_run(f,0.4)
+		assert_object(a._a).is_null()
+
+
+func test_walking_still_releases_a_previous_held_reaction()->void:
+	var f:=_figure()
+	Acting.play(f,"kneel",{"hold":true})
+	_run(f,0.5)
+	f.play("walk_in",0.0,0.0)
+	_run(f,0.5)
+	assert_object(Acting.of(f)._a).is_null()
+
+
+func test_speech_keeps_the_walk_and_face_instead_of_replacing_the_gait()->void:
+	for acted in [false,true]:
+		var f:=_figure()
+		f.play("walk_in",0.0,0.0)
+		if acted:Acting.play(f,"storm_walk",{"loop":true})
+		Acting.speak(f,"Bring everyone through the doorway!",3.0)
+		var a=Acting.of(f)
+		assert_int(a._gest_t.size()).is_greater(0)
+		_run(f,1.0)
+		assert_bool(a.speaking).is_true()
+		assert_int(a._gest_i).is_greater(0)
+		if acted:
+			assert_object(a._a).is_not_null()
+			if a._a!=null:assert_str(String(a._a.clip)).is_equal("storm_walk")
+		else:assert_object(a._a).is_null()
+
+
+func test_walk_layers_follow_the_figure_pace_without_retiming_reactions()->void:
+	var f:=_figure()
+	f.play("walk_in",0.0,0.0)
+	f.set(&"locomotion_rate",0.5)
+	Acting.play(f,"storm_walk",{"loop":true,"speed":1.2})
+	var a=Acting.of(f)
+	_run(f,0.5)
+	assert_float(float(a._a.t)).is_equal_approx(0.3,0.01)
+	# The outgoing gait follows the same rate during its crossfade.
+	Acting.play(f,"walk_led",{"loop":true,"blend":1.0})
+	_run(f,0.2)
+	assert_float(float(a._a.t)).is_equal_approx(0.1,0.01)
+	assert_float(float(a._b.t)).is_equal_approx(0.42,0.01)
+	f.play("stand",0.0,0.0)
+	f.set(&"locomotion_rate",0.5)
+	Acting.play(f,"gasp")
+	_run(f,0.2)
+	assert_float(float(a._a.t)).is_equal_approx(0.2,0.01)
+
+
 func test_the_stage_calls_reach_the_acting()->void:
 	## court_stage.gd _beat: acting.play(body, act, args) and acting.set_mood(body, vector).
 	var service=Acting.service()
