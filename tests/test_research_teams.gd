@@ -27,6 +27,8 @@ func before_test()->void:
 	GameState.active_investigations.clear();GameState.research_targets.clear();GameState.discovery_progress.clear()
 	# Nobody leaves learning for sickroom duty mid-test (civilian_care.gd).
 	preload("res://scripts/civilian_care.gd").data().staff_share=0.0
+	# The learners have their goods (Research600.goods_cover): pacing in full.
+	GameState.resource_stockpiles[R.GOODS_KEY]=500.0
 	DiscoverySystem.take_research_steps()
 	DiscoverySystem.refresh_investigations()
 
@@ -50,14 +52,17 @@ func _prove(channel:String)->String:
 
 # --- How many teams ---------------------------------------------------------------
 
-func test_team_count_grows_four_teams_for_every_tenfold_researchers()->void:
+func test_team_count_grows_four_teams_for_every_tenfold_researchers_without_end()->void:
 	assert_int(R.team_count(0.0)).is_equal(1)
 	assert_int(R.team_count(1.0)).is_equal(2)
 	assert_int(R.team_count(2.5)).is_equal(4)
 	assert_int(R.team_count(25.0)).is_equal(8)
 	assert_int(R.team_count(250.0)).is_equal(12)
 	assert_int(R.team_count(2500.0)).is_equal(16)
-	assert_int(R.team_count(1.0e12)).is_equal(R.TEAMS_MAX)
+	# No cap on the questions worked at once.
+	assert_int(R.team_count(250000.0)).is_equal(24)
+	assert_int(R.team_count(2.5e6)).is_equal(28)
+	assert_int(R.team_count(1.0e12)).is_greater(24)
 	# The people field that many teams, each doing an equal part of the whole work.
 	var teams:=DiscoverySystem.research_teams()
 	assert_int(int(teams.count)).is_equal(R.team_count(float(teams.on_lines)))
@@ -547,6 +552,8 @@ func test_a_founding_band_sees_steps_within_a_year_and_proofs_soon_after()->void
 	GameState.synchronize_population_allocations()
 	DiscoverySystem.reset_for_new_world();DiscoverySystem.initialize()
 	preload("res://scripts/civilian_care.gd").data().staff_share=0.0
+	# A settled band's makers keep its learners in goods.
+	GameState.resource_stockpiles[R.GOODS_KEY]=500.0
 	DiscoverySystem.take_research_steps()
 	var first_step:=-1
 	var first_proof:=-1

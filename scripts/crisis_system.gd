@@ -73,6 +73,8 @@ const ERAS:=preload("res://scripts/technology_eras.gd")
 const HEARTH:=preload("res://scripts/hearth_count.gd")
 const SPECIFICS:=preload("res://scripts/chronicle_specifics.gd")
 const HARDSHIPS:=preload("res://scripts/hardship_log.gd")
+## The lean buffer and the rulers' store gates (food_care.gd).
+const FoodCare:=preload("res://scripts/food_care.gd")
 const TURNING_PATH:="res://scripts/turning_points.gd"
 
 const KEY:="crises"
@@ -649,7 +651,9 @@ static func _maybe_onset(day:int,x:Dictionary,h:Dictionary)->void:
 				if not opened.is_empty(): opened["echo_count"]=int(echo.get("count",1))
 				return
 	# Hunger: the hazard, or hunger already at the door.
-	var hungry_now:=(float(x.shortage_days)>=10.0 and float(x.intake)<0.94) or (int(x.first_shortage)>0 and int(x.first_shortage)<=(75 if unlocked("hunger:early") else 45) and float(x.food_days)<(70.0 if unlocked("hunger:early") else 40.0))
+	# A shortage forecast near while the stores are under the lean buffer (or,
+	# once learned early, under full stores) is hunger at the door.
+	var hungry_now:=(float(x.shortage_days)>=10.0 and float(x.intake)<0.94) or (int(x.first_shortage)>0 and int(x.first_shortage)<=(75 if unlocked("hunger:early") else 45) and float(x.food_days)<(FoodCare.store_gate(70.0) if unlocked("hunger:early") else FoodCare.LEAN_DAYS))
 	if _active_of("hunger").is_empty() and _ready_again("hunger",day,300) and (hungry_now or _roll("hunger:%d" % day,float(h.hunger))):
 		_open_hunger(day,x,float(h.hunger_shortfall)); return
 	# Drought and the dim summer: the real weather.
@@ -727,7 +731,7 @@ static func _signs(x:Dictionary,type:String)->Array[String]:
 			if float(x.health)<0.55: out.append("people were already weak")
 			if not _active_of("hunger").is_empty(): out.append("hunger has thinned them")
 		"hunger":
-			if float(x.food_days)<45.0: out.append("the stores are thin")
+			if float(x.food_days)<FoodCare.LEAN_DAYS: out.append("the stores are thin")
 			if float(x.weather_season)<0.95: out.append("the season's gathering came in short")
 			if float(x.pressure)>0.05: out.append("the land nearby feeds fewer than we are")
 			if float(x.divers)<0.3: out.append("we live on too few foods")
@@ -1192,7 +1196,7 @@ static func _mid(c:Dictionary,day:int,x:Dictionary)->void:
 			needs=left>=1.5 or bool(c.get("virgin",false))
 			if needs: text+=" It has reached the children's fire."
 		"hunger":
-			var still:=float(x.food_days)<25.0 or float(x.intake)<0.95
+			var still:=float(x.food_days)<FoodCare.store_gate(25.0) or float(x.intake)<0.95
 			text="%s: the stores stand at about %d days.%s" % [_cap(String(c.name)),roundi(float(x.food_days)),dead_words]
 			needs=still
 			if needs: text+=" They will not reach the thaw."

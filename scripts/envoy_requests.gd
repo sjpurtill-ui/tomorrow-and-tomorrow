@@ -486,7 +486,7 @@ static func candidate(situation_type:String,civ_id:String,occasion:Dictionary,rn
 			var lineage:Array=(r.call("character",civ_id) as Dictionary).get("lineage",[]) if r!=null else []
 			if not lineage.is_empty() and day-int((lineage[0] as Dictionary).get("died",-99999))<=540: what="the first year of %s's rule" % who
 			elif float(civ.get("health",0.7))<0.6: what="their sick"
-			elif float(civ.get("food_days",30))>45.0: what="their planting" if CV.era_tags(civ_id).has("farming") else "their hunt"
+			elif float(civ.get("food_days",30))>preload("res://scripts/food_care.gd").store_gate(45.0): what="their planting" if CV.era_tags(civ_id).has("farming") else "their hunt"
 			else: what="the child born to %s's house" % who
 			var offer2:=_surplus(civ_id,[],20.0)
 			if offer2.is_empty(): return {}

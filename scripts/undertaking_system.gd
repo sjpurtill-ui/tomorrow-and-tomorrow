@@ -382,7 +382,7 @@ static func pitch_trigger(state:Node,day:int,seen:Dictionary)->Dictionary:
 		var hunger:=0
 		for entry:Dictionary in state.demographic_ledger:
 			if String(entry.get("kind",""))=="death" and String(entry.get("cause",""))=="Hunger" and day-int(entry.get("day",-99999))<=730:hunger+=int(entry.get("count",0))
-		if hunger>=maxi(2,roundi(float(state.population_exact)*.005)) and float(state.simulation_metrics.get("food_days",0))>60:
+		if hunger>=maxi(2,roundi(float(state.population_exact)*.005)) and float(state.simulation_metrics.get("food_days",0))>preload("res://scripts/food_care.gd").store_gate(60):
 			return {"kind":"famine","text":"We came through a famine that took %d" % hunger}
 	var founded:=int(state.settlement_founded_day)
 	if fresh.call("anniversary") and founded>=0 and day-founded>=365*25 and posmod(day-founded,365*25)<30:
@@ -395,7 +395,7 @@ static func pitch_trigger(state:Node,day:int,seen:Dictionary)->Dictionary:
 			return {"kind":"envy","text":"News of %s built by %s" % [String(item.get("title","a great work")),String(item.get("civ_name","another people"))]}
 	var stock:=0.0
 	for material:String in ["Stone","Timber","Clay"]:stock+=float(state.resource_stockpiles.get(material,0))
-	if fresh.call("plenty") and float(state.simulation_metrics.get("food_days",0))>150 and stock>=float(state.population_exact)*3:
+	if fresh.call("plenty") and float(state.simulation_metrics.get("food_days",0))>preload("res://scripts/food_care.gd").store_gate(150) and stock>=float(state.population_exact)*3:
 		return {"kind":"plenty","text":"Our stores overflow"}
 	return {}
 
