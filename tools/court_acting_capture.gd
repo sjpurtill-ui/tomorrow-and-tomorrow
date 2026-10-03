@@ -50,6 +50,9 @@ func _ready()->void:
 	if mode=="room":await _room()
 	elif mode=="room2":await _room2()
 	elif mode=="r2":await _sheets_r2()
+	elif mode=="face":await _face_close()
+	elif mode=="mouth":await _mouth_test()
+	elif mode=="r3":await _sheets_r3()
 	else:await _sheets()
 	print("COURT_ACTING_CAPTURE DONE ",out_dir)
 	get_tree().quit(0)
@@ -316,6 +319,99 @@ func _room2()->void:
 		await RenderingServer.frame_post_draw
 		get_viewport().get_texture().get_image().save_png(out_dir+"room2/frame_%04d.png" % k)
 	print("COURT_ACTING_CAPTURE room2 frames ",frames)
+
+## A face up close (as a push-in shows it): the words in the mouth, a gasp,
+## a laugh, a side-eye. Frames to face/frame_####.png at 30 a second; the
+## line's syllable times are printed to check the mouth against them.
+func _face_close()->void:
+	_clear()
+	DirAccess.make_dir_recursive_absolute(out_dir+"face")
+	var f:=_person(1,"stand")
+	f.position=Vector3.ZERO;f.rotation_degrees.y=-12.0
+	var a=Acting.of(f)
+	Acting.set_ambient(f,0.0)
+	var head:int=f.skeleton.find_bone("head")
+	_step_all(0.4)
+	var h:Vector3=f.skeleton.global_transform*f.skeleton.get_bone_global_pose(head).origin
+	camera.fov=18.0
+	camera.position=h+Vector3(0.15,0.02,1.25);camera.look_at(h+Vector3(0.0,0.0,0.0),Vector3.UP)
+	var line:="Two men and a boy at the ford, and you come to me only now?"
+	var done:={}
+	var frames:=int(9.0/DT)
+	for k in frames:
+		var t:=float(k)*DT
+		if t>=0.4 and not done.has("speak"):
+			done.speak=true
+			Acting.speak(f,line,3.4,{"gestures":false})
+			print("COURT_ACTING_CAPTURE syllables ",a._syl_t)
+		if t>=4.2 and not done.has("gasp"):
+			done.gasp=true;Acting.play(f,"gasp")
+		if t>=6.0 and not done.has("laugh"):
+			done.laugh=true;Acting.play(f,"laugh_polite")
+		if t>=7.6 and not done.has("eye"):
+			done.eye=true;Acting.play(f,"side_eye_l")
+		_frame(f)
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(out_dir+"face/frame_%04d.png" % k)
+	print("COURT_ACTING_CAPTURE face frames ",frames)
+
+func _sheets_r3()->void:
+	camera.fov=26.0
+	_frame_row(5.0)
+	await _row("The rest of the director's words (1)",[
+		{"clip":"cover_eyes_l","t":0.9,"label":"covers a child's eyes","who":5},{"clip":"make_room_r","t":0.8,"label":"makes room","who":1},
+		{"clip":"grab_l","t":0.6,"label":"grabs","who":0},{"clip":"count_fingers","t":1.0,"label":"counts it off","who":2},
+		{"clip":"point_r","t":0.7,"label":"points","who":6}],"r3_words_1.png",1.0)
+	await _row("(2)",[
+		{"clip":"point_up","t":0.9,"label":"points up at the god","who":4},{"clip":"raise_finger","t":0.6,"label":"ah, but","who":2},
+		{"clip":"clap_soft","t":0.58,"label":"claps, softly","who":3},{"clip":"shoo_r","t":0.4,"label":"shoos the dog","who":5},
+		{"clip":"tug_sleeve_l","t":0.45,"label":"tugs a sleeve","who":1}],"r3_words_2.png",1.0)
+	await _row("(3)",[
+		{"clip":"over_thank","t":0.4,"label":"thanks, and thanks","who":0},{"clip":"clear_throat","t":0.32,"label":"clears the throat","who":2},
+		{"clip":"smooth_clothes","t":0.5,"label":"smooths the clothes","who":6},{"clip":"sit_floor","t":1.6,"label":"sits down","who":4},
+		{"clip":"wave","t":0.5,"label":"waves at the god","who":3}],"r3_words_3.png",1.0)
+	await _row("(4)",[
+		{"clip":"mortified","t":0.6,"label":"mortified","who":1},{"clip":"count_heads","t":1.1,"label":"counts heads","who":2},
+		{"clip":"thumb_measure","t":0.8,"label":"measures the hall","who":4},{"clip":"stroke_chin","t":0.8,"label":"appraises","who":6},
+		{"clip":"fiddle","t":0.9,"label":"works a knot","who":5}],"r3_words_4.png",1.0)
+	await _row("(5)",[
+		{"clip":"arrange_floor","t":1.0,"label":"lines up the bowls","who":3},{"clip":"sniff_disdain","t":1.45,"label":"sniffs","who":6},
+		{"clip":"brush_sleeve","t":0.42,"label":"brushes the sleeve","who":0},{"clip":"rub_hands_greedy","t":0.5,"label":"rubs the hands","who":2},
+		{"clip":"scribble","t":0.9,"label":"scribbles","who":4}],"r3_words_5.png",1.0)
+	await _row("Readable now at court distance",[
+		{"clip":"rub_belly","t":0.9,"label":"stomach rumbles","who":4},{"clip":"stretch","t":1.2,"label":"stretch","who":0},
+		{"clip":"fan_self","t":0.6,"label":"fans","who":1},{"clip":"wring_hands","t":0.7,"label":"wrings the hands","who":5},
+		{"stance":"cord","t":1.6,"label":"cord","who":3}],"r3_readable.png",1.0)
+	_frame_row(4.6)
+	await _row("The catch under the arms; warming at the fire",[
+		{"clip":"faint_caught_l","t":0.65,"label":"0.65 s","who":1,"x":-1.6,"yaw":0.0},{"clip":"half_catch_r","t":0.65,"label":"","who":0,"x":-0.85,"yaw":0.0},
+		{"clip":"faint_caught_l","t":1.1,"label":"1.1 s","who":1,"x":0.25,"yaw":0.0},{"clip":"half_catch_r","t":1.1,"label":"","who":0,"x":1.0,"yaw":0.0},
+		{"stance":"fire","t":2.0,"label":"by the fire","who":4,"x":2.0,"yaw":-20.0}],"r3_catch_fire.png")
+
+## The mouth's morphs by hand (no acting): rest, jaw_open, v_aa, v_oo, smile.
+func _mouth_test()->void:
+	_clear()
+	var f:=_person(1,"stand")
+	f.position=Vector3.ZERO;f.rotation_degrees.y=0.0
+	_step_all(0.3)
+	var a=Acting.of(f);a.active=false
+	var head:int=f.skeleton.find_bone("head")
+	var h:Vector3=f.skeleton.global_transform*f.skeleton.get_bone_global_pose(head).origin
+	camera.fov=12.0
+	camera.position=h+Vector3(0.0,-0.02,1.2);camera.look_at(h+Vector3(0.0,-0.03,0.0),Vector3.UP)
+	for state in ["rest","jaw_open","v_aa","v_oo","smile"]:
+		for m in f._meshes:
+			if not m.visible or m.mesh==null:continue
+			for i in m.get_blend_shape_count():
+				var nm:String=String(m.mesh.get_blend_shape_name(i))
+				if nm in ["jaw_open","v_aa","v_oo","smile","v_ee","v_mm","v_fv"]:m.set_blend_shape_value(i,1.0 if nm==state else 0.0)
+		var listed:=PackedStringArray()
+		for m in f._meshes:
+			if m.visible and m.mesh!=null:
+				var idx:int=m.find_blend_shape_by_name(StringName(state))
+				listed.append("%s:%s=%s" % [m.name,idx,m.get_blend_shape_value(idx) if idx>=0 else -1])
+		print("COURT_ACTING_CAPTURE mouth ",state," ",listed)
+		await _shot("mouth_%s.png" % state)
 
 ## People at rest for a while: where are they looking?
 func _idle_sheet()->void:

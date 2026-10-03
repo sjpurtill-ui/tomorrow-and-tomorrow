@@ -218,7 +218,9 @@ def hand_rest(s):
     """The hand's rest axes: along the fingers, and the way the palm faces."""
     f = FRAME
     along, front, out = f.hand_frame(s)
-    palm = -out
+    # cf_body's hand_frame calls `out` "out of the back of the hand", but the
+    # palm (the side the fingers curl to) faces along it: palm = +out
+    palm = out
     return along.normalized(), palm.normalized()
 
 

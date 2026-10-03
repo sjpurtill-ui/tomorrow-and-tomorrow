@@ -536,6 +536,29 @@ func test_the_face_runs_on_the_figures_expression_morphs()->void:
 	assert_float(most).override_failure_message("no viseme moved").is_greater(0.5)
 
 
+func test_the_painted_mouth_and_the_skin_under_it_move_together()->void:
+	## A viseme or the jaw is on the skin, the painted mouth and a beard: all of
+	## them move (the painted mouth once stayed shut over a dropping jaw).
+	var f:Node3D=auto_free(Figure3D.new())
+	add_child(f)
+	f.setup({"variant":"male_adult","outfit":"tunic","hair":"cropped","beard":"beard_full","stance":"stand"})
+	f.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+	var a=Acting.of(f)
+	Acting.speak(f,"Bring me the oxen, all of them, and the carts.",2.0,{"gestures":false})
+	var peak:={}
+	for i in 50:
+		_frame(f,a)
+		for m in f._meshes:
+			if not m.visible or m.mesh==null:continue
+			for key in ["v_aa","v_ee","v_oo","jaw_open"]:
+				var idx:int=m.find_blend_shape_by_name(StringName(key))
+				if idx<0:continue
+				peak[String(m.name)]=maxf(float(peak.get(String(m.name),0.0)),m.get_blend_shape_value(idx))
+	for part in ["Mouth","Body"]:
+		assert_float(float(peak.get(part,0.0))).override_failure_message("%s never opened (%s)" % [part,str(peak)]).is_greater(0.4)
+	if peak.has("beard_full"):assert_float(float(peak.beard_full)).is_greater(0.4)
+
+
 func test_the_rooms_business_is_in_the_library()->void:
 	for act in ["cough","keep_apart","rub_belly","pat_belly","sharpen_spear","rub_hands","stamp_feet","swat_fly","stretch","whisper","wring_hands","shush","fan_self","laugh_polite"]:
 		var spec:Array=Acting.ACT_MAP.get(act,[])

@@ -642,6 +642,11 @@ var _mood_face:=PackedFloat32Array()
 var _vis_amt:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0])
 ## The jaw_open, brows_up, brows_down, eyes_wide and blink morphs (-1: the bones do it).
 var _x_key:=PackedInt32Array([-1,-1,-1,-1,-1])
+var _vis_from:=PackedInt32Array()
+var _vis_to:=PackedInt32Array()
+var _x_from:=PackedInt32Array()
+var _x_to:=PackedInt32Array()
+var _x_amt:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0])
 var _refresh:=0.0
 var _beat_mood:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0])
 var _beat_face:=PackedFloat32Array([0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0])
@@ -718,12 +723,22 @@ func _axis_along(bone:int,dir:Vector3)->int:
 		if d>score:score=d;best=i
 	return best
 
+## The face's morphs again (the figure was dressed again: other hair, a beard).
+func rebind_face()->void:
+	_sk_mesh.clear();_sk_index.clear();_sk_value.clear();_sk_last.clear()
+	_sk_from_ch.clear();_sk_from_key.clear();_sk_from_gain.clear()
+	_vis_from.clear();_vis_to.clear();_x_from.clear();_x_to.clear()
+	_vis_key.fill(-1);_x_key.fill(-1)
+	_bind_face()
+
 func _bind_face()->void:
 	var meshes:Array=[]
 	var listed:Variant=fig.get(&"_meshes")
 	if listed is Array:
 		for m in listed:
-			if m is MeshInstance3D and String((m as MeshInstance3D).name) in ["Mouth","Brows","Eyes","Body"]:meshes.append(m)
+			if not m is MeshInstance3D:continue
+			var part:=String((m as MeshInstance3D).name)
+			if part in ["Mouth","Brows","Eyes","Body"] or ((part.begins_with("beard_") or part.begins_with("hair_")) and (m as MeshInstance3D).visible):meshes.append(m)
 	var keys:={}
 	for ch:String in SHAPES:
 		for pair:Array in SHAPES[ch]:
@@ -749,21 +764,23 @@ func _bind_face()->void:
 				_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
 			_sk_from_ch.append(int(e[1]));_sk_from_key.append(int(keys[key]));_sk_from_gain.append(float(e[2]))
 			break
+	# every mesh that carries the morph moves with it: the painted mouth, the
+	# skin under it, and a beard riding the jaw
 	for v in VISEMES.size():
 		for m:MeshInstance3D in meshes:
 			var idx:=m.find_blend_shape_by_name(StringName(VISEMES[v]))
 			if idx<0:continue
 			_vis_key[v]=_sk_mesh.size()
+			_vis_from.append(v);_vis_to.append(_sk_mesh.size())
 			_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
-			break
 	# J's expression morphs for the jaw, the brows and the lids (else the bones do it)
 	for pair:Array in [["jaw_open",0],["brows_up",1],["brows_down",2],["eyes_wide",3],["blink",4]]:
 		for m:MeshInstance3D in meshes:
 			var idx:=m.find_blend_shape_by_name(StringName(String(pair[0])))
 			if idx<0:continue
 			_x_key[int(pair[1])]=_sk_mesh.size()
+			_x_from.append(int(pair[1]));_x_to.append(_sk_mesh.size())
 			_sk_mesh.append(m);_sk_index.append(idx);_sk_value.append(0.0);_sk_last.append(-1.0)
-			break
 	for name:String in OWNED_ZERO:
 		for m:MeshInstance3D in meshes:
 			var idx:=m.find_blend_shape_by_name(StringName(name))
@@ -886,6 +903,7 @@ func side_of(other:Variant)->String:
 
 func rest_in(stance_id:String,opts:={})->void:
 	let_go(0.45)
+	rebind_face()
 	var own:=String(OWN_STANCES.get(stance_id,""))
 	var under:=own if not own.is_empty() else stance_id
 	# a seat from the set's mark: the figure's own stool only when none is given
@@ -1596,19 +1614,19 @@ func _face_out(dt:float,face_w:float)->void:
 		skel.set_bone_pose_position(b,skel.get_bone_pose_position(b)+_brow_up[s]*lift)
 	# the morphs
 	_sk_value.fill(0.0)
-	for v in VISEMES.size():
-		if _vis_key[v]>=0:_sk_value[_vis_key[v]]+=_vis_amt[v]
+	for i in _vis_from.size():_sk_value[_vis_to[i]]+=_vis_amt[_vis_from[i]]
 	_vis_amt.fill(0.0)
 	for i in _sk_from_ch.size():
 		var ch:=_sk_from_ch[i]
 		if ch<0:continue
 		_sk_value[_sk_from_key[i]]+=face_now[ch]*_sk_from_gain[i]
 	# the jaw, brows and lids on their morphs (J's: eyes_wide is 1.28 open, blink 0.06)
-	if _x_key[0]>=0:_sk_value[_x_key[0]]+=clampf(face_now[CH_JAW]*(0.45 if speaking and _has_visemes() else 1.0),0.0,1.0)
-	if _x_key[1]>=0:_sk_value[_x_key[1]]+=maxf(0.0,face_now[CH_BROWS])
-	if _x_key[2]>=0:_sk_value[_x_key[2]]+=maxf(0.0,-face_now[CH_BROWS])
-	if _x_key[3]>=0:_sk_value[_x_key[3]]+=maxf(0.0,(lids-1.0)/0.28)
-	if _x_key[4]>=0:_sk_value[_x_key[4]]+=maxf(0.0,(1.0-lids)/0.94)
+	_x_amt[0]=clampf(face_now[CH_JAW]*(0.45 if speaking and _has_visemes() else 1.0),0.0,1.0)
+	_x_amt[1]=maxf(0.0,face_now[CH_BROWS])
+	_x_amt[2]=maxf(0.0,-face_now[CH_BROWS])
+	_x_amt[3]=maxf(0.0,(lids-1.0)/0.28)
+	_x_amt[4]=maxf(0.0,(1.0-lids)/0.94)
+	for i in _x_from.size():_sk_value[_x_to[i]]+=_x_amt[_x_from[i]]
 	# now and then every morph is written again (anything else that set one is undone)
 	_refresh-=dt
 	if _refresh<=0.0:
