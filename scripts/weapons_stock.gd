@@ -24,18 +24,23 @@ extends RefCounted
 ## or paid away.
 ##
 ## THE MILITARY'S API (call in the people's own scope, outside a town's day):
-##   weapons_held()->int       whole sets held for the watch, realm-wide (made
-##                             sets in every store, and the old armoury).
-##   take_weapons(n)->int      takes up to n sets for the watch (made sets: the
-##                             capital's first, then the towns'; then the old
-##                             armoury, the cheapest kits first); exact: a part
+##   weapons_held(item="")->int  whole sets held realm-wide: with a kit named,
+##                             those that can become it (made sets, when the
+##                             makers' age can be that weapon: made_items(),
+##                             and the armoury's kits of it); with none, every
+##                             arm.
+##   take_weapons(n,item="")->int  takes up to n sets (made sets first for the
+##                             watch's kit, then the armoury's kits of it; with
+##                             no kit named, the cheapest kits); exact: a part
 ##                             set left over stays in store. Returns how many.
-##   return_weapons(n)->int    sets carried back into store (fighters stand
-##                             down); never more than were taken.
-##   lose_weapons(n)->int      sets lost with the fallen or in a rout.
-##   weapons_issued()->int     sets the watch carries now (taken, less returned
-##                             and lost). Stays 0 until the military calls
-##                             take_weapons (workstream E).
+##   return_weapons(n,item="")->int  sets carried back: kits to the armoury
+##                             (never traded), made sets to the store.
+##   lose_weapons(n,item="")->int  sets lost with the fallen or in a rout (on
+##                             the arms record).
+##   weapons_issued()->int     sets the watch carries now, read from its
+##                             formations (watch_military.gd weapons_carried).
+## The military calls these through watch_military.gd's own five (the one
+## seam), so made arms reach the formations that join, drill or are re-armed.
 ##   cost_per_fighter()->Dictionary  what one set costs now: kind, maker_days,
 ##                             materials, goods_forgone, worth_goods,
 ##                             worth_rations, quality.
@@ -109,6 +114,96 @@ static func known_age()->Dictionary:
 		if _held(String(age.needs)):best=age
 	return best
 
+## The weapons a made set can be in a fighter's hands, by the makers' age: the
+## age's own first, then what an older smith still makes.
+const AGE_ITEMS:={"stone":["spear"],"bronze":["sword_shield","axe","spear"],"iron":["sword_shield","pike","axe","spear"],
+	"firearms":["musket","sword_shield","pike","axe","spear"],"rifles":["service_rifle","musket","sword_shield","pike","spear"],"automatic":["service_rifle","musket","sword_shield","pike","spear"]}
+## The line foot a made set can arm, the trained before the levy.
+const LINE_BRANCHES:=["heavy_infantry","missile_infantry","force_generation"]
+
+static func _mil(mc:Variant=null)->Variant:
+	return mc if mc!=null else WorldSimulation.military
+
+## The line unit of ours that can carry `item` with its practice learned
+## (the unit's and the weapon's knowledge adopted: no prototype cohorts), the
+## trained before the levy; "" when none.
+static func _line_unit_for(mc:Variant,item:String)->String:
+	if mc==null:return ""
+	var best:="";var rank:=99
+	var units:Array=(mc.UnitCatalog.ARCHETYPES as Dictionary).keys()
+	units.sort()
+	for unit:String in units:
+		var branch:=String((mc.UnitCatalog.ARCHETYPES[unit] as Dictionary).get("branch",""))
+		var at:=LINE_BRANCHES.find(branch)
+		if at<0 or at>=rank or not item in mc.UnitCatalog.equipment_for(unit):continue
+		if not (mc._training_gate(unit,item) as Dictionary).is_empty():continue
+		best=unit;rank=at
+	return best
+
+## THE MAKERS' ARMS NOW: {age (an AGES row), unit, item}: the best age whose
+## knowledge is held, whose materials are in store or being dug, and one of
+## whose weapons (AGE_ITEMS, in order) a line unit of ours can carry with its
+## practice learned; else the next age down. {} when none (the watch fights
+## with what comes to hand, and the makers make no arms). Read once a day
+## for each people, and again when what it knows changes.
+static var _ages:={}
+static func arms_age(mc:Variant=null)->Dictionary:
+	mc=_mil(mc)
+	if mc==null:return {"age":AGES[0],"unit":"spearman","item":"spear"}
+	var state=WorldSimulation.state
+	var key:="%d|%d|%d" % [int(state.world_seed),int(state.elapsed_days),(state.known_discoveries as Array).size()]
+	var kept:Variant=_ages.get(_owner())
+	if kept is Array and String((kept as Array)[0])==key:return (kept as Array)[1]
+	var found:={}
+	for i in range(AGES.size()-1,-1,-1):
+		var age:Dictionary=AGES[i]
+		if not _held(String(age.needs)) or not _within_reach(age):continue
+		for item:String in AGE_ITEMS[String(age.id)]:
+			var unit:=_line_unit_for(mc,item)
+			if unit!="":found={"age":age,"unit":unit,"item":item};break
+		if not found.is_empty():break
+	_ages[_owner()]=[key,found]
+	return found
+
+## Whether a material is being dug: a deposit of it with diggers on it, or
+## some of it on the way in today.
+static func _being_dug(item:String)->bool:
+	for deposit in WorldSimulation.state.resource_deposits:
+		if not deposit is Dictionary or String((deposit as Dictionary).get("resource",""))!=item:continue
+		if int((deposit as Dictionary).get("workers",0))>0 or float((deposit as Dictionary).get("extracted_today",0.0))>0.0:return true
+	return false
+
+## Whether this age's sets can be made from what is in store or being dug.
+static func _within_reach(age:Dictionary)->bool:
+	if _can_make(age):return true
+	if String(age.id)=="stone":
+		for item:String in STONE_BASKET:
+			if _being_dug(item):return true
+		return false
+	for item:String in age.materials:
+		if _usable(item)<float(age.materials[item]) and not _being_dug(item):return false
+	return true
+
+## The weapon a formation's unit can take up from made sets: the first on the
+## makers' age's list it can carry with its practice learned ("" when none:
+## a levy takes a spear, never a sword and shield it cannot carry).
+static func rekit_item(mc:Variant,formation:Dictionary)->String:
+	if bool(formation.get("emergency_militia",false)) or int(formation.get("count",0))<=0:return ""
+	var unit:=String(formation.get("unit","levy"))
+	for item:String in made_items(mc):
+		if item in mc.UnitCatalog.equipment_for(unit) and (mc._training_gate(unit,item) as Dictionary).is_empty():return item
+	return ""
+
+## The kit made sets arm the watch with: {unit, item}, or {}.
+static func made_kit(mc:Variant=null)->Dictionary:
+	var a:=arms_age(mc)
+	return {} if a.is_empty() else {"unit":String(a.unit),"item":String(a.item)}
+
+## The age whose sets the makers make (spear and bow when none).
+static func set_age()->Dictionary:
+	var a:=arms_age()
+	return a.age if not a.is_empty() else AGES[0]
+
 static func _stock_of(item:String)->float:
 	return maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(item,0.0)))
 
@@ -135,15 +230,6 @@ static func _raw_per_set(age:Dictionary)->float:
 	for item:String in age.materials:total+=float(age.materials[item])
 	return total
 
-## The age the makers make now: the best known whose materials are in store,
-## else the best known lower one that can be made, else spear and bow.
-static func making_age()->Dictionary:
-	var known:=known_age()
-	var index:=AGES.find(known)
-	for i in range(index,-1,-1):
-		if _can_make(AGES[i]):return AGES[i]
-	return AGES[0]
-
 ## What arming one fighter costs now, in the engine's numbers: the maker-days
 ## at full pace, the materials, and its worth in goods. goods_forgone is the
 ## household goods those maker-days would have made (a slower people takes
@@ -151,7 +237,7 @@ static func making_age()->Dictionary:
 ## makers' other work lost that day (tools and materials, food put by, the
 ## workshops) is a cost beside it, not counted in goods.
 static func cost_per_fighter()->Dictionary:
-	var age:=known_age()
+	var age:=set_age()
 	var goods:=load("res://scripts/civilian_goods.gd") as GDScript
 	var goods_rate:=float(goods.call("goods_per_maker_day_at_full_pace"))
 	var goods_price:=_price("Civilian Goods")
@@ -163,7 +249,7 @@ static func cost_per_fighter()->Dictionary:
 		"goods_forgone":forgone,"worth_goods":worth_goods,"worth_rations":worth_goods*goods_price/maxf(0.01,_price("Food")),"quality":float(age.quality)}
 
 static func weapons_quality()->float:
-	return float(known_age().quality)
+	return float(set_age().quality)
 
 static func _price(item:String)->float:
 	return preload("res://scripts/trade_prices.gd").in_scope(item)
@@ -216,44 +302,161 @@ static func _arms_kit(item:String)->bool:
 static func held_exact()->float:
 	return store_exact()+float(armoury_sets())
 
-static func weapons_held()->int:
-	return floori(held_exact()+0.000001)
+## The keeping-watch rules (watch_military.gd), loaded when first read.
+static var _watch_script:GDScript
+static func _watch()->GDScript:
+	if _watch_script==null:_watch_script=load("res://scripts/watch_military.gd") as GDScript
+	return _watch_script
 
-static func weapons_issued()->int:
+## The kit made sets arm the watch with ("improvised" when the makers' arms
+## arm no line foot of ours).
+static func kit_item(mc:Variant=null)->String:
+	var kit:=made_kit(mc)
+	return String(kit.get("item","improvised"))
+
+## The weapons a made set can be in a fighter's hands now (AGE_ITEMS of the
+## makers' age): a formation of any of these is filled from made sets.
+static func made_items(mc:Variant=null)->Array:
+	var a:=arms_age(mc)
+	return [] if a.is_empty() else AGE_ITEMS[String((a.age as Dictionary).id)]
+
+## Whether made sets can fill a kit of this weapon.
+static func _made_serve(item:String,mc:Variant=null)->bool:
+	return item!="" and item!="improvised" and item in made_items(mc)
+
+static func _armoury_of(item:String,mc:Variant=null)->int:
+	var military=_mil(mc)
+	if military==null:return 0
+	return maxi(0,int((military.military_inventory as Dictionary).get(item,0)))
+
+## Sets held. With no kit named: every arm (made sets and every armoury kit
+## that arms a fighter). With a kit named: those that can become it (made
+## sets, when made sets can be that weapon, and the armoury's kits of it).
+static func weapons_held(item:String="",mc:Variant=null)->int:
+	if item=="":return floori(held_exact()+0.000001)
+	var kits:=float(_armoury_of(item,mc))
+	return floori((store_exact() if _made_serve(item,mc) else 0.0)+kits+0.000001)
+
+## Sets the watch carries now, read from its formations wherever they stand
+## (watch_military.gd weapons_carried: one ledger). The arms record's
+## `issued` is a statistic of what passed through here, never read instead.
+static func weapons_issued(mc:Variant=null)->int:
+	mc=_mil(mc)
+	if mc!=null and _watch()!=null and mc.get("home_army")!=null:return int(_watch().call("weapons_carried",mc))
 	var r:Variant=WorldSimulation.state.civilian_goods.get("arms")
 	return maxi(0,roundi(float((r as Dictionary).get("issued",0.0)))) if r is Dictionary else 0
 
+## SETS THE WATCH LACKS THAT MADE SETS CAN FILL, weapon by weapon, each set
+## counted once: {weapon: sets}. In every formation (home, bands, garrisons)
+## whose weapon made sets can be, its sets still missing (a crew weapon
+## counts per weapon, as the formation's own need does); a formation at home
+## with what comes to hand, all its sets of the weapon its unit can take up
+## (rekit_item; it is re-kitted as they come: watch_military.gd
+## rekit_for_made); new drill orders' sets not yet reserved (the reserved are
+## in hand; a reinforcement or a field draft is its formation's own gap);
+## less the sets drafts carry on the road to their bands; and those of the
+## watch not yet serving, a set each of the made kit.
+static func arms_gaps_by_weapon(mc:Variant=null)->Dictionary:
+	mc=_mil(mc)
+	var kit:=made_kit(mc)
+	var gaps:={}
+	if kit.is_empty():return gaps
+	if mc==null or mc.get("home_army")==null:
+		gaps[String(kit.item)]=maxf(0.0,watch()*ARMS_PER_WATCHER)
+		return gaps
+	var items:=made_items(mc)
+	var forces:Array=[mc.home_army]+(mc.field_armies as Array)+(mc.occupation_forces as Array)
+	for index in forces.size():
+		var force:Variant=forces[index]
+		if not force is Dictionary:continue
+		for f in (force as Dictionary).get("formations",[]):
+			if not f is Dictionary:continue
+			var formation:Dictionary=f
+			var weapon:=String(formation.get("weapon","improvised"))
+			var count:=int(formation.get("authorized_count",formation.get("count",0)))
+			if weapon in items:
+				_add_gap(gaps,weapon,float(int(formation.get("equipment_required",count))-int(formation.get("equipment",0))))
+			elif index==0 and weapon=="improvised":
+				var item:=rekit_item(mc,formation)
+				if item!="":_add_gap(gaps,item,float(mc._equipment_required_for(String(formation.get("unit","levy")),count)))
+	for order in mc.training_queue:
+		if not order is Dictionary:continue
+		var o:Dictionary=order
+		if String(o.get("mode",""))=="field_draft" or (String(o.get("mode",""))=="reinforce" and int(o.get("target_formation_id",-1))>=0):continue
+		var weapon:=String(o.get("weapon",""))
+		if not weapon in items:continue
+		_add_gap(gaps,weapon,float(int(mc._equipment_required_for(String(o.get("unit","levy")),int(o.get("count",0))))-int(o.get("reserved_equipment",0))))
+	var drafts:Array=mc.get("field_drafts") if mc.get("field_drafts") is Array else []
+	for draft in drafts:
+		if not draft is Dictionary:continue
+		var weapon:=String((draft as Dictionary).get("weapon",""))
+		if gaps.has(weapon):gaps[weapon]=maxf(0.0,float(gaps[weapon])-float(maxi(0,int((draft as Dictionary).get("equipment",0)))))
+	var watch_mod:=_watch()
+	if watch_mod!=null:
+		var unserved:=maxi(0,int(watch_mod.call("manpower",mc))-int(mc._mobilized_count()))
+		if unserved>0:_add_gap(gaps,String(kit.item),float(mc._equipment_required_for(String(kit.unit),unserved)))
+	return gaps
+
+static func _add_gap(gaps:Dictionary,weapon:String,sets:float)->void:
+	if sets<=0.0:return
+	gaps[weapon]=float(gaps.get(weapon,0.0))+sets
+
+## Every weapon's gap together (arms_gaps_by_weapon).
+static func arms_gaps(mc:Variant=null)->float:
+	var total:=0.0
+	for weapon in arms_gaps_by_weapon(mc).values():total+=float(weapon)
+	return total
+
+## What made sets must still fill: each weapon's gap less the armoury's own
+## kits of that weapon (a spear in the armoury never fills a sword's place).
+static func _left_for_made(mc:Variant=null)->float:
+	var left:=0.0
+	var gaps:=arms_gaps_by_weapon(mc)
+	for weapon:String in gaps:left+=maxf(0.0,float(gaps[weapon])-float(_armoury_of(weapon,mc)))
+	return left
+
 ## Made sets another people could have: those beyond what the watch still
-## lacks once the armoury and what it carries are counted (the trade ledger's
-## holding of "Arms" and the economy's wanted holding read these two).
+## lacks once the armoury's kits of each weapon are counted (the trade
+## ledger's holding of "Arms" and the economy's wanted holding read these two).
 static func trade_holding()->float:
 	return store_exact()
 
 static func trade_wanted()->float:
-	return maxf(0.0,watch()*ARMS_PER_WATCHER-float(weapons_issued())-float(armoury_sets()))
+	return _left_for_made()
 
-## Takes up to n whole sets for the watch, exactly: made sets first (the
-## capital's, then the towns'), then the old armoury's kits, the cheapest
-## first. A part set left when a kit makes up the last of it goes into the
-## capital's store, so nothing is lost. Returns how many were taken.
-static func take_weapons(n:int)->int:
-	var want:=mini(maxi(0,n),weapons_held())
+## Takes up to n whole sets for the watch, exactly. With a kit named (the
+## military's way: watch_military.gd): made sets first when made sets can be
+## that weapon (the capital's, then the towns'), then the armoury's kits of
+## it. With none: made sets, then the armoury's kits, the cheapest first.
+## A part set left when a kit makes up the last of it goes into the capital's
+## store, so nothing is lost. Returns how many were taken.
+static func take_weapons(n:int,item:String="",mc:Variant=null)->int:
+	var want:=mini(maxi(0,n),weapons_held(item,mc))
 	if want<=0:return 0
 	var left:=float(want)
-	left-=_take_from(WorldSimulation.state.resource_stockpiles,left)
-	for stores:Dictionary in _town_stores():
-		if left<=0.000001:break
-		left-=_take_from(stores,left)
+	if item=="" or _made_serve(item,mc):
+		left-=_take_from(WorldSimulation.state.resource_stockpiles,left)
+		for stores:Dictionary in _town_stores():
+			if left<=0.000001:break
+			left-=_take_from(stores,left)
 	if left>0.000001:
 		var kits:=ceili(left-0.000001)
-		var got:=_take_from_armoury(kits)
+		var got:=_take_from_armoury(kits) if item=="" else _take_kit(item,kits,mc)
 		left-=float(got)
 		# A whole kit covered a part set: the rest of it stays in store.
 		if left<-0.000001:WorldSimulation.state.resource_stockpiles[GOOD]=stock()-left
-	var r:=record()
-	r.issued=float(r.issued)+want
-	r.taken=float(r.taken)+want
+	if item=="" or _arms_kit(item):
+		var r:=record()
+		r.issued=float(r.issued)+want
+		r.taken=float(r.taken)+want
 	return want
+
+static func _take_kit(item:String,count:int,mc:Variant=null)->int:
+	var military=_mil(mc)
+	if military==null or count<=0:return 0
+	var out:=mini(count,_armoury_of(item,mc))
+	if out>0:military.military_inventory[item]=_armoury_of(item,mc)-out
+	return out
 
 static func _take_from(stores:Dictionary,amount:float)->float:
 	var have:=maxf(0.0,float(stores.get(GOOD,0.0)))
@@ -297,21 +500,34 @@ static func remove(amount:float)->float:
 		left-=_take_from(stores,left)
 	return want-maxf(0.0,left)
 
-## Sets carried back into the capital's store.
-static func return_weapons(n:int)->int:
+## Sets carried back. With a kit named (the military's way), kits go back to
+## the armoury, where they arm the watch again but are never traded; with
+## none, made sets go back to the capital's store, never more than the
+## record says were taken. Returns how many went back.
+static func return_weapons(n:int,item:String="",mc:Variant=null)->int:
 	var r:=record()
-	var back:=mini(maxi(0,n),weapons_issued())
-	if back<=0:return 0
-	WorldSimulation.state.resource_stockpiles[GOOD]=stock()+back
-	r.issued=float(r.issued)-back
+	var back:=maxi(0,n)
+	if item=="":
+		back=mini(back,maxi(0,roundi(float(r.issued))))
+		if back<=0:return 0
+		WorldSimulation.state.resource_stockpiles[GOOD]=stock()+back
+	else:
+		if back<=0:return 0
+		var military=_mil(mc)
+		if military==null:return 0
+		military.military_inventory[item]=_armoury_of(item,mc)+back
+		if not _arms_kit(item):return back
+	r.issued=maxf(0.0,float(r.issued)-back)
 	r.returned=float(r.returned)+back
 	return back
 
-## Sets lost with the fallen or in a rout.
-static func lose_weapons(n:int)->int:
+## Sets lost with the fallen or in a rout (already gone from the formations
+## that carried them): kept on the arms record. Returns how many.
+static func lose_weapons(n:int,item:String="",_mc:Variant=null)->int:
+	var gone:=maxi(0,n)
+	if gone<=0 or (item!="" and not _arms_kit(item)):return gone
 	var r:=record()
-	var gone:=mini(maxi(0,n),weapons_issued())
-	r.issued=float(r.issued)-gone
+	r.issued=maxf(0.0,float(r.issued)-gone)
 	r.lost=float(r.lost)+gone
 	return gone
 
@@ -333,9 +549,14 @@ static func at_war()->bool:
 		if String(ledger.call("blocked",owner,String(other))) in ["war","feud"]:return true
 	return false
 
-## Sets still wanted: the watch's arms, less what it carries and what is held.
-static func arms_wanted()->int:
-	return maxi(0,ceili(watch()*ARMS_PER_WATCHER-0.000001)-weapons_issued()-weapons_held())
+## Sets still to make: what the watch lacks that made sets can fill, weapon
+## by weapon less the armoury's own kits of that weapon (arms_gaps_by_weapon:
+## each set once, those carried, reserved for drill or on the road already
+## counted), then less the made sets in store (they can be any of them).
+## None while the makers' arms arm no line foot of ours.
+static func arms_wanted(mc:Variant=null)->int:
+	if made_kit(mc).is_empty():return 0
+	return maxi(0,ceili(_left_for_made(mc)-store_exact()-0.000001))
 
 ## The realm's plan, made each morning in the people's own scope (before any
 ## place makes anything): sets wanted, the share of makers on arms, and what
@@ -379,8 +600,19 @@ static func _make(makers:float,efficiency:float)->Dictionary:
 	if makers<=0.0 or efficiency<=0.0:
 		out.reason="No makers"
 		return out
-	var age:=making_age()
+	var arms:=arms_age()
+	if arms.is_empty():
+		out.reason="No weapon our makers make arms our line foot yet"
+		return out
+	# The age is within reach (arms_age: in store or being dug). What is still
+	# being dug is waited for: an older age's sets would stand in the age's
+	# weapon's place at its quality. An age out of reach altogether falls back
+	# in arms_age, never here.
+	var age:Dictionary=arms.age
 	out.kind=String(age.kind)
+	if not _can_make(age):
+		out.reason="Waiting on %s" % _short_words(age)
+		return out
 	var span:=float(WorldSimulation.span)
 	var work:=makers*share*efficiency*span
 	var sets:=minf(work/float(age.maker_days),left)
@@ -404,6 +636,14 @@ static func _make(makers:float,efficiency:float)->Dictionary:
 	var r:=record()
 	r.made=float(r.made)+sets
 	return out
+
+## The materials of an age not in store for one set (what is being waited on).
+static func _short_words(age:Dictionary)->String:
+	if String(age.id)=="stone":return _needs_words(age)
+	var names:PackedStringArray=[]
+	for item:String in age.materials:
+		if _usable(item)<float(age.materials[item]):names.append(String(item).to_lower())
+	return ", ".join(names) if not names.is_empty() else _needs_words(age)
 
 static func _needs_words(age:Dictionary)->String:
 	var names:PackedStringArray=[]

@@ -6,11 +6,17 @@ engine's daily rates. Every formula names its GDScript source; numeric
 constants are parsed from the game where feasible (gamedata.py / gdparse.py),
 and the rest live in params.json.
 
+People first (docs/PEOPLE_FIRST.md): the leaders' daily work by focus, the
+people's ambition and the path (work_paths.gd, learning cap included), the
+ruler's own split with the leader's food guard, searched land and cutting,
+one raw-materials stock, making as the engine does it (homes, barter, arms
+first), the watch as the army (drill, arms, standing might) and new towns.
+
 What it deliberately omits (see docs/research/SURROGATE_SIM.md): individual
 people and officials, geography/terrain, rivals and diplomacy, war, trade and
 the money economy, construction projects and buildings as objects (buildings are
-a count), per-resource stockpiles, water logistics, policies other than the
-scenario knobs, the civic court and decrees.
+a count), per-resource stockpiles (one raw-materials stock stands in), water
+logistics, policies other than the scenario knobs, the civic court and decrees.
 """
 from __future__ import annotations
 
@@ -150,6 +156,56 @@ GOODS_K = {k: float(g.const("scripts/civilian_goods.gd", k, default=0.0, optiona
            for k in ("BASE_TARGET_PER_PERSON", "DAILY_WEAR", "CRAFT_SHARE", "BASE_RATE", "TECHNIQUE_OUTPUT")}
 GOODS_TARGETS = g.const("scripts/civilian_goods.gd", "TARGET_PER_PERSON", default={}, optional=True) or {}
 REPLAN_STEPS = float(g.const("scripts/civilization_controller.gd", "REPLAN_STEPS", default=0.0, optional=True))
+
+# --- People first: the leaders' work, paths, land, making, arms and the watch ----
+# GovernmentPeopleSystem._allocations_for_focus: the people's ambitions' labor
+# bias (cultural_inheritance.gd WORK; Food becomes a deeper reserve), the path's
+# lean (work_paths.gd WORK, each role the larger of the two asks), its food
+# reserve (FOOD_LEAN) and its learning cap (cap_learning).
+AMBITION_WORK = g.const("scripts/cultural_inheritance.gd", "WORK", default={}, optional=True) or {}
+PATH_WORK = g.const("scripts/work_paths.gd", "WORK", default={}, optional=True) or {}
+PATH_FOOD_LEAN = g.const("scripts/work_paths.gd", "FOOD_LEAN", default={}, optional=True) or {}
+RESERVE_FOOD_WISH = float(g.const("scripts/government_people_system.gd", "RESERVE_FOOD_WISH", default=12.0, optional=True))
+# GovernmentPeopleSystem._ruler_split_fed: under the ruler's own split the town's
+# leader puts more on food while the food alarm is up, until RULER_RELEASE_DAYS.
+RULER_FED = "func _ruler_split_fed" in g.source("scripts/government_people_system.gd")
+RULER = {k: float(g.const("scripts/government_people_system.gd", k, default=d, optional=True)) for k, d in {
+    "RULER_RELEASE_DAYS": 45.0, "FOOD_CEILING_SHARE": 85.0, "RESERVE_TARGET_DAYS": 30.0, "RESERVE_MARGIN": 0.15}.items()}
+# resource_system.gd searched land (land_step, land_yield) and the cutters' day.
+LAND = {k: float(g.const("scripts/resource_system.gd", "LAND_" + k, default=d, optional=True)) for k, d in {
+    "PEOPLE_PER_SEARCHER": 60.0, "RISE_YEAR": 0.45, "RISE_MAX": 0.9, "SAG_YEAR": 0.05, "YIELD_BASE": 0.75, "YIELD_SPAN": 0.5,
+    "FIND_RATE": 0.016}.items()}
+LAND["HALF"] = 2.0 / 3.0 if "const LAND_HALF:=2.0/3.0" in g.source("scripts/resource_system.gd") else float(g.const("scripts/resource_system.gd", "LAND_HALF", default=2.0 / 3.0, optional=True))
+SURVEY_COVER = "func land_yield_factor" in g.source("scripts/resource_system.gd")
+_PROFILES = g.const("scripts/resource_system.gd", "MATERIAL_PROFILES", default={}, optional=True) or {}
+_MINERAL = g.const("scripts/resource_system.gd", "MINERAL_PROFILE", default={"base_yield": 0.24, "loss": 0.00015}, optional=True)
+# civilian_goods.gd: making for the homes, then for barter up to ceiling(), from a basket of materials.
+GOODS_X = {k: float(g.const("scripts/civilian_goods.gd", k, default=d, optional=True)) for k, d in {
+    "SPECIALIZATION": 0.0, "MAKERS_START": 0.05, "MAKERS_FULL": 0.20, "HOLD_MORE": 0.0, "SURPLUS_PER_HEAD": 0.0,
+    "RAW_PER_UNIT": 0.16, "REFERENCE_EFFICIENCY": 0.8}.items()}
+GOODS_BASKET = g.const("scripts/civilian_goods.gd", "BASKET", default={"Fiber Plants": .32, "Timber": .30, "Clay": .18, "Stone": .12, "Flint": .08}, optional=True)
+# What one cutter brings in at base, over the makers' basket (MATERIAL_PROFILES base_yield).
+BASKET_YIELD = sum(float(w) * float(_PROFILES.get(r, _MINERAL).get("base_yield", 0.24)) for r, w in GOODS_BASKET.items()) / max(1e-9, sum(float(w) for w in GOODS_BASKET.values()))
+PRICES = g.const("scripts/economy_system.gd", "BASE_VALUES", default={"Food": 1.0, "Civilian Goods": 6.0, "Arms": 48.0}, optional=True)
+# weapons_stock.gd: arms for one fighter a set, made first while the watch lacks them.
+ARMS_AGES = g.const("scripts/weapons_stock.gd", "AGES", default=[], optional=True) or []
+ARMS_SHARE = float(g.const("scripts/weapons_stock.gd", "ARMS_SHARE", default=0.2, optional=True))
+ARMS_WEAR_DAY = float(_MINERAL.get("loss", 0.00015))   # the store's mineral rate (weapons_stock.gd header)
+# watch_military.gd / MilitaryCampaign: the watch is the army; drill closes on
+# _training_quality (levy 0.48, line foot 0.58, + command 0.5 x 0.12 + drill
+# practices) x (0.72 + 0.28 armed), a little more for a people given to war.
+WATCH = {k: float(g.const("scripts/watch_military.gd", k, default=d, optional=True)) for k, d in {
+    "MARTIAL_FROM": 0.05, "MARTIAL_FULL": 0.20, "MARTIAL_DRILL": 0.0, "MARTIAL_PACE": 0.0, "START_DRILL": 0.25}.items()}
+WARRIOR_WEIGHT = float(g.const("scripts/standing.gd", "WARRIOR_WEIGHT", default=3.0, optional=True))
+LEVY_TRAINING_DAYS = 45.0   # military_unit_catalog.gd training_days: max(45, 7 x 3)
+# civilization_strategy.gd expansion (leaders.py _expansion): one more good site
+# known every SITE_YEARS; a founding party of max(40, 2 %) leaves 80 at least.
+ESTABLISHMENT_DAYS = float(g.const("scripts/civilization_strategy.gd", "ESTABLISHMENT_DAYS", default=30.0, optional=True))
+SITE_YEARS = 30.0
+# Surrogate stand-ins (not engine numbers; docs/research/SURROGATE_SIM.md):
+RAW_START = 60.0          # founding manifest of timber and fibre
+RAW_PER_HEAD_HELD = 6.0   # the yards hold about this much a head; the rest stays at the source
+BUILD_DRAW = 0.02         # loads a builder uses a day (homes and works)
 
 
 def team_strength(researchers: float) -> float:
@@ -366,8 +422,16 @@ class Scenario:
     seed_finds_day: int = -1
     study_rule: str = ""      # "ai": ArtifactCollection.advance staffs 1 while anything is unstudied
     # The ruler's own daily split (manual_work.gd, GovernmentPeopleSystem._lay_ruler_split):
-    # applied as given, with no survival guard and no food floor.
+    # applied as given, no food floor; the town's leader still feeds the town
+    # past it while the food alarm is up (_ruler_split_fed, when the engine has it).
     manual: dict = field(default_factory=dict)
+    # People first: the path the leaders lean the work toward (work_paths.gd),
+    # the people's ambition (cultural_inheritance.gd WORK), "auto" focus (the
+    # leaders' own: GovernmentPeopleSystem._focus_decision_for_settlement) and
+    # new towns ("leaders": one per SITE_YEARS when stores allow).
+    path: str = ""
+    ambition: str = ""
+    expand: str = ""
 
     @staticmethod
     def from_dict(name: str, d: dict, sites: dict) -> "Scenario":
@@ -495,6 +559,28 @@ class Surrogate:
         self.goods_reserved = 0.0
         self.goods_taken = 0.0
         self.goods_made = 0.0
+        # People first: searched land, the raw-materials stock, arms and the watch's drill.
+        self.cover = 0.0
+        self.raw = RAW_START
+        self.arms = 0.0
+        self.arms_made = 0.0
+        self.extracted = 0.0
+        self.per_cutter = 0.0
+        self.goods_barter = 0.0
+        self.maker_capacity = 0.0
+        self.drill = WATCH["START_DRILL"]
+        self.armed = 0.0
+        self.edge = 0.0
+        self._watch_prev = 0.0
+        self.daughters = 0
+        self.settler_deaths = 0.0
+        self.hunger_toll = 0.0
+        self.person_years = 0.0
+        self.fed_guard = False
+        self.focus_now = scenario.focus
+        self.learning_cap = None
+        self.spare_ratio = 0.0
+        self.found_rng = np.random.default_rng((seed * 9176 + 3) & 0xFFFFFFFF)
         self.effects = np.zeros(len(cat.effect_keys))
         self.effect_raw = np.zeros(len(cat.effect_keys))
         self.ceiling_era = 0.0
@@ -660,7 +746,7 @@ class Surrogate:
         Truth probes: the player's delegated society stays in one settlement; the
         rival controller founds daughter settlements (about one per 30 years)."""
         founded = int(getattr(self, "daughters", 0))
-        if self.s.ai:
+        if self.s.ai and self.s.expand != "leaders":
             return 1 + founded + int(min(self.day / YEAR, float(self.p.get("ai_settlement_until", 360.0))) // float(self.p.get("ai_settlement_years", 30.0)))
         # The player's realm founds a daughter settlement when its land runs short
         # (_found_daughters); the truth probes' delegated player never crowds in 100 years.
@@ -669,7 +755,7 @@ class Surrogate:
     def _found_daughters(self, year: float) -> None:
         """Surrogate player model (research_3000): a crowded realm founds a daughter
         settlement, at most one per found_interval_years (not in headless calibration runs)."""
-        if self.p.get("headless_world") or year < float(self.p.get("found_from_year", 600.0)):
+        if self.p.get("headless_world") or year < float(self.p.get("found_from_year", 600.0)) or self.s.expand == "leaders":
             return
         last = getattr(self, "_last_found", -1e9)
         if getattr(self, "crowding", 0.0) >= float(self.p.get("found_crowding", 0.15)) and year - last >= float(self.p.get("found_interval_years", 25.0)):
@@ -826,8 +912,11 @@ class Surrogate:
         """GovernmentPeopleSystem._allocations_for_focus + _apply_survival_guard."""
         if self.s.manual:
             total = sum(max(0.0, float(v)) for v in self.s.manual.values()) or 1.0
+            shares = {r: max(0.0, float(self.s.manual.get(r, 0.0))) / total * 100.0 for r in ROLES}
+            if RULER_FED:
+                shares = self._ruler_split_fed(shares)
             for r in ROLES:
-                self.alloc_pct[r] = max(0.0, float(self.s.manual.get(r, 0.0))) / total * 100.0
+                self.alloc_pct[r] = shares[r]
             return
         if self.s.labor:
             # Observed delegated mix (GovernmentPeopleSystem auto focus + cultural
@@ -846,8 +935,11 @@ class Surrogate:
                 w["Knowledge"] = total * share / 100.0
         else:
             w = {r: float(v) for r, v in BASE_ALLOC.items()}
-            for role, v in FOCUS_CHANGES.get(self.s.focus, {}).items():
+            self.focus_now = self._auto_focus() if self.s.focus == "auto" else self.s.focus
+            for role, v in FOCUS_CHANGES.get(self.focus_now, {}).items():
                 w[role] = w.get(role, 0.0) + float(v)
+            if self.s.ambition or self.s.path:
+                self._lay_path()
             # The people's cultural labor bias (cultural_inheritance.gd labor_bias):
             # every role but Food; the wish for food work deepens the reserve
             # instead (GovernmentPeopleSystem.reserve_lean_of). Leader scenarios
@@ -926,7 +1018,9 @@ class Surrogate:
         cap = getattr(self, "learning_cap", None)
         if cap is None and LEARNING_CAP:
             cap = float(LEARNING_CAP.get("balanced", 1.0))
-        if cap is not None and not self.s.focus and float(getattr(self, "active_knowledge_share", -1.0)) < 0:
+        # The leaders' own focus ("auto", GovernmentPeopleSystem picks it) is
+        # theirs too, so it is capped as no focus is.
+        if cap is not None and self.s.focus in ("", "auto") and float(getattr(self, "active_knowledge_share", -1.0)) < 0:
             most = cap * sum(w.values())
             if w["Knowledge"] > most:
                 others = sum(v for r, v in w.items() if r not in ("Food", "Knowledge"))
@@ -942,6 +1036,177 @@ class Surrogate:
         rate = 1.0 if food_risk else float(self.p["food_adjust_rate"])
         for r in ROLES:
             self.alloc_pct[r] = lerp(self.alloc_pct[r], target[r], rate)
+
+    def _auto_focus(self) -> str:
+        """GovernmentPeopleSystem._focus_decision_for_settlement (water always
+        reached here; no forecast): provisions while short or while the stores,
+        falling, would last under 45 days, shelter under 0.96 housing, defense when weak with towns,
+        establishment in the first year, else balanced (development needs a
+        leader skilled past 135 in building and carrying; the default is 100)."""
+        deficit = self.last["need"] - self.last["production"]
+        projected = (self.fresh + self.stored) / deficit if deficit > 0.0 else 9999.0   # FoodSystem food_projected_days
+        if self.last["intake"] < 0.995 or projected < 45.0:
+            return "provisions"
+        if self.housing_capacity / max(1.0, self.population) < 0.96:
+            return "shelter"
+        if self.capacities.get("security", 0.4) < 0.30 and self.territory_settlements > 1:
+            return "defense"
+        if self.day < 365.0:
+            return "establishment"
+        return "balanced"
+
+    def _lay_path(self) -> None:
+        """The people's ambition and the path: culture_bias, reserve_lean and
+        learning_cap as GovernmentPeopleSystem._allocations_for_focus lays them
+        (work_paths.gd lean: each role the larger of the two asks)."""
+        bias = {r: float(v) for r, v in AMBITION_WORK.get(self.s.ambition, {}).items()}
+        food_wish = float(bias.get("Food", 0.0))
+        path = self.s.path or "balanced"
+        for role, v in PATH_WORK.get(path, {}).items():
+            bias[role] = max(bias.get(role, 0.0), float(v))
+        self.culture_bias = bias
+        self.reserve_lean = clamp(max(food_wish / max(1e-9, RESERVE_FOOD_WISH), float(PATH_FOOD_LEAN.get(path, 0.0))), 0.0, 1.0)
+        if LEARNING_CAP:
+            self.learning_cap = float(LEARNING_CAP.get(path, LEARNING_CAP.get("balanced", 1.0))) \
+                + (INQUIRY_CAP if self.s.ambition == "inquiry" and path != "learning" else 0.0)
+
+    def _ruler_split_fed(self, shares: dict) -> dict:
+        """GovernmentPeopleSystem._ruler_split_fed: the ruler's shares, unless the
+        food alarm is up (or the leader is already feeding the town and its stores
+        hold under RULER_RELEASE_DAYS): then enough on food for what is eaten and
+        spoils, more under the reserve, from today's food per hand, the rest of
+        the split scaled down."""
+        need = self.last["need"]
+        if need <= 0.0:
+            return shares
+        days = self.stored_days
+        alarm = self.last["intake"] < 0.995 or (days < 20.0 and self.last["production"] < need * 0.97)
+        if not alarm and not (self.fed_guard and days < RULER["RULER_RELEASE_DAYS"]):
+            self.fed_guard = False
+            return shares
+        self.fed_guard = True
+        ruler_food = shares["Food"]
+        working = clamp(self.last.get("food_share", 0.0), 0.0, 1.0) * 100.0 or ruler_food
+        gap = clamp((RULER["RESERVE_TARGET_DAYS"] - days) / RULER["RESERVE_TARGET_DAYS"], 0.0, 1.0)
+        wanted = need * (1.05 + RULER["RESERVE_MARGIN"] * gap)
+        produced = self.last["production"]
+        food = working * wanted / produced if produced > 0.01 else RULER["FOOD_CEILING_SHARE"]
+        food = clamp(food, ruler_food, max(ruler_food, RULER["FOOD_CEILING_SHARE"]))
+        if food <= ruler_food + 0.01:
+            return shares
+        others = 100.0 - ruler_food
+        scale = (100.0 - food) / others if others > 0.01 else 0.0
+        return {r: (food if r == "Food" else shares[r] * scale) for r in ROLES}
+
+    # ------------------------------------------------------------ people first
+    def _people_first(self, days: float) -> None:
+        """A month of the systems the people-first overhaul added: searched land
+        and the cutters' day (resource_system.gd), the watch's drill
+        (watch_military.gd drill_day) and new towns (expand == "leaders")."""
+        pop = max(1.0, self.population)
+        self.hunger_toll += float(getattr(self, "mortality", {}).get("Hunger", 0.0)) * pop * days / YEAR
+        self.person_years += pop * days / YEAR
+        # resource_system.gd land_step: searchers for every 60 people.
+        searchers = self.able * self.alloc_pct["Survey"] / 100.0
+        r = max(0.0, searchers) * LAND["PEOPLE_PER_SEARCHER"] / pop
+        target = r / (r + LAND["HALF"])
+        years = days / YEAR
+        if target > self.cover:
+            rate = clamp(LAND["RISE_YEAR"] * r, 0.0, LAND["RISE_MAX"])
+            self.cover = clamp(self.cover + (target - self.cover) * (1.0 - (1.0 - rate) ** years), 0.0, 1.0)
+        else:
+            self.cover = clamp(max(target, self.cover * (1.0 - LAND["SAG_YEAR"]) ** years), 0.0, 1.0)
+        # resource_system.gd extraction: base yield x quality (1) x tools x work x knowledge x land.
+        cutters = self.able * self.alloc_pct["Extraction"] / 100.0
+        tools = clamp(0.18 + self.material * 0.92, 0.18, 1.10)      # ConsequenceEngine.tools_factor
+        labor_eff = float(getattr(self, "labor_eff", GOODS_X["REFERENCE_EFFICIENCY"]))
+        self.per_cutter = BASKET_YIELD * (0.55 + tools * 0.75) * labor_eff * (1.0 + self.eff("extraction_yield")) * self.land_yield()
+        got = cutters * self.per_cutter * days
+        builders = self.able * self.alloc_pct["Construction"] / 100.0
+        self.raw = min(max(0.0, self.raw + got - builders * BUILD_DRAW * days), pop * RAW_PER_HEAD_HELD)
+        self.extracted = got / days
+        # watch_military.gd drill_day.
+        watch = self.watch()
+        self.edge = clamp((watch / pop - WATCH["MARTIAL_FROM"]) / max(1e-9, WATCH["MARTIAL_FULL"] - WATCH["MARTIAL_FROM"]), 0.0, 1.0)
+        self.armed = clamp(self.arms / watch, 0.0, 1.0) if watch > 0.5 else 1.0
+        quality = clamp(lerp(0.48, 0.58, self.armed) + 0.5 * 0.12 + self._adopted("formation_drill") * 0.14 + self._adopted("professional_corps") * 0.12
+                        + self._adopted("military_staffs") * 0.06, 0.30, 1.15)
+        ceiling = (quality + WATCH["MARTIAL_DRILL"] * self.edge) * (0.72 + 0.28 * self.armed)
+        train = (0.42 + self.capacities.get("security", 0.38) * 0.55) * (1.0 + self._adopted("formation_drill") * 0.35 + self._adopted("professional_corps") * 0.55)
+        step = clamp(train * clamp(self.food_security, 0.3, 1.0) * (1.0 + WATCH["MARTIAL_PACE"] * self.edge) / LEVY_TRAINING_DAYS, 0.0, 1.0)
+        if watch > self._watch_prev + 1e-6:   # newcomers join raw (START_DRILL)
+            self.drill = (self.drill * self._watch_prev + WATCH["START_DRILL"] * (watch - self._watch_prev)) / watch
+        self._watch_prev = watch
+        self.drill = self.drill + (ceiling - self.drill) * (1.0 - (1.0 - step) ** days) if self.drill < ceiling else ceiling
+        if self.s.expand == "leaders":
+            self._found_town(self.day / YEAR, 30.0, ESTABLISHMENT_DAYS, 28.0, self.found_rng)
+
+    def _found_town(self, year: float, gate_days: float, margin: float, distance: float, rng) -> bool:
+        """civilization_controller.expansion_order_steps by the shared rule
+        (leaders.py _expansion): one more good site every SITE_YEARS, not hungry,
+        stores at the gate, a founding party of max(40, 2 %) leaving 80 at home;
+        the party carries food for the road and the margin, and thin rations meet
+        a late first harvest (25-70 days) with hunger."""
+        if self.completed < 1.0 or self.day < getattr(self, "convoy_until", -1.0):
+            return False
+        if self.daughters >= int(year / SITE_YEARS) or self.last.get("intake", 1.0) < 0.98 or self.stored_days < gate_days:
+            return False
+        pop = self.population
+        founders = max(40.0, round(pop * .02))
+        if pop - founders < 80.0:
+            return False
+        travel = distance * float(rng.uniform(.5, 1.5)) / 16.0
+        food = founders * (travel + margin)
+        if self.fresh + self.stored < food:
+            return False
+        taken = min(food, self.fresh + self.stored)
+        fresh = min(self.fresh, taken)
+        self.fresh -= fresh
+        self.stored = max(0.0, self.stored - (taken - fresh))
+        short = max(0.0, float(rng.uniform(25.0, 70.0)) - margin)
+        lost = founders * min(.4, short * .004)
+        share = self.coh * HUNGER_W
+        taken_people = np.minimum(self.coh, share / max(1e-9, share.sum()) * lost)
+        self.coh = self.coh - taken_people
+        self._sync()
+        self.settler_deaths += float(taken_people.sum())
+        self.daughters += 1
+        self.convoy_until = self.day + travel + 30.0
+        return True
+
+    def _adopted(self, rid: str) -> float:
+        i = self.cat.index.get(rid)
+        return clamp(float(self.adoption[i]), 0.0, 1.0) if i is not None and self.known[i] else 0.0
+
+    def land_yield(self) -> float:
+        """resource_system.gd land_yield: what the searched land gives the cutters."""
+        return LAND["YIELD_BASE"] + LAND["YIELD_SPAN"] * clamp(self.cover, 0.0, 1.0) if SURVEY_COVER else 1.0
+
+    def watch(self) -> float:
+        """watch_military.gd manpower: those keeping watch are the army."""
+        return self.able * self.alloc_pct["Defense"] / 100.0
+
+    def _arms_age(self) -> tuple:
+        """weapons_stock.gd making_age: the best set whose knowledge is held (a quarter adopted)."""
+        best = (10.0, 2.1, 1.0)
+        for age in ARMS_AGES:
+            needs = str(age.get("needs", ""))
+            if needs and self._adopted(needs) < 0.25:
+                continue
+            best = (float(age.get("maker_days", 10.0)), sum(float(v) for v in (age.get("materials") or {}).values()), float(age.get("quality", 1.0)))
+        return best
+
+    def field_strength(self) -> float:
+        """A proxy of the watch's fighting weight: each fighter 1 + WARRIOR_WEIGHT x
+        drill, armed sets at their quality and the unarmed at improvised arms (0.55)."""
+        quality = self._arms_age()[2]
+        return self.watch() * (1.0 + WARRIOR_WEIGHT * self.drill) * (self.armed * quality + (1.0 - self.armed) * 0.55)
+
+    def might(self) -> float:
+        """standing.gd our_fighting_strength: the watch counts 1 + WARRIOR_WEIGHT x readiness."""
+        pop = max(1.0, self.population)
+        w = clamp(self.watch(), 0.0, pop)
+        return max(1.0, (pop - w) * 0.8 + w * (1.0 + WARRIOR_WEIGHT * self.drill))
 
     def _storage_capacity(self) -> float:
         """FoodSystem._food_storage_capacity (founding stores, pits, public stores)."""
@@ -1464,8 +1729,13 @@ class Surrogate:
         shelter = float(p["shelter_bonus"]) * clamp(self.completed / 2.0, 0.0, 1.0)
         past = self.fresh_share - FOOD_CARE["FRESH_EVEN"]
         fresh_care = (FOOD_CARE["FRESH_HEALTH"] if past >= 0.0 else FOOD_CARE["FRESH_PENALTY"]) * past + FOOD_CARE["CARE_HEALTH"] * max(0.0, self.carer_cover)
+        # ConsequenceEngine process_health_cost: the harm of working materials,
+        # by how much is cut and dug for every 8 in 100 of the people (chemical
+        # control's cut is left out).
+        industry = clamp(self.extracted / max(1.0, pop * 0.08), 0.0, 2.0)
+        process_cost = (e("health_risk") + e("pollution") * 0.22 + e("water_pollution") * 0.18) * industry
         h_target = clamp(0.18 + self._fed() * 0.43 + fresh_care + food["diet"] * 0.06 + housing * 0.16 + clean_water + shelter
-                         - self.malnutrition * 0.28 - env_cost + self.policy("health_target") + float(p["health_offset"]), 0.02, 0.97)
+                         - self.malnutrition * 0.28 - env_cost - process_cost + self.policy("health_target") + float(p["health_offset"]), 0.02, 0.97)
         self.health = lag(self.health, h_target, 0.022, days)
         stewards = self.able * self.alloc_pct["Administration"] / 100.0
         admin_cov = clamp(stewards / max(1.0, pop * 0.035), 0.0, 1.25)
@@ -2086,12 +2356,47 @@ class Surrogate:
             if i is not None and self.known[i]:
                 output += GOODS_K["TECHNIQUE_OUTPUT"] * clamp(float(self.adoption[i]), 0.0, 1.0)
         makers = self.able * self.alloc_pct["Crafting"] / 100.0
-        capacity = makers * GOODS_K["CRAFT_SHARE"] * GOODS_K["BASE_RATE"] * output * days
+        # CivilianGoods.specialization and efficiency: a people of many makers
+        # makes more each; output follows how well people work.
+        many = clamp((makers / max(1.0, self.population) - GOODS_X["MAKERS_START"]) / max(1e-9, GOODS_X["MAKERS_FULL"] - GOODS_X["MAKERS_START"]), 0.0, 1.0)
+        pace = clamp(float(getattr(self, "labor_eff", GOODS_X["REFERENCE_EFFICIENCY"])), 0.2, 1.6) if GOODS_X["SURPLUS_PER_HEAD"] > 0 else 1.0
+        rate = GOODS_K["BASE_RATE"] * output * pace * (1.0 + GOODS_X["SPECIALIZATION"] * many)
+        # weapons_stock.gd make: arms first while the watch lacks them (ARMS_SHARE of
+        # the makers, the whole day); a set wears at the store's mineral rate.
+        self.arms *= (1.0 - ARMS_WEAR_DAY) ** days
+        arms_hands = 0.0
+        self.arms_made = 0.0
+        if ARMS_AGES and makers > 0.0:
+            maker_days, materials, _quality = self._arms_age()
+            lacking = max(0.0, self.watch() - self.arms)
+            if lacking > 0.01:
+                arms_hands = makers * ARMS_SHARE
+                can = arms_hands * pace / maker_days * days
+                sets = min(can, lacking, self.raw / max(1e-9, materials))
+                arms_hands *= sets / max(1e-9, can)
+                self.raw -= sets * materials
+                self.arms += sets
+                self.arms_made = sets / days
+        capacity = max(0.0, makers - arms_hands) * GOODS_K["CRAFT_SHARE"] * rate * days
+        self.maker_capacity = capacity / days
         wanted = max(0.0, target * 1.2 + need - self.goods)
-        made = min(capacity, wanted)
+        if GOODS_X["SURPLUS_PER_HEAD"] > 0:
+            # For the homes first, from any material on hand; then for barter up
+            # to ceiling(), only from what the builders' stores can spare (half
+            # the stock stands in for BARTER_MATERIAL_FLOOR).
+            room = max(0.0, target * 1.2 + max(1.0, self.population) * GOODS_X["SURPLUS_PER_HEAD"] * (1.0 + GOODS_X["HOLD_MORE"] * many) - self.goods)
+            by_raw = self.raw / GOODS_X["RAW_PER_UNIT"]
+            homes = min(capacity, wanted, room, by_raw)
+            barter = max(0.0, min(capacity - homes, room - homes, (by_raw - homes) * 0.5))
+            made = homes + barter
+            self.raw = max(0.0, self.raw - made * GOODS_X["RAW_PER_UNIT"])
+            self.goods_barter = barter / max(1.0, days)
+        else:
+            made = min(capacity, wanted)
         self.goods += made
         self.goods_reserved = need
         self.goods_made = made / max(1.0, days)
+        self.spare_ratio = clamp(max(0.0, self.goods - target * 1.2) / max(1.0, self.population * max(1e-9, GOODS_X["SURPLUS_PER_HEAD"]) * (1.0 + GOODS_X["HOLD_MORE"])), 0.0, 1.0)
         return LEARNER_GOODS["GOODS_FLOOR"] + (1.0 - LEARNER_GOODS["GOODS_FLOOR"]) * self.goods_cover
 
     def _expected_work(self, i: int, year: float) -> float:
@@ -2294,6 +2599,27 @@ class Surrogate:
         self.allure = clamp(collection + float(k["ALLURE_CULTURE"]) * self.capacities["culture"] + float(k["ALLURE_VALUES"]) * float(p["openness"]) + works, 0.0, 1.0)
 
     # --------------------------------------------------------------------- run
+    def _apply_phase(self, year: float) -> None:
+        """A timed strategy's phase may also change the work: the leaders'
+        weights ("labor"), the ruler's own split ("manual"), the path, the
+        ambition or the focus. Read at the turn of each year."""
+        if not self.s.phases:
+            return
+        phase = [ph for ph in self.s.phases if float(ph.get("from", 0)) <= year + 1e-9]
+        if not phase:
+            return
+        phase = phase[-1]
+        for key in ("labor", "manual"):
+            if key in phase:
+                setattr(self.s, key, dict(phase[key]))
+        for key in ("path", "ambition", "focus"):
+            if key in phase:
+                setattr(self.s, key, str(phase[key]))
+        if "manual" in phase and phase["manual"]:
+            self.s.labor = {}
+        elif "labor" in phase or "path" in phase:
+            self.s.manual = {}
+
     def research_policy(self, year: float) -> dict:
         if self.s.phases:
             phase = [ph for ph in self.s.phases if float(ph.get("from", 0)) <= year + 1e-9][-1]
@@ -2469,6 +2795,7 @@ class Surrogate:
             if m == months:
                 break
             if m % 12 == 0:
+                self._apply_phase(year)
                 self.s_research = dict(self.research_policy(year))
                 self._found_daughters(year)
                 self._conditions(year)
@@ -2477,11 +2804,16 @@ class Surrogate:
                 self._activity(self.ctx, hearth=True)
             self._allocate_labor()
             self._monthly(year)
+            self._people_first(MONTH)
             heavy = (self.alloc_pct["Food"] + self.alloc_pct["Extraction"] + self.alloc_pct["Construction"]) / 100.0
             overwork = clamp(clamp((heavy - 0.74) / 0.22, 0, 1) * 0.7 + (0.5 if "labor_mobilization" in self.s.policies else 0.0), 0.0, 1.0)
             care = self._care(overwork)
             days = MONTH / sub
-            for _ in range(sub):
+            for k in range(sub):
+                if k > 0 and p.get("replan_each_substep", True):
+                    # GovernmentPeopleSystem re-plans the work daily: a monthly plan
+                    # lags the seasons and overshoots the food work.
+                    self._allocate_labor()
                 pop = max(1.0, self.population)
                 housing = clamp(self.housing_capacity / pop, 0.15, 1.12)
                 labor_eff = clamp(0.34 + self.health * 0.34 + self.cohesion * 0.18 + housing * 0.12, 0.25, 1.08)
@@ -2546,4 +2878,17 @@ class Surrogate:
             "lead": getattr(self, "lead", 0.0), "goods": max(0.0, getattr(self, "goods", 0.0)), "goods_cover": getattr(self, "goods_cover", 1.0),
             "goods_per_head": max(0.0, getattr(self, "goods", 0.0) - getattr(self, "goods_reserved", 0.0)) / max(1.0, pop), "learners_goods": getattr(self, "goods_taken", 0.0),
             "household_goods": max(0.0, getattr(self, "goods", 0.0) - getattr(self, "goods_reserved", 0.0)) / max(0.25, self._goods_target()) if GOODS_MODEL and getattr(self, "goods", -1.0) >= 0.0 else 1.0,
+            # People first (docs/PEOPLE_FIRST.md). Output is economy_system.gd's
+            # daily output value in rations: food got + materials x 2 + goods x their price.
+            "focus": getattr(self, "focus_now", ""), "fed_guard": bool(getattr(self, "fed_guard", False)),
+            "survey_cover": getattr(self, "cover", 0.0), "land_yield": self.land_yield() if hasattr(self, "cover") else 1.0,
+            "extracted": getattr(self, "extracted", 0.0), "raw": getattr(self, "raw", 0.0),
+            "goods_made": getattr(self, "goods_made", 0.0), "goods_barter": getattr(self, "goods_barter", 0.0), "maker_capacity": getattr(self, "maker_capacity", 0.0),
+            "output": self.last.get("production", 0.0) + 2.0 * getattr(self, "extracted", 0.0) + float(PRICES.get("Civilian Goods", 6.0)) / float(PRICES.get("Food", 1.0)) * getattr(self, "goods_made", 0.0),
+            "watch": self.watch() if hasattr(self, "drill") else 0.0, "arms": getattr(self, "arms", 0.0), "armed": getattr(self, "armed", 0.0),
+            "drill": getattr(self, "drill", 0.0), "field_strength": self.field_strength() if hasattr(self, "drill") else 0.0,
+            "might": self.might() if hasattr(self, "drill") else 0.0, "towns": self.territory_settlements, "carrying_capacity": getattr(self, "carrying_capacity", 0.0),
+            "crowding": getattr(self, "crowding", 0.0), "carer_cover": getattr(self, "carer_cover", 0.0), "specialist_excess": getattr(self, "specialist_excess", 0.0),
+            "hunger_toll": getattr(self, "hunger_toll", 0.0), "settler_deaths": getattr(self, "settler_deaths", 0.0), "person_years": getattr(self, "person_years", 0.0),
+            "conception_support": e("conception_support"), "able": self.able,
         }

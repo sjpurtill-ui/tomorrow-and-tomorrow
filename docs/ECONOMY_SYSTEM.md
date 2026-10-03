@@ -148,11 +148,44 @@ are the first currency, and a making people can buy and make arms.
   in a yard), priced at 48. Only made sets beyond what the watch still lacks
   are traded; the old armoury's spears and bows arm the watch and count as
   held for it, but are never traded, paid or given away, and no toll,
-  tribute or gift is paid in arms unless chosen. The military's API:
-  `weapons_held()`, `take_weapons(n)` (exact: made sets, then the armoury's
-  cheapest kits; a part set left over stays in store), `return_weapons(n)`,
-  `lose_weapons(n)`, `weapons_issued()` (0 until the military takes arms),
-  `arms_wanted()`, `cost_per_fighter()`, `weapons_quality()`.
+  tribute or gift is paid in arms unless chosen.
+  **Wired to the watch** (`watch_military.gd`, workstream E): the military's
+  five accessors are the stock's, on the military passed to them.
+  `weapons_held(item)`, `take_weapons(n, item)`, `return_weapons(n, item)`
+  and `lose_weapons(n, item)` take the kit named. The makers' arms are tied
+  to their age (`arms_age`): the best age whose knowledge is held, whose
+  materials are in store or being dug (else the next age down: bronze known
+  with no tin still makes spears and bows), and one of whose weapons (stone: spear; bronze: sword and shield or axe, or spear;
+  iron adds the pike; muskets; rifles) a line unit of ours can carry with its
+  practice learned (never a prototype cohort). That weapon is the watch's
+  kit (`watch_military arms_kit`); a made set can be any weapon of that age's
+  list in a fighter's hands, so spearmen are still armed by bronze-age
+  makers. Made sets go first, then the armoury's kits of the weapon; exact
+  with part sets. While the age's materials are being dug but not yet in
+  store, the makers wait ("Waiting on copper ore, tin ore"), so a spear and
+  bow never stands in a sword's place; only an age wholly out of reach falls
+  back to the next one down. Men at home with what comes to hand take up
+  arms as sets come, only as many as are truly spare for the weapon their
+  unit can carry (the first on the age's list: a spear for the levy, whatever
+  the age): made sets and the armoury's own kits of it, less every set
+  already owed to that weapon at home (formations not yet fully armed, new
+  drill orders not yet reserved). `rekit_for_made` splits them off, their
+  drill kept, their old arms to the armoury, so an older save's levy is
+  armed from the makers or the armoury, never left waiting and never
+  stripped. Kits handed back (a stand-down, a cancelled or retrained drill, a
+  garrison, a draft or a band's spare) go to the armoury as that kit; losses
+  in battle go on the arms record. `weapons_issued()` reads what the
+  formations carry (`weapons_carried`). `arms_wanted()` = what the watch
+  lacks that made sets can fill, weapon by weapon (`arms_gaps_by_weapon`: per
+  formation of a made weapon its missing sets, a crew weapon per weapon; the
+  levy to re-kit; new drill orders' unreserved sets, never a field draft's or
+  a reinforcement's, which are their formation's own gap; less the sets on
+  the road with drafts; the watch not yet serving), each less the armoury's
+  own kits of that weapon, then less the made sets in store: each set counted
+  once. The record's `issued` is only a statistic.
+  Joining the watch, finishing drill, the daily re-arming at home, a field
+  draft's gear, an army build's and a deployment line's reserve and a
+  general's resupply all draw through `take_weapons`.
 
 ## Exchange stages
 

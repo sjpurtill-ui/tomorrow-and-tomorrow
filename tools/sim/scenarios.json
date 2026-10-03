@@ -341,6 +341,542 @@
     "Administration": 2,
     "Defense": 2
    }
+  },
+  "path_balanced": {
+   "_doc": "Truth probe mirror (tools/sim/truth_probe.gd --scenario=sensible --path=balanced): the leaders' own work (focus 'auto', the makers ambition, the path's lean and learning cap), one town.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "balanced"
+  },
+  "path_growth": {
+   "_doc": "Truth probe mirror (tools/sim/truth_probe.gd --scenario=sensible --path=growth): the leaders' own work (focus 'auto', the makers ambition, the path's lean and learning cap), one town.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "growth"
+  },
+  "path_making": {
+   "_doc": "Truth probe mirror (tools/sim/truth_probe.gd --scenario=sensible --path=making): the leaders' own work (focus 'auto', the makers ambition, the path's lean and learning cap), one town.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "making"
+  },
+  "path_war": {
+   "_doc": "Truth probe mirror (tools/sim/truth_probe.gd --scenario=sensible --path=war): the leaders' own work (focus 'auto', the makers ambition, the path's lean and learning cap), one town.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "war"
+  },
+  "path_learning": {
+   "_doc": "Truth probe mirror (tools/sim/truth_probe.gd --scenario=sensible --path=learning): the leaders' own work (focus 'auto', the makers ambition, the path's lean and learning cap), one town.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "learning"
+  },
+  "path_building": {
+   "_doc": "Truth probe mirror (tools/sim/truth_probe.gd --scenario=sensible --path=building): the leaders' own work (focus 'auto', the makers ambition, the path's lean and learning cap), one town.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "building"
+  },
+  "towns_balanced": {
+   "_doc": "A computer people on the balanced path: the leaders' own work, and a new town every 30 years when the stores allow (leaders.py _expansion).",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "balanced",
+   "expand": "leaders"
+  },
+  "towns_growth": {
+   "_doc": "A computer people on the growth path: the leaders' own work, and a new town every 30 years when the stores allow (leaders.py _expansion).",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "growth",
+   "expand": "leaders"
+  },
+  "towns_war": {
+   "_doc": "A computer people on the war path: the leaders' own work, and a new town every 30 years when the stores allow (leaders.py _expansion).",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "war",
+   "expand": "leaders"
+  },
+  "towns_learning": {
+   "_doc": "A computer people on the learning path: the leaders' own work, and a new town every 30 years when the stores allow (leaders.py _expansion).",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "learning",
+   "expand": "leaders"
+  },
+  "split_balanced": {
+   "_doc": "The ruler's own split (balanced), one town; the town's leader feeds the town past it only while the food alarm is up.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "manual": {
+    "Food": 38,
+    "Survey": 6,
+    "Extraction": 9,
+    "Construction": 13,
+    "Crafting": 14,
+    "Logistics": 7,
+    "Knowledge": 4,
+    "Administration": 5,
+    "Defense": 4
+   }
+  },
+  "split_big_dumb": {
+   "_doc": "The ruler's own split (big dumb), one town; the town's leader feeds the town past it only while the food alarm is up.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "manual": {
+    "Food": 40,
+    "Administration": 14,
+    "Logistics": 8,
+    "Knowledge": 1,
+    "Crafting": 8,
+    "Extraction": 8,
+    "Construction": 12,
+    "Survey": 5,
+    "Defense": 4
+   }
+  },
+  "split_small_smart": {
+   "_doc": "The ruler's own split (small smart), one town; the town's leader feeds the town past it only while the food alarm is up.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "manual": {
+    "Food": 40,
+    "Knowledge": 30,
+    "Administration": 5,
+    "Crafting": 8,
+    "Extraction": 5,
+    "Construction": 6,
+    "Survey": 2,
+    "Logistics": 2,
+    "Defense": 2
+   }
+  },
+  "split_war_heavy": {
+   "_doc": "The ruler's own split (war heavy), one town; the town's leader feeds the town past it only while the food alarm is up.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "manual": {
+    "Food": 40,
+    "Defense": 20,
+    "Crafting": 10,
+    "Extraction": 8,
+    "Construction": 10,
+    "Logistics": 5,
+    "Administration": 3,
+    "Survey": 2,
+    "Knowledge": 2
+   }
+  },
+  "split_making_heavy": {
+   "_doc": "The ruler's own split (making heavy), one town; the town's leader feeds the town past it only while the food alarm is up.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "manual": {
+    "Food": 40,
+    "Crafting": 22,
+    "Extraction": 12,
+    "Logistics": 8,
+    "Construction": 8,
+    "Survey": 4,
+    "Administration": 3,
+    "Knowledge": 2,
+    "Defense": 1
+   }
+  },
+  "switch_grow2learn": {
+   "_doc": "The ruler's split big_dumb until year 200, then small_smart.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "manual": {
+    "Food": 40,
+    "Administration": 14,
+    "Logistics": 8,
+    "Knowledge": 1,
+    "Crafting": 8,
+    "Extraction": 8,
+    "Construction": 12,
+    "Survey": 5,
+    "Defense": 4
+   },
+   "phases": [
+    {
+     "from": 0,
+     "manual": {
+      "Food": 40,
+      "Administration": 14,
+      "Logistics": 8,
+      "Knowledge": 1,
+      "Crafting": 8,
+      "Extraction": 8,
+      "Construction": 12,
+      "Survey": 5,
+      "Defense": 4
+     }
+    },
+    {
+     "from": 200,
+     "manual": {
+      "Food": 40,
+      "Knowledge": 30,
+      "Administration": 5,
+      "Crafting": 8,
+      "Extraction": 5,
+      "Construction": 6,
+      "Survey": 2,
+      "Logistics": 2,
+      "Defense": 2
+     }
+    }
+   ]
+  },
+  "switch_learn2grow": {
+   "_doc": "The ruler's split small_smart until year 200, then big_dumb.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "manual": {
+    "Food": 40,
+    "Knowledge": 30,
+    "Administration": 5,
+    "Crafting": 8,
+    "Extraction": 5,
+    "Construction": 6,
+    "Survey": 2,
+    "Logistics": 2,
+    "Defense": 2
+   },
+   "phases": [
+    {
+     "from": 0,
+     "manual": {
+      "Food": 40,
+      "Knowledge": 30,
+      "Administration": 5,
+      "Crafting": 8,
+      "Extraction": 5,
+      "Construction": 6,
+      "Survey": 2,
+      "Logistics": 2,
+      "Defense": 2
+     }
+    },
+    {
+     "from": 200,
+     "manual": {
+      "Food": 40,
+      "Administration": 14,
+      "Logistics": 8,
+      "Knowledge": 1,
+      "Crafting": 8,
+      "Extraction": 8,
+      "Construction": 12,
+      "Survey": 5,
+      "Defense": 4
+     }
+    }
+   ]
+  },
+  "switch_war2make": {
+   "_doc": "The ruler's split war_heavy until year 200, then making_heavy.",
+   "site": "good",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "manual": {
+    "Food": 40,
+    "Defense": 20,
+    "Crafting": 10,
+    "Extraction": 8,
+    "Construction": 10,
+    "Logistics": 5,
+    "Administration": 3,
+    "Survey": 2,
+    "Knowledge": 2
+   },
+   "phases": [
+    {
+     "from": 0,
+     "manual": {
+      "Food": 40,
+      "Defense": 20,
+      "Crafting": 10,
+      "Extraction": 8,
+      "Construction": 10,
+      "Logistics": 5,
+      "Administration": 3,
+      "Survey": 2,
+      "Knowledge": 2
+     }
+    },
+    {
+     "from": 200,
+     "manual": {
+      "Food": 40,
+      "Crafting": 22,
+      "Extraction": 12,
+      "Logistics": 8,
+      "Construction": 8,
+      "Survey": 4,
+      "Administration": 3,
+      "Knowledge": 2,
+      "Defense": 1
+     }
+    }
+   ]
   }
  },
  "generated": {
@@ -361,5 +897,45 @@
    }
   }
  },
- "_labor_doc": "'labor' = delegated role mix measured in the truth runs (auto focus + 'makers' ambition bias + leader skills); Food still rises through the survival guard when stores run short."
+ "_labor_doc": "'labor' = delegated role mix measured in the truth runs (auto focus + 'makers' ambition bias + leader skills); Food still rises through the survival guard when stores run short.",
+ "suites": {
+  "people_first": [
+   "path_balanced",
+   "path_growth",
+   "path_making",
+   "path_war",
+   "path_learning",
+   "path_building",
+   "towns_balanced",
+   "towns_growth",
+   "towns_war",
+   "towns_learning",
+   "split_balanced",
+   "split_big_dumb",
+   "split_small_smart",
+   "split_war_heavy",
+   "split_making_heavy",
+   "switch_grow2learn",
+   "switch_learn2grow",
+   "switch_war2make"
+  ],
+  "paths": [
+   "path_balanced",
+   "path_growth",
+   "path_making",
+   "path_war",
+   "path_learning",
+   "path_building"
+  ],
+  "extremes": [
+   "split_balanced",
+   "split_big_dumb",
+   "split_small_smart",
+   "split_war_heavy",
+   "split_making_heavy",
+   "switch_grow2learn",
+   "switch_learn2grow",
+   "switch_war2make"
+  ]
+ }
 }
