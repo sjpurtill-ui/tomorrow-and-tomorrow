@@ -346,18 +346,23 @@ func test_defense_allocation_immediately_mans_watch_and_automates_basic_training
 	GameState.population_exact=500.0
 	GameState.population_total=500
 	GameState.population_allocations["Defense"]=16
-	var defense:=MilitaryCampaign.settlement_defense_snapshot()
-	# The sixteen on defence work keep the watch, beside the townsfolk who
-	# rise (civilization_combat.gd guard_ledger), all untrained.
-	var militia:=preload("res://scripts/civilization_combat.gd").home_militia()
-	assert_int(int(militia.watch)).is_equal(16)
-	assert_int(int(defense.garrison_personnel)).is_equal(16+int(militia.rise))
-	assert_int(int(defense.garrison_trained)).is_equal(0)
-	assert_int(int(defense.garrison_militia)).is_equal(16+int(militia.rise))
+	# KEEPING WATCH IS THE MILITARY (watch_military.gd): the sixteen on defence
+	# work join the watch at home at once, armed from the store, and drill
+	# there; no course stands between them and the watch.
 	MilitaryCampaign.military_inventory.improvised=16
-	MilitaryCampaign._ensure_automatic_basic_training()
-	assert_int(MilitaryCampaign._automatic_basic_trainees()).is_greater(0)
-	assert_bool(bool(MilitaryCampaign.training_queue[0].get("automated_basic",false))).is_true()
+	MilitaryCampaign.keep_watch()
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(16)
+	assert_bool(MilitaryCampaign.training_queue.is_empty()).is_true()
+	var defense:=MilitaryCampaign.settlement_defense_snapshot()
+	# They stand at home beside the townsfolk who rise (civilization_combat.gd
+	# guard_ledger), the home guard and those free for the bands alike.
+	var militia:=preload("res://scripts/civilization_combat.gd").home_militia()
+	assert_int(int(defense.garrison_personnel)).is_equal(16+int(militia.rise))
+	assert_int(int(defense.garrison_guard)).is_equal(16)
+	assert_int(int(defense.garrison_militia)).is_equal(int(militia.rise))
+	var drill:=preload("res://scripts/watch_military.gd").drill_of(MilitaryCampaign.home_army.formations)
+	for day in 30:preload("res://scripts/watch_military.gd").drill_day(MilitaryCampaign)
+	assert_float(preload("res://scripts/watch_military.gd").drill_of(MilitaryCampaign.home_army.formations)).is_greater(drill)
 
 
 func test_supplied_peacetime_home_garrison_does_not_inevitably_desert()->void:
@@ -375,6 +380,8 @@ func test_supplied_peacetime_home_garrison_does_not_inevitably_desert()->void:
 
 func test_untrained_local_watch_can_defend_home_before_basic_training_finishes()->void:
 	GameState.population_allocations["Defense"]=12
+	# The twelve join the watch at home at once, raw (watch_military.gd).
+	MilitaryCampaign.keep_watch()
 	var enemy:Dictionary=MilitaryCampaign.simulator.create_formation_force("Raiders",[{"id":91,"unit":"levy","weapon":"improvised","count":8,"equipment":0}],0.55,0.35)
 	MilitaryCampaign.active_threat={"id":"raid_probe","source_civ_id":"","source_name":"Raiders","campaign_mode":"defensive","enemy_force":enemy,"estimated_strength":8,"terrain_defense":1.0,"seed":991}
 	# The twelve on the watch and the townsfolk who rise beside them.

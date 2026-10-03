@@ -388,14 +388,20 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 		if item.is_empty():continue
 		var value:=STRATEGY.unit_score(definition,plan)+COUNTER_WEIGHT*STRATEGY.counter_score(campaign,unit,item,threat)
 		if value>score:chosen=unit;weapon=item;score=value
-	var intake:=preload("res://scripts/military_intake_supply.gd").places(campaign,chosen,weapon)
-	var vacancies:=mini(maxi(0,target-campaign._mobilized_count()),maxi(0,intake-campaign.aggregate_recruits))
-	if String(plan.training)!="suspended" and vacancies>0:WorldSimulation.submit(id,{"kind":"recruit","count":vacancies})
-	land_training_orders(id,chosen,weapon,target,plan)
-	# Release an inherited waiting backlog; keep only one feasible intake in reserve.
-	# This count cannot stand down a serving formation.
-	var surplus:=maxi(0,campaign.aggregate_recruits-intake)
-	if surplus>0:WorldSimulation.submit(id,{"kind":"demobilize","count":surplus})
+	# KEEPING WATCH IS THE MILITARY (watch_military.gd): the ruler raises no
+	# recruits apart from the watch. Its watch share is its people's Defense
+	# work, and the war leader keeps everyone under arms equal to it every
+	# day; the ruler arms it (below) and splits it between the home guard and
+	# the bands (MilitaryCampaign.set_watch_split; by temper until set).
+	campaign.watch_home_auto=preload("res://scripts/watch_military.gd").default_home_share(plan.get("personality",{}),bool(plan.get("at_war",false)))
+	# Until its ruler's path is laid (docs/PEOPLE_FIRST.md F), a computer
+	# ruler raises its watch to the share of its people its temper has always
+	# kept under arms (target, above), as its recruiting did; it never sends
+	# its watch home on that account, and a hungry people at peace raises none.
+	if String(WorldSimulation.actor_id)!="player":
+		var watch:=int(campaign.watch_manpower())
+		if target-watch>=maxi(1,ceili(float(watch)*0.02)):campaign.set_watch_share(float(target)/maxf(1.0,float(WorldSimulation.state.population_total)))
+	land_training_orders(id,chosen,weapon,int(campaign.watch_manpower()),plan)
 	# The army stands at home, where it defends the town; the war council
 	# (war_council.gd, the same for every people) forms the bands an errand
 	# needs and sends them by the land road: no standing band in a home zone.

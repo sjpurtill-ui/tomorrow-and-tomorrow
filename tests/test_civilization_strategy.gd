@@ -90,7 +90,9 @@ func test_controller_issues_distinct_paid_orders_and_preserves_player_state()->v
 			Controller.research_orders(id,plan)
 			Controller.military_orders(id,plan)
 			training.append(WorldSimulation.military.training_staff.policy("army").id)
-			recruits.append(WorldSimulation.military._mobilized_count())
+			# The watch is the army (watch_military.gd): a ruler's temper shows
+			# in how much of it stays home.
+			recruits.append(WorldSimulation.military.watch_split())
 			research.append(WorldSimulation.state.research_allocations.duplicate(true))
 			assert_float(WorldSimulation.state.population_exact).is_equal(before)
 			# Orders have no right to conjure weapons; production happens over time.
@@ -98,7 +100,7 @@ func test_controller_issues_distinct_paid_orders_and_preserves_player_state()->v
 				assert_int(WorldSimulation.military.military_inventory[item]).is_less_equal(int(inventory.get(item,0)))
 		)
 	assert_str(training[0]).is_not_equal(training[1])
-	assert_int(recruits[0]).is_less(recruits[1])
+	assert_float(float(recruits[0])).is_greater(float(recruits[1]))
 	assert_bool(research[0]==research[1]).is_false()
 	assert_dict(SaveSystem._capture_reflected(GameState,[])).is_equal(human_before)
 

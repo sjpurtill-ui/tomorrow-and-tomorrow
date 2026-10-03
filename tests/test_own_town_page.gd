@@ -203,9 +203,11 @@ func test_every_row_is_the_number_its_own_dock_shows()->void:
 	var Combat:=preload("res://scripts/civilization_combat.gd")
 	var defense:=MilitaryCampaign.settlement_defense_snapshot()
 	var home_guard:=Combat.home_defenders()
-	assert_int(int(home_guard.trained)).is_equal(int(MilitaryCampaign.personnel_ledger().home))
+	# The watch is the army (watch_military.gd): at home its home guard and
+	# those free for the bands, all thirty-seven of them.
+	assert_int(int(home_guard.trained)+int(home_guard.watch)).is_equal(int(MilitaryCampaign.personnel_ledger().home))
 	assert_int(int(rows.garrison.number)).is_equal(int(defense.garrison_personnel))
-	assert_int(int(rows.garrison.number)).is_equal(37+int(home_guard.watch)+int(home_guard.rise))
+	assert_int(int(rows.garrison.number)).is_equal(37+int(home_guard.rise))
 	assert_int(int(rows.garrison.number)).is_equal(Combat.defenders(id))
 	assert_str(String(rows.garrison.value)).is_equal("%d fighters" % int(rows.garrison.number))
 	assert_str(String(rows.fortification.value)).is_equal(String(defense.short))

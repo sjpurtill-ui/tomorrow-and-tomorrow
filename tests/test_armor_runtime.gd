@@ -209,10 +209,15 @@ func test_actual_automatic_military_orders_select_available_armor_for_infantry()
 		host.aggregate_recruits=4
 		var preference:=plan();preference.personality.discipline=.95
 		C.military_orders("armor",preference)
-		assert_array(host.training_queue).is_not_empty()
-		assert_str(String(host.training_queue.back().weapon)).is_equal("plate_spear")
-		assert_int(int(host.military_inventory.plate_spear)).is_equal(20)
-		assert_int(int(host.home_army.get("troops",0))).is_equal(0))
+		# The watch is the army (watch_military.gd): those waiting join the
+		# watch at home, armed with the best line kit our people can arm, the
+		# plate from the store; nobody waits in a course.
+		host.keep_watch()
+		assert_array(host.training_queue).is_empty()
+		assert_int(int(host.aggregate_recruits)).is_equal(0)
+		var plated:Array=(host.home_army.get("formations",[]) as Array).filter(func(f:Dictionary)->bool:return String(f.get("weapon",""))=="plate_spear")
+		assert_array(plated).is_not_empty()
+		assert_int(int(host.military_inventory.plate_spear)).is_less(20))
 func test_automatic_armor_kits_use_one_free_workshop_and_replenish_after_issue()->void:
 	WorldSimulation.scoped("armor",func()->void:
 		setup();know("articulated_plate_armor")

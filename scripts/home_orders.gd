@@ -14,7 +14,9 @@ extends RefCounted
 ##            named when our people can train them), and the weapons they lack
 ##            are put in hand in the workshops (queue_equipment_production:
 ##            only what the store and the work already under way will not
-##            cover). New fighters asked for without a calling verb ("I need
+##            cover). KEEPING WATCH IS THE MILITARY (watch_military.gd): those
+##            called up are set to keep watch, so the watch share rises by
+##            them (the People view's own split, in the ruler's hands). New fighters asked for without a calling verb ("I need
 ##            10 levies", "give me ten more levies", "raise a levy of 10 men")
 ##            are called up the same way. "Train 10 levies" drills those
 ##            waiting and calls up the rest; words that only drill ("train the
@@ -518,8 +520,8 @@ static func _recruit(reading:Dictionary)->Dictionary:
 		return out
 	var short:=(" Only %d could be found; there are no more free adults." % raised) if raised<n else ""
 	var unnamed:=" You named no number, so I called up %d." % raised if not named else ""
-	out.says="%d are called up and leave their work in the fields and workshops.%s%s %d now wait for weapons and drill." % [raised,short,unnamed,waiting]
-	out.outcome="%d called up from our own people; %d recruits now wait for weapons and drill, and that much less work is done at home." % [raised,waiting]
+	out.says="%d are called up to keep watch and leave their work in the fields and workshops.%s%s They join the watch at home and drill there." % [raised,short,unnamed]
+	out.outcome="%d called up from our own people to keep watch; the watch is now %d, and that much less other work is done at home." % [raised,int(mc.watch_manpower())]
 	return out
 
 ## Nobody free to call up, with the engine's own count: the able adults at
@@ -556,7 +558,7 @@ static func _stand_down(reading:Dictionary)->Dictionary:
 	if n<=0 and bool(reading.get("recruits",false)): n=waiting
 	if n<=0 and not everyone:
 		var free:=Law.free_to_go(mc)
-		out.says=("How many should go home? %d wait as recruits and %d stand under arms at home beside the watch." % [waiting,maxi(0,free-waiting)]) if free>0 else "There is nobody under arms at home to send back."
+		out.says=("How many should go home? %d keep watch at home%s." % [maxi(0,free-waiting),(" and %d are joining them" % waiting) if waiting>0 else ""]) if free>0 else "There is nobody under arms at home to send back."
 		out.outcome="Nothing is set in motion: no number was named." if free>0 else "Nothing is set in motion: nobody is under arms at home."
 		return out
 	var r:Dictionary=Law.stand_down(mc,n,everyone)
@@ -590,7 +592,7 @@ static func _stand_down(reading:Dictionary)->Dictionary:
 		if fighting>0: lines.append("%d are in a fight and cannot be called back until it is decided." % fighting)
 	elif away>0 and released<n: lines.append("%d more are away with the bands." % away)
 	if everyone and int(r.get("held",0))>0: lines.append("The %d holding the towns we took stay there." % int(r.held))
-	if int(r.get("watch",0))>0 and (everyone or released<n): lines.append("The %d on the watch stay at their posts." % int(r.watch))
+	if int(r.get("watch",0))>0 and released<n: lines.append("%d still keep watch." % int(r.watch))
 	if level_words!="": lines.append(level_words)
 	out.says=" ".join(lines)
 	if released>0: out.outcome="%d stood down and back at work at home." % released
@@ -620,7 +622,9 @@ static func _stand_down_band(mc:Variant,army_id:int,out:Dictionary)->Dictionary:
 			out.says="%s cannot be stood down: %s" % [name,String(r.error)]
 			out.outcome="Nothing is set in motion: %s" % String(r.error)
 			return out
-		var gone:Dictionary=mc.stand_down(mini(men,maxi(0,int(mc.home_army.get("troops",0))-int(Law.watch(mc).home))))
+		# Its men go back to their work; the watch falls by them
+		# (MilitaryCampaign.stand_down, watch_military.gd).
+		var gone:Dictionary=mc.stand_down(mini(men,maxi(0,int(mc.home_army.get("troops",0)))))
 		var released:=int(gone.get("released",0))
 		var level_words:=Law.lower(mc)
 		out.ok=true
@@ -677,13 +681,8 @@ static func _levy(reading:Dictionary)->Dictionary:
 			var short:=(" Only %d could be found; there are no more free adults." % raised) if raised<n else ""
 			var unnamed:=(" You named no number, so I called up %d." % raised) if not named else ""
 			var making_up:=(" with the %d already waiting that makes the %d you asked for" % [waiting_before,asked]) if filling and waiting_before>0 else ""
-			says.append("%d are called up and leave their work in the fields and workshops%s.%s%s" % [raised,making_up,short,unnamed])
-			done.append("%d called up from our own people" % raised)
-			# The ruler's own levy stands against the share the war leader
-			# keeps (army_levy_law.gd): the share rises to hold them.
-			if not bool(reading.get("by_law",false)):
-				var kept:=preload("res://scripts/army_levy_law.gd").cover(mc)
-				if kept!="":says.append(kept)
+			says.append("%d are called up to keep watch and leave their work in the fields and workshops%s.%s%s" % [raised,making_up,short,unnamed])
+			done.append("%d called up from our own people to keep watch" % raised)
 		elif int(mc.aggregate_recruits)<=0:
 			out.says=_nobody_free_says(mc,n)
 			out.outcome=_nobody_free_outcome(mc,n)

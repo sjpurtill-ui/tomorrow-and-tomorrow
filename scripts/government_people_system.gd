@@ -1927,6 +1927,9 @@ func _delegate_settlements(_day:int)->void:
 		total_weight+=share
 	if total_weight>0.0:
 		for role in GameState.POPULATION_ROLES: WorldSimulation.state.population_allocation_percentages[role]=float(aggregate[role])/total_weight
+		# The watch is the army: the leaders keep it at the share the ruler set
+		# (watch_military.gd hold_share).
+		preload("res://scripts/watch_military.gd").hold_share(WorldSimulation.state.population_allocation_percentages)
 		WorldSimulation.state.synchronize_population_allocations()
 	if management_changed: WorldSimulation.state.settlement_network_revision+=1
 

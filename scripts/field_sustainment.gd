@@ -443,7 +443,7 @@ func draft_block(force:Dictionary)->String:
 ## as "+0 coming" and as advice to raise the Defense share, is gone: drafts
 ## come from the army's size now.
 const BLOCK_WORDS:={
-	"at_level":"No more are called up: the army already stands at the size you set. Raise how many serve to fill the empty places.",
+	"at_level":"No more can come: everyone keeping watch is already serving, and the home guard stays home. Raise the watch share, or keep fewer at home, to fill the empty places.",
 	"nobody_free":"Nobody free to call up: every able adult is already serving or away.",
 	"hungry":"No drafts while the band is starving: they would starve too.",
 	"cut_off":"No drafts: no road our carriers use reaches them.",
@@ -457,15 +457,14 @@ static func block_words(block:String)->String:
 
 ## The same reason in a few words: "the army stands at the size you set".
 static func block_reason(block:String)->String:
-	return String({"at_level":"the army stands at the size you set","nobody_free":"nobody is free to call up","hungry":"they are starving","cut_off":"no road our carriers use reaches them","last":"it is reinforced last","campaign":"the general's campaign keeps its own ranks","few":"its empty places are too few to call a draft for"}.get(block,"no drafts can reach them"))
+	return String({"at_level":"the watch is all serving and the home guard stays home","nobody_free":"nobody is free to call up","hungry":"they are starving","cut_off":"no road our carriers use reaches them","last":"it is reinforced last","campaign":"the general's campaign keeps its own ranks","few":"its empty places are too few to call a draft for"}.get(block,"no drafts can reach them"))
 
-## How many more the war leader may call up for the army today: the gap to
-## the size the ruler chose (army_levy_law.gd, a share of the people), or,
-## with none chosen yet, as many as are free (the bands and garrisons are
-## kept at the strength they were formed with).
+## How many more the war leader may call up for the army today: the watch
+## is the army (watch_military.gd), so only the watch share not yet under
+## arms; drafts otherwise come from the offensive troops at home
+## (home_reserve). Raise the watch share to fill more places.
 func levy_room()->int:
 	var read:Dictionary=preload("res://scripts/army_levy_law.gd").reading(host)
-	if int(read.get("target",-1))<0: return 1<<30
 	return maxi(0,int(read.get("gap",0)))
 
 ## People a new draft may call up today: those already called up and
@@ -474,9 +473,9 @@ func draftable()->int:
 	var free_adults:int=maxi(0,host.recruitment_capacity()-host._mobilized_count())
 	return maxi(0,host.aggregate_recruits)+mini(free_adults,levy_room())
 
-## Trained men of the army's reserve at home: the levy at home beyond those
-## keeping the watch (army_levy_law.watch). They fill bands and garrisons
-## first, needing no drill.
+## The army's reserve at home: the watch at home beyond the home guard (the
+## offensive troops not in a band, watch_military.gd). They fill bands and
+## garrisons first, needing no drill.
 func home_reserve()->int:
 	if host.recovery.home_unavailable() or host._home_battle_running(): return 0
 	var watch:Dictionary=preload("res://scripts/army_levy_law.gd").watch(host)
@@ -529,7 +528,9 @@ func draft_day()->Array:
 			if count<mini(need,DRAFT_MIN_MEN):
 				short=true
 				continue
-			if count>host.aggregate_recruits: host.raise_recruits(count-host.aggregate_recruits)
+			# From the watch share not yet under arms (levy_room): they are
+			# already counted in the share, so it does not move.
+			if count>host.aggregate_recruits: host.aggregate_recruits=count
 			count=mini(count,host.aggregate_recruits)
 			if count<=0:
 				short=true

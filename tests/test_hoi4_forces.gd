@@ -356,7 +356,7 @@ func test_the_home_levy_calls_up_its_empty_places()->void:
 	assert_int(orders.size()).is_equal(1)
 	assert_int(int(orders[0].count)).is_equal(5)
 	assert_int(int(orders[0].target_formation_id)).is_equal(int(formation.id))
-	assert_str(board.feedback.text).is_equal("5 called up to fill the levy")
+	assert_str(board.feedback.text).is_equal("5 more keep watch to fill the levy")
 
 func test_talk_calls_the_bands_own_general_to_court()->void:
 	_train(40)

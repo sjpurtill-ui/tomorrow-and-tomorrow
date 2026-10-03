@@ -610,12 +610,14 @@ static func defense()->Dictionary:
 	var required:=int(walls.get("garrison_required",maxi(8,ceili(pop*0.035))))
 	var guard:=int(walls.get("garrison_guard",roundi(watch)))
 	lines.append(_line("Guard at home","%d of %d" % [guard,required],
-		"The trained fighters and the watch are home's guard: in a raid or siege they defend it, the watch untrained. A town needs 3.5 in 100 of its people on guard, at least 8.","good" if guard>=required else "bad"))
+		"The watch at home is home's guard (the watch is the army): in a raid or siege they defend it; the home guard posted in our other towns stands there. A town needs 3.5 in 100 of its people on guard, at least 8.","good" if guard>=required else "bad"))
 	var townsfolk:=int(walls.get("garrison_townsfolk",0))
 	lines.append(_line("Townsfolk who would fight","%s at home" % _count(townsfolk) if townsfolk>0 else "none",
 		"When raiders come, about 1 in 10 of the town's grown people take up arms beside the watch. They are untrained and are not counted as the guard.","plain"))
-	lines.append(_line("Training soldiers","%d at a time" % MilitaryCampaign.training_capacity(),
-		"How many can be trained at once: 3, plus 3 for every 10 on watch, plus the commander's skill, more with drill and a standing corps.","good" if watch>0.0 else "plain"))
+	# The watch is the army and drills at home (watch_military.gd).
+	var drill:Dictionary=preload("res://scripts/watch_military.gd").role_effect(MilitaryCampaign)
+	lines.append(_line("Drill of the watch","%d in 100" % roundi(float(drill.drill)*100.0),
+		"Everyone keeping watch is under arms and drills at home every day%s. Ten more: %s" % [(", most of a newcomer's drill in about %d days" % int(drill.drill_days)) if int(drill.drill_days)>0 else "",String(drill.ten_more).trim_prefix("Ten more: ")],"good" if watch>0.0 else "plain"))
 	# Walls and ditches: only the watch builds them (military_campaign.gd).
 	var project:Dictionary=walls.get("construction",{}) if walls.get("construction") is Dictionary else {}
 	if bool(project.get("active",false)):

@@ -1,8 +1,9 @@
 extends RefCounted
 ## THE ARMY WHERE IT STANDS, for the War screen's forces list. Every soldier is
-## counted once, in the row of the place they are: at home (the army's men
-## and the watch apart), each band in the field, each garrison, those in
-## drill, and those waiting, hurt or away. A row says where they are, how
+## counted once, in the row of the place they are: at home (the watch at
+## home: the home guard and those free for the bands), each band in the
+## field, each garrison, those in a drill course, and those waiting, hurt or
+## away. A row says where they are, how
 ## many, what they carry (kit by count), who leads them and how they stand.
 ## Read from the one ledger (MilitaryCampaign and the army bar's own cards);
 ## nothing here moves anyone. Static; preload.
@@ -26,8 +27,8 @@ static func rows(mc:Node)->Array[Dictionary]:
 	if home_men>0:
 		var blocks:=Strips.composition(mc.home_army.get("formations",[]))
 		var ready:=maxi(0,home_men-int(watch.home))
-		var doing:="%s ready for the field" % EraWords.grouped(ready)
-		if int(watch.home)>0:doing+=" · %s keep the watch" % EraWords.grouped(int(watch.home))
+		var doing:="%s free for the bands" % EraWords.grouped(ready)
+		if int(watch.home)>0:doing+=" · %s guard home and the towns" % EraWords.grouped(int(watch.home))
 		out.append({"kind":"home","id":"home","title":"At home in %s" % home,"men":home_men,"full":home_men,"blocks":blocks,"kit":kit_words(blocks),
 			"leader":_name_of(mc.home_army.get("commander",{})),"doing":doing,"will":clampf(float(mc.home_army.get("morale",0.6)),0.0,1.0),"fed":-1.0,"army_id":0})
 	for army_variant in mc.field_armies:
@@ -84,10 +85,10 @@ static func kit_words(blocks:Array)->String:
 	return ", ".join(parts)
 
 
-## Where the army's people come from: every soldier is one fewer at work.
-## {soldiers, workers (who can work), one_in}.
+## Where the army's people come from: everyone keeping watch is one fewer at
+## other work (watch_military.gd). {soldiers, workers (who can work), one_in}.
 static func drawn_from(mc:Node)->Dictionary:
-	var soldiers:=Law.under_arms(mc)
+	var soldiers:=maxi(Law.under_arms(mc),int(mc.watch_manpower()))
 	var able:=maxi(1,int(WorldSimulation.state.able_population()))
 	return {"soldiers":soldiers,"workers":able,"one_in":roundi(float(able)/float(soldiers)) if soldiers>0 else 0}
 

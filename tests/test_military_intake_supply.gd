@@ -45,8 +45,13 @@ func test_controller_returns_unserviceable_waiting_recruits_without_disbanding_t
 		WorldSimulation.state.resource_stockpiles.clear()
 		var plan:=Controller.current_plan("intake")
 		Controller.military_orders("intake",plan)
-		assert_int(host.aggregate_recruits).is_equal(0)
-		assert_int(int(host.home_army.troops)).is_equal(3)
+		# The ruler raises no recruits apart from the watch; those waiting join
+		# the watch at the war leader's keeping and those above its share go
+		# back to work (watch_military.gd). The troops stand.
 		assert_array(host.training_queue).is_empty()
+		host.keep_watch()
+		assert_int(host.aggregate_recruits).is_equal(0)
+		assert_int(int(host.home_army.troops)).is_greater_equal(3)
+		assert_int(host._mobilized_count()).is_less_equal(maxi(3,host.watch_manpower()+maxi(1,ceili(float(host.watch_manpower())*0.01))))
 		assert_float(WorldSimulation.state.population_exact).is_equal(500.0)
 	)
