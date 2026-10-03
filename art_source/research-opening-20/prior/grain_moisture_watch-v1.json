@@ -1,0 +1,12 @@
+{
+  "id": "grain_moisture_watch",
+  "line": "nutrition",
+  "game_year": 24,
+  "approx_historical_year": -4840,
+  "prompt": "c. 4840 BCE: Adults spread and turn grain to dry on woven mats while inspecting baskets for damp under reed granary; matte egg tempera panel. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-45c36ba7-e597-4717-b986-cdeb51ccabb8.png",
+  "asset": "res://assets/ui/research/subjects/grain_moisture_watch-v1.png",
+  "sha256": "d62b996475ee27bff63de7b9a5825b0e4d0aab95f236279816a2656fe86dfe33",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; drying, turning and moisture watch clear in crop."
+}

@@ -63,7 +63,7 @@
   "field_armorer_teams": "res://assets/ui/research/paper/first300-cards/field_armorer_teams.tres",
   "skirmish_pair_drill": "res://assets/ui/research/paper/first300-cards/skirmish_pair_drill.tres",
   "clay_levigation": "res://assets/ui/research/paper/first300-cards/clay_levigation.tres",
-  "grog_preparation": "res://assets/ui/research/paper/first300-cards/grog_preparation.tres",
+  "grog_preparation": "res://assets/ui/research/subjects/grog_preparation-v2.png",
   "fiber_combing": "res://assets/ui/research/paper/first300-cards/fiber_combing.tres",
   "warp_weighted_looms": "res://assets/ui/research/paper/first300-cards/warp_weighted_looms.tres",
   "woven_dressings": "res://assets/ui/research/paper/first300-cards/woven_dressings.tres",
@@ -132,7 +132,7 @@
   "sail_seaming": "res://assets/ui/research/paper/sail_seaming.png",
   "thatched_roofing": "res://assets/ui/research/paper/thatched_roofing.png",
   "fired_roof_tiles": "res://assets/ui/research/paper/fired_roof_tiles.png",
-  "wattle_and_daub_walls": "res://assets/ui/research/paper/wattle_and_daub_walls.png",
+  "wattle_and_daub_walls": "res://assets/ui/research/subjects/wattle_and_daub_walls-v2.png",
   "clay_pipe_forming": "res://assets/ui/research/paper/clay_pipe_forming.png",
   "clay_pipe_socket_jointing": "res://assets/ui/research/paper/clay_pipe_socket_jointing.png",
   "aggregate_road_foundations": "res://assets/ui/research/paper/aggregate_road_foundations.png",
@@ -184,5 +184,8 @@
   "framed_construction": "res://assets/ui/research/subjects/framed_construction-v2.png",
   "pit_firing": "res://assets/ui/research/subjects/pit_firing-v2.png",
   "earth_oven_cooking": "res://assets/ui/research/subjects/earth_oven_cooking-v2.png",
-  "clay_tempering": "res://assets/ui/research/subjects/clay_tempering-v2.png"
+  "clay_tempering": "res://assets/ui/research/subjects/clay_tempering-v2.png",
+  "fish_weirs_and_traps": "res://assets/ui/research/subjects/fish_weirs_and_traps-v2.png",
+  "milking": "res://assets/ui/research/subjects/milking-v2.png",
+  "sweat_baths": "res://assets/ui/research/subjects/sweat_baths-v2.png"
 }

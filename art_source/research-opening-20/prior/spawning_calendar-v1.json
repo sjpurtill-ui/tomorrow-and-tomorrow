@@ -1,0 +1,12 @@
+{
+  "id": "spawning_calendar",
+  "line": "ecology",
+  "game_year": 24,
+  "approx_historical_year": -4840,
+  "prompt": "c. 4840 BCE: Adults watch dense spawning fish run and flowering riverside plants as natural seasonal sign to prepare trap; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-b87f1250-3363-4dc1-81df-4b3cb1011686.png",
+  "asset": "res://assets/ui/research/subjects/spawning_calendar-v1.png",
+  "sha256": "7f754ef9249e0043d666ea1f4614d4cbcefdce5fd9fe58e2aca52d2070bae851",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; fish run and seasonal plants clear; no written calendar."
+}
