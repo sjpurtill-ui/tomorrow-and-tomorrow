@@ -69,13 +69,7 @@
    "caption": "Race games on a marked board with throwing sticks (Year 310)",
    "style": "silhouette_ochre"
   },
-  "bone_flutes_drums": {
-   "path": "res://assets/ui/research/discovery-600/bone_flutes_drums.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
-   "tile_index": 6,
-   "caption": "Bone flutes and hand drums at gatherings (Year 7)",
-   "style": "silhouette_ochre"
-  },
+  "bone_flutes_drums": {"path": "res://assets/ui/research/subjects/bone_flutes_drums-v1.png", "style": "culture: flat interlocking indigo/rose/gold/violet tapestry-inspired PAINTING, never literal cloth", "focus": [0.5, 0.5]},
   "boundary_sighting_marks": {
    "path": "res://assets/ui/research/discovery-600/boundary_sighting_marks.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 01_20_39 PM.png",

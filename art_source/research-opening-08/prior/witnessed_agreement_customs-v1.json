@@ -1,0 +1,12 @@
+{
+  "id": "witnessed_agreement_customs",
+  "line": "institutions",
+  "game_year": 7,
+  "approx_historical_year": -4953,
+  "prompt": "Two Neolithic household representatives make an oral agreement in front of adult witnesses, hands on shoulders; archaic mineral fresco on plaster.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-61d3b134-4493-48c1-9585-9503f02a3061.png",
+  "asset": "res://assets/ui/research/subjects/witnessed_agreement_customs-v1.png",
+  "sha256": "92831b473168400ee64af3c777e5b8c3ecd54b687c50963493062c1e03be2c80",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; rejected first for lifelike/classical faces; oral agreement and witnesses clear; crop reviewed."
+}

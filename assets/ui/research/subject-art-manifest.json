@@ -11,8 +11,12 @@
     ]
   },
   "seed_selection": {
-    "path": "res://assets/ui/research/subjects/seed_selection-v1.png",
+    "path": "res://assets/ui/research/subjects/seed_selection-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -212,8 +216,12 @@
     ]
   },
   "hide_floats": {
-    "path": "res://assets/ui/research/subjects/hide_floats-v1.png",
+    "path": "res://assets/ui/research/subjects/hide_floats-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -255,8 +263,12 @@
     ]
   },
   "hafted_tools": {
-    "path": "res://assets/ui/research/subjects/hafted_tools-v1.png",
+    "path": "res://assets/ui/research/subjects/hafted_tools-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -883,8 +895,12 @@
     ]
   },
   "hafted_weapons": {
-    "path": "res://assets/ui/research/subjects/hafted_weapons-v1.png",
+    "path": "res://assets/ui/research/subjects/hafted_weapons-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -5878,14 +5894,14 @@
     ]
   },
   "postpartum_seclusion_care": {
-    "path": "res://assets/ui/research/subjects/postpartum_seclusion_care-v1.png",
+    "path": "res://assets/ui/research/subjects/postpartum_seclusion_care-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "witnessed_agreement_customs": {
-    "path": "res://assets/ui/research/subjects/witnessed_agreement_customs-v1.png",
+    "path": "res://assets/ui/research/subjects/witnessed_agreement_customs-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9753,6 +9769,13 @@
       0.5
     ],
     "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "bone_flutes_drums": {
+    "path": "res://assets/ui/research/subjects/bone_flutes_drums-v1.png",
+    "focus": [
       0.5,
       0.5
     ]
