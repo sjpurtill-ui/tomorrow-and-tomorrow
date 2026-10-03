@@ -228,3 +228,17 @@ Your own `codex/court-motion` (turning, walk speed and foot sync, walk-cancel) o
   - K's stake act assumes a 1.85 m stake top; M's stake is 2.68 m. Match one to the other.
   - L's plan staging casts only victim, executioner and cook. Acts with more people (throwers, hoisters, the scribe) need more roles cast.
   - Act 16 (arrows) has a fall at +5.0 s that would want an extra thump in N's track if kept.
+
+## Addendum 2: clothing fix in progress (handed to Astra)
+
+The user has put all court animation, figure and clothing work with Astra. J's unfinished clothing fix is pushed, unmerged, on `codex/court-clothes-fix` at `58a0912a`, based on main with K's skirt fix (eaadfb50) merged in.
+
+- **Done:**
+  - The tunic and hide skirt fronts follow the legs.
+  - The robe is slit from the hem to above the knee, and its front follows the legs.
+  - The sleeve-to-body weights blend over about a hand's width, so the shoulder doesn't tear when an arm goes up.
+  - Skin under cloth is hidden only where the cloth moves with it or lies tight. Where a skirt or strap stays behind, a leg or arm shows instead of a hole.
+  - `build_all.sh` takes `OUT=...`, so K's audit can check a build before it goes into the game.
+  - All seven bodies are rebuilt and committed.
+- **Audit counts:** main has 2,297 clothing failures across all bodies, and female_old alone has 421. On female_old, this branch's settings bring that down to 167, mostly the robe and hide stretching when sitting on the floor or kneeling. The final seven-body build has not been audited yet.
+- **Needs a visual check:** the audit can't detect skin poking through cloth. The cover change trades holes for that risk, so check kneeling, sitting and striding by eye.
