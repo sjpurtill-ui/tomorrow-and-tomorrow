@@ -696,7 +696,7 @@ func _embody(f:Figure)->void:
 ## post steps a little aside, onto open floor (never onto the fire). The one
 ## before the god and the seated keep their places.
 const APART:=0.62
-const IN_LINE:=0.5
+const IN_LINE:=0.7
 func _space_spot(f:Figure)->void:
 	if court_set==null or f.spot==null or f.role==MAIN:return
 	var yaw:=22.0
