@@ -50,6 +50,9 @@ TOLERANCES = {
     "art_studied": ("abs", 1.5, 0),
     "art_science": ("abs", 0.04, 0),
     "art_allure": ("abs", 0.10, 0),
+    # People first: the leaders' food work (percentage points of those at work) and cohesion.
+    "food_labor": ("abs", 6.0, 0),
+    "cohesion": ("abs", 0.08, 0),
 }
 # Formula lines transcribed into model.py; check.py warns when the game line changes.
 FORMULA_ANCHORS = [
@@ -108,6 +111,8 @@ def row_at(rows: list, year: float):
 
 
 def metric(row: dict, key: str):
+    if key == "food_labor":
+        return (row.get("alloc") or {}).get("Food")
     if key.startswith("art_"):
         a = row.get("artifacts", {})
         return {"art_studied": a.get("studied"), "art_science": a.get("science"), "art_allure": a.get("allure")}[key]
@@ -175,7 +180,9 @@ KNOWN_GAPS = {
     ("poor", "known"): "follows the poor-site population gap (fewer researchers)",
     ("poor", "lines_total"): "follows the poor-site population gap (fewer researchers)",
     ("poor", "food_security"): "the poor site's food-labor floor surplus (GovernmentPeopleSystem._apply_food_labor_floor) is not carried into the surrogate's coarse poor-site harvest; the engine's food security runs ~0.1 higher",
-    ("*", "food_days"): "timing of Storage Pits / Public Stores builds (settlement construction queue) is approximated",
+    ("path_growth", "food_labor"): "first years: the engine's harvest per food worker runs ~10-15% above the surrogate's (founding traditions' food_yield, the abundant-game modifier and the gathering lever are not modelled), so its leaders need fewer on food; within tolerance from year 10",
+    ("path_war", "food_labor"): "as path_growth: the first years' harvest per food worker (founding traditions, modifiers) is not modelled",
+    ("*", "food_days"): "the engine's leaders hold the store near 20 days (LEAN_DAYS) while the surrogate's monthly-to-weekly re-planning keeps 28-44; food security counts only the first 20 days, so deaths, births and health are unaffected",
 }
 
 

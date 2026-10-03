@@ -31,7 +31,7 @@ SIM = Path(__file__).resolve().parent
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--seeds", type=int, default=3)
+    ap.add_argument("--seeds", type=int, default=6, help="surrogate seeds per truth run (the truth runs are short, so 6 are cheap and keep the discovery mix out of seed noise)")
     ap.add_argument("--strict", action="store_true")
     ap.add_argument("--jobs", type=int, default=16)
     ap.add_argument("--rev", default="auto", help="game revision to read ('auto': HEAD when the truth came from HEAD's files, else the working tree; '' = working tree)")
