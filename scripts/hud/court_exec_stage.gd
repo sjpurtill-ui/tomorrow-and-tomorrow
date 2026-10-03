@@ -15,6 +15,7 @@ extends Node
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
+const Paths:=preload("res://scripts/hud/court_paths.gd")
 ## J's gore on the person's own figure (court_figure_gore.gd), when it is in.
 const GORE_PATH:="res://scripts/hud/court_figure_gore.gd"
 static var _gore:Script
@@ -43,6 +44,7 @@ var _survivors:Dictionary={}
 var _court_dog:Node3D
 var _dog_home:=Transform3D.IDENTITY
 var _skipped:=false
+var _pack_follow:Tween
 
 const BLOOD:=Color("9c1a12")
 const BLOOD_DARK:=Color("6a0d08")
@@ -653,7 +655,9 @@ func _plan_sequence(key:String,clips:Array)->void:
 			var per_second:Array=c.move
 			var seconds:=float(c.until)-float(c.t)
 			var step:=_plan_frame.basis*Vector3(float(per_second[0]),float(per_second[1]),float(per_second[2]))*seconds*_drag_scale
-			t.tween_callback(func()->void:_move_to(key,b.global_position+step,seconds,Tween.TRANS_LINEAR))
+			t.tween_callback(func()->void:
+				_move_to(key,b.global_position+step,seconds,Tween.TRANS_LINEAR)
+				if key==victim and not _pack.is_empty():_follow_dragged_victim())
 
 ## A clip's event: the split at the blow, the blood.
 func _on_plan_cue(fig:Node3D,event:Dictionary)->void:
@@ -705,16 +709,83 @@ func _point_node(at:Vector3)->Node3D:
 func _pack_come(args:Dictionary)->void:
 	var court:=_court()
 	if court==null:return
+	_clear_drag_lane()
 	_court_dog=court.call("animal","dog") if court.has_method("animal") else null
 	if is_instance_valid(_court_dog):_dog_home=_court_dog.transform
 	if court.has_method("dog_pack"):_pack=court.call("dog_pack",int(args.get("more",2)))
 	else:_dogs(args);return
 	var v:=_body(victim)
+	var forward:=(point("windbreak")-v.global_position).normalized() if v!=null else Vector3.FORWARD
+	var side:=forward.cross(Vector3.UP)
 	for i in _pack.size():
 		var dog:Node3D=_pack[i]
-		if is_instance_valid(dog) and v!=null:dog.call("go_to",v.global_position-v.global_transform.basis.z*0.9+v.global_transform.basis.x*(0.25 if i%2==0 else -0.25),"trot")
+		if is_instance_valid(dog) and v!=null:
+			dog.call("hold",30.0)
+			dog.call("go_to",court.to_local(v.global_position+forward*0.85+side*(float(i)-1.0)*0.35),"trot")
+
+## Only those in the drag corridor move aside, onto open floor. Remembered
+## nudges let a skip or natural end return them without changing their marks.
+func _clear_drag_lane()->void:
+	var court:=_court();var v:=_body(victim)
+	if court==null or v==null:return
+	var a3:=court.to_local(v.global_position);var b3:=court.to_local(point("windbreak"))
+	var a:=Vector2(a3.x,a3.z);var end:=Vector2(b3.x,b3.z)
+	var along:=(end-a).normalized();var side:=Vector2(-along.y,along.x)
+	var room:=Paths.room_of(court)
+	var spots:Dictionary={}
+	for key:String in stage.get("cast_order"):
+		var f:Variant=_fig(key);var b:=_body(key)
+		if b!=null and f!=null and not f.leaving:
+			var p:=court.to_local(b.global_position)
+			spots[key]=Vector2(p.x,p.z)
+	for key:String in spots:
+		if key==victim:continue
+		var from:Vector2=spots[key]
+		if Geometry2D.get_closest_point_to_segment(from,a,end).distance_to(from)>=1.0:continue
+		var preferred:=1.0 if (from-a).dot(side)>=0.0 else -1.0
+		var best:=from;var distance:=INF
+		for width:float in [1.15,1.5,1.85,2.2]:
+			for sign_:float in [preferred,-preferred]:
+				for shift:float in [0.0,0.65,-0.65,1.3,-1.3]:
+					var candidate:=a+along*((from-a).dot(along)+shift)+side*width*sign_
+					if not Paths.open_at(room,candidate):continue
+					# A seat may start on its log; the remainder of the sidestep must be clear.
+					var start:=from.move_toward(candidate,0.45)
+					if not Paths.clear_line(room,start,candidate):continue
+					var clear:=true
+					for other:String in spots:
+						if other!=key and candidate.distance_to(spots[other])<0.65:clear=false;break
+					if clear and from.distance_to(candidate)<distance:
+						best=candidate;distance=from.distance_to(candidate)
+		if distance<INF:
+			spots[key]=best
+			_walk_to(key,court.to_global(Vector3(best.x,a3.y,best.y)),clampf(distance/1.2,0.4,1.2),"stand")
+
+## The authored victim moves in two bursts with a struggle between them.
+## Keep the same pack at their ankles throughout, rather than leaving it at
+## the original mark until the final crunch beat.
+func _follow_dragged_victim()->void:
+	if _pack_follow!=null and _pack_follow.is_valid():return
+	var v:=_body(victim)
+	if v==null:return
+	var forward:=-_plan_frame.basis.z;var side:=forward.cross(Vector3.UP)
+	var starts:Array[Vector3]=[]
+	for dog:Node3D in _pack:
+		starts.append(dog.global_position-v.global_position)
+		dog.call("cancel_action");dog.call("hold",30.0)
+		dog.call("play","tug",0.2)
+		dog.call("face_toward",dog.get_parent_node_3d().to_local(dog.global_position-forward*2.0))
+	_pack_follow=_tween()
+	_pack_follow.tween_method(func(elapsed:float)->void:
+		if not is_instance_valid(v):return
+		for i in _pack.size():
+			var dog:Node3D=_pack[i]
+			if not is_instance_valid(dog):continue
+			var offset:=forward*0.85+side*(float(i)-1.0)*0.35
+			dog.global_position=v.global_position+starts[i].lerp(offset,clampf(elapsed/0.5,0.0,1.0)),0.0,30.0,30.0)
 
 func _pack_crunch(args:Dictionary)->void:
+	if _pack_follow!=null and _pack_follow.is_valid():_pack_follow.kill()
 	var court:=_court()
 	var route:Array=court.call("drag_route") if court!=null and court.has_method("drag_route") else []
 	for dog in _pack:
