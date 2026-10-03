@@ -516,6 +516,34 @@ func test_makers_arm_the_watch_at_a_high_cost_in_goods()->void:
 	assert_float(float(Goods.advance().arms_made)).is_equal(0.0)
 
 
+func test_arms_makers_are_counted_with_every_bonus_in()->void:
+	# A hundred makers with a genius of making (each counts for 1.4), a fifth on arms.
+	GameState.ensure_population_total(1000)
+	_work("player","Crafting",100)
+	_work("player","Defense",400)
+	_materials("player",5000.0)
+	WorldSimulation.figures.genius_bonus={"Crafting":0.4}
+	var all_makers:=GameState.effective_workers("Crafting")
+	assert_float(all_makers).is_equal_approx(140.0,0.0001)
+	GameState.elapsed_days=70
+	Arms.plan_day()
+	var report:=Goods.advance()
+	assert_float(float(report.arms_hands)).is_equal_approx(28.0,0.0001)
+	# The rest of the making work counts the other 112, and all the makers are still 140.
+	assert_float(GameState.effective_workers("Crafting")).is_equal_approx(112.0,0.0001)
+	assert_float(Goods.makers()).is_equal_approx(140.0,0.0001)
+	# The tools-and-materials count leaves out the same share (a fifth).
+	assert_float(Goods.arms_fraction(GameState)).is_equal_approx(0.2,0.0001)
+	WorldSimulation.figures.genius_bonus={}
+
+
+func test_goods_to_trade_leave_what_makers_must_make_again()->void:
+	GameState.resource_stockpiles[Goods.GOODS]=Goods.target()+50.0
+	# Beyond the homes' need, less the goods kept for the first plant and the learners.
+	assert_float(Goods.spare()).is_equal_approx(maxf(0.0,50.0-Goods.capital_reserve()-float(preload("res://scripts/research_600_catalog.gd").learners_goods().wanted)),0.0001)
+	assert_float(Goods.spare()).is_less_equal(50.0)
+
+
 func test_arms_trade_as_a_good_between_peoples()->void:
 	var a:=String(ids[0])
 	assert_bool(Ledger.ARMS in Ledger.GOODS).is_true()

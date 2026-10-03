@@ -128,6 +128,12 @@ static func arms_hands(state:Variant)->float:
 	if int(state.elapsed_days)-int((goods as Dictionary).get("last_day",-99999))>7:return 0.0
 	return maxf(0.0,float((report as Dictionary).get("arms_hands",0.0)))
 
+## The share of all the makers (bonuses counted the same way) on arms.
+static func arms_fraction(state:Variant)->float:
+	var hands:=arms_hands(state)
+	if hands<=0.0:return 0.0
+	return clampf(hands/maxf(1.0,maxf(0.0,float(state.effective_workers("Crafting")))+hands),0.0,1.0)
+
 ## Every maker in scope, those on arms included.
 static func makers()->float:
 	return maxf(0.0,WorldSimulation.state.effective_workers("Crafting"))+arms_hands(WorldSimulation.state)
@@ -140,9 +146,12 @@ static func makers_share()->float:
 static func specialization()->float:
 	return 1.0+SPECIALIZATION*clampf((makers_share()-MAKERS_START)/(MAKERS_FULL-MAKERS_START),0.0,1.0)
 
-## Goods held beyond the homes' need: what can change hands.
+## Goods held beyond the homes' need, what the learners will take and the
+## goods kept for the first plant: what can change hands (so a deal never
+## sells what makers would have to make again).
 static func spare()->float:
-	return maxf(0.0,stock()-target())
+	var learners:=float(preload("res://scripts/research_600_catalog.gd").learners_goods().get("wanted",0.0))
+	return maxf(0.0,stock()-target()-learners-capital_reserve())
 
 ## The most goods the homes and the market hold before makers stop.
 static func ceiling()->float:
