@@ -12,7 +12,8 @@ static func recommendation()->Dictionary:
 	var eligible:Dictionary={};var opens:Dictionary={}
 	# Each question's opening year (research_open_year), read once per catalog.
 	var open_years:=discovery.technology_open_years()
-	var year:=float(WorldSimulation.state.elapsed_days)/365.0
+	# The people's own age (the calendar plus its learning lead).
+	var year:=float(discovery.learning_year())
 	for index in open_years.size():
 		# A foundation to start now is one near its own age (work before it
 		# costs proportionally more; never a wall): research_years_ahead.

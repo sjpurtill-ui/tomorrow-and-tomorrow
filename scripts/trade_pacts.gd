@@ -410,7 +410,8 @@ static func offline_choices(civ_id:String)->Array[Dictionary]:
 	var ours:=""; var ours_worth:=0.0
 	for res:String in RESOURCES:
 		var held_worth:=player_stock(res)*worth(res)
-		if res=="Food" and float(GameState.simulation_metrics.get("food_days",60.0))<45.0: continue
+		# Food is offered only from full stores (food_care.gd RESERVE_DAYS).
+		if res=="Food" and float(GameState.simulation_metrics.get("food_days",60.0))<preload("res://scripts/food_care.gd").RESERVE_DAYS: continue
 		if held_worth>ours_worth: ours_worth=held_worth; ours=res
 	var theirs:=""; var best:=0.0
 	for res:String in RESOURCES:

@@ -277,7 +277,9 @@ static func _household_card()->Dictionary:
 		var amount:=float(GameState.resource_stockpiles.get(resource,0.0))
 		if amount>0.0:basket.append({"resource":resource,"name":ResourceSystem.display_name(resource),"amount":amount})
 	return {"stock":goods.stock(),"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
-		"worn":float(report.get("worn",0.0)) if current else goods.stock()*goods.daily_wear(),"reason":String(report.get("reason","")) if current else "","basket":basket}
+		"worn":float(report.get("worn",0.0)) if current else goods.stock()*goods.daily_wear(),"reason":String(report.get("reason","")) if current else "","basket":basket,
+		# Goods the learners took today (research_600_catalog.gd learning_goods).
+		"learners":float(report.get("learners",0.0)) if current else 0.0}
 
 ## Household goods as dock rows (used by tests and older reports).
 static func _household_rows()->Array:
@@ -285,7 +287,7 @@ static func _household_rows()->Array:
 	var card:=_household_card()
 	var reason:=String(card.reason)
 	if reason.is_empty():reason="Replenishing as needed"
-	return [{"name":"Civilian Goods","value":"%+.2f today" % (float(card.made)-float(card.worn)),"sub":"%.1f held of %.1f wanted (%d%%) · %s" % [goods.stock(),goods.target(),roundi(float(card.coverage)*100.0),reason],"accent":Tokens.GREEN if float(card.coverage)>=.8 else Tokens.AMBER}]
+	return [{"name":"Civilian Goods","value":"%+.2f today" % (float(card.made)-float(card.worn)-float(card.get("learners",0.0))),"sub":"%.1f held of %.1f wanted (%d%%) · %s" % [goods.stock(),goods.target(),roundi(float(card.coverage)*100.0),reason],"accent":Tokens.GREEN if float(card.coverage)>=.8 else Tokens.AMBER}]
 
 static func _technique_list()->Array:
 	var goods=preload("res://scripts/civilian_goods.gd")

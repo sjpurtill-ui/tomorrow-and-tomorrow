@@ -376,8 +376,9 @@ func test_charter_fees_come_out_of_real_stores()->void:
 	assert_float(float((purse.month as Dictionary).charter)).is_equal_approx(float(day.charter),0.0001)
 	assert_float(float(Purse.sources().charter)).is_greater(0.0)
 	assert_float(float(Purse.forecast().charter)).is_greater(0.0)
-	# A town with nothing to spare gives nothing: no fee is made up.
-	_stock_food(30.0)
+	# A town with nothing to spare (under its lean buffer, Purse.LEVY_KEEP_DAYS)
+	# gives nothing: no fee is made up.
+	_stock_food(Purse.LEVY_KEEP_DAYS-5.0)
 	var bare:=Purse.accrue({"daily_output_value":1000.0},0.0)
 	assert_float(float(bare.charter)).is_equal(0.0)
 	# Guarded takes nothing beyond the levy.

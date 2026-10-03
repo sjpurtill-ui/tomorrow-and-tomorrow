@@ -821,7 +821,7 @@ static func _voices(audience:Dictionary)->Dictionary:
 	var res:=String(terms.get("resource","Food"))
 	var stock:=floori(Hall.player_stock(res)) if not res.is_empty() else 0
 	var c:=Hall.conditions()
-	var lean:=float(c.food_days)<35.0
+	var lean:=float(c.food_days)<preload("res://scripts/food_care.gd").LEAN_DAYS
 	var tells:Array=situation.get("tells",[]) if situation.get("tells") is Array else []
 	var signs:Array=situation.get("signs",[]) if situation.get("signs") is Array else []
 	var against:="";var against_why:="";var favour:="";var favour_why:=""

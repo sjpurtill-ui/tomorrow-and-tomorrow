@@ -173,8 +173,9 @@ static func logistics()->Dictionary:
 # --- Learning -----------------------------------------------------------------------
 
 ## What the people know, a year (consequence_engine.gd knowledge gain:
-## learners × pace × attention ÷ (92 × people, at least 3000)), and research
-## strength in learners' worth (research_600_catalog.gd team_capacity).
+## learners × pace × attention ÷ (92 × people, at least 3000)), the questions
+## worked at once and how much faster ten more make the research
+## (discovery_system.gd role_effect: learning without a cap, goods counted).
 static func knowledge()->Dictionary:
 	var state=_state()
 	var learners:=_workers("Knowledge")
@@ -186,8 +187,15 @@ static func knowledge()->Dictionary:
 		var fit:=1.0 if asked<=maxf(1.0,floorf(people)) else clampf(people/maxf(1.0,asked),0.15,1.0)
 		return people*labor*fit/maxf(3000.0,pop*92.0)*rate*365.0*100.0
 	var more:=learners+_ten("Knowledge")
-	return _row("What we know: +%s points a year; research at %s learners' worth." % [_points(float(gain.call(learners))),_one(Research600.team_capacity(learners))],
-		"Ten more: +%s points a year, +%s learners' worth." % [_points(float(gain.call(more))-float(gain.call(learners))),_one(Research600.team_capacity(more)-Research600.team_capacity(learners))])
+	var research:Dictionary=WorldSimulation.discovery.role_effect("Knowledge",_ten("Knowledge"))
+	return _row("What we know: +%s points a year; %s questions at once." % [_points(float(gain.call(learners))),_count(int(research.get("teams",0)))],
+		"Ten more learners: +%s points a year, research %s." % [_points(float(gain.call(more))-float(gain.call(learners))),faster(float(research.get("pace_gain",0.0)))])
+
+## A research pace gain in a few words: "61 in 100 faster", "twice as fast".
+static func faster(gain:float)->String:
+	if gain>=0.995:return "%s times as fast" % _one(1.0+gain)
+	if gain>=0.01:return "%d in 100 faster" % roundi(gain*100.0)
+	return "a little faster" if gain>0.0 else "no faster"
 
 # --- Keeping and caring -------------------------------------------------------------
 

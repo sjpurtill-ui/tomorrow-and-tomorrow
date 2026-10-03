@@ -273,7 +273,11 @@ static func advance()->Dictionary:
 	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
 	var worn:=stock()*(1.0-pow(1.0-daily_wear(),elapsed))
 	if worn>0.0:stocks[GOODS]=stock()-worn
-	var report:Dictionary={"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":"","for_barter":0.0,"worth":0.0,"per_maker":0.0,"arms_made":0.0,"arms_hands":0.0,"arms_kind":"","arms_inputs":{}}
+	# Learning (research_600_catalog.gd learners_goods, builder A): the learners
+	# took their goods before the makers' day; the report shows it ("learners",
+	# a day) and the makers make it good below.
+	var learners:=preload("res://scripts/research_600_catalog.gd").learners_goods()
+	var report:Dictionary={"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":"","learners":float(learners.taken),"for_barter":0.0,"worth":0.0,"per_maker":0.0,"arms_made":0.0,"arms_hands":0.0,"arms_kind":"","arms_inputs":{}}
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:
 		report.reason="Needs a settled workplace"
 	else:
@@ -287,7 +291,8 @@ static func advance()->Dictionary:
 		# Techniques, and how well people work (the business sector's factor included).
 		var rate:=BASE_RATE*technique_output()*pace*specialization()
 		report.per_maker=CRAFT_SHARE*rate
-		var need:=maxf(0.0,float(report.target)*1.20+capital_reserve()-stock())
+		# The homes' need first, and what the learners will take before the next step.
+		var need:=maxf(0.0,float(report.target)*1.20+capital_reserve()+float(learners.wanted)-stock())
 		var room:=maxf(0.0,ceiling()-stock())
 		var spendable:Dictionary={}
 		var raw_available:=0.0

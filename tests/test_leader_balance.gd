@@ -101,7 +101,8 @@ func test_risk_trades_sooner_settling_for_thinner_rations()->void:
 	var bold:=Strategy.preferences(Bold,{"food_days":120})
 	var cautious:=Strategy.preferences(Cautious,{"food_days":120})
 	assert_float(float(bold.expansion_food)).is_less(float(cautious.expansion_food))
-	assert_float(float(bold.expansion_food)).is_greater_equal(45.0)
+	# The stores are a lean buffer: gates count FoodCare.store_gate of the old days.
+	assert_float(float(bold.expansion_food)).is_greater_equal(preload("res://scripts/food_care.gd").store_gate(45.0))
 	assert_float(float(bold.settle_distance)).is_greater(float(cautious.settle_distance))
 	assert_float(float(bold.settle_distance)).is_less_equal(40.0)
 	assert_float(float(bold.settle_margin_days)).is_less(Strategy.ESTABLISHMENT_DAYS)
@@ -126,7 +127,7 @@ func test_great_works_gates_answer_by_one_rule()->void:
 	var doubtful:=facts.duplicate();doubtful.feasibility=.64
 	assert_str(Strategy.works_answer("design",doubtful,Bold)).is_equal("grander")
 	assert_str(Strategy.works_answer("design",doubtful,Cautious)).is_equal("practical")
-	var lean:=facts.duplicate();lean.food_days=110.0
+	var lean:=facts.duplicate();lean.food_days=55.0
 	assert_str(Strategy.works_answer("stores",lean,Bold)).is_equal("pour")
 	assert_str(Strategy.works_answer("stores",lean,Cautious)).is_equal("protect")
 	# Only a hard temper levies forced labor, and only from a people that accepts rank.
@@ -150,7 +151,7 @@ func test_goodwill_carries_a_real_gift_or_does_not_go()->void:
 	var scarce:={"resource":"Stone","amount":20.0,"available":30.0,"can_send":true,"reception":"especially useful"}
 	assert_str(Strategy.goodwill_gift([food,timber,scarce],120.0,plan)).is_equal("Timber")
 	assert_str(Strategy.goodwill_gift([food,scarce],120.0,plan)).is_equal("Food")
-	assert_str(Strategy.goodwill_gift([food,scarce],60.0,plan)).is_equal("")
+	assert_str(Strategy.goodwill_gift([food,scarce],Strategy.GOODWILL_FOOD_DAYS-5.0,plan)).is_equal("")
 	# Friends already won receive no more gifts.
 	assert_str(Strategy.diplomatic_action({"opinion":.2,"treaty":"trade"},plan,120.0)).is_equal("goodwill")
 	assert_str(Strategy.diplomatic_action({"opinion":.7,"treaty":"trade"},plan,120.0)).is_equal("")
@@ -230,9 +231,11 @@ func test_sustenance_and_wellbeing_plan_deeper_stores()->void:
 		GameState.founding_manifest["food_storage_rations"]=120.0*400.0
 		GameState.simulation_metrics={"food_consumption":120.0,"food_production":130.0,"food_labor_share":.5,"food_intake_ratio":1.0,"food_days":food_days,"food_projected_days":food_days}
 		return float(GovernmentPeopleSystem._allocations_for_focus("balanced",{},true).Food)
-	var even:=float(planned.call("",75.0))
-	var wellbeing:=float(planned.call("wellbeing",75.0))
-	var sustenance:=float(planned.call("sustenance",75.0))
+	# Stores a little under the plain reserve (RESERVE_TARGET_DAYS, 30 days):
+	# the deeper the reserve a people wants, the more it plans.
+	var even:=float(planned.call("",25.0))
+	var wellbeing:=float(planned.call("wellbeing",25.0))
+	var sustenance:=float(planned.call("sustenance",25.0))
 	assert_float(wellbeing).is_greater(even)
 	assert_float(sustenance).is_greater(wellbeing)
 	# With the deep reserve full, the planners release the extra hands again.
