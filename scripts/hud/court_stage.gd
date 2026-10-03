@@ -32,6 +32,8 @@ const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Studio:=preload("res://scripts/hud/court_figure_studio.gd")
 const Looks:=preload("res://scripts/people_appearance.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
+const Acting:=preload("res://scripts/hud/court_acting.gd")
+const DivineRegard:=preload("res://scripts/divine_regard.gd")
 const Voice:=preload("res://scripts/character_voice.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 
@@ -135,6 +137,9 @@ static var set_builder:Object     # M: build(era, facts) -> Node3D with marks
 static var camera_rig:Object      # M: attach(stage, camera, set_root); shot(name, args)
 static var acting:Object          # K: play / look_at / set_mood / speak / idle
 static var director:Object        # L: beats / ambient / asides
+static var sound:GDScript         # N: court_sound.gd (attach(stage) -> Node; on_event; on_beat); null: a silent court
+## The bystanders' muttered lines, a setting (the director reads it here).
+static var mutters_enabled:=true
 ## The Court installs L's director while this is on (tests may turn it off).
 static var directing:=true
 ## Off for a run (tests): no modelled court, the figures stand before the
@@ -143,10 +148,27 @@ static var use_sets:=true
 ## The court's modelled place (court_set_3d.gd, M) when there is one: the
 ## people stand on its marks, its camera frames them, its lights fall on them.
 var court_set:Node3D
+## The set's camera rig (M): shots, insets, the view's changes.
+var rig:Node
 ## Which mark each person holds (mark name -> cast key).
 var _marks:Dictionary={}
 var _hush_tween:Tween
 var _bearer_chosen:=false
+## The court's sound (N), once the stage stands in the tree.
+var _sound:Node
+## The beats the director gave for the last event (an exit or an arrival
+## reads them: backing out bowing, coming back, the wrong side).
+var _last_beats:Array=[]
+## The camera's current claim: a shot holds until its event's beats are
+## done, unless a weightier event comes (wrath, the god > an arrival, a
+## decision > speech > the room's own life).
+var _shot_until:=0.0
+var _shot_weight:=0
+var _event_weight:=1
+var _event_end:=0.0
+## Whose face the camera has gone in on (bubbles keep off it).
+var _focus_key:=""
+var _beat_sets:Array=[]
 ## What the engine says about the hall now (the Court fills it): era, season,
 ## stores_days, hungry, sick, at_war, love, dread, mood, offer.
 var facts:Dictionary={}
@@ -340,6 +362,28 @@ func _init()->void:
 	figure_layer=_layer("Figures");god_layer=_layer("FromAbove");bubble_layer=_layer("Bubbles");caption_layer=_layer("Captions")
 	resized.connect(_on_resized)
 
+func _ready()->void:
+	if sound!=null and _sound==null:
+		var made:Variant=sound.call("attach",self)
+		if made is Node:_sound=made
+	_ambience()
+	_attach_rig()
+
+## The set's rig takes the stage's lens once everyone stands in the tree.
+var _rig_attached:=false
+func _attach_rig()->void:
+	if _rig_attached or rig==null or rig==camera or court_set==null or not court_set.is_inside_tree():return
+	if rig.has_method("attach"):rig.call("attach",self,camera,court_set)
+	_rig_attached=true
+
+## The room's own sound for this place and season (N): the beds and the
+## room's life, from the facts.
+func _ambience()->void:
+	if _sound==null or not is_instance_valid(_sound):return
+	var kind:="fire_ring"
+	if court_set!=null and court_set.get("kind")!=null:kind=String(court_set.get("kind"))
+	_sound.call("ambience",kind,String(facts.get("season","summer")),facts)
+
 ## One transparent SubViewport under the plates and bubbles: every modelled
 ## figure on this stage stands in it, seen by one camera that maps the
 ## stage's pixels onto the hall (layout() still decides where people stand).
@@ -370,7 +414,12 @@ func use_set(era_id:String,set_facts:Dictionary={})->bool:
 	if is_instance_valid(camera) and camera!=lens:camera.queue_free()
 	camera=lens
 	camera.current=true
-	camera.connect("view_changed",_on_view_changed)
+	# M's camera rig drives the set's lens (round 2); the round-1 camera was
+	# the lens itself. Shots, insets and the view's changes go through it.
+	var made_rig:Variant=court_set.get("rig")
+	rig=made_rig if made_rig is Node else camera
+	if rig.has_signal("view_changed"):rig.connect("view_changed",_on_view_changed)
+	if is_inside_tree():_attach_rig()
 	# The set's light is known once it stands in the tree.
 	court_set.ready.connect(func()->void:
 		if is_instance_valid(court_set):Figure3D.set_key_light(court_set.call("key_dir")))
@@ -396,20 +445,46 @@ func _track_all()->void:
 ## onlookers are seen over their shoulders), clear of the UI laid over it.
 func frame_cast(time:=0.0)->void:
 	if court_set==null or camera==null or not camera.is_inside_tree():return
-	camera.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
+	# A shot still holding (a push-in on the one before the god) is not cut
+	# back to everyone by a newcomer or a resize.
+	if _now()<_shot_until and _shot_weight>=2 and time>0.0:return
+	_focus_key=""
+	if rig==null:return
+	rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
 	var subjects:=[]
+	var lead:Variant=null
 	for key in cast_order:
 		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.role=="crowd":continue
 		subjects.append(f.spot)
+		if f.role==MAIN:lead=f.spot
 	if subjects.is_empty():subjects.append(set_point("petitioner"))
-	camera.call("wide",subjects,time)
+	# The one before the god leads the frame (the rest are kept around them).
+	if lead!=null:rig.call("wide",subjects,time,lead)
+	else:rig.call("wide",subjects,time)
 
 ## Where a newcomer stands in the set: the one before the god on the
 ## petitioner's mark (an envoy on the envoy's), their company on the marks
 ## behind, our officials in the arc about the fire, onlookers on the logs
 ## and at the back. "" when every mark is taken.
 func _take_mark(f:Figure)->String:
+	# M's assignment for the whole cast as it stands (main first, then the
+	# company, officials, the seated and the standing), kept for everyone
+	# already placed; the old search below when it cannot place them.
+	if court_set.has_method("assign_marks"):
+		var entries:=[]
+		for key in cast_order:
+			var other:=figure(key)
+			if other==null or other==f:continue
+			entries.append({"key":key,"role":other.role,"stance":String(other.body3d.stance) if other.body3d!=null else ""})
+		entries.append({"key":f.key,"role":f.role,"stance":String(f.body3d.stance) if f.body3d!=null else ""})
+		var assigned:Dictionary=court_set.call("assign_marks",entries,layout_kind)
+		var name_out:=String(assigned.get(f.key,""))
+		if not name_out.is_empty():
+			var holder:=figure(String(_marks.get(name_out,"")))
+			if holder==null or holder.leaving or holder==f:
+				_marks[name_out]=f.key
+				return name_out
 	var wanted:Array=[]
 	var crowd_marks:Array=[]
 	for m:Marker3D in court_set.call("marks_for","crowd_"):crowd_marks.append(String(m.name))
@@ -507,13 +582,45 @@ func add_figure(key:String,person:Dictionary,role:String,name_text:String="",tit
 	# An envoy's gift of food is carried in by the first of their company.
 	if f.role=="attendant" and f.body3d!=null and not _bearer_chosen and String((facts.get("gift",{}) as Dictionary).get("resource","")).to_lower()=="food":
 		_bearer_chosen=true
-		f.body3d.carry("bundle",true)
+		# (once the body stands in the hall: the bundle rides between its hands)
+		var bearer:=f.body3d
+		if bearer.is_inside_tree():bearer.carry("bundle",true)
+		else:bearer.ready.connect(func()->void:if is_instance_valid(bearer):bearer.carry("bundle",true),CONNECT_ONE_SHOT)
 	figures[key]=f;cast_order.append(key)
 	if enter:_arrivals.append(key)
 	if _laid_out:
 		layout(true)
 		_run_arrivals()
 	return f
+
+## Each person keeps their own stance for life; the room is spread so it never
+## looks like a line of hostages: at most one pair of clasped hands in the
+## hall. The one before the god stands as they feel: the frightened with
+## their hands clasped before them, the proud with arms folded, the warm
+## easy; an envoy as their temper is.
+const EASY_STANCES:=["hip","belt","stand","folded","hip","stand"]
+func _spread_stance(f:Figure,own:String)->String:
+	var h:=absi(("%s|%d|stance" % [String(f.person.get("name",f.key)),int(f.person.get("person_id",0))]).hash())
+	var stance:=own
+	if f.role==MAIN:
+		if String(f.person.get("role",""))=="envoy" or layout_kind=="envoy":
+			var temper:=String(f.person.get("temper",""))
+			if temper.is_empty() and director!=null and director.has_method("envoy_temper") and facts.get("envoy") is Dictionary:temper=String(director.call("envoy_temper",facts.envoy))
+			stance=String({"haughty":"folded","nervous":"clasped","greedy":"belt","calm":"stand"}.get(temper,own if own!="clasped" else "stand"))
+		else:
+			var dread:=float(DivineRegard.dread_of(f.person)) if f.person.has("relationships") else 0.0
+			var love:=float(DivineRegard.love_of(f.person)) if f.person.has("relationships") else 0.4
+			if dread>=0.45:stance="clasped"
+			elif float(f.person.get("pride",0.5))>=0.7:stance="folded"
+			elif love>=0.6:stance="stand" if own!="hip" else "hip"
+			elif own=="clasped":stance=String(EASY_STANCES[h%EASY_STANCES.size()])
+	if stance!="clasped":return stance
+	# Someone already has their hands clasped: this one stands otherwise.
+	for key in cast_order:
+		var other:=figure(key)
+		if other!=null and other!=f and other.body3d!=null and String(other.body3d.stance)=="clasped":
+			return String(EASY_STANCES[h%EASY_STANCES.size()])
+	return stance
 
 ## Gives a figure its modelled body in the hall (and its shade on the floor).
 func _embody(f:Figure)->void:
@@ -522,6 +629,7 @@ func _embody(f:Figure)->void:
 	# The one before the god, and an envoy's company, stand.
 	if f.role in [MAIN,"attendant"] and String(look.get("stance","")) in ["sit","crouch"]:look.stance="clasped"
 	if f.role==MAIN and String(look.get("stance",""))=="bowl" and layout_kind=="home":look.stance="clasped"
+	look.stance=_spread_stance(f,String(look.get("stance","stand")))
 	var mark:=""
 	var seat:=-1.0
 	if court_set!=null:
@@ -540,7 +648,9 @@ func _embody(f:Figure)->void:
 		if not mark.is_empty():
 			var m:Marker3D=court_set.call("mark",mark)
 			var holder:=m.get_parent() as Node3D
-			spot.transform=(holder.transform if holder!=null else Transform3D.IDENTITY)*m.transform
+			# A mark's -Z is the way a person there faces; a figure's front is +Z
+			# (M's place() turns them the same way).
+			spot.transform=(holder.transform if holder!=null else Transform3D.IDENTITY)*m.transform*Transform3D(Basis(Vector3.UP,PI),Vector3.ZERO)
 		else:
 			# every mark is taken: at the back, along the far side
 			var extra:=_marks.size()+cast_order.size()
@@ -618,6 +728,8 @@ static func mood_of(regard:Dictionary,envoy_mood:=0.0)->String:
 ## beats on top.
 func event(kind:String,data:Dictionary={})->void:
 	_event_index+=1
+	_last_beats=[]
+	if _sound!=null and is_instance_valid(_sound):_sound.call("on_event",kind,data)
 	if court_set!=null:_set_answers(kind,data)
 	if director==null or not director.has_method("beats"):return
 	var happened:=data.duplicate();happened["kind"]=kind
@@ -628,7 +740,30 @@ func event(kind:String,data:Dictionary={})->void:
 	var all:Array=[]
 	if beats is Array:all.append_array(beats)
 	if lines is Array:all.append_array(lines)
+	_last_beats=all
+	_event_weight=_weight_of(kind,data)
+	var span:=0.0
+	for beat in all:
+		if beat is Dictionary:span=maxf(span,float((beat as Dictionary).get("t",0.0))+float(((beat as Dictionary).get("args",{}) as Dictionary).get("dur",0.8)))
+	_event_end=_now()+span
 	if not all.is_empty():run_beats(all)
+
+## How weighty an event is for the camera.
+static func _weight_of(kind:String,data:Dictionary)->int:
+	match kind:
+		"divine","terrify_envoy","command":return 4
+		"god":return 3
+		"enter","exit","gift","decree","promise","dismiss","defer":return 2
+		"line","direction":return 1
+	return 0
+
+## Did the director just give this person this act (by its own name)?
+func _directed(who:String,act:String)->Dictionary:
+	for beat in _last_beats:
+		if not beat is Dictionary or String((beat as Dictionary).get("who",""))!=who:continue
+		var args:Dictionary=(beat as Dictionary).get("args",{}) if (beat as Dictionary).get("args") is Dictionary else {}
+		if String((beat as Dictionary).get("act",""))=="play" and String(args.get("beat",""))==act:return args
+	return {}
 
 ## The god's acts that are wrath, and those that are favour (the frame
 ## jolts at wrath and the dog cowers; at favour the dog wags).
@@ -638,16 +773,20 @@ const FAVOUR_ACTS:=["bless","boon","raise_up","honour","honor","reward","envoy_f
 ## The place answers the god: wrath jolts the frame and sends the dog
 ## cowering; favour sets it wagging; at the god's voice it looks up.
 func _set_answers(kind:String,data:Dictionary)->void:
-	var dog:Node3D=court_set.call("animal","dog")
+	var beasts:Array=[]
+	for kind_of in ["dog","goat"]:
+		var beast:Node3D=court_set.call("animal",kind_of)
+		if beast!=null and beast.has_method("on_god"):beasts.append(beast)
 	match kind:
 		"divine":
 			var action:=String(data.get("action",""))
 			if action in WRATH_ACTS:
-				if camera!=null and camera.has_method("shake"):camera.call("shake",0.6)
-				if dog!=null:dog.call("on_god","wrath")
-			elif action in FAVOUR_ACTS and dog!=null:dog.call("on_god","favour")
+				if rig!=null and rig.has_method("shake"):rig.call("shake",0.6)
+				for beast:Node3D in beasts:beast.call("on_god","wrath")
+			elif action in FAVOUR_ACTS:
+				for beast:Node3D in beasts:beast.call("on_god","favour")
 		"god":
-			if dog!=null:dog.call("on_god","voice")
+			for beast:Node3D in beasts:beast.call("on_god","voice")
 
 ## An animal's beat (the director's dog or goat) on the set's own beast.
 func _animal_beat(key:String,beat:Dictionary)->void:
@@ -713,23 +852,76 @@ func add_extra(entry:Dictionary)->void:
 func mutter(who:String,text:String)->void:
 	var f:=figure(who)
 	if f==null or f.leaving or text.strip_edges().is_empty():return
+	# One at a time: a newer mutter takes the place of an older one.
+	for child in bubble_layer.get_children():
+		if child is Bubble and (child as Bubble).kind=="mutter":(child as Bubble).queue_free()
 	var bubble:=Bubble.new();bubble.name="Mutter";bubble.kind="mutter";bubble.speaker=who
 	bubble_layer.add_child(bubble)
-	bubble.setup(text,HudTokens.voice_font(true),14 if compact else 15,Color("4a3d2c"),Color(0.96,0.93,0.86,0.92),Color("9a8566"),minf(260.0,size.x*.24),false,"",12)
+	# Small and sidelong: 0.8 of a speech bubble's letter, a paler paper, no
+	# kicker, the tail from the side toward their mouth.
+	bubble.setup(text,HudTokens.voice_font(true),13 if compact else 15,Color("4a3d2c"),Color(ASIDE_PAPER,0.85),Color("9a8566"),minf(240.0,size.x*.22),false,"",12)
 	var head:=head_point(f)
-	var right:=head.x<size.x*.5
-	bubble.position=Vector2(clampf(head.x+(18.0 if right else -18.0-bubble.size.x),6.0,maxf(6.0,size.x-bubble.size.x-6.0)),clampf(head.y-bubble.size.y*.2,top_inset+4.0,maxf(top_inset+4.0,size.y-bubble.size.y-6.0))).round()
-	bubble.tail_side="none"
+	var mouth:=Vector2(head.x,head.y+f.size.y*.10)
+	# Beside the head, away from the middle of the hall.
+	var outward:=head.x>size.x*.5
+	var x:=mouth.x+22.0 if outward else mouth.x-22.0-bubble.size.x
+	x=clampf(x,6.0,maxf(6.0,size.x-bubble.size.x-6.0))
+	var y:=clampf(mouth.y-bubble.size.y*.7,top_inset+4.0,maxf(top_inset+4.0,size.y-bubble.size.y-6.0))
+	bubble.position=Vector2(x,y).round()
+	bubble.tail_side="left" if x>mouth.x else "right"
+	bubble.tip=mouth-bubble.position
+	if (bubble.tail_side=="left" and bubble.tip.x>-4.0) or (bubble.tail_side=="right" and bubble.tip.x<bubble.size.x+4.0):bubble.tail_side="none"
+	_clear_focus(bubble)
+	bubble.queue_redraw()
 	bubble.modulate.a=0.0
 	var tw:=bubble.create_tween()
-	tw.tween_property(bubble,"modulate:a",0.92,Motion.duration(Motion.FAST))
-	tw.tween_interval(hold_time(text)+1.0)
-	tw.tween_property(bubble,"modulate:a",0.0,Motion.duration(Motion.BASE))
+	tw.tween_property(bubble,"modulate:a",1.0,0.2)
+	tw.tween_interval(hold_time(text))
+	tw.tween_property(bubble,"modulate:a",0.0,0.6)
 	tw.tween_callback(bubble.queue_free)
+
+## A noise made visible: a tiny wordless bubble by the head (or at the feet
+## for a thump, a clatter or a fall), drawn in ink, gone in a moment.
+const GLYPHS_LOW:=["thump","clatter"]
+func glyph(who:String,glyph_name:String)->void:
+	var f:=figure(who)
+	if f==null or glyph_name.is_empty():return
+	var mark:=Glyph.new();mark.name="Glyph";mark.glyph=glyph_name
+	bubble_layer.add_child(mark)
+	var head:=head_point(f)
+	var at:=Vector2(f.home.x+f.size.x*.18,f.home.y-24.0) if glyph_name in GLYPHS_LOW else Vector2(head.x+f.size.x*.22,head.y+4.0)
+	mark.position=(at-mark.size*.5).clamp(Vector2(4.0,top_inset+2.0),Vector2(maxf(4.0,size.x-mark.size.x-4.0),maxf(top_inset+2.0,size.y-mark.size.y-4.0))).round()
+	mark.pivot_offset=mark.size*.5
+	if who!=_focus_key:_clear_focus(mark)
+	if Motion.reduced():
+		get_tree().create_timer(1.2).timeout.connect(mark.queue_free);return
+	mark.scale=Vector2(.4,.4);mark.modulate.a=0.0
+	var tw:=mark.create_tween()
+	tw.set_parallel(true)
+	tw.tween_property(mark,"scale",Vector2.ONE,0.12).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(mark,"modulate:a",1.0,0.12)
+	tw.set_parallel(false)
+	tw.tween_interval(1.0)
+	tw.tween_property(mark,"modulate:a",0.0,0.25)
+	tw.tween_callback(mark.queue_free)
+
+## How the bubble of a line is performed (never what it says): it trembles
+## for the terrified; a child's is smaller.
+func _style_bubble(who:String,args:Dictionary)->void:
+	var newest:Bubble=null
+	for child in bubble_layer.get_children():
+		if child is Bubble and (child as Bubble).speaker==who and not (child as Bubble).dropping and (child as Bubble).kind in ["speech","aside"]:newest=child
+	if newest==null:return
+	match String(args.get("style","")):
+		"tremble":newest.tremble(float(args.get("amount",0.5)),reveal_time(newest.text)+1.5)
+		"small":
+			newest.pivot_offset=newest.tip.clamp(Vector2.ZERO,newest.size)
+			newest.scale=Vector2(.86,.86)
 
 ## The room's own life: the director's loops of idle business, each seeded,
 ## driven by one quarter-second timer (nothing per frame), paused while hushed.
 func start_ambient()->void:
+	if is_inside_tree():_glances()
 	if director==null or not director.has_method("ambient") or not is_inside_tree():return
 	var specs:Variant=director.call("ambient",cast_list(),facts,hash("%s|ambient" % audience_key))
 	_ambient.clear()
@@ -747,6 +939,26 @@ func start_ambient()->void:
 		_ambient_timer=Timer.new();_ambient_timer.name="RoomLife";_ambient_timer.wait_time=0.25
 		add_child(_ambient_timer);_ambient_timer.timeout.connect(_ambient_tick)
 	if not _ambient.is_empty():_ambient_timer.start()
+
+## Where an idle glance may fall (K's acting): the nearest neighbours, the
+## fire, and the one before the god (and what they carry).
+func _glances()->void:
+	if acting==null or not three_d:return
+	var heads:Array=[]
+	for key in cast_order:
+		var f:=figure(key)
+		if f!=null and f.body3d!=null and not f.leaving and f.body3d.is_inside_tree():heads.append([key,f.body3d.head_top()])
+	var fire:=set_point("fire") if court_set!=null and court_set.is_inside_tree() else Vector3.ZERO
+	for row:Array in heads:
+		var f:=figure(String(row[0]))
+		var near:=heads.filter(func(o:Array)->bool:return String(o[0])!=String(row[0]))
+		near.sort_custom(func(a:Array,b:Array)->bool:return (a[1] as Vector3).distance_to(row[1])<(b[1] as Vector3).distance_to(row[1]))
+		var points:=PackedVector3Array()
+		for o:Array in near.slice(0,3):points.append(o[1])
+		if court_set!=null:points.append(fire+Vector3(0.0,0.4,0.0))
+		var main:=figure(MAIN)
+		if main!=null and main.body3d!=null and String(row[0])!=MAIN:points.append(main.body3d.global_position+Vector3(0.0,1.0,0.0))
+		Acting.set_glance_points(f.body3d,points)
 
 func _now()->float:
 	return float(Time.get_ticks_msec())/1000.0
@@ -770,10 +982,13 @@ func _ambient_beat(item:Dictionary)->void:
 ## Plays a set of beats [{t, who, act, args}] on one tween, in time order.
 func run_beats(beats:Array)->void:
 	if not is_inside_tree() or beats.is_empty():return
-	if _beats and _beats.is_valid():_beats.kill()
+	# Each event's beats play out on their own: the caption that follows the
+	# god's wrath in the same moment must not cut the wrath short.
+	_beat_sets=_beat_sets.filter(func(t:Variant)->bool:return t is Tween and (t as Tween).is_valid())
 	var ordered:=beats.duplicate()
 	ordered.sort_custom(func(a:Variant,b:Variant)->bool:return float((a as Dictionary).get("t",0.0))<float((b as Dictionary).get("t",0.0)))
 	_beats=create_tween()
+	_beat_sets.append(_beats)
 	var at:=0.0
 	for beat in ordered:
 		var t:=maxf(float((beat as Dictionary).get("t",0.0)),at)
@@ -789,6 +1004,7 @@ func _beat(beat:Dictionary)->void:
 	var body:Node3D=f.body3d if f!=null and not f.leaving else null
 	var args:Dictionary=beat.get("args",{}) if beat.get("args") is Dictionary else {}
 	var act:=String(beat.get("act",""))
+	if _sound!=null and is_instance_valid(_sound):_sound.call("on_beat",beat,body)
 	if f==null and court_set!=null and String((extras.get(who,{}) as Dictionary).get("role",""))=="animal":
 		if act=="play":_animal_beat(who,beat)
 		return
@@ -796,11 +1012,16 @@ func _beat(beat:Dictionary)->void:
 		"shot":
 			shot(String(args.get("name","wide")),args)
 		"hush":
-			hush(float(args.get("dur",2.0)))
+			hush(float(args.get("dur",2.0)),String(args.get("bubbles",""))=="dim")
 		"aside":
 			mutter(who,String(args.get("text","")))
+		"bubble":
+			_style_bubble(who,args)
+		"sound":
+			if String(args.get("glyph",""))!="":glyph(who,String(args.glyph))
 		"play":
 			if body==null:return
+			if _moved(f,args):return
 			_props_after(f,String(args.get("beat",args.get("clip",""))))
 			if acting!=null and acting.has_method("play"):
 				acting.call("play",body,args,self);return
@@ -833,6 +1054,43 @@ func _beat(beat:Dictionary)->void:
 			# anything else the acting layer knows by name (speak, idle, stop...)
 			if body!=null and acting!=null and acting.has_method(act):acting.call(act,body,args,self)
 
+## Acts that move someone through the hall. The walks in and out (the wrong
+## side, backing out bowing, storming back for what was left) are the
+## arrival's and the exit's own (arrive, conclude); here, the small steps.
+const WALKED_ACTS:=["enter_wrong","hurry_round","back_out_bowing","bump_post","bow_to_post","storm_off","stop_short","come_back","come_back_for","snatch_up","hurry_after","bolt"]
+func _moved(f:Figure,args:Dictionary)->bool:
+	var act:=String(args.get("beat",""))
+	if act in WALKED_ACTS:return f.spot!=null or f.leaving
+	var other:=figure(String(args.get("at","")))
+	match act:
+		"bow_wrong":
+			# They bow, deeply, to the grandest official instead of the god.
+			if other==null or other.body3d==null:return false
+			f.bow_toward(other.body3d.global_position)
+			return true
+		"hide_behind":
+			if f.spot==null or other==null or other.body3d==null or camera==null:return false
+			var away:=(other.body3d.global_position-camera.global_position)
+			away.y=0.0
+			f.step_to(other.body3d.global_position+away.normalized()*0.45+Vector3(0.18,0.0,0.0),0.5,3.6)
+			return false
+		"edge_forward":
+			if f.spot==null:return false
+			var front:=god_point()-f.body3d.global_position;front.y=0.0
+			f.step_to(f.body3d.global_position+front.normalized()*0.35,0.9,7.0)
+			return false
+		"step_back":
+			if f.spot==null:return false
+			var back:=f.body3d.global_position-god_point();back.y=0.0
+			f.step_to(f.body3d.global_position+back.normalized()*0.3,0.35,3.0)
+			return false
+		"make_room":
+			if f.spot==null or other==null or other.body3d==null:return false
+			var aside:=f.body3d.global_position-other.body3d.global_position;aside.y=0.0
+			f.step_to(f.body3d.global_position+aside.normalized()*0.3,0.6,4.0)
+			return false
+	return false
+
 ## A held thing follows the act: a dropped bowl falls and stays on the floor
 ## (they stand empty-handed after); a bundle rides between the hands while it
 ## is lifted or struggled with, and stays where it is set down.
@@ -854,8 +1112,17 @@ func _props_after(f:Figure,act:String)->void:
 
 ## The room goes still for a while (the god speaks, a sentence falls): the
 ## acting holds everyone's idle business; the room's own loops wait too.
-func hush(seconds:float)->void:
+func hush(seconds:float,dim:=false)->void:
 	_hush_until=maxf(_hush_until,_now()+seconds)
+	if dim and is_inside_tree() and not Motion.reduced():
+		for child in bubble_layer.get_children():
+			var old:=child as Control
+			if old==null or (old is Bubble and (old as Bubble).dropping):continue
+			var was:=old.modulate.a
+			var tw:=old.create_tween()
+			tw.tween_property(old,"modulate:a",minf(was,0.45),0.25)
+			tw.tween_interval(maxf(seconds-0.5,0.2))
+			tw.tween_property(old,"modulate:a",was,0.4)
 	if acting==null or not acting.has_method("hush"):return
 	for key in cast_order:
 		var f:=figure(key)
@@ -871,21 +1138,29 @@ func hush(seconds:float)->void:
 ## A shot of the director's on the set's camera: wide, two_shot (a, b),
 ## push_in (target), reaction (target), shake (strength), home.
 func shot(name:String,args:Dictionary={})->void:
-	if court_set==null or camera==null:
+	if court_set==null or rig==null:
 		if camera_rig!=null and camera_rig.has_method("shot"):camera_rig.call("shot",name,args)
 		return
+	# A lighter event does not cut a weightier event's shot short (a shake
+	# never takes the camera's claim).
+	var weight:=int(args.get("weight",_event_weight))
+	if name!="shake":
+		if _now()<_shot_until and weight<_shot_weight:return
+		_shot_weight=weight
+		_shot_until=maxf(_event_end,_now()+1.0)
+		_focus_key=String(args.get("target","")) if name in ["push_in","reaction"] else ""
 	var target:=figure(String(args.get("target","")))
 	var body:Node3D=target.body3d if target!=null and target.body3d!=null else null
 	match name:
-		"wide","home":camera.call("wide",[],float(args.get("time",0.9)))
+		"wide","home":rig.call("wide",[],float(args.get("time",0.9)))
 		"two_shot":
 			var a:=figure(String(args.get("a","")));var b:=figure(String(args.get("b","")))
-			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:camera.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
+			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
-			if body!=null:camera.call("push_in",body,float(args.get("seconds",4.0)))
+			if body!=null:rig.call("push_in",body,float(args.get("seconds",2.4)))
 		"reaction":
-			if body!=null:camera.call("reaction",body,float(args.get("time",0.0)))
-		"shake":camera.call("shake",float(args.get("strength",0.35)))
+			if body!=null:rig.call("reaction",body,float(args.get("time",0.0)))
+		"shake":rig.call("shake",float(args.get("strength",0.35)))
 
 ## Someone's mood shows on their face and in the set of their head.
 func set_mood(key:String,mood:String)->void:
@@ -953,7 +1228,11 @@ func subject_of(words:String,about:="")->String:
 
 ## They walk in from the side (the threshold) once the stage has a size.
 func arrive(keys:Array)->void:
-	for key in keys:event("enter",{"who":String(key)})
+	for key in keys:
+		event("enter",{"who":String(key)})
+		# The director sent them in by the wrong side.
+		var f:=figure(String(key))
+		if f!=null and not _directed(String(key),"enter_wrong").is_empty():f.wrong_side=true
 	for key in keys:
 		if has_figure(String(key)) and not String(key) in _arrivals:_arrivals.append(String(key))
 	if _laid_out:_run_arrivals()
@@ -978,15 +1257,30 @@ func _run_arrivals()->void:
 ##  "led"   no bow, darkened, taken out quickly (cast out, seized, maimed);
 ##  "fall"  put to death: they sink and are gone where they stood;
 ##  "stay"  nobody leaves.
-func conclude(delay:float=1.4,style:="bow")->void:
+func conclude(delay:float=1.4,style:="bow",reaction:="")->void:
 	if style=="stay":return
-	event("exit",{"who":MAIN,"style":style})
+	event("exit",{"who":MAIN,"style":style,"reaction":reaction})
+	# How the director has them go: backing out bowing (into the door post),
+	# or storming off and coming back for what they left (the bearer, who
+	# stays put until then).
+	var main_style:=style
+	var left_behind:=""
+	if not _directed(MAIN,"back_out_bowing").is_empty():main_style="backward_bump" if not _directed(MAIN,"bump_post").is_empty() else "backward"
+	var back_for:=_directed(MAIN,"come_back_for")
+	if not back_for.is_empty() or not _directed(MAIN,"come_back").is_empty():
+		main_style="storm_back"
+		left_behind=String(back_for.get("at",""))
 	var index:=0
 	for key in cast_order.duplicate():
 		var f:=figure(key)
 		if f==null or f.leaving or not f.role in [MAIN,"attendant"]:continue
 		# Their company is not struck down with them: they are sent away.
 		var own:=style if f.role==MAIN or style!="fall" else "led"
+		if f.role==MAIN:own=main_style
+		elif key==left_behind:
+			f.leave(-1.0,maxf(size.x*.4,f.size.x*2.0) if f.body3d==null else f.home.x+f.size.x,delay+5.2,"storm")
+			index+=1
+			continue
 		var distance:=maxf(size.x*.4,f.size.x*2.0)
 		if f.body3d!=null:distance=f.home.x+f.size.x
 		f.leave(-1.0,distance,delay+index*0.2,own)
@@ -1005,8 +1299,9 @@ func set_insets(top:float,right:float)->void:
 func _on_resized()->void:
 	if size.x<40 or size.y<40:return
 	_frame_camera()
-	# The set's lens frames by the view's own size, which follows a frame later.
-	if court_set!=null:call_deferred("frame_cast",0.0)
+	# The set's lens frames by the view's own size, which follows a frame later
+	# (a push-in or a reaction shot keeps going: the next wide takes the new size).
+	if court_set!=null and _wide_now():call_deferred("frame_cast",0.0)
 	layout(false)
 	var first:=not _laid_out
 	_laid_out=true
@@ -1095,8 +1390,14 @@ func _layout_set(animate:bool)->void:
 		if f.spot.is_inside_tree():
 			f.light_base=float(court_set.call("light_at",f.spot.global_position))
 			f._light(1.0)
-	frame_cast(0.9 if animate and _laid_out else 0.0)
+	if not _laid_out or _wide_now():frame_cast(0.9 if animate and _laid_out else 0.0)
 	_track_all()
+
+## Is the set's camera on everyone (not pushed in on someone)?
+func _wide_now()->bool:
+	if rig==null:return true
+	var now:Variant=rig.get("current_shot") if rig.get("current_shot")!=null else rig.get("shot")
+	return now==null or String(now) in ["wide","still",""]
 
 ## Which name plates show in the modelled court: the one before the god's,
 ## and the one speaking now.
@@ -1146,6 +1447,14 @@ func say(key:String,text:String,aside:=false,animate:=true,ref:=-1)->Label:
 	if animate:bubble.pop_in()
 	return bubble.label
 
+## Whether the god's words are wrath or favour (the swell under them), read
+## the way the hall reads a spoken act (divine_regard.gd intent).
+static func _tone_of(text:String)->String:
+	var act:=String(DivineRegard.intent(text))
+	if act in ["terrify","penance"]:return "wrath"
+	if act in ["bless","raise_up"]:return "favour"
+	return ""
+
 ## The god's own words, from above.
 func god_says(text:String,animate:=true,ref:=-1)->Label:
 	if is_instance_valid(_god):_drop(_god,false)
@@ -1170,7 +1479,7 @@ func god_says(text:String,animate:=true,ref:=-1)->Label:
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null and not f.leaving:f.look_up()
-	event("god",{"text":text,"seconds":reveal_time(text)})
+	event("god",{"text":text,"seconds":reveal_time(text),"tone":_tone_of(text)})
 	if animate:
 		_god.descend()
 		_rays.modulate.a=0.0
@@ -1210,7 +1519,7 @@ func settle()->void:
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null:f.finish_moves()
-	if court_set!=null and camera!=null and camera.has_method("settle"):camera.call("settle")
+	if court_set!=null and rig!=null and rig.has_method("settle"):rig.call("settle")
 	for layer in [bubble_layer,god_layer,caption_layer]:
 		for child in (layer as Control).get_children():
 			var item:=child as Control
@@ -1356,6 +1665,7 @@ func _place_bubble(bubble:Bubble)->void:
 		if (to_right and bubble.tip.x>-4.0) or (not to_right and bubble.tip.x<bs.x+4.0):bubble.tail_side="none"
 	bubble.pivot_offset=bubble.tip.clamp(Vector2.ZERO,bs)
 	bubble.home_y=0.0
+	if bubble.speaker!=_focus_key:_clear_focus(bubble)
 	bubble.queue_redraw()
 
 ## The faces of everyone standing here but one, as stage rectangles.
@@ -1376,10 +1686,41 @@ func _place_god()->void:
 		_rays.target=Rect2(_god.position,_god.size);_rays.queue_redraw()
 
 func _place_caption()->void:
-	## Low on the stage like a line under a picture, but above the name plates.
+	## A line under the picture. In the modelled hall it sits in a band at the
+	## very foot of the stage, and goes to the top, under the god's band,
+	## rather than lie over the face the camera is on.
 	if not is_instance_valid(_caption):return
-	_caption.position=Vector2((_usable_width()-_caption.size.x)*.5,maxf(top_inset+6.0,size.y-_caption.size.y-PLATE_ROOM)).round()
+	var foot:=size.y-_caption.size.y-(8.0 if court_set!=null else PLATE_ROOM)
+	_caption.position=Vector2((_usable_width()-_caption.size.x)*.5,maxf(top_inset+6.0,foot)).round()
+	var face:=_focus_face()
+	if face.size.x>0.0 and Rect2(_caption.position,_caption.size).intersects(face):
+		var high:=top_inset+6.0+(_god.size.y+6.0 if is_instance_valid(_god) else 0.0)
+		_caption.position.y=round(high)
 	_caption.home_y=_caption.position.y
+
+## The face the camera is pushed in on, as a stage rectangle (empty: none).
+func _focus_face()->Rect2:
+	var f:=figure(_focus_key)
+	if f==null or f.leaving:return Rect2()
+	var top:=head_point(f)
+	return Rect2(top.x-f.size.x*.30,top.y,f.size.x*.60,f.size.y*.28)
+
+## A bubble never lies over the face the camera has gone in on: above it if
+## there is room, else to the side with more room.
+func _clear_focus(bubble:Control)->void:
+	var face:=_focus_face()
+	if face.size.x<=0.0 or not is_instance_valid(bubble):return
+	var rect:=Rect2(bubble.position,bubble.size)
+	if not rect.intersects(face.grow(4.0)):return
+	if face.position.y-bubble.size.y-8.0>=top_inset+4.0:
+		bubble.position.y=face.position.y-bubble.size.y-8.0
+	elif face.position.x>size.x-face.end.x:
+		bubble.position.x=maxf(6.0,face.position.x-bubble.size.x-10.0)
+	else:
+		bubble.position.x=minf(size.x-bubble.size.x-6.0,face.end.x+10.0)
+	if bubble is Bubble:
+		var b:=bubble as Bubble
+		b.tail_side="none";b.queue_redraw()
 
 func _place_thinking()->void:
 	if not is_instance_valid(thinking) or not thinking.visible:return
@@ -1445,6 +1786,14 @@ class Figure extends Control:
 	var lift:=0.0
 	var stroll:=0.0:
 		set(value):stroll=value;_sync()
+	## A small step off their mark (spot-local metres): hiding behind someone,
+	## edging forward, making room. Tweened out and back.
+	var nudge:=Vector3.ZERO:
+		set(value):nudge=value;_sync()
+	## The director sent them in by the wrong side (they stop, lost, then
+	## hurry round to their mark).
+	var wrong_side:=false
+	var _step:Tween
 	var _path:=PackedVector3Array()
 	var _act:Tween
 	var _shift:Tween
@@ -1487,7 +1836,7 @@ class Figure extends Control:
 		if body3d==null or not is_instance_valid(body3d) or _stage==null:return
 		if spot!=null:
 			var at:=_path_at(stroll)
-			body3d.position=Vector3(at.x,lift-sink,at.z)
+			body3d.position=Vector3(at.x,lift-sink,at.z)+nudge
 			_track()
 			return
 		var stage:=_stage.get_ref() as Control
@@ -1563,7 +1912,9 @@ class Figure extends Control:
 
 	func _stroll_in(delay:float)->void:
 		var stage:=_stage.get_ref() as Control
-		_path=_route(spot.to_local(stage.set_point("door")))
+		if wrong_side and not Motion.reduced():
+			_stroll_in_wrong(delay);return
+		_path=_route(spot.to_local(_door(stage,0)))
 		stroll=1.0
 		modulate.a=1.0
 		if Motion.reduced():
@@ -1578,10 +1929,50 @@ class Figure extends Control:
 		_move.tween_method(_stroll_step.bind(true),1.0,0.0,time)
 		_move.tween_callback(_settle_in)
 
+	## The set's door (0) and the way out beyond it (1) (M's door_points).
+	func _door(stage:Control,which:int)->Vector3:
+		var court:Variant=stage.get("court_set")
+		if court is Node3D and (court as Node3D).has_method("door_points"):
+			var points:Array=(court as Node3D).call("door_points")
+			if points.size()>which:return points[which]
+		return stage.set_point("door" if which==0 else "door_out")
+
+	## In by the wrong side: from the far side of the hall, a few steps in,
+	## a stop and a look about (someone points), then round to their mark.
+	func _stroll_in_wrong(delay:float)->void:
+		var stage:=_stage.get_ref() as Control
+		var door:=_door(stage,0)
+		var mine:=spot.global_position
+		var wrong:=Vector3(2.0*mine.x-door.x,door.y,door.z)
+		_path=_route(spot.to_local(wrong))
+		stroll=1.0
+		var pace:float=float(Self.Figure3D.WALK_SPEED.walk_in)*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+		var first:=_path_at(0.98)-_path_at(1.0)
+		body3d.rotation.y=atan2(first.x,first.z)
+		_clip("walk_in",0.0,0.0)
+		_move=create_tween()
+		if delay>0.0:_move.tween_interval(delay)
+		var lost:=0.6
+		_move.tween_method(_stroll_step.bind(true),1.0,lost,clampf(_path_length()*(1.0-lost)/maxf(pace,0.1),0.6,3.0))
+		_move.tween_callback(func()->void:_clip(rest_clip,0.3);body3d.face(rest_yaw+60.0,0.4))
+		_move.tween_interval(0.7)
+		_move.tween_callback(func()->void:body3d.face(rest_yaw-50.0,0.5))
+		_move.tween_interval(0.9)
+		# Round to their mark, hurrying.
+		_move.tween_callback(func()->void:
+			var here:=_path_at(stroll)
+			_path=_route(here)
+			stroll=1.0
+			_clip("walk_in",0.25,0.0))
+		_move.tween_method(_stroll_step.bind(true),1.0,0.0,1.4)
+		_move.tween_callback(func()->void:wrong_side=false;_settle_in())
+
 	func _stroll_out(delay:float,style:String)->void:
 		if _act and _act.is_valid():_act.kill()
 		var stage:=_stage.get_ref() as Control
-		_path=_route(spot.to_local(stage.set_point("door_out")))
+		_path=_route(spot.to_local(_door(stage,1)))
+		if style in ["backward","backward_bump","storm_back"] and not Motion.reduced():
+			_stroll_out_acted(delay,style);return
 		_move=create_tween()
 		if delay>0.0:_move.tween_interval(delay)
 		if Motion.reduced():
@@ -1610,6 +2001,83 @@ class Figure extends Control:
 		var time:=clampf(_path_length()/maxf(pace,0.1),1.2,7.0)
 		_move.tween_method(_stroll_step.bind(false),0.0,1.0,time)
 		_move.tween_callback(_vanish)
+
+	## Walking backward: they keep facing the hall (no turn with the path).
+	func _back_step(value:float)->void:
+		stroll=value
+
+	## The exits the director acts out:
+	##  "backward"       backing away bowing, a couple of metres, then out;
+	##  "backward_bump"  the same, into the door post: a jolt, a bow to the
+	##                   post, then out;
+	##  "storm_back"     storming off, stopping short at the door, coming back
+	##                   to their mark for what they left, and out again.
+	func _stroll_out_acted(delay:float,style:String)->void:
+		var whole:=maxf(_path_length(),0.5)
+		var walk_pace:float=float(Self.Figure3D.WALK_SPEED.walk_out)*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+		_move=create_tween()
+		if delay>0.0:_move.tween_interval(delay)
+		if style.begins_with("backward"):
+			var back:=clampf(2.2/whole,0.15,0.6)
+			_move.tween_callback(func()->void:body3d.face(rest_yaw*.3,0.25);_clip("bow",0.3,0.0))
+			# Bowing all the way, a bow and a half-step, and another.
+			var bows:=3
+			for i in bows:
+				_move.tween_method(_back_step,back*float(i)/float(bows),back*float(i+1)/float(bows),0.8)
+				_move.tween_callback(func()->void:_clip("bow",0.2,0.25))
+			if style=="backward_bump":
+				# Into the post: a jolt forward, a look round, a bow to the post.
+				_move.tween_property(self,"nudge",Vector3(0.0,0.0,0.12),0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				_move.tween_property(self,"nudge",Vector3.ZERO,0.2)
+				_move.tween_callback(func()->void:
+					var ahead:=_path_at(minf(back+0.05,1.0))-_path_at(back)
+					body3d.rotation.y=atan2(ahead.x,ahead.z)
+					_clip("bow",0.2,0.0))
+				_move.tween_interval(1.1)
+			_move.tween_callback(func()->void:_clip("walk_out",0.35,0.0))
+			_move.tween_method(_stroll_step.bind(false),back,1.0,clampf(whole*(1.0-back)/maxf(walk_pace,0.1),0.8,6.0))
+			_move.tween_callback(_vanish)
+			return
+		# Storming off, then back for what they left.
+		var stride:float=float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+		var door:=0.82
+		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_method(_stroll_step.bind(false),0.0,door,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
+		_move.tween_callback(func()->void:_clip(rest_clip,0.25))
+		_move.tween_interval(0.6)
+		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_method(_stroll_step.bind(true),door,0.0,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
+		# Snatched up: their stance (and its prop) for a moment.
+		_move.tween_callback(func()->void:body3d.face(rest_yaw,0.2);_clip(rest_clip,0.2))
+		_move.tween_interval(0.7)
+		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_method(_stroll_step.bind(false),0.0,1.0,clampf(whole/maxf(stride,0.1),0.8,5.0))
+		_move.tween_callback(_vanish)
+
+	## A small step to a point in the hall (world), and back after a while.
+	func step_to(world:Vector3,time:float,back_after:float)->void:
+		if spot==null or body3d==null or leaving or not is_inside_tree():return
+		if _step and _step.is_valid():_step.kill()
+		var local:=spot.to_local(world)-_path_at(stroll)
+		local.y=0.0
+		if local.length()>1.2:local=local.normalized()*1.2
+		_step=create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+		_step.tween_property(self,"nudge",local,maxf(time,0.15))
+		if back_after>0.0:
+			_step.tween_interval(back_after)
+			_step.tween_property(self,"nudge",Vector3.ZERO,0.6)
+
+	## They turn to someone and bow to them, deeply (the wrong one); turned
+	## back to the god after.
+	func bow_toward(world:Vector3)->void:
+		if body3d==null or leaving:return
+		if _act and _act.is_valid():_act.kill()
+		var way:=world-body3d.global_position
+		var yaw:=rad_to_deg(atan2(way.x,way.z))
+		if body3d.get_parent() is Node3D:yaw-=rad_to_deg((body3d.get_parent() as Node3D).global_rotation.y)
+		body3d.face(yaw,0.3)
+		_clip("bow",0.3,0.0)
+		_later(2.2,func()->void:body3d.face(rest_yaw,0.4);_clip(rest_clip,0.4))
 
 	func _clip(name:String,blend:=0.3,at:=-1.0)->void:
 		if body3d!=null and is_instance_valid(body3d):body3d.play(name,blend,at)
@@ -1853,6 +2321,9 @@ class Figure extends Control:
 	var exit_style:=""
 	func leave(side:float,distance:float,delay:float=0.0,style:="bow")->void:
 		leaving=true;exit_style=style
+		if spot==null:
+			if style.begins_with("backward"):style="bow"
+			elif style=="storm_back":style="storm"
 		if not is_inside_tree():return
 		if _move and _move.is_valid():_move.kill()
 		if _lean and _lean.is_valid():_lean.kill()
@@ -1900,6 +2371,7 @@ class Figure extends Control:
 		if body3d!=null and is_instance_valid(body3d):
 			if leaving:
 				if spot==null and exit_style!="fall":walk=-maxf(home.x+size.x,1.0)
+				nudge=Vector3.ZERO
 				_vanish()
 			elif spot!=null and stroll!=0.0:
 				stroll=0.0;_settle_in()
@@ -2217,6 +2689,21 @@ class Bubble extends Control:
 		## Ends any entrance at once (used when everything is shown at once).
 		if _tween and _tween.is_valid():_tween.custom_step(10.0)
 
+	## The words of the terrified shake a little (never what they say): each
+	## letter's line jitters about a pixel at about eleven times a second for
+	## a while, then settles.
+	var _shake:Tween
+	func tremble(amount:float,seconds:float)->void:
+		if label==null or not is_inside_tree() or Motion.reduced():return
+		if _shake and _shake.is_valid():_shake.kill()
+		var base:=label.position
+		var reach:=0.6+1.2*clampf(amount,0.0,1.0)
+		var rng:=RandomNumberGenerator.new();rng.seed=hash(text)
+		_shake=create_tween()
+		for i in clampi(int(seconds*11.0),4,80):
+			_shake.tween_property(label,"position",base+Vector2(rng.randf_range(-reach,reach),rng.randf_range(-reach,reach)*0.7),1.0/11.0)
+		_shake.tween_property(label,"position",base,0.12)
+
 # =================================================================================
 
 class Rays extends Control:
@@ -2241,3 +2728,81 @@ class Rays extends Control:
 			draw_polygon(points,colours)
 		var glow:=Rect2(target.position-Vector2(18,10),target.size+Vector2(36,20))
 		draw_rect(glow,Color(gold,.10))
+
+# =================================================================================
+
+class Glyph extends Control:
+	## A noise made visible: a tiny wordless bubble, ink on paper (the icon
+	## engine's manner: a disc and a few strokes). glyph: zzz, cough, growl,
+	## creak, gulp, snort, clatter, thump, clap, yawn, gasp, bleat, whimper,
+	## slap; anything else is three dots.
+	var glyph:="dots"
+
+	func _init()->void:
+		mouse_filter=Control.MOUSE_FILTER_IGNORE
+		size=Vector2(34.0,30.0)
+
+	func _draw()->void:
+		var c:=size*0.5
+		var ink:=Color("3b2f22")
+		draw_circle(c,13.0,Color(Self.ASIDE_PAPER,0.94))
+		draw_arc(c,13.0,0.0,TAU,28,Color(ink,0.75),1.5,true)
+		var w:=1.8
+		match glyph:
+			"zzz":
+				for i in 3:
+					var o:=c+Vector2(-6.0+i*4.5,4.0-i*4.5)
+					var k:=2.2+i*0.6
+					draw_polyline(PackedVector2Array([o+Vector2(-k,-k),o+Vector2(k,-k),o+Vector2(-k,k),o+Vector2(k,k)]),ink,w,true)
+			"cough":
+				draw_circle(c+Vector2(-2,1),3.5,ink)
+				for i in 6:
+					var a:=TAU*float(i)/6.0-0.4
+					draw_line(c+Vector2(-2,1)+Vector2(cos(a),sin(a))*5.5,c+Vector2(-2,1)+Vector2(cos(a),sin(a))*9.0,ink,w,true)
+			"growl":
+				for row in 2:
+					var pts:=PackedVector2Array()
+					for i in 9:pts.append(c+Vector2(-8.0+i*2.0,-3.0+row*6.0+(1.6 if i%2==0 else -1.6)))
+					draw_polyline(pts,ink,w,true)
+			"creak":
+				draw_polyline(PackedVector2Array([c+Vector2(-8,2),c+Vector2(-4,-4),c+Vector2(0,3),c+Vector2(4,-4),c+Vector2(8,2)]),ink,w,true)
+			"gulp":
+				draw_circle(c+Vector2(0,3),4.5,ink)
+				draw_colored_polygon(PackedVector2Array([c+Vector2(-3.8,1.5),c+Vector2(3.8,1.5),c+Vector2(0,-8)]),ink)
+			"snort":
+				draw_line(c+Vector2(-7,-2),c+Vector2(-2,-2),ink,w+0.4,true)
+				draw_line(c+Vector2(2,-2),c+Vector2(7,-2),ink,w+0.4,true)
+				draw_arc(c+Vector2(0,3),5.0,0.2,PI-0.2,10,ink,w,true)
+			"clatter":
+				for i in 3:draw_line(c+Vector2(-6+i*6,-8),c+Vector2(-4+i*6,-3),ink,w,true)
+				draw_arc(c+Vector2(0,4),6.0,0.0,PI,12,ink,w,true)
+			"thump":
+				for i in 8:
+					var a:=TAU*float(i)/8.0
+					draw_line(c+Vector2(cos(a),sin(a))*3.0,c+Vector2(cos(a),sin(a))*(9.0 if i%2==0 else 6.0),ink,w,true)
+			"clap":
+				draw_arc(c+Vector2(-3,0),6.0,-1.2,1.2,10,ink,w,true)
+				draw_arc(c+Vector2(3,0),6.0,PI-1.2,PI+1.2,10,ink,w,true)
+			"yawn":
+				var pts:=PackedVector2Array()
+				for i in 17:
+					var a:=TAU*float(i)/16.0
+					pts.append(c+Vector2(cos(a)*4.5,sin(a)*7.5))
+				draw_polyline(pts,ink,w,true)
+			"gasp":
+				draw_arc(c+Vector2(-1,1),5.5,0.0,TAU,18,ink,w+0.4,true)
+				draw_arc(c+Vector2(7,-6),1.8,0.0,TAU,8,ink,w,true)
+			"bleat":
+				var pts:=PackedVector2Array()
+				for i in 9:pts.append(c+Vector2(-8.0+i*2.0,sin(float(i)*1.4)*3.0))
+				draw_polyline(pts,ink,w,true)
+				draw_circle(c+Vector2(8,-5),1.8,ink)
+			"whimper":
+				draw_arc(c+Vector2(0,-2),7.0,0.3,PI-0.3,12,ink,w,true)
+				draw_line(c+Vector2(-5,4),c+Vector2(-3,8),ink,w,true)
+			"slap":
+				for i in 5:
+					var a:=TAU*float(i)/5.0-PI*0.5
+					draw_line(c,c+Vector2(cos(a),sin(a))*8.5,ink,w,true)
+			_:
+				for i in 3:draw_circle(c+Vector2(-6.0+i*6.0,1.0),1.9,ink)
