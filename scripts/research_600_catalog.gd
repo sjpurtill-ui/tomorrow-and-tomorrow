@@ -507,7 +507,8 @@ static func learning_goods(amount:float=0.0,take:=false,whole:=false)->Dictionar
 	var towns:Array=[]
 	var town_total:=0.0
 	for record:Variant in state.player_settlements:
-		if not record is Dictionary or bool((record as Dictionary).get("primary",false)) or settlements.abandoned(record): continue
+		# Never an empty town, nor one an enemy holds (its makers do not work).
+		if not record is Dictionary or bool((record as Dictionary).get("primary",false)) or settlements.abandoned(record) or not String((record as Dictionary).get("occupied_by","")).is_empty(): continue
 		var id:=String((record as Dictionary).get("id",""))
 		if id.is_empty(): continue
 		var held:=float(settlements.with_city_resources(id,func()->float: return maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(GOODS_KEY,0.0)))))
