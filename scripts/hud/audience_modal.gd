@@ -1586,8 +1586,12 @@ func show_execution(words:String,result:Dictionary={})->bool:
 	var ex:=""
 	if int(actor.get("person_id",0))>0:ex=court_stage.key_for_name(String(actor.get("name","")))
 	var stage:=court_stage
+	stage.exec_done=false
+	stage.exec_method=method
 	get_tree().create_timer(1.4).timeout.connect(func()->void:
-		if is_instance_valid(stage) and stage.execute(method,Stage.MAIN,ex,name):Executions.last_used=method)
+		if not is_instance_valid(stage):return
+		if stage.execute(method,Stage.MAIN,ex,name):Executions.last_used=method
+		else:stage.exec_done=true)
 	return true
 
 func _maybe_execute(result:Dictionary,words:String)->void:
@@ -1956,7 +1960,14 @@ func _stage_line(line:Dictionary,animate:bool,ref:int=-1)->Label:
 	if text.is_empty():return null
 	match String(line.get("role","")):
 		"ruler":return court_stage.god_says(text,animate,ref)
-		"narrator":return court_stage.caption(_named_death(text),"narration",animate,ref,"",String(line.get("about","")))
+		"narrator":
+			# While the hall watches the execution, the narrator holds its
+			# words (the picture tells it); its account of the death, named
+			# the way it was done, is the caption at the end.
+			if _executed and not bool(court_stage.exec_done):
+				if text.contains("at your word") or text.contains("cost you"):court_stage.exec_caption_override=_named_death(text)
+				return null
+			return court_stage.caption(_named_death(text),"narration",animate,ref,"",String(line.get("about","")))
 	return court_stage.say(_stage_key(line),text,bool(line.get("aside",false)),animate,ref)
 
 ## The engine's words for a death, told the way the hall saw it done ("was

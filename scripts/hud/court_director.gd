@@ -2325,26 +2325,30 @@ static func _exec_before(ctx:Dictionary,out:Array,victim:String,roles:Dictionary
 ## sick, the child hides their eyes and then peeks, the flatterer applauds
 ## alone, the scribe keeps writing, the envoy's guard gulps. A terrified room
 ## does it all in silence and shaking (no applause, no peeking).
-static func _exec_after(ctx:Dictionary,out:Array,at:float,victim:String,roles:Dictionary,splash:=true)->void:
+static func _exec_after(ctx:Dictionary,out:Array,at:float,victim:String,roles:Dictionary,splash:=true,times:={})->void:
 	var rng:RandomNumberGenerator=ctx.rng
 	var dread:=people_dread(ctx.facts)>=DREAD_HIGH
 	var used:=[victim,String(roles.ex)]
+	var t_wipe:=float(times.get("wipe",at+0.5));var t_faint:=float(times.get("faint",at+0.8))
+	var t_retch:=float(times.get("retch",at+1.4));var t_clap:=float(times.get("clap",at+2.2))
 	_snd(out,at,"crowd_gasp",0.9)
 	if splash:
 		for key in roles.front:
-			_beat(out,at+0.5+rng.randf()*0.3,String(key),"wipe_face",{},"reaction")
+			_beat(out,t_wipe+rng.randf()*0.3,String(key),"wipe_face",{},"reaction")
 			used.append(String(key))
 	var jumpy:Array=_jumpiest(_people(ctx,used).filter(func(m:Dictionary)->bool:return String(m.kind)!="child"))
 	if not jumpy.is_empty():
 		var fainter:=String((jumpy[0] as Dictionary).key)
-		_beat(out,at+0.8,fainter,"faint",{},"reaction")
+		_beat(out,t_faint,fainter,"faint",{},"reaction")
 		used.append(fainter)
 		var catcher:=_nearest(ctx,jumpy[0],["official","hearth_chief","commoner","elder"],used)
-		if not catcher.is_empty() and rng.randf()<0.5:_beat(out,at+1.2,String(catcher.key),"half_catch",{"at":fainter},"reaction");used.append(String(catcher.key))
+		if not catcher.is_empty() and rng.randf()<0.5:
+			_beat(out,t_faint+0.4,String(catcher.key),"half_catch",{"at":fainter},"reaction")
+			used.append(String(catcher.key))
 	var queasy:Array=_people(ctx,used).filter(func(m:Dictionary)->bool:return not String(m.kind) in ["child","scribe"] and float(m.courage)<0.6)
 	if not queasy.is_empty():
 		var sick:=String((_pick(ctx,queasy) as Dictionary).key)
-		_beat(out,at+1.4,sick,"retch",{"sound":"retch","gain":0.7},"reaction")
+		_beat(out,t_retch,sick,"retch",{"sound":"retch","gain":0.7},"reaction")
 		used.append(sick)
 	for child:Dictionary in _of_kind(ctx,["child"]):
 		_beat(out,at+0.3,String(child.key),"hide_eyes",{},"reaction")
@@ -2354,11 +2358,11 @@ static func _exec_after(ctx:Dictionary,out:Array,at:float,victim:String,roles:Di
 	if not dread:
 		for m:Dictionary in _people(ctx,used):
 			if String(m.get("quirk",""))=="flatterer":
-				_beat(out,at+2.2,String(m.key),"soft_clap",{"dur":1.6},"reaction")
+				_beat(out,t_clap,String(m.key),"soft_clap",{"dur":1.6},"reaction")
 				# nobody joins in
 				var other:=_nearest(ctx,m,["official","hearth_chief","elder","commoner"],used+[String(m.key)])
-				if not other.is_empty():_beat(out,at+3.0,String(other.key),"side_eye",{"at":String(m.key)},"reaction")
-				_shot(out,at+2.3,"reaction",{"target":String(m.key)})
+				if not other.is_empty():_beat(out,t_clap+0.8,String(other.key),"side_eye",{"at":String(m.key)},"reaction")
+				_shot(out,t_clap+0.1,"reaction",{"target":String(m.key)})
 				break
 
 ## Mild: the blow lands off screen. The camera turns to the room's faces at
@@ -2381,126 +2385,130 @@ static func _exec_mild(out:Array,ctx:Dictionary,victim:String,roles:Dictionary)-
 # --- the acts -------------------------------------------------------------------------
 
 ## 2. Club home run: a huge wind-up, CRACK, the head sails in a long arc into
-## the cooking pot; the cook looks in, stirs, and puts the lid on.
+## the cooking pot; the cook looks in, stirs, and puts the lid on. (Timed to
+## the sound's track: the blow at `blow`, the plop 1.25 s after, the stir
+## 3.0, the lid 4.6, the lone clap 6.0.)
 static func _exec_club(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
 	var ex:=String(roles.ex);var cook:=String(roles.cook)
-	var length:=10.0
+	var blow:=2.8
+	var length:=blow+7.2
 	_exec_before(ctx,out,victim,roles,length)
-	_exec(out,0.0,"prop",{"name":"pot","at":"fire","toward_camera":1.15,"offset":Vector3(0.75,0,0)})
+	_exec(out,0.0,"prop",{"name":"pot","id":"pot","at":"fire","toward_camera":1.15,"offset":Vector3(0.75,0,0)})
 	_beat(out,0.2,victim,"kneel",{"dur":3.0,"hold":true},"anticipation")
 	_shot(out,0.0,"two_shot",{"a":victim,"b":ex,"weight":5})
 	_exec(out,0.3,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.85,"time":1.0})
 	_exec(out,1.3,"prop",{"name":"club","to":ex,"hand":"R"})
-	_beat(out,1.5,ex,"windup",{"dur":1.1,"hold":true},"anticipation")
-	_exec(out,1.5,"twist",{"who":ex,"yaw":-80.0,"time":0.9})
-	_beat(out,2.45,ex,"squint",{"dur":0.4},"anticipation")
+	_beat(out,blow-0.9,ex,"windup",{"dur":0.8,"hold":true},"anticipation")
+	_exec(out,blow-0.9,"twist",{"who":ex,"yaw":-80.0,"time":0.75})
+	_beat(out,blow-0.4,ex,"squint",{"dur":0.3},"anticipation")
 	# CRACK
-	_exec(out,2.75,"twist",{"who":ex,"yaw":165.0,"time":0.11})
-	_exec(out,2.75,"lunge",{"who":ex,"dist":0.22,"time":0.1})
-	_beat(out,2.75,ex,"swing",{"dur":0.6},"action")
-	_snd(out,2.82,"club_crack",1.0,"crack")
-	_shot(out,2.82,"shake",{"strength":0.45})
-	_exec(out,2.84,"behead",{"who":victim,"fly":"pot","time":1.25,"arc":2.4,"spin":2.5})
-	_exec(out,2.86,"spray",{"at":"neck:"+victim,"dir":"up","seconds":0.9,"amount":70,"speed":3.0})
-	_shot(out,2.9,"wide",{"time":0.6})
-	_exec(out,3.3,"fall",{"who":victim,"kind":"forward","time":0.55})
-	_snd(out,3.85,"thud",0.7)
-	_snd(out,4.1,"plop",0.9,"plop")
-	_exec(out,4.12,"spray",{"at":"pot","y":0.45,"dir":"up","seconds":0.25,"amount":28,"speed":1.8,"pool":false})
+	_exec(out,blow-0.12,"twist",{"who":ex,"yaw":165.0,"time":0.11})
+	_exec(out,blow-0.12,"lunge",{"who":ex,"dist":0.22,"time":0.1})
+	_beat(out,blow-0.12,ex,"swing",{"dur":0.6},"action")
+	_exec(out,blow,"blow",{})
+	_snd(out,blow,"club_crack",1.0,"crack")
+	_shot(out,blow,"shake",{"strength":0.45})
+	_exec(out,blow+0.02,"behead",{"who":victim,"fly":"pot","time":1.23,"arc":2.4,"spin":2.5})
+	_exec(out,blow+0.04,"spray",{"at":"neck:"+victim,"dir":"up","seconds":0.9,"amount":70,"speed":3.0})
+	_shot(out,blow+0.1,"frame",{"on":[victim,ex,"pot"],"time":0.6})
+	_exec(out,blow+0.5,"fall",{"who":victim,"kind":"forward","time":0.55})
+	_snd(out,blow+1.25,"plop",0.9,"plop")
+	_exec(out,blow+1.27,"spray",{"at":"pot","y":0.45,"dir":"up","seconds":0.25,"amount":28,"speed":1.8,"pool":false})
 	# the cook
 	if cook!="":
-		_beat(out,4.4,cook,"double_take",{"at":ex},"reaction")
-		_exec(out,4.9,"approach",{"who":cook,"to":"pot","side":1.0,"dist":0.55,"time":0.9})
-		_shot(out,5.2,"reaction",{"target":cook})
-		_beat(out,5.9,cook,"lean_in",{"dur":0.8},"action")
-		_beat(out,6.6,cook,"stir",{"dur":1.0},"action")
-		_snd(out,6.6,"stir",0.6)
-		_exec(out,7.5,"prop",{"name":"lid","id":"lid","at":"pot","y":0.44})
-		_exec(out,7.5,"drop",{"id":"lid","at":"pot","offset":Vector3(0,0.44,0),"height":0.35,"time":0.2})
-		_snd(out,7.7,"lid_clank",0.8,"clatter")
-		_beat(out,7.9,cook,"wipe_hands",{},"reaction")
-	_exec_after(ctx,out,3.0,victim,roles,true)
-	_shot(out,8.3,"wide",{"time":0.8})
+		_beat(out,blow+1.6,cook,"double_take",{"at":ex},"reaction")
+		_exec(out,blow+1.7,"approach",{"who":cook,"to":"pot","side":1.0,"dist":0.55,"time":0.8})
+		_shot(out,blow+2.4,"frame",{"on":[cook,"pot"],"time":0.7})
+		_beat(out,blow+2.6,cook,"lean_in",{"dur":0.4},"action")
+		_beat(out,blow+3.0,cook,"stir",{"dur":1.2},"action")
+		_exec(out,blow+4.45,"prop",{"name":"lid","id":"lid","at":"pot","y":0.44})
+		_exec(out,blow+4.45,"drop",{"id":"lid","at":"pot","offset":Vector3(0,0.44,0),"height":0.35,"time":0.2})
+		_snd(out,blow+4.6,"lid_clank",0.8,"clatter")
+		_beat(out,blow+4.9,cook,"wipe_hands",{},"reaction")
+	_exec_after(ctx,out,blow+1.4,victim,roles,true,{"wipe":blow+0.5,"faint":blow+1.7,"retch":blow+2.2,"clap":blow+6.0})
 	return length
 
 ## 10. Three-swing beheading: the first stroke sticks in the block, the second
 ## bounces off, the third pops the head off; it rolls, stops facing the god,
-## and blinks; a geyser soaks the front row.
+## and blinks; a geyser soaks the front row. (Timed to the sound's track: the
+## stuck stroke at `blow`, the pull 0.9, the clang 2.5, the chop 4.8, the
+## geyser 5.1, the patter on the front row 5.9, the blink 7.0, the retch 8.1.)
 static func _exec_behead(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
 	var ex:=String(roles.ex)
-	var length:=12.0
+	var blow:=2.6
+	var length:=blow+9.0
 	_exec_before(ctx,out,victim,roles,length)
 	_shot(out,0.0,"two_shot",{"a":victim,"b":ex,"weight":5})
-	_exec(out,0.1,"prop",{"name":"block","at":victim,"front":0.5,"of":victim})
+	_exec(out,0.1,"prop",{"name":"block","id":"block","at":victim,"front":0.5,"of":victim})
 	_beat(out,0.3,victim,"kneel",{"dur":10.0,"hold":true},"anticipation")
 	_exec(out,0.3,"approach",{"who":ex,"to":victim,"side":-1.0,"dist":0.8,"time":1.0})
 	_exec(out,1.2,"lean",{"who":victim,"pitch":36.0,"time":0.6})
 	_exec(out,1.3,"prop",{"name":"axe","id":"axe","to":ex,"hand":"R"})
 	# one: it sticks in the block
-	_beat(out,1.7,ex,"windup",{"dur":0.8,"hold":true},"anticipation")
-	_exec(out,1.7,"twist",{"who":ex,"yaw":-70.0,"time":0.7})
-	_exec(out,2.5,"twist",{"who":ex,"yaw":120.0,"time":0.1})
-	_beat(out,2.5,ex,"swing",{"dur":0.5},"action")
-	_snd(out,2.58,"thunk",1.0,"thump")
-	_exec(out,2.6,"stick",{"id":"axe","in":"block"})
-	_beat(out,2.9,ex,"tug",{"dur":0.9},"action")
-	_exec(out,3.0,"lunge",{"who":ex,"dist":-0.12,"time":0.12})
-	_exec(out,3.35,"lunge",{"who":ex,"dist":-0.14,"time":0.12})
-	_snd(out,3.1,"creak",0.6,"creak")
-	_beat(out,3.2,victim,"side_eye",{"at":ex,"dur":0.9},"reaction")
-	_exec(out,3.8,"retrieve",{"id":"axe","who":ex})
-	_exec(out,3.8,"lunge",{"who":ex,"dist":-0.3,"time":0.18})
-	_snd(out,3.8,"wood_pop",0.7)
+	_beat(out,blow-0.9,ex,"windup",{"dur":0.7,"hold":true},"anticipation")
+	_exec(out,blow-0.9,"twist",{"who":ex,"yaw":-70.0,"time":0.65})
+	_exec(out,blow-0.2,"twist",{"who":ex,"yaw":120.0,"time":0.1})
+	_beat(out,blow-0.2,ex,"swing",{"dur":0.5},"action")
+	_exec(out,blow,"blow",{})
+	_snd(out,blow,"thunk",1.0,"thump")
+	_exec(out,blow+0.02,"stick",{"id":"axe","in":"block"})
+	_beat(out,blow+0.25,ex,"tug",{"dur":0.6},"action")
+	_exec(out,blow+0.35,"lunge",{"who":ex,"dist":-0.12,"time":0.12})
+	_exec(out,blow+0.65,"lunge",{"who":ex,"dist":-0.14,"time":0.12})
+	_beat(out,blow+0.4,victim,"side_eye",{"at":ex,"dur":0.9},"reaction")
+	_exec(out,blow+0.9,"retrieve",{"id":"axe","who":ex})
+	_exec(out,blow+0.9,"lunge",{"who":ex,"dist":-0.3,"time":0.18})
 	# two: it bounces off
-	_exec(out,4.3,"twist",{"who":ex,"yaw":-120.0,"time":0.7})
-	_beat(out,4.3,ex,"windup",{"dur":0.7,"hold":true},"anticipation")
-	_exec(out,5.0,"twist",{"who":ex,"yaw":120.0,"time":0.1})
-	_beat(out,5.0,ex,"swing",{"dur":0.4},"action")
-	_snd(out,5.08,"clang",1.0,"clatter")
-	_exec(out,5.12,"twist",{"who":ex,"yaw":-60.0,"time":0.12})
-	_beat(out,5.15,ex,"wobble",{"dur":0.8},"reaction")
-	_beat(out,5.2,victim,"flinch",{},"reaction")
-	_shot(out,5.3,"reaction",{"target":ex})
+	_exec(out,blow+1.5,"twist",{"who":ex,"yaw":-120.0,"time":0.7})
+	_beat(out,blow+1.5,ex,"windup",{"dur":0.7,"hold":true},"anticipation")
+	_exec(out,blow+2.3,"twist",{"who":ex,"yaw":120.0,"time":0.1})
+	_beat(out,blow+2.3,ex,"swing",{"dur":0.4},"action")
+	_snd(out,blow+2.5,"clang",1.0,"clatter")
+	_exec(out,blow+2.5,"twist",{"who":ex,"yaw":-60.0,"time":0.12})
+	_beat(out,blow+2.55,ex,"wobble",{"dur":0.8},"reaction")
+	_beat(out,blow+2.6,victim,"flinch",{},"reaction")
+	_beat(out,blow+3.15,ex,"mortified",{"dur":0.6},"reaction")
+	_shot(out,blow+2.55,"reaction",{"target":ex})
 	# three: off it comes
-	_exec(out,6.2,"twist",{"who":ex,"yaw":-90.0,"time":0.85})
-	_beat(out,6.2,ex,"windup",{"dur":0.85,"hold":true},"anticipation")
-	_shot(out,6.4,"two_shot",{"a":victim,"b":ex})
-	_exec(out,7.05,"twist",{"who":ex,"yaw":150.0,"time":0.1})
-	_exec(out,7.05,"lunge",{"who":ex,"dist":0.25,"time":0.1})
-	_beat(out,7.05,ex,"swing",{"dur":0.6},"action")
-	_snd(out,7.12,"chop",1.0,"crack")
-	_exec(out,7.14,"behead",{"who":victim,"fly":"roll","roll_dist":1.5,"time":1.1,"arc":0.45,"spin":2.0,"face_god":true,"blink":true})
-	_exec(out,7.16,"spray",{"at":"neck:"+victim,"dir":"camera","seconds":1.8,"amount":120,"speed":4.4,"spread":18.0,"pool_r":0.7})
-	_snd(out,7.2,"geyser",0.9)
-	_exec(out,7.7,"fall",{"who":victim,"kind":"forward","time":0.5})
-	_shot(out,7.2,"wide",{"time":0.5})
-	_exec_after(ctx,out,7.4,victim,roles,true)
-	for dog:Dictionary in _of_kind(ctx,["dog"]):_beat(out,9.0,String(dog.key),"sniff",{"at":victim},"reaction")
+	_exec(out,blow+3.75,"twist",{"who":ex,"yaw":-90.0,"time":0.8})
+	_beat(out,blow+3.75,ex,"windup",{"dur":0.8,"hold":true},"anticipation")
+	_shot(out,blow+3.8,"two_shot",{"a":victim,"b":ex})
+	_exec(out,blow+4.6,"twist",{"who":ex,"yaw":150.0,"time":0.1})
+	_exec(out,blow+4.6,"lunge",{"who":ex,"dist":0.25,"time":0.1})
+	_beat(out,blow+4.6,ex,"swing",{"dur":0.6},"action")
+	_snd(out,blow+4.8,"chop",1.0,"crack")
+	_exec(out,blow+4.82,"behead",{"who":victim,"fly":"roll","roll_dist":1.5,"time":1.0,"arc":0.45,"spin":2.0,"face_god":true,"blink":true,"blink_at":2.18})
+	_exec(out,blow+5.1,"spray",{"at":"neck:"+victim,"dir":"camera","seconds":1.8,"amount":120,"speed":4.4,"spread":18.0,"pool_r":0.7})
+	_exec(out,blow+5.3,"fall",{"who":victim,"kind":"forward","time":0.5})
+	_shot(out,blow+4.9,"frame",{"on":[victim,ex,"front:"+victim+":1.5"],"time":0.5})
+	_exec_after(ctx,out,blow+5.4,victim,roles,true,{"wipe":blow+5.9,"faint":blow+6.2,"retch":blow+8.1,"clap":blow+7.6})
+	for dog:Dictionary in _of_kind(ctx,["dog"]):_beat(out,blow+6.6,String(dog.key),"sniff",{"at":victim},"reaction")
 	return length
 
 ## 4. Dog dinner: the camp dogs drag them behind the windbreak; loud
 ## crunching; a dog trots back with a thighbone, drops it at the god's feet
-## and wags.
+## and wags. (Timed to the sound's track: the snarl at `blow`, the drag 0.2,
+## the crunching from 2.0, the bone dropped 7.6.)
 static func _exec_dogs(ctx:Dictionary,out:Array,victim:String,roles:Dictionary)->float:
-	var length:=11.0
+	var blow:=2.2
+	var length:=blow+8.8
 	_exec_before(ctx,out,victim,roles,length)
-	_shot(out,0.0,"wide",{"weight":5})
+	_shot(out,0.0,"frame",{"on":[victim,"windbreak"],"weight":5})
 	_beat(out,0.2,victim,"look_wrong_way",{"dur":0.8},"anticipation")
 	_snd(out,0.4,"dog_bark",0.8,"bark")
-	_exec(out,0.4,"dogs",{"to":victim,"more":2})
+	_exec(out,0.3,"dogs",{"to":victim,"more":2})
 	_beat(out,1.0,victim,"double_take",{"dur":0.7},"reaction")
 	_beat(out,1.5,victim,"flinch",{},"reaction")
-	_snd(out,2.0,"dog_snarl",0.9)
-	_exec(out,2.1,"fall",{"who":victim,"kind":"back","time":0.4})
-	_snd(out,2.4,"thud",0.7,"thump")
-	_exec(out,2.8,"drag",{"who":victim,"to":"windbreak","time":2.6})
-	_snd(out,2.8,"drag_scrape",0.6)
-	_exec(out,5.4,"vanish",{"who":victim})
-	_snd(out,5.6,"crunch_loop",1.0,"crunch")
-	_shot(out,5.6,"shake",{"strength":0.12})
-	_exec_after(ctx,out,5.8,victim,roles,false)
-	_exec(out,8.0,"fetch",{"to":"god_feet"})
-	_snd(out,9.4,"bone_drop",0.7,"clatter")
+	_exec(out,blow,"blow",{})
+	_snd(out,blow,"dog_snarl",0.9)
+	_exec(out,blow,"fall",{"who":victim,"kind":"back","time":0.35})
+	_exec(out,blow+0.2,"drag",{"who":victim,"to":"windbreak","time":1.8})
+	_exec(out,blow+2.0,"vanish",{"who":victim})
+	_snd(out,blow+2.0,"crunch_loop",1.0,"crunch")
+	_shot(out,blow+2.0,"shake",{"strength":0.12})
+	_exec_after(ctx,out,blow+2.4,victim,roles,false,{"faint":blow+2.8,"retch":blow+3.6,"clap":blow+8.6})
+	_exec(out,blow+5.0,"fetch",{"to":"god_feet"})
+	_shot(out,blow+5.4,"frame",{"on":["god_feet","windbreak"],"time":0.8})
 	return length
 
 ## 3. Into the fire: heaved onto the hearth, WHOOMPH; a charred figure walks

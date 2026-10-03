@@ -15,6 +15,12 @@ extends Node
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
+## J's gore on the person's own figure (court_figure_gore.gd), when it is in.
+const GORE_PATH:="res://scripts/hud/court_figure_gore.gd"
+static var _gore:Script
+static func gore_kit()->Script:
+	if _gore==null and ResourceLoader.exists(GORE_PATH):_gore=load(GORE_PATH)
+	return _gore
 
 signal finished
 
@@ -42,6 +48,14 @@ const STONE:=Color("8a857b")
 
 func begin(on_stage:Control,method_id:String,victim_key:String,how:String)->void:
 	stage=on_stage;method=method_id;victim=victim_key;style=how
+	# The figures cut the person's own meshes ready for the blow (J).
+	var b:=_body(victim)
+	if style=="full" and b!=null and b.has_method("gore_prepare") and bool(b.call("gore_allowed")):b.call("gore_prepare")
+
+## The pieces a person came apart into (J's split): {key: {name: Node3D}}.
+var _pieces:Dictionary={}
+## Where their neck was at the blow (the spray comes from there).
+var _necks:Dictionary={}
 
 # --- the beats ------------------------------------------------------------------------
 
@@ -70,6 +84,7 @@ func op(name:String,args:Dictionary)->void:
 		"drop":_drop(args)
 		"vanish":_vanish(String(args.get("who",victim)))
 		"caption":_caption(String(args.get("text","")))
+		"blow","noise":pass
 		"end":finish()
 
 # --- people ---------------------------------------------------------------------------
@@ -95,6 +110,10 @@ func _tween()->Tween:
 ## floor before the god), "windbreak" (behind the hides, or the door).
 func point(name:String)->Vector3:
 	if _things.has(name) and is_instance_valid(_things[name]):return (_things[name] as Node3D).global_position
+	if name.begins_with("front:"):
+		var parts:=name.split(":")
+		var from:=point(parts[1]) if parts.size()>1 else Vector3.ZERO
+		return from-_camera_dir()*(float(parts[2]) if parts.size()>2 else 1.0)
 	var b:=_body(name)
 	if b!=null:return b.global_position
 	var court:=_court()
@@ -174,6 +193,17 @@ func _lunge(key:String,dist:float,time:float)->void:
 	t.tween_property(f,"nudge",from,0.35).set_trans(Tween.TRANS_SINE)
 
 func _fall(key:String,kind:String,time:float)->void:
+	var torso:Node3D=null
+	for name in ["torso_limbs","torso"]:
+		if _pieces.has(key) and (_pieces[key] as Dictionary).has(name):torso=(_pieces[key] as Dictionary)[name]
+	if torso!=null and is_instance_valid(torso):
+		# the body that is left goes over where it knelt
+		var down:=_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		var turn:=Vector3(-80.0 if kind=="back" else 80.0,0.0,0.0) if kind!="side" else Vector3(0.0,0.0,80.0)
+		var ahead:=torso.global_transform.basis.z;ahead.y=0.0
+		down.tween_property(torso,"rotation_degrees",torso.rotation_degrees+turn,time)
+		down.parallel().tween_property(torso,"global_position",Vector3(torso.global_position.x,0.18,torso.global_position.z)+ahead.normalized()*0.3*(-1.0 if kind=="back" else 1.0),time)
+		return
 	var b:=_body(key)
 	if b==null:return
 	var t:=_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
@@ -415,18 +445,22 @@ func _behead(args:Dictionary)->void:
 	var neck_world:=sk.global_transform*sk.get_bone_global_pose(neck).origin
 	var head_world:=sk.global_transform*sk.get_bone_global_pose(head_bone).origin
 	var head_scale:=body.global_transform.basis.get_scale().y
+	_necks[key]=neck_world
 	# J's split pieces when the figure has them; else the stand-in.
 	var head:Node3D=null
-	if body.has_method("split"):
-		var theirs:Variant=body.call("split","head")
-		if theirs is Node3D:head=theirs
+	var theirs:=false
+	if body.has_method("gore_split") and bool(body.call("gore_allowed")):
+		var parts:Dictionary=body.call("gore_split","head")
+		if parts.get("head") is Node3D:
+			head=parts.head;theirs=true
+			_pieces[key]=parts
 	if head==null:
 		head=_head_of(body,head_world,neck_world,head_scale)
 		_shrink(body,{"neck":Vector3.ONE*0.02})
 	if head==null:return
 	_things["head:"+key]=head
 	# the stump: a red cap where the neck was
-	if chest>=0 and not body.has_method("split"):
+	if chest>=0 and not theirs:
 		var cap:=BoneAttachment3D.new();cap.name="ExecStump";cap.bone_name="chest"
 		sk.add_child(cap);_made.append(cap)
 		var disc:=CylinderMesh.new();disc.top_radius=0.055;disc.bottom_radius=0.06;disc.height=0.03;disc.radial_segments=12
@@ -457,7 +491,9 @@ func _behead(args:Dictionary)->void:
 		var yaw:=atan2(god.x-to.x,god.z-to.z)
 		t.parallel().tween_property(head,"rotation:y",yaw,0.35).set_trans(Tween.TRANS_SINE)
 		if bool(args.get("blink",true)):
-			t.tween_interval(0.5)
+			# blinks at the god (at blink_at seconds after the blow, if given)
+			var wait:=maxf(float(args.get("blink_at",time+0.85))-time-0.35,0.1)
+			t.tween_interval(wait)
 			t.tween_callback(_blink.bind(head))
 			t.tween_interval(0.45)
 			t.tween_callback(_blink.bind(head))
@@ -496,6 +532,9 @@ func _head_of(body:Node3D,head_world:Vector3,neck_world:Vector3,head_scale:float
 
 func _blink(head:Node3D)->void:
 	if not is_instance_valid(head):return
+	if head.has_method("blink"):
+		head.call("blink",1)
+		return
 	for mi in head.find_children("*","MeshInstance3D",true,false):
 		var node:=mi as MeshInstance3D
 		var shape:=node.find_blend_shape_by_name(&"blink")
@@ -513,7 +552,9 @@ func _spray_at(args:Dictionary)->void:
 	if court==null:return
 	var at_name:=String(args.get("at",""))
 	var origin:Vector3
-	if at_name.begins_with("neck:"):
+	if at_name.begins_with("neck:") and _necks.has(at_name.trim_prefix("neck:")):
+		origin=_necks[at_name.trim_prefix("neck:")]
+	elif at_name.begins_with("neck:"):
 		var b:=_body(at_name.trim_prefix("neck:"))
 		if b==null:return
 		var sk:Skeleton3D=b.get("skeleton")
@@ -644,12 +685,22 @@ func _fetch(args:Dictionary)->void:
 func _char(key:String,time:float)->void:
 	var b:=_body(key)
 	if b==null:return
+	var kit:=gore_kit()
+	if kit!=null and style=="full" and bool(kit.call("allowed",b)):
+		kit.call("char",b,true)
+		return
 	var t:=_tween()
 	t.tween_method(func(v:float)->void:if is_instance_valid(b):b.set_light(v),1.0,0.05,time)
 
 func _crumble(key:String,time:float)->void:
 	var b:=_body(key)
 	if b==null:return
+	var kit:=gore_kit()
+	if kit!=null and style=="full" and bool(kit.call("allowed",b)):
+		var fall:=_tween()
+		fall.tween_method(func(v:float)->void:if is_instance_valid(b):kit.call("crumble",b,v),0.0,1.0,time)
+		fall.tween_callback(func()->void:_vanish(key))
+		return
 	var t:=_tween()
 	t.tween_property(b,"scale",Vector3(b.scale.x*1.25,0.02,b.scale.z*1.25),time).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	t.tween_callback(func()->void:_vanish(key))
@@ -666,6 +717,8 @@ func _crumble(key:String,time:float)->void:
 # --- the caption, the end -------------------------------------------------------------
 
 func _caption(text:String)->void:
+	var told:=String(stage.get("exec_caption_override")) if stage.get("exec_caption_override")!=null else ""
+	if not told.is_empty():text=told
 	_caption_text=text
 	if text.is_empty():return
 	stage.call("caption",text,"narration",true)
@@ -685,6 +738,13 @@ func finish()->void:
 		if t is Tween and (t as Tween).is_valid():(t as Tween).kill()
 	_tweens.clear()
 	_vanish(victim)
+	var kit:=gore_kit()
+	var b:=_body(victim)
+	if kit!=null and b!=null:kit.call("release",b)
+	for key in _pieces:
+		for piece in (_pieces[key] as Dictionary).values():
+			if is_instance_valid(piece):(piece as Node).queue_free()
+	_pieces.clear()
 	for node in _made:
 		if is_instance_valid(node) and not String((node as Node).name).begins_with("ExecPool"):(node as Node).queue_free()
 	# the pools fade over a few seconds

@@ -502,6 +502,12 @@ func frame_cast(time:=0.0)->void:
 	if _now()<_shot_until and _shot_weight>=2 and time>0.0:return
 	_frame_all(time)
 
+## Where someone is to the camera: their mark, or their body when they have
+## stepped off it (an executioner gone up to the one before the god).
+func _where_now(f:Figure)->Node3D:
+	if f.body3d!=null and is_instance_valid(f.body3d) and f.nudge.length()>0.05:return f.body3d
+	return f.spot
+
 ## Everyone standing before the god, the one before the god leading.
 func _frame_all(time:float)->void:
 	_focus_key=""
@@ -513,8 +519,8 @@ func _frame_all(time:float)->void:
 	for key in cast_order:
 		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.role=="crowd":continue
-		subjects.append(f.spot)
-		if f.role==MAIN:lead=f.spot
+		subjects.append(_where_now(f))
+		if f.role==MAIN:lead=_where_now(f)
 	if subjects.is_empty():subjects.append(set_point("petitioner"))
 	# The one before the god leads the frame (the rest are kept around them).
 	if lead!=null:rig.call("wide",subjects,time,lead)
@@ -610,6 +616,11 @@ var _exec:Node
 ## The method last played here (the caption follows it).
 var exec_method:=""
 var exec_victim:=""
+## The execution has played to its end (or none has begun).
+var exec_done:=true
+## The engine's own words for the death, told the way the hall saw it (the
+## modal sets it; the caption at the end says it instead of the plain one).
+var exec_caption_override:=""
 
 func executing()->bool:
 	return is_instance_valid(_exec)
@@ -627,6 +638,8 @@ func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")
 	_exec=ExecStage.new();_exec.name="Execution"
 	add_child(_exec)
 	_exec.begin(self,method_id,victim_key,style)
+	_exec.finished.connect(func()->void:exec_done=true)
+	exec_done=false
 	exec_method=method_id;exec_victim=victim_key
 	var who:=name_text if name_text!="" else String(person.get("name",""))
 	event("execution",{"method":method_id,"victim":victim_key,"ex":ex_key,"style":style,"name":who,"caption":Executions.caption(method_id,who)})
@@ -987,6 +1000,7 @@ func event(kind:String,data:Dictionary={})->void:
 	var all:Array=[]
 	if beats is Array:all.append_array(beats)
 	if lines is Array:all.append_array(lines)
+	if kind=="execution":all=_exec_in_step(all,data)
 	# Those the scene is about finish walking in before it plays on them (a
 	# gift accepted while the bearer is still on the way in is set down at
 	# their mark, not in the doorway).
@@ -1017,6 +1031,72 @@ func _still_arriving(beats:Array)->float:
 		if f==null or f.leaving or f.spot==null or f.stroll<=0.0:continue
 		wait=maxf(wait,f.arriving_in())
 	return clampf(wait+(0.3 if wait>0.0 else 0.0),0.0,7.0)
+
+## An execution's beats and the sound's whole-act track (N: play_act) in
+## step: the track's blow lands `lead` seconds after it starts; the scene's
+## blow is its "blow" beat. Whichever starts later waits for the other. With
+## the track, the scene's own single sounds give way to it (the hush's cut of
+## the murmur stays).
+const GoreFoley:="res://scripts/hud/court_gore_foley.gd"
+func _exec_in_step(beats:Array,data:Dictionary)->Array:
+	if _sound==null or not is_instance_valid(_sound) or not _sound.has_method("play_act") or not ResourceLoader.exists(GoreFoley):return beats
+	var method:=Executions.method(String(data.get("method","")))
+	if method.is_empty():return beats
+	var consts:Dictionary=(load(GoreFoley) as Script).get_script_constant_map()
+	var names:Array=consts.get("ACT_NUMBERS",[]) if consts.get("ACT_NUMBERS") is Array else []
+	var acts:Dictionary=consts.get("ACTS",{}) if consts.get("ACTS") is Dictionary else {}
+	var n:=int(method.n)
+	var act_name:=String(names[n]) if n<names.size() else ""
+	var track:Array=acts.get(act_name,[])
+	if track.is_empty():return beats
+	var lead:=0.0
+	for item in track:lead=maxf(lead,-float((item as Dictionary).get("t",0.0)))
+	var blow:=-1.0
+	for beat in beats:
+		if beat is Dictionary and String(beat.get("who",""))=="exec" and String(beat.get("act",""))=="blow":blow=float(beat.get("t",0.0))
+	if blow<0.0:return beats
+	var kept:Array=[]
+	var shift:=maxf(lead-blow,0.0)
+	for beat in beats:
+		if not beat is Dictionary:continue
+		var b:=(beat as Dictionary).duplicate()
+		if String(b.get("act",""))=="sound" and String((b.get("args",{}) as Dictionary).get("name",""))!="murmur_cut":continue
+		b.erase("sound")
+		b["t"]=float(b.get("t",0.0))+shift
+		kept.append(b)
+	var roles:=_exec_roles(kept,data)
+	var opts:={"gore":String(data.get("style","full"))}
+	var later:=maxf(blow-lead,0.0)
+	var sound_node:=_sound
+	if later<=0.0:sound_node.call("play_act",n,roles,opts)
+	else:get_tree().create_timer(later,false).timeout.connect(func()->void:if is_instance_valid(sound_node):sound_node.call("play_act",n,roles,opts))
+	return kept
+
+## Who the sound comes from: the executioner (the first to step up), the
+## victim, the cook (the second), the dog, the nearest of the front row.
+func _exec_roles(beats:Array,data:Dictionary)->Dictionary:
+	var roles:={}
+	var victim:=figure(String(data.get("victim",MAIN)))
+	if victim!=null and victim.body3d!=null:roles["victim"]=victim.body3d
+	var stepped:=[]
+	for beat in beats:
+		if String(beat.get("who",""))=="exec" and String(beat.get("act",""))=="approach":
+			var who:=String((beat.get("args",{}) as Dictionary).get("who",""))
+			if who!="" and not who in stepped:stepped.append(who)
+	if stepped.size()>0 and figure(String(stepped[0]))!=null:roles["executioner"]=figure(String(stepped[0])).body3d
+	if stepped.size()>1 and figure(String(stepped[1]))!=null:roles["cook"]=figure(String(stepped[1])).body3d
+	if court_set!=null and court_set.has_method("animal"):
+		var dog:Variant=court_set.call("animal","dog")
+		if dog is Node3D:roles["dog"]=dog
+	var best:Figure=null;var gap:=INF
+	for key in cast_order:
+		var f:=figure(key)
+		if f==null or f==victim or f.body3d==null or f.leaving or (roles.has("executioner") and f.body3d==roles.executioner):continue
+		if victim==null or victim.body3d==null:break
+		var d:=f.body3d.global_position.distance_to(victim.body3d.global_position)
+		if d<gap:gap=d;best=f
+	if best!=null:roles["front_row"]=best.body3d
+	return roles
 
 ## How weighty an event is for the camera.
 static func _weight_of(kind:String,data:Dictionary)->int:
@@ -1492,14 +1572,14 @@ func shot(name:String,args:Dictionary={})->void:
 				# closes on the pair, the first leading. An envoy and their
 				# company come together as one party.
 				if a.spot!=null and b.spot!=null:
-					var pair:=[a.spot,b.spot]
+					var pair:=[_where_now(a),_where_now(b)]
 					if a.role in [MAIN,"attendant"] and b.role in [MAIN,"attendant"]:
 						pair=[]
 						for key in cast_order:
 							var p:=figure(key)
-							if p!=null and not p.leaving and p.spot!=null and p.role in [MAIN,"attendant"]:pair.append(p.spot)
+							if p!=null and not p.leaving and p.spot!=null and p.role in [MAIN,"attendant"]:pair.append(_where_now(p))
 					rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
-					rig.call("wide",pair,float(args.get("time",0.8)),a.spot)
+					rig.call("wide",pair,float(args.get("time",0.8)),_where_now(a))
 				else:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
 			# A close-up (head and shoulders) for the god's wrath on them and
@@ -1509,6 +1589,18 @@ func shot(name:String,args:Dictionary={})->void:
 		"reaction":
 			if body!=null:rig.call("reaction",body,float(args.get("time",0.0)))
 		"shake":rig.call("shake",float(args.get("strength",0.35)))
+		"frame":
+			# Several people and things at once (an execution: the one before
+			# the god, the one with the club, the pot), from the hall's side.
+			var on:Array=[]
+			for thing in args.get("on",[]):
+				var f:=figure(String(thing))
+				if f!=null and f.body3d!=null:on.append(_where_now(f))
+				elif is_instance_valid(_exec):on.append(_exec.call("point",String(thing)))
+				elif court_set!=null:on.append(set_point(String(thing)))
+			if not on.is_empty():
+				rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
+				rig.call("wide",on,float(args.get("time",0.7)),on[0])
 	# The caption goes up out of a shot that has gone in on someone, and
 	# back down for the room; the bubbles step clear of it.
 	if name!="shake":
@@ -2078,7 +2170,7 @@ func _place_caption()->void:
 	# reaction), they fill the lower frame: the caption goes to the top band,
 	# under the god's line, never over the one in the shot.
 	var face:=_focus_face()
-	var gone_in:=court_set!=null and _shot_name in ["push_in","two_shot","reaction"]
+	var gone_in:=court_set!=null and _shot_name in ["push_in","two_shot","reaction","frame"]
 	if gone_in or (face.size.x>0.0 and Rect2(_caption.position,_caption.size).intersects(face)):
 		var high:=top_inset+6.0+(_god.size.y+6.0 if is_instance_valid(_god) and _god.visible else 0.0)
 		_caption.position.y=round(high)
