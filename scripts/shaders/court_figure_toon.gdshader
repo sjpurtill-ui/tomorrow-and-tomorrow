@@ -27,6 +27,12 @@ uniform float sheen = 0.0;
 // court_figures.py) they break into strokes over it, never a cut edge;
 // stubble is strokes all over. UV is the rest position, so it keeps still.
 uniform float stipple = 0.0;
+// The painted face (Body skin) and hair cards: court_figure_face.gdshaderinc.
+uniform bool face_paint = false;
+uniform float card = 0.0;
+uniform bool skin = false;
+instance uniform vec4 face_a = vec4(0.0);
+instance uniform vec4 face_b = vec4(0.0);
 // Per figure: the speaker a little in the light, listeners a little back.
 instance uniform float dim = 1.0;
 
@@ -34,6 +40,9 @@ varying float v_ao;
 varying float v_cover;
 varying float v_edge;
 varying vec2 v_rest;
+varying vec2 v_face2;
+varying vec2 v_face;
+varying float v_card;
 varying vec3 v_world_normal;
 varying vec3 v_obj;
 
@@ -44,6 +53,10 @@ void vertex() {
 	v_obj = VERTEX;
 	v_edge = COLOR.g;
 	v_rest = UV;
+	// glTF stores V flipped (1 - v): the face's up, a card's along
+	v_face2 = vec2(UV2.x, 1.0 - UV2.y);
+	v_face = vec2(UV.x, 1.0 - UV.y);
+	v_card = COLOR.b;
 }
 
 float hash3(vec3 p) {
@@ -60,9 +73,24 @@ float noise3(vec3 x) {
 		mix(mix(hash3(i + vec3(0, 0, 1)), hash3(i + vec3(1, 0, 1)), f.x), mix(hash3(i + vec3(0, 1, 1)), hash3(i + vec3(1, 1, 1)), f.x), f.y), f.z);
 }
 
+#include "res://scripts/shaders/court_figure_face.gdshaderinc"
+
+// How deep a skin is (0 the fairest, 1 the deepest), from its colour.
+float skin_depth() {
+	float lum = dot(albedo, vec3(0.299, 0.587, 0.114));
+	return 1.0 - smoothstep(0.03, 0.45, lum);
+}
+
 void fragment() {
 	if (v_cover > 0.5) {
 		discard;
+	}
+	if (card > 0.0) {
+		// a card of strands: it thins toward its end and its sides
+		float n_card = noise3(vec3(v_face.x * 9.0 + v_card * 40.0, v_face.y * 0.8, v_card * 13.0));
+		if (!card_strand(v_face, v_card, n_card)) {
+			discard;
+		}
 	}
 	if (stipple > 0.0) {
 		float st = noise3(vec3(v_rest.x * 900.0, v_rest.y * 330.0, 0.5)) * 0.7 + noise3(vec3(v_rest.x * 2100.0, v_rest.y * 700.0, 3.1)) * 0.3;
@@ -71,6 +99,12 @@ void fragment() {
 		}
 	}
 	vec3 base = albedo * mix(1.0, v_ao, ao_amount);
+	if (face_paint) {
+		base = paint_face(base, v_face, v_face2, face_a, face_b, skin_depth());
+	}
+	if (card > 0.0) {
+		base *= (0.88 + 0.24 * v_card) * (0.86 + 0.28 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
+	}
 	if (strands > 0.0) {
 		float s = noise3(vec3(v_obj.x * 210.0, v_obj.y * 16.0, v_obj.z * 210.0)) * 0.65 + noise3(vec3(v_obj.x * 90.0, v_obj.y * 7.0, v_obj.z * 90.0)) * 0.35;
 		base *= 1.0 + (s - 0.5) * strands * 2.0;

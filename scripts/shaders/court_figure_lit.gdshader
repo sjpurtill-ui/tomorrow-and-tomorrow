@@ -8,7 +8,7 @@ shader_type spatial;
 // the hide, tunic and robe outfits: the worn outfit's channel is hidden.
 // Both sides are drawn (M's lit twin): an open garment, a cape or a sleeve's
 // mouth shows its inside, not a black hole; the shade side keeps a warm tint.
-render_mode cull_disabled, depth_draw_opaque, specular_disabled;
+render_mode cull_disabled, depth_draw_opaque;
 
 uniform vec3 albedo : source_color = vec3(0.6, 0.5, 0.4);
 uniform vec3 shade_tint : source_color = vec3(0.56, 0.46, 0.44);
@@ -30,6 +30,12 @@ uniform float sheen = 0.0;
 // court_figures.py) they break into strokes over it, never a cut edge;
 // stubble is strokes all over. UV is the rest position, so it keeps still.
 uniform float stipple = 0.0;
+// The painted face (Body skin) and hair cards: court_figure_face.gdshaderinc.
+uniform bool face_paint = false;
+uniform float card = 0.0;
+uniform bool skin = false;
+instance uniform vec4 face_a = vec4(0.0);
+instance uniform vec4 face_b = vec4(0.0);
 // How much of its own colour a person keeps where no light reaches (warm, never black).
 uniform float fill = 0.16;
 // How dark the sun's shadows fall on a person (1: as dark as on the ground).
@@ -44,6 +50,9 @@ varying float v_ao;
 varying float v_cover;
 varying float v_edge;
 varying vec2 v_rest;
+varying vec2 v_face2;
+varying vec2 v_face;
+varying float v_card;
 varying vec3 v_obj;
 
 void vertex() {
@@ -52,6 +61,10 @@ void vertex() {
 	v_obj = VERTEX;
 	v_edge = COLOR.g;
 	v_rest = UV;
+	// glTF stores V flipped (1 - v): the face's up, a card's along
+	v_face2 = vec2(UV2.x, 1.0 - UV2.y);
+	v_face = vec2(UV.x, 1.0 - UV.y);
+	v_card = COLOR.b;
 }
 
 float hash3(vec3 p) {
@@ -68,9 +81,24 @@ float noise3(vec3 x) {
 		mix(mix(hash3(i + vec3(0, 0, 1)), hash3(i + vec3(1, 0, 1)), f.x), mix(hash3(i + vec3(0, 1, 1)), hash3(i + vec3(1, 1, 1)), f.x), f.y), f.z);
 }
 
+#include "res://scripts/shaders/court_figure_face.gdshaderinc"
+
+// How deep a skin is (0 the fairest, 1 the deepest), from its colour.
+float skin_depth() {
+	float lum = dot(albedo, vec3(0.299, 0.587, 0.114));
+	return 1.0 - smoothstep(0.03, 0.45, lum);
+}
+
 void fragment() {
 	if (v_cover > 0.5) {
 		discard;
+	}
+	if (card > 0.0) {
+		// a card of strands: it thins toward its end and its sides
+		float n_card = noise3(vec3(v_face.x * 9.0 + v_card * 40.0, v_face.y * 0.8, v_card * 13.0));
+		if (!card_strand(v_face, v_card, n_card)) {
+			discard;
+		}
 	}
 	if (stipple > 0.0) {
 		float st = noise3(vec3(v_rest.x * 900.0, v_rest.y * 330.0, 0.5)) * 0.7 + noise3(vec3(v_rest.x * 2100.0, v_rest.y * 700.0, 3.1)) * 0.3;
@@ -79,6 +107,12 @@ void fragment() {
 		}
 	}
 	vec3 base = albedo * mix(1.0, v_ao, ao_amount * 0.8);
+	if (face_paint) {
+		base = paint_face(base, v_face, v_face2, face_a, face_b, skin_depth());
+	}
+	if (card > 0.0) {
+		base *= (0.88 + 0.24 * v_card) * (0.86 + 0.28 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
+	}
 	if (!flat_colour) {
 		float g = noise3(v_obj * 46.0) * 0.6 + noise3(v_obj * 13.0) * 0.4;
 		base *= 1.0 + (g - 0.5) * grain;
@@ -125,6 +159,19 @@ void light() {
 		float edge = clamp(tone * (1.0 - tone) * 4.0, 0.0, 1.0);
 		// the shade keeps a warm tint of the stuff's own shadow, not grey
 		vec3 tint = mix(shade_tint, vec3(1.0), tone);
-		DIFFUSE_LIGHT += LIGHT_COLOR * (tint * tone + terminator * edge * 0.30) / PI;
+		vec3 lc = LIGHT_COLOR;
+		if (skin) {
+			float depth = skin_depth();
+			// deep skin keeps its depth: the fire's orange is tamed on it
+			float l = dot(lc, vec3(0.299, 0.587, 0.114));
+			lc = mix(lc, vec3(l), 0.40 * depth);
+			// fair skin: light warms under it at the edge of the shade
+			float wrap = smoothstep(-0.45, 0.15, ndl) * (1.0 - lit);
+			DIFFUSE_LIGHT += lc * vec3(0.55, 0.20, 0.12) * wrap * att * (1.0 - depth) * 0.55 / PI;
+			// deep skin: a cool soft highlight where the light glances back
+			float sp = pow(clamp(dot(reflect(-LIGHT, NORMAL), VIEW), 0.0, 1.0), 9.0) * att;
+			SPECULAR_LIGHT += vec3(0.80, 0.88, 1.0) * l * sp * 0.12 * depth;
+		}
+		DIFFUSE_LIGHT += lc * (tint * tone + terminator * edge * 0.30) / PI;
 	}
 }

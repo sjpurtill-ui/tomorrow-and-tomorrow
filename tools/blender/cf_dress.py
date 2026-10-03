@@ -594,23 +594,25 @@ def _hide(f):
     lo, hi = box_of(f, hem - 0.08, zs + 0.06, x=0.36)
     wrap = Piece("hide_wrap", "CLOTH_A", solid_fn(outer, keep), shell_fn(outer, keep, 0.0075), lo, hi, outer=outer, keep=keep)
     # the fur cape about the shoulders, open at the throat
+    # it lies on the shoulders and falls from them: close over the shoulder,
+    # hanging a little free below it, the pelt's own slight unevenness
     cs = [
-        (zc - 0.045 * k, 0.322 * k, 0.150 * k, 0.160 * k, 0.012),
-        (zs - 0.090 * k, 0.290 * k, 0.130 * k, 0.140 * k, 0.012),
-        (zs - 0.010, 0.255 * k, 0.098 * k, 0.110 * k, 0.012),
-        (zs + 0.030 * k, 0.150 * k, 0.074 * k, 0.088 * k, 0.014),
-        (zs + 0.052 * k, 0.088 * k, 0.062 * k, 0.074 * k, 0.016),
+        (zc - 0.045 * k, 0.298 * k, 0.140 * k, 0.150 * k, 0.012),
+        (zs - 0.090 * k, 0.268 * k, 0.120 * k, 0.130 * k, 0.012),
+        (zs - 0.010, 0.240 * k, 0.090 * k, 0.102 * k, 0.012),
+        (zs + 0.030 * k, 0.146 * k, 0.070 * k, 0.084 * k, 0.014),
+        (zs + 0.052 * k, 0.086 * k, 0.060 * k, 0.072 * k, 0.016),
     ]
-    cape_outer_l = loft(cs, ((9, 0.2, 0.0, [(zc - 0.05, 0.06), (zs, 0.01)]),), seed=1.1).eval
+    cape_outer_l = loft(cs, ((9, 0.2, 0.0, [(zc - 0.05, 0.05), (zs, 0.006)]),), seed=1.1).eval
 
     def cape_outer(P):
         d = cape_outer_l(P)
-        n = np.sin(P[..., 0] * 160.0) * np.sin(P[..., 1] * 140.0 + 1.0) * np.sin(P[..., 2] * 150.0 + 2.0)
-        return d + 0.0035 * n
+        n = np.sin(P[..., 0] * 90.0) * np.sin(P[..., 1] * 80.0 + 1.0) * np.sin(P[..., 2] * 85.0 + 2.0)
+        return d + 0.0016 * n
     cape_hem = _hem(zc - 0.020 * k, jag=0.036 * k, count=11, seed=0.2)
     cape_keep = keep_all(above(cape_hem), _front_slit(f, 0.030, 0.50, zs + 0.05))
     lo, hi = box_of(f, zc - 0.12, zs + 0.09, x=0.40)
-    cape = Piece("hide_cape", "CLOTH_B", solid_fn(cape_outer, cape_keep), shell_fn(cape_outer, cape_keep, 0.011), lo, hi, cover=False)
+    cape = Piece("hide_cape", "CLOTH_B", solid_fn(cape_outer, cape_keep), shell_fn(cape_outer, cape_keep, 0.008), lo, hi, cover=False)
     # a cord belt with hanging ends
     belt = _cord_belt(f, zw - 0.012 * k, outer, "hide_cord", "CLOTH_C")
     feet = _shoes(f, "hide_footwraps", "CLOTH_B", top=0.11, wraps=3)

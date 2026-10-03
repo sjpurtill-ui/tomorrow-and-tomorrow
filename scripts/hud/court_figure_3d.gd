@@ -21,6 +21,8 @@ const DIR:="res://assets/court_figures/"
 const TOON:=preload("res://scripts/shaders/court_figure_toon.gdshader")
 ## Each person's own shade of their people's look (hair, skin, build, dress, stance).
 const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
+## In a lit court a person's visible parts are merged into a few pieces.
+const Merge:=preload("res://scripts/hud/court_figure_merge.gd")
 ## In a modelled court (court_set_3d.gd) the figures take the set's own light.
 const TOON_LIT:=preload("res://scripts/shaders/court_figure_lit.gdshader")
 const INK:=preload("res://scripts/shaders/court_figure_ink.gdshader")
@@ -78,7 +80,14 @@ var head_bone:=-1
 var head_height:=0.28
 var body_height:=1.72
 var _base_height:=1.72
+## What is shown and driven (the merged pieces and the props, or the parts).
 var _meshes:Array[MeshInstance3D]=[]
+## Every part the body's .glb has (hair styles, beards, outfits, face parts, props).
+var _parts:Array[MeshInstance3D]=[]
+## The merged pieces (Body, Rest, Hair, Eyes) when the figure stands in a lit court.
+var _merged:Dictionary={}
+var _merge_root:Node3D
+static var _uber:Array=[]
 var _yaw_tween:Tween
 ## What they keep doing at rest, and the mood the engine gives them.
 var stance:="stand"
@@ -118,7 +127,7 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 	if _materials.has(key):return _materials[key]
 	if _materials.size()>=MATERIAL_LIMIT:_materials.erase(_materials.keys()[0])
 	var made:=ShaderMaterial.new()
-	made.shader=shader_for(lit,"read" if slot in STENCIL_READ else ("write" if slot in STENCIL_WRITE else ""))
+	made.shader=shader_for(lit,"read" if slot in STENCIL_READ else ("write" if slot in STENCIL_WRITE else ("card" if slot=="HAIR_CARD" else "")))
 	made.set_shader_parameter("albedo",colour)
 	made.set_shader_parameter("cover_channel",cover)
 	made.set_shader_parameter("key_dir",key_dir)
@@ -127,8 +136,16 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 	else:
 		if slot=="SKIN":
 			made.set_shader_parameter("shade_tint",Color(0.70,0.52,0.47))
-			made.set_shader_parameter("band_soft",0.24)
+			made.set_shader_parameter("band_soft",0.34)
+			# the painted face (court_figure_face.gdshaderinc) and skin's own light
+			made.set_shader_parameter("face_paint",true)
+			made.set_shader_parameter("skin",true)
 			made.set_shader_parameter("terminator",Color(0.30,0.10,0.05))
+		if slot=="HAIR_CARD":
+			made.set_shader_parameter("card",1.0)
+			made.set_shader_parameter("rim_amount",0.30)
+			made.set_shader_parameter("sheen",0.18)
+			made.set_shader_parameter("grain",0.0)
 		if slot=="HAIR":
 			made.set_shader_parameter("rim_amount",0.22)
 			made.set_shader_parameter("strands",0.24)
@@ -140,7 +157,7 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 		if lit:
 			made.set_shader_parameter("fill",0.22 if slot=="SKIN" else 0.16)
 			if slot=="SKIN":made.set_shader_parameter("grain",0.025)
-		if inked and not slot in ["BROW","STUBBLE"]:made.next_pass=_ink(cover,slot=="HAIR")
+		if inked and not slot in ["BROW","STUBBLE","HAIR_CARD"]:made.next_pass=_ink(cover,slot=="HAIR")
 	_materials[key]=made
 	return made
 
@@ -153,7 +170,10 @@ static func shader_for(lit:bool,stencil:="")->Shader:
 	var key:="%d|%s" % [int(lit),stencil]
 	if _shaders.has(key):return _shaders[key]
 	var code:=base.code
-	if stencil=="write":
+	if stencil=="card":
+		# hair cards: both sides of a strip of strands
+		code=code.replace("cull_back","cull_disabled")
+	elif stencil=="write":
 		code=code.replace("render_mode ","stencil_mode write, compare_always, 1;\nrender_mode ")
 	else:
 		code=code.replace("depth_draw_opaque","depth_draw_never").replace("render_mode ","stencil_mode read, compare_equal, 1;\nrender_mode blend_mix, shadows_disabled, ")
@@ -180,6 +200,11 @@ static func _ink(cover:int,stippled:=false)->ShaderMaterial:
 static func set_key_light(direction:Vector3)->void:
 	key_dir=direction.normalized()
 	for made:ShaderMaterial in _materials.values():made.set_shader_parameter("key_dir",key_dir)
+	var alive:=[]
+	for ref:WeakRef in _uber:
+		var made:=ref.get_ref() as ShaderMaterial
+		if made!=null:made.set_shader_parameter("key_dir",key_dir);alive.append(ref)
+	_uber=alive
 
 static func height_of(variant_name:String)->float:
 	for entry:Dictionary in manifest().get("variants",[]):
@@ -207,8 +232,9 @@ func setup(look_in:Dictionary)->bool:
 		var players:=model.find_children("*","AnimationPlayer",true,false)
 		player=players[0] as AnimationPlayer if not players.is_empty() else null
 		head_bone=skeleton.find_bone("head") if skeleton!=null else -1
-		_meshes.clear()
-		for node in model.find_children("*","MeshInstance3D",true,false):_meshes.append(node as MeshInstance3D)
+		_meshes.clear();_parts.clear();_merged.clear();_merge_root=null
+		for node in model.find_children("*","MeshInstance3D",true,false):_parts.append(node as MeshInstance3D)
+		_meshes=_parts.duplicate()
 		for entry:Dictionary in manifest().get("variants",[]):
 			if String(entry.get("variant",""))==variant:
 				head_height=float(entry.get("head_top",1.72))-float(entry.get("chin",1.44))
@@ -278,7 +304,7 @@ func set_mood(name:String)->void:
 	if has_meta(&"court_acting"):return
 	var keys:Dictionary=(MOODS[name] as Array)[0]
 	for mesh_node in _meshes:
-		if mesh_node.name!="Mouth" and mesh_node.name!="Brows":continue
+		if not String(mesh_node.name) in ["Mouth","Brows","Body"]:continue
 		for key in ["mood_smile","mood_tight","mood_worry","mood_stern"]:
 			var index:=mesh_node.find_blend_shape_by_name(StringName(key))
 			if index>=0:mesh_node.set_blend_shape_value(index,float(keys.get(key,0.0)))
@@ -286,7 +312,7 @@ func set_mood(name:String)->void:
 ## Their own face: the morph targets of their people's family face and theirs.
 func _face()->void:
 	var face:Dictionary=look.get("face",{})
-	for mesh_node in _meshes:
+	for mesh_node in _parts:
 		if mesh_node.mesh==null:continue
 		# Every morph starts at rest; only this person's own are set.
 		for index in mesh_node.get_blend_shape_count():mesh_node.set_blend_shape_value(index,0.0)
@@ -313,7 +339,7 @@ func set_expression(values:Dictionary)->void:
 			for key in EXPRESSION_STANDINS[name]:standins[key]=maxf(float(standins.get(key,0.0)),value*float(EXPRESSION_STANDINS[name][key]))
 	for key in standins:
 		for mesh_node in _meshes:
-			if mesh_node.name!="Mouth" and mesh_node.name!="Brows":continue
+			if not String(mesh_node.name) in ["Mouth","Brows","Body"]:continue
 			var index:=mesh_node.find_blend_shape_by_name(StringName(key))
 			if index>=0:mesh_node.set_blend_shape_value(index,float(standins[key]))
 
@@ -344,12 +370,12 @@ func _dress()->void:
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
 		"EYES":Color("22170f"),"EYE_WHITE":Color("e6dbc6"),"EYE_SHINE":Color("fbf6ea"),
 		"IRIS":Color(look.get("eye_colour",Color("5a3a22"))),"PUPIL":Color("140d08"),
-		"MOUTH":skin.darkened(0.62),"LEATHER":Color(look.get("leather",Color("5b3b24"))),
+		"MOUTH":Color("2a0d0a").lerp(skin.darkened(0.7),0.35),"HAIR_CARD":hair_colour,"LEATHER":Color(look.get("leather",Color("5b3b24"))),
 		"STUBBLE":skin.lerp(hair_colour,0.42).darkened(0.08),"WOOD":Color("6b4a2e"),"CLAY":Color("a0603a"),
 	}
 	var cloth:Array=look.get("cloth",[Color("b07a35"),Color("6e5541"),Color("a8432f")])
 	for i in 3:colours["CLOTH_"+"ABC"[i]]=Color(cloth[i]) if i<cloth.size() else Color("8a7a66")
-	for mesh_node in _meshes:
+	for mesh_node in _parts:
 		var part:=String(mesh_node.name)
 		var shown:=part in FACE_PARTS or part==hair or part==beard or (part.begins_with(outfit+"_") and not part in hidden_pieces) or part==String(PROPS.get(stance,"-"))
 		mesh_node.visible=shown
@@ -358,14 +384,100 @@ func _dress()->void:
 		# (hair and beards neither: their shade on the brow reads as a dark band)
 		var shadows:=lit and not part in NO_SHADOW and not part.begins_with("hair_") and not part.begins_with("beard_")
 		mesh_node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON if shadows else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		# A beard has no inked edge: it grows out of the skin, it is not pasted on.
-		var inked:=not part.begins_with("beard_")
+		# Beards and hair have no inked edge: they grow out of the skin, and
+		# hair's outline is its cards of strands, not a drawn helmet's edge.
+		var inked:=not part.begins_with("beard_") and not part.begins_with("hair_")
 		for surface in mesh_node.mesh.get_surface_count():
 			var source:=mesh_node.mesh.surface_get_material(surface)
 			var slot:=source.resource_name if source!=null else "CLOTH_A"
 			if part=="Brows":slot="BROW"
 			var cover:=int(OUTFITS.get(outfit,0)) if part=="Body" else 0
 			mesh_node.set_surface_override_material(surface,material(slot,colours.get(slot,Color("8a7a66")),cover,lit,inked))
+		if part=="Body":_paint_face(mesh_node,beard)
+	if lit and Merge.enabled and skeleton!=null:_merge_parts(colours,int(OUTFITS.get(outfit,0)),beard)
+	else:_unmerge()
+
+## The visible parts as a few merged pieces (court_figure_merge.gd): Body
+## (skin, brows, mouth, beard, lid line; the moving morphs), Rest (the
+## outfit), Hair (hair and cards) and Eyes (whites, and what shows in them).
+func _merge_parts(colours:Dictionary,cover:int,beard:String)->void:
+	var groups:={"Body":[],"Rest":[],"Hair":[],"Eyes":[]}
+	var names:=PackedStringArray()
+	var skin_res:Skin=null
+	for mesh_node in _parts:
+		var part:=String(mesh_node.name)
+		if not mesh_node.visible or mesh_node.mesh==null or part.begins_with("prop_"):continue
+		names.append(part)
+		if skin_res==null:skin_res=mesh_node.skin
+		for surface in mesh_node.mesh.get_surface_count():
+			var source:=mesh_node.mesh.surface_get_material(surface)
+			var slot:=source.resource_name if source!=null else "CLOTH_A"
+			if part=="Brows":slot="BROW"
+			var entry:=[mesh_node,surface,slot]
+			if part=="Eyes":(groups.Body if slot=="EYES" else groups.Eyes).append(entry)
+			elif part in ["Body","Brows","Mouth"] or part.begins_with("beard_"):groups.Body.append(entry)
+			elif part.begins_with("hair_"):groups.Hair.append(entry)
+			else:groups.Rest.append(entry)
+	var face:Dictionary=look.get("face",{})
+	var face_key:=PackedStringArray()
+	for shape:String in FACE_SHAPES:face_key.append("%.2f" % float(face.get(shape,0.0)))
+	var made:=Merge.meshes("%s|%s|%s" % [variant,",".join(names),",".join(face_key)],groups,face)
+	if not is_instance_valid(_merge_root):
+		_merge_root=Node3D.new();_merge_root.name="Merged";skeleton.add_child(_merge_root)
+	var opaque:=Merge.material(colours,cover,key_dir)
+	var write:=Merge.material(colours,cover,key_dir,"write")
+	var read:=Merge.material(colours,cover,key_dir,"read")
+	for m in [opaque,write,read]:_uber.append(weakref(m))
+	_meshes.clear()
+	for group in ["Body","Rest","Hair","Eyes"]:
+		var node:=_merged.get(group) as MeshInstance3D
+		if not made.has(group):
+			if node!=null:node.visible=false
+			continue
+		if node==null:
+			node=MeshInstance3D.new();node.name=group
+			_merge_root.add_child(node)
+			node.skeleton=NodePath("../..")
+			_merged[group]=node
+		node.skin=skin_res
+		node.mesh=made[group]
+		node.visible=true
+		for i in node.get_blend_shape_count():node.set_blend_shape_value(i,0.0)
+		if group=="Eyes":
+			node.set_surface_override_material(0,write)
+			if node.mesh.get_surface_count()>1:node.set_surface_override_material(1,read)
+		else:
+			node.set_surface_override_material(0,opaque)
+		node.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_ON if group in ["Body","Rest"] else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		_meshes.append(node)
+	if _merged.has("Body"):_paint_face(_merged.Body,beard)
+	# the parts step aside (the props stay, shown by their stance)
+	for mesh_node in _parts:
+		if String(mesh_node.name).begins_with("prop_"):_meshes.append(mesh_node)
+		else:mesh_node.visible=false
+
+## Back to the parts as they are (no lit court: the studio, the flat stage).
+func _unmerge()->void:
+	for node in _merged.values():
+		if is_instance_valid(node):(node as MeshInstance3D).visible=false
+	_meshes=_parts.duplicate()
+
+## Their own painted face (court_figure_face.gdshaderinc): years, freckles,
+## a shaved man's shadow of beard, their seed, and how readily they colour.
+func _paint_face(body:MeshInstance3D,beard:String)->void:
+	var years:=FigureLook.years_of(look)
+	var seed_value:=FigureLook.seed_of(look)
+	var rng:=RandomNumberGenerator.new();rng.seed=seed_value+101
+	var age:=clampf(float(years-26)/40.0,0.0,1.0)
+	var skin:=Color(look.get("skin",Color("bd8659")))
+	var fair:=skin.get_luminance()>0.55
+	var freckles:=rng.randf_range(0.4,1.0) if rng.randf()<(0.45 if fair else 0.12) and years<60 else 0.0
+	var male:=variant.begins_with("male")
+	var shadow:=0.0
+	if male and years>=17 and (beard.is_empty() or beard=="beard_moustache"):shadow=rng.randf_range(0.25,0.85)
+	var blush:=0.8 if variant=="child" else (0.6 if variant.begins_with("female") else 0.25)
+	body.set_instance_shader_parameter("face_a",Vector4(age,freckles,shadow,float(seed_value%9973)/9973.0))
+	body.set_instance_shader_parameter("face_b",Vector4(blush,0.0,0.0,0.0))
 
 ## A prop shows only in the stance that holds it (not while walking or bowing).
 func _props_for(name:String)->void:
