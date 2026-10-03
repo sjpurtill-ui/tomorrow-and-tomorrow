@@ -377,8 +377,37 @@ func _ready()->void:
 	if sound!=null and _sound==null:
 		var made:Variant=sound.call("attach",self)
 		if made is Node:_sound=made
+	if _sound!=null and _sound.has_signal("music_changed") and not _sound.is_connected("music_changed",_on_music):_sound.connect("music_changed",_on_music)
 	_ambience()
 	_attach_rig()
+
+## A visible musician (N's music, K's playing clips): seated by the fire when
+## the people know an instrument and the acting can play it; otherwise the
+## music plays off to one side and nobody is stood up for it.
+func add_musician()->void:
+	if _sound==null or not _sound.has_method("music_state") or extras.has("musician") or court_set==null:return
+	var key:=String((_sound.call("music_state") as Dictionary).get("key",""))
+	if key.is_empty() or sound==null:return
+	var band:Dictionary=(sound.call("music_spec",key) as Dictionary).get("ensemble",{})
+	var lead:=String(band.get("lead","hum"))
+	if lead=="hum" or acting==null or not Acting.has_clip("play_"+lead):return
+	add_extra({"key":"musician","role":"crowd","kind":"musician","stance":"sit","name":"the musician","age":34,
+		"instrument":lead,"drum":String(band.get("drum",""))})
+
+func _on_music(state:String)->void:
+	var f:=figure("musician")
+	if f==null or f.body3d==null or f.leaving or acting==null:return
+	var lead:=String((extras.get("musician",{}) as Dictionary).get("instrument",""))
+	match state:
+		"play":Acting.play(f.body3d,"play_"+lead,{"loop":true})
+		"stop_dead":
+			Acting.play(f.body3d,"freeze_mid_note",{"hold":true})
+			f.body3d.look_at_point(god_point(true),0.35)
+		"tentative":
+			Acting.play(f.body3d,"glance_up")
+			Acting.play(f.body3d,"play_"+lead,{"loop":true,"speed":0.7})
+		"flourish":Acting.play(f.body3d,"flourish_"+lead)
+		"rest":Acting.stop(f.body3d,0.4)
 
 ## The set's rig takes the stage's lens once everyone stands in the tree.
 var _rig_attached:=false
@@ -686,6 +715,8 @@ func _embody(f:Figure)->void:
 		if seat<0.0:_space_spot(f)
 		f.attach_body(body,null,self)
 		_acting_stance(f,seat)
+		# Winter: their breath shows (M).
+		if String(facts.get("season",""))=="winter" and court_set.has_method("add_breath"):court_set.call("add_breath",body)
 		return
 	view3d.add_child(body)
 	var shade:=MeshInstance3D.new();shade.name="Shade_"+node_key(f.key)
@@ -953,13 +984,33 @@ func _set_answers(kind:String,data:Dictionary)->void:
 	match kind:
 		"divine":
 			var action:=String(data.get("action",""))
+			var target:=_addressed(data)
 			if action in WRATH_ACTS:
-				if rig!=null and rig.has_method("shake"):rig.call("shake",0.6)
+				# (the director's beats carry the jolt; without them, the stage's)
+				if director==null and rig!=null and rig.has_method("shake"):rig.call("shake",0.6)
 				for beast:Node3D in beasts:beast.call("on_god","wrath")
+				_god_light(target,"wrath",3.6)
 			elif action in FAVOUR_ACTS:
 				for beast:Node3D in beasts:beast.call("on_god","favour")
+				_god_light(target,"favour",2.6)
 		"god":
 			for beast:Node3D in beasts:beast.call("on_god","voice")
+			# The god turns to the one before them: the light falls there for the
+			# words and the hush after them.
+			var tone:=String(data.get("tone",""))
+			_god_light(_addressed(data),tone if tone in ["wrath","favour"] else "speaks",float(data.get("seconds",2.0))+1.8)
+
+## The body the god's words or act fall on: the one named, else the one
+## before the god.
+func _addressed(data:Dictionary)->Node3D:
+	var f:=figure(String(data.get("target",data.get("who",MAIN))))
+	if f==null or f.body3d==null or f.leaving:f=figure(MAIN)
+	return f.body3d if f!=null and f.body3d!=null and not f.leaving else null
+
+## The god's presence in light on the set (M's god_light): held, then eased back.
+func _god_light(body:Node3D,tone:String,hold:float)->void:
+	if court_set==null or not court_set.has_method("god_light"):return
+	court_set.call("god_light",body,tone,maxf(hold,0.5))
 
 ## An animal's beat (the director's dog or goat) on the set's own beast.
 func _animal_beat(key:String,beat:Dictionary)->void:
@@ -1347,7 +1398,17 @@ func shot(name:String,args:Dictionary={})->void:
 		"wide","home":rig.call("wide",[],float(args.get("time",0.9)))
 		"two_shot":
 			var a:=figure(String(args.get("a","")));var b:=figure(String(args.get("b","")))
-			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
+			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:
+				# An envoy and their company: all of them, from the hall's own
+				# side (the camera does not swing round behind our people), the
+				# envoy leading; nobody between them and the lens.
+				if a.role in [MAIN,"attendant"] and b.role in [MAIN,"attendant"] and a.spot!=null and b.spot!=null:
+					var party:=[]
+					for key in cast_order:
+						var p:=figure(key)
+						if p!=null and not p.leaving and p.spot!=null and p.role in [MAIN,"attendant"]:party.append(p.spot)
+					rig.call("wide",party,float(args.get("time",0.8)),a.spot)
+				else:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
 			# A close-up (head and shoulders) for the god's wrath on them and
 			# the big reactions: M's close_up, else the push-in.

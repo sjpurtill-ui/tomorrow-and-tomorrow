@@ -363,3 +363,34 @@ func test_a_scene_waits_for_those_still_walking_in()->void:
 	assert_float(stage._still_arriving(beats)).is_greater(0.5)
 	stage.settle()
 	assert_float(stage._still_arriving(beats)).is_equal(0.0)
+
+
+func test_the_gods_light_falls_on_the_one_addressed()->void:
+	# The god's words bring the god's light (M) on the one before the god; the
+	# wrath turns it cold; it holds through the hush and eases back.
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	if not stage.court_set.has_method("god_light"):return
+	stage.god_says("Speak, and be quick.",false)
+	assert_str(String((stage.court_set.call("god_state") as Dictionary).get("tone",""))).is_equal("speaks")
+	stage.event("divine",{"action":"terrify","response":"cower"})
+	assert_str(String((stage.court_set.call("god_state") as Dictionary).get("tone",""))).is_equal("wrath")
+
+
+func test_an_envoys_gift_is_framed_from_the_halls_side()->void:
+	# The bearer and the envoy are framed together with their company, from
+	# the hall's own side: the camera does not swing round behind our people.
+	if not _ready_or_skip():return
+	var id:=_envoy_audience()
+	if id.is_empty():return
+	var modal:Control=await _open(id)
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var other:=""
+	for key in stage.cast_order:
+		if stage.figure(key)!=null and stage.figure(key).role=="attendant":other=key;break
+	if other.is_empty():return
+	stage.shot("two_shot",{"a":Stage.MAIN,"b":other,"weight":4})
+	assert_str(String(stage.rig.get("current_shot"))).is_equal("wide")

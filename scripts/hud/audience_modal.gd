@@ -571,6 +571,7 @@ func _build_stage(audience:Dictionary)->Control:
 func _add_room()->void:
 	if Stage.director==null or not is_instance_valid(court_stage):return
 	for entry in Directing.extras(court_stage.facts,hash(audience_id),{}):court_stage.add_extra(entry)
+	court_stage.add_musician()
 	court_stage.start_ambient()
 
 func _new_stage(parent:Control,kind:String)->Control:
@@ -591,6 +592,8 @@ func _new_stage(parent:Control,kind:String)->Control:
 	var set_facts:=CourtSet.facts_from_game()
 	set_facts["tier"]=Backdrop.current_tier()
 	set_facts["seed"]=hash(audience_id)
+	# The season lies on the set (snow, flies, leaves; breath in winter).
+	set_facts["season"]=String(made.facts.get("season",""))
 	if made.use_set(Backdrop.current_stage(),set_facts) and is_instance_valid(backdrop):backdrop.visible=false
 	parent.add_child(made);made.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	made.event("open",{"layout":kind,"era":made.facts.get("era",0),"season":String(made.facts.get("season","")),
