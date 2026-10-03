@@ -225,6 +225,33 @@ func _face()->void:
 			var index:=mesh_node.find_blend_shape_by_name(StringName("face_"+shape))
 			if index>=0:mesh_node.set_blend_shape_value(index,clampf(float(face.get(shape,0.0)),-1.0,1.0))
 
+## Expressions and visemes (docs/COURT_STAGE_3D.md §3): drives the named
+## morph targets where the body has them, else their nearest stand-ins.
+const EXPRESSION_STANDINS:={"smile":{"mood_smile":1.0},"lips_pressed":{"mood_tight":1.0},"frown":{"mood_tight":0.6,"mood_stern":0.5},
+	"brows_worried":{"mood_worry":1.0},"brows_down":{"mood_stern":1.0},"brows_up":{"mood_worry":0.5},"sneer":{"mood_stern":0.6,"mood_tight":0.4}}
+func set_expression(values:Dictionary)->void:
+	var standins:={}
+	for name in values:
+		var value:=clampf(float(values[name]),0.0,1.0)
+		var found:=false
+		for mesh_node in _meshes:
+			if mesh_node.mesh==null:continue
+			var index:=mesh_node.find_blend_shape_by_name(StringName(name))
+			if index>=0:mesh_node.set_blend_shape_value(index,value);found=true
+		if not found and EXPRESSION_STANDINS.has(name):
+			for key in EXPRESSION_STANDINS[name]:standins[key]=maxf(float(standins.get(key,0.0)),value*float(EXPRESSION_STANDINS[name][key]))
+	for key in standins:
+		for mesh_node in _meshes:
+			if mesh_node.name!="Mouth" and mesh_node.name!="Brows":continue
+			var index:=mesh_node.find_blend_shape_by_name(StringName(key))
+			if index>=0:mesh_node.set_blend_shape_value(index,float(standins[key]))
+
+## Another library of clips (K's): its clips play as "<name>/<clip>".
+func add_library(name:String,library:AnimationLibrary)->void:
+	if player==null or library==null:return
+	if player.has_animation_library(name):player.remove_animation_library(name)
+	player.add_animation_library(name,library)
+
 ## The clip a stance rests in, and the one it talks in.
 func rest_clip()->String:
 	return stance

@@ -545,6 +545,8 @@ func _build_stage(audience:Dictionary)->Control:
 
 func _new_stage(parent:Control,kind:String)->Control:
 	var made:=Stage.new();made.layout_kind=kind;made.compact=_compact();made.registry=scene_portraits
+	made.audience_key=audience_id
+	made.facts={"era":Backdrop.current_tier(),"layout":kind}
 	parent.add_child(made);made.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	made.advance_requested.connect(advance)
 	made.history_requested.connect(show_history_at)
@@ -646,7 +648,9 @@ func _refresh_regard()->void:
 	var risky:=String(regard.get("id","")) in ["hates_dread","terror","fear","war"]
 	regard_label.add_theme_color_override("font_color",Color("f0a08e") if risky else Color("f6ecd6"))
 	# Their face and bearing show it: fond, afraid or defiant.
-	if is_instance_valid(court_stage):court_stage.set_mood(Stage.MAIN,Stage.mood_of(regard,float(audience.get("mood",0.0)) if foreign else 0.0))
+	if is_instance_valid(court_stage):
+		court_stage.set_mood(Stage.MAIN,Stage.mood_of(regard,float(audience.get("mood",0.0)) if foreign else 0.0))
+		court_stage.facts.merge({"love":float(regard.get("love",0.0)),"dread":float(regard.get("dread",0.0)),"mood":float(audience.get("mood",0.0))},true)
 	var strip:=regard_label.get_parent().get_parent() as Control
 	strip.tooltip_text=regard_label.text+". "
 	strip.tooltip_text+="From their opinion of you, their ruler's trust, border tension and remembered terror." if foreign else "Dread buys obedience and costs honesty; love buys candour. Dread soured by resentment shows first in their words, then in their work, and at last in flight."
@@ -1071,6 +1075,7 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 	# The one before the god kneels under wrath and bows under favour.
 	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)):
 		court_stage.react(Stage.MAIN,Stage.divine_mood(action,String(result.get("response",""))))
+	if is_instance_valid(court_stage):court_stage.event("divine",{"action":action,"response":String(result.get("response","")),"terminal":bool(result.get("terminal",false))})
 	_refresh_regard()
 	_update_mood(Hall.find(audience_id))
 	if bool(result.get("terminal",false)):_show_outcome(result)
