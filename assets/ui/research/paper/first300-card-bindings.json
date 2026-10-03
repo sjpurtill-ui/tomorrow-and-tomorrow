@@ -109,7 +109,7 @@
   "nut_kernel_shelling": "res://assets/ui/research/subjects/nut_kernel_shelling-v1.png",
   "root_grating_dewatering": "res://assets/ui/research/subjects/root_grating_dewatering-v2.png",
   "pulse_splitting": "res://assets/ui/research/paper/pulse_splitting.png",
-  "fruit_pulp_screening": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+  "fruit_pulp_screening": "res://assets/ui/research/subjects/fruit_pulp_screening-v2.png",
   "textile_dye_fixation": "res://assets/ui/research/paper/textile_dye_fixation.png",
   "resist_dye_patterning": "res://assets/ui/research/paper/resist_dye_patterning.png",
   "textile_printing": "res://assets/ui/research/paper/textile_printing.png",
@@ -172,5 +172,6 @@
   "well_siting": "res://assets/ui/research/subjects/well_siting-v2.png",
   "shared_childcare": "res://assets/ui/research/subjects/shared_childcare-v2.png",
   "clay_shaping": "res://assets/ui/research/subjects/clay_shaping-v2.png",
-  "river_craft": "res://assets/ui/research/subjects/river_craft-v2.png"
+  "river_craft": "res://assets/ui/research/subjects/river_craft-v2.png",
+  "bone_needle_sewing": "res://assets/ui/research/subjects/bone_needle_sewing-v2.png"
 }

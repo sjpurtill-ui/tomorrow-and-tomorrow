@@ -1449,10 +1449,14 @@
     ]
   },
   "fruit_pulp_screening": {
-    "path": "res://assets/ui/research/paper/fruit_pulp_screening.png",
+    "path": "res://assets/ui/research/subjects/fruit_pulp_screening-v2.png",
     "focus": [
       0.5,
-      0.65
+      0.43
+    ],
+    "opening_focus": [
+      0.5,
+      0.43
     ]
   },
   "textile_dye_fixation": {
@@ -6202,14 +6206,14 @@
     ]
   },
   "flood_mark_reading": {
-    "path": "res://assets/ui/research/subjects/flood_mark_reading-v1.png",
+    "path": "res://assets/ui/research/subjects/flood_mark_reading-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "hide_wicker_shields": {
-    "path": "res://assets/ui/research/subjects/hide_wicker_shields-v1.png",
+    "path": "res://assets/ui/research/subjects/hide_wicker_shields-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9914,6 +9918,24 @@
   "hearth_shrine_offerings": {
     "path": "res://assets/ui/research/subjects/hearth_shrine_offerings-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "cairn_sightline_marking": {
+    "path": "res://assets/ui/research/subjects/cairn_sightline_marking-v2.png",
+    "focus": [
+      0.5,
+      0.45
+    ]
+  },
+  "bone_needle_sewing": {
+    "path": "res://assets/ui/research/subjects/bone_needle_sewing-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]

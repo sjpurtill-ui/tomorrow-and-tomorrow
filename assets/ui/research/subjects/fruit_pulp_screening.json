@@ -1,0 +1,18 @@
+{
+  "id": "fruit_pulp_screening",
+  "line": "nutrition",
+  "version": 2,
+  "focus": [
+    0.5,
+    0.43
+  ],
+  "prompt": "Create ONE new Tomorrow and Tomorrow research painting. The reference guides its mature handmade nutrition medium and the EXACT EXTRA-WIDE CANVAS ONLY, not subject. Preserve reference width, height and panoramic aspect; paint full bleed edge to edge with no frame, text or paper border. Do not produce a default 3:2 image. New subject: An adult presses soft wild plum pulp through a loosely woven shallow fiber screen into an opaque rough wooden bowl, another separates hard fruit stones and skins on a leaf. Closer tabletop-height view outdoors by shaded fruit trees, faces and mechanism central. Opaque botanical egg tempera, olive/gold/cream and earth pigments, visibly flat brushwork. Coarse basketry, no metal sieve, glass, pottery glaze or planted orchard rows.\nPrimary heads, hands and practical action stay within central vertical band y=170..610 of the wide 765px-high reference, so an actual 3.37:1 card preserves them. Paint a distinct coherent scene, not collaged icons or generic same couple at river sunset. Early-game fictional capability chronology permits cordage, basketry and worked hides. No later industrial or permanent urban technology.",
+  "reference": "C:/Users/sjpur/tt-research-art-line-overviews-01/assets/ui/research/nutrition-v1.png",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-61740bd7-1f7c-4976-a0b0-12fab94f6566.png",
+  "replace_art600": false,
+  "replace_first300": true,
+  "review": "Full original and final actual3.37:1 Godot card inspected: handmade field medium, inherited capabilities, primary heads and mechanism legible. Corrected five-item runtime and isolated GPU checks pass.",
+  "asset": "res://assets/ui/research/subjects/fruit_pulp_screening-v2.png",
+  "sha256": "3f80275135ebc8a5991eaf1d7d628e717671e8e0acb399e182d3bf2557496d5a",
+  "mode": "built-in image_gen / edit"
+}

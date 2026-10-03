@@ -1,0 +1,12 @@
+{
+  "id": "hide_wicker_shields",
+  "line": "security",
+  "game_year": 15,
+  "approx_historical_year": -4900,
+  "prompt": "c. 4900 BCE: Adults weave wicker frames and bind stretched hide over them for protective round shields; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-aee9cc3f-fbd5-4cf4-a7b7-63850ef81fc0.png",
+  "asset": "res://assets/ui/research/subjects/hide_wicker_shields-v1.png",
+  "sha256": "482319a01af11f0b40be1ac0c8aeae68e8b6a3ebbcfc342ef3476075dac8c42a",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; wicker frame, hide covering and restrained practice clear in crop."
+}
