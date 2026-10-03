@@ -1,0 +1,353 @@
+[
+  {
+    "id": "standard_measures",
+    "line": "knowledge",
+    "status": "catalog",
+    "name": "Body Measures",
+    "one_liner": "Body measures: hand, forearm, pace, basket",
+    "observation": "Body measures: hand, forearm, pace, basket.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 30.0,
+    "band_high": 65.0,
+    "min_year": 30.0,
+    "research_years": 5.0,
+    "requires_all": [
+      "counting_words"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "notched_measuring_rods",
+      "paired_measure_checking"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": true,
+    "replace_art600": true,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/knowledge-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/standard_measures.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 01_18_09 PM.png",
+        "tile_index": 5,
+        "caption": "Body measures: hand, forearm, pace, basket (Year 45)",
+        "style": "paper_gouache"
+      },
+      "subject": {
+        "path": "res://assets/ui/research/subjects/standard_measures-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    }
+  },
+  {
+    "id": "household_mediators",
+    "line": "institutions",
+    "status": "new",
+    "name": "Go-betweens Mediate Quarrels Between Households",
+    "one_liner": "Go-betweens mediate quarrels between households",
+    "observation": "Go-betweens mediate quarrels between households.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 30.0,
+    "band_high": 60.0,
+    "min_year": 30.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "customary_law"
+    ],
+    "requires_any": [],
+    "precedents": [],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Institutional flexibility",
+    "signals": [
+      "administration",
+      "society"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/institutions-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/household_mediators-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    }
+  },
+  {
+    "id": "named_star_figures",
+    "line": "culture",
+    "status": "new",
+    "name": "Star Figures Named in Stories",
+    "one_liner": "Star figures named in stories",
+    "observation": "Star figures named in stories.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 28.0,
+    "band_high": 65.0,
+    "min_year": 28.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "oral_epics"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "moon_counting",
+      "weather_sign_reading"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Social cohesion",
+    "signals": [
+      "society",
+      "information"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": true,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/culture-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": {
+        "path": "res://assets/ui/research/discovery-600/named_star_figures.png",
+        "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+        "tile_index": 5,
+        "caption": "Star figures named in stories (Year 45)",
+        "style": "silhouette_ochre"
+      },
+      "subject": null
+    }
+  },
+  {
+    "id": "poppy_analgesia",
+    "line": "health",
+    "status": "new",
+    "name": "Poppy Latex to Ease Pain",
+    "one_liner": "Poppy latex to ease pain",
+    "observation": "Poppy latex to ease pain.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 30.0,
+    "band_high": 65.0,
+    "min_year": 30.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "herbal_classification"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "seed_selection"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "General health",
+    "signals": [
+      "health",
+      "illness"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/health-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/poppy_analgesia-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    }
+  },
+  {
+    "id": "load_backframes",
+    "line": "logistics",
+    "status": "new",
+    "name": "Backframes for Bulky Loads",
+    "one_liner": "Backframes for bulky loads",
+    "observation": "Backframes for bulky loads.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 29.0,
+    "band_high": 61.0,
+    "min_year": 29.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "load_lashing_knots",
+      "joinery"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "woven_carriers"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Carrying capacity",
+    "signals": [
+      "travel",
+      "logistics"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/logistics-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/load_backframes-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    }
+  },
+  {
+    "id": "leaf_fodder_pollarding",
+    "line": "ecology",
+    "status": "new",
+    "name": "Pollarded Trees Cut for Leaf Fodder",
+    "one_liner": "Pollarded trees cut for leaf fodder",
+    "observation": "Pollarded trees cut for leaf fodder.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 29.0,
+    "band_high": 61.0,
+    "min_year": 29.0,
+    "research_years": 4.0,
+    "requires_all": [
+      "animal_taming",
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "fallow_thicket_regrowth"
+    ],
+    "conditions": {
+      "environment": [
+        "woodland"
+      ]
+    },
+    "shared_with": [],
+    "subcategory": "Land health",
+    "signals": [
+      "nature",
+      "survey"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/ecology-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    }
+  },
+  {
+    "id": "thorn_barriers",
+    "line": "security",
+    "status": "new",
+    "name": "Thorn and Brush Barriers Around Camps",
+    "one_liner": "Thorn and brush barriers around camps",
+    "observation": "Thorn and brush barriers around camps.",
+    "key_threshold": false,
+    "target_year": 45,
+    "proposed_year": 45,
+    "band_low": 29.0,
+    "band_high": 61.0,
+    "min_year": 29.0,
+    "research_years": 3.0,
+    "requires_all": [
+      "hafted_tools"
+    ],
+    "requires_any": [],
+    "precedents": [
+      "watch_rotation",
+      "refuge_point_marking"
+    ],
+    "conditions": {},
+    "shared_with": [],
+    "subcategory": "Public safety",
+    "signals": [
+      "defense",
+      "warfare"
+    ],
+    "version": 2,
+    "year": 45,
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "replace_first300": false,
+    "replace_art600": false,
+    "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/security-v1.png",
+    "prior_effective_source": {
+      "opening": null,
+      "art600": null,
+      "subject": {
+        "path": "res://assets/ui/research/subjects/thorn_barriers-v1.png",
+        "focus": [
+          0.5,
+          0.5
+        ]
+      }
+    }
+  }
+]

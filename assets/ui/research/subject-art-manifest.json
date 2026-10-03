@@ -168,8 +168,12 @@
     ]
   },
   "standard_measures": {
-    "path": "res://assets/ui/research/subjects/standard_measures-v1.png",
+    "path": "res://assets/ui/research/subjects/standard_measures-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -6778,35 +6782,35 @@
     ]
   },
   "household_mediators": {
-    "path": "res://assets/ui/research/subjects/household_mediators-v1.png",
+    "path": "res://assets/ui/research/subjects/household_mediators-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "leaf_fodder_pollarding": {
-    "path": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v1.png",
+    "path": "res://assets/ui/research/subjects/leaf_fodder_pollarding-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "load_backframes": {
-    "path": "res://assets/ui/research/subjects/load_backframes-v1.png",
+    "path": "res://assets/ui/research/subjects/load_backframes-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.2
     ]
   },
   "poppy_analgesia": {
-    "path": "res://assets/ui/research/subjects/poppy_analgesia-v1.png",
+    "path": "res://assets/ui/research/subjects/poppy_analgesia-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "thorn_barriers": {
-    "path": "res://assets/ui/research/subjects/thorn_barriers-v1.png",
+    "path": "res://assets/ui/research/subjects/thorn_barriers-v2.png",
     "focus": [
       0.5,
       0.5
@@ -10271,6 +10275,13 @@
     "opening_focus": [
       0.5,
       0.5
+    ]
+  },
+  "named_star_figures": {
+    "path": "res://assets/ui/research/subjects/named_star_figures-v2.png",
+    "focus": [
+      0.5,
+      0.3
     ]
   }
 }

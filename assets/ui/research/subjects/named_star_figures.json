@@ -1,0 +1,56 @@
+{
+  "id": "named_star_figures",
+  "line": "culture",
+  "status": "new",
+  "name": "Star Figures Named in Stories",
+  "one_liner": "Star figures named in stories",
+  "observation": "Star figures named in stories.",
+  "key_threshold": false,
+  "target_year": 45,
+  "proposed_year": 45,
+  "band_low": 28,
+  "band_high": 65,
+  "min_year": 28,
+  "research_years": 3,
+  "requires_all": [
+    "oral_epics"
+  ],
+  "requires_any": [],
+  "precedents": [
+    "moon_counting",
+    "weather_sign_reading"
+  ],
+  "conditions": {},
+  "shared_with": [],
+  "subcategory": "Social cohesion",
+  "signals": [
+    "society",
+    "information"
+  ],
+  "version": 2,
+  "year": 45,
+  "focus": [
+    0.5,
+    0.3
+  ],
+  "replace_first300": false,
+  "replace_art600": true,
+  "reference": "C:/Users/sjpur/tt-art-production-paired-02/art_source/research-opening-28/style-reference/culture-v1.png",
+  "prior_effective_source": {
+    "opening": null,
+    "art600": {
+      "path": "res://assets/ui/research/discovery-600/named_star_figures.png",
+      "source_sheet": "ChatGPT Image Sep 24, 2026, 03_13_13 PM.png",
+      "tile_index": 5,
+      "caption": "Star figures named in stories (Year 45)",
+      "style": "silhouette_ochre"
+    },
+    "subject": null
+  },
+  "prompt": "ONE Tomorrow and Tomorrow year45 research discovery painting. Match supplied reference ONLY for established field medium and EXACT full extra-wide canvas aspect and width. Full bleed, no border, text, panels, 3:2 or photography. NEW SUBJECT: A seated storyteller points toward a small loose group of natural stars while two listeners follow the gesture, beside a modest ember hearth and hide shelter. Flat star dots, no drawn constellation lines, zodiac symbols, text or magical figures in the sky. Medium: flat interlocking tapestry-inspired PAINTING in indigo, rose, gold and violet, not literal cloth. Compose heads, hands and entire subject mechanism comfortably within central vertical band y170..590 of765 pixels, zoom out to fit actual3.37:1 game card. Modest early materials wood, clay, stone, reeds, fiber; hide/fur clothing. No ornate later technology, metal, photoreal lighting or generic unrelated river scene.",
+  "source": "C:/Users/sjpur/.codex/generated_images/01a0f4c4-02b2-7ff1-94f2-4f15da9174e1/exec-098bd8f5-2976-40fd-93d7-dc6a54c43426.png",
+  "review": "Full original reviewed and accepted against established field painting medium; actual3.37:1 GPU card inspected and accepted.",
+  "asset": "res://assets/ui/research/subjects/named_star_figures-v2.png",
+  "sha256": "236892aff759bb15dd1865ad26c61e276739855c5f1c89615a3bc4781d9e50f0",
+  "mode": "built-in image_gen / edit"
+}

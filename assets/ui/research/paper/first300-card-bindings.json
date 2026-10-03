@@ -199,5 +199,6 @@
   "public_stores": "res://assets/ui/research/subjects/public_stores-v2.png",
   "food_steaming_vessels": "res://assets/ui/research/subjects/food_steaming_vessels-v2.png",
   "household_space_planning": "res://assets/ui/research/subjects/household_space_planning-v2.png",
-  "plain_weaving": "res://assets/ui/research/subjects/plain_weaving-v2.png"
+  "plain_weaving": "res://assets/ui/research/subjects/plain_weaving-v2.png",
+  "standard_measures": "res://assets/ui/research/subjects/standard_measures-v2.png"
 }
