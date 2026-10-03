@@ -17,6 +17,8 @@ uniform float ao_amount = 1.0;
 uniform float band_soft = 0.10;
 uniform float grain = 0.05;
 uniform int cover_channel = 0;
+// Skin: the edge between light and shade warms, as light does under skin.
+uniform vec3 terminator : source_color = vec3(0.0, 0.0, 0.0);
 uniform bool flat_colour = false;
 // Per figure: the speaker a little in the light, listeners a little back.
 instance uniform float dim = 1.0;
@@ -63,6 +65,8 @@ void fragment() {
 		float g = noise3(v_obj * 46.0) * 0.6 + noise3(v_obj * 13.0) * 0.4;
 		base *= 1.0 + (g - 0.5) * grain;
 		vec3 col = mix(base * shade_tint, base * key_color, tone);
+		float edge = clamp(tone * (1.0 - tone) * 4.0, 0.0, 1.0);
+		col += base * terminator * edge * 0.35;
 		float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 		col += rim_color * rim_amount * fres * (0.35 + 0.65 * lit);
 		ALBEDO = col * dim;
