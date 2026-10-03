@@ -12,6 +12,8 @@ extends RefCounted
 const MAX_PER_SETTLEMENT := 12
 const STORE_KEY := "village_notables"
 
+## Names notables were given before each people had its own tongue (older
+## saves); new notables take the people's own names (era_names.palette).
 const MEN := ["Harl","Tesk","Oru","Brim","Kael","Dunn","Vesh","Tam","Pell","Rook","Faro","Garro","Nesh","Tuk","Arvo","Bekk","Joss","Lorn","Madoc","Senn","Ulf","Yarro","Dask","Hobb"]
 const WOMEN := ["Ama","Sela","Iri","Nuna","Vesa","Tilla","Mora","Ysa","Kira","Oda","Luma","Hesk","Bryn","Edda","Fen","Ghia","Jora","Liss","Maren","Nell","Pira","Runa","Sabe","Wenna"]
 const TRADES := ["flint-knapper","hide-scraper","fisher","trapper","fire-keeper","bone-carver","reed-weaver","tracker","digger","storyteller","wood-cutter","snare-setter","gatherer","net-maker","water-carrier","herb-finder"]
@@ -147,7 +149,11 @@ static func _create(settlement_id:String,key:String,serial:int)->Dictionary:
 	var wanted:=key.get_slice("|",0).split(",",false)
 	var sex:=key.get_slice("|",1)
 	if sex=="any": sex="male" if rng.randf()<0.5 else "female"
-	var names:Array=MEN if sex=="male" else WOMEN
+	# The names our people (or the people in scope) commonly give, in their own tongue.
+	var owner:=String(WorldSimulation.actor_id) if String(WorldSimulation.actor_id)!="" else "player"
+	var common:Array=preload("res://scripts/era_names.gd").palette(owner,int(WorldSimulation.state.world_seed))
+	var names:Array=common[1] if sex=="male" else common[0]
+	if names.is_empty(): names=MEN if sex=="male" else WOMEN
 	var given:=String(names[rng.randi_range(0,names.size()-1)])
 	var used:Dictionary={}
 	for entry_variant in roster(settlement_id): used[String((entry_variant as Dictionary).get("given",""))]=true

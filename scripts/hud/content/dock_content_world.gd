@@ -377,7 +377,8 @@ func _peoples_model(encounters:Array,home:Vector2,pace:float)->Array:
 	for encounter:Dictionary in encounters:
 		var id:=String(encounter.get("civ_id",""))
 		var leader:Dictionary=ForeignDiplomacy.leader(id)
-		if not leader.is_empty() and EarlyArt.active():EarlyArt.bind_foreign_identity(leader,id,GameState.world_seed)
+		# Drawn as one of their own people in every age (people_appearance.gd).
+		if not leader.is_empty():EarlyArt.bind_foreign_identity(leader,id,GameState.world_seed)
 		var regard:Dictionary=Divine.foreign_regard(id)
 		var located:=bool(encounter.get("home_location_known",false))
 		var at:=vec(encounter.get("home_position",{})) if located else vec(encounter.get("position",{}))

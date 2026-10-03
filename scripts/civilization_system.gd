@@ -259,8 +259,12 @@ func reset_for_new_world()->void:
 			"societal_values":SOCIETAL_VALUES_MODEL.initial_state(founding_focus_id,seed_value,civ_id)
 		}
 		civ=_apply_rival_founding_focus_start(civ)
+		# Their own tongue, kept with them (people_language.gd).
+		civ["language"]=preload("res://scripts/people_language.gd").record(civ_id,seed_value)
 		civ["strategic_regions"]=_create_strategic_regions(civ_id,name,population,territory,rng,identity.cities)
 		civilizations.append(civ)
+	# Our own tongue is kept with our records too (people_language.gd).
+	preload("res://scripts/people_language.gd").record("player",seed_value)
 	_initialize_relations(seed_value)
 	_initialize_foreign_formations(seed_value)
 	_rebuild_competition()

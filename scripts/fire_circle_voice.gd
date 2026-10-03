@@ -147,19 +147,21 @@ static func interpret(text:String,fallback:String)->String:
 	return best
 
 static func name_suggestions(profile:Dictionary,seed_value:int)->Array[String]:
-	## Names a founding band might give, from the ground it actually stands on.
-	var firsts:=["Alder","Ash","Reed","Elk","Hazel","Heron","Willow","Flint","Otter","Birch","Aurochs","Sedge"]
-	var ends:Array[String]=["hearth","fire"]
-	if float(profile.get("water_access",0.0))>0.5 or float(profile.get("river_distance_km",99.0))<3.0: ends.append_array(["ford","water"])
-	if bool(profile.get("coastal",false)): ends.append("strand")
-	if float(profile.get("woodland",0.0))>0.4: ends.append("wood")
-	if float(profile.get("relief",0.0))>0.3: ends.append("rise")
-	ends.append_array(["hollow","stand"])
-	var rng:=RandomNumberGenerator.new(); rng.seed=hash("%d|first_fire_names" % seed_value)
+	## Names a founding band might give, in its own tongue (people_language.gd),
+	## with a word for the ground it actually stands on: water, shore, wood, hill.
+	var lands:Array[String]=[]
+	if float(profile.get("water_access",0.0))>0.5 or float(profile.get("river_distance_km",99.0))<3.0: lands.append("river")
+	if bool(profile.get("coastal",false)): lands.append("shore")
+	if float(profile.get("woodland",0.0))>0.4: lands.append("wood")
+	if float(profile.get("relief",0.0))>0.3: lands.append("hill")
+	lands.append("plain")
+	var lang:=preload("res://scripts/people_language.gd")
+	var world:=int(GameState.world_seed)
 	var result:Array[String]=[]
-	var guard:=0
-	while result.size()<3 and guard<40:
-		guard+=1
-		var name:=String(firsts[rng.randi_range(0,firsts.size()-1)])+String(ends[rng.randi_range(0,ends.size()-1)])
-		if name not in result: result.append(name)
+	var taken:={}
+	for i in 24:
+		if result.size()>=3: break
+		var name:=lang.town("player",world,"first_fire:%d:%d" % [seed_value,i],taken,lands[i%lands.size()])
+		if name=="" or name in result: continue
+		result.append(name); taken[name.to_lower()]=true
 	return result
