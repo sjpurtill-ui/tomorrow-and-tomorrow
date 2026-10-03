@@ -248,7 +248,7 @@ static func commission(city_id:String,concept:Dictionary,ambition:String,site_he
 static func assess_record(r:Dictionary,owner:String)->Dictionary:
 	var concept:=Catalog.get_definition(String(r.id)).duplicate()
 	if not bool(concept.get("concept",false)):return {}
-	return Concept.assess(concept,owner,{"architect":r.get("architect",{}),"shift":float(r.get("shift",0.0))})
+	return Concept.assess(concept,owner,{"architect":r.get("architect",{}),"shift":float(r.get("shift",0.0)),"record":r})
 ## Stage decisions and events move the odds (bounded).
 static func _shift(r:Dictionary,delta:float)->void:
 	r.shift=clampf(float(r.get("shift",0.0))+delta,-.4,.4)

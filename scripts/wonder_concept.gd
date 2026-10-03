@@ -469,7 +469,7 @@ static func assess(concept:Dictionary,owner:String="player",extra:Dictionary={})
 	# The builders' craft, the crews at work and the materials in store
 	# (built_fabric.gd great_capability).
 	var Fabric:=preload("res://scripts/built_fabric.gd")
-	var built:Dictionary=Fabric.great_capability(s,d.cost)
+	var built:Dictionary=Fabric.great_capability(s,d.cost,extra.get("record",{}))
 	capability+=float(built.total)
 	# A master builder of rare gift (geniuses.gd): their strength x 0.6 more.
 	var gifted:=preload("res://scripts/geniuses.gd").architect_capability(architect)

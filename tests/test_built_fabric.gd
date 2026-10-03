@@ -129,6 +129,24 @@ func test_without_builders_everything_wears_and_homes_fall_a_grade()->void:
 	assert_array(Array(Fabric.decline_words())).is_not_empty()
 
 
+## Second review 2: worn walls are said, on the page and at court.
+func test_unkept_walls_are_said_to_crumble()->void:
+	var mc=WorldSimulation.military
+	mc._ensure_settlement_defense()
+	mc.settlement_defense["stage"]=5
+	mc.settlement_defense["project_stage"]=-1
+	var f:=Fabric.data()
+	f.homes=[0.0,0.0,1.0,0.0,0.0]
+	# Too few builders: past the town's repair crew, too few are left to keep
+	# the homes and the bastions.
+	GameState.population_allocations["Construction"]=5
+	_reckon(30)
+	assert_float(float(f.kept.walls)).is_less(1.0)
+	assert_str(", ".join(Fabric.decline_words())).contains("walls")
+	assert_str(Fabric.court_line()).contains("walls")
+	assert_float(Fabric.wall_wear(365.0)).is_greater(0.0)
+
+
 func test_upkeep_keeps_homes_first()->void:
 	var f:=Fabric.data()
 	f.homes=[0.0,0.0,1.0,0.0,0.0];f.beauty=900000.0
@@ -192,11 +210,11 @@ func test_every_hook_stands_in_its_owners_code()->void:
 		["crisis_system.gd","HOME_SICKNESS*float(x.get(\"homes_q\",0.0))"],["crisis_system.gd","HOME_FIRE*float(x.get(\"homes_q\",0.0))"],
 		["food_system.gd","granary_factor()"],["civilian_goods.gd","making_factor()"],["resource_system.gd","water_factor()"],["resource_system.gd","haul_factor()"],["resource_system.gd","extraction_bonus()"],
 		["settlement_model.gd","Fabric.speed_factor()"],["settlement_model.gd","Fabric.reach_factor()"],["trade_ledger.gd","ROAD_REACH"],["caravan_system.gd","speed_factor()"],
-		["civilization_combat.gd","rise_factor()"],["settlement_roads.gd","drawn_road_tier(GameState)"],
+		["civilization_combat.gd","rise_factor()"],["settlement_model.gd","built_fabric.gd\").crews().infra"],["settlement_model.gd","float(crew.infra)*labor_efficiency"],
 		["military_campaign.gd","Fabric.wall_quality()+Fabric.stone_defense()"],["military_campaign.gd","wall_wear(float(WorldSimulation.span))"],["military_campaign.gd","wall_hands(workers,stage_index,builders)"],
 		["civilization_controller.gd","wall_wish()"],["standing.gd","Fabric.FORT_STRENGTH*_walls()"],["standing.gd","Fabric.FORT_MIGHT*walls"],["standing.gd","Fabric.BEAUTY_SPLENDOR"],
 		["standing.gd","Fabric.BEAUTY_CULTURE"],["standing.gd","Fabric.BEAUTY_RESPECT"],["discovery_system.gd","BUILT_FABRIC.research_multiplier(direction)"],
-		["civilization_day.gd","construction_signal()"],["wonder_concept.gd","Fabric.great_capability(s,d.cost)"],["undertaking_system.gd","great_payoff(state,gifted)"],
+		["civilization_day.gd","construction_signal()"],["wonder_concept.gd","Fabric.great_capability(s,d.cost,extra.get(\"record\",{}))"],["undertaking_system.gd","great_payoff(state,gifted)"],
 		["settlement_construction.gd","Fabric.process_day()"],["settlement_construction.gd","craft_pace()"],["society_model.gd","homes_quality*0.10+roads*0.08"]]
 	for guard:Array in guards:
 		var source:=FileAccess.get_file_as_string("res://scripts/"+String(guard[0]))
@@ -256,16 +274,21 @@ func test_every_builder_works_one_job()->void:
 	mc.settlement_defense["project_stage"]=2
 	GameState.city_form={"tier":1.0,"condition":0.6}
 	GameState.housing_capacity=int(GameState.population_total)-5
+	# A water channel takes its own crew (second review: water, waste and rail).
+	GameState.water_conveyance.lines.append({"id":1,"status":"active","condition":1.0})
 	var c:=Fabric.crews()
-	var total:=float(c.homes)+float(c.civic)+float(c.repair)+float(c.walls)+float(c.fabric)
+	var total:=float(c.homes)+float(c.civic)+float(c.repair)+float(c.infra)+float(c.walls)+float(c.fabric)
 	assert_float(total).is_equal_approx(float(c.builders),0.001)
-	# Some sleep without a roof: every builder raises homes.
-	assert_float(float(c.homes)).is_equal_approx(float(c.builders),0.001)
+	# Some sleep without a roof: most builders raise homes, never all, so
+	# repair and the walls go on.
+	assert_float(float(c.homes)).is_equal_approx(float(c.builders)*Fabric.HOMES_SHORT,0.001)
+	assert_float(float(c.repair)+float(c.walls)).is_greater(0.0)
 	GameState.housing_capacity=int(GameState.population_total)+20
 	c=Fabric.crews()
-	total=float(c.homes)+float(c.civic)+float(c.repair)+float(c.walls)+float(c.fabric)
+	total=float(c.homes)+float(c.civic)+float(c.repair)+float(c.infra)+float(c.walls)+float(c.fabric)
 	assert_float(total).is_equal_approx(float(c.builders),0.001)
 	assert_float(float(c.repair)).is_greater(0.0)
+	assert_float(float(c.infra)).is_greater(0.0)
 	assert_float(float(c.walls)).is_greater(0.0)
 	# The civic work and the homes read only their own crews.
 	var labor:=float(GameState.simulation_metrics.get("labor_efficiency",.72))
@@ -317,9 +340,15 @@ func test_an_older_save_keeps_its_roads_and_its_homes_from_the_first_day()->void
 	# Before any reckoning, the readers see the town as it stands, not lean-tos.
 	assert_float(Fabric.quality()).is_greater(0.0)
 	Fabric.data()
-	assert_float(Fabric.roads()).is_greater_equal(Fabric.ROAD_DRAW[1])
-	assert_int(Fabric.drawn_road_tier(GameState)).is_equal(1)
+	assert_float(Fabric.roads()).is_greater_equal(Fabric.ROAD_SEED[1])
 	assert_int(int(Roads.knowledge().tier)).is_equal(1)
+	# Unkept, the roads wear, but the map keeps the kind the people know and
+	# its marches keep their pace: only the ink and the speed of what
+	# travels the roads tell their state.
+	var f:=Fabric.data()
+	f.roads=0.0;Fabric._cache(f);Fabric._report_town(f,Fabric.realm_data())
+	assert_int(int(Roads.knowledge().tier)).is_equal(1)
+	assert_float(Fabric.ink_quality(GameState)).is_equal(0.0)
 	# The realm hears of the town at once.
 	assert_bool((GameState.fabric_realm.towns as Dictionary).has("home")).is_true()
 
@@ -342,6 +371,10 @@ func test_great_works_under_way_keep_their_materials()->void:
 	# Half built: half the bill is kept.
 	city.undertakings[0].progress=U.total_work(city.undertakings[0])*0.5
 	assert_float(float(Fabric.great_bills().get("Stone",0.0))).is_equal_approx(float((d.cost as Dictionary).get("Stone",0.0))*0.5,0.01)
+	# Second review 3: a grander work (x1.25) still has its larger bill to use.
+	city.undertakings[0].work_scale=1.25
+	city.undertakings[0].progress=0.0
+	assert_float(float(Fabric.great_bills().get("Stone",0.0))).is_equal_approx(float((d.cost as Dictionary).get("Stone",0.0))*1.25,0.01)
 
 
 ## Review 1: a great work resolved inside one town's count reads the whole
@@ -368,6 +401,12 @@ func test_craft_settles_over_every_town_and_odds_count_the_crew_on_the_work()->v
 	assert_float(Fabric.craft_settles()).is_equal_approx(40.0*365.0*Fabric.CRAFT_YEARS/float(GameState.population_exact)/Fabric.CRAFT_PER_LEVEL,0.01)
 	var all:=float(GameState.effective_workers("Construction"))
 	assert_float(Fabric.great_crew(GameState)).is_equal_approx(all*Fabric.GREAT_CREW_SHARE,0.01)
+	# Second review 4: a work under way counts its own crew, never another's.
+	var city:={"id":"c1","primary":true,"name":"Here","undertakings":[{"id":"x","status":"building","policy":"press","speed":1.0},{"id":"y","status":"building","policy":"careful","speed":1.0}]}
+	GameState.player_settlements=[city]
+	var whole:=float(GameState.effective_workers("Construction"))/(1.0-0.65)
+	assert_float(Fabric.great_crew(GameState,city.undertakings[1])).is_equal_approx(whole*0.20,0.01)
+	assert_float(Fabric.great_crew(GameState,city.undertakings[0])).is_equal_approx(whole*0.50,0.01)
 
 
 func test_walls_and_stone_strengthen_the_defences_and_might()->void:

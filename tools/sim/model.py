@@ -1939,10 +1939,10 @@ class Surrogate:
         # work in hand takes its share of the crew first (undertaking_system.gd
         # advance_record; leaders.py sets construction_diverted).
         builders = self.able * self.alloc_pct["Construction"] / 100.0 * (1.0 - getattr(self, "construction_diverted", 0.0))
-        # built_fabric.gd crews: all builders while some sleep without a roof,
-        # HOMES_AHEAD of them while homes go up ahead of need.
-        if fabric_model.ON and self.housing_capacity >= pop:
-            builders *= fabric_model.K["HOMES_AHEAD"]
+        # built_fabric.gd crews: HOMES_SHORT of the builders while some sleep
+        # without a roof, HOMES_AHEAD of them while homes go up ahead of need.
+        if fabric_model.ON:
+            builders *= fabric_model.K["HOMES_AHEAD"] if self.housing_capacity >= pop else fabric_model.K["HOMES_SHORT"]
         if self.housing_capacity < pop * float(p["housing_target_ratio"]):
             self.housing_capacity += builders * labor_eff * float(p["housing_build_rate"]) * (1.0 + e("construction_rate") + e("housing_output")) * days
         # Founding works (Hearth, Lean-to, Open Work Area, Gathering Yard, Storage Pits)

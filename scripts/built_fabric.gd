@@ -92,9 +92,12 @@ const ROAD_HAUL:=0.35        # hauls from the deposits x (1 + this x roads) (res
 const ROAD_SPEED:=0.6        # goods, caravans and founding parties between towns x (1 + this x roads)
 const ROAD_REACH:=0.5        # trade reach x (1 + this x roads) (trade_ledger.gd, settlement_model.gd)
 const ROAD_RISE:=0.3         # townsfolk who reach the fight x (1 + this x roads) (civilization_combat.gd)
-## The road index at which the map draws each kind (settlement_roads.gd).
-const ROAD_DRAW:=[0.0,0.32,0.62]
-## An older save's roads start this far past the kind the map drew.
+## The kind of road the map draws, and the march pace on it, follow what the
+## people know (settlement_roads.gd, march_terrain.gd); the road index acts
+## through speed, hauling and reach, and the ink's roughness (ink_quality).
+## An older save's roads start at the index of the kind its map drew
+## (ROAD_SEED), and this far past it.
+const ROAD_SEED:=[0.0,0.32,0.62]
 const ROAD_SEED_MARGIN:=0.03
 
 # --- Beauty --------------------------------------------------------------------------
@@ -148,17 +151,23 @@ const UPKEEP_ORDER:=["homes","walls","works","roads","beauty"]
 ## THE TOWN'S BUILDERS, EACH ON ONE THING (crews): every builder the town
 ## counts (a great work's crew and military works are already out,
 ## game_state.gd effective_workers) is on one of these, in this order:
-##   homes   all of them while some sleep without a roof; HOMES_AHEAD of them
-##           while new homes go up ahead of need (settlement_construction.gd)
+##   homes   HOMES_SHORT of them while some sleep without a roof (so repair
+##           and the walls never stop); HOMES_AHEAD of them while new homes
+##           go up ahead of need (settlement_construction.gd)
 ##   civic   CIVIC_SHARE of the rest while a civic work is in hand
 ##   repair  what the town's civic works need to be kept in repair: REPAIR_SHARE
 ##           of the people at most (half that once in full repair), as
 ##           settlement_model.gd _advance_city_form counts its builders
+##   infra   INFRA_SHARE of the rest while the town has water channels, water
+##           and waste works or railways built or going up: they raise and
+##           keep them (settlement_model.gd process_month, its maintenance)
 ##   walls   at home, WALL_SHARE of the rest while a defence stage goes up or
 ##           the walls are being mended (military_campaign.gd settlement_defense)
 ##   fabric  the rest: the upkeep and improvement of the town's fabric
 const HOMES_AHEAD:=0.3
+const HOMES_SHORT:=0.7
 const CIVIC_SHARE:=0.5
+const INFRA_SHARE:=0.25
 const REPAIR_SHARE:=0.05
 const WALL_SHARE:=0.4
 ## The walls' upkeep a year, as a share of their stage's work; unkept, they
@@ -286,7 +295,7 @@ static func _found(f:Dictionary,store:bool=true)->void:
 	var roads:=0.0
 	if settled>365.0*3.0:
 		var drawn:=int((load("res://scripts/settlement_roads.gd") as GDScript).call("known_tier",WorldSimulation.state))
-		if drawn>0:roads=minf(road_cap(),float(ROAD_DRAW[mini(drawn,ROAD_DRAW.size()-1)])+ROAD_SEED_MARGIN)*ROAD_FULL*maxf(1.0,float(WorldSimulation.state.population_exact))
+		if drawn>0:roads=minf(road_cap(),float(ROAD_SEED[mini(drawn,ROAD_SEED.size()-1)])+ROAD_SEED_MARGIN)*ROAD_FULL*maxf(1.0,float(WorldSimulation.state.population_exact))
 	f.merge({"v":1,"day":int(WorldSimulation.state.elapsed_days),"homes":homes,"places":maxi(0,int(WorldSimulation.state.housing_capacity)),
 		"roads":roads,"beauty":0.0,"works":0.0,"spent":{},"paid":1.0,"effects":{}},true)
 	_cache(f)
@@ -472,9 +481,12 @@ static func great_bills()->Dictionary:
 	var out:={}
 	for r:Dictionary in U.current_city(WorldSimulation.state).get("undertakings",[]):
 		if String(r.get("status","")) not in ["building","stalled"]:continue
-		var cost:Dictionary=preload("res://scripts/undertaking_catalog.gd").get_definition(String(r.id)).get("cost",{})
-		var left:=1.0-U.fraction(r)
-		for item:String in cost:out[item]=float(out.get(item,0.0))+float(cost[item])*left
+		var d:Dictionary=preload("res://scripts/undertaking_catalog.gd").get_definition(String(r.id))
+		var cost:Dictionary=d.get("cost",{})
+		# _spend draws cost / work for each unit of work done, and a grander
+		# work (work_scale) has more units still to do.
+		var left:=maxf(0.0,float(U.total_work(r))-float(r.get("progress",0.0)))
+		for item:String in cost:out[item]=float(out.get(item,0.0))+float(cost[item])/maxf(0.001,float(d.get("work",1.0)))*left
 	return out
 
 static func _affordable(bill:Dictionary,per:float,avail:Dictionary)->float:
@@ -505,7 +517,7 @@ static func crews(extra:float=0.0)->Dictionary:
 	var state=WorldSimulation.state
 	var builders:=maxf(0.0,float(state.effective_workers("Construction"))+extra)
 	var short:=int(state.population_total)>int(state.housing_capacity)
-	var homes_if:=builders if short else builders*HOMES_AHEAD
+	var homes_if:=builders*(HOMES_SHORT if short else HOMES_AHEAD)
 	var homes:=homes_if if Construction.housing_under_way() else 0.0
 	var rest:=builders-homes
 	var civic_if:=rest*CIVIC_SHARE
@@ -514,10 +526,19 @@ static func crews(extra:float=0.0)->Dictionary:
 	var want:=repair_want()
 	var repair:=minf(rest,want)
 	rest-=repair
+	var infra:=rest*INFRA_SHARE if _has_infrastructure() else 0.0
+	rest-=infra
 	var walls_ready:=rest*WALL_SHARE if _is_home() else 0.0
 	var walls:=walls_ready if _walls_at_work() else 0.0
 	rest-=walls
-	return {"builders":builders,"homes":homes,"homes_if":homes_if,"civic":civic,"civic_if":civic_if,"repair":repair,"repair_want":want,"walls":walls,"walls_ready":walls_ready,"fabric":maxf(0.0,rest)}
+	return {"builders":builders,"homes":homes,"homes_if":homes_if,"civic":civic,"civic_if":civic_if,"repair":repair,"repair_want":want,"infra":infra,"walls":walls,"walls_ready":walls_ready,"fabric":maxf(0.0,rest)}
+
+## Whether the town has water channels, water and waste works or railways,
+## built or going up (they take their own crew).
+static func _has_infrastructure()->bool:
+	if not (WorldSimulation.state.water_conveyance.get("lines",[]) as Array).is_empty():return true
+	if not (preload("res://scripts/water_waste_works.gd").data().get("works",[]) as Array).is_empty():return true
+	return preload("res://scripts/rail_freight.gd").construction_sites()>0
 
 ## Builders the town's civic works need to be kept in repair: REPAIR_SHARE of
 ## its people while its repair is short, half that once full (the monthly
@@ -799,19 +820,18 @@ static func defense_bonus_now()->float:
 # Great works (wonder_concept.gd assess, undertaking_system.gd apply_outcome)
 # ===========================================================================================
 
-## The builders on the town's great work: the crew of the works under way
-## (undertaking_system.gd share), else the crew a new work would get
-## (GREAT_CREW_SHARE), of every builder the town counts.
-static func great_crew(s:Object)->float:
+## The builders on one great work: `record`'s own crew while it rises (half
+## the builders when pressed, a fifth when careful, undertaking_system.gd
+## advance_record), else the crew a new work would get (GREAT_CREW_SHARE),
+## of every builder the town counts.
+static func great_crew(s:Object,record:Dictionary={})->float:
 	if s==null or not s.has_method("effective_workers"):return 0.0
 	var U=preload("res://scripts/undertaking_system.gd")
 	var on_works:=clampf(float(U.share(s)),0.0,0.95)
-	var free:=maxf(0.0,float(s.effective_workers("Construction")))
-	var all:=free/(1.0-on_works)
-	var building:=false
-	for r:Dictionary in U.current_city(s).get("undertakings",[]):
-		if String(r.get("status","")) in ["building","stalled"]:building=true
-	return all*(on_works if building else GREAT_CREW_SHARE)
+	var all:=maxf(0.0,float(s.effective_workers("Construction")))/(1.0-on_works)
+	if String(record.get("status","")) in ["building","stalled"]:
+		return all*(0.50 if String(record.get("policy",""))=="press" else 0.20)*float(record.get("speed",1.0))
+	return all*GREAT_CREW_SHARE
 
 ## A people's craft read from its own state (assess may be asked about any owner).
 ## The live state reads craft() (the whole people's number, even while one
@@ -827,9 +847,9 @@ static func craft_of(s:Object)->float:
 ## What the builders bring to a great work's odds: {craft, builders, cover,
 ## from_craft, from_crews, from_materials, total, words}. `cost` is the work's
 ## bill.
-static func great_capability(s:Object,cost:Dictionary)->Dictionary:
+static func great_capability(s:Object,cost:Dictionary,record:Dictionary={})->Dictionary:
 	var level:=craft_of(s)
-	var builders:=great_crew(s)
+	var builders:=great_crew(s,record)
 	var stocks:Dictionary=s.get("resource_stockpiles") if s!=null and s.get("resource_stockpiles") is Dictionary else {}
 	var cover:=1.0
 	var stone:=0.0
@@ -897,14 +917,17 @@ static func roads_of(state:Object)->float:
 		pop+=maxf(0.0,float(town.get("pop",0.0)));sum+=float(town.get("roads",0.0))*maxf(0.0,float(town.get("pop",0.0)))
 	return sum/pop if pop>0.0 else 0.0
 
-## The kind of road the map draws (0 footpath, 1 cart track, 2 made road)
-## for the roads a people has laid (ROAD_DRAW).
-static func drawn_road_tier(state:Object)->int:
-	var r:=roads_of(state)
-	var tier:=0
-	for k in ROAD_DRAW.size():
-		if r>=float(ROAD_DRAW[k]):tier=k
-	return tier
+## How well the people's roads are kept against the best they know (0..1):
+## the map's ink is rough and broken when low, clean when high (a visual
+## hook; the drawn kind follows what is known).
+static func ink_quality(state:Object)->float:
+	var cap:=0.35
+	if state!=null:
+		var known:Array=state.get("known_discoveries")
+		for k in range(1,ROAD_KINDS.size()):
+			for id in (ROAD_KINDS[k][0] as Array):
+				if String(id) in known:cap=float(ROAD_KINDS[k][1])
+	return clampf(roads_of(state)/maxf(0.01,cap),0.0,1.0)
 ## standing.gd: Splendor, culture and respect read the realm's beauty.
 static func realm_beauty()->float:return float(realm().beauty)
 
@@ -955,6 +978,7 @@ static func decline_words(r:Dictionary={})->PackedStringArray:
 	var out:PackedStringArray=[]
 	var kept:Dictionary=r.kept
 	if float(kept.get("homes",1.0))<0.99:out.append("homes fall a grade (%d in 100 of their upkeep is done)" % roundi(float(kept.homes)*100.0))
+	if float(kept.get("walls",1.0))<0.99:out.append("the walls crumble")
 	if float(kept.get("works",1.0))<0.99:out.append("workshops and stores decay")
 	if float(kept.get("roads",1.0))<0.99:out.append("roads roughen")
 	if float(kept.get("beauty",1.0))<0.99:out.append("fine works weather")

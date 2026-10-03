@@ -763,9 +763,9 @@ func _fabric_blocks()->Array:
 		{"type":"bars","heading":"The built fabric","note":note,"items":bars}]
 	if not declining.is_empty():
 		blocks.append({"type":"impact_lines","heading":"Falling into disrepair","compact":false,"lines":[{"label":"Too few builders","value":"%d%% kept" % roundi(float(r.paid)*100.0),
-			"words":"The builders keep homes first, then work buildings, roads and fine works. Now %s. More builders, or fewer works to keep." % ", ".join(declining),"tone":"bad"}]})
+			"words":"The builders keep homes first, then the walls, work buildings, roads and fine works. Now %s. More builders, or fewer works to keep." % ", ".join(declining),"tone":"bad"}]})
 	if float(spent.get("upkeep",0.0))+float(spent.get("homes",0.0))+float(spent.get("roads",0.0))+float(spent.get("works",0.0))+float(spent.get("beauty",0.0))>0.0:
-		blocks.append({"type":"segments","heading":"Where the builders' days go","note":"last %d days" % int(r.days),"items":_spent_items(spent,float(r.idle)),"legend":"Upkeep first, then homes, roads, work buildings and fine works by their share; what one cannot use goes to fine works. Idle: no materials to work with."})
+		blocks.append({"type":"segments","heading":"Where the builders' days go","note":"last %d days" % int(r.days),"items":_spent_items(spent,float(r.idle)),"legend":"Upkeep first (homes, then the walls, work buildings, roads and fine works), then new work on homes, roads, work buildings and fine works by their share; what one cannot use goes to fine works. Idle: no materials to work with."})
 	blocks.append({"type":"impact_lines","heading":"What the built fabric does","compact":true,"columns":3,"lines":Fabric.effect_lines(r)})
 	blocks.append({"type":"impact_lines","heading":"What ten more builders would buy now","compact":true,"columns":3,"lines":Fabric.plus_lines(10.0)})
 	return blocks

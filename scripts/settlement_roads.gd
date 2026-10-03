@@ -62,14 +62,13 @@ static func material()->ShaderMaterial:
 static var _knowledge_key:=-1
 static var _knowledge:Dictionary={}
 static func knowledge()->Dictionary:
-	# The roads drawn follow the roads the builders have laid and keep
-	# (built_fabric.gd: the road index), never better than what is known.
-	var laid:=preload("res://scripts/built_fabric.gd").drawn_road_tier(GameState)
-	var size_key:=GameState.discovery_log.size()*100003+GameState.known_discoveries.size()*7+laid
+	# The kind of road drawn, and the march pace on it, follow what the people
+	# know; how well the builders keep them is the ink's quality
+	# (built_fabric.gd ink_quality) and the speed of what travels them.
+	var size_key:=GameState.discovery_log.size()*100003+GameState.known_discoveries.size()
 	if size_key==_knowledge_key:return _knowledge
 	_knowledge_key=size_key
-	var known:=_known()
-	_knowledge={"tier":mini(int(known.tier),laid),"bridge":int(known.bridge)}
+	_knowledge=_known()
 	return _knowledge
 
 ## The kind of road the people know how to make, laid or not: 0 footpath,

@@ -33,9 +33,10 @@ Every people runs the same code in its own scope. Only how many build differs.
 Every `TICK_DAYS` (10) a town reckons its fabric. `settlement_construction.gd process_day` calls it, so the day's cost is one comparison.
 
 1. **Every builder works one job** (`crews`). These are the builders the town counts: a great work's crew and military works are already out (`effective_workers`). In order:
-   - **homes:** every builder while some sleep without a roof; `HOMES_AHEAD` (30 in 100) while new homes go up ahead of need (`housing_work_per_day` reads this crew);
+   - **homes:** `HOMES_SHORT` (70 in 100) while some sleep without a roof, so repair and the walls never stop; `HOMES_AHEAD` (30 in 100) while new homes go up ahead of need (`housing_work_per_day` reads this crew);
    - **civic:** `CIVIC_SHARE` (half) of the rest while a civic work is in hand (`daily_work` reads this crew);
    - **repair:** what the town's civic works need to be kept in repair, at most `REPAIR_SHARE` (5 in 100) of the people, and half that once in full repair (`settlement_model.gd _advance_city_form` reads this crew);
+   - **works:** `INFRA_SHARE` (25 in 100) of the rest while the town has water channels, water and waste works or railways, built or going up: they raise and keep them (`settlement_model.gd process_month` and its maintenance); the buildings' own upkeep is the repair crew's;
    - **walls:** at home, `WALL_SHARE` (40 in 100) of the rest while a stage goes up or the walls are mended after a fight;
    - **fabric:** everyone left.
 2. **Their work.** Fabric builders × working pace × days × (1 + `CRAFT_WORK` a level of craft) × (1 + `KILN_BUILDING` × kiln cover).
@@ -45,7 +46,7 @@ Every `TICK_DAYS` (10) a town reckons its fabric. `settlement_construction.gd pr
      - roads roughen (`ROAD_WEAR`, 8 in 100);
      - work buildings decay (`WORKS_WEAR`, 5);
      - fine works weather (`BEAUTY_WEAR`, 4).
-   - **A people that stops building visibly declines,** and the screens say so.
+   - **A people that stops building visibly declines,** and the screens say so (homes fall a grade, the walls crumble, works decay, roads roughen, fine works weather).
 4. **Improvements** take what is left, by `SPLIT` (homes 35, roads 15, work buildings 20, fine works 30).
    - What one account cannot use goes to the others.
    - Fine works are the sink: carved posts, plazas, painted halls, monuments.
@@ -88,7 +89,7 @@ The share of a town's places in each grade:
   - goods between towns, caravans and founding parties × (1 + 0.6R) speed;
   - trade reach × (1 + 0.5R), in city trade and the trade ledger;
   - townsfolk who reach a fight in time × (1 + 0.3R).
-- **The map follows it.** The roads the map draws come from the index (`ROAD_DRAW`: footpath, cart track from 0.32, made road from 0.62), never better than what is known (`settlement_roads.gd`). The army's march terrain reads the same tier.
+- **The map.** The kind of road the map draws, and the army's march pace on it, follow what the people know (`settlement_roads.gd`, `march_terrain.gd`). The road index acts through speed, hauling and reach, and through the ink: `ink_quality` (the index against the best known) is the visual hook for rough, broken ink on unkept roads.
 
 ### 3. Beauty: awe and allure
 
@@ -153,7 +154,8 @@ The share of a town's places in each grade:
   - 0.06 × (cover − 0.5) for the materials in store.
   - The "Builders" factor names them.
 - **The roll reads the whole people's craft** even while one town's count is in scope (`craft_of`), so it uses the odds and payoff the screen states.
-- **Materials.** The fabric never takes what a great work under way has still to use (`great_bills`).
+- **Materials.** The fabric never takes what a great work under way has still to use (`great_bills`: its bill per unit of work × the work left, so a grander work keeps its larger bill).
+- **The crew** the odds count is the work's own (half the builders when pressed, a fifth when careful), never another work's.
 - **The payoff** (`undertaking_system.gd apply_outcome`). A work that stands has its strength, rewards and renown × (1 + 0.05 a level of craft), and × 1.15 more under a gifted master builder (geniuses.gd). The work records it as `payoff`.
 - **Stated plainly.** The assessment's `stated` text is shown on the great work's screen and in the order's reply, for example: "With 14 builders on the work at craft 3.0 and 400 stone in store (100 in 100 of the materials), the odds it stands are 83 in 100 (a triumph 18, flawed 12, it falls 17); if it stands, its strength, rewards and renown count x1.15 for the builders' craft and Ama, a gifted master builder."
 

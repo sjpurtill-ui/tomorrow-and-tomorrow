@@ -1590,7 +1590,9 @@ func process_month(context:Dictionary={})->Array[Dictionary]:
 	var active_construction:Array[Dictionary]=[]
 	for plot in WorldSimulation.state.settlement_plots:
 		if String(plot.get("status",""))=="under_construction": active_construction.append(plot)
-	var builders:=WorldSimulation.state.effective_workers("Construction")
+	# The works crew alone raises water channels, works and railways
+	# (built_fabric.gd crews: every builder works one job).
+	var builders:=float(preload("res://scripts/built_fabric.gd").crews().infra)
 	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 
 	var water_sites:=0
@@ -2338,7 +2340,10 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 			_record_plot_building_event(plot,"vacated" if String(plot.status)=="vacant" else "reoccupied",day,{},false,"Population redistributed across usable household ground.")
 			WorldSimulation.state.morphology_revision+=1
 			events.append({"type":"morphology","title":"Household Ground %s" % ("Vacated" if String(plot.status)=="vacant" else "Reoccupied"),"plot_id":int(plot.id)})
-	var builders:=WorldSimulation.state.effective_workers("Construction")
+	# The repair crew keeps the buildings; the works crew the water channels
+	# and works (built_fabric.gd crews: every builder works one job).
+	var crew:Dictionary=preload("res://scripts/built_fabric.gd").crews()
+	var builders:=float(crew.builders)
 	var labor_efficiency:=float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72))
 	var maintained_plots:=0
 	for plot in WorldSimulation.state.settlement_plots:
@@ -2346,9 +2351,10 @@ func _process_occupancy_and_maintenance(day:int,events:Array[Dictionary])->void:
 		maintained_plots+=1
 	var water_lines:=preload("res://scripts/water_conveyance.gd").active_lines()
 	var water_works:int=preload("res://scripts/water_waste_works.gd").data().works.size()
-	var maintenance_per_plot:=builders*labor_efficiency/maxf(1.0,float(maintained_plots+water_lines+water_works))*0.0032
-	preload("res://scripts/water_conveyance.gd").scheduled_maintenance(maintenance_per_plot/.01,day)
-	preload("res://scripts/water_waste_works.gd").scheduled_maintenance(maintenance_per_plot/.01,day)
+	var maintenance_per_plot:=float(crew.repair)*labor_efficiency/maxf(1.0,float(maintained_plots))*0.0032
+	var maintenance_per_line:=float(crew.infra)*labor_efficiency/maxf(1.0,float(water_lines+water_works))*0.0032
+	preload("res://scripts/water_conveyance.gd").scheduled_maintenance(maintenance_per_line/.01,day)
+	preload("res://scripts/water_waste_works.gd").scheduled_maintenance(maintenance_per_line/.01,day)
 	var hardship:=clampf(1.0-float(WorldSimulation.state.simulation_metrics.get("health",WorldSimulation.state.population_health)),0.0,1.0)
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=WorldSimulation.state.world_seed^day^0x27d4eb2d

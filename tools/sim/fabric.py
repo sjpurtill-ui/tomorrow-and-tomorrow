@@ -45,7 +45,7 @@ GRADE_CRAFT = [float(x) for x in _c("GRADE_CRAFT", [0.0])]
 GRADE_CRAFT_FULL = [float(x) for x in _c("GRADE_CRAFT_FULL", [0.0])]
 K = {k: float(_c(k, 0.0)) for k in (
     "TICK_DAYS", "HOME_HEALTH", "HOME_COHESION", "HOME_ILLNESS", "HOME_SICKNESS", "HOME_FIRE",
-    "ROAD_FULL", "ROAD_WEAR", "ROAD_STONE", "ROAD_LOGISTICS", "HOME_WEATHER", "HOMES_AHEAD", "CIVIC_SHARE", "REPAIR_SHARE", "WALL_UPKEEP", "WALL_WEAR", "GREAT_CREW_SHARE", "BEAUTY_SCALE", "BEAUTY_WEAR", "ARTISTRY_EACH", "BEAUTY_MATERIALS",
+    "ROAD_FULL", "ROAD_WEAR", "ROAD_STONE", "ROAD_LOGISTICS", "HOME_WEATHER", "HOMES_AHEAD", "HOMES_SHORT", "CIVIC_SHARE", "REPAIR_SHARE", "WALL_UPKEEP", "WALL_WEAR", "GREAT_CREW_SHARE", "BEAUTY_SCALE", "BEAUTY_WEAR", "ARTISTRY_EACH", "BEAUTY_MATERIALS",
     "BEAUTY_COHESION", "BEAUTY_SPLENDOR", "BEAUTY_CULTURE", "WORKS_FULL", "WORKS_WEAR", "WORKSHOP_MAKING", "GRANARY_ROT",
     "KILN_BUILDING", "STOREHOUSE_LOGISTICS", "STOREHOUSE_EXTRACTION", "WALL_SHARE", "CRAFT_YEARS", "CRAFT_PER_LEVEL", "CRAFT_MAX", "CRAFT_WORK",
     "CRAFT_RESEARCH", "CRAFT_SIGNAL", "CRAFT_WALLS", "CRAFT_WALL_QUALITY", "STONE_DEFENSE", "BUILDER_WALL_WEIGHT", "STONE_STAGE",
@@ -199,13 +199,14 @@ class Fabric:
     def crews(self, builders: float, pop: float) -> dict:
         """built_fabric.gd crews. The surrogate's homes go up while the places lag
         the people (housing_target_ratio stands in for the engine's 80% trigger);
-        its civic works are the founding works; its town is in full repair."""
+        its civic works are the founding works; its town is in full repair; it
+        has no water channels, waste works or railways (no works crew)."""
         s = self.sim
         if not ON:
             return {"homes": builders, "fabric": 0.0, "walls": 0.0, "walls_ready": 0.0}
         short = s.housing_capacity < pop
         ahead = s.housing_capacity < pop * float(s.p["housing_target_ratio"])
-        homes = builders if short else builders * K["HOMES_AHEAD"] if ahead else 0.0
+        homes = builders * K["HOMES_SHORT"] if short else builders * K["HOMES_AHEAD"] if ahead else 0.0
         rest = builders - homes
         civic = rest * K["CIVIC_SHARE"] if s.completed < float(s.p["founding_works"]) else 0.0
         rest -= civic

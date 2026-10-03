@@ -30,13 +30,14 @@ func test_links_join_every_near_place_once_and_skip_the_far_ones() -> void:
 	assert_int(links.size()).is_equal(3)
 	assert_array(ROADS.links(_places([Vector2.ZERO]))).is_empty()
 
-## The roads drawn follow what is known and what the builders have laid and
-## keep (built_fabric.gd road index, ROAD_DRAW): never better than either.
+## The kind of road drawn (and the march pace on it) follows what is known;
+## how well the builders keep them is the ink's quality alone
+## (built_fabric.gd ink_quality), never a vanishing road.
 func _lay_roads(index: float) -> void:
 	GameState.fabric_realm = {"v": 1, "xp": 0.0, "decay_day": 0, "wall_builders": 0.0, "towns": {"home": {"day": 0, "pop": 100.0, "places": 100, "quality": 0.0, "roads": index, "beauty_points": 0.0, "beauty": 0.0, "cover": 0.0, "stone": 0.0}}}
 
 func test_road_knowledge_follows_the_discovery_log() -> void:
-	_lay_roads(1.0)
+	_lay_roads(0.0)
 	assert_dict(ROADS.knowledge()).is_equal({"tier": 0, "bridge": 0})
 	GameState.discovery_log.append({"id": "cart_running_gear"})
 	assert_int(int(ROADS.knowledge().tier)).is_equal(1)
@@ -46,18 +47,16 @@ func test_road_knowledge_follows_the_discovery_log() -> void:
 	assert_int(int(know.tier)).is_equal(2)
 	assert_int(int(know.bridge)).is_equal(1)
 
-func test_roads_drawn_follow_the_roads_laid() -> void:
+func test_unkept_roads_keep_their_kind_and_only_the_ink_roughens() -> void:
 	GameState.discovery_log.append({"id": "cart_running_gear"})
 	GameState.discovery_log.append({"id": "graded_roads"})
+	GameState.known_discoveries.append("graded_roads")
 	_lay_roads(0.1)
-	assert_int(int(ROADS.knowledge().tier)).is_equal(0)
-	_lay_roads(0.4)
-	assert_int(int(ROADS.knowledge().tier)).is_equal(1)
-	_lay_roads(0.7)
 	assert_int(int(ROADS.knowledge().tier)).is_equal(2)
-	# Unkept roads roughen: the map draws them plainer again.
-	_lay_roads(0.2)
-	assert_int(int(ROADS.knowledge().tier)).is_equal(0)
+	var FABRIC := preload("res://scripts/built_fabric.gd")
+	assert_float(FABRIC.ink_quality(GameState)).is_equal_approx(0.1 / 0.7, 0.001)
+	_lay_roads(0.7)
+	assert_float(FABRIC.ink_quality(GameState)).is_equal_approx(1.0, 0.001)
 
 func test_easing_keeps_the_ends_where_the_towns_are() -> void:
 	var line := PackedVector2Array([Vector2(0, 0), Vector2(1, 1), Vector2(2, 0), Vector2(3, 1)])
