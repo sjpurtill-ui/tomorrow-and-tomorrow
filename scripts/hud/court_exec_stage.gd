@@ -39,6 +39,10 @@ var _moving:Dictionary={}
 var _shrinks:Array=[]
 var _ended:=false
 var _caption_text:=""
+var _survivors:Dictionary={}
+var _court_dog:Node3D
+var _dog_home:=Transform3D.IDENTITY
+var _skipped:=false
 
 const BLOOD:=Color("9c1a12")
 const BLOOD_DARK:=Color("6a0d08")
@@ -78,6 +82,11 @@ func op(name:String,args:Dictionary)->void:
 		"spray":_spray_at(args)
 		"pool":_pool_at(args)
 		"drag":_drag(args)
+		"walk":_walk_to(String(args.get("who",victim)),point(String(args.get("to","petitioner"))),float(args.get("time",1.0)))
+		"heave":_heave(args)
+		"flare":
+			var court:=_court()
+			if court!=null and court.has_method("fire_flare"):court.call("fire_flare",1.2,0.8)
 		"dogs":_dogs(args)
 		"fetch":_fetch(args)
 		"throw":_throw(args)
@@ -150,6 +159,7 @@ func point(name:String)->Vector3:
 func _move_to(key:String,world:Vector3,time:float,trans:=Tween.TRANS_SINE)->void:
 	var f:Variant=_fig(key)
 	if f==null or f.spot==null:return
+	_remember(key)
 	var local:Vector3=f.spot.to_local(world)-f._path_at(f.stroll)
 	local.y=0.0
 	# one move at a time for each person (a new one takes over from the last)
@@ -160,21 +170,81 @@ func _move_to(key:String,world:Vector3,time:float,trans:=Tween.TRANS_SINE)->void
 	t.tween_property(f,"nudge",local,maxf(time,0.05)).set_trans(trans).set_ease(Tween.EASE_IN_OUT)
 
 func _approach(key:String,to:String,side:float,dist:float,time:float)->void:
-	var b:=_body(key);var v:=_body(to)
-	if b==null or v==null:return
+	var b:=_body(key)
+	if b==null:return
+	var target:=point(to)
 	var cam:=_camera_dir()
 	var across:=Vector3(-cam.z,0.0,cam.x).normalized()*side
-	var spot:=v.global_position+across*dist
-	_move_to(key,spot,time)
-	var f:Variant=_fig(key)
-	if f!=null:f.body3d.play("walk_in",0.2,0.0)
+	_walk_to(key,target+across*dist,time)
 	var t:=_tween()
 	t.tween_interval(time)
 	t.tween_callback(func()->void:
 		if is_instance_valid(b):
-			b.play(String(f.rest_clip) if f!=null else "stand",0.3)
-			var way:=v.global_position-b.global_position
+			var way:=target-b.global_position
 			b.face(rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),0.2))
+
+## A short scene move still needs facing and a matching stride.
+func _walk_to(key:String,to:Vector3,time:float)->void:
+	var b:=_body(key);var f:Variant=_fig(key)
+	if b==null or f==null:return
+	_remember(key)
+	var way:=to-b.global_position;way.y=0.0
+	if way.length()<0.02:return
+	Acting.stop(b,0.1)
+	b.face(rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),0.18)
+	b.play("walk_in",0.15,0.0)
+	var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
+	b.set_locomotion_rate(way.length()/maxf(time*pace,0.05))
+	_move_to(key,to,time,Tween.TRANS_LINEAR)
+	var t:=_tween();t.tween_interval(time)
+	t.tween_callback(func()->void:
+		if is_instance_valid(b):b.play(String(f.rest_clip),0.2);b.set_locomotion_rate(1.0))
+
+func _heave(args:Dictionary)->void:
+	var key:=String(args.get("who",victim));var f:Variant=_fig(key)
+	var b:=_body(key)
+	if f==null or b==null:return
+	var seconds:=float(args.get("time",0.9))
+	Acting.stop(b,0.1);b.play("kneel",0.1,0.0)
+	_move_to(key,point(String(args.get("to","fire"))),seconds,Tween.TRANS_LINEAR)
+	var from:=float(f.lift)
+	var t:=_tween()
+	t.tween_method(func(k:float)->void:if is_instance_valid(f):f.lift=from+sin(k*PI)*0.6,0.0,1.0,seconds)
+	t.tween_callback(func()->void:if is_instance_valid(b):b.play(String(f.rest_clip),0.15))
+
+func _remember(key:String)->void:
+	if key==victim or _survivors.has(key):return
+	var f:Variant=_fig(key);var b:=_body(key)
+	if f==null or b==null:return
+	var props:=[]
+	for name:String in ["prop_staff","prop_bowl"]:
+		for node in b.find_children(name,"MeshInstance3D",true,false):props.append({"node":node,"visible":node.visible})
+	_survivors[key]={"nudge":f.nudge,"rotation":b.rotation,"clip":String(f.rest_clip),"props":props}
+
+func _restore_survivors()->void:
+	for key:String in _survivors:
+		var f:Variant=_fig(key);var b:=_body(key)
+		if f==null or b==null or f.leaving:continue
+		var saved:Dictionary=_survivors[key]
+		Acting.stop(b,0.15)
+		var restore:=func()->void:
+			if not is_instance_valid(b) or not is_instance_valid(f):return
+			f.nudge=saved.nudge;b.rotation=saved.rotation
+			b.play(String(saved.clip),0.2);b.set_locomotion_rate(1.0)
+			for prop:Dictionary in saved.props:
+				if is_instance_valid(prop.node):prop.node.visible=bool(prop.visible)
+		var distance:float=(f.nudge as Vector3).distance_to(saved.nudge)
+		if _skipped or distance<0.05:restore.call();continue
+		var way:Vector3=f.spot.global_transform.basis*((saved.nudge as Vector3)-f.nudge)
+		b.face(rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),0.2)
+		b.play("walk_in",0.2,0.0)
+		var seconds:=clampf(distance/1.15,0.3,2.5)
+		var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
+		b.set_locomotion_rate(distance/maxf(seconds*pace,0.05))
+		var t:=stage.create_tween()
+		t.tween_property(f,"nudge",saved.nudge,seconds)
+		t.tween_callback(restore)
+	_survivors.clear()
 
 ## Which way the camera looks along the floor.
 func _camera_dir()->Vector3:
@@ -506,6 +576,7 @@ func _plan_start(args:Dictionary)->void:
 		var key:=String(_plan_keys.get(role,""))
 		var b:=_body(key)
 		if b==null:continue
+		_remember(key)
 		var walk:=0.0
 		if role!="victim":
 			# to their place (a few steps if they are not there yet), turned the plan's way
@@ -515,8 +586,7 @@ func _plan_start(args:Dictionary)->void:
 				walk=clampf(far/1.2,0.35,1.4)
 				_move_to(key,to,walk,Tween.TRANS_LINEAR)
 				b.play("walk_in",0.2,0.0)
-			var face:=_tween()
-			face.tween_property(b,"rotation:y",yaw+deg_to_rad(float(r.get("yaw",0.0)))-b.get_parent_node_3d().global_rotation.y,maxf(walk,0.2))
+			b.face(rad_to_deg(yaw)+float(r.get("yaw",0.0))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),maxf(walk,0.2))
 		for side:String in (r.get("props",{}) as Dictionary):
 			var name:=String(r.props[side])
 			var prop:=_plan_thing(name)
@@ -624,6 +694,8 @@ func _point_node(at:Vector3)->Node3D:
 func _pack_come(args:Dictionary)->void:
 	var court:=_court()
 	if court==null:return
+	_court_dog=court.call("animal","dog") if court.has_method("animal") else null
+	if is_instance_valid(_court_dog):_dog_home=_court_dog.transform
 	if court.has_method("dog_pack"):_pack=court.call("dog_pack",int(args.get("more",2)))
 	else:_dogs(args);return
 	var v:=_body(victim)
@@ -942,10 +1014,10 @@ func _crumble(key:String,time:float)->void:
 		var fall:=_tween()
 		fall.tween_method(func(v:float)->void:if is_instance_valid(b):kit.call("crumble",b,v),0.0,1.0,time)
 		fall.tween_callback(func()->void:_vanish(key))
-		return
-	var t:=_tween()
-	t.tween_property(b,"scale",Vector3(b.scale.x*1.25,0.02,b.scale.z*1.25),time).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-	t.tween_callback(func()->void:_vanish(key))
+	else:
+		var t:=_tween()
+		t.tween_property(b,"scale",Vector3(b.scale.x*1.25,0.02,b.scale.z*1.25),time).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		t.tween_callback(func()->void:_vanish(key))
 	# a heap of ash where they stood
 	var court:=_court()
 	if court!=null:
@@ -954,7 +1026,7 @@ func _crumble(key:String,time:float)->void:
 		court.add_child(ash);_made.append(ash)
 		ash.global_position=Vector3(b.global_position.x,0.0,b.global_position.z)
 		ash.scale=Vector3(0.05,0.05,0.05)
-		t.parallel().tween_property(ash,"scale",Vector3.ONE,time)
+		_tween().tween_property(ash,"scale",Vector3.ONE,time)
 
 # --- the caption, the end -------------------------------------------------------------
 
@@ -965,12 +1037,11 @@ func _caption(text:String)->void:
 	if text.is_empty():return
 	stage.call("caption",text,"narration",true)
 
-## Everything to its end at once (a click): the person gone, the head where
-## it lands, the things taken away, the caption said.
+## End an interrupted scene without running its outstanding callbacks.
+## The person is gone, scene props are cleared, and survivors return.
 func skip()->void:
 	if _ended:return
-	for t in _tweens:
-		if t is Tween and (t as Tween).is_valid():(t as Tween).custom_step(60.0)
+	_skipped=true
 	finish()
 
 func finish()->void:
@@ -979,6 +1050,16 @@ func finish()->void:
 	for t in _tweens:
 		if t is Tween and (t as Tween).is_valid():(t as Tween).kill()
 	_tweens.clear()
+	_restore_survivors()
+	var court:=_court()
+	for dog in _pack:
+		if not is_instance_valid(dog):continue
+		if dog.has_method("cancel_action"):dog.call("cancel_action",_dog_home if _skipped and dog==_court_dog else null)
+		if dog==_court_dog:
+			if not _skipped:dog.call("go_to",_dog_home.origin,"walk")
+		else:
+			if court!=null and court.get("animals") is Array:(court.get("animals") as Array).erase(dog)
+			dog.queue_free()
 	_vanish(victim)
 	var kit:=gore_kit()
 	var b:=_body(victim)

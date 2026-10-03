@@ -284,3 +284,16 @@ func test_each_reaction_is_made_in_range_in_each_voice()->void:
 		# the seed varies it; the same seed repeats it
 		assert_bool(Reactions.make(String(kind),a,11)==one).is_true()
 		assert_bool(Reactions.make(String(kind),a,12)==one).override_failure_message("%s ignores its seed" % kind).is_false()
+
+func test_cancel_act_keeps_other_sound_and_discards_late_reactions()->void:
+	var sound:=_court([])
+	sound.call("play_act","into_the_fire",{},{})
+	var epoch:=int(sound.get("_act_epoch"))
+	sound.call("cue","creak",null,{"delay":30.0})
+	assert_bool((_queued(sound) as Array).has("whoomph")).is_true()
+	sound.call("stop_act")
+	assert_array(_queued(sound)).is_equal(["creak"])
+	# A worker may finish rendering after the user has skipped the scene.
+	var late:={"at":float(sound.call("_now"))+2.0,"stream":Synth.to_stream(Synth.buffer(0.02)),"body_id":0,"kind":"gasp","act":epoch}
+	sound.call("_reactions_ready",[late])
+	assert_array(_queued(sound)).is_equal(["creak"])
