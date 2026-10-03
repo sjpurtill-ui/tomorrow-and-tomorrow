@@ -147,7 +147,7 @@ func _run()->void:
 	var p2:=Sound.stream_for("music@"+mk3,2).get_length()
 	var stop_scene:=[{"t":0.0,"bed":"fire","until":24.0,"db":-4.0},{"t":0.0,"talk":tongue_key,"until":3.0,"release":0.06,"seed":6},
 		{"t":0.3,"music":"music@"+mk3,"variant":0,"until":3.0,"release":0.03},
-		{"t":2.97,"cue":"god_wrath_boom","variant":0,"db":-4.0},{"t":3.02,"cue":"room_gasp","variant":1},
+		{"t":3.45,"cue":"god_wrath_boom","variant":0,"db":-4.0},{"t":3.8,"cue":"room_gasp","variant":1},
 		{"t":3.0,"god":"god_swell_wrath","until":6.6,"release":2.2,"attack":0.8,"level":-11.0},
 		{"t":3.0,"music":"musicstop@"+mk3,"variant":0,"db":5.0},{"t":3.29,"music":"musictap@"+mk3,"db":3.0},
 		{"t":9.0,"talk":tongue_key,"until":24.0,"attack":1.5,"seed":7},
@@ -157,6 +157,19 @@ func _run()->void:
 	# a gift taken: the musician plays it in
 	var p3:=Sound.stream_for("music@"+mk3,3).get_length()
 	_save("15_gift_flourish",Sound.render_scene([{"t":0.3,"music":"music@"+mk3,"variant":3},{"t":0.9+p3,"music":"musicfl@"+mk3,"db":3.0}],2.6+p3+Sound.stream_for("musicfl@"+mk3,0).get_length()))
+	# seven-note peoples, each with its own mode, ornaments and rhythm (bone flute and drum)
+	var seven:Array=[];var at4:=0.3
+	for fam in ["semitic","indo_aryan","slavic","dravidian","romance","iranic"]:
+		var spec:=Music.people(fam,seed_value,["bone_flutes_drums"])
+		var tune:=Music.phrase(spec,0)
+		var top:=Synth.peak_of(tune)
+		if top>0.0:Synth.scale(tune,0.6/top)
+		seven.append([at4,tune])
+		print("seven-note %s: mode scale %s, ornament %s, %s" % [fam,str(spec.scale),String(spec.ornament),String(spec.meter)])
+		at4+=float(tune.size())/Synth.RATE+1.0
+	var seven_out:=Synth.buffer(at4)
+	for piece in seven:Synth.mix_into(seven_out,piece[1],Synth.n_of(float(piece[0])),1.0)
+	_save("16_seven_note_peoples",seven_out)
 	if args.has("all"):
 		DirAccess.make_dir_recursive_absolute(out_dir.path_join("cues"))
 		for name in Foley.CUES:
@@ -186,9 +199,13 @@ func _run()->void:
                        lyre, temple (lyre and small cymbals)
 13_music_three_peoples the same age (bone flute, frame drum) played by our people and two others with
                        other beats: each its own scale, beat, key and tunes
-14_music_wrath_stops_it_dead  music by the fire; wrath lands mid-phrase: squeak, a stray tap, silence;
+14_music_wrath_stops_it_dead  music by the fire; the musician stops dead (squeak, a stray tap) a beat
+                       BEFORE the god's boom lands, then silence;
                        a tentative few notes later; then it plays on
 15_gift_flourish       a phrase, then a gift taken: a run and a roll
+16_seven_note_peoples  six peoples whose scales have seven notes (semitic, indo_aryan, slavic, dravidian,
+                       romance, iranic), each its own mode, ornaments (mordents, slides, turns, gamaka
+                       shakes, grace notes, trills) and rhythm
 cues/                  every one-shot and bed on its own (name_variant.wav)
 """)
 		index.close()

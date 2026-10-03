@@ -1165,8 +1165,11 @@ func on_event(kind:String,data:Dictionary={})->void:
 					_bed_tweens["wind"]=tw
 				# the swell under it darkens to wrath
 				god("",2.6,"wrath")
-				cue("god_wrath_boom",null,{"db":0.0 if action in ["strike_down","cast_out","smite"] else -6.0})
-				if not action.begins_with("envoy_kill"):cue("room_gasp",null,{"delay":0.35})
+				# the musician stops dead first, as if they felt it coming; the
+				# boom lands a beat after, in the gap (the squeak is not lost under it)
+				var beat:=0.45 if is_instance_valid(_music) and _music_said=="stop_dead" and _now()-_hush_began<0.1 else 0.0
+				cue("god_wrath_boom",null,{"db":0.0 if action in ["strike_down","cast_out","smite"] else -6.0,"delay":beat})
+				if not action.begins_with("envoy_kill"):cue("room_gasp",null,{"delay":beat+0.35})
 			elif action in FAVOUR:
 				god("",2.0,"favour")
 				# the musician picks up again at once, brighter
