@@ -85,7 +85,15 @@ const DAILY_SCALE:=0.12
 ## question of the classical age and after takes years, not decades, once its
 ## team takes it up; refitted with tools/sim so the 1200-3000 milestones land in
 ## their bands (they were mostly late).
-const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.55],[1200.0,0.38],[1800.0,0.30],[2400.0,0.25],[3000.0,0.16]]
+## Learning pace (2026-10-02): the founding ages' small practices ask more work
+## than they did (4.2 at year 0, was 7.0; full pace again by year 150). The
+## engine at the same learner count learned as fast as before the learning
+## overhaul (a fresh world, 3 learners: 110 against 106 known by year 16), but
+## that pace made a balanced village of a hundred learn some 75 ways in its
+## first 16 years; BENCHMARKS_600 asks about 65 in 100 of the first 50 years'
+## 259 questions for a typical people. Now a balanced people learns some 45 in
+## 16 years and the learning path about two and a half times that.
+const PACE_BY_YEAR:Array=[[0.0,4.2],[60.0,3.9],[150.0,3.95],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.55],[1200.0,0.38],[1800.0,0.30],[2400.0,0.25],[3000.0,0.16]]
 ## (research_3000 parallel capacity, which multiplied research with a people's
 ## size alone, is gone: a large people runs many investigations at once only by
 ## putting many people to learning, docs/PEOPLE_FIRST.md A.)
@@ -189,7 +197,7 @@ const GOODS_KEY:="Civilian Goods"
 ## age can spare (the sustainable share, society_model.gd
 ## SUSTAINABLE_SPECIALISTS, read at the economy's real age) carries its
 ## learning ahead of the calendar: each doubling of that share adds
-## LEAD_YEARS_PER_DOUBLING years a year to its lead (twice the share: 6 years
+## LEAD_YEARS_PER_DOUBLING years a year to its lead (twice the share: 3 years
 ## ahead in a century). Below the sustainable share the lead falls back the same
 ## way, never below the calendar. Questions are dated against the people's own
 ## age (DiscoverySystem.learning_year), not the calendar, and what it knows pays
@@ -199,7 +207,7 @@ const GOODS_KEY:="Civilian Goods"
 ## people with a sixth of its workers learning reaches writing, bronze and
 ## place value some 20-30 years before their band floors, one with a third some
 ## 30-40 years before, with fewer people, goods and guards than a sensible one.
-const LEAD_YEARS_PER_DOUBLING:=0.06
+const LEAD_YEARS_PER_DOUBLING:=0.03
 ## The lead falls back at most this many doublings a year (a people with no
 ## learners at all loses LEAD_YEARS_PER_DOUBLING x 3 years a year).
 const LEAD_FALL_DOUBLINGS:=3.0

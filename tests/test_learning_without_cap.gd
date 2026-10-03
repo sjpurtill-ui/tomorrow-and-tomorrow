@@ -412,3 +412,25 @@ func test_a_lead_is_paid_for_in_the_extra_learners_upkeep()->void:
 	assert_float(float(model.specialist_burden)).is_equal_approx(1.5,0.000001)
 	assert_float(float(model.effect("conception_support"))).is_less(births)
 	assert_float(float(model.effect("labor_demand"))).is_greater_equal(work)
+
+# --- The first ways come at a village's pace (2026-10-02 recalibration) -------------
+
+## A founding people's small practices ask more work than they did (pace 4.2 at
+## year 0, was 7.0), back to the full pace by year 150; the later ages are as
+## they were. Per learner the engine had not changed (a fresh village with 3
+## learners: 110 ways by year 16 on main, 106 before the overhaul), but a
+## balanced village learned some 75 ways in 16 years; now about 45.
+func test_the_first_ways_come_at_a_village_pace()->void:
+	assert_float(R.pace_for(0.0)).is_equal_approx(4.2,0.0001)
+	assert_float(R.pace_for(60.0)).is_equal_approx(3.9,0.0001)
+	assert_float(R.pace_for(150.0)).is_equal_approx(3.95,0.0001)
+	# Year 200 and after: unchanged.
+	assert_float(R.pace_for(200.0)).is_equal_approx(2.4,0.0001)
+	assert_float(R.pace_for(300.0)).is_equal_approx(1.0,0.0001)
+	# A founding question takes more than half again the work it did.
+	assert_float(7.0/R.pace_for(0.0)).is_greater(1.6)
+	# The lead grows slowly and the age can spare a little more at its founding.
+	assert_float(R.LEAD_YEARS_PER_DOUBLING).is_equal_approx(0.03,0.0001)
+	assert_float(Society._rise(Society.SUSTAINABLE_SPECIALISTS,0.0)).is_equal_approx(0.065,0.0001)
+	# More learners still give more work: no cap.
+	assert_float(R.team_capacity(8.0)).is_greater(R.team_capacity(2.0)*3.5)
