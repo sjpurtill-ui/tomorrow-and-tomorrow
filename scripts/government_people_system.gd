@@ -140,6 +140,9 @@ var initializing:=false
 ## people yet): the founders take their places as the hearth chose them;
 ## every later succession follows the stated rule (succession_rule).
 var _founding:=false
+## The share of the last plan moved onto learning against hunger
+## (work_paths.gd keep_learners), read into the town's record as it is laid.
+var _learners_kept:=0.0
 
 
 func reset_for_new_world()->void:
@@ -1880,6 +1883,8 @@ func _allocations_for_focus(focus:String,leader:Dictionary,cultural:bool=false)-
 	# The hands food does not need go by the path: only the learning path (or
 	# a people set on ideas) puts many on learning (work_paths.gd cap_learning).
 	if cultural:preload("res://scripts/work_paths.gd").cap_learning(weights)
+	# Hunger never takes the people's few learners (work_paths.gd keep_learners).
+	_learners_kept=preload("res://scripts/work_paths.gd").keep_learners(weights)
 	var total:=0.0
 	for role in GameState.POPULATION_ROLES: total+=maxf(0.0,float(weights.get(role,0.0)))
 	for role in GameState.POPULATION_ROLES: weights[role]=maxf(0.0,float(weights.get(role,0.0)))/maxf(0.001,total)*100.0
@@ -1933,7 +1938,8 @@ func _delegate_settlements(_day:int)->void:
 				"label":String(FOCUS_LABELS.get(String(settlement.get("management_focus","balanced")),"BALANCED STEWARDSHIP")),
 				"reason":String(settlement.get("management_focus_reason",_manual_focus_reason(String(settlement.get("management_focus","balanced"))))),
 			}
-			return {"guard":guard,"decision":decision,"allocations":_allocations_for_focus(String(decision.id),leader,auto_manage)}
+			var planned:=_allocations_for_focus(String(decision.id),leader,auto_manage)
+			return {"guard":guard,"decision":decision,"allocations":planned,"kept":_learners_kept}
 		)
 		var guard:Dictionary=local.guard
 		var decision:Dictionary=local.decision
@@ -1950,6 +1956,7 @@ func _delegate_settlements(_day:int)->void:
 			focus_effect+=" Survival safeguard: %s." % "; ".join(guard.reasons)
 		settlement["management_focus_effect"]=focus_effect
 		settlement["survival_guard_active"]=bool(guard.active)
+		settlement["learners_kept"]=float(local.get("kept",0.0))
 		settlement.erase("fed_by_leader")
 		settlement["auto_manage"]=auto_manage
 		settlement["local_allocations"]=allocations

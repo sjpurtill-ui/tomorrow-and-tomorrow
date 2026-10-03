@@ -118,6 +118,10 @@ The engine counted the crises twice: the age table is all-cause (BENCHMARKS_600:
 
 Against the engine's first decade on good and average land (8 runs on 4 seeds), the surrogate's crises take 8.2–8.4 in 1,000 a year against the engine's 7.5–8.4, in the same mix: sickness about 4.5, hunger about 1.6, and floods, fires and dry seasons about 1 each. Its growth sits a little under the engine's: +0.41% and +0.35% a year over 48 seeds, against +0.57% and +0.51%. On poor land it starves sooner than the engine (Known gaps 2), so its poor-land crises run high, 18.6 against 13.6. The six truth runs were re-recorded on this branch (103–112 s each); `check.py --strict` passes (score 31.1). The surrogate sits about 6% under the engine's people at year 15 (128 against 136 on the balanced path), inside the 15% tolerance.
 
+### Poor land's learners (2026-10-03)
+
+The surrogate keeps the people's few learners in hunger as the leaders do (`work_paths.gd LEARNERS_KEPT`, `LEARNERS_KEPT_FROM`, `LEARNERS_KEPT_MOST`, read from the game; `Surrogate._keep_learners`, the last step of the labor plan). Absent constants switch it off, so `SIM_GAME_REV=<older main>` reproduces that main.
+
 ## What it models
 
 The surrogate models one aggregate society, stepped month by month. Research, adoption, effect totals, capacities and artifacts update once a month. Demography and food take four sub-steps a month (two before the people-first recalibration), using the engine's daily rates, and the leaders re-plan the work at each.
