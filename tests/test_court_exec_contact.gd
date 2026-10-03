@@ -18,9 +18,10 @@ class TestStage extends Control:
 	var figures:Dictionary={}
 	func figure(key:String)->Variant:return figures.get(key)
 
-func _plan(act:String,variant:="male_adult",tall:=1.0,approach:=false)->Dictionary:
+func _plan(act:String,variant:="male_adult",tall:=1.0,approach:=false,pottery:=true)->Dictionary:
 	var stage:TestStage=auto_free(TestStage.new());add_child(stage)
 	stage.court_set=Court.new();stage.add_child(stage.court_set)
+	if not pottery:stage.court_set.facts.era_tags=["metal"]
 	var plan:=Acting.exec_plan(act)
 	for key:String in plan.roles:
 		var role:Dictionary=plan.roles[key]
@@ -107,7 +108,8 @@ func test_authored_cook_tools_follow_the_fists_and_the_lid_can_be_released()->vo
 	_pose(cook,7.4)
 	for side:String in ["L","R"]:
 		var prop:Node3D=scene._things["lid" if side=="L" else "ladle"]
-		var grip:Array=Props.info(String(prop.get_meta("prop"))).get("grip",[0,0,0])
+		var info:=Props.info(String(prop.get_meta("prop")))
+		var grip:Array=[0,info.size[1],0] if side=="L" else info.get("grip",[0,0,0])
 		assert_vector(prop.to_global(Vector3(grip[0],grip[1],grip[2]))).is_equal_approx(Acting.of(cook).fist_frame(0 if side=="L" else 1).origin,Vector3.ONE*0.001)
 	scene._on_cook_cue(cook,{"name":"lid"})
 	var resting:=lid.global_transform
@@ -186,3 +188,46 @@ func test_arrival_restores_the_authored_heading_and_keeps_the_lid_at_rest()->voi
 	assert_bool(lid.global_transform.is_equal_approx(resting)).is_true()
 	_pose(cook,7.4)
 	assert_bool(lid.global_transform.is_equal_approx(resting)).is_false()
+
+func test_both_cookware_variants_fit_the_authored_rim_and_keep_the_lid_through_its_real_cue()->void:
+	for pottery:bool in [false,true]:
+		var setup:=_plan("club_home_run","male_adult",1.0,false,pottery)
+		var scene:Node=setup.scene;var stage:TestStage=setup.stage
+		var cook:Node3D=stage.figure("cook").body3d
+		var lid:Node3D=scene._things.lid
+		var pot:MeshInstance3D=scene._things.pot
+		var spec:=Props.info(String(pot.get_meta("prop")))
+		var seat:Array=spec.lid_seat
+		var rim:=pot.to_global(Vector3(seat[0],seat[1],seat[2]))
+		assert_float(rim.y).is_equal_approx(0.55*float(cook.body_height)/Figure.REFERENCE_HEIGHT,0.001)
+		assert_float(pot.scale.x).is_equal(1.0)
+		assert_float(pot.scale.z).is_equal(1.0)
+		assert_float(pot.mesh.get_aabb().end.y*pot.scale.y).is_less(float(cook.body_height)*0.6)
+		var before_pickup:=lid.global_transform
+		assert_float(lid.global_position.y).is_between(0.50,0.65)
+		assert_float(lid.global_position.y).is_equal_approx(rim.y,0.001)
+		var lid_width:float=Props.info(String(lid.get_meta("prop"))).size[0]
+		var horizontal:=Vector2(lid.global_position.x-rim.x,lid.global_position.z-rim.z).length()
+		assert_float(horizontal).is_between(float(spec.broth_radius),float(spec.broth_radius)+lid_width*0.5)
+		assert_float(lid.global_transform.basis.y.normalized().dot(Vector3.UP)).is_greater(0.99)
+		_pose(cook,7.1)
+		assert_bool(lid.global_transform.is_equal_approx(before_pickup)).is_true()
+		_pose(cook,7.4)
+		assert_vector(lid.global_transform.basis.get_scale()).is_equal_approx(pot.scale,Vector3.ONE*0.001)
+		# Run the actual clip signal across 7.6s instead of directly calling
+		# the receiver: the lid must detach and stay seated as the hand pats.
+		var a=Acting.of(cook);a._a.t=7.58;a._a.ev_i=0
+		a.step(0.04)
+		assert_object(lid.get_parent()).is_same(pot)
+		assert_vector(lid.global_position).is_equal_approx(rim,Vector3.ONE*0.001)
+		assert_vector(lid.global_transform.basis.get_scale()).is_equal_approx(pot.scale,Vector3.ONE*0.001)
+		var on_pot:=lid.global_transform
+		_pose(cook,8.2)
+		assert_bool(lid.global_transform.is_equal_approx(on_pot)).is_true()
+		assert_object(a._held[0]).is_null()
+		var made:Array=scene._made.duplicate()
+		scene._restore_survivors() # returning hands cannot take the lid back
+		scene._survivors.clear()
+		scene.finish()
+		await await_idle_frame()
+		for prop in made:assert_bool(is_instance_valid(prop)).is_false()
