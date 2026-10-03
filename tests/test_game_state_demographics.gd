@@ -220,12 +220,14 @@ func test_natural_mortality_uses_the_same_age_gradient_as_the_life_table()->void
 	state._normalize_population_cohorts()
 	var old_rate:float=state.current_natural_mortality_rate(1.0)
 	assert_float(old_rate).is_less(0.5)
-	# Each band dies at its life-table hazard (with the era burden), so the old
-	# society's rate is the cohort-weighted table, not a flat per-head rate.
+	# Each band dies at its life-table hazard (with the era burden) less the
+	# crises' expected share of it (crisis_background.gd), so the old society's
+	# rate is the cohort-weighted table, not a flat per-head rate.
 	var conditions:float=state._mortality_condition_factor(1.0)
 	var hazards:Dictionary=state._natural_cohort_hazards(conditions)
+	var kept:Dictionary=preload("res://scripts/crisis_background.gd").background(state.elapsed_days/365.0)
 	var expected:=0.0
-	for key:String in hazards:expected+=float(state.population_cohorts[key])*clampf(float(hazards[key])*conditions,0.0001,0.98)
+	for key:String in hazards:expected+=float(state.population_cohorts[key])*clampf(float(hazards[key])*float(kept[key])*conditions,0.0001,0.98)
 	assert_float(old_rate).is_equal_approx(expected/300.0,0.000001)
 	# Pre-modern child mortality is heavy (about 5% a year under 14), yet an
 	# elder-heavy band still dies well over twice as fast as a child-heavy one.
@@ -309,11 +311,12 @@ func test_founders_are_young_families() -> void:
 	assert_float(float(state.population_cohorts.elders)).is_greater(20.0)
 
 
-## A healthy, fed founding band on its first land, with no misfortune, is
-## born into faster than it buries: the year's expected births (the engine's
-## own conception, gestation and birth losses under the founders' care
-## profile, frontier included) outrun its expected deaths (the age-specific
-## life table under the same profile).
+## A healthy, fed founding band on its first land is born into faster than
+## it buries: the year's expected births (the engine's own conception,
+## gestation and birth losses under the founders' care profile, frontier
+## included) outrun its expected deaths (the whole age-specific life table
+## under the same profile: the day's ordinary deaths and the crises' expected
+## share, crisis_background.gd).
 func test_a_healthy_fed_founding_band_grows() -> void:
 	var discovery: Node = auto_free(_PlainDiscovery.new())
 	state.population_health = 0.97
@@ -327,7 +330,12 @@ func test_a_healthy_fed_founding_band_grows() -> void:
 		"maternal_care": preload("res://scripts/early_life_conditions.gd").maternal_factor(state.early_care)}
 	var result: Dictionary = state.process_reproduction_day(context)
 	var births := float(result.projected_birth_rate)
-	var deaths := float(state.current_natural_mortality_rate(1.1))
+	var conditions: float = state._mortality_condition_factor(1.1)
+	var hazards: Dictionary = state._natural_cohort_hazards(conditions)
+	var deaths := 0.0
+	for key: String in hazards: deaths += float(state.population_cohorts[key]) * clampf(float(hazards[key]) * conditions, 0.0001, 0.98)
+	deaths /= state.population_exact
+	assert_float(float(state.current_natural_mortality_rate(1.1))).is_less(deaths)
 	print("founding band: births %.1f, deaths %.1f in 1,000 a year (frontier %.2f)" % [births * 1000.0, deaths * 1000.0, float(state.early_care.get("frontier", 0.0))])
 	assert_float(float(state.early_care.get("frontier", 0.0))).is_greater(0.0)
 	assert_float(births).is_greater(deaths)

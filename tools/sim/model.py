@@ -26,10 +26,35 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+import crisis as crisis_model
 import gamedata as gd
 import gdparse as g
 
 YEAR = 365.0
+# The crises' expected share of each cohort's all-cause hazard
+# (crisis_background.gd CRISIS_SHARE): the age table emits only the rest each
+# day; the crises (crisis.py) take the share themselves, as their own swings.
+CRISIS_SHARE = g.const("scripts/crisis_background.gd", "CRISIS_SHARE", default=[], optional=True) if g.game_file_exists("scripts/crisis_background.gd") else []
+
+
+def crisis_share(year: float) -> np.ndarray:
+    """crisis_background.gd shares(): each cohort's expected crisis share of its
+    all-cause hazard at game year ``year`` (0 without the table)."""
+    if not CRISIS_SHARE:
+        return np.zeros(6)
+    pts = CRISIS_SHARE
+    if year <= float(pts[0][0]):
+        row = pts[0][1]
+        return np.array([float(row[k]) for k in COH])
+    for i in range(1, len(pts)):
+        if year <= float(pts[i][0]):
+            a, b = pts[i - 1], pts[i]
+            t = (year - float(a[0])) / max(0.0001, float(b[0]) - float(a[0]))
+            return np.array([float(a[1][k]) + (float(b[1][k]) - float(a[1][k])) * t for k in COH])
+    row = pts[-1][1]
+    return np.array([float(row[k]) for k in COH])
+
+
 MONTH = YEAR / 12.0
 ROLES = ["Food", "Survey", "Extraction", "Construction", "Crafting", "Logistics", "Knowledge", "Administration", "Defense"]
 R = {r: i for i, r in enumerate(ROLES)}
@@ -656,6 +681,13 @@ class Surrogate:
         self.allure = 0.0
         self.day = 0.0
         self._modern_adult = 1.0
+        # Crises (crisis.py): on unless params say "crises": false.
+        self.crises = crisis_model.Crises(self, seed) if params.get("crises", True) else None
+        # Person-years and the all-cause age table's expected deaths by cohort
+        # (tools/sim/crisis_share.py measures the crises' share against them).
+        self.person_years_coh = np.zeros(6)
+        self.allcause_coh = np.zeros(6)
+        self.natural_coh = np.zeros(6)
         self._effects_update()
         self._capacities()
 
@@ -1332,7 +1364,7 @@ class Surrogate:
         season = self._seasons(day)
         temp = float(p["mean_temperature_c"]) + season["wave"] * float(p["seasonality_c"])
         climate = base * (clamp((12.0 - temp) / 28.0, 0, 1) * 0.075 + clamp((temp - 31.0) / 17.0, 0, 1) * 0.045)
-        policy_demand = 1.0 - (0.0)
+        policy_demand = 1.0 + self.policy("food_demand")
         need = (base + labor + pregnancy + lactation + climate) * policy_demand
         # --- production (_produce)
         water = clamp(prof.get("water_access", 0.0), 0, 1)
@@ -1482,6 +1514,8 @@ class Surrogate:
         total = 0.0
         for pol in self.s.policies:
             total += PROBE_POLICY_MAGNITUDE * float(POLICIES.get(pol, {}).get("effects", {}).get(channel, 0.0))
+        if self.crises is not None:
+            total += self.crises.policy(channel)
         return clamp(total, -1.0, 1.0)
 
     # ----------------------------------------------------------------- mortality
@@ -1689,8 +1723,13 @@ class Surrogate:
         cf = self._condition_factor(housing)
         age_h = self._hazards(care, cf)
         coh_h = self.cohort_mean @ age_h
-        natural = np.clip(coh_h * cf, 0.0001, 0.98)                 # annual, per cohort
+        allcause = np.clip(coh_h * cf, 0.0001, 0.98)
+        # The age table less the crises' expected share (crisis_background.gd).
+        natural = np.clip(coh_h * cf * (1.0 - crisis_share(self.day / YEAR)), 0.0001, 0.98)   # annual, per cohort
         self._age_h, self._cf = age_h, cf
+        self.person_years_coh += self.coh * days / YEAR
+        self.allcause_coh += self.coh * allcause * days / YEAR
+        self.natural_coh += self.coh * natural * days / YEAR
         # Exceptional deaths distributed by cause weights (register_population_deaths).
         pop = self.population
         other = np.zeros(6)
@@ -2892,6 +2931,8 @@ class Surrogate:
                 food = self._food(days, labor_eff)
                 soc = self._society(days, labor_eff, food)
                 self._demography(days, soc["housing"], care, soc["mortality"])
+                if self.crises is not None:
+                    self.crises.step(self.day, days)
                 self.mortality = soc["mortality"]
                 self.day += days
             if self.s.seed_finds_day >= 0 and self.day - MONTH < self.s.seed_finds_day <= self.day:
@@ -2960,4 +3001,6 @@ class Surrogate:
             "crowding": getattr(self, "crowding", 0.0), "carer_cover": getattr(self, "carer_cover", 0.0), "specialist_excess": getattr(self, "specialist_excess", 0.0),
             "hunger_toll": getattr(self, "hunger_toll", 0.0), "settler_deaths": getattr(self, "settler_deaths", 0.0), "person_years": getattr(self, "person_years", 0.0),
             "conception_support": e("conception_support"), "able": self.able,
+            "crisis_deaths": self.crises.total_deaths if self.crises is not None else 0.0,
+            "crisis_by_cause": dict(self.crises.deaths_by_cause) if self.crises is not None else {},
         }

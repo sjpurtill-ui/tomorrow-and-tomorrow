@@ -912,6 +912,27 @@
    "focus": "auto",
    "ambition": "makers",
    "path": "balanced"
+  },
+  "poor_balanced": {
+   "_doc": "Truth probe mirror (truth_probe.gd --scenario=poorland --path=balanced): the leaders' own balanced work on poor land (no development focus or decrees).",
+   "site": "poor",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "balanced"
   }
  },
  "generated": {
