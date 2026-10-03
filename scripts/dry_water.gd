@@ -220,10 +220,13 @@ static func springs_words(c:Dictionary,day:float)->String:
 # --------------------------------------------------------------------------
 
 ## What the rest of dry year `c` will take, as things stand, from each town's
-## last water day. `change`: {far: more reach of the far pools (the order to
-## carry: CARRY_REACH) for far_days from far_from days ahead, carriers: share of each town's
-## people more on the water path, cistern: true (a lined cistern in every
-## town), toll_factor: on the dry year's own toll}.
+## last water day. As things stand includes the holder's own course when the
+## god stays silent (carrying from the decision day). `change`: {choice: an
+## answer given today ("carry", "river_camp", or any other, which carries
+## nothing), far: an explicit reach of the far pools for far_days from
+## far_from days ahead, carriers: share of each town's people more on the
+## water path, cistern: true (a lined cistern in every town), toll_factor: on
+## the dry year's own toll}.
 ## {thirst, toll, total, held (the people's mean drinking ahead), dry_day (the
 ## first day a store runs dry, -1 when none), towns: [{name, thirst, dry_day,
 ## low_days}]}.
@@ -231,9 +234,19 @@ static func forecast(c:Dictionary,town_list:Array,today:float,change:Dictionary=
 	var end:=float(c.get("end_day",today))
 	var out:={"thirst":0.0,"toll":0.0,"total":0.0,"held":1.0,"dry_day":-1,"towns":[]}
 	var people_days:=0.0;var drank_days:=0.0
-	var extra:=float(change.get("far",0.0))
-	var extra_from:=today+float(change.get("far_from",0.0))
-	var extra_until:=extra_from+float(change.get("far_days",1e9))
+	# The far water ordered ahead: an explicit change, an answer chosen today,
+	# or, while the god is silent, the holder's own course at the decision
+	# day (crisis_system.gd _default_choice: carry, for 90 days).
+	var extra:=0.0;var extra_from:=today;var extra_until:=today
+	var choice:=String(change.get("choice",""))
+	if change.has("far"):
+		extra=float(change.far);extra_from=today+float(change.get("far_from",0.0));extra_until=extra_from+float(change.get("far_days",1e9))
+	elif choice=="carry":
+		extra=CARRY_REACH;extra_until=today+90.0
+	elif choice=="river_camp":
+		extra=RIVER_CAMP_REACH;extra_until=today+60.0
+	elif choice=="" and String(c.get("phase","open"))=="open" and String(c.get("choice",""))=="":
+		extra=CARRY_REACH;extra_from=maxf(today,float(c.get("decide_by",c.get("start",today))));extra_until=extra_from+90.0
 	for town:Dictionary in town_list:
 		var w:Dictionary=town.water
 		var people:=float(town.population)
@@ -294,4 +307,6 @@ static func _parts_from(w:Dictionary)->Dictionary:
 	var need:=float(w.get("total_required_today",w.get("required_today",0.0)))
 	return {"need":need,"cap":need*DRAW_CAP,"near":float(w.get("household_collected_today",0.0))+float(w.get("organized_collection_capacity",0.0)),"household":float(w.get("household_collected_today",0.0)),
 		"flow":1.0,"organized":float(w.get("organized_collection_capacity",0.0)),"line":float(w.get("conveyed_today",0.0)),"rain":float(w.get("rain_collected_today",0.0)),
-		"cistern":float(w.get("cistern_capacity",0.0)),"held":0.0,"accessible":bool(w.get("source_accessible",true))}
+		"cistern":float(w.get("cistern_capacity",0.0)),"accessible":bool(w.get("source_accessible",true)),
+		# The builders' wells of the people in scope (built_fabric.gd), as the town's own day would hold.
+		"held":held_by(false,float((load("res://scripts/built_fabric.gd") as GDScript).call("works_cover","water")))}

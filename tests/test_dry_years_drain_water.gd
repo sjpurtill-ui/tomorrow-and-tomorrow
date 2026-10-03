@@ -110,6 +110,21 @@ func test_a_deep_well_keeps_most_of_the_loss_away()->void:
 	assert_float(float(GameState.water_metrics.dry_loss)).is_equal_approx(open_loss*(1.0-DryWater.DEEP_WELL_HOLD),0.02)
 	assert_float(float(GameState.water_metrics.stored)).is_greater(open_store)
 
+func test_the_court_quotes_each_answer_from_the_water_forecast()->void:
+	_days(_river(),1,9)
+	var c:=_dry_year(0.9)
+	c["decide_by"]=34
+	var regex:=RegEx.create_from_string("about ([0-9]+) may die.*this way about ([0-9]+)")
+	# As things stand the holder carries at the decision day: carrying now is
+	# about the same (its 90 days end sooner), praying for rain carries nothing.
+	var carry:=regex.search(Crisis.stakes_words(c,"carry","open"))
+	var rain:=regex.search(Crisis.stakes_words(c,"rain","open"))
+	assert_object(carry).is_not_null()
+	assert_object(rain).is_not_null()
+	assert_int(absi(int(carry.get_string(2))-int(carry.get_string(1)))).is_less_equal(2)
+	assert_int(int(rain.get_string(2))).is_greater(int(rain.get_string(1)))
+	assert_str(Crisis.stakes_words(c,"hold","mid")).is_empty()
+
 func test_with_no_dry_year_the_water_day_is_unchanged()->void:
 	# collect() with no loss is the old arithmetic exactly.
 	var parts:={"need":100.0,"cap":135.0,"near":320.0,"household":118.0,"flow":0.95,"organized":202.0,"line":60.0,"rain":9.6,"cistern":250.0,"accessible":true}
@@ -150,7 +165,7 @@ static func springs_failed()->Dictionary:
 ## Its toll from the first day, the holder carrying from the far pools at
 ## day 24 for 90 days as they did.
 static func users_toll(change:Dictionary={},carry:bool=true)->Dictionary:
-	return DryWater.forecast(springs_failed(),users_towns(change),21556.0,{"far":DryWater.CARRY_REACH,"far_days":90.0,"far_from":24.0} if carry else {})
+	return DryWater.forecast(springs_failed(),users_towns(change),21556.0,{"far":DryWater.CARRY_REACH,"far_days":90.0,"far_from":24.0} if carry else {"choice":"rain"})
 
 func test_the_users_dry_year_kills_about_as_many_as_before()->void:
 	# Before: a toll fixed at its start, 261 x 0.0602 x 0.7 for carrying: 11.
@@ -170,6 +185,9 @@ func test_the_users_dry_year_kills_about_as_many_as_before()->void:
 	assert_float(float(cistern.total)).is_less(float(today.total))
 	# Not carrying at all: many more.
 	assert_float(float(users_toll({},false).total)).is_greater(float(today.total)*1.5)
+	# Silent, the holder carries from the decision day (24 days in): as things stand.
+	var silent:=springs_failed();silent["decide_by"]=21580;silent["choice"]=""
+	assert_float(float(DryWater.forecast(silent,users_towns(),21556.0).total)).is_equal_approx(float(today.total),0.01)
 
 func test_the_dry_years_depth_comes_from_its_own_draw()->void:
 	var c:=springs_failed()

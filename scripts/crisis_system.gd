@@ -463,14 +463,12 @@ static func _weather(day:int)->float:
 	return float(food.call("_weather_yield_factor",food.call("_environment_mix"),float(day)))
 
 ## A dry year's answer in the water forecast's own numbers (dry_water.gd):
-## "As things stand about 26 may die, most of thirst; this way about 12."
+## "As things stand about 26 may die, most of thirst; this way about 51."
 static func drought_stakes(c:Dictionary,option_id:String)->String:
-	var change:={}
-	match option_id:
-		"carry": change={"far":DryWater.CARRY_REACH,"far_days":90.0}
-		"river_camp": change={"far":DryWater.RIVER_CAMP_REACH,"far_days":60.0}
-		"ration","hardy": change={"toll_factor":death_factor(c,option_id)}
-		_: return ""
+	# As things stand: the holder's own course if the god stays silent
+	# (dry_water.gd forecast). Any answer but carrying carries nothing.
+	if option_id in ["hold","stay","send_hunters"]: return ""
+	var change:={"choice":option_id,"toll_factor":death_factor(c,option_id)}
 	var towns:=DryWater.towns()
 	var today:=float(_day())
 	var now:=DryWater.forecast(c,towns,today)
