@@ -33,6 +33,8 @@ func before_test()->void:
 	MilitaryCampaign.home_army=MilitaryCampaign._empty_home_army()
 	for item in MilitaryCampaign.military_inventory.keys():MilitaryCampaign.military_inventory[item]=0
 	GameState.resource_stockpiles[Arms.GOOD]=0.0
+	# What spears and bows are made from (the makers' age must be within reach).
+	GameState.resource_stockpiles.merge({"Timber":200.0,"Flint":50.0,"Stone":50.0,"Fiber Plants":50.0,"Copper Ore":50.0,"Tin Ore":10.0},true)
 
 
 func after_test()->void:
@@ -211,19 +213,111 @@ func test_an_older_saves_levy_with_what_comes_to_hand_takes_up_made_arms()->void
 	assert_int(Arms.arms_wanted()).is_greater_equal(20)
 	GameState.elapsed_days=6
 	assert_int(int(Arms.plan_day().wanted)).is_greater_equal(20)
-	# Made sets come: the levy takes up the made kit, its old arms to the armoury.
+	# Eight made sets come: eight of the levy take them up, the other twelve
+	# keep what comes to hand; eight old arms go to the armoury.
 	GameState.resource_stockpiles[Arms.GOOD]=8.0
+	var troops:=int(MilitaryCampaign.home_army.troops)
 	var men:=Watch.rekit_for_made(MilitaryCampaign)
-	assert_int(men).is_equal(20)
-	var levy:Dictionary=MilitaryCampaign.home_army.formations[0]
-	assert_str(String(levy.weapon)).is_equal(_kit())
-	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(20)
+	assert_int(men).is_equal(8)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(troops)
+	var kitted:=0;var still:=0;var still_armed:=0
+	for f in MilitaryCampaign.home_army.formations:
+		var formation:Dictionary=f
+		if String(formation.weapon)=="improvised":still+=int(formation.count);still_armed+=int(formation.equipment)
+		else:kitted+=int(formation.count);assert_float(float(formation.training)).is_equal_approx(0.3,0.0001)
+	assert_int(kitted).is_equal(8)
+	assert_int(still).is_equal(12)
+	assert_int(still_armed).is_equal(12)
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(8)
 	MilitaryCampaign._deliver_inventory_replacements(1000.0)
-	assert_int(_carried_at_home()).is_equal(8)
 	assert_int(Arms.weapons_issued()).is_equal(8)
 	# Still wanted: the twelve they lack, nothing tradeable meanwhile.
 	assert_int(Arms.arms_wanted()).is_equal(12)
 	assert_float(Arms.trade_holding()).is_equal_approx(0.0,0.0001)
+
+
+func test_one_made_set_rekits_one_man_never_the_whole_levy()->void:
+	MilitaryCampaign.military_inventory["improvised"]=0
+	MilitaryCampaign._rebuild_home_army_with([{"id":43,"unit":"levy","weapon":"improvised","count":100,"authorized_count":100,"equipment":100,"equipment_required":100,"ammunition":0,"ammunition_required":0,"training":0.3,"experience":0.0,"personnel_condition":1.0}])
+	GameState.resource_stockpiles[Arms.GOOD]=1.0
+	assert_int(Watch.rekit_for_made(MilitaryCampaign)).is_equal(1)
+	var levy:Dictionary={}
+	for f in MilitaryCampaign.home_army.formations:
+		if String((f as Dictionary).weapon)=="improvised":levy=f
+	assert_int(int(levy.count)).is_equal(99)
+	assert_int(int(levy.equipment)).is_equal(99)
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(1)
+
+
+func test_a_bronze_age_levy_takes_up_spears_it_can_carry()->void:
+	_know("bronze_weaponry",1.0)
+	GameState.elapsed_days=8
+	assert_bool(_kit()!="spear").is_true()
+	MilitaryCampaign._rebuild_home_army_with([{"id":44,"unit":"levy","weapon":"improvised","count":10,"authorized_count":10,"equipment":10,"equipment_required":10,"ammunition":0,"ammunition_required":0,"training":0.3,"experience":0.0,"personnel_condition":1.0}])
+	var levy:Dictionary=MilitaryCampaign.home_army.formations.back()
+	assert_str(Arms.rekit_item(MilitaryCampaign,levy)).is_equal("spear")
+	assert_float(float(Arms.arms_gaps_by_weapon().get("spear",0.0))).is_greater_equal(10.0)
+	GameState.resource_stockpiles[Arms.GOOD]=10.0
+	assert_int(Watch.rekit_for_made(MilitaryCampaign)).is_equal(10)
+	MilitaryCampaign._deliver_inventory_replacements(1000.0)
+	var spears:=0
+	for f in MilitaryCampaign.home_army.formations:
+		if String((f as Dictionary).weapon)=="spear":spears+=int((f as Dictionary).equipment)
+	assert_int(spears).is_equal(10)
+
+
+func test_the_makers_fall_back_to_an_age_they_can_make()->void:
+	_work_crafting(20)
+	MilitaryCampaign._rebuild_home_army_with([{"id":45,"unit":"spearman","weapon":"spear","count":20,"authorized_count":20,"equipment":0,"equipment_required":20,"ammunition":0,"ammunition_required":0,"training":0.4,"experience":0.0,"personnel_condition":1.0}])
+	GameState.resource_stockpiles.merge({"Timber":500.0,"Flint":100.0,"Stone":100.0,"Fiber Plants":100.0},true)
+	GameState.resource_stockpiles.erase("Copper Ore");GameState.resource_stockpiles.erase("Tin Ore");GameState.resource_stockpiles.erase("Coal")
+	# Bronze known, no tin or copper in store or being dug: spears and bows.
+	_know("bronze_weaponry",1.0)
+	GameState.elapsed_days=10
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("stone")
+	assert_int(int(Arms.plan_day().wanted)).is_equal(20)
+	var made:=Arms.make(20.0,0.8)
+	assert_float(float(made.sets)).is_greater(0.0)
+	# Iron known too, no coal: still spears and bows, never nothing.
+	_know("bloomery_smelting",1.0)
+	GameState.elapsed_days=11
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("stone")
+	Arms.plan_day()
+	assert_float(float(Arms.make(20.0,0.8).sets)).is_greater(0.0)
+	# Copper and tin come into store: bronze arms.
+	GameState.resource_stockpiles["Copper Ore"]=50.0;GameState.resource_stockpiles["Tin Ore"]=10.0
+	GameState.elapsed_days=12
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("bronze")
+
+
+func test_a_weapons_own_kits_never_fill_another_weapons_place()->void:
+	# Twenty spears in the armoury; bronze learned; twenty raised with the bronze kit, none armed.
+	MilitaryCampaign.military_inventory["spear"]=20
+	_know("bronze_weaponry",1.0)
+	GameState.elapsed_days=13
+	var kit:Dictionary=Arms.made_kit()
+	assert_str(String(kit.item)).is_not_equal("spear")
+	MilitaryCampaign._rebuild_home_army_with([{"id":46,"unit":String(kit.unit),"weapon":String(kit.item),"count":20,"authorized_count":20,"equipment":0,"equipment_required":20,"ammunition":0,"ammunition_required":0,"training":0.4,"experience":0.0,"personnel_condition":1.0}])
+	# The spears count only against spear places: twenty sets wanted for them.
+	assert_int(Arms.arms_wanted()).is_greater_equal(20)
+	assert_float(Arms.trade_wanted()).is_greater_equal(20.0)
+	assert_float(float(Arms.plan_day().share)).is_greater(0.0)
+
+
+func test_a_field_draft_or_a_reinforcement_is_its_formations_own_gap()->void:
+	_watch(0.05)
+	var before:=Arms.arms_gaps()
+	MilitaryCampaign.training_queue.append({"id":902,"mode":"field_draft","unit":"spearman","weapon":"spear","count":12,"initial_count":12,"reserved_equipment":0,"progress_days":0.0,"required_days":30.0})
+	assert_float(Arms.arms_gaps()).is_equal_approx(before,0.0001)
+	MilitaryCampaign.training_queue.pop_back()
+	MilitaryCampaign.training_queue.append({"id":903,"mode":"reinforce","target_formation_id":int((MilitaryCampaign.home_army.formations[0] as Dictionary).id),"unit":"spearman","weapon":"spear","count":6,"initial_count":6,"reserved_equipment":0,"progress_days":0.0,"required_days":30.0})
+	assert_float(Arms.arms_gaps()).is_equal_approx(before,0.0001)
+	MilitaryCampaign.training_queue.pop_back()
+
+
+func _work_crafting(n:int)->void:
+	GameState.population_allocations["Crafting"]=n
+	GameState.population_allocations["Defense"]=20
 
 
 func test_gear_reserved_for_drill_and_on_the_road_is_not_wanted_again()->void:

@@ -255,32 +255,55 @@ static func lose_weapons(mc:Variant,n:int,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
 	return int(_arms().call("lose_weapons",maxi(0,n),item,mc))
 
-## Formations at home with what comes to hand take up the made kit as made
-## sets come: their unit must carry it with its practice learned; what they
-## held goes back to the armoury, and they are armed from the made sets by
-## the day's delivery (MilitaryCampaign._deliver_inventory_replacements).
-## So an older save's levy is armed as the makers work, never left waiting.
-## Returns the men re-kitted.
+## Those at home with what comes to hand take up made arms as the sets come,
+## only as many men as there are made sets in hand: they split off into a
+## formation of the weapon their unit can take up (weapons_stock.gd
+## rekit_item: the first on the makers' age's list it can carry with its
+## practice learned, a spear for the levy), their drill kept, their old arms
+## back to the armoury; the day's delivery then arms them from the made sets
+## (MilitaryCampaign._deliver_inventory_replacements). The rest keep what
+## comes to hand. So an older save's levy is armed as the makers work, never
+## left waiting, and never stripped of more arms than it is given. Returns
+## the men re-kitted.
 static func rekit_for_made(mc:Variant)->int:
-	var kit:Dictionary=_arms().call("made_kit",mc)
-	if kit.is_empty() or float(_arms().call("store_exact"))<1.0:return 0
-	var item:=String(kit.item)
+	if (_arms().call("made_kit",mc) as Dictionary).is_empty():return 0
+	var sets:=floori(float(_arms().call("store_exact"))+0.000001)
+	if sets<1:return 0
 	var men:=0
-	var formations:Array=mc.home_army.get("formations",[])
+	var formations:Array=(mc.home_army.get("formations",[]) as Array).duplicate(true)
+	var additions:Array=[]
 	for index in formations.size():
+		if sets<=0:break
 		var formation:Dictionary=formations[index]
-		if String(formation.get("weapon","improvised"))!="improvised" or not bool(_arms().call("_rekits",mc,formation,item)):continue
+		if String(formation.get("weapon","improvised"))!="improvised":continue
+		var item:=String(_arms().call("rekit_item",mc,formation))
+		if item=="":continue
 		var unit:=String(formation.get("unit","levy"))
-		var authorized:=int(formation.get("authorized_count",formation.get("count",0)))
-		return_weapons(mc,maxi(0,int(formation.get("equipment",0))),"improvised")
-		formation["weapon"]=item
-		formation["equipment"]=0
-		formation["equipment_required"]=mc._equipment_required_for(unit,authorized)
-		formation["ammunition"]=0
-		formation["ammunition_required"]=mc._ammunition_required_for(item,int(formation.equipment_required))
+		var count:=int(formation.get("count",0))
+		var per:=float(mc._equipment_required_for(unit,count))/maxf(1.0,float(count))
+		var moving:=mini(count,floori(float(sets)/maxf(0.0001,per)+0.000001))
+		if moving<=0:continue
+		var need:int=mc._equipment_required_for(unit,moving)
+		# Their old arms go back to the armoury; the rest keep theirs.
+		var gear:=int(formation.get("equipment",0))
+		var back:=mini(gear,roundi(float(gear)*float(moving)/maxf(1.0,float(count))))
+		return_weapons(mc,back,"improvised")
+		var authorized:=int(formation.get("authorized_count",count))
+		formation["count"]=count-moving
+		formation["authorized_count"]=maxi(int(formation.count),authorized-moving)
+		formation["equipment"]=gear-back
+		formation["equipment_required"]=mc._equipment_required_for(unit,int(formation.authorized_count))
 		formations[index]=formation
-		men+=int(formation.get("count",0))
-	mc.home_army["formations"]=formations
+		var target:=_formation_of(mc,unit,item)
+		additions.append({"id":int(target.get("id",-1)) if not target.is_empty() else int(mc.next_formation_id),"unit":unit,"weapon":item,"count":moving,"authorized_count":moving,
+			"equipment":0,"equipment_required":need,"ammunition":0,"ammunition_required":mc._ammunition_required_for(item,need),
+			"training":float(formation.get("training",START_DRILL)),"experience":float(formation.get("experience",0.0)),"personnel_condition":float(formation.get("personnel_condition",1.0))})
+		if target.is_empty():mc.next_formation_id=int(mc.next_formation_id)+1
+		sets-=need
+		men+=moving
+	if additions.is_empty():return 0
+	mc.home_army["formations"]=formations.filter(func(f:Dictionary)->bool:return int(f.get("count",0))>0)
+	mc._rebuild_home_army_with(additions)
 	return men
 
 ## Sets the watch carries now, read from its formations wherever they stand

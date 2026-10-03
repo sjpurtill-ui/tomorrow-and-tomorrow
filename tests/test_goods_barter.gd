@@ -51,6 +51,8 @@ func before_test()->void:
 	GameState.simulation_metrics["labor_efficiency"]=0.8
 	# No arms in any old armoury unless a test puts them there.
 	_clear_armoury("player")
+	# Flint and stone in store: spears and bows are within the makers' reach.
+	GameState.resource_stockpiles.merge({"Flint":20.0,"Stone":20.0},true)
 	for id:String in ids: _clear_armoury(id)
 
 func after_test()->void:
@@ -427,6 +429,8 @@ func test_arms_cost_per_fighter_is_high_and_rises_with_the_age()->void:
 	assert_float(float(cost.worth_goods)).is_greater(8.0)
 	assert_float(float(cost.worth_rations)).is_between(40.0,80.0)
 	assert_float(Arms.weapons_quality()).is_equal(1.0)
+	# Bronze learned, with copper and tin in store.
+	GameState.resource_stockpiles.merge({"Copper Ore":50.0,"Tin Ore":10.0,"Timber":50.0,"Fiber Plants":50.0},true)
 	GameState.known_discoveries.append("bronze_weaponry"); GameState.discovery_adoption["bronze_weaponry"]=0.5
 	var bronze:=Arms.cost_per_fighter()
 	assert_float(float(bronze.maker_days)).is_equal(16.0)
