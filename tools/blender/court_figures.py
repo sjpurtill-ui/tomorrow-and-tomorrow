@@ -579,7 +579,7 @@ def _bake_ao(sets, body):
 # How far in from its edge hair thins out (metres, at a 1.72 m body): the
 # game stipples it there (vertex colour G), so a hairline or a beard's edge is
 # broken into strokes over the skin, never a cut edge of a cap.
-HAIR_EDGE = {"hair_cropped": 0.0075, "hair_balding": 0.0040, "hair_shaved": 0.004, "beard_stubble": 0.006,
+HAIR_EDGE = {"hair_cropped": 0.0095, "hair_balding": 0.0045, "hair_shaved": 0.004, "beard_stubble": 0.006,
              "beard_short": 0.0100, "beard_chin": 0.0090, "beard_full": 0.0120, "beard_long": 0.0100,
              "beard_moustache": 0.0030}
 # Hair that is stippled all over (stubble): a shadow of dots on the skin.
@@ -592,8 +592,8 @@ HAIR_STIPPLE_ALL = {"hair_shaved": 0.42, "beard_stubble": 0.50}
 # fringe count, flyaways]. flow: "crown" (out from the crown), "down"
 # (hanging), "back" (pulled back to a knot or tail).
 CARD_STYLE = {
-    "cropped": [170, (0.012, 0.022), 0.0070, 0.45, "crown", 30, 6],
-    "balding": [90, (0.010, 0.016), 0.0065, 0.40, "crown", 0, 4],
+    "cropped": [150, (0.012, 0.022), 0.0085, 0.45, "crown", 60, 0],
+    "balding": [80, (0.010, 0.016), 0.0080, 0.40, "crown", 0, 0],
     "long": [240, (0.040, 0.090), 0.0130, 0.18, "down", 26, 10],
     "long_framed": [240, (0.040, 0.090), 0.0130, 0.18, "down", 34, 10],
     "bun": [120, (0.016, 0.028), 0.0080, 0.30, "back", 22, 10],

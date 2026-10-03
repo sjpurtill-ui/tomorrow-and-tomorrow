@@ -12,6 +12,7 @@ const Stage:=preload("res://scripts/hud/court_stage.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Looks:=preload("res://scripts/people_appearance.gd")
+const Acting:=preload("res://scripts/hud/court_acting.gd")
 
 const TILE:=Vector2i(300,360)
 const PEOPLES:=["kilnfold","thornbank","ochrestep"]
@@ -146,6 +147,17 @@ func _ready()->void:
 				for i in 12:await get_tree().process_frame
 				await RenderingServer.frame_post_draw
 				if capture:view.get_texture().get_image().save_png(dir+"faces_%s_%s.png" % [String(shot[0]),String(sitter[0])])
+			# one face in each mood, chest up (K's acting: the face and the set of the body)
+			if String(sitter[0])=="kilnfold":
+				for mood in ["joy","fear","anger","scorn"]:
+					Acting.set_mood(main,{mood:0.95})
+					for i in 50:await get_tree().process_frame
+					cam.call("frame_points",PackedVector3Array([head+Vector3.UP*0.03,head-Vector3.UP*0.62,head-Vector3.UP*0.31+side*0.30,head-Vector3.UP*0.31-side*0.30]),yaw,-3.0)
+					for i in 4:await get_tree().process_frame
+					await RenderingServer.frame_post_draw
+					if capture:view.get_texture().get_image().save_png(dir+"faces_mood_%s.png" % mood)
+				Acting.set_mood(main,{})
+				for i in 30:await get_tree().process_frame
 			row+=1
 		print("CAPTURE ",dir+"faces_sheet.png")
 	if failures.is_empty():

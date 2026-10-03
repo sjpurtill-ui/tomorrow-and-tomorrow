@@ -251,6 +251,33 @@ def lock(a, b, c, ra, rb, rc):
     return union_fn(prim(S.RoundCone(a, b, ra, rb)), prim(S.RoundCone(b, c, rb, rc)), k=0.004)
 
 
+def _edge_locks(head, s, style):
+    """A few clumped locks at the hair's edge, lying with its fall and lifting
+    a little off it at their tips: the outline breaks into locks, never into
+    quills. Per style: the temples, over the ears, the nape, the crown."""
+    spots = {
+        "cropped": [(48, 0.10, 0.10), (66, 0.06, 0.12), (96, 0.08, 0.14), (122, 0.10, 0.14), (150, 0.16, 0.14), (176, 0.20, 0.12)],
+        "balding": [(96, 0.08, 0.12), (124, 0.10, 0.12), (150, 0.14, 0.12), (176, 0.16, 0.10)],
+        "topknot": [(52, 0.10, 0.10), (92, 0.08, 0.12), (150, 0.12, 0.10)],
+        "bun": [(50, 0.10, 0.12), (90, 0.10, 0.14), (148, 0.12, 0.12)],
+        "tail": [(50, 0.10, 0.12), (90, 0.10, 0.14), (140, 0.12, 0.12)],
+        "braids": [(46, 0.10, 0.12), (78, 0.10, 0.12)],
+    }.get(style, [])
+    locks = []
+    for i, (th, above, length) in enumerate(spots):
+        for sd in (1.0, -1.0):
+            th_j = th + (4.0 if sd > 0 else -3.0) * ((i % 3) - 1)
+            H = float(head.hairline(np.asarray(th_j)))
+            a = head.point(th_j, H + above + length, 0.002 * s)
+            b = head.point(th_j + 6.0, H + above + length * 0.45, 0.006 * s)
+            e = head.point(th_j + 10.0, H - 0.02, 0.009 * s)
+            for q in (a, b, e):
+                q.x = float(head.c[0]) + sd * abs(q.x - float(head.c[0]))
+            locks.append(prim(S.RoundCone(a, b, 0.0062 * s, 0.0048 * s)))
+            locks.append(prim(S.RoundCone(b, e, 0.0048 * s, 0.0012 * s)))
+    return locks
+
+
 def hair_style(f, style):
     """A hair Piece for a style, or None for 'bald'."""
     head = Head(f)
@@ -384,6 +411,9 @@ def hair_style(f, style):
         hi = (hi[0] + 0.02, hi[1] + 0.02, hi[2] + 0.02)
     else:
         raise ValueError(style)
+    locks = _edge_locks(head, s, style)
+    if locks:
+        shell = union_fn(shell, *locks, k=0.004 * s)
     return Piece("hair_" + style, "HAIR", shell, shell, lo, hi, voxel=0.0022 * s, cover=False)
 
 

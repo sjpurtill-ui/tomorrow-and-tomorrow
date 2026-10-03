@@ -21,7 +21,7 @@ uniform vec3 slot_albedo[17];
 uniform vec4 slot_a[17];
 // grain, fill, stipple, card
 uniform vec4 slot_b[17];
-// flat, skin (painted face, skin's light), cover, unused
+// flat, skin (painted face, skin's light), glow (shines of itself), unused
 uniform vec4 slot_c[17];
 uniform vec3 key_dir = vec3(-0.35, 0.65, 0.68);
 uniform vec3 key_color : source_color = vec3(1.0, 0.97, 0.92);
@@ -32,6 +32,9 @@ uniform vec3 skin_terminator : source_color = vec3(0.30, 0.10, 0.05);
 uniform int cover_channel = 0;
 uniform float shadow_amount = 0.6;
 uniform float front_fill = 0.30;
+// The fire's light thrown back up from the floor, warm, under the chin and nose.
+uniform vec3 bounce_color : source_color = vec3(1.0, 0.60, 0.32);
+uniform float bounce = 0.16;
 instance uniform vec4 face_a = vec4(0.0);
 instance uniform vec4 face_b = vec4(0.0);
 instance uniform float dim = 1.0;
@@ -111,7 +114,7 @@ void fragment() {
 		base = paint_face(base, v_face, v_face2, face_a, face_b, slot_depth(albedo));
 	}
 	if (pb.w > 0.0) {
-		base *= (0.88 + 0.24 * v_card) * (0.86 + 0.28 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
+		base *= (0.94 + 0.12 * v_card) * (0.90 + 0.20 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
 	}
 	if (!flat_colour && pb.x > 0.0) {
 		float g = noise3(v_obj * 46.0) * 0.6 + noise3(v_obj * 13.0) * 0.4;
@@ -125,12 +128,20 @@ void fragment() {
 	ROUGHNESS = 1.0;
 	AO = mix(1.0, v_ao, 0.5);
 	AO_LIGHT_AFFECT = 0.2;
-	vec3 shade = skin ? skin_shade : other_shade;
+	float depth = skin ? slot_depth(albedo) : 0.0;
+	vec3 shade = skin ? mix(skin_shade, vec3(0.50, 0.56, 0.74), 0.55 * depth) : other_shade;
 	vec3 glow = base * shade * pb.y * dim;
 	float facing = clamp(dot(normalize(NORMAL), VIEW), 0.0, 1.0);
 	glow += base * key_color * front_fill * smoothstep(0.15, 0.85, facing) * dim;
 	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
-	glow += rim_color * pa.y * fres * 0.35;
+	// deep skin takes a cool rim from the sky, so its features part from each other
+	vec3 rim = skin ? mix(rim_color, vec3(0.62, 0.76, 1.0), depth) : rim_color;
+	glow += rim * (pa.y + 0.22 * depth) * fres * 0.35;
+	// the fire's light from the floor, under the chin, the nose and the brows
+	vec3 n_world = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	glow += base * bounce_color * bounce * (skin ? 2.0 : 0.8) * smoothstep(0.10, -0.60, n_world.y) * dim;
+	// the catch of light in the eye shines of itself; the whites a little
+	glow += albedo * pc.z * dim;
 	if (pa.w > 0.0) {
 		vec3 n = normalize(NORMAL);
 		vec3 key_view = normalize((VIEW_MATRIX * vec4(key_dir, 0.0)).xyz);
@@ -152,10 +163,18 @@ void light() {
 		bool skin = pc.y > 0.5;
 		float lit = smoothstep(-0.02, pa.x, ndl);
 		float half_lit = smoothstep(-0.42, -0.18, ndl) * 0.30;
+		if (skin) {
+			// skin in four planes of tone, so a head turns in the light
+			// (the deepest plane keeps a fifth of the light: skin is never a hole)
+			lit = 0.20 + 0.22 * smoothstep(-0.30, -0.22, ndl) + 0.30 * smoothstep(0.08, 0.16, ndl) + 0.28 * smoothstep(0.48, 0.56, ndl);
+			half_lit = 0.0;
+		}
 		float att = LIGHT_IS_DIRECTIONAL ? mix(1.0, ATTENUATION, shadow_amount) : ATTENUATION;
 		float tone = max(lit * att, half_lit * min(1.0, att * 1.5));
 		float edge = clamp(tone * (1.0 - tone) * 4.0, 0.0, 1.0);
-		vec3 tint = mix(skin ? skin_shade : other_shade, vec3(1.0), tone);
+		float sdepth = skin ? slot_depth(slot_albedo[s]) : 0.0;
+		vec3 shade_c = skin ? mix(skin_shade, vec3(0.50, 0.56, 0.74), 0.55 * sdepth) : other_shade;
+		vec3 tint = mix(shade_c, vec3(1.0), tone);
 		vec3 lc = LIGHT_COLOR;
 		vec3 term = vec3(0.0);
 		if (skin) {

@@ -433,7 +433,7 @@ def decal(name, body, outline, centre, offset, rings=3):
     return obj
 
 
-EYE = {"w": 0.034, "up": 0.0072, "up_f": 0.0080, "low": 0.0056, "tilt": 0.06}
+EYE = {"w": 0.038, "up": 0.0081, "up_f": 0.0090, "low": 0.0063, "tilt": 0.06}
 
 
 def _eye_curves(cx, cz, sd, s, female, n=12):
@@ -481,7 +481,7 @@ def _clip_to_eye(points, up, lo, sd):
 # (morphs eyes_left/right/up/down; the figure's left is +X). Across, the iris
 # reaches the corner; up and down, about half of it hides under a lid.
 GAZE = {"eyes_left": (1.0, 0.0), "eyes_right": (-1.0, 0.0), "eyes_up": (0.0, 1.0), "eyes_down": (0.0, -1.0)}
-GAZE_REACH = (0.0082, 0.0036)
+GAZE_REACH = (0.0092, 0.0040)
 
 
 def _gaze_keys(obj, make, s):
@@ -559,10 +559,10 @@ def build_face(f, body):
         # The iris and pupil are whole discs: the game draws them only over
         # the white (a stencil), so they can roll about inside the lids.
         def iris_at(dx, dz, ix=ix, iz=iz):
-            return decal("Eye_" + side, body, _oval(ix + dx, iz + dz, 0.0074 * s, 0.0080 * s, n=24), (ix + dx, iz + dz), 0.0016 * s, rings=2)
+            return decal("Eye_" + side, body, _oval(ix + dx, iz + dz, 0.0083 * s, 0.0089 * s, n=24), (ix + dx, iz + dz), 0.0016 * s, rings=2)
 
         def pupil_at(dx, dz, ix=ix, iz=iz):
-            return decal("EyePupil_" + side, body, _oval(ix + dx, iz + dz, 0.0034 * s, 0.0037 * s, n=16), (ix + dx, iz + dz), 0.0019 * s, rings=1)
+            return decal("EyePupil_" + side, body, _oval(ix + dx, iz + dz, 0.0038 * s, 0.0041 * s, n=16), (ix + dx, iz + dz), 0.0019 * s, rings=1)
         iris = iris_at(0.0, 0.0)
         _gaze_keys(iris, iris_at, s)
         iris["bone"] = "eye." + side
@@ -576,15 +576,15 @@ def build_face(f, body):
         up, lo = _eye_curves(cx, cz, sd, s, fem)
         lid = [(x, z + 0.0004 * s) for x, z in up]
         lid.append((up[-1][0] + sd * 0.0030 * s, up[-1][1] - 0.0012 * s))
-        widths = [(0.0014 + 0.0018 * math.sin(math.pi * min(1.0, i / (len(lid) - 1) * 1.1))) * s for i in range(len(lid))]
+        widths = [(0.0019 + 0.0029 * math.sin(math.pi * min(1.0, i / (len(lid) - 1) * 1.1))) * s for i in range(len(lid))]
         lidm = decal("EyeLid_" + side, body, _stroke_outline(lid, widths), lid[len(lid) // 2], 0.0020 * s, rings=1)
         lidm["bone"] = "eye." + side
         _gaze_keys(lidm, None, s)
         out["eyes"].append(lidm)
         hit, nor = surface_hit(body, Vector((cx, -1.0, cz)), Vector((0, 1, 0)))
         out["eye_center"][side] = hit if hit is not None else Vector((cx, -0.09 * s, cz))
-        r = 0.0017 * s
-        sx, sz = ix + sd * 0.0024 * s, iz + 0.0018 * s
+        r = 0.0022 * s
+        sx, sz = ix + sd * 0.0027 * s, iz + 0.0022 * s
 
         def shine_at(dx, dz, sx=sx, sz=sz):
             ring = [(sx + dx + r * math.cos(a * math.pi / 6), sz + dz + r * math.sin(a * math.pi / 6)) for a in range(12)]
@@ -601,7 +601,7 @@ def build_face(f, body):
             x = sd * (0.011 + 0.050 * u) * s
             arch = (0.0060 if fem else 0.0042) * math.sin(math.pi * min(1.0, u * 1.15)) - 0.0030 * u
             line.append((x, bz + arch * s))
-            widths.append(((0.0072 if not fem else 0.0056) * (1.0 - u) + 0.0022 * u) * s)
+            widths.append(((0.0094 if not fem else 0.0072) * (1.0 - u) + 0.0030 * u) * s)
         brow = decal("Brow_" + side, body, _stroke_outline(line, widths), line[3], 0.0011 * s, rings=2)
         brow["bone"] = "brow." + side
         out["brows"].append(brow)
@@ -767,9 +767,9 @@ def mood_morphs(f, mouth, brows):
                 else:
                     inner = max(0.0, 1.0 - (abs(x) - 0.011 * s) / (0.050 * s))
                     if name == "mood_worry":
-                        kv.co = Vector((x, y, z + 0.0034 * s * inner * inner - 0.0006 * s * (1 - inner)))
+                        kv.co = Vector((x, y, z + 0.0056 * s * inner * inner - 0.0010 * s * (1 - inner)))
                     else:
-                        kv.co = Vector((x - math.copysign(0.0010 * s * inner, x), y, z - 0.0026 * s * inner * inner + 0.0004 * s * (1 - inner)))
+                        kv.co = Vector((x - math.copysign(0.0017 * s * inner, x), y, z - 0.0044 * s * inner * inner + 0.0007 * s * (1 - inner)))
 
 
 EXPRESSIONS = ("smile", "frown", "brows_up", "brows_down", "brows_worried", "eyes_wide", "eyes_narrow", "blink",

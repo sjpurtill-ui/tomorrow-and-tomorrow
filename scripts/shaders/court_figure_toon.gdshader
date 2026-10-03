@@ -103,7 +103,7 @@ void fragment() {
 		base = paint_face(base, v_face, v_face2, face_a, face_b, skin_depth());
 	}
 	if (card > 0.0) {
-		base *= (0.88 + 0.24 * v_card) * (0.86 + 0.28 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
+		base *= (0.94 + 0.12 * v_card) * (0.90 + 0.20 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
 	}
 	if (strands > 0.0) {
 		float s = noise3(vec3(v_obj.x * 210.0, v_obj.y * 16.0, v_obj.z * 210.0)) * 0.65 + noise3(vec3(v_obj.x * 90.0, v_obj.y * 7.0, v_obj.z * 90.0)) * 0.35;

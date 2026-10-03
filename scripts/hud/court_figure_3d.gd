@@ -368,7 +368,7 @@ func _dress()->void:
 	var lit:=bool(look.get("lit",false))
 	var colours:={
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
-		"EYES":Color("22170f"),"EYE_WHITE":Color("e6dbc6"),"EYE_SHINE":Color("fbf6ea"),
+		"EYES":Color("120a06"),"EYE_WHITE":Color("e9dfcb"),"EYE_SHINE":Color("fffdf6"),
 		"IRIS":Color(look.get("eye_colour",Color("5a3a22"))),"PUPIL":Color("140d08"),
 		"MOUTH":Color("2a0d0a").lerp(skin.darkened(0.7),0.35),"HAIR_CARD":hair_colour,"LEATHER":Color(look.get("leather",Color("5b3b24"))),
 		"STUBBLE":skin.lerp(hair_colour,0.42).darkened(0.08),"WOOD":Color("6b4a2e"),"CLAY":Color("a0603a"),
