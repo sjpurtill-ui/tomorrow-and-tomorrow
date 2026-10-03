@@ -16,6 +16,7 @@ const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
+const Director:=preload("res://scripts/hud/court_director.gd")
 ## J's gore on the person's own figure (court_figure_gore.gd), when it is in.
 const GORE_PATH:="res://scripts/hud/court_figure_gore.gd"
 static var _gore:Script
@@ -203,10 +204,12 @@ func _walk_to(key:String,to:Vector3,time:float,arrive_clip:="")->void:
 
 ## Execution approaches use the same floor map as ordinary court walks.
 ## Current bodies, including a person already nudged by this scene, are blockers.
-func _walk_path(key:String,to:Vector3)->PackedVector3Array:
+func _walk_path(key:String,to:Vector3,settled:=false)->PackedVector3Array:
 	var b:=_body(key)
 	if b==null:return PackedVector3Array()
 	var from:=b.global_position
+	var f:Variant=_fig(key)
+	if settled and f!=null and f.spot!=null:from=f.spot.to_global(f.nudge)
 	var court:=_court()
 	if court==null:return PackedVector3Array([from,to])
 	var room:=Paths.room_of(court)
@@ -220,6 +223,7 @@ func _walk_path(key:String,to:Vector3)->PackedVector3Array:
 			var other:Variant=_fig(other_key);var body:=_body(other_key)
 			if other==null or body==null or other.leaving or not body.visible:continue
 			var at:=court.to_local(body.global_position)
+			if settled and other.spot!=null:at=court.to_local(other.spot.to_global(other.nudge))
 			people.append(Vector3(at.x,at.z,0.3))
 	var route:=Paths.route(room,Vector2(start.x,start.z),Vector2(goal.x,goal.z),people)
 	if route.is_empty():route=_seat_route(court,room,Vector2(start.x,start.z),Vector2(goal.x,goal.z),people)
@@ -227,6 +231,43 @@ func _walk_path(key:String,to:Vector3)->PackedVector3Array:
 	for at:Vector2 in route:out.append(court.to_global(Vector3(at.x,start.y,at.y)))
 	# An obstructed/no-route result must not turn into a straight hearth crossing.
 	return out
+
+## Before the director casts an authored helper, check their eventual court
+## mark. An arrival in the doorway does not make a trapped seat reachable.
+func prepare_support_roles(event:Dictionary)->bool:
+	var plan:=Director._exec_plan_of(method)
+	if plan.is_empty():return true
+	var v:=_body(victim);var f:Variant=_fig(victim)
+	if v==null:return false
+	var origin:=v.global_position
+	if f!=null and f.spot!=null:origin=f.spot.to_global(f.nudge)
+	origin.y=0.0
+	var yaw:=v.global_rotation.y
+	var rig:Variant=stage.get("rig")
+	if method in ["club","behead"] and rig!=null:yaw=deg_to_rad(float(rig.get("base_yaw"))+15.0)
+	var frame:=Transform3D(Basis(Vector3.UP,yaw),origin)
+	var choices:Dictionary={}
+	for role:String in plan.roles:
+		if role=="victim":continue
+		choices[role]=[]
+		var at:Array=plan.roles[role].get("at",[0,0,0])
+		var to:=frame*Vector3(at[0],at[1],at[2])
+		for key:String in stage.get("cast_order"):
+			var actor:Variant=_fig(key);var b:=_body(key)
+			if key==victim or actor==null or b==null or actor.leaving or not b.visible:continue
+			if Executions.is_child(actor.person):continue
+			var from:Vector3=actor.spot.to_global(actor.nudge) if actor.spot!=null else b.global_position
+			if Vector2(from.x-to.x,from.z-to.z).length()<0.25 or _walk_path(key,to,true).size()>1:
+				(choices[role] as Array).append(key)
+	event["reachable_roles"]=choices
+	if choices.is_empty():return true
+	var roles:=Director.execution_roles(event,stage.call("cast_list"),stage.get("facts"))
+	for role:String in choices:
+		var key:=String(roles.get("ex" if role=="executioner" else role,""))
+		if key.is_empty() or not key in choices[role]:return false
+	# An explicit adjudicated actor is never replaced by the visual casting.
+	var explicit:=String(event.get("ex",""))
+	return explicit.is_empty() or String(roles.ex)==explicit
 
 ## Seated marks deliberately lie on low benches. The normal floor grid cannot
 ## leave a deep bench with its small endpoint opening. Locally allow the seat
@@ -785,7 +826,16 @@ func _plan_start(args:Dictionary)->void:
 				var later:=_tween()
 				later.tween_interval(walk)
 				var clip:=String(r.clip)
-				later.tween_callback(func()->void:if is_instance_valid(b):Acting.play(b,clip,{"blend":0.2,"at":walk}))
+				var goal:=_plan_at(r.get("at",[0,0,0]))
+				later.tween_callback(func()->void:
+					if not is_instance_valid(b):return
+					var f:Variant=_fig(key)
+					if f!=null and f.has_method("_sync"):f.call("_sync")
+					if Vector2(b.global_position.x-goal.x,b.global_position.z-goal.z).length()>0.25:
+						# A new obstruction must not produce a swing at a distant seat.
+						if stage.has_method("skip_execution"):stage.call("skip_execution")
+						return
+					Acting.play(b,clip,{"blend":0.2,"at":walk}))
 		if r.has("clips"):_plan_sequence(key,r.clips as Array)
 	# the victim's clips tell when the body splits and the blood flies; the
 	# cook's, when the lid goes on

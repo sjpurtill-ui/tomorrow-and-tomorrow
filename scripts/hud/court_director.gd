@@ -2306,14 +2306,22 @@ static func _execution(ctx:Dictionary,out:Array)->void:
 
 ## Who does what: the one who carries it out (the engine's actor, else the
 ## boldest of our people), the cook (by the fire), the front row.
+static func execution_roles(event:Dictionary,cast:Array,facts:Dictionary)->Dictionary:
+	var ctx:=_context(event,normal_cast(cast,facts),normal_facts(facts),0,{})
+	return _exec_roles(ctx,String(event.get("victim","main")),String(event.get("ex","")))
+
+static func _exec_can_reach(ctx:Dictionary,role:String,key:String)->bool:
+	var choices:Dictionary=ctx.event.get("reachable_roles",{})
+	return not choices.has(role) or key in choices[role]
+
 static func _exec_roles(ctx:Dictionary,victim:String,ex_in:String)->Dictionary:
 	var ex:=ex_in
 	if ex=="" or ex==victim or _m(ctx,ex).is_empty():
-		var bold:Array=_people(ctx,[victim]).filter(func(m:Dictionary)->bool:return String(m.kind) in ["official","hearth_chief","guard","commoner"])
+		var bold:Array=_people(ctx,[victim]).filter(func(m:Dictionary)->bool:return String(m.kind) in ["official","hearth_chief","guard","commoner"] and _exec_can_reach(ctx,"executioner",String(m.key)))
 		bold.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.courage)>float(b.courage) if not is_equal_approx(float(a.courage),float(b.courage)) else int(a.index)<int(b.index))
 		ex=String((bold[0] as Dictionary).key) if not bold.is_empty() else ""
-	var cook:Array=_of_kind(ctx,["commoner","elder"],[victim,ex])
-	if cook.is_empty():cook=_people(ctx,[victim,ex])
+	var cook:Array=_of_kind(ctx,["commoner","elder"],[victim,ex]).filter(func(m:Dictionary)->bool:return _exec_can_reach(ctx,"cook",String(m.key)))
+	if cook.is_empty():cook=_people(ctx,[victim,ex]).filter(func(m:Dictionary)->bool:return _exec_can_reach(ctx,"cook",String(m.key)))
 	var front:Array=_people(ctx,[victim,ex]).filter(func(m:Dictionary)->bool:return not String(m.kind) in ["child","scribe"])
 	var v:=_m(ctx,victim)
 	front.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return absf(_where(a)-_where(v))<absf(_where(b)-_where(v)))

@@ -637,7 +637,14 @@ func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")
 	person["kind"]=String(person.get("kind",""))
 	var style:=how if how!="" else Executions.style(person)
 	if style=="off" or Executions.is_child(person):return false
-	_exec=ExecStage.new();_exec.name="Execution"
+	var who:=name_text if name_text!="" else String(person.get("name",""))
+	var data:={"method":method_id,"victim":victim_key,"ex":ex_key,"style":style,"name":who,"caption":Executions.caption(method_id,who)}
+	var scene:=ExecStage.new();scene.stage=self;scene.method=method_id;scene.victim=victim_key
+	if not scene.prepare_support_roles(data):
+		scene.free()
+		exec_done=true
+		return false # Keep the adjudicated identity and use the sober exit.
+	_exec=scene;_exec.name="Execution"
 	add_child(_exec)
 	_exec.begin(self,method_id,victim_key,style)
 	_exec.finished.connect(func()->void:
@@ -650,8 +657,7 @@ func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")
 		_place_caption();_reclear_bubbles())
 	exec_done=false
 	exec_method=method_id;exec_victim=victim_key
-	var who:=name_text if name_text!="" else String(person.get("name",""))
-	event("execution",{"method":method_id,"victim":victim_key,"ex":ex_key,"style":style,"name":who,"caption":Executions.caption(method_id,who)})
+	event("execution",data)
 	return true
 
 ## A click: the execution to its end now (the head where it lands, the
