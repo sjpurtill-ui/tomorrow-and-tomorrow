@@ -92,28 +92,44 @@ static func _has_key(keys:Dictionary,key:String)->bool:
 static func _ensure_geology_cell(grid:Vector2i,world_keys:Variant=null)->void:
 	var keys:Dictionary=world_keys if world_keys is Dictionary else _world_keys()
 	var state:=WorldSimulation.state
+	for deposit:Dictionary in cell_occurrences(grid,keys):
+		var key:=String(deposit.world_key)
+		if not WorldSimulation.geography_stock.has(key):WorldSimulation.geography_stock[key]={"remaining":float(deposit.initial_amount),"initial_amount":float(deposit.initial_amount),"last_day":int(state.elapsed_days)}
+		deposit.remaining=WorldSimulation.geography_stock[key].remaining
+		state.resource_deposits.append(deposit)
+		keys[key]=true
+
+## The deposits a 16 km geology cell holds, by the one rule of the world's
+## geology (keyed by place and seed, never by owner), made but not added to
+## the society's list and with the world's reserve untouched. Kinds whose key
+## is in `skip` are left out. Ids number on from the list's present size, as
+## _ensure_geology_cell adds them. Searchers' finds (resource_system.gd
+## _land_new_ground_world) read a cell this way and add only what they find.
+static func cell_occurrences(grid:Vector2i,skip:Dictionary={})->Array[Dictionary]:
+	var state:=WorldSimulation.state
+	var index:=state.resource_deposits.size()
 	var center:=Vector2((grid.x+0.5)*16.0,(grid.y+0.5)*16.0)
 	var context:=preload("res://scripts/civilization_day.gd").context(center)
 	var profile:Dictionary=context.environment_profile
 	var potentials:Dictionary=profile.get("resource_potentials",{})
+	var found:Array[Dictionary]=[]
 	for resource:String in WorldSimulation.resources.catalog:
 		if resource in ["Freshwater","Timber","Fiber Plants"]:continue
 		var key:="%d:%d:%s" % [grid.x,grid.y,resource]
-		if _has_key(keys,key):continue
+		if _has_key(skip,key):continue
 		var rng:=RandomNumberGenerator.new();rng.seed=hash("%d:%s" % [state.world_seed,key])
 		var potential:=float(potentials.get(resource,0.0))
 		if potential<0.14 or rng.randf()>0.08+potential*0.58:continue
 		var point:=center+Vector2(rng.randf_range(-7.0,7.0),rng.randf_range(-7.0,7.0))
 		if not WorldSimulation.world._scout_land_at(point):continue
 		var amount:=rng.randf_range(700.0,8500.0)*(0.45+potential)
-		var deposit:=WorldSimulation.resources._deposit(resource,Vector3(point.x,0.0,point.y),rng.randf_range(0.38,0.82)+potential*0.58,amount,state.resource_deposits.size(),"world_geology",potential,String(profile.get("signature","")))
+		var deposit:=WorldSimulation.resources._deposit(resource,Vector3(point.x,0.0,point.y),rng.randf_range(0.38,0.82)+potential*0.58,amount,index,"world_geology",potential,String(profile.get("signature","")))
 		deposit["world_key"]=key
 		if WorldSimulation.world._position_is_revealed(point) and resource in WorldSimulation.resources.FOUNDING_SURFACE_RESOURCES:
 			WorldSimulation.resources._seed_founding_surface_recognition(deposit)
-		if not WorldSimulation.geography_stock.has(key):WorldSimulation.geography_stock[key]={"remaining":amount,"initial_amount":amount,"last_day":int(state.elapsed_days)}
-		deposit.remaining=WorldSimulation.geography_stock[key].remaining
-		state.resource_deposits.append(deposit)
-		keys[key]=true
+		found.append(deposit)
+		index+=1
+	return found
 
 static func survey_occurrence(resource:String,position:Vector2,record_survey:bool=true)->Dictionary:
 	if not WorldSimulation.resources.recognition_ready(resource):return {}

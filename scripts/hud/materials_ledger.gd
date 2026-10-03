@@ -16,6 +16,8 @@ var _city:Label
 var _manage:Label
 var _supply:Label
 var _slows:Label
+## The searched land: how well, what it gives cutting and digging, the find odds.
+var _land:Label
 ## Per material row: {voice, trend, spark, details:[Label]}.
 var _rows:Array=[]
 ## Per shipment on the road: {voice, when}.
@@ -33,6 +35,7 @@ func setup(block:Dictionary)->void:
 	_manage=_voice("",18);manager.add_child(_manage)
 	_supply=_line(manager,"",13,T.BODY);_supply.name="SupplySentence"
 	if not String(Words.supply(float(data.storage),float(data.capacity),data.hauling).slows).is_empty():_slows=_line(manager,"",13,tone_color("warn"));_slows.name="SupplySlows"
+	if not String(data.get("land","")).is_empty():_land=_line(manager,"",13,T.MUTED);_land.name="SearchedLand"
 	_rule(self)
 	for item:Dictionary in data.rows:
 		var refs:={"details":[]}
@@ -89,7 +92,7 @@ static func shape_of(block:Dictionary)->Array:
 		rows.append([String(item.key),open,(item.get("details",[]) as Array).size() if open else -1])
 	var supply:=Words.supply(float(block.get("storage",0.0)),float(block.get("capacity",0.0)),block.get("hauling"))
 	var leader:Dictionary=block.get("leader",{})
-	return [Portrait.picture_key(leader) if not leader.is_empty() else [],_who(block),bool(block.get("managed",true)),String(block.get("focus","")),String(supply.slows).is_empty(),rows,(block.get("incoming",[]) as Array).size(),bool(block.get("can_direct",false))]
+	return [Portrait.picture_key(leader) if not leader.is_empty() else [],_who(block),bool(block.get("managed",true)),String(block.get("focus","")),String(supply.slows).is_empty(),String(block.get("land","")).is_empty(),rows,(block.get("incoming",[]) as Array).size(),bool(block.get("can_direct",false))]
 
 static func _who(block:Dictionary)->String:
 	var leader:Dictionary=block.get("leader",{})
@@ -103,6 +106,7 @@ func _fill()->void:
 	var supply:=Words.supply(float(data.storage),float(data.capacity),data.hauling)
 	_put(_supply,String(supply.sentence))
 	if _slows!=null:_put(_slows,String(supply.slows))
+	if _land!=null:_put(_land,String(data.get("land","")))
 	for index in mini(_rows.size(),(data.rows as Array).size()):
 		var item:Dictionary=data.rows[index]
 		var refs:Dictionary=_rows[index]

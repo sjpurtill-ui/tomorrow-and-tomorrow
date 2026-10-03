@@ -217,6 +217,8 @@ static func survey()->Dictionary:
 			return 0.55*effort*_method(deposit,"survey")*speed)
 		lines.append(_line("Measuring what is found","next in %s" % _days(measure),
 			"%s found and waiting to be measured (%s). Searchers work on all of them at once; more searchers measure each sooner, and nobody else can do it." % [_cap(_count(found.size())),_names(found)],"good"))
+	# Searched land and finds (resource_system.gd land_survey): its own rule and odds.
+	_land_lines(lines)
 	# The claim: survey share × 16 points of reach (settlement_model.gd).
 	var able:=_able()
 	var share:=clampf(searchers/maxf(1.0,able*CLAIM_SEARCHERS),0.0,1.0)
@@ -230,6 +232,23 @@ static func survey()->Dictionary:
 		"Four tenths of the cunning shown on the Standing page comes from people out watching and finding, full when %s search; the rest is the chief scout's skill. It changes nothing else yet." % _count(ceili(pop*CUNNING_SEARCHERS)),"good" if watching>0.0 else "plain"))
 	lines.append(_cost_line("Survey",searchers))
 	return {"lead":"Searchers walk the country for useful materials and measure what they find, so carriers and builders can open it for work. They do not scout for strangers; scouting parties are sent from court.","lines":lines}
+
+## The searched land's two lines, for the whole people as every line here is
+## (resource_system.gd realm_land_reading: each town's own land, averaged by
+## its people): how well it is searched and what it gives cutting and
+## digging, and the chance of a find in the next month; each with what ten
+## more searchers would do.
+static func _land_lines(lines:Array)->void:
+	var R=WorldSimulation.resources
+	var land:Dictionary=R.realm_land_reading()
+	if not bool(land.get("settled",false)):return
+	var plus:Dictionary=land.plus_ten
+	var cover:=roundi(float(land.cover)*100.0)
+	lines.append(_line("Searched land","%d in 100" % cover,
+		"Cutters and diggers get %s from it (×0.75 unsearched, up to ×1.25). One searcher for every 60 people holds it near 60; it is %s. Ten more searching would take it toward %d (×%s)." % [String(R.land_yield_words(land)),String(R.land_heading(land)),roundi(float(plus.target)*100.0),_two(float(plus.yield))],"good" if cover>=50 else "plain"))
+	var odds:=String(R.odds_words(float(land.find_month)))
+	lines.append(_line("Finds","%s a month" % odds,
+		"A find in the next month: %s. A find is a deposit not yet measured, new ground, or a richer part of one being worked. Ten more searching: %s." % [odds,String(R.odds_words(float(plus.find_month)))],"good" if float(land.find_month)>0.0 else "plain"))
 
 ## The deposits by what searchers can still do: hidden ones the people could
 ## recognise, and found ones waiting to be measured.
@@ -296,6 +315,11 @@ static func extraction()->Dictionary:
 	var tool_factor:=0.55+tools*0.75
 	lines.append(_line("Tools in hand","×%s" % _two(tool_factor),
 		"Each cutter's work goes ×%s with today's tools: ×0.69 with the poorest, up to ×1.38 with the best. Makers raise it." % _two(tool_factor),"good" if tool_factor>=1.0 else "plain"))
+	# Searched land: × (0.75 + 0.5 × how well it is searched) (resource_system.gd land_yield).
+	var land:Dictionary=WorldSimulation.resources.realm_land_reading()
+	if bool(land.get("settled",false)):
+		lines.append(_line("Searched land","×%s" % _two(float(land.applied)),
+			"Cutters and diggers get %s from land searched %d in 100: ×0.75 where nobody has searched, up to ×1.25 where all of it is known. Searchers raise it." % [String(WorldSimulation.resources.land_yield_words(land)),roundi(float(land.cover)*100.0)],"good" if float(land.applied)>=1.0 else "bad"))
 	var waiting:=0
 	for deposit:Dictionary in _deposits_by_stage().measured:
 		if String(deposit.get("resource",""))!="Freshwater":waiting+=1
