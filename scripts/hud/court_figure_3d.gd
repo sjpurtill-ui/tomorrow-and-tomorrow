@@ -101,6 +101,12 @@ var _gaze_tween:Tween
 var _gaze_on:=false
 ## A seat the set gives them (its height): their own stool is not shown.
 var seat_height:=-1.0
+## The acting may sit on the floor over this figure's ordinary seated clip.
+## Its unskinned stool must not remain inside the lowered torso.
+var floor_seated:=false:
+	set(value):
+		floor_seated=value
+		_props_for(clip)
 
 static func manifest()->Dictionary:
 	if _manifest.is_empty():
@@ -380,6 +386,7 @@ func _dress()->void:
 	for mesh_node in _parts:
 		var part:=String(mesh_node.name)
 		var shown:=part in FACE_PARTS or part==hair or part==beard or (part.begins_with(outfit+"_") and not part in hidden_pieces) or part==String(PROPS.get(stance,"-"))
+		if part=="prop_stool" and (floor_seated or seat_height>=0.0):shown=false
 		mesh_node.visible=shown
 		if (not shown and not part in CARRIED.values()) or mesh_node.mesh==null:continue
 		# In a lit court they cast shadows (not the paint on the skin).
@@ -511,7 +518,7 @@ func _props_for(name:String)->void:
 	var holding:=name==stance or name==stance+"_talk"
 	for mesh_node in _meshes:
 		var part:=String(mesh_node.name)
-		if part.begins_with("prop_") and not part in CARRIED.values():mesh_node.visible=holding and part==held and not (part=="prop_stool" and seat_height>=0.0)
+		if part.begins_with("prop_") and not part in CARRIED.values():mesh_node.visible=holding and part==held and not (part=="prop_stool" and (floor_seated or seat_height>=0.0))
 
 func _mesh_named(part:String)->MeshInstance3D:
 	for mesh_node in _meshes:
