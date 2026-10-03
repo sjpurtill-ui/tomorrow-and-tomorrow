@@ -82,6 +82,12 @@ func _execute(director:Node)->void:
 	await _wait(2.0)
 	print("EXEC method=",modal.court_stage.exec_method if is_instance_valid(modal.court_stage) else "")
 	await _wait(16.5)
+	# Entering cast members can delay the first beat. Wait for the actual end,
+	# then record recovery as well, instead of truncating a longer arrival.
+	var finish_deadline:=Time.get_ticks_msec()+30000
+	while not bool(review_stage.exec_done) and Time.get_ticks_msec()<finish_deadline:
+		await _wait(0.25)
+	await _wait(3.0)
 	print("MARK end")
 	print("EXEC REVIEW saw_execution=",saw_execution," done=",review_stage.exec_done," things=",seen_things.keys())
 	if not saw_execution:_fail("the order never started an execution")
