@@ -15,12 +15,19 @@ const Executions:=preload("res://scripts/hud/court_executions.gd")
 
 var only:="club"
 var tier:=0
+var frame_dir:=""
+var frame_index:=0
+var review_stage:Control
 
 func _ready()->void:
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--only="):only=arg.trim_prefix("--only=")
 		if arg.begins_with("--tier="):tier=int(arg.trim_prefix("--tier="))
+		if arg=="--capture-frames":frame_dir="res://reports/court_execution_review/"
 	capture=DisplayServer.get_name()!="headless"
+	if not frame_dir.is_empty():
+		frame_dir=ProjectSettings.globalize_path(frame_dir+"%s-tier%d/" % [only,tier])
+		DirAccess.make_dir_recursive_absolute(frame_dir)
 	Backdrop.tier_override=tier
 	_setup_world()
 	if only=="behead" and not GameState.known_discoveries.has("bronze_alloying"):GameState.known_discoveries.append("bronze_alloying")
@@ -37,7 +44,16 @@ func _ready()->void:
 	get_tree().quit(0 if failures.is_empty() else 1)
 
 func _wait(seconds:float)->void:
-	await get_tree().create_timer(seconds).timeout
+	if frame_dir.is_empty() or not capture:
+		await get_tree().create_timer(seconds).timeout
+		return
+	var deadline:=Time.get_ticks_msec()+int(seconds*1000.0)
+	while Time.get_ticks_msec()<deadline:
+		await get_tree().create_timer(0.25).timeout
+		if is_instance_valid(review_stage):
+			await RenderingServer.frame_post_draw
+			review_stage.view3d.get_texture().get_image().save_png(frame_dir+"frame_%04d.png" % frame_index)
+			frame_index+=1
 
 func _execute(director:Node)->void:
 	var audience:=Hall.debug_force("petition")
@@ -45,6 +61,7 @@ func _execute(director:Node)->void:
 	var id:=String(audience.id)
 	var modal:Control=director.open_audience(id)
 	await _wait_scene(modal,id,1)
+	review_stage=modal.court_stage
 	print("MARK opened")
 	await _wait(4.0)
 	var name:=String((Hall.find(id).get("speaker",{}) as Dictionary).get("name",""))
@@ -60,3 +77,4 @@ func _execute(director:Node)->void:
 	print("EXEC method=",modal.court_stage.exec_method if is_instance_valid(modal.court_stage) else "")
 	await _wait(16.5)
 	print("MARK end")
+	if not frame_dir.is_empty():print("COURT_EXECUTION_REVIEW wrote ",frame_index," frames to ",frame_dir)
