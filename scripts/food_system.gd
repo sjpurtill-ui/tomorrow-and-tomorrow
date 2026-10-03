@@ -28,10 +28,11 @@ const CULTIVATION_YIELD:=5.65
 ## worker-day brings HARVEST_SETTLED of the founding yields by
 ## HARVEST_SETTLED_YEAR (linear from the founding; the calendar's age, the same
 ## for every people). The founding decades keep the age's usual share on food
-## (about 40 in 100); by years 300-1200 the leaders keep 34-39 in 100 on food,
-## near the documented peoples' least (benchmarks_*.json food_labor_share: 35
-## the least plausible at year 300), where the founding yields kept 27-30.
-const HARVEST_SETTLED:=0.8
+## (about 40 in 100, as before); by years 300-1200 the leaders keep 35-40 in 100
+## on food, at or above the documented peoples' least (benchmarks_*.json
+## food_labor_share: 35 the least plausible at year 300), where the founding
+## yields kept 27-30.
+const HARVEST_SETTLED:=0.77
 const HARVEST_SETTLED_YEAR:=200.0
 
 ## What a worker-day brings at `year` against the founding yields (1 at the

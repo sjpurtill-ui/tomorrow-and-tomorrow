@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 ## of the births they did; a lead asks a third of the goods it did; a watch past 6 in 100 of the workers costs as extra
 ## learners do; carers ease crowding; daughter towns claim less new land; every
 ## non-learning path learns as the balanced one does; the harvest settles from
-## the founding yields so the leaders keep 34-39 in 100 on food from year 300.
+## the founding yields so the leaders keep 35-40 in 100 on food from year 300.
 ## The same rules for every people.
 const Society:=preload("res://scripts/society_model.gd")
 const EarlyCare:=preload("res://scripts/early_life_conditions.gd")
@@ -198,14 +198,14 @@ func test_every_path_but_learning_keeps_the_balanced_share_of_learners()->void:
 # --- 7. The harvest settles from the founding yields --------------------------------------
 
 ## The founding decades keep the founding yields; the harvest settles to
-## 0.8 of them by year 200 (the leaders then keep 34-39 in 100 on food).
+## 0.77 of them by year 200 (the leaders then keep 35-40 in 100 on food).
 func test_the_harvest_settles_from_the_founding_yields_by_year_200()->void:
 	assert_float(Food.BASE_SUBSISTENCE_YIELD_CALIBRATION).is_equal_approx(1.34,0.000001)
 	assert_float(Food.CULTIVATION_YIELD).is_equal_approx(5.65,0.000001)
 	assert_float(Food.harvest_settled(0.0)).is_equal(1.0)
-	assert_float(Food.harvest_settled(50.0)).is_equal_approx(0.95,0.000001)
-	assert_float(Food.harvest_settled(200.0)).is_equal_approx(0.8,0.000001)
-	assert_float(Food.harvest_settled(900.0)).is_equal_approx(0.8,0.000001)
+	assert_float(Food.harvest_settled(50.0)).is_equal_approx(1.0-0.23*0.25,0.000001)
+	assert_float(Food.harvest_settled(200.0)).is_equal_approx(0.77,0.000001)
+	assert_float(Food.harvest_settled(900.0)).is_equal_approx(0.77,0.000001)
 	var source:=FileAccess.get_file_as_string("res://scripts/food_system.gd")
 	assert_str(source).contains("workers*cultivation_weight*CULTIVATION_YIELD*harvest_settled(")
 	assert_str(source).contains("var wild_yield:=BASE_SUBSISTENCE_YIELD_CALIBRATION*harvest_settled(")

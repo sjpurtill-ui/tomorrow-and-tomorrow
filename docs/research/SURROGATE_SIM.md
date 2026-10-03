@@ -104,9 +104,9 @@ The suite's flags on this revision: the leaders' food work is 29-33% at years 30
 
 ### Balance P2 (2026-10-03)
 
-The surrogate reads P2 from the game: `TERRITORY_SLOPE`, `CARER_CROWDING` (crowding eased by carers), `CULTIVATION_YIELD`, `WATCH_SUSTAINABLE` and `WATCH_UPKEEP` (a watch past 6 in 100 of the able costs as extra learners do), the learners' births upkeep (−0.7), `LEAD_GOODS_YEARS` (60) and the equal learning caps. Absent constants fall back to the rules before P2, so `SIM_GAME_REV=<older main>` still reproduces that main.
+The surrogate reads P2 from the game: `TERRITORY_SLOPE`, `CARER_CROWDING` (crowding eased by carers), the settling harvest (`HARVEST_SETTLED` 0.77 of the founding yields by `HARVEST_SETTLED_YEAR` 200, `FoodSystem.harvest_settled`), the watch's upkeep (`WATCH_FREE_SHARE` of the people or the towns' guard free, `WATCH_UPKEEP` on `WATCH_UPKEEP_KEYS`), the learners' births upkeep (−0.7), `LEAD_GOODS_YEARS` (60) and the equal learning caps. Absent constants fall back to the rules before P2, so `SIM_GAME_REV=<older main>` still reproduces that main.
 
-Truth: the five 15-year path runs were re-recorded on the P2 branch (one engine at a time, 144–165 s each while the fast sim shared the machine). With the lower yields the surrogate's food work ran 7–11 points over the engine's; a fitted `harvest_mult` (1.1) now stands in for what the engine's harvest gets that the surrogate leaves out (founding traditions, progression and season modifiers, the gathering lever, seed coverage), and the re-planning rate is held at 1. `check.py --strict` passes: 5 runs, score 22.9, two known gaps (food days).
+Truth: six 15-year runs, the five path runs plus `avg_balanced` (the probe's average site, between good and poor), recorded on the P2 branch one engine at a time (103–121 s each). A fitted `harvest_mult` (1.1, best on both sites) stands in for what the engine's harvest gets that the surrogate leaves out (founding traditions, progression and season modifiers, the gathering lever, seed coverage); the re-planning rate is held at 1. `check.py --strict` passes: 6 runs, five known gaps (food days; the first years' food work on growth, war and the average site; the learning path's line mix, production 21 against 15 of 144).
 
 ## What it models
 
