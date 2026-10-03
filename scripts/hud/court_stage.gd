@@ -38,6 +38,7 @@ const Voice:=preload("res://scripts/character_voice.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
+const Prewarm:=preload("res://scripts/hud/court_prewarm.gd")
 
 const MAIN:="main"
 const BUBBLE_PAPER:=Color("fbf4e4")
@@ -174,6 +175,8 @@ var _event_weight:=1
 var _event_end:=0.0
 ## Whose face the camera has gone in on (bubbles keep off it).
 var _focus_key:=""
+## The shot the stage last asked for ("wide", "push_in", "two_shot", ...).
+var _shot_name:="wide"
 var _beat_sets:Array=[]
 ## What the engine says about the hall now (the Court fills it): era, season,
 ## stores_days, hungry, sick, at_war, love, dread, mood, offer.
@@ -374,6 +377,8 @@ func _init()->void:
 	resized.connect(_on_resized)
 
 func _ready()->void:
+	# (the court's warm-up keeps its worker out of an open court's way)
+	add_to_group("court_stage")
 	if sound!=null and _sound==null:
 		var made:Variant=sound.call("attach",self)
 		if made is Node:_sound=made
@@ -444,6 +449,8 @@ func _make_view()->void:
 ## hall's view, its camera in place of the flat one, its key light on every
 ## figure. Call before anyone is added. false (nothing changes) without sets.
 func use_set(era_id:String,set_facts:Dictionary={})->bool:
+	# A clip library still being read by the warm-up is finished first.
+	Prewarm.settle()
 	if not three_d or not use_sets or court_set!=null or view3d==null or not CourtSet.available():return false
 	court_set=CourtSet.build(era_id,set_facts)
 	if court_set==null:return false
@@ -491,8 +498,13 @@ func frame_cast(time:=0.0)->void:
 	# A shot still holding (a push-in on the one before the god) is not cut
 	# back to everyone by a newcomer or a resize.
 	if _now()<_shot_until and _shot_weight>=2 and time>0.0:return
+	_frame_all(time)
+
+## Everyone standing before the god, the one before the god leading.
+func _frame_all(time:float)->void:
 	_focus_key=""
-	if rig==null:return
+	_shot_name="wide"
+	if rig==null or court_set==null:return
 	rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
 	var subjects:=[]
 	var lead:Variant=null
@@ -1200,8 +1212,16 @@ func _glances()->void:
 		if main!=null and main.body3d!=null and String(row[0])!=MAIN:points.append(main.body3d.global_position+Vector3(0.0,1.0,0.0))
 		Acting.set_glance_points(f.body3d,points)
 
+## The stage's clock: the game's own time, so shot holds, arrivals in single
+## file and the room's life keep step with the beats' tweens, also under the
+## movie writer's fixed rate. It is one idle tween's elapsed time (nothing of
+## the stage's own runs per frame); 0 until the stage is in the tree.
+var _clock:Tween
 func _now()->float:
-	return float(Time.get_ticks_msec())/1000.0
+	if _clock==null or not _clock.is_valid():
+		if not is_inside_tree():return 0.0
+		_clock=create_tween();_clock.tween_interval(1.0e9)
+	return _clock.get_total_elapsed_time()
 
 func _ambient_tick()->void:
 	if not is_visible_in_tree():return
@@ -1402,22 +1422,29 @@ func shot(name:String,args:Dictionary={})->void:
 		_shot_weight=weight
 		_shot_until=maxf(_event_end,_now()+1.0)
 		_focus_key=String(args.get("target","")) if name in ["push_in","reaction"] else ""
+		_shot_name=name
 	var target:=figure(String(args.get("target","")))
 	var body:Node3D=target.body3d if target!=null and target.body3d!=null else null
 	match name:
-		"wide","home":rig.call("wide",[],float(args.get("time",0.9)))
+		"wide","home":
+			_frame_all(float(args.get("time",0.9)))
+			_shot_name=name
 		"two_shot":
 			var a:=figure(String(args.get("a","")));var b:=figure(String(args.get("b","")))
 			if a!=null and b!=null and a.body3d!=null and b.body3d!=null:
-				# An envoy and their company: all of them, from the hall's own
-				# side (the camera does not swing round behind our people), the
-				# envoy leading; nobody between them and the lens.
-				if a.role in [MAIN,"attendant"] and b.role in [MAIN,"attendant"] and a.spot!=null and b.spot!=null:
-					var party:=[]
-					for key in cast_order:
-						var p:=figure(key)
-						if p!=null and not p.leaving and p.spot!=null and p.role in [MAIN,"attendant"]:party.append(p.spot)
-					rig.call("wide",party,float(args.get("time",0.8)),a.spot)
+				# Two together, from the hall's own side: the camera keeps the
+				# room's angle (it never swings round behind our people) and
+				# closes on the pair, the first leading. An envoy and their
+				# company come together as one party.
+				if a.spot!=null and b.spot!=null:
+					var pair:=[a.spot,b.spot]
+					if a.role in [MAIN,"attendant"] and b.role in [MAIN,"attendant"]:
+						pair=[]
+						for key in cast_order:
+							var p:=figure(key)
+							if p!=null and not p.leaving and p.spot!=null and p.role in [MAIN,"attendant"]:pair.append(p.spot)
+					rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
+					rig.call("wide",pair,float(args.get("time",0.8)),a.spot)
 				else:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
 			# A close-up (head and shoulders) for the god's wrath on them and
@@ -1685,8 +1712,7 @@ func _layout_set(animate:bool)->void:
 ## Is the set's camera on everyone (not pushed in on someone)?
 func _wide_now()->bool:
 	if rig==null:return true
-	var now:Variant=rig.get("current_shot") if rig.get("current_shot")!=null else rig.get("shot")
-	return now==null or String(now) in ["wide","still",""]
+	return _shot_name in ["wide","home","still",""]
 
 ## Which name plates show in the modelled court: the one before the god's,
 ## and the one speaking now.
@@ -1987,7 +2013,7 @@ func _place_caption()->void:
 	# reaction), they fill the lower frame: the caption goes to the top band,
 	# under the god's line, never over the one in the shot.
 	var face:=_focus_face()
-	var gone_in:=court_set!=null and not _wide_now()
+	var gone_in:=court_set!=null and _shot_name in ["push_in","two_shot","reaction"]
 	if gone_in or (face.size.x>0.0 and Rect2(_caption.position,_caption.size).intersects(face)):
 		var high:=top_inset+6.0+(_god.size.y+6.0 if is_instance_valid(_god) and _god.visible else 0.0)
 		_caption.position.y=round(high)

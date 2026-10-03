@@ -438,3 +438,36 @@ func test_bubbles_never_lie_on_each_other_and_the_caption_keeps_off_the_shot()->
 	var cap:Rect2=stage._caption.get_rect()
 	assert_float(cap.position.y).override_failure_message("caption at %s during a push-in" % cap).is_less(stage.size.y*0.4)
 	assert_bool(cap.intersects(god)).is_false()
+
+
+func test_two_together_are_framed_from_the_halls_own_side_on_the_games_clock()->void:
+	# A two-shot of two of our own keeps the room's angle (the camera does
+	# not swing round behind anyone), and the shot's hold runs on the game's
+	# clock, not the wall's (a movie at a fixed rate keeps step).
+	if not _ready_or_skip():return
+	Stage.directing=true
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var pair:=[]
+	for key in stage.cast_order:
+		var f:Stage.Figure=stage.figure(key)
+		if f!=null and f.role=="court" and f.spot!=null and f.body3d!=null:pair.append(key)
+	if pair.size()<2:return
+	stage.shot("two_shot",{"a":pair[0],"b":pair[1],"weight":4})
+	stage.settle()
+	var yaw:=rad_to_deg(stage.camera.global_rotation.y)
+	var base:=float(stage.rig.get("base_yaw"))
+	assert_float(absf(wrapf(yaw-base,-180.0,180.0))).override_failure_message("the camera turned to %.1f from the hall's %.1f" % [yaw,base]).is_less(3.0)
+	# held on the game's clock: a lighter shot does not cut it while it holds
+	var held_until:float=stage._shot_until
+	assert_float(held_until).is_greater(stage._now())
+	# the game stopped (time scale 0): the wall goes on, the stage's clock does not
+	var before:float=stage._now()
+	Engine.time_scale=0.0
+	for i in 5:await await_idle_frame()
+	var stopped:float=stage._now()
+	Engine.time_scale=1.0
+	assert_float(stopped).is_equal_approx(before,0.02)
+	for i in 3:await await_idle_frame()
+	assert_float(stage._now()).is_greater(before)

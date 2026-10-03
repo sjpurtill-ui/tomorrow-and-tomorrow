@@ -237,31 +237,46 @@ static func _draw_part(room:Room,hard:PackedByteArray,part:Node3D,top:Node3D)->v
 			var arrays:=mi.mesh.surface_get_arrays(s)
 			if arrays.is_empty():continue
 			var verts:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+			var world:PackedVector3Array=xf*verts
 			var index:PackedInt32Array=arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX]!=null else PackedInt32Array()
-			var world:=PackedVector3Array();world.resize(verts.size())
-			for i in verts.size():world[i]=xf*verts[i]
-			var count:=index.size() if not index.is_empty() else world.size()
+			if index.is_empty():
+				index.resize(world.size())
+				for i in world.size():index[i]=i
+			# Which vertices lie in the band (most of a set lies outside it).
+			var inband:=PackedByteArray();inband.resize(world.size())
+			for i in world.size():
+				var y:=world[i].y
+				if y>=BAND_LOW and y<=BAND_HIGH:inband[i]=1
 			var t:=0
+			var count:=index.size()
 			while t+2<count:
-				var a:=world[index[t] if not index.is_empty() else t]
-				var b:=world[index[t+1] if not index.is_empty() else t+1]
-				var c:=world[index[t+2] if not index.is_empty() else t+2]
+				var ia:=index[t];var ib:=index[t+1];var ic:=index[t+2]
 				t+=3
-				if maxf(a.y,maxf(b.y,c.y))<BAND_LOW or minf(a.y,minf(b.y,c.y))>BAND_HIGH:continue
+				if inband[ia]==0 and inband[ib]==0 and inband[ic]==0:
+					# none in the band: only a face that spans it (a post) counts
+					var lo:=minf(world[ia].y,minf(world[ib].y,world[ic].y))
+					var hi:=maxf(world[ia].y,maxf(world[ib].y,world[ic].y))
+					if hi<BAND_LOW or lo>BAND_HIGH:continue
+				var a:=world[ia];var b:=world[ib];var c:=world[ic]
 				_triangle(room,hard,Vector2(a.x,a.z),Vector2(b.x,b.z),Vector2(c.x,c.z))
 
 ## A triangle's floor print: its edges, and its inside when it has one.
 static func _triangle(room:Room,hard:PackedByteArray,a:Vector2,b:Vector2,c:Vector2)->void:
-	for edge in [[a,b],[b,c],[c,a]]:
-		var p:Vector2=edge[0];var q:Vector2=edge[1]
-		var steps:=int(ceil(p.distance_to(q)/(CELL*0.5)))
-		for i in steps+1:_mark(room,hard,p.lerp(q,float(i)/float(maxi(steps,1))))
+	# A small face (most of them): its corners' squares are enough.
+	_mark(room,hard,a);_mark(room,hard,b);_mark(room,hard,c)
+	var reach:=CELL*0.5
+	if a.distance_squared_to(b)<=reach*reach and b.distance_squared_to(c)<=reach*reach and c.distance_squared_to(a)<=reach*reach:return
+	_edge(room,hard,a,b);_edge(room,hard,b,c);_edge(room,hard,c,a)
 	var area:=absf((b-a).cross(c-a))*0.5
 	if area<CELL*CELL:return
 	var lo:=room.square(a.min(b).min(c));var hi:=room.square(a.max(b).max(c))
 	for y in range(maxi(lo.y,0),mini(hi.y,room.height-1)+1):
 		for x in range(maxi(lo.x,0),mini(hi.x,room.width-1)+1):
 			if Geometry2D.point_is_inside_triangle(room.centre(Vector2i(x,y)),a,b,c):hard[y*room.width+x]=1
+
+static func _edge(room:Room,hard:PackedByteArray,p:Vector2,q:Vector2)->void:
+	var steps:=int(ceil(p.distance_to(q)/(CELL*0.5)))
+	for i in range(1,steps):_mark(room,hard,p.lerp(q,float(i)/float(steps)))
 
 static func _mark(room:Room,hard:PackedByteArray,p:Vector2)->void:
 	var c:=room.square(p)
