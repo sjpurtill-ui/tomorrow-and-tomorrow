@@ -416,13 +416,7 @@
    "caption": "Unit fractions and parts (Year 520)",
    "style": "paper_gouache"
   },
-  "genealogical_recitation": {
-   "path": "res://assets/ui/research/discovery-600/genealogical_recitation.png",
-   "source_sheet": "ChatGPT Image Sep 24, 2026, 03_03_32 PM.png",
-   "tile_index": 3,
-   "caption": "Elders recite each household's lineage (Year 4)",
-   "style": "silhouette_ochre"
-  },
+  "genealogical_recitation": {"path": "res://assets/ui/research/subjects/genealogical_recitation-v1.png", "style": "culture: tapestry-inspired painting", "focus": [0.5, 0.5]},
   "geometric_survey": {
    "path": "res://assets/ui/research/discovery-600/geometric_survey.png",
    "source_sheet": "ChatGPT Image Sep 24, 2026, 02_17_54 PM.png",

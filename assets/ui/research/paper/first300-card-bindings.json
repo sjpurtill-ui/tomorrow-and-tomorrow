@@ -146,5 +146,9 @@
   "seasonal_patterns": "res://assets/ui/research/subjects/seasonal_patterns-v2.png",
   "stone_sorting": "res://assets/ui/research/subjects/stone_sorting-v1.png",
   "ember_tending": "res://assets/ui/research/subjects/ember_tending-v1.png",
-  "timber_grading": "res://assets/ui/research/subjects/timber_grading-v3.png"
+  "timber_grading": "res://assets/ui/research/subjects/timber_grading-v3.png",
+  "drainage": "res://assets/ui/research/subjects/drainage-v2.png",
+  "controlled_flaking": "res://assets/ui/research/subjects/controlled_flaking-v2.png",
+  "fiber_grading": "res://assets/ui/research/subjects/fiber_grading-v2.png",
+  "hearth_heat_retention": "res://assets/ui/research/subjects/hearth_heat_retention-v1.png"
 }

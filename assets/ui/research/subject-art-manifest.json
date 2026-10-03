@@ -74,8 +74,12 @@
     ]
   },
   "drainage": {
-    "path": "res://assets/ui/research/subjects/drainage-v1.png",
+    "path": "res://assets/ui/research/subjects/drainage-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -232,8 +236,12 @@
     ]
   },
   "controlled_flaking": {
-    "path": "res://assets/ui/research/subjects/controlled_flaking-v1.png",
+    "path": "res://assets/ui/research/subjects/controlled_flaking-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]
@@ -271,10 +279,14 @@
     ]
   },
   "fiber_grading": {
-    "path": "res://assets/ui/research/subjects/fiber_grading-v1.png",
+    "path": "res://assets/ui/research/subjects/fiber_grading-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.45
+    ],
+    "opening_focus": [
+      0.5,
+      0.45
     ]
   },
   "woven_carriers": {
@@ -5696,17 +5708,17 @@
     ]
   },
   "aptitude_trials": {
-    "path": "res://assets/ui/research/subjects/aptitude_trials-v1.png",
+    "path": "res://assets/ui/research/subjects/aptitude_trials-v3.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "dawn_readiness_drill": {
-    "path": "res://assets/ui/research/subjects/dawn_readiness_drill-v1.png",
+    "path": "res://assets/ui/research/subjects/dawn_readiness_drill-v2.png",
     "focus": [
       0.5,
-      0.4
+      0.5
     ]
   },
   "dissenting_voice_custom": {
@@ -5717,21 +5729,21 @@
     ]
   },
   "fever_watch_customs": {
-    "path": "res://assets/ui/research/subjects/fever_watch_customs-v1.png",
-    "focus": [
-      0.5,
-      0.5
-    ]
-  },
-  "paired_carrier_balancing": {
-    "path": "res://assets/ui/research/subjects/paired_carrier_balancing-v1.png",
+    "path": "res://assets/ui/research/subjects/fever_watch_customs-v2.png",
     "focus": [
       0.5,
       0.4
     ]
   },
+  "paired_carrier_balancing": {
+    "path": "res://assets/ui/research/subjects/paired_carrier_balancing-v2.png",
+    "focus": [
+      0.5,
+      0.45
+    ]
+  },
   "sleeping_area_rotation": {
-    "path": "res://assets/ui/research/subjects/sleeping_area_rotation-v1.png",
+    "path": "res://assets/ui/research/subjects/sleeping_area_rotation-v2.png",
     "focus": [
       0.5,
       0.5
@@ -9652,6 +9664,24 @@
     "focus": [
       0.5,
       0.45
+    ]
+  },
+  "hearth_heat_retention": {
+    "path": "res://assets/ui/research/subjects/hearth_heat_retention-v1.png",
+    "focus": [
+      0.5,
+      0.45
+    ],
+    "opening_focus": [
+      0.5,
+      0.45
+    ]
+  },
+  "genealogical_recitation": {
+    "path": "res://assets/ui/research/subjects/genealogical_recitation-v1.png",
+    "focus": [
+      0.5,
+      0.5
     ]
   }
 }
