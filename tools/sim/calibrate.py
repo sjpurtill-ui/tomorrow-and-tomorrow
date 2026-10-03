@@ -124,7 +124,13 @@ FORMULA_ANCHORS = [
     ("scripts/crisis_unattended.gd", "var m:=clampf((0.012+0.2*maxf(0.0,shortfall))*(1.0-0.4*float(x.inst))"),
     ("scripts/crisis_unattended.gd", "var target_pool:=clampf(0.1+0.6*float(x.dens)+0.3*float(x.trade),0.0,1.0)"),
     ("scripts/crisis_unattended.gd", "var sick:=clampi(roundi(float(x.pop)*(0.06+3.0*float(c.m))),3,"),
-    ("scripts/crisis_unattended.gd", "var expected:=float(c.pop0)*float(c.m)*float(c.mult)*share"),
+    ("scripts/crisis_unattended.gd", "var expected:=float(c.pop0)*planned*float(c.mult)*share"),
+    # Dry years in the water ledger (dry_water.py mirrors dry_water.gd; the
+    # parity fixture checks the arithmetic, these lines its formulas).
+    ("scripts/dry_water.gd", "return pow(deficit,3.0)*(THIRST_BASE+ramp*THIRST_RAMP)"),
+    ("scripts/dry_water.gd", "return clampf(sev+DEPTH_LUCK*luck(sev,draw),0.0,DEPTH_MAX)"),
+    ("scripts/dry_water.gd", "far=minf(FAR_POOLS*need*clampf(reach_share,0.0,2.0)*(1.0-FAR_FAIL*loss_today)"),
+    ("scripts/dry_water.gd", "return DRAW_MEDIAN*(1.0+DRAW_SEV*sev)*TOLL_K*(1.0-TOLL_HELD_CUT*clampf(held_intake,0.0,1.0))"),
     ("scripts/crisis_unattended.gd", "s.immunity=maxf(float(s.immunity),minf(0.85,0.35+4.0*float(c.m)))"),
     ("scripts/crisis_unattended.gd", "if float(c.pop0)*float(c.m)*float(c.mult)*0.6>=1.5 or bool(c.get(\"virgin\",false)):"),
     ("scripts/game_state.gd", "for key in POPULATION_AGE_COHORTS:hazards[key]=float(hazards[key])*float(kept.get(key,1.0))"),

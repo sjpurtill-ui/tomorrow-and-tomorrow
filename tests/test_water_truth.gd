@@ -194,7 +194,7 @@ func test_the_water_tile_in_the_users_dry_year()->void:
 	var texts:=PackedStringArray()
 	for fact:Dictionary in read.facts:texts.append(String(fact.text))
 	assert_array(Array(texts)).is_equal(["The Year the Springs Failed has taken 4 so far","About 7 more may die as things stand: 6 of thirst and one of the heat and the failed forage",
-		"13 more on the water path would save about 2; cisterns, once the people learn to line them, about one","The stores run dry in about 10 days","No one died of thirst in the last year"])
+		"13 more on the water path would save about 2; cisterns, once the people learn to line them, would save about one","The stores run dry in about 10 days","No one died of thirst in the last year"])
 	assert_str(String(read.status)).contains("Thirst is the water ledger's own count once the stores run out: at its worst the springs give 2 in 10 of what they did")
 	assert_str(String(read.status)).contains("9.3 in 1,000 of the 261 people at this dryness, half that when everyone drinks.")
 

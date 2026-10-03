@@ -210,10 +210,13 @@ static func _dry_words(drought:Dictionary,ahead:Dictionary)->Dictionary:
 		var by_carriers:=maxi(0,roundi(float(now.total)-float((ahead.get("carriers",now) as Dictionary).total)))
 		var by_cistern:=maxi(0,roundi(float(now.total)-float((ahead.get("cistern",now) as Dictionary).total)))
 		var hands:=int(ahead.get("extra_carriers",0))
-		var cistern_words:=("a lined cistern in every town about %s" if bool(ahead.get("cisterns_known",false)) else "cisterns, once the people learn to line them, about %s") % _count(by_cistern)
 		if all>0:
-			# More hands help only while the far pools give more than the carriers bring.
-			saves=("%s more on the water path would save about %s; %s" % [EraWords.grouped(hands),_count(by_carriers),cistern_words]) if by_carriers>0 else ("More hands would not help, the far pools give all they have; %s" % cistern_words)
+			# More hands help only while the far pools give more than the carriers
+			# bring; a cistern holds 2.5 days more for everyone.
+			var hands_words:="%s more on the water path would save about %s" % [EraWords.grouped(hands),_count(by_carriers)] if by_carriers>0 else "More hands would not help: the far pools give all they have"
+			var cistern_words:="a cistern would hold too little to matter"
+			if by_cistern>0:cistern_words=("a lined cistern in every town would save about %s" if bool(ahead.get("cisterns_known",false)) else "cisterns, once the people learn to line them, would save about %s") % _count(by_cistern)
+			saves="%s; %s" % [hands_words,cistern_words]
 		var mult:=float(drought.get("mult",1.0))
 		long="%s. Thirst is the water ledger's own count once the stores run out: at its worst the springs give %d in 10 of what they did, and the far pools what the carriers reach. The rest is the dry year's own toll (the heat, the failed forage, the sickness of foul water): %.1f in 1,000 of the %d people at this dryness, half that when everyone drinks%s." % [ahead_words,clampi(roundi((1.0-float(drought.get("depth",0.0)))*10.0),0,10),DryWater.toll_share(float(drought.get("sev",0.0)),0.0)*1000.0,int(drought.get("pop0",0)),", x%.2f for what was done about it" % mult if absf(mult-1.0)>0.005 else ""]
 		if saves!="":long+=" %s." % saves
