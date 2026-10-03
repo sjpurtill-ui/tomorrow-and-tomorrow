@@ -48,6 +48,7 @@ WATCHED = [
     "data/research/research_600.json",
     "scripts/food_care.gd", "scripts/government_people_system.gd", "scripts/work_paths.gd",
     "scripts/civilian_goods.gd", "scripts/resource_system.gd", "scripts/weapons_stock.gd", "scripts/watch_military.gd",
+    "scripts/crisis_background.gd", "scripts/crisis_system.gd", "scripts/crisis_unattended.gd",
 ]
 
 

@@ -1725,7 +1725,9 @@ class Surrogate:
         coh_h = self.cohort_mean @ age_h
         allcause = np.clip(coh_h * cf, 0.0001, 0.98)
         # The age table less the crises' expected share (crisis_background.gd).
-        natural = np.clip(coh_h * cf * (1.0 - crisis_share(self.day / YEAR)), 0.0001, 0.98)   # annual, per cohort
+        # tune knob "crisis_share_scale" (what-ifs only; the game takes the whole share).
+        share = crisis_share(self.day / YEAR) * float(self.p.get("crisis_share_scale", 1.0))
+        natural = np.clip(coh_h * cf * (1.0 - share), 0.0001, 0.98)   # annual, per cohort
         self._age_h, self._cf = age_h, cf
         self.person_years_coh += self.coh * days / YEAR
         self.allcause_coh += self.coh * allcause * days / YEAR
