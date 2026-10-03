@@ -152,6 +152,7 @@ def build_variant(variant, quick=False, ao=True):
     cf_body.mood_morphs(f, mouth, brows)
     riders = [o for key, objs in sets.items() if key.startswith("beard_") for o in objs]
     cf_body.expression_morphs(f, body, eyes, brows, mouth, face.get("eye_center", {}), riders)
+    cf_body.gaze_morphs(eyes)
     cf_anim.write_actions(rig, k, frame=f)
     sets["props"] = build_props(rig, f)
     log(variant, "clips", len(cf_anim.CLIPS), round(time.time() - t0, 1), "s")
@@ -159,6 +160,79 @@ def build_variant(variant, quick=False, ao=True):
     rig["height"] = f.H
     rig["head_top"] = f.z_top
     return rig, f, sets
+
+
+def _bundle(rig, k):
+    """A hide sack, lumpy with what is in it, gathered and tied at the top, with
+    the gathered ends flaring above the tie. Centre at the origin, +Z up."""
+    import bmesh
+    import random
+    rnd = random.Random(7)
+    bm = bmesh.new()
+    bmesh.ops.create_uvsphere(bm, u_segments=20, v_segments=14, radius=1.0)
+    rx, ry, rz = 0.155 * k, 0.120 * k, 0.120 * k
+    lumps = [(Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-0.7, 0.4))).normalized(), rnd.uniform(0.05, 0.11)) for _ in range(7)]
+    for v in bm.verts:
+        d = v.co.normalized()
+        bump = sum(a * max(0.0, d.dot(c)) ** 6 for c, a in lumps)
+        z = v.co.z
+        # gathered to a neck at the top, flat-ish where it sits
+        neck = 1.0
+        if z > 0.55:
+            t = (z - 0.55) / 0.45
+            neck = 1.0 - 0.80 * t ** 0.8
+        flat = 0.82 if z < -0.75 else 1.0
+        v.co = Vector((v.co.x * rx * neck * (1 + bump), v.co.y * ry * neck * (1 + bump), (z * rz * flat) * (1 + 0.5 * bump)))
+    me = bpy.data.meshes.new("bundle_sack")
+    bm.to_mesh(me)
+    bm.free()
+    sack = bpy.data.objects.new("bundle_sack", me)
+    bpy.context.scene.collection.objects.link(sack)
+    for poly in me.polygons:
+        poly.use_smooth = True
+    cf_body.set_material(sack, "LEATHER")
+    # the tie about the neck
+    bm = bmesh.new()
+    bmesh.ops.create_cone(bm, cap_ends=False, segments=14, radius1=0.040 * k, radius2=0.036 * k, depth=0.022 * k)
+    for v in bm.verts:
+        v.co.z += 0.118 * k
+    me = bpy.data.meshes.new("bundle_tie")
+    bm.to_mesh(me)
+    bm.free()
+    tie = bpy.data.objects.new("bundle_tie", me)
+    bpy.context.scene.collection.objects.link(tie)
+    sol = tie.modifiers.new("wall", 'SOLIDIFY')
+    sol.thickness = 0.010 * k
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    bpy.context.view_layer.objects.active = tie
+    tie.select_set(True)
+    bpy.ops.object.modifier_apply(modifier=sol.name)
+    cf_body.set_material(tie, "CLOTH_C")
+    # the gathered ends, flaring above the tie
+    bm = bmesh.new()
+    bmesh.ops.create_cone(bm, cap_ends=False, segments=10, radius1=0.034 * k, radius2=0.062 * k, depth=0.060 * k)
+    for v in bm.verts:
+        a = math.atan2(v.co.y, v.co.x)
+        if v.co.z > 0:
+            v.co.z += 0.012 * k * math.sin(a * 5.0)
+        v.co.z += 0.150 * k
+    me = bpy.data.meshes.new("bundle_top")
+    bm.to_mesh(me)
+    bm.free()
+    top = bpy.data.objects.new("bundle_top", me)
+    bpy.context.scene.collection.objects.link(top)
+    sol = top.modifiers.new("wall", 'SOLIDIFY')
+    sol.thickness = 0.006 * k
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    bpy.context.view_layer.objects.active = top
+    top.select_set(True)
+    bpy.ops.object.modifier_apply(modifier=sol.name)
+    cf_body.set_material(top, "LEATHER")
+    bundle = cf_body.join([sack, tie, top], "prop_bundle")
+    bundle.parent = rig
+    return bundle
 
 
 def build_props(rig, f):
@@ -236,6 +310,9 @@ def build_props(rig, f):
     cf_body.set_material(stool, "WOOD")
     stool.parent = rig
     made.append(stool)
+    # a bundle of food wrapped in hide, tied at the neck: the game carries it
+    # between the hands (court_figure_3d.gd), so it is made about its middle
+    made.append(_bundle(rig, k))
     poser.apply({})
     bpy.context.view_layer.update()
     for o in made:
@@ -499,6 +576,8 @@ def manifest(entries, out_dir):
         "stances": list(cf_anim.STANCES),
         "free_hands": dict(cf_anim.FREE_HANDS),
         "props": {"staff": "prop_staff", "bowl": "prop_bowl", "sit": "prop_stool"},
+        "carried": {"bundle": "prop_bundle"},
+        "gaze": list(cf_body.GAZE.keys()),
         "face_shapes": ["face_" + n for n in cf_body.FACE_SHAPES],
         "moods": ["mood_smile", "mood_tight", "mood_worry", "mood_stern"],
         "expressions": list(cf_body.EXPRESSIONS),

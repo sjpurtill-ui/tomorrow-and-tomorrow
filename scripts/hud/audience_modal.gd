@@ -41,6 +41,8 @@ const Motion:=preload("res://scripts/hud/motion.gd")
 ## The hall as a stage: the people present stand in it and speak in bubbles.
 const Stage:=preload("res://scripts/hud/court_stage.gd")
 const Directing:=preload("res://scripts/hud/court_director.gd")
+const Acting:=preload("res://scripts/hud/court_acting.gd")
+const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
@@ -205,6 +207,11 @@ const MIN_CARD_SCALE:=0.5
 ## The least height the hall keeps before "What you stand to gain" folds to
 ## one line (normal and compact screens).
 const HALL_FLOOR:=Vector2(280.0,240.0)
+## The hall's share of the card's height: the people are the scene; the
+## stakes, the orders and the answers sit compactly under it.
+const STAGE_SHARE:=0.57
+## The row that holds the hall (its least height is set from the card's).
+var stage_row:Control
 
 func _fit()->void:
 	if not is_instance_valid(card):return
@@ -223,9 +230,21 @@ func _fit()->void:
 	# Autowrapped labels report inflated heights before their first sort and a
 	# container never shrinks by itself; re-assert the stage size every frame.
 	var target:=(room/scale_now).floor().min(DESIGN_SIZE.max(room))
+	_size_stage(target.y)
 	if card.size!=target:card.size=target
 	var place:=((view-card.size*scale_now)*.5).round()
 	if card.position!=place:card.position=place
+
+## The hall takes STAGE_SHARE of the card's height when the rest still fits
+## under it (never so much that the card would have to shrink).
+func _size_stage(card_h:float)->void:
+	if not is_instance_valid(stage_row) or not is_instance_valid(card):return
+	var floor_h:=260.0 if _compact() else 330.0
+	if is_instance_valid(envoy_stage) and stage_row==envoy_stage:floor_h=ENVOY_STAGE_MIN_H*(.75 if _compact() else 1.0)
+	var have:=stage_row.custom_minimum_size.y
+	var rest:=card.get_combined_minimum_size().y-maxf(have,stage_row.get_combined_minimum_size().y)
+	var want:=floorf(clampf(card_h*STAGE_SHARE,floor_h,maxf(floor_h,card_h-rest-2.0)))
+	if absf(want-have)>1.0:stage_row.custom_minimum_size.y=want
 
 ## "What you stand to gain" folds to one line when the hall would be too
 ## short for the people in it to be seen speaking.
@@ -245,7 +264,9 @@ func _reset_card(next_mode:String)->void:
 	## Clear the stage for another view of the court.
 	for tween in reveal_tweens:if tween and tween.is_valid():tween.kill()
 	reveal_tweens.clear();revealing=false;rendered_lines=0;resolved_result={};_last_line={};_history_rows.clear();_pending_toasts.clear()
-	_stakes_compact=false;_stakes_opened=false
+	# "What you stand to gain" opens folded to one line: the hall comes first.
+	_stakes_compact=true;_stakes_opened=false
+	stage_row=null
 	court_stage=null;_reveal_label=null;_leave_when_quiet=false;scene_portraits.clear()
 	rest_seats.clear();foreign_refs.clear();rest_signature=[];foreign_count=-1
 	civic_settlement="";civic_seen.clear();civic_signature=""
@@ -331,10 +352,11 @@ func show_audience(id:String)->void:
 	veil.add_theme_stylebox_override("panel",_veil_style());body.add_child(veil)
 	var inner:=MarginContainer.new();inner.size_flags_vertical=Control.SIZE_EXPAND_FILL
 	for side in ["left","right"]:inner.add_theme_constant_override("margin_"+side,20)
-	inner.add_theme_constant_override("margin_top",14);inner.add_theme_constant_override("margin_bottom",12)
+	inner.add_theme_constant_override("margin_top",10);inner.add_theme_constant_override("margin_bottom",8)
 	veil.add_child(inner)
-	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",10);inner.add_child(column)
-	column.add_child(_build_stage(audience))
+	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);inner.add_child(column)
+	stage_row=_build_stage(audience)
+	column.add_child(stage_row)
 	proposal_box=null
 	conceive_next=false
 	if kind=="wonder_proposal" and String(audience.get("status",""))=="waiting":
@@ -376,7 +398,7 @@ func _build_herald(audience:Dictionary)->Control:
 	var layers:=VBoxContainer.new();layers.add_theme_constant_override("separation",10);banner.add_child(layers)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",16);layers.add_child(row)
 	# The court itself stands on the stage below, watching.
-	var seal:=Seal.new();seal.kind=kind;seal.tint=accent.lightened(.15);seal.custom_minimum_size=Vector2(58,58);row.add_child(seal)
+	var seal:=Seal.new();seal.kind=kind;seal.tint=accent.lightened(.15);seal.custom_minimum_size=Vector2(50,50);row.add_child(seal)
 	if origin=="foreign":
 		var flag:=TextureRect.new();flag.name="Flag";flag.texture=Identity.foreign(String(audience.get("civ_id",""))).texture
 		flag.custom_minimum_size=Vector2(50,58);flag.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;flag.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -395,7 +417,7 @@ func _build_herald(audience:Dictionary)->Control:
 	if not headline.is_empty() and kind!="report" and not kind in WORK_KINDS:
 		herald_text=("%s %s" % [subject,headline]).to_upper()
 	if kind in WORK_KINDS:herald_text=String(work_info.get("herald",herald_text))
-	var title:=Tokens.make_label(herald_text,24 if _compact() else 30,cream);title.name="HeraldTitle"
+	var title:=Tokens.make_label(herald_text,24 if _compact() else 27,cream);title.name="HeraldTitle"
 	title.add_theme_font_override("font",Tokens.font("display"));title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.add_child(title)
 	var day:=int(GameState.elapsed_days);var arrived:=int(audience.get("arrived_day",day))
 	var waited:=day-arrived
@@ -559,6 +581,15 @@ func _new_stage(parent:Control,kind:String)->Control:
 	if Stage.directing:
 		if Stage.director==null or not Stage.director.get_script()==Directing:Stage.director=Directing.new()
 		made.facts.merge(Directing.facts_now(Hall.find(audience_id)),true)
+		# The acting (K) moves, looks and speaks for every modelled person.
+		if Stage.acting==null:Stage.acting=Acting.service()
+	# The court's modelled place for this era: the people stand in it, its
+	# camera frames them, its lights fall on them; the painting stays behind
+	# it as the fallback for a machine without the models.
+	var set_facts:=CourtSet.facts_from_game()
+	set_facts["tier"]=Backdrop.current_tier()
+	set_facts["seed"]=hash(audience_id)
+	if made.use_set(Backdrop.current_stage(),set_facts) and is_instance_valid(backdrop):backdrop.visible=false
 	parent.add_child(made);made.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	made.advance_requested.connect(advance)
 	made.history_requested.connect(show_history_at)
@@ -791,9 +822,11 @@ func _build_stakes()->void:
 	var kicker:=Tokens.make_label("WHAT YOU STAND TO GAIN",12,Tokens.INK_MUTED,.12);kicker.name="StakesKicker";kicker.size_flags_vertical=Control.SIZE_SHRINK_CENTER;head.add_child(kicker)
 	var full:=Stakes.tip(weighed)
 	if folded:
-		# One line: the first of it, the rest a click away.
-		var first:Dictionary=rows[0]
-		var gist:=Tokens.make_label("%s: %s" % [String(first.get("key","")),String(first.get("text",""))],13,Tokens.BODY);gist.name="StakesGist"
+		# One line: all of it, as far as it fits (the whole of it a click or a
+		# hover away).
+		var parts:=PackedStringArray()
+		for row:Dictionary in rows:parts.append("%s: %s" % [String(row.get("key","")),String(row.get("text",""))])
+		var gist:=Tokens.make_label("  ·  ".join(parts),13,Tokens.BODY);gist.name="StakesGist"
 		gist.size_flags_horizontal=Control.SIZE_EXPAND_FILL;gist.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 		gist.clip_text=true;gist.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;gist.tooltip_text=full;gist.mouse_filter=Control.MOUSE_FILTER_PASS
 		head.add_child(gist)
@@ -1123,7 +1156,7 @@ func _option_card(option:Dictionary)->Button:
 	var enabled:=bool(option.get("enabled",true))
 	var button:=Button.new();button.name="Option_"+String(option.get("id",""))
 	button.set_meta("option_id",String(option.get("id","")))
-	button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.custom_minimum_size=Vector2(0,72)
+	button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;button.custom_minimum_size=Vector2(0,54)
 	button.disabled=not enabled;button.focus_mode=Control.FOCUS_ALL
 	button.tooltip_text=String(option.get("reason","")) if not enabled else String(option.get("sub",""))
 	# A proposal's card says what it gives and costs (proposal_stakes.gd); the
@@ -1140,11 +1173,11 @@ func _option_card(option:Dictionary)->Button:
 	button.add_theme_stylebox_override("hover",hover);button.add_theme_stylebox_override("pressed",hover);button.add_theme_stylebox_override("disabled",off)
 	var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);margin.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	for side in ["left","right"]:margin.add_theme_constant_override("margin_"+side,16)
-	margin.add_theme_constant_override("margin_top",9);margin.add_theme_constant_override("margin_bottom",8)
+	margin.add_theme_constant_override("margin_top",6);margin.add_theme_constant_override("margin_bottom",6)
 	button.add_child(margin)
-	var stack:=VBoxContainer.new();stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_theme_constant_override("separation",2);margin.add_child(stack)
+	var stack:=VBoxContainer.new();stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_theme_constant_override("separation",1);margin.add_child(stack)
 	var ink:=_ink(tone_color) if enabled else Tokens.DISABLED
-	var title:=Tokens.make_label(String(option.get("label","")),17,ink);title.add_theme_font_override("font",_bold);title.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	var title:=Tokens.make_label(String(option.get("label","")),16,ink);title.add_theme_font_override("font",_bold);title.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	title.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;stack.add_child(title)
 	var sub_text:=String(option.get("sub","")) if enabled else String(option.get("reason",option.get("sub","")))
 	if weighed!="":sub_text=weighed
@@ -1187,7 +1220,7 @@ func _build_footer()->Control:
 	var bar:=PanelContainer.new();bar.name="Footer"
 	var bar_style:=Tokens.flat(Tokens.TILE_BG,Color(0,0,0,0),0,0,0)
 	bar_style.corner_radius_bottom_left=9;bar_style.corner_radius_bottom_right=9;bar_style.border_color=Tokens.BORDER_SOFT;bar_style.border_width_top=1
-	bar_style.content_margin_left=20;bar_style.content_margin_right=20;bar_style.content_margin_top=8;bar_style.content_margin_bottom=8
+	bar_style.content_margin_left=20;bar_style.content_margin_right=20;bar_style.content_margin_top=6;bar_style.content_margin_bottom=6
 	bar.add_theme_stylebox_override("panel",bar_style)
 	var row:=HBoxContainer.new();row.add_theme_constant_override("separation",14);bar.add_child(row)
 	row.add_child(_build_return_button())
@@ -2051,6 +2084,7 @@ func _build_envoy_stage(audience:Dictionary)->Control:
 	var stage:=Control.new();stage.name="EnvoyStage";stage.custom_minimum_size.y=ENVOY_STAGE_MIN_H*(.75 if _compact() else 1.0);stage.size_flags_vertical=Control.SIZE_EXPAND_FILL;stage.clip_contents=true
 	stage.mouse_filter=Control.MOUSE_FILTER_PASS
 	envoy_stage=stage
+	stage_row=stage
 	var offer:=_envoy_offer(audience)
 	# The era's hall, composed below the herald's band.
 	_add_backdrop(stage)
