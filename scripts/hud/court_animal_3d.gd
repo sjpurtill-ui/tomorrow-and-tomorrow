@@ -27,7 +27,7 @@ static var _sound_checked:=false
 ## Each species' paint by slot.
 const PALETTE:={
 	"dog":{"COAT":"a06c3b","COAT_LIGHT":"e0c99e","COAT_DARK":"5f4027","NOSE":"1d1612","EYE":"150f0c","EYE_SHINE":"fbf6ea"},
-	"goat":{"COAT":"d8ccb2","COAT_DARK":"4a3a2e","NOSE":"3a2c26","HOOF":"2c241e","HORN":"8c8070","EYE":"120c08","EYE_AMBER":"b8862e"},
+	"goat":{"COAT":"e6d6b4","COAT_DARK":"3e2c20","NOSE":"3a2c26","HOOF":"2c241e","HORN":"8c8070","EYE":"120c08","EYE_AMBER":"b8862e"},
 }
 ## A species' own clip for each of the court's animal acts (the dog's names).
 const CLIP_MAP:={
@@ -42,6 +42,9 @@ const DOWN:=["sit","sit_idle","scratch","lie","lie_idle"]
 ## Keep clear of the fire by this much when walking past it.
 const FIRE_CLEAR:=1.05
 
+## Whether the beasts carry their own inked shells (off when the set inks the
+## whole stage in one pass).
+static var hull_ink:=true
 static var _manifest:Dictionary={}
 static var _scenes:Dictionary={}
 static var _materials:Dictionary={}
@@ -126,7 +129,7 @@ func _dress()->void:
 			mesh_node.set_surface_override_material(surface,_material(slot,Color(String(paint.get(slot,"8a6a48")))))
 
 static func _material(slot:String,colour:Color)->ShaderMaterial:
-	var key:="%s|%s" % [slot,colour.to_html(false)]
+	var key:="%s|%s|%s" % [slot,colour.to_html(false),hull_ink]
 	if _materials.has(key):return _materials[key]
 	var made:=ShaderMaterial.new();made.shader=TOON
 	made.set_shader_parameter("albedo",colour);made.set_shader_parameter("albedo_worn",colour)
@@ -136,7 +139,7 @@ static func _material(slot:String,colour:Color)->ShaderMaterial:
 		"EYE_SHINE":made.set_shader_parameter("emission_color",Color(1,1,1));made.set_shader_parameter("emission_amount",0.8)
 		"EYE","NOSE":made.set_shader_parameter("rim_amount",0.25)
 		_:made.set_shader_parameter("rim_amount",0.10)
-	if not slot in ["EYE","EYE_SHINE"]:
+	if hull_ink and not slot in ["EYE","EYE_SHINE"]:
 		if _ink_material==null:
 			_ink_material=ShaderMaterial.new();_ink_material.shader=INK
 		made.next_pass=_ink_material

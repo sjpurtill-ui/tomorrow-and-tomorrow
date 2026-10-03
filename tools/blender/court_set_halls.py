@@ -535,7 +535,19 @@ def build_grand_hall(bld):
     bld.add("Floor", flags, "FLAGS", wear=lambda co: max(0.0, 1.0 - abs(co.x) / 1.2) * 0.6)
 
     # the walls: dressed stone, high windows in the left wall
-    box(bld, "Walls", (0.0, H * 0.5, ZB - T * 0.5), (X1 - X0 + 2 * T, H, T), "STONE_BLOCK")
+    # the back wall, with two high windows either side of the seat: the sun
+    # comes in over the dais and falls in shafts onto the floor before it
+    WIN = [(-4.1, -3.1), (3.1, 4.1)]
+    WY = (4.6, 6.2)
+    xs = [X0 - T, WIN[0][0], WIN[0][1], WIN[1][0], WIN[1][1], X1 + T]
+    for k in range(0, len(xs) - 1):
+        x0, x1 = xs[k], xs[k + 1]
+        if k in (1, 3):
+            box(bld, "Walls", ((x0 + x1) * 0.5, WY[0] * 0.5, ZB - T * 0.5), (x1 - x0, WY[0], T), "STONE_BLOCK")
+            box(bld, "Walls", ((x0 + x1) * 0.5, (WY[1] + H) * 0.5, ZB - T * 0.5), (x1 - x0, H - WY[1], T), "STONE_BLOCK")
+            K.log_piece(bld, "Walls", (x0, WY[0], ZB + 0.02), (x1, WY[0], ZB + 0.02), 0.06, seed=k, slot="STONE", end_slot="STONE", knots=False, bend=0.0, stubs=0)
+        else:
+            box(bld, "Walls", ((x0 + x1) * 0.5, H * 0.5, ZB - T * 0.5), (x1 - x0, H, T), "STONE_BLOCK")
     box(bld, "Walls", (X1 + T * 0.5, H * 0.5, (ZB + 3.6) * 0.5), (T, H, 3.6 - ZB), "STONE_BLOCK")
     xl = X0 - T * 0.5
     wins = [(-4.6, -3.4), (-1.4, -0.2)]
@@ -707,13 +719,13 @@ def build_grand_hall(bld):
         "fx": {
             "fire": {"pos": [0, 0.05, 0], "size": 1.15},
             "smoke_top": H,
-            "shafts": [{"top": [X0 - 0.2, 5.4, -4.0], "dir": [0.62, -0.62, 0.24], "radius": 0.5, "strength": 0.16, "soft": 1.0},
-                       {"top": [X0 - 0.2, 5.4, -0.8], "dir": [0.62, -0.62, 0.24], "radius": 0.5, "strength": 0.16, "soft": 1.0}],
+            "shafts": [{"top": [-3.6, 5.4, ZB - 0.4], "radius": 0.5, "strength": 0.6, "soft": 0.55},
+                       {"top": [3.6, 5.4, ZB - 0.4], "radius": 0.5, "strength": 0.6, "soft": 0.55}],
             "fill": [[0.0, 3.8, ZB + 1.6, 1.1, 9.0], [-5.0, 3.0, -2.0, 0.5, 7.0], [5.0, 3.0, -2.0, 0.5, 7.0]],
             "dust": {"pos": [-3.0, 3.0, -1.6], "extent": [4.0, 2.5, 2.4]},
             "door_light": [X0 + 0.1, 1.3, 1.6],
         },
-        "light": {"open_sky": False, "sun_dir": [0.62, -0.62, 0.24], "sun_energy": 0.7, "fire_energy": 1.6, "fire_range": 8.5, "fog": 0.006, "brazier_energy": 2.2, "brazier_range": 6.5},
+        "light": {"open_sky": False, "sun_dir": [0.22, -0.8, 0.56], "sun_energy": 1.5, "fire_energy": 1.6, "fire_range": 8.5, "fog": 0.006, "brazier_energy": 2.2, "brazier_range": 6.5},
         "camera": {"yaw": 16.0, "pitch": -10.0, "fov": 52.0, "centre": [0.1, 1.0, -0.2], "yaw_range": [-30.0, 36.0]},
         "ink": ["Hearth", "Columns", "Dais", "Canopy", "Table", "Benches", "Shields", "Braziers", "Carpet", "Roof", "food_", "spear_", "weave_"],
         "shadow_only": ["ShadowCaster"],

@@ -34,6 +34,9 @@ extends Node3D
 ## The season (spring, summer, autumn, winter) shows: snow lying and breath
 ## in the cold, dry grass and flies about the food in summer, fallen leaves in
 ## autumn, flowers in the grass in spring.
+## Ink: "screen" (one pass over the whole stage, from depth: the figures and
+## the set need no inked shells, half their drawing) or "hull" (each piece
+## carries its own inked shell, as before; the fallback). CourtSet.ink.
 ## Quality: "high", "low" or "auto" (CourtSet.quality). Low drops the heat
 ## shimmer, thins the smoke and sparks, the dust and the snow, inks only the
 ## set's main pieces, shortens the shadows and the far blur. Auto starts high
@@ -59,6 +62,7 @@ const SHAFT:=preload("res://assets/court_sets/shaders/court_shaft.gdshader")
 const CONTACT:=preload("res://assets/court_sets/shaders/court_contact.gdshader")
 const SKY:=preload("res://assets/court_sets/shaders/court_sky.gdshader")
 const PAPER:=preload("res://assets/court_sets/shaders/court_paper.gdshader")
+const INK_POST:=preload("res://assets/court_sets/shaders/court_ink_post.gdshader")
 
 const KIND_BY_STAGE:={
 	"hearth_council":"fire_ring","fire_circle":"fire_ring",
@@ -129,6 +133,9 @@ const LOOK:={
 static var enabled:=true
 ## "high", "low" or "auto" (start high, drop to low if the frames come slow).
 static var quality:="auto"
+## "screen" or "hull" (see above). The stage asks uses_screen_ink() before it
+## dresses its figures: with screen ink they need no shells of their own.
+static var ink:="screen"
 ## Auto drops to low when the frames average slower than this (seconds).
 const SLOW_FRAME:=1.0/45.0
 ## Seasons, as the stage's facts name them.
@@ -168,11 +175,15 @@ var _shaft_top:=Vector3.ZERO
 var _shaft_dir:=Vector3.DOWN
 var _shaft_radius:=0.0
 var _dyes:Array=[]
+var _rack_at:=Vector3.ZERO
 ## The quality in force now ("high" or "low"), and why.
 var level:="high"
 var level_reason:=""
 var season:=""
 var shimmer:MeshInstance3D
+var ink_pass:MeshInstance3D
+## The ink in force for this set: "screen" or "hull".
+var ink_mode:="screen"
 var flies:Array[GPUParticles3D]=[]
 var snowfall:GPUParticles3D
 var breaths:Array[GPUParticles3D]=[]
@@ -245,6 +256,8 @@ static func normal_facts(raw:Dictionary)->Dictionary:
 
 func _build(era_id_in:String,facts_in:Dictionary)->void:
 	era_id=era_id_in
+	ink_mode="hull" if ink=="hull" else "screen"
+	Animal.hull_ink=ink_mode=="hull"
 	facts=normal_facts(facts_in)
 	kind=kind_for(era_id,int(facts.get("tier",-1)))
 	name="CourtSet_"+kind
@@ -316,6 +329,7 @@ func _colour(code:String,fallback:Color)->Color:
 	return Color(code)
 
 func _material(slot:String,inked:bool)->ShaderMaterial:
+	inked=inked and ink_mode=="hull"
 	var key:="%s|%s|%s|%s" % [kind,slot,inked,",".join(PackedStringArray(_dyes))]
 	if _materials.has(key):return _materials[key]
 	var look:Dictionary=LOOK.get(kind,LOOK.fire_ring)
@@ -327,7 +341,7 @@ func _material(slot:String,inked:bool)->ShaderMaterial:
 	made.set_shader_parameter("albedo_worn",worn)
 	if paint.size()>2:made.set_shader_parameter("accent_a",_colour(String(paint[2]),base.darkened(0.3)))
 	if paint.size()>3:made.set_shader_parameter("accent_b",_colour(String(paint[3]),base.lightened(0.3)))
-	made.set_shader_parameter("haze_color",Color(String(look.get("haze","cdd2cf"))))
+	made.set_shader_parameter("haze_color",_air())
 	if PATTERN.has(slot):
 		var p:Array=PATTERN[slot]
 		made.set_shader_parameter("pattern",int(p[0]));made.set_shader_parameter("motif",int(p[1]));made.set_shader_parameter("pattern_scale",float(p[2]))
@@ -367,11 +381,13 @@ func _wash_material(layer:int)->ShaderMaterial:
 	made.set_shader_parameter("wash",Color(String(spec[0])))
 	made.set_shader_parameter("ink",Color(String(spec[1])))
 	made.set_shader_parameter("airiness",float(spec[2]))
-	made.set_shader_parameter("air",Color(String(look.get("sky_horizon","e2ddcb"))).lerp(Color(String(look.get("haze","b9c0bd"))),0.5))
+	made.set_shader_parameter("air",_air())
+	made.set_shader_parameter("foot_from",[2.5,5.0,9.0][clampi(layer,0,2)])
+	made.set_shader_parameter("foot_to",[7.5,15.0,26.0][clampi(layer,0,2)])
 	made.set_shader_parameter("ink_width",[0.22,0.45,0.9][clampi(layer,0,2)])
 	made.set_shader_parameter("ink_amount",[0.7,0.5,0.32][clampi(layer,0,2)])
 	made.set_shader_parameter("bleed",[2.0,4.5,9.0][clampi(layer,0,2)])
-	made.set_shader_parameter("trunks",0.6 if layer==0 else 0.0)
+	made.set_shader_parameter("trunks",0.3 if layer==0 else 0.0)
 	made.render_priority=-1-layer
 	_materials[key]=made
 	return made
@@ -386,7 +402,10 @@ func _ground_material()->ShaderMaterial:
 	made.set_shader_parameter("earth",Color(String(look.earth)))
 	made.set_shader_parameter("earth_dark",Color(String(look.earth_dark)))
 	made.set_shader_parameter("straw",float(look.straw))
-	made.set_shader_parameter("haze_color",Color(String(look.haze)))
+	made.set_shader_parameter("haze_color",_air())
+	made.set_shader_parameter("haze_start",24.0)
+	made.set_shader_parameter("haze_end",60.0)
+	made.set_shader_parameter("haze_max",0.85)
 	made.set_shader_parameter("hearth_radius",0.95 if kind!="longhouse" else 1.0)
 	made.set_shader_parameter("hearth_scale",Vector2(2.1,0.75) if kind=="longhouse" else Vector2(1.0,1.0))
 	_materials[key]=made
@@ -532,7 +551,7 @@ func _make_environment()->void:
 	env.glow_blend_mode=Environment.GLOW_BLEND_MODE_SOFTLIGHT
 	env.fog_enabled=true
 	env.fog_mode=Environment.FOG_MODE_EXPONENTIAL
-	env.fog_light_color=Color(String(look.fog))
+	env.fog_light_color=Color(String(look.fog)) if not bool((info.get("light",{}) as Dictionary).get("open_sky",true)) else _air()
 	env.fog_density=float(light.get("fog",look.fog_density))
 	env.fog_sky_affect=0.0
 	env.fog_sun_scatter=0.0
@@ -756,6 +775,28 @@ func _make_paper()->void:
 	quad.extra_cull_margin=16384.0
 	quad.position=Vector3(0.0,0.0,-0.5)
 	camera.add_child(quad)
+	if ink_mode=="screen":_make_ink()
+
+## The colour of the air at the horizon: the sky's own, so the land, the
+## far woods and the fog all fade into the same haze.
+func _air()->Color:
+	var look:Dictionary=LOOK.get(kind,LOOK.fire_ring)
+	return Color(String(look.get("sky_horizon","e2ddcb"))).lerp(Color(String(look.get("haze","b9c0bd"))),0.25)
+
+## The ink line, once over the whole stage (court_ink_post.gdshader).
+func _make_ink()->void:
+	ink_pass=MeshInstance3D.new();ink_pass.name="Ink"
+	var mesh:=QuadMesh.new();mesh.size=Vector2(1.0,1.0);ink_pass.mesh=mesh
+	var mat:=ShaderMaterial.new();mat.shader=INK_POST;mat.render_priority=90
+	ink_pass.material_override=mat
+	ink_pass.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	ink_pass.extra_cull_margin=16384.0
+	ink_pass.position=Vector3(0.0,0.0,-0.5)
+	camera.add_child(ink_pass)
+
+## Whether the stage's figures should go without their own inked shells.
+static func uses_screen_ink()->bool:
+	return ink!="hull"
 
 # --- Props from the facts -----------------------------------------------------------
 
@@ -803,32 +844,35 @@ func apply_facts(facts_in:Dictionary)->void:
 ## made once and switched with the season.
 func _make_season_fx()->void:
 	var spots:Array[Vector3]=[]
-	for group in ["food","rack"]:
+	for group in ["rack","food"]:
 		var list:Array=props.get(group,[])
 		if list.is_empty():continue
 		var centre:=Vector3.ZERO
 		for node in list:centre+=_centre_of(node as Node3D)
 		spots.append(centre/float(list.size()))
+	_rack_at=spots[0] if not spots.is_empty() else Vector3(0.0,1.0,-3.0)
 	for at in spots:
 		var swarm:=GPUParticles3D.new();swarm.name="Flies"
-		swarm.amount=7;swarm.lifetime=3.0;swarm.preprocess=3.0;swarm.randomness=0.8
+		# short, darting lives about the meat: each fly a little dark streak
+		# along its flight, so they read as moving, not as dust
+		swarm.amount=8;swarm.lifetime=1.6;swarm.preprocess=2.0;swarm.randomness=0.6
 		var pm:=ParticleProcessMaterial.new()
-		pm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_SPHERE;pm.emission_sphere_radius=0.35
-		pm.direction=Vector3(0,1,0);pm.spread=180.0
-		pm.initial_velocity_min=0.3;pm.initial_velocity_max=0.7
-		pm.gravity=Vector3.ZERO;pm.damping_min=0.0;pm.damping_max=0.2
-		pm.turbulence_enabled=true;pm.turbulence_noise_strength=6.0;pm.turbulence_noise_scale=0.6;pm.turbulence_noise_speed=Vector3(0.6,0.6,0.6)
-		pm.turbulence_influence_min=0.6;pm.turbulence_influence_max=0.9
-		var life:=Gradient.new();life.set_color(0,Color(1,1,1,1));life.set_color(1,Color(1,1,1,1))
-		var life_tex:=GradientTexture1D.new();life_tex.gradient=life;pm.color_ramp=life_tex
+		pm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_SPHERE;pm.emission_sphere_radius=0.3
+		pm.direction=Vector3(0,0.2,1);pm.spread=180.0
+		pm.initial_velocity_min=0.9;pm.initial_velocity_max=1.6
+		pm.gravity=Vector3.ZERO;pm.damping_min=0.3;pm.damping_max=0.8
+		pm.turbulence_enabled=true;pm.turbulence_noise_strength=9.0;pm.turbulence_noise_scale=0.35;pm.turbulence_noise_speed=Vector3(1.2,1.0,1.2)
+		pm.turbulence_influence_min=0.7;pm.turbulence_influence_max=1.0
+		pm.particle_flag_align_y=true
+		var size:=Curve.new();size.add_point(Vector2(0.0,0.0));size.add_point(Vector2(0.12,1.0));size.add_point(Vector2(0.88,1.0));size.add_point(Vector2(1.0,0.0))
+		var size_tex:=CurveTexture.new();size_tex.curve=size;pm.scale_curve=size_tex
 		swarm.process_material=pm
-		var dot:=QuadMesh.new();dot.size=Vector2(0.014,0.014)
+		var body:=CapsuleMesh.new();body.radius=0.006;body.height=0.034;body.radial_segments=4;body.rings=1
 		var mat:=StandardMaterial3D.new();mat.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.albedo_color=Color(0.08,0.07,0.06);mat.billboard_mode=BaseMaterial3D.BILLBOARD_ENABLED
-		mat.billboard_keep_scale=true
-		dot.material=mat
-		swarm.draw_pass_1=dot
-		swarm.position=at+Vector3(0.0,0.45,0.0)
+		mat.albedo_color=Color(0.06,0.05,0.045)
+		body.material=mat
+		swarm.draw_pass_1=body
+		swarm.position=at+Vector3(0.0,0.35,0.0)
 		swarm.visibility_aabb=AABB(Vector3(-2,-1,-2),Vector3(4,3,4))
 		swarm.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		swarm.emitting=false;swarm.visible=false
@@ -894,8 +938,18 @@ func _apply_season(name_in:String)->void:
 	for layer in 3:
 		var wash:=_wash_material(layer)
 		wash.set_shader_parameter("snow",snow)
-	for swarm in flies:
-		swarm.visible=season=="summer";swarm.emitting=swarm.visible and active
+	# flies about the meat in summer; a cloud of them when the stores are so
+	# full the meat is spoiling; a few in a mild autumn with full stores
+	var food:=clampf(float(facts.get("food",0.6)),0.0,1.0)
+	var count:=0
+	if season=="summer":count=22 if food>0.8 else (12 if food>0.5 else 6)
+	elif season=="autumn" and food>0.9:count=5
+	for i in flies.size():
+		var swarm:=flies[i]
+		var want:=count if i==0 else count/2
+		swarm.visible=want>0
+		if want>0 and swarm.amount!=want:swarm.amount=want
+		swarm.emitting=swarm.visible and active
 	if snowfall!=null:
 		snowfall.visible=season=="winter" and level=="high";snowfall.emitting=snowfall.visible and active
 	for puff in breaths:
@@ -981,6 +1035,10 @@ func set_quality(to:String,reason:="asked")->void:
 ## What the auto quality found, for a report.
 func quality_report()->Dictionary:
 	return {"level":level,"reason":level_reason,"frames":_frames_seen,"mean_frame_ms":(1000.0*_slow_time/maxf(1.0,float(_frames_seen)))}
+
+## Where the meat rack (or the stores) stands: where the flies gather.
+func rack_centre()->Vector3:
+	return _rack_at
 
 ## How many of a prop group are showing (tests, the director).
 func shown(group:String)->int:

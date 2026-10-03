@@ -145,8 +145,9 @@ func attach(stage:Node,camera:Camera3D,set_root:Node3D)->void:
 	if old!=null and old!=camera and is_instance_valid(old):
 		old.current=false
 		# the paper the court is painted on goes with the lens in use
-		var paper:=old.get_node_or_null("Paper")
-		if paper!=null and camera!=null:paper.reparent(camera,false)
+		for overlay in ["Paper","Ink"]:
+			var node:=old.get_node_or_null(overlay)
+			if node!=null and camera!=null:node.reparent(camera,false)
 	if camera!=null:camera.current=true
 	if set_root!=null and set_root.get("info") is Dictionary:configure((set_root.get("info") as Dictionary).get("camera",{}))
 	_insets_from_stage()
@@ -285,7 +286,8 @@ func frame_points(points:PackedVector3Array,yaw:=-1000.0,pitch:=-1000.0)->void:
 ## An animal close up (it has no head to frame by).
 func frame_animal(animal:Node3D,time:=0.0)->void:
 	var at:=animal.global_position
-	var pts:=PackedVector3Array([at+Vector3(-0.5,0.0,-0.5),at+Vector3(0.5,0.0,0.5),at+Vector3(0.0,0.75,0.0)])
+	var tall:=float((animal.get("info") as Dictionary).get("height",0.75)) if animal.get("info") is Dictionary else 0.75
+	var pts:=PackedVector3Array([at+Vector3(-0.55,-0.05,-0.55),at+Vector3(0.55,-0.05,0.55),at+Vector3(0.0,tall+0.3,0.0)])
 	_go(frame(pts,clampf(base_yaw,yaw_range.x,yaw_range.y),base_pitch*0.8,base_fov*0.7,0.0),base_fov*0.7,time,EASE_OUT,"animal",at)
 
 ## A small jolt (the god's wrath): strength 0..1, it settles in about a second.

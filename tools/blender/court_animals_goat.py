@@ -8,7 +8,7 @@ stare at the god's wrath), lie, lie_idle, look, stand_up.
 import math
 
 import bpy
-from mathutils import Vector, Quaternion
+from mathutils import Vector, Quaternion, Matrix
 from mathutils.noise import noise as _noise
 
 import cf_sdf as S
@@ -110,8 +110,11 @@ def build(quick=False):
         b.name = "Pupil.%s" % ("L" if s > 0 else "R")
         b.data.materials.append(A().material("EYE"))
         extras.append(b)
-    # stretch everything from the dog's frame to the goat's
+    # stretch everything from the dog's frame to the goat's (pieces placed by
+    # location are first baked into their vertices, so they stretch with it)
     for o in [body] + extras:
+        o.data.transform(o.matrix_world)
+        o.matrix_world = Matrix.Identity(4)
         for v in o.data.vertices:
             v.co = Vector((v.co.x * SCALE[0], v.co.y * SCALE[1], v.co.z * SCALE[2]))
     return body, extras
@@ -196,7 +199,7 @@ def g_startle(t):
     hop = a.env(t, 0.0, 0.08, 0.14, 0.32)
     brace = a.ramp(t, 0.25, 0.45)
     p = {}
-    a.add(p, "pelvis", loc=(0, 0.02 * hop, 0.07 * hop - 0.02 * brace))
+    a.add(p, "pelvis", loc=(0, 0.03 * hop, 0.12 * hop - 0.02 * brace))
     a.add(p, "neck", rot=(-30 * max(hop, brace), 0, 0))
     a.add(p, "head", rot=(-10 * max(hop, brace), 0, 0))
     a.add(p, "ear.L", rot=(-25, 0, -10))

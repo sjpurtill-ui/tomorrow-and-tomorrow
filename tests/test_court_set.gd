@@ -421,6 +421,40 @@ func test_the_season_shows()->void:
 	assert_float(float((made.call("_ground_material") as ShaderMaterial).get_shader_parameter("flowers"))).is_equal(1.0)
 
 
+func test_screen_ink_replaces_the_shells()->void:
+	CourtSet.ink="screen"
+	var made:=_built("chiefs_hall")
+	assert_str(String(made.get("ink_mode"))).is_equal("screen")
+	assert_object(made.get("ink_pass")).is_not_null()
+	# no piece of the set carries an inked shell of its own
+	for node in (made.get("model") as Node3D).find_children("*","MeshInstance3D",true,false):
+		var mesh_node:=node as MeshInstance3D
+		if mesh_node.mesh==null:continue
+		for surface in mesh_node.mesh.get_surface_count():
+			var mat:=mesh_node.get_surface_override_material(surface) as ShaderMaterial
+			if mat!=null:assert_object(mat.next_pass).override_failure_message("%s keeps a shell" % mesh_node.name).is_null()
+	CourtSet.ink="hull"
+	var old:=_built("chiefs_hall")
+	assert_object(old.get("ink_pass")).is_null()
+	var shells:=0
+	for node in (old.get("model") as Node3D).find_children("StaticInked","MeshInstance3D",true,false):
+		var mat:=(node as MeshInstance3D).get_surface_override_material(0) as ShaderMaterial
+		if mat!=null and mat.next_pass!=null:shells+=1
+	assert_int(shells).is_greater(0)
+	CourtSet.ink="screen"
+
+
+func test_flies_follow_the_season_and_the_stores()->void:
+	var made:=_built("hearth_council",{"season":"summer","food":0.95})
+	var flies:Array=made.get("flies")
+	var thick:=(flies[0] as GPUParticles3D).amount
+	assert_bool((flies[0] as Node3D).visible).is_true()
+	made.call("apply_facts",{"food":0.3})
+	assert_int((flies[0] as GPUParticles3D).amount).is_less(thick)
+	made.call("apply_facts",{"season":"winter"})
+	assert_bool((flies[0] as Node3D).visible).is_false()
+
+
 func test_set_rests_when_hidden()->void:
 	var made:=_built("chiefs_hall")
 	made.call("set_active",false)
