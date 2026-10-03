@@ -19,6 +19,7 @@ const Modal:=preload("res://scripts/hud/audience_modal.gd")
 const Stage:=preload("res://scripts/hud/court_stage.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
+const Acting:=preload("res://scripts/hud/court_acting.gd")
 
 var _root_size:=Vector2i.ZERO
 
@@ -203,3 +204,31 @@ func test_a_dropped_bowl_lies_on_the_floor_and_a_bundle_rides_the_hands()->void:
 	body.set_down()
 	assert_bool(body.is_processing()).is_false()
 	assert_float(bundle.global_position.y-body.global_position.y).is_less(0.2)
+
+
+func test_the_acted_ways_out_play_the_actings_own_walks()->void:
+	# With the acting (K) plugged in, backing out bowing plays its back_out
+	# and storming off its storm_walk; they still leave by the door and are
+	# gone at the end.
+	if not _ready_or_skip():return
+	if not Acting.has_clip("back_out") or not Acting.has_clip("storm_walk"):return
+	Stage.acting=Acting.service()
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	var other:Stage.Figure=null
+	for key in stage.cast_order:
+		var f:Stage.Figure=stage.figure(key)
+		if f!=null and f!=main and f.spot!=null and f.body3d!=null:other=f;break
+	main.leave(-1.0,1.0,0.0,"backward_bump")
+	main._move.custom_step(1.0)
+	var acting:Node=Acting.of(main.body3d)
+	assert_object(acting).is_not_null()
+	assert_str(String(acting.get("_a").clip)).is_equal("back_out")
+	if other!=null:
+		other.leave(-1.0,1.0,0.0,"storm_back")
+		other._move.custom_step(0.3)
+		assert_str(String(Acting.of(other.body3d).get("_a").clip)).is_equal("storm_walk")
+	stage.settle()
+	assert_bool(main.body3d.visible).is_false()

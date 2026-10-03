@@ -1989,11 +1989,11 @@ class Figure extends Control:
 			"led":
 				_move.tween_callback(func()->void:_clip("kneel",0.3,0.0);_light(0.78))
 				_move.tween_interval(1.1)
-				_move.tween_callback(func()->void:_clip("walk_out",0.3,0.0);_light(0.66))
-				pace*=1.25
+				_move.tween_callback(func()->void:_acted("walk_led","walk_out",0.3,{"loop":true});_light(0.66))
+				pace=_pace_of("walk_led",pace*1.25)
 			"storm":
-				_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
-				pace=float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+				_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
+				pace=_pace_of("storm_walk",float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT)
 			_:
 				_move.tween_callback(func()->void:body3d.face(rest_yaw*.2,0.25);_clip("bow",0.3,0.0))
 				_move.tween_interval(2.35)
@@ -2020,37 +2020,45 @@ class Figure extends Control:
 		if style.begins_with("backward"):
 			var back:=clampf(2.2/whole,0.15,0.6)
 			_move.tween_callback(func()->void:body3d.face(rest_yaw*.3,0.25);_clip("bow",0.3,0.0))
-			# Bowing all the way, a bow and a half-step, and another.
-			var bows:=3
-			for i in bows:
-				_move.tween_method(_back_step,back*float(i)/float(bows),back*float(i+1)/float(bows),0.8)
-				_move.tween_callback(func()->void:_clip("bow",0.2,0.25))
+			if Self.acting!=null and Self.Acting.has_clip("back_out"):
+				# The acting's own backing-away bow (K), a step at a time at its pace.
+				_move.tween_interval(0.5)
+				_move.tween_callback(func()->void:_acted("back_out","",0.25,{"loop":true}))
+				_move.tween_method(_back_step,0.0,back,clampf(whole*back/maxf(_pace_of("back_out",0.42),0.1),1.2,5.0))
+			else:
+				# Bowing all the way, a bow and a half-step, and another.
+				var bows:=3
+				for i in bows:
+					_move.tween_method(_back_step,back*float(i)/float(bows),back*float(i+1)/float(bows),0.8)
+					_move.tween_callback(func()->void:_clip("bow",0.2,0.25))
 			if style=="backward_bump":
 				# Into the post: a jolt forward, a look round, a bow to the post.
+				_move.tween_callback(func()->void:_acted("bump_post","",0.05))
 				_move.tween_property(self,"nudge",Vector3(0.0,0.0,0.12),0.08).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 				_move.tween_property(self,"nudge",Vector3.ZERO,0.2)
 				_move.tween_callback(func()->void:
 					var ahead:=_path_at(minf(back+0.05,1.0))-_path_at(back)
 					body3d.rotation.y=atan2(ahead.x,ahead.z)
 					_clip("bow",0.2,0.0))
-				_move.tween_interval(1.1)
-			_move.tween_callback(func()->void:_clip("walk_out",0.35,0.0))
+				_move.tween_interval(maxf(1.1,_length_of("bump_post",1.1)-0.28))
+			_move.tween_callback(func()->void:_let_go(0.3);_clip("walk_out",0.35,0.0))
 			_move.tween_method(_stroll_step.bind(false),back,1.0,clampf(whole*(1.0-back)/maxf(walk_pace,0.1),0.8,6.0))
 			_move.tween_callback(_vanish)
 			return
 		# Storming off, then back for what they left.
-		var stride:float=float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT
+		var stride:=_pace_of("storm_walk",float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT)
 		var door:=0.82
-		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
 		_move.tween_method(_stroll_step.bind(false),0.0,door,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
-		_move.tween_callback(func()->void:_clip(rest_clip,0.25))
-		_move.tween_interval(0.6)
-		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		# Stopped short at the door: they remember.
+		_move.tween_callback(func()->void:_clip(rest_clip,0.25);_acted("storm_stop","",0.06))
+		_move.tween_interval(maxf(0.6,_length_of("storm_stop",0.6)-0.2))
+		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
 		_move.tween_method(_stroll_step.bind(true),door,0.0,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
 		# Snatched up: their stance (and its prop) for a moment.
-		_move.tween_callback(func()->void:body3d.face(rest_yaw,0.2);_clip(rest_clip,0.2))
-		_move.tween_interval(0.7)
-		_move.tween_callback(func()->void:_clip("walk_in",0.25,0.0))
+		_move.tween_callback(func()->void:body3d.face(rest_yaw,0.2);_clip(rest_clip,0.2);_acted("snatch_up","",0.08))
+		_move.tween_interval(maxf(0.7,_length_of("snatch_up",0.7)-0.1))
+		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
 		_move.tween_method(_stroll_step.bind(false),0.0,1.0,clampf(whole/maxf(stride,0.1),0.8,5.0))
 		_move.tween_callback(_vanish)
 
@@ -2081,6 +2089,34 @@ class Figure extends Control:
 
 	func _clip(name:String,blend:=0.3,at:=-1.0)->void:
 		if body3d!=null and is_instance_valid(body3d):body3d.play(name,blend,at)
+
+	## One of the acting's clips (K: back_out, bump_post, storm_walk,
+	## storm_stop, snatch_up, walk_led...) over the figure's own, when the
+	## acting is plugged in and its library has it; the figure's own clip
+	## (fallback) underneath either way.
+	func _acted(name:String,fallback:String,blend:=0.25,opts:={})->void:
+		if body3d==null or not is_instance_valid(body3d):return
+		if not fallback.is_empty():_clip(fallback,blend,0.0)
+		if Self.acting!=null and Self.Acting.has_clip(name) and body3d.is_inside_tree():
+			var o:Dictionary=opts.duplicate();o["blend"]=blend
+			Self.Acting.play(body3d,name,o)
+
+	## The acting lets go of a looping walk (back to the figure's own clip).
+	func _let_go(blend:=0.3)->void:
+		if Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():Self.Acting.stop(body3d,blend)
+
+	## How fast this body covers the hall in one of the acting's walks (its
+	## own metres a second, for a 1.72 m body), else the given pace.
+	func _pace_of(name:String,otherwise:float)->float:
+		if Self.acting==null or not Self.Acting.has_clip(name):return otherwise
+		var mps:=float(Self.Acting.clip_meta(name).get("speed_mps",0.0))
+		if mps<=0.0:return otherwise
+		return mps*float(body3d.body_height)/1.72
+
+	## How long one of the acting's clips runs, else the given seconds.
+	func _length_of(name:String,otherwise:float)->float:
+		if Self.acting==null or not Self.Acting.has_clip(name):return otherwise
+		return maxf(float(Self.Acting.clip_length(name)),0.2)
 
 	## How much light falls where they stand (the set's), times the speaker's lift.
 	var light_base:=1.0
