@@ -1785,6 +1785,8 @@ func effective_workers(role:String,include_military_construction:bool=false,incl
 	# Makers on arms give the whole day to them (civilian_goods.gd arms_hands).
 	if role=="Crafting":capacity=maxf(0,capacity-preload("res://scripts/civilian_goods.gd").arms_hands(self))
 	capacity*=1.0+preload("res://scripts/undertaking_system.gd").benefit(self,role)
+	# A grown genius of this work makes each person on it count for more (geniuses.gd).
+	capacity*=1.0+preload("res://scripts/geniuses.gd").bonus(self,role)
 	if role=="Construction":capacity*=1.0-preload("res://scripts/undertaking_system.gd").share(self)
 	return capacity
 

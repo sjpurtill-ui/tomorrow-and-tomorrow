@@ -93,6 +93,10 @@ func _refresh()->void:
 		var bonus:float=WorldSimulation.figures.living_bonus(p)
 		var potential:float=(.12+float(p.talent)*.18)*100
 		effect.text="Their work speeds progress in %s by %.1f%% now. With your support it could reach %.1f%%." % [field,bonus*100,potential]
+	# A gifted figure's gift, by the engine's own numbers (geniuses.gd).
+	if p.get("genius") is Dictionary and p.status=="living":
+		var gift:=preload("res://scripts/geniuses.gd").gift_words(p)
+		effect.text="%s has %s.\n%s" % [String(p.name).get_slice(" ",0),gift,effect.text]
 	var pages:=1+ceili(float(p.events.size())/3.0)
 	chapter=clampi(chapter,0,pages-1); chapter_previous.disabled=chapter==0; chapter_next.disabled=chapter==pages-1
 	page.text="Their early life" if chapter==0 else "What they did · page %d of %d" % [chapter,pages-1]

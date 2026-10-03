@@ -250,6 +250,8 @@ static func wonder_motive(trigger:Dictionary,plan:Dictionary)->float:
 		# Hearing of another people's work: envy for the proud, awe for the curious.
 		"envy":return maxf(assertive*.7+(1-empathy)*.35,open*.55+empathy*.25)
 		"plenty":return open*.3+assertive*.3+risk*.3+.15
+		# A master builder of rare gift come of age: the open and daring build.
+		"genius":return open*.3+risk*.2+assertive*.1+.45
 	return 0.0
 
 static func wonder_purpose_fit(purpose:String,trigger:Dictionary,plan:Dictionary)->float:

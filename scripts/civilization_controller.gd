@@ -923,6 +923,9 @@ static func conception_trigger(id:String,plan:Dictionary)->Dictionary:
 	for material:String in ["Stone","Timber","Clay"]:stock+=float(state.resource_stockpiles.get(material,0))
 	if float(state.simulation_metrics.get("food_days",0))>FoodCare.store_gate(150) and stock>=state.population_exact*3:
 		found.append({"kind":"plenty","day":day,"text":"Our stores overflow"})
+	# A grown master builder of rare gift who has led no work yet (geniuses.gd).
+	var gifted:=preload("res://scripts/geniuses.gd").architect_trigger(WorldSimulation.figures,day,false)
+	if not gifted.is_empty():found.append(gifted)
 	var best:={};var strongest:=STRATEGY.WONDER_MOTIVE_THRESHOLD
 	for trigger:Dictionary in found:
 		var motive:=STRATEGY.wonder_motive(trigger,plan)

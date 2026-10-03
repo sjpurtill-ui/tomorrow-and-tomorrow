@@ -845,6 +845,8 @@ static func _summoned_speaker(target:Dictionary)->Dictionary:
 		var figure_role:=String(found.get("role","Architect"))
 		# War leaders answer the court by their calling, not as builders.
 		var figure_title:="War leader" if figure_role=="General" else "%s, master builder" % figure_role.capitalize()
+		# The gifted are called by their gift (geniuses.gd).
+		if found.get("genius") is Dictionary:figure_title=preload("res://scripts/geniuses.gd").court_title(found)
 		return {"name":name.substr(0,100),"title":figure_title,"person_id":0,"role":"official"}
 	return {}
 
