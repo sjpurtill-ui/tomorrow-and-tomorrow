@@ -1,0 +1,868 @@
+extends RefCounted
+## THE COURT'S EXECUTION SOUNDS: comic, juicy, synthesized (docs: court_night
+## EXECUTIONS.md). Cartoon gore in sound: SPLAT, CRACK, a hollow bonk, the
+## pot lid's clank, the fire's WHOOMPH, the neck's BOING, crunches and
+## squelches, a bone's pop, the saw's rasp, a long rip, the cauldron's bubbles,
+## the bear's gulp and burp, the elephant, the pigs, the ox, the whistle and
+## the far-off splat, the arrows, the muskets, the cannon, the geyser and the
+## patter on the front row, the retching, the groan, the lone clap, and the
+## musician's drum roll before and the hit on the punchline.
+##
+## The sounds must carry the joke on their own: with the gore setting "mild"
+## the picture cuts away and only these are heard. So each is a little larger
+## than life, and each act's timeline (ACTS) leaves the beat of silence where
+## the laugh goes.
+##
+## make(name, variant) -> samples; stream(name, variant) -> AudioStreamWAV.
+## CUES: every name L can cue ({variants, db, kind}). ACTS: the sound track of
+## an act, [{t, cue, who, db?, variant?}] (t in seconds from the act's own
+## moment, negative before it; who a role: executioner, victim, cook, dog,
+## room, musician, front_row, flatterer). court_sound.gd play_act() plays one.
+## Pure and deterministic; safe on a worker thread.
+
+const Synth:=preload("res://scripts/hud/court_synth.gd")
+const Voice:=preload("res://scripts/hud/court_voice.gd")
+const Music:=preload("res://scripts/hud/court_music.gd")
+const RATE:=22050
+
+const CUES:={
+	# impacts
+	"gore_splat":{"variants":3,"db":-5.0,"kind":"gore"},
+	"gore_crack":{"variants":2,"db":-4.0,"kind":"gore"},
+	"bonk":{"variants":3,"db":-7.0,"kind":"thing"},
+	"lid_clank":{"variants":2,"db":-8.0,"kind":"thing"},
+	"gore_chop":{"variants":2,"db":-5.0,"kind":"gore"},
+	"splat_distant":{"variants":2,"db":-10.0,"kind":"gore"},
+	# fire, spring, flight
+	"whoomph":{"variants":2,"db":-5.0,"kind":"fire"},
+	"boing":{"variants":2,"db":-7.0,"kind":"thing"},
+	"whistle_long":{"variants":2,"db":-11.0,"kind":"thing"},
+	"head_whistle":{"variants":2,"db":-12.0,"kind":"thing"},
+	"swing_whoosh":{"variants":3,"db":-8.0,"kind":"thing"},
+	# crunches, squelches, pops, saws, rips
+	"crunch":{"variants":3,"db":-7.0,"kind":"gore"},
+	"crunch_loop":{"variants":2,"db":-8.0,"kind":"gore"},
+	"wheel_crunch":{"variants":1,"db":-8.0,"kind":"gore"},
+	"squelch":{"variants":3,"db":-7.0,"kind":"gore"},
+	"bone_pop":{"variants":3,"db":-7.0,"kind":"gore"},
+	"saw_rasp":{"variants":1,"db":-10.0,"kind":"thing"},
+	"rip":{"variants":2,"db":-8.0,"kind":"gore"},
+	# liquids
+	"bubbling":{"variants":1,"db":-12.0,"kind":"thing"},
+	"pot_plop":{"variants":2,"db":-7.0,"kind":"thing"},
+	"spoon_stir":{"variants":1,"db":-13.0,"kind":"thing"},
+	"blood_geyser":{"variants":2,"db":-7.0,"kind":"gore"},
+	"blood_patter":{"variants":2,"db":-10.0,"kind":"gore"},
+	"blink":{"variants":1,"db":-14.0,"kind":"thing"},
+	# beasts
+	"bear_swallow":{"variants":1,"db":-6.0,"kind":"animal"},
+	"burp":{"variants":2,"db":-6.0,"kind":"animal"},
+	"elephant_trumpet":{"variants":2,"db":-6.0,"kind":"animal"},
+	"pig_swarm":{"variants":1,"db":-8.0,"kind":"animal"},
+	"ox_low":{"variants":2,"db":-9.0,"kind":"animal"},
+	"dog_snarl":{"variants":2,"db":-9.0,"kind":"animal"},
+	"drag":{"variants":2,"db":-12.0,"kind":"thing"},
+	"bone_drop":{"variants":2,"db":-10.0,"kind":"thing"},
+	# weapons
+	"arrow_volley":{"variants":1,"db":-7.0,"kind":"thing"},
+	"arrow_thunk":{"variants":3,"db":-8.0,"kind":"thing"},
+	"musket_volley":{"variants":2,"db":-4.0,"kind":"thing"},
+	"cannon_boom":{"variants":1,"db":-3.0,"kind":"thing"},
+	"axe_thunk":{"variants":2,"db":-6.0,"kind":"thing"},
+	"axe_clang":{"variants":2,"db":-8.0,"kind":"thing"},
+	"axe_pull":{"variants":1,"db":-10.0,"kind":"thing"},
+	"head_roll":{"variants":2,"db":-9.0,"kind":"thing"},
+	# people
+	"windup":{"variants":2,"db":-10.0,"kind":"voice"},
+	"retch":{"variants":2,"db":-9.0,"kind":"voice"},
+	"crowd_groan":{"variants":2,"db":-9.0,"kind":"voice"},
+	"lone_clap":{"variants":2,"db":-11.0,"kind":"thing"},
+	"ow":{"variants":2,"db":-11.0,"kind":"voice"},
+	# the musician
+	"drum_roll":{"variants":2,"db":-9.0,"kind":"music"},
+	"log_roll":{"variants":1,"db":-10.0,"kind":"music"},
+	"punch_drum":{"variants":2,"db":-8.0,"kind":"music"},
+	"punch_cymbal":{"variants":1,"db":-8.0,"kind":"music"},
+	"punch_log":{"variants":1,"db":-9.0,"kind":"music"},
+}
+
+## Each act's sound, as L's scene will play it (seconds from the act's moment;
+## negative before it). "punch" and "roll" are the musician's: play_act()
+## turns them into what the people can play (a cymbal only once they have
+## them, a drum, else hands on a log).
+const ACTS:={
+	# 2. Club home run: the wind-up, CRACK, the head's arc into the pot, the
+	# cook looks, stirs, puts the lid on. Ba-dum.
+	"club_home_run":[
+		{"t":-2.4,"cue":"roll","who":"musician"},
+		{"t":-0.9,"cue":"windup","who":"executioner"},
+		{"t":-0.12,"cue":"swing_whoosh","who":"executioner","variant":0},
+		{"t":0.0,"cue":"gore_crack","who":"victim"},
+		{"t":0.06,"cue":"head_whistle","who":"victim"},
+		{"t":1.25,"cue":"pot_plop","who":"cook"},
+		{"t":1.5,"cue":"room_gasp","who":"room"},
+		{"t":3.0,"cue":"spoon_stir","who":"cook"},
+		{"t":4.6,"cue":"lid_clank","who":"cook","variant":0},
+		{"t":5.15,"cue":"punch","who":"musician"},
+		{"t":6.0,"cue":"lone_clap","who":"flatterer"},
+	],
+	# 10. Three-swing beheading: stuck in the block; bounced off; off it pops,
+	# rolls to face the god, blinks; the geyser soaks the front row.
+	"three_swing_beheading":[
+		{"t":-2.4,"cue":"roll","who":"musician"},
+		{"t":-0.2,"cue":"swing_whoosh","who":"executioner","variant":1},
+		{"t":0.0,"cue":"axe_thunk","who":"executioner","variant":0},
+		{"t":0.9,"cue":"axe_pull","who":"executioner"},
+		{"t":2.3,"cue":"swing_whoosh","who":"executioner","variant":2},
+		{"t":2.5,"cue":"axe_clang","who":"executioner","variant":0},
+		{"t":3.15,"cue":"ow","who":"executioner","variant":0},
+		{"t":4.6,"cue":"swing_whoosh","who":"executioner","variant":0},
+		{"t":4.8,"cue":"gore_chop","who":"victim","variant":0},
+		{"t":4.86,"cue":"bone_pop","who":"victim","variant":1},
+		{"t":5.05,"cue":"head_roll","who":"victim","variant":0},
+		{"t":5.1,"cue":"blood_geyser","who":"victim","variant":0},
+		{"t":5.4,"cue":"room_gasp","who":"room"},
+		{"t":5.9,"cue":"blood_patter","who":"front_row","variant":0},
+		{"t":7.0,"cue":"blink","who":"victim"},
+		{"t":7.35,"cue":"punch","who":"musician"},
+		{"t":8.1,"cue":"retch","who":"front_row","variant":0},
+	],
+	# 4. Dog dinner: dragged behind the windbreak, snarls, loud crunching; the
+	# dog trots back, drops a thighbone at the god's feet, wags.
+	"dog_dinner":[
+		{"t":-2.0,"cue":"roll","who":"musician"},
+		{"t":0.0,"cue":"dog_snarl","who":"dog","variant":0},
+		{"t":0.2,"cue":"drag","who":"victim","variant":0},
+		{"t":1.6,"cue":"dog_snarl","who":"dog","variant":1},
+		{"t":2.0,"cue":"crunch_loop","who":"dog","variant":0},
+		{"t":2.4,"cue":"crowd_groan","who":"room","variant":0},
+		{"t":5.3,"cue":"crunch","who":"dog","variant":2},
+		{"t":6.6,"cue":"paws","who":"dog"},
+		{"t":7.6,"cue":"bone_drop","who":"dog","variant":0},
+		{"t":8.0,"cue":"dog_thump","who":"dog"},
+		{"t":8.3,"cue":"punch","who":"musician"},
+	],
+}
+
+static func has(name:String)->bool:
+	return CUES.has(name)
+
+static func variants(name:String)->int:
+	return int((CUES.get(name,{}) as Dictionary).get("variants",1))
+
+static func level(name:String)->float:
+	return float((CUES.get(name,{}) as Dictionary).get("db",-10.0))
+
+static func stream(name:String,variant:=0)->AudioStreamWAV:
+	return Synth.to_stream(make(name,variant),0.0)
+
+static func make(name:String,variant:=0)->PackedFloat32Array:
+	var v:=posmod(variant,maxi(1,variants(name)))
+	var rng:=RandomNumberGenerator.new();rng.seed=Synth.seed_of("court_gore|%s|%d" % [name,v])
+	var b:PackedFloat32Array
+	match name:
+		"gore_splat":b=splat(v,rng)
+		"gore_crack":b=crack(v,rng)
+		"bonk":b=bonk(v,rng)
+		"lid_clank":b=lid_clank(v,rng)
+		"gore_chop":b=chop(v,rng)
+		"splat_distant":b=splat_distant(v,rng)
+		"whoomph":b=whoomph(v,rng)
+		"boing":b=boing(v,rng)
+		"whistle_long":b=whistle(v,rng,2.6,2400.0,520.0)
+		"head_whistle":b=head_whistle(v,rng)
+		"swing_whoosh":b=whoosh(v,rng)
+		"crunch":b=crunch(v,rng)
+		"crunch_loop":b=crunch_loop(v,rng)
+		"wheel_crunch":b=wheel_crunch(v,rng)
+		"squelch":b=squelch(v,rng)
+		"bone_pop":b=bone_pop(v,rng)
+		"saw_rasp":b=saw_rasp(v,rng)
+		"rip":b=rip(v,rng)
+		"bubbling":b=bubbling(v,rng)
+		"pot_plop":b=pot_plop(v,rng)
+		"spoon_stir":b=spoon_stir(v,rng)
+		"blood_geyser":b=geyser(v,rng)
+		"blood_patter":b=patter(v,rng)
+		"blink":b=blink(v,rng)
+		"bear_swallow":b=bear_swallow(v,rng)
+		"burp":b=burp(v,rng)
+		"elephant_trumpet":b=trumpet(v,rng)
+		"pig_swarm":b=pig_swarm(v,rng)
+		"ox_low":b=ox_low(v,rng)
+		"dog_snarl":b=dog_snarl(v,rng)
+		"drag":b=drag(v,rng)
+		"bone_drop":b=bone_drop(v,rng)
+		"arrow_volley":b=arrow_volley(v,rng)
+		"arrow_thunk":b=arrow_thunk(v,rng)
+		"musket_volley":b=musket_volley(v,rng)
+		"cannon_boom":b=cannon(v,rng)
+		"axe_thunk":b=axe_thunk(v,rng)
+		"axe_clang":b=axe_clang(v,rng)
+		"axe_pull":b=axe_pull(v,rng)
+		"head_roll":b=head_roll(v,rng)
+		"windup":b=windup(v,rng)
+		"retch":b=retch(v,rng)
+		"crowd_groan":b=crowd_groan(v,rng)
+		"lone_clap":b=lone_clap(v,rng)
+		"ow":b=ow(v,rng)
+		"drum_roll":b=drum_roll(v,rng,"frame" if v==0 else "clay")
+		"log_roll":b=log_roll(v,rng)
+		"punch_drum":b=punch_drum(v,rng,"frame" if v==0 else "clay")
+		"punch_cymbal":b=punch_cymbal(v,rng)
+		"punch_log":b=punch_log(v,rng)
+		_:b=Synth.buffer(0.05)
+	Synth.fade_edges(b,0.002,0.02)
+	var top:=Synth.peak_of(b)
+	if top>0.0001:Synth.scale(b,0.7/top)
+	return b
+
+# =============================================================================
+# Pieces
+# =============================================================================
+
+## A falling tone (Hz) over seconds, enveloped: a thud, a gulp, a blip.
+static func _sweep(seconds:float,f0:float,f1:float,harm:Array,attack:=0.004)->PackedFloat32Array:
+	var t:=Synth.tone(Synth.track(seconds,[[0.0,f0],[seconds,f1]]),harm)
+	Synth.shape(t,[[0.0,0.0],[attack,1.0],[seconds,0.0]])
+	return t
+
+## Wet noise: white noise through a band that moves (Hz a point), enveloped.
+static func _wet(seconds:float,points:Array,q:float,rng:RandomNumberGenerator,env:Array)->PackedFloat32Array:
+	var n:=Synth.white(seconds,rng)
+	var c:=Synth.track(seconds,points)
+	var frames:=PackedFloat32Array();frames.resize(c.size()/32+1)
+	for i in frames.size():frames[i]=c[mini(i*32,c.size()-1)]
+	Synth.bandpass_track(n,frames,q)
+	Synth.lowpass(n,3800.0)
+	Synth.shape(n,env)
+	return n
+
+## A few bubbles (a gas pocket's ring rises in pitch as it shrinks).
+static func _bubbles(b:PackedFloat32Array,from:float,to:float,count:int,low:float,high:float,amp:float,rng:RandomNumberGenerator)->void:
+	for k in count:
+		var f:=rng.randf_range(low,high)
+		var d:=rng.randf_range(0.02,0.05)
+		var bl:=_sweep(d,f,f*rng.randf_range(1.3,1.8),[1.0],0.002)
+		Synth.mix_into(b,bl,Synth.n_of(rng.randf_range(from,to)),amp*rng.randf_range(0.5,1.0))
+
+## A heavy thud on the earth floor.
+static func _thud(b:PackedFloat32Array,at:float,f:float,amp:float,rng:RandomNumberGenerator)->void:
+	Synth.mix_into(b,_sweep(0.3,f,f*0.55,[1.0,0.4,0.15]),Synth.n_of(at),amp*0.8)
+	# the knock that carries on small speakers
+	Synth.modal(b,at,[Vector3(f*4.2,0.5,0.05),Vector3(f*7.1,0.25,0.03)],rng,amp)
+	var dirt:=Synth.white(0.08,rng)
+	Synth.lowpass2(dirt,500.0)
+	Synth.shape(dirt,[[0.0,1.0],[0.08,0.0]])
+	Synth.mix_into(b,dirt,Synth.n_of(at),amp*0.8)
+
+# =============================================================================
+# Impacts
+# =============================================================================
+
+## SPLAT: the low thump of the weight, the wet "splorch" sweeping down, a few
+## bubbles in the squish, and the spatter landing round about.
+static func splat(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.0)
+	_thud(b,0.0,72.0+v*8.0,1.0,rng)
+	Synth.mix_into(b,_wet(0.32,[[0.0,1400.0],[0.06,900.0],[0.32,280.0]],1.6,rng,[[0.0,0.0],[0.004,1.0],[0.08,0.6],[0.32,0.0]]),0,2.2)
+	_bubbles(b,0.05,0.45,6+v*2,180.0,420.0,0.35,rng)
+	for k in 14:Synth.burst(b,rng.randf_range(0.08,0.7),0.004,rng.randf_range(2000.0,4500.0),1.5,rng.randf_range(0.05,0.2),rng)
+	return b
+
+## A splat heard from beyond the wall: duller, smaller, with the wall's echo.
+static func splat_distant(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var near:=splat(v,rng)
+	Synth.lowpass(near,1500.0)
+	var b:=Synth.buffer(1.4)
+	Synth.mix_into(b,near,0,1.0)
+	Synth.mix_into(b,near,Synth.n_of(0.21),0.25)
+	return b
+
+## CRACK: a club meets a head, a bat meets a ball: a hard click, the hollow
+## wood-and-bone ring, a crunch inside it, the thump.
+static func crack(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.6)
+	Synth.burst(b,0.0,0.004,3200.0,0.5,1.4,rng)
+	Synth.modal(b,0.0,[Vector3(470.0+v*60.0,0.8,0.06),Vector3(1120.0+v*90.0,0.6,0.045),Vector3(2350.0,0.4,0.03),Vector3(3900.0,0.25,0.02)],rng,1.0)
+	for k in 7:Synth.burst(b,0.003+rng.randf_range(0.0,0.035),0.003,rng.randf_range(1500.0,4000.0),1.2,rng.randf_range(0.3,0.7),rng)
+	Synth.mix_into(b,_sweep(0.18,140.0,80.0,[1.0,0.3]),0,0.6)
+	return b
+
+## A hollow comic bonk: a stone on a skull, a coconut's knock, its pitch
+## dropping as it rings.
+static func bonk(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.45)
+	var f:=380.0+v*90.0
+	Synth.mix_into(b,_sweep(0.32,f,f*0.8,[1.0,0.0,0.18],0.002),0,1.0)
+	Synth.mix_into(b,_sweep(0.08,f*2.31,f*2.0,[1.0],0.001),0,0.35)
+	Synth.burst(b,0.0,0.003,2500.0,1.0,0.5,rng)
+	return b
+
+## A lid set on a pot: the clank, then the lid rocking on its rim, quicker
+## and quicker, and still. 0: clay; 1: bronze (rings long).
+static func lid_clank(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.2)
+	var modes:Array=[Vector3(880,1.0,0.05),Vector3(2140,0.6,0.035),Vector3(3650,0.3,0.02)]
+	if v==1:modes=[Vector3(1240,1.0,0.5),Vector3(2930,0.7,0.35),Vector3(4710,0.4,0.22),Vector3(6260,0.2,0.15)]
+	Synth.modal(b,0.0,modes,rng,1.0)
+	Synth.burst(b,0.0,0.004,2500.0,1.0,0.6,rng)
+	var t:=0.11;var gap:=0.075;var amp:=0.45
+	while gap>0.012 and t<1.0:
+		Synth.modal(b,t,modes.slice(0,2),rng,amp)
+		t+=gap;gap*=0.78;amp*=0.8
+	return b
+
+## The third swing lands: a wet thock through the neck and into the block.
+static func chop(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.7)
+	Synth.burst(b,0.0,0.005,2600.0,0.7,1.0,rng)
+	Synth.modal(b,0.004,[Vector3(180.0,0.7,0.08),Vector3(430.0,0.5,0.05),Vector3(950.0,0.3,0.03)],rng,1.0)
+	Synth.mix_into(b,_wet(0.25,[[0.0,1200.0],[0.25,350.0]],1.8,rng,[[0.0,0.0],[0.003,1.0],[0.25,0.0]]),0,1.6)
+	_bubbles(b,0.04,0.3,4+v,200.0,500.0,0.25,rng)
+	return b
+
+# =============================================================================
+# Fire, spring, flight, swings
+# =============================================================================
+
+## WHOOMPH: the fire takes a whole person at once: air sucked in, then the
+## roar flaring up and settling, a low boom under it, crackling after.
+static func whoomph(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=2.2
+	var b:=Synth.pink(d,rng,1.0)
+	var c:=Synth.track(d,[[0.0,250.0],[0.12,350.0],[0.32,2600.0+v*400.0],[1.2,700.0],[d,400.0]])
+	var frames:=PackedFloat32Array();frames.resize(c.size()/32+1)
+	for i in frames.size():frames[i]=c[mini(i*32,c.size()-1)]
+	Synth.bandpass_track(b,frames,0.8)
+	Synth.shape(b,[[0.0,0.0],[0.14,0.25],[0.3,1.0],[0.7,0.6],[d,0.0]])
+	Synth.mix_into(b,_sweep(1.0,62.0,38.0,[1.0,0.3]),Synth.n_of(0.24),0.9)
+	var t:=0.5
+	while t<d-0.1:
+		Synth.burst(b,t,0.002,rng.randf_range(2000.0,5000.0),1.0,rng.randf_range(0.1,0.35),rng);t+=rng.randf_range(0.02,0.12)
+	return b
+
+## BOING: the stretched neck springs back: a twanging tone whose pitch wobbles
+## wide and settles, through a jaw-harp mouth.
+static func boing(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=1.3+0.3*v
+	var f0:=150.0-30.0*v
+	var p:=Synth.buffer(d)
+	for i in p.size():
+		var t:=float(i)/RATE
+		p[i]=f0*(1.0+0.45*exp(-t*3.0)*sin(TAU*(11.0-2.0*v)*t))*(1.0+0.25*exp(-t*8.0))
+	var b:=Synth.tone(p,[1.0,0.7,0.5,0.35,0.25,0.18,0.12])
+	Synth.resonate(b,800.0,220.0)
+	Synth.shape(b,[[0.0,0.0],[0.005,1.0],[d*0.4,0.5],[d,0.0]])
+	return b
+
+## A long falling whistle (a catapult's passenger, high over the wall).
+static func whistle(v:int,rng:RandomNumberGenerator,d:float,f_hi:float,f_lo:float)->PackedFloat32Array:
+	var p:=Synth.track(d,[[0.0,f_hi*(1.0+0.05*v)],[d*0.5,f_hi*0.62],[d,f_lo]])
+	for i in p.size():p[i]*=1.0+0.012*sin(TAU*6.0*float(i)/RATE)
+	var b:=Synth.tone(p,[1.0,0.12])
+	var air:=Synth.white(d,rng,0.25)
+	Synth.bandpass(air,1800.0,1.0)
+	for i in b.size():b[i]+=air[i]*0.3
+	Synth.shape(b,[[0.0,0.0],[0.08,1.0],[d*0.8,0.8],[d,0.0]])
+	return b
+
+## A head sailing up and over into the pot: a rising-then-falling whistle.
+static func head_whistle(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=1.2
+	var p:=Synth.track(d,[[0.0,900.0],[0.45,1700.0+v*200.0],[d,700.0]])
+	var b:=Synth.tone(p,[1.0,0.1])
+	var air:=Synth.white(d,rng,0.4)
+	Synth.bandpass(air,1500.0,2.0)
+	for i in b.size():b[i]=b[i]*0.7+air[i]*0.15
+	Synth.shape(b,[[0.0,0.0],[0.1,1.0],[d*0.8,0.7],[d,0.0]])
+	return b
+
+## A big swing through the air.
+static func whoosh(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=0.42+0.06*v
+	return _wet(d,[[0.0,300.0],[d*0.55,1500.0+v*250.0],[d,400.0]],1.1,rng,[[0.0,0.0],[d*0.55,1.0],[d,0.0]])
+
+# =============================================================================
+# Crunches, squelches, pops, saws, rips
+# =============================================================================
+
+## A bone crunched: a snap, then a dense cluster of crackles, with the wet in it.
+static func crunch(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=0.35+0.08*v
+	var b:=Synth.buffer(d+0.15)
+	Synth.burst(b,0.0,0.004,1800.0,0.8,1.0,rng)
+	Synth.mix_into(b,_sweep(0.08,260.0,140.0,[1.0,0.4]),0,0.5)
+	var t:=0.005
+	while t<d:
+		Synth.burst(b,t,0.0025,rng.randf_range(1400.0,5000.0),1.3,rng.randf_range(0.2,0.8)*(1.0-0.6*t/d),rng);t+=rng.randf_range(0.003,0.018)
+	Synth.mix_into(b,_wet(d,[[0.0,700.0],[d,400.0]],1.5,rng,[[0.0,0.0],[0.01,0.6],[d,0.0]]),0,0.7)
+	return b
+
+## The dogs at their dinner, behind the windbreak: crunch after crunch, wet
+## chewing between, a growl under it, a gnaw.
+static func crunch_loop(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=3.4
+	var b:=Synth.buffer(d)
+	var t:=0.05
+	while t<d-0.5:
+		var one:=crunch(rng.randi_range(0,2),rng)
+		Synth.mix_into(b,one,Synth.n_of(t),rng.randf_range(0.6,1.0))
+		for k in 3:Synth.mix_into(b,_wet(0.09,[[0.0,600.0],[0.09,300.0]],2.0,rng,[[0.0,0.0],[0.02,1.0],[0.09,0.0]]),Synth.n_of(t+0.25+k*0.11),0.35)
+		t+=rng.randf_range(0.42,0.66)
+	var g:=dog_snarl(1,rng)
+	Synth.mix_into(b,g,Synth.n_of(1.2),0.35)
+	return b
+
+## Tied to a wheel and rolled out of the door and down the hill: crunch...
+## crunch... crunch, further each time, and the wheel's rumble going.
+static func wheel_crunch(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=4.6
+	var b:=Synth.buffer(d)
+	var t:=0.1;var k:=0
+	while t<d-0.6:
+		var one:=crunch(k%3,rng)
+		Synth.lowpass(one,4000.0-k*500.0)
+		Synth.mix_into(b,one,Synth.n_of(t),pow(0.66,k))
+		t+=0.55+k*0.06;k+=1
+	var rumble:=Synth.brown(d,rng,1.0)
+	Synth.lowpass(rumble,160.0)
+	for i in rumble.size():
+		var tt:=float(i)/RATE
+		rumble[i]*=(0.6+0.4*sin(TAU*2.2*tt))*exp(-tt*0.8)
+	Synth.mix_into(b,rumble,0,0.22)
+	return b
+
+## A squelch: a wet squish whose band slides like a vowel, with bubbles.
+static func squelch(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=0.38+0.08*v
+	var b:=_wet(d,[[0.0,320.0],[d*0.35,1250.0],[d,480.0]],4.0,rng,[[0.0,0.0],[0.02,1.0],[d*0.7,0.7],[d,0.0]])
+	var flutter:=Synth.wander(d,0.012,rng,0.4,1.0)
+	for i in b.size():b[i]*=flutter[i]
+	_bubbles(b,0.05,d,5,250.0,600.0,0.12,rng)
+	return b
+
+## A bone pops out of its joint: a click, a short knock, a tiny squish.
+static func bone_pop(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.3)
+	Synth.burst(b,0.0,0.003,3000.0+v*400.0,1.2,1.0,rng)
+	Synth.modal(b,0.0,[Vector3(680.0+v*90.0,0.7,0.03),Vector3(1650.0,0.3,0.015)],rng,1.0)
+	Synth.mix_into(b,_wet(0.12,[[0.0,900.0],[0.12,400.0]],3.0,rng,[[0.0,0.0],[0.005,1.0],[0.12,0.0]]),Synth.n_of(0.01),0.5)
+	return b
+
+## Two men sawing lengthwise: stroke and back, the teeth rasping (the noise
+## chopped at the teeth's rate, which rises and falls with the stroke).
+static func saw_rasp(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var stroke:=0.5
+	var b:=Synth.buffer(stroke*6.0+0.2)
+	for s in 6:
+		var n:=Synth.white(stroke,rng)
+		var ph:=0.0
+		for i in n.size():
+			var x:=float(i)/float(n.size())
+			var speed:=sin(PI*x)
+			ph+=(40.0+60.0*speed)*(1.2 if s%2==0 else 0.9)/RATE
+			n[i]*=(0.25+0.75*pow(0.5+0.5*sin(TAU*ph),4.0))*speed
+		var hi:=n.duplicate()
+		Synth.bandpass(n,2600.0 if s%2==0 else 2100.0,1.2)
+		Synth.bandpass(hi,900.0,1.0)
+		for i in n.size():n[i]+=hi[i]*0.5
+		Synth.mix_into(b,n,Synth.n_of(0.05+s*stroke),1.0)
+	Synth.lowpass(b,5000.0)
+	return b
+
+## A long rip, lengthwise: tearing that speeds up and ends in a pop and a flap.
+static func rip(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=0.9+0.2*v
+	var b:=Synth.buffer(d+0.3)
+	var t:=0.0
+	while t<d:
+		var x:=t/d
+		Synth.burst(b,t,0.0018,rng.randf_range(1200.0,3800.0),1.3,rng.randf_range(0.3,1.0)*(0.4+0.6*x),rng)
+		t+=lerpf(0.02,0.0025,x)*rng.randf_range(0.6,1.4)
+	Synth.mix_into(b,_wet(d,[[0.0,500.0],[d,900.0]],1.5,rng,[[0.0,0.0],[d*0.3,0.4],[d,0.8]]),0,0.6)
+	Synth.burst(b,d,0.01,1500.0,0.8,1.0,rng)
+	Synth.mix_into(b,_wet(0.2,[[0.0,600.0],[0.2,250.0]],1.0,rng,[[0.0,1.0],[0.2,0.0]]),Synth.n_of(d+0.02),0.6)
+	return b
+
+# =============================================================================
+# Liquids
+# =============================================================================
+
+## The cauldron on the boil: bubbles rising and bursting over a low rumble.
+static func bubbling(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=4.0
+	var b:=Synth.brown(d,rng,0.25)
+	Synth.lowpass(b,200.0)
+	_bubbles(b,0.0,d-0.1,70,180.0,900.0,0.5,rng)
+	return Synth.seamless(b,0.3)
+
+## Something heavy into the pot: the "bloop", the splash, drops falling back.
+static func pot_plop(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.9)
+	Synth.mix_into(b,_sweep(0.16,240.0+v*30.0,95.0,[1.0,0.2],0.003),0,1.0)
+	Synth.mix_into(b,_wet(0.35,[[0.0,2600.0],[0.35,1100.0]],1.0,rng,[[0.0,0.0],[0.006,1.0],[0.35,0.0]]),Synth.n_of(0.01),0.9)
+	_bubbles(b,0.08,0.5,7,300.0,800.0,0.3,rng)
+	for k in 8:Synth.burst(b,rng.randf_range(0.2,0.75),0.004,rng.randf_range(1800.0,3500.0),2.0,rng.randf_range(0.05,0.15),rng)
+	# the pot rings a little
+	Synth.modal(b,0.0,[Vector3(330.0,0.2,0.2),Vector3(790.0,0.1,0.12)],rng,1.0)
+	return b
+
+## The cook stirs: liquid swirling round, the spoon knocking the pot's side.
+static func spoon_stir(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=1.6
+	var b:=Synth.white(d,rng)
+	var c:=Synth.buffer(d)
+	for i in c.size():c[i]=700.0+350.0*sin(TAU*1.6*float(i)/RATE)
+	var frames:=PackedFloat32Array();frames.resize(c.size()/32+1)
+	for i in frames.size():frames[i]=c[mini(i*32,c.size()-1)]
+	Synth.bandpass_track(b,frames,3.0)
+	Synth.shape(b,[[0.0,0.0],[0.15,1.0],[d-0.2,1.0],[d,0.0]])
+	for k in 3:Synth.modal(b,0.3+k*0.62,[Vector3(520.0,0.5,0.04),Vector3(1300.0,0.25,0.02)],rng,1.0)
+	return b
+
+## The blood geyser: spurts in time with a heart that has not heard the news,
+## each weaker, a wet hiss and gurgle.
+static func geyser(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=2.8
+	var b:=Synth.buffer(d)
+	var t:=0.0;var amp:=1.0
+	while t<d-0.3:
+		var spurt:=_wet(0.38,[[0.0,1600.0],[0.38,700.0]],1.2,rng,[[0.0,0.0],[0.01,1.0],[0.38,0.0]])
+		Synth.mix_into(b,spurt,Synth.n_of(t),amp)
+		_bubbles(b,t+0.05,t+0.3,3,200.0,450.0,0.3*amp,rng)
+		t+=0.42+0.05*v;amp*=0.78
+	Synth.lowpass(b,2800.0)
+	return b
+
+## Patter on the front row: drops landing, a lot and then fewer, a few big drips.
+static func patter(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=2.0
+	var b:=Synth.buffer(d)
+	var t:=0.0
+	while t<d:
+		var x:=t/d
+		Synth.burst(b,t,0.003,rng.randf_range(2000.0,5000.0),2.0,rng.randf_range(0.2,0.8)*(1.0-0.7*x),rng)
+		if rng.randf()<0.25:Synth.mix_into(b,_sweep(0.03,rng.randf_range(400.0,800.0),300.0,[1.0],0.001),Synth.n_of(t),0.2)
+		t+=lerpf(0.006,0.12,x*x)*rng.randf_range(0.5,1.5)
+	for k in 3:Synth.mix_into(b,_sweep(0.05,1400.0,2200.0,[1.0],0.002),Synth.n_of(rng.randf_range(0.6,1.9)),0.4)
+	return b
+
+## The head blinks: a tiny wet "plip".
+static func blink(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.15)
+	Synth.mix_into(b,_sweep(0.035,1700.0,2500.0,[1.0],0.001),0,1.0)
+	Synth.burst(b,0.0,0.002,3500.0,2.0,0.3,rng)
+	return b
+
+# =============================================================================
+# Beasts
+# =============================================================================
+
+static func _beast(f0:float,fs:float,extra:Dictionary)->Dictionary:
+	var v:=Voice.plain("man",int(f0))
+	v["f0"]=f0;v["fs"]=fs
+	v.merge(extra,true)
+	return v
+
+## The bear swallows them whole: GLORP, throat working.
+static func bear_swallow(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.2)
+	var bear:=_beast(62.0,0.72,{"breath":0.3,"jitter":0.05,"shimmer":0.2,"fry":0.15,"rd":1.0})
+	var gl:=Voice.gesture(bear,[[0.02,"o",0.0,0.0,1.0,0.8],[0.25,"o",0.9,0.3,0.85,0.8],[0.25,"u",0.8,0.2,0.7,1.0],[0.05,"u",0.0,0.0,0.7]],rng.randi())
+	Synth.mix_into(b,gl,0,1.0)
+	Synth.mix_into(b,_sweep(0.3,380.0,110.0,[1.0,0.3],0.005),Synth.n_of(0.15),0.7)
+	for k in 3:Synth.burst(b,0.55+k*0.12,0.006,900.0,2.0,0.3,rng)
+	return b
+
+## A long, satisfied burp.
+static func burp(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var who:=_beast(72.0 if v==0 else 95.0,0.78 if v==0 else 0.9,{"breath":0.25,"jitter":0.08,"shimmer":0.3,"fry":0.3,"rd":0.7})
+	var b:=Voice.gesture(who,[[0.02,"o",0.0,0.0,1.0],[0.25,"o",0.9,0.2,1.1],[0.35,"a",1.0,0.25,0.95],[0.25,"o",0.8,0.2,0.8],[0.05,"u",0.0,0.0,0.8]],rng.randi())
+	var out:=Synth.buffer(1.1)
+	Synth.mix_into(out,b,0,1.0)
+	Synth.burst(out,0.9,0.006,700.0,1.0,0.4,rng)
+	return out
+
+## An elephant trumpets: a rough brassy tone rising and wavering through its trunk.
+static func trumpet(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=1.3
+	var p:=Synth.track(d,[[0.0,330.0+v*40.0],[0.15,520.0+v*60.0],[0.9,480.0],[d,420.0]])
+	var growl:=Synth.wander(d,0.04,rng,0.9,1.1)
+	for i in p.size():p[i]*=growl[i]
+	var harm:Array=[]
+	for k in 18:harm.append(1.0/float(k+1))
+	var b:=Synth.tone(p,harm)
+	for i in b.size():b[i]*=0.7+0.3*sin(TAU*27.0*float(i)/RATE)
+	var trunk:=b.duplicate()
+	Synth.resonate(trunk,1250.0,300.0)
+	var bell:=b.duplicate()
+	Synth.resonate(bell,2700.0,500.0)
+	for i in b.size():b[i]=b[i]*0.2+trunk[i]+bell[i]*0.5
+	var air:=Synth.white(d,rng,0.15)
+	Synth.bandpass(air,2000.0,0.8)
+	for i in b.size():b[i]+=air[i]
+	Synth.shape(b,[[0.0,0.0],[0.06,1.0],[d*0.7,0.9],[d,0.0]])
+	Synth.lowpass(b,6000.0)
+	return b
+
+## The pig pen: grunts, squeals and chomping, many pigs at once.
+static func pig_swarm(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=3.2
+	var b:=Synth.buffer(d)
+	for k in 16:
+		var at:=rng.randf_range(0.0,d-0.4)
+		if rng.randf()<0.7:
+			var pig:=_beast(rng.randf_range(95.0,140.0),0.95,{"breath":0.4,"jitter":0.06,"shimmer":0.25,"fry":0.1,"nasal":0.6})
+			var g:=Voice.gesture(pig,[[0.01,"o",0.0,0.0,1.0,1.0],[0.08,"o",0.8,0.4,1.25,1.0],[0.07,"u",0.6,0.3,0.9,1.0],[0.02,"u",0.0,0.0,0.9]],rng.randi())
+			Synth.mix_into(b,g,Synth.n_of(at),rng.randf_range(0.5,1.0))
+		else:
+			var sq:=_sweep(0.25,rng.randf_range(900.0,1300.0),rng.randf_range(1300.0,1700.0),[1.0,0.4,0.2],0.01)
+			Synth.mix_into(b,sq,Synth.n_of(at),rng.randf_range(0.2,0.45))
+	var t:=0.1
+	while t<d-0.1:
+		Synth.burst(b,t,0.006,rng.randf_range(1500.0,3000.0),1.5,rng.randf_range(0.1,0.3),rng);t+=rng.randf_range(0.04,0.15)
+	return b
+
+## The ox lows: "mmmoooaaa".
+static func ox_low(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var ox:=_beast(92.0+v*12.0,0.8,{"breath":0.2,"jitter":0.03,"shimmer":0.1})
+	return Voice.gesture(ox,[[0.02,"u",0.0,0.0,1.0,1.0],[0.3,"u",0.8,0.1,1.1,1.0],[0.5,"o",1.0,0.15,1.25],[0.6,"a",0.9,0.2,1.0],[0.2,"o",0.5,0.2,0.85],[0.05,"u",0.0,0.0,0.8]],rng.randi())
+
+## The camp dogs growl and snarl as they drag their dinner off.
+static func dog_snarl(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var dog:=_beast(85.0+v*20.0,1.25,{"breath":0.45,"jitter":0.1,"shimmer":0.35,"fry":0.25,"rd":0.8})
+	var b:=Voice.gesture(dog,[[0.02,"a",0.0,0.0,1.0],[0.5,"a",0.7,0.5,1.05],[0.3,"ae",0.8,0.5,1.4],[0.3,"a",0.6,0.5,1.0],[0.05,"a",0.0,0.0,1.0]],rng.randi())
+	for i in b.size():b[i]*=0.6+0.4*sin(TAU*31.0*float(i)/RATE)
+	return b
+
+## A body dragged over the earth floor.
+static func drag(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=1.6
+	var b:=Synth.pink(d,rng,1.0)
+	Synth.lowpass(b,1600.0)
+	var scrape:=Synth.white(d,rng,0.4)
+	Synth.bandpass(scrape,2100.0,1.5)
+	for i in b.size():b[i]+=scrape[i]
+	var grit:=Synth.wander(d,0.01,rng,0.3,1.0)
+	var tugs:=Synth.buffer(d)
+	for i in tugs.size():tugs[i]=0.4+0.6*pow(0.5+0.5*sin(TAU*1.8*float(i)/RATE),2.0)
+	for i in b.size():b[i]*=grit[i]*tugs[i]
+	Synth.shape(b,[[0.0,0.0],[0.1,1.0],[d*0.7,0.8],[d,0.0]])
+	return b
+
+## A bone dropped at the god's feet: a dry knock, a bounce.
+static func bone_drop(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.6)
+	Synth.modal(b,0.0,[Vector3(640.0+v*80.0,1.0,0.04),Vector3(1580.0,0.5,0.025),Vector3(2900.0,0.25,0.015)],rng,1.0)
+	Synth.mix_into(b,_sweep(0.06,160.0,110.0,[1.0]),0,0.4)
+	Synth.modal(b,0.16,[Vector3(640.0+v*80.0,0.5,0.03),Vector3(1580.0,0.2,0.02)],rng,0.5)
+	Synth.modal(b,0.26,[Vector3(640.0+v*80.0,0.25,0.02)],rng,0.4)
+	return b
+
+# =============================================================================
+# Weapons
+# =============================================================================
+
+## One arrow arriving: a short hiss, a thunk into the target, the shaft's quiver.
+static func arrow_thunk(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.6)
+	Synth.mix_into(b,_wet(0.09,[[0.0,2400.0],[0.09,900.0]],1.5,rng,[[0.0,0.0],[0.07,1.0],[0.09,0.0]]),0,0.4)
+	var at:=0.09
+	Synth.burst(b,at,0.004,1500.0,1.0,0.8,rng)
+	Synth.modal(b,at,[Vector3(190.0+v*25.0,0.7,0.05),Vector3(520.0,0.4,0.03)],rng,1.0)
+	# the shaft quivers: a fast-wobbling twang, dying
+	var q:=Synth.buffer(0.35)
+	for i in q.size():
+		var t:=float(i)/RATE
+		q[i]=sin(TAU*(95.0+v*10.0)*t+2.0*sin(TAU*14.0*t))*exp(-t*12.0)
+	Synth.mix_into(b,q,Synth.n_of(at+0.005),0.35)
+	return b
+
+## A volley: arrows hissing in and thunking home, close together, ragged.
+static func arrow_volley(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(2.0)
+	for k in 11:
+		Synth.mix_into(b,arrow_thunk(k%3,rng),Synth.n_of(rng.randf_range(0.0,1.25)),rng.randf_range(0.6,1.0))
+	return b
+
+## A musket volley: a ragged rank of cracks and booms, then the smoke's echo.
+static func musket_volley(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=2.8
+	var b:=Synth.buffer(d)
+	for k in 5+v*2:
+		var at:=rng.randf_range(0.0,0.14)
+		Synth.burst(b,at,0.006,3000.0,0.4,1.2,rng)
+		Synth.burst(b,at,0.09,700.0,0.7,1.4,rng)
+		Synth.mix_into(b,_sweep(0.35,140.0,60.0,[1.0,0.6,0.4,0.2],0.002),Synth.n_of(at),0.6)
+	var tail:=Synth.brown(d,rng,1.0)
+	Synth.lowpass(tail,500.0)
+	Synth.shape(tail,[[0.0,0.0],[0.06,1.0],[0.6,0.4],[d,0.0]])
+	Synth.mix_into(b,tail,0,0.35)
+	var echo:=b.duplicate()
+	Synth.lowpass(echo,1500.0)
+	Synth.mix_into(b,echo,Synth.n_of(0.28),0.3)
+	return b
+
+## The cannon: a crack, a chest-deep boom, the rumble rolling away, bits falling.
+static func cannon(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=3.6
+	var b:=Synth.buffer(d)
+	Synth.burst(b,0.0,0.01,2200.0,0.4,1.5,rng)
+	Synth.mix_into(b,_sweep(0.9,58.0,28.0,[1.0,0.5,0.2],0.003),0,1.0)
+	# the body of the BOOM, where small speakers can say it
+	Synth.burst(b,0.0,0.6,320.0,0.6,2.2,rng)
+	Synth.mix_into(b,_sweep(0.7,130.0,70.0,[1.0,0.8,0.6,0.45,0.3,0.2],0.003),0,0.9)
+	var rumble:=Synth.brown(d,rng,1.0)
+	Synth.lowpass(rumble,400.0)
+	Synth.shape(rumble,[[0.0,0.0],[0.03,1.0],[1.2,0.5],[d,0.0]])
+	Synth.mix_into(b,rumble,0,1.0)
+	var t:=0.6
+	while t<2.6:
+		Synth.burst(b,t,0.004,rng.randf_range(1500.0,4000.0),1.2,rng.randf_range(0.05,0.2),rng);t+=rng.randf_range(0.03,0.2)
+	return b
+
+## The axe bites into the block and sticks: a deep wooden thunk, a creak.
+static func axe_thunk(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.8)
+	Synth.burst(b,0.0,0.004,2000.0,0.8,0.8,rng)
+	Synth.modal(b,0.0,[Vector3(150.0+v*20.0,1.0,0.12),Vector3(410.0,0.6,0.07),Vector3(880.0,0.35,0.04),Vector3(1700.0,0.2,0.02)],rng,1.0)
+	var creak:=_sweep(0.25,260.0,240.0,[1.0,0.5,0.3,0.2])
+	for i in creak.size():creak[i]*=0.5+0.5*sin(TAU*45.0*float(i)/RATE)
+	Synth.mix_into(b,creak,Synth.n_of(0.3),0.15)
+	return b
+
+## The second swing bounces off: a ringing CLANG, the haft buzzing in the hands.
+static func axe_clang(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.2)
+	Synth.burst(b,0.0,0.004,3500.0,0.6,0.8,rng)
+	var ring:=Synth.buffer(1.1)
+	Synth.modal(ring,0.0,[Vector3(1150.0+v*120.0,1.0,0.35),Vector3(2580.0,0.6,0.25),Vector3(4170.0,0.35,0.15)],rng,1.0)
+	# the haft's buzz shakes the ring
+	for i in ring.size():ring[i]*=0.55+0.45*sin(TAU*(23.0-12.0*float(i)/float(ring.size()))*float(i)/RATE)
+	Synth.mix_into(b,ring,0,1.0)
+	return b
+
+## Working the stuck axe free: a strain, the wood creaking, a pop.
+static func axe_pull(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.3)
+	var man:=Voice.plain("man",61)
+	man["oq"]=0.44;man["tremor"]=0.05;man["tremor_hz"]=9.0
+	var g:=Voice.gesture(man,[[0.02,"y",0.0,0.0,1.0],[0.6,"y",0.7,0.2,1.2,0.8],[0.08,"y",0.0,0.3,1.0]],rng.randi())
+	Synth.mix_into(b,g,0,0.7)
+	var creak:=_sweep(0.6,300.0,340.0,[1.0,0.6,0.4,0.25])
+	for i in creak.size():creak[i]*=0.4+0.6*pow(0.5+0.5*sin(TAU*38.0*float(i)/RATE),3.0)
+	Synth.mix_into(b,creak,Synth.n_of(0.1),0.25)
+	Synth.modal(b,0.75,[Vector3(420.0,0.8,0.05),Vector3(1100.0,0.4,0.02)],rng,1.0)
+	return b
+
+## The head rolls across the earth floor, bump by bump, slowing, still.
+static func head_roll(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.8)
+	var t:=0.0;var gap:=0.12;var amp:=1.0
+	while t<1.5 and amp>0.08:
+		_thud(b,t,120.0+rng.randf_range(-10.0,10.0),amp,rng)
+		t+=gap;gap*=1.17+0.05*v;amp*=0.8
+	return b
+
+# =============================================================================
+# People
+# =============================================================================
+
+## The executioner's wind-up: a long breath in and a rising "hnnnnngh".
+static func windup(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var man:=Voice.plain("man" if v==0 else "old_man",71+v)
+	man["oq"]=0.44;man["breath"]=0.2
+	return Voice.gesture(man,[[0.25,"a",0.0,0.7,1.0],[0.05,"y",0.0,0.0,1.0],[0.55,"y",0.7,0.2,1.35,0.8],[0.05,"y",0.0,0.0,1.4]],rng.randi())
+
+## "Ow!": the axe bounced and stung the hands.
+static func ow(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var man:=Voice.plain("man" if v==0 else "youth_m",83+v)
+	return Voice.gesture(man,[[0.01,"a",0.0,0.0,1.3],[0.18,"a",1.0,0.2,1.55],[0.12,"o",0.8,0.1,1.2],[0.08,"u",0.0,0.1,1.1]],rng.randi())
+
+## Someone in the front row is sick into a pot: the heave, again, and the splash.
+static func retch(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.9)
+	var who:=Voice.plain("man" if v==0 else "woman",97+v)
+	who["breath"]=0.5;who["fry"]=0.25;who["jitter"]=0.05
+	var heave:=[[0.05,"a",0.0,0.6,1.0],[0.02,"a",0.0,0.0,1.0],[0.22,"o",0.9,0.5,0.85],[0.06,"a",0.0,0.0,0.8]]
+	Synth.mix_into(b,Voice.gesture(who,heave,rng.randi()),0,0.8)
+	Synth.mix_into(b,Voice.gesture(who,[[0.03,"a",0.0,0.6,1.0],[0.3,"a",1.0,0.6,0.75],[0.06,"a",0.0,0.0,0.7]],rng.randi()),Synth.n_of(0.55),1.0)
+	var splash:=_wet(0.45,[[0.0,1800.0],[0.45,700.0]],1.0,rng,[[0.0,0.0],[0.01,1.0],[0.45,0.0]])
+	Synth.mix_into(b,splash,Synth.n_of(0.72),0.8)
+	_bubbles(b,0.8,1.2,5,250.0,500.0,0.2,rng)
+	Synth.modal(b,0.72,[Vector3(310.0,0.3,0.15),Vector3(760.0,0.15,0.08)],rng,1.0)
+	return b
+
+## The hall's disgust: a few people's "ughh", a beat apart.
+static func crowd_groan(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(1.5)
+	var regs:=["man","woman","old_woman","man","youth_f"]
+	for k in 5:
+		var who:=Voice.plain(String(regs[(k+v)%regs.size()]),131+k*7+v)
+		who["breath"]=0.3
+		var g:=Voice.gesture(who,[[0.02,"u",0.0,0.0,1.0],[0.12,"u",0.7,0.3,1.05],[0.4,"a",0.6,0.4,0.82],[0.06,"a",0.0,0.1,0.8]],rng.randi())
+		Synth.mix_into(b,g,Synth.n_of(rng.randf_range(0.0,0.3)),rng.randf_range(0.5,1.0))
+	Synth.lowpass(b,4000.0)
+	return b
+
+## The flatterer applauds, alone: a few claps, slowing, into silence.
+static func lone_clap(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(3.0)
+	var t:=0.02;var gap:=0.42
+	for k in 5+v:
+		Synth.burst(b,t,0.012,rng.randf_range(1200.0,1700.0),0.8,1.0,rng)
+		Synth.mix_into(b,_sweep(0.02,450.0,380.0,[1.0],0.001),Synth.n_of(t),0.4)
+		t+=gap;gap*=1.17
+	return b
+
+# =============================================================================
+# The musician
+# =============================================================================
+
+## The drum roll before: taps quickening and swelling, and no end to it (the
+## hit comes on the punchline).
+static func drum_roll(v:int,rng:RandomNumberGenerator,kind:String)->PackedFloat32Array:
+	var d:=2.2
+	var b:=Synth.buffer(d+0.3)
+	var t:=0.0
+	while t<d:
+		var x:=t/d
+		var hit:=Music.drum(kind,"t",0.35+0.6*x,rng)
+		Synth.mix_into(b,hit,Synth.n_of(t),1.0)
+		t+=lerpf(0.11,0.045,x)*rng.randf_range(0.9,1.1)
+	return b
+
+## No drum yet: hands drumming on a log, quickening.
+static func log_roll(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var d:=2.2
+	var b:=Synth.buffer(d+0.3)
+	var t:=0.0
+	while t<d:
+		var x:=t/d
+		Synth.modal(b,t,[Vector3(rng.randf_range(210.0,250.0),0.8,0.05),Vector3(620.0,0.4,0.03)],rng,0.35+0.6*x)
+		Synth.burst(b,t,0.006,900.0,0.8,0.2+0.3*x,rng)
+		t+=lerpf(0.12,0.05,x)*rng.randf_range(0.9,1.1)
+	return b
+
+## The punchline on a drum: ba-DUM.
+static func punch_drum(v:int,rng:RandomNumberGenerator,kind:String)->PackedFloat32Array:
+	var b:=Synth.buffer(1.0)
+	Synth.mix_into(b,Music.drum(kind,"t",0.7,rng),0,1.0)
+	Synth.mix_into(b,Music.drum(kind,"d",1.0,rng),Synth.n_of(0.17),1.2)
+	return b
+
+## The punchline with small cymbals (once the people have them): ba-dum-TSS.
+static func punch_cymbal(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(2.0)
+	Synth.mix_into(b,Music.drum("clay","t",0.7,rng),0,1.0)
+	Synth.mix_into(b,Music.drum("clay","d",1.0,rng),Synth.n_of(0.16),1.1)
+	Synth.mix_into(b,Music.cymbal(rng),Synth.n_of(0.34),1.4)
+	return b
+
+## The punchline on a log: tok-TOK.
+static func punch_log(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.7)
+	Synth.modal(b,0.0,[Vector3(240.0,0.6,0.05),Vector3(650.0,0.3,0.03)],rng,1.0)
+	Synth.modal(b,0.17,[Vector3(200.0,1.0,0.08),Vector3(560.0,0.5,0.04)],rng,1.0)
+	return b

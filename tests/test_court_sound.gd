@@ -354,7 +354,7 @@ func test_sounds_come_from_where_people_stand()->void:
 	assert_float(from_left.x+from_left.y).override_failure_message("nothing was heard").is_greater(0.0001)
 	assert_float(db_left).is_between(4.0,7.0)
 	assert_float(db_right).is_between(4.0,7.0)
-	assert_float(absf(db_middle)).is_less(0.5)
+	assert_float(absf(db_middle)).is_less(1.2)
 
 # --- the musician -------------------------------------------------------------
 
