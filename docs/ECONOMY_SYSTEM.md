@@ -161,13 +161,18 @@ are the first currency, and a making people can buy and make arms.
   kit (`watch_military arms_kit`); a made set can be any weapon of that age's
   list in a fighter's hands, so spearmen are still armed by bronze-age
   makers. Made sets go first, then the armoury's kits of the weapon; exact
-  with part sets; on a day the age's materials are being dug but not yet in
-  store, the makers make the next age down meanwhile. Men at home with what
-  comes to hand take up made arms as the sets come, only as many as there
-  are sets in hand (`rekit_for_made` splits them off, their drill kept, their
-  old arms to the armoury), each with the first weapon on the age's list
-  their unit can carry (a spear for the levy, whatever the age), so an older
-  save's levy is armed, never left waiting and never stripped. Kits handed back (a stand-down, a cancelled or retrained drill, a
+  with part sets. While the age's materials are being dug but not yet in
+  store, the makers wait ("Waiting on copper ore, tin ore"), so a spear and
+  bow never stands in a sword's place; only an age wholly out of reach falls
+  back to the next one down. Men at home with what comes to hand take up
+  arms as sets come, only as many as are truly spare for the weapon their
+  unit can carry (the first on the age's list: a spear for the levy, whatever
+  the age): made sets and the armoury's own kits of it, less every set
+  already owed to that weapon at home (formations not yet fully armed, new
+  drill orders not yet reserved). `rekit_for_made` splits them off, their
+  drill kept, their old arms to the armoury, so an older save's levy is
+  armed from the makers or the armoury, never left waiting and never
+  stripped. Kits handed back (a stand-down, a cancelled or retrained drill, a
   garrison, a draft or a band's spare) go to the armoury as that kit; losses
   in battle go on the arms record. `weapons_issued()` reads what the
   formations carry (`weapons_carried`). `arms_wanted()` = what the watch

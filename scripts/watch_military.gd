@@ -256,32 +256,35 @@ static func lose_weapons(mc:Variant,n:int,item:String="")->int:
 	return int(_arms().call("lose_weapons",maxi(0,n),item,mc))
 
 ## Those at home with what comes to hand take up made arms as the sets come,
-## only as many men as there are made sets in hand: they split off into a
-## formation of the weapon their unit can take up (weapons_stock.gd
-## rekit_item: the first on the makers' age's list it can carry with its
-## practice learned, a spear for the levy), their drill kept, their old arms
-## back to the armoury; the day's delivery then arms them from the made sets
+## only as many men as there are sets truly spare for the weapon their unit
+## can take up (weapons_stock.gd rekit_item: the first on the makers' age's
+## list it can carry with its practice learned, a spear for the levy): the
+## sets held for it (made sets and the armoury's kits of it, weapons_held)
+## less every set already owed to that weapon at home (formations of it not
+## yet fully armed, new drill orders not yet reserved). They split off into
+## a formation of that weapon, their drill kept, their old arms back to the
+## armoury; the day's delivery then arms them
 ## (MilitaryCampaign._deliver_inventory_replacements). The rest keep what
-## comes to hand. So an older save's levy is armed as the makers work, never
-## left waiting, and never stripped of more arms than it is given. Returns
-## the men re-kitted.
+## comes to hand. So an older save's levy is armed as the makers work, or
+## from the armoury's own kits, never left waiting and never stripped of more
+## arms than it is given. Returns the men re-kitted.
 static func rekit_for_made(mc:Variant)->int:
 	if (_arms().call("made_kit",mc) as Dictionary).is_empty():return 0
-	var sets:=floori(float(_arms().call("store_exact"))+0.000001)
-	if sets<1:return 0
 	var men:=0
 	var formations:Array=(mc.home_army.get("formations",[]) as Array).duplicate(true)
 	var additions:Array=[]
+	var spare:={}
 	for index in formations.size():
-		if sets<=0:break
 		var formation:Dictionary=formations[index]
 		if String(formation.get("weapon","improvised"))!="improvised":continue
 		var item:=String(_arms().call("rekit_item",mc,formation))
 		if item=="":continue
+		if not spare.has(item):spare[item]=weapons_held(mc,item)-_owed_at_home(mc,item)
+		if int(spare[item])<=0:continue
 		var unit:=String(formation.get("unit","levy"))
 		var count:=int(formation.get("count",0))
 		var per:=float(mc._equipment_required_for(unit,count))/maxf(1.0,float(count))
-		var moving:=mini(count,floori(float(sets)/maxf(0.0001,per)+0.000001))
+		var moving:=mini(count,floori(float(spare[item])/maxf(0.0001,per)+0.000001))
 		if moving<=0:continue
 		var need:int=mc._equipment_required_for(unit,moving)
 		# Their old arms go back to the armoury; the rest keep theirs.
@@ -299,12 +302,26 @@ static func rekit_for_made(mc:Variant)->int:
 			"equipment":0,"equipment_required":need,"ammunition":0,"ammunition_required":mc._ammunition_required_for(item,need),
 			"training":float(formation.get("training",START_DRILL)),"experience":float(formation.get("experience",0.0)),"personnel_condition":float(formation.get("personnel_condition",1.0))})
 		if target.is_empty():mc.next_formation_id=int(mc.next_formation_id)+1
-		sets-=need
+		spare[item]=int(spare[item])-need
 		men+=moving
 	if additions.is_empty():return 0
 	mc.home_army["formations"]=formations.filter(func(f:Dictionary)->bool:return int(f.get("count",0))>0)
 	mc._rebuild_home_army_with(additions)
 	return men
+
+## Sets already owed to a weapon at home: what its formations still lack of
+## their need, and what new drill orders for it have not yet reserved.
+static func _owed_at_home(mc:Variant,item:String)->int:
+	var owed:=0
+	for f in mc.home_army.get("formations",[]):
+		if not f is Dictionary or String((f as Dictionary).get("weapon",""))!=item:continue
+		owed+=maxi(0,int((f as Dictionary).get("equipment_required",(f as Dictionary).get("count",0)))-int((f as Dictionary).get("equipment",0)))
+	for order in mc.training_queue:
+		if not order is Dictionary or String((order as Dictionary).get("weapon",""))!=item:continue
+		var o:Dictionary=order
+		if String(o.get("mode",""))=="field_draft" or (String(o.get("mode",""))=="reinforce" and int(o.get("target_formation_id",-1))>=0):continue
+		owed+=maxi(0,int(mc._equipment_required_for(String(o.get("unit","levy")),int(o.get("count",0))))-int(o.get("reserved_equipment",0)))
+	return owed
 
 ## Sets the watch carries now, read from its formations wherever they stand
 ## (home, bands, garrisons): one ledger, never a counter kept apart.

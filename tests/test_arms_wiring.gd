@@ -335,3 +335,75 @@ func test_gear_reserved_for_drill_and_on_the_road_is_not_wanted_again()->void:
 	assert_float(Arms.arms_gaps()).is_equal_approx(maxf(0.0,before-5.0),0.0001)
 	MilitaryCampaign.field_drafts.pop_back()
 	assert_int(watch).is_greater(0)
+
+
+func _levy(n:int)->void:
+	MilitaryCampaign.military_inventory["improvised"]=0
+	MilitaryCampaign._rebuild_home_army_with([{"id":42,"unit":"levy","weapon":"improvised","count":n,"authorized_count":n,"equipment":n,"equipment_required":n,"ammunition":0,"ammunition_required":0,"training":0.3,"experience":0.0,"personnel_condition":1.0}])
+
+func _men_with(weapon:String)->Vector2i:
+	var men:=0;var sets:=0
+	for f in MilitaryCampaign.home_army.formations:
+		if String((f as Dictionary).weapon)==weapon:men+=int((f as Dictionary).count);sets+=int((f as Dictionary).equipment)
+	return Vector2i(men,sets)
+
+func test_sets_already_owed_are_never_counted_as_spare_again()->void:
+	# The probe: 20 levy, 8 made sets, a convoy of 2 loads a day.
+	_levy(20)
+	GameState.elapsed_days=6
+	GameState.resource_stockpiles[Arms.GOOD]=8.0
+	assert_int(Watch.rekit_for_made(MilitaryCampaign)).is_equal(8)
+	MilitaryCampaign._deliver_inventory_replacements(2.0)
+	# The six sets still in store are owed to the eight who split off.
+	GameState.elapsed_days=7
+	assert_int(Watch.rekit_for_made(MilitaryCampaign)).is_equal(0)
+	MilitaryCampaign._deliver_inventory_replacements(2.0)
+	GameState.elapsed_days=8
+	assert_int(Watch.rekit_for_made(MilitaryCampaign)).is_equal(0)
+	var spears:=_men_with(_kit())
+	assert_int(spears.x).is_equal(8)
+	assert_int(_men_with("improvised").x).is_equal(12)
+	assert_int(_men_with("improvised").y).is_equal(12)
+	# Sets owed to a formation of the weapon already at home count too.
+	MilitaryCampaign._deliver_inventory_replacements(1000.0)
+	assert_int(_men_with(_kit()).y).is_equal(8)
+	GameState.resource_stockpiles[Arms.GOOD]=5.0
+	MilitaryCampaign._rebuild_home_army_with([{"id":77,"unit":"spearman","weapon":_kit(),"count":5,"authorized_count":5,"equipment":0,"equipment_required":5,"ammunition":0,"ammunition_required":0,"training":0.4,"experience":0.0,"personnel_condition":1.0}])
+	assert_int(Watch.rekit_for_made(MilitaryCampaign)).is_equal(0)
+
+
+func test_an_old_levy_takes_up_the_armourys_own_spears()->void:
+	# The probe: 20 levy with improvised arms and 20 spears in the armoury, no made sets.
+	_levy(20)
+	MilitaryCampaign.military_inventory["spear"]=20
+	GameState.elapsed_days=9
+	assert_int(Arms.arms_wanted()).is_equal(0)
+	assert_int(Watch.rekit_for_made(MilitaryCampaign)).is_equal(20)
+	assert_int(MilitaryCampaign._deliver_inventory_replacements(1000.0)).is_equal(20)
+	assert_int(_men_with("spear").y).is_equal(20)
+	assert_int(int(MilitaryCampaign.military_inventory.spear)).is_equal(0)
+	assert_int(int(MilitaryCampaign.military_inventory.improvised)).is_equal(20)
+
+
+func test_while_bronze_is_being_dug_the_makers_wait_never_passing_spears_off_as_swords()->void:
+	GameState.population_allocations["Crafting"]=20
+	GameState.population_allocations["Defense"]=20
+	GameState.resource_stockpiles.erase("Copper Ore");GameState.resource_stockpiles.erase("Tin Ore")
+	_know("bronze_weaponry",1.0)
+	GameState.resource_deposits.append({"resource":"Copper Ore","workers":3,"extracted_today":0.5,"stage":"developed"})
+	GameState.resource_deposits.append({"resource":"Tin Ore","workers":2,"extracted_today":0.1,"stage":"developed"})
+	GameState.elapsed_days=12
+	# Bronze is within reach (being dug): its kit, and nothing made until it is in store.
+	assert_str(String((Arms.arms_age().age as Dictionary).id)).is_equal("bronze")
+	var kit:Dictionary=Arms.made_kit()
+	MilitaryCampaign._rebuild_home_army_with([{"id":46,"unit":String(kit.unit),"weapon":String(kit.item),"count":20,"authorized_count":20,"equipment":0,"equipment_required":20,"ammunition":0,"ammunition_required":0,"training":0.4,"experience":0.0,"personnel_condition":1.0}])
+	assert_int(int(Arms.plan_day().wanted)).is_greater(0)
+	var made:=Arms.make(20.0,0.8)
+	assert_float(float(made.sets)).is_equal(0.0)
+	assert_str(String(made.reason)).contains("copper ore").contains("tin ore")
+	assert_float(Arms.stock()).is_equal(0.0)
+	assert_int(MilitaryCampaign._deliver_inventory_replacements(1000.0)).is_equal(0)
+	# Once in store, bronze arms are made.
+	GameState.resource_stockpiles["Copper Ore"]=50.0;GameState.resource_stockpiles["Tin Ore"]=10.0
+	assert_float(float(Arms.make(20.0,0.8).sets)).is_greater(0.0)
+	GameState.resource_deposits.pop_back();GameState.resource_deposits.pop_back()

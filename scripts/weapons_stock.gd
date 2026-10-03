@@ -604,14 +604,14 @@ static func _make(makers:float,efficiency:float)->Dictionary:
 	if arms.is_empty():
 		out.reason="No weapon our makers make arms our line foot yet"
 		return out
+	# The age is within reach (arms_age: in store or being dug). What is still
+	# being dug is waited for: an older age's sets would stand in the age's
+	# weapon's place at its quality. An age out of reach altogether falls back
+	# in arms_age, never here.
 	var age:Dictionary=arms.age
-	# What is being dug is not in store today: an older age's sets meanwhile.
-	if not _can_make(age):
-		for i in range(AGES.find(age)-1,-1,-1):
-			if _held(String((AGES[i] as Dictionary).needs)) and _can_make(AGES[i]):age=AGES[i];break
 	out.kind=String(age.kind)
 	if not _can_make(age):
-		out.reason="Needs %s" % _needs_words(arms.age)
+		out.reason="Waiting on %s" % _short_words(age)
 		return out
 	var span:=float(WorldSimulation.span)
 	var work:=makers*share*efficiency*span
@@ -636,6 +636,14 @@ static func _make(makers:float,efficiency:float)->Dictionary:
 	var r:=record()
 	r.made=float(r.made)+sets
 	return out
+
+## The materials of an age not in store for one set (what is being waited on).
+static func _short_words(age:Dictionary)->String:
+	if String(age.id)=="stone":return _needs_words(age)
+	var names:PackedStringArray=[]
+	for item:String in age.materials:
+		if _usable(item)<float(age.materials[item]):names.append(String(item).to_lower())
+	return ", ".join(names) if not names.is_empty() else _needs_words(age)
 
 static func _needs_words(age:Dictionary)->String:
 	var names:PackedStringArray=[]
