@@ -15,6 +15,7 @@ extends Node
 const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
+const Paths:=preload("res://scripts/hud/court_paths.gd")
 ## J's gore on the person's own figure (court_figure_gore.gd), when it is in.
 const GORE_PATH:="res://scripts/hud/court_figure_gore.gd"
 static var _gore:Script
@@ -186,19 +187,67 @@ func _approach(key:String,to:String,side:float,dist:float,time:float)->void:
 ## A short scene move still needs facing and a matching stride.
 func _walk_to(key:String,to:Vector3,time:float,arrive_clip:="")->void:
 	var b:=_body(key);var f:Variant=_fig(key)
-	if b==null or f==null:return
+	if b==null or f==null or f.spot==null:return
 	_remember(key)
-	var way:=to-b.global_position;way.y=0.0
-	if way.length()<0.02:return
+	var path:=_walk_path(key,to)
+	if _walk_length(path)<0.02:return
+	var old:Variant=_moving.get(key)
+	if old is Tween and (old as Tween).is_valid():(old as Tween).kill()
 	Acting.stop(b,0.1)
-	b.face(rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),0.18)
 	b.play("walk_in",0.15,0.0)
-	var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
-	b.set_locomotion_rate(way.length()/maxf(time*pace,0.05))
-	_move_to(key,to,time,Tween.TRANS_LINEAR)
-	var t:=_tween();t.tween_interval(time)
+	var t:=_tween();_moving[key]=t
+	_queue_walk(t,f,b,path,maxf(time,0.05))
 	t.tween_callback(func()->void:
 		if is_instance_valid(b):b.play(arrive_clip if not arrive_clip.is_empty() else String(f.rest_clip),0.2);b.set_locomotion_rate(1.0))
+
+## Execution approaches use the same floor map as ordinary court walks.
+## Current bodies, including a person already nudged by this scene, are blockers.
+func _walk_path(key:String,to:Vector3)->PackedVector3Array:
+	var b:=_body(key)
+	if b==null:return PackedVector3Array()
+	var from:=b.global_position
+	var court:=_court()
+	if court==null:return PackedVector3Array([from,to])
+	var room:=Paths.room_of(court)
+	if room==null:return PackedVector3Array([from,to])
+	var start:=court.to_local(from);var goal:=court.to_local(to)
+	var people:=[]
+	var cast:Variant=stage.get("cast_order")
+	if cast is Array:
+		for other_key:String in cast:
+			if other_key==key:continue
+			var other:Variant=_fig(other_key);var body:=_body(other_key)
+			if other==null or body==null or other.leaving or not body.visible:continue
+			var at:=court.to_local(body.global_position)
+			people.append(Vector3(at.x,at.z,0.3))
+	var route:=Paths.route(room,Vector2(start.x,start.z),Vector2(goal.x,goal.z),people)
+	var out:=PackedVector3Array()
+	for at:Vector2 in route:out.append(court.to_global(Vector3(at.x,start.y,at.y)))
+	# An obstructed/no-route result must not turn into a straight hearth crossing.
+	return out
+
+static func _walk_length(path:PackedVector3Array)->float:
+	var length:=0.0
+	for i in range(1,path.size()):length+=path[i-1].distance_to(path[i])
+	return length
+
+## One constant-speed journey: segment times and foot cadence use total length.
+## Static callbacks also remain valid while a stage-owned return outlives us.
+static func _queue_walk(t:Tween,f:Variant,b:Node3D,path:PackedVector3Array,seconds:float)->void:
+	var length:=_walk_length(path)
+	var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
+	b.set_locomotion_rate(length/maxf(seconds*pace,0.05))
+	for i in range(1,path.size()):
+		var way:=path[i]-path[i-1]
+		var duration:=seconds*way.length()/maxf(length,0.001)
+		if duration<=0.00001:continue
+		var yaw:=rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y)
+		var turn:=minf(0.18,duration)
+		if i==1:b.face(yaw,turn)
+		t.tween_callback(func()->void:if is_instance_valid(b):b.face(yaw,turn))
+		var local:Vector3=f.spot.to_local(path[i])-f._path_at(f.stroll)
+		local.y=0.0
+		t.tween_property(f,"nudge",local,duration).set_trans(Tween.TRANS_LINEAR).set_ease(Tween.EASE_IN_OUT)
 
 func _heave(args:Dictionary)->void:
 	var key:=String(args.get("who",victim));var f:Variant=_fig(key)
@@ -238,14 +287,16 @@ func _restore_survivors()->void:
 				if is_instance_valid(prop.node):prop.node.visible=bool(prop.visible)
 		var distance:float=(f.nudge as Vector3).distance_to(saved.nudge)
 		if _skipped or distance<0.05:restore.call();continue
-		var way:Vector3=f.spot.global_transform.basis*((saved.nudge as Vector3)-f.nudge)
-		b.face(rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),0.2)
+		var home:Vector3=f.spot.to_global(f._path_at(f.stroll)+(saved.nudge as Vector3))
+		var path:=_walk_path(key,home)
+		if _walk_length(path)<0.02:
+			# No safe route: retain this floor position instead of crossing a solid.
+			saved.nudge=f.nudge
+			restore.call();continue
 		b.play("walk_in",0.2,0.0)
 		var seconds:=clampf(distance/1.15,0.3,2.5)
-		var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(b.body_height)/Figure3D.REFERENCE_HEIGHT
-		b.set_locomotion_rate(distance/maxf(seconds*pace,0.05))
 		var t:=stage.create_tween()
-		t.tween_property(f,"nudge",saved.nudge,seconds)
+		_queue_walk(t,f,b,path,seconds)
 		t.tween_callback(restore)
 	_survivors.clear()
 
