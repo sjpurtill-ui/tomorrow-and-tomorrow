@@ -104,7 +104,10 @@ static func material(slot:String,colour:Color,cover:=0)->ShaderMaterial:
 	if slot in FLAT_SLOTS:
 		made.set_shader_parameter("flat_colour",true)
 	else:
-		if slot=="SKIN":made.set_shader_parameter("shade_tint",Color(0.66,0.50,0.46))
+		if slot=="SKIN":
+			made.set_shader_parameter("shade_tint",Color(0.70,0.52,0.47))
+			made.set_shader_parameter("band_soft",0.24)
+			made.set_shader_parameter("terminator",Color(0.62,0.20,0.10))
 		if slot=="HAIR":made.set_shader_parameter("rim_amount",0.22)
 		if not slot in ["BROW","STUBBLE"]:made.next_pass=_ink(cover)
 	_materials[key]=made
@@ -220,7 +223,10 @@ func set_mood(name:String)->void:
 func _face()->void:
 	var face:Dictionary=look.get("face",{})
 	for mesh_node in _meshes:
-		if not mesh_node.visible or mesh_node.mesh==null:continue
+		if mesh_node.mesh==null:continue
+		# Every morph starts at rest; only this person's own are set.
+		for index in mesh_node.get_blend_shape_count():mesh_node.set_blend_shape_value(index,0.0)
+		if not mesh_node.visible:continue
 		for shape:String in FACE_SHAPES:
 			var index:=mesh_node.find_blend_shape_by_name(StringName("face_"+shape))
 			if index>=0:mesh_node.set_blend_shape_value(index,clampf(float(face.get(shape,0.0)),-1.0,1.0))

@@ -20,7 +20,7 @@ from cf_sdf import Field, Loft, Ellipsoid, RoundCone, Sphere, RoundBox, finish_m
 
 BASE = {
     # overall
-    "height": 1.72, "head_ratio": 6.1, "neck": 0.050,
+    "height": 1.72, "head_ratio": 7.1, "neck": 0.060,
     # half widths (metres)
     "shoulder": 0.186, "hip_joint": 0.086, "pelvis": 0.150, "waist": 0.128,
     "chest_w": 0.156, "chest_d": 0.108, "belly": 0.0, "bust": 0.0, "pecs": 1.0,
@@ -32,20 +32,20 @@ BASE = {
 
 VARIANTS = {
     "male_adult": {},
-    "female_adult": {"height": 1.62, "head_ratio": 6.0, "neck": 0.056, "shoulder": 0.160, "hip_joint": 0.090,
+    "female_adult": {"height": 1.62, "head_ratio": 6.9, "neck": 0.064, "shoulder": 0.160, "hip_joint": 0.090,
                      "pelvis": 0.164, "waist": 0.108, "chest_w": 0.132, "chest_d": 0.096, "bust": 1.0, "pecs": 0.0,
                      "arm": 0.038, "forearm": 0.032, "thigh": 0.074, "shin": 0.044, "hand": 1.06,
                      "jaw": 0.80, "brow_ridge": 0.45},
-    "male_old": {"height": 1.66, "stoop": 1.0, "belly": 0.8, "arm": 0.042, "forearm": 0.036, "thigh": 0.066,
+    "male_old": {"height": 1.66, "head_ratio": 6.9, "stoop": 1.0, "belly": 0.8, "arm": 0.042, "forearm": 0.036, "thigh": 0.066,
                  "shin": 0.044, "chest_w": 0.150, "waist": 0.136, "pelvis": 0.150, "pecs": 0.4, "arm_angle": 20.0},
-    "female_old": {"height": 1.55, "head_ratio": 5.9, "neck": 0.050, "shoulder": 0.154, "hip_joint": 0.090,
+    "female_old": {"height": 1.55, "head_ratio": 6.8, "neck": 0.056, "shoulder": 0.154, "hip_joint": 0.090,
                    "pelvis": 0.164, "waist": 0.124, "chest_w": 0.134, "chest_d": 0.098, "bust": 0.8, "pecs": 0.0,
                    "arm": 0.037, "forearm": 0.032, "thigh": 0.068, "shin": 0.042, "hand": 1.05,
                    "jaw": 0.80, "brow_ridge": 0.45, "stoop": 1.0, "belly": 0.5, "arm_angle": 20.0},
-    "male_young": {"height": 1.62, "head_ratio": 5.8, "neck": 0.054, "shoulder": 0.168, "hip_joint": 0.082,
+    "male_young": {"height": 1.64, "head_ratio": 6.8, "neck": 0.062, "shoulder": 0.168, "hip_joint": 0.082,
                    "pelvis": 0.140, "waist": 0.116, "chest_w": 0.138, "chest_d": 0.096, "pecs": 0.4,
                    "arm": 0.040, "forearm": 0.034, "thigh": 0.066, "shin": 0.044, "jaw": 0.86, "brow_ridge": 0.6},
-    "female_young": {"height": 1.54, "head_ratio": 5.7, "neck": 0.056, "shoulder": 0.150, "hip_joint": 0.086,
+    "female_young": {"height": 1.56, "head_ratio": 6.6, "neck": 0.062, "shoulder": 0.150, "hip_joint": 0.086,
                      "pelvis": 0.152, "waist": 0.102, "chest_w": 0.124, "chest_d": 0.090, "bust": 0.6, "pecs": 0.0,
                      "arm": 0.035, "forearm": 0.030, "thigh": 0.068, "shin": 0.041, "hand": 1.0,
                      "jaw": 0.76, "brow_ridge": 0.35},
@@ -699,3 +699,155 @@ def mood_morphs(f, mouth, brows):
                         kv.co = Vector((x, y, z + 0.0034 * s * inner * inner - 0.0006 * s * (1 - inner)))
                     else:
                         kv.co = Vector((x - math.copysign(0.0010 * s * inner, x), y, z - 0.0026 * s * inner * inner + 0.0004 * s * (1 - inner)))
+
+
+EXPRESSIONS = ("smile", "frown", "brows_up", "brows_down", "brows_worried", "eyes_wide", "eyes_narrow", "blink",
+               "jaw_open", "lips_pressed", "sneer", "cheeks_puff")
+VISEMES = ("v_aa", "v_ee", "v_oo", "v_mm", "v_fv")
+
+
+def _smooth(x):
+    x = max(0.0, min(1.0, x))
+    return x * x * (3 - 2 * x)
+
+
+def expression_morphs(f, body, eyes, brows, mouth, eye_centers, riders=()):
+    """Expressions and visemes as morph targets, each 0..1, on the meshes they
+    move: the mouth (its painted lens), the skin of the jaw and cheeks, the
+    eyes and the brows. Beards and hair near the jaw (riders) move with the
+    skin under them."""
+    import numpy as np
+    from mathutils.kdtree import KDTree
+    s = f.head_h / 0.282
+    mz = f.face(FACE["mouth_u"])
+    hw = 0.0165 * s
+    my = float(getattr(f, "mouth_center", Vector((0, -0.1 * s, mz))).y)
+
+    def add_key(o, name, fn):
+        if o.data.shape_keys is None:
+            o.shape_key_add(name="Basis", from_mix=False)
+        k = o.shape_key_add(name=name, from_mix=False)
+        for v, kv in zip(o.data.vertices, k.data):
+            kv.co = fn(v.co.copy())
+        return k
+
+    # --- the painted mouth
+    def mouth_shape(name):
+        def fn(c):
+            x, y, z = c
+            t = min(1.0, abs(x) / hw)
+            up = z >= mz
+            if name == "smile":
+                return Vector((x * 1.08, y, z + 0.0028 * s * t * t - 0.0003 * s * (1 - t)))
+            if name == "frown":
+                return Vector((x * 0.97, y, z - 0.0024 * s * t * t + 0.0003 * s * (1 - t)))
+            if name == "lips_pressed":
+                return Vector((x * 0.92, y, mz + (z - mz) * 0.30))
+            if name == "sneer":
+                side = 1.0 if x < 0 else 0.25
+                return Vector((x, y, z + (0.0018 * s * side if up else 0.0004 * s * side)))
+            open_ = {"jaw_open": (0.0095, 0.0012, 1.00), "v_aa": (0.0075, 0.0010, 0.96), "v_ee": (0.0030, 0.0008, 1.14),
+                     "v_oo": (0.0045, 0.0016, 0.62), "v_mm": (0.0, 0.0, 0.96), "v_fv": (0.0016, -0.0007, 1.00)}[name]
+            low, high, wide = open_
+            round_ = math.sqrt(max(0.0, 1.0 - t * t))
+            if name == "v_mm":
+                return Vector((x * wide, y, mz + (z - mz) * 0.22))
+            dz = (high * s * round_) if up else (-low * s * round_)
+            return Vector((x * wide, y + (0.0006 * s if not up else 0.0), z + dz))
+        return fn
+
+    for name in ("smile", "frown", "lips_pressed", "sneer", "jaw_open") + VISEMES:
+        add_key(mouth, name, mouth_shape(name))
+
+    # --- the skin: the jaw drops, cheeks lift or puff, a lip curls
+    hy = float(f.head_point(0, 0, 0.5).y)
+
+    def skin_shape(name):
+        def fn(c):
+            x, y, z = c
+            if z < f.z_chin - 0.06 * s or z > f.face(0.62) or y > hy + 0.02 * s:
+                return c
+            u = (z - f.z_chin) / f.head_h
+            ax = abs(x)
+            if name in ("jaw_open", "v_aa", "v_oo", "v_ee"):
+                amount = {"jaw_open": 1.0, "v_aa": 0.8, "v_oo": 0.45, "v_ee": 0.3}[name]
+                below = _smooth((FACE["mouth_u"] - 0.01 - u) / 0.08)
+                across = 1.0 - _smooth((ax - 0.040 * s) / (0.030 * s))
+                w = below * across
+                return Vector((x, y + 0.0020 * s * w * amount, z - 0.0110 * s * w * amount))
+            if name in ("smile", "cheeks_puff", "sneer", "frown"):
+                cheek = _smooth(1.0 - abs(u - 0.33) / 0.12) * _smooth(1.0 - abs(ax - 0.040 * s) / (0.025 * s))
+                if name == "smile":
+                    return Vector((x, y - 0.0008 * s * cheek, z + 0.0016 * s * cheek))
+                if name == "cheeks_puff":
+                    out = Vector((x, y, 0)).normalized() if ax > 1e-5 else Vector((0, -1, 0))
+                    return c + (Vector((math.copysign(0.0035 * s, x), -0.0018 * s, 0)) * cheek)
+                if name == "frown":
+                    corner = _smooth(1.0 - abs(u - FACE["mouth_u"]) / 0.05) * _smooth(1.0 - abs(ax - 0.020 * s) / (0.012 * s))
+                    return Vector((x, y, z - 0.0012 * s * corner))
+                lip = _smooth(1.0 - abs(u - 0.27) / 0.06) * (1.0 if x < 0 else 0.0) * _smooth(1.0 - abs(ax - 0.012 * s) / (0.012 * s))
+                return Vector((x, y - 0.0005 * s * lip, z + 0.0018 * s * lip))
+            return c
+        return fn
+
+    skin_keys = ("jaw_open", "v_aa", "v_oo", "v_ee", "smile", "cheeks_puff", "sneer", "frown")
+    base = np.array([v.co[:] for v in body.data.vertices], dtype=np.float32)
+    moves = {}
+    for name in skin_keys:
+        k = add_key(body, name, skin_shape(name))
+        after = np.zeros_like(base)
+        k.data.foreach_get("co", after.ravel())
+        moves[name] = after - base
+    # beards and the lower hair ride the skin under them
+    if riders:
+        tree = KDTree(len(base))
+        for i, c in enumerate(base):
+            tree.insert(c, i)
+        tree.balance()
+        for o in riders:
+            co = np.array([v.co[:] for v in o.data.vertices], dtype=np.float32)
+            near = [tree.find_n(Vector(c), 4) for c in co]
+            for name in skin_keys:
+                move = np.zeros_like(co)
+                for i, hits in enumerate(near):
+                    wsum = 0.0
+                    for (_, idx, dist) in hits:
+                        if dist > 0.04:
+                            continue
+                        w = 1.0 / (dist + 1e-4)
+                        move[i] += moves[name][idx] * w
+                        wsum += w
+                    if wsum > 0:
+                        move[i] /= wsum
+                if o.data.shape_keys is None:
+                    o.shape_key_add(name="Basis", from_mix=False)
+                k = o.shape_key_add(name=name, from_mix=False)
+                k.data.foreach_set("co", (co + move).ravel())
+
+    # --- the eyes: wide, narrowed, shut (about each eye's own middle)
+    def eye_shape(name):
+        factor = {"eyes_wide": 1.28, "eyes_narrow": 0.55, "blink": 0.06}[name]
+
+        def fn(c):
+            side = "L" if c.x > 0 else "R"
+            mid = eye_centers.get(side, c)
+            return Vector((c.x, c.y, mid.z + (c.z - mid.z) * factor))
+        return fn
+
+    for name in ("eyes_wide", "eyes_narrow", "blink"):
+        add_key(eyes, name, eye_shape(name))
+
+    # --- the brows
+    def brow_shape(name):
+        def fn(c):
+            x, y, z = c
+            inner = max(0.0, 1.0 - (abs(x) - 0.011 * s) / (0.050 * s))
+            if name == "brows_up":
+                return Vector((x, y, z + 0.0032 * s))
+            if name == "brows_down":
+                return Vector((x - math.copysign(0.0010 * s * inner, x), y, z - 0.0024 * s * inner - 0.0008 * s))
+            return Vector((x, y, z + 0.0036 * s * inner * inner - 0.0007 * s * (1 - inner)))
+        return fn
+
+    for name in ("brows_up", "brows_down", "brows_worried"):
+        add_key(brows, name, brow_shape(name))

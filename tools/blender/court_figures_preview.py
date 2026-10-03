@@ -167,8 +167,8 @@ def ink_material():
     return m
 
 
-def outline(obj, width=0.0055):
-    if obj.name.split(".")[0] in ("Eyes", "Brows", "Mouth"):
+def outline(obj, width=0.0038):
+    if obj.name.split(".")[0] in ("Eyes", "Brows", "Mouth", "hair_shaved", "beard_stubble"):
         return
     obj.data.materials.append(ink_material())
     mod = obj.modifiers.new("ink", 'SOLIDIFY')
