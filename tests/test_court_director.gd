@@ -26,10 +26,11 @@ const SEASONS:=["spring","summer","autumn","winter"]
 static func home_cast()->Array:
 	return [
 		{"key":"main","role":"main","kind":"petitioner","name":"Hena Tuvasi","age":38,"courage":0.5,"pride":0.5,"love":0.45,"dread":0.3,"voice":"grant","x":0.40},
-		{"key":"p1","role":"court","kind":"official","name":"Orrin Vael","age":47,"courage":0.75,"pride":0.8,"love":0.35,"dread":0.15,"voice":"achilles","office":"War leader","x":0.66},
-		{"key":"p2","role":"court","kind":"official","name":"Suri Danek","age":33,"courage":0.3,"pride":0.3,"love":0.6,"dread":0.55,"voice":"falstaff","office":"Headman","x":0.14},
-		{"key":"p3","role":"court","kind":"hearth_chief","name":"Kavu Mbeli","age":41,"courage":0.35,"pride":0.2,"love":0.7,"dread":0.4,"voice":"polonius","office":"Hearth chief of Reedmouth","x":0.80},
-		{"key":"p4","role":"court","kind":"official","name":"Tamsin Oru","age":29,"courage":0.6,"pride":0.45,"love":0.5,"dread":0.2,"empathy":0.8,"voice":"atticus","office":"Keeper of Tribute","x":0.27},
+		{"key":"p1","role":"court","kind":"official","name":"Orrin Vael","age":47,"courage":0.75,"pride":0.8,"love":0.35,"dread":0.15,"voice":"achilles","disposition":"cantankerous","office":"War leader","x":0.66},
+		{"key":"p2","role":"court","kind":"official","name":"Suri Danek","age":33,"courage":0.3,"pride":0.3,"love":0.6,"dread":0.55,"voice":"falstaff","disposition":"sycophantic","office":"Headman","x":0.14},
+		{"key":"p3","role":"court","kind":"hearth_chief","name":"Kavu Mbeli","age":41,"courage":0.35,"pride":0.2,"love":0.7,"dread":0.4,"voice":"polonius","disposition":"diplomatic","office":"Hearth chief of Reedmouth","x":0.80},
+		{"key":"p4","role":"court","kind":"official","name":"Tamsin Oru","age":29,"courage":0.6,"pride":0.45,"love":0.5,"dread":0.2,"empathy":0.8,"voice":"atticus","disposition":"principled","office":"Keeper of Tribute","x":0.27},
+		{"key":"p5","role":"court","kind":"official","name":"Gedde Ran","age":52,"courage":0.55,"pride":0.45,"love":0.5,"dread":0.25,"voice":"sancho","office":"Keeper of the Fire","x":0.72},
 		{"key":"c1","role":"crowd","kind":"elder","name":"Ama Seld","age":71,"courage":0.5,"pride":0.4,"love":0.5,"dread":0.2,"x":0.93},
 		{"key":"c2","role":"crowd","kind":"child","name":"Lio","age":7,"courage":0.3,"pride":0.1,"love":0.5,"dread":0.3,"x":0.88},
 		{"key":"c3","role":"crowd","kind":"commoner","name":"Brann Ute","age":30,"courage":0.35,"pride":0.3,"love":0.4,"dread":0.5,"stance":"bowl","x":0.53},
@@ -512,6 +513,15 @@ func test_a_long_campaign_stays_fresh()->void:
 	assert_int(int(report.line_repeats_within_3y)).is_equal(0)
 	assert_int(int(report.bits_used)).is_greater_equal(25)
 	assert_int(int(report.asides)).is_between(40,220)
+	# Nobody carries an audience: no one over about a quarter of its bits.
+	assert_int(int(report.cap_breaks)).is_equal(0)
+	# The children do not carry the comedy (a quarter of the bits at most),
+	# and the officials carry their share of it.
+	var star_kinds:Dictionary=report.star_kinds
+	assert_float(float(star_kinds.get("child",0))/float(report.stars)).is_less_equal(0.25)
+	assert_float(float(int(star_kinds.get("official",0))+int(star_kinds.get("hearth_chief",0)))/float(report.stars)).is_greater_equal(0.3)
+	var mutter_kinds:Dictionary=report.mutter_kinds
+	assert_float(float(mutter_kinds.get("child",0))/float(int(report.asides))).is_less_equal(0.4)
 	print(String(report.text))
 
 func _campaign(count:int,rng_seed:int)->Dictionary:
@@ -536,6 +546,11 @@ func _campaign(count:int,rng_seed:int)->Dictionary:
 	var kinds:={}
 	var audience:=0
 	var examples:Array=[]
+	var worst_share:=0.0
+	var cap_breaks:=0
+	var star_kinds:={}
+	var mutter_kinds:={}
+	var stars_total:=0
 	while total<count:
 		audience+=1
 		day+=rng.randi_range(48,78)
@@ -596,6 +611,8 @@ func _campaign(count:int,rng_seed:int)->Dictionary:
 			else:plan.append({"kind":"decree","issued":true,"accepted":true})
 		var dead:=plan.any(func(e:Dictionary)->bool:return String(e.get("action",""))=="strike_down")
 		if not dead:plan.append({"kind":"exit","who":"main","style":["bow","bow","storm"][rng.randi_range(0,2)],"reaction":["pleased","delighted","furious"][rng.randi_range(0,2)]})
+		var aud_stars:={}
+		var aud_total:=0
 		for event:Dictionary in plan:
 			if total>=count:break
 			var seed_value:=hash("%d|%d" % [audience,total])
@@ -603,14 +620,27 @@ func _campaign(count:int,rng_seed:int)->Dictionary:
 			kinds[String(event.kind)]=int(kinds.get(String(event.kind),0))+1
 			for bit in memory.get("bits",{}):
 				if int(memory.bits[bit])==int(memory.n):bit_events[bit]=int(bit_events.get(bit,0))+1
+			var played:Dictionary=(memory.get("last",{}) as Dictionary).get("played",{})
+			for bit in played:
+				var star:=String((played[bit] as Dictionary).get("star",""))
+				if star.is_empty():continue
+				aud_stars[star]=int(aud_stars.get(star,0))+1;aud_total+=1;stars_total+=1
+				var star_kind:=_kind_of(cast,star)
+				star_kinds[star_kind]=int(star_kinds.get(star_kind,0))+1
 			for line:Dictionary in Director.asides_for(event,facts,cast,seed_value,memory):
+				var speaker_kind:=_kind_of(cast,String(line.who))
+				mutter_kinds[speaker_kind]=int(mutter_kinds.get(speaker_kind,0))+1
 				asides+=1
 				var id:=String(line.line_id)
 				if line_last.has(id) and day-int(line_last[id])<1095:repeats+=1
 				line_last[id]=day
 				line_counts[id]=int(line_counts.get(id,0))+1
-				if examples.size()<24:examples.append("    y%-2d %-16s %-10s \"%s\"" % [day/365,String(line.situation),String((cast.filter(func(c:Dictionary)->bool:return String(c.key)==String(line.who))[0] as Dictionary).get("kind","")),String(line.text)])
+				if examples.size()<30:examples.append("    y%-2d %-16s %-10s \"%s\"" % [day/365,String(line.situation),String((cast.filter(func(c:Dictionary)->bool:return String(c.key)==String(line.who))[0] as Dictionary).get("kind","")),String(line.text)])
 			total+=1
+		for who in aud_stars:
+			var allowed:=maxi(2 if String(who)=="main" else 1,floori(0.25*float(aud_total)))
+			if int(aud_stars[who])>allowed:cap_breaks+=1
+			if aud_total>=4:worst_share=maxf(worst_share,float(aud_stars[who])/float(aud_total))
 	var shares:={}
 	for bit in bit_events:shares[bit]=float(bit_events[bit])/float(total)
 	var rows:PackedStringArray=PackedStringArray(["","=== LONG CAMPAIGN: %d events, %d audiences, %d years ===" % [total,audience,day/365],"Bits (share of events):"])
@@ -621,9 +651,18 @@ func _campaign(count:int,rng_seed:int)->Dictionary:
 	for id in line_counts:most=maxi(most,int(line_counts[id]))
 	rows.append("Muttered lines: %d in %d events (1 in %.1f); %d different lines; most-said line %d times; repeats within 3 years: %d" % [asides,total,float(total)/maxf(1.0,float(asides)),line_counts.size(),most,repeats])
 	rows.append("Event mix: %s" % JSON.stringify(kinds))
+	rows.append("Who carries the bits (%d in all): %s" % [stars_total,JSON.stringify(star_kinds)])
+	rows.append("Who mutters: %s" % JSON.stringify(mutter_kinds))
+	rows.append("Per audience, the most one person carried: %.0f%% of its bits (audiences with 4+ bits); over the cap: %d" % [worst_share*100.0,cap_breaks])
 	rows.append("The first muttered lines (year, situation, who, words):")
 	rows.append_array(PackedStringArray(examples))
-	return {"shares":shares,"line_repeats_within_3y":repeats,"bits_used":bit_events.size(),"asides":asides,"text":"\n".join(rows)}
+	return {"shares":shares,"line_repeats_within_3y":repeats,"bits_used":bit_events.size(),"asides":asides,"text":"\n".join(rows),
+		"cap_breaks":cap_breaks,"star_kinds":star_kinds,"mutter_kinds":mutter_kinds,"stars":stars_total}
+
+func _kind_of(cast:Array,key:String)->String:
+	for c:Dictionary in cast:
+		if String(c.key)==key:return String(c.get("kind","official"))
+	return "?"
 
 func _shuffled_copy(list:Array,rng:RandomNumberGenerator)->Array:
 	var out:=list.duplicate()
@@ -718,7 +757,7 @@ func test_the_stage_object_speaks_the_stages_primitives()->void:
 		var list:=director.beats({"kind":"divine","action":"penance","response":"defy"},stage_cast(),facts,i)
 		for beat:Dictionary in list:
 			seen[String(beat.act)]=true
-			assert_bool(String(beat.act) in ["play","look_at","mood","shot","hush"]).override_failure_message("not a stage primitive: %s" % beat.act).is_true()
+			assert_bool(String(beat.act) in ["play","look_at","mood","shot","hush","sound","bubble"]).override_failure_message("not a stage primitive: %s" % beat.act).is_true()
 			if String(beat.who)=="main":
 				assert_bool(String((beat.args as Dictionary).get("beat","")) in Director.KNEEL_LIKE).override_failure_message("main defied but %s" % beat.args).is_false()
 				assert_str(String((beat.args as Dictionary).get("fallback",""))).is_not_equal("kneel")
@@ -769,40 +808,112 @@ func test_every_act_has_a_way_to_be_played()->void:
 	assert_bool(bool(kneel.hold)).is_true()
 	assert_str(String(Director.performance({"act":"stand_firm","args":{}}).mood)).is_equal("defiant")
 
+# --- Sound, bubbles and the officials' own ways -------------------------------------------
+
+func test_what_is_heard_is_named_and_the_hush_cuts_the_murmur()->void:
+	var memory:={}
+	var names:={}
+	for seed_value in 60:
+		for event:Dictionary in events():
+			for beat:Dictionary in Director.beats_for(event,home_cast(),hungry_facts(),seed_value,memory):
+				if not beat.has("sound"):continue
+				var heard:Dictionary=beat.sound
+				names[String(heard.name)]=true
+				assert_str(String(heard.name)).is_not_empty()
+				if String(beat.act)=="hush":
+					assert_str(String(heard.name)).is_equal("murmur_cut")
+					assert_bool(bool((beat.args as Dictionary).get("cut",false))).is_true()
+				else:
+					assert_bool(Director.SOUNDS.has(String(beat.act)) or String(heard.name)=="gasp_room").override_failure_message("unlisted sound on %s" % beat.act).is_true()
+	for name in ["growl","cough_fought","creak","swallow","gasp_room","snort_laugh","bowl_clatter","faint_thump","dog_whimper","goat_bleat","footsteps","murmur_cut"]:
+		assert_bool(names.has(name)).override_failure_message("never heard: %s (heard %s)" % [name,names.keys()]).is_true()
+	# A room's gasp is one sound, not ten.
+	for seed_value in 40:
+		var list:=Director.beats_for({"kind":"command","verb":"detain","stage":"refuse_seized","actor":"p1","target":"main","obedience":"refuse"},home_cast(),hungry_facts(),seed_value,{})
+		var rooms:=0
+		for beat:Dictionary in list:
+			if beat.has("sound") and String(beat.sound.name)=="gasp_room":rooms+=1
+		assert_int(rooms).is_less_equal(1)
+	# The stage gets them as primitives, with the glyph for the bubble.
+	var director:=Director.new()
+	var glyphs:={}
+	for i in 60:
+		for beat:Dictionary in director.beats({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),hungry_facts(),i):
+			if String(beat.act)=="sound" and String((beat.args as Dictionary).get("glyph",""))!="":glyphs[String(beat.args.glyph)]=true
+	assert_int(glyphs.size()).is_greater_equal(2)
+
+func test_officials_keep_their_comic_ways_for_life()->void:
+	assert_str(Director.quirk_of({"name":"A","disposition":"sycophantic"},"official")).is_equal("flatterer")
+	assert_str(Director.quirk_of({"name":"A","disposition":"cantankerous"},"official")).is_equal("jealous")
+	assert_str(Director.quirk_of({"name":"A","disposition":"principled"},"hearth_chief")).is_equal("pedant")
+	assert_str(Director.quirk_of({"name":"A","disposition":"diplomatic"},"official")).is_equal("yes_man")
+	assert_str(Director.quirk_of({"name":"A","voice":"sancho"},"official")).is_equal("sleepy")
+	assert_str(Director.quirk_of({"name":"A","disposition":"principled"},"child")).is_empty()
+	# The same person, the same way, every time; across many people, all five.
+	var seen:={}
+	for i in 200:
+		var entry:={"name":"Person %d" % i,"person_id":1000+i}
+		var q:=Director.quirk_of(entry,"official")
+		assert_str(Director.quirk_of(entry.duplicate(),"official")).is_equal(q)
+		seen[q]=true
+	for q in Director.QUIRKS:assert_bool(seen.has(q)).override_failure_message("nobody is %s" % q).is_true()
+
+func test_each_comic_way_plays_on_the_one_who_has_it()->void:
+	var starred:={}
+	var rows:=[
+		[{"kind":"line","who":"main","text":"We have 40 hides drying and the snow is coming early this year."},"quirk_count","p4"],
+		[{"kind":"god_speaks","text":"So be it."},"quirk_flatter","p2"],
+		[{"kind":"line","who":"main","text":"The river path is washed out past the second bend, and the hunters will not go that way now."},"quirk_yawn","p5"],
+		[{"kind":"divine","action":"bless","target":"main","response":"blessed"},"quirk_jealous","p1"],
+		[{"kind":"line","who":"p4","text":"The pens are full."},"quirk_agree","p3"],
+	]
+	for seed_value in 200:
+		for row:Array in rows:
+			var memory:={}
+			Director.beats_for(row[0],home_cast(),full_facts(60),seed_value,memory)
+			var played:Dictionary=(memory.get("last",{}) as Dictionary).get("played",{})
+			if played.has(String(row[1])):
+				assert_str(String((played[row[1]] as Dictionary).star)).is_equal(String(row[2]))
+				starred[String(row[1])]=true
+	for row:Array in rows:assert_bool(starred.has(String(row[1]))).override_failure_message("%s never played" % row[1]).is_true()
+
+func test_every_situation_has_ten_lines()->void:
+	for situation in Asides.LINES:
+		assert_int(Asides.count(String(situation))).override_failure_message("%s has only %d lines" % [situation,Asides.count(String(situation))]).is_greater_equal(10)
+
+func test_a_terrified_speaker_trembles_in_their_bubble()->void:
+	var memory:={}
+	Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"cower"},home_cast(),full_facts(60),3,memory)
+	var after:=Director.speech_style({"kind":"line","who":"main","text":"Yes, Great One."},home_cast(),full_facts(60),memory)
+	assert_str(String(after.style)).is_equal("tremble")
+	assert_str(String(Director.speech_style({"kind":"line","who":"p2","text":"Yes."},home_cast(),full_facts(60),{}).style)).is_equal("tremble")
+	assert_str(String(Director.speech_style({"kind":"line","who":"p1","text":"No."},home_cast(),full_facts(60),{}).style)).is_equal("speech")
+	assert_str(String(Director.speech_style({"kind":"line","who":"c2","text":"Hi."},home_cast(),full_facts(60),{}).style)).is_equal("small")
+	var list:=Director.beats_for({"kind":"line","who":"p2","text":"The stores hold nine days."},home_cast(),full_facts(60),5,{})
+	assert_bool(_did(list,"p2","bubble")).is_true()
+
 # --- For the coordinator: a sample screenplay ------------------------------------------------
 
 func test_print_a_screenplay()->void:
 	var memory:={}
-	var stone:={"day":900,"food_days":9,"population":180,"season":"winter","era_tags":[],"era_tier":0,"people_dread":0.3,"people_love":0.5,
+	var facts:={"day":2200,"food_days":9,"population":214,"season":"winter","era_tags":["farming","pottery","dairy"],"era_tier":1,"people_dread":0.3,"people_love":0.5,
 		"sickness":{"name":"the Marsh Cough","deaths":3}}
-	var letters:={"day":5900,"food_days":44,"population":1400,"season":"summer","era_tags":["farming","pottery","dairy","writing","metal"],"era_tier":2,
-		"people_dread":0.25,"people_love":0.6,"war":{"enemy":"Kelvar","kind":"war"},"envoy":{"civ":"Kelvar","days_waiting":6,"their_food_days":30}}
-	var letters_gift:=letters.duplicate(true);letters_gift["gift"]={"resource":"Food","amount":40}
-	var stone_hall:=home_cast().slice(0,8)+[{"key":"dog","role":"animal","kind":"dog","name":"the dog","x":0.47}]
-	var grand_hall:=home_cast()+[{"key":"scribe","role":"crowd","kind":"scribe","name":"Pell Ardo","age":44,"courage":0.6,"pride":0.6,"dread":0.2,"x":0.6},
-		{"key":"door_guard","role":"crowd","kind":"door_guard","name":"Hal","age":30,"courage":0.8,"pride":0.5,"x":0.99}]
-	var nervous_official:=grand_hall.duplicate(true);nervous_official[0]={"key":"main","role":"main","kind":"official","name":"Bren Toll","age":34,"courage":0.3,"pride":0.3,"love":0.5,"dread":0.6,"voice":"polonius","x":0.40}
-	var stranger:=stone_hall.duplicate(true);stranger[0]={"key":"main","role":"main","kind":"commoner","name":"Bo Narra","age":30,"courage":0.4,"pride":0.2,"dread":0.4,"x":0.40}
-	var haughty:=[{"key":"main","role":"main","kind":"envoy","name":"Ishkar Velu","age":44,"courage":0.7,"pride":0.8,"temper":"haughty","x":0.26},
-		{"key":"att0","role":"attendant","kind":"guard","name":"Dov","age":26,"x":0.09},{"key":"att1","role":"attendant","kind":"bearer","name":"Nel","age":22,"x":0.42}]+grand_hall.slice(1)
 	var scenes:=[
-		["STONE AGE, WINTER. A stranger from the camp is summoned",{"kind":"summon","who":"main"},stranger,stone],
-		["STONE AGE, WINTER. The god speaks",{"kind":"god_speaks","text":"Tell me what you saw."},stranger,stone],
-		["STONE AGE, WINTER. Wrath on the stranger, who cowers",{"kind":"divine","action":"terrify","target":"main","response":"cower","witnesses":{"p1":"unbowed"}},stranger,stone],
-		["STONE AGE, WINTER. The god makes them wait",{"kind":"wait","who":"main"},stranger,stone],
-		["STONE AGE, WINTER. Promise: 'consider it'",{"kind":"promise","who":"main"},stranger,stone],
-		["LETTERS AND METAL, SUMMER. A nervous official is summoned",{"kind":"summon","who":"main"},nervous_official,letters],
-		["LETTERS AND METAL, SUMMER. A decree granted, costing 30 food",{"kind":"decree","who":"main","accepted":true,"reaction":"delighted","cost":{"resource":"Food","amount":30}},nervous_official,letters],
-		["LETTERS AND METAL, SUMMER. They leave pleased",{"kind":"exit","who":"main","style":"bow","reaction":"delighted"},nervous_official,letters],
-		["LETTERS AND METAL, SUMMER, AT WAR WITH KELVAR. A haughty envoy of Kelvar arrives",{"kind":"summon","who":"main"},haughty,letters],
-		["LETTERS AND METAL, SUMMER. The god turns away Kelvar's gift of 40 food",{"kind":"gift","accepted":false,"resource":"Food","amount":40,"who":"main"},haughty,letters_gift],
-		["LETTERS AND METAL, SUMMER. The envoy storms out",{"kind":"exit","who":"main","style":"storm","reaction":"furious"},haughty,letters_gift],
+		["Hena reports",{"kind":"line","who":"main","text":"We have 40 hides drying and the snow is coming early this year, Great One."}],
+		["The god speaks",{"kind":"god_speaks","text":"And the stores?"}],
+		["Tamsin answers, then Hena",{"kind":"line","who":"p4","text":"Nine days of food, if nobody eats much."}],
+		["",{"kind":"line","who":"main","text":"We can stretch it to twelve with the dried fish."}],
+		["The god gives Hena 12 food from the stores",{"kind":"divine","action":"boon","target":"main","response":"relief","terms":{"resource":"Food","amount":12},"witnesses":{"p1":"envy"}}],
+		["The god makes them wait",{"kind":"wait","who":"main"}],
+		["The god's fury falls on Hena, who cowers",{"kind":"divine","action":"terrify","target":"main","response":"cower","witnesses":{"p1":"unbowed"}}],
+		["Hena answers, shaking",{"kind":"line","who":"main","text":"It will be done, Great One."}],
+		["Hena leaves, pleased all the same",{"kind":"exit","who":"main","style":"bow","reaction":"pleased"}],
 	]
-	var text:PackedStringArray=PackedStringArray(["","=== SCREENPLAY ==="])
+	var text:PackedStringArray=PackedStringArray(["","=== SCREENPLAY (villages, winter, stores 9 days, Marsh Cough). Orrin is jealous, Suri a flatterer, Kavu agrees with everyone, Tamsin a pedant, Gedde sleepy ==="])
 	var i:=0
 	for scene:Array in scenes:
-		text.append("-- %s" % scene[0])
-		text.append(Director.screenplay(scene[1],scene[2],scene[3],77+i*13,memory))
+		if String(scene[0])!="":text.append("-- %s" % scene[0])
+		text.append(Director.screenplay(scene[1],home_cast(),facts,311+i*17,memory))
 		i+=1
 	print("\n".join(text))
 

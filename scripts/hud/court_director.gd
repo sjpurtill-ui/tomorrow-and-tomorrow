@@ -163,7 +163,14 @@ const ACTS:={
 	"count_fingers":{"clip":"","mood":"","face":{"brows_down":0.4},"dur":1.8,"look":"","desc":"counts it off on their fingers"},
 	"point":{"clip":"point","mood":"","face":{},"dur":2.0,"look":"at","desc":"points at {at}"},
 	"look_at":{"clip":"","mood":"","face":{},"dur":1.0,"look":"at","desc":"looks at {at}"},
+	"bubble":{"dur":0.0,"desc":"'s words come in a {style} bubble"},
 	"shrug":{"clip":"","mood":"","face":{"brows_up":0.6,"lips_pressed":0.4},"dur":1.0,"look":"","desc":"shrugs, very slightly"},
+	"raise_finger":{"clip":"raise_hand","mood":"","face":{"brows_up":0.5,"jaw_open":0.2},"dur":0.9,"speed":1.4,"look":"god","desc":"lifts a finger to correct someone"},
+	"lower_finger":{"clip":"","mood":"neutral","face":{"lips_pressed":0.6},"dur":0.8,"look":"","desc":"thinks better of it and lowers the finger"},
+	"nod_along":{"clip":"","mood":"defiant","face":{"brows_down":0.4,"lips_pressed":0.5},"dur":1.6,"look":"god","desc":"nods along gravely, as if they had said it themselves"},
+	"soft_clap":{"clip":"","mood":"warm","face":{"smile":0.6},"dur":0.9,"look":"god","desc":"claps, softly, once or twice, then stops when nobody joins in"},
+	"edge_forward":{"clip":"","mood":"","face":{"lips_pressed":0.3},"dur":1.0,"look":"god","desc":"edges a step nearer the front"},
+	"check_room":{"clip":"","mood":"","face":{"brows_up":0.4},"dur":1.0,"look":"away","desc":"glances round to see what everyone else thinks"},
 	# Animals.
 	"perk_up":{"clip":"","mood":"","face":{},"dur":0.8,"look":"god_up","desc":"pricks up its ears"},
 	"whimper":{"clip":"","mood":"","face":{},"dur":1.2,"look":"","desc":"whimpers"},
@@ -278,6 +285,31 @@ const ACTS:={
 }
 
 
+## What is heard (court sound, codex/court-sound): beats carry
+## sound {name, gain, pace?, glyph?, people, who}. Names agreed with the
+## sound builder; a name the sound side lacks plays nothing. glyph: the tiny
+## wordless bubble a noise gets on the stage (bubble spec, hook notes).
+const SOUNDS:={
+	"snore":["snore",0.7,"zzz"],"stomach_growl":["growl",0.8,"growl"],"stifle_cough":["cough_fought",0.7,"cough"],"cough":["cough",0.8,"cough"],
+	"floor_creak":["creak",0.9,"creak"],"swallow_loud":["swallow",0.8,"gulp"],"gulp":["swallow",0.4,""],"gasp":["gasp",0.6,""],
+	"stifle_laugh":["snort_laugh",0.6,"snort"],"drop_bowl":["bowl_clatter",1.0,"clatter"],"set_down_bundle":["bundle_thud_grunt",0.9,""],
+	"lift_bundle":["grunt",0.7,""],"struggle_bundle":["grunt",0.5,""],"faint":["faint_thump",0.9,"thump"],"whimper":["dog_whimper",0.7,"whimper"],
+	"bleat":["goat_bleat",1.0,"bleat"],"chew":["goat_chew",0.3,""],"lie_down":["dog_flop",0.4,""],"sniff":["dog_sniff",0.4,""],
+	"enter_wrong":["footsteps",0.6,""],"hurry_round":["footsteps",0.7,""],"storm_off":["footsteps",0.9,""],"back_out_bowing":["footsteps",0.5,""],
+	"come_back":["footsteps",0.9,""],"come_back_for":["footsteps",0.9,""],"hurry_after":["footsteps",0.7,""],"bolt":["footsteps",1.0,""],
+	"hurry":["footsteps",0.5,""],"edge_forward":["footsteps",0.3,""],"make_room":["footsteps",0.3,""],"step_back":["footsteps",0.4,""],
+	"bump_post":["thud_wood",0.9,"thump"],"stamp_feet":["stamp",0.7,""],"breath":["breath_out",0.3,""],"swat_fly":["slap_air",0.4,""],
+	"swat_miss":["slap",0.8,"slap"],"yawn":["yawn",0.7,"yawn"],"knees_knock":["knees_knock",0.6,""],"kneel":["kneel_cloth",0.6,""],
+	"kneel_bound":["kneel_cloth",0.8,""],"prostrate":["body_floor",0.7,""],"elbow":["oof",0.5,""],"shush":["shh",0.6,""],
+	"clear_throat":["throat_clear",0.7,""],"sniff_disdain":["sniff",0.6,""],"jerk_awake":["snort_wake",0.7,"snort"],
+	"scribble":["reed_scratch",0.5,""],"scratch_out":["reed_scratch",0.6,""],"count_fingers":["babble_count",0.4,""],
+	"whisper":["whisper_babble",0.4,""],"over_thank":["babble_thanks",0.7,""],"soft_clap":["soft_clap",0.6,"clap"],
+	"raise_finger":["babble_ahem",0.5,""],"startle":["yelp_small",0.7,"gasp"],"snatch_up":["snatch",0.6,""],"wave":["",0.0,""],
+	"shoo":["shoo",0.6,""],"nibble":["goat_nibble",0.4,""],"tail_wag":["",0.0,""],"bow_to_post":["",0.0,""],"scratch":["",0.0,""],
+}
+## The god's moments: the room's murmur is cut sharply and comes back after.
+const HUSH_SOUND:="murmur_cut"
+
 ## Comic bits: the event kinds each may be drawn for (empty: played only by
 ## its own moment), its weight, and how many events it rests after it plays.
 ## A rest of 12 or more keeps a bit under about one event in twelve over a
@@ -300,7 +332,7 @@ const BITS:={
 	"dog_sniff_gift":{"kinds":["gift"],"weight":3.0,"rest":8},
 	"double_take":{"kinds":["line","divine","gift","decree"],"weight":2.6,"rest":12},
 	"count_fingers":{"kinds":["line","gift","decree"],"weight":1.8,"rest":14},
-	"child_copies":{"kinds":["decree","line","dismiss","summon"],"weight":2.4,"rest":14},
+	"child_copies":{"kinds":["decree","line","dismiss","summon"],"weight":1.4,"rest":18},
 	"double_bow":{"kinds":[],"weight":2.0,"rest":12},
 	"over_thank":{"kinds":[],"weight":2.0,"rest":12},
 	"bow_early":{"kinds":[],"weight":2.6,"rest":12},
@@ -322,10 +354,18 @@ const BITS:={
 	"envoy_startle":{"kinds":[],"weight":1.0,"rest":0},
 	"envoy_appraise":{"kinds":[],"weight":1.0,"rest":0},
 	"late_prostrate":{"kinds":[],"weight":1.0,"rest":0},
+	# The officials' own ways (quirk_of), each tied to the one who has it.
+	"quirk_count":{"kinds":["line","decree","gift","divine"],"weight":3.0,"rest":8},
+	"quirk_flatter":{"kinds":["god_speaks","decree","command","divine"],"weight":2.6,"rest":8},
+	"quirk_yawn":{"kinds":["line","promise","wait","decree"],"weight":2.6,"rest":8},
+	"quirk_jealous":{"kinds":["divine","decree"],"weight":3.0,"rest":6},
+	"quirk_agree":{"kinds":["line","god_speaks","promise","dismiss","decree"],"weight":2.6,"rest":8},
 }
 ## How likely a moment's own bit is when it is rested and possible.
 const DIRECT_ODDS:={"double_bow":0.35,"over_thank":0.4,"guard_snap":0.6,"bump_post":0.5,"forgot_thing":0.6,"wrong_door":0.5,"bow_wrong":0.7,
 	"child_wave":0.6,"stare_down":0.45,"company_gawk":0.5,"bow_early":0.4}
+## How likely an official's own way shows when its moment comes.
+const QUIRK_CHANCE:=0.45
 ## Events the sleeper stays awake once woken, before nodding off again.
 const DOZE_AGAIN:=12
 ## How often a light moment gets a bit from the pool, by kind (a ruler's
@@ -349,6 +389,7 @@ static func beats_for(event_in:Dictionary,cast_in:Array,facts_in:Dictionary,rng_
 	var sig:=""
 	var last:=String((memory.get("sig",{}) as Dictionary).get(kind,"")) if memory.get("sig") is Dictionary else ""
 	var ctx:Dictionary={}
+	_audience(memory,cast,kind)
 	# The same kind of moment never plays out the same way twice running.
 	for attempt in 4:
 		ctx=_context(event,cast,facts,rng_seed+attempt*7919,memory)
@@ -359,6 +400,17 @@ static func beats_for(event_in:Dictionary,cast_in:Array,facts_in:Dictionary,rng_
 	out.sort_custom(_earlier)
 	_remember(memory,ctx,sig,out)
 	return out
+
+## A new audience (someone new before the god, or a new arrival) starts its
+## own count of who has carried the comedy.
+static func _audience(memory:Dictionary,cast:Array,kind:String)->void:
+	var main:=""
+	for entry in cast:
+		if entry is Dictionary and String((entry as Dictionary).get("key",""))=="main":main=String((entry as Dictionary).get("name",""))
+	var aud:Dictionary=memory.get("aud",{}) if memory.get("aud") is Dictionary else {}
+	if String(aud.get("main",""))!=main or (kind=="summon" and int(aud.get("events",0))>0):
+		memory["aud"]={"main":main,"stars":{},"total":0,"events":0}
+		memory.erase("last_speaker");memory.erase("quirk_dozed")
 
 static func _earlier(a:Dictionary,b:Dictionary)->bool:
 	if not is_equal_approx(float(a.t),float(b.t)):return float(a.t)<float(b.t)
@@ -415,9 +467,19 @@ static func _remember(memory:Dictionary,ctx:Dictionary,sig:String,out:Array)->vo
 		if not acts.has(String(beat.act)):acts[String(beat.act)]=[]
 		(acts[String(beat.act)] as Array).append({"who":who,"end":end})
 	var played:={}
+	var aud:Dictionary=memory.get("aud",{}) if memory.get("aud") is Dictionary else {}
+	if not aud.get("stars") is Dictionary:aud["stars"]={}
 	for bit in (ctx.stars as Dictionary):
 		var star:=String(ctx.stars[bit])
 		played[String(bit)]={"star":star,"end":float(ends.get(star,2.5))}
+		if not star.is_empty():
+			(aud.stars as Dictionary)[star]=int((aud.stars as Dictionary).get(star,0))+1
+			aud["total"]=int(aud.get("total",0))+1
+	aud["events"]=int(aud.get("events",0))+1
+	memory["aud"]=aud
+	if String(ctx.kind)=="line":memory["last_speaker"]=String(ctx.event.get("who",""))
+	if ctx.has("quirk_dozed"):memory["quirk_dozed"]=String(ctx.quirk_dozed)
+	elif String(ctx.kind)=="god_speaks":memory.erase("quirk_dozed")
 	memory["last"]={"n":n,"played":played,"acts":acts,"number":int(ctx.get("number",-1)),"number_from":String(ctx.get("number_from","")),
 		"other":String(ctx.get("other","")),"struck":String(ctx.get("struck",""))}
 	memory["last_envier"]=String(ctx.get("envier",""))
@@ -488,13 +550,38 @@ static func member(entry:Dictionary,index:=0)->Dictionary:
 		"empathy":clampf(float(entry.get("empathy",0.5)),0.0,1.0),"love":clampf(float(entry.get("love",0.4)),0.0,1.0),
 		"dread":clampf(float(entry.get("dread",0.2)),0.0,1.0),"resentment":clampf(float(entry.get("resentment",0.0)),0.0,1.0),
 		"voice":String(entry.get("voice","")),"stance":String(entry.get("stance","")),"office":String(entry.get("office","")),
-		"temper":String(entry.get("temper","")),"gifted":String(entry.get("gifted","")),
+		"temper":String(entry.get("temper","")),"gifted":String(entry.get("gifted","")),"people":String(entry.get("people","player")),
 		"x":float(entry.get("x",-1.0)),"index":index}
 	m["pos"]=float(entry.pos) if _num(entry.get("pos",null)) else (float(m.x) if float(m.x)>=0.0 else float(index)*0.12)
 	m["animal"]=kind in ["dog","goat"]
+	m["quirk"]=quirk_of(entry,kind)
 	# How hard they flinch, and how soon: the frightened and the timid first.
 	m["jumpy"]=clampf(float(m.dread)*0.6+(1.0-float(m.courage))*0.5,0.0,1.0)
 	return m
+
+## Each officeholder's comic way, kept for life: the pedant who counts, the
+## flatterer, the sleepy one, the jealous one, the one who agrees with
+## everyone, or none. Read from their temper (GovernmentPeopleSystem's
+## disposition, which their personality fixes), else their lifelong voice
+## model, else their traits, else a steady roll of who they are.
+const QUIRKS:=["pedant","flatterer","sleepy","jealous","yes_man"]
+const QUIRK_BY_DISPOSITION:={"sycophantic":"flatterer","cantankerous":"jealous","principled":"pedant","diplomatic":"yes_man"}
+const QUIRK_BY_VOICE:={"polonius":"yes_man","cicero":"pedant","grant":"pedant","falstaff":"flatterer","odysseus":"flatterer","quixote":"flatterer",
+	"sancho":"sleepy","nestor":"sleepy","iago":"jealous","achilles":"jealous","heathcliff":"jealous","lady_macbeth":"jealous"}
+const QUIRK_BY_TRAIT:={"Methodical":"pedant","Skeptical":"pedant","Ambitious":"jealous","Humble":"yes_man","Cautious":"yes_man","Patient":"sleepy","Warm":"flatterer","Generous":"flatterer"}
+static func quirk_of(entry:Dictionary,kind:String)->String:
+	if entry.has("quirk"):return String(entry.quirk)
+	if not kind in ["official","hearth_chief"]:return ""
+	var id:=str(int(entry.get("person_id",0))) if int(entry.get("person_id",0))>0 else String(entry.get("name",""))
+	var roll:=posmod(hash("quirk|"+id),6)
+	var disposition:=String(entry.get("disposition",""))
+	if QUIRK_BY_DISPOSITION.has(disposition):return String(QUIRK_BY_DISPOSITION[disposition])
+	if disposition=="pragmatic":return "sleepy" if roll<2 else ""
+	var voice:=String(entry.get("voice","")).to_lower()
+	if QUIRK_BY_VOICE.has(voice):return String(QUIRK_BY_VOICE[voice])
+	for t in (entry.get("traits",[]) if entry.get("traits") is Array else []):
+		if QUIRK_BY_TRAIT.has(String(t)):return String(QUIRK_BY_TRAIT[String(t)])
+	return ["pedant","flatterer","sleepy","jealous","yes_man",""][roll]
 
 ## A cast entry from a game person (an official, the one before the god):
 ## their courage, pride, warmth and their love and dread of the god, read the
@@ -511,6 +598,11 @@ static func cast_member(person:Dictionary,extra:Dictionary={})->Dictionary:
 		"love":float(divine.call("love_of",person)),"dread":float(divine.call("dread_of",person)),"resentment":float(rel.get("resentment",0.0)),
 		"office":String(person.get("office_title",person.get("title",""))),"voice":String(person.get("voice_model",""))}
 	if String(person.get("office_key",""))=="settlement":entry["kind"]="hearth_chief"
+	if person.get("traits") is Array:entry["traits"]=(person.traits as Array).duplicate()
+	# Their temper, which their personality fixes for life.
+	if Engine.get_main_loop()!=null and int(person.get("person_id",0))>0 and String(person.get("office_key",""))!="":
+		var disposition:Variant=GovernmentPeopleSystem.leader_disposition(person)
+		if disposition is Dictionary:entry["disposition"]=String((disposition as Dictionary).get("id",""))
 	# Someone the court summoned from among the people, not an officeholder.
 	if String(person.get("known_id",""))!="" or String(person.get("kind",""))=="known":entry["kind"]="child" if years<14 else "commoner"
 	elif years<14:entry["kind"]="child"
@@ -695,7 +787,20 @@ static func _beat(out:Array,t:float,who:String,act:String,args:Dictionary={},pha
 	var a:=args.duplicate()
 	if not a.has("dur"):a["dur"]=float(spec.get("dur",0.8))
 	if spec.has("speed") and not a.has("speed"):a["speed"]=float(spec.speed)
-	out.append({"t":snappedf(maxf(t,0.0),0.01),"who":who,"act":act,"args":a,"phase":phase})
+	var beat:={"t":snappedf(maxf(t,0.0),0.01),"who":who,"act":act,"args":a,"phase":phase}
+	# What is heard: the act's own sound, or the one the beat asks for
+	# ("" for silence); the room's hush cuts the murmur.
+	var sound:Array=SOUNDS.get(act,[])
+	if a.has("sound"):
+		sound=[String(a.sound),float(a.get("gain",0.8)),String(a.get("glyph",""))] if String(a.sound)!="" else []
+		a.erase("sound")
+	if who=="room" and act=="hush":
+		a["cut"]=true
+		beat["sound"]={"name":HUSH_SOUND,"dur":float(a.dur),"gain":1.0,"glyph":"","who":"room"}
+	elif not sound.is_empty() and String(sound[0])!="":
+		beat["sound"]={"name":String(sound[0]),"gain":float(sound[1]),"glyph":String(sound[2]),"who":who}
+		if String(sound[0])=="footsteps":(beat.sound as Dictionary)["pace"]=String({"storm_off":"stomp","come_back":"stomp","come_back_for":"stomp","bolt":"run","hurry_after":"hurry","hurry_round":"hurry","hurry":"hurry","back_out_bowing":"shuffle","edge_forward":"shuffle","make_room":"shuffle","step_back":"shuffle"}.get(act,"walk"))
+	out.append(beat)
 
 static func _shot(out:Array,t:float,shot:String,args:Dictionary={})->void:
 	_beat(out,t,"camera",shot,args,"camera")
@@ -704,8 +809,50 @@ static func _shot(out:Array,t:float,shot:String,args:Dictionary={})->void:
 ## muttered line can answer it.
 static func _ran(ctx:Dictionary,bit:String)->void:
 	if not (ctx.bits as Array).has(bit):(ctx.bits as Array).append(bit)
-	(ctx.stars as Dictionary)[bit]=String(ctx.get("star",""))
+	# A moment that is someone's own (an envoy's temper, a gifted child) still
+	# plays, but does not count them past their share.
+	var star:=String(ctx.get("star",""))
+	if not star.is_empty() and not _share_left(ctx,star):star=""
+	(ctx.stars as Dictionary)[bit]=star
 	ctx["star"]=""
+
+## How much of one audience's comedy one person may carry: about a quarter
+## once there is enough of it (the one before the god may carry two bits).
+const STAR_SHARE:=0.25
+## What a bit may leave on the moment, put back if the bit is taken back.
+const SIDE_KEYS:=["woke","fainted","number","number_from","other","struck","eager","cougher","dozed","star","quirk_dozed"]
+
+## Plays a bit unless the one it would fall on already carries their share
+## of this audience's comedy; then it is taken back whole. True if it played.
+static func _try(ctx:Dictionary,bit:String,out:Array,at:float)->bool:
+	var size:=out.size()
+	var saved:={}
+	for key in SIDE_KEYS:
+		if ctx.has(key):saved[key]=ctx[key]
+	if not _bit(ctx,bit,out,at):return false
+	var star:=String(ctx.get("star",""))
+	if not star.is_empty() and not _share_left(ctx,star):
+		out.resize(size)
+		for key in SIDE_KEYS:
+			if saved.has(key):ctx[key]=saved[key]
+			else:ctx.erase(key)
+		return false
+	_ran(ctx,bit)
+	return true
+
+## Whether this person may carry one more bit in this audience.
+static func _share_left(ctx:Dictionary,star:String)->bool:
+	var aud:Dictionary=ctx.memory.get("aud",{}) if ctx.memory.get("aud") is Dictionary else {}
+	var stars:Dictionary=aud.get("stars",{}) if aud.get("stars") is Dictionary else {}
+	var total:=int(aud.get("total",0))
+	var mine:=int(stars.get(star,0))
+	for bit in (ctx.stars as Dictionary):
+		var who:=String(ctx.stars[bit])
+		if who.is_empty():continue
+		total+=1
+		if who==star:mine+=1
+	var allowed:=maxi(2 if star==String(ctx.main) else 1,floori(STAR_SHARE*float(total+1)))
+	return mine+1<=allowed
 
 ## Is a bit rested (and, when drawn from the pool, does it fit this kind)?
 static func _rested(ctx:Dictionary,bit:String,pooled:=false)->bool:
@@ -722,6 +869,16 @@ static func _rested(ctx:Dictionary,bit:String,pooled:=false)->bool:
 static func _play_bits(ctx:Dictionary,out:Array,at:float,count:=1)->void:
 	if String(ctx.gravity)=="grave":return
 	var rng:RandomNumberGenerator=ctx.rng
+	# An official's own way comes out when its moment comes (the pedant when
+	# a number is said, the flatterer when the god speaks), more often than
+	# the room's chance business.
+	var ways:Array=[]
+	for bit in ["quirk_count","quirk_flatter","quirk_yawn","quirk_jealous","quirk_agree"]:
+		if not (ctx.bits as Array).has(bit) and _rested(ctx,bit,true) and _can(ctx,bit):ways.append(bit)
+	if not ways.is_empty() and rng.randf()<QUIRK_CHANCE:
+		if _try(ctx,String(ways[rng.randi_range(0,ways.size()-1)]),out,at):
+			count-=1
+			if count<=0:return
 	if rng.randf()>float(BIT_CHANCE.get(String(ctx.kind),0.4)):return
 	var open:Array=[]
 	var total:=0.0
@@ -741,7 +898,7 @@ static func _play_bits(ctx:Dictionary,out:Array,at:float,count:=1)->void:
 			if roll<=0.0:chosen=j;break
 		var bit:=String(open[chosen][0])
 		total-=float(open[chosen][1]);open.remove_at(chosen)
-		if _bit(ctx,bit,out,at+float(i)*0.5):_ran(ctx,bit)
+		_try(ctx,bit,out,at+float(i)*0.5)
 
 # =============================================================================
 # The moments
@@ -771,20 +928,29 @@ static func _direct(ctx:Dictionary)->Array:
 static func _god_speaks(ctx:Dictionary,out:Array)->void:
 	var event:Dictionary=ctx.event
 	var rng:RandomNumberGenerator=ctx.rng
-	_beat(out,0.0,"room","hush",{"dur":1.6},"anticipation")
+	_beat(out,0.0,"room","hush",{"dur":1.6,"bubbles":"dim"},"anticipation")
 	var main:=_m(ctx,String(ctx.main))
 	var order:Array=_people(ctx)
 	var origin:=_where(main) if not main.is_empty() else 0.5
 	order.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return absf(_where(a)-origin)<absf(_where(b)-origin) if not is_equal_approx(absf(_where(a)-origin),absf(_where(b)-origin)) else int(a.index)<int(b.index))
 	var sleeper:=_asleep(ctx)
+	var dozing:=String(ctx.memory.get("quirk_dozed",""))
+	if not _m(ctx,dozing).is_empty():
+		_beat(out,0.7,dozing,"jerk_awake",{},"reaction")
+		_beat(out,1.1,dozing,"nod_too_much",{},"reaction")
 	var step:=0
 	for m:Dictionary in order:
-		if String(m.key)==sleeper:continue
+		if String(m.key)==sleeper or String(m.key)==dozing:continue
 		if String(m.kind)=="scribe":continue
 		_beat(out,0.05+step*0.07+rng.randf()*0.08,String(m.key),"look_up",{},"action")
 		step+=1
 	for dog:Dictionary in _of_kind(ctx,["dog"]):_beat(out,0.2,String(dog.key),"perk_up",{},"action")
 	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,0.3,String(scribe.key),"scribble",{},"action")
+	# Under the voice, one or two do their own small thing.
+	var rng0:RandomNumberGenerator=ctx.rng
+	for m:Dictionary in _shuffled(rng0,_people(ctx,[String(ctx.main),sleeper,dozing])).slice(0,rng0.randi_range(1,2)):
+		var small:String=["straighten","lips_pressed","shift_weight","glance_up" if float(m.dread)>=0.4 else "smile_warm"][rng0.randi_range(0,3)]
+		_beat(out,0.9+rng0.randf()*0.6,String(m.key),small,{},"reaction")
 	# The voice usually wakes the sleeper, a beat behind everyone; now and
 	# then they sleep straight through it.
 	if not sleeper.is_empty() and rng.randf()<0.75:_wake(ctx,out,0.9)
@@ -797,12 +963,40 @@ static func _god_speaks(ctx:Dictionary,out:Array)->void:
 		var warm:Array=_people(ctx,[String(ctx.main)])
 		if not warm.is_empty():_beat(out,1.0,String(_pick(ctx,warm).key),"lean_in",{"because":"people_love"},"reaction")
 
+## How a line's bubble is performed (never what it says): "tremble" for the
+## terrified (dread high, or they went down before the god just now),
+## "aside" for words murmured to the god alone, "small" for a child, else
+## "speech". amount: how much it trembles, 0..1.
+static func speech_style(event:Dictionary,cast:Array,facts:Dictionary={},memory:Dictionary={})->Dictionary:
+	var who:=String(event.get("who",""))
+	var m:={}
+	var index:=0
+	for entry in cast:
+		if entry is Dictionary and String((entry as Dictionary).get("key",""))==who:m=member(entry,index)
+		index+=1
+	if String(event.get("kind",""))=="god_speaks":return {"style":"god","amount":0.0}
+	if m.is_empty():return {"style":"speech","amount":0.0}
+	var shaken:=false
+	var last:Dictionary=memory.get("last",{}) if memory.get("last") is Dictionary else {}
+	var acts:Dictionary=last.get("acts",{}) if last.get("acts") is Dictionary else {}
+	for act in ["kneel","knees_knock","prostrate","flinch","faint","plead"]:
+		for seen in acts.get(act,[]):
+			if String((seen as Dictionary).get("who",""))==who:shaken=true
+	var dread:=maxf(float(m.dread),people_dread(facts)*0.8)
+	if shaken or dread>=DREAD_HIGH:return {"style":"tremble","amount":clampf(0.35+dread*0.6,0.3,1.0)}
+	if bool(event.get("aside",false)):return {"style":"aside","amount":0.0}
+	if String(m.kind)=="child":return {"style":"small","amount":0.0}
+	return {"style":"speech","amount":0.0}
+
 ## A line said: the speaker talks (the stage does that). Around them, now and
 ## then, someone reacts: a number said lands as a double take timed to when
 ## the number appears in the bubble, and the scribe writes it down.
 static func _line(ctx:Dictionary,out:Array)->void:
 	var rng:RandomNumberGenerator=ctx.rng
 	var who:=String(ctx.event.get("who",""))
+	if not _m(ctx,who).is_empty():
+		var style:=speech_style(ctx.event,ctx.cast,ctx.facts,ctx.memory)
+		_beat(out,0.0,who,"bubble",style,"action")
 	var listeners:Array=_people(ctx,[who])
 	if listeners.is_empty():return
 	var said:=number_in(String(ctx.event.get("text","")))
@@ -906,7 +1100,7 @@ static func _wrath(ctx:Dictionary,out:Array,action:String,target:String,response
 	# silence is total, and one small noise breaks it.
 	var hold:=land+(2.9 if big else 2.2)
 	_beat(out,hold,"room","hush",{"dur":1.4 if big else 0.9},"hold")
-	if big and _rested(ctx,"dead_silence") and _can(ctx,"dead_silence") and _bit(ctx,"dead_silence",out,hold+0.5):_ran(ctx,"dead_silence")
+	if big and not (ctx.bits as Array).has("goat_ignores") and _rested(ctx,"dead_silence") and _can(ctx,"dead_silence") and _try(ctx,"dead_silence",out,hold+0.5):pass
 	if not ctx.bits.has("gasp_pretend") and not ctx.bits.has("dead_silence") and big:
 		var shaken:Array=_jumpiest(_people(ctx,[target,String(ctx.get("fainted","")),sleeper]))
 		if not shaken.is_empty():_beat(out,hold+0.7,String((shaken[0] as Dictionary).key),"straighten",{},"hold")
@@ -929,7 +1123,7 @@ static func _favour(ctx:Dictionary,out:Array,action:String,target:String,respons
 	_beat(out,0.0,"room","hush",{"dur":1.2},"anticipation")
 	if not t_m.is_empty():
 		_beat(out,0.5,target,"exhale" if response=="relief" else "beam",{},"action")
-		if _bit_ready(ctx,"over_thank") and _bit(ctx,"over_thank",out,1.1):_ran(ctx,"over_thank")
+		if _bit_ready(ctx,"over_thank") and _try(ctx,"over_thank",out,1.1):pass
 		else:_beat(out,1.1,target,"bow",{},"action")
 	var witnesses:Dictionary=ctx.event.get("witnesses",{}) if ctx.event.get("witnesses") is Dictionary else {}
 	var envier:={}
@@ -1007,7 +1201,8 @@ static func _command(ctx:Dictionary,out:Array)->void:
 		_shot(out,0.0,"wide")
 		var all:Array=_people(ctx)
 		var late:={}
-		if all.size()>=3:late=_pick(ctx,all)
+		var can_be_late:Array=all.filter(func(m:Dictionary)->bool:return _share_left(ctx,String(m.key)))
+		if all.size()>=3 and not can_be_late.is_empty():late=_pick(ctx,can_be_late)
 		for m:Dictionary in all:
 			if String(m.key)==String(late.get("key","")):continue
 			_beat(out,0.2+rng.randf()*0.35,String(m.key),"prostrate",{},"action")
@@ -1018,7 +1213,7 @@ static func _command(ctx:Dictionary,out:Array)->void:
 			_ran(ctx,"late_prostrate")
 		for dog:Dictionary in _of_kind(ctx,["dog"]):_beat(out,1.0,String(dog.key),"lie_down",{},"reaction")
 		_beat(out,2.0,"room","hush",{"dur":1.6},"hold")
-		if _rested(ctx,"dead_silence") and _can(ctx,"dead_silence") and _bit(ctx,"dead_silence",out,2.6):_ran(ctx,"dead_silence")
+		if _rested(ctx,"dead_silence") and _can(ctx,"dead_silence") and _try(ctx,"dead_silence",out,2.6):pass
 		return
 	if _odd(ctx):
 		_absurd(ctx,out,actor)
@@ -1090,7 +1285,7 @@ static func _absurd(ctx:Dictionary,out:Array,actor:String)->void:
 	if pair.size()==2 and rng.randf()<0.7:
 		_beat(out,1.5,String((pair[0] as Dictionary).key),"side_eye",{"at":String((pair[1] as Dictionary).key)},"reaction")
 		_beat(out,1.8,String((pair[1] as Dictionary).key),"side_eye",{"at":String((pair[0] as Dictionary).key)},"reaction")
-	if _rested(ctx,"stifle_elbow") and _can(ctx,"stifle_elbow") and rng.randf()<0.65 and _bit(ctx,"stifle_elbow",out,2.0):_ran(ctx,"stifle_elbow")
+	if _rested(ctx,"stifle_elbow") and _can(ctx,"stifle_elbow") and rng.randf()<0.65 and _try(ctx,"stifle_elbow",out,2.0):pass
 	elif rng.randf()<0.5:_play_bits(ctx,out,2.2)
 
 ## A gasp through the room; with `pretend`, one or two of the jumpiest then
@@ -1100,14 +1295,20 @@ static func _gasp(ctx:Dictionary,out:Array,at:float,exclude:Array,pretend:=true)
 	# The visitor's own company does not gasp at them: they hurry after.
 	var room:Array=_people(ctx,exclude).filter(func(m:Dictionary)->bool:return not String(m.kind) in ["guard","bearer","attendant"])
 	if room.size()<2:return
+	var heard:=false
 	for m:Dictionary in room:
 		var roll:=rng.randf()
 		var act:="gasp" if roll<0.6 else ("hand_to_mouth" if roll<0.8 else "freeze")
 		# The proud and brave do not gasp: they set their jaw.
 		if float(m.pride)>0.7 and float(m.courage)>0.65:act=["lips_pressed","cross_arms","straighten"][rng.randi_range(0,2)]
-		_beat(out,at+rng.randf()*0.15,String(m.key),act,{},"reaction")
+		# The whole room's gasp is heard once, as one sound.
+		var args:={}
+		if act=="gasp":
+			args={"sound":"gasp_room","gain":1.0,"glyph":"gasp"} if not heard else {"sound":""}
+			heard=true
+		_beat(out,at+rng.randf()*0.15,String(m.key),act,args,"reaction")
 	if not pretend:return
-	var caught:Array=_shuffled(rng,_jumpiest(room).slice(0,3))
+	var caught:Array=_shuffled(rng,_jumpiest(room).filter(func(m:Dictionary)->bool:return _share_left(ctx,String(m.key))).slice(0,3))
 	var pretenders:=1+rng.randi_range(0,1)
 	for i in mini(pretenders,caught.size()):_beat(out,at+1.6+i*0.25,String((caught[i] as Dictionary).key),"pretend_calm",{},"hold")
 	if not caught.is_empty():ctx["star"]=String((caught[0] as Dictionary).key)
@@ -1133,8 +1334,8 @@ static func _decree(ctx:Dictionary,out:Array)->void:
 		if accepted:
 			_beat(out,0.4,who,"exhale" if float(w.dread)>=0.4 else "beam",{},"action")
 			# Now and then one bow is not enough for them.
-			if _bit_ready(ctx,"over_thank") and _bit(ctx,"over_thank",out,1.1):_ran(ctx,"over_thank")
-			elif _bit_ready(ctx,"double_bow") and _bit(ctx,"double_bow",out,1.1):_ran(ctx,"double_bow")
+			if _bit_ready(ctx,"over_thank") and _try(ctx,"over_thank",out,1.1):pass
+			elif _bit_ready(ctx,"double_bow") and _try(ctx,"double_bow",out,1.1):pass
 			else:_beat(out,1.1,who,"bow",{},"action")
 		elif reaction in ["offended","furious"]:
 			_beat(out,0.4,who,"stiffen" if reaction=="furious" or float(w.pride)>0.65 else "face_fall",{},"action")
@@ -1166,7 +1367,7 @@ static func _bit_ready(ctx:Dictionary,bit:String,chance:=-1.0)->bool:
 ## way, then up, a full second behind the room.
 static func _wake(ctx:Dictionary,out:Array,at:float)->void:
 	if (ctx.bits as Array).has("doze_jerk") or not _rested(ctx,"doze_jerk"):return
-	if _bit(ctx,"doze_jerk",out,at):_ran(ctx,"doze_jerk")
+	_try(ctx,"doze_jerk",out,at)
 
 ## Whether the sleeper is asleep now, for the stage's idle business: the
 ## doze resumes once DOZE_AGAIN events have passed since they were woken,
@@ -1238,11 +1439,16 @@ static func _wait(ctx:Dictionary,out:Array)->void:
 		if _asleep(ctx)==key:_beat(out,2.4,key,"snore",{},"reaction")
 		else:_beat(out,2.4,key,"doze_off",{},"reaction")
 		ctx["dozed"]=true
+	_play_bits(ctx,out,1.8)
+	var sleepy:=_quirky(ctx,"sleepy")
+	var yawned:=String((ctx.stars as Dictionary).get("quirk_yawn",""))==String(sleepy.get("key","-"))
+	if not sleepy.is_empty() and not yawned and rng.randf()<0.7:
+		_beat(out,3.2,String(sleepy.key),"doze_off",{},"reaction")
+		ctx["quirk_dozed"]=String(sleepy.key)
 	for child:Dictionary in _of_kind(ctx,["child"],[who]):
 		if rng.randf()<0.4:_beat(out,3.0,String(child.key),"sit_down",{},"reaction");break
 	for dog:Dictionary in _of_kind(ctx,["dog"]):
 		if rng.randf()<0.5:_beat(out,2.8,String(dog.key),"lie_down",{},"reaction")
-	_play_bits(ctx,out,1.8)
 
 ## A gift carried in: the bearer heaves it forward and sets it down; taken,
 ## eyes go to it (hungry eyes if the stores are short and it is food);
@@ -1302,7 +1508,7 @@ static func _summon(ctx:Dictionary,out:Array)->void:
 	if not String(w.gifted).is_empty():
 		_gifted_arrives(ctx,out,who)
 	elif String(w.kind)=="child":
-		if _bit_ready(ctx,"child_wave") and _bit(ctx,"child_wave",out,1.2):_ran(ctx,"child_wave")
+		if _bit_ready(ctx,"child_wave") and _try(ctx,"child_wave",out,1.2):pass
 		else:
 			_beat(out,1.2,who,"gape",{},"action")
 			if not near.is_empty():_beat(out,2.2,String(near.key),"nudge",{"at":who},"reaction")
@@ -1310,11 +1516,11 @@ static func _summon(ctx:Dictionary,out:Array)->void:
 	elif String(w.kind)=="commoner":
 		_beat(out,1.0,who,"gawk",{},"action")
 		_beat(out,1.9,who,"wipe_hands",{},"action")
-		if _bit_ready(ctx,"bow_wrong") and _bit(ctx,"bow_wrong",out,2.4):_ran(ctx,"bow_wrong")
+		if _bit_ready(ctx,"bow_wrong") and _try(ctx,"bow_wrong",out,2.4):pass
 		else:_beat(out,2.6,who,"bow",{},"action")
 	else:
-		if float(w.dread)>=0.45 and _bit_ready(ctx,"wrong_door") and _bit(ctx,"wrong_door",out,0.0):_ran(ctx,"wrong_door")
-		elif float(w.dread)>=0.4 and _bit_ready(ctx,"bow_early") and _bit(ctx,"bow_early",out,0.6):_ran(ctx,"bow_early")
+		if float(w.dread)>=0.45 and _bit_ready(ctx,"wrong_door") and _try(ctx,"wrong_door",out,0.0):pass
+		elif float(w.dread)>=0.4 and _bit_ready(ctx,"bow_early") and _try(ctx,"bow_early",out,0.6):pass
 		else:
 			if not near.is_empty():_beat(out,1.4,String(near.key),"make_room",{"at":who},"reaction")
 			if float(w.dread)>=0.5:_beat(out,1.8,who,"wring_hands",{},"action")
@@ -1364,8 +1570,8 @@ static func _envoy_arrives(ctx:Dictionary,out:Array,envoy:String)->void:
 			_beat(out,3.0,envoy,"bow_small",{},"action")
 			ctx["star"]=envoy;_ran(ctx,"envoy_appraise")
 		_:_beat(out,1.6,envoy,"bow",{},"action")
-	if _bit_ready(ctx,"company_gawk") and _bit(ctx,"company_gawk",out,1.2):_ran(ctx,"company_gawk")
-	if _bit_ready(ctx,"stare_down") and _bit(ctx,"stare_down",out,2.4):_ran(ctx,"stare_down")
+	if _bit_ready(ctx,"company_gawk") and _try(ctx,"company_gawk",out,1.2):pass
+	if _bit_ready(ctx,"stare_down") and _try(ctx,"stare_down",out,2.4):pass
 
 ## Someone goes. The stage walks them out in the engine's style; the room
 ## shows what it made of it. Pleased, they back out bowing (and now and then
@@ -1389,8 +1595,7 @@ static func _exit(ctx:Dictionary,out:Array)->void:
 			_beat(out,0.0,who,"storm_off",{},"action")
 			# Now and then they have to come back for what they left: their
 			# staff or bowl, or the bearer still standing there with the bundle.
-			var forgot:=_bit_ready(ctx,"forgot_thing") and _bit(ctx,"forgot_thing",out,2.4)
-			if forgot:_ran(ctx,"forgot_thing")
+			var forgot:=_bit_ready(ctx,"forgot_thing") and _try(ctx,"forgot_thing",out,2.4)
 			var left_behind:=String(_forgotten(ctx).get("follower","")) if forgot else ""
 			for att:Dictionary in _of_kind(ctx,["guard","bearer","attendant"]):
 				if String(att.key)==left_behind:_beat(out,0.6,left_behind,"look_at",{"at":String(ctx.main)},"reaction")
@@ -1406,7 +1611,7 @@ static func _exit(ctx:Dictionary,out:Array)->void:
 					_beat(out,1.9,String((two[0] as Dictionary).key),"exchange_look",{"at":String((two[1] as Dictionary).key)},"hold")
 					_beat(out,2.0,String((two[1] as Dictionary).key),"exchange_look",{"at":String((two[0] as Dictionary).key)},"hold")
 		_:
-			if reaction in ["pleased","delighted"] and _bit_ready(ctx,"bump_post") and _bit(ctx,"bump_post",out,0.2):_ran(ctx,"bump_post")
+			if reaction in ["pleased","delighted"] and _bit_ready(ctx,"bump_post") and _try(ctx,"bump_post",out,0.2):pass
 			elif reaction in ["pleased","delighted"]:_beat(out,0.2,who,"back_out_bowing",{"walk":"backward"},"action")
 			for m:Dictionary in room:
 				if rng.randf()<0.4:_beat(out,0.8+_lag(ctx,m),String(m.key),"nod",{},"reaction")
@@ -1432,8 +1637,7 @@ static func _terrify_envoy(ctx:Dictionary,out:Array)->void:
 		if temper=="haughty":_beat(out,2.2,envoy,"pretend_calm",{},"hold")
 		elif temper=="nervous":_beat(out,1.6,envoy,"knees_knock",{},"action")
 	# Their bored guard, suddenly very much awake.
-	var snapped:=_bit_ready(ctx,"guard_snap") and _bit(ctx,"guard_snap",out,0.8)
-	if snapped:_ran(ctx,"guard_snap")
+	var snapped:=_bit_ready(ctx,"guard_snap") and _try(ctx,"guard_snap",out,0.8)
 	for att:Dictionary in _of_kind(ctx,["attendant","bearer","guard"]):
 		if String(att.kind)=="guard" and snapped:continue
 		_beat(out,0.8+_lag(ctx,att),String(att.key),"step_back",{},"reaction")
@@ -1443,14 +1647,14 @@ static func _terrify_envoy(ctx:Dictionary,out:Array)->void:
 		if float(m.pride)>0.65 and (ctx.rng as RandomNumberGenerator).randf()<0.6:_beat(out,1.4+_lag(ctx,m),String(m.key),"smirk",{"at":envoy},"reaction")
 	_play_bits(ctx,out,0.8,1)
 	_beat(out,2.6,"room","hush",{"dur":1.2},"hold")
-	if _rested(ctx,"dead_silence") and _can(ctx,"dead_silence") and _bit(ctx,"dead_silence",out,3.0):_ran(ctx,"dead_silence")
+	if _rested(ctx,"dead_silence") and _can(ctx,"dead_silence") and _try(ctx,"dead_silence",out,3.0):pass
 	_shot(out,3.4,"wide")
 
 static func _insulted(ctx:Dictionary,out:Array)->void:
 	var envoy:=String(ctx.main)
 	if envoy!="":_beat(out,0.4,envoy,"stiffen",{},"action")
 	if String(_m(ctx,envoy).get("temper",""))=="haughty":_beat(out,1.2,envoy,"sniff_disdain",{},"action")
-	if _bit_ready(ctx,"guard_snap") and _bit(ctx,"guard_snap",out,0.9):_ran(ctx,"guard_snap")
+	if _bit_ready(ctx,"guard_snap") and _try(ctx,"guard_snap",out,0.9):pass
 	var two:Array=_shuffled(ctx.rng,_of_kind(ctx,["official","hearth_chief"]))
 	if two.size()>=2:
 		_beat(out,1.0,String((two[0] as Dictionary).key),"exchange_look",{"at":String((two[1] as Dictionary).key)},"reaction")
@@ -1510,7 +1714,30 @@ static func _can(ctx:Dictionary,bit:String)->bool:
 		"child_wave":return not _m(ctx,who).is_empty()
 		"stare_down":return not _of_kind(ctx,["guard"]).is_empty() and not _staring_official(ctx).is_empty()
 		"company_gawk":return not _of_kind(ctx,["guard","bearer","attendant"]).is_empty()
+		"quirk_count":return not _quirky(ctx,"pedant").is_empty() and not _amount(ctx).is_empty()
+		"quirk_flatter":
+			var f:=_quirky(ctx,"flatterer")
+			return not f.is_empty() and String(ctx.gravity)!="grave"
+		"quirk_yawn":return not _quirky(ctx,"sleepy").is_empty() and (String(ctx.kind)!="line" or String(event.get("text","")).length()>=50)
+		"quirk_jealous":return not _quirky(ctx,"jealous").is_empty() and _favourable(ctx) and not _favoured(ctx).is_empty()
+		"quirk_agree":return not _quirky(ctx,"yes_man").is_empty()
 	return false
+
+## Someone present with this comic way who is not being dealt with now.
+static func _quirky(ctx:Dictionary,quirk:String)->Dictionary:
+	var event:Dictionary=ctx.event
+	var skip:=[String(event.get("target","")),String(event.get("who","")),String(event.get("actor","")),String(ctx.firm),String(ctx.gone),String(ctx.main)]
+	for m:Dictionary in ctx.cast:
+		if String(m.get("quirk",""))==quirk and not String(m.key) in skip:return m
+	return {}
+
+## Whom this moment favours (the one blessed, granted or raised).
+static func _favoured(ctx:Dictionary)->String:
+	var event:Dictionary=ctx.event
+	match String(ctx.kind):
+		"divine":return String(event.get("target",""))
+		"decree":return String(event.get("who",ctx.main)) if not bool(event.get("issued",false)) else ""
+	return ""
 
 ## Something odd was ordered: the engine could not carry it out ("none"),
 ## or the order went nowhere; or a petition was answered against custom.
@@ -1592,6 +1819,8 @@ static func _rival(ctx:Dictionary)->Dictionary:
 	var event:Dictionary=ctx.event
 	var target:=String(event.get("target",event.get("who","")))
 	if target.is_empty():return {}
+	for m:Dictionary in _of_kind(ctx,["official","hearth_chief"],[target]):
+		if String(m.get("quirk",""))=="jealous":return m
 	for m:Dictionary in _of_kind(ctx,["official","hearth_chief"],[target]):
 		if float(m.pride)>=0.68 and float(m.love)<0.45:return m
 	return {}
@@ -1902,6 +2131,60 @@ static func _bit(ctx:Dictionary,bit:String,out:Array,at:float)->bool:
 			var loser:=String(guard.key) if float(ours.pride)+float(ours.courage)>=1.1 else String(ours.key)
 			_beat(out,at+2.4,loser,"blink_first",{},"hold")
 			ctx["star"]=String(ours.key) if loser==String(guard.key) else String(guard.key);ctx["other"]=loser
+		"quirk_count":
+			# The pedant counts it off, lifts a finger to correct someone, and
+			# thinks better of it.
+			var m:=_quirky(ctx,"pedant")
+			var amount:=_amount(ctx)
+			_beat(out,float(amount.at)+0.3,String(m.key),"count_fingers",{"number":int(amount.value)},"reaction")
+			_beat(out,float(amount.at)+2.0,String(m.key),"raise_finger",{},"reaction")
+			var near:=_nearest(ctx,m,["official","hearth_chief","commoner","elder"],busy)
+			if not near.is_empty():_beat(out,float(amount.at)+2.5,String(near.key),"side_eye",{"at":String(m.key)},"reaction")
+			_beat(out,float(amount.at)+3.0,String(m.key),"lower_finger",{},"hold")
+			ctx["star"]=String(m.key);ctx["number"]=int(amount.value);ctx["number_from"]=String(amount.get("from",""))
+		"quirk_flatter":
+			# The flatterer agrees with the god harder than anyone; in wrath on
+			# another, they nod along as if they had said it themselves.
+			var m:=_quirky(ctx,"flatterer")
+			var wrath:=String(ctx.gravity)=="tense"
+			_beat(out,at,String(m.key),"nod_along" if wrath else "nod_too_much",{},"reaction")
+			if not wrath:_beat(out,at+1.2,String(m.key),"soft_clap",{},"reaction")
+			var near:=_nearest(ctx,m,["official","hearth_chief","commoner","elder"],busy)
+			if not near.is_empty():_beat(out,at+1.6,String(near.key),"side_eye",{"at":String(m.key)},"reaction")
+			ctx["star"]=String(m.key)
+		"quirk_yawn":
+			var m:=_quirky(ctx,"sleepy")
+			_beat(out,at,String(m.key),"yawn",{},"reaction")
+			_beat(out,at+1.5,String(m.key),"snap_alert",{},"reaction")
+			var near:=_nearest(ctx,m,["official","hearth_chief","commoner","elder"],busy)
+			if not near.is_empty():_beat(out,at+1.0,String(near.key),"elbow",{"at":String(m.key)},"reaction")
+			ctx["star"]=String(m.key)
+		"quirk_jealous":
+			# The jealous one looks sideways at the favoured and edges a step
+			# nearer the front.
+			var m:=_quirky(ctx,"jealous")
+			var whom:=_favoured(ctx)
+			if String(ctx.get("envier",""))!=String(m.key):_beat(out,at,String(m.key),"side_eye",{"at":whom},"reaction")
+			_beat(out,at+0.9,String(m.key),"edge_forward",{},"reaction")
+			_beat(out,at+1.8,String(m.key),"smooth_clothes",{},"hold")
+			ctx["star"]=String(m.key);ctx["other"]=whom
+		"quirk_agree":
+			# The one who agrees with everyone: a nod for the last speaker, a
+			# nod for this one, a look round to see what the others think.
+			var m:=_quirky(ctx,"yes_man")
+			var now:=String(event.get("who","")) if String(ctx.kind)=="line" else ""
+			var before:=String(ctx.memory.get("last_speaker",""))
+			if not now.is_empty() and before!="" and before!=now and not _m(ctx,before).is_empty() and before!=String(m.key):
+				_beat(out,at,String(m.key),"look_at",{"at":before},"reaction")
+				_beat(out,at+0.4,String(m.key),"nod",{},"reaction")
+				_beat(out,at+1.2,String(m.key),"look_at",{"at":now},"reaction")
+				_beat(out,at+1.6,String(m.key),"nod_too_much",{},"reaction")
+				ctx["other"]=now
+			else:
+				_beat(out,at,String(m.key),"nod",{},"reaction")
+				_beat(out,at+0.8,String(m.key),"check_room",{},"reaction")
+				_beat(out,at+1.6,String(m.key),"nod_too_much",{},"reaction")
+			ctx["star"]=String(m.key)
 		"company_gawk":
 			var company:Array=_of_kind(ctx,["guard","bearer","attendant"])
 			for i in company.size():_beat(out,at+i*0.3,String((company[i] as Dictionary).key),"gawk",{},"reaction")
@@ -2113,7 +2396,7 @@ static func _hold(out:Array,who:String,act:String,args:Dictionary,because:String
 ## frightened.
 static func dare(m:Dictionary)->float:
 	var d:=float(m.courage)*0.6+float(m.pride)*0.5-float(m.dread)*0.9-0.2
-	if String(m.kind)=="child":d+=0.5
+	if String(m.kind)=="child":d+=0.38
 	elif int(m.age)>=60:d+=0.2
 	return d
 
@@ -2146,6 +2429,8 @@ const BIT_ASIDES:={
 	"child_wave":["child_wave","any"],"stare_down":["stare_down","any"],"company_gawk":["company_gawk","any"],
 	"gifted":["gifted","any"],"envoy_sniff":["envoy_haughty","any"],"envoy_startle":["envoy_nervous","any"],
 	"envoy_appraise":["envoy_greedy","any"],"side_eye_pair":["absurd","star"],"double_bow":["over_thank","near"],
+	"quirk_count":["pedant","star"],"quirk_flatter":["flatter","near"],"quirk_yawn":["yawn","near"],"quirk_jealous":["jealous","star"],
+	"quirk_agree":["yes_man","any"],
 }
 ## Or a visible beat of the moment itself: act -> [situation, who speaks].
 const ACT_ASIDES:={
@@ -2203,6 +2488,10 @@ static func asides_for(event_in:Dictionary,facts_in:Dictionary,cast_in:Array,rng
 		if not memory.get("aside_situations") is Dictionary:memory["aside_situations"]={}
 		(memory.aside_lines as Dictionary)[String(said.template)]=stamp
 		(memory.aside_situations as Dictionary)[String(said.situation)]=stamp
+		var recent:Array=memory.get("mutterers",[]) if memory.get("mutterers") is Array else []
+		recent.append(String(_m(ctx,String(said.who)).get("name","")))
+		while recent.size()>8:recent.pop_front()
+		memory["mutterers"]=recent
 		said["line_id"]=String(said.template)
 		said.erase("template")
 		return [said]
@@ -2343,6 +2632,8 @@ static func _say(ctx:Dictionary,option:Dictionary)->Dictionary:
 	var candidates:Array=[]
 	for m:Dictionary in _people(ctx):
 		if String(m.kind) in ["envoy","guard","bearer","attendant"] or String(m.role)=="main":continue
+		# Nobody carries the muttering: two of the last eight is enough.
+		if _mutter_count(ctx,m)>=2:continue
 		if not only.is_empty():
 			if String(m.key)!=only:continue
 		elif String(m.key) in exclude:continue
@@ -2359,7 +2650,10 @@ static func _say(ctx:Dictionary,option:Dictionary)->Dictionary:
 	for key in slots:flat[key]=String((slots[key] as Array)[0])
 	var recent:Dictionary=ctx.memory.get("aside_lines",{}) if ctx.memory.get("aside_lines") is Dictionary else {}
 	for m:Dictionary in order:
-		var lines:Array=_shuffled(rng,Asides.lines(situation,Asides.family(m)))
+		# Their own manner first; the plain speech of the hall after.
+		var manner:=Asides.family(m)
+		var lines:Array=_shuffled(rng,Asides.own_lines(situation,manner))
+		if manner!="child":lines+=_shuffled(rng,Asides.own_lines(situation,"plain")) if manner!="plain" else []
 		for template in lines:
 			var key:="%s|%s" % [situation,template]
 			if not _rested_since(recent.get(key,null),facts,n,LINE_REST_DAYS,LINE_REST_EVENTS):continue
@@ -2371,8 +2665,19 @@ static func _say(ctx:Dictionary,option:Dictionary)->Dictionary:
 			var cites:Array=(option.get("cites",[]) as Array).duplicate()
 			for slot in Asides.slots_in(line):cites.append(String((slots[slot] as Array)[1]))
 			var t:=clampf(float(option.t),1.2,5.0) if option.has("t") else 3.0+rng.randf()*0.5
-			return {"t":snappedf(t,0.01),"who":String(m.key),"text":text,"cites":cites,"situation":situation,"template":key}
+			# Performed small and sidelong, in their people's babble.
+			var sound:={"name":"babble_mutter","gain":0.5,"words":Asides.word_count(text),"people":String(m.people),"who":String(m.key),"glyph":""}
+			return {"t":snappedf(t,0.01),"who":String(m.key),"text":text,"cites":cites,"situation":situation,"template":key,"bubble":"mutter","sound":sound}
 	return {}
+
+## How many of the last eight muttered lines this person said.
+static func _mutter_count(ctx:Dictionary,m:Dictionary)->int:
+	var recent:Array=ctx.memory.get("mutterers",[]) if ctx.memory.get("mutterers") is Array else []
+	var id:=String(m.name)
+	var n:=0
+	for who in recent:
+		if String(who)==id:n+=1
+	return n
 
 static func _key_of_name(ctx:Dictionary,given:String)->String:
 	if given.is_empty():return ""
@@ -2571,6 +2876,8 @@ static func normal_cast(cast:Array,facts:Dictionary={},voices:Dictionary={})->Ar
 		if not e.get("person") is Dictionary:
 			if String(e.get("kind",""))=="envoy" and String(e.get("temper",""))=="" and not envoy_facts.is_empty():
 				e=e.duplicate();e["temper"]=envoy_temper(envoy_facts)
+			if String(e.get("kind","")) in ["envoy","guard","bearer","attendant"] and not e.has("people") and String(envoy_facts.get("civ_id",""))!="":
+				e=e.duplicate();e["people"]=String(envoy_facts.civ_id)
 			out.append(e);continue
 		var person:Dictionary=e.person
 		var extra:={"key":String(e.get("key","")),"role":String(e.get("role","court"))}
@@ -2590,6 +2897,7 @@ static func normal_cast(cast:Array,facts:Dictionary={},voices:Dictionary={})->Ar
 					else:extra["kind"]=["guard","bearer"][seen_attendants] if seen_attendants<2 else "attendant"
 					seen_attendants+=1
 		if String(extra.get("kind",""))=="envoy" and not extra.has("temper"):extra["temper"]=envoy_temper(envoy_facts)
+		if String(extra.get("kind","")) in ["envoy","guard","bearer","attendant"] and String(envoy_facts.get("civ_id",""))!="":extra["people"]=String(envoy_facts.civ_id)
 		var pid:=int(person.get("person_id",0))
 		if not extra.has("voice") and voices.has(pid):extra["voice"]=String(voices[pid])
 		out.append(cast_member(person,extra))
@@ -2645,8 +2953,13 @@ static func lower(list:Array)->Array:
 		if who=="camera":
 			var shot:=args.duplicate();shot["name"]=act;shot["beat"]=act
 			out.append({"t":t,"who":who,"act":"shot","args":shot});continue
+		if beat.get("sound") is Dictionary:
+			var heard:Dictionary=(beat.sound as Dictionary).duplicate()
+			out.append({"t":t,"who":who,"act":"sound","args":heard})
 		if who=="room":
 			out.append({"t":t,"who":who,"act":act,"args":args.duplicate()});continue
+		if act=="bubble":
+			out.append({"t":t,"who":who,"act":"bubble","args":args.duplicate()});continue
 		var p:=performance(beat)
 		var mood:=String(p.mood)
 		if mood!="" or not (p.face as Dictionary).is_empty():
@@ -2684,7 +2997,7 @@ func asides(event:Dictionary,facts:Dictionary,cast:Array,rng_seed:int)->Array:
 	if not mutters_enabled or not _stage_allows_mutters():return out
 	for line:Dictionary in asides_for(event,facts,cast,rng_seed,stage_memory):
 		var said:=line.duplicate()
-		said["act"]="aside";said["args"]={"text":String(line.text)}
+		said["act"]="aside";said["args"]={"text":String(line.text),"bubble":"mutter","sound":line.get("sound",{})}
 		out.append(said)
 	return out
 
@@ -2728,6 +3041,9 @@ static func describe(beat:Dictionary,cast:Array)->String:
 	for slot in ["at","target","a","b"]:
 		if args.has(slot):text=text.replace("{%s}" % slot,String(names.get(String(args[slot]),String(args[slot]))))
 	if args.has("thing"):text=text.replace("{thing}",String(args.thing) if String(args.thing)!="bearer" else "bearer")
+	if args.has("style"):text=text.replace("{style}",String(args.style))
+	if beat.get("sound") is Dictionary and String(beat.who)!="room":text+="  [sound: %s%s]" % [String(beat.sound.name),", glyph %s" % beat.sound.glyph if String(beat.sound.get("glyph",""))!="" else ""]
+	if String(beat.who)=="room" and String(beat.act)=="hush":text+="  [sound: murmur cut]"
 	if args.has("strength"):text=text.replace("{strength}",str(args.strength))
 	if args.has("number"):text+=" (\"%d?\")" % int(args.number)
 	var who:=String(beat.who)
