@@ -525,6 +525,9 @@ static func idle(fig:Node3D,stance_id:String,opts:={})->void:
 
 ## The acting's own stances and the figure's stance (and prop) each stands on.
 const OWN_STANCES:={"cord":"stand","bundle":"stand","guard":"staff","log":"sit","fire":"crouch","cross":"sit","fidget":"stand"}
+## Kinds of clip the stage plays over the figure's own walk on purpose (the
+## figure's walk is only the fallback under them): never let go for that walk.
+const WALKED_KINDS:=["walk","exit","exec"]
 
 ## How a stage takes someone out of the hall, step by step (the stage moves and
 ## turns the body; this says what it plays): [{clip, seconds, move, face}].
@@ -1187,8 +1190,14 @@ func _step(delta:float)->void:
 	_acc.fill(Vector3.ZERO)
 	_touched.clear()
 	_hips_move=Vector3.ZERO
-	var walking:=String(fig.get(&"clip")).begins_with("walk") or (_a!=null and String(clip_meta(_a.clip).get("kind",""))=="walk")
-	if walking and String(fig.get(&"clip")).begins_with("walk"):
+	var own_walk:=String(fig.get(&"clip")).begins_with("walk")
+	var a_kind:=String(clip_meta(_a.clip).get("kind","")) if _a!=null else ""
+	var walking:=own_walk or a_kind=="walk"
+	# the figure sets off on its own walk: a reaction left on lets go of it; a
+	# walk, an exit or an execution of the acting's own (storming off, backing
+	# out bowing, led away) is played over that walk on purpose and runs until
+	# it finishes or the stage stops it
+	if own_walk and not a_kind in WALKED_KINDS:
 		let_go(0.3)
 	_moods(dt)
 	# the stance of their own under it all, then the reactions, the fading one first

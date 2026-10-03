@@ -23,6 +23,24 @@ def _legs0(a):
     return out
 
 
+def square():
+    """J's easy stance with its lean and weight shift taken out: a body that
+    goes down onto its knees faces square on."""
+    p = cf_anim.relaxed()
+    for b in ("hips", "spine", "chest", "neck", "head", "thigh.L", "thigh.R", "shin.L", "foot.L"):
+        p[b] = {"rot": (0.0, 0.0, 0.0)}
+    p["hips"]["loc"] = (0.0, 0.0, 0.0)
+    return p
+
+
+def both_knees(a, lean=0.0):
+    """Leg keys for kneeling on both knees (shins flat behind); lean: degrees
+    the hips pitch forward, taken back out of the thighs so the knees stay put."""
+    legs0 = _legs0(a)
+    return merge(legs0, {"thigh.L": {"rot": (8 - lean, 0, -4)}, "shin.L": {"rot": (92, 0, 0)}, "foot.L": {"rot": (-52, 0, 0)}, "toe.L": {"rot": (-50, 0, 0)},
+                         "thigh.R": {"rot": (8 - lean, 0, 4)}, "shin.R": {"rot": (92, 0, 0)}, "foot.R": {"rot": (-52, 0, 0)}, "toe.R": {"rot": (-50, 0, 0)}})
+
+
 def make_more(clips):
     f = L.FRAME
     k = L.K
