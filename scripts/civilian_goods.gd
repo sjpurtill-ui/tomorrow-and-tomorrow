@@ -1,11 +1,22 @@
 extends RefCounted
 ## One aggregate stock of everyday made things: tools, bindings, containers,
-## vessels, mats and fittings. Crafting workers make it from a basket of raw
-## materials; households wear it out. Discoveries such as basketry or pottery
-## are techniques: once adopted they apply their listed effects in proportion
-## to how well households are supplied (goods coverage), and they raise how much
-## each craftsperson makes and how much a household expects to hold.
+## vessels, mats and fittings, counted in one unit (a goods-worth). Makers
+## (Crafting) make it from a basket of what is cut, dug and carried;
+## households wear it out. Discoveries such as basketry or pottery are
+## techniques: once adopted they apply their listed effects in proportion to
+## how well households are supplied (goods coverage), and they raise how much
+## each maker makes and how much a household expects to hold.
+##
+## Goods are the first currency (docs/PEOPLE_FIRST.md D). Makers make for the
+## homes first, then for barter: goods held beyond the homes' need change
+## hands for food and materials at home (economy_system.gd, the barter stage)
+## and buy resources, arms and people from other peoples (trade_ledger.gd
+## goods_deal). A maker's output follows how well people work (the working
+## efficiency, which carries the business sector's factor). While the watch
+## lacks arms, some makers make arms instead (weapons_stock.gd): those hands
+## make no household goods that day.
 
+const Arms:=preload("res://scripts/weapons_stock.gd")
 const GOODS:="Civilian Goods"
 ## Techniques that used to be individual household products. Order is the
 ## order they are listed in the production panel.
@@ -22,8 +33,26 @@ const BASE_TARGET_PER_PERSON:=.02
 const DAILY_WEAR:=.004
 ## Share of Crafting workers' time spent on household goods.
 const CRAFT_SHARE:=.18
-## Goods one craftsperson makes in a day before techniques.
-const BASE_RATE:=4.0
+## Goods one maker makes in that time before techniques, at full working
+## efficiency: four at the usual pace (REFERENCE_EFFICIENCY).
+const BASE_RATE:=5.0
+## The working efficiency read before the day's first reading exists.
+const REFERENCE_EFFICIENCY:=.8
+## Beyond the homes' need, makers make goods for barter up to this many
+## goods-worth a head held, only from materials beyond BARTER_MATERIAL_FLOOR
+## of what the stores want (the builders' share stays in store).
+const SURPLUS_PER_HEAD:=4.0
+const BARTER_MATERIAL_FLOOR:=.5
+## A people of many makers splits the work and learns from itself: each maker
+## makes up to SPECIALIZATION more once MAKERS_FULL of the people make, none
+## at MAKERS_START or fewer (a balanced people), and the homes and market hold
+## up to HOLD_MORE more goods a head. A little beyond history's best for a
+## people all in on making and trade; its costs are the hands not on food,
+## the watch or learning.
+const SPECIALIZATION:=.15
+const MAKERS_START:=.05
+const MAKERS_FULL:=.20
+const HOLD_MORE:=.5
 ## Output gained per fully adopted technique.
 const TECHNIQUE_OUTPUT:=.05
 ## Raw materials per goods-unit and the basket they are drawn from. A missing
@@ -71,6 +100,84 @@ static func technique_output()->float:
 static func sealed_storage_rations()->float:
 	if "sealed_vessels" not in WorldSimulation.state.known_discoveries:return 0.0
 	return stock()*SEALED_STORAGE_SHARE*RATIONS_PER_SEALED_UNIT*clampf(WorldSimulation.discovery.adoption("sealed_vessels"),0.0,1.0)
+
+## How well people work today (the working efficiency, consequence_engine.gd;
+## it carries the business sector's factor, enterprise.gd).
+static func efficiency()->float:
+	return clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",REFERENCE_EFFICIENCY)),.2,1.6)
+
+## Goods one maker makes a day now: CRAFT_SHARE of the day x BASE_RATE x
+## techniques x how well people work.
+static func goods_per_maker_day()->float:
+	return goods_per_maker_day_at_full_pace()*efficiency()
+
+## The same at full pace (working efficiency 1): what a maker-day of arms
+## forgoes in goods (weapons_stock.gd cost_per_fighter).
+static func goods_per_maker_day_at_full_pace()->float:
+	return CRAFT_SHARE*BASE_RATE*technique_output()*specialization()
+
+## Makers on arms in the place in scope (its latest day's making): they give
+## the whole day to arms, so game_state.gd effective_workers("Crafting") leaves
+## them out of every other making work. A record older than a week counts
+## none.
+static func arms_hands(state:Variant)->float:
+	var goods:Variant=state.civilian_goods
+	if not goods is Dictionary:return 0.0
+	var report:Variant=(goods as Dictionary).get("report",{})
+	if not report is Dictionary:return 0.0
+	if int(state.elapsed_days)-int((goods as Dictionary).get("last_day",-99999))>7:return 0.0
+	return maxf(0.0,float((report as Dictionary).get("arms_hands",0.0)))
+
+## The share of all the makers (bonuses counted the same way) on arms.
+static func arms_fraction(state:Variant)->float:
+	var hands:=arms_hands(state)
+	if hands<=0.0:return 0.0
+	return clampf(hands/maxf(1.0,maxf(0.0,float(state.effective_workers("Crafting")))+hands),0.0,1.0)
+
+## Every maker in scope, those on arms included.
+static func makers()->float:
+	return maxf(0.0,WorldSimulation.state.effective_workers("Crafting"))+arms_hands(WorldSimulation.state)
+
+## The share of the people who make (Crafting).
+static func makers_share()->float:
+	return clampf(makers()/maxf(1.0,WorldSimulation.state.population_exact),0.0,1.0)
+
+## How much more each maker makes when many make: 1 up to 1 + SPECIALIZATION.
+static func specialization()->float:
+	return 1.0+SPECIALIZATION*clampf((makers_share()-MAKERS_START)/(MAKERS_FULL-MAKERS_START),0.0,1.0)
+
+## Goods held beyond the homes' need, what the learners will take and the
+## goods kept for the first plant: what can change hands (so a deal never
+## sells what makers would have to make again).
+static func spare()->float:
+	var learners:=float(preload("res://scripts/research_600_catalog.gd").learners_goods().get("wanted",0.0))
+	return maxf(0.0,stock()-target()-learners-capital_reserve())
+
+## The most goods the homes and the market hold before makers stop.
+static func ceiling()->float:
+	var many:=clampf((makers_share()-MAKERS_START)/(MAKERS_FULL-MAKERS_START),0.0,1.0)
+	return target()*1.20+capital_reserve()+maxf(1.0,WorldSimulation.state.population_exact)*SURPLUS_PER_HEAD*(1.0+HOLD_MORE*many)
+
+## What `amount` goods-worth is worth now in food (rations), at the people's
+## own prices (trade_prices.gd, the one table).
+static func worth_in_rations(amount:float=1.0)->float:
+	var prices:=preload("res://scripts/trade_prices.gd")
+	return amount*prices.in_scope(GOODS)/maxf(.01,prices.in_scope("Food"))
+
+## What `amount` goods buy now at the people's own prices: {good: units}.
+static func buys(amount:float,goods:Array=["Food","Timber","Stone","Fiber Plants"])->Dictionary:
+	var prices:=preload("res://scripts/trade_prices.gd")
+	var value:=amount*prices.in_scope(GOODS)
+	var out:={}
+	for good:String in goods:out[good]=value/maxf(.01,prices.in_scope(good))
+	return out
+
+## Takes goods from the stock for a use (learners' writing stuff and tools, a
+## purchase): never more than is held. Returns what was taken.
+static func draw(amount:float)->float:
+	var taken:=minf(maxf(0.0,amount),stock())
+	if taken>0.0:WorldSimulation.state.resource_stockpiles[GOODS]=stock()-taken
+	return taken
 
 static func capital_reserve()->float:
 	# Goods also build the first local plant. A small city's household target must
@@ -162,8 +269,10 @@ static func workshop_input_reserve()->Dictionary:
 static func daily_wear()->float:
 	return DAILY_WEAR*preload("res://scripts/research_mechanics.gd").goods_wear_factor()
 
-## One day of household goods: wear since the last call, then production.
-## A multi-day step (day_span.gd) produces `span` days of craft work.
+## One day of household goods: wear since the last call, then the day's
+## making. Arms come first while the watch lacks them (weapons_stock.gd);
+## the other makers make for the homes, then for barter. A multi-day step
+## (day_span.gd) makes `span` days of work.
 static func advance()->Dictionary:
 	ensure_initialized()
 	var day:=int(WorldSimulation.state.elapsed_days)
@@ -177,60 +286,129 @@ static func advance()->Dictionary:
 	# took their goods before the makers' day; the report shows it ("learners",
 	# a day) and the makers make it good below.
 	var learners:=preload("res://scripts/research_600_catalog.gd").learners_goods()
-	var report:Dictionary={"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":"","learners":float(learners.taken)}
+	var report:Dictionary={"workers":0.0,"made":0.0,"worn":worn/elapsed,"inputs":{},"coverage":0.0,"target":target(),"reason":"","learners":float(learners.taken),"for_barter":0.0,"worth":0.0,"per_maker":0.0,"arms_made":0.0,"arms_hands":0.0,"arms_kind":"","arms_inputs":{}}
 	if not WorldSimulation.state.settlement_site_committed or WorldSimulation.state.convoy_traveling:
 		report.reason="Needs a settled workplace"
 	else:
-		var labor:=maxf(0.0,WorldSimulation.state.effective_workers("Crafting")*CRAFT_SHARE)*WorldSimulation.span
-		# Techniques, and how well the business sector works (enterprise.gd).
-		var rate:=BASE_RATE*technique_output()*preload("res://scripts/enterprise.gd").factor()
-		# Makers also keep what the learners will take before the next step.
-		var wanted:=maxf(0.0,float(report.target)*1.20+capital_reserve()+float(learners.wanted)-stock())
+		var all_makers:=makers()
+		var pace:=efficiency()
 		var reserve:=workshop_input_reserve()
+		# Arms first, while the watch lacks them: those hands make no goods today.
+		var arms:=Arms.make(all_makers,pace,reserve)
+		report.arms_made=float(arms.sets);report.arms_hands=float(arms.hands);report.arms_kind=String(arms.kind);report.arms_inputs=arms.inputs
+		var labor:=maxf(0.0,all_makers-float(arms.hands))*CRAFT_SHARE*WorldSimulation.span
+		# Techniques, and how well people work (the business sector's factor included).
+		var rate:=BASE_RATE*technique_output()*pace*specialization()
+		report.per_maker=CRAFT_SHARE*rate
+		# The homes' need first, and what the learners will take before the next step.
+		var need:=maxf(0.0,float(report.target)*1.20+capital_reserve()+float(learners.wanted)-stock())
+		var room:=maxf(0.0,ceiling()-stock())
 		var spendable:Dictionary={}
 		var raw_available:=0.0
 		for item:String in BASKET:
 			spendable[item]=maxf(0.0,_stock_of(item)-float(reserve.get(item,0)))
 			raw_available+=float(spendable[item])
-		var amount:=minf(minf(labor*rate,wanted),raw_available/RAW_PER_UNIT)
 		if labor<=0.0:report.reason="No craftspeople assigned"
-		elif wanted<=0.0:report.reason="Stock target met"
+		elif room<=0.0:report.reason="Homes and the market are full"
 		elif raw_available<=.000001:report.reason="Needs timber, fiber, clay, stone or flint"
+		# For the homes first, from any material on hand.
+		var for_homes:=_make_from(spendable,minf(minf(labor*rate,need),room),report.inputs)
+		# Then for barter, only from what the builders' stores can spare.
+		var for_barter:=0.0
+		var left:=labor*rate-for_homes
+		if left>.000001 and room-for_homes>.000001:
+			var population:=maxf(1.0,WorldSimulation.state.population_exact)
+			var beyond:Dictionary={}
+			for item:String in BASKET:
+				var floor_:=float(WorldSimulation.economy._desired_stock(item,population))*BARTER_MATERIAL_FLOOR if WorldSimulation.economy!=null else 0.0
+				beyond[item]=minf(float(spendable[item]),maxf(0.0,_stock_of(item)-floor_))
+			for_barter=_make_from(beyond,minf(left,room-for_homes),report.inputs)
+			if for_barter<=.000001 and for_homes<=.000001 and report.reason=="" and need<=0.0:report.reason="No materials to spare for barter"
+		var amount:=for_homes+for_barter
 		if amount>.000001:
-			var needed:=amount*RAW_PER_UNIT
-			# Draw by basket weight among the materials on hand; if one runs short,
-			# the rest cover the remainder.
-			for pass_index in 2:
-				var weight_total:=0.0
-				for item:String in BASKET:
-					if float(spendable[item])>.000001:weight_total+=float(BASKET[item])
-				if weight_total<=0.0 or needed<=.000001:break
-				var drawn_total:=0.0
-				for item:String in BASKET:
-					if float(spendable[item])<=.000001:continue
-					var drawn:=minf(float(spendable[item]),needed*float(BASKET[item])/weight_total)
-					spendable[item]=float(spendable[item])-drawn
-					stocks[item]=maxf(0.0,_stock_of(item)-drawn)
-					report.inputs[item]=float(report.inputs.get(item,0.0))+drawn
-					drawn_total+=drawn
-				needed-=drawn_total
-			amount-=maxf(0.0,needed)/RAW_PER_UNIT
 			stocks[GOODS]=stock()+amount
 			report.made=amount/WorldSimulation.span
+			report.for_barter=for_barter/WorldSimulation.span
 			report.workers=amount/rate/WorldSimulation.span
-			report.reason="Replenishing as needed"
+			report.reason="Making goods for barter" if for_barter>.000001 else "Replenishing as needed"
+		elif report.reason=="" and need<=0.0:report.reason="Stock target met"
+	report.worth=worth_in_rations(float(report.made))
 	report.coverage=coverage()
 	data().report=report
 	WorldSimulation.military.workshop.record_household({GOODS:float(report.made)})
 	WorldSimulation.discovery.refresh_operating_effects()
 	return report.duplicate(true)
 
+## Makes up to `amount` goods from `spendable` (by basket weight among the
+## materials on hand; a short one is covered by the rest), drawing from the
+## stores. Returns what was made.
+static func _make_from(spendable:Dictionary,amount:float,inputs:Dictionary)->float:
+	var raw:=0.0
+	for item:String in BASKET:raw+=float(spendable.get(item,0.0))
+	amount=minf(amount,raw/RAW_PER_UNIT)
+	if amount<=.000001:return 0.0
+	var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
+	var needed:=amount*RAW_PER_UNIT
+	for pass_index in 2:
+		var weight_total:=0.0
+		for item:String in BASKET:
+			if float(spendable.get(item,0.0))>.000001:weight_total+=float(BASKET[item])
+		if weight_total<=0.0 or needed<=.000001:break
+		var drawn_total:=0.0
+		for item:String in BASKET:
+			if float(spendable.get(item,0.0))<=.000001:continue
+			var drawn:=minf(float(spendable[item]),needed*float(BASKET[item])/weight_total)
+			spendable[item]=float(spendable[item])-drawn
+			stocks[item]=maxf(0.0,_stock_of(item)-drawn)
+			inputs[item]=float(inputs.get(item,0.0))+drawn
+			drawn_total+=drawn
+		needed-=drawn_total
+	return amount-maxf(0.0,needed)/RAW_PER_UNIT
+
+## WHAT MAKING DOES, in the engine's numbers (for the People view,
+## role_effects.gd): what the makers make now, and what ten more would make.
+## {now, plus_ten} in twelve words or fewer each (the People view's lines),
+## and `numbers`: goods a day now and with ten more, their worth in rations,
+## goods per maker, arms a day now and with ten more, a set's cost.
+static func role_effect(role:String="Crafting")->Dictionary:
+	if role!="Crafting":return {}
+	var report:Dictionary=data().get("report",{})
+	var per:=goods_per_maker_day()
+	var made:=float(report.get("made",0.0))
+	var arms_now:=float(report.get("arms_made",0.0))
+	var cost:=Arms.cost_per_fighter()
+	var plan:=Arms.plan()
+	var arms_ten:=10.0*float(plan.get("share",0.0))*efficiency()/maxf(.01,float(cost.maker_days)) if int(plan.get("wanted",0))>0 else 0.0
+	var room:=maxf(0.0,ceiling()-stock())
+	var goods_ten:=minf(10.0*per,room) if String(report.get("reason",""))!="Needs timber, fiber, clay, stone or flint" else 0.0
+	var now:="%s goods a day, worth %s rations." % [_n(made),_n(worth_in_rations(made))]
+	if arms_now>0.001:now="%s goods and arms for %s a day." % [_n(made),_n(arms_now)]
+	var ten:="Ten more: about %s more goods a day." % _n(goods_ten)
+	if arms_ten>0.001:ten="Ten more: %s more goods, or arms for %s more." % [_n(goods_ten),_n(arms_ten)]
+	if goods_ten<=.001 and room<=0.0:ten="Ten more: nothing; homes and market hold all they can."
+	return {"role":"Crafting","now":now,"plus_ten":ten,"ten_more":ten,"numbers":{"goods_day":made,"goods_day_ten_more":made+goods_ten,"worth_day":worth_in_rations(made),"per_maker":per,
+		"arms_day":arms_now,"arms_day_ten_more":arms_now+arms_ten,"arms_cost_maker_days":float(cost.maker_days),"arms_cost_goods":float(cost.worth_goods),"stock":stock(),"spare":spare()}}
+
+## The keeper's line of fact on making (court_facts.gd): goods made today and
+## their worth, goods held and beyond the homes' use, arms in store against
+## the watch, and what a set costs.
+static func court_line()->String:
+	var report:Dictionary=data().get("report",{})
+	var made:=float(report.get("made",0.0))
+	var cost:=Arms.cost_per_fighter()
+	return "Making: %s goods made today, worth %s rations; %s goods held, %s beyond the homes' use. Arms in store for %d fighters; the watch is %d, carrying %d; arming one (%s) takes %s maker-days and goods worth %s." % [_n(made),_n(worth_in_rations(made)),_n(stock()),_n(spare()),Arms.weapons_held(),roundi(Arms.watch()),Arms.weapons_issued(),String(cost.kind),_n(float(cost.maker_days)),_n(float(cost.worth_goods))]
+
+static func _n(value:float)->String:
+	if value>=10.0:return str(roundi(value))
+	return str(snappedf(value,0.1))
+
 static func valid(value:Variant)->bool:
 	if not value is Dictionary or not (value.get("initialized",false) is bool):return false
 	var last:Variant=value.get("last_day",-1)
 	if not (last is int or last is float) or not is_finite(float(last)) or float(last)<-1 or float(last)>1e12 or float(last)!=floorf(float(last)):return false
 	if not value.get("report",{}) is Dictionary:return false
-	return (value.report as Dictionary).size()<=8
+	if value.has("arms") and not value.arms is Dictionary:return false
+	return (value.report as Dictionary).size()<=16
 
 static func valid_settlements(records:Variant)->bool:
 	if not records is Array:return false

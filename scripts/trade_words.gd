@@ -22,7 +22,7 @@ const SHORT:={"free":"trading freely","favour":"favoured","toll":"tolled","embar
 const ANSWER_WORDS:={"yield":"yield","supplier":"find others","counter":"strike back","raid":"raid traders","war":"war","bear":"bear it"}
 ## Alerts: [tone, kinds]. Red when it strikes at us, amber for what wants seeing to.
 const RED_NEWS:=["embargo","squeeze","toll","raided","war","tribute_stopped"]
-const ALERT_NEWS:=["partner","meeting","embargo","squeeze","toll","yield","shortage","raided","war","counter","supplier","lifted","tribute_stopped"]
+const ALERT_NEWS:=["partner","meeting","embargo","squeeze","toll","yield","shortage","raided","war","counter","supplier","lifted","tribute_stopped","deal"]
 
 # --------------------------------------------------------------------------
 # Goods and numbers
@@ -35,6 +35,7 @@ static func good_word(good:String)->String:
 		"Civilian Goods": return "goods"
 		"Fiber Plants": return "plant fiber"
 		"Medicinal Plants": return "healing herbs"
+		"Arms": return "arms"
 	return Names.label(good).to_lower()
 
 static func qty(value:float)->String:
@@ -45,6 +46,8 @@ static func qty(value:float)->String:
 
 ## "12 flint", "1,200 food", "a little salt".
 static func amount(value:float,good:String)->String:
+	# Arms are counted by the fighters they arm.
+	if good=="Arms": return "arms for %s" % qty(value)
 	return "%s %s" % [qty(value),good_word(good)]
 
 ## How often a pair settles: a season for gifts and barter, a month for priced trade.
@@ -372,6 +375,20 @@ static func war_line(civ_id:String)->String:
 # News: the alert under the clock and the chronicle, told once
 # --------------------------------------------------------------------------
 
+## A deal of goods for something, in few words, from our side.
+static func _deal_line(item:Dictionary,them:String)->String:
+	var n:=float(item.get("count",0.0))
+	var paid:=qty(float(item.get("goods",0.0)))
+	var ours:=String(item.get("buyer",""))=="player"
+	match String(item.get("good","")):
+		"families":
+			var who:="%d %s" % [roundi(n),"people" if roundi(n)!=1 else "person"]
+			return "%s from %s come to work for %s goods" % [who,them,paid] if ours else "%s of ours go to work for %s" % [who,them]
+		"captives":
+			return "We ransom %d of ours from %s for %s goods" % [roundi(n),them,paid]
+	var what:=amount(n,String(item.get("good","")))
+	return "We buy %s from %s for %s goods" % [what,them,paid] if ours else "%s buys %s from us for %s goods" % [them,what,paid]
+
 static func _other(item:Dictionary)->String:
 	return String(item.b) if String(item.a)=="player" else String(item.a)
 
@@ -386,6 +403,7 @@ static func news_line(item:Dictionary)->String:
 			var p:=Ledger.pair(String(item.a),String(item.b))
 			line="New trade partner: %s · %s" % [them,form_words(String(p.get("form","gift")))]
 		"meeting": line="A meeting place with %s: barter each season" % them
+		"deal": line=_deal_line(item,them)
 		"embargo": line="%s embargoes us · we lose %s" % [them,flow_words(other,"player",1)] if String(item.a)!="player" else "We embargo %s" % them
 		"squeeze": line="%s cuts off our %s and buys it up" % [them,good_word(good)] if String(item.a)!="player" else "We squeeze %s's %s" % [them,good_word(good)]
 		"toll": line="%s tolls our traders · a tenth of our trade" % them

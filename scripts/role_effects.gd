@@ -144,21 +144,10 @@ static func construction()->Dictionary:
 
 # --- Making -------------------------------------------------------------------------
 
-## What makers add to everyone's tools and materials (consequence_engine.gd
-## craft coverage: makers ÷ 5 in 100 of the people, up to 1.25, × 38 points)
-## and the household goods they turn out (civilian_goods.gd).
+## The goods makers make a day and their worth, arms while the watch lacks
+## them, and what ten more makers would add (civilian_goods.gd role_effect).
 static func crafting()->Dictionary:
-	var pop:=_pop()
-	var civilian:=clampf(MilitaryCampaign.civilian_crafting_fraction(),0.0,1.0)
-	var raw:=_raw("Crafting")
-	var points:=func(people:float)->float:return clampf(people*civilian/maxf(1.0,pop*Impact.MAKER_SHARE),0.0,1.25)*Impact.MAKER_POINTS*100.0
-	var now:=float(points.call(raw))
-	var more:=float(points.call(raw+MORE))
-	var each:=0.18*4.0*Goods.technique_output()
-	var stocked:=roundi(Goods.coverage()*100.0)
-	var gain:="+%d points" % roundi(more-now) if roundi(more-now)>0 else "no more points"
-	return _row("Tools and materials +%d points; homes %d of 100 stocked." % [roundi(now),stocked],
-		"Ten more: %s, about %s more goods a day." % [gain,_one(each*_ten("Crafting")*civilian)])
+	return Goods.role_effect("Crafting")
 
 # --- Carrying -----------------------------------------------------------------------
 

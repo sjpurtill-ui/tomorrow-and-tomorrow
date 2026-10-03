@@ -184,6 +184,15 @@ static func _glyph(resource_name:String)->Array:
 		]
 		"Clay": return _pot(Color("#b06a3e"),Color("#c07a4a"))
 		"Refractory Clay": return _pot(Color("#d8c7a8"),Color("#e4d6bc"))
+		# Arms (weapons_stock.gd): a spear crossed with a strung bow.
+		"Arms": return [
+			_s(12,46,38,16,2.6,Color("#7a5230")),
+			_t(46,8,34,14,40,21,Color("#4a4f52")),
+			_s(16,10,16,46,1.2,Color("#5a4632")),
+			_s(16,10,24,20,2.2,Color("#8a6040")),
+			_s(24,20,24,36,2.2,Color("#8a6040")),
+			_s(24,36,16,46,2.2,Color("#8a6040")),
+		]
 		"Flint": return [
 			_t(28,10,18,41,38,41,Color("#4a4f52")),
 			_t(28,17,22,37,34,37,Color("#6a7075")),

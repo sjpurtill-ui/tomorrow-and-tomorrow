@@ -195,14 +195,20 @@ static func knowledge_rung()->int:
 static func prices_kept()->bool:
 	return int(WorldSimulation.state.economy_metrics.get("price_observations",0))>0
 
-## The highest rung the people's money allows: none without weighed metal or
-## coin and kept prices; below COIN_RUNG with weighed metal only.
+## Goods have changed hands at the hearth (economy_system.gd counts the days
+## of barter): stalls and workshops can stand before money.
+static func goods_change_hands()->bool:
+	return int(WorldSimulation.state.economy_metrics.get("goods_traded_days",0))>0
+
+## The highest rung the people's money allows, prices kept: stalls and hired
+## workshops under barter once goods change hands; below COIN_RUNG with
+## weighed metal; every rung with coin.
 static func money_cap()->int:
 	var stage:=String(WorldSimulation.state.economy_stage)
 	if not prices_kept():return 0
 	if stage=="currency":return RUNGS.size()-1
 	if stage=="weighed_metal":return COIN_RUNG-1
-	return 0
+	return 1 if goods_change_hands() else 0
 
 ## The rung the people stand on now.
 static func rung()->int:
@@ -221,8 +227,10 @@ static func next_needs(short:=false)->String:
 	var next:=r+1
 	var parts:PackedStringArray=[]
 	if next==1 or money_cap()<next:
-		if next>=COIN_RUNG and String(WorldSimulation.state.economy_stage)!="currency":parts.append("coin")
-		elif next<COIN_RUNG and not String(WorldSimulation.state.economy_stage) in ["weighed_metal","currency"]:parts.append("weighed metal or coin")
+		var stage:=String(WorldSimulation.state.economy_stage)
+		if next>=COIN_RUNG and stage!="currency":parts.append("coin")
+		elif next>1 and next<COIN_RUNG and not stage in ["weighed_metal","currency"]:parts.append("weighed metal or coin")
+		elif next==1 and not stage in ["weighed_metal","currency"] and not goods_change_hands():parts.append("goods changing hands at market")
 		if not prices_kept():parts.append("prices kept")
 	var known:=maxi(int(_raw().get("reached",0)),knowledge_rung())
 	if known<next and RUNG_KNOWLEDGE.has(next):

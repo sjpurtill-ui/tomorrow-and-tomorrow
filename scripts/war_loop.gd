@@ -415,7 +415,10 @@ static func _our_deaths(count:int)->int:
 
 static func _our_captives_lost(count:int,civ_id:String)->int:
 	if count<=0: return 0
-	return int(GameState.register_population_departures(count,"Taken captive by %s" % _name(civ_id),{"children":1.2,"youth":1.4,"early_adults":1.0,"established_adults":0.6,"mature_adults":0.3,"elders":0.1}).get("count",0))
+	var taken:=int(GameState.register_population_departures(count,"Taken captive by %s" % _name(civ_id),{"children":1.2,"youth":1.4,"early_adults":1.0,"established_adults":0.6,"mature_adults":0.3,"elders":0.1}).get("count",0))
+	# Kept with the holder, ages as taken, for a ransom (trade_ledger.gd note_captives).
+	if taken>0: (load("res://scripts/trade_ledger.gd") as GDScript).call("note_captives",civ_id,"player",taken,(GameState.last_population_removal_by_cohort as Dictionary).duplicate())
+	return taken
 
 static func _their_deaths(civ_id:String,count:int)->int:
 	if count<=0: return 0
