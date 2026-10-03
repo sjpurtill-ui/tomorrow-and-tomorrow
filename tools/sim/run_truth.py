@@ -7,7 +7,7 @@
 A spec is scenario:seed:years. ``path_<path>`` runs the probe's sensible
 scenario with the leaders' work laid toward that path (truth_probe.gd --path;
 work_paths.gd), ``avg_<path>`` the same on an average site (between good and
-poor); the truth file keeps that name so the surrogate runs its own
+poor) and ``poor_<path>`` on poor land; the truth file keeps that name so the surrogate runs its own
 scenario of the name (scenarios.json) against it.
 
 Each run writes tools/sim/ground_truth/<scenario>_<seed>_<years>y.json via
@@ -48,6 +48,7 @@ WATCHED = [
     "data/research/research_600.json",
     "scripts/food_care.gd", "scripts/government_people_system.gd", "scripts/work_paths.gd",
     "scripts/civilian_goods.gd", "scripts/resource_system.gd", "scripts/weapons_stock.gd", "scripts/watch_military.gd",
+    "scripts/crisis_background.gd", "scripts/crisis_system.gd", "scripts/crisis_unattended.gd",
 ]
 
 
@@ -101,6 +102,8 @@ def probe_args(scenario: str) -> list[str]:
         return ["--scenario=sensible", f"--path={scenario[5:]}"]
     if scenario.startswith("avg_"):
         return ["--scenario=average", f"--path={scenario[4:]}"]
+    if scenario.startswith("poor_"):
+        return ["--scenario=poorland", f"--path={scenario[5:]}"]
     return [f"--scenario={scenario}"]
 
 
@@ -113,7 +116,7 @@ def run_one(godot: str, spec: str) -> tuple[str, float, int]:
                            *probe_args(scenario), f"--seed={seed}", f"--years={years}", f"--out={out.as_posix()}"],
                           capture_output=True, text=True, encoding="utf-8", errors="replace")
     elapsed = time.time() - started
-    if out.exists() and scenario.startswith(("path_", "avg_")):
+    if out.exists() and scenario.startswith(("path_", "avg_", "poor_")):
         # The surrogate runs the truth's own scenario name (scenarios.json path_<p>, avg_<p>).
         data = json.loads(out.read_text(encoding="utf-8"))
         data["scenario"] = scenario

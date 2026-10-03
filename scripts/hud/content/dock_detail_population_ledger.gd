@@ -29,14 +29,7 @@ func tab(_sub:int)->Dictionary:
 		{"label":"MOTHERS DIED","value":str(GameState.lifetime_maternal_deaths),"note":"in childbirth","note_color":Tokens.RED_TEXT,"tip":"Mothers who died giving birth, since the people set out"},
 		{"label":"NEWBORNS DIED","value":str(GameState.lifetime_neonatal_deaths),"note":"in their first month","note_color":Tokens.RED_TEXT,"tip":"Babies who died in their first month, since the people set out"},
 	]
-	var mortality:Dictionary=GameState.simulation_metrics.get("mortality_components",{})
-	var mortality_items:Array=[]
-	var top:=0.001
-	for cause in mortality: top=maxf(top,float(mortality[cause]))
-	for cause in mortality:
-		var amount:=float(mortality[cause])
-		if amount<=0.0: continue
-		mortality_items.append({"name":String(cause).replace("_"," ").capitalize(),"value":preload("res://scripts/hud/content/dock_detail_health.gd")._per_year_words(amount),"ratio":amount/top,"color":Tokens.RED,"tip":"How many people this cause kills each year at the present rate"})
+	var killing:Dictionary=preload("res://scripts/hud/content/dock_detail_health.gd").mortality_block("How many people this cause kills each year at the present rate")
 	var blocks:Array=[
 		Charts.population("civilization"),
 		{"type":"tiles","heading":"Mothers and babies","items":maternity_items},
@@ -46,8 +39,8 @@ func tab(_sub:int)->Dictionary:
 		records.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.last_day)>int(b.last_day))
 		return {"kpis":kpis,"brief":{},"blocks":_death_pages(records,false)}
 	blocks.append_array(_death_pages(death_summary(GameState.demographic_ledger),true))
-	if not mortality_items.is_empty():
-		blocks.append({"type":"bars","heading":"What is killing people now","note":"deaths each year, at the present rate","items":mortality_items})
+	if not killing.is_empty():
+		blocks.append(killing)
 	var profile:Dictionary=CivilizationSystem.player_population_function_profile()
 	blocks.append({"type":"tiles","heading":"Where everyone is","items":[
 		{"label":"WORKING","value":str(int(profile.get("productive",0))),"note":"gathering, making, building","note_color":Tokens.GREEN_TEXT,"tip":"People doing the day's work"},
@@ -60,7 +53,7 @@ func tab(_sub:int)->Dictionary:
 	return {"kpis":kpis,"brief":{},"blocks":blocks}
 
 func signature()->Array:
-	return [death_page,summary_page,GameState.demographic_ledger.size(),GameState.strategic_history.get("last_day",-1),GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true)]
+	return [death_page,summary_page,GameState.demographic_ledger.size(),GameState.strategic_history.get("last_day",-1),GameState.civilian_injuries.duplicate(true),GameState.population_allocations.duplicate(true),GameState.population_total,GameState.lifetime_births,GameState.lifetime_deaths,int(GameState.pregnancy_summary().get("active",0)),GameState.housing_capacity,float(GameState.simulation_metrics.get("housing_ratio",-1.0)),GameState.simulation_metrics.get("mortality_components",{}).duplicate(true),float(GameState.simulation_metrics.get("usual_hardship_rate",0.0))]
 
 static func grouped_deaths(ledger:Array)->Array:
 	var groups:Dictionary={}

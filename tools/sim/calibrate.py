@@ -113,6 +113,21 @@ FORMULA_ANCHORS = [
     ("scripts/food_system.gd", "result[\"Dry staples\"]=workers*cultivation_weight*CULTIVATION_YIELD*"),
     ("scripts/food_system.gd", "return lerpf(1.0,HARVEST_SETTLED,clampf(year/HARVEST_SETTLED_YEAR,0.0,1.0))"),
     ("scripts/food_system.gd", "var wild_yield:=BASE_SUBSISTENCE_YIELD_CALIBRATION*harvest_settled("),
+    # Crises (crisis.py mirrors crisis_unattended.gd on crisis_system.gd's hazards and tolls)
+    # and the age table's background (crisis_background.gd, game_state.gd).
+    ("scripts/crisis_system.gd", "var p:=0.0025*exp(8.0*shortfall)+1.0/(1.0+exp(-(shortfall-0.16)/0.015))"),
+    ("scripts/crisis_system.gd", "var sick:=BASE_SICKNESS*exp(1.6*(float(x.crowd)-CROWD_REF)"),
+    ("scripts/crisis_system.gd", "out[\"pestilence_emerge\"]=_ramp(PANDEMIC_EMERGE,float(x.H))/100.0"),
+    ("scripts/crisis_system.gd", "var fire:=BASE_FIRE*exp(1.0*(float(x.crowd)-CROWD_REF))"),
+    ("scripts/crisis_system.gd", "var m:=v*(0.5+float(x.dens))*(1.0-float(s.immunity))*pow(1.0-float(x.med),2.0)"),
+    ("scripts/crisis_system.gd", "\"pop\":pop,\"crowd\":pop/cap,\"dens\":clampf(pop/5000.0,0.02,1.0),"),
+    ("scripts/crisis_unattended.gd", "var m:=clampf((0.012+0.2*maxf(0.0,shortfall))*(1.0-0.4*float(x.inst))"),
+    ("scripts/crisis_unattended.gd", "var target_pool:=clampf(0.1+0.6*float(x.dens)+0.3*float(x.trade),0.0,1.0)"),
+    ("scripts/crisis_unattended.gd", "var sick:=clampi(roundi(float(x.pop)*(0.06+3.0*float(c.m))),3,"),
+    ("scripts/crisis_unattended.gd", "var expected:=float(c.pop0)*float(c.m)*float(c.mult)*share"),
+    ("scripts/crisis_unattended.gd", "s.immunity=maxf(float(s.immunity),minf(0.85,0.35+4.0*float(c.m)))"),
+    ("scripts/crisis_unattended.gd", "if float(c.pop0)*float(c.m)*float(c.mult)*0.6>=1.5 or bool(c.get(\"virgin\",false)):"),
+    ("scripts/game_state.gd", "for key in POPULATION_AGE_COHORTS:hazards[key]=float(hazards[key])*float(kept.get(key,1.0))"),
 ]
 
 
