@@ -505,7 +505,7 @@ func _access_blockers(deposit: Dictionary, definition: Dictionary, context: Dict
 			blockers.append("no usable access route")
 		elif requirement == "tools" and float(context.get("tools",0.25)) < 0.5:
 			blockers.append("tools are inadequate")
-		elif requirement == "specialists" and int(WorldSimulation.state.population_allocations.get("Knowledge",0)) < 5:
+		elif requirement == "specialists" and not specialists_ready(definition):
 			blockers.append("specialist knowledge is unavailable")
 		elif requirement == "mine" and (float(deposit.route) < 0.8 or int(WorldSimulation.state.population_allocations.get("Construction",0)) < 10):
 			blockers.append("mining works have not been developed")
@@ -518,6 +518,23 @@ func _access_blockers(deposit: Dictionary, definition: Dictionary, context: Dict
 		elif requirement == "lifting" and "mine_drainage" not in WorldSimulation.state.known_discoveries:
 			blockers.append("deep lifting machinery is unavailable")
 	return blockers
+
+## Specialist work (ores, nitrates, deep water) wants people who know the
+## craft. A people that knows one of the deposit's own practices (its
+## processing: firing and charcoal for copper and iron, assaying for silver)
+## needs a learner among every SPECIALIST_PEOPLE at work, at least one and
+## never more than SPECIALIST_LEARNERS: copper working was common to many
+## peoples, not only the scholarly, and knowing the craft is never harder
+## than not knowing it. One that knows none of them must work it out with
+## SPECIALIST_LEARNERS learners.
+const SPECIALIST_LEARNERS:=5
+const SPECIALIST_PEOPLE:=150.0
+func specialists_ready(definition:Dictionary)->bool:
+	var learners:=int(WorldSimulation.state.population_allocations.get("Knowledge",0))
+	for requirement_variant in definition.get("processing",[]):
+		if String(requirement_variant) in WorldSimulation.state.known_discoveries:
+			return learners>=mini(SPECIALIST_LEARNERS,maxi(1,ceili(float(WorldSimulation.state.able_population())/SPECIALIST_PEOPLE)))
+	return learners>=SPECIALIST_LEARNERS
 
 func _access_practice_blocker(definition:Dictionary)->String:
 	var missing:Array[String]=[]
