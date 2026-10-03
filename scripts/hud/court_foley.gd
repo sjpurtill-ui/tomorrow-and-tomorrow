@@ -99,10 +99,10 @@ const CUES:={
 
 ## Beds that loop under the room: seconds long, seamless.
 const BEDS:={
-	"fire":{"seconds":7.0,"db":-20.0},
-	"wind_soft":{"seconds":11.0,"db":-28.0},
-	"wind_hard":{"seconds":11.0,"db":-19.0},
-	"wind_indoor":{"seconds":11.0,"db":-29.0},
+	"fire":{"seconds":17.0,"db":-20.0},
+	"wind_soft":{"seconds":19.0,"db":-28.0},
+	"wind_hard":{"seconds":19.0,"db":-19.0},
+	"wind_indoor":{"seconds":19.0,"db":-29.0},
 	"murmur_small":{"seconds":9.0,"db":-18.0},
 	"murmur":{"seconds":9.0,"db":-15.0},
 	"murmur_hall":{"seconds":9.0,"db":-13.0},
@@ -1214,6 +1214,8 @@ static func murmur_bed(d:float,rng:RandomNumberGenerator,people:int,tongue:Dicti
 ## (less the crossfade): men, women, the old. The murmur of any size is mixed
 ## from these (murmur_mix), so a hall full of talk costs six voices.
 const MURMUR_VOICES:=["man","woman","old_man","woman","man","old_woman"]
+## Seconds of talk each of the six has (the live murmur plays runs from it).
+const TALKER_SECONDS:=16.0
 static func murmur_tracks(tongue:Dictionary,seed_value:int,seconds:float)->Array[PackedFloat32Array]:
 	var out:Array[PackedFloat32Array]=[]
 	var rng:=RandomNumberGenerator.new();rng.seed=seed_value
@@ -1228,6 +1230,12 @@ static func murmur_tracks(tongue:Dictionary,seed_value:int,seconds:float)->Array
 		if k==1 or k==4:
 			var aside:=Voice.gesture(voice,[[0.01,"a",0.0,0.0,1.3],[0.05,"a",0.0,0.7,1.3],[0.1,"a",0.7,0.3,1.2],[0.06,"a",0.0,0.2,1.15],[0.1,"a",0.6,0.3,1.08],[0.05,"y",0.0,0.0,1.0]],rng.randi())
 			Synth.mix_into(talk,aside,Synth.n_of(rng.randf_range(1.0,seconds-1.5)),0.7)
+		# across the room: no boom, the top softened, two near walls answering
+		Synth.highpass(talk,170.0)
+		Synth.lowpass(talk,2600.0)
+		var wall:=talk.duplicate()
+		Synth.mix_into(talk,wall,Synth.n_of(0.019+0.004*k),0.2)
+		Synth.mix_into(talk,wall,Synth.n_of(0.037+0.003*k),0.12)
 		var top:=Synth.peak_of(talk)
 		if top>0.0:Synth.scale(talk,0.5/top)
 		out.append(Synth.seamless(talk,0.6))
