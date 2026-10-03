@@ -444,7 +444,7 @@ func _geyser_perf()->void:
 	_quiet(court)
 	RenderingServer.viewport_set_measure_render_time(view.get_viewport_rid(),true)
 	for i in 30:await get_tree().process_frame
-	for phase in ["idle","geyser","after"]:
+	for phase in ["idle","geyser","after","no_splats","after","no_splats","cleared","idle"]:
 		if phase=="geyser":
 			var blood:Node3D=court.call("blood")
 			var neck:=block.global_position+Vector3(0.0,0.62,0.05)
@@ -455,8 +455,18 @@ func _geyser_perf()->void:
 			blood.call("spray",neck,front,1.0)
 			blood.call("pool",block.global_position+Vector3(0.0,0.0,0.3),0.6,2.0)
 			for i in 8:await get_tree().process_frame
+		var splats_node:Node3D=(court.call("blood") as Node3D).get_node("Splats") if court.get("blood_node")!=null else null
 		if phase=="after":
-			for i in 150:await get_tree().process_frame
+			if splats_node!=null and splats_node.visible:
+				for i in 150:await get_tree().process_frame
+			if splats_node!=null:splats_node.visible=true
+		if phase=="no_splats":
+			# which part costs: the splats' MultiMesh hidden, the rest kept
+			splats_node.visible=false
+		if phase=="cleared":
+			splats_node.visible=true
+			court.call("blood").call("clear")
+			for i in 10:await get_tree().process_frame
 		var gpu:=0.0;var cpu:=0.0;var n:=0;var draws:=0;var prims:=0
 		for i in 60:
 			await get_tree().process_frame
@@ -465,7 +475,7 @@ func _geyser_perf()->void:
 			draws=maxi(draws,view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_DRAW_CALLS_IN_FRAME))
 			prims=maxi(prims,view.get_render_info(Viewport.RENDER_INFO_TYPE_VISIBLE,Viewport.RENDER_INFO_PRIMITIVES_IN_FRAME))
 			n+=1
-		var blood2:Node3D=court.call("blood") if phase!="idle" else null
+		var blood2:Node3D=court.call("blood") if court.get("blood_node")!=null else null
 		print("PERF blood %s draws=%d primitives=%d gpu_ms=%.2f cpu_ms=%.2f fps=%d splats=%d stickers=%d jets=%d" % [phase,draws,prims,gpu/float(n),cpu/float(n),Engine.get_frames_per_second(),
 			int(blood2.get("landed")) if blood2!=null else 0,int(blood2.call("stickers_on")) if blood2!=null else 0,int(blood2.call("jets_on")) if blood2!=null else 0])
 	view.queue_free()

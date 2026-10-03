@@ -1562,6 +1562,9 @@ func shot(name:String,args:Dictionary={})->void:
 		_shot_name=name
 	var target:=figure(String(args.get("target","")))
 	var body:Node3D=target.body3d if target!=null and target.body3d!=null else null
+	# During an execution a two-shot is a whole-figure frame of the two.
+	if name=="two_shot" and executing():
+		name="frame";args=args.duplicate();args["on"]=[String(args.get("a","")),String(args.get("b",""))]
 	match name:
 		"wide","home":
 			_frame_all(float(args.get("time",0.9)))
@@ -1580,7 +1583,7 @@ func shot(name:String,args:Dictionary={})->void:
 						for key in cast_order:
 							var p:=figure(key)
 							if p!=null and not p.leaving and p.spot!=null and p.role in [MAIN,"attendant"]:pair.append(_where_now(p))
-					rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
+					rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,0.0 if executing() else right_reserve)
 					rig.call("wide",pair,float(args.get("time",0.8)),_where_now(a))
 				else:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
@@ -1593,16 +1596,21 @@ func shot(name:String,args:Dictionary={})->void:
 		"shake":rig.call("shake",float(args.get("strength",0.35)))
 		"frame":
 			# Several people and things at once (an execution: the one before
-			# the god, the one with the club, the pot), from the hall's side.
-			var on:Array=[]
+			# the god, the one with the club, the pot), whole, feet and floor
+			# and all, from the hall's side: a cut (the edit of a comic scene).
+			var pts:=PackedVector3Array()
 			for thing in args.get("on",[]):
 				var f:=figure(String(thing))
-				if f!=null and f.body3d!=null:on.append(_where_now(f))
-				elif is_instance_valid(_exec):on.append(_exec.call("point",String(thing)))
-				elif court_set!=null:on.append(set_point(String(thing)))
-			if not on.is_empty():
-				rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
-				rig.call("wide",on,float(args.get("time",0.7)),on[0])
+				if f!=null and f.body3d!=null and is_instance_valid(f.body3d):
+					var feet:=f.body3d.global_position
+					pts.append(feet+Vector3(0.0,-0.05,0.0));pts.append(f.body3d.head_top()+Vector3(0.0,0.12,0.0) if f.body3d.is_inside_tree() else feet+Vector3(0.0,1.8,0.0))
+					pts.append(feet+Vector3(0.35,0.9,0.0));pts.append(feet+Vector3(-0.35,0.9,0.0))
+				else:
+					var at:Vector3=_exec.call("point",String(thing)) if is_instance_valid(_exec) else set_point(String(thing))
+					pts.append(at+Vector3(0.0,-0.05,0.0));pts.append(at+Vector3(0.0,0.6,0.0))
+			if not pts.is_empty() and rig.has_method("frame_points"):
+				rig.call("set_insets",top_inset,FOOT_ROOM*.4,0.0,0.0 if executing() else right_reserve)
+				rig.call("frame_points",pts)
 	# The caption goes up out of a shot that has gone in on someone, and
 	# back down for the room; the bubbles step clear of it.
 	if name!="shake":

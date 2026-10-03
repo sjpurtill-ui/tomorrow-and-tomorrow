@@ -134,6 +134,9 @@ func point(name:String)->Vector3:
 			var toward:=Vector3(god.x-front.x,0.0,god.z-front.z)
 			return front+toward.normalized()*minf(1.6,toward.length()*0.5) if toward.length()>0.01 else front
 		"windbreak":
+			# the set's own way out of sight (M's drag route: the door, then
+			# round behind the windbreak); the door is where they vanish
+			if court.has_method("drag_route") and court.call("has_mark","door"):return (court.call("mark","door") as Node3D).global_position
 			var model:=court.get_node_or_null("Model")
 			var wall:Node3D=model.find_child("Windbreak",true,false) as Node3D if model!=null else null
 			if wall!=null:
@@ -629,8 +632,12 @@ func _pack_come(args:Dictionary)->void:
 		if is_instance_valid(dog) and v!=null:dog.call("go_to",v.global_position-v.global_transform.basis.z*0.9+v.global_transform.basis.x*(0.25 if i%2==0 else -0.25),"trot")
 
 func _pack_crunch(args:Dictionary)->void:
+	var court:=_court()
+	var route:Array=court.call("drag_route") if court!=null and court.has_method("drag_route") else []
 	for dog in _pack:
-		if is_instance_valid(dog) and dog.has_method("crunch"):dog.call("crunch",float(args.get("seconds",3.0)))
+		if not is_instance_valid(dog):continue
+		if not route.is_empty() and dog.has_method("drag_off"):dog.call("drag_off",route)
+		elif dog.has_method("crunch"):dog.call("crunch",float(args.get("seconds",3.0)))
 
 func _pack_fetch(args:Dictionary)->void:
 	if _pack.is_empty():return

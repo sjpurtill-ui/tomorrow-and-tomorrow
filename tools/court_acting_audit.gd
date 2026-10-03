@@ -25,6 +25,7 @@ const Acting:=preload("res://scripts/hud/court_acting.gd")
 const DT:=1.0/30.0
 const SAMPLES:=10
 const STRETCH_MAX:=2.6        # an edge longer than this many times its rest length tears
+const STRETCH_MAX_BODY:=3.2   # the skin: an arm over the head stretches the armpit about 3x (linear skinning)
 const STRETCH_MIN_EDGE:=0.004 # metres: shorter edges are ignored (noise)
 const KNEE_BACK_MAX:=0.025    # metres the knee may sit behind the hip-ankle line (a little give)
 const ELBOW_BACK_MAX:=0.035
@@ -53,7 +54,9 @@ func _ready()->void:
 	var fails:=0
 	var t0:=Time.get_ticks_msec()
 	for v in bodies:
-		var report:=audit_body(self,String(v),clips)
+		var glb:=""
+		if args.size()>2:glb=args[2].path_join("court_figure_%s.glb" % v)
+		var report:=audit_body(self,String(v),clips,SAMPLES,1.0,OUTFITS,glb)
 		for line:String in report.lines:print("COURT_ACTING_AUDIT ",line)
 		fails+=int(report.fails)
 		print("COURT_ACTING_AUDIT body %s clips %d samples %d fails %d worst_stretch %.2f (%s) worst_gap %.2f m (%s)" % [
@@ -63,7 +66,9 @@ func _ready()->void:
 
 ## One body: every clip it has (or those named), in each outfit's cover.
 ## Returns {lines, fails, clips, samples, worst, worst_at, worst_gap, worst_gap_at}.
-static func audit_body(host:Node,variant:String,only:=PackedStringArray(),samples:=SAMPLES,scale:=1.0,outfits:=OUTFITS)->Dictionary:
+## mesh_glb: measure the meshes of another build of this body (a figure .glb
+## read as it is, never imported), skinned by the same posed skeleton.
+static func audit_body(host:Node,variant:String,only:=PackedStringArray(),samples:=SAMPLES,scale:=1.0,outfits:=OUTFITS,mesh_glb:="")->Dictionary:
 	var out:={"lines":[],"fails":0,"clips":0,"samples":0,"worst":0.0,"worst_at":"","worst_gap":0.0,"worst_gap_at":""}
 	var fig:Node3D=Figure3D.new()
 	fig.set_meta(&"person_name","audit "+variant)
@@ -75,7 +80,17 @@ static func audit_body(host:Node,variant:String,only:=PackedStringArray(),sample
 	var a=Acting.of(fig)
 	a.active=false
 	var skel:Skeleton3D=fig.skeleton
-	var probes:=_mesh_probe(fig,skel,scale,outfits)
+	var parts:Array=fig.get(&"_parts")
+	var other:Node=null
+	if not mesh_glb.is_empty():
+		other=Acting.load_glb(mesh_glb)
+		if other==null:
+			out.lines.append("%s: cannot read %s" % [variant,mesh_glb]);out.fails=1
+			fig.queue_free();return out
+		parts=[]
+		for n in other.find_children("*","MeshInstance3D",true,false):parts.append(n)
+	var probes:=_mesh_probe(parts,skel,scale,outfits)
+	if other!=null:other.free()
 	var front:=(skel.global_transform.basis.inverse()*fig.global_transform.basis*Vector3(0,0,1)).normalized()
 	var bones:=_bones(skel,front)
 	var k:float=fig.body_height/1.72
@@ -102,7 +117,7 @@ static func audit_body(host:Node,variant:String,only:=PackedStringArray(),sample
 				out.worst=st.ratio;out.worst_at="%s %.2fs %s" % [clip,t,st.mesh]
 			if float(st.gap)>float(out.worst_gap):
 				out.worst_gap=st.gap;out.worst_gap_at="%s %.2fs %s" % [clip,t,st.gap_at]
-			if float(st.ratio)>STRETCH_MAX:bad.append("mesh %s edge x%.1f" % [st.mesh,st.ratio])
+			if float(st.ratio)>(STRETCH_MAX_BODY if String(st.mesh)=="Body" else STRETCH_MAX):bad.append("mesh %s edge x%.1f" % [st.mesh,st.ratio])
 			for kind:String in (st.gaps as Dictionary):
 				if kind.ends_with("@"):continue
 				if float(st.gaps[kind])>COVER_GAP*k:bad.append("skin left bare by the %s (%.0f cm off, at %s)" % [kind,float(st.gaps[kind])*100.0,String(st.gaps[kind+"@"])])
@@ -225,6 +240,9 @@ static func _add_vertex(probe:Dictionary,mi:MeshInstance3D,skel:Skeleton3D,surf:
 			var bind:=Transform3D.IDENTITY
 			if bi<skin.get_bind_count():
 				bone=skin.get_bind_bone(bi)
+				# a mesh of another build binds to its own skeleton: by name onto ours
+				var own:=mi.get_node_or_null(mi.skeleton) as Skeleton3D
+				if own!=null and own!=skel and bone>=0:bone=skel.find_bone(own.get_bone_name(bone))
 				if bone<0:bone=skel.find_bone(skin.get_bind_name(bi))
 				bind=skin.get_bind_pose(bi)
 			probe.mat_key[key]=(probe.mat_bone as Array).size()
@@ -263,13 +281,13 @@ static func _poke(probe:Dictionary,pose:Array,p:PackedVector3Array,i:int)->float
 	var n:=(m.basis*(probe.normals as PackedVector3Array)[i/2]).normalized()
 	return (p[i]-p[cv]).dot(n)
 
-static func _mesh_probe(fig:Node3D,skel:Skeleton3D,scale:float,outfits:Array)->Array:
+static func _mesh_probe(parts:Array,skel:Skeleton3D,scale:float,outfits:Array)->Array:
 	var probes:=[]
 	var rng:=RandomNumberGenerator.new();rng.seed=7
 	var rest:=_pose(skel,true)
 	var body:MeshInstance3D=null
 	var pieces:={}
-	for mi:MeshInstance3D in fig.get(&"_parts"):
+	for mi:MeshInstance3D in parts:
 		if mi.mesh==null or mi.skin==null:continue
 		var name:=String(mi.name)
 		if name=="Body":body=mi

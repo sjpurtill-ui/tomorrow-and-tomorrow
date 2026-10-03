@@ -215,7 +215,7 @@ def act_club(clips):
     hit_u = Vector((0.35, -0.90, 0.10)).normalized()
     hit_C = hitpt - hit_u * (0.70 * k)
     hit_t = dict(hips=(0, 0, 34), hips_loc=(0.03, -0.08, -0.08), spine=(10, 0, 8), chest=(8, 0, 16), neck=(0, 0, -8), head=(4, 0, -4))
-    thru_t = dict(hips=(0, 0, 52), hips_loc=(0.04, -0.06, -0.05), spine=(4, 0, 18), chest=(0, 0, 44), neck=(-4, 0, -12), head=(-10, 0, -18))
+    thru_t = dict(hips=(0, 0, 60), hips_loc=(0.04, -0.06, -0.05), spine=(4, 0, 22), chest=(0, 0, 34), neck=(-4, 0, -12), head=(-10, 0, -18))
     thru_C, thru_u = V(0.20, -0.10, 1.40), (0.18, 0.62, 0.76)
     watch_t = dict(thru_t, neck=(-10, 0, 10), head=(-18, 0, 30))
     watch2_t = dict(thru_t, neck=(-4, 0, 16), head=(2, 0, 44))
@@ -250,8 +250,8 @@ def act_club(clips):
         a.t(t, kind, **tor)
     shade = arm_at("L", contact=lm["brow"] + Vector((0.03 * k, -0.04 * k, 0.03 * k)), along=(-0.35, -0.5, 0.05), palm=(0.0, 0.1, -1.0),
                    pole=(0.9, 0.1, -0.2), curl=(0, -4, -6), reach=0.35)
-    pump_hi = arm_at("L", w=body_pt(0.24, -0.24, z_chest + 0.18), along=(0.0, -0.3, 0.95), palm=(-0.9, 0.0, 0.0), pole=(0.9, 0.2, -0.3), curl=(90, 80, 40))
-    pump_lo = pump_hi.copy(w=pump_hi.w + Vector((0, 0.02 * k, -0.16 * k)))
+    pump_hi = arm_at("L", w=body_pt(0.24, -0.24, z_chest + 0.18), along=(0.0, -0.3, 0.95), palm=(-0.9, 0.0, 0.0), pole=(0.6, 0.2, -0.8), curl=(90, 80, 40))
+    pump_lo = pump_hi.copy(w=pump_hi.w + Vector((-0.02 * k, 0.04 * k, -0.09 * k)))
     a.world("L", 4.35, watch_t, shade, "out").world("L", T_PLOP - 0.05, watch2_t, shade)
     a.world("L", 5.12, watch2_t, pump_hi, "out").world("L", 5.24, watch2_t, pump_lo, "snap").world("L", 5.36, watch2_t, pump_hi, "out")
     a.world("L", 5.48, watch2_t, pump_lo, "snap").arm("L", 6.1, hip_L, "ease").arm("L", 7.0, hip_L)
@@ -577,7 +577,7 @@ def act_dogs(clips):
             a.world(s_, t, lying, hold_.copy(curl=c), "snap")
         open_ = hold_.copy(w=hold_.w + Vector((0, 0.10 * k, 0.02 * k)), curl=(0, -6, -10))
         a.world(s_, 2.15, lying, open_, "snap")
-    wave_k = arm_at("R", w=V(0.20, -0.85, 0.32), along=(0.0, -0.3, 0.95), palm=(0.0, -1.0, 0.0), pole=(0.9, 0.0, 0.0), curl=(0, -6, -8))
+    wave_k = arm_at("R", w=V(0.20, -0.85, 0.32), along=(0.0, -0.3, 0.95), palm=(0.0, -1.0, 0.0), pole=(0.9, 0.1, -0.6), curl=(0, -6, -8))
     a.world("R", 2.35, lying, wave_k, "out")
     for i in range(3):
         sw = 1.0 if i % 2 == 0 else -1.0
@@ -720,7 +720,7 @@ def room(clips):
         a.t(t, "snap", **wince).t(t + 0.35, "ease", **dict(wince, chest=(3, 0, 0), head=(6, 0, -3)))
     a.t(2.6, "ease", **dict(wince, chest=(3, 0, 0), head=(6, 0, -3)))
     for s_ in "LR":
-        ear = arm_at(s_, contact=lm["ear"] + Vector((0.01 * k, 0.0, 0.0)), along=(0.0, 0.1, 0.99), palm=(-1.0, 0.0, 0.0), pole=(0.9, 0.2, -0.3), curl=(6, 0, -4), reach=0.40)
+        ear = arm_at(s_, contact=lm["ear"] + Vector((0.01 * k, 0.0, 0.0)), along=(0.0, 0.1, 0.99), palm=(-1.0, 0.0, 0.0), pole=(0.8, -0.5, -0.35), curl=(6, 0, -4), reach=0.40)
         a.rest(s_, 0.0).rest(s_, crunches[0], sh=(0, -10, 0), kind="snap").rest(s_, 0.85).arm(s_, crunches[1], ear.copy(arc=(0.05, -0.05, 0.0)), "snap").arm(s_, 2.6, ear)
     a.f(0.0)
     for t in crunches:

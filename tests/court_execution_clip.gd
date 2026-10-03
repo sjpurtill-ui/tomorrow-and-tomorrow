@@ -58,5 +58,5 @@ func _execute(director:Node)->void:
 		print("ORDER again executed=",result.get("executed",false)," removed=",result.get("removed",false))
 	await _wait(2.0)
 	print("EXEC method=",modal.court_stage.exec_method if is_instance_valid(modal.court_stage) else "")
-	await _wait(13.0)
+	await _wait(16.5)
 	print("MARK end")
