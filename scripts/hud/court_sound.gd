@@ -583,11 +583,15 @@ func steps_at_pace(body:Node3D,pace:String,db:=0.0)->void:
 ## Node3D or null}). The act's own moment (t = 0: the blow) falls `lead`
 ## seconds from now; returns that lead, so the scene can line its picture up
 ## with it. opts: gore ("full", "mild": the same sounds over the cutaway;
-## "off": nothing, the sober exit is the stage's own), db (added to all).
+## "off": nothing, the sober exit is the stage's own), db (added to all),
+## dread (0..1, else the fact sheet's): at 0.7 and over the hall is too
+## frightened to gasp, groan, laugh or clap; it swallows and its knees knock.
+## act may also be the act's number (1..25, EXECUTIONS.md).
 ## The roll and the punchline are what the people can play: hands on a log
 ## before any drum, a drum, and small cymbals only in a temple age.
-func play_act(act:String,roles:Dictionary={},opts:Dictionary={})->float:
-	var track:Array=Gore.ACTS.get(act,[])
+func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
+	if act is int and int(act)>0 and int(act)<Gore.ACT_NUMBERS.size():act=Gore.ACT_NUMBERS[int(act)]
+	var track:Array=Gore.ACTS.get(String(act),[])
 	if track.is_empty() or String(opts.get("gore","full"))=="off" or not can_play():return 0.0
 	var first:=0.0
 	for item:Dictionary in track:first=minf(first,float(item.t))
@@ -597,8 +601,17 @@ func play_act(act:String,roles:Dictionary={},opts:Dictionary={})->float:
 	var roll_v:=1 if String(e.drum)=="clay" else 0
 	var punch:="punch_cymbal" if bool(e.cymbal) else ("punch_log" if String(e.drum)=="" else "punch_drum")
 	var now:=_now()
+	var dread:=float(opts.get("dread",facts.get("dread",facts.get("people_dread",0.0))))
+	var frightened:=dread>=0.7
+	var stores:=float(facts.get("stores_days",facts.get("food_days",99.0)))
+	var hungry:=bool(facts.get("hungry",false)) and stores<16.0 or stores<7.0
+	var punch_at:=0.0
 	for item:Dictionary in track:
+		var cond:=String(item.get("if",""))
+		if (cond=="hungry" and not hungry) or (cond=="not_hungry" and hungry):continue
 		var cue_name:=String(item.cue)
+		if cue_name=="punch":punch_at=float(item.t)
+		if frightened and cue_name in Gore.ROOM_NOISE:continue
 		var v:=int(item.get("variant",-1))
 		if cue_name=="roll":cue_name=roll;v=roll_v
 		elif cue_name=="punch":cue_name=punch;v=roll_v if punch=="punch_drum" else 0
@@ -608,6 +621,10 @@ func play_act(act:String,roles:Dictionary={},opts:Dictionary={})->float:
 		if v>=0:o["variant"]=v
 		if who=="musician":o["pan"]=_music_pan()
 		_queue.append({"at":now+lead+float(item.t),"name":cue_name,"body":body as Node3D if body is Node3D else null,"opts":o})
+	if frightened:
+		# a terrified hall: someone swallows, knees knock, nobody laughs
+		_queue.append({"at":now+lead+punch_at+0.5,"name":"swallow","body":roles.get("front_row",null) as Node3D if roles.get("front_row") is Node3D else null,"opts":{"variant":1}})
+		_queue.append({"at":now+lead+0.6,"name":"knees_knock","body":null,"opts":{"variant":0}})
 	# the musician puts down their tune for the act
 	if is_instance_valid(_music) and _music.playing:
 		var tw:=create_tween();tw.tween_property(_music,"volume_db",-60.0,0.4);tw.tween_callback(_music.stop)

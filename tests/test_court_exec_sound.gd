@@ -92,3 +92,37 @@ func test_the_queued_sounds_play_when_their_time_comes()->void:
 	var heard:=[]
 	for p in (sound.get("played") as Array):heard.append(String(p.name))
 	assert_array(heard).contains(["drum_roll","windup","swing_whoosh","gore_crack"])
+
+func test_all_twenty_five_acts_have_a_track()->void:
+	assert_int(Gore.ACT_NUMBERS.size()).is_equal(26)
+	for n in range(1,26):
+		var act:String=Gore.ACT_NUMBERS[n]
+		var track:Array=Gore.ACTS.get(act,[])
+		assert_bool(track.is_empty()).override_failure_message("act %d (%s) has no track" % [n,act]).is_false()
+		# roll before the blow, something at the blow, a punchline after it
+		var at_blow:=false
+		var punch_after:=false
+		for item:Dictionary in track:
+			if absf(float(item.t))<0.3 and String(item.cue) not in ["roll","punch"]:at_blow=true
+			if String(item.cue)=="punch" and float(item.t)>0.5:punch_after=true
+		assert_bool(at_blow and punch_after).override_failure_message("act %d lacks a blow or a late punchline" % n).is_true()
+		# 6-12 s from the blow to the room's last word, and no longer before it than the roll
+		var last:=0.0
+		for item:Dictionary in track:last=maxf(last,float(item.t))
+		assert_float(last).override_failure_message("act %d runs %.1f s after the blow" % [n,last]).is_between(2.5,9.5)
+
+func test_a_terrified_hall_is_silent_and_the_hungry_eye_the_pot()->void:
+	var sound:=_court(["bone_flutes_drums","rattles_drums_pipes"])
+	sound.call("play_act",2,{},{"dread":0.9})
+	var names:=_queued(sound)
+	assert_array(names).not_contains(["room_gasp","lone_clap"])
+	assert_array(names).contains(["swallow","knees_knock","gore_crack"])
+	var fed:=_court(["bone_flutes_drums","rattles_drums_pipes"])
+	fed.set("facts",{"stores_days":40})
+	fed.call("play_act","boiled_in_pot",{},{})
+	assert_array(_queued(fed)).not_contains(["stomach_growl"])
+	assert_array(_queued(fed)).contains(["crowd_groan"])
+	var starving:=_court(["bone_flutes_drums","rattles_drums_pipes"])
+	starving.set("facts",{"stores_days":4})
+	starving.call("play_act","boiled_in_pot",{},{})
+	assert_array(_queued(starving)).contains(["stomach_growl"])

@@ -26,9 +26,10 @@ func _act(act:String,drum:String,cymbal:bool)->Array:
 	var last:=0.0
 	for item:Dictionary in Gore.ACTS[act]:first=minf(first,float(item.t));last=maxf(last,float(item.t))
 	var lead:=-first+0.3
-	var end:=lead+last+3.5
+	var end:=lead+last+3.0
 	items[0]["until"]=end
 	for item:Dictionary in Gore.ACTS[act]:
+		if String(item.get("if",""))=="hungry":continue
 		var cue:=String(item.cue)
 		var v:=int(item.get("variant",0))
 		if cue=="roll":
@@ -46,6 +47,12 @@ func _run()->void:
 	var plan:={"20_act02_club_home_run":["club_home_run","frame",false],
 		"21_act10_three_swing_beheading":["three_swing_beheading","clay",true],
 		"22_act04_dog_dinner":["dog_dinner","frame",false]}
+	# every act, by number, at the age it needs (the punchline as that age plays it)
+	var ages:={1:"",3:"",5:"frame",6:"",7:"frame",8:"frame",9:"frame",11:"clay",12:"clay",13:"clay",14:"clay",15:"clay",
+		16:"clay",17:"clay",18:"clay",19:"clay",20:"clay",21:"clay",22:"clay",23:"clay",24:"clay",25:"clay"}
+	for n in ages:
+		var cym:=int(n)>=17
+		plan["act%02d_%s" % [int(n),Gore.ACT_NUMBERS[int(n)]]]=[Gore.ACT_NUMBERS[int(n)],String(ages[n]),cym]
 	for name in plan:
 		var spec:Array=plan[name]
 		var made:=_act(String(spec[0]),String(spec[1]),bool(spec[2]))
@@ -63,6 +70,7 @@ func _run()->void:
 		lines+="20_act02_club_home_run          drum roll; wind-up; whoosh; CRACK; the head's whistle; plop in the pot; gasp; stir; lid; ba-DUM; a lone clap\n"
 		lines+="21_act10_three_swing_beheading  roll; THUNK (stuck), creak, pull; CLANG (bounced), \"ow!\"; CHOP, pop, the roll across the floor, the geyser, gasp, patter on the front row, the blink; ba-dum-TSS (a temple age); retching\n"
 		lines+="22_act04_dog_dinner             roll; snarls; dragged off; crunching behind the windbreak; groans; one more crunch; paws trotting back; the bone dropped; tail thumping; ba-DUM\n"
+		lines+="actNN_<name>                    each of the 25 acts by number (the roll on a log before drums, a frame or clay drum after; cymbals from act 17 on)\n"
 		lines+="23_every_execution_sound        every sound once, in this order: %s\n" % ", ".join(PackedStringArray(order))
 		lines+="cues/                           each sound and variant on its own\n"
 		index.store_string(lines);index.close()
