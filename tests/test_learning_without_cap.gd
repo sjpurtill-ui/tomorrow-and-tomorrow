@@ -429,8 +429,9 @@ func test_the_first_ways_come_at_a_village_pace()->void:
 	assert_float(R.pace_for(300.0)).is_equal_approx(1.0,0.0001)
 	# A founding question takes more than half again the work it did.
 	assert_float(7.0/R.pace_for(0.0)).is_greater(1.6)
-	# The lead grows slowly and the age can spare a little more at its founding.
-	assert_float(R.LEAD_YEARS_PER_DOUBLING).is_equal_approx(0.03,0.0001)
+	# The age can spare a little more at its founding (a balanced people's
+	# learners, capped at 3.5 in 100, bank no lead).
+	assert_float(R.LEAD_YEARS_PER_DOUBLING).is_equal_approx(0.06,0.0001)
 	assert_float(Society._rise(Society.SUSTAINABLE_SPECIALISTS,0.0)).is_equal_approx(0.065,0.0001)
 	# More learners still give more work: no cap.
 	assert_float(R.team_capacity(8.0)).is_greater(R.team_capacity(2.0)*3.5)

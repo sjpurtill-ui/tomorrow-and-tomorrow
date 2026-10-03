@@ -197,7 +197,7 @@ const GOODS_KEY:="Civilian Goods"
 ## age can spare (the sustainable share, society_model.gd
 ## SUSTAINABLE_SPECIALISTS, read at the economy's real age) carries its
 ## learning ahead of the calendar: each doubling of that share adds
-## LEAD_YEARS_PER_DOUBLING years a year to its lead (twice the share: 3 years
+## LEAD_YEARS_PER_DOUBLING years a year to its lead (twice the share: 6 years
 ## ahead in a century). Below the sustainable share the lead falls back the same
 ## way, never below the calendar. Questions are dated against the people's own
 ## age (DiscoverySystem.learning_year), not the calendar, and what it knows pays
@@ -207,7 +207,7 @@ const GOODS_KEY:="Civilian Goods"
 ## people with a sixth of its workers learning reaches writing, bronze and
 ## place value some 20-30 years before their band floors, one with a third some
 ## 30-40 years before, with fewer people, goods and guards than a sensible one.
-const LEAD_YEARS_PER_DOUBLING:=0.03
+const LEAD_YEARS_PER_DOUBLING:=0.06
 ## The lead falls back at most this many doublings a year (a people with no
 ## learners at all loses LEAD_YEARS_PER_DOUBLING x 3 years a year).
 const LEAD_FALL_DOUBLINGS:=3.0
