@@ -110,8 +110,23 @@ RESEARCH_TEAMS = float(g.const("scripts/research_600_catalog.gd", "RESEARCH_TEAM
 QUESTION_EXPONENT = float(g.const("scripts/research_600_catalog.gd", "QUESTION_EXPONENT", default=0.0, optional=True))
 UNCAPPED = QUESTION_EXPONENT > 0.0
 NORMAL = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
-          for k in ("NORMAL_FULL", "NORMAL_LOG", "NORMAL_RESEARCH_SHARE", "LEAD_YEARS_PER_DOUBLING", "LEAD_FALL_DOUBLINGS")}
+          for k in ("LEARNER_PACE", "LEAD_YEARS_PER_DOUBLING", "LEAD_FALL_DOUBLINGS")}
 PARITY = ATTENTION_STEPS > 0.0 and (RESEARCH_TEAMS > 0.0 or UNCAPPED)
+# Learners use goods (Research600.LEARNER_DAYS_PER_GOOD present): a goods-unit
+# per LEARNER_DAYS_PER_GOOD learner-days, taken before the makers' day; makers
+# (civilian_goods.gd) keep households' target x 1.2 plus the learners' need for
+# the next step; short of goods, learning goes at GOODS_FLOOR + the rest x cover,
+# and households' techniques work as far as the stock covers their target.
+# Raw materials are taken as on hand (the surrogate keeps no raw stocks).
+LEARNER_GOODS = {k: float(g.const("scripts/research_600_catalog.gd", k, default=0.0, optional=True))
+                 for k in ("LEARNER_DAYS_PER_GOOD", "GOODS_FLOOR", "LEAD_GOODS_YEARS", "LEAD_UPKEEP_YEARS")}
+GOODS_MODEL = LEARNER_GOODS["LEARNER_DAYS_PER_GOOD"] > 0.0
+# Research600.AGE_WORK_BY_YEAR: each age's questions ask the work of the
+# learners a people of that age usually keeps (absent -> 1).
+AGE_WORK = g.const("scripts/research_600_catalog.gd", "AGE_WORK_BY_YEAR", default=[], optional=True) or []
+GOODS_K = {k: float(g.const("scripts/civilian_goods.gd", k, default=0.0, optional=True))
+           for k in ("BASE_TARGET_PER_PERSON", "DAILY_WEAR", "CRAFT_SHARE", "BASE_RATE", "TECHNIQUE_OUTPUT")}
+GOODS_TARGETS = g.const("scripts/civilian_goods.gd", "TARGET_PER_PERSON", default={}, optional=True) or {}
 REPLAN_STEPS = float(g.const("scripts/civilization_controller.gd", "REPLAN_STEPS", default=0.0, optional=True))
 
 
@@ -140,23 +155,12 @@ def learners_work(researchers: float) -> float:
     return teams * team_strength(researchers / teams)
 
 
-def normal_work(population: float) -> float:
-    """Research600.normal_work: the normal share's work in a people of this size."""
-    normal = max(0.0, population) * NORMAL["NORMAL_RESEARCH_SHARE"]
-    if normal <= NORMAL["NORMAL_FULL"]:
-        return normal
-    return NORMAL["NORMAL_FULL"] * (1.0 + NORMAL["NORMAL_LOG"] * math.log10(normal / NORMAL["NORMAL_FULL"]))
-
-
-def team_capacity(researchers: float, population: float = -1.0) -> float:
-    """Research600.team_capacity: the whole community's work (no knee when
-    uncapped, scaled by the people's size; the older rule's knee otherwise)."""
+def team_capacity(researchers: float) -> float:
+    """Research600.team_capacity: the whole community's work from the number of
+    its learners alone (uncapped: no knee, never the people's size; the older
+    rule's knee otherwise)."""
     if UNCAPPED:
-        work = learners_work(researchers)
-        if population < 0.0 or work <= 0.0:
-            return work
-        base = learners_work(max(0.0, population) * NORMAL["NORMAL_RESEARCH_SHARE"])
-        return work * (normal_work(population) / base if base > 0.0 else 1.0)
+        return learners_work(researchers) * (NORMAL["LEARNER_PACE"] or 1.0)
     if researchers <= RESEARCH_TEAMS:
         return max(0.0, researchers)
     return RESEARCH_TEAMS * team_strength(researchers / RESEARCH_TEAMS)
@@ -460,9 +464,16 @@ class Surrogate:
         self.scholarship = 0.0
         # DiscoverySystem.learning_lead: years the people's learning runs ahead.
         self.lead = 0.0
+        # Civilian Goods held (GOODS_MODEL), the learners' cover and what they took.
+        self.goods = -1.0
+        self.goods_cover = 1.0
+        self.goods_reserved = 0.0
+        self.goods_taken = 0.0
+        self.goods_made = 0.0
         self.effects = np.zeros(len(cat.effect_keys))
         self.effect_raw = np.zeros(len(cat.effect_keys))
         self.ceiling_era = 0.0
+        self.economy_era = 0.0
         self.targets = cat.id_mask(scenario.targets)
         self.chan_items = [np.where(cat.channel == k)[0] for k in range(nch)]
         self.children = [[] for _ in range(n)]
@@ -674,8 +685,11 @@ class Surrogate:
             eras = np.sort(eras)
             frontier = eras[int((eras.size - 1) * self.c.frontier_percentile)]
             self.ceiling_era = clamp(min(self.day / YEAR + self.lead, frontier), 0.0, self.c.modern_era)
+            # SocietyModel.economy_era: the calendar or the frontier, never the lead.
+            self.economy_era = clamp(min(self.day / YEAR, frontier), 0.0, self.c.modern_era)
         else:
             self.ceiling_era = 0.0
+            self.economy_era = 0.0
         lo, hi = gd.era_bounds(cat, self.c, self.ceiling_era)
         if self.tune_cap != 1.0:
             lo = np.where(cat.lower_better, np.maximum(cat.limit_lo, lo * self.tune_cap), lo)
@@ -700,11 +714,15 @@ class Surrogate:
         self.specialist_excess = 0.0
         if SUSTAINABLE_SPECIALISTS and self.able > 0:
             share = clamp(self.workers("Knowledge") / max(1.0, self.able), 0.0, 1.0)
-            self.specialist_excess = max(0.0, share - curve(SUSTAINABLE_SPECIALISTS, self.ceiling_era))
+            self.specialist_excess = max(0.0, share - curve(SUSTAINABLE_SPECIALISTS, getattr(self, "economy_era", self.ceiling_era)))
             for key, k in SPECIALIST_UPKEEP.items():
                 lim = self.c.effect_limits.get(key, (-0.5, 0.8)) if hasattr(self.c, "effect_limits") else (-0.5, 0.8)
-                self._eff[key] = clamp(self._eff.get(key, 0.0) + float(k) * self.specialist_excess, float(lim[0]), float(lim[1]))
+                burden = 1.0 + (self.lead / LEARNER_GOODS["LEAD_UPKEEP_YEARS"] if LEARNER_GOODS.get("LEAD_UPKEEP_YEARS", 0.0) > 0.0 else 0.0)
+                self._eff[key] = clamp(self._eff.get(key, 0.0) + float(k) * self.specialist_excess * burden, float(lim[0]), float(lim[1]))
         self._knowledge_rate_cap = float(hi[cat.effect_index["knowledge_rate"]]) if "knowledge_rate" in cat.effect_index else 1.0
+        if UNCAPPED and "knowledge_rate" in cat.effect_index:
+            # ArtifactCollection.era_bonus_cap reads the economy's age (what artifacts exist).
+            self._knowledge_rate_cap = float(gd.era_bounds(cat, self.c, getattr(self, "economy_era", self.ceiling_era))[1][cat.effect_index["knowledge_rate"]])
 
     def _adoption(self, days: float) -> None:
         """SocietyModel.process_day adoption (every 30 days)."""
@@ -1131,7 +1149,12 @@ class Surrogate:
                     total += float(levers[lever]) * clamp(float(self.adoption[i]), 0.0, 1.0)
             if len(cache) > 64:
                 cache.clear()
-            cache[key] = min(float(LEVER_LIMITS.get(lever, 1.0)), total * float(self.p.get("goods_coverage", 0.8)))
+            cover = float(self.p.get("goods_coverage", 0.8))
+            if GOODS_MODEL and self.goods >= 0.0:
+                # What households hold once the learners have taken their next
+                # step's goods (learners take first), against their target.
+                cover = min(cover, max(0.0, self.goods - self.goods_reserved) / max(0.25, self._goods_target()))
+            cache[key] = min(float(LEVER_LIMITS.get(lever, 1.0)), total * cover)
         return cache[key]
 
     def _agronomy_yield(self) -> float:
@@ -1439,10 +1462,14 @@ class Surrogate:
         staffing = clamp(min(researchers_total / 6.0, researchers_total / pop / 0.03), 0.0, 1.0)
         rate = (0.45 + 0.55 * staffing) * lerp(0.85, 1.2, self.education) * lerp(0.7, 1.0, self.food_security)
         self.scholarship += rate * days / YEAR
+        goods_factor = self._goods_step(days, researchers_total) if GOODS_MODEL else 1.0
+        self._goods_factor = goods_factor
         if UNCAPPED and SUSTAINABLE_SPECIALISTS:
-            # DiscoverySystem._advance_learning (goods assumed covered here).
-            share = researchers_total / max(1.0, self.able)
-            self.lead = max(0.0, self.lead + lead_rate(share, curve(SUSTAINABLE_SPECIALISTS, self.ceiling_era)) * days / YEAR)
+            # DiscoverySystem._advance_learning: the learning done (learners on
+            # the lines, goods counted) against what the economy's real age can spare.
+            on_lines = researchers_total if sum(max(0, int(v)) for v in self.s_research.values()) > 0 else 0.0
+            share = on_lines * goods_factor / max(1.0, self.able)
+            self.lead = max(0.0, self.lead + lead_rate(share, curve(SUSTAINABLE_SPECIALISTS, self.economy_era)) * days / YEAR)
         open_mask = self.ready & self.cond_ok & cat.channel_staffable[cat.channel] & self.offered
         if self.stale_k.get("STALE_ABANDON"):
             # Research600.pursued (research_3000): superseded practices are abandoned.
@@ -1595,7 +1622,7 @@ class Surrogate:
                 if known_ext is None:
                     known_ext = np.concatenate([self.known, [False, False]])
                 precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
-            difficulty = self.cost_draw[item] * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
+            difficulty = self.cost_draw[item] * self._age_work(item) * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, year))) / precedent
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 # Research600.stale_factor (research_3000)
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
@@ -1903,7 +1930,8 @@ class Surrogate:
         if len(teams) == 0:
             return found
         # 5. Every team does an equal part of the community's whole work.
-        community = team_capacity(on_lines, self.population) if UNCAPPED else team_capacity(on_lines)
+        community = team_capacity(on_lines)
+        community *= getattr(self, "_goods_factor", 1.0)
         share = community / float(len(teams))
         food_support = lerp(0.62, 1.08, clamp(self.food_security, 0, 1))
         material_support = lerp(0.72, 1.12, clamp(self.material, 0.0, 1.2) / 1.2)
@@ -1922,7 +1950,7 @@ class Surrogate:
                 if known_ext is None:
                     known_ext = np.concatenate([self.known, [False, False]])
                 precedent = min(c.precedent_cap, 1.0 + c.precedent_bonus * float(known_ext[cat.precedents[item]].sum()))
-            difficulty = self.cost_draw[item] * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, age))) / precedent
+            difficulty = self.cost_draw[item] * self._age_work(item) * 2.0 ** (min(30.0, max(0.0, cat.era[item] - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling) + float(self._early_doublings(item, age))) / precedent
             if self.stale_k.get("STALE_DOUBLING") and self.relevance[item] >= 0:
                 difficulty *= 2.0 ** min(20.0, max(0.0, self.ceiling_era - self.relevance[item] - self.stale_k["STALE_GRACE"]) / self.stale_k["STALE_DOUBLING"])
             prob = self.chance[item] / difficulty * attention * self.item_activity[item] * self.evidence[item] * throughput * self.tune_pace \
@@ -1939,10 +1967,60 @@ class Surrogate:
             self._learn(item)
         return found
 
+    def _age_work(self, i: int) -> float:
+        """Research600.age_work of question ``i`` (its design year, else its era)."""
+        if not AGE_WORK:
+            return 1.0
+        table = self.__dict__.get("_age_work_table")
+        if table is None:
+            years = np.where(self.cat.design_year >= 0, self.cat.design_year, self.cat.era)
+            table = self._age_work_table = np.interp(years, [float(p[0]) for p in AGE_WORK], [float(p[1]) for p in AGE_WORK])
+        return float(table[i])
+
+    def _goods_target(self) -> float:
+        """CivilianGoods.target: what households expect to hold."""
+        per = GOODS_K["BASE_TARGET_PER_PERSON"]
+        for rid, extra in GOODS_TARGETS.items():
+            i = self.cat.index.get(rid)
+            if i is not None and self.known[i]:
+                per += float(extra) * clamp(float(self.adoption[i]), 0.0, 1.0)
+        return max(0.25, self.population * per)
+
+    def _goods_step(self, days: float, learners: float) -> float:
+        """DiscoverySystem._advance_learning + CivilianGoods.advance over ``days``:
+        wear, the learners' draw first (cover), then the makers make what the
+        households' target x 1.2 and the learners' next draw ask, as far as their
+        labor goes. Returns the learning factor GOODS_FLOOR + the rest x cover."""
+        target = self._goods_target()
+        if self.goods < 0.0:
+            self.goods = target
+        self.goods *= (1.0 - GOODS_K["DAILY_WEAR"]) ** days
+        per_learner = 1.0 / LEARNER_GOODS["LEARNER_DAYS_PER_GOOD"]
+        if LEARNER_GOODS["LEAD_GOODS_YEARS"] > 0.0:
+            per_learner *= 1.0 + self.lead / LEARNER_GOODS["LEAD_GOODS_YEARS"]
+        need = max(0.0, learners) * per_learner * days
+        taken = min(self.goods, need)
+        self.goods -= taken
+        self.goods_cover = taken / need if need > 0.0 else 1.0
+        self.goods_taken = taken / max(1.0, days)
+        output = 1.0
+        for rid in GOODS_TARGETS:
+            i = self.cat.index.get(rid)
+            if i is not None and self.known[i]:
+                output += GOODS_K["TECHNIQUE_OUTPUT"] * clamp(float(self.adoption[i]), 0.0, 1.0)
+        makers = self.able * self.alloc_pct["Crafting"] / 100.0
+        capacity = makers * GOODS_K["CRAFT_SHARE"] * GOODS_K["BASE_RATE"] * output * days
+        wanted = max(0.0, target * 1.2 + need - self.goods)
+        made = min(capacity, wanted)
+        self.goods += made
+        self.goods_reserved = need
+        self.goods_made = made / max(1.0, days)
+        return LEARNER_GOODS["GOODS_FLOOR"] + (1.0 - LEARNER_GOODS["GOODS_FLOOR"]) * self.goods_cover
+
     def _expected_work(self, i: int, year: float) -> float:
         """DiscoverySystem._expected_work: remaining work over the question's chance."""
         era_cost = max(0.0, float(self.cat.era[i]) - (self.scholarship + self.lead) - self.tune_window) / self.tune_doubling
-        difficulty = float(self.cost_draw[i]) * 2.0 ** (min(30.0, era_cost) + float(self._early_doublings(i, year)))
+        difficulty = float(self.cost_draw[i]) * self._age_work(i) * 2.0 ** (min(30.0, era_cost) + float(self._early_doublings(i, year)))
         return (1.0 - float(self.progress[i])) * difficulty / max(1e-9, float(self.chance[i]))
 
     def _early_doublings(self, idx, year: float):
@@ -2388,4 +2466,7 @@ class Surrogate:
             "construction_rate": e("construction_rate"), "trade_capacity": e("trade_capacity"), "warfare_readiness": e("warfare_readiness"),
             "literacy": 100.0 * clamp(e("literacy"), 0.0, 1.0), "urban_share": 100.0 * self.urban_share(),
             "parallel": self.parallel_capacity(), "modern_survival": e("modern_survival"), "fertility_transition": getattr(self, "_transition", 0.0),
+            "lead": getattr(self, "lead", 0.0), "goods": max(0.0, getattr(self, "goods", 0.0)), "goods_cover": getattr(self, "goods_cover", 1.0),
+            "goods_per_head": max(0.0, getattr(self, "goods", 0.0) - getattr(self, "goods_reserved", 0.0)) / max(1.0, pop), "learners_goods": getattr(self, "goods_taken", 0.0),
+            "household_goods": max(0.0, getattr(self, "goods", 0.0) - getattr(self, "goods_reserved", 0.0)) / max(0.25, self._goods_target()) if GOODS_MODEL and getattr(self, "goods", -1.0) >= 0.0 else 1.0,
         }

@@ -46,7 +46,7 @@ func test_the_same_researchers_make_the_same_progress_under_any_emphasis()->void
 		for plan:Dictionary in [{"security":4},{"knowledge":1,"production":1,"infrastructure":1,"nutrition":1},SENSIBLE,everything]:
 			_lay_out(plan)
 			totals.append(_work())
-		for value in totals:assert_float(value).is_equal_approx(R.team_capacity(researchers,float(WorldSimulation.state.population_exact)),.0001)
+		for value in totals:assert_float(value).is_equal_approx(R.team_capacity(researchers),.0001)
 	)
 
 func test_piling_attention_onto_one_line_gives_it_turns_never_a_bigger_team()->void:

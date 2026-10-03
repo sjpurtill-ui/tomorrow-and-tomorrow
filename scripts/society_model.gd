@@ -1056,6 +1056,21 @@ func society_era()->float:
 	var elapsed:=float(WorldSimulation.state.elapsed_days)/365.0
 	var owner:Variant=WorldSimulation.discovery
 	if owner!=null and is_same(owner.society_model,self): elapsed+=maxf(0.0,float(owner.learning_lead))
+	var frontier:=knowledge_frontier()
+	if frontier<0.0: return 0.0
+	return clampf(minf(elapsed,frontier),0.0,MODERN_ERA)
+
+## The age the economy has reached: the calendar or the knowledge frontier,
+## whichever is earlier, never the learners' own lead. What the people can
+## spare and keep (full-time learners, the artifacts a collection can hold)
+## follows it: a lead is paid for by the economy of the people's real age.
+func economy_era()->float:
+	var frontier:=knowledge_frontier()
+	if frontier<0.0: return 0.0
+	return clampf(minf(float(WorldSimulation.state.elapsed_days)/365.0,frontier),0.0,MODERN_ERA)
+
+## FRONTIER_PERCENTILE of the known discoveries' eras (-1 when none is known).
+func knowledge_frontier()->float:
 	# The frontier depends only on what is known; it is worked out again only
 	# when that changes.
 	var known:Array=WorldSimulation.state.known_discoveries
@@ -1070,8 +1085,7 @@ func society_era()->float:
 		eras.sort()
 		_today.frontier=-1.0 if eras.is_empty() else eras[int(float(eras.size()-1)*FRONTIER_PERCENTILE)]
 		_today.frontier_key=key
-	if _today.frontier<0.0: return 0.0
-	return clampf(minf(elapsed,_today.frontier),0.0,MODERN_ERA)
+	return float(_today.frontier)
 
 ## Research is never free. Full-time specialists (the Knowledge role) beyond what
 ## the era's surplus could keep (about 4% of workers at year 0, 10% by year 600:
@@ -1084,13 +1098,23 @@ const SUSTAINABLE_SPECIALISTS:Array=[[0.0,0.04],[300.0,0.07],[600.0,0.10],[2400.
 const SPECIALIST_UPKEEP:={"labor_demand":1.4,"fatigue":0.6,"cohesion":-1.0,"conception_support":-1.0,"food_storage":-0.6}
 ## Latest excess specialist share (0 when research staffing is sustainable).
 var specialist_excess:=0.0
+## The upkeep's weight now: 1, more while the people's learning runs ahead of
+## the calendar (Research600.LEAD_UPKEEP_YEARS: a lead is carried by the rest).
+var specialist_burden:=1.0
 
 func _apply_specialist_upkeep()->void:
 	var able:=maxf(1.0,float(WorldSimulation.state.able_population()))
 	var share:=clampf(float(WorldSimulation.state.effective_workers("Knowledge"))/able,0.0,1.0)
-	specialist_excess=maxf(0.0,share-_rise(SUSTAINABLE_SPECIALISTS,ceiling_era))
+	# What the economy can spare follows its real age, never the learners' lead.
+	specialist_excess=maxf(0.0,share-_rise(SUSTAINABLE_SPECIALISTS,economy_era()))
+	# Learners kept ahead of the age are dearer still: every LEAD_UPKEEP_YEARS
+	# the people's learning runs ahead adds the usual upkeep again (scholars of a
+	# later age, kept by the work, stores and households of this one).
+	var owner:Variant=WorldSimulation.discovery
+	var lead:=maxf(0.0,float(owner.learning_lead)) if owner!=null and is_same(owner.society_model,self) else 0.0
+	specialist_burden=1.0+lead/preload("res://scripts/research_600_catalog.gd").LEAD_UPKEEP_YEARS
 	if specialist_excess<=0.0: return
 	for key:String in SPECIALIST_UPKEEP:
 		var limit:Vector2=EFFECT_LIMITS.get(key,Vector2(-0.5,0.8))
-		effect_totals[key]=clampf(float(effect_totals.get(key,0.0))+float(SPECIALIST_UPKEEP[key])*specialist_excess,limit.x,limit.y)
+		effect_totals[key]=clampf(float(effect_totals.get(key,0.0))+float(SPECIALIST_UPKEEP[key])*specialist_excess*specialist_burden,limit.x,limit.y)
 # --- research_600 era ceilings (end) ------------------------------------------

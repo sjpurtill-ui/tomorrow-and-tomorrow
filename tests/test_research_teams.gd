@@ -71,7 +71,7 @@ func test_team_count_grows_four_teams_for_every_tenfold_researchers_without_end(
 	for channel:String in GameState.active_investigations:
 		var home:=channel.split("::")
 		total+=float(DiscoverySystem.research_capacity_for(home[0],home[1]).team_scale)
-	assert_float(total).is_equal_approx(R.team_capacity(float(teams.on_lines),float(GameState.population_exact)),0.0001)
+	assert_float(total).is_equal_approx(R.team_capacity(float(teams.on_lines)),0.0001)
 
 # --- A team keeps its question ------------------------------------------------------
 

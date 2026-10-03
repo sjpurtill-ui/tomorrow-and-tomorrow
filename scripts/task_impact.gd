@@ -518,7 +518,7 @@ static func knowledge()->Dictionary:
 	# Learners use goods: tallies, writing stuff, tools (Research600.goods_cover).
 	var cover:=float(now.goods_cover)
 	lines.append(_line("Goods for the learners","%d of 100 covered" % roundi(cover*100.0) if keepers>0.0 else "none asked",
-		"Learners use goods: tallies, writing stuff and tools, one for each %d days of learning. %s learners ask %s goods a day and the stores hold %s. Short of goods, learning slows, to half its pace with none; now it goes at %d in 100. Makers make the goods." % [roundi(Research600.LEARNER_DAYS_PER_GOOD),_whole(keepers),_two(float(now.goods_a_day)),_one(float(now.goods_held)),roundi(float(now.goods_factor)*100.0)],"good" if cover>=0.99 else "bad"))
+		"Learners use goods: tallies, writing stuff and tools, one for each %d days of learning, and the same again for every %d years our learning runs ahead of the calendar. %s learners ask %s goods a day and our stores hold %s. Makers make them; short of goods, learning slows, to half its pace with none. Now it goes at %d in 100." % [roundi(Research600.LEARNER_DAYS_PER_GOOD),roundi(Research600.LEAD_GOODS_YEARS),_whole(keepers),_two(float(now.goods_a_day)),_one(float(now.goods_held)),roundi(float(now.goods_factor)*100.0)],"good" if cover>=0.99 else "bad"))
 	# Our own age: learners past what the age can spare carry it ahead of the
 	# calendar (Research600.lead_rate, discovery_system.gd learning_lead).
 	var lead:=float(now.lead_years)
@@ -529,7 +529,8 @@ static func knowledge()->Dictionary:
 	# Too many keepers: past the share the age can spare, each costs work,
 	# weariness, cohesion and births (society_model.gd specialist upkeep).
 	var model=WorldSimulation.discovery.society_model
-	var era:=float(model.ceiling_era) if model!=null else 0.0
+	# What the economy can spare follows its real age, not the learners' lead.
+	var era:=float(model.economy_era()) if model!=null else 0.0
 	var sustainable:=Society._rise(Society.SUSTAINABLE_SPECIALISTS,era)
 	var able:=_able()
 	var excess:=float(model.specialist_excess) if model!=null else 0.0

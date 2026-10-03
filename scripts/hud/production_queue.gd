@@ -410,7 +410,7 @@ func _apply_households()->void:
 		if coverage>=.98:look="idle"
 		var tip:="\n".join(PackedStringArray([String(story.progress_text),String(story.pace),String(story.eta),String(story.held),String(story.materials)]))
 		(row.get_node("Coverage") as W.OutputBar).set_reading(coverage,look,"%d%% stocked" % roundi(coverage*100.0),tip)
-		var change:=float(city.get("made",0.0))-float(city.get("worn",0.0))
+		var change:=float(city.get("made",0.0))-float(city.get("worn",0.0))-float(city.get("learners",0.0))
 		var net:=row.get_node("Net") as Label
 		net.text=("+" if change>=0.0 else "−")+Plain.number(absf(change))+" a day"
 		net.add_theme_color_override("font_color",T.GREEN_TEXT if change>0.0 else (T.RED_TEXT if change<0.0 else T.INK_MUTED))
@@ -434,11 +434,14 @@ func _apply_households()->void:
 static func household_story(city:Dictionary)->Dictionary:
 	var stock:=float(city.get("stock",0.0));var target:=maxf(.01,float(city.get("target",1.0)))
 	var made:=float(city.get("made",0.0));var worn:=float(city.get("worn",0.0))
+	# Goods the learners take (research_600_catalog.gd learning_goods).
+	var learners:=float(city.get("learners",0.0))
 	var coverage:=float(city.get("coverage",clampf(stock/target,0,1)))
-	var net:=made-worn
+	var net:=made-worn-learners
 	var story:={"tone":"good"}
 	story.progress_text="%s in store of %s wanted (%d%%)" % [Plain.number(stock),Plain.number(target),roundi(coverage*100.0)]
 	var wear:=("about %s a day wear out" % Plain.number(worn)) if worn>=0.01 else "hardly any wear out yet"
+	if learners>=0.01:wear+="; the learners take about %s a day" % Plain.number(learners)
 	story.pace=("Making about %s a day; %s" % [Plain.number(made),wear]) if made>0.0 else ("Nothing made today; "+wear)
 	if coverage>=.98:story.eta="Full"
 	elif net>0.0:

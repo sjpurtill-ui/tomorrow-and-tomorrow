@@ -86,16 +86,9 @@ const DAILY_SCALE:=0.12
 ## team takes it up; refitted with tools/sim so the 1200-3000 milestones land in
 ## their bands (they were mostly late).
 const PACE_BY_YEAR:Array=[[0.0,7.0],[100.0,5.5],[200.0,2.4],[300.0,1.0],[450.0,0.7],[600.0,0.65],[700.0,0.55],[1200.0,0.38],[1800.0,0.30],[2400.0,0.25],[3000.0,0.16]]
-## research_3000 parallel research capacity. A band of a few hundred works one
-## question per staffed channel; a large, literate, well-governed society runs
-## many investigations at once (academies, universities, laboratories), so a
-## staffed channel's progress multiplies with the society's size beyond
-## PARALLEL_POPULATION_REF, scaled by its institutions and literacy. It is 1 for
-## every society below the reference (the whole 0-600 window as calibrated).
-const PARALLEL_POPULATION_REF:=4000.0
-## Extra parallel teams per tenfold population beyond the reference.
-const PARALLEL_PER_DECADE:=0.25
-const PARALLEL_LITERACY:=1.0
+## (research_3000 parallel capacity, which multiplied research with a people's
+## size alone, is gone: a large people runs many investigations at once only by
+## putting many people to learning, docs/PEOPLE_FIRST.md A.)
 ## research_3000 superseded practice: a registry item whose relevance the
 ## society's era has left more than STALE_GRACE years behind is slower to take
 ## up (nobody works the old way any more; the society adopts what replaced it),
@@ -148,14 +141,23 @@ const ATTENTION_STEPS:=24
 ## 1.8 times the work), and more learners also work more questions at once
 ## (team_count), so 200 learners do about 1.8 times the work of 100.
 const QUESTION_EXPONENT:=0.85
-## The pace every age's questions were measured against (PACE_BY_YEAR): a people
-## with the normal share at learning (NORMAL_RESEARCH_SHARE) did the work of
-## that many learners in full up to NORMAL_FULL, then NORMAL_LOG of NORMAL_FULL
-## more for every tenfold (normal_work). A people at the normal share keeps that
-## pace whatever its size; every learner more or fewer counts from there
-## (team_capacity), so pressing learning is a real path, not a wasted crowd.
-const NORMAL_FULL:=12.0
-const NORMAL_LOG:=0.78
+## The allocation is the budget: research comes from the number of people at
+## learning alone, never from a people's size. A big people that moves many
+## hands to learning (and has makers to keep them in goods) learns fast; a
+## people with few learners learns slowly whatever its size. LEARNER_PACE is
+## the one pace constant: the work of one learner on the scale every question's
+## pace is measured in (PACE_BY_YEAR). At 1, a founding band with its usual few
+## learners paces docs/research/BENCHMARKS_600.md exactly as before.
+const LEARNER_PACE:=1.0
+## Each age's questions are measured against the learners a people of that age
+## usually keeps (AGE_WORK_BY_YEAR, by the question's own year: the work a
+## sensible people of that age does, in tools/sim, over what the older capped
+## rule credited it). A question of year 600 asks about three times the work it
+## did, one of year 1200 twelve times: a people with the usual share of an
+## age's usual size still meets each age's benchmarks, a small people with few
+## learners falls behind, and a people that puts more hands to learning runs
+## ahead. It never reads the calendar or the people's size.
+const AGE_WORK_BY_YEAR:Array=[[0.0,1.0],[100.0,1.0],[200.0,0.95],[250.0,1.02],[300.0,1.3],[350.0,1.5],[400.0,1.76],[450.0,2.06],[500.0,2.38],[600.0,2.97],[700.0,3.99],[800.0,6.65],[1000.0,9.11],[1200.0,12.03],[1500.0,15.61],[1800.0,19.54],[2100.0,23.33],[2400.0,28.64],[2700.0,33.42],[3000.0,54.77]]
 ## Teams carry questions. A people's researchers work in equal teams, each on
 ## one question until it is proven, so every question under way moves visibly
 ## season by season instead of twenty questions crawling at once. A band of a
@@ -171,6 +173,16 @@ const TEAMS_REF:=2.5
 ## GOODS_FLOOR of its pace at none (progress x (GOODS_FLOOR + the rest x cover)).
 const LEARNER_DAYS_PER_GOOD:=20.0
 const GOODS_FLOOR:=0.5
+## Learning ahead of the age is dear: every LEAD_GOODS_YEARS a people's learning
+## runs ahead of the calendar (DiscoverySystem.learning_lead) adds the usual
+## goods again to each learner's need (instruments, writing stuff and schooling
+## of a later age, kept by the economy of this one). The makers must keep up or
+## the learners slow, and households hold less: a lead is paid for in goods.
+const LEAD_GOODS_YEARS:=20.0
+## And the people carry it: every LEAD_UPKEEP_YEARS ahead adds the usual
+## upkeep of learners past the share the age can spare again (SocietyModel
+## specialist upkeep: work, weariness, cohesion, births and stores).
+const LEAD_UPKEEP_YEARS:=100.0
 ## The store learning draws on (civilian_goods.gd GOODS).
 const GOODS_KEY:="Civilian Goods"
 ## A people's own age. Keeping more learners than its age can spare (the
@@ -185,7 +197,7 @@ const GOODS_KEY:="Civilian Goods"
 ## reaches bronze and archives some 55 years early by year 300, one with a third
 ## some 80 years early, at the cost of most of its growth; at the usual share
 ## nothing moves (the older rule gave all three the same years).
-const LEAD_YEARS_PER_DOUBLING:=0.15
+const LEAD_YEARS_PER_DOUBLING:=0.06
 ## The lead falls back at most this many doublings a year (a people with no
 ## learners at all loses LEAD_YEARS_PER_DOUBLING x 3 years a year).
 const LEAD_FALL_DOUBLINGS:=3.0
@@ -425,22 +437,17 @@ static func chance_for(research_years:float,design_year:float=0.0)->float:
 	return pace_for(design_year)/(DAILY_SCALE*365.0*maxf(0.25,research_years))
 
 
-## The whole research community's work from its learners alone (before food,
-## goods, tools, schooling and officials). Emphasis shares this out; it never
-## adds to it. No knee: every learner counts. The learners work teams_at()
-## questions at once, each team at team_strength of its people, so twice the
-## learners do about 1.8 times the work, ten times about 7.6 times.
-## `population` (the people's size) sets the scale: a people with the normal
-## share at learning does normal_work(population), the pace its questions were
-## measured against, and every learner beyond or below that share counts from
-## there. Without a population the work is in learners (one learner alone, one).
-static func team_capacity(researchers:float,population:float=-1.0)->float:
-	var work:=learners_work(researchers)
-	if population<0.0 or work<=0.0: return work
-	return work*learner_scale(population)
+## The whole research community's work from the number of its learners alone
+## (before food, goods, tools, schooling and officials), never from the
+## people's size. Emphasis shares this out; it never adds to it. No knee:
+## every learner counts. The learners work teams_at() questions at once, each
+## team at team_strength of its people, so twice the learners do about 1.8 times
+## the work, ten times about 7.6 times.
+static func team_capacity(researchers:float)->float:
+	return learners_work(researchers)*LEARNER_PACE
 
 
-## The work of `researchers` learners in teams, before the people's scale:
+## The work of `researchers` learners in teams:
 ## teams_at(researchers) teams of equal people, each at team_strength.
 static func learners_work(researchers:float)->float:
 	if researchers<=0.0: return 0.0
@@ -456,26 +463,15 @@ static func team_strength(people:float)->float:
 	return pow(people,QUESTION_EXPONENT)
 
 
-## The work a people of `population` does with the normal share at learning
-## (NORMAL_RESEARCH_SHARE): the pace every age's questions were measured
-## against (PACE_BY_YEAR, docs/research/BENCHMARKS_600.md).
-static func normal_work(population:float)->float:
-	var normal:=maxf(0.0,population)*NORMAL_RESEARCH_SHARE
-	if normal<=NORMAL_FULL: return normal
-	return NORMAL_FULL*(1.0+NORMAL_LOG*log(normal/NORMAL_FULL)/log(10.0))
+## Goods `learners` use over `days` (LEARNER_DAYS_PER_GOOD learner-days a unit),
+## dearer by a `lead` of years ahead of the calendar (LEAD_GOODS_YEARS).
+static func goods_need(learners:float,days:float=1.0,lead:float=0.0)->float:
+	return maxf(0.0,learners)*maxf(0.0,days)*goods_per_learner_day(lead)
 
 
-## What a learner's work counts for in a people of `population`: 1 in a band;
-## in a larger people the normal share does normal_work, and each learner more
-## or fewer moves the work along learners_work from there.
-static func learner_scale(population:float)->float:
-	var work:=learners_work(maxf(0.0,population)*NORMAL_RESEARCH_SHARE)
-	return normal_work(population)/work if work>0.0 else 1.0
-
-
-## Goods `learners` use over `days` (LEARNER_DAYS_PER_GOOD learner-days a unit).
-static func goods_need(learners:float,days:float=1.0)->float:
-	return maxf(0.0,learners)*maxf(0.0,days)/LEARNER_DAYS_PER_GOOD
+## Goods one learner uses a day with a `lead` of years ahead of the calendar.
+static func goods_per_learner_day(lead:float=0.0)->float:
+	return (1.0+maxf(0.0,lead)/LEAD_GOODS_YEARS)/LEARNER_DAYS_PER_GOOD
 
 
 ## Learning's pace at goods `cover` (0..1): GOODS_FLOOR with none, in full with
@@ -484,23 +480,80 @@ static func goods_factor(cover:float)->float:
 	return GOODS_FLOOR+(1.0-GOODS_FLOOR)*clampf(cover,0.0,1.0)
 
 
-## Goods held where learning draws them: the stores of the acting place (the
-## people's home stores while research runs). The one place learning reads
-## goods (civilian_goods.gd keeps them; re-point here if goods move).
+## The realm's goods learning draws on, read and taken through this one
+## accessor (civilian_goods.gd keeps them; re-point here if goods move). The
+## home stores come first; when they are short, the towns' stores give the rest
+## in proportion to what each holds. `amount` is what the learners ask (0 only
+## reads); `take` takes it; `whole` reads every town even when home suffices.
+## Returns {held: goods in the stores read, home: the home stores, taken: what
+## the stores cover of `amount`, places: {"" for home, else a town id: taken}}.
+## Only the home scope reaches the towns (a town's own scope reads itself).
+static func learning_goods(amount:float=0.0,take:=false,whole:=false)->Dictionary:
+	var state=WorldSimulation.state
+	var stocks:Dictionary=state.resource_stockpiles
+	var home:=maxf(0.0,float(stocks.get(GOODS_KEY,0.0)))
+	var want:=maxf(0.0,amount)
+	var from_home:=minf(home,want)
+	var result:={"held":home,"home":home,"taken":from_home,"places":{}}
+	if take and from_home>0.0:
+		stocks[GOODS_KEY]=home-from_home
+		(result.places as Dictionary)[""]=from_home
+	var short:=want-from_home
+	if (short<=0.000001 and not whole) or not String(state.resource_settlement_id).is_empty(): return result
+	var settlements=WorldSimulation.settlements
+	if settlements==null: return result
+	var towns:Array=[]
+	var town_total:=0.0
+	for record:Variant in state.player_settlements:
+		if not record is Dictionary or bool((record as Dictionary).get("primary",false)) or settlements.abandoned(record): continue
+		var id:=String((record as Dictionary).get("id",""))
+		if id.is_empty(): continue
+		var held:=float(settlements.with_city_resources(id,func()->float: return maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(GOODS_KEY,0.0)))))
+		if held>0.0:
+			towns.append([id,held])
+			town_total+=held
+	result.held=home+town_total
+	if short<=0.000001 or town_total<=0.0: return result
+	var from_towns:=minf(short,town_total)
+	result.taken=from_home+from_towns
+	if take:
+		for town:Array in towns:
+			var part:=from_towns*float(town[1])/town_total
+			settlements.with_city_resources(String(town[0]),func()->void:
+				var local:Dictionary=WorldSimulation.state.resource_stockpiles
+				local[GOODS_KEY]=maxf(0.0,float(local.get(GOODS_KEY,0.0))-part))
+			(result.places as Dictionary)[String(town[0])]=part
+	return result
+
+
+## Goods in all the realm's stores that learning may draw on.
 static func goods_held()->float:
-	return maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get(GOODS_KEY,0.0)))
+	return float(learning_goods(0.0,false,true).held)
 
 
-## Share of what `learners` need over `days` that the stores cover (1 with no
-## learners). With `take`, the goods used are taken from the stores.
-static func goods_cover(learners:float,days:float=1.0,take:=false)->float:
-	var need:=goods_need(learners,days)
-	if need<=0.0: return 1.0
-	var used:=minf(goods_held(),need)
-	if take and used>0.0:
-		var stocks:Dictionary=WorldSimulation.state.resource_stockpiles
-		stocks[GOODS_KEY]=maxf(0.0,float(stocks.get(GOODS_KEY,0.0))-used)
-	return used/need
+## Share of what `learners` need over `days` that the realm's stores cover (1
+## with no learners). With `take`, the goods used are taken (learning_goods).
+static func goods_cover(learners:float,days:float=1.0,take:=false,lead:float=0.0)->float:
+	return float(goods_draw(learners,days,take,lead).cover)
+
+
+## goods_cover with the draw itself: {cover, need, taken, places}.
+static func goods_draw(learners:float,days:float=1.0,take:=false,lead:float=0.0)->Dictionary:
+	var need:=goods_need(learners,days,lead)
+	if need<=0.0: return {"cover":1.0,"need":0.0,"taken":0.0,"places":{}}
+	var drawn:=learning_goods(need,take)
+	return {"cover":clampf(float(drawn.taken)/need,0.0,1.0),"need":need,"taken":float(drawn.taken),"places":drawn.places}
+
+
+## What the learners took from the acting place's stores in today's step, a
+## day, and what its makers should keep for them before the next step
+## (civilian_goods.gd adds it to what they make): the home stores keep the
+## realm learners' whole need for a step; a town keeps what they took from it.
+## {taken: a day, wanted: goods}. Nothing before the learners' first draw.
+static func learners_goods()->Dictionary:
+	var discovery=WorldSimulation.discovery
+	if discovery==null or not discovery.has_method("learning_goods_today"): return {"taken":0.0,"wanted":0.0}
+	return discovery.learning_goods_today(String(WorldSimulation.state.resource_settlement_id))
 
 
 ## Years a year a people's lead over the calendar moves with `share` of its able
@@ -532,13 +585,6 @@ static func keepers_asked(allocations:Dictionary)->float:
 	for value:Variant in allocations.values():
 		if int(value)>0: lines+=1
 	return float(ATTENTION_STEPS)/12.0*float(lines)
-
-
-## research_3000: parallel research capacity (>= 1) for a society of
-## `population` with institutions capacity and literacy (both 0..1).
-static func parallel_capacity(population:float,institutions:float,literacy:float)->float:
-	var decades:=maxf(0.0,log(maxf(1.0,population)/PARALLEL_POPULATION_REF)/log(10.0))
-	return 1.0+PARALLEL_PER_DECADE*decades*lerpf(0.6,1.2,clampf(institutions,0.0,1.0))*(1.0+PARALLEL_LITERACY*clampf(literacy,0.0,1.0))
 
 
 ## research_3000: difficulty multiplier for registry item `id` in a society of
@@ -626,13 +672,23 @@ static func _build_relevance()->void:
 ## never from the calendar: a people far ahead pays the same for a question as
 ## a people of its age does, so it never holds back a people that presses on.
 static func pace_for(design_year:float)->float:
-	if design_year<=float(PACE_BY_YEAR[0][0]): return float(PACE_BY_YEAR[0][1])
-	for index in range(1,PACE_BY_YEAR.size()):
-		if design_year<=float(PACE_BY_YEAR[index][0]):
-			var low:Array=PACE_BY_YEAR[index-1]
-			var high:Array=PACE_BY_YEAR[index]
-			return lerpf(float(low[1]),float(high[1]),(design_year-float(low[0]))/(float(high[0])-float(low[0])))
-	return float(PACE_BY_YEAR[PACE_BY_YEAR.size()-1][1])
+	return _curve(PACE_BY_YEAR,design_year)
+
+
+## The work a question of `question_year` asks, against the older capped rule
+## (AGE_WORK_BY_YEAR, linear between points).
+static func age_work(question_year:float)->float:
+	return _curve(AGE_WORK_BY_YEAR,question_year)
+
+
+static func _curve(points:Array,x:float)->float:
+	if x<=float(points[0][0]): return float(points[0][1])
+	for index in range(1,points.size()):
+		if x<=float(points[index][0]):
+			var low:Array=points[index-1]
+			var high:Array=points[index]
+			return lerpf(float(low[1]),float(high[1]),(x-float(low[0]))/(float(high[0])-float(low[0])))
+	return float(points[points.size()-1][1])
 
 
 ## Registry entries that the authored catalog does not already define, in the
