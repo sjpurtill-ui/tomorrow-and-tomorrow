@@ -621,7 +621,10 @@ static func _watch_report(op:Dictionary,day:int)->void:
 static func _plant_report(op:Dictionary,day:int)->void:
 	var rng:=_rng(String(op.seed)+":plant:%d" % day)
 	var odds:Dictionary=op.odds
-	if rng.randf()<float(odds.get("caught",0.1)):
+	# A pretender sent back as our eyes is their own ruler's: never found out
+	# by them (captured_agents.gd), though the stated odds stay on the card.
+	var found:=rng.randf()<float(odds.get("caught",0.1))
+	if found and not bool(op.get("double_feigned",false)):
 		_agent_caught_ours(op,day,"a source in their town")
 		return
 	if bool(op.get("double_feigned",false)):

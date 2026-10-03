@@ -290,11 +290,10 @@ func test_send_home_with_a_message_answered_on_arrival()->void:
 	var tension_before:=float(((CivilizationSystem.civilizations[Hall._civ_index(civ)] as Dictionary).player_relation as Dictionary).get("border_tension",0.0))
 	var grudge_before:=float(Rivals.grudge_weight(civ))
 	GameState.elapsed_days=int(rec.fate.arrive_day)
-	# The odds stated on the day they arrive are the odds rolled.
-	var on_arrival:=Captives.message_odds(civ,"threat")
 	Captives.daily(_day())
 	assert_bool(bool(rec.fate.answered)).is_true()
-	assert_float(float(rec.fate.answer_odds)).is_equal(on_arrival)
+	# The odds stated when they were sent are the odds rolled on arrival.
+	assert_float(float(rec.fate.answer_odds)).is_equal(stated)
 	if bool(rec.fate.yes): assert_bool(Captives.scheme_factor(civ)<1.0).is_true()
 	else:
 		assert_bool(float(Rivals.grudge_weight(civ))>grudge_before).is_true()
@@ -554,3 +553,204 @@ func test_the_ticker_carries_a_bring_them_button_while_they_are_held()->void:
 	preload("res://scripts/hud/map_ticker_style.gd").fit(label,1601.0)
 	assert_bool(button.visible).is_false()
 	label.queue_free()
+
+
+
+# --------------------------------------------------------------------------
+# Review fixes (PR #133)
+# --------------------------------------------------------------------------
+
+## A prisoner won over to us through a course whose end is forced.
+func _won_over(feigned:bool=false)->Dictionary:
+	var p:=_catch("watch")
+	var id:=_before_god(p)
+	Hall.resolve(id,"pr_turn")
+	var rec:=Captives.by_id(String(p.id))
+	rec["turn_odds"]={"converted":0.0 if feigned else 1.0,"feigned":1.0 if feigned else 0.0,"unmoved":0.0,"days":28,"food_day":2.0}
+	GameState.elapsed_days=int(rec.turn_end)
+	Captives.daily(_day())
+	assert_str(String(rec.status)).is_equal("joined")
+	return rec
+
+
+func _cell(cohort:String,sex:String)->float:
+	GameState.ensure_female_cohorts()
+	var all:=float(GameState.population_cohorts.get(cohort,0.0))
+	var women:=float(GameState.population_cohorts.get(GameState.FEMALE_PREFIX+cohort,0.0))
+	return women if sex=="female" else all-women
+
+
+func test_one_won_over_leaves_our_count_as_who_they_are_when_struck_down()->void:
+	var rec:=_won_over()
+	var cohort:=Captives._cohort_of(Captives.age_now(rec))
+	assert_str(String(rec.counted.cohort)).is_equal(cohort)
+	var pop:=float(GameState.population_exact)
+	var cell:=_cell(cohort,String(rec.sex))
+	var id:=_before_god(rec)
+	var r:=Hall.divine(id,"strike_down")
+	assert_bool(bool(r.ok)).is_true()
+	assert_str(String(rec.status)).is_equal("executed")
+	assert_float(float(GameState.population_exact)).is_equal_approx(pop-1.0,0.01)
+	assert_float(_cell(cohort,String(rec.sex))).is_equal_approx(cell-1.0,0.01)
+
+
+func test_one_won_over_sent_home_departs_our_count()->void:
+	var rec:=_won_over()
+	var pop:=float(GameState.population_exact)
+	var cohort:=Captives._cohort_of(Captives.age_now(rec))
+	var cell:=_cell(cohort,String(rec.sex))
+	var id:=_before_god(rec)
+	var heard:=Captives.hear(id,"Send him home and tell your chief we want peace")
+	Hall.resolve(id,String(heard.option))
+	assert_str(String(rec.status)).is_equal("sent_home")
+	assert_float(float(GameState.population_exact)).is_equal_approx(pop-1.0,0.01)
+	assert_float(_cell(cohort,String(rec.sex))).is_equal_approx(cell-1.0,0.01)
+
+
+func test_the_age_and_sex_ledger_holds_through_joining_and_leaving()->void:
+	var p:=_catch("watch")
+	var cohort:=Captives._cohort_of(Captives.age_now(p))
+	var cell:=_cell(cohort,String(p.sex))
+	var id:=_before_god(p)
+	Hall.resolve(id,"pr_turn")
+	var rec:=Captives.by_id(String(p.id))
+	rec["turn_odds"]={"converted":1.0,"feigned":0.0,"unmoved":0.0,"days":28,"food_day":2.0}
+	GameState.elapsed_days=int(rec.turn_end)
+	Captives.daily(_day())
+	cohort=Captives._cohort_of(Captives.age_now(rec))
+	assert_float(_cell(cohort,String(rec.sex))).is_equal_approx(cell+1.0,0.01)
+	var id2:=_before_god(rec)
+	Hall.resolve(id2,"pr_double")
+	assert_float(_cell(cohort,String(rec.sex))).is_equal_approx(cell,0.01)
+
+
+func test_each_course_of_care_rolls_anew()->void:
+	var p:=_catch("watch")
+	var id:=_before_god(p)
+	Hall.resolve(id,"pr_turn")
+	var rec:=Captives.by_id(String(p.id))
+	var first:=Captives.turn_key(rec)
+	rec["turn_odds"]={"converted":0.0,"feigned":0.0,"unmoved":1.0,"days":28,"food_day":2.0}
+	GameState.elapsed_days=int(rec.turn_end)
+	Captives.daily(_day())
+	assert_str(String(rec.status)).is_equal("held")
+	var id2:=_before_god(rec)
+	Hall.resolve(id2,"pr_turn")
+	assert_int(int(rec.course)).is_equal(2)
+	assert_bool(Captives.turn_key(rec)!=first).is_true()
+
+
+func test_a_pretender_tells_everything_too_and_shows_the_same_odds_of_being_found()->void:
+	var rec:=_won_over(true)
+	assert_bool(bool(rec.feigned)).is_true()
+	for topic in Captives.TOPICS:
+		var last:=Captives._last_said(rec,topic)
+		assert_bool(bool(last.talked)).override_failure_message(topic).is_true()
+		assert_bool(bool(last.lied)).override_failure_message(topic).is_true()
+		assert_str(String(last.text)).is_equal(String(Captives.fact(rec,topic).lie))
+	# On the screen they read as a true convert's would: nothing shown false.
+	var id:=_before_god(rec)
+	assert_bool(Captives.dossier_rows(id).any(func(row:Array)->bool: return String(row[2])=="false")).is_false()
+	assert_int(Captives.said_rows(rec).size()).is_equal(Captives.TOPICS.size())
+	# Sent back as our eyes: the same stated odds of being found, never rolled.
+	Hall.resolve(id,"pr_double")
+	var op:=Covert.op_by_id(int(rec.fate.op_id))
+	assert_float(float(op.odds.caught)).is_equal(float(Captives.double_odds(rec).found))
+	(op.odds as Dictionary)["caught"]=1.0
+	op["stage"]="in_place"
+	Covert._plant_report(op,_day()+90)
+	assert_str(String(op.stage)).is_equal("in_place")
+	# A true double agent on the same certain odds is found.
+	var real:=_won_over()
+	var id2:=_before_god(real)
+	Hall.resolve(id2,"pr_double")
+	var op2:=Covert.op_by_id(int(real.fate.op_id))
+	(op2.odds as Dictionary)["caught"]=1.0
+	op2["stage"]="in_place"
+	Covert._plant_report(op2,_day()+90)
+	assert_str(String(op2.stage)).is_equal("done")
+
+
+func test_our_official_killed_abroad_dies_of_their_hand_not_ours()->void:
+	var civ:=_varesh()
+	var official:Dictionary={}
+	for person in Hall._officials():
+		if String(person.get("office_key",""))!="" and String(person.get("office_key",""))!="settlement": official=person; break
+	assert_bool(official.is_empty()).is_false()
+	var agent:=Covert.agent_from_person(official)
+	var op:=Covert.launch("watch",civ,"","trader",agent)
+	var metrics:Dictionary=GameState.simulation_metrics
+	var legitimacy:=float(metrics.get("legitimacy",0.5)); var cohesion:=float(metrics.get("cohesion",0.5))
+	var pop:=float(GameState.population_exact)
+	Captives._our_agent_dies(op,agent,civ)
+	var after:=GovernmentPeopleSystem.person_snapshot(int(official.person_id))
+	assert_str(String(after.get("status",""))).is_equal("deceased")
+	assert_str(String(after.get("removal_reason",""))).is_equal("executed_abroad")
+	assert_float(float(metrics.get("legitimacy",0.5))).is_equal(legitimacy)
+	assert_float(float(metrics.get("cohesion",0.5))).is_equal(cohesion)
+	assert_float(float(GameState.population_exact)).is_equal_approx(pop-1.0,0.01)
+
+
+func test_ours_held_abroad_may_slip_their_guards_each_month()->void:
+	var civ:=_varesh()
+	var rec:={"op_id":991,"civ_id":civ,"agent":"t","name":"Kael Tor","given":"Kael","kind":"watch","day":_day(),"odds":{},"roll":0.5,"choice":"keep","status":"held_abroad","doing":"watching","loyalty":0.6,"nerve":0.95}
+	(Captives.state().abroad as Array).push_front(rec)
+	var odds:=Captives.abroad_escape_odds(rec)
+	assert_bool(odds>=0.01 and odds<=0.15).is_true()
+	var start:=_day()
+	for d in range(start+1,start+30*48+1):
+		GameState.elapsed_days=d
+		Captives._abroad_daily(rec,d)
+		if String(rec.status)!="held_abroad": break
+	assert_str(String(rec.status)).override_failure_message("four years of monthly chances at %f should free them" % odds).is_equal("home")
+	assert_bool(float(rec.escape.roll)<float(rec.escape.odds)).is_true()
+	# A foreign ruler works on ours with the same turn odds we use on theirs.
+	var t:=Captives.turn_odds(Captives.held_view(rec),civ)
+	assert_float(float(t.converted)+float(t.feigned)+float(t.unmoved)).is_equal_approx(1.0,0.001)
+
+
+func test_words_about_others_never_kill_the_one_before_the_god()->void:
+	assert_dict(Captives.read("Find the others and kill them")).is_empty()
+	assert_dict(Captives.read("Hunt down his people and kill them all")).is_empty()
+	var p:=_catch("watch")
+	var id:=_before_god(p)
+	Captives.hear(id,"Find the others and kill them")
+	assert_str(String(Captives.by_id(String(p.id)).status)).is_equal("held")
+
+
+func test_favour_counts_again_only_after_a_month_however_often_they_are_summoned()->void:
+	var p:=_catch("watch")
+	var id:=_before_god(p)
+	assert_bool(bool(Hall.divine(id,"bless").ok)).is_true()
+	Hall.resolve(id,"pr_keep")
+	var id2:=_before_god(p)
+	var bless:Dictionary=Hall.divine_options(id2).filter(func(o:Dictionary)->bool: return String(o.id)=="bless")[0]
+	assert_bool(bool(bless.enabled)).is_false()
+	assert_bool(bool(Hall.divine(id2,"bless").ok)).is_false()
+	Hall.resolve(id2,"pr_keep")
+	GameState.elapsed_days+=Captives.FAVOUR_DAYS
+	var id3:=_before_god(p)
+	assert_bool(bool(Hall.divine(id3,"bless").ok)).is_true()
+	# Gentle questions warm them once a day, however many are asked.
+	var love:=float(p.love)
+	Captives.ask(id3,"sender","gentle"); Captives.ask(id3,"plans","gentle"); Captives.ask(id3,"others","gentle")
+	assert_float(float(p.love)).is_equal_approx(love+0.03,0.001)
+
+
+func test_unfed_prisoners_suffer_and_an_unpaid_course_waits()->void:
+	var p:=_catch("watch")
+	var id:=_before_god(p)
+	Hall.resolve(id,"pr_turn")
+	var rec:=Captives.by_id(String(p.id))
+	var end:=int(rec.turn_end)
+	var escape:=Captives.escape_odds(rec)
+	var kind:=float(rec.treatment)
+	# Empty stores.
+	Hall.EXCHANGE.take("player","Food",Hall.player_stock("Food"))
+	for i in 5:
+		GameState.elapsed_days+=1
+		Captives.daily(_day())
+	assert_int(int(rec.turn_end)).is_equal(end+5)
+	assert_int(int(rec.hungry_days)).is_equal(5)
+	assert_bool(float(rec.treatment)<kind).is_true()
+	assert_bool(Captives.escape_odds(rec)>escape).is_true()

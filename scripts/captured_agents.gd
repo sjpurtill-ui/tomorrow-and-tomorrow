@@ -85,6 +85,9 @@ const CARE_FOOD:=0.5
 const DETER_DAYS:=365
 ## A double agent sends word this often (covert_ops PLANT_REPORT_DAYS).
 const DOUBLE_REPORT_DAYS:=90
+## A blessing or a gift of food given to one prisoner counts again only after
+## this many days (re-summoning them does not renew it).
+const FAVOUR_DAYS:=30
 
 const QUESTION_LABELS:={"sender":"Who sent you?","mission":"What were you sent to do?","strength":"How strong is your people?","plans":"What are they planning?","others":"Are there others?"}
 const MANNER_LABELS:={"gentle":"Ask gently ▾","firm":"Ask firmly ▾","terror":"Ask in terror ▾"}
@@ -315,6 +318,39 @@ static func take(spy:Dictionary,day:int)->Dictionary:
 	_contradict_others(civ_id,day,String(p.id))
 	_stat("taken")
 	return p
+
+static func age_now(p:Dictionary)->int:
+	## Their real age today (taken at `age`, on `taken_day`).
+	return int(p.get("age",30))+floori(float(maxi(0,_day()-int(p.get("taken_day",_day()))))/365.0)
+
+static func _cohort_of(age:int)->String:
+	for key in GameState.POPULATION_AGE_COHORTS:
+		var span:Vector2=GameState.POPULATION_COHORT_AGE_RANGES[key]
+		if float(age)<span.y: return String(key)
+	return "elders"
+
+static func _joins_our_count(p:Dictionary,source:String)->void:
+	## Won over (or seeming so): one person of their own age group and sex
+	## joins our people's count.
+	var cohort:=_cohort_of(age_now(p))
+	p["counted"]={"cohort":cohort,"sex":String(p.get("sex","male")),"day":_day()}
+	GameState.register_population_arrivals(1,source,{cohort:1.0},1.0 if String(p.get("sex",""))=="female" else 0.0)
+
+static func _leaves_our_count(p:Dictionary,reason:String,death:bool)->void:
+	## One counted among us leaves it as who they are: their own age group
+	## and sex, by a death or a departure. Nothing when they were never counted.
+	if not p.has("counted"): return
+	var cohort:=_cohort_of(age_now(p))
+	var sex:=String(p.get("sex","male"))
+	p.erase("counted")
+	if death:
+		var done:Dictionary=GameState.register_population_deaths_by_cell([{"cohort":cohort,"sex":sex,"count":1}],"prisoner_put_to_death",reason,String(p.get("name","")))
+		if int(done.get("count",0))<=0: GameState.register_population_deaths(1,reason)
+	else:
+		var only:={}
+		for key in GameState.POPULATION_AGE_COHORTS: only[key]=1.0 if key==cohort else 0.0
+		var gone:Dictionary=GameState.register_population_departures(1,reason,only,sex)
+		if int(gone.get("count",0))<=0: GameState.register_population_departures(1,reason)
 
 static func _town()->String:
 	var n:=String(GameState.settlement_name).strip_edges()
@@ -563,7 +599,10 @@ static func ask(audience_id:String,topic:String,manner:String,echo:String="")->D
 			_shift(p,-0.05,0.15,-0.15)
 		"gentle":
 			_narrate(audience_id,"The guards loosen %s's bonds and set water before them." % given,given)
-			_shift(p,0.03,0.0,0.05)
+			# Kindness counts once a day, however many gentle questions.
+			if int(p.get("gentle_day",-1))!=_day():
+				p["gentle_day"]=_day()
+				_shift(p,0.03,0.0,0.05)
 		_:
 			_shift(p,0.0,0.03,0.0)
 	if talked:
@@ -781,6 +820,7 @@ static func dossier_rows(audience_id:String)->Array:
 	var home:="no one" if not bool(fam.get("spouse",false)) and int(fam.get("children",0))<=0 else ("a %s%s" % ["husband" if String(p.get("sex",""))=="female" else "wife",(" and %s children" % EraWords.count_word(int(fam.children))) if int(fam.get("children",0))>0 else ""])
 	rows.append(["Bearing","%s; courage %.2f; loyalty to %s %.2f; family at home: %s" % [String(p.temper),float(p.courage),_ruler_given(String(p.civ_id)),float(p.loyalty),home],""])
 	rows.append(["Kept","%s; escape %s a month" % ["%d Food a day" % roundi(RATION) if String(p.status)=="held" else "%.1f Food a day in care" % _care_cost_day(),pct(escape_odds(p))],""])
+	if float(p.get("hunger",0.0))>0.0: rows.append(["Hungry","%d days unfed: they resent it, and try the guards harder" % int(p.get("hungry_days",0)),"false"])
 	for r in said_rows(p):
 		var text:=String(r.text)
 		if bool(r.found_false): rows.append(["Said (false)","%s — shown false by %s" % [text,String(r.found_by)],"false"])
@@ -818,6 +858,9 @@ static func divine_options(audience:Dictionary)->Array[Dictionary]:
 		var sub:=""
 		var enabled:bool=not (action in done)
 		var reason:="" if enabled else "Already done in this audience."
+		var last:=int((p.get("favours",{}) as Dictionary).get(action,-99999)) if p.get("favours") is Dictionary else -99999
+		if enabled and action in ["bless","boon"] and _day()-last<FAVOUR_DAYS:
+			enabled=false; reason="Given %d days ago; it counts again in %d days." % [_day()-last,FAVOUR_DAYS-(_day()-last)]
 		if action=="strike_down":
 			var o:=fate_odds(p)
 			sub="Put them to death here. Our people's dread rises; %s hear of it %s." % [_the(String(p.civ_id)),pct(float(o.learn))]
@@ -859,6 +902,9 @@ static func divine(audience:Dictionary,action:String,words:String="")->Dictionar
 	var dl:Array=_act_deltas(action)
 	_shift(p,float(dl[0]),float(dl[1]),float(dl[2]))
 	p["divine"]=((p.get("divine",[]) as Array)+[action]).slice(-8)
+	if action in ["bless","boon"]:
+		if not p.get("favours") is Dictionary: p["favours"]={}
+		(p.favours as Dictionary)[action]=_day()
 	var outcome:=""
 	var response:="cower"
 	match action:
@@ -891,15 +937,24 @@ static func divine(audience:Dictionary,action:String,words:String="")->Dictionar
 static func _watch()->float:
 	return clampf(float(GameState.population_allocations.get("Defense",0))/maxf(1.0,float(GameState.population_exact)*0.08),0.0,1.0)
 
+static func escape_core(watch:float,edge:float,cohesion:float,courage:float,harsh:bool,tended:bool,hunger:float)->float:
+	## The one rule for a held person's month, whoever holds them: the
+	## keepers' watch, their spymaster's hand and their cohesion against the
+	## prisoner's courage; harsh keeping and hunger make them try harder.
+	return clampf(0.08-watch*0.05-edge*0.3-cohesion*0.02+courage*0.04+(0.02 if harsh else 0.0)-(0.02 if tended else 0.0)+clampf(hunger,0.0,1.0)*0.04,0.01,0.15)
+
 static func escape_odds(p:Dictionary)->float:
-	## A month's odds of a held prisoner slipping their guards: our watch, the
-	## Pathfinder's hand and our cohesion against their courage; harsh keeping
-	## makes them try harder.
-	var edge:=OfficeLevers.intrigue_edge("ChiefScout")
-	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.5)),0.0,1.0)
-	var harsh:=0.02 if float(p.get("treatment",0.0))<=-0.3 else 0.0
-	var tended:=-0.02 if String(p.get("status",""))=="turning" else 0.0
-	return clampf(0.08-_watch()*0.05-edge*0.3-cohesion*0.02+float(p.get("courage",0.5))*0.04+harsh+tended,0.01,0.15)
+	## A month's odds of one of theirs held here slipping our guards.
+	return escape_core(_watch(),OfficeLevers.intrigue_edge("ChiefScout"),clampf(float(GameState.simulation_metrics.get("cohesion",0.5)),0.0,1.0),
+		float(p.get("courage",0.5)),float(p.get("treatment",0.0))<=-0.3,String(p.get("status",""))=="turning",float(p.get("hunger",0.0)))
+
+static func abroad_escape_odds(rec:Dictionary)->float:
+	## The same month for one of ours held among them: their wariness of us
+	## is their watch; their people's cohesion; our agent's nerve.
+	var civ_id:=String(rec.get("civ_id",""))
+	var watch:=clampf(float(_covert().call("_wariness",civ_id)),0.0,1.0)
+	var cohesion:=clampf(float(_civ(civ_id).get("cohesion",0.5)),0.0,1.0)
+	return escape_core(watch,0.0,cohesion,float(rec.get("nerve",0.5)),false,false,0.0)
 
 static func _care_cost_day()->float:
 	## A tended prisoner's day: the ration, better food, and a carer's lost
@@ -910,19 +965,25 @@ static func _care_cost_day()->float:
 static func turn_days(p:Dictionary)->int:
 	return 28+roundi(clampf(float(p.get("loyalty",0.5)),0.0,1.0)*28.0)
 
-static func turn_odds(p:Dictionary)->Dictionary:
+static func turn_odds(p:Dictionary,holder:String="player")->Dictionary:
 	## A course of care and teaching: won over, unmoved or only pretending.
-	## Their loyalty and family at home hold them; love, kind keeping and our
-	## people's love of the god draw them; terror sours it.
+	## Their loyalty and family at home hold them; love, kind keeping and the
+	## keepers' own people's regard of their ruler draw them; terror sours it.
+	## holder: whose keeping (a foreign people works on one of ours the same way).
 	var love:=clampf(float(p.get("love",0.3)),0.0,1.0)
 	var kind:=clampf(float(p.get("treatment",0.0)),-1.0,1.0)
 	var loyalty:=clampf(float(p.get("loyalty",0.5)),0.0,1.0)
 	var dread:=clampf(float(p.get("dread",0.2)),0.0,1.0)
 	var fam:Dictionary=p.get("family",{}) if p.get("family") is Dictionary else {}
 	var family:=bool(fam.get("spouse",false)) or int(fam.get("children",0))>0
-	var people:=Hall.people_regard()
-	var our_love:=clampf(float(people.get("love",0.5)),0.0,1.0)
-	var standing:=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5)),0.0,1.0)
+	var our_love:=0.5
+	var standing:=0.5
+	if holder=="player":
+		our_love=clampf(float(Hall.people_regard().get("love",0.5)),0.0,1.0)
+		standing=clampf(float(GameState.simulation_metrics.get("legitimacy",0.5)),0.0,1.0)
+	else:
+		our_love=clampf(float(_civ(holder).get("cohesion",0.5)),0.0,1.0)
+		standing=our_love
 	var converted:=clampf(0.15+love*0.35+kind*0.15+our_love*0.15+standing*0.1-loyalty*0.35-(0.12 if family else 0.0)-maxf(0.0,dread-0.4)*0.2,0.05,0.8)
 	var feigned:=clampf(0.08+loyalty*0.18+(0.1 if String(p.get("temper",""))=="sly" else 0.0)+float(p.get("courage",0.5))*0.05-love*0.05,0.03,0.35)
 	var unmoved:=1.0-converted-feigned
@@ -1035,7 +1096,7 @@ static func resolve(audience:Dictionary,option_id:String)->Dictionary:
 		match option_id:
 			"pr_execute": result=execute(p,words,id)
 			"pr_turn":
-				if String(p.status)!="held": return {"ok":false,"outcome":"They are already with the carers.","reaction":"neutral"}
+				if String(p.status)!="held": return {"ok":false,"outcome":"They are already with the carers." if String(p.status)=="turning" else "They are one of us already.","reaction":"neutral"}
 				result=begin_turning(p,id)
 			"pr_keep": result=keep(p,id)
 			"pr_double":
@@ -1064,8 +1125,11 @@ static func execute(p:Dictionary,words:String,audience_id:String="")->Dictionary
 	var day:=_day()
 	var learn:=learn_odds(p)
 	var heard:=_rng(String(p.seed)+":learn").randf()<learn
+	var ours:=p.has("counted")
 	p["status"]="executed"; p["status_day"]=day
-	p["fate"]={"kind":"executed","day":day,"learn":learn,"heard":heard,"words":words.substr(0,300)}
+	p["fate"]={"kind":"executed","day":day,"learn":learn,"heard":heard,"words":words.substr(0,300),"was_ours":ours}
+	# One counted among us now (won over, or seeming so): a death of our people.
+	if ours: _leaves_our_count(p,"%s, once of %s, was put to death at the god's word." % [String(p.name),_name(civ_id)],true)
 	DIVINE.record_people_act("harsh_law")
 	var ruler:=_ruler_given(civ_id)
 	var tail:=""
@@ -1090,6 +1154,7 @@ static func send_home(p:Dictionary,kind:String,words:String,_audience_id:String=
 	var odds:=message_odds(civ_id,kind)
 	p["status"]="sent_home"; p["status_day"]=day
 	p["fate"]={"kind":"sent_home","day":day,"message":kind,"words":words.substr(0,400),"arrive_day":day+days,"odds":odds,"answered":false}
+	_leaves_our_count(p,"Sent home to %s" % _name(civ_id),false)
 	_stat("sent_home")
 	var verb:String={"warning":"heeds a warning","threat":"bows to a threat","peace":"takes an offer of peace","demand":"meets a demand"}[kind]
 	return {"ok":true,"action":"send","verb":"send","terminal":true,"removed":true,"reaction":"neutral","words":words,"message":kind,"odds":odds,"days":days,
@@ -1099,12 +1164,19 @@ static func begin_turning(p:Dictionary,_audience_id:String="")->Dictionary:
 	var t:=turn_odds(p)
 	var day:=_day()
 	p["status"]="turning"; p["status_day"]=day
+	p["course"]=int(p.get("course",0))+1
 	p["turn_start"]=day; p["turn_end"]=day+int(t.days); p["turn_odds"]=t
 	_stat("turning")
 	return {"ok":true,"action":"turn","verb":"turn","terminal":true,"removed":true,"reaction":"neutral","odds":t,
 		"outcome":"%s is given to the carers for about %d weeks of care and teaching, at %.1f Food a day (about %d in all). At the end: won over %s, unmoved %s, only pretending %s." % [String(p.given),roundi(float(t.days)/7.0),float(t.food_day),roundi(float(t.food_day)*float(t.days)),pct(float(t.converted)),pct(float(t.unmoved)),pct(float(t.feigned))]}
 
 static func keep(p:Dictionary,_audience_id:String="")->Dictionary:
+	if String(p.status)=="joined":
+		# One counted among us, bound again: they leave our count for the guards'.
+		_leaves_our_count(p,"Put under guard again",false)
+		p["status"]="held"; p["status_day"]=_day()
+		return {"ok":true,"action":"keep","verb":"keep","terminal":true,"reaction":"offended",
+			"outcome":"%s is bound and put under guard again: %d Food a day; the odds of an escape are %s a month." % [String(p.given),roundi(RATION),pct(escape_odds(p))]}
 	if String(p.status)=="turning":
 		return {"ok":true,"action":"keep","verb":"keep","terminal":true,"reaction":"neutral","outcome":"%s goes back to the carers." % String(p.given)}
 	return {"ok":true,"action":"keep","verb":"keep","terminal":true,"reaction":"neutral",
@@ -1147,7 +1219,8 @@ static func daily(day:int)->void:
 				_feed(p,RATION)
 				_maybe_escape(p,day)
 			"turning":
-				_feed(p,_care_cost_day())
+				# A day the care was not paid for is a day the course waits.
+				if not _feed(p,_care_cost_day()): p["turn_end"]=int(p.get("turn_end",day))+1
 				if day>=int(p.get("turn_end",day)): _end_turning(p,day)
 				else: _maybe_escape(p,day)
 			"joined":
@@ -1158,10 +1231,18 @@ static func daily(day:int)->void:
 	for r in (s.abroad as Array).duplicate(): _abroad_daily(r as Dictionary,day)
 	refresh_contradictions()
 
-static func _feed(p:Dictionary,amount:float)->void:
+static func _feed(p:Dictionary,amount:float)->bool:
+	## A day's food from our stores. Unfed, they go hungry: resentment (kind
+	## keeping and love fall) and a hunger that makes them try the guards.
 	var paid:=EXCHANGE.take("player","Food",amount)
 	p["food_spent"]=snappedf(float(p.get("food_spent",0.0))+paid,0.01)
-	if paid+0.001<amount: p["hungry_days"]=int(p.get("hungry_days",0))+1
+	if paid+0.001<amount:
+		p["hungry_days"]=int(p.get("hungry_days",0))+1
+		p["hunger"]=snappedf(clampf(float(p.get("hunger",0.0))+0.1,0.0,1.0),0.01)
+		_shift(p,-0.01,0.0,-0.02)
+		return false
+	if float(p.get("hunger",0.0))>0.0: p["hunger"]=snappedf(maxf(0.0,float(p.hunger)-0.05),0.01)
+	return true
 
 static func _maybe_escape(p:Dictionary,day:int)->void:
 	var since:=day-int(p.get("taken_day",day))
@@ -1183,17 +1264,23 @@ static func _carried_home(civ_id:String,amount:float)->void:
 	var rel:Dictionary=_relation(civ_id)
 	rel["rival_player_intelligence"]=clampf(float(rel.get("rival_player_intelligence",0.0))+amount,0.0,1.0)
 
+static func turn_key(p:Dictionary)->String:
+	## Each course of care rolls on its own: the record and the course number.
+	return "turn|%s|%d" % [String(p.seed),int(p.get("course",1))]
+
 static func _end_turning(p:Dictionary,day:int)->void:
 	var t:Dictionary=p.get("turn_odds",{}) if p.get("turn_odds") is Dictionary else turn_odds(p)
-	var roll:=_rng("turn|%s" % String(p.seed)).randf()
+	var roll:=_rng(turn_key(p)).randf()
 	var given:=String(p.given)
 	p["turn_roll"]=snappedf(roll,0.0001)
 	if roll<float(t.converted)+float(t.feigned):
 		var feigned:=roll>=float(t.converted)
 		p["status"]="joined"; p["status_day"]=day; p["feigned"]=feigned
-		GameState.register_population_arrivals(1,"Won over from %s" % _name(String(p.civ_id)),{"early_adults":1.0},1.0 if String(p.get("sex",""))=="female" else 0.0)
-		if feigned: p["betray_day"]=day+_rng("betray|%s" % String(p.seed)).randi_range(20,60)
-		else: _tell_everything(p)
+		_joins_our_count(p,"Won over from %s" % _name(String(p.civ_id)))
+		if feigned: p["betray_day"]=day+_rng("betray|"+turn_key(p)).randi_range(20,60)
+		# Both tell everything: a true convert truly, one pretending from their
+		# prepared lies (kept false in the ledger). The god sees the same.
+		_tell_everything(p)
 		# Told the same either way: the god sees what the prisoner shows.
 		_tell("%s Is Won Over" % String(p.name),"After %d days with the carers, %s says they are one of us now, and will answer anything you ask. (The odds were: won over %s, only pretending %s.)" % [day-int(p.get("turn_start",day)),String(p.name),pct(float(t.converted)),pct(float(t.feigned))],day,true,String(p.id))
 		_stat("feigned" if feigned else "converted")
@@ -1203,19 +1290,24 @@ static func _end_turning(p:Dictionary,day:int)->void:
 		_stat("unmoved")
 
 static func _tell_everything(p:Dictionary)->void:
-	## Won over: every true thing they know is said, and every earlier lie of
-	## theirs is shown false by it.
+	## Won over (or seeming so), every matter is told. A true convert tells it
+	## truly, and every earlier lie of theirs is shown false by it. One only
+	## pretending tells their prepared lies, kept false in the ledger with the
+	## truth beside them; on the screen the two read alike.
+	var feigned:=bool(p.get("feigned",false))
 	for f in p.get("facts",[]):
 		var topic:=String((f as Dictionary).topic)
 		var prior:=_last_said(p,topic)
-		if not prior.is_empty() and bool(prior.get("talked",false)) and not bool(prior.get("lied",false)): continue
-		(p.said as Array).append({"day":_day(),"topic":topic,"manner":"gentle","p_talk":1.0,"p_lie":0.0,"r_talk":0.0,"r_lie":1.0,"talked":true,"lied":false,"text":String((f as Dictionary).text),"truth":"","found_false":false,"found_by":"","told_when_won":true})
-		_contradict_by_truth(String(p.civ_id),topic,f,String(p.id),"%s's own word once won over" % String(p.given))
+		if not prior.is_empty() and bool(prior.get("talked",false)) and (feigned or not bool(prior.get("lied",false))): continue
+		var text:=String((f as Dictionary).lie) if feigned else String((f as Dictionary).text)
+		(p.said as Array).append({"day":_day(),"topic":topic,"manner":"gentle","p_talk":1.0,"p_lie":0.0,"r_talk":0.0,"r_lie":1.0,"talked":true,"lied":feigned,
+			"text":text,"truth":String((f as Dictionary).text) if feigned else "","found_false":false,"found_by":"","told_when_won":true,"rolled":false})
+		if not feigned: _contradict_by_truth(String(p.civ_id),topic,f,String(p.id),"%s's own word once won over" % String(p.given))
 	while (p.said as Array).size()>SAID_MAX: (p.said as Array).pop_front()
 
 static func _betray(p:Dictionary,day:int)->void:
 	## The pretender's end: they flee home, or fire a store before fleeing.
-	var rng:=_rng("betray_how|%s" % String(p.seed))
+	var rng:=_rng("betray_how|"+turn_key(p))
 	var burn:=rng.randf()<0.4
 	var lost:=0.0
 	if burn:
@@ -1223,7 +1315,7 @@ static func _betray(p:Dictionary,day:int)->void:
 		lost=EXCHANGE.take("player","Food",minf(30.0,maxf(0.0,have*0.04)))
 	p["status"]="fled"; p["status_day"]=day
 	p["fate"]={"kind":"fled","day":day,"burned":roundi(lost)}
-	GameState.register_population_departures(1,"Fled home to %s" % _name(String(p.civ_id)))
+	_leaves_our_count(p,"Fled home to %s" % _name(String(p.civ_id)),false)
 	_carried_home(String(p.civ_id),0.15)
 	# Their lies are lies: shown false now.
 	for e in p.get("said",[]):
@@ -1239,7 +1331,8 @@ static func _message_arrives(p:Dictionary,day:int)->void:
 	var fate:Dictionary=p.fate
 	var civ_id:=String(p.civ_id)
 	var kind:=String(fate.message)
-	var odds:=message_odds(civ_id,kind)
+	# The odds stated when they were sent are the odds rolled now.
+	var odds:=float(fate.get("odds",message_odds(civ_id,kind)))
 	var yes:=_rng("msg|%s" % String(p.seed)).randf()<odds
 	fate["answered"]=true; fate["answer_odds"]=odds; fate["yes"]=yes; fate["answer_day"]=day
 	var ruler:=_ruler_given(civ_id)
@@ -1322,16 +1415,17 @@ static func send_double(p:Dictionary,_audience_id:String="")->Dictionary:
 	if op.has("error"): return {"ok":false,"outcome":String(op.error),"reaction":"neutral"}
 	var odds:=double_odds(p)
 	(op.odds as Dictionary)["success"]=1.0
-	# The court reckons the odds of being found as for one truly ours; one only
-	# pretending is their ruler's own man and is never "found" by them.
-	(op.odds as Dictionary)["caught"]=0.0 if bool(p.get("feigned",false)) else float(odds.found)
+	# The stated odds of being found, the same whoever they truly serve; one
+	# only pretending is their ruler's own and is never rolled for
+	# (covert_ops _plant_report).
+	(op.odds as Dictionary)["caught"]=float(odds.found)
 	op["stated_found"]=float(odds.found)
 	op["double"]=true
 	op["double_feigned"]=bool(p.get("feigned",false))
 	op["prisoner_id"]=String(p.id)
 	p["status"]="double"; p["status_day"]=_day()
 	p["fate"]={"kind":"double","day":_day(),"op_id":int(op.id),"found":float(odds.found)}
-	GameState.register_population_departures(1,"Sent back among %s as our eyes" % _name(civ_id))
+	_leaves_our_count(p,"Sent back among %s as our eyes" % _name(civ_id),false)
 	_stat("doubles")
 	return {"ok":true,"action":"double","verb":"send","terminal":true,"reaction":"neutral",
 		"outcome":"%s goes home to %s as our eyes. Word every %d days; found out %s each time." % [String(p.given),_the(civ_id),DOUBLE_REPORT_DAYS,pct(float(odds.found))]}
@@ -1356,6 +1450,9 @@ const SEND_RE:="\\b(send (him|her|them) (back|home)|let (him|her|them) go( home)
 const HARM_RE:="\\b(flog|whip|beat|maim|torture|brand|cut|break) (him|her|them)\\b|\\b(break|cut off|take) (his|her|their) (fingers|hand|hands|ear|ears|nose)\\b"
 const TURN_RE:="\\b(turn (him|her|them)|win (him|her|them) over|convert (him|her|them)|make (him|her|them) one of us|teach (him|her|them) our ways|care for (him|her|them)|propaganda|nurse (him|her|them)|feed (him|her|them) and teach|show (him|her|them) our ways)\\b"
 const KEEP_RE:="\\b(keep (him|her|them) (under guard|bound|locked|here|prisoner)|take (him|her|them) away|lock (him|her|them) up|throw (him|her|them) in|back to (his|her|their) (cell|pit|hut)|hold (him|her|them))\\b"
+## Words aimed at others than the one before the god ("find the others and
+## kill them"): never read as their death, their keeping or their turning.
+const OTHERS_RE:="\\b(the others|others|the rest|accomplices?|anyone else|whoever|all of them|every one of them|the spies|their spies|(their|his|her) (chief|ruler|people|men|kin|family|spies|friends))\\b"
 const DOUBLE_RE:="\\b(send (him|her|them) back as (our|my) (eyes|spy|agent)|spy for us|be our eyes|go back and spy)\\b"
 
 static func read(text:String)->Dictionary:
@@ -1369,9 +1466,11 @@ static func read(text:String)->Dictionary:
 		if RegEx.create_from_string(SEND_RE).search(lower)!=null:
 			var kind:=classify_message(text)
 			return {"kind":"fate","option":"pr_send:"+kind,"words":text.strip_edges(),"message":kind}
-		if RegEx.create_from_string(EXECUTE_RE).search(lower)!=null and not lower.ends_with("?"): return {"kind":"fate","option":"pr_execute","words":text.strip_edges()}
-		if RegEx.create_from_string(TURN_RE).search(lower)!=null: return {"kind":"fate","option":"pr_turn","words":text.strip_edges()}
-		if RegEx.create_from_string(KEEP_RE).search(lower)!=null: return {"kind":"fate","option":"pr_keep","words":text.strip_edges()}
+		var others:=RegEx.create_from_string(OTHERS_RE).search(lower)!=null
+		if not others:
+			if RegEx.create_from_string(EXECUTE_RE).search(lower)!=null and not lower.ends_with("?"): return {"kind":"fate","option":"pr_execute","words":text.strip_edges()}
+			if RegEx.create_from_string(TURN_RE).search(lower)!=null: return {"kind":"fate","option":"pr_turn","words":text.strip_edges()}
+			if RegEx.create_from_string(KEEP_RE).search(lower)!=null: return {"kind":"fate","option":"pr_keep","words":text.strip_edges()}
 	for topic in TOPICS:
 		if RegEx.create_from_string(String(Q_RE[topic])).search(lower)!=null:
 			var manner:="firm"
@@ -1403,7 +1502,7 @@ static func hear(audience_id:String,text:String)->Dictionary:
 		a["prisoner_words"]=text.strip_edges()
 		return {"handled":true,"option":String(r.option),"words":text.strip_edges()}
 	var act:=Hall.divine_intent(audience_id,text)
-	if act=="" and RegEx.create_from_string(HARM_RE).search(_as_pronoun(p,text).to_lower())!=null and RegEx.create_from_string(NOT_RE).search(text.to_lower())==null: act="terrify"
+	if act=="" and RegEx.create_from_string(HARM_RE).search(_as_pronoun(p,text).to_lower())!=null and RegEx.create_from_string(NOT_RE).search(text.to_lower())==null and RegEx.create_from_string(OTHERS_RE).search(text.to_lower())==null: act="terrify"
 	if act!="": return {"handled":true,"divine":act}
 	# A question the prisoner was not asked in any form they can answer, or
 	# talk: they hold their tongue, and the questions they can be asked are
@@ -1479,7 +1578,7 @@ static func judge_ours(op:Dictionary,day:int,doing:String)->Dictionary:
 	var ruler:=_ruler_given(civ_id)
 	var who:=String(op.get("agent_name",agent.get("name","our agent")))
 	var rec:={"op_id":int(op.get("id",0)),"civ_id":civ_id,"agent":String(op.get("agent","")),"name":who,"given":String(op.get("agent_given","")),"kind":kind,"day":day,"odds":odds,"roll":snappedf(roll,0.0001),
-		"choice":choice,"status":"","doing":doing,"loyalty":_our_loyalty(agent)}
+		"choice":choice,"status":"","doing":doing,"loyalty":_our_loyalty(agent),"nerve":clampf(float(agent.get("nerve",0.5)),0.0,1.0)}
 	var text:=""
 	match choice:
 		"execute":
@@ -1491,12 +1590,13 @@ static func judge_ours(op:Dictionary,day:int,doing:String)->Dictionary:
 			rec.status="coming_home"; rec["message"]=mk; rec["words"]=_their_words(mk,civ_id); rec["arrive_day"]=day+int(_covert().call("travel_days",civ_id,""))
 			text="%s is sending %s home with a message (the odds of that were %s); they walk for about %d days." % [ruler,who,pct(float(odds.send)),int(rec.arrive_day)-day]
 		"turn":
-			# Worked on in their keeping, as we work on theirs: the same odds,
-			# with our agent's love of the god against their care.
-			var conv:=clampf(0.12+(1.0-float(rec.loyalty))*0.35-0.1,0.05,0.6)
-			var feign:=clampf(0.1+float(rec.loyalty)*0.2,0.05,0.35)
+			# Worked on in their keeping, as we work on theirs: the same
+			# turn_odds, our agent's love of the god as their loyalty.
+			var t:=turn_odds(held_view(rec),civ_id)
+			var conv:=float(t.converted)
+			var feign:=float(t.feigned)
 			var r2:=_rng("abroad_turn|%d|%s" % [int(op.get("id",0)),civ_id]).randf()
-			rec["turn_odds"]={"converted":conv,"feigned":feign,"unmoved":1.0-conv-feign}
+			rec["turn_odds"]=t
 			rec["turn_roll"]=snappedf(r2,0.0001)
 			rec.status="held_abroad"
 			rec["release_day"]=day+28+_rng("abroad_days|%d" % int(op.get("id",0))).randi_range(0,28)
@@ -1511,6 +1611,11 @@ static func judge_ours(op:Dictionary,day:int,doing:String)->Dictionary:
 	while list.size()>ABROAD_MAX: list.pop_back()
 	_stat("ours_judged_"+choice)
 	return rec
+
+static func held_view(rec:Dictionary)->Dictionary:
+	## One of ours in their keeping, as turn_odds reads a prisoner: our love
+	## of the god is their loyalty; they are kept plainly, neither kind nor cruel.
+	return {"love":0.2,"treatment":0.0,"loyalty":float(rec.get("loyalty",0.5)),"dread":0.3,"courage":float(rec.get("nerve",0.5)),"temper":"","family":{"spouse":false,"children":0}}
 
 static func _their_message_kind(civ_id:String)->String:
 	var t:=_temper(civ_id)
@@ -1547,17 +1652,21 @@ static func _our_agent_dies(op:Dictionary,agent:Dictionary,civ_id:String)->void:
 	if source=="person" and pid>0:
 		var person:=GovernmentPeopleSystem.person_snapshot(pid)
 		if not person.is_empty() and String(person.get("status",""))=="active":
+			# Their offices pass as on a dismissal (the god did not kill them:
+			# no "sovereign order", no cost to our own legitimacy); then they
+			# are dead of the foreign ruler's hand, as who they are.
 			var office:=String(person.get("office_key",""))
-			if office!="" and office!="settlement":
-				done=bool(GovernmentPeopleSystem.remove_central_officeholder(office,"execute").get("ok",false))
-			elif String(person.get("local_leader_of",""))!="":
-				done=bool(GovernmentPeopleSystem.remove_settlement_leader(String(person.local_leader_of),"execute").get("ok",false))
-			if not done:
-				for i in GovernmentPeopleSystem.people.size():
-					var rec:Dictionary=GovernmentPeopleSystem.people[i]
-					if int(rec.get("person_id",0))==pid and String(rec.get("status",""))=="active":
-						rec["status"]="deceased"; rec["died_day"]=_day(); rec["removal_reason"]="executed_abroad"
-						break
+			if office!="" and office!="settlement": GovernmentPeopleSystem.remove_central_officeholder(office,"dismiss")
+			if String(GovernmentPeopleSystem.person_snapshot(pid).get("local_leader_of",""))!="":
+				GovernmentPeopleSystem.remove_settlement_leader(String(GovernmentPeopleSystem.person_snapshot(pid).local_leader_of),"dismiss")
+			for i in GovernmentPeopleSystem.people.size():
+				var rec:Dictionary=GovernmentPeopleSystem.people[i]
+				if int(rec.get("person_id",0))==pid:
+					rec["status"]="deceased"; rec["died_day"]=_day(); rec["removal_reason"]="executed_abroad"; rec["death_cause"]=reason
+					var age:=floori(float(_day()-int(rec.get("born_day",_day()-30*365)))/365.0)
+					var dead:Dictionary=GameState.register_population_deaths_by_cell([{"cohort":_cohort_of(age),"sex":String(rec.get("sex","male")),"count":1}],"put_to_death_abroad","%s was put to death by %s." % [String(rec.get("name","")),_name(civ_id)],String(rec.get("name","")))
+					done=int(dead.get("count",0))>0
+					break
 	elif source=="figure" and String(agent.get("figure_id",""))!="":
 		HistoricalFigures.record_death(String(agent.figure_id),_day(),reason)
 	elif source=="known" and String(agent.get("known_id",""))!="":
@@ -1573,6 +1682,17 @@ static func _abroad_daily(rec:Dictionary,day:int)->void:
 		"coming_home":
 			if day>=int(rec.get("arrive_day",day)): _ours_home(rec,day)
 		"held_abroad":
+			# The same monthly chance to slip the guards our prisoners have.
+			var since:=day-int(rec.get("day",day))
+			if since>0 and since%30==0:
+				var odds:=abroad_escape_odds(rec)
+				var roll:=_rng("abroad_esc|%d|%s|%d" % [int(rec.get("op_id",0)),String(rec.civ_id),int(since/30.0)]).randf()
+				if roll<odds:
+					rec.status="home"; rec["home_day"]=day; rec["escape"]={"odds":odds,"roll":snappedf(roll,0.0001),"month":int(since/30.0)}
+					_tell("%s Came Home" % String(rec.name),"%s slipped the guards among %s and came home (the odds were %s a month)." % [String(rec.name),_the(String(rec.civ_id)),pct(odds)],day)
+					_covert().call("record_agent",{"key":String(rec.agent),"name":String(rec.name)},"watch",String(rec.civ_id),"home")
+					_stat("ours_escaped")
+					return
 			if String(rec.get("turned",""))!="" and day>=int(rec.get("release_day",1<<30)):
 				match String(rec.turned):
 					"converted":
