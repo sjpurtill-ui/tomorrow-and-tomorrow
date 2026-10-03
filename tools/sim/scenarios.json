@@ -27,6 +27,20 @@
    "environment_tags": [
     "dry"
    ]
+  },
+  "average": {
+   "forage": 0.44,
+   "game": 0.37,
+   "fertility": 0.4,
+   "growing_season": 0.48,
+   "water_access": 0.37,
+   "rainfall_variability": 0.46,
+   "precipitation": 0.43,
+   "ecological_resilience": 0.45,
+   "environment_tags": [
+    "river",
+    "woodland"
+   ]
   }
  },
  "scenarios": {
@@ -877,6 +891,27 @@
      }
     }
    ]
+  },
+  "avg_balanced": {
+   "_doc": "Truth probe mirror (truth_probe.gd --scenario=average --path=balanced): the leaders' own balanced work on an average site (between good and poor).",
+   "site": "average",
+   "research": {
+    "demography": 2,
+    "nutrition": 3,
+    "health": 3,
+    "labor": 2,
+    "knowledge": 2,
+    "production": 3,
+    "infrastructure": 2,
+    "logistics": 1,
+    "ecology": 1,
+    "institutions": 1,
+    "security": 1,
+    "culture": 1
+   },
+   "focus": "auto",
+   "ambition": "makers",
+   "path": "balanced"
   }
  },
  "generated": {

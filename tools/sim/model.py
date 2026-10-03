@@ -73,6 +73,20 @@ PREMODERN_FECUNDITY = float(g.const("scripts/early_life_conditions.gd", "PREMODE
 FECUNDITY_KNEE = float(g.const("scripts/early_life_conditions.gd", "PREMODERN_FECUNDITY_KNEE", default=9.0, optional=True))
 FECUNDITY_SLOPE = float(g.const("scripts/early_life_conditions.gd", "PREMODERN_FECUNDITY_SLOPE", default=1.0, optional=True))
 TERRITORY_CAPACITY = g.const("scripts/early_life_conditions.gd", "TERRITORY_CAPACITY", default=[], optional=True)
+# Balance P2: each town past the first claims TERRITORY_SLOPE x sqrt(towns - 1)
+# of the home land; carers ease crowding (CARER_CROWDING x carer cover lifted).
+TERRITORY_SLOPE = float(g.const("scripts/early_life_conditions.gd", "TERRITORY_SLOPE", default=1.6, optional=True))
+CARER_CROWDING = float(g.const("scripts/early_life_conditions.gd", "CARER_CROWDING", default=0.0, optional=True))
+# FoodSystem CULTIVATION_YIELD: rations a worker-day from the fields, before soil, seed and season.
+CULTIVATION_YIELD = float(g.const("scripts/food_system.gd", "CULTIVATION_YIELD", default=5.65, optional=True))
+# FoodSystem.harvest_settled: the founding yields settle to HARVEST_SETTLED by HARVEST_SETTLED_YEAR (absent: 1).
+HARVEST_SETTLED = float(g.const("scripts/food_system.gd", "HARVEST_SETTLED", default=1.0, optional=True))
+HARVEST_SETTLED_YEAR = float(g.const("scripts/food_system.gd", "HARVEST_SETTLED_YEAR", default=200.0, optional=True))
+
+
+def harvest_settled(year: float) -> float:
+    """FoodSystem.harvest_settled."""
+    return 1.0 + (HARVEST_SETTLED - 1.0) * clamp(year / max(1e-9, HARVEST_SETTLED_YEAR), 0.0, 1.0)
 CROWDING_ONSET = float(g.const("scripts/early_life_conditions.gd", "CROWDING_ONSET", default=0.8, optional=True))
 CROWDING_MORTALITY = float(g.const("scripts/early_life_conditions.gd", "CROWDING_MORTALITY", default=0.0, optional=True))
 CROWDING_CONCEPTION = float(g.const("scripts/early_life_conditions.gd", "CROWDING_CONCEPTION", default=0.0, optional=True))
@@ -87,6 +101,14 @@ _MIX = g.const("scripts/game_state.gd", "FOUNDING_AGE_MIX", default={}, optional
 FOUNDING_AGE_MIX = np.array([float(_MIX[k]) for k in ("children", "youth", "early_adults", "established_adults", "mature_adults", "elders")]) if _MIX     else np.array([0.32, 0.15, 0.14, 0.13, 0.18, 0.08])
 SUSTAINABLE_SPECIALISTS = g.const("scripts/society_model.gd", "SUSTAINABLE_SPECIALISTS", default=[], optional=True)
 SPECIALIST_UPKEEP = g.const("scripts/society_model.gd", "SPECIALIST_UPKEEP", default={}, optional=True)
+# SocietyModel watch upkeep (balance P2): a watch past the free one (WATCH_FREE_SHARE
+# of the people, or the towns' guard: watch_military.gd GUARD_MIN a town, GUARD_SHARE
+# of its people) costs WATCH_UPKEEP x SPECIALIST_UPKEEP on WATCH_UPKEEP_KEYS for each
+# share of the able past it (absent: none).
+WATCH_FREE_SHARE = float(g.const("scripts/society_model.gd", "WATCH_FREE_SHARE", default=1.0, optional=True))
+WATCH_UPKEEP = float(g.const("scripts/society_model.gd", "WATCH_UPKEEP", default=0.0, optional=True))
+WATCH_UPKEEP_KEYS = g.const("scripts/society_model.gd", "WATCH_UPKEEP_KEYS", default=[], optional=True) or []
+GUARD = {k: float(g.const("scripts/watch_military.gd", k, default=d, optional=True)) for k, d in {"GUARD_SHARE": 0.035, "GUARD_MIN": 8.0}.items()}
 DECREE_COVER = g.const("scripts/early_life_conditions.gd", "DECREE_COVER", default={}, optional=True)
 FOOD_LABOR_FLOOR = g.const("scripts/government_people_system.gd", "FOOD_LABOR_FLOOR", default=[], optional=True)
 FOOD_FLOOR_OF_TYPICAL = float(g.const("scripts/government_people_system.gd", "FOOD_FLOOR_OF_TYPICAL", default=1.0, optional=True))
@@ -780,7 +802,7 @@ class Surrogate:
     @property
     def territory_factor(self) -> float:
         """EarlyLifeConditions.carrying_capacity territory 1 + 1.6 sqrt(n - 1)."""
-        return 1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * 1.6
+        return 1.0 + math.sqrt(max(0, int(self.territory_settlements) - 1)) * TERRITORY_SLOPE
 
     @property
     def settlements(self) -> int:
@@ -846,6 +868,19 @@ class Surrogate:
         # SocietyModel._apply_specialist_upkeep (Phase 3 R3): Knowledge workers
         # beyond the era's sustainable share cost labor, stores, cohesion and births.
         self.specialist_excess = 0.0
+        # SocietyModel watch upkeep: the watch past the free one (heads), over the able.
+        self.watch_excess = 0.0
+        if WATCH_UPKEEP > 0.0 and self.able > 0:
+            pop = max(1.0, self.population)
+            towns = max(1, int(self.territory_settlements))
+            free = max(math.ceil(pop * WATCH_FREE_SHARE), towns * GUARD["GUARD_MIN"], math.ceil(pop * GUARD["GUARD_SHARE"]))
+            self.watch_excess = max(0.0, self.able * self.alloc_pct["Defense"] / 100.0 - free) / self.able
+        if self.watch_excess > 0.0:
+            for key, k in SPECIALIST_UPKEEP.items():
+                if key not in WATCH_UPKEEP_KEYS:
+                    continue
+                lim = self.c.effect_limits.get(key, (-0.5, 0.8)) if hasattr(self.c, "effect_limits") else (-0.5, 0.8)
+                self._eff[key] = clamp(self._eff.get(key, 0.0) + float(k) * self.watch_excess * WATCH_UPKEEP, float(lim[0]), float(lim[1]))
         if SUSTAINABLE_SPECIALISTS and self.able > 0:
             share = clamp(self.workers("Knowledge") / max(1.0, self.able), 0.0, 1.0)
             self.specialist_excess = max(0.0, share - curve(SUSTAINABLE_SPECIALISTS, getattr(self, "economy_era", self.ceiling_era)))
@@ -1322,7 +1357,11 @@ class Surrogate:
         ecol = lerp(0.58, 1.04, clamp(self.ecology, 0, 1))
         practice = 1.0 + e("foraging_yield") + e("food_output") + self.policy("food_yield")
         weather = self._weather(day)
-        cal = c.yield_calibration
+        # harvest_mult (fitted, params.json): what the engine's harvest gets that the
+        # surrogate leaves out (founding traditions' food_yield, progression food_output,
+        # season and game modifiers, the gathering lever, seed coverage).
+        harvest = float(p.get("harvest_mult", 1.0)) * harvest_settled(day / YEAR)
+        cal = c.yield_calibration * harvest
         raw = {
             "plants": W * adapted["plants"] * 4.55 * cal * tg * season["plants"] * eff_f * ecol * sh["gather"] * practice * weather,
             "meat": W * adapted["meat"] * 4.85 * cal * th * season["meat"] * eff_f * ecol * sh["hunt"] * (1.0 + float(p["access_game"]) * 0.18) * (1.0 + e("hunting_yield")) * practice * lerp(1.0, weather, 0.38),
@@ -1330,7 +1369,7 @@ class Surrogate:
         }
         staples = 0.0
         if cult_w > 0:
-            staples = W * cult_w * 5.65 * season["staples"] * eff_f * sh["cult"] * (0.68 + prof.get("fertility", 0.0) * 0.38 + float(p["access_fertile"]) * 0.12) \
+            staples = W * cult_w * CULTIVATION_YIELD * harvest * season["staples"] * eff_f * sh["cult"] * (0.68 + prof.get("fertility", 0.0) * 0.38 + float(p["access_fertile"]) * 0.12) \
                 * self._agronomy_yield() * (1.0 + self._lever("cultivation")) * (1.0 + max(0.0, e("farm_mechanization"))) \
                 * (1.0 + e("soil_productivity") + e("cultivation_yield")) * clamp(weather ** 1.25, 0.46, 1.30)
         # _apply_wild_ceilings + wild_food_capacity
@@ -1583,16 +1622,19 @@ class Surrogate:
             self.carrying_capacity = base * territory * methods * lerp(0.6, 1.0, grounds)
             crowding = max(0.0, self.population / max(1.0, self.carrying_capacity) - CROWDING_ONSET)
         self.crowding = crowding
+        # EarlyLifeConditions: carers ease crowding's toll on deaths and births (CARER_CROWDING).
+        eased = crowding * (1.0 - CARER_CROWDING * max(0.0, carers))
+        self.crowding_eased = eased
         # engine: spare land is judged against the founding territory only
         spare = max(0.0, SPARE_LAND_ONSET - self.population / float(TERRITORY_CAPACITY[0][1])) if TERRITORY_CAPACITY else 0.0
         age_keys = ("under5", "child", "adult", "elder")
         care["burden"] = {k: (1.0 + (float(v) - 1.0) * scale * (1.0 - relief) * ((1.0 - spare * SPARE_LAND_HEALTH) if k in age_keys else 1.0) * (1.0 - carers * float(CARER_BURDEN.get(k, 0.0))))
-                          * ((1.0 + crowding * CROWDING_MORTALITY) if k in age_keys else 1.0) for k, v in ERA_BURDEN.items()}
+                          * ((1.0 + eased * CROWDING_MORTALITY) if k in age_keys else 1.0) for k, v in ERA_BURDEN.items()}
         # EarlyLifeConditions.frontier_of against home_capacity: the home land alone, no town count.
         home = self.carrying_capacity / max(1e-6, self.territory_factor) if FRONTIER_HOME else self.carrying_capacity
         frontier = clamp((FRONTIER_ONSET - self.population / max(1.0, home)) / FRONTIER_ONSET, 0.0, 1.0) if TERRITORY_CAPACITY else 0.0
         self.frontier = frontier
-        care["conception"] *= max(0.3, 1.0 - crowding * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION) * (1.0 + frontier * FRONTIER_CONCEPTION)
+        care["conception"] *= max(0.3, 1.0 - eased * CROWDING_CONCEPTION) * (1.0 + spare * SPARE_LAND_CONCEPTION) * (1.0 + frontier * FRONTIER_CONCEPTION)
         care["excess_weight"] = {k: float(v) for k, v in EXCESS_WEIGHT.items()}
         if MODERN_SURVIVAL_WEIGHT:
             # EarlyLifeConditions.modern_factors / fertility_transition (research_3000).

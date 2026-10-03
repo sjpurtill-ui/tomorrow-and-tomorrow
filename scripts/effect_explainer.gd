@@ -1077,7 +1077,7 @@ static func totals()->Array[Dictionary]:
 		var ceiling:Vector2=model.era_ceiling(key) if model!=null else Vector2(-INF,INF)
 		var sum:=float(slot.sum)
 		var capped:=clampf(sum,ceiling.x,ceiling.y)
-		var upkeep:=float(Society.SPECIALIST_UPKEEP.get(key,0.0))*float(model.specialist_excess) if model!=null else 0.0
+		var upkeep:=float(model.upkeep_of(key)) if model!=null else 0.0
 		var row:=describe(key,total,1.0)
 		row["total"]=total
 		row["raw"]=sum
@@ -1103,7 +1103,7 @@ static func _total_notes(key:String,sum:float,capped:float,ceiling:Vector2,upkee
 		var limit:=ceiling.x if sum<ceiling.x else ceiling.y
 		notes.append("Held back by our age: everything known adds up to %s, but this age allows %s; the rest (%s) counts only as later ages open. Scale bonuses for the same thing share this limit." % [percent(sum),percent(limit),percent(sum-capped)])
 	if absf(upkeep)>0.000001:
-		notes.append("Feeding more full-time lore keepers than this age can spare moves it by %s." % percent(upkeep))
+		notes.append("Feeding more full-time lore keepers, or keeping more on watch, than this age can spare moves it by %s." % percent(upkeep))
 	return notes
 
 static func _contributors(by:Dictionary,limit:int=5)->Array[Dictionary]:

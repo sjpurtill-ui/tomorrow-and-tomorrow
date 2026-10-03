@@ -195,7 +195,10 @@ const GOODS_FLOOR:=0.5
 ## goods again to each learner's need (instruments, writing stuff and schooling
 ## of a later age, kept by the economy of this one). The makers must keep up or
 ## the learners slow, and households hold less: a lead is paid for in goods.
-const LEAD_GOODS_YEARS:=20.0
+## 60 (balance P2, was 20): at 20 a people a century ahead asked six times the
+## goods a learner and its learning starved for want of them; at 60 a century
+## ahead asks under three times, still dear.
+const LEAD_GOODS_YEARS:=60.0
 ## And the people carry it: every LEAD_UPKEEP_YEARS ahead adds the usual
 ## upkeep of learners past the share the age can spare again (SocietyModel
 ## specialist upkeep: work, weariness, cohesion, births and stores).

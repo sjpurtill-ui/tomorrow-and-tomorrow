@@ -1,5 +1,5 @@
 {
- "spec": "path_growth:74119:15",
+ "spec": "avg_balanced:74119:15",
  "commit": "e0201466e5a568ac2964e74a3b453f8101adf546",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "41f6f346c8fa",
@@ -21,7 +21,7 @@
   "scripts/watch_military.gd": "ec1cd7d0af11",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 104.2,
+ "wall_seconds": 105.3,
  "returncode": 0,
- "generated": "2026-10-03 04:40:06"
+ "generated": "2026-10-03 04:45:42"
 }

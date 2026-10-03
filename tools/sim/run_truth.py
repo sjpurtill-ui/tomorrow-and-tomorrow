@@ -6,8 +6,9 @@
 
 A spec is scenario:seed:years. ``path_<path>`` runs the probe's sensible
 scenario with the leaders' work laid toward that path (truth_probe.gd --path;
-work_paths.gd), and the truth file names it path_<path> so the surrogate runs
-its own path_<path> scenario (scenarios.json) against it.
+work_paths.gd), ``avg_<path>`` the same on an average site (between good and
+poor); the truth file keeps that name so the surrogate runs its own
+scenario of the name (scenarios.json) against it.
 
 Each run writes tools/sim/ground_truth/<scenario>_<seed>_<years>y.json via
 tools/sim/truth_probe.tscn, plus a .meta.json recording the worktree commit and
@@ -38,6 +39,7 @@ DEFAULT_GODOT = r"C:\Users\sjpur\leviathan\tools\godot\Godot_v4.7-stable_mono_wi
 DEFAULT_RUNS = [
     "path_balanced:74119:15", "path_balanced:5150:15",
     "path_growth:74119:15", "path_war:74119:15", "path_learning:74119:15",
+    "avg_balanced:74119:15",
 ]
 WATCHED = [
     "scripts/discovery_system.gd", "scripts/society_model.gd", "scripts/game_state.gd",
@@ -97,6 +99,8 @@ def probe_args(scenario: str) -> list[str]:
     """truth_probe.gd arguments for a truth scenario name (path_<p> -> sensible + --path=p)."""
     if scenario.startswith("path_"):
         return ["--scenario=sensible", f"--path={scenario[5:]}"]
+    if scenario.startswith("avg_"):
+        return ["--scenario=average", f"--path={scenario[4:]}"]
     return [f"--scenario={scenario}"]
 
 
@@ -109,11 +113,11 @@ def run_one(godot: str, spec: str) -> tuple[str, float, int]:
                            *probe_args(scenario), f"--seed={seed}", f"--years={years}", f"--out={out.as_posix()}"],
                           capture_output=True, text=True, encoding="utf-8", errors="replace")
     elapsed = time.time() - started
-    if out.exists() and scenario.startswith("path_"):
-        # The surrogate runs the truth's own scenario name (scenarios.json path_<p>).
+    if out.exists() and scenario.startswith(("path_", "avg_")):
+        # The surrogate runs the truth's own scenario name (scenarios.json path_<p>, avg_<p>).
         data = json.loads(out.read_text(encoding="utf-8"))
         data["scenario"] = scenario
-        data["path"] = scenario[5:]
+        data["path"] = scenario.split("_", 1)[1]
         out.write_text(json.dumps(data), encoding="utf-8")
     meta = {"spec": spec, "commit": commit(), "sources_at_launch": fingerprint,
             "wall_seconds": round(elapsed, 1), "returncode": proc.returncode,

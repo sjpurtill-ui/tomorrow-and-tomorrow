@@ -305,6 +305,22 @@ The note has room for about 19 letters (every top-strip value must fit at 1280 w
   
   The same rules apply to all peoples; only the tendencies differ. No ruler goes all in on learning unless its temperament is scholarly. Log and test the spread of paths across a world's peoples.
 
+## Balance P2 (2026-10-03)
+
+Each path gets a clear payoff and a real cost; balanced is never at least as good as another path on every measure; balanced peoples stay in the historical bands and all-in paths go a little extra. Tested on the fast sim (`tools/sim/paths.py`, recalibrated to engine truth on this branch).
+
+| Item | Change | Why |
+|---|---|---|
+| Learners' births upkeep | `society_model.gd SPECIALIST_UPKEEP.conception_support` −1.0 → −0.7 | A third-learning people sat at the births limit for centuries (a fifth of balanced by 1200); now about an eighth smaller. At −0.5 the learning path paid nothing in people before year 150 under the new learning pace (#121); at −0.7 it pays from about its hundredth year. |
+| A lead's goods | `research_600_catalog.gd LEAD_GOODS_YEARS` 20 → 60 | A century ahead asked six times the goods a learner; now under three. |
+| Carers ease crowding | `early_life_conditions.gd CARER_CROWDING` 0.5 | Full carer cover lifts half of crowding's toll on deaths and births: the growth path fills its land further (+17% people). |
+| The watch's upkeep | `society_model.gd WATCH_FREE_SHARE` 0.05, `WATCH_UPKEEP` 1.0, `WATCH_UPKEEP_KEYS` | Up to 5 in 100 of the people keep watch at no extra cost, or the towns' guard if more (`watch_military.gd guard_needed`: 3.5 in 100 of each town, at least 8), so standing the guard the screen asks for is never charged. Past it, each person costs as a learner past the age's share does in work, weariness, births and stores; not cohesion (`standing.gd` levy burden charges that). The People view says it in heads ("Up to 9 can keep watch at no extra cost … 4 over now: about 3.6 in 100 fewer births"), read live; the capacity history gives it its own key. |
+| Learning caps | `work_paths.gd LEARNING_CAP` growth/making/war/building .03 → .035 | Every path but learning learns as balanced does, so balanced no longer wins on knowledge; no free learners. |
+| Daughter towns' land | `early_life_conditions.gd TERRITORY_SLOPE` 1.6 → 0.85 | A people founding a town every generation reaches about 19,000 by year 600 (high 20,000), not 30,000. |
+| Food yields | `food_system.gd harvest_settled`: the founding yields (1.34, `CULTIVATION_YIELD` 5.65) settle to `HARVEST_SETTLED` 0.77 of them by `HARVEST_SETTLED_YEAR` 200 | The founding decades keep the age's usual food share (the same as before, on good and average land); from year 300 the leaders keep 35–40% on food (was 27–30%, under the plausible floor of 35). |
+
+Still open (the user's decisions): building has no payoff the engine's numbers reach (no great works or splendor in the measure; it trails every path), and making's goods have no sink (the barter ceiling holds every path's goods near 4–5 a head).
+
 ## Integration rules (every builder)
 - Work only in your worktree, on your `codex/<task>` branch. Never use `git stash`, never merge main yourself, never launch the player game, never remove a worktree.
 - Edit files other than your own only in small, local hunks, and list them. Shared hotspots: `game_state.gd`, `consequence_engine.gd` (B owns), `military_campaign.gd` (E owns), `discovery_system.gd` (A owns), `economy_system.gd` (D owns), `world_simulation.gd`, `local_terrain.gd`, `save_system.gd`.

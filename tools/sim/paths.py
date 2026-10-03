@@ -24,7 +24,8 @@ outside the historical bands (docs/research/benchmarks_*.json), extreme paths
 past "a little extra" (more than 25% of the typical-to-high gap beyond the
 high value), and dominated paths (another of the same kind - the leaders'
 paths, the computer peoples with towns, the ruler's splits - at least as good
-on people, knowledge, field strength and output per worker, better by 3% on one).
+on people, knowledge, field strength, output per worker, goods a head and infant
+deaths, and as far ahead of the calendar, better on one by 3% or 3 years).
 """
 from __future__ import annotations
 
@@ -246,17 +247,22 @@ def main() -> int:
             flags += 1
     final = max(y for y in years if all(summary[n].get(y) for n in names)) if years else None
     if final:
-        keys = ["people", "known", "field_strength", "output_per_worker"]
+        # Each path's payoff counts: people, knowledge, field strength, output per
+        # worker, goods a head, infant deaths (fewer is better) and years ahead of
+        # the calendar (3 or more counts).
+        keys = [("people", True), ("known", True), ("field_strength", True), ("output_per_worker", True), ("goods_per_head", True), ("infant_mortality", False)]
         group = lambda n: "split" if n.startswith(("split_", "switch_")) else n.split("_", 1)[0]
         for a in names:
             for b in names:
                 if a == b or group(a) != group(b):
                     continue
                 ma, mb = summary[a][final], summary[b][final]
-                better = sum(1 for k in keys if ma[k] > mb[k] * 1.03)
-                worse = sum(1 for k in keys if ma[k] < mb[k] * 0.97)
+                better = sum(1 for k, up in keys if (ma[k] > mb[k] * 1.03 if up else ma[k] < mb[k] * 0.97))
+                worse = sum(1 for k, up in keys if (ma[k] < mb[k] * 0.97 if up else ma[k] > mb[k] * 1.03))
+                better += ma["lead"] - mb["lead"] >= 3.0
+                worse += mb["lead"] - ma["lead"] >= 3.0
                 if better and not worse:
-                    print(f"  DOMINATED  {b} by {a} at year {final} (people, knowledge, field strength, output per worker)")
+                    print(f"  DOMINATED  {b} by {a} at year {final} (people, knowledge, field strength, output, goods, infant deaths, lead)")
                     flags += 1
     print(f"  {flags} flag(s)")
     if args.json:

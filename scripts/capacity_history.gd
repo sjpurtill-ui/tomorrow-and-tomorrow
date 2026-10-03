@@ -349,9 +349,13 @@ static func _effect_changes(model:Object,last:Dictionary,basis:Dictionary,before
 		var upkeep_now:=rate*float(basis.get("excess",0.0))
 		var upkeep_then:=rate*float(old_basis.get("excess",0.0))
 		if absf(upkeep_now-upkeep_then)>0.000000000001: changes["upkeep"]=upkeep_now-upkeep_then
+		# A watch past the free one costs on its own key (society_model.gd watch upkeep).
+		var watch_now:=Society.watch_upkeep_for(effect_id,float(basis.get("watch",0.0)))
+		var watch_then:=Society.watch_upkeep_for(effect_id,float(old_basis.get("watch",0.0)))
+		if absf(watch_now-watch_then)>0.000000000001: changes["watch_upkeep"]=watch_now-watch_then
 		var total_now:=float(now.get("fx:"+effect_id,0.0))
 		var total_then:=float(before.get("fx:"+effect_id,0.0))
-		var limit_change:=(total_now-raw_now-upkeep_now)-(total_then-raw_then-upkeep_then)
+		var limit_change:=(total_now-raw_now-upkeep_now-watch_now)-(total_then-raw_then-upkeep_then-watch_then)
 		if absf(limit_change)>0.000000001: changes["limit"]=limit_change
 		if not changes.is_empty(): result[effect_id]=changes
 	return result
@@ -419,7 +423,7 @@ static func _seasonal(history:Dictionary,dynamic_id:String,pending:Dictionary,da
 	var top:=""
 	for key in reasons:
 		if String(key)!="~" and (top=="" or absf(float(reasons[key]))>absf(float(reasons[top]))): top=String(key)
-	if top=="" or _is_practice(top) or top in ["works","officials","values","limit","upkeep"]: return false
+	if top=="" or _is_practice(top) or top in ["works","officials","values","limit","upkeep","watch_upkeep"]: return false
 	if _in_season(history,dynamic_id,day,value)!=1: return false
 	# The way back from a departure is told: it began away from its season.
 	return _in_season(history,dynamic_id,int(pending.get("since",day)),float(pending.get("from",0))/1000.0)!=0

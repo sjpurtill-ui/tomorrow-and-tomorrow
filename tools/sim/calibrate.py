@@ -103,6 +103,16 @@ FORMULA_ANCHORS = [
     ("scripts/watch_military.gd", "var rate:=float(mc._training_rate())"),
     ("scripts/military_campaign.gd", "return clampf(base+float(commander.get(\"command\",0.5))*0.12"),
     ("scripts/military_campaign.gd", "return (0.42+security*0.55)*(1.0+_adoption(\"formation_drill\")*0.35"),
+    # Balance P2: carers ease crowding, the watch's upkeep, daughter towns' land, the fields' yield.
+    ("scripts/early_life_conditions.gd", "var eased:=crowding*(1.0-CARER_CROWDING*carers)"),
+    ("scripts/early_life_conditions.gd", "var territory:=1.0+sqrt(float(settlements-1))*TERRITORY_SLOPE"),
+    ("scripts/society_model.gd", "watch_excess=watch_over()/maxf(1.0,float(WorldSimulation.state.able_population()))"),
+    ("scripts/society_model.gd", "return maxi(ceili(people*WATCH_FREE_SHARE),guard)"),
+    ("scripts/watch_military.gd", "total+=maxi(GUARD_MIN,ceili(maxf(1.0,float(WorldSimulation.settlements._settlement_population(city)))*GUARD_SHARE))"),
+    ("scripts/society_model.gd", "return float(SPECIALIST_UPKEEP.get(key,0.0))*maxf(0.0,excess)*WATCH_UPKEEP if key in WATCH_UPKEEP_KEYS else 0.0"),
+    ("scripts/food_system.gd", "result[\"Dry staples\"]=workers*cultivation_weight*CULTIVATION_YIELD*"),
+    ("scripts/food_system.gd", "return lerpf(1.0,HARVEST_SETTLED,clampf(year/HARVEST_SETTLED_YEAR,0.0,1.0))"),
+    ("scripts/food_system.gd", "var wild_yield:=BASE_SUBSISTENCE_YIELD_CALIBRATION*harvest_settled("),
 ]
 
 
@@ -183,6 +193,8 @@ KNOWN_GAPS = {
     ("poor", "food_security"): "the poor site's food-labor floor surplus (GovernmentPeopleSystem._apply_food_labor_floor) is not carried into the surrogate's coarse poor-site harvest; the engine's food security runs ~0.1 higher",
     ("path_growth", "food_labor"): "first years: the engine's harvest per food worker runs ~10-15% above the surrogate's (founding traditions' food_yield, the abundant-game modifier and the gathering lever are not modelled), so its leaders need fewer on food; within tolerance from year 10",
     ("path_war", "food_labor"): "as path_growth: the first years' harvest per food worker (founding traditions, modifiers) is not modelled",
+    ("path_learning", "lines_total"): "the engine's learners put more on production questions than the surrogate's (21 against 15 of 144 in 15 years: the makers' activity signals), 15-17% off by line on one engine seed; the total is within 4%",
+    ("avg_balanced", "food_labor"): "as path_growth, on the average site: the first years' harvest per food worker (founding traditions, modifiers) is not modelled; within tolerance from year 10",
     ("*", "food_days"): "the engine's leaders hold the store near 20 days (LEAN_DAYS) while the surrogate's monthly-to-weekly re-planning keeps 28-44; food security counts only the first 20 days, so deaths, births and health are unaffected",
 }
 

@@ -18,7 +18,27 @@ const Mechanics=preload("res://scripts/research_mechanics.gd")
 ## Fresh food, small stores, carriers and keepers (docs/PEOPLE_FIRST.md B).
 const FoodCare=preload("res://scripts/food_care.gd")
 const KCAL_PER_RATION := 2400.0
+## What a food worker gets from the wild (BASE_SUBSISTENCE_YIELD_CALIBRATION)
+## and from the fields (CULTIVATION_YIELD, before soil, seed and season), in
+## rations a worker-day, at the founding.
 const BASE_SUBSISTENCE_YIELD_CALIBRATION:=1.34
+const CULTIVATION_YIELD:=5.65
+## The harvest settles (balance P2): a founding people takes the easy pickings
+## of new land, then shares out what the land gives over the generations, so a
+## worker-day brings HARVEST_SETTLED of the founding yields by
+## HARVEST_SETTLED_YEAR (linear from the founding; the calendar's age, the same
+## for every people). The founding decades keep the age's usual share on food
+## (about 40 in 100, as before); by years 300-1200 the leaders keep 35-40 in 100
+## on food, at or above the documented peoples' least (benchmarks_*.json
+## food_labor_share: 35 the least plausible at year 300), where the founding
+## yields kept 27-30.
+const HARVEST_SETTLED:=0.77
+const HARVEST_SETTLED_YEAR:=200.0
+
+## What a worker-day brings at `year` against the founding yields (1 at the
+## founding, HARVEST_SETTLED from HARVEST_SETTLED_YEAR).
+static func harvest_settled(year:float)->float:
+	return lerpf(1.0,HARVEST_SETTLED,clampf(year/HARVEST_SETTLED_YEAR,0.0,1.0))
 ## Share of a food worker's day spent getting food. The rest goes to carrying,
 ## grinding, cooking, drying and storing it: the historical share of labour on
 ## food (docs/research/benchmarks_*.json food_labor_share, 62% at year 0)
@@ -447,14 +467,16 @@ func _produce(workers: float,labor_efficiency: float,ecology: float,traveling: b
 	var variation:=rng.randf_range(0.93,1.07)
 	var route_factor:=0.48+clampf(WorldSimulation.state.effective_workers("Logistics")/maxf(1.0,WorldSimulation.state.population_exact*0.08),0.0,1.0)*0.08 if traveling else 1.0
 	var gathering_bonus:=1.0+technique_lever("gathering")
-	result["Fresh plants"]=workers*gathering_weight*4.55*BASE_SUBSISTENCE_YIELD_CALIBRATION*terrain_gather*plant_season*efficiency*ecological*float(WorldSimulation.state.food_source_health.get("Wild gathering",0.9))*practice*variation*route_factor*(1.0+float(coastal.foraging_bonus))*_food_type_weather_multiplier("Fresh plants",weather_factor)*gathering_bonus
-	result["Fresh meat"]=workers*hunting_weight*4.85*BASE_SUBSISTENCE_YIELD_CALIBRATION*terrain_hunt*game_season*efficiency*ecological*float(WorldSimulation.state.food_source_health.get("Hunting",0.9))*(1.0+float(access.game)*0.18)*(1.0+WorldSimulation.discovery.effect("hunting_yield"))*practice*variation*route_factor*_food_type_weather_multiplier("Fresh meat",weather_factor)
+	# The harvest settles from the founding yields (HARVEST_SETTLED).
+	var wild_yield:=BASE_SUBSISTENCE_YIELD_CALIBRATION*harvest_settled(float(WorldSimulation.state.elapsed_days)/365.0)
+	result["Fresh plants"]=workers*gathering_weight*4.55*wild_yield*terrain_gather*plant_season*efficiency*ecological*float(WorldSimulation.state.food_source_health.get("Wild gathering",0.9))*practice*variation*route_factor*(1.0+float(coastal.foraging_bonus))*_food_type_weather_multiplier("Fresh plants",weather_factor)*gathering_bonus
+	result["Fresh meat"]=workers*hunting_weight*4.85*wild_yield*terrain_hunt*game_season*efficiency*ecological*float(WorldSimulation.state.food_source_health.get("Hunting",0.9))*(1.0+float(access.game)*0.18)*(1.0+WorldSimulation.discovery.effect("hunting_yield"))*practice*variation*route_factor*_food_type_weather_multiplier("Fresh meat",weather_factor)
 	# Boats and seamanship (research: seafaring strength) take fishers farther out.
 	var fishing_access:float=Mechanics.fishing_access_of(float(access.freshwater),float(coastal.marine_opportunity),Mechanics.sea_reach())
-	result["Fish"]=workers*fishing_weight*5.00*BASE_SUBSISTENCE_YIELD_CALIBRATION*fish_season*efficiency*float(WorldSimulation.state.food_source_health.get("Fishing",0.9))*(0.76+fishing_access*0.34)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))*_food_type_weather_multiplier("Fish",weather_factor)
+	result["Fish"]=workers*fishing_weight*5.00*wild_yield*fish_season*efficiency*float(WorldSimulation.state.food_source_health.get("Fishing",0.9))*(0.76+fishing_access*0.34)*practice*variation*route_factor*(1.0+float(coastal.food_output_bonus))*_food_type_weather_multiplier("Fish",weather_factor)
 	if cultivation_weight>0.0 and not traveling:
 		var agronomy:Dictionary=preload("res://scripts/agronomy_knowledge.gd").factors(traveling)
-		result["Dry staples"]=workers*cultivation_weight*5.65*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*float(agronomy["yield"])*preload("res://scripts/agronomy_knowledge.gd").weather_factor(_food_type_weather_multiplier("Dry staples",weather_factor),agronomy)*(1.0+technique_lever("cultivation"))*(1.0+maxf(0.0,WorldSimulation.discovery.effect("farm_mechanization"))) # research_3000: machines, fertilizer, bred seed
+		result["Dry staples"]=workers*cultivation_weight*CULTIVATION_YIELD*harvest_settled(float(WorldSimulation.state.elapsed_days)/365.0)*crop_season*efficiency*float(WorldSimulation.state.food_source_health.get("Cultivation",0.9))*(0.68+float(environment.get("fertility",0.0))*0.38+float(access.fertile)*0.12)*(1.0+WorldSimulation.discovery.effect("soil_productivity")+WorldSimulation.discovery.effect("cultivation_yield"))*variation*float(agronomy["yield"])*preload("res://scripts/agronomy_knowledge.gd").weather_factor(_food_type_weather_multiplier("Dry staples",weather_factor),agronomy)*(1.0+technique_lever("cultivation"))*(1.0+maxf(0.0,WorldSimulation.discovery.effect("farm_mechanization"))) # research_3000: machines, fertilizer, bred seed
 	if not traveling:
 		# A day's wild harvest cannot exceed what the surrounding land holds in
 		# season. Hands that find nothing more to gather or hunt go to the fields

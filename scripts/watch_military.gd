@@ -450,19 +450,44 @@ static func hold_share(percentages:Dictionary)->void:
 	percentages["Defense"]=total*want/100.0
 
 ## Sets the watch to `share` of the people (0..1): moves people onto or off
-## it. {ok, moved, watch, said}.
+## it. {ok, moved, watch, said}. What the watch costs is worked out again at
+## once (society_model.gd watch upkeep), not at the next day's reckoning.
 static func set_share(mc:Variant,share:float)->Dictionary:
 	if not is_finite(share) or share<0.0:return {"error":"The share must be 0 or more."}
 	var population:=maxi(0,int(WorldSimulation.state.population_total))
 	var want:=roundi(float(population)*share)
 	var moved:=move(want-manpower(mc))
+	if moved!=0 and WorldSimulation.discovery!=null and WorldSimulation.discovery.has_method("refresh_operating_effects"):WorldSimulation.discovery.refresh_operating_effects()
 	return {"ok":true,"moved":moved,"watch":manpower(mc),"said":share_words(mc)}
 
-## "48 keep watch: 6% of the people (1 in 10 of those who can work)."
+## "48 keep watch: 6 in 100 of the people." Heads first, then the people's share.
 static func share_words(mc:Variant)->String:
 	var r:=reading(mc)
-	var one_in:=roundi(1.0/float(r.work_share)) if float(r.work_share)>0.0 else 0
-	return "%s keep watch: %s of the people%s." % [EraWords.grouped(int(r.watch)),percent(float(r.share)),(" (1 in %d of those who can work)" % one_in) if one_in>0 else ""]
+	return "%s keep watch: %s in 100 of the people." % [EraWords.grouped(int(r.watch)),_in_100(float(r.share))]
+
+## A share as "6", "3.5" or "0.4" in 100.
+static func _in_100(share:float)->String:
+	var v:=share*100.0
+	if v>=10.0 or is_equal_approx(v,roundf(v)):return str(roundi(v))
+	return "%.1f" % v
+
+## A town needs GUARD_SHARE of its people on guard, at least GUARD_MIN
+## (military_campaign.gd settlement_defense_snapshot reads the same).
+const GUARD_SHARE:=0.035
+const GUARD_MIN:=8
+
+## The guard every town of the people needs together (a people with no town
+## yet: its own band's).
+static func guard_needed()->int:
+	var Combat:=preload("res://scripts/civilization_combat.gd")
+	var total:=0
+	var towns:=0
+	for city:Dictionary in WorldSimulation.state.player_settlements:
+		if not Combat.keeps_watch(city):continue
+		towns+=1
+		total+=maxi(GUARD_MIN,ceili(maxf(1.0,float(WorldSimulation.settlements._settlement_population(city)))*GUARD_SHARE))
+	if towns==0:total=maxi(GUARD_MIN,ceili(maxf(1.0,float(WorldSimulation.state.population_exact))*GUARD_SHARE))
+	return total
 
 ## WHAT KEEPING WATCH DOES (the People view's row, workstream F): now and
 ## with ten more, in the engine's numbers. {role, now, ten_more, watch,
