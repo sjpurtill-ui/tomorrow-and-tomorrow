@@ -184,7 +184,7 @@ func _approach(key:String,to:String,side:float,dist:float,time:float)->void:
 			b.face(rad_to_deg(atan2(way.x,way.z))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),0.2))
 
 ## A short scene move still needs facing and a matching stride.
-func _walk_to(key:String,to:Vector3,time:float)->void:
+func _walk_to(key:String,to:Vector3,time:float,arrive_clip:="")->void:
 	var b:=_body(key);var f:Variant=_fig(key)
 	if b==null or f==null:return
 	_remember(key)
@@ -198,7 +198,7 @@ func _walk_to(key:String,to:Vector3,time:float)->void:
 	_move_to(key,to,time,Tween.TRANS_LINEAR)
 	var t:=_tween();t.tween_interval(time)
 	t.tween_callback(func()->void:
-		if is_instance_valid(b):b.play(String(f.rest_clip),0.2);b.set_locomotion_rate(1.0))
+		if is_instance_valid(b):b.play(arrive_clip if not arrive_clip.is_empty() else String(f.rest_clip),0.2);b.set_locomotion_rate(1.0))
 
 func _heave(args:Dictionary)->void:
 	var key:=String(args.get("who",victim));var f:Variant=_fig(key)
@@ -226,10 +226,13 @@ func _restore_survivors()->void:
 		var f:Variant=_fig(key);var b:=_body(key)
 		if f==null or b==null or f.leaving:continue
 		var saved:Dictionary=_survivors[key]
+		var instant:=_skipped
 		Acting.stop(b,0.15)
 		var restore:=func()->void:
 			if not is_instance_valid(b) or not is_instance_valid(f):return
-			f.nudge=saved.nudge;b.rotation=saved.rotation
+			f.nudge=saved.nudge
+			b.rotation.x=(saved.rotation as Vector3).x;b.rotation.z=(saved.rotation as Vector3).z
+			b.face(rad_to_deg((saved.rotation as Vector3).y),0.0 if instant else 0.2)
 			b.play(String(saved.clip),0.2);b.set_locomotion_rate(1.0)
 			for prop:Dictionary in saved.props:
 				if is_instance_valid(prop.node):prop.node.visible=bool(prop.visible)
@@ -584,8 +587,8 @@ func _plan_start(args:Dictionary)->void:
 			var far:=Vector2(to.x-b.global_position.x,to.z-b.global_position.z).length()
 			if far>0.25:
 				walk=clampf(far/1.2,0.35,1.4)
-				_move_to(key,to,walk,Tween.TRANS_LINEAR)
-				b.play("walk_in",0.2,0.0)
+				# The authored act takes over empty-handed; do not resume the old staff/bowl pose.
+				_walk_to(key,to,walk,"stand")
 			b.face(rad_to_deg(yaw)+float(r.get("yaw",0.0))-rad_to_deg(b.get_parent_node_3d().global_rotation.y),maxf(walk,0.2))
 		for side:String in (r.get("props",{}) as Dictionary):
 			var name:=String(r.props[side])

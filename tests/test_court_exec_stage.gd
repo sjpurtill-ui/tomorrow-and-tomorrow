@@ -247,3 +247,68 @@ func test_a_terminal_order_keeps_the_victim_until_the_execution_finishes()->void
 	await get_tree().create_timer(maxf(finish-scene.get_total_elapsed_time()+0.3,0.02)).timeout
 	assert_bool(stage.exec_done).is_true()
 	assert_bool(main.leaving).is_true()
+
+func test_planned_approach_matches_stride_and_restores_the_base_clip()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	var key:=""
+	for candidate:String in stage.cast_order:
+		if candidate!=Stage.MAIN and stage.figure(candidate).body3d!=null:key=candidate;break
+	var f:Stage.Figure=stage.figure(key)
+	f.nudge+=Vector3(4.0,0.0,0.0)
+	assert_bool(stage.execute("club",Stage.MAIN)).is_true()
+	for t:Tween in stage._beat_sets:t.kill()
+	stage._beat_sets.clear()
+	var exec:Node=stage.get_node("Execution")
+	var from:=f.body3d.global_position
+	exec.call("_plan_start",{"act":"club_home_run","ex":key})
+	var to:Vector3=exec.call("_plan_at",[-0.95,0.0,0.2])
+	var distance:=Vector2(to.x-from.x,to.z-from.z).length()
+	assert_float(distance).is_greater(1.68) # The approach duration is capped at 1.4 seconds.
+	var pace:=float(Figure3D.WALK_SPEED.walk_in)*float(f.body3d.body_height)/Figure3D.REFERENCE_HEIGHT
+	assert_float(f.body3d.locomotion_rate).is_equal_approx(distance/(1.4*pace),0.001)
+	assert_str(f.body3d.clip).is_equal("walk_in")
+	for t in exec._tweens:
+		if t is Tween and (t as Tween).is_valid():(t as Tween).custom_step(1.41)
+	assert_float(f.body3d.locomotion_rate).is_equal(1.0)
+	assert_str(f.body3d.clip).is_equal("stand")
+	for part:String in ["prop_staff","prop_bowl"]:
+		for prop:MeshInstance3D in f.body3d.find_children(part,"MeshInstance3D",true,false):assert_bool(prop.visible).is_false()
+	stage.skip_execution()
+
+func test_a_survivor_turns_smoothly_back_after_walking_home()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	var key:=""
+	for candidate:String in stage.cast_order:
+		if candidate!=Stage.MAIN and stage.figure(candidate).body3d!=null:key=candidate;break
+	var f:Stage.Figure=stage.figure(key)
+	var body:=f.body3d
+	assert_bool(stage.execute("fire",Stage.MAIN)).is_true()
+	for t:Tween in stage._beat_sets:t.kill()
+	stage._beat_sets.clear()
+	var exec:Node=stage.get_node("Execution")
+	body.face(179.0,0.0)
+	exec.call("_remember",key)
+	var home:=f.nudge
+	var heading:=deg_to_rad(-179.0)+body.get_parent_node_3d().global_rotation.y
+	f.nudge-=f.spot.global_transform.basis.inverse()*Vector3(sin(heading),0.0,cos(heading))*0.6
+	var before:=get_tree().get_processed_tweens()
+	exec.call("_restore_survivors")
+	var journey:Tween
+	for t:Tween in get_tree().get_processed_tweens():
+		if not t in before and t!=body._yaw_tween:journey=t
+	assert_object(journey).is_not_null()
+	body._yaw_tween.custom_step(0.21)
+	var walking_yaw:=body.rotation.y
+	journey.custom_step(0.6)
+	assert_vector(f.nudge).is_equal(home)
+	assert_float(body.rotation.y).is_equal_approx(walking_yaw,0.001)
+	assert_float(f.body3d.locomotion_rate).is_equal(1.0)
+	body._yaw_tween.custom_step(0.1)
+	assert_float(absf(body.rotation.y-walking_yaw)).is_between(0.001,deg_to_rad(2.0))
+	body._yaw_tween.custom_step(0.11)
+	assert_float(absf(angle_difference(body.rotation.y,deg_to_rad(179.0)))).is_less(0.001)
+	stage.skip_execution()
