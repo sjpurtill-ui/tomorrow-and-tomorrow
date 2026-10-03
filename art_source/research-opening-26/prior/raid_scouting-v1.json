@@ -1,0 +1,12 @@
+{
+  "id": "raid_scouting",
+  "line": "security",
+  "game_year": 40,
+  "approx_historical_year": -4733,
+  "prompt": "c. 4733 BCE: Scouts move ahead on ridge and hand-signal to hidden following raid party; hand-carved woodblock print. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-49041ea9-50ee-4516-9faa-d9c403e3494e.png",
+  "asset": "res://assets/ui/research/subjects/raid_scouting-v1.png",
+  "sha256": "f78732d765694e4007d50036a8b11911d3efb9c0ea70a73d71e3d1a89512406f",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; forward scouts and following party clear, no actual violence."
+}

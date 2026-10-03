@@ -200,10 +200,14 @@
     ]
   },
   "public_stores": {
-    "path": "res://assets/ui/research/subjects/public_stores-v1.png",
+    "path": "res://assets/ui/research/subjects/public_stores-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.3
+    ],
+    "opening_focus": [
+      0.5,
+      0.3
     ]
   },
   "watch_rotation": {
@@ -6724,38 +6728,38 @@
     ]
   },
   "brushwood_trackways": {
-    "path": "res://assets/ui/research/subjects/brushwood_trackways-v1.png",
+    "path": "res://assets/ui/research/subjects/brushwood_trackways-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "raid_scouting": {
-    "path": "res://assets/ui/research/subjects/raid_scouting-v1.png",
+    "path": "res://assets/ui/research/subjects/raid_scouting-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "slack_season_building": {
-    "path": "res://assets/ui/research/subjects/slack_season_building-v1.png",
+    "path": "res://assets/ui/research/subjects/slack_season_building-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.4
     ]
   },
   "stone_wall_footings": {
-    "path": "res://assets/ui/research/subjects/stone_wall_footings-v1.png",
+    "path": "res://assets/ui/research/subjects/stone_wall_footings-v2.png",
     "focus": [
       0.5,
       0.5
     ]
   },
   "swidden_cycle": {
-    "path": "res://assets/ui/research/subjects/swidden_cycle-v1.png",
+    "path": "res://assets/ui/research/subjects/swidden_cycle-v2.png",
     "focus": [
       0.5,
-      0.5
+      0.1
     ]
   },
   "flat_clay_roofs": {
@@ -10210,6 +10214,42 @@
   "first_fruits_offering": {
     "path": "res://assets/ui/research/subjects/first_fruits_offering-v2.png",
     "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "solstice_horizon_markers": {
+    "path": "res://assets/ui/research/subjects/solstice_horizon_markers-v2.png",
+    "focus": [
+      0.5,
+      0.3
+    ]
+  },
+  "winter_tale_nights": {
+    "path": "res://assets/ui/research/subjects/winter_tale_nights-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "warp_weighted_looms": {
+    "path": "res://assets/ui/research/subjects/warp_weighted_looms-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
+      0.5,
+      0.5
+    ]
+  },
+  "food_steaming_vessels": {
+    "path": "res://assets/ui/research/subjects/food_steaming_vessels-v2.png",
+    "focus": [
+      0.5,
+      0.5
+    ],
+    "opening_focus": [
       0.5,
       0.5
     ]

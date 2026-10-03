@@ -1,0 +1,12 @@
+{
+  "id": "swidden_cycle",
+  "line": "ecology",
+  "game_year": 40,
+  "approx_historical_year": -4733,
+  "prompt": "c. 4733 BCE: Adults clear and lightly burn brush, crop opened patch, and leave older ground to regrow shrubs; plant-pigment naturalist illustration. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-230b1f7a-24d1-4ceb-b4d1-4a1afc7bdffb.png",
+  "asset": "res://assets/ui/research/subjects/swidden_cycle-v1.png",
+  "sha256": "8805f470804a80ae941533a16e9cc612c849a47c69d0f350c30490d6cebedac7",
+  "mode": "built-in image_gen / new image",
+  "review": "First generation; clear, crop and regrowth phases visible across wide crop."
+}

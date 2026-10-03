@@ -1,0 +1,12 @@
+{
+  "id": "brushwood_trackways",
+  "line": "logistics",
+  "game_year": 40,
+  "approx_historical_year": -4733,
+  "prompt": "c. 4733 BCE: Adults lay overlapping brushwood mats across boggy ground and traveler crosses with basket; travel watercolor and ink. Mature handmade 2D; no writing, photorealism, CGI or childlike art.",
+  "source": "C:\\Users\\sjpur\\.codex\\generated_images\\01a0d94b-564f-7a23-a03d-78831c465b59\\exec-90b844fc-c59a-43c7-a268-b95e43179cee.png",
+  "asset": "res://assets/ui/research/subjects/brushwood_trackways-v1.png",
+  "sha256": "d2a35d1382ae66a848360be11f381e4a62065e436903d25fa59dd3b4a919a066",
+  "mode": "built-in image_gen / new image",
+  "review": "Second generation; first too lifelike; brushwood track, mud and crossing clear."
+}
