@@ -135,6 +135,25 @@ func test_a_people_given_to_war_drills_a_little_harder()->void:
 	assert_float(float(r.martial_drill)).is_equal_approx(Watch.MARTIAL_DRILL,0.0001)
 
 
+func test_arms_pass_through_the_one_weapons_accessor()->void:
+	var item:=String(Watch.arms_kit(MilitaryCampaign).item)
+	MilitaryCampaign.military_inventory[item]=12
+	_watch(0.05)
+	# Twelve sets taken from the store for the twenty who joined; the rest
+	# fight with what comes to hand.
+	assert_int(Watch.weapons_held(MilitaryCampaign,item)).is_equal(0)
+	var issued:=0
+	for f in MilitaryCampaign.home_army.formations:issued+=int((f as Dictionary).equipment)
+	assert_int(issued).is_equal(12)
+	# Sent home to their work, their sets go back to the store.
+	MilitaryCampaign.set_watch_share(0.0)
+	assert_int(int(MilitaryCampaign.home_army.troops)).is_equal(0)
+	assert_int(Watch.weapons_held(MilitaryCampaign,item)).is_equal(12)
+	# What the watch carries is read from its own formations: one ledger.
+	MilitaryCampaign._rebuild_home_army_with([{"id":77,"unit":"levy","weapon":"spear","count":6,"authorized_count":6,"equipment":4,"equipment_required":6,"ammunition":0,"ammunition_required":0,"training":0.4,"experience":0.0,"personnel_condition":1.0}])
+	assert_int(Watch.weapons_carried(MilitaryCampaign)).is_equal(4)
+
+
 func test_no_drill_when_the_training_policy_suspends_it()->void:
 	_watch(0.05)
 	MilitaryCampaign.training_staff.set_policy("army","suspended")

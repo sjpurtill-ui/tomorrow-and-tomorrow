@@ -197,20 +197,54 @@ static func arms_kit(mc:Variant)->Dictionary:
 	if String(kit.get("item",""))=="":kit={"unit":"levy","item":"improvised"}
 	return kit
 
-## WEAPONS HELD FOR THE WATCH. The one place the watch reads its arms. Until
-## workstream D's weapons stock is joined (weapons_stock.gd weapons_held()),
-## it is the military store's count of the watch's kit.
+## THE ONE WEAPONS ACCESSOR. Every set of arms the watch takes up, hands back
+## or loses passes through these five, so they are the one seam to point at
+## workstream D's weapons stock (scripts/weapons_stock.gd, called in the
+## people's own scope): weapons_held -> weapons_held(), take_weapons ->
+## take_weapons(n), return_weapons -> return_weapons(n), lose_weapons ->
+## lose_weapons(n), weapons_carried -> weapons_issued(). Until then they are
+## the military store's count of the watch's kit (MilitaryCampaign
+## military_inventory). Fighters without a set fight with what comes to
+## hand (combat_simulator: the unarmed share of a formation).
+
+## Sets in store for the watch's kit.
 static func weapons_held(mc:Variant,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
 	return maxi(0,int(mc.military_inventory.get(item,0)))
 
-## Takes up to `n` weapons of the watch's kit from the stock; returns how
-## many were taken (workstream D: weapons_stock.gd take_weapons(n)).
+## Takes up to `n` sets of the watch's kit from the store for the watch;
+## returns how many were taken.
 static func take_weapons(mc:Variant,n:int,item:String="")->int:
 	if item=="":item=String(arms_kit(mc).item)
 	var taken:=mini(maxi(0,n),weapons_held(mc,item))
 	if taken>0:mc.military_inventory[item]=weapons_held(mc,item)-taken
 	return taken
+
+## `n` sets the watch hands back to the store as its people go back to work;
+## returns how many went back.
+static func return_weapons(mc:Variant,n:int,item:String="")->int:
+	if item=="":item=String(arms_kit(mc).item)
+	var back:=maxi(0,n)
+	if back>0:mc.military_inventory[item]=int(mc.military_inventory.get(item,0))+back
+	return back
+
+## `n` sets the watch lost with its fallen or in a rout (already gone from
+## the formations that carried them; the store is unchanged). Returns n.
+static func lose_weapons(_mc:Variant,n:int,_item:String="")->int:
+	return maxi(0,n)
+
+## Sets the watch carries now, read from its formations wherever they stand
+## (home, bands, garrisons): one ledger, never a counter kept apart.
+static func weapons_carried(mc:Variant)->int:
+	var carried:=0
+	for force in [mc.home_army]+(mc.field_armies as Array)+(mc.occupation_forces as Array):
+		if not force is Dictionary:continue
+		for f in (force as Dictionary).get("formations",[]):
+			if not f is Dictionary:continue
+			var formation:Dictionary=f
+			if String(formation.get("weapon","improvised"))=="improvised":continue
+			carried+=mini(maxi(0,int(formation.get("equipment",0))),int(formation.get("equipment_required",formation.get("count",0))))
+	return carried
 
 
 # --------------------------------------------------------------------------
@@ -427,8 +461,7 @@ static func _release_least_drilled(mc:Variant,n:int)->int:
 		var off:=mini(left,count)
 		if off<=0:continue
 		var gear:=mini(int(formation.get("equipment",0)),roundi(float(int(formation.get("equipment",0)))*float(off)/maxf(1.0,float(count))))
-		var weapon:=String(formation.get("weapon","improvised"))
-		mc.military_inventory[weapon]=int(mc.military_inventory.get(weapon,0))+gear
+		return_weapons(mc,gear,String(formation.get("weapon","improvised")))
 		formation["count"]=count-off
 		formation["authorized_count"]=maxi(int(formation.count),int(formation.get("authorized_count",count))-off)
 		formation["equipment"]=int(formation.get("equipment",0))-gear

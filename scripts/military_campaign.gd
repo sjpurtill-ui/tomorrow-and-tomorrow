@@ -362,7 +362,7 @@ func _stand_down_aggregate(requested:int)->Dictionary:
 		var gear:=mini(old_equipment,roundi(float(old_equipment)*float(removed)/maxf(1.0,float(old_count))))
 		formation["count"]=old_count-removed; formation["authorized_count"]=maxi(int(formation.count),int(formation.get("authorized_count",old_count))-removed)
 		formation["equipment"]=old_equipment-gear; formation["equipment_required"]=_equipment_required_for(String(formation.get("unit","levy")),int(formation.authorized_count))
-		var weapon:=String(formation.get("weapon","improvised")); military_inventory[weapon]=int(military_inventory.get(weapon,0))+gear; returned[weapon]=int(returned.get(weapon,0))+gear
+		var weapon:=String(formation.get("weapon","improvised")); preload("res://scripts/watch_military.gd").return_weapons(self,gear,weapon); returned[weapon]=int(returned.get(weapon,0))+gear
 		remaining-=removed
 		if int(formation.count)<=0: formations.remove_at(index)
 		else: formations[index]=formation
@@ -2228,6 +2228,9 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 	# they are held under guard.
 	var taken_in_battle:=int((result.get("defender" if home_side=="attacker" else "attacker",{}) as Dictionary).get("captured_in_battle",0))
 	var home_force_kind:=String(result.get("home_force_kind","field"))
+	# Sets lost with our fallen go through the one weapons accessor
+	# (watch_military.gd lose_weapons), whichever of our forces fought.
+	var carried:=preload("res://scripts/watch_military.gd").weapons_carried(self)
 	if not result.get("command_participants",[]).is_empty():
 		command_hierarchy.battle.commit(result)
 	elif home_force_kind=="occupation":
@@ -2242,6 +2245,7 @@ func _commit_campaign_battle(result:Dictionary)->Dictionary:
 		_return_posted_guard(result.get("posted_guard",{}))
 		home_army["recent_combat_days"]=7
 		home_army["supply_level"]=clampf(float(home_army.get("supply_level",1.0))-0.06,0.0,1.0)
+	preload("res://scripts/watch_military.gd").lose_weapons(self,maxi(0,carried-preload("res://scripts/watch_military.gd").weapons_carried(self)))
 	var termination:Dictionary=result.get("termination",{})
 	var succession:Dictionary={}
 	if home_force_kind=="field": succession=_apply_home_commander_fate(termination)
