@@ -6,10 +6,14 @@
 # minutes, never more than ten), and released only if the owner line is still
 # ours, so others get the machine between bodies.
 #   bash tools/blender/build_all.sh [variant ...]
+# OUT=<folder> builds somewhere else (to audit a build before it goes in:
+# godot ... res://tools/court_acting_audit.tscn -- all <body> <folder>).
 cd "$(dirname "$0")/../.." || exit 1
 BLENDER="/c/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 LOCK=/c/Users/sjpur/tt-court-lock-blender
 VARIANTS=${@:-male_adult female_adult male_old female_old male_young female_young child}
+OUT=${OUT:-assets/court_figures}
+mkdir -p "$OUT"
 mkdir -p reports/court_figures
 ME=""
 release() {
@@ -23,7 +27,7 @@ for v in $VARIANTS; do
   done
   ME="J court_figures build $v $$ $(date +%H:%M:%S)"
   echo "$ME" > "$LOCK/owner.txt"
-  timeout 600 "$BLENDER" --background --factory-startup --python tools/blender/court_figures.py -- --variants "$v" --out assets/court_figures > "reports/court_figures/build_$v.log" 2>&1
+  timeout 600 "$BLENDER" --background --factory-startup --python tools/blender/court_figures.py -- --variants "$v" --out "$OUT" > "reports/court_figures/build_$v.log" 2>&1
   release
   grep -E "exported|Traceback|Error" "reports/court_figures/build_$v.log" | tail -2
 done
