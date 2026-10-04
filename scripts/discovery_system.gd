@@ -97,6 +97,9 @@ class ResearchScan extends RefCounted:
 	## Each channel's whole catalog list in order of opening years, with the
 	## list, its size and the world seed it was read from.
 	var by_age_whole:Dictionary={}
+	## Each question's channel (_channel_key of its line and subcategory), ""
+	## for an id not in the catalog.
+	var channel_of:Dictionary={}
 	func clear_batch()->void:
 		day=-1;known_size=-1;known={};has_known=false;society={};has_society=false
 		environment={};has_environment=false;home_resources={};has_home_resources=false
@@ -104,7 +107,7 @@ class ResearchScan extends RefCounted:
 	func clear_catalog()->void:
 		seed_value=0;seeded=false;seed_tables={};by_dynamic={};by_dynamic_basis=[]
 		children={};children_basis=[];open_years=PackedFloat64Array();open_years_basis=[]
-		year_buckets={};year_buckets_basis=[];foundation_scanned={};by_age={};by_age_whole={}
+		year_buckets={};year_buckets_basis=[];foundation_scanned={};by_age={};by_age_whole={};channel_of={}
 var _scan:=ResearchScan.new()
 
 var latest_context:Dictionary={}
@@ -1454,8 +1457,12 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 	if not skip.is_empty():
 		var own:Array=[]
 		for id:Variant in skip:
-			var held:Dictionary=catalog_by_id.get(String(id),{})
-			if held.is_empty() or _channel_key(String(held.get("dynamic","")),String(held.get("subcategory","")))==channel: own.append(String(id))
+			var home_channel:Variant=_scan.channel_of.get(id)
+			if home_channel==null:
+				var held:Dictionary=catalog_by_id.get(String(id),{})
+				home_channel="" if held.is_empty() else _channel_key(String(held.get("dynamic","")),String(held.get("subcategory","")))
+				_scan.channel_of[id]=home_channel
+			if home_channel=="" or home_channel==channel: own.append(String(id))
 		if not own.is_empty():
 			own.sort()
 			key+="|"+"|".join(own)

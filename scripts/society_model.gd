@@ -273,6 +273,17 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		adoption=adoption.merged(trials,true)
 		practices=practices.duplicate()
 		practices.append_array(trials.keys())
+	# The sums read only the practices, their adoption, the tools, works and
+	# goods they need, and the lines' focus: when all of these stand as at the
+	# last rebuild, so do the sums (the same additions in the same order).
+	var means:=PackedFloat64Array()
+	for special:String in Goods.FACTOR_SPECIAL:
+		if practices.has(special): means.append(Goods.factor(special))
+	var reading:=[practices,adoption,means,Goods.coverage() if _has_technique(practices) else -1.0,line_focus,neglect,definitions_by_id.size()]
+	if _sums_memo.reading.size()==reading.size() and _sums_memo.reading==reading:
+		effect_totals.merge(_sums_memo.totals)
+		_clamp_and_upkeep(neglect)
+		return
 	# Each line's practice_scale is read once; scaled_effect is applied inline.
 	var scales:Dictionary={}
 	if _lower_keys.is_empty(): _build_key_sets()
@@ -322,6 +333,25 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 			if seen[slot]==0:seen[slot]=1;order.append(slot)
 			sums[slot]+=value*adoption_level
 	for slot in order:effect_totals[_effect_names[slot]]=sums[slot]
+	_sums_memo.reading=[practices.duplicate(),adoption.duplicate(),means,reading[3],line_focus.duplicate(),neglect,definitions_by_id.size()]
+	_sums_memo.totals=effect_totals.duplicate()
+	_clamp_and_upkeep(neglect)
+
+## Whether any of `practices` is a technique household goods carry
+## (civilian_goods.gd TECHNIQUES, other than FACTOR_SPECIAL).
+static func _has_technique(practices:Array)->bool:
+	for id:String in Goods.TECHNIQUES:
+		if not Goods.FACTOR_SPECIAL.has(id) and practices.has(id): return true
+	return false
+
+## The last rebuild's sums and what they were read from (never saved).
+class SumsMemo extends RefCounted:
+	var reading:Array=[]
+	var totals:Dictionary={}
+var _sums_memo:=SumsMemo.new()
+
+## The rebuild's last part: the era's ceilings and the specialists' upkeep.
+func _clamp_and_upkeep(neglect:float)->void:
 	# research_600 balance: totals are held under the society's era ceiling,
 	# never the flat modern limit alone.
 	ceiling_era=society_era()
