@@ -46,10 +46,10 @@ GRADE_CRAFT_FULL = [float(x) for x in _c("GRADE_CRAFT_FULL", [0.0])]
 K = {k: float(_c(k, 0.0)) for k in (
     "TICK_DAYS", "HOME_HEALTH", "HOME_COHESION", "HOME_ILLNESS", "HOME_SICKNESS", "HOME_FIRE",
     "ROAD_FULL", "ROAD_WEAR", "ROAD_STONE", "ROAD_LOGISTICS", "HOME_WEATHER", "HOMES_AHEAD", "HOMES_SHORT", "CIVIC_SHARE", "REPAIR_SHARE", "WALL_UPKEEP", "WALL_WEAR", "GREAT_CREW_SHARE", "BEAUTY_SCALE", "BEAUTY_WEAR", "ARTISTRY_EACH", "BEAUTY_MATERIALS",
-    "BEAUTY_COHESION", "BEAUTY_SPLENDOR", "BEAUTY_CULTURE", "WORKS_FULL", "WORKS_WEAR", "WORKSHOP_MAKING", "GRANARY_ROT",
+    "BEAUTY_COHESION", "BEAUTY_CULTURE", "WORKS_FULL", "WORKS_WEAR", "WORKSHOP_MAKING", "GRANARY_ROT",
     "KILN_BUILDING", "STOREHOUSE_LOGISTICS", "STOREHOUSE_EXTRACTION", "WALL_SHARE", "CRAFT_YEARS", "CRAFT_PER_LEVEL", "CRAFT_MAX", "CRAFT_WORK",
     "CRAFT_RESEARCH", "CRAFT_SIGNAL", "CRAFT_WALLS", "CRAFT_WALL_QUALITY", "STONE_DEFENSE", "BUILDER_WALL_WEIGHT", "STONE_STAGE",
-    "STONE_WATCH", "FORT_MIGHT", "FORT_STRENGTH", "BASTION_BONUS", "WALL_WISH", "WALL_WISH_FROM", "WALL_WISH_MAX", "GREAT_CRAFT", "GREAT_BUILDERS",
+    "STONE_WATCH", "FORT_STRENGTH", "BASTION_BONUS", "WALL_WISH", "WALL_WISH_FROM", "WALL_WISH_MAX", "GREAT_CRAFT", "GREAT_BUILDERS",
     "GREAT_CREW", "GREAT_MATERIALS", "GREAT_PAYOFF", "RESERVE")}
 ROAD_KINDS = _c("ROAD_KINDS", [["", 0.0]])
 ARTISTRY = _c("ARTISTRY", [])
@@ -87,10 +87,7 @@ WORK_RISK = 0.12             # the most risk of collapse the standard policy acc
 RENOWN_SCALE = float(g.const("scripts/great_works.gd", "RENOWN_SCALE", default=30.0, optional=True))
 WORKS_CAP = float(g.const("scripts/artifact_culture.gd", "ALLURE_WORKS", default=.25, optional=True))
 ST = "scripts/standing.gd"
-SPLENDOR_WORKS = float(g.const(ST, "SPLENDOR_WORKS", default=2.4, optional=True))
-SPLENDOR_CULTURE = float(g.const(ST, "SPLENDOR_CULTURE", default=0.6, optional=True))
-MIGHT_FULL_SHARE = float(g.const(ST, "MIGHT_FULL_SHARE", default=0.07, optional=True))
-WEALTH_FOOD_DAYS = float(g.const(ST, "WEALTH_FOOD_DAYS", default=45.0, optional=True))
+import standing as standing_mirror  # noqa: E402  standing.gd against the age
 
 
 def clamp(x, lo, hi):
@@ -478,29 +475,21 @@ class Fabric:
 
     # ------------------------------------------------------------------ readings
     def readings(self) -> dict:
-        """standing.gd strengths and renown, as far as one people alone can be read:
-        might (the watch at the ready, the walls), splendor (great works, culture,
-        fine works), awe and allure."""
+        """standing.gd strengths against the age and renown, as far as one people
+        alone can be read (standing.py): might (the watch at the ready, the
+        walls), splendor (great works, culture, fine works), awe, allure, pride."""
         s = self.sim
         pop = max(1.0, s.population)
-        watch = s.watch() if hasattr(s, "drill") else 0.0
-        readiness = clamp(getattr(s, "drill", 0.0), 0.0, 1.0)
         walls = clamp(self.defense_bonus() / max(1e-9, K["BASTION_BONUS"] or 0.62), 0.0, 1.0)
-        might = clamp(watch * readiness / max(1.0, pop * MIGHT_FULL_SHARE) + (K["FORT_MIGHT"] * walls if ON else 0.0), 0.0, 1.0)
-        works = WORKS_CAP * (1.0 - math.exp(-self.works_points / RENOWN_SCALE))
-        culture_allure = float(getattr(s, "allure", 0.0))
-        beauty = self.beauty_r if ON else 0.0
-        splendor = clamp(works * SPLENDOR_WORKS + max(0.0, culture_allure - works) * SPLENDOR_CULTURE + beauty * K["BEAUTY_SPLENDOR"], 0.0, 1.0)
-        culture = clamp(culture_allure + beauty * K["BEAUTY_CULTURE"], 0.0, 1.0)
-        scholars = s.workers("Knowledge")
-        genius = clamp(0.35 + scholars / pop * 3.0, 0.0, 1.0)
-        wealth = clamp(clamp(s.stored_days / WEALTH_FOOD_DAYS, 0.0, 1.0) * .65 + clamp(s.raw / max(1.0, pop * 5.0), 0.0, 1.0) * .35, 0.0, 1.0)
-        order = clamp(s.legitimacy * .55 + s.cohesion * .25 + .2 * .4, 0.0, 1.0)
-        awe = clamp(might * .45 + splendor * .35 + max(0.0, genius - .5) * .4, 0.0, 1.0)
-        allure = clamp(culture * .5 + wealth * .25 + max(0.0, genius - .5) * .2 + order * .1 - might * .35 * .35, 0.0, 1.0)
-        pride = clamp(0.5 + splendor * .25 + awe * .15 + allure * .1, 0.0, 1.0)
-        return {"might_strength": might, "splendor": splendor, "awe": awe, "allure_view": allure, "pride": pride, "walls": walls,
-                "defense_bonus": self.defense_bonus(), "stage": self.stage}
+        row = {"year": s.day / 365.0, "population": pop, "watch": s.watch() if hasattr(s, "drill") else 0.0, "drill": getattr(s, "drill", 0.0),
+               "defense_bonus": self.defense_bonus() if ON else 0.0, "works_points": self.works_points, "beauty": self.beauty_r if ON else 0.0,
+               "artifacts": {"allure": float(getattr(s, "allure", 0.0))}, "known": int(s.known.sum()), "knowledge_workers": s.workers("Knowledge"),
+               "food_days": s.stored_days, "raw": getattr(s, "raw", 0.0), "goods_per_head": max(0.0, getattr(s, "goods", 0.0)) / pop,
+               "health": s.health, "cohesion": s.cohesion, "legitimacy": s.legitimacy, "logistics": s.logistics, "alloc": dict(s.alloc_pct), "able": s.able}
+        r = standing_mirror.readings(row, getattr(s.s, "posture", {}) or {})
+        command = standing_mirror.renown(r)
+        return {"might_strength": r["might"], "splendor": r["splendor"], "awe": command["awe"], "allure_view": command["allure"], "pride": command["pride"],
+                "walls": walls, "defense_bonus": self.defense_bonus(), "stage": self.stage}
 
     def snapshot(self) -> dict:
         row = {"homes": list(self.homes), "home_quality": self.quality, "roads": self.road, "beauty": self.beauty_r, "works_cover": self.cover,

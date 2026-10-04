@@ -150,7 +150,7 @@ static func _standing(out:Dictionary)->void:
 		var feelings:={}
 		for row:Array in Standing.VIEWS: feelings[String(row[0])]=roundi(float(v.get(String(row[0]),0.0))*100.0)
 		peoples.append({"name":String(v.civ_name),"headline":Standing.view_words(v),"feelings":feelings,"envy":roundi(float(v.envy)*100.0),"contempt":roundi(float(v.contempt)*100.0),
-			"strength":String(preload("res://scripts/hud/content/dock_content_standing.gd")._strength_words(float(v.strength_ratio))),"does":does})
+			"strength":String(preload("res://scripts/hud/content/dock_content_standing.gd")._estimated_strength_words(String(v.civ_id),float(v.strength_ratio))),"does":does})
 	out["standing"]={"peoples":peoples,"posture":String(Standing.posture().words)}
 
 # --------------------------------------------------------------------------
@@ -197,7 +197,8 @@ static func _common(out:Dictionary)->void:
 			bowed.append({"name":String(t.name),"value":String(answer.call("_qty",float(t.get("value",0.0)))),"since":floori(float(t.get("since",0))/365.0),"hostage":String(t.get("hostage",""))})
 		for c in world.civilizations:
 			if not c is Dictionary: continue
-			var arm:Dictionary=answer.call("arming",String((c as Dictionary).get("id","")))
+			# Only what our watchers have heard of (world_answer heard_of_arming).
+			var arm:Dictionary=answer.call("heard_of_arming",String((c as Dictionary).get("id","")))
 			if not arm.is_empty(): arming.append({"name":String(c.get("name","")),"days":maxi(0,int(arm.get("march",0))-_day())})
 	out["tributaries"]=bowed
 	out["arming"]=arming

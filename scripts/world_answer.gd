@@ -139,6 +139,27 @@ static func tributary(civ_id:String)->Dictionary:
 static func is_tributary(civ_id:String)->bool:
 	return not tributary(civ_id).is_empty()
 
+## Late word of an arming our watchers missed: it reaches us in the last month
+## before they march (standing.gd LATE_WORD_DAYS), told then.
+static func _late_word(civ_id:String,day:int)->void:
+	var arm:Dictionary=(state().arming as Dictionary).get(civ_id,{})
+	if arm.is_empty() or bool(arm.get("heard",true)): return
+	var left:=int(arm.get("march",day))-day
+	var standing:=load(STANDING_PATH) as GDScript
+	var late:=int(standing.get_script_constant_map().get("LATE_WORD_DAYS",30)) if standing!=null else 30
+	if left>late: return
+	arm["heard"]=true
+	var name:=_name(civ_id)
+	var text:="Late word: %s is calling every spear it has, and marches on us within %s. Our watchers did not see it begin (we hear of it at once %d times in 100, by our cunning). Our watch should be ready." % [name,_days_words(maxi(1,left)),roundi(float(arm.get("heard_odds",0.5))*100.0)]
+	_chronicle("arming_late:%s:%d" % [civ_id,int(arm.get("since",day))],"Late Word: %s Sharpens Every Spear" % name,text,"moment",civ_id)
+	_log(civ_id,"arming",text)
+
+## Arming against us as far as we have heard of it ({} while our watchers
+## have missed it): what the Standing page and the court can say.
+static func heard_of_arming(civ_id:String)->Dictionary:
+	var arm:=arming(civ_id)
+	return arm if bool(arm.get("heard",true)) else {}
+
 ## Arming to come at us with everything: {} or {since, march, league, cause}.
 ## Asked in a rival's own scope by its planner (civilization_strategy), with
 ## its own id.
@@ -259,7 +280,7 @@ static func standing_rows(civ_id:String,view:Dictionary)->Array[Dictionary]:
 		out.append({"id":"tributary","tone":"good","words":"Bowed to us: tribute worth %s every season%s" % [_qty(float(t.get("value",0.0))),("; %s is our hostage" % hostage) if hostage!="" else ""],
 			"detail":"Worth %s paid in all since they bowed. They pay while they fear us (they stop below %d in 100) and our spears outmatch theirs." % [_qty(paid_so_far(civ_id)),roundi(PAY_FEAR*100.0)]})
 		return out
-	var arm:=arming(civ_id)
+	var arm:=heard_of_arming(civ_id)
 	if not arm.is_empty():
 		var left:=maxi(0,int(arm.get("march",_day()))-_day())
 		out.append({"id":"arming","tone":"danger","words":"Gathering every spear against us: they march in about %s" % _days_words(left),
@@ -291,6 +312,7 @@ static func monthly(day:int)->void:
 		if day>=int((a.tributaries[civ_id] as Dictionary).get("due",day+1)): _tribute_due(String(civ_id),day)
 	for civ_id in (a.arming as Dictionary).keys():
 		if day>=int((a.arming[civ_id] as Dictionary).get("march",day+1)): _march(String(civ_id),day)
+		else: _late_word(String(civ_id),day)
 	var war:=load(WAR_PATH) as GDScript
 	# One reading of our strengths and our people's dread serves every people
 	# weighed this month (standing.gd's shared reading).
@@ -652,9 +674,17 @@ static func _begin_arming(civ_id:String,day:int,o:Dictionary)->void:
 		for other in league.call("members"):
 			if String(other)!=civ_id and free_to_come(String(other),day,true): with.append(String(other))
 	var march:=day+_rng("arm:%s:%d" % [civ_id,day]).randi_range(ARMING_MIN,ARMING_MAX)
-	state().arming[civ_id]={"since":day,"march":march,"league":with,"cause":String(o.get("why_all_in","")).substr(0,160)}
+	# Whether our watchers hear of it now (standing.gd forewarn_odds, by our
+	# cunning), or only in the last month before they march (_late_word).
+	var standing:=load(STANDING_PATH) as GDScript
+	var odds:=float(standing.call("forewarn_odds",float(standing.call("art_of","player","cunning")))) if standing!=null else 1.0
+	var heard:=_rng("arm_heard:%s:%d" % [civ_id,day]).randf()<odds
+	state().arming[civ_id]={"since":day,"march":march,"league":with,"cause":String(o.get("why_all_in","")).substr(0,160),"heard":heard,"heard_odds":snappedf(odds,0.01)}
 	_mark(civ_id,"all_in",day)
 	var name:=_name(civ_id)
+	if not heard:
+		_log(civ_id,"arming_unseen","%s began to gather every spear against us; our watchers did not see it." % name)
+		return
 	var allies:=""
 	if not with.is_empty():
 		var names:PackedStringArray=[]

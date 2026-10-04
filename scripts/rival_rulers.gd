@@ -210,6 +210,10 @@ static func grudge(civ_id:String,clause:String,weight:float,source:String)->void
 	var c:=character(civ_id)
 	if c.is_empty(): return
 	if String(c.trait)=="grudge": weight*=1.5
+	# A persuasive people's wrongs are held a little lighter (standing.gd
+	# grudge_factor: x0.8 at full persuasion, x1.2 at none).
+	var Standing:=preload("res://scripts/standing.gd")
+	weight*=Standing.grudge_factor(Standing.art_of("player","persuasion"))
 	for g in c.grudges:
 		if g is Dictionary and String(g.get("source",""))==source and not bool(g.get("settled",false)):
 			g["weight"]=clampf(float(g.weight)+weight*0.5,0.0,1.5); return
@@ -706,13 +710,17 @@ static func _bluff(civ_id:String,audience:Dictionary,rng:RandomNumberGenerator)-
 	var name:=String(civ.get("name",civ_id))
 	var tells:Array=[]
 	var signs:Array=[]
+	# How well our watchers read their herald (standing.gd bluff_reading, by
+	# our cunning; a typical people keeps 0.85, 0.7 and 0.15).
+	var Standing:=preload("res://scripts/standing.gd")
+	var reading:=Standing.bluff_reading(Standing.art_of("player","cunning"))
 	if bluff:
 		var pool:Array=["%s's herald names no day and no place, and will not meet your eye." % name]
 		if size_ratio<0.9: pool.append("The herald boasts of more spears than %s has grown hunters." % name)
 		if hungry: pool.append("%s's escort is thin and hungry; no band marches on empty bellies." % name)
 		if enemy!="": pool.append("%s is already quarrelling with %s; it cannot fight on two sides." % [name,Hall._civ_name(enemy)])
 		if String(c.get("trait",""))=="bluffer": pool.append("%s is known for threats that never arrive." % given(civ_id))
-		if rng.randf()<0.85:
+		if rng.randf()<float(reading.tells):
 			var first:=rng.randi_range(0,pool.size()-1)
 			tells.append(pool[first])
 			pool.remove_at(first)
@@ -720,8 +728,8 @@ static func _bluff(civ_id:String,audience:Dictionary,rng:RandomNumberGenerator)-
 	else:
 		var strong:Array=["%s's escort is painted for war, and the herald names a day." % name,"%s's herald counts the paths to your fires aloud, as if already walking them." % name]
 		if size_ratio>=1.0: strong.append("%s has more grown hunters than your people, and the herald knows it." % name)
-		if rng.randf()<0.7: signs.append(strong[rng.randi_range(0,strong.size()-1)])
-		if rng.randf()<0.15: tells.append("%s's herald names no day and no place, and will not meet your eye." % name)
+		if rng.randf()<float(reading.signs): signs.append(strong[rng.randi_range(0,strong.size()-1)])
+		if rng.randf()<float(reading.false_tells): tells.append("%s's herald names no day and no place, and will not meet your eye." % name)
 	return {"bluff":bluff,"tells":tells,"signs":signs}
 
 # --------------------------------------------------------------------------

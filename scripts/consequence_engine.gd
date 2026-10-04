@@ -673,8 +673,10 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 	# Previous-day calculations and trends read scalar metrics only. Keep their
 	# snapshot without recursively copying forecasts and demographic breakdowns.
 	var previous: Dictionary = WorldSimulation.state.simulation_metrics.duplicate()
-	# The month's reading of might and pride (standing.gd), kept with the state.
-	if int(WorldSimulation.state.elapsed_days)%30==0 or not WorldSimulation.state.simulation_metrics.has("standing_pride"):
+	# The month's reading of might and pride (standing.gd), kept with the state:
+	# every 30 days of the people's own calendar (reading_due), however many
+	# days its step covers.
+	if preload("res://scripts/standing.gd").reading_due():
 		preload("res://scripts/standing.gd").record_monthly()
 	var traveling:=bool(context.get("traveling",WorldSimulation.state.convoy_traveling))
 	WorldSimulation.state.convoy_traveling=traveling

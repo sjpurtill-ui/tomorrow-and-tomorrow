@@ -579,8 +579,35 @@ static func _schedule(civ_id:String,due:int,cause:String,ref:String)->void:
 	var pending:Dictionary=f.pending
 	if pending.is_empty() or due<int(pending.get("day",due)):
 		f["pending"]={"day":due,"cause":cause,"ref":ref,"stack":int(pending.get("stack",0))+1}
+		_foresee(civ_id,f.pending)
 	else:
 		pending["stack"]=int(pending.get("stack",1))+1
+
+## CUNNING SEES THEM COMING (standing.gd forewarn_odds, forewarn_days): when a
+## raid is set for a day, our watchers see it coming on our cunning's odds,
+## that many days ahead (seeded; stated on the Standing page). Seen, the watch
+## keeps the approaches from the warning until the raiders come, and meets
+## them on ground of our choosing (_raid's guard).
+static func _foresee(civ_id:String,pending:Dictionary)->void:
+	var cunning:=Standing.art_of("player","cunning")
+	var odds:=Standing.forewarn_odds(cunning)
+	var due:=int(pending.get("day",_day()))
+	pending["seen_odds"]=snappedf(odds,0.01)
+	if _rng("foresee:%s:%d" % [civ_id,due]).randf()>=odds: return
+	pending["seen"]=true
+	pending["warn_day"]=maxi(_day(),due-Standing.forewarn_days(cunning))
+
+## The warning comes on its day: told under the clock, and the watch keeps
+## the approaches through the day they come.
+static func _forewarn(civ_id:String,f:Dictionary,day:int)->void:
+	var pending:Dictionary=f.pending
+	if pending.is_empty() or not bool(pending.get("seen",false)) or bool(pending.get("warned",false)) or day<int(pending.get("warn_day",day)): return
+	pending["warned"]=true
+	var due:=int(pending.get("day",day))
+	f["guard_until"]=maxi(int(f.get("guard_until",-1)),due+TICK+1)
+	var name:=_name(civ_id)
+	_chronicle("forewarned:%s:%d" % [civ_id,due],"Raiders From %s Seen Gathering" % name,"Our watchers saw %s's raiders gathering: they may come within %d days. The watch keeps the approaches until they do. (We see raiders coming %d times in 100, by our cunning.)" % [name,maxi(1,due-day),roundi(float(pending.get("seen_odds",0.5))*100.0)],"notice",civ_id)
+	_log(civ_id,"seen_coming","Our watchers saw %s's raiders gathering, about %d days before they came." % [name,maxi(1,due-day)])
 
 static func _mark_harm(civ_id:String,day:int)->void:
 	for r in state().refusals:
@@ -1788,6 +1815,7 @@ static func daily(day:int)->void:
 		var war:Dictionary=f.war
 		if war.is_empty():
 			var pending:Dictionary=f.pending
+			_forewarn(id,f,day)
 			if not pending.is_empty() and day>=int(pending.get("day",day)): _execute(id,day)
 			var op:Dictionary=f.get("op",{})
 			if not op.is_empty() and day>=int(op.get("due",day)):

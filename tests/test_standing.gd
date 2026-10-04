@@ -39,10 +39,13 @@ func _met(population:float=120.0,warriors:float=6.0,readiness:float=0.55)->Strin
 	ForeignDiplomacy.leader(String(civ.id))
 	return String(civ.id)
 
+## Rich against the age (standing_scale.gd): deep stores, and materials and
+## made goods well past a typical people's (a hoard of food alone is not).
 func _rich(food_days:float)->void:
-	GameState.simulation_metrics["food_days"]=food_days
+	GameState.simulation_metrics["food_days"]=maxf(food_days,240.0) if food_days>=100.0 else food_days
 	GameState.resource_stockpiles["Timber"]=600.0
 	GameState.resource_stockpiles["Stone"]=600.0
+	GameState.resource_stockpiles["Civilian Goods"]=GameState.population_exact*6.0 if food_days>=100.0 else 0.0
 
 func _arm(troops:int,readiness:float)->void:
 	MilitaryCampaign.home_army["troops"]=troops
@@ -101,7 +104,8 @@ func test_a_people_never_met_holds_no_view()->void:
 
 func test_pride_is_ordinary_for_a_plain_village_and_menace_costs_allure()->void:
 	_arm(0,0.3)
-	assert_float(float(Standing.pride().value)).is_between(0.45,0.6)
+	# Ordinary as the home card words it (neither proud, 0.62, nor ashamed, 0.42).
+	assert_float(float(Standing.pride().value)).is_between(0.42,0.62)
 	var calm:=Standing.attraction_shift()
 	_arm(14,0.85)
 	assert_float(Standing.attraction_shift()).is_less(calm)
@@ -156,7 +160,9 @@ func test_the_board_draws_the_rose_the_peoples_and_home()->void:
 	board.size=Vector2(900,1600)
 	board.setup(page.tab(0).blocks[0])
 	assert_object(board.find_child("Rose",true,false)).is_not_null()
-	assert_int(board.find_child("StrengthList",true,false).get_child_count()).is_equal(10)
+	# What the percentages mean, the year's dashes, and the nine.
+	assert_int(board.find_child("StrengthList",true,false).get_child_count()).is_equal(11)
+	assert_object(board.find_child("Arts",true,false)).is_not_null()
 	assert_object(board.find_child("People_"+id,true,false)).is_not_null()
 	assert_object(board.find_child("Home",true,false)).is_not_null()
 	# Laying a people's strengths over ours needs them simulated; a plain
@@ -365,8 +371,9 @@ func test_the_page_tells_what_they_remember_and_what_they_mean_to_do()->void:
 	for c:Dictionary in theirs.consequences: rows.append(String(c.words))
 	if float(o.all_in)>0.0: assert_str(" ".join(rows)).contains("every spear they have: "+Standing.monthly_odds_words(float(o.all_in)))
 	if float(o.bow)>0.0: assert_str(" ".join(rows)).contains("bow and pay us tribute: "+Standing.monthly_odds_words(float(o.bow)))
-	# Arming leads the dangers.
+	# Arming leads the dangers, once our watchers have heard of it.
 	answer._begin_arming(id,int(GameState.elapsed_days),{"why_all_in":"they resent us"})
+	(answer.state().arming[id] as Dictionary)["heard"]=true
 	board=page.tab(0).blocks[0]
 	assert_str(String((board.warnings as Array)[0].title)).contains("gathering every spear")
 	# Our own people's long memory is on the home card.

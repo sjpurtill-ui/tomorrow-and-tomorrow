@@ -113,7 +113,12 @@ func _civic_observation(city_id:String)->Dictionary:
 func capture(observer:String,city_id:String,quality:float,day:int,source:String,reference:String,observation_days:int=1)->Dictionary:
 	var actual:=truth(city_id)
 	if actual.is_empty() or actual.civ_id==observer: return {}
-	quality=clampf(quality,0, .9)
+	# The observer's cunning sharpens every look (standing.gd intel_quality_edge,
+	# intel_error_factor): the same rule for every people's watchers.
+	var Standing:=preload("res://scripts/standing.gd")
+	var cunning:=Standing.art_of(observer,"cunning")
+	var sharper:=Standing.intel_error_factor(cunning)
+	quality=clampf(quality+Standing.intel_quality_edge(cunning),0, .9)
 	var fields:Dictionary={}
 	for key:String in FIELDS:
 		if quality<float(FIELDS[key].threshold) or not actual.values.has(key) or float(actual.values[key])<0: continue
@@ -122,7 +127,7 @@ func capture(observer:String,city_id:String,quality:float,day:int,source:String,
 		# Repeated days of physically present observation improve counting, not
 		# days spent travelling. Stores remain harder to assess than inhabitants.
 		var days:=clampi(observation_days,1,366)
-		var error:=maxf(.035,lerpf(.65,.16,quality)/sqrt(float(days))) if key=="population" else maxf(.10,lerpf(.65,.16,quality)/pow(float(days),.25))
+		var error:=(maxf(.035,lerpf(.65,.16,quality)/sqrt(float(days))) if key=="population" else maxf(.10,lerpf(.65,.16,quality)/pow(float(days),.25)))*sharper
 		var quantum:=.025 if FIELDS[key].unit=="capacity" else .1 if key=="science_capacity" else maxf(1,pow(10,floor(log(maxf(1,value))/log(10))-2))
 		var width:=maxf(quantum,value*error)
 		var center:=value+rng.randf_range(-.3,.3)*width
