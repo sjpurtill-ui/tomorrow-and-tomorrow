@@ -88,8 +88,9 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 	var V:=PackedVector3Array();var N:=PackedVector3Array();var C:=PackedColorArray()
 	var UV:=PackedVector2Array();var UV2:=PackedVector2Array()
 	var B:=PackedInt32Array();var W:=PackedFloat32Array();var S:=PackedFloat32Array();var I:=PackedInt32Array()
-	var SV:Array=[]
-	for n in names:SV.append(PackedVector3Array())
+	var SV:Array=[];var SN:Array=[]
+	for n in names:
+		SV.append(PackedVector3Array());SN.append(PackedVector3Array())
 	for p:Array in parts:
 		var mi:MeshInstance3D=p[0];var s:int=p[1]
 		var slot:=float(maxi(0,SLOTS.find(String(p[2]))))
@@ -104,15 +105,17 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 		var nn:=n0
 		var moved:=PackedInt32Array()
 		var delta:=PackedVector3Array()
+		var normal_delta:=PackedVector3Array()
 		var baked:=false
 		for i in mesh.get_blend_shape_count():
 			var nm:=String(mesh.get_blend_shape_name(i))
 			if not nm.begins_with("face_") or i>=bshapes.size():continue
 			var w:=clampf(float(face.get(nm.trim_prefix("face_"),0.0)),-1.0,1.0)
 			if absf(w)<0.002:continue
+			var sv:PackedVector3Array=bshapes[i][Mesh.ARRAY_VERTEX]
+			if sv.size()!=count:continue
 			if not baked:
 				v=v0.duplicate();nn=n0.duplicate();baked=true
-			var sv:PackedVector3Array=bshapes[i][Mesh.ARRAY_VERTEX]
 			var sn:Variant=bshapes[i][Mesh.ARRAY_NORMAL]
 			var has_n:=sn is PackedVector3Array and (sn as PackedVector3Array).size()==count
 			var snp:PackedVector3Array=sn if has_n else PackedVector3Array()
@@ -120,13 +123,18 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 				var d:=sv[k]-v0[k]
 				if d.x!=0.0 or d.y!=0.0 or d.z!=0.0:
 					v[k]+=d*w
-					if has_n:nn[k]+=(snp[k]-n0[k])*w
+				# An unmoved vertex still turns when its neighbours move.
+				if has_n:nn[k]+=(snp[k]-n0[k])*w
 		if baked:
+			normal_delta.resize(count)
 			for k in count:
 				var d:=v[k]-v0[k]
 				if d.x!=0.0 or d.y!=0.0 or d.z!=0.0:
 					moved.append(k);delta.append(d)
-					nn[k]=nn[k].normalized()
+				# Keep the authored weighted delta before normalizing the base:
+				# every moving target needs the same person's face baked in.
+				normal_delta[k]=nn[k]-n0[k]
+				nn[k]=_unit_normal(nn[k],n0[k])
 		var base:=V.size()
 		V.append_array(v);N.append_array(nn)
 		var col:Variant=arr[Mesh.ARRAY_COLOR]
@@ -154,10 +162,13 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 				if String(mesh.get_blend_shape_name(i))==String(names[j]):found=i;break
 			# (packed arrays are values: take the list out, add, put it back)
 			var list:PackedVector3Array=SV[j]
+			var normals:PackedVector3Array=SN[j]
 			if found<0 or found>=bshapes.size():
 				list.append_array(v);SV[j]=list
+				normals.append_array(nn);SN[j]=normals
 				continue
 			var t:PackedVector3Array=(bshapes[found][Mesh.ARRAY_VERTEX] as PackedVector3Array)
+			var valid_vertices:=t.size()==count
 			if t.size()!=count:
 				push_warning("court figure merge: %s %s morph %s has %d of %d vertices" % [mi.name,String(p[2]),names[j],t.size(),count])
 				t=v
@@ -165,6 +176,14 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 				t=t.duplicate()
 				for m in moved.size():t[moved[m]]+=delta[m]
 			list.append_array(t);SV[j]=list
+			var target_normals:Variant=bshapes[found][Mesh.ARRAY_NORMAL]
+			if valid_vertices and target_normals is PackedVector3Array and (target_normals as PackedVector3Array).size()==count:
+				var tn:PackedVector3Array=target_normals
+				for k in count:
+					normals.append(_unit_normal(tn[k]+(normal_delta[k] if baked else Vector3.ZERO),nn[k]))
+			else:
+				normals.append_array(nn)
+			SN[j]=normals
 	var arrays:=[]
 	arrays.resize(Mesh.ARRAY_MAX)
 	arrays[Mesh.ARRAY_VERTEX]=V;arrays[Mesh.ARRAY_NORMAL]=N;arrays[Mesh.ARRAY_COLOR]=C
@@ -174,9 +193,15 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 	for j in names.size():
 		var sa:=[]
 		sa.resize(Mesh.ARRAY_MAX)
-		sa[Mesh.ARRAY_VERTEX]=SV[j];sa[Mesh.ARRAY_NORMAL]=N
+		sa[Mesh.ARRAY_VERTEX]=SV[j];sa[Mesh.ARRAY_NORMAL]=SN[j]
 		shapes.append(sa)
 	return {"arrays":arrays,"shapes":shapes}
+
+## Opposing weighted morphs can cancel a normal. Keep a usable direction.
+static func _unit_normal(value:Vector3,fallback:Vector3)->Vector3:
+	if value.is_finite() and value.length_squared()>0.000001:return value.normalized()
+	if fallback.is_finite() and fallback.length_squared()>0.000001:return fallback.normalized()
+	return Vector3.UP
 
 static func _or_zero2(a:Variant,count:int)->PackedVector2Array:
 	if a is PackedVector2Array and (a as PackedVector2Array).size()==count:return a
