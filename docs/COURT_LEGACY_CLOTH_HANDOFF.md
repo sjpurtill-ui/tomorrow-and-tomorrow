@@ -98,6 +98,11 @@ attribute, index, morph, rig and non-hide body channel unchanged. Only 327–486
 hide-mask vertices per body are restored. Logs:
 `artifacts/legacy-optional-cape-{before,raw,invariants}.log`.
 
-This checkpoint is HELD for cape-on/off GPU review and combined runtime tests;
-no player-build delivery is claimed. Existing motion/contact geometry evidence
-remains applicable because garment geometry and animation data are exact.
+The original checkpoint was HELD pending cape-on/off GPU review and combined
+runtime tests. Combined acceptance is now READY in
+`COURT_EVOLUTION_POLISH_HANDOFF.md`: 411/411 court tests, an independent focused
+14/14, refreshed actual-court close-ups and 32 optional-cape captures. Corrected
+private probes 50972 and 61680 exited 0; root reviewed 16 targeted full-resolution
+images covering all seven bodies, four poses and both cape states. No player-build
+delivery is claimed. Existing motion/contact geometry evidence remains
+applicable because garment geometry and animation data are exact.
