@@ -608,8 +608,11 @@ class LeaderSurrogate(Surrogate):
         year_now = self.day / YEAR
         pop = max(1.0, self.population)
         T = lambda name: standing_mirror.anchors(standing_mirror.TABLES[name], year_now)  # noqa: E731
-        wealth = standing_mirror.blend({"food": standing_mirror.score(self.stored_days, T("STORES")), "materials": standing_mirror.score(getattr(self, "raw", 0.0) / pop, T("MATERIALS")),
-                                        "goods": standing_mirror.score(max(0.0, getattr(self, "goods", 0.0)) / pop, T("GOODS"))}, standing_mirror.WEALTH_W)
+        # Wealth is goods, materials and treasures (none kept here: typical);
+        # food in store is Endurance's.
+        wealth = standing_mirror.blend({"goods": standing_mirror.score(max(0.0, getattr(self, "goods", 0.0)) / pop, T("GOODS")),
+                                        "materials": standing_mirror.score(getattr(self, "raw", 0.0) / pop, T("MATERIALS")),
+                                        "treasures": standing_mirror.TYPICAL}, standing_mirror.WEALTH_W)
         theirs = float(self.p.get("neighbour_wealth", .5))
         envy = clamp((wealth * ENVY_PLENTY + max(0.0, wealth - theirs) * ENVY_RICHER + heard * .4) * (1 - awe) * (1 - trust * .5), 0, 1)
         # standing_check.py's raid world may set harder neighbours (a lower floor).
