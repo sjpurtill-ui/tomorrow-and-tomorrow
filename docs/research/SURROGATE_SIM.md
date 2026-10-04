@@ -157,7 +157,7 @@ holding pacts, newcomers and softer grudges it also buys are not in the
 surrogate.
 
 Truth: the seven runs were re-recorded on this branch, one engine at a time
-(124-198 s each), since standing.gd's pride now centres on the typical people
+(78-198 s each), since standing.gd's pride now centres on the typical people
 and `built_fabric.gd` (a watched file) states its Splendor and Might lines in
 the new readings. Against the old truth the engine's 15-year path differs
 only in holding together (0.872 against 0.881 at year 15, pride no longer

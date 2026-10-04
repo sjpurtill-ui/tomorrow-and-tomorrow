@@ -1,6 +1,6 @@
 {
  "spec": "path_war:74119:15",
- "commit": "b9050833dde7cb3646a1f6c643c9d8d109d88c6f",
+ "commit": "e9de5cd4378d1f2eaacede9544262d47f75d3c7e",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "f309d9311627",
   "scripts/society_model.gd": "1b3e35dc26d7",
@@ -26,7 +26,7 @@
   "scripts/settlement_construction.gd": "55bb3fda4014",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 188.4,
+ "wall_seconds": 82.2,
  "returncode": 0,
- "generated": "2026-10-03 18:42:25"
+ "generated": "2026-10-03 19:12:07"
 }
