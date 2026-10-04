@@ -69,6 +69,8 @@ class ResearchScan extends RefCounted:
 	var has_home_resources:=false
 	var eligible:Dictionary={}
 	var best:Dictionary={}
+	## _score_best_candidate's answers in this scan, by what they were read from.
+	var scored:Dictionary={}
 	var needs:Dictionary={}
 	var seed_value:=0
 	var seeded:=false
@@ -92,14 +94,17 @@ class ResearchScan extends RefCounted:
 	## Each channel's open questions in order of their opening years, with the
 	## list they were read from (_channel_by_age).
 	var by_age:Dictionary={}
+	## Each channel's whole catalog list in order of opening years, with the
+	## list, its size and the world seed it was read from.
+	var by_age_whole:Dictionary={}
 	func clear_batch()->void:
 		day=-1;known_size=-1;known={};has_known=false;society={};has_society=false
 		environment={};has_environment=false;home_resources={};has_home_resources=false
-		eligible={};best={};needs={}
+		eligible={};best={};scored={};needs={}
 	func clear_catalog()->void:
 		seed_value=0;seeded=false;seed_tables={};by_dynamic={};by_dynamic_basis=[]
 		children={};children_basis=[];open_years=PackedFloat64Array();open_years_basis=[]
-		year_buckets={};year_buckets_basis=[];foundation_scanned={};by_age={}
+		year_buckets={};year_buckets_basis=[];foundation_scanned={};by_age={};by_age_whole={}
 var _scan:=ResearchScan.new()
 
 var latest_context:Dictionary={}
@@ -1435,6 +1440,28 @@ func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
 ## FAR_BANDS), so a further band is read only when the nearer ones hold nothing
 ## open; a question the player chose wins wherever it stands.
 func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max_tier:int=TEAM_TIER_LAST)->Dictionary:
+	if not _scan_active(): return _score_best_candidate_read(channel,current_day,skip,max_tier)
+	# Inside a scan the answer is kept, like _best_candidate_for_channel's, by
+	# what it is read from: the line's allocation and chosen target, the day,
+	# the band limit, and which of the channel's own questions are passed over
+	# (ids of other channels in `skip` never change it).
+	var home:=_research_600_channel_home(channel)
+	var key:="%s|%d|%s|%d|%d" % [channel,_subcategory_allocation(home[0],home[1]),String(WorldSimulation.state.research_targets.get(channel,"")),current_day,max_tier]
+	if not skip.is_empty():
+		var own:Array=[]
+		for id:Variant in skip:
+			var held:Dictionary=catalog_by_id.get(String(id),{})
+			if held.is_empty() or _channel_key(String(held.get("dynamic","")),String(held.get("subcategory","")))==channel: own.append(String(id))
+		if not own.is_empty():
+			own.sort()
+			key+="|"+"|".join(own)
+	var memo:Variant=_scan.scored.get(key)
+	if memo is Dictionary: return memo if not (memo as Dictionary).is_empty() else {}
+	var best:=_score_best_candidate_read(channel,current_day,skip,max_tier)
+	_scan.scored[key]=best
+	return best
+
+func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={},max_tier:int=TEAM_TIER_LAST)->Dictionary:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
 	# _scan_eligible, inlined for the channel's many candidates.
@@ -1452,13 +1479,14 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 			if open: return chosen
 	var year:=learning_year()
 	var by_age:=_channel_by_age(channel,candidates)
+	var opens:PackedFloat64Array=(_scan.by_age[channel] as Array)[2]
 	var index:=0
 	for tier in range(0,max_tier+1):
 		var best:Dictionary={}
 		var best_score:=-INF
 		while index<by_age.size():
 			var discovery:Dictionary=by_age[index]
-			if team_tier(discovery,year)>tier: break
+			if _tier_from_open(opens[index],year)>tier: break
 			index+=1
 			var id:=String(discovery.get("id",""))
 			if id==target or (not skip.is_empty() and skip.has(id)): continue
@@ -1480,14 +1508,57 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 func _channel_by_age(channel:String,candidates:Array)->Array:
 	var cached:Variant=_scan.by_age.get(channel)
 	if cached is Array and is_same((cached as Array)[0],candidates): return (cached as Array)[1]
+	# The whole channel in order of opening years is kept while its catalog
+	# list and the world stand (the years follow the seed and the definition
+	# alone); the open questions are read off it in that order, the order a
+	# sort of them alone would give (opening year, then id: a total order).
+	var definitions:Array=catalog_by_channel.get(channel,[])
+	var seed_value:=int(WorldSimulation.state.world_seed)
+	var whole:Variant=_scan.by_age_whole.get(channel)
+	if not (whole is Array and is_same((whole as Array)[0],definitions) and int((whole as Array)[1])==definitions.size() and int((whole as Array)[2])==seed_value):
+		whole=[definitions,definitions.size(),seed_value]
+		whole.append_array(_sorted_by_age(definitions))
+		_scan.by_age_whole[channel]=whole
+	var open:Dictionary={}
+	for discovery:Dictionary in candidates: open[String(discovery.get("id",""))]=true
+	var by_age:Array=[]
+	var opens:=PackedFloat64Array()
+	if open.size()==candidates.size():
+		var ordered:Array=(whole as Array)[3]
+		var years:PackedFloat64Array=(whole as Array)[4]
+		for index in ordered.size():
+			var discovery:Dictionary=ordered[index]
+			if open.has(String(discovery.get("id",""))):
+				by_age.append(discovery)
+				opens.append(years[index])
+	if by_age.size()!=candidates.size():
+		# Not a plain subset of the channel's list: sort the questions themselves.
+		var sorted:=_sorted_by_age(candidates)
+		by_age=sorted[0];opens=sorted[1]
+	_scan.by_age[channel]=[candidates,by_age,opens]
+	return by_age
+
+## `list` in order of opening years (then id), with each one's opening year
+## (research_open_year): [ordered, years].
+func _sorted_by_age(list:Array)->Array:
 	var opens:Dictionary={}
-	for discovery:Dictionary in candidates: opens[String(discovery.get("id",""))]=research_open_year(discovery)
-	var by_age:=candidates.duplicate()
-	by_age.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+	for discovery:Dictionary in list: opens[String(discovery.get("id",""))]=research_open_year(discovery)
+	var ordered:=list.duplicate()
+	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var first:=float(opens[String(a.get("id",""))]);var second:=float(opens[String(b.get("id",""))])
 		return first<second if first!=second else String(a.get("id",""))<String(b.get("id","")))
-	_scan.by_age[channel]=[candidates,by_age]
-	return by_age
+	var years:=PackedFloat64Array()
+	for discovery:Dictionary in ordered: years.append(float(opens[String(discovery.get("id",""))]))
+	return [ordered,years]
+
+## team_tier from a question's opening year (research_open_year) at `year`.
+static func _tier_from_open(open_year:float,year:float)->int:
+	var ahead:=maxf(0.0,open_year-year)
+	if ahead<=0.0: return 0
+	if ahead<NEAR_AGE_YEARS: return 1
+	for index in FAR_BANDS.size():
+		if ahead<=float(FAR_BANDS[index]): return 2+index
+	return TEAM_TIER_LAST
 
 
 # Each world has a different but generous subset of the 4,608 latent routes.
