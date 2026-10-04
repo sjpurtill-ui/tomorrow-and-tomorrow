@@ -31,11 +31,11 @@ func _placement_and_signs()->void:
 	var Signs:=preload("res://scripts/neighbor_signs.gd")
 	for seed_value in [424242,77013,91420]:
 		GameState.reset_for_new_world(seed_value)
-		for group in 3:
-			var anchor:=Start.candidate(seed_value,group*Start.REGION_SEATS)
-			for member in range(1,Start.REGION_SEATS):
-				var km:=Start.candidate(seed_value,group*Start.REGION_SEATS+member).distance_to(anchor)
-				check(km>=Start.NEIGHBOR_MIN_KM-Start.REGION_CELL_KM and km<=Start.NEIGHBOR_MAX_KM*1.5,"seed %d seat %d is %.0f km from its region" % [seed_value,group*Start.REGION_SEATS+member,km])
+		var seats:Array=[]
+		for seat in 12:
+			var point:=Start.candidate(seed_value,seat)
+			check(Start.separation(point,seats)>=Start.SEAT_SEPARATION_KM,"seed %d seat %d is %.0f km from another people" % [seed_value,seat,Start.separation(point,seats)])
+			seats.append(point)
 	_setup()
 	var civ:Dictionary=CivilizationSystem.civilizations[0]
 	var home:Vector2=CivilizationSystem._civilization_world_position(civ)

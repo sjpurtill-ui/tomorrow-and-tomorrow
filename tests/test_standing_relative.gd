@@ -235,6 +235,105 @@ func test_cunning_lifts_our_agents_and_catches_theirs()->void:
 	assert_float(float(sharp.caught)).is_less(float(dull.caught))
 	assert_float(Covert._catch_chance()).is_greater(dull_catch)
 
+## Their cunning, in their own month's reading (their own scope).
+func _their_cunning(id:String,cunning:float)->void:
+	WorldSimulation.scoped(id,func()->void:
+		WorldSimulation.state.elapsed_days=GameState.elapsed_days
+		WorldSimulation.state.simulation_metrics["standing_cunning"]=cunning
+		WorldSimulation.state.simulation_metrics["standing_day"]=float(GameState.elapsed_days))
+
+func test_cunning_against_cunning_is_one_rule_both_ways()->void:
+	# The rule itself: the sender's edge is the keeper's loss, whoever is the god.
+	for pair in [[0.9,0.5],[0.5,0.9],[0.2,0.7],[0.65,0.65]]:
+		var a:=float(pair[0]); var b:=float(pair[1])
+		assert_float(Standing.covert_edge(a,b)).is_equal_approx(-Standing.covert_edge(b,a),0.000001)
+		assert_float(Standing.catch_edge(a,b)).is_equal_approx(-Standing.catch_edge(b,a),0.000001)
+	assert_float(Standing.covert_edge(0.7,0.7)).is_equal(0.0)
+	_actors()
+	var id:=_met(0,0.5)
+	var Covert:=preload("res://scripts/covert_ops.gd")
+	var agent:={"tongue":0.5,"stealth":0.5,"nerve":0.5,"blade":0.5,"poison":0.5}
+	_arts(0.5,0.5)
+	_their_cunning(id,0.5)
+	var even:=Covert.odds("plant",id,"","trader",agent)
+	var even_catch:=Covert._catch_chance(id)
+	_their_cunning(id,0.9)
+	var sharp:=Covert.odds("plant",id,"","trader",agent)
+	var sharp_catch:=Covert._catch_chance(id)
+	# Their cunning counts against our agents: lower odds, more caught...
+	assert_float(float(sharp.success)).is_less(float(even.success))
+	assert_float(float(sharp.caught)).is_greater(float(even.caught))
+	# ...and for their spies among us: fewer caught, by the same 12 points.
+	assert_float(sharp_catch).is_less(even_catch)
+	assert_float(float(sharp.caught)-float(even.caught)).is_equal_approx(even_catch-sharp_catch,0.0001)
+	assert_float(float(sharp.caught)-float(even.caught)).is_equal_approx(0.4*Standing.CATCH_EDGE,0.0001)
+	# The roles swapped (ours 0.9, theirs 0.5) give us exactly what they had.
+	_arts(0.9,0.5)
+	_their_cunning(id,0.5)
+	var ours_sharp:=Covert.odds("plant",id,"","trader",agent)
+	assert_float(float(even.caught)-float(ours_sharp.caught)).is_equal_approx(float(sharp.caught)-float(even.caught),0.0001)
+	assert_float(Covert._catch_chance(id)-even_catch).is_equal_approx(even_catch-sharp_catch,0.0001)
+	# A sender not named counts as typical.
+	_arts(0.5,0.5)
+	assert_float(Covert._catch_chance()).is_equal_approx(even_catch,0.0001)
+
+func test_their_cunning_finds_doubles_and_turned_agents_by_the_same_rule()->void:
+	_actors()
+	var id:=_met(0,0.5)
+	var Captives:=preload("res://scripts/captured_agents.gd")
+	var prisoner:={"civ_id":id,"courage":0.5}
+	_arts(0.5,0.5)
+	_their_cunning(id,0.5)
+	var plain:=float(Captives.double_odds(prisoner).found)
+	_their_cunning(id,0.9)
+	var watched:=float(Captives.double_odds(prisoner).found)
+	assert_float(watched).is_greater(plain)
+	assert_float(watched-plain).is_equal_approx(minf(0.3,plain+0.4*Standing.CATCH_EDGE)-plain,0.0001)
+	_arts(0.9,0.5)
+	assert_float(float(Captives.double_odds(prisoner).found)).is_equal_approx(plain,0.0001)
+
+func test_the_spies_line_states_the_odds_between_us()->void:
+	_actors()
+	var id:=_met(0,0.95)
+	_arts(0.5,0.5)
+	_their_cunning(id,0.9)
+	var line:=Standing.spies_words(id)
+	assert_str(String(line.words)).contains("Spies between us")
+	assert_str(String(line.words)).contains("points")
+	assert_str(String(line.tone)).is_equal("danger")
+	assert_str(String(line.detail)).contains("the same rule both ways")
+	# The arts card names the most cunning people we know with the same numbers.
+	var rows:Array=Standing.arts_at_work().cunning
+	var words:=PackedStringArray()
+	for row:Dictionary in rows: words.append(String(row.words))
+	assert_str(" ".join(words)).contains("The most cunning people we know")
+	assert_str(" ".join(words)).contains("typical cunning")
+	# Hardly known: we say we cannot tell, never a false number.
+	CivilizationSystem.civilizations[0].player_relation.contact_intelligence=0.0
+	_arts(0.0,0.5)
+	assert_str(String(Standing.spies_words(id).words)).contains("know too little")
+
+# ------------------------------------------------ another people's month
+
+func test_another_peoples_month_is_values_only_and_the_same_values()->void:
+	_actors()
+	var id:=String(CivilizationSystem.civilizations[0].id)
+	var out:Dictionary=WorldSimulation.scoped(id,func()->Dictionary:
+		WorldSimulation.state.elapsed_days=75*365
+		var full:=Standing.strengths()
+		var quiet:=Standing.values()
+		Standing.record_monthly()
+		return {"full":full,"quiet":quiet,"metrics":WorldSimulation.state.simulation_metrics.duplicate()})
+	for row:Array in Standing.STRENGTHS:
+		var sid:=String(row[0])
+		assert_float(float(out.quiet[sid].value)).override_failure_message(sid).is_equal(float(out.full[sid].value))
+		assert_str(String(out.quiet[sid].why)).is_empty()
+		assert_str(String(out.full[sid].why)).is_not_empty()
+		assert_float(float(out.metrics["standing_"+sid])).override_failure_message(sid).is_equal(float(out.full[sid].value))
+	# The words come back for the god's own reading.
+	assert_str(String(Standing.strengths().might.why)).is_not_empty()
+	assert_float(float(out.metrics.standing_dangers)).is_equal(0.0)
+
 func test_cunning_sharpens_every_look_at_their_towns()->void:
 	var chart=CivilizationSystem.city_intelligence
 	var place:Dictionary={}

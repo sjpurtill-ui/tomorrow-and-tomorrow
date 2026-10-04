@@ -130,6 +130,21 @@ static func strengths()->Dictionary:
 	## culture, for the views). Always read fresh: nothing here can go stale.
 	return _reckon_strengths()
 
+## The same nine values (and their parts) without the reasons: another
+## people's month, which only the engine reads (their_true, renown, pride,
+## the daily systems). Every value is the one strengths() gives; nobody reads
+## a computer people's reasons, so they are never written. {id: {value,
+## why:"", parts}}.
+static func values()->Dictionary:
+	var was:=_words
+	_words=false
+	var out:=_reckon_strengths()
+	_words=was
+	return out
+
+## Whether the reading in hand writes its reasons (values() turns them off).
+static var _words:=true
+
 ## Kept for callers and tests from before readings were stored (no-op).
 static func forget()->void:
 	pass
@@ -206,6 +221,7 @@ static func _might(year:float)->Dictionary:
 	var share:=warriors*readiness/pop*lift
 	var a:=Scale.might_anchors(year)
 	var parts:=[_part("ready",Scale.score(share,a),1.0,share,a)]
+	if not _words: return _entry(parts,"")
 	var why:="%d under arms or training, ready %d%%, among %d people: %s ready to fight%s, %s" % [roundi(warriors),roundi(readiness*100.0),roundi(pop),_per_hundred(share),(" with walls and stone (x%.2f)" % lift) if walls>0.005 else "",_vs(share,a,_per_hundred(float(a[1])))]
 	return _entry(parts,why)
 
@@ -220,6 +236,7 @@ static func _genius(year:float)->Dictionary:
 	var share:=scholars/_population()
 	var sa:=Scale.anchors(Scale.SCHOLARS,year)
 	var parts:=[_part("known",Scale.score(known,a),GENIUS_WEIGHTS.known,known,a),_part("scholars",Scale.score(share,sa),GENIUS_WEIGHTS.scholars,share,sa)]
+	if not _words: return _entry(parts,"")
 	var why:="%d practices known, %s; %d at research (%s), %s" % [roundi(known),_vs(known,a,"about %d" % roundi(float(a[1]))),roundi(scholars),_per_hundred(share),_vs(share,sa,_per_hundred(float(sa[1])))]
 	var rival:=best_known_rival()
 	if not rival.is_empty():
@@ -282,6 +299,7 @@ static func _persuasion(year:float)->Dictionary:
 		_part("treaties",Scale.score(1.0+float(kept.count),ta),PERSUASION_WEIGHTS.treaties,float(kept.count),ta),
 		_part("gifts",Scale.score(1.0+20.0*gift_rate,ga),PERSUASION_WEIGHTS.gifts,gift_rate,ga),
 		_part("abroad",Scale.score(1.0+days_rate/10.0,ea),PERSUASION_WEIGHTS.abroad,days_rate,ea)]
+	if not _words: return _entry(parts,"")
 	var bits:PackedStringArray=[]
 	bits.append(String(speaker.words))
 	bits.append("openness %s" % _pct(openness))
@@ -310,6 +328,7 @@ static func _cunning(year:float)->Dictionary:
 		_part("agents",Scale.bonus_score(float(agents),AGENTS_HALF),CUNNING_WEIGHTS.agents,float(agents),[0.0,0.0,AGENTS_HALF,AGENTS_HALF*3.0]),
 		_part("caught",Scale.bonus_score(float(caught.count),CAUGHT_HALF),CUNNING_WEIGHTS.caught,float(caught.count),[0.0,0.0,CAUGHT_HALF,CAUGHT_HALF*3.0]),
 		_part("intel",Scale.score(intel,ia) if intel>=0.0 else Scale.TYPICAL_SCORE,CUNNING_WEIGHTS.intel,intel,ia)]
+	if not _words: return _entry(parts,"")
 	var bits:PackedStringArray=[]
 	bits.append("our chief scout's skill %s%s" % [_pct(scout),"" if scout>0.2 else " (no chief scout named)"])
 	bits.append("%d out scouting and %d on the watch (%s, %s)" % [roundi(surveyors),roundi(watch),_per_hundred(eyes),_vs(eyes,sa,_per_hundred(float(sa[1])))])
@@ -342,6 +361,7 @@ static func _wealth(year:float)->Dictionary:
 	var ma:=Scale.anchors(Scale.MATERIALS,year)
 	var ga:=Scale.anchors(Scale.GOODS,year)
 	var parts:=[_part("food",Scale.score(food_days,fa),WEALTH_WEIGHTS.food,food_days,fa),_part("materials",Scale.score(materials/pop,ma),WEALTH_WEIGHTS.materials,materials/pop,ma),_part("goods",Scale.score(goods/pop,ga),WEALTH_WEIGHTS.goods,goods/pop,ga)]
+	if not _words: return _entry(parts,"")
 	var why:="food for %d days, %s; %s loads of materials and %s of made goods a head (a typical people of our age: %s and %s)" % [roundi(food_days),_vs(food_days,fa),_n(materials/pop),_n(goods/pop),_n(float(ma[1])),_n(float(ga[1]))]
 	return _entry(parts,why)
 
@@ -366,9 +386,11 @@ static func _splendor(year:float)->Dictionary:
 	var ca:=Scale.anchors(Scale.CULTURE,year)
 	var ba:=Scale.anchors(Scale.BEAUTY,year)
 	var parts:=[_part("works",Scale.score(1.0+points,wa),SPLENDOR_WEIGHTS.works,points,wa),_part("culture",Scale.score_share(culture,ca),SPLENDOR_WEIGHTS.culture,culture,ca),_part("beauty",Scale.score(1.0+10.0*beauty,Scale.beauty_anchors(year)),SPLENDOR_WEIGHTS.beauty,beauty,ba)]
-	var standing_works:=int(report.get("works_standing",0))
-	var works_words:="no great work standing yet" if points<0.5 else ("%s, renown %d" % ["lesser monuments and remains that visitors see" if standing_works==0 else ("one great work standing" if standing_works==1 else "%d great works standing" % standing_works),roundi(points)])
-	var why:="%s (a typical people of our age: renown about %d); our culture's allure %s (typical %s); our builders' fine works %s (typical %s)" % [works_words,maxi(0,roundi(float(wa[1])-1.0)),_pct(culture),_pct(float(ca[1])),_pct(beauty),_pct(float(ba[1]))]
+	var why:=""
+	if _words:
+		var standing_works:=int(report.get("works_standing",0))
+		var works_words:="no great work standing yet" if points<0.5 else ("%s, renown %d" % ["lesser monuments and remains that visitors see" if standing_works==0 else ("one great work standing" if standing_works==1 else "%d great works standing" % standing_works),roundi(points)])
+		why="%s (a typical people of our age: renown about %d); our culture's allure %s (typical %s); our builders' fine works %s (typical %s)" % [works_words,maxi(0,roundi(float(wa[1])-1.0)),_pct(culture),_pct(float(ca[1])),_pct(beauty),_pct(float(ba[1]))]
 	var out:=_entry(parts,why)
 	out["_culture"]=clampf(float(report.allure)+beauty*Fabric.BEAUTY_CULTURE,0.0,1.0)
 	out["_beauty"]=beauty
@@ -388,6 +410,7 @@ static func _order(year:float)->Dictionary:
 	var aa:=Scale.anchors(Scale.ADMINISTRATION,year)
 	var parts:=[_part("legitimacy",Scale.score_share(legitimacy,la),ORDER_WEIGHTS.legitimacy,legitimacy,la),_part("cohesion",Scale.score_share(cohesion,ca),ORDER_WEIGHTS.cohesion,cohesion,ca),
 		_part("administration",Scale.score(admin,aa),ORDER_WEIGHTS.administration,admin,aa),_part("steward",Scale.skill_score(steward),ORDER_WEIGHTS.steward,steward,[0.2,Scale.ORDINARY_SKILL,0.8,1.0])]
+	if not _words: return _entry(parts,"")
 	var why:="trust in the chiefs %s and holding together %s (a typical people of our age: %s and %s); %s at administration (typical %s); the steward's skill %s%s" % [_pct(legitimacy),_pct(cohesion),_pct(float(la[1])),_pct(float(ca[1])),_per_hundred(admin),_per_hundred(float(aa[1])),_pct(steward),"" if steward>0.2 else " (no steward named)"]
 	return _entry(parts,why)
 
@@ -408,6 +431,7 @@ static func _endurance(year:float)->Dictionary:
 	var ca:=Scale.anchors(Scale.COHESION,year)
 	var parts:=[_part("food",Scale.score(food_days,fa),ENDURANCE_WEIGHTS.food,food_days,fa),_part("water",Scale.score(water_days,wa),ENDURANCE_WEIGHTS.water,water_days,wa),_part("walls",Scale.score(walls,da),ENDURANCE_WEIGHTS.walls,walls,da),
 		_part("health",Scale.score_share(health,ha),ENDURANCE_WEIGHTS.health,health,ha),_part("cohesion",Scale.score_share(cohesion,ca),ENDURANCE_WEIGHTS.cohesion,cohesion,ca)]
+	if not _words: return _entry(parts,"")
 	var why:="food for %d days, %s; water for %d (typical %d); walls %s (typical %s); health %s" % [roundi(food_days),_vs(food_days,fa),roundi(water_days),roundi(float(wa[1])),_wall_words(walls),_wall_words(float(da[1])),_pct(health)]
 	return _entry(parts,why)
 
@@ -424,6 +448,7 @@ static func _reach(year:float)->Dictionary:
 	var la:=Scale.anchors(Scale.LOGISTICS,year)
 	var ma:=Scale.anchors(Scale.MET,year)
 	var parts:=[_part("logistics",Scale.score_share(logistics,la),REACH_WEIGHTS.logistics,logistics,la),_part("met",Scale.score(1.0+float(met),ma),REACH_WEIGHTS.met,float(met),ma)]
+	if not _words: return _entry(parts,"")
 	var why:="carrying and hauling %s (a typical people of our age: %s); %s %s met (typical %s)" % [_pct(logistics),_pct(float(la[1])),_count_word(met),"people" if met==1 else "peoples",_n(maxf(0.0,float(ma[1])-1.0))]
 	return _entry(parts,why)
 
@@ -436,9 +461,9 @@ static func _speaker()->Dictionary:
 	var open:=government!=null and government.has_method("office_is_active") and bool(government.office_is_active("Envoy"))
 	if open:
 		var envoy:=_office_skill("Envoy","Diplomacy")
-		return {"skill":envoy,"words":"our envoy's skill %s%s" % [_pct(envoy),"" if envoy>0.2 else " (the office stands empty)"]}
+		return {"skill":envoy,"words":("our envoy's skill %s%s" % [_pct(envoy),"" if envoy>0.2 else " (the office stands empty)"]) if _words else ""}
 	var chief:=_office_skill("Steward","Diplomacy")
-	return {"skill":chief,"words":"our chief speaks for us (no envoy's office yet), skill %s" % _pct(chief)}
+	return {"skill":chief,"words":("our chief speaks for us (no envoy's office yet), skill %s" % _pct(chief)) if _words else ""}
 
 static func _office_skill(office:String,skill:String)->float:
 	var government=WorldSimulation.government
@@ -830,8 +855,12 @@ const ENVY_RICHER:=0.6
 ## reading kept with the state can never belong to another world or save.
 ## ConsequenceEngine.process_day calls this once a month.
 static func record_monthly()->void:
-	_begin_reading()
-	_record_monthly()
+	# Only the god's people reads its own reasons (the Standing page, the
+	# court); another people's month is values only, read on its officials as
+	# its own day last settled them.
+	var ours:=String(WorldSimulation.actor_id)=="player"
+	_begin_reading(not ours)
+	_record_monthly(ours)
 	_end_reading()
 
 ## One reading of every view of us shares what does not change while it is
@@ -842,11 +871,15 @@ static func record_monthly()->void:
 static var _reading_depth:=0
 static var _reading_government:Object=null
 static var _reading_was_initializing:=false
-static func _begin_reading()->void:
+## `settled`: the roll is read as the people's own day last reconciled it
+## (GovernmentPeopleSystem.process_day, every day it steps), without
+## reconciling it again: another people's month, which must not change the
+## ledger it reads. A government not yet founded is founded as before.
+static func _begin_reading(settled:bool=false)->void:
 	if _reading_depth==0:
 		var government=WorldSimulation.government
 		if government!=null and "initializing" in government and not bool(government.initializing):
-			government.initialize()
+			if not settled or not "people" in government or (government.people as Array).is_empty():government.initialize()
 			_reading_government=government
 			_reading_was_initializing=bool(government.initializing)
 			government.initializing=true
@@ -861,8 +894,8 @@ static func _end_reading()->void:
 	var lives:=_lives()
 	if lives!=null:lives.call("end_reading")
 
-static func _record_monthly()->void:
-	var our:=strengths()
+static func _record_monthly(ours:bool=true)->void:
+	var our:=strengths() if ours else values()
 	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
 	for row:Array in STRENGTHS: metrics["standing_"+String(row[0])]=float((our[String(row[0])] as Dictionary).value)
 	# The day of the reading: another people's month is read from here, and
@@ -881,8 +914,9 @@ static func _record_monthly()->void:
 		var told:Dictionary=preload("res://scripts/deeds.gd").home()
 		metrics["standing_love"]=float(told.love)
 		metrics["standing_dread"]=float(told.dread)
-	# How many peoples we know are moved against us (the rail's Standing badge).
-	metrics["standing_dangers"]=float(danger_count(our))
+	# How many peoples we know are moved against us (the rail's Standing badge):
+	# only the god's people is seen by the others (views), so another's is 0.
+	metrics["standing_dangers"]=float(danger_count(our)) if ours else 0.0
 
 ## Peoples we know who are moved against us now: envy or contempt past their
 ## floors, a grudge heavy enough to raid, or a league against us.
@@ -1144,7 +1178,7 @@ static func their_true(civ_id:String)->Dictionary:
 	# month will be recorded soon; until then this is the same code as ours).
 	var key:="%s|%s|%d" % [String(WorldSimulation.actor_id),owner,int(state.elapsed_days)]
 	if _their_cache.has(key): return (_their_cache[key] as Dictionary).duplicate()
-	var theirs:Variant=strengths() if owner==String(WorldSimulation.actor_id) else WorldSimulation.scoped(owner,func()->Dictionary: return strengths())
+	var theirs:Variant=_settled_values() if owner==String(WorldSimulation.actor_id) else WorldSimulation.scoped(owner,func()->Dictionary: return _settled_values())
 	if not theirs is Dictionary: return {}
 	for row:Array in STRENGTHS:
 		var entry:Variant=(theirs as Dictionary).get(String(row[0]),{})
@@ -1153,6 +1187,17 @@ static func their_true(civ_id:String)->Dictionary:
 	_their_cache[key]=out.duplicate()
 	return out
 static var _their_cache:Dictionary={}
+
+## The nine values of the people in scope (values()), read on its officials as
+## its own day last settled them: a reading from another people's scope must
+## not reconcile (and so change) this people's roll of officials.
+static func _settled_values()->Dictionary:
+	var government=WorldSimulation.government
+	var hold:=government!=null and "initializing" in government and not bool(government.initializing) and "people" in government and not (government.people as Array).is_empty()
+	if hold: government.initializing=true
+	var out:=values()
+	if hold: government.initializing=false
+	return out
 
 ## Their reading of one strength as it stands (true, not our estimate: their
 ## own feelings and plans read their own); the typical 0.5 when unknown.
@@ -1271,16 +1316,59 @@ const LATE_WORD_DAYS:=30
 static func bluff_reading(cunning:float)->Dictionary:
 	return {"tells":clampf(0.55+cunning*0.6,0.5,0.98),"signs":clampf(0.4+cunning*0.6,0.4,0.95),"false_tells":clampf(0.3-cunning*0.3,0.02,0.3)}
 
-## Our covert operations (covert_ops.gd odds): success odds up and the odds
-## of being caught down, by cunning past the typical.
+## CUNNING AGAINST CUNNING: every agent's odds weigh the cunning of the
+## people that sends it against the cunning of the people it works among (the
+## keeper), the same rule whichever people sends and whichever keeps, the
+## god's or another's (covert_ops.gd odds and _catch_chance, captured_agents.gd
+## double_odds and a turned agent found out). Each point of the sender's
+## cunning over the keeper's adds COVERT_EDGE to the agent's odds of success
+## and takes CATCH_EDGE from its odds of being caught (or traced); each point
+## of the keeper's over the sender's does the reverse. Two peoples of equal
+## cunning leave the odds as they are.
 const COVERT_EDGE:=0.2
-static func covert_edge(cunning:float)->float:
-	return (cunning-0.5)*COVERT_EDGE
-
-## Our watch catching their agents (covert_ops.gd _catch_chance).
 const CATCH_EDGE:=0.3
-static func catch_edge(cunning:float)->float:
-	return (cunning-0.5)*CATCH_EDGE
+## The sender's edge in an agent's odds of success (keeper typical when not given).
+static func covert_edge(sender:float,keeper:float=0.5)->float:
+	return (sender-keeper)*COVERT_EDGE
+## The keeper's edge in catching (or tracing) the sender's agent: positive
+## when the keeper is the more cunning (sender typical when not given).
+static func catch_edge(keeper:float,sender:float=0.5)->float:
+	return (keeper-sender)*CATCH_EDGE
+
+## The covert odds between us and one people we know, as our watchers reckon
+## their cunning (their own month's reading through our estimate): {ours,
+## theirs (-1 unknown), low, high, exact, unknown, agents (our agents' odds),
+## caught (ours caught among them), theirs_caught (their spies caught among
+## us)}: points of 0..1 added to the stated odds. The roll itself reads their
+## true cunning; this is what the page and the court say of it.
+static func covert_between(civ_id:String)->Dictionary:
+	var ours:=own_art("cunning")
+	var est:=estimate(civ_id,"cunning",their_reading_value(civ_id,"cunning"))
+	if bool(est.get("unknown",false)): return {"ours":ours,"theirs":-1.0,"unknown":true,"agents":0.0,"caught":0.0,"theirs_caught":0.0}
+	var theirs:=float(est.value)
+	return {"ours":ours,"theirs":theirs,"low":float(est.low),"high":float(est.high),"exact":bool(est.exact),"unknown":false,
+		"agents":covert_edge(ours,theirs),"caught":catch_edge(theirs,ours),"theirs_caught":catch_edge(ours,theirs)}
+
+## The spies line of a people's card and the court's fact sheet: {words,
+## detail, tone}; {} when we have not met them.
+static func spies_words(civ_id:String)->Dictionary:
+	if int(_relation_with(civ_id).get("contact_level",0))<2: return {}
+	var c:=covert_between(civ_id)
+	var ours:=float(c.ours)
+	if bool(c.unknown):
+		return {"tone":"calm","words":"Spies between us: we know too little of them to say how their cunning weighs against ours",
+			"detail":"Cunning against cunning: the more cunning people's agents do better among the other, and its watch catches more of the other's, by the same rule both ways. Our cunning is %d%%." % roundi(ours*100.0)}
+	var theirs_words:=estimate_words({"value":float(c.theirs),"low":float(c.low),"high":float(c.high),"exact":bool(c.exact)})
+	var words:="Spies between us: our agents' odds %s and caught %s among them; their spies caught %s among us" % [_points(float(c.agents)),_points(float(c.caught)),_points(float(c.theirs_caught))]
+	var detail:="Our cunning %d%% against theirs, %s by our watchers' reckoning. Cunning against cunning, the same rule both ways: every 10 points of one people's cunning over the other's add %d points to its agents' odds, take %d from their odds of being caught, and add %d to its watch's odds of catching the other's spies. %sAdded to the stated odds of every watch, source, theft and strike." % [roundi(ours*100.0),theirs_words,roundi(COVERT_EDGE*10.0),roundi(CATCH_EDGE*10.0),roundi(CATCH_EDGE*10.0),"These numbers come from our estimate of them; the odds themselves read how cunning they truly are. " if not bool(c.exact) else ""]
+	var lead:=ours-float(c.theirs)
+	return {"tone":"good" if lead>=0.15 else ("danger" if lead<=-0.15 else "calm"),"words":words,"detail":detail}
+
+## "+3 points", "-1 point", "unchanged" for an edge in odds.
+static func _points(x:float)->String:
+	var points:=roundi(x*100.0)
+	if points==0: return "unchanged"
+	return "%+d point%s" % [points,"" if absi(points)==1 else "s"]
 
 ## A scout's or spy's look at a town (city_intelligence.gd capture): the
 ## quality of the look rises, and the error band narrows, with cunning.
@@ -1342,9 +1430,11 @@ static func arts_at_work()->Dictionary:
 		{"words":"Raids seen coming: %d in 100, about %d days ahead" % [roundi(forewarn_odds(c)*100.0),forewarn_days(c)],"detail":"When raiders are sent against us, our watchers see them coming on these odds; then the watch keeps the approaches until they come, and meets them on ground of our choosing. A typical people of the age sees %d in 100, %d days ahead." % [roundi(forewarn_odds(0.5)*100.0),forewarn_days(0.5)]},
 		{"words":"A people arming against us heard of at once: %d in 100" % roundi(forewarn_odds(c)*100.0),"detail":"Otherwise word comes only in the last %d days before they march." % LATE_WORD_DAYS},
 		{"words":"An envoy's bluff seen through: %d in 100; a real threat's signs read: %d in 100" % [roundi(float(bluff.tells)*100.0),roundi(float(bluff.signs)*100.0)],"detail":"Misleading tells on a real threat: %d in 100. A typical people: 85, 70 and 15." % roundi(float(bluff.false_tells)*100.0)},
-		{"words":"Our agents' odds %s; caught %s" % [_signed_points(covert_edge(c)),_signed_points(-covert_edge(c))],"detail":"Added to the stated odds of every watch, source, theft and strike our agents attempt."},
-		{"words":"Their spies caught: %s" % _signed_points(catch_edge(c)),"detail":"Added to our watch's odds of taking a spy or an assassin of theirs."},
+		{"words":"Our agents among a people of typical cunning: odds %s, caught %s" % [_signed_points(covert_edge(c,0.5)),_signed_points(catch_edge(0.5,c))],"detail":"Cunning against cunning, the same rule for every people, ours among them and theirs among us: every 10 points of the sender's cunning over the keeper's add %d points to an agent's odds and take %d from its odds of being caught; the keeper's cunning over the sender's does the reverse. Added to the stated odds of every watch, source, theft and strike." % [roundi(COVERT_EDGE*10.0),roundi(CATCH_EDGE*10.0)]},
+		{"words":"Spies of a people of typical cunning caught: %s" % _signed_points(catch_edge(c,0.5)),"detail":"Added to our watch's odds of taking a spy or an assassin of theirs. A more cunning people's spies are caught less often, a less cunning people's more, by the same rule."},
 	]
+	var against:=_most_cunning_known()
+	if not against.is_empty(): cunning_rows.append(against)
 	if sure>=0.0:
 		cunning_rows.append({"words":"What we know of the peoples we know: within %d points either way, right %d in 100" % [roundi(ESTIMATE_WIDEST*(1.0-clampf(sure,0.0,1.0))*100.0),roundi(estimate_right_odds(sure)*100.0)],"detail":"Our estimates of their strengths, their learning and their spears, on every screen that shows them. Envoys, scouts and years of contact make them surer; cunning adds or takes away up to %d points." % roundi(CUNNING_CERTAINTY*100.0)})
 	var grace:=maxi(1,3+pact_grace(p))
@@ -1357,6 +1447,25 @@ static func arts_at_work()->Dictionary:
 		{"words":"Their rulers' trust in our word: %s" % _signed_points((p-0.5)*0.2),"detail":"How our envoys carry themselves."},
 	]
 	return {"cunning":cunning_rows,"persuasion":persuasion_rows,"cunning_value":c,"persuasion_value":p}
+
+## The arts' row for the peoples we know: the most cunning of them as our
+## watchers reckon it, with every one's odds in the detail; {} when we know
+## nobody well enough to say.
+static func _most_cunning_known()->Dictionary:
+	var best:={}
+	var lines:PackedStringArray=[]
+	for civ:Dictionary in WorldSimulation.world.civilizations:
+		if not bool(civ.get("alive",true)) or int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))<2: continue
+		var id:=String(civ.id)
+		var c:=covert_between(id)
+		if bool(c.unknown): continue
+		var name:=String(civ.get("name",id))
+		lines.append("%s, cunning %s: our agents %s, caught %s; theirs caught %s" % [name,estimate_words({"value":float(c.theirs),"low":float(c.low),"high":float(c.high),"exact":bool(c.exact)}),_points(float(c.agents)),_points(float(c.caught)),_points(float(c.theirs_caught))])
+		if best.is_empty() or float(c.theirs)>float(best.theirs): best={"name":name,"theirs":float(c.theirs),"c":c}
+	if best.is_empty(): return {}
+	var c:Dictionary=best.c
+	return {"words":"The most cunning people we know, %s, cunning %s: our agents %s and caught %s among them; theirs caught %s among us" % [String(best.name),estimate_words({"value":float(c.theirs),"low":float(c.low),"high":float(c.high),"exact":bool(c.exact)}),_points(float(c.agents)),_points(float(c.caught)),_points(float(c.theirs_caught))],
+		"detail":"By our watchers' reckoning of each people's cunning. "+"; ".join(lines)+"."}
 
 static func _signed_points(x:float,up:String="",down:String="")->String:
 	var points:=roundi(x*100.0)

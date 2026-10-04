@@ -1408,10 +1408,15 @@ static func _tell(title:String,text:String,day:int,bring:bool=false,id:String=""
 
 static func double_odds(p:Dictionary)->Dictionary:
 	## Each time word comes (every DOUBLE_REPORT_DAYS): the odds they are
-	## found out among their own people.
-	var wary:=float(_covert().call("_wariness",String(p.civ_id)))
+	## found out among their own people, by their wariness, the agent's nerve,
+	## and their cunning against ours (standing.gd catch_edge: the same rule
+	## every agent meets, ours among them and theirs among us).
+	var civ_id:=String(p.civ_id)
+	var wary:=float(_covert().call("_wariness",civ_id))
 	var nerve:=clampf(float(p.get("courage",0.5)),0.0,1.0)
-	return {"found":snappedf(clampf(0.06+wary*0.15-nerve*0.04,0.03,0.3),0.0001),"every":DOUBLE_REPORT_DAYS}
+	var Standing:=preload("res://scripts/standing.gd")
+	var watched:=Standing.catch_edge(Standing.art_of(civ_id,"cunning"),Standing.art_of("player","cunning"))
+	return {"found":snappedf(clampf(0.06+wary*0.15-nerve*0.04+watched,0.03,0.3),0.0001),"every":DOUBLE_REPORT_DAYS}
 
 static func send_double(p:Dictionary,_audience_id:String="")->Dictionary:
 	var civ_id:=String(p.civ_id)
@@ -1722,11 +1727,13 @@ static func _abroad_daily(rec:Dictionary,day:int)->void:
 					_:
 						rec["turned"]=""   # unmoved: kept, as before
 		"home_turned":
-			# Their eyes among us, until found: each season, our watch may see it.
+			# Their eyes among us, until found: each season, our watch may see
+			# it, on our watch's odds against a spy of theirs (their cunning
+			# against ours: they turned them).
 			var since:=day-int(rec.get("home_day",day))
 			if since>0 and since%90==0:
 				_carried_home(String(rec.civ_id),0.05)
-				var found:=clampf(float(_covert().call("_catch_chance"))*0.3,0.05,0.4)
+				var found:=clampf(float(_covert().call("_catch_chance",String(rec.civ_id)))*0.3,0.05,0.4)
 				if _rng("found|%d|%d" % [int(rec.op_id),int(since/90.0)]).randf()<found:
 					rec.status="found_out"
 					_tell("%s Was Theirs" % String(rec.name),"Our watch found that %s was turned while held by %s; since coming home they have carried word of us to %s (the odds our watch would see it each season were %s)." % [String(rec.name),_the(String(rec.civ_id)),_ruler_given(String(rec.civ_id)),pct(found)],day)

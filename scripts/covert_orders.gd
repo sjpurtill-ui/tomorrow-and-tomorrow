@@ -245,7 +245,22 @@ static func _cover_phrase(cover:String)->String:
 
 static func _answer(kind:String,civ_id:String,city_id:String,cover:String,agent:Dictionary,odds:Dictionary,named_missing:bool)->String:
 	## The official's plain answer with the odds in numbers (covert_ops.gd
-	## odds_words already reads "about even", "about 2 in 5"...).
+	## odds_words already reads "about even", "about 2 in 5"...), and how
+	## their cunning weighs against ours.
+	return _answer_odds(kind,civ_id,city_id,cover,agent,odds,named_missing)+_cunning_words(civ_id)
+
+## Cunning against cunning in the official's words (standing.gd covert_between,
+## as our watchers reckon theirs): "" when it moves the odds of being caught
+## by less than 3 points either way, or we cannot say.
+static func _cunning_words(civ_id:String)->String:
+	var c:Dictionary=preload("res://scripts/standing.gd").covert_between(civ_id)
+	if bool(c.get("unknown",true)): return ""
+	var caught:=roundi(float(c.get("caught",0.0))*100.0)
+	if absi(caught)<3: return ""
+	if caught>0: return " Their watchers are sharper than ours, by our reckoning: that adds about %d in 100 to the risk." % caught
+	return " We are more cunning than they are, by our reckoning: that takes about %d in 100 from the risk." % -caught
+
+static func _answer_odds(kind:String,civ_id:String,city_id:String,cover:String,agent:Dictionary,odds:Dictionary,named_missing:bool)->String:
 	var the:=_the(civ_id)
 	var who:=String(agent.get("given",agent.get("name","the one I would send")))
 	var cv:=_cover_phrase(cover)
