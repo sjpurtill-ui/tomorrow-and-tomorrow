@@ -233,6 +233,8 @@ static func expansion_order_steps(id:String,plan_source:Callable)->Array:
 		var plan:Dictionary=plan_source.call()
 		shared.plan=plan
 		shared.eligible=false
+		# One seat for every people (one_seat.gd): no settlers leave it.
+		if preload("res://scripts/one_seat.gd").has_seat():return null
 		# One rule for every council: how often it looks for land follows its
 		# temper (civilization_strategy.expansion_months), for a computer ruler
 		# and for the player's leaders (auto_founding.looks_for_land) alike.

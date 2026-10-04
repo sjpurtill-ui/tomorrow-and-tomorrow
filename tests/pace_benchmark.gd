@@ -122,6 +122,7 @@ func run()->void:
 			var usec:=int(record.usec)
 			owners[owner]=int(owners.get(owner,0))+usec
 			if String(record.label)=="arrivals":advanced[owner]=int(advanced.get(owner,0))+1
+			if String(record.label)=="secondary_settlements":advanced[owner+":towns"]=int(advanced.get(owner+":towns",0))+1
 			var kind:="player" if owner=="player" else "rival"
 			var key:="%s:%s" % [kind,String(record.label)]
 			labels[key]=int(labels.get(key,0))+usec
@@ -319,7 +320,8 @@ func _census()->void:
 			var towns_dry:=[]
 			for city:Dictionary in state.player_settlements:
 				if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
-				towns_dry.append(snappedf(float((city.get("resource_metrics",{}) as Dictionary).get("water_intake_ratio",0.0)),.01))
+				var m:Dictionary=city.get("resource_metrics",{})
+				towns_dry.append("%s/f%d/p%d" % [snappedf(float(m.get("water_intake_ratio",0.0)),.01),int(m.get("food_days",0.0)),int(city.get("population",0))])
 			print("PACE_CENSUS ",id," pop=",int(state.population_exact)," contact=",contact.get(id,-1)," calm=",preload("res://scripts/day_span.gd").calm()," food_span=",preload("res://scripts/day_span.gd").food_span()," limit=",WorldSimulation._span_limit_for(id)," last_gap=",actor.get("last_gap",1)," wars=",WorldSimulation.world.player_effects().get("war_count",0)," moving_armies=",moving," engaged=",not military.active_engagement.is_empty()," threat=",not military.active_threat.is_empty()," siege=",not military.active_siege.is_empty()," water=",snappedf(float(state.simulation_metrics.get("water_intake_ratio",0.0)),.01)," towns_water=",towns_dry," convoy=",state.convoy_traveling or bool(state.settlement_convoy.get("active",false))," recovery=",military.recovery.home_unavailable())
 		)
 

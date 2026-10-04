@@ -1598,8 +1598,11 @@ func _refresh_toolbar()->void:
 		settle_tooltip="The first settlement is already committed here. Complete the Hearth Circle before organizing another founding convoy."
 		settle_disabled=true
 	else:
+		# One seat for every people (one_seat.gd): it grows outward and sends
+		# no settlers away, so there is nothing to found.
 		settle_text="Found a new settlement"
 		settle_tooltip="Enter temporary destination-selection mode. Route and cost are reviewed before anything is committed."
+		settle_disabled=preload("res://scripts/one_seat.gd").has_seat()
 	# An action that can neither be taken nor report anything does not earn a
 	# toolbar slot; it appears when it becomes possible. Away-mission states
 	# stay visible because their countdown IS the information.
