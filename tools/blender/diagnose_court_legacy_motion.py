@@ -9,6 +9,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 import numpy as np
+from validate_court_walking_cloth import intersections
 
 
 def edges(faces):
@@ -41,25 +42,36 @@ def records(path):
         for line in stream:yield json.loads(line)
 
 
-def inspect(path, coverage=False):
-    meshes = {}; reports = []; groups = defaultdict(lambda: {"poses": 0, "large_strained_edges": 0, "visible_uncovered_samples": 0})
+def inspect(path, coverage=False, hands=False):
+    meshes = {}; reports = []; groups = defaultdict(lambda: {"poses": 0, "large_strained_edges": 0, "visible_uncovered_samples": 0, "hand_crossing_poses": 0})
     for record in records(path):
         key = (record["variant"], record["outfit"])
         if record["kind"] == "mesh":
             assert record["body_position_mismatches"] == 0, "Replacement changed original body geometry"
             record["body_triangles"] = np.array(record["body_triangles"]).reshape(-1, 3)
+            if hands:
+                record["hand_faces"] = np.array(record["hand_triangles"]).reshape(-1,3)
+                record["hand_edges"] = edges(record["hand_faces"])
             for piece in record["pieces"]:
                 piece["faces"] = np.array(piece["triangles"]).reshape(-1, 3)
                 piece["edges"] = edges(piece["faces"])
                 rest = np.array(piece["rest"])
                 piece["lengths"] = np.linalg.norm(rest[piece["edges"][:, 0]] - rest[piece["edges"][:, 1]], axis=1)
+                if hands:
+                    piece["lower_faces"] = np.array(piece["lower_triangles"],dtype=int).reshape(-1,3)
+                    piece["lower_edges"] = edges(piece["lower_faces"])
             meshes[key] = record; continue
         meta = meshes[key]; group = " ".join((*key, record["clip"]))
         groups[group]["poses"] += 1
         detail = {"pose": group, "time": record["time"], "pieces": []}
         shell = []
+        if hands:
+            body = np.array(record["body"]); hits = []
         for definition, points in zip(meta["pieces"], record["pieces"]):
             points = np.array(points); shell.append(points[definition["faces"]])
+            if hands and len(definition["lower_faces"]):
+                hits += intersections(body[meta["hand_edges"]],points[definition["lower_faces"]])
+                hits += intersections(points[definition["lower_edges"]],body[meta["hand_faces"]])
             lengths = np.linalg.norm(points[definition["edges"][:, 0]] - points[definition["edges"][:, 1]], axis=1)
             ratio = lengths / np.maximum(definition["lengths"], 1e-9)
             delta = lengths - definition["lengths"]
@@ -83,12 +95,15 @@ def inspect(path, coverage=False):
                 uncovered.extend({"vertex": int(ids[i]), "yaw": yaw, "position": targets[i].tolist()} for i in np.flatnonzero(holes))
             detail["visible_uncovered_samples"] = uncovered
             groups[group]["visible_uncovered_samples"] += len(uncovered)
-        if detail["pieces"] or detail.get("visible_uncovered_samples"): reports.append(detail)
-    result = {"groups": dict(groups), "flagged_poses": reports, "coverage_enabled": coverage}
+        if hands and hits:
+            detail["hand_crossings"] = {"count":len(hits),"first":hits[0]}
+            groups[group]["hand_crossing_poses"] += 1
+        if detail["pieces"] or detail.get("visible_uncovered_samples") or detail.get("hand_crossings"): reports.append(detail)
+    result = {"groups": dict(groups), "flagged_poses": reports, "coverage_enabled": coverage, "hands_enabled":hands}
     output = Path(path).with_suffix(".diagnosis.json"); output.write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps({"poses": sum(v["poses"] for v in groups.values()), "groups": dict(groups), "report": str(output)}))
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(); parser.add_argument("poses"); parser.add_argument("--coverage", action="store_true")
-    args = parser.parse_args(); inspect(args.poses, args.coverage)
+    parser = argparse.ArgumentParser(); parser.add_argument("poses"); parser.add_argument("--coverage", action="store_true"); parser.add_argument("--hands",action="store_true")
+    args = parser.parse_args(); inspect(args.poses, args.coverage, args.hands)

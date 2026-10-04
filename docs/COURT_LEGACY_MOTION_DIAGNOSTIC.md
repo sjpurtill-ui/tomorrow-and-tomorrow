@@ -8,13 +8,14 @@ Headless exporter:
 
 ```
 Godot --headless --path <explicit worktree> res://tools/court_legacy_motion_audit.tscn -- --bodies=male_adult,female_old --outfits=hide,tunic,robe --label=prototype
-python tools/blender/diagnose_court_legacy_motion.py reports/court_legacy_motion/prototype.jsonl --coverage
+python tools/blender/diagnose_court_legacy_motion.py reports/court_legacy_motion/prototype.jsonl --coverage --hands
 ```
 
 Use all seven body names for final coverage. Reports stay ignored. The exporter
 uses the real Figure/Acting/Skeleton pipeline and currently loaded garment
 provider. It records all garment vertices/triangles at seven times through
-walking, sitting, kneeling, cross-legged sitting, and release back to walking.
+standing, standing speech, walking, sitting, kneeling, cross-legged sitting, and
+release back to walking. `--clips=stand,stand_talk` can isolate idle hand fit.
 The release cases deliberately stress the normal acting fade rather than
 pretending the garment only needs to fit a held final pose.
 
@@ -26,6 +27,10 @@ cloth must lie between it and the camera. Open vents therefore require visible
 skin, not expanded masks. A report is diagnostic evidence requiring pixel review,
 not proof that every flagged sample is a player-visible hole or that every
 unflagged garment is beautiful. The cameras are representative, not exhaustive.
+The optional hand check intersects every hand triangle against the lower garment
+surface in both directions. It excludes the intentional wrist/cuff join and
+reports actual crossings separately from cloth strain. It does not certify
+clearance of an entirely enclosed hand; pixel review remains necessary.
 Body position matching catches accidentally replaced geometry; the provider and
 asset preservation tests remain responsible for all attributes, morphs and rig.
 
@@ -37,6 +42,14 @@ largest~157mm extension is its soft cape, which needs visual classification;
 its wrap reaches~68mm during cross-sitting. Hidden-skin cover diagnostics also
 flag the inherited deep poses and their recovery. These are baseline findings,
 not failures introduced by replacement assets.
+
+Corrected two-body prototype `9d36fa9a` is held, not accepted: 98 deep/recovery
+samples show old-female crossed-leg panel edges extending up to57mm and male
+kneeling waist edges up to51mm. The separate 128-pose walking clearance check
+finds no crossings, while the new idle check reproduces crossings in all14
+standing samples across the two bodies (standing speech has none). This is why
+walking alone cannot certify a replacement garment. Original all-body baseline
+contains1,029 poses. Generated evidence stays in ignored reports and artifacts.
 
 No GPU process, simulation state, source body/rig or animation edits. Save
 compatibility unchanged. New diagnostic files only; no shared production conflict.
