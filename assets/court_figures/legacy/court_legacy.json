@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "revision": "legacy-cloth-v1",
+  "variants": {
+    "male_adult": {
+      "file": "court_legacy_male_adult.glb",
+      "outfits": [
+        "tunic"
+      ],
+      "parts": {
+        "tunic": [
+          "tunic_body",
+          "tunic_trim",
+          "tunic_belt",
+          "tunic_shoes"
+        ]
+      },
+      "source_sha256": "84c95e81cf67251325bb616e6ed1434a13231f79bece33170c279254c14e9459",
+      "sha256": "3d6d22479216d486e9dc00e0f2ec7ddecd3f4e27776c77625040b7899b97cd73"
+    },
+    "female_old": {
+      "file": "court_legacy_female_old.glb",
+      "outfits": [
+        "tunic"
+      ],
+      "parts": {
+        "tunic": [
+          "tunic_body",
+          "tunic_trim",
+          "tunic_belt",
+          "tunic_shoes"
+        ]
+      },
+      "source_sha256": "55328f7b84b143cf0da77927739be516e579d8a4fdf3f8d5d5199a33918c1c98",
+      "sha256": "038dcfeb749bcfb4f9175bc3c5be29d423d332985a4a4fe64d72d58fe2983774"
+    }
+  }
+}
