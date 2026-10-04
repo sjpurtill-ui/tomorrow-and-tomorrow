@@ -29,3 +29,13 @@ Final visual evidence (ignored, not source assets):
 The live petition fixture has a small, tightly framed roster and some occluded listeners. Reviewed samples show eased, readable turns and no pose disruption; this is not evidence of every dense crowd configuration. Deterministic tests separately cover listener staggering, stale callbacks, protected actions, short-glance return, freed/hidden targets and overlapping hushes. The first private startup failed natively before OpenGL/project code (PID39260, exit3221226505); a separate console/PNG attempt completed but its capture-write overhead reduced sampling to7.6fps, so neither is the accepted normal-speed evidence. Their logs remain distinct.
 
 Generated imports, UIDs, captures, reports and the pre-existing local early-settlement test are excluded. That unrelated test's SHA256 remains `3AD943645A68BE6629B3E3555E4C125EF2F44DB04CC2FE4C160E0A3408D15B4E`.
+
+## Combined-suite fallback correction
+
+Follow-up from `7932a5253da02a3777179d7e2fa4fecadf9b0f3c`, same worktree and branch. This checkpoint owns only `tests/test_court_stage.gd` and this handoff; production behavior is unchanged.
+
+The integrator's report64 reproduced eight old gaze assertions before the first delayed listener callback. That suite deliberately disables the acting service, so its `Figure3D._gaze_on` and physical gaze-point assertions remain appropriate. The corrected test advances the real attention tween by 0.5 seconds, covering the entire bounded listener ripple, before checking the unchanged speaker-head distance and all faces' upward targets. Immediate speech, retained resting stance and explicit kneeling assertions remain intact. The service path's stagger, cancellation and protected-acting tests also remain unchanged.
+
+Two intermediate runs confirmed all original behavior assertions passed but rejected unnecessary assumptions about a manually stepped tween's lifecycle/completion return. Those assumptions were removed; the actual resulting gaze targets are the acceptance conditions. Reports43/44 and their logs remain separate from the final result. No GPU probe or new visual evidence was generated for this test-only correction.
+
+Final verification: **49/49 tests, 2/2 suites**, zero errors, failures, skips or orphans, exit0 in Godot4.7.2 headless. `test_court_stage.gd` supplies37 cases and `test_court_attention.gd` supplies12. Evidence: `artifacts/court-attention-fallback-verified.log`, `reports/report_45`. No engine/script errors in that final log. Save compatibility and source behavior are unchanged; the unrelated local early-settlement test retains the hash above.
