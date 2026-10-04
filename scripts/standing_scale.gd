@@ -68,11 +68,14 @@ const SCHOLARS:=[[0,0.01,0.03,0.08,0.15]]
 ## is 120; a year's grain is the most the granary states of history kept.
 const STORES:=[[0,7,25,90,240],[300,10,30,120,365]]
 ## Building materials (timber, stone, clay, fibre) a head, and made goods a
-## head: computer peoples of a played world at year 75 (median 1.5 and 2).
-const MATERIALS:=[[0,0.3,1.5,6.0,15.0]]
-const GOODS:=[[0,0.5,2.0,6.0,12.0]]
-## Days of water drawn and kept against a siege.
-const WATER:=[[0,0.5,3.0,8.0,20.0]]
+## head: every people founds with about 0.2 and 0.1; by year 10 the yards and
+## the makers have filled to what computer peoples of a played world held at
+## year 75 (median 1.5 and 2).
+const MATERIALS:=[[0,0.05,0.2,1.0,3.0],[10,0.3,1.5,6.0,15.0]]
+const GOODS:=[[0,0.03,0.1,0.5,1.5],[10,0.5,2.0,6.0,12.0]]
+## Days of water drawn and kept against a siege: none at the founding;
+## computer peoples kept about 5 at year 75.
+const WATER:=[[0,0.0,0.0,1.0,3.0],[10,0.5,3.0,8.0,20.0]]
 ## The defences' bonus (built_fabric.gd defense_bonus_now; a bastion 0.62):
 ## a ditch and fence early, walls by the bronze age.
 const WALLS:=[[0,0.01,0.04,0.2,0.45],[100,0.03,0.12,0.35,0.62],[600,0.05,0.15,0.4,0.62],[1500,0.08,0.25,0.5,0.62]]
@@ -106,9 +109,9 @@ static func beauty_anchors(year:float)->Array:
 	return [0.8+10.0*float(a[0]),1.0+10.0*float(a[1]),1.0+10.0*float(a[2]),1.0+10.0*float(a[3])]
 
 ## Scouts and the watch: the share of the people out scouting and surveying,
-## and half the share on the watch (computer peoples of a played world at
-## year 75: 6.4-11.8%, median about 8.5%).
-const SCOUTS:=[[0,0.03,0.08,0.15,0.22]]
+## and half the share on the watch (every people founds with about 6 in 100;
+## computer peoples of a played world at year 75: 6.4-11.8, median about 8.5).
+const SCOUTS:=[[0,0.02,0.06,0.12,0.2],[25,0.03,0.08,0.15,0.22]]
 ## Mean familiarity with the peoples we know (society_exchange.gd ties).
 const FAMILIARITY:=[[0,0.01,0.08,0.3,0.6]]
 ## Counts that start at nothing are read as 1 + the count (or a multiple of
