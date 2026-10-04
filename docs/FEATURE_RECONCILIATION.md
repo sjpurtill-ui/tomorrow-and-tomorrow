@@ -1,3 +1,9 @@
+## October 4, 2026 — nasal and ear geometry
+
+Integrated runtime source `473fa8990a47dca94804601f25cfc07602bef276` from `codex/court-face-richness`, on main base `304ad0cb`. Local skinned refinement restores a projecting bridge/tip/alar form and shallow nasal recesses, and sculpts ear rims, bowls, inner folds and lobes. All21 original/legacy/era body assets carry the same head, identities and expressions. The generator reproduces the refinement after export; rig, clip, garment and nonface source data are preserved. The previous surface-only pass had not addressed the missing shapes.
+
+Final103 court tests and8 ear-helper tests pass. Independent validation passes all21 assets and7 head comparisons with no added open/nonmanifold edges; private rendered front/profile/expression checks pass. `docs/COURT_ANATOMY_HANDOFF.md` records exact checks, source worker commits, increased geometry budget and remaining stylized proportions. Main is pushed and freshly verified before canonical fast-forward; player/editor sessions remain open and local generated evidence is excluded.
+
 ## October 4, 2026 — court face depth, eye detail and expression normals
 
 Canonical base `dd4bd733`; integrated runtime source `4e98252b132c607f4e23fbbb0c89c7489dd94c6e` from `codex/court-face-richness`, with source normal worker `34a81041` cherry-picked as `937017c5`. Continuous skin shading and restrained surface relief make cheeks, lids and lips read with the room's light; irises/whites/glints gain detail, brow intersections are cleared, and authored expression normals are retained. Body-variant reuse no longer dereferences a freed acting controller; fallback pupils/glints have explicit draw order. No geometry assets, rig, clip, identity, simulation or save-schema changes.

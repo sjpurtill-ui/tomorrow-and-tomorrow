@@ -2,6 +2,7 @@
 
 Worktree: `C:/Users/sjpur/.codex/worktrees/court-face-richness/TomorrowandTomorrow`.
 Branch: `codex/court-face-richness`. Source baseline: integrated main `304ad0cb68ad21f036a9ec792f15df275e70c544` (includes the decree popup).
+Runtime delivery: `473fa8990a47dca94804601f25cfc07602bef276`.
 
 ## Behavior
 

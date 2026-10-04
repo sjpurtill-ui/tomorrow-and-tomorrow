@@ -1,3 +1,11 @@
+## October 4 — modeled court noses and ear folds: INTEGRATED
+
+Runtime source `473fa8990a47dca94804601f25cfc07602bef276` on `codex/court-face-richness`, based on integrated main `304ad0cb` (including the decree popup). The earlier face pass did not resolve the nearly missing nasal anatomy or solid ellipsoid ears. Actual Body geometry now has a readable bridge, rounded tip, wings and shallow nostril recesses, plus a rim, recessed bowl, inner folds and lobe on each ear. All seven variants and their LegacyBody/WardrobeBody replacements are updated, retaining identities and expression targets. Brow clearance is preserved during refinement.
+
+Acceptance: final combined court tests 103/103, ear-helper tests 8/8, independent raw-asset validation 21/21 plus seven cross-bundle head matches. Rigs, clips, clothing, original nonbody payloads and positions/morphs outside the local facial envelope are preserved. Private GPU front/three-quarter/profile and expression captures pass; fallback capture also passes. Details and honest limits, including increased triangle count and unchanged mouth/chin proportions, are in `docs/COURT_ANATOMY_HANDOFF.md`. No simulation, ledger or save-format change.
+
+Delivery reconciles both main refs in the isolated worktree, pushes and verifies origin/main before canonical fast-forward. Existing local files are preserved; generated imports/captures remain excluded. The running player/editor are not restarted, and new assets load on the next normal launch.
+
 ## October 4 — richer court faces and expression lighting: INTEGRATED
 
 Runtime source `4e98252b132c607f4e23fbbb0c89c7489dd94c6e` on `codex/court-face-richness`, based on synchronized canonical/origin main `dd4bd733089665172db55cad57bb37e586b55a9f`. Both main refs were reconciled in the isolated worktree; no source conflicts. Includes worker normal correction `34a81041` as `937017c5`, facial shading/eye detail `6254b1aa`, and reliable fallback eye-layer ordering. Delivery record and exact evidence: `docs/COURT_FACE_RICHNESS_HANDOFF.md`.
