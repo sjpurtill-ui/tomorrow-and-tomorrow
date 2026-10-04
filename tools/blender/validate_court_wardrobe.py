@@ -53,6 +53,29 @@ def boundary_edges(glb, name):
     return np.asarray([samples[key] for key,n in edges.items() if n==1])
 
 
+def surface_distance(points, triangles):
+    """True triangle distance, including edges; nearest vertices miss thin bands."""
+    a,b,c=triangles[:,0],triangles[:,1],triangles[:,2]
+    ab,ac=b-a,c-a
+    normal=np.cross(ab,ac);nn=np.sum(normal*normal,axis=1)
+    aa=np.sum(ab*ab,axis=1);cc=np.sum(ac*ac,axis=1);cross=np.sum(ab*ac,axis=1)
+    denominator=np.maximum(aa*cc-cross*cross,1e-20)
+    result=[]
+    for chunk in range(0,len(points),64):
+        point=points[chunk:chunk+64,None,:];delta=point-a
+        av=np.sum(delta*ab,axis=2);cv=np.sum(delta*ac,axis=2)
+        u=(av*cc-cv*cross)/denominator;v=(cv*aa-av*cross)/denominator
+        inside=(u>=0)&(v>=0)&(u+v<=1)&(nn>1e-20)
+        distance=np.where(inside,np.sum(delta*normal,axis=2)**2/np.maximum(nn,1e-20),np.inf)
+        for start,end in ((a,b),(b,c),(c,a)):
+            edge=end-start
+            along=np.clip(np.sum((point-start)*edge,axis=2)/np.maximum(np.sum(edge*edge,axis=1),1e-20),0,1)
+            offset=point-(start+along[:,:,None]*edge)
+            distance=np.minimum(distance,np.sum(offset*offset,axis=2))
+        result.extend(np.sqrt(distance.min(axis=1)))
+    return np.array(result)
+
+
 def check_seams(bundle, rec, body):
     height=float(body[:,1].max()-body[:,1].min())
     for outfit in rec["outfits"]:
@@ -79,6 +102,14 @@ def check_seams(bundle, rec, body):
             vertical=edges[np.abs(edges[:,0,1]-edges[:,1,1])>.003]
             assert len(vertical)>0,(rec["variant"],name,"no vent")
             assert np.abs(vertical[:,:,0]).max()<height*.025,(rec["variant"],name,"open side seam")
+    belt=bundle.mesh("medieval_belt")["primitives"][0]
+    belt_pos=bundle.values(belt["attributes"]["POSITION"])
+    doublet=bundle.mesh("medieval_doublet")["primitives"][0]
+    cloth=bundle.values(doublet["attributes"]["POSITION"])
+    triangles=cloth[bundle.values(doublet["indices"]).reshape(-1,3)]
+    near=np.any((triangles[:,:,1]>belt_pos[:,1].min()-.03)&(triangles[:,:,1]<belt_pos[:,1].max()+.03),axis=1)
+    gap=float(surface_distance(belt_pos,triangles[near]).max())
+    assert gap<height*.004,(rec["variant"],"belt floats away from doublet",gap)
 
 
 def check(root):

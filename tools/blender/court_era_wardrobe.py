@@ -297,7 +297,7 @@ def build(variant, out):
             sectors = ((-math.pi+.025,-.025),(.025,math.pi-.025))
             if kind=="courtcoat":sectors=((-math.pi+.025,-.5*math.pi),(.5*math.pi,math.pi-.025))
             for side_i, (a0, a1) in enumerate(sectors):
-                verts = []; joints = []; values = []
+                verts = []; joints = []; values = []; anchors = []
                 rings, steps = 12, 19
                 for row in range(rings):
                     t = row / (rings - 1)
@@ -317,13 +317,23 @@ def build(variant, out):
                         z = -cy+math.cos(a)*clearance
                         verts.append((x, height, z))
                         joint = b.names.index("thigh." + ("L" if x >= 0 else "R"))
-                        hip = b.names.index("hips")
-                        # The lower panel must move with its thigh; a partial
-                        # blend all the way to the hem lets seated knees emerge
-                        # through the cloth. Keep the transition at the waist.
-                        bend = min(1.0, t / .42)
+                        if row==0:
+                            nearest=b.kd.find(Vector((x,height,z)))[1]
+                            anchor=np.zeros(len(b.names))
+                            for index,value in zip(b.j[nearest],b.w[nearest]):anchor[index]+=value
+                            anchors.append(anchor)
+                        # Front fabric must follow the raised thigh promptly.
+                        # Behind the seat, spread the hip/thigh bend over more
+                        # cloth instead of pulling one short row apart by 7cm.
+                        transition=.42+.38*max(0.0,-math.cos(a))
+                        bend = min(1.0, t / transition)
                         follow = bend * bend * (3.0 - 2.0 * bend)
-                        joints.append((hip, joint, 0, 0)); values.append((1 - follow, follow, 0, 0))
+                        # The upper hem belongs to the actual waist, whose
+                        # weights can include spine as well as hips. A generic
+                        # hips-only ring separated from a leaning doublet.
+                        weight=anchors[col]*(1-follow);weight[joint]+=follow
+                        ids=np.argsort(weight)[-4:][::-1];kept=weight[ids];kept/=kept.sum()
+                        joints.append(ids);values.append(kept)
                 faces = []
                 for row in range(rings - 1):
                     for col in range(steps - 1):
@@ -342,8 +352,12 @@ def build(variant, out):
         band(b,kind+"_collar","CLOTH_C" if kind=="medieval" else "CLOTH_B",neck_center,np.array((0.,1.,0.)),
              .050*k+ease+.002*k,.052*k+ease+.002*k,.034*k if f.p.get("child") else .041*k)
         if kind == "medieval":
-            band(b, kind + "_belt", "LEATHER", np.array((0, f.z_waist, -.005)), np.array((0., 1., 0.)),
-                 f.p["waist"] + .030 * k, .133 * k, .038 * k)
+            # Follow the delivered waist and its skinning, including stooped
+            # bodies. A two-ring fixed oval floated behind a seated torso.
+            belt_mask=top & (arm+hands<.20)
+            b.shell(kind+"_belt","LEATHER",belt_mask,np.full(len(y),ease+.003*k),
+                    planes=[(np.array((0,1,0)),-f.z_waist+.019*k),
+                            (np.array((0,-1,0)),f.z_waist+.019*k)])
             for i in range(4):
                 h = f.z_chest + .05 * k - i * .038 * k
                 panel(b, kind + "_lacing_" + str(i), "CLOTH_C", [front(-.025*k,h+.006*k,.031), front(.025*k,h-.008*k,.031), front(.025*k,h-.015*k,.031), front(-.025*k,h-.001*k,.031)])
