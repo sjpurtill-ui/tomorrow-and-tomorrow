@@ -156,6 +156,13 @@ raids (-16%), 1.80 million taken, 0.35 dead in 1,000 a year against 0.42, at
 holding pacts, newcomers and softer grudges it also buys are not in the
 surrogate.
 
+Truth: the seven runs were re-recorded on this branch, one engine at a time
+(124-198 s each), since standing.gd's pride now centres on the typical people
+and `built_fabric.gd` (a watched file) states its Splendor and Might lines in
+the new readings. Against the old truth the engine's 15-year path differs
+only in holding together (0.872 against 0.881 at year 15, pride no longer
+lifting every people); `check.py --strict` passes (score 39.3).
+
 ### Crises and the age table's background (2026-10-03)
 
 The surrogate now has the crises (`crisis.py`): a seeded mirror of `crisis_unattended.gd` on the hazards and tolls of `crisis_system.gd`. Each sub-step rolls each crisis type at the chance of an onset over its days, in the engine's order (hunger, dry season, cold year, sickness and new pestilence, flood, fire). Two onsets never open within `ONSET_GAP` days, and two at most run at once. Deaths come at the turn (40 in 100 of the toll) and at the end, off the cohorts by the cause's own death weights, never below the shock floor. The silent official's answers apply: tending or keeping the sick apart, rationing, carrying water, children kept apart, the roots. So do the side effects: sick leave, rations on the food demand, spoiled stores and lost roofs, immunity and the people's own custom of keeping the sick apart, and echoes of a bad sickness. Strangers' sickness is left out (the surrogate has no foreign contacts), as are the dry season's water work and timber. `"crises": false` in the params turns them off.
