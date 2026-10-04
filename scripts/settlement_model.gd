@@ -1783,7 +1783,9 @@ func _attempt_secondary_nucleus(day:int,events:Array[Dictionary],context:Diction
 	events.append({"type":"morphology","title":"A New Local Centre Emerged","plot_id":int(best_plot.get("id",-1)),"nucleus_id":nucleus_id})
 
 func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context:Dictionary={})->void:
-	if not _can_add_plots(6): return
+	# One quarter has at most eight plots/routes. Reserve the whole bounded batch
+	# before drawing it, so no inherited routes are truncated to make room.
+	if not _can_add_plots(8) or WorldSimulation.state.settlement_routes.size()+8>MAX_SIMULATED_ROUTES or WorldSimulation.state.settlement_nuclei.size()>=MAX_SIMULATED_NUCLEI: return
 	# Dense inherited compounds can absorb population for centuries, but a capable
 	# city also externalizes service load into new quarters. This annual process is
 	# deliberately separate from ordinary housing pressure: it founds a connected
@@ -1813,19 +1815,26 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 		# expansion and must not be created for the price of one household plot.
 		cluster_cost[resource_name]=float(recipe.cost[resource_name])*14.0
 	if not _can_pay_fabric_cost(cluster_cost): return
-	var occupied_extent:=0.10
+	var anchors:Array[Dictionary]=[]
 	for plot in WorldSimulation.state.settlement_plots:
-		if String(plot.get("status",""))=="reclaimed": continue
-		occupied_extent=maxf(occupied_extent,Vector2(plot.get("centroid",Vector2.ZERO)).length())
-	var ring_distance:=clampf(occupied_extent+0.11,0.19,1.05)
+		if String(plot.get("status","")) not in ["active","stressed"]: continue
+		if String(plot.get("land_use","")) not in ["residential_compound","mixed_household","communal","civic","market","workshop","storage"]: continue
+		anchors.append(plot)
+	if anchors.is_empty(): return
+	anchors.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return Vector2(a.centroid).length_squared()>Vector2(b.centroid).length_squared())
 	var district_seed:=hash("%d:district:%d:%d" % [WorldSimulation.state.world_seed,WorldSimulation.state.next_settlement_nucleus_id,day])
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=district_seed
 	var best_center:=Vector2.ZERO
+	var approach_start:=Vector2.ZERO
 	var best_score:=-INF
 	for attempt in 96:
-		var angle:=rng.randf()*TAU
-		var candidate:=Vector2.from_angle(angle)*ring_distance*rng.randf_range(0.94,1.08)
+		# Add a short inhabited approach from the built edge, at any distance
+		# from the founding hearth. Fields and resource sites are not city edges.
+		var anchor:Dictionary=anchors[rng.randi_range(0,maxi(0,ceili(anchors.size()*0.4)-1))]
+		var edge:=Vector2(anchor.centroid)
+		var angle:=edge.angle()+rng.randf_range(-1.15,1.15) if edge.length()>0.004 else rng.randf()*TAU
+		var candidate:=edge+Vector2.from_angle(angle)*rng.randf_range(0.13,0.19)
 		var nearest_nucleus_distance:=INF
 		for nucleus in WorldSimulation.state.settlement_nuclei:
 			if bool(nucleus.get("active",true)):
@@ -1833,27 +1842,21 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 		if nearest_nucleus_distance<0.12: continue
 		var score:=_growth_site_score(candidate,0.014,"mixed_household",context)
 		if score<=-9000.0: continue
+		var frontage:=_district_frontage_at(anchor,candidate)
+		if not _district_approach_buildable(candidate,frontage,context): continue
 		# A quarter is valuable when it extends the inherited settlement without
 		# becoming an isolated new town. Gentle seeded asymmetry prevents rings.
-		score+=exp(-absf(candidate.length()-ring_distance)/0.10)*1.35
+		score+=clampf((candidate.length()-edge.length())/0.19,0.0,1.0)*1.35
 		score+=rng.randf_range(-0.12,0.12)
 		if score>best_score:
 			best_score=score
 			best_center=candidate
+			approach_start=frontage
 	if best_score<=-9000.0: return
 	var nucleus_id:=WorldSimulation.state.next_settlement_nucleus_id
 	WorldSimulation.state.next_settlement_nucleus_id+=1
-	var previous_nucleus_position:=Vector2.ZERO
-	var previous_distance:=INF
-	for nucleus in WorldSimulation.state.settlement_nuclei:
-		if not bool(nucleus.get("active",true)): continue
-		var nucleus_position:=Vector2(nucleus.get("position",Vector2.ZERO))
-		var distance:=best_center.distance_to(nucleus_position)
-		if distance<previous_distance:
-			previous_distance=distance
-			previous_nucleus_position=nucleus_position
 	WorldSimulation.state.settlement_nuclei.append({"id":nucleus_id,"kind":"satellite_quarter","position":best_center,"pull":0.82,"active":true,"created_day":day,"absorbed_day":-1})
-	var generation:=clampi(_supported_fabric_tier(day),0,4)
+	var generation:=_new_fabric_tier(day)
 	var created_plots:Array[Dictionary]=[]
 	created_plots.append(_make_district_seed_plot(best_center,0.014,"mixed_household",recipe,day,nucleus_id,generation,0))
 	for companion_index in 2:
@@ -1861,11 +1864,11 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 		var companion_center:=best_center+Vector2.from_angle(companion_angle)*rng.randf_range(0.030,0.037)
 		if _growth_site_score(companion_center,0.009,"residential_compound",context)<=-9000.0: continue
 		created_plots.append(_make_district_seed_plot(companion_center,0.009,"residential_compound",recipe,day,nucleus_id,generation,companion_index+1))
-	var corridor_direction:=best_center-previous_nucleus_position
+	var corridor_direction:=best_center-approach_start
 	var corridor_side:=Vector2(-corridor_direction.y,corridor_direction.x).normalized()
 	for corridor_index in 5:
 		var corridor_t:=0.18+float(corridor_index)*0.155
-		var corridor_center:=previous_nucleus_position.lerp(best_center,corridor_t)
+		var corridor_center:=approach_start.lerp(best_center,corridor_t)
 		corridor_center+=corridor_side*sin(float(corridor_index+1)*1.71+float(district_seed%997)*0.013)*rng.randf_range(0.010,0.023)
 		if _growth_site_score(corridor_center,0.0075,"residential_compound",context)<=-9000.0: continue
 		var separated:=true
@@ -1875,7 +1878,7 @@ func _attempt_mature_district_expansion(day:int,events:Array[Dictionary],context
 				break
 		if not separated: continue
 		created_plots.append(_make_district_seed_plot(corridor_center,0.0075,"residential_compound",recipe,day,nucleus_id,generation,corridor_index+3))
-	var connector_id:=_create_district_connector(best_center,previous_nucleus_position,day)
+	var connector_id:=_create_district_connector(best_center,approach_start,day)
 	for created_index in created_plots.size():
 		var plot:Dictionary=created_plots[created_index]
 		if created_index==0: plot["frontage_route_id"]=connector_id
@@ -1893,27 +1896,84 @@ func _make_district_seed_plot(center:Vector2,radius:float,land_use:String,recipe
 	rng.seed=plot_seed
 	var polygon:=_irregular_polygon(center,radius,plot_seed)
 	var form:=_fabric_form_for(land_use,generation,String(recipe.form))
-	var era_names:=["founding","foothold","hamlet","village","local_centre"]
-	return {
+	var plot:Dictionary={
 		"id":plot_id,"seed":plot_seed,"nucleus_id":nucleus_id,"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
 		"land_use":land_use,"secondary_use":"exchange" if land_use=="mixed_household" else "","form":form,"roof_plan":preload("res://scripts/building_material_operations.gd").roof_plan(recipe.get("building_materials",{}),_roof_plan_for(plot_seed,String(recipe.family),form)),"material_family":recipe.family,"material_mix":recipe.mix.duplicate(true),"construction_recipe":"connected_district_seed","supply_provenance":recipe.cost.duplicate(true),"building_materials":recipe.get("building_materials",{}).duplicate(true),"visual_material_mix":preload("res://scripts/building_material_operations.gd").visual_mix(recipe.cost) if not recipe.get("building_materials",{}).is_empty() else recipe.mix.duplicate(true),"replacement_debt":{},"roof_coverage":0.34 if land_use=="mixed_household" else 0.28,"storeys":1,
 		"resident_capacity":rng.randi_range(12,18) if land_use=="mixed_household" else rng.randi_range(7,10),"resident_count":0,"worker_capacity":5 if land_use=="mixed_household" else 1,"worker_count":0,"storage_capacity":2.4 if land_use=="mixed_household" else 0.8,
-		"condition":0.60,"maintenance_debt":0.0,"service_access":0.42,"hazard_exposure":rng.randf_range(0.08,0.20),"prosperity":0.34,"status":"under_construction","construction_progress":0.0,"growth_cause":"connected district expansion","fabric_generation":generation,"morphology_era":era_names[generation],
+		"condition":0.60,"maintenance_debt":0.0,"service_access":0.42,"hazard_exposure":rng.randf_range(0.08,0.20),"prosperity":0.34,"status":"under_construction","construction_progress":0.0,"growth_cause":"connected district expansion",
 		"pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied","displaced_households":0,"returning_households":0,"claim_pressure":0.0,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
 	}
+	_stamp_new_fabric(plot,generation)
+	return plot
 
 func _create_district_connector(start:Vector2,finish:Vector2,day:int)->int:
 	var route_id:=1
 	for route in WorldSimulation.state.settlement_routes: route_id=maxi(route_id,int(route.get("id",0))+1)
-	var direction:=finish-start
-	var side:=Vector2(-direction.y,direction.x).normalized()
-	var bend:=minf(0.060,direction.length()*0.16)
 	var graded:="graded_roads" in WorldSimulation.state.known_discoveries
 	WorldSimulation.state.settlement_routes.append({
-		"id":route_id,"kind":"district_connector","hierarchy":"main_approach","points":PackedVector2Array([start,start.lerp(finish,0.18)+side*bend*0.72,start.lerp(finish,0.39)+side*bend,start.lerp(finish,0.62)-side*bend*0.48,start.lerp(finish,0.82)-side*bend*0.22,finish]),
+		"id":route_id,"kind":"district_connector","hierarchy":"main_approach","points":_district_connector_points(start,finish),
 		"condition":0.72 if graded else 0.48,"width_m":4.6 if graded else 2.8,"surface_tier":3 if graded else 1,"surface":"drained_earth" if graded else "cleared_earth","traffic":0.44,"created_day":day,"active":true
 	})
 	return route_id
+
+func _district_connector_points(start:Vector2,finish:Vector2)->PackedVector2Array:
+	var direction:=finish-start
+	var side:=Vector2(-direction.y,direction.x).normalized()
+	var bend:=minf(0.060,direction.length()*0.16)
+	return PackedVector2Array([start,start.lerp(finish,0.18)+side*bend*0.72,start.lerp(finish,0.39)+side*bend,start.lerp(finish,0.62)-side*bend*0.48,start.lerp(finish,0.82)-side*bend*0.22,finish])
+
+func _district_frontage_at(anchor:Dictionary,candidate:Vector2)->Vector2:
+	var polygon:PackedVector2Array=anchor.get("polygon",PackedVector2Array())
+	var choices:PackedVector2Array=[]
+	for route in WorldSimulation.state.settlement_routes:
+		if int(route.get("id",-2))!=int(anchor.get("frontage_route_id",-1)):continue
+		var points:PackedVector2Array=route.get("points",PackedVector2Array())
+		for index in points.size()-1:
+			var nearest:=Geometry2D.get_closest_point_to_segment(candidate,points[index],points[index+1])
+			if not Geometry2D.is_point_in_polygon(nearest,polygon):choices.append(nearest)
+			# Old desire paths start at parcel centroids. Join their exit from the
+			# parcel, rather than extending a new road into an inherited house.
+			for edge in polygon.size():
+				var crossing:Variant=Geometry2D.segment_intersects_segment(points[index],points[index+1],polygon[edge],polygon[(edge+1)%polygon.size()])
+				if crossing is Vector2:choices.append(crossing)
+		break
+	if choices.is_empty():
+		for edge in polygon.size():choices.append(Geometry2D.get_closest_point_to_segment(candidate,polygon[edge],polygon[(edge+1)%polygon.size()]))
+	var best:=Vector2(anchor.get("centroid",Vector2.ZERO))
+	var distance:=INF
+	for point in choices:
+		if point.distance_squared_to(candidate)<distance:
+			best=point;distance=point.distance_squared_to(candidate)
+	return best
+
+func _district_approach_buildable(start:Vector2,finish:Vector2,context:Dictionary)->bool:
+	# These short edge extensions cannot invent bridges or cross unsuitable land.
+	# Test the same bent path that will be stored, at intervals of at most 10 m.
+	var points:=_district_connector_points(start,finish)
+	var near_path:=Rect2(points[0],Vector2.ZERO)
+	for point in points:near_path=near_path.expand(point)
+	near_path=near_path.grow(0.0001)
+	var occupied:Array[PackedVector2Array]=[]
+	for plot in WorldSimulation.state.settlement_plots:
+		if String(plot.get("status","")) in ["reclaimed","vacant"] or String(plot.get("land_use","")) in ["field","pasture","vacant"]:continue
+		var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
+		if polygon.size()<3:continue
+		var bounds:=Rect2(polygon[0],Vector2.ZERO)
+		for point in polygon:bounds=bounds.expand(point)
+		if near_path.intersects(bounds):occupied.append(polygon)
+	for index in points.size()-1:
+		# Parcel intersection is exact, independent of the terrain sample spacing.
+		# Only the final frontage/entrance may touch an inherited boundary.
+		for polygon in occupied:
+			if Geometry2D.is_point_in_polygon(points[index].lerp(points[index+1],0.5),polygon):return false
+			for edge in polygon.size():
+				var crossing:Variant=Geometry2D.segment_intersects_segment(points[index],points[index+1],polygon[edge],polygon[(edge+1)%polygon.size()])
+				if crossing is Vector2 and (crossing as Vector2).distance_squared_to(finish)>0.00000001:return false
+		var steps:=maxi(1,ceili(points[index].distance_to(points[index+1])/0.010))
+		for step in steps+1:
+			var point:=points[index].lerp(points[index+1],float(step)/steps)
+			if _growth_terrain_score(point,context)<=-9000.0:return false
+	return true
 
 func _permanent_resident_capacity()->int:
 	var capacity:=0
@@ -2615,6 +2675,7 @@ func _settlement_age_years(day:int)->float:
 
 ## Years a town must have stood before each construction era (index = era).
 const FABRIC_ERA_AGE_YEARS:=[0.0,0.25,1.0,3.0,10.0,25.0,40.0,80.0,125.0,175.0,300.0,700.0,1500.0]
+const FABRIC_ERA_NAMES:=["founding","foothold","hamlet","village","local_centre","town","mature_town","urban_system","city_consolidation","historic_landscape","regional_system","industrial_age","metropolitan_age"]
 
 func _age_fabric_ceiling(age_years:float)->int:
 	# These are opportunity thresholds from the morphology specification, not free
@@ -2673,6 +2734,34 @@ func _supported_fabric_tier(day:int)->int:
 	for tier in range(1,FABRIC_ERA_AGE_YEARS.size()):
 		if fabric_era_checks(tier,inputs).all(func(check:Dictionary)->bool:return bool(check.met)): support=tier
 	return mini(mini(age_ceiling,support),preload("res://scripts/settlement_architecture_knowledge.gd").ceiling())
+
+func _new_fabric_tier(day:int)->int:
+	# Knowledge offers possibilities; the city's paid construction/renewal has
+	# to have reached them. Neither elapsed time nor a research unlock repaints
+	# inherited plots, or lets a new quarter leap ahead of its city's capability.
+	return clampi(mini(floori(float(city_form().tier)),_supported_fabric_tier(day)),0,FABRIC_ERA_NAMES.size()-1)
+
+func _fabric_storeys_for(plot:Dictionary,tier:int)->int:
+	var floors:=1
+	var durable:=String(plot.get("material_family","organic")) in ["earth","stone","brick"]
+	if durable and tier>=5:floors=2
+	if durable and tier>=8 and WorldSimulation.discovery.effect("construction_rate")>=0.025:floors=3
+	if tier>=11:floors=4+posmod(int(plot.get("seed",1)),3)
+	if tier>=12:floors=6+posmod(int(plot.get("seed",1)),7)
+	return floors
+
+func _stamp_new_fabric(plot:Dictionary,tier:int)->void:
+	# Only new drawings call this. Keep the recipe's recorded roof/materials and
+	# the existing capacity authority; these are bounded visual representatives.
+	var use:=String(plot.get("land_use",""))
+	plot["fabric_generation"]=tier
+	plot["morphology_era"]=FABRIC_ERA_NAMES[tier]
+	plot["form"]=_fabric_form_for(use,tier,String(plot.get("form","inherited_plot")))
+	plot["roof_coverage"]=minf(0.72,float(plot.get("roof_coverage",0.0))+0.032*tier)
+	if use in ["residential_compound","mixed_household"]:
+		plot["storeys"]=_fabric_storeys_for(plot,tier)
+		for step in range(1,tier+1):
+			plot["resident_capacity"]=int(plot.get("resident_capacity",0))+2+step+maxi(0,_fabric_storeys_for(plot,step)-1)*4
 
 func _fabric_form_for(use:String,tier:int,current_form:String)->String:
 	if use in ["residential_compound","mixed_household"]:
@@ -2770,17 +2859,12 @@ func _apply_fabric_upgrade(chosen:Dictionary,day:int,events:Array[Dictionary])->
 		chosen_plot["material_mix"]={"Stone":0.76,"Timber":0.16,"Clay":0.04} if target_family=="stone" else {"Clay":0.68,"Timber":0.19,"Fiber Plants":0.06}
 		chosen_plot["roof_plan"]=_roof_plan_for(int(chosen_plot.get("seed",1)),target_family,String(chosen_plot.form))
 	chosen_plot["fabric_generation"]=next_tier
-	chosen_plot["morphology_era"]=["founding","foothold","hamlet","village","local_centre","town","mature_town","urban_system","city_consolidation","historic_landscape","regional_system","industrial_age","metropolitan_age"][next_tier]
+	chosen_plot["morphology_era"]=FABRIC_ERA_NAMES[next_tier]
 	chosen_plot["converted_day"]=day
 	chosen_plot["last_update_day"]=day
 	chosen_plot["roof_coverage"]=minf(0.72,float(chosen_plot.get("roof_coverage",0.0))+(0.018 if use=="field" else 0.032))
 	if use in ["residential_compound","mixed_household"]:
-		var durable:=String(chosen_plot.get("material_family","organic")) in ["earth","stone"]
-		var new_storeys:=1
-		if durable and next_tier>=5: new_storeys=2
-		if durable and next_tier>=8 and WorldSimulation.discovery.effect("construction_rate")>=0.025: new_storeys=3
-		if next_tier>=11:new_storeys=4+posmod(int(chosen_plot.get("seed",1)),3)
-		if next_tier>=12:new_storeys=6+posmod(int(chosen_plot.get("seed",1)),7)
+		var new_storeys:=_fabric_storeys_for(chosen_plot,next_tier)
 		chosen_plot["storeys"]=maxi(int(chosen_plot.get("storeys",1)),new_storeys)
 		var capacity_gain:=2+next_tier+maxi(0,int(chosen_plot.storeys)-1)*4
 		chosen_plot["resident_capacity"]=int(chosen_plot.get("resident_capacity",0))+capacity_gain
@@ -2946,6 +3030,11 @@ func _growth_site_score(candidate:Vector2,radius:float,land_use:String,context:D
 	if land_use=="storage": score+=compactness*1.25
 	elif land_use in ["workshop","dirty_industry"]: score+=edge_preference*1.12-route_access*0.10
 	else: score+=compactness*0.86
+	var terrain_score:=_growth_terrain_score(candidate,context)
+	return terrain_score if terrain_score<=-9000.0 else score+terrain_score
+
+func _growth_terrain_score(candidate:Vector2,context:Dictionary)->float:
+	var score:=0.0
 	var origin:Vector3=context.get("settlement_origin",WorldSimulation.state.settlement_founded_at)
 	var world_x:=origin.x+candidate.x
 	var world_z:=origin.z+candidate.y
@@ -3011,13 +3100,15 @@ func _create_functional_growth_plot(day:int,land_use:String,recipe:Dictionary,co
 	var workers:=int(WorldSimulation.state.population_allocations.get(worker_role,0))
 	var worker_capacity:=rng.randi_range(5,8) if land_use not in ["civic","dirty_industry"] else rng.randi_range(10,18)
 	var secondary_use:=String({"workshop":"craft","storage":"provisions","market":"exchange","hospitality":"lodging","civic":"administration","dirty_industry":"bulk_processing"}.get(land_use,"service"))
-	return {
+	var plot:Dictionary={
 		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
 		"land_use":land_use,"secondary_use":secondary_use,"form":recipe.form,"roof_plan":preload("res://scripts/building_material_operations.gd").roof_plan(recipe.get("building_materials",{}),_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form))),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"specialized_%s_expansion" % land_use,"supply_provenance":recipe.cost.duplicate(true),"building_materials":recipe.get("building_materials",{}).duplicate(true),"visual_material_mix":preload("res://scripts/building_material_operations.gd").visual_mix(recipe.cost) if not recipe.get("building_materials",{}).is_empty() else recipe.mix.duplicate(true),"replacement_debt":{},"roof_coverage":0.42 if land_use=="workshop" else (0.36 if land_use in ["market","civic"] else 0.54),"storeys":1,
 		"resident_capacity":rng.randi_range(8,16) if land_use=="hospitality" else 0,"resident_count":0,"worker_capacity":worker_capacity,"worker_count":mini(workers,worker_capacity),"storage_capacity":rng.randf_range(10.0,18.0) if land_use=="storage" else (rng.randf_range(4.0,9.0) if land_use in ["market","dirty_industry"] else 1.4),"condition":0.58,"maintenance_debt":0.0,"service_access":0.38,"hazard_exposure":rng.randf_range(0.18,0.34) if land_use=="dirty_industry" else rng.randf_range(0.10,0.24),"prosperity":0.34,
 		"status":"under_construction","construction_progress":0.0,"growth_cause":"assigned %s labor, construction labor, and delivered materials" % ("craft" if land_use=="workshop" else "logistics"),"pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied",
 		"displaced_households":0,"returning_households":0,"claim_pressure":0.0,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
 	}
+	_stamp_new_fabric(plot,_new_fabric_tier(day))
+	return plot
 
 func _resident_capacity_for_growth()->int:
 	var capacity:=0
@@ -3105,6 +3196,7 @@ func _create_growth_route(plot:Dictionary,day:int,route_kind:String="desire_path
 	var nearest:=Vector2.ZERO
 	var nearest_distance:=INF
 	for existing in WorldSimulation.state.settlement_plots:
+		if int(existing.get("id",-1))==int(plot.get("id",-2)):continue
 		var candidate:=Vector2(existing.get("centroid",Vector2.ZERO))
 		var distance:=plot_center.distance_to(candidate)
 		if distance<nearest_distance:
@@ -3172,13 +3264,15 @@ func _create_household_growth_plot(day:int,recipe:Dictionary,context:Dictionary=
 	center=best_center
 	WorldSimulation.state.next_settlement_plot_id+=1
 	var polygon:=_irregular_polygon(center,radius,plot_seed)
-	return {
+	var plot:Dictionary={
 		"id":plot_id,"seed":plot_seed,"nucleus_id":_nearest_nucleus_id(center),"parent_plot_id":-1,"lineage_ids":[],"polygon":polygon,"centroid":_polygon_centroid(polygon),"area_ha":_polygon_area_km2(polygon)*100.0,"frontage_route_id":-1,
 		"land_use":"residential_compound","secondary_use":"","form":recipe.form,"roof_plan":preload("res://scripts/building_material_operations.gd").roof_plan(recipe.get("building_materials",{}),_roof_plan_for(plot_seed,String(recipe.family),String(recipe.form))),"material_family":recipe.family,"material_mix":recipe.mix,"construction_recipe":"household_expansion","supply_provenance":recipe.cost.duplicate(true),"building_materials":recipe.get("building_materials",{}).duplicate(true),"visual_material_mix":preload("res://scripts/building_material_operations.gd").visual_mix(recipe.cost) if not recipe.get("building_materials",{}).is_empty() else recipe.mix.duplicate(true),"replacement_debt":{},"roof_coverage":0.30,"storeys":1,
 		"resident_capacity":rng.randi_range(7,10),"resident_count":0,"worker_capacity":1,"worker_count":0,"storage_capacity":0.8,"condition":0.58,"maintenance_debt":0.0,"service_access":0.34,"hazard_exposure":rng.randf_range(0.08,0.20),"prosperity":0.31,
 		"status":"under_construction","construction_progress":0.0,"growth_cause":"household crowding, available labor, and delivered materials","pre_damage_use":"","damage":{"structural":0.0,"fire":0.0,"contamination":0.0,"looting":0.0,"neglect":0.0},"habitability":0.0,"repair_state":"maintained","reoccupation_state":"occupied",
 		"displaced_households":0,"returning_households":0,"claim_pressure":0.0,"created_day":day,"converted_day":-1,"damaged_day":-1,"abandoned_day":-1,"last_update_day":day
 	}
+	_stamp_new_fabric(plot,_new_fabric_tier(day))
+	return plot
 
 func _roof_plan_for(plot_seed:int,material_family:String,form:String)->String:
 	if form in ["portable_shelter_cluster","light_shelter_cluster"]:
