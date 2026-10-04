@@ -97,7 +97,11 @@ def joint_weights(b,values):
 
 def cloth_surface(b,name,slot,points,faces,joints,weights,thickness):
     """One shared deformation field on both sides; no separately weighted liner."""
-    points=np.asarray(points);faces=np.asarray(faces);n=np.zeros_like(points)
+    points=np.asarray(points);faces=np.asarray(faces)
+    used,inverse=np.unique(faces,return_inverse=True)
+    points=points[used];faces=inverse.reshape(-1,3)
+    joints=np.asarray(joints)[used];weights=np.asarray(weights)[used]
+    n=np.zeros_like(points)
     fn=np.cross(points[faces[:,1]]-points[faces[:,0]],points[faces[:,2]]-points[faces[:,0]])
     for c in range(3):np.add.at(n,faces[:,c],fn)
     n/=np.maximum(np.linalg.norm(n,axis=1,keepdims=True),1e-8)
@@ -116,11 +120,11 @@ def skirt(b,f,kind,hem,ease,start,trim=False):
     # Vents are only a few millimetres at rest and open with the actual stride.
     for half,(a0,a1) in enumerate(((-math.pi+.008,-.008),(.008,math.pi-.008))):
         points=[];joints=[];values=[]
-        rows,steps=22,33
-        if trim:rows=3
-        for row in range(rows):
-            t=row/(rows-1)
-            height=(hem+.032*k-t*.032*k) if trim else start-t*(start-hem)
+        steps=33
+        band_top=hem+.032*k
+        heights=sorted(set(np.linspace(start,hem,22).tolist()+[band_top]),reverse=True)
+        rows=len(heights)
+        for height in heights:
             h=max(height,f.z_hip)
             rx,fr,bk,cy=[float(np.interp(h,zvals,[s[j] for s in sections])) for j in range(1,5)]
             nearby=b.p[(np.abs(b.p[:,1]-h)<.014*k)&b.trunk_mask]
@@ -149,6 +153,8 @@ def skirt(b,f,kind,hem,ease,start,trim=False):
                 ids,w=joint_weights(b,weight);joints.append(ids);values.append(w)
         faces=[]
         for row in range(rows-1):
+            in_band=(heights[row]+heights[row+1])*.5<band_top
+            if in_band!=trim:continue
             for col in range(steps-1):
                 i=row*steps+col;faces.extend(((i,i+steps,i+steps+1),(i,i+steps+1,i+1)))
         cloth_surface(b,kind+('_hem_' if trim else '_panel_')+str(half),
@@ -197,7 +203,9 @@ def garment(b,f,kind):
     b.shell(kind+'_neckband','CLOTH_C',mask,upper_ease+.0008*k,limits=[lower,neck,trim]+ends)
     for side,(on_arm,field) in zip(('L','R'),cuffs):
         b.shell(kind+'_cuff_'+side,'CLOTH_C',mask&on_arm,np.full(len(y),ease+.0008*k),limits=[field,.027*k-field])
-    skirt(b,f,kind,hem,ease+.001*k,start,True)
+    # The hem is a material region of the exact same panel grid, not an
+    # independently weighted strip hovering over the deformed body.
+    skirt(b,f,kind,hem,ease,start,True)
     b.finish_group(group,kind+'_trim')
     for name in PARTS[kind][2:]:b.copy_piece(name)
     # The open skirt must never erase the legs behind its vents. Only the
