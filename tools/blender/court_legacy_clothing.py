@@ -130,16 +130,16 @@ def skirt(b,f,kind,hem,ease,start,trim=False):
                 a=a0+(a1-a0)*col/(steps-1)
                 # Retain the long female tunic / ankle robe silhouettes and
                 # subdued vertical pleats, without a jagged triangulated hem.
-                flare=(.035 if kind=='tunic' else .055)*k*fall
+                flare=(.010 if kind=='tunic' else .032)*k*fall
                 pleat=.004*k*fall*math.sin(a*(12 if kind=='tunic' else 14))
                 x=math.sin(a)*(rx+ease+flare+pleat)
-                depth=(fr if math.cos(a)>=0 else bk)+ease+.010*k*fall+pleat
+                depth=(fr if math.cos(a)>=0 else bk)+ease-.008*k*fall+pleat
                 z=-cy+math.cos(a)*depth
                 points.append((x,height,z))
-                anchor=(math.sin(a)*(rx+ease),start,-cy+math.cos(a)*((fr if math.cos(a)>=0 else bk)+ease))
-                nearest=b.trunk_kd.find(Vector(anchor))[1]
                 weight=np.zeros(len(b.names))
-                for index,value in zip(b.j[nearest],b.w[nearest]):weight[index]+=value
+                # A single continuous waist anchor avoids nearest-vertex
+                # jumps between hips and opposite thighs around the belt.
+                weight[b.names.index('hips')]=1.
                 own='L' if half==1 else 'R'
                 follow=float(smooth((start-height)/(.15*k)))
                 shin=float(smooth((f.z_knee+.025*k-height)/(.16*k)))
@@ -165,7 +165,11 @@ def garment(b,f,kind):
     start=f.z_hip+.045*k
     hem=(f.z_knee+(.05 if not f.p['female'] else -.17)*k) if kind=='tunic' else f.z_ankle+.030*k
     ease=(.019 if kind=='tunic' else .023)*k
-    p=b.p+b.n*ease
+    # Retain the original belt's fitted waist. Inflating this narrow band as
+    # much as the sleeves puts the preserved leather belt inside the cloth.
+    waist_fit=1.-smooth(np.abs(y-f.z_waist)/(.075*k))
+    upper_ease=ease-(ease-.010*k)*waist_fit
+    p=b.p+b.n*upper_ease[:,None]
     mask=(y<f.z_chin+.05*k)&(hands<.995)
     lower=p[:,1]-start+.045*k
     neck=np.maximum(f.z_shoulder+.050*k-p[:,1],np.abs(p[:,0])-.092*k)
@@ -180,11 +184,17 @@ def garment(b,f,kind):
         ends.append(np.where(on_arm,field,1.))
         cuffs.append((on_arm,field))
     group=len(b.doc['meshes'])
-    b.shell(kind+'_upper','CLOTH_A',mask,np.full(len(y),ease),limits=[lower,neck,-trim]+ends)
+    b.shell(kind+'_upper','CLOTH_A',mask,upper_ease,limits=[lower,neck,-trim]+ends)
+    # Overlapping inner facings stay within the original hem and follow the
+    # body's actual hip/knee blend. They support the outer folds when a vent
+    # opens in a deep bend, without erasing the visible legs below the hem.
+    facing=(b.trunk_mask)&(y<start+.040*k)&(y>hem-.04*k)
+    b.shell(kind+'_facings','CLOTH_A',facing,np.full(len(y),.011*k),
+            limits=[start+.022*k-(y+b.n[:,1]*.011*k),y+b.n[:,1]*.011*k-hem])
     skirt(b,f,kind,hem,ease,start)
     b.finish_group(group,kind+'_body')
     group=len(b.doc['meshes'])
-    b.shell(kind+'_neckband','CLOTH_C',mask,np.full(len(y),ease+.0008*k),limits=[lower,neck,trim]+ends)
+    b.shell(kind+'_neckband','CLOTH_C',mask,upper_ease+.0008*k,limits=[lower,neck,trim]+ends)
     for side,(on_arm,field) in zip(('L','R'),cuffs):
         b.shell(kind+'_cuff_'+side,'CLOTH_C',mask&on_arm,np.full(len(y),ease+.0008*k),limits=[field,.027*k-field])
     skirt(b,f,kind,hem,ease+.001*k,start,True)
@@ -194,6 +204,7 @@ def garment(b,f,kind):
     # matched upper shell and original shoes provide fixed body coverage.
     cover=mask&(lower>.018*k)&(neck>.012*k)
     for end in ends:cover &= end>.016*k
+    cover |= b.trunk_mask&(y<start+.008*k)&(y>hem+.020*k)
     faces=b.faces[np.any(~cover[b.faces],axis=1)]
     cover[np.unique(faces)]=False
     original=b.array(b.attrs['COLOR_0'])
