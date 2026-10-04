@@ -579,11 +579,11 @@ func _now()->float:
 ## being written (the frames wait for them, so nothing is late).
 static func exact()->bool:
 	return sync_render or OS.has_feature("movie")
-## Footsteps for a while at a body: earth or wood by the set; pace in steps a second.
+## Footsteps for a while at a body: the authored floor; pace in steps a second.
 func footsteps(body:Node3D,seconds:float,pace:=1.8,heavy:=false,cue_name:="step",db:=0.0)->void:
 	if not can_play():return
 	var name:=cue_name
-	if cue_name=="step":name="step_wood" if set_kind in WOOD_FLOORS else "step_earth"
+	if cue_name=="step":name=step_for(set_kind,facts)
 	var t:=0.0
 	var k:=0
 	while t<seconds:
@@ -934,10 +934,21 @@ func ambience(set_id:String,season_id:String,facts_in:Dictionary={})->void:
 	var bus:=ensure_bus()
 	var room:=AudioServer.get_bus_effect(bus,0) as AudioEffectReverb
 	if room!=null:
-		var open_air:=set_kind in OPEN_SETS
+		var open_air:=not indoors_for(set_kind,facts)
 		room.wet=0.04 if open_air else (0.12 if set_kind in ["longhouse"] else 0.18)
 		room.room_size=0.15 if open_air else (0.32 if set_kind=="longhouse" else 0.55)
 	_bed_list=beds_for(set_kind,season,facts)
+	# Reconfiguring an existing sound service must stop beds the new room lacks.
+	var retained:Array=[]
+	for role:Array in _bed_list:retained.append(String(role[0]))
+	for role:String in _beds.keys():
+		if role in retained:continue
+		var tween:Tween=_bed_tweens.get(role,null)
+		if tween!=null and tween.is_valid():tween.kill()
+		_bed_tweens.erase(role)
+		var player:=_beds[role] as AudioStreamPlayer
+		player.stop();player.queue_free()
+		_beds.erase(role);_bed_db.erase(role)
 	if _tongue_key.is_empty():_tongue_key=register_tongue("player",world_seed())
 	var talk:Array=talk_for(facts)
 	_talk_size=String(talk[0]);_talk_db=float(talk[1])
@@ -976,11 +987,26 @@ func _known()->Array:
 		if got is Array:return got
 	return []
 
+## New rooms supply their physical facts. Legacy callers retain their original
+## open-air classification, hearth and floor when those facts are absent.
+static func indoors_for(set_id:String,facts_in:Dictionary)->bool:
+	return bool(facts_in.indoor) if facts_in.has("indoor") else not set_id in OPEN_SETS
+
+static func has_hearth_for(facts_in:Dictionary)->bool:
+	return bool(facts_in.get("has_hearth",true))
+
+static func step_for(set_id:String,facts_in:Dictionary)->String:
+	var floor:=String(facts_in.get("floor","")).to_lower()
+	if floor in ["wood","plank","timber","parquet"]:return "step_wood"
+	if floor in ["stone","flags","stone_block","tile","concrete","masonry"]:return "step_stone"
+	if floor in ["earth","ground","dirt","sand"]:return "step_earth"
+	return "step_wood" if set_id in WOOD_FLOORS else "step_earth"
+
 ## The beds for a set and season: [[role, bed name, dB offset]...].
 static func beds_for(set_id:String,season_id:String,facts_in:Dictionary)->Array:
 	var out:Array=[]
-	var open_air:=set_id in OPEN_SETS
-	out.append(["fire","fire",0.0 if open_air else -2.0])
+	var open_air:=not indoors_for(set_id,facts_in)
+	if has_hearth_for(facts_in):out.append(["fire","fire",0.0 if open_air else -2.0])
 	if open_air:out.append(["wind","wind_hard" if season_id=="winter" else "wind_soft",-3.0 if season_id=="winter" else 0.0])
 	else:out.append(["wind","wind_indoor",6.0 if season_id=="winter" else 0.0])
 	if not open_air:out.append(["room","room",0.0])
@@ -1306,10 +1332,11 @@ func _tick()->void:
 	if _hushed:return
 	_crowd_talk(now)
 	_music_tick(now)
-	_life("fire_pop",now,0.25,1.6,0.0)
-	_life("fire_hiss",now,7.0,20.0,0.0)
-	_life("log_settle",now,18.0,45.0,0.0)
-	var open_air:=set_kind in OPEN_SETS
+	if has_hearth_for(facts):
+		_life("fire_pop",now,0.25,1.6,0.0)
+		_life("fire_hiss",now,7.0,20.0,0.0)
+		_life("log_settle",now,18.0,45.0,0.0)
+	var open_air:=not indoors_for(set_kind,facts)
 	if BIRD_SPANS.has(season):
 		var span:Array=BIRD_SPANS[season]
 		_life("bird",now,float(span[0]),float(span[1]),0.0 if open_air else -9.0)

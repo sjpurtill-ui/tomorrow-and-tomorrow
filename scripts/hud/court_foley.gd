@@ -47,6 +47,7 @@ const CUES:={
 	"heave":{"variants":2,"db":-11.0,"kind":"voice"},
 	"step_earth":{"variants":4,"db":-16.0,"kind":"thing"},
 	"step_wood":{"variants":4,"db":-15.0,"kind":"thing"},
+	"step_stone":{"variants":4,"db":-16.0,"kind":"thing"},
 	"dog_whimper":{"variants":2,"db":-12.0,"kind":"animal"},
 	"dog_sniff":{"variants":3,"db":-13.0,"kind":"animal"},
 	"dog_bark":{"variants":3,"db":-9.0,"kind":"animal"},
@@ -161,6 +162,7 @@ static func make(name:String,variant:=0)->PackedFloat32Array:
 		"heave":b=heave(v,rng)
 		"step_earth":b=step(v,rng,false)
 		"step_wood":b=step(v,rng,true)
+		"step_stone":b=step_stone(v,rng)
 		"dog_whimper":b=dog_whimper(v,rng)
 		"dog_sniff":b=dog_sniff(v,rng)
 		"dog_bark":b=dog_bark(v,rng)
@@ -578,6 +580,19 @@ static func step(v:int,rng:RandomNumberGenerator,wood:bool)->PackedFloat32Array:
 	Synth.lowpass2(toe,320.0)
 	Synth.shape(toe,[[0.0,0.0],[0.003,1.0],[0.04,0.0]])
 	Synth.mix_into(b,toe,Synth.n_of(0.07+0.01*v),0.5)
+	return b
+
+## A firm floor answers with a short heel click and sole impact, without the
+## earth's loose grit or a plank's low resonant ring.
+static func step_stone(v:int,rng:RandomNumberGenerator)->PackedFloat32Array:
+	var b:=Synth.buffer(0.24)
+	for contact in 2:
+		var at:=0.005 if contact==0 else 0.065+0.008*v
+		var impact:=Synth.white(0.045,rng)
+		Synth.lowpass2(impact,650.0+float(v)*55.0)
+		Synth.shape(impact,[[0.0,0.0],[0.002,1.0],[0.045,0.0]])
+		Synth.mix_into(b,impact,Synth.n_of(at),1.0 if contact==0 else 0.45)
+		Synth.burst(b,at,0.012,2200.0+v*130.0,1.0,0.18 if contact==0 else 0.07,rng)
 	return b
 
 # =============================================================================
