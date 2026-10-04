@@ -99,6 +99,27 @@ images, reports, imports, UIDs and `override.cfg` are excluded from source deliv
 
 ## Verification checkpoint
 
+The final ground tip `be859720da6a029a47326b26893bdeeda04facd9` also keys
+paint by the actual contributing inputs. The targeted GPU timing probe passed
+33/33 and exited 0 without script/engine errors. At 129 plots, damage and repair,
+the home signature stayed unchanged and reused the 128-plot paint. Plot geometry
+still changed where required, retaining the same 14/18 inherited roots and
+replacing one repair patch.
+
+| Final targeted mutation | Submission ms | Ground call ms | New home raster |
+| --- | ---: | ---: | --- |
+| Add plot 129 | 22.263 | 7.646 | No |
+| Damage plot 129 | 17.802 | 6.980 | No |
+| Repair plot 129 | 17.348 | 6.489 | No |
+
+The 129-plot steady refresh p95 was 1.283 ms with zero geometry/ground churn.
+The maximum queued builder was 10.470 ms and incremental layout step 16.600 ms.
+The cold, direct 96-plot initialization still took 820.803 ms, including
+511.839 ms in the request path. With no existing root, the first refresh bypasses
+the incremental layout primer and can solve the full layout synchronously.
+This startup limitation is separate from the measured incremental updates;
+these results do not certify hitch-free initialization or hard frame deadlines.
+
 The baseline combined runtime at `8f1a0d8e894401a8fec89e3b5edf33a978529982` includes
 the model growth policy, persistent patch renderer, incremental layout work and
 camera ground tiles. A private GPU timing run on Godot 4.7.2, Compatibility
@@ -120,12 +141,43 @@ Initial steady, paused pan/zoom and 129-plot steady refresh p95 were 0.914,
 0.886 and 1.146 ms respectively. Each interval performed zero geometry and
 ground texture rebuilds. Frame p95 was 20.2–20.4 ms under this host's scheduling.
 
-Growth is not yet free of frame hitches. Adding plot 129 took 160.7 ms to submit,
+In this baseline, adding plot 129 took 160.7 ms to submit,
 including 130.1 ms in the ground wrapper; its raster report measured 114.6 ms.
 Repair submission took 146.4 ms, with 112.1 ms raster time. Maximum observed
 individual mesh job was 32.2 ms and layout step 34.4 ms. The two-job cap and
 cooperative budget bound work counts, but cannot preempt these individual jobs.
 These are measured costs, not pass/fail latency thresholds.
+
+The raster optimization at `292c6afa2a248deae1276c18f0a5847889099366`
+passed the same full GPU timing probe, 169/169, with the same patch retention.
+Its separate targeted stress capture passed 38/38, saved five images and exited
+0 without script/engine errors. The 129-plot image was visually inspected.
+It resolves brush state once per line instead of for each stamp. Observed
+before/after costs on this host were:
+
+| Measured operation | Baseline ms | Optimized ms |
+| --- | ---: | ---: |
+| Add plot 129: submission | 160.653 | 42.148 |
+| Add plot 129: home raster | 114.639 | 20.421 |
+| Repair plot 129: submission | 146.433 | 37.509 |
+| Repair plot 129: home raster | 112.105 | 19.999 |
+| Maximum individual mesh job | 32.238 | 18.990 |
+| Maximum incremental layout step | 34.414 | 17.385 |
+
+These were separate GPU runs; changes in unrelated mesh/layout timing show
+host variation, so the entire observed ratio cannot be attributed to the raster
+change. The ground worker separately measured the raster in the same process:
+129 plots 114.765→47.703 ms and repair 116.082→48.260 ms, with identical complete
+image bytes at 96, 128, 129, damage and repair. Optimized steady refresh p95 was
+1.409 ms initially, 0.860 ms while panning/zooming, and 1.295 ms at 129 plots,
+again with zero geometry or ground texture rebuilds. A 42 ms mutation or a
+19 ms indivisible job can still exceed a frame budget; this is not a claim of
+hitch-free construction or a hard 2–4 ms deadline.
+
+Each stage also records the home ground signature before and after refresh.
+The `ground` object is the last completed raster report; its `build_usec` must
+not be counted as fresh work when `ground_signature_changed` is false. Current
+ground-call cost is separately available in `stats.refresh_costs.ground_usec`.
 
 The ground-layer isolation probe identified the former broad polygonal fields
 as the procedural cultivation halo. They persisted with stage/props hidden and

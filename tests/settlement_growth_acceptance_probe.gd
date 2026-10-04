@@ -436,6 +436,7 @@ func _record_changes(before: Array, after: Array) -> Array:
 
 func _refresh(label: String) -> Dictionary:
 	title.text = "TEST · Persistent settlement growth\n" + label + " · prepared records · simulation paused"
+	var ground_signature_before := Ground.signature
 	var begin := Time.get_ticks_usec()
 	terrain._refresh_settlement_footprint()
 	var submit_ms := (Time.get_ticks_usec() - begin) / 1000.0
@@ -472,6 +473,9 @@ func _refresh(label: String) -> Dictionary:
 	_check(int(stats.get("cached", -1)) <= int(stats.get("cache_limit", -2)), label + " keeps the hidden geometry cache within its limit")
 	var stage := {"label": label, "submit_ms": submit_ms, "slice_ms": _distribution(slices), "max_builds_per_slice": max_builds_per_slice, "max_pending": max_pending, "stats": stats, "plots": GameState.settlement_plots.size(), "routes": GameState.settlement_routes.size(), "memory_bytes": OS.get_static_memory_usage(), "draw_calls": RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME)}
 	stage["ground"] = Ground.report.duplicate(true)
+	stage["ground_signature_before"] = ground_signature_before
+	stage["ground_signature_after"] = Ground.signature
+	stage["ground_signature_changed"] = ground_signature_before != Ground.signature
 	if capture and DisplayServer.get_name() != "headless":
 		for frame in 4: await get_tree().process_frame
 		await RenderingServer.frame_post_draw
