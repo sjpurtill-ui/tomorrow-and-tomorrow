@@ -755,6 +755,11 @@ static func _defences()->Dictionary:
 static var site_override:Callable=Callable()
 
 static func _found(reading:Dictionary)->Dictionary:
+	# One seat for every people (one_seat.gd): it grows outward, district by
+	# district, and sends no settlers away to found another town.
+	var OneSeat:=preload("res://scripts/one_seat.gd")
+	if OneSeat.has_seat():
+		return _no("found_town","%s %s" % [OneSeat.NO_NEW_TOWNS,OneSeat.stage_words()])
 	var Ctl:=preload("res://scripts/civilization_controller.gd")
 	var plan:Dictionary=Ctl.current_plan("player")
 	var best:=Vector2.INF

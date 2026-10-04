@@ -289,10 +289,11 @@ func _note(parent:Node,value:String)->void:
 func _new_towns(founding:Dictionary)->void:
 	_rule(self)
 	var box:=VBoxContainer.new();box.name="NewTowns";box.add_theme_constant_override("separation",6);add_child(box)
-	box.add_child(_voice("New towns",20))
+	box.add_child(_voice(String(founding.get("title","New towns")),20))
 	var words:=_line(box,String(founding.get("words","")),13,T.BODY);words.name="NewTownsWords"
 	if not _page_refs.is_empty():_page_refs["founding"]=words
-	_choices(box,"",founding.get("options",[]),"leaders" if bool(founding.get("on",true)) else "ruler").name="NewTownsChoice"
+	if not (founding.get("options",[]) as Array).is_empty():
+		_choices(box,"",founding.get("options",[]),"leaders" if bool(founding.get("on",true)) else "ruler").name="NewTownsChoice"
 
 ## Water and waste works: what is built, and what can be started, each with
 ## its cost and time and one verb.

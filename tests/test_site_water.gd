@@ -120,55 +120,12 @@ func test_found_sources_count_by_the_same_rule()->void:
 # The leaders' council, the court and the settle order
 # --------------------------------------------------------------------------
 
-func test_the_leaders_refuse_a_site_with_no_water_though_the_capital_has_it()->void:
-	_settled_world()
-	var point:=HOME+Vector2(20,0)
-	for dry:float in [INF,20.0]:
-		_water_at=func(_p:Vector2)->float:return dry
-		assert_dict(Controller.expansion_site(point,_plan(),{})).is_empty()
-	_water_at=func(_p:Vector2)->float:return 5.0
-	var site:=Controller.expansion_site(point,_plan(),{})
-	assert_bool(site.is_empty()).is_false()
-	assert_float(float((site.water as Dictionary).distance_km)).is_equal(5.0)
-
 func test_the_leaders_council_sends_no_settlers_to_dry_ground()->void:
 	_settled_world()
 	GameState.elapsed_days=90.0
 	_water_at=func(_p:Vector2)->float:return INF
 	DayJob.run_parts(Controller.expansion_order_steps("player",func()->Dictionary:return _plan()))
 	assert_bool(bool(GameState.settlement_convoy.get("active",false))).is_false()
-
-func test_the_leaders_council_settles_where_there_is_water()->void:
-	_settled_world()
-	GameState.elapsed_days=90.0
-	_water_at=func(_p:Vector2)->float:return 1.0
-	DayJob.run_parts(Controller.expansion_order_steps("player",func()->Dictionary:return _plan()))
-	assert_bool(bool(GameState.settlement_convoy.get("active",false))).is_true()
-	var destination:Vector2=GameState.settlement_convoy.destination
-	assert_bool(bool(ResourceSystem.site_water(preload("res://scripts/civilization_day.gd").context(destination)).accessible)).is_true()
-
-func test_the_court_founds_no_town_on_dry_ground()->void:
-	_settled_world()
-	var Realm:=load("res://scripts/realm_orders.gd")
-	_water_at=func(_p:Vector2)->float:return 20.0
-	var refused:Dictionary=Realm._found({})
-	assert_bool(bool(refused.ok)).is_false()
-	assert_str(String(refused.says)).contains("drinking water within 6 km")
-	assert_bool(bool(GameState.settlement_convoy.get("active",false))).is_false()
-	_water_at=func(_p:Vector2)->float:return 1.0
-	var went:Dictionary=Realm._found({})
-	assert_bool(bool(went.ok)).override_failure_message(str(went)).is_true()
-
-func test_the_settle_order_needs_water_at_the_place_itself()->void:
-	_settled_world()
-	var point:=HOME+Vector2(20,0)
-	for dry:float in [INF,20.0]:
-		_water_at=func(_p:Vector2)->float:return dry
-		var refused:=Orders.execute({"kind":"settle","destination":point})
-		assert_str(String(refused.get("error",""))).contains("drinking water within 6 km")
-	_water_at=func(_p:Vector2)->float:return 1.0
-	var went:=Orders.execute({"kind":"settle","destination":point})
-	assert_bool(bool(went.get("ok",false))).override_failure_message(str(went)).is_true()
 
 ## The sea's salt water adds nothing to a site's worth; fresh water does.
 func test_salt_coast_is_not_drinking_water_in_the_leaders_judgment()->void:

@@ -60,7 +60,7 @@ static func calm()->bool:
 	var dry_year:=not preload("res://scripts/dry_water.gd").running().is_empty()
 	if float(WorldSimulation.state.simulation_metrics.get("water_intake_ratio",0.0))<.98 and not dry_year:return false
 	for city:Dictionary in WorldSimulation.state.player_settlements:
-		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
+		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty() or WorldSimulation.settlements.abandoned(city):continue
 		var metrics:Dictionary=city.get("resource_metrics",{})
 		if float(metrics.get("water_intake_ratio",0.0))<.98 and not dry_year:return false
 	return true
@@ -71,7 +71,7 @@ static func food_span()->int:
 	if WorldSimulation.state.population_total<REMNANT_POPULATION:return UNCONTACTED_SPAN
 	var days:=float(WorldSimulation.state.simulation_metrics.get("food_days",0.0))
 	for city:Dictionary in WorldSimulation.state.player_settlements:
-		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
+		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty() or WorldSimulation.settlements.abandoned(city):continue
 		days=minf(days,float((city.get("resource_metrics",{}) as Dictionary).get("food_days",0.0)))
 	return maxi(1,floori(days*FOOD_SHARE))
 

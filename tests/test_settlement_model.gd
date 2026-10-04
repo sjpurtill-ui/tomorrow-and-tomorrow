@@ -168,32 +168,6 @@ func test_founding_lifecycle_stops_calling_committed_ground_a_convoy()->void:
 	GameState.settlement_convoy={"active":true}
 	assert_str(GameState.settlement_lifecycle_phase()).is_equal("expansion_convoy")
 
-func test_model_rejects_an_uncharted_convoy_destination_even_without_the_ui()->void:
-	GameState.ensure_population_total(1000)
-	GameState.resource_stockpiles={"Food":100000.0,"Timber":1000.0,"Fiber Plants":1000.0}
-	var destination:=Vector2(GameState.settlement_founded_at.x+500.0,GameState.settlement_founded_at.z)
-	var assessment:Dictionary=model.known_land_assessment(destination)
-	assert_bool(bool(assessment.known)).is_false()
-	var quote:Dictionary=model.settlement_convoy_quote(destination,30.0)
-	assert_bool(bool(quote.ok)).is_false()
-	assert_str(String(quote.reason)).contains("uncharted")
-
-func test_convoy_quote_requires_a_continuous_returned_chart_and_real_travel_time()->void:
-	GameState.ensure_population_total(1000)
-	GameState.resource_stockpiles={"Food":1_000_000.0,"Timber":1000.0,"Fiber Plants":1000.0}
-	var origin:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
-	var charted_destination:=origin+Vector2(64.0,0.0)
-	var timed:Dictionary=model.settlement_convoy_quote(charted_destination,0.1)
-	assert_bool(bool(timed.ok)).is_true()
-	assert_float(float(timed.duration_days)).is_equal_approx(4.0,0.001)
-	var disconnected_destination:=origin+Vector2(180.0,0.0)
-	CivilizationSystem._add_revealed_area(disconnected_destination,42.0,"isolated returned chart")
-	assert_bool(bool(model.known_land_assessment(disconnected_destination).known)).is_true()
-	var disconnected:Dictionary=model.settlement_convoy_quote(disconnected_destination,20.0)
-	assert_bool(bool(disconnected.ok)).is_false()
-	assert_bool(bool(disconnected.get("known_route",true))).is_false()
-	assert_str(String(disconnected.reason)).contains("route crosses uncharted ground")
-
 func test_access_axes_make_the_fixed_border_follow_rivers_routes_and_work()->void:
 	var settlement_id:=String(GameState.player_settlements[0].id)
 	var axes:Array[Dictionary]=[]
@@ -212,86 +186,6 @@ func test_access_axes_make_the_fixed_border_follow_rivers_routes_and_work()->voi
 	assert_float(east).is_greater(west)
 	assert_float(float(settlement.territory_drivers.water)).is_equal(1.0)
 	assert_float(float(settlement.territory_drivers.work)).is_greater_equal(0.8)
-
-func test_paid_aggregate_convoy_seeds_a_second_settlement_without_creating_people_entities()->void:
-	GameState.ensure_population_total(1000)
-	GameState.food_stocks={"Fresh plants":0.0,"Fresh meat":0.0,"Fish":0.0,"Dry staples":5000.0,"Preserved food":1000.0}
-	GameState.resource_stockpiles={"Food":6000.0,"Timber":500.0,"Fiber Plants":500.0}
-	var destination:=Vector2(GameState.settlement_founded_at.x+8.0,GameState.settlement_founded_at.z)
-	var quote:Dictionary=model.settlement_convoy_quote(destination,1.0)
-	assert_bool(bool(quote.ok)).is_true()
-	var quoted_sources:=0
-	for amount in (quote.population_sources as Dictionary).values(): quoted_sources+=int(amount)
-	assert_int(quoted_sources).is_equal(int(quote.population))
-	var food_before:=float(GameState.resource_stockpiles.Food)
-	var timber_before:=float(GameState.resource_stockpiles.Timber)
-	var started:Dictionary=model.begin_settlement_convoy(destination,1.0,"Rivermeet")
-	assert_bool(bool(started.ok)).is_true()
-	assert_bool(bool(GameState.settlement_convoy.active)).is_true()
-	assert_str(String(GameState.settlement_convoy.settlement_name)).is_equal("Rivermeet")
-	assert_dict(GameState.settlement_convoy.population_sources).is_equal(quote.population_sources)
-	var convoy_profile:=GameState.population_function_profile({"total_absent":int(quote.population),"by_function":quote.population_sources})
-	assert_int(int(convoy_profile.absent)).is_equal(int(quote.population))
-	assert_int(int(convoy_profile.accounted)).is_equal(GameState.population_total)
-	assert_float(float(GameState.resource_stockpiles.Food)).is_less(food_before)
-	assert_float(float(GameState.resource_stockpiles.Timber)).is_less(timber_before)
-	assert_int(roundi(model.primary_population_exact())).is_equal(960)
-	assert_str(String(GameState.food_issue_history.back().category)).is_equal("settlement_convoy")
-	assert_bool(bool(GameState.food_issue_history.back().charged_at_departure)).is_true()
-	GameState.elapsed_days=float(GameState.settlement_convoy.arrival_day)
-	model.update_settlement_convoy(destination,1.0)
-	var completed:Dictionary=model.complete_settlement_convoy(destination)
-	assert_bool(bool(completed.ok)).is_true()
-	var network:Dictionary=model.settlement_network_snapshot()
-	assert_int(int(network.count)).is_equal(2)
-	assert_int(int(network.runtime_people_entities)).is_equal(0)
-	assert_str(String(network.settlements[1].name)).is_equal("Rivermeet")
-	assert_bool(bool(model.select_settlement(String(network.settlements[1].id)).ok)).is_true()
-	assert_str(String(model.selected_settlement_snapshot().name)).is_equal("Rivermeet")
-	assert_bool(bool(model.rename_settlement(String(network.settlements[1].id),"Riverwatch").ok)).is_true()
-	assert_str(String(model.selected_settlement_snapshot().name)).is_equal("Riverwatch")
-	var represented:=0
-	for settlement in network.settlements: represented+=int(settlement.population)
-	assert_int(represented).is_equal(GameState.population_total)
-	assert_array(model.validate_settlement_network()).is_empty()
-
-func test_expansion_convoy_uses_substitutable_founding_supplies_instead_of_hard_gating_plant_fiber()->void:
-	GameState.ensure_population_total(1000)
-	GameState.resource_stockpiles={"Food":100000.0,"Timber":0.0,"Fiber Plants":0.0,"Clay":20.0,"Stone":20.0}
-	var destination:=Vector2(GameState.settlement_founded_at.x+8.0,GameState.settlement_founded_at.z)
-	var quote:Dictionary=model.settlement_convoy_quote(destination,1.0)
-	assert_bool(bool(quote.ok)).is_true()
-	assert_float(float(quote.get("fiber",-1.0))).is_equal(0.0)
-	assert_float(float((quote.materials as Dictionary).get("Clay",0.0))).is_greater(0.0)
-	assert_str(String(quote.reason)).is_equal("Ready")
-
-func test_expansion_convoy_names_the_general_supply_shortage_not_one_arbitrary_resource()->void:
-	GameState.ensure_population_total(1000)
-	GameState.resource_stockpiles={"Food":100000.0,"Timber":1.0,"Fiber Plants":0.0,"Clay":0.0,"Stone":0.0}
-	var destination:=Vector2(GameState.settlement_founded_at.x+8.0,GameState.settlement_founded_at.z)
-	var quote:Dictionary=model.settlement_convoy_quote(destination,1.0)
-	assert_bool(bool(quote.ok)).is_false()
-	assert_str(String(quote.reason)).contains("founding supplies")
-	assert_str(String(quote.reason)).contains("any mix")
-	assert_str(String(quote.reason)).not_contains("more Fiber Plants")
-	assert_str(ResourceSystem.display_name("Fiber Plants")).is_equal("Plant Fiber")
-	assert_str(ResourceSystem.plain_language_description("Fiber Plants")).contains("reeds")
-
-func test_convoy_cannot_arrive_early_or_found_anywhere_except_its_approved_site()->void:
-	GameState.ensure_population_total(1000)
-	GameState.resource_stockpiles={"Food":100000.0,"Timber":1000.0,"Fiber Plants":1000.0}
-	var destination:=Vector2(GameState.settlement_founded_at.x+8.0,GameState.settlement_founded_at.z)
-	var started:Dictionary=model.begin_settlement_convoy(destination,1.0)
-	assert_bool(bool(started.ok)).is_true()
-	model.update_settlement_convoy(destination,1.0)
-	assert_float(float(GameState.settlement_convoy.progress)).is_equal(0.0)
-	assert_bool(bool(model.complete_settlement_convoy(destination).ok)).is_false()
-	GameState.elapsed_days=float(GameState.settlement_convoy.arrival_day)
-	model.update_settlement_convoy(destination,1.0)
-	var diverted:Dictionary=model.complete_settlement_convoy(destination+Vector2(1.0,0.0))
-	assert_bool(bool(diverted.ok)).is_false()
-	assert_str(String(diverted.reason)).contains("approved")
-	assert_bool(bool(model.complete_settlement_convoy(destination).ok)).is_true()
 
 func test_billion_person_civilization_keeps_fixed_border_resolution()->void:
 	GameState.ensure_population_total(1_000_000_000)

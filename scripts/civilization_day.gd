@@ -97,7 +97,12 @@ static func steps(run:Dictionary,timings:Dictionary={})->Array:
 			if WorldSimulation.actor_id!="player":preload("res://scripts/crisis_unattended.gd").daily(day)
 	),
 		S.step("construction",timings,func()->void:WorldSimulation.settlements.with_local_population(run.build)),
-		S.step("secondary_plan",timings,func()->Array:return _city_steps(run.build,run.secondary_timings,timings,"secondary_settlements")),
+		S.step("secondary_plan",timings,func()->Array:
+			# One seat for every people (one_seat.gd): a town standing apart
+			# from it comes home before the towns' days are planned.
+			preload("res://scripts/one_seat.gd").fold_towns(day)
+			return _city_steps(run.build,run.secondary_timings,timings,"secondary_settlements")
+	),
 		# A town that has had no water within reach for a week is left: its
 		# families go to the nearest town of theirs with water (dry_towns.gd),
 		# before the day's goods are sent between towns.
@@ -170,7 +175,7 @@ static func _city_steps(build:Callable,secondary_timings:Dictionary,timings:Dict
 	var S=preload("res://scripts/day_job.gd")
 	var result:Array=[]
 	for city:Dictionary in WorldSimulation.state.player_settlements:
-		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
+		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty() or WorldSimulation.settlements.abandoned(city):continue
 		var town_span:=SPAN.town_span(city)
 		if town_span<=0:continue
 		result.append(S.step(label,timings,func()->void:
