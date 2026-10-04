@@ -2,16 +2,17 @@ extends "res://tools/court_acting_capture.gd"
 ## Private-desktop diagnostic only. Close after capture; never the player game.
 ## Existing fitted medieval and business meshes, seated/talking/walking from
 ## two angles. These explicit garments test deformation, not discovery gating.
+## Use "collar-only no-ink" to isolate outline artifacts in the four closeups.
 
 func _ready()->void:
-	out_dir=ProjectSettings.globalize_path("res://reports/court_progression_poses/")
+	out_dir=ProjectSettings.globalize_path("res://reports/court_progression_poses_no_ink/" if "no-ink" in OS.get_cmdline_user_args() else "res://reports/court_progression_poses/")
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	get_window().size=Vector2i(W,H);get_window().content_scale_size=Vector2i(W,H)
 	_stage()
 	await _frames(3)
 	var variants:=["male_adult","female_adult","female_old","male_old"]
 	for outfit:String in ["medieval","business"]:
-		for pose:String in ["sit","sit_talk","talk_both","walk_in","kneel","sit_cross"]:
+		for pose:String in ([] if "collar-only" in OS.get_cmdline_user_args() else ["sit","sit_talk","talk_both","walk_in","kneel","sit_cross"]):
 			for yaw in [-20,70]:
 				_clear();await _frames(3)
 				for i in variants.size():
@@ -19,6 +20,7 @@ func _ready()->void:
 					f.setup({"variant":variants[i],"outfit":outfit,"lit":true,"hair":"cropped","stance":"stand",
 						"cloth":[Color("466557"),Color("ece5d4"),Color("a88949")],"skin":Color("bd8659"),
 						"leather":Color("191b1d") if outfit=="business" else Color("5b3b24")})
+					_diagnostic_materials(f)
 					f.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 					Acting.of(f).active=false
 					f.position=Vector3((float(i)-1.5)*1.10,0,0);f.rotation_degrees.y=float(yaw)
@@ -37,6 +39,7 @@ func _ready()->void:
 			var f:=Figure3D.new();world.add_child(f)
 			f.setup({"variant":variant,"outfit":outfit,"lit":true,"hair":"cropped","stance":"sit",
 				"cloth":[Color("787b77"),Color("ece5d4"),Color("70a28d")],"skin":Color("bd8659")})
+			_diagnostic_materials(f)
 			f.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 			Acting.of(f).active=false;figures.append(f);f.play("sit_talk",0.0,0.0)
 			_step_all(1.05)
@@ -44,5 +47,12 @@ func _ready()->void:
 			camera.position=head+Vector3(.08,.06,1.1);camera.look_at(head,Vector3.UP)
 			_title("TEST seam closeup: %s / %s / seated speech" % [outfit,variant])
 			await _shot("%s_%s_seated_close.png" % [outfit,variant])
-	print("COURT_PROGRESSION_POSES captured 28 views; inspect pixels before assessing quality")
+	print("COURT_PROGRESSION_POSES captured %d views; inspect pixels before assessing quality" % (4 if "collar-only" in OS.get_cmdline_user_args() else 28))
 	get_tree().quit()
+
+func _diagnostic_materials(f:Node3D)->void:
+	if not "no-ink" in OS.get_cmdline_user_args():return
+	for node:MeshInstance3D in f._merged.values():
+		for surface in node.mesh.get_surface_count():
+			var material=node.get_surface_override_material(surface).duplicate()
+			material.next_pass=null;node.set_surface_override_material(surface,material)

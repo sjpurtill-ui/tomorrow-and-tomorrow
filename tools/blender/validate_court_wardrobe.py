@@ -38,9 +38,13 @@ class GLB:
 
 def boundary_edges(glb, name):
     """Weld clip-generated duplicates before finding the visible cut edges."""
-    mesh=glb.mesh(name)["primitives"][0]
-    pos=glb.values(mesh["attributes"]["POSITION"])
-    faces=glb.values(mesh["indices"]).reshape(-1,3)
+    positions=[];triangles=[];offset=0
+    for part in ([name] if isinstance(name,str) else name):
+        mesh=glb.mesh(part)["primitives"][0]
+        points=glb.values(mesh["attributes"]["POSITION"])
+        positions.append(points);triangles.append(glb.values(mesh["indices"]).reshape(-1,3)+offset)
+        offset+=len(points)
+    pos=np.concatenate(positions);faces=np.concatenate(triangles)
     _,ids=np.unique(np.round(pos,6),axis=0,return_inverse=True)
     edges=Counter()
     samples={}
@@ -80,7 +84,23 @@ def check_seams(bundle, rec, body):
     height=float(body[:,1].max()-body[:,1].min())
     for outfit in rec["outfits"]:
         shell=outfit+("_doublet" if outfit=="medieval" else "_jacket")
-        edges=boundary_edges(bundle,shell)
+        shell_edges=boundary_edges(bundle,shell)
+        collar_edges=boundary_edges(bundle,outfit+"_collar")
+        collar=np.unique(collar_edges.reshape(-1,3),axis=0)
+        seam=np.unique(shell_edges.reshape(-1,3),axis=0)
+        distances=((collar[:,None,:]-seam[None,:,:])**2).sum(axis=2).min(axis=1)
+        sewn=int(np.sum(distances<(.0003*height)**2))
+        assert sewn>=8 and sewn>=len(collar)*.30,(rec["variant"],outfit,"unjoined collar",sewn,len(collar))
+        if outfit!="medieval":
+            shirt=bundle.mesh(outfit+"_shirt")["primitives"][0]
+            shirt_pos=bundle.values(shirt["attributes"]["POSITION"])
+            upper=shirt_pos[shirt_pos[:,1]>shirt_pos[:,1].max()-.002]
+            collar_mesh=bundle.mesh(outfit+"_collar")["primitives"][0]
+            collar_pos=bundle.values(collar_mesh["attributes"]["POSITION"])
+            triangles=collar_pos[bundle.values(collar_mesh["indices"]).reshape(-1,3)]
+            gap=float(surface_distance(upper,triangles).max())
+            assert gap<height*.006,(rec["variant"],outfit,"shirt stops below collar",gap)
+        edges=boundary_edges(bundle,[shell,outfit+"_collar"])
         upper=edges[np.all(edges[:,:,1]>height*.78,axis=1)]
         assert len(upper)>12,(rec["variant"],shell,"missing neckline")
         span=float(np.ptp(upper[:,:,1]))
