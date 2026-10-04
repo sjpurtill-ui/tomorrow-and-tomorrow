@@ -107,13 +107,16 @@ static func read(t:Dictionary,drought:Dictionary={},causes:Dictionary={},dry_yea
 		if String(dry.runs_dry)!="":out.facts.append({"text":String(dry.runs_dry),"trend":-1,"good":false})
 	# The year past: what the dry years took, and whether anyone died of thirst.
 	var year_dry:=0
+	var year_thirst:=0
 	var deadly:Array=[]
 	for spell:Dictionary in dry_years:
 		if String(spell.get("id",""))==String(drought.get("id","-")) or int(spell.get("deaths",0))<=0:continue
 		year_dry+=int(spell.deaths)
+		year_thirst+=int(spell.get("thirst",0))
 		deadly.append(spell)
 	if year_dry>0:
-		out.facts.append({"text":"%s took %s" % [_cap(String((deadly[0] as Dictionary).get("name","the dry year"))) if deadly.size()==1 else "The dry years",_count(year_dry)],"trend":-1,"good":false})
+		# Its thirst is part of its dead, never more on top of them.
+		out.facts.append({"text":"%s took %s%s" % [_cap(String((deadly[0] as Dictionary).get("name","the dry year"))) if deadly.size()==1 else "The dry years",_count(year_dry),", %s of them of thirst" % _count(year_thirst) if year_thirst>0 else ""],"trend":-1,"good":false})
 	var thirst_dead:=int(causes.get("Dehydration",0))
 	if thirst_dead>0:out.facts.append({"text":"%s died of thirst in the last year" % EraWords.grouped(thirst_dead),"trend":-1,"good":false})
 	elif year_dry>0 or not dry.is_empty():out.facts.append({"text":"No one died of thirst in the last year"})
@@ -130,7 +133,11 @@ static func drought_now()->Dictionary:
 	for key in ["id","name","deaths","thirst","toll_dead","m","mult","pop0","sev","choice","mid_choice","phase","start","end_day","held_sum","held_days","draw"]:
 		if c.has(key):out[key]=c[key]
 	out["depth"]=DryWater.depth_of(c)
-	out["loss"]=DryWater.loss(c,float(GameState.elapsed_days))
+	# The towns' own loss after their deep wells (their last water day); the
+	# dry year's raw loss before any water day has counted it.
+	var felt:=DryWater.felt_loss()
+	out["loss"]=felt if felt>=0.0 else DryWater.loss(c,float(GameState.elapsed_days))
+	out["held"]=DryWater.held_now()
 	return out
 
 ## The dry year's forecasts from today, from each town's last water day
@@ -162,12 +169,12 @@ static func recent_droughts(days:int=365)->Array:
 		if not h is Dictionary or String(h.get("type",""))!="drought":continue
 		if int(h.get("end",-99999))<today-days+1:continue
 		seen[String(h.get("id",""))]=true
-		out.append({"id":String(h.get("id","")),"name":String(h.get("name","the dry year")),"deaths":int(h.get("deaths",0)),"end":int(h.get("end",0))})
+		out.append({"id":String(h.get("id","")),"name":String(h.get("name","the dry year")),"deaths":int(h.get("deaths",0)),"thirst":int(h.get("thirst",0)),"end":int(h.get("end",0))})
 	for e in preload("res://scripts/hardship_log.gd").entries():
 		if not e is Dictionary or String(e.get("type",""))!="drought" or not e.has("end"):continue
 		if seen.has(String(e.get("crisis",""))) or int(e.end)<today-days+1:continue
 		seen[String(e.get("crisis",""))]=true
-		out.append({"id":String(e.get("crisis","")),"name":String(e.get("name","the dry year")),"deaths":int(e.get("dead",0)),"end":int(e.end)})
+		out.append({"id":String(e.get("crisis","")),"name":String(e.get("name","the dry year")),"deaths":int(e.get("dead",0)),"thirst":int(e.get("thirst",0)),"end":int(e.end)})
 	out.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return int(a.end)>int(b.end))
 	return out
 
@@ -206,11 +213,14 @@ static func _dry_words(drought:Dictionary,ahead:Dictionary)->Dictionary:
 		var store:=float(ahead.get("store_days",-1.0))
 		if dry_day>=0 and store>=0.05:runs_dry="The stores run dry in about %s" % _span(float(dry_day)-float(ahead.get("today",GameState.elapsed_days)))
 		elif dry_day>=0:runs_dry="The stores are empty: what is drawn each day is all there is"
-		# What more hands or a cistern would save, by the same forecast.
+		# What more hands or a cistern would save, by the same forecast; only
+		# when thirst is forecast at all (else there is nothing to save from it).
 		var by_carriers:=maxi(0,roundi(float(now.total)-float((ahead.get("carriers",now) as Dictionary).total)))
 		var by_cistern:=maxi(0,roundi(float(now.total)-float((ahead.get("cistern",now) as Dictionary).total)))
 		var hands:=int(ahead.get("extra_carriers",0))
-		if all>0:
+		if float(now.thirst)<0.5:
+			saves="No one is forecast to go thirsty: the stores and the far pools hold"
+		else:
 			# More hands help only while the far pools give more than the carriers
 			# bring; a cistern holds 2.5 days more for everyone.
 			var hands_words:="%s more on the water path would save about %s" % [EraWords.grouped(hands),_count(by_carriers)] if by_carriers>0 else "More hands would not help: the far pools give all they have"
@@ -218,7 +228,11 @@ static func _dry_words(drought:Dictionary,ahead:Dictionary)->Dictionary:
 			if by_cistern>0:cistern_words=("a lined cistern in every town would save about %s" if bool(ahead.get("cisterns_known",false)) else "cisterns, once the people learn to line them, would save about %s") % _count(by_cistern)
 			saves="%s; %s" % [hands_words,cistern_words]
 		var mult:=float(drought.get("mult",1.0))
-		long="%s. Thirst is the water ledger's own count once the stores run out: at its worst the springs give %d in 10 of what they did, and the far pools what the carriers reach. The rest is the dry year's own toll (the heat, the failed forage, the sickness of foul water): %.1f in 1,000 of the %d people at this dryness, half that when everyone drinks%s." % [ahead_words,clampi(roundi((1.0-float(drought.get("depth",0.0)))*10.0),0,10),DryWater.toll_share(float(drought.get("sev",0.0)),0.0)*1000.0,int(drought.get("pop0",0)),", x%.2f for what was done about it" % mult if absf(mult-1.0)>0.005 else ""]
+		var done:=""
+		if mult<0.995:done=", and what was done about it leaves %d in 10 of that" % clampi(roundi(mult*10.0),0,10)
+		elif mult>1.005:done=", and what was done about it adds %d in 10 to that" % roundi((mult-1.0)*10.0)
+		var worst:=float(drought.get("depth",0.0))*(1.0-float(drought.get("held",0.0)))
+		long="%s. Thirst is the water ledger's own count once the stores run out: at its worst the springs give %d in 10 of what they did after the wells hold their part, and the far pools what the carriers reach. Going short of water also makes sickness likelier: the drinking water is worse. The rest is the dry year's own toll (the heat, the failed forage, the sickness of foul water): %.1f in 1,000 of the %d people at this dryness, half that when everyone drinks%s." % [ahead_words,clampi(roundi((1.0-worst)*10.0),0,10),DryWater.toll_share(float(drought.get("sev",0.0)),0.0)*1000.0,int(drought.get("pop0",0)),done]
 		if saves!="":long+=" %s." % saves
 	return {"toll":toll,"ahead":ahead_words,"springs":springs,"runs_dry":runs_dry,"saves":saves,"long":long}
 

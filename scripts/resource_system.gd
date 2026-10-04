@@ -343,9 +343,12 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var household_access_ratio:=_household_surface_water_access_ratio(walk_km) if accessible_quality>0.0 else 0.0
 	var household_collection:=total_required*household_access_ratio
 	var organized_collection:=collection_workers*28.0*clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)*distance_factor*(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5))
-	organized_collection*=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("water_collection"))
 	# Wells and water works the builders raised and keep (built_fabric.gd WATERWORKS_WATER).
 	organized_collection*=preload("res://scripts/built_fabric.gd").water_factor()
+	# The carriers' own haul before any answer: the dry year's forecast
+	# (dry_water.gd) applies each day's answers to it as this day does.
+	var organized_base:=organized_collection
+	organized_collection*=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("water_collection"))
 	var collection_capacity:=household_collection+organized_collection
 	var flow_factor:=clampf(0.75+accessible_quality*0.25,0.0,1.08)
 	# A running dry year dries the near sources (dry_water.gd): today's loss,
@@ -361,7 +364,7 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	# was all they were asked for, what they could have brought.
 	var line:=delivered if delivered<budget-0.0001 else maxf(delivered,float((WorldSimulation.state.water_conveyance.get("report",{}) as Dictionary).get("potential",delivered)))
 	var works:Dictionary=preload("res://scripts/water_waste_works.gd").advance(context,int(WorldSimulation.state.elapsed_days),total_required)
-	var dry_parts:={"need":total_required,"cap":cap,"near":collection_capacity,"household":household_collection,"flow":flow_factor,"organized":organized_collection,
+	var dry_parts:={"need":total_required,"cap":cap,"near":collection_capacity,"household":household_collection,"flow":flow_factor,"organized":organized_collection,"organized_base":organized_base,
 		"line":line,"rain":maxf(0.0,float(works.get("rain_collected",0.0))),"cistern":maxf(0.0,float(works.get("cistern_capacity",0.0))),"held":dry_held,"accessible":accessible_quality>0.0}
 	var drawn:=DryWater.collect(dry_parts,dry_loss,dry_held,dry_reach)
 	var collected:=float(drawn.collected)

@@ -307,7 +307,7 @@ static func numbers(e:Dictionary)->String:
 		"drought":
 			if float(e.get("sev",0.0))>0.0: parts.append("the gathering fell by about %s in 10" % _parts(float(e.sev)))
 			# The water ledger (dry_water.gd): how far the springs failed, and the thirst.
-			if e.has("depth"): parts.append("at its worst the near springs gave about %d in 10 of their water" % clampi(roundi((1.0-float(e.depth))*10.0),0,10))
+			if e.has("depth") or e.has("felt_depth"): parts.append("at its worst the near springs gave about %d in 10 of their water" % clampi(roundi((1.0-float(e.get("felt_depth",e.get("depth",0.0))))*10.0),0,10))
 			if int(e.get("thirst",0))>0: parts.append("%d died of thirst when the water stores ran dry" % int(e.thirst))
 		"cold":
 			if float(e.get("sev",0.0))>0.0: parts.append("the year's gathering fell by about %s in 10" % _parts(float(e.sev)))

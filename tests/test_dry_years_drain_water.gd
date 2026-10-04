@@ -125,6 +125,53 @@ func test_the_court_quotes_each_answer_from_the_water_forecast()->void:
 	assert_int(int(rain.get_string(2))).is_greater(int(rain.get_string(1)))
 	assert_str(Crisis.stakes_words(c,"hold","mid")).is_empty()
 
+## The review's case: a town 3 km from its water with one carrier, where
+## the carriers' haul under the order to carry decides how much is drawn.
+## The forecast runs the engine's own water day forward: its day-by-day
+## drinking and its dead match the engine's, the haul ending with the order.
+func test_the_forecast_is_the_engines_water_day_off_the_river_with_few_carriers()->void:
+	GameState.population_allocations.Logistics=1
+	var context:={"origin":Vector3.ZERO,"surface_water_distance_km":3.0,"surface_water_recognized":true,"environment_profile":{"precipitation":0.6}}
+	_days(context,1,9)
+	var c:=_dry_year(0.95)
+	c.choice="carry"
+	_carry(34)
+	var ahead:=DryWater.forecast(c,DryWater.towns(),9.0,{"trace":true})
+	var forecast_intake:Array=(ahead.towns[0] as Dictionary).intake
+	var engine_intake:Array=[]
+	for day in range(10,131):
+		GameState.elapsed_days=float(day)
+		ResourceSystem._process_water_flow(context)
+		engine_intake.append(float(GameState.water_metrics.intake_ratio))
+	assert_int(forecast_intake.size()).is_equal(engine_intake.size())
+	var worst:=0.0
+	for i in engine_intake.size():worst=maxf(worst,absf(float(engine_intake[i])-float(forecast_intake[i])))
+	assert_float(worst).override_failure_message("drinking differs by %.3f on some day" % worst).is_less(0.02)
+	# The engine's dead by its own thirst rate, day by day, as the forecast counts them.
+	var people:=float(GameState.water_metrics.required_today)
+	var dead:=0.0;var shortage:=0.0
+	for intake in engine_intake:
+		shortage=shortage+1.0 if float(intake)<0.98 else maxf(0.0,shortage-2.0)
+		dead+=(people-dead)*DryWater.thirst_rate(float(intake),shortage)/365.0
+	assert_float(dead).override_failure_message("the engine's thirst: %.2f, the forecast's %.2f" % [dead,float(ahead.thirst)]).is_greater(1.0)
+	assert_float(float(ahead.thirst)).is_equal_approx(dead,dead*0.05)
+	print("off-river, one carrier: engine thirst %.2f, forecast %.2f, worst day %.4f" % [dead,float(ahead.thirst),worst])
+
+func test_the_answers_reach_is_capped_with_the_records()->void:
+	# Two answers on the records already: the reach of an answer still to come
+	# is capped with them at 1, as the engine caps the channel.
+	for tag in ["a","b","c"]:
+		GameState.active_modifiers.append({"id":"far_"+tag,"kind":"policy","effects":{"water_far":2.0},"magnitude":0.2,"started_day":0.0,"until_day":500.0})
+	assert_float(DryWater.far_policy_on(10.0)).is_equal(1.0)
+	assert_float(ConsequenceEngine.policy_effect("water_far")).is_equal(1.0)
+	_days(_river(),1,9)
+	var c:=_dry_year(0.85)
+	c.choice="carry"
+	var plain:=DryWater.forecast(c,DryWater.towns(),9.0)
+	var carried:=DryWater.forecast(c,DryWater.towns(),9.0,{"choice":"carry"})
+	# Already at the cap: carrying again reaches no further (its haul still counts).
+	assert_float(float(carried.thirst)).is_less_equal(float(plain.thirst))
+
 func test_with_no_dry_year_the_water_day_is_unchanged()->void:
 	# collect() with no loss is the old arithmetic exactly.
 	var parts:={"need":100.0,"cap":135.0,"near":320.0,"household":118.0,"flow":0.95,"organized":202.0,"line":60.0,"rain":9.6,"cistern":250.0,"accessible":true}
@@ -165,7 +212,7 @@ static func springs_failed()->Dictionary:
 ## Its toll from the first day, the holder carrying from the far pools at
 ## day 24 for 90 days as they did.
 static func users_toll(change:Dictionary={},carry:bool=true)->Dictionary:
-	return DryWater.forecast(springs_failed(),users_towns(change),21556.0,{"far":DryWater.CARRY_REACH,"far_days":90.0,"far_from":24.0} if carry else {"choice":"rain"})
+	return DryWater.forecast(springs_failed(),users_towns(change),21556.0,{"far":DryWater.CARRY_REACH,"collect":DryWater.CARRY_HAUL,"days":90.0,"from":24.0} if carry else {"choice":"rain"})
 
 func test_the_users_dry_year_kills_about_as_many_as_before()->void:
 	# Before: a toll fixed at its start, 261 x 0.0602 x 0.7 for carrying: 11.
@@ -181,7 +228,7 @@ func test_the_users_dry_year_kills_about_as_many_as_before()->void:
 	assert_float(float(deep.total)).is_less(float(today.total)/3.0)
 	var line:=users_toll({"line":1.0})
 	assert_float(float(line.total)).is_less(float(today.total)/3.0)
-	var cistern:=DryWater.forecast(springs_failed(),users_towns(),21556.0,{"far":DryWater.CARRY_REACH,"far_days":90.0,"far_from":24.0,"cistern":true})
+	var cistern:=DryWater.forecast(springs_failed(),users_towns(),21556.0,{"far":DryWater.CARRY_REACH,"collect":DryWater.CARRY_HAUL,"days":90.0,"from":24.0,"cistern":true})
 	assert_float(float(cistern.total)).is_less(float(today.total))
 	# Not carrying at all: many more.
 	assert_float(float(users_toll({},false).total)).is_greater(float(today.total)*1.5)
@@ -209,7 +256,7 @@ func test_the_fast_sims_mirror_gives_the_same_numbers()->void:
 		var c:={"start":float(case.start),"end_day":float(case.end),"sev":float(case.sev),"draw":float(case.draw),"pop0":int(case.people),"mult":1.0,"phase":"open"}
 		var parts:Dictionary=case.parts
 		var town:={"name":"t","population":float(case.people),"shortage_days":0.0,"water":{"required_today":float(case.people),"stored":float(case.capacity)-float(case.people),"capacity":float(case.capacity),"collection_workers":1.0,"dry_parts":parts}}
-		var got:=DryWater.forecast(c,[town],float(case.start),{"far":DryWater.CARRY_REACH,"far_days":90.0,"far_from":float(case.carry_from)-float(case.start)})
+		var got:=DryWater.forecast(c,[town],float(case.start),{"far":DryWater.CARRY_REACH,"collect":DryWater.CARRY_HAUL,"days":90.0,"from":float(case.carry_from)-float(case.start)})
 		assert_float(float(got.thirst)).override_failure_message("%s: %.4f, the sim's %.4f" % [case.name,float(got.thirst),float(case.thirst)]).is_equal_approx(float(case.thirst),0.01)
 		assert_float(float(got.held)).is_equal_approx(float(case.held),0.0005)
 

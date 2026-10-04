@@ -195,7 +195,8 @@ func test_the_water_tile_in_the_users_dry_year()->void:
 	for fact:Dictionary in read.facts:texts.append(String(fact.text))
 	assert_array(Array(texts)).is_equal(["The Year the Springs Failed has taken 4 so far","About 7 more may die as things stand: 6 of thirst and one of the heat and the failed forage",
 		"13 more on the water path would save about 2; cisterns, once the people learn to line them, would save about one","The stores run dry in about 10 days","No one died of thirst in the last year"])
-	assert_str(String(read.status)).contains("Thirst is the water ledger's own count once the stores run out: at its worst the springs give 2 in 10 of what they did")
+	assert_str(String(read.status)).contains("Thirst is the water ledger's own count once the stores run out: at its worst the springs give 2 in 10 of what they did after the wells hold their part")
+	assert_str(String(read.status)).contains("Going short of water also makes sickness likelier")
 	assert_str(String(read.status)).contains("9.3 in 1,000 of the 261 people at this dryness, half that when everyone drinks.")
 
 
@@ -215,6 +216,9 @@ func test_after_the_dry_year_the_tile_is_calm_and_the_card_says_what_it_took()->
 	for fact:Dictionary in read.facts:texts.append(String(fact.text))
 	# Why 5.3 never moved: the stores were full, as full as they can be.
 	assert_array(Array(texts)).is_equal(["The stores are full: they hold 6.3 days at most","The Year the Springs Failed took 11","No one died of thirst in the last year"])
+	# A dry year that drained the water: its thirst is part of its dead.
+	var drained:=Watch.read(_users_towns(),{},{"Dehydration":6,"Drought":5},[{"id":"c9","name":"the Dry Year of year 70","deaths":11,"thirst":6,"end":21682}])
+	assert_str(String((drained.facts[1] as Dictionary).text)).is_equal("The Dry Year of year 70 took 11, 6 of them of thirst")
 
 
 func test_a_town_gone_thirsty_is_named_with_its_days()->void:
@@ -241,6 +245,18 @@ func test_a_store_nearly_gone_turns_amber_before_anyone_goes_thirsty()->void:
 	assert_str(String(read.notes[0])).is_equal("Wallyfire running low")
 	assert_str(String(read.headline)).is_equal("Water is running low at Wallyfire: 2 days held, and less is drawn than drunk. All drank their fill today.")
 
+
+## No thirst forecast: the card says so, and gives no reason why more hands
+## would not help (the review's catch).
+func test_no_thirst_forecast_says_so()->void:
+	GameState.elapsed_days=21600.0
+	var ahead:={"now":{"thirst":0.2,"toll":0.9,"total":1.1,"dry_day":-1},"carriers":{"total":1.1},"cistern":{"total":1.1},
+		"extra_carriers":13,"cisterns_known":true,"store_days":5.3,"today":21600.0}
+	var read:=Watch.read(_users_towns(),_drought_reading(_springs_failed()),{},[],ahead)
+	var texts:=PackedStringArray()
+	for fact:Dictionary in read.facts:texts.append(String(fact.text))
+	assert_array(Array(texts)).contains(["No one is forecast to go thirsty: the stores and the far pools hold"])
+	for text in texts:assert_str(text).not_contains("More hands would not help")
 
 func test_the_strip_turns_amber_in_a_dry_year_and_red_when_thirsty()->void:
 	GameState.elapsed_days=21600.0

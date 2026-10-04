@@ -53,9 +53,13 @@ const FAR_FAIL:=0.5
 const FAR_KM:=10.0
 ## The share of the far pools the families reach without an order.
 const FAR_SELF:=0.5
-## The answers that send people to the far water (policy channel water_far).
+## The answers that send people to the far water (policy channel water_far)
+## and put more hands on the water path (water_collection: the carriers'
+## haul x 1 + this): carrying from the far pools, moving to the river.
 const CARRY_REACH:=0.5
 const RIVER_CAMP_REACH:=0.75
+const CARRY_HAUL:=0.3
+const RIVER_CAMP_HAUL:=0.35
 ## The dry year's own toll, a share of the people: TOLL_K x the draw's median
 ## for this dryness, less TOLL_HELD_CUT of it for the share that drank.
 const TOLL_K:=2.0
@@ -188,16 +192,69 @@ static func intake_now()->float:
 		drank+=float(town.population)*clampf(float((town.water as Dictionary).get("intake_ratio",1.0)),0.0,1.0)
 	return drank/people if people>0.0 else 1.0
 
-## The water_far reach the answers give on `day` (from the people's own
-## policy records, as consequence_engine.policy_effect reads them).
-static func far_policy_on(day:float)->float:
+## The sum a policy channel's records give on `day`, before the engine's cap
+## (consequence_engine.gd policy_effect reads the same records: kind
+## "policy", begun and not yet ended, effects of their own or the catalog's).
+## Callers add an answer still to be given, then cap: clampf(sum, -1, 1).
+static func policy_on(channel:String,day:float)->float:
 	var total:=0.0
 	for modifier:Variant in WorldSimulation.state.active_modifiers:
 		if not modifier is Dictionary or String(modifier.get("kind",""))!="policy":continue
 		if day>float(modifier.get("until_day",-INF)) or float(modifier.get("started_day",-INF))>day:continue
 		var effects:Dictionary=modifier.get("effects",{}) if modifier.get("effects") is Dictionary else {}
-		if effects.has("water_far"):total+=clampf(float(modifier.get("magnitude",0.0)),-0.35,0.35)*float(effects.water_far)
-	return clampf(total,-1.0,1.0)
+		if effects.is_empty() and GovernmentPolicyCatalog.has_policy(String(modifier.get("id",""))):effects=GovernmentPolicyCatalog.definition(String(modifier.id)).get("effects",{})
+		if effects.has(channel):total+=clampf(float(modifier.get("magnitude",0.0)),-0.35,0.35)*float(effects[channel])
+	return total
+
+## The water_far reach the answers give on `day`, capped as the engine caps it.
+static func far_policy_on(day:float)->float:
+	return clampf(policy_on("water_far",day),-1.0,1.0)
+
+## The share of the near water the towns actually lost on their last water
+## day, after their groundwater held part of it, people-weighted.
+## -1 when no town has had a water day that counts it.
+static func felt_loss()->float:
+	var people:=0.0;var lost:=0.0
+	for town:Dictionary in towns():
+		if not (town.water as Dictionary).has("dry_loss"):continue
+		people+=float(town.population)
+		lost+=float(town.population)*float((town.water as Dictionary).get("dry_loss",0.0))
+	return lost/people if people>0.0 else -1.0
+
+## The towns' groundwater hold, people-weighted.
+static func held_now()->float:
+	var people:=0.0;var held:=0.0
+	for town:Dictionary in towns():
+		var parts:Variant=(town.water as Dictionary).get("dry_parts",{})
+		people+=float(town.population)
+		held+=float(town.population)*(float((parts as Dictionary).get("held",0.0)) if parts is Dictionary else 0.0)
+	return held/people if people>0.0 else 0.0
+
+## A store this low (days of drinking) is watched day by day in a dry year.
+const BITE_DAYS:=3.0
+
+## Whether a dry year bites this town now: the springs fail enough that the
+## store falls (what is drawn at today's loss and reach is less than the
+## day's need), or the store is already low. Only then must its days run one
+## at a time (day_span.gd); a full store that holds steps like any other.
+static func bites(water:Dictionary,loss_today:float=-1.0)->bool:
+	var lost:=loss_now() if loss_today<0.0 else loss_today
+	if lost<=0.0 or water.is_empty():return false
+	var need:=float(water.get("total_required_today",water.get("required_today",0.0)))
+	if need<=0.0:return false
+	if float(water.get("stored",0.0))<float(water.get("required_today",need))*BITE_DAYS:return true
+	var parts:Variant=water.get("dry_parts",{})
+	if not parts is Dictionary or (parts as Dictionary).is_empty():return true
+	var got:=collect(parts,lost,float((parts as Dictionary).get("held",0.0)),reach(far_policy_on(float(WorldSimulation.state.elapsed_days))))
+	return float(got.collected)<need*0.999
+
+## Whether a dry year bites any town of the people in scope.
+static func bites_any()->bool:
+	var lost:=loss_now()
+	if lost<=0.0:return false
+	for town:Dictionary in towns():
+		if bites(town.water,lost):return true
+	return false
 
 ## The people's days of water held: every town's store over its drinking.
 static func store_days()->float:
@@ -210,7 +267,10 @@ static func store_days()->float:
 ## "The near springs give about 4 in 10 of what they did; the water stores
 ## hold 2.1 days." from the ledger.
 static func springs_words(c:Dictionary,day:float)->String:
-	var left:=clampi(roundi((1.0-loss(c,day))*10.0),0,10)
+	# What the towns lost after their own deep wells (their last water day).
+	var lost:=felt_loss()
+	if lost<0.0:lost=loss(c,day)
+	var left:=clampi(roundi((1.0-lost)*10.0),0,10)
 	var days:=store_days()
 	var held:="" if days<0.0 else ("; the water stores are empty" if days<0.05 else "; the water stores hold %s days" % (str(roundi(days)) if days>=10.0 else "%.1f" % days))
 	return "The near springs give about %d in 10 of what they did%s." % [left,held]
@@ -220,45 +280,50 @@ static func springs_words(c:Dictionary,day:float)->String:
 # --------------------------------------------------------------------------
 
 ## What the rest of dry year `c` will take, as things stand, from each town's
-## last water day. As things stand includes the holder's own course when the
-## god stays silent (carrying from the decision day). `change`: {choice: an
-## answer given today ("carry", "river_camp", or any other, which carries
-## nothing), far: an explicit reach of the far pools for far_days from
-## far_from days ahead, carriers: share of each town's people more on the
-## water path, cistern: true (a lined cistern in every town), toll_factor: on
-## the dry year's own toll}.
+## last water day, by the town's own water day run forward (collect): the
+## loss on each day, the groundwater's hold, and the answers on the people's
+## policy records on each day (the carriers' haul under water_collection and
+## the far pools' reach under water_far, capped as the engine caps them). As
+## things stand includes the holder's own course when the god stays silent
+## (carrying from the decision day). `change`: {choice: an answer given today
+## ("carry" for 90 days, "river_camp" for 60, any other carries nothing),
+## far/collect: an explicit answer's reach and haul for `days` from `from`
+## days ahead, carriers: share of each town's people more on the water path,
+## cistern: true (a lined cistern in every town), toll_factor: on the dry
+## year's own toll, trace: true (each town's day-by-day drinking)}.
 ## {thirst, toll, total, held (the people's mean drinking ahead), dry_day (the
 ## first day a store runs dry, -1 when none), towns: [{name, thirst, dry_day,
-## low_days}]}.
+## low_days, intake (trace only)}]}.
 static func forecast(c:Dictionary,town_list:Array,today:float,change:Dictionary={})->Dictionary:
 	var end:=float(c.get("end_day",today))
 	var out:={"thirst":0.0,"toll":0.0,"total":0.0,"held":1.0,"dry_day":-1,"towns":[]}
 	var people_days:=0.0;var drank_days:=0.0
-	# The far water ordered ahead: an explicit change, an answer chosen today,
-	# or, while the god is silent, the holder's own course at the decision
-	# day (crisis_system.gd _default_choice: carry, for 90 days).
-	var extra:=0.0;var extra_from:=today;var extra_until:=today
+	# The answer still to come: an explicit one, one chosen today, or, while
+	# the god is silent, the holder's own course at the decision day
+	# (crisis_system.gd _default_choice: carry, for 90 days).
+	var answer:={}
 	var choice:=String(change.get("choice",""))
-	if change.has("far"):
-		extra=float(change.far);extra_from=today+float(change.get("far_from",0.0));extra_until=extra_from+float(change.get("far_days",1e9))
-	elif choice=="carry":
-		extra=CARRY_REACH;extra_until=today+90.0
-	elif choice=="river_camp":
-		extra=RIVER_CAMP_REACH;extra_until=today+60.0
-	elif choice=="" and String(c.get("phase","open"))=="open" and String(c.get("choice",""))=="":
-		extra=CARRY_REACH;extra_from=maxf(today,float(c.get("decide_by",c.get("start",today))));extra_until=extra_from+90.0
+	if change.has("far") or change.has("collect"):
+		answer={"far":float(change.get("far",0.0)),"collect":float(change.get("collect",0.0)),"from":today+float(change.get("from",0.0)),"days":float(change.get("days",1e9))}
+	elif choice!="":
+		answer=answer_effects(choice,today)
+	elif String(c.get("phase","open"))=="open" and String(c.get("choice",""))=="":
+		answer=answer_effects("carry",maxf(today,float(c.get("decide_by",c.get("start",today)))))
+	var trace:=bool(change.get("trace",false))
 	for town:Dictionary in town_list:
 		var w:Dictionary=town.water
 		var people:=float(town.population)
 		if people<=0.0:continue
 		var parts:Dictionary=(w.get("dry_parts",{}) as Dictionary).duplicate() if w.get("dry_parts") is Dictionary else {}
-		if parts.is_empty():parts=_parts_from(w)
+		if parts.is_empty():parts=_parts_from(w,today)
+		# The carriers' own haul before any answer (the engine multiplies it
+		# by 1 + water_collection each day).
+		var base:=float(parts.get("organized_base",float(parts.get("organized",0.0))/(1.0+maxf(0.0,clampf(policy_on("water_collection",today),-1.0,1.0)))))
 		var added:=float(change.get("carriers",0.0))*people
 		if added>0.0:
 			# More on the water path: each brings what today's carriers bring.
-			var per:=float(parts.get("organized",0.0))/maxf(0.5,float(w.get("collection_workers",1.0)))
-			parts.organized=float(parts.get("organized",0.0))+per*added
-			parts.near=float(parts.get("near",0.0))+per*added
+			base+=base/maxf(0.5,float(w.get("collection_workers",1.0)))*added
+		var household:=float(parts.get("household",0.0))
 		var capacity:=float(w.get("capacity",0.0))
 		var store:=float(w.get("stored",0.0))
 		if bool(change.get("cistern",false)):
@@ -270,19 +335,27 @@ static func forecast(c:Dictionary,town_list:Array,today:float,change:Dictionary=
 		var dead:=0.0
 		var low:=0
 		var dry_day:=-1
+		var intakes:Array=[]
 		var day:=today+1.0
 		while day<=end:
 			var scale:=maxf(0.0,people-dead)/people
+			var on:=not answer.is_empty() and day>float(answer.from) and day<=float(answer.from)+float(answer.days)
+			var haul:=clampf(policy_on("water_collection",day)+(float(answer.collect) if on else 0.0),-1.0,1.0)
+			var far:=clampf(policy_on("water_far",day)+(float(answer.far) if on else 0.0),-1.0,1.0)
+			var organized:=base*(1.0+maxf(0.0,haul))
 			var day_parts:=parts.duplicate()
-			for key in ["need","cap","near","household","organized","rain","cistern"]:day_parts[key]=float(parts.get(key,0.0))*scale
-			var water_far:=far_policy_on(day)+(extra if day>extra_from and day<=extra_until else 0.0)
-			var got:=collect(day_parts,loss(c,day),held,reach(water_far))
+			for key in ["need","cap","rain","cistern"]:day_parts[key]=float(parts.get(key,0.0))*scale
+			day_parts.household=household*scale
+			day_parts.organized=organized*scale
+			day_parts.near=(household+organized)*scale
+			var got:=collect(day_parts,loss(c,day),held,reach(far))
 			var drinking:=drinking0*scale
 			var available:=minf(capacity*scale,store+float(got.collected))
 			var drunk:=minf(drinking,available)
 			var rest:=maxf(0.0,available-drunk)
 			store=maxf(0.0,rest-minf(rest,float(day_parts.need)-drinking))
 			var intake:=drunk/maxf(0.001,drinking)
+			if trace:intakes.append(intake)
 			if intake<0.98:
 				shortage+=1.0;low+=1
 				if dry_day<0:dry_day=int(day)
@@ -292,7 +365,9 @@ static func forecast(c:Dictionary,town_list:Array,today:float,change:Dictionary=
 			day+=1.0
 		out.thirst=float(out.thirst)+dead
 		if dry_day>=0 and (int(out.dry_day)<0 or dry_day<int(out.dry_day)):out.dry_day=dry_day
-		(out.towns as Array).append({"name":String(town.get("name","")),"thirst":dead,"dry_day":dry_day,"low_days":low})
+		var row:={"name":String(town.get("name","")),"thirst":dead,"dry_day":dry_day,"low_days":low}
+		if trace:row["intake"]=intakes
+		(out.towns as Array).append(row)
 	out.held=drank_days/people_days if people_days>0.0 else 1.0
 	# The dry year's own toll still to come: the turn takes 0.4 of it, the end 0.6.
 	var share:=0.6 if String(c.get("phase","open"))=="mid" else 1.0
@@ -302,11 +377,23 @@ static func forecast(c:Dictionary,town_list:Array,today:float,change:Dictionary=
 	out.total=float(out.thirst)+float(out.toll)
 	return out
 
-## The parts of an older water day that kept none (before dry years drained it).
-static func _parts_from(w:Dictionary)->Dictionary:
+## What an answer to a dry year puts on the water channels from `from`:
+## {far, collect, from, days} (crisis_system.gd CARRY_EFFECTS, river_camp),
+## or {} for an answer that carries no water.
+static func answer_effects(choice:String,from:float)->Dictionary:
+	match choice:
+		"carry":return {"far":CARRY_REACH,"collect":CARRY_HAUL,"from":from,"days":90.0}
+		"river_camp":return {"far":RIVER_CAMP_REACH,"collect":RIVER_CAMP_HAUL,"from":from,"days":60.0}
+	return {}
+
+## The parts of an older water day that kept none (before dry years drained
+## it): the carriers' haul backed out of that day's answers.
+static func _parts_from(w:Dictionary,today:float=-1.0)->Dictionary:
 	var need:=float(w.get("total_required_today",w.get("required_today",0.0)))
-	return {"need":need,"cap":need*DRAW_CAP,"near":float(w.get("household_collected_today",0.0))+float(w.get("organized_collection_capacity",0.0)),"household":float(w.get("household_collected_today",0.0)),
-		"flow":1.0,"organized":float(w.get("organized_collection_capacity",0.0)),"line":float(w.get("conveyed_today",0.0)),"rain":float(w.get("rain_collected_today",0.0)),
+	var organized:=float(w.get("organized_collection_capacity",0.0))
+	var day:=float(WorldSimulation.state.elapsed_days) if today<0.0 else today
+	return {"need":need,"cap":need*DRAW_CAP,"near":float(w.get("household_collected_today",0.0))+organized,"household":float(w.get("household_collected_today",0.0)),
+		"flow":1.0,"organized":organized,"organized_base":organized/(1.0+maxf(0.0,clampf(policy_on("water_collection",day),-1.0,1.0))),"line":float(w.get("conveyed_today",0.0)),"rain":float(w.get("rain_collected_today",0.0)),
 		"cistern":float(w.get("cistern_capacity",0.0)),"accessible":bool(w.get("source_accessible",true)),
 		# The builders' wells of the people in scope (built_fabric.gd), as the town's own day would hold.
 		"held":held_by(false,float((load("res://scripts/built_fabric.gd") as GDScript).call("works_cover","water")))}

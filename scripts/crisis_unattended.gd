@@ -26,6 +26,9 @@ static func daily(day:int)->void:
 	if from>=day: return
 	var first:=from<=0
 	s.last_day=day
+	# An older save's dry-year dead, written as thirst, are its own toll's
+	# (once): so its running dry year never counts them again as thirst.
+	CS.reconcile_drought_causes(s,false)
 	# A calm people may be stepped several days at once (day_span.gd); the
 	# drift and the onset rolls cover every day stepped.
 	var span:=1 if first else clampi(day-from,1,30)

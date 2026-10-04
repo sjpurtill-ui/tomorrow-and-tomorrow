@@ -829,7 +829,7 @@ static func _ledger_line(c:Dictionary,suffix:String,title:String,text:String)->v
 	while events.size()>80: events.pop_back()
 
 ## Crisis fields its log line copies as they change (hardship_log.gd words()).
-const LOG_FIELDS:=["sick","where","food_lost","house_lost","timber_lost","sev","holder","choice","mid_choice","rite","escalated","thirst","depth"]
+const LOG_FIELDS:=["sick","where","food_lost","house_lost","timber_lost","sev","holder","choice","mid_choice","rite","escalated","thirst","depth","felt_depth"]
 
 static func _hardship(c:Dictionary,extra:Dictionary={})->Dictionary:
 	## Writes or updates this crisis's line in the sickness & disaster log
@@ -1009,6 +1009,8 @@ static func _open_drought(day:int,x:Dictionary)->void:
 static func plan_drought(c:Dictionary,draw:float)->void:
 	c["draw"]=draw
 	c["depth"]=DryWater.depth(float(c.get("sev",0.0)),draw)
+	# What the towns will feel at its worst, after their own deep wells (the log).
+	c["felt_depth"]=float(c.depth)*(1.0-DryWater.held_now())
 	c["thirst"]=0
 	c["toll_dead"]=0
 	var ahead:=DryWater.forecast(c,DryWater.towns(),float(_day()))
@@ -1193,8 +1195,10 @@ static func _kill(c:Dictionary,count:int,salt:String)->int:
 ## sickness & disaster log (a shallow dry spell closes without a history line).
 ## A real thirst death outside those days stays thirst. Only the words change:
 ## no one is added, removed or moved between ages. "drought_cause_v2": the
-## first pass missed the shallow spells.
-static func reconcile_drought_causes(s:Dictionary)->void:
+## first pass missed the shallow spells. Each people's own ledger: the god's
+## people also read the sickness & disaster log (`with_log`); another
+## people's history keeps no end, so its dry year is read to 180 days on.
+static func reconcile_drought_causes(s:Dictionary,with_log:bool=true)->void:
 	var flags:Dictionary=s.get("flags",{}) if s.get("flags") is Dictionary else {}
 	if bool(flags.get("drought_cause_v2",false)): return
 	flags["drought_cause_v2"]=true
@@ -1203,15 +1207,15 @@ static func reconcile_drought_causes(s:Dictionary)->void:
 	var spells:={}
 	for h in s.get("history",[]):
 		if h is Dictionary and String(h.get("type",""))=="drought" and int(h.get("deaths",0))>0:
-			spells[String(h.get("id",""))]={"start":int(h.get("start",0)),"end":int(h.get("end",today)),"deaths":int(h.deaths)-int(h.get("thirst",0))}
+			spells[String(h.get("id",""))]={"start":int(h.get("start",0)),"end":int(h.get("end",mini(today,int(h.get("start",0))+180))),"deaths":int(h.deaths)-int(h.get("thirst",0))}
 	for key in (s.get("active",{}) as Dictionary):
 		var c:Variant=s.active[key]
 		if c is Dictionary and String(c.get("type",""))=="drought" and int(c.get("deaths",0))>0 and not spells.has(String(c.get("id",""))):
 			spells[String(c.get("id",""))]={"start":int(c.get("start",0)),"end":today,"deaths":int(c.deaths)-int(c.get("thirst",0))}
-	for e in HARDSHIPS.entries():
+	for e in (HARDSHIPS.entries() if with_log else []):
 		if e is Dictionary and String(e.get("type",""))=="drought" and int(e.get("dead",0))>0 and not spells.has(String(e.get("crisis",""))):
 			spells[String(e.get("crisis",""))]={"start":int(e.get("start",0)),"end":int(e.get("end",today)),"deaths":int(e.dead)-int(e.get("thirst",0))}
-	var rows:Array[Dictionary]=GameState.death_cause_days
+	var rows:Array[Dictionary]=WorldSimulation.state.death_cause_days
 	for spell:Dictionary in spells.values():
 		var left:=int(spell.deaths)
 		for row in rows:
@@ -1597,7 +1601,7 @@ const DEATH_FACTOR:={"children_apart":0.7,"mothers":1.15,"far_camp":0.65,"send_a
 	"water":0.85,"burn":0.6,"rite":1.05,"close":0.55,"healers":0.7,"hardy":0.8,"raid":0.5}
 ## Carrying water from the far pools: every strong back on the water path
 ## (other work waits), reaching all of the far pools (dry_water.gd water_far).
-const CARRY_EFFECTS:={"water_collection":0.3,"labor_multiplier":-0.06,"water_far":DryWater.CARRY_REACH}
+const CARRY_EFFECTS:={"water_collection":DryWater.CARRY_HAUL,"labor_multiplier":-0.06,"water_far":DryWater.CARRY_REACH}
 ## Keeping the sick apart once it is the people's own custom.
 const APART_CUSTOM_FACTOR:=0.4
 ## Clean water against the flux, the watery sickness.
@@ -1823,7 +1827,7 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			"raid":
 				return _raid(c,phase,silent)
 			"river_camp":
-				_policy(c,"river_camp",{"water_collection":0.35,"labor_multiplier":-0.06,"water_far":DryWater.RIVER_CAMP_REACH},60)
+				_policy(c,"river_camp",{"water_collection":DryWater.RIVER_CAMP_HAUL,"labor_multiplier":-0.06,"water_far":DryWater.RIVER_CAMP_REACH},60)
 				c.mult=float(c.mult)*death_factor(c,"river_camp")
 				outcome="The sleeping places moved down to the river. Water every day, and a long carry."
 			"send_hunters":

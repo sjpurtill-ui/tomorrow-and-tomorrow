@@ -98,5 +98,30 @@
   },
   "thirst": 0.0,
   "held": 1.0
+ },
+ {
+  "name": "An off-river town, few carriers",
+  "people": 100.0,
+  "capacity": 500.0,
+  "start": 21556.0,
+  "end": 21682.0,
+  "sev": 0.33415129256561904,
+  "draw": 0.06018884114340828,
+  "carry_from": 21580.0,
+  "parts": {
+   "need": 100.0,
+   "cap": 135.0,
+   "near": 126.0,
+   "household": 86.0,
+   "flow": 1.0,
+   "organized": 40.0,
+   "line": 0.0,
+   "rain": 0.0,
+   "cistern": 0.0,
+   "held": 0.0,
+   "accessible": true
+  },
+  "thirst": 13.5486,
+  "held": 0.69072
  }
 ]

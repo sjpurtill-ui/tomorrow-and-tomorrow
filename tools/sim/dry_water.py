@@ -45,6 +45,7 @@ FAR_FAIL = _k("FAR_FAIL", 0.5)
 FAR_KM = _k("FAR_KM", 10.0)
 FAR_SELF = _k("FAR_SELF", 0.5)
 CARRY_REACH = _k("CARRY_REACH", 0.5)
+CARRY_HAUL = _k("CARRY_HAUL", 0.3)
 TOLL_K = _k("TOLL_K", 2.0)
 TOLL_HELD_CUT = _k("TOLL_HELD_CUT", 0.5)
 THIRST_BASE = _k("THIRST_BASE", 0.35)
@@ -117,10 +118,15 @@ def town_forecast(parts: dict, people: float, capacity: float, start: float, end
     while day <= end:
         scale = max(0.0, people - dead) / people
         p = dict(parts)
-        for key in ("need", "cap", "near", "household", "organized", "rain", "cistern"):
+        for key in ("need", "cap", "household", "rain", "cistern"):
             p[key] = float(parts.get(key, 0.0)) * scale
-        water_far = CARRY_REACH if carry_from < day <= carry_from + carry_days else 0.0
-        got = collect(p, dep * ramp(start, end, day), held, FAR_SELF + water_far)
+        # The order to carry: every strong back on the water path (the
+        # carriers' haul x 1 + CARRY_HAUL) and all the far pools reached.
+        on = carry_from < day <= carry_from + carry_days
+        organized = float(parts.get("organized", 0.0)) * (1.0 + (CARRY_HAUL if on else 0.0))
+        p["organized"] = organized * scale
+        p["near"] = (float(parts.get("household", 0.0)) + organized) * scale
+        got = collect(p, dep * ramp(start, end, day), held, FAR_SELF + (CARRY_REACH if on else 0.0))
         drinking = people * scale
         available = min(capacity * scale, store + got["collected"])
         drink = min(drinking, available)
@@ -168,7 +174,10 @@ def _parity_cases() -> list:
     return [town("Ashleyfire", 114.84, 122.30, 144.31, 450.97, 728.28, wells),
             town("Ashleyfire, poor works", 114.84, 122.30, 144.31, 112.74, 344.52, 0.0),
             town("Ashleyfire, deep well", 114.84, 122.30, 144.31, 450.97, 728.28, held_by(True, 0.161)),
-            town("Ashleyfire, a water line", 114.84, 122.30, 144.31, 450.97, 728.28, wells, 114.84)]
+            town("Ashleyfire, a water line", 114.84, 122.30, 144.31, 450.97, 728.28, wells, 114.84),
+            # Off the river (3 km, households fetch 0.86 of the need) with few carriers:
+            # the carriers' haul under the order to carry decides it.
+            town("An off-river town, few carriers", 100.0, 100.0, 86.0, 40.0, 500.0, 0.0)]
 
 
 def parity(write: bool = False) -> int:
