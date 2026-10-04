@@ -130,7 +130,12 @@ func _ready()->void:
 		var sitters:=[["kilnfold","male",38,"Odu Kiln"],["thornbank","female",31,"Sela Thorn"],["ochrestep","male",44,"Tamo Ochre"]]
 		if "variants" in OS.get_cmdline_user_args():
 			sitters.clear()
+			var selected:=OS.get_cmdline_user_args()
+			var filtered:=false
 			for body:String in Figure3D.BODIES:
+				if body in selected:filtered=true
+			for body:String in Figure3D.BODIES:
+				if filtered and not body in selected:continue
 				var age:=8 if body=="child" else (68 if body.ends_with("_old") else (19 if body.ends_with("_young") else 38))
 				sitters.append(["kilnfold","female" if body.begins_with("female") else "male",age,"MPFB "+body,body])
 		var row:=0

@@ -122,6 +122,28 @@ def bridge(lower_edges, upper_edges, points):
     return result
 
 
+def neck_relaxation(points, triangles, start, scale, origin):
+    """A fixed linear fairing operator for the new neck, anchored to the body.
+
+    A valid annulus alone still leaves the native cut's sawtooth silhouette.
+    Relax its lower contour into the old neck without moving retained vertices
+    or facial features. Reuse the same operator for shapes and skin weights.
+    """
+    gain=.5*(1-smooth(-.015,.040,(points[:,1]-origin[1])/scale))
+    gain[:start]=0
+    active=np.flatnonzero(gain>0)
+    edges=np.unique(np.sort(np.concatenate([triangles[:,[0,1]],triangles[:,[1,2]],triangles[:,[2,0]]]),axis=1),axis=0)
+    neighbours=[np.unique(edges[np.any(edges==i,axis=1)]) for i in active]
+    neighbours=[n[n!=i] for i,n in zip(active,neighbours)]
+    def relax(values):
+        result=values.astype(np.float64).copy()
+        for _ in range(6):
+            means=np.asarray([result[n].mean(axis=0) for n in neighbours])
+            result[active]+=(means-result[active])*gain[active,None]
+        return result.astype(values.dtype)
+    return relax
+
+
 class Writer:
     def __init__(self, glb):
         self.g=glb; self.binary=bytearray(glb.bin)
@@ -269,9 +291,22 @@ def graft_body(writer, name, source, variant, scale, origin, joints):
         blended[n]=np.concatenate([original_delta[keep],fitted]).astype(np.float32)
     necktri=bridge(lowedges,highedges+N,total)
     alltri=np.concatenate([lowertri,headtri,necktri])
+    relax=neck_relaxation(total,alltri,N,scale,origin)
+    total=relax(total);hp=total[N:]
+    blended={n:relax(d) for n,d in blended.items()}
     metadata=json.loads(str(source.get('metadata','{}')))
     headattrs=new_attrs(hp,ht,scale,origin,joints['head'],joints['neck'],metadata)
     out={k:np.concatenate([v[keep],headattrs[k].astype(v.dtype)]) for k,v in attrs.items()}
+    # Blend in joint space before reducing to the four glTF influences.
+    # This keeps an animated neck as smooth as its resting contour.
+    joint_weights=np.zeros((len(total),max(joints.values())+1),np.float32)
+    for slot in range(4):
+        np.add.at(joint_weights,(np.arange(len(total)),out['JOINTS_0'][:,slot]),out['WEIGHTS_0'][:,slot])
+    joint_weights=relax(joint_weights)
+    selected=np.argsort(-joint_weights[N:],axis=1)[:,:4]
+    weights=np.take_along_axis(joint_weights[N:],selected,axis=1)
+    out['JOINTS_0'][N:]=selected
+    out['WEIGHTS_0'][N:]=weights/weights.sum(axis=1,keepdims=True)
     calculated=normals(total,alltri).astype(np.float32)
     out['NORMAL'][N:]=calculated[N:];out['NORMAL'][lowloop]=calculated[lowloop]
     prim=mesh['primitives'][0]
