@@ -774,7 +774,14 @@ def _robe(f):
     outer = sleeved(body, union_fn(*parts[1:], k=0.012), zc - 0.02, k=0.018)
     neck = _neck_hole(f, 0.064 * k, 0.064 * k, 0.052 * k, drop=0.008, front=0.020)
     hem_fn = _hem(hem, amp=0.004)
-    keeps = [above(hem_fn), remove(neck)] + [remove(_sleeve_cut(el, d, L, 0.13)) for el, d, L in cuts]
+    slit_top = zk + 0.045 * k
+
+    def slit(P):
+        # a slit up the front from the hem to above the knee, a little wider at the hem
+        z = P[..., 2]
+        w = 0.004 * k + 0.020 * k * np.clip((slit_top - z) / max(slit_top - hem, 1e-3), 0.0, 1.0)
+        return np.maximum(np.maximum(np.abs(P[..., 0]) - w, z - slit_top), P[..., 1] - float(f.pelvis.y) + 0.02)
+    keeps = [above(hem_fn), remove(neck), remove(slit)] + [remove(_sleeve_cut(el, d, L, 0.13)) for el, d, L in cuts]
     keep = keep_all(*keeps)
     lo, hi = box_of(f, hem - 0.05, zs + 0.08, x=0.52)
     robe = Piece("robe_body", "CLOTH_A", solid_fn(outer, keep), shell_fn(outer, keep, 0.0065), lo, hi, outer=outer, keep=keep)
@@ -840,11 +847,16 @@ def _mantle(f):
 
 # --- what the clothes cover ----------------------------------------------------------
 
-def coverage(body, pieces, strict=None, margin=0.010, reach=0.016, edge=0.014):
+def coverage(body, pieces, strict=None, margin=0.010, reach=0.016, edge=0.014, objs=None, share=0.50):
     """For each body vertex: True where these pieces hide it.
     Skin inside a piece is hidden; skin poking up to `reach` out through it is
     hidden too (the cloth is drawn there), but never within `edge` of a hem,
-    cuff or neckline. strict (per vertex, e.g. arms) only hides what is inside."""
+    cuff or neckline. strict (per vertex, e.g. arms) only hides what is inside.
+    objs (the built, bound pieces): skin is hidden only where the cloth nearest
+    it moves with it (their bone weights share at least `share`): legs under a
+    skirt that stays behind,
+    or an arm under a strap that stays on the shoulder, show as legs and arms
+    when they come out, never as a hole through the body."""
     co = np.array([v.co[:] for v in body.data.vertices], dtype=np.float32)
     covered = np.zeros(len(co), dtype=bool)
     if strict is None:
@@ -866,4 +878,48 @@ def coverage(body, pieces, strict=None, margin=0.010, reach=0.016, edge=0.014):
         else:
             hit = pc.solid(P) < -margin
         covered[idx[hit]] = True
+    if objs:
+        covering_names = {pc.name for pc in pieces if pc.cover}
+        covered &= _moves_with(body, [obj for obj in objs if obj.name in covering_names], co, covered, share)
     return covered
+
+
+def _moves_with(body, objs, co, covered, share):
+    """Only discard skin when the overlying cloth shares its main bone weights.
+
+    Distance at rest is no guarantee: a close sleeve or hem can move away on
+    the very next pose. Keeping that skin prevents missing forearms and knees.
+    """
+    from mathutils.kdtree import KDTree
+    import cf_rig
+    cloth = []
+    for o in objs:
+        if o.type != 'MESH':
+            continue
+        table = cf_rig._weights_table(o)
+        for v, w in zip(o.data.vertices, table):
+            cloth.append((v.co.copy(), w))
+    if not cloth:
+        return np.ones(len(co), dtype=bool)
+    kd = KDTree(len(cloth))
+    for i, (c, w) in enumerate(cloth):
+        kd.insert(c, i)
+    kd.balance()
+    skin = cf_rig._weights_table(body)
+    keep = np.ones(len(co), dtype=bool)
+    for i in np.nonzero(covered)[0]:
+        found = kd.find_n(Vector(co[i].tolist()), 4)
+        best = 0.0
+        sw = skin[i]
+        for _c, j, _d in found:
+            cw = cloth[j][1]
+            best = max(best, sum(min(sw.get(b, 0.0), cw.get(b, 0.0)) for b in sw))
+        # Sleeves can turn through a large angle in one gesture. A shared
+        # torso contribution is not enough to erase the arm underneath them.
+        arm = sum(value for bone, value in sw.items()
+                  if bone.split('.')[0] in ('upper_arm', 'forearm', 'hand', 'thumb', 'index', 'fingers'))
+        leg = sum(value for bone, value in sw.items()
+                  if bone.split('.')[0] in ('thigh', 'shin', 'foot', 'toe'))
+        required = max(share, 0.80 if arm > 0.35 else (0.65 if leg > 0.50 else share))
+        keep[i] = best >= required
+    return keep

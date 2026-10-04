@@ -76,6 +76,8 @@ var model:Node3D
 var skeleton:Skeleton3D
 var player:AnimationPlayer
 var clip:=""
+## Travel speed / the authored walk speed. Acting walks use this clock too.
+var locomotion_rate:=1.0
 var head_bone:=-1
 var head_height:=0.28
 var body_height:=1.72
@@ -99,6 +101,12 @@ var _gaze_tween:Tween
 var _gaze_on:=false
 ## A seat the set gives them (its height): their own stool is not shown.
 var seat_height:=-1.0
+## The acting may sit on the floor over this figure's ordinary seated clip.
+## Its unskinned stool must not remain inside the lowered torso.
+var floor_seated:=false:
+	set(value):
+		floor_seated=value
+		_props_for(clip)
 
 static func manifest()->Dictionary:
 	if _manifest.is_empty():
@@ -378,6 +386,7 @@ func _dress()->void:
 	for mesh_node in _parts:
 		var part:=String(mesh_node.name)
 		var shown:=part in FACE_PARTS or part==hair or part==beard or (part.begins_with(outfit+"_") and not part in hidden_pieces) or part==String(PROPS.get(stance,"-"))
+		if part=="prop_stool" and (floor_seated or seat_height>=0.0):shown=false
 		mesh_node.visible=shown
 		if (not shown and not part in CARRIED.values()) or mesh_node.mesh==null:continue
 		# In a lit court they cast shadows (not the paint on the skin).
@@ -456,6 +465,30 @@ func _merge_parts(colours:Dictionary,cover:int,beard:String)->void:
 		if String(mesh_node.name).begins_with("prop_"):_meshes.append(mesh_node)
 		else:mesh_node.visible=false
 
+# --- Put to death (court_figure_gore.gd: the court's executions) ---------------------
+
+const Gore:=preload("res://scripts/hud/court_figure_gore.gd")
+
+## Can gore be shown on this person (never a child)?
+func gore_allowed()->bool:
+	return Gore.allowed(self)
+
+## When an execution starts: cut the meshes and keep the pose for the blow.
+func gore_prepare()->void:
+	Gore.prepare(self)
+
+## The body comes apart now ("head", "limbs", "all", "halves"): {name: piece}.
+func gore_split(cut:="head")->Dictionary:
+	return Gore.split(self,cut)
+
+## Gone from the hall, the pieces in its place: nothing of it runs.
+func _vanish_for_gore()->void:
+	visible=false
+	if player!=null:player.stop()
+	set_process(false)
+	for node in skeleton.get_children():
+		if node is SkeletonModifier3D:(node as SkeletonModifier3D).active=false
+
 ## Back to the parts as they are (no lit court: the studio, the flat stage).
 func _unmerge()->void:
 	for node in _merged.values():
@@ -485,7 +518,7 @@ func _props_for(name:String)->void:
 	var holding:=name==stance or name==stance+"_talk"
 	for mesh_node in _meshes:
 		var part:=String(mesh_node.name)
-		if part.begins_with("prop_") and not part in CARRIED.values():mesh_node.visible=holding and part==held and not (part=="prop_stool" and seat_height>=0.0)
+		if part.begins_with("prop_") and not part in CARRIED.values():mesh_node.visible=holding and part==held and not (part=="prop_stool" and (floor_seated or seat_height>=0.0))
 
 func _mesh_named(part:String)->MeshInstance3D:
 	for mesh_node in _meshes:
@@ -574,10 +607,15 @@ func drop_held(empty_stance:="stand")->Node3D:
 func play(name:String,blend:=0.25,at:=-1.0)->void:
 	if player==null or not player.has_animation(name):return
 	if name==clip and at<0.0 and player.is_playing():return
+	set_locomotion_rate(1.0)
 	clip=name
 	_props_for(name)
 	player.play(name,blend)
 	if at>=0.0:player.seek(fmod(at,player.get_animation(name).length),true)
+
+func set_locomotion_rate(rate:float)->void:
+	locomotion_rate=maxf(rate,0.0)
+	if player!=null:player.speed_scale=locomotion_rate
 
 func clip_length(name:String)->float:
 	return player.get_animation(name).length if player!=null and player.has_animation(name) else 0.0
@@ -593,7 +631,9 @@ func face(yaw_degrees:float,time:=0.3)->void:
 	if time<=0.0 or not is_inside_tree():
 		rotation_degrees.y=yaw_degrees;return
 	_yaw_tween=create_tween().set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	_yaw_tween.tween_property(self,"rotation_degrees:y",yaw_degrees,time)
+	# Angles wrap at 180 degrees; cross that seam by the short turn.
+	var target:=rotation.y+wrapf(deg_to_rad(yaw_degrees)-rotation.y,-PI,PI)
+	_yaw_tween.tween_property(self,"rotation:y",target,time)
 
 ## The top of the head in world space (speech bubbles hang above it).
 func head_top()->Vector3:

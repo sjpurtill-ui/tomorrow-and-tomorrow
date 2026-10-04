@@ -41,6 +41,7 @@ const Motion:=preload("res://scripts/hud/motion.gd")
 ## The hall as a stage: the people present stand in it and speak in bubbles.
 const Stage:=preload("res://scripts/hud/court_stage.gd")
 const Directing:=preload("res://scripts/hud/court_director.gd")
+const Executions:=preload("res://scripts/hud/court_executions.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
@@ -269,7 +270,7 @@ func _reset_card(next_mode:String)->void:
 	# "What you stand to gain" opens folded to one line: the hall comes first.
 	_stakes_compact=true;_stakes_opened=false
 	stage_row=null
-	court_stage=null;_reveal_label=null;_leave_when_quiet=false;scene_portraits.clear()
+	court_stage=null;_reveal_label=null;_leave_when_quiet=false;scene_portraits.clear();_executed=false
 	rest_seats.clear();foreign_refs.clear();rest_signature=[];foreign_count=-1
 	civic_settlement="";civic_seen.clear();civic_signature=""
 	civic_strip=null;civic_state_label=null;civic_status_label=null;civic_replies=null
@@ -901,7 +902,16 @@ func _build_orders_row()->void:
 	if not is_instance_valid(orders_row):return
 	for child in orders_row.get_children():child.queue_free()
 	var audience:=Hall.find(audience_id)
-	var menus:Array=OfficeOrders.menus(audience_id) if mode=="audience" and resolved_result.is_empty() and String(audience.get("status",""))=="waiting" else []
+	var open:=mode=="audience" and resolved_result.is_empty() and String(audience.get("status",""))=="waiting"
+	var menus:Array=OfficeOrders.menus(audience_id) if open else []
+	# Put to death ▾: the ways this people knows, as the god would say them
+	# (the engine decides whether it is done, as with the typed words).
+	var deaths:Array=[]
+	if open and is_instance_valid(court_stage) and court_stage.court_set!=null:
+		var facts:=Executions.facts_from_game(String(court_stage.court_set.get("kind")))
+		facts["dogs"]=court_stage.court_set.has_method("animal") and court_stage.court_set.call("animal","dog")!=null
+		for item:Dictionary in Executions.menu(facts,_speaker_name()):deaths.append({"label":String(item.label),"text":String(item.order)})
+	if not deaths.is_empty():menus.append({"label":"Put to death ▾","name":"PutToDeath","items":deaths})
 	orders_row.visible=not menus.is_empty()
 	if menus.is_empty():return
 	var caption:=Tokens.make_label("ORDERS",12,Tokens.GOLD,0.12);caption.size_flags_vertical=Control.SIZE_SHRINK_CENTER;caption.custom_minimum_size.x=58
@@ -1151,6 +1161,7 @@ func divine(action:String,words:String="",voice_reacts:bool=true)->Dictionary:
 	if is_instance_valid(court_stage) and not bool(result.get("terminal",false)) and Stage.director==null:
 		court_stage.react(Stage.MAIN,Stage.divine_mood(action,String(result.get("response",""))))
 	if is_instance_valid(court_stage):court_stage.event("divine",{"result":result,"action":action,"response":String(result.get("response",""))})
+	_maybe_execute(result,words)
 	_refresh_regard()
 	_update_mood(Hall.find(audience_id))
 	if bool(result.get("terminal",false)):_show_outcome(result)
@@ -1170,6 +1181,7 @@ func act_on_envoy(act_id:String,words:String="")->Dictionary:
 		court_stage.react(Stage.MAIN,Stage.divine_mood(act_id,String(result.get("response",""))))
 	if is_instance_valid(court_stage):court_stage.event("divine",{"result":result,"action":act_id,"response":String(result.get("response",""))})
 	_after_command(result)
+	_maybe_execute(result,words)
 	return result
 
 func _on_divine_intent(id:String,action:String)->void:
@@ -1580,11 +1592,49 @@ func _route_live_command(id:String,text:String,command:Dictionary)->bool:
 	_after_command(heard)
 	return true
 
+## THE ONE WAY AN EXECUTION IS SHOWN (ordinary court orders, the god's own
+## wrath, an envoy, a prisoner brought before the court): the engine has put
+## the one before the god to death, and only then, the hall sees it done by
+## the method the god's words name if the people can, else the director's
+## choice (court_executions.gd), a beat after the order is acknowledged.
+## result: the engine's result (it must be a death of the one before the
+## god); empty when the caller's engine has already killed them (the
+## prisoner flow) and vouches for it. Off, a child, or no modelled hall:
+## false, and the old sober exit plays at the leave-taking, as before.
+var _executed:=false
+func show_execution(words:String,result:Dictionary={})->bool:
+	if _executed or not is_instance_valid(court_stage) or court_stage.court_set==null:return false
+	if not result.is_empty() and exit_style_for(result)!="fall":return false
+	var victim:Variant=court_stage.figure(Stage.MAIN)
+	if victim==null:return false
+	var person:Dictionary=victim.person
+	if Executions.style(person)=="off":return false
+	_executed=true
+	var facts:=Executions.facts_from_game(String(court_stage.court_set.get("kind")))
+	facts["dogs"]=court_stage.court_set.has_method("animal") and court_stage.court_set.call("animal","dog")!=null
+	var name:=String(person.get("name",_speaker_name()))
+	var method:=Executions.pick(words,facts,hash("%s|%d|%d" % [name,int(person.get("person_id",0)),int(GameState.elapsed_days)]),Executions.last_used)
+	var actor:Dictionary=result.get("actor",{}) if result.get("actor") is Dictionary else {}
+	var ex:=""
+	if int(actor.get("person_id",0))>0:ex=court_stage.key_for_name(String(actor.get("name","")))
+	var stage:=court_stage
+	stage.exec_done=false
+	stage.exec_method=method
+	get_tree().create_timer(1.4).timeout.connect(func()->void:
+		if not is_instance_valid(stage):return
+		if stage.execute(method,Stage.MAIN,ex,name):Executions.last_used=method
+		else:stage.exec_done=true)
+	return true
+
+func _maybe_execute(result:Dictionary,words:String)->void:
+	if not result.is_empty():show_execution(words,result)
+
 ## Shows a command's result: the voice stages it (a bracketed direction, the
 ## actor's answer as decided, a witness), then the outcome line and receipt.
 func _after_command(result:Dictionary)->void:
 	_settle_card(result)
 	if is_instance_valid(court_stage):court_stage.event("command",{"result":result})
+	_maybe_execute(result,String(result.get("text",_last_words)))
 	# Carried out only as a vague standing order: the closest real orders are
 	# offered, so the god can pick instead of rephrasing.
 	if String(result.get("route",""))=="custom_directive" and _last_words!="":_offer_closest(_last_words)
@@ -1899,7 +1949,7 @@ func _process(delta:float)->void:
 		_civic_clock=.25
 		_sync_civic()
 	_pump()
-	if _leave_when_quiet and not revealing and is_instance_valid(court_stage):
+	if _leave_when_quiet and not revealing and is_instance_valid(court_stage) and (not _executed or bool(court_stage.exec_done)):
 		# Concluded: once everything has been said, they take their leave.
 		var said:Array=Hall.find(audience_id).get("lines",[])
 		_sync_rendered(said)
@@ -1969,8 +2019,30 @@ func _stage_line(line:Dictionary,animate:bool,ref:int=-1)->Label:
 	if text.is_empty():return null
 	match String(line.get("role","")):
 		"ruler":return court_stage.god_says(text,animate,ref)
-		"narrator":return court_stage.caption(text,"narration",animate,ref,"",String(line.get("about","")))
+		"narrator":
+			# While the hall watches the execution, the narrator holds its
+			# words (the picture tells it); its account of the death, named
+			# the way it was done, is the caption at the end.
+			if _executed and not bool(court_stage.exec_done):
+				if text.contains("at your word") or text.contains("cost you"):court_stage.exec_caption_override=_named_death(text)
+				return null
+			return court_stage.caption(_named_death(text),"narration",animate,ref,"",String(line.get("about","")))
 	return court_stage.say(_stage_key(line),text,bool(line.get("aside",false)),animate,ref)
+
+## The engine's words for a death, told the way the hall saw it done ("was
+## put to death" becomes "was beheaded at the third stroke"); everything
+## else the engine said (what it cost) stays as it is.
+func _named_death(text:String)->String:
+	if not is_instance_valid(court_stage) or String(court_stage.exec_method).is_empty():return text
+	var done:=String(Executions.method(String(court_stage.exec_method)).get("done",""))
+	if done.is_empty():return text
+	var out:=text
+	out=out.replace("They are taken out, and put to death.","They are %s." % done)
+	for pair in [["was brought out of the guards' keeping and put to death","was brought out of the guards' keeping and %s"],["were put to death","were %s"],["was put to death","was %s"],["was killed","was %s"],["put to death","%s"]]:
+		if out.contains(String(pair[0])):
+			out=out.replace(String(pair[0]),String(pair[1]) % done)
+			break
+	return out
 
 ## "more" on words cut short: Earlier opens at that entry.
 func show_history_at(ref:int)->void:

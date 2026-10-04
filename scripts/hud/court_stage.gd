@@ -38,7 +38,10 @@ const Voice:=preload("res://scripts/character_voice.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
+const WalkMotion:=preload("res://scripts/hud/court_motion.gd")
 const Prewarm:=preload("res://scripts/hud/court_prewarm.gd")
+const Executions:=preload("res://scripts/hud/court_executions.gd")
+const ExecStage:=preload("res://scripts/hud/court_exec_stage.gd")
 
 const MAIN:="main"
 const BUBBLE_PAPER:=Color("fbf4e4")
@@ -500,6 +503,12 @@ func frame_cast(time:=0.0)->void:
 	if _now()<_shot_until and _shot_weight>=2 and time>0.0:return
 	_frame_all(time)
 
+## Where someone is to the camera: their mark, or their body when they have
+## stepped off it (an executioner gone up to the one before the god).
+func _where_now(f:Figure)->Node3D:
+	if f.body3d!=null and is_instance_valid(f.body3d) and f.nudge.length()>0.05:return f.body3d
+	return f.spot
+
 ## Everyone standing before the god, the one before the god leading.
 func _frame_all(time:float)->void:
 	_focus_key=""
@@ -511,8 +520,8 @@ func _frame_all(time:float)->void:
 	for key in cast_order:
 		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.role=="crowd":continue
-		subjects.append(f.spot)
-		if f.role==MAIN:lead=f.spot
+		subjects.append(_where_now(f))
+		if f.role==MAIN:lead=_where_now(f)
 	if subjects.is_empty():subjects.append(set_point("petitioner"))
 	# The one before the god leads the frame (the rest are kept around them).
 	if lead!=null:rig.call("wide",subjects,time,lead)
@@ -593,8 +602,78 @@ func _layer(layer_name:String)->Control:
 
 func _gui_input(event:InputEvent)->void:
 	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:
+		# A click during an execution brings it to its end at once.
+		if executing():
+			skip_execution()
+			accept_event()
+			return
 		advance_requested.emit()
 		accept_event()
+
+# --- Executions -------------------------------------------------------------------
+
+## The execution playing now (court_exec_stage.gd), if any.
+var _exec:Node
+## The method last played here (the caption follows it).
+var exec_method:=""
+var exec_victim:=""
+## The execution has played to its end (or none has begun).
+var exec_done:=true
+## The engine's own words for the death, told the way the hall saw it (the
+## modal sets it; the caption at the end says it instead of the plain one).
+var exec_caption_override:=""
+
+func executing()->bool:
+	return is_instance_valid(_exec)
+
+## The engine has put someone here to death: the hall sees it done by this
+## method (court_executions.gd). Returns false when it is not to be shown so
+## (no modelled hall, a child, gore "off"): the caller keeps the sober exit.
+func execute(method_id:String,victim_key:=MAIN,ex_key:="",name_text:="",how:="")->bool:
+	if not Executions.is_staged(method_id):return false
+	var f:=figure(victim_key)
+	if f==null or f.leaving or f.body3d==null or court_set==null or executing():return false
+	var person:=f.person.duplicate()
+	person["kind"]=String(person.get("kind",""))
+	var style:=how if how!="" else Executions.style(person)
+	if style=="off" or Executions.is_child(person):return false
+	var who:=name_text if name_text!="" else String(person.get("name",""))
+	var data:={"method":method_id,"victim":victim_key,"ex":ex_key,"style":style,"name":who,"caption":Executions.caption(method_id,who)}
+	var scene:=ExecStage.new();scene.stage=self;scene.method=method_id;scene.victim=victim_key
+	if not scene.prepare_support_roles(data):
+		scene.free()
+		exec_done=true
+		return false # Keep the adjudicated identity and use the sober exit.
+	_exec=scene;_exec.name="Execution"
+	add_child(_exec)
+	_exec.begin(self,method_id,victim_key,style)
+	_exec.finished.connect(func()->void:
+		exec_done=true
+		if is_instance_valid(_sound) and _sound.has_method("stop_act"):_sound.call("stop_act")
+		# The props are gone and their scene is over; return to the surviving court.
+		_shot_until=0.0;_shot_weight=0
+		if rig!=null:rig.set("main",null)
+		_frame_all(0.6)
+		_place_caption();_reclear_bubbles())
+	exec_done=false
+	exec_method=method_id;exec_victim=victim_key
+	event("execution",data)
+	return true
+
+## A click: the execution to its end now (the head where it lands, the
+## person gone, the caption said).
+func skip_execution()->void:
+	if not executing():return
+	for t in _beat_sets:
+		if t is Tween and (t as Tween).is_valid():(t as Tween).kill()
+	_beat_sets.clear()
+	var caption_text:=Executions.caption(exec_method,String(figure(exec_victim).person.get("name","")) if figure(exec_victim)!=null else "")
+	_exec.call("skip")
+	if not exec_caption_override.is_empty():caption_text=exec_caption_override
+	caption(caption_text,"narration",false)
+	_hush_until=_now();_event_end=_now();_event_weight=0
+	if is_instance_valid(_sound) and _sound.has_method("hush"):_sound.call("hush",false)
+	hush(0.0)
 
 # --- The cast -------------------------------------------------------------------
 
@@ -819,11 +898,11 @@ func _beside_a_grown_up(f:Figure)->void:
 ## A walk in the hall (spot-local points, from their mark to far) that goes
 ## round the set's things and everyone standing (court_paths.gd); empty: the
 ## old way (round the fire only).
-func plan_walk(f:Figure,far:Vector3)->PackedVector3Array:
+func plan_walk(f:Figure,far:Vector3,start:=Vector3.ZERO)->PackedVector3Array:
 	if court_set==null or f==null or f.spot==null:return PackedVector3Array()
 	var room:Variant=Paths.room_of(court_set)
 	if room==null:return PackedVector3Array()
-	var from3:=f.spot.position
+	var from3:=f.spot.transform*start
 	var to3:=f.spot.transform*far
 	var people:=[]
 	for key in cast_order:
@@ -838,7 +917,7 @@ func plan_walk(f:Figure,far:Vector3)->PackedVector3Array:
 		var local:=back*Vector3(point.x,from3.y,point.y)
 		local.y=0.0
 		out.append(local)
-	out[0]=Vector3.ZERO;out[out.size()-1]=far
+	out[0]=start;out[out.size()-1]=far
 	return out
 
 ## The acting's own stances (K) where the hall calls for them: an envoy's
@@ -924,6 +1003,7 @@ static func mood_of(regard:Dictionary,envoy_mood:=0.0)->String:
 ## stage's own acting has already run; a director, when installed, adds its
 ## beats on top.
 func event(kind:String,data:Dictionary={})->void:
+	if kind=="execution" and not Executions.is_staged(String(data.get("method","club"))):return
 	_event_index+=1
 	_last_beats=[]
 	if _sound!=null and is_instance_valid(_sound):_sound.call("on_event",kind,data)
@@ -937,11 +1017,19 @@ func event(kind:String,data:Dictionary={})->void:
 	var all:Array=[]
 	if beats is Array:all.append_array(beats)
 	if lines is Array:all.append_array(lines)
+	if kind=="execution":
+		all=_exec_in_step(all,data)
+		# Later dialogue can update _event_weight before a queued camera beat
+		# runs; every shot in this scene keeps the execution's priority.
+		for beat:Dictionary in all:
+			if String(beat.get("act",""))=="shot":
+				var shot_args:Dictionary=(beat.get("args",{}) as Dictionary).duplicate()
+				shot_args["weight"]=_weight_of(kind,data);beat["args"]=shot_args
 	# Those the scene is about finish walking in before it plays on them (a
 	# gift accepted while the bearer is still on the way in is set down at
 	# their mark, not in the doorway).
 	if not kind in ["enter","exit","open","close"]:
-		var wait:=_still_arriving(all)
+		var wait:=_still_arriving(all,String(data.get("victim",MAIN)) if kind=="execution" else "")
 		if wait>0.0:
 			var later:Array=[]
 			for beat in all:
@@ -959,18 +1047,97 @@ func event(kind:String,data:Dictionary={})->void:
 	if not all.is_empty():run_beats(all)
 
 ## How long until everyone the beats name has finished walking in (0: all here).
-func _still_arriving(beats:Array)->float:
+func _still_arriving(beats:Array,execution_victim:="")->float:
 	var wait:=0.0
+	var people:Array[String]=[]
+	if not execution_victim.is_empty():people.append(execution_victim)
 	for beat in beats:
 		if not beat is Dictionary:continue
-		var f:=figure(String((beat as Dictionary).get("who","")))
+		var who:=String(beat.get("who",""))
+		people.append(who)
+		# Authored plans name their actors inside an exec beat. They need to
+		# reach their marks too, before the plan takes a fixed world origin.
+		if not execution_victim.is_empty() and who=="exec":
+			var args:Dictionary=beat.get("args",{})
+			for role:String in ["who","to","ex","cook"]:
+				if args.has(role):people.append(String(args[role]))
+	for key:String in people:
+		var f:=figure(key)
 		if f==null or f.leaving or f.spot==null or f.stroll<=0.0:continue
 		wait=maxf(wait,f.arriving_in())
-	return clampf(wait+(0.3 if wait>0.0 else 0.0),0.0,7.0)
+	wait+=0.3 if wait>0.0 else 0.0
+	return minf(wait,7.0) if execution_victim.is_empty() else wait
+
+## An execution's beats and the sound's whole-act track (N: play_act) in
+## step: the track's blow lands `lead` seconds after it starts; the scene's
+## blow is its "blow" beat. Whichever starts later waits for the other. With
+## the track, the scene's own single sounds give way to it (the hush's cut of
+## the murmur stays).
+const GoreFoley:="res://scripts/hud/court_gore_foley.gd"
+func _exec_in_step(beats:Array,data:Dictionary)->Array:
+	if _sound==null or not is_instance_valid(_sound) or not _sound.has_method("play_act") or not ResourceLoader.exists(GoreFoley):return beats
+	var method:=Executions.method(String(data.get("method","")))
+	if method.is_empty():return beats
+	var consts:Dictionary=(load(GoreFoley) as Script).get_script_constant_map()
+	var names:Array=consts.get("ACT_NUMBERS",[]) if consts.get("ACT_NUMBERS") is Array else []
+	var acts:Dictionary=consts.get("ACTS",{}) if consts.get("ACTS") is Dictionary else {}
+	var n:=int(method.n)
+	var act_name:=String(names[n]) if n<names.size() else ""
+	var track:Array=acts.get(act_name,[])
+	if track.is_empty():return beats
+	var lead:=0.0
+	for item in track:lead=maxf(lead,-float((item as Dictionary).get("t",0.0)))
+	var blow:=-1.0
+	for beat in beats:
+		if beat is Dictionary and String(beat.get("who",""))=="exec" and String(beat.get("act",""))=="blow":blow=float(beat.get("t",0.0))
+	if blow<0.0:return beats
+	var kept:Array=[]
+	var shift:=maxf(lead-blow,0.0)
+	for beat in beats:
+		if not beat is Dictionary:continue
+		var b:=(beat as Dictionary).duplicate()
+		if String(b.get("act",""))=="sound" and String((b.get("args",{}) as Dictionary).get("name",""))!="murmur_cut":continue
+		b.erase("sound")
+		b["t"]=float(b.get("t",0.0))+shift
+		kept.append(b)
+	var roles:=_exec_roles(kept,data)
+	var opts:={"gore":String(data.get("style","full"))}
+	var later:=maxf(blow-lead,0.0)
+	# Keep the soundtrack on the scene's clock: arrival delays move it with
+	# the action, and skipping cancels it along with the other queued beats.
+	kept.append({"t":later,"who":"exec","act":"soundtrack","args":{"number":n,"roles":roles,"opts":opts}})
+	return kept
+
+## Who the sound comes from: the executioner (the first to step up), the
+## victim, the cook (the second), the dog, the nearest of the front row.
+func _exec_roles(beats:Array,data:Dictionary)->Dictionary:
+	var roles:={}
+	var victim:=figure(String(data.get("victim",MAIN)))
+	if victim!=null and victim.body3d!=null:roles["victim"]=victim.body3d
+	var stepped:=[]
+	for beat in beats:
+		if String(beat.get("who",""))=="exec" and String(beat.get("act",""))=="approach":
+			var who:=String((beat.get("args",{}) as Dictionary).get("who",""))
+			if who!="" and not who in stepped:stepped.append(who)
+	if stepped.size()>0 and figure(String(stepped[0]))!=null:roles["executioner"]=figure(String(stepped[0])).body3d
+	if stepped.size()>1 and figure(String(stepped[1]))!=null:roles["cook"]=figure(String(stepped[1])).body3d
+	if court_set!=null and court_set.has_method("animal"):
+		var dog:Variant=court_set.call("animal","dog")
+		if dog is Node3D:roles["dog"]=dog
+	var best:Figure=null;var gap:=INF
+	for key in cast_order:
+		var f:=figure(key)
+		if f==null or f==victim or f.body3d==null or f.leaving or (roles.has("executioner") and f.body3d==roles.executioner):continue
+		if victim==null or victim.body3d==null:break
+		var d:=f.body3d.global_position.distance_to(victim.body3d.global_position)
+		if d<gap:gap=d;best=f
+	if best!=null:roles["front_row"]=best.body3d
+	return roles
 
 ## How weighty an event is for the camera.
 static func _weight_of(kind:String,data:Dictionary)->int:
 	match kind:
+		"execution":return 5
 		"divine","terrify_envoy","command":return 4
 		"god":return 3
 		"enter","exit","gift","decree","promise","dismiss","defer":return 2
@@ -1264,7 +1431,14 @@ func _beat(beat:Dictionary)->void:
 	var body:Node3D=f.body3d if f!=null and not f.leaving else null
 	var args:Dictionary=beat.get("args",{}) if beat.get("args") is Dictionary else {}
 	var act:=String(beat.get("act",""))
+	if who=="exec" and act=="soundtrack":
+		if executing() and is_instance_valid(_sound):_sound.call("play_act",int(args.number),args.roles,args.opts)
+		return
 	if _sound!=null and is_instance_valid(_sound):_sound.call("on_beat",beat,body)
+	# The execution's own beats (props, the blow, blood): to its player.
+	if who=="exec" and act!="sound":
+		if is_instance_valid(_exec):_exec.call("op",act,args)
+		return
 	if f==null and court_set!=null and String((extras.get(who,{}) as Dictionary).get("role",""))=="animal":
 		if act=="play":_animal_beat(who,beat)
 		return
@@ -1425,6 +1599,9 @@ func shot(name:String,args:Dictionary={})->void:
 		_shot_name=name
 	var target:=figure(String(args.get("target","")))
 	var body:Node3D=target.body3d if target!=null and target.body3d!=null else null
+	# During an execution a two-shot is a whole-figure frame of the two.
+	if name=="two_shot" and executing():
+		name="frame";args=args.duplicate();args["on"]=[String(args.get("a","")),String(args.get("b",""))]
 	match name:
 		"wide","home":
 			_frame_all(float(args.get("time",0.9)))
@@ -1437,14 +1614,14 @@ func shot(name:String,args:Dictionary={})->void:
 				# closes on the pair, the first leading. An envoy and their
 				# company come together as one party.
 				if a.spot!=null and b.spot!=null:
-					var pair:=[a.spot,b.spot]
+					var pair:=[_where_now(a),_where_now(b)]
 					if a.role in [MAIN,"attendant"] and b.role in [MAIN,"attendant"]:
 						pair=[]
 						for key in cast_order:
 							var p:=figure(key)
-							if p!=null and not p.leaving and p.spot!=null and p.role in [MAIN,"attendant"]:pair.append(p.spot)
-					rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,right_reserve)
-					rig.call("wide",pair,float(args.get("time",0.8)),a.spot)
+							if p!=null and not p.leaving and p.spot!=null and p.role in [MAIN,"attendant"]:pair.append(_where_now(p))
+					rig.call("set_insets",top_inset,FOOT_ROOM*.6,0.0,0.0 if executing() else right_reserve)
+					rig.call("wide",pair,float(args.get("time",0.8)),_where_now(a))
 				else:rig.call("two_shot",a.body3d,b.body3d,float(args.get("time",0.7)))
 		"push_in":
 			# A close-up (head and shoulders) for the god's wrath on them and
@@ -1454,6 +1631,23 @@ func shot(name:String,args:Dictionary={})->void:
 		"reaction":
 			if body!=null:rig.call("reaction",body,float(args.get("time",0.0)))
 		"shake":rig.call("shake",float(args.get("strength",0.35)))
+		"frame":
+			# Several people and things at once (an execution: the one before
+			# the god, the one with the club, the pot), whole, feet and floor
+			# and all, from the hall's side: a cut (the edit of a comic scene).
+			var pts:=PackedVector3Array()
+			for thing in args.get("on",[]):
+				var f:=figure(String(thing))
+				if f!=null and f.body3d!=null and is_instance_valid(f.body3d):
+					var feet:=f.body3d.global_position
+					pts.append(feet+Vector3(0.0,-0.05,0.0));pts.append(f.body3d.head_top()+Vector3(0.0,0.12,0.0) if f.body3d.is_inside_tree() else feet+Vector3(0.0,1.8,0.0))
+					pts.append(feet+Vector3(0.35,0.9,0.0));pts.append(feet+Vector3(-0.35,0.9,0.0))
+				else:
+					var at:Vector3=_exec.call("point",String(thing)) if is_instance_valid(_exec) else set_point(String(thing))
+					pts.append(at+Vector3(0.0,-0.05,0.0));pts.append(at+Vector3(0.0,0.6,0.0))
+			if not pts.is_empty() and rig.has_method("frame_points"):
+				rig.call("set_insets",top_inset,FOOT_ROOM*.4,0.0,0.0 if executing() else right_reserve)
+				rig.call("frame_points",pts)
 	# The caption goes up out of a shot that has gone in on someone, and
 	# back down for the room; the bubbles step clear of it.
 	if name!="shake":
@@ -1572,6 +1766,16 @@ var _next_arrival_at:=0.0
 ##  "stay"  nobody leaves.
 func conclude(delay:float=1.4,style:="bow",reaction:="")->void:
 	if style=="stay":return
+	var main_f:=figure(MAIN)
+	if main_f!=null and main_f.leaving and (executing() or exec_victim==MAIN):
+		# Already put to death before the hall: only their company goes, led.
+		var index0:=0
+		for key in cast_order.duplicate():
+			var f0:=figure(key)
+			if f0==null or f0.leaving or f0.role!="attendant":continue
+			f0.leave(-1.0,f0.home.x+f0.size.x,delay+2.0+index0*FILE_GAP,"led")
+			index0+=1
+		return
 	event("exit",{"who":MAIN,"style":style,"reaction":reaction})
 	# How the director has them go: backing out bowing (into the door post),
 	# or storming off and coming back for what they left (the bearer, who
@@ -2013,7 +2217,7 @@ func _place_caption()->void:
 	# reaction), they fill the lower frame: the caption goes to the top band,
 	# under the god's line, never over the one in the shot.
 	var face:=_focus_face()
-	var gone_in:=court_set!=null and _shot_name in ["push_in","two_shot","reaction"]
+	var gone_in:=court_set!=null and _shot_name in ["push_in","two_shot","reaction","frame"]
 	if gone_in or (face.size.x>0.0 and Rect2(_caption.position,_caption.size).intersects(face)):
 		var high:=top_inset+6.0+(_god.size.y+6.0 if is_instance_valid(_god) and _god.visible else 0.0)
 		_caption.position.y=round(high)
@@ -2150,6 +2354,9 @@ class Figure extends Control:
 	func arriving_in()->float:
 		if leaving or stroll<=0.0 or _move==null or not _move.is_valid():return 0.0
 		return maxf(walk_total-_move.get_total_elapsed_time(),0.0)
+
+	func _arriving()->bool:
+		return not leaving and _move!=null and _move.is_valid() and (stroll>0.0 if spot!=null else absf(walk)>0.01)
 	## One of the acting's own stances they keep (K: "guard", "fire"), or "".
 	var acting_stance:=""
 	## How far they have sunk (put to death where they stood), in metres.
@@ -2172,6 +2379,7 @@ class Figure extends Control:
 	var wrong_side:=false
 	var _step:Tween
 	var _path:=PackedVector3Array()
+	var _travel_progress:=0.0
 	var _act:Tween
 	var _shift:Tween
 	var _idle:Tween
@@ -2246,16 +2454,16 @@ class Figure extends Control:
 		position=(foot-Vector2(box.x*.5,box.y)).round()
 
 	## The way between their mark and a point (spot-local), around the fire.
-	func _route(far:Vector3)->PackedVector3Array:
-		var out:=PackedVector3Array([Vector3.ZERO])
+	func _route(far:Vector3,start:=Vector3.ZERO)->PackedVector3Array:
+		var out:=PackedVector3Array([start])
 		var stage:=_stage.get_ref() as Control if _stage!=null else null
 		# Round the set's things and the people standing (court_paths.gd).
 		if stage!=null and stage.get("court_set")!=null and spot!=null:
-			var planned:PackedVector3Array=stage.call("plan_walk",self,far)
+			var planned:PackedVector3Array=stage.call("plan_walk",self,far,start)
 			if planned.size()>=2:return planned
 		if stage!=null and stage.get("court_set")!=null:
 			var fire:=spot.to_local(stage.set_point("fire"))
-			var a:=Vector2.ZERO;var b:=Vector2(far.x,far.z);var c:=Vector2(fire.x,fire.z)
+			var a:=Vector2(start.x,start.z);var b:=Vector2(far.x,far.z);var c:=Vector2(fire.x,fire.z)
 			var ab:=b-a
 			var t:=clampf((c-a).dot(ab)/maxf(ab.length_squared(),0.001),0.0,1.0)
 			var near:=a+ab*t
@@ -2267,7 +2475,8 @@ class Figure extends Control:
 		return out
 
 	func _path_at(along:float)->Vector3:
-		if _path.size()<2 or along<=0.0:return Vector3.ZERO
+		if _path.is_empty():return Vector3.ZERO
+		if _path.size()<2 or along<=0.0:return _path[0]
 		var total:=0.0
 		for i in _path.size()-1:total+=_path[i].distance_to(_path[i+1])
 		var want:=clampf(along,0.0,1.0)*total
@@ -2283,13 +2492,31 @@ class Figure extends Control:
 		return total
 
 	## Walking: turned the way they go along the path.
-	func _stroll_step(value:float,inward:bool)->void:
-		var ahead:=_path_at(clampf(value+(-0.02 if inward else 0.02),0.0,1.0))
+	func _stroll_step(value:float,inward:bool,delta:=1.0/60.0)->void:
+		# Look ahead by a step's distance, independent of the route's length.
+		var look_ahead:=0.30/maxf(_path_length(),0.01)
+		var ahead:=_path_at(clampf(value+(-look_ahead if inward else look_ahead),0.0,1.0))
 		var here:=_path_at(value)
 		var way:=ahead-here
 		if Vector2(way.x,way.z).length()>0.002:
-			body3d.rotation.y=lerp_angle(body3d.rotation.y,atan2(way.x,way.z),0.25)
+			body3d.rotation.y=lerp_angle(body3d.rotation.y,atan2(way.x,way.z),1.0-exp(-12.0*maxf(delta,0.0)))
 		stroll=value
+
+	func _queue_stroll(from:float,to:float,seconds:float,pace:float,inward:bool)->void:
+		_move.tween_callback(func()->void:
+			_travel_progress=0.0
+			# A prior bow/look tween must not fight the path's steering.
+			body3d.face(body3d.rotation_degrees.y,0.0))
+		_move.tween_method(_travel_step.bind(from,to,seconds,pace,inward),0.0,1.0,seconds)
+		_move.tween_callback(func()->void:body3d.set_locomotion_rate(1.0))
+
+	func _travel_step(progress:float,from:float,to:float,seconds:float,pace:float,inward:bool)->void:
+		var motion:=Self.WalkMotion.sample(progress,seconds)
+		var delta:=maxf(progress-_travel_progress,0.0)*seconds
+		_travel_progress=progress
+		var metres:=absf(to-from)*_path_length()
+		body3d.set_locomotion_rate(motion.y*metres/maxf(seconds*pace,0.001))
+		_stroll_step(lerpf(from,to,motion.x),inward,delta)
 
 	func _stroll_in(delay:float)->void:
 		var stage:=_stage.get_ref() as Control
@@ -2312,7 +2539,7 @@ class Figure extends Control:
 			body3d.visible=false
 			_move.tween_interval(delay)
 			_move.tween_callback(func()->void:if is_instance_valid(body3d):body3d.visible=true)
-		_move.tween_method(_stroll_step.bind(true),1.0,0.0,time)
+		_queue_stroll(1.0,0.0,time,pace,true)
 		_move.tween_callback(_settle_in)
 
 	## The set's door (0) and the way out beyond it (1) (M's door_points).
@@ -2340,7 +2567,7 @@ class Figure extends Control:
 		_move=create_tween()
 		if delay>0.0:_move.tween_interval(delay)
 		var lost:=0.6
-		_move.tween_method(_stroll_step.bind(true),1.0,lost,clampf(_path_length()*(1.0-lost)/maxf(pace,0.1),0.6,3.0))
+		_queue_stroll(1.0,lost,clampf(_path_length()*(1.0-lost)/maxf(pace,0.1),0.6,3.0),pace,true)
 		_move.tween_callback(func()->void:_clip(rest_clip,0.3);body3d.face(rest_yaw+60.0,0.4))
 		_move.tween_interval(0.7)
 		_move.tween_callback(func()->void:body3d.face(rest_yaw-50.0,0.5))
@@ -2351,13 +2578,21 @@ class Figure extends Control:
 			_path=_route(here)
 			stroll=1.0
 			_clip("walk_in",0.25,0.0))
-		_move.tween_method(_stroll_step.bind(true),1.0,0.0,1.4)
+		_queue_stroll(1.0,0.0,1.4,pace,true)
 		_move.tween_callback(func()->void:wrong_side=false;_settle_in())
 
 	func _stroll_out(delay:float,style:String)->void:
 		if _act and _act.is_valid():_act.kill()
 		var stage:=_stage.get_ref() as Control
-		_path=_route(spot.to_local(_door(stage,1)))
+		# A dismissal can arrive halfway through an entrance or a small step.
+		# Leave from those feet, without jumping back to the assigned mark.
+		var start:=_path_at(stroll)+nudge
+		if _step and _step.is_valid():_step.kill()
+		_path=_route(spot.to_local(_door(stage,1)),start)
+		nudge=Vector3.ZERO
+		stroll=0.0
+		body3d.set_locomotion_rate(1.0)
+		if delay>0.0 and String(body3d.clip).begins_with("walk"):_clip(rest_clip,0.2)
 		if style in ["backward","backward_bump","storm_back"] and not Motion.reduced():
 			_stroll_out_acted(delay,style);return
 		_move=create_tween()
@@ -2386,7 +2621,7 @@ class Figure extends Control:
 				_move.tween_interval(2.35)
 				_move.tween_callback(func()->void:_clip("walk_out",0.35,0.0))
 		var time:=clampf(_path_length()/maxf(pace,0.1),1.2,7.0)
-		_move.tween_method(_stroll_step.bind(false),0.0,1.0,time)
+		_queue_stroll(0.0,1.0,time,pace,false)
 		_move.tween_callback(_vanish)
 
 	## Walking backward: they keep facing the hall (no turn with the path).
@@ -2429,24 +2664,24 @@ class Figure extends Control:
 					_clip("bow",0.2,0.0))
 				_move.tween_interval(maxf(1.1,_length_of("bump_post",1.1)-0.28))
 			_move.tween_callback(func()->void:_let_go(0.3);_clip("walk_out",0.35,0.0))
-			_move.tween_method(_stroll_step.bind(false),back,1.0,clampf(whole*(1.0-back)/maxf(walk_pace,0.1),0.8,6.0))
+			_queue_stroll(back,1.0,clampf(whole*(1.0-back)/maxf(walk_pace,0.1),0.8,6.0),walk_pace,false)
 			_move.tween_callback(_vanish)
 			return
 		# Storming off, then back for what they left.
 		var stride:=_pace_of("storm_walk",float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT)
 		var door:=0.82
 		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
-		_move.tween_method(_stroll_step.bind(false),0.0,door,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
+		_queue_stroll(0.0,door,clampf(whole*door/maxf(stride,0.1),0.8,4.0),stride,false)
 		# Stopped short at the door: they remember.
 		_move.tween_callback(func()->void:_clip(rest_clip,0.25);_acted("storm_stop","",0.06))
 		_move.tween_interval(maxf(0.6,_length_of("storm_stop",0.6)-0.2))
 		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
-		_move.tween_method(_stroll_step.bind(true),door,0.0,clampf(whole*door/maxf(stride,0.1),0.8,4.0))
+		_queue_stroll(door,0.0,clampf(whole*door/maxf(stride,0.1),0.8,4.0),stride,true)
 		# Snatched up: their stance (and its prop) for a moment.
 		_move.tween_callback(func()->void:body3d.face(rest_yaw,0.2);_clip(rest_clip,0.2);_acted("snatch_up","",0.08))
 		_move.tween_interval(maxf(0.7,_length_of("snatch_up",0.7)-0.1))
 		_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
-		_move.tween_method(_stroll_step.bind(false),0.0,1.0,clampf(whole/maxf(stride,0.1),0.8,5.0))
+		_queue_stroll(0.0,1.0,clampf(whole/maxf(stride,0.1),0.8,5.0),stride,false)
 		_move.tween_callback(_vanish)
 
 	## A small step to a point in the hall (world), and back after a while.
@@ -2650,12 +2885,13 @@ class Figure extends Control:
 		if leaving:return
 		if body3d!=null:
 			if _act and _act.is_valid():_act.kill()
-			# They turn a little to the god they answer and speak with their hands.
-			body3d.face(rest_yaw*.55,0.35)
 			var stage:=_stage.get_ref() as Control if _stage!=null else null
 			if stage!=null:body3d.look_at_point(stage.god_point(),0.5)
-			_clip(body3d.talk_clip(both_hands),0.35)
 			_light(1.06)
+			# Their face can answer on the way in; their feet still have to walk.
+			if _arriving():return
+			body3d.face(rest_yaw*.55,0.35)
+			_clip(body3d.talk_clip(both_hands),0.35)
 			_later(seconds,func()->void:
 				_clip(rest_clip,0.5);_light(1.0);body3d.face(rest_yaw,0.5))
 			return
@@ -2675,24 +2911,26 @@ class Figure extends Control:
 		if body3d==null or speaker==null or speaker.body3d==null:
 			listen_toward(speaker.home.x if speaker!=null else home.x);return
 		if _act and _act.is_valid():_act.kill()
+		body3d.look_at_point(speaker.body3d.head_top()+Vector3(0.0,-0.10*speaker.body3d.scale.y,0.0),0.45)
+		_light(0.95)
+		if _arriving():return
 		var toward:=clampf((speaker.home.x-home.x)/maxf(size.x*3.0,1.0)*90.0,-55.0,55.0)
 		if spot!=null:
 			var to:=spot.to_local(speaker.body3d.global_position)
 			toward=clampf(rad_to_deg(atan2(to.x,to.z)),-75.0,75.0)
 		body3d.face(lerpf(rest_yaw,toward,.45),0.5)
-		body3d.look_at_point(speaker.body3d.head_top()+Vector3(0.0,-0.10*speaker.body3d.scale.y,0.0),0.45)
 		_clip(rest_clip,0.45)
-		_light(0.95)
 
 	## Someone else speaks: they turn a little toward them and listen.
 	func listen_toward(x:float)->void:
 		if leaving:return
 		if body3d!=null:
 			if _act and _act.is_valid():_act.kill()
+			_light(0.93)
+			if _arriving():return
 			# Facing the hall, the speaker on the right is on their left.
 			body3d.face(rest_yaw,0.3)
 			_clip(rest_clip,0.4)
-			_light(0.93)
 			return
 		var side:=signf(x-home.x)
 		_pose(deg_to_rad(1.6)*side,4.0*side,1.0,Color(.90,.89,.87))
@@ -2703,11 +2941,12 @@ class Figure extends Control:
 		if body3d!=null:
 			if _act and _act.is_valid():_act.kill()
 			# Every face lifts to the god's voice, from where they stand.
-			body3d.face(rest_yaw*.5,0.45)
 			var stage:=_stage.get_ref() as Control if _stage!=null else null
 			if stage!=null:body3d.look_at_point(stage.god_point(true),0.5)
-			_clip(rest_clip,0.5)
 			_light(1.03)
+			if _arriving():return
+			body3d.face(rest_yaw*.5,0.45)
+			_clip(rest_clip,0.5)
 			return
 		_pose(0.0,0.0,1.0,Color(1.03,1.02,.98))
 		if not is_inside_tree() or Motion.reduced():return
@@ -2719,6 +2958,7 @@ class Figure extends Control:
 	## Walk in from the side: a few steps, into place.
 	func enter_from(side:float,distance:float,delay:float=0.0)->void:
 		if not is_inside_tree():return
+		if _act and _act.is_valid():_act.kill()
 		if _move and _move.is_valid():_move.kill()
 		if body3d!=null and spot!=null:
 			_stroll_in(delay);return
@@ -2748,8 +2988,12 @@ class Figure extends Control:
 		if body3d!=null and spot!=null and not body3d.visible and _move!=null and _move.is_valid():
 			_move.kill();_vanish();return
 		# Off the staff (or up from the fire) before they walk.
-		if not acting_stance.is_empty() and Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():
-			Self.Acting.idle(body3d,String(body3d.stance))
+		var from_floor:=body3d!=null and is_instance_valid(body3d) and bool(body3d.get(&"floor_seated"))
+		if (not acting_stance.is_empty() or from_floor) and Self.acting!=null and body3d!=null and is_instance_valid(body3d) and body3d.is_inside_tree():
+			# The cross-legged pose borrows sit underneath. Returning to that
+			# fallback would put a stool through them while they rise and wait.
+			if from_floor:rest_clip="stand"
+			Self.Acting.idle(body3d,"stand" if from_floor else String(body3d.stance))
 			acting_stance=""
 		if spot==null:
 			if style.begins_with("backward"):style="bow"

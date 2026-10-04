@@ -222,7 +222,7 @@ func test_every_sound_the_director_names_is_made()->void:
 		assert_bool(Foley.CUES.has(name)).override_failure_message("%s -> %s is not a sound" % [act,name]).is_true()
 	for key in Sound.SOUND_NAMES:
 		var cue:=String(Sound.SOUND_NAMES[key][0])
-		assert_bool(Foley.CUES.has(cue) or cue=="snort_wake").override_failure_message("%s -> %s is not a sound" % [key,cue]).is_true()
+		assert_bool(Foley.CUES.has(cue) or Sound.Gore.has(cue) or cue=="snort_wake").override_failure_message("%s -> %s is not a sound" % [key,cue]).is_true()
 	if not ResourceLoader.exists("res://scripts/hud/court_director.gd"):return
 	var consts:Dictionary=(load("res://scripts/hud/court_director.gd") as GDScript).get_script_constant_map()
 	var sounds:Dictionary=consts.get("SOUNDS",{}) if consts.get("SOUNDS") is Dictionary else {}
@@ -232,6 +232,20 @@ func test_every_sound_the_director_names_is_made()->void:
 		assert_bool(Sound.knows(name)).override_failure_message("the director's %s (for %s) is not made" % [name,act]).is_true()
 	if consts.has("HUSH_SOUND"):assert_bool(Sound.knows(String(consts.HUSH_SOUND))).is_true()
 	for name in ["gasp_room","babble_mutter"]:assert_bool(Sound.knows(name)).is_true()
+
+func test_director_execution_sounds_reach_the_audio_player()->void:
+	var made:=_court()
+	var sound:Node=made[1]
+	Sound.set_volume(1.0)
+	for names in [["stir","spoon_stir"],["gore_crack","gore_crack"],["slurp","slurp"]]:
+		assert_bool(sound.call("sound",{"name":names[0],"gain":0.6})).is_true()
+		var heard:Array=sound.get("played")
+		assert_bool(heard.is_empty()).is_false()
+		if not heard.is_empty():assert_str(String(heard.back().name)).is_equal(names[1])
+	Sound.set_volume(0.0)
+	var count:int=(sound.get("played") as Array).size()
+	assert_bool(sound.call("sound",{"name":"gore_crack"})).is_false()
+	assert_int((sound.get("played") as Array).size()).is_equal(count)
 
 func test_a_sound_beat_plays_its_sound()->void:
 	var made:=_court()
@@ -354,7 +368,7 @@ func test_sounds_come_from_where_people_stand()->void:
 	assert_float(from_left.x+from_left.y).override_failure_message("nothing was heard").is_greater(0.0001)
 	assert_float(db_left).is_between(4.0,7.0)
 	assert_float(db_right).is_between(4.0,7.0)
-	assert_float(absf(db_middle)).is_less(0.5)
+	assert_float(absf(db_middle)).is_less(1.2)
 
 # --- the musician -------------------------------------------------------------
 

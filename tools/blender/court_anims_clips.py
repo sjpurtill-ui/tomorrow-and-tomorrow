@@ -109,6 +109,7 @@ class Act:
         self.foot_keys = {"L": [], "R": []}
         self.knee_fn = None
         self.loop = False
+        self.arm_drag = None   # the arms' own lag (0: a held prop lands on its key's time)
 
     # torso: a delta on the base stance
     def t(self, at, kind="ease", **bones):
@@ -170,7 +171,7 @@ class Act:
             p = pose_seq(tseq, t, drag, self.lags)
             for s in "LR":
                 if s in aseq:
-                    p.update(aseq[s].at(t, drag))
+                    p.update(aseq[s].at(t, drag if self.arm_drag is None else self.arm_drag))
                 else:
                     for bone in cf_anim.ARM_BONES:
                         if bone + "." + s in B:
@@ -614,11 +615,13 @@ def make_clips():
     import court_anims_r2
     import court_anims_r3
     import court_anims_child
+    import court_anims_exec
     court_anims_more.make_more(clips)
     court_anims_r2.make_r2(clips)
     court_anims_r3.make_r3(clips)
     court_anims_child.make_cross(clips)
     court_anims_child.make_child(clips)
+    court_anims_exec.make_exec(clips)
     return clips
 
 
