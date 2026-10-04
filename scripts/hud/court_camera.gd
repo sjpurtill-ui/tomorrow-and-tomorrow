@@ -381,6 +381,7 @@ func _nearest_to_god(subjects:Array)->Variant:
 ## heads and shoulders, nobody else forced in.
 func _room_points(subjects:Array,lead:Variant,t:float,yaw:float,pitch:float)->PackedVector3Array:
 	var out:=PackedVector3Array()
+	var shoulder:=Basis.from_euler(Vector3(0.0,deg_to_rad(yaw),0.0)).x*0.42
 	var others:Array=[]
 	for s in subjects:
 		if not is_same(s,lead):others.append(s)
@@ -392,13 +393,17 @@ func _room_points(subjects:Array,lead:Variant,t:float,yaw:float,pitch:float)->Pa
 		out.append(head+Vector3.UP*0.1)
 		var low:=foot.lerp(head,lerpf(0.0,0.36,t))-Vector3.UP*FEET_MARGIN*(1.0-t)
 		out.append(low)
-		out.append(low.lerp(head,0.6)+Vector3(0.32,0.0,0.0))
-		out.append(low.lerp(head,0.6)-Vector3(0.32,0.0,0.0))
+		out.append(low.lerp(head,0.6)+shoulder)
+		out.append(low.lerp(head,0.6)-shoulder)
 	for i in keep:
 		var s:Variant=others[i]
 		var foot2:=_foot_of(s);var head2:=_head_of(s)
 		out.append(head2+Vector3.UP*0.08)
 		out.append(foot2.lerp(head2,lerpf(0.0,0.86,t))-Vector3.UP*FEET_MARGIN*(1.0-t))
+		# A centre point fitting the frame does not mean a person's shoulders do.
+		# This matters especially for the side chairs in a wide room.
+		out.append(foot2.lerp(head2,0.65)+shoulder)
+		out.append(foot2.lerp(head2,0.65)-shoulder)
 	for extra in also_show:
 		# only when it is near the one before the god (a dog off at the door is not asked for)
 		if (_alive(extra) or typeof(extra)==TYPE_VECTOR3) and _foot_of(extra).distance_to(lead_at)<3.2:

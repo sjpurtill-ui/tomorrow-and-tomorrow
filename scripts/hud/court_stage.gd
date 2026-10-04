@@ -520,7 +520,9 @@ func frame_cast(time:=0.0)->void:
 ## Where someone is to the camera: their mark, or their body when they have
 ## stepped off it (an executioner gone up to the one before the god).
 func _where_now(f:Figure)->Node3D:
-	if f.body3d!=null and is_instance_valid(f.body3d) and f.nudge.length()>0.05:return f.body3d
+	# At rest, frame the actual seated/standing head instead of treating every
+	# floor mark as a 1.7 m standing person. Keep arrivals anchored to the room.
+	if f.body3d!=null and is_instance_valid(f.body3d) and (f.nudge.length()>0.05 or f.stroll<=0.001):return f.body3d
 	return f.spot
 
 ## Everyone standing before the god, the one before the god leading.
