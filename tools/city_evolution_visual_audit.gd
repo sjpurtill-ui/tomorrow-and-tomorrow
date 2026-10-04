@@ -6,6 +6,7 @@ func _run()->void:
 	Fixture.initialize()
 	var out:="res://artifacts/city-evolution"
 	var roof_only:=OS.get_cmdline_user_args().has("--roof-only")
+	var provenance_only:=OS.get_cmdline_user_args().has("--provenance-only")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--out="):out=arg.trim_prefix("--out=")
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out))
@@ -26,7 +27,7 @@ func _run()->void:
 	ground.material_override=renderer._create_terrain_material();ground.position.y=-.0001;add_child(ground)
 	var label:=Label.new();label.position=Vector2(30,25);label.add_theme_font_size_override("font_size",24);label.modulate=Color("26302b");add_child(label)
 	var results:Array=[]
-	for year in ([] if roof_only else range(0,3001,200)):
+	for year in ([] if roof_only or provenance_only else range(0,3001,200)):
 		var snapshot:=Fixture.snapshot(year);var city:=Node3D.new();add_child(city)
 		var result:=Fixture.render(renderer,snapshot,city);results.append(result)
 		renderer._paint_settlement_grounds(Vector3.ZERO)
@@ -39,9 +40,38 @@ func _run()->void:
 		print("CITY_EVOLUTION ",JSON.stringify(result))
 		city.queue_free();await get_tree().process_frame
 	var file:=FileAccess.open(out.path_join("metrics.json"),FileAccess.WRITE);file.store_string(JSON.stringify(results,"\t"));file.close()
-	if DisplayServer.get_name()!="headless":await _roof_outline_probe(camera,label,out)
+	if provenance_only:await _roof_provenance_probe(camera,label,out)
+	elif DisplayServer.get_name()!="headless":await _roof_outline_probe(camera,label,out)
 	renderer.settlement_fabric_shader=null;renderer.free()
 	get_tree().quit()
+
+func _roof_provenance_probe(camera:Camera3D,label:Label,out:String)->void:
+	# Explicit recorded constructions exercise the later supported cases which
+	# the conservative sixteen-year fixture intentionally never fabricates.
+	GameState.known_discoveries.clear()
+	var rows:=[
+		["recorded timber","timber_span_on_rubble",Vector3(-.020,0,-.019),false],
+		["recorded slab","rubble_slab",Vector3(.020,0,-.019),false],
+		["recorded tile","fired_tile_roof",Vector3(-.020,0,.019),false],
+		["recorded tile and chimney","fired_tile_roof",Vector3(.020,0,.019),true]]
+	var ink:=preload("res://scripts/settlement_ink.gd")
+	camera.size=.085;camera.position=Vector3(.065,.080,.10);camera.look_at(Vector3(0,.003,0))
+	ink.set_pixel(camera.size/900.0)
+	label.text="TEST · Roof construction from recorded provenance\nBack: timber / slab · Front: fired tile / fired tile with installed chimney"
+	var made:Array[MeshInstance3D]=[]
+	for row:Array in rows:
+		var plot:={"id":1,"seed":12,"land_use":"mixed_household","fabric_generation":9,
+			"storeys":2,"material_family":"stone","roof_plan":row[1]}
+		if row[3]:plot.building_materials={"applied":["wall_chimneys"]}
+		var node:=MeshInstance3D.new();node.mesh=Fixture.Kit.mesh_for_plot(plot)
+		node.scale=Vector3.ONE*.001;node.position=row[2];node.material_override=ink.architecture_material()
+		add_child(node);made.append(node)
+		print("CITY_ROOF_PROVENANCE ",row[0]," style=",Fixture.Kit.style_for(plot)," vertices=",node.mesh.surface_get_array_len(0))
+	if DisplayServer.get_name()!="headless":
+		for frame in 3:await get_tree().process_frame
+		await RenderingServer.frame_post_draw
+		get_viewport().get_texture().get_image().save_png(out.path_join("roof-provenance.png"))
+	for node in made:node.queue_free()
 
 func _roof_outline_probe(camera:Camera3D,label:Label,out:String)->void:
 	var ink:=preload("res://scripts/settlement_ink.gd")
