@@ -19,6 +19,7 @@ extends RefCounted
 ## Visual only; one material, no per-frame rebuilds.
 
 static var _material:ShaderMaterial
+static var _architecture_material:ShaderMaterial
 static var _srgb_material:ShaderMaterial
 static var _shadow_material:ShaderMaterial
 static var _shadow_quad:QuadMesh
@@ -35,6 +36,18 @@ static func material()->ShaderMaterial:
 	# Cloud shadows and the live wind reach it like any other map material.
 	(load("res://scripts/map_ambience.gd") as GDScript).call("bind_wind_material",_material)
 	return _material
+
+## Thin roof slabs, glazing and concave courtyard wings need their own surface
+## normals. Raising every back face from the building's origin lifted the roof
+## slab's inked underside through its top, leaving an apparently open black roof.
+static func architecture_material()->ShaderMaterial:
+	if _architecture_material and is_instance_valid(_architecture_material):return _architecture_material
+	_architecture_material=material().duplicate() as ShaderMaterial
+	var outline:=outline_material().duplicate() as ShaderMaterial
+	outline.set_shader_parameter("surface_normals",true)
+	_architecture_material.next_pass=outline
+	(load("res://scripts/map_ambience.gd") as GDScript).call("bind_wind_material",_architecture_material)
+	return _architecture_material
 
 static var _ground_material:ShaderMaterial
 ## The same paint without the silhouette pass, for flat worked ground laid
@@ -55,6 +68,8 @@ static func set_pixel(km:float)->void:
 	if absf(km-_pixel_km)<=_pixel_km*0.01:return
 	_pixel_km=km
 	outline_material().set_shader_parameter("pixel_km",km)
+	if _architecture_material:
+		(_architecture_material.next_pass as ShaderMaterial).set_shader_parameter("pixel_km",km)
 ## The outline pass shared by every inked form.
 static func outline_material()->ShaderMaterial:
 	if _outline_material and is_instance_valid(_outline_material):return _outline_material
@@ -62,6 +77,7 @@ static func outline_material()->ShaderMaterial:
 	shader.code=OUTLINE_SHADER
 	_outline_material=ShaderMaterial.new()
 	_outline_material.shader=shader
+	_outline_material.set_shader_parameter("surface_normals",false)
 	return _outline_material
 
 ## The same ink for meshes whose vertex colours are authored in sRGB (the
@@ -81,6 +97,7 @@ static func set_hearth(at:Vector3,power:float)->void:
 	m.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
 	if _srgb_material:_srgb_material.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
 	if _ground_material:_ground_material.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
+	if _architecture_material:_architecture_material.set_shader_parameter("hearth",Vector4(at.x,at.y,at.z,clampf(power,0.0,1.0)))
 
 ## Soft cool shadows on the ground under a batch of buildings, cast a little
 ## away from the sun: each building sits on the land instead of floating on
@@ -120,6 +137,7 @@ static func add_ground_shadows(parent:Node3D,name:String,transforms:Array[Transf
 static func set_clock(seconds:float)->void:
 	if _material:_material.set_shader_parameter("anim_clock",seconds)
 	if _srgb_material:_srgb_material.set_shader_parameter("anim_clock",seconds)
+	if _architecture_material:_architecture_material.set_shader_parameter("anim_clock",seconds)
 	for i in range(_timed.size()-1,-1,-1):
 		var timed:=_timed[i].get_ref() as ShaderMaterial
 		if timed==null:_timed.remove_at(i)
@@ -245,6 +263,7 @@ shader_type spatial;
 render_mode unshaded, cull_front, shadows_disabled, fog_disabled;
 uniform float outline_px = 1.15;
 uniform float pixel_km = 0.0002;
+uniform bool surface_normals = false;
 void vertex() {
 	float model_scale = max(length(MODEL_MATRIX[0].xyz), 1e-9);
 	float grow = min(pixel_km*outline_px, 0.004)/model_scale;
@@ -254,9 +273,13 @@ void vertex() {
 	// before it could turn a distant hut into an ink speck.
 	float reach_px = reach*model_scale/max(pixel_km, 1e-9);
 	grow *= clamp((reach_px-2.5)/5.0, 0.0, 1.0);
-	if (reach > 1e-6) { VERTEX.xz += radial/reach*grow; }
-	// A touch of height as well, so a flat roof edge seen from above keeps it.
-	VERTEX.y += grow*0.5*step(0.05, VERTEX.y);
+	if (surface_normals) {
+		VERTEX += NORMAL*grow;
+	} else {
+		if (reach > 1e-6) { VERTEX.xz += radial/reach*grow; }
+		// A touch of height as well, so a flat roof edge seen from above keeps it.
+		VERTEX.y += grow*0.5*step(0.05, VERTEX.y);
+	}
 }
 void fragment() {
 	ALBEDO = vec3(0.105, 0.080, 0.055);
