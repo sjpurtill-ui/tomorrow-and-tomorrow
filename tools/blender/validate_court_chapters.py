@@ -88,7 +88,7 @@ def main():
         roots = doc["scenes"][doc.get("scene", 0)]["nodes"]
         names = set()
         geometry = hashlib.sha256()
-        triangles = 0
+        triangles, keyboards_checked = 0, 0
         for node_index in roots:
             node = doc["nodes"][node_index]
             assert "mesh" in node and not node.get("children"), (key, node)
@@ -101,7 +101,17 @@ def main():
                 geometry.update(accessor_bytes(doc, binary, positions))
                 geometry.update(accessor_bytes(doc, binary, primitive["indices"]))
                 triangles += doc["accessors"][primitive["indices"]]["count"] // 3
+                if i == 13 and name.startswith("Typewriter") and doc["materials"][primitive["material"]]["name"] == "PAPER":
+                    keyboards_checked += 1
+                    keys = doc["accessors"][positions]
+                    key_z = (keys["min"][2] + keys["max"][2]) / 2
+                    if name in ("Typewriter_0", "Typewriter_1"):
+                        assert key_z < -1.2, (name, "keys face away from seated typist")
+                    else:
+                        assert key_z > -2.85, (name, "secretary keys face away from front approach")
         assert names == set(info["objects"]) == set(info["bounds"]), key
+        if i == 13:
+            assert keyboards_checked == 3, "all three keyboard faces must be checked"
         assert triangles == info["triangles"] and triangles < 12000, (key, triangles)
         if i == 3:
             for column in range(4):
