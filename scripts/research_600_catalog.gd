@@ -894,6 +894,31 @@ static func _environment_label(tag:String)->String:
 ## trees (thousands of descendants) stayed shut for the whole game.
 const HOME_SURFACE_RESOURCES:=["Timber","Stone","Fertile Soil","Game","Fiber Plants","Clay","Flint"]
 
+## Worked stone of a named kind is stone. A people who knap flint or quarry
+## limestone knows stone, even on ground with no loose stone of its own.
+## Without this a woodland people knapped flint for 96 years without Stone
+## Selection. Clay testing, pit firing, framed building and weaving descend
+## from it, so about 75 practices long past their age then came within one
+## year, once carriers found loose stone 10 km out.
+const RESOURCE_STAND_INS:={"Stone":["Flint","Limestone"]}
+
+## True when a deposit or stock of `resource` meets a requirement for `wanted`.
+static func counts_as(resource:String,wanted:String)->bool:
+	return resource==wanted or (RESOURCE_STAND_INS.get(wanted,[]) as Array).has(resource)
+
+## A landscape's potential for `wanted`: its own, or its best stand-in's.
+static func potential(potentials:Dictionary,wanted:String)->float:
+	var best:=float(potentials.get(wanted,0.0))
+	for kind:String in RESOURCE_STAND_INS.get(wanted,[]): best=maxf(best,float(potentials.get(kind,0.0)))
+	return best
+
+## Adds to `resources` (a set of names) every material its stand-ins show.
+static func add_stand_ins(resources:Dictionary)->Dictionary:
+	for wanted:String in RESOURCE_STAND_INS:
+		for kind:String in RESOURCE_STAND_INS[wanted]:
+			if resources.has(kind): resources[wanted]=true;break
+	return resources
+
 static func home_surface_resources(settlements:Array,fallback_profile:Dictionary={},into:Dictionary={})->Dictionary:
 	var profiles:Array=[]
 	for settlement:Variant in settlements:
@@ -903,7 +928,7 @@ static func home_surface_resources(settlements:Array,fallback_profile:Dictionary
 		var potentials:Dictionary=profile.get("resource_potentials",{})
 		for resource_name:String in HOME_SURFACE_RESOURCES:
 			if float(potentials.get(resource_name,0.0))>=RIVAL_RESOURCE_FLOOR: into[resource_name]=true
-	return into
+	return add_stand_ins(into)
 
 
 ## Environment tags (river, coast, woodland, dry) of a PlanetEnvironment profile.

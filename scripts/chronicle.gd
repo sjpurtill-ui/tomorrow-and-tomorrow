@@ -59,6 +59,13 @@ const CONDITION_QUIET_DAYS:=60
 const FOLD_WINDOW_DAYS:=1095
 ## A card gathers repeats for at most this long; the next one is told afresh.
 const FOLD_SPAN_DAYS:=3650
+## A season's repeat discoveries each get a line in the event ledger only up
+## to this many; past it the season's tally tells the rest as one line, so a
+## rush of learning (a foundation found late opening a whole tree) reads as
+## "This season the people learned 25 new ways" and never floods the ledger.
+const LEARNED_LEDGER_LINES:=3
+## Names a long list shows before "and N more".
+const LIST_NAMES:=4
 ## How far back fresh() looks for a queued card's stored entry.
 const FRESH_LOOK:=400
 ## Never folded, by kind, key or the action the card offers: deaths, births,
@@ -645,13 +652,16 @@ static func _discovery(event:Dictionary)->void:
 		var kept:=record({"key":"discovery:"+id,"title":name,"text":text.strip_edges(),"kind":"discovery","tier":"whisper","art":{"discovery_id":id,"domain":dynamic},"action":{"kind":"section","section":"inquiry","sub":0},"domain":dynamic,"ledger":false})
 		if kept.is_empty():return
 		Annals.note_learned(c,name,int(kept.day))
-		var ledger_line:=kept.duplicate(true);ledger_line["tier"]="notice"
-		_to_ledger(ledger_line)
 		var learned:Dictionary=c.get("learned",{})
 		var season:=season_of(int(kept.day))
 		if learned.is_empty() or int(learned.get("season",season))!=season:
 			_flush_learned(c)
 			learned={"season":season,"ids":[],"names":[],"fields":[]}
+		# The first few of a season each get their ledger line; the rest wait
+		# for the season's one line (_flush_learned).
+		if (learned.ids as Array).size()<LEARNED_LEDGER_LINES:
+			var ledger_line:=kept.duplicate(true);ledger_line["tier"]="notice"
+			_to_ledger(ledger_line)
 		(learned.ids as Array).append(id);(learned.names as Array).append(name)
 		if not (learned.fields as Array).has(dynamic):(learned.fields as Array).append(dynamic)
 		c["learned"]=learned
@@ -695,8 +705,9 @@ static func _steps_text(steps:Array)->String:
 		if names.is_empty():continue
 		var households:=roundi(share*100.0)
 		var many:=names.size()>1
-		if stage==1:parts.append("First cases held for %s: %d in 100 households try %s." % [_list(names),households,"them" if many else "it"])
-		else:parts.append("%s held up when repeated: %d in 100 households use %s." % [_list(names).left(1).to_upper()+_list(names).substr(1),households,"them" if many else "it"])
+		var listed:=_some(names)
+		if stage==1:parts.append("First cases held for %s: %d in 100 households try %s." % [listed,households,"them" if many else "it"])
+		else:parts.append("%s held up when repeated: %d in 100 households use %s." % [listed.left(1).to_upper()+listed.substr(1),households,"them" if many else "it"])
 	return " ".join(parts)
 
 
@@ -728,18 +739,33 @@ static func _flush_learned(c:Dictionary,today:int=-1)->Dictionary:
 	var season_name:String=["spring","summer","autumn","winter"][posmod(season+(0 if hemisphere>=0.0 else 2),4)]
 	var annals:=String(voice().era)=="annals"
 	var text:=""
+	# More than the ledger told one by one: one line counts them all.
+	var rush:=names.size()>LEARNED_LEDGER_LINES
 	if not names.is_empty():
-		var listed:=_list(names.map(func(n:Variant)->String:return String(n).to_lower()))
+		var lowered:=names.map(func(n:Variant)->String:return String(n).to_lower())
 		var fields:PackedStringArray=[]
 		for f in learned.fields:fields.append(field_name(String(f)))
-		text=("This season the keepers recorded new learning: %s." if annals else "This season the people learned: %s.") % listed
-		if fields.size()>1:text+=" Their knowing grew in %s." % _list(Array(fields))
+		if rush:text=("This season the keepers recorded %d new ways, among them %s." if annals else "This season the people learned %d new ways, among them %s.") % [names.size(),_list(lowered.slice(0,LIST_NAMES))]
+		else:text=("This season the keepers recorded new learning: %s." if annals else "This season the people learned: %s.") % _list(lowered)
+		if fields.size()>1:text+=" Their knowing grew in %s." % _some(Array(fields))
 	var stepped:=_steps_text(steps)
 	if not stepped.is_empty():text=(text+" "+stepped).strip_edges()
 	var day:=int(season*91.25+45.625)-1 if today<0 else today
 	var first_id:=String((learned.ids as Array)[0]) if not (learned.ids as Array).is_empty() else String((steps[0] as Dictionary).get("id",""))
 	var first_field:=String((learned.fields as Array)[0]) if not (learned.fields as Array).is_empty() else String((steps[0] as Dictionary).get("dynamic","knowledge"))
-	return record({"key":"learned:%d" % season,"day":mini(day,int(GameState.elapsed_days)),"title":"What the %s taught" % season_name,"text":text,"kind":"discovery","tier":"notice","art":{"discovery_id":first_id,"domain":first_field},"action":{"kind":"section","section":"inquiry","sub":0},"domain":"knowledge","ledger":false,"learned":(learned.ids as Array).duplicate()})
+	var title:="What the %s taught" % season_name
+	if rush:title+=": %d new ways" % names.size()
+	var told:=record({"key":"learned:%d" % season,"day":mini(day,int(GameState.elapsed_days)),"title":title,"text":text,"kind":"discovery","tier":"notice","art":{"discovery_id":first_id,"domain":first_field},"action":{"kind":"section","section":"inquiry","sub":0},"domain":"knowledge","ledger":false,"learned":(learned.ids as Array).duplicate()})
+	if rush and not told.is_empty():
+		var ledger_line:=told.duplicate(true);ledger_line["tier"]="notice"
+		_to_ledger(ledger_line)
+	return told
+
+
+## A list of at most LIST_NAMES names, the rest counted: "a, b, c, d and 21 more".
+static func _some(items:Array)->String:
+	if items.size()<=LIST_NAMES:return _list(items)
+	return "%s and %d more" % [", ".join(PackedStringArray(items.slice(0,LIST_NAMES).map(func(n:Variant)->String:return String(n)))),items.size()-LIST_NAMES]
 
 
 static func _list(items:Array)->String:

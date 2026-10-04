@@ -1756,7 +1756,8 @@ func _resource_requirements_met(requirements: Array) -> bool:
 		var minimum_stock:=float(requirement.get("minimum_stock",0.0))
 		var found:=_alternative_research_stock_met(requirement)
 		for deposit in WorldSimulation.state.resource_deposits:
-			if String(deposit.get("resource",""))!=resource_name:
+			# Flint or limestone worked is stone known (Research600.RESOURCE_STAND_INS).
+			if not Research600.counts_as(String(deposit.get("resource","")),resource_name):
 				continue
 			if _stage_rank(String(deposit.get("stage","unknown")))>=_stage_rank(needed_stage):
 				found=true
@@ -1782,7 +1783,7 @@ func _resource_evidence(requirements:Array)->float:
 		var resource_name:=String(requirement.get("resource",""))
 		var best:=0.0
 		for deposit in WorldSimulation.state.resource_deposits:
-			if String(deposit.get("resource",""))!=resource_name: continue
+			if not Research600.counts_as(String(deposit.get("resource","")),resource_name): continue
 			var stage_score:=float(_stage_rank(String(deposit.get("stage","unknown"))))/4.0
 			var worked:=clampf(float(deposit.get("lifetime_extracted",0.0))/200.0,0.0,0.35)
 			best=maxf(best,0.65+stage_score*0.25+worked)
@@ -2357,7 +2358,7 @@ func rival_research_candidates(civ:Dictionary,domain:String)->Array[Dictionary]:
 			if route.ready:viable=true;break
 		if not viable: continue
 		for requirement in entry.get("resource_requirements",[]):
-			if float(resources.get(String(requirement.get("resource","")),0.0))<0.16: viable=false; break
+			if Research600.potential(resources,String(requirement.get("resource","")))<0.16: viable=false; break
 			var access:=String(requirement.get("stage","recognized"))
 			var capacity_floor:=0.12 if access=="recognized" else (0.20 if access=="surveyed" else (0.35 if access=="accessible" else 0.55))
 			if minf(float(civ.get("production",0.0)),float(civ.get("logistics",0.0)))<capacity_floor: viable=false; break
@@ -2631,6 +2632,7 @@ func research_600_player_society()->Dictionary:
 	if WorldSimulation.world!=null:
 		for civ:Dictionary in WorldSimulation.world.civilizations:
 			if int((civ.get("player_relation",{}) as Dictionary).get("contact_level",0))>=Research600.CONTACT_MET_LEVEL: contact=true;break
+	Research600.add_stand_ins(resources)
 	return {"year":float(state.elapsed_days)/365.0,"population":float(state.population_total),"settlements":maxi(1,state.player_settlements.size()),
 		"resources":resources,"environment":environment,"institutions":float(state.society_capacities.get("institutions",0.0)),"contact":contact}
 
@@ -2643,6 +2645,7 @@ func research_600_rival_society(civ:Dictionary)->Dictionary:
 	var resources:Dictionary={}
 	for resource_name:Variant in potentials:
 		if float(potentials[resource_name])>=Research600.RIVAL_RESOURCE_FLOOR: resources[String(resource_name)]=true
+	Research600.add_stand_ins(resources)
 	var contact:=int((civ.get("player_relation",{}) as Dictionary).get("rival_contact_level",0))>=Research600.CONTACT_MET_LEVEL
 	for relation_variant:Variant in (civ.get("relations",{}) as Dictionary).values():
 		var relation:Dictionary=relation_variant
