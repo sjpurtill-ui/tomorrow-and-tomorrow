@@ -28,18 +28,22 @@ simulation, save format, terrain, population ownership, weather, or player
 launch changes. Generated imports and captures are local evidence, excluded
 from the commit. Only the integrator can deliver this worker branch to main.
 
-## LivingMap checkpoint (visual review pending)
+## LivingMap checkpoint
 
 Workers now approach the front edge of the renderer's saved building footprint,
 use active street waypoints and detour around expanded building footprints.
-The pure placement helper owns only disposable presentation geometry. It reads
-at most 512 obstacles, searches the nearest 32 obstacle boundaries plus bounded
-street candidates, and caches at most 128 paths. An unresolved/blocked route
+The pure placement helper owns only disposable presentation geometry. It keeps
+at most 512 detailed obstacles and reserves every remaining footprint inside
+one conservative blocked envelope. Search uses the nearest 32 detailed obstacle
+boundaries, at most 64 street points and at most 322 total graph points, and
+caches at most 128 paths. An unresolved/blocked route
 holds the representative rather than crossing a wall. Aggregate parcels with
 no detailed footprint are conservatively reserved as whole parcels. Geometry
 or route changes invalidate the cache; identities/counts are retained. Walking
 uses distance along the path with terrain samples every three metres. Children's
-short play runs reject building/water crossings as well.
+short play runs reject building/water crossings as well. All usable saved home
+frontages participate in placement, avoiding a crowd at the first home of a
+multi-building parcel without increasing the representative population.
 
 Smoke now comes from actual chimney-cap geometry at its rotated position and
 roof height, or an actual open-hearth record/camp. Modern vents, unfinished or
@@ -50,8 +54,10 @@ population, building, research, resource or save records are written.
 
 CPU validation: combined architecture/facade/evolution/life suites passed
 34/34; the final placement/life rerun with conservative aggregate handling passed
-17/17 (`artifacts/city-character-life-final-tests-2.log`, report34), with zero
-engine/script errors or orphan nodes. The prepared full-city fixture routed
+17/17 (`artifacts/city-character-life-final-tests-2.log`, report34). The boundary
+follow-up passes 18/18, including 516 footprints, 100 nearby routes, and all
+recorded home frontages. There are zero script/engine errors or orphan nodes.
+The prepared full-city fixture routed
 28/28 sampled pairs around 140 detailed footprints in roughly 124 ms total cold
 search time. A live-layer regression samples worker travel/terrain following,
 checks no invented modern smoke/hearth, verifies unchanged actor counts and
@@ -61,11 +67,21 @@ Private capture entry: `res://tools/city_life_character_capture.tscn`, using
 `tools/run_isolated_gpu_probe.ps1` with this explicit worker project and
 `--out=res://artifacts/city-life-character`. This prepares four real-rendered
 three-storey parcels in each era and records 20 frames per era. It is a visual
-fixture, not the player game or an economic progression simulation. Pixel
-acceptance is still pending at this checkpoint.
+fixture, not the player game or an economic progression simulation. The initial
+40-frame probe, PID38220, exited 0 with zero script/engine errors. Its masonry
+view has seven bounded plumes at actual chimney caps; modern has zero plumes or
+phantom hearth. Every sampled worker remained outside recorded footprints.
+Images are under `artifacts/city-life-character/`. Review identified first-home
+crowding, corrected by the tested all-frontages change above. Final recapture
+PIDs49584 and69956 both failed before renderer initialization with exit
+3221226505 and only the Godot banner in their logs. Both exited; this last
+distribution change is CPU-verified but its final pixels remain unverified.
 
-Limits: conservative whole-parcel obstacles and bounded local graph search
-can hold a representative in unusually crowded/disconnected layouts. Workers
+Limits: conservative whole-parcel/overflow obstacles and bounded local graph
+search can hold a representative in unusually crowded/disconnected layouts.
+The 140-footprint performance fixture is not a claim of exhaustive large-city
+coverage. The private probe uses flat ground rather than the live landscape.
+Workers
 use the existing minimum 0.6-second leg duration. This does not change the
 separate scripted scout-return/burial-procession paths. Roof style/provenance,
 terrain generation, simulation owners and all save formats remain unchanged.

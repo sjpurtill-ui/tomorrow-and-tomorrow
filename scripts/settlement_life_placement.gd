@@ -7,15 +7,22 @@ const MAX_OBSTACLES:=512
 const MAX_GRAPH_OBSTACLES:=32
 const MAX_LANE_POINTS:=64
 const MAX_CACHED_PATHS:=128
+const MAX_GRAPH_POINTS:=2+MAX_LANE_POINTS+MAX_GRAPH_OBSTACLES*8
 const CLEARANCE:=0.00075
 var obstacles:Array[Dictionary]=[]
 var entries:Array[Dictionary]=[]
 var lanes:Array[PackedVector2Array]=[]
 var hearths:Array[Vector2]=[]
 var paths:Dictionary={}
+var overflow_bounds:=Rect2()
+var has_overflow:=false
+var last_road_points:=0
+var last_graph_points:=0
 
 func configure(plots:Array,routes:Array)->void:
 	obstacles.clear();entries.clear();lanes.clear();hearths.clear();paths.clear()
+	has_overflow=false;overflow_bounds=Rect2()
+	last_road_points=0;last_graph_points=0
 	var route_by_id:Dictionary={}
 	for route:Dictionary in routes:
 		if not bool(route.get("active",true)):continue
@@ -35,21 +42,15 @@ func configure(plots:Array,routes:Array)->void:
 			# Aggregate/fallback roofs have no published individual footprint.
 			# Reserve their parcel rather than invent a building-sized hole in it.
 			var parcel:=points_of(plot.get("polygon",[]))
-			if parcel.size()>=3 and obstacles.size()<MAX_OBSTACLES:
-				var expanded:=Geometry2D.offset_polygon(parcel,CLEARANCE,Geometry2D.JOIN_MITER)
-				if not expanded.is_empty():obstacles.append({"polygon":expanded[0],"bounds":bounds(expanded[0])})
+			if parcel.size()>=3 and _reserve(parcel):
 				var lane:PackedVector2Array=route_by_id.get(int(plot.get("frontage_route_id",-1)),PackedVector2Array())
 				var at:=point_of(plot.get("centroid",Vector2.ZERO))
 				var frontage:=nearest_on(lane,at)
 				entries.append({"at":at,"door":frontage,"frontage":frontage,"angle":0.0,"plot":plot,"site":{},"rendered":false})
 		for site:Dictionary in sites:
-			if obstacles.size()>=MAX_OBSTACLES:break
 			var polygon:=points_of(site.get("footprint",[]))
 			if polygon.size()<3:continue
-			var expanded:=Geometry2D.offset_polygon(polygon,CLEARANCE,Geometry2D.JOIN_MITER)
-			if expanded.is_empty():continue
-			var occupied:PackedVector2Array=expanded[0]
-			obstacles.append({"polygon":occupied,"bounds":bounds(occupied)})
+			if not _reserve(polygon):continue
 			var at:=point_of(site.get("position",plot.get("centroid",Vector2.ZERO)))
 			var angle:=float(site.get("angle",0.0))
 			var forward:=Vector2(sin(angle),cos(angle))
@@ -64,8 +65,25 @@ func configure(plots:Array,routes:Array)->void:
 		if not open_at(entry.door):
 			entry.door=entry.frontage if open_at(entry.frontage) else Vector2.INF
 
+## Beyond the detailed budget, retain one conservative occupied envelope. An
+## overflow must never turn a real building into apparently walkable ground.
+func _reserve(polygon:PackedVector2Array)->bool:
+	var area:=bounds(polygon).grow(CLEARANCE)
+	if obstacles.size()>=MAX_OBSTACLES:
+		overflow_bounds=overflow_bounds.merge(area) if has_overflow else area
+		has_overflow=true
+		return false
+	var expanded:=Geometry2D.offset_polygon(polygon,CLEARANCE,Geometry2D.JOIN_MITER)
+	var occupied:PackedVector2Array=expanded[0] if not expanded.is_empty() else _rectangle(area)
+	obstacles.append({"polygon":occupied,"bounds":bounds(occupied)})
+	return true
+
+static func _rectangle(rect:Rect2)->PackedVector2Array:
+	return PackedVector2Array([rect.position,Vector2(rect.end.x,rect.position.y),rect.end,Vector2(rect.position.x,rect.end.y)])
+
 func open_at(at:Vector2)->bool:
 	if not at.is_finite():return false
+	if has_overflow and overflow_bounds.has_point(at):return false
 	for obstacle in obstacles:
 		if (obstacle.bounds as Rect2).has_point(at) and Geometry2D.is_point_in_polygon(at,obstacle.polygon):return false
 	return true
@@ -73,6 +91,10 @@ func open_at(at:Vector2)->bool:
 func clear_segment(a:Vector2,b:Vector2)->bool:
 	if not open_at(a) or not open_at(b):return false
 	var area:=Rect2(a,Vector2.ZERO).expand(b).grow(.000001)
+	if has_overflow and area.intersects(overflow_bounds,true):
+		var corners:=_rectangle(overflow_bounds)
+		for i in 4:
+			if Geometry2D.segment_intersects_segment(a,b,corners[i],corners[(i+1)%4])!=null:return false
 	for obstacle in obstacles:
 		if not area.intersects(obstacle.bounds,true):continue
 		var polygon:PackedVector2Array=obstacle.polygon
@@ -93,12 +115,15 @@ func route(from:Vector2,to:Vector2,land:Callable=Callable())->PackedVector2Array
 	# Road projections are exact points on the recorded active route. A short
 	# route is preferred to a bare-yard diagonal when both endpoints reach it.
 	for lane in lanes:
+		if road_nodes.size()>=MAX_LANE_POINTS:break
 		for endpoint in [from,to]:
 			var p:=nearest_on(lane,endpoint)
 			if p.distance_to(endpoint)<=.04 and open_at(p):_add_point(points,p,road_nodes)
 		for p in lane:
 			if road_nodes.size()>=MAX_LANE_POINTS:break
 			if p.distance_to(Geometry2D.get_closest_point_to_segment(p,from,to))<.035 and open_at(p):_add_point(points,p,road_nodes)
+	last_road_points=road_nodes.size()
+	last_graph_points=points.size()
 	# Open camp ground needs no graph. In town we keep the road candidates so
 	# crossing the lawn is not always the shortest-looking animation.
 	if points.size()==2 and clear_segment(from,to) and _land_segment(from,to,land):answer=PackedVector2Array([from,to])
@@ -109,8 +134,10 @@ func route(from:Vector2,to:Vector2,land:Callable=Callable())->PackedVector2Array
 			var polygon:PackedVector2Array=obstacle.polygon
 			var center:Vector2=(obstacle.bounds as Rect2).get_center()
 			for vertex in polygon:
+				if points.size()>=MAX_GRAPH_POINTS:break
 				var p:=vertex+(vertex-center).normalized()*.00003
 				if open_at(p):points.append(p)
+		last_graph_points=points.size()
 		answer=_search(points,road_nodes,land)
 	if paths.size()>=MAX_CACHED_PATHS:paths.erase(paths.keys()[0])
 	paths[key]=answer.duplicate()
@@ -163,6 +190,7 @@ static func _distance(obstacle:Dictionary,a:Vector2,b:Vector2)->float:
 	return center.distance_squared_to(Geometry2D.get_closest_point_to_segment(center,a,b))
 
 static func _add_point(points:PackedVector2Array,p:Vector2,road_nodes:Dictionary)->void:
+	if road_nodes.size()>=MAX_LANE_POINTS:return
 	for i in points.size():
 		if points[i].distance_squared_to(p)<.0000000001:road_nodes[i]=true;return
 	road_nodes[points.size()]=true;points.append(p)
