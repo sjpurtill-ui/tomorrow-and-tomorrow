@@ -134,6 +134,14 @@ func test_direct_cue_does_not_inherit_old_spoken_release()->void:
 	room.god_light(body,"favour",1.0,0.0)
 	assert_float(room._god_out).is_equal(-1.0)
 
+func test_spoken_light_releases_after_words_without_adding_attack_twice()->void:
+	var room:=_room()
+	room.god_moment(_body(room),"",4.0)
+	room._god_tween.custom_step(4.39)
+	assert_str(room.god_tone).is_equal("speaks")
+	room._god_tween.custom_step(.03)
+	assert_str(room.god_tone).is_equal("off")
+
 func test_old_hold_callback_cannot_extinguish_new_address()->void:
 	var room:=_room();var first:=_body(room);var next:=_body(room,Vector3(2,0,1))
 	room.god_light(first,"wrath",.02,0.0)

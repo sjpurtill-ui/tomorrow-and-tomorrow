@@ -39,11 +39,18 @@ func test_reverb_uses_physical_enclosure_for_chapter_rooms()->void:
 	var sound:=_court()
 	sound.call("ambience","chapter_00","summer",{"indoor":false,"has_hearth":true,"known":[]})
 	var room:=AudioServer.get_bus_effect(Sound.ensure_bus(),0) as AudioEffectReverb
-	assert_float(room.wet).is_equal_approx(0.04,0.001)
-	assert_float(room.room_size).is_equal_approx(0.15,0.001)
+	assert_float(room.wet).is_less(.05)
+	assert_float(room.room_size).is_less(.2)
+	var open_wet:=room.wet;var open_size:=room.room_size
 	sound.call("ambience","chapter_15","summer",{"indoor":true,"has_hearth":false,"known":[]})
-	assert_float(room.wet).is_equal_approx(0.18,0.001)
-	assert_float(room.room_size).is_equal_approx(0.55,0.001)
+	assert_float(room.wet).is_greater(open_wet)
+	assert_float(room.room_size).is_greater(open_size)
+	var office_wet:=room.wet;var office_size:=room.room_size
+	# A furnished conference room has an indoor return without the long,
+	# hard reverberation of the stone hall that the former constant implied.
+	sound.call("ambience","chapter_08","summer",{"indoor":true,"floor":"stone","known":[]})
+	assert_float(room.wet).is_greater(office_wet)
+	assert_float(room.room_size).is_greater(office_size)
 
 func test_switching_to_a_cold_room_stops_an_existing_fire_bed()->void:
 	var sound:=_court()

@@ -1287,18 +1287,19 @@ func god_light(target:Variant=null,tone:="speaks",hold:=0.0,fade:=-1.0)->void:
 		_god_tween.tween_interval(hold)
 		_god_tween.tween_callback(_god_ease_out)
 
-## The god's words as one moment, on the same envelope as N's swell
-## (court_sound.gd god(text, seconds, tone)): in over 1.2 s, held for the
-## words and a breath (seconds + 0.4), out over 2.2 s. Call it in the same
-## frame as the sound's god(): tone "" (awe), "wrath" or "favour".
+## The god's words as one moment, called alongside the sound's god(). The
+## attack occupies the beginning of the line, not extra time after it.
+## A short visual afterglow lets the room recover after the quieter sound
+## tail. Tone "" (awe), "wrath" or "favour".
 const GOD_SWELL_IN:=1.2
 const GOD_SWELL_HOLD:=0.4
-const GOD_SWELL_OUT:=2.2
+const GOD_SWELL_OUT:=1.4
 func god_moment(target:Variant,tone:="",seconds:=2.0)->void:
 	var t:="speaks"
 	if tone=="wrath":t="wrath"
 	elif tone in ["favour","favor"]:t="favour"
-	god_light(target,t,maxf(0.4,seconds+GOD_SWELL_HOLD),GOD_SWELL_IN if t!="wrath" else 0.25)
+	var attack:=.25 if t=="wrath" else minf(GOD_SWELL_IN,maxf(.25,seconds*.35))
+	god_light(target,t,maxf(.1,seconds+GOD_SWELL_HOLD-attack),attack)
 	_god_out=GOD_SWELL_OUT
 
 func _god_ease_out()->void:
