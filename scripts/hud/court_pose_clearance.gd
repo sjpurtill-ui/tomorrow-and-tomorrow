@@ -3,7 +3,23 @@ extends RefCounted
 ## non-arm track stay unchanged; executions and prop-specific acts never enter.
 const CLIPS:=["stand","sit_cross","stance_cross"]
 const CACHE_LIMIT:=96
-const PROFILES:={}
+## The short descent opens the hands beside the knees; after landing, a small
+## elbow bend rests them above the lap. These two profiles have dense body/cloth
+## checks and rendered transition review. Other variants retain source poses
+## until their own garment envelopes have been checked.
+const PROFILES:={
+	"male_adult":{
+		"stand":6.0,
+		"sit_cross":{
+			"spread":[[0.0,6.0],[.4,6.0],[.6,20.0],[.92,20.0],[1.1,10.0],[1.6,10.0]],
+			"flex":[[0.0,0.0],[.4,0.0],[.6,-12.0],[.9,-12.0],[1.08,6.0],[1.6,6.0]]},
+		"stance_cross":{"spread":10.0,"flex":6.0}},
+	"female_old":{
+		"stand":{"L":12.0,"R":13.0},
+		"sit_cross":{
+			"spread":[[0.0,14.0],[.4,14.0],[.6,20.0],[.92,20.0],[1.1,14.0],[1.6,14.0]],
+			"flex":[[0.0,0.0],[.4,0.0],[.6,-12.0],[.9,-12.0],[1.08,14.0],[1.6,14.0]]},
+		"stance_cross":{"spread":14.0,"flex":14.0}}}
 ## Private diagnostic fixtures may supply calibration profiles before setup.
 ## Values are degrees, or [seconds,degrees] pairs sampled at original key times;
 ## an L/R dictionary can fit asymmetric arm poses without overcorrecting a hand.

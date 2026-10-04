@@ -23,7 +23,7 @@ func _ready()->void:
 			if pose.begins_with("release_"):times=[0.0,.1,.2,.3,.4,.5]
 			if pose in ["settle_cross","depart_cross"]:times=[0.0,.1,.2,.4,.6]
 			if pose=="kneel":times=[.67,1.33,2.5]
-			if quick:times=[.33,.67,.8,.9,1.33] if pose=="sit_cross" else ([.2] if pose.begins_with("release_") else [1.33])
+			if quick:times=[.33,.67,.77,.87,1.33,1.6] if pose=="sit_cross" else ([.2] if pose.begins_with("release_") else [1.33])
 			for at:float in times:
 				for yaw:int in [-20,70]:
 					_clear();await _frames(3)
