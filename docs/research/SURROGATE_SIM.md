@@ -164,6 +164,36 @@ the new readings. Against the old truth the engine's 15-year path differs
 only in holding together (0.872 against 0.881 at year 15, pride no longer
 lifting every people); `check.py --strict` passes (score 43.1, re-recorded again after the review fixes to consequence_engine.gd).
 
+### A computer ruler's watch (2026-10-03)
+
+`tools/sim/watch_check.py` runs the five archetypal tempers of `leaders.py`
+as computer rulers, on the good and the poor site, in three ways:
+
+- the leaders' split alone (as the surrogate ran before);
+- the rulers' old hold on the watch;
+- the age's hold (`civilization_strategy.gd watch_share`, mirrored as
+  `leaders.watch_hold`).
+
+It then runs the raid world with the neighbours keeping what an
+even-tempered ruler keeps under each rule, at the engine's readiness (0.92).
+It takes about a minute on 12 processes.
+
+`LeaderSurrogate` holds the watch only when the run sets `ruler_hold` ("old"
+or "age"; off by default), as `watch_military.gd hold_share` does: the other
+work keeps its proportions. The raid world's neighbours keep 3 in 100 under
+arms at readiness 0.45 unless the run sets `neighbour_under_arms` and
+`neighbour_ready`. With neither set, every other check reads as before.
+
+Results (docs/STANDING_DESIGN.md section 11):
+
+- Good site, year 300: the balanced ruler keeps 7.0 in 100 under arms (Might
+  88) under the old hold, and 3.0 (Might 53) under the age's hold. It holds
+  3,957 people against 3,646, with 26 days of food against 18.
+- On poor land the old hold starved the warlike people out by year 600.
+- In the raid world (others met from year 98), neighbours at 2.7 in 100
+  instead of 7.0 raid 8% less often. They are repelled 46 times in 171 raids
+  instead of never, and take 44% fewer rations.
+
 ### Crises and the age table's background (2026-10-03)
 
 The surrogate now has the crises (`crisis.py`): a seeded mirror of `crisis_unattended.gd` on the hazards and tolls of `crisis_system.gd`. Each sub-step rolls each crisis type at the chance of an onset over its days, in the engine's order (hunger, dry season, cold year, sickness and new pestilence, flood, fire). Two onsets never open within `ONSET_GAP` days, and two at most run at once. Deaths come at the turn (40 in 100 of the toll) and at the end, off the cohorts by the cause's own death weights, never below the shock floor. The silent official's answers apply: tending or keeping the sick apart, rationing, carrying water, children kept apart, the roots. So do the side effects: sick leave, rations on the food demand, spoiled stores and lost roofs, immunity and the people's own custom of keeping the sick apart, and echoes of a bad sickness. Strangers' sickness is left out (the surrogate has no foreign contacts), as are the dry season's water work and timber. `"crises": false` in the params turns them off.

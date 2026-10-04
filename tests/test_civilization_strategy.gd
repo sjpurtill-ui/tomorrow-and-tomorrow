@@ -20,6 +20,27 @@ func test_personality_changes_real_strategic_choices_with_identical_conditions()
 	assert_str(Strategy.diplomatic_action({"opinion":-.55,"treaty":"none"},peace,120)).is_not_equal("declare_war")
 	assert_str(Strategy.diplomatic_action({"opinion":-.55,"treaty":"none"},martial,120)).is_equal("declare_war")
 
+func test_a_rulers_watch_sits_in_the_ages_band_and_rises_at_war()->void:
+	# Before 2026-10-03 an even temper held 7 in 100 of its whole people under
+	# arms at peace, the age's most; now the age's own band (standing_scale.gd).
+	var Scale:=preload("res://scripts/standing_scale.gd")
+	var even:={"openness":.5,"discipline":.5,"empathy":.5,"assertiveness":.5,"risk_tolerance":.5}
+	var hardest:={"openness":.5,"discipline":1.0,"empathy":0.0,"assertiveness":1.0,"risk_tolerance":1.0}
+	var gentlest:={"openness":.5,"discipline":0.0,"empathy":1.0,"assertiveness":0.0,"risk_tolerance":0.0}
+	var band:=Scale.anchors(Scale.DEFENSE_SHARE,94.0)
+	assert_float(Strategy.watch_share(even,94.0,false)).is_equal_approx(float(band[1])/100.0*Scale.ABLE_SHARE,0.0001)
+	assert_float(Strategy.watch_share(hardest,94.0,false)).is_equal_approx(float(band[2])/100.0*Scale.ABLE_SHARE,0.0001)
+	assert_float(Strategy.watch_share(gentlest,94.0,false)).is_equal_approx(float(band[0])/100.0*Scale.ABLE_SHARE,0.0001)
+	assert_float(Strategy.watch_share(Martial,94.0,false)).is_less(0.05)
+	# At war twice as many, never past the age's most.
+	assert_float(Strategy.watch_share(even,94.0,true)).is_equal_approx(2.0*Strategy.watch_share(even,94.0,false),0.0001)
+	assert_float(Strategy.watch_share(hardest,94.0,true)).is_less_equal(float(band[3])/100.0*Scale.ABLE_SHARE+0.0001)
+	# The age moves the band: by year 600 the typical share is 5 in 100 of the able.
+	assert_float(Strategy.watch_share(even,600.0,false)).is_equal_approx(0.05*Scale.ABLE_SHARE,0.0001)
+	# The plan carries it for the people's own year.
+	var plan:=Strategy.preferences(even,{"food_days":120,"food_intake_ratio":1,"at_war":false,"year":94.0})
+	assert_float(float(plan.recruit_share)).is_equal_approx(Strategy.watch_share(even,94.0,false),0.0001)
+
 func test_survival_overrides_preference_without_free_resources()->void:
 	for personality in [Peaceful,Martial]:
 		var plan:=Strategy.preferences(personality,{"food_days":5,"food_intake_ratio":.7,"at_war":true})

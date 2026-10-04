@@ -116,6 +116,15 @@ WORK_BASE = 6000.0          # mean base work of the concept forms (wonder_concep
 SITE_YEARS = 30.0           # one more good site known every 30 years
 NEIGHBOUR_YEARS = 80.0      # one more neighbouring people every 80 years after first contact
 NEIGHBOURS_MAX = 3
+# A computer ruler's hold on the watch (civilization_strategy.gd watch_share,
+# civilization_controller.gd interim_watch): the share of the whole people
+# held under arms when the leaders' split keeps fewer. "age" is the rule since
+# 2026-10-03 (the age's typical share for an even temper at peace, the high
+# for the hardest, the low for the gentlest); "old" the rule before it
+# (.025 + .055 assertiveness + .035 discipline + .02 risk - .02 empathy of
+# the people). Off unless the run asks for it (leaders.py --hold).
+WATCH_LEAN = g.const("scripts/civilization_strategy.gd", "WATCH_LEAN", default={}, optional=True)
+WATCH_AT_WAR = float(g.const("scripts/civilization_strategy.gd", "WATCH_AT_WAR", default=2.0, optional=True))
 
 ARCHETYPES = {
     "cautious-caring": {"openness": .45, "discipline": .5, "empathy": .85, "assertiveness": .2, "risk_tolerance": .15},
@@ -175,6 +184,18 @@ def culture_drive(scores: dict) -> float:
         total += weight * sum(poles.values())
         expansion += weight * poles.get("expansion", 0.0)
     return expansion / total if total > 0 else 0.0
+
+
+def watch_hold(p: dict, year: float, rule: str, war: bool = False) -> float:
+    """civilization_strategy.gd watch_share (rule "age") or the rule before it
+    ("old"): the share of the whole people a ruler of this temper holds under arms."""
+    if rule == "old":
+        return clamp(.025 + p["assertiveness"] * .055 + p["discipline"] * .035 + p["risk_tolerance"] * .02 - p["empathy"] * .02 + (.08 if war else 0.0), .02, .22)
+    lean = sum(float(w) * (p.get(a, .5) - .5) for a, w in WATCH_LEAN.items())
+    span = sum(abs(float(w)) * .5 for w in WATCH_LEAN.values()) or 1.0
+    lean = clamp(lean / span, -1.0, 1.0)
+    low, typical, _high, most = standing_mirror.anchors(standing_mirror.DEFENSE_SHARE, max(0.0, year))
+    return clamp(typical * 2.0 ** lean * (WATCH_AT_WAR if war else 1.0), low, most) / 100.0 * standing_mirror.ABLE_SHARE
 
 
 def research_weights(p: dict) -> dict:
@@ -309,6 +330,32 @@ class LeaderSurrogate(Surrogate):
         self.treaty = False
         self.victory_day = -1e9
         self.construction_diverted = 0.0
+
+    def _allocate_labor(self) -> None:
+        """The leaders' split (model.py), then the ruler's hold on the watch
+        (watch_military.gd hold_share: the other work keeps its proportions)
+        when the run gives the ruler one (params "ruler_hold": "age" or "old")
+        and it asks more than the split keeps (civilization_controller.gd
+        interim_watch; the 2-in-100 slack is left out)."""
+        super()._allocate_labor()
+        rule = str(self.p.get("ruler_hold", "") or "")
+        if not rule:
+            return
+        able = max(1.0, float(getattr(self, "able", 0.0) or self.population * .6))
+        want = watch_hold(self.temper, self.day / YEAR, rule) * max(1.0, self.population) / able * 100.0
+        want = clamp(want, 0.0, 90.0)
+        have = float(self.alloc_pct.get("Defense", 0.0))
+        if want <= have:
+            return
+        others = sum(v for r, v in self.alloc_pct.items() if r != "Defense")
+        if others <= 0:
+            return
+        total = others + have
+        room = total - total * want / 100.0
+        for r in list(self.alloc_pct):
+            if r != "Defense":
+                self.alloc_pct[r] = self.alloc_pct[r] * room / others
+        self.alloc_pct["Defense"] = total * want / 100.0
 
     def _culture_refresh(self) -> None:
         """What the people's ambitions do now (choice weights fade with the years):
@@ -523,11 +570,16 @@ class LeaderSurrogate(Surrogate):
         return 0 if year < contact else min(NEIGHBOURS_MAX, 1 + int((year - contact) / NEIGHBOUR_YEARS))
 
     def might_ratio(self) -> float:
-        """standing.gd our_fighting_strength over a same-size neighbour's (3 % under arms, ready 0.45)."""
+        """standing.gd our_fighting_strength over a same-size neighbour's
+        (their_fighting_strength): 3 % under arms, ready 0.45, unless the run
+        sets the neighbours' share and readiness (params neighbour_under_arms,
+        neighbour_ready: watch_check.py gives them a computer ruler's)."""
         warriors = clamp(self.alloc_pct["Defense"] / 100.0 * self.able / max(1.0, self.population), 0, 1)
         readiness = clamp(self.security, 0, 1)
         ours = (1 - warriors) * .8 + warriors * (1 + WARRIOR_WEIGHT * readiness)
-        theirs = .97 * (.55 + .45 * .3) + .03 * (1 + WARRIOR_WEIGHT * .45)
+        armed = clamp(float(self.p.get("neighbour_under_arms", .03)), 0, 1)
+        ready = clamp(float(self.p.get("neighbour_ready", .45)), .2, 1)
+        theirs = (1 - armed) * (.55 + ready * .3) + armed * (1 + WARRIOR_WEIGHT * ready)
         return ours / theirs
 
     def _standing(self, year: float) -> None:
