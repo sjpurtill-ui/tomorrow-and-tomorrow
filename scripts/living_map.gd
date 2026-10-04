@@ -216,11 +216,10 @@ func set_season(day:float)->void:
 # --------------------------------------------------------------------------
 
 func _refresh_site()->void:
-	# Work sites follow the town as it grows, re-read at most twice a month.
-	var geometry:Array=[]
-	for plot:Dictionary in GameState.settlement_plots:
-		geometry.append([plot.get("visual_building_sites",[]),plot.get("status",""),plot.get("form",""),plot.get("fabric_generation",0),plot.get("building_materials",{})])
-	var signature:="%s|%d|%d|%s" % [anchor,floori(GameState.elapsed_days/15.0),hash([geometry,GameState.settlement_routes,GameState.known_discoveries]),settled]
+	# Called by the committed-day hook, not per frame. Hash the actual records:
+	# roof/storey/material changes also move chimney geometry, and aggregate
+	# parcel/frontage changes matter even without a saved individual footprint.
+	var signature:="%s|%d|%d|%s" % [anchor,floori(GameState.elapsed_days/15.0),hash([GameState.settlement_plots,GameState.settlement_routes,GameState.known_discoveries,WorldSimulation.state.known_discoveries]),settled]
 	if signature==site_signature: return
 	site_signature=signature
 	homes.clear(); chimneys.clear(); smoke_sources.clear();spots.clear()
@@ -252,7 +251,7 @@ func _refresh_site()->void:
 				if not (entry.door as Vector2).is_finite():continue
 				if door==Vector2.INF:door=entry.door
 				if entry.door not in doors:doors.append(entry.door)
-				if bool(entry.rendered) and status!="under_construction" and smoke_sources.size()<MAX_PLUMES:
+				if bool(entry.rendered) and status!="under_construction" and float(plot.get("damage",{}).get("structural",0))<=.65 and smoke_sources.size()<MAX_PLUMES:
 					for outlet in Placement.chimney_outlets(plot):
 						if smoke_sources.size()>=MAX_PLUMES:break
 						var world_outlet:Vector3=Basis(Vector3.UP,float(entry.angle))*outlet
@@ -275,12 +274,13 @@ func _refresh_site()->void:
 				"water": waters.append(at)
 				"civic","communal","sacred":offices.append_array(doors)
 	if homes.is_empty():
-		# The camp: shelters in a loose ring around the fire.
-		for i in 7:
-			var a:=float(i)*TAU/7.0+0.4
-			var fallback:=Vector2(cos(a),sin(a))*(0.014+0.004*float(i%3))
-			if navigation.open_at(fallback):homes.append(fallback)
-		if homes.is_empty():homes.append(hearth_at)
+		homes=_safe_home_fallback()
+	if homes.is_empty():
+		# No supported walking origin within the finite search. Omit visual
+		# representatives until one exists; never alter population/officials.
+		workers.clear();children.clear();labor_signature=""
+		worker_mm.multimesh.visible_instance_count=0
+		child_mm.multimesh.visible_instance_count=0
 	for source in smoke_sources:chimneys.append(Vector2(source.x,source.z))
 	var center:=Vector2(anchor.x,anchor.z)
 	var land_key:="%s" % anchor
@@ -325,6 +325,7 @@ func _refresh_site()->void:
 			_set_path(worker,current,worker.to)
 			worker["t"]=0.0
 			worker["pose"]=POSES.talk if bool(worker.blocked) else POSES.walk
+	_reconcile_children()
 	if relocated:
 		# New ground: everyone sets out again from a home here.
 		relocated=false
@@ -332,6 +333,25 @@ func _refresh_site()->void:
 			worker["home"]=homes[rng.randi_range(0,homes.size()-1)]
 			worker.erase("pos")
 			_start_leg(worker,0)
+
+func _safe_home_fallback()->Array[Vector2]:
+	var candidates:Array[Vector2]=[]
+	# Preserve the familiar small camp ring when it is genuinely open.
+	for i in 7:
+		var a:=float(i)*TAU/7.0+.4
+		candidates.append(Vector2(cos(a),sin(a))*(.014+.004*float(i%3)))
+	for entry:Dictionary in navigation.entries.slice(0,64):candidates.append(entry.frontage)
+	for lane:PackedVector2Array in navigation.lanes.slice(0,16):
+		candidates.append(Placement.nearest_on(lane,Vector2.ZERO))
+		candidates.append(lane[0]);candidates.append(lane[-1])
+	for radius in [.04,.065,.10,.16,.25,.4,.6]:
+		for i in 16:candidates.append(Vector2.from_angle(float(i)*TAU/16.0)*float(radius))
+	var safe:Array[Vector2]=[]
+	for candidate in candidates:
+		if not candidate.is_finite() or candidate.length()>.60001 or candidate in safe:continue
+		if navigation.open_at(candidate) and _walkable(candidate):safe.append(candidate)
+		if safe.size()==7:break
+	return safe
 
 func _ring_spots(center:Vector2,radii:Array,want:String,count:int)->Array[Vector2]:
 	var scored:Array[Dictionary]=[]
@@ -422,7 +442,7 @@ static func allocate(shares:Dictionary,budget:int)->Dictionary:
 
 func _refresh_workers()->void:
 	var shares:=activity_shares()
-	var budget:=figure_budget(GameState.population_total)
+	var budget:=0 if settled and homes.is_empty() else figure_budget(GameState.population_total)
 	var counts:=allocate(shares,budget)
 	var signature:="%s|%d" % [JSON.stringify(counts),int(settled)]
 	last_report={"population":GameState.population_total,"budget":budget,"figures":counts,"labor":shares}
@@ -667,6 +687,19 @@ func _frame(delta:float)->void:
 # --------------------------------------------------------------------------
 # Children at play (bounded; never one per child)
 # --------------------------------------------------------------------------
+
+func _reconcile_children()->void:
+	for index in children.size():
+		var child:Dictionary=children[index]
+		if child.home not in homes:child.home=homes[(index*3+1)%homes.size()]
+		var k:=clampf(float(child.t)/maxf(.001,float(child.dur)),0.0,1.0)
+		var current:Vector2=Vector2(child.from).lerp(child.to,k)
+		var displaced:=relocated or not navigation.open_at(current) or not _walkable(current)
+		if displaced:current=child.home
+		if displaced or not navigation.clear_segment(current,child.to) or not Placement._land_segment(current,child.to,_walkable):
+			# Retain identity/colour/phase/count. Cancel only an invalid leg, so
+			# construction cannot trap a child inside its new footprint forever.
+			child.from=current;child.to=current;child.t=0.0;child.dur=.1;child["still"]=true
 
 func _refresh_children()->void:
 	var real:=float(GameState.population_cohorts.get("children",0.0)) if GameState.population_cohorts is Dictionary else 0.0
