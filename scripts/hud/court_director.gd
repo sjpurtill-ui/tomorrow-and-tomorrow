@@ -288,6 +288,7 @@ const ACTS:={
 	"swat_fly":{"clip":"","mood":"","face":{"eyes_narrow":0.5},"dur":0.8,"look":"","desc":"swats at a fly"},
 	"swat_miss":{"clip":"","mood":"","face":{"eyes_wide":0.5},"dur":0.8,"look":"at","desc":"swats at the fly and catches {at} instead"},
 	"scribble":{"clip":"","mood":"","face":{"eyes_narrow":0.4},"dur":2.0,"look":"","desc":"scribbles furiously"},
+	"review_brief":{"clip":"stroke_chin","mood":"","face":{"eyes_narrow":0.2},"dur":2.4,"speed":0.7,"look":"","desc":"considers the briefing"},
 	"shake_hand":{"clip":"","mood":"","face":{"lips_pressed":0.5},"dur":1.0,"look":"","desc":"shakes out a cramped hand"},
 	"scratch_out":{"clip":"","mood":"","face":{"brows_down":0.4},"dur":1.0,"look":"","desc":"scratches something out"},
 	# Silence.
@@ -650,6 +651,9 @@ static func extras(facts:Dictionary,rng_seed:int,taken:Dictionary={})->Array:
 	var tags:Array=facts.get("era_tags",[]) if facts.get("era_tags") is Array else []
 	var tier:=int(facts.era_tier) if _num(facts.get("era_tier",null)) else int(preload("res://scripts/character_voice.gd").era_tier(tags))
 	var rows:Array=[["crowd_elder","elder",62+rng.randi_range(0,14),""],["crowd_child","child",6+rng.randi_range(0,5),""],["crowd_bowl","commoner",22+rng.randi_range(0,20),"bowl"]]
+	var protocol:=presentation(facts)
+	if not bool(protocol.get("rustic_props",true)):
+		rows[2]=["crowd_visitor","commoner",int(rows[2][2]),"clasped"]
 	if tier>=1:
 		rows.append(["crowd_child2","child",3+rng.randi_range(0,3),""])
 		rows.append(["crowd_1","commoner",18+rng.randi_range(0,30),""])
@@ -669,10 +673,12 @@ static func extras(facts:Dictionary,rng_seed:int,taken:Dictionary={})->Array:
 			"empathy":clampf(rng.randf_range(0.35,0.8),0.0,1.0),"love":clampf(love+rng.randf_range(-0.12,0.12),0.0,1.0),"dread":clampf(dread+rng.randf_range(-0.1,0.15),0.0,1.0),
 			"name":_crowd_name(rng_seed,serial,woman,taken)}
 		if String(row[3])!="":entry["stance"]=String(row[3])
+		if kind=="scribe" and bool(protocol.get("paperwork",false)):entry["paperwork"]=true
 		out.append(entry)
 		serial+=1
-	out.append({"key":"dog","role":"animal","kind":"dog","name":"the dog"})
-	if tags.has("dairy"):out.append({"key":"goat","role":"animal","kind":"goat","name":"the goat"})
+	if bool(protocol.get("court_animals",true)):
+		out.append({"key":"dog","role":"animal","kind":"dog","name":"the dog"})
+		if tags.has("dairy"):out.append({"key":"goat","role":"animal","kind":"goat","name":"the goat"})
 	return out
 
 static func _crowd_name(rng_seed:int,serial:int,woman:bool,taken:Dictionary)->String:
@@ -707,6 +713,31 @@ static func performance(beat:Dictionary)->Dictionary:
 		"speed":float(args.get("speed",spec.get("speed",1.0))),"dur":float(args.get("dur",spec.get("dur",0.8)))}
 
 # --- The cast, read ------------------------------------------------------------
+
+## Profiles are supplied with the fact sheet, never inferred from the day or
+## the player's knowledge here. An envoy may retain their own people's manners.
+## Old callers without a profile keep the original performance unchanged.
+static func presentation(facts:Dictionary,person:Dictionary={})->Dictionary:
+	var profiles:Dictionary=facts.get("presentations",{}) if facts.get("presentations") is Dictionary else {}
+	var owner:=String(person.get("people",""))
+	if owner!="" and profiles.get(owner) is Dictionary:return profiles[owner]
+	return facts.get("presentation",{}) if facts.get("presentation") is Dictionary else {}
+
+static func routine_act(facts:Dictionary,person:Dictionary,fallback:String,departure:=false)->String:
+	var profile:=presentation(facts,person)
+	var act:=String(profile.get("routine_departure" if departure else "routine_greeting",fallback))
+	return act if ACTS.has(act) else fallback
+
+static func _greet(ctx:Dictionary,out:Array,t:float,who:String,fallback:String,departure:=false)->void:
+	if String(ctx.firm)==who:return
+	var person:=_m(ctx,who)
+	_beat(out,t,who,routine_act(ctx.facts,person,fallback,departure),{"routine":true} if not presentation(ctx.facts,person).is_empty() else {},"action")
+
+static func _writing_act(facts:Dictionary,person:Dictionary)->String:
+	var profile:=presentation(facts,person)
+	# The existing rig has no folio: consider the briefing without miming
+	# writing on an absent page. A supported stationery prop can add that later.
+	return "review_brief" if bool(profile.get("paperwork",false)) and String(profile.get("period","")) in ["medieval","early_modern","industrial","modern"] else "scribble"
 
 static func _m(ctx:Dictionary,key:String)->Dictionary:
 	return (ctx.by as Dictionary).get(key,{})
@@ -972,7 +1003,7 @@ static func _god_speaks(ctx:Dictionary,out:Array)->void:
 		_beat(out,0.05+step*0.07+rng.randf()*0.08,String(m.key),"look_up",{},"action")
 		step+=1
 	for dog:Dictionary in _of_kind(ctx,["dog"]):_beat(out,0.2,String(dog.key),"perk_up",{},"action")
-	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,0.3,String(scribe.key),"scribble",{},"action")
+	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,0.3,String(scribe.key),_writing_act(ctx.facts,scribe),{},"action")
 	# Under the voice, one or two do their own small thing.
 	var rng0:RandomNumberGenerator=ctx.rng
 	for m:Dictionary in _shuffled(rng0,_people(ctx,[String(ctx.main),sleeper,dozing])).slice(0,rng0.randi_range(1,2)):
@@ -1034,7 +1065,7 @@ static func _line(ctx:Dictionary,out:Array)->void:
 	if listeners.is_empty():return
 	var said:=number_in(String(ctx.event.get("text","")))
 	if not said.is_empty():
-		for scribe:Dictionary in _of_kind(ctx,["scribe"],[who]):_beat(out,0.15+float(said.at)*0.025+0.3,String(scribe.key),"scribble",{},"reaction")
+		for scribe:Dictionary in _of_kind(ctx,["scribe"],[who]):_beat(out,0.15+float(said.at)*0.025+0.3,String(scribe.key),_writing_act(ctx.facts,scribe),{},"reaction")
 	if rng.randf()<0.35:
 		var nodder:=_pick(ctx,listeners)
 		if float(nodder.love)>=0.45:_beat(out,1.2+rng.randf()*0.8,String(nodder.key),"nod",{},"reaction")
@@ -1363,14 +1394,14 @@ static func _decree(ctx:Dictionary,out:Array)->void:
 		_beat(out,0.0,"room","hush",{"dur":1.4},"anticipation")
 		for m:Dictionary in _of_kind(ctx,["official","hearth_chief"]):
 			if rng.randf()<0.6:_beat(out,0.6+_lag(ctx,m),String(m.key),["nod","straighten","lips_pressed"][rng.randi_range(0,2)],{},"reaction")
-		for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,0.4,String(scribe.key),"scribble",{},"reaction")
+		for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,0.4,String(scribe.key),_writing_act(ctx.facts,scribe),{},"reaction")
 	elif not w.is_empty():
 		if accepted:
 			_beat(out,0.4,who,"exhale" if float(w.dread)>=0.4 else "beam",{},"action")
 			# Now and then one bow is not enough for them.
 			if _bit_ready(ctx,"over_thank") and _try(ctx,"over_thank",out,1.1):pass
 			elif _bit_ready(ctx,"double_bow") and _try(ctx,"double_bow",out,1.1):pass
-			else:_beat(out,1.1,who,"bow",{},"action")
+			else:_greet(ctx,out,1.1,who,"bow")
 		elif reaction in ["offended","furious"]:
 			_beat(out,0.4,who,"stiffen" if reaction=="furious" or float(w.pride)>0.65 else "face_fall",{},"action")
 		else:_beat(out,0.5,who,"face_fall",{"dur":1.0},"action")
@@ -1425,7 +1456,7 @@ static func _promise(ctx:Dictionary,out:Array)->void:
 			_beat(out,2.1,who,"deflate_polite",{"dur":1.6},"action")
 		else:
 			_beat(out,0.4,who,"deflate_polite",{},"action")
-			_beat(out,2.0,who,"bow_small",{},"action")
+			_greet(ctx,out,2.0,who,"bow_small")
 	var doubters:Array=_people(ctx,[who]).filter(func(m:Dictionary)->bool:return float(m.pride)>=0.6 and float(m.love)<0.45)
 	if not doubters.is_empty() and rng.randf()<0.6:_beat(out,1.0+rng.randf()*0.4,String(_pick(ctx,doubters).key),"eyes_narrow",{"at":who},"reaction")
 	var two:Array=_shuffled(rng,_of_kind(ctx,["official","hearth_chief"],[who]))
@@ -1445,11 +1476,11 @@ static func _dismiss(ctx:Dictionary,out:Array)->void:
 	if not w.is_empty() and String(ctx.firm)!=who:
 		if reaction=="furious":
 			_beat(out,0.3,who,"stiffen",{},"action")
-			_beat(out,1.2,who,"bow_curt",{},"action")
+			_greet(ctx,out,1.2,who,"bow_curt",true)
 		elif reaction=="offended":
 			_beat(out,0.3,who,"face_fall",{},"action")
-			_beat(out,1.3,who,"bow_small",{},"action")
-		else:_beat(out,0.3,who,"bow_small",{},"action")
+			_greet(ctx,out,1.3,who,"bow_small",true)
+		else:_greet(ctx,out,0.3,who,"bow_small",true)
 	if reaction in ["offended","furious"]:
 		var kind_one:Array=_people(ctx,[who]).filter(func(m:Dictionary)->bool:return float(m.empathy)>=0.6)
 		if not kind_one.is_empty() and rng.randf()<0.6:_beat(out,1.4,String(_pick(ctx,kind_one).key),"sympathetic_look",{"at":who},"reaction")
@@ -1506,12 +1537,12 @@ static func _gift(ctx:Dictionary,out:Array)->void:
 	if accepted:
 		if envoy!="":
 			match temper:
-				"haughty":_beat(out,2.0,envoy,"bow_curt",{},"action")
-				"nervous":_beat(out,2.0,envoy,"double_bow",{},"action")
+				"haughty":_greet(ctx,out,2.0,envoy,"bow_curt")
+				"nervous":_greet(ctx,out,2.0,envoy,"double_bow")
 				"greedy":
-					_beat(out,2.0,envoy,"bow_small",{},"action")
+					_greet(ctx,out,2.0,envoy,"bow_small")
 					_beat(out,2.8,envoy,"rub_hands_greedy",{},"action")
-				_:_beat(out,2.0,envoy,"bow_small",{},"action")
+				_:_greet(ctx,out,2.0,envoy,"bow_small")
 		if food and hungry(ctx.facts):
 			var eyes:Array=_shuffled(rng,_people(ctx,[envoy,String(bearer.get("key",""))]).filter(func(m:Dictionary)->bool:return not String(m.kind) in ["envoy","guard","bearer","attendant"]))
 			for i in mini(3 if starving(ctx.facts) else 2,eyes.size()):
@@ -1546,12 +1577,12 @@ static func _summon(ctx:Dictionary,out:Array)->void:
 		else:
 			_beat(out,1.2,who,"gape",{},"action")
 			if not near.is_empty():_beat(out,2.2,String(near.key),"nudge",{"at":who},"reaction")
-			_beat(out,2.6,who,"bow_deep",{},"action")
+			_greet(ctx,out,2.6,who,"bow_deep")
 	elif String(w.kind)=="commoner":
 		_beat(out,1.0,who,"gawk",{},"action")
 		_beat(out,1.9,who,"wipe_hands",{},"action")
 		if _bit_ready(ctx,"bow_wrong") and _try(ctx,"bow_wrong",out,2.4):pass
-		else:_beat(out,2.6,who,"bow",{},"action")
+		else:_greet(ctx,out,2.6,who,"bow")
 	else:
 		if float(w.dread)>=0.45 and _bit_ready(ctx,"wrong_door") and _try(ctx,"wrong_door",out,0.0):pass
 		elif float(w.dread)>=0.4 and _bit_ready(ctx,"bow_early") and _try(ctx,"bow_early",out,0.6):pass
@@ -1559,7 +1590,7 @@ static func _summon(ctx:Dictionary,out:Array)->void:
 			if not near.is_empty():_beat(out,1.4,String(near.key),"make_room",{"at":who},"reaction")
 			if float(w.dread)>=0.5:_beat(out,1.8,who,"wring_hands",{},"action")
 			elif float(w.love)>=LOVE_HIGH:_beat(out,1.8,who,"beam",{},"action")
-			if String(ctx.firm)!=who:_beat(out,2.6,who,"bow",{},"action")
+			_greet(ctx,out,2.6,who,"bow")
 	_play_bits(ctx,out,2.8)
 
 ## A gifted child (geniuses.gd, noticed): they do the thing they are gifted
@@ -1570,7 +1601,7 @@ static func _gifted_arrives(ctx:Dictionary,out:Array,who:String)->void:
 	var rng:RandomNumberGenerator=ctx.rng
 	var w:=_m(ctx,who)
 	var act:=String(GIFT_ACTS.get(String(w.gifted),"watch_god"))
-	_beat(out,1.0,who,"bow_small",{},"action")
+	_greet(ctx,out,1.0,who,"bow_small")
 	_beat(out,2.2,who,act,{"gift":String(w.gifted)},"action")
 	var grown:Array=_shuffled(rng,_of_kind(ctx,["official","hearth_chief","elder"],[who]))
 	if grown.size()>=2:
@@ -1578,7 +1609,7 @@ static func _gifted_arrives(ctx:Dictionary,out:Array,who:String)->void:
 		_beat(out,3.3,String((grown[1] as Dictionary).key),"exchange_look",{"at":String((grown[0] as Dictionary).key)},"reaction")
 	for elder:Dictionary in _of_kind(ctx,["elder"],[who]):
 		_beat(out,3.8,String(elder.key),"nod_proud",{"at":who},"reaction");break
-	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,3.6,String(scribe.key),"scribble",{},"reaction")
+	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,3.6,String(scribe.key),_writing_act(ctx.facts,scribe),{},"reaction")
 	ctx["star"]=who
 	_ran(ctx,"gifted")
 
@@ -1590,7 +1621,7 @@ static func _envoy_arrives(ctx:Dictionary,out:Array,envoy:String)->void:
 		"haughty":
 			_beat(out,1.0,envoy,"sniff_disdain",{},"action")
 			_beat(out,2.4,envoy,"brush_sleeve",{},"action")
-			_beat(out,3.2,envoy,"bow_curt",{},"action")
+			_greet(ctx,out,3.2,envoy,"bow_curt")
 			ctx["star"]=envoy;_ran(ctx,"envoy_sniff")
 		"nervous":
 			var dogs:Array=_of_kind(ctx,["dog"])
@@ -1598,12 +1629,12 @@ static func _envoy_arrives(ctx:Dictionary,out:Array,envoy:String)->void:
 				_beat(out,1.0,String((dogs[0] as Dictionary).key),"sniff",{"at":envoy},"action")
 				_beat(out,1.4,envoy,"startle",{"at":String((dogs[0] as Dictionary).key)},"action")
 				ctx["star"]=envoy;_ran(ctx,"envoy_startle")
-			_beat(out,2.4,envoy,"double_bow",{},"action")
+			_greet(ctx,out,2.4,envoy,"double_bow")
 		"greedy":
 			_beat(out,1.0,envoy,"appraise",{},"action")
-			_beat(out,3.0,envoy,"bow_small",{},"action")
+			_greet(ctx,out,3.0,envoy,"bow_small")
 			ctx["star"]=envoy;_ran(ctx,"envoy_appraise")
-		_:_beat(out,1.6,envoy,"bow",{},"action")
+		_:_greet(ctx,out,1.6,envoy,"bow")
 	if _bit_ready(ctx,"company_gawk") and _try(ctx,"company_gawk",out,1.2):pass
 	if _bit_ready(ctx,"stare_down") and _try(ctx,"stare_down",out,2.4):pass
 
@@ -1645,7 +1676,8 @@ static func _exit(ctx:Dictionary,out:Array)->void:
 					_beat(out,1.9,String((two[0] as Dictionary).key),"exchange_look",{"at":String((two[1] as Dictionary).key)},"hold")
 					_beat(out,2.0,String((two[1] as Dictionary).key),"exchange_look",{"at":String((two[0] as Dictionary).key)},"hold")
 		_:
-			if reaction in ["pleased","delighted"] and _bit_ready(ctx,"bump_post") and _try(ctx,"bump_post",out,0.2):pass
+			if not presentation(ctx.facts,_m(ctx,who)).is_empty():_greet(ctx,out,0.2,who,"bow_small",true)
+			elif reaction in ["pleased","delighted"] and _bit_ready(ctx,"bump_post") and _try(ctx,"bump_post",out,0.2):pass
 			elif reaction in ["pleased","delighted"]:_beat(out,0.2,who,"back_out_bowing",{"walk":"backward"},"action")
 			for m:Dictionary in room:
 				if rng.randf()<0.4:_beat(out,0.8+_lag(ctx,m),String(m.key),"nod",{},"reaction")
@@ -1707,6 +1739,12 @@ static func _asleep(ctx:Dictionary)->String:
 ## Can the room play this bit now (the people it needs are here, the facts
 ## allow it)?
 static func _can(ctx:Dictionary,bit:String)->bool:
+	# Routine etiquette can be restrained without taking worship, terror,
+	# defiance or an execution away from the engine's explicit event.
+	if String(ctx.kind) in ["summon","gift","decree","promise","dismiss","exit","line","wait","god_speaks"]:
+		if bit in ["eager_bow","double_bow","over_thank","bow_early","bow_wrong","child_copies","bump_post"]:
+			var person:=_m(ctx,String(ctx.event.get("who",ctx.main))) if bit in ["double_bow","over_thank","bow_early","bow_wrong","bump_post"] else {}
+			if routine_act(ctx.facts,person,"bow") in ["nod","bow_small"]:return false
 	var event:Dictionary=ctx.event
 	var target:=String(event.get("target",""))
 	var who:=String(event.get("who",ctx.main))
@@ -1740,7 +1778,9 @@ static func _can(ctx:Dictionary,bit:String)->bool:
 		"dead_silence":return not _silence_breaker(ctx).is_empty()
 		"winter_stamp":return season=="winter" and not _people(ctx,[String(ctx.main),who]).is_empty()
 		"fly_elder":return season=="summer" and not _of_kind(ctx,["elder"],[String(ctx.main),who]).is_empty() and not _nearest(ctx,_of_kind(ctx,["elder"],[String(ctx.main),who])[0],["official","hearth_chief","commoner","child"],[String(ctx.main)]).is_empty()
-		"scribe_cramp":return not _of_kind(ctx,["scribe"]).is_empty()
+		"scribe_cramp":
+			var scribes:=_of_kind(ctx,["scribe"])
+			return not scribes.is_empty() and _writing_act(ctx.facts,scribes[0])=="scribble"
 		"bump_post":return not _m(ctx,who).is_empty() and String(ctx.firm)!=who
 		"forgot_thing":return not _forgotten(ctx).is_empty()
 		"wrong_door":return not _m(ctx,who).is_empty() and not _of_kind(ctx,["official","hearth_chief","door_guard"],[who]).is_empty()
@@ -2136,7 +2176,7 @@ static func _bit(ctx:Dictionary,bit:String,out:Array,at:float)->bool:
 			_beat(out,at,who,"enter_wrong",{"from":"wrong_side"},"anticipation")
 			_beat(out,at+1.5,String(pointer.key),"point",{"at":who},"anticipation")
 			_beat(out,at+2.2,who,"hurry_round",{},"action")
-			_beat(out,at+3.4,who,"bow",{},"action")
+			_greet(ctx,out,at+3.4,who,"bow")
 			ctx["star"]=who;ctx["other"]=String(pointer.key)
 		"bow_wrong":
 			var wrong:=_wrong_one(ctx)
@@ -2153,7 +2193,7 @@ static func _bit(ctx:Dictionary,bit:String,out:Array,at:float)->bool:
 			if not near.is_empty():
 				_beat(out,at+1.9,String(near.key),"hand_to_mouth",{},"reaction")
 				_beat(out,at+2.4,String(near.key),"nudge",{"at":who},"reaction")
-			_beat(out,at+2.9,who,"bow_deep",{},"action")
+			_greet(ctx,out,at+2.9,who,"bow_deep")
 			ctx["star"]=who
 		"stare_down":
 			# Their guard sizes up our proudest; one of them blinks first.
@@ -2842,7 +2882,9 @@ static func ambient(cast_in:Array,facts_in:Dictionary,rng_seed:int)->Array:
 		var fighters:Array=ours.filter(func(m:Dictionary)->bool:return int(m.age)>=16 and int(m.age)<56 and not busy.has(String(m.key)))
 		fighters.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return float(a.courage)>float(b.courage) if not is_equal_approx(float(a.courage),float(b.courage)) else int(a.index)<int(b.index))
 		if not fighters.is_empty():
-			_loop(out,String((fighters[0] as Dictionary).key),"sharpen_spear",[6.0,12.0],{},"war",rng)
+			var fighter:Dictionary=fighters[0]
+			var act:="sharpen_spear" if bool(presentation(facts,fighter).get("rustic_props",true)) else "glance_door"
+			_loop(out,String(fighter.key),act,[6.0,12.0],{},"war",rng)
 			busy[String((fighters[0] as Dictionary).key)]=true
 		var watcher:Dictionary=guards[0] if not guards.is_empty() else (fighters[1] if fighters.size()>=2 else {})
 		if not watcher.is_empty():
@@ -2894,7 +2936,7 @@ static func ambient(cast_in:Array,facts_in:Dictionary,rng_seed:int)->Array:
 						if absf(_where(o)-_where(m))<gap:gap=absf(_where(o)-_where(m));near=o
 					_loop(out,String(m.key),"tug_sleeve",[10.0,20.0],{"at":String(near.key)},"life",rng)
 			"scribe":
-				_loop(out,String(m.key),"scribble",[4.0,9.0],{},"writing",rng)
+				_loop(out,String(m.key),_writing_act(facts,m),[4.0,9.0],{},"writing",rng)
 			"dog":
 				if room_dread>=DREAD_HIGH:_hold(out,String(m.key),"lie_down",{"ears":"back"},"dread")
 				else:
