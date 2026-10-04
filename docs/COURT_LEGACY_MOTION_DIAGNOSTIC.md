@@ -61,5 +61,14 @@ Narrowing a garment inside the bare thigh cannot provide an acceptable remedy.
 Source body positions are still exact; provider preservation tests establish
 unchanged weights/rig/morphs. No pose or production changes are made here.
 
+For independent pose calibration, `--samples=24` covers each complete base loop
+or at least 1.6 seconds of an acting transition. `--profiles=res://artifacts/profiles.json`
+loads named maps of `CourtPoseClearance.overrides`, before creating each figure.
+For example, `{"trial":{"female_old":{"stand":6,"sit_cross":[[0,6],[0.65,12],[1.6,4]]}}}`.
+Each profile gets its own suffixed report, and the override is cleared afterward.
+Include `stance_cross` when checking the separate held crossed-leg idle clip.
+This fixture consumes the runtime helper; it does not modify shared clips or
+carry a competing implementation of the arm correction.
+
 No GPU process, simulation state, source body/rig or animation edits. Save
 compatibility unchanged. New diagnostic files only; no shared production conflict.
