@@ -6,6 +6,10 @@ const VALUES:=preload("res://scripts/societal_values_model.gd")
 # Give root-dependent helpers a tree without running the terrain startup flow.
 class IsolatedRenderer extends RENDERER:
 	func _ready()->void:pass
+	func _process(_delta:float)->void:pass
+	# Geometry fixtures deliberately keep labels outside a live camera tree.
+	# Screen-space city-card behavior has its own suite.
+	func _register_city_card(_label:Label3D)->void:pass
 
 var renderer:Node3D
 

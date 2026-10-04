@@ -61,9 +61,9 @@ static func known_crafts() -> Dictionary:
 		"carts": any.call(["solid_wheel_assembly", "spoked_wheel_assembly", "cart_running_gear", "cart_bed_framing", "transport_cart", "sleeved_cart_assembly", "wheel"]),
 	}
 
-static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dictionary], center: Vector3, height: Callable, land: Callable, parent: Node3D) -> void:
+static func render(plan: Dictionary, plots: Array[Dictionary], routes: Array[Dictionary], center: Vector3, height: Callable, land: Callable, parent: Node3D, paint_ground:=true) -> void:
 	# The worn ground of the home settlement (painted into the terrain).
-	GROUNDS.build_if_home(plan, plots, routes, center)
+	if paint_ground:GROUNDS.build_if_home(plan, plots, routes, center)
 	var crafts := known_crafts()
 	var placed: Dictionary = {}   # prop name -> Array[Transform3D]
 	var blocked: Array[Vector3] = [] # x, z, radius (km) of every footprint and prop
