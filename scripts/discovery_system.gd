@@ -71,6 +71,10 @@ class ResearchScan extends RefCounted:
 	var best:Dictionary={}
 	## _score_best_candidate's answers in this scan, by what they were read from.
 	var scored:Dictionary={}
+	## _candidate_score of each question read in this scan.
+	var scores:Dictionary={}
+	## Where the last _score_best_candidate_read that found nothing stopped.
+	var read_stop:=0
 	var needs:Dictionary={}
 	var seed_value:=0
 	var seeded:=false
@@ -103,7 +107,7 @@ class ResearchScan extends RefCounted:
 	func clear_batch()->void:
 		day=-1;known_size=-1;known={};has_known=false;society={};has_society=false
 		environment={};has_environment=false;home_resources={};has_home_resources=false
-		eligible={};best={};scored={};needs={}
+		eligible={};best={};scored={};scores={};needs={}
 	func clear_catalog()->void:
 		seed_value=0;seeded=false;seed_tables={};by_dynamic={};by_dynamic_basis=[]
 		children={};children_basis=[];open_years=PackedFloat64Array();open_years_basis=[]
@@ -1447,10 +1451,10 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 	# Inside a scan the answer is kept, like _best_candidate_for_channel's, by
 	# what it is read from: the line's allocation and chosen target, the day,
 	# and which of the channel's own questions are passed over (ids of other
-	# channels in `skip` never change it). One reading with no band limit
-	# serves every limit: the questions are read nearest band first, so a
-	# limited reading finds the same question when its band is within the
-	# limit (or it is the chosen target), and nothing otherwise.
+	# channels in `skip` never change it). The questions are read nearest band
+	# first, so what a reading finds is what any wider limit finds too: a
+	# further limit is served from it (the question when its band is within
+	# the limit or it is the chosen target, else nothing).
 	var home:=_research_600_channel_home(channel)
 	var target:=String(WorldSimulation.state.research_targets.get(channel,""))
 	var key:="%s|%d|%s|%d" % [channel,_subcategory_allocation(home[0],home[1]),target,current_day]
@@ -1466,17 +1470,29 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 		if not own.is_empty():
 			own.sort()
 			key+="|"+"|".join(own)
+	# [question found (null while unread), its band (-1 for the chosen
+	# target), the furthest band read without finding one, where that
+	# reading stopped]. A wider limit carries on the reading from there.
 	var memo:Variant=_scan.scored.get(key)
 	if not memo is Array:
-		var found:=_score_best_candidate_read(channel,current_day,skip,TEAM_TIER_LAST)
-		var band:=-1 if found.is_empty() or String(found.get("id",""))==target else _tier_from_open(research_open_year(found),learning_year())
-		memo=[found,band]
+		memo=[null,0,-1,0]
 		_scan.scored[key]=memo
+	if memo[0]==null:
+		if max_tier<=int(memo[2]): return {}
+		var found:=_score_best_candidate_read(channel,current_day,skip,max_tier,int(memo[2])+1,int(memo[3]))
+		if found.is_empty():
+			memo[2]=max_tier;memo[3]=_scan.read_stop
+			if max_tier<TEAM_TIER_LAST: return {}
+		memo[0]=found
+		memo[1]=-1 if found.is_empty() or String(found.get("id",""))==target else _tier_from_open(research_open_year(found),learning_year())
 	var best:Dictionary=memo[0]
 	if best.is_empty() or int(memo[1])>max_tier: return {}
 	return best
 
-func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={},max_tier:int=TEAM_TIER_LAST)->Dictionary:
+## `from_tier` and `from_index` carry on a reading that found nothing up to
+## band from_tier-1 and stopped at from_index (its chosen target already
+## judged); _scan.read_stop is left where a reading that finds nothing stopped.
+func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={},max_tier:int=TEAM_TIER_LAST,from_tier:int=0,from_index:int=0)->Dictionary:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
 	# _scan_eligible, inlined for the channel's many candidates.
@@ -1484,7 +1500,7 @@ func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={
 	var memo:Dictionary=_scan.eligible
 	var judged_known:Dictionary=_scan_known() if scanning else known
 	var target:=String(WorldSimulation.state.research_targets.get(channel,""))
-	if target!="" and not known.has(target) and not skip.has(target):
+	if from_tier==0 and target!="" and not known.has(target) and not skip.has(target):
 		var chosen:Dictionary=catalog_by_id.get(target,{})
 		if not chosen.is_empty() and _channel_key(String(chosen.get("dynamic","")),String(chosen.get("subcategory","")))==channel:
 			var open:Variant=memo.get(target) if scanning else null
@@ -1493,10 +1509,12 @@ func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={
 				if scanning: memo[target]=open
 			if open: return chosen
 	var year:=learning_year()
+	var home:=_research_600_channel_home(channel)
+	var allocation:=_subcategory_allocation(home[0],home[1])
 	var by_age:=_channel_by_age(channel,candidates)
 	var opens:PackedFloat64Array=(_scan.by_age[channel] as Array)[2]
-	var index:=0
-	for tier in range(0,max_tier+1):
+	var index:=from_index
+	for tier in range(from_tier,max_tier+1):
 		var best:Dictionary={}
 		var best_score:=-INF
 		while index<by_age.size():
@@ -1510,11 +1528,19 @@ func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={
 				eligible=_discovery_is_eligible(discovery,current_day,judged_known)
 				if scanning: memo[id]=eligible
 			if not eligible: continue
-			var score:=_candidate_score(discovery)
+			# A question's score is kept for the scan with its line's allocation
+			# (the one input of it the scan's work can move).
+			var score:float
+			var known_score:Variant=_scan.scores.get(id) if scanning else null
+			if known_score==null or int(known_score[0])!=allocation:
+				score=_candidate_score(discovery)
+				if scanning: _scan.scores[id]=[allocation,score]
+			else: score=float(known_score[1])
 			if score>best_score:
 				best_score=score
 				best=discovery
 		if not best.is_empty(): return best
+	_scan.read_stop=index
 	return {}
 
 ## A channel's open questions (`candidates`, those not yet known) in order of
