@@ -309,19 +309,10 @@ def build(variant, out):
                     # thighs; its actual hip is wider than the trunk blueprint.
                     row_body=b.p[(np.abs(y-section_height)<.012*k)&(arm+hands<.2)]
                     if len(row_body):rx=max(rx,float(np.max(np.abs(row_body[:,0]))))
-                    # The hand travels beside the thigh, not beside the broad
-                    # pelvis. Keeping hip width down the whole panel buried it
-                    # in a cylindrical skirt. Fit the side to the actual leg
-                    # envelope while retaining the sewn waist and front/back.
-                    lower_body=b.p[(np.abs(y-height)<.012*k)&(arm+hands<.2)]
-                    side_width=(float(np.max(np.abs(lower_body[:,0])))+pant_ease+.003*k) if len(lower_body) else rx+ease
                     for col in range(steps):
                         a = a0 + (a1 - a0) * col / (steps - 1)
                         # Around +Z front; a narrow centre opening is deliberate.
-                        ease_in=min(1.0,t/.32);ease_in=ease_in*ease_in*(3-2*ease_in)
-                        side_fit=abs(math.sin(a))**3*ease_in
-                        width=(rx+ease+.004*k+.018*k*t)*(1-side_fit)+side_width*side_fit
-                        x = math.sin(a) * width
+                        x = math.sin(a) * (rx+ease+.004*k+.018*k*t)
                         depth=fr if math.cos(a)>=0 else bk
                         clearance=(depth+ease+.004*k)*(1-min(1,t/.28))+(.155+.025*t)*k*min(1,t/.28)
                         z = -cy+math.cos(a)*clearance
