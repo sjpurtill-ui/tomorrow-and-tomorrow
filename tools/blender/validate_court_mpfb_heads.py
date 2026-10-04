@@ -38,6 +38,20 @@ def check_payload(before, after):
     """Only head mesh records/references and appended data may change."""
     assert after.bin[:len(before.bin)] == before.bin, "original binary prefix changed"
     old, new = before.doc, copy.deepcopy(after.doc)
+    # Teeth are the one intentional new material: only the replaced Mouth
+    # primitive may use it. Every original material definition remains exact.
+    original_materials = old.get("materials", [])
+    materials = new.get("materials", [])
+    assert materials[:len(original_materials)] == original_materials, "original material changed"
+    appended = materials[len(original_materials):]
+    assert len(appended) <= 1 and all(material.get("name") == "TEETH" for material in appended), "unexpected appended material"
+    if appended:
+        teeth_index = len(original_materials)
+        mouth = node_for(after, "Mouth")
+        users = [index for index, mesh in enumerate(after.doc["meshes"])
+                 if any(primitive.get("material") == teeth_index for primitive in mesh["primitives"])]
+        assert users == [mouth.get("mesh")], "TEETH must be used only by the Mouth mesh"
+    new["materials"] = original_materials
     for key in ("accessors", "bufferViews"):
         assert len(new[key]) > len(old[key]), "no appended " + key
         assert new[key][:len(old[key])] == old[key], "original " + key + " changed"
@@ -92,6 +106,7 @@ def check_mesh(glb, name):
     all_motion = Counter()
     vertices = triangles = 0
     for primitive in mesh["primitives"]:
+        assert primitive.get("mode", 4) == 4, name + " is not a triangle primitive"
         attrs = primitive_arrays(glb, primitive)
         count = len(attrs["POSITION"])
         assert count > 0, name + " is empty"
@@ -128,7 +143,7 @@ def _oriented_faces(faces):
                    for face in faces for start in [int(np.argmin(face))])
 
 
-def retained_body(before, after, body, variant, cut):
+def retained_body(before, after, body, variant, cut, boundary_old_ids=()):
     """Prove actual lower-body data is retained, independent of vertex order."""
     old_mesh, new_mesh = before.mesh(body), after.mesh(body)
     assert len(old_mesh["primitives"]) == len(new_mesh["primitives"]) == 1, "body must remain one primitive"
@@ -147,16 +162,20 @@ def retained_body(before, after, body, variant, cut):
     np.testing.assert_array_equal(new_rows[new_ids], needle, err_msg="original lower-body position changed/missing")
     for key in oa:
         assert key in na, "lost lower-body attribute " + key
-        np.testing.assert_array_equal(na[key][new_ids], oa[key][old_ids], err_msg="changed lower-body attribute " + key)
+        fixed = ~np.isin(old_ids, boundary_old_ids) if key == "NORMAL" else np.ones(len(old_ids), dtype=bool)
+        np.testing.assert_array_equal(na[key][new_ids[fixed]], oa[key][old_ids[fixed]], err_msg="changed lower-body attribute " + key)
     ot, nt = targets(before, old_mesh, old), targets(after, new_mesh, new)
     assert ot.keys() <= nt.keys(), "original body target missing"
     for target_name, channels in ot.items():
         for key, values in channels.items():
             assert key in nt[target_name], "lost morph channel " + target_name + ":" + key
-            np.testing.assert_array_equal(nt[target_name][key][new_ids], values[old_ids],
+            fixed = ~np.isin(old_ids, boundary_old_ids) if key == "NORMAL" else np.ones(len(old_ids), dtype=bool)
+            np.testing.assert_array_equal(nt[target_name][key][new_ids[fixed]], values[old_ids[fixed]],
                                            err_msg="changed lower-body morph " + target_name + ":" + key)
     for target_name in nt.keys() - ot.keys():
-        np.testing.assert_array_equal(nt[target_name]["POSITION"][new_ids], 0., err_msg="new face target affects retained body: " + target_name)
+        for key, values in nt[target_name].items():
+            fixed = ~np.isin(old_ids, boundary_old_ids) if key == "NORMAL" else np.ones(len(old_ids), dtype=bool)
+            np.testing.assert_array_equal(values[new_ids[fixed]], 0., err_msg="new face target affects retained body: " + target_name + ":" + key)
     inverse = np.full(len(na["POSITION"]), -1, dtype=np.int64)
     inverse[new_ids] = old_ids
     old_faces = before.values(old["indices"]).reshape(-1, 3)
@@ -168,6 +187,16 @@ def retained_body(before, after, body, variant, cut):
     referenced = np.unique(new_faces)
     assert np.all(np.isin(new_ids, referenced)), "retained vertices are merely unused stale data"
     return {"retained_vertices": len(old_ids), "retained_triangles": len(old_low_faces)}, scale, origin
+
+
+def _edge_counts(faces):
+    return Counter(tuple(sorted((int(face[a]), int(face[b]))))
+                   for face in faces for a, b in ((0, 1), (1, 2), (2, 0)))
+
+
+def _new_cut_edges(old_faces, kept_faces):
+    previous = {edge for edge, count in _edge_counts(old_faces).items() if count == 1}
+    return {edge for edge, count in _edge_counts(kept_faces).items() if count == 1} - previous
 
 
 def _welded_neck_edges(points, faces, scale, origin):
@@ -215,6 +244,37 @@ def check_graft(before, after, body, variant):
     expected = old_faces[np.all(oa["POSITION"][old_faces, 1] <= cut, axis=1)]
     retained_faces = new_faces[np.all(new_faces < start, axis=1)]
     assert _oriented_faces(mapping[retained_faces]) == _oriented_faces(expected), "retained body triangles do not match the original cut"
+    cut_edges = _new_cut_edges(old_faces, expected)
+    assert len(cut_edges) >= 8, "original cut boundary was not found"
+    boundary_ids = np.unique(np.asarray(list(cut_edges)))
+    fixed_prefix = ~np.isin(mapping, boundary_ids)
+    np.testing.assert_array_equal(na["NORMAL"][:start][fixed_prefix], oa["NORMAL"][mapping[fixed_prefix]], err_msg="non-boundary retained normals changed")
+    old_targets = targets(before, old_mesh, old)
+    new_targets = targets(after, mesh, new)
+    for name, channels in new_targets.items():
+        for key, values in channels.items():
+            fixed = fixed_prefix if key == "NORMAL" else np.ones(start, dtype=bool)
+            original = old_targets.get(name, {}).get(key)
+            expected_values = original[mapping[fixed]] if original is not None else np.zeros_like(values[:start][fixed])
+            np.testing.assert_array_equal(values[:start][fixed], expected_values, err_msg="retained-prefix target changed: " + name + ":" + key)
+    # Closed but disconnected caps are not an attachment. Every actual old
+    # cut edge must receive exactly one triangle reaching the new head, even
+    # where the irregular original cut dips below the nominal neck band.
+    cross = new_faces[np.any(new_faces < start, axis=1) & np.any(new_faces >= start, axis=1)]
+    assert len(cross) >= len(cut_edges), "new head has no complete connecting annulus"
+    qy = (na["POSITION"][:, 1] - origin[1]) / scale
+    assert np.all((qy[cross] > -.080) & (qy[cross] < .040)), "connecting triangles leave the neck"
+    inverse_mapping = {int(old_index): index for index, old_index in enumerate(mapping)}
+    cross_edges = _edge_counts(cross)
+    for a, b in cut_edges:
+        edge = tuple(sorted((inverse_mapping[a], inverse_mapping[b])))
+        assert cross_edges[edge] == 1, "original cut edge not attached exactly once: " + str((a, b))
+    head_faces = new_faces[np.all(new_faces >= start, axis=1)]
+    head_boundary = {edge for edge, count in _edge_counts(head_faces).items()
+                     if count == 1 and max(qy[list(edge)]) < .035}
+    assert len(head_boundary) >= 8, "new head neck boundary was not found"
+    for edge in head_boundary:
+        assert cross_edges[edge] == 1, "new neck boundary not attached exactly once: " + str(edge)
     referenced = np.unique(new_faces)
     assert np.all(np.isin(np.arange(start), referenced)), "unused retained-prefix vertices"
     original_defects = _welded_neck_edges(oa["POSITION"], old_faces, scale, origin)
@@ -234,7 +294,7 @@ def check_graft(before, after, body, variant):
             moved = int(np.count_nonzero(np.linalg.norm(channels["POSITION"][start:], axis=1) > 1e-6))
             assert moved >= 5, "identity is inert on the new head: " + name
             identity_moved[name] = moved
-    preserved, _, _ = retained_body(before, after, body, variant, -.040)
+    preserved, _, _ = retained_body(before, after, body, variant, -.040, boundary_ids)
     return head_data, {**preserved, "head_vertices": len(na["POSITION"]) - start,
                        "neck_defects": len(new_defects), "identities_nonzero": len(identity_moved)}
 
@@ -261,6 +321,9 @@ def check(root, baseline_ref):
                     for name in ("Eyes", "Brows", "Mouth"):
                         assert "mesh" in node_for(after, name), "missing facial part: " + name
                         part = check_mesh(after, name)
+                        if name == "Eyes":
+                            for channel in GAZE:
+                                assert part["moved_vertices"].get(channel, 0) >= 5, "Eyes lacks working gaze: " + channel
                         motion.update(part["moved_vertices"])
                     for name in IDENTITY + EXPRESSIONS + MOODS:
                         assert motion[name] >= 5, "missing/inert court face channel: " + name
