@@ -5,6 +5,7 @@ const Figure=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting=preload("res://scripts/hud/court_acting.gd")
 const Audit=preload("res://tools/court_acting_audit.gd")
 const TIMES:=[0.0,.2,.4,.65,.9,1.2,1.6]
+var _pose_fit:Script
 
 func _ready()->void:
 	var variants:=["male_adult","female_old"];var outfits:=["hide","tunic","robe"]
@@ -19,8 +20,11 @@ func _ready()->void:
 		if arg.begins_with("--profiles="):profile_file=arg.trim_prefix("--profiles=")
 		if arg.begins_with("--samples="):dense=maxi(2,int(arg.trim_prefix("--samples=")))
 	if not profile_file.is_empty():
-		var profiles:Dictionary=JSON.parse_string(FileAccess.get_file_as_string(profile_file))
+		var profiles:Variant=JSON.parse_string(FileAccess.get_file_as_string(profile_file))
+		if not profiles is Dictionary or profiles.is_empty():
+			push_error("Expected a nonempty pose-profile dictionary: "+profile_file);get_tree().quit(2);return
 		var fit=load("res://scripts/hud/court_pose_clearance.gd")
+		_pose_fit=fit
 		for name:String in profiles:
 			fit.overrides=profiles[name]
 			_dump(variants,outfits,label+"-"+name.validate_filename(),clips,dense)
@@ -84,14 +88,17 @@ func _dump(variants:Array,outfits:Array,label:String,clips:Array,dense:int)->voi
 			file.store_line(JSON.stringify({"kind":"mesh","variant":variant,"outfit":outfit,"height":f._base_height,
 				"body_triangles":bs.i,"hand_triangles":hand_triangles,"leg_triangles":leg_triangles,"hidden":hidden,"newly_hidden":newly_hidden,"body_position_mismatches":mismatches,"pieces":metadata}))
 			for clip:String in clips:
+				_check_elbow_limit(f,variant,clip)
 				Audit._reset(f,acting)
 				if clip.begins_with("kneel") or clip.begins_with("sit_cross") or clip=="stance_cross":
 					f.play("stand",0.0,0.0);Acting.play(f,clip.trim_suffix("_release"),{"blend":0.0})
 					if clip.ends_with("_release"):
-						for frame in 48:Audit._frame(f,acting)
+						var settle_frames:=ceili(Acting.clip_length(clip.trim_suffix("_release"))/Audit.DT)
+						for frame in settle_frames:Audit._frame(f,acting)
 						Acting.stop(f,.45);f.play("walk_out",0.0,0.0)
 				else:f.play(clip,0.0,0.0)
 				var now:=0.0
+				var previous_sample:=-1.0
 				var sample_times:=TIMES.duplicate()
 				if dense>0:
 					var duration:=1.6
@@ -101,6 +108,8 @@ func _dump(variants:Array,outfits:Array,label:String,clips:Array,dense:int)->voi
 					for i in dense:sample_times.append(duration*float(i)/float(dense-1))
 				for target:float in sample_times:
 					while now+Audit.DT*.5<target:Audit._frame(f,acting);now+=Audit.DT
+					if is_equal_approx(now,previous_sample):continue
+					previous_sample=now
 					f.skeleton.force_update_all_bone_transforms();var pose:=Audit._pose(f.skeleton,false);var cloth:Array=[]
 					for probe:Dictionary in probes:cloth.append(_vectors(Audit._skin(probe,pose)))
 					file.store_line(JSON.stringify({"kind":"pose","variant":variant,"outfit":outfit,"clip":clip,"time":now,"body":_vectors(Audit._skin(bp,pose)),"pieces":cloth}))
@@ -108,6 +117,31 @@ func _dump(variants:Array,outfits:Array,label:String,clips:Array,dense:int)->voi
 			f.free()
 		source.free()
 	file.close();print("LEGACY_MOTION_EXPORT poses=",count," path=",dir+label+".jsonl")
+
+func _check_elbow_limit(fig:Node3D,variant:String,clip:String)->void:
+	if _pose_fit==null or not clip in ["sit_cross","stance_cross"]:return
+	var profile:Dictionary=_pose_fit.profile_for(variant)
+	var value:Variant=profile.get(clip,{})
+	if not value is Dictionary or not value.has("flex"):return
+	var source:Animation=Acting.library(variant).get(clip)
+	var skeleton:Skeleton3D=fig.get("skeleton")
+	var minimum:=180.0;var touched:=false
+	for track in source.get_track_count():
+		if source.track_get_type(track)!=Animation.TYPE_ROTATION_3D:continue
+		var path:=String(source.track_get_path(track))
+		for side:String in ["L","R"]:
+			if not path.ends_with(":forearm."+side):continue
+			var bone:=skeleton.find_bone("forearm."+side);var hand:=skeleton.find_bone("hand."+side)
+			var toward:Vector3=-skeleton.get_bone_rest(bone).origin
+			var curve:Variant=value.flex.get(side,0.0) if value.flex is Dictionary else value.flex
+			for key in source.track_get_key_count(track):
+				var amount:float=_pose_fit.degrees_at(curve,source.track_get_key_time(track,key))
+				if amount>=0.0:continue
+				var rotation:Quaternion=source.track_get_key_value(track,key)
+				var wrist:=rotation*skeleton.get_bone_rest(hand).origin
+				var original:=rad_to_deg(PI-wrist.angle_to(toward))
+				minimum=minf(minimum,original+amount);touched=true
+	if touched:print("POSE_ELBOW_LIMIT ",variant," ",clip," minimum_bend_degrees=",minimum," valid=",minimum>=0.0)
 
 static func _key(p:Vector3)->String:return "%.6f:%.6f:%.6f" % [p.x,p.y,p.z]
 static func _mask(c:Color,outfit:String)->float:return c.g if outfit=="hide" else (c.b if outfit=="tunic" else c.a)

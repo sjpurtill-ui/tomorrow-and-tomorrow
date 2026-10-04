@@ -72,3 +72,25 @@ carry a competing implementation of the arm correction.
 
 No GPU process, simulation state, source body/rig or animation edits. Save
 compatibility unchanged. New diagnostic files only; no shared production conflict.
+
+Dense samples now omit repeated 30 Hz poses (64 requested samples over a 1.6 s
+transition produce 49 distinct records). Release warm-up uses the actual clip
+duration, including the full 2.5 s kneel. Invalid profile JSON exits with an
+error instead of leaving an idle fixture. Negative flex trials also print the
+minimum anatomical elbow bend at the exact source keys; ext12's two prototype
+bodies remain more than 6 degrees short of straight.
+
+The ray diagnostic uses conservative perspective bounds to omit triangles that
+cannot meet the requested rays. A deterministic random control compares this
+optimization with the original complete triangle scan, including cameras inside
+the geometry and triangles crossing the camera plane. Python controls: 4/4.
+
+The two-body ext12 candidate removes sampled bare-body hand crossings. Older
+female cloth still crosses the inner hand edge briefly during descent, around
+0.73–0.97 s. Independent front/side renders show the wrist, palm and fingers
+remaining visible; this is a substantial improvement over forearm burial, not a
+zero-collision claim. Local six-direction interior sampling estimates typical
+overlap of 3–6 mm and a sampled maximum near 13 mm, falling below 2.4 mm at 0.93 s
+and 0.2 mm at 0.97 s. Keep visual acceptance separate from numerical counts.
+Expanded replacement meshes require fresh walking and ordinary-pose checks;
+earlier walking counts against the inherited legacy meshes do not certify them.

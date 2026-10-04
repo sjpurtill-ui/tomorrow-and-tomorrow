@@ -16,12 +16,29 @@ def edges(faces):
     return np.unique(np.sort(np.concatenate((faces[:, [0, 1]], faces[:, [1, 2]], faces[:, [2, 0]])), axis=1), axis=0)
 
 
-def nearest_hits(origin, targets, triangles):
+def nearest_hits(origin, targets, triangles, projected_bounds=True):
     result = np.full(len(targets), np.inf)
-    a = triangles[:, 0]
-    e1, e2 = triangles[:, 1] - a, triangles[:, 2] - a
+    all_a = triangles[:, 0]
+    all_e1, all_e2 = triangles[:, 1] - all_a, triangles[:, 2] - all_a
+    forward=triangles.mean(axis=(0,1))-origin
+    can_project=projected_bounds and np.linalg.norm(forward)>1e-9
+    if can_project:
+        forward/=np.linalg.norm(forward)
+        right=np.cross(forward,[0.,1.,0.] if abs(forward[1])<.95 else [1.,0.,0.]);right/=np.linalg.norm(right)
+        up=np.cross(right,forward);relative=triangles-origin
+        depth=relative@forward;uncullable=depth.min(axis=1)<=1e-9
+        screen=np.stack((relative@right,relative@up),axis=-1)/np.where(abs(depth)>1e-9,depth,1e-9)[:,:,None]
+        low,high=screen.min(axis=1),screen.max(axis=1)
     for start in range(0, len(targets), 16):
         direction = targets[start:start+16] - origin
+        candidates=np.ones(len(triangles),dtype=bool)
+        if can_project and np.all(direction@forward>1e-9):
+            screen=np.column_stack((direction@right,direction@up))/(direction@forward)[:,None]
+            # Conservative perspective bounds. Triangles crossing the camera
+            # plane always remain candidates; no near-plane approximation.
+            candidates=uncullable | (np.all(high>=screen.min(axis=0)-1e-8,axis=1)&np.all(low<=screen.max(axis=0)+1e-8,axis=1))
+        if not np.any(candidates):continue
+        a,e1,e2=all_a[candidates],all_e1[candidates],all_e2[candidates]
         length = np.linalg.norm(direction, axis=1)
         direction /= length[:, None]
         h = np.cross(direction[:, None], e2)
