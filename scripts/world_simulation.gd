@@ -194,10 +194,22 @@ func start_world()->void:
 	clear()
 	_seed=GameState.world_seed
 	last_day=int(GameState.elapsed_days)
+	var Start:=preload("res://scripts/civilization_start.gd")
+	var seats:Array=[]
+	for civ in CivilizationSystem.civilizations:seats.append(CivilizationSystem._civilization_world_position(civ))
+	seats.append(Start.candidate(_seed,0))
 	for civ in CivilizationSystem.civilizations:
 		var id:=String(civ.id)
-		var origin:=CivilizationSystem._civilization_world_position(civ)
-		if start_provider.is_valid():origin=start_provider.call(origin)
+		var seat:=CivilizationSystem._civilization_world_position(civ)
+		var origin:=seat
+		if start_provider.is_valid():origin=start_provider.call(seat)
+		# A people looks for its first site around its own seat. A search that
+		# found nothing close and wandered far never carries it into another
+		# people's country: it stays at its seat, which the planet already
+		# judged livable (civilization_start.gd).
+		var others:=seats.filter(func(other:Vector2)->bool:return other!=seat)
+		var apart:=Start.separation(origin,others)
+		if origin.distance_to(seat)>Start.SETTING_REACH_KM and apart<Start.SEAT_SEPARATION_KM*0.75 and apart<Start.separation(seat,others):origin=seat
 		civ.world_position=origin
 		civ.position=Vector2(origin.x/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_X_KM,origin.y/CivilizationSystem.CIVILIZATION_WORLD_RADIUS_Z_KM)
 		create_actor(id,_seed,origin)

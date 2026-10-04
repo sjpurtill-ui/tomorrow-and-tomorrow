@@ -364,7 +364,9 @@ table). By year 300 the balanced path reads 41-66 everywhere; war lifts Might
 to 93, learning Genius to 91 at year 25 and 65 by 300, building Splendor to
 71, the arts' postures Cunning to 73 and Persuasion to 83, administration
 Order to 70, carriers Reach to 79; nothing reaches 97 off its own lean.
-Endurance past 70 needs 100 days and more in store. In the raid world the
-same raids met with cunning lose 35% fewer stores (at 3% fewer people by
-600, the hands on scouting), and persuasion draws 17% fewer raids (at the
+Endurance past 70 needs 100 days and more in store. In the raid world
+(neighbours met from year 98, as far peoples are: tools/sim/params.json
+contact_year) the
+same raids met with cunning lose 42% fewer stores (at 3% fewer people by
+600, the hands on scouting), and persuasion draws 11% fewer raids (at the
 gifts' cost).
