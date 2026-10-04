@@ -64,6 +64,8 @@ static var _home_revision:=0
 static var _home_paths:Array[Dictionary]=[]
 static var _home_hearth:=Vector2.ZERO
 static var _home_has_hearth:=false
+static var _home_shares:Dictionary={}
+static var _home_bearings:Array=[]
 static var tile_builds:=0
 static var tile_cache_hits:=0
 static var _materials:Array[WeakRef]=[]
@@ -106,6 +108,7 @@ static func clear()->void:
 	_requests.clear();_served_at=Vector2.INF
 	_home_args.clear();_tile_cache.clear();_tile_inputs.clear()
 	_home_paths.clear();_home_hearth=Vector2.ZERO;_home_has_hearth=false
+	_home_shares.clear();_home_bearings.clear()
 	_tile_view=Vector2i(2147483647,2147483647);_tile_revision=0;_home_revision=0
 	_tile_level=-1
 	tile_builds=0;tile_cache_hits=0
@@ -197,7 +200,10 @@ static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionar
 	slot_keys[0]="home"
 	_home_args=[plan,plots,routes,center]
 	var bearings:=_approach_bearings(Vector2(center.x,center.z))
-	_home_revision=hash([center,_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),_labour(),_works_near(center),bearings])
+	_home_shares=_labour();_home_bearings=bearings.duplicate()
+	var revision:=hash([center,plan.is_empty(),_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),_home_shares,_works_near(center),bearings])
+	if revision==_home_revision and slot_frames[0].y>0.0:return
+	_home_revision=revision
 	# Distant growth does not move or repaint the old centre's texture.
 	_home_paths.clear();_home_hearth=Vector2.ZERO;_home_has_hearth=false
 	for plot in plots:
@@ -244,22 +250,34 @@ static func _in_rect(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictio
 		var polygon:=_polygon(plot)
 		var bounds:=Rect2(_v2(plot.get("centroid",Vector2.ZERO)),Vector2.ZERO)
 		for point in polygon:bounds=bounds.expand(point)
-		if nearby.intersects(bounds,true):selected_plots.append(plot)
+		if nearby.intersects(bounds,true):selected_plots.append(_ground_plot_snapshot(plot))
 	for route in routes:
 		var points:=_points(route)
 		if points.is_empty():continue
 		var bounds:=Rect2(points[0],Vector2.ZERO)
 		for point in points:bounds=bounds.expand(point)
-		if nearby.intersects(bounds,true):selected_routes.append(route)
+		if nearby.intersects(bounds,true):
+			var copy:=route.duplicate();copy["points"]=points.duplicate()
+			selected_routes.append(copy)
 	for record in plan.get("buildings",[]):
-		if nearby.has_point(Vector2(record.get("position",Vector2.ZERO))):buildings.append(record)
+		if nearby.has_point(Vector2(record.get("position",Vector2.ZERO))):
+			var copy:Dictionary=record.duplicate();copy["plot"]=_ground_plot_snapshot(record.get("plot",{}))
+			buildings.append(copy)
 	var paths:Array[Dictionary]=[]
 	for path in _home_paths:
 		var points:PackedVector2Array=path.points
 		var bounds:=Rect2(points[0],Vector2.ZERO)
 		for point in points:bounds=bounds.expand(point)
 		if nearby.intersects(bounds,true):paths.append(path)
-	return {"plan":{"buildings":buildings,"_ground_fallback":plan.is_empty(),"_ground_paths":paths,"_ground_hearth":_home_hearth,"_ground_has_hearth":_home_has_hearth},"plots":selected_plots,"routes":selected_routes}
+	return {"plan":{"buildings":buildings,"_ground_fallback":plan.is_empty(),"_ground_paths":paths,"_ground_hearth":_home_hearth,"_ground_has_hearth":_home_has_hearth,"_ground_shares":_home_shares.duplicate(),"_ground_bearings":_home_bearings.duplicate()},"plots":selected_plots,"routes":selected_routes}
+
+## Freeze only paint inputs: deep-copying saved building sites and unrelated
+## simulation payloads would make a visual job unnecessarily expensive.
+static func _ground_plot_snapshot(plot:Dictionary)->Dictionary:
+	var copy:=plot.duplicate()
+	copy["polygon"]=_polygon(plot).duplicate()
+	if plot.get("damage") is Dictionary:copy["damage"]=(plot.damage as Dictionary).duplicate()
+	return copy
 
 ## Installs at most one tile per settled frame. Four resident layers and twelve
 ## CPU image pairs bound memory independently of the city's total land area.
@@ -335,9 +353,10 @@ static func set_approaches(value:Dictionary)->void:
 		build(_home_args[0],plots,routes,_home_args[3])
 
 static func _paint_key(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,frame:=Rect2())->int:
-	var shares:=_labour()
+	var shares:Dictionary=plan._ground_shares.duplicate() if plan.has("_ground_shares") else _labour()
 	for activity in shares:shares[activity]=snappedf(float(shares[activity]),0.1)
-	return hash([center,frame,_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),plan.get("_ground_paths",[]),plan.get("_ground_hearth",Vector2.ZERO),plan.get("_ground_has_hearth",false),_works_near(center) if not frame.has_area() else [],_approach_bearings(Vector2(center.x,center.z)),shares])
+	var bearings:Array=plan._ground_bearings if plan.has("_ground_bearings") else _approach_bearings(Vector2(center.x,center.z))
+	return hash([center,frame,bool(plan.get("_ground_fallback",plan.is_empty())),_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),plan.get("_ground_paths",[]),plan.get("_ground_hearth",Vector2.ZERO),plan.get("_ground_has_hearth",false),_works_near(center) if not frame.has_area() else [],bearings,shares])
 
 ## Road bearings leaving the town at `center` (world km).
 static func _approach_bearings(center:Vector2)->Array:
@@ -380,7 +399,7 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	var buildings:Array=plan.get("buildings",[])
 	var works:Array[Dictionary]=[]
 	if slot==0:works=_works_near(center)
-	var bearings:=_approach_bearings(Vector2(center.x,center.z))
+	var bearings:Array=plan._ground_bearings if plan.has("_ground_bearings") else _approach_bearings(Vector2(center.x,center.z))
 	var key:=_paint_key(plan,plots,routes,center,frame)
 	if not cache_only and key==slot_signatures[slot] and ground_layers!=null and slot_frames[slot].y>0.0:return
 	if not cache_only:slot_signatures[slot]=key
@@ -403,7 +422,7 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	var image:=Image.create_empty(RES,RES,false,Image.FORMAT_RGBA8)
 	image.fill(Color(0,0,0,1))
 	var painter:={"image":image,"corner":corner,"texel":side/float(RES),"stamps":0}
-	var shares:=_labour()
+	var shares:Dictionary=plan._ground_shares if plan.has("_ground_shares") else _labour()
 	# --- G: grass worn short -------------------------------------------------
 	for record in buildings:
 		var plot:Dictionary=record.plot
@@ -597,7 +616,10 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	for entry in GameState.discovery_log:
 		if entry is Dictionary and String(entry.get("id","")) in ["fruit_tree_grafting","terraced_orchards","orchard","nut_orchards","citrus_orchards"]:orchards=1.0;break
 	slot_halos[slot]=Vector4(halo_km,1.0 if slot==0 else 0.85,0.65 if farmed else 0.2,orchards if slot==0 else 0.0)
-	if frame.has_area():slot_halos[slot]=Vector4.ZERO
+	# Home land use now streams from actual records across the camera view.
+	# The old synthetic field halo would overlay invented parcels and clear
+	# woodland through the recorded neighborhoods. Other places retain it.
+	if slot==0 or frame.has_area():slot_halos[slot]=Vector4.ZERO
 	slot_reports[slot]=paint_report
 	if slot==0:
 		if texture==null:texture=ImageTexture.create_from_image(image)
