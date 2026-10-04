@@ -23,13 +23,14 @@ const TOON:=preload("res://scripts/shaders/court_figure_toon.gdshader")
 const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
 ## In a lit court a person's visible parts are merged into a few pieces.
 const Merge:=preload("res://scripts/hud/court_figure_merge.gd")
+const Wardrobe:=preload("res://scripts/hud/court_wardrobe.gd")
 ## In a modelled court (court_set_3d.gd) the figures take the set's own light.
 const TOON_LIT:=preload("res://scripts/shaders/court_figure_lit.gdshader")
 const INK:=preload("res://scripts/shaders/court_figure_ink.gdshader")
 const VARIANTS:=["male_adult","female_adult","male_old","female_old","male_young","female_young"]
 ## Every body there is: the six grown ones and a child of seven or eight.
 const BODIES:=["male_adult","female_adult","male_old","female_old","male_young","female_young","child"]
-const OUTFITS:={"hide":1,"tunic":2,"robe":3}
+const OUTFITS:={"hide":1,"tunic":2,"robe":3,"medieval":1,"courtcoat":1,"formal":1,"business":1}
 const STANCES:=["stand","hip","folded","clasped","belt","staff","bowl","sit","crouch"]
 ## Which hands a stance leaves free to talk with (both: "talk_both" can be used).
 const FREE_HANDS:={"stand":"LR","hip":"R","folded":"","clasped":"LR","belt":"R","staff":"L","bowl":"","sit":"LR","crouch":"R"}
@@ -89,6 +90,10 @@ var _parts:Array[MeshInstance3D]=[]
 ## The merged pieces (Body, Rest, Hair, Eyes) when the figure stands in a lit court.
 var _merged:Dictionary={}
 var _merge_root:Node3D
+var _plain_skin:Mesh
+var _wardrobe_skin:Mesh
+var _wardrobe_loaded:=false
+var _wardrobe_outfit:=""
 static var _uber:Array=[]
 var _yaw_tween:Tween
 ## What they keep doing at rest, and the mood the engine gives them.
@@ -241,7 +246,10 @@ func setup(look_in:Dictionary)->bool:
 		player=players[0] as AnimationPlayer if not players.is_empty() else null
 		head_bone=skeleton.find_bone("head") if skeleton!=null else -1
 		_meshes.clear();_parts.clear();_merged.clear();_merge_root=null
+		_plain_skin=null;_wardrobe_skin=null;_wardrobe_loaded=false;_wardrobe_outfit=""
 		for node in model.find_children("*","MeshInstance3D",true,false):_parts.append(node as MeshInstance3D)
+		for node in _parts:
+			if String(node.name)=="Body":_plain_skin=node.mesh
 		_meshes=_parts.duplicate()
 		for entry:Dictionary in manifest().get("variants",[]):
 			if String(entry.get("variant",""))==variant:
@@ -367,6 +375,11 @@ func talk_clip(both_hands:=false)->String:
 
 func _dress()->void:
 	var outfit:=String(look.get("outfit","tunic"))
+	if outfit in Wardrobe.OUTFITS and outfit!=_wardrobe_outfit:_load_wardrobe(outfit)
+	for body in _parts:
+		if String(body.name)=="Body":
+			var skin_mesh:Mesh=_wardrobe_skin if outfit in Wardrobe.OUTFITS and _wardrobe_skin!=null else _plain_skin
+			if body.mesh!=skin_mesh:body.mesh=skin_mesh
 	var hair:="hair_"+String(look.get("hair","cropped"))
 	var beard:=String(look.get("beard",""))
 	if not beard.is_empty() and not beard.begins_with("beard_"):beard="beard_"+beard
@@ -405,6 +418,28 @@ func _dress()->void:
 		if part=="Body":_paint_face(mesh_node,beard)
 	if lit and Merge.enabled and skeleton!=null:_merge_parts(colours,int(OUTFITS.get(outfit,0)),beard)
 	else:_unmerge()
+
+func _load_wardrobe(outfit:String)->void:
+	if skeleton==null:return
+	var skin:Skin=null
+	for body in _parts:
+		if String(body.name)=="Body":skin=body.skin;break
+	if skin==null:return
+	var pieces:=Wardrobe.parts(variant,skin,skeleton)
+	if not pieces.has("WardrobeBody"):return
+	_wardrobe_skin=pieces.WardrobeBody
+	# Only the chosen outfit needs render instances; the shared mesh cache keeps
+	# all four available for redressing without reimporting or replacing the rig.
+	for part:MeshInstance3D in _parts.duplicate():
+		if not _wardrobe_outfit.is_empty() and String(part.name).begins_with(_wardrobe_outfit+"_"):
+			_parts.erase(part);part.free()
+	for name:String in pieces:
+		if not name.begins_with(outfit+"_"):continue
+		var node:=MeshInstance3D.new();node.name=name;node.mesh=pieces[name];node.skin=skin
+		skeleton.add_child(node);node.skeleton=NodePath("..")
+		_parts.append(node)
+	_wardrobe_loaded=true
+	_wardrobe_outfit=outfit
 
 ## The visible parts as a few merged pieces (court_figure_merge.gd): Body
 ## (skin, brows, mouth, beard, lid line; the moving morphs), Rest (the
