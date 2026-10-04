@@ -59,6 +59,7 @@ const CHAPTER_MANIFEST:=DIR+"court_chapters.json"
 const Chapters:=preload("res://scripts/hud/court_chapters.gd")
 const CourtCamera:=preload("res://scripts/hud/court_camera.gd")
 const Daylight:=preload("res://scripts/hud/court_daylight.gd")
+const Motion:=preload("res://scripts/hud/motion.gd")
 const Animal:=preload("res://scripts/hud/court_animal_3d.gd")
 const TOON:=preload("res://assets/court_sets/shaders/court_set_toon.gdshader")
 const GROUND:=preload("res://assets/court_sets/shaders/court_set_ground.gdshader")
@@ -181,6 +182,7 @@ var fire_light:OmniLight3D
 var bounce:OmniLight3D
 var door_light:SpotLight3D
 var flame_lights:Array[OmniLight3D]=[]
+var _flame_energies:Array[float]=[]
 var world_env:WorldEnvironment
 var model:Node3D
 var animals:Array=[]
@@ -224,6 +226,10 @@ var _god_col:=Color(1,1,1)
 var _god_tween:Tween
 var _god_base:={}
 var _god_target:=Vector3.ZERO
+var _god_target_ref:WeakRef
+var _god_origin:=Vector3.ZERO
+var _god_beam_basis:=Basis.IDENTITY
+var _god_reduced:=false
 var _god_wind:=Vector3(1.0,0.1,0.35)
 var _sun_wrath:=Quaternion.IDENTITY
 var _fire_mul:=1.0
@@ -744,6 +750,7 @@ func _make_lights()->void:
 		var lamp:=_omni("Brazier",Color(1.0,0.6,0.32),float(light.get("brazier_energy",_fire_energy*0.6))*(0.35 if small else 1.0),float(light.get("brazier_range",4.5))*(0.5 if small else 1.0),1.4)
 		lamp.position=_vec(spot.get("pos",[0,1,0]))+Vector3(0.0,0.3 if not small else 0.12,0.0)
 		flame_lights.append(lamp)
+		_flame_energies.append(lamp.light_energy)
 	# soft warm fills where a hall's back would fall into darkness
 	for spec:Array in fx.get("fill",[]):
 		var fill:=_omni("Fill",Color(String(light.get("fill_colour","c9d2d4" if not has_hearth() else "ffc78c"))),float(spec[3]),float(spec[4]),0.8)
@@ -1229,8 +1236,10 @@ func set_quality(to:String,reason:="asked")->void:
 		sun.directional_shadow_split_3=0.52
 		sun.directional_shadow_blend_splits=false
 		sun.shadow_blur=1.0 if low else 1.4
+		if not _god_base.is_empty():_god_base.sun_blur=sun.shadow_blur
 	if rig!=null:rig.set("far_blur",not low)
 	if season!="":_apply_season(season)
+	_god_apply()
 
 ## What the auto quality found, for a report.
 func quality_report()->Dictionary:
@@ -1249,11 +1258,17 @@ func rack_centre()->Vector3:
 ## jolt for wrath is the director's (shot "shake"), not this.
 func god_light(target:Variant=null,tone:="speaks",hold:=0.0,fade:=-1.0)->void:
 	if not GOD_TONES.has(tone):tone="off"
-	if typeof(target)==TYPE_VECTOR3:_god_target=target
-	elif typeof(target)==TYPE_OBJECT and is_instance_valid(target) and target is Node3D:_god_target=(target as Node3D).global_position
+	if typeof(target)==TYPE_VECTOR3:
+		_god_target=target;_god_target_ref=null
+	elif typeof(target)==TYPE_OBJECT and is_instance_valid(target) and target is Node3D:
+		_god_target=(target as Node3D).global_position;_god_target_ref=weakref(target)
 	elif tone!="off" and god_tone=="off" and has_mark("petitioner"):_god_target=mark("petitioner").global_position
-	if tone!="off":_god_make();_god_aim()
-	if god_tone=="off" and tone!="off":_god_baseline()
+	_god_reduced=Motion.reduced()
+	if tone!="off":
+		_god_make();_god_origin=_god_source();_god_aim()
+	if _god_cur[0]==0.0 and tone!="off":_god_baseline()
+	# A direct light cue must not inherit a previous spoken line's release.
+	_god_out=-1.0
 	god_tone=tone
 	_god_from=_god_cur.duplicate();_god_col_from=_god_col
 	_god_to=PackedFloat32Array(GOD_NEUTRAL) if tone=="off" else PackedFloat32Array((GOD_TONES[tone] as Dictionary).p)
@@ -1308,6 +1323,7 @@ func _god_make()->void:
 	god_shaft.mesh=cyl
 	_god_shaft_mat=ShaderMaterial.new();_god_shaft_mat.shader=SHAFT
 	_god_shaft_mat.set_shader_parameter("strength",0.0);_god_shaft_mat.set_shader_parameter("soft",0.6)
+	_god_shaft_mat.set_shader_parameter("ribbons",0.48)
 	god_shaft.material_override=_god_shaft_mat
 	god_shaft.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	god_shaft.visible=false
@@ -1355,14 +1371,24 @@ func _god_source()->Vector3:
 		if toward.length()>0.01:toward=toward.normalized()
 		return t+Vector3(0.0,9.0,0.0)+toward*2.2
 	var best:=t+Vector3(0.0,5.0,0.0);var best_d:=INF
+	# Chapter rooms have real windows, not the legacy hall's smoke hole.
+	# Choose one opening per address; its position stays fixed as the person
+	# moves, so the light cannot jump between windows halfway through a line.
+	for opening:Array in info.get("apertures",[]):
+		if opening.size()<4 or float(opening[3])<=float(opening[2]):continue
+		var x:=float(opening[0])*(model.scale.x if model!=null else 1.0)
+		var top:=to_global(Vector3(x,lerpf(float(opening[2]),float(opening[3]),.84),float((info.get("light",{}) as Dictionary).get("aperture_z",-3.78))))
+		var d:=top.distance_squared_to(t+Vector3.UP)
+		if d<best_d:best_d=d;best=top
+	if best_d<INF:return best
 	for spec:Dictionary in (info.get("fx",{}) as Dictionary).get("shafts",[]):
-		var top:=_vec(spec.get("top",[0,5,0]))
+		var top:=to_global(_vec(spec.get("top",[0,5,0])))
 		var d:=Vector2(top.x-t.x,top.z-t.z).length()
 		if d<best_d:best_d=d;best=top
 	return best
 
 func _god_aim()->void:
-	var s:=_god_source()
+	var s:=_god_origin
 	var t:=_god_target
 	var aim:=t+Vector3(0.0,1.0,0.0)
 	# the lamp itself hangs a few metres up the beam, so nobody nearer the
@@ -1374,7 +1400,8 @@ func _god_aim()->void:
 	var y_axis:=-dir
 	var x_axis:=y_axis.cross(Vector3.FORWARD if absf(y_axis.z)<0.9 else Vector3.RIGHT).normalized()
 	var z_axis:=x_axis.cross(y_axis).normalized()
-	god_shaft.transform=Transform3D(Basis(x_axis,y_axis*length,z_axis),s+dir*length*0.5)
+	_god_beam_basis=Basis(x_axis,y_axis*length,z_axis)
+	god_shaft.global_transform=Transform3D(_god_beam_basis,s+dir*length*0.5)
 	# the column fades out above their head: it never paints over them
 	_god_shaft_mat.set_shader_parameter("fade_from",clampf(1.0-3.2/maxf(length,0.1),0.0,0.95))
 	_god_shaft_mat.set_shader_parameter("fade_to",clampf(1.0-2.0/maxf(length,0.1),0.05,1.0))
@@ -1383,6 +1410,10 @@ func _god_aim()->void:
 	_god_dust_mat.set_shader_parameter("shaft_top",s)
 	_god_dust_mat.set_shader_parameter("shaft_dir",dir)
 	_god_dust_mat.set_shader_parameter("shaft_radius",0.7)
+	# Stretch the pool along the incoming light, without a new projected
+	# texture or light. It remains a soft pool, never a targeting decal.
+	god_pool.global_rotation.y=atan2(dir.x,dir.z)
+	god_pool.scale=Vector3(1.0,1.0,clampf(1.0/maxf(absf(dir.y),.55),1.0,1.65))
 	# the wind comes from the god's side, across the one addressed
 	var across:=Vector3(t.x-god_point().x,0.0,t.z-god_point().z)
 	_god_wind=(across.normalized() if across.length()>0.01 else Vector3(1,0,0))+Vector3(0.0,0.08,0.0)
@@ -1397,7 +1428,7 @@ func _god_baseline()->void:
 	var env:=world_env.environment if world_env!=null else null
 	_god_base={"ambient":env.ambient_light_energy if env!=null else 0.5,"sat":env.adjustment_saturation if env!=null else 1.0,
 		"sun_energy":sun.light_energy if sun!=null else 1.0,"sun_rot":sun.transform.basis.get_rotation_quaternion() if sun!=null else Quaternion.IDENTITY,
-		"sun_blur":sun.shadow_blur if sun!=null else 1.0,"sun_colour":sun.light_color if sun!=null else Color.WHITE,"bounce":bounce.light_energy if bounce!=null else 0.45}
+		"sun_blur":sun.shadow_blur if sun!=null else 1.0,"sun_colour":sun.light_color if sun!=null else Color.WHITE,"bounce":0.45}
 	_god_base["fills"]=[]
 	for fill in fill_lights:_god_base.fills.append(fill.light_energy)
 
@@ -1411,26 +1442,27 @@ func _god_apply()->void:
 	var energy:=_god_cur[0];var angle:=_god_cur[1];var shaft_s:=_god_cur[2];var dim:=_god_cur[3]
 	var fire:=_god_cur[4];var fire_h:=_god_cur[5];var lean:=_god_cur[6];var gust:=_god_cur[7]
 	var sharp:=_god_cur[8];var sat:=_god_cur[9];var sun_turn:=_god_cur[10];var rise:=_god_cur[11]
-	var on:=energy>0.02
+	if _god_reduced:lean=0.0;gust=0.0;sun_turn=0.0;rise=0.0
 	var open_sky:=bool((info.get("light",{}) as Dictionary).get("open_sky",true))
 	if god_spot!=null:
 		# under the open sky the beam must stand out against daylight
-		god_spot.visible=on;god_spot.light_energy=energy*(1.3 if open_sky else 0.65);god_spot.spot_angle=angle;god_spot.light_color=_god_col
-		god_shaft.visible=shaft_s>0.01
+		god_spot.light_energy=energy*(1.3 if open_sky else 0.65);god_spot.spot_angle=angle;god_spot.light_color=_god_col
+		var width:=clampf(angle/15.0,.7,1.45)
+		god_shaft.global_basis=Basis(_god_beam_basis.x*width,_god_beam_basis.y,_god_beam_basis.z*width)
+		_god_shaft_mat.set_shader_parameter("motion",0.0 if _god_reduced else 1.0)
 		# the god's column owns the opening (the sun's own shaft fades below)
 		_god_shaft_mat.set_shader_parameter("strength",shaft_s*(2.0 if open_sky else 1.1));_god_shaft_mat.set_shader_parameter("colour",_god_col)
 		_god_dust_mat.set_shader_parameter("colour",_god_col.lerp(Color(1,1,1),0.3))
-		god_dust.emitting=on and active and level=="high"
 		# the pool on the ground: the light reads even where the beam does not
 		var peak:=7.0 if god_tone!="wrath" else 2.4
 		var share:=clampf(energy/peak,0.0,1.0)
-		god_pool.visible=share>0.02
 		_god_pool_mat.set_shader_parameter("colour",_god_col)
 		_god_pool_mat.set_shader_parameter("strength",share*(0.55 if open_sky else 0.4)*(0.6 if god_tone=="wrath" else 1.0))
 		# in a hall the god's light owns the opening: the sun's own shaft fades
 		for i in _sun_shaft_mats.size():
 			_sun_shaft_mats[i].set_shader_parameter("strength",_sun_shaft_strength[i]*(1.0-0.8*share))
 		_god_dust_pm.gravity=Vector3(0.0,0.02+0.3*rise,0.0)+_god_wind*1.6*gust
+		_god_visibility()
 	if _god_base.is_empty():return
 	var env:=world_env.environment if world_env!=null else null
 	if env!=null:
@@ -1460,6 +1492,18 @@ func _god_apply()->void:
 		mat.set_shader_parameter("gust",gust)
 		mat.set_shader_parameter("wind",_god_wind)
 	if _smoke_pm!=null:_smoke_pm.gravity=_smoke_gravity.lerp(_god_wind*1.4+Vector3(0.0,0.05,0.0),gust)
+
+## Visibility is reconciled immediately on quality and modal changes too;
+## holding a light has no Tween callbacks to do that work on our behalf.
+func _god_visibility()->void:
+	if god_spot==null:return
+	var on:=active and _god_cur[0]>.02
+	god_spot.visible=on
+	god_shaft.visible=active and _god_cur[2]>.01
+	god_pool.visible=on
+	god_dust.visible=on and level=="high" and not _god_reduced
+	god_dust.emitting=god_dust.visible
+	god_dust.speed_scale=1.0 if god_dust.visible else 0.0
 
 # --- Executions: props, blood, the pack, the hall that remembers ----------------------
 
@@ -1822,6 +1866,7 @@ func animal(species:String)->Node3D:
 func set_active(on:bool)->void:
 	active=on
 	set_process(on)
+	_god_visibility()
 	for p in particles:
 		if is_instance_valid(p):
 			p.emitting=on and p.visible
@@ -1841,6 +1886,15 @@ func _ready()->void:
 
 func _process(delta:float)->void:
 	_clock+=delta
+	var reduced:=Motion.reduced()
+	if reduced!=_god_reduced:
+		_god_reduced=reduced;_god_apply()
+	if _god_cur[0]>.02 and _god_target_ref!=null:
+		var body:=_god_target_ref.get_ref() as Node3D
+		if not is_instance_valid(body) or not body.is_inside_tree() or not body.is_visible_in_tree():
+			_god_target_ref=null;god_light(null,"off",0.0,.45)
+		elif body.global_position.distance_squared_to(_god_target)>.000001:
+			_god_target=body.global_position;_god_aim();_god_apply()
 	# auto quality: watch the first seconds the court is open, drop once if slow
 	if quality=="auto" and level=="high" and _clock>0.5 and _frames_seen<120:
 		_frames_seen+=1;_slow_time+=delta
@@ -1850,9 +1904,11 @@ func _process(delta:float)->void:
 	if fire_light!=null:
 		fire_light.light_energy=_fire_energy*_fire_mul*(1.0+0.22*n)
 		fire_light.position=_fire_at+Vector3(n*0.05,absf(n)*0.06,_noise.get_noise_1d(_clock*5.0+7.0)*0.05)
-	if bounce!=null:bounce.light_energy=0.45*(1.0+0.12*n)
+	# Keep the room's hush throughout the held beat. Previously the next
+	# frame restored full fire bounce and erased the god's lighting envelope.
+	if bounce!=null:bounce.light_energy=float(_god_base.get("bounce",.45))*_fire_now*(1.0+0.12*n)
 	for i in flame_lights.size():
-		flame_lights[i].light_energy=_fire_energy*0.6*(1.0+0.2*_noise.get_noise_1d(_clock*7.0+float(i)*50.0))
+		flame_lights[i].light_energy=_flame_energies[i]*_fire_mul*(1.0+0.2*_noise.get_noise_1d(_clock*7.0+float(i)*50.0))
 
 ## Which way the strongest light comes from (toward it), for figures whose
 ## shading takes one key light (court_figure_3d.gd set_key_light).
