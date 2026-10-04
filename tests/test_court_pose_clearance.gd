@@ -72,3 +72,26 @@ func test_redress_preserves_stand_clock_pause_and_walking_resources()->void:
 	assert_object(player.get_animation("walk_in")).is_same(walking)
 	assert_array(_signature(walking)).is_equal(walk_data)
 	f.free()
+
+func test_validated_descent_extensions_do_not_pass_a_straight_elbow()->void:
+	Pose.overrides={}
+	assert_int(Pose.PROFILES.size()).is_greater_equal(2)
+	for variant:String in Pose.PROFILES:
+		var f:=_figure(variant)
+		var source:Animation=Acting.library(variant).sit_cross
+		var flex:Variant=Pose.PROFILES[variant].sit_cross.get("flex",0.0)
+		for track in source.get_track_count():
+			var path:=String(source.track_get_path(track))
+			for side:String in ["L","R"]:
+				if not path.ends_with(":forearm."+side):continue
+				var elbow:=f.skeleton.find_bone("forearm."+side)
+				var hand:=f.skeleton.find_bone("hand."+side)
+				var toward_shoulder:=-f.skeleton.get_bone_rest(elbow).origin
+				for key in source.track_get_key_count(track):
+					var amount:=Pose.degrees_at(flex.get(side,0.0) if flex is Dictionary else flex,source.track_get_key_time(track,key))
+					if amount>=0.0:continue
+					var rotation:Quaternion=source.track_get_key_value(track,key)
+					var wrist:=rotation*f.skeleton.get_bone_rest(hand).origin
+					var available:=PI-wrist.angle_to(toward_shoulder)
+					assert_float(available+deg_to_rad(amount)).override_failure_message("%s %s extends past straight at %.3fs" % [variant,side,source.track_get_key_time(track,key)]).is_greater_equal(0.0)
+		f.free()
