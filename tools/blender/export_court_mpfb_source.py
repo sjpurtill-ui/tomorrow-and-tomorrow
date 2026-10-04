@@ -391,6 +391,27 @@ def validate(data):
     assert data["positions"][boundary, 1].max() < .005
 
 
+def copy_source_textures(output, services):
+    """Keep the native alpha mask: eyebrow001 is not an opaque solid brow."""
+    user = Path(services["Location"].get_user_data())
+    relative = "eyebrows/eyebrow001/eyebrow001.png"
+    source = user / relative
+    material = source.with_suffix(".mhmat")
+    content = source.read_bytes()
+    destination = output / source.name
+    destination.write_bytes(content)
+    digest = hashlib.sha256(content).hexdigest()
+    assert hashlib.sha256(destination.read_bytes()).hexdigest() == digest
+    return {source.name: {
+        "sha256": digest, "source_path": relative, "license": "CC0-1.0",
+        "usage": "Native eyebrow001 diffuse/alpha; retain brow_triangle_uv and alpha-test edges",
+        "input_sha256": {
+            relative: digest,
+            str(material.relative_to(user)).replace("\\", "/"): hashlib.sha256(material.read_bytes()).hexdigest(),
+        },
+    }}
+
+
 def main():
     if not bpy.app.background:
         raise RuntimeError("Run in a fresh background Blender process; never in an interactive scene")
@@ -411,11 +432,12 @@ def main():
                                 "vertices": len(data["positions"]), "triangles": len(data["triangles"]),
                                 "metadata": json.loads(str(data["metadata"]))}
     provenance = {"schema": 1, "license": "CC0-1.0", "sources": SOURCE_LINKS,
+                  "textures": copy_source_textures(args.output, services),
                   "identity_targets": IDENTITY_TARGETS, "expression_composites": COMPOSITES, "files": files}
     (args.output / "provenance.json").write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (args.output / "LICENSE.md").write_text(
         "# Native MPFB court source assets\n\n"
-        "The NPZ geometry and deformation data in this directory derive from MakeHuman/MPFB's "
+        "The NPZ geometry and deformation data, and the original eyebrow001.png texture, derive from MakeHuman/MPFB's "
         "CC0 graphical assets and the CC0 faceunits01/visemes02 targets. The generated asset data "
         "and any adaptation of it in this directory are provided under CC0 1.0 Universal.\n\n"
         "License: https://creativecommons.org/publicdomain/zero/1.0/\n\n"
