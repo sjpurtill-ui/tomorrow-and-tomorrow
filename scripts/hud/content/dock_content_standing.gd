@@ -95,7 +95,7 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 	var home:=_home(our,seen)
 	return {"type":"standing","people_name":_our_name(),"posture":posture,"renown":Standing.renown(our),"strengths":strengths,"year_ago":year_ago,
 		"peoples":peoples,"home":home,"warnings":_warnings(peoples,posture,our),"view_state":view_state,"arts":Standing.arts_at_work(),
-		"on_raise":func(section:String,sub:int)->void: hud.section_requested.emit(section,sub),
+		"on_raise":func(section:String,sub:int)->void: jump(section,sub).call(),
 		"on_court":func(civ_id:String)->void: court({"civ_id":civ_id}).call(),
 		"on_scouts":func()->void: if is_instance_valid(terrain) and terrain.has_method("_open_scout_dispatch_panel"): terrain.call("_open_scout_dispatch_panel"),
 		# A people's strengths are reckoned in their own scope only when laid

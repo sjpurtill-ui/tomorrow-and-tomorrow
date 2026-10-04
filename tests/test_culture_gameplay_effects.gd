@@ -22,7 +22,7 @@ func test_reputation_requires_conduct_not_cultural_label()->void:
 func test_culture_ui_builds_compact_effects_and_collapsed_roots()->void:
 	var panel:Control=auto_free(preload("res://scripts/hud/culture_panel.gd").new());add_child(panel)
 	var noop:=func():pass
-	panel.setup({"identity":{"name":"Test society","summary":"Test"},"direction":{},"values":[],"memories":[{"domain":"justice","current":"Restoration","inherited":"Restoration"}],"effects":Presenter.effects(Culture.empty(),0,{},true,1.0),"reputation":Presenter.reputation({}),"on_direction":noop,"on_council":noop,"on_capacities":noop,"on_government":noop})
+	panel.setup({"identity":{"name":"Test society","summary":"Test"},"direction":{},"values":[],"memories":[{"domain":"justice","current":"Restoration","inherited":"Restoration"}],"effects":Presenter.effects(Culture.empty(),0,{},true,1.0),"reputation":Presenter.reputation({}),"on_direction":noop,"on_council":noop,"on_capacities":noop})
 	var text:=""
 	for label in panel.find_children("*","Label",true,false):text+=label.text+"\n"
 	assert_str(text).contains("WHAT OUR WAYS CHANGE")
@@ -32,7 +32,7 @@ func test_culture_ui_builds_compact_effects_and_collapsed_roots()->void:
 func test_roots_open_and_closed_state_survive_live_body_rebuild()->void:
 	var provider=Provider.new(null,null)
 	var noop:=func():pass
-	var block:={"view_state":provider.culture_view_state,"identity":{"name":"Test","summary":""},"direction":{},"values":[],"memories":[{"domain":"justice","current":"Restoration","inherited":"Restoration"}],"on_direction":noop,"on_council":noop,"on_capacities":noop,"on_government":noop}
+	var block:={"view_state":provider.culture_view_state,"identity":{"name":"Test","summary":""},"direction":{},"values":[],"memories":[{"domain":"justice","current":"Restoration","inherited":"Restoration"}],"on_direction":noop,"on_council":noop,"on_capacities":noop}
 	var panel:Control=auto_free(preload("res://scripts/hud/culture_panel.gd").new());add_child(panel);panel.setup(block)
 	assert_bool(panel.get_node("CulturalRoots").visible).is_false()
 	panel.get_node("CulturalRootsToggle").pressed.emit()

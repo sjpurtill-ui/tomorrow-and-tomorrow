@@ -6,9 +6,9 @@ func before_test()->void:
 	WorldSimulation.clear()
 	GameState.reset_for_new_world(4242)
 	MilitaryCampaign.reset_for_new_world()
-func test_government_has_correct_sidebar_name()->void:
+func test_rail_has_no_government_section()->void:
 	for section in Rail.SECTIONS:
-		if section.id=="government":assert_str(section.label).is_equal("Government")
+		assert_str(String(section.id)).is_not_equal("government")
 func test_logistics_has_no_production_board_or_order_actions()->void:
 	var provider=Military.new(null,null)
 	var blocks:=provider._supply_overview()

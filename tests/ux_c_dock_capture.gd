@@ -9,7 +9,6 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const PROVIDERS:={
 	"economy":"res://scripts/hud/content/dock_content_economy.gd",
 	"settlement":"res://scripts/hud/content/dock_content_settlement.gd",
-	"government":"res://scripts/hud/content/dock_content_government.gd",
 	"civ":"res://scripts/hud/content/dock_content_civilization.gd",
 	"inquiry":"res://scripts/hud/content/dock_content_inquiry.gd",
 	"health":"res://scripts/hud/content/dock_detail_health.gd",

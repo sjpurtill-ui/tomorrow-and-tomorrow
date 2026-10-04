@@ -10,7 +10,7 @@ extends RefCounted
 ##     the next founding, never in between;
 ##   - spoken in the court ("call our nation the Reedfolk",
 ##     court_realm_acts.nation);
-##   - changed on the Government screen ("Our nation: ... · Rename").
+##   - named or changed in the court (the Headman's "Name our nation" choices).
 ## Unnamed, everything reads as before. The towns keep their own names, and
 ## the home town's own uses (where the army stands, where the stores are)
 ## never change.

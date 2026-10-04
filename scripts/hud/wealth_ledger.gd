@@ -53,7 +53,7 @@ func setup(block:Dictionary)->void:
 	var footer:=HFlowContainer.new();footer.add_theme_constant_override("h_separation",8);add_child(footer)
 	if money or metal:_button(footer,"Past balances",data.on_history,"How these holdings changed over past months")
 	_button(footer,"Hide the note" if bool(data.show_work) else "What this counts",data.on_work,"What the day's work measures")
-	_button(footer,"Government and policy",data.on_policy,"Officials and standing policy")
+	_button(footer,"Officials in court",data.on_policy,"Summon an official: what they do, how well, and the standing orders they carry out")
 	_button(footer,"Material stores",data.on_stores,"Wood, stone, clay and fibre in store")
 	_fill()
 

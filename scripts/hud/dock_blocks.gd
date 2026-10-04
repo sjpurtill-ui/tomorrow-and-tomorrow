@@ -47,9 +47,6 @@ static func render(container:VBoxContainer,blocks:Array)->void:
 				var panel:=preload("res://scripts/hud/settlement_chronicle.gd").new();section.add_child(panel);panel.setup(block)
 			"chronicle_feed":
 				var feed:=preload("res://scripts/hud/chronicle_feed.gd").new();section.add_child(feed);feed.setup(block)
-			"cabinet":
-				var cabinet:=preload("res://scripts/hud/government_cabinet_widget.gd").new()
-				section.add_child(cabinet);cabinet.setup(block)
 			"purse_board":
 				var board:=preload("res://scripts/hud/purse_board.gd").new();section.add_child(board);board.setup(block)
 			"wealth_ledger":

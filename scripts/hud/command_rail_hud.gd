@@ -23,7 +23,6 @@ const SECTIONS:Array[Dictionary]=[
 	# The warriors stand on the rail itself, one click away as HOI4 keeps them.
 	{"id":"military","label":"Military","icon":8,"tooltip":"War: how many serve, our enemies and our leaders · F8"},
 	{"id":"chronicle","label":"Chronicle","tooltip":"The story of your people: moments, news and the seasons' tallies · F11"},
-	{"id":"government","label":"Government","icon":1,"drawer":true,"tooltip":"Chiefs, officeholders and their duties · F3"},
 	{"id":"economy","label":"Food","icon":2,"sub":0,"drawer":true,"tooltip":"Food and water · F2"},
 	{"id":"materials","label":"Materials","icon":3,"section":"economy","sub":1,"drawer":true,"tooltip":"Material stores and supply"},
 	{"id":"wealth","label":"Wealth","icon":4,"section":"economy","sub":2,"drawer":true,"tooltip":"Wealth, gifts and exchange"},
@@ -511,13 +510,13 @@ func _make_rail_button(section:Dictionary)->Button:
 	return button
 
 ## The ledgers drawer: food, materials, wealth, buildings, crafts, culture,
-## warriors, lore and chiefs, folded under one tally-stick mark (drawn by the
+## warriors and lore, folded under one tally-stick mark (drawn by the
 ## procedural icon engine) until the player asks for them.
 func _make_drawer_button()->Button:
 	var button:=Button.new()
 	button.name="RailLedgers"
 	button.custom_minimum_size=Vector2(0,52)
-	button.tooltip_text="The tallies of the people's work: food, materials, wealth, buildings, crafts, culture, warriors, lore and chiefs"
+	button.tooltip_text="The tallies of the people's work: food, materials, wealth, buildings, crafts, culture, warriors and lore"
 	button.add_theme_stylebox_override("normal",_approved_rail_style(false))
 	button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
 	button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
@@ -560,7 +559,7 @@ func _style_drawer_label()->void:
 	var open:=drawer_box!=null and drawer_box.visible
 	var word:=EraWords.word("rail.drawer","Ledgers")
 	if drawer_label:drawer_label.text=word
-	if drawer_button:drawer_button.tooltip_text=("Hide the %s" if open else "Show the %s: food, materials, wealth, buildings, crafts, culture, warriors, learning and chiefs") % word.to_lower()
+	if drawer_button:drawer_button.tooltip_text=("Hide the %s" if open else "Show the %s: food, materials, wealth, buildings, crafts, culture, warriors and learning") % word.to_lower()
 	_sync_drawer_badge()
 
 ## Drawer alerts, summed onto the drawer button while the drawer is closed.
@@ -1373,7 +1372,7 @@ func _unhandled_key_input(event:InputEvent)->void:
 		toggle_section(String(keys[key.keycode]))
 		get_viewport().set_input_as_handled()
 
-const HOTKEYS:={KEY_F1:"overview",KEY_F2:"economy",KEY_F3:"government",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F7:"construction",KEY_F8:"military",KEY_F9:"production",KEY_F11:"chronicle"}
+const HOTKEYS:={KEY_F1:"overview",KEY_F2:"economy",KEY_F4:"civ",KEY_F5:"inquiry",KEY_F6:"world",KEY_F7:"construction",KEY_F8:"military",KEY_F9:"production",KEY_F11:"chronicle"}
 
 func _dock_interaction_active(panel:Control)->bool:
 	## Hovering must not freeze progress. Protect an active click or text edit only.
