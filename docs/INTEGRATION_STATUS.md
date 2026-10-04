@@ -1,3 +1,13 @@
+## October 4 — richer court faces and expression lighting: INTEGRATED
+
+Runtime source `4e98252b132c607f4e23fbbb0c89c7489dd94c6e` on `codex/court-face-richness`, based on synchronized canonical/origin main `dd4bd733089665172db55cad57bb37e586b55a9f`. Both main refs were reconciled in the isolated worktree; no source conflicts. Includes worker normal correction `34a81041` as `937017c5`, facial shading/eye detail `6254b1aa`, and reliable fallback eye-layer ordering. Delivery record and exact evidence: `docs/COURT_FACE_RICHNESS_HANDOFF.md`.
+
+Faces gain continuous skin lighting, shallow cheek/lid/lip relief, softer painted detail, finer outlines, textured irises, shaded eye whites, smaller glints and brow clearance. Identity and expression normals survive mesh merging. A reused figure safely rebinds its acting controller after a body-variant change. Original GLBs, rigs, clips and identities stay intact; no simulation/state/save changes or additional draw surfaces.
+
+Acceptance: 102/102 combined court tests plus 9/9 final fallback/eye-budget tests (103 distinct cases), zero errors/failures/skips/orphans. Private GPU captures pass for 18 varied people, three face close-ups and 21 expression/gaze states in both merged and unmerged lit paths. Final captures have no engine/script errors; first failing expression capture identified the now-fixed stale actor reference. Existing Compatibility depth-of-field warnings remain. Original stylized proportions and narrow nose-outline artifacts remain outside this rendering pass.
+
+Incoming files have no overlap with existing canonical local files; 4678 modified/untracked files were inventoried for preservation. Generated imports, UIDs, captures, test settings and unrelated local work are excluded. Verified push to `origin/main` precedes canonical fast-forward. The running canonical game is untouched and loads these scripts on its next normal restart.
+
 ## October 4 — court evolution, city presentation and dramatic presence: INTEGRATED
 
 At the user's explicit request to merge, source `7516b33f9d13e37237687ac5d881fa8decb508bb` (`codex/court-presence`) was reconciled in the existing court-motion worktree on `codex/integrate-court-presence` with both `origin/main` and canonical `main` at `ec537b74fa82253806dc3cb5ee2ce9bd718ba81d`. Both were already ancestors; no source conflict or runtime change was needed. This integration record is the only additional delivery change. The published integration commit includes the full prerequisite court evolution/atmosphere work, not just the last lighting adjustment.
