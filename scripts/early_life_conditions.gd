@@ -436,6 +436,12 @@ static func diet_window(state:Node)->float:
 ## `condition_factor` is GameState._mortality_condition_factor(): where hunger,
 ## exposure and sickness already raise every death rate, missing practices add
 ## proportionally less, so the same deaths are not counted twice.
+## age_multiplier for every age at once: it reads an age only by its band
+## (under 5, child, adult) and whether it is 45 or older, so its four values
+## are worked out once: [under 5, child, adult under 45, 45 and older].
+static func age_multiplier_table(care:Dictionary,condition_factor:float=GOOD_CONDITIONS)->PackedFloat64Array:
+	return PackedFloat64Array([age_multiplier(care,0,condition_factor),age_multiplier(care,5,condition_factor),age_multiplier(care,15,condition_factor),age_multiplier(care,45,condition_factor)])
+
 static func age_multiplier(care:Dictionary,age:int,condition_factor:float=GOOD_CONDITIONS)->float:
 	if care.is_empty():return 1.0
 	var band:="adult"

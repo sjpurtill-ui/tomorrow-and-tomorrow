@@ -3,9 +3,9 @@
  "commit": "f7db465e681d41684a86f95e7b9ca2ba921ab0dd",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "f309d9311627",
-  "scripts/society_model.gd": "1b3e35dc26d7",
-  "scripts/game_state.gd": "77ea219a7cf9",
-  "scripts/early_life_conditions.gd": "98edd883a637",
+  "scripts/society_model.gd": "9c03184805cd",
+  "scripts/game_state.gd": "2aa10698a637",
+  "scripts/early_life_conditions.gd": "525ce31a4f92",
   "scripts/food_system.gd": "5d8727a83c0e",
   "scripts/consequence_engine.gd": "a39bf8580e71",
   "scripts/research_600_catalog.gd": "64f4b5035937",

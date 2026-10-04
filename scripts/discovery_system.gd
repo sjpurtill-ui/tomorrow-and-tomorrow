@@ -69,6 +69,12 @@ class ResearchScan extends RefCounted:
 	var has_home_resources:=false
 	var eligible:Dictionary={}
 	var best:Dictionary={}
+	## _score_best_candidate's answers in this scan, by what they were read from.
+	var scored:Dictionary={}
+	## _candidate_score of each question read in this scan.
+	var scores:Dictionary={}
+	## Where the last _score_best_candidate_read that found nothing stopped.
+	var read_stop:=0
 	var needs:Dictionary={}
 	var seed_value:=0
 	var seeded:=false
@@ -92,14 +98,20 @@ class ResearchScan extends RefCounted:
 	## Each channel's open questions in order of their opening years, with the
 	## list they were read from (_channel_by_age).
 	var by_age:Dictionary={}
+	## Each channel's whole catalog list in order of opening years, with the
+	## list, its size and the world seed it was read from.
+	var by_age_whole:Dictionary={}
+	## Each question's channel (_channel_key of its line and subcategory), ""
+	## for an id not in the catalog.
+	var channel_of:Dictionary={}
 	func clear_batch()->void:
 		day=-1;known_size=-1;known={};has_known=false;society={};has_society=false
 		environment={};has_environment=false;home_resources={};has_home_resources=false
-		eligible={};best={};needs={}
+		eligible={};best={};scored={};scores={};needs={}
 	func clear_catalog()->void:
 		seed_value=0;seeded=false;seed_tables={};by_dynamic={};by_dynamic_basis=[]
 		children={};children_basis=[];open_years=PackedFloat64Array();open_years_basis=[]
-		year_buckets={};year_buckets_basis=[];foundation_scanned={};by_age={}
+		year_buckets={};year_buckets_basis=[];foundation_scanned={};by_age={};by_age_whole={};channel_of={}
 var _scan:=ResearchScan.new()
 
 var latest_context:Dictionary={}
@@ -1181,6 +1193,11 @@ func _switch_to_quicker_questions(current_day:int)->void:
 	var held:=_teams_by_line()
 	var turns:=_team_turns(lines,held,current_day)
 	var busy:=_busy_ids()
+	# Nothing in this look changes which questions stand open or how near
+	# their age they are; teams only move between them. When no followed line
+	# has an open question of its age at all (whoever holds it), no team
+	# finds one, and the look for one is passed over.
+	var of_age:=_any_work_of_age(lines,current_day)
 	for entry:Array in ahead:
 		var channel:=String(entry[1])
 		if not active.has(channel): continue
@@ -1190,7 +1207,7 @@ func _switch_to_quicker_questions(current_day:int)->void:
 		busy.erase(current_id)
 		# Questions of their age first: the monthly look stays cheap.
 		_count_turn(held,turns,line,-1)
-		var best:=_next_team_placement(lines,turns,held,current_day,busy,channel,0)
+		var best:=_next_team_placement(lines,turns,held,current_day,busy,channel,0) if of_age else {}
 		var tier:=team_tier(current)
 		if best.is_empty() and tier>=4:
 			# Far ahead: the work a free team would take, two bands nearer or more.
@@ -1215,6 +1232,45 @@ func _switch_to_quicker_questions(current_day:int)->void:
 		active[String(best.channel)]=String(best.id)
 		busy[String(best.id)]=true
 		_count_turn(held,turns,String(best.line),1)
+
+
+## Whether any of `lines` has an open question of its age (band 0, team_tier)
+## on any of its channels, its chosen target included, or foundation work of
+## its age, whatever team holds it now: the most a free team could find at
+## band 0 (_next_team_placement with max_rank 0 reads no further).
+func _any_work_of_age(lines:Dictionary,current_day:int)->bool:
+	var scanning:=_scan_active()
+	var memo:Dictionary=_scan.eligible
+	var year:=learning_year()
+	for line:String in lines:
+		for sub_variant in (WorldSimulation.state.research_subcategory_allocations.get(line,{}) as Dictionary):
+			var channel:=_channel_key(line,String(sub_variant))
+			var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
+			var known:Dictionary=_candidate_index.known
+			var judged_known:Dictionary=_scan_known() if scanning else known
+			var target:=String(WorldSimulation.state.research_targets.get(channel,""))
+			if target!="" and not known.has(target):
+				var chosen:Dictionary=catalog_by_id.get(target,{})
+				if not chosen.is_empty() and team_tier(chosen)==0 and _channel_key(String(chosen.get("dynamic","")),String(chosen.get("subcategory","")))==channel:
+					var open:Variant=memo.get(target) if scanning else null
+					if open==null:
+						open=_discovery_is_eligible(chosen,current_day,judged_known)
+						if scanning: memo[target]=open
+					if open: return true
+			var by_age:=_channel_by_age(channel,candidates)
+			var opens:PackedFloat64Array=(_scan.by_age[channel] as Array)[2]
+			for index in by_age.size():
+				if _tier_from_open(opens[index],year)>0: break
+				var discovery:Dictionary=by_age[index]
+				var id:=String(discovery.get("id",""))
+				var eligible:Variant=memo.get(id) if scanning else null
+				if eligible==null:
+					eligible=_discovery_is_eligible(discovery,current_day,judged_known)
+					if scanning: memo[id]=eligible
+				if eligible: return true
+		for id:String in _research_600_foundation_ids(line,current_day):
+			if team_tier(discovery_definition(id))==0: return true
+	return false
 
 ## The questions the teams freed by today's proofs took up, kept on each proof's
 ## record ("next"): for a season the research dock offers that team the next
@@ -1435,6 +1491,52 @@ func _best_candidate_for_channel(channel:String,current_day:int)->Dictionary:
 ## FAR_BANDS), so a further band is read only when the nearer ones hold nothing
 ## open; a question the player chose wins wherever it stands.
 func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max_tier:int=TEAM_TIER_LAST)->Dictionary:
+	if not _scan_active(): return _score_best_candidate_read(channel,current_day,skip,max_tier)
+	# Inside a scan the answer is kept, like _best_candidate_for_channel's, by
+	# what it is read from: the line's allocation and chosen target, the day,
+	# and which of the channel's own questions are passed over (ids of other
+	# channels in `skip` never change it). The questions are read nearest band
+	# first, so what a reading finds is what any wider limit finds too: a
+	# further limit is served from it (the question when its band is within
+	# the limit or it is the chosen target, else nothing).
+	var home:=_research_600_channel_home(channel)
+	var target:=String(WorldSimulation.state.research_targets.get(channel,""))
+	var key:="%s|%d|%s|%d" % [channel,_subcategory_allocation(home[0],home[1]),target,current_day]
+	if not skip.is_empty():
+		var own:Array=[]
+		for id:Variant in skip:
+			var home_channel:Variant=_scan.channel_of.get(id)
+			if home_channel==null:
+				var held:Dictionary=catalog_by_id.get(String(id),{})
+				home_channel="" if held.is_empty() else _channel_key(String(held.get("dynamic","")),String(held.get("subcategory","")))
+				_scan.channel_of[id]=home_channel
+			if home_channel=="" or home_channel==channel: own.append(String(id))
+		if not own.is_empty():
+			own.sort()
+			key+="|"+"|".join(own)
+	# [question found (null while unread), its band (-1 for the chosen
+	# target), the furthest band read without finding one, where that
+	# reading stopped]. A wider limit carries on the reading from there.
+	var memo:Variant=_scan.scored.get(key)
+	if not memo is Array:
+		memo=[null,0,-1,0]
+		_scan.scored[key]=memo
+	if memo[0]==null:
+		if max_tier<=int(memo[2]): return {}
+		var found:=_score_best_candidate_read(channel,current_day,skip,max_tier,int(memo[2])+1,int(memo[3]))
+		if found.is_empty():
+			memo[2]=max_tier;memo[3]=_scan.read_stop
+			if max_tier<TEAM_TIER_LAST: return {}
+		memo[0]=found
+		memo[1]=-1 if found.is_empty() or String(found.get("id",""))==target else _tier_from_open(research_open_year(found),learning_year())
+	var best:Dictionary=memo[0]
+	if best.is_empty() or int(memo[1])>max_tier: return {}
+	return best
+
+## `from_tier` and `from_index` carry on a reading that found nothing up to
+## band from_tier-1 and stopped at from_index (its chosen target already
+## judged); _scan.read_stop is left where a reading that finds nothing stopped.
+func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={},max_tier:int=TEAM_TIER_LAST,from_tier:int=0,from_index:int=0)->Dictionary:
 	var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
 	var known:Dictionary=_candidate_index.known
 	# _scan_eligible, inlined for the channel's many candidates.
@@ -1442,7 +1544,7 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 	var memo:Dictionary=_scan.eligible
 	var judged_known:Dictionary=_scan_known() if scanning else known
 	var target:=String(WorldSimulation.state.research_targets.get(channel,""))
-	if target!="" and not known.has(target) and not skip.has(target):
+	if from_tier==0 and target!="" and not known.has(target) and not skip.has(target):
 		var chosen:Dictionary=catalog_by_id.get(target,{})
 		if not chosen.is_empty() and _channel_key(String(chosen.get("dynamic","")),String(chosen.get("subcategory","")))==channel:
 			var open:Variant=memo.get(target) if scanning else null
@@ -1451,14 +1553,17 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 				if scanning: memo[target]=open
 			if open: return chosen
 	var year:=learning_year()
+	var home:=_research_600_channel_home(channel)
+	var allocation:=_subcategory_allocation(home[0],home[1])
 	var by_age:=_channel_by_age(channel,candidates)
-	var index:=0
-	for tier in range(0,max_tier+1):
+	var opens:PackedFloat64Array=(_scan.by_age[channel] as Array)[2]
+	var index:=from_index
+	for tier in range(from_tier,max_tier+1):
 		var best:Dictionary={}
 		var best_score:=-INF
 		while index<by_age.size():
 			var discovery:Dictionary=by_age[index]
-			if team_tier(discovery,year)>tier: break
+			if _tier_from_open(opens[index],year)>tier: break
 			index+=1
 			var id:=String(discovery.get("id",""))
 			if id==target or (not skip.is_empty() and skip.has(id)): continue
@@ -1467,11 +1572,19 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 				eligible=_discovery_is_eligible(discovery,current_day,judged_known)
 				if scanning: memo[id]=eligible
 			if not eligible: continue
-			var score:=_candidate_score(discovery)
+			# A question's score is kept for the scan with its line's allocation
+			# (the one input of it the scan's work can move).
+			var score:float
+			var known_score:Variant=_scan.scores.get(id) if scanning else null
+			if known_score==null or int(known_score[0])!=allocation:
+				score=_candidate_score(discovery)
+				if scanning: _scan.scores[id]=[allocation,score]
+			else: score=float(known_score[1])
 			if score>best_score:
 				best_score=score
 				best=discovery
 		if not best.is_empty(): return best
+	_scan.read_stop=index
 	return {}
 
 ## A channel's open questions (`candidates`, those not yet known) in order of
@@ -1480,14 +1593,57 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 func _channel_by_age(channel:String,candidates:Array)->Array:
 	var cached:Variant=_scan.by_age.get(channel)
 	if cached is Array and is_same((cached as Array)[0],candidates): return (cached as Array)[1]
+	# The whole channel in order of opening years is kept while its catalog
+	# list and the world stand (the years follow the seed and the definition
+	# alone); the open questions are read off it in that order, the order a
+	# sort of them alone would give (opening year, then id: a total order).
+	var definitions:Array=catalog_by_channel.get(channel,[])
+	var seed_value:=int(WorldSimulation.state.world_seed)
+	var whole:Variant=_scan.by_age_whole.get(channel)
+	if not (whole is Array and is_same((whole as Array)[0],definitions) and int((whole as Array)[1])==definitions.size() and int((whole as Array)[2])==seed_value):
+		whole=[definitions,definitions.size(),seed_value]
+		whole.append_array(_sorted_by_age(definitions))
+		_scan.by_age_whole[channel]=whole
+	var open:Dictionary={}
+	for discovery:Dictionary in candidates: open[String(discovery.get("id",""))]=true
+	var by_age:Array=[]
+	var opens:=PackedFloat64Array()
+	if open.size()==candidates.size():
+		var ordered:Array=(whole as Array)[3]
+		var years:PackedFloat64Array=(whole as Array)[4]
+		for index in ordered.size():
+			var discovery:Dictionary=ordered[index]
+			if open.has(String(discovery.get("id",""))):
+				by_age.append(discovery)
+				opens.append(years[index])
+	if by_age.size()!=candidates.size():
+		# Not a plain subset of the channel's list: sort the questions themselves.
+		var sorted:=_sorted_by_age(candidates)
+		by_age=sorted[0];opens=sorted[1]
+	_scan.by_age[channel]=[candidates,by_age,opens]
+	return by_age
+
+## `list` in order of opening years (then id), with each one's opening year
+## (research_open_year): [ordered, years].
+func _sorted_by_age(list:Array)->Array:
 	var opens:Dictionary={}
-	for discovery:Dictionary in candidates: opens[String(discovery.get("id",""))]=research_open_year(discovery)
-	var by_age:=candidates.duplicate()
-	by_age.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
+	for discovery:Dictionary in list: opens[String(discovery.get("id",""))]=research_open_year(discovery)
+	var ordered:=list.duplicate()
+	ordered.sort_custom(func(a:Dictionary,b:Dictionary)->bool:
 		var first:=float(opens[String(a.get("id",""))]);var second:=float(opens[String(b.get("id",""))])
 		return first<second if first!=second else String(a.get("id",""))<String(b.get("id","")))
-	_scan.by_age[channel]=[candidates,by_age]
-	return by_age
+	var years:=PackedFloat64Array()
+	for discovery:Dictionary in ordered: years.append(float(opens[String(discovery.get("id",""))]))
+	return [ordered,years]
+
+## team_tier from a question's opening year (research_open_year) at `year`.
+static func _tier_from_open(open_year:float,year:float)->int:
+	var ahead:=maxf(0.0,open_year-year)
+	if ahead<=0.0: return 0
+	if ahead<NEAR_AGE_YEARS: return 1
+	for index in FAR_BANDS.size():
+		if ahead<=float(FAR_BANDS[index]): return 2+index
+	return TEAM_TIER_LAST
 
 
 # Each world has a different but generous subset of the 4,608 latent routes.
