@@ -161,7 +161,7 @@ Truth: the seven runs were re-recorded on this branch, one engine at a time
 and `built_fabric.gd` (a watched file) states its Splendor and Might lines in
 the new readings. Against the old truth the engine's 15-year path differs
 only in holding together (0.872 against 0.881 at year 15, pride no longer
-lifting every people); `check.py --strict` passes (score 39.3).
+lifting every people); `check.py --strict` passes (score 43.1 after merging main with #137, re-recorded again on the merge).
 
 ### Crises and the age table's background (2026-10-03)
 
