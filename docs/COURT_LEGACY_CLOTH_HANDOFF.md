@@ -86,3 +86,18 @@ counts are diagnostics, not a visual pass. Angular lower robe folds and short
 gold cape-attachment tabs remain stylized mesh limitations. Full staged execution
 and continuous playback acceptance belong to the combined build. Generated
 imports, diagnostic files and captures stay local.
+
+Optional-cape coverage follow-up: branch `codex/court-hide-optional-cape`, base
+`1c7d7cc0`, same isolated asset worktree. The actual-scene speech close-up found
+missing shoulders when CourtStage intentionally omitted `hide_cape`. The hide
+body mask had incorrectly included that optional layer. It now masks only the
+always-present wrap and footwear; cape-on uses real underlying shoulder skin.
+All seven bundles pass raw invariants and the new anatomical shoulder assertion
+fails against the previous bundle. Exact comparison to base proves every mesh
+attribute, index, morph, rig and non-hide body channel unchanged. Only 327–486
+hide-mask vertices per body are restored. Logs:
+`artifacts/legacy-optional-cape-{before,raw,invariants}.log`.
+
+This checkpoint is HELD for cape-on/off GPU review and combined runtime tests;
+no player-build delivery is claimed. Existing motion/contact geometry evidence
+remains applicable because garment geometry and animation data are exact.
