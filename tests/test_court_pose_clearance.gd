@@ -75,12 +75,13 @@ func test_redress_preserves_stand_clock_pause_and_walking_resources()->void:
 
 func test_validated_descent_extensions_do_not_pass_a_straight_elbow()->void:
 	Pose.overrides={}
-	assert_int(Pose.PROFILES.size()).is_greater_equal(2)
+	assert_array(Pose.PROFILES.keys()).contains_exactly_in_any_order(BODIES)
 	for variant:String in Pose.PROFILES:
 		var f:=_figure(variant)
 		var source:Animation=Acting.library(variant).sit_cross
 		var flex:Variant=Pose.PROFILES[variant].sit_cross.get("flex",0.0)
 		for track in source.get_track_count():
+			if source.track_get_type(track)!=Animation.TYPE_ROTATION_3D:continue
 			var path:=String(source.track_get_path(track))
 			for side:String in ["L","R"]:
 				if not path.ends_with(":forearm."+side):continue

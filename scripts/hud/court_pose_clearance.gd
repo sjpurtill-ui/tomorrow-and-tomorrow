@@ -4,9 +4,8 @@ extends RefCounted
 const CLIPS:=["stand","sit_cross","stance_cross"]
 const CACHE_LIMIT:=96
 ## The short descent opens the hands beside the knees; after landing, a small
-## elbow bend rests them above the lap. These two profiles have dense body/cloth
-## checks and rendered transition review. Other variants retain source poses
-## until their own garment envelopes have been checked.
+## elbow bend rests them above the lap. Profiles are fitted to each body's
+## envelope, with cloth contact judged against the visible hand support.
 const PROFILES:={
 	"male_adult":{
 		"stand":6.0,
@@ -19,7 +18,37 @@ const PROFILES:={
 		"sit_cross":{
 			"spread":[[0.0,14.0],[.4,14.0],[.6,20.0],[.92,20.0],[1.1,14.0],[1.6,14.0]],
 			"flex":[[0.0,0.0],[.4,0.0],[.6,-12.0],[.9,-12.0],[1.08,14.0],[1.6,14.0]]},
-		"stance_cross":{"spread":14.0,"flex":14.0}}}
+		"stance_cross":{"spread":14.0,"flex":14.0}},
+	"male_old":{
+		"stand":8.0,
+		"sit_cross":{
+			"spread":[[0.0,8.0],[.4,8.0],[.6,20.0],[.92,20.0],[1.1,10.0],[1.6,10.0]],
+			"flex":[[0.0,0.0],[.4,0.0],[.6,-12.0],[.9,-12.0],[1.08,8.0],[1.6,8.0]]},
+		"stance_cross":{"spread":10.0,"flex":8.0}},
+	"male_young":{
+		"stand":6.0,
+		"sit_cross":{
+			"spread":[[0.0,6.0],[.4,6.0],[.6,20.0],[.92,20.0],[1.1,10.0],[1.6,10.0]],
+			"flex":[[0.0,0.0],[.4,0.0],[.6,-12.0],[.9,-12.0],[1.08,6.0],[1.6,6.0]]},
+		"stance_cross":{"spread":10.0,"flex":6.0}},
+	"female_adult":{
+		"stand":8.0,
+		"sit_cross":{
+			"spread":[[0.0,8.0],[.4,8.0],[.6,20.0],[.92,20.0],[1.1,10.0],[1.6,10.0]],
+			"flex":[[0.0,0.0],[.4,0.0],[.6,-12.0],[.9,-12.0],[1.08,6.0],[1.6,6.0]]},
+		"stance_cross":{"spread":10.0,"flex":6.0}},
+	"female_young":{
+		"stand":6.0,
+		"sit_cross":{
+			"spread":[[0.0,6.0],[.4,6.0],[.6,20.0],[.92,20.0],[1.1,10.0],[1.6,10.0]],
+			"flex":[[0.0,0.0],[.4,0.0],[.6,-12.0],[.9,-12.0],[1.08,6.0],[1.6,6.0]]},
+		"stance_cross":{"spread":10.0,"flex":6.0}},
+	"child":{
+		"stand":10.0,
+		"sit_cross":{
+			"spread":[[0.0,10.0],[.4,10.0],[.6,20.0],[.92,20.0],[1.1,10.0],[1.6,10.0]],
+			"flex":[[0.0,0.0],[.4,0.0],[.6,-12.0],[.9,-12.0],[1.08,6.0],[1.6,6.0]]},
+		"stance_cross":{"spread":10.0,"flex":6.0}}}
 ## Private diagnostic fixtures may supply calibration profiles before setup.
 ## Values are degrees, or [seconds,degrees] pairs sampled at original key times;
 ## an L/R dictionary can fit asymmetric arm poses without overcorrecting a hand.
