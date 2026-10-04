@@ -46,7 +46,7 @@ static func bounds(polygon: PackedVector2Array) -> Rect2:
 	for point in polygon: rect = rect.expand(point)
 	return rect
 
-static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Callable) -> Dictionary:
+static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Callable, changed_plots:Dictionary={}) -> Dictionary:
 	var records: Array[Dictionary] = []
 	var replaced: Dictionary = {}
 	var ordered := plots.duplicate()
@@ -79,6 +79,10 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			records.append(retained);replaced[int(plot.id)]=true
 	for plot in ordered:
 		if int(plot.get("id", 0)) > MAX_PLOTS or not supports(plot): continue
+		# An unchanged parcel has already exhausted its deterministic site search.
+		# Reserve its saved sites above, but never retry hundreds of failed infill
+		# positions merely because another quarter acquired a new household.
+		if not changed_plots.is_empty() and not changed_plots.has(int(plot.id)):continue
 		var polygon: PackedVector2Array = plot.get("polygon", PackedVector2Array())
 		if polygon.size() < 3: continue
 		# Reserve each plot's sites even while ruined/constructing, so a neighbour

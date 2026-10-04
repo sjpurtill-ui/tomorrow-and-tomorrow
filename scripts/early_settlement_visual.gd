@@ -57,8 +57,12 @@ static func has_kit(plots: Array[Dictionary]) -> bool:
 		if int(plot.get("id",0)) <= TOWN.MAX_PLOTS and supports(plot): return true
 	return false
 
-static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Callable) -> Dictionary:
-	var proxies: Array[Dictionary] = plots.duplicate(true)
+static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Callable, changed_plots:Dictionary={}) -> Dictionary:
+	# Adapter fields are top-level values; nested geometry is observed only.
+	# Copying saved sites into every proxy and every returned building turned a
+	# single-parcel update into repeated copies of the full inherited fabric.
+	var proxies:Array[Dictionary]=[]
+	for plot in plots:proxies.append(plot.duplicate(false))
 	var originals: Dictionary = {}
 	for plot in plots: originals[int(plot.id)] = plot
 	for plot in proxies:
@@ -67,7 +71,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			# from re-admitting a later/unknown form inside the shared solver.
 			plot["roof_plan"] = "unsupported_early_adapter_form"
 			continue
-		plot["visual_form"]=kind(plot)
+		plot["visual_form"]=kind(plot) if not kind(plot).is_empty() else String(plot.get("form",""))
 		if LATE.kind(plot)=="" and kind(plot) not in KIT and TOWN.supports(plot) and LATE.installed_features(plot)>0:
 			# Variant is selected inside TOWN.layout; reserve the maximum envelope
 			# of its finite kit so overlays cannot bypass road/neighbor clearance.
@@ -90,7 +94,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 		plot.storeys=1
 		plot.material_family = "organic"; plot.roof_plan = "timber_ridge"
 		plot.form = "timber_household"; plot.land_use = "residential_compound"
-	var plan := TOWN.layout(proxies,routes,land)
+	var plan := TOWN.layout(proxies,routes,land,changed_plots)
 	# Round huts and tents turn their doors to the hearth (codex/beauty-5): a
 	# round footprint is the same whichever way it faces, so the solver's
 	# clearances still hold.
@@ -101,7 +105,7 @@ static func layout(plots: Array[Dictionary], routes: Array[Dictionary], land: Ca
 			if c is Vector2: hearth = c; break
 	for record in plan.buildings:
 		var original: Dictionary = originals[int(record.plot_id)]
-		record.plot = original.duplicate(true)
+		record.plot = original.duplicate(false)
 		record["early_kind"] = kind(original)
 		if String(record.early_kind) in KIT:
 			record.erase("garden")
@@ -115,7 +119,8 @@ static func remember_layout(plan:Dictionary,plots:Array[Dictionary])->void:
 	# the pure layout function used by previews/tests never changes simulation data.
 	var by_plot:Dictionary={}
 	for record:Dictionary in plan.buildings:
-		var site:=record.duplicate(true);site.erase("plot");site.erase("garden");site.erase("early_kind")
+		var site:=record.duplicate(false);site.erase("plot");site.erase("garden");site.erase("early_kind")
+		site=site.duplicate(true)
 		var id:=int(record.plot_id)
 		if not by_plot.has(id):by_plot[id]=[]
 		by_plot[id].append(site)

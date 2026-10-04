@@ -12,7 +12,7 @@ recently visited geometry; obsolete pending requests are replaced or cancelled.
 
 At most two builders run per frame with a cooperative 2-ms camera-motion / 4-ms
 stationary time allowance. This is **not a hard frame-time guarantee**: an
-individual existing geometry builder cannot be preempted. Layout, common props,
+individual existing geometry builder cannot be preempted. Common props,
 strategic surfaces, and ground painting remain bounded shared work. The ground
 tile worker preserves its separate public `build_if_home`/`serve` API; this worker
 requests painting from the complete recorded plan, never from each patch.
@@ -61,3 +61,44 @@ Shared integration hotspot: `scripts/local_terrain.gd`. New helpers and tests ar
 task-owned; generated imports, private test settings, logs and captures are excluded.
 No canonical game/editor process is launched or stopped. The integrator must run
 combined growth/ground acceptance and graphical validation before player delivery.
+
+## Growth hitch follow-up
+
+The acceptance stress test exposed two separate growth costs: completed layout
+searches repeated for unchanged parcels, and the first fallback parcel loaded
+unrelated strategic texture sheets. Placement now advances one changed parcel
+per refresh, reserving all saved sites, and publishes a complete plan only when
+that request is ready. A parcel beyond the inherited kit's budget does not run
+that solver. One immutable plot snapshot is shared by the request's builders;
+remembering a site never first copies the discarded full plot record.
+
+Geometry LOD now follows camera scale. The old 96-parcel threshold changed LOD
+for every inherited quarter as the 97th parcel appeared. The retained patch
+manager provides stable camera behavior without that count-dependent switch.
+Inherited routes, props whose inputs are unchanged, and undefended village
+stage roots also survive crossing the 128-parcel kit budget. Defense continues
+to use its own authoritative snapshot. Strategic town/city rendering remains.
+
+Common ground and roof atlases load with the map script; only strategic fabric
+materials bind strategic sheets. This moves common asset startup cost out of
+the first growth job without reducing texture quality. Ground painting reuses
+the exact completed request plan.
+
+Diagnostics now include per-key build durations, the slowest job key, signature
+components, layout pending/step counts, maximum layout-step duration, and
+vegetation/request/ground refresh costs. The isolated prepared-history probe
+passed 145/145 checks through generations 0–12/year 3000. In the final measured
+headless run before the last ground-plan reuse, 96→128 and 128→129 each replaced
+zero old plot roots; a single repair replaced one. The largest geometry job was
+about 17 ms, and the largest placement step about 16.5 ms. These are worker
+headless observations, not a GPU frame-time claim or a full simulation benchmark.
+The approximately 52 ms ground request measured on integration base 2750f788 is
+owned by the separately advancing ground worker. Combined GPU validation is
+still required. Initial synchronous loading and strategic texture first use
+remain outside a hard per-frame time guarantee.
+
+Final worker regression after the ground-plan reuse and village-stage continuity
+changes: 129/129 cases passed across the patch, early/organic, year-71,
+city-evolution and architecture suites, with no script/shader/engine errors in
+`artifacts/patch-tests-incremental-final.log`. All save/site identity tests pass;
+there is no save schema change.

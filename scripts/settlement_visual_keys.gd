@@ -23,6 +23,21 @@ static func placement(plots:Array[Dictionary],routes:Array[Dictionary])->int:
 	for route:Dictionary in routes:records.append(project(route,ROUTE_FIELDS))
 	return hash(records)
 
+static func layout_inputs(plots:Array[Dictionary],routes:Array[Dictionary])->Dictionary:
+	var early:=preload("res://scripts/early_settlement_visual.gd")
+	var frontage:Dictionary={}
+	for road:Dictionary in routes:frontage[int(road.get("id",-1))]=project(road,ROUTE_FIELDS)
+	var obstacles:Array=[]
+	for plot:Dictionary in plots:
+		if not early.supports(plot) and String(plot.get("land_use","")) not in ["field","pasture","water","waste","vacant"]:
+			obstacles.append([plot.get("id"),plot.get("polygon")])
+	var obstacle_key:=hash(obstacles)
+	var out:Dictionary={}
+	for plot:Dictionary in plots:
+		if int(plot.get("id",0))>preload("res://scripts/organic_town_visual.gd").MAX_PLOTS or not early.supports(plot):continue
+		out[int(plot.id)]=hash([project(plot,PLACEMENT_FIELDS),frontage.get(int(plot.get("frontage_route_id",-1)),[]),obstacle_key])
+	return out
+
 static func appearance(plot:Dictionary)->int:
 	var values:=project(plot,APPEARANCE_FIELDS)
 	for field:String in TONE_FIELDS:values.append(roundi(float(plot.get(field,1.0 if field=="condition" else 0.0))*5.0))
