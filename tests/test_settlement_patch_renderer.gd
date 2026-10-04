@@ -124,6 +124,40 @@ func test_recorded_kit_and_fields_do_not_rebuild_for_another_calendar_year()->vo
 	assert_int(Keys.age({"created_day":0,"land_use":"field"},365*3000,false)).is_equal(0)
 	assert_int(Keys.age({"created_day":0,"land_use":"residential_compound"},365*3000,false)).is_equal(90)
 
+func test_layout_search_only_advances_changed_parcels_and_keeps_saved_sites()->void:
+	GameState.reset_for_new_world(9143)
+	var fixture:=preload("res://tests/city_evolution_visual_fixture.gd")
+	GameState.settlement_plots=[fixture.plot(1,Vector2(.02,.02))]
+	GameState.settlement_routes=[{"id":1,"active":true,"points":PackedVector2Array([Vector2(-.02,.044),Vector2(.24,.044)])}]
+	var terrain:Terrain=auto_free(Terrain.new())
+	terrain._organic_town_plan(Vector3.ZERO,func(_p:Vector2)->bool:return true)
+	var old_sites:PackedByteArray=var_to_bytes(GameState.settlement_plots[0].get("visual_building_sites",[]))
+	GameState.settlement_plots.append(fixture.plot(2,Vector2(.06,.02)))
+	GameState.settlement_plots.append(fixture.plot(3,Vector2(.10,.02)))
+	assert_bool(terrain._prime_organic_town_plan(Vector3.ZERO)).is_true()
+	assert_int(terrain.settlement_layout_steps).is_equal(1)
+	assert_int(terrain.settlement_patch_stats().layout_pending).is_equal(1)
+	assert_bool(terrain._prime_organic_town_plan(Vector3.ZERO)).is_true()
+	assert_int(terrain.settlement_layout_steps).is_equal(2)
+	# Completion remains pending until the next refresh can install its request.
+	assert_int(terrain.settlement_patch_stats().layout_pending).is_equal(1)
+	assert_bool(terrain._prime_organic_town_plan(Vector3.ZERO)).is_false()
+	assert_int(terrain.settlement_patch_stats().pending).is_equal(0)
+	assert_array(var_to_bytes(GameState.settlement_plots[0].get("visual_building_sites",[]))).is_equal(old_sites)
+	GameState.settlement_plots.append(fixture.plot(129,Vector2(.30,.02)))
+	assert_bool(terrain._prime_organic_town_plan(Vector3.ZERO)).is_false()
+	assert_int(terrain.settlement_layout_steps).is_equal(2)
+
+func test_parcel_material_uses_its_atlas_without_loading_strategic_sheets()->void:
+	var terrain:Terrain=auto_free(Terrain.new())
+	var roof:ShaderMaterial=terrain._settlement_fabric_material(3,.62)
+	assert_object(roof.get_shader_parameter("roof_material_atlas")).is_not_null()
+	assert_object(roof.get_shader_parameter("late_roof_material_atlas")).is_not_null()
+	assert_object(roof.get_shader_parameter("strategic_district_atlas")).is_null()
+	var ground:ShaderMaterial=terrain._settlement_fabric_material(0,.48)
+	assert_object(ground.get_shader_parameter("material_atlas")).is_not_null()
+	assert_object(ground.get_shader_parameter("strategic_district_atlas")).is_null()
+
 func test_ground_shader_preserves_valid_founding_paint_before_frontier_tiles()->void:
 	var source:=FileAccess.get_file_as_string("res://scripts/settlement_ground.gdshaderinc").replace("\r\n","\n")
 	var selection:=source.substr(source.find("int settlement_ground_slot("))
