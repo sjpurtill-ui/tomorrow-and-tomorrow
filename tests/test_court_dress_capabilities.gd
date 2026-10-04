@@ -58,6 +58,12 @@ func test_business_variation_is_stable_supported_and_preserves_identity()->void:
 		assert_str(String(dressed.outfit)).is_equal("business")
 		assert_dict(dressed.face).is_equal(source.face)
 		assert_that(dressed.cloth[2]).is_equal(source.cloth[2])
+		assert_float(Color(dressed.leather).v).is_less(0.25)
 		coats[str(dressed.cloth[0])]=true;details[str(dressed.without)]=true
 	assert_int(coats.size()).is_greater(1)
 	assert_int(details.size()).is_equal(2)
+
+func test_simple_clothes_retain_existing_leather_colour()->void:
+	var source:=_look();source.leather=Color("9e744c")
+	var profile:=Presentation.from_knowledge(["plain_weaving"])
+	assert_that(Look.dress(source,profile).leather).is_equal(source.leather)

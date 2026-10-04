@@ -142,30 +142,30 @@ class Bundle:
         self.doc["nodes"].append({"name": name, "mesh": len(self.doc["meshes"]) - 1, "skin": self.body_node["skin"]})
         self.doc["nodes"][self.parent]["children"].append(len(self.doc["nodes"]) - 1)
 
-    def shell(self, name, slot, mask, offset, select=None, planes=()):
+    def shell(self, name, slot, mask, offset, select=None, planes=(), limits=()):
         faces = self.faces[np.all(mask[self.faces], axis=1)]
         p = self.p + self.n * np.asarray(offset).reshape(-1, 1)
         if select is not None: faces = faces[select(p[faces].mean(axis=1))]
-        if planes:
+        if planes or limits:
             # Clip triangle edges and interpolate their skinning, rather than
             # selecting whole triangles: collars and cuffs need straight seams.
             verts=[]; normals=[]; joints=[]; weights=[]; triangles=[]
             full=np.zeros((len(self.p),len(self.names)))
             for col in range(4): full[np.arange(len(self.p)), self.j[:,col]] += self.w[:,col]
             for face in faces:
-                polygon=[(p[i],self.n[i],full[i]) for i in face]
-                for normal, distance in planes:
+                polygon=[(p[i],self.n[i],full[i],np.array([p[i] @ normal+distance for normal,distance in planes]+[limit[i] for limit in limits])) for i in face]
+                for field in range(len(planes)+len(limits)):
                     if not polygon: break
                     clipped=[]
                     for i, a in enumerate(polygon):
                         z=polygon[(i+1)%len(polygon)]
-                        da=float(a[0] @ normal+distance); dz=float(z[0] @ normal+distance)
+                        da=float(a[3][field]); dz=float(z[3][field])
                         if da>=0: clipped.append(a)
                         if (da>=0)!=(dz>=0):
-                            t=da/(da-dz);clipped.append(tuple(a[k]+t*(z[k]-a[k]) for k in range(3)))
+                            t=da/(da-dz);clipped.append(tuple(a[k]+t*(z[k]-a[k]) for k in range(4)))
                     polygon=clipped
                 start=len(verts)
-                for pos,n,weights_all in polygon:
+                for pos,n,weights_all,_ in polygon:
                     ids=np.argsort(weights_all)[-4:][::-1];values=weights_all[ids];values/=values.sum()
                     verts.append(pos);normals.append(n);joints.append(ids);weights.append(values)
                 for i in range(1,len(polygon)-1):triangles.append((start,start+i,start+i+1))
@@ -227,18 +227,22 @@ def build(variant, out):
         weights[family] = np.sum(b.w * np.isin(b.j, ids), axis=1)
     arm = weights["upper_arm"] + weights["forearm"]
     hands = weights["hand"] + weights["thumb"] + weights["index"] + weights["fingers"]
-    dress = (y < f.z_chin - .008 * k) & (hands < .62)
-    dress &= ~((np.abs(b.p[:, 0]) < .056 * k) & (y > f.z_shoulder + .018 * k))
-    # Cuff planes leave hands and wrist articulation intact on every body.
+    # Keep a generous source region, then clip seams through triangles. A
+    # rectangular neck mask removed whole triangles and left shoulder tabs;
+    # a hand-weight mask similarly left skin wedges behind the cuff.
+    dress = (y < f.z_chin + .05 * k) & (hands < .995)
+    sleeve_limits = []
     for side in ("L", "R"):
         wrist = gl(f.wrist[side]); axis = gl(f.wrist[side] - f.elbow[side]); axis /= np.linalg.norm(axis)
-        beyond = (b.p - wrist) @ axis > -.010 * k
-        dress &= ~((arm + hands > .45) & beyond & (b.p[:, 0] * (1 if side == "L" else -1) > 0))
-    top = dress & ((y > f.z_hip - .030 * k) | (arm > .45))
+        on_arm = (arm + hands > .20) & (b.p[:, 0] * (1 if side == "L" else -1) > f.p["shoulder"] * .70)
+        sleeve_limits.append(np.where(on_arm, -(b.p-wrist) @ axis-.002*k, 1.0))
+    top = dress & ((y > f.z_hip - .030 * k) | (arm + hands > .45))
     legs = dress & (y < f.z_waist + .015 * k) & (arm + hands < .35)
     # Hide only vertices inside a complete cloth triangle, away from its boundary.
     cover = np.zeros(len(y), dtype=bool)
-    covered_faces = b.faces[np.all(dress[b.faces], axis=1)]
+    coverage = dress & (y < f.z_shoulder+.025*k)
+    for limit in sleeve_limits: coverage &= limit > .004*k
+    covered_faces = b.faces[np.all(coverage[b.faces], axis=1)]
     cover[np.unique(covered_faces)] = True
     for _ in range(2):
         border_faces = b.faces[np.any(~cover[b.faces], axis=1)]
@@ -262,10 +266,20 @@ def build(variant, out):
         b.shell(kind + "_trousers", "CLOTH_A" if kind != "medieval" else "CLOTH_B", legs, np.full(len(y), pant_ease), planes=[(np.array((0,1,0)), -f.z_ankle-.008*k)])
         b.shell(kind + "_shoes", "LEATHER", legs, np.full(len(y), .013*k), planes=[(np.array((0,-1,0)), f.z_ankle+.052*k)])
         shirt_bottom = f.z_waist + (.04 if kind == "business" else -.035) * k
+        eased=b.p+b.n*ease
+        cuff_width=(.080 if kind=="courtcoat" else .038)*k
+        tailored_sleeves=[]
+        for side in ("L","R"):
+            wrist=gl(f.wrist[side]);axis=gl(f.wrist[side]-f.elbow[side]);axis/=np.linalg.norm(axis)
+            on_arm=(arm+hands>.20)&(b.p[:,0]*(1 if side=="L" else -1)>f.p["shoulder"]*.70)
+            tailored_sleeves.append(np.where(on_arm,-(eased-wrist)@axis-.008*k-cuff_width,1.0))
+        # Shoulders rise above the neck base in the source body. Restrict the
+        # cut to the neck column, so a flat seam never slices their domes.
+        neck_limit=np.maximum(f.z_shoulder+.050*k-eased[:,1],np.abs(eased[:,0])-.092*k)
         if kind == "medieval":
-            b.shell(kind + "_doublet", "CLOTH_A", top, np.full(len(y), ease))
+            b.shell(kind + "_doublet", "CLOTH_A", top, np.full(len(y), ease), limits=tailored_sleeves+[neck_limit])
         else:
-            b.shell(kind + "_jacket", "CLOTH_A", top, np.full(len(y), ease))
+            b.shell(kind + "_jacket", "CLOTH_A", top, np.full(len(y), ease), limits=tailored_sleeves+[neck_limit])
             slope=.072*k/(f.z_shoulder-shirt_bottom)
             planes=[(np.array((0,0,1)), -.025*k), (np.array((0,1,0)), -shirt_bottom),
                     (np.array((1,slope,0)), -slope*shirt_bottom), (np.array((-1,slope,0)), -slope*shirt_bottom),
@@ -276,20 +290,31 @@ def build(variant, out):
         if kind != "business":
             length = {"medieval": .25, "courtcoat": .28, "formal": .13}[kind] * k
             hem = f.z_hip - length
-            radius = f.p["pelvis"] + .045 * k
-            sectors = ((-.5 * math.pi + .12, -.02), (.02, .5 * math.pi - .12), (.5 * math.pi + .10, math.pi - .08), (-math.pi + .08, -.5 * math.pi - .10))
+            # Side seams are continuous: the previous four quarter panels left
+            # full-height rectangular side gaps as soon as either thigh moved.
+            # Only front/back vents separate the legs; coat tails stay open at
+            # the front. The waist follows the existing torso, without a shelf.
+            sectors = ((-math.pi+.025,-.025),(.025,math.pi-.025))
+            if kind=="courtcoat":sectors=((-math.pi+.025,-.5*math.pi),(.5*math.pi,math.pi-.025))
             for side_i, (a0, a1) in enumerate(sectors):
-                if kind == "courtcoat" and side_i < 2: continue
                 verts = []; joints = []; values = []
-                rings, steps = 8, 9
+                rings, steps = 12, 19
                 for row in range(rings):
                     t = row / (rings - 1)
                     height = f.z_hip + .08 * k - t * (length + .08 * k)
+                    section_height=max(height,f.z_hip)
+                    rx,fr,bk,cy=[float(np.interp(section_height,[s[0] for s in sections],[s[j] for s in sections])) for j in range(1,5)]
+                    # The delivered body includes the rounded union with the
+                    # thighs; its actual hip is wider than the trunk blueprint.
+                    row_body=b.p[(np.abs(y-section_height)<.012*k)&(arm+hands<.2)]
+                    if len(row_body):rx=max(rx,float(np.max(np.abs(row_body[:,0]))))
                     for col in range(steps):
                         a = a0 + (a1 - a0) * col / (steps - 1)
                         # Around +Z front; a narrow centre opening is deliberate.
-                        x = math.sin(a) * radius * (1 + .12 * t)
-                        z = math.cos(a) * (.15 * k + .028 * k * t)
+                        x = math.sin(a) * (rx+ease+.004*k+.018*k*t)
+                        depth=fr if math.cos(a)>=0 else bk
+                        clearance=(depth+ease+.004*k)*(1-min(1,t/.28))+(.155+.025*t)*k*min(1,t/.28)
+                        z = -cy+math.cos(a)*clearance
                         verts.append((x, height, z))
                         joint = b.names.index("thigh." + ("L" if x >= 0 else "R"))
                         hip = b.names.index("hips")
@@ -308,14 +333,14 @@ def build(variant, out):
         # court camera distance. Children have smaller, plain collars and no tie.
         for side in ("L", "R"):
             wrist = gl(f.wrist[side]); axis = gl(f.wrist[side] - f.elbow[side]); axis /= np.linalg.norm(axis)
-            width=(.080 if kind == "courtcoat" else .038)*k
+            width=cuff_width
             cuff_mask=(arm+hands>.15) & (b.p[:,0]*(1 if side=="L" else -1)>0)
             b.shell(kind + "_cuff_" + side, "CLOTH_C" if kind in ("medieval", "courtcoat") else "CLOTH_B",
-                    cuff_mask, np.full(len(y),ease+.003*k),
+                    cuff_mask, np.full(len(y),ease),
                     planes=[(axis,-float(wrist@axis)+.008*k+width),(-axis,float(wrist@axis)-.008*k)])
-        neck_center = gl(f.neck) + np.array((0, .017 * k, 0))
-        band(b, kind + "_collar", "CLOTH_C" if kind == "medieval" else "CLOTH_B", neck_center, np.array((0., 1., 0.)),
-             .063 * k, .056 * k, (.035 if f.p.get("child") else .047) * k)
+        neck_center=gl(f.neck)+np.array((0,.037*k,0))
+        band(b,kind+"_collar","CLOTH_C" if kind=="medieval" else "CLOTH_B",neck_center,np.array((0.,1.,0.)),
+             .050*k+ease+.002*k,.052*k+ease+.002*k,.034*k if f.p.get("child") else .041*k)
         if kind == "medieval":
             band(b, kind + "_belt", "LEATHER", np.array((0, f.z_waist, -.005)), np.array((0., 1., 0.)),
                  f.p["waist"] + .030 * k, .133 * k, .038 * k)
