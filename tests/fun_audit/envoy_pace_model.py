@@ -1,18 +1,35 @@
 """Quick pacing model for first contact and envoys (codex/envoy-pace).
 
-Mirrors the rules in scripts/civilization_system.gd (scout_known_reach_km,
-_foreign_scout_operational_range), scripts/neighbor_signs.gd (range_km,
-ENCOUNTER_KM) and scripts/audience_hall.gd (ERA_GLOBAL_GAP, ERA_CIV_GAP,
-civ_gap, _business_mix, sequels, one envoy waiting at a time). Neighbour
-distances come from tests/fun_audit/contact_distance_probe.gd on 12 seeds.
+Mirrors the rules in scripts/civilization_system.gd (scout_known_reach_km: the
+same known-country rule for every people's parties), scripts/neighbor_signs.gd
+(range_km, ENCOUNTER_KM) and scripts/audience_hall.gd (ERA_GLOBAL_GAP,
+ERA_CIV_GAP, civ_gap, _business_mix, sequels, one envoy waiting at a time).
+Neighbour distances come from the placement probe (civilization_start.gd
+candidate, then the real founding-site choice) on 20 seeds.
 Run: python tests/fun_audit/envoy_pace_model.py
+     python tests/fun_audit/envoy_pace_model.py --contact-table [--years 120] [--before]
 """
-import math, random, statistics
+import math, random, statistics, sys
 
-# (nearest, second, third, fourth) km from the placement probe
-WORLDS = {424242:[506,550,11413,24060],77013:[490,500,2682,2778],112358:[297,322,22419,22547],
-    91420:[312,447,1470,1754],5:[288,546,5136,5137],8080:[316,546,2881,2915],31337:[214,333,430,451],
-    2024:[511,540,9729,9764],6:[301,565,5548,5676],99:[361,424,5203,5221],1234:[288,546,3308,3736],555:[717,745,13086,13107]}
+# (nearest, second, third, fourth) km from the player's home, after the
+# planet-wide placement (codex/far-peoples: every seat at least 2,000 km from
+# every other); the nearest is measured at the real founding sites.
+WORLDS = {7932:[3909,5069,5480,6388],15851:[3223,7777,8034,9803],23770:[4174,5106,5172,8294],
+    31689:[3428,3665,4486,4924],39608:[6558,6788,9110,9146],47527:[2672,5752,8239,9878],
+    55446:[7675,14857,16402,16878],63365:[3246,4716,6308,6552],71284:[4128,5776,6508,6603],
+    79203:[3011,4965,5584,6308],87122:[5611,6196,8573,9271],95041:[5023,5607,5695,6462],
+    102960:[3406,3499,5336,5715],110879:[5318,8113,8147,8547],118798:[2038,5564,5952,7249],
+    126717:[2597,3538,5961,6132],134636:[2269,3294,4376,4962],142555:[2248,3289,4992,9164],
+    150474:[2325,2445,5892,6080],158393:[3491,5808,6801,7176]}
+# The same 20 seeds under the old regional groups of three (two peoples placed
+# 250-600 km from the player's seat): the "before" of codex/far-peoples.
+REGIONAL_WORLDS = {7932:[460,4733,5050,5069],15851:[291,424,9437,10603],23770:[301,422,9446,9838],
+    31689:[341,412,1780,2361],39608:[316,577,10490,10585],47527:[361,402,7942,8242],
+    55446:[428,581,16390,16774],63365:[331,388,1774,1981],71284:[418,538,5124,6969],
+    79203:[360,588,4433,4621],87122:[404,439,5716,6196],95041:[497,573,6203,6275],
+    102960:[368,556,5492,5715],110879:[388,584,8113,8408],118798:[428,447,5564,5803],
+    126717:[428,502,612,971],134636:[474,520,4304,4423],142555:[394,566,2229,2516],
+    150474:[369,581,5300,5482],158393:[260,278,2978,3105]}
 YEARS = 30
 ENCOUNTER_KM = 58.0
 FREQ = {"rare":1.6,"normal":1.0,"lively":0.6}
@@ -28,8 +45,9 @@ def known_reach(t):
     return 110.0 + t * 18.0 * (1.0 + travel_knowledge(t) * 1.5)
 
 def foreign_range(t):
-    reach = 0.00174 * t  # world_reach per year at stone-age rival stats
-    return 110.0 + reach * 18000.0 * 0.70
+    # Every people's parties walk its own known country (scout_known_reach_km
+    # in that people's scope): the same rule as ours.
+    return known_reach(t)
 
 def sign_range(t):
     pop = 160 + 12 * t
@@ -44,17 +62,19 @@ def radial_pass(dist, bearing_err, reach):
         return math.hypot(dist * math.cos(bearing_err) - reach, dist * math.sin(bearing_err))
     return abs(dist * math.sin(bearing_err))
 
-def contact_run(dists, rng):
-    """Returns per-neighbour (sign_day, contact_day) over YEARS for the given homes."""
+def contact_run(dists, rng, years=None, player_scouting=True):
+    """Returns per-neighbour (sign_day, contact_day) over `years` (default YEARS)
+    for the given homes. Without player scouting only their parties travel."""
+    years = YEARS if years is None else years
     homes = [(d, rng.uniform(-math.pi, math.pi)) for d in dists]
     sign = [None] * len(homes); contact = [None] * len(homes); how = [None] * len(homes)
     day = 30
     foreign_next = [rng.randint(0, 60) for _ in homes]
     foreign_seq = [rng.randint(0, 50) for _ in homes]
-    while day < YEARS * 365:
+    while day < years * 365:
         t = day / 365.0
         # player parties: about one departure a month across two parties
-        reach = known_reach(t)
+        reach = known_reach(t) if player_scouting else 0.0
         target = None
         for i, (d, b) in enumerate(homes):
             if sign[i] is not None and contact[i] is None and d - ENCOUNTER_KM <= reach:
@@ -235,5 +255,39 @@ def main():
     print("metal-age envoys per year, two peoples met: %.2f" % statistics.mean(later))
     print("pure goodwill gifts: %d of %d envoys (%.0f%%); routine-word Chronicle lines: %d" % (all_gifts, all_arrivals, 100 * all_gifts / max(1, all_arrivals), words_total))
 
+def contact_table(worlds, years, reps=8):
+    """Per seed: first sign and first contact year, with our parties scouting
+    and with only theirs travelling (median of `reps` runs; '-' = none)."""
+    def first(days):
+        met = [c for c in days if c is not None]
+        return min(met) / 365.0 if met else None
+    def median_or_none(xs):
+        got = sorted(x for x in xs if x is not None)
+        if len(got) * 2 <= len(xs): return None
+        return got[len(xs) // 2] if len(got) == len(xs) else statistics.median(got + [1e9] * (len(xs) - len(got)))
+    fmt = lambda v: "-" if v is None else "%.0f" % v
+    print("seed     nearest_km  sign_yr  contact_yr(scouting)  contact_yr(no player scouting)  met@30  met@60")
+    all_scout, all_quiet = [], []
+    for seed, dists in worlds.items():
+        sg, sc, qc, m30, m60 = [], [], [], [], []
+        for rep in range(reps):
+            sign, contact, _ = contact_run(dists, random.Random(seed * 10 + rep), years, True)
+            sg.append(first(sign)); sc.append(first(contact))
+            m30.append(sum(1 for c in contact if c is not None and c <= 30 * 365))
+            m60.append(sum(1 for c in contact if c is not None and c <= 60 * 365))
+            _, quiet, _ = contact_run(dists, random.Random(seed * 10 + rep), years, False)
+            qc.append(first(quiet))
+        all_scout += sc; all_quiet += qc
+        print("%-8d %10d  %7s  %20s  %30s  %6.1f  %6.1f" % (seed, dists[0], fmt(median_or_none(sg)), fmt(median_or_none(sc)), fmt(median_or_none(qc)), statistics.mean(m30), statistics.mean(m60)))
+    within = lambda xs, y: 100.0 * sum(1 for x in xs if x is not None and x < y) / len(xs)
+    print("runs with first contact before year 30 / 60, our parties scouting: %.0f%% / %.0f%%" % (within(all_scout, 30), within(all_scout, 60)))
+    print("runs with first contact before year 30 / 60, only their parties: %.0f%% / %.0f%%" % (within(all_quiet, 30), within(all_quiet, 60)))
+    met = sorted(x for x in all_scout if x is not None)
+    if met: print("first contact year with our parties scouting: median %.0f, earliest %.0f (%d of %d runs within %d years)" % (statistics.median(met), met[0], len(met), len(all_scout), years))
+
 if __name__ == "__main__":
-    main()
+    if "--contact-table" in sys.argv:
+        years = int(sys.argv[sys.argv.index("--years") + 1]) if "--years" in sys.argv else 120
+        contact_table(REGIONAL_WORLDS if "--before" in sys.argv else WORLDS, years)
+    else:
+        main()

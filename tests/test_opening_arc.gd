@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## The opening: regional neighbours, signs of strangers, the fire circle and
+## The opening: far neighbours, signs of strangers, the fire circle and
 ## the Opening Arc's beats.
 const Start=preload("res://scripts/civilization_start.gd")
 const Signs=preload("res://scripts/neighbor_signs.gd")
@@ -12,30 +12,28 @@ func before_test()->void:
 	CivilizationSystem.reset_for_new_world()
 	PeopleDirection.reset_for_new_world()
 
-func test_every_seat_has_neighbours_a_few_weeks_walk_away()->void:
+func test_every_seat_lives_far_from_every_other_seat()->void:
 	for seed_value in [424242,77013,91420]:
 		GameState.reset_for_new_world(seed_value)
-		for group in 3:
-			var anchor:=Start.candidate(seed_value,group*Start.REGION_SEATS)
-			for member in range(1,Start.REGION_SEATS):
-				var seat:=group*Start.REGION_SEATS+member
-				var point:=Start.candidate(seed_value,seat)
-				assert_bool(point==Start.candidate(seed_value,seat)).is_true()
-				assert_float(point.distance_to(anchor)).override_failure_message("seed %d seat %d is %.0f km from its region" % [seed_value,seat,point.distance_to(anchor)]).is_between(Start.NEIGHBOR_MIN_KM-Start.REGION_CELL_KM,Start.NEIGHBOR_MAX_KM*1.5)
-				assert_bool(Start.supports_founders(PlanetEnvironment.profile_at(point))).is_true()
+		var seats:Array=[]
+		for seat in 12:
+			var point:=Start.candidate(seed_value,seat)
+			assert_bool(point==Start.candidate(seed_value,seat)).is_true()
+			assert_float(Start.separation(point,seats)).override_failure_message("seed %d seat %d is %.0f km from another people" % [seed_value,seat,Start.separation(point,seats)]).is_greater_equal(Start.SEAT_SEPARATION_KM)
+			assert_bool(Start.supports_founders(PlanetEnvironment.profile_at(point))).is_true()
+			seats.append(point)
 
-func test_the_players_seat_is_placed_like_any_other_region_anchor()->void:
+func test_the_players_seat_is_drawn_like_any_first_seat()->void:
 	assert_vector(Start.candidate(424242,0)).is_equal(Start._planet_candidate(424242,0))
-	assert_vector(Start.candidate(424242,3)).is_equal(Start._planet_candidate(424242,3))
 
-func test_the_audit_seeds_now_have_a_reachable_neighbour()->void:
+func test_the_audit_seeds_have_no_neighbour_within_a_season_of_walking()->void:
 	for seed_value in [424242,77013]:
 		GameState.reset_for_new_world(seed_value)
 		CivilizationSystem.reset_for_new_world()
 		var home:=Start.candidate(seed_value,0)
 		var nearest:=INF
 		for civ:Dictionary in CivilizationSystem.civilizations:nearest=minf(nearest,home.distance_to(CivilizationSystem._civilization_world_position(civ)))
-		assert_float(nearest).override_failure_message("seed %d nearest rival %.0f km" % [seed_value,nearest]).is_less_equal(Start.NEIGHBOR_MAX_KM+Start.REGION_CELL_KM)
+		assert_float(nearest).override_failure_message("seed %d nearest rival %.0f km" % [seed_value,nearest]).is_greater_equal(Start.SEAT_SEPARATION_KM)
 
 func _route_past(home:Vector2,miss_km:float)->Array:
 	var a:=home+Vector2(-150,miss_km);var b:=home+Vector2(150,miss_km)
