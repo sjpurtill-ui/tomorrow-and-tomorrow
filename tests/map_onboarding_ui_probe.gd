@@ -89,18 +89,12 @@ func _ready()->void:
 	_expect(not terrain.map_help_panel.visible and not terrain.map_help_button.visible,"map help remained visible or clickable beneath an open report")
 	report_blocker.visible=false
 	terrain._arbitrate_notification_overlays()
-	_expect(not terrain.active_foreign_alert.is_empty() and terrain.foreign_alert_panel.visible,"deferred foreign alert did not appear after the report closed")
+	# The deferred first contact is told as an urgent notice in the one stack at
+	# the top right (hud/notification_stack.gd), never a separate card.
+	var Notices:=preload("res://scripts/hud/notification_model.gd")
+	_expect(not terrain.active_foreign_alert.is_empty() and not terrain.foreign_alert_panel.visible,"deferred foreign alert did not become active after the report closed")
+	_expect(Notices.pending.any(func(n:Dictionary)->bool:return String(n.get("tier",""))=="urgent" and String(n.get("category",""))=="neighbours") or Notices.history.any(func(n:Dictionary)->bool:return String(n.get("category",""))=="neighbours"),"first contact was not told as an urgent Neighbours notice")
 	_expect(terrain.map_help_panel.visible and terrain.map_help_button.visible,"map help did not return after the player returned to the map")
-	var alert_rect:Rect2=terrain.foreign_alert_panel.get_rect()
-	_expect(alert_rect.position.x>=0.0 and alert_rect.position.y>=0.0 and alert_rect.end.x<=viewport_size.x and alert_rect.end.y<=viewport_size.y,"deferred foreign alert was not clamped inside the viewport: rect=%s viewport=%s" % [alert_rect,viewport_size])
-	var visible_alert_buttons:=0
-	for alert_button_variant in terrain.foreign_alert_panel.find_children("*","Button",true,false):
-		var alert_button:=alert_button_variant as Button
-		if alert_button==null or not alert_button.is_visible_in_tree(): continue
-		visible_alert_buttons+=1
-		var button_rect:Rect2=alert_button.get_global_rect()
-		_expect(not alert_button.disabled and button_rect.position.x>=0.0 and button_rect.position.y>=0.0 and button_rect.end.x<=viewport_size.x and button_rect.end.y<=viewport_size.y,"foreign alert action was disabled or outside the clickable viewport: %s rect=%s" % [alert_button.text,button_rect])
-	_expect(visible_alert_buttons>=2,"foreign alert exposed no visible map/dismiss actions")
 	report_blocker.visible=true
 	terrain._arbitrate_notification_overlays()
 	_expect(not terrain.foreign_alert_panel.visible and not terrain.foreign_alert_panel.is_visible_in_tree(),"active foreign alert was not suppressed when a report opened over it")

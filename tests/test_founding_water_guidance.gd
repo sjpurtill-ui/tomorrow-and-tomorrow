@@ -101,7 +101,9 @@ func test_first_foundation_rechecks_exact_position_and_refuses_dry_site_without_
 	var stores:=GameState.resource_stockpiles.duplicate(true)
 	world._start_settlement_here()
 	assert_bool(GameState.settlement_site_committed).is_false()
-	assert_str(world.travel_status_label.text).contains("No known fresh water")
+	# The refusal is told in the notice stack at the top right, not over the map.
+	var Notices:=preload("res://scripts/hud/notification_model.gd")
+	assert_bool(Notices.pending.any(func(n:Dictionary)->bool:return (String(n.get("title",""))+" "+String(n.get("text",""))).contains("No known fresh water"))).is_true()
 	assert_dict(GameState.resource_stockpiles).is_equal(stores)
 
 func test_later_city_preview_quote_and_final_send_all_refuse_unconfirmed_water()->void:
