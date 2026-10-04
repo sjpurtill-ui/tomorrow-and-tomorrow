@@ -201,6 +201,23 @@ def panel(b, name, slot, points):
     b.add(name, slot, q, faces)
 
 
+def front_patch(b, name, slot, points, mask, offset, front_limit, limits=()):
+    # Sew the facing to the actual curved shell, not a coarse four-corner
+    # approximation of the torso. Each cut edge inherits the shell's skinning.
+    # The outline is convex in front elevation; the Z plane excludes the back.
+    polygon = np.asarray(points, dtype=np.float32)[:, :2]
+    center = polygon.mean(axis=0)
+    planes = [(np.array((0., 0., 1.)), -front_limit)]
+    for i, a in enumerate(polygon):
+        edge = polygon[(i + 1) % len(polygon)] - a
+        normal = np.array((-edge[1], edge[0], 0.))
+        distance = -float(normal[:2] @ a)
+        if float(normal[:2] @ center) + distance < 0:
+            normal = -normal; distance = -distance
+        planes.append((normal, distance))
+    b.shell(name, slot, mask, np.full(len(b.p), offset), planes=planes, limits=limits)
+
+
 def band(b, name, slot, center, axis, radius_a, radius_b, length, steps=24):
     axis = np.asarray(axis); axis /= np.linalg.norm(axis)
     right = np.cross(axis, np.array((0., 0., 1.)))
@@ -367,14 +384,17 @@ def build(variant, out):
         else:
             for side in (-1, 1):
                 low = f.z_waist + (.03 if kind == "business" else -.015) * k
-                panel(b, kind + "_lapel_" + str(side), "CLOTH_A" if kind == "business" else "CLOTH_C",
+                front_patch(b, kind + "_lapel_" + str(side), "CLOTH_A" if kind == "business" else "CLOTH_C",
                       [front(side*.065*k,f.z_shoulder-.023*k,.043), front(side*.12*k,f.z_chest+.036*k,.043),
-                       front(side*.043*k,low,.043), front(side*.025*k,f.z_chest-.01*k,.043)])
+                       front(side*.043*k,low,.043), front(side*.025*k,f.z_chest-.01*k,.043)],
+                      top, ease+.009*k, .025*k, limits=[neck_limit])
             if not f.p.get("child"):
                 if kind == "business":
-                    panel(b, kind + "_tie", "CLOTH_C", [front(-.014*k,f.z_shoulder-.033*k,.048),front(.014*k,f.z_shoulder-.033*k,.048),front(.022*k,f.z_waist+.09*k,.048),front(0,f.z_waist+.06*k,.048),front(-.022*k,f.z_waist+.09*k,.048)])
+                    front_patch(b, kind + "_tie", "CLOTH_C", [front(-.014*k,f.z_shoulder-.033*k,.048),front(.014*k,f.z_shoulder-.033*k,.048),front(.022*k,f.z_waist+.09*k,.048),front(0,f.z_waist+.06*k,.048),front(-.022*k,f.z_waist+.09*k,.048)],
+                                top, ease+.013*k, .025*k, limits=[neck_limit])
                 else:
-                    panel(b, kind + "_cravat", "CLOTH_B", [front(-.041*k,f.z_shoulder-.014*k,.05),front(.041*k,f.z_shoulder-.014*k,.05),front(.027*k,f.z_chest+.002*k,.05),front(-.027*k,f.z_chest+.002*k,.05)])
+                    front_patch(b, kind + "_cravat", "CLOTH_B", [front(-.041*k,f.z_shoulder-.014*k,.05),front(.041*k,f.z_shoulder-.014*k,.05),front(.027*k,f.z_chest+.002*k,.05),front(-.027*k,f.z_chest+.002*k,.05)],
+                                top, ease+.013*k, .025*k, limits=[neck_limit])
             count = 6 if kind == "courtcoat" else (4 if kind == "formal" else 2)
             for i in range(count):
                 h = f.z_waist + .025*k + i*.039*k
