@@ -356,7 +356,32 @@ static func _paint_key(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dict
 	var shares:Dictionary=plan._ground_shares.duplicate() if plan.has("_ground_shares") else _labour()
 	for activity in shares:shares[activity]=snappedf(float(shares[activity]),0.1)
 	var bearings:Array=plan._ground_bearings if plan.has("_ground_bearings") else _approach_bearings(Vector2(center.x,center.z))
-	return hash([center,frame,bool(plan.get("_ground_fallback",plan.is_empty())),_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),plan.get("_ground_paths",[]),plan.get("_ground_hearth",Vector2.ZERO),plan.get("_ground_has_hearth",false),_works_near(center) if not frame.has_area() else [],bearings,shares])
+	var fallback:=bool(plan.get("_ground_fallback",plan.is_empty()))
+	var works:Array[Dictionary]=[]
+	if not frame.has_area():works=_works_near(center)
+	var paint_frame:=frame
+	var fabric:=_fabric_key(plots)
+	if plan.has("_ground_paths"):
+		# The source revision still tracks the full settlement. A home paint job
+		# only needs records that can leave ink, plus the actual framing and its
+		# already-derived connectivity. An unrendered household inside that
+		# frame must not repaint every inherited yard when it grows or repairs.
+		paint_frame=frame if frame.has_area() else _paint_rect(plan,plots,routes,works)
+		fabric=_paint_plot_key(plots,fallback)
+	return hash([center,paint_frame,fallback,fabric,_route_key(routes),_building_key(plan.get("buildings",[])),plan.get("_ground_paths",[]),plan.get("_ground_hearth",Vector2.ZERO),plan.get("_ground_has_hearth",false),works,bearings,shares])
+
+static func _paint_plot_key(plots:Array[Dictionary],fallback:bool)->int:
+	var painted:Array[Dictionary]=[]
+	for plot in plots:
+		var use:=String(plot.get("land_use",""))
+		var form:=String(plot.get("form",""))
+		var status:=String(plot.get("status","active"))
+		var field:=use=="field" and status!="reclaimed" and _polygon(plot).size()>=3
+		var midden:=form=="refuse_and_latrine_ground" and status!="reclaimed"
+		var service:=form in HEARTH_FORMS or form in ["open_work_yard","covered_work_yard","sheltered_work_area","guarded_cache","lined_storage_pits","protected_household_store","raised_timber_store","communal_store","carried_water_point","refuse_and_latrine_ground"] or use in ["market","civic","sacred"]
+		var household:=fallback and use in ["residential_compound","mixed_household"]
+		if field or midden or (_alive(plot) and (service or household)):painted.append(plot)
+	return _fabric_key(painted)
 
 ## Road bearings leaving the town at `center` (world km).
 static func _approach_bearings(center:Vector2)->Array:

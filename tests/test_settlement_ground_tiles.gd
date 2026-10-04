@@ -273,3 +273,56 @@ func test_fallback_household_clearing_participates_in_cache_identity()->void:
 	var slot:=_tile_at(Vector2.ZERO)
 	assert_int(slot).is_greater_equal(Ground.CITY_SLOTS)
 	if slot>=Ground.CITY_SLOTS:assert_float(_pixel(slot,Vector2.ZERO).g).is_equal(0.0)
+
+func test_unpainted_129th_household_growth_and_repair_reuse_the_core_image()->void:
+	var plots:Array[Dictionary]=[]
+	var routes:Array[Dictionary]=[]
+	var buildings:Array=[]
+	for index in 128:
+		var plot:=_plot(index+1,Vector2(.04+(index%12)*.039,.04+(index/12)*.039))
+		plots.append(plot)
+		buildings.append({"position":plot.centroid,"angle":0.0,"radius":.004,"plot":plot})
+	var plan:={"buildings":buildings}
+	Ground.build(plan,plots,routes,GameState.settlement_founded_at)
+	var signature:=Ground.signature
+	var usec:int=Ground.report.build_usec
+	var revision:=Ground._home_revision
+	# The detailed plan has reached its budget. This adjoining record still
+	# belongs to the model and source revision, but adds no ground stamps or
+	# frame extent until its own renderer contributes a building/clearing.
+	var adjoining:=_plot(129,Vector2(.04+8*.039,.04+10*.039))
+	plots.append(adjoining)
+	for status:String in ["active","damaged","active"]:
+		adjoining.status=status
+		adjoining.damage={"fire":.4} if status=="damaged" else {}
+		Ground.build(plan,plots,routes,GameState.settlement_founded_at)
+		assert_int(Ground._home_revision).is_not_equal(revision)
+		revision=Ground._home_revision
+		assert_int(Ground.signature).is_equal(signature)
+		assert_int(int(Ground.report.build_usec)).is_equal(usec)
+
+func test_painted_fields_frontages_buildings_fire_service_and_frame_still_invalidate()->void:
+	for change:String in ["field","frontage","building","fire","service","frame","route","midden"]:
+		Ground.clear()
+		var house:=_plot(1,Vector2(.04,.04));house.frontage_route_id=1
+		var field:=_plot(2,Vector2(.14,.08),"field")
+		var other:=_plot(3,Vector2(.3,.1))
+		var plots:Array[Dictionary]=[house,field,other]
+		var routes:Array[Dictionary]=[
+			{"id":1,"active":true,"points":PackedVector2Array([Vector2(0,.08),Vector2(.32,.08)])},
+			{"id":2,"active":true,"points":PackedVector2Array([Vector2.ZERO,Vector2(.32,0)])}]
+		var record:={"position":house.centroid,"angle":0.0,"radius":.004,"plot":house}
+		var plan:={"buildings":[record]}
+		Ground.build(plan,plots,routes,GameState.settlement_founded_at)
+		var before:=Ground.signature
+		match change:
+			"field":field.cultivation_phase="harvested"
+			"frontage":house.frontage_route_id=2
+			"building":record.radius=.007
+			"fire":house.damage={"fire":.8}
+			"service":other.form="open_work_yard"
+			"frame":other.centroid=Vector2(.42,.2)
+			"route":routes[0].points[1]=Vector2(.3,.11)
+			"midden":other.form="refuse_and_latrine_ground";other.status="ruin"
+		Ground.build(plan,plots,routes,GameState.settlement_founded_at)
+		assert_int(Ground.signature).is_not_equal(before)
