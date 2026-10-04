@@ -6,8 +6,11 @@ const TEST_SEED:=772241
 
 var model:Node
 var civilization_was_processing:bool
+var prior_growth_effects:Dictionary
 
 func before_test()->void:
+	DiscoverySystem.initialize()
+	prior_growth_effects=DiscoverySystem.society_model.effect_totals.duplicate(true)
 	civilization_was_processing=CivilizationSystem.is_processing()
 	CivilizationSystem.set_process(false)
 	model=auto_free(SETTLEMENT_MODEL_SCRIPT.new())
@@ -18,6 +21,7 @@ func after_test()->void:
 	# Keep the autoload from simulating centuries between test assertions.
 	GameState.elapsed_days=19.0
 	CivilizationSystem.set_process(civilization_was_processing)
+	DiscoverySystem.society_model.effect_totals=prior_growth_effects
 
 func _reset_fixture(seed:int)->void:
 	GameState.reset_for_new_world(seed)
@@ -391,6 +395,7 @@ func test_depopulation_creates_visible_vacancy_and_reoccupation_without_erasure(
 	assert_int(reoccupied).is_greater(0)
 
 func test_two_centuries_of_supplied_growth_stays_bounded_and_valid()->void:
+	var founding_plots:=GameState.settlement_plots.size()
 	GameState.population_allocations["Construction"]=10
 	GameState.simulation_metrics["labor_efficiency"]=0.78
 	GameState.resource_stockpiles={"Timber":80.0,"Fiber Plants":80.0}
@@ -403,7 +408,10 @@ func test_two_centuries_of_supplied_growth_stays_bounded_and_valid()->void:
 		GameState.elapsed_days=float(month*30)
 		model.process_month()
 	assert_array(model.validate_state()).is_empty()
-	assert_int(GameState.settlement_plots.size()).is_between(60,190)
+	# Contemporary new homes can hold more than founding shelters, so their
+	# exact count changes with inherited era; growth must still occur and stay bounded.
+	assert_int(GameState.settlement_plots.size()).is_greater(founding_plots)
+	assert_int(GameState.settlement_plots.size()).is_less_equal(190)
 	var maximum_extent:=0.0
 	for plot in GameState.settlement_plots:
 		for point in plot.polygon: maximum_extent=maxf(maximum_extent,point.length())
@@ -847,3 +855,171 @@ func test_vacant_household_is_repaired_when_people_return()->void:
 	assert_int(int(home.resident_count)).is_greater(0)
 	assert_str(String(home.status)).is_equal("damaged")
 	assert_float(float(home.condition)).is_greater_equal(0.2)
+
+func _growth_capability(year:float,tier:float)->void:
+	GameState.settlement_founded_day=0
+	GameState.elapsed_days=year*365.0
+	GameState.ensure_population_total(12000)
+	GameState.settlement_completed=["Hearth Circle","Lean-to Shelters","Storage Pits","Open Work Area"]
+	GameState.city_form={"tier":tier,"condition":.9}
+	for role in ["Construction","Crafting","Logistics","Administration"]:GameState.population_allocations[role]=1000
+	GameState.simulation_metrics={"labor_efficiency":.9,"logistics":.9}
+	# The positive fixture has adopted the real catalogue's construction
+	# capabilities. Separate negative cases remove adoption, labor and city work.
+	for definition:Dictionary in DiscoverySystem.catalog:
+		var id:=String(definition.id)
+		if id not in GameState.known_discoveries:GameState.known_discoveries.append(id)
+		GameState.discovery_adoption[id]=1.0
+	DiscoverySystem.refresh_operating_effects()
+	GameState.resource_stockpiles={"Timber":1000.0,"Clay":1000.0,"Stone":1000.0,"Fiber Plants":1000.0}
+	if GameState.settlement_nuclei.size()<2:
+		GameState.settlement_nuclei.append({"id":2,"kind":"market_crossing","position":Vector2(.11,.02),"active":true,"pull":.7})
+		GameState.next_settlement_nucleus_id=3
+
+func _growth_flat_context()->Dictionary:
+	return {"settlement_origin":GameState.settlement_founded_at,"buildable_land_at":func(_x:float,_z:float)->bool:return true,"terrain_height_at":func(_x:float,_z:float)->float:return 0.0,"river_distance_at":func(_x:float,_z:float)->float:return INF}
+
+func test_new_households_cover_all_supported_eras_without_changing_inherited_ground()->void:
+	var inherited:=var_to_bytes([GameState.settlement_plots,GameState.settlement_routes])
+	var founding:Dictionary=model._create_household_growth_plot(19,model._available_household_recipe(),_growth_flat_context())
+	assert_int(int(founding.fabric_generation)).is_equal(0)
+	assert_int(int(founding.storeys)).is_equal(1)
+	assert_str(String(founding.material_family)).is_equal("organic")
+	for tier in model.FABRIC_ERA_AGE_YEARS.size():
+		_growth_capability(float(model.FABRIC_ERA_AGE_YEARS[tier]),12.0)
+		var day:=ceili(GameState.elapsed_days)
+		var recipe:Dictionary=model._available_household_recipe()
+		var stocks:=GameState.resource_stockpiles.duplicate(true)
+		var housing:=GameState.housing_capacity
+		var plot:Dictionary=model._create_household_growth_plot(day,recipe,_growth_flat_context())
+		assert_dict(plot).is_not_empty()
+		assert_int(int(plot.fabric_generation)).is_equal(tier)
+		assert_str(String(plot.morphology_era)).is_equal(String(model.FABRIC_ERA_NAMES[tier]))
+		assert_int(int(plot.storeys)).is_equal(model._fabric_storeys_for(plot,tier))
+		assert_str(String(plot.status)).is_equal("under_construction")
+		assert_dict(GameState.resource_stockpiles).is_equal(stocks)
+		assert_int(GameState.housing_capacity).is_equal(housing)
+		assert_array(var_to_bytes([GameState.settlement_plots,GameState.settlement_routes])).is_equal(inherited)
+	_growth_capability(3000.0,12.0)
+	assert_int(int(model._new_fabric_tier(roundi(GameState.elapsed_days)))).is_equal(12)
+
+func test_new_building_era_requires_city_work_adopted_technology_and_available_crews()->void:
+	_growth_capability(3000.0,5.9)
+	var day:=ceili(GameState.elapsed_days)
+	assert_int(int(model._new_fabric_tier(day))).is_equal(5)
+	GameState.city_form.tier=12.0
+	GameState.discovery_adoption["reinforced_concrete"]=0.0
+	assert_int(int(model._new_fabric_tier(day))).is_equal(11)
+	GameState.discovery_adoption["structural_steel"]=0.0
+	assert_int(int(model._new_fabric_tier(day))).is_equal(10)
+	for role in GameState.population_allocations:GameState.population_allocations[role]=0
+	assert_int(int(model._new_fabric_tier(day))).is_equal(0)
+	var plot:Dictionary=model._create_household_growth_plot(day,model._available_household_recipe(),_growth_flat_context())
+	assert_int(int(plot.fabric_generation)).is_equal(0)
+	assert_int(int(plot.storeys)).is_equal(1)
+
+func test_new_functional_ground_and_connected_quarter_use_current_city_era()->void:
+	_growth_capability(3000.0,12.0)
+	var day:=floori(GameState.elapsed_days/360.0)*360
+	var old_ground:=var_to_bytes([GameState.settlement_plots,GameState.settlement_routes])
+	var storage:Dictionary=model._create_functional_growth_plot(day,"storage",model._available_functional_recipe("storage"),_growth_flat_context())
+	assert_int(int(storage.fabric_generation)).is_equal(12)
+	assert_str(String(storage.form)).is_equal("metropolitan_logistics_hub")
+	assert_array(var_to_bytes([GameState.settlement_plots,GameState.settlement_routes])).is_equal(old_ground)
+	var plot_count:=GameState.settlement_plots.size()
+	var routes_before:=GameState.settlement_routes.duplicate(true)
+	var plots_before:=GameState.settlement_plots.duplicate(true)
+	var events:Array[Dictionary]=[]
+	model._attempt_mature_district_expansion(day,events,_growth_flat_context())
+	assert_array(events).has_size(1)
+	for plot in GameState.settlement_plots.slice(plot_count):
+		assert_int(int(plot.fabric_generation)).is_equal(12)
+		assert_int(int(plot.storeys)).is_between(6,12)
+		assert_str(String(plot.form)).is_equal("metropolitan_mixed_block")
+	for index in plots_before.size():assert_dict(GameState.settlement_plots[index]).is_equal(plots_before[index])
+	for index in routes_before.size():assert_dict(GameState.settlement_routes[index]).is_equal(routes_before[index])
+
+func test_connected_quarter_extends_an_existing_built_edge_beyond_one_kilometre()->void:
+	_growth_capability(40.0,5.0)
+	var shift:=Vector2(1.45,0.0)
+	for plot in GameState.settlement_plots:
+		plot.centroid=Vector2(plot.centroid)+shift
+		var polygon:PackedVector2Array=plot.polygon
+		for index in polygon.size():polygon[index]+=shift
+		plot.polygon=polygon
+	for route in GameState.settlement_routes:
+		var points:PackedVector2Array=route.points
+		for index in points.size():points[index]+=shift
+		route.points=points
+	for nucleus in GameState.settlement_nuclei:nucleus.position=Vector2(nucleus.position)+shift
+	var plots_before:=GameState.settlement_plots.duplicate(true)
+	var routes_before:=GameState.settlement_routes.duplicate(true)
+	var events:Array[Dictionary]=[]
+	model._attempt_mature_district_expansion(14400,events,_growth_flat_context())
+	assert_array(events).has_size(1)
+	assert_float(Vector2(GameState.settlement_nuclei.back().position).length()).is_greater(1.6)
+	assert_int(GameState.settlement_plots.size()-plots_before.size()).is_between(1,8)
+	for index in plots_before.size():assert_dict(GameState.settlement_plots[index]).is_equal(plots_before[index])
+	for index in routes_before.size():assert_dict(GameState.settlement_routes[index]).is_equal(routes_before[index])
+	for route in GameState.settlement_routes.slice(routes_before.size()):
+		assert_float(Vector2(route.points[0]).distance_to(Vector2(route.points[-1]))).is_greater(.000001)
+		if String(route.kind)!="district_connector":continue
+		var endpoint:Vector2=route.points[-1]
+		var distance:=INF
+		for inherited_route:Dictionary in routes_before:
+			var points:PackedVector2Array=inherited_route.points
+			for index in points.size()-1:distance=minf(distance,Geometry2D.get_closest_point_to_segment(endpoint,points[index],points[index+1]).distance_to(endpoint))
+		for inherited_plot:Dictionary in plots_before:
+			var polygon:PackedVector2Array=inherited_plot.polygon
+			for index in polygon.size():distance=minf(distance,Geometry2D.get_closest_point_to_segment(endpoint,polygon[index],polygon[(index+1)%polygon.size()]).distance_to(endpoint))
+		assert_float(distance).is_less(.000001)
+	assert_array(model.validate_state()).is_empty()
+
+func test_new_quarter_refuses_blocked_ground_and_unbuildable_approach()->void:
+	_growth_capability(40.0,5.0)
+	var before:=var_to_bytes([GameState.settlement_plots,GameState.settlement_routes,GameState.settlement_nuclei,GameState.next_settlement_plot_id,GameState.next_settlement_nucleus_id])
+	var blocked:=_growth_flat_context()
+	blocked.buildable_land_at=func(_x:float,_z:float)->bool:return false
+	var events:Array[Dictionary]=[]
+	model._attempt_mature_district_expansion(14400,events,blocked)
+	assert_array(events).is_empty()
+	assert_array(var_to_bytes([GameState.settlement_plots,GameState.settlement_routes,GameState.settlement_nuclei,GameState.next_settlement_plot_id,GameState.next_settlement_nucleus_id])).is_equal(before)
+	var barrier:=_growth_flat_context()
+	var origin_x:=GameState.settlement_founded_at.x
+	barrier.buildable_land_at=func(x:float,_z:float)->bool:return absf(x-origin_x-.07)>.015
+	assert_bool(model._district_approach_buildable(Vector2(.16,0),Vector2.ZERO,barrier)).is_false()
+	barrier=_growth_flat_context()
+	barrier.terrain_height_at=func(x:float,_z:float)->float:return x*.8
+	assert_bool(model._district_approach_buildable(Vector2(.16,0),Vector2.ZERO,barrier)).is_false()
+	# A valid dry road still cannot cut through an inherited compound.
+	GameState.settlement_plots.append({"id":9999,"centroid":Vector2(.58,.5),"status":"active","land_use":"residential_compound","polygon":PackedVector2Array([Vector2(.55,.46),Vector2(.61,.46),Vector2(.61,.54),Vector2(.55,.54)])})
+	assert_bool(model._district_approach_buildable(Vector2(.66,.5),Vector2(.50,.5),_growth_flat_context())).is_false()
+	# A two-metre-wide parcel cannot fall between ten-metre terrain samples.
+	GameState.settlement_plots.back().polygon=PackedVector2Array([Vector2(.574,.46),Vector2(.576,.46),Vector2(.576,.54),Vector2(.574,.54)])
+	assert_bool(model._district_approach_buildable(Vector2(.66,.5),Vector2(.50,.5),_growth_flat_context())).is_false()
+	# A large parcel's centre can be far away while its boundary crosses the lane.
+	GameState.settlement_plots.back().centroid=Vector2(.59,.7)
+	GameState.settlement_plots.back().polygon=PackedVector2Array([Vector2(.56,.49),Vector2(.62,.49),Vector2(.62,.91),Vector2(.56,.91)])
+	assert_bool(model._district_approach_buildable(Vector2(.66,.5),Vector2(.50,.5),_growth_flat_context())).is_false()
+
+func test_new_quarter_reserves_complete_plot_route_and_nucleus_budgets()->void:
+	_growth_capability(40.0,5.0)
+	var template:Dictionary=GameState.settlement_plots[0]
+	while GameState.settlement_plots.size()<model.MAX_SIMULATED_PLOTS-7:GameState.settlement_plots.append(template.duplicate(true))
+	var plots_before:=GameState.settlement_plots.size()
+	var events:Array[Dictionary]=[]
+	model._attempt_mature_district_expansion(14400,events,_growth_flat_context())
+	assert_array(events).is_empty()
+	assert_int(GameState.settlement_plots.size()).is_equal(plots_before)
+	GameState.settlement_plots.resize(24)
+	while GameState.settlement_routes.size()<model.MAX_SIMULATED_ROUTES-7:GameState.settlement_routes.append({"id":GameState.settlement_routes.size()+1})
+	var routes_before:=GameState.settlement_routes.size()
+	model._attempt_mature_district_expansion(14400,events,_growth_flat_context())
+	assert_array(events).is_empty()
+	assert_int(GameState.settlement_routes.size()).is_equal(routes_before)
+
+	GameState.settlement_routes.resize(24)
+	while GameState.settlement_nuclei.size()<model.MAX_SIMULATED_NUCLEI:GameState.settlement_nuclei.append({"id":GameState.settlement_nuclei.size()+1})
+	model._attempt_mature_district_expansion(14400,events,_growth_flat_context())
+	assert_array(events).is_empty()
+	assert_int(GameState.settlement_nuclei.size()).is_equal(model.MAX_SIMULATED_NUCLEI)
