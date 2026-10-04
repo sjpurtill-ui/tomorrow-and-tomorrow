@@ -208,6 +208,34 @@ def _new_cut_edges(old_faces, kept_faces):
     return {edge for edge, count in _edge_counts(kept_faces).items() if count == 1} - previous
 
 
+def _retained_cut_faces(points, faces, cut, scale, origin):
+    """Keep the body; permit discarding only detached chin remnants."""
+    candidates = faces[np.all(points[faces, 1] <= cut, axis=1)]
+    used = np.unique(candidates)
+    parent = {int(index): int(index) for index in used}
+
+    def find(index):
+        index = int(index)
+        while parent[index] != index:
+            parent[index] = parent[parent[index]]
+            index = parent[index]
+        return index
+
+    for triangle in candidates:
+        root = find(triangle[0])
+        for index in triangle[1:]:
+            parent[find(index)] = root
+    labels = np.asarray([find(triangle[0]) for triangle in candidates])
+    components, counts = np.unique(labels, return_counts=True)
+    assert len(components), "cut removed the entire original body"
+    keep = labels == components[np.argmax(counts)]
+    discarded = np.unique(candidates[~keep])
+    if len(discarded):
+        y = (points[discarded, 1] - origin[1]) / scale
+        assert np.all(np.abs(y) <= .020), "discarded component extends beyond the permitted 20mm chin remnants"
+    return candidates[keep], discarded
+
+
 def _welded_neck_edges(points, faces, scale, origin):
     # UV/material splits can duplicate one geometric vertex. Weld positions
     # to micrometre precision before judging the actual visible neck seam.
@@ -250,7 +278,7 @@ def check_graft(before, after, body, variant):
             np.testing.assert_array_equal(na[key][:start], oa[key][mapping], err_msg="retained-prefix attribute changed: " + key)
     old_faces = before.values(old["indices"]).reshape(-1, 3)
     new_faces = after.values(new["indices"]).reshape(-1, 3)
-    expected = old_faces[np.all(oa["POSITION"][old_faces, 1] <= cut, axis=1)]
+    expected, discarded_chin = _retained_cut_faces(oa["POSITION"], old_faces, cut, scale, origin)
     retained_faces = new_faces[np.all(new_faces < start, axis=1)]
     assert _oriented_faces(mapping[retained_faces]) == _oriented_faces(expected), "retained body triangles do not match the original cut"
     cut_edges = _new_cut_edges(old_faces, expected)
@@ -309,7 +337,8 @@ def check_graft(before, after, body, variant):
             identity_moved[name] = moved
     preserved, _, _ = retained_body(before, after, body, variant, -.040, boundary_ids)
     return head_data, {**preserved, "head_vertices": len(na["POSITION"]) - start,
-                       "neck_defects": len(new_defects), "identities_nonzero": len(identity_moved)}
+                       "neck_defects": len(new_defects), "identities_nonzero": len(identity_moved),
+                       "discarded_chin_remnant_vertices": len(discarded_chin)}
 
 
 def check(root, baseline_ref):
