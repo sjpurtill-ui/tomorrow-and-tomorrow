@@ -46,13 +46,23 @@ func test_enclosed_rooms_have_no_indoor_snow_breath_or_phantom_hearth()->void:
 			assert_object(made.find_child("Smoke",true,false)).is_null()
 			made._process(0.1)
 
+func test_support_staff_leave_the_councils_chairs_for_actual_officials()->void:
+	var made:=_room(15)
+	var cast:Array=[{"key":"visitor","role":"crowd"},{"key":"clerk","role":"crowd"},{"key":"guard","role":"crowd","stance":"stand"}]
+	for i in 6:cast.append({"key":"official%d" % i,"role":"court"})
+	var assigned:Dictionary=made.assign_marks(cast)
+	for key in ["visitor","clerk","guard"]:
+		assert_str(String(assigned[key])).starts_with("crowd_")
+		assert_bool(made.mark(assigned[key]).get_meta("sit",false)).is_false()
+	for i in 6:assert_str(String(assigned["official%d" % i])).starts_with("officials_")
+
 func test_equipment_gates_resolve_real_meshes_and_follow_actual_capabilities()->void:
 	for index in 16:
 		var made:=_room(index)
 		var specs:Dictionary=made.info.get("technology_gates",{})
 		for key:String in specs:
 			assert_bool(Chapters.CAPABILITIES.has(key.trim_prefix("no_"))).override_failure_message("unknown capability "+key).is_true()
-			assert_int((made.technology_gates[key] as Array).size()).is_equal((specs[key] as Array).size())
+			assert_int((made.technology_gates[key] as Array).size()).override_failure_message("%s: unresolved %s parts %s" % [made.kind,key,specs[key]]).is_equal((specs[key] as Array).size())
 		for enabled:bool in [false,true]:
 			made.apply_facts({"chapter":{"capabilities":_capabilities(enabled),"lean":"assembly"}})
 			for key:String in made.technology_gates:

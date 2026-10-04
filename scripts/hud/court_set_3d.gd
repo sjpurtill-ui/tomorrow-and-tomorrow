@@ -630,6 +630,7 @@ func assign_marks(entries:Array,layout_kind:="home")->Dictionary:
 		if name_out.is_empty() or not marks.has(name_out) or used.has(name_out):
 			name_out=""
 			var pools:Array=[seats,officials,standing] if String(entry.get("stance",""))=="sit" else [officials,standing,seats]
+			if role=="crowd":pools=[seats,standing] if String(entry.get("stance",""))=="sit" else [standing,seats]
 			for pool:Array in pools:
 				for m:Marker3D in pool:
 					if not used.has(String(m.name)):

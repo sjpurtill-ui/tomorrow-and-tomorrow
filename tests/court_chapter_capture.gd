@@ -25,18 +25,21 @@ const ADDITIONS:=[[],["central_hall_houses","plain_weaving"],
 
 func _ready()->void:
 	capture=DisplayServer.get_name()!="headless"
-	var reference:=false;var selected:Array[int]=[];var acting_review:=false
+	var reference:=false;var selected:Array[int]=[];var acting_review:=false;var render_quality:="low"
 	for argument:String in OS.get_cmdline_user_args():
 		if argument=="--reference":reference=true
 		elif argument=="--acting-review":acting_review=true
+		elif argument.begins_with("--quality="):render_quality=argument.trim_prefix("--quality=")
 		elif argument.begins_with("--chapters="):
 			for part:String in argument.trim_prefix("--chapters=").split(","):selected.append(int(part))
 	out_dir=ProjectSettings.globalize_path("res://reports/court_evolution_reference/" if reference else "res://reports/court_chapters/")
+	if render_quality in ["high","auto"]:out_dir+="quality-%s/" % render_quality
+	else:render_quality="low"
 	if capture:DirAccess.make_dir_recursive_absolute(out_dir)
 	_setup_world()
 	get_window().size=Vector2i(1536,864);get_window().content_scale_size=Vector2i(1536,864)
 	Stage.acting=Stage.Acting.service();Stage.director=Directing.new()
-	CourtSet.quality="low"
+	CourtSet.quality=render_quality
 	var known:Array=[]
 	var reviewed:=0
 	for index in 16:
@@ -83,6 +86,7 @@ func _ready()->void:
 			stage.frame_cast(0.0);stage.arrive(["main"])
 			await get_tree().create_timer(0.8).timeout
 			await _capture_stage(stage,"%02d-arrival" % index)
+		print("COURT_CAPTURE_QUALITY chapter=%d report=%s" % [index,stage.court_set.quality_report()])
 		stage.settle();stage.queue_free();await _frames(3)
 		reviewed+=1
 	Voice.knowledge_override.clear();CourtSet.quality="auto"

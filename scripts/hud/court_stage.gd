@@ -463,6 +463,7 @@ func use_set(era_id:String,set_facts:Dictionary={})->bool:
 	if not three_d or not use_sets or court_set!=null or view3d==null or not CourtSet.available():return false
 	court_set=CourtSet.build(era_id,set_facts)
 	if court_set==null:return false
+	facts["indoor"]=court_set.indoors()
 	view3d.add_child(court_set)
 	view3d.transparent_bg=false
 	view3d.render_target_update_mode=SubViewport.UPDATE_WHEN_VISIBLE

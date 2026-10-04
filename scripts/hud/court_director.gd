@@ -664,6 +664,13 @@ static func extras(facts:Dictionary,rng_seed:int,taken:Dictionary={})->Array:
 	if tier>=3:
 		for i in 2:rows.append(["crowd_%d" % (rows.size()-3),"commoner",18+rng.randi_range(0,40),""])
 	if tags.has("writing"):rows.append(["scribe","scribe",26+rng.randi_range(0,25),""])
+	# A working ministry or cabinet has a small adult support staff. The
+	# ledger's actual petitioners and officials are cast separately; random
+	# village children should not occupy their conference-room chairs.
+	if String(protocol.get("period","")) in ["early_modern","industrial","modern"]:
+		rows=[["crowd_visitor","commoner",24+rng.randi_range(0,35),"clasped"],
+			["door_guard","door_guard",24+rng.randi_range(0,25),"stand"]]
+		if bool(protocol.get("paperwork",false)):rows.append(["scribe","scribe",26+rng.randi_range(0,35),"stand"])
 	var out:Array=[]
 	var serial:=0
 	for row in rows:
@@ -2913,11 +2920,11 @@ static func ambient(cast_in:Array,facts_in:Dictionary,rng_seed:int)->Array:
 	# The season, felt in the hall.
 	var season:=String(facts.get("season","")).to_lower()
 	var sleeper:=dozer(cast,facts)
-	if season=="winter":
+	if season=="winter" and not bool(facts.get("indoor",false)):
 		for m:Dictionary in _shuffled(rng,ours).slice(0,3):
 			if busy.has(String(m.key)):continue
 			_loop(out,String(m.key),["rub_hands","stamp_feet","breath"][rng.randi_range(0,2)],[8.0,15.0],{},"season",rng)
-	elif season=="summer":
+	elif season=="summer" and not bool(facts.get("indoor",false)):
 		# The fly finds the old one, asleep or not: they swat at it in their sleep.
 		var elders:Array=ours.filter(func(m:Dictionary)->bool:return String(m.kind)=="elder")
 		if not elders.is_empty():_loop(out,String((elders[0] as Dictionary).key),"swat_fly",[9.0,18.0],{},"season",rng)
