@@ -106,6 +106,8 @@ class Bundle:
 
     def body_copy(self, cover):
         mesh = copy.deepcopy(self.body); mesh["name"] = "WardrobeBody"
+        if "mpfb_original_indices" in mesh.get("extras", {}):
+            mesh["extras"]["mpfb_original_indices"] = self.copy_accessor(mesh["extras"]["mpfb_original_indices"])
         for primitive in mesh["primitives"]:
             primitive["indices"] = self.copy_accessor(primitive["indices"])
             primitive["attributes"] = {k: self.copy_accessor(v) for k, v in primitive["attributes"].items()}

@@ -139,8 +139,13 @@ func test_spherical_eyes_keep_gaze_and_leave_lid_deformation_on_the_body() -> vo
 func test_brow_alpha_uvs_and_teeth_survive_merged_and_fallback_dressing() -> void:
 	for mode in [[true, true], [false, true], [false, false]]:
 		var figure := _figure(mode[0], mode[1])
-		var brow: MeshInstance3D = figure._mesh_named("Brows")
-		var teeth: MeshInstance3D = figure._mesh_named("Mouth")
+		# Merged figures expose only draw groups through _mesh_named; source
+		# accessory UVs remain on the hidden imported parts.
+		var brow: MeshInstance3D
+		var teeth: MeshInstance3D
+		for part: MeshInstance3D in figure._parts:
+			if part.name==&"Brows":brow=part
+			elif part.name==&"Mouth":teeth=part
 		assert_object(brow).is_not_null()
 		assert_object(teeth).is_not_null()
 		if brow == null or teeth == null:
@@ -158,7 +163,7 @@ func test_brow_alpha_uvs_and_teeth_survive_merged_and_fallback_dressing() -> voi
 			if teeth_texture != null:
 				assert_str(teeth_texture.resource_path).is_equal(TEETH_PATH)
 			var arrays := body.mesh.surface_get_arrays(0)
-			var slots: PackedFloat32Array = (arrays[Mesh.ARRAY_CUSTOM0] as PackedByteArray).to_float32_array()
+			var slots: PackedFloat32Array = arrays[Mesh.ARRAY_CUSTOM0]
 			var uv: PackedVector2Array = arrays[Mesh.ARRAY_TEX_UV]
 			var merged_brow := PackedVector2Array()
 			var tooth_vertices := 0

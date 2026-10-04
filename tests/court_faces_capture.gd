@@ -128,11 +128,18 @@ func _ready()->void:
 		# chest up, and a true close-up of the face, three-quarter: a man of
 		# the deepest people, a woman of the fairest, a man between
 		var sitters:=[["kilnfold","male",38,"Odu Kiln"],["thornbank","female",31,"Sela Thorn"],["ochrestep","male",44,"Tamo Ochre"]]
+		if "variants" in OS.get_cmdline_user_args():
+			sitters.clear()
+			for body:String in Figure3D.BODIES:
+				var age:=8 if body=="child" else (68 if body.ends_with("_old") else (19 if body.ends_with("_young") else 38))
+				sitters.append(["kilnfold","female" if body.begins_with("female") else "male",age,"MPFB "+body,body])
 		var row:=0
 		for sitter:Array in sitters:
+			var shot_id:=String(sitter[4]) if sitter.size()>4 else String(sitter[0])
 			var person:={"name":String(sitter[3]),"person_id":9600+row,"sex":String(sitter[1]),"age":int(sitter[2]),"appearance_civ_id":owners[String(sitter[0])],"appearance_world_seed":4242}
 			var look:Dictionary=Stage.figure_look(person,{}).duplicate()
 			look["years"]=int(sitter[2]);look["lit"]=true;look["stance"]="clasped";look["keep_stance"]=true
+			if sitter.size()>4:look["variant"]=String(sitter[4])
 			main.setup(look)
 			court.call("place",main,"petitioner")
 			main.play(main.rest_clip(),0.0,0.5)
@@ -148,7 +155,7 @@ func _ready()->void:
 				cam.call("frame_points",PackedVector3Array([head+Vector3.UP*0.03,head-Vector3.UP*down,head-Vector3.UP*down*0.5+side*wide,head-Vector3.UP*down*0.5-side*wide]),yaw,-3.0)
 				for i in 12:await get_tree().process_frame
 				await RenderingServer.frame_post_draw
-				if capture:view.get_texture().get_image().save_png(dir+"faces_%s_%s.png" % [String(shot[0]),String(sitter[0])])
+				if capture:view.get_texture().get_image().save_png(dir+"faces_%s_%s.png" % [String(shot[0]),shot_id])
 			# Close-up acceptance of the actual expression/gaze targets. Freeze
 			# the animation clock so a blink cannot hide a visual regression.
 			if "anatomy" in OS.get_cmdline_user_args():
@@ -158,7 +165,7 @@ func _ready()->void:
 					cam.call("frame_points",PackedVector3Array([head+Vector3.UP*0.03,head-Vector3.UP*0.27,head-Vector3.UP*0.135+side*0.13,head-Vector3.UP*0.135-side*0.13]),yaw-24.0+angle,-3.0)
 					await _frames(6)
 					await RenderingServer.frame_post_draw
-					if capture:view.get_texture().get_image().save_png(dir+"anatomy_%s_%d.png" % [String(sitter[0]),int(angle)])
+					if capture:view.get_texture().get_image().save_png(dir+"anatomy_%s_%d.png" % [shot_id,int(angle)])
 				main.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
 				Acting.of(main).active=true
 				cam.call("frame_points",PackedVector3Array([head+Vector3.UP*0.03,head-Vector3.UP*0.27,head-Vector3.UP*0.135+side*0.13,head-Vector3.UP*0.135-side*0.13]),yaw,-3.0)
@@ -177,7 +184,7 @@ func _ready()->void:
 							if not key.begins_with("face_"):mesh.set_blend_shape_value(index,float((pose["keys"] as Dictionary).get(key,0.0)))
 					await _frames(3)
 					await RenderingServer.frame_post_draw
-					if capture:view.get_texture().get_image().save_png(dir+"expression_%s_%s.png" % [String(sitter[0]),String(pose.name)])
+					if capture:view.get_texture().get_image().save_png(dir+"expression_%s_%s.png" % [shot_id,String(pose.name)])
 				actor.active=true
 				main.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
 			# one face in each mood, chest up (K's acting: the face and the set of the body)

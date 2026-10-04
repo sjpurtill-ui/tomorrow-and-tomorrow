@@ -16,13 +16,13 @@ const int S_HAIR = 1;
 const int S_CARD = 2;
 const int S_STUBBLE = 5;
 
-uniform vec3 slot_albedo[17];
+uniform vec3 slot_albedo[18];
 // band_soft, rim, strands, sheen
-uniform vec4 slot_a[17];
+uniform vec4 slot_a[18];
 // grain, fill, stipple, card
-uniform vec4 slot_b[17];
+uniform vec4 slot_b[18];
 // flat, skin (painted face, skin's light), glow (shines of itself), unused
-uniform vec4 slot_c[17];
+uniform vec4 slot_c[18];
 uniform vec3 key_dir = vec3(-0.35, 0.65, 0.68);
 uniform vec3 key_color : source_color = vec3(1.0, 0.97, 0.92);
 uniform vec3 rim_color : source_color = vec3(1.0, 0.84, 0.60);
@@ -151,6 +151,7 @@ void fragment() {
 	bool flat_colour = pc.x > 0.5;
 	bool skin = pc.y > 0.5;
 	vec3 base = albedo * mix(1.0, v_ao, 0.8);
+	if (s == 17) { base *= texture(teeth_mask, v_rest).rgb; }
 	if (s == 16) {
 		// The upper lid shades the sclera; its corners turn into the socket.
 		float upper_lid = smoothstep(0.30, 1.0, v_rest.y);
@@ -170,6 +171,7 @@ void fragment() {
 		// A small corneal glint rather than a white button over the pupil.
 		if (length(v_rest - 0.5) > 0.34) { discard; }
 	} else if (s == 3) {
+		if (texture(brow_mask, v_rest).a < 0.32) { discard; }
 		float strokes = noise3(vec3(v_rest.x * 75.0, v_rest.y * 6.0, 4.1));
 		base *= 0.92 + 0.16 * strokes;
 	}

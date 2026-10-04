@@ -151,6 +151,12 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 	made.set_shader_parameter("albedo",colour)
 	made.set_shader_parameter("cover_channel",cover)
 	made.set_shader_parameter("key_dir",key_dir)
+	if slot=="BROW":
+		made.set_shader_parameter("brow",true)
+		made.set_shader_parameter("brow_mask",Merge.brow_mask())
+	if slot=="TEETH":
+		made.set_shader_parameter("teeth",true)
+		made.set_shader_parameter("teeth_mask",Merge.teeth_mask())
 	if slot in FLAT_SLOTS:
 		made.set_shader_parameter("flat_colour",true)
 	else:
@@ -177,7 +183,7 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 		if lit:
 			made.set_shader_parameter("fill",0.14 if slot=="SKIN" else 0.16)
 			if slot=="SKIN":made.set_shader_parameter("grain",0.025)
-		if inked and not slot in ["BROW","STUBBLE","HAIR_CARD"]:made.next_pass=_ink(cover,slot=="HAIR",slot=="SKIN")
+		if inked and not slot in ["BROW","STUBBLE","HAIR_CARD","TEETH"]:made.next_pass=_ink(cover,slot=="HAIR",slot=="SKIN")
 	_materials[key]=made
 	return made
 
@@ -404,6 +410,7 @@ func _dress()->void:
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
 		"EYES":skin.darkened(0.68).lerp(Color("271b18"),0.45),"EYE_WHITE":Color("e9dfcb"),"EYE_SHINE":Color("fffdf6"),
 		"IRIS":Color(look.get("eye_colour",Color("5a3a22"))),"PUPIL":Color("140d08"),
+		"TEETH":Color("c8bca3"),
 		"MOUTH":Color("2a0d0a").lerp(skin.darkened(0.7),0.35),"HAIR_CARD":hair_colour,"LEATHER":Color(look.get("leather",Color("5b3b24"))),
 		"STUBBLE":skin.lerp(hair_colour,0.42).darkened(0.08),"WOOD":Color("6b4a2e"),"CLAY":Color("a0603a"),
 	}
