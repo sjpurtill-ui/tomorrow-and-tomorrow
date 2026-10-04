@@ -227,7 +227,8 @@ def room_shell(b,info,i):
     elif i==3:
         for n,x in enumerate((-4.9,-2.1,2.1,4.9)):
             box(b,"AudiencePier_%d"%n,(x,2.0,-3.5),(.48,4,.48),"STONE_BLOCK")
-            box(b,"AudienceCapital_%d"%n,(x,3.9,-3.5),(.80,.20,.75),"STONE_BLOCK")
+            # Capital top must sit above the pier top, not share its plane.
+            box(b,"AudienceCapital_%d"%n,(x,3.96,-3.5),(.80,.20,.75),"STONE_BLOCK")
         box(b,"RecessPediment",(0,3.4,-3.75),(3.5,.25,.4),"BRICK")
     elif i==4:
         for side in (-1,1):
@@ -257,7 +258,8 @@ def room_shell(b,info,i):
         box(b,"Mantel",(4.9,1.23,-2.73),(1.15,.12,.45),"STONE_BLOCK")
     elif i==12:
         for n,z in enumerate((-3.0,-1.6,-.2)):cabinet(b,"MinistryFiling_%d"%n,(5.12,0,z),.7,2.0,style=12)
-        box(b,"ConsultationPartition",(-4.7,1.1,-2.7),(1.6,2.2,.12),"PLASTER")
+        # Side screen separates the secretary alcove without cutting its desk.
+        box(b,"ConsultationPartition",(-3.95,1.1,-2.9),(.12,2.2,1.2),"PLASTER")
     elif i==13:
         for n,x in enumerate((-4.7,-1.5,1.5,4.7)):beam(b,"IronCeiling_%d"%n,(x,3.55,-4),(x,3.55,2.3),.065,"IRON")
         for n,z in enumerate((-3,-1.6)):cabinet(b,"DepartmentFile_%d"%n,(5.1,0,z),.75,2.0,style=13)
