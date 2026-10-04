@@ -93,3 +93,51 @@ func test_merged_replacement_has_distinct_cache_identity_without_extra_draw_inst
 		assert_bool(node.visible).is_false()
 		for surface in node.get_surface_override_material_count():assert_object(node.get_surface_override_material(surface)).is_null()
 	f.free()
+
+func test_installed_bundles_preserve_source_body_and_select_only_listed_outfits()->void:
+	Wardrobe._legacy_manifest={}
+	var catalog:=Wardrobe.legacy_manifest()
+	for variant:String in Figure.BODIES:
+		var f:=Figure.new();add_child(f)
+		f.setup({"variant":variant,"outfit":"tunic","lit":false,"stance":"stand"})
+		var body:=_part(f,"Body");var source:Mesh=f._plain_skin
+		var original_data:Array=source.get("_surfaces").duplicate(true)
+		var rig:=f.skeleton;var player:=f.player
+		var entry:Dictionary=catalog.get("variants",{}).get(variant,{})
+		var unchanged_channels:=[0]
+		for channel in [["hide",1],["tunic",2],["robe",3]]:
+			if not channel[0] in entry.get("outfits",[]):unchanged_channels.append(channel[1])
+		for outfit:String in Wardrobe.LEGACY_OUTFITS:
+			f.look.outfit=outfit;f._dress()
+			assert_object(f.skeleton).is_same(rig);assert_object(f.player).is_same(player)
+			if outfit in entry.get("outfits",[]):
+				assert_str(f._legacy_key).is_not_empty()
+				assert_object(body.mesh).is_same(f._legacy_skin)
+				assert_object(body.mesh).is_not_same(source)
+				assert_bool(_body_records(body.mesh,unchanged_channels)==_body_records(source,unchanged_channels)).is_true()
+				for name:String in entry.parts[outfit]:
+					assert_bool(_part(f,name).visible).is_true()
+					assert_object(_part(f,name).skin).is_same(body.skin)
+			else:
+				assert_str(f._legacy_key).is_empty()
+				assert_object(body.mesh).is_same(source)
+		assert_bool(source.get("_surfaces")==original_data).is_true()
+		f.free()
+
+## Imported glTFs can reorder vertices. Compare the full data by value, including
+## all face morphs and every coverage channel the bundle did not replace.
+func _body_records(mesh:Mesh,colors:Array)->Dictionary:
+	var records:Dictionary={}
+	for surface in mesh.get_surface_count():
+		var arrays:=mesh.surface_get_arrays(surface)
+		var morphs:=mesh.surface_get_blend_shape_arrays(surface)
+		for i in arrays[Mesh.ARRAY_VERTEX].size():
+			var record:Array=[]
+			for channel in [Mesh.ARRAY_VERTEX,Mesh.ARRAY_NORMAL,Mesh.ARRAY_TEX_UV,Mesh.ARRAY_TEX_UV2]:record.append(arrays[channel][i] if arrays[channel]!=null else null)
+			for channel in [Mesh.ARRAY_BONES,Mesh.ARRAY_WEIGHTS]:
+				for j in 4:record.append(arrays[channel][i*4+j])
+			for channel:int in colors:record.append(arrays[Mesh.ARRAY_COLOR][i][channel])
+			for morph:Array in morphs:
+				for channel in [Mesh.ARRAY_VERTEX,Mesh.ARRAY_NORMAL]:record.append(morph[channel][i] if morph[channel]!=null else null)
+			var key:=hash(record);records[key]=int(records.get(key,0))+1
+	return records
