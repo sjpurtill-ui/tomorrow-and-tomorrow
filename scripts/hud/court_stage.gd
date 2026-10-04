@@ -491,12 +491,18 @@ func set_point(mark_name:String)->Vector3:
 	if court_set==null or not court_set.call("has_mark",mark_name):return Vector3.ZERO
 	return (court_set.call("mark",mark_name) as Marker3D).global_position
 
+## Placement while the modal is being built must use the room's coordinates;
+## its nodes do not have world transforms until the UI enters the scene tree.
+func _set_local_point(mark_name:String)->Vector3:
+	if court_set==null or not court_set.call("has_mark",mark_name):return Vector3.ZERO
+	return Paths._in_set(court_set.call("mark",mark_name),court_set).origin
+
 ## The meeting has a focus even when its room has no hearth.
-func focus_point()->Vector3:
+func focus_point(local:=false)->Vector3:
 	if court_set!=null:
 		for mark:String in ["focus","petitioner","fire"]:
 			if mark=="fire" and Paths.hearth_point(court_set)==null:continue
-			if court_set.call("has_mark",mark):return set_point(mark)
+			if court_set.call("has_mark",mark):return _set_local_point(mark) if local else set_point(mark)
 	return Vector3.ZERO
 
 func _on_view_changed()->void:
@@ -820,15 +826,14 @@ func _embody(f:Figure)->void:
 		# (the stage may not be in the tree yet: the mark's place within the set)
 		if not mark.is_empty():
 			var m:Marker3D=court_set.call("mark",mark)
-			var holder:=m.get_parent() as Node3D
 			# A mark's -Z is the way a person there faces; a figure's front is +Z
 			# (M's place() turns them the same way).
-			spot.transform=(holder.transform if holder!=null else Transform3D.IDENTITY)*m.transform*Transform3D(Basis(Vector3.UP,PI),Vector3.ZERO)
+			spot.transform=Paths._in_set(m,court_set)*Transform3D(Basis(Vector3.UP,PI),Vector3.ZERO)
 		else:
 			# every mark is taken: at the back, along the far side
 			var extra:=_marks.size()+cast_order.size()
-			spot.position=set_point("crowd_8")+Vector3(-1.2+0.65*float(extra%5),0.0,-0.5*float(extra/5))
-			var toward:=focus_point()-spot.position;toward.y=0.0
+			spot.position=_set_local_point("crowd_8")+Vector3(-1.2+0.65*float(extra%5),0.0,-0.5*float(extra/5))
+			var toward:=focus_point(true)-spot.position;toward.y=0.0
 			if toward.length()>0.01:spot.basis=Basis.looking_at(-toward.normalized(),Vector3.UP)
 		spot.add_child(body)
 		if seat>=0.0:
