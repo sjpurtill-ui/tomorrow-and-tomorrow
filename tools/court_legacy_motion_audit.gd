@@ -6,6 +6,8 @@ const Acting=preload("res://scripts/hud/court_acting.gd")
 const Audit=preload("res://tools/court_acting_audit.gd")
 const TIMES:=[0.0,.2,.4,.65,.9,1.2,1.6]
 var _pose_fit:Script
+var _explicit_times:Array=[]
+var _identity:="legacy_motion"
 
 func _ready()->void:
 	var variants:=["male_adult","female_old"];var outfits:=["hide","tunic","robe"]
@@ -19,6 +21,10 @@ func _ready()->void:
 		if arg.begins_with("--clips="):clips=arg.trim_prefix("--clips=").split(",")
 		if arg.begins_with("--profiles="):profile_file=arg.trim_prefix("--profiles=")
 		if arg.begins_with("--samples="):dense=maxi(2,int(arg.trim_prefix("--samples=")))
+		if arg.begins_with("--identity="):_identity=arg.trim_prefix("--identity=")
+		if arg.begins_with("--times="):
+			for value:String in arg.trim_prefix("--times=").split(","):_explicit_times.append(maxf(0.0,float(value)))
+	_explicit_times.sort()
 	if not profile_file.is_empty():
 		var profiles:Variant=JSON.parse_string(FileAccess.get_file_as_string(profile_file))
 		if not profiles is Dictionary or profiles.is_empty():
@@ -43,7 +49,11 @@ func _dump(variants:Array,outfits:Array,label:String,clips:Array,dense:int)->voi
 		var source_arrays:=Audit._surface(source_body);var source_colors:Dictionary={}
 		for vertex in source_arrays.v.size():source_colors[_key(source_arrays.v[vertex])]=source_arrays.c[vertex]
 		for outfit:String in outfits:
-			var f:=Figure.new();add_child(f);f.setup({"variant":variant,"outfit":outfit,"lit":false,"hair":"cropped","stance":"stand"})
+			var f:=Figure.new()
+			# Acting seeds breathing and shifts from this identity. Auto node
+			# names vary with list order and would spoil angle-only comparisons.
+			f.set_meta(&"person_name",_identity+"_"+variant)
+			add_child(f);f.setup({"variant":variant,"outfit":outfit,"lit":false,"hair":"cropped","stance":"stand"})
 			f.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 			var acting=Acting.of(f);acting.active=false
 			var body:MeshInstance3D=null;var pieces:Array=[]
@@ -85,12 +95,18 @@ func _dump(variants:Array,outfits:Array,label:String,clips:Array,dense:int)->voi
 						var a:int=surface.i[index];var b:int=surface.i[index+1];var c:int=surface.i[index+2]
 						if maxf(surface.v[a].y,maxf(surface.v[b].y,surface.v[c].y))<=f._base_height*.62:lower_triangles.append_array([a,b,c])
 				metadata.append({"name":part.name,"rest":_vectors(Audit._skin(probe,Audit._pose(f.skeleton,true))),"triangles":surface.i,"lower_triangles":lower_triangles})
-			file.store_line(JSON.stringify({"kind":"mesh","variant":variant,"outfit":outfit,"height":f._base_height,
+			file.store_line(JSON.stringify({"kind":"mesh","variant":variant,"outfit":outfit,"height":f._base_height,"identity":f.get_meta(&"person_name"),
 				"body_triangles":bs.i,"hand_triangles":hand_triangles,"leg_triangles":leg_triangles,"hidden":hidden,"newly_hidden":newly_hidden,"body_position_mismatches":mismatches,"pieces":metadata}))
 			for clip:String in clips:
 				_check_elbow_limit(f,variant,clip)
-				Audit._reset(f,acting)
-				if clip.begins_with("kneel") or clip.begins_with("sit_cross") or clip=="stance_cross":
+				# Start every clip with the same ambient state, independently of
+				# the length/order of earlier clips in this diagnostic request.
+				acting.free();f.remove_meta(&"court_acting")
+				f.skeleton.reset_bone_poses();f.position=Vector3.ZERO
+				f.play("stand",0.0,0.0)
+				acting=Acting.of(f);acting.active=false
+				var performed:bool=Acting.library(variant).has(clip.trim_suffix("_release"))
+				if performed:
 					f.play("stand",0.0,0.0);Acting.play(f,clip.trim_suffix("_release"),{"blend":0.0})
 					if clip.ends_with("_release"):
 						var settle_frames:=ceili(Acting.clip_length(clip.trim_suffix("_release"))/Audit.DT)
@@ -103,9 +119,10 @@ func _dump(variants:Array,outfits:Array,label:String,clips:Array,dense:int)->voi
 				if dense>0:
 					var duration:=1.6
 					if not clip.ends_with("_release"):
-						duration=maxf(duration,Acting.clip_length(clip)) if clip.begins_with("kneel") or clip.begins_with("sit_cross") or clip=="stance_cross" else f.player.get_animation(clip).length
+						duration=maxf(duration,Acting.clip_length(clip)) if performed else f.player.get_animation(clip).length
 					sample_times.clear()
 					for i in dense:sample_times.append(duration*float(i)/float(dense-1))
+				if not _explicit_times.is_empty():sample_times=_explicit_times
 				for target:float in sample_times:
 					while now+Audit.DT*.5<target:Audit._frame(f,acting);now+=Audit.DT
 					if is_equal_approx(now,previous_sample):continue

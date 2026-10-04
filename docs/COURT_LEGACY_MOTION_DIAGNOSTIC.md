@@ -94,3 +94,19 @@ overlap of 3–6 mm and a sampled maximum near 13 mm, falling below 2.4 mm at 0.
 and 0.2 mm at 0.97 s. Keep visual acceptance separate from numerical counts.
 Expanded replacement meshes require fresh walking and ordinary-pose checks;
 earlier walking counts against the inherited legacy meshes do not certify them.
+
+Pose calibration now gives each figure the stable identity
+`legacy_motion_<variant>` before Acting binds, and recreates the ordinary acting
+state before each clip. Auto node names otherwise change breathing/weight-shift
+seeds when a body list changes; earlier results are real samples but were not
+strict angle-only comparisons. A live order-control export reversed both the
+body and clip lists: all eight shared poses had exactly equal body and cloth
+vertices. `--identity=legacy_motion_alternate` requests a second deterministic
+ambient identity for the final variation check.
+
+`--times=0.8,8.7` requests exact diagnostic moments (rounded to the 30 Hz step).
+Any authored Acting clip can be inspected, including protected execution poses,
+without fitting or changing that clip. One such sample traced the gold-looking
+male-old shoulder oval in the block pose to `tunic_trim`, with the original skin
+behind it; it was not a skin breakthrough. The seven-body replacement walking
+sweep on asset checkpoint63140339 completed all1,344 samples with zero crossings.
