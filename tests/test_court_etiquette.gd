@@ -163,3 +163,11 @@ func test_protocol_planning_is_deterministic_and_does_not_mutate_inputs()->void:
 	var b:=Director.beats_for(event,cast,facts,73,{})
 	assert_str(var_to_str(a)).is_equal(var_to_str(b))
 	assert_str(var_to_str([event,cast,facts])).is_equal(before)
+
+func test_lowered_greeting_keeps_the_marker_that_defers_it_until_arrival()->void:
+	var cast:=[{"key":"main","role":"main","kind":"envoy","temper":"calm"}]
+	var beats:=Director.beats_for({"kind":"enter","who":"main"},cast,_facts(_profile("modern")),4)
+	var plays:=Director.lower(beats).filter(func(b:Dictionary)->bool:return String(b.who)=="main" and String(b.act)=="play")
+	assert_bool(plays.any(func(b:Dictionary)->bool:return String(b.args.get("clip",""))=="nod" and bool(b.args.get("routine",false)))).is_true()
+	var wrath:=Director.lower(Director.beats_for({"kind":"divine","action":"terrify","target":"main","response":"cower"},cast,_facts(_profile("modern")),4))
+	assert_bool(wrath.any(func(b:Dictionary)->bool:return bool(b.args.get("routine",false)))).is_false()

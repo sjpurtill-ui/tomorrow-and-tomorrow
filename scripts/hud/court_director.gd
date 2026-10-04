@@ -3562,7 +3562,7 @@ static func lower(list:Array)->Array:
 			var vector:Dictionary=(MOOD_VECTOR.get(mood,{}) as Dictionary).duplicate()
 			out.append({"t":t,"who":who,"act":"mood","args":{"vector":vector,"name":mood,"face":p.face,"dur":float(p.dur),"hold":bool(p.hold),"beat":act}})
 		var play:={"clip":act,"fallback":String(p.clip),"hold":bool(p.hold),"speed":float(p.speed),"dur":float(p.dur),"blend":0.25,"beat":act,"at":String(p.at),"number":args.get("number",null)}
-		for extra in ["thing","walk","from","gift","because"]:
+		for extra in ["thing","walk","from","gift","because","routine"]:
 			if args.has(extra):play[extra]=args[extra]
 		out.append({"t":t,"who":who,"act":"play","args":play})
 		match String(p.look):
