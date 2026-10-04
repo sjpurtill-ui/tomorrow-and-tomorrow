@@ -113,6 +113,9 @@ func _review_atmosphere(stage:Control,index:int)->void:
 	await _capture_stage(stage,"%02d-atmosphere-wrath" % index)
 	for i in energy.size():
 		if room.fill_lights[i].light_energy>=float(energy[i])*.8:_fail("window fill ignores wrath in "+str(index))
+	room.god_light(stage.figure("main").body3d,"favour",0.0,0.0)
+	await _frames(12)
+	await _capture_stage(stage,"%02d-atmosphere-favour" % index)
 	room.god_light(null,"off",0.0,0.0)
 	for i in energy.size():
 		if absf(room.fill_lights[i].light_energy-float(energy[i]))>.00001:_fail("window fill did not recover in "+str(index))

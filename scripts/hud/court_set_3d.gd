@@ -48,7 +48,8 @@ extends Node3D
 ## guttering, a gust in the hides driving the smoke sideways), "favour" (warm
 ## gold, the fire brightening, motes rising), "off" (all eased back). Under the
 ## open sky it falls from the sky; in a hall through the smoke hole or the
-## window. One unshadowed spot, the shaft effect and one small dust emitter.
+## window. One unshadowed spot and a small diffuse face return, the shaft
+## effect and one small dust emitter.
 ## Presentation only: nothing here reads or changes the game's state except
 ## facts_from_game(), which only reads. Nothing is allocated per frame; the
 ## set stops processing when it is hidden (set_active).
@@ -205,6 +206,7 @@ const GOD_TONES:={
 }
 var god_tone:="off"
 var god_spot:SpotLight3D
+var god_return:OmniLight3D
 var god_shaft:MeshInstance3D
 var god_dust:GPUParticles3D
 var _god_shaft_mat:ShaderMaterial
@@ -1317,6 +1319,13 @@ func _god_make()->void:
 	god_spot.spot_attenuation=0.6;god_spot.spot_angle_attenuation=1.6
 	god_spot.light_energy=0.0;god_spot.visible=false
 	add_child(god_spot)
+	# A small diffuse return from the god's side keeps the addressed face and
+	# hands legible under a strong window backlight. No shadows or specular.
+	god_return=OmniLight3D.new();god_return.name="GodReturn"
+	god_return.shadow_enabled=false;god_return.light_specular=0.0
+	god_return.omni_range=3.6;god_return.omni_attenuation=1.0
+	god_return.light_energy=0.0;god_return.visible=false
+	add_child(god_return)
 	god_shaft=MeshInstance3D.new();god_shaft.name="GodShaft"
 	var cyl:=CylinderMesh.new();cyl.top_radius=0.42;cyl.bottom_radius=0.78;cyl.height=1.0
 	cyl.radial_segments=20;cyl.rings=1;cyl.cap_top=false;cyl.cap_bottom=false
@@ -1396,15 +1405,18 @@ func _god_aim()->void:
 	var from:=aim+(s-aim).normalized()*3.6
 	god_spot.global_transform=Transform3D(Basis.looking_at((aim-from).normalized(),Vector3.UP if absf((aim-from).normalized().y)<0.98 else Vector3.FORWARD),from)
 	god_spot.spot_range=from.distance_to(t)+2.5
-	var dir:=(t-s).normalized();var length:=s.distance_to(t)
+	var window:bool=not (info.get("apertures",[]) as Array).is_empty() and indoors()
+	var end:=t+Vector3.UP*1.45 if window else t
+	var dir:=(end-s).normalized();var length:=s.distance_to(end)
 	var y_axis:=-dir
 	var x_axis:=y_axis.cross(Vector3.FORWARD if absf(y_axis.z)<0.9 else Vector3.RIGHT).normalized()
 	var z_axis:=x_axis.cross(y_axis).normalized()
 	_god_beam_basis=Basis(x_axis,y_axis*length,z_axis)
 	god_shaft.global_transform=Transform3D(_god_beam_basis,s+dir*length*0.5)
-	# the column fades out above their head: it never paints over them
-	_god_shaft_mat.set_shader_parameter("fade_from",clampf(1.0-3.2/maxf(length,0.1),0.0,0.95))
-	_god_shaft_mat.set_shader_parameter("fade_to",clampf(1.0-2.0/maxf(length,0.1),0.05,1.0))
+	# Window light ends before the upper body; an overhead column fades above
+	# their head. Neither beam paints a luminous stripe across the face.
+	_god_shaft_mat.set_shader_parameter("fade_from",clampf(1.0-(1.4 if window else 3.2)/maxf(length,0.1),0.0,0.95))
+	_god_shaft_mat.set_shader_parameter("fade_to",clampf(1.0-(.45 if window else 2.0)/maxf(length,0.1),0.05,1.0))
 	god_dust.global_position=t+Vector3(0.0,1.25,0.0)
 	god_pool.global_position=Vector3(t.x,t.y+0.03,t.z)
 	_god_dust_mat.set_shader_parameter("shaft_top",s)
@@ -1417,6 +1429,8 @@ func _god_aim()->void:
 	# the wind comes from the god's side, across the one addressed
 	var across:=Vector3(t.x-god_point().x,0.0,t.z-god_point().z)
 	_god_wind=(across.normalized() if across.length()>0.01 else Vector3(1,0,0))+Vector3(0.0,0.08,0.0)
+	var toward_god:Vector3=-across.normalized() if across.length()>.01 else Vector3.FORWARD
+	god_return.global_position=t+Vector3.UP*1.5+toward_god*1.8+Vector3(toward_god.z,0,-toward_god.x)*.5
 	if sun!=null:
 		# wrath: a low cold sun from the god's side; shadows run long toward them
 		var flat:=Vector3(t.x-god_point().x,0.0,t.z-god_point().z)
@@ -1454,10 +1468,12 @@ func _god_apply()->void:
 		_god_shaft_mat.set_shader_parameter("strength",shaft_s*(2.0 if open_sky else 1.1));_god_shaft_mat.set_shader_parameter("colour",_god_col)
 		_god_dust_mat.set_shader_parameter("colour",_god_col.lerp(Color(1,1,1),0.3))
 		# the pool on the ground: the light reads even where the beam does not
-		var peak:=7.0 if god_tone!="wrath" else 2.4
+		var peak:=lerpf(7.0,2.4,sharp)
 		var share:=clampf(energy/peak,0.0,1.0)
+		god_return.light_energy=share*lerpf(.9,.7,sharp)
+		god_return.light_color=_god_col
 		_god_pool_mat.set_shader_parameter("colour",_god_col)
-		_god_pool_mat.set_shader_parameter("strength",share*(0.55 if open_sky else 0.4)*(0.6 if god_tone=="wrath" else 1.0))
+		_god_pool_mat.set_shader_parameter("strength",share*(0.55 if open_sky else 0.4)*lerpf(1.0,.6,sharp))
 		# in a hall the god's light owns the opening: the sun's own shaft fades
 		for i in _sun_shaft_mats.size():
 			_sun_shaft_mats[i].set_shader_parameter("strength",_sun_shaft_strength[i]*(1.0-0.8*share))
@@ -1499,6 +1515,7 @@ func _god_visibility()->void:
 	if god_spot==null:return
 	var on:=active and _god_cur[0]>.02
 	god_spot.visible=on
+	god_return.visible=on
 	god_shaft.visible=active and _god_cur[2]>.01
 	god_pool.visible=on
 	god_dust.visible=on and level=="high" and not _god_reduced
