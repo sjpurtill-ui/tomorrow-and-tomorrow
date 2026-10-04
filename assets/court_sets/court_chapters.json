@@ -39,13 +39,15 @@
     "fire_energy": 1.15,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "d7d5c2"
+    "fill_colour": "c9d6df",
+    "aperture_z": -3.78,
+    "daylight_strength": 0
    },
    "look": {
     "ambient_energy": 0.48,
     "exposure": 1.0,
-    "sun": "fff0d5",
-    "ambient": "aaa896"
+    "sun": "ffe6c5",
+    "ambient": "aab8bd"
    },
    "apertures": [],
    "camera": {
@@ -526,7 +528,7 @@
     ]
    },
    "glb": "court_chapter_00.glb",
-   "sha256": "686d8eeaddf4b0d0f7c1d371d4cea3d67b87149e459a3aa337317b2cff6d30f5"
+   "sha256": "607713a7b708cad9a42bcb5c52998a6b89c2ecafdf71cbe743ebfe85ca71bf3c"
   },
   "chapter_01": {
    "chapter": 1,
@@ -559,18 +561,18 @@
    "fx": {
     "fill": [
      [
-      -3.55,
+      -2.9109999999999996,
       1.9749999999999999,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      3.7,
+      3.034,
       1.9749999999999999,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ]
     ],
     "fire": {
@@ -586,21 +588,23 @@
    "light": {
     "open_sky": false,
     "sun_dir": [
-     0.4,
-     -0.85,
-     -0.25
+     -0.16,
+     -0.64,
+     0.78
     ],
-    "sun_energy": 0.72,
+    "sun_energy": 0.48,
     "fire_energy": 1.15,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "d7d5c2"
+    "fill_colour": "c9d6df",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.4,
+    "ambient_energy": 0.38,
     "exposure": 1.0,
-    "sun": "fff0d5",
-    "ambient": "aaa896"
+    "sun": "ffe6c5",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -642,8 +646,17 @@
      "pattern": 16,
      "albedo": "6b5038",
      "albedo_worn": "7c6045",
-     "mottle": 0.09,
-     "variation": 0.1
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
     }
    },
    "marks": {
@@ -1865,7 +1878,8 @@
    "gates": {
     "writing": [
      "TabletPigeonholes_Records",
-     "RecordSheet_0"
+     "RecordSheet_0",
+     "WorkDetail_0"
     ]
    },
    "technology_gates": {
@@ -1893,39 +1907,41 @@
    "fx": {
     "fill": [
      [
-      -3.6,
-      2.3600000000000003,
-      -3.48,
-      0.26,
-      4.4
+      -2.952,
+      2.35,
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      3.6,
-      2.3600000000000003,
-      -3.48,
-      0.26,
-      4.4
+      2.952,
+      2.35,
+      -2.72,
+      0.34,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.5,
-     -0.65,
-     -0.45
+     0.1,
+     -0.78,
+     0.64
     ],
-    "sun_energy": 0.95,
+    "sun_energy": 0.62,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.45,
+    "ambient_energy": 0.41,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "aaa896"
+    "sun": "fff0da",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -1964,12 +1980,53 @@
      "mottle": 0.03,
      "variation": 0.025
     },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "6b5038",
+     "albedo_worn": "7c6045",
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
+    },
+    "FLAGS": {
+     "albedo": "9a9282",
+     "albedo_worn": "a79f8d",
+     "mottle": 0.045,
+     "variation": 0.05,
+     "grain": 0.035
+    },
+    "STONE_BLOCK": {
+     "albedo": "b0a58f",
+     "albedo_worn": "b9af9c",
+     "mottle": 0.035,
+     "variation": 0.05
+    },
     "MUD": {
      "pattern": 0,
      "albedo": "b0a080",
      "albedo_worn": "bcad8d",
      "mottle": 0.1,
      "grain": 0.08
+    }
+   },
+   "dressing": {
+    "TabletPigeonholes_Records": {
+     "support": "TabletPigeonholes",
+     "capability": "writing",
+     "kind": "shelf"
+    },
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "writing",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -2274,6 +2331,7 @@
     "Chair_officials_5",
     "Desk_0",
     "RecordSheet_0",
+    "WorkDetail_0",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -2331,9 +2389,10 @@
     "WindowReveal_0",
     "WindowReveal_1",
     "WindowSill_0",
-    "WindowSill_1"
+    "WindowSill_1",
+    "WorkDetail_0"
    ],
-   "triangles": 7328,
+   "triangles": 7308,
    "bounds": {
     "Floor": [
      [
@@ -2829,14 +2888,14 @@
     ],
     "TabletPigeonholes_Records": [
      [
-      -1.085,
-      1.545,
-      -3.785
+      -1.0687,
+      1.5425,
+      -3.7839
      ],
      [
-      0.9204,
-      2.4083,
-      -3.635
+      1.0687,
+      2.4458,
+      -3.6361
      ]
     ],
     "Chair_officials_0": [
@@ -2925,14 +2984,26 @@
     ],
     "RecordSheet_0": [
      [
-      -3.19,
+      -3.195,
       0.76,
       -0.755
      ],
      [
-      -2.91,
-      0.82,
+      -2.905,
+      0.814,
       -0.545
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -2.8129,
+      0.76,
+      -0.4836
+     ],
+     [
+      -2.4352,
+      0.802,
+      -0.3364
      ]
     ],
     "InstitutionMount": [
@@ -2956,7 +3027,7 @@
      [
       2.65,
       2.31,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -2973,7 +3044,7 @@
     ]
    },
    "glb": "court_chapter_02.glb",
-   "sha256": "cb90e05ca2d47a4f02d81d98079d8abd7299edb84ee90e39eec98a5d99fc6f5d"
+   "sha256": "437dd611f1d20acf319510578df4decc390fe2635e1f864fa05b31cf18f9aaa1"
   },
   "chapter_03": {
    "chapter": 3,
@@ -2987,7 +3058,9 @@
    "gates": {
     "writing": [
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ]
    },
    "technology_gates": {
@@ -3021,39 +3094,41 @@
    "fx": {
     "fill": [
      [
-      -4.25,
-      3.05,
-      -3.48,
-      0.26,
-      4.4
+      -3.485,
+      2.35,
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      4.25,
-      3.05,
-      -3.48,
-      0.26,
-      4.4
+      3.485,
+      2.35,
+      -2.72,
+      0.34,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.4,
+     0.12,
      -0.7,
-     -0.5
+     0.72
     ],
-    "sun_energy": 0.85,
+    "sun_energy": 0.56,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.42,
+    "ambient_energy": 0.39,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "aaa896"
+    "sun": "fff0da",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -3103,6 +3178,47 @@
      "albedo_worn": "b1bcb0",
      "mottle": 0.03,
      "variation": 0.025
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "6b5038",
+     "albedo_worn": "7c6045",
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
+    },
+    "FLAGS": {
+     "albedo": "9a9282",
+     "albedo_worn": "a79f8d",
+     "mottle": 0.045,
+     "variation": 0.05,
+     "grain": 0.035
+    },
+    "STONE_BLOCK": {
+     "albedo": "b0a58f",
+     "albedo_worn": "b9af9c",
+     "mottle": 0.035,
+     "variation": 0.05
+    }
+   },
+   "dressing": {
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "writing",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "Desk_1",
+     "capability": "writing",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -3429,6 +3545,8 @@
     "Desk_1",
     "RecordSheet_0",
     "RecordSheet_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -3510,9 +3628,11 @@
     "WindowSill_0",
     "WindowSill_1",
     "WindowSill_2",
-    "WindowSill_3"
+    "WindowSill_3",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
-   "triangles": 8504,
+   "triangles": 8632,
    "bounds": {
     "Floor": [
      [
@@ -4380,26 +4500,50 @@
     ],
     "RecordSheet_0": [
      [
-      -3.19,
+      -3.195,
       0.76,
       -0.755
      ],
      [
-      -2.91,
-      0.82,
+      -2.905,
+      0.814,
       -0.545
      ]
     ],
     "RecordSheet_1": [
      [
-      2.41,
+      2.405,
       0.76,
       -0.755
      ],
      [
-      2.69,
-      0.82,
+      2.695,
+      0.814,
       -0.545
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -2.8129,
+      0.76,
+      -0.4836
+     ],
+     [
+      -2.4352,
+      0.802,
+      -0.3364
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      2.7871,
+      0.76,
+      -0.4836
+     ],
+     [
+      3.1648,
+      0.802,
+      -0.3364
      ]
     ],
     "InstitutionMount": [
@@ -4423,7 +4567,7 @@
      [
       0.5,
       2.61,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -4440,7 +4584,7 @@
     ]
    },
    "glb": "court_chapter_03.glb",
-   "sha256": "d1412dea8af9bd46e9ddbb1e20f5b98a2fa64fa5b0eaf5ca1a31f8f14ac4b60a"
+   "sha256": "70db43fb4997fca22fcfb5366fd272a1813f9f80d57949c2afbbd3f6567c88a2"
   },
   "chapter_04": {
    "chapter": 4,
@@ -4455,7 +4599,9 @@
     "writing": [
      "CouncilRecords_Records",
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ]
    },
    "technology_gates": {
@@ -4483,39 +4629,41 @@
    "fx": {
     "fill": [
      [
-      -3.5,
+      -2.8699999999999997,
       2.335,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      3.5,
+      2.8699999999999997,
       2.335,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     0.4,
-     -0.85,
-     -0.25
+     -0.16,
+     -0.64,
+     0.78
     ],
-    "sun_energy": 0.8,
+    "sun_energy": 0.52,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.46,
+    "ambient_energy": 0.41,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "aaa896"
+    "sun": "fff0da",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -4553,6 +4701,52 @@
      "albedo_worn": "b1bcb0",
      "mottle": 0.03,
      "variation": 0.025
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "6b5038",
+     "albedo_worn": "7c6045",
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
+    },
+    "FLAGS": {
+     "albedo": "9a9282",
+     "albedo_worn": "a79f8d",
+     "mottle": 0.045,
+     "variation": 0.05,
+     "grain": 0.035
+    },
+    "STONE_BLOCK": {
+     "albedo": "b0a58f",
+     "albedo_worn": "b9af9c",
+     "mottle": 0.035,
+     "variation": 0.05
+    }
+   },
+   "dressing": {
+    "CouncilRecords_Records": {
+     "support": "CouncilRecords",
+     "capability": "writing",
+     "kind": "shelf"
+    },
+    "WorkDetail_0": {
+     "support": "CouncilTable",
+     "capability": "writing",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "CouncilTable",
+     "capability": "writing",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -4861,6 +5055,8 @@
     "CouncilTable",
     "RecordSheet_0",
     "RecordSheet_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -4922,9 +5118,11 @@
     "WindowReveal_0",
     "WindowReveal_1",
     "WindowSill_0",
-    "WindowSill_1"
+    "WindowSill_1",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
-   "triangles": 9200,
+   "triangles": 9256,
    "bounds": {
     "Floor": [
      [
@@ -5456,14 +5654,14 @@
     ],
     "CouncilRecords_Records": [
      [
-      -1.035,
-      1.695,
-      -3.825
+      -1.0187,
+      1.6925,
+      -3.8239
      ],
      [
-      0.7977,
-      2.5917,
-      -3.675
+      1.0187,
+      2.6292,
+      -3.6761
      ]
     ],
     "Chair_officials_0": [
@@ -5552,26 +5750,50 @@
     ],
     "RecordSheet_0": [
      [
-      -1.09,
+      -1.095,
       0.76,
       -0.655
      ],
      [
-      -0.81,
-      0.82,
+      -0.805,
+      0.814,
       -0.445
      ]
     ],
     "RecordSheet_1": [
      [
-      0.31,
+      0.305,
       0.76,
       -0.655
      ],
      [
-      0.59,
-      0.82,
+      0.595,
+      0.814,
       -0.445
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -0.7129,
+      0.76,
+      -0.3836
+     ],
+     [
+      -0.3352,
+      0.802,
+      -0.2364
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      0.6871,
+      0.76,
+      -0.3836
+     ],
+     [
+      1.0648,
+      0.802,
+      -0.2364
      ]
     ],
     "InstitutionMount": [
@@ -5595,7 +5817,7 @@
      [
       0.5,
       3.66,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -5612,7 +5834,7 @@
     ]
    },
    "glb": "court_chapter_04.glb",
-   "sha256": "b116e66a75527192fb1ed163f443e2acbccb30136d3797a82107d0a08d830c52"
+   "sha256": "233de721a09b7a0ccbf0e266168d2277a246ca99c7f9144634bd2b003f1afb6f"
   },
   "chapter_05": {
    "chapter": 5,
@@ -5628,7 +5850,9 @@
      "ClericalShelves_0_Records",
      "ClericalShelves_1_Records",
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ]
    },
    "technology_gates": {
@@ -5659,39 +5883,41 @@
    "fx": {
     "fill": [
      [
-      -3.4,
+      -2.788,
       2.275,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      3.4,
+      2.788,
       2.275,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.5,
-     -0.65,
-     -0.45
+     0.1,
+     -0.78,
+     0.64
     ],
-    "sun_energy": 0.6,
+    "sun_energy": 0.45,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.42,
+    "ambient_energy": 0.39,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "aaa896"
+    "sun": "fff0da",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -5736,12 +5962,63 @@
      "mottle": 0.03,
      "variation": 0.025
     },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "6b5038",
+     "albedo_worn": "7c6045",
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
+    },
+    "FLAGS": {
+     "albedo": "9a9282",
+     "albedo_worn": "a79f8d",
+     "mottle": 0.045,
+     "variation": 0.05,
+     "grain": 0.035
+    },
+    "STONE_BLOCK": {
+     "albedo": "b0a58f",
+     "albedo_worn": "b9af9c",
+     "mottle": 0.035,
+     "variation": 0.05
+    },
     "PLASTER": {
      "pattern": 0,
      "albedo": "c1b699",
      "albedo_worn": "cdc2a9",
      "mottle": 0.07,
      "variation": 0.06
+    }
+   },
+   "dressing": {
+    "ClericalShelves_0_Records": {
+     "support": "ClericalShelves_0",
+     "capability": "writing",
+     "kind": "shelf"
+    },
+    "ClericalShelves_1_Records": {
+     "support": "ClericalShelves_1",
+     "capability": "writing",
+     "kind": "shelf"
+    },
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "writing",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "Desk_1",
+     "capability": "writing",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -6061,6 +6338,8 @@
     "Desk_1",
     "RecordSheet_0",
     "RecordSheet_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -6134,9 +6413,11 @@
     "WindowReveal_2",
     "WindowSill_0",
     "WindowSill_1",
-    "WindowSill_2"
+    "WindowSill_2",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
-   "triangles": 10092,
+   "triangles": 10148,
    "bounds": {
     "Floor": [
      [
@@ -6776,14 +7057,14 @@
     ],
     "ClericalShelves_0_Records": [
      [
-      -2.31,
-      1.195,
-      -3.795
+      -2.2937,
+      1.1925,
+      -3.7939
      ],
      [
-      -1.16,
-      2.2917,
-      -3.645
+      -0.9988,
+      2.3292,
+      -3.6461
      ]
     ],
     "ClericalShelves_1": [
@@ -6800,14 +7081,14 @@
     ],
     "ClericalShelves_1_Records": [
      [
-      0.99,
-      1.195,
-      -3.795
+      1.0063,
+      1.1925,
+      -3.7939
      ],
      [
-      2.14,
-      2.2917,
-      -3.645
+      2.3012,
+      2.3292,
+      -3.6461
      ]
     ],
     "Chair_officials_0": [
@@ -6908,26 +7189,50 @@
     ],
     "RecordSheet_0": [
      [
-      -3.19,
+      -3.195,
       0.76,
       -0.755
      ],
      [
-      -2.91,
-      0.82,
+      -2.905,
+      0.814,
       -0.545
      ]
     ],
     "RecordSheet_1": [
      [
-      2.41,
+      2.405,
       0.76,
       -0.755
      ],
      [
-      2.69,
-      0.82,
+      2.695,
+      0.814,
       -0.545
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -2.8129,
+      0.76,
+      -0.4836
+     ],
+     [
+      -2.4352,
+      0.802,
+      -0.3364
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      2.7871,
+      0.76,
+      -0.4836
+     ],
+     [
+      3.1648,
+      0.802,
+      -0.3364
      ]
     ],
     "InstitutionMount": [
@@ -6951,7 +7256,7 @@
      [
       0.5,
       3.86,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -6968,7 +7273,7 @@
     ]
    },
    "glb": "court_chapter_05.glb",
-   "sha256": "e76705cd4baead0837944c8f97355305dbc9275afe2122cff48d6deda6fb4cca"
+   "sha256": "2e5fce32f3d9d2b05c0342d5e43c1fe36f2e72387415eaa614c023a1d491e4fa"
   },
   "chapter_06": {
    "chapter": 6,
@@ -6981,7 +7286,8 @@
    "rustic_trophies": true,
    "gates": {
     "writing": [
-     "RecordSheet_0"
+     "RecordSheet_0",
+     "WorkDetail_0"
     ]
    },
    "technology_gates": {
@@ -7018,39 +7324,41 @@
    "fx": {
     "fill": [
      [
-      -3.0,
-      2.575,
-      -3.48,
-      0.26,
-      4.4
+      -2.46,
+      2.35,
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      3.0,
-      2.575,
-      -3.48,
-      0.26,
-      4.4
+      2.46,
+      2.35,
+      -2.72,
+      0.34,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.4,
+     0.12,
      -0.7,
-     -0.5
+     0.72
     ],
-    "sun_energy": 0.62,
+    "sun_energy": 0.43,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.48,
+    "ambient_energy": 0.44,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "aaa896"
+    "sun": "fff0da",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -7095,12 +7403,63 @@
      "mottle": 0.03,
      "variation": 0.025
     },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "6b5038",
+     "albedo_worn": "7c6045",
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
+    },
+    "FLAGS": {
+     "albedo": "9a9282",
+     "albedo_worn": "a79f8d",
+     "mottle": 0.045,
+     "variation": 0.05,
+     "grain": 0.035
+    },
+    "STONE_BLOCK": {
+     "albedo": "b0a58f",
+     "albedo_worn": "b9af9c",
+     "mottle": 0.035,
+     "variation": 0.05
+    },
     "PLASTER": {
      "pattern": 0,
      "albedo": "c1b699",
      "albedo_worn": "cdc2a9",
      "mottle": 0.07,
      "variation": 0.06
+    }
+   },
+   "dressing": {
+    "ArchiveSlots_-3_Records": {
+     "support": "ArchiveSlots_-3",
+     "capability": "bound_records",
+     "kind": "shelf"
+    },
+    "ArchiveSlots_0_Records": {
+     "support": "ArchiveSlots_0",
+     "capability": "bound_records",
+     "kind": "shelf"
+    },
+    "ArchiveSlots_3_Records": {
+     "support": "ArchiveSlots_3",
+     "capability": "bound_records",
+     "kind": "shelf"
+    },
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "writing",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -7418,6 +7777,7 @@
     "Desk_0",
     "RecordSheet_0",
     "BoundRecord_0",
+    "WorkDetail_0",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -7489,9 +7849,10 @@
     "WindowReveal_2",
     "WindowSill_0",
     "WindowSill_1",
-    "WindowSill_2"
+    "WindowSill_2",
+    "WorkDetail_0"
    ],
-   "triangles": 10528,
+   "triangles": 10228,
    "bounds": {
     "Floor": [
      [
@@ -8096,13 +8457,13 @@
     "ArchiveSlots_-3_Records": [
      [
       -3.7,
-      0.84,
+      0.8525,
       -3.805
      ],
      [
-      -2.4,
-      1.9267,
-      -3.6125
+      -2.3025,
+      1.9042,
+      -3.605
      ]
     ],
     "ArchiveSlots_0": [
@@ -8120,13 +8481,13 @@
     "ArchiveSlots_0_Records": [
      [
       -0.7,
-      0.84,
+      0.8525,
       -3.805
      ],
      [
-      0.6,
-      1.9267,
-      -3.6125
+      0.6975,
+      1.9042,
+      -3.605
      ]
     ],
     "ArchiveSlots_3": [
@@ -8144,13 +8505,13 @@
     "ArchiveSlots_3_Records": [
      [
       2.3,
-      0.84,
+      0.8525,
       -3.805
      ],
      [
-      3.6,
-      1.9267,
-      -3.6125
+      3.6975,
+      1.9042,
+      -3.605
      ]
     ],
     "Chair_officials_0": [
@@ -8239,13 +8600,13 @@
     ],
     "RecordSheet_0": [
      [
-      -3.19,
+      -3.195,
       0.76,
       -0.755
      ],
      [
-      -2.91,
-      0.82,
+      -2.905,
+      0.814,
       -0.545
      ]
     ],
@@ -8257,8 +8618,20 @@
      ],
      [
       -2.295,
-      0.87,
+      0.86,
       -0.6
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -2.8129,
+      0.76,
+      -0.4836
+     ],
+     [
+      -2.4352,
+      0.802,
+      -0.3364
      ]
     ],
     "InstitutionMount": [
@@ -8282,7 +8655,7 @@
      [
       2.05,
       2.46,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -8299,7 +8672,7 @@
     ]
    },
    "glb": "court_chapter_06.glb",
-   "sha256": "d338b9c660ffd6c99ec7ed72657ad566f6b4b15463950d4ad9e4dd8d079d5799"
+   "sha256": "8908b675d2facf57c6f342246afe76c4d3a13ef72faa1c1b9a233d6fe79d2157"
   },
   "chapter_07": {
    "chapter": 7,
@@ -8324,7 +8697,9 @@
     ],
     "paper": [
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ],
     "bound_records": [
      "BoundRecord_0",
@@ -8344,18 +8719,18 @@
    "fx": {
     "fill": [
      [
-      -3.5,
+      -2.8699999999999997,
       2.25,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      3.5,
+      2.8699999999999997,
       2.25,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ]
     ],
     "fire": {
@@ -8371,21 +8746,23 @@
    "light": {
     "open_sky": false,
     "sun_dir": [
-     0.4,
-     -0.85,
-     -0.25
+     -0.16,
+     -0.64,
+     0.78
     ],
-    "sun_energy": 0.67,
+    "sun_energy": 0.46,
     "fire_energy": 1.15,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "d7d5c2"
+    "fill_colour": "c9d6df",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.42,
+    "ambient_energy": 0.38,
     "exposure": 1.0,
-    "sun": "fff0d5",
-    "ambient": "aaa896"
+    "sun": "ffe6c5",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -8428,8 +8805,29 @@
      "pattern": 16,
      "albedo": "6b5038",
      "albedo_worn": "7c6045",
-     "mottle": 0.09,
-     "variation": 0.1
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
+    }
+   },
+   "dressing": {
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "Desk_1",
+     "capability": "paper",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -8769,6 +9167,8 @@
     "BoundRecord_0",
     "RecordSheet_1",
     "BoundRecord_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
     "HearthstoneInset",
     "HearthstoneBorder_-1",
     "HearthstoneBorder_1",
@@ -8850,7 +9250,9 @@
     "WindowReveal_0",
     "WindowReveal_1",
     "WindowSill_0",
-    "WindowSill_1"
+    "WindowSill_1",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
    "triangles": 9060,
    "bounds": {
@@ -9600,14 +10002,14 @@
     ],
     "RecordSheet_0": [
      [
-      -3.8603,
+      -3.83,
       0.76,
-      -1.9099
+      -1.8958
      ],
      [
-      -3.4397,
-      0.799,
-      -1.5901
+      -3.448,
+      0.78,
+      -1.625
      ]
     ],
     "BoundRecord_0": [
@@ -9618,20 +10020,20 @@
      ],
      [
       -2.895,
-      0.87,
+      0.86,
       -1.7
      ]
     ],
     "RecordSheet_1": [
      [
-      2.9397,
+      2.97,
       0.76,
-      -1.9099
+      -1.8958
      ],
      [
-      3.3603,
-      0.799,
-      -1.5901
+      3.352,
+      0.78,
+      -1.625
      ]
     ],
     "BoundRecord_1": [
@@ -9642,8 +10044,32 @@
      ],
      [
       3.905,
-      0.87,
+      0.86,
       -1.7
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -3.425,
+      0.76,
+      -1.5675
+     ],
+     [
+      -3.075,
+      0.818,
+      -1.4525
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      3.375,
+      0.76,
+      -1.5675
+     ],
+     [
+      3.725,
+      0.818,
+      -1.4525
      ]
     ],
     "HearthstoneInset": [
@@ -9715,7 +10141,7 @@
      [
       0.5,
       2.61,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -9732,7 +10158,7 @@
     ]
    },
    "glb": "court_chapter_07.glb",
-   "sha256": "0b55e578680aa1029f2207c438d407435ad8c906f31401b29514471fd071c86e"
+   "sha256": "feb18d4b39f846f86d7308629817a505feec580aae8cdd0727df3190ded70e12"
   },
   "chapter_08": {
    "chapter": 8,
@@ -9757,7 +10183,9 @@
     ],
     "paper": [
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ],
     "bound_records": [
      "BoundRecord_0",
@@ -9777,18 +10205,18 @@
    "fx": {
     "fill": [
      [
-      -3.45,
-      2.55,
-      -3.48,
-      0.26,
-      4.4
+      -2.829,
+      2.35,
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      3.45,
-      2.55,
-      -3.48,
-      0.26,
-      4.4
+      2.829,
+      2.35,
+      -2.72,
+      0.34,
+      5.4
      ]
     ],
     "fire": {
@@ -9804,21 +10232,23 @@
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.5,
-     -0.65,
-     -0.45
+     0.1,
+     -0.78,
+     0.64
     ],
-    "sun_energy": 0.7,
+    "sun_energy": 0.5,
     "fire_energy": 1.15,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "d7d5c2"
+    "fill_colour": "c9d6df",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.43,
+    "ambient_energy": 0.4,
     "exposure": 1.0,
-    "sun": "fff0d5",
-    "ambient": "aaa896"
+    "sun": "ffe6c5",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -9856,6 +10286,47 @@
      "albedo_worn": "b1bcb0",
      "mottle": 0.03,
      "variation": 0.025
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "6b5038",
+     "albedo_worn": "7c6045",
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
+    },
+    "FLAGS": {
+     "albedo": "9a9282",
+     "albedo_worn": "a79f8d",
+     "mottle": 0.045,
+     "variation": 0.05,
+     "grain": 0.035
+    },
+    "STONE_BLOCK": {
+     "albedo": "b0a58f",
+     "albedo_worn": "b9af9c",
+     "mottle": 0.035,
+     "variation": 0.05
+    }
+   },
+   "dressing": {
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "Desk_1",
+     "capability": "paper",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -10186,6 +10657,8 @@
     "BoundRecord_0",
     "RecordSheet_1",
     "BoundRecord_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
     "HearthstoneInset",
     "HearthstoneBorder_-1",
     "HearthstoneBorder_1",
@@ -10258,7 +10731,9 @@
     "WindowReveal_0",
     "WindowReveal_1",
     "WindowSill_0",
-    "WindowSill_1"
+    "WindowSill_1",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
    "triangles": 10216,
    "bounds": {
@@ -10900,14 +11375,14 @@
     ],
     "RecordSheet_0": [
      [
-      -3.8603,
+      -3.83,
       0.76,
-      -1.9099
+      -1.8958
      ],
      [
-      -3.4397,
-      0.799,
-      -1.5901
+      -3.448,
+      0.78,
+      -1.625
      ]
     ],
     "BoundRecord_0": [
@@ -10918,20 +11393,20 @@
      ],
      [
       -2.895,
-      0.87,
+      0.86,
       -1.7
      ]
     ],
     "RecordSheet_1": [
      [
-      2.9397,
+      2.97,
       0.76,
-      -1.9099
+      -1.8958
      ],
      [
-      3.3603,
-      0.799,
-      -1.5901
+      3.352,
+      0.78,
+      -1.625
      ]
     ],
     "BoundRecord_1": [
@@ -10942,8 +11417,32 @@
      ],
      [
       3.905,
-      0.87,
+      0.86,
       -1.7
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -3.425,
+      0.76,
+      -1.5675
+     ],
+     [
+      -3.075,
+      0.818,
+      -1.4525
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      3.375,
+      0.76,
+      -1.5675
+     ],
+     [
+      3.725,
+      0.818,
+      -1.4525
      ]
     ],
     "HearthstoneInset": [
@@ -11015,7 +11514,7 @@
      [
       0.5,
       2.61,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -11032,7 +11531,7 @@
     ]
    },
    "glb": "court_chapter_08.glb",
-   "sha256": "0fa84f9113d01b170572d1e4720f31950eb683f0efb35e6add7ae7fce87169b3"
+   "sha256": "c03c8abe16979cefd6740916876a005315684df961fb7693991e1803a33504b2"
   },
   "chapter_09": {
    "chapter": 9,
@@ -11062,7 +11561,9 @@
     ],
     "paper": [
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ]
    },
    "institution_gates": {
@@ -11078,39 +11579,41 @@
    "fx": {
     "fill": [
      [
-      -3.3,
+      -2.7059999999999995,
       2.075,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ],
      [
-      3.3,
+      2.7059999999999995,
       2.075,
-      -3.48,
-      0.26,
-      4.4
+      -2.72,
+      0.34,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.4,
+     0.12,
      -0.7,
-     -0.5
+     0.72
     ],
-    "sun_energy": 0.66,
+    "sun_energy": 0.43,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "d7d5c2"
+    "fill_colour": "c9d6df",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.055
    },
    "look": {
-    "ambient_energy": 0.47,
+    "ambient_energy": 0.43,
     "exposure": 1.0,
-    "sun": "fff0d5",
-    "ambient": "aaa896"
+    "sun": "ffe6c5",
+    "ambient": "aab8bd"
    },
    "apertures": [
     [
@@ -11149,12 +11652,45 @@
      "mottle": 0.03,
      "variation": 0.025
     },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "6b5038",
+     "albedo_worn": "7c6045",
+     "mottle": 0.045,
+     "variation": 0.075,
+     "grain": 0.03
+    },
+    "PLANK": {
+     "pattern": 9,
+     "albedo": "71583f",
+     "albedo_worn": "826a4d",
+     "mottle": 0.035,
+     "variation": 0.06,
+     "grain": 0.03
+    },
     "PLASTER": {
      "pattern": 0,
      "albedo": "c1b699",
      "albedo_worn": "cdc2a9",
      "mottle": 0.07,
      "variation": 0.06
+    }
+   },
+   "dressing": {
+    "ChanceryArchive_Records": {
+     "support": "ChanceryArchive",
+     "capability": "bound_records",
+     "kind": "shelf"
+    },
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "Desk_1",
+     "capability": "paper",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -11475,6 +12011,8 @@
     "BoundRecord_0",
     "RecordSheet_1",
     "BoundRecord_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -11538,9 +12076,11 @@
     "WindowSill_0",
     "WindowSill_1",
     "WindowTransom_0",
-    "WindowTransom_1"
+    "WindowTransom_1",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
-   "triangles": 8636,
+   "triangles": 8456,
    "bounds": {
     "Floor": [
      [
@@ -12001,13 +12541,13 @@
     "ChanceryArchive_Records": [
      [
       -0.875,
-      0.38,
+      0.3925,
       -3.825
      ],
      [
-      0.765,
-      2.2667,
-      -3.6325
+      0.865,
+      2.2442,
+      -3.625
      ]
     ],
     "ChanceryCornice": [
@@ -12168,14 +12708,14 @@
     ],
     "RecordSheet_0": [
      [
-      -3.0603,
+      -3.03,
       0.76,
-      -1.3599
+      -1.3458
      ],
      [
-      -2.6397,
-      0.799,
-      -1.0401
+      -2.648,
+      0.78,
+      -1.075
      ]
     ],
     "BoundRecord_0": [
@@ -12186,20 +12726,20 @@
      ],
      [
       -2.095,
-      0.87,
+      0.86,
       -1.15
      ]
     ],
     "RecordSheet_1": [
      [
-      2.1397,
+      2.17,
       0.76,
-      -1.3599
+      -1.3458
      ],
      [
-      2.5603,
-      0.799,
-      -1.0401
+      2.552,
+      0.78,
+      -1.075
      ]
     ],
     "BoundRecord_1": [
@@ -12210,8 +12750,32 @@
      ],
      [
       3.105,
-      0.87,
+      0.86,
       -1.15
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -2.625,
+      0.76,
+      -1.0175
+     ],
+     [
+      -2.275,
+      0.818,
+      -0.9025
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      2.575,
+      0.76,
+      -1.0175
+     ],
+     [
+      2.925,
+      0.818,
+      -0.9025
      ]
     ],
     "InstitutionMount": [
@@ -12235,7 +12799,7 @@
      [
       1.8,
       2.502,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -12252,7 +12816,7 @@
     ]
    },
    "glb": "court_chapter_09.glb",
-   "sha256": "fda46a0b0f3e2a0174467ad4e87c83a8796b8c8a59effe9ef76351e287fcf473"
+   "sha256": "52fd06fbb9f430567dad18db1d6f8846e2f6335c7c8ff69fbc8913fcc10f27d2"
   },
   "chapter_10": {
    "chapter": 10,
@@ -12276,7 +12840,9 @@
     ],
     "paper": [
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ]
    },
    "institution_gates": {
@@ -12292,39 +12858,41 @@
    "fx": {
     "fill": [
      [
-      -3.5,
+      -2.8699999999999997,
       2.05,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ],
      [
-      3.5,
+      2.8699999999999997,
       2.05,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     0.4,
-     -0.85,
-     -0.25
+     -0.16,
+     -0.64,
+     0.78
     ],
-    "sun_energy": 0.62,
+    "sun_energy": 0.4,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.045
    },
    "look": {
-    "ambient_energy": 0.5,
+    "ambient_energy": 0.45,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "b6bdbb"
+    "sun": "fff0da",
+    "ambient": "b9c4c9"
    },
    "apertures": [
     [
@@ -12398,6 +12966,23 @@
      "albedo_worn": "b1bcb0",
      "mottle": 0.03,
      "variation": 0.025
+    }
+   },
+   "dressing": {
+    "SecretariatRecords_Records": {
+     "support": "SecretariatRecords",
+     "capability": "bound_records",
+     "kind": "shelf"
+    },
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "Desk_1",
+     "capability": "paper",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -12722,6 +13307,8 @@
     "BoundRecord_0",
     "RecordSheet_1",
     "BoundRecord_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -12789,9 +13376,11 @@
     "WindowSill_0",
     "WindowSill_1",
     "WindowTransom_0",
-    "WindowTransom_1"
+    "WindowTransom_1",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
-   "triangles": 8548,
+   "triangles": 8368,
    "bounds": {
     "Floor": [
      [
@@ -13348,13 +13937,13 @@
     "SecretariatRecords_Records": [
      [
       -0.875,
-      1.07,
+      1.0825,
       -3.835
      ],
      [
-      0.765,
-      2.4233,
-      -3.6425
+      0.865,
+      2.4008,
+      -3.635
      ]
     ],
     "Chair_officials_0": [
@@ -13467,14 +14056,14 @@
     ],
     "RecordSheet_0": [
      [
-      -3.0603,
+      -3.03,
       0.76,
-      -1.3599
+      -1.3458
      ],
      [
-      -2.6397,
-      0.799,
-      -1.0401
+      -2.648,
+      0.78,
+      -1.075
      ]
     ],
     "BoundRecord_0": [
@@ -13485,20 +14074,20 @@
      ],
      [
       -2.095,
-      0.87,
+      0.86,
       -1.15
      ]
     ],
     "RecordSheet_1": [
      [
-      2.1397,
+      2.17,
       0.76,
-      -1.3599
+      -1.3458
      ],
      [
-      2.5603,
-      0.799,
-      -1.0401
+      2.552,
+      0.78,
+      -1.075
      ]
     ],
     "BoundRecord_1": [
@@ -13509,8 +14098,32 @@
      ],
      [
       3.105,
-      0.87,
+      0.86,
       -1.15
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -2.625,
+      0.76,
+      -1.0175
+     ],
+     [
+      -2.275,
+      0.818,
+      -0.9025
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      2.575,
+      0.76,
+      -1.0175
+     ],
+     [
+      2.925,
+      0.818,
+      -0.9025
      ]
     ],
     "InstitutionMount": [
@@ -13534,7 +14147,7 @@
      [
       2.35,
       2.61,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -13551,7 +14164,7 @@
     ]
    },
    "glb": "court_chapter_10.glb",
-   "sha256": "8c0d5aad738e0f264e73858d83a00e6337c1a097a16fb5f56d5b772c2e321b7f"
+   "sha256": "e48ef0e64c6872d72b324ea7d6f0d5ebdd3c8c7346c458a2e9324c1fa37c4439"
   },
   "chapter_11": {
    "chapter": 11,
@@ -13570,7 +14183,9 @@
     ],
     "paper": [
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ],
     "bound_records": [
      "BoundRecord_0",
@@ -13594,39 +14209,41 @@
    "fx": {
     "fill": [
      [
-      -3.45,
+      -2.829,
       1.9500000000000002,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ],
      [
-      3.45,
+      2.829,
       1.9500000000000002,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.5,
-     -0.65,
-     -0.45
+     0.1,
+     -0.78,
+     0.64
     ],
-    "sun_energy": 0.55,
+    "sun_energy": 0.38,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "d7d5c2"
+    "fill_colour": "c9d6df",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.045
    },
    "look": {
-    "ambient_energy": 0.48,
+    "ambient_energy": 0.44,
     "exposure": 1.0,
-    "sun": "fff0d5",
-    "ambient": "b6bdbb"
+    "sun": "ffe6c5",
+    "ambient": "b9c4c9"
    },
    "apertures": [
     [
@@ -13700,6 +14317,18 @@
      "albedo_worn": "b1bcb0",
      "mottle": 0.03,
      "variation": 0.025
+    }
+   },
+   "dressing": {
+    "WorkDetail_0": {
+     "support": "CouncilTable",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "CouncilTable",
+     "capability": "paper",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -14039,6 +14668,8 @@
     "RecordSheet_1",
     "BoundRecord_1",
     "ElectricLamp_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -14101,7 +14732,9 @@
     "WindowSill_0",
     "WindowSill_1",
     "WindowTransom_0",
-    "WindowTransom_1"
+    "WindowTransom_1",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
    "triangles": 7340,
    "bounds": {
@@ -14695,14 +15328,14 @@
     ],
     "RecordSheet_0": [
      [
-      -1.5603,
+      -1.53,
       0.76,
-      -1.6099
+      -1.5958
      ],
      [
-      -1.1397,
-      0.799,
-      -1.2901
+      -1.148,
+      0.78,
+      -1.325
      ]
     ],
     "BoundRecord_0": [
@@ -14713,7 +15346,7 @@
      ],
      [
       -0.595,
-      0.87,
+      0.86,
       -1.4
      ]
     ],
@@ -14731,14 +15364,14 @@
     ],
     "RecordSheet_1": [
      [
-      0.6397,
+      0.67,
       0.76,
-      -1.6099
+      -1.5958
      ],
      [
-      1.0603,
-      0.799,
-      -1.2901
+      1.052,
+      0.78,
+      -1.325
      ]
     ],
     "BoundRecord_1": [
@@ -14749,7 +15382,7 @@
      ],
      [
       1.605,
-      0.87,
+      0.86,
       -1.4
      ]
     ],
@@ -14763,6 +15396,30 @@
       0.68,
       1.22,
       -1.36
+     ]
+    ],
+    "WorkDetail_0": [
+     [
+      -1.275,
+      0.76,
+      -1.2325
+     ],
+     [
+      -0.925,
+      0.818,
+      -1.1175
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      0.925,
+      0.76,
+      -1.2325
+     ],
+     [
+      1.275,
+      0.818,
+      -1.1175
      ]
     ],
     "InstitutionMount": [
@@ -14786,7 +15443,7 @@
      [
       0.5,
       2.61,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -14803,7 +15460,7 @@
     ]
    },
    "glb": "court_chapter_11.glb",
-   "sha256": "59622b8e23436d5e4369a1d2c74cfe9671a03b43eb523ce2d0aca0a8ca682139"
+   "sha256": "45a473713657336fd5abe8414586cc5f96f1329c0d0db5f1d3bd5a46dcee97ca"
   },
   "chapter_12": {
    "chapter": 12,
@@ -14832,7 +15489,10 @@
     "paper": [
      "RecordSheet_0",
      "RecordSheet_1",
-     "RecordSheet_2"
+     "RecordSheet_2",
+     "WorkDetail_0",
+     "WorkDetail_1",
+     "WorkDetail_2"
     ],
     "electricity": [
      "ElectricLamp_0",
@@ -14858,39 +15518,41 @@
    "fx": {
     "fill": [
      [
-      -3.7,
+      -3.034,
       1.9,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ],
      [
-      1.75,
+      1.4349999999999998,
       1.9,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.4,
+     0.12,
      -0.7,
-     -0.5
+     0.72
     ],
-    "sun_energy": 0.52,
+    "sun_energy": 0.36,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.045
    },
    "look": {
-    "ambient_energy": 0.53,
+    "ambient_energy": 0.47,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "b6bdbb"
+    "sun": "fff0da",
+    "ambient": "b9c4c9"
    },
    "apertures": [
     [
@@ -14964,6 +15626,28 @@
      "albedo_worn": "b1bcb0",
      "mottle": 0.03,
      "variation": 0.025
+    }
+   },
+   "dressing": {
+    "MinistryBooks_Records": {
+     "support": "MinistryBooks",
+     "capability": "bound_records",
+     "kind": "shelf"
+    },
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "Desk_1",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_2": {
+     "support": "SecretaryStation",
+     "capability": "paper",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -15288,6 +15972,9 @@
     "BoundRecord_2",
     "ElectricLamp_2",
     "Telephone_2",
+    "WorkDetail_0",
+    "WorkDetail_1",
+    "WorkDetail_2",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -15355,9 +16042,12 @@
     "WindowSill_0",
     "WindowSill_1",
     "WindowTransom_0",
-    "WindowTransom_1"
+    "WindowTransom_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
+    "WorkDetail_2"
    ],
-   "triangles": 10108,
+   "triangles": 10012,
    "bounds": {
     "Floor": [
      [
@@ -15806,13 +16496,13 @@
     "MinistryBooks_Records": [
      [
       -1.575,
-      0.32,
+      0.3325,
       -3.845
      ],
      [
-      -0.275,
-      2.3067,
-      -3.6525
+      -0.02,
+      2.2842,
+      -3.645
      ]
     ],
     "OfficeCornice": [
@@ -15937,14 +16627,14 @@
     ],
     "RecordSheet_0": [
      [
-      -3.0603,
+      -3.03,
       0.76,
-      -1.3599
+      -1.3458
      ],
      [
-      -2.6397,
-      0.799,
-      -1.0401
+      -2.648,
+      0.78,
+      -1.075
      ]
     ],
     "BoundRecord_0": [
@@ -15955,7 +16645,7 @@
      ],
      [
       -2.095,
-      0.87,
+      0.86,
       -1.15
      ]
     ],
@@ -15985,14 +16675,14 @@
     ],
     "RecordSheet_1": [
      [
-      2.1397,
+      2.17,
       0.76,
-      -1.3599
+      -1.3458
      ],
      [
-      2.5603,
-      0.799,
-      -1.0401
+      2.552,
+      0.78,
+      -1.075
      ]
     ],
     "BoundRecord_1": [
@@ -16003,7 +16693,7 @@
      ],
      [
       3.105,
-      0.87,
+      0.86,
       -1.15
      ]
     ],
@@ -16033,14 +16723,14 @@
     ],
     "RecordSheet_2": [
      [
-      -5.0603,
+      -5.03,
       0.76,
-      -3.0099
+      -2.9958
      ],
      [
-      -4.6397,
-      0.799,
-      -2.6901
+      -4.648,
+      0.78,
+      -2.725
      ]
     ],
     "BoundRecord_2": [
@@ -16051,7 +16741,7 @@
      ],
      [
       -4.095,
-      0.87,
+      0.86,
       -2.8
      ]
     ],
@@ -16079,6 +16769,42 @@
       -2.715
      ]
     ],
+    "WorkDetail_0": [
+     [
+      -2.775,
+      0.76,
+      -0.9825
+     ],
+     [
+      -2.425,
+      0.818,
+      -0.8675
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      2.425,
+      0.76,
+      -0.9825
+     ],
+     [
+      2.775,
+      0.818,
+      -0.8675
+     ]
+    ],
+    "WorkDetail_2": [
+     [
+      -4.775,
+      0.76,
+      -2.6875
+     ],
+     [
+      -4.425,
+      0.818,
+      -2.5725
+     ]
+    ],
     "InstitutionMount": [
      [
       3.525,
@@ -16100,7 +16826,7 @@
      [
       4.05,
       2.61,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -16117,7 +16843,7 @@
     ]
    },
    "glb": "court_chapter_12.glb",
-   "sha256": "38e540c481a8fe56bf883a95e081dd35d4f1f6873a599781aa886d4d33ae026f"
+   "sha256": "b29147b6af272ea8abe8322a65c03975b56067b0c4da4b5a98655e4f872e06a8"
   },
   "chapter_13": {
    "chapter": 13,
@@ -16148,7 +16874,10 @@
     "paper": [
      "RecordSheet_0",
      "RecordSheet_1",
-     "RecordSheet_2"
+     "RecordSheet_2",
+     "WorkDetail_0",
+     "WorkDetail_1",
+     "WorkDetail_2"
     ],
     "electricity": [
      "ElectricLamp_0",
@@ -16179,39 +16908,41 @@
    "fx": {
     "fill": [
      [
-      -4.3,
+      -3.526,
       2.1,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ],
      [
-      4.3,
+      3.526,
       2.1,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     0.4,
-     -0.85,
-     -0.25
+     -0.16,
+     -0.64,
+     0.78
     ],
-    "sun_energy": 0.63,
+    "sun_energy": 0.42,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.045
    },
    "look": {
-    "ambient_energy": 0.54,
+    "ambient_energy": 0.48,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "b6bdbb"
+    "sun": "fff0da",
+    "ambient": "b9c4c9"
    },
    "apertures": [
     [
@@ -16297,6 +17028,28 @@
      "albedo_worn": "b1bcb0",
      "mottle": 0.03,
      "variation": 0.025
+    }
+   },
+   "dressing": {
+    "DispatchRecords_Records": {
+     "support": "DispatchRecords",
+     "capability": "bound_records",
+     "kind": "shelf"
+    },
+    "WorkDetail_0": {
+     "support": "Desk_0",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "Desk_1",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_2": {
+     "support": "SecretaryStation",
+     "capability": "paper",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -16644,6 +17397,9 @@
     "ElectricLamp_2",
     "Telephone_2",
     "Typewriter_2",
+    "WorkDetail_0",
+    "WorkDetail_1",
+    "WorkDetail_2",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -16736,9 +17492,12 @@
     "WindowTransom_0",
     "WindowTransom_1",
     "WindowTransom_2",
-    "WindowTransom_3"
+    "WindowTransom_3",
+    "WorkDetail_0",
+    "WorkDetail_1",
+    "WorkDetail_2"
    ],
-   "triangles": 11952,
+   "triangles": 11856,
    "bounds": {
     "Floor": [
      [
@@ -17463,13 +18222,13 @@
     "DispatchRecords_Records": [
      [
       -0.725,
-      0.3,
+      0.3125,
       -3.835
      ],
      [
-      0.575,
-      2.1867,
-      -3.6425
+      0.73,
+      2.1642,
+      -3.635
      ]
     ],
     "Chair_officials_0": [
@@ -17582,14 +18341,14 @@
     ],
     "RecordSheet_0": [
      [
-      -3.0603,
+      -3.03,
       0.76,
-      -1.3599
+      -1.3458
      ],
      [
-      -2.6397,
-      0.799,
-      -1.0401
+      -2.648,
+      0.78,
+      -1.075
      ]
     ],
     "BoundRecord_0": [
@@ -17600,7 +18359,7 @@
      ],
      [
       -2.095,
-      0.87,
+      0.86,
       -1.15
      ]
     ],
@@ -17642,14 +18401,14 @@
     ],
     "RecordSheet_1": [
      [
-      2.1397,
+      2.17,
       0.76,
-      -1.3599
+      -1.3458
      ],
      [
-      2.5603,
-      0.799,
-      -1.0401
+      2.552,
+      0.78,
+      -1.075
      ]
     ],
     "BoundRecord_1": [
@@ -17660,7 +18419,7 @@
      ],
      [
       3.105,
-      0.87,
+      0.86,
       -1.15
      ]
     ],
@@ -17702,14 +18461,14 @@
     ],
     "RecordSheet_2": [
      [
-      -5.0603,
+      -5.03,
       0.76,
-      -3.0099
+      -2.9958
      ],
      [
-      -4.6397,
-      0.799,
-      -2.6901
+      -4.648,
+      0.78,
+      -2.725
      ]
     ],
     "BoundRecord_2": [
@@ -17720,7 +18479,7 @@
      ],
      [
       -4.095,
-      0.87,
+      0.86,
       -2.8
      ]
     ],
@@ -17760,6 +18519,42 @@
       -2.7
      ]
     ],
+    "WorkDetail_0": [
+     [
+      -2.775,
+      0.76,
+      -0.9825
+     ],
+     [
+      -2.425,
+      0.818,
+      -0.8675
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      2.425,
+      0.76,
+      -0.9825
+     ],
+     [
+      2.775,
+      0.818,
+      -0.8675
+     ]
+    ],
+    "WorkDetail_2": [
+     [
+      -4.775,
+      0.76,
+      -2.6875
+     ],
+     [
+      -4.425,
+      0.818,
+      -2.5725
+     ]
+    ],
     "InstitutionMount": [
      [
       -0.025,
@@ -17781,7 +18576,7 @@
      [
       0.5,
       3.46,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -17798,7 +18593,7 @@
     ]
    },
    "glb": "court_chapter_13.glb",
-   "sha256": "ce420a7548e4bd98c429dbecbd0cd626c97180fa78ef4983d69d9b6fb244b2b0"
+   "sha256": "f73c17a162956e3203f47e496fd7ea5290c5ea01d493fb3650bb23dabdfa1a58"
   },
   "chapter_14": {
    "chapter": 14,
@@ -17834,7 +18629,10 @@
     "paper": [
      "RecordSheet_0",
      "RecordSheet_1",
-     "RecordSheet_2"
+     "RecordSheet_2",
+     "WorkDetail_0",
+     "WorkDetail_1",
+     "WorkDetail_2"
     ],
     "bound_records": [
      "BoundRecord_0",
@@ -17863,39 +18661,41 @@
    "fx": {
     "fill": [
      [
-      -3.0,
+      -2.46,
       1.7149999999999999,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ],
      [
-      2.7,
+      2.214,
       1.7149999999999999,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.5,
-     -0.65,
-     -0.45
+     0.1,
+     -0.78,
+     0.64
     ],
-    "sun_energy": 0.42,
+    "sun_energy": 0.31,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.03
    },
    "look": {
-    "ambient_energy": 0.61,
+    "ambient_energy": 0.52,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "b6bdbb"
+    "sun": "fff0da",
+    "ambient": "b9c4c9"
    },
    "apertures": [
     [
@@ -17984,6 +18784,23 @@
      "albedo_worn": "52636c",
      "mottle": 0.025,
      "variation": 0.02
+    }
+   },
+   "dressing": {
+    "WorkDetail_0": {
+     "support": "CouncilTable",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "CouncilTable",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_2": {
+     "support": "SecretaryStation",
+     "capability": "paper",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -18334,6 +19151,9 @@
     "ElectricLamp_2",
     "Telephone_2",
     "Computer_2",
+    "WorkDetail_0",
+    "WorkDetail_1",
+    "WorkDetail_2",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -18407,9 +19227,12 @@
     "WindowSill_0",
     "WindowSill_1",
     "WindowTransom_0",
-    "WindowTransom_1"
+    "WindowTransom_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
+    "WorkDetail_2"
    ],
-   "triangles": 7244,
+   "triangles": 7220,
    "bounds": {
     "Floor": [
      [
@@ -19073,14 +19896,14 @@
     ],
     "RecordSheet_0": [
      [
-      -1.5603,
+      -1.53,
       0.76,
-      -1.6099
+      -1.5958
      ],
      [
-      -1.1397,
-      0.799,
-      -1.2901
+      -1.148,
+      0.78,
+      -1.325
      ]
     ],
     "BoundRecord_0": [
@@ -19091,7 +19914,7 @@
      ],
      [
       -0.595,
-      0.87,
+      0.86,
       -1.4
      ]
     ],
@@ -19109,14 +19932,14 @@
     ],
     "RecordSheet_1": [
      [
-      0.6397,
+      0.67,
       0.76,
-      -1.6099
+      -1.5958
      ],
      [
-      1.0603,
-      0.799,
-      -1.2901
+      1.052,
+      0.78,
+      -1.325
      ]
     ],
     "BoundRecord_1": [
@@ -19127,7 +19950,7 @@
      ],
      [
       1.605,
-      0.87,
+      0.86,
       -1.4
      ]
     ],
@@ -19145,14 +19968,14 @@
     ],
     "RecordSheet_2": [
      [
-      -5.0603,
+      -5.03,
       0.76,
-      -3.0099
+      -2.9958
      ],
      [
-      -4.6397,
-      0.799,
-      -2.6901
+      -4.648,
+      0.78,
+      -2.725
      ]
     ],
     "BoundRecord_2": [
@@ -19163,7 +19986,7 @@
      ],
      [
       -4.095,
-      0.87,
+      0.86,
       -2.8
      ]
     ],
@@ -19203,6 +20026,42 @@
       -2.665
      ]
     ],
+    "WorkDetail_0": [
+     [
+      -1.275,
+      0.76,
+      -1.2325
+     ],
+     [
+      -0.925,
+      0.818,
+      -1.1175
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      0.925,
+      0.76,
+      -1.2325
+     ],
+     [
+      1.275,
+      0.818,
+      -1.1175
+     ]
+    ],
+    "WorkDetail_2": [
+     [
+      -4.775,
+      0.76,
+      -2.6875
+     ],
+     [
+      -4.425,
+      0.818,
+      -2.5725
+     ]
+    ],
     "InstitutionMount": [
      [
       -0.025,
@@ -19224,7 +20083,7 @@
      [
       0.5,
       2.61,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -19241,7 +20100,7 @@
     ]
    },
    "glb": "court_chapter_14.glb",
-   "sha256": "385f11c8c4a5b6ae247f1d7d335e504dbc49ac264feb1964f5fbf68373b7f5a7"
+   "sha256": "b24c0fae0bc5a35a537222c8b54495ac9502c0bb513f4c2f2ca180c6fb131fc9"
   },
   "chapter_15": {
    "chapter": 15,
@@ -19278,11 +20137,14 @@
     ],
     "paper": [
      "RecordSheet_0",
-     "RecordSheet_1"
+     "RecordSheet_1",
+     "WorkDetail_0",
+     "WorkDetail_1"
     ],
     "bound_records": [
      "BoundRecord_0",
-     "BoundRecord_1"
+     "BoundRecord_1",
+     "ReceptionFolio"
     ],
     "telephone": [
      "Telephone_0",
@@ -19302,32 +20164,34 @@
    "fx": {
     "fill": [
      [
-      -3.0,
+      -2.46,
       1.65,
-      -3.48,
-      0.32,
-      4.4
+      -2.72,
+      0.36,
+      5.4
      ]
     ]
    },
    "light": {
     "open_sky": false,
     "sun_dir": [
-     -0.4,
+     0.12,
      -0.7,
-     -0.5
+     0.72
     ],
-    "sun_energy": 0.38,
+    "sun_energy": 0.29,
     "fire_energy": 0,
     "fire_range": 5.5,
     "fog": 0.001,
-    "fill_colour": "cfdae0"
+    "fill_colour": "d3dce0",
+    "aperture_z": -3.78,
+    "daylight_strength": 0.03
    },
    "look": {
-    "ambient_energy": 0.64,
+    "ambient_energy": 0.54,
     "exposure": 1.0,
-    "sun": "ecf0ef",
-    "ambient": "b6bdbb"
+    "sun": "fff0da",
+    "ambient": "b9c4c9"
    },
    "apertures": [
     [
@@ -19410,6 +20274,23 @@
      "albedo_worn": "6b7272",
      "mottle": 0.025,
      "variation": 0.02
+    }
+   },
+   "dressing": {
+    "WorkDetail_0": {
+     "support": "CouncilTable",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "WorkDetail_1": {
+     "support": "CouncilTable",
+     "capability": "paper",
+     "kind": "desktop"
+    },
+    "ReceptionFolio": {
+     "support": "ReceptionConsole",
+     "capability": "bound_records",
+     "kind": "desktop"
     }
    },
    "marks": {
@@ -19753,6 +20634,9 @@
     "BoundRecord_1",
     "Telephone_1",
     "FlatDisplay_1",
+    "WorkDetail_0",
+    "WorkDetail_1",
+    "ReceptionFolio",
     "InstitutionMount",
     "InstitutionAssembly",
     "InstitutionThrone"
@@ -19792,6 +20676,7 @@
     "OpenDoorLeaf",
     "Radiator",
     "ReceptionConsole",
+    "ReceptionFolio",
     "ReceptionSlat_0",
     "ReceptionSlat_1",
     "ReceptionSlat_2",
@@ -19818,9 +20703,11 @@
     "WindowMullion_0",
     "WindowReveal_0",
     "WindowSill_0",
-    "WindowTransom_0"
+    "WindowTransom_0",
+    "WorkDetail_0",
+    "WorkDetail_1"
    ],
-   "triangles": 6420,
+   "triangles": 6444,
    "bounds": {
     "Floor": [
      [
@@ -20424,14 +21311,14 @@
     ],
     "RecordSheet_0": [
      [
-      -1.5603,
+      -1.53,
       0.76,
-      -1.6099
+      -1.5958
      ],
      [
-      -1.1397,
-      0.799,
-      -1.2901
+      -1.148,
+      0.78,
+      -1.325
      ]
     ],
     "BoundRecord_0": [
@@ -20442,7 +21329,7 @@
      ],
      [
       -0.595,
-      0.87,
+      0.86,
       -1.4
      ]
     ],
@@ -20472,14 +21359,14 @@
     ],
     "RecordSheet_1": [
      [
-      0.6397,
+      0.67,
       0.76,
-      -1.6099
+      -1.5958
      ],
      [
-      1.0603,
-      0.799,
-      -1.2901
+      1.052,
+      0.78,
+      -1.325
      ]
     ],
     "BoundRecord_1": [
@@ -20490,7 +21377,7 @@
      ],
      [
       1.605,
-      0.87,
+      0.86,
       -1.4
      ]
     ],
@@ -20518,6 +21405,42 @@
       -1.35
      ]
     ],
+    "WorkDetail_0": [
+     [
+      -1.275,
+      0.76,
+      -1.2325
+     ],
+     [
+      -0.925,
+      0.818,
+      -1.1175
+     ]
+    ],
+    "WorkDetail_1": [
+     [
+      0.925,
+      0.76,
+      -1.2325
+     ],
+     [
+      1.275,
+      0.818,
+      -1.1175
+     ]
+    ],
+    "ReceptionFolio": [
+     [
+      -5.05,
+      0.84,
+      -1.86
+     ],
+     [
+      -4.75,
+      0.905,
+      -1.64
+     ]
+    ],
     "InstitutionMount": [
      [
       -0.645,
@@ -20539,7 +21462,7 @@
      [
       -0.12,
       2.61,
-      -3.565
+      -3.554
      ]
     ],
     "InstitutionThrone": [
@@ -20556,7 +21479,7 @@
     ]
    },
    "glb": "court_chapter_15.glb",
-   "sha256": "e897fa4e23a9f47732aa6c90a5463c4603a6fb86b1c6a09b452b0786e2b48649"
+   "sha256": "931bb30a5c37c4860530ecb987924124487587cba1667548e038b340fb2bc7d8"
   }
  }
 }
