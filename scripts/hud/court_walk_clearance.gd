@@ -15,7 +15,9 @@ static func degrees_for(variant:String,outfit:String)->float:
 		return 14.0 if variant=="child" else 12.0
 	if outfit=="business":return base+(3.0 if variant=="female_old" else 2.0)
 	if outfit in ["medieval","courtcoat","formal"]:
-		return base+(4.0 if variant=="female_old" and outfit in ["courtcoat","formal"] else 2.0)
+		if variant=="female_old" and outfit=="formal":return 15.0
+		if variant in ["male_adult","male_young"]:return 8.0
+		return 14.0 if variant in ["female_old","child"] else 12.0
 	return base
 
 static func configure(player:AnimationPlayer,skeleton:Skeleton3D,variant:String,outfit:String,override_degrees:=-1.0)->void:
