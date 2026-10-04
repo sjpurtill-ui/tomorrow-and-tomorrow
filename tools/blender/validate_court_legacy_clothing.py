@@ -41,6 +41,25 @@ def check(root,complete=False):
         names=[n['name'] for n in bundle.doc['nodes'] if 'mesh' in n]
         expected=['LegacyBody']+[name for parts in record['parts'].values() for name in parts]
         assert sorted(names)==sorted(expected),(variant,names,expected)
+        # Preserved fastenings/footwear and the original cape/mantle silhouette
+        # must remain exact. The latter may append a supported shoulder lining.
+        preserved={'hide_cape','hide_cord','hide_footwraps','tunic_belt','tunic_shoes',
+                   'robe_sash','robe_mantle','robe_mantle_edge','robe_shoes'}
+        for name in preserved.intersection(names):
+            a,b=source.mesh(name),bundle.mesh(name)
+            expected_count=len(a['primitives'])+(1 if name in ('hide_cape','robe_mantle') else 0)
+            assert len(b['primitives'])==expected_count,(variant,name,'surface count')
+            for ap,bp in zip(a['primitives'],b['primitives']):
+                assert ap.get('material')==bp.get('material')
+                for key,index in ap['attributes'].items():
+                    assert np.array_equal(source.values(index),bundle.values(bp['attributes'][key])),(variant,name,key)
+                assert np.array_equal(source.values(ap['indices']),bundle.values(bp['indices']))
+            if name in ('hide_cape','robe_mantle'):
+                attrs=b['primitives'][-1]['attributes']
+                joints=bundle.values(attrs['JOINTS_0']);weights=bundle.values(attrs['WEIGHTS_0'])
+                joint_names=[bundle.doc['nodes'][i]['name'].split('.')[0] for i in bundle.doc['skins'][0]['joints']]
+                head=[i for i,n in enumerate(joint_names) if n in ('head','neck','jaw')]
+                assert (np.sum(weights*np.isin(joints,head),axis=1)<.20001).all(),(variant,name,'lining includes face/neck')
         triangles=0
         for kind in record['outfits']:
             for name in record['parts'][kind]:

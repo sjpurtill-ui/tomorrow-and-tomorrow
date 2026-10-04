@@ -1,49 +1,58 @@
 # Additive legacy cloth repair
 
-Status: **HELD prototype**, not visually accepted or delivered to the player.
+Status: **HELD two-body prototype**, pending independent family/hand acceptance
+and extension to the other five bodies. It is not delivered to the player.
 Branch `codex/court-legacy-cloth`, base `1c09a4e6`, worktree
 `C:/Users/sjpur/.codex/worktrees/court-chapter-assets/TomorrowandTomorrow`.
 
-The prototype contains adult-male and old-female tunics only. Raw invariants
-pass both bundles; actual animation transitions and hand clearance remain
-under review with the separately owned runtime provider. Missing variants/outfits
-must continue to use their source pieces until a validated replacement exists.
+The current bundles contain tunic, hide and robe for adult male and old female.
+Upper shells share the original body's topology and skin field. Skirts have
+independent same-leg panels, overlapping inner facings within the original hem,
+smooth waist anchors, and a gold hem partition on the same panel grid. The
+lower front/back vent corners turn inward near the knee, avoiding the broad
+shin-driven rim protruding as a pointed ribbon. The hip/thigh envelope used by
+the separate arm-fitting worker is unchanged. Source animation and real
+kneeling are preserved.
 
-The additive files use the original skeleton and body morphs without rewriting
-the source figures or modern wardrobe. `LegacyBody` changes only the replaced
-outfits' vertex coverage channels. Exact source part names and material slots
-are listed in `assets/court_figures/legacy/court_legacy.json`. Open skirt vents
-retain the actual legs; there is no pose substitution or animation modification.
+Hide retains its asymmetric upper wrap, original ragged hem vocabulary, fur
+cape, cord and foot wraps. Robe retains full length, mantle, sash and shoes.
+The original cape and mantle meshes are retained with a body-matched shoulder
+lining. The lining excludes head/neck vertices; an earlier local variant that
+overlaid the lower jaw was rejected. Original fastenings, footwear and cape
+surfaces are checked exactly by the raw validator.
 
-Initial raw checks: `artifacts/legacy-prototype-raw.log`, 2/2 pass. The private
-original-baseline GPU probe produced 18 views of hide/tunic/robe standing,
-kneeling and cross-sitting; PID40752 exited 0 without engine/script errors.
-`reports/legacy_baseline/` records genuine failures in all three families.
-Captures and generated imports remain local and are not delivery evidence for
-the prototype itself.
+The additive files use original skeleton and body morphs without rewriting any
+source figure or modern wardrobe. `LegacyBody` changes only replaced outfits'
+coverage channels (G hide, B tunic, A robe), for regions covered by real mesh.
+Visible legs below the hem remain present. The manifest lists exact source part
+names/material slots; missing variants/outfits fall back to the original.
+The separately delivered provider is `3b2b8f02` (local cherry-pick `1192e389`).
+No simulation or save fields change.
 
-The second iteration adds overlapping source-body-matched skirt facings,
-confined to the original hem, and fits the upper shell inside the preserved
-belt. It removes the raised-thigh skin breakthrough and buried belt. A third
-iteration tapering the skirt to the leg envelope was rejected: it read as
-breeches and did not fix the hands. The current fourth iteration restores the
-fuller drape and uses a continuous hips anchor around the skirt waist, avoiding
-nearest-source weight jumps between opposite thighs. Neither the facings nor
-the coverage channel remove visible legs below the hem.
+Validation against this explicit worktree:
 
-Actual local evidence: the second iteration captured 22 views; the rejected
-third captured 58 onset/release/walking views, PID48540 exit 0 with no script or
-engine errors after a local fixture indentation repair. Both remain HELD.
-Independent source-only intersection checks found bare hand/body crossings in
-all seven old-female standing samples and all seven cross-sit samples; at
-0.633 seconds of cross-sit, male and old-female have 41 and 119 crossings.
-Further skirt narrowing cannot repair those original pose contacts. A bounded
-runtime hand clearance fit is being coordinated separately. Full seven-body,
-robe and hide expansion has deliberately not begun before two-body acceptance.
+- Raw two-bundle/all-three-outfit invariants pass: body attributes, morphs,
+  skeleton and binds exact; retained original pieces exact; no face/neck in
+  cape linings. Log `artifacts/legacy-three-outfits-v9-raw.log`.
+- Provider and modern wardrobe regression suites pass 5/5, zero failures,
+  errors, skips or orphans (`artifacts/legacy-three-outfits-runtime-tests.log`).
+- Current private GPU evidence: `reports/legacy_candidate_v9/`, 186 views,
+  PID73864 exit 0 without engine/script errors. Includes both yaws, standing,
+  walking samples, kneel through its actual 2.5-second endpoint, cross-sit
+  through 1.6 seconds, and release from those complete poses. Earlier captures
+  ending at 1.33 seconds were preliminary and do not establish full transitions.
+- Adding hide/robe leaves the current tunic surfaces and its B coverage exact.
+  Against the previous accepted calibration envelope, the male tunic is exact;
+  only old-female lower vent positions change, up to rest Y 0.45651 m. All
+  joint weights/indices stay exact (`artifacts/legacy-vent-bounds.log`).
+- No diff from base in the seven source figure GLBs, modern wardrobe builder
+  or bundles, or animation libraries.
 
-The fifth iteration partitions the green panel and gold hem on one shared
-vertex grid and skinning field, with no overlapping raised trim sheet. The
-fuller standing silhouette is restored. `reports/legacy_candidate_v5/` has 58
-views of onset, release and walking; PID48640 exited 0 without engine/script
-errors. This remains a HELD two-body checkpoint pending the separate pose fit
-and independent visual acceptance. Geometry is frozen for that calibration.
+Known outstanding work: authored bare poses already intersect hands and thighs
+in some standing/cross-sit samples. The runtime worker owns a bounded cached
+arm fit; these asset captures deliberately contain no unvalidated pose override.
+Raw motion/coverage diagnostics remain diagnostics, not a visual pass. The
+previous prototype's over-tapered breeches silhouette and inward hem-return
+experiment were rejected. Current full-family pixels need independent review,
+then all seven bodies require the same checks. Generated imports, diagnostics
+and captures remain local and are excluded from source commits.
