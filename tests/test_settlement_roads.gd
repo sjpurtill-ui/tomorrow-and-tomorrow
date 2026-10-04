@@ -76,8 +76,8 @@ func test_approaches_wear_a_track_out_of_the_home_ground_and_repaint_once() -> v
 	var after := GROUNDS.signature
 	GROUNDS.set_approaches({"a":{"center":Vector2(10.0, 20.0),"bearings":[0.4]}})
 	assert_int(GROUNDS.signature).is_equal(after)
-	# A cultivated halo is set for the home slot.
-	assert_float(GROUNDS.slot_halos[0].x).is_greater(0.2)
+	# Recorded home land use owns the ground; approaches must not restore a synthetic field halo.
+	assert_float(GROUNDS.slot_halos[0].x).is_equal(0.0)
 
 func test_foreign_towns_are_organic_bounded_and_built_in_their_peoples_way() -> void:
 	var styles := {}

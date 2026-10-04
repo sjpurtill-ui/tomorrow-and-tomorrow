@@ -1,3 +1,33 @@
+## October 4 — organic central settlement growth: INTEGRATION VALIDATED
+
+Prepared on `codex/settlement-growth-integration` from synchronized main
+`bdacd023`. Model source `2805336c`, renderer source through `afeb5c96`,
+camera helper `64fa954d`, retained ground through `8f1a0d8e`, raster/key source
+through `be859720`, and acceptance source `9e9534fb` are reconciled in the
+isolated worktree. Details: `docs/SETTLEMENT_GROWTH_HANDOFF.md`.
+
+New quarters extend the same settlement along connected, terrain-checked
+approaches. Newly recorded buildings use supported construction capabilities
+through all 13 generations, from opening shelters to year 3000; old sites and
+records persist. Fixed plot patches and camera-covered cached ground tiles
+retain unchanged neighborhoods instead of rebuilding the whole settlement.
+Recorded home land use replaces the synthetic cultivation halo.
+
+Final combined regression: 231/231 cases across 15 suites, no errors, failures,
+skips or orphans, report 11. Private GPU evidence includes all 13 generations,
+96/128/129-plot retention, repair and paused camera motion. Final targeted
+GPU checks pass 33/33; add/repair submission measured 22.263/17.348 ms and
+steady refresh p95 1.283 ms with zero geometry/ground churn. The preceding
+full GPU run passed 169/169. Cold 96-plot initialization still took 820.803 ms;
+these prepared flat fixtures are neither an FPS guarantee nor a continuous
+campaign certification. A complete new year-3000 art kit is not included.
+
+No save schema, population accounting, civic/labor owner or historical-figure
+authority changes. Delivery verifies the main push before canonical
+fast-forward and checks the 4696-file existing-local SHA256 inventory.
+Generated imports, captures, concepts and test userdata remain local.
+No player/editor session is launched or restarted; next normal launch loads it.
+
 ## October 4 — engraved folio HUD: INTEGRATED
 
 User-approved original icon family and parchment chrome from `31dffe90`

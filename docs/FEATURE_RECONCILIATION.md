@@ -1,3 +1,27 @@
+## October 4, 2026 — one settlement growing from earliest history to year 3000
+
+Integration on `codex/settlement-growth-integration`, base `bdacd023`, combines
+model growth `2805336c`, retained renderer through `afeb5c96`, ground-view
+helper `64fa954d`, ground streaming through `8f1a0d8e`, raster/key optimizations
+through `be859720` and live acceptance through `9e9534fb`.
+Horizontal growth keeps inherited parcels and uses capability-gated forms for
+new construction across all 13 supported generations. Stable plot patches,
+incremental placement and cached camera-covered ground reuse unchanged work.
+
+Final combined tests pass 231/231 across 15 suites. Private GPU checks exercise
+all generations and retained 96/128/129-plot growth, damage/repair and paused
+camera views. Final targeted update/repair submission measured 22.263/17.348 ms;
+steady refresh p95 was 1.283 ms with no rebuilds. Cold large-settlement initial
+layout remains synchronous (820.803 ms observed). This is a first implementation
+slice with the current art library, not completion of every era's visual assets
+or a continuous campaign benchmark. Exact evidence and limits are in
+`docs/SETTLEMENT_GROWTH_HANDOFF.md` and `docs/SETTLEMENT_GROWTH_ACCEPTANCE.md`.
+
+No save migration or state-authority change. Verified remote-main delivery
+precedes canonical fast-forward, with pre-existing local files preserved.
+Concept images, test captures, imports and userdata are excluded. No player or
+editor restart; the next normal canonical launch loads the integrated source.
+
 ## October 4, 2026 — engraved folio navigation and status bar
 
 Source `31dffe90daa213c7562903f5ed484d50d91fa925` on `codex/hud-chrome`
