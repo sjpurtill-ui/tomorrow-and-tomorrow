@@ -34,19 +34,45 @@ const ROOF_TILE:=0.98
 const ROOF_SHINGLE:=0.96
 const ROOF_EARTH:=0.94
 const ROOF_SLATE:=0.92
+const GLASS_SURFACE:=0.86
 
-## The look of one plot's building (codex/beauty-4): what its walls are made
-## of (the recorded material family) and whether its hearth has a chimney yet
-## (only once towns consolidate, generation 7 and later; before that smoke
-## leaves by a louvre in the ridge).
+## Three bounded facade treatments, stable for the life of a recorded plot.
+## Divide before selecting so the palette does not repeat the four plan types.
+static func facade_for(plot:Dictionary)->int:
+	return posmod(int(plot.get("seed",plot.get("id",1)))/4,3) if kind(plot).begins_with("modern_") else 0
+
+## Roof construction follows the recorded plan, not the settlement's age or
+## its wall material. Old records without a plan use a modest timber/earth
+## covering; they do not acquire fired tiles merely for having stone walls.
+static func roof_for(plot:Dictionary)->String:
+	var plan:=String(plot.get("roof_plan",""))
+	if plan.is_empty():
+		plan=preload("res://scripts/building_material_operations.gd").roof_plan(plot.get("building_materials",{}),"")
+		if plan.is_empty() and float((plot.get("supply_provenance",{}) as Dictionary).get("Roof Tiles",0.0))>0.0:plan="fired_tile_roof"
+	if plan=="fired_tile_roof":return "tile"
+	if plan in ["masonry_roof","concrete_roof","rubble_slab"]:return "slab"
+	if plan in ["irregular_flat","courtyard_flat","mixed_earthen_span"]:return "earth"
+	if plan in ["thatched_ridge","round_thatch","tapered_thatch","long_thatch"]:return "thatch"
+	if plan in ["timber_ridge","timber_span_on_rubble","ridge_light_shelter"]:return "timber"
+	return "earth" if String(plot.get("material_family",""))=="earth" else "timber"
+
+static func chimney_for(plot:Dictionary)->bool:
+	# A completed material profile can retain its applied practice in an older
+	# save. Otherwise actual local knowledge supplies the capability, never age.
+	var applied:Array=(plot.get("building_materials",{}) as Dictionary).get("applied",[])
+	for id in ["wall_chimneys","multi_flue_chimney_stacks","narrow_throat_fireplace"]:
+		if id in applied:return true
+		if int(plot.get("fabric_generation",0))>=7 and id in WorldSimulation.state.known_discoveries:return true
+	return false
+
 static func style_for(plot:Dictionary)->String:
 	var family:=String(plot.get("material_family",""))
 	var material_key:="earth" if family=="earth" else ("brick" if family=="brick" else "stone")
-	var chimney:=int(plot.get("fabric_generation",0))>=7
-	return material_key+("_chimney" if chimney else "")
+	return material_key+"|"+roof_for(plot)+("_chimney" if chimney_for(plot) else "")
 
-static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone")->ArrayMesh:
-	var key:=name+":"+str(storeys)+":"+str(features)+":"+style
+static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone",facade:int=0)->ArrayMesh:
+	facade=posmod(facade,3) if name.begins_with("modern_") else 0
+	var key:=name+":"+str(storeys)+":"+str(features)+":"+style+":"+str(facade)
 	if cache.has(key):return cache[key]
 	var modern:=name.begins_with("modern_")
 	var industrial:=name.begins_with("industrial_")
@@ -67,25 +93,36 @@ static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone")->A
 	if timber:wall=Color("d8c7a4")
 	var trim:=Color("e6d9bd") if not modern else Color("eef1e9")
 	var glass:=Color("3a3129") if not (modern or industrial) else (Color("365058") if industrial else Color("658f9b"))
-	# Roofs: red fired tile on masonry, shingle on timber, slate-grey on the
-	# industrial town, flat packed earth over mud brick.
-	var roof:=Color("a4583a");var roof_code:=ROOF_TILE
-	if timber:roof=Color("7c5c40");roof_code=ROOF_SHINGLE
-	if industrial:roof=Color("5f6266");roof_code=ROOF_SLATE
+	var roof_kind:=style.get_slice("|",1).trim_suffix("_chimney")
+	if roof_kind.is_empty():roof_kind="slate" if industrial else ("earth" if earth else "timber")
+	var roof:=Color("7c5c40");var roof_code:=ROOF_SHINGLE
+	match roof_kind:
+		"tile":roof=Color("a4583a");roof_code=ROOF_TILE
+		"slate":roof=Color("5f6266");roof_code=ROOF_SLATE
+		"thatch":roof=Color("9b895e");roof_code=1.0
+		"earth":roof=Color(.58,.47,.35);roof_code=ROOF_EARTH
+		"slab":roof=Color("a49b82");roof_code=ROOF_EARTH
 	if modern:roof=Color("6d7b77");roof_code=ROOF_SLATE
 	roof.a=roof_code
-	var flat:=earth and not (industrial or modern) and type in ["terrace","courtyard","corner","villa"]
-	if flat:roof=Color(0.58,0.47,0.35,ROOF_EARTH)
+	var flat:=roof_kind in ["earth","slab"] and not modern
 	var height:=3.1*storeys
 	var frame:=Color("5a4430")
+	if modern:
+		wall=[Color("d9d9d0"),Color("b88d74"),Color("889a96")][facade]
+		glass=[Color("547888"),Color("486b70"),Color("596f85")][facade]
+		glass.a=GLASS_SURFACE
+		trim=[Color("edf0e5"),Color("dbcdbb"),Color("d4ddd9")][facade]
+		_modern_building(surface,type,storeys,features,wall,glass,trim,roof,facade)
+		surface.generate_normals()
+		var modern_mesh:=surface.commit();cache[key]=modern_mesh;return modern_mesh
 	match type:
 		"courtyard":
 			# Rooms round an open yard: two wings and a back range, each under
 			# its own roof, the yard paved, a basin in its middle, the street
 			# side open through a gate.
-			_block(surface,Vector3(-3,0,0),Vector3(2,height,10),wall,glass,trim,features)
-			_block(surface,Vector3(3,0,0),Vector3(2,height,10),wall,glass,trim,features)
-			_block(surface,Vector3(0,0,-4),Vector3(4,height,2),wall,glass,trim,features)
+			_block(surface,Vector3(-3,0,0),Vector3(2,height,10),wall,glass,trim,features,1 if industrial else 0)
+			_block(surface,Vector3(3,0,0),Vector3(2,height,10),wall,glass,trim,features,1 if industrial else 0)
+			_block(surface,Vector3(0,0,-4),Vector3(4,height,2),wall,glass,trim,features,1 if industrial else 0)
 			_box(surface,Vector3(0,.06,.6),Vector3(4.0,.12,7.6),Color("b3a489"))
 			_box(surface,Vector3(0,.2,.8),Vector3(1.1,.4,1.1),Color("8e8a80"))
 			_box(surface,Vector3(0,.41,.8),Vector3(.8,.02,.8),Color("4d6670"))
@@ -97,18 +134,18 @@ static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone")->A
 				_gable(surface,Vector3(0,height,-4),Vector2(2.9,1.0),1.1,.45,roof,wall,true)
 			if chimney:_chimney(surface,Vector3(3.2,height+.6,-3.4),wall)
 		"corner":
-			_block(surface,Vector3(-1.5,0,0),Vector3(5,height,10),wall,glass,trim,features)
-			_block(surface,Vector3(2.5,0,2.7),Vector3(3,height*.78,4.6),wall,glass,trim,features)
+			_block(surface,Vector3(-1.5,0,0),Vector3(5,height,10),wall,glass,trim,features,1 if industrial else 0)
+			_block(surface,Vector3(2.5,0,2.7),Vector3(3,height*.78,4.6),wall,glass,trim,features,1 if industrial else 0)
 			if flat:
 				_flat_roof(surface,Vector3(-1.5,height,0),Vector2(2.5,5.0),wall,roof)
 				_flat_roof(surface,Vector3(2.5,height*.78,2.7),Vector2(1.5,2.3),wall,roof)
 			else:
 				_gable(surface,Vector3(-1.5,height,0),Vector2(2.5,5.0),1.8,.5,roof,wall,false)
 				_gable(surface,Vector3(2.5,height*.78,2.7),Vector2(1.5,2.3),1.2,.45,roof.darkened(.04),wall,true)
-			if chimney:_chimney(surface,Vector3(-2.6,height+1.0,-2.8),wall)
+			if chimney:_chimney(surface,Vector3(-2.6,height+(.6 if flat else 1.0),-2.8),wall)
 		"villa":
 			# A house behind a porch: posts carry the porch roof over the door.
-			_block(surface,Vector3(0,0,-1),Vector3(7,height*.75,7),wall,glass,trim,features)
+			_block(surface,Vector3(0,0,-1),Vector3(7,height*.75,7),wall,glass,trim,features,1 if industrial else 0)
 			_box(surface,Vector3(0,.12,3.1),Vector3(7,.24,2.5),Color("a89a80"))
 			for x in [-2.6,-.9,.9,2.6]:_box(surface,Vector3(x,1.3,4.1),Vector3(.24,2.6,.24),trim if not timber else frame)
 			if flat:
@@ -117,33 +154,32 @@ static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone")->A
 			else:
 				_hip(surface,Vector3(0,height*.75,-1),Vector2(3.5,3.5),2.0,.55,roof,.6)
 				_lean_roof(surface,Vector3(0,2.6,3.2),Vector2(3.6,1.25),.5,.2,roof.darkened(.05),wall,0.0)
-			if chimney:_chimney(surface,Vector3(2.0,height*.75+1.2,-2.4),wall)
+			if chimney:_chimney(surface,Vector3(2.0,height*.75+(.6 if flat else 1.2),-2.4),wall)
 		"arcade":
 			# Shops behind an arcade: a row of piers carries a lean-to roof.
-			_block(surface,Vector3(0,0,-1),Vector3(8,height,7),wall,glass,trim,features)
+			_block(surface,Vector3(0,0,-1),Vector3(8,height,7),wall,glass,trim,features,1 if industrial else 0)
 			for x in [-3.5,-1.2,1.2,3.5]:_box(surface,Vector3(x,1.6,3.7),Vector3(.36,3.2,.36),trim)
 			_lean_roof(surface,Vector3(0,3.2,3.5),Vector2(4.1,1.4),.6,.2,roof.darkened(.06),wall,0.0)
 			_gable(surface,Vector3(0,height,-1),Vector2(4.0,3.5),2.0,.5,roof,wall,true)
-			if chimney:_chimney(surface,Vector3(-2.8,height+1.1,-2.6),wall)
+			if chimney:_chimney(surface,Vector3(-2.8,height+(.6 if flat else 1.1),-2.6),wall)
 		"hall":
 			# A hall with two wings and a forecourt; a lantern louvre on its ridge.
-			_block(surface,Vector3(0,0,-1.5),Vector3(8,height,6.5),wall,glass,trim,features)
+			_block(surface,Vector3(0,0,-1.5),Vector3(8,height,6.5),wall,glass,trim,features,1 if industrial else 0)
 			for x in [-3,3]:
-				_block(surface,Vector3(x,0,2.5),Vector3(2,height*.6,5),wall,glass,trim,features)
-				if not modern:_gable(surface,Vector3(x,height*.6,2.5),Vector2(1.0,2.5),.9,.35,roof.darkened(.04),wall,false)
+				_block(surface,Vector3(x,0,2.5),Vector3(2,height*.6,5),wall,glass,trim,features,1 if industrial else 0)
+				_gable(surface,Vector3(x,height*.6,2.5),Vector2(1.0,2.5),.9,.35,roof.darkened(.04),wall,false)
 			_box(surface,Vector3(0,.12,3),Vector3(4,.24,4),Color("a89a80"))
-			if modern:_box(surface,Vector3(0,height+.8,-1.5),Vector3(6,1.6,4),glass)
-			else:
-				_gable(surface,Vector3(0,height,-1.5),Vector2(4.0,3.25),2.4,.55,roof,wall,true)
+			_gable(surface,Vector3(0,height,-1.5),Vector2(4.0,3.25),2.4,.55,roof,wall,true)
+			if not flat:
 				_box(surface,Vector3(0,height+2.5,-1.5),Vector3(.9,.7,.9),wall.darkened(.08))
 				_pyramid(surface,Vector3(0,height+2.85,-1.5),.6,.5,roof.darkened(.1))
 		"workshop", "warehouse":
 			height=maxf(4,minf(height,9))
-			_block(surface,Vector3.ZERO,Vector3(8,height,10),wall,glass,trim,features)
+			_block(surface,Vector3.ZERO,Vector3(8,height,10),wall,glass,trim,features,1 if industrial else 0)
 			if type=="workshop":
 				for z in [-3.4,0,3.4]:_gable(surface,Vector3(0,height,z),Vector2(4.0,1.6),1.1,.3,roof.darkened(.03*absf(z)/3.4),wall,true)
 				if industrial:_box(surface,Vector3(3,height*.9,-3.5),Vector3(.8,height*1.8,.8),wall.darkened(.18))
-				elif chimney:_chimney(surface,Vector3(2.6,height+1.1,-3.8),wall)
+				elif chimney:_chimney(surface,Vector3(2.6,height+(.6 if flat else 1.1),-3.8),wall)
 			else:
 				_gable(surface,Vector3(0,height,0),Vector2(4.0,5.0),1.6,.45,roof,wall,false)
 				# Loading doors in the gable and a hoist beam.
@@ -151,42 +187,117 @@ static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone")->A
 				_box(surface,Vector3(0,height+.35,5.5),Vector3(.2,.2,1.2),frame)
 			_box(surface,Vector3(0,1.6,5.05),Vector3(3.8,3.2,.18),Color("4f4034") if not (industrial or modern) else Color("505859"))
 		_:
-			_block(surface,Vector3.ZERO,Vector3(8,height,10),wall,glass,trim,features)
-			if modern and storeys>=5:
-				_block(surface,Vector3(0,height,0),Vector3(5,3.1,7),wall,glass,trim,features)
-			elif modern:_box(surface,Vector3(0,height+.09,0),Vector3(8.4,.18,10.4),roof)
-			elif flat:_flat_roof(surface,Vector3(0,height,0),Vector2(4.0,5.0),wall,roof)
+			_block(surface,Vector3.ZERO,Vector3(8,height,10),wall,glass,trim,features,1 if industrial else 0)
+			if flat:_flat_roof(surface,Vector3(0,height,0),Vector2(4.0,5.0),wall,roof)
 			else:
 				# A row house: the ridge runs along the street (x), eaves front and back.
 				_gable(surface,Vector3(0,height,0),Vector2(4.0,5.0),2.2,.5,roof,wall,true)
 				if chimney:
 					_chimney(surface,Vector3(-3.4,height+1.4,-.6),wall)
 					_chimney(surface,Vector3(3.4,height+1.4,-.6),wall)
-	if timber and not modern:_frame_walls(surface,name,height,frame)
-	if modern and type not in ["workshop","warehouse"]:
-		# Roof gardens and raised parapets retain readable, restrained roof detail.
-		_box(surface,Vector3(-2,height+.22,-2.6),Vector3(2.2,.44,2.4),Color("6d875b"))
+	if timber:_frame_walls(surface,name,height,frame)
 	surface.generate_normals()
 	var mesh:=surface.commit();cache[key]=mesh;return mesh
 
-static func _block(s:SurfaceTool,base:Vector3,size:Vector3,wall:Color,glass:Color,trim:Color,features:int=0)->void:
+## Modern construction keeps the recorded land use and floor count, with real
+## flat roof slabs/parapets on every wing. The former shared medieval branches
+## put pitched gables on modern courtyards and roof gardens above empty space.
+static func _modern_building(s:SurfaceTool,type:String,storeys:int,features:int,wall:Color,glass:Color,trim:Color,roof:Color,facade:int=0)->void:
+	var height:=3.1*storeys
+	var blocks:Array=[]
+	match type:
+		"courtyard":blocks=[[Vector3(-3,0,0),Vector3(2,height,10)],[Vector3(3,0,0),Vector3(2,height,10)],[Vector3(0,0,-4),Vector3(4,height,2)]]
+		"corner":blocks=[[Vector3(-1.5,0,0),Vector3(5,height,10)],[Vector3(2.5,0,2.7),Vector3(3,3.1*maxi(1,storeys-2),4.6)]]
+		"villa":blocks=[[Vector3(0,0,-1),Vector3(7,height,7)]]
+		"arcade":blocks=[[Vector3(0,0,-1),Vector3(8,height,7)]]
+		"hall":blocks=[[Vector3(0,0,-1.5),Vector3(8,height,6.5)],[Vector3(-3,0,2.5),Vector3(2,3.1*maxi(1,storeys-1),5)],[Vector3(3,0,2.5),Vector3(2,3.1*maxi(1,storeys-1),5)]]
+		"workshop","warehouse":blocks=[[Vector3.ZERO,Vector3(8,maxf(4.0,minf(height,9.0)),10)]]
+		_:
+			if storeys>=5:
+				# The setback replaces the top floors; it does not add a fictional
+				# nineteenth floor to a parcel recorded as eighteen storeys.
+				var lower:=3.1*(storeys-2)
+				blocks=[[Vector3.ZERO,Vector3(8,lower,10)],[Vector3(0,lower,0),Vector3(5,6.2,7)]]
+			else:blocks=[[Vector3.ZERO,Vector3(8,height,10)]]
+	for block:Array in blocks:
+		var base:Vector3=block[0];var size:Vector3=block[1]
+		_modern_block(s,base,size,wall,glass,trim,features,facade)
+		var top:=base+Vector3(0,size.y,0)
+		_box(s,top+Vector3(0,.06,0),Vector3(size.x,.12,size.z),roof)
+		for side in [-1,1]:
+			_box(s,top+Vector3(side*(size.x*.5-.1),.25,0),Vector3(.2,.38,size.z),trim)
+			_box(s,top+Vector3(0,.25,side*(size.z*.5-.1)),Vector3(size.x,.38,.2),trim)
+		# Compact vents sit on a supported roof and remain below its parapet.
+		if size.x>=3.0:_box(s,top+Vector3(-size.x*.22,.24,-size.z*.22),Vector3(.65,.36,.8),Color("899391"))
+	if type in ["villa","arcade","hall"]:
+		var front:=4.1 if type=="villa" else (3.5 if type=="arcade" else 4.1)
+		_box(s,Vector3(0,2.65,front),Vector3(5.6,.18,1.7),trim)
+		for side in [-1,1]:_box(s,Vector3(side*2.5,1.3,front+.65),Vector3(.16,2.6,.16),Color("647371"))
+	if type in ["workshop","warehouse"]:
+		_box(s,Vector3(0,1.7,5.06),Vector3(3.6,3.4,.13),Color("536569"))
+		for y in [1.0,1.8,2.6]:_box(s,Vector3(0,y,5.14),Vector3(3.5,.06,.04),trim.darkened(.2))
+		if type=="workshop":
+			for z in [-2.4,0,2.4]:_box(s,Vector3(0,maxf(4.0,minf(height,9.0))+.15,z),Vector3(4.6,.18,1.2),glass)
+
+## Same structural envelope and floor levels as the old modern block. Broad
+## openings, grouped bays and quiet spandrels survive the district camera;
+## every pane no longer needs its own heavy projecting lintel and mullion.
+static func _modern_block(s:SurfaceTool,base:Vector3,size:Vector3,wall:Color,glass:Color,trim:Color,features:int,facade:int)->void:
+	_box(s,base+Vector3(0,size.y*.5,0),size,wall)
+	_box(s,base+Vector3(0,.2,0),Vector3(size.x+.08,.4,size.z+.08),wall.darkened(.14))
+	var levels:=maxi(1,floori(size.y/3.1))
+	for floor in levels:
+		var y:=base.y+1.7+floor*3.1
+		for axis in 2:
+			var span:=size.x if axis==0 else size.z
+			var depth:=size.z if axis==0 else size.x
+			var bays:=maxi(1,floori(span/2.6))
+			for side in [-1,1]:
+				if facade==1:
+					_facade_box(s,base,axis,0,y-base.y,side*(depth*.5+.065),span-.55,1.65,.05,glass)
+				else:
+					for bay in bays:
+						var offset:=-span*.5+(bay+.5)*span/bays
+						_facade_box(s,base,axis,offset,y-base.y,side*(depth*.5+.065),span/bays*(.68 if facade==0 else .82),1.85,.05,glass)
+				if facade==2:
+					for bay in range(1,bays):
+						_facade_box(s,base,axis,-span*.5+bay*span/bays,(floor+.5)*3.1,side*(depth*.5+.045),.16,3.1,.07,trim)
+		if floor<levels-1:
+			_box(s,base+Vector3(0,(floor+1)*3.1-.08,0),Vector3(size.x+.12,.16,size.z+.12),trim if facade!=2 else wall.lightened(.08))
+	# A darker inset entrance with a pale head matches the former projection.
+	_box(s,base+Vector3(0,1.0,size.z*.5+.05),Vector3(1.0,2.0,.1),glass.darkened(.23))
+	_box(s,base+Vector3(0,2.08,size.z*.5+.07),Vector3(1.3,.18,.12),trim)
+	if features:s.append_from(detail_mesh(AABB(base-Vector3(size.x*.5,0,size.z*.5),size),features,1.0),0,Transform3D.IDENTITY)
+
+static func _facade_box(s:SurfaceTool,base:Vector3,axis:int,along:float,y:float,out:float,width:float,height:float,depth:float,color:Color)->void:
+	var at:=Vector3(along,y,out) if axis==0 else Vector3(out,y,along)
+	var size:=Vector3(width,height,depth) if axis==0 else Vector3(depth,height,width)
+	_box(s,base+at,size,color)
+
+static func _block(s:SurfaceTool,base:Vector3,size:Vector3,wall:Color,glass:Color,trim:Color,features:int=0,period:int=0)->void:
 	_box(s,base+Vector3(0,size.y*.5,0),size,wall)
 	# A plinth course a shade darker, where the wall meets the ground.
 	_box(s,base+Vector3(0,.2,0),Vector3(size.x+.08,.4,size.z+.08),wall.darkened(.14))
 	var floors:=maxi(1,floori(size.y/3.1))
+	var window_width:=1.5 if period>=1 else .7
+	var window_height:=1.65 if period>=1 else 1.1
 	for floor in floors:
 		var y:=base.y+1.7+floor*3.1
 		for side in [-1,1]:
 			var across:=maxi(1,floori(size.x/2.6))
 			for x in range(across):
 				var offset:=-size.x*.5+(x+.5)*size.x/across
-				_box(s,Vector3(base.x+offset,y,base.z+side*(size.z*.5+.025)),Vector3(.7,1.1,.06),glass)
-				_box(s,Vector3(base.x+offset,y+.64,base.z+side*(size.z*.5+.04)),Vector3(.9,.16,.08),trim)
+				var width:=minf(window_width,size.x/across*.72)
+				_box(s,Vector3(base.x+offset,y,base.z+side*(size.z*.5+.025)),Vector3(width,window_height,.06),glass)
+				_box(s,Vector3(base.x+offset,y+window_height*.5+.09,base.z+side*(size.z*.5+.04)),Vector3(width+.2,.16,.08),trim)
+				if period>=1:_box(s,Vector3(base.x+offset,y,base.z+side*(size.z*.5+.065)),Vector3(.06,window_height,.05),trim)
 			var deep:=maxi(1,floori(size.z/3.2))
 			for z in range(deep):
 				var offset:=-size.z*.5+(z+.5)*size.z/deep
-				_box(s,Vector3(base.x+side*(size.x*.5+.025),y,base.z+offset),Vector3(.06,1.1,.7),glass)
-				_box(s,Vector3(base.x+side*(size.x*.5+.04),y+.64,base.z+offset),Vector3(.08,.16,.9),trim)
+				var width:=minf(window_width,size.z/deep*.72)
+				_box(s,Vector3(base.x+side*(size.x*.5+.025),y,base.z+offset),Vector3(.06,window_height,width),glass)
+				_box(s,Vector3(base.x+side*(size.x*.5+.04),y+window_height*.5+.09,base.z+offset),Vector3(.08,.16,width+.2),trim)
+				if period>=1:_box(s,Vector3(base.x+side*(size.x*.5+.065),y,base.z+offset),Vector3(.05,window_height,.06),trim)
 		if floor<floors-1:_box(s,base+Vector3(0,(floor+1)*3.1-.08,0),Vector3(size.x+.12,.16,size.z+.12),trim)
 	# A plank door under a lintel.
 	_box(s,base+Vector3(0,1.0,size.z*.5+.05),Vector3(1.0,2.0,.1),Color("4a3526"))
@@ -216,6 +327,8 @@ static func _quad(s:SurfaceTool,a:Vector3,b:Vector3,c:Vector3,d:Vector3,color:Co
 ## top, along x when `along_x` (else along z). Gable ends in the wall's
 ## material, a dark eave soffit, a ridge cap, and courses along each slope.
 static func _gable(s:SurfaceTool,base:Vector3,half:Vector2,rise:float,overhang:float,roof:Color,wall:Color,along_x:bool)->void:
+	if is_equal_approx(roof.a,ROOF_EARTH):
+		_flat_roof(s,base,half,wall,roof);return
 	var a:=half.y if along_x else half.x   # half span across the ridge
 	var l:=(half.x if along_x else half.y)+overhang*.8   # half length along it
 	var span:=a+overhang
@@ -247,6 +360,8 @@ static func _gable(s:SurfaceTool,base:Vector3,half:Vector2,rise:float,overhang:f
 ## A single slope from a high wall side down to the eave (a lean-to, a porch,
 ## a courtyard wing); `fall` is the x direction it drains toward (0 = +z).
 static func _lean_roof(s:SurfaceTool,base:Vector3,half:Vector2,rise:float,overhang:float,roof:Color,wall:Color,fall:float)->void:
+	if is_equal_approx(roof.a,ROOF_EARTH):
+		_flat_roof(s,base,half,wall,roof);return
 	var hx:=half.x+overhang;var hz:=half.y+overhang
 	var hi:=base.y+rise;var lo:=base.y-overhang*.3
 	var a:Vector3;var b:Vector3;var c:Vector3;var d:Vector3
@@ -265,6 +380,8 @@ static func _lean_roof(s:SurfaceTool,base:Vector3,half:Vector2,rise:float,overha
 
 ## A hipped roof: slopes on all four sides to a short ridge along x.
 static func _hip(s:SurfaceTool,base:Vector3,half:Vector2,rise:float,overhang:float,roof:Color,ridge_share:float)->void:
+	if is_equal_approx(roof.a,ROOF_EARTH):
+		_flat_roof(s,base,half,roof,roof);return
 	var hx:=half.x+overhang;var hz:=half.y+overhang
 	var y0:=base.y-overhang*rise/maxf(half.y,.1);var y1:=base.y+rise
 	var rh:=hx*ridge_share*.5
@@ -335,13 +452,13 @@ static func _frame_walls(s:SurfaceTool,name:String,height:float,frame:Color)->vo
 
 static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)->void:
 	if material==null:
-		material=preload("res://scripts/settlement_ink.gd").material()
+		material=preload("res://scripts/settlement_ink.gd").architecture_material()
 	var groups:Dictionary={}
 	for record:Dictionary in plan.buildings:
 		var name:=kind(record.plot)
 		if name=="" or String(record.plot.get("status","active")) in ["ruin","reclaimed","under_construction"]:continue
 		if float(record.plot.get("damage",{}).get("structural",0))>.65:continue
-		var key:=name+":"+str(floors(record.plot))+":"+str(installed_features(record.plot))+":"+style_for(record.plot)
+		var key:=name+":"+str(floors(record.plot))+":"+str(installed_features(record.plot))+":"+style_for(record.plot)+":"+str(facade_for(record.plot))
 		if not groups.has(key):groups[key]=[]
 		groups[key].append(record)
 	for key:String in groups:
@@ -374,7 +491,7 @@ static func installed_features(plot:Dictionary)->int:
 	return flags
 
 static func mesh_for_plot(plot:Dictionary)->ArrayMesh:
-	return mesh_for(kind(plot),floors(plot),installed_features(plot),style_for(plot))
+	return mesh_for(kind(plot),floors(plot),installed_features(plot),style_for(plot),facade_for(plot))
 
 static func _add_installed_details(surface:SurfaceTool,height:float,flags:int)->void:
 	var wood:=Color("624831")

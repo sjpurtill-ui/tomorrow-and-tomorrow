@@ -24,6 +24,8 @@ extends Camera3D
 signal view_changed
 signal shot_changed(shot:String)
 
+const Motion:=preload("res://scripts/hud/motion.gd")
+
 ## A person's height when a subject has no head of its own.
 const HEAD:=1.70
 const FEET_MARGIN:=0.10
@@ -173,6 +175,9 @@ func shot_named(name_in:String,args:Dictionary,time:float)->void:
 	if name_in!="shake":
 		_last_shot=name_in;_last_args=args
 	match name_in:
+		"address":
+			var addressed:Variant=_resolve(args.get("target",null))
+			if addressed!=null:address(addressed,float(args.get("seconds",1.0)) if time<0.0 else time,bool(args.get("whole",false)))
 		"push_in":
 			var who:Variant=_resolve(args.get("target",args.get("who",null)))
 			if who!=null:push_in(who,float(args.get("seconds",5.0)) if time<0.0 else time)
@@ -260,6 +265,18 @@ func push_in(fig:Variant,seconds:=5.0)->void:
 	var pts:=_head_points(fig,0.62)
 	_go(frame(pts,yaw,base_pitch*0.5,base_fov*0.75,headroom*0.6),base_fov*0.75,seconds,EASE_SLOW,"push_in",_foot_of(fig))
 
+## One composed move for a divine address, then complete stillness. Keep the
+## room's side and their hands in view; a physical response keeps its feet too.
+func address(fig:Variant,seconds:=1.0,whole:=false)->void:
+	_last_shot="address";_last_args={"target":fig,"whole":whole,"seconds":seconds}
+	var yaw:=clampf(base_yaw,yaw_range.x,yaw_range.y)
+	var foot:=_foot_of(fig);var head:=_head_of(fig)
+	var low:=foot-Vector3.UP*FEET_MARGIN if whole else foot.lerp(head,0.26)
+	var shoulder:=Basis(Vector3.UP,deg_to_rad(yaw)).x*0.48
+	var chest:=foot.lerp(head,0.63)
+	var pts:=PackedVector3Array([head+Vector3.UP*0.12,low,chest+shoulder,chest-shoulder])
+	_go(frame(pts,yaw,base_pitch*0.7,base_fov*0.86,headroom*0.65),base_fov*0.86,seconds,EASE_INOUT,"push_in",head)
+
 ## A cut to someone as they take something in: at their eye level, chest up,
 ## on the third of the frame that leaves room for where they look.
 func reaction(fig:Variant,time:=0.0)->void:
@@ -292,6 +309,7 @@ func frame_animal(animal:Node3D,time:=0.0)->void:
 
 ## A small jolt (the god's wrath): strength 0..1, it settles in about a second.
 func shake(strength:=0.35)->void:
+	if Motion.reduced():return
 	_trauma=clampf(_trauma+strength,0.0,1.0)
 	set_process(true)
 
@@ -381,6 +399,7 @@ func _nearest_to_god(subjects:Array)->Variant:
 ## heads and shoulders, nobody else forced in.
 func _room_points(subjects:Array,lead:Variant,t:float,yaw:float,pitch:float)->PackedVector3Array:
 	var out:=PackedVector3Array()
+	var shoulder:=Basis.from_euler(Vector3(0.0,deg_to_rad(yaw),0.0)).x*0.42
 	var others:Array=[]
 	for s in subjects:
 		if not is_same(s,lead):others.append(s)
@@ -392,13 +411,17 @@ func _room_points(subjects:Array,lead:Variant,t:float,yaw:float,pitch:float)->Pa
 		out.append(head+Vector3.UP*0.1)
 		var low:=foot.lerp(head,lerpf(0.0,0.36,t))-Vector3.UP*FEET_MARGIN*(1.0-t)
 		out.append(low)
-		out.append(low.lerp(head,0.6)+Vector3(0.32,0.0,0.0))
-		out.append(low.lerp(head,0.6)-Vector3(0.32,0.0,0.0))
+		out.append(low.lerp(head,0.6)+shoulder)
+		out.append(low.lerp(head,0.6)-shoulder)
 	for i in keep:
 		var s:Variant=others[i]
 		var foot2:=_foot_of(s);var head2:=_head_of(s)
 		out.append(head2+Vector3.UP*0.08)
 		out.append(foot2.lerp(head2,lerpf(0.0,0.86,t))-Vector3.UP*FEET_MARGIN*(1.0-t))
+		# A centre point fitting the frame does not mean a person's shoulders do.
+		# This matters especially for the side chairs in a wide room.
+		out.append(foot2.lerp(head2,0.65)+shoulder)
+		out.append(foot2.lerp(head2,0.65)-shoulder)
 	for extra in also_show:
 		# only when it is near the one before the god (a dog off at the door is not asked for)
 		if (_alive(extra) or typeof(extra)==TYPE_VECTOR3) and _foot_of(extra).distance_to(lead_at)<3.2:
@@ -471,7 +494,8 @@ func _go(to:Transform3D,to_fov:float,time:float,ease_kind:int,shot_name:String,f
 	_from=_base if _moving or _trauma>0.0 else lens.transform
 	_fov_from=lens.fov
 	_to=to;_fov_to=to_fov
-	_duration=maxf(time,0.0);_ease=ease_kind;_t=0.0
+	_duration=0.0 if Motion.reduced() else maxf(time,0.0);_ease=ease_kind;_t=0.0
+	if Motion.reduced():_trauma=0.0
 	# the far background softens past what the shot is about
 	_focus=maxf(4.0,(to.origin-focus_at).length()+2.5)
 	if _attributes!=null:
@@ -489,6 +513,8 @@ func _go(to:Transform3D,to_fov:float,time:float,ease_kind:int,shot_name:String,f
 func _process(delta:float)->void:
 	if lens==null:
 		set_process(false);return
+	if Motion.reduced():
+		settle();return
 	if _moving:
 		_t=minf(1.0,_t+delta/maxf(_duration,0.001))
 		var k:=_t

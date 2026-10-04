@@ -23,13 +23,14 @@ const TOON:=preload("res://scripts/shaders/court_figure_toon.gdshader")
 const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
 ## In a lit court a person's visible parts are merged into a few pieces.
 const Merge:=preload("res://scripts/hud/court_figure_merge.gd")
+const Wardrobe:=preload("res://scripts/hud/court_wardrobe.gd")
 ## In a modelled court (court_set_3d.gd) the figures take the set's own light.
 const TOON_LIT:=preload("res://scripts/shaders/court_figure_lit.gdshader")
 const INK:=preload("res://scripts/shaders/court_figure_ink.gdshader")
 const VARIANTS:=["male_adult","female_adult","male_old","female_old","male_young","female_young"]
 ## Every body there is: the six grown ones and a child of seven or eight.
 const BODIES:=["male_adult","female_adult","male_old","female_old","male_young","female_young","child"]
-const OUTFITS:={"hide":1,"tunic":2,"robe":3}
+const OUTFITS:={"hide":1,"tunic":2,"robe":3,"medieval":1,"courtcoat":1,"formal":1,"business":1}
 const STANCES:=["stand","hip","folded","clasped","belt","staff","bowl","sit","crouch"]
 ## Which hands a stance leaves free to talk with (both: "talk_both" can be used).
 const FREE_HANDS:={"stand":"LR","hip":"R","folded":"","clasped":"LR","belt":"R","staff":"L","bowl":"","sit":"LR","crouch":"R"}
@@ -89,6 +90,14 @@ var _parts:Array[MeshInstance3D]=[]
 ## The merged pieces (Body, Rest, Hair, Eyes) when the figure stands in a lit court.
 var _merged:Dictionary={}
 var _merge_root:Node3D
+var _plain_skin:Mesh
+var _wardrobe_skin:Mesh
+var _wardrobe_loaded:=false
+var _wardrobe_outfit:=""
+var _legacy_skin:Mesh
+var _legacy_outfit:=""
+var _legacy_key:=""
+var _legacy_originals:Dictionary={}
 static var _uber:Array=[]
 var _yaw_tween:Tween
 ## What they keep doing at rest, and the mood the engine gives them.
@@ -241,7 +250,11 @@ func setup(look_in:Dictionary)->bool:
 		player=players[0] as AnimationPlayer if not players.is_empty() else null
 		head_bone=skeleton.find_bone("head") if skeleton!=null else -1
 		_meshes.clear();_parts.clear();_merged.clear();_merge_root=null
+		_plain_skin=null;_wardrobe_skin=null;_wardrobe_loaded=false;_wardrobe_outfit=""
+		_legacy_skin=null;_legacy_outfit="";_legacy_key="";_legacy_originals.clear()
 		for node in model.find_children("*","MeshInstance3D",true,false):_parts.append(node as MeshInstance3D)
+		for node in _parts:
+			if String(node.name)=="Body":_plain_skin=node.mesh
 		_meshes=_parts.duplicate()
 		for entry:Dictionary in manifest().get("variants",[]):
 			if String(entry.get("variant",""))==variant:
@@ -367,6 +380,14 @@ func talk_clip(both_hands:=false)->String:
 
 func _dress()->void:
 	var outfit:=String(look.get("outfit","tunic"))
+	preload("res://scripts/hud/court_walk_clearance.gd").configure(player,skeleton,variant,outfit)
+	preload("res://scripts/hud/court_pose_clearance.gd").configure(player,skeleton,variant)
+	if outfit in Wardrobe.OUTFITS and outfit!=_wardrobe_outfit:_load_wardrobe(outfit)
+	if outfit!=_legacy_outfit:_load_legacy(outfit)
+	for body in _parts:
+		if String(body.name)=="Body":
+			var skin_mesh:Mesh=_wardrobe_skin if outfit in Wardrobe.OUTFITS and _wardrobe_skin!=null else (_legacy_skin if _legacy_skin!=null else _plain_skin)
+			if body.mesh!=skin_mesh:body.mesh=skin_mesh
 	var hair:="hair_"+String(look.get("hair","cropped"))
 	var beard:=String(look.get("beard",""))
 	if not beard.is_empty() and not beard.begins_with("beard_"):beard="beard_"+beard
@@ -374,6 +395,7 @@ func _dress()->void:
 	var skin:=Color(look.get("skin",Color("bd8659")))
 	var hair_colour:=readable_hair(Color(look.get("hair_colour",Color("2b2018"))))
 	var lit:=bool(look.get("lit",false))
+	var merging:=lit and Merge.enabled and skeleton!=null
 	var colours:={
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
 		"EYES":Color("120a06"),"EYE_WHITE":Color("e9dfcb"),"EYE_SHINE":Color("fffdf6"),
@@ -388,7 +410,13 @@ func _dress()->void:
 		var shown:=part in FACE_PARTS or part==hair or part==beard or (part.begins_with(outfit+"_") and not part in hidden_pieces) or part==String(PROPS.get(stance,"-"))
 		if part=="prop_stool" and (floor_seated or seat_height>=0.0):shown=false
 		mesh_node.visible=shown
-		if (not shown and not part in CARRIED.values()) or mesh_node.mesh==null:continue
+		# The source parts retain geometry, skin and morphs for later redressing,
+		# but only the merged pieces draw them. Hidden shader materials still
+		# reserve instance-uniform buffer space (16 slots per mesh on GL).
+		if (merging and not part.begins_with("prop_")) or (not shown and not part in CARRIED.values()):
+			_release_draw_materials(mesh_node)
+			continue
+		if mesh_node.mesh==null:continue
 		# In a lit court they cast shadows (not the paint on the skin).
 		# (hair and beards neither: their shade on the brow reads as a dark band)
 		var shadows:=lit and not part in NO_SHADOW and not part.begins_with("hair_") and not part.begins_with("beard_")
@@ -403,8 +431,58 @@ func _dress()->void:
 			var cover:=int(OUTFITS.get(outfit,0)) if part=="Body" else 0
 			mesh_node.set_surface_override_material(surface,material(slot,colours.get(slot,Color("8a7a66")),cover,lit,inked))
 		if part=="Body":_paint_face(mesh_node,beard)
-	if lit and Merge.enabled and skeleton!=null:_merge_parts(colours,int(OUTFITS.get(outfit,0)),beard)
+	if merging:_merge_parts(colours,int(OUTFITS.get(outfit,0)),beard)
 	else:_unmerge()
+
+func _release_draw_materials(node:MeshInstance3D)->void:
+	for surface in node.get_surface_override_material_count():
+		if node.get_surface_override_material(surface)!=null:node.set_surface_override_material(surface,null)
+
+func _load_wardrobe(outfit:String)->void:
+	if skeleton==null:return
+	var skin:Skin=null
+	for body in _parts:
+		if String(body.name)=="Body":skin=body.skin;break
+	if skin==null:return
+	var pieces:=Wardrobe.parts(variant,skin,skeleton)
+	if not pieces.has("WardrobeBody"):return
+	_wardrobe_skin=pieces.WardrobeBody
+	# Only the chosen outfit needs render instances; the shared mesh cache keeps
+	# all four available for redressing without reimporting or replacing the rig.
+	for part:MeshInstance3D in _parts.duplicate():
+		if not _wardrobe_outfit.is_empty() and String(part.name).begins_with(_wardrobe_outfit+"_"):
+			_parts.erase(part);part.free()
+	for name:String in pieces:
+		if not name.begins_with(outfit+"_"):continue
+		var node:=MeshInstance3D.new();node.name=name;node.mesh=pieces[name];node.skin=skin
+		skeleton.add_child(node);node.skeleton=NodePath("..")
+		_parts.append(node)
+	_wardrobe_loaded=true
+	_wardrobe_outfit=outfit
+
+## Replace mesh resources on the original nodes: no duplicate render instances,
+## skeletons, animation players or per-frame garment processing.
+func _load_legacy(outfit:String)->void:
+	var nodes:Dictionary={};var skin:Skin=null
+	for part:MeshInstance3D in _parts:
+		var name:=String(part.name);nodes[name]=part
+		if name=="Body":skin=part.skin
+		if _legacy_originals.has(name):part.mesh=_legacy_originals[name]
+	_legacy_skin=null;_legacy_key="";_legacy_outfit=outfit
+	if not outfit in Wardrobe.LEGACY_OUTFITS or skin==null or skeleton==null:return
+	var replacement:=Wardrobe.legacy_parts(variant,outfit,skin,skeleton)
+	if replacement.is_empty():return
+	# Never display a partial outfit if a bundle and its source disagree.
+	for name:String in replacement.parts:
+		if not nodes.has(name):return
+	for name:String in nodes:
+		if name.begins_with(outfit+"_") and not replacement.parts.has(name):return
+	for name:String in replacement.parts:
+		var node:MeshInstance3D=nodes[name]
+		if not _legacy_originals.has(name):_legacy_originals[name]=node.mesh
+		node.mesh=replacement.parts[name]
+	_legacy_skin=replacement.skin
+	_legacy_key=String(replacement.key)
 
 ## The visible parts as a few merged pieces (court_figure_merge.gd): Body
 ## (skin, brows, mouth, beard, lid line; the moving morphs), Rest (the
@@ -430,18 +508,23 @@ func _merge_parts(colours:Dictionary,cover:int,beard:String)->void:
 	var face:Dictionary=look.get("face",{})
 	var face_key:=PackedStringArray()
 	for shape:String in FACE_SHAPES:face_key.append("%.2f" % float(face.get(shape,0.0)))
-	var made:=Merge.meshes("%s|%s|%s" % [variant,",".join(names),",".join(face_key)],groups,face)
+	var made:=Merge.meshes("%s|%s|%s|%s" % [variant,_legacy_key,",".join(names),",".join(face_key)],groups,face)
 	if not is_instance_valid(_merge_root):
 		_merge_root=Node3D.new();_merge_root.name="Merged";skeleton.add_child(_merge_root)
 	var opaque:=Merge.material(colours,cover,key_dir)
 	var write:=Merge.material(colours,cover,key_dir,"write")
 	var read:=Merge.material(colours,cover,key_dir,"read")
+	# Keep render resources alive until every merged child has been destroyed.
+	# Immediate scene teardown otherwise releases an eye material too early.
+	_merge_root.set_meta(&"draw_materials",[opaque,write,read])
 	for m in [opaque,write,read]:_uber.append(weakref(m))
 	_meshes.clear()
 	for group in ["Body","Rest","Hair","Eyes"]:
 		var node:=_merged.get(group) as MeshInstance3D
 		if not made.has(group):
-			if node!=null:node.visible=false
+			if node!=null:
+				node.visible=false
+				_release_draw_materials(node)
 			continue
 		if node==null:
 			node=MeshInstance3D.new();node.name=group
@@ -492,7 +575,9 @@ func _vanish_for_gore()->void:
 ## Back to the parts as they are (no lit court: the studio, the flat stage).
 func _unmerge()->void:
 	for node in _merged.values():
-		if is_instance_valid(node):(node as MeshInstance3D).visible=false
+		if is_instance_valid(node):
+			(node as MeshInstance3D).visible=false
+			_release_draw_materials(node)
 	_meshes=_parts.duplicate()
 
 ## Their own painted face (court_figure_face.gdshaderinc): years, freckles,

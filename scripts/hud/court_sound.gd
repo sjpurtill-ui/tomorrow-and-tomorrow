@@ -212,7 +212,10 @@ var _beds:Dictionary={}       # role -> AudioStreamPlayer
 var _bed_db:Dictionary={}     # role -> the level it rests at
 var _bed_tweens:Dictionary={}
 var _god:AudioStreamPlayer
-var _god_tween:Tween
+## One frame-clock envelope; replacing/closing it cannot leave an old callback
+## that later stops the next line. Its timbre remains the cached Foley swell.
+var _presence:Dictionary={}
+var _duck_tweens:Array[Tween]=[]
 var _timer:Timer
 var _rng:=RandomNumberGenerator.new()
 var _next:Dictionary={}       # random life -> when it next sounds
@@ -276,6 +279,7 @@ func _ready()->void:
 
 func _process(delta:float)->void:
 	_clock+=delta
+	_advance_presence()
 
 func _exit_tree()->void:
 	if current==self:current=null
@@ -353,6 +357,13 @@ func _on_visibility()->void:
 ## Every sound stops (the court hidden, closed, or muted).
 func stop_all()->void:
 	stop_act()
+	_presence.clear()
+	_talk.clear() # invalidate worker-rendered lines from the previous audience
+	for tw in _bed_tweens.values()+_slot_tw+_duck_tweens:
+		if tw is Tween and (tw as Tween).is_valid():(tw as Tween).kill()
+	_bed_tweens.clear();_duck_tweens.clear()
+	if _music_tw!=null and _music_tw.is_valid():_music_tw.kill()
+	_hushed=false;_hush_until=0.0;_duck_until=0.0;_shy_until=0.0
 	for p in _pool:
 		if is_instance_valid(p):p.stop()
 	for t in _slots:
@@ -579,11 +590,11 @@ func _now()->float:
 ## being written (the frames wait for them, so nothing is late).
 static func exact()->bool:
 	return sync_render or OS.has_feature("movie")
-## Footsteps for a while at a body: earth or wood by the set; pace in steps a second.
+## Footsteps for a while at a body: the authored floor; pace in steps a second.
 func footsteps(body:Node3D,seconds:float,pace:=1.8,heavy:=false,cue_name:="step",db:=0.0)->void:
 	if not can_play():return
 	var name:=cue_name
-	if cue_name=="step":name="step_wood" if set_kind in WOOD_FLOORS else "step_earth"
+	if cue_name=="step":name=step_for(set_kind,facts)
 	var t:=0.0
 	var k:=0
 	while t<seconds:
@@ -664,7 +675,10 @@ func play_act(act:Variant,roles:Dictionary={},opts:Dictionary={})->float:
 		_queue.append({"at":now+lead+0.6,"name":"knees_knock","body":null,"opts":{"variant":0},"act":_act_epoch})
 	# the musician puts down their tune for the act
 	if is_instance_valid(_music) and _music.playing:
-		var tw:=create_tween();tw.tween_property(_music,"volume_db",-60.0,0.4);tw.tween_callback(_music.stop)
+		if _music_tw!=null and _music_tw.is_valid():_music_tw.kill()
+		_music_tw=create_tween()
+		_music_tw.tween_property(_music,"volume_db",-60.0,0.4)
+		_music_tw.tween_callback(_music.stop)
 	_music_next=maxf(_music_next,now+lead+12.0)
 	_ensure_timer()
 	return lead
@@ -859,9 +873,11 @@ func voice(body:Node3D,text:String,seconds:float,mood:Variant="neutral",people_i
 ## The crowd talks lower while someone speaks up, and comes back after.
 func _duck(seconds:float)->void:
 	if _hushed:return
+	_duck_tweens=_duck_tweens.filter(func(tw:Tween)->bool:return tw.is_valid())
 	_duck_until=maxf(_duck_until,_now()+seconds)
 	if is_instance_valid(_music) and _music.playing:
 		var mt:=create_tween()
+		_duck_tweens.append(mt)
 		mt.tween_property(_music,"volume_db",_music.volume_db-10.0,0.3).set_trans(Tween.TRANS_SINE)
 		mt.tween_interval(maxf(0.2,seconds))
 		mt.tween_property(_music,"volume_db",_music.volume_db,1.2).set_trans(Tween.TRANS_SINE)
@@ -869,6 +885,7 @@ func _duck(seconds:float)->void:
 		var t:=_slots[i]
 		if not t.playing:continue
 		var tw:=create_tween()
+		_duck_tweens.append(tw)
 		tw.tween_property(t,"volume_db",t.volume_db-8.0,0.35).set_trans(Tween.TRANS_SINE)
 
 func _next_token()->int:
@@ -934,10 +951,21 @@ func ambience(set_id:String,season_id:String,facts_in:Dictionary={})->void:
 	var bus:=ensure_bus()
 	var room:=AudioServer.get_bus_effect(bus,0) as AudioEffectReverb
 	if room!=null:
-		var open_air:=set_kind in OPEN_SETS
-		room.wet=0.04 if open_air else (0.12 if set_kind in ["longhouse"] else 0.18)
-		room.room_size=0.15 if open_air else (0.32 if set_kind=="longhouse" else 0.55)
+		var acoustic:=acoustics_for(set_kind,facts)
+		room.wet=acoustic.wet;room.room_size=acoustic.size
+		room.damping=acoustic.damping;room.predelay_msec=acoustic.predelay
 	_bed_list=beds_for(set_kind,season,facts)
+	# Reconfiguring an existing sound service must stop beds the new room lacks.
+	var retained:Array=[]
+	for role:Array in _bed_list:retained.append(String(role[0]))
+	for role:String in _beds.keys():
+		if role in retained:continue
+		var tween:Tween=_bed_tweens.get(role,null)
+		if tween!=null and tween.is_valid():tween.kill()
+		_bed_tweens.erase(role)
+		var player:=_beds[role] as AudioStreamPlayer
+		player.stop();player.queue_free()
+		_beds.erase(role);_bed_db.erase(role)
 	if _tongue_key.is_empty():_tongue_key=register_tongue("player",world_seed())
 	var talk:Array=talk_for(facts)
 	_talk_size=String(talk[0]);_talk_db=float(talk[1])
@@ -976,11 +1004,44 @@ func _known()->Array:
 		if got is Array:return got
 	return []
 
+## New rooms supply their physical facts. Legacy callers retain their original
+## open-air classification, hearth and floor when those facts are absent.
+static func indoors_for(set_id:String,facts_in:Dictionary)->bool:
+	return bool(facts_in.indoor) if facts_in.has("indoor") else not set_id in OPEN_SETS
+
+## The actual room's surfaces, not elapsed years or an invented technology.
+## Chapter selection already applies construction knowledge caps upstream.
+static func acoustics_for(set_id:String,facts_in:Dictionary)->Dictionary:
+	var shape:="masonry"
+	if not indoors_for(set_id,facts_in):shape="open"
+	elif set_id in ["chapter_14","chapter_15"]:shape="conference"
+	elif set_id in ["chapter_10","chapter_11","chapter_12","chapter_13"]:shape="office"
+	elif set_id in ["chapter_06","chapter_09"]:shape="records"
+	elif set_id=="chapter_02":shape="courtyard"
+	elif set_id in ["longhouse","chapter_01","chapter_07"] or step_for(set_id,facts_in)=="step_wood":shape="timber"
+	var profiles:={
+		"open":[.025,.12,.80,6.0],"timber":[.10,.36,.78,14.0],
+		"courtyard":[.08,.28,.60,12.0],"masonry":[.17,.64,.50,24.0],
+		"records":[.095,.38,.72,14.0],"office":[.075,.30,.82,11.0],
+		"conference":[.055,.23,.88,8.0]}
+	var p:Array=profiles[shape]
+	return {"kind":shape,"wet":p[0],"size":p[1],"damping":p[2],"predelay":p[3]}
+
+static func has_hearth_for(facts_in:Dictionary)->bool:
+	return bool(facts_in.get("has_hearth",true))
+
+static func step_for(set_id:String,facts_in:Dictionary)->String:
+	var floor:=String(facts_in.get("floor","")).to_lower()
+	if floor in ["wood","plank","timber","parquet"]:return "step_wood"
+	if floor in ["stone","flags","stone_block","tile","concrete","masonry"]:return "step_stone"
+	if floor in ["earth","ground","dirt","sand"]:return "step_earth"
+	return "step_wood" if set_id in WOOD_FLOORS else "step_earth"
+
 ## The beds for a set and season: [[role, bed name, dB offset]...].
 static func beds_for(set_id:String,season_id:String,facts_in:Dictionary)->Array:
 	var out:Array=[]
-	var open_air:=set_id in OPEN_SETS
-	out.append(["fire","fire",0.0 if open_air else -2.0])
+	var open_air:=not indoors_for(set_id,facts_in)
+	if has_hearth_for(facts_in):out.append(["fire","fire",0.0 if open_air else -2.0])
 	if open_air:out.append(["wind","wind_hard" if season_id=="winter" else "wind_soft",-3.0 if season_id=="winter" else 0.0])
 	else:out.append(["wind","wind_indoor",6.0 if season_id=="winter" else 0.0])
 	if not open_air:out.append(["room","room",0.0])
@@ -1009,7 +1070,8 @@ func _start_beds()->void:
 		if not p.playing:
 			p.volume_db=level-30.0 if not _hushed else -80.0
 			p.play(_rng.randf_range(0.0,maxf(0.0,s.get_length()-1.0)))
-			_fade(bed_role,level,1.2)
+			var target:=level-(4.0 if bed_role=="fire" else 6.0 if bed_role=="room" else 3.0) if _hushed else level
+			_fade(bed_role,target,1.2)
 	_ensure_timer()
 func _fade(role:String,to_db:float,seconds:float)->void:
 	var p:AudioStreamPlayer=_beds.get(role,null)
@@ -1041,6 +1103,7 @@ func hush(on:Variant=true)->void:
 		_music_stop_dead()
 		_fade("fire",float(_bed_db.get("fire",-20.0))-4.0,0.25)
 		_fade("wind",float(_bed_db.get("wind",-26.0))-3.0,0.4)
+		_fade("room",float(_bed_db.get("room",-26.0))-6.0,0.18)
 		_ensure_timer()
 	elif _hush_until<=_now() and _hushed:
 		_unhush()
@@ -1054,6 +1117,7 @@ func _unhush()->void:
 		cue("mutter",_someone_in_crowd(),{"db":-3.0,"delay":0.45})
 	_fade("fire",float(_bed_db.get("fire",-17.0)),1.0)
 	_fade("wind",float(_bed_db.get("wind",-26.0)),1.5)
+	_fade("room",float(_bed_db.get("room",-26.0)),1.4)
 	# the talk comes back late and shy, one and then another: nobody wants to be first
 	_shy_until=now+3.0
 	for i in _slot_free.size():_slot_free[i]=now+0.9+float(i)*_rng.randf_range(0.35,0.8)
@@ -1247,26 +1311,51 @@ static func murmur_schedule(seed_value:int,seconds:float,size:="murmur",preroll:
 func hushed()->bool:
 	return _hushed
 
-## The swell under the god's words, for their seconds and a breath after.
-## tone: "wrath", "favour" or "" (awe).
-func god(text:String,seconds:float,tone:="")->bool:
-	hush(seconds+1.4)
+## Hush, a readable attack, then space for the words. No extra reaction or
+## impact is invented: divine events retain their existing boom/response cues.
+static func presence_plan(seconds:float,tone:String)->Dictionary:
+	var kind:="wrath" if tone=="wrath" else "favour" if tone in ["favour","favor"] else "awe"
+	var p:Array={"wrath":[.18,.24,.34,1.60,-11.0,-22.0],
+		"favour":[.08,.55,.46,1.05,-14.0,-23.0],"awe":[.12,.70,.48,1.20,-19.0,-27.0]}[kind]
+	var release_at:=maxf(clampf(seconds,.15,120.0),float(p[0])+float(p[1])+float(p[2]))
+	return {"tone":kind,"lead":p[0],"attack":p[1],"settle":p[2],"tail":p[3],
+		"peak":p[4],"bed":p[5],"initial":-65.0,"release_at":release_at,"end":release_at+float(p[3])}
+
+static func presence_db_at(plan:Dictionary,elapsed:float)->float:
+	if elapsed<0.0 or elapsed>=float(plan.end):return -65.0
+	if elapsed<float(plan.lead):return float(plan.initial)
+	var t:=elapsed-float(plan.lead)
+	if t<float(plan.attack):return lerpf(float(plan.initial),float(plan.peak),sin(t/float(plan.attack)*PI*.5))
+	t-=float(plan.attack)
+	if t<float(plan.settle):return lerpf(float(plan.peak),float(plan.bed),sin(t/float(plan.settle)*PI*.5))
+	if elapsed<float(plan.release_at):return float(plan.bed)
+	return lerpf(float(plan.bed),-65.0,sin((elapsed-float(plan.release_at))/float(plan.tail)*PI*.5))
+
+func _advance_presence()->void:
+	if _presence.is_empty():return
+	var elapsed:=_now()-float(_presence.started)
+	if not can_play() or elapsed>=float(_presence.end):
+		_god.stop();_presence.clear();return
+	_god.volume_db=presence_db_at(_presence,elapsed)
+
+## tone: "wrath", "favour" or "" (awe); seconds is the actual line length.
+func god(_text:String,seconds:float,tone:="")->bool:
 	if not can_play():return false
-	var wrath:=tone=="wrath"
-	var favour:=tone in ["favour","favor"]
-	var s:=stream_for("god_swell_wrath" if wrath else "god_swell_favour",0)
-	var level:=-11.0 if wrath else (-14.0 if favour else -19.0)
-	if _god_tween!=null and _god_tween.is_valid():_god_tween.kill()
-	# a second line while the first still hums carries on the same swell
-	if not (_god.playing and _god.stream==s):
-		_god.stream=s;_god.volume_db=-40.0;_god.pitch_scale=1.0 if wrath or favour else 0.94
-		_god.play()
-	_god_tween=create_tween()
-	_god_tween.tween_property(_god,"volume_db",level,1.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	_god_tween.tween_interval(maxf(0.4,seconds+0.4))
-	_god_tween.tween_property(_god,"volume_db",-60.0,2.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN)
-	_god_tween.tween_callback(_god.stop)
-	played.append({"name":"god_swell_%s" % ("wrath" if wrath else ("favour" if favour else "awe")),"at":_now(),"db":level})
+	var plan:=presence_plan(seconds,tone)
+	hush(float(plan.release_at)+float(plan.tail)*.55)
+	var s:=stream_for("god_swell_wrath" if plan.tone=="wrath" else "god_swell_favour",0)
+	var continuing:bool=_god.playing and _god.stream==s and _presence.get("tone","")==plan.tone
+	if continuing:
+		# Another line extends the same presence without a second loud attack.
+		plan.initial=_god.volume_db;plan.peak=plan.bed;plan.lead=0.0;plan.attack=.16;plan.settle=.12
+	else:
+		_god.stream=s;_god.volume_db=-65.0;_god.pitch_scale=.94 if plan.tone=="awe" else 1.0
+		# Use the already-cached stable timbre; the frame envelope now authors
+		# the attack, instead of multiplying two slow attacks together.
+		_god.play(Foley.SWELL_HOLD)
+	plan.started=_now();_presence=plan
+	played.append({"name":"god_swell_%s" % plan.tone,"at":_now(),"db":plan.peak})
+	if played.size()>48:played.pop_front()
 	return true
 
 ## A tenth of a second of the room's life: queued sounds, then the fire's
@@ -1306,10 +1395,11 @@ func _tick()->void:
 	if _hushed:return
 	_crowd_talk(now)
 	_music_tick(now)
-	_life("fire_pop",now,0.25,1.6,0.0)
-	_life("fire_hiss",now,7.0,20.0,0.0)
-	_life("log_settle",now,18.0,45.0,0.0)
-	var open_air:=set_kind in OPEN_SETS
+	if has_hearth_for(facts):
+		_life("fire_pop",now,0.25,1.6,0.0)
+		_life("fire_hiss",now,7.0,20.0,0.0)
+		_life("log_settle",now,18.0,45.0,0.0)
+	var open_air:=not indoors_for(set_kind,facts)
 	if BIRD_SPANS.has(season):
 		var span:Array=BIRD_SPANS[season]
 		_life("bird",now,float(span[0]),float(span[1]),0.0 if open_air else -9.0)
@@ -1404,9 +1494,7 @@ func on_event(kind:String,data:Dictionary={})->void:
 				_say_music("flourish")
 		"close":
 			_open=false
-			for role in _beds:_fade(String(role),-80.0,0.8)
-			if is_instance_valid(_god) and _god.playing:
-				var tw:=create_tween();tw.tween_property(_god,"volume_db",-60.0,0.8);tw.tween_callback(_god.stop)
+			stop_all()
 
 ## One of the director's lowered beats as the stage plays it ({t, who, act,
 ## args}; args.beat names the act). Only the "play" primitive sounds (the

@@ -14,6 +14,10 @@ extends Control
 
 const Voice:=preload("res://scripts/character_voice.gd")
 const Stages:=preload("res://scripts/civic_stages.gd")
+const Chapters:=preload("res://scripts/hud/court_chapters.gd")
+const CHAPTER_SCENES:=["fire_circle","chiefs_hall","temple_palace","palace_hall",
+	"assembly_tiers","council_house","basilica","chiefs_hall","great_hall",
+	"chancery","government","government","government","government","government","government"]
 const OVERRIDE_PATH:="res://assets/ui/court/court-tier-%d.png"
 ## Captures that pin an era tier see the stage that tier used to draw.
 const TIER_STAGES:=["hearth_council","chiefs_hall","temple_palace","palace_bureaucracy","imperial_court"]
@@ -41,6 +45,7 @@ var _clock:=0.0
 var animate:=true
 ## Pixels at the top covered by a header; the scene is composed below it.
 var content_top:=0.0
+var chapter:Dictionary={}
 
 static func current_tier()->int:
 	if tier_override>=0: return clampi(tier_override,0,MAX_TIER)
@@ -62,9 +67,11 @@ static func place_line(t:int)->String:
 	return String(PLACE_LINES[clampi(t,0,MAX_TIER)])
 
 static func stage_place_name(id:String="")->String:
+	if id.is_empty() and tier_override<0 and Stages.stage_override.is_empty():return String(Chapters.for_owner().name)
 	return String(Stages.stage(id if id!="" else current_stage()).get("place_name",PLACE_NAMES[0]))
 
 static func stage_place_line(id:String="")->String:
+	if id.is_empty() and tier_override<0 and Stages.stage_override.is_empty():return String(Chapters.for_owner().description)
 	return String(Stages.stage(id if id!="" else current_stage()).get("place_line",PLACE_LINES[0]))
 
 static func stage_texture(id:String)->Texture2D:
@@ -96,23 +103,38 @@ func configure(t:int,dark_mode:bool,stage:String="")->void:
 	_texture=stage_texture(stage_id)
 	# An era plate painted for the old tiers still dresses the matching stage.
 	if _texture==null and TIER_STAGES.find(stage_id)==tier: _texture=override_texture(tier)
+	chapter={}
+	if stage.is_empty() and tier_override<0 and Stages.stage_override.is_empty():
+		chapter=Chapters.for_owner()
+		scene=String(CHAPTER_SCENES[int(chapter.design)])
+		if String(chapter.lean)=="assembly":
+			if int(chapter.design) in [2,3,5,6]:scene="council_house"
+			elif int(chapter.design) in [8,9]:scene="commune_hall"
+		elif int(chapter.design) in [4,5]:scene="palace_hall"
+		_texture=null
 	queue_redraw()
 
 ## The court stage last shown in the Court, so a stage change can dissolve.
 static var _last_court_stage:=""
 static var _last_court_tier:=0
+static var _last_chapter:Dictionary={}
+static var _last_scene:=""
 const STAGE_DISSOLVE:=1.5
 
 ## Called by the Court after configure(): if the stage differs from the one
 ## last shown there, lay the old stage over this one and dissolve it (one tween).
 func cross_fade_from_last()->void:
 	var old:=_last_court_stage;var old_tier:=_last_court_tier
+	var old_chapter:=_last_chapter.duplicate(true);var old_scene:=_last_scene
 	_last_court_stage=stage_id;_last_court_tier=tier
-	if old=="" or old==stage_id or not is_inside_tree():return
+	_last_chapter=chapter.duplicate(true);_last_scene=scene
+	if old=="" or (old==stage_id and old_chapter==chapter) or not is_inside_tree():return
 	var ghost:Control=(get_script() as GDScript).new()
 	ghost.name="StageBefore";ghost.animate=false
 	add_child(ghost);ghost.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	ghost.configure(old_tier,dark,old)
+	if not old_chapter.is_empty():
+		ghost.chapter=old_chapter;ghost.scene=old_scene;ghost._texture=null;ghost.queue_redraw()
 	var tween:=ghost.create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(ghost,"modulate:a",0.0,preload("res://scripts/hud/motion.gd").duration(STAGE_DISSOLVE))
 	tween.tween_callback(ghost.queue_free)
@@ -182,11 +204,65 @@ func _draw()->void:
 		"assembly_tiers": _draw_assembly(w,eh)
 		"council_house": _draw_council_house(w,eh)
 		"great_hall","estates_hall","commune_hall": _draw_great_hall(w,eh)
+		"government": _draw_government(w,eh)
 		_: _draw_stone_hall(w,eh,true)
-	if dark: _firelight(w,eh)
+	if dark and scene!="government": _firelight(w,eh)
 	draw_set_transform(Vector2.ZERO)
 	_grain(w,h)
 	_vignette(w,h)
+
+## The lightweight overview uses the same chapter and equipment facts as the
+## modelled audience. A working office has daylight, records and circulation.
+func _draw_government(w:float,h:float)->void:
+	var design:=int(chapter.get("design",10))
+	var caps:Dictionary=chapter.get("capabilities",{})
+	var wall:=_c("d8d0bc","363b3c")
+	var wood:=_c("795e43","4a3a2c")
+	var floor:=_c("aea28c","555047")
+	draw_rect(Rect2(0,0,w,h),wall)
+	_quad(Vector2(0,h*.58),Vector2(w,h*.58),Vector2(w,h),Vector2(0,h),floor)
+	for i in 9:
+		draw_line(Vector2(w*.5+(i-4)*w*.065,h*.58),Vector2((i-2)*w*.24,h),Color(wood,.22),1.0,true)
+	var windows:=4 if design>=14 else 3
+	for i in windows:
+		var r:=Rect2(w*(.22+i*.15),h*.08,w*.10,h*(.34 if design<14 else .39))
+		draw_rect(r.grow(4),wood)
+		draw_rect(r,_c("b7c8c9","637c86") if bool(caps.get("glazing",false)) else _c("d6cba8","687279"))
+		draw_line(Vector2(r.get_center().x,r.position.y),Vector2(r.get_center().x,r.end.y),wood,3.0,true)
+		if design<14:draw_line(Vector2(r.position.x,r.get_center().y),Vector2(r.end.x,r.get_center().y),wood,3.0,true)
+	# A side door remains clear of the table and the records cupboards.
+	var right:=bool(chapter.get("limited",false)) and int(chapter.get("renewal",0))%2==1
+	var door_x:=w*.86 if right else w*.035
+	draw_rect(Rect2(door_x,h*.16,w*.10,h*.48),wood.darkened(.25))
+	draw_rect(Rect2(door_x+5,h*.18,w*.10-10,h*.44),wood)
+	draw_circle(Vector2(door_x+w*.08,h*.42),2.5,_c("bda776","d4bd83"))
+	var cupboard_x:=w*.035 if right else w*.86
+	draw_rect(Rect2(cupboard_x,h*.27,w*.10,h*.40),wood.darkened(.12))
+	for shelf in 4:
+		var y:=h*(.29+shelf*.087)
+		draw_line(Vector2(cupboard_x,y+h*.06),Vector2(cupboard_x+w*.10,y+h*.06),wood.lightened(.2),2.0)
+		if bool(caps.get("bound_records",false)):
+			for book in 7:draw_rect(Rect2(cupboard_x+5+book*w*.012,y,w*.009,h*.055),banner.lightened(book*.03))
+	var office:=design in [12,13]
+	var centre:=Vector2(w*(.56 if office else .50),h*.69)
+	var radius:=Vector2(w*(.22 if office else .31),h*.12)
+	# Chair backs frame a human-height working table; no central throne or fire.
+	for i in 6:
+		var x:=centre.x+radius.x*(-.78+.31*i)
+		draw_rect(Rect2(x-w*.026,h*.53,w*.052,h*.16),_c("536263","293c42") if design>=14 else wood)
+	var top:=_ellipse(centre,radius,40)
+	draw_colored_polygon(top,wood.lightened(.14))
+	draw_polyline(PackedVector2Array(Array(top)+[top[0]]),wood.darkened(.3),2.0,true)
+	if office:
+		_quad(Vector2(w*.10,h*.72),Vector2(w*.30,h*.72),Vector2(w*.35,h*.83),Vector2(w*.12,h*.83),wood)
+		draw_rect(Rect2(w*.12,h*.83,w*.22,h*.08),wood.darkened(.2))
+	if bool(caps.get("paper",false)):
+		for i in 5:draw_rect(Rect2(centre.x+radius.x*(-.72+i*.32),centre.y-2,w*.032,h*.027),_c("eee5cf","c4bda7"))
+	if bool(caps.get("computer",false)):
+		draw_rect(Rect2(w*.43,h*.58,w*.075,h*.075),_c("353f43","24363d"))
+		draw_rect(Rect2(w*.435,h*.585,w*.065,h*.060),_c("829b9e","54747c"))
+	if bool(caps.get("electricity",false)):
+		draw_line(Vector2(w*.30,h*.055),Vector2(w*.68,h*.055),_c("eee9d7","dddcca"),4.0,true)
 
 func _top_colour()->Color:
 	match scene:
@@ -213,6 +289,7 @@ func _radial(center:Vector2,radius:Vector2,inner:Color,outer:Color,segments:int=
 		draw_polygon(PackedVector2Array([points[0],points[i+1],points[i+2]]),PackedColorArray([colours[0],colours[i+1],colours[i+2]]))
 
 func _firelight(w:float,h:float)->void:
+	if not chapter.is_empty() and not int(chapter.design) in [0,1,7,8]:return
 	## At night the fire lights the faces and the near ground.
 	var flicker:=.5+.5*sin(_clock*5.1)
 	_radial(hearth_point()+Vector2(0,-h*.12),Vector2(w*.42,h*.62),Color(1,.58,.22,.20+.03*flicker),Color(1,.58,.22,0))
@@ -345,6 +422,7 @@ func _log(center:Vector2,along:Vector2,length:float,thick:float,index:int)->void
 		draw_colored_polygon(fur,_c("d8c09a","8a7050") if index%4==0 else _c("a78a66","5f4a35"))
 
 func _fire(base:Vector2,height:float)->void:
+	if not chapter.is_empty() and not int(chapter.design) in [0,1,7,8]:return
 	var flicker:=.5+.5*sin(_clock*7.3)*sin(_clock*3.1+1.0)
 	_radial(base+Vector2(0,-height*.25),Vector2(height*1.4,height*1.1)*(1.0+.03*flicker),Color(1,.62,.25,.30 if not dark else .45),Color(1,.62,.25,0))
 	# Stones and embers.

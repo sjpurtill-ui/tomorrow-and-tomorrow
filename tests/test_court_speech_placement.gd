@@ -1,0 +1,62 @@
+extends GdUnitTestSuite
+const Stage:=preload("res://scripts/hud/court_stage.gd")
+
+func test_words_clear_the_speaker_when_earlier_dialogue_occupies_the_space_above()->void:
+	var bounds:=Rect2(4,24,792,332)
+	var head:=Rect2(350,132,96,90)
+	var earlier:=Rect2(190,30,400,80)
+	var bubble:=Rect2(250,100,300,70)
+	bubble.position=Stage.clear_bubble_position(bubble,bounds,[earlier,head])
+	assert_bool(bounds.encloses(bubble)).is_true()
+	assert_bool(bubble.intersects(head)).is_false()
+	assert_bool(bubble.intersects(earlier)).is_false()
+
+func test_a_clear_bubble_does_not_move_and_repeated_placement_is_stable()->void:
+	var bounds:=Rect2(4,24,1272,500)
+	var bubble:=Rect2(480,50,310,72)
+	var obstacles:Array[Rect2]=[Rect2(600,160,100,80),Rect2(20,30,300,80)]
+	var first:=Stage.clear_bubble_position(bubble,bounds,obstacles)
+	assert_vector(first).is_equal(bubble.position)
+	bubble.position=first
+	assert_vector(Stage.clear_bubble_position(bubble,bounds,obstacles)).is_equal(first)
+
+func test_constrained_speech_remains_inside_the_view()->void:
+	var bounds:=Rect2(4,24,632,212)
+	var bubble:=Rect2(-10,150,610,200)
+	var placed:=Rect2(Stage.clear_bubble_position(bubble,bounds,[Rect2(280,100,100,100)]),bubble.size)
+	assert_bool(bounds.encloses(placed)).is_true()
+
+func test_crowded_envoy_speech_keeps_the_offered_object_strip_clear()->void:
+	var stage:Stage=auto_free(Stage.new())
+	stage.size=Vector2(900,360);stage.right_reserve=320
+	var speaker:=Stage.Figure.new();stage.figure_layer.add_child(speaker)
+	speaker.key="main";speaker.size=Vector2(100,160);speaker.home=Vector2(80,320)
+	stage.figures["main"]=speaker;stage.cast_order=["main"]
+	var earlier:=Control.new();stage.bubble_layer.add_child(earlier)
+	earlier.position=Vector2(150,0);earlier.size=Vector2(250,260)
+	var bubble:=Stage.Bubble.new();stage.bubble_layer.add_child(bubble)
+	bubble.speaker="main";bubble.position=Vector2(310,100);bubble.size=Vector2(260,60)
+	stage._clear_of_others(bubble)
+	assert_float(bubble.get_rect().end.x).is_less_equal(stage._usable_width())
+	assert_bool(bubble.get_rect().intersects(earlier.get_rect())).is_false()
+	var first:=bubble.position
+	stage._clear_of_others(bubble)
+	assert_vector(bubble.position).is_equal(first)
+
+func test_speech_above_its_speaker_also_clears_the_seated_listener_behind()->void:
+	var stage:Stage=auto_free(Stage.new())
+	stage.size=Vector2(900,360)
+	for key:String in ["main","listener"]:
+		var person:=Stage.Figure.new();stage.figure_layer.add_child(person)
+		person.key=key;person.size=Vector2(100,160)
+		person.home=Vector2(450,340 if key=="main" else 270)
+		stage.figures[key]=person;stage.cast_order.append(key)
+	var bubble:=Stage.Bubble.new();stage.bubble_layer.add_child(bubble)
+	bubble.speaker="main";bubble.position=Vector2(310,100);bubble.size=Vector2(260,60)
+	var listener_face:Rect2=stage._faces_except("main")[0]
+	assert_bool(bubble.get_rect().intersects(listener_face)).is_true()
+	stage._clear_of_others(bubble)
+	assert_bool(bubble.get_rect().intersects(listener_face)).is_false()
+	var first:=bubble.position
+	stage._clear_of_others(bubble)
+	assert_vector(bubble.position).is_equal(first)

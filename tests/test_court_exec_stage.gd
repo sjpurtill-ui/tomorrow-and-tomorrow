@@ -166,6 +166,9 @@ func test_approaching_a_set_mark_moves_and_skip_restores_the_survivor()->void:
 
 func test_skipping_dogs_releases_the_court_dog_and_removes_the_extra_pack()->void:
 	if not _ready_or_skip():return
+	# This fixture exercises borrowing the legacy court's resident dog.
+	# Calendar-selected rooms can legitimately have no resident animals.
+	Backdrop.tier_override=0
 	var modal:Control=await _open(_home_audience())
 	var stage:Control=modal.court_stage
 	var court:Node3D=stage.court_set

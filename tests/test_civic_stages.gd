@@ -56,7 +56,9 @@ func _know(ids:Array)->void:
 
 func _backdrop()->Control:
 	var scene:Control=auto_free(Backdrop.new())
-	scene.configure(Backdrop.current_tier(),false)
+	# This suite verifies explicit civic stages. The default overview additionally
+	# follows the elapsed-year architecture chapter (tested in test_court_chapters).
+	scene.configure(Backdrop.current_tier(),false,Stages.current_id())
 	return scene
 
 
@@ -120,7 +122,7 @@ func test_granting_each_stages_key_discoveries_changes_the_whole_court()->void:
 		assert_str(Stages.current_id()).override_failure_message("with %s" % str(known)).is_equal(expected)
 		var scene:=_backdrop()
 		assert_str(String(scene.stage_id)).is_equal(expected)
-		var now:={"scene":String(scene.scene),"place":Backdrop.stage_place_name(),"attendants":Roster.attendance_line(),"roles":str(Roster.attendant_roles()),
+		var now:={"scene":String(scene.scene),"place":Backdrop.stage_place_name(expected),"attendants":Roster.attendance_line(),"roles":str(Roster.attendant_roles()),
 			"title":_steward_title(),"address":_address(int(steward.person_id)),"council":Roster.group_word("council"),"protocol":Roster.ceremony_line()}
 		if not previous.is_empty():
 			for key in ["scene","place","attendants","title","address","protocol"]:
@@ -153,7 +155,7 @@ func test_the_hearth_council_keeps_the_rustic_court()->void:
 	assert_str(Stages.current_id()).is_equal("hearth_council")
 	var scene:=_backdrop()
 	assert_str(String(scene.scene)).is_equal("fire_circle")
-	assert_str(Backdrop.stage_place_name()).is_equal(Backdrop.place_name(0))
+	assert_str(Backdrop.stage_place_name(Stages.current_id())).is_equal(Backdrop.place_name(0))
 	assert_str(_steward_title()).is_equal("Hearth Chief")
 	assert_array(Roster.attendants()).is_empty()
 	assert_int(Roster.seat_limit()).is_equal(7)
@@ -220,7 +222,7 @@ func test_an_older_save_with_no_new_fields_derives_its_court()->void:
 	var saved:Dictionary=payload.get("reflected_GovernmentPeopleSystem",{})
 	assert_dict(saved).is_not_empty()
 	for field in saved:
-		assert_array(["administration_records","people","next_person_id","last_processed_month","government_stage","revision","initializing"]).contains([String(field)])
+		assert_array(["administration_records","people","next_person_id","last_processed_month","government_stage","revision","initializing","_founding","_learners_kept"]).contains([String(field)])
 	# A fresh session: nothing cached, the court unknown until derived.
 	GameState.known_discoveries.clear()
 	Stages.reload()

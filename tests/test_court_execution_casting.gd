@@ -12,6 +12,7 @@ const Acting:=preload("res://scripts/hud/court_acting.gd")
 const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 
 var _root_size:=Vector2i.ZERO
+var _modals:Array[Control]=[]
 
 func before_test()->void:
 	WorldFixtures.new(self).base(false)
@@ -20,6 +21,10 @@ func before_test()->void:
 	_root_size=get_tree().root.size;get_tree().root.size=Vector2i(1920,1080)
 
 func after_test()->void:
+	# Dispose the stages' delayed callbacks before clearing their shared service.
+	for modal in _modals:
+		if is_instance_valid(modal):modal.free()
+	_modals.clear()
 	Stage.director=null;Stage.acting=null;Backdrop.tier_override=-1
 	get_tree().root.size=_root_size
 
@@ -27,6 +32,7 @@ func _open()->Control:
 	var marshal:Dictionary=GovernmentPeopleSystem.officeholder("Marshal")
 	var target:Dictionary={"person_id":int(marshal.get("person_id",0))} if not marshal.is_empty() else Hall.summonable()[0].target
 	var modal:Control=auto_free(Modal.new())
+	_modals.append(modal)
 	modal.audience_id=String(Hall.summon(target).get("id",""));add_child(modal)
 	for i in 4:await await_idle_frame()
 	modal.skip_reveal();modal.court_stage.settle()

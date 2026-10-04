@@ -12,7 +12,9 @@ shader_type spatial;
 //  9 planks (grain, seams)                 10 plaster (stains, fallen patches)
 // 11 mudbrick courses                       12 dressed stone blocks
 // 13 flagstones (by the world, not UV)  14 charred wood (cracks glow low down)
-// 15 weathered stone with lichen
+// 15 weathered stone with lichen       16 finished veneer (no plank joints)
+// 17 regular modern floor tiles        18 subdued woven upholstery
+// 19 leaded diamond glazing            20 small rectangular window panes
 render_mode cull_back, depth_draw_opaque, specular_disabled;
 
 uniform vec3 albedo : source_color = vec3(0.5, 0.45, 0.4);
@@ -39,6 +41,9 @@ uniform float haze_start = 40.0;
 uniform float haze_end = 160.0;
 uniform float haze_max = 0.0;
 uniform float rim_amount = 0.0;
+uniform float sheen_amount = 0.0;
+uniform float sheen_power = 40.0;
+uniform float glazing = 0.0;
 // The season: snow lies on what faces the sky (not near the fire, not in a
 // hall), dust and dryness in summer.
 uniform float snow = 0.0;
@@ -262,6 +267,25 @@ vec3 paint(vec3 base, vec2 uv, float seed) {
 		col = mix(col, vec3(0.70, 0.72, 0.58), l1 * 0.75);
 		col = mix(col, vec3(0.78, 0.50, 0.22), l2 * 0.7);
 		col = mix(col, ink, (1.0 - smoothstep(0.0, 0.04, abs(noise2(p * vec2(1.2, 4.0) + seed) - 0.5))) * 0.3);
+	} else if (pattern == 16) {
+		float g = noise2(uv * vec2(1.1, 28.0) + seed * 3.0);
+		col *= 0.94 + 0.12 * g;
+	} else if (pattern == 17) {
+		vec2 p = v_world.xz / 0.8;
+		vec2 f = fract(p);
+		float edge = min(min(f.x, 1.0-f.x), min(f.y, 1.0-f.y));
+		col *= 0.97 + 0.06 * hash2(floor(p));
+		col = mix(col * 0.72, col, smoothstep(0.002, 0.008, edge));
+	} else if (pattern == 18) {
+		vec2 threads = sin(uv * 280.0);
+		col *= 0.98 + 0.02 * threads.x * threads.y;
+	} else if (pattern == 19 || pattern == 20) {
+		// Early glazing is assembled from small pieces, not modern plate glass.
+		vec2 p = pattern == 19 ? vec2(v_world.x + v_world.y, v_world.x - v_world.y) / 0.28 : v_world.xy / vec2(0.38, 0.48);
+		vec2 f = fract(p);
+		float edge = min(min(f.x, 1.0-f.x), min(f.y, 1.0-f.y));
+		col *= 0.92 + 0.16 * hash2(floor(p));
+		col = mix(vec3(0.26, 0.29, 0.27), col, smoothstep(0.008, 0.02, edge));
 	} else if (pattern == 13) {
 		// flagstones on the floor (by the world: no seam shows)
 		vec2 p = v_world.xz;
@@ -317,6 +341,14 @@ void fragment() {
 	float dist = length(v_world - CAMERA_POSITION_WORLD);
 	float haze = haze_max * smoothstep(haze_start, haze_end, dist);
 	ALBEDO = mix(base, haze_color, haze);
+	if (glazing > 0.0) {
+		vec3 normal_world = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
+		vec3 reflection = reflect(normalize(v_world - CAMERA_POSITION_WORLD), normal_world);
+		float sky = smoothstep(-0.22, 0.58, reflection.y);
+		vec3 reflected = mix(vec3(0.31, 0.39, 0.38), vec3(0.65, 0.79, 0.84), sky);
+		float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+		ALBEDO = mix(ALBEDO, reflected, glazing * (0.55 + 0.45 * fresnel));
+	}
 	AO = ao;
 	AO_LIGHT_AFFECT = 0.25;
 	ROUGHNESS = 1.0;
@@ -338,4 +370,11 @@ void light() {
 	float half_lit = smoothstep(-0.6, -0.15, ndl) * half_tone;
 	float tone = max(lit * ATTENUATION, half_lit * min(1.0, ATTENUATION * 1.5));
 	DIFFUSE_LIGHT += LIGHT_COLOR * tone / PI;
+	if (sheen_amount > 0.0) {
+		float reflected = pow(max(dot(NORMAL, normalize(LIGHT + VIEW)), 0.0), sheen_power);
+		// A broad painted highlight with a softer shoulder, not a sharp white
+		// point that flickers as the conversation camera moves.
+		float highlight = smoothstep(0.10, 0.58, reflected);
+		SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * SPECULAR_AMOUNT * highlight * sheen_amount / PI;
+	}
 }

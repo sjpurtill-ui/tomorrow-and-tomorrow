@@ -243,6 +243,24 @@ func test_the_hall_grows_with_the_age()->void:
 
 # --- Who dares to mutter, and what ---------------------------------------------------
 
+func test_administrative_rooms_have_bounded_adult_support_staff()->void:
+	for period in ["early_modern","industrial","modern"]:
+		var facts:={"era_tier":3,"era_tags":["writing","dairy"],"presentation":{"period":period,"rustic_props":false,"paperwork":true,"court_animals":false}}
+		var cast:=Director.extras(facts,71)
+		assert_int(cast.size()).is_equal(3)
+		assert_array(cast.map(func(m:Dictionary)->String:return m.kind)).contains_exactly_in_any_order(["commoner","door_guard","scribe"])
+		for person:Dictionary in cast:
+			assert_int(int(person.age)).is_greater_equal(18)
+			assert_str(String(person.role)).is_equal("crowd")
+		assert_str(JSON.stringify(Director.extras(facts,71))).is_equal(JSON.stringify(cast))
+
+func test_enclosed_rooms_keep_weather_out_of_ambient_acting()->void:
+	for season in ["summer","winter"]:
+		for seed_value in 20:
+			var facts:=full_facts(60);facts["season"]=season;facts["indoor"]=true
+			for loop:Dictionary in Director.ambient(home_cast(),facts,seed_value):
+				assert_bool(String(loop.act) in ["stamp_feet","breath","rub_hands","swat_fly","fan_self"]).is_false()
+
 func test_asides_cite_only_facts_present()->void:
 	var said:=0
 	var runs:=[[home_cast(),events()],[envoy_cast("haughty"),envoy_events()],[envoy_cast("greedy"),envoy_events()]]

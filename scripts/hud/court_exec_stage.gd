@@ -46,6 +46,7 @@ var _court_dog:Node3D
 var _dog_home:=Transform3D.IDENTITY
 var _skipped:=false
 var _pack_follow:Tween
+var _temporary_fire:=false
 
 const BLOOD:=Color("9c1a12")
 const BLOOD_DARK:=Color("6a0d08")
@@ -140,6 +141,11 @@ func point(name:String)->Vector3:
 	var court:=_court()
 	if court==null:return Vector3.ZERO
 	match name:
+		"fire":
+			if Paths.hearth_point(court)!=null:return stage.call("set_point","fire")
+			for mark:String in ["execution","focus","petitioner"]:
+				if court.call("has_mark",mark):return stage.call("set_point",mark)
+			return court.global_position
 		"god_feet":
 			var front:Vector3=stage.call("set_point","petitioner")
 			var god:Vector3=court.call("god_point")
@@ -152,7 +158,7 @@ func point(name:String)->Vector3:
 			var model:=court.get_node_or_null("Model")
 			var wall:Node3D=model.find_child("Windbreak",true,false) as Node3D if model!=null else null
 			if wall!=null:
-				var fire:Vector3=stage.call("set_point","fire")
+				var fire:Vector3=point("fire")
 				var away:=Vector3(wall.global_position.x-fire.x,0.0,wall.global_position.z-fire.z)
 				return wall.global_position+away.normalized()*1.2
 			return stage.call("set_point","door_out")
@@ -225,8 +231,11 @@ func _walk_path(key:String,to:Vector3,settled:=false)->PackedVector3Array:
 			var at:=court.to_local(body.global_position)
 			if settled and other.spot!=null:at=court.to_local(other.spot.to_global(other.nudge))
 			people.append(Vector3(at.x,at.z,0.3))
-	var route:=Paths.route(room,Vector2(start.x,start.z),Vector2(goal.x,goal.z),people)
-	if route.is_empty():route=_seat_route(court,room,Vector2(start.x,start.z),Vector2(goal.x,goal.z),people)
+	var a:=Vector2(start.x,start.z);var z:=Vector2(goal.x,goal.z)
+	var route:=Paths.route_with_seats(court,room,a,z,people)
+	# Older benches lack explicit approaches. Keep their bounded low-seat
+	# release, but never bypass a modern chair's authored aisle contract.
+	if route.is_empty() and Paths._seat_at(court,a)==null and Paths._seat_at(court,z)==null:route=_seat_route(court,room,a,z,people)
 	var out:=PackedVector3Array()
 	for at:Vector2 in route:out.append(court.to_global(Vector3(at.x,start.y,at.y)))
 	# An obstructed/no-route result must not turn into a straight hearth crossing.
@@ -286,7 +295,7 @@ static func _seat_route(court:Node3D,room:Paths.Room,start:Vector2,goal:Vector2,
 			break
 	if seats.is_empty():return PackedVector2Array()
 	var changed:Array[Vector2i]=[]
-	var fire:Variant=Paths._mark_xz(court,"fire")
+	var fire:Variant=Paths.hearth_point(court)
 	for seat:Dictionary in seats:
 		var high:=_above_seat_obstacles(court,room,float(seat.height))
 		var centre:=room.square(seat.at)
@@ -369,6 +378,9 @@ func _heave(args:Dictionary)->void:
 	var key:=String(args.get("who",victim));var f:Variant=_fig(key)
 	var b:=_body(key)
 	if f==null or b==null:return
+	var court:=_court()
+	if String(args.get("to","fire"))=="fire" and court!=null and Paths.hearth_point(court)==null and court.has_method("execution_fire"):
+		court.call("execution_fire",point("fire"),true);_temporary_fire=true
 	var seconds:=float(args.get("time",0.9))
 	Acting.stop(b,0.1);b.play("kneel",0.1,0.0)
 	_move_to(key,point(String(args.get("to","fire"))),seconds,Tween.TRANS_LINEAR)
@@ -1372,6 +1384,8 @@ func finish()->void:
 	_tweens.clear()
 	_restore_survivors()
 	var court:=_court()
+	if _temporary_fire and court!=null and court.has_method("execution_fire"):
+		court.call("execution_fire",point("fire"),false);_temporary_fire=false
 	for dog in _pack:
 		if not is_instance_valid(dog):continue
 		if dog.has_method("cancel_action"):dog.call("cancel_action",_dog_home if _skipped and dog==_court_dog else null)

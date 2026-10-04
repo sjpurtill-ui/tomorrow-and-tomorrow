@@ -589,14 +589,22 @@ func _new_stage(parent:Control,kind:String)->Control:
 		if Stage.acting==null:Stage.acting=Acting.service()
 		# The court's sound (N): babble voices, the room, the hush.
 		if Stage.sound==null and ResourceLoader.exists("res://scripts/hud/court_sound.gd"):Stage.sound=load("res://scripts/hud/court_sound.gd")
+	made.facts["presentation"]=Stage.Presentation.for_owner("player")
+	made.facts["presentations"]={"player":made.facts.presentation}
 	# The court's modelled place for this era: the people stand in it, its
 	# camera frames them, its lights fall on them; the painting stays behind
 	# it as the fallback for a machine without the models.
 	var set_facts:=CourtSet.facts_from_game()
+	# Explicit diagnostic stage/tier pins keep their established fixture room.
+	if Backdrop.tier_override>=0 or not Backdrop.Stages.stage_override.is_empty():set_facts.erase("chapter")
+	made.facts["chapter"]=set_facts.get("chapter",{})
 	set_facts["tier"]=Backdrop.current_tier()
 	set_facts["seed"]=hash(audience_id)
 	# The season lies on the set (snow, flies, leaves; breath in winter).
 	set_facts["season"]=String(made.facts.get("season",""))
+	set_facts["rustic_props"]=bool(made.facts.presentation.get("rustic_props",true))
+	if not bool(made.facts.presentation.get("court_animals",true)):
+		set_facts.merge({"dogs":false,"herds":false,"fowl":false},true)
 	if made.use_set(Backdrop.current_stage(),set_facts) and is_instance_valid(backdrop):backdrop.visible=false
 	parent.add_child(made);made.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	made.event("open",{"layout":kind,"era":made.facts.get("era",0),"season":String(made.facts.get("season","")),

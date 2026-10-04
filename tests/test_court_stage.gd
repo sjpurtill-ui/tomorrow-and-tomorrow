@@ -618,8 +618,7 @@ func test_each_person_wears_their_peoples_look()->void:
 		keys[Stage._look_key(other)]=true
 	assert_int(keys.size()).is_greater_equal(10)
 	# Their dress is the dress of the age their people have reached.
-	var tier:int=Stage._era_tier(EarlyArt.owner(ours))
-	if tier!=2:assert_str(String(look.outfit)).is_equal(String(Stage.ERA_DRESS[clampi(tier,0,3)]))
+	assert_str(String(look.outfit)).is_equal(String(Stage.Presentation.for_owner(EarlyArt.owner(ours)).outfit))
 
 
 func test_the_room_acts_out_what_is_said()->void:
@@ -635,7 +634,13 @@ func test_the_room_acts_out_what_is_said()->void:
 	# The speaker talks with their hands, in their own stance.
 	var main:Stage.Figure=modal.court_stage.figure(Stage.MAIN)
 	assert_str(_clip_of(modal,Stage.MAIN)).contains("talk")
-	# The others keep their stance and look at the one speaking.
+	# The others keep their stance, then notice the voice within the bounded
+	# listener ripple. This suite deliberately exercises the no-service fallback;
+	# one idle frame is earlier than the new 0.06–0.45 second attention window.
+	var attention:Tween=modal.court_stage._attention_tween
+	assert_object(attention).is_not_null()
+	attention.pause()
+	attention.custom_step(0.5)
 	var w:Stage.Figure=modal.court_stage.figure(witness)
 	assert_str(_clip_of(modal,witness)).is_equal(w.body3d.rest_clip())
 	assert_bool(w.body3d._gaze_on).is_true()
@@ -645,6 +650,10 @@ func test_the_room_acts_out_what_is_said()->void:
 	_say(id,{"speaker":"You","role":"ruler","text":"Then cross."})
 	modal.skip_reveal()
 	await await_idle_frame()
+	attention=modal.court_stage._attention_tween
+	assert_object(attention).is_not_null()
+	attention.pause()
+	attention.custom_step(0.5)
 	for key in _cast(modal):
 		var f:Stage.Figure=modal.court_stage.figure(key)
 		assert_bool(f.body3d._gaze_on).is_true()
@@ -683,8 +692,8 @@ func test_they_walk_in_and_walk_out_as_people_do()->void:
 	stage.settle()
 	assert_float(f.walk).is_equal(0.0)
 	assert_str(String(f.body3d.clip)).is_equal(f.body3d.rest_clip())
-	# Taking their leave: a bow first, then they are gone and still.
-	stage.conclude(0.0,"bow")
+	# Explicit reverence still bows in every period, then leaves and rests.
+	stage.conclude(0.0,"bow","reverence")
 	await await_idle_frame()
 	var main:Stage.Figure=stage.figure(Stage.MAIN)
 	assert_bool(main.leaving).is_true()
