@@ -6,6 +6,8 @@ Base: `09b3a5f5de858b0c11ac181b78a84e2d73299c67`, the pushed court animation pas
 
 This branch is for the designated court integrator. It has not been merged into main or launched as the player game. It includes the earlier animation work documented in `COURT_ANIMATION_QUALITY_HANDOFF.md`; avoid duplicating that work if it has already been integrated.
 
+Final coordination check: main advanced during this task to `3c8ddbe35e122bf7ec4b39a657ad65325329a9c9` (PR #138, earlier court animation pass). Canonical main and origin/main are synchronized, and `09b3a5f5` is now an ancestor of main. The era-presentation work is still on its worker branch. There are no additional main-side changes to this task's shared court files beyond that incorporated base at this check.
+
 ## Behaviour
 
 - `court_presentation.gd` derives six periods from each society's actual known practices and institutions. The calendar cannot grant clothing, administration, democracy or secularism.
