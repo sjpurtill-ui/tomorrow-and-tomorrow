@@ -1041,6 +1041,7 @@ func _layer(clip:String,opts:Dictionary)->Layer:
 	layer.clip=clip
 	layer.anim=library(variant).get(clip)
 	if layer.anim==null:return null
+	layer.anim=preload("res://scripts/hud/court_pose_clearance.gd").fitted(layer.anim,skel,variant,clip)
 	layer.map=_map_for(variant,clip,skel)
 	_fit(variant,skel)
 	layer.corr=_corr[variant]

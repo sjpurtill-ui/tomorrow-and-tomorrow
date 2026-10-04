@@ -381,6 +381,7 @@ func talk_clip(both_hands:=false)->String:
 func _dress()->void:
 	var outfit:=String(look.get("outfit","tunic"))
 	preload("res://scripts/hud/court_walk_clearance.gd").configure(player,skeleton,variant,outfit)
+	preload("res://scripts/hud/court_pose_clearance.gd").configure(player,skeleton,variant)
 	if outfit in Wardrobe.OUTFITS and outfit!=_wardrobe_outfit:_load_wardrobe(outfit)
 	if outfit!=_legacy_outfit:_load_legacy(outfit)
 	for body in _parts:
