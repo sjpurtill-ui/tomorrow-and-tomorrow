@@ -488,12 +488,14 @@ func test_a_freed_team_offers_a_choice_for_a_season_then_keeps_its_question()->v
 		assert_int(int(option.days)).is_greater(0)
 		assert_int(int(option.opens)).is_greater_equal(0)
 		assert_bool(option.has("effects")).is_true()
-	# Drawn inline on the research board, never as a pop-up.
+	# Waiting on its question's card as a badge; its picker floats, so the board never moves.
 	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(1120,2000);add_child(viewport)
 	var board=Board.new();viewport.add_child(board)
 	board.setup({"fields":[],"investigations":DiscoverySystem.active_investigation_records(),"choices":choices,"on_choose":func(_k:String,_i:String)->void:pass,"on_tree":func()->void:pass,"on_work":func()->void:pass,"on_domain":func(_d:String)->void:pass})
 	var card:Node=board.find_child("Choice_"+String(choice.key).validate_node_name(),true,false)
 	assert_object(card).is_not_null()
+	assert_object(board.find_child("ChoiceBadge",true,false)).is_not_null()
+	assert_object(card.get_parent()).is_instanceof(PopupPanel)
 	assert_int(card.find_children("Option_*","",true,false).size()).is_equal(options.size())
 	assert_int(card.find_children("Choose","Button",true,false).size()).is_equal(options.size())
 	# Choosing another question sends the team there until it is proven.

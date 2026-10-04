@@ -787,6 +787,10 @@ func _capture_preview_if_requested() -> void:
 		_on_hud_section_requested(dock_parts[0],int(dock_parts[1]) if dock_parts.size()>1 else 0)
 		if "--capture-detail-ledger" in OS.get_cmdline_user_args():
 			hud.open_detail(preload("res://scripts/hud/content/dock_detail_population_ledger.gd").new(self,hud))
+		# Capture only: "--capture-field=<domain>" opens that field's Research page.
+		for argument in OS.get_cmdline_user_args():
+			if argument.begins_with("--capture-field="):
+				preload("res://scripts/hud/content/dock_content_inquiry.gd").new(self,hud).open_domain(argument.trim_prefix("--capture-field="))
 		# Captures draw synchronously before the deferred container sort runs;
 		# force the dock's layout so its content is arranged in the screenshot.
 		hud.force_dock_layout()

@@ -217,6 +217,7 @@ func force_dock_layout()->void:
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--capture-dock-scroll=") and dock!=null:
 			dock.body_scroll.set_deferred("scroll_vertical",int(argument.trim_prefix("--capture-dock-scroll=")))
+			if detail_dock!=null and detail_dock.visible:detail_dock.body_scroll.set_deferred("scroll_vertical",int(argument.trim_prefix("--capture-dock-scroll=")))
 
 func _position_toolbar()->void:
 	if toolbar==null: return

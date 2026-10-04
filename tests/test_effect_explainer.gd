@@ -324,7 +324,7 @@ func test_inquiry_dock_builds_with_explanations_for_a_small_state()->void:
 	var report:Dictionary=inquiry._domain_report("health")
 	var field_rows:Array=[]
 	for block:Dictionary in report.blocks:
-		if String(block.get("heading",""))=="WHAT THIS FIELD'S KNOWLEDGE DOES":field_rows=block.rows
+		if String(block.get("type",""))=="field_sheet":field_rows=block.rows
 	assert_array(field_rows.map(func(item:Dictionary)->String:return String(item.key))).contains(["health_protection"])
 
 func test_question_cards_say_what_they_would_bring()->void:

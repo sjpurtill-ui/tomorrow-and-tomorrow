@@ -45,15 +45,19 @@ func setup(block:Dictionary)->void:
 	_shape=plan.shape
 	if block.has("pace"):_pace_header(self,plan.pace)
 	else:_plain_heading(self)
-	# A team freed by a proof took up the best question open to it; for a season
-	# the player may send it elsewhere (DiscoverySystem.team_choices).
-	for choice:Dictionary in data.get("choices",[]):_choice_card(self,choice)
 	var learning:=VBoxContainer.new();learning.name="BeingLearned";learning.add_theme_constant_override("separation",6);add_child(learning)
 	var heading:=HBoxContainer.new();learning.add_child(heading)
 	var title:=T.make_label("BEING LEARNED, FIELD BY FIELD",12,T.GOLD_TEXT);title.size_flags_horizontal=Control.SIZE_EXPAND_FILL;heading.add_child(title)
 	var hint:=T.make_label("Hover a card for the whole account; click it for its field.",12,T.TEXT_SOFT);heading.add_child(hint)
 	for lane:Dictionary in plan.lanes:_lane(learning,lane)
 	if (data.get("investigations",[]) as Array).is_empty():_empty(learning)
+	# A team freed by a proof took up the best question open to it; for a season
+	# the player may send it elsewhere (DiscoverySystem.team_choices). The choice
+	# waits on that question's own card as a badge with a floating picker, so
+	# it never pushes the board down when it arrives or goes.
+	for choice:Dictionary in data.get("choices",[]):
+		var card:Dictionary=_cards.get(String(choice.get("channel","")),{})
+		if not card.is_empty():_choice_badge(card.panel,choice)
 	resized.connect(_arrange);_arrange()
 
 ## The live refresh: while the board keeps its shape the header, the lanes
@@ -580,13 +584,41 @@ static func option_words(option:Dictionary)->Dictionary:
 	return {"time":(time.left(1).to_upper()+time.substr(1)+" with this team") if not time.is_empty() else "","ahead":ahead,"brings":brings,
 		"opens":("Opens %d more question%s." % [opens,"" if opens==1 else "s"]) if opens>0 else "Opens no further question yet."}
 
+## The badge on a freed team's card: "Choose ▾" opens the picker beside it.
+func _choice_badge(card:PanelContainer,choice:Dictionary)->void:
+	var badge:=Button.new();badge.name="ChoiceBadge";badge.text="Choose ▾";badge.focus_mode=Control.FOCUS_NONE
+	badge.size_flags_horizontal=Control.SIZE_SHRINK_END;badge.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;badge.custom_minimum_size.y=24
+	badge.add_theme_font_size_override("font_size",12);badge.add_theme_color_override("font_color",T.INK);badge.add_theme_color_override("font_hover_color",T.INK)
+	badge.add_theme_stylebox_override("normal",T.flat(T.ACTIVE_BG,T.GOLD,1,12,6));badge.add_theme_stylebox_override("hover",T.flat(T.HOVER_BG,T.GOLD_BRIGHT,1,12,6))
+	badge.add_theme_stylebox_override("pressed",T.flat(T.HOVER_BG,T.GOLD_BRIGHT,1,12,6))
+	badge.tooltip_text="A team is free: %s is proven. Keep them on the question they took, or send them to another." % String(choice.get("proved","A question"))
+	card.add_child(badge)
+	var popup:=PopupPanel.new();popup.name="ChoicePicker";popup.add_theme_stylebox_override("panel",T.flat(T.PANEL_BG_SOLID,T.GOLD,1,T.RADIUS_CARD,0))
+	badge.add_child(popup)
+	_choice_card(popup,choice)
+	badge.pressed.connect(_open_picker.bind(badge,popup))
+
+## Opens a choice's picker under its badge, right-aligned to it, kept on screen
+## and as tall as its options once they have wrapped at its width.
+func _open_picker(badge:Button,popup:PopupPanel)->void:
+	var width:=int(clampf(size.x,320.0,760.0))
+	var at:=badge.get_screen_position()+Vector2(badge.size.x-width,badge.size.y+4)
+	var screen:=get_viewport().get_visible_rect().size
+	at.x=clampf(at.x,get_screen_position().x,maxf(get_screen_position().x,screen.x-width-4.0))
+	popup.popup(Rect2i(Vector2i(at),Vector2i(width,120)))
+	await get_tree().process_frame
+	if not is_instance_valid(popup) or not popup.visible:return
+	var tall:=int(popup.get_contents_minimum_size().y)
+	popup.size=Vector2i(width,tall)
+	if at.y+tall>screen.y-4.0:popup.position.y=int(maxf(4.0,badge.get_screen_position().y-tall-4.0))
+
 ## A free team's choice: the proof that freed it, the question it took up, and
 ## its options side by side, each with a plain button. A season after the proof
-## the card goes and the team keeps the question it took.
+## the badge goes and the team keeps the question it took.
 func _choice_card(parent:Node,choice:Dictionary)->void:
 	var panel:=PanelContainer.new();panel.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(panel)
 	panel.name="Choice_"+String(choice.get("key","")).validate_node_name()
-	panel.add_theme_stylebox_override("panel",T.flat(T.ROW_BG,T.GOLD,1,T.RADIUS_CARD,12))
+	panel.add_theme_stylebox_override("panel",T.flat(T.PANEL_BG_SOLID,Color.TRANSPARENT,0,T.RADIUS_CARD,12))
 	var box:=VBoxContainer.new();box.add_theme_constant_override("separation",8);panel.add_child(box)
 	box.add_child(T.make_label("A TEAM IS FREE",12,T.GOLD_TEXT))
 	var options:Array=choice.get("options",[])
@@ -611,6 +643,12 @@ func _choice_card(parent:Node,choice:Dictionary)->void:
 		_line(text,String(words.brings),12,T.TEXT_SOFT)
 		_line(text,String(words.opens),12,T.TEXT_SOFT)
 		var press:Variant=(data.on_choose as Callable).bind(String(choice.get("key","")),String(option.get("id",""))) if data.get("on_choose") is Callable else null
+		# Choosing closes the picker it floats in.
+		var pick:Variant=press
+		if pick is Callable:press=func()->void:
+			var window:=panel.get_parent() as Window
+			if window:window.hide()
+			(pick as Callable).call()
 		var button:=_button(text,"Keep them on it" if taken else "Take this up instead",press,"They keep %s until it is proven." % String(option.get("name","")) if taken else "The team leaves %s (its work is kept) and takes up %s until it is proven." % [taken_name,String(option.get("name",""))],taken)
 		button.name="Choose"
 
