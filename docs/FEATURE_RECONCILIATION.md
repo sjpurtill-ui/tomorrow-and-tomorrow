@@ -1,3 +1,22 @@
+## October 4, 2026 — MPFB anatomy in the court
+
+Source `a0914eedcb156836bbfbeedf8ab51e913a7eaa53` from
+`codex/court-face-richness` combines the MPFB adapter and final neck blending
+with canonical/origin main `9b41e8114e470a265818afca1f7e948f026c5d5f`.
+All21 original/legacy/era assets have the same seven native head variants;
+noses, folded ears, eyes, brows, lips and teeth animate through the existing
+identity/expression/speech controls. Rigs, clips, garments and retained body
+data survive; no save or simulation change. The regeneration tools, licensed
+source assets and provenance are committed, so the game does not require MPFB.
+
+Final129 combined tests and independent21-asset/seven-head checks pass;6,531
+individual poses plus seven speech combinations retain sound neck topology
+and area. Private renderer checks cover front/profile, all seven variants,
+expressions and fallback materials. See `docs/COURT_MPFB_HANDOFF.md` for exact
+evidence and style/performance limits. Remote-first delivery and canonical
+fast-forward preserve existing local files and leave player/editor sessions
+running; new assets load on the next normal game launch.
+
 ## October 4, 2026 — MPFB authoring dependency
 
 Setup documentation on `codex/court-face-richness`, based on synchronized main `7c214eb6`, records the locally enabled MPFB 2.0.17 and five newly installed CC0 anatomy/expression packs. Blender generation and GLB export retain a 53-bone rig and 67 facial/speech targets. See `docs/MPFB_SETUP.md` for sources, local paths and limits. Tool installation and the verification model stay local; no imported head is wired into the player court. This delivery changes documentation only and is pushed/verified before canonical fast-forward.

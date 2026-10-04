@@ -3,7 +3,9 @@
 Verified on October 4, 2026 with Blender 5.2.0 LTS and MPFB 2.0.17,
 build 20260820. MPFB and the MakeHuman system assets were already installed and
 enabled on the Windows authoring machine. This task added the five packs below.
-This is authoring-tool setup; the player's court heads have not been replaced.
+The court now uses derived MPFB heads through the adapter documented in
+`docs/COURT_MPFB_HANDOFF.md`. Blender/MPFB is an authoring dependency; the game
+loads committed GLBs and does not need MPFB installed.
 
 ## Assets and provenance
 
@@ -71,9 +73,12 @@ Local files (intentionally excluded from Git):
 - MPFB asset library: `C:/Users/sjpur/AppData/Roaming/Blender Foundation/Blender/5.2/extensions/.user/user_default/mpfb/data`
 - Setup/check scripts and logs: `artifacts/mpfb*` in the court-face-richness worktree.
 
-The existing court rig, identity/expression names, hair attachment, neck join,
-wardrobe replacement bodies and merged rendering still need an adapter and
-visual review. No runtime assets, simulation, saves or game processes changed.
+The installation fixture above remains separate from production. The production
+adapter retains the game's existing rig and animation clips, maps native targets
+to the court's face contract, fits existing hair, and replaces heads in all seven
+original, legacy and era body bundles. Source NPZs, original brow/teeth textures,
+licenses and provenance are committed under `assets/court_figures/mpfb_source/`.
+See `docs/COURT_MPFB_HANDOFF.md` for regeneration, acceptance and remaining limits.
 
 Blender 5.2's geometry-node hair editor and Rigify are outside this check:
 [upcoming MPFB fixes](https://static.makehumancommunity.org/mpfb/releases/release_next.html)
