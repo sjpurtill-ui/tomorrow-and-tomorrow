@@ -145,6 +145,9 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 	if _materials.size()>=MATERIAL_LIMIT:_materials.erase(_materials.keys()[0])
 	var made:=ShaderMaterial.new()
 	made.shader=shader_for(lit,"read" if slot in STENCIL_READ else ("write" if slot in STENCIL_WRITE else ("card" if slot=="HAIR_CARD" else "")))
+	# Separate fallback surfaces share one sort origin. Order their transparent
+	# stencil readers explicitly so the iris cannot paint over its pupil/glint.
+	if slot in STENCIL_READ:made.render_priority=STENCIL_READ.find(slot)+1
 	made.set_shader_parameter("albedo",colour)
 	made.set_shader_parameter("cover_channel",cover)
 	made.set_shader_parameter("key_dir",key_dir)

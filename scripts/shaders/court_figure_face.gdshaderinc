@@ -23,7 +23,7 @@ float face_hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
 }
 
-// Broad, sub-millimetre surface relief. Face UVs travel with the skin and
+// Shallow surface relief. Face UVs travel with the skin and
 // expression morphs; screen derivatives provide a frame without requiring
 // tangents on these untextured, skinned meshes. This adds soft lid/lip/cheek
 // form without moving the skin through the eye and mouth decals.

@@ -1,5 +1,14 @@
 extends GdUnitTestSuite
 const Merge=preload("res://scripts/hud/court_figure_merge.gd")
+const Figure=preload("res://scripts/hud/court_figure_3d.gd")
+
+func test_fallback_eye_layers_keep_pupil_and_glint_above_the_iris()->void:
+	for lit in [true,false]:
+		var iris:=Figure.material("IRIS",Color("5a3a22"),0,lit)
+		var pupil:=Figure.material("PUPIL",Color("140d08"),0,lit)
+		var glint:=Figure.material("EYE_SHINE",Color.WHITE,0,lit)
+		assert_int(pupil.render_priority).is_greater(iris.render_priority)
+		assert_int(glint.render_priority).is_greater(pupil.render_priority)
 
 func test_each_eye_gets_its_own_surface_despite_asymmetric_spacing()->void:
 	var vertices:=PackedVector3Array([
