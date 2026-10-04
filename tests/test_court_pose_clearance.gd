@@ -2,16 +2,19 @@ extends GdUnitTestSuite
 const Figure=preload("res://scripts/hud/court_figure_3d.gd")
 const Acting=preload("res://scripts/hud/court_acting.gd")
 const Pose=preload("res://scripts/hud/court_pose_clearance.gd")
+const BODIES:=["male_adult","female_adult","male_young","female_young","male_old","female_old","child"]
 var saved:Dictionary
 
 func before_test()->void:
 	saved=Pose.overrides
-	Pose.overrides={"male_adult":{"stand":8.0,"sit_cross":{"spread":[[0.0,8.0],[.6,16.0],[1.6,5.0]],"flex":6.0},"stance_cross":{"spread":5.0,"flex":6.0}}}
+	Pose.overrides={}
+	for variant:String in BODIES:
+		Pose.overrides[variant]={"stand":8.0,"sit_cross":{"spread":[[0.0,8.0],[.6,16.0],[1.6,5.0]],"flex":6.0},"stance_cross":{"spread":5.0,"flex":6.0}}
 
 func after_test()->void:Pose.overrides=saved
 
-func _figure()->Figure:
-	var f:=Figure.new();add_child(f);f.setup({"variant":"male_adult","outfit":"tunic"})
+func _figure(variant:="male_adult")->Figure:
+	var f:=Figure.new();add_child(f);f.setup({"variant":variant,"outfit":"tunic"})
 	return f
 
 func _signature(animation:Animation)->Array:
@@ -23,7 +26,10 @@ func _signature(animation:Animation)->Array:
 	return result
 
 func test_fitting_preserves_source_timing_and_every_non_arm_track()->void:
-	var f:=_figure()
+	for variant:String in BODIES:_check_source_invariants(variant)
+
+func _check_source_invariants(variant:String)->void:
+	var f:=_figure(variant)
 	for clip:String in Pose.CLIPS:
 		var source:Animation=f.player.get_meta(&"pose_clearance_original_stand") if clip=="stand" else Acting.library(f.variant)[clip]
 		var before:=_signature(source)
