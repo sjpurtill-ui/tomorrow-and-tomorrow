@@ -212,7 +212,7 @@ func test_every_hook_stands_in_its_owners_code()->void:
 		["settlement_model.gd","Fabric.speed_factor()"],["settlement_model.gd","Fabric.reach_factor()"],["trade_ledger.gd","ROAD_REACH"],["caravan_system.gd","speed_factor()"],
 		["civilization_combat.gd","rise_factor()"],["settlement_model.gd","built_fabric.gd\").crews().infra"],["settlement_model.gd","float(crew.infra)*labor_efficiency"],
 		["military_campaign.gd","Fabric.wall_quality()+Fabric.stone_defense()"],["military_campaign.gd","wall_wear(float(WorldSimulation.span))"],["military_campaign.gd","wall_hands(workers,stage_index,builders)"],
-		["civilization_controller.gd","wall_wish()"],["standing.gd","Fabric.FORT_STRENGTH*_walls()"],["standing.gd","Fabric.FORT_MIGHT*walls"],["standing.gd","Fabric.BEAUTY_SPLENDOR"],
+		["civilization_controller.gd","wall_wish()"],["standing.gd","Fabric.FORT_STRENGTH*_walls()"],["standing.gd","Fabric.FORT_STRENGTH*walls"],["standing.gd","Fabric.realm_beauty()"],
 		["standing.gd","Fabric.BEAUTY_CULTURE"],["standing.gd","Fabric.BEAUTY_RESPECT"],["discovery_system.gd","BUILT_FABRIC.research_multiplier(direction)"],
 		["civilization_day.gd","construction_signal()"],["wonder_concept.gd","Fabric.great_capability(s,d.cost,extra.get(\"record\",{}))"],["undertaking_system.gd","great_payoff(state,gifted)"],
 		["settlement_construction.gd","Fabric.process_day()"],["settlement_construction.gd","craft_pace()"],["society_model.gd","homes_quality*0.10+roads*0.08"]]

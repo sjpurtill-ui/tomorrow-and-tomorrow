@@ -336,3 +336,29 @@ func test_the_arts_are_fed_by_their_ledgers()->void:
 	var plain:=float(Standing.strengths().persuasion.value)
 	CivilizationSystem.civilizations[0].player_relation.treaty="trade"
 	assert_float(float(Standing.strengths().persuasion.value)).is_greater(plain)
+
+func test_the_rose_lays_every_people_we_know_beside_ours()->void:
+	_actors()
+	var id:=_met(0,0.4)
+	WorldSimulation.scoped(id,func()->void:
+		WorldSimulation.state.elapsed_days=75*365
+		Standing.record_monthly())
+	var page=preload("res://scripts/hud/content/dock_content_standing.gd").new(null,null)
+	var board=auto_free(preload("res://scripts/hud/standing_board.gd").new())
+	add_child(board)
+	board.size=Vector2(900,1600)
+	board.setup(page.tab(0).blocks[0])
+	var rose=board.find_child("Rose",true,false)
+	assert_int((rose.others as Array).size()).is_equal(1)
+	assert_bool(bool(rose.others[0].chosen)).is_false()
+	# Chosen, it is drawn stronger with its band; the tooltip names it.
+	var chip:Button=board.find_child("Compare_"+id,true,false)
+	assert_bool(chip.disabled).is_false()
+	chip.pressed.emit()
+	assert_bool((rose.theirs as Dictionary).is_empty()).is_false()
+	rose.size=Vector2(420,420)
+	# (No frames are drawn here: this test world's CivilizationSystem would
+	# catch up seventy-five years on the next frame.)
+	var tip:String=rose._get_tooltip(rose.size*0.5+Vector2(0,-120))
+	assert_str(tip).contains(String(CivilizationSystem.civilizations[0].name))
+	assert_str(tip).contains("typical people of our age")

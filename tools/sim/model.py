@@ -501,6 +501,12 @@ class Scenario:
     path: str = ""
     ambition: str = ""
     expand: str = ""
+    # The arts of standing (standing.gd cunning and persuasion), what they cost:
+    # {"away": share of the able abroad (envoys, agents), "shift": {role:
+    # points more of the work}, "gifts": food given a head a year, and the
+    # readings only standing.py takes (envoy_skill, scout_skill, agents,
+    # treaties, familiarity, intel)}. Empty: the people as before.
+    posture: dict = field(default_factory=dict)
 
     @staticmethod
     def from_dict(name: str, d: dict, sites: dict) -> "Scenario":
@@ -737,7 +743,8 @@ class Surrogate:
         self._able = values[1] + values[2] + values[3] + values[4]
 
     def workers(self, role: str) -> float:
-        count = self.able * self.alloc_pct[role] / 100.0
+        # Envoys and agents abroad (scenario posture "away") are no hands at home.
+        count = self.able * (1.0 - float(self.s.posture.get("away", 0.0))) * self.alloc_pct[role] / 100.0
         if role == "Knowledge":
             count *= float(self.p["knowledge_effective_factor"])
         return count
@@ -1007,6 +1014,7 @@ class Surrogate:
         if self.s.manual:
             total = sum(max(0.0, float(v)) for v in self.s.manual.values()) or 1.0
             shares = {r: max(0.0, float(self.s.manual.get(r, 0.0))) / total * 100.0 for r in ROLES}
+            self._posture_shift(shares)
             if RULER_FED:
                 shares = self._ruler_split_fed(shares)
             for r in ROLES:
@@ -1126,12 +1134,43 @@ class Surrogate:
                             w[r] += cut * w[r] / others
         if LEARNERS_KEPT:
             self._keep_learners(w, cap)
+        self._posture_shift(w)
         total = sum(w.values())
         target = {r: w[r] / total * 100.0 for r in ROLES}
         # The engine re-plans labor daily; a month with any shortfall moves at once.
         rate = 1.0 if food_risk else float(self.p["food_adjust_rate"])
         for r in ROLES:
             self.alloc_pct[r] = lerp(self.alloc_pct[r], target[r], rate)
+
+    def _posture_shift(self, w: dict) -> None:
+        """The posture's extra work (points of the whole), taken evenly from the
+        roles that are not food, learning or the extra itself."""
+        shift = self.s.posture.get("shift", {})
+        if not shift:
+            return
+        total = sum(w.values()) or 1.0
+        for role, points in shift.items():
+            amount = float(points) / 100.0 * total
+            donors = [r for r in w if r not in ("Food", "Knowledge", role)]
+            pool = sum(w[r] for r in donors)
+            if pool <= 0.0:
+                continue
+            amount = min(amount, pool * 0.5)
+            for r in donors:
+                w[r] -= amount * w[r] / pool
+            w[role] = w.get(role, 0.0) + amount
+
+    def _posture_month(self) -> None:
+        """Gifts given from the stores (standing.gd gifts_given; trade_ledger.gd gifts)."""
+        rate = float(self.s.posture.get("gifts", 0.0))
+        if rate <= 0.0:
+            return
+        want = rate * max(1.0, self.population) * MONTH / YEAR
+        taken = max(0.0, min(want, self.fresh + self.stored))
+        fresh = min(self.fresh, taken)
+        self.fresh -= fresh
+        self.stored = max(0.0, self.stored - (taken - fresh))
+        self.gifts_given = getattr(self, "gifts_given", 0.0) + taken
 
     def _keep_learners(self, w: dict, cap) -> float:
         """work_paths.gd keep_learners: learning at LEARNERS_KEPT of the plan at
@@ -2990,6 +3029,7 @@ class Surrogate:
             self._allocate_labor()
             self._monthly(year)
             self._people_first(MONTH)
+            self._posture_month()
             self._fabric_month(year)
             heavy = (self.alloc_pct["Food"] + self.alloc_pct["Extraction"] + self.alloc_pct["Construction"]) / 100.0
             overwork = clamp(clamp((heavy - 0.74) / 0.22, 0, 1) * 0.7 + (0.5 if "labor_mobilization" in self.s.policies else 0.0), 0.0, 1.0)
@@ -3082,4 +3122,5 @@ class Surrogate:
             "crisis_deaths": self.crises.total_deaths if self.crises is not None else 0.0,
             "crisis_by_cause": dict(self.crises.deaths_by_cause) if self.crises is not None else {},
             **(self.fabric.snapshot() if hasattr(self, "fabric") else {}),
+            "gifts_given": getattr(self, "gifts_given", 0.0),
         }

@@ -100,8 +100,11 @@ AMBITION_TRIUMPH = g.const("scripts/wonder_concept.gd", "AMBITION_TRIUMPH")
 AMBITION_WORK = g.const("scripts/wonder_concept.gd", "AMBITION_WORK")
 OUTCOME_PAY = g.const("scripts/wonder_concept.gd", "OUTCOME_PAY")
 ENVY_RAID_FLOOR = float(g.const("scripts/standing.gd", "ENVY_RAID_FLOOR"))
-WEALTH_FOOD_DAYS = float(g.const("scripts/standing.gd", "WEALTH_FOOD_DAYS"))
 WARRIOR_WEIGHT = float(g.const("scripts/standing.gd", "WARRIOR_WEIGHT"))
+# Standing against the age (standing_scale.gd, mirrored in standing.py).
+ENVY_PLENTY = float(g.const("scripts/standing.gd", "ENVY_PLENTY", default=0.6, optional=True))
+ENVY_RICHER = float(g.const("scripts/standing.gd", "ENVY_RICHER", default=0.0, optional=True))
+import standing as standing_mirror  # noqa: E402
 NEEDING_OTHERS = g.const("scripts/civilization_strategy.gd", "AMBITIONS_NEEDING_OTHERS")
 HALF_LIFE_DAYS = float(g.const("scripts/cultural_inheritance.gd", "HALF_LIFE_DAYS"))
 CENTURY_DAYS = float(g.const("scripts/people_direction.gd", "CENTURY_DAYS"))
@@ -298,7 +301,7 @@ class LeaderSurrogate(Surrogate):
         self.works_done = self.triumphs = self.follies = 0
         self.folly_deaths = 0.0
         self.splendor = 0.0
-        self.raids = self.repelled = 0
+        self.raids = self.repelled = self.seen = 0
         self.raid_deaths = self.raid_stores = 0.0
         self.gifts = 0
         self.gift_food = 0.0
@@ -544,15 +547,31 @@ class LeaderSurrogate(Surrogate):
         might_term = clamp((ratio - .8) / 1.6, 0, 1)
         heard = clamp(self.splendor / 30.0, 0, 1)
         awe = clamp(might_term * .45 + heard * .35, 0, 1)
-        trust = .5 + (.15 if self.treaty else 0.0)
-        wealth = clamp(clamp(self.stored_days / WEALTH_FOOD_DAYS, 0, 1) * .65 + clamp(self.material, 0, 1) * .35, 0, 1)
-        envy = clamp((wealth * .6 + heard * .4) * (1 - awe) * (1 - trust * .5), 0, 1)
-        chance = clamp((envy - ENVY_RAID_FLOOR) * .06, 0, .03)
+        # The arts (standing.gd): our persuasion lifts their trust in our word
+        # (+-10 points), our cunning sees their raiders coming.
+        persuasion, cunning = self.arts()
+        trust = .5 + (.15 if self.treaty else 0.0) + (persuasion - .5) * .2
+        # Wealth against the age (standing_scale.gd), and envy of plenty past
+        # a typical neighbour's (standing.gd view_of: their own is typical here).
+        year_now = self.day / YEAR
+        pop = max(1.0, self.population)
+        T = lambda name: standing_mirror.anchors(standing_mirror.TABLES[name], year_now)  # noqa: E731
+        wealth = standing_mirror.blend({"food": standing_mirror.score(self.stored_days, T("STORES")), "materials": standing_mirror.score(getattr(self, "raw", 0.0) / pop, T("MATERIALS")),
+                                        "goods": standing_mirror.score(max(0.0, getattr(self, "goods", 0.0)) / pop, T("GOODS"))}, standing_mirror.WEALTH_W)
+        theirs = float(self.p.get("neighbour_wealth", .5))
+        envy = clamp((wealth * ENVY_PLENTY + max(0.0, wealth - theirs) * ENVY_RICHER + heard * .4) * (1 - awe) * (1 - trust * .5), 0, 1)
+        # standing_check.py's raid world may set harder neighbours (a lower floor).
+        chance = clamp((envy - float(self.p.get("envy_floor", ENVY_RAID_FLOOR))) * .06, 0, .03)
         for _ in range(n):
             if self.leader_rng.random() >= chance:
                 continue
             self.raids += 1
-            if ratio >= 1.25:
+            # Seen coming (standing.gd forewarn_odds), the watch keeps the
+            # approaches and meets them on ground of our choosing (war_loop
+            # _raid: the guard's ground x1.35).
+            seen = self.leader_rng.random() < standing_mirror.forewarn_odds(cunning)
+            self.seen += seen
+            if ratio * (1.35 if seen else 1.0) >= 1.25:
                 self.repelled += 1
                 self.victory_day = self.day
                 self.raid_deaths += self._remove(self.population * .001, INSEC_W)
@@ -568,8 +587,19 @@ class LeaderSurrogate(Surrogate):
             row.update({"ambition": self.ambition, "ambitions": list(self.ambitions_taken), "towns": 1 + self.daughters, "settler_deaths": self.settler_deaths, "hunger_deaths": self.hunger_deaths,
                         "works": self.works_done, "triumphs": self.triumphs, "follies": self.follies, "folly_deaths": self.folly_deaths,
                         "splendor": self.splendor, "raids": self.raids, "repelled": self.repelled, "raid_deaths": self.raid_deaths,
-                        "raid_stores": self.raid_stores, "gifts": self.gifts, "gift_food": self.gift_food, "might_ratio": self.might_ratio()})
+                        "raid_stores": self.raid_stores, "gifts": self.gifts, "gift_food": self.gift_food, "might_ratio": self.might_ratio(), "seen": self.seen})
         return row
+
+    def arts(self) -> tuple:
+        """This people's persuasion and cunning (standing.py, from its posture
+        and its own work), read once a year."""
+        year = int(self.day // YEAR)
+        if getattr(self, "_arts_year", -1) != year:
+            self._arts_year = year
+            row = {"year": self.day / YEAR, "population": self.population, "alloc": dict(self.alloc_pct), "able": self.able}
+            r = standing_mirror.readings(row, self.s.posture)
+            self._arts = (r["persuasion"], r["cunning"])
+        return self._arts
 
 
 def _shock_class():

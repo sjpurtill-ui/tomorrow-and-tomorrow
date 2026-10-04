@@ -17,8 +17,13 @@ const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
 var memo:=Memo.new()
 
 ## The page's own view state, kept across the daily rebuilds: which people's
-## rose is laid over ours.
-var view_state:Dictionary={"compare":""}
+## rose is laid over ours (a capture may choose one: --capture-compare=<id>).
+var view_state:Dictionary={"compare":_capture_compare()}
+
+static func _capture_compare()->String:
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--capture-compare="): return argument.trim_prefix("--capture-compare=")
+	return ""
 
 func meta()->Dictionary:
 	return {"eyebrow":"Our name among the peoples","title":"Standing","subtabs":["Standing"]}
@@ -174,7 +179,7 @@ static func _estimated_strength_words(civ_id:String,ratio:float)->String:
 	if bool(est.get("unknown",false)): return "We cannot say how strong they are in a fight"
 	var words:=_strength_words(1.0/maxf(0.01,float(est.value)))
 	if bool(est.exact): return words
-	return "%s, by our watchers' reckoning (somewhere between %.1f and %.1f times ours)" % [words,float(est.low),float(est.high)]
+	return "%s, by our watchers' reckoning (theirs somewhere between %.1f and %.1f times ours)" % [words,float(est.low),float(est.high)]
 
 ## A strength's parts as the Standing page's tooltip says them: "food 98%,
 ## materials 63%, goods 45%".

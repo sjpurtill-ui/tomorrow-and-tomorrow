@@ -35,12 +35,6 @@ const WARRIOR_WEIGHT:=3.0
 ## Envy and Contempt start to move peoples above these.
 const ENVY_RAID_FLOOR:=0.35
 const CONTEMPT_FLOOR:=0.3
-## What Splendor weighs: our great works' renown (great_works.gd renown, the
-## one reading the works screens show), the rest of our culture's allure, and
-## the town's building era (of 6).
-const SPLENDOR_WORKS:=2.4
-const SPLENDOR_CULTURE:=0.6
-const SPLENDOR_ERA:=0.15
 
 ## The nine strengths in the order the Standing page's rose draws them,
 ## clockwise from the top: hard power, plenty, soft power, learning, order.
@@ -237,6 +231,31 @@ const GENIUS_WEIGHTS:={"known":0.6,"scholars":0.4}
 const PERSUASION_WEIGHTS:={"envoy":0.3,"openness":0.15,"familiarity":0.1,"treaties":0.15,"gifts":0.15,"abroad":0.15}
 const CUNNING_WEIGHTS:={"scout":0.25,"eyes":0.25,"agents":0.15,"caught":0.1,"intel":0.25}
 const SPLENDOR_WEIGHTS:={"works":0.55,"culture":0.25,"beauty":0.2}
+
+## What our great works' renown (great_works.gd renown points) adds to
+## Splendor now, over having none: the works part read against the age, x its
+## weight. The works screens and the dedication say it in these numbers.
+static func works_splendor(points:float,year:float=-1.0)->float:
+	var a:=Scale.anchors(Scale.WORKS,_year() if year<0.0 else year)
+	return SPLENDOR_WEIGHTS.works*(Scale.score(1.0+maxf(0.0,points),a)-Scale.score(1.0,a))
+
+## What the realm's fine works (built_fabric.gd realm_beauty) add to Splendor
+## now, over none, and their reading against the age: {splendor, score, typical}.
+static func beauty_reading(beauty:float,year:float=-1.0)->Dictionary:
+	var y:=_year() if year<0.0 else year
+	var a:=Scale.beauty_anchors(y)
+	var score:=Scale.score(1.0+10.0*maxf(0.0,beauty),a)
+	return {"splendor":SPLENDOR_WEIGHTS.beauty*(score-Scale.score(1.0,a)),"score":score,"typical":float(Scale.anchors(Scale.BEAUTY,y)[1])}
+
+## What walls and stone (the defences' bonus) do for our strengths: every
+## defender counts x(1 + FORT_STRENGTH x bonus) in Might and in others'
+## reckoning, and the walls are a part of Endurance read against the age:
+## {might_factor, endurance, score, typical}.
+static func walls_reading(bonus:float,year:float=-1.0)->Dictionary:
+	var y:=_year() if year<0.0 else year
+	var a:=Scale.anchors(Scale.WALLS,y)
+	var score:=Scale.score(maxf(0.0,bonus),a)
+	return {"might_factor":1.0+Fabric.FORT_STRENGTH*maxf(0.0,bonus),"endurance":ENDURANCE_WEIGHTS.walls*score,"score":score,"typical":float(a[1])}
 
 ## PERSUASION: our envoy's skill, how open our ways are, how well we know
 ## the peoples we know, the treaties and exchanges we keep, the gifts we give
@@ -1089,12 +1108,19 @@ static func their_true(civ_id:String)->Dictionary:
 		for row:Array in STRENGTHS: out[String(row[0])]=clampf(float(metrics.get("standing_"+String(row[0]),0.5)),0.0,1.0)
 		return out
 	if owner!="player" and not WorldSimulation.actors.has(owner): return {}
+	# One reckoning a day serves every reading of them that day (their own
+	# month will be recorded soon; until then this is the same code as ours).
+	var key:="%s|%s|%d" % [String(WorldSimulation.actor_id),owner,int(state.elapsed_days)]
+	if _their_cache.has(key): return (_their_cache[key] as Dictionary).duplicate()
 	var theirs:Variant=strengths() if owner==String(WorldSimulation.actor_id) else WorldSimulation.scoped(owner,func()->Dictionary: return strengths())
 	if not theirs is Dictionary: return {}
 	for row:Array in STRENGTHS:
 		var entry:Variant=(theirs as Dictionary).get(String(row[0]),{})
 		out[String(row[0])]=clampf(float((entry as Dictionary).get("value",0.5)),0.0,1.0) if entry is Dictionary else 0.5
+	if _their_cache.size()>=64: _their_cache.clear()
+	_their_cache[key]=out.duplicate()
 	return out
+static var _their_cache:Dictionary={}
 
 ## Their reading of one strength as it stands (true, not our estimate: their
 ## own feelings and plans read their own); the typical 0.5 when unknown.
@@ -1164,16 +1190,17 @@ static func estimate_right_odds(sure:float)->float:
 	return clampf(sure*0.6+(own_art("cunning")-0.5)*0.4,0.05,0.95)
 
 ## Another people's nine strengths as we know them: {id: {value, low, high,
-## exact, unknown}} plus "_certainty" and "_unknown"; {} when the world does
-## not simulate them or we have not met them. The same for every people: our
+## exact, unknown}} plus "_certainty"; {} when the world does not simulate
+## them, we have not met them or we know too little of them to say. The same for every people: our
 ## knowledge of them and our cunning set the band.
 static func their_strengths(civ_id:String)->Dictionary:
 	if civ_id=="": return {}
+	# Too little known of them to say anything: nothing to lay beside ours.
 	var sure:=certainty(civ_id)
-	if sure<=0.0: return {}
+	if sure<UNKNOWN_BELOW: return {}
 	var truth:=their_true(civ_id)
 	if truth.is_empty(): return {}
-	var result:Dictionary={"_certainty":sure,"_unknown":sure<UNKNOWN_BELOW}
+	var result:Dictionary={"_certainty":sure}
 	for row:Array in STRENGTHS:
 		var id:=String(row[0])
 		var est:=estimate(civ_id,id,float(truth.get(id,0.5)))
@@ -1191,7 +1218,7 @@ static func estimate_words(est:Dictionary)->String:
 # own month's reading; the same rule for every people.
 
 ## The odds a raid coming at a people is seen before it falls, and how many
-## days before: a typical people (0.5) half the time, 17 days ahead.
+## days before: a typical people (0.5) half the time, 18 days ahead.
 const FOREWARN_ODDS_TYPICAL:=0.5
 const FOREWARN_ODDS_SLOPE:=0.8
 const FOREWARN_DAYS_MIN:=5.0
@@ -1280,7 +1307,7 @@ static func arts_at_work()->Dictionary:
 	var bluff:=bluff_reading(c)
 	var sure:=_mean_certainty()
 	var cunning_rows:Array=[
-		{"words":"Raids seen coming: %d in 100, about %d days ahead" % [roundi(forewarn_odds(c)*100.0),forewarn_days(c)],"detail":"When raiders are sent against us, our watchers see them coming on these odds; then the watch keeps the approaches until they come, and meets them on ground of our choosing. A typical people of the age sees half of them, 17 days ahead."},
+		{"words":"Raids seen coming: %d in 100, about %d days ahead" % [roundi(forewarn_odds(c)*100.0),forewarn_days(c)],"detail":"When raiders are sent against us, our watchers see them coming on these odds; then the watch keeps the approaches until they come, and meets them on ground of our choosing. A typical people of the age sees %d in 100, %d days ahead." % [roundi(forewarn_odds(0.5)*100.0),forewarn_days(0.5)]},
 		{"words":"A people arming against us heard of at once: %d in 100" % roundi(forewarn_odds(c)*100.0),"detail":"Otherwise word comes only in the last %d days before they march." % LATE_WORD_DAYS},
 		{"words":"An envoy's bluff seen through: %d in 100; a real threat's signs read: %d in 100" % [roundi(float(bluff.tells)*100.0),roundi(float(bluff.signs)*100.0)],"detail":"Misleading tells on a real threat: %d in 100. A typical people: 85, 70 and 15." % roundi(float(bluff.false_tells)*100.0)},
 		{"words":"Our agents' odds %s; caught %s" % [_signed_points(covert_edge(c)),_signed_points(-covert_edge(c))],"detail":"Added to the stated odds of every watch, source, theft and strike our agents attempt."},

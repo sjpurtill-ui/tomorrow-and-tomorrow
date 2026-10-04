@@ -117,17 +117,14 @@ class Rose extends Control:
 		var radius:=_radius()
 		# The chart: four rings and nine spokes, in the rule's ink.
 		draw_circle(center,radius+10.0,Color(T.PAPER_RAISED,0.9))
+		# The middle ring is a typical people of our age, the rim the most the
+		# age has seen (standing_scale.gd): both drawn a little stronger.
 		for ring in [0.25,0.5,0.75,1.0]:
 			var outline:=PackedVector2Array()
 			for i in count+1: outline.append(center+Vector2.from_angle(_angle(i%count))*radius*ring)
-			draw_polyline(outline,T.RULE_STRONG if ring==1.0 else T.RULE,1.4 if ring==1.0 else 1.0,true)
+			draw_polyline(outline,T.RULE_STRONG if ring==1.0 or ring==0.5 else T.RULE,1.4 if ring==1.0 else (1.2 if ring==0.5 else 1.0),true)
 		for i in count:
 			draw_line(center,center+Vector2.from_angle(_angle(i))*radius,T.RULE_STRONG if i==highlight else T.RULE,2.0 if i==highlight else 1.0,true)
-		# The age's yardstick named on its rings, small, beside the top spoke.
-		var note_font:=T.voice_font(true)
-		for pair:Array in [[0.5,"typical of our age"],[1.0,"the most the age has seen"]]:
-			var at:=center+Vector2(5.0,-radius*float(pair[0])-3.0)
-			draw_string(note_font,at,String(pair[1]),HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color(T.INK_MUTED,0.85))
 		# Last year's shape, faint, so the change shows.
 		if not ghost.is_empty():
 			var past:=PackedVector2Array()
@@ -143,8 +140,8 @@ class Rose extends Control:
 			var line:=_outline(values)
 			line.append(line[0])
 			if _estimated(values):
-				for i in line.size()-1: _dashes(line[i],line[i+1],Color(tint,0.55),1.2,5.0)
-			else: draw_polyline(line,Color(tint,0.55),1.2,true)
+				for i in line.size()-1: _dashes(line[i],line[i+1],Color(tint.darkened(0.1),0.8),1.5,5.0)
+			else: draw_polyline(line,Color(tint.darkened(0.1),0.8),1.5,true)
 		# The people chosen beside ours: how unsure we are of them as a soft
 		# band (between the low and the high of each estimate), a light wash
 		# and a stronger line.
@@ -157,12 +154,12 @@ class Rose extends Control:
 				for i in count:
 					var j:=(i+1)%count
 					var quad:=PackedVector2Array([low[i],low[j],high[j],high[i]])
-					if Geometry2D.triangulate_polygon(quad).size()>=3: draw_colored_polygon(quad,Color(their_color,0.09))
+					if Geometry2D.triangulate_polygon(quad).size()>=3: draw_colored_polygon(quad,Color(their_color.darkened(0.35),0.16))
 			elif shape.size()>=3: draw_colored_polygon(shape,Color(their_color,0.10))
 			shape.append(shape[0])
 			if unsure:
-				for i in shape.size()-1: _dashes(shape[i],shape[i+1],their_color.darkened(0.15),2.2,7.0)
-			else: draw_polyline(shape,their_color.darkened(0.15),2.2,true)
+				for i in shape.size()-1: _dashes(shape[i],shape[i+1],their_color.darkened(0.35),2.4,7.0)
+			else: draw_polyline(shape,their_color.darkened(0.35),2.4,true)
 		# Ours: a gold wash and a gold line.
 		var ours:=PackedVector2Array()
 		for i in count: ours.append(_point(i,maxf(0.02,float(strengths[i].value))))
@@ -193,7 +190,7 @@ class Rose extends Control:
 			draw_string(strong,Vector2(x+(block_width-name_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y),name,HORIZONTAL_ALIGNMENT_LEFT,-1,14,T.GOLD_TEXT if i==highlight else T.INK)
 			draw_string(plain,Vector2(x+(block_width-value_size.x)*(0.0 if direction.x>0.35 else 1.0 if direction.x<-0.35 else 0.5),y+15.0),value,HORIZONTAL_ALIGNMENT_LEFT,-1,13,T.INK_MUTED)
 		if their_name!="" and not theirs.is_empty():
-			var note:=("- - %s, as our watchers reckon them; shaded, how unsure we are" % their_name) if _estimated(theirs) else ("%s, as we know them" % their_name)
+			var note:=("- - %s as our watchers reckon them; shaded: how unsure" % their_name) if _estimated(theirs) else ("%s, as we know them" % their_name)
 			draw_string(plain,Vector2(8.0,size.y-8.0),note,HORIZONTAL_ALIGNMENT_LEFT,size.x-16.0,12,T.text_for(their_color) if their_color!=Color.WHITE else T.INK_MUTED)
 	func _dashes(from:Vector2,to:Vector2,color:Color,width:float,dash:float)->void:
 		var length:=from.distance_to(to)
@@ -379,6 +376,8 @@ func _build_hero()->void:
 	hero_body.add_theme_constant_override("h_separation",18);hero_body.add_theme_constant_override("v_separation",12)
 	column.add_child(hero_body)
 	rose=Rose.new();rose.name="Rose"
+	# Beside the first strengths, not adrift in the middle of a long list.
+	rose.size_flags_vertical=Control.SIZE_SHRINK_BEGIN
 	rose.picked.connect(_raise)
 	hero_body.add_child(rose)
 	strength_list=VBoxContainer.new();strength_list.name="StrengthList"
@@ -406,7 +405,7 @@ func _fill_strengths()->void:
 	_clear(strength_list)
 	strength_rows.clear()
 	_strength_refs.clear()
-	Kit.label(strength_list,"Each against the peoples of our age: 50% is a typical people, 80% what the best of them managed, 100% the most the age has seen.","note")
+	Kit.label(strength_list,"Each against the peoples of our age: 50% (the rose's middle ring) is a typical people, 80% what the best of them managed, 100% (the rim) the most the age has seen.","note")
 	Kit.label(strength_list,"Faint dashes on the rose: a year ago. Click a strength to raise it." if not (data.get("year_ago",{}) as Dictionary).is_empty() else "Click a strength to raise it.","note")
 	for index in items.size():
 		strength_list.add_child(_strength_row(items[index],index))
