@@ -115,31 +115,29 @@ func _build_summary()->void:
 	_clear(summary_box)
 	var panel:=_panel(summary_box,"Summary")
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);panel.add_child(column)
-	var head:=HBoxContainer.new();head.add_theme_constant_override("separation",22);column.add_child(head)
 	var partners:=Ledger.partners("player").filter(func(row:Dictionary)->bool:return float(row.value)>=Ledger.PARTNER_FLOOR)
 	var sent:=0.0;var came:=0.0
 	for row:Dictionary in Ledger.partners("player"):
 		sent+=Ledger.flow_value("player",String(row.id))
 		came+=Ledger.flow_value(String(row.id),"player")
-	_number(head,str(partners.size()),"trading partners" if partners.size()!=1 else "trading partner")
-	_number(head,EraWords.grouped(roundi(sent*3.0)),"worth of goods sent a season")
-	_number(head,EraWords.grouped(roundi(came*3.0)),"worth of goods brought in")
+	# The answer first: whom we trade with and how much passes a season.
+	var answer:=_line("No goods pass between us and any people yet" if partners.is_empty() else "%d trading %s: %s sent, %s brought in a season" % [partners.size(),"partner" if partners.size()==1 else "partners",EraWords.grouped(roundi(sent*3.0)),EraWords.grouped(roundi(came*3.0))],17,T.INK,true)
+	answer.name="TradeAnswer";answer.add_theme_font_override("font",T.font("ui_strong"))
+	answer.tooltip_text="Worth of goods, a season. Gifts and barter settle each season; silver and coin each month."
+	column.add_child(answer)
+	# What we can trade and pay with, on one small line.
+	var means:PackedStringArray=["%s goods to trade" % EraWords.grouped(roundi(Goods.spare()))]
 	var unit:=Ledger.purse_unit("player")
 	# What we can pay other peoples with now (trade_ledger.pay moves no more).
-	if unit!="":_number(head,EraWords.grouped(roundi(Ledger.purse_balance("player"))),"%s to pay other peoples" % unit)
+	if unit!="":means.append("%s %s to pay with" % [EraWords.grouped(roundi(Ledger.purse_balance("player"))),unit])
 	var tribute_in:=0.0
 	for c:Dictionary in CivilizationSystem.civilizations:
 		var t:=Stances.tribute(String(c.get("id","")),"player")
 		if not t.is_empty():tribute_in+=float(t.value)
-	if tribute_in>0.0:_number(head,EraWords.grouped(roundi(tribute_in)),"tribute a season")
-	# Goods are our first currency with other peoples; arms are what the watch needs.
-	var spare:=_number(head,EraWords.grouped(roundi(Goods.spare())),"goods to trade");spare.name="GoodsToTrade"
-	spare.tooltip_text="Goods beyond what the homes use: they buy what other peoples have to spare, arms, and families who come to work. Makers make about %s a day." % str(snappedf(float((GameState.civilian_goods.get("report",{}) as Dictionary).get("made",0.0)),0.1))
-	var arms:=_number(head,EraWords.grouped(Arms.weapons_held()),"arms in store");arms.name="ArmsInStore"
-	arms.tooltip_text="Sets of arms, one a fighter, for a watch of %s. A set costs about %s goods to make." % [EraWords.grouped(roundi(Arms.watch())),str(roundi(float(Arms.cost_per_fighter().worth_goods)))]
-	if partners.is_empty():
-		column.add_child(_line("No goods pass between us and any people yet.",13,T.INK_MUTED,true))
-	column.add_child(_line("Gifts and barter settle each season; silver and coin each month.",13,T.INK_MUTED,true))
+	if tribute_in>0.0:means.append("%s tribute a season" % EraWords.grouped(roundi(tribute_in)))
+	var spare:=_line(" · ".join(means)+".",13,T.INK_MUTED,true);spare.name="GoodsToTrade"
+	spare.tooltip_text="Goods beyond what the homes use: they buy what other peoples have to spare, arms, and families who come to work. Makers make about %s a day.\nArms beyond what the watch lacks can be traded too; they are counted on the Production screen, under Military." % str(snappedf(float((GameState.civilian_goods.get("report",{}) as Dictionary).get("made",0.0)),0.1))
+	column.add_child(spare)
 
 
 # --- One row per people ---------------------------------------------------------

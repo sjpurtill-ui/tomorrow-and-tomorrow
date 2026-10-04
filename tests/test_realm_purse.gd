@@ -404,6 +404,16 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	board.setup({})
 	for part in ["Balance","ComingIn","GoingOut","Budget","Levels","LevyNow","LevyCost","Line_army","Line_scholars","Line_crews","Line_relief","Fifths","Shares","Pressure"]:
 		assert_object(board.find_child(part,true,false)).override_failure_message("the purse board has no %s" % part).is_not_null()
+	# Arms live on the Production screen: Wealth only points there.
+	for gone in ["ArmsHeld","ArmsCost"]:assert_object(board.find_child(gone,true,false)).is_null()
+	assert_object(board.find_child("SeeArms",true,false)).is_not_null()
+	# Every budget bar carries its word and its sum.
+	for row in ["ComingIn","GoingOut"]:
+		var texts:=PackedStringArray()
+		for label in board.find_child(row,true,false).find_children("*","Label",true,false):texts.append((label as Label).text)
+		assert_str(" ".join(texts)).contains("a season")
+	# The store's answer comes first, with whether it grows.
+	assert_str((board.find_child("Verdict",true,false) as Label).text).is_not_empty()
 	var long:=PackedStringArray()
 	for node in board.find_children("*","",true,false):
 		var text:=""

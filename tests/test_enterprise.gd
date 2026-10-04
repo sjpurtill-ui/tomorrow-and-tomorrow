@@ -625,7 +625,7 @@ func test_the_wealth_tab_shows_business_with_short_plain_labels()->void:
 	var board:=Board.new()
 	add_child(board)
 	board.setup({})
-	for part in ["Ladder","Rung_0","Rung_5","RungNow","NextRung","Share","ShareWords","BusinessEffect","Stances","Stance_guarded","Stance_chartered","Stance_open","BustOdds"]:
+	for part in ["RungNow","NextRung","ShareWords","BusinessEffect","StanceToggle","StanceChoice","Stances","Stance_guarded","Stance_chartered","Stance_open","BustOdds"]:
 		assert_object(board.find_child(part,true,false)).override_failure_message("the business section has no %s" % part).is_not_null()
 	assert_object(board.find_child("Stance_state",true,false)).is_null()
 	var texts:=PackedStringArray()
@@ -644,13 +644,19 @@ func test_the_wealth_tab_shows_business_with_short_plain_labels()->void:
 	assert_array(Array(long)).override_failure_message("labels over twelve words: %s" % str(long)).is_empty()
 	var all:=" | ".join(texts)
 	assert_str(all).contains("to all work")
-	assert_str(all).contains("Stalls and hired workshops.")
-	# The section sits between where the purse's coming-in comes from and the levy.
+	assert_str(all).contains("Stalls and hired workshops")
+	# Hardly any effect yet: said so plainly, and the stance waits behind one button.
+	assert_float(float(Business.effects().work)).is_less(Board.BUSINESS_MATTERS)
+	assert_str(all).contains("hardly any effect yet")
+	assert_bool((board.find_child("StanceChoice",true,false) as Control).visible).is_false()
+	(board.find_child("StanceToggle",true,false) as Button).emit_signal("pressed")
+	assert_bool((board.find_child("StanceChoice",true,false) as Control).visible).is_true()
+	# The section follows what the makers make and comes before who holds the wealth.
 	var order:=[]
 	for child in board.get_children():
 		if child is Label:order.append((child as Label).text)
-	assert_int(order.find("BUSINESS")).is_greater(order.find("WHERE IT COMES FROM"))
-	assert_int(order.find("BUSINESS")).is_less(order.find("THE LEVY"))
+	assert_int(order.find("BUSINESS")).is_greater(order.find("WHAT WE MAKE"))
+	assert_int(order.find("BUSINESS")).is_less(order.find("WHO HOLDS THE WEALTH"))
 	# A stance chosen on the screen is the engine's stance.
 	(board.find_child("Stance_open",true,false) as Button).emit_signal("pressed")
 	assert_str(Business.stance()).is_equal("open")

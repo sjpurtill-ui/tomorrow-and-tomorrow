@@ -148,7 +148,8 @@ var show_work:=false
 ## and its households' money. Trade between peoples mounts its own board
 ## between them: one line, blocks.append(<its block>), where marked.
 func _wealth_tab()->Dictionary:
-	var blocks:Array=[{"type":"purse_board"}]
+	var blocks:Array=[{"type":"purse_board","on_open":func(section:String,sub:int)->void:
+		if is_instance_valid(hud):hud.section_requested.emit(section,sub)}]
 	# Trade between peoples (econ-trade) mounts its board here.
 	blocks.append(_ledger_block())
 	return {"blocks":blocks}

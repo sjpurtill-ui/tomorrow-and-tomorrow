@@ -317,7 +317,9 @@ func test_the_materials_page_shows_the_searched_land()->void:
 		"rows":[],"incoming":[],"day":0,"selected":"","on_select":func(_k:String):pass,"on_map":func():pass,"on_focus":func(_f:String):pass,"on_trade":func():pass})
 	var label:Label=page.find_child("SearchedLand",true,false)
 	assert_object(label).is_not_null()
-	assert_str(label.text).is_equal(words)
+	# The page says how much land is searched; the factors and odds are behind it.
+	assert_str(label.text).starts_with("Searched land").not_contains("Cutting and digging")
+	assert_str(label.tooltip_text).is_equal(words)
 
 
 # --- Review fixes: where new ground may be, what is never found ------------------------------------

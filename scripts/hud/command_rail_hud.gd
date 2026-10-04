@@ -218,6 +218,10 @@ func force_dock_layout()->void:
 		panel.size=Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if panel==dock and active_section in ["world","overview","standing","chronicle","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
+	# Capture only: "--capture-dock-scroll=<px>" shows a long page further down.
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--capture-dock-scroll=") and dock!=null:
+			dock.body_scroll.set_deferred("scroll_vertical",int(argument.trim_prefix("--capture-dock-scroll=")))
 
 func _position_toolbar()->void:
 	if toolbar==null: return

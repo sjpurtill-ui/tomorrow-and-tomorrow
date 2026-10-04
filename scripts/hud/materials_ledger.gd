@@ -106,7 +106,14 @@ func _fill()->void:
 	var supply:=Words.supply(float(data.storage),float(data.capacity),data.hauling)
 	_put(_supply,String(supply.sentence))
 	if _slows!=null:_put(_slows,String(supply.slows))
-	if _land!=null:_put(_land,String(data.get("land","")))
+	if _land!=null:
+		# The first sentence on the page (how much land is searched); the yield
+		# factors and the find odds sit in its tooltip.
+		var land:=String(data.get("land",""))
+		var cut:=land.find(". ")
+		_put(_land,land.left(cut+1) if cut>0 else land)
+		_land.mouse_filter=Control.MOUSE_FILTER_PASS
+		_land.tooltip_text=land
 	for index in mini(_rows.size(),(data.rows as Array).size()):
 		var item:Dictionary=data.rows[index]
 		var refs:Dictionary=_rows[index]

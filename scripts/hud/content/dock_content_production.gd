@@ -21,19 +21,29 @@ func _ensure_workshop()->void:
 	if workshop==null:workshop=preload("res://scripts/hud/content/dock_content_military.gd").new(terrain,hud)
 func tab(sub:int)->Dictionary:
 	_ensure_workshop()
-	# Civilian manufactures are one Civilian Goods stock made by households;
-	# workshop lines and recipes are military only.
+	# Three distinct pages: All is a short overview (how the makers' hands
+	# split, and the one or two things that need the god); Civilian is what
+	# the makers make for the homes and for barter (one Civilian Goods stock);
+	# Military is arms, the workshop lines and war gear, the one place arms
+	# live.
 	var mode:=String(["all","civilian","military"][clampi(sub,0,2)])
-	var block:={"type":"production_queue","mode":mode}
+	var block:={"type":"production_queue","mode":mode,"on_open":func(section:String,page:int)->void:
+		if is_instance_valid(hud):hud.section_requested.emit(section,page)}
 	if mode!="military":
 		block.households=household_cards()
+	if mode=="civilian":
 		block.techniques=_technique_list()
+		block.carts=_carts()
 	if mode!="civilian":
 		var snapshot:=MilitaryCampaign.production_lines_snapshot()
-		var lines:Array=with_staff_plans(snapshot.lines)
-		var context:=line_context(snapshot)
 		var stock:=Logistics.rows(MilitaryCampaign,snapshot)
 		var pool:=P.hands(MilitaryCampaign)
+		if mode=="all":
+			block.overview=overview(block.households,stock,pool,snapshot)
+			return {"blocks":[block]}
+		var lines:Array=with_staff_plans(snapshot.lines)
+		var context:=line_context(snapshot)
+		block.arms=arms_reading()
 		block.merge({"lines":line_views(lines,context,stock,pool),"capacity":snapshot.capacity,"context":context,
 			"materials":_stores(lines),"hands":{"total":int(pool.total),"lines":int(pool.lines)},"boatyards":_boatyards(),"stock":stock,
 			"managed":bool(MilitaryCampaign.workshop.data.enabled),"owner":workshop_owner(),"status":MilitaryCampaign.workshop.data.status,
@@ -43,6 +53,55 @@ func tab(sub:int)->Dictionary:
 			"on_manage":focused_action("WORKSHOP MANAGEMENT","Delegation",workshop._workshop_management_report).on_press,
 			"on_history":focused_action("PRODUCTION HISTORY","Completed output",_history).on_press})
 	return {"blocks":[block]}
+
+## The All page: how the makers' hands split between the homes, the
+## workshop lines and arms, what they make a day, who runs the workshops,
+## and at most two things that need the god (each with the page that
+## answers it). Every number is the engine's (persistent_production.gd
+## hands, civilian_goods.gd, weapons_stock.gd, equipment_logistics.gd).
+static func overview(cards:Array,stock:Array,pool:Dictionary,snapshot:Dictionary)->Dictionary:
+	var Goods:=preload("res://scripts/civilian_goods.gd")
+	var Arms:=preload("res://scripts/weapons_stock.gd")
+	var Queue:=preload("res://scripts/hud/production_queue.gd")
+	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
+	var made:=0.0
+	for card:Dictionary in cards:made+=float(card.get("made",0.0))
+	var attention:Array=[]
+	for row:Dictionary in stock:
+		var deficit:=int(row.get("deficit",0))
+		if deficit<=0:continue
+		var said:=Queue.cover_words(deficit,int(row.get("needed",0)),float(row.get("making_per_day",0.0)),float(row.get("days_to_cover",0.0)),not (row.get("lines",[]) as Array).is_empty())
+		attention.append({"text":"The bands are short %d %s" % [deficit,String(row.get("name",row.get("item",""))).to_lower()],"sub":String(said.text).trim_prefix("short %d · " % deficit),"tone":String(said.tone),"page":2})
+	var wanted:=Arms.arms_wanted()
+	if wanted>0:
+		var hands:=Goods.arms_hands(WorldSimulation.state)
+		attention.append({"text":"The watch lacks %d %s of arms" % [wanted,"set" if wanted==1 else "sets"],"sub":("%s makers are making them" % Plain.number(hands)) if hands>=0.05 else "no maker is making them now","tone":"amber" if hands>=0.05 else "red","page":2})
+	for card:Dictionary in cards:
+		var story:=Queue.household_story(card)
+		if String(story.tone)!="good" and float(card.get("coverage",1.0))<0.98:
+			attention.append({"text":"%s: %s" % [String(card.get("city","")),String(story.held).trim_suffix(".")],"sub":String(story.eta),"tone":"red" if String(story.tone)=="bad" else "amber","page":1})
+	var owner:=workshop_owner()
+	return {"hands_total":int(pool.get("total",0)),"hands_lines":int(pool.get("lines",0)),"hands_arms":Goods.arms_hands(WorldSimulation.state),
+		"goods_made":made,"arms_made":float(report.get("arms_made",0.0)),"lines":(snapshot.get("lines",[]) as Array).size(),"capacity":int(snapshot.get("capacity",0)),
+		"owner":owner,"managed":bool(MilitaryCampaign.workshop.data.enabled),"status":String(MilitaryCampaign.workshop.data.status),"attention":attention}
+
+## Arms for the watch (weapons_stock.gd): sets held and carried against the
+## watch, what is still wanted, what the makers make a day, and one set's cost.
+static func arms_reading()->Dictionary:
+	var Goods:=preload("res://scripts/civilian_goods.gd")
+	var Arms:=preload("res://scripts/weapons_stock.gd")
+	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
+	return {"held":Arms.weapons_held(),"issued":Arms.weapons_issued(),"watch":roundi(Arms.watch()),"wanted":Arms.arms_wanted(),
+		"made":float(report.get("arms_made",0.0)),"hands":Goods.arms_hands(WorldSimulation.state),"cost":Arms.cost_per_fighter(),
+		"share":Arms.ARMS_SHARE,"war_share":Arms.WAR_SHARE}
+
+## Carts in store, and whether the people know how to make them (they are
+## made on the workshop lines).
+static func _carts()->Dictionary:
+	var known:=false
+	for item:String in MilitaryCampaign.PersistentProduction.available_products(MilitaryCampaign):
+		if item=="transport_cart":known=true
+	return {"count":int(GameState.resource_stockpiles.get("Transport Carts",0)),"known":known}
 
 ## Every line as the compact row draws it (see Plain.line_view), in list
 ## order: rank is priority for scarce materials.
@@ -257,8 +316,9 @@ static func _group(item:String)->String:
 	if MilitaryCampaign.CONSUMABLE_KNOWLEDGE.has(item):return "Ammunition"
 	return "Weapons and gear"
 
-## One card of household goods per city, read inside that city's resources.
-func household_cards()->Array:
+## One card of household goods per city, read inside that city's resources
+## (the Wealth page sums them too, so both screens say the same).
+static func household_cards()->Array:
 	var cards:Array=[]
 	for city:Dictionary in GameState.player_settlements:
 		var card:Dictionary=SettlementModel.with_city_resources(String(city.id),func()->Dictionary:
@@ -276,7 +336,7 @@ static func _household_card()->Dictionary:
 	for resource:String in goods.BASKET:
 		var amount:=float(GameState.resource_stockpiles.get(resource,0.0))
 		if amount>0.0:basket.append({"resource":resource,"name":ResourceSystem.display_name(resource),"amount":amount})
-	return {"stock":goods.stock(),"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
+	return {"stock":goods.stock(),"spare":goods.spare(),"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
 		"worn":float(report.get("worn",0.0)) if current else goods.stock()*goods.daily_wear(),"reason":String(report.get("reason","")) if current else "","basket":basket,
 		# Goods the learners took today (research_600_catalog.gd learning_goods).
 		"learners":float(report.get("learners",0.0)) if current else 0.0}

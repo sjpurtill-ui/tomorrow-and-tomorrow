@@ -150,7 +150,7 @@ func test_economy_dock_titles_follow_the_rail()->void:
 	var hud:=FakeHud.new();auto_free(hud)
 	var economy=preload("res://scripts/hud/content/dock_content_economy.gd").new(null,hud)
 	assert_str(String(economy.meta().title)).is_equal("Food")
-	assert_array(economy.meta().subtabs).contains_exactly(["Food & water","Materials","Wealth"])
+	assert_array(economy.meta().subtabs).contains_exactly(["Food & water","Materials","Wealth","Trade"])
 	var dock:=SubHolder.new();auto_free(dock);dock.sub=2;hud.dock=dock
 	assert_str(String(economy.meta().title)).is_equal("Wealth")
 
