@@ -29,6 +29,38 @@ const OWN_STANCES:=["hip","folded","hip","folded","stand","belt"]
 ## How often a person the clasp falls to keeps it.
 const KEEP_CLASP:=0.25
 
+## A supported cut and finish from this people's actual textile practice.
+## The caller supplies real office/rank, not whether somebody happens to sit.
+## Hair, face and personal identity stay intact. No calendar or RNG is read.
+static func dress(look:Dictionary,profile:Dictionary,formal_role:=false)->Dictionary:
+	var out:=look.duplicate(true)
+	var choices:Array=profile.get("dress_options",[])
+	if choices.is_empty():return out # Older callers keep their authored look.
+	var outfit:=String(profile.get("outfit",look.get("outfit","hide")))
+	if "tunic" in choices and "robe" in choices:outfit="robe" if formal_role else "tunic"
+	elif not outfit in choices:outfit=String(choices[0])
+	out["outfit"]=outfit
+	var seed_value:=seed_of(look)
+	var cloth:Array=(look.get("cloth",[]) as Array).duplicate()
+	var dye_level:=int(profile.get("dye_level",0))
+	if outfit!="hide":
+		for i in cloth.size():
+			var natural:Color=[Color("c7b99b"),Color("a89b80"),Color("d3c9af"),Color("918778")][posmod(seed_value+i*11,4)]
+			if dye_level==0:cloth[i]=natural
+			elif dye_level==1:cloth[i]=natural.lerp(Color(cloth[i]),0.64)
+	if outfit in ["courtcoat","formal","business"] and cloth.size()>=2:
+		# The people's actual dyes remain visible in coats and trim; distinct
+		# dark bases avoid dressing an entire administration in one navy suit.
+		var base:Color=[Color("29303b"),Color("39322d"),Color("33383b"),Color("343c36")][posmod(seed_value>>4,4)]
+		cloth[0]=base.lerp(Color(cloth[0]),float(profile.get("tailored_colour_weight",0.33)))
+		cloth[1]=Color("e9e3d4")
+		if outfit=="business" and posmod(seed_value>>7,3)==0:
+			var without:Array=out.get("without",[])
+			if not "business_tie" in without:without.append("business_tie")
+			out["without"]=without
+	if not cloth.is_empty():out["cloth"]=cloth
+	return out
+
 ## The person's own seed: the look's, else their face (the accessor makes
 ## each person's face from their identity).
 static func seed_of(look:Dictionary)->int:
