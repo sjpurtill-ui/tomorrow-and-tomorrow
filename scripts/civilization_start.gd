@@ -2,104 +2,67 @@ extends RefCounted
 ## Every seat uses the same seeded planet sampling and viability search. No
 ## distance calculation is relative to the human player's selected location.
 ##
-## Seats come in loose regional groups. Early peoples did not live alone on a
-## continent, but neither did they live within sight of each other's smoke:
-## each group's first seat is placed anywhere on the planet, and its other
-## seats settle a few weeks' walk away (250-600 km) on connected land. The
-## other groups are elsewhere on the planet, often continents away. Every seat
-## (the player's included) is placed by the same rule, so the regions are part
-## of the seeded world, not arranged around the player. Worlds already made
-## keep their stored positions; this only shapes new worlds.
-const REGION_SEATS:=3
-const NEIGHBOR_MIN_KM:=250.0
-const NEIGHBOR_MAX_KM:=600.0
-const NEIGHBOR_SEPARATION_KM:=220.0
+## Peoples are spread over the whole planet. Each seat is placed anywhere the
+## shared founding kit can live, and never nearer than SEAT_SEPARATION_KM to
+## any seat placed before it. The player's people is seat 0 and is placed
+## first by the same draw; every other people keeps the same distance from
+## every other, the player's included. The first farming peoples of Earth rose
+## thousands of kilometres apart (the Levant, the Yellow River, Mesoamerica,
+## the Andes, New Guinea), so the nearest people is at least 2,000 km off and
+## usually 2,000-5,000 km, across real land or sea. Nobody is met in the first
+## decades: first contact waits until someone's parties actually walk that far
+## (the known country of scout_known_reach_km: 110 km, about 18 km more a
+## year). Two parties at the edges of their known country, walking toward each
+## other, cannot glimpse each other in the first thirty years, and no party
+## can reach another people's home in the first forty even with the most
+## route lore there is (tests/test_far_peoples.gd). Worlds already made keep
+## their stored positions; this only shapes new worlds.
+const SEAT_SEPARATION_KM:=2000.0
+## Draws the first seat takes (as every seat did before separation).
+const FIRST_DRAWS:=48
+## More draws a later seat may take to keep its distance from earlier seats.
+const SEPARATION_DRAWS:=208
+## Seats already placed, per world: {"seed:world_seed": [Vector2, ...]}. A seat
+## depends on every seat before it, so each world is placed once, in order.
+static var _placed:Dictionary={}
 
 static func candidate(seed_value:int,seat:int)->Vector2:
-	var anchor_seat:=seat-posmod(seat,REGION_SEATS)
-	if anchor_seat==seat:return _planet_candidate(seed_value,seat)
-	var anchor:=_planet_candidate(seed_value,anchor_seat)
-	var siblings:Array[Vector2]=[anchor]
-	for earlier in range(anchor_seat+1,seat):siblings.append(candidate(seed_value,earlier))
-	var neighbor:=_regional_candidate(seed_value,seat,siblings)
-	# An anchor on an island or a narrow coast has no walkable ring: its
-	# neighbours then live across the water, a little farther out.
-	if not is_finite(neighbor.x):neighbor=_across_water_candidate(seed_value,seat,siblings)
-	return neighbor if is_finite(neighbor.x) else _planet_candidate(seed_value,seat)
+	var key:="%d:%d" % [seed_value,int(WorldSimulation.state.world_seed)]
+	if not _placed.has(key):
+		if _placed.size()>=8:_placed.clear()
+		_placed[key]=[]
+	var placed:Array=_placed[key]
+	while placed.size()<=seat:placed.append(_planet_candidate(seed_value,placed.size(),placed))
+	return placed[seat]
 
-static func _across_water_candidate(seed_value:int,seat:int,siblings:Array[Vector2])->Vector2:
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=seed_value^((seat+1)*49979687)
-	for attempt in 160:
-		var point:Vector2=siblings[0]+Vector2.from_angle(rng.randf_range(-PI,PI))*rng.randf_range(NEIGHBOR_MIN_KM,NEIGHBOR_MAX_KM*1.5)
-		if absf(point.x)>PlanetEnvironment.PLANET_WIDTH_KM*.49 or absf(point.y)>PlanetEnvironment.PLANET_DEPTH_KM*.49:continue
-		var apart:=true
-		for other in siblings:
-			if other.distance_to(point)<NEIGHBOR_SEPARATION_KM:apart=false;break
-		if apart and supports_founders(PlanetEnvironment.profile_at(point)):return point
-	return Vector2.INF
+## Kilometres from `point` to the nearest of `seats` (INF when there are none).
+static func separation(point:Vector2,seats:Array)->float:
+	var nearest:=INF
+	for other:Vector2 in seats:nearest=minf(nearest,point.distance_to(other))
+	return nearest
 
-static func _regional_candidate(seed_value:int,seat:int,siblings:Array[Vector2])->Vector2:
-	var anchor:=siblings[0]
-	var rng:=RandomNumberGenerator.new()
-	rng.seed=seed_value^((seat+1)*15485863)
-	var cells:=_reachable_ring(anchor)
-	# Seeded order over the reachable ring; the first viable, separated cell wins.
-	for index in range(cells.size()-1,0,-1):
-		var swap:=rng.randi_range(0,index)
-		var held:Vector2=cells[index];cells[index]=cells[swap];cells[swap]=held
-	for point:Vector2 in cells:
-		var apart:=true
-		for other in siblings:
-			if other.distance_to(point)<NEIGHBOR_SEPARATION_KM:apart=false;break
-		if apart and supports_founders(PlanetEnvironment.profile_at(point)):return point
-	return Vector2.INF
-
-const REGION_CELL_KM:=20.0
-const REGION_WATER_CELLS:=1
-
-static func _reachable_ring(anchor:Vector2)->Array[Vector2]:
-	## Land a band could walk to from the anchor: a bounded grid flood fill that
-	## may cross at most one cell (about 20 km) of water at a time, as over a
-	## strait or a wide river. Returns land cells in the neighbour window.
-	var limit:=ceili(NEIGHBOR_MAX_KM/REGION_CELL_KM)
-	var best_run:Dictionary={Vector2i.ZERO:0}
-	var queue:Array[Vector2i]=[Vector2i.ZERO]
-	var cursor:=0
-	var ring:Array[Vector2]=[]
-	while cursor<queue.size():
-		var cell:=queue[cursor];cursor+=1
-		var run:=int(best_run[cell])
-		for direction:Vector2i in [Vector2i.RIGHT,Vector2i.DOWN,Vector2i.LEFT,Vector2i.UP]:
-			var next:=cell+direction
-			if absi(next.x)>limit or absi(next.y)>limit:continue
-			var point:=anchor+Vector2(next)*REGION_CELL_KM
-			if absf(point.x)>PlanetEnvironment.PLANET_WIDTH_KM*.49 or absf(point.y)>PlanetEnvironment.PLANET_DEPTH_KM*.49:continue
-			var land:=PlanetEnvironment.is_land(point)
-			var next_run:=0 if land else run+1
-			if next_run>REGION_WATER_CELLS or int(best_run.get(next,999))<=next_run:continue
-			var first_visit:=not best_run.has(next)
-			best_run[next]=next_run
-			queue.append(next)
-			var distance:=point.distance_to(anchor)
-			if first_visit and land and distance>=NEIGHBOR_MIN_KM and distance<=NEIGHBOR_MAX_KM:ring.append(point)
-	return ring
-
-static func _planet_candidate(seed_value:int,seat:int)->Vector2:
+static func _planet_candidate(seed_value:int,seat:int,earlier:Array=[])->Vector2:
 	var rng:=RandomNumberGenerator.new()
 	rng.seed=seed_value^((seat+1)*32452843)
 	var best:=Vector2.ZERO;var best_score:=-INF
+	# A crowded or watery planet: the place farthest from every earlier seat,
+	# preferring one where the founding kit can live.
+	var far:=Vector2.ZERO;var far_value:=-INF
 	# Generated communities share a generalist founding kit. Select places where
 	# that kit has a plausible subsistence base, not merely a patch of dry ground.
 	# This does not restrict later player settlement or grant local resources.
-	for attempt in 48:
+	for attempt in FIRST_DRAWS+(0 if earlier.is_empty() else SEPARATION_DRAWS):
 		var desired:=Vector2(rng.randf_range(-18000,18000),rng.randf_range(-8000,8000))
 		var point:=PlanetEnvironment.nearest_viable_land(desired,seed_value^((seat+1)*104729+attempt))
 		var profile:=PlanetEnvironment.profile_at(point)
 		var score:=float(profile.food_potential)+minf(.3,float(profile.growing_season)*.3)
 		if score>best_score:best=point;best_score=score
-		if supports_founders(profile):return point
-	return best
+		var fits:=supports_founders(profile)
+		var apart:=separation(point,earlier)
+		if fits and apart>=SEAT_SEPARATION_KM:return point
+		var value:=minf(apart,SEAT_SEPARATION_KM)+(100000.0 if fits else 0.0)
+		if value>far_value:far=point;far_value=value
+	return best if earlier.is_empty() else far
 
 static func supports_founders(profile:Dictionary)->bool:
 	return bool(profile.get("land",false)) and float(profile.get("food_potential",0))>=.4 and float(profile.get("mean_temperature_c",-100))>=6.0 and float(profile.get("growing_season",0))>=.35

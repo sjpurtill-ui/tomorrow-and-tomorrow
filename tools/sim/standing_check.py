@@ -14,7 +14,7 @@ Two parts, about two minutes on 12 processes:
      IMPOSSIBLE       a strength no path lifts past 70% by year 600;
      FOCUS LOW        a path that does not lift its own strength past 70%.
 2. THE ARTS PAY AND COST. The balanced temper in leaders.py's raid world
-   (neighbours from year 40, envy raids by standing.gd's rules) with no
+   (neighbours from params contact_year, year 98, envy raids by standing.gd's rules) with no
    posture, with cunning and with persuasion: raids, raids seen coming,
    repelled, the dead and the stores taken, against the people, discoveries
    and stores the posture costs.
