@@ -54,15 +54,15 @@ static func calm()->bool:
 	for army:Dictionary in military.field_armies:
 		if String(army.get("status","stationed"))!="stationed":return false
 	if int(WorldSimulation.world.player_effects().get("war_count",0))>0:return false
-	if float(WorldSimulation.state.simulation_metrics.get("water_intake_ratio",0.0))<.98:return false
-	# A dry year that bites drains a store day by day (dry_water.gd): a water
-	# day covers one day, so the people step daily while any store falls or
-	# is low. A dry year whose stores hold steps as any calm day.
-	if preload("res://scripts/dry_water.gd").bites_any():return false
+	# A thirsty people steps daily, except in a dry year: its water day then
+	# runs every day a step covers (resource_system.gd) and the thirst kills
+	# as those days would, so a dry year costs no extra steps (dry_water.gd).
+	var dry_year:=not preload("res://scripts/dry_water.gd").running().is_empty()
+	if float(WorldSimulation.state.simulation_metrics.get("water_intake_ratio",0.0))<.98 and not dry_year:return false
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
 		var metrics:Dictionary=city.get("resource_metrics",{})
-		if float(metrics.get("water_intake_ratio",0.0))<.98:return false
+		if float(metrics.get("water_intake_ratio",0.0))<.98 and not dry_year:return false
 	return true
 
 ## Longest step the owner's food stores allow: a share of the fewest days of
@@ -100,7 +100,4 @@ static func _town_calm(city:Dictionary)->bool:
 	var military=WorldSimulation.military
 	if not military.active_engagement.is_empty() or not military.active_threat.is_empty() or not military.active_siege.is_empty():return false
 	var metrics:Dictionary=city.get("resource_metrics",{})
-	# Its store drains a day at a time while a dry year bites it (dry_water.gd).
-	var local:Variant=city.get("local_resources",{})
-	if local is Dictionary and preload("res://scripts/dry_water.gd").bites((local as Dictionary).get("water_metrics",{}) if (local as Dictionary).get("water_metrics") is Dictionary else {}):return false
 	return float(metrics.get("water_intake_ratio",0.0))>=.98

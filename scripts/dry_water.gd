@@ -165,8 +165,12 @@ static func running()->Dictionary:
 
 ## Today's loss for the town in scope (0 with no dry year).
 static func loss_now()->float:
+	return loss_at(float(WorldSimulation.state.elapsed_days))
+
+## The running dry year's loss on `day` (0 with none).
+static func loss_at(day:float)->float:
 	var c:=running()
-	return 0.0 if c.is_empty() else loss(c,float(WorldSimulation.state.elapsed_days))
+	return 0.0 if c.is_empty() else loss(c,day)
 
 ## Every lived-in town of the people in scope: [{name, water (its last water
 ## day), shortage_days, population}], the capital first.
@@ -229,32 +233,6 @@ static func held_now()->float:
 		people+=float(town.population)
 		held+=float(town.population)*(float((parts as Dictionary).get("held",0.0)) if parts is Dictionary else 0.0)
 	return held/people if people>0.0 else 0.0
-
-## A store this low (days of drinking) is watched day by day in a dry year.
-const BITE_DAYS:=3.0
-
-## Whether a dry year bites this town now: the springs fail enough that the
-## store falls (what is drawn at today's loss and reach is less than the
-## day's need), or the store is already low. Only then must its days run one
-## at a time (day_span.gd); a full store that holds steps like any other.
-static func bites(water:Dictionary,loss_today:float=-1.0)->bool:
-	var lost:=loss_now() if loss_today<0.0 else loss_today
-	if lost<=0.0 or water.is_empty():return false
-	var need:=float(water.get("total_required_today",water.get("required_today",0.0)))
-	if need<=0.0:return false
-	if float(water.get("stored",0.0))<float(water.get("required_today",need))*BITE_DAYS:return true
-	var parts:Variant=water.get("dry_parts",{})
-	if not parts is Dictionary or (parts as Dictionary).is_empty():return true
-	var got:=collect(parts,lost,float((parts as Dictionary).get("held",0.0)),reach(far_policy_on(float(WorldSimulation.state.elapsed_days))))
-	return float(got.collected)<need*0.999
-
-## Whether a dry year bites any town of the people in scope.
-static func bites_any()->bool:
-	var lost:=loss_now()
-	if lost<=0.0:return false
-	for town:Dictionary in towns():
-		if bites(town.water,lost):return true
-	return false
 
 ## The people's days of water held: every town's store over its drinking.
 static func store_days()->float:

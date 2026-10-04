@@ -172,6 +172,40 @@ func test_the_answers_reach_is_capped_with_the_records()->void:
 	# Already at the cap: carrying again reaches no further (its haul still counts).
 	assert_float(float(carried.thirst)).is_less_equal(float(plain.thirst))
 
+## A calm people may step several days at once (day_span.gd). Its water
+## day then runs each of those days' store in turn, so a falling store falls
+## by every day covered and the step's drinking kills as the days' would:
+## no people needs daily steps for a dry year (the review's speed concern).
+func test_a_step_of_several_days_drains_as_many_water_days()->void:
+	_days(_river(),1,9)
+	var c:=_dry_year(0.85)
+	c.start=-1000;c.end_day=10000
+	var cubes:=0.0
+	for day in range(10,20):
+		GameState.elapsed_days=float(day)
+		ResourceSystem._process_water_flow(_river())
+		cubes+=pow(1.0-float(GameState.water_metrics.intake_ratio),3.0)
+	var daily_store:=float(GameState.water_metrics.stored)
+	assert_float(cubes).is_greater(0.0)
+	before_test()
+	_days(_river(),1,9)
+	c=_dry_year(0.85)
+	c.start=-1000;c.end_day=10000
+	WorldSimulation.span=10
+	GameState.elapsed_days=19.0
+	ResourceSystem._process_water_flow(_river())
+	WorldSimulation.span=1
+	assert_float(float(GameState.water_metrics.stored)).is_equal_approx(daily_store,0.001)
+	assert_float(pow(1.0-float(GameState.water_metrics.intake_ratio),3.0)*10.0).is_equal_approx(cubes,0.001)
+
+## A thirsty people steps daily, except in a dry year, whose water days a
+## step integrates (above): a dry year costs no extra steps.
+func test_a_dry_year_keeps_a_calm_people_stepping()->void:
+	GameState.simulation_metrics["water_intake_ratio"]=0.6
+	assert_bool(preload("res://scripts/day_span.gd").calm()).is_false()
+	_dry_year()
+	assert_bool(preload("res://scripts/day_span.gd").calm()).is_true()
+
 func test_with_no_dry_year_the_water_day_is_unchanged()->void:
 	# collect() with no loss is the old arithmetic exactly.
 	var parts:={"need":100.0,"cap":135.0,"near":320.0,"household":118.0,"flow":0.95,"organized":202.0,"line":60.0,"rain":9.6,"cistern":250.0,"accessible":true}

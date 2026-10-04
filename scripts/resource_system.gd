@@ -354,7 +354,8 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	# A running dry year dries the near sources (dry_water.gd): today's loss,
 	# the share this town's groundwater keeps away, and how much of the far
 	# pools the people reach (the answer "carry" sends every strong back).
-	var dry_loss:=DryWater.loss_now()
+	# A step of several days reads the dry year at its middle day.
+	var dry_loss:=DryWater.loss_at(float(WorldSimulation.state.elapsed_days)-float(maxi(1,int(WorldSimulation.span))-1)*0.5)
 	var dry_held:=DryWater.held_by(preload("res://scripts/water_waste_works.gd")._has_existing_well(context),preload("res://scripts/built_fabric.gd").works_cover("water"))
 	var dry_reach:=DryWater.reach(WorldSimulation.consequences.policy_effect("water_far"))
 	var cap:=total_required*DryWater.DRAW_CAP
@@ -377,16 +378,29 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var capacity:=population*portable_days+maxf(0.0,float(works.get("cistern_capacity",0.0)))
 	capacity+=preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"water_capacity")
 	var stored_before:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Freshwater",0.0)))
-	var available:=minf(capacity,stored_before+collected)
-	var drinking_consumed:=minf(drinking_required,available)
-	var remaining:=maxf(0.0,available-drinking_consumed)
-	var wound_cleaning_used:=minf(wound_cleaning_required,remaining)
-	remaining=maxf(0.0,remaining-wound_cleaning_used)
-	var clean_water_used:=minf(clean_water_required,remaining)
+	# A multi-day step (day_span.gd) runs each of its days' store in turn at
+	# the day's draw, so a falling store falls by every day it covers; its
+	# drinking is told as the day whose shortfall kills as the days' did
+	# (the thirst rate is the cube of the shortfall, dry_water.gd).
+	var span:=maxi(1,int(WorldSimulation.span))
+	var stored:=stored_before
+	var available:=0.0
+	var drinking_consumed:=0.0;var wound_cleaning_used:=0.0;var clean_water_used:=0.0
+	var short_cubed:=0.0
+	for step in span:
+		available=minf(capacity,stored+collected)
+		var drunk:=minf(drinking_required,available)
+		var remaining:=maxf(0.0,available-drunk)
+		var wound:=minf(wound_cleaning_required,remaining)
+		remaining=maxf(0.0,remaining-wound)
+		var clean:=minf(clean_water_required,remaining)
+		stored=maxf(0.0,available-drunk-wound-clean)
+		drinking_consumed+=drunk;wound_cleaning_used+=wound;clean_water_used+=clean
+		short_cubed+=pow(clampf(1.0-drunk/maxf(0.01,drinking_required),0.0,1.0),3.0)
+	drinking_consumed/=float(span);wound_cleaning_used/=float(span);clean_water_used/=float(span)
 	var consumed:=drinking_consumed+wound_cleaning_used+clean_water_used
-	var stored:=maxf(0.0,available-consumed)
 	WorldSimulation.state.resource_stockpiles["Freshwater"]=stored
-	var intake:=clampf(drinking_consumed/maxf(0.01,drinking_required),0.0,1.0)
+	var intake:=clampf(drinking_consumed/maxf(0.01,drinking_required),0.0,1.0) if span==1 else clampf(1.0-pow(short_cubed/float(span),1.0/3.0),0.0,1.0)
 	var wound_cleaning_coverage:=clampf(wound_cleaning_used/maxf(.000001,wound_cleaning_required),0.0,1.0) if wound_cleaning_required>.000001 else 0.0
 	var clean_water_coverage:=clampf(clean_water_used/maxf(.000001,clean_water_required),0.0,1.0) if clean_water_required>.000001 else 0.0
 	WorldSimulation.state.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"conveyed_today":conveyed,"rain_collected_today":rain_collected,"cistern_capacity":float(works.get("cistern_capacity",0.0)),"household_collected_today":minf(collected,household_collection*flow_factor),"organized_collection_capacity":organized_collection*flow_factor,"required_today":drinking_required,"practice_required_today":practice_required,"total_required_today":total_required,"consumed_today":consumed,"drinking_consumed_today":drinking_consumed,"wound_cleaning_water_used":wound_cleaning_used,"clean_water_water_used":clean_water_used,"wound_cleaning_coverage":wound_cleaning_coverage,"clean_water_coverage":clean_water_coverage,"intake_ratio":intake,"days":stored/maxf(0.01,drinking_required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers,
