@@ -16,7 +16,7 @@
         ]
       },
       "source_sha256": "84c95e81cf67251325bb616e6ed1434a13231f79bece33170c279254c14e9459",
-      "sha256": "fb66be56a4662323b3140bea2f3e318372b0ce3127054cd9f1ff9b21f242884a"
+      "sha256": "725b80221d3eb94636e3c41cf4c003faae96c0196a2799b4c45664b6f5d4d4ca"
     },
     "female_old": {
       "file": "court_legacy_female_old.glb",
@@ -32,7 +32,7 @@
         ]
       },
       "source_sha256": "55328f7b84b143cf0da77927739be516e579d8a4fdf3f8d5d5199a33918c1c98",
-      "sha256": "ad90c04869ae506ba8182140c3677f0ca327bb4fd87618d55dff9019940f9ef2"
+      "sha256": "4c6749676fc8c80ad95dca4ed81d343360af103ce1bdd211df2f939c7e717b88"
     }
   }
 }
