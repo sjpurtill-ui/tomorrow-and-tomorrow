@@ -54,6 +54,9 @@ static func dress(look:Dictionary,profile:Dictionary,formal_role:=false)->Dictio
 		var base:Color=[Color("29303b"),Color("39322d"),Color("33383b"),Color("343c36")][posmod(seed_value>>4,4)]
 		cloth[0]=base.lerp(Color(cloth[0]),float(profile.get("tailored_colour_weight",0.33)))
 		cloth[1]=Color("e9e3d4")
+		# These bundles already include leather shoes. Keep them distinct from
+		# the tan hide footwear instead of tinting a suited foot like bare skin.
+		out["leather"]=[Color("191b1d"),Color("30261f"),Color("3b2921")][posmod(seed_value>>5,3)]
 		if outfit=="business" and posmod(seed_value>>7,3)==0:
 			var without:Array=out.get("without",[])
 			if not "business_tie" in without:without.append("business_tie")

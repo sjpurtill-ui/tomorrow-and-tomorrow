@@ -19,8 +19,6 @@
           "medieval_doublet",
           "medieval_skirt_0",
           "medieval_skirt_1",
-          "medieval_skirt_2",
-          "medieval_skirt_3",
           "medieval_cuff_L",
           "medieval_cuff_R",
           "medieval_collar",
@@ -35,8 +33,8 @@
           "courtcoat_shoes",
           "courtcoat_jacket",
           "courtcoat_shirt",
-          "courtcoat_skirt_2",
-          "courtcoat_skirt_3",
+          "courtcoat_skirt_0",
+          "courtcoat_skirt_1",
           "courtcoat_cuff_L",
           "courtcoat_cuff_R",
           "courtcoat_collar",
@@ -57,8 +55,6 @@
           "formal_shirt",
           "formal_skirt_0",
           "formal_skirt_1",
-          "formal_skirt_2",
-          "formal_skirt_3",
           "formal_cuff_L",
           "formal_cuff_R",
           "formal_collar",
@@ -85,9 +81,9 @@
           "business_button_1"
         ]
       },
-      "covered_vertices": 2878,
+      "covered_vertices": 2794,
       "body_vertices": 4000,
-      "sha256": "ac5e4965c5ce6f3833398fef40d96acd2eb53b76c3459aafdb0334bd8d55c065"
+      "sha256": "d5b413aa3a4cd1e7c71c56a2eb622e09f5b8f6ab2b382580323d4f478b599e30"
     },
     {
       "variant": "female_adult",
@@ -100,8 +96,6 @@
           "medieval_doublet",
           "medieval_skirt_0",
           "medieval_skirt_1",
-          "medieval_skirt_2",
-          "medieval_skirt_3",
           "medieval_cuff_L",
           "medieval_cuff_R",
           "medieval_collar",
@@ -116,8 +110,8 @@
           "courtcoat_shoes",
           "courtcoat_jacket",
           "courtcoat_shirt",
-          "courtcoat_skirt_2",
-          "courtcoat_skirt_3",
+          "courtcoat_skirt_0",
+          "courtcoat_skirt_1",
           "courtcoat_cuff_L",
           "courtcoat_cuff_R",
           "courtcoat_collar",
@@ -138,8 +132,6 @@
           "formal_shirt",
           "formal_skirt_0",
           "formal_skirt_1",
-          "formal_skirt_2",
-          "formal_skirt_3",
           "formal_cuff_L",
           "formal_cuff_R",
           "formal_collar",
@@ -166,9 +158,9 @@
           "business_button_1"
         ]
       },
-      "covered_vertices": 2900,
+      "covered_vertices": 2853,
       "body_vertices": 4002,
-      "sha256": "40efc997c858ee89f99855ae51d3f6f578730cd0bc7381d57952da7da16113e1"
+      "sha256": "95e17314501429f31b3102e86440737b29e7b29d1c7f9964d5e531ea63172a53"
     },
     {
       "variant": "male_old",
@@ -181,8 +173,6 @@
           "medieval_doublet",
           "medieval_skirt_0",
           "medieval_skirt_1",
-          "medieval_skirt_2",
-          "medieval_skirt_3",
           "medieval_cuff_L",
           "medieval_cuff_R",
           "medieval_collar",
@@ -197,8 +187,8 @@
           "courtcoat_shoes",
           "courtcoat_jacket",
           "courtcoat_shirt",
-          "courtcoat_skirt_2",
-          "courtcoat_skirt_3",
+          "courtcoat_skirt_0",
+          "courtcoat_skirt_1",
           "courtcoat_cuff_L",
           "courtcoat_cuff_R",
           "courtcoat_collar",
@@ -219,8 +209,6 @@
           "formal_shirt",
           "formal_skirt_0",
           "formal_skirt_1",
-          "formal_skirt_2",
-          "formal_skirt_3",
           "formal_cuff_L",
           "formal_cuff_R",
           "formal_collar",
@@ -247,9 +235,9 @@
           "business_button_1"
         ]
       },
-      "covered_vertices": 2771,
+      "covered_vertices": 2681,
       "body_vertices": 4008,
-      "sha256": "4ad999aa6e812032e9760eea703696786c5d83ba4d471758d2bb6609ece1f594"
+      "sha256": "357de564604dcc82b8950370b648c20c3779d6b4bcc1593167f22c73ef7e5362"
     },
     {
       "variant": "female_old",
@@ -262,8 +250,6 @@
           "medieval_doublet",
           "medieval_skirt_0",
           "medieval_skirt_1",
-          "medieval_skirt_2",
-          "medieval_skirt_3",
           "medieval_cuff_L",
           "medieval_cuff_R",
           "medieval_collar",
@@ -278,8 +264,8 @@
           "courtcoat_shoes",
           "courtcoat_jacket",
           "courtcoat_shirt",
-          "courtcoat_skirt_2",
-          "courtcoat_skirt_3",
+          "courtcoat_skirt_0",
+          "courtcoat_skirt_1",
           "courtcoat_cuff_L",
           "courtcoat_cuff_R",
           "courtcoat_collar",
@@ -300,8 +286,6 @@
           "formal_shirt",
           "formal_skirt_0",
           "formal_skirt_1",
-          "formal_skirt_2",
-          "formal_skirt_3",
           "formal_cuff_L",
           "formal_cuff_R",
           "formal_collar",
@@ -328,9 +312,9 @@
           "business_button_1"
         ]
       },
-      "covered_vertices": 2820,
+      "covered_vertices": 2754,
       "body_vertices": 4004,
-      "sha256": "9f9041ff375a23aad83ecd5f258acf7144085689e3e08cc54ba34c403e5d3c51"
+      "sha256": "af4c15cf48f8ec57750f4ca0848a8eafb62b5f245d3c4095fc9205b6ab3f4215"
     },
     {
       "variant": "male_young",
@@ -343,8 +327,6 @@
           "medieval_doublet",
           "medieval_skirt_0",
           "medieval_skirt_1",
-          "medieval_skirt_2",
-          "medieval_skirt_3",
           "medieval_cuff_L",
           "medieval_cuff_R",
           "medieval_collar",
@@ -359,8 +341,8 @@
           "courtcoat_shoes",
           "courtcoat_jacket",
           "courtcoat_shirt",
-          "courtcoat_skirt_2",
-          "courtcoat_skirt_3",
+          "courtcoat_skirt_0",
+          "courtcoat_skirt_1",
           "courtcoat_cuff_L",
           "courtcoat_cuff_R",
           "courtcoat_collar",
@@ -381,8 +363,6 @@
           "formal_shirt",
           "formal_skirt_0",
           "formal_skirt_1",
-          "formal_skirt_2",
-          "formal_skirt_3",
           "formal_cuff_L",
           "formal_cuff_R",
           "formal_collar",
@@ -409,9 +389,9 @@
           "business_button_1"
         ]
       },
-      "covered_vertices": 2840,
+      "covered_vertices": 2765,
       "body_vertices": 4002,
-      "sha256": "2e5fa04b81e7342d787bca9b87dc68f4d8a189fdfa653d93419d272ce5b3cc28"
+      "sha256": "88c950fa0c39b2fd1ca8a48a9b99ac8594590f024ad9ffbf727d0644f1c86ae4"
     },
     {
       "variant": "female_young",
@@ -424,8 +404,6 @@
           "medieval_doublet",
           "medieval_skirt_0",
           "medieval_skirt_1",
-          "medieval_skirt_2",
-          "medieval_skirt_3",
           "medieval_cuff_L",
           "medieval_cuff_R",
           "medieval_collar",
@@ -440,8 +418,8 @@
           "courtcoat_shoes",
           "courtcoat_jacket",
           "courtcoat_shirt",
-          "courtcoat_skirt_2",
-          "courtcoat_skirt_3",
+          "courtcoat_skirt_0",
+          "courtcoat_skirt_1",
           "courtcoat_cuff_L",
           "courtcoat_cuff_R",
           "courtcoat_collar",
@@ -462,8 +440,6 @@
           "formal_shirt",
           "formal_skirt_0",
           "formal_skirt_1",
-          "formal_skirt_2",
-          "formal_skirt_3",
           "formal_cuff_L",
           "formal_cuff_R",
           "formal_collar",
@@ -490,9 +466,9 @@
           "business_button_1"
         ]
       },
-      "covered_vertices": 2900,
+      "covered_vertices": 2837,
       "body_vertices": 4002,
-      "sha256": "5bb286d52a0cbbfb91c15aa3d3d97ff59a2a53c14c3f52a1ccbbec93934717eb"
+      "sha256": "887efa51890134da0eff46c2340649f80e64685db6de76a633d58f20763b5b82"
     },
     {
       "variant": "child",
@@ -505,8 +481,6 @@
           "medieval_doublet",
           "medieval_skirt_0",
           "medieval_skirt_1",
-          "medieval_skirt_2",
-          "medieval_skirt_3",
           "medieval_cuff_L",
           "medieval_cuff_R",
           "medieval_collar",
@@ -521,8 +495,8 @@
           "courtcoat_shoes",
           "courtcoat_jacket",
           "courtcoat_shirt",
-          "courtcoat_skirt_2",
-          "courtcoat_skirt_3",
+          "courtcoat_skirt_0",
+          "courtcoat_skirt_1",
           "courtcoat_cuff_L",
           "courtcoat_cuff_R",
           "courtcoat_collar",
@@ -542,8 +516,6 @@
           "formal_shirt",
           "formal_skirt_0",
           "formal_skirt_1",
-          "formal_skirt_2",
-          "formal_skirt_3",
           "formal_cuff_L",
           "formal_cuff_R",
           "formal_collar",
@@ -568,9 +540,9 @@
           "business_button_1"
         ]
       },
-      "covered_vertices": 2791,
+      "covered_vertices": 2719,
       "body_vertices": 3999,
-      "sha256": "b7824892977324802a36594b01deae93c9a7ecd627f189916f3999765acc824d"
+      "sha256": "0561f4f6c23b7864878faff54aa75ec56a862c999ecd8809a42867e46e8d0f6f"
     }
   ]
 }

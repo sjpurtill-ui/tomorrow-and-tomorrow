@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import struct
+from collections import Counter
 import numpy as np
 
 DT = {5120:"i1",5121:"u1",5122:"<i2",5123:"<u2",5125:"<u4",5126:"<f4"}
@@ -35,6 +36,51 @@ class GLB:
         return self.doc["meshes"][node["mesh"]]
 
 
+def boundary_edges(glb, name):
+    """Weld clip-generated duplicates before finding the visible cut edges."""
+    mesh=glb.mesh(name)["primitives"][0]
+    pos=glb.values(mesh["attributes"]["POSITION"])
+    faces=glb.values(mesh["indices"]).reshape(-1,3)
+    _,ids=np.unique(np.round(pos,6),axis=0,return_inverse=True)
+    edges=Counter()
+    samples={}
+    for face in faces:
+        for i in range(3):
+            a,c=int(face[i]),int(face[(i+1)%3])
+            key=tuple(sorted((int(ids[a]),int(ids[c]))))
+            if key[0]==key[1]:continue
+            edges[key]+=1;samples[key]=(pos[a],pos[c])
+    return np.asarray([samples[key] for key,n in edges.items() if n==1])
+
+
+def check_seams(bundle, rec, body):
+    height=float(body[:,1].max()-body[:,1].min())
+    for outfit in rec["outfits"]:
+        shell=outfit+("_doublet" if outfit=="medieval" else "_jacket")
+        edges=boundary_edges(bundle,shell)
+        upper=edges[np.all(edges[:,:,1]>height*.78,axis=1)]
+        assert len(upper)>12,(rec["variant"],shell,"missing neckline")
+        span=float(np.ptp(upper[:,:,1]))
+        # A fitted neck can rise gently at the side; the old rectangular mask
+        # left 5-6 cm tabs. Bound that excursion to 1% of the body's height.
+        assert span<height*.010,(rec["variant"],shell,"ragged neckline",span)
+        sleeve_edges=np.unique(edges.reshape(-1,3),axis=0)
+        for side in ("L","R"):
+            cuff=np.unique(boundary_edges(bundle,outfit+"_cuff_"+side).reshape(-1,3),axis=0)
+            distances=((cuff[:,None,:]-sleeve_edges[None,:,:])**2).sum(axis=2).min(axis=1)
+            sewn=int(np.sum(distances<(.0003*height)**2))
+            assert sewn>=8 and sewn>=len(cuff)*.30,(rec["variant"],outfit,side,"unjoined cuff",sewn,len(cuff))
+        if outfit not in ("medieval","formal"):continue
+        # Front/back vents can articulate between the legs. A longitudinal
+        # opening at the outer hip is a missing side seam, not such a vent.
+        for name in rec["outfits"][outfit]:
+            if "_skirt_" not in name:continue
+            edges=boundary_edges(bundle,name)
+            vertical=edges[np.abs(edges[:,0,1]-edges[:,1,1])>.003]
+            assert len(vertical)>0,(rec["variant"],name,"no vent")
+            assert np.abs(vertical[:,:,0]).max()<height*.025,(rec["variant"],name,"open side seam")
+
+
 def check(root):
     folder=os.path.join(root,"assets","court_figures","wardrobe")
     manifest=json.load(open(os.path.join(folder,"court_wardrobe.json")))
@@ -60,6 +106,7 @@ def check(root):
         attrs=b["primitives"][0]["attributes"]
         body=bundle.values(attrs["POSITION"]);colors=bundle.values(attrs["COLOR_0"])
         hidden=body[colors[:,1]>.5]
+        check_seams(bundle,rec,body)
         worst=0.
         for outfit in manifest["outfits"]:
             cloth=[];triangles=0
