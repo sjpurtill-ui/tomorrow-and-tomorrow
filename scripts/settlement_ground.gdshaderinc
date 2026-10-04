@@ -24,12 +24,14 @@ uniform sampler2DArray settlement_ground : filter_linear_mipmap, repeat_disable;
 uniform sampler2DArray settlement_fields : filter_linear, repeat_disable;
 // Each slot's square: origin split into an exact multiple of 64 km (x, y) and
 // a small remainder (z, w), all in world km.
-uniform vec4 sg_origins[4];
+uniform vec4 sg_origins[8];
 // size (km), strength (0 disables), -, -
-uniform vec4 sg_frames[4];
+uniform vec4 sg_frames[8];
 // Each slot's cultivated halo (codex/beauty-5): radius (km), strength (0
 // none), worked share (fields rather than pasture), orchards known (0/1).
-uniform vec4 sg_halos[4];
+uniform vec4 sg_halos[8];
+// Home tiles share settlement-local noise coordinates across padded seams.
+uniform vec2 sg_noise_offsets[8];
 
 float sg_hash(vec2 p) {
 	vec3 q = fract(vec3(p.xyx)*0.1031);
@@ -49,12 +51,14 @@ float sg_noise(vec2 p) {
 // metres within it (precise: see surface_precision).
 int settlement_ground_slot(vec2 surface_position_km, vec2 surface_origin_km, out vec2 local_m) {
 	local_m = vec2(-1.0);
-	for (int s = 0; s < 4; s++) {
+	for (int index = 0; index < 8; index++) {
+		int s = index < 4 ? index+4 : index-4;
 		if (sg_frames[s].y <= 0.0) { continue; }
 		vec2 cells = surface_origin_km-sg_origins[s].xy;
 		vec2 m = (surface_position_km+cells-sg_origins[s].zw)*1000.0;
 		float size_m = sg_frames[s].x*1000.0;
-		if (m.x > 0.0 && m.y > 0.0 && m.x < size_m && m.y < size_m) { local_m = m; return s; }
+		float pad_m = sg_frames[s].z*1000.0;
+		if (m.x >= pad_m && m.y >= pad_m && m.x < size_m-pad_m && m.y < size_m-pad_m) { local_m = m; return s; }
 	}
 	return -1;
 }
@@ -66,10 +70,12 @@ float settlement_clearing(int slot, vec2 local_m, float pixel_m) {
 	if (slot < 0) { return 0.0; }
 	float size_m = sg_frames[slot].x*1000.0;
 	vec2 uv = local_m/size_m;
+	local_m += sg_noise_offsets[slot];
 	vec4 coarse = textureLod(settlement_ground, vec3(uv, float(slot)), 5.0);
 	float lived = max(coarse.g*1.4, coarse.r);
 	float ragged = sg_noise(local_m*0.045+vec2(3.0, -1.0))*0.7+sg_noise(local_m*0.13)*0.3;
 	float fade = smoothstep(0.02, 0.18, min(min(uv.x, uv.y), min(1.0-uv.x, 1.0-uv.y))+(ragged-0.5)*0.10);
+	if (slot >= 4) { fade = 1.0; } // Padded adjacent tiles have no clearing seam.
 	return smoothstep(0.03, 0.18, lived+(ragged-0.5)*0.16)*fade*sg_frames[slot].y;
 }
 
@@ -174,6 +180,7 @@ vec3 settlement_ground_paint(vec3 earth, int slot, vec2 local_m, float pixel_m, 
 	float strength = sg_frames[slot].y*(1.0-smoothstep(2.5, 6.0, pixel_m));
 	if (strength <= 0.0) { return earth; }
 	vec2 uv = local_m/size_m;
+	local_m += sg_noise_offsets[slot];
 	float layer = float(slot);
 	// Untouched meadow costs one coarse look (a mip a few metres across).
 	vec4 coarse = textureLod(settlement_ground, vec3(uv, layer), 2.0);
@@ -247,6 +254,7 @@ vec3 settlement_fields_paint(vec3 earth, int slot, vec2 local_m, float pixel_m) 
 	float strength = sg_frames[slot].y*(1.0-smoothstep(4.0, 9.0, pixel_m));
 	if (strength <= 0.0) { return earth; }
 	vec2 uv = local_m/size_m;
+	local_m += sg_noise_offsets[slot];
 	float layer = float(slot);
 	// Most ground is not worked: one plain look before any noise.
 	if (textureLod(settlement_fields, vec3(uv, layer), 0.0).r < 0.001) { return earth; }

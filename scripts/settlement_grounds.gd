@@ -11,14 +11,21 @@ extends RefCounted
 ##      paths out to the water point and the worked fields;
 ##   G  grass worn short around every dwelling and along the paths;
 ##   B  ash at the hearth, the midden, and the burnt ground of ruins.
-## Four slots share two texture arrays: slot 0 is the home settlement, slots
+## Eight slots share two texture arrays: slot 0 is the home settlement, slots
 ## 1-3 the player's other towns and the foreign cities the people have seen,
 ## whichever were drawn most recently near the camera (the farthest is let go
-## first). Everything derives from plots, buildings and routes; nothing here
+## first); slots 4-7 stream fixed home ground tiles beyond the old centre.
+## Everything derives from plots, buildings and routes; nothing here
 ## changes the simulation or the save.
 
 const RES:=512
-const SLOTS:=4
+const SLOTS:=8
+const CITY_SLOTS:=4
+## Four camera-local home tiles supplement the retained founding ground.
+## Their fixed grid never stretches as population or settlement extent grows.
+const TILE_KM:=0.512
+const TILE_PAD_KM:=0.032
+const MAX_TILE_CACHE:=12
 const MIN_SIZE_KM:=0.14
 const MAX_SIZE_KM:=1.1
 const PAD_KM:=0.03
@@ -39,14 +46,22 @@ static var report:Dictionary={}
 ## Every slot, for the shader: two texture arrays and per-slot frames.
 static var ground_layers:Texture2DArray
 static var field_layers:Texture2DArray
-static var slot_keys:PackedStringArray=PackedStringArray(["","","",""])
-static var slot_signatures:PackedInt64Array=PackedInt64Array([0,0,0,0])
-static var slot_centers:PackedVector2Array=PackedVector2Array([Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO])
-static var slot_origins:PackedVector4Array=PackedVector4Array([Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO])
-static var slot_frames:PackedVector4Array=PackedVector4Array([Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0)])
+static var slot_keys:PackedStringArray=PackedStringArray(["","","","","","","",""])
+static var slot_signatures:PackedInt64Array=PackedInt64Array([0,0,0,0,0,0,0,0])
+static var slot_centers:PackedVector2Array=PackedVector2Array([Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO])
+static var slot_origins:PackedVector4Array=PackedVector4Array([Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO])
+static var slot_frames:PackedVector4Array=PackedVector4Array([Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0),Vector4(1,0,0,0)])
 ## Each slot's cultivated halo: radius km, strength, worked share, orchards.
-static var slot_halos:PackedVector4Array=PackedVector4Array([Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO])
-static var slot_reports:Array[Dictionary]=[{},{},{},{}]
+static var slot_halos:PackedVector4Array=PackedVector4Array([Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO,Vector4.ZERO])
+static var slot_reports:Array[Dictionary]=[{},{},{},{},{},{},{},{}]
+static var slot_noise_offsets:PackedVector2Array=PackedVector2Array([Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO,Vector2.ZERO])
+static var _tile_cache:Dictionary={}
+static var _tile_inputs:Dictionary={}
+static var _tile_view:=Vector2i(2147483647,2147483647)
+static var _tile_revision:=0
+static var _home_revision:=0
+static var tile_builds:=0
+static var tile_cache_hits:=0
 static var _materials:Array[WeakRef]=[]
 static var _brushes:Dictionary={}
 ## Places other than the home that have been drawn: key -> [plan, plots,
@@ -66,6 +81,7 @@ static func bind(material:ShaderMaterial)->void:
 static func _apply(material:ShaderMaterial)->void:
 	material.set_shader_parameter("sg_frames",slot_frames)
 	material.set_shader_parameter("sg_halos",slot_halos)
+	material.set_shader_parameter("sg_noise_offsets",slot_noise_offsets)
 	if ground_layers==null:return
 	material.set_shader_parameter("settlement_ground",ground_layers)
 	material.set_shader_parameter("settlement_fields",field_layers)
@@ -84,6 +100,9 @@ static func _apply_all()->void:
 static func clear()->void:
 	texture=null;fields_texture=null;strength=0.0;signature=0;report={}
 	_requests.clear();_served_at=Vector2.INF
+	_home_args.clear();_tile_cache.clear();_tile_inputs.clear()
+	_tile_view=Vector2i(2147483647,2147483647);_tile_revision=0;_home_revision=0
+	tile_builds=0;tile_cache_hits=0
 	for slot in SLOTS:
 		slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot]=Vector4(1,0,0,0);slot_reports[slot]={};slot_halos[slot]=Vector4.ZERO
 	_apply_all()
@@ -128,6 +147,7 @@ static func request(key:String,plan:Dictionary,plots:Array[Dictionary],routes:Ar
 ## not painted yet (at most one per call; cheap when there is nothing to do).
 ## The map calls it on settled frames at settlement zoom.
 static func serve(target:Vector2,reach:float)->void:
+	if _serve_home_tile(target):return
 	if _requests.is_empty() or _served_at.distance_to(target)<reach*0.25:return
 	var best:="";var nearest:=INF
 	for key:String in _requests:
@@ -154,7 +174,7 @@ static func build_other(key:String,plan:Dictionary,plots:Array[Dictionary],route
 	if slot<=0:
 		slot=-1
 		var farthest:=-1.0
-		for candidate in range(1,SLOTS):
+		for candidate in range(1,CITY_SLOTS):
 			if slot_keys[candidate]=="":slot=candidate;break
 			var distance:=slot_centers[candidate].distance_to(near)
 			if distance>farthest:farthest=distance;slot=candidate
@@ -169,7 +189,76 @@ static func build_other(key:String,plan:Dictionary,plots:Array[Dictionary],route
 static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
 	slot_keys[0]="home"
 	_home_args=[plan,plots,routes,center]
-	_paint(0,plan,plots,routes,center)
+	_home_revision=hash([center,_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),_labour(),_works_near(center)])
+	# Distant growth does not move or repaint the old centre's texture.
+	var core:=_in_rect(plan,plots,routes,Rect2(Vector2.ONE*(-MAX_SIZE_KM*0.5),Vector2.ONE*MAX_SIZE_KM))
+	_paint(0,core.plan,core.plots,core.routes,center)
+
+## Narrow a ground job to records whose paint can reach its fixed square.
+## Whole route segments are retained so brush spacing agrees at tile seams.
+static func _in_rect(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],rect:Rect2)->Dictionary:
+	var nearby:=rect.grow(0.09)
+	var selected_plots:Array[Dictionary]=[]
+	var selected_routes:Array[Dictionary]=[]
+	var buildings:Array=[]
+	for plot in plots:
+		var polygon:=_polygon(plot)
+		var bounds:=Rect2(_v2(plot.get("centroid",Vector2.ZERO)),Vector2.ZERO)
+		for point in polygon:bounds=bounds.expand(point)
+		if nearby.intersects(bounds,true):selected_plots.append(plot)
+	for route in routes:
+		var points:=_points(route)
+		if points.is_empty():continue
+		var bounds:=Rect2(points[0],Vector2.ZERO)
+		for point in points:bounds=bounds.expand(point)
+		if nearby.intersects(bounds,true):selected_routes.append(route)
+	for record in plan.get("buildings",[]):
+		if nearby.has_point(Vector2(record.get("position",Vector2.ZERO))):buildings.append(record)
+	return {"plan":{} if plan.is_empty() else {"buildings":buildings},"plots":selected_plots,"routes":selected_routes}
+
+## Installs at most one tile per settled frame. Four resident layers and twelve
+## CPU image pairs bound memory independently of the city's total land area.
+static func _serve_home_tile(target:Vector2)->bool:
+	if _home_args.is_empty():return false
+	var center:Vector3=_home_args[3]
+	var local:=target-Vector2(center.x,center.z)
+	var cell:=Vector2i(floori(local.x/TILE_KM-0.5),floori(local.y/TILE_KM-0.5))
+	if cell!=_tile_view or _tile_revision!=_home_revision:
+		_tile_view=cell;_tile_revision=_home_revision;_tile_inputs.clear()
+		var plots:Array[Dictionary]=[];plots.assign(_home_args[1])
+		var routes:Array[Dictionary]=[];routes.assign(_home_args[2])
+		for y in 2:
+			for x in 2:
+				var coordinate:=cell+Vector2i(x,y)
+				var rect:=Rect2(Vector2(coordinate)*TILE_KM,Vector2.ONE*TILE_KM).grow(TILE_PAD_KM)
+				# The founding square keeps its original detailed presentation.
+				var inner:=rect.grow(-TILE_PAD_KM)
+				var core:=slot_rect(0)
+				var world_inner:=Rect2(inner.position+Vector2(center.x,center.z),inner.size)
+				if core.encloses(world_inner):continue
+				var args:=_in_rect(_home_args[0],plots,routes,rect)
+				if args.plots.is_empty() and args.routes.is_empty() and args.plan.get("buildings",[]).is_empty():continue
+				args["rect"]=rect;args["center"]=center
+				args["signature"]=_paint_key(args.plan,args.plots,args.routes,center,rect)
+				_tile_inputs["home_tile:%d:%d" % [coordinate.x,coordinate.y]]=args
+		for slot in range(CITY_SLOTS,SLOTS):
+			if not _tile_inputs.has(slot_keys[slot]):
+				slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot].y=0.0
+		_apply_all()
+	var wanted:Array=_tile_inputs.keys()
+	wanted.sort_custom(func(a:String,b:String)->bool:return (_tile_inputs[a].rect as Rect2).get_center().distance_squared_to(local)<(_tile_inputs[b].rect as Rect2).get_center().distance_squared_to(local))
+	for key:String in wanted:
+		var args:Dictionary=_tile_inputs[key]
+		var slot:=slot_keys.find(key)
+		if slot>=CITY_SLOTS and slot_signatures[slot]==int(args.signature):continue
+		if slot<CITY_SLOTS:
+			for candidate in range(CITY_SLOTS,SLOTS):
+				if slot_keys[candidate] not in wanted:slot=candidate;break
+		if slot<CITY_SLOTS:continue
+		slot_keys[slot]=key
+		_paint(slot,args.plan,args.plots,args.routes,center,args.rect)
+		return true
+	return false
 
 static var _home_args:Array=[]
 ## Where roads between places leave each town (settlement_roads.gd): world
@@ -179,13 +268,18 @@ static var approaches:Dictionary={}
 static func set_approaches(value:Dictionary)->void:
 	if hash(value)==hash(approaches):return
 	approaches=value
-	for slot in range(1,SLOTS):
+	for slot in range(1,CITY_SLOTS):
 		if slot_keys[slot]!="":slot_signatures[slot]=-1
 	_served_at=Vector2.INF
 	if not _home_args.is_empty():
 		var plots:Array[Dictionary]=[];plots.assign(_home_args[1])
 		var routes:Array[Dictionary]=[];routes.assign(_home_args[2])
-		_paint(0,_home_args[0],plots,routes,_home_args[3])
+		build(_home_args[0],plots,routes,_home_args[3])
+
+static func _paint_key(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,frame:=Rect2())->int:
+	var shares:=_labour()
+	for activity in shares:shares[activity]=snappedf(float(shares[activity]),0.1)
+	return hash([center,frame,_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),_works_near(center) if not frame.has_area() else [],_approach_bearings(Vector2(center.x,center.z)),shares])
 
 ## Road bearings leaving the town at `center` (world km).
 static func _approach_bearings(center:Vector2)->Array:
@@ -195,12 +289,12 @@ static func _approach_bearings(center:Vector2)->Array:
 		if Vector2(entry.center).distance_to(center)<0.4:out.append_array(entry.bearings)
 	return out
 
-static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
+static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,frame:=Rect2())->void:
 	var buildings:Array=plan.get("buildings",[])
 	var works:Array[Dictionary]=[]
 	if slot==0:works=_works_near(center)
 	var bearings:=_approach_bearings(Vector2(center.x,center.z))
-	var key:=hash([center,plots.size(),routes.size(),_fabric_key(plots),_route_key(routes),buildings.size(),_building_key(buildings),works,bearings])
+	var key:=_paint_key(plan,plots,routes,center,frame)
 	if key==slot_signatures[slot] and ground_layers!=null and slot_frames[slot].y>0.0:return
 	slot_signatures[slot]=key
 	var began:=Time.get_ticks_usec()
@@ -229,6 +323,15 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	var side:=clampf(maxf(box.size.x,box.size.y),MIN_SIZE_KM,MAX_SIZE_KM)
 	var mid:=box.get_center()
 	var corner:=mid-Vector2(side,side)*0.5
+	if frame.has_area():side=frame.size.x;corner=frame.position
+	if frame.has_area() and _tile_cache.has(key):
+		var cached:Dictionary=_tile_cache[key]
+		_tile_cache.erase(key);_tile_cache[key]=cached
+		_store(slot,cached.ground,cached.fields)
+		slot_origins[slot]=cached.origin;slot_frames[slot]=cached.frame;slot_halos[slot]=Vector4.ZERO
+		slot_noise_offsets[slot]=frame.position*1000.0
+		slot_centers[slot]=Vector2(center.x,center.z)+frame.get_center();slot_reports[slot]=cached.report.duplicate()
+		tile_cache_hits+=1;_apply_all();return
 	var image:=Image.create_empty(RES,RES,false,Image.FORMAT_RGBA8)
 	image.fill(Color(0,0,0,1))
 	var painter:={"image":image,"corner":corner,"texel":side/float(RES),"stamps":0}
@@ -397,6 +500,8 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	slot_centers[slot]=Vector2(center.x,center.z)
 	slot_origins[slot]=Vector4(hi.x,hi.y,lo.x,lo.y)
 	slot_frames[slot]=Vector4(side,1.0,0.0,0.0)
+	slot_noise_offsets[slot]=corner*1000.0 if slot==0 or frame.has_area() else Vector2.ZERO
+	if frame.has_area():slot_frames[slot].z=TILE_PAD_KM;slot_centers[slot]=Vector2(center.x,center.z)+frame.get_center()
 	# The cultivated halo: wider for a bigger, longer-farmed place; mostly
 	# pasture and clearings where nobody farms yet.
 	var farmed:=field_count>0 or float(shares.get("farm",0.0))>0.0
@@ -405,6 +510,7 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	for entry in GameState.discovery_log:
 		if entry is Dictionary and String(entry.get("id","")) in ["fruit_tree_grafting","terraced_orchards","orchard","nut_orchards","citrus_orchards"]:orchards=1.0;break
 	slot_halos[slot]=Vector4(halo_km,1.0 if slot==0 else 0.85,0.65 if farmed else 0.2,orchards if slot==0 else 0.0)
+	if frame.has_area():slot_halos[slot]=Vector4.ZERO
 	slot_reports[slot]={"fields":field_count,"gardens":gardens,"size_m":roundi(side*1000.0),"texel_m":snappedf(side*1000.0/RES,0.01),"stamps":int(painter.stamps),"build_usec":Time.get_ticks_usec()-began,"slot":slot}
 	if slot==0:
 		if texture==null:texture=ImageTexture.create_from_image(image)
@@ -413,6 +519,10 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 		else:fields_texture.update(worked)
 		origin_hi=hi;origin_lo=lo;size_km=side;strength=1.0;signature=key
 		report=slot_reports[0]
+	if frame.has_area():
+		tile_builds+=1
+		_tile_cache[key]={"ground":image,"fields":worked,"origin":slot_origins[slot],"frame":slot_frames[slot],"report":slot_reports[slot].duplicate()}
+		while _tile_cache.size()>MAX_TILE_CACHE:_tile_cache.erase(_tile_cache.keys()[0])
 	_apply_all()
 
 ## Writes one slot's images into the shared texture arrays (created blank on
@@ -518,17 +628,19 @@ static func _labour()->Dictionary:
 
 static func _fabric_key(plots:Array[Dictionary])->int:
 	var parts:=[]
-	for plot in plots:parts.append([int(plot.get("id",0)),String(plot.get("status","")),String(plot.get("form","")),_v2(plot.get("centroid",Vector2.ZERO))])
+	for plot in plots:parts.append([int(plot.get("id",0)),plot.get("status",""),plot.get("form",""),plot.get("land_use",""),_v2(plot.get("centroid",Vector2.ZERO)),_polygon(plot),plot.get("area_ha",0.01),plot.get("cultivation_phase","prepared"),plot.get("field_pattern","smallholder_mosaic"),plot.get("crop_family","grain"),roundi(float(plot.get("crop_cover",0.1))*15.0),int(plot.get("worker_count",0))>0,plot.get("seed",0)])
 	return hash(parts)
 
 static func _building_key(buildings:Array)->int:
 	var parts:=[]
-	for record in buildings:parts.append([Vector2(record.get("position",Vector2.ZERO)),snappedf(float(record.get("angle",0.0)),0.01)])
+	for record in buildings:
+		var plot:Dictionary=record.get("plot",{})
+		parts.append([Vector2(record.get("position",Vector2.ZERO)),snappedf(float(record.get("angle",0.0)),0.01),record.get("radius",0.003),record.get("variant",0),plot.get("status","active"),plot.get("land_use",""),plot.get("frontage_route_id",-1),plot.get("seed",1),plot.get("damage",{}).get("fire",0.0)])
 	return hash(parts)
 
 static func _route_key(routes:Array[Dictionary])->int:
 	var parts:=[]
-	for route in routes:parts.append([int(route.get("id",0)),bool(route.get("active",true)),snappedf(float(route.get("traffic",0.0)),0.1),_points(route).size()])
+	for route in routes:parts.append([int(route.get("id",0)),bool(route.get("active",true)),snappedf(float(route.get("traffic",0.0)),0.1),_points(route),route.get("width_m",1.0),route.get("hierarchy","path"),route.get("kind","desire_path"),route.get("surface_tier",0)])
 	return hash(parts)
 
 static func _v2(value:Variant)->Vector2:
@@ -609,6 +721,9 @@ static func _brush(radius_px:float,alpha:float,channel:Color)->Image:
 
 static func _stamp(painter:Dictionary,at:Vector2,radius:float,alpha:float,channel:Color)->void:
 	var texel:float=painter.texel
+	# Reject off-tile stamps before generating an expensive brush.
+	var extent:=radius+texel*2.0
+	if not Rect2(Vector2(painter.corner),Vector2.ONE*texel*RES).grow(extent).has_point(at):return
 	var brush:=_brush(radius/texel,alpha,channel)
 	var p:=(at-Vector2(painter.corner))/texel
 	var n:=brush.get_width()
@@ -632,6 +747,23 @@ static func _line(painter:Dictionary,points:PackedVector2Array,radius:float,alph
 		var a:=points[i-1];var b:=points[i]
 		var length:=a.distance_to(b)
 		var steps:=maxi(1,ceili(length/spacing))
-		for s in steps:
+		# Clip the iteration, not the segment: adjacent tiles keep identical
+		# stamp positions, while a long road costs only its on-tile length.
+		var window:=_line_window(a,b,Rect2(Vector2(painter.corner),Vector2.ONE*texel*RES).grow(radius+texel*2.0))
+		if window.x>window.y:continue
+		for s in range(maxi(0,floori(window.x*steps)),mini(steps,ceili(window.y*steps)+1)):
 			_stamp(painter,a.lerp(b,float(s)/float(steps)),radius,per,channel)
 	_stamp(painter,points[points.size()-1],radius,per,channel)
+
+static func _line_window(a:Vector2,b:Vector2,rect:Rect2)->Vector2:
+	var low:=0.0;var high:=1.0
+	var delta:=b-a
+	for axis in 2:
+		if absf(delta[axis])<0.000000001:
+			if a[axis]<rect.position[axis] or a[axis]>rect.end[axis]:return Vector2(1,0)
+			continue
+		var first:float=(rect.position[axis]-a[axis])/delta[axis]
+		var last:float=(rect.end[axis]-a[axis])/delta[axis]
+		low=maxf(low,minf(first,last));high=minf(high,maxf(first,last))
+		if low>high:return Vector2(1,0)
+	return Vector2(low,high)

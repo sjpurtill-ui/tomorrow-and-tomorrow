@@ -88,7 +88,7 @@ func test_other_towns_and_foreign_cities_get_their_own_slots_near_the_camera() -
 	# Other places are only remembered until the camera settles near them.
 	for k in 5:
 		GROUNDS.request("foreign:%d" % k, plan, data.plots, data.routes, home + Vector3(20.0 * float(k + 1), 0, 0))
-	assert_int(GROUNDS.slot_keys.count("")).is_equal(3)
+	assert_int(GROUNDS.slot_keys.slice(0,GROUNDS.CITY_SLOTS).count("")).is_equal(3)
 	GROUNDS.serve(Vector2(home.x + 20.0, home.z), 0.6)
 	assert_int(GROUNDS.slot_keys.find("foreign:0")).is_greater(0)
 	assert_float(GROUNDS.slot_frames[GROUNDS.slot_keys.find("foreign:0")].y).is_equal(1.0)
@@ -99,7 +99,7 @@ func test_other_towns_and_foreign_cities_get_their_own_slots_near_the_camera() -
 	assert_str(GROUNDS.slot_keys[0]).is_equal("home")
 	# A settled camera paints at most one place per call; far places wait.
 	GROUNDS.serve(Vector2(home.x + 20.0, home.z), 0.6)
-	assert_int(GROUNDS.slot_keys.count("")).is_equal(2)
+	assert_int(GROUNDS.slot_keys.slice(0,GROUNDS.CITY_SLOTS).count("")).is_equal(2)
 	# Visiting more places than there are slots lets the farthest go.
 	for k in range(1, 5):
 		GROUNDS.serve(Vector2(home.x + 20.0 * float(k + 1), home.z), 0.6)
