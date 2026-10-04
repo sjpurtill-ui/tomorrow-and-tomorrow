@@ -31,8 +31,9 @@
           "robe_shoes"
         ]
       },
+      "cape_join_y": 1.2994769295774649,
       "source_sha256": "84c95e81cf67251325bb616e6ed1434a13231f79bece33170c279254c14e9459",
-      "sha256": "8e5395872c539e7303dc080999e197e4c56b6fcbd2d3cd65afd8a31894e6ac10"
+      "sha256": "ccd29cdf3a8caf7b9fb300dd68aa1f3abe4d74dab6a209175b3d5df71b55862d"
     },
     "female_old": {
       "file": "court_legacy_female_old.glb",
@@ -63,8 +64,174 @@
           "robe_shoes"
         ]
       },
+      "cape_join_y": 1.1538403248974007,
       "source_sha256": "55328f7b84b143cf0da77927739be516e579d8a4fdf3f8d5d5199a33918c1c98",
-      "sha256": "42f2c9557a93e15a5746c130b5b9f0d59d4cbd511b3fed04d11687c7f7c0c4ed"
+      "sha256": "481d6202f75a6090ad5d42810c250649ade87aba96a12b0ea4b4738a8c18bdd8"
+    },
+    "female_adult": {
+      "file": "court_legacy_female_adult.glb",
+      "outfits": [
+        "tunic",
+        "hide",
+        "robe"
+      ],
+      "parts": {
+        "tunic": [
+          "tunic_body",
+          "tunic_trim",
+          "tunic_belt",
+          "tunic_shoes"
+        ],
+        "hide": [
+          "hide_wrap",
+          "hide_cape",
+          "hide_cord",
+          "hide_footwraps"
+        ],
+        "robe": [
+          "robe_body",
+          "robe_trim",
+          "robe_sash",
+          "robe_mantle",
+          "robe_mantle_edge",
+          "robe_shoes"
+        ]
+      },
+      "cape_join_y": 1.2136315096056622,
+      "source_sha256": "38a6d0ca37f9726ea776684d3ac0f04d7036e1ca5199f445586516ecbba51f05",
+      "sha256": "8e0bcc971c45ef064fb3943f27141c8257d706751765824459002adbda7b1b88"
+    },
+    "male_old": {
+      "file": "court_legacy_male_old.glb",
+      "outfits": [
+        "tunic",
+        "hide",
+        "robe"
+      ],
+      "parts": {
+        "tunic": [
+          "tunic_body",
+          "tunic_trim",
+          "tunic_belt",
+          "tunic_shoes"
+        ],
+        "hide": [
+          "hide_wrap",
+          "hide_cape",
+          "hide_cord",
+          "hide_footwraps"
+        ],
+        "robe": [
+          "robe_body",
+          "robe_trim",
+          "robe_sash",
+          "robe_mantle",
+          "robe_mantle_edge",
+          "robe_shoes"
+        ]
+      },
+      "cape_join_y": 1.238911299966296,
+      "source_sha256": "7048ad92cca135505073d1e79c5a8971dc21978f263e98b50ab88e63e5cbbd49",
+      "sha256": "7973dcbe0c54045e9f075cbac98a24c542611f3c7fbf0d8645943af205c06ac0"
+    },
+    "male_young": {
+      "file": "court_legacy_male_young.glb",
+      "outfits": [
+        "tunic",
+        "hide",
+        "robe"
+      ],
+      "parts": {
+        "tunic": [
+          "tunic_body",
+          "tunic_trim",
+          "tunic_belt",
+          "tunic_shoes"
+        ],
+        "hide": [
+          "hide_wrap",
+          "hide_cape",
+          "hide_cord",
+          "hide_footwraps"
+        ],
+        "robe": [
+          "robe_body",
+          "robe_trim",
+          "robe_sash",
+          "robe_mantle",
+          "robe_mantle_edge",
+          "robe_shoes"
+        ]
+      },
+      "cape_join_y": 1.2280998276333788,
+      "source_sha256": "cafdcc4d7004f7324a73a4ee97a77c07cc1b1a2384ed835027e10962ab57c431",
+      "sha256": "ea1ee9ebe61c8877eda6ff7ed1a0e6542eee873dd526358bae99902c2e2b84f3"
+    },
+    "female_young": {
+      "file": "court_legacy_female_young.glb",
+      "outfits": [
+        "tunic",
+        "hide",
+        "robe"
+      ],
+      "parts": {
+        "tunic": [
+          "tunic_body",
+          "tunic_trim",
+          "tunic_belt",
+          "tunic_shoes"
+        ],
+        "hide": [
+          "hide_wrap",
+          "hide_cape",
+          "hide_cord",
+          "hide_footwraps"
+        ],
+        "robe": [
+          "robe_body",
+          "robe_trim",
+          "robe_sash",
+          "robe_mantle",
+          "robe_mantle_edge",
+          "robe_shoes"
+        ]
+      },
+      "cape_join_y": 1.160909847780127,
+      "source_sha256": "1b3baa7b011d0b698ead58d038fd8f706dc0a288c1969ddde922cab7235f4779",
+      "sha256": "db3a4fcc388ef0d755066c37f64ca0c2c283a1fe1fe00ef6d9fc8ddb0cee8d98"
+    },
+    "child": {
+      "file": "court_legacy_child.glb",
+      "outfits": [
+        "tunic",
+        "hide",
+        "robe"
+      ],
+      "parts": {
+        "tunic": [
+          "tunic_body",
+          "tunic_trim",
+          "tunic_belt",
+          "tunic_shoes"
+        ],
+        "hide": [
+          "hide_wrap",
+          "hide_cape",
+          "hide_cord",
+          "hide_footwraps"
+        ],
+        "robe": [
+          "robe_body",
+          "robe_trim",
+          "robe_sash",
+          "robe_mantle",
+          "robe_mantle_edge",
+          "robe_shoes"
+        ]
+      },
+      "cape_join_y": 0.9106329414595028,
+      "source_sha256": "db997702fc26716edc3477d5d83d6f6c21e371cbc52e88673a3efa382f287ecb",
+      "sha256": "6e0b0b5e472707be7e2781dcf87779aa09c47daa9b6f47515c0884ba81032fef"
     }
   }
 }

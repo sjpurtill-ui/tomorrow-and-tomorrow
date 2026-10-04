@@ -1,7 +1,7 @@
 """Additive legacy garments fitted to the delivered court bodies.
 
 Blender --background --factory-startup --python tools/blender/court_legacy_clothing.py
-  -- --variants male_adult,female_old --outfits tunic
+  -- --variants male_adult,female_old --outfits tunic,hide,robe
 
 Never rewrites the original figures or the modern wardrobe. The body copy only
 changes coverage for an explicitly replaced outfit; all source morphs and rig
@@ -17,6 +17,7 @@ import sys
 import numpy as np
 from mathutils import Vector
 from mathutils.kdtree import KDTree
+from mathutils.bvhtree import BVHTree
 
 HERE=os.path.dirname(os.path.abspath(__file__))
 ROOT=os.path.dirname(os.path.dirname(HERE))
@@ -63,11 +64,16 @@ class LegacyBundle(Bundle):
         node=next(n for n in self.doc['nodes'] if n.get('name')=='Body')
         node.update(name='LegacyBody',mesh=len(self.doc['meshes'])-1,skin=self.body_node['skin'])
 
-    def copy_piece(self,name):
+    def copy_piece(self,name,below=None):
         source_node=next(n for n in self.source['nodes'] if n.get('name')==name)
         mesh=copy.deepcopy(self.source['meshes'][source_node['mesh']])
         for primitive in mesh['primitives']:
-            primitive['indices']=self.copy_accessor(primitive['indices'])
+            if below is not None:
+                points=self.array(primitive['attributes']['POSITION'])
+                faces=self.array(primitive['indices']).reshape(-1,3)
+                faces=faces[np.max(points[faces,1],axis=1)<=below]
+                primitive['indices']=self.accessor(faces,'SCALAR',5125)
+            else:primitive['indices']=self.copy_accessor(primitive['indices'])
             primitive['attributes']={k:self.copy_accessor(v) for k,v in primitive['attributes'].items()}
             for target in primitive.get('targets',[]):
                 for k,v in list(target.items()):target[k]=self.copy_accessor(v)
@@ -85,6 +91,48 @@ class LegacyBundle(Bundle):
             if node.get('mesh',-1)<start:continue
             if first:node.update(mesh=start,name=name);first=False
             else:node.pop('mesh',None);node.pop('skin',None);node['name']='Unused_'+node['name']
+
+    def cape_join(self,name,cut,ease,k):
+        """Sew the retained lower cape boundary under the matched shoulder cap."""
+        mesh=next(m for m in self.source['meshes'] if m['name']==name)
+        body_faces=self.faces[np.all(self.below_neck[self.faces],axis=1)]
+        tree=BVHTree.FromPolygons(self.p.tolist(),body_faces.tolist(),all_triangles=True)
+        for primitive in mesh['primitives']:
+            a=primitive['attributes'];p=self.array(a['POSITION']);norm=self.array(a['NORMAL'])
+            sj=self.array(a['JOINTS_0']);sw=self.array(a['WEIGHTS_0'])
+            faces=self.array(primitive['indices']).reshape(-1,3)
+            faces=faces[np.max(p[faces,1],axis=1)<=cut]
+            edges={}
+            for face in faces:
+                for u,v in zip(face,np.roll(face,-1)):
+                    key=tuple(sorted((int(u),int(v))))
+                    edges.setdefault(key,[]).append((int(u),int(v)))
+            boundary=[items[0] for key,items in edges.items() if len(items)==1 and min(p[key[0],1],p[key[1],1])>cut-.045*k]
+            ids=sorted(set(v for edge in boundary for v in edge));lookup={v:i for i,v in enumerate(ids)}
+            points=[];joints=[];weights=[];endpoints=[];endweights=[]
+            for v in ids:
+                probe=p[v].copy();probe[1]=cut+.035*k
+                hit,_,face,_=tree.find_nearest(Vector(probe));tri_ids=body_faces[face];tri=self.p[tri_ids];hit=np.asarray(hit)
+                uv=np.linalg.lstsq(np.column_stack((tri[1]-tri[0],tri[2]-tri[0])),hit-tri[0],rcond=None)[0]
+                bary=np.maximum(np.array((1-uv.sum(),uv[0],uv[1])),0);bary/=bary.sum()
+                normal=bary@self.n[tri_ids];normal/=max(np.linalg.norm(normal),1e-8)
+                # End below the cap, so the overlap has a definite depth order.
+                endpoint=hit+normal*(ease-.003*k if np.dot(norm[v],normal)>0 else ease-.006*k)
+                full=np.zeros(len(self.names))
+                for c in range(3):np.add.at(full,self.j[tri_ids[c]],self.w[tri_ids[c]]*bary[c])
+                endpoints.append(endpoint);endweights.append(full)
+            for t in np.linspace(0,1,5):
+                for i,v in enumerate(ids):
+                    points.append(p[v]*(1-t)+endpoints[i]*t)
+                    full=endweights[i]*t;np.add.at(full,sj[v],sw[v]*(1-t))
+                    j,w=joint_weights(self,full);joints.append(j);weights.append(w)
+            count=len(ids);join_faces=[]
+            for row in range(4):
+                for u,v in boundary:
+                    a=row*count+lookup[u];z=row*count+lookup[v]
+                    join_faces.extend(((z,a,a+count),(z,a+count,z+count)))
+            slot=self.source['materials'][primitive['material']]['name']
+            self.add(name+'_join',slot,points,join_faces,joints,weights)
 
 
 def smooth(t):
@@ -231,6 +279,7 @@ def garment(b,f,kind):
     b.finish_group(group,kind+'_trim')
     for name in PARTS[kind][2:]:
         if name=='robe_mantle':supported_mantle(b,f)
+        elif name=='robe_mantle_edge':supported_mantle(b,f,True)
         else:b.copy_piece(name)
     # The open skirt must never erase the legs behind its vents. Only the
     # matched upper shell and original shoes provide fixed body coverage.
@@ -249,19 +298,23 @@ def hide_hem(f,hem):
     return cf_dress._hem(hem,amp=.012,jag=.038*k,count=6,tilt=.030*k,seed=.4)
 
 
-def supported_mantle(b,f):
-    """Keep the original mantle silhouette, with a body-matched shoulder lining."""
+def supported_mantle(b,f,trim=False):
+    """Retain the lower mantle, sew one matched shoulder cap over its opening."""
     k=f.H/1.72;start=len(b.doc['meshes'])
-    b.copy_piece('robe_mantle')
-    p=b.p+b.n*(.029*k);y=p[:,1]
+    name='robe_mantle_edge' if trim else 'robe_mantle'
+    b.copy_piece(name,below=f.z_chest+.030*k)
+    b.cape_join(name,f.z_chest+.030*k,.034*k,k)
+    if trim:b.finish_group(start,name);return
+    offset=.034*k
+    p=b.p+b.n*offset;y=p[:,1]
     back=np.degrees(np.abs(np.arctan2(p[:,0],-p[:,2]-.020)))
     reach=np.interp(y,[f.z_chest-.02,f.z_shoulder-.10*k,f.z_shoulder-.02*k,f.z_shoulder+.030*k],
                     [79.,92.,150.,172.])
     mask=(b.p[:,1]>f.z_chest-.10*k)&(b.p[:,1]<f.z_shoulder+.13*k)&b.below_neck
     neck=np.maximum(f.z_shoulder+.055*k-y,np.abs(p[:,0])-.075*k)
-    b.shell('robe_mantle_lining','CLOTH_B',mask,np.full(len(y),.029*k),
-            limits=[y-f.z_chest+.035*k,neck,reach-back])
-    b.finish_group(start,'robe_mantle')
+    limits=[y-f.z_chest+.045*k,neck,reach-back]
+    b.shell(name+'_shoulders','CLOTH_B',mask,np.full(len(y),offset),limits=limits)
+    b.finish_group(start,name)
 
 
 def hide(b,f):
@@ -285,7 +338,8 @@ def hide(b,f):
     skirt(b,f,'hide',hem,ease,start)
     b.finish_group(group,'hide_wrap')
     group=len(b.doc['meshes'])
-    b.copy_piece('hide_cape')
+    b.copy_piece('hide_cape',below=f.z_chest+.030*k)
+    b.cape_join('hide_cape',f.z_chest+.030*k,.032*k,k)
     cape_p=b.p+b.n*(.032*k);cy=cape_p[:,1]
     slit=np.maximum(np.abs(cape_p[:,0])-(.030+.50*(f.z_shoulder+.05-cy)),.010-cape_p[:,2])
     neck=np.maximum(f.z_shoulder+.046*k-cy,np.abs(cape_p[:,0])-.075*k)
@@ -315,6 +369,7 @@ def build(variant,kinds,out):
     b.body_copy_masks(masks)
     path=os.path.join(out,'court_legacy_'+variant+'.glb');b.write(path)
     record={'file':os.path.basename(path),'outfits':kinds,'parts':{kind:PARTS[kind] for kind in kinds},
+            'cape_join_y':f.z_chest+.030*f.H/1.72,
             'source_sha256':hashlib.sha256(open(source,'rb').read()).hexdigest(),
             'sha256':hashlib.sha256(open(path,'rb').read()).hexdigest()}
     print('LEGACY_CLOTH',variant,kinds,len(b.doc['meshes']),'meshes',len(b.data),'bytes',flush=True)
@@ -323,8 +378,8 @@ def build(variant,kinds,out):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
-    parser.add_argument('--variants',default='male_adult,female_old')
-    parser.add_argument('--outfits',default='tunic')
+    parser.add_argument('--variants',default='male_adult,female_adult,male_old,female_old,male_young,female_young,child')
+    parser.add_argument('--outfits',default='tunic,hide,robe')
     parser.add_argument('--out',default=os.path.join(ROOT,'assets','court_figures','legacy'))
     args=parser.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
     os.makedirs(args.out,exist_ok=True)
