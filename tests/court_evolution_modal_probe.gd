@@ -36,6 +36,11 @@ func _ready()->void:
 		if main!=null:
 			modal.court_stage.say("main","We ask you to hear the council's report.",true)
 			await get_tree().create_timer(.7).timeout
+			for bubble in modal.court_stage.bubble_layer.get_children():
+				if bubble is Control and bubble.get("speaker")=="main" and not bool(bubble.get("dropping")):
+					var head:Vector2=modal.court_stage.head_point(main)
+					var face:=Rect2(head.x-main.size.x*.22,head.y,main.size.x*.44,main.size.y*.24)
+					if bubble.get_rect().intersects(face):_fail("Speech covers its speaker at %s: %s against %s" % [dimensions,bubble.get_rect(),face])
 			if capture:await _capture("%04d-%dx%d-speaking" % [year,dimensions.x,dimensions.y])
 		modal.make_them_wait();await _frames(5)
 	CourtSet.quality="auto"

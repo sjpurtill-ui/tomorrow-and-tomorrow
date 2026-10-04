@@ -2286,24 +2286,27 @@ func _clear_of_others(bubble:Control)->void:
 	for child in bubble_layer.get_children():
 		var other:=child as Control
 		if other==null or other==bubble or not other.visible or other.is_queued_for_deletion():continue
-		if other is Bubble and ((other as Bubble).dropping or (other as Bubble).kind=="mutter" and bubble is Bubble and (bubble as Bubble).kind!="mutter"):continue
+		if other is Bubble:
+			var previous:=other as Bubble
+			if previous.dropping:continue
+			if bubble is Bubble:
+				var fresh:=bubble as Bubble
+				if previous.kind=="mutter" and fresh.kind!="mutter":continue
+				# say() retires this speaker's previous line immediately after
+				# placement. It must not push the new line over their face first.
+				if fresh.kind!="mutter" and previous.speaker==fresh.speaker:continue
 		others.append(Rect2(other.position,other.size).grow(4.0))
 	var start:=bubble.position
 	var rect:=Rect2(bubble.position,bubble.size)
 	var face:=_focus_face()
-	for turn in 12:
-		var hit:=Rect2()
-		for r in others:
-			if r.intersects(rect):hit=r;break
-		if hit.size.x<=0.0:break
-		var down:=Rect2(Vector2(rect.position.x,hit.end.y+2.0),rect.size)
-		if down.end.y<=size.y-4.0 and (face.size.x<=0.0 or not down.intersects(face)):
-			rect=down
-		else:
-			# beside it instead, on the side with more room
-			var left:=hit.position.x-rect.size.x-4.0
-			var right:=hit.end.x+4.0
-			rect.position.x=left if left>=4.0 and (hit.position.x>size.x-hit.end.x or right+rect.size.x>size.x-4.0) else minf(right,size.x-rect.size.x-4.0)
+	if face.has_area():others.append(face.grow(8.0))
+	if bubble is Bubble:
+		var speaker:=figure((bubble as Bubble).speaker)
+		if speaker!=null:
+			var head:=head_point(speaker)
+			others.append(Rect2(head.x-speaker.size.x*.30,head.y,speaker.size.x*.60,speaker.size.y*.28).grow(8.0))
+	var bounds:=Rect2(4.0,top_inset+4.0,maxf(1.0,size.x-8.0),maxf(1.0,size.y-top_inset-8.0))
+	rect.position=clear_bubble_position(rect,bounds,others)
 	if rect.position.is_equal_approx(start):return
 	var moved:=rect.position-start
 	bubble.position=rect.position.round()
@@ -2314,6 +2317,32 @@ func _clear_of_others(bubble:Control)->void:
 		if (b.tail_side=="down" and b.tip.y<bs.y+2.0) or (b.tail_side=="left" and b.tip.x>-4.0) or (b.tail_side=="right" and b.tip.x<bs.x+4.0):b.tail_side="none"
 		b.pivot_offset=b.tip.clamp(Vector2.ZERO,bs)
 		b.queue_redraw()
+
+## Pick the nearest clear position from obstacle edges. Considering both axes
+## together avoids oscillating between a caption and the speaker below it.
+## When a tiny view cannot fit everything, the least-overlapped position wins.
+static func clear_bubble_position(rect:Rect2,bounds:Rect2,obstacles:Array[Rect2])->Vector2:
+	var xmax:=maxf(bounds.position.x,bounds.end.x-rect.size.x)
+	var ymax:=maxf(bounds.position.y,bounds.end.y-rect.size.y)
+	var xs:Array[float]=[clampf(rect.position.x,bounds.position.x,xmax)]
+	var ys:Array[float]=[clampf(rect.position.y,bounds.position.y,ymax)]
+	for obstacle:Rect2 in obstacles:
+		for x:float in [obstacle.position.x-rect.size.x-2.0,obstacle.end.x+2.0]:
+			x=clampf(x,bounds.position.x,xmax)
+			if not x in xs:xs.append(x)
+		for y:float in [obstacle.position.y-rect.size.y-2.0,obstacle.end.y+2.0]:
+			y=clampf(y,bounds.position.y,ymax)
+			if not y in ys:ys.append(y)
+	var best:=Vector2(xs[0],ys[0]);var best_overlap:=INF;var best_distance:=INF
+	for x:float in xs:
+		for y:float in ys:
+			var at:=Vector2(x,y);var candidate:=Rect2(at,rect.size)
+			var overlap:=0.0
+			for obstacle:Rect2 in obstacles:overlap+=candidate.intersection(obstacle).get_area()
+			var distance:=at.distance_squared_to(rect.position)
+			if overlap<best_overlap or (is_equal_approx(overlap,best_overlap) and distance<best_distance):
+				best=at;best_overlap=overlap;best_distance=distance
+	return best
 
 ## Everything said steps clear again (the god's line or the caption came or moved).
 func _reclear_bubbles()->void:
