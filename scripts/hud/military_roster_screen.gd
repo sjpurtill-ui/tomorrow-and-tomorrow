@@ -130,7 +130,7 @@ func _tell_hud()->void:
 func _layout_war(view:Vector2)->void:
 	layout_size=Vector2.ZERO
 	var width:=float(WarBoard.COLUMN_WIDTH)
-	var top:=64.0
+	var top:=T.CONTENT_TOP
 	var bottom:=view.y-T.EDGE_MARGIN
 	var hud:=_hud()
 	if hud!=null and hud.has_method("right_stack_top"):bottom=minf(bottom,float(hud.call("right_stack_top")))
@@ -187,7 +187,7 @@ func _layout()->void:
 	if view!=layout_size:
 		layout_size=view
 		var inset:=maxf(16,view.x*.045)
-		panel.position=Vector2(inset,64);panel.size=Vector2(view.x-inset*2,view.y-100)
+		panel.position=Vector2(inset,T.CONTENT_TOP);panel.size=Vector2(view.x-inset*2,view.y-100)
 		for board:Node in [forces_board,readiness_board]:
 			if is_instance_valid(board):board.call("set_available_width",_body_width())
 	if is_instance_valid(body):

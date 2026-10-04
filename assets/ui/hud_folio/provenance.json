@@ -1,0 +1,27 @@
+{
+  "tool": "built-in image_gen",
+  "date": "2026-10-04",
+  "approval": "User selected Use this engraved folio style after reviewing THE FOLIO concept sheet.",
+  "assets": [
+    {
+      "file": "folio-navigation.png",
+      "sha256": "1bfb6bf7b8a0010367f2bb4642c5eacbb0a1b65b3486d1c52ba954012aa82bdc",
+      "size": [
+        1448,
+        1086
+      ],
+      "alpha_zero_fraction": 0.5253508999521789
+    },
+    {
+      "file": "folio-work-and-life.png",
+      "sha256": "736d6ccd64591799f80054688975d550f4bc1493a92bb85a43adcee365d5e0cc",
+      "size": [
+        1774,
+        887
+      ],
+      "alpha_zero_fraction": 0.4886758375075785
+    }
+  ],
+  "method": "Original generated PNGs copied unchanged. Runtime atlas regions select the emblems; no raster edits.",
+  "brief": "Shakespearean Elizabethan woodcut and engraved folio emblems: dark iron-gall ink, ivory highlights, restrained aged gold; transparent background, no text."
+}

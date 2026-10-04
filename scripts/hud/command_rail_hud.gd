@@ -5,7 +5,7 @@ extends Control
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
 const DockPanelScript:=preload("res://scripts/hud/dock_panel.gd")
-const NavIcon:=preload("res://scripts/hud/nav_icon.gd")
+const NavIcon:=preload("res://scripts/hud/hud_chrome_icon.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 
 signal section_requested(section:String,sub:int)
@@ -35,7 +35,6 @@ const SECTIONS:Array[Dictionary]=[
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## The WATER tile's one reading of every town's water and the dry year.
 const WaterWatch:=preload("res://scripts/hud/water_watch.gd")
-const ApprovedArt:=preload("res://scripts/hud/approved_ui_art.gd")
 ## Time controls speak in words: Pause, then five paces from slowest to fastest.
 const SPEED_LABELS:Array[String]=["Pause","Slowest","Slow","Normal","Fast","Fastest"]
 const MAX_QUEUE_CARDS:=3
@@ -135,23 +134,23 @@ func _layout()->void:
 	var primary:=0
 	for spec in SECTIONS:
 		if not bool(spec.get("drawer",false)):primary+=1
-	# With the drawer open on a short screen, everything tightens so every
-	# ledger stays reachable without scrolling.
+	# Compact ledger rows retain readable type; short screens can scroll the
+	# final entries without shrinking their icons or labels.
 	var drawer_shown:=drawer_box!=null and drawer_box.visible
 	var tight:=drawer_shown and view.y<900.0
 	for id in rail_buttons:
 		var button:Button=rail_buttons[id]
-		if _in_drawer(String(id)):button.custom_minimum_size.y=36.0 if tight else 46.0
-		else:button.custom_minimum_size.y=(52.0 if view.y>=700.0 else 44.0) if tight else clampf((view.y-150.0)/float(primary+1),56.0,72.0)
-	if drawer_button:drawer_button.custom_minimum_size.y=44.0 if tight else 52.0
+		if _in_drawer(String(id)):button.custom_minimum_size.y=32.0 if tight else 36.0
+		else:button.custom_minimum_size.y=62.0 if tight else clampf((view.y-170.0)/float(primary+1),62.0,78.0)
+	if drawer_button:drawer_button.custom_minimum_size.y=52.0 if tight else 58.0
 	if top_frame:
 		top_frame.position=Vector2(Tokens.RAIL_WIDTH,0)
-		top_frame.size=Vector2(view.x-Tokens.RAIL_WIDTH,56)
+		top_frame.size=Vector2(view.x-Tokens.RAIL_WIDTH,Tokens.TOP_BAR_HEIGHT)
 	if rail_panel:
 		rail_panel.position=Vector2.ZERO
 		rail_panel.size=Vector2(Tokens.RAIL_WIDTH,view.y)
 	if time_pill:
-		time_pill.position=Vector2(Tokens.DOCK_X,6)
+		time_pill.position=Vector2(Tokens.DOCK_X,4)
 	if kpi_strip:
 		kpi_strip.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 		# The status strip is a fixed-height top-bar component. At the minimum
@@ -178,26 +177,26 @@ func _layout()->void:
 			if kpi_strip.get_combined_minimum_size().x<=room:break
 			_hide_kpi(String(id))
 		kpi_strip.reset_size()
-		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),1)
+		kpi_strip.position=Vector2(maxf(left,view.x-Tokens.EDGE_MARGIN-kpi_strip.size.x),4)
 	_layout_orders()
 	if queue_root:
 		queue_root.visible=not (view.x<1400 and ((dock and dock.visible) or (detail_dock and detail_dock.visible)))
 		# The council's waiting matters stand just above your orders.
 		queue_root.position=Vector2(view.x-Tokens.EDGE_MARGIN-Tokens.QUEUE_WIDTH,orders_top()-queue_root.size.y)
 	if dock:
-		dock.position=Vector2(Tokens.DOCK_X,64)
+		dock.position=Vector2(Tokens.DOCK_X,Tokens.CONTENT_TOP)
 		# Before the first container sort, autowrap labels report inflated
 		# minimum heights and set_size clamps upward; defer so the assignment
 		# lands after layout settles.
-		dock.set_deferred("size",Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if active_section in ["world","overview","standing","chronicle","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
+		dock.set_deferred("size",Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if active_section in ["world","overview","standing","chronicle","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.CONTENT_TOP-Tokens.DOCK_MARGIN_Y))
 	if detail_dock:
-		detail_dock.position=Vector2(Tokens.DOCK_X,64)
-		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y))
+		detail_dock.position=Vector2(Tokens.DOCK_X,Tokens.CONTENT_TOP)
+		detail_dock.set_deferred("size",Vector2(minf(Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.CONTENT_TOP-Tokens.DOCK_MARGIN_Y))
 	_position_toolbar()
 	if army_alerts:
 		# Under the clock at the map's top left; a dock covers that corner.
 		# The War screen's strip stands there while it is open: below it.
-		army_alerts.position=Vector2(Tokens.DOCK_X,64.0+(_war_layout("STRIP_HEIGHT")+12.0 if war_open() else 0.0))
+		army_alerts.position=Vector2(Tokens.DOCK_X,Tokens.CONTENT_TOP+(_war_layout("STRIP_HEIGHT")+12.0 if war_open() else 0.0))
 		army_alerts.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
 
 func _work_queue_width(view_width:float)->float:
@@ -210,7 +209,7 @@ func force_dock_layout()->void:
 		if panel==null or not panel.visible: continue
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
-		panel.size=Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if panel==dock and active_section in ["world","overview","standing","chronicle","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-64-Tokens.DOCK_MARGIN_Y)
+		panel.size=Vector2(minf((minf(1240,view.x-Tokens.DOCK_X-12) if active_section=="military" else _work_queue_width(view.x)) if panel==dock and active_section in ["world","overview","standing","chronicle","production","construction","economy","settlement","civ","military","inquiry"] else Tokens.DOCK_WIDTH,view.x-Tokens.DOCK_X-12),view.y-Tokens.CONTENT_TOP-Tokens.DOCK_MARGIN_Y)
 		for sort_pass in 3:
 			panel.propagate_notification(Container.NOTIFICATION_SORT_CHILDREN)
 	# Capture only: "--capture-dock-scroll=<px>" shows a long page further down.
@@ -393,8 +392,8 @@ func _build_frame()->void:
 	top_frame=PanelContainer.new()
 	top_frame.name="TopFrame"
 	top_frame.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	var style:=Tokens.flat(Tokens.PANEL_BG_SOLID)
-	style.border_color=Tokens.BORDER_SOFT
+	var style:=Tokens.flat(Tokens.PAPER)
+	style.border_color=Tokens.RULE_STRONG
 	style.border_width_bottom=1
 	top_frame.add_theme_stylebox_override("panel",style)
 	add_child(top_frame)
@@ -405,10 +404,10 @@ func _build_rail()->void:
 	var style:=Tokens.flat(Tokens.PAPER,Tokens.RULE,0,0)
 	style.border_color=Tokens.RULE
 	style.border_width_right=1
-	style.content_margin_top=6.0
-	style.content_margin_bottom=6.0
-	style.content_margin_left=4.0
-	style.content_margin_right=4.0
+	style.content_margin_top=8.0
+	style.content_margin_bottom=8.0
+	style.content_margin_left=6.0
+	style.content_margin_right=6.0
 	rail_panel.add_theme_stylebox_override("panel",style)
 	add_child(rail_panel)
 	var column:=VBoxContainer.new()
@@ -422,7 +421,7 @@ func _build_rail()->void:
 	header_rule.custom_minimum_size=Vector2(0,1)
 	column.add_child(header_rule)
 	var scroll:=ScrollContainer.new();scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
-	var entries:=VBoxContainer.new();entries.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entries.add_theme_constant_override("separation",0);scroll.add_child(entries)
+	var entries:=VBoxContainer.new();entries.size_flags_horizontal=Control.SIZE_EXPAND_FILL;entries.add_theme_constant_override("separation",2);scroll.add_child(entries)
 	for section in SECTIONS:
 		if bool(section.get("drawer",false)):continue
 		entries.add_child(_make_rail_button(section))
@@ -431,7 +430,8 @@ func _build_rail()->void:
 	drawer_box.name="RailDrawer"
 	drawer_box.visible=false
 	drawer_box.add_theme_constant_override("separation",0)
-	var drawer_style:=Tokens.flat(Tokens.PAPER_SUNK)
+	var drawer_style:=Tokens.flat(Tokens.PAPER_SUNK,Tokens.RULE,1,Tokens.RADIUS_CONTROL)
+	drawer_style.content_margin_top=4.0;drawer_style.content_margin_bottom=4.0
 	drawer_box.add_theme_constant_override("separation",0)
 	var drawer_panel:=PanelContainer.new()
 	drawer_panel.name="RailDrawerPanel"
@@ -445,13 +445,26 @@ func _build_rail()->void:
 	var menu_button:=Button.new()
 	menu_button.name="RailMenu"
 	menu_button.custom_minimum_size=Vector2(0,Tokens.RAIL_HEADER_HEIGHT)
-	menu_button.text="Menu"
 	menu_button.tooltip_text="Save, load, settings, or a new world (Esc)."
 	menu_button.add_theme_font_size_override("font_size",13)
 	menu_button.add_theme_color_override("font_color",Tokens.TEXT_DIM)
 	menu_button.add_theme_stylebox_override("normal",_approved_rail_style(false))
 	menu_button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
 	menu_button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
+	menu_button.add_theme_stylebox_override("focus",_rail_focus_style())
+	var menu_content:=HBoxContainer.new()
+	menu_content.set_anchors_preset(Control.PRESET_FULL_RECT)
+	menu_content.alignment=BoxContainer.ALIGNMENT_CENTER
+	menu_content.add_theme_constant_override("separation",5)
+	menu_content.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	menu_button.add_child(menu_content)
+	var menu_mark:=NavIcon.new("menu")
+	menu_mark.custom_minimum_size=Vector2(20,20)
+	menu_mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	menu_content.add_child(menu_mark)
+	var menu_label:=Tokens.make_label("Menu",13,Tokens.INK_MUTED)
+	menu_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	menu_content.add_child(menu_label)
 	menu_button.pressed.connect(func()->void: menu_requested.emit())
 	column.add_child(menu_button)
 
@@ -465,29 +478,32 @@ func _make_rail_button(section:Dictionary)->Button:
 	button.add_theme_stylebox_override("normal",_approved_rail_style(false))
 	button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
 	button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
-	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	button.add_theme_stylebox_override("focus",_rail_focus_style())
 	button.pressed.connect(func()->void:
 		var target:=String(section.get("section",id));var target_sub:=int(section.get("sub",0))
 		section_requested.emit("" if active_section==target and dock and dock.sub==target_sub else target,target_sub))
-	var content:=VBoxContainer.new()
+	var drawer:=bool(section.get("drawer",false))
+	var content:BoxContainer=HBoxContainer.new() if drawer else VBoxContainer.new()
 	content.set_anchors_preset(Control.PRESET_FULL_RECT)
 	content.alignment=BoxContainer.ALIGNMENT_CENTER
-	content.add_theme_constant_override("separation",0)
+	content.add_theme_constant_override("separation",4 if drawer else 3)
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	if drawer:content.offset_left=4;content.offset_right=-2
 	button.add_child(content)
-	var drawer:=bool(section.get("drawer",false))
-	if section.has("icon"):
-		var art:Control=ApprovedArt.icon(int(section.icon))
-		if drawer:art.custom_minimum_size=art.custom_minimum_size*0.6
-		art.self_modulate=_rail_icon_tint()
-		content.add_child(art)
-	else:
-		var symbol:=NavIcon.new(id)
-		symbol.set_icon_color(_rail_ink())
-		symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
-		if drawer:symbol.custom_minimum_size=Vector2(20,20)
-		content.add_child(symbol)
-	var label:=Tokens.make_label(EraWords.word("rail."+id,String(section.label)),12,Tokens.INK);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	var symbol:=NavIcon.new(id)
+	symbol.set_icon_color(_rail_ink())
+	symbol.custom_minimum_size=Vector2(26,26) if drawer else Vector2(40,40)
+	symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
+	symbol.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	content.add_child(symbol)
+	rail_icons[id]=symbol
+	var label:=Tokens.make_label(EraWords.word("rail."+id,String(section.label)),13,Tokens.INK)
+	label.add_theme_font_override("font",Tokens.font("ui_strong"))
+	label.horizontal_alignment=HORIZONTAL_ALIGNMENT_LEFT if drawer else HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment=VERTICAL_ALIGNMENT_CENTER
+	label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+	if drawer:label.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	content.add_child(label)
 	rail_labels[id]=label
 	var badge:=Label.new()
 	badge.visible=false
@@ -499,7 +515,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
 	# Rail width is fixed, so a plain top-left offset lands the pill at the
 	# button's top-right corner (button content width = rail - 2*8 padding).
-	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
+	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-14.0,2.0)
 	button.add_child(badge)
 	rail_buttons[id]=button
 	rail_badges[id]=badge
@@ -507,8 +523,7 @@ func _make_rail_button(section:Dictionary)->Button:
 	return button
 
 ## The ledgers drawer: food, materials, wealth, buildings, crafts, culture,
-## warriors and lore, folded under one tally-stick mark (drawn by the
-## procedural icon engine) until the player asks for them.
+## warriors and lore, folded under the engraved ledger until opened.
 func _make_drawer_button()->Button:
 	var button:=Button.new()
 	button.name="RailLedgers"
@@ -517,7 +532,7 @@ func _make_drawer_button()->Button:
 	button.add_theme_stylebox_override("normal",_approved_rail_style(false))
 	button.add_theme_stylebox_override("hover",_approved_rail_style(false,true))
 	button.add_theme_stylebox_override("pressed",_approved_rail_style(true))
-	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	button.add_theme_stylebox_override("focus",_rail_focus_style())
 	button.pressed.connect(toggle_drawer)
 	var content:=VBoxContainer.new()
 	content.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -525,16 +540,14 @@ func _make_drawer_button()->Button:
 	content.add_theme_constant_override("separation",0)
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	button.add_child(content)
-	var mark:=TextureRect.new()
+	var mark:=NavIcon.new("drawer")
 	mark.name="DrawerMark"
-	mark.texture=preload("res://scripts/resource_icons.gd").moment_texture("hearth_count",_rail_ink(),56)
-	mark.custom_minimum_size=Vector2(26,26)
-	mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
-	mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	mark.set_icon_color(_rail_ink())
+	mark.custom_minimum_size=Vector2(32,32)
 	mark.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 	mark.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	content.add_child(mark)
-	drawer_label=Tokens.make_label("",12,Tokens.INK);drawer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;drawer_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(drawer_label)
+	drawer_label=Tokens.make_label("",13,Tokens.INK);drawer_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;drawer_label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(drawer_label)
 	# Alerts inside a closed drawer show on the drawer button itself.
 	var badge:=Label.new()
 	badge.name="DrawerBadge"
@@ -545,7 +558,7 @@ func _make_drawer_button()->Button:
 	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	badge.add_theme_font_size_override("font_size",12)
 	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
-	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
+	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-14.0,2.0)
 	button.add_child(badge)
 	rail_badges["drawer"]=badge
 	drawer_button=button
@@ -555,7 +568,7 @@ func _make_drawer_button()->Button:
 func _style_drawer_label()->void:
 	var open:=drawer_box!=null and drawer_box.visible
 	var word:=EraWords.word("rail.drawer","Ledgers")
-	if drawer_label:drawer_label.text=word
+	if drawer_label:drawer_label.text=word+(" −" if open else " +")
 	if drawer_button:drawer_button.tooltip_text=("Hide the %s" if open else "Show the %s: food, materials, wealth, buildings, crafts, culture, warriors and learning") % word.to_lower()
 	_sync_drawer_badge()
 
@@ -591,7 +604,7 @@ func _sync_drawer()->void:
 	drawer_box.visible=drawer_open or (active_section!="" and _in_drawer(active_section))
 	_style_drawer_label()
 	if drawer_button:
-		var lit:=active_section!="" and _in_drawer(active_section) and not drawer_box.visible
+		var lit:=drawer_box.visible
 		drawer_button.add_theme_stylebox_override("normal",_approved_rail_style(lit))
 	_layout()
 
@@ -620,14 +633,14 @@ func _make_court_button()->Button:
 	var button:=Button.new()
 	button.name="RailCourt"
 	# The heart of the game gets the largest place on the rail.
-	button.custom_minimum_size=Vector2(0,64)
+	button.custom_minimum_size=Vector2(0,76)
 	button.tooltip_text="Your court: summon anyone, receive envoys, send word abroad · F12"
 	var gold:=Tokens.flat(Tokens.GOLD_WASH,Tokens.GOLD,1,Tokens.RADIUS_CONTROL)
 	var gold_hover:=Tokens.flat(Tokens.GOLD_WASH.lerp(Tokens.GOLD,.12),Tokens.GOLD,1,Tokens.RADIUS_CONTROL)
 	button.add_theme_stylebox_override("normal",gold)
 	button.add_theme_stylebox_override("hover",gold_hover)
 	button.add_theme_stylebox_override("pressed",gold_hover)
-	button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	button.add_theme_stylebox_override("focus",_rail_focus_style())
 	button.pressed.connect(open_court)
 	# COURT PREWARM (L): the modelled court's people, place and clips load in
 	# the background a few seconds after the rail is up, or at once on the
@@ -640,12 +653,13 @@ func _make_court_button()->Button:
 	content.add_theme_constant_override("separation",0)
 	content.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	button.add_child(content)
-	var symbol:=ApprovedArt.symbol(Rect2(15,7,46,47),38,38)
+	var symbol:=NavIcon.new("court")
+	symbol.custom_minimum_size=Vector2(48,48)
+	symbol.set_icon_color(Tokens.GOLD_TEXT)
 	symbol.size_flags_horizontal=Control.SIZE_SHRINK_CENTER
 	symbol.mouse_filter=Control.MOUSE_FILTER_IGNORE
-	symbol.self_modulate=_rail_icon_tint()
 	content.add_child(symbol)
-	var label:=Tokens.make_label("Court",13,Tokens.GOLD_TEXT);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
+	var label:=Tokens.make_label("Court",15,Tokens.GOLD_TEXT);label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;label.mouse_filter=Control.MOUSE_FILTER_IGNORE;content.add_child(label)
 	var badge:=Label.new()
 	badge.visible=false
 	badge.custom_minimum_size=Vector2(16,16)
@@ -654,7 +668,7 @@ func _make_court_button()->Button:
 	badge.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	badge.add_theme_font_size_override("font_size",12)
 	badge.add_theme_color_override("font_color",Tokens.GLYPH_DARK)
-	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-8.0,2.0)
+	badge.position=Vector2(Tokens.RAIL_WIDTH-16.0-14.0,2.0)
 	button.add_child(badge)
 	rail_badges["court"]=badge
 	return button
@@ -681,7 +695,9 @@ func set_active_section(id:String)->void:
 		var icon:Control=rail_icons.get(section_id)
 		if icon:
 			if icon.has_method("set_active"): icon.set_active(active)
-			if icon.has_method("set_icon_color"): icon.set_icon_color(Tokens.GOLD if active else Tokens.TEXT_DIM)
+			if icon.has_method("set_icon_color"): icon.set_icon_color(Tokens.GOLD_TEXT if active else _rail_ink())
+		var label:Label=rail_labels.get(section_id)
+		if label:label.add_theme_color_override("font_color",Tokens.GOLD_TEXT if active else Tokens.INK)
 	_sync_drawer()
 	_position_toolbar()
 
@@ -715,26 +731,28 @@ func _build_time_pill()->void:
 	time_pill=PanelContainer.new()
 	time_pill.name="TimePill"
 	var style:=Tokens.pill_style()
-	style.content_margin_left=16.0
+	style.content_margin_left=8.0
 	style.content_margin_right=8.0
-	style.content_margin_top=6.0
-	style.content_margin_bottom=6.0
+	style.content_margin_top=0.0
+	style.content_margin_bottom=0.0
 	style.bg_color=Color.TRANSPARENT
 	style.border_width_left=0;style.border_width_top=0;style.border_width_right=0;style.border_width_bottom=0
 	time_pill.add_theme_stylebox_override("panel",style)
 	add_child(time_pill)
-	var row:=HBoxContainer.new()
-	row.add_theme_constant_override("separation",7)
+	var row:=VBoxContainer.new()
+	row.add_theme_constant_override("separation",1)
 	time_pill.add_child(row)
 	time_text=RichTextLabel.new()
 	time_text.bbcode_enabled=true
 	time_text.fit_content=true
 	time_text.autowrap_mode=TextServer.AUTOWRAP_OFF
 	time_text.scroll_active=false
-	time_text.custom_minimum_size=Vector2(166,28)
+	time_text.custom_minimum_size=Vector2(166,26)
 	time_text.mouse_filter=Control.MOUSE_FILTER_PASS
-	time_text.add_theme_font_size_override("normal_font_size",15)
-	time_text.add_theme_font_size_override("bold_font_size",15)
+	time_text.add_theme_font_size_override("normal_font_size",17)
+	time_text.add_theme_font_size_override("bold_font_size",17)
+	time_text.add_theme_font_override("bold_font",Tokens.font("ui_strong"))
+	time_text.add_theme_color_override("default_color",Tokens.INK)
 	row.add_child(time_text)
 	var speed_row:=HBoxContainer.new()
 	speed_row.add_theme_constant_override("separation",2)
@@ -802,6 +820,7 @@ func _style_speed_controls(selected:int)->void:
 		var normal:=Tokens.flat(Tokens.GOLD_WASH if active else Color.TRANSPARENT)
 		if active:normal.border_color=Tokens.GOLD;normal.border_width_bottom=2
 		var hover:=Tokens.flat(Tokens.HOVER_BG)
+		button.add_theme_stylebox_override("focus",_rail_focus_style())
 		for box:StyleBoxFlat in [normal,hover]:box.content_margin_left=8.0;box.content_margin_right=8.0
 		button.add_theme_stylebox_override("normal",normal)
 		button.add_theme_stylebox_override("hover",hover)
@@ -825,10 +844,9 @@ const KPI_DEFS:Array[Dictionary]=[
 ## all (after the age's own rules in _layout).
 const KPI_SHED_ORDER:=["goods","water","population","science"]
 
-const KPI_GUTTER:=10.0
-## Caption, value and its note stack in three short lines inside the 56 px top
-## frame, so a value never shares its line with (or is cut off by) a note.
-const KPI_HEIGHT:=54.0
+## Caption, value and note have separate lines within the 72 px header.
+## Insets keep them clear of the fine frame and the semantic bottom rule.
+const KPI_HEIGHT:=64.0
 
 func _build_kpi_strip()->void:
 	kpi_strip=PanelContainer.new()
@@ -842,7 +860,7 @@ func _build_kpi_strip()->void:
 	for index:int in KPI_DEFS.size():
 		var def:Dictionary=KPI_DEFS[index]
 		if index>0:
-			var divider:=ColorRect.new();divider.color=Tokens.BORDER;divider.custom_minimum_size=Vector2(1,26);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;divider.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(divider);kpi_separators.append(divider)
+			var divider:=ColorRect.new();divider.color=Color.TRANSPARENT;divider.custom_minimum_size=Vector2(4,26);divider.size_flags_vertical=Control.SIZE_SHRINK_CENTER;divider.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(divider);kpi_separators.append(divider)
 		var chip:=preload("res://scripts/hud/kpi_detail_chip.gd").new()
 		chip.metric_id=String(def.id)
 		chip.name="Kpi"+String(def.id).capitalize()
@@ -851,26 +869,29 @@ func _build_kpi_strip()->void:
 		# and jump from the first row to the second while the simulation runs.
 		chip.custom_minimum_size=Vector2(_kpi_width(String(def.id),float(def.width)),KPI_HEIGHT)
 		chip.clip_contents=true
-		chip.add_theme_stylebox_override("normal",Tokens.flat(Color.TRANSPARENT))
-		chip.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG))
+		chip.add_theme_stylebox_override("normal",Tokens.flat(Tokens.PAPER_RAISED,Tokens.RULE,1,Tokens.RADIUS_CONTROL))
+		chip.add_theme_stylebox_override("hover",Tokens.flat(Tokens.HOVER_BG,Tokens.RULE_STRONG,1,Tokens.RADIUS_CONTROL))
 		chip.add_theme_stylebox_override("pressed",Tokens.flat(Tokens.ACTIVE_BG))
-		chip.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		chip.add_theme_stylebox_override("focus",_rail_focus_style())
 		chip.pressed.connect(func()->void: section_requested.emit(String(def.section),int(def.sub)))
 		row.add_child(chip)
 		_hover_host().attach(chip,chip.hover_spec)
 		var inner:=HBoxContainer.new()
 		inner.set_anchors_preset(Control.PRESET_FULL_RECT)
 		# A gutter on the right keeps a chip's last word off the next caption.
-		inner.offset_right=-KPI_GUTTER
-		inner.add_theme_constant_override("separation",8)
+		inner.offset_left=8.0
+		inner.offset_right=-8.0
+		inner.offset_top=2.0
+		inner.offset_bottom=-4.0
+		inner.add_theme_constant_override("separation",0)
 		inner.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		chip.add_child(inner)
 		var accent:=ColorRect.new()
 		accent.color=def.accent
-		accent.custom_minimum_size=Vector2(3,24)
-		accent.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		accent.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+		accent.offset_left=8;accent.offset_right=-8;accent.offset_top=-2
 		accent.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		inner.add_child(accent)
+		chip.add_child(accent)
 		var text_column:=VBoxContainer.new()
 		text_column.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		text_column.clip_contents=true
@@ -878,11 +899,23 @@ func _build_kpi_strip()->void:
 		text_column.alignment=BoxContainer.ALIGNMENT_CENTER
 		text_column.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		inner.add_child(text_column)
-		var caption:=Tokens.make_label(EraWords.word("kpi."+String(def.id),String(def.label)),12,Tokens.INK_MUTED,0.12)
+		var caption_row:=HBoxContainer.new()
+		caption_row.add_theme_constant_override("separation",4)
+		caption_row.mouse_filter=Control.MOUSE_FILTER_IGNORE
+		text_column.add_child(caption_row)
+		var mark:=NavIcon.new(String(def.id))
+		mark.custom_minimum_size=Vector2(14,14)
+		mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+		mark.set_icon_color(Tokens.text_for(def.accent))
+		caption_row.add_child(mark)
+		var caption:=Tokens.make_label(EraWords.word("kpi."+String(def.id),String(def.label)),12,Tokens.INK_MUTED)
 		caption.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		text_column.add_child(caption)
+		caption.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
+		caption.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+		caption_row.add_child(caption)
 		# The value is the loudest line of the chip: SemiBold ink over a quiet kicker.
 		var value:=Tokens.text(Tokens.make_label("—",20,Tokens.INK),"value",Tokens.INK) as Label
+		value.add_theme_font_size_override("font_size",22)
 		# Widths are sized for the longest real value; the ellipsis is only a
 		# last guard against a runaway string pushing the strip over the clock.
 		value.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
@@ -893,7 +926,7 @@ func _build_kpi_strip()->void:
 		delta.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS
 		delta.mouse_filter=Control.MOUSE_FILTER_IGNORE
 		text_column.add_child(delta)
-		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width),"caption":caption,"accent":accent,"accent_color":def.accent}
+		kpi_chips[String(def.id)]={"chip":chip,"value":value,"delta":delta,"inner":inner,"width":float(def.width),"caption":caption,"accent":accent,"mark":mark,"accent_color":def.accent}
 
 func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color,_tooltip:String)->void:
 	var parts:Dictionary=kpi_chips.get(id,{})
@@ -905,6 +938,7 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	delta.add_theme_color_override("font_color",Tokens.text_for(delta_color))
 	# A warning note tints the chip's accent bar too, so it reads at a glance.
 	if parts.has("accent"):(parts.accent as ColorRect).color=Tokens.RED if delta_color==Tokens.RED else parts.accent_color
+	if parts.has("mark"):parts.mark.set_icon_color(Tokens.RED_TEXT if delta_color==Tokens.RED else Tokens.text_for(parts.accent_color))
 	var chip:Button=parts.chip
 	# Width is intentionally independent of live text so a deficit cannot move
 	# the complete top bar. Hover details read fresh state when opened.
@@ -919,8 +953,8 @@ func _fitting_note(id:String,candidates:Array)->String:
 	var label:Label=parts.delta
 	var font:Font=label.get_theme_font("font")
 	var size:=label.get_theme_font_size("font_size")
-	# The chip's width less its right gutter, the accent bar and the gap after it.
-	var room:=_kpi_width(id,float(parts.width))-KPI_GUTTER-3.0-8.0
+	# The text column has equal eight-pixel left and right insets.
+	var room:=_kpi_width(id,float(parts.width))-16.0
 	for text in candidates:
 		if font==null or font.get_string_size(String(text),HORIZONTAL_ALIGNMENT_LEFT,-1,size).x<=room:return String(text)
 	return String(candidates[-1])
@@ -1108,7 +1142,7 @@ func _build_toolbar()->void:
 		button.add_theme_stylebox_override("normal",Tokens.action_button_style(bool(action[2])))
 		button.add_theme_stylebox_override("hover",Tokens.action_button_style(bool(action[2]),true))
 		button.add_theme_stylebox_override("disabled",Tokens.action_button_style(false))
-		button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+		button.add_theme_stylebox_override("focus",_rail_focus_style())
 		button.pressed.connect(_on_toolbar_action.bind(String(action[0])))
 		row.add_child(button)
 		toolbar_action_buttons[String(action[0])]=button
@@ -1158,7 +1192,7 @@ func _build_toolbar()->void:
 	world_button.add_theme_color_override("font_color",Tokens.BODY)
 	world_button.add_theme_stylebox_override("normal",Tokens.action_button_style(false))
 	world_button.add_theme_stylebox_override("hover",Tokens.action_button_style(false,true))
-	world_button.add_theme_stylebox_override("focus",StyleBoxEmpty.new())
+	world_button.add_theme_stylebox_override("focus",_rail_focus_style())
 	world_button.tooltip_text="See the whole world, and how much of it our people know."
 	world_button.pressed.connect(func()->void:
 		if terrain and terrain.has_method("open_world_globe"):terrain.open_world_globe())
@@ -1659,14 +1693,12 @@ func show_action_feedback(message:String,category:String="war")->void:
 	preload("res://scripts/hud/notification_model.gd").push({"category":category,"tier":"notable","text":message})
 
 func _approved_rail_style(active:bool,hover:bool=false)->StyleBoxFlat:
-	## Paper rail entries: a warm wash when lit and a 2 px gold tab on the left.
-	var style:=Tokens.flat(Tokens.ACTIVE_BG if active else Tokens.HOVER_BG if hover else Color(0,0,0,0),Tokens.GOLD,0,0)
-	style.border_color=Tokens.GOLD if active else Tokens.RULE_STRONG
-	style.border_width_left=2 if active or hover else 0
+	var style:=Tokens.flat(Tokens.PAPER_RAISED if active else Tokens.HOVER_BG if hover else Color.TRANSPARENT,Tokens.GOLD if active else Tokens.RULE,1 if active else 0,Tokens.RADIUS_CONTROL)
+	style.border_width_left=3 if active else 1 if hover else 0
 	return style
 
-## Rail glyph ink: dark brown ink on light paper, warm gold on night paper.
-func _rail_ink()->Color:return Tokens.INK_MUTED if Tokens.is_light() else Color("e1cc91")
+func _rail_focus_style()->StyleBoxFlat:
+	return Tokens.flat(Color.TRANSPARENT,Tokens.GOLD,2,Tokens.RADIUS_CONTROL)
 
-## The atlas glyphs are light gold pigment; on light paper they are inked darker.
-func _rail_icon_tint()->Color:return Color(.42,.33,.22) if Tokens.is_light() else Color.WHITE
+## Rail glyph ink: dark brown ink on light paper, warm gold on night paper.
+func _rail_ink()->Color:return Tokens.INK_MUTED

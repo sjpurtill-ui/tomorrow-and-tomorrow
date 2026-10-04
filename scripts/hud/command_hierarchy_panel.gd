@@ -30,7 +30,7 @@ const Board=preload("res://scripts/hud/recruit_deploy_board.gd")
 const Strips=preload("res://scripts/hud/force_strips.gd")
 const PICK_RADIUS_PX:=26.0
 const PANEL_WIDTH:=452.0
-const PANEL_TOP:=64.0
+const PANEL_TOP:=T.CONTENT_TOP
 ## The orders as the grid shows them: the verb, its icon and a short label.
 const VERB_FACES:=[["attack","attack","Attack"],["siege","besiege","Besiege"],["raid","raid","Raid"],["defend","defend","Defend"],["guard","guard","Guard"],
 	["goto","goto","Go to"],["depot","depot","Lay depot"],["recall","recall","Come home"],["front","front","Front line"],["arrow","arrow","Arrow"]]

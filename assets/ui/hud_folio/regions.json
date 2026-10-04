@@ -1,0 +1,182 @@
+{
+  "court": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      44,
+      47,
+      304,
+      334
+    ]
+  },
+  "overview": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      371,
+      125,
+      368,
+      249
+    ]
+  },
+  "standing": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      756,
+      43,
+      306,
+      348
+    ]
+  },
+  "world": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      1096,
+      72,
+      311,
+      315
+    ]
+  },
+  "military": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      44,
+      412,
+      308,
+      288
+    ]
+  },
+  "chronicle": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      443,
+      431,
+      247,
+      272
+    ]
+  },
+  "food": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      756,
+      407,
+      296,
+      299
+    ]
+  },
+  "water": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      1110,
+      424,
+      301,
+      263
+    ]
+  },
+  "wealth": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      33,
+      733,
+      340,
+      283
+    ]
+  },
+  "trade": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      392,
+      777,
+      327,
+      208
+    ]
+  },
+  "production": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      747,
+      728,
+      316,
+      270
+    ]
+  },
+  "inquiry": {
+    "atlas": "folio-navigation.png",
+    "rect": [
+      1083,
+      714,
+      337,
+      284
+    ]
+  },
+  "materials": {
+    "atlas": "folio-work-and-life.png",
+    "rect": [
+      37,
+      85,
+      366,
+      326
+    ]
+  },
+  "construction": {
+    "atlas": "folio-work-and-life.png",
+    "rect": [
+      468,
+      47,
+      410,
+      358
+    ]
+  },
+  "civ": {
+    "atlas": "folio-work-and-life.png",
+    "rect": [
+      929,
+      27,
+      370,
+      404
+    ]
+  },
+  "drawer": {
+    "atlas": "folio-work-and-life.png",
+    "rect": [
+      1380,
+      40,
+      350,
+      367
+    ]
+  },
+  "health": {
+    "atlas": "folio-work-and-life.png",
+    "rect": [
+      27,
+      447,
+      380,
+      407
+    ]
+  },
+  "goods": {
+    "atlas": "folio-work-and-life.png",
+    "rect": [
+      450,
+      492,
+      409,
+      364
+    ]
+  },
+  "gdp": {
+    "atlas": "folio-work-and-life.png",
+    "rect": [
+      916,
+      463,
+      409,
+      396
+    ]
+  },
+  "menu": {
+    "atlas": "folio-work-and-life.png",
+    "rect": [
+      1349,
+      454,
+      407,
+      402
+    ]
+  }
+}

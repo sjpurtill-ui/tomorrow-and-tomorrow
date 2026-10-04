@@ -1,8 +1,8 @@
 extends Control
-## A small family of ink marks for the command rail and KPI captions.
-## Geometry uses a 24-unit square; counters remain transparent over any paper.
+## Approved folio emblems, with small vector marks as a missing-art fallback.
 
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
+const Folio:=preload("res://scripts/hud/hud_folio_art.gd")
 const GRID:=24.0
 const STROKE:=1.8
 
@@ -21,6 +21,7 @@ func _init(id:String="population")->void:
 	mouse_filter=Control.MOUSE_FILTER_IGNORE
 	focus_mode=Control.FOCUS_NONE
 	custom_minimum_size=Vector2(16,16)
+	texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 
 func set_icon_color(value:Color)->void:
 	_custom_color=value
@@ -38,6 +39,14 @@ func _notification(what:int)->void:
 func _draw()->void:
 	var side:=minf(size.x,size.y)
 	if side<=0.0:return
+	var art:=Folio.texture(icon_id)
+	if art:
+		material=Folio.night_material() if Tokens.color_mode=="dark" else null
+		var extent:=art.get_size()
+		var fitted:=extent*minf(size.x/extent.x,size.y/extent.y)
+		draw_texture_rect(art,Rect2((size-fitted)*0.5,fitted),false)
+		return
+	material=null
 	_ink=Tokens.GOLD if active else (_custom_color if _has_custom_color else Tokens.INK)
 	_detail=side>=22.0
 	var factor:=side/GRID

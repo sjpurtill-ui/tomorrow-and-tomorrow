@@ -28,7 +28,7 @@ const WIDTH:=372.0
 const MAX_ROWS:=4
 const GAP:=8.0
 const RIGHT:=16.0
-const TOP:=64.0
+const TOP:=T.CONTENT_TOP
 const PILL_HEIGHT:=28.0
 const LOG_ROWS:=40
 

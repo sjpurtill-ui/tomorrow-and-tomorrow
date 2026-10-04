@@ -61,7 +61,7 @@ const MARKS:={"leave":"leave","defend":"defend","punish":"raid","take":"besiege"
 ## council queue's, so the right edge reads as one column), and where the
 ## strip stands under the clock.
 const COLUMN_WIDTH:=400.0
-const STRIP_TOP:=62.0
+const STRIP_TOP:=T.CONTENT_TOP
 const STRIP_HEIGHT:=50.0
 ## The strip's chips that can give way when the screen is narrow; those
 ## that warn of something (unpaid, short of gear, hungry) give way last

@@ -318,12 +318,14 @@ const COHORT_COLORS:Array[Color]=[Color("#9b7252"),Color("#779a67"),Color("#5e9d
 const ROLE_COLORS:Array[Color]=[Color("#8fa26a"),Color("#79a8a0"),Color("#a9946e"),Color("#b39a68"),Color("#c9a95a"),Color("#8798b5"),Color("#a897c9"),Color("#d0b46f"),Color("#c67462")]
 
 # Layout
-const RAIL_WIDTH:=78.0
+const RAIL_WIDTH:=132.0
 const RAIL_BUTTON_HEIGHT:=46.0
 const RAIL_HEADER_HEIGHT:=42.0
-const DOCK_X:=88.0
+const TOP_BAR_HEIGHT:=72.0
+const CONTENT_TOP:=TOP_BAR_HEIGHT+8.0
+const DOCK_X:=RAIL_WIDTH+10.0
 const DOCK_WIDTH:=540.0
-const DOCK_DETAIL_X:=652.0
+const DOCK_DETAIL_X:=DOCK_X+DOCK_WIDTH+24.0
 const DOCK_MARGIN_Y:=8.0
 const EDGE_MARGIN:=10.0
 const CHIP_HEIGHT:=40.0

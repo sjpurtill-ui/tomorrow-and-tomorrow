@@ -1042,7 +1042,7 @@ func _process(delta: float) -> void:
 			var rail:=float(preload("res://scripts/hud/hud_tokens.gd").RAIL_WIDTH)
 			var free_w:=maxf(240.0,view_w-float(hud.call("_war_layout","COLUMN_WIDTH"))-24.0-rail)
 			travel_status_label.size.x=minf(travel_status_label.size.x,free_w)
-			travel_status_label.position=Vector2(rail+(free_w-travel_status_label.size.x)*0.5,64.0+float(hud.call("_war_layout","STRIP_HEIGHT"))+12.0)
+			travel_status_label.position=Vector2(rail+(free_w-travel_status_label.size.x)*0.5,preload("res://scripts/hud/hud_tokens.gd").CONTENT_TOP+float(hud.call("_war_layout","STRIP_HEIGHT"))+12.0)
 			travel_status_label.set_meta("war_placed",true)
 		elif bool(travel_status_label.get_meta("war_placed",false)):
 			travel_status_label.set_meta("war_placed",false)

@@ -13,6 +13,8 @@
 # Discovery paintings keep a bounded UI resolution on every checkout.
 !assets/ui/research/subjects/*.png.import
 !assets/ui/research/stone-selection-v1.png.import
+# Engraved HUD artwork needs mipmaps to retain stable small-scale detail.
+!assets/ui/hud_folio/*.png.import
 
 # Generated test reports and local visual captures
 reports/

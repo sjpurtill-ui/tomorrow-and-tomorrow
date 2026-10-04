@@ -468,8 +468,8 @@ func _free_rect(view:Vector2)->Rect2:
 	var consts:Dictionary=board.get_script_constant_map() if board!=null else {}
 	var column:=float(consts.get("COLUMN_WIDTH",400.0))
 	var strip:=float(consts.get("STRIP_HEIGHT",64.0))
-	var left:=96.0
-	var top:=64.0+strip+12.0
+	var left:=HudTokens.DOCK_X+8.0
+	var top:=HudTokens.CONTENT_TOP+strip+12.0
 	var bottom:=view.y-150.0
 	return Rect2(Vector2(left,top),Vector2(maxf(200.0,view.x-column-24.0-left),maxf(200.0,bottom-top)))
 
