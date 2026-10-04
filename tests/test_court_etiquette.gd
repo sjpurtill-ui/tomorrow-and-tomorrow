@@ -64,6 +64,37 @@ func test_routine_dismissal_gifts_and_pleased_departure_use_later_etiquette()->v
 			for beat:Dictionary in beats:
 				if String(beat.who)=="main":assert_str(String((beat.args as Dictionary).get("walk",""))).is_not_equal("backward")
 
+func test_stage_shaped_envoy_and_company_keep_foreign_identity_and_etiquette()->void:
+	var cast:=[
+		{"key":"main","role":"main","person":{"name":"Visiting Envoy","person_id":0,"appearance_civ_id":"visitors"}},
+		{"key":"att0","role":"attendant","person":{"name":"First Companion","person_id":0,"appearance_civ_id":"visitors"}},
+		{"key":"att1","role":"attendant","person":{"name":"Second Companion","person_id":0,"appearance_civ_id":"visitors"}},
+		{"key":"official","role":"court","person":{"name":"Local Official","person_id":0}}]
+	var facts:=_facts(_profile("modern"))
+	facts["envoy"]={"civ_id":"visitors"}
+	facts["presentations"]={"visitors":_profile("medieval","bow")}
+	var normalized:=Director.normal_cast(cast,facts)
+	for member:Dictionary in normalized.slice(0,3):assert_str(String(member.people)).is_equal("visitors")
+	assert_str(String(normalized[0].kind)).is_equal("envoy")
+	assert_str(String(normalized[3].people)).is_equal("player")
+	var acts:=_acts(Director.beats_for({"kind":"enter","who":"main"},cast,facts,19))
+	assert_bool(acts.has("bow")).is_true()
+	assert_bool(acts.has("nod")).is_false()
+
+func test_foreign_prisoner_keeps_identity_without_becoming_an_envoy()->void:
+	var cast:=[{"key":"main","role":"main","person":{"name":"Prisoner","person_id":0,"appearance_civ_id":"visitors"}}]
+	var normalized:=Director.normal_cast(cast,_facts(_profile("modern")))
+	assert_str(String(normalized[0].people)).is_equal("visitors")
+	assert_str(String(normalized[0].get("kind",""))).is_not_equal("envoy")
+
+func test_explicit_reverence_and_fear_departures_are_not_replaced_by_routine_nods()->void:
+	var modern:=_facts(_profile("modern"));var legacy:=modern.duplicate();legacy.erase("presentation")
+	for reaction in ["awe","reverence","dread","fear"]:
+		var event:={"kind":"exit","who":"main","style":"bow","reaction":reaction}
+		for seed_value in 12:
+			assert_str(var_to_str(Director.beats_for(event,Existing.home_cast(),modern,seed_value))).is_equal(
+				var_to_str(Director.beats_for(event,Existing.home_cast(),legacy,seed_value)))
+
 func test_modern_greetings_keep_love_and_dread_visible()->void:
 	var cast:=[{"key":"main","role":"main","kind":"petitioner","dread":0.7}]
 	var facts:=_facts(_profile("modern"))

@@ -616,6 +616,7 @@ static func cast_member(person:Dictionary,extra:Dictionary={})->Dictionary:
 	var age:Variant=person.get("age",35)
 	var years:=int(age) if (age is int or age is float) else (66 if String(age).to_lower() in ["old","elder","aged"] else (10 if String(age).to_lower()=="child" else 35))
 	var entry:={"name":String(person.get("name","")),"person_id":int(person.get("person_id",0)),"age":years,
+		"people":String(person.get("appearance_civ_id",person.get("civilization_id","player"))),
 		"courage":float(person.get("courage",0.5)),"pride":float(person.get("pride",0.5)),"empathy":float(personality.get("empathy",0.5)),
 		"love":float(divine.call("love_of",person)),"dread":float(divine.call("dread_of",person)),"resentment":float(rel.get("resentment",0.0)),
 		"office":String(person.get("office_title",person.get("title",""))),"voice":String(person.get("voice_model",""))}
@@ -1676,7 +1677,7 @@ static func _exit(ctx:Dictionary,out:Array)->void:
 					_beat(out,1.9,String((two[0] as Dictionary).key),"exchange_look",{"at":String((two[1] as Dictionary).key)},"hold")
 					_beat(out,2.0,String((two[1] as Dictionary).key),"exchange_look",{"at":String((two[0] as Dictionary).key)},"hold")
 		_:
-			if not presentation(ctx.facts,_m(ctx,who)).is_empty():_greet(ctx,out,0.2,who,"bow_small",true)
+			if not reaction in ["awe","reverence","dread","fear"] and not presentation(ctx.facts,_m(ctx,who)).is_empty():_greet(ctx,out,0.2,who,"bow_small",true)
 			elif reaction in ["pleased","delighted"] and _bit_ready(ctx,"bump_post") and _try(ctx,"bump_post",out,0.2):pass
 			elif reaction in ["pleased","delighted"]:_beat(out,0.2,who,"back_out_bowing",{"walk":"backward"},"action")
 			for m:Dictionary in room:
@@ -1741,7 +1742,7 @@ static func _asleep(ctx:Dictionary)->String:
 static func _can(ctx:Dictionary,bit:String)->bool:
 	# Routine etiquette can be restrained without taking worship, terror,
 	# defiance or an execution away from the engine's explicit event.
-	if String(ctx.kind) in ["summon","gift","decree","promise","dismiss","exit","line","wait","god_speaks"]:
+	if String(ctx.kind) in ["summon","gift","decree","promise","dismiss","exit","line","wait","god_speaks"] and not String(ctx.event.get("reaction","")) in ["awe","reverence","dread","fear"]:
 		if bit in ["eager_bow","double_bow","over_thank","bow_early","bow_wrong","child_copies","bump_post"]:
 			var person:=_m(ctx,String(ctx.event.get("who",ctx.main))) if bit in ["double_bow","over_thank","bow_early","bow_wrong","bump_post"] else {}
 			if routine_act(ctx.facts,person,"bow") in ["nod","bow_small"]:return false
@@ -3472,7 +3473,7 @@ static func normal_cast(cast:Array,facts:Dictionary={},voices:Dictionary={})->Ar
 			out.append(e);continue
 		var person:Dictionary=e.person
 		var extra:={"key":String(e.get("key","")),"role":String(e.get("role","court"))}
-		for field in ["kind","voice","stance","x","pos","name","office","age","temper","gifted"]:
+		for field in ["kind","voice","stance","x","pos","name","office","age","temper","gifted","people"]:
 			if e.has(field):extra[field]=e[field]
 		var figure:Variant=e.get("figure",null)
 		if figure is Node3D and is_instance_valid(figure):
@@ -3482,7 +3483,11 @@ static func normal_cast(cast:Array,facts:Dictionary={},voices:Dictionary={})->Ar
 		if not extra.has("kind"):
 			match String(extra.role):
 				"main":
-					if String(person.get("role",""))=="envoy":extra["kind"]="envoy"
+					# The audience's transient envoy has an appearance owner but
+					# no person.role. A foreign prisoner outside an envoy audience
+					# keeps their identity without becoming an invented diplomat.
+					var owner:=String(person.get("appearance_civ_id",person.get("civilization_id","player")))
+					if String(person.get("role",""))=="envoy" or (not owner.is_empty() and owner!="player" and owner==String(envoy_facts.get("civ_id",""))):extra["kind"]="envoy"
 				"attendant":
 					if attendants==1:extra["kind"]="bearer" if offer else "guard"
 					else:extra["kind"]=["guard","bearer"][seen_attendants] if seen_attendants<2 else "attendant"
