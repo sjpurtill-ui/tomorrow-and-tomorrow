@@ -1,6 +1,48 @@
 extends GdUnitTestSuite
 const Ground:=preload("res://scripts/settlement_grounds.gd")
 
+## Retain the former stamp-by-stamp path as a pixel oracle for the line fast
+## path. This catches shifted samples, changed overlap, and tile-edge clipping.
+func _reference_line(painter:Dictionary,points:PackedVector2Array,radius:float,alpha:float,channel:Color)->void:
+	if points.size()<2:return
+	var texel:float=painter.texel
+	var spacing:=maxf(radius*0.45,texel*0.7)
+	var overlap:=maxf(1.0,radius*2.0/spacing*0.55)
+	var per:=1.0-pow(1.0-clampf(alpha,0.0,0.98),1.0/overlap)
+	for i in range(1,points.size()):
+		var a:=points[i-1];var b:=points[i]
+		var steps:=maxi(1,ceili(a.distance_to(b)/spacing))
+		var window:=Ground._line_window(a,b,Rect2(Vector2(painter.corner),Vector2.ONE*texel*Ground.RES).grow(radius+texel*2.0))
+		if window.x>window.y:continue
+		for s in range(maxi(0,floori(window.x*steps)),mini(steps,ceili(window.y*steps)+1)):
+			Ground._stamp(painter,a.lerp(b,float(s)/float(steps)),radius,per,channel)
+	Ground._stamp(painter,points[-1],radius,per,channel)
+
+func _assert_line_matches_reference(points:PackedVector2Array,radius:float,alpha:float,channel:Color,corner:Vector2,side:float)->void:
+	var expected:=Image.create_empty(Ground.RES,Ground.RES,false,Image.FORMAT_RGBA8)
+	expected.fill(Color(.1,.2,.3,1))
+	var actual:Image=expected.duplicate()
+	var reference:={"image":expected,"corner":corner,"texel":side/Ground.RES,"stamps":0}
+	var optimized:={"image":actual,"corner":corner,"texel":side/Ground.RES,"stamps":0}
+	_reference_line(reference,points,radius,alpha,channel)
+	Ground._line(optimized,points,radius,alpha,channel)
+	assert_bool(actual.get_data()==expected.get_data()).is_true()
+	assert_int(int(optimized.stamps)).is_equal(int(reference.stamps))
+
+func test_line_fast_path_preserves_each_pixel_and_stamp_at_clipped_edges()->void:
+	var cases:Array[Dictionary]=[
+		{"points":PackedVector2Array([Vector2(-3,.1),Vector2(3,.1)]),"radius":.0007,"alpha":.7,"channel":Color(1,0,0)},
+		{"points":PackedVector2Array([Vector2(-.02,-.03),Vector2(.15,.19),Vector2(.32,.03),Vector2(.63,.4)]),"radius":.0088,"alpha":.1,"channel":Color(0,1,0)},
+		{"points":PackedVector2Array([Vector2(.1,.1),Vector2(.1,.1),Vector2(.12,.08)]),"radius":.00001,"alpha":1.0,"channel":Color(0,0,1)},
+		{"points":PackedVector2Array([Vector2(-.3,.28),Vector2(.8,.28)]),"radius":.14,"alpha":.34,"channel":Color(0,1,0)},
+		{"points":PackedVector2Array([Vector2(-8,-8),Vector2(-7,-7)]),"radius":.003,"alpha":.9,"channel":Color(1,0,0)}]
+	for entry in cases:_assert_line_matches_reference(entry.points,entry.radius,entry.alpha,entry.channel,Vector2.ZERO,.56)
+
+func test_line_fast_path_preserves_padded_tile_samples_at_negative_grid_phase()->void:
+	var points:=PackedVector2Array([Vector2(-.7,-.02),Vector2(-.49,.03),Vector2(.09,-.015),Vector2(.63,.08)])
+	for corner:Vector2 in [Vector2(-.544,-.032),Vector2(-.032,-.032),Vector2(-.544,-.608)]:
+		_assert_line_matches_reference(points,.0012,.78,Color(1,0,0),corner,.576)
+
 func before_test()->void:
 	GameState.reset_for_new_world(625114)
 	GameState.settlement_founded_at=Vector3(812.25,0,-41.5)
