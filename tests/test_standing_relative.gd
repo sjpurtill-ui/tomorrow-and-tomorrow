@@ -94,8 +94,10 @@ func test_a_typical_people_of_its_age_reads_about_half()->void:
 	var pop:=float(GameState.population_exact)
 	var year:=75.0
 	GameState.simulation_metrics["food_days"]=float(Scale.anchors(Scale.STORES,year)[1])
+	for res in ["Stone","Clay","Fiber Plants"]: GameState.resource_stockpiles[res]=0.0
 	GameState.resource_stockpiles["Timber"]=pop*float(Scale.anchors(Scale.MATERIALS,year)[1])
 	GameState.resource_stockpiles["Civilian Goods"]=pop*float(Scale.anchors(Scale.GOODS,year)[1])
+	_treasures(pop*float(Scale.anchors(Scale.TREASURES,year)[1]))
 	var wealth:=float(Standing.strengths().wealth.value)
 	assert_float(wealth).is_equal_approx(0.5,0.02)
 	# Might: the typical share ready to fight.
@@ -110,6 +112,52 @@ func test_a_typical_people_of_its_age_reads_about_half()->void:
 	GameState.known_discoveries.assign(ids)
 	var genius:Dictionary=Standing.strengths().genius
 	assert_float(float((genius.parts as Array)[0].score)).is_equal_approx(0.8,0.02)
+
+## Treasures appraised at `goods` goods in all (artifact_collection.gd price:
+## a common piece held a day appraises at 20 x (1 + its study)).
+func _treasures(goods:float)->void:
+	var worth:=goods*preload("res://scripts/trade_prices.gd").in_scope("Civilian Goods")
+	GameState.society_exchange.collections["test_piece"]={"id":"test_piece","kind":"artifact","rarity":0,"held_days":0,"study":maxf(0.0,worth/20.0-1.0)}
+
+## The player, 2026-10-04: "Isn't wealth goods, primarily?" Wealth reads the
+## goods, materials and treasures a people holds; food in store is
+## Endurance's alone.
+func test_wealth_is_goods_not_food()->void:
+	var pop:=float(GameState.population_exact)
+	GameState.resource_stockpiles["Civilian Goods"]=pop*2.0
+	GameState.simulation_metrics["food_days"]=10.0
+	var lean:=Standing.strengths()
+	GameState.simulation_metrics["food_days"]=400.0
+	var full:=Standing.strengths()
+	assert_float(float(full.wealth.value)).is_equal_approx(float(lean.wealth.value),0.0001)
+	assert_float(float(full.endurance.value)).is_greater(float(lean.endurance.value))
+	var ids:=[]
+	for part:Dictionary in full.wealth.parts: ids.append(String(part.id))
+	assert_array(ids).contains_exactly(["goods","materials","treasures"])
+	# More goods, more Wealth, and the reason says so in goods a head.
+	GameState.resource_stockpiles["Civilian Goods"]=pop*5.0
+	var rich:=Standing.strengths()
+	assert_float(float(rich.wealth.value)).is_greater(float(full.wealth.value))
+	var why:=String(rich.wealth.why)
+	assert_str(why).contains("goods (about 5")
+	assert_str(why).contains("a typical people of our age about")
+	assert_str(why).not_contains("food")
+	# Every town's goods count, not the capital's alone.
+	var held:=float(Standing.wealth_held().goods)
+	GameState.player_settlements.append({"id":"test_daughter","name":"Daughter","local_resources":{"resource_stockpiles":{"Civilian Goods":120.0,"Timber":30.0},"private_currency":0.0}})
+	assert_float(float(Standing.wealth_held().goods)).is_equal_approx(held+120.0,0.001)
+	GameState.player_settlements.pop_back()
+	# Treasures count at their appraisal, in goods.
+	var before:=float(Standing.wealth_held().treasure_worth)
+	_treasures(60.0)
+	assert_float(float(Standing.wealth_held().treasure_worth)-before).is_equal_approx(60.0,0.5)
+	GameState.society_exchange.collections.erase("test_piece")
+	# Coin, once known, counts at what it buys in goods.
+	GameState.private_currency=600.0
+	var coined:=Standing.wealth_held()
+	assert_float(float(coined.coin)).is_greater_equal(600.0)
+	assert_float(float(coined.worth)).is_greater(float(coined.goods))
+	GameState.private_currency=0.0
 
 func test_every_reason_says_what_it_is_compared_with()->void:
 	var our:=Standing.strengths()
@@ -180,8 +228,8 @@ func test_parity_the_same_state_reads_the_same_in_any_scope()->void:
 		s.elapsed_days=GameState.elapsed_days
 		s.simulation_metrics["food_days"]=float(GameState.simulation_metrics.get("food_days",0.0))
 		return Standing.strengths())
-	# The yardstick is the age's, not the god's: wealth's food part reads the same.
-	assert_float(float(theirs.wealth.parts[0].score)).is_equal_approx(float(ours.wealth.parts[0].score),0.0001)
+	# The yardstick is the age's, not the god's: endurance's food part reads the same.
+	assert_float(float(theirs.endurance.parts[0].score)).is_equal_approx(float(ours.endurance.parts[0].score),0.0001)
 
 # ---------------------------------------------------------- cunning at work
 

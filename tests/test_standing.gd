@@ -128,7 +128,7 @@ func test_the_standing_page_says_what_we_are_and_how_each_people_sees_us()->void
 	for view:Dictionary in theirs.views: names.append(String(view.name))
 	assert_array(names).contains_exactly(["Allure","Awe","Fear","Respect","Trust","Resentment"])
 	# Rich and unguarded: the page leads with the raid danger and its odds.
-	assert_str(String(tab.brief.title)).contains("envy our stores")
+	assert_str(String(tab.brief.title)).contains("envy our goods")
 	assert_str(String(tab.brief.why)).contains("each month")
 	# The years of our name are charted from the monthly record.
 	assert_str(String(tab.blocks[1].type)).is_equal("trend_chart")

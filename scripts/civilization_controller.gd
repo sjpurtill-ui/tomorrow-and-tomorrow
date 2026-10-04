@@ -555,7 +555,7 @@ static func ensure_line(id:String,item:String,target:int)->void:
 ## 0..1 (the strongest counts): at war, under siege or facing raiders at its
 ## gate; its home attacked within DEFENSE_MEMORY_DAYS; its people's fear of war
 ## (war_fear x 4); a hostile neighbour (opinion -0.2 or less, or border tension
-## 0.45 or more); rich stores few guard (the month's Standing: wealth at least
+## 0.45 or more); riches few guard (the month's Standing: wealth at least
 ## 0.35 above might); or simply other peoples known.
 const DEFENSE_DANGER:={"war":1.0,"attacked":.8,"hostile":.55,"tempting":.4,"neighbours":.2}
 const DEFENSE_MEMORY_DAYS:=730

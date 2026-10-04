@@ -31,7 +31,7 @@ func setup(block:Dictionary)->void:
 	_rule(self)
 	if not money and not metal:
 		add_child(_voice("Goods, stores and gifts",19))
-		_line(self,"There is no money yet. Households trade the goods makers make for food and materials, and prices are kept. Wealth is the goods, food and materials in store, and the favours households owe one another.",13,T.BODY)
+		_line(self,"There is no money yet. Households trade the goods makers make for food and materials, and prices are kept. Wealth is the goods, materials and treasures we hold, and the favours households owe one another.",13,T.BODY)
 		_button(self,"See the material stores",data.on_stores,"Wood, stone, clay and fibre in store")
 	else:
 		add_child(T.make_label("MONEY HELD" if money else "EXCHANGE METAL",12,T.MUTED))

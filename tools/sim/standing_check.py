@@ -38,9 +38,11 @@ CHECK_YEARS = [25, 75, 150, 300, 600]
 PATHS = ["path_balanced", "path_growth", "path_making", "path_war", "path_learning", "path_building"]
 # What each scenario leans toward: the strengths it should raise.
 # (Growth raises people, none of the nine by itself; making's goods a head
-# are held at the barter ceiling in the surrogate, a known gap.)
+# are held at the balanced barter ceiling in the surrogate, a known gap: in
+# the engine a people of many makers holds up to half again. Stores feed
+# Endurance alone: Wealth is goods, materials and treasures.)
 FOCUS = {"path_war": ["might"], "path_learning": ["genius"], "path_building": ["splendor"], "path_making": ["wealth"],
-         "arts_cunning": ["cunning"], "arts_persuasion": ["persuasion"], "lean_stores": ["wealth"], "lean_hold": ["endurance"], "lean_order": ["order"], "lean_reach": ["reach"]}
+         "arts_cunning": ["cunning"], "arts_persuasion": ["persuasion"], "lean_stores": ["endurance"], "lean_hold": ["endurance"], "lean_order": ["order"], "lean_reach": ["reach"]}
 # The arts' postures: what they cost (people away, the work shifted, gifts
 # from the stores) and what they read (an able envoy or chief scout, agents,
 # treaties kept, ties, how well the others are known).

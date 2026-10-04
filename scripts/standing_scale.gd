@@ -67,12 +67,28 @@ const SCHOLARS:=[[0,0.01,0.03,0.08,0.15]]
 ## (the Headman plans 60 while short, food_care.gd); the deepest a ruler plans
 ## is 120; a year's grain is the most the granary states of history kept.
 const STORES:=[[0,7,25,90,240],[300,10,30,120,365]]
-## Building materials (timber, stone, clay, fibre) a head, and made goods a
-## head: every people founds with about 0.2 and 0.1; by year 10 the yards and
-## the makers have filled to what computer peoples of a played world held at
-## year 75 (median 1.5 and 2).
-const MATERIALS:=[[0,0.05,0.2,1.0,3.0],[10,0.3,1.5,6.0,15.0]]
-const GOODS:=[[0,0.03,0.1,0.5,1.5],[10,0.5,2.0,6.0,12.0]]
+## WEALTH (standing.gd wealth_held, every town counted): made goods a head
+## (with coin and weighed metal at what they buy in goods), materials a head
+## and treasures a head, in goods.
+## Goods: every people founds with about 0.1 a head. Makers fill the homes,
+## then make for barter up to the engine's barter ceiling (civilian_goods.gd
+## ceiling: SURPLUS_PER_HEAD 4 a head beyond the homes' 1.2 x target, about
+## 0.25 a head), and a balanced people sits near it: the fast sim's balanced
+## people 4.4 at year 1 and 4.7-5.1 from then on; a played world's twelve
+## computer peoples at year 37, 3.8-4.7 (median 4.3). Typical 4.3. A people
+## of many makers holds up to HOLD_MORE (half) more: about 5.5 with 14 in 100
+## making (high), 6.3 all in at 20 in 100 (max 6.5). Low 1.5: short of makers
+## or of materials to spare.
+const GOODS:=[[0,0.03,0.1,0.5,1.5],[2,1.5,4.3,5.5,6.5]]
+## Materials (timber, stone, clay, fibre) a head: about 0.2 at the founding;
+## the played world's peoples at year 37 held 2.4-4.2 in one town and 8-12.5
+## with daughter towns (the fast sim's one-town balanced people 5.8).
+const MATERIALS:=[[0,0.05,0.2,1.0,3.0],[10,2.0,6.0,15.0,30.0]]
+## Treasures (artifact_collection.gd appraisals) in goods a head: none is
+## typical through the first ten years (finds come with scouts' years on the
+## land); the played world's computer peoples at year 37 held 16-58 pieces
+## worth 6-24 goods a head (median 15). A straight line between.
+const TREASURES:=[[0,0.0,0.0,1.0,3.0],[10,0.0,0.0,5.0,15.0],[37,5.0,15.0,40.0,100.0]]
 ## Days of water drawn and kept against a siege: none at the founding;
 ## computer peoples kept about 5 at year 75.
 const WATER:=[[0,0.0,0.0,1.0,3.0],[10,0.5,3.0,8.0,20.0]]

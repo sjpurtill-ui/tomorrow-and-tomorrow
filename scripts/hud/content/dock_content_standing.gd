@@ -260,7 +260,7 @@ func _warnings(peoples:Array,posture:Dictionary,our:Dictionary)->Array:
 				"arming": title="%s is gathering every spear against us" % String(p.name)
 				"all_in": title="%s may come at us with everything" % String(p.name)
 				"league": title="%s stand together against us" % String(p.name)
-				"envy": title="%s envy our stores" % String(p.name)
+				"envy": title="%s envy our goods" % String(p.name)
 				"grudge": title="%s nurse a grudge against us" % String(p.name)
 				"tribute_demand": title="%s think us easy to push" % String(p.name)
 				"redress_demand": title="%s want old wrongs righted" % String(p.name)
@@ -292,7 +292,7 @@ static func _fix_for(id:String,our:Dictionary)->Dictionary:
 	return {"words":"","section":"","sub":0,"action":""}
 
 static func _neglect_words(id:String)->String:
-	return String({"might":"With few under arms, rich neighbours are envied and weak ones pushed","endurance":"A bad season or a siege would break us quickly","wealth":"Thin stores leave nothing for hard years or gifts","reach":"Few peoples know us, so our works and word carry nowhere",
+	return String({"might":"With few under arms, rich neighbours are envied and weak ones pushed","endurance":"A bad season or a siege would break us quickly","wealth":"Few goods to trade or give, and nothing that draws traders","reach":"Few peoples know us, so our works and word carry nowhere",
 		"persuasion":"Our envoys win little, and peoples find our ways closed","splendor":"Nothing we have built makes others hold back or want to come","genius":"Others learn faster than we do, and their respect falls","cunning":"We learn late what others plan","order":"The people trust their chiefs little and hold together poorly"}.get(id,""))
 
 func signature()->Array:

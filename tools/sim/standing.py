@@ -33,7 +33,7 @@ KNOWN_SPREAD = _c("KNOWN_SPREAD", [0.5, 1.0, 1.28, 1.47])
 KNOWN_TYPICAL_EARLY = _c("KNOWN_TYPICAL_EARLY", [[0, 10]])
 KNOWN_BENCHMARK = _c("KNOWN_BENCHMARK", [[600, 390, 790, 1010, 1180]])
 TABLES = {name: _c(name, [[0, 0.1, 0.5, 0.8, 1.0]]) for name in
-          ["SCHOLARS", "STORES", "MATERIALS", "GOODS", "WATER", "WALLS", "HEALTH", "COHESION", "LEGITIMACY", "LOGISTICS",
+          ["SCHOLARS", "STORES", "MATERIALS", "GOODS", "TREASURES", "WATER", "WALLS", "HEALTH", "COHESION", "LEGITIMACY", "LOGISTICS",
            "CULTURE", "ADMINISTRATION", "MET", "WORKS", "BEAUTY", "SCOUTS", "FAMILIARITY", "TREATIES", "GIFTS", "ENVOY_DAYS", "INTEL"]}
 ORDINARY_SKILL = float(_c("ORDINARY_SKILL", 0.47))
 READY_FROM_DRILL = 1.5
@@ -47,7 +47,7 @@ GENIUS_W = _w("GENIUS_WEIGHTS", {"known": 0.6, "scholars": 0.4})
 PERSUASION_W = _w("PERSUASION_WEIGHTS", {"envoy": 0.3, "openness": 0.15, "familiarity": 0.1, "treaties": 0.15, "gifts": 0.15, "abroad": 0.15})
 CUNNING_W = _w("CUNNING_WEIGHTS", {"scout": 0.25, "eyes": 0.25, "agents": 0.15, "caught": 0.1, "intel": 0.25})
 SPLENDOR_W = _w("SPLENDOR_WEIGHTS", {"works": 0.55, "culture": 0.25, "beauty": 0.2})
-WEALTH_W = _w("WEALTH_WEIGHTS", {"food": 0.5, "materials": 0.25, "goods": 0.25})
+WEALTH_W = _w("WEALTH_WEIGHTS", {"goods": 0.6, "materials": 0.25, "treasures": 0.15})
 ENDURANCE_W = _w("ENDURANCE_WEIGHTS", {"food": 0.45, "water": 0.1, "walls": 0.2, "health": 0.125, "cohesion": 0.125})
 ORDER_W = _w("ORDER_WEIGHTS", {"legitimacy": 0.35, "cohesion": 0.2, "administration": 0.2, "steward": 0.25})
 REACH_W = _w("REACH_WEIGHTS", {"logistics": 0.5, "met": 0.5})
@@ -182,10 +182,12 @@ def readings(row: dict, posture: dict | None = None) -> dict:
     known = float(row.get("known", 0.0))
     scholars = float(row.get("knowledge_workers", 0.0)) / pop
     genius = blend({"known": score(known, known_anchors(year)), "scholars": score(scholars, T("SCHOLARS"))}, GENIUS_W)
-    # Wealth: the yards' raw materials and the goods a head.
+    # Wealth: the goods a head, the yards' raw materials a head and treasures
+    # (the surrogate keeps no treasures: read as typical). Food in store is
+    # Endurance's alone.
     food = float(row.get("food_days", 0.0))
-    wealth = blend({"food": score(food, T("STORES")), "materials": score(float(row.get("raw", 0.0)) / pop, T("MATERIALS")),
-                    "goods": score(float(row.get("goods_per_head", 0.0)), T("GOODS"))}, WEALTH_W)
+    wealth = blend({"goods": score(float(row.get("goods_per_head", 0.0)), T("GOODS")), "materials": score(float(row.get("raw", 0.0)) / pop, T("MATERIALS")),
+                    "treasures": TYPICAL}, WEALTH_W)
     # Endurance: no water model in the surrogate (read as typical).
     endurance = blend({"food": score(food, T("STORES")), "water": TYPICAL, "walls": score(bonus, T("WALLS")),
                        "health": score_share(float(row.get("health", 0.9)), T("HEALTH")), "cohesion": score_share(float(row.get("cohesion", 0.9)), T("COHESION"))}, ENDURANCE_W)

@@ -399,14 +399,35 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 	_soldiers(10)
 	Purse.state().balance=640.0
 	Purse.set_line("scholars",true)
+	# The common store is food: it lives on Food & water ("store").
 	var board:=Board.new()
 	add_child(board)
-	board.setup({})
-	for part in ["Balance","ComingIn","GoingOut","Budget","Levels","LevyNow","LevyCost","Line_army","Line_scholars","Line_crews","Line_relief","Fifths","Shares","Pressure"]:
-		assert_object(board.find_child(part,true,false)).override_failure_message("the purse board has no %s" % part).is_not_null()
+	board.setup({"mode":"store"})
+	for part in ["Balance","ComingIn","GoingOut","Budget","Levels","LevyNow","LevyCost","Line_army","Line_scholars","Line_crews","Line_relief"]:
+		assert_object(board.find_child(part,true,false)).override_failure_message("the store board has no %s" % part).is_not_null()
+	for gone in ["GoodsHeld","Fifths","SeeArms"]:assert_object(board.find_child(gone,true,false)).override_failure_message("the store board shows %s" % gone).is_null()
+	# Wealth is what we own: goods first, then making, treasures, materials;
+	# the store is one line and a way to Food & water.
+	var wealth:=Board.new()
+	add_child(wealth)
+	wealth.setup({})
+	for part in ["GoodsHeld","GoodsBuy","GoodsAHead","GoodsSpare","GoodsMade","Treasures","SeeTreasures","Materials","SeeMaterials","Barter","Fifths","Shares","Pressure","StorePointer","SeeStore"]:
+		assert_object(wealth.find_child(part,true,false)).override_failure_message("the wealth board has no %s" % part).is_not_null()
+	for gone in ["Balance","Levels","Line_army","StoreAnswer"]:assert_object(wealth.find_child(gone,true,false)).override_failure_message("the wealth board shows %s" % gone).is_null()
+	var kickers:=[]
+	for child in wealth.get_children():
+		if child is Label and (child as Label).text!="":kickers.append((child as Label).text)
+	assert_str(String(kickers[0])).is_equal("WHAT WE OWN")
+	assert_int(kickers.find("WHAT WE MAKE")).is_less(kickers.find("TREASURES"))
+	assert_int(kickers.find("TREASURES")).is_less(kickers.find("MATERIALS IN STORE"))
+	assert_int(kickers.find("MATERIALS IN STORE")).is_less(kickers.find("TRADE AND BUSINESS"))
+	assert_str(String(kickers[-1])).is_equal("THE COMMON STORE")
 	# Arms live on the Production screen: Wealth only points there.
-	for gone in ["ArmsHeld","ArmsCost"]:assert_object(board.find_child(gone,true,false)).is_null()
-	assert_object(board.find_child("SeeArms",true,false)).is_not_null()
+	for gone in ["ArmsHeld","ArmsCost"]:assert_object(wealth.find_child(gone,true,false)).is_null()
+	assert_object(wealth.find_child("SeeArms",true,false)).is_not_null()
+	# What we own is the engine's count: every town's goods, at our own prices.
+	var held:=preload("res://scripts/standing.gd").wealth_held()
+	assert_str((wealth.find_child("GoodsHeld",true,false) as Label).text).contains("%s goods" % preload("res://scripts/hud/era_words.gd").grouped(roundi(float(held.goods))))
 	# Every budget bar carries its word and its sum.
 	for row in ["ComingIn","GoingOut"]:
 		var texts:=PackedStringArray()
@@ -425,17 +446,35 @@ func test_the_wealth_screen_builds_with_short_plain_labels()->void:
 			if token in ["·","−","+",":"]: continue
 			words+=1
 		if words>12: long.append(text)
+	for node in wealth.find_children("*","",true,false):
+		var text:=""
+		if node is Label: text=(node as Label).text
+		elif node is Button: text=(node as Button).text
+		else: continue
+		var words:=0
+		for token in text.replace("\n"," ").split(" ",false):
+			if token in ["·","−","+",":"]: continue
+			words+=1
+		if words>12: long.append(text)
 	assert_array(Array(long)).override_failure_message("labels over twelve words: %s" % str(long)).is_empty()
 	# A level chosen on the screen is the engine's levy.
 	(board.find_child("Level_heavy",true,false) as Button).emit_signal("pressed")
 	assert_str(String(Purse.state().levy)).is_equal("heavy")
-	# The sections drawn again are freed with the frame; then the board.
+	# The sections drawn again are freed with the frame; then the boards.
 	await await_idle_frame()
 	remove_child(board)
 	board.free()
-	# The economy's Wealth tab mounts the board first.
-	var tab:Dictionary=preload("res://scripts/hud/content/dock_content_economy.gd").new(null,null)._wealth_tab()
+	remove_child(wealth)
+	wealth.free()
+	# The economy's Wealth tab mounts the wealth board first; Food & water
+	# carries the common store after the town's food while it is food.
+	var economy=preload("res://scripts/hud/content/dock_content_economy.gd").new(null,null)
+	var tab:Dictionary=economy._wealth_tab()
 	assert_str(String((tab.blocks[0] as Dictionary).type)).is_equal("purse_board")
+	assert_str(String((tab.blocks[0] as Dictionary).get("mode",""))).is_equal("wealth")
+	var food:Dictionary=economy._food_tab()
+	assert_str(String((food.blocks[-1] as Dictionary).type)).is_equal("purse_board")
+	assert_str(String((food.blocks[-1] as Dictionary).get("mode",""))).is_equal("store")
 
 
 # --- 10. The court ------------------------------------------------------------------------------
@@ -607,7 +646,7 @@ func test_the_board_says_where_the_silver_comes_from()->void:
 	assert_float(float(home.evaded)).is_greater(0.0)
 	var board:=Board.new()
 	add_child(board)
-	board.setup({})
+	board.setup({"mode":"store"})
 	var said:=PackedStringArray()
 	for node in board.find_children("*","Label",true,false): said.append((node as Label).text)
 	var text:=" | ".join(said)
