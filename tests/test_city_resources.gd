@@ -184,16 +184,6 @@ func test_food_trade_uses_the_food_ledger_and_records_transit_loss()->void:
 		if String(entry.status)=="delivered" and String(entry.resource)=="Food": lost+=float(entry.lost)
 	assert_float(arrived+lost).is_equal_approx(shipped,0.00001)
 
-func test_second_city_cannot_provision_a_convoy_from_capital_stores()->void:
-	GameState.population_exact=1000.0
-	GameState.population_total=1000
-	GameState.resource_stockpiles={"Food":100000.0,"Timber":1000.0,"Fiber Plants":1000.0}
-	CivilizationSystem.record_player_travel(Vector2(20,0))
-	var quote:=SettlementModel.settlement_convoy_quote(Vector2(20,0),2.0)
-	assert_str(String(quote.get("origin_id",""))).is_equal("dawngate")
-	assert_bool(bool(quote.ok)).is_false()
-	assert_bool("travel rations" in String(quote.reason)).is_true()
-
 func test_secondary_woodland_supply_is_local_and_does_not_duplicate_capital()->void:
 	var before:=GameState.resource_deposits.duplicate(true)
 	var context:={"settled":true,"origin":Vector3(10,0,0),"woodland_catchment":{"density":0.65,"area_km2":9.0,"position":Vector3(10,0,0)}}

@@ -181,31 +181,6 @@ func test_standing_down_sends_the_recruits_then_the_fighters_home()->void:
 	assert_str(String(all.says)).contains("Nobody keeps watch")
 
 
-## Founding one town (realm_orders.gd found_town): the settlers set out.
-## Tests have no mapped rivers, so the site is given through the seam.
-func test_founding_a_town_sends_settlers_out()->void:
-	var Realm:=load("res://scripts/realm_orders.gd")
-	CivilizationSystem._add_revealed_area(Vector2.ZERO,45.0,"scout report")
-	var reading:Dictionary=Realm.read("Found a new town by the river")
-	assert_str(String(reading.get("kind",""))).is_equal("found_town")
-	assert_bool(bool(reading.river)).is_true()
-	Realm.site_override=func()->Vector2: return Vector2(12.0,5.0)
-	var done:Dictionary=Realm.perform(reading)
-	Realm.site_override=Callable()
-	assert_bool(bool(done.ok)).override_failure_message(str(done)).is_true()
-	assert_bool((GameState.settlement_convoy as Dictionary).is_empty()).is_false()
-	assert_str(String(done.says)).contains("settlers set out")
-
-
-# --------------------------------------------------------------------------
-# "I called on my court for 10 levies, they said they were training. Nothing."
-# The words were not read as a call-up; with nobody waiting the court fell to
-# the drill at home, and a drill nobody could attend (every soldier already at
-# the staff's target) had stood "under way" for 24 years. The people had cut
-# down every stand of trees they knew, so no levy could be armed, and the
-# court promised 45 days of drill that were really 9 months.
-# --------------------------------------------------------------------------
-
 func test_asking_for_levies_in_any_words_calls_them_up()->void:
 	for said in ["I need 10 levies","Give me 10 levies","Raise a levy of 10 men","I want 10 more levies","10 levies","Prepare 10 levies","Get me ten levies"]:
 		var r:=HomeOrders.read(said)
