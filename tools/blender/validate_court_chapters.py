@@ -103,6 +103,11 @@ def main():
                 triangles += doc["accessors"][primitive["indices"]]["count"] // 3
         assert names == set(info["objects"]) == set(info["bounds"]), key
         assert triangles == info["triangles"] and triangles < 12000, (key, triangles)
+        if i == 3:
+            for column in range(4):
+                assert info["bounds"][f"AudienceCapital_{column}"][1][1] > info["bounds"][f"AudiencePier_{column}"][1][1] + .01, "coplanar capital top"
+        if i == 12:
+            assert info["bounds"]["ConsultationPartition"][0][0] > info["bounds"]["SecretaryStation"][1][0] + .04, "partition intersects secretary desk"
         shape = geometry.hexdigest()
         assert shape not in shapes, (key, "geometry duplicates earlier chapter")
         shapes.add(shape)
