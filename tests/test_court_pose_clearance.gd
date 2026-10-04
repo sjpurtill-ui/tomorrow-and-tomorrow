@@ -6,7 +6,7 @@ var saved:Dictionary
 
 func before_test()->void:
 	saved=Pose.overrides
-	Pose.overrides={"male_adult":{"stand":8.0,"sit_cross":[[0.0,8.0],[.6,16.0],[1.6,5.0]],"stance_cross":5.0}}
+	Pose.overrides={"male_adult":{"stand":8.0,"sit_cross":{"spread":[[0.0,8.0],[.6,16.0],[1.6,5.0]],"flex":6.0},"stance_cross":{"spread":5.0,"flex":6.0}}}
 
 func after_test()->void:Pose.overrides=saved
 
@@ -33,7 +33,7 @@ func test_fitting_preserves_source_timing_and_every_non_arm_track()->void:
 		var after:=_signature(fitted)
 		assert_array(after.slice(0,3)).is_equal(before.slice(0,3))
 		for track in source.get_track_count():
-			if Pose._arm_track(source,track):
+			if Pose._arm_track(source,track,clip!="stand"):
 				assert_array(after[track+3].slice(0,5)).is_equal(before[track+3].slice(0,5))
 				for key in source.track_get_key_count(track):assert_array(after[track+3][key+5].slice(0,2)).is_equal(before[track+3][key+5].slice(0,2))
 			else:assert_array(after[track+3]).is_equal(before[track+3])
