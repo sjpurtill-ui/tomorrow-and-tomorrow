@@ -362,3 +362,95 @@ func test_the_rose_lays_every_people_we_know_beside_ours()->void:
 	var tip:String=rose._get_tooltip(rose.size*0.5+Vector2(0,-120))
 	assert_str(tip).contains(String(CivilizationSystem.civilizations[0].name))
 	assert_str(tip).contains("typical people of our age")
+
+# ------------------------------------------------------ review of PR #139
+
+func test_a_missed_arming_shows_nowhere_until_word_comes()->void:
+	var id:=_met()
+	var Answer:=preload("res://scripts/world_answer.gd")
+	var Ledger:=preload("res://scripts/hud/war_ledger_model.gd")
+	var Known:=preload("res://scripts/hud/peoples_known_model.gd")
+	_arts(0.0,0.5)
+	var day:=int(GameState.elapsed_days)
+	for k in 60:
+		Answer.state().arming.erase(id)
+		Answer._begin_arming(id,day+k,{"why_all_in":"they resent us"})
+		if not bool((Answer.state().arming[id] as Dictionary).get("heard",true)): break
+	assert_bool(bool((Answer.state().arming[id] as Dictionary).get("heard",true))).is_false()
+	var armed:=func()->bool:
+		for e:Dictionary in Ledger.entries(day): if String(e.civ_id)==id and e.has("arming_days"): return true
+		return false
+	assert_bool(armed.call()).is_false()
+	assert_str(String(Known.relation_cell({"civ_id":id}).get("text",""))).is_not_equal("Arming against us")
+	(Answer.state().arming[id] as Dictionary)["heard"]=true
+	assert_bool(armed.call()).is_true()
+	assert_str(String(Known.relation_cell({"civ_id":id}).text)).is_equal("Arming against us")
+
+func test_every_people_reads_its_month_however_many_days_a_step_covers()->void:
+	var metrics:Dictionary=GameState.simulation_metrics
+	metrics.erase("standing_day")
+	assert_bool(Standing.reading_due()).is_true()
+	# A computer people stepping three days at a time, from day 1.
+	var readings:=0
+	for step in range(1,301,3):
+		GameState.elapsed_days=float(step)
+		if Standing.reading_due():
+			Standing.record_monthly()
+			readings+=1
+	assert_int(readings).is_equal(10)
+	# A calendar set back reads again at once.
+	GameState.elapsed_days=10.0
+	assert_bool(Standing.reading_due()).is_true()
+	# The engine asks it.
+	assert_str(FileAccess.get_file_as_string("res://scripts/consequence_engine.gd")).contains("standing.gd\").reading_due()")
+
+func test_the_reasons_beside_an_estimate_say_the_estimate()->void:
+	_actors()
+	var id:=_met(0,0.3)
+	var ours:Array=[]
+	for i in 600: ours.append("ours_%d" % i)
+	GameState.known_discoveries.assign(ours)
+	var theirs:Array=[]
+	for i in 100: theirs.append("theirs_%d" % i)
+	WorldSimulation.scoped(id,func()->void:
+		WorldSimulation.state.elapsed_days=75*365
+		WorldSimulation.state.known_discoveries.assign(theirs))
+	_arts(0.5,0.5)
+	var awe:=String((Standing.view_of(id).why as Dictionary).awe)
+	assert_str(awe).contains("by our watchers' reckoning")
+	assert_str(awe).not_contains("we know 500 things")
+	# Their plenty, as an estimate; nothing at all when we cannot say.
+	assert_str(Standing._plenty_words(id,0.8,0.4)).contains("against their about")
+	CivilizationSystem.civilizations[0].player_relation.contact_intelligence=0.02
+	_arts(0.0,0.5)
+	assert_str(Standing._plenty_words(id,0.8,0.4)).is_equal(" (our plenty 80%)")
+	assert_str(Standing._lead_words(id,600.0,100.0)).is_equal("")
+
+func test_the_war_ledger_says_unknown_when_we_know_too_little()->void:
+	var id:=_met(0,0.02)
+	var Ledger:=preload("res://scripts/hud/war_ledger_model.gd")
+	_arts(0.0,0.5)
+	var e:=Ledger._common(id,{},{},int(GameState.elapsed_days))
+	assert_bool(bool(e.strength_unknown)).is_true()
+	assert_bool(bool(Ledger.odds(e).get("unknown",false))).is_true()
+	assert_str(Ledger.odds_words(e)).starts_with("unknown")
+	# Known a little: a real band, never "between X and X".
+	CivilizationSystem.civilizations[0].player_relation.contact_intelligence=0.3
+	_arts(0.5,0.5)
+	var known:=Ledger._common(id,{},{},int(GameState.elapsed_days))
+	assert_bool(bool(known.strength_unknown)).is_false()
+	assert_float(float(known.strength_high)).is_greater(float(known.strength_low))
+
+func test_the_arts_lines_read_plainly()->void:
+	assert_str(Standing._signed_points(0.01)).is_equal("+1 point")
+	assert_str(Standing._signed_points(-0.04)).is_equal("-4 points")
+	assert_str(Standing._signed_points(0.01,"more","less")).is_equal("1 point more")
+	assert_str(Standing._share_words(0.1,"more","less")).is_equal("a tenth more")
+	assert_str(Standing._share_words(-0.05,"more","less")).is_equal("a twentieth less")
+	_arts(0.5,1.0)
+	var lines:=PackedStringArray()
+	for row:Dictionary in Standing.arts_at_work().persuasion: lines.append(String(row.words)+" "+String(row.detail))
+	var text:=" ".join(lines)
+	assert_str(text).contains("pays a tenth more")
+	assert_str(text).not_contains(" 1 points")
+	assert_str(text).contains("Between any two peoples")

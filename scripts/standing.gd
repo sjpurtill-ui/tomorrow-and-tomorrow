@@ -33,7 +33,7 @@ const Scale:=preload("res://scripts/standing_scale.gd")
 ## A trained, ready warrior counts as this many untrained defenders.
 const WARRIOR_WEIGHT:=3.0
 ## Envy and Contempt start to move peoples above these.
-const ENVY_RAID_FLOOR:=0.35
+const ENVY_RAID_FLOOR:=0.40
 const CONTEMPT_FLOOR:=0.3
 
 ## The nine strengths in the order the Standing page's rose draws them,
@@ -664,7 +664,7 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var our_known:=float(WorldSimulation.state.known_discoveries.size())
 	var lead:=clampf((our_known-their_known)/maxf(20.0,maxf(our_known,their_known)),-1.0,1.0)
 	var awe:=clampf(might_term*0.45+heard*0.35+maxf(0.0,lead)*0.35,0.0,1.0)
-	why["awe"]="our fighting strength %s theirs%s%s" % [_ratio_words(ratio)," · works of ours they have heard of" if heard>0.05 else "",(" · we know %d things they do not" % roundi(our_known-their_known)) if lead>0.05 else ""]
+	why["awe"]="our fighting strength %s theirs%s%s" % [_ratio_words(ratio)," · works of ours they have heard of" if heard>0.05 else "",_lead_words(civ_id,our_known,their_known) if lead>0.05 else ""]
 	var lives:=_lives()
 	var fear:=float(lives.call("rival_dread",civ_id)) if lives!=null else 0.0
 	why["fear"]="what they remember of our wrath and harm" if fear>0.05 else "no harm done to them"
@@ -699,10 +699,26 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var their_wealth:=their_reading_value(civ_id,"wealth")
 	var richer:=maxf(0.0,our_wealth-their_wealth)
 	var envy:=clampf((our_wealth*ENVY_PLENTY+richer*ENVY_RICHER+heard*0.4)*(1.0-awe)*(1.0-trust*0.5)*(1.0-fear*0.5),0.0,1.0)
-	why["envy"]="they see our stores and works%s%s" % [(" (our plenty %d%% against their %d%%)" % [roundi(our_wealth*100.0),roundi(their_wealth*100.0)]) if richer>0.05 else ""," and too few to guard them" if awe<0.35 else ""]
+	why["envy"]="they see our stores and works%s%s" % [_plenty_words(civ_id,our_wealth,their_wealth) if richer>0.05 else ""," and too few to guard them" if awe<0.35 else ""]
 	var contempt:=clampf((1.0-respect)*clampf(1.25-ratio,0.0,1.0)*(1.0-fear*0.6),0.0,1.0)
 	why["contempt"]="our fighting strength %s theirs" % _ratio_words(ratio)
 	return {"known":true,"allure":allure,"awe":awe,"fear":fear,"respect":respect,"trust":trust,"resentment":resentment,"envy":envy,"contempt":contempt,"strength_ratio":ratio,"why":why}
+
+## " · we know about 90 things they do not", from our estimate of what they
+## know (the same estimate the Standing page shows); "" when we cannot say.
+static func _lead_words(civ_id:String,ours:float,theirs:float)->String:
+	var est:=estimate(civ_id,"known",theirs,true)
+	if bool(est.get("unknown",false)): return ""
+	var lead:=roundi(ours-float(est.value))
+	if lead<=0: return ""
+	return (" · we know %d things they do not" if bool(est.exact) else " · we know about %d things they do not, by our watchers' reckoning") % lead
+
+## " (our plenty 76% against their about 48%)", their plenty from our
+## estimate of them; " (our plenty 76%)" when we cannot say theirs.
+static func _plenty_words(civ_id:String,ours:float,theirs:float)->String:
+	var est:=estimate(civ_id,"wealth",theirs)
+	if bool(est.get("unknown",false)): return " (our plenty %d%%)" % roundi(ours*100.0)
+	return " (our plenty %d%% against their %s)" % [roundi(ours*100.0),estimate_words(est)]
 
 static func _ratio_words(ratio:float)->String:
 	if ratio>=3.0: return "is several times"
@@ -797,9 +813,14 @@ const RENOWN_MENACE:=0.15
 const BORDER_MENACE:=0.3
 ## Persuasion's share in our allure: good words draw people to us.
 const PERSUASION_ALLURE:=0.15
-## Envy: our plenty, and how far it passes theirs.
-const ENVY_PLENTY:=0.45
-const ENVY_RICHER:=0.8
+## Envy: our plenty, and how far it passes theirs. With ENVY_RAID_FLOOR
+## 0.40, a people as rich as the player's at year 75 (Wealth 76%: 248 days of
+## food), with few under arms and twelve neighbours met, draws about one envy
+## raid in three years; a typical people none; the richest the age has seen
+## (Wealth 90%), unguarded, about one a year, and guarded as a typical people
+## fewer (the PR's table).
+const ENVY_PLENTY:=0.6
+const ENVY_RICHER:=0.6
 
 # -------------------------------------------------------- read by daily systems
 
@@ -1064,6 +1085,17 @@ static func home_effects()->Dictionary:
 		# What the levy costs, as ConsequenceEngine's targets take it.
 		"levy_cohesion":levy_burden()*60.0,"levy_trust":levy_burden()*40.0*blame()}
 
+## Whether the people in scope is due its month's reading: 30 days or more
+## since its last (standing_day), or none yet, or a calendar set back. A
+## computer people steps several days at once (day_span.gd), so a reading on
+## day%30 alone would miss most of its months.
+const READING_EVERY:=30
+static func reading_due()->bool:
+	var metrics:Dictionary=WorldSimulation.state.simulation_metrics
+	if not metrics.has("standing_day") or not metrics.has("standing_pride"): return true
+	var since:=int(WorldSimulation.state.elapsed_days)-int(float(metrics.standing_day))
+	return since>=READING_EVERY or since<0
+
 # ------------------------------------------------ other peoples, as we know them
 
 ## Another people's month's reading is read from their own ledger (their
@@ -1317,9 +1349,9 @@ static func arts_at_work()->Dictionary:
 		cunning_rows.append({"words":"What we know of the peoples we know: within %d points either way, right %d in 100" % [roundi(ESTIMATE_WIDEST*(1.0-clampf(sure,0.0,1.0))*100.0),roundi(estimate_right_odds(sure)*100.0)],"detail":"Our estimates of their strengths, their learning and their spears, on every screen that shows them. Envoys, scouts and years of contact make them surer; cunning adds or takes away up to %d points." % roundi(CUNNING_CERTAINTY*100.0)})
 	var grace:=maxi(1,3+pact_grace(p))
 	var persuasion_rows:Array=[
-		{"words":"Envoys' deals: their ruler pays %s; agrees to harder terms %s" % [_signed_points(deal_temper(p),"more","less"),_signed_points(counter_edge(p))],"detail":"In every envoy's bargain: what they offer for what they ask, and the odds they take our counter."},
+		{"words":"Envoys' deals: their ruler pays %s; agrees to harder terms %s" % [_share_words(deal_temper(p),"more","less"),_signed_points(counter_edge(p))],"detail":"In every envoy's bargain: what they offer for what they ask, and the odds they take our counter."},
 		{"words":"A message sent home with a captured agent heeded: %s" % _signed_points(message_edge(p)),"detail":"Added to the odds their ruler heeds a warning, bows to a threat, takes an offer of peace or meets a demand."},
-		{"words":"Exchanges bear %d failed portion%s before they are ended" % [grace,"" if grace==1 else "s"],"detail":"Three for a typical people. Between other peoples too, a treaty holds until regard falls %s." % _signed_points((p-0.5)*TREATY_HOLD,"lower","higher")},
+		{"words":"Exchanges bear %d failed portion%s before they are ended" % [grace,"" if grace==1 else "s"],"detail":"Three for a typical people. Between any two peoples, a treaty breaks once regard falls below %d in 100; the more persuasive the two, the lower it must fall first (%d points lower for two of the best)." % [roundi(TREATY_BREAK*100.0),roundi(0.5*TREATY_HOLD*100.0)]},
 		{"words":"Families of other peoples drawn to us: %+.1f a month (points of 100)" % (persuasion_draw(p)*100.0),"detail":"Added to how much families want to join us and stay."},
 		{"words":"New grudges against us weigh x%.2f" % grudge_factor(p),"detail":"A grudge of theirs over a wrong of ours starts lighter, so it fades sooner and sends raiders later."},
 		{"words":"Their rulers' trust in our word: %s" % _signed_points((p-0.5)*0.2),"detail":"How our envoys carry themselves."},
@@ -1329,8 +1361,16 @@ static func arts_at_work()->Dictionary:
 static func _signed_points(x:float,up:String="",down:String="")->String:
 	var points:=roundi(x*100.0)
 	if points==0: return "as for a typical people"
-	if up!="": return "%d points %s" % [absi(points),up if points>0 else down]
-	return "%+d points" % points
+	var unit:="point" if absi(points)==1 else "points"
+	if up!="": return "%d %s %s" % [absi(points),unit,up if points>0 else down]
+	return "%+d %s" % [points,unit]
+
+## "a tenth more", "a twentieth less", "7 in 100 more": a multiplier's share.
+static func _share_words(x:float,up:String,down:String)->String:
+	var share:=roundi(absf(x)*100.0)
+	if share==0: return "as to a typical people"
+	var words:=String({5:"a twentieth",10:"a tenth",20:"a fifth",25:"a quarter",50:"a half"}.get(share,"%d in 100" % share))
+	return "%s %s" % [words,up if x>0.0 else down]
 
 ## How sure we are of the peoples we know, on average (-1 when none).
 static func _mean_certainty()->float:
