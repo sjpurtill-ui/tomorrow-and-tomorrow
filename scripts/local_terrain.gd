@@ -77,10 +77,10 @@ const DAY_STEP_BUDGET_NAVIGATING_USEC := 4000
 ## than DAY_STEP_BUDGET_FAST_USEC nor leaving the rest of the frame less than
 ## DAY_FRAME_RESERVE_USEC. When the pace asked for needs more simulation a
 ## second than 30 such frames give, the frame grows as far as that pace needs
-## (_catch_up_frame_usec), never past DAY_FRAME_LONGEST_USEC (20 a second).
+## (_catch_up_frame_usec), never past DAY_FRAME_LONGEST_USEC (15 a second).
 ## The world is the same; only how many of its steps share a frame changes.
 const DAY_FRAME_TARGET_USEC := 33000
-const DAY_FRAME_LONGEST_USEC := 50000
+const DAY_FRAME_LONGEST_USEC := 66000
 const DAY_FRAME_RESERVE_USEC := 9000
 const DAY_STEP_BUDGET_MAX_USEC := DAY_FRAME_TARGET_USEC-DAY_FRAME_RESERVE_USEC
 ## Even pacing (_paced_day_budget_usec): a day aims to be done this far
@@ -404,6 +404,9 @@ var warfare_front_markers:Dictionary={}
 var war_map_overlay:Control
 var rendered_observation_revision:=-1
 const LIVE_REPORT_REFRESH_INTERVAL_SECONDS:=0.75
+## At the fastest speed an open side panel redraws this often instead: its
+## figures move by the week there, and each rebuild takes time from the days.
+const LIVE_REPORT_REFRESH_FASTEST_SECONDS:=2.0
 var live_report_refresh_elapsed:=0.0
 # Visual-audit override only. Gameplay leaves this at -1 and derives one of the eight
 # aggregate neighborhood conditions from authoritative civilization/settlement state.
@@ -1086,7 +1089,7 @@ func _day_step_budget_usec()->int:
 ## asked for allows. A second of the calendar's days costs `needed` of a
 ## second of simulation (what a day has lately cost); the rest of each frame
 ## (the map, the HUD, drawing) must fit in what is left: frame = rest / (1 -
-## needed), between 30 and 20 frames a second.
+## needed), between 30 and 15 frames a second.
 func _catch_up_frame_usec()->int:
 	return catch_up_frame_usec(_day_cost_usec,_speed_hours_per_second()/24.0,_frame_other_usec)
 
@@ -1288,12 +1291,19 @@ func _after_world_time(days_advanced:float)->void:
 # full-screen dimmer from strobing as simulation values change.
 func _process_live_report_refresh(delta:float)->void:
 	live_report_refresh_elapsed+=maxf(0.0,delta)
-	if live_report_refresh_elapsed<LIVE_REPORT_REFRESH_INTERVAL_SECONDS: return
-	live_report_refresh_elapsed=fmod(live_report_refresh_elapsed,LIVE_REPORT_REFRESH_INTERVAL_SECONDS)
+	var interval:=live_report_refresh_interval()
+	if live_report_refresh_elapsed<interval: return
+	live_report_refresh_elapsed=fmod(live_report_refresh_elapsed,interval)
 	if hud and not _live_report_global_interaction_active():
 		var refreshed:=Time.get_ticks_usec()
 		hud.live_refresh_dock()
 		PerfMeter.dock(Time.get_ticks_usec()-refreshed)
+
+
+func live_report_refresh_interval()->float:
+	if game_speed>0.0 and _speed_hours_per_second()>=float(SPEED_HOURS_PER_REAL_SECOND[5]):
+		return LIVE_REPORT_REFRESH_FASTEST_SECONDS
+	return LIVE_REPORT_REFRESH_INTERVAL_SECONDS
 
 
 func _live_report_global_interaction_active()->bool:
