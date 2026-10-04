@@ -302,6 +302,7 @@ func _field_rows(domain:String)->Array:
 		var row:=Explainer.ledger_row(key,float(totals[key]),1.0,1.0,"total")
 		row["id"]="field:%s:%s" % [domain,key]
 		row["usage"]="now, from this field's practices, before the age's limit"
+		row["value"]=float(totals[key])
 		rows.append(row)
 	rows.sort_custom(func(a:Dictionary,b:Dictionary)->bool: return absf(float(totals[a.key]))>absf(float(totals[b.key])))
 	return rows
@@ -407,31 +408,44 @@ func _open_report(title:String,reader:Callable)->void:
 	var report:=preload("res://scripts/hud/content/focused_report.gd").new(terrain,hud,title,"INQUIRY",reader,signature)
 	hud.open_detail(report)
 func open_domain(domain:String)->void:
-	_open_report(domain.capitalize(),_domain_report.bind(domain))
+	_open_report(Visuals.name_for(domain),_domain_report.bind(domain))
 func _attention_overview()->Array:
 	return [{"type":"text","heading":"WHAT SHOULD WE UNDERSTAND BETTER?","text":"Choose a direction. Your people pursue the work; evidence, experience and established knowledge determine what becomes possible."},{"type":"actions","items":[focused_action("FOOD & LAND","Nutrition and the living landscape",_domain_group.bind(["nutrition","ecology"])),focused_action("PEOPLE & COMMUNITY","Growth, health and culture",_domain_group.bind(["demography","health","culture"])),focused_action("WORK & MAKING","Labor, production and construction",_domain_group.bind(["labor","production","infrastructure"])),focused_action("KNOWLEDGE & SOCIETY","Learning, institutions and security",_domain_group.bind(["knowledge","institutions","security","logistics"]))]},{"type":"actions","items":[focused_action("RESEARCH WORK","Your leader's labor priority",_research_work_report),focused_action("COMPARE ATTENTION","Advanced shares across all domains",func()->Dictionary:return {"blocks":_attention_blocks()})]}]
 func _domain_group(domains:Array)->Dictionary:
 	var items:Array=[]
 	for id:String in domains:items.append({"label":id.capitalize(),"sub":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"on_press":open_domain.bind(id)})
 	return {"blocks":[{"type":"actions","heading":"CHOOSE A DIRECTION","items":items}]}
+## A field's page, drawn (field_sheet.gd): its banner, its attention as a
+## dial and a dot per learner, what its knowledge does now as bars, and its
+## questions under way with what each would bring.
 func _domain_report(id:String)->Dictionary:
 	var weight:=int(GameState.research_allocations.get(id,0));var total:=ArtifactCulture.study_weight()
 	for amount in GameState.research_allocations.values():total+=maxi(0,int(amount))
 	var share:=float(weight)/maxf(1,total)
 	var observers:=int(GameState.population_allocations.get("Knowledge",0))
-	var blocks:Array=[{"type":"text","heading":"PURPOSE","text":String(DOMAIN_GOALS.get(id,""))},{"type":"text","heading":"CURRENT ATTENTION","text":"About %d in every 100 of our lore keepers' hours go to this field: roughly %s of our %d people at learning. More attention speeds the work here but cannot replace missing clues."%[roundi(share*100),preload("res://scripts/hud/production_plain.gd").number(share*observers),observers]},{"type":"actions","items":[{"label":"More attention here","sub":"Move one step of attention to this field","on_press":terrain._change_research_domain_allocation.bind(id,1)},{"label":"Less attention here","sub":"Give one step of attention back to the others","disabled":weight<=0,"on_press":terrain._change_research_domain_allocation.bind(id,-1)},focused_action("CURRENT INVESTIGATIONS","Progress and actual bottlenecks",func()->Dictionary:return {"blocks":_investigation_blocks(id)}),focused_action("RESEARCH WORK","Local leadership allocates observers",_research_work_report)]},{"type":"text","text":"Changing attention reallocates existing observers. It creates no discovery, people or resources, and cannot bypass missing evidence or prior knowledge."}]
-	blocks.append({"type":"impact","heading":"WHAT THIS FIELD'S KNOWLEDGE DOES","note":"now","state":effect_state,"rows":_field_rows(id),
-		"intro":"What the people's knowledge of %s adds now, each practice counted by how widely it is used. The whole people's totals, held under what this age allows, are on the Research page under What we know." % Visuals.name_for(id).to_lower(),
-		"empty":"Nothing known in this field acts on the world yet."})
+	var questions:Array=[]
 	for record:Dictionary in DiscoverySystem.active_investigation_records():
-		if String(record.get("dynamic",""))!=id or (record.get("effects",{}) as Dictionary).is_empty(): continue
-		# Its trial use counts already: the households trying it before proof.
-		var trying:=roundi(float(record.get("trial_share",0.0))*100.0)
-		var now:=" Its first cases hold, so %d in 100 households try it now and that share of each effect counts already." % trying if trying>0 else ""
-		blocks.append({"type":"impact","heading":"IF %s IS ANSWERED" % String(record.get("name","this question")).to_upper(),"note":"at full use","state":effect_state,
-			"rows":Explainer.discovery_rows(String(record.id),false),
-			"intro":"What this question under way would do.%s Proven, it starts with about %d in 100 households and spreads over years." % [now,roundi(Research600.PROOF_ADOPTION*100.0)]})
-	return {"blocks":blocks}
+		if String(record.get("dynamic",""))!=id:continue
+		var effects:Dictionary=record.get("effects",{})
+		var would:Array=Explainer.discovery_rows(String(record.id),false) if not effects.is_empty() else []
+		for row:Dictionary in would:row["value"]=float(effects.get(row.key,0.0))
+		questions.append({"record":record,"rows":would})
+	# The sheet keeps its nodes (and the bars opened) while what it shows holds.
+	var rows:=_field_rows(id)
+	var shown:Array=[id,weight,total,observers]
+	for row:Dictionary in rows:shown.append([row.key,row.amount,row.tone])
+	for question:Dictionary in questions:
+		var record:Dictionary=question.record
+		shown.append([record.get("id",""),roundi(float(record.get("progress",0.0))*100.0),record.get("bottleneck",""),roundi(float(record.get("estimated_days",0.0))/30.0),roundi(float(record.get("trial_share",0.0))*100.0),roundf(float(record.get("research_workforce",0.0))*10.0)])
+	var goal:=String(DOMAIN_GOALS.get(id,""))
+	goal=(goal.get_slice(" — ",1) if " — " in goal else goal.trim_prefix("Aims at ")).trim_suffix(".")
+	return {"blocks":[{"type":"field_sheet","id":id,"name":Visuals.name_for(id),"goal":goal.left(1).to_upper()+goal.substr(1),
+		"share":share,"weight":weight,"learners":observers,"on_field":share*observers,
+		"caveat":"About %d in every 100 of our learners' hours go to this field. More attention speeds the work here but cannot replace missing clues; it moves people already at learning and creates no discovery, people or resources." % roundi(share*100),
+		"rows":rows,"questions":questions,"state":effect_state,"_print":str(shown).hash(),
+		"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1),
+		"on_investigations":_open_report.bind("Under way in %s" % Visuals.name_for(id).to_lower(),func()->Dictionary:return {"blocks":_investigation_blocks(id)}),
+		"on_work":_open_report.bind("Who does the work",_research_work_report)}]}
 func _research_work_report()->Dictionary:
 	var id:=SettlementModel._primary_settlement_id()
 	var state:=GovernmentPeopleSystem.settlement_management(id)

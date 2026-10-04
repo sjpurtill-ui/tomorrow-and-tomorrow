@@ -71,7 +71,9 @@ func test_materials_and_wealth_ledgers_use_words()->void:
 		"rows":[{"key":"Timber","name":"Timber","stock":40.0,"delivered":2.0,"loss":0.0,"points":[{"day":0,"value":30.0}],"details":["North wood: access not organized"],"blocked":false}],
 		"incoming":[],"day":10,"selected":"","on_select":func(_k:String):pass,"on_map":func():pass,"on_focus":func(_f:String):pass,"on_trade":func():pass})
 	var text:=_texts(materials)
-	assert_str(text).contains("Stores are full").contains("Storage is what slows us").contains("Timber: 40 in store").contains("Rising since last month")
+	assert_str(text).contains("Stores are full").contains("Storage is what slows us").contains("Timber").contains("Rising · +2 a day")
+	# The whole account sits on the tile.
+	assert_str((materials.find_child("Material_Timber",true,false) as Control).tooltip_text).contains("Timber: 40 in store").contains("Rising since last month")
 	assert_str(text).not_contains("›").not_contains("DELIVERED / DAY")
 	var wealth:VBoxContainer=auto_free(preload("res://scripts/hud/wealth_ledger.gd").new())
 	wealth.setup({"stage":"subsistence","city":"Ashford","leader":{},"managed":true,"economy":{"gdp":42.0,"gdp_per_capita":0.4,"productivity":0.8,"effective_workers":52.0},
