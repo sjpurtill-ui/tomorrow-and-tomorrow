@@ -12,6 +12,8 @@ Validation at this checkpoint:
 
 - Headless Blender 5.2 rebuilt all sixteen rooms successfully.
 - Existing raw asset validator passed 16/16: 140,712 triangles total, maximum 11,856 in chapter 13, 13,599,160 bytes, and 90 authored seats. Every room remains below 12,000 triangles; gate names, equipment contacts, seat exits, and foreground floor clearance pass.
-- Additional support-contact and baseline mark/geometry invariants are being added separately. Combined actual Godot imagery and runtime gating remain pending; no visual acceptance is claimed from the raw build.
+- `python tools/blender/validate_court_room_character.py` passes all sixteen rooms against the Git baseline: every movement/seat mark and aperture is unchanged, and 931 original meshes retain exact triangle positions, winding and material assignments. Triangle index ordering is normalized because Blender can reorder identical triangles during export. Only record contents and the framed institutional panel are excluded from this structural comparison.
+- All 41 registered work groups have existing supports, contained horizontal footprints and capability gates. Desktop groups touch their support tops within 2 mm and stay within 16 cm above them; shelf contents stay inside shelf bounds. Inward light, restrained lateral direction, fill counts and finished-wood/raw-bark separation are asserted.
+- Combined actual Godot imagery and runtime gating remain pending; no visual acceptance is claimed from the raw build.
 
 No simulation or save format changes. Existing capability selection remains authoritative. Shared integration files are the additive chapter manifest and generator; runtime/shader work is owned by the integrator. Generated imports, caches, and unrelated files are excluded.

@@ -25,9 +25,12 @@ EQUIPMENT = {
 
 
 def glb_read(path):
-    data = path.read_bytes()
+    return glb_decode(path.read_bytes(), str(path))
+
+
+def glb_decode(data, label="GLB"):
     magic, version, length = struct.unpack_from("<III", data)
-    assert magic == 0x46546C67 and version == 2 and length == len(data), path
+    assert magic == 0x46546C67 and version == 2 and length == len(data), label
     offset = 12
     doc, binary = None, None
     while offset < len(data):
@@ -38,7 +41,7 @@ def glb_read(path):
         elif kind == 0x004E4942:
             binary = chunk
         offset += 8 + length
-    assert doc is not None and binary is not None, path
+    assert doc is not None and binary is not None, label
     return data, doc, binary
 
 
