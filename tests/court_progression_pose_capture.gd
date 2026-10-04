@@ -7,6 +7,11 @@ extends "res://tools/court_acting_capture.gd"
 
 func _ready()->void:
 	out_dir=ProjectSettings.globalize_path("res://reports/court_progression_poses_no_ink/" if "no-ink" in OS.get_cmdline_user_args() else "res://reports/court_progression_poses/")
+	var source_walk:="source-walk" in OS.get_cmdline_user_args()
+	if source_walk:out_dir=ProjectSettings.globalize_path("res://reports/court_progression_poses_source_walk/")
+	var selected:=PackedStringArray()
+	for argument:String in OS.get_cmdline_user_args():
+		if argument.begins_with("outfits="):selected=argument.trim_prefix("outfits=").split(",")
 	DirAccess.make_dir_recursive_absolute(out_dir)
 	get_window().size=Vector2i(W,H);get_window().content_scale_size=Vector2i(W,H)
 	_stage()
@@ -14,6 +19,7 @@ func _ready()->void:
 	var variants:=["male_adult","female_adult","female_old","male_old"]
 	var captured:=0
 	for outfit:String in ["medieval","courtcoat","formal","business","hide","tunic","robe"]:
+		if not selected.is_empty() and not outfit in selected:continue
 		var poses:Array=["sit","sit_talk","talk_both","walk_in","walk_out","walk_in_0","walk_out_0","kneel","sit_cross"]
 		if outfit in ["hide","tunic","robe"]:poses=["walk_in","walk_out","walk_in_0","walk_out_0"]
 		if "collar-only" in OS.get_cmdline_user_args():poses=[]
@@ -27,6 +33,7 @@ func _ready()->void:
 					f.setup({"variant":row_variants[i],"outfit":outfit,"lit":true,"hair":"cropped","stance":"stand",
 						"cloth":[Color("466557"),Color("ece5d4"),Color("a88949")],"skin":Color("bd8659"),
 						"leather":Color("191b1d") if outfit=="business" else Color("5b3b24")})
+					if source_walk:preload("res://scripts/hud/court_walk_clearance.gd").configure(f.player,f.skeleton,f.variant,outfit,0.0)
 					_diagnostic_materials(f)
 					f.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 					Acting.of(f).active=false
@@ -42,6 +49,7 @@ func _ready()->void:
 				await _shot("%s_%s_%d.png" % [outfit,pose,yaw])
 				captured+=1
 	for outfit:String in ["medieval","business"]:
+		if source_walk or (not selected.is_empty() and not outfit in selected):continue
 		for variant:String in ["male_adult","female_old"]:
 			_clear();await _frames(3)
 			var f:=Figure3D.new();world.add_child(f)
