@@ -47,7 +47,12 @@ def material_finishes(chapter):
     """Runtime shader finishes; keep this metadata reproducible without a GLB rebuild."""
     glazing={"WINDOW_GLASS":{"pattern":19 if chapter in (7,8,9) else 20,
                             "albedo":"9daea2","albedo_worn":"b1bcb0","mottle":.03,"variation":.025}}
-    if chapter<10:return glazing if chapter>=2 else {}
+    if chapter<10:
+        out=glazing if chapter>=2 else {}
+        if chapter in (1,7):out["WOOD"]={"pattern":16,"albedo":"6b5038","albedo_worn":"7c6045","mottle":.09,"variation":.10}
+        if chapter==2:out["MUD"]={"pattern":0,"albedo":"b0a080","albedo_worn":"bcad8d","mottle":.10,"grain":.08}
+        if chapter in (5,6,9):out["PLASTER"]={"pattern":0,"albedo":"c1b699","albedo_worn":"cdc2a9","mottle":.07,"variation":.06}
+        return out
     modern=chapter>=14
     out={"PLASTER":{"pattern":0,"albedo":"deded3" if modern else "d5c8ab",
                      "albedo_worn":"e5e5dc" if modern else "ddcfb6","mottle":.025,"variation":.025,"grain":.025},
@@ -58,8 +63,201 @@ def material_finishes(chapter):
     if modern:
         out["FLAGS"]={"pattern":17,"albedo":"acb2ae","albedo_worn":"b8bfba","mottle":.02,"variation":.025,"grain":.02}
         out["STONE_BLOCK"]={"pattern":0,"albedo":"c2c8c5","albedo_worn":"cdd0cc","mottle":.02,"variation":.025}
-    else:out.update(glazing)
+        out["CARPET"]={"pattern":18,"albedo":"45545d" if chapter==14 else "5d6263","albedo_worn":"52636c" if chapter==14 else "6b7272","mottle":.025,"variation":.02}
+    if not modern:out.update(glazing)
+    if chapter==12:out["PLASTER"].update({"albedo":"bcc5b6","albedo_worn":"c8d0c3"})
     return out
+
+
+# Apertures are deliberately distinct silhouettes, not the same facade recolored.
+# x, width, sill, head; enclosed early halls favor small/high openings, while
+# later sash and industrial windows admit more controlled daylight.
+WINDOWS={
+ 1:[(-3.55,1.0,1.65,2.30),(.1,.80,1.80,2.35),(3.7,.95,1.65,2.30)],
+ 2:[(-3.6,1.35,2.0,2.72),(3.6,1.35,2.0,2.72)],
+ 3:[(-4.25,.65,2.55,3.55),(-2.95,.55,2.8,3.65),(2.95,.55,2.8,3.65),(4.25,.65,2.55,3.55)],
+ 4:[(-3.5,1.25,1.55,3.12),(3.5,1.25,1.55,3.12)],
+ 5:[(-3.4,.90,1.65,2.9),(0,.75,1.9,3.0),(3.4,.90,1.65,2.9)],
+ 6:[(-3.0,1.30,2.25,2.90),(0,1.3,2.25,2.90),(3.0,1.30,2.25,2.90)],
+ 7:[(-3.5,1.35,1.65,2.85),(3.5,1.35,1.65,2.85)],
+ 8:[(-3.45,1.35,1.5,3.6),(3.45,1.35,1.5,3.6)],
+ 9:[(-3.3,1.65,1.40,2.75),(3.3,1.65,1.40,2.75)],
+ 10:[(-3.5,1.5,1.15,2.95),(3.5,1.5,1.15,2.95)],
+ 11:[(-3.45,1.5,1.05,2.85),(3.45,1.5,1.05,2.85)],
+ 12:[(-3.7,1.40,1.05,2.75),(1.75,1.45,1.05,2.75)],
+ 13:[(-4.3,1.15,.95,3.25),(-1.65,1.15,.95,3.25),(1.65,1.15,.95,3.25),(4.3,1.15,.95,3.25)],
+ 14:[(-3.0,3.7,.88,2.55),(2.7,2.8,.88,2.55)],
+ 15:[(-3.0,3.6,.55,2.75)],
+}
+
+
+def lighting(i):
+    # Window fills represent diffuse daylight, so do not depend on electrical
+    # capabilities. Electrical fixture meshes retain their own capability gates.
+    warm=i in (0,1,7,8,9,11)
+    sun=[1.05,.72,.95,.85,.80,.60,.62,.67,.70,.66,.62,.55,.52,.63,.42,.38][i]
+    ambient=[.48,.40,.45,.42,.46,.42,.48,.42,.43,.47,.50,.48,.53,.54,.61,.64][i]
+    dirs=[[-.4,-.7,-.5],[.4,-.85,-.25],[-.5,-.65,-.45]][i%3]
+    light={"open_sky":i==0,"sun_dir":dirs,"sun_energy":sun,"fire_energy":1.15 if i in (0,1,7,8) else 0,
+           "fire_range":5.5,"fog":.001,"fill_colour":"d7d5c2" if warm else "cfdae0"}
+    look={"ambient_energy":ambient,"exposure":1.0,"sun":"fff0d5" if warm else "ecf0ef",
+          "ambient":"b6bdbb" if i>=10 else "aaa896"}
+    fills=[] if i==0 else [[x,(sill+head)/2,-3.48,.26 if i<10 else .32,4.4] for x,w,sill,head in WINDOWS[i]]
+    if len(fills)>2:fills=[fills[0],fills[-1]]
+    return light,look,fills
+
+
+def rear_facade(b,info,i,h,wall):
+    """A thick wall assembled around real openings, with deep interior reveals."""
+    windows=WINDOWS[i];start=-5.65
+    thick=.34 if i<10 else .24
+    for n,(x,w,sill,head) in enumerate(windows):
+        left=x-w/2;right=x+w/2
+        if left>start:box(b,"WallBackPier_%d"%n,((left+start)/2,h/2,-4),(left-start,h,thick),wall)
+        box(b,"WallBackLow_%d"%n,(x,sill/2,-4),(w,sill,thick),wall)
+        box(b,"WallBackHigh_%d"%n,(x,(head+h)/2,-4),(w,h-head,thick),wall)
+        trim="WOOD" if i in (1,7,9,10,11,12) else "IRON" if i>=13 else "STONE_BLOCK"
+        # Splayed-looking deep jambs make windows part of a load-bearing wall.
+        for side in (-1,1):box(b,"WindowReveal_%d"%n,(x+side*(w/2+.025),(sill+head)/2,-3.86),(.11,head-sill+.12,.42),trim)
+        box(b,"WindowSill_%d"%n,(x,sill,-3.84),(w+.2,.10,.44),trim)
+        box(b,"WindowLintel_%d"%n,(x,head+.055,-3.85),(w+.24,.12,.4),trim)
+        if i not in (1,2,3,6):
+            box(b,"WindowMullion_%d"%n,(x,(sill+head)/2,-3.85),(.055,head-sill,.10),trim)
+        if i>=9:
+            rows=3 if i==13 else 2
+            for row in range(1,rows):box(b,"WindowTransom_%d"%n,(x,sill+(head-sill)*row/rows,-3.84),(w,.045,.095),trim)
+        if i in (1,2,3,6):
+            for bar in (-.25,0,.25):box(b,"WindowLattice_%d"%n,(x+bar*w,(sill+head)/2,-3.86),(.035,head-sill,.045),"WOOD")
+        name="Glazing_%d"%n;box(b,name,(x,(sill+head)/2,-4.06),(w-.05,head-sill-.04,.018),"WINDOW_GLASS",bevel=0);gate(info,"glazing",name)
+        if i<=9:
+            for side in (-1,1):
+                name="Shutter_%d_%s"%(n,side)
+                box(b,name,(x+side*(w/2+.2),(sill+head)/2,-3.72),(.32,head-sill,.045),"PLANK",yaw=side*.32)
+                for height in (.25,.75):box(b,name,(x+side*(w/2+.2),sill+(head-sill)*height,-3.68),(.28,.035,.025),"WOOD")
+                gate(info,"no_glazing",name)
+        start=right
+    if start<5.65:box(b,"WallBackPier_end",((start+5.65)/2,h/2,-4),(5.65-start,h,thick),wall)
+    # Floor skirting and an actual door reveal keep the cutaway readable as an
+    # occupied interior. Door leaf is open against the external wall, not a blocker.
+    if i>=9:
+        box(b,"SkirtingRear",(0,.09,-3.79),(11.15,.18,.08),"WOOD")
+        box(b,"CorniceRear",(0,h-.12,-3.72),(11.15,.17,.30),"PLASTER" if i>=10 else "WOOD")
+    for z in (.7,2.8):box(b,"EntranceJamb_%s"%z,(-5.51,1.12,z),(.30,2.24,.13),trim)
+    box(b,"EntranceHeader",(-5.51,2.28,1.75),(.30,.16,2.23),trim)
+    box(b,"OpenDoorLeaf",(-5.86,1.05,.14),(.07,2.1,1.30),"PLANK")
+
+
+def record_shelves(b,info,name,at,width,height=1.8,kind="book"):
+    """Open shelf structure has visible working contents; no false drawer front."""
+    x,y,z=at;depth=.26
+    box(b,name,(x,y+height/2,z-.1),(width,height,.06),"WOOD")
+    for side in (-1,1):box(b,name,(x+side*(width/2-.025),y+height/2,z),(.05,height,depth),"WOOD")
+    for shelf in range(4):
+        sy=y+.07+shelf*(height-.1)/3
+        box(b,name,(x,sy,z),(width,.045,depth),"WOOD")
+        if shelf==3:continue
+        contents=name+"_Records"
+        for n in range(max(2,int(width/.19))):
+            bx=x-width/2+.13+n*.17
+            if kind=="tablet":box(b,contents,(bx,sy+.09,z+.01),(.13,.13,.14),"TABLET",yaw=.04*(n%3),bevel=0)
+            else:
+                box(b,contents,(bx,sy+.17,z+.005),(.11,.29+(.03 if n%3==0 else 0),.18),"WEAVE_A" if n%3 else "WEAVE_B",bevel=0)
+                box(b,contents,(bx,sy+.17,z+.10),(.075,.22,.015),"PAPER",bevel=0)
+    if kind=="tablet":info["gates"].setdefault("writing",[]).append(contents)
+    else:gate(info,"bound_records",contents)
+
+
+def architectural_layers(b,info,i,h):
+    """A compositional layer per period: structure, work walls and circulation."""
+    if i==0:
+        for n,x in enumerate((-4.7,4.8)):
+            # Portable hide rolls, not anachronistic pottery/baskets at year zero.
+            K.log_piece(b,"HideRoll_%d"%n,(x-.32,.16,-3.1),(x+.32,.16,-3.1),.16,slot="HIDE_DARK",end_slot="HIDE",stubs=0,knots=False)
+        return
+    if i==1:
+        for x in (-4.9,-1.9,1.9,4.9):
+            beam(b,"WallBrace_%s"%x,(x-.50,1.7,-3.74),(x+.50,2.9,-3.74),.075)
+        for x in (-4.95,4.95):
+            box(b,"HouseholdChest_%s"%x,(x,.26,-3.55),(1.1,.52,.48),"WOOD")
+            box(b,"ChestLid_%s"%x,(x,.54,-3.55),(1.16,.06,.52),"PLANK")
+    elif i==2:
+        # A shaded portico and clerical store, separated from the open court.
+        box(b,"PorticoEntablature",(0,2.92,-2.95),(10.2,.26,.45),"WOOD")
+        for x in (-3.5,3.5):box(b,"ClericalStoreBench_%s"%x,(x,.30,-3.65),(1.8,.60,.35),"MUD")
+        record_shelves(b,info,"TabletPigeonholes",(0,1.45,-3.72),2.3,1.2,"tablet")
+    elif i==3:
+        # Broad pilaster/entablature composition instead of four isolated posts.
+        box(b,"AudienceEntablature",(0,4.10,-3.51),(10.6,.18,.72),"STONE_BLOCK")
+        box(b,"RecessBack",(0,1.9,-3.77),(3.35,3.8,.08),"OCHRE")
+        for x in (-1.8,1.8):box(b,"RecessPilaster_%s"%x,(x,1.9,-3.6),(.20,3.8,.45),"STONE_BLOCK")
+        box(b,"RecessLintel",(0,3.8,-3.59),(3.85,.24,.48),"STONE_BLOCK")
+    elif i==4:
+        box(b,"CouncilFrieze",(0,3.5,-3.72),(10.8,.28,.30),"STONE_BLOCK")
+        for x in (-4.65,-2.2,2.2,4.65):box(b,"CouncilWallPilaster_%s"%x,(x,1.75,-3.76),(.14,3.5,.25),"STONE_BLOCK")
+        record_shelves(b,info,"CouncilRecords",(0,1.6,-3.76),2.2,1.25,"tablet")
+    elif i==5:
+        # One recessed vault bay is enough to read a ceiling without obscuring
+        # the actors in the open-front cutaway camera.
+        verts=[]
+        for z in (-4.0,-2.95):
+            for n in range(17):
+                a=n*math.pi/16;verts.append(K.B((math.cos(a)*5.1,2.8+math.sin(a)*1.45,z)))
+        faces=[(n,n+1,n+18,n+17) for n in range(16)]
+        b.add("VaultCeilingBay",K._bm_from(verts,faces),"PLASTER")
+        for x in (-1.65,1.65):record_shelves(b,info,"ClericalShelves_%s"%x,(x,1.1,-3.73),1.45,1.55,"tablet")
+    elif i==6:
+        box(b,"LowCeilingBeam",(0,3.06,-2.98),(10.7,.22,.28),"WOOD")
+        for x in (-3,0,3):record_shelves(b,info,"ArchiveSlots_%s"%x,(x,.76,-3.72),1.55,1.25,"book")
+    elif i==7:
+        for side in (-1,1):
+            for z in (-3.4,-1.0,1.4):beam(b,"TrussBrace_%s_%s"%(side,z),(side*5.3,2.5,z),(side*3.7,4.15,z),.10)
+        box(b,"HallHanging",(0,2.20,-3.73),(2.0,2.4,.045),"WEAVE_A")
+        for x in (-4.7,4.7):box(b,"LinenChest_%s"%x,(x,.27,-3.6),(1.15,.54,.4),"PLANK")
+    elif i==8:
+        for x in (-5.2,5.2):box(b,"HallButtress_%s"%x,(x,2.1,-3.6),(.38,4.2,.55),"STONE_BLOCK")
+        box(b,"StoneHallHanging",(0,2.35,-3.75),(2.0,2.8,.045),"WEAVE_A")
+        for side in (-1,1):beam(b,"StoneHallRoofBrace_%s"%side,(side*5.25,3.2,-2.9),(side*3.6,4.45,-2.9),.10)
+    elif i==9:
+        record_shelves(b,info,"ChanceryArchive",(0,.30,-3.74),1.9,2.45,"book")
+        box(b,"ChanceryCornice",(0,3.15,-3.62),(10.7,.16,.27),"WOOD")
+        for x in (-2.0,2.0):box(b,"ChanceryPanelPost_%s"%x,(x,1.55,-3.69),(.12,3.1,.19),"WOOD")
+    elif i==10:
+        # A closed double door gives the secretariat a believable rear anteroom.
+        for side in (-1,1):
+            box(b,"AnteroomDoor_%s"%side,(side*.48,1.15,-3.76),(.94,2.3,.10),"PLANK")
+            for yy in (.60,1.70):box(b,"AnteroomDoorPanel_%s"%side,(side*.48,yy,-3.69),(.69,.79,.035),"WOOD")
+        for x in (-1.05,1.05):box(b,"DoorSurround_%s"%x,(x,1.30,-3.65),(.16,2.6,.24),"PLASTER")
+        box(b,"DoorSurroundHeader",(0,2.6,-3.63),(2.35,.20,.28),"PLASTER")
+    elif i==11:
+        for x in (-2.15,0,2.15):
+            box(b,"CabinetPanel_%s"%x,(x,1.75,-3.78),(1.8,2.95,.055),"WOOD")
+            box(b,"CabinetPanelInset_%s"%x,(x,1.75,-3.735),(1.59,2.7,.025),"PLANK")
+        box(b,"CabinetPictureRail",(0,3.1,-3.68),(10.5,.08,.1),"WOOD")
+    elif i==12:
+        record_shelves(b,info,"MinistryBooks",(-.8,.24,-3.76),1.7,2.6,"book")
+        box(b,"OfficeCornice",(0,3.1,-3.65),(10.6,.13,.3),"PLASTER")
+    elif i==13:
+        box(b,"IronCrossBeam",(0,3.56,-2.7),(10.6,.15,.18),"IRON")
+        for side in (-1,1):box(b,"BeamWallBracket_%s"%side,(side*5.30,3.38,-2.7),(.35,.35,.35),"IRON",bevel=0)
+        # Bounded filing/dispatch storage stays against the rear wall.
+        record_shelves(b,info,"DispatchRecords",(0,.22,-3.75),1.6,2.45,"book")
+    elif i==14:
+        box(b,"ConferenceCarpet",(0,.007,-1.32),(6.35,.014,3.3),"CARPET",bevel=0)
+        for side in (-1,1):
+            box(b,"AcousticSide_%s"%side,(side*5.43,1.55,-1.4),(.06,2.2,2.1),"WEAVE_A")
+            for n in range(6):box(b,"WindowBlind_%s"%side,(side*2.9,2.42-n*.085,-3.66),(3.6,.045,.12),"WOOD")
+        box(b,"MeetingCeilingRaft",(0,2.85,-1.40),(5.9,.13,2.2),"PLASTER")
+        for n,x in enumerate((-1.9,0,1.9)):
+            name="ConferenceLight_%d"%n;box(b,name,(x,2.75,-1.40),(1.15,.05,.45),"PAPER");gate(info,"electricity",name)
+    elif i==15:
+        box(b,"ConferenceCarpet",(0,.007,-1.25),(6.3,.014,3.25),"CARPET",bevel=0)
+        box(b,"BriefingBackdrop",(2.3,1.5,-3.85),(4.7,2.85,.08),"WOOD")
+        box(b,"ReceptionSoffit",(-4.55,2.85,-2.5),(1.7,.18,2.4),"PLASTER")
+        box(b,"CeilingPerimeterRear",(0,3.03,-3.55),(10.75,.18,.68),"PLASTER")
+        for x in (-2.3,2.3):
+            name="LinearPendant_%s"%x;box(b,name,(x,2.62,-1.4),(1.70,.045,.09),"PAPER");gate(info,"electricity",name)
+            for dx in (-.55,.55):
+                beam(b,name,(x+dx,2.66,-1.4),(x+dx,3.1,-1.4),.008,"IRON")
 
 
 def box(b,name,at,size,slot="WOOD",yaw=0,bevel=.012):
@@ -168,7 +366,7 @@ def equipment(b,info,chapter,desks):
     for i,(x,y,z) in enumerate(desks):
         if chapter>=2:papers(b,info,"RecordSheet_%d"%i,(x-.25,y,z),"tablet" if chapter<7 else "paper")
         if chapter>=6:papers(b,info,"BoundRecord_%d"%i,(x+.34,y,z-.08),"book")
-        if chapter>=11:
+        if chapter>=11 and (chapter<14 or i>=2):
             n="ElectricLamp_%d"%i;box(b,n,(x-.58,y+.025,z),(.22,.05,.18),"IRON")
             beam(b,n,(x-.58,y+.05,z),(x-.58,y+.38,z),.022,"IRON")
             box(b,n,(x-.58,y+.4,z),(.32,.12,.18),"WEAVE_B");gate(info,"electricity",n)
@@ -186,14 +384,15 @@ def equipment(b,info,chapter,desks):
                 bmesh.ops.transform(mesh,matrix=Matrix.Translation(pivot) @ Matrix.Rotation(math.pi,4,'Z') @ Matrix.Translation(-pivot),verts=mesh.verts)
                 mesh.normal_update()
             gate(info,"typewriter",n)
-        if chapter==14:
+        if chapter==14 and i>=2:
             n="Computer_%d"%i;box(b,n,(x,y+.09,z),(.43,.18,.37),"STONE_BLOCK")
             box(b,n,(x,y+.37,z-.02),(.42,.40,.36),"STONE_BLOCK")
             box(b,n,(x,y+.39,z+.166),(.32,.27,.012),"SOCKET");gate(info,"computer",n)
         if chapter>=15:
             n="FlatDisplay_%d"%i;box(b,n,(x,y+.045,z),(.27,.09,.20),"IRON")
-            box(b,n,(x,y+.30,z-.055),(.49,.32,.04),"IRON")
-            box(b,n,(x,y+.30,z-.03),(.43,.26,.015),"SOCKET");gate(info,"flat_screen",n)
+            # Low meeting displays preserve the other participants' sightlines.
+            box(b,n,(x,y+.18,z-.055),(.44,.22,.04),"IRON")
+            box(b,n,(x,y+.18,z-.03),(.38,.165,.015),"SOCKET");gate(info,"flat_screen",n)
 
 
 def room_shell(b,info,i):
@@ -204,34 +403,21 @@ def room_shell(b,info,i):
             K.tree(b,"Trees_%d"%n,(x,0,-5.3),4.8,1.7,seed=4+n,clumps=8)
         for n,(x,z) in enumerate(((-3.1,-2.2),(3.1,-2.2),(-4.3,.3),(4.3,.3))):
             K.log_piece(b,"LogSeat_%d"%n,(x-.7,.22,z),(x+.7,.22,z),.25,seed=n,stubs=0)
-        for n,x in enumerate((-3.8,0,3.8)):
-            K.hide_panel(b,"Windbreak_%d"%n,(x-1.4,0,-4),(x+1.4,0,-4),.12,1.8,seed=n,slot="HIDE",sag=.08)
-            K.post(b,"WindbreakPost_%d"%n,(x-1.4,0,-4),2.2,.065,pointed=False)
-            K.post(b,"WindbreakPost_%d_R"%n,(x+1.4,0,-4),2.2,.065,pointed=False)
+        panels=[((-5.2,0,-2.5),(-2.8,0,-4.0)),((-1.4,0,-4.2),(1.4,0,-4.2)),((2.8,0,-4.0),(5.2,0,-2.5))]
+        for n,(a,c) in enumerate(panels):
+            K.hide_panel(b,"Windbreak_%d"%n,a,c,.12,1.8,seed=n,slot="HIDE",sag=.12)
+            K.post(b,"WindbreakPost_%d"%n,a,2.1,.065,pointed=False)
+            K.post(b,"WindbreakPost_%d_R"%n,c,2.1,.065,pointed=False)
         return
     box(b,"Floor",(0,-.075,0),(11.6,.15,8.4),floor,bevel=0)
     wall="WOOD" if i in (1,7) else ("MUD" if i==2 else "PLASTER" if i>=6 else "STONE_BLOCK")
     if i==8:wall="STONE_BLOCK"
     # Front cutaway; left wall has a real 1.8m doorway.
-    box(b,"WallRight",(5.65,h*.5,-.3),(.2,h,7.8),wall)
-    box(b,"WallLeftRear",(-5.65,h*.5,-1.65),(.2,h,4.7),wall)
+    box(b,"WallRight",(5.65,h*.5,-.115),(.2,h,7.43),wall)
+    box(b,"WallLeftRear",(-5.65,h*.5,-1.565),(.2,h,4.53),wall)
     box(b,"WallLeftFront",(-5.65,h*.5,3.4),(.2,h,1.2),wall)
     box(b,"DoorLintel",(-5.65,2.55,1.75),(.22,.30,1.9),"WOOD" if i<8 else "STONE_BLOCK")
-    # Broad modern windows replace separated ancient/high medieval bays.
-    windows=[(-3.8,1.3),(0,1.3),(3.8,1.3)] if i<14 else [(-2.8,3.8),(2.8,3.8)]
-    sill=1.45 if i in (3,5,8) else 1.05;top=h-.42
-    box(b,"WallBackLow",(0,sill*.5,-4),(11.3,sill,.24),wall)
-    box(b,"WallBackHigh",(0,(top+h)/2,-4),(11.3,h-top,.24),wall)
-    start=-5.65
-    for n,(x,w) in enumerate(windows):
-        left=x-w/2
-        if left>start:box(b,"WallBackPier_%d"%n,((left+start)/2,(sill+top)/2,-4),(left-start,top-sill,.24),wall)
-        start=x+w/2
-        box(b,"WindowSill_%d"%n,(x,sill,-3.83),(w+.18,.12,.40),"STONE_BLOCK" if i<10 else "WOOD")
-        for sx in (-1,1):box(b,"WindowFrame_%d"%n,(x+sx*w/2,(sill+top)/2,-3.85),(.07,top-sill,.09),"WOOD" if i<13 else "IRON")
-        box(b,"WindowMullion_%d"%n,(x,(sill+top)/2,-3.85),(.045,top-sill,.065),"WOOD" if i<13 else "IRON")
-        name="Glazing_%d"%n;box(b,name,(x,(sill+top)/2,-3.965),(w-.08,top-sill-.08,.018),"WINDOW_GLASS",bevel=0);gate(info,"glazing",name)
-    if start<5.65:box(b,"WallBackPier_end",((start+5.65)/2,(sill+top)/2,-4),(5.65-start,top-sill,.24),wall)
+    rear_facade(b,info,i,h,wall)
     # Construction changes are geometry, not a material-only age switch.
     if i in (1,7):
         for n,x in enumerate((-5.3,-2.0,2.0,5.3)):
@@ -266,11 +452,10 @@ def room_shell(b,info,i):
         box(b,"ClerestoryBand",(0,2.75,-3.70),(10.7,.12,.28),"STONE_BLOCK")
         for n,x in enumerate((-3.0,0,3.0)):cabinet(b,"RearRecordChest_%d"%n,(x,0,-3.7),1.7,.70)
     elif i==8:
-        for n,x in enumerate((-3.8,0,3.8)):arch(b,"PointedWindow_%d"%n,x,-3.78,1.3,1.45,2.25,pointed=True)
+        for n,(x,w,sill,head) in enumerate(WINDOWS[i]):arch(b,"PointedWindow_%d"%n,x,-3.65,w,head-.70,.56,pointed=True)
         box(b,"SolarScreen",(4.9,1.25,-2.55),(1.0,2.5,.12),"PLANK")
         arch(b,"SolarDoor",4.6,-2.50,1.0,1.6,.65,slot="WOOD",pointed=True)
     elif i==9:
-        for n,x in enumerate((-4.1,-1.4,1.4,4.1)):arch(b,"ChanceryArcade_%d"%n,x,-3.65,2.0,1.2,1.0,slot="STONE_BLOCK",pointed=True)
         for n,x in enumerate((-4.8,4.8)):box(b,"WindowSeat_%d"%n,(x,.235,-3.45),(1.15,.47,.65),"PLANK")
     elif i==10:
         for x in (-4.9,4.9):
@@ -309,14 +494,15 @@ def room_shell(b,info,i):
 def build(i):
     key="chapter_%02d"%i;title,base,h,floor=CHAPTERS[i]
     b=K.Builder(seed=610+i);hearth=i in (0,1,7,8)
+    light,look,fills=lighting(i)
     info={"chapter":i,"elapsed_year":i*200,"title":title,"look_base":base,"indoor":i!=0,"has_hearth":hearth,
           "floor":"earth" if floor=="GROUND" else "wood" if floor=="PLANK" else "stone","rustic_trophies":i<9,
-          "gates":{},"technology_gates":{},"institution_gates":{},"default_tags":[],"props":{},"fx":{},
-          "light":{"open_sky":i==0,"sun_dir":[-.35,-.75,-.55],"sun_energy":1.5,"fire_energy":1.2 if hearth else 0,"fire_range":6,"fog":.001 if i==0 else .002},
-          "look":{"ambient_energy":.48 if i<7 else .52,"exposure":1.03},
+          "gates":{},"technology_gates":{},"institution_gates":{},"default_tags":[],"props":{},"fx":{"fill":fills},
+          "light":light,"look":look,"apertures":WINDOWS.get(i,[]),
           "camera":{"yaw":12,"pitch":-14,"fov":52,"centre":[0,.9,.1],"yaw_range":[-24,28]},"door_side":-1,
           "material_overrides":material_finishes(i)}
     room_shell(b,info,i)
+    architectural_layers(b,info,i,h)
     marks={"focus":S.mark((0,0,1.4)),"throne_gaze":S.mark((0,2.3,6.4)),
            "petitioner":S.mark((-1.3 if hearth else 0,0,2.4)),"execution":S.mark((-1.6 if hearth else 0,0,1.7)),
            "door":S.mark((-5.2,0,1.8)),"door_out":S.mark((-6.8,0,1.8)),"behind_windbreak":S.mark((-7.3,0,-.1))}
@@ -376,6 +562,11 @@ def build(i):
         table(b,"ReceptionConsole",(-4.9,0,-1.75),.85,.55,.84,kind="desk")
     equipment(b,info,i,desks)
     if hearth:
+        if i:
+            # Flush noncombustible inset: the authored ash/log bases remain above
+            # its .005m top, and the planked floor no longer carries the fire.
+            box(b,"HearthstoneInset",(0,-.0375,0),(2.3,.085,1.95),"STONE_DARK",bevel=.015)
+            for side in (-1,1):box(b,"HearthstoneBorder_%s"%side,(side*1.12,.008,0),(.09,.016,1.98),"FLAGS",bevel=.005)
         S.hearth_ring(b,seed=20+i)
         marks["fire"]=S.mark((0,0,0))
         info["fx"]["fire"]={"pos":[0,.05,0],"size":.8 if i==0 else .7}
@@ -383,8 +574,15 @@ def build(i):
         else:info["fx"]["smoke"]=False
     if i>=2:
         # Neutral institutional alternatives; no unconditional royal throne.
-        box(b,"InstitutionAssembly",(0,2.25,-3.77),(1.0,.72,.07),"WEAVE_B")
-        K.shield(b,"InstitutionThrone",(0,2.25,-3.68),(0,0,1),.36,slot="SHIELD_C",boss_slot="BRONZE")
+        emblem_y=3.1 if i in (9,10,12,13) else 2.25
+        emblem_x=-.62 if i==15 else 0
+        if i==2:emblem_x,emblem_y=2.15,1.95
+        elif i==4:emblem_y=3.3
+        elif i==5:emblem_y=3.5
+        elif i==6:emblem_x,emblem_y=1.55,2.1
+        beam(b,"InstitutionMount",(emblem_x,emblem_y,-3.8),(emblem_x,emblem_y,-3.59),.025)
+        box(b,"InstitutionAssembly",(emblem_x,emblem_y,-3.60),(1.0,.72,.07),"WEAVE_B")
+        K.shield(b,"InstitutionThrone",(emblem_x,emblem_y,-3.52),(0,0,1),.36,slot="SHIELD_C",boss_slot="BRONZE")
         info["institution_gates"]={"assembly":["InstitutionAssembly"],"throne":["InstitutionThrone"]}
     info["marks"]=marks
     objects=list(b.finish(flat_slots=tuple(K.SLOT_COLOURS)).values());K.write_colors(objects)

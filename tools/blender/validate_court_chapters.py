@@ -20,6 +20,7 @@ EQUIPMENT = {
     "Telephone": "telephone", "Typewriter": "typewriter", "Computer": "computer",
     "FlatDisplay": "flat_screen", "BriefingDisplay": "flat_screen", "Radiator": "radiator",
     "AirConditioning": "air_conditioning", "Fluorescent": "fluorescent",
+    "ConferenceLight": "electricity", "LinearPendant": "electricity",
 }
 
 
@@ -80,6 +81,12 @@ def main():
         assert info["has_hearth"] == (i in (0, 1, 7, 8)), key
         assert info["has_hearth"] == ("fire" in info["marks"]) == ("fire" in info["fx"]), key
         assert "focus" in info["marks"] and "execution" in info["marks"], key
+        apertures = info["apertures"]
+        if 0 < i <= 3:
+            assert max(width * (head - sill) for x, width, sill, head in apertures) <= 1.05, (key, "early oversized window")
+        if i:
+            assert 1 <= len(info["fx"]["fill"]) <= 2, (key, "bounded daylight fills")
+            assert all(len(fill) == 5 and 0 < fill[3] <= .4 for fill in info["fx"]["fill"]), key
         if info["indoor"]:
             assert "smoke_top" not in info["fx"] and not info["fx"].get("smoke", False), key
             assert not any(n.startswith(("animal", "dog", "chicken")) for n in info["marks"]), key
@@ -110,6 +117,18 @@ def main():
                     else:
                         assert key_z > -2.85, (name, "secretary keys face away from front approach")
         assert names == set(info["objects"]) == set(info["bounds"]), key
+        if i in (1, 7, 8):
+            assert "HearthstoneInset" in names, (key, "fire on combustible floor")
+            hearth = info["bounds"]["HearthstoneInset"]
+            assert hearth[0][0] <= -1.1 and hearth[1][0] >= 1.1 and hearth[1][1] < .025, key
+        if 0 < i <= 9:
+            shutters = {name for name in names if name.startswith("Shutter_")}
+            assert shutters and shutters <= set(info["technology_gates"]["no_glazing"]), key
+        if i == 14:
+            assert "Computer_0" not in names and "Computer_1" not in names and "Computer_2" in names, "conference CRTs obstruct rear officials"
+        if i == 15:
+            for display in ("FlatDisplay_0", "FlatDisplay_1"):
+                assert info["bounds"][display][1][1] <= 1.06, (display, "meeting display face sightline")
         if i == 13:
             assert keyboards_checked == 3, "all three keyboard faces must be checked"
         assert triangles == info["triangles"] and triangles < 12000, (key, triangles)
@@ -127,6 +146,8 @@ def main():
                 if group == "technology_gates":
                     assert gate.removeprefix("no_") in CAPABILITIES, (key, gate)
         for name in names:
+            if name.endswith("_Records"):
+                assert name in info["gates"].get("writing", []) or name in info["technology_gates"].get("bound_records", []), (key, name, "ungated records")
             for prefix, capability in EQUIPMENT.items():
                 if name.startswith(prefix):
                     assert name in info["technology_gates"].get(capability, []), (key, name)
