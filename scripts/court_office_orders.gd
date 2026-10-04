@@ -221,6 +221,13 @@ static func _town()->Array:
 			else: envoys.append(_item("%s: declare war" % people,"Declare war on %s" % the))
 			if envoys.size()>=16: break
 	if not envoys.is_empty(): out.append(_menu("Envoys","Envoys",envoys))
+	# All our towns together take a name (nation_name.gd), once there are two;
+	# the names the people might take, as the god would say them.
+	var NationName:GDScript=load("res://scripts/nation_name.gd")
+	if bool(NationName.call("can_name")):
+		var names:Array=[]
+		for name in NationName.call("suggestions",4): names.append(_item(String(name),"Call our nation %s" % String(name)))
+		if not names.is_empty(): out.append(_menu("Name our nation","NameNation",names))
 	return out
 
 

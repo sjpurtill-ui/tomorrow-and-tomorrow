@@ -2,8 +2,8 @@ extends GdUnitTestSuite
 ## OUR NATION'S NAME (nation_name.gd, hud/nation_name_card.gd, the court's
 ## court_realm_acts.nation). A people of one town goes by that town. With a
 ## second town the ruler may name the nation: at that founding (skipping asks
-## again only at the next founding), on the Government screen, or in the
-## court. The name is saved; an older save loads unnamed and reads as before.
+## again only at the next founding) or in the court, by typing or the
+## Headman's "Name our nation" choices. The name is saved; an older save loads unnamed and reads as before.
 ## Foreign peoples, envoys, the Chronicle and the Standing board use it; the
 ## home town's own uses stay the town. Offline; never calls a real API.
 
@@ -18,13 +18,9 @@ const Envoys:=preload("res://scripts/envoy_messages.gd")
 const Facts:=preload("res://scripts/court_facts.gd")
 const Answers:=preload("res://scripts/court_answers.gd")
 const StandingDock:=preload("res://scripts/hud/content/dock_content_standing.gd")
-const GovernmentDock:=preload("res://scripts/hud/content/dock_content_government.gd")
+const OfficeOrders:=preload("res://scripts/court_office_orders.gd")
 const ChronicleDock:=preload("res://scripts/hud/content/dock_content_chronicle.gd")
 const CityLabels:=preload("res://scripts/hud/city_labels.gd")
-
-class Hud extends Control:
-	var refreshes:=0
-	func request_immediate_dock_refresh()->void:refreshes+=1
 
 ## The map's own naming card (local_terrain.gd), its drawing stood in for.
 class NamingMap extends "res://scripts/local_terrain.gd":
@@ -114,8 +110,8 @@ func test_one_town_reads_as_the_town_and_cannot_be_named_yet()->void:
 	assert_str(String(CommunityNetwork.nodes()[0].name)).is_equal("Seanstone")
 	assert_str(CityLabels.affiliation_of("player",false,"city")).is_equal("")
 	assert_bool(Facts.sheet(["common"]).has("nation")).is_false()
-	# The Government screen has no nation line, and nothing can name it.
-	assert_str(String(GovernmentDock.new(null,null).tab(0).blocks[0].type)).is_equal("cabinet")
+	# The Headman offers no nation names, and nothing can name it.
+	assert_bool(_nation_menu().is_empty()).is_true()
 	var refused:=NationName.give_name("The Reedfolk","screen")
 	assert_bool(bool(refused.ok)).is_false()
 	assert_str(String(refused.why)).is_equal("one_town")
@@ -236,53 +232,27 @@ func test_skipping_names_nothing_and_only_the_next_founding_asks_again()->void:
 	assert_str(GameState.nation_name).is_equal("")
 	assert_array(_told()).is_empty()
 	assert_int(GameState.council_inbox.size()).is_equal(inbox)
-	# Between foundings the Government screen only offers it, quietly.
-	var page:=GovernmentDock.new(null,null).tab(0)
-	assert_str(String(page.blocks[0].type)).is_equal("rows")
-	assert_str(String(page.blocks[0].items[0].name)).is_equal("Our nation: not yet named")
-	assert_str(String(page.blocks[0].items[0].value)).is_equal("Name it")
-	assert_str(String(page.blocks[1].type)).is_equal("cabinet")
+	# Between foundings only the Headman's court choices offer it, quietly.
+	assert_bool(_nation_menu().is_empty()).is_false()
 	# The next founding asks again.
 	fx.second_town("Ashbank")
 	assert_bool(NationName.ask_at_founding()).is_true()
 
 
-func test_the_government_screen_renames_the_nation()->void:
-	fx.second_town("Reedmouth")
-	assert_bool(bool(NationName.give_name("the reedfolk","screen").ok)).is_true()
-	assert_str(GameState.nation_name).is_equal("The Reedfolk")
-	var hud:Hud=auto_free(Hud.new())
-	add_child(hud)
-	# The dock keeps its provider while the screen is open.
-	var provider=GovernmentDock.new(null,hud)
-	var page:Dictionary=provider.tab(0)
-	var row:Dictionary=page.blocks[0].items[0]
-	assert_str(String(row.name)).is_equal("Our nation: The Reedfolk")
-	assert_str(String(row.value)).is_equal("Rename")
-	# One click opens the small card; the name given there is the nation's.
-	(row.on_click as Callable).call()
-	var card:=hud.find_child("NationNameCard",true,false)
-	assert_object(card).is_not_null()
-	var input:LineEdit=card.find_child("NationName",true,false)
-	assert_str(input.text).is_equal("The Reedfolk")
-	var confirm:Button=card.find_child("NationNameConfirm",true,false)
-	# Another people's name is refused on the card, and nothing changes.
-	input.text="the Esurai"
-	input.text_changed.emit(input.text)
-	confirm.pressed.emit()
-	assert_str(GameState.nation_name).is_equal("The Reedfolk")
-	assert_str((card.find_child("NationNameStatus",true,false) as Label).text).contains("another people")
-	input.text="ashfolk"
-	input.text_changed.emit(input.text)
-	confirm.pressed.emit()
-	assert_str(GameState.nation_name).is_equal("Ashfolk")
-	assert_int(hud.refreshes).is_equal(1)
-	assert_bool(card.is_queued_for_deletion()).is_true()
-	var told:=_told()
-	assert_int(told.size()).is_equal(2)
-	assert_str(String(told[0].title)).is_equal("A New Name for Our People: Ashfolk")
-	assert_str(String(told[0].text)).is_equal("By the god's word, the Reedfolk are called Ashfolk from this day.")
+func _nation_menu()->Dictionary:
+	for menu:Dictionary in OfficeOrders._town():
+		if String(menu.get("name",""))=="NameNation": return menu
+	return {}
 
+func test_the_headman_offers_names_that_the_court_reads_as_naming_the_nation()->void:
+	fx.second_town("Reedmouth")
+	var menu:=_nation_menu()
+	assert_str(String(menu.label)).contains("Name our nation")
+	var items:Array=menu.get("items",[])
+	assert_bool(items.is_empty()).is_false()
+	for item:Dictionary in items:
+		# Each choice is the plain words the god could type (orders-by-office).
+		assert_str(String(Realm.nation(String(item.text)).get("name",""))).override_failure_message("'%s' did not name the nation" % String(item.text)).is_equal(NationName.tidy(String(item.label)))
 
 func test_the_court_line_names_the_nation_and_the_order_card_is_done()->void:
 	# The words that name all our towns together, and look-alikes that do not.

@@ -81,7 +81,7 @@ static func _owns_service(domain:String)->bool:
 const WORDS:={
 	"hearth":{
 		"rail.overview":"The People","rail.world":"Known World","rail.chronicle":"Chronicle","rail.drawer":"Tallies",
-		"rail.government":"Chiefs","rail.inquiry":"Lore","rail.production":"Crafts","rail.military":"Warriors","rail.wealth":"Exchange",
+		"rail.inquiry":"Lore","rail.production":"Crafts","rail.military":"Warriors","rail.wealth":"Exchange",
 		"kpi.population":"PEOPLE","kpi.food":"STORES","kpi.water":"WATER","kpi.goods":"TOOLS & GEAR","kpi.health":"LIVES","kpi.science":"LORE","kpi.gdp":"HANDS AT WORK",
 		"scope":"All our hearths","place":"hearth","places":"hearths",
 		"chronicle.caption":"Great moments told at the fire, and smaller things remembered.","chronicle.tallies":"Show every season's tally",

@@ -893,7 +893,7 @@ func _leader_row(c:Dictionary)->Control:
 	if war_leader:
 		var other:=Button.new();other.name="NameWarLeader";other.text="Change";other.flat=true;other.focus_mode=Control.FOCUS_NONE
 		other.add_theme_font_size_override("font_size",12);other.add_theme_color_override("font_color",T.GOLD_TEXT);other.add_theme_color_override("font_hover_color",T.INK)
-		other.tooltip_text="The war leader at home is the Marshal among the officials, or the best of the field staff while no one holds that office. Choose the Marshal among the officials."
+		other.tooltip_text="The war leader at home is the Marshal among the officials, or the best of the field staff while no one holds that office. Summon the Marshal to the court to hear who could replace them."
 		other.pressed.connect(_name_war_leader)
 		top.add_child(other)
 	if not (leader.get("commander",{}) as Dictionary).is_empty():
@@ -921,13 +921,13 @@ func _leader_row(c:Dictionary)->Control:
 	return panel
 
 
-## The officials, where the ruler names the Marshal (the war leader at home).
+## The court, on the Marshal (the war leader at home): who else could hold
+## the office is told there, and "make X our war leader" names them.
 func _name_war_leader()->void:
-	var scene:=get_tree().current_scene if is_inside_tree() else null
-	var hud:Variant=scene.get("hud") if scene!=null else null
-	if hud==null or not hud.has_method("has_provider") or not hud.has_provider("government"):return
 	close_wanted.emit()
-	hud.open_dock("government",0)
+	var marshal:Dictionary=GovernmentPeopleSystem.officeholder("Marshal")
+	var pid:=int(marshal.get("person_id",0))
+	load("res://scripts/audience_director.gd").open_court_for({"person_id":pid} if pid>0 else {})
 
 
 ## What a leader is best and worst at, by the skills the engine fights,

@@ -19,7 +19,10 @@ func meta()->Dictionary:
 func tab(_sub:int)->Dictionary:
 	return {"kpis":[],"brief":{},"blocks":[]}
 
+## "court" opens the court at rest: officials, their offices and standing
+## orders live there (court_office_dossier.gd), not in a dock of their own.
 func jump(section:String,sub:int)->Callable:
+	if section=="court": return court({})
 	return func()->void: hud.section_requested.emit(section,sub)
 
 ## Opens the court, where every conversation with your people and with

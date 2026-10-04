@@ -43,6 +43,8 @@ const Stage:=preload("res://scripts/hud/court_stage.gd")
 const Directing:=preload("res://scripts/hud/court_director.gd")
 const Executions:=preload("res://scripts/hud/court_executions.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
+## What the court knows of an official (what the Chiefs dock used to show).
+const OfficeDossier:=preload("res://scripts/hud/court_office_dossier.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const Identity:=preload("res://scripts/city_map_identity.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
@@ -736,6 +738,9 @@ func _dossier_rows(audience:Dictionary)->Array:
 		# PRISONER (captured_agents.gd, builder P): who they are and what they said; a word shown false in red.
 		if audience.has("prisoner_id"):
 			for row:Array in Prisoners.dossier_rows(String(audience.get("id",""))):rows.append([String(row[0]),String(row[1]),Tokens.RED if String(row[2])=="false" else Tokens.BODY])
+		# An official: their office, fit, skills, hand, who could replace them
+		# and their standing orders (court_office_dossier.gd).
+		if String(audience.get("origin",""))=="court":rows.append_array(OfficeDossier.rows(int((audience.get("speaker",{}) as Dictionary).get("person_id",0))))
 		var petitioner:Dictionary=context.get("petitioner",{}) if context.get("petitioner") is Dictionary else {}
 		if not petitioner.is_empty():
 			rows.append(["Trust in you",String(petitioner.get("trust","moderate")),Tokens.BODY])
