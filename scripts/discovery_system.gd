@@ -1443,10 +1443,14 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 	if not _scan_active(): return _score_best_candidate_read(channel,current_day,skip,max_tier)
 	# Inside a scan the answer is kept, like _best_candidate_for_channel's, by
 	# what it is read from: the line's allocation and chosen target, the day,
-	# the band limit, and which of the channel's own questions are passed over
-	# (ids of other channels in `skip` never change it).
+	# and which of the channel's own questions are passed over (ids of other
+	# channels in `skip` never change it). One reading with no band limit
+	# serves every limit: the questions are read nearest band first, so a
+	# limited reading finds the same question when its band is within the
+	# limit (or it is the chosen target), and nothing otherwise.
 	var home:=_research_600_channel_home(channel)
-	var key:="%s|%d|%s|%d|%d" % [channel,_subcategory_allocation(home[0],home[1]),String(WorldSimulation.state.research_targets.get(channel,"")),current_day,max_tier]
+	var target:=String(WorldSimulation.state.research_targets.get(channel,""))
+	var key:="%s|%d|%s|%d" % [channel,_subcategory_allocation(home[0],home[1]),target,current_day]
 	if not skip.is_empty():
 		var own:Array=[]
 		for id:Variant in skip:
@@ -1456,9 +1460,13 @@ func _score_best_candidate(channel:String,current_day:int,skip:Dictionary={},max
 			own.sort()
 			key+="|"+"|".join(own)
 	var memo:Variant=_scan.scored.get(key)
-	if memo is Dictionary: return memo if not (memo as Dictionary).is_empty() else {}
-	var best:=_score_best_candidate_read(channel,current_day,skip,max_tier)
-	_scan.scored[key]=best
+	if not memo is Array:
+		var found:=_score_best_candidate_read(channel,current_day,skip,TEAM_TIER_LAST)
+		var band:=-1 if found.is_empty() or String(found.get("id",""))==target else _tier_from_open(research_open_year(found),learning_year())
+		memo=[found,band]
+		_scan.scored[key]=memo
+	var best:Dictionary=memo[0]
+	if best.is_empty() or int(memo[1])>max_tier: return {}
 	return best
 
 func _score_best_candidate_read(channel:String,current_day:int,skip:Dictionary={},max_tier:int=TEAM_TIER_LAST)->Dictionary:
