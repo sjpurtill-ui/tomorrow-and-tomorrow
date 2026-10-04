@@ -3,6 +3,8 @@ extends Node
 var rng := RandomNumberGenerator.new()
 var initialized := false
 const SPAN:=preload("res://scripts/day_span.gd")
+## How a dry year dries the near sources (one rule for every people and the fast sim).
+const DryWater:=preload("res://scripts/dry_water.gd")
 const SURFACE_FRONT_SPACING_KM:=3.0
 const MAX_SURFACE_FRONT_RING:=3
 ## Carriers at work for each ring of new ground searched past the first.
@@ -341,16 +343,34 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var household_access_ratio:=_household_surface_water_access_ratio(walk_km) if accessible_quality>0.0 else 0.0
 	var household_collection:=total_required*household_access_ratio
 	var organized_collection:=collection_workers*28.0*clampf(float(WorldSimulation.state.simulation_metrics.get("labor_efficiency",0.72)),0.2,1.2)*distance_factor*(1.0+clampf(WorldSimulation.discovery.effect("haul_capacity"),-0.4,1.5))
-	organized_collection*=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("water_collection"))
 	# Wells and water works the builders raised and keep (built_fabric.gd WATERWORKS_WATER).
 	organized_collection*=preload("res://scripts/built_fabric.gd").water_factor()
+	# The carriers' own haul before any answer: the dry year's forecast
+	# (dry_water.gd) applies each day's answers to it as this day does.
+	var organized_base:=organized_collection
+	organized_collection*=1.0+maxf(0.0,WorldSimulation.consequences.policy_effect("water_collection"))
 	var collection_capacity:=household_collection+organized_collection
 	var flow_factor:=clampf(0.75+accessible_quality*0.25,0.0,1.08)
-	var collected:=minf(total_required*1.35,collection_capacity)*flow_factor if accessible_quality>0.0 else 0.0
-	var conveyed:=preload("res://scripts/water_conveyance.gd").delivery(context,int(WorldSimulation.state.elapsed_days),maxf(0.0,total_required*1.35-household_collection*flow_factor))
+	# A running dry year dries the near sources (dry_water.gd): today's loss,
+	# the share this town's groundwater keeps away, and how much of the far
+	# pools the people reach (the answer "carry" sends every strong back).
+	# A step of several days reads the dry year at its middle day.
+	var dry_loss:=DryWater.loss_at(float(WorldSimulation.state.elapsed_days)-float(maxi(1,int(WorldSimulation.span))-1)*0.5)
+	var dry_held:=DryWater.held_by(preload("res://scripts/water_waste_works.gd")._has_existing_well(context),preload("res://scripts/built_fabric.gd").works_cover("water"))
+	var dry_reach:=DryWater.reach(WorldSimulation.consequences.policy_effect("water_far"))
+	var cap:=total_required*DryWater.DRAW_CAP
+	var budget:=maxf(0.0,cap-(household_collection*flow_factor*(1.0-dry_loss*(1.0-dry_held)) if accessible_quality>0.0 else 0.0))
+	var delivered:=preload("res://scripts/water_conveyance.gd").delivery(context,int(WorldSimulation.state.elapsed_days),budget)
+	# The lines' own throughput: what they delivered, or, when the town's want
+	# was all they were asked for, what they could have brought.
+	var line:=delivered if delivered<budget-0.0001 else maxf(delivered,float((WorldSimulation.state.water_conveyance.get("report",{}) as Dictionary).get("potential",delivered)))
 	var works:Dictionary=preload("res://scripts/water_waste_works.gd").advance(context,int(WorldSimulation.state.elapsed_days),total_required)
-	var rain_collected:=maxf(0.0,float(works.get("rain_collected",0.0)))
-	collected=minf(total_required*1.35+float(works.get("cistern_capacity",0.0)),collected+conveyed+rain_collected)
+	var dry_parts:={"need":total_required,"cap":cap,"near":collection_capacity,"household":household_collection,"flow":flow_factor,"organized":organized_collection,"organized_base":organized_base,
+		"line":line,"rain":maxf(0.0,float(works.get("rain_collected",0.0))),"cistern":maxf(0.0,float(works.get("cistern_capacity",0.0))),"held":dry_held,"accessible":accessible_quality>0.0}
+	var drawn:=DryWater.collect(dry_parts,dry_loss,dry_held,dry_reach)
+	var collected:=float(drawn.collected)
+	var conveyed:=float(drawn.conveyed)
+	var rain_collected:=float(drawn.rain)
 	var portable_days:=float(WorldSimulation.state.founding_manifest.get("water_vessel_days",3.0))
 	portable_days+=maxf(0.0,WorldSimulation.consequences.policy_effect("water_storage"))
 	if "Storage Pits" in WorldSimulation.state.settlement_completed: portable_days+=2.0
@@ -358,26 +378,41 @@ func _process_water_flow(context:Dictionary={})->Array[Dictionary]:
 	var capacity:=population*portable_days+maxf(0.0,float(works.get("cistern_capacity",0.0)))
 	capacity+=preload("res://scripts/undertaking_rewards.gd").local_bonus(WorldSimulation.state,"water_capacity")
 	var stored_before:=maxf(0.0,float(WorldSimulation.state.resource_stockpiles.get("Freshwater",0.0)))
-	var available:=minf(capacity,stored_before+collected)
-	var drinking_consumed:=minf(drinking_required,available)
-	var remaining:=maxf(0.0,available-drinking_consumed)
-	var wound_cleaning_used:=minf(wound_cleaning_required,remaining)
-	remaining=maxf(0.0,remaining-wound_cleaning_used)
-	var clean_water_used:=minf(clean_water_required,remaining)
+	# A multi-day step (day_span.gd) runs each of its days' store in turn at
+	# the day's draw, so a falling store falls by every day it covers; its
+	# drinking is told as the day whose shortfall kills as the days' did
+	# (the thirst rate is the cube of the shortfall, dry_water.gd).
+	var span:=maxi(1,int(WorldSimulation.span))
+	var stored:=stored_before
+	var available:=0.0
+	var drinking_consumed:=0.0;var wound_cleaning_used:=0.0;var clean_water_used:=0.0
+	var short_cubed:=0.0
+	for step in span:
+		available=minf(capacity,stored+collected)
+		var drunk:=minf(drinking_required,available)
+		var remaining:=maxf(0.0,available-drunk)
+		var wound:=minf(wound_cleaning_required,remaining)
+		remaining=maxf(0.0,remaining-wound)
+		var clean:=minf(clean_water_required,remaining)
+		stored=maxf(0.0,available-drunk-wound-clean)
+		drinking_consumed+=drunk;wound_cleaning_used+=wound;clean_water_used+=clean
+		short_cubed+=pow(clampf(1.0-drunk/maxf(0.01,drinking_required),0.0,1.0),3.0)
+	drinking_consumed/=float(span);wound_cleaning_used/=float(span);clean_water_used/=float(span)
 	var consumed:=drinking_consumed+wound_cleaning_used+clean_water_used
-	var stored:=maxf(0.0,available-consumed)
 	WorldSimulation.state.resource_stockpiles["Freshwater"]=stored
-	var intake:=clampf(drinking_consumed/maxf(0.01,drinking_required),0.0,1.0)
+	var intake:=clampf(drinking_consumed/maxf(0.01,drinking_required),0.0,1.0) if span==1 else clampf(1.0-pow(short_cubed/float(span),1.0/3.0),0.0,1.0)
 	var wound_cleaning_coverage:=clampf(wound_cleaning_used/maxf(.000001,wound_cleaning_required),0.0,1.0) if wound_cleaning_required>.000001 else 0.0
 	var clean_water_coverage:=clampf(clean_water_used/maxf(.000001,clean_water_required),0.0,1.0) if clean_water_required>.000001 else 0.0
-	WorldSimulation.state.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"conveyed_today":conveyed,"rain_collected_today":rain_collected,"cistern_capacity":float(works.get("cistern_capacity",0.0)),"household_collected_today":minf(collected,household_collection*flow_factor),"organized_collection_capacity":organized_collection*flow_factor,"required_today":drinking_required,"practice_required_today":practice_required,"total_required_today":total_required,"consumed_today":consumed,"drinking_consumed_today":drinking_consumed,"wound_cleaning_water_used":wound_cleaning_used,"clean_water_water_used":clean_water_used,"wound_cleaning_coverage":wound_cleaning_coverage,"clean_water_coverage":clean_water_coverage,"intake_ratio":intake,"days":stored/maxf(0.01,drinking_required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers}
-	WorldSimulation.state.water_history.append({"day":int(WorldSimulation.state.elapsed_days),"stored":stored,"collected":collected,"household_collected":minf(collected,household_collection*flow_factor),"required":drinking_required,"practice_required":practice_required,"consumed":consumed,"drinking_consumed":drinking_consumed,"wound_cleaning_coverage":wound_cleaning_coverage,"clean_water_coverage":clean_water_coverage,"intake_ratio":intake,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_id":source_id,"source_origin":source_origin})
+	WorldSimulation.state.water_metrics={"stored":stored,"capacity":capacity,"collected_today":collected,"conveyed_today":conveyed,"rain_collected_today":rain_collected,"cistern_capacity":float(works.get("cistern_capacity",0.0)),"household_collected_today":minf(collected,household_collection*flow_factor),"organized_collection_capacity":organized_collection*flow_factor,"required_today":drinking_required,"practice_required_today":practice_required,"total_required_today":total_required,"consumed_today":consumed,"drinking_consumed_today":drinking_consumed,"wound_cleaning_water_used":wound_cleaning_used,"clean_water_water_used":clean_water_used,"wound_cleaning_coverage":wound_cleaning_coverage,"clean_water_coverage":clean_water_coverage,"intake_ratio":intake,"days":stored/maxf(0.01,drinking_required),"source_accessible":accessible_quality>0.0,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_kind":source_kind,"source_id":source_id,"source_origin":source_origin,"recognized":accessible_quality>0.0,"renewable":accessible_quality>0.0,"supports_drinking":accessible_quality>0.0,"supports_food_gathering":accessible_quality>0.0,"collection_workers":collection_workers,
+		"dry_loss":float(drawn.lost),"dry_far":float(drawn.far),"dry_parts":dry_parts}
+	WorldSimulation.state.water_history.append({"day":int(WorldSimulation.state.elapsed_days),"dry_loss":float(drawn.lost),"stored":stored,"collected":collected,"household_collected":minf(collected,household_collection*flow_factor),"required":drinking_required,"practice_required":practice_required,"consumed":consumed,"drinking_consumed":drinking_consumed,"wound_cleaning_coverage":wound_cleaning_coverage,"clean_water_coverage":clean_water_coverage,"intake_ratio":intake,"source_distance_km":nearest_source_km if nearest_source_km<INF else -1.0,"source_id":source_id,"source_origin":source_origin})
 	if WorldSimulation.state.water_history.size()>370: WorldSimulation.state.water_history.pop_front()
 	# ConsequenceEngine runs after resource flow, so rebuild the society totals now
 	# using today's physical service coverage.
 	WorldSimulation.discovery.refresh_operating_effects()
 	if intake<0.98:
 		var remedy:="The source is present; shorten the carry or increase organized collection and distribution." if accessible_quality>0.0 else "Secure a recognized freshwater source."
+		if float(drawn.lost)>0.0:remedy="The dry year has taken %d%% of what the near sources give; carry from the far pools, dig deeper wells, or hold more in cisterns." % roundi(float(drawn.lost)*100.0)
 		events.append(_event("Water Shortfall","Only %d%% of today's drinking-water requirement was met. %s" % [roundi(intake*100.0),remedy],"Freshwater"))
 	return events
 

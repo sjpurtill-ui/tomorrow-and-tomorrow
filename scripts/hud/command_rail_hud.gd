@@ -34,6 +34,8 @@ const SECTIONS:Array[Dictionary]=[
 	{"id":"inquiry","label":"Research","drawer":true,"tooltip":"What the people know and are learning · F5"},
 ]
 const EraWords:=preload("res://scripts/hud/era_words.gd")
+## The WATER tile's one reading of every town's water and the dry year.
+const WaterWatch:=preload("res://scripts/hud/water_watch.gd")
 const ApprovedArt:=preload("res://scripts/hud/approved_ui_art.gd")
 ## Time controls speak in words: Pause, then five paces from slowest to fastest.
 const SPEED_LABELS:Array[String]=["Pause","Slowest","Slow","Normal","Fast","Fastest"]
@@ -908,6 +910,21 @@ func _update_kpi(id:String,value_text:String,delta_text:String,delta_color:Color
 	# the complete top bar. Hover details read fresh state when opened.
 	chip.custom_minimum_size=Vector2(_kpi_width(id,float(parts.width)),KPI_HEIGHT)
 
+## The first of `candidates` (most telling first) that fits the chip's note
+## line without an ellipsis; the last one when none does.
+func _fitting_note(id:String,candidates:Array)->String:
+	if candidates.is_empty():return ""
+	var parts:Dictionary=kpi_chips.get(id,{})
+	if parts.is_empty():return String(candidates[0])
+	var label:Label=parts.delta
+	var font:Font=label.get_theme_font("font")
+	var size:=label.get_theme_font_size("font_size")
+	# The chip's width less its right gutter, the accent bar and the gap after it.
+	var room:=_kpi_width(id,float(parts.width))-KPI_GUTTER-3.0-8.0
+	for text in candidates:
+		if font==null or font.get_string_size(String(text),HORIZONTAL_ALIGNMENT_LEFT,-1,size).x<=room:return String(text)
+	return String(candidates[-1])
+
 ## Stable widths per era: the people's words are longer than the acronyms.
 ## Hides one status chip and the rule beside it: the rule before it, or, for
 ## the first chip, the rule after it.
@@ -1433,7 +1450,8 @@ var distance_selector:OptionButton
 
 func _refresh_kpis()->void:
 	var t:Dictionary=preload("res://scripts/hud/civilization_kpi_model.gd").snapshot()
-	var signature:=str(hash(t))
+	# A dry year can begin, or take its dead, on a day the towns' numbers stand still.
+	var signature:=str(hash(t))+str(WaterWatch.drought_now().hash())
 	if signature==_kpi_signature:return
 	_kpi_signature=signature
 	# Every number in the strip is told in the people's own counting
@@ -1462,10 +1480,20 @@ func _refresh_kpis()->void:
 		var pending:bool=int(t[id+"_reports"])<t.cities.size()
 		var days:=float(t[id+"_days"])
 		var note:String
-		if id=="water" and shortage>0:
-			var drank:=EraWords.fed(population,float(t.water_eaten),float(t.water_need))
-			note=EraWords.went_without(population-drank,"thirsty") if drank>=0 and drank<population else "running short"
-		elif shortage>0:note="%d short" % shortage if modern else ("running short" if t.cities.size()<=1 else "%s short" % EraWords.places(shortage))
+		if id=="water" and days>=0.0:
+			# WATER reads every town's own ledger and the dry year
+			# (water_watch.gd): red with the worst town and its days when
+			# anyone went thirsty, amber when a store is nearly gone or a dry
+			# year is killing, else the people's days held.
+			var watch:Dictionary=WaterWatch.live(t)
+			var tone:=String(watch.tone)
+			if tone=="calm":
+				note=("civ total" if modern else "of drinking water") if not pending else "partial"
+				_update_kpi(id,EraWords.days(days),note,Tokens.MUTED,"")
+			else:
+				_update_kpi(id,EraWords.days(float(watch.days)),_fitting_note(id,watch.notes),Tokens.RED if tone=="short" else Tokens.AMBER,"")
+			continue
+		if shortage>0:note="%d short" % shortage if modern else ("running short" if t.cities.size()<=1 else "%s short" % EraWords.places(shortage))
 		elif pending:note="partial"
 		else:note="civ total" if modern else ("of food" if id=="food" else "of drinking water")
 		_update_kpi(id,EraWords.days(days),note,Tokens.RED if shortage>0 else Tokens.MUTED,"")

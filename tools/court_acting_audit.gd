@@ -37,7 +37,12 @@ const COVER_GAP:=0.12         # ...unless the cloth is this far off: then that s
 const COVER_NEAR:=0.05        # skin farther than this from the cloth at rest is hidden by another piece
 const MESH_PREFIX:=["Body","hide_wrap","hide_cape","tunic_body","robe_body","robe_mantle"]
 const OUTFITS:=["hide","tunic","robe"]
-const WRAPS:={"hide":["hide_wrap","hide_cape"],"tunic":["tunic_body"],"robe":["robe_body"]}
+## Coverage is encoded for the whole outfit. Feet under shoes and the waist
+## under a belt must not be paired with a nearby skirt that moves differently.
+## Capes/mantles deliberately lift away and never supply body coverage.
+const WRAPS:={"hide":["hide_wrap","hide_footwraps","hide_cord"],
+	"tunic":["tunic_body","tunic_shoes","tunic_belt"],
+	"robe":["robe_body","robe_shoes","robe_sash"]}
 ## Pieces whose stretch is reported but not failed (a cape bound to the arms
 ## stretches with them by design: J's call).
 const STRETCH_SOFT:=["hide_cape"]

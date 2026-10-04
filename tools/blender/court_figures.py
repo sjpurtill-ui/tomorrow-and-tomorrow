@@ -141,7 +141,7 @@ def build_variant(variant, quick=False, ao=True):
             _bind_garment(o, pc, body, proxy, rig, f)
             objs.append(o)
         sets[kind] = objs
-        masks[kind] = cf_dress.coverage(body, pieces, strict=arms)
+        masks[kind] = cf_dress.coverage(body, pieces, strict=arms, objs=objs)
         log(variant, kind, [o.name for o in objs], "covers", int(masks[kind].sum()), "skin vertices",
             round(time.time() - t0, 1), "s")
     bpy.data.objects.remove(proxy, do_unlink=True)
@@ -428,6 +428,17 @@ def _bind_garment(obj, pc, body, proxy, rig, f):
     name = pc.name
     hangs = any(t in name for t in ("robe_body", "robe_trim", "tunic_body", "tunic_trim", "hide_wrap", "mantle"))
     in_sleeve = _sleeve_vertices(obj, pc)
+    # a knee-length skirt's front follows the thighs and lies over the shins:
+    # a knee raised to kneel, sit or crouch stays under the cloth instead of
+    # coming out from under it (that skin is hidden, so the legs looked cut
+    # off at the knee). The long robe too, now that it is slit up the front to
+    # the knee (cf_dress._robe): without the slit its hem split at every step.
+    front = None
+    if hangs and name.startswith(("tunic_", "hide_")):
+        front = _front_of_legs(obj, f)
+    elif hangs and name.startswith(("robe_body", "robe_trim")):
+        # the long robe's front goes with the legs too, now that it is slit to the knee
+        front = _front_of_legs(obj, f)
 
     def ease(co, i):
         if in_sleeve is not None and in_sleeve[i]:
@@ -440,33 +451,209 @@ def _bind_garment(obj, pc, body, proxy, rig, f):
         if hangs and z < f.z_hip:
             # below the hips a skirt moves with the hips more than either leg
             t = min(1.0, max(0.0, (f.z_hip - z) / 0.20))
-            return [("hips", 0.55 * t)]
+            return [("hips", 0.55 * t * (1.0 - 0.8 * (front[i] if front is not None else 0.0)))]
         return []
 
     if in_sleeve is not None:
         # sleeves take the arms' weights; the rest of the garment the armless body's
         cf_rig.bind_from_body(obj, body, rig, ease=None)
+        with_arms = cf_rig._weights_table(obj)
         _retransfer(obj, proxy, ~in_sleeve)
+        _blend_at_sleeves(obj, in_sleeve, with_arms, 0.07 * f.H / 1.72)
     else:
         cf_rig.bind_from_body(obj, proxy if name != "hide_cape" else body, rig, ease=None)
     if hangs:
         cf_rig._ease_weights(obj, ease)
-        _skirt_off_shins(obj, in_sleeve)
+        _skirt_off_shins(obj, in_sleeve, front)
         cf_rig._normalize(obj)
         cf_rig.smooth_weights(obj, repeat=6, factor=0.5)
+        _refine_garment_weights(obj, f)
 
 
-def _skirt_off_shins(obj, in_sleeve):
+def _refine_garment_weights(obj, f):
+    """A skirt is one sheet, not a nearest-leg map with a seam down the middle.
+
+    Transferring body weights gives adjacent centre vertices opposite legs;
+    even after topological smoothing a one-centimetre edge can stretch tenfold.
+    Use a continuous field below the hips. Hip influence finishes before knee
+    influence begins, keeping at most four bones without a top-four cutoff.
+    A shoulder mantle must never acquire weights from the legs underneath it.
+    """
+    name = obj.name
+    is_mantle = name.startswith("robe_mantle")
+    is_skirt = name.startswith(("hide_wrap", "tunic_body", "tunic_trim", "robe_body", "robe_trim"))
+    if not (is_mantle or is_skirt):
+        return
+    k = f.H / 1.72
+    table = cf_rig._weights_table(obj)
+    if not is_mantle:
+        table = _smooth_upper_garment(obj, table, f)
+
+    def smooth(t):
+        t = min(1.0, max(0.0, t))
+        return t * t * (3.0 - 2.0 * t)
+
+    for i, v in enumerate(obj.data.vertices):
+        co = v.co
+        if is_mantle:
+            # The cloak hangs from its yoke. Blending the chest and spine lets
+            # it follow a bow without grabbing a passing knee or either arm.
+            low = smooth((f.z_chest - co.z) / (0.22 * k))
+            table[i] = {"chest": 1.0 - 0.30 * low, "spine": 0.30 * low}
+            continue
+        # Bone-heat weights spread from the upper thigh into the abdomen.
+        # Copying them to a robe pulls the belly toward the raised thighs
+        # when sitting. Cloth above the belt belongs to the torso instead.
+        leg_fade = smooth((co.z - (f.z_hip - 0.03 * k)) / (0.10 * k))
+        for bone in list(table[i]):
+            if bone.split('.')[0] in ('thigh', 'shin', 'foot', 'toe'):
+                amount = table[i][bone] * leg_fade
+                table[i][bone] -= amount
+                table[i]['hips'] = table[i].get('hips', 0.0) + amount
+        if co.z >= f.z_hip:
+            continue
+        blend = smooth((f.z_hip - co.z) / (0.12 * k))
+        left = smooth(0.5 + co.x / (0.44 * k))
+        front = smooth((float(f.pelvis.y) - co.y + 0.02 * k) / (0.17 * k))
+        hip = (0.48 - 0.30 * front) * smooth((f.z_hip - co.z) / (0.16 * k))
+        # Finish the hip-to-thigh handover before the shin starts, keeping
+        # either hips + two thighs, or two thighs + two shins (never five
+        # bones with one arbitrarily discarded at export).
+        knee_top = f.z_knee + 0.04 * k
+        hip *= smooth((co.z - knee_top) / (0.16 * k))
+        shin = smooth((knee_top - co.z) / (0.40 * k))
+        lower = 1.0 - hip
+        target = {"hips": hip,
+                  "thigh.L": lower * (1.0 - shin) * left,
+                  "thigh.R": lower * (1.0 - shin) * (1.0 - left),
+                  "shin.L": lower * shin * left,
+                  "shin.R": lower * shin * (1.0 - left)}
+        old = table[i]
+        table[i] = {bone: old.get(bone, 0.0) * (1.0 - blend) + target.get(bone, 0.0) * blend
+                    for bone in set(old) | set(target)}
+    cf_rig._write_table(obj, table)
+    cf_rig._normalize(obj)
+
+
+def _smooth_upper_garment(obj, table, f):
+    """Keep a sleeve seam continuous on both faces of the cloth shell.
+
+    Nearest-surface transfer can borrow a hanging forearm for the armpit, then
+    drop that influence at the adjacent torso vertex. Remove that anatomical
+    mismatch before a small spatial average; unlike topology-only smoothing,
+    this gives the inner and outer cloth faces the same continuous field.
+    """
+    from mathutils.kdtree import KDTree
+    k = f.H / 1.72
+
+    def smooth(t):
+        t = min(1.0, max(0.0, t))
+        return t * t * (3.0 - 2.0 * t)
+
+    cooked = []
+    for vertex, weights in zip(obj.data.vertices, table):
+        co = vertex.co
+        values = dict(weights)
+        if co.z > f.z_hip:
+            for bone in list(values):
+                base = bone.split('.')[0]
+                destination = ''
+                amount = values[bone]
+                if base == 'shoulder':
+                    destination = 'chest'
+                elif base in ('hand', 'thumb', 'index', 'fingers'):
+                    destination = 'forearm.' + bone.split('.')[-1]
+                elif base == 'forearm':
+                    side = bone.split('.')[-1]
+                    amount *= smooth((co.z - f.elbow[side].z) / (0.12 * k))
+                    destination = 'upper_arm.' + side
+                if destination:
+                    values[bone] -= amount
+                    values[destination] = values.get(destination, 0.0) + amount
+            arm_keep = smooth(abs(co.x) / (0.16 * k))
+            for bone in list(values):
+                if bone.startswith(('upper_arm.', 'forearm.')):
+                    amount = values[bone] * (1.0 - arm_keep)
+                    values[bone] -= amount
+                    values['chest'] = values.get('chest', 0.0) + amount
+        cooked.append(values)
+    names = sorted({bone for values in cooked for bone in values})
+    matrix = np.array([[values.get(bone, 0.0) for bone in names] for values in cooked], dtype=np.float64)
+    kd = KDTree(len(table))
+    for vertex in obj.data.vertices:
+        kd.insert(vertex.co, vertex.index)
+    kd.balance()
+    result = list(table)
+    radius = 0.055 * k
+    for i, vertex in enumerate(obj.data.vertices):
+        if vertex.co.z <= f.z_hip:
+            continue
+        nearby = kd.find_range(vertex.co, radius)
+        ids = [index for _, index, _ in nearby]
+        weights = np.array([max(0.0, 1.0 - distance / radius) ** 2 for _, _, distance in nearby])
+        average = np.sum(matrix[ids] * weights[:, None], axis=0) / weights.sum()
+        result[i] = {bone: float(value) for bone, value in zip(names, average) if value > 0.0001}
+    return result
+
+
+def _skirt_off_shins(obj, in_sleeve, front=None):
     """A skirt hangs from the hips and thighs: what the shins and feet held
-    goes to the thigh above them, so a knee bent forward never splits the hem."""
+    goes to the thigh above them, so a knee bent forward never splits the hem.
+    Where `front` (0..1 a vertex) is given, that share stays on the shins: a
+    skirt's front lies over the shins of someone kneeling or sitting."""
     table = cf_rig._weights_table(obj)
     for i, w in enumerate(table):
         if in_sleeve is not None and in_sleeve[i]:
             continue
+        keep = front[i] if front is not None else 0.0
         for low in [n for n in w if n.split(".")[0] in ("shin", "foot", "toe")]:
-            thigh = "thigh." + low.split(".")[-1]
-            w[thigh] = w.get(thigh, 0.0) + w.pop(low)
+            side = low.split(".")[-1]
+            val = w.pop(low)
+            w["thigh." + side] = w.get("thigh." + side, 0.0) + val * (1.0 - keep)
+            if keep > 0.0:
+                w["shin." + side] = w.get("shin." + side, 0.0) + val * keep
     cf_rig._write_table(obj, table)
+
+
+def _front_of_legs(obj, f, spread=1.5, lift=-0.2, ramp=0.10):
+    """How much each vertex is the garment's front (1 straight ahead of the
+    legs, fading to 0 by the sides), below the hips only, easing in over
+    `ramp` metres below them."""
+    co = np.array([v.co[:] for v in obj.data.vertices], dtype=np.float32)
+    th = np.arctan2(co[:, 0], -(co[:, 1] - f.pelvis.y))
+    below = np.clip((f.z_hip - co[:, 2]) / ramp, 0.0, 1.0)
+    return np.clip(spread * np.cos(th) + lift, 0.0, 1.0) * below
+
+
+def _blend_at_sleeves(obj, in_sleeve, with_arms, width):
+    """Body-of-garment vertices within `width` of a sleeve keep part of the arm's
+    weights (all at the sleeve, none a hand's breadth away), so the shoulder and
+    armhole stretch smoothly with a raised arm instead of tearing."""
+    from mathutils.kdtree import KDTree
+    sleeve_idx = np.nonzero(in_sleeve)[0]
+    if len(sleeve_idx) == 0:
+        return
+    kd = KDTree(len(sleeve_idx))
+    verts = obj.data.vertices
+    for j, i in enumerate(sleeve_idx):
+        kd.insert(verts[int(i)].co, j)
+    kd.balance()
+    table = cf_rig._weights_table(obj)
+    for i, w in enumerate(table):
+        if in_sleeve[i]:
+            continue
+        _c, _j, d = kd.find(verts[i].co)
+        if d >= width:
+            continue
+        t = d / width
+        t = t * t * (3 - 2 * t)
+        a = with_arms[i]
+        mixed = {}
+        for name in set(w) | set(a):
+            mixed[name] = w.get(name, 0.0) * t + a.get(name, 0.0) * (1.0 - t)
+        table[i] = mixed
+    cf_rig._write_table(obj, table)
+    cf_rig._normalize(obj)
 
 
 def _sleeve_vertices(obj, pc):

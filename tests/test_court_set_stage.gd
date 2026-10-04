@@ -253,6 +253,56 @@ func test_the_acted_ways_out_play_the_actings_own_walks()->void:
 	assert_bool(main.body3d.visible).is_false()
 
 
+func test_words_during_an_entrance_keep_the_person_walking()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	main.enter_from(-1.0,1.0)
+	main._move.pause();main._move.custom_step(0.5)
+	assert_bool(main._arriving()).is_true()
+	stage.say(Stage.MAIN,"I am coming to answer you.",true)
+	assert_str(String(main.body3d.clip)).is_equal("walk_in")
+	stage.god_says("Come forward.",true)
+	assert_str(String(main.body3d.clip)).is_equal("walk_in")
+	main.listen_toward(0.0)
+	assert_str(String(main.body3d.clip)).is_equal("walk_in")
+	for key in stage.cast_order:
+		if key==Stage.MAIN:continue
+		stage.say(key,"The hall is listening.",true)
+		assert_str(String(main.body3d.clip)).is_equal("walk_in")
+		break
+	var before:Vector3=main.body3d.global_position
+	main._move.custom_step(0.2)
+	assert_float(main.body3d.global_position.distance_to(before)).is_greater(0.02)
+	stage.settle()
+	assert_str(String(main.body3d.clip)).is_equal(main.rest_clip)
+	assert_float(float(main.body3d.player.speed_scale)).is_equal(1.0)
+
+
+func test_a_dismissed_arrival_leaves_from_its_current_feet()->void:
+	if not _ready_or_skip():return
+	var modal:Control=await _open(_home_audience())
+	var stage:Control=modal.court_stage
+	stage.settle()
+	var main:Stage.Figure=stage.figure(Stage.MAIN)
+	main.enter_from(-1.0,1.0)
+	main._move.pause();main._move.custom_step(0.7)
+	main.nudge=Vector3(0.1,0.0,0.0)
+	var before:Vector3=main.body3d.global_position
+	main.leave(-1.0,1.0,0.4,"storm")
+	main._move.pause()
+	assert_float(main.body3d.global_position.distance_to(before)).is_less(0.001)
+	assert_str(String(main.body3d.clip)).is_equal(main.rest_clip)
+	main._move.custom_step(0.3)
+	assert_float(main.body3d.global_position.distance_to(before)).is_less(0.001)
+	main._move.custom_step(0.2)
+	assert_float(main.body3d.global_position.distance_to(before)).is_less(0.15)
+	stage.settle()
+	assert_bool(main.body3d.visible).is_false()
+
+
 ## Everyone standing in the hall (not seated, not leaving).
 func _standing(stage:Control)->Array:
 	var out:=[]

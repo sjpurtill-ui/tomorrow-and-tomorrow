@@ -14,6 +14,10 @@ var music_volume:=1.0
 ## N (court sound) -> J: the court's voices, room and fire, on the "Court" bus
 ## (scripts/hud/court_sound.gd). 0 mutes them; music is separate.
 var court_volume:=1.0
+## L (court executions): how an execution at court is shown: "full" (comic
+## gore, the default), "mild" (no blood or parts: the camera on the room) or
+## "off" (they kneel and sink, as before). scripts/hud/court_executions.gd.
+var court_gore:="full"
 var map_scroll_speed:=DEFAULT_MAP_SCROLL_SPEED
 var color_theme:="light"
 ## Shorter transitions, no camera coasting, no weather or bird motion.
@@ -30,6 +34,8 @@ func _ready()->void:
 		frame_limit=int(config.get_value("display","frame_limit",60))
 		music_volume=clampf(float(config.get_value("display","music_volume",1.0)),0.0,1.0)
 		court_volume=clampf(float(config.get_value("display","court_volume",1.0)),0.0,1.0)
+		court_gore=String(config.get_value("display","court_gore","full"))
+		if court_gore not in ["full","mild","off"]:court_gore="full"
 		color_theme=String(config.get_value("display","color_theme","light"))
 		if color_theme not in ["light","dark"]:color_theme="light"
 		reduce_motion=bool(config.get_value("display","reduce_motion",false))
@@ -71,6 +77,7 @@ func apply()->void:
 	Motion.reduce_motion=reduce_motion
 	apply_music()
 	apply_court()
+	apply_gore()
 	for child in get_parent().get_children():
 		if child is DirectionalLight3D:child.shadow_enabled=shadows
 	applying=false
@@ -89,13 +96,17 @@ func apply_music()->void:
 
 ## N (court sound): the "Court" bus at the player's level; the court's
 ## sounds are made ahead of time so it never opens silent.
+## The gore setting reaches the court at once.
+func apply_gore()->void:
+	preload("res://scripts/hud/court_executions.gd").gore=court_gore
+
 func apply_court()->void:
 	preload("res://scripts/hud/court_sound.gd").set_volume(court_volume)
 	if is_inside_tree():preload("res://scripts/hud/court_sound.gd").prewarm(self)
 
 func persist()->void:
 	var config:=ConfigFile.new()
-	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume","court_volume","color_theme","reduce_motion"]:config.set_value("display",key,get(key))
+	for key in ["ui_scale","render_scale","shadows","frame_limit","music_volume","court_volume","court_gore","color_theme","reduce_motion"]:config.set_value("display",key,get(key))
 	config.set_value("camera","map_scroll_speed",map_scroll_speed)
 	if config.save(config_path)!=OK:push_warning("Settings apply this session but could not be saved.")
 
@@ -149,6 +160,9 @@ func add_controls(parent:Node)->void:
 	court.tooltip_text="The voices, the fire and the crowd at court. Zero mutes them; music is unchanged."
 	court.value_changed.connect(func(value:float):court_volume=value/100;court_label.text="Court sounds: %d%%"%roundi(value);apply_court();persist())
 	parent.add_child(court)
+	var gore:=_choice(parent,"Executions at court",["Gore: full","Gore: mild (no blood)","Gore: off (they simply fall)"],["full","mild","off"].find(court_gore),func(index:int):court_gore=["full","mild","off"][index];apply_gore();persist())
+	gore.name="CourtGore"
+	gore.tooltip_text="Full: the court's executions in comic, cartoon gore. Mild: no blood or body parts; the camera turns to the room. Off: the condemned simply kneel and sink."
 	var hint:=Label.new();hint.text="Changes take effect at once and are remembered. A lower 3D resolution runs faster and keeps text sharp.";hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;hint.add_theme_font_size_override("font_size",14);parent.add_child(hint)
 
 func _theme_boundary(node:Node)->void:

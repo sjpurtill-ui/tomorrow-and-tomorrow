@@ -246,6 +246,8 @@ def build_shelter(bld):
         S.clear_of(tuple(c - t * 0.95), tuple(c + t * 0.95), r)
     marks["door"] = S.mark(S.polar(272, 4.8), face="fire")
     marks["door_out"] = S.mark(S.polar(272, 8.5), face="fire")
+    # out of the court's sight behind the shelter's back wall, by the door
+    marks["behind_windbreak"] = S.mark(S.polar(240, 6.6), face="fire")
     crowd = []
     for phi, c in elder_seats:
         crowd.append(S.mark((c.x, 0.0, c.z), face="fire", sit=True, seat=0.47))
@@ -478,6 +480,8 @@ def build_mudbrick_hall(bld):
         marks["crowd_%d" % (i + 4)] = S.mark((x, 0, z), face="fire")
     marks["door"] = S.mark((X0 + 0.5, 0, 0.75), face="fire")
     marks["door_out"] = S.mark((X0 - 2.5, 0, 0.75), face="fire")
+    # out of sight past the end wall, beside the door
+    marks["behind_windbreak"] = S.mark((X0 - 1.4, 0, -1.2), face="fire")
     for i, (x, z) in enumerate([(1.65, 0.95), (-4.6, -2.0), (3.7, 1.6), (-6.0, 1.2)]):
         marks["animal_%d" % i] = S.mark((x, 0, z), face="fire")
     for x in (-3.3, 3.3):
@@ -703,6 +707,8 @@ def build_grand_hall(bld):
         marks["crowd_%d" % (i + 4)] = S.mark((x, 0, z), face="fire")
     marks["door"] = S.mark((X0 + 0.6, 0, 1.6), face="fire")
     marks["door_out"] = S.mark((X0 - 2.5, 0, 1.6), face="fire")
+    # out of sight past the end wall, beside the door
+    marks["behind_windbreak"] = S.mark((X0 - 1.4, 0, -0.4), face="fire")
     for i, (x, z) in enumerate([(1.75, 1.0), (-4.6, -2.0), (3.9, 1.8), (6.0, 1.6)]):
         marks["animal_%d" % i] = S.mark((x, 0, z), face="fire")
     for x in (-5.4, 5.4):

@@ -73,6 +73,8 @@ const ERAS:=preload("res://scripts/technology_eras.gd")
 const HEARTH:=preload("res://scripts/hearth_count.gd")
 const SPECIFICS:=preload("res://scripts/chronicle_specifics.gd")
 const HARDSHIPS:=preload("res://scripts/hardship_log.gd")
+## How a dry year dries the water and what it kills (dry_water.gd).
+const DryWater:=preload("res://scripts/dry_water.gd")
 ## The lean buffer and the rulers' store gates (food_care.gd).
 const FoodCare:=preload("res://scripts/food_care.gd")
 const TURNING_PATH:="res://scripts/turning_points.gd"
@@ -153,12 +155,19 @@ const DROUGHT_COURT_DEPTH:=0.20
 const DROUGHT_FAILED_DEPTH:=0.28
 ## How far ahead the officials judge a dry spell's worst (days).
 const DROUGHT_LOOKAHEAD:=120
+## The cause a dry year's dead are written under. Its toll is planned from how
+## dry the season is (_open_drought), never from the water store, so it is not
+## thirst: "Dehydration" stays the cause of a real drinking shortfall
+## (consequence_engine.gd), and the People card and the WATER tile can tell the
+## two apart. Before this, a dry year that killed 11 while every town drank its
+## fill was told as "11 lost to thirst" beside a full water store.
+const DROUGHT_CAUSE:="Drought"
 
 const TYPES:={
 	"hunger":{"offices":["Quartermaster","Steward","settlement"],"cause":"Hunger","domain":"nutrition"},
 	"sickness":{"offices":["Scholar","Steward","settlement"],"cause":"Illness","domain":"health"},
 	"stranger":{"offices":["Envoy","Scholar","Steward","ChiefScout","settlement"],"cause":"Illness","domain":"health"},
-	"drought":{"offices":["Quartermaster","Steward","ChiefScout","settlement"],"cause":"Dehydration","domain":"ecology"},
+	"drought":{"offices":["Quartermaster","Steward","ChiefScout","settlement"],"cause":DROUGHT_CAUSE,"domain":"ecology"},
 	"cold":{"offices":["Quartermaster","Steward","settlement"],"cause":"Hunger","domain":"ecology"},
 	"flood":{"offices":["Steward","Quartermaster","settlement"],"cause":"Drowning","domain":"ecology"},
 	"fire":{"offices":["settlement","Steward","Quartermaster"],"cause":"Fire","domain":"demography"},
@@ -453,6 +462,23 @@ static func _weather(day:int)->float:
 	if food==null or not is_instance_valid(food) or not food.has_method("_weather_yield_factor") or not food.has_method("_environment_mix"): return 1.0
 	return float(food.call("_weather_yield_factor",food.call("_environment_mix"),float(day)))
 
+## A dry year's answer in the water forecast's own numbers (dry_water.gd):
+## "As things stand about 26 may die, most of thirst; this way about 51."
+static func drought_stakes(c:Dictionary,option_id:String)->String:
+	# As things stand: the holder's own course if the god stays silent
+	# (dry_water.gd forecast). Any answer but carrying carries nothing.
+	if option_id in ["hold","stay","send_hunters"]: return ""
+	var change:={"choice":option_id,"toll_factor":death_factor(c,option_id)}
+	var towns:=DryWater.towns()
+	var today:=float(_day())
+	var now:=DryWater.forecast(c,towns,today)
+	var then:=DryWater.forecast(c,towns,today,change)
+	var a:=roundi(float(now.total));var b:=roundi(float(then.total))
+	if a<=0 and b<=0: return "Few if any are likely to die either way."
+	var why:=", most of thirst" if float(now.thirst)>float(now.toll) else ""
+	if a==b: return "As things stand about %d may die%s; this way about the same." % [a,why]
+	return "As things stand about %d may die%s; this way about %d." % [a,why,b]
+
 static func _season_wave(day:int)->float:
 	var food=WorldSimulation.food
 	if food==null or not is_instance_valid(food) or not food.has_method("_environment_mix") or not is_instance_valid(PlanetEnvironment): return 0.0
@@ -616,6 +642,7 @@ static func daily(day:int)->void:
 	if int(s.last_day)>=day: return
 	var first_pass:=int(s.last_day)<=0
 	s.last_day=day
+	reconcile_drought_causes(s)
 	var x:=inputs(day)
 	# Immunity fades as new generations grow up (half-life ~18 years); the
 	# disease pool drifts toward what crowding and trade support (catalog).
@@ -802,7 +829,7 @@ static func _ledger_line(c:Dictionary,suffix:String,title:String,text:String)->v
 	while events.size()>80: events.pop_back()
 
 ## Crisis fields its log line copies as they change (hardship_log.gd words()).
-const LOG_FIELDS:=["sick","where","food_lost","house_lost","timber_lost","sev","holder","choice","mid_choice","rite","escalated"]
+const LOG_FIELDS:=["sick","where","food_lost","house_lost","timber_lost","sev","holder","choice","mid_choice","rite","escalated","thirst","depth","felt_depth"]
 
 static func _hardship(c:Dictionary,extra:Dictionary={})->Dictionary:
 	## Writes or updates this crisis's line in the sickness & disaster log
@@ -920,7 +947,7 @@ static func _open_quiet_drought(c:Dictionary,day:int)->void:
 	c["season_part"]=_season_part(day)
 	_stat("drought","mild")
 	c.choice="carry"
-	_policy(c,"carry",{"water_collection":0.3,"labor_multiplier":-0.06},90)
+	_policy(c,"carry",CARRY_EFFECTS,90)
 	c.mult=float(c.mult)*death_factor(c,"carry")
 	_hardship(c,{"place":String(GameState.settlement_name).strip_edges(),"by":"custom"})
 	_log("mild","%s: a dry spell the people carry by custom." % _cap(String(c.name)),{"type":"drought","sub":"drought","name":String(c.name),"crisis":String(c.id),"m":float(c.m),"option":"carry"})
@@ -964,7 +991,7 @@ static func _open_drought(day:int,x:Dictionary)->void:
 	var rng:=_rng("drought:%d" % day)
 	var sev:=maxf(clampf(1.0-float(x.weather_season),0.0,0.6),drought_depth(day))
 	var c:=_new("drought","drought","the Dry Year of %s" % _year_words(day) if sev<DROUGHT_FAILED_DEPTH else "the Year the Springs Failed",day,x,{"sev":sev,"mid_day":day+rng.randi_range(30,45),"end_day":day+rng.randi_range(90,130)})
-	_plan_deaths(c,_lognormal(rng,0.002,1.0,0.0,0.05)*(1.0+4.0*sev))
+	plan_drought(c,_lognormal(rng,0.002,1.0,0.0,0.05)*(1.0+4.0*sev))
 	if sev>=DROUGHT_COURT_DEPTH: c["severe"]=true; _stat("drought","severe")
 	if sev<DROUGHT_COURT_DEPTH:
 		_open_quiet_drought(c,day)
@@ -974,6 +1001,52 @@ static func _open_drought(day:int,x:Dictionary)->void:
 	var summary:=(dry_words % ("river" if bool(x.river) else "water"))+(" "+_pick(["What we gather this season will be about %d parts in ten of a good year.","The gatherers expect about %d parts in ten of what a good year brings.","At this rate the season will give about %d parts in ten of the usual."],"dry_tail:%s" % String(c.id)) % clampi(roundi(float(x.weather_season)*10.0),3,9))
 	_file(c,"open",summary,"comes about the dry weather",int(c.decide_by))
 	_announce(c,"The Rain Does Not Come",summary)
+
+## A dry year's plan from its draw (the same draw for every people): how deep
+## the springs fail (dry_water.gd depth) and, as its planned death share `m`
+## (is_extreme, the log), what the water forecast says it will take before
+## anyone answers.
+static func plan_drought(c:Dictionary,draw:float)->void:
+	c["draw"]=draw
+	c["depth"]=DryWater.depth(float(c.get("sev",0.0)),draw)
+	# What the towns will feel at its worst, after their own deep wells (the log).
+	c["felt_depth"]=float(c.depth)*(1.0-DryWater.held_now())
+	c["thirst"]=0
+	c["toll_dead"]=0
+	var ahead:=DryWater.forecast(c,DryWater.towns(),float(_day()))
+	_plan_deaths(c,float(ahead.total)/maxf(1.0,float(c.pop0)))
+
+## A dry year's day, for every people: the share of the people that drank
+## (its own toll falls when the water held) and the dead of thirst it has
+## caused, from the death ledger (consequence_engine.gd "Dehydration"), added
+## to its dead. `name` names the newly dead (the turn and the end).
+static func dry_day(c:Dictionary,name:bool=false)->int:
+	if String(c.get("type",""))!="drought": return 0
+	var day:=_day()
+	var seen:=int(c.get("dry_seen",int(c.get("start",day))))
+	if day>seen:
+		c["held_sum"]=float(c.get("held_sum",0.0))+DryWater.intake_now()*float(day-seen)
+		c["held_days"]=float(c.get("held_days",0.0))+float(day-seen)
+		c["dry_seen"]=day
+	var thirst:=0
+	for row:Dictionary in WorldSimulation.state.death_cause_days:
+		if String(row.get("cause",""))=="Dehydration" and int(row.get("day",-1))>=int(c.get("start",day)) and int(row.get("day",-1))<=day: thirst+=int(row.get("count",0))
+	var fresh:=maxi(0,thirst-int(c.get("thirst",0)))
+	c["thirst"]=maxi(thirst,int(c.get("thirst",0)))
+	c.deaths=int(c.deaths)+fresh
+	if fresh>0: _stat("drought","deaths",float(fresh))
+	if name and WorldSimulation.actor_id=="player":
+		var unnamed:=int(c.thirst)-int(c.get("thirst_named",0))
+		if unnamed>0:
+			for who in _dead_names(mini(unnamed,3),"%s:thirst:%d" % [String(c.id),day]): (c.dead as Array).append(who)
+			c["thirst_named"]=int(c.thirst)
+	return fresh
+
+## The dry year's own toll still due (its share of the people, by the share
+## that drank so far).
+static func drought_toll(c:Dictionary)->float:
+	var held:=float(c.get("held_sum",0.0))/float(c.held_days) if float(c.get("held_days",0.0))>0.0 else 1.0
+	return DryWater.toll_share(float(c.get("sev",0.0)),held)
 
 static func _open_cold(day:int,x:Dictionary)->void:
 	var rng:=_rng("cold:%d" % day)
@@ -1108,13 +1181,65 @@ static func _kill(c:Dictionary,count:int,salt:String)->int:
 	var result:=GameState.register_population_deaths(allowed,cause if cause!="" else "Hardship")
 	var n:=int(result.get("count",0))
 	c.deaths=int(c.deaths)+n
+	if String(c.type)=="drought": c["toll_dead"]=int(c.get("toll_dead",0))+n
 	var names:=_dead_names(mini(n,3),"%s:%s" % [String(c.id),salt])
 	for name in names: (c.dead as Array).append(name)
 	_stat(String(c.type),"deaths",float(n))
 	return n
 
+## Once per save: the dead of a dry year written before it had a cause of its
+## own (as "Dehydration", thirst, though no town went short) move to
+## DROUGHT_CAUSE in the death ledger, from that dry year's own days and never
+## more than its own toll took (its dead less any thirst the water ledger
+## counted). Dry years come from the crisis history, the running ones and the
+## sickness & disaster log (a shallow dry spell closes without a history line).
+## A real thirst death outside those days stays thirst. Only the words change:
+## no one is added, removed or moved between ages. "drought_cause_v2": the
+## first pass missed the shallow spells. Each people's own ledger: the god's
+## people also read the sickness & disaster log (`with_log`); another
+## people's history keeps no end, so its dry year is read to 180 days on.
+static func reconcile_drought_causes(s:Dictionary,with_log:bool=true)->void:
+	var flags:Dictionary=s.get("flags",{}) if s.get("flags") is Dictionary else {}
+	if bool(flags.get("drought_cause_v2",false)): return
+	flags["drought_cause_v2"]=true
+	s["flags"]=flags
+	var today:=_day()
+	var spells:={}
+	for h in s.get("history",[]):
+		if h is Dictionary and String(h.get("type",""))=="drought" and int(h.get("deaths",0))>0:
+			spells[String(h.get("id",""))]={"start":int(h.get("start",0)),"end":int(h.get("end",mini(today,int(h.get("start",0))+180))),"deaths":int(h.deaths)-int(h.get("thirst",0))}
+	for key in (s.get("active",{}) as Dictionary):
+		var c:Variant=s.active[key]
+		if c is Dictionary and String(c.get("type",""))=="drought" and int(c.get("deaths",0))>0 and not spells.has(String(c.get("id",""))):
+			spells[String(c.get("id",""))]={"start":int(c.get("start",0)),"end":today,"deaths":int(c.deaths)-int(c.get("thirst",0))}
+	for e in (HARDSHIPS.entries() if with_log else []):
+		if e is Dictionary and String(e.get("type",""))=="drought" and int(e.get("dead",0))>0 and not spells.has(String(e.get("crisis",""))):
+			spells[String(e.get("crisis",""))]={"start":int(e.get("start",0)),"end":int(e.get("end",today)),"deaths":int(e.dead)-int(e.get("thirst",0))}
+	var rows:Array[Dictionary]=WorldSimulation.state.death_cause_days
+	for spell:Dictionary in spells.values():
+		var left:=int(spell.deaths)
+		for row in rows:
+			if String(row.get("cause",""))==DROUGHT_CAUSE and int(row.get("day",-1))>=int(spell.start) and int(row.get("day",-1))<=int(spell.end): left-=int(row.get("count",0))
+		var index:=0
+		while index<rows.size() and left>0:
+			var row:Dictionary=rows[index]
+			var day:=int(row.get("day",-1))
+			if String(row.get("cause",""))=="Dehydration" and day>=int(spell.start) and day<=int(spell.end):
+				var moved:=mini(left,int(row.get("count",0)))
+				left-=moved
+				if moved>=int(row.get("count",0)): row["cause"]=DROUGHT_CAUSE
+				else:
+					row["count"]=int(row.count)-moved
+					rows.insert(index+1,{"day":day,"cause":DROUGHT_CAUSE,"count":moved})
+					index+=1
+			index+=1
+
 static func _due_deaths(c:Dictionary,share:float,salt:String)->int:
-	var expected:=float(c.pop0)*float(c.m)*float(c.mult)*share
+	# A dry year's planned share is its forecast; what it takes itself is its
+	# own toll, the rest is the thirst the water ledger kills (dry_water.gd).
+	if String(c.get("type",""))=="drought": dry_day(c,true)
+	var planned:=drought_toll(c) if String(c.get("type",""))=="drought" else float(c.m)
+	var expected:=float(c.pop0)*planned*float(c.mult)*share
 	var n:=floori(expected+_rng("due:%s:%s" % [String(c.id),salt]).randf())
 	return _kill(c,n,salt)
 
@@ -1150,6 +1275,7 @@ static func _withdraw(c:Dictionary)->void:
 	c.matter=""
 
 static func _advance(c:Dictionary,day:int,x:Dictionary)->void:
+	if String(c.phase) in ["open","mid"]: dry_day(c)
 	var phase:=String(c.phase)
 	# Silence: the holder acts on their own judgement.
 	if phase=="open" and String(c.choice)=="" and day>=int(c.decide_by):
@@ -1211,6 +1337,8 @@ static func _mid(c:Dictionary,day:int,x:Dictionary)->void:
 			text=("The dry weather holds." if dry else "Rain came at last, though late.")+dead_words
 			needs=dry
 			if needs: text+=" The springs near camp are failing."
+			# The water ledger's own numbers (dry_water.gd).
+			text+=" %s" % DryWater.springs_words(c,float(day))
 		"flood":
 			text="The water is going down. It left mud in every hut and stores spoiled by damp.%s" % dead_words
 		"fire":
@@ -1320,6 +1448,7 @@ static func _end(c:Dictionary,day:int,x:Dictionary)->void:
 	(c.notes as Array).append(text)
 	_log("end",text,{"type":type,"crisis":String(c.id),"deaths":total,"severe":bool(c.get("severe",false)),"m":float(c.m),"mult":float(c.mult)})
 	var hist:Dictionary={"id":String(c.id),"type":type,"name":String(c.name),"start":int(c.start),"end":day,"deaths":total,"dead":dead.slice(0,6),"choice":String(c.choice),"mid_choice":String(c.mid_choice),"severe":bool(c.get("severe",false)),"m":float(c.m),"sick":int(c.get("sick",0)),"where":String(c.get("where",""))}
+	if type=="drought": hist["thirst"]=int(c.get("thirst",0))
 	var hl:Array=state().history
 	hl.push_front(hist)
 	while hl.size()>HISTORY_MAX: hl.pop_back()
@@ -1464,9 +1593,15 @@ static func _aside(c:Dictionary)->String:
 
 ## How each answer changes the deaths a crisis will take (its `mult`):
 ## the one table the answers apply and the court's stakes quote.
-const DEATH_FACTOR:={"children_apart":0.7,"mothers":1.15,"far_camp":0.65,"send_away":0.55,"roots":0.8,"river_camp":0.6,
+## A dry year's water answers ("carry", "river_camp") are not here: they act
+## through the water ledger (CARRY_EFFECTS, dry_water.gd), and the court quotes
+## their stakes from its forecast.
+const DEATH_FACTOR:={"children_apart":0.7,"mothers":1.15,"far_camp":0.65,"send_away":0.55,"roots":0.8,
 	"ration":0.6,"hunt":0.8,"ask":0.5,"seed":0.45,"pots":0.75,"herd":0.5,"speak":0.95,"apart":0.55,"tend":1.25,"herbs":0.75,
-	"water":0.85,"burn":0.6,"rite":1.05,"close":0.55,"healers":0.7,"carry":0.7,"hardy":0.8,"raid":0.5}
+	"water":0.85,"burn":0.6,"rite":1.05,"close":0.55,"healers":0.7,"hardy":0.8,"raid":0.5}
+## Carrying water from the far pools: every strong back on the water path
+## (other work waits), reaching all of the far pools (dry_water.gd water_far).
+const CARRY_EFFECTS:={"water_collection":DryWater.CARRY_HAUL,"labor_multiplier":-0.06,"water_far":DryWater.CARRY_REACH}
 ## Keeping the sick apart once it is the people's own custom.
 const APART_CUSTOM_FACTOR:=0.4
 ## Clean water against the flux, the watery sickness.
@@ -1487,6 +1622,7 @@ static func death_factor(c:Dictionary,option_id:String)->float:
 ## the crisis's own planned deaths ("" when it takes no lives or the answer
 ## does not change them).
 static func stakes_words(c:Dictionary,option_id:String,phase:String)->String:
+	if String(c.get("type",""))=="drought": return drought_stakes(c,option_id)
 	if float(c.get("m",0.0))<=0.0 or not DEATH_FACTOR.has(option_id): return ""
 	var ahead:=float(c.get("pop0",0))*float(c.m)*float(c.get("mult",1.0))*(0.6 if phase=="mid" else 1.0)
 	var factor:=death_factor(c,option_id)
@@ -1691,7 +1827,7 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			"raid":
 				return _raid(c,phase,silent)
 			"river_camp":
-				_policy(c,"river_camp",{"water_collection":0.35,"labor_multiplier":-0.06},60)
+				_policy(c,"river_camp",{"water_collection":DryWater.RIVER_CAMP_HAUL,"labor_multiplier":-0.06,"water_far":DryWater.RIVER_CAMP_REACH},60)
 				c.mult=float(c.mult)*death_factor(c,"river_camp")
 				outcome="The sleeping places moved down to the river. Water every day, and a long carry."
 			"send_hunters":
@@ -1815,9 +1951,9 @@ static func _apply(c:Dictionary,option_id:String,phase:String,silent:bool)->Dict
 			ForeignDiplomacy.remember(civ_id2,"We sent our healers to the god's people in their fever. They were weak and afraid.")
 			outcome="%s sent two healers who know this sickness. They saw how weak we are." % _cap(_the(String(c.get("civ_name",""))))
 		"carry":
-			_policy(c,"carry",{"water_collection":0.3,"labor_multiplier":-0.06},90)
+			_policy(c,"carry",CARRY_EFFECTS,90)
 			c.mult=float(c.mult)*death_factor(c,"carry")
-			outcome="Every strong back is on the water path. Other work waits."
+			outcome="Every strong back is on the water path to the far pools. Other work waits."
 		"hardy":
 			_policy(c,"hardy",{"food_yield":0.06},180)
 			c.mult=float(c.mult)*death_factor(c,"hardy")

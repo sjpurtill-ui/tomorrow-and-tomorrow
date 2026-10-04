@@ -12,9 +12,13 @@ _mortality_weights_for), never below the shock floor. Side effects mirror the
 answers: sick leave, rations, the roots, store and roof losses, the weariness
 of a cairn.
 
+A dry year dries the springs (dry_water.py, the engine's dry_water.gd): its
+draw sets how deep, the dead of thirst come from the water arithmetic run for
+one nominal town at its onset (cause Dehydration, day by day), and its own
+smaller toll (cause Drought) at its turn and end by the share that drank.
+
 Left out (no counterpart in the surrogate): strangers' sickness (no foreign
-contacts: trade stays at its 0.05 floor), the water channel of a dry season,
-and timber. Constants are read from the game (gdparse); formula literals are
+contacts: trade stays at its 0.05 floor) and timber. Constants are read from the game (gdparse); formula literals are
 hand copies checked by calibrate.py FORMULA_ANCHORS.
 """
 from __future__ import annotations
@@ -25,6 +29,7 @@ import numpy as np
 
 import gdparse as g
 import fabric as _fabric
+import dry_water as _dry
 
 HOME_SICKNESS = _fabric.K["HOME_SICKNESS"]
 HOME_FIRE = _fabric.K["HOME_FIRE"]
@@ -54,7 +59,7 @@ ACTIVE_MAX = int(_k("ACTIVE_MAX", 2))
 FLOOR_SHARE = float(_k("FLOOR_SHARE", 0.7))
 FLOOR_PEOPLE = int(_k("FLOOR_PEOPLE", 30))
 SEVERE = dict(_k("SEVERE", {"hunger": 0.02, "sickness": 0.05, "stranger": 0.05}))
-DEATH_FACTOR = dict(_k("DEATH_FACTOR", {"ration": 0.6, "tend": 1.25, "children_apart": 0.7, "roots": 0.8, "carry": 0.7}))
+DEATH_FACTOR = dict(_k("DEATH_FACTOR", {"ration": 0.6, "tend": 1.25, "children_apart": 0.7, "roots": 0.8}))
 APART_CUSTOM_FACTOR = float(_k("APART_CUSTOM_FACTOR", 0.4))
 MEDICINE_CEILING = _k("MEDICINE_CEILING", [[-5000, 0.35], [1400, 0.45], [1850, 0.8], [1900, 0.9], [1945, 0.95], [2030, 0.95]])
 PANDEMIC_EMERGE = _k("PANDEMIC_EMERGE", [[-5000, 0.01], [-3000, 0.08], [-1200, 0.075], [0, 0.055], [1300, 0.08], [1700, 0.07], [1900, 0.035], [2030, 0.03]])
@@ -65,7 +70,7 @@ REBUILD_APART_EFFECTS = dict(_k("REBUILD_APART_EFFECTS", {"labor_multiplier": -0
 ERA_CURVE = g.const("scripts/technology_eras.gd", "CURVE", default=[[0, -5000], [300, -3000], [800, -500], [1500, 1000], [2000, 1600], [2400, 1800], [2800, 1950], [3000, 2030]])
 LEAN_DAYS = float(g.const("scripts/food_care.gd", "LEAN_DAYS", default=20.0, optional=True))
 STORE_GATE = float(g.const("scripts/food_care.gd", "STORE_GATE", default=0.5, optional=True))
-CAUSE = {"hunger": "Hunger", "sickness": "Illness", "drought": "Dehydration", "cold": "Hunger", "flood": "Drowning", "fire": "Fire"}
+CAUSE = {"hunger": "Hunger", "sickness": "Illness", "drought": "Drought", "cold": "Hunger", "flood": "Drowning", "fire": "Fire"}
 
 
 def _weights(anchor: str, default: dict) -> np.ndarray:
@@ -77,10 +82,11 @@ def _weights(anchor: str, default: dict) -> np.ndarray:
 # fire take the default row.
 WEIGHTS = {
     "Hunger": _weights('"Hunger": return', {"children": 2.2, "youth": 0.8, "early_adults": 0.7, "established_adults": 0.8, "mature_adults": 1.2, "elders": 2.0}),
-    "Illness": _weights('"Illness","Dehydration","Exposure": return', {"children": 1.8, "youth": 0.7, "early_adults": 0.7, "established_adults": 0.9, "mature_adults": 1.4, "elders": 2.6}),
+    "Illness": _weights('"Illness","Dehydration","Drought","Exposure": return', {"children": 1.8, "youth": 0.7, "early_adults": 0.7, "established_adults": 0.9, "mature_adults": 1.4, "elders": 2.6}),
     "_": _weights("\t\t_: return", {"children": 0.8, "youth": 0.25, "early_adults": 0.32, "established_adults": 0.55, "mature_adults": 1.25, "elders": 3.2}),
 }
 WEIGHTS["Dehydration"] = WEIGHTS["Illness"]
+WEIGHTS["Drought"] = WEIGHTS["Illness"]
 
 
 def cause_weights(cause: str) -> np.ndarray:
@@ -245,6 +251,8 @@ class Crises:
         self.pool += (target_pool - self.pool) * 0.01 * days / 365.0
         end = day + days
         for c in list(self.active):
+            if c["type"] == "drought":
+                self._thirst(c, day, end)
             if c["phase"] == "open" and c["mid_day"] < end:
                 x = x or self.inputs(day)
                 self._mid(c, x)
@@ -335,8 +343,29 @@ class Crises:
     def _open_drought(self, day: float, x: dict) -> None:
         sev = max(clamp(1.0 - x["weather_season"], 0.0, 0.6), self.drought_depth(day))
         c = self._new("drought", day, x, self.rng.integers(30, 46), self.rng.integers(90, 131), sev=sev)
-        self._plan(c, self._lognormal(0.002, 1.0, 0.0, 0.05) * (1.0 + 4.0 * sev))
+        draw = self._lognormal(0.002, 1.0, 0.0, 0.05) * (1.0 + 4.0 * sev)
+        # dry_water.gd: the draw sets how deep the springs fail; the water
+        # arithmetic for the people's nominal town gives the dead of thirst.
+        town = _dry.nominal_town(self.sim)
+        ahead = _dry.town_forecast(town["parts"], town["people"], town["capacity"], c["start"], c["end_day"],
+                                   _dry.depth(sev, draw), carry_from=c["start"], held=town["held"])
+        c["thirst_days"] = ahead["deaths"]
+        c["held"] = ahead["held"]
+        c["thirst_due"] = 0.0
+        self._plan(c, (sum(ahead["deaths"]) + c["pop0"] * _dry.toll_share(sev, ahead["held"])) / max(1.0, c["pop0"]))
         self._answer(c, "carry")
+
+    def _thirst(self, c: dict, day: float, end: float) -> None:
+        """The dead of thirst the water arithmetic gave for these days (Dehydration)."""
+        days = c.get("thirst_days") or []
+        first = int(c["start"]) + 1
+        lo = max(0, int(math.ceil(day)) - first)
+        hi = min(len(days), int(math.ceil(end)) - first)
+        c["thirst_due"] = float(c.get("thirst_due", 0.0)) + sum(days[lo:hi]) if hi > lo else float(c.get("thirst_due", 0.0))
+        n = int(math.floor(c["thirst_due"]))
+        if n > 0:
+            c["thirst_due"] -= n
+            self._kill(c, n, "Dehydration")
 
     def _open_cold(self, day: float, x: dict) -> None:
         loss = clamp(self.rng.uniform(0.04, 0.12) * (1.0 - 0.5 * x["divers"]) * 1.3, 0.02, 0.2)
@@ -396,8 +425,8 @@ class Crises:
             self._policy({"labor_multiplier": -0.05}, 30)
             self._cohesion(0.01)
         elif choice == "carry":
+            # Through the water ledger (the far pools in the forecast); its toll is unchanged.
             self._policy({"labor_multiplier": -0.06}, 90)
-            c["mult"] *= float(DEATH_FACTOR["carry"])
 
     def _mid(self, c: dict, x: dict) -> None:
         c["phase"] = "mid"
@@ -437,10 +466,11 @@ class Crises:
 
     # ---------------------------------------------------------------- effects
     def _due(self, c: dict, share: float) -> None:
-        expected = c["pop0"] * c["m"] * c["mult"] * share
+        planned = _dry.toll_share(c["sev"], c.get("held", 1.0)) if c["type"] == "drought" else c["m"]
+        expected = c["pop0"] * planned * c["mult"] * share
         self._kill(c, int(math.floor(expected + self.rng.random())))
 
-    def _kill(self, c: dict, count: int) -> None:
+    def _kill(self, c: dict, count: int, cause: str = "") -> None:
         if count <= 0:
             return
         s = self.sim
@@ -448,7 +478,7 @@ class Crises:
         allowed = min(count, max(0, int(s.population) - floor_count))
         if allowed <= 0:
             return
-        cause = CAUSE.get(c["type"], "Hardship")
+        cause = cause or CAUSE.get(c["type"], "Hardship")
         share = s.coh * cause_weights(cause)
         if share.sum() <= 1e-9:
             share = s.coh.copy()

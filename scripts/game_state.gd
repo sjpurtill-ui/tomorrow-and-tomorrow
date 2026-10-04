@@ -451,6 +451,20 @@ var vital_statistics_tracking_start_day := -1
 ## so the People card names what really took them. Not swapped into a town's
 ## scope: a town's deaths are the people's.
 var death_cause_days: Array[Dictionary] = []
+## The hall remembers (court executions, EXECUTIONS.md): every death ever
+## recorded as put to death at the god's word (a cause beginning "Executed"),
+## where death_cause_days keeps only the last DEATH_CAUSE_DAYS. Counted in
+## record_death_cause, taken back in reclassify_death_cause. Read only by the
+## court's set (its skulls on stakes). A save from before it starts at 0 (the
+## set reads the larger of this and the rolling window).
+var executions_total := 0
+## The court's bronze statues (court executions, act 20): the looks of those
+## the court stage dipped in bronze, newest last, at most COURT_STATUES_MAX
+## ([{look, clip, at}]). Presentation memory only: written by the court's
+## director through CourtSet.remember_statue, read only by the court's set,
+## which stands them by the door for good. A save from before it has none.
+var court_statues: Array[Dictionary] = []
+const COURT_STATUES_MAX := 6
 ## Monthly life-expectancy observations. Meaningful changes carry either the
 ## health discovery that occurred in the interval or an explicit conditions
 ## marker, so the chart never implies that every change came from research.
@@ -671,6 +685,8 @@ func reset_for_new_world(new_seed:int)->void:
 	vital_statistics_history=[]
 	vital_statistics_tracking_start_day=-1
 	death_cause_days=[]
+	executions_total=0
+	court_statues=[]
 	health_history=[]
 	capacity_history={}
 	lifetime_departures=0
@@ -1002,7 +1018,8 @@ func _mortality_weights_for(cause:String) -> Dictionary:
 			if early_care_blend>0.0 and not early_care.is_empty(): return _background_cohort_hazards()
 			return {"children":1.0,"youth":0.36,"early_adults":0.50,"established_adults":0.75,"mature_adults":2.20,"elders":10.0}
 		"Hunger": return {"children":2.2,"youth":0.8,"early_adults":0.7,"established_adults":0.8,"mature_adults":1.2,"elders":2.0}
-		"Illness","Dehydration","Exposure": return {"children":1.8,"youth":0.7,"early_adults":0.7,"established_adults":0.9,"mature_adults":1.4,"elders":2.6}
+		# A dry year (crisis_system.gd DROUGHT_CAUSE) takes the same ages as thirst.
+		"Illness","Dehydration","Drought","Exposure": return {"children":1.8,"youth":0.7,"early_adults":0.7,"established_adults":0.9,"mature_adults":1.4,"elders":2.6}
 		"Travel exhaustion": return {"children":1.3,"youth":1.1,"early_adults":1.2,"established_adults":1.2,"mature_adults":1.5,"elders":2.1}
 		"Insecurity","Killed in battle": return {"children":0.2,"youth":1.2,"early_adults":1.8,"established_adults":1.7,"mature_adults":1.1,"elders":0.3}
 		"Complications of childbirth": return {"children":0.0,"youth":1.2,"early_adults":2.0,"established_adults":1.5,"mature_adults":0.4,"elders":0.0}
@@ -1128,6 +1145,7 @@ func record_death_cause(cause:String,count:int)->void:
 	if count<=0:return
 	var day:=floori(elapsed_days)
 	var name:=cause if cause!="" else "Hardship"
+	if name.begins_with("Executed"):executions_total+=count
 	if not death_cause_days.is_empty():
 		var last:Dictionary=death_cause_days[-1]
 		if int(last.get("day",-1))==day and String(last.get("cause",""))==name:
@@ -1146,6 +1164,7 @@ func reclassify_death_cause(from:String,to:String,count:int)->void:
 		if int(row.get("day",-1))!=day:break
 		if String(row.get("cause",""))!=from:continue
 		var moved:=mini(count,int(row.get("count",0)))
+		if from.begins_with("Executed"):executions_total=maxi(0,executions_total-moved)
 		row["count"]=int(row.count)-moved
 		if int(row.count)<=0:death_cause_days.remove_at(index)
 		record_death_cause(to,moved)

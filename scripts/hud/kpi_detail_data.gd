@@ -1,6 +1,7 @@
 extends RefCounted
 const Model=preload("res://scripts/hud/civilization_kpi_model.gd")
 const EraWords=preload("res://scripts/hud/era_words.gd")
+const WaterWatch=preload("res://scripts/hud/water_watch.gd")
 static func snapshot(id:String)->Dictionary:
 	return from_totals(id,Model.snapshot())
 static func from_totals(id:String,t:Dictionary)->Dictionary:
@@ -30,6 +31,11 @@ static func from_totals(id:String,t:Dictionary)->Dictionary:
 			if food:r.rows.append({"label":"Net reserve change","value":"%+.1f rations/day" % float(t.food_net)})
 			if float(t[id+"_need"])>0:
 				r.meter=clampf(float(t[id+"_eaten"])/float(t[id+"_need"]),0,1);r.meter_label="Civilization need met today" if modern else ("Bellies filled today" if food else "Thirst slaked today")
+			if not food and days>=0:
+				# The worst town by name and a dry year's toll, with its numbers
+				# (water_watch.gd, the tile's own reading).
+				var watch:=WaterWatch.live(t)
+				if String(watch.tone)!="calm":r.status=String(watch.status);r.tone="warning"
 			if int(t[id+"_reports"])<t.cities.size():r.status+=" Some city reports are pending."
 		"goods":
 			r.merge({"title":"Civilian Goods" if not hearth else "Tools & gear","value":"%d%%" % roundi(float(t.goods_coverage)*100.0) if not hearth else EraWords.goods(float(t.goods_coverage)),"unit":"of what households expect" if not hearth else "of the hearths have the tools, cords and bags they need","status":"%d cities are below half their expected goods" % int(t.goods_shortages) if int(t.goods_shortages)>0 else "Everyday tools, containers and fittings. Adopted techniques act in proportion to this coverage.","tone":"warning" if int(t.goods_shortages)>0 else "neutral","meter":float(t.goods_coverage),"meter_label":"Goods coverage"},true)
@@ -96,6 +102,9 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 				# people's deaths by cause); else the ordinary toll is explained by
 				# the winter tally's rule (dwindling_cause.gd).
 				var Dwindling:=preload("res://scripts/dwindling_cause.gd")
+				# A dry year's dead written as thirst by an older save are
+				# re-read first (once; crisis_system.gd), so the card says the dry year.
+				WaterWatch.Crisis.reconcile_drought_causes(WaterWatch.Crisis.state())
 				var causes:=GameState.rolling_death_causes(365)
 				var born:=int(vitals.get("births",0));var buried:=int(vitals.get("deaths",0))
 				var reason:=Dwindling.misfortune(causes,buried-born)
@@ -123,7 +132,16 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 			c.value=EraWords.days(days) if days>=0 else "Not yet told"
 			c.unit=("of food" if food else "of drinking water") if days>=0 else ""
 			var gaining:=produced>=need
-			if shortages>0:
+			# Water: one reading with the tile (water_watch.gd): the worst town
+			# by name, a dry year and its toll, and whether anyone died of thirst.
+			var watch:Dictionary=WaterWatch.live(t) if not food and days>=0 else {}
+			if not watch.is_empty() and String(watch.tone)!="calm":
+				c.tone="warning"
+				c.headline=String(watch.headline)
+				if String(watch.tone) in ["short","low"]:
+					c.value=EraWords.days(float(watch.days))
+					if String(watch.where)!="":c.unit="of drinking water at %s" % String(watch.where)
+			elif shortages>0:
 				c.tone="warning"
 				var without:=population-EraWords.fed(population,float(t[id+"_eaten"]),need) if need>0 else 0
 				var lead:="Stores are running short: " if food else "Water is running short: "
@@ -132,10 +150,15 @@ static func card_from_totals(id:String,t:Dictionary)->Dictionary:
 			elif days<0:c.headline="No %s has been counted yet." % ("food" if food else "water")
 			elif food:c.headline="%s at today's eating, and %s." % [_sentence_case(EraWords.store_span(days)),"more is brought in than eaten" if gaining else "we eat more than we bring in"]
 			else:c.headline="Water held for %s at today's drinking, and %s." % [EraWords.days(days),"more is drawn than drunk" if gaining else "we drink more than we draw"]
+			# A warning's own facts come first (the card shows four).
+			if not watch.is_empty() and String(watch.tone)!="calm":
+				for fact:Dictionary in watch.facts:c.facts.append(fact)
 			if need>0:
 				var brought:=("Gathered" if hearth else "Brought in") if food else "Drawn"
 				c.facts.append({"text":"%s %s today, %s %s" % [brought,_amount(produced),"eaten" if food else "drunk",_amount(need)],"trend":1 if produced>need*1.02 else -1 if produced<need*0.98 else 0,"good":gaining})
-			if shortages>0 and cities>1:c.facts.append({"text":"Short at %s" % EraWords.places(shortages),"trend":-1,"good":false})
+			if not watch.is_empty() and String(watch.tone)=="calm":
+				for fact:Dictionary in watch.facts:c.facts.append(fact)
+			elif watch.is_empty() and shortages>0 and cities>1:c.facts.append({"text":"Short at %s" % EraWords.places(shortages),"trend":-1,"good":false})
 			if int(t[id+"_reports"])<cities:c.facts.append({"text":"Some %s have not yet sent word" % EraWords.word("places","places")})
 			if cities<=1:
 				c.spark=_history_days(GameState.food_history if food else GameState.water_history,"stored","required")
