@@ -595,6 +595,9 @@ func _new_stage(parent:Control,kind:String)->Control:
 	# camera frames them, its lights fall on them; the painting stays behind
 	# it as the fallback for a machine without the models.
 	var set_facts:=CourtSet.facts_from_game()
+	# Explicit diagnostic stage/tier pins keep their established fixture room.
+	if Backdrop.tier_override>=0 or not Backdrop.Stages.stage_override.is_empty():set_facts.erase("chapter")
+	made.facts["chapter"]=set_facts.get("chapter",{})
 	set_facts["tier"]=Backdrop.current_tier()
 	set_facts["seed"]=hash(audience_id)
 	# The season lies on the set (snow, flies, leaves; breath in winter).
