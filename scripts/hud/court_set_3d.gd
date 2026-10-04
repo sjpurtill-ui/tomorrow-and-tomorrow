@@ -480,6 +480,13 @@ func _material(slot:String,inked:bool)->ShaderMaterial:
 			made.set_shader_parameter("rim_amount",0.7);made.set_shader_parameter("emission_amount",0.12)
 	if slot in ["BARK","WOOD","STONE","HIDE","HIDE_DARK","REED","CLAY","PLANK","THATCH"]:
 		made.set_shader_parameter("haze_max",0.45);made.set_shader_parameter("haze_start",22.0);made.set_shader_parameter("haze_end",80.0)
+	# Authored chapter finishes keep offices maintained and their upholstery
+	# restrained while older halls retain their weathering and woven borders.
+	var finish:Dictionary=(info.get("material_overrides",{}) as Dictionary).get(slot,{})
+	for parameter:String in finish:
+		var value:Variant=finish[parameter]
+		if parameter in ["albedo","albedo_worn","accent_a","accent_b"]:value=_colour(String(value),base)
+		made.set_shader_parameter(parameter,value)
 	if inked:made.next_pass=_ink()
 	_materials[key]=made
 	return made
@@ -548,7 +555,8 @@ func _make_marks()->void:
 				"focus":target=focus
 				"door":target=_vec((raw.get("door",{}) as Dictionary).get("pos",[0,0,0]))
 				_:target=throne
-		elif face is Array and (face as Array).size()>=2:target=Vector3(float(face[0]),0.0,float(face[1]))
+		elif face is Array and (face as Array).size()>=2:
+			target=Vector3(float(face[0]),0.0,float(face[2] if (face as Array).size()>=3 else face[1]))
 		var m:=Marker3D.new();m.name=mark_name
 		var dir:=Vector3(target.x-at.x,0.0,target.z-at.z)
 		var basis:=Basis.IDENTITY
@@ -752,60 +760,61 @@ func _make_fires()->void:
 		shimmer.scale=Vector3(0.9*size,1.6*size,1.0)
 		shimmer.position=Vector3(0.0,1.35*size,0.0)
 		holder.add_child(shimmer)
-		var top:=float(fx.get("smoke_top",8.0))-at.y
-		var smoke:=GPUParticles3D.new();smoke.name="Smoke"
-		smoke.amount=26;smoke.lifetime=7.0 if top>6.0 else 4.5;smoke.preprocess=6.0;smoke.randomness=0.4
-		var sm:=ParticleProcessMaterial.new()
-		sm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_BOX
-		sm.emission_box_extents=Vector3(0.25*size,0.1,0.18)
-		sm.direction=Vector3(0,1,0);sm.spread=10.0
-		sm.initial_velocity_min=0.35;sm.initial_velocity_max=0.6
-		sm.gravity=Vector3(0.06,0.10,-0.04)
-		sm.damping_min=0.05;sm.damping_max=0.15
-		sm.scale_min=0.55;sm.scale_max=0.9
-		var curve:=Curve.new();curve.add_point(Vector2(0.0,0.35));curve.add_point(Vector2(1.0,2.6))
-		var curve_tex:=CurveTexture.new();curve_tex.curve=curve;sm.scale_curve=curve_tex
-		var ramp:=Gradient.new()
-		ramp.set_offset(0,0.0);ramp.set_color(0,Color(1,1,1,0.0))
-		ramp.set_offset(1,1.0);ramp.set_color(1,Color(1,1,1,0.0))
-		ramp.add_point(0.12,Color(1,1,1,1.0));ramp.add_point(0.6,Color(1,1,1,0.65))
-		var ramp_tex:=GradientTexture1D.new();ramp_tex.gradient=ramp;sm.color_ramp=ramp_tex
-		var seeds:=Gradient.new();seeds.set_color(0,Color(1,1,0,1));seeds.set_color(1,Color(1,1,1,1))
-		var seeds_tex:=GradientTexture1D.new();seeds_tex.gradient=seeds;sm.color_initial_ramp=seeds_tex
-		sm.turbulence_enabled=true;sm.turbulence_noise_strength=0.35;sm.turbulence_noise_scale=3.0;sm.turbulence_noise_speed_random=0.2
-		smoke.process_material=sm
-		_smoke_pm=sm;_smoke_gravity=sm.gravity
-		var puff:=QuadMesh.new();puff.size=Vector2(1.0,1.0)
-		var smoke_mat:=ShaderMaterial.new();smoke_mat.shader=SMOKE
-		smoke_mat.set_shader_parameter("fire_y",at.y)
-		smoke_mat.set_shader_parameter("opacity",0.18)
-		puff.material=smoke_mat
-		smoke.draw_pass_1=puff
-		smoke.position=Vector3(0,0.9*size,0)
-		smoke.visibility_aabb=AABB(Vector3(-4,-1,-4),Vector3(8,maxf(top,4.0)+2.0,8))
-		smoke.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		holder.add_child(smoke);particles.append(smoke)
-		var sparks:=GPUParticles3D.new();sparks.name="Embers"
-		sparks.amount=18;sparks.lifetime=2.4;sparks.preprocess=3.0;sparks.randomness=0.6
-		var em:=ParticleProcessMaterial.new()
-		em.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_BOX
-		em.emission_box_extents=Vector3(0.25,0.05,0.2)
-		em.direction=Vector3(0,1,0);em.spread=22.0
-		em.initial_velocity_min=0.6;em.initial_velocity_max=1.4
-		em.gravity=Vector3(0.0,0.25,0.0)
-		em.damping_min=0.2;em.damping_max=0.6
-		em.scale_min=0.6;em.scale_max=1.2
-		var life:=Gradient.new();life.set_color(0,Color(1,1,1,1));life.set_color(1,Color(1,1,1,0))
-		var life_tex:=GradientTexture1D.new();life_tex.gradient=life;em.color_ramp=life_tex
-		em.turbulence_enabled=true;em.turbulence_noise_strength=1.2;em.turbulence_noise_scale=1.6
-		sparks.process_material=em
-		var spark:=QuadMesh.new();spark.size=Vector2(0.035,0.035)
-		var spark_mat:=ShaderMaterial.new();spark_mat.shader=EMBER;spark.material=spark_mat
-		sparks.draw_pass_1=spark
-		sparks.position=Vector3(0,0.35,0)
-		sparks.visibility_aabb=AABB(Vector3(-3,-1,-3),Vector3(6,8,6))
-		sparks.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		holder.add_child(sparks);particles.append(sparks)
+		if bool(fx.get("smoke",true)):
+			var top:=float(fx.get("smoke_top",8.0))-at.y
+			var smoke:=GPUParticles3D.new();smoke.name="Smoke"
+			smoke.amount=26;smoke.lifetime=7.0 if top>6.0 else 4.5;smoke.preprocess=6.0;smoke.randomness=0.4
+			var sm:=ParticleProcessMaterial.new()
+			sm.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_BOX
+			sm.emission_box_extents=Vector3(0.25*size,0.1,0.18)
+			sm.direction=Vector3(0,1,0);sm.spread=10.0
+			sm.initial_velocity_min=0.35;sm.initial_velocity_max=0.6
+			sm.gravity=Vector3(0.06,0.10,-0.04)
+			sm.damping_min=0.05;sm.damping_max=0.15
+			sm.scale_min=0.55;sm.scale_max=0.9
+			var curve:=Curve.new();curve.add_point(Vector2(0.0,0.35));curve.add_point(Vector2(1.0,2.6))
+			var curve_tex:=CurveTexture.new();curve_tex.curve=curve;sm.scale_curve=curve_tex
+			var ramp:=Gradient.new()
+			ramp.set_offset(0,0.0);ramp.set_color(0,Color(1,1,1,0.0))
+			ramp.set_offset(1,1.0);ramp.set_color(1,Color(1,1,1,0.0))
+			ramp.add_point(0.12,Color(1,1,1,1.0));ramp.add_point(0.6,Color(1,1,1,0.65))
+			var ramp_tex:=GradientTexture1D.new();ramp_tex.gradient=ramp;sm.color_ramp=ramp_tex
+			var seeds:=Gradient.new();seeds.set_color(0,Color(1,1,0,1));seeds.set_color(1,Color(1,1,1,1))
+			var seeds_tex:=GradientTexture1D.new();seeds_tex.gradient=seeds;sm.color_initial_ramp=seeds_tex
+			sm.turbulence_enabled=true;sm.turbulence_noise_strength=0.35;sm.turbulence_noise_scale=3.0;sm.turbulence_noise_speed_random=0.2
+			smoke.process_material=sm
+			_smoke_pm=sm;_smoke_gravity=sm.gravity
+			var puff:=QuadMesh.new();puff.size=Vector2(1.0,1.0)
+			var smoke_mat:=ShaderMaterial.new();smoke_mat.shader=SMOKE
+			smoke_mat.set_shader_parameter("fire_y",at.y)
+			smoke_mat.set_shader_parameter("opacity",0.18)
+			puff.material=smoke_mat
+			smoke.draw_pass_1=puff
+			smoke.position=Vector3(0,0.9*size,0)
+			smoke.visibility_aabb=AABB(Vector3(-4,-1,-4),Vector3(8,maxf(top,4.0)+2.0,8))
+			smoke.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			holder.add_child(smoke);particles.append(smoke)
+			var sparks:=GPUParticles3D.new();sparks.name="Embers"
+			sparks.amount=18;sparks.lifetime=2.4;sparks.preprocess=3.0;sparks.randomness=0.6
+			var em:=ParticleProcessMaterial.new()
+			em.emission_shape=ParticleProcessMaterial.EMISSION_SHAPE_BOX
+			em.emission_box_extents=Vector3(0.25,0.05,0.2)
+			em.direction=Vector3(0,1,0);em.spread=22.0
+			em.initial_velocity_min=0.6;em.initial_velocity_max=1.4
+			em.gravity=Vector3(0.0,0.25,0.0)
+			em.damping_min=0.2;em.damping_max=0.6
+			em.scale_min=0.6;em.scale_max=1.2
+			var life:=Gradient.new();life.set_color(0,Color(1,1,1,1));life.set_color(1,Color(1,1,1,0))
+			var life_tex:=GradientTexture1D.new();life_tex.gradient=life;em.color_ramp=life_tex
+			em.turbulence_enabled=true;em.turbulence_noise_strength=1.2;em.turbulence_noise_scale=1.6
+			sparks.process_material=em
+			var spark:=QuadMesh.new();spark.size=Vector2(0.035,0.035)
+			var spark_mat:=ShaderMaterial.new();spark_mat.shader=EMBER;spark.material=spark_mat
+			sparks.draw_pass_1=spark
+			sparks.position=Vector3(0,0.35,0)
+			sparks.visibility_aabb=AABB(Vector3(-3,-1,-3),Vector3(6,8,6))
+			sparks.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+			holder.add_child(sparks);particles.append(sparks)
 	var index:=0
 	for spot:Dictionary in fx.get("flames",[]):
 		var p:=_vec(spot.get("pos",[0,1,0]))
@@ -1576,6 +1585,10 @@ func dog_pack(count:=3)->Array:
 func _apply_trophies()->void:
 	var count:=maxi(0,int(facts.get("executions",0)))
 	var days:Array=facts.get("execution_days",[]) if facts.get("execution_days",[]) is Array else []
+	# Lifetime deaths remain in the ledger; a working office is not permanently
+	# furnished with the old camp's stake avenue or heaps. Explicit acted effects
+	# still belong to the current scene and are cleaned up with it.
+	if not bool(info.get("rustic_trophies",true)):count=0;days=[]
 	var statues:Array=facts.get("statues",[]) if facts.get("statues",[]) is Array else []
 	if count==0 and days.is_empty() and statues.is_empty() and _trophy_root==null:
 		trophies={"stakes":0,"heap":0,"stains":0,"statues":0};return

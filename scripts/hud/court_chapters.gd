@@ -31,10 +31,11 @@ const DESCRIPTIONS:=["a shared fire, windbreaks and a circle of seats",
 ## Nominal historical sequence follows TechnologyEras.CURVE: the medieval
 ## chapters are 1400, 1600 and 1800; 2400 is about the start of industrialization.
 const CONSTRUCTION:={
-	1:["central_hall_houses","plank_walled_timber_halls"],
+	1:["central_hall_houses"],
 	2:["lime_plastered_floors","seasonal_wall_replastering"],
 	3:["dressed_stone_masonry","ashlar_masonry"],
 	6:["columned_stone_temple","vaulted_masonry_roofs","long_span_timber_halls","clerestory_halls"],
+	7:["plank_walled_timber_halls"],
 	8:["round_arch_great_houses","great_hall_of_justice","belfry_town_halls"],
 	9:["chancery_enrolment_rolls","fixed_capital_archives"],
 	11:["secretaries_of_state","privy_council_minutes","grand_palace_court"],

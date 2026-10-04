@@ -471,6 +471,9 @@ func _merge_parts(colours:Dictionary,cover:int,beard:String)->void:
 	var opaque:=Merge.material(colours,cover,key_dir)
 	var write:=Merge.material(colours,cover,key_dir,"write")
 	var read:=Merge.material(colours,cover,key_dir,"read")
+	# Keep render resources alive until every merged child has been destroyed.
+	# Immediate scene teardown otherwise releases an eye material too early.
+	_merge_root.set_meta(&"draw_materials",[opaque,write,read])
 	for m in [opaque,write,read]:_uber.append(weakref(m))
 	_meshes.clear()
 	for group in ["Body","Rest","Hair","Eyes"]:

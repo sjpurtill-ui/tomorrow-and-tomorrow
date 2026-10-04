@@ -5,13 +5,16 @@ extends GdUnitTestSuite
 const Chapters:=preload("res://scripts/hud/court_chapters.gd")
 const Stages:=preload("res://scripts/civic_stages.gd")
 const Voice:=preload("res://scripts/character_voice.gd")
+const Backdrop:=preload("res://scripts/hud/court_backdrop.gd")
 const YEAR:=365.0
 
 func before_test()->void:
+	Backdrop.tier_override=-1
 	Voice.knowledge_override.clear();Stages.stage_override="";Stages.reload()
 	GameState.reset_for_new_world(904621)
 
 func after_test()->void:
+	Backdrop.tier_override=-1
 	Voice.knowledge_override.clear();Stages.stage_override="";Stages.reload()
 
 func test_all_sixteen_chapters_change_at_the_exact_two_hundred_year_boundary()->void:
@@ -61,7 +64,7 @@ func test_aging_without_knowledge_renews_the_early_room_without_modernizing_it()
 func test_construction_knowledge_limits_the_room_independently_of_elapsed_time()->void:
 	var cases:=[
 		["central_hall_houses",1],["lime_plastered_floors",2],
-		["ashlar_masonry",3],["long_span_timber_halls",6],
+		["ashlar_masonry",3],["long_span_timber_halls",6],["plank_walled_timber_halls",7],
 		["great_hall_of_justice",8],["fixed_capital_archives",9],
 		["privy_council_minutes",11],["ministry_office_block",13],
 		["reinforced_concrete",15]]
@@ -221,3 +224,22 @@ func test_old_save_fields_alone_reconstruct_the_same_room_after_cache_reload()->
 	assert_int(int(first.design)).is_equal(13)
 	assert_bool(first.capabilities.typewriter).is_true()
 	assert_array(GameState.known_discoveries).is_equal(before)
+
+func test_default_overview_uses_the_chapter_but_explicit_civic_fixtures_stay_exact()->void:
+	GameState.elapsed_days=3000.0*YEAR
+	Voice.knowledge_override["player"]=["reinforced_concrete","national_income_accounts","labor_ministry"]
+	var actual:Control=auto_free(Backdrop.new());actual.configure(4,false)
+	assert_str(String(actual.scene)).is_equal("government")
+	assert_int(int(actual.chapter.design)).is_equal(15)
+	assert_str(Backdrop.stage_place_name()).is_equal(String(Chapters.for_owner().name))
+	var pinned:Control=auto_free(Backdrop.new());pinned.configure(4,false,"feudal_hall")
+	assert_str(String(pinned.scene)).is_equal("great_hall")
+	assert_dict(pinned.chapter).is_empty()
+	assert_str(Backdrop.stage_place_name("feudal_hall")).is_equal(String(Stages.stage("feudal_hall").place_name))
+
+func test_medieval_assembly_overview_does_not_introduce_a_throne()->void:
+	GameState.elapsed_days=1800.0*YEAR
+	Voice.knowledge_override["player"]=["reinforced_concrete","free_adult_assembly","annual_elected_magistrates"]
+	var actual:Control=auto_free(Backdrop.new());actual.configure(3,false)
+	assert_str(String(actual.chapter.lean)).is_equal("assembly")
+	assert_str(String(actual.scene)).is_equal("commune_hall")

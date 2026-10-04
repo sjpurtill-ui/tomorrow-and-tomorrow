@@ -104,27 +104,37 @@ func configure(t:int,dark_mode:bool,stage:String="")->void:
 	# An era plate painted for the old tiers still dresses the matching stage.
 	if _texture==null and TIER_STAGES.find(stage_id)==tier: _texture=override_texture(tier)
 	chapter={}
-	if tier_override<0 and Stages.stage_override.is_empty():
+	if stage.is_empty() and tier_override<0 and Stages.stage_override.is_empty():
 		chapter=Chapters.for_owner()
 		scene=String(CHAPTER_SCENES[int(chapter.design)])
+		if String(chapter.lean)=="assembly":
+			if int(chapter.design) in [2,3,5,6]:scene="council_house"
+			elif int(chapter.design) in [8,9]:scene="commune_hall"
+		elif int(chapter.design) in [4,5]:scene="palace_hall"
 		_texture=null
 	queue_redraw()
 
 ## The court stage last shown in the Court, so a stage change can dissolve.
 static var _last_court_stage:=""
 static var _last_court_tier:=0
+static var _last_chapter:Dictionary={}
+static var _last_scene:=""
 const STAGE_DISSOLVE:=1.5
 
 ## Called by the Court after configure(): if the stage differs from the one
 ## last shown there, lay the old stage over this one and dissolve it (one tween).
 func cross_fade_from_last()->void:
 	var old:=_last_court_stage;var old_tier:=_last_court_tier
+	var old_chapter:=_last_chapter.duplicate(true);var old_scene:=_last_scene
 	_last_court_stage=stage_id;_last_court_tier=tier
-	if old=="" or old==stage_id or not is_inside_tree():return
+	_last_chapter=chapter.duplicate(true);_last_scene=scene
+	if old=="" or (old==stage_id and old_chapter==chapter) or not is_inside_tree():return
 	var ghost:Control=(get_script() as GDScript).new()
 	ghost.name="StageBefore";ghost.animate=false
 	add_child(ghost);ghost.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	ghost.configure(old_tier,dark,old)
+	if not old_chapter.is_empty():
+		ghost.chapter=old_chapter;ghost.scene=old_scene;ghost._texture=null;ghost.queue_redraw()
 	var tween:=ghost.create_tween().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_property(ghost,"modulate:a",0.0,preload("res://scripts/hud/motion.gd").duration(STAGE_DISSOLVE))
 	tween.tween_callback(ghost.queue_free)
@@ -221,7 +231,7 @@ func _draw_government(w:float,h:float)->void:
 		draw_line(Vector2(r.get_center().x,r.position.y),Vector2(r.get_center().x,r.end.y),wood,3.0,true)
 		if design<14:draw_line(Vector2(r.position.x,r.get_center().y),Vector2(r.end.x,r.get_center().y),wood,3.0,true)
 	# A side door remains clear of the table and the records cupboards.
-	var right:=int(chapter.get("renewal",0))%2==1
+	var right:=bool(chapter.get("limited",false)) and int(chapter.get("renewal",0))%2==1
 	var door_x:=w*.86 if right else w*.035
 	draw_rect(Rect2(door_x,h*.16,w*.10,h*.48),wood.darkened(.25))
 	draw_rect(Rect2(door_x+5,h*.18,w*.10-10,h*.44),wood)
@@ -279,6 +289,7 @@ func _radial(center:Vector2,radius:Vector2,inner:Color,outer:Color,segments:int=
 		draw_polygon(PackedVector2Array([points[0],points[i+1],points[i+2]]),PackedColorArray([colours[0],colours[i+1],colours[i+2]]))
 
 func _firelight(w:float,h:float)->void:
+	if not chapter.is_empty() and not int(chapter.design) in [0,1,7,8]:return
 	## At night the fire lights the faces and the near ground.
 	var flicker:=.5+.5*sin(_clock*5.1)
 	_radial(hearth_point()+Vector2(0,-h*.12),Vector2(w*.42,h*.62),Color(1,.58,.22,.20+.03*flicker),Color(1,.58,.22,0))
@@ -411,6 +422,7 @@ func _log(center:Vector2,along:Vector2,length:float,thick:float,index:int)->void
 		draw_colored_polygon(fur,_c("d8c09a","8a7050") if index%4==0 else _c("a78a66","5f4a35"))
 
 func _fire(base:Vector2,height:float)->void:
+	if not chapter.is_empty() and not int(chapter.design) in [0,1,7,8]:return
 	var flicker:=.5+.5*sin(_clock*7.3)*sin(_clock*3.1+1.0)
 	_radial(base+Vector2(0,-height*.25),Vector2(height*1.4,height*1.1)*(1.0+.03*flicker),Color(1,.62,.25,.30 if not dark else .45),Color(1,.62,.25,0))
 	# Stones and embers.

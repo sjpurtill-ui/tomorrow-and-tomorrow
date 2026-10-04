@@ -43,6 +43,25 @@ CHAPTERS=[
 K.SLOT_COLOURS.update({"WINDOW_GLASS":(.53,.67,.71),"PAPER":(.85,.81,.70)})
 
 
+def material_finishes(chapter):
+    """Runtime shader finishes; keep this metadata reproducible without a GLB rebuild."""
+    glazing={"WINDOW_GLASS":{"pattern":19 if chapter in (7,8,9) else 20,
+                            "albedo":"9daea2","albedo_worn":"b1bcb0","mottle":.03,"variation":.025}}
+    if chapter<10:return glazing if chapter>=2 else {}
+    modern=chapter>=14
+    out={"PLASTER":{"pattern":0,"albedo":"deded3" if modern else "d5c8ab",
+                     "albedo_worn":"e5e5dc" if modern else "ddcfb6","mottle":.025,"variation":.025,"grain":.025},
+         "WEAVE_A":{"pattern":18,"albedo":"344b55" if modern else "485443","albedo_worn":"405963" if modern else "55614e","mottle":.02,"variation":.03},
+         "WEAVE_B":{"pattern":18,"albedo":"465964" if modern else "4b5752","albedo_worn":"526771" if modern else "5b6861","mottle":.02,"variation":.03},
+         "WOOD":{"pattern":16,"albedo":"79624d" if modern else "674b33","albedo_worn":"846e56" if modern else "785c40","mottle":.025,"variation":.04},
+         "PLANK":{"pattern":16,"albedo":"81694f" if modern else "765638","albedo_worn":"90775b" if modern else "87684b","mottle":.025,"variation":.04}}
+    if modern:
+        out["FLAGS"]={"pattern":17,"albedo":"acb2ae","albedo_worn":"b8bfba","mottle":.02,"variation":.025,"grain":.02}
+        out["STONE_BLOCK"]={"pattern":0,"albedo":"c2c8c5","albedo_worn":"cdd0cc","mottle":.02,"variation":.025}
+    else:out.update(glazing)
+    return out
+
+
 def box(b,name,at,size,slot="WOOD",yaw=0,bevel=.012):
     bm=bmesh.new();bmesh.ops.create_cube(bm,size=1)
     m=Matrix.Translation(K.B(at)) @ Matrix.Rotation(-yaw,4,'Z') @ Matrix.Diagonal((size[0],size[2],size[1],1))
@@ -290,7 +309,8 @@ def build(i):
           "gates":{},"technology_gates":{},"institution_gates":{},"default_tags":[],"props":{},"fx":{},
           "light":{"open_sky":i==0,"sun_dir":[-.35,-.75,-.55],"sun_energy":1.5,"fire_energy":1.2 if hearth else 0,"fire_range":6,"fog":.001 if i==0 else .002},
           "look":{"ambient_energy":.48 if i<7 else .52,"exposure":1.03},
-          "camera":{"yaw":12,"pitch":-14,"fov":52,"centre":[0,.9,.1],"yaw_range":[-24,28]},"door_side":-1}
+          "camera":{"yaw":12,"pitch":-14,"fov":52,"centre":[0,.9,.1],"yaw_range":[-24,28]},"door_side":-1,
+          "material_overrides":material_finishes(i)}
     room_shell(b,info,i)
     marks={"focus":S.mark((0,0,1.4)),"throne_gaze":S.mark((0,2.3,6.4)),
            "petitioner":S.mark((-1.3 if hearth else 0,0,2.4)),"execution":S.mark((-1.6 if hearth else 0,0,1.7)),

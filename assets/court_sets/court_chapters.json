@@ -492,7 +492,8 @@
     ]
    },
    "glb": "court_chapter_00.glb",
-   "sha256": "06e9458ae9db91c16205e2a3be6c06f21000d9854f81129b538425bcb33c91e3"
+   "sha256": "06e9458ae9db91c16205e2a3be6c06f21000d9854f81129b538425bcb33c91e3",
+   "material_overrides": {}
   },
   "chapter_01": {
    "chapter": 1,
@@ -1369,7 +1370,8 @@
     ]
    },
    "glb": "court_chapter_01.glb",
-   "sha256": "1a077837b4b5e9d35fb642662646f89195d4669e30deb1d7ea64753b685f9b01"
+   "sha256": "1a077837b4b5e9d35fb642662646f89195d4669e30deb1d7ea64753b685f9b01",
+   "material_overrides": {}
   },
   "chapter_02": {
    "chapter": 2,
@@ -2252,7 +2254,16 @@
     ]
    },
    "glb": "court_chapter_02.glb",
-   "sha256": "3a2564eb3928915741b0850b3c0f27c828e30f7a9502bd4124ac8ed17179781c"
+   "sha256": "3a2564eb3928915741b0850b3c0f27c828e30f7a9502bd4124ac8ed17179781c",
+   "material_overrides": {
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_03": {
    "chapter": 3,
@@ -3192,7 +3203,16 @@
     ]
    },
    "glb": "court_chapter_03.glb",
-   "sha256": "61264c3bf1a762aea117fe354e108c6faa8d6e35c1d5732397cbaa9e89bd67c1"
+   "sha256": "61264c3bf1a762aea117fe354e108c6faa8d6e35c1d5732397cbaa9e89bd67c1",
+   "material_overrides": {
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_04": {
    "chapter": 4,
@@ -4104,7 +4124,16 @@
     ]
    },
    "glb": "court_chapter_04.glb",
-   "sha256": "da9812b452acf57d2ff599168fc95cd2d664e696d5c74aaf95f58117a6dcd6ec"
+   "sha256": "da9812b452acf57d2ff599168fc95cd2d664e696d5c74aaf95f58117a6dcd6ec",
+   "material_overrides": {
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_05": {
    "chapter": 5,
@@ -5072,7 +5101,16 @@
     ]
    },
    "glb": "court_chapter_05.glb",
-   "sha256": "822b7921d700fce201e4228c4505b22923eb205c5eefe8c6a357e9379455e1f4"
+   "sha256": "822b7921d700fce201e4228c4505b22923eb205c5eefe8c6a357e9379455e1f4",
+   "material_overrides": {
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_06": {
    "chapter": 6,
@@ -5986,7 +6024,16 @@
     ]
    },
    "glb": "court_chapter_06.glb",
-   "sha256": "eeafdc553c1869c8b49174fb7e2dccf5ef06838cadfe390292f550e907e8aa3d"
+   "sha256": "eeafdc553c1869c8b49174fb7e2dccf5ef06838cadfe390292f550e907e8aa3d",
+   "material_overrides": {
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_07": {
    "chapter": 7,
@@ -7084,7 +7131,16 @@
     ]
    },
    "glb": "court_chapter_07.glb",
-   "sha256": "635078fdeac5b15121c715fe72062326bad5887b87a6f8a14f6de6298fc41499"
+   "sha256": "635078fdeac5b15121c715fe72062326bad5887b87a6f8a14f6de6298fc41499",
+   "material_overrides": {
+    "WINDOW_GLASS": {
+     "pattern": 19,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_08": {
    "chapter": 8,
@@ -8154,7 +8210,16 @@
     ]
    },
    "glb": "court_chapter_08.glb",
-   "sha256": "23a8d85be69c5e5022ac20a956aab1b0e4493b76537871e71395ad5ce723a2c8"
+   "sha256": "23a8d85be69c5e5022ac20a956aab1b0e4493b76537871e71395ad5ce723a2c8",
+   "material_overrides": {
+    "WINDOW_GLASS": {
+     "pattern": 19,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_09": {
    "chapter": 9,
@@ -9247,7 +9312,16 @@
     ]
    },
    "glb": "court_chapter_09.glb",
-   "sha256": "a109dd9f4e0eae622b7acc495a4d784b02060d755245b7ad27c8f09b86156f03"
+   "sha256": "a109dd9f4e0eae622b7acc495a4d784b02060d755245b7ad27c8f09b86156f03",
+   "material_overrides": {
+    "WINDOW_GLASS": {
+     "pattern": 19,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_10": {
    "chapter": 10,
@@ -10256,7 +10330,52 @@
     ]
    },
    "glb": "court_chapter_10.glb",
-   "sha256": "033755ba8f4527d91dbf29fe67b26d2575fcc714ded947c32ee009aa651b0127"
+   "sha256": "033755ba8f4527d91dbf29fe67b26d2575fcc714ded947c32ee009aa651b0127",
+   "material_overrides": {
+    "PLASTER": {
+     "pattern": 0,
+     "albedo": "d5c8ab",
+     "albedo_worn": "ddcfb6",
+     "mottle": 0.025,
+     "variation": 0.025,
+     "grain": 0.025
+    },
+    "WEAVE_A": {
+     "pattern": 18,
+     "albedo": "485443",
+     "albedo_worn": "55614e",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WEAVE_B": {
+     "pattern": 18,
+     "albedo": "4b5752",
+     "albedo_worn": "5b6861",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "674b33",
+     "albedo_worn": "785c40",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "PLANK": {
+     "pattern": 16,
+     "albedo": "765638",
+     "albedo_worn": "87684b",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_11": {
    "chapter": 11,
@@ -11219,7 +11338,52 @@
     ]
    },
    "glb": "court_chapter_11.glb",
-   "sha256": "9bec9311420d415c3e2d55b53c64fbfac8c5f8cc504da261c275eb736bf3180e"
+   "sha256": "9bec9311420d415c3e2d55b53c64fbfac8c5f8cc504da261c275eb736bf3180e",
+   "material_overrides": {
+    "PLASTER": {
+     "pattern": 0,
+     "albedo": "d5c8ab",
+     "albedo_worn": "ddcfb6",
+     "mottle": 0.025,
+     "variation": 0.025,
+     "grain": 0.025
+    },
+    "WEAVE_A": {
+     "pattern": 18,
+     "albedo": "485443",
+     "albedo_worn": "55614e",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WEAVE_B": {
+     "pattern": 18,
+     "albedo": "4b5752",
+     "albedo_worn": "5b6861",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "674b33",
+     "albedo_worn": "785c40",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "PLANK": {
+     "pattern": 16,
+     "albedo": "765638",
+     "albedo_worn": "87684b",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_12": {
    "chapter": 12,
@@ -12299,7 +12463,52 @@
     ]
    },
    "glb": "court_chapter_12.glb",
-   "sha256": "dbd2de423b62d9458ff582932f52e7a43b2d2d01d8ed0649df4d33680f703cd1"
+   "sha256": "dbd2de423b62d9458ff582932f52e7a43b2d2d01d8ed0649df4d33680f703cd1",
+   "material_overrides": {
+    "PLASTER": {
+     "pattern": 0,
+     "albedo": "d5c8ab",
+     "albedo_worn": "ddcfb6",
+     "mottle": 0.025,
+     "variation": 0.025,
+     "grain": 0.025
+    },
+    "WEAVE_A": {
+     "pattern": 18,
+     "albedo": "485443",
+     "albedo_worn": "55614e",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WEAVE_B": {
+     "pattern": 18,
+     "albedo": "4b5752",
+     "albedo_worn": "5b6861",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "674b33",
+     "albedo_worn": "785c40",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "PLANK": {
+     "pattern": 16,
+     "albedo": "765638",
+     "albedo_worn": "87684b",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_13": {
    "chapter": 13,
@@ -13454,7 +13663,52 @@
     ]
    },
    "glb": "court_chapter_13.glb",
-   "sha256": "6b04bc4116918182386592e3ee23ba46260b18b371fab8122460ee39759c928f"
+   "sha256": "6b04bc4116918182386592e3ee23ba46260b18b371fab8122460ee39759c928f",
+   "material_overrides": {
+    "PLASTER": {
+     "pattern": 0,
+     "albedo": "d5c8ab",
+     "albedo_worn": "ddcfb6",
+     "mottle": 0.025,
+     "variation": 0.025,
+     "grain": 0.025
+    },
+    "WEAVE_A": {
+     "pattern": 18,
+     "albedo": "485443",
+     "albedo_worn": "55614e",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WEAVE_B": {
+     "pattern": 18,
+     "albedo": "4b5752",
+     "albedo_worn": "5b6861",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "674b33",
+     "albedo_worn": "785c40",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "PLANK": {
+     "pattern": 16,
+     "albedo": "765638",
+     "albedo_worn": "87684b",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "WINDOW_GLASS": {
+     "pattern": 20,
+     "albedo": "9daea2",
+     "albedo_worn": "b1bcb0",
+     "mottle": 0.03,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_14": {
    "chapter": 14,
@@ -14552,7 +14806,60 @@
     ]
    },
    "glb": "court_chapter_14.glb",
-   "sha256": "1ff2f078f7603d08033a8b7d3a0edce2a527566cbb63308d56aee2cacae28347"
+   "sha256": "1ff2f078f7603d08033a8b7d3a0edce2a527566cbb63308d56aee2cacae28347",
+   "material_overrides": {
+    "PLASTER": {
+     "pattern": 0,
+     "albedo": "deded3",
+     "albedo_worn": "e5e5dc",
+     "mottle": 0.025,
+     "variation": 0.025,
+     "grain": 0.025
+    },
+    "WEAVE_A": {
+     "pattern": 18,
+     "albedo": "344b55",
+     "albedo_worn": "405963",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WEAVE_B": {
+     "pattern": 18,
+     "albedo": "465964",
+     "albedo_worn": "526771",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "79624d",
+     "albedo_worn": "846e56",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "PLANK": {
+     "pattern": 16,
+     "albedo": "81694f",
+     "albedo_worn": "90775b",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "FLAGS": {
+     "pattern": 17,
+     "albedo": "acb2ae",
+     "albedo_worn": "b8bfba",
+     "mottle": 0.02,
+     "variation": 0.025,
+     "grain": 0.02
+    },
+    "STONE_BLOCK": {
+     "pattern": 0,
+     "albedo": "c2c8c5",
+     "albedo_worn": "cdd0cc",
+     "mottle": 0.02,
+     "variation": 0.025
+    }
+   }
   },
   "chapter_15": {
    "chapter": 15,
@@ -15674,7 +15981,60 @@
     ]
    },
    "glb": "court_chapter_15.glb",
-   "sha256": "3fcda9a385b6767a1ac0b17909edc9f29bf41e033039b4cbddc8907596279b9d"
+   "sha256": "3fcda9a385b6767a1ac0b17909edc9f29bf41e033039b4cbddc8907596279b9d",
+   "material_overrides": {
+    "PLASTER": {
+     "pattern": 0,
+     "albedo": "deded3",
+     "albedo_worn": "e5e5dc",
+     "mottle": 0.025,
+     "variation": 0.025,
+     "grain": 0.025
+    },
+    "WEAVE_A": {
+     "pattern": 18,
+     "albedo": "344b55",
+     "albedo_worn": "405963",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WEAVE_B": {
+     "pattern": 18,
+     "albedo": "465964",
+     "albedo_worn": "526771",
+     "mottle": 0.02,
+     "variation": 0.03
+    },
+    "WOOD": {
+     "pattern": 16,
+     "albedo": "79624d",
+     "albedo_worn": "846e56",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "PLANK": {
+     "pattern": 16,
+     "albedo": "81694f",
+     "albedo_worn": "90775b",
+     "mottle": 0.025,
+     "variation": 0.04
+    },
+    "FLAGS": {
+     "pattern": 17,
+     "albedo": "acb2ae",
+     "albedo_worn": "b8bfba",
+     "mottle": 0.02,
+     "variation": 0.025,
+     "grain": 0.02
+    },
+    "STONE_BLOCK": {
+     "pattern": 0,
+     "albedo": "c2c8c5",
+     "albedo_worn": "cdd0cc",
+     "mottle": 0.02,
+     "variation": 0.025
+    }
+   }
   }
  }
 }
