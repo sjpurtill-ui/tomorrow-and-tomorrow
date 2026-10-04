@@ -5,6 +5,7 @@ func before_test()->void:
 	GameState.reset_for_new_world(625114)
 	GameState.settlement_founded_at=Vector3(812.25,0,-41.5)
 	Ground.clear()
+	Ground.set_approaches({})
 
 func _plot(id:int,at:Vector2,use:="residential_compound")->Dictionary:
 	return {"id":id,"seed":id,"centroid":at,"polygon":PackedVector2Array([at+Vector2(-.02,-.02),at+Vector2(.02,-.02),at+Vector2(.02,.02),at+Vector2(-.02,.02)]),"land_use":use,"status":"active","form":"durable_household_cluster","area_ha":.16,"cultivation_phase":"growing","crop_cover":.6}
@@ -108,3 +109,42 @@ func test_regional_road_paints_only_its_on_tile_span_and_cache_stays_bounded()->
 		if Ground.slot_frames[slot].y<=0:continue
 		assert_int(int(Ground.slot_reports[slot].stamps)).is_less(6000)
 		assert_float(float(Ground.slot_reports[slot].texel_m)).is_less(1.2)
+
+func test_approach_only_changes_refresh_pending_and_resident_requests()->void:
+	var data:=_data();_build(data);_serve(Vector2(2.05,.04))
+	var revision:=Ground._home_revision
+	var at:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	Ground.set_approaches({"home":{"center":at,"bearings":[0.25]}})
+	assert_int(Ground._home_revision).is_not_equal(revision)
+	_serve(Vector2(2.05,.04))
+	for key:String in Ground._tile_inputs:
+		var slot:=Ground.slot_keys.find(key)
+		assert_int(slot).is_greater_equal(Ground.CITY_SLOTS)
+		if slot>=Ground.CITY_SLOTS:assert_int(Ground.slot_signatures[slot]).is_equal(int(Ground._tile_inputs[key].signature))
+	var count:=Ground.tile_builds
+	_serve(Vector2(2.05,.04))
+	assert_int(Ground.tile_builds).is_equal(count)
+
+func test_field_tracks_are_derived_before_cropping_hearth_and_route_context()->void:
+	var field:=_plot(1,Vector2(.51,.10),"field")
+	field.polygon=PackedVector2Array([Vector2(.49,.09),Vector2(.53,.09),Vector2(.53,.11),Vector2(.49,.11)])
+	var hearth:=_plot(2,Vector2(.65,.10));hearth.form="open_hearth_yard"
+	var plots:Array[Dictionary]=[field,hearth]
+	var routes:Array[Dictionary]=[{"id":1,"points":PackedVector2Array([Vector2(.4,.2),Vector2(.45,.2)])}]
+	Ground.build({},plots,routes,GameState.settlement_founded_at)
+	var left:=Ground._in_rect({},plots,routes,Rect2(0,0,.512,.512).grow(.032))
+	var right:=Ground._in_rect({},plots,routes,Rect2(.512,0,.512,.512).grow(.032))
+	assert_array(left.plan._ground_paths).has_size(1)
+	assert_array(right.plan._ground_paths).is_equal(left.plan._ground_paths)
+	var track:PackedVector2Array=left.plan._ground_paths[0].points
+	assert_vector(track[0]).is_equal(Vector2(.65,.10))
+	assert_vector(track[-1]).is_equal(Vector2(.53,.10))
+	# A field outside the left job still contributes the part of its path
+	# that crosses it; filtering whole plots must not amputate the track.
+	field.centroid=Vector2(.78,.20)
+	field.polygon=PackedVector2Array([Vector2(.76,.18),Vector2(.8,.18),Vector2(.8,.22),Vector2(.76,.22)])
+	plots=[field]
+	Ground.build({},plots,routes,GameState.settlement_founded_at)
+	left=Ground._in_rect({},plots,routes,Rect2(0,0,.512,.512).grow(.032))
+	assert_array(left.plots).is_empty()
+	assert_array(left.plan._ground_paths).has_size(1)
