@@ -38,6 +38,22 @@ def check(root,complete=False):
             assert a['joints']==b['joints']
             assert np.array_equal(source.values(a['inverseBindMatrices']),bundle.values(b['inverseBindMatrices']))
             for index in a['joints']:assert source.doc['nodes'][index]==bundle.doc['nodes'][index]
+        if 'hide' in record['outfits']:
+            # The cape is optional at runtime. Its shoulder band must retain
+            # actual body skin when look.without omits hide_cape. Check an
+            # anatomical region by bind weights, independently of the shell
+            # builder's coverage formula; always-present wrap coverage stays.
+            attrs=new['primitives'][0]['attributes']
+            points=bundle.values(attrs['POSITION'])
+            joints=bundle.values(attrs['JOINTS_0'])
+            weights=bundle.values(attrs['WEIGHTS_0'])
+            colours=bundle.values(attrs['COLOR_0'])
+            names=[bundle.doc['nodes'][i]['name'] for i in bundle.doc['skins'][0]['joints']]
+            arms=[i for i,name in enumerate(names) if name.startswith('upper_arm.')]
+            shoulders=(np.sum(weights*np.isin(joints,arms),axis=1)>=.5)&(points[:,1]>record['cape_join_y'])
+            assert shoulders.sum()>20,(variant,'no shoulder coverage samples')
+            assert np.all(colours[shoulders,CHANNELS['hide']]==0),(variant,'optional cape erases bare shoulders')
+            assert np.count_nonzero(colours[:,CHANNELS['hide']])>100,(variant,'hide wrap lost body coverage')
         names=[n['name'] for n in bundle.doc['nodes'] if 'mesh' in n]
         expected=['LegacyBody']+[name for parts in record['parts'].values() for name in parts]
         assert sorted(names)==sorted(expected),(variant,names,expected)
