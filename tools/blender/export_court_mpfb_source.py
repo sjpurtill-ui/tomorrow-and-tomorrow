@@ -392,24 +392,30 @@ def validate(data):
 
 
 def copy_source_textures(output, services):
-    """Keep the native alpha mask: eyebrow001 is not an opaque solid brow."""
+    """Preserve native brow alpha and the enamel/gum color distinction."""
     user = Path(services["Location"].get_user_data())
-    relative = "eyebrows/eyebrow001/eyebrow001.png"
-    source = user / relative
-    material = source.with_suffix(".mhmat")
-    content = source.read_bytes()
-    destination = output / source.name
-    destination.write_bytes(content)
-    digest = hashlib.sha256(content).hexdigest()
-    assert hashlib.sha256(destination.read_bytes()).hexdigest() == digest
-    return {source.name: {
-        "sha256": digest, "source_path": relative, "license": "CC0-1.0",
-        "usage": "Native eyebrow001 diffuse/alpha; retain brow_triangle_uv and alpha-test edges",
-        "input_sha256": {
-            relative: digest,
-            str(material.relative_to(user)).replace("\\", "/"): hashlib.sha256(material.read_bytes()).hexdigest(),
-        },
-    }}
+    textures = {}
+    for relative, usage in (
+        ("eyebrows/eyebrow001/eyebrow001.png",
+         "Native eyebrow001 diffuse/alpha; retain brow_triangle_uv and alpha-test edges"),
+        ("teeth/teeth_base/teeth.png",
+         "Native teeth_base diffuse; retain teeth_triangle_uv seams to distinguish enamel and gums"),
+    ):
+        source = user / relative
+        material = source.with_suffix(".mhmat")
+        content = source.read_bytes()
+        destination = output / source.name
+        destination.write_bytes(content)
+        digest = hashlib.sha256(content).hexdigest()
+        assert hashlib.sha256(destination.read_bytes()).hexdigest() == digest
+        textures[source.name] = {
+            "sha256": digest, "source_path": relative, "license": "CC0-1.0", "usage": usage,
+            "input_sha256": {
+                relative: digest,
+                str(material.relative_to(user)).replace("\\", "/"): hashlib.sha256(material.read_bytes()).hexdigest(),
+            },
+        }
+    return textures
 
 
 def main():
@@ -437,7 +443,7 @@ def main():
     (args.output / "provenance.json").write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     (args.output / "LICENSE.md").write_text(
         "# Native MPFB court source assets\n\n"
-        "The NPZ geometry and deformation data, and the original eyebrow001.png texture, derive from MakeHuman/MPFB's "
+        "The NPZ geometry and deformation data, and the original eyebrow001.png and teeth.png textures, derive from MakeHuman/MPFB's "
         "CC0 graphical assets and the CC0 faceunits01/visemes02 targets. The generated asset data "
         "and any adaptation of it in this directory are provided under CC0 1.0 Universal.\n\n"
         "License: https://creativecommons.org/publicdomain/zero/1.0/\n\n"
