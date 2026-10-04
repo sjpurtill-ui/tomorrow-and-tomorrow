@@ -11,6 +11,7 @@ var reused:=0
 var retired:=0
 var last_slice_usec:=0
 var max_job_usec:=0
+var max_job_key:=""
 var last_jobs:=0
 const MAX_HIDDEN_PATCHES:=64
 var request_serial:=0
@@ -63,20 +64,21 @@ func process(budget_usec:int=4000,max_jobs:int=2)->void:
 		replacement.set_meta("patch_key",key)
 		var started:=Time.get_ticks_usec()
 		(record.build as Callable).call(replacement)
-		max_job_usec=maxi(max_job_usec,Time.get_ticks_usec()-started)
+		var build_usec:=Time.get_ticks_usec()-started
+		if build_usec>max_job_usec:max_job_usec=build_usec;max_job_key=key
 		parent.add_child(replacement)
 		if installed.has(key):
 			var old:Node3D=installed[key].node
 			if is_instance_valid(old):parent.remove_child(old);old.queue_free()
-		installed[key]={"node":replacement,"signature":record.signature,"seen":request_serial}
+		installed[key]={"node":replacement,"signature":record.signature,"seen":request_serial,"build_usec":build_usec,"parts":record.get("parts",{})}
 		builds+=1;last_jobs+=1
 	last_slice_usec=Time.get_ticks_usec()-began
 
 func stats()->Dictionary:
 	var keys:Dictionary={}
 	for key:String in installed:
-		keys[key]={"node_id":installed[key].node.get_instance_id(),"signature":installed[key].signature,"visible":installed[key].node.visible}
+		keys[key]={"node_id":installed[key].node.get_instance_id(),"signature":installed[key].signature,"visible":installed[key].node.visible,"build_usec":installed[key].build_usec,"parts":installed[key].parts}
 	var hidden:=0
 	for key:String in installed:
 		if not desired.has(key):hidden+=1
-	return {"pending":pending.size(),"installed":installed.size(),"cached":hidden,"cache_limit":MAX_HIDDEN_PATCHES,"builds":builds,"reused":reused,"retired":retired,"last_slice_usec":last_slice_usec,"max_job_usec":max_job_usec,"last_jobs":last_jobs,"keys":keys}
+	return {"pending":pending.size(),"installed":installed.size(),"cached":hidden,"cache_limit":MAX_HIDDEN_PATCHES,"builds":builds,"reused":reused,"retired":retired,"last_slice_usec":last_slice_usec,"max_job_usec":max_job_usec,"max_job_key":max_job_key,"last_jobs":last_jobs,"keys":keys}
