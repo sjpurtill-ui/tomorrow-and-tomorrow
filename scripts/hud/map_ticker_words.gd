@@ -46,7 +46,9 @@ static func journey(travel_active:bool,remaining_days:float,colony:Dictionary,ha
 	if placing:return ""
 	if not site_committed:
 		return "Right-click land to walk the travellers there. Left-click to look at the ground first."
-	if founded_day>=0 and today-float(founded_day)>30.0:return latest_telling()
+	# The Chronicle's news is told in the notice stack at the top right
+	# (hud/notification_stack.gd), not over the map: once the people are
+	# settled, the slip says nothing unless the player is choosing something.
 	return ""
 
 static func _leader_line(advice:Dictionary)->String:

@@ -65,7 +65,14 @@ func _ready()->void:
 	check(MilitaryCampaign._queued_trainees()==3,"three people enter actual training")
 	check(hud.detail_dock.visible and hud.detail_dock.sub==1,"same training tab remains open")
 	check("IN TRAINING" in texts(hud.detail_dock),"training rows appear without leaving tab")
-	var feedback:Control=hud.action_feedback
+	# The result is a notice in the one stack at the top right.
+	var stack:=preload("res://scripts/hud/notification_stack.gd").of(hud)
+	var feedback:Control=null
+	if stack:
+		for n:Dictionary in stack.rows:
+			if "All 3 soldiers" in String(n.get("title",""))+" "+String(n.get("text","")):feedback=stack._views.get(int(n.id))
+	check(feedback!=null,"training result told as a notice")
+	if feedback==null:get_tree().quit(1);return
 	print("FEEDBACK_RECT: ",feedback.get_global_rect()," CHILDREN ",feedback.get_children())
 	check("All 3 soldiers" in texts(feedback),"feedback contains action result")
 	check(get_window().get_visible_rect().encloses(feedback.get_global_rect()),"feedback stays inside viewport")

@@ -376,6 +376,8 @@ static func line_view(line:Dictionary,context:Dictionary={},extra:Dictionary={})
 		"progress":float(story.progress),"short":String(story.short),"efficiency":clampf(float(line.get("efficiency",.2)),0.0,1.0),
 		"hands":int(extra.get("hands",0)),"hands_exact":float(extra.get("hands_exact",extra.get("hands",0))),"hands_step":float(extra.get("hands_step",1.0)),"badge":extra.get("badge",{}),
 		"ordered":int(line.get("ordered",line.get("count",0))),"completed":int(line.get("completed",0)),"progress_text":String(story.progress_text)}
+	# The next item's share done (the target row's arc on the line card).
+	view.next=clampf(float(line.get("progress_days",0.0))/maxf(.001,float(line.get("work_per_item",1.0))),0.0,1.0)
 	var stock_row:Dictionary=extra.get("stock",{})
 	view.needed=int(stock_row.get("needed",0));view.deficit=int(stock_row.get("deficit",0))
 	# The bar: green running, amber short or slow, red stopped, grey resting.

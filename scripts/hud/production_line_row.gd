@@ -11,6 +11,7 @@ const T:=preload("res://scripts/hud/hud_tokens.gd")
 const W:=preload("res://scripts/hud/production_widgets.gd")
 const Icons:=preload("res://scripts/resource_icons.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
+const Pictures:=preload("res://scripts/hud/production_pictures.gd")
 ## Column widths, shared with the column heads above the list.
 const ART_WIDTH:=44.0
 const BAR_MIN_WIDTH:=140.0
@@ -45,6 +46,7 @@ var keep_up:W.IconButton
 var repeat_one:Button
 var repeat_always:Button
 var skill:W.SkillGraph
+var target_row:Pictures.TargetRow
 var _arm_close:=false
 ## The line's condition colour, drawn as a rule down its left edge.
 var _left_rule:=Color(0,0,0,0)
@@ -107,6 +109,9 @@ func build(owner_screen:Node,first:Dictionary)->void:
 		keep_up=W.IconButton.new("plus","",24);keep_up.name="KeepUp";keep.add_child(keep_up)
 		keep_up.pressed.connect(func():screen.act(int(view.id),"target",float(Plain.step_target(int(view.target),1))))
 	skill=W.SkillGraph.new();skill.name="Skill";skill.custom_minimum_size.x=SKILL_WIDTH;body.add_child(skill)
+	# The store against its target, one mark an item, the next one's arc.
+	var marks:=MarginContainer.new();marks.add_theme_constant_override("margin_left",int(ART_WIDTH)+COLUMN_GAP);marks.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_child(marks)
+	target_row=Pictures.TargetRow.new();target_row.name="TargetRow";marks.add_child(target_row)
 	apply(first)
 
 func apply(next:Dictionary)->void:
@@ -177,6 +182,11 @@ func apply(next:Dictionary)->void:
 		W.style_text_button(repeat_one,not always);W.style_text_button(repeat_always,always)
 		repeat_one.tooltip_text="Build one more, then rest.";repeat_always.tooltip_text="Keep building until you pause it."
 	skill.set_reading(float(view.efficiency),String(view.get("skill_tip","")))
+	var keep_count:=int(view.get("target",0)) if persistent else int(view.get("ordered",0))
+	var have:=int(view.stock) if persistent else int(view.get("completed",0))
+	target_row.visible=keep_count>0 and not bool(view.get("ship",false))
+	target_row.set_row(have,keep_count,float(view.get("next",0.0)) if not paused else 0.0,tone)
+	target_row.tooltip_text=("%d in store of %d to keep; the open marks are still to make, the arc is the next one." % [have,keep_count]) if persistent else ("%d of %d made." % [have,keep_count])
 	tooltip_text=""
 
 func _draw()->void:

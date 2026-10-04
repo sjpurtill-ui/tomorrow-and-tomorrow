@@ -166,14 +166,15 @@ static func _tell_chronicle(entry:Dictionary,told:Dictionary)->Dictionary:
 	if not Chronicle.active(): return {}
 	var kind:=String(entry.kind)
 	var text:=String(told.get("text",entry.text))
+	var title:=String(told.get("title",entry.title))
 	var key:=String(told.get("key","court:%s:%d:%s" % [kind,int(entry.day),(String(entry.title)+text).md5_text().left(10)]))
 	var focus:Dictionary=told.get("focus",{}) if told.get("focus") is Dictionary else {}
 	# The court's own ledger line stands in for the event ledger (rites have none).
-	var request:={"key":key,"day":int(entry.day),"title":String(entry.title),"text":text,
+	var request:={"key":key,"day":int(entry.day),"title":title,"text":text,
 		"tier":String(told.get("tier",CHRONICLE_TIERS.get(kind,"notice"))),"kind":String(CHRONICLE_KINDS.get(kind,"court")),
 		"action":{"kind":"court","focus":focus},"ledger":false,"domain":"institutions" if kind in ["death","succession","callback"] else "court"}
 	# How a routine line folds into its earlier card (chronicle.gd fold_as).
-	for field in ["fold_as","fold_days","fold"]:
+	for field in ["fold_as","fold_days","fold","category","alert"]:
 		if told.has(field): request[field]=told[field]
 	return Chronicle.record(request)
 
@@ -884,7 +885,16 @@ static func _file_callback(order:Dictionary,day:int)->void:
 	audience.situation={"type":"callback","ask":"callback:%s" % String(order.get("id","")).substr(0,40),"headline":"brings word of an old order","summary":summary.substr(0,400),"spoken":spoken.substr(0,400),
 		"occasion":{"type":"callback","text":"what came of %s" % since,"day":day,"crisis":false}}
 	Hall._file_matter(audience,[])
-	record("callback","An Old Order Remembered","%s has word for you of what came of it: %s" % [String(person.get("name","")),spoken],{"pid":int(person.person_id)},{"key":"court:callback:"+String(order.get("id","")).substr(0,40),"focus":{"person_id":int(person.person_id)}})
+	# The notice says which order, how long ago, what the ledger shows came of
+	# it and where to hear it (Notifications, codex/notifications): a bare "An
+	# old order remembered" told the player nothing.
+	var told_order:=String(order.get("text","")).strip_edges().trim_suffix(".")
+	var order_words:="“%s”" % (told_order.left(60)+("…" if told_order.length()>60 else "")) if told_order!="" else since
+	var ago:=maxi(0,day-int(order.get("day",day)))
+	var notice:="%s reports, %d days after your order: %s Summon them in the court to hear it." % [String(person.get("name","An official")),ago,change]
+	record("callback","An Old Order Remembered","%s has word for you of what came of it: %s" % [String(person.get("name","")),spoken],{"pid":int(person.person_id)},
+		{"key":"court:callback:"+String(order.get("id","")).substr(0,40),"focus":{"person_id":int(person.person_id)},
+		"title":"What came of your order %s" % order_words,"text":notice,"category":"court"})
 
 # --------------------------------------------------------------------------
 # Omens: when the sky happens to agree

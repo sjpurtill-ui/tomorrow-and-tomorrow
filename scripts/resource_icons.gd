@@ -1406,10 +1406,61 @@ static func workshop_texture(kind:String,ink:Color,px:int=24)->Texture2D:
 		"anchor": glyph=[_ring(28,10,4.2,2.4,ink),_s(28,14,28,46,3,ink),_s(19,20,37,20,2.6,ink),_s(12,33,17,41,3,ink),_s(17,41,28,47,3,ink),_s(28,47,39,41,3,ink),_s(39,41,44,33,3,ink),_t(8,29,15,34,9,37,ink),_t(48,29,41,34,47,37,ink)]
 		"mend": glyph=[_rr(28,14,17,6.5,2,ink),_rr(12,14,3,8,1.5,ink),_s(28,20,28,51,6,ink)]
 		"hands": glyph=[_c(20,20,5,ink),_rr(20,33,6,8,4,ink),_s(16,41,30,44,3.4,ink),_s(24,30,36,28,2.4,ink),_s(36,28,44,20,2.2,ink),_rr(45,19,4,2.6,1,ink),_rr(40,44,8,3,1,ink)]
-		_: glyph=[_c(28,28,8,ink)]
+		_: glyph=production_glyph(kind,ink)
 	var texture:=ImageTexture.create_from_image(_render_boxed(_with_halo(glyph,WORKSHOP_PAPER,1.2),px))
 	_workshop_textures[key]=texture
 	return texture
+
+
+## The Production screen's flow chart (hud/production_flow.gd): the makers'
+## benches by era and what comes out of them, inked on the 56 grid.
+##   benches   knapping (hammerstone striking a flake off a core), basket
+##             (a woven basket), kiln (a domed kiln with its fire mouth),
+##             anvil (an anvil with a hammer), loom (an upright loom)
+##   outputs   homes (a house with goods at its door), barter (a balance),
+##             watch (spear and shield), gear (crossed tools)
+## Unknown kinds draw a dot, never an error.
+static func production_glyph(kind:String,ink:Color)->Array:
+	var soft:=Color(ink,0.55)
+	match kind:
+		"knapping": return [
+			_poly([10,44,16,30,30,24,42,30,46,44],ink),
+			_t(30,24,24,31,35,30,Color(WORKSHOP_PAPER,1.0)),
+			_c(38,14,6.5,ink),_s(33,19,30,23,1.6,soft),
+			_t(46,22,52,18,50,27,soft),_t(20,22,15,17,17,25,soft)]
+		"basket": return [
+			_poly([10,24,46,24,41,46,15,46],ink),
+			_s(13,31,43,31,1.4,Color(WORKSHOP_PAPER,0.9)),_s(14,38,42,38,1.4,Color(WORKSHOP_PAPER,0.9)),
+			_s(21,25,20,45,1.2,Color(WORKSHOP_PAPER,0.7)),_s(28,25,28,45,1.2,Color(WORKSHOP_PAPER,0.7)),_s(35,25,36,45,1.2,Color(WORKSHOP_PAPER,0.7)),
+			_ring(28,24,13,2.4,ink)]
+		"kiln": return [
+			_c(28,30,16,ink),_rr(28,40,17,8,1,ink),
+			_c(28,38,6,Color(WORKSHOP_PAPER,1.0)),_rr(28,42,6,4,0,Color(WORKSHOP_PAPER,1.0)),
+			_t(28,33,24,44,32,44,Color("#b5552f")),
+			_rr(28,12,3,4,1,ink),_s(27,7,30,2,1.6,soft)]
+		"anvil": return [
+			_poly([8,22,44,22,48,26,38,30,16,30],ink),
+			_rr(27,35,6,5,1,ink),_rr(27,44,13,3.5,1,ink),
+			_s(36,6,46,16,3,ink),_rr(33,9,5,3,1,ink)]
+		"loom": return [
+			_s(12,8,12,48,3,ink),_s(44,8,44,48,3,ink),_s(10,10,46,10,3,ink),_s(10,40,46,40,2.4,ink),
+			_s(18,11,18,40,1.1,soft),_s(23,11,23,40,1.1,soft),_s(28,11,28,40,1.1,soft),_s(33,11,33,40,1.1,soft),_s(38,11,38,40,1.1,soft),
+			_rr(28,26,15,4,1,ink)]
+		"homes": return [
+			_t(28,8,8,26,48,26,ink),_rr(28,37,15,11,1,ink),
+			_rr(28,41,4,7,1,Color(WORKSHOP_PAPER,1.0)),_rr(40,13,3,6,0.5,ink)]
+		"barter": return [
+			_s(28,10,28,46,2.6,ink),_s(10,16,46,16,2.4,ink),_rr(28,47,10,2.4,1,ink),
+			_s(12,16,7,30,1.2,soft),_s(12,16,17,30,1.2,soft),_rr(12,31,7,2.6,2,ink),
+			_s(44,16,39,30,1.2,soft),_s(44,16,49,30,1.2,soft),_rr(44,31,7,2.6,2,ink),
+			_c(10,27,2.6,ink),_c(14,27,2.6,ink),_rr(44,26,4,3,1,ink)]
+		"watch": return [
+			_s(40,52,40,12,2.6,ink),_t(40,2,35,13,45,13,ink),
+			_rr(23,30,12,15,10,ink),_rr(23,30,8.5,11.5,7,Color(WORKSHOP_PAPER,0.9)),_c(23,30,3.4,ink)]
+		"gear": return [
+			_s(12,44,36,20,4,ink),_rr(39,16,6,4,1.5,ink),
+			_s(44,44,22,22,2.6,ink),_t(16,12,24,20,18,26,ink)]
+	return [_c(28,28,8,ink)]
 
 
 # -- Logistics: the Forces and Readiness & supply tabs -------------------------
