@@ -360,7 +360,7 @@ static func _paint_key(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dict
 	var works:Array[Dictionary]=[]
 	if not frame.has_area():works=_works_near(center)
 	var paint_frame:=frame
-	var fabric:=_fabric_key(plots)
+	var fabric:int
 	if plan.has("_ground_paths"):
 		# The source revision still tracks the full settlement. A home paint job
 		# only needs records that can leave ink, plus the actual framing and its
@@ -368,6 +368,8 @@ static func _paint_key(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dict
 		# frame must not repaint every inherited yard when it grows or repairs.
 		paint_frame=frame if frame.has_area() else _paint_rect(plan,plots,routes,works)
 		fabric=_paint_plot_key(plots,fallback)
+	else:
+		fabric=_fabric_key(plots)
 	return hash([center,paint_frame,fallback,fabric,_route_key(routes),_building_key(plan.get("buildings",[])),plan.get("_ground_paths",[]),plan.get("_ground_hearth",Vector2.ZERO),plan.get("_ground_has_hearth",false),works,bearings,shares])
 
 static func _paint_plot_key(plots:Array[Dictionary],fallback:bool)->int:
