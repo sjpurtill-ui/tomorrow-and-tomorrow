@@ -16,6 +16,7 @@ const DATA_PATH:="res://data/civic/civic_stages.json"
 ## The single mapping of 1200-1800 research ids onto stages, tracks and
 ## offices. Those ids activate once a built research block makes them known.
 const Y1200_PATH:="res://data/civic/y1200_triggers.json"
+const LATE_PATH:="res://data/civic/later_courts.json"
 const Voice:=preload("res://scripts/character_voice.gd")
 const DEFAULT_ID:="hearth_council"
 
@@ -34,12 +35,24 @@ static func data()->Dictionary:
 	if _data.is_empty():
 		var parsed:Variant=JSON.parse_string(FileAccess.get_file_as_string(DATA_PATH))
 		_data=parsed if parsed is Dictionary else {"stages":[]}
+		_merge_later()
 		_by_id.clear()
 		for stage_variant in _data.get("stages",[]):
 			var entry:Dictionary=stage_variant
 			_by_id[String(entry.get("id",""))]=entry
 		_merge_y1200()
 	return _data
+
+static func _merge_later()->void:
+	## Later councils extend presentation, titles and protocol through the same
+	## office owners. They confer no institutions or discoveries by themselves.
+	var parsed:Variant=JSON.parse_string(FileAccess.get_file_as_string(LATE_PATH))
+	if not parsed is Dictionary:return
+	(_data["stages"] as Array).append_array(parsed.get("stages",[]))
+	var tracks:Dictionary=_data.get("tracks",{})
+	for track in parsed.get("tracks",{}):
+		tracks[track]=(tracks.get(track,[]) as Array)+(parsed.tracks[track] as Array)
+	_data["tracks"]=tracks
 
 static func _merge_y1200()->void:
 	## Fold the 1200-1800 id mapping into the loaded stages: an alternative
