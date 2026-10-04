@@ -220,7 +220,7 @@ func test_an_older_save_with_no_new_fields_derives_its_court()->void:
 	var saved:Dictionary=payload.get("reflected_GovernmentPeopleSystem",{})
 	assert_dict(saved).is_not_empty()
 	for field in saved:
-		assert_array(["administration_records","people","next_person_id","last_processed_month","government_stage","revision","initializing"]).contains([String(field)])
+		assert_array(["administration_records","people","next_person_id","last_processed_month","government_stage","revision","initializing","_founding","_learners_kept"]).contains([String(field)])
 	# A fresh session: nothing cached, the court unknown until derived.
 	GameState.known_discoveries.clear()
 	Stages.reload()
