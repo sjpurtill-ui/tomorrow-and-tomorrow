@@ -2127,5 +2127,17 @@
     "mpfb_license": "https://github.com/makehumancommunity/mpfb2/blob/master/LICENSE.md",
     "system_assets": "https://static.makehumancommunity.org/assets/assetpacks/makehuman_system_assets.html",
     "visemes02": "https://static.makehumancommunity.org/assets/assetpacks/visemes02.html"
+  },
+  "textures": {
+    "eyebrow001.png": {
+      "input_sha256": {
+        "eyebrows/eyebrow001/eyebrow001.mhmat": "976e5f4f1d3922d7a11c6e2db233f8b4584b068d00619d5749687e81c92d61fc",
+        "eyebrows/eyebrow001/eyebrow001.png": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b"
+      },
+      "license": "CC0-1.0",
+      "sha256": "9940f7d0b1b223709a19b05156ba6f6e9e4dbdbced02d7574f4d51d72c58967b",
+      "source_path": "eyebrows/eyebrow001/eyebrow001.png",
+      "usage": "Native eyebrow001 diffuse/alpha; retain brow_triangle_uv and alpha-test edges"
+    }
   }
 }

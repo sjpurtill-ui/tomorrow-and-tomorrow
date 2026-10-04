@@ -1,6 +1,6 @@
 # Native MPFB court source assets
 
-The NPZ geometry and deformation data in this directory derive from MakeHuman/MPFB's CC0 graphical assets and the CC0 faceunits01/visemes02 targets. The generated asset data and any adaptation of it in this directory are provided under CC0 1.0 Universal.
+The NPZ geometry and deformation data, and the original eyebrow001.png texture, derive from MakeHuman/MPFB's CC0 graphical assets and the CC0 faceunits01/visemes02 targets. The generated asset data and any adaptation of it in this directory are provided under CC0 1.0 Universal.
 
 License: https://creativecommons.org/publicdomain/zero/1.0/
 
