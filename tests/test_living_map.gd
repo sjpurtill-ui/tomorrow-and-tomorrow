@@ -75,7 +75,8 @@ func test_layer_shows_the_workers_and_reports_them_against_labour()->void:
 	var report:Dictionary=layer.activity_report()
 	assert_int(int(report.workers)).is_equal(24)
 	assert_float(float(report.max_share_error)).is_less_equal(1.0/24.0+0.001)
-	assert_int(int(report.plumes)).is_equal(5)
+	# No recorded homes/chimneys in this fixture: only its camp hearth smokes.
+	assert_int(int(report.plumes)).is_equal(1)
 	# One draw call per batch; never more instances than the cap.
 	var workers:MultiMeshInstance3D=layer.get("worker_mm")
 	assert_int(workers.multimesh.instance_count).is_equal(Living.MAX_WORKERS)

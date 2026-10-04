@@ -25,6 +25,7 @@ extends Node3D
 ## costs a frame when the camera is too far away to see it.
 
 const NODE_NAME:="LivingMap"
+const Placement:=preload("res://scripts/settlement_life_placement.gd")
 const UNIT:=0.001                  ## one metre in map units (km)
 const FIGURE_SCALE:=1.6            ## people read at 200 m without looking like giants
 const MAX_WORKERS:=40
@@ -68,6 +69,10 @@ var flares:Array[Dictionary]=[]
 var spots:Dictionary={}                   ## activity -> Array[Vector2] (anchor-local km)
 var homes:Array[Vector2]=[]
 var chimneys:Array[Vector2]=[]
+var smoke_sources:Array[Vector3]=[]
+var navigation:=Placement.new()
+var hearth_active:=true
+var hearth_at:=Vector2.ZERO
 var burial:=Vector2.ZERO
 var labor_signature:=""
 var site_signature:=""
@@ -212,14 +217,21 @@ func set_season(day:float)->void:
 
 func _refresh_site()->void:
 	# Work sites follow the town as it grows, re-read at most twice a month.
-	var signature:="%s|%d|%d|%s" % [anchor,floori(GameState.elapsed_days/15.0),GameState.settlement_plots.size(),settled]
+	var geometry:Array=[]
+	for plot:Dictionary in GameState.settlement_plots:
+		geometry.append([plot.get("visual_building_sites",[]),plot.get("status",""),plot.get("form",""),plot.get("fabric_generation",0),plot.get("building_materials",{})])
+	var signature:="%s|%d|%d|%s" % [anchor,floori(GameState.elapsed_days/15.0),hash([geometry,GameState.settlement_routes,GameState.known_discoveries]),settled]
 	if signature==site_signature: return
 	site_signature=signature
-	homes.clear(); chimneys.clear(); spots.clear()
+	homes.clear(); chimneys.clear(); smoke_sources.clear();spots.clear()
+	navigation.configure(GameState.settlement_plots if settled else [],GameState.settlement_routes if settled else [])
+	hearth_active=not settled or GameState.settlement_plots.is_empty() or not navigation.hearths.is_empty()
+	hearth_at=navigation.hearths[0] if not navigation.hearths.is_empty() else Vector2.ZERO
 	var builds:Array[Vector2]=[]
 	var workshops:Array[Vector2]=[]
 	var stores:Array[Vector2]=[]
 	var fields:Array[Vector2]=[]
+	var offices:Array[Vector2]=[]
 	waters.clear()
 	if settled:
 		# Nearest plots first: a large city keeps its figures in the old heart.
@@ -233,10 +245,23 @@ func _refresh_site()->void:
 			var status:=String(plot.get("status","active"))
 			var use:=String(plot.get("land_use",""))
 			if status in ["ruin","reclaimed"]: continue
-			if status=="under_construction": builds.append(at); continue
-			var sites:Array=plot.get("visual_building_sites",[]) if plot.get("visual_building_sites") is Array else []
-			var door:=at
-			if not sites.is_empty() and sites[0] is Dictionary: door=_v2((sites[0] as Dictionary).get("position",at))
+			var door:=Vector2.INF
+			for entry:Dictionary in navigation.entries:
+				if int(entry.plot.get("id",-1))!=int(plot.get("id",-2)):continue
+				if not (entry.door as Vector2).is_finite():continue
+				if door==Vector2.INF:door=entry.door
+				if bool(entry.rendered) and status!="under_construction" and smoke_sources.size()<MAX_PLUMES:
+					for outlet in Placement.chimney_outlets(plot):
+						if smoke_sources.size()>=MAX_PLUMES:break
+						var world_outlet:Vector3=Basis(Vector3.UP,float(entry.angle))*outlet
+						world_outlet+=Vector3(entry.at.x,0,entry.at.y)
+						world_outlet.y+=_local_height(entry.at)+.0001
+						smoke_sources.append(world_outlet)
+			# Non-building work parcels retain their genuine outdoor centroid.
+			if door==Vector2.INF:
+				if not navigation.open_at(at):continue
+				door=at
+			if status=="under_construction":builds.append(door);continue
 			match use:
 				"residential_compound","mixed_household","temporary_encampment":
 					homes.append(door)
@@ -245,12 +270,15 @@ func _refresh_site()->void:
 				"storage": stores.append(door)
 				"field": fields.append(at)
 				"water": waters.append(at)
+				"civic","communal","sacred":offices.append(door)
 	if homes.is_empty():
 		# The camp: shelters in a loose ring around the fire.
 		for i in 7:
 			var a:=float(i)*TAU/7.0+0.4
-			homes.append(Vector2(cos(a),sin(a))*(0.014+0.004*float(i%3)))
-	for i in mini(MAX_PLUMES-1,homes.size()): chimneys.append(homes[i])
+			var fallback:=Vector2(cos(a),sin(a))*(0.014+0.004*float(i%3))
+			if navigation.open_at(fallback):homes.append(fallback)
+		if homes.is_empty():homes.append(hearth_at)
+	for source in smoke_sources:chimneys.append(Vector2(source.x,source.z))
 	var center:=Vector2(anchor.x,anchor.z)
 	var land_key:="%s" % anchor
 	if land_key!=land_signature:
@@ -267,7 +295,7 @@ func _refresh_site()->void:
 		land_spots["fish"]=_water_spots(center)
 		if (land_spots.fish as Array).is_empty(): land_spots["fish"]=land_spots.gather
 		burial=_burial_ground(center)
-		_place_hearth()
+	_place_hearth()
 	for key in land_spots: spots[key]=land_spots[key]
 	spots["farm"]=fields if not fields.is_empty() else land_spots.open
 	spots["build"]=builds if not builds.is_empty() else homes.slice(0,4)
@@ -275,9 +303,25 @@ func _refresh_site()->void:
 	spots["carry"]=stores if not stores.is_empty() else [Vector2(0.006,-0.004)]
 	spots["water"]=waters.duplicate()
 	var ring:Array[Vector2]=[]
-	for i in 6: ring.append(Vector2(cos(float(i)*TAU/6.0),sin(float(i)*TAU/6.0))*0.0045)
-	spots["fire"]=ring
-	spots["council"]=ring
+	for i in 6:
+		var spot:=hearth_at+Vector2(cos(float(i)*TAU/6.0),sin(float(i)*TAU/6.0))*0.0045
+		if navigation.open_at(spot):ring.append(spot)
+	spots["fire"]=ring if hearth_active else (offices if not offices.is_empty() else homes.slice(0,3))
+	spots["council"]=offices if not offices.is_empty() else spots["fire"]
+	for index in workers.size():
+		var worker:Dictionary=workers[index]
+		if worker.home not in homes:worker["home"]=homes[index%homes.size()]
+		if relocated:continue
+		var current_transform:=_worker_transform(worker,false)
+		var current:=Vector2(current_transform.origin.x,current_transform.origin.z)
+		if not navigation.open_at(current):
+			# A newly completed building can replace the ground a representative
+			# occupied. Retain the actor, but resume at its safe frontage.
+			worker["pos"]=worker.home;_start_leg(worker,3)
+		elif int(worker.stage) in [0,2]:
+			_set_path(worker,current,worker.to)
+			worker["t"]=0.0
+			worker["pose"]=POSES.talk if bool(worker.blocked) else POSES.walk
 	if relocated:
 		# New ground: everyone sets out again from a home here.
 		relocated=false
@@ -403,7 +447,11 @@ func _refresh_workers()->void:
 func _pick(act:String)->Vector2:
 	var list:Array=spots.get(act,[])
 	if list.is_empty(): return Vector2.ZERO
-	return _v2(list[rng.randi_range(0,list.size()-1)])+Vector2(rng.randf_range(-1,1),rng.randf_range(-1,1))*0.004
+	var base:=_v2(list[rng.randi_range(0,list.size()-1)])
+	for attempt in 4:
+		var candidate:=base+Vector2(rng.randf_range(-1,1),rng.randf_range(-1,1))*.0012
+		if navigation.open_at(candidate) and _walkable(candidate):return candidate
+	return base
 
 func _start_leg(worker:Dictionary,stage:int,duration:float=-1.0)->void:
 	## stage 0 walk out, 1 work, 2 walk home (often loaded), 3 rest at home.
@@ -412,6 +460,8 @@ func _start_leg(worker:Dictionary,stage:int,duration:float=-1.0)->void:
 	worker["stage"]=stage
 	worker["t"]=0.0
 	worker["carry"]=false
+	worker["blocked"]=false
+	worker.erase("path");worker.erase("path_heights")
 	match stage:
 		0:
 			var spot:=_pick(act)
@@ -420,7 +470,7 @@ func _start_leg(worker:Dictionary,stage:int,duration:float=-1.0)->void:
 			if act=="carry" and not (spots.get("water",[]) as Array).is_empty() and rng.randf()<0.5: spot=_pick("water")
 			worker["spot"]=spot
 			_set_path(worker,at,spot)
-			worker["pose"]=POSES.walk
+			worker["pose"]=POSES.talk if bool(worker.blocked) else POSES.walk
 		1:
 			worker["from"]=at; worker["to"]=at
 			worker["dur"]=duration if duration>=0.0 else rng.randf_range(5.0,11.0)
@@ -432,7 +482,7 @@ func _start_leg(worker:Dictionary,stage:int,duration:float=-1.0)->void:
 			if act=="carry": home=_pick("build") if rng.randf()<0.5 else worker.home
 			if act in ["watch","fire","council"]: home=_pick(act)
 			_set_path(worker,at,home)
-			worker["pose"]=POSES.walk
+			worker["pose"]=POSES.talk if bool(worker.blocked) else POSES.walk
 			worker["carry"]=act in ["gather","haul","hunt","fish","farm","carry","survey"]
 		_:
 			worker["from"]=at; worker["to"]=at
@@ -447,15 +497,35 @@ func _work_pose(act:String)->int:
 		"gather","farm": return POSES.gather
 		"haul","build": return POSES.chop
 		"fish": return POSES.fish
-		"fire": return POSES.fire
+		"fire": return POSES.fire if hearth_active else POSES.craft
 		"council","carry","survey","hunt": return POSES.talk
 		"watch": return POSES.watch
 		"craft": return POSES.craft
 	return POSES.talk
 
 func _set_path(worker:Dictionary,from:Vector2,to:Vector2)->void:
-	worker["from"]=from; worker["to"]=to
-	worker["dur"]=maxf(0.6,from.distance_to(to)/(WALK_MPS*UNIT*_pace()))
+	var path:=navigation.route(from,to,_walkable)
+	worker["blocked"]=path.size()<2
+	if path.size()<2:path=PackedVector2Array([from,from])
+	# Ground height is sampled at the same small lattice as the existing
+	# terrain cache, including long straight street legs across rises/dips.
+	var sampled:=PackedVector2Array([path[0]])
+	for i in range(1,path.size()):
+		var steps:=maxi(1,ceili(path[i-1].distance_to(path[i])/HEIGHT_CELL))
+		for step in range(1,steps+1):sampled.append(path[i-1].lerp(path[i],float(step)/steps))
+	path=sampled
+	worker["from"]=path[0]; worker["to"]=path[-1]
+	worker["path"]=path
+	var heights:=PackedFloat32Array();var lengths:=PackedFloat32Array([0.0]);var length:=0.0
+	for i in path.size():
+		heights.append(_local_height(path[i]))
+		if i>0:length+=path[i-1].distance_to(path[i]);lengths.append(length)
+	worker["path_heights"]=heights;worker["path_lengths"]=lengths
+	worker["dur"]=maxf(0.6,length/(WALK_MPS*UNIT*_pace()))
+	worker["h0"]=heights[0];worker["h1"]=heights[-1];worker["hm"]=_local_height(path[0].lerp(path[-1],.5))
+
+func _walkable(local:Vector2)->bool:
+	return not terrain.has_method("_settlement_stage_land_at") or bool(terrain.call("_settlement_stage_land_at",Vector2(anchor.x,anchor.z)+local))
 
 func _local_height(local:Vector2)->float:
 	## Ground height under a figure, relative to the anchor. The rendered-surface
@@ -509,6 +579,17 @@ func _worker_transform(worker:Dictionary,traveling:bool)->Transform3D:
 	var h0:=float(worker.h0); var h1:=float(worker.h1); var hm:=float(worker.hm)
 	var h:=h0*(1.0-k)*(1.0-2.0*k)+hm*4.0*k*(1.0-k)+h1*k*(2.0*k-1.0)
 	var facing:=(to-from)
+	if worker.has("path"):
+		var path:PackedVector2Array=worker.path
+		var lengths:PackedFloat32Array=worker.path_lengths
+		var heights:PackedFloat32Array=worker.path_heights
+		var distance:=k*lengths[-1]
+		for i in range(1,path.size()):
+			if distance>lengths[i] and i<path.size()-1:continue
+			var along:=clampf((distance-lengths[i-1])/maxf(.0000001,lengths[i]-lengths[i-1]),0.0,1.0)
+			at=path[i-1].lerp(path[i],along);h=lerpf(heights[i-1],heights[i],along)
+			facing=path[i]-path[i-1]
+			break
 	if facing.length()<0.0001:
 		facing=Vector2(-at.x,-at.y) if at.length()>0.001 else Vector2(0,1)
 		if int(worker.pose)==POSES.fish or int(worker.pose)==POSES.watch: facing=-facing
@@ -553,7 +634,7 @@ func _frame(delta:float)->void:
 		smoke_material().set_shader_parameter("legibility",legible)
 	var traveling:=not settled and bool(terrain.get("travel_active"))
 	# The camp fire burns whenever the people stop, and at the settled hearth.
-	hearth_root.visible=size<=SMOKE_MAX_VIEW and near and not traveling
+	hearth_root.visible=hearth_active and size<=SMOKE_MAX_VIEW and near and not traveling
 	smoke_mm.visible=smoke_mm.visible and not traveling
 	if not paused:
 		for worker in workers:
@@ -611,16 +692,19 @@ func _draw_children(delta:float)->void:
 			if rng.randf()<0.35:
 				child.dur=rng.randf_range(1.5,4.0);child["still"]=true
 			else:
-				child.to=home+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.002,0.009)
+				child.to=child.from
+				for attempt in 5:
+					var candidate:=home+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(0.002,0.009)
+					if navigation.clear_segment(child.from,candidate) and Placement._land_segment(child.from,candidate,_walkable):child.to=candidate;break
 				child.dur=maxf(0.4,Vector2(child.from).distance_to(child.to)/(WALK_MPS*1.35*UNIT*pace))
-				child["still"]=false
+				child["still"]=Vector2(child.from).is_equal_approx(child.to)
 			child["h"]=_local_height(child.to)
 		var k:=clampf(float(child.t)/maxf(0.001,float(child.dur)),0.0,1.0)
 		var at:Vector2=Vector2(child.from).lerp(child.to,k)
 		var facing:Vector2=Vector2(child.to)-Vector2(child.from)
 		if facing.length()<0.0001: facing=Vector2(0,1)
 		var basis:=Basis.looking_at(Vector3(facing.x,0,facing.y).normalized(),Vector3.UP).scaled(Vector3.ONE*UNIT*FIGURE_SCALE*CHILD_SCALE)
-		mm.set_instance_transform(i,Transform3D(basis,Vector3(at.x,float(child.get("h",_local_height(at))),at.y)))
+		mm.set_instance_transform(i,Transform3D(basis,Vector3(at.x,_local_height(at),at.y)))
 		var still:=bool(child.get("still",false))
 		mm.set_instance_custom_data(i,Color(float(child.phase),float(POSES.talk if still else POSES.walk),2.0,pace*1.4))
 
@@ -647,9 +731,9 @@ func _build_hearth()->void:
 
 func _place_hearth()->void:
 	if hearth_root==null: return
-	hearth_root.position=Vector3(0,_local_height(Vector2.ZERO)-0.00012,0)
+	hearth_root.position=Vector3(hearth_at.x,_local_height(hearth_at)-0.00012,hearth_at.y)
 	# Huts near the fire take its warm light (scripts/settlement_ink.gd).
-	preload("res://scripts/settlement_ink.gd").set_hearth(anchor+hearth_root.position+Vector3(0,1.2*UNIT,0),1.0 if settled else 0.6)
+	preload("res://scripts/settlement_ink.gd").set_hearth(anchor+hearth_root.position+Vector3(0,1.2*UNIT,0),(1.0 if settled else 0.6) if hearth_active else 0.0)
 
 func _emissive(color:Color,energy:float)->StandardMaterial3D:
 	var m:=StandardMaterial3D.new()
@@ -686,10 +770,11 @@ static func plume_count(population:int)->int:
 
 func _refresh_smoke()->void:
 	var plumes:=plume_count(GameState.population_total)
-	var sources:Array[Vector2]=[Vector2.ZERO]
-	for chimney in chimneys:
+	var sources:Array[Vector3]=[]
+	if hearth_active and plumes>0:sources.append(Vector3(hearth_at.x,_local_height(hearth_at)+.0012,hearth_at.y))
+	for source in smoke_sources:
 		if sources.size()>=plumes: break
-		sources.append(chimney)
+		sources.append(source)
 	var winter:=clampf(-PlanetEnvironment.season_wave({"position":Vector2(anchor.x,anchor.z)},GameState.elapsed_days),0.0,1.0)
 	var signature:="%s|%s|%d" % [anchor,sources,roundi(winter*8.0)]
 	last_report["plumes"]=sources.size()
@@ -699,11 +784,11 @@ func _refresh_smoke()->void:
 	var index:=0
 	for p in sources.size():
 		var base:=sources[p]
-		var h:=_local_height(base)+(0.0012 if p==0 else 0.0035)
+		var h:=base.y
 		for k in PUFFS_PER_PLUME:
-			mm.set_instance_transform(index,Transform3D(Basis.IDENTITY,Vector3(base.x,h,base.y)))
+			mm.set_instance_transform(index,Transform3D(Basis.IDENTITY,Vector3(base.x,h,base.z)))
 			# x: age offset, y: strength (home fires burn harder in winter), z: jitter
-			mm.set_instance_custom_data(index,Color(float(k)/float(PUFFS_PER_PLUME)+float(p)*0.137,(1.0 if p==0 else 0.55)+winter*0.35,rng.randf(),0))
+			mm.set_instance_custom_data(index,Color(float(k)/float(PUFFS_PER_PLUME)+float(p)*0.137,(1.0 if hearth_active and p==0 else 0.55)+winter*0.35,rng.randf(),0))
 			index+=1
 	mm.visible_instance_count=index
 
