@@ -124,6 +124,18 @@ func test_recorded_kit_and_fields_do_not_rebuild_for_another_calendar_year()->vo
 	assert_int(Keys.age({"created_day":0,"land_use":"field"},365*3000,false)).is_equal(0)
 	assert_int(Keys.age({"created_day":0,"land_use":"residential_compound"},365*3000,false)).is_equal(90)
 
+func test_ground_shader_preserves_valid_founding_paint_before_frontier_tiles()->void:
+	var source:=FileAccess.get_file_as_string("res://scripts/settlement_ground.gdshaderinc").replace("\r\n","\n")
+	var selection:=source.substr(source.find("int settlement_ground_slot("))
+	selection=selection.substr(0,selection.find("\n}\n")+3)
+	# Keep the 140 m founding texture ahead of overlapping 512 m frontier cells.
+	assert_str(selection).contains("int s = index == 0 ? 0 : (index < 5 ? index+3 : index-4);")
+	assert_str(selection).contains("if (sg_frames[s].y <= 0.0) { continue; }")
+	assert_str(selection).contains("m.x >= pad_m && m.y >= pad_m && m.x < size_m-pad_m && m.y < size_m-pad_m")
+	var shader:=Shader.new()
+	shader.code="shader_type spatial;\nuniform vec4 sg_frames[8];\nuniform vec4 sg_origins[8];\n"+selection+"\nvoid fragment() { vec2 local_m; int slot = settlement_ground_slot(vec2(0.0), vec2(0.0), local_m); ALBEDO = vec3(float(slot)); }"
+	assert_int(shader.get_shader_uniform_list().size()).is_equal(2)
+
 func field(id:int,x:float)->Dictionary:
 	return {"id":id,"seed":id,"centroid":Vector2(x,0),"polygon":PackedVector2Array([Vector2(x-.01,-.01),Vector2(x+.01,-.01),Vector2(x+.01,.01),Vector2(x-.01,.01)]),"area_ha":.04,"land_use":"field","status":"active","cultivation_phase":"growing","form":"worked_field","condition":.8,"created_day":0}
 

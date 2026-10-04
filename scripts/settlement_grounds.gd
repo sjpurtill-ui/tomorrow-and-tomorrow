@@ -60,6 +60,9 @@ static var _tile_inputs:Dictionary={}
 static var _tile_view:=Vector2i(2147483647,2147483647)
 static var _tile_revision:=0
 static var _home_revision:=0
+static var _home_paths:Array[Dictionary]=[]
+static var _home_hearth:=Vector2.ZERO
+static var _home_has_hearth:=false
 static var tile_builds:=0
 static var tile_cache_hits:=0
 static var _materials:Array[WeakRef]=[]
@@ -101,6 +104,7 @@ static func clear()->void:
 	texture=null;fields_texture=null;strength=0.0;signature=0;report={}
 	_requests.clear();_served_at=Vector2.INF
 	_home_args.clear();_tile_cache.clear();_tile_inputs.clear()
+	_home_paths.clear();_home_hearth=Vector2.ZERO;_home_has_hearth=false
 	_tile_view=Vector2i(2147483647,2147483647);_tile_revision=0;_home_revision=0
 	tile_builds=0;tile_cache_hits=0
 	for slot in SLOTS:
@@ -189,10 +193,42 @@ static func build_other(key:String,plan:Dictionary,plots:Array[Dictionary],route
 static func build(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3)->void:
 	slot_keys[0]="home"
 	_home_args=[plan,plots,routes,center]
-	_home_revision=hash([center,_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),_labour(),_works_near(center)])
+	var bearings:=_approach_bearings(Vector2(center.x,center.z))
+	_home_revision=hash([center,_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),_labour(),_works_near(center),bearings])
 	# Distant growth does not move or repaint the old centre's texture.
+	_home_paths.clear();_home_hearth=Vector2.ZERO;_home_has_hearth=false
+	for plot in plots:
+		if _alive(plot) and String(plot.get("form","")) in HEARTH_FORMS:
+			_home_hearth=_v2(plot.get("centroid",Vector2.ZERO));_home_has_hearth=true;break
 	var core:=_in_rect(plan,plots,routes,Rect2(Vector2.ONE*(-MAX_SIZE_KM*0.5),Vector2.ONE*MAX_SIZE_KM))
+	var core_frame:=_paint_rect(core.plan,core.plots,core.routes,_works_near(center))
+	_home_paths=_derive_home_paths(plots,routes,bearings,core_frame)
+	core=_in_rect(plan,plots,routes,Rect2(Vector2.ONE*(-MAX_SIZE_KM*0.5),Vector2.ONE*MAX_SIZE_KM))
 	_paint(0,core.plan,core.plots,core.routes,center)
+
+## Resolve connectivity once against the whole recorded settlement. Cropping
+## records first can send the same field towards different hearths/routes on
+## opposite sides of a texture seam, or omit the middle of a long footpath.
+static func _derive_home_paths(plots:Array[Dictionary],routes:Array[Dictionary],bearings:Array,core:Rect2)->Array[Dictionary]:
+	var points:=PackedVector2Array()
+	for route in routes:
+		if bool(route.get("active",true)):points.append_array(_points(route))
+	if _home_has_hearth:points.append(_home_hearth)
+	var paths:Array[Dictionary]=[]
+	for plot in plots:
+		if not _alive(plot):continue
+		var use:=String(plot.get("land_use",""))
+		var kind:="water" if use=="water" or String(plot.get("form",""))=="carried_water_point" else "field" if use=="field" else ""
+		if kind=="":continue
+		var target:=_polygon_near(plot,_home_hearth) if kind=="field" else _v2(plot.get("centroid",Vector2.ZERO))
+		var start:=_nearest_point(points,target)
+		if start.distance_to(target)<0.004 or start.distance_to(target)>0.4:continue
+		paths.append({"kind":kind,"points":_wander(start,target,int(plot.get("seed",7)))})
+	for index in bearings.size():
+		var direction:=Vector2.from_angle(float(bearings[index]))
+		var start:=_nearest_point(points,direction*0.05) if not points.is_empty() else Vector2.ZERO
+		paths.append({"kind":"approach","points":_wander(start,core.get_center()+direction*core.size.x*0.75,index*131+7)})
+	return paths
 
 ## Narrow a ground job to records whose paint can reach its fixed square.
 ## Whole route segments are retained so brush spacing agrees at tile seams.
@@ -214,7 +250,13 @@ static func _in_rect(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictio
 		if nearby.intersects(bounds,true):selected_routes.append(route)
 	for record in plan.get("buildings",[]):
 		if nearby.has_point(Vector2(record.get("position",Vector2.ZERO))):buildings.append(record)
-	return {"plan":{} if plan.is_empty() else {"buildings":buildings},"plots":selected_plots,"routes":selected_routes}
+	var paths:Array[Dictionary]=[]
+	for path in _home_paths:
+		var points:PackedVector2Array=path.points
+		var bounds:=Rect2(points[0],Vector2.ZERO)
+		for point in points:bounds=bounds.expand(point)
+		if nearby.intersects(bounds,true):paths.append(path)
+	return {"plan":{"buildings":buildings,"_ground_fallback":plan.is_empty(),"_ground_paths":paths,"_ground_hearth":_home_hearth,"_ground_has_hearth":_home_has_hearth},"plots":selected_plots,"routes":selected_routes}
 
 ## Installs at most one tile per settled frame. Four resident layers and twelve
 ## CPU image pairs bound memory independently of the city's total land area.
@@ -237,7 +279,7 @@ static func _serve_home_tile(target:Vector2)->bool:
 				var world_inner:=Rect2(inner.position+Vector2(center.x,center.z),inner.size)
 				if core.encloses(world_inner):continue
 				var args:=_in_rect(_home_args[0],plots,routes,rect)
-				if args.plots.is_empty() and args.routes.is_empty() and args.plan.get("buildings",[]).is_empty():continue
+				if args.plots.is_empty() and args.routes.is_empty() and args.plan.get("buildings",[]).is_empty() and args.plan.get("_ground_paths",[]).is_empty():continue
 				args["rect"]=rect;args["center"]=center
 				args["signature"]=_paint_key(args.plan,args.plots,args.routes,center,rect)
 				_tile_inputs["home_tile:%d:%d" % [coordinate.x,coordinate.y]]=args
@@ -279,7 +321,7 @@ static func set_approaches(value:Dictionary)->void:
 static func _paint_key(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,frame:=Rect2())->int:
 	var shares:=_labour()
 	for activity in shares:shares[activity]=snappedf(float(shares[activity]),0.1)
-	return hash([center,frame,_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),_works_near(center) if not frame.has_area() else [],_approach_bearings(Vector2(center.x,center.z)),shares])
+	return hash([center,frame,_fabric_key(plots),_route_key(routes),_building_key(plan.get("buildings",[])),plan.get("_ground_paths",[]),plan.get("_ground_hearth",Vector2.ZERO),plan.get("_ground_has_hearth",false),_works_near(center) if not frame.has_area() else [],_approach_bearings(Vector2(center.x,center.z)),shares])
 
 ## Road bearings leaving the town at `center` (world km).
 static func _approach_bearings(center:Vector2)->Array:
@@ -289,15 +331,8 @@ static func _approach_bearings(center:Vector2)->Array:
 		if Vector2(entry.center).distance_to(center)<0.4:out.append_array(entry.bearings)
 	return out
 
-static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,frame:=Rect2())->void:
+static func _paint_rect(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],works:Array[Dictionary])->Rect2:
 	var buildings:Array=plan.get("buildings",[])
-	var works:Array[Dictionary]=[]
-	if slot==0:works=_works_near(center)
-	var bearings:=_approach_bearings(Vector2(center.x,center.z))
-	var key:=_paint_key(plan,plots,routes,center,frame)
-	if key==slot_signatures[slot] and ground_layers!=null and slot_frames[slot].y>0.0:return
-	slot_signatures[slot]=key
-	var began:=Time.get_ticks_usec()
 	# The settled square: everything lived in, plus a margin. Far vacant
 	# fields do not stretch it.
 	var box:=Rect2(Vector2.ZERO,Vector2.ZERO)
@@ -323,6 +358,21 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	var side:=clampf(maxf(box.size.x,box.size.y),MIN_SIZE_KM,MAX_SIZE_KM)
 	var mid:=box.get_center()
 	var corner:=mid-Vector2(side,side)*0.5
+	return Rect2(corner,Vector2.ONE*side)
+
+static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,frame:=Rect2())->void:
+	var buildings:Array=plan.get("buildings",[])
+	var works:Array[Dictionary]=[]
+	if slot==0:works=_works_near(center)
+	var bearings:=_approach_bearings(Vector2(center.x,center.z))
+	var key:=_paint_key(plan,plots,routes,center,frame)
+	if key==slot_signatures[slot] and ground_layers!=null and slot_frames[slot].y>0.0:return
+	slot_signatures[slot]=key
+	var began:=Time.get_ticks_usec()
+	var base_frame:=_paint_rect(plan,plots,routes,works)
+	var side:=base_frame.size.x
+	var mid:=base_frame.get_center()
+	var corner:=base_frame.position
 	if frame.has_area():side=frame.size.x;corner=frame.position
 	if frame.has_area() and _tile_cache.has(key):
 		var cached:Dictionary=_tile_cache[key]
@@ -347,7 +397,7 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	for plot in plots:
 		if String(plot.get("form","")) in HEARTH_FORMS and _alive(plot):
 			_disc(painter,_v2(plot.get("centroid",Vector2.ZERO)),0.024,0.42,Color(0,1,0))
-		elif plan.is_empty() and String(plot.get("land_use","")) in ["residential_compound","mixed_household"] and _alive(plot):
+		elif (plan.is_empty() or bool(plan.get("_ground_fallback",false))) and String(plot.get("land_use","")) in ["residential_compound","mixed_household"] and _alive(plot):
 			_disc(painter,_v2(plot.get("centroid",Vector2.ZERO)),_plot_radius(plot)*1.4,0.26,Color(0,1,0))
 	for route in routes:
 		if not bool(route.get("active",true)):continue
@@ -387,6 +437,8 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 		# Made streets (surface tier 2 and up) are full width and hard-worn.
 		var made:=int(route.get("surface_tier",0))>=2
 		_line(painter,_points(route),width_m*(0.50 if made else 0.36)*0.001+0.00014,1.0 if made else 0.55+0.40*traffic,Color(1,0,0))
+	if plan.has("_ground_hearth"):
+		hearth=plan._ground_hearth;hearth_found=bool(plan._ground_has_hearth)
 	# Each home's door yard, the ring its eaves drip on, and its own path
 	# to the route it fronts.
 	var fronts:Dictionary={}
@@ -415,28 +467,39 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	for route in routes:
 		if bool(route.get("active",true)):all_points.append_array(_points(route))
 	if hearth_found:all_points.append(hearth)
-	for plot in plots:
-		if not _alive(plot):continue
-		var use:=String(plot.get("land_use",""))
-		var form:=String(plot.get("form",""))
-		var target:=_v2(plot.get("centroid",Vector2.ZERO))
-		var wear:=0.0
-		if form=="carried_water_point" or use=="water":wear=0.62+0.25*clampf(float(shares.get("carry",0.0)),0.0,1.0)
-		elif use=="field":wear=0.45+0.40*clampf(float(shares.get("farm",0.0)),0.0,1.0)
-		else:continue
-		if use=="field":target=_polygon_near(plot,hearth if hearth_found else Vector2.ZERO)
-		var start:=_nearest_point(all_points,target)
-		if start.distance_to(target)<0.004 or start.distance_to(target)>0.4:continue
-		_line(painter,_wander(start,target,int(plot.get("seed",7))),0.0009,wear,Color(1,0,0))
-	# The roads to other places: a worn approach from the lived ground out
-	# to the edge of the painted square, where the road's ink takes over.
-	for index in bearings.size():
-		var out_dir:=Vector2.from_angle(float(bearings[index]))
-		var start:=_nearest_point(all_points,out_dir*0.05) if not all_points.is_empty() else Vector2.ZERO
-		var finish:=mid+out_dir*side*0.75
-		var track:=_wander(start,finish,index*131+7)
-		_line(painter,track,0.0012,0.78,Color(1,0,0))
-		_line(painter,track,0.0030,0.22,Color(0,1,0))
+	if plan.has("_ground_paths"):
+		for path:Dictionary in plan._ground_paths:
+			var kind:=String(path.kind)
+			var track:PackedVector2Array=path.points
+			if kind=="approach":
+				_line(painter,track,0.0012,0.78,Color(1,0,0))
+				_line(painter,track,0.0030,0.22,Color(0,1,0))
+			else:
+				var wear:=0.62+0.25*clampf(float(shares.get("carry",0.0)),0.0,1.0) if kind=="water" else 0.45+0.40*clampf(float(shares.get("farm",0.0)),0.0,1.0)
+				_line(painter,track,0.0009,wear,Color(1,0,0))
+	else:
+		for plot in plots:
+			if not _alive(plot):continue
+			var use:=String(plot.get("land_use",""))
+			var form:=String(plot.get("form",""))
+			var target:=_v2(plot.get("centroid",Vector2.ZERO))
+			var wear:=0.0
+			if form=="carried_water_point" or use=="water":wear=0.62+0.25*clampf(float(shares.get("carry",0.0)),0.0,1.0)
+			elif use=="field":wear=0.45+0.40*clampf(float(shares.get("farm",0.0)),0.0,1.0)
+			else:continue
+			if use=="field":target=_polygon_near(plot,hearth if hearth_found else Vector2.ZERO)
+			var start:=_nearest_point(all_points,target)
+			if start.distance_to(target)<0.004 or start.distance_to(target)>0.4:continue
+			_line(painter,_wander(start,target,int(plot.get("seed",7))),0.0009,wear,Color(1,0,0))
+		# The roads to other places: a worn approach from the lived ground out
+		# to the edge of the painted square, where the road's ink takes over.
+		for index in bearings.size():
+			var out_dir:=Vector2.from_angle(float(bearings[index]))
+			var start:=_nearest_point(all_points,out_dir*0.05) if not all_points.is_empty() else Vector2.ZERO
+			var finish:=mid+out_dir*side*0.75
+			var track:=_wander(start,finish,index*131+7)
+			_line(painter,track,0.0012,0.78,Color(1,0,0))
+			_line(painter,track,0.0030,0.22,Color(0,1,0))
 	for work in works:
 		var at:Vector2=work.at
 		var building:=String(work.state)=="building"
