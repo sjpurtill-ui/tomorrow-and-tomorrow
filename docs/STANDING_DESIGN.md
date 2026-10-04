@@ -286,8 +286,9 @@ Played world at year 75 (the player's save, before and after): Might 27 -> 33,
 Endurance 98 -> 78, Wealth 84 -> 76, Reach 54 -> 63, Persuasion 25 -> 44,
 Splendor 41 -> 44, Genius 100 -> 68, Cunning 73 -> 58, Order 91 -> 70. The
 twelve computer peoples read 40-75 on most strengths, but 89-100 on Might:
-they keep 6-10% of all their people under arms at readiness 0.91-0.97, at
-the historical maximum (11-16% of the able).
+they kept 6-10% of all their people under arms at readiness 0.91-0.97, at
+the historical maximum (11-16% of the able). The cause was their rulers'
+hold on the watch, not the leaders' split; section 11 has the fix.
 
 ### Other peoples, as we know them
 
@@ -314,8 +315,9 @@ Genius names the most learned people we know with their real
 | Raids between other peoples seen by the defenders (rival_feuds) | the same | the same |
 | An arming people heard of at once (world_answer); else only in its last month | 50 in 100 | 90 in 100 |
 | An envoy's bluff shows its tells / a real threat its signs / a misleading tell (rival_rulers `_bluff`) | 85 / 70 / 15 in 100 (as before) | 98 / 95 / 2 |
-| Our covert operations' odds, and of being caught (covert_ops odds) | +0 | +10 / -10 points |
-| Their spies caught (covert_ops `_catch_chance`) | +0 | +15 points |
+| Our agents' odds of success, and of being caught or traced, among a people of typical cunning (covert_ops odds) | +0 | +10 / -15 points |
+| Spies of a people of typical cunning caught among us (covert_ops `_catch_chance`) | +0 | +15 points |
+| Cunning against cunning: every agent, ours among them and theirs among us, a double sent back, a turned agent found out (covert_ops, captured_agents) | each 10 points of the sender's cunning over the keeper's: +2 points of success, -3 of being caught; the keeper's over the sender's the reverse | |
 | A scout's or spy's look at a town (city_intelligence capture): quality, error band | +0, x1 | +0.1, x0.85 |
 
 | Persuasion | Typical (0.5) | Best (1.0) |
@@ -345,10 +347,11 @@ splendour filled. Envy weighs our plenty (x0.6) and how far it passes theirs
 0.40. With twelve neighbours met and few under arms, a people as rich as the
 player's at year 75 (Wealth 76%: 248 days of food) draws about one envy raid
 in 3.2 years (4.4 years guarded as a typical people); a typical people none;
-the richest the age has seen (Wealth 90%) about 1.4 a year, guarded or not,
-because the computer peoples' own Might is so high that a typical guard
-awes nobody (a follow-up). Might past 50% menaces newcomers (5.6 points a
-month at 85%) and, at a tense border, the neighbours' allure.
+the richest the age has seen (Wealth 90%) about 1.4 a year, guarded or not.
+With the computer rulers' watch at the age's band (section 11) the same
+cases read 4.0 years, 5.3 years guarded, and 1.3 a year for the richest.
+Might past 50% menaces newcomers (5.6 points a month at 85%) and, at a tense
+border, the neighbours' allure.
 
 Every people reads its month every 30 days of its own calendar
 (`Standing.reading_due`): calm computer peoples step several days at once.
@@ -368,3 +371,203 @@ Endurance past 70 needs 100 days and more in store. In the raid world the
 same raids met with cunning lose 35% fewer stores (at 3% fewer people by
 600, the hands on scouting), and persuasion draws 17% fewer raids (at the
 gifts' cost).
+
+## 11. Follow-ups: covert parity, the monthly reading's cost, the rulers' watch (2026-10-03)
+
+### Cunning against cunning (standing.gd covert_edge, catch_edge)
+
+Before, our agents' odds read only our cunning, and our catch of their spies
+read only ours: the target's cunning and the sender's counted for nothing,
+though the Standing page said "the same for every people". Now every agent's
+odds weigh the sender's cunning against the keeper's (the people it works
+among), by one rule whichever side is the god's. Each point of the sender's
+cunning over the keeper's adds `COVERT_EDGE` (0.2) to the odds of success and
+takes `CATCH_EDGE` (0.3) from the odds of being caught or traced; the
+keeper's over the sender's does the reverse. Two peoples of equal cunning
+leave the odds as they were. The rule reaches:
+
+- our operations' success, caught and traced odds (covert_ops `odds`);
+- our watch's catch of their spies and assassins (`_catch_chance(sender)`);
+- a double agent found out among their own (captured_agents `double_odds`);
+- one of ours turned while held and found out at home (the season's roll).
+
+| Our cunning | Theirs | Our agents' success | Ours caught | Their spies caught |
+|---|---|---|---|---|
+| 0.5 | 0.5 | +0 | +0 | +0 |
+| 0.9 | 0.5 | +8 | -12 | +12 |
+| 0.5 | 0.9 | -8 | +12 | -12 |
+| 0.3 | 0.8 | -10 | +15 | -15 |
+
+Before, a cunning target cost our agents nothing, and a cunning sender
+slipped its spies past us as easily as a dull one. Our agents' odds of being
+caught moved only 10 points at best, where our catch of theirs moved 15; now
+both move 15 at the extremes. Covert operations run only between the god's
+people and the others (covert_ops.daily runs in the god's scope), so there is
+no computer-against-computer covert roll to bring level.
+
+The odds are stated:
+
+- Each people's card has a spies line ("Spies between us: our agents' odds
+  -2 points and caught +3 among them; their spies caught -3 among us"), with
+  our cunning and theirs, as our watchers reckon it, in its tooltip.
+- The arts card states the rule against a people of typical cunning, and
+  names the most cunning people we know with its numbers.
+- The court's fact sheet carries the spies line.
+- The official who sends an agent says, by our reckoning, when their
+  watchers are sharper than ours (or ours sharper).
+
+The roll itself reads their true cunning (their own month).
+
+captured_agents, checked for the same gap:
+
+- The turn odds (care and teaching) read no art on either side, and are the
+  same rule for both holders.
+- The escape odds still read our chief scout's hand (OfficeLevers
+  intrigue_edge) when they are held here, and nothing for theirs when ours
+  are held there. That is the officials' lever, not cunning, and is left as
+  it was.
+
+### The monthly reading of another people (standing.gd values, record_monthly)
+
+Every computer people reads its nine strengths once a month in its own
+scope. Nobody reads their reasons, so their month is now values only:
+
+- `Standing.values()` gives every value as `strengths()` does, without the
+  reason text, the most learned rival's estimate, or the danger count (which
+  is 0 for any people but the god's).
+- It reads its officials as its own day last settled them, instead of
+  reconciling its roll of officials again. A reading must not change the
+  ledger it reads; the government's own day reconciles the roll.
+- Another people's stale month reckoned from our side (`their_true`) reads
+  the same way.
+
+Measured on the player's save (year 94, twelve computer peoples, one engine,
+the same save copy before and after):
+
+| | Before | After |
+|---|---|---|
+| A computer people's monthly reading, warm (mean of 12) | 2.54 ms | 1.22 ms |
+| The same, first reading after loading (mean of 12) | 4.1 ms | 2.3 ms |
+| The god's own monthly reading | 8.7 ms | 8.4 ms (unchanged) |
+| The Standing page, built from nothing | 41-45 ms | 40-42 ms (unchanged) |
+
+Of the 2.5 ms before:
+
+- reconciling the officials took about 1.0 ms;
+- the nine strengths took about 1.3 ms, a quarter of it their reasons and
+  the rival's estimate;
+- the rest took about 0.2 ms.
+
+All 13 stored values of each of the twelve peoples (nine strengths, awe,
+allure, pride, dangers) came out the same to 14 digits. The god's Standing
+page data came out byte for byte the same.
+
+### The computer rulers' watch (civilization_strategy.gd watch_share)
+
+Why they kept 6-10 in 100 under arms:
+
+- A computer ruler holds its watch at its temper's share of the whole people
+  whenever the leaders' split keeps fewer (civilization_controller.gd
+  `interim_watch`).
+- That share was .025 + .055 assertiveness + .035 discipline + .02 risk
+  - .02 empathy: 7 in 100 for an even temper at peace, 13.5 for the hardest,
+  and 8 more at war.
+- In the played world at year 94, eleven of twelve peoples sat at that hold,
+  at peace. Their leaders' own split would have kept 2.6-9.6 in 100.
+- Neither the levy law (army_levy_law.gd, which only names the share) nor
+  the war loop's raiding bands (3-7 in 100, war_loop MOBILIZE_MIN/MAX) set
+  it.
+
+Pre-modern peoples kept a few in 100 under arms in peace and 3-7 in war, so
+7 in 100 at peace is the age's most, not its peace. The hold now reads the
+age's band (standing_scale.gd DEFENSE_SHARE, the yardstick Might is read
+against):
+
+- an even temper keeps the age's typical share of the able (4 in 100 before
+  year 100, about 2.4 of the whole people);
+- the hardest temper keeps twice it (the age's high), the gentlest half (its
+  low);
+- at war, or arming against the god's people, a ruler keeps twice that,
+  never past the age's most.
+
+The hold stays a floor. The leaders' split keeps more when it asks more, by
+the same rules as the god's leaders (the path, the people's ambitions, the
+neighbours' pressure).
+
+The played world at year 94 (twelve peoples, the save as it stands, each at
+the larger of the new hold and its leaders' split):
+
+| | Before | After |
+|---|---|---|
+| Under arms, of the whole people | 4.2-9.4 in 100 (median 7.0) | 2.7-9.6 (median 4.4) |
+| Might | 74-100 (median 93) | 56-100 (median 77) |
+
+Six peoples fall to 56-71 (growth and building paths). The rest keep more
+through their leaders' split, not the hold:
+
+- two on the war path: 9.1 and 9.6 in 100, Might 100;
+- one at a hot border (tension 0.99): 7.3 in 100, Might 93;
+- three balanced peoples whose ambitions ask for the watch (purity: +8 weight
+  on it), at a border tension of about 0.2: 5.0-6.3 in 100, Might 82-89.
+
+Two things in the shared split lift every people's watch. They are left for
+the user to decide:
+
+- Border tension counts as a threat even between friends. Every people with
+  a neighbour reads 0.21-0.24 at opinions of +0.1 to +0.6, which adds two
+  points of weight to the watch.
+- The hands food no longer needs go to every work in proportion, the watch
+  included. Learning did the same before work_paths.gd LEARNING_CAP.
+
+Envy raids on the god's people (section 10's cases, twelve peoples met, in
+memory):
+
+| Our people | Before | After |
+|---|---|---|
+| As rich as the old year-75 save | one in 3.2 years | one in 4.0 years |
+| The same, guarded as a typical people | one in 4.5 years | one in 5.3 years |
+| The richest the age has seen | 1.36 a year | 1.26 a year |
+| The same, guarded | 1.21 a year | 1.10 a year |
+
+Awe rises a little (0.12 to 0.14), and contempt falls (0.14 to 0.12).
+
+- Raiding bands come out of the home watch, at most four fifths of it
+  (war_loop `_their_raiders`). A people of 300 keeping 8 instead of 21 sends
+  about 6 raiders instead of 12.
+- Feuds between computer peoples size their bands by population, not by the
+  watch, so their raids are no fewer. Only a hungry people's war hazard
+  (+1 each, war_loop `rival_war_hazard`) falls, as fewer go hungry.
+- A computer people weighing war on the god's people sees itself weaker
+  (standing.gd `war_deterrence`). On this save it rates the god's people so
+  far below itself that nothing moves (-0.10 before and after).
+
+Fast sim (`python tools/sim/watch_check.py`): the five archetypal tempers as
+computer rulers, 2 seeds x 600 years, with the leaders' split alone, the old
+hold and the age's hold. The surrogate has no war and no neighbours'
+pressure.
+
+| Good site, year 300 | Under arms (old -> age) | Might | People | Days of food |
+|---|---|---|---|---|
+| balanced | 7.0 -> 3.0 in 100 | 88 -> 53 | 3,556 -> 3,954 | 16 -> 26 |
+| cautious-caring | 4.0 -> 2.3 | 65 -> 43 | 4,629 -> 4,607 | 48 -> 63 |
+| open-scholarly | 5.7 -> 2.6 | 80 -> 47 | 3,400 -> 3,568 | 20 -> 26 |
+| bold-expansionist | 8.4 -> 5.9 | 95 -> 80 | 3,423 -> 3,922 | 18 -> 27 |
+| disciplined-warlike | 10.9 -> 6.5 | 100 -> 83 | 3,242 -> 3,981 | 20 -> 25 |
+
+On poor land the old hold starved them. By year 600 the disciplined-warlike
+people had died out (hunger 23 in 1,000 a year), and the balanced one held 97
+people. With the age's hold they hold 292 and 269 (hunger 8.5 and 8.6; with
+the split alone, 448 and 448). The bold and warlike keep 6-7 in 100 through
+their own path either way, at Might 80-91.
+
+Their raids, in the raid world of standing_check.py, with the neighbours
+keeping an even-tempered ruler's watch at the engine's readiness (0.92), 600
+years, 4 seeds:
+
+| Neighbours | Under arms | Raids | Repelled | Dead a year in 1,000 | Rations taken |
+|---|---|---|---|---|---|
+| Old hold | 7.0 in 100 | 220 | 0 | 1.70 | 12.2M |
+| Age's hold | 2.7 in 100 | 201 (-9%) | 60 | 1.04 | 6.7M (-45%) |
+
+There are 9% fewer raids because the raided people's might now awes the
+neighbours a little.
