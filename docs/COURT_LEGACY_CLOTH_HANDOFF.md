@@ -1,7 +1,8 @@
 # Additive legacy cloth repair
 
-Status: **HELD all-seven motion checkpoint**, pending complete motion, hand-fit
-and selected execution-pose acceptance. It is not delivered to the player.
+Status: **Asset repair ready for combined validation**; overall court release
+remains HELD for the separate all-seven ordinary-pose hand fit and integration.
+It is not delivered to the player.
 Branch `codex/court-legacy-cloth`, base `1c09a4e6`, worktree
 `C:/Users/sjpur/.codex/worktrees/court-chapter-assets/TomorrowandTomorrow`.
 
@@ -54,11 +55,34 @@ Current evidence:
   robe body/trim and all LegacyBody attributes remain exact for the two original
   calibration bodies. Source figures, modern wardrobe and animation libraries
   have no diff from base.
+- All-seven family/protected-pose sweep: `reports/legacy_all_v12_adult/` and
+  `reports/legacy_all_v12_young/`, 228 views each (PIDs59968/11816, exit0,
+  zero engine/script errors). Includes standing, kneel/cross-sit transitions,
+  both-knee `kneel_bound` through2.4s, club/block victim clips, three dog clips
+  and fire's `struggle_bundle`. Execution victim samples use adult bodies only.
+  These are sampled garment reviews without props/gore or full scene staging.
+  Reviewed protected poses preserve continuous sleeves, waist and leg coverage.
+- Material-ID diagnostic confirmed the small old-male upper-back oval is gold
+  neckline trim, not skin; an independent projected-mesh trace confirmed the
+  same triangle. No tunic change was made for it.
+- The sweep found an old-female hide underarm opening during club victim5.6s.
+  The follow-up includes the torso-side upper-armpit triangles that the original
+  arm-influence cutoff excluded. Body coverage and every other mesh primitive
+  remain exact against63140339 for all seven bodies. Raw complete invariants
+  pass7/7. Logs: `artifacts/legacy-hide-seam-v13-{raw,invariants}.log`.
+- Hide follow-up: `reports/legacy_hide_seam_v13_{adult,young}/`, 24 private views
+  total, PIDs15980/24264 exit0 without errors; standing, kneel, cross-sit,
+  bound-kneel and protected club/block poses. Independent peer review confirms
+  the specific underarm gap is closed without visible silhouette inflation.
 
-Outstanding acceptance: all-seven transition and walking matrices, bound-kneel
-and selected victim poses, and the separate runtime arm-fitting profile. Source
+Outstanding combined acceptance: the separate all-seven runtime arm-fitting
+profile and its ordinary-pose transition matrix. Independent walking diagnostics
+reported0 hand crossings in1,344 replacement-legacy samples; the hide seam
+follow-up leaves that lower hand-contact geometry exact. Source
 bare poses already cross hands through thighs; narrowing the garments cannot
 solve that. The runtime worker owns the bounded cached fit and its acceptance.
-Asset-only captures still show those known contacts. Raw strain/coverage counts
-are diagnostics, not a visual pass. Angular lower robe folds remain a stylized
-mesh limitation. Generated imports, diagnostic files and captures stay local.
+Asset-only captures still show those known unfitted contacts. Raw strain/coverage
+counts are diagnostics, not a visual pass. Angular lower robe folds and short
+gold cape-attachment tabs remain stylized mesh limitations. Full staged execution
+and continuous playback acceptance belong to the combined build. Generated
+imports, diagnostic files and captures stay local.
