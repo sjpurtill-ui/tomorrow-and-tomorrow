@@ -177,6 +177,8 @@ var _event_end:=0.0
 var _focus_key:=""
 ## The shot the stage last asked for ("wide", "push_in", "two_shot", ...).
 var _shot_name:="wide"
+var _staging_epoch:=0
+var _dramatic_shot:=false
 var _beat_sets:Array=[]
 var _pending_greetings:Dictionary={}
 var _attention_epoch:=0
@@ -1049,6 +1051,12 @@ static func mood_of(regard:Dictionary,envoy_mood:=0.0)->String:
 ## beats on top.
 func event(kind:String,data:Dictionary={})->void:
 	if kind=="execution" and not Executions.is_staged(String(data.get("method","club"))):return
+	# Only camera callbacks expire. The adjudicated physical response runs on.
+	if kind in ["god","divine","terrify_envoy","execution","line","command","order","close","exit"]:
+		_staging_epoch+=1
+		if _dramatic_shot:
+			_dramatic_shot=false;_shot_until=0.0;_shot_weight=0
+			if kind in ["line","exit"] and not executing():_frame_all(0.65)
 	_event_index+=1
 	_last_beats=[]
 	if _sound!=null and is_instance_valid(_sound):_sound.call("on_event",kind,data)
@@ -1094,6 +1102,19 @@ func event(kind:String,data:Dictionary={})->void:
 	for beat in all:
 		if beat is Dictionary:span=maxf(span,float((beat as Dictionary).get("t",0.0))+float(((beat as Dictionary).get("args",{}) as Dictionary).get("dur",0.8)))
 	_event_end=_now()+span
+	var dramatic_subject:=""
+	for beat:Dictionary in all:
+		var shot_args:Dictionary=beat.get("args",{})
+		if String(beat.get("act",""))=="shot" and bool(shot_args.get("dramatic",false)) and String(shot_args.get("name",""))=="push_in":dramatic_subject=String(shot_args.get("target",""))
+	for beat:Dictionary in all:
+		if String(beat.get("act",""))!="shot":continue
+		var shot_args:Dictionary=(beat.get("args",{}) as Dictionary).duplicate()
+		shot_args["weight"]=_event_weight;shot_args["until"]=_event_end
+		# Comic cutaways from the same presence are cosmetic too; none may
+		# turn up late after a new speaker has taken the room.
+		if kind in ["god","divine","terrify_envoy"]:shot_args["staging_epoch"]=_staging_epoch
+		if bool(shot_args.get("dramatic",false)):shot_args["subject"]=dramatic_subject
+		beat["args"]=shot_args
 	if not all.is_empty():run_beats(all)
 
 ## How long until everyone the beats name has finished walking in (0: all here).
@@ -1218,15 +1239,17 @@ func _set_answers(kind:String,data:Dictionary)->void:
 		"divine":
 			var action:=String(data.get("action",""))
 			var target:=_addressed(data)
+			if target==null:return
 			if action in WRATH_ACTS:
 				# (the director's beats carry the jolt; without them, the stage's)
-				if director==null and rig!=null and rig.has_method("shake"):rig.call("shake",0.6)
+				if director==null:shot("shake",{"weight":4,"strength":0.6})
 				for beast:Node3D in beasts:beast.call("on_god","wrath")
 				_god_light(target,"wrath",3.0)
 			elif action in FAVOUR_ACTS:
 				for beast:Node3D in beasts:beast.call("on_god","favour")
 				_god_light(target,"favour",3.0)
 		"god":
+			if (data.has("target") or data.has("who")) and _addressed(data)==null:return
 			for beast:Node3D in beasts:beast.call("on_god","voice")
 			# The god turns to the one before them: the light falls there with
 			# N's swell, in, held and out on the same envelope (M's god_moment).
@@ -1241,8 +1264,7 @@ func _set_answers(kind:String,data:Dictionary)->void:
 ## before the god.
 func _addressed(data:Dictionary)->Node3D:
 	var f:=figure(String(data.get("target",data.get("who",MAIN))))
-	if f==null or f.body3d==null or f.leaving:f=figure(MAIN)
-	return f.body3d if f!=null and f.body3d!=null and not f.leaving else null
+	return f.body3d if f!=null and is_instance_valid(f.body3d) and not f.leaving and f.body3d.visible else null
 
 ## The god's presence in light on the set (M's god_light): held, then eased back.
 func _god_light(body:Node3D,tone:String,hold:float)->void:
@@ -1660,20 +1682,26 @@ func hush(seconds:float,dim:=false)->void:
 ## A shot of the director's on the set's camera: wide, two_shot (a, b),
 ## push_in (target), reaction (target), shake (strength), home.
 func shot(name:String,args:Dictionary={})->void:
+	if args.has("staging_epoch") and int(args.staging_epoch)!=_staging_epoch:return
+	if args.has("subject") and _addressed({"target":args.subject})==null:return
 	if court_set==null or rig==null:
 		if camera_rig!=null and camera_rig.has_method("shot"):camera_rig.call("shot",name,args)
 		return
-	# A lighter event does not cut a weightier event's shot short (a shake
-	# never takes the camera's claim).
 	var weight:=int(args.get("weight",_event_weight))
+	var dramatic:=bool(args.get("dramatic",false))
+	# An execution owns its frame through impact, including against a jolt.
+	if executing() and weight<5:return
+	if _now()<_shot_until and (weight<_shot_weight or (_dramatic_shot and not dramatic and weight<=_shot_weight)):return
+	var target:=figure(String(args.get("target","")))
+	var body:Node3D=target.body3d if target!=null and not target.leaving and is_instance_valid(target.body3d) and target.body3d.visible else null
+	# A missing subject must not acquire a claim that blocks the next speaker.
+	if name in ["push_in","reaction"] and body==null:return
 	if name!="shake":
-		if _now()<_shot_until and weight<_shot_weight:return
 		_shot_weight=weight
-		_shot_until=maxf(_event_end,_now()+1.0)
+		_shot_until=maxf(float(args.get("until",_event_end)),_now()+1.0)
+		_dramatic_shot=dramatic and name=="push_in"
 		_focus_key=String(args.get("target","")) if name in ["push_in","reaction"] else ""
 		_shot_name=name
-	var target:=figure(String(args.get("target","")))
-	var body:Node3D=target.body3d if target!=null and target.body3d!=null else null
 	# During an execution a two-shot is a whole-figure frame of the two.
 	if name=="two_shot" and executing():
 		name="frame";args=args.duplicate();args["on"]=[String(args.get("a","")),String(args.get("b",""))]
@@ -1701,7 +1729,8 @@ func shot(name:String,args:Dictionary={})->void:
 		"push_in":
 			# A close-up (head and shoulders) for the god's wrath on them and
 			# the big reactions: M's close_up, else the push-in.
-			if body!=null and bool(args.get("close",false)) and close_ups_enabled and rig.has_method("close_up"):rig.call("close_up",body,float(args.get("seconds",1.6)))
+			if dramatic and rig.has_method("address"):rig.call("address",body,float(args.get("seconds",1.0)),bool(args.get("whole",false)))
+			elif body!=null and bool(args.get("close",false)) and close_ups_enabled and rig.has_method("close_up"):rig.call("close_up",body,float(args.get("seconds",1.6)))
 			elif body!=null:rig.call("push_in",body,float(args.get("seconds",2.4)))
 		"reaction":
 			if body!=null:rig.call("reaction",body,float(args.get("time",0.0)))

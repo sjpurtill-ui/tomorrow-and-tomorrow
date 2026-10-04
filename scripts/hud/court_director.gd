@@ -995,7 +995,14 @@ static func _god_speaks(ctx:Dictionary,out:Array)->void:
 	var wrath:=tone=="wrath"
 	var favour:=tone in ["favor","favour"]
 	_beat(out,0.0,"room","hush",{"dur":1.6,"bubbles":"dim"},"anticipation")
-	var main:=_m(ctx,String(ctx.main))
+	var addressed:=String(event.get("target",event.get("who",ctx.main)))
+	var main:=_m(ctx,addressed)
+	# Let the room register the voice, move once, and let the face hold it.
+	# No camera hunt through the crowd while the player reads the words.
+	var voice_hold:=maxf(2.2,float(event.get("seconds",2.0))+0.8)
+	if not main.is_empty():
+		_shot(out,0.24,"push_in",{"target":addressed,"dramatic":true,"seconds":1.05})
+		_shot(out,voice_hold,"wide",{"dramatic":true,"time":1.1})
 	var order:Array=_people(ctx)
 	var origin:=_where(main) if not main.is_empty() else 0.5
 	order.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return absf(_where(a)-origin)<absf(_where(b)-origin) if not is_equal_approx(absf(_where(a)-origin),absf(_where(b)-origin)) else int(a.index)<int(b.index))
@@ -1108,16 +1115,16 @@ static func _wrath(ctx:Dictionary,out:Array,action:String,target:String,response
 	var rng:RandomNumberGenerator=ctx.rng
 	var t_m:=_m(ctx,target)
 	var big:=action=="terrify"
-	# Anticipation: the room stills, the camera goes in on them (close, head
-	# and shoulders, when it is the god's terror).
+	# Anticipation: the room stills, then the camera registers the subject.
+	# A physical response keeps the whole body in view.
 	_beat(out,0.0,"room","hush",{"dur":3.6 if big else 2.4},"anticipation")
-	if not t_m.is_empty():_shot(out,0.0,"push_in",{"target":target,"close":true} if big else {"target":target})
+	if not t_m.is_empty():_shot(out,0.18,"push_in",{"target":target,"close":big,"dramatic":true,"whole":response=="cower","seconds":0.85})
 	var sleeper:=_asleep(ctx)
 	for m:Dictionary in _people(ctx,[target,sleeper]):
 		if rng.randf()<(0.75 if big else 0.4):_beat(out,0.08+rng.randf()*0.2,String(m.key),"freeze",{},"anticipation")
 	# The action: what the engine says they did.
 	var land:=0.55 if big else 0.7
-	if big:_shot(out,land,"shake",{"strength":0.3})
+	if big:_shot(out,land,"shake",{"strength":0.22,"dramatic":true})
 	if not t_m.is_empty():
 		match response:
 			"defy","defiant":
@@ -1180,7 +1187,10 @@ static func _wrath(ctx:Dictionary,out:Array,action:String,target:String,response
 	if not ctx.bits.has("gasp_pretend") and not ctx.bits.has("dead_silence") and big:
 		var shaken:Array=_jumpiest(_people(ctx,[target,String(ctx.get("fainted","")),sleeper]))
 		if not shaken.is_empty():_beat(out,hold+0.7,String((shaken[0] as Dictionary).key),"straighten",{},"hold")
-	_shot(out,hold+0.6,"wide")
+	# Cowering reaches its kneel after the tremble. Do not pull away halfway
+	# down; no timing or lower-body track of the adjudicated response changes.
+	var release:=maxf(hold+0.6,land+1.5+2.5+0.5) if big and response=="cower" else hold+0.6
+	_shot(out,release,"wide",{"dramatic":true,"time":1.1})
 
 ## How a witness meets the god's act (divine_regard.gd witness_response):
 ## used only when the engine's own reading of them is not given.
@@ -1195,7 +1205,7 @@ static func _witness(action:String,m:Dictionary)->String:
 static func _favour(ctx:Dictionary,out:Array,action:String,target:String,response:String)->void:
 	var rng:RandomNumberGenerator=ctx.rng
 	var t_m:=_m(ctx,target)
-	if not t_m.is_empty():_shot(out,0.0,"push_in",{"target":target})
+	if not t_m.is_empty():_shot(out,0.22,"push_in",{"target":target,"dramatic":true,"seconds":0.9})
 	_beat(out,0.0,"room","hush",{"dur":1.2},"anticipation")
 	if not t_m.is_empty():
 		_beat(out,0.5,target,"exhale" if response=="relief" else "beam",{},"action")
@@ -1213,7 +1223,8 @@ static func _favour(ctx:Dictionary,out:Array,action:String,target:String,respons
 		elif rng.randf()<0.45:
 			_beat(out,t,key,"smile_warm" if float(m.love)>=0.4 else "nod",{},"reaction")
 	if not envier.is_empty() and not t_m.is_empty():
-		_shot(out,1.6,"two_shot",{"a":target,"b":String(envier.key)})
+		# Their sideways reaction still plays in the room. The favoured face
+		# keeps this beat rather than a second shot interrupting the first move.
 		ctx["envier"]=String(envier.key)
 	# A gift of food from the stores while people go short: every eye on it.
 	var terms:Dictionary=ctx.event.get("terms",{}) if ctx.event.get("terms") is Dictionary else {}
@@ -1223,6 +1234,7 @@ static func _favour(ctx:Dictionary,out:Array,action:String,target:String,respons
 			_beat(out,1.4+i*0.3,String((eyes[i] as Dictionary).key),"eye_food",{"at":target,"because":"food_days"},"reaction")
 	_play_bits(ctx,out,1.3)
 	_beat(out,3.0,"room","hush",{"dur":0.6},"hold")
+	_shot(out,3.8,"wide",{"dramatic":true,"time":1.1})
 
 ## A death at the god's word: no comedy. The room goes still, looks away,
 ## covers the children's eyes; the proud make themselves watch.
