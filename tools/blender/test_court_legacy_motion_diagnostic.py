@@ -23,5 +23,14 @@ class LegacyDiagnosticTests(unittest.TestCase):
         self.assertEqual(len(actual),5)
         self.assertEqual(sum(np.all(actual==[1,2],axis=1)),1)
 
+    def test_projection_bounds_match_full_triangle_scan(self):
+        rng=np.random.default_rng(37)
+        triangles=rng.uniform(-2.,2.,size=(300,3,3))
+        targets=rng.uniform(-1.,1.,size=(64,3))
+        for camera in (np.array([0.,0.,4.]),np.array([0.,.1,0.]),np.array([1.,4.,.3])):
+            fast=nearest_hits(camera,targets,triangles)
+            reference=nearest_hits(camera,targets,triangles,projected_bounds=False)
+            np.testing.assert_allclose(fast,reference,atol=1e-12)
+
 
 if __name__=="__main__":unittest.main()
