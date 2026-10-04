@@ -94,7 +94,6 @@ func setup(block:Dictionary)->void:
 	var actions:=HFlowContainer.new();actions.add_theme_constant_override("h_separation",10);add_child(actions)
 	_button(actions,"Talk with our leader in court",data.on_council,"Call the local leader to the court")
 	_button(actions,"What we are good and poor at",data.on_capacities,"Twelve things a people needs, weakest first")
-	_button(actions,"Government",data.on_government,"Officials and standing orders")
 	resized.connect(_culture_layout);_culture_layout()
 func _culture_layout()->void:
 	var columns:=3 if size.x>=650 else 2 if size.x>=450 else 1
@@ -165,7 +164,7 @@ static func culture_shape(block:Dictionary)->Array:
 	var roots:Array=[]
 	for memory:Dictionary in block.get("memories",[]):roots.append([String(memory.get("domain","")),String(memory.get("inherited",""))!=String(memory.get("current",""))])
 	return [Portrait.Early.active(),values,(block.get("effects",[]) as Array).size(),(block.get("reputation",[]) as Array).size(),roots,(block.get("memories",[]) as Array).is_empty(),block.has("artifacts"),
-		callable_key(block.get("on_direction")),callable_key(block.get("on_council")),callable_key(block.get("on_capacities")),callable_key(block.get("on_government"))]
+		callable_key(block.get("on_direction")),callable_key(block.get("on_council")),callable_key(block.get("on_capacities"))]
 
 ## What the artifacts showcase is drawn from (its figures and finest pieces).
 static func _showcase_print(block:Dictionary)->Array:

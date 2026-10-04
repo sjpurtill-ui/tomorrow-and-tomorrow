@@ -7,8 +7,8 @@ extends RefCounted
 ##              heard among the people as chips that fill it. Left empty,
 ##              nothing is named and the next founding asks again; nothing
 ##              nags in between.
-##   open       the small card the Government screen opens to name or rename
-##              the nation.
+## Between foundings the nation is named or renamed in the court ("call our
+## nation the Reedfolk", or the Headman's "Name our nation" choices).
 ## Static helpers; preload.
 
 const Kit:=preload("res://scripts/hud/paper_kit.gd")
@@ -51,43 +51,6 @@ static func commit_founding(input:LineEdit,town:String)->Dictionary:
 	var status:Variant=input.get_meta("status",null)
 	if not bool(done.get("ok",false)) and is_instance_valid(status) and status is Label: (status as Label).text=String(done.get("reason",""))
 	return done
-
-
-## The Government screen's card: name or rename the nation. on_done(name)
-## runs after a name is given. Returns the card's overlay.
-static func open(host:Node,on_done:Callable=Callable())->Control:
-	var parts:=Kit.modal(host,520.0,T.GOLD,"NationNameCard")
-	var overlay:Control=parts[0]
-	var column:VBoxContainer=parts[1]
-	var named:=NationName.named()
-	Kit.label(column,"Our nation","kicker")
-	Kit.label(column,("A new name for %s" % NationName.in_sentence(NationName.current())) if named else ("A name for all our %s" % EraWords.word("places","towns")),"title")
-	Kit.label(column,"The name other peoples know us by, and the one the Chronicle uses. Each %s keeps its own name." % EraWords.word("place","town"),"body").custom_minimum_size.x=460
-	var input:=_line(column,NationName.current())
-	var status:=Kit.label(column,"","note")
-	status.name="NationNameStatus"
-	var footer:=HBoxContainer.new()
-	footer.alignment=BoxContainer.ALIGNMENT_END
-	footer.add_theme_constant_override("separation",10)
-	column.add_child(footer)
-	var close:=func()->void:
-		if is_instance_valid(overlay): overlay.queue_free()
-	Kit.button(footer,"Not now",false,close).name="NationNameLater"
-	var confirm:=Kit.button(footer,"Rename" if named else "Name it",true)
-	confirm.name="NationNameConfirm"
-	var commit:=func()->void:
-		var done:=NationName.give_name(input.text,"screen")
-		if not bool(done.get("ok",false)):
-			status.text=String(done.get("reason",""))
-			return
-		close.call()
-		if on_done.is_valid(): on_done.call(String(done.get("name","")))
-	confirm.pressed.connect(commit)
-	input.text_submitted.connect(func(_text:String)->void: commit.call())
-	input.text_changed.connect(func(text:String)->void: confirm.disabled=NationName.tidy(text)=="")
-	confirm.disabled=NationName.tidy(input.text)==""
-	input.grab_focus.call_deferred()
-	return overlay
 
 
 static func _line(column:VBoxContainer,prefill:String)->LineEdit:

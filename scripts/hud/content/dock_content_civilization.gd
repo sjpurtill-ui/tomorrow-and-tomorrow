@@ -1,6 +1,6 @@
 extends "res://scripts/hud/content/dock_content_base.gd"
-## CIVILIZATION section: society and civic dialogue. Government has its own
-## first-class rail destination.
+## CIVILIZATION section: society and civic dialogue. Officials, their offices
+## and standing orders live in the court (court_office_dossier.gd).
 
 var culture_view_state:Dictionary={"roots_open":false}
 ## Tests may point the showcase at a stand-in facade; play uses artifact_culture.gd.
@@ -249,7 +249,7 @@ func _society_overview()->Array:
 	var presenter=preload("res://scripts/hud/culture_presenter.gd")
 	var effects:=presenter.effects(WorldSimulation.direction.cultural_memory,int(GameState.elapsed_days),research,WorldSimulation.direction.auto_scouting,float(GameState.simulation_metrics.get("food_intake_ratio",1)))
 	return [{"type":"culture","lived_values":GameState.societal_values.get("lived",{}).duplicate(),"view_state":culture_view_state,"effects":effects,"reputation":presenter.reputation(MilitaryCampaign.war_reputation_snapshot()),"identity":identity,"values":values,"memories":memories,"direction":PeopleDirection.AMBITIONS.get(WorldSimulation.direction.ambition,{}),
-		"on_direction":func():PeopleDirection.open_direction(),"on_council":_open_court.bind({"settlement_id":String(_civic_settlement().get("id",""))}),"on_government":jump("government",0),
+		"on_direction":func():PeopleDirection.open_direction(),"on_council":_open_court.bind({"settlement_id":String(_civic_settlement().get("id",""))}),
 		"on_capacities":focused_action("Society’s strengths & needs","",func()->Dictionary:return {"blocks":_society_blocks(GameState.society_capacities)}).on_press}.merged(_artifact_showcase())]
 
 func _artifact_facade()->Variant:
@@ -273,7 +273,7 @@ func _artifact_signature()->Array:
 	return [summary.get("collection_count",0),summary.get("studied_count",0),summary.get("in_study_count",0),summary.get("exhibited_count",0),snappedf(float(summary.get("allure",0)),.01),snappedf(float(summary.get("study_role",{}).get("researchers",0.0)),.1)]
 
 func _government_overview()->Array:
-	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[{"label":"Government","sub":"Officials and standing orders","on_press":jump("government",0)},{"label":"Talk with our leader","sub":"In the court: ask, order or replace","on_press":_open_court.bind({"settlement_id":String(_civic_settlement().get("id",""))})}]}]
+	return [{"type":"actions","heading":"GOVERNING TOGETHER","items":[{"label":"Talk with our leader","sub":"In the court: ask, order or replace","on_press":_open_court.bind({"settlement_id":String(_civic_settlement().get("id",""))})}]}]
 func _council_blocks()->Array:
 	var all:=_council_all_blocks();var blocks:Array=[]
 	for item:Dictionary in all:

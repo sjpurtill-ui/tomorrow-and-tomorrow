@@ -96,15 +96,12 @@ func test_each_card_names_who_else_could_hold_it_with_their_numbers()->void:
 		assert_str(String(row.text)).contains(" would ")
 		assert_str(String(row.tip)).contains("make %s our" % String(row.name).get_slice(" ",0))
 		assert_int(int(row.person_id)).is_not_equal(int(GovernmentPeopleSystem.officeholder("ChiefScout").person_id))
-	var provider=preload("res://scripts/hud/content/dock_content_government.gd").new(null,null)
-	var items:Array=provider.tab(0).blocks[0].items
-	var scout:Dictionary={}
-	for item:Dictionary in items:
-		if String(item.office_key)=="ChiefScout": scout=item
-	assert_bool((scout.get("shortlist",[]) as Array).is_empty()).is_false()
-	assert_bool((scout.shortlist[0] as Dictionary).on_summon is Callable).is_true()
-	var lever:Dictionary=scout.get("lever",{})
-	assert_str(String(lever.get("text",""))).contains("Scouts are caught")
+	# The court's "What you know" of the Chief Scout names them too.
+	var told:=""
+	for row:Array in preload("res://scripts/hud/court_office_dossier.gd").rows(int(GovernmentPeopleSystem.officeholder("ChiefScout").person_id)): told+="%s: %s
+" % [String(row[0]),String(row[1])]
+	assert_str(told).contains("Could hold it: ")
+	assert_str(told).contains("Scouts are caught")
 
 
 func test_a_town_is_given_to_an_official_by_name_in_the_court()->void:

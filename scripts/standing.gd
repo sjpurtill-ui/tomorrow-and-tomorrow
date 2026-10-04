@@ -45,11 +45,11 @@ const STRENGTHS:=[
 	["endurance","Endurance","how long we could hold out, starved or besieged","economy",0,"Food","stores put by, and the hands to fill them"],
 	["wealth","Wealth","food and materials put by","economy",0,"Food","nothing by itself, but plenty draws envy"],
 	["reach","Reach","how far our carriers go and how many peoples know us","world",0,"Known World","carriers and scouts away from home"],
-	["persuasion","Persuasion","our envoy's skill and how open our ways are","government",0,"Government","a skilled envoy, gifts, and time spent abroad"],
+	["persuasion","Persuasion","our envoy's skill and how open our ways are","court",0,"The court","a skilled envoy, gifts, and time spent abroad"],
 	["splendor","Splendor","great works and treasures others hear of","construction",3,"Landmarks","builders, materials and years"],
 	["genius","Genius","what we know against the peoples we know","inquiry",0,"Research","people at research, and food for them"],
 	["cunning","Cunning","scouts and watchers: what we find out and keep hidden","world",0,"Known World","scouts' days and sometimes their lives"],
-	["order","Order","trust in the chiefs, holding together, a steward's hand","government",0,"Government","able officials, and restraint"],
+	["order","Order","trust in the chiefs, holding together, a steward's hand","court",0,"The court","able officials, and restraint"],
 ]
 ## The six views another people holds of us: [id, name, what it makes them do].
 const VIEWS:=[

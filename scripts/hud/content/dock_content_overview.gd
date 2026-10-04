@@ -43,7 +43,7 @@ func tab(_sub:int)->Dictionary:
 			"attention":not issue.is_empty(),"art":art,"tip":"Open this %s: its leader, buildings and story" % EraWords.word("place","hearth"),"on_click":open_city.bind(id)})
 	var hearth_actions:Array=[]
 	if hearths.is_empty():hearth_actions.append({"label":"Choose a home","sub":"Choose a home and establish your first settlement","on_press":jump("settlement",0)})
-	var tallies:Array=[{"label":"Food & water","on_press":jump("economy",0)},{"label":EraWords.word("rail.wealth","Wealth"),"on_press":jump("economy",2)},{"label":EraWords.word("rail.inquiry","Research"),"on_press":jump("inquiry",0)},{"label":EraWords.word("rail.production","Production"),"on_press":jump("production",0)},{"label":"Buildings","on_press":jump("construction",0)},{"label":EraWords.word("rail.government","Government"),"on_press":jump("government",0)}]
+	var tallies:Array=[{"label":"Food & water","on_press":jump("economy",0)},{"label":EraWords.word("rail.wealth","Wealth"),"on_press":jump("economy",2)},{"label":EraWords.word("rail.inquiry","Research"),"on_press":jump("inquiry",0)},{"label":EraWords.word("rail.production","Production"),"on_press":jump("production",0)},{"label":"Buildings","on_press":jump("construction",0)}]
 	var block:={"type":"people","scene":scene,"faces":faces,"vitals":People.vitals(report,totals),"labor":labor,"story":story,"hearths":hearths,"hearth_actions":hearth_actions,"tallies":tallies,
 		"vitals_heading":"HOW THEY FARE" if not modern else "VITAL STATISTICS","hearths_heading":("OUR %s" % EraWords.word("places","hearths").to_upper()) if not modern else "CITIES & SETTLEMENTS",
 		"hearths_note":"the neediest first" if hearths.size()>1 else "","tallies_heading":EraWords.word("rail.drawer","Ledgers").to_upper(),"on_summon":summon}
