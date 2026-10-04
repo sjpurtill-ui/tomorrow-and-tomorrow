@@ -2299,13 +2299,15 @@ func _clear_of_others(bubble:Control)->void:
 	var start:=bubble.position
 	var rect:=Rect2(bubble.position,bubble.size)
 	var face:=_focus_face()
+	var right:=size.x
 	if face.has_area():others.append(face.grow(8.0))
 	if bubble is Bubble:
 		var speaker:=figure((bubble as Bubble).speaker)
 		if speaker!=null:
 			var head:=head_point(speaker)
 			others.append(Rect2(head.x-speaker.size.x*.30,head.y,speaker.size.x*.60,speaker.size.y*.28).grow(8.0))
-	var bounds:=Rect2(4.0,top_inset+4.0,maxf(1.0,size.x-8.0),maxf(1.0,size.y-top_inset-8.0))
+			if speaker.home.x<_usable_width() and bubble.size.x<_usable_width()-16.0:right=_usable_width()
+	var bounds:=Rect2(4.0,top_inset+4.0,maxf(1.0,right-8.0),maxf(1.0,size.y-top_inset-8.0))
 	rect.position=clear_bubble_position(rect,bounds,others)
 	if rect.position.is_equal_approx(start):return
 	var moved:=rect.position-start
@@ -2322,6 +2324,8 @@ func _clear_of_others(bubble:Control)->void:
 ## together avoids oscillating between a caption and the speaker below it.
 ## When a tiny view cannot fit everything, the least-overlapped position wins.
 static func clear_bubble_position(rect:Rect2,bounds:Rect2,obstacles:Array[Rect2])->Vector2:
+	if bounds.encloses(rect) and not obstacles.any(func(obstacle:Rect2)->bool:return rect.intersects(obstacle)):
+		return rect.position
 	var xmax:=maxf(bounds.position.x,bounds.end.x-rect.size.x)
 	var ymax:=maxf(bounds.position.y,bounds.end.y-rect.size.y)
 	var xs:Array[float]=[clampf(rect.position.x,bounds.position.x,xmax)]

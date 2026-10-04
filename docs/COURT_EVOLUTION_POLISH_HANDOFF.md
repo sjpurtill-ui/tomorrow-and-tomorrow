@@ -40,6 +40,10 @@ checkpoints; the evidence below concerns this subsequent quality pass.
 - Camera framing uses the actual seated body height and protects the shoulders
   of officials at the outer chairs. Placement before the modal enters the scene
   tree uses local transforms, avoiding outside-tree transform errors.
+- Speech placement protects its own speaker even when earlier dialogue occupies
+  the space above. It does not move aside for a same-speaker line that is about
+  to disappear. The constrained search also preserves an envoy's offered-object
+  strip, remains stable when repeated, and skips searching when already clear.
 - Administrative rooms use three bounded adult support extras. Existing named
   officials and petitioners are preserved; background extras cannot claim the
   officials' authored chairs. Indoor ambient acting no longer stamps against the
@@ -76,11 +80,22 @@ distinct 200-year room designs are a court feature, not sixteen city styles.
 
 ## Verification at the combined checkpoint
 
-- Broad court regression: **390/390**, thirty suites, no errors, failures, skips
-  or orphans; process exit 0. `artifacts/court-evolution-full-tests.log`, report47.
+- Latest broad court regression: **393/393**, thirty-one suites, no errors,
+  failures, skips or orphans; process exit0.
+  `artifacts/court-evolution-final-combined-tests.log`, report49.
   Includes presentation, wardrobe, etiquette, acting, motion, camera, staging,
-  navigation, execution, gore, rendering budget and sound. This run precedes the
-  final four wall-bay asset corrections and subsequent collar/shadow review.
+  navigation, execution, gore, rendering budget and sound. This run includes the
+  final four wall-bay corrections and sewn collars, and precedes the subsequent
+  shadow, outline and hand/skirt-clearance follow-ups. Earlier report47 passed
+  390 cases; it is retained as evidence rather than a final asset certification.
+- Root raw validations after final wall bays and sewn collars: **16/16 rooms and
+  7/7 wardrobe bundles**, preserving original body/face/rig bytes. Logs:
+  `artifacts/court-evolution-final-rooms-raw.log` and
+  `artifacts/court-evolution-final-wardrobe-raw.log`.
+- The actual modern audience headless probe passes at both supported review
+  sizes with an assertion that the active speech bubble clears its speaker.
+  The reserved-offer regression first failed at x666 against a usable width580;
+  the subsequent bounds correction is covered separately.
 - Focused city/architecture tests: **29/29**, no errors or failures; report44,
   `artifacts/court-evolution-city-combined-tests.log`.
 - Final architecture worker meshes: **192/192 chair arrivals/departures plus

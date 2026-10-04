@@ -25,3 +25,20 @@ func test_constrained_speech_remains_inside_the_view()->void:
 	var bubble:=Rect2(-10,150,610,200)
 	var placed:=Rect2(Stage.clear_bubble_position(bubble,bounds,[Rect2(280,100,100,100)]),bubble.size)
 	assert_bool(bounds.encloses(placed)).is_true()
+
+func test_crowded_envoy_speech_keeps_the_offered_object_strip_clear()->void:
+	var stage:Stage=auto_free(Stage.new())
+	stage.size=Vector2(900,360);stage.right_reserve=320
+	var speaker:=Stage.Figure.new();stage.figure_layer.add_child(speaker)
+	speaker.key="main";speaker.size=Vector2(100,160);speaker.home=Vector2(80,320)
+	stage.figures["main"]=speaker;stage.cast_order=["main"]
+	var earlier:=Control.new();stage.bubble_layer.add_child(earlier)
+	earlier.position=Vector2(150,0);earlier.size=Vector2(250,260)
+	var bubble:=Stage.Bubble.new();stage.bubble_layer.add_child(bubble)
+	bubble.speaker="main";bubble.position=Vector2(310,100);bubble.size=Vector2(260,60)
+	stage._clear_of_others(bubble)
+	assert_float(bubble.get_rect().end.x).is_less_equal(stage._usable_width())
+	assert_bool(bubble.get_rect().intersects(earlier.get_rect())).is_false()
+	var first:=bubble.position
+	stage._clear_of_others(bubble)
+	assert_vector(bubble.position).is_equal(first)
