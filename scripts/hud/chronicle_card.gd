@@ -50,6 +50,9 @@ var showing:=false
 var player:AudioStreamPlayer
 ## True while an open dock sheet leaves no room: the card is held back.
 var held:=false
+## Where the card's top edge stands: the notice stack (notification_stack.gd)
+## sets it under its log button, so the card heads the one column of notices.
+var top:=TOP
 static var _stings:Dictionary={}
 
 
@@ -121,7 +124,7 @@ func layout()->void:
 	panel.custom_minimum_size.x=width;panel.size.x=width
 	panel.size.y=panel.get_combined_minimum_size().y
 	# Top right, below the time and status bar, clear of the rail.
-	panel.position=Vector2(roundf(maxf(16.0,extent.x-width-16.0)),TOP)
+	panel.position=Vector2(roundf(maxf(16.0,extent.x-width-16.0)),top)
 	held=false
 	var sheet:=sheet_rect()
 	if sheet.has_area() and Rect2(panel.position,panel.size).intersects(sheet):
@@ -129,6 +132,10 @@ func layout()->void:
 		var beside:=sheet.end.x+12.0
 		if beside+width<=extent.x-8.0:panel.position.x=roundf(beside)
 		else:held=true
+
+
+func set_top(y:float)->void:
+	top=y
 
 
 ## The open dock sheets (the section dock and its detail), in screen space.
@@ -202,7 +209,9 @@ func _render(entry:Dictionary)->void:
 	var art:Dictionary=entry.get("art",{})
 	if bool(entry.get("first",false)) and kind=="discovery":
 		field=" · FIRST IN %s" % String(Chronicle.DOMAIN_NAMES.get(String(art.get("domain","")),"A NEW FIELD")).to_upper()
-	eyebrow.text="%s · %s%s" % [String(voice.moment),Chronicle.date_label(int(entry.get("day",0))).to_upper(),field]
+	# The same category label as every notice (notification_model.gd).
+	var Notices:=preload("res://scripts/hud/notification_model.gd")
+	eyebrow.text="%s · %s · %s%s" % [Notices.label(Notices.category_of(entry)).to_upper(),String(voice.moment),Chronicle.date_label(int(entry.get("day",0))).to_upper(),field]
 	title_label.text=String(entry.get("title",""))
 	caption.text=String(entry.get("text",""))
 	caption.visible=caption.text!=""

@@ -18,8 +18,9 @@ func test_repeated_return_notifications_preserve_running_and_manual_pause()->voi
 		for party in 3:
 			CivilizationSystem.scout_report_returned.emit({"mission_id":party,"day":100,"new_contact_count":1})
 			assert_float(terrain.game_speed).is_equal(speed)
-	# The report is told by the Chronicle's card; the status line points there.
-	assert_str(label.text).contains("Chronicle")
+	# The report is told by the Chronicle's card in the notice column at the
+	# top right; nothing is written over the map.
+	assert_str(label.text).is_empty()
 	CivilizationSystem.scout_report_returned.disconnect(terrain._on_scout_report_returned)
 	label.free()
 	terrain.free()

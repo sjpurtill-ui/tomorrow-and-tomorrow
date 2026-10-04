@@ -87,6 +87,10 @@ const DOMAIN_NAMES:={"demography":"people & homes","nutrition":"food & farming",
 
 ## Moment cards waiting to be shown; hud/chronicle_card.gd drains this.
 static var pending_cards:Array[Dictionary]=[]
+## Everything told above a whisper (and each folded repeat), waiting for the
+## notice stack (hud/notification_stack.gd), which shows or logs it.
+static var pending_notes:Array[Dictionary]=[]
+const PENDING_NOTES_MAX:=40
 static var _voice_cache:Dictionary={}
 static var _voice_signature:=-1
 
@@ -168,7 +172,7 @@ static func record(moment:Dictionary)->Dictionary:
 			if repeat:entry["repeat"]=true
 	# The story's own telling replaces a plainer report of the same finding.
 	for older in shaped.get("demote",[]):_demote(c,String(older),key)
-	for optional in ["art","action","domain","source","first","learned"]:
+	for optional in ["art","action","domain","source","first","learned","category","alert"]:
 		if moment.has(optional):entry[optional]=moment[optional].duplicate(true) if moment[optional] is Dictionary or moment[optional] is Array else moment[optional]
 	(c.entries as Array).push_front(entry)
 	keys[key]=day
@@ -181,6 +185,10 @@ static func record(moment:Dictionary)->Dictionary:
 		if pending_cards.size()>6:pending_cards.pop_front()
 	# A folded repeat keeps its line in the event ledger.
 	if (tier!="whisper" or repeat) and bool(moment.get("ledger",true)):_to_ledger(entry)
+	# The notice stack shows or logs what was told (a repeat counts on its notice).
+	if tier!="whisper" or repeat or not head.is_empty():
+		pending_notes.append(entry.duplicate(true))
+		while pending_notes.size()>PENDING_NOTES_MAX:pending_notes.pop_front()
 	Annals.note(c,entry)
 	_trim(c)
 	return entry

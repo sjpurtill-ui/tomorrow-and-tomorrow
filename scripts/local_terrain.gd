@@ -57,6 +57,8 @@ const GroundLens:=preload("res://scripts/hud/ground_lens.gd")
 const MapTickerWords:=preload("res://scripts/hud/map_ticker_words.gd")
 const MapNotes:=preload("res://scripts/hud/map_notes.gd")
 const PaperKit:=preload("res://scripts/hud/paper_kit.gd")
+# Notifications (codex/notifications): every notice goes to the one stack at the top right.
+const Notices:=preload("res://scripts/hud/notification_model.gd")
 const MAIN_RIVER_WATER_HALF_WIDTH_KM := 0.125
 const TRIBUTARY_WATER_HALF_WIDTH_KM := 0.035
 const MAIN_RIVER_SETTLEMENT_CLEARANCE_KM := 0.25
@@ -1230,9 +1232,7 @@ func _commit_world_day(day_result:Dictionary)->void:
 	_refresh_settlement_footprint()
 	preload("res://scripts/rite_marks.gd").refresh(self)
 	preload("res://scripts/living_map.gd").refresh(self)
-	if travel_status_label:
-		var news:=MapTickerWords.day_news(progression_events,discoveries,resource_events,simulation_events)
-		if news!="":travel_status_label.text=news
+	# Notifications (codex/notifications): the day's news is told by the Chronicle's notices, not over the map.
 	_evaluate_travel_survival()
 	if hud:preload("res://scripts/hud/chronicle_card.gd").flush(self,hud)
 
@@ -11298,7 +11298,8 @@ func _process_local_settlement_day()->void:
 			hearth_established=true
 			if settlement_visual_root:settlement_visual_root.position=GameState.settlement_founded_at
 		_spawn_settlement_structure(String(event.kind))
-		if travel_status_label:travel_status_label.text="The people's work has made %s." % String(event.kind).replace("_"," ").to_lower()
+		# Notifications (codex/notifications): kept in the log; the Chronicle tells the finished work.
+		Notices.push({"category":"building","tier":"minor","title":"%s built" % String(event.kind).replace("_"," ").capitalize(),"text":"The people's work has made %s." % String(event.kind).replace("_"," ").to_lower(),"action":{"kind":"section","section":"construction","sub":0,"label":"the Building page"}})
 
 
 func _spawn_settlement_structure(structure_name: String) -> void:
@@ -11493,8 +11494,7 @@ func _on_settler_clicked(_camera: Node, event: InputEvent, _position: Vector3, _
 			camera.size = 0.18
 			_update_camera()
 		_inspect_location(settler_marker.position)
-		if travel_status_label:
-			travel_status_label.text="%s. The card on the right shows the ground around them." % ("The travellers are here" if not GameState.settlement_site_committed else _settlement_display_name())
+		# Notifications (codex/notifications): no line over the map; the card or notice already tells it.
 		get_viewport().set_input_as_handled()
 
 
@@ -11512,8 +11512,7 @@ func _move_settlers_to(destination:Vector3)->void:
 	var surface_assessment:=_settlement_surface_assessment(destination)
 	if not bool(surface_assessment.get("valid",false)):
 		_inspect_location(destination)
-		if travel_status_label:
-			travel_status_label.text=PaperKit.sentence(String(surface_assessment.get("reason","That ground cannot hold a settlement")))+"."
+		_tell(PaperKit.sentence(String(surface_assessment.get("reason","That ground cannot hold a settlement")))+".","travel","notable")
 		return
 	if GameState.settlement_site_committed or hearth_established or "Hearth Circle" in GameState.settlement_completed:
 		if settlement_convoy_targeting:
@@ -11523,7 +11522,7 @@ func _move_settlers_to(destination:Vector3)->void:
 		return
 	var accepted:=WorldSimulation.submit("player",{"kind":"move","destination":Vector2(destination.x,destination.z)})
 	if accepted.has("error"):
-		if travel_status_label:travel_status_label.text=PaperKit.sentence(String(accepted.error))
+		_tell(PaperKit.sentence(String(accepted.error)),"travel","notable")
 		if bool(accepted.get("refused",false)):_show_caravan_notice({"leader":String(accepted.get("leader","The caravan leader")),"title":"The caravan leader advises against this","text":String(accepted.error).trim_prefix(String(accepted.get("leader",""))+": "),"severity":"warning"})
 		return
 	travel_start=settler_marker.position
@@ -11543,7 +11542,7 @@ func _move_settlers_to(destination:Vector3)->void:
 func _halt_founding_convoy_to_forage()->void:
 	var result:Dictionary=preload("res://scripts/civilization_travel.gd").camp_to_forage()
 	if result.has("error"):
-		if travel_status_label:travel_status_label.text=PaperKit.sentence(String(result.error))
+		_tell(PaperKit.sentence(String(result.error)),"travel","notable")
 		return
 	travel_active=false
 	travel_reported_milestones.erase("forage_ready")
@@ -11593,7 +11592,7 @@ func _on_caravan_override(id:String,action:String)->void:
 				var from:Vector2=path[0]
 				var to:Vector2=path[-1]
 				_draw_route(Vector3(from.x,0,from.y),Vector3(to.x,0,to.y),path)
-	if result.has("error") and travel_status_label:travel_status_label.text=PaperKit.sentence(String(result.error))
+	if result.has("error"):_tell(PaperKit.sentence(String(result.error)),"travel","notable")
 	_present_caravan_reports()
 	_update_time_interface()
 
@@ -11611,13 +11610,20 @@ func _present_caravan_reports()->void:
 		if String(entry.get("kind",""))=="arrival" and String(entry.get("caravan",""))=="founding" and route_mesh:route_mesh.visible=false
 
 func _show_caravan_notice(entry:Dictionary)->void:
-	if travel_council_notice==null:return
+	# Notifications (codex/notifications): word from the road is a notice in the stack at the top
+	## right (Travel), urgent when the leader warns of danger. A click opens
+	## the court, where the caravan's leader can be answered.
 	var danger:=String(entry.get("severity",""))=="danger" or String(entry.get("severity",""))=="warning"
-	travel_council_notice.text=MapNotes.caravan_words(entry)
-	MapNotes.style_notice(travel_council_notice,danger)
-	_place_travel_council_notice()
-	travel_council_notice.visible=true
-	travel_council_notice_until_msec=Time.get_ticks_msec()+(24000 if danger else 16000)
+	var leader:=String(entry.get("leader","The caravan leader"))
+	var title:=PaperKit.sentence(String(entry.get("title",""))).trim_suffix(".")
+	Notices.push({"category":"travel","tier":"urgent" if danger else "notable","title":"%s: %s" % [leader,title] if title!="" else "Word from the road, from %s" % leader,
+		"text":String(entry.get("text","")),"group":"travel|caravan|%s|%s" % [leader,title],"action":{"kind":"court","focus":{}}})
+
+## One plain line in answer to something the player just did, told in the
+## notice stack at the top right (hud/notification_stack.gd), never over the map.
+func _tell(text:String,category:String="travel",tier:String="notable",action:Dictionary={})->void:
+	if text.strip_edges()=="":return
+	Notices.push({"category":category,"tier":tier,"text":text,"action":action})
 
 ## Cheap geography for caravan route planning: the same authored surface water
 ## the daily water ledger uses, and dry-land height.
@@ -11694,7 +11700,7 @@ func _cancel_settlement_convoy_targeting()->void:
 	if map_help_panel and not map_help_dismissed and not capture_render_active: map_help_panel.visible=true
 	_refresh_map_help()
 	_update_time_interface()
-	if travel_status_label: travel_status_label.text="You stopped choosing land. Nobody has left."
+	_tell("You stopped choosing land. Nobody has left.","travel","minor")
 
 func _ensure_settlement_convoy_preview()->void:
 	if settlement_convoy_preview and is_instance_valid(settlement_convoy_preview): return
@@ -11785,7 +11791,7 @@ func _update_settlement_convoy_preview(screen_position:Vector2)->void:
 func _select_settlement_convoy_site(screen_position:Vector2)->void:
 	_update_settlement_convoy_preview(screen_position)
 	if not settlement_convoy_hover_valid:
-		if travel_status_label: travel_status_label.text="That land will not do. The note at the bottom of the map says why."
+		_tell("That land will not do. The note at the bottom of the map says why.","travel","notable")
 		return
 	_begin_settlement_convoy(settlement_convoy_hover_position)
 
@@ -11985,12 +11991,11 @@ func _start_settlement_here() -> void:
 		return
 	var site_assessment:=_settlement_surface_assessment(settler_marker.position)
 	if not bool(site_assessment.get("valid",false)):
-		if travel_status_label:
-			travel_status_label.text="Not founded here: %s." % PaperKit.sentence(String(site_assessment.get("reason","choose dry land"))).trim_suffix(".")
+		_tell("Not founded here: %s." % PaperKit.sentence(String(site_assessment.get("reason","choose dry land"))).trim_suffix("."),"building","notable")
 		return
 	var water:=_founding_site_advice(settler_marker.position,true)
 	if not bool(water.valid):
-		if travel_status_label:travel_status_label.text="Not founded here. %s" % String(water.reason)
+		_tell("Not founded here. %s" % String(water.reason),"food","notable")
 		if is_instance_valid(founding_site_guide):founding_site_guide.update_site(settler_marker.position)
 		return
 	_close_founding_site_guide()
@@ -12149,14 +12154,14 @@ func _issue_travel_council_report(stage: String,progress: float,reason:="") -> v
 		"known_resources":ResourceSystem.visible_deposits().size()
 	}
 	var item:=AdvisorSystem.generate_travel_item(stage,data)
-	if item.is_empty() or travel_council_notice==null:
+	if item.is_empty():
 		return
 	var urgency:=float(item.get("urgency",0.4))
-	travel_council_notice.text=MapNotes.road_words(String(item.get("advisor","")),String(item.get("text","")))
-	MapNotes.style_notice(travel_council_notice,urgency>0.7)
-	_place_travel_council_notice()
-	travel_council_notice.visible=true
-	travel_council_notice_until_msec=Time.get_ticks_msec()+(24000 if urgency>0.7 else 16000)
+	# Notifications (codex/notifications): the road report is a Travel notice in the stack.
+	var who:=String(item.get("advisor","")).strip_edges()
+	var stage_words:={"quarter":"A quarter of the way","half":"Halfway there","three_quarters":"Three quarters of the way","halt":"The travellers have stopped"}
+	Notices.push({"category":"travel","tier":"urgent" if urgency>0.7 else "notable","title":"%s: word from %s" % [String(stage_words.get(stage,"On the road")),who if who!="" else "the road"],
+		"text":String(item.get("text","")),"action":{"kind":"court","focus":{}}})
 
 ## Sizes the road notice to its words and keeps it clear of the Chronicle's
 ## moment card (top right): beside the card when there is room, else below it.
@@ -12239,7 +12244,14 @@ func _render_active_foreign_alert()->void:
 		foreign_alert_world_button.text="Speak with them" if known_people else "Open the Known World"
 		foreign_alert_world_button.tooltip_text="Open the court and send word to their people through our envoys." if known_people else "The Known World lists every band in sight."
 	_clamp_foreign_alert_to_viewport()
-	foreign_alert_panel.visible=not _blocking_modal_or_report_open()
+	# Notifications (codex/notifications): strangers in sight are an urgent Neighbours notice in
+	## the stack (once per alert); a click shows where they are on the map.
+	foreign_alert_panel.visible=false
+	if bool(active_foreign_alert.get("noticed",false)):return
+	active_foreign_alert["noticed"]=true
+	Notices.push({"key":"foreign_alert:"+String(active_foreign_alert.get("alert_key","")),"category":"neighbours","tier":"urgent",
+		"title":foreign_alert_title.text,"text":foreign_alert_body.text.get_slice("\n",0),
+		"action":{"kind":"call","callable":_center_active_foreign_alert,"label":"show where they are on the map"}})
 
 
 func _bounded_alert_copy(value:String,limit:int=260)->String:
@@ -12586,6 +12598,8 @@ func _build_interface() -> void:
 	layer.add_child(settlement_convoy_instruction_panel)
 	_refresh_population_allocations()
 	_build_command_rail_hud(layer)
+	# Notifications (codex/notifications): the one notice stack, top right.
+	preload("res://scripts/hud/notification_stack.gd").ensure(self,hud)
 	_update_time_interface()
 	_refresh_discovered_resource_overlays()
 
@@ -12648,17 +12662,15 @@ func _select_army_and_focus(army_id:int)->void:
 		world_position.y=_height_at(world_position.x,world_position.z)
 		_set_camera_target(world_position)
 		_refresh_player_field_army_markers()
-		if travel_status_label:
-			travel_status_label.text="%s is selected. Its general chooses the road; tell them where to go through the court." % String(army.get("name","The army"))
+		# Notifications (codex/notifications): no line over the map; the card or notice already tells it.
 		break
 
 func _report_military_action(result:Dictionary)->void:
-	## Surface a campaign action's outcome in the status ticker and refresh
+	## Surface a campaign action's outcome in the notice stack and refresh
 	## the dock immediately so the change is visible.
-	if travel_status_label:
-		travel_status_label.text=PaperKit.sentence(String(result.get("message",result.get("error",""))))
+	# Notifications (codex/notifications): one notice (War) instead of the ticker and a lower-right slip.
+	_tell(PaperKit.sentence(String(result.get("message",result.get("error","")))),"war","notable",{"kind":"section","section":"military","sub":0,"label":"the War screen"})
 	if hud:
-		hud.show_action_feedback(String(result.get("message",result.get("error",""))))
 		hud.live_refresh_dock()
 
 func _on_hud_section_requested(section:String,sub:int)->void:
@@ -12804,8 +12816,7 @@ func _open_founding_naming_panel(settlement_id:String) -> void:
 
 func _open_settlement_naming_panel(settlement_id:String="") -> void:
 	if not GameState.settlement_site_committed:
-		if travel_status_label:
-			travel_status_label.text="Found the first settlement before you name it."
+		_tell("Found the first settlement before you name it.","building","notable")
 		return
 	if settlement_naming_panel:
 		return
@@ -12888,7 +12899,7 @@ func _commit_settlement_name() -> void:
 	else:
 		result=_settlement_model().rename_settlement(settlement_naming_target_id,chosen)
 	if not bool(result.get("ok",false)):
-		if travel_status_label: travel_status_label.text=PaperKit.sentence(String(result.get("reason","That name could not be given")))
+		_tell(PaperKit.sentence(String(result.get("reason","That name could not be given"))),"people","notable")
 		return
 	var final_name:=String(result.get("name",chosen))
 	if nation_name_input!=null:
@@ -12897,7 +12908,7 @@ func _commit_settlement_name() -> void:
 		var told:Dictionary=preload("res://scripts/hud/nation_name_card.gd").commit_founding(nation_name_input,final_name)
 		if not told.is_empty() and not bool(told.get("ok",false)): return
 		if final_name==String(settlement_name_input.get_meta("founded_as","")):
-			if travel_status_label and not told.is_empty(): travel_status_label.text=String(told.get("line",""))
+			if not told.is_empty(): _tell(String(told.get("line","")),"people","notable")
 			_update_time_interface()
 			_dismiss_settlement_naming_panel()
 			return
@@ -12907,8 +12918,7 @@ func _commit_settlement_name() -> void:
 	var event:={"day":int(GameState.elapsed_days),"title":"Settlement Named","description":description,"domain":"settlement","severity":"major"}
 	GameState.simulation_events.push_front(event)
 	if GameState.simulation_events.size()>80: GameState.simulation_events.resize(80)
-	if travel_status_label:
-		travel_status_label.text="The settlement is now called %s." % final_name
+	_tell("The settlement is now called %s." % final_name,"people","notable")
 	_update_time_interface()
 	_dismiss_settlement_naming_panel()
 
@@ -13483,8 +13493,7 @@ func _on_scout_report_returned(report:Dictionary)->void:
 	if not ScoutArchive.newsworthy(report):return
 	# The simulation owns report delivery and storage. Arrival is told by the
 	# Chronicle's card (chronicle.gd), never a pause or a second toast.
-	if travel_status_label:
-		travel_status_label.text="The scouts are home. Their tale is in the Chronicle."
+	# Notifications (codex/notifications): no line over the map; the card or notice already tells it.
 
 
 func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
@@ -13512,8 +13521,7 @@ func _open_foreign_formation_from_screen(screen_position:Vector2)->bool:
 	# A card of what we see and who to ask; it orders nothing.
 	if hud:
 		hud.open_detail(preload("res://scripts/hud/content/dock_detail_map_contact.gd").new(self,hud,String(best.get("id",""))))
-	if travel_status_label:
-		travel_status_label.text="Strangers in sight. The card on the left says what we see and who to ask."
+	# Notifications (codex/notifications): no line over the map; the card or notice already tells it.
 	return true
 
 
@@ -14365,8 +14373,7 @@ func _open_owned_settlement_at(position:Vector3)->bool:
 	if not bool(selected.get("ok",false)): return false
 	_close_lens()
 	_on_hud_section_requested("settlement",0)
-	if travel_status_label:
-		travel_status_label.text="%s: its people, stores and works are on the left." % String(settlement.get("name","Our settlement"))
+	# Notifications (codex/notifications): no line over the map; the card or notice already tells it.
 	return true
 
 func _inspect_location(position: Vector3) -> void:
@@ -14478,7 +14485,7 @@ func _perform_civic_leader_removal(settlement_id:String,action:String,player_tex
 	var result:=GovernmentPeopleSystem.remove_settlement_leader(settlement_id,action)
 	AdvisorSystem.record_civic_leadership_change(settlement_id,player_text,result)
 	var message:=String(result.get("message",result.get("reason","Leadership did not change.")))
-	if travel_status_label: travel_status_label.text=PaperKit.sentence(message)
+	_tell(PaperKit.sentence(message),"court","notable")
 	if hud:
 		hud._queue_signature="__stale__"
 		hud.refresh()
@@ -14515,7 +14522,7 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		input.text=""
 		var withdrawn:=AdvisorSystem.withdraw_pending_civic_directive(settlement_id,int(leader.get("person_id",0)),text)
 		var withdrawal_message:=String(withdrawn.get("message",withdrawn.get("reason","There is no unresolved directive to withdraw.")))
-		if travel_status_label: travel_status_label.text=PaperKit.sentence(withdrawal_message.split("\n")[0])
+		_tell(PaperKit.sentence(withdrawal_message.split("\n")[0]),"court","notable")
 		if hud:
 			hud._queue_signature="__stale__"
 			hud.refresh()
@@ -14530,7 +14537,7 @@ func _issue_freeform_order(input: LineEdit) -> void:
 		input.text=""
 		var refusal:=String(grave_home.get_script_constant_map().get("COUNCIL_NO",""))
 		AdvisorSystem.record_civic_refusal(settlement_id,text,refusal)
-		if travel_status_label: travel_status_label.text=refusal
+		_tell(refusal,"court","notable")
 		if hud:
 			hud._queue_signature="__stale__"
 			hud.refresh()
@@ -14570,7 +14577,7 @@ func _issue_freeform_order(input: LineEdit) -> void:
 	# The dock is rebuilt immediately below, which destroys its LineEdit. Pending
 	# network state must therefore contain data only, never a transient UI node.
 	pending_pronouncement_inputs[request_id]=_pending_civic_request_record(text,pending_order,settlement_id,int(leader.get("person_id",0)))
-	if travel_status_label: travel_status_label.text="%s is thinking over what you said." % String(leader.get("name","The leader"))
+	_tell("%s is thinking over what you said." % String(leader.get("name","The leader")),"court","minor")
 	var initial_progress:=PronouncementInterpreter.request_progress(request_id)
 	if not initial_progress.is_empty(): _on_pronouncement_progress(request_id,initial_progress)
 	_refresh_council_dock()
@@ -14603,7 +14610,7 @@ func _on_pronouncement_interpreted(request_id:String,result:Dictionary)->void:
 	var message:=String(order.get("leader_reply",""))
 	if message.is_empty(): message="  ".join(ripples)
 	if message.is_empty(): message=String(result.get("unresolved","The pronouncement was recorded without an executable simulation effect."))
-	if travel_status_label: travel_status_label.text=PaperKit.sentence(message)
+	_tell(PaperKit.sentence(message),"court","notable")
 	_refresh_council_dock.call_deferred()
 
 func _cancel_pending_pronouncement(order_id:String,request_id:String)->void:
@@ -15288,8 +15295,7 @@ func _focus_settlement_from_screen(screen_position: Vector2, close_inspection: b
 	# still means geographic zoom; a single click opens the existing dock rather
 	# than introducing another permanent map panel.
 	if hud and not close_inspection: _on_hud_section_requested("settlement",0)
-	if travel_status_label:
-		travel_status_label.text="%s: its people, stores and works are on the left. Double-click to move closer." % String(selected.get("name","Our settlement"))
+	# Notifications (codex/notifications): no line over the map; the card or notice already tells it.
 	return true
 
 func _update_camera() -> void:
