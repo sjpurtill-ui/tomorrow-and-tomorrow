@@ -204,7 +204,7 @@ def architectural_layers(b,info,i,h):
                 a=n*math.pi/16;verts.append(K.B((math.cos(a)*5.1,2.8+math.sin(a)*1.45,z)))
         faces=[(n,n+1,n+18,n+17) for n in range(16)]
         b.add("VaultCeilingBay",K._bm_from(verts,faces),"PLASTER")
-        for x in (-1.65,1.65):record_shelves(b,info,"ClericalShelves_%s"%x,(x,1.1,-3.73),1.45,1.55,"tablet")
+        for n,x in enumerate((-1.65,1.65)):record_shelves(b,info,"ClericalShelves_%d"%n,(x,1.1,-3.73),1.45,1.55,"tablet")
     elif i==6:
         box(b,"LowCeilingBeam",(0,3.06,-2.98),(10.7,.22,.28),"WOOD")
         for x in (-3,0,3):record_shelves(b,info,"ArchiveSlots_%s"%x,(x,.76,-3.72),1.55,1.25,"book")
@@ -254,8 +254,8 @@ def architectural_layers(b,info,i,h):
         box(b,"BriefingBackdrop",(2.3,1.5,-3.85),(4.7,2.85,.08),"WOOD")
         box(b,"ReceptionSoffit",(-4.55,2.85,-2.5),(1.7,.18,2.4),"PLASTER")
         box(b,"CeilingPerimeterRear",(0,3.03,-3.55),(10.75,.18,.68),"PLASTER")
-        for x in (-2.3,2.3):
-            name="LinearPendant_%s"%x;box(b,name,(x,2.62,-1.4),(1.70,.045,.09),"PAPER");gate(info,"electricity",name)
+        for n,x in enumerate((-2.3,2.3)):
+            name="LinearPendant_%d"%n;box(b,name,(x,2.62,-1.4),(1.70,.045,.09),"PAPER");gate(info,"electricity",name)
             for dx in (-.55,.55):
                 beam(b,name,(x+dx,2.66,-1.4),(x+dx,3.1,-1.4),.008,"IRON")
 

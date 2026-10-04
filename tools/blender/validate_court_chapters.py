@@ -143,6 +143,10 @@ def main():
         for group in ("gates", "technology_gates", "institution_gates"):
             for gate, objects in info[group].items():
                 assert set(objects) <= names, (key, group, gate)
+                # Godot sanitizes these node-name characters during GLB import;
+                # a raw name match alone would leave the runtime gate unbound.
+                for name in objects:
+                    assert not any(c in name for c in '.:@/"%'), (key, group, gate, name, "Godot-unsafe gate target")
                 if group == "technology_gates":
                     assert gate.removeprefix("no_") in CAPABILITIES, (key, gate)
         for name in names:

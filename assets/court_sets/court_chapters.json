@@ -5625,8 +5625,8 @@
    "rustic_trophies": true,
    "gates": {
     "writing": [
-     "ClericalShelves_-1.65_Records",
-     "ClericalShelves_1.65_Records",
+     "ClericalShelves_0_Records",
+     "ClericalShelves_1_Records",
      "RecordSheet_0",
      "RecordSheet_1"
     ]
@@ -6047,10 +6047,10 @@
     "RecordNiche_-4.8",
     "RecordNiche_4.8",
     "VaultCeilingBay",
-    "ClericalShelves_-1.65",
-    "ClericalShelves_-1.65_Records",
-    "ClericalShelves_1.65",
-    "ClericalShelves_1.65_Records",
+    "ClericalShelves_0",
+    "ClericalShelves_0_Records",
+    "ClericalShelves_1",
+    "ClericalShelves_1_Records",
     "Chair_officials_0",
     "Chair_officials_1",
     "Chair_officials_2",
@@ -6072,10 +6072,10 @@
     "Chair_officials_3",
     "Chair_officials_4",
     "Chair_officials_5",
-    "ClericalShelves_-1.65",
-    "ClericalShelves_-1.65_Records",
-    "ClericalShelves_1.65",
-    "ClericalShelves_1.65_Records",
+    "ClericalShelves_0",
+    "ClericalShelves_0_Records",
+    "ClericalShelves_1",
+    "ClericalShelves_1_Records",
     "Desk_0",
     "Desk_1",
     "DoorLintel",
@@ -6762,7 +6762,7 @@
       -2.95
      ]
     ],
-    "ClericalShelves_-1.65": [
+    "ClericalShelves_0": [
      [
       -2.375,
       1.1,
@@ -6774,7 +6774,7 @@
       -3.6
      ]
     ],
-    "ClericalShelves_-1.65_Records": [
+    "ClericalShelves_0_Records": [
      [
       -2.31,
       1.195,
@@ -6786,7 +6786,7 @@
       -3.645
      ]
     ],
-    "ClericalShelves_1.65": [
+    "ClericalShelves_1": [
      [
       0.925,
       1.1,
@@ -6798,7 +6798,7 @@
       -3.6
      ]
     ],
-    "ClericalShelves_1.65_Records": [
+    "ClericalShelves_1_Records": [
      [
       0.99,
       1.195,
@@ -6968,7 +6968,7 @@
     ]
    },
    "glb": "court_chapter_05.glb",
-   "sha256": "4a18fb5755e3666480a8176a5648033c2d720224b479c6d69a59c6e622188107"
+   "sha256": "e76705cd4baead0837944c8f97355305dbc9275afe2122cff48d6deda6fb4cca"
   },
   "chapter_06": {
    "chapter": 6,
@@ -19272,8 +19272,8 @@
      "AirConditioning"
     ],
     "electricity": [
-     "LinearPendant_-2.3",
-     "LinearPendant_2.3"
+     "LinearPendant_0",
+     "LinearPendant_1"
     ],
     "paper": [
      "RecordSheet_0",
@@ -19734,8 +19734,8 @@
     "BriefingBackdrop",
     "ReceptionSoffit",
     "CeilingPerimeterRear",
-    "LinearPendant_-2.3",
-    "LinearPendant_2.3",
+    "LinearPendant_0",
+    "LinearPendant_1",
     "Chair_officials_0",
     "Chair_officials_1",
     "Chair_officials_2",
@@ -19786,8 +19786,8 @@
     "InstitutionAssembly",
     "InstitutionMount",
     "InstitutionThrone",
-    "LinearPendant_-2.3",
-    "LinearPendant_2.3",
+    "LinearPendant_0",
+    "LinearPendant_1",
     "OpenDoorLeaf",
     "Radiator",
     "ReceptionConsole",
@@ -20301,7 +20301,7 @@
       -3.21
      ]
     ],
-    "LinearPendant_-2.3": [
+    "LinearPendant_0": [
      [
       -3.15,
       2.5975,
@@ -20313,7 +20313,7 @@
       -1.355
      ]
     ],
-    "LinearPendant_2.3": [
+    "LinearPendant_1": [
      [
       1.45,
       2.5975,
@@ -20555,7 +20555,7 @@
     ]
    },
    "glb": "court_chapter_15.glb",
-   "sha256": "4238ba37ebd5924a618143216c9da5a60e3921676938c4f36c72b93b2a433c35"
+   "sha256": "e897fa4e23a9f47732aa6c90a5463c4603a6fb86b1c6a09b452b0786e2b48649"
   }
  }
 }
