@@ -20,6 +20,7 @@ sys.path.insert(0,HERE)
 import court_set_kit as K
 import court_set_halls as H
 import court_set as S
+import court_room_dressing as D
 
 OUT=os.path.join(ROOT,"assets","court_sets")
 CHAPTERS=[
@@ -49,7 +50,14 @@ def material_finishes(chapter):
                             "albedo":"9daea2","albedo_worn":"b1bcb0","mottle":.03,"variation":.025}}
     if chapter<10:
         out=glazing if chapter>=2 else {}
-        if chapter in (1,7):out["WOOD"]={"pattern":16,"albedo":"6b5038","albedo_worn":"7c6045","mottle":.09,"variation":.10}
+        if chapter:
+            # WOOD is cut joinery; actual unpeeled logs keep their BARK slot.
+            # Bark's oversized dark furrows made the chancery cornice look raw.
+            out["WOOD"]={"pattern":16,"albedo":"6b5038","albedo_worn":"7c6045","mottle":.045,"variation":.075,"grain":.03}
+            out["PLANK"]={"pattern":9,"albedo":"71583f","albedo_worn":"826a4d","mottle":.035,"variation":.06,"grain":.03}
+        if chapter in (2,3,4,5,6,8):
+            out["FLAGS"]={"albedo":"9a9282","albedo_worn":"a79f8d","mottle":.045,"variation":.05,"grain":.035}
+            out["STONE_BLOCK"]={"albedo":"b0a58f","albedo_worn":"b9af9c","mottle":.035,"variation":.05}
         if chapter==2:out["MUD"]={"pattern":0,"albedo":"b0a080","albedo_worn":"bcad8d","mottle":.10,"grain":.08}
         if chapter in (5,6,9):out["PLASTER"]={"pattern":0,"albedo":"c1b699","albedo_worn":"cdc2a9","mottle":.07,"variation":.06}
         return out
@@ -95,14 +103,17 @@ def lighting(i):
     # Window fills represent diffuse daylight, so do not depend on electrical
     # capabilities. Electrical fixture meshes retain their own capability gates.
     warm=i in (0,1,7,8,9,11)
-    sun=[1.05,.72,.95,.85,.80,.60,.62,.67,.70,.66,.62,.55,.52,.63,.42,.38][i]
-    ambient=[.48,.40,.45,.42,.46,.42,.48,.42,.43,.47,.50,.48,.53,.54,.61,.64][i]
-    dirs=[[-.4,-.7,-.5],[.4,-.85,-.25],[-.5,-.65,-.45]][i%3]
+    sun=[1.05,.48,.62,.56,.52,.45,.43,.46,.50,.43,.40,.38,.36,.42,.31,.29][i]
+    ambient=[.48,.38,.41,.39,.41,.39,.44,.38,.40,.43,.45,.44,.47,.48,.52,.54][i]
+    # Rays enter from the actual rear apertures and travel toward +Z. A small
+    # lateral component avoids the old side-wall wedge across the whole cast.
+    dirs=[[-.4,-.7,-.5],[.12,-.70,.72],[-.16,-.64,.78],[.10,-.78,.64]][0 if i==0 else 1+(i%3)]
     light={"open_sky":i==0,"sun_dir":dirs,"sun_energy":sun,"fire_energy":1.15 if i in (0,1,7,8) else 0,
-           "fire_range":5.5,"fog":.001,"fill_colour":"d7d5c2" if warm else "cfdae0"}
-    look={"ambient_energy":ambient,"exposure":1.0,"sun":"fff0d5" if warm else "ecf0ef",
-          "ambient":"b6bdbb" if i>=10 else "aaa896"}
-    fills=[] if i==0 else [[x,(sill+head)/2,-3.48,.26 if i<10 else .32,4.4] for x,w,sill,head in WINDOWS[i]]
+           "fire_range":5.5,"fog":.001,"fill_colour":"c9d6df" if warm else "d3dce0",
+           "aperture_z":-3.78,"daylight_strength":0 if i==0 else .03 if i>=14 else .045 if i>=10 else .055}
+    look={"ambient_energy":ambient,"exposure":1.0,"sun":"ffe6c5" if warm else "fff0da",
+          "ambient":"b9c4c9" if i>=10 else "aab8bd"}
+    fills=[] if i==0 else [[x*.82,min(2.35,(sill+head)/2),-2.72,.34 if i<10 else .36,5.4] for x,w,sill,head in WINDOWS[i]]
     if len(fills)>2:fills=[fills[0],fills[-1]]
     return light,look,fills
 
@@ -155,16 +166,7 @@ def record_shelves(b,info,name,at,width,height=1.8,kind="book"):
     for shelf in range(4):
         sy=y+.07+shelf*(height-.1)/3
         box(b,name,(x,sy,z),(width,.045,depth),"WOOD")
-        if shelf==3:continue
-        contents=name+"_Records"
-        for n in range(max(2,int(width/.19))):
-            bx=x-width/2+.13+n*.17
-            if kind=="tablet":box(b,contents,(bx,sy+.09,z+.01),(.13,.13,.14),"TABLET",yaw=.04*(n%3),bevel=0)
-            else:
-                box(b,contents,(bx,sy+.17,z+.005),(.11,.29+(.03 if n%3==0 else 0),.18),"WEAVE_A" if n%3 else "WEAVE_B",bevel=0)
-                box(b,contents,(bx,sy+.17,z+.10),(.075,.22,.015),"PAPER",bevel=0)
-    if kind=="tablet":info["gates"].setdefault("writing",[]).append(contents)
-    else:gate(info,"bound_records",contents)
+    D.shelf_records(b,box,info,name,at,width,height,kind)
 
 
 def architectural_layers(b,info,i,h):
@@ -350,16 +352,12 @@ def gate(info,cap,name):info["technology_gates"].setdefault(cap,[]).append(name)
 
 
 def papers(b,info,name,at,kind="paper"):
+    D.record(b,box,info,name,at,kind)
     if kind=="paper":
-        box(b,name,local(at,(0,.018,0)),(.40,.036,.29),"PAPER",yaw=.08)
-        for i in range(4):box(b,name,local(at,(0,.038,.07-i*.04)),(.24,.002,.006),"SOOT",yaw=.08,bevel=0)
         gate(info,"paper",name)
     elif kind=="book":
-        box(b,name,local(at,(0,.055,0)),(.33,.11,.26),"WEAVE_A")
-        box(b,name,local(at,(.01,.055,.005)),(.31,.07,.25),"PAPER")
         gate(info,"bound_records",name)
     else:
-        box(b,name,local(at,(0,.03,0)),(.28,.06,.21),"TABLET")
         info["gates"].setdefault("writing",[]).append(name)
 
 
@@ -538,7 +536,7 @@ def build(i):
         else:marks["officials_%d"%n]=S.mark(at)
     for n,(x,z) in enumerate(((-4.4,2.8),(-3.1,3.1),(3.1,3.1),(4.4,2.8))):marks["crowd_%d"%n]=S.mark((x,0,z))
     for n,(x,z) in enumerate(((-1.2,3.1),(1.2,3.1),(0,3.5))):marks["envoy_%d"%n]=S.mark((x,0,z))
-    desks=[]
+    desks=[];supports=[]
     if i in (2,3,5,6,7,8,9,10,12,13):
         places=[(-2.8,-.65),(2.8,-.65)]
         if i in (2,6):places=places[:1]
@@ -547,21 +545,24 @@ def build(i):
         for n,(x,z) in enumerate(places):
             y=table(b,"Desk_%d"%n,(x,0,z),1.9 if working else 1.65,.85 if working else .75,kind="desk" if i>=10 else "trestle")
             desks.append((x,y,z))
+            supports.append("Desk_%d"%n)
     if i in (4,11,14,15):
         tz=-1.45 if meeting else -.55
         y=table(b,"CouncilTable",(0,0,tz),4.6 if meeting else 3.0,1.35 if meeting else 1.25,kind="boat" if i==15 else "oval")
         desks=[(-1.1 if meeting else -.7,y,tz),(1.1 if meeting else .7,y,tz)]
+        supports=["CouncilTable","CouncilTable"]
     if i==1:
         for x in (-4.85,4.85):table(b,"CommunityBench_%s"%x,(x,0,-2.8),1.1,.4,.45)
     if i==9:
         for n,x in enumerate((-4.7,4.7)):cabinet(b,"RecordChest_%d"%n,(x,0,-2.2),.8,.60)
     if 10<=i<15:
         y=table(b,"SecretaryStation",(-4.6,0,-2.85),1.0,.65,kind="desk")
-        if i>=12:desks.append((-4.6,y,-2.85))
+        if i>=12:desks.append((-4.6,y,-2.85));supports.append("SecretaryStation")
     if i==15:
         # Leave a full side aisle between reception and the conference end chair.
         table(b,"ReceptionConsole",(-4.9,0,-1.75),.85,.55,.84,kind="desk")
     equipment(b,info,i,desks)
+    if i>=2:D.work_clusters(b,box,beam,info,i,desks,supports)
     if hearth:
         if i:
             # Flush noncombustible inset: the authored ash/log bases remain above
@@ -587,6 +588,7 @@ def build(i):
         beam(b,"InstitutionMount",(emblem_x,emblem_y,-3.8),(emblem_x,emblem_y,-3.59),.025)
         emblem_scale=.7 if i==9 else 1.0
         box(b,"InstitutionAssembly",(emblem_x,emblem_y,-3.60),(emblem_scale,.72*emblem_scale,.07),"WEAVE_B")
+        D.plaque_frame(b,box,(emblem_x,emblem_y,-3.60),emblem_scale)
         K.shield(b,"InstitutionThrone",(emblem_x,emblem_y,-3.52),(0,0,1),.36*emblem_scale,slot="SHIELD_C",boss_slot="BRONZE")
         info["institution_gates"]={"assembly":["InstitutionAssembly"],"throne":["InstitutionThrone"]}
     info["marks"]=marks
