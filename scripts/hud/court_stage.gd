@@ -264,10 +264,6 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={},presenta
 	var order:Array=[[0,1,2],[1,2,0],[2,0,1],[0,2,1],[1,0,2],[2,1,0]][(h>>11)%6]
 	var cloth:Array=[]
 	for i in 3:cloth.append(Color(String(dyes[int(order[i])%dyes.size()])))
-	if tailored:
-		# A fitted coat, a light shirt, and the people's dye in its trim/tie.
-		cloth[0]=Color("29303b").lerp(cloth[0],0.24 if outfit=="courtcoat" else 0.10)
-		cloth[1]=Color("e9e3d4")
 	var without:Array=[]
 	if outfit=="hide":
 		# Hides are hides: the dye shows as a stain and in the cord.
@@ -301,11 +297,15 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={},presenta
 	var known:Variant=person.get("age",null)
 	if known is int or known is float:look["years"]=int(known)
 	elif String(known if known!=null else "").to_lower()=="child":look["years"]=9
+	look=FigureLook.dress(look,era,high or not String(person.get("office_key","")).is_empty())
+	outfit=String(look.outfit)
+	tailored=outfit in ["courtcoat","formal","business"]
+	cloth=look.cloth
 	# Two people on one screen are never dressed and coloured alike.
 	if screen_registry!=null:
 		var taken:Dictionary=screen_registry.get("_look_of",{})
 		# A court can be reopened after discovery without changing the person.
-		var dressed_identity:=identity+"|"+outfit+"|"+String(era.get("stage_id",""))
+		var dressed_identity:=identity+"|"+outfit+"|"+String(era.get("stage_id",""))+"|"+str(era.get("dye_level",0))
 		if taken.has(dressed_identity):return taken[dressed_identity]
 		var used:Dictionary=screen_registry.get("_looks",{})
 		var turn:=0

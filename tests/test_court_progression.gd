@@ -61,7 +61,7 @@ func test_foreign_identity_keeps_its_dress_and_greeting_in_a_later_host_room()->
 	var host:=Presentation.for_owner()
 	var visitor:=Presentation.for_owner("visitor")
 	var facts:={"presentation":host,"presentations":{"player":host,"visitor":visitor}}
-	var person:={"name":"Visiting envoy","person_id":198,"age":38,"sex":"female","appearance_civ_id":"visitor"}
+	var person:={"name":"Visiting envoy","person_id":198,"age":38,"sex":"female","appearance_civ_id":"visitor","office_key":"Envoy"}
 	var member:=Director.cast_member(person,{"key":"main","role":"main"})
 	assert_str(String(Stage.figure_look(person).outfit)).is_equal(String(visitor.outfit))
 	assert_str(Director.routine_act(facts,member,"bow")).is_equal(String(visitor.routine_greeting))

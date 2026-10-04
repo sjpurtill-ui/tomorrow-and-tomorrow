@@ -25,6 +25,27 @@ func test_formal_clothes_keep_light_shirts_when_the_registry_spreads_people()->v
 		assert_float((look.cloth[1] as Color).get_luminance()).is_greater(0.7)
 		assert_bool(String(look.stance) in ["bowl","staff","crouch"]).is_false()
 
+func test_actual_office_role_selects_formal_dress_without_changing_person()->void:
+	var profile:=Presentation.from_knowledge(["temple_high_steward","pictographic_records","plain_weaving"])
+	var person:={"name":"Hena","person_id":81,"sex":"female","age":35}
+	var registry:={}
+	var visitor:=Stage.figure_look(person,registry,profile)
+	person["office_key"]="Scholar"
+	var official:=Stage.figure_look(person,registry,profile)
+	assert_str(String(visitor.outfit)).is_equal("tunic")
+	assert_str(String(official.outfit)).is_equal("robe")
+	for key in ["skin","face","hair_colour","variant","seed"]:
+		assert_that(official[key]).is_equal(visitor[key])
+
+func test_learning_dyes_refreshes_a_reused_wardrobe_registry()->void:
+	var person:={"name":"Hena","person_id":81,"sex":"female","age":35}
+	var registry:={}
+	var plain:=Stage.figure_look(person,registry,Presentation.from_knowledge(["plain_weaving"]))
+	var dyed:=Stage.figure_look(person,registry,Presentation.from_knowledge(["plain_weaving","alum_mordant_dyeing"]))
+	assert_str(String(dyed.outfit)).is_equal(String(plain.outfit))
+	assert_array(dyed.cloth).is_not_equal(plain.cloth)
+	assert_dict(dyed.face).is_equal(plain.face)
+
 func test_later_institutions_use_the_hall_fallback_without_camp_stores()->void:
 	for id in ["privy_state_council","parliamentary_council","ministerial_cabinet","executive_council"]:
 		assert_str(CourtSet.kind_for(id,0)).is_equal("grand_hall")
