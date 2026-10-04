@@ -107,11 +107,13 @@ def town_forecast(parts: dict, people: float, capacity: float, start: float, end
                   carry_from: float = 0.0, carry_days: float = 90.0, held: float = 0.0) -> dict:
     """dry_water.gd forecast for one town from the dry year's first day: the
     store full (capacity less a day's drinking), the order to carry from
-    `carry_from` for `carry_days`. {deaths: [dead of thirst each day], held}."""
+    `carry_from` for `carry_days`. {deaths: [dead of thirst each day], held,
+    low (days short of water)}."""
     store = max(0.0, capacity - people)
     shortage = 0.0
     dead = 0.0
     deaths = []
+    low = 0
     drunk_sum = 0.0
     need_sum = 0.0
     day = start + 1.0
@@ -134,13 +136,14 @@ def town_forecast(parts: dict, people: float, capacity: float, start: float, end
         store = max(0.0, rest - min(rest, p["need"] - drinking))
         intake = drink / max(0.001, drinking)
         shortage = shortage + 1.0 if intake < 0.98 else max(0.0, shortage - 2.0)
+        low += 1 if intake < 0.98 else 0
         today = (people - dead) * thirst_rate(intake, shortage) / 365.0
         dead += today
         deaths.append(today)
         drunk_sum += drink
         need_sum += drinking
         day += 1.0
-    return {"deaths": deaths, "held": drunk_sum / need_sum if need_sum > 0 else 1.0}
+    return {"deaths": deaths, "held": drunk_sum / need_sum if need_sum > 0 else 1.0, "low": low}
 
 
 def nominal_town(sim) -> dict:

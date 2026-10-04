@@ -1,6 +1,6 @@
 {
  "spec": "path_war:74119:15",
- "commit": "484aeca238d3661b033f534c7500e18b8a9b2e81",
+ "commit": "cd3cabfe9abaeffccd7d874cd89acf5239e43658",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "f309d9311627",
   "scripts/society_model.gd": "1b3e35dc26d7",
@@ -16,18 +16,18 @@
   "scripts/government_people_system.gd": "03495db7ac51",
   "scripts/work_paths.gd": "d50f7aa9d6ee",
   "scripts/civilian_goods.gd": "f1e474bca48a",
-  "scripts/resource_system.gd": "fbab026550ae",
+  "scripts/resource_system.gd": "314ae1659dba",
   "scripts/weapons_stock.gd": "4add78acd046",
   "scripts/watch_military.gd": "ec1cd7d0af11",
   "scripts/crisis_background.gd": "138760ec064e",
-  "scripts/crisis_system.gd": "854a60fb6706",
-  "scripts/crisis_unattended.gd": "38bc50272819",
+  "scripts/crisis_system.gd": "2b1df6e22d25",
+  "scripts/crisis_unattended.gd": "96454dcfd419",
   "scripts/built_fabric.gd": "fe92161c61b7",
   "scripts/settlement_construction.gd": "55bb3fda4014",
-  "scripts/dry_water.gd": "566f1a07c874",
+  "scripts/dry_water.gd": "b92e49a80010",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 129.9,
+ "wall_seconds": 126.0,
  "returncode": 0,
- "generated": "2026-10-03 17:39:14"
+ "generated": "2026-10-03 18:57:38"
 }
