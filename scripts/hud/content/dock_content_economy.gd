@@ -2,6 +2,7 @@ extends "res://scripts/hud/content/dock_content_base.gd"
 const Charts:=preload("res://scripts/hud/strategic_chart_blocks.gd")
 const Indicators:=preload("res://scripts/civilization_indicators.gd")
 const Plain:=preload("res://scripts/hud/production_plain.gd")
+const Purse:=preload("res://scripts/realm_purse.gd")
 ## The Food, Materials and Wealth docks (one section, three tabs). The rail
 ## names each tab, so the dock's title follows the tab the player opened.
 const TITLES:=["Food","Materials","Wealth","Trade"]
@@ -30,7 +31,18 @@ func _local_tab(sub:int)->Dictionary:
 		1:return {"blocks":[_materials_data()]}
 		2:return _wealth_tab()
 		3:return {"blocks":[{"type":"trade_board"}]}
-	return {"blocks":[_provisions_data()]}
+	return _food_tab()
+
+## The Food & water tab: this place's food and water, then the common store
+## while it is food (hud/purse_board.gd "store": the levy, what it pays for).
+## After coinage the treasury is coin and lives on Wealth.
+func _food_tab()->Dictionary:
+	var blocks:Array=[_provisions_data()]
+	if Purse.in_kind():blocks.append({"type":"purse_board","mode":"store","on_open":_open_section})
+	return {"blocks":blocks}
+
+func _open_section(section:String,sub:int)->void:
+	if is_instance_valid(hud):hud.section_requested.emit(section,sub)
 
 func _food_blocks(metrics:Dictionary)->Array:
 	var produced:=float(metrics.get("food_production",0.0))
@@ -143,13 +155,13 @@ func _trade_block()->Dictionary:
 
 var selected_account:=""
 var show_work:=false
-## The Wealth tab: the realm's purse first (hud/purse_board.gd, which reads
-## the realm itself and refreshes on its own), then this place's day's work
-## and its households' money. Trade between peoples mounts its own board
-## between them: one line, blocks.append(<its block>), where marked.
+## The Wealth tab: what the people own and can trade, goods first, and the
+## treasury once it is coin (hud/purse_board.gd, which reads the realm itself
+## and refreshes on its own), then this place's day's work and its
+## households' money. Trade between peoples mounts its own board between
+## them: one line, blocks.append(<its block>), where marked.
 func _wealth_tab()->Dictionary:
-	var blocks:Array=[{"type":"purse_board","on_open":func(section:String,sub:int)->void:
-		if is_instance_valid(hud):hud.section_requested.emit(section,sub)}]
+	var blocks:Array=[{"type":"purse_board","mode":"wealth","on_open":_open_section}]
 	# Trade between peoples (econ-trade) mounts its board here.
 	blocks.append(_ledger_block())
 	return {"blocks":blocks}

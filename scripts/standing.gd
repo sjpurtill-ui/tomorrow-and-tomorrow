@@ -43,7 +43,7 @@ const CONTEMPT_FLOOR:=0.3
 const STRENGTHS:=[
 	["might","Might","warriors trained and ready to fight","military",0,"Warriors","people out of the fields, and food and arms for them"],
 	["endurance","Endurance","how long we could hold out, starved or besieged","economy",0,"Food","stores put by, and the hands to fill them"],
-	["wealth","Wealth","food and materials put by","economy",0,"Food","nothing by itself, but plenty draws envy"],
+	["wealth","Wealth","goods, materials and treasures we hold","economy",2,"Wealth","makers' hands and materials; plenty draws envy"],
 	["reach","Reach","how far our carriers go and how many peoples know us","world",0,"Known World","carriers and scouts away from home"],
 	["persuasion","Persuasion","our envoy's skill and how open our ways are","court",0,"The court","a skilled envoy, gifts, and time spent abroad"],
 	["splendor","Splendor","great works and treasures others hear of","construction",3,"Landmarks","builders, materials and years"],
@@ -62,9 +62,9 @@ const VIEWS:=[
 ]
 ## What each strength makes of us when it leads, when it is second, and when
 ## it is neglected: the words of the Standing page's "what we are".
-const LEANING:={"might":"A people of spears","endurance":"A hardy people","wealth":"A people of full stores","reach":"A far-travelling people","persuasion":"A people of good words","splendor":"A people of great works","genius":"A learned people","cunning":"A watchful people","order":"A well-ordered people"}
-const ALSO:={"might":"strong in spears","endurance":"hard to starve out","wealth":"rich in stores","reach":"known far and wide","persuasion":"well spoken","splendor":"rich in works","genius":"learned","cunning":"watchful","order":"orderly"}
-const NEGLECT:={"might":"with few spears","endurance":"who could not hold out long","wealth":"with thin stores","reach":"known to few","persuasion":"whose words carry little weight","splendor":"with nothing to show","genius":"slow to learn","cunning":"blind to what others plan","order":"quarrelsome"}
+const LEANING:={"might":"A people of spears","endurance":"A hardy people","wealth":"A people rich in goods","reach":"A far-travelling people","persuasion":"A people of good words","splendor":"A people of great works","genius":"A learned people","cunning":"A watchful people","order":"A well-ordered people"}
+const ALSO:={"might":"strong in spears","endurance":"hard to starve out","wealth":"rich in goods","reach":"known far and wide","persuasion":"well spoken","splendor":"rich in works","genius":"learned","cunning":"watchful","order":"orderly"}
+const NEGLECT:={"might":"with few spears","endurance":"who could not hold out long","wealth":"with little to trade","reach":"known to few","persuasion":"whose words carry little weight","splendor":"with nothing to show","genius":"slow to learn","cunning":"blind to what others plan","order":"quarrelsome"}
 
 ## How long a people remembers what was done to it, against oral memory: a
 ## people that writes keeps its dread and its grudges twice as long, one that
@@ -348,24 +348,84 @@ static func _knowledge_words(intel:float)->String:
 	if intel>=0.2: return "a little"
 	return "hardly at all"
 
-## WEALTH: food in store, building materials and made goods a head, against
-## the age. Stores alone cannot fill it.
+## WEALTH: what the people own and can trade, a head, against the age: made
+## goods (with coin and weighed metal once known, at what they buy in goods),
+## materials in store, and treasures. Food in store is Endurance's alone: a
+## granary is not riches to trade. Every town counts (wealth_held).
 static func _wealth(year:float)->Dictionary:
-	var s=WorldSimulation.state
 	var pop:=_population()
-	var food_days:=maxf(0.0,float(s.simulation_metrics.get("food_days",0.0)))
-	var materials:=0.0
-	for resource in ["Timber","Stone","Clay","Fiber Plants"]: materials+=maxf(0.0,float(s.resource_stockpiles.get(resource,0.0)))
-	var goods:=maxf(0.0,float(s.resource_stockpiles.get("Civilian Goods",0.0)))
-	var fa:=Scale.anchors(Scale.STORES,year)
-	var ma:=Scale.anchors(Scale.MATERIALS,year)
+	var held:=wealth_held()
+	var worth:=float(held.worth)/pop
+	var materials:=float(held.materials)/pop
+	var treasures:=float(held.treasure_worth)/pop
 	var ga:=Scale.anchors(Scale.GOODS,year)
-	var parts:=[_part("food",Scale.score(food_days,fa),WEALTH_WEIGHTS.food,food_days,fa),_part("materials",Scale.score(materials/pop,ma),WEALTH_WEIGHTS.materials,materials/pop,ma),_part("goods",Scale.score(goods/pop,ga),WEALTH_WEIGHTS.goods,goods/pop,ga)]
+	var ma:=Scale.anchors(Scale.MATERIALS,year)
+	var ta:=Scale.anchors(Scale.TREASURES,year)
+	var parts:=[_part("goods",Scale.score(worth,ga),WEALTH_WEIGHTS.goods,worth,ga),_part("materials",Scale.score(materials,ma),WEALTH_WEIGHTS.materials,materials,ma),
+		_part("treasures",Scale.score(treasures,ta),WEALTH_WEIGHTS.treasures,treasures,ta)]
 	if not _words: return _entry(parts,"")
-	var why:="food for %d days, %s; %s loads of materials and %s of made goods a head (a typical people of our age: %s and %s)" % [roundi(food_days),_vs(food_days,fa),_n(materials/pop),_n(goods/pop),_n(float(ma[1])),_n(float(ga[1]))]
+	var goods_words:="%s goods (about %s a head; a typical people of our age about %s)" % [EraWordsRef.grouped(roundi(float(held.goods))),_n(float(held.goods)/pop),_n(float(ga[1]))]
+	if float(held.coin)>=0.5: goods_words="%s goods and %s in %s, worth %s goods together (about %s a head; a typical people of our age about %s)" % [EraWordsRef.grouped(roundi(float(held.goods))),EraWordsRef.grouped(roundi(float(held.coin))),String(held.coin_word),EraWordsRef.grouped(roundi(float(held.worth))),_n(worth),_n(float(ga[1]))]
+	var count:=int(held.treasures)
+	var treasure_words:=("no treasures" if count==0 else "%s treasure%s worth about %s goods" % [_count_word(count),"" if count==1 else "s",EraWordsRef.grouped(roundi(float(held.treasure_worth)))])
+	if float(ta[1])>0.05: treasure_words+=" (%s a head; typical %s)" % [_n(treasures),_n(float(ta[1]))]
+	var why:="%s; %s loads of materials a head (typical %s); %s" % [goods_words,_n(materials),_n(float(ma[1])),treasure_words]
 	return _entry(parts,why)
 
-const WEALTH_WEIGHTS:={"food":0.5,"materials":0.25,"goods":0.25}
+const EraWordsRef:=preload("res://scripts/hud/era_words.gd")
+
+## What the people in scope holds, in every town: made goods, materials
+## (timber, stone, clay and fibre), coin and weighed metal (once known), and
+## treasures, with what the coin and treasures are worth in goods at the
+## people's own prices (trade_prices.gd). {goods, materials, coin, coin_word,
+## treasures, treasure_worth, worth (goods + coin's worth)}. The same for
+## every people, read in its own scope.
+static func wealth_held()->Dictionary:
+	var s=WorldSimulation.state
+	# The place in scope, then every other town's own stores and purses
+	# (settlement_model.gd keeps them in its local_resources).
+	var places:Array=[s]
+	var here:=String(s.resource_settlement_id)
+	for record in s.player_settlements:
+		if not record is Dictionary or bool((record as Dictionary).get("primary",false)) or String((record as Dictionary).get("id",""))==here: continue
+		var local:Variant=(record as Dictionary).get("local_resources",{})
+		if local is Dictionary and not (local as Dictionary).is_empty(): places.append(local)
+	var goods:=0.0
+	var materials:=0.0
+	var coin:=0.0
+	for place:Variant in places:
+		var stock:Variant=place.get("resource_stockpiles")
+		if stock is Dictionary:
+			goods+=maxf(0.0,_num((stock as Dictionary).get(WEALTH_GOODS,0.0)))
+			for resource:String in WEALTH_MATERIALS: materials+=maxf(0.0,_num((stock as Dictionary).get(resource,0.0)))
+		# Coin and weighed metal, once the people keep them (economy_system.gd):
+		# the households' purses, hoards and mutual aid, and the town's own.
+		for field:String in WEALTH_MONEY: coin+=maxf(0.0,_num(place.get(field)))
+	# The treasury's coin (realm_purse.gd keeps the realm's one account).
+	var purse:Variant=s.realm_purse
+	if purse is Dictionary: coin+=maxf(0.0,_num((purse as Dictionary).get("coin",0.0)))
+	var prices:=preload("res://scripts/trade_prices.gd")
+	var goods_price:=maxf(0.01,prices.in_scope(WEALTH_GOODS))
+	var count:=0
+	var appraised:=0.0
+	var collection:=preload("res://scripts/artifact_collection.gd")
+	var exchange:Variant=s.society_exchange
+	if exchange is Dictionary and (exchange as Dictionary).get("collections") is Dictionary:
+		for item:Variant in ((exchange as Dictionary).collections as Dictionary).values():
+			if item is Dictionary and String((item as Dictionary).get("kind",""))=="artifact":
+				count+=1
+				appraised+=maxf(0.0,float(collection.price(item)))
+	var coin_worth:=coin*prices.in_scope("Coin")/goods_price
+	return {"goods":goods,"materials":materials,"coin":coin,"coin_word":"coin" if String(s.economy_stage)=="currency" else "weighed metal","treasures":count,"treasure_worth":appraised/goods_price,"worth":goods+coin_worth}
+
+static func _num(value:Variant)->float:
+	return float(value) if value is float or value is int else 0.0
+
+const WEALTH_GOODS:="Civilian Goods"
+const WEALTH_MATERIALS:=["Timber","Stone","Clay","Fiber Plants"]
+## The money a town's people and keepers hold (game_state.gd), in coin.
+const WEALTH_MONEY:=["private_currency","currency_hoards","mutual_aid_reserve","public_treasury","weighed_metal_circulation"]
+const WEALTH_WEIGHTS:={"goods":0.6,"materials":0.25,"treasures":0.15}
 const ENDURANCE_WEIGHTS:={"food":0.45,"water":0.1,"walls":0.2,"health":0.125,"cohesion":0.125}
 const ORDER_WEIGHTS:={"legitimacy":0.35,"cohesion":0.2,"administration":0.2,"steward":0.25}
 const REACH_WEIGHTS:={"logistics":0.5,"met":0.5}
@@ -724,7 +784,7 @@ static func view_of(civ_id:String,our:Dictionary={})->Dictionary:
 	var their_wealth:=their_reading_value(civ_id,"wealth")
 	var richer:=maxf(0.0,our_wealth-their_wealth)
 	var envy:=clampf((our_wealth*ENVY_PLENTY+richer*ENVY_RICHER+heard*0.4)*(1.0-awe)*(1.0-trust*0.5)*(1.0-fear*0.5),0.0,1.0)
-	why["envy"]="they see our stores and works%s%s" % [_plenty_words(civ_id,our_wealth,their_wealth) if richer>0.05 else ""," and too few to guard them" if awe<0.35 else ""]
+	why["envy"]="they see our goods and works%s%s" % [_plenty_words(civ_id,our_wealth,their_wealth) if richer>0.05 else ""," and too few to guard them" if awe<0.35 else ""]
 	var contempt:=clampf((1.0-respect)*clampf(1.25-ratio,0.0,1.0)*(1.0-fear*0.6),0.0,1.0)
 	why["contempt"]="our fighting strength %s theirs" % _ratio_words(ratio)
 	return {"known":true,"allure":allure,"awe":awe,"fear":fear,"respect":respect,"trust":trust,"resentment":resentment,"envy":envy,"contempt":contempt,"strength_ratio":ratio,"why":why}
@@ -1097,7 +1157,7 @@ static func consequences(civ_id:String,v:Dictionary)->Array[Dictionary]:
 		var grudge:=float(war.call("grudge_raid_chance",civ_id))
 		if grudge>0.0: out.append({"id":"grudge","tone":"danger","words":"Raiders to settle an old grudge: %s" % monthly_odds_words(grudge),"detail":"Their ruler's grudges weigh heavy enough to send raiders without a new quarrel."})
 		var raid:=float(war.call("envy_raid_chance",civ_id,float(v.get("envy",0.0))))
-		if raid>0.0: out.append({"id":"envy","tone":"danger","words":"Raiders for our stores: %s" % monthly_odds_words(raid),"detail":"Envy %d%%: %s." % [roundi(float(v.envy)*100.0),String((v.get("why",{}) as Dictionary).get("envy",""))]})
+		if raid>0.0: out.append({"id":"envy","tone":"danger","words":"Raiders for our goods: %s" % monthly_odds_words(raid),"detail":"Envy %d%%: %s." % [roundi(float(v.envy)*100.0),String((v.get("why",{}) as Dictionary).get("envy",""))]})
 	var lives:=_lives()
 	if lives!=null:
 		for row:Array in [["tribute_demand","Demands for tribute and tests of our resolve","danger"],["redress_demand","Demands to right old wrongs","danger"],["gift_goods","Gifts and offers of peace","good"],["trade_offer","Offers of trade and pacts","good"]]:

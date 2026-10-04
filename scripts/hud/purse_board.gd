@@ -1,22 +1,31 @@
 extends VBoxContainer
-## THE REALM'S PURSE, at a glance (the Wealth tab, above the day's work). One
-## question a section, answered first in big plain words; the supporting
-## numbers stay small and the rest is in tooltips. Every number is the
-## engine's own (realm_purse.gd, civilian_goods.gd, enterprise.gd):
-##   the store    how long it lasts (or what it holds) and whether it grows;
-##                what comes in and goes out a season, two labelled bars;
+## WHAT WE OWN AND THE REALM'S PURSE, at a glance. One question a section,
+## answered first in big plain words; the supporting numbers stay small and
+## the rest is in tooltips. Every number is the engine's own (standing.gd
+## wealth_held, civilian_goods.gd, realm_purse.gd, enterprise.gd).
+##
+## The Wealth tab ("wealth", the default) is what the people own and can
+## trade, goods first:
+##   what we own  goods held in every town, what they buy at our own prices,
+##                a head against a typical people of the age, and what can
+##                change hands; coin and weighed metal once known;
+##   what we make goods a day and their worth; arms point to Production;
+##   treasures    the pieces held and their appraisal;
+##   materials    timber, stone, clay and fibre in store, a secondary line;
+##   the treasury after coinage: the purse's sections below, in coin;
+##   trade and business  barter at home, then the business rung and stance;
+##   the wealth   who holds it by fifths, and the pressure it puts on trust;
+##   the store    before coinage, one line and a link to Food & water.
+## The Food & water tab ("store") holds the common store while it is food:
+##   the store    how long it lasts and whether it grows; what comes in and
+##                goes out a season, two labelled bars;
 ##   where from   each town's levy, and what never came in;
 ##   the levy     light, usual or heavy: a button each with what it takes,
 ##                brings in and costs in trust;
 ##   pays for     the soldiers' pay, the scholars' keep, hired crews and food
-##                for hungry towns: a switch each, its cost and its effect;
-##   what we make goods a day and their worth, goods held; arms live on the
-##                Production screen's Military tab, one line points there;
-##   business     the rung we stand on, what it does now in plain words and
-##                what the next needs; the stance only when it matters;
-##   the wealth   who holds it by fifths, and the pressure it puts on trust.
-## The words follow the age: the common store (food, in rations) until
-## coinage, then the treasury (coin).
+##                for hungry towns: a switch each, its cost and its effect.
+## The purse's sections live where its money is: with the food until coinage,
+## then with the wealth (the treasury, in coin).
 
 signal close_wanted
 
@@ -27,6 +36,9 @@ const Goods:=preload("res://scripts/civilian_goods.gd")
 const Arms:=preload("res://scripts/weapons_stock.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 const Tracker:=preload("res://scripts/order_tracker.gd")
+const Standing:=preload("res://scripts/standing.gd")
+const Scale:=preload("res://scripts/standing_scale.gd")
+const Production:=preload("res://scripts/hud/content/dock_content_production.gd")
 const REFRESH_SECONDS:=1.0
 const LINE_LABELS:={"army":"Soldiers","scholars":"Scholars","crews":"Crews","relief":"Food for the hungry","debts":"Old debts","spent":"Gifts and buying","spoiled":"Rot"}
 ## Business does "hardly anything yet" below this much added to all work;
@@ -40,10 +52,19 @@ var levy_box:VBoxContainer
 var sources_box:VBoxContainer
 var business_box:VBoxContainer
 var goods_box:VBoxContainer
+var own_box:VBoxContainer
+var treasures_box:VBoxContainer
+var materials_box:VBoxContainer
+var store_box:VBoxContainer
 var lines_box:VBoxContainer
 var wealth_box:VBoxContainer
 var ledger_box:VBoxContainer
 var feedback:Label
+## "wealth" (the Wealth tab) or "store" (the common store on Food & water).
+var mode:="wealth"
+## Whether the purse counted in food when the board was drawn: its sections
+## move between the tabs at coinage, so the dock draws the board afresh.
+var kind_at_setup:=true
 var clock:=0.0
 var signatures:={}
 ## Opens another screen: on_open.call(section, sub) (the dock's provider).
@@ -55,18 +76,34 @@ var stances_open:=false
 func setup(block:Dictionary={})->void:
 	name="PurseBoard"
 	if block.get("on_open") is Callable:on_open=block.on_open
+	mode="store" if String(block.get("mode","wealth"))=="store" else "wealth"
+	kind_at_setup=Purse.in_kind()
 	size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	add_theme_constant_override("separation",10)
-	head_box=_section(Purse.account_name())
-	feedback=_line("",14,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false;add_child(feedback)
-	sources_box=_section("Where it comes from")
-	levy_box=_section("The levy")
-	lines_box=_section("What it pays for")
-	goods_box=_section("What we make")
-	business_box=_section("Business")
-	wealth_box=_section("Who holds the wealth")
-	ledger_box=_section("Lately")
+	feedback=_line("",14,T.GOLD_TEXT,true);feedback.name="Said";feedback.visible=false
+	if mode=="wealth":
+		own_box=_section("What we own")
+		add_child(feedback)
+		goods_box=_section("What we make")
+		treasures_box=_section("Treasures")
+		materials_box=_section("Materials in store")
+	if _purse_here():
+		head_box=_section(Purse.account_name())
+		if mode=="store":add_child(feedback)
+		sources_box=_section("Where it comes from")
+		levy_box=_section("The levy")
+		lines_box=_section("What it pays for")
+	if mode=="wealth":
+		business_box=_section("Trade and business")
+		wealth_box=_section("Who holds the wealth")
+		if kind_at_setup:store_box=_section(Purse.account_name())
+	if _purse_here():ledger_box=_section("Lately")
 	refresh(true)
+
+## Whether this board holds the purse's own sections: the store's on Food &
+## water while it is food, the treasury's on Wealth once it is coin.
+func _purse_here()->bool:
+	return (mode=="store")==kind_at_setup
 
 
 func _process(delta:float)->void:
@@ -79,6 +116,7 @@ func _process(delta:float)->void:
 ## The dock's own refresh (dock_panel.gd, each day the page is open): the
 ## board keeps its nodes and reads the purse again, as a fresh page would.
 func update_block(block:Dictionary)->bool:
+	if String(block.get("mode","wealth"))!=mode or Purse.in_kind()!=kind_at_setup:return false
 	if block.get("on_open") is Callable:on_open=block.on_open
 	clock=0.0
 	refresh()
@@ -88,24 +126,37 @@ func update_block(block:Dictionary)->bool:
 ## Each section is drawn again only when what it shows has changed and no
 ## button of it is held.
 func refresh(force:=false)->void:
-	var forecast:=Purse.forecast()
-	var purse:=Purse.state()
-	var season:=Purse.season()
-	_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),roundi(Purse.days_of_food()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
-	var sources:=Purse.sources()
-	_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.rich)),roundi(float(sources.get("charter",0.0))),roundi(float(sources.deposits)),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
-	_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),Purse.LEVELS.map(func(l:String)->int:return roundi(float(Purse.quote(l).per_season))),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
-	_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open()]),force,func()->void:_build_lines(forecast,purse))
+	if _purse_here():
+		var forecast:=Purse.forecast()
+		var purse:=Purse.state()
+		var season:=Purse.season()
+		_rebuild("head",head_box,str([roundi(float(purse.balance)),roundi(float(forecast["in"])),roundi(float(forecast.out)),Purse.unit_word(),roundi(Purse.buys_rations()),roundi(Purse.days_of_food()),season.total_in,season.total_out]),force,func()->void:_build_head(forecast,season))
+		var sources:=Purse.sources()
+		_rebuild("sources",sources_box,str([sources.towns.map(func(t:Dictionary)->int: return roundi(float(t.levy))),roundi(float(sources.rich)),roundi(float(sources.get("charter",0.0))),roundi(float(sources.deposits)),roundi(float(sources.evaded)),Purse.unit_word()]),force,func()->void:_build_sources(sources))
+		_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),Purse.LEVELS.map(func(l:String)->int:return roundi(float(Purse.quote(l).per_season))),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
+		_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open()]),force,func()->void:_build_lines(forecast,purse))
+		_rebuild("ledger",ledger_box,str((purse.ledger as Array).slice(0,5)),force,func()->void:_build_ledger(purse))
+	if mode!="wealth":return
+	var held:=Standing.wealth_held()
+	var cards:=Production.household_cards()
+	var spare:=0.0
+	for card:Dictionary in cards:spare+=float(card.get("spare",0.0))
+	if cards.is_empty():spare=Goods.spare()
+	var people:=roundi(float(WorldSimulation.state.population_exact))
+	_rebuild("own",own_box,str([roundi(float(held.goods)),roundi(Goods.worth_in_rations(float(held.goods))),roundi(spare),roundi(float(held.coin)),String(held.coin_word),people,int(_year())]),force,func()->void:_build_own(held,spare))
 	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
-	_rebuild("goods",goods_box,str([int(WorldSimulation.state.elapsed_days),GameState.player_settlements.size(),snappedf(float(report.get("made",0.0)),0.1),roundi(Goods.stock()),roundi(Goods.spare()),roundi(Arms.watch()),String(WorldSimulation.state.economy_stage),snappedf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.01),roundi(Goods.worth_in_rations(1.0)*10.0)]),force,func()->void:_build_goods())
+	_rebuild("goods",goods_box,str([int(WorldSimulation.state.elapsed_days),GameState.player_settlements.size(),snappedf(float(report.get("made",0.0)),0.1),roundi(Goods.stock()),roundi(Arms.watch()),roundi(Goods.worth_in_rations(1.0)*10.0)]),force,func()->void:_build_goods(cards))
+	_rebuild("treasures",treasures_box,str([int(held.treasures),roundi(float(held.treasure_worth)),people,int(_year())]),force,func()->void:_build_treasures(held))
+	_rebuild("materials",materials_box,str([roundi(float(held.materials)),people,int(_year())]),force,func()->void:_build_materials(held))
 	var e:=Business.state()
-	_rebuild("business",business_box,str([Business.rung(),snappedf(Business.share(),0.001),snappedf(float(e.get("target",0.0)),0.001),Business.stance(),snappedf(Business.factor(),0.001),int(e.get("boom_months",0)),Business.bust_left(),Business.choices(),Business.next_needs(),Purse.unit_word(),stances_open]),force,func()->void:_build_business())
+	_rebuild("business",business_box,str([Business.rung(),snappedf(Business.share(),0.001),snappedf(float(e.get("target",0.0)),0.001),Business.stance(),snappedf(Business.factor(),0.001),int(e.get("boom_months",0)),Business.bust_left(),Business.choices().map(func(id:String)->Array:var q:=Business.quote(id);return [id,Purse.number(float(q.purse_now)),Purse.number(float(q.purse_season))]),Business.next_needs(),Purse.unit_word(),stances_open,String(WorldSimulation.state.economy_stage),snappedf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.01)]),force,func()->void:_build_business())
 	var parts:Variant=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{})
 	_rebuild("wealth",wealth_box,str([WorldSimulation.state.wealth_shares,parts,String(WorldSimulation.state.economy_stage)]),force,func()->void:_build_wealth())
-	_rebuild("ledger",ledger_box,str((purse.ledger as Array).slice(0,5)),force,func()->void:_build_ledger(purse))
+	if store_box!=null:_rebuild("store",store_box,str([roundi(Purse.balance()),roundi(Purse.days_of_food())]),force,func()->void:_build_store_pointer())
 
 
 func _rebuild(key:String,box:Control,next:String,force:bool,build:Callable)->void:
+	if box==null:return
 	if not force and next==String(signatures.get(key,"")):return
 	if not force and box.is_visible_in_tree() and box.get_global_rect().has_point(box.get_global_mouse_position()) and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):return
 	signatures[key]=next
@@ -359,43 +410,120 @@ func _buy_now()->void:
 
 # --- What we make ---------------------------------------------------------------------
 
-## What the makers make a day and its worth, the goods held and what can
-## change hands, barter at home before money (civilian_goods.gd,
-## economy_system.gd). Arms are counted on the Production screen.
-func _build_goods()->void:
+## What the makers make a day and its worth, in every town (the Production
+## screen's own count). Goods held are in "What we own"; barter is with
+## trade. Arms are counted on the Production screen.
+func _build_goods(cards:Array)->void:
 	_clear(goods_box)
 	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
 	var made:=float(report.get("made",0.0))
-	var stock:=Goods.stock()
-	var spare:=Goods.spare()
 	# Every town's makers, as the Production screen counts them.
-	var cards:Array=preload("res://scripts/hud/content/dock_content_production.gd").household_cards()
 	if not cards.is_empty():
-		made=0.0;stock=0.0;spare=0.0
-		for card:Dictionary in cards:made+=float(card.get("made",0.0));stock+=float(card.get("stock",0.0));spare+=float(card.get("spare",0.0))
+		made=0.0
+		for card:Dictionary in cards:made+=float(card.get("made",0.0))
 	var answer:=_answer("%s goods a day, worth %s rations" % [_amount(made),_amount(Goods.worth_in_rations(made))],17);answer.name="GoodsMade"
 	var buys:=Goods.buys(maxf(made,0.0),["Food","Timber"])
 	answer.tooltip_text="Makers make for the homes first, then for barter. Each makes about %s a day now: more with the crafts the people know, and as well as people work.\nA day's goods buy %s rations or %s timber at our own prices." % [_amount(Goods.goods_per_maker_day()),_amount(float(buys.Food)),_amount(float(buys.Timber))]
 	goods_box.add_child(answer)
-	var held:=_line("%s goods held; %s beyond the homes' use can change hands." % [EraWords.grouped(roundi(stock)),EraWords.grouped(roundi(spare))],13,T.INK_MUTED,true);held.name="GoodsHeld"
-	held.tooltip_text="Goods held in the homes and kept for barter. With other peoples, goods also buy arms, and bring families who come to work: see the Trade page."
-	goods_box.add_child(held)
 	if String(report.get("reason",""))!="" and made<=0.001:
 		goods_box.add_child(_line(String(report.reason)+".",13,T.INK_MUTED,true))
-	if String(WorldSimulation.state.economy_stage)=="subsistence":
-		var reach:=float(WorldSimulation.state.economy_metrics.get("market_access",0.0))
-		var barter:=_line("Goods change hands by barter, for food and materials.",13,T.INK_MUTED,true);barter.name="Barter"
-		barter.tooltip_text="%d in 100 of what is made reaches the market. Makers and carriers widen it: makers bring goods to trade, carriers bring them to the hearth." % roundi(reach*100.0)
-		goods_box.add_child(barter)
 	# Arms are made by the same makers; they are shown with the workshops.
 	var arms:=HBoxContainer.new();arms.name="ArmsPointer";arms.add_theme_constant_override("separation",10);goods_box.add_child(arms)
 	var said:=_line("These makers also make arms for the watch.",13,T.INK_MUTED,true);said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;arms.add_child(said)
 	said.tooltip_text="While the watch lacks arms, some makers make them instead of goods. What is held, made and needed is on the Production screen, under Military."
-	var go:=Button.new();go.name="SeeArms";go.text="See arms";go.focus_mode=Control.FOCUS_NONE;go.size_flags_vertical=Control.SIZE_SHRINK_CENTER
-	go.tooltip_text="Open Production, Military: arms in store, on the watch, made a day."
-	go.pressed.connect(func()->void:if on_open.is_valid():on_open.call("production",2))
+	arms.add_child(_go("SeeArms","See arms","Open Production, Military: arms in store, on the watch, made a day.","production",2))
+
+
+# --- What we own --------------------------------------------------------------------
+
+## The goods held in every town and what they are worth at our own prices
+## (trade_prices.gd): the answer; what they buy; a head against a typical
+## people of the age (standing_scale.gd, the yardstick Standing's Wealth
+## reads); what can change hands; coin and weighed metal once known.
+func _build_own(held:Dictionary,spare:float)->void:
+	_clear(own_box)
+	var goods:=float(held.goods)
+	var people:=maxf(1.0,float(WorldSimulation.state.population_exact))
+	var answer:=_answer("%s goods, worth %s rations" % [EraWords.grouped(roundi(goods)),EraWords.grouped(roundi(Goods.worth_in_rations(goods)))]);answer.name="GoodsHeld"
+	answer.tooltip_text="Made things our homes hold and keep for barter, in every town: tools, cord, baskets, pots. Goods are our first money.\nOne is worth %s rations at our own prices." % _amount(Goods.worth_in_rations(1.0))
+	own_box.add_child(answer)
+	var buys:=Goods.buys(goods,["Timber","Stone","Fiber Plants"])
+	var buy:=_line("They would buy %s timber, %s stone or %s fibre." % [EraWords.grouped(roundi(float(buys.Timber))),EraWords.grouped(roundi(float(buys.Stone))),EraWords.grouped(roundi(float(buys["Fiber Plants"])))],13,T.INK,true);buy.name="GoodsBuy"
+	buy.tooltip_text="At our own prices, which follow what is scarce and what is plenty."
+	own_box.add_child(buy)
+	var typical:=float(Scale.anchors(Scale.GOODS,_year())[1])
+	var head:=_line("About %s a head; a typical people holds %s." % [_amount(goods/people),_amount(typical)],13,T.INK_MUTED,true);head.name="GoodsAHead"
+	var wealth:Dictionary=Standing.strengths().get("wealth",{})
+	head.tooltip_text="A typical people of our age, counted the same way.\nOur Wealth against the age: %d%%. %s." % [roundi(float(wealth.get("value",0.0))*100.0),_cap(String(wealth.get("why","")))]
+	own_box.add_child(head)
+	var change:=_line("%s beyond the homes' use can change hands." % EraWords.grouped(roundi(spare)),13,T.INK_MUTED,true);change.name="GoodsSpare"
+	change.tooltip_text="Goods beyond what the homes need, what the learners will take and what is kept back for the first workshops. With other peoples they buy food, materials, arms, and bring families who come to work: see Trade."
+	own_box.add_child(change)
+	if float(held.coin)>=0.5:
+		var coin:=_line("With %s in %s, worth %s goods." % [EraWords.grouped(roundi(float(held.coin))),String(held.coin_word),EraWords.grouped(roundi(float(held.worth)-goods))],13,T.INK,true);coin.name="CoinHeld"
+		coin.tooltip_text="What households, their hoards and the treasury hold, at our own prices."
+		own_box.add_child(coin)
+
+
+# --- Treasures ------------------------------------------------------------------------
+
+func _build_treasures(held:Dictionary)->void:
+	_clear(treasures_box)
+	var count:=int(held.treasures)
+	var worth:=float(held.treasure_worth)
+	var people:=maxf(1.0,float(WorldSimulation.state.population_exact))
+	var typical:=float(Scale.anchors(Scale.TREASURES,_year())[1])
+	var row:=HBoxContainer.new();row.name="TreasuresRow";row.add_theme_constant_override("separation",10);treasures_box.add_child(row)
+	var said:Label
+	if count==0:said=_line("None held yet.",13,T.INK_MUTED,true)
+	else:said=_answer("%d %s, worth about %s goods" % [count,"treasure" if count==1 else "treasures",EraWords.grouped(roundi(worth))],15)
+	said.name="Treasures";said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(said)
+	said.tooltip_text="Old pieces found on the land or got in trade. Each is appraised by its rarity, how long we have held it and how well it is studied.\nAbout %s goods a head; a typical people of our age holds about %s." % [_amount(worth/people),_amount(typical)]
+	var see:=Button.new();see.name="SeeTreasures";see.text="See treasures";see.focus_mode=Control.FOCUS_NONE;see.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	see.tooltip_text="Open the collection: every piece, what it is worth and what it does."
+	see.pressed.connect(func()->void:preload("res://scripts/hud/exchange_collection_panel.gd").open())
+	row.add_child(see)
+
+
+# --- Materials in store ------------------------------------------------------------------
+
+func _build_materials(held:Dictionary)->void:
+	_clear(materials_box)
+	var people:=maxf(1.0,float(WorldSimulation.state.population_exact))
+	var materials:=float(held.materials)
+	var typical:=float(Scale.anchors(Scale.MATERIALS,_year())[1])
+	var row:=HBoxContainer.new();row.name="MaterialsRow";row.add_theme_constant_override("separation",10);materials_box.add_child(row)
+	var words:=VBoxContainer.new();words.add_theme_constant_override("separation",1);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(words)
+	var said:=_line("%s loads of timber, stone, clay and fibre" % EraWords.grouped(roundi(materials)),13,T.INK,true);said.name="Materials";words.add_child(said)
+	said.tooltip_text="In every town's yards. Builders and makers draw on them; what they can spare also changes hands by barter."
+	var head:=_line("About %s a head; a typical people holds %s." % [_amount(materials/people),_amount(typical)],13,T.INK_MUTED,true);head.name="MaterialsAHead";words.add_child(head)
+	head.tooltip_text="A typical people of our age, counted the same way."
+	row.add_child(_go("SeeMaterials","See materials","Open Materials: each one in store, coming in and going out.","economy",1))
+
+
+# --- The common store, from the Wealth tab ----------------------------------------------
+
+## Before coinage the common store is food: it lives on Food & water. One
+## line and a way there.
+func _build_store_pointer()->void:
+	_clear(store_box)
+	var row:=HBoxContainer.new();row.name="StorePointer";row.add_theme_constant_override("separation",10);store_box.add_child(row)
+	var said:=_line("%s rations, %s days of food; kept with Food & water." % [EraWords.grouped(roundi(Purse.balance())),EraWords.grouped(roundi(Purse.days_of_food()))],13,T.INK_MUTED,true)
+	said.name="StoreLine";said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(said)
+	said.tooltip_text="Food the levy took from every town's stores, kept for all. It pays the soldiers, feeds the hungry, keeps scholars and crews. It is food, so it lives with the food; with coin it becomes the treasury, here."
+	row.add_child(_go("SeeStore","See the store","Open Food & water: the common store, the levy and what it pays for.","economy",0))
+
+
+## A button that opens another screen (the dock's provider).
+func _go(node_name:String,text:String,tip:String,section:String,sub:int)->Button:
+	var go:=Button.new();go.name=node_name;go.text=text;go.focus_mode=Control.FOCUS_NONE;go.size_flags_vertical=Control.SIZE_SHRINK_CENTER
+	go.tooltip_text=tip
+	go.pressed.connect(func()->void:if on_open.is_valid():on_open.call(section,sub))
 	go.disabled=not on_open.is_valid()
-	arms.add_child(go)
+	return go
+
+static func _year()->float:
+	return maxf(0.0,float(WorldSimulation.state.elapsed_days)/365.0)
 
 
 static func _amount(value:float)->String:
@@ -411,6 +539,7 @@ static func _amount(value:float)->String:
 ## number is the engine's (enterprise.gd).
 func _build_business()->void:
 	_clear(business_box)
+	_build_barter()
 	var panel:=_panel(business_box,"Business")
 	var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);panel.add_child(column)
 	var r:=Business.rung()
@@ -471,6 +600,16 @@ func _build_business()->void:
 	var odds:=_line("%s: busts %s." % [Business.stance_name(current),String(Business.odds_words(Business.bust_year())).to_lower()],13,T.INK_MUTED,true);odds.name="BustOdds"
 	odds.tooltip_text=String(q.words)+".\nA bust cuts business by a third at once, slows all work 4% for 6 to 12 months, writes off debts, and costs the rich and the people's unity. Honest books (double-entry ledgers, audited accounts, a central bank) make busts rarer."
 	choice.add_child(odds)
+
+
+## How goods change hands at home in this age, and a way to the Trade page.
+func _build_barter()->void:
+	var row:=HBoxContainer.new();row.name="Barter";row.add_theme_constant_override("separation",10);business_box.add_child(row)
+	var stage:=String(WorldSimulation.state.economy_stage)
+	var words:="Goods change hands by barter, for food and materials." if stage=="subsistence" else ("Weighed metal settles trades beside barter." if stage=="weighed_metal" else "Coin settles most trades.")
+	var said:=_line(words,13,T.INK,true);said.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(said)
+	said.tooltip_text="%d in 100 of what is made reaches the market. Makers and carriers widen it: makers bring goods to trade, carriers bring them to the hearth." % roundi(float(WorldSimulation.state.economy_metrics.get("market_access",0.0))*100.0)
+	row.add_child(_go("SeeTrade","See trade","Open Trade: what passes between us and other peoples.","economy",3))
 
 
 ## "bust 1 in 40 yrs" for a stance button's second line.
