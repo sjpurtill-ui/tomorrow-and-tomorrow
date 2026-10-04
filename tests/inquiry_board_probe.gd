@@ -30,7 +30,8 @@ func _ready()->void:
 		var panel=hud.dock.find_child("InquiryBoard",true,false)
 		check(panel!=null,"Illustrated research is wired")
 		if panel:
-			check(panel.fields_grid.get_child_count()==12,"All twelve fields appear")
+			check(panel.find_children("Lane_*","",true,false).size()==12,"All twelve fields have a lane")
+			check(panel.find_child("LearningPace",true,false)!=null,"The pace header is drawn")
 			var active_count:=0
 			for field:Dictionary in panel.data.fields:active_count+=int(field.active)
 			check(active_count==panel.data.investigations.size(),"Investigations counted in their actual fields")
@@ -66,7 +67,7 @@ func _ready()->void:
 	check(hud.detail_dock.visible,"Field details open")
 	var empty_data:Dictionary=board.data.duplicate();empty_data.investigations=[]
 	var empty=preload("res://scripts/hud/inquiry_board.gd").new();add_child(empty);empty.setup(empty_data)
-	check(empty.projects_grid.get_child_count()==1,"Empty research offers a workforce action")
+	check(empty.find_child("NothingUnderWay",true,false)!=null,"Empty research offers a workforce action")
 	empty.queue_free()
 	print("INQUIRY_BOARD_CHECKS: ",failures)
 	get_tree().quit(0 if failures.is_empty() else 1)
