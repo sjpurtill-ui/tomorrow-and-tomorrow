@@ -32,18 +32,32 @@ static func fitted(source:Animation,skeleton:Skeleton3D,variant:String,clip:Stri
 	if _cache.has(key):return _cache[key]
 	var made:=_copy_exact(source)
 	for track in made.get_track_count():
-		if not _arm_track(made,track):continue
+		if not _arm_track(made,track,clip!="stand"):continue
 		var path:=String(made.track_get_path(track))
-		var side:="L" if path.ends_with(":upper_arm.L") else "R"
-		var bone:=skeleton.find_bone("upper_arm."+side)
+		var side:="L" if path.ends_with(".L") else "R"
+		var forearm:=path.ends_with(":forearm."+side)
+		var bone:=skeleton.find_bone(("forearm." if forearm else "upper_arm.")+side)
 		if bone<0:continue
 		var parent:=skeleton.get_bone_parent(bone)
 		var rest:=skeleton.get_bone_global_rest(parent).basis if parent>=0 else Basis.IDENTITY
 		var axis:=(rest.inverse()*Vector3.BACK).normalized()
+		var curve:Variant=value
+		if value is Dictionary and (value.has("spread") or value.has("flex")):curve=value.get("flex" if forearm else "spread",0.0)
+		elif forearm:continue
 		for frame in made.track_get_key_count(track):
-			var amount:=degrees_at(value.get(side,0.0) if value is Dictionary else value,made.track_get_key_time(track,frame))
-			var turn:=Quaternion(axis,deg_to_rad(amount)*(1.0 if side=="L" else -1.0))
+			var amount:=degrees_at(curve.get(side,0.0) if curve is Dictionary else curve,made.track_get_key_time(track,frame))
+			if is_zero_approx(amount):continue
 			var rotation:Quaternion=source.track_get_key_value(track,frame)
+			if forearm:
+				var hand:=skeleton.find_bone("hand."+side)
+				if hand<0:continue
+				# Flex in this key's actual elbow plane, toward the shoulder.
+				# Both vectors are in upper-arm coordinates, so this works for
+				# either side and does not twist the wrist around the forearm.
+				axis=(rotation*skeleton.get_bone_rest(hand).origin).cross(-skeleton.get_bone_rest(bone).origin)
+				if axis.length_squared()<.00000001:continue
+				axis=axis.normalized()
+			var turn:=Quaternion(axis,deg_to_rad(amount)*(1.0 if forearm or side=="L" else -1.0))
 			made.track_set_key_value(track,frame,(turn*rotation).normalized())
 	if _cache.size()>=CACHE_LIMIT:_cache.erase(_cache.keys()[0])
 	_cache[key]=made
@@ -60,10 +74,10 @@ static func _copy_exact(source:Animation)->Animation:
 			made.track_set_key_value(track,frame,source.track_get_key_value(track,frame))
 	return made
 
-static func _arm_track(animation:Animation,track:int)->bool:
+static func _arm_track(animation:Animation,track:int,include_forearm:=false)->bool:
 	if animation.track_get_type(track)!=Animation.TYPE_ROTATION_3D:return false
 	var path:=String(animation.track_get_path(track))
-	return path.ends_with(":upper_arm.L") or path.ends_with(":upper_arm.R")
+	return path.ends_with(":upper_arm.L") or path.ends_with(":upper_arm.R") or (include_forearm and (path.ends_with(":forearm.L") or path.ends_with(":forearm.R")))
 
 static func configure(player:AnimationPlayer,skeleton:Skeleton3D,variant:String)->void:
 	if player==null or skeleton==null or not player.has_animation(&"stand"):return
