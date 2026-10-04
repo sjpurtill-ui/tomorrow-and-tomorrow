@@ -545,22 +545,24 @@ Awe rises a little (0.12 to 0.14), and contempt falls (0.14 to 0.12).
 
 Fast sim (`python tools/sim/watch_check.py`): the five archetypal tempers as
 computer rulers, 2 seeds x 600 years, with the leaders' split alone, the old
-hold and the age's hold. The surrogate has no war and no neighbours'
+hold and the age's hold, others first met in year 98 (params.json
+contact_year, far peoples). The surrogate has no war and no neighbours'
 pressure.
 
 | Good site, year 300 | Under arms (old -> age) | Might | People | Days of food |
 |---|---|---|---|---|
-| balanced | 7.0 -> 3.0 in 100 | 88 -> 53 | 3,556 -> 3,954 | 16 -> 26 |
-| cautious-caring | 4.0 -> 2.3 | 65 -> 43 | 4,629 -> 4,607 | 48 -> 63 |
-| open-scholarly | 5.7 -> 2.6 | 80 -> 47 | 3,400 -> 3,568 | 20 -> 26 |
-| bold-expansionist | 8.4 -> 5.9 | 95 -> 80 | 3,423 -> 3,922 | 18 -> 27 |
-| disciplined-warlike | 10.9 -> 6.5 | 100 -> 83 | 3,242 -> 3,981 | 20 -> 25 |
+| balanced | 7.0 -> 3.0 in 100 | 88 -> 53 | 3,646 -> 3,957 | 18 -> 26 |
+| cautious-caring | 3.9 -> 2.2 | 65 -> 41 | 4,551 -> 4,705 | 51 -> 51 |
+| open-scholarly | 5.7 -> 2.6 | 80 -> 47 | 3,399 -> 3,569 | 20 -> 26 |
+| bold-expansionist | 8.4 -> 5.9 | 95 -> 80 | 3,664 -> 3,920 | 18 -> 27 |
+| disciplined-warlike | 10.9 -> 6.5 | 100 -> 84 | 3,250 -> 3,756 | 16 -> 26 |
 
 On poor land the old hold starved them. By year 600 the disciplined-warlike
-people had died out (hunger 23 in 1,000 a year), and the balanced one held 97
-people. With the age's hold they hold 292 and 269 (hunger 8.5 and 8.6; with
-the split alone, 448 and 448). The bold and warlike keep 6-7 in 100 through
-their own path either way, at Might 80-91.
+people had died out (hunger 23 in 1,000 a year), the bold one held 82 people
+and the balanced one 103. With the age's hold they hold 285, 379 and 282
+(hunger about 8; with the split alone, 427, 466 and 465 at about 7). On good
+land the bold and warlike keep 6-7 in 100 through their own path either way,
+at Might 80-87.
 
 Their raids, in the raid world of standing_check.py, with the neighbours
 keeping an even-tempered ruler's watch at the engine's readiness (0.92), 600
@@ -568,8 +570,8 @@ years, 4 seeds:
 
 | Neighbours | Under arms | Raids | Repelled | Dead a year in 1,000 | Rations taken |
 |---|---|---|---|---|---|
-| Old hold | 7.0 in 100 | 220 | 0 | 1.70 | 12.2M |
-| Age's hold | 2.7 in 100 | 201 (-9%) | 60 | 1.04 | 6.7M (-45%) |
+| Old hold | 7.0 in 100 | 186 | 0 | 1.67 | 12.1M |
+| Age's hold | 2.7 in 100 | 171 (-8%) | 46 | 1.02 | 6.8M (-44%) |
 
-There are 9% fewer raids because the raided people's might now awes the
+There are 8% fewer raids because the raided people's might now awes the
 neighbours a little.

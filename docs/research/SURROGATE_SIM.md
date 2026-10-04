@@ -188,11 +188,11 @@ Results (docs/STANDING_DESIGN.md section 11):
 
 - Good site, year 300: the balanced ruler keeps 7.0 in 100 under arms (Might
   88) under the old hold, and 3.0 (Might 53) under the age's hold. It holds
-  3,954 people against 3,556, with 26 days of food against 16.
+  3,957 people against 3,646, with 26 days of food against 18.
 - On poor land the old hold starved the warlike people out by year 600.
-- In the raid world, neighbours at 2.7 in 100 instead of 7.0 raid 9% less
-  often. They are repelled 60 times in 201 raids instead of never, and take
-  45% fewer rations.
+- In the raid world (others met from year 98), neighbours at 2.7 in 100
+  instead of 7.0 raid 8% less often. They are repelled 46 times in 171 raids
+  instead of never, and take 44% fewer rations.
 
 ### Crises and the age table's background (2026-10-03)
 
