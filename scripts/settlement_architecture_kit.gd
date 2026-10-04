@@ -34,6 +34,12 @@ const ROOF_TILE:=0.98
 const ROOF_SHINGLE:=0.96
 const ROOF_EARTH:=0.94
 const ROOF_SLATE:=0.92
+const GLASS_SURFACE:=0.86
+
+## Three bounded facade treatments, stable for the life of a recorded plot.
+## Divide before selecting so the palette does not repeat the four plan types.
+static func facade_for(plot:Dictionary)->int:
+	return posmod(int(plot.get("seed",plot.get("id",1)))/4,3) if kind(plot).begins_with("modern_") else 0
 
 ## Roof construction follows the recorded plan, not the settlement's age or
 ## its wall material. Old records without a plan use a modest timber/earth
@@ -64,8 +70,9 @@ static func style_for(plot:Dictionary)->String:
 	var material_key:="earth" if family=="earth" else ("brick" if family=="brick" else "stone")
 	return material_key+"|"+roof_for(plot)+("_chimney" if chimney_for(plot) else "")
 
-static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone")->ArrayMesh:
-	var key:=name+":"+str(storeys)+":"+str(features)+":"+style
+static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone",facade:int=0)->ArrayMesh:
+	facade=posmod(facade,3) if name.begins_with("modern_") else 0
+	var key:=name+":"+str(storeys)+":"+str(features)+":"+style+":"+str(facade)
 	if cache.has(key):return cache[key]
 	var modern:=name.begins_with("modern_")
 	var industrial:=name.begins_with("industrial_")
@@ -101,7 +108,11 @@ static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone")->A
 	var height:=3.1*storeys
 	var frame:=Color("5a4430")
 	if modern:
-		_modern_building(surface,type,storeys,features,wall,glass,trim,roof)
+		wall=[Color("d9d9d0"),Color("b88d74"),Color("889a96")][facade]
+		glass=[Color("547888"),Color("486b70"),Color("596f85")][facade]
+		glass.a=GLASS_SURFACE
+		trim=[Color("edf0e5"),Color("dbcdbb"),Color("d4ddd9")][facade]
+		_modern_building(surface,type,storeys,features,wall,glass,trim,roof,facade)
 		surface.generate_normals()
 		var modern_mesh:=surface.commit();cache[key]=modern_mesh;return modern_mesh
 	match type:
@@ -191,7 +202,7 @@ static func mesh_for(name:String,storeys:int=3,features:int=0,style:="stone")->A
 ## Modern construction keeps the recorded land use and floor count, with real
 ## flat roof slabs/parapets on every wing. The former shared medieval branches
 ## put pitched gables on modern courtyards and roof gardens above empty space.
-static func _modern_building(s:SurfaceTool,type:String,storeys:int,features:int,wall:Color,glass:Color,trim:Color,roof:Color)->void:
+static func _modern_building(s:SurfaceTool,type:String,storeys:int,features:int,wall:Color,glass:Color,trim:Color,roof:Color,facade:int=0)->void:
 	var height:=3.1*storeys
 	var blocks:Array=[]
 	match type:
@@ -210,7 +221,7 @@ static func _modern_building(s:SurfaceTool,type:String,storeys:int,features:int,
 			else:blocks=[[Vector3.ZERO,Vector3(8,height,10)]]
 	for block:Array in blocks:
 		var base:Vector3=block[0];var size:Vector3=block[1]
-		_block(s,base,size,wall,glass,trim,features,2)
+		_modern_block(s,base,size,wall,glass,trim,features,facade)
 		var top:=base+Vector3(0,size.y,0)
 		_box(s,top+Vector3(0,.06,0),Vector3(size.x,.12,size.z),roof)
 		for side in [-1,1]:
@@ -227,6 +238,41 @@ static func _modern_building(s:SurfaceTool,type:String,storeys:int,features:int,
 		for y in [1.0,1.8,2.6]:_box(s,Vector3(0,y,5.14),Vector3(3.5,.06,.04),trim.darkened(.2))
 		if type=="workshop":
 			for z in [-2.4,0,2.4]:_box(s,Vector3(0,maxf(4.0,minf(height,9.0))+.15,z),Vector3(4.6,.18,1.2),glass)
+
+## Same structural envelope and floor levels as the old modern block. Broad
+## openings, grouped bays and quiet spandrels survive the district camera;
+## every pane no longer needs its own heavy projecting lintel and mullion.
+static func _modern_block(s:SurfaceTool,base:Vector3,size:Vector3,wall:Color,glass:Color,trim:Color,features:int,facade:int)->void:
+	_box(s,base+Vector3(0,size.y*.5,0),size,wall)
+	_box(s,base+Vector3(0,.2,0),Vector3(size.x+.08,.4,size.z+.08),wall.darkened(.14))
+	var levels:=maxi(1,floori(size.y/3.1))
+	for floor in levels:
+		var y:=base.y+1.7+floor*3.1
+		for axis in 2:
+			var span:=size.x if axis==0 else size.z
+			var depth:=size.z if axis==0 else size.x
+			var bays:=maxi(1,floori(span/2.6))
+			for side in [-1,1]:
+				if facade==1:
+					_facade_box(s,base,axis,0,y-base.y,side*(depth*.5+.065),span-.55,1.65,.05,glass)
+				else:
+					for bay in bays:
+						var offset:=-span*.5+(bay+.5)*span/bays
+						_facade_box(s,base,axis,offset,y-base.y,side*(depth*.5+.065),span/bays*(.68 if facade==0 else .82),1.85,.05,glass)
+				if facade==2:
+					for bay in range(1,bays):
+						_facade_box(s,base,axis,-span*.5+bay*span/bays,(floor+.5)*3.1,side*(depth*.5+.045),.16,3.1,.07,trim)
+		if floor<levels-1:
+			_box(s,base+Vector3(0,(floor+1)*3.1-.08,0),Vector3(size.x+.12,.16,size.z+.12),trim if facade!=2 else wall.lightened(.08))
+	# A darker inset entrance with a pale head matches the former projection.
+	_box(s,base+Vector3(0,1.0,size.z*.5+.05),Vector3(1.0,2.0,.1),glass.darkened(.23))
+	_box(s,base+Vector3(0,2.08,size.z*.5+.07),Vector3(1.3,.18,.12),trim)
+	if features:s.append_from(detail_mesh(AABB(base-Vector3(size.x*.5,0,size.z*.5),size),features,1.0),0,Transform3D.IDENTITY)
+
+static func _facade_box(s:SurfaceTool,base:Vector3,axis:int,along:float,y:float,out:float,width:float,height:float,depth:float,color:Color)->void:
+	var at:=Vector3(along,y,out) if axis==0 else Vector3(out,y,along)
+	var size:=Vector3(width,height,depth) if axis==0 else Vector3(depth,height,width)
+	_box(s,base+at,size,color)
 
 static func _block(s:SurfaceTool,base:Vector3,size:Vector3,wall:Color,glass:Color,trim:Color,features:int=0,period:int=0)->void:
 	_box(s,base+Vector3(0,size.y*.5,0),size,wall)
@@ -412,7 +458,7 @@ static func render(plan:Dictionary,center:Vector3,height:Callable,parent:Node3D)
 		var name:=kind(record.plot)
 		if name=="" or String(record.plot.get("status","active")) in ["ruin","reclaimed","under_construction"]:continue
 		if float(record.plot.get("damage",{}).get("structural",0))>.65:continue
-		var key:=name+":"+str(floors(record.plot))+":"+str(installed_features(record.plot))+":"+style_for(record.plot)
+		var key:=name+":"+str(floors(record.plot))+":"+str(installed_features(record.plot))+":"+style_for(record.plot)+":"+str(facade_for(record.plot))
 		if not groups.has(key):groups[key]=[]
 		groups[key].append(record)
 	for key:String in groups:
@@ -445,7 +491,7 @@ static func installed_features(plot:Dictionary)->int:
 	return flags
 
 static func mesh_for_plot(plot:Dictionary)->ArrayMesh:
-	return mesh_for(kind(plot),floors(plot),installed_features(plot),style_for(plot))
+	return mesh_for(kind(plot),floors(plot),installed_features(plot),style_for(plot),facade_for(plot))
 
 static func _add_installed_details(surface:SurfaceTool,height:float,flags:int)->void:
 	var wood:=Color("624831")
