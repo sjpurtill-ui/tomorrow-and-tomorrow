@@ -177,3 +177,57 @@ func test_wide_view_uses_four_coarser_tiles_without_changing_the_founding_core()
 	var builds:=Ground.tile_builds
 	for pass_index in 5:Ground.serve(view.get_center(),3.0,view)
 	assert_int(Ground.tile_builds).is_equal(builds)
+
+func test_recorded_home_ground_does_not_overlay_synthetic_fields_or_clearings()->void:
+	var data:=_data();_build(data);_serve(Vector2(2.05,.04))
+	assert_vector(Ground.slot_halos[0]).is_equal(Vector4.ZERO)
+	for slot in range(Ground.CITY_SLOTS,Ground.SLOTS):assert_vector(Ground.slot_halos[slot]).is_equal(Vector4.ZERO)
+	_serve(Vector2(12,12));_serve(Vector2(2.05,.04))
+	data.plots[0].status="ruin";_build(data)
+	assert_vector(Ground.slot_halos[0]).is_equal(Vector4.ZERO)
+	var other:=GameState.settlement_founded_at+Vector3(20,0,0)
+	Ground.build_other("seen-town",data.plan,data.plots,data.routes,other)
+	var foreign_slot:=Ground.slot_keys.find("seen-town")
+	assert_int(foreign_slot).is_between(1,Ground.CITY_SLOTS-1)
+	assert_float(Ground.slot_halos[foreign_slot].y).is_greater(0.0)
+
+func test_pending_window_finishes_from_its_snapshot_when_live_records_and_labor_change()->void:
+	GameState.population_allocations={"Food":20}
+	var data:=_data();_build(data)
+	var home:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	var at:=home+Vector2(2.05,.04)
+	var view:=Rect2(at-Vector2.ONE*.128,Vector2.ONE*.256)
+	Ground.serve(at,.6,view)
+	var pending_keys:Dictionary={}
+	for key:String in Ground._tile_inputs:pending_keys[key]=int(Ground._tile_inputs[key].signature)
+	GameState.population_allocations={"Logistics":20}
+	data.plots[2].cultivation_phase="harvested"
+	data.routes[0].points[0]=Vector2(1.95,.06)
+	for pass_index in 5:Ground.serve(at,.6,view)
+	for key:String in pending_keys:
+		var slot:=Ground.slot_keys.find(key)
+		assert_int(slot).is_greater_equal(Ground.CITY_SLOTS)
+		if slot>=Ground.CITY_SLOTS:assert_int(Ground.slot_signatures[slot]).is_equal(int(pending_keys[key]))
+	assert_int(Ground.tile_builds).is_less_equal(4)
+	# Publishing a new source revision then brings the changed crop forward.
+	_build(data);_serve(Vector2(2.05,.04))
+	var slot:=_tile_at(Vector2(2.10,.08))
+	assert_int(roundi(_pixel(slot,Vector2(2.10,.08),true).b*255.0)&7).is_equal(Ground.PHASES.find("harvested"))
+
+func test_fallback_household_clearing_participates_in_cache_identity()->void:
+	var plots:Array[Dictionary]=[_plot(1,Vector2.ZERO)]
+	var routes:Array[Dictionary]=[]
+	Ground.build({},plots,routes,GameState.settlement_founded_at)
+	var old_key:=Ground.signature
+	var old_revision:=Ground._home_revision
+	assert_float(Ground.texture.get_image().get_pixel(256,256).g).is_greater(.1)
+	Ground.build({"buildings":[]},plots,routes,GameState.settlement_founded_at)
+	assert_int(Ground.signature).is_not_equal(old_key)
+	assert_int(Ground._home_revision).is_not_equal(old_revision)
+	assert_int(int(Ground.report.stamps)).is_equal(0)
+	_serve(Vector2.ZERO)
+	# Inspect the CPU paint result: Dummy rendering retains an ImageTexture's
+	# initial image in get_image() even after update(), unlike the real GPU.
+	var slot:=_tile_at(Vector2.ZERO)
+	assert_int(slot).is_greater_equal(Ground.CITY_SLOTS)
+	if slot>=Ground.CITY_SLOTS:assert_float(_pixel(slot,Vector2.ZERO).g).is_equal(0.0)
