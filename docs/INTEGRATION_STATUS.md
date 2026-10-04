@@ -1,3 +1,7 @@
+## October 4 — MPFB authoring setup: READY LOCALLY
+
+Blender 5.2 has MPFB 2.0.17 enabled with system assets and newly installed CC0 nose, ear, cheek, expression and speech packs. `docs/MPFB_SETUP.md` records provenance and verification. A generated human exports 52 facial targets plus 15 speech shapes with a GameEngine rig. This is local authoring setup and a disposable verification model; replacing the court heads remains unfinished. Only setup documentation is delivered through Git; no runtime, save or player-session change.
+
 ## October 4 — modeled court noses and ear folds: INTEGRATED
 
 Runtime source `473fa8990a47dca94804601f25cfc07602bef276` on `codex/court-face-richness`, based on integrated main `304ad0cb` (including the decree popup). The earlier face pass did not resolve the nearly missing nasal anatomy or solid ellipsoid ears. Actual Body geometry now has a readable bridge, rounded tip, wings and shallow nostril recesses, plus a rim, recessed bowl, inner folds and lobe on each ear. All seven variants and their LegacyBody/WardrobeBody replacements are updated, retaining identities and expression targets. Brow clearance is preserved during refinement.

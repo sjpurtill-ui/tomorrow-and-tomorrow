@@ -1,3 +1,7 @@
+## October 4, 2026 — MPFB authoring dependency
+
+Setup documentation on `codex/court-face-richness`, based on synchronized main `7c214eb6`, records the locally enabled MPFB 2.0.17 and five newly installed CC0 anatomy/expression packs. Blender generation and GLB export retain a 53-bone rig and 67 facial/speech targets. See `docs/MPFB_SETUP.md` for sources, local paths and limits. Tool installation and the verification model stay local; no imported head is wired into the player court. This delivery changes documentation only and is pushed/verified before canonical fast-forward.
+
 ## October 4, 2026 — nasal and ear geometry
 
 Integrated runtime source `473fa8990a47dca94804601f25cfc07602bef276` from `codex/court-face-richness`, on main base `304ad0cb`. Local skinned refinement restores a projecting bridge/tip/alar form and shallow nasal recesses, and sculpts ear rims, bowls, inner folds and lobes. All21 original/legacy/era body assets carry the same head, identities and expressions. The generator reproduces the refinement after export; rig, clip, garment and nonface source data are preserved. The previous surface-only pass had not addressed the missing shapes.
