@@ -42,3 +42,21 @@ func test_crowded_envoy_speech_keeps_the_offered_object_strip_clear()->void:
 	var first:=bubble.position
 	stage._clear_of_others(bubble)
 	assert_vector(bubble.position).is_equal(first)
+
+func test_speech_above_its_speaker_also_clears_the_seated_listener_behind()->void:
+	var stage:Stage=auto_free(Stage.new())
+	stage.size=Vector2(900,360)
+	for key:String in ["main","listener"]:
+		var person:=Stage.Figure.new();stage.figure_layer.add_child(person)
+		person.key=key;person.size=Vector2(100,160)
+		person.home=Vector2(450,340 if key=="main" else 270)
+		stage.figures[key]=person;stage.cast_order.append(key)
+	var bubble:=Stage.Bubble.new();stage.bubble_layer.add_child(bubble)
+	bubble.speaker="main";bubble.position=Vector2(310,100);bubble.size=Vector2(260,60)
+	var listener_face:Rect2=stage._faces_except("main")[0]
+	assert_bool(bubble.get_rect().intersects(listener_face)).is_true()
+	stage._clear_of_others(bubble)
+	assert_bool(bubble.get_rect().intersects(listener_face)).is_false()
+	var first:=bubble.position
+	stage._clear_of_others(bubble)
+	assert_vector(bubble.position).is_equal(first)

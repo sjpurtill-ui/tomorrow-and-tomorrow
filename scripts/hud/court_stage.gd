@@ -2276,7 +2276,7 @@ func _place_caption()->void:
 
 ## The god's line keeps the top centre and the caption its band. Speech,
 ## mutters and noises take the nearest free position, keeping both the
-## speaker and camera subject clear and retaining the tail when possible.
+## speaker, listeners and camera subject clear, retaining the tail when possible.
 func _clear_of_others(bubble:Control)->void:
 	if not is_instance_valid(bubble) or bubble==_god or bubble==_caption:return
 	var others:Array[Rect2]=[]
@@ -2301,6 +2301,10 @@ func _clear_of_others(bubble:Control)->void:
 	var right:=size.x
 	if face.has_area():others.append(face.grow(8.0))
 	if bubble is Bubble:
+		# The space above a standing speaker can contain a seated listener.
+		# Protect the rest of the cast for above-head placement as well as sides.
+		for listener_face:Rect2 in _faces_except((bubble as Bubble).speaker):
+			others.append(listener_face.grow(6.0))
 		var speaker:=figure((bubble as Bubble).speaker)
 		if speaker!=null:
 			var head:=head_point(speaker)

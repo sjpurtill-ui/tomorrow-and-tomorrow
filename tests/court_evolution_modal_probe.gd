@@ -41,6 +41,8 @@ func _ready()->void:
 					var head:Vector2=modal.court_stage.head_point(main)
 					var face:=Rect2(head.x-main.size.x*.22,head.y,main.size.x*.44,main.size.y*.24)
 					if bubble.get_rect().intersects(face):_fail("Speech covers its speaker at %s: %s against %s" % [dimensions,bubble.get_rect(),face])
+					for listener_face:Rect2 in modal.court_stage._faces_except("main"):
+						if bubble.get_rect().intersects(listener_face):_fail("Speech covers a listener at %s: %s against %s" % [dimensions,bubble.get_rect(),listener_face])
 			if capture:await _capture("%04d-%dx%d-speaking" % [year,dimensions.x,dimensions.y])
 		modal.make_them_wait();await _frames(5)
 	CourtSet.quality="auto"

@@ -41,6 +41,11 @@ checkpoints; the evidence below concerns this subsequent quality pass.
   Identity, face, rig, age, sex and civic ownership remain unchanged.
 - Later garments have continuous shoulder/neck boundaries, joined cuffs and side
   seams, fitted belts and stronger waist anchoring during seated movement. The
+  lapels, cravats and ties now follow the actual jacket surface and weights;
+  sparse floating panels were replaced after their intersections were rendered.
+  Only those sixty attachments changed in that follow-up, preserving every
+  other mesh in the seven additive bundles.
+  The
   additive wardrobe preserves the original body, morph, skeleton and animation
   bytes. It remains skinned geometry, not a cloth simulation.
 - Camera framing uses the actual seated body height and protects the shoulders
@@ -50,6 +55,9 @@ checkpoints; the evidence below concerns this subsequent quality pass.
   the space above. It does not move aside for a same-speaker line that is about
   to disappear. The constrained search also preserves an envoy's offered-object
   strip, remains stable when repeated, and skips searching when already clear.
+  Above-head placement also clears seated listeners behind the speaker. The
+  actual modern modal exposed that case, which now has a failing-before,
+  passing-after regression and actual-modal assertions for every cast face.
 - Administrative rooms use three bounded adult support extras. Existing named
   officials and petitioners are preserved; background extras cannot claim the
   officials' authored chairs. Indoor ambient acting no longer stamps against the
@@ -103,9 +111,12 @@ distinct 200-year room designs are a court feature, not sixteen city styles.
 
 ## Verification at the combined checkpoint
 
-Final visual acceptance remains in progress: the expanded walking review found
-legacy tunic thigh breakthrough and overlapping formal lapel/cravat panels.
-These are being corrected separately. The walking clearance itself passes
+Final visual acceptance remains in progress. The overlapping formal front panels
+are repaired and independently accepted in all thirty reviewed views. A separate
+small tunic walking-fit checkpoint `1f58e1f0` is pushed but excluded from this
+combined branch while additive legacy replacements are developed: deep kneeling
+and cross-sit review exposed substantial original tunic sleeve/skirt failure,
+which is not being waived as threshold noise. The walking clearance itself passes
 3,136 sampled poses with no hand/garment crossings after the full skirt volume
 was restored (worker `6cba2761`), with 67 focused regressions and 100 rendered
 pose/camera views. Do not treat the earlier narrowed-skirt commit `b19e62bb`
@@ -119,6 +130,14 @@ must identify their checks explicitly. The 96-view root capture at this interim
 checkpoint also completed with exit0 (PID65232), and is retained only as interim
 evidence. The independent final city provenance swatch passed and was visually
 reviewed, PID51960 exit0 with no engine/script errors.
+
+Final front-attachment raw validation passes all seven bodies in this checkout
+(`artifacts/court-evolution-final-front-layers-raw.log`); import exit0, no errors.
+The listener placement follow-up passes **60/60** stage/speech cases, report56;
+its new regression failed on the preceding code, report54. The actual modern
+audience passes all speaker/listener face assertions and was visually reviewed
+at both 1920x1080 and 1280x720 (private PID7212 exit0, no engine/script errors;
+`artifacts/court-evolution-final-listeners-3000-gpu.log`).
 
 - Latest broad court regression: **393/393**, thirty-one suites, no errors,
   failures, skips or orphans; process exit0.
