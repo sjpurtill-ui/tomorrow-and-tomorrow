@@ -58,6 +58,10 @@ def horizontal_clearance(point, bounds):
                       max(low[2] - point[2], 0, point[2] - high[2]))
 
 
+def bounds_overlap(a, b):
+    return all(min(a[1][axis], b[1][axis]) > max(a[0][axis], b[0][axis]) for axis in range(3))
+
+
 def floor_obstacles(info):
     # Everything intersecting walking-body height. Curved overhead arches have
     # separate piers so this conservative AABB test cannot fill the entire arch.
@@ -137,6 +141,19 @@ def main():
                 assert info["bounds"][f"AudienceCapital_{column}"][1][1] > info["bounds"][f"AudiencePier_{column}"][1][1] + .01, "coplanar capital top"
         if i == 12:
             assert info["bounds"]["ConsultationPartition"][0][0] > info["bounds"]["SecretaryStation"][1][0] + .04, "partition intersects secretary desk"
+        if i in (9, 10, 12):
+            for emblem in ("InstitutionMount", "InstitutionAssembly", "InstitutionThrone"):
+                assert info["bounds"][emblem][0][1] > 1.6, (key, emblem, "below human clearance")
+                for name, bounds in info["bounds"].items():
+                    if "Cornice" in name or name.startswith(("WindowReveal", "WindowLintel", "ChanceryArchive", "MinistryBooks", "SecretariatRecords")):
+                        assert not bounds_overlap(info["bounds"][emblem], bounds), (key, emblem, name, "wall-display intersection")
+        if i == 10:
+            assert not any(name.startswith("AnteroomDoor") for name in names), "blocked rear door behind waiting chairs"
+            assert "SecretariatRecords_Records" in info["technology_gates"]["bound_records"], "record cupboard contents ungated"
+        if i == 11:
+            for name in ("CabinetPanel_0", "CabinetPanel_2", "CabinetPanelInset_0", "CabinetPanelInset_2"):
+                for window in ("WindowReveal_0", "WindowReveal_1"):
+                    assert not bounds_overlap(info["bounds"][name], info["bounds"][window]), (name, window, "raised panel covers window")
         shape = geometry.hexdigest()
         assert shape not in shapes, (key, "geometry duplicates earlier chapter")
         shapes.add(shape)

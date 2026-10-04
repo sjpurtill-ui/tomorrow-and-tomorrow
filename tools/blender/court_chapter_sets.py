@@ -222,16 +222,17 @@ def architectural_layers(b,info,i,h):
         box(b,"ChanceryCornice",(0,3.15,-3.62),(10.7,.16,.27),"WOOD")
         for x in (-2.0,2.0):box(b,"ChanceryPanelPost_%s"%x,(x,1.55,-3.69),(.12,3.1,.19),"WOOD")
     elif i==10:
-        # A closed double door gives the secretariat a believable rear anteroom.
+        # This bay backs waiting chairs, so it is storage, not a blocked doorway.
+        box(b,"SecretariatCupboard",(0,.48,-3.77),(1.90,.96,.22),"WOOD")
         for side in (-1,1):
-            box(b,"AnteroomDoor_%s"%side,(side*.48,1.15,-3.76),(.94,2.3,.10),"PLANK")
-            for yy in (.60,1.70):box(b,"AnteroomDoorPanel_%s"%side,(side*.48,yy,-3.69),(.69,.79,.035),"WOOD")
-        for x in (-1.05,1.05):box(b,"DoorSurround_%s"%x,(x,1.30,-3.65),(.16,2.6,.24),"PLASTER")
-        box(b,"DoorSurroundHeader",(0,2.6,-3.63),(2.35,.20,.28),"PLASTER")
+            box(b,"CupboardDoor_%s"%side,(side*.46,.49,-3.645),(.86,.81,.035),"PLANK")
+            box(b,"CupboardHandle_%s"%side,(side*.12,.56,-3.61),(.055,.08,.03),"BRONZE")
+        record_shelves(b,info,"SecretariatRecords",(0,.99,-3.75),1.9,1.65,"book")
     elif i==11:
-        for x in (-2.15,0,2.15):
-            box(b,"CabinetPanel_%s"%x,(x,1.75,-3.78),(1.8,2.95,.055),"WOOD")
-            box(b,"CabinetPanelInset_%s"%x,(x,1.75,-3.735),(1.59,2.7,.025),"PLANK")
+        for n,x in enumerate((-1.9,0,1.9)):
+            width=1.8 if n==1 else 1.3
+            box(b,"CabinetPanel_%d"%n,(x,1.75,-3.78),(width,2.95,.055),"WOOD")
+            box(b,"CabinetPanelInset_%d"%n,(x,1.75,-3.735),(width-.21,2.7,.025),"PLANK")
         box(b,"CabinetPictureRail",(0,3.1,-3.68),(10.5,.08,.1),"WOOD")
     elif i==12:
         record_shelves(b,info,"MinistryBooks",(-.8,.24,-3.76),1.7,2.6,"book")
@@ -580,9 +581,13 @@ def build(i):
         elif i==4:emblem_y=3.3
         elif i==5:emblem_y=3.5
         elif i==6:emblem_x,emblem_y=1.55,2.1
+        elif i==9:emblem_x,emblem_y=1.45,2.25
+        elif i==10:emblem_x,emblem_y=1.85,2.25
+        elif i==12:emblem_x,emblem_y=3.55,2.25
         beam(b,"InstitutionMount",(emblem_x,emblem_y,-3.8),(emblem_x,emblem_y,-3.59),.025)
-        box(b,"InstitutionAssembly",(emblem_x,emblem_y,-3.60),(1.0,.72,.07),"WEAVE_B")
-        K.shield(b,"InstitutionThrone",(emblem_x,emblem_y,-3.52),(0,0,1),.36,slot="SHIELD_C",boss_slot="BRONZE")
+        emblem_scale=.7 if i==9 else 1.0
+        box(b,"InstitutionAssembly",(emblem_x,emblem_y,-3.60),(emblem_scale,.72*emblem_scale,.07),"WEAVE_B")
+        K.shield(b,"InstitutionThrone",(emblem_x,emblem_y,-3.52),(0,0,1),.36*emblem_scale,slot="SHIELD_C",boss_slot="BRONZE")
         info["institution_gates"]={"assembly":["InstitutionAssembly"],"throne":["InstitutionThrone"]}
     info["marks"]=marks
     objects=list(b.finish(flat_slots=tuple(K.SLOT_COLOURS)).values());K.write_colors(objects)
