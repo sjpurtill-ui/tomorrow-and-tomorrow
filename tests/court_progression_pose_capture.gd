@@ -1,7 +1,8 @@
 extends "res://tools/court_acting_capture.gd"
 ## Private-desktop diagnostic only. Close after capture; never the player game.
-## Existing fitted medieval and business meshes, seated/talking/walking from
-## two angles. These explicit garments test deformation, not discovery gating.
+## All fitted families seated/talking/walking from two angles, plus the legacy
+## garments and child at two stride phases. Explicit dress tests deformation,
+## not discovery gating.
 ## Use "collar-only no-ink" to isolate outline artifacts in the four closeups.
 
 func _ready()->void:
@@ -11,13 +12,19 @@ func _ready()->void:
 	_stage()
 	await _frames(3)
 	var variants:=["male_adult","female_adult","female_old","male_old"]
-	for outfit:String in ["medieval","business"]:
-		for pose:String in ([] if "collar-only" in OS.get_cmdline_user_args() else ["sit","sit_talk","talk_both","walk_in","kneel","sit_cross"]):
+	var captured:=0
+	for outfit:String in ["medieval","courtcoat","formal","business","hide","tunic","robe"]:
+		var poses:Array=["sit","sit_talk","talk_both","walk_in","walk_out","walk_in_0","walk_out_0","kneel","sit_cross"]
+		if outfit in ["hide","tunic","robe"]:poses=["walk_in","walk_out","walk_in_0","walk_out_0"]
+		if "collar-only" in OS.get_cmdline_user_args():poses=[]
+		for pose:String in poses:
+			var row_variants:=variants.duplicate()
+			if pose.begins_with("walk_"):row_variants[3]="child"
 			for yaw in [-20,70]:
 				_clear();await _frames(3)
-				for i in variants.size():
+				for i in row_variants.size():
 					var f:=Figure3D.new();world.add_child(f)
-					f.setup({"variant":variants[i],"outfit":outfit,"lit":true,"hair":"cropped","stance":"stand",
+					f.setup({"variant":row_variants[i],"outfit":outfit,"lit":true,"hair":"cropped","stance":"stand",
 						"cloth":[Color("466557"),Color("ece5d4"),Color("a88949")],"skin":Color("bd8659"),
 						"leather":Color("191b1d") if outfit=="business" else Color("5b3b24")})
 					_diagnostic_materials(f)
@@ -27,12 +34,13 @@ func _ready()->void:
 					figures.append(f)
 					if pose in ["kneel","sit_cross"]:
 						f.play("stand",0.0,0.0);Acting.play(f,pose,{"blend":0.0})
-					else:f.play(pose,0.0,0.0)
-				_step_all(1.33 if pose in ["kneel","sit_cross"] else (0.95 if pose=="talk_both" else 0.55))
+					else:f.play(pose.trim_suffix("_0"),0.0,0.0)
+				_step_all(0.0 if pose.ends_with("_0") else (1.33 if pose in ["kneel","sit_cross"] else (.95 if pose=="talk_both" else (.24 if pose=="walk_out" else .55))))
 				_frame_row(4.6,2.05)
 				_title("TEST wardrobe deformation: %s / %s / %d degrees" % [outfit,pose,yaw])
-				for i in figures.size():_label(variants[i].replace("_"," "),figures[i].position+Vector3(0,-.18,.2),16)
+				for i in figures.size():_label(row_variants[i].replace("_"," "),figures[i].position+Vector3(0,-.18,.2),16)
 				await _shot("%s_%s_%d.png" % [outfit,pose,yaw])
+				captured+=1
 	for outfit:String in ["medieval","business"]:
 		for variant:String in ["male_adult","female_old"]:
 			_clear();await _frames(3)
@@ -47,7 +55,8 @@ func _ready()->void:
 			camera.position=head+Vector3(.08,.06,1.1);camera.look_at(head,Vector3.UP)
 			_title("TEST seam closeup: %s / %s / seated speech" % [outfit,variant])
 			await _shot("%s_%s_seated_close.png" % [outfit,variant])
-	print("COURT_PROGRESSION_POSES captured %d views; inspect pixels before assessing quality" % (4 if "collar-only" in OS.get_cmdline_user_args() else 28))
+			captured+=1
+	print("COURT_PROGRESSION_POSES captured %d views; inspect pixels before assessing quality" % captured)
 	get_tree().quit()
 
 func _diagnostic_materials(f:Node3D)->void:
