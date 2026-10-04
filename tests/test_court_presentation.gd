@@ -5,11 +5,11 @@ const Stages:=preload("res://scripts/civic_stages.gd")
 const Voice:=preload("res://scripts/character_voice.gd")
 const PERIOD_CASES:=[
 	["early","hide",[]],
-	["ancient","robe",["temple_high_steward","pictographic_records"]],
+	["ancient","robe",["temple_high_steward","pictographic_records","plain_weaving"]],
 	["medieval","medieval",["fitted_tailoring","royal_chancery_office"]],
-	["early_modern","courtcoat",["secretaries_of_state","privy_council_minutes"]],
-	["industrial","formal",["single_minister_departments","appointed_department_prefects"]],
-	["modern","business",["national_income_accounts","labor_ministry"]]
+	["early_modern","courtcoat",["secretaries_of_state","privy_council_minutes","fitted_tailoring"]],
+	["industrial","formal",["single_minister_departments","appointed_department_prefects","fitted_tailoring"]],
+	["modern","business",["national_income_accounts","labor_ministry","fitted_tailoring"]]
 ]
 
 func before_test()->void:
@@ -21,7 +21,7 @@ func after_test()->void:
 
 func test_every_presentation_and_later_civic_anchor_is_in_the_live_catalog()->void:
 	DiscoverySystem.initialize()
-	var ids:Array=Presentation.CLOTH+Presentation.LETTERS
+	var ids:Array=Presentation.CLOTH+Presentation.LETTERS+Presentation.FITTED+Presentation.DYES
 	for group:Array in Presentation.GATES.values():ids.append_array(group)
 	var later:Dictionary=JSON.parse_string(FileAccess.get_file_as_string(Stages.LATE_PATH))
 	for markers:Array in later.tracks.values():ids.append_array(markers)
@@ -87,7 +87,7 @@ func test_modern_administration_does_not_turn_a_monarchy_into_an_assembly()->voi
 	assert_str(String(throne.protocol)).contains("god")
 
 func test_foreign_and_home_presentations_use_their_own_knowledge()->void:
-	Voice.knowledge_override["player"]=["national_income_accounts","labor_ministry"]
+	Voice.knowledge_override["player"]=["national_income_accounts","labor_ministry","fitted_tailoring"]
 	Voice.knowledge_override["neighbours"]=["plain_weaving"]
 	assert_str(String(Presentation.for_owner().period)).is_equal("modern")
 	assert_str(String(Presentation.for_owner("neighbours").period)).is_equal("early")
@@ -95,7 +95,7 @@ func test_foreign_and_home_presentations_use_their_own_knowledge()->void:
 	assert_str(String(Presentation.for_owner().outfit)).is_equal("business")
 
 func test_existing_save_knowledge_derives_the_profile_without_new_state()->void:
-	GameState.known_discoveries.assign(["national_income_accounts","labor_ministry"])
+	GameState.known_discoveries.assign(["national_income_accounts","labor_ministry","fitted_tailoring"])
 	var before:Array=GameState.known_discoveries.duplicate()
 	var first:=Presentation.for_owner()
 	Stages.reload()
