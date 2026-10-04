@@ -172,7 +172,7 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 		# hair breaks into strokes where it meets the skin (stubble all over)
 		if slot in ["HAIR","STUBBLE"]:made.set_shader_parameter("stipple",1.0)
 		if lit:
-			made.set_shader_parameter("fill",0.22 if slot=="SKIN" else 0.16)
+			made.set_shader_parameter("fill",0.14 if slot=="SKIN" else 0.16)
 			if slot=="SKIN":made.set_shader_parameter("grain",0.025)
 		if inked and not slot in ["BROW","STUBBLE","HAIR_CARD"]:made.next_pass=_ink(cover,slot=="HAIR")
 	_materials[key]=made
@@ -398,7 +398,7 @@ func _dress()->void:
 	var merging:=lit and Merge.enabled and skeleton!=null
 	var colours:={
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
-		"EYES":Color("120a06"),"EYE_WHITE":Color("e9dfcb"),"EYE_SHINE":Color("fffdf6"),
+		"EYES":skin.darkened(0.68).lerp(Color("271b18"),0.45),"EYE_WHITE":Color("e9dfcb"),"EYE_SHINE":Color("fffdf6"),
 		"IRIS":Color(look.get("eye_colour",Color("5a3a22"))),"PUPIL":Color("140d08"),
 		"MOUTH":Color("2a0d0a").lerp(skin.darkened(0.7),0.35),"HAIR_CARD":hair_colour,"LEATHER":Color(look.get("leather",Color("5b3b24"))),
 		"STUBBLE":skin.lerp(hair_colour,0.42).darkened(0.08),"WOOD":Color("6b4a2e"),"CLAY":Color("a0603a"),

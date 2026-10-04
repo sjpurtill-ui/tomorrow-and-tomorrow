@@ -23,6 +23,29 @@ float face_hash(vec2 p) {
 	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
 }
 
+// Broad, sub-millimetre surface relief. Face UVs travel with the skin and
+// expression morphs; screen derivatives provide a frame without requiring
+// tangents on these untextured, skinned meshes. This adds soft lid/lip/cheek
+// form without moving the skin through the eye and mouth decals.
+vec3 face_normal(vec3 position, vec3 normal, vec2 F, vec2 G, float age) {
+	float ax = abs(F.x);
+	float relief = 0.0016 * (1.0 - 0.2 * age) * face_ell(vec2(ax - 0.043, F.y - 0.108), vec2(0.026, 0.023));
+	relief += 0.00028 * face_ell(vec2(ax - 0.035, F.y - 0.123), vec2(0.023, 0.006));
+	relief += 0.0010 * face_ell(vec2(ax - 0.034, F.y - 0.154), vec2(0.031, 0.012));
+	relief += 0.0010 * face_ell(vec2(F.x, F.y - 0.048), vec2(0.020, 0.006));
+	relief += 0.0006 * face_ell(vec2(F.x, F.y - 0.061), vec2(0.022, 0.005));
+	relief -= 0.0005 * face_ell(vec2(F.x, F.y - 0.075), vec2(0.004, 0.010));
+	relief -= 0.0005 * face_ell(vec2(F.x, F.y - 0.035), vec2(0.016, 0.005));
+	relief *= smoothstep(0.12, 0.65, G.x) * smoothstep(0.5, 0.9, G.y);
+	vec3 dx = dFdx(position);
+	vec3 dy = dFdy(position);
+	vec3 rx = cross(dy, normal);
+	vec3 ry = cross(normal, dx);
+	float det = dot(dx, rx);
+	vec3 grad = sign(det) * (dFdx(relief) * rx + dFdy(relief) * ry);
+	return normalize(max(abs(det), 1e-12) * normal - grad);
+}
+
 // depth: 0 the fairest skin, 1 the deepest.
 vec3 paint_face(vec3 base, vec2 F, vec2 G, vec4 fa, vec4 fb, float depth) {
 	if (G.y < 0.5) {
@@ -37,9 +60,9 @@ vec3 paint_face(vec3 base, vec2 F, vec2 G, vec4 fa, vec4 fb, float depth) {
 	// the sockets: shade above and about the eye, deepest at the inner corner
 	float sock = face_ell(vec2(ax - 0.033, y - 0.141), vec2(0.028, 0.019)) * front;
 	float inner = face_ell(vec2(ax - 0.020, y - 0.139), vec2(0.010, 0.012)) * front;
-	c *= mix(vec3(1.0), vec3(0.83, 0.77, 0.80), clamp(sock * 0.75 + inner * 0.55, 0.0, 1.0));
+	c *= mix(vec3(1.0), vec3(0.83, 0.77, 0.80), clamp(sock * 0.45 + inner * 0.40, 0.0, 1.0));
 	float under = face_ell(vec2(ax - 0.036, y - 0.121), vec2(0.020, 0.008)) * front;
-	c *= 1.0 - under * (0.06 + 0.12 * fa.x);
+	c *= 1.0 - under * (0.03 + 0.07 * fa.x);
 	// the planes of the head: a lit brow and forehead, the cheekbone high,
 	// the hollow under it, the temple and the side of the jaw turned away
 	c *= 1.0 + face_ell(vec2(ax - 0.034, y - 0.167), vec2(0.030, 0.010)) * front * (0.06 + 0.08 * depth);
@@ -57,7 +80,7 @@ vec3 paint_face(vec3 base, vec2 F, vec2 G, vec4 fa, vec4 fb, float depth) {
 	c *= 1.0 - nside * 0.08 - under_nose * 0.04;
 	// the underside of the nose is a mid tone, not a hole: only the nostrils are dark
 	float nose_under = face_ell(vec2(ax - 0.004, y - 0.0895), vec2(0.016, 0.006)) * (1.0 - smoothstep(0.20, 0.60, G.x));
-	c *= 1.0 + nose_under * 0.55;
+	c *= 1.0 + nose_under * 0.18;
 	c *= 1.0 - nostril * 0.38;
 	// warm cheeks (most on fair skin)
 	float cheek = face_ell(vec2(ax - 0.046, y - 0.098), vec2(0.026, 0.020)) * front;
@@ -65,25 +88,25 @@ vec3 paint_face(vec3 base, vec2 F, vec2 G, vec4 fa, vec4 fb, float depth) {
 	// the lips: their own colour, a catch of light below, the corners dark
 	float upper = face_ell(vec2(F.x, y - 0.0590), vec2(0.0215, 0.0052));
 	float lower = face_ell(vec2(F.x, y - 0.0485), vec2(0.0190, 0.0064));
-	vec3 lip = mix(c * vec3(0.86, 0.50, 0.50), c * vec3(0.64, 0.42, 0.52), depth);
-	c = mix(c, lip, clamp((upper + lower) * 1.4, 0.0, 1.0));
+	vec3 lip = mix(c * vec3(0.93, 0.66, 0.63), c * vec3(0.78, 0.57, 0.60), depth);
+	c = mix(c, lip, clamp((upper + lower) * 1.15, 0.0, 1.0));
 	c = mix(c, c * vec3(1.10, 1.04, 1.02), face_ell(vec2(F.x, y - 0.0465), vec2(0.010, 0.0024)) * (0.35 + 0.35 * depth));
 	float corner = face_ell(vec2(ax - 0.0185, y - 0.0548), vec2(0.0032, 0.0034));
-	c *= 1.0 - corner * 0.60;
+	c *= 1.0 - corner * 0.28;
 	// shade under the line of the jaw and down the throat
 	c *= 1.0 - smoothstep(0.012, -0.022, y) * 0.10;
 	// years: the folds from nose to mouth, crow's feet, lines on the brow
 	float age = fa.x;
 	if (age > 0.01) {
 		float fold = 1.0 - smoothstep(0.0011, 0.0032, face_seg(vec2(ax, y), vec2(0.0155, 0.0870), vec2(0.0258, 0.0512)));
-		c *= 1.0 - fold * front * (0.08 + 0.22 * age);
+		c *= 1.0 - fold * front * (0.035 + 0.10 * age);
 		float crow = 0.0;
 		for (int i = 0; i < 3; i++) {
 			float a = -0.40 + 0.40 * float(i);
 			vec2 o = vec2(0.0545, 0.1375);
 			crow = max(crow, 1.0 - smoothstep(0.0006, 0.0017, face_seg(vec2(ax, y), o, o + vec2(cos(a), sin(a)) * 0.011)));
 		}
-		c *= 1.0 - crow * smoothstep(0.25, 1.0, age) * 0.24;
+		c *= 1.0 - crow * smoothstep(0.25, 1.0, age) * 0.14;
 		float lines = smoothstep(0.5, 1.0, age) * front * (0.5 + 0.5 * sin(y * 1300.0)) * face_ell(vec2(F.x, y - 0.192), vec2(0.046, 0.017));
 		c *= 1.0 - lines * 0.12;
 	}
@@ -100,7 +123,10 @@ vec3 paint_face(vec3 base, vec2 F, vec2 G, vec4 fa, vec4 fb, float depth) {
 	if (fa.y > 0.01) {
 		vec2 cell = floor(F * 900.0);
 		float h = face_hash(cell + fa.w * 97.0);
-		float spot = (1.0 - smoothstep(0.18, 0.34, length(fract(F * 900.0) - 0.5))) * step(1.0 - fa.y * 0.35, h);
+		vec2 centre = vec2(face_hash(cell + 3.7), face_hash(cell + 19.3)) * 0.5 + 0.25;
+		float radius = mix(0.11, 0.27, face_hash(cell + 8.1));
+		float aa = max(length(fwidth(F * 900.0)), 0.035);
+		float spot = (1.0 - smoothstep(radius * 0.55, radius + aa, length(fract(F * 900.0) - centre))) * step(1.0 - fa.y * 0.24, h);
 		float zone = face_ell(vec2(ax - 0.030, y - 0.103), vec2(0.050, 0.030)) * front;
 		c *= 1.0 - spot * zone * 0.24;
 	}
@@ -108,7 +134,9 @@ vec3 paint_face(vec3 base, vec2 F, vec2 G, vec4 fa, vec4 fb, float depth) {
 	vec2 mole = vec2(mix(-0.050, 0.050, fract(fa.w * 13.7)), mix(0.030, 0.130, fract(fa.w * 7.3)));
 	float m = (1.0 - smoothstep(0.0012, 0.0021, length(F - mole))) * step(0.5, fract(fa.w * 3.1));
 	c *= 1.0 - m * 0.45;
-	return c;
+	// All facial markings belong to the face, including lips and moles.
+	// Projected coordinates alone also occur on the back of the head.
+	return mix(base, c, smoothstep(0.06, 0.48, G.x));
 }
 
 // A hair card: strands across it, finer toward their ends. false: no strand here.

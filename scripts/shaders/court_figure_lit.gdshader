@@ -109,6 +109,7 @@ void fragment() {
 	vec3 base = albedo * mix(1.0, v_ao, ao_amount * 0.8);
 	if (face_paint) {
 		base = paint_face(base, v_face, v_face2, face_a, face_b, skin_depth());
+		NORMAL = face_normal(VERTEX, normalize(NORMAL), v_face, v_face2, face_a.x);
 	}
 	if (card > 0.0) {
 		base *= (0.94 + 0.12 * v_card) * (0.90 + 0.20 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
@@ -129,7 +130,7 @@ void fragment() {
 	// a warm floor of colour in the deepest shade, and a rim of the sky
 	vec3 glow = base * shade_tint * fill * dim;
 	float facing = clamp(dot(normalize(NORMAL), VIEW), 0.0, 1.0);
-	glow += base * key_color * front_fill * smoothstep(0.15, 0.85, facing) * dim;
+	glow += base * key_color * front_fill * (skin || flat_colour ? 0.55 : 1.0) * smoothstep(0.15, 0.85, facing) * dim;
 	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	glow += rim_color * rim_amount * fres * 0.35;
 	if (sheen > 0.0) {
@@ -152,6 +153,10 @@ void light() {
 	} else {
 		float lit = smoothstep(-0.02, band_soft, ndl);
 		float half_lit = smoothstep(-0.42, -0.18, ndl) * 0.30;
+		if (skin) {
+			lit = 0.10 + 0.90 * smoothstep(-0.35, 0.95, ndl);
+			half_lit = 0.0;
+		}
 		// The sun's shadows fall on a person softened (their own hair and arms
 		// would stipple them); the fire's reach is as it is.
 		float att = LIGHT_IS_DIRECTIONAL ? mix(1.0, ATTENUATION, shadow_amount) : ATTENUATION;
@@ -169,8 +174,8 @@ void light() {
 			float wrap = smoothstep(-0.45, 0.15, ndl) * (1.0 - lit);
 			DIFFUSE_LIGHT += lc * vec3(0.55, 0.20, 0.12) * wrap * att * (1.0 - depth) * 0.55 / PI;
 			// deep skin: a cool soft highlight where the light glances back
-			float sp = pow(clamp(dot(reflect(-LIGHT, NORMAL), VIEW), 0.0, 1.0), 9.0) * att;
-			SPECULAR_LIGHT += vec3(0.80, 0.88, 1.0) * l * sp * 0.12 * depth;
+			float sp = pow(clamp(dot(NORMAL, normalize(LIGHT + VIEW)), 0.0, 1.0), 24.0) * att;
+			SPECULAR_LIGHT += mix(LIGHT_COLOR, vec3(l), 0.65) * sp * (0.018 + 0.045 * depth);
 		}
 		DIFFUSE_LIGHT += lc * (tint * tone + terminator * edge * 0.30) / PI;
 	}

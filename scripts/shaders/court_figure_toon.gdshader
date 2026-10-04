@@ -101,6 +101,7 @@ void fragment() {
 	vec3 base = albedo * mix(1.0, v_ao, ao_amount);
 	if (face_paint) {
 		base = paint_face(base, v_face, v_face2, face_a, face_b, skin_depth());
+		NORMAL = face_normal(VERTEX, normalize(NORMAL), v_face, v_face2, face_a.x);
 	}
 	if (card > 0.0) {
 		base *= (0.94 + 0.12 * v_card) * (0.90 + 0.20 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
@@ -112,11 +113,14 @@ void fragment() {
 	if (flat_colour) {
 		ALBEDO = albedo * min(dim, 1.0);
 	} else {
-		vec3 n = normalize(v_world_normal);
+		vec3 n = skin ? normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz) : normalize(v_world_normal);
 		float ndl = dot(n, normalize(key_dir));
 		float lit = smoothstep(-0.02, band_soft, ndl);
 		float half_tone = smoothstep(-0.42, -0.18, ndl) * 0.30;
 		float tone = max(lit, half_tone);
+		if (skin) {
+			tone = 0.10 + 0.90 * smoothstep(-0.35, 0.95, ndl);
+		}
 		float g = noise3(v_obj * 46.0) * 0.6 + noise3(v_obj * 13.0) * 0.4;
 		base *= 1.0 + (g - 0.5) * grain;
 		vec3 col = mix(base * shade_tint, base * key_color, tone);

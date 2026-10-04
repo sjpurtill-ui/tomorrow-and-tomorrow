@@ -586,7 +586,7 @@ static func of(fig:Node3D)->Node:
 	if fig==null or not is_instance_valid(fig):return null
 	var existing:Variant=fig.get_meta(&"court_acting") if fig.has_meta(&"court_acting") else null
 	var skel:=fig.get(&"skeleton") as Skeleton3D
-	if existing is Node and is_instance_valid(existing) and (existing as Node).get_script()==Self and (existing as Node).get(&"skel")==skel:return existing
+	if is_instance_valid(existing) and existing is Node and (existing as Node).get_script()==Self and (existing as Node).get(&"skel")==skel:return existing
 	if skel==null:return null
 	var actor:Node=Self.new()
 	actor.name="Acting"

@@ -125,6 +125,13 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 					v[k]+=d*w
 				# An unmoved vertex still turns when its neighbours move.
 				if has_n:nn[k]+=(snp[k]-n0[k])*w
+		# The thin brow decal can intersect its sculpted ridge once several
+		# identity shapes combine. Carry a small outward clearance through
+		# every expression, just like the identity's positional delta.
+		if String(p[2])=="BROW":
+			if not baked:
+				v=v0.duplicate();nn=n0.duplicate();baked=true
+			for k in count:v[k]+=_unit_normal(nn[k],n0[k])*0.0011
 		if baked:
 			normal_delta.resize(count)
 			for k in count:
@@ -141,7 +148,12 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 		if col is PackedColorArray and (col as PackedColorArray).size()==count:C.append_array(col)
 		else:
 			var white:=PackedColorArray();white.resize(count);white.fill(Color(1,0,0,0));C.append_array(white)
-		UV.append_array(_or_zero2(arr[Mesh.ARRAY_TEX_UV],count))
+		# The source eye decals have no UVs. Coordinates made from each
+		# resting eye travel with gaze/blink morphs instead of swimming over it.
+		if String(p[2]) in ["EYE_WHITE","IRIS","PUPIL","EYE_SHINE","BROW"]:
+			UV.append_array(_feature_uv(v0))
+		else:
+			UV.append_array(_or_zero2(arr[Mesh.ARRAY_TEX_UV],count))
 		UV2.append_array(_or_zero2(arr[Mesh.ARRAY_TEX_UV2],count))
 		var bones:Variant=arr[Mesh.ARRAY_BONES];var weights:Variant=arr[Mesh.ARRAY_WEIGHTS]
 		if bones is PackedInt32Array and (bones as PackedInt32Array).size()==count*4:
@@ -208,6 +220,24 @@ static func _or_zero2(a:Variant,count:int)->PackedVector2Array:
 	var z:=PackedVector2Array();z.resize(count);z.fill(Vector2.ZERO)
 	return z
 
+## A separate 0..1 surface for each eye/brow, from the unposed source.
+## Taking bounds per side preserves spacing, body size and individual gaze.
+static func _feature_uv(vertices:PackedVector3Array)->PackedVector2Array:
+	var lo:=[Vector2(INF,INF),Vector2(INF,INF)]
+	var hi:=[Vector2(-INF,-INF),Vector2(-INF,-INF)]
+	for point:Vector3 in vertices:
+		var side:=int(point.x>0.0)
+		var at:=Vector2(point.x,point.y)
+		lo[side]=(lo[side] as Vector2).min(at)
+		hi[side]=(hi[side] as Vector2).max(at)
+	var uv:=PackedVector2Array();uv.resize(vertices.size())
+	for i in vertices.size():
+		var point:=vertices[i]
+		var side:=int(point.x>0.0)
+		var span:Vector2=(hi[side]-lo[side]).max(Vector2(0.000001,0.000001))
+		uv[i]=(Vector2(point.x,point.y)-lo[side])/span
+	return uv
+
 # --- One material a figure -----------------------------------------------------
 
 ## The figure's materials: its colours (sRGB) by slot, its outfit's cover
@@ -240,12 +270,12 @@ static func material(colours:Dictionary,cover:int,key_dir:Vector3,stencil:="")->
 ## [band_soft, rim, strands, sheen], [grain, fill, stipple, card], [flat, skin, glow (shines of itself), -].
 static func _params(slot:String)->Array:
 	match slot:
-		"SKIN":return [Vector4(0.34,0.14,0.0,0.0),Vector4(0.025,0.22,0.0,0.0),Vector4(0.0,1.0,0.0,0.0)]
+		"SKIN":return [Vector4(0.34,0.10,0.0,0.0),Vector4(0.025,0.14,0.0,0.0),Vector4(0.0,1.0,0.0,0.0)]
 		"HAIR":return [Vector4(0.30,0.22,0.24,0.22),Vector4(0.05,0.16,1.0,0.0),Vector4.ZERO]
 		"HAIR_CARD":return [Vector4(0.30,0.30,0.0,0.18),Vector4(0.0,0.16,0.0,1.0),Vector4.ZERO]
 		"STUBBLE":return [Vector4(0.10,0.14,0.0,0.0),Vector4(0.35,0.16,1.0,0.0),Vector4.ZERO]
 		"EYE_SHINE":return [Vector4(0.10,0.0,0.0,0.0),Vector4(0.0,0.16,0.0,0.0),Vector4(1.0,0.0,0.9,0.0)]
-		"EYE_WHITE":return [Vector4(0.10,0.0,0.0,0.0),Vector4(0.0,0.16,0.0,0.0),Vector4(1.0,0.0,0.22,0.0)]
+		"EYE_WHITE":return [Vector4(0.10,0.0,0.0,0.0),Vector4(0.0,0.10,0.0,0.0),Vector4(1.0,0.0,0.035,0.0)]
 		"MOUTH","EYES","IRIS","PUPIL":return [Vector4(0.10,0.0,0.0,0.0),Vector4(0.0,0.16,0.0,0.0),Vector4(1.0,0.0,0.0,0.0)]
 	return [Vector4(0.10,0.14,0.0,0.0),Vector4(0.05,0.16,0.0,0.0),Vector4.ZERO]
 

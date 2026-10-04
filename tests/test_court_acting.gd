@@ -48,6 +48,21 @@ func _hand(f:Node3D,side:="R")->Vector3:
 	var b:int=f.skeleton.find_bone("hand."+side)
 	return f.skeleton.get_bone_global_pose(b).origin
 
+func test_actor_rebinds_after_a_reused_figure_changes_body()->void:
+	var figure:=_figure()
+	var original:=Acting.of(figure)
+	assert_object(original).is_not_null()
+	assert_bool(figure.setup({"variant":"female_old","outfit":"tunic","hair":"long","stance":"stand"})).is_true()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	assert_bool(is_instance_valid(original)).is_false()
+	var replacement:=Acting.of(figure)
+	assert_object(replacement).is_not_null()
+	if replacement!=null:
+		assert_object(replacement.skel).is_same(figure.skeleton)
+		Acting.set_mood(figure,{"joy":0.6})
+		_run(figure,0.3)
+
 
 func _bone_y(f:Node3D,bone:String)->float:
 	return f.skeleton.get_bone_global_pose(f.skeleton.find_bone(bone)).origin.y

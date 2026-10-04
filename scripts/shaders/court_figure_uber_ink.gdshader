@@ -24,8 +24,11 @@ void vertex() {
 	vec3 nv = normalize((MODELVIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	vec2 nc = (PROJECTION_MATRIX * vec4(nv, 0.0)).xy;
 	float l = length(nc);
+	// Fine facial contours: a full garment-width outline turns small
+	// concavities beside the nose into black slits at conversation distance.
+	float width = width_px * (v_slot == 0 && UV2.y < 0.5 ? 0.42 : 1.0);
 	if (l > 1e-5) {
-		clip.xy += nc / l * width_px * 2.0 / VIEWPORT_SIZE * clip.w;
+		clip.xy += nc / l * width * 2.0 / VIEWPORT_SIZE * clip.w;
 	}
 	// Keep the ink behind the painted surface at concave folds. XY-only
 	// expansion otherwise pulls back faces over the chest and collar.

@@ -25,6 +25,8 @@ var failures:Array[String]=[]
 var labels:Array=[]
 
 func _ready()->void:
+	var unmerged:="unmerged" in OS.get_cmdline_user_args()
+	if unmerged:Figure3D.Merge.enabled=false
 	var capture:=DisplayServer.get_name()!="headless"
 	if capture:get_window().size=Vector2i(1536,864)
 	await _frames(2)
@@ -92,7 +94,7 @@ func _ready()->void:
 			print("FACE ",labels[-1])
 			fig.queue_free()
 			await _frames(1)
-		var dir:=ProjectSettings.globalize_path("res://reports/court_figures/")
+		var dir:=ProjectSettings.globalize_path("res://reports/court_faces_unmerged/" if unmerged else "res://reports/court_figures/")
 		DirAccess.make_dir_recursive_absolute(dir)
 		if capture:
 			sheet.save_png(dir+"faces_sheet.png")
@@ -147,6 +149,26 @@ func _ready()->void:
 				for i in 12:await get_tree().process_frame
 				await RenderingServer.frame_post_draw
 				if capture:view.get_texture().get_image().save_png(dir+"faces_%s_%s.png" % [String(shot[0]),String(sitter[0])])
+			# Close-up acceptance of the actual expression/gaze targets. Freeze
+			# the animation clock so a blink cannot hide a visual regression.
+			if "expressions" in OS.get_cmdline_user_args():
+				main.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+				var actor=Acting.of(main)
+				actor.active=false
+				for pose:Dictionary in [{"name":"rest","keys":{}},{"name":"smile","keys":{"smile":0.85}},
+					{"name":"worried","keys":{"brows_worried":0.8,"lips_pressed":0.4}},
+					{"name":"speech","keys":{"jaw_open":0.65,"v_aa":0.45}},
+					{"name":"left","keys":{"eyes_left":0.9}},{"name":"right","keys":{"eyes_right":0.9}},
+					{"name":"blink","keys":{"blink":1.0}}]:
+					for mesh:MeshInstance3D in main._meshes:
+						for index in mesh.get_blend_shape_count():
+							var key:=String(mesh.mesh.get_blend_shape_name(index))
+							if not key.begins_with("face_"):mesh.set_blend_shape_value(index,float((pose["keys"] as Dictionary).get(key,0.0)))
+					await _frames(3)
+					await RenderingServer.frame_post_draw
+					if capture:view.get_texture().get_image().save_png(dir+"expression_%s_%s.png" % [String(sitter[0]),String(pose.name)])
+				actor.active=true
+				main.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
 			# one face in each mood, chest up (K's acting: the face and the set of the body)
 			if String(sitter[0])=="kilnfold":
 				for mood in ["joy","fear","anger","scorn"]:
