@@ -340,9 +340,20 @@ are people abroad, gifts leave the stores.
 Renown and pride are centred on the typical people of the age (awe 0.25,
 allure 0.25, pride 0.5 for a people at 50% everywhere): a typical people is
 neither proud nor ashamed, where before every people drifted proud as
-splendour filled. Envy weighs our plenty and how far it passes theirs (their
-own month's Wealth). Might past 50% menaces newcomers (5.6 points a month at
-85%) and, at a tense border, the neighbours' allure. The computer peoples'
+splendour filled. Envy weighs our plenty (x0.6) and how far it passes theirs
+(x0.6, their own month's Wealth), and moves raiders past ENVY_RAID_FLOOR
+0.40. With twelve neighbours met and few under arms, a people as rich as the
+player's at year 75 (Wealth 76%: 248 days of food) draws about one envy raid
+in 3.2 years (4.4 years guarded as a typical people); a typical people none;
+the richest the age has seen (Wealth 90%) about 1.4 a year, guarded or not,
+because the computer peoples' own Might is so high that a typical guard
+awes nobody (a follow-up). Might past 50% menaces newcomers (5.6 points a
+month at 85%) and, at a tense border, the neighbours' allure.
+
+Every people reads its month every 30 days of its own calendar
+(`Standing.reading_due`): calm computer peoples step several days at once.
+The awe and envy reasons word another people's learning and plenty from our
+estimate of them, and the War Ledger says "unknown" when we know too little. The computer peoples'
 "tempting" danger (wealth past might by 0.35) reads the new scale.
 
 ### Fast sim (`python tools/sim/standing_check.py`)
@@ -354,6 +365,6 @@ to 93, learning Genius to 91 at year 25 and 65 by 300, building Splendor to
 71, the arts' postures Cunning to 73 and Persuasion to 83, administration
 Order to 70, carriers Reach to 79; nothing reaches 97 off its own lean.
 Endurance past 70 needs 100 days and more in store. In the raid world the
-same raids met with cunning lose 39% fewer stores (at 5% fewer people by
-600, the hands on scouting), and persuasion draws 16% fewer raids (at the
+same raids met with cunning lose 35% fewer stores (at 3% fewer people by
+600, the hands on scouting), and persuasion draws 17% fewer raids (at the
 gifts' cost).

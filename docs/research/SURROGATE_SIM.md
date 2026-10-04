@@ -145,14 +145,15 @@ a played world and read 78).
 
 The arts in the raid world (`leaders.py`, the cautious-caring temper, which
 raises works and is raided for them; neighbours at Wealth 0.45 and an envy
-floor of 0.2 so the raids are many; 600 years, 4 seeds): with no posture,
-141 raids, 67 seen coming and repelled, 2.14 million rations taken, 23,012
-people. Cunning (chief scout 0.85, two to three agents abroad, scouts +5
-points of the work): 98 of 142 seen and repelled, 1.31 million taken (-39%),
-at 21,830 people (-5%: the hands on scouting). Persuasion (envoy 0.85,
-treaties, gifts 0.3 rations a head a year, administrators +3 points): 119
-raids (-16%), 1.80 million taken, 0.35 dead in 1,000 a year against 0.42, at
-1.28 million rations given, 23,200 people. The deals, heeded messages,
+floor of 0.2 so the raids are many; 600 years, 4 seeds; envy on standing.gd's
+weights, plenty 0.6 and plenty past theirs 0.6): with no posture, 167 raids,
+81 seen coming and repelled, 2.47 million rations taken, 0.49 dead in 1,000
+a year, 22,651 people. Cunning (chief scout 0.85, two to three agents abroad,
+scouts +5 points of the work): 116 of 170 seen and repelled, 1.60 million
+taken (-35%), 0.45 dead, at 22,050 people (-3%: the hands on scouting).
+Persuasion (envoy 0.85, treaties, gifts 0.3 rations a head a year,
+administrators +3 points): 138 raids (-17%), 2.26 million taken, 0.42 dead,
+at 1.28 million rations given, 23,396 people. The deals, heeded messages,
 holding pacts, newcomers and softer grudges it also buys are not in the
 surrogate.
 
@@ -161,7 +162,7 @@ Truth: the seven runs were re-recorded on this branch, one engine at a time
 and `built_fabric.gd` (a watched file) states its Splendor and Might lines in
 the new readings. Against the old truth the engine's 15-year path differs
 only in holding together (0.872 against 0.881 at year 15, pride no longer
-lifting every people); `check.py --strict` passes (score 43.1 after merging main with #137, re-recorded again on the merge).
+lifting every people); `check.py --strict` passes (score 43.1, re-recorded again after the review fixes to consequence_engine.gd).
 
 ### Crises and the age table's background (2026-10-03)
 
