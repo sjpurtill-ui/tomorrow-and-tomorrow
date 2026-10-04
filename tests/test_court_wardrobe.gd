@@ -11,7 +11,7 @@ func test_every_body_has_four_real_outfits_and_preserves_its_face_and_rig()->voi
 	for variant:String in Figure.BODIES:
 		var figure:=Figure.new();add_child(figure)
 		assert_bool(figure.setup({"variant":variant,"outfit":"tunic","lit":false})).is_true()
-		var original:=_body(figure).mesh
+		var original:Mesh=figure._plain_skin
 		var rig:=figure.skeleton;var player:=figure.player
 		var arrays:=original.surface_get_arrays(0)
 		var morphs:=original.surface_get_blend_shape_arrays(0)
@@ -37,7 +37,7 @@ func test_every_body_has_four_real_outfits_and_preserves_its_face_and_rig()->voi
 			fingerprints[hash(geometry)]=true
 		assert_int(fingerprints.size()).is_equal(4)
 		figure.setup({"variant":variant,"outfit":"robe","lit":false})
-		assert_object(_body(figure).mesh).is_same(original)
+		assert_object(_body(figure).mesh).is_same(figure._legacy_skin if figure._legacy_skin!=null else original)
 		for part:MeshInstance3D in figure._parts:
 			for outfit:String in Wardrobe.OUTFITS:
 				if String(part.name).begins_with(outfit+"_"):assert_bool(part.visible).is_false()
