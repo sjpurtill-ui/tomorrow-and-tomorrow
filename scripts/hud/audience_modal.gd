@@ -33,6 +33,7 @@ const PERSONS_WORDS:="(?i)\\b(who|whom|whose|summon|bring|fetch|send for|respons
 
 const Hall:=preload("res://scripts/audience_hall.gd")
 const Stakes:=preload("res://scripts/proposal_stakes.gd")
+const DecreeCard:=preload("res://scripts/hud/decree_card.gd")
 const OrderReader:=preload("res://scripts/order_reader.gd")
 const ViewState:=preload("res://scripts/hud/view_state.gd")
 const Tokens:=preload("res://scripts/hud/hud_tokens.gd")
@@ -273,6 +274,7 @@ func _reset_card(next_mode:String)->void:
 	_stakes_compact=true;_stakes_opened=false
 	stage_row=null
 	court_stage=null;_reveal_label=null;_leave_when_quiet=false;scene_portraits.clear();_executed=false
+	decree_card=null;_decree_words=""
 	rest_seats.clear();foreign_refs.clear();rest_signature=[];foreign_count=-1
 	civic_settlement="";civic_seen.clear();civic_signature=""
 	civic_strip=null;civic_state_label=null;civic_status_label=null;civic_replies=null
@@ -1348,6 +1350,8 @@ func _speak()->void:
 		return
 	speech_input.clear()
 	_last_words=text
+	# Words to a town's leader may come back as a decree's receipt: its title.
+	if not civic_settlement.is_empty() and not text.ends_with("?") and not _is_short_answer(text):_decree_words=text
 	_clear_suggestions()
 	_open_card(text)
 	# PRISONER (captured_agents.gd, builder P): their questions, the god's acts
@@ -1648,6 +1652,11 @@ func _after_command(result:Dictionary)->void:
 	_settle_card(result)
 	if is_instance_valid(court_stage):court_stage.event("command",{"result":result})
 	_maybe_execute(result,String(result.get("text",_last_words)))
+	# A law laid down before the court: the decree card says it and what the
+	# engine made of it (its measured result follows as a receipt).
+	if bool(result.get("law",false)) and bool(result.get("executed",false)):
+		_decree_words=String(result.get("text",_last_words))
+		show_decree({"kind":"law","title":_decree_words,"who":String(result.get("actor_name","")),"outcome":String(result.get("outcome","")).trim_prefix("From today it is the law. ")})
 	# Carried out only as a vague standing order: the closest real orders are
 	# offered, so the god can pick instead of rephrasing.
 	if String(result.get("route",""))=="custom_directive" and _last_words!="":_offer_closest(_last_words)
@@ -1689,6 +1698,9 @@ func _after_request_reading(id:String,text:String,reading:Dictionary)->void:
 func choose(option_id:String)->Dictionary:
 	if not resolved_result.is_empty():return resolved_result
 	var audience:=Hall.find(audience_id)
+	# What a decree would bring, read before the choice (the stakes are gone
+	# once it is resolved): the decree card shows it once given.
+	var decree_stakes:Dictionary=Hall.stakes(audience_id) if option_id in Stakes.DECREE_OPTIONS else {}
 	var result:Dictionary=Hall.resolve(audience_id,option_id)
 	if not bool(result.get("ok",false)):
 		# PRISONER (captured_agents.gd, builder P): which words go home with them.
@@ -1703,11 +1715,17 @@ func choose(option_id:String)->Dictionary:
 	var routed:=String(result.get("decree",""))
 	if not routed.is_empty() and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 		terrain.issue_civic_directive_text(routed)
+	if not routed.is_empty():
+		_decree_words=routed
+		_decree_from_stakes(routed,decree_stakes if not decree_stakes.is_empty() else Hall.stakes(audience_id))
 	conceive_next=bool(result.get("conceive",false))
 	if String(audience.get("kind",""))=="petition" and option_id.contains("decree"):
 		var decree:=String((audience.get("petition",{}) as Dictionary).get("suggested_decree",""))
 		if not decree.is_empty() and is_instance_valid(terrain) and terrain.has_method("issue_civic_directive_text"):
 			terrain.issue_civic_directive_text(decree)
+		if not decree.is_empty():
+			_decree_words=decree
+			_decree_from_stakes(decree,decree_stakes)
 	if is_instance_valid(court_stage):
 		var happened:Dictionary=Directing.event_from_resolution(audience,option_id,result)
 		if not happened.is_empty():court_stage.event(String(happened.get("kind","decree")),happened)
@@ -1767,6 +1785,87 @@ func exit_style_for(result:Dictionary)->String:
 		if done_to_them and act in LED_VERBS:return "led"
 	if String(result.get("reaction","")) in ["offended","furious"]:return "storm"
 	return "bow"
+
+# --- The decree card (decree_card.gd) -------------------------------------------
+## What the god decreed and what it does, in the engine's numbers, on its own
+## layer of the stage: no speech bubble drops it. It folds to a seal after a
+## reading time; the same words stay in Earlier.
+var decree_card:Control
+## The god's last order words in this audience: the title of a receipt that
+## comes back later.
+var _decree_words:=""
+var _decree_place:Callable
+
+func show_decree(data:Dictionary)->Control:
+	var holder:Control=court_stage.get_parent() if is_instance_valid(court_stage) else null
+	if holder==null:return null
+	if is_instance_valid(decree_card):
+		decree_card.get_parent().remove_child(decree_card);decree_card.queue_free()
+	if _decree_place.is_valid() and holder.resized.is_connected(_decree_place):holder.resized.disconnect(_decree_place)
+	var shown:=data.duplicate(true)
+	if not shown.has("day"):shown["day"]=int(GameState.elapsed_days)
+	if String(shown.get("title",""))=="":
+		var said:=_decree_words if _decree_words!="" else (_last_words if not _is_short_answer(_last_words) else "")
+		shown["title"]=said if said!="" else "Your decree"
+	if String(shown.get("who",""))=="":shown["who"]=_speaker_name()
+	if String(shown.get("place",""))=="" and not civic_settlement.is_empty():shown["place"]=Civic.settlement_name(civic_settlement)
+	var made:=DecreeCard.new()
+	made.setup(shown)
+	# In the hall, over the people but under their words: a speech bubble is
+	# never hidden by it (it is the speech that comes and goes); the hall's
+	# buttons and the Earlier / What you know popovers stay above it.
+	var stage:=court_stage
+	stage.add_child(made)
+	var bubbles:Control=stage.get("bubble_layer")
+	if bubbles!=null:stage.move_child(made,bubbles.get_index())
+	decree_card=made
+	var place:=func()->void:
+		if not is_instance_valid(made) or not is_instance_valid(holder) or not is_instance_valid(stage):return
+		made.reset_size()
+		# Top right of the hall, left of its two buttons (the hall is short:
+		# under them it would be cut off); in an envoy's hall, under its band.
+		var tools:=holder.find_child("StageTools",false,false) as Control
+		var right:=holder.size.x-12.0
+		var top:=8.0
+		if tools!=null and tools.visible:right=tools.position.x-10.0
+		else:top=stage.top_inset+8.0
+		made.position=Vector2(maxf(236.0,right-made.size.x),top)-stage.position
+	made.resized.connect(place)
+	made.folded_changed.connect(func(_f:bool)->void:place.call_deferred())
+	holder.resized.connect(place)
+	_decree_place=place
+	place.call_deferred()
+	return made
+
+## "Yes, do it", "I insist", "Withdraw it": an answer about an order, not one.
+static func _is_short_answer(text:String)->bool:
+	var re:=RegEx.create_from_string("(?i)^\\W*(yes|yea|aye|no|nay|confirm(ed)?|proceed|do it|go on|i insist|insist|this is an order|withdraw( it)?|call it back|never mind|as i said)\\b[\\w ,.!—-]{0,24}$")
+	return re.search(text.strip_edges())!=null
+
+## The words of the god's order a receipt answers (GameState.sovereign_orders).
+func _order_words(order_id:String)->String:
+	if order_id=="":return ""
+	for order_variant in GameState.sovereign_orders:
+		var order:Dictionary=order_variant
+		if String(order.get("id",""))!=order_id:continue
+		var params:Dictionary=order.get("parameters",{}) if order.get("parameters") is Dictionary else {}
+		var words:=String(params.get("text",order.get("text",""))).strip_edges()
+		# "Yes, do it" names no decree: the words it answered stay the title.
+		return "" if _is_short_answer(words) else words
+	return ""
+
+## A petition's decree granted: the decree, and what the engine said it would
+## bring, read before the choice (proposal_stakes.gd) and kept.
+func _decree_from_stakes(decree:String,weighed:Dictionary)->void:
+	var rows:Array=[]
+	var notes:Array=[]
+	for row:Dictionary in Stakes.lines(weighed):
+		var tone:=String(row.get("tone",""))
+		if tone in ["gain","cost"]:rows.append({"key":String(row.get("key","")),"text":String(row.get("text","")),"tone":tone})
+		elif String(row.get("text",""))!="":notes.append("%s: %s" % [String(row.get("key","")),String(row.get("text",""))])
+	var data:={"kind":"decree","title":decree,"rows":rows,"notes":notes}
+	if int(weighed.get("days",0))>0:data["days"]=int(weighed.days)
+	show_decree(data)
 
 func _show_outcome(result:Dictionary,leave:=true)->void:
 	resolved_result=result
@@ -2033,6 +2132,11 @@ func _stage_line(line:Dictionary,animate:bool,ref:int=-1)->Label:
 	match String(line.get("role","")):
 		"ruler":return court_stage.god_says(text,animate,ref)
 		"narrator":
+			# The measured result of a decree: the decree card, never a caption
+			# (a caption is dropped by the next speech bubble it touches).
+			if text.begins_with("RECEIPT · "):
+				if animate:show_decree({"kind":"receipt","receipt":text.trim_prefix("RECEIPT · "),"day":int(line.get("day",GameState.elapsed_days))})
+				return null
 			# While the hall watches the execution, the narrator holds its
 			# words (the picture tells it); its account of the death, named
 			# the way it was done, is the caption at the end.
@@ -2109,6 +2213,10 @@ func _history_row(line:Dictionary)->Array:
 		staged.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;staged.name="StageText";stage_box.add_child(staged)
 		transcript.add_child(stage_box)
 		return [stage_box,staged]
+	if role=="narrator" and String(line.get("text","")).begins_with("RECEIPT · "):
+		var record:=DecreeCard.history_row(String(line.text).trim_prefix("RECEIPT · "))
+		transcript.add_child(record)
+		return [record,record.find_child("DecreeRecordText",true,false)]
 	if role=="narrator":
 		var narration:=Tokens.make_label(String(line.get("text","")),14,Tokens.TEXT_DIM);narration.add_theme_font_override("font",_italic)
 		narration.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;narration.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
@@ -3437,6 +3545,8 @@ func _civic_say(text:String)->bool:
 		Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":Commands.GraveHome.COUNCIL_NO,"day":int(GameState.elapsed_days),"aside":false})
 		_pump();return false
 	SettlementModel.select_settlement(civic_settlement)
+	# A one-word answer (yes, do it) keeps the order it answers as the title.
+	if not text.ends_with("?") and not _is_short_answer(text):_decree_words=text
 	terrain.issue_civic_directive_text(text)
 	_sync_civic()
 	_refresh_civic_strip(true)
@@ -3460,6 +3570,9 @@ func _sync_civic()->void:
 			continue
 		Hall.append_line(audience_id,{"speaker":who,"role":"official","person_id":speaker_person_id,"civ_id":"","text":String(turn.text),"day":int(turn.day),"aside":false})
 		if not String(turn.get("receipt","")).is_empty():
+			# The decree card names the order this receipt answers.
+			var ordered:=_order_words(String(turn.get("order_id","")))
+			if ordered!="":_decree_words=ordered
 			Hall.append_line(audience_id,{"speaker":"","role":"narrator","person_id":0,"civ_id":"","text":"RECEIPT · "+String(turn.receipt),"day":int(turn.day),"aside":false})
 	if holder!=speaker_person_id and resolved_result.is_empty():
 		# They no longer lead the settlement (dismissed, arrested, or gone).
