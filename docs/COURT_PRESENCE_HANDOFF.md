@@ -1,6 +1,6 @@
 # Court presence: lighting, staging and sound
 
-Status: READY for the designated integrator. Combined worker checks and visual review pass; player integration has not been performed.
+Status: INTEGRATED at the user's explicit merge request. Source `7516b33f` and its prerequisites are recorded in `docs/INTEGRATION_STATUS.md` and `docs/FEATURE_RECONCILIATION.md`. The worker evidence below is retained; historical references to pending integration describe the handoff state, not the later integration record. No player restart was performed.
 
 Worktree: `C:/Users/sjpur/.codex/worktrees/court-motion/TomorrowandTomorrow`.
 Delivery branch: `codex/court-presence`.
