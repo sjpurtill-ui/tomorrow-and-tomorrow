@@ -1193,6 +1193,11 @@ func _switch_to_quicker_questions(current_day:int)->void:
 	var held:=_teams_by_line()
 	var turns:=_team_turns(lines,held,current_day)
 	var busy:=_busy_ids()
+	# Nothing in this look changes which questions stand open or how near
+	# their age they are; teams only move between them. When no followed line
+	# has an open question of its age at all (whoever holds it), no team
+	# finds one, and the look for one is passed over.
+	var of_age:=_any_work_of_age(lines,current_day)
 	for entry:Array in ahead:
 		var channel:=String(entry[1])
 		if not active.has(channel): continue
@@ -1202,7 +1207,7 @@ func _switch_to_quicker_questions(current_day:int)->void:
 		busy.erase(current_id)
 		# Questions of their age first: the monthly look stays cheap.
 		_count_turn(held,turns,line,-1)
-		var best:=_next_team_placement(lines,turns,held,current_day,busy,channel,0)
+		var best:=_next_team_placement(lines,turns,held,current_day,busy,channel,0) if of_age else {}
 		var tier:=team_tier(current)
 		if best.is_empty() and tier>=4:
 			# Far ahead: the work a free team would take, two bands nearer or more.
@@ -1227,6 +1232,45 @@ func _switch_to_quicker_questions(current_day:int)->void:
 		active[String(best.channel)]=String(best.id)
 		busy[String(best.id)]=true
 		_count_turn(held,turns,String(best.line),1)
+
+
+## Whether any of `lines` has an open question of its age (band 0, team_tier)
+## on any of its channels, its chosen target included, or foundation work of
+## its age, whatever team holds it now: the most a free team could find at
+## band 0 (_next_team_placement with max_rank 0 reads no further).
+func _any_work_of_age(lines:Dictionary,current_day:int)->bool:
+	var scanning:=_scan_active()
+	var memo:Dictionary=_scan.eligible
+	var year:=learning_year()
+	for line:String in lines:
+		for sub_variant in (WorldSimulation.state.research_subcategory_allocations.get(line,{}) as Dictionary):
+			var channel:=_channel_key(line,String(sub_variant))
+			var candidates:=_candidate_index.candidates(channel,catalog_by_channel.get(channel,[]),WorldSimulation.state.known_discoveries)
+			var known:Dictionary=_candidate_index.known
+			var judged_known:Dictionary=_scan_known() if scanning else known
+			var target:=String(WorldSimulation.state.research_targets.get(channel,""))
+			if target!="" and not known.has(target):
+				var chosen:Dictionary=catalog_by_id.get(target,{})
+				if not chosen.is_empty() and team_tier(chosen)==0 and _channel_key(String(chosen.get("dynamic","")),String(chosen.get("subcategory","")))==channel:
+					var open:Variant=memo.get(target) if scanning else null
+					if open==null:
+						open=_discovery_is_eligible(chosen,current_day,judged_known)
+						if scanning: memo[target]=open
+					if open: return true
+			var by_age:=_channel_by_age(channel,candidates)
+			var opens:PackedFloat64Array=(_scan.by_age[channel] as Array)[2]
+			for index in by_age.size():
+				if _tier_from_open(opens[index],year)>0: break
+				var discovery:Dictionary=by_age[index]
+				var id:=String(discovery.get("id",""))
+				var eligible:Variant=memo.get(id) if scanning else null
+				if eligible==null:
+					eligible=_discovery_is_eligible(discovery,current_day,judged_known)
+					if scanning: memo[id]=eligible
+				if eligible: return true
+		for id:String in _research_600_foundation_ids(line,current_day):
+			if team_tier(discovery_definition(id))==0: return true
+	return false
 
 ## The questions the teams freed by today's proofs took up, kept on each proof's
 ## record ("next"): for a season the research dock offers that team the next
