@@ -85,6 +85,7 @@ const KIND_BY_STAGE:={
 	"senate_house":"grand_hall","council_house":"grand_hall","late_antique_hall":"grand_hall","basilica":"grand_hall",
 	"feudal_hall":"grand_hall","great_hall":"grand_hall","chancery_court":"grand_hall","chancery":"grand_hall",
 	"chartered_commune":"grand_hall","commune_hall":"grand_hall","estates_assembly":"grand_hall","estates_hall":"grand_hall",
+	"privy_state_council":"grand_hall","parliamentary_council":"grand_hall","ministerial_cabinet":"grand_hall","executive_council":"grand_hall",
 }
 const STAND_IN:={"shelter":"fire_ring","mudbrick_hall":"longhouse","grand_hall":"mudbrick_hall"}
 const KIND_BY_TIER:=["fire_ring","longhouse","mudbrick_hall","grand_hall","grand_hall"]
@@ -905,6 +906,8 @@ func apply_facts(facts_in:Dictionary)->void:
 		var show:=tags.has(tag)!=without
 		for node in gates[key]:
 			if is_instance_valid(node):(node as Node3D).visible=show
+	if not bool(facts.get("rustic_props",true)):
+		for group in ["food","rack","spears"]:_show_first(props.get(group,[]),0)
 
 # --- The season -------------------------------------------------------------------
 
@@ -1012,6 +1015,7 @@ func _apply_season(name_in:String)->void:
 	var count:=0
 	if season=="summer":count=22 if food>0.8 else (12 if food>0.5 else 6)
 	elif season=="autumn" and food>0.9:count=5
+	if not bool(facts.get("rustic_props",true)):count=0
 	for i in flies.size():
 		var swarm:=flies[i]
 		var want:=count if i==0 else count/2
