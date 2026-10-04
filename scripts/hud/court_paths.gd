@@ -37,6 +37,7 @@ class Room:
 	var hard:=PackedByteArray()
 	var astar:AStarGrid2D
 	var key:=""
+	var seat_obstacles:Dictionary={}
 
 	func square(p:Vector2)->Vector2i:
 		return Vector2i(floori((p.x-origin.x)/Self.CELL),floori((p.y-origin.y)/Self.CELL))
@@ -61,9 +62,15 @@ static func room_of(court_set:Node3D)->Room:
 	if model!=null:
 		for child in model.get_children():
 			if child is Node3D and _shown(child as Node3D,court_set) and not _open_part(String(child.name)):parts.append(child)
-	var names:PackedStringArray=PackedStringArray()
-	for part:Node3D in parts:names.append(String(part.name))
-	var key:="%s|%s" % [String(court_set.get("kind")),"/".join(names)]
+	# Chapters may reuse both kind and mesh names with different furniture.
+	# Resource identity, transforms and marks belong to the navigation cache.
+	var geometry:Array=[String(court_set.get("kind")),hearth_point(court_set),_mark_points(court_set)]
+	for part:Node3D in parts:
+		var meshes:Array=[part] if part is MeshInstance3D else []
+		meshes.append_array(part.find_children("*","MeshInstance3D",true,false))
+		for mesh:MeshInstance3D in meshes:
+			if mesh.mesh!=null and _shown(mesh,court_set):geometry.append([mesh.mesh.get_rid().get_id(),_in_set(mesh,court_set)])
+	var key:="%s" % hash(geometry)
 	if _rooms.has(key):return _rooms[key]
 	var room:=Room.new();room.key=key
 	# The floor: everywhere the set has a mark, the door and the way out,
@@ -79,7 +86,7 @@ static func room_of(court_set:Node3D)->Room:
 	var hard:=PackedByteArray();hard.resize(room.width*room.height);hard.fill(0)
 	for part:Node3D in parts:_draw_part(room,hard,part,court_set)
 	# The fire.
-	var fire:Variant=_mark_xz(court_set,"fire")
+	var fire:Variant=hearth_point(court_set)
 	if fire!=null:_disc(room,hard,fire as Vector2,FIRE_RADIUS)
 	room.hard=hard
 	# Widened by half a body: feet keep that far from anything.
@@ -156,6 +163,112 @@ static func route(room:Room,from:Vector2,to:Vector2,people:Array=[])->PackedVect
 	for c in changed:room.astar.set_point_solid(c,false)
 	return walk
 
+## Authored chairs have one clear approach, in set coordinates. Only the
+## short seat-to-approach segment may cross the chair's low seat; tables and
+## chair backs remain solid. Both ordinary and execution walks use this.
+static func route_with_seats(court:Node3D,room:Room,from:Vector2,to:Vector2,people:Array=[])->PackedVector2Array:
+	var a:=from;var b:=to
+	var start:=_seat_at(court,from);var end:=_seat_at(court,to)
+	var start_access:=PackedVector2Array();var end_access:=PackedVector2Array()
+	if start!=null:
+		start_access=_seat_access(court,room,start,from)
+		if start_access.is_empty():return PackedVector2Array()
+		a=start_access[start_access.size()-1]
+	if end!=null:
+		end_access=_seat_access(court,room,end,to)
+		if end_access.is_empty():return PackedVector2Array()
+		b=end_access[end_access.size()-1]
+	var walk:=route(room,a,b,people)
+	if walk.is_empty():return walk
+	for i in range(start_access.size()-2,-1,-1):walk.insert(0,start_access[i])
+	for i in range(end_access.size()-2,-1,-1):walk.append(end_access[i])
+	return walk
+
+static func _seat_access(court:Node3D,room:Room,mark:Node3D,seat:Vector2)->PackedVector2Array:
+	var out:=PackedVector2Array([seat])
+	var approach:Variant=seat_exit(court,mark,"seat_approach")
+	var exit:Variant=seat_exit(court,mark)
+	if exit==null:return PackedVector2Array()
+	if approach!=null and seat.distance_to(approach)>0.01 and exit.distance_to(approach)>0.01:out.append(approach)
+	out.append(exit)
+	for i in range(1,out.size()):
+		if not _seat_line_clear(court,room,out[i-1],out[i],float(mark.get_meta("seat",0.47)),i==out.size()-1):return PackedVector2Array()
+	return out
+
+static func _seat_at(court:Node3D,at:Vector2)->Node3D:
+	var marks:Variant=court.get("marks")
+	if not marks is Dictionary:return null
+	for mark:Node3D in (marks as Dictionary).values():
+		if not bool(mark.get_meta("external_seat",false)):continue
+		var p:=_in_set(mark,court).origin
+		if at.distance_to(Vector2(p.x,p.z))<0.25:return mark
+	return null
+
+static func seat_exit(court:Node3D,mark:Node3D,metadata:="seat_exit")->Variant:
+	var exit:Variant=mark.get_meta(metadata,null)
+	if exit is String:return _mark_xz(court,exit)
+	if exit is Vector3:return Vector2(exit.x,exit.z)
+	if exit is Array and exit.size()>=3:return Vector2(float(exit[0]),float(exit[2]))
+	return null
+
+static func _seat_line_clear(court:Node3D,room:Room,seat:Vector2,exit:Vector2,height:float,open_exit:=true)->bool:
+	if room==null or (open_exit and not open_at(room,exit)):return false
+	if not room.seat_obstacles.has(height):
+		var high:=PackedByteArray();high.resize(room.width*room.height);high.fill(0)
+		var model:=court.get_node_or_null("Model")
+		if model!=null:
+			for part:Node3D in model.get_children():
+				if not _open_part(String(part.name)) and _shown(part,court):_draw_part(room,high,part,court,height+0.1)
+		var fire:Variant=hearth_point(court)
+		if fire!=null:_disc(room,high,fire,FIRE_RADIUS+WALKER)
+		room.seat_obstacles[height]=high
+	var high:PackedByteArray=room.seat_obstacles[height]
+	var steps:=maxi(1,ceili(seat.distance_to(exit)/(CELL*0.4)))
+	for i in steps+1:
+		var cell:=room.square(seat.lerp(exit,float(i)/steps))
+		if not room.inside(cell):return false
+		if high[cell.y*room.width+cell.x]!=0:return _seat_geometry_clear(court,seat,exit,height+0.1)
+	return true
+
+## A diagonal chair's back can share a 20cm grid cell with its seat centre.
+## Resolve that one short passage against actual triangles; do not remove
+## the back, change the aisle padding, or clear neighbouring furniture.
+static func _seat_geometry_clear(court:Node3D,seat:Vector2,exit:Vector2,height:float)->bool:
+	var fire:Variant=hearth_point(court)
+	if fire!=null and Geometry2D.get_closest_point_to_segment(fire,seat,exit).distance_to(fire)<FIRE_RADIUS+WALKER:return false
+	var model:=court.get_node_or_null("Model")
+	if model==null:return true
+	for part:Node3D in model.get_children():
+		if _open_part(String(part.name)) or not _shown(part,court):continue
+		var meshes:Array=[part] if part is MeshInstance3D else []
+		meshes.append_array(part.find_children("*","MeshInstance3D",true,false))
+		for mesh:MeshInstance3D in meshes:
+			if mesh.mesh==null or not _shown(mesh,court):continue
+			for surface in mesh.mesh.get_surface_count():
+				var arrays:=mesh.mesh.surface_get_arrays(surface)
+				var vertices:PackedVector3Array=_in_set(mesh,court)*(arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+				var indices:PackedInt32Array=arrays[Mesh.ARRAY_INDEX] if arrays[Mesh.ARRAY_INDEX]!=null else PackedInt32Array()
+				if indices.is_empty():
+					indices.resize(vertices.size())
+					for i in vertices.size():indices[i]=i
+				for i in range(0,indices.size()-2,3):
+					var a:=vertices[indices[i]];var b:=vertices[indices[i+1]];var c:=vertices[indices[i+2]]
+					if maxf(a.y,maxf(b.y,c.y))<height or minf(a.y,minf(b.y,c.y))>BAND_HIGH:continue
+					var triangle:=[Vector2(a.x,a.z),Vector2(b.x,b.z),Vector2(c.x,c.z)]
+					if absf((triangle[1]-triangle[0]).cross(triangle[2]-triangle[0]))>0.00001:
+						if Geometry2D.point_is_inside_triangle(seat,triangle[0],triangle[1],triangle[2]) or Geometry2D.point_is_inside_triangle(exit,triangle[0],triangle[1],triangle[2]):return false
+					for side in 3:
+						var p:Vector2=triangle[side];var q:Vector2=triangle[(side+1)%3]
+						if Geometry2D.segment_intersects_segment(seat,exit,p,q)!=null:return false
+						if Geometry2D.get_closest_point_to_segment(seat,p,q).distance_to(seat)<0.001 or Geometry2D.get_closest_point_to_segment(exit,p,q).distance_to(exit)<0.001:return false
+	return true
+
+## A focus/execution mark is not a hearth, even when an older caller asks
+## for fire. Do not reserve an invisible fire circle in an office.
+static func hearth_point(court:Node3D)->Variant:
+	if court.has_method("has_hearth") and not bool(court.call("has_hearth")):return null
+	return _mark_xz(court,"fire")
+
 ## Whether a straight walk between two floor points is clear of everything.
 static func clear_line(room:Room,a:Vector2,b:Vector2)->bool:
 	var steps:=int(ceil(a.distance_to(b)/(CELL*0.4)))
@@ -226,7 +339,7 @@ static func _mark_xz(court_set:Node3D,mark_name:String)->Variant:
 	return Vector2(o.x,o.z)
 
 ## Every triangle of a part between ankle and head height, laid on the floor.
-static func _draw_part(room:Room,hard:PackedByteArray,part:Node3D,top:Node3D)->void:
+static func _draw_part(room:Room,hard:PackedByteArray,part:Node3D,top:Node3D,band_low:=BAND_LOW)->void:
 	var meshes:Array=[part] if part is MeshInstance3D else []
 	meshes.append_array(part.find_children("*","MeshInstance3D",true,false))
 	for node in meshes:
@@ -246,7 +359,7 @@ static func _draw_part(room:Room,hard:PackedByteArray,part:Node3D,top:Node3D)->v
 			var inband:=PackedByteArray();inband.resize(world.size())
 			for i in world.size():
 				var y:=world[i].y
-				if y>=BAND_LOW and y<=BAND_HIGH:inband[i]=1
+				if y>=band_low and y<=BAND_HIGH:inband[i]=1
 			var t:=0
 			var count:=index.size()
 			while t+2<count:
@@ -256,7 +369,7 @@ static func _draw_part(room:Room,hard:PackedByteArray,part:Node3D,top:Node3D)->v
 					# none in the band: only a face that spans it (a post) counts
 					var lo:=minf(world[ia].y,minf(world[ib].y,world[ic].y))
 					var hi:=maxf(world[ia].y,maxf(world[ib].y,world[ic].y))
-					if hi<BAND_LOW or lo>BAND_HIGH:continue
+					if hi<band_low or lo>BAND_HIGH:continue
 				var a:=world[ia];var b:=world[ib];var c:=world[ic]
 				_triangle(room,hard,Vector2(a.x,a.z),Vector2(b.x,b.z),Vector2(c.x,c.z))
 

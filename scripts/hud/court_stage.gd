@@ -430,7 +430,13 @@ func _ambience()->void:
 	if _sound==null or not is_instance_valid(_sound):return
 	var kind:="fire_ring"
 	if court_set!=null and court_set.get("kind")!=null:kind=String(court_set.get("kind"))
-	_sound.call("ambience",kind,String(facts.get("season","summer")),facts)
+	var room_facts:=facts.duplicate()
+	if court_set!=null:
+		if court_set.has_method("has_hearth"):room_facts["has_hearth"]=court_set.call("has_hearth")
+		if court_set.has_method("indoors"):room_facts["indoor"]=court_set.call("indoors")
+		var info:Variant=court_set.get("info")
+		if info is Dictionary and info.has("floor"):room_facts["floor"]=String(info.floor)
+	_sound.call("ambience",kind,String(facts.get("season","summer")),room_facts)
 
 ## One transparent SubViewport under the plates and bubbles: every modelled
 ## figure on this stage stands in it, seen by one camera that maps the
@@ -484,6 +490,14 @@ func use_set(era_id:String,set_facts:Dictionary={})->bool:
 func set_point(mark_name:String)->Vector3:
 	if court_set==null or not court_set.call("has_mark",mark_name):return Vector3.ZERO
 	return (court_set.call("mark",mark_name) as Marker3D).global_position
+
+## The meeting has a focus even when its room has no hearth.
+func focus_point()->Vector3:
+	if court_set!=null:
+		for mark:String in ["focus","petitioner","fire"]:
+			if mark=="fire" and Paths.hearth_point(court_set)==null:continue
+			if court_set.call("has_mark",mark):return set_point(mark)
+	return Vector3.ZERO
 
 func _on_view_changed()->void:
 	_track_all()
@@ -784,13 +798,16 @@ func _embody(f:Figure)->void:
 		mark=_take_mark(f)
 		var m:Marker3D=court_set.call("mark",mark) if not mark.is_empty() else null
 		# Onlookers on a log sit on it; nobody sits on a standing mark's air.
-		if m!=null and bool(m.get_meta("sit",false)) and f.role=="crowd":look.stance="sit"
+		f.external_seat=m!=null and bool(m.get_meta("external_seat",false)) and bool(m.get_meta("sit",false))
+		if m!=null and bool(m.get_meta("sit",false)) and (f.role=="crowd" or f.external_seat):look.stance="sit"
 		if m!=null and bool(m.get_meta("sit",false)) and String(look.get("stance",""))=="sit":seat=float(m.get_meta("seat",0.47))
 	# The one before the god stands as they feel (kept); everyone else is
 	# spread within their people (J) and, for the room, at most one keeps
 	# their hands clasped before them.
 	if f.role==MAIN:look["keep_stance"]=true
 	look=FigureLook.vary(look)
+	# An authored chair is a room assignment, not a person's random stance.
+	if f.external_seat:look.stance="sit"
 	if not bool(profile.get("rustic_props",true)) and String(look.get("stance","stand")) in ["staff","bowl","crouch"]:look.stance="stand"
 	if seat<0.0 or String(look.get("stance",""))!="sit":look["stance"]=FigureLook.room_stance(look,_room_stances)
 	if not body.setup(look):
@@ -809,12 +826,12 @@ func _embody(f:Figure)->void:
 			# every mark is taken: at the back, along the far side
 			var extra:=_marks.size()+cast_order.size()
 			spot.position=set_point("crowd_8")+Vector3(-1.2+0.65*float(extra%5),0.0,-0.5*float(extra/5))
-			var toward:=set_point("fire")-spot.position;toward.y=0.0
+			var toward:=focus_point()-spot.position;toward.y=0.0
 			if toward.length()>0.01:spot.basis=Basis.looking_at(-toward.normalized(),Vector3.UP)
 		spot.add_child(body)
 		if seat>=0.0:
 			body.seat_height=seat
-			f.lift=seat-0.47
+			f.seat_lift=seat-0.47;f.lift=f.seat_lift
 		body.add_child(CourtSet.contact_shadow(0.85,0.6,0.5))
 		f.spot=spot;f.mark_name=mark
 		if seat<0.0:_space_spot(f)
@@ -844,7 +861,7 @@ func _space_spot(f:Figure)->void:
 	var right:=Vector2(cos(deg_to_rad(yaw)),-sin(deg_to_rad(yaw)))
 	var toward:=Vector2(sin(deg_to_rad(yaw)),cos(deg_to_rad(yaw)))
 	var room:Variant=Paths.room_of(court_set)
-	var fire:Variant=Paths._mark_xz(court_set,"fire")
+	var fire:Variant=Paths.hearth_point(court_set)
 	var home:=Vector2(f.spot.position.x,f.spot.position.z)
 	var others:Array[Vector2]=[]
 	for key in cast_order:
@@ -879,7 +896,7 @@ func _beside_a_grown_up(f:Figure)->void:
 	if court_set==null or f.spot==null:return
 	var me:=Vector2(f.spot.position.x,f.spot.position.z)
 	var room:Variant=Paths.room_of(court_set)
-	var fire:Variant=Paths._mark_xz(court_set,"fire")
+	var fire:Variant=Paths.hearth_point(court_set)
 	var yaw:=22.0
 	if court_set.get("rig")!=null and (court_set.get("rig") as Object).get("base_yaw")!=null:yaw=float((court_set.get("rig") as Object).get("base_yaw"))
 	var right:=Vector2(cos(deg_to_rad(yaw)),-sin(deg_to_rad(yaw)))
@@ -919,9 +936,14 @@ func plan_walk(f:Figure,far:Vector3,start:=Vector3.ZERO)->PackedVector3Array:
 	for key in cast_order:
 		var other:=figure(key)
 		if other==null or other==f or other.leaving or other.spot==null:continue
-		people.append(Vector3(other.spot.position.x,other.spot.position.z,0.3))
-	var way:=Paths.route(room,Vector2(from3.x,from3.z),Vector2(to3.x,to3.z),people)
-	if way.size()<2:return PackedVector3Array()
+		if other.body3d!=null and not other.body3d.visible:continue
+		var at:=other.spot.transform*(other._path_at(other.stroll)+other.nudge)
+		people.append(Vector3(at.x,at.z,0.3))
+	var way:=Paths.route_with_seats(court_set,room,Vector2(from3.x,from3.z),Vector2(to3.x,to3.z),people)
+	# A crowd may temporarily close an aisle. Retry the furniture map, but
+	# never replace an unreachable chair with a straight walk through a table.
+	if way.size()<2:way=Paths.route_with_seats(court_set,room,Vector2(from3.x,from3.z),Vector2(to3.x,to3.z))
+	if way.size()<2:return PackedVector3Array([start,start])
 	var back:=f.spot.transform.affine_inverse()
 	var out:=PackedVector3Array()
 	for point in way:
@@ -953,7 +975,7 @@ func _acting_stance(f:Figure,seat:float)->void:
 
 ## Whether someone's mark is close enough to the fire to warm their hands.
 func _near_fire(f:Figure)->bool:
-	if court_set==null or f.spot==null or not court_set.call("has_mark","fire"):return false
+	if court_set==null or f.spot==null or Paths.hearth_point(court_set)==null:return false
 	var m:Marker3D=court_set.call("mark","fire")
 	var holder:=m.get_parent() as Node3D
 	var at:=((holder.transform if holder!=null and holder!=court_set else Transform3D.IDENTITY)*m.transform).origin
@@ -1378,14 +1400,14 @@ func _glances()->void:
 	for key in cast_order:
 		var f:=figure(key)
 		if f!=null and f.body3d!=null and not f.leaving and f.body3d.is_inside_tree():heads.append([key,f.body3d.head_top()])
-	var fire:=set_point("fire") if court_set!=null and court_set.is_inside_tree() else Vector3.ZERO
+	var focus:=focus_point() if court_set!=null and court_set.is_inside_tree() else Vector3.ZERO
 	for row:Array in heads:
 		var f:=figure(String(row[0]))
 		var near:=heads.filter(func(o:Array)->bool:return String(o[0])!=String(row[0]))
 		near.sort_custom(func(a:Array,b:Array)->bool:return (a[1] as Vector3).distance_to(row[1])<(b[1] as Vector3).distance_to(row[1]))
 		var points:=PackedVector3Array()
 		for o:Array in near.slice(0,3):points.append(o[1])
-		if court_set!=null:points.append(fire+Vector3(0.0,0.4,0.0))
+		if court_set!=null:points.append(focus+Vector3(0.0,0.8,0.0))
 		var main:=figure(MAIN)
 		if main!=null and main.body3d!=null and String(row[0])!=MAIN:points.append(main.body3d.global_position+Vector3(0.0,1.0,0.0))
 		Acting.set_glance_points(f.body3d,points)
@@ -1922,7 +1944,7 @@ func _layout_set(animate:bool)->void:
 		if f.acting_stance=="fire" and f.spot.is_inside_tree():
 			var to_fire:=f.spot.to_local(set_point("fire"))
 			yaw=clampf(rad_to_deg(atan2(to_fire.x,to_fire.z)),-150.0,150.0)
-		elif focus!=null and f!=main and f.role in ["court","crowd"]:
+		elif not f.external_seat and focus!=null and f!=main and f.role in ["court","crowd"]:
 			var to:=f.spot.to_local(focus.global_position)
 			yaw=clampf(rad_to_deg(atan2(to.x,to.z))*(0.45 if f.role=="court" else 0.3),-70.0,70.0)
 		f.rest_yaw=yaw
@@ -2389,6 +2411,8 @@ class Figure extends Control:
 	var spot:Node3D
 	var mark_name:=""
 	var lift:=0.0
+	var seat_lift:=0.0
+	var external_seat:=false
 	var stroll:=0.0:
 		set(value):stroll=value;_sync()
 	## A small step off their mark (spot-local metres): hiding behind someone,
@@ -2433,7 +2457,7 @@ class Figure extends Control:
 		painting.visible=false
 		var h:=absi(String(person.get("name",key)).hash())
 		rest_clip=body3d.rest_clip()
-		body3d.play(rest_clip,0.0,float(h%600)/100.0)
+		_clip(rest_clip,0.0,float(h%600)/100.0)
 		_sync();queue_redraw()
 
 	func _sync()->void:
@@ -2482,7 +2506,7 @@ class Figure extends Control:
 		if stage!=null and stage.get("court_set")!=null and spot!=null:
 			var planned:PackedVector3Array=stage.call("plan_walk",self,far,start)
 			if planned.size()>=2:return planned
-		if stage!=null and stage.get("court_set")!=null:
+		if stage!=null and stage.get("court_set")!=null and Self.Paths.hearth_point(stage.get("court_set"))!=null:
 			var fire:=spot.to_local(stage.set_point("fire"))
 			var a:=Vector2(start.x,start.z);var b:=Vector2(far.x,far.z);var c:=Vector2(fire.x,fire.z)
 			var ab:=b-a
@@ -2541,6 +2565,7 @@ class Figure extends Control:
 
 	func _stroll_in(delay:float)->void:
 		var stage:=_stage.get_ref() as Control
+		if external_seat:body3d.stance="stand"
 		if wrong_side and not Motion.reduced():
 			_stroll_in_wrong(delay);return
 		_path=_route(spot.to_local(_door(stage,0)))
@@ -2589,7 +2614,7 @@ class Figure extends Control:
 		if delay>0.0:_move.tween_interval(delay)
 		var lost:=0.6
 		_queue_stroll(1.0,lost,clampf(_path_length()*(1.0-lost)/maxf(pace,0.1),0.6,3.0),pace,true)
-		_move.tween_callback(func()->void:_clip(rest_clip,0.3);body3d.face(rest_yaw+60.0,0.4))
+		_move.tween_callback(func()->void:_clip("stand" if external_seat else rest_clip,0.3);body3d.face(rest_yaw+60.0,0.4))
 		_move.tween_interval(0.7)
 		_move.tween_callback(func()->void:body3d.face(rest_yaw-50.0,0.5))
 		_move.tween_interval(0.9)
@@ -2735,7 +2760,11 @@ class Figure extends Control:
 		_later(2.2,func()->void:body3d.face(rest_yaw,0.4);_clip(rest_clip,0.4))
 
 	func _clip(name:String,blend:=0.3,at:=-1.0)->void:
-		if body3d!=null and is_instance_valid(body3d):body3d.play(name,blend,at)
+		if body3d!=null and is_instance_valid(body3d):
+			if external_seat:
+				lift=seat_lift if name.begins_with("sit") else 0.0
+				_sync()
+			body3d.play(name,blend,at)
 
 	## One of the acting's clips (K: back_out, bump_post, storm_walk,
 	## storm_stop, snatch_up, walk_led...) over the figure's own, when the
@@ -2775,6 +2804,7 @@ class Figure extends Control:
 	func _settle_in()->void:
 		## Back to standing at rest, facing the hall.
 		if body3d==null or leaving:return
+		if external_seat:body3d.stance="sit"
 		body3d.face(rest_yaw,0.35)
 		_clip(rest_clip,0.45)
 		var stage:Control=_stage.get_ref() as Control if _stage!=null else null
@@ -3011,6 +3041,9 @@ class Figure extends Control:
 	var exit_style:=""
 	func leave(side:float,distance:float,delay:float=0.0,style:="bow")->void:
 		leaving=true;exit_style=style
+		if external_seat and body3d!=null:
+			body3d.stance="stand";rest_clip="stand"
+			_clip("stand",0.3)
 		# Sent away before their turn through the door: they simply do not come.
 		if body3d!=null and spot!=null and not body3d.visible and _move!=null and _move.is_valid():
 			_move.kill();_vanish();return
