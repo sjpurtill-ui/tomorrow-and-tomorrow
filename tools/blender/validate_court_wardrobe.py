@@ -132,6 +132,43 @@ def check_seams(bundle, rec, body):
     assert gap<height*.004,(rec["variant"],"belt floats away from doublet",gap)
 
 
+def check_front_layers(bundle, rec):
+    """Facings must stay outside the real jacket, including triangle interiors.
+
+    Vertex-only clearance accepted the old four-corner panels even when their
+    broad faces cut through the convex chest between the corners.
+    """
+    worst = float("inf")
+    for outfit in ("courtcoat", "formal", "business"):
+        jacket = bundle.mesh(outfit+"_jacket")["primitives"][0]
+        pos = bundle.values(jacket["attributes"]["POSITION"])
+        triangles = pos[bundle.values(jacket["indices"]).reshape(-1, 3)]
+        a, u, v = triangles[:, 0], triangles[:, 1]-triangles[:, 0], triangles[:, 2]-triangles[:, 0]
+        determinant = u[:, 0]*v[:, 1]-u[:, 1]*v[:, 0]
+        valid = np.abs(determinant)>1e-10
+        a, u, v, determinant = a[valid], u[valid], v[valid], determinant[valid]
+        for name in rec["outfits"][outfit]:
+            if not any(part in name for part in ("_lapel_", "_cravat", "_tie")):continue
+            patch = bundle.mesh(name)["primitives"][0]
+            points = bundle.values(patch["attributes"]["POSITION"])
+            faces = bundle.values(patch["indices"]).reshape(-1, 3)
+            samples = np.concatenate((points, points[faces].mean(axis=1)))
+            gaps = []
+            for point in samples:
+                q = point-a
+                s = (q[:, 0]*v[:, 1]-q[:, 1]*v[:, 0])/determinant
+                t = (u[:, 0]*q[:, 1]-u[:, 1]*q[:, 0])/determinant
+                inside = (s>=-1e-5)&(t>=-1e-5)&(s+t<=1.00001)
+                assert inside.any(), (rec["variant"], name, "front attachment leaves jacket", point)
+                front = np.max((a[:, 2]+s*u[:, 2]+t*v[:, 2])[inside])
+                gaps.append(float(point[2]-front))
+            minimum = min(gaps)
+            assert minimum>0.0002, (rec["variant"], name, "jacket intersects facing", minimum)
+            assert max(gaps)<0.035, (rec["variant"], name, "facing floats off jacket", max(gaps))
+            worst=min(worst, minimum)
+    print("WARDROBE_FRONT_LAYERS PASS", rec["variant"], "minimum jacket clearance %.4fm"%worst, flush=True)
+
+
 def check(root):
     folder=os.path.join(root,"assets","court_figures","wardrobe")
     manifest=json.load(open(os.path.join(folder,"court_wardrobe.json")))
@@ -158,6 +195,7 @@ def check(root):
         body=bundle.values(attrs["POSITION"]);colors=bundle.values(attrs["COLOR_0"])
         hidden=body[colors[:,1]>.5]
         check_seams(bundle,rec,body)
+        check_front_layers(bundle,rec)
         worst=0.
         for outfit in manifest["outfits"]:
             cloth=[];triangles=0

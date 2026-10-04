@@ -83,7 +83,7 @@
       },
       "covered_vertices": 2794,
       "body_vertices": 4000,
-      "sha256": "5c4bbfc0d2f80ef8f3505f1c3ad8665da70f21b0810ba232bc68ab707e58dbea"
+      "sha256": "c40ca77cf7a1f7e0a2590281bd2fd4834f5060f99a367faa51bc9ddc21d05544"
     },
     {
       "variant": "female_adult",
@@ -160,7 +160,7 @@
       },
       "covered_vertices": 2853,
       "body_vertices": 4002,
-      "sha256": "299351f6f57cefc2523408f025bb640a5856a237e5d3580e9ddeb3aba4de8e73"
+      "sha256": "ee40b0ddc96eae46f45e17835dbde89cdc8e66100abda361ab9a16455dacea48"
     },
     {
       "variant": "male_old",
@@ -237,7 +237,7 @@
       },
       "covered_vertices": 2681,
       "body_vertices": 4008,
-      "sha256": "891c1b5e7d95b1de4fd0deb4128a0e7405600db26ce02b3bb57aefdd37b453a9"
+      "sha256": "7a8d8f2cab5152acbe9efd6fdfbd760e525fed64e96d922bca70537f9e39913a"
     },
     {
       "variant": "female_old",
@@ -314,7 +314,7 @@
       },
       "covered_vertices": 2754,
       "body_vertices": 4004,
-      "sha256": "df350e0248e55ab4b96e2054165bf9ec1100bf230268ecd922c91c46fbb8692f"
+      "sha256": "55407d757879e9d99c831de0b230d5ed0822f32f0fcd898a9870beb28f8cd112"
     },
     {
       "variant": "male_young",
@@ -391,7 +391,7 @@
       },
       "covered_vertices": 2765,
       "body_vertices": 4002,
-      "sha256": "d22f548120bf423443ae0ccfcb92f73341854de24ceeb3af8660583583d9791c"
+      "sha256": "50700bec9d2cd169fc595e14eaee9a26849d8dac314225d8c955fcd343c7f39d"
     },
     {
       "variant": "female_young",
@@ -468,7 +468,7 @@
       },
       "covered_vertices": 2837,
       "body_vertices": 4002,
-      "sha256": "cd1d25b752dc1c4684e3adad546a4769c68bb552067dac7fc69b3153a59ae1a0"
+      "sha256": "bcd94f7dcc8f48d040cd6a54f334a1ee686f63b0a068efc1db2dca39f888c19b"
     },
     {
       "variant": "child",
@@ -542,7 +542,7 @@
       },
       "covered_vertices": 2719,
       "body_vertices": 3999,
-      "sha256": "2f782b4dae5e037d03c2dc8e7c79a4f156f34e8f05c5ba93856abe74b35fee19"
+      "sha256": "bf341118081538a93bfcd28767ddae36bf9d19fc1418765acfc1e57d44db4f09"
     }
   ]
 }
