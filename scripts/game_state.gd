@@ -1002,7 +1002,8 @@ func _mortality_weights_for(cause:String) -> Dictionary:
 			if early_care_blend>0.0 and not early_care.is_empty(): return _background_cohort_hazards()
 			return {"children":1.0,"youth":0.36,"early_adults":0.50,"established_adults":0.75,"mature_adults":2.20,"elders":10.0}
 		"Hunger": return {"children":2.2,"youth":0.8,"early_adults":0.7,"established_adults":0.8,"mature_adults":1.2,"elders":2.0}
-		"Illness","Dehydration","Exposure": return {"children":1.8,"youth":0.7,"early_adults":0.7,"established_adults":0.9,"mature_adults":1.4,"elders":2.6}
+		# A dry year (crisis_system.gd DROUGHT_CAUSE) takes the same ages as thirst.
+		"Illness","Dehydration","Drought","Exposure": return {"children":1.8,"youth":0.7,"early_adults":0.7,"established_adults":0.9,"mature_adults":1.4,"elders":2.6}
 		"Travel exhaustion": return {"children":1.3,"youth":1.1,"early_adults":1.2,"established_adults":1.2,"mature_adults":1.5,"elders":2.1}
 		"Insecurity","Killed in battle": return {"children":0.2,"youth":1.2,"early_adults":1.8,"established_adults":1.7,"mature_adults":1.1,"elders":0.3}
 		"Complications of childbirth": return {"children":0.0,"youth":1.2,"early_adults":2.0,"established_adults":1.5,"mature_adults":0.4,"elders":0.0}

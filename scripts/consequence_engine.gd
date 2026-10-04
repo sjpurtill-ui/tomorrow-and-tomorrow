@@ -1031,6 +1031,9 @@ func process_day(context: Dictionary) -> Array[Dictionary]:
 		var water_place:="No reachable drinking-water source is recorded." if source_distance<0.0 else "The nearest usable source is %.1f km away." % source_distance
 		var water_severity:="critical" if water_intake<0.65 or (water_intake<0.82 and WorldSimulation.state.consecutive_water_shortage_days>=2.0) else "warning"
 		var water_remedy:="River access remains intact; increase collection or distribution capacity." if String(WorldSimulation.state.water_metrics.get("source_origin",""))=="mapped_hydrology" and source_distance<=1.5 else "Increase Food or Logistics work, or move closer to visible water."
+		# A dry year has dried the near sources (dry_water.gd): say so, and what answers it.
+		var dried:=float(WorldSimulation.state.water_metrics.get("dry_loss",0.0))
+		if dried>0.0:water_remedy="The dry year has taken %d%% of what the near sources give. Carry from the far pools, dig deeper wells, or build water lines and cisterns." % roundi(dried*100.0)
 		_threshold_event(events,"water_shortfall","Drinking Water Is Short","Collection supplied only %d%% of today's need. %s %s" % [roundi(water_intake*100.0),water_place,water_remedy],"health",water_severity,2)
 	if WorldSimulation.state.population_health < 0.46:
 		# Widespread sickness is written in the sickness & disaster log, not
@@ -1065,10 +1068,9 @@ func _process_directive_migration(population:float,span:float)->void:
 func _dehydration_mortality_rate(water_intake:float,shortage_days:float)->float:
 	## A small collection miss is a warning and lost resilience, not mass death.
 	## Lethality rises non-linearly as the actual drinking deficit becomes severe;
-	## a complete sustained loss of water remains rapidly catastrophic.
-	var deficit:=clampf(1.0-water_intake,0.0,1.0)
-	var shortage_ramp:=clampf((shortage_days-1.0)/4.0,0.0,1.0)
-	return pow(deficit,3.0)*(0.35+shortage_ramp*5.0)
+	## a complete sustained loss of water remains rapidly catastrophic. The one
+	## rule, shared with the dry year's forecast (dry_water.gd thirst_rate).
+	return preload("res://scripts/dry_water.gd").thirst_rate(water_intake,shortage_days)
 
 func _population_location() -> String:
 	if WorldSimulation.state.convoy_traveling:

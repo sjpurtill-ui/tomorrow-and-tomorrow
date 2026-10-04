@@ -1,13 +1,13 @@
 {
  "spec": "path_war:74119:15",
- "commit": "4bf93a4842dee0946fb302abccb6a2420c1914e9",
+ "commit": "cd3cabfe9abaeffccd7d874cd89acf5239e43658",
  "sources_at_launch": {
   "scripts/discovery_system.gd": "f309d9311627",
   "scripts/society_model.gd": "1b3e35dc26d7",
-  "scripts/game_state.gd": "2b5debee71ef",
+  "scripts/game_state.gd": "52c50d12c056",
   "scripts/early_life_conditions.gd": "98edd883a637",
   "scripts/food_system.gd": "5d8727a83c0e",
-  "scripts/consequence_engine.gd": "edb873ac637c",
+  "scripts/consequence_engine.gd": "e9490c36765f",
   "scripts/research_600_catalog.gd": "64f4b5035937",
   "scripts/technology_eras.gd": "c0bbf4054a38",
   "scripts/artifact_collection.gd": "9195657cdf5b",
@@ -16,17 +16,18 @@
   "scripts/government_people_system.gd": "03495db7ac51",
   "scripts/work_paths.gd": "d50f7aa9d6ee",
   "scripts/civilian_goods.gd": "f1e474bca48a",
-  "scripts/resource_system.gd": "fa9c69410d99",
+  "scripts/resource_system.gd": "314ae1659dba",
   "scripts/weapons_stock.gd": "4add78acd046",
   "scripts/watch_military.gd": "ec1cd7d0af11",
   "scripts/crisis_background.gd": "138760ec064e",
-  "scripts/crisis_system.gd": "926859b2ad37",
-  "scripts/crisis_unattended.gd": "fc93b9e75847",
+  "scripts/crisis_system.gd": "2b1df6e22d25",
+  "scripts/crisis_unattended.gd": "96454dcfd419",
   "scripts/built_fabric.gd": "fe92161c61b7",
   "scripts/settlement_construction.gd": "55bb3fda4014",
+  "scripts/dry_water.gd": "b92e49a80010",
   "data/research/effects/*.json": "977e4ba51ffc"
  },
- "wall_seconds": 124.2,
+ "wall_seconds": 126.0,
  "returncode": 0,
- "generated": "2026-10-03 14:19:03"
+ "generated": "2026-10-03 18:57:38"
 }

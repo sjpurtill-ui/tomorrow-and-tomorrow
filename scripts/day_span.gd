@@ -54,11 +54,15 @@ static func calm()->bool:
 	for army:Dictionary in military.field_armies:
 		if String(army.get("status","stationed"))!="stationed":return false
 	if int(WorldSimulation.world.player_effects().get("war_count",0))>0:return false
-	if float(WorldSimulation.state.simulation_metrics.get("water_intake_ratio",0.0))<.98:return false
+	# A thirsty people steps daily, except in a dry year: its water day then
+	# runs every day a step covers (resource_system.gd) and the thirst kills
+	# as those days would, so a dry year costs no extra steps (dry_water.gd).
+	var dry_year:=not preload("res://scripts/dry_water.gd").running().is_empty()
+	if float(WorldSimulation.state.simulation_metrics.get("water_intake_ratio",0.0))<.98 and not dry_year:return false
 	for city:Dictionary in WorldSimulation.state.player_settlements:
 		if bool(city.get("primary",false)) or not String(city.get("occupied_by","")).is_empty():continue
 		var metrics:Dictionary=city.get("resource_metrics",{})
-		if float(metrics.get("water_intake_ratio",0.0))<.98:return false
+		if float(metrics.get("water_intake_ratio",0.0))<.98 and not dry_year:return false
 	return true
 
 ## Longest step the owner's food stores allow: a share of the fewest days of
