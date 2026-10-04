@@ -1693,13 +1693,13 @@ func _background_cohort_hazards(condition_factor:float=-1.0)->Dictionary:
 func _natural_cohort_hazards(condition_factor:float=-1.0)->Dictionary:
 	var result:Dictionary={}
 	var conditions:=_mortality_condition_factor() if condition_factor<0.0 else condition_factor
-	var care:=care_profile()
+	var table:=EARLY_CARE.age_multiplier_table(care_profile(),conditions)
 	for key in POPULATION_AGE_COHORTS:
 		var age_range:Vector2=POPULATION_COHORT_AGE_RANGES[key]
 		var hazard_sum:=0.0
 		var years:=maxi(1,roundi(age_range.y-age_range.x))
 		for age in range(roundi(age_range.x),roundi(age_range.y)):
-			hazard_sum+=BASELINE_HAZARD_BY_AGE[age]*EARLY_CARE.age_multiplier(care,age,conditions)
+			hazard_sum+=BASELINE_HAZARD_BY_AGE[age]*table[0 if age<5 else (1 if age<15 else (2 if age<45 else 3))]
 		result[key]=hazard_sum/float(years)
 	return result
 
@@ -1763,8 +1763,9 @@ func life_expectancy_from(inputs:Dictionary)->float:
 	var exceptional_hazard:=maxf(0.0,float(inputs.get("hazard",0.0)))
 	var survival:=1.0
 	var expected_years:=0.0
+	var table:=EARLY_CARE.age_multiplier_table(care,condition_factor)
 	for age in 110:
-		var baseline_hazard:=BASELINE_HAZARD_BY_AGE[age]*EARLY_CARE.age_multiplier(care,age,condition_factor)
+		var baseline_hazard:=BASELINE_HAZARD_BY_AGE[age]*table[0 if age<5 else (1 if age<15 else (2 if age<45 else 3))]
 		var annual_hazard:=clampf(baseline_hazard*condition_factor+exceptional_hazard,0.0001,0.98)
 		expected_years+=survival
 		survival*=1.0-annual_hazard

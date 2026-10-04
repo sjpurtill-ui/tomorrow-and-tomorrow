@@ -273,6 +273,17 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 		adoption=adoption.merged(trials,true)
 		practices=practices.duplicate()
 		practices.append_array(trials.keys())
+	# The sums read only the practices, their adoption, the tools, works and
+	# goods they need, and the lines' focus: when all of these stand as at the
+	# last rebuild, so do the sums (the same additions in the same order).
+	var means:=PackedFloat64Array()
+	for special:String in Goods.FACTOR_SPECIAL:
+		if practices.has(special): means.append(Goods.factor(special))
+	var reading:=[practices,adoption,means,Goods.coverage() if _has_technique(practices) else -1.0,line_focus,neglect,definitions_by_id.size()]
+	if _sums_memo.reading.size()==reading.size() and _sums_memo.reading==reading:
+		effect_totals.merge(_sums_memo.totals)
+		_clamp_and_upkeep(neglect)
+		return
 	# Each line's practice_scale is read once; scaled_effect is applied inline.
 	var scales:Dictionary={}
 	if _lower_keys.is_empty(): _build_key_sets()
@@ -294,14 +305,18 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 			for effect_name in effects:values.append(float(effects[effect_name]))
 			row=[effects.keys(),values,Goods.FACTOR_SPECIAL.has(id) or Goods.TECHNIQUES.has(id)]
 			_effect_rows[id]=row
-		var extras:Array=_row_extras(id,row)
-		var adoption_level:float
-		if bool(row[2]) and not Goods.FACTOR_SPECIAL.has(id):
-			# A technique works as far as household goods cover it
-			# (civilian_goods.gd factor); nothing in this pass changes that cover.
-			if goods_coverage<0.0:goods_coverage=Goods.coverage()
-			adoption_level=clampf(float(adoption.get(id,0.025)),0.0,1.0)*goods_coverage
-		else:adoption_level=_practice_level(String(id),adoption,bool(row[2]))
+		# _row_extras and _practice_level, inlined: this loop reads every
+		# practice several times a town's day.
+		var extras:Variant=_extras_by_id.get(id)
+		if extras==null or (extras[0] as PackedInt32Array).size()!=(row[0] as Array).size():extras=_row_extras(id,row)
+		var adoption_level:=clampf(float(adoption.get(id,0.025)),0.0,1.0)
+		if bool(row[2]):
+			if not Goods.FACTOR_SPECIAL.has(id):
+				# A technique works as far as household goods cover it
+				# (civilian_goods.gd factor); nothing in this pass changes that cover.
+				if goods_coverage<0.0:goods_coverage=Goods.coverage()
+				adoption_level*=goods_coverage
+			else:adoption_level*=Goods.factor(String(id))
 		var values:PackedFloat64Array=row[1]
 		var line:String=extras[2]
 		var known_scale:Variant=scales.get(line)
@@ -318,11 +333,30 @@ func _rebuild_effect_totals(_catalog:Array[Dictionary])->void:
 			if seen[slot]==0:seen[slot]=1;order.append(slot)
 			sums[slot]+=value*adoption_level
 	for slot in order:effect_totals[_effect_names[slot]]=sums[slot]
+	_sums_memo.reading=[practices.duplicate(),adoption.duplicate(),means,reading[3],line_focus.duplicate(),neglect,definitions_by_id.size()]
+	_sums_memo.totals=effect_totals.duplicate()
+	_clamp_and_upkeep(neglect)
+
+## Whether any of `practices` is a technique household goods carry
+## (civilian_goods.gd TECHNIQUES, other than FACTOR_SPECIAL).
+static func _has_technique(practices:Array)->bool:
+	for id:String in Goods.TECHNIQUES:
+		if not Goods.FACTOR_SPECIAL.has(id) and practices.has(id): return true
+	return false
+
+## The last rebuild's sums and what they were read from (never saved).
+class SumsMemo extends RefCounted:
+	var reading:Array=[]
+	var totals:Dictionary={}
+var _sums_memo:=SumsMemo.new()
+
+## The rebuild's last part: the era's ceilings and the specialists' upkeep.
+func _clamp_and_upkeep(neglect:float)->void:
 	# research_600 balance: totals are held under the society's era ceiling,
 	# never the flat modern limit alone.
 	ceiling_era=society_era()
 	for effect_name in effect_totals:
-		var limit:=era_ceiling(String(effect_name))
+		var limit:=_era_ceiling_at(String(effect_name),neglect)
 		effect_totals[effect_name]=clampf(float(effect_totals[effect_name]),limit.x,limit.y)
 	_apply_specialist_upkeep()
 
@@ -1003,6 +1037,11 @@ static func era_ceiling_for(effect_id:String,era:float)->Vector2:
 ## Allowed range of `effect_id` for this society as of its latest effect totals,
 ## including the headroom its research focus earns on that key's line.
 func era_ceiling(effect_id:String)->Vector2:
+	return _era_ceiling_at(effect_id,-1.0)
+
+## era_ceiling with the unfocused lines' `neglect` (neglect_for(line_focus))
+## already worked out, or -1.0 to work it out when needed.
+func _era_ceiling_at(effect_id:String,neglect:float)->Vector2:
 	if _today.ceilings_era!=ceiling_era:
 		_today.ceilings={}
 		_today.ceilings_era=ceiling_era
@@ -1014,7 +1053,7 @@ func era_ceiling(effect_id:String)->Vector2:
 	var focus:=float(line_focus.get(String(EFFECT_LINE.get(effect_id,"")),0.0))
 	# A focused line's channels may pass the common ceiling; a neglected line's
 	# channels stop short of it while another line takes the society's effort.
-	var scale:=1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-neglect_for(line_focus)
+	var scale:=1.0+SPECIALIZATION_HEADROOM*focus if focus>0.0 else 1.0-(neglect_for(line_focus) if neglect<0.0 else neglect)
 	if scale==1.0: return limit
 	var modern:Vector2=EFFECT_LIMITS.get(effect_id,Vector2(-0.50,0.80))
 	if _lower_is_better(effect_id): return Vector2(maxf(modern.x,limit.x*scale),limit.y)
