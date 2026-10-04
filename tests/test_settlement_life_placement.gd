@@ -67,6 +67,25 @@ func test_aggregate_parcels_are_conservative_obstacles_without_fake_chimneys()->
 	assert_bool(placement.entries[0].rendered).is_false()
 	assert_bool(placement.open_at(placement.entries[0].door)).is_true()
 
+func test_overflow_buildings_remain_blocked_and_lane_projections_cannot_exceed_budget()->void:
+	var plots:Array=[]
+	for i in Placement.MAX_OBSTACLES+4:plots.append(_plot(i+1,Vector2(i*.012,0)))
+	var placement:=Placement.new();placement.configure(plots,[])
+	assert_int(placement.obstacles.size()).is_equal(Placement.MAX_OBSTACLES)
+	assert_int(placement.entries.size()).is_less_equal(Placement.MAX_OBSTACLES)
+	assert_bool(placement.has_overflow).is_true()
+	var beyond:=Vector2((Placement.MAX_OBSTACLES+2)*.012,0)
+	assert_bool(placement.open_at(beyond)).is_false()
+	assert_bool(placement.clear_segment(beyond+Vector2(0,-.02),beyond+Vector2(0,.02))).is_false()
+	var routes:Array=[]
+	for i in 100:
+		var y:=.0005*i
+		routes.append({"id":i,"active":true,"points":PackedVector2Array([Vector2(-.04,y),Vector2(.04,y)])})
+	placement.configure([],routes)
+	placement.route(Vector2(-.02,0),Vector2(.02,.03))
+	assert_int(placement.last_road_points).is_less_equal(Placement.MAX_LANE_POINTS)
+	assert_int(placement.last_graph_points).is_less_equal(Placement.MAX_GRAPH_POINTS)
+
 func test_chimney_sources_match_rendered_caps_not_population_or_modern_vents()->void:
 	GameState.reset_for_new_world(42)
 	var plot:=_plot(1,Vector2.ZERO)
@@ -135,6 +154,14 @@ func test_live_workers_follow_clear_routes_at_constant_speed_without_a_phantom_c
 	assert_bool(layer.hearth_active).is_false()
 	assert_int(layer.smoke_mm.multimesh.visible_instance_count).is_equal(0)
 	assert_int(layer.workers.size()).is_equal(Living.figure_budget(200))
+	var recorded_homes:Array[Vector2]=[]
+	for entry:Dictionary in layer.navigation.entries:
+		if String(entry.plot.get("land_use","")) not in ["residential_compound","mixed_household","temporary_encampment"]:continue
+		if not (entry.door as Vector2).is_finite():continue
+		if entry.door not in recorded_homes:recorded_homes.append(entry.door)
+	assert_int(recorded_homes.size()).is_greater(1)
+	assert_int(layer.homes.size()).is_equal(recorded_homes.size())
+	for home in recorded_homes:assert_bool(home in layer.homes).is_true()
 	var worker:Dictionary=layer.workers[0]
 	var from:Vector2=layer.navigation.entries[0].door
 	var to:Vector2=layer.navigation.entries[10].door

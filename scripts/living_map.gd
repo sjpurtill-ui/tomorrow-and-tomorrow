@@ -246,10 +246,12 @@ func _refresh_site()->void:
 			var use:=String(plot.get("land_use",""))
 			if status in ["ruin","reclaimed"]: continue
 			var door:=Vector2.INF
+			var doors:Array[Vector2]=[]
 			for entry:Dictionary in navigation.entries:
 				if int(entry.plot.get("id",-1))!=int(plot.get("id",-2)):continue
 				if not (entry.door as Vector2).is_finite():continue
 				if door==Vector2.INF:door=entry.door
+				if entry.door not in doors:doors.append(entry.door)
 				if bool(entry.rendered) and status!="under_construction" and smoke_sources.size()<MAX_PLUMES:
 					for outlet in Placement.chimney_outlets(plot):
 						if smoke_sources.size()>=MAX_PLUMES:break
@@ -261,16 +263,17 @@ func _refresh_site()->void:
 			if door==Vector2.INF:
 				if not navigation.open_at(at):continue
 				door=at
-			if status=="under_construction":builds.append(door);continue
+				if doors.is_empty():doors.append(door)
+			if status=="under_construction":builds.append_array(doors);continue
 			match use:
 				"residential_compound","mixed_household","temporary_encampment":
-					homes.append(door)
-					if use=="mixed_household": workshops.append(door)
-				"workshop": workshops.append(door)
-				"storage": stores.append(door)
+					homes.append_array(doors)
+					if use=="mixed_household": workshops.append_array(doors)
+				"workshop": workshops.append_array(doors)
+				"storage": stores.append_array(doors)
 				"field": fields.append(at)
 				"water": waters.append(at)
-				"civic","communal","sacred":offices.append(door)
+				"civic","communal","sacred":offices.append_array(doors)
 	if homes.is_empty():
 		# The camp: shelters in a loose ring around the fire.
 		for i in 7:
