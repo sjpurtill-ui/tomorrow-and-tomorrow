@@ -150,6 +150,33 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	assert_bool(bool(MilitaryCampaign.equipment_queue[0].planner_managed)).is_true()
 	assert_str(String(provider.tab(1).blocks[0].mode)).is_equal("civilian")
 	assert_bool(provider.tab(1).blocks[0].has("lines")).is_false()
+	# The three pages differ: All is an overview, not the Military page again;
+	# arms live on Military alone.
+	var all:Dictionary=provider.tab(0).blocks[0]
+	assert_str(String(all.mode)).is_equal("all")
+	for gone in ["lines","recipes","stock","arms"]:assert_bool(all.has(gone)).override_failure_message("All carries %s" % gone).is_false()
+	var military:Dictionary=provider.tab(2).blocks[0]
+	assert_bool(military.has("arms")).is_true()
+	assert_bool(provider.tab(1).blocks[0].has("arms")).is_false()
+	var overview:Control=auto_free(Queue.new());add_child(overview);overview.setup(all)
+	assert_object(overview.find_child("HandsAnswer",true,false)).is_not_null()
+	assert_object(overview.find_child("WorkshopLines",true,false)).is_null()
+	assert_object(overview.find_child("Recipe_improvised",true,false)).is_null()
+	assert_str(String((overview.find_child("HandsAnswer",true,false) as Label).text)).contains("makers, most")
+	var legend:=""
+	for label in overview.find_child("HandsLegend",true,false).find_children("*","Label",true,false):legend+=(label as Label).text+" | "
+	assert_str(legend).contains("Homes and barter").contains("Workshop lines").contains("Arms")
+	var arms:Control=auto_free(Queue.new());add_child(arms);arms.setup(military)
+	assert_str((arms.find_child("ArmsCost",true,false) as Label).text).starts_with("Arming one fighter:")
+	assert_object(arms.find_child("SeeWarriors",true,false)).is_not_null()
+	var civilian:Control=auto_free(Queue.new());add_child(civilian);civilian.setup(provider.tab(1).blocks[0])
+	assert_object(civilian.find_child("GoodsAnswer",true,false)).is_not_null()
+	assert_object(civilian.find_child("ArmsAnswer",true,false)).is_null()
+
+func test_the_workshop_note_is_said_the_way_a_person_says_it()->void:
+	assert_str(Queue.plain_status("No additional feasible supply order. Existing lines continue.")).is_equal("Nothing new to order; the lines keep working.")
+	assert_str(Queue.plain_status("Workshop idle: no feasible order for current needs. Household crafts are recorded separately from production lines. Short of timber.")).is_equal("Nothing to order: no band needs gear the workshops can make. Short of timber.")
+	assert_str(Queue.plain_status("Line paused under your control")).is_equal("Line paused under your control")
 
 func test_staff_plan_is_said_plainly_when_present()->void:
 	var line:=starved_line();line.planner_managed=true

@@ -129,7 +129,7 @@ func _build_head(forecast:Dictionary,season:Dictionary)->void:
 	var net:=float(forecast.net)
 	var trend:=_trend(net,float(forecast.seasons_left))
 	var head:=HBoxContainer.new();head.name="Headline";head.add_theme_constant_override("separation",12);column.add_child(head)
-	var big:=_answer(_store_words(forecast));big.name="StoreAnswer";head.add_child(big)
+	var big:=_answer(_store_words(forecast));big.name="StoreAnswer";big.autowrap_mode=TextServer.AUTOWRAP_OFF;head.add_child(big)
 	var moving:=_line(String(trend.text),16,trend.color);moving.name="Verdict";moving.size_flags_vertical=Control.SIZE_SHRINK_CENTER
 	moving.add_theme_font_override("font",T.font("ui_strong"))
 	moving.tooltip_text="A season: %s in, %s out: %s %s." % [Purse.number(float(forecast["in"])),Purse.number(float(forecast.out)),Purse.number(absf(net)),"left over" if net>=0.0 else "short"]
@@ -210,8 +210,11 @@ func _build_sources(sources:Dictionary)->void:
 	if float(sources.deposits)>0.0: rows.append(["Other",float(sources.deposits),"tolls, spoils and fees paid in",""])
 	var top:Array=rows[0]
 	for r:Array in rows:if float(r[1])>float(top[1]):top=r
-	var answer:=_answer("%s a season, most from %s" % [Purse.number(total),String(top[0])] if rows.size()>1 else "%s a season, from %s" % [Purse.number(total),String(top[0])],17)
+	# The answer names the biggest giver; the sums are on the rows (a season at
+	# the pace of the last months, which the store's forecast need not match).
+	var answer:=_answer("Most from %s: %d in 100" % [String(top[0]),roundi(float(top[1])/maxf(0.001,total)*100.0)] if rows.size()>1 else "All from %s" % String(top[0]),17)
 	answer.name="SourcesAnswer";sources_box.add_child(answer)
+	answer.tooltip_text="A season at the pace of the last months: %s in all." % Purse.amount_text(total)
 	for r:Array in rows:
 		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_PASS
 		var who:=_line(String(r[0]),13,T.INK);who.custom_minimum_size=Vector2(140,0);row.add_child(who)
