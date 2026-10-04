@@ -25,10 +25,11 @@ const ADDITIONS:=[[],["central_hall_houses","plain_weaving"],
 
 func _ready()->void:
 	capture=DisplayServer.get_name()!="headless"
-	var reference:=false;var selected:Array[int]=[];var acting_review:=false;var render_quality:="low"
+	var reference:=false;var selected:Array[int]=[];var acting_review:=false;var atmosphere_review:=false;var render_quality:="low"
 	for argument:String in OS.get_cmdline_user_args():
 		if argument=="--reference":reference=true
 		elif argument=="--acting-review":acting_review=true
+		elif argument=="--atmosphere-review":atmosphere_review=true
 		elif argument.begins_with("--quality="):render_quality=argument.trim_prefix("--quality=")
 		elif argument.begins_with("--chapters="):
 			for part:String in argument.trim_prefix("--chapters=").split(","):selected.append(int(part))
@@ -74,6 +75,7 @@ func _ready()->void:
 			if stage.court_set.fire_light!=null or stage.court_set.shimmer!=null:_fail("phantom hearth in "+str(chapter.set_kind))
 		if stage.court_set.indoors() and (stage.court_set.snowfall!=null or not stage.court_set.breaths.is_empty()):_fail("indoor winter particles in "+str(chapter.set_kind))
 		await _capture_stage(stage,"%02d-year-%04d-audience" % [index,index*200])
+		if atmosphere_review:await _review_atmosphere(stage,index)
 		if acting_review and index in [0,7,9,12,15]:
 			await _review_actions(stage,index)
 		# A room overview for evaluating architecture alongside the actual framing.
@@ -97,6 +99,33 @@ func _capture_stage(stage:Control,label:String)->void:
 	if not capture:return
 	await RenderingServer.frame_post_draw
 	stage.view3d.get_texture().get_image().save_png(out_dir+label+".png")
+
+func _review_atmosphere(stage:Control,index:int)->void:
+	var room=stage.court_set
+	var previous_level:String=room.level;var previous_reason:String=room.level_reason
+	var rays:Array=room._window_daylight
+	if room.indoors() and rays.is_empty():_fail("authored indoor daylight missing in "+str(index))
+	if rays.size()>2:_fail("unbounded window daylight in "+str(index))
+	var energy:Array=[]
+	for fill in room.fill_lights:energy.append(fill.light_energy)
+	room.god_light(stage.figure("main").body3d,"wrath",0.0,0.0)
+	await _frames(4)
+	await _capture_stage(stage,"%02d-atmosphere-wrath" % index)
+	for i in energy.size():
+		if room.fill_lights[i].light_energy>=float(energy[i])*.8:_fail("window fill ignores wrath in "+str(index))
+	room.god_light(null,"off",0.0,0.0)
+	for i in energy.size():
+		if absf(room.fill_lights[i].light_energy-float(energy[i]))>.00001:_fail("window fill did not recover in "+str(index))
+	room.set_quality("low")
+	for ray in rays:
+		if ray.visible:_fail("daylight left on at low quality in "+str(index))
+	await _frames(4)
+	await _capture_stage(stage,"%02d-atmosphere-low" % index)
+	room.set_quality("high")
+	for ray in rays:
+		if not ray.visible:_fail("daylight did not recover at high quality in "+str(index))
+	room.set_quality(previous_level,previous_reason)
+	await _frames(4)
 
 func _review_actions(stage:Control,index:int)->void:
 	# Side officials must remain seated while they speak, with the camera

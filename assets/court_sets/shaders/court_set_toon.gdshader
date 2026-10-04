@@ -41,6 +41,9 @@ uniform float haze_start = 40.0;
 uniform float haze_end = 160.0;
 uniform float haze_max = 0.0;
 uniform float rim_amount = 0.0;
+uniform float sheen_amount = 0.0;
+uniform float sheen_power = 40.0;
+uniform float glazing = 0.0;
 // The season: snow lies on what faces the sky (not near the fire, not in a
 // hall), dust and dryness in summer.
 uniform float snow = 0.0;
@@ -338,6 +341,14 @@ void fragment() {
 	float dist = length(v_world - CAMERA_POSITION_WORLD);
 	float haze = haze_max * smoothstep(haze_start, haze_end, dist);
 	ALBEDO = mix(base, haze_color, haze);
+	if (glazing > 0.0) {
+		vec3 normal_world = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
+		vec3 reflection = reflect(normalize(v_world - CAMERA_POSITION_WORLD), normal_world);
+		float sky = smoothstep(-0.22, 0.58, reflection.y);
+		vec3 reflected = mix(vec3(0.31, 0.39, 0.38), vec3(0.65, 0.79, 0.84), sky);
+		float fresnel = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+		ALBEDO = mix(ALBEDO, reflected, glazing * (0.55 + 0.45 * fresnel));
+	}
 	AO = ao;
 	AO_LIGHT_AFFECT = 0.25;
 	ROUGHNESS = 1.0;
@@ -359,4 +370,11 @@ void light() {
 	float half_lit = smoothstep(-0.6, -0.15, ndl) * half_tone;
 	float tone = max(lit * ATTENUATION, half_lit * min(1.0, ATTENUATION * 1.5));
 	DIFFUSE_LIGHT += LIGHT_COLOR * tone / PI;
+	if (sheen_amount > 0.0) {
+		float reflected = pow(max(dot(NORMAL, normalize(LIGHT + VIEW)), 0.0), sheen_power);
+		// A broad painted highlight with a softer shoulder, not a sharp white
+		// point that flickers as the conversation camera moves.
+		float highlight = smoothstep(0.10, 0.58, reflected);
+		SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * SPECULAR_AMOUNT * highlight * sheen_amount / PI;
+	}
 }

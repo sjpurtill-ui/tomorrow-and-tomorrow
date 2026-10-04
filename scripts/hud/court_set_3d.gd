@@ -58,6 +58,7 @@ const MANIFEST:=DIR+"court_sets.json"
 const CHAPTER_MANIFEST:=DIR+"court_chapters.json"
 const Chapters:=preload("res://scripts/hud/court_chapters.gd")
 const CourtCamera:=preload("res://scripts/hud/court_camera.gd")
+const Daylight:=preload("res://scripts/hud/court_daylight.gd")
 const Animal:=preload("res://scripts/hud/court_animal_3d.gd")
 const TOON:=preload("res://assets/court_sets/shaders/court_set_toon.gdshader")
 const GROUND:=preload("res://assets/court_sets/shaders/court_set_ground.gdshader")
@@ -210,6 +211,7 @@ var _god_pool_mat:ShaderMaterial
 ## The hall's own sun shafts (dimmed while the god's light owns the opening).
 var _sun_shaft_mats:Array[ShaderMaterial]=[]
 var _sun_shaft_strength:Array[float]=[]
+var _window_daylight:Array[MeshInstance3D]=[]
 var _god_out:=-1.0
 var _god_dust_mat:ShaderMaterial
 var _god_dust_pm:ParticleProcessMaterial
@@ -478,6 +480,18 @@ func _material(slot:String,inked:bool)->ShaderMaterial:
 		"BRONZE_CAST":
 			# the statue gleams: a hard rim of light, a little glow of its own
 			made.set_shader_parameter("rim_amount",0.7);made.set_shader_parameter("emission_amount",0.12)
+	# A finish belongs to its material. Glazed windows and metal no longer
+	# receive the same chalk-matte response as plaster, paper and rough stone.
+	if slot in ["WINDOW_GLASS","GLASS"]:
+		made.set_shader_parameter("glazing",.42 if slot=="WINDOW_GLASS" else .18)
+		made.set_shader_parameter("sheen_amount",.22)
+		made.set_shader_parameter("sheen_power",72.0)
+	elif slot in ["IRON","METAL","BRONZE","GOLD","BRONZE_CAST"]:
+		made.set_shader_parameter("sheen_amount",.28)
+		made.set_shader_parameter("sheen_power",40.0)
+	elif slot=="CERAMIC":
+		made.set_shader_parameter("sheen_amount",.12)
+		made.set_shader_parameter("sheen_power",48.0)
 	if slot in ["BARK","WOOD","STONE","HIDE","HIDE_DARK","REED","CLAY","PLANK","THATCH"]:
 		made.set_shader_parameter("haze_max",0.45);made.set_shader_parameter("haze_start",22.0);made.set_shader_parameter("haze_end",80.0)
 	# Authored chapter finishes keep offices maintained and their upholstery
@@ -735,6 +749,13 @@ func _make_lights()->void:
 		var fill:=_omni("Fill",Color(String(light.get("fill_colour","c9d2d4" if not has_hearth() else "ffc78c"))),float(spec[3]),float(spec[4]),0.8)
 		fill.position=Vector3(float(spec[0]),float(spec[1]),float(spec[2]))
 		fill_lights.append(fill)
+	if kind.begins_with("chapter_") and indoors():
+		# Light returned from the unseen front of an enclosed room keeps faces
+		# readable against rear windows. One broad, diffuse-only bounce keeps
+		# the window shadows and distant wall contrast intact.
+		var returned:=_omni("RoomReturn",Color("e4ded1"),.90,10.5,0.8)
+		returned.position=Vector3(1.6,2.6,4.2)
+		fill_lights.append(returned)
 	if fx.has("door_light"):
 		door_light=SpotLight3D.new();door_light.name="DoorLight"
 		var at:=_vec(fx.door_light)
@@ -878,6 +899,13 @@ func _make_air()->void:
 		add_child(shaft)
 		if first:
 			_shaft_top=top;_shaft_dir=dir;_shaft_radius=radius;first=false
+	if indoors() and not (info.get("apertures",[]) as Array).is_empty():
+		_window_daylight=Daylight.build(info.apertures,sun_dir,Color(String(_look().sun)),float(light.get("daylight_strength",0.0)),float(light.get("aperture_z",-3.78)),model.scale.x if model!=null else 1.0)
+		for ray in _window_daylight:
+			add_child(ray)
+			var ray_material:=ray.material_override as ShaderMaterial
+			_sun_shaft_mats.append(ray_material)
+			_sun_shaft_strength.append(float(ray_material.get_shader_parameter("strength")))
 	var dust:Dictionary=fx.get("dust",{})
 	if dust.is_empty():return
 	var motes:=GPUParticles3D.new();motes.name="Dust"
@@ -1176,6 +1204,7 @@ func set_quality(to:String,reason:="asked")->void:
 	level="low" if to=="low" else "high"
 	level_reason=reason
 	var low:=level=="low"
+	for ray in _window_daylight:ray.visible=not low
 	if is_instance_valid(shimmer):shimmer.visible=not low
 	for p in particles:
 		if not is_instance_valid(p):continue
@@ -1369,6 +1398,8 @@ func _god_baseline()->void:
 	_god_base={"ambient":env.ambient_light_energy if env!=null else 0.5,"sat":env.adjustment_saturation if env!=null else 1.0,
 		"sun_energy":sun.light_energy if sun!=null else 1.0,"sun_rot":sun.transform.basis.get_rotation_quaternion() if sun!=null else Quaternion.IDENTITY,
 		"sun_blur":sun.shadow_blur if sun!=null else 1.0,"sun_colour":sun.light_color if sun!=null else Color.WHITE,"bounce":bounce.light_energy if bounce!=null else 0.45}
+	_god_base["fills"]=[]
+	for fill in fill_lights:_god_base.fills.append(fill.light_energy)
 
 ## One step of the god's light toward its tone (k 0..1 of the way).
 func _god_step(k:float)->void:
@@ -1416,6 +1447,10 @@ func _god_apply()->void:
 		sun.shadow_blur=lerpf(float(_god_base.sun_blur),0.2,sharp)
 		sun.light_color=(_god_base.sun_colour as Color).lerp(Color(0.86,0.9,1.0),sharp*0.35)
 	if bounce!=null:bounce.light_energy=float(_god_base.bounce)*fire
+	# Window bounce follows the room's dramatic change too. Leaving these at
+	# full energy washed out the speaker's light in newer, well-lit offices.
+	for i in fill_lights.size():
+		fill_lights[i].light_energy=float(_god_base.fills[i])*(1.0-dim*.65)*(1.0-(0.0 if open_sky else clampf(energy/2.4,0.0,1.0))*.32)
 	_fire_now=fire;_fire_h_now=fire_h
 	_fire_mul=fire*(1.0+2.2*_flare)
 	for mat in _flame_mats:
