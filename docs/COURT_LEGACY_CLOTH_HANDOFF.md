@@ -1,58 +1,64 @@
 # Additive legacy cloth repair
 
-Status: **HELD two-body prototype**, pending independent family/hand acceptance
-and extension to the other five bodies. It is not delivered to the player.
+Status: **HELD all-seven motion checkpoint**, pending complete motion, hand-fit
+and selected execution-pose acceptance. It is not delivered to the player.
 Branch `codex/court-legacy-cloth`, base `1c09a4e6`, worktree
 `C:/Users/sjpur/.codex/worktrees/court-chapter-assets/TomorrowandTomorrow`.
 
-The current bundles contain tunic, hide and robe for adult male and old female.
-Upper shells share the original body's topology and skin field. Skirts have
-independent same-leg panels, overlapping inner facings within the original hem,
-smooth waist anchors, and a gold hem partition on the same panel grid. The
-lower front/back vent corners turn inward near the knee, avoiding the broad
-shin-driven rim protruding as a pointed ribbon. The hip/thigh envelope used by
-the separate arm-fitting worker is unchanged. Source animation and real
-kneeling are preserved.
+All seven body variants now contain tunic, hide and robe. Upper shells share
+the original body's topology and skin field. Skirts use independent same-leg
+panels, inner facings within the original hem, smooth waist anchors and a gold
+hem partition on the same grid. Lower front/back vent corners turn inward near
+the knee, avoiding the broad shin-driven rim that previously protruded as a
+pointed ribbon. The accepted two-body hip/thigh contact envelope is unchanged.
+The other five variants use the same construction. Original animation bytes,
+clip timing and real kneeling are preserved.
 
-Hide retains its asymmetric upper wrap, original ragged hem vocabulary, fur
-cape, cord and foot wraps. Robe retains full length, mantle, sash and shoes.
-The original cape and mantle meshes are retained with a body-matched shoulder
-lining. The lining excludes head/neck vertices; an earlier local variant that
-overlaid the lower jaw was rejected. Original fastenings, footwear and cape
-surfaces are checked exactly by the raw validator.
+Hide retains its asymmetric wrap, ragged hem vocabulary, fur cape, cord and
+foot wraps. Robe retains its original full length, lower mantle drape, sash
+and shoes. The upper cape/mantle facets that intersected the supported shoulder
+surface are removed; the matched shoulder cap joins to the retained lower
+boundary with short sewn strips. Original lower triangles and all their vertex
+attributes remain exact, including trim. The small visible gold cape tabs are
+a deliberate stylized attachment, independently reviewed as connected cloth.
+The head/neck exclusion prevents face overlays. Fastenings and footwear remain
+exact. The earlier overlapping lining, unsupported cropped cape and reweighted
+open-shoulder experiments were rejected.
 
-The additive files use original skeleton and body morphs without rewriting any
-source figure or modern wardrobe. `LegacyBody` changes only replaced outfits'
-coverage channels (G hide, B tunic, A robe), for regions covered by real mesh.
-Visible legs below the hem remain present. The manifest lists exact source part
-names/material slots; missing variants/outfits fall back to the original.
-The separately delivered provider is `3b2b8f02` (local cherry-pick `1192e389`).
-No simulation or save fields change.
+The additive files preserve every source body attribute, morph, skeleton and
+bind without rewriting source figures or modern wardrobe. `LegacyBody` changes
+only the replaced outfits' coverage channels (G hide, B tunic, A robe), for
+regions backed by actual garment mesh; visible lower legs remain. The manifest
+lists exact source part names/material slots; missing or incomplete outfits
+fall back as a whole. Provider dependency: `3b2b8f02` (local cherry-pick
+`1192e389`). No simulation or save fields change.
 
-Validation against this explicit worktree:
+Current evidence:
 
-- Raw two-bundle/all-three-outfit invariants pass: body attributes, morphs,
-  skeleton and binds exact; retained original pieces exact; no face/neck in
-  cape linings. Log `artifacts/legacy-three-outfits-v9-raw.log`.
-- Provider and modern wardrobe regression suites pass 5/5, zero failures,
-  errors, skips or orphans (`artifacts/legacy-three-outfits-runtime-tests.log`).
-- Current private GPU evidence: `reports/legacy_candidate_v9/`, 186 views,
-  PID73864 exit 0 without engine/script errors. Includes both yaws, standing,
-  walking samples, kneel through its actual 2.5-second endpoint, cross-sit
-  through 1.6 seconds, and release from those complete poses. Earlier captures
-  ending at 1.33 seconds were preliminary and do not establish full transitions.
-- Adding hide/robe leaves the current tunic surfaces and its B coverage exact.
-  Against the previous accepted calibration envelope, the male tunic is exact;
-  only old-female lower vent positions change, up to rest Y 0.45651 m. All
-  joint weights/indices stay exact (`artifacts/legacy-vent-bounds.log`).
-- No diff from base in the seven source figure GLBs, modern wardrobe builder
-  or bundles, or animation libraries.
+- All seven bundles / 21 outfits pass `validate_court_legacy_clothing.py
+  --complete`: body/face/rig exact, original lower cape triangles and data exact,
+  no face/neck influence in shoulder caps, valid indices and normalized weights.
+  Log: `artifacts/legacy-all-seven-v12-raw.log`.
+- Fresh all-seven import succeeded. Provider and modern wardrobe suites pass
+  5/5, zero errors, failures, skipped cases or orphans; process exit 0.
+  Log: `artifacts/legacy-all-seven-v12-tests.log`.
+- Current cape gate: `reports/legacy_cape_v12/ink/`, 12 private GPU views of
+  standing, full 2.5-second kneel and full 1.6-second cross-sit, both yaws,
+  male adult and old female. PID33556 exited 0, zero engine/script errors.
+  Independent reviewer accepted the clean shoulders and connected junction.
+- Earlier two-body three-family transition evidence remains in
+  `reports/legacy_candidate_v9/`: 186 views, including walking, full endpoints
+  and release. The shoulder replacement supersedes that version's speckles;
+  tunic and lower garment geometry remain unchanged.
+- Raw equality against `890ed589` confirms all tunic surfaces, hide wrap,
+  robe body/trim and all LegacyBody attributes remain exact for the two original
+  calibration bodies. Source figures, modern wardrobe and animation libraries
+  have no diff from base.
 
-Known outstanding work: authored bare poses already intersect hands and thighs
-in some standing/cross-sit samples. The runtime worker owns a bounded cached
-arm fit; these asset captures deliberately contain no unvalidated pose override.
-Raw motion/coverage diagnostics remain diagnostics, not a visual pass. The
-previous prototype's over-tapered breeches silhouette and inward hem-return
-experiment were rejected. Current full-family pixels need independent review,
-then all seven bodies require the same checks. Generated imports, diagnostics
-and captures remain local and are excluded from source commits.
+Outstanding acceptance: all-seven transition and walking matrices, bound-kneel
+and selected victim poses, and the separate runtime arm-fitting profile. Source
+bare poses already cross hands through thighs; narrowing the garments cannot
+solve that. The runtime worker owns the bounded cached fit and its acceptance.
+Asset-only captures still show those known contacts. Raw strain/coverage counts
+are diagnostics, not a visual pass. Angular lower robe folds remain a stylized
+mesh limitation. Generated imports, diagnostic files and captures stay local.
