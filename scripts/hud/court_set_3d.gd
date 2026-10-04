@@ -701,13 +701,20 @@ func _make_lights()->void:
 	sun.light_color=Color(String(look.sun))
 	sun.light_energy=float(light.get("sun_energy",1.3))
 	sun.shadow_enabled=true
-	sun.directional_shadow_mode=DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	sun.directional_shadow_mode=DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 	sun.directional_shadow_max_distance=30.0
-	sun.directional_shadow_blend_splits=true
+	# The old 3m near split put the wall behind a speaker in the coarse 30m
+	# cascade. Give close, room and distant geometry separate shadow texels.
+	sun.directional_shadow_split_1=0.12
+	sun.directional_shadow_split_2=0.28
+	sun.directional_shadow_split_3=0.52
+	sun.directional_shadow_blend_splits=false
 	sun.shadow_bias=0.04
 	sun.shadow_normal_bias=1.2
 	sun.shadow_blur=1.4
-	sun.light_angular_distance=1.2
+	# Compatibility expands the shadow frustum for angular size but cannot
+	# apply PCSS. Avoid wasting its texels on an unsupported soft-shadow halo.
+	sun.light_angular_distance=0.0 if RenderingServer.get_current_rendering_method()=="gl_compatibility" else 1.2
 	add_child(sun)
 	var fire:Dictionary=fx.get("fire",{})
 	_fire_energy=float(light.get("fire_energy",1.3)) if has_hearth() else 0.0
@@ -1184,8 +1191,14 @@ func set_quality(to:String,reason:="asked")->void:
 		var inked:=bool(entry[3]) and (not low or String(entry[4])=="StaticInked")
 		(entry[0] as MeshInstance3D).set_surface_override_material(int(entry[1]),_material(String(entry[2]),inked))
 	if sun!=null:
-		sun.directional_shadow_mode=DirectionalLight3D.SHADOW_ORTHOGONAL if low else DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+		sun.directional_shadow_mode=DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if low else DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
 		sun.directional_shadow_max_distance=18.0 if low else 30.0
+		# Keep a detailed 3.6m near cascade on both levels, including a later
+		# automatic downgrade. Low still uses half as many shadow passes.
+		sun.directional_shadow_split_1=0.2 if low else 0.12
+		sun.directional_shadow_split_2=0.28
+		sun.directional_shadow_split_3=0.52
+		sun.directional_shadow_blend_splits=false
 		sun.shadow_blur=1.0 if low else 1.4
 	if rig!=null:rig.set("far_blur",not low)
 	if season!="":_apply_season(season)
