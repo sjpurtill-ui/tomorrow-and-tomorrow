@@ -10,11 +10,25 @@ func _ready()->void:
 	var variants:=["male_adult","female_old"];var outfits:=["hide","tunic","robe"]
 	var label:="baseline"
 	var clips:=["stand","stand_talk","walk_in","walk_out","sit","kneel","sit_cross","kneel_release","sit_cross_release"]
+	var profile_file:="";var dense:=0
 	for arg:String in OS.get_cmdline_user_args():
 		if arg.begins_with("--bodies="):variants=arg.trim_prefix("--bodies=").split(",")
 		if arg.begins_with("--outfits="):outfits=arg.trim_prefix("--outfits=").split(",")
 		if arg.begins_with("--label="):label=arg.trim_prefix("--label=").validate_filename()
 		if arg.begins_with("--clips="):clips=arg.trim_prefix("--clips=").split(",")
+		if arg.begins_with("--profiles="):profile_file=arg.trim_prefix("--profiles=")
+		if arg.begins_with("--samples="):dense=maxi(2,int(arg.trim_prefix("--samples=")))
+	if not profile_file.is_empty():
+		var profiles:Dictionary=JSON.parse_string(FileAccess.get_file_as_string(profile_file))
+		var fit=load("res://scripts/hud/court_pose_clearance.gd")
+		for name:String in profiles:
+			fit.overrides=profiles[name]
+			_dump(variants,outfits,label+"-"+name.validate_filename(),clips,dense)
+		fit.overrides={}
+	else:_dump(variants,outfits,label,clips,dense)
+	get_tree().quit()
+
+func _dump(variants:Array,outfits:Array,label:String,clips:Array,dense:int)->void:
 	var dir:=ProjectSettings.globalize_path("res://reports/court_legacy_motion/");DirAccess.make_dir_recursive_absolute(dir)
 	var file:=FileAccess.open(dir+label+".jsonl",FileAccess.WRITE);var count:=0
 	for variant:String in variants:
@@ -71,14 +85,21 @@ func _ready()->void:
 				"body_triangles":bs.i,"hand_triangles":hand_triangles,"leg_triangles":leg_triangles,"hidden":hidden,"newly_hidden":newly_hidden,"body_position_mismatches":mismatches,"pieces":metadata}))
 			for clip:String in clips:
 				Audit._reset(f,acting)
-				if clip.begins_with("kneel") or clip.begins_with("sit_cross"):
+				if clip.begins_with("kneel") or clip.begins_with("sit_cross") or clip=="stance_cross":
 					f.play("stand",0.0,0.0);Acting.play(f,clip.trim_suffix("_release"),{"blend":0.0})
 					if clip.ends_with("_release"):
 						for frame in 48:Audit._frame(f,acting)
 						Acting.stop(f,.45);f.play("walk_out",0.0,0.0)
 				else:f.play(clip,0.0,0.0)
 				var now:=0.0
-				for target:float in TIMES:
+				var sample_times:=TIMES.duplicate()
+				if dense>0:
+					var duration:=1.6
+					if not clip.ends_with("_release"):
+						duration=maxf(duration,Acting.clip_length(clip)) if clip.begins_with("kneel") or clip.begins_with("sit_cross") or clip=="stance_cross" else f.player.get_animation(clip).length
+					sample_times.clear()
+					for i in dense:sample_times.append(duration*float(i)/float(dense-1))
+				for target:float in sample_times:
 					while now+Audit.DT*.5<target:Audit._frame(f,acting);now+=Audit.DT
 					f.skeleton.force_update_all_bone_transforms();var pose:=Audit._pose(f.skeleton,false);var cloth:Array=[]
 					for probe:Dictionary in probes:cloth.append(_vectors(Audit._skin(probe,pose)))
@@ -86,7 +107,7 @@ func _ready()->void:
 					count+=1
 			f.free()
 		source.free()
-	file.close();print("LEGACY_MOTION_EXPORT poses=",count," path=",dir+label+".jsonl");get_tree().quit()
+	file.close();print("LEGACY_MOTION_EXPORT poses=",count," path=",dir+label+".jsonl")
 
 static func _key(p:Vector3)->String:return "%.6f:%.6f:%.6f" % [p.x,p.y,p.z]
 static func _mask(c:Color,outfit:String)->float:return c.g if outfit=="hide" else (c.b if outfit=="tunic" else c.a)
