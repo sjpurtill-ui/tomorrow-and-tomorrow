@@ -23,8 +23,10 @@ checkpoints; the evidence below concerns this subsequent quality pass.
   and stone medieval great halls, a chancery, secretariat, cabinet, ministerial
   and industrial offices, and twentieth-century/contemporary conference rooms.
   These are game-year milestones following the existing nonlinear chronology,
-  not AD dates. Construction knowledge bounds the available room family;
-  equipment still requires the corresponding actual discoveries.
+  not AD dates. Known construction or established civic institutions bound the
+  available room family; equipment still requires the corresponding actual
+  discoveries. Societies that lack a later room family renew their supported
+  layout through entrance/service-side and modest width variation.
 - The second architecture pass replaces repeated large windows and empty rear
   walls with distinct openings, structural bays, work areas and record storage.
   Indoor hearths have stone bases. Desks, tables and chairs retain navigable
@@ -61,6 +63,14 @@ checkpoints; the evidence below concerns this subsequent quality pass.
   high / 0.76px low in the same-camera comparison, with retained contrast. The
   outdoor camp and medieval/modern wider views were also reviewed. This costs
   four/two shadow passes instead of two/one; the automatic downgrade remains.
+- Figure outlines retain their original screen-space width but sit behind the
+  painted surface at concave folds. This removes false black chest/armpit slits
+  without thinning shoulder silhouettes, adding materials or altering meshes.
+- Walking upper arms clear all seven clothing styles across all seven bodies.
+  Each player owns two fitted walking clips; redressing updates only upper-arm
+  rotation keys in place. Timing, speed, pause/queue state, root and lower-body
+  motion remain unchanged. Final calibration retains the full validated skirt
+  geometry; a narrower-skirt candidate was rejected after seated pixel review.
 - City population thresholds no longer shrink the visible settlement extent.
   Supported parcels beyond the detailed geometry budget can retain bounded roof
   proxies, subject to full-footprint road, parcel, land, slope and overlap checks.
@@ -92,6 +102,23 @@ demographic simulation. City art has broader building families; the sixteen
 distinct 200-year room designs are a court feature, not sixteen city styles.
 
 ## Verification at the combined checkpoint
+
+Final visual acceptance remains in progress: the expanded walking review found
+legacy tunic thigh breakthrough and overlapping formal lapel/cravat panels.
+These are being corrected separately. The walking clearance itself passes
+3,136 sampled poses with no hand/garment crossings after the full skirt volume
+was restored (worker `6cba2761`), with 67 focused regressions and 100 rendered
+pose/camera views. Do not treat the earlier narrowed-skirt commit `b19e62bb`
+as a standalone accepted delivery.
+
+The latest root combined run passes **400/400**, thirty-three suites, no errors,
+failures, skips or orphans (`artifacts/court-evolution-delivery-tests.log`,
+report53). It includes the final outline/runtime-walk implementation but predates
+the skirt restoration and remaining panel/coverage corrections; final evidence
+must identify their checks explicitly. The 96-view root capture at this interim
+checkpoint also completed with exit0 (PID65232), and is retained only as interim
+evidence. The independent final city provenance swatch passed and was visually
+reviewed, PID51960 exit0 with no engine/script errors.
 
 - Latest broad court regression: **393/393**, thirty-one suites, no errors,
   failures, skips or orphans; process exit0.
