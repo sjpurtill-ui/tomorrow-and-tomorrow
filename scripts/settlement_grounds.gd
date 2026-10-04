@@ -848,16 +848,37 @@ static func _line(painter:Dictionary,points:PackedVector2Array,radius:float,alph
 	var spacing:=maxf(radius*0.45,texel*0.7)
 	var overlap:=maxf(1.0,radius*2.0/spacing*0.55)
 	var per:=1.0-pow(1.0-clampf(alpha,0.0,0.98),1.0/overlap)
+	# A line uses one brush. Resolve its cached image and immutable painting
+	# state once, rather than format a cache key and unpack a Dictionary for
+	# every overlapping stamp (tens of thousands in a developed quarter).
+	var image:Image=painter.image
+	var corner:Vector2=painter.corner
+	var bounds:=Rect2(corner,Vector2.ONE*texel*RES).grow(radius+texel*2.0)
+	var brush:Image
+	var source:=Rect2i()
+	var n:=0
+	var half:=0.0
+	var stamps:=0
 	for i in range(1,points.size()):
 		var a:=points[i-1];var b:=points[i]
 		var length:=a.distance_to(b)
 		var steps:=maxi(1,ceili(length/spacing))
 		# Clip the iteration, not the segment: adjacent tiles keep identical
 		# stamp positions, while a long road costs only its on-tile length.
-		var window:=_line_window(a,b,Rect2(Vector2(painter.corner),Vector2.ONE*texel*RES).grow(radius+texel*2.0))
+		var window:=_line_window(a,b,bounds)
 		if window.x>window.y:continue
+		if brush==null:
+			brush=_brush(radius/texel,per,channel)
+			n=brush.get_width();half=float(n)*0.5;source=Rect2i(0,0,n,n)
 		for s in range(maxi(0,floori(window.x*steps)),mini(steps,ceili(window.y*steps)+1)):
-			_stamp(painter,a.lerp(b,float(s)/float(steps)),radius,per,channel)
+			var at:=a.lerp(b,float(s)/float(steps))
+			if not bounds.has_point(at):continue
+			var p:=(at-corner)/texel
+			var dst:=Vector2i(roundi(p.x-half),roundi(p.y-half))
+			if dst.x>=RES or dst.y>=RES or dst.x+n<=0 or dst.y+n<=0:continue
+			image.blend_rect(brush,source,dst)
+			stamps+=1
+	painter.stamps=int(painter.stamps)+stamps
 	_stamp(painter,points[points.size()-1],radius,per,channel)
 
 static func _line_window(a:Vector2,b:Vector2,rect:Rect2)->Vector2:
