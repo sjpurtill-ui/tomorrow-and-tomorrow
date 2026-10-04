@@ -16,6 +16,7 @@ import os
 import sys
 import numpy as np
 from mathutils import Vector
+from mathutils.kdtree import KDTree
 
 HERE=os.path.dirname(os.path.abspath(__file__))
 ROOT=os.path.dirname(os.path.dirname(HERE))
@@ -32,6 +33,12 @@ PARTS={"hide":["hide_wrap","hide_cape","hide_cord","hide_footwraps"],
 class LegacyBundle(Bundle):
     def __init__(self,path):
         super().__init__(path)
+        arms=[i for i,n in enumerate(self.names) if n.split('.')[0] in ('upper_arm','forearm','hand','thumb','index','fingers')]
+        self.trunk_mask=np.sum(self.w*np.isin(self.j,arms),axis=1)<.15
+        torso=np.flatnonzero(self.trunk_mask)
+        self.trunk_kd=KDTree(len(torso))
+        for i in torso:self.trunk_kd.insert(Vector(self.p[i]),int(i))
+        self.trunk_kd.balance()
         # Empty source garment nodes must not steal the replacement's exact name.
         for node in self.doc['nodes']:
             if any(node.get('name','').startswith(k+'_') for k in CHANNELS):
@@ -116,7 +123,7 @@ def skirt(b,f,kind,hem,ease,start,trim=False):
             height=(hem+.032*k-t*.032*k) if trim else start-t*(start-hem)
             h=max(height,f.z_hip)
             rx,fr,bk,cy=[float(np.interp(h,zvals,[s[j] for s in sections])) for j in range(1,5)]
-            nearby=b.p[(np.abs(b.p[:,1]-h)<.014*k)&(np.abs(b.p[:,0])<.35*k)]
+            nearby=b.p[(np.abs(b.p[:,1]-h)<.014*k)&b.trunk_mask]
             if len(nearby):rx=max(rx,float(np.max(np.abs(nearby[:,0]))))
             fall=float(np.clip((start-height)/(start-hem),0.,1.))
             for col in range(steps):
@@ -130,7 +137,7 @@ def skirt(b,f,kind,hem,ease,start,trim=False):
                 z=-cy+math.cos(a)*depth
                 points.append((x,height,z))
                 anchor=(math.sin(a)*(rx+ease),start,-cy+math.cos(a)*((fr if math.cos(a)>=0 else bk)+ease))
-                nearest=b.kd.find(Vector(anchor))[1]
+                nearest=b.trunk_kd.find(Vector(anchor))[1]
                 weight=np.zeros(len(b.names))
                 for index,value in zip(b.j[nearest],b.w[nearest]):weight[index]+=value
                 own='L' if half==1 else 'R'
