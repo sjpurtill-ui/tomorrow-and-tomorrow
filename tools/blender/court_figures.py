@@ -1094,6 +1094,10 @@ def main():
         rig, f, sets = build_variant(v, o["quick"], o["ao"])
         path = os.path.join(o["out"], "court_figure_%s.glb" % v)
         export(rig, sets, path)
+        # Preserve fine nasal/ear anatomy after the global body reduction.
+        # Later wardrobe bundles copy this already-refined Body and its morphs.
+        from refine_court_anatomy import refine_file
+        refine_file(path)
         size = os.path.getsize(path)
         log("exported", path, round(size / 1024), "KB")
         entries.append({"variant": v, "file": os.path.basename(path), "height": round(f.H, 3),

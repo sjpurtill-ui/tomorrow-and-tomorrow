@@ -177,7 +177,7 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 		if lit:
 			made.set_shader_parameter("fill",0.14 if slot=="SKIN" else 0.16)
 			if slot=="SKIN":made.set_shader_parameter("grain",0.025)
-		if inked and not slot in ["BROW","STUBBLE","HAIR_CARD"]:made.next_pass=_ink(cover,slot=="HAIR")
+		if inked and not slot in ["BROW","STUBBLE","HAIR_CARD"]:made.next_pass=_ink(cover,slot=="HAIR",slot=="SKIN")
 	_materials[key]=made
 	return made
 
@@ -207,12 +207,13 @@ static func readable_hair(colour:Color)->Color:
 	if colour.v>=0.20:return colour
 	return Color.from_hsv(colour.h,colour.s*0.85,lerpf(colour.v,0.20,0.6))
 
-static func _ink(cover:int,stippled:=false)->ShaderMaterial:
-	var key:="%d|%d" % [cover,int(stippled)]
+static func _ink(cover:int,stippled:=false,skin:=false)->ShaderMaterial:
+	var key:="%d|%d|%d" % [cover,int(stippled),int(skin)]
 	if not _inks.has(key):
 		var ink:=ShaderMaterial.new();ink.shader=INK
 		ink.set_shader_parameter("cover_channel",cover)
 		ink.set_shader_parameter("stipple",1.0 if stippled else 0.0)
+		ink.set_shader_parameter("skin",skin)
 		_inks[key]=ink
 	return _inks[key]
 

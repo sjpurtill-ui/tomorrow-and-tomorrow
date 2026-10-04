@@ -151,6 +151,17 @@ func _ready()->void:
 				if capture:view.get_texture().get_image().save_png(dir+"faces_%s_%s.png" % [String(shot[0]),String(sitter[0])])
 			# Close-up acceptance of the actual expression/gaze targets. Freeze
 			# the animation clock so a blink cannot hide a visual regression.
+			if "anatomy" in OS.get_cmdline_user_args():
+				main.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
+				Acting.of(main).active=false
+				for angle in [0.0,45.0,90.0,-90.0]:
+					cam.call("frame_points",PackedVector3Array([head+Vector3.UP*0.03,head-Vector3.UP*0.27,head-Vector3.UP*0.135+side*0.13,head-Vector3.UP*0.135-side*0.13]),yaw-24.0+angle,-3.0)
+					await _frames(6)
+					await RenderingServer.frame_post_draw
+					if capture:view.get_texture().get_image().save_png(dir+"anatomy_%s_%d.png" % [String(sitter[0]),int(angle)])
+				main.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_IDLE
+				Acting.of(main).active=true
+				cam.call("frame_points",PackedVector3Array([head+Vector3.UP*0.03,head-Vector3.UP*0.27,head-Vector3.UP*0.135+side*0.13,head-Vector3.UP*0.135-side*0.13]),yaw,-3.0)
 			if "expressions" in OS.get_cmdline_user_args():
 				main.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 				var actor=Acting.of(main)

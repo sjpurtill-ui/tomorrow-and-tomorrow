@@ -12,9 +12,13 @@ uniform int inked = 0;
 
 varying flat int v_slot;
 varying float v_cover;
+varying vec2 v_face;
+varying float v_head;
 
 void vertex() {
 	v_slot = int(CUSTOM0.r + 0.5);
+	v_face = vec2(UV.x, 1.0 - UV.y);
+	v_head = 1.0 - UV2.y;
 	v_cover = 0.0;
 	if (v_slot == 0) {
 		v_cover = cover_channel == 1 ? COLOR.g : (cover_channel == 2 ? COLOR.b : (cover_channel == 3 ? COLOR.a : 0.0));
@@ -43,6 +47,11 @@ void vertex() {
 
 void fragment() {
 	if (v_cover > 0.5 || ((inked >> v_slot) & 1) == 0) {
+		discard;
+	}
+	// The nose is lit geometry. An expanded inverted hull draws black
+	// seams across its alar folds and bridge, even inside the face.
+	if (v_slot == 0 && v_head > 0.5 && abs(v_face.x) < 0.055 && v_face.y > 0.065 && v_face.y < 0.165) {
 		discard;
 	}
 	ALBEDO = ink;
