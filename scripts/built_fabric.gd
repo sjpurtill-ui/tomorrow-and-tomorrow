@@ -115,7 +115,6 @@ const BEAUTY_MATERIALS:=0.2
 ## What beauty (0..1) does in full:
 const BEAUTY_COHESION:=0.03  # cohesion's target (civic_building_effects.gd)
 const BEAUTY_DEVOTION:=0.05  # the people's love of the god (divine_regard.gd)
-const BEAUTY_SPLENDOR:=0.4   # Splendor (standing.gd): pride and awe
 const BEAUTY_CULTURE:=0.5   # the allure of our culture abroad (standing.gd)
 const BEAUTY_RESPECT:=0.10   # what others' envoys and travellers respect (standing.gd)
 
@@ -207,9 +206,10 @@ const STONE_WATCH:=0.35
 ## Walls wear WALL_WEAR of their integrity a year while their upkeep goes
 ## undone (the town's fabric keeps them, after its homes: UPKEEP_ORDER).
 const WALL_WEAR:=0.03
-## Might (standing.gd): + FORT_MIGHT x the defences (bonus over BASTION_BONUS);
-## our fighting strength as others weigh it x (1 + FORT_STRENGTH x bonus).
-const FORT_MIGHT:=0.4
+## Might (standing.gd): every defender counts x (1 + FORT_STRENGTH x bonus),
+## in Might against the age and in our fighting strength as others weigh it;
+## the walls are a part of Endurance (standing.gd walls_reading). Fine works
+## are a part of Splendor (standing.gd beauty_reading).
 const FORT_STRENGTH:=0.8
 const BASTION_BONUS:=0.62
 ## Builders who want walls: the people's council weighs danger plus this a
@@ -1074,12 +1074,15 @@ static func effect_lines(r:Dictionary={})->Array:
 	_add_line(lines,"Cutting and digging","+%d%%" % roundi(extraction_bonus()*100.0),"Storehouses and yards: every deposit worked gives %d%% more." % roundi(extraction_bonus()*100.0),"good" if extraction_bonus()>0.0 else "plain","resource_system.gd STOREHOUSE_EXTRACTION")
 	_add_line(lines,"Water carried","x%.2f" % water_factor(),"Wells and water works: each water carrier brings x%.2f.%s" % [water_factor(),"" if works_cover("water")>0.0 else " The people must first learn to site wells."],"good" if works_cover("water")>0.0 else "plain","resource_system.gd WATERWORKS_WATER")
 	_add_line(lines,"Kilns","x%.2f builders" % (1.0+KILN_BUILDING*works_cover("kilns")),"Fired brick and lime: the builders' own work x%.2f.%s" % [1.0+KILN_BUILDING*works_cover("kilns"),"" if works_cover("kilns")>0.0 else " The people must first learn to fire a kiln."],"good" if works_cover("kilns")>0.0 else "plain","built_fabric.gd KILN_BUILDING")
-	_add_line(lines,"Splendor","+%d" % roundi(BEAUTY_SPLENDOR*realm_beauty()*100.0),"Fine works in every town add to Splendor, and through it to pride and awe.","good","standing.gd BEAUTY_SPLENDOR")
+	# Read against the age (standing.gd beauty_reading): a fifth of Splendor.
+	var fine:Dictionary=(load("res://scripts/standing.gd") as GDScript).call("beauty_reading",realm_beauty())
+	_add_line(lines,"Splendor","+%d" % roundi(float(fine.splendor)*100.0),"Fine works in every town read %d%% against the peoples of our age (a typical people's fine works: %d%%); they are a fifth of Splendor, and through it pride and awe." % [roundi(float(fine.score)*100.0),roundi(float(fine.typical)*100.0)],"good","standing.gd beauty_reading")
 	_add_line(lines,"Allure abroad","+%d" % roundi(BEAUTY_CULTURE*realm_beauty()*100.0),"What others hear of our fine works draws families, traders and envoys; their respect +%d." % roundi(BEAUTY_RESPECT*realm_beauty()*100.0),"good","standing.gd BEAUTY_CULTURE, BEAUTY_RESPECT")
 	if bool(r.home):
 		var d:Dictionary=r.defense
 		_add_line(lines,"Defences","+%d%%" % roundi(float(d.get("defense_bonus",0.0))*100.0),"Walls %d%% (x%.2f for the builders' craft) and the town's stone houses +%d%%: defenders fight better and a siege needs more men." % [roundi(float(d.get("works_bonus",0.0))*100.0),wall_quality(),roundi(stone_defense()*100.0)],"good","military_campaign.gd settlement_defense_snapshot CRAFT_WALL_QUALITY, STONE_DEFENSE")
-		_add_line(lines,"Might","+%d" % roundi(FORT_MIGHT*fort_reading()*100.0),"Walls and stone count toward Might, and others weigh our fighting strength x%.2f." % (1.0+FORT_STRENGTH*float(d.get("defense_bonus",0.0))),"good","standing.gd FORT_MIGHT, FORT_STRENGTH")
+		var held:Dictionary=(load("res://scripts/standing.gd") as GDScript).call("walls_reading",float(d.get("defense_bonus",0.0)))
+		_add_line(lines,"Might","x%.2f" % float(held.might_factor),"Walls and stone make every defender count x%.2f: in Might and in our fighting strength as others weigh it. They are a fifth of Endurance too (+%d; a typical people's walls: +%d%% to every defender)." % [float(held.might_factor),roundi(float(held.endurance)*100.0),roundi(float(held.typical)*100.0)],"good","standing.gd walls_reading, FORT_STRENGTH")
 	_add_line(lines,"Building knowledge","x%.2f" % research_multiplier("infrastructure"),"Skilled builders learn new ways of building faster (x%.2f), and learn some by doing." % research_multiplier("infrastructure"),"good","discovery_system.gd CRAFT_RESEARCH; civilization_day.gd CRAFT_SIGNAL")
 	_add_line(lines,"Great works","+%d odds" % roundi(GREAT_CRAFT*craft()*140.0),"The builders' craft adds %d points to a great work's odds, and a work that stands is worth x%.2f." % [roundi(GREAT_CRAFT*craft()*140.0),1.0+GREAT_PAYOFF*craft()],"good","wonder_concept.gd, undertaking_system.gd GREAT_CRAFT, GREAT_PAYOFF")
 	return lines

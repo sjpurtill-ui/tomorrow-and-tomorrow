@@ -70,7 +70,8 @@ static func entries(day:int=-1)->Array[Dictionary]:
 		for civ in WorldSimulation.world.civilizations:
 			var civ_id:=String((civ as Dictionary).get("id","")) if civ is Dictionary else ""
 			if civ_id=="" or not _alive(civ_id): continue
-			var arm:Dictionary=answer.call("arming",civ_id)
+			# Only what our watchers have heard of (world_answer heard_of_arming).
+			var arm:Dictionary=answer.call("heard_of_arming",civ_id)
 			if arm.is_empty(): continue
 			var left:=maxi(0,int(arm.get("march",day))-day)
 			if listed.has(civ_id):
@@ -117,20 +118,34 @@ static func _common(civ_id:String,f:Dictionary,bands:Dictionary,day:int)->Dictio
 		var objective:=String(op.get("objective",""))
 		band={"objective":objective,"words":String(OP_WORDS.get(objective,"out against them")),"men":int(op.get("band",0)),"general":String(op.get("general","")),
 			"days_left":maxi(0,int(op.get("due",day))-day)}
-	return {"civ_id":civ_id,"name":WarLoop._name(civ_id),"strength":WarLoop.ratio(civ_id),"dread":WarLoop._dread(civ_id),"band":band,"bands":bands.get(civ_id,[])}
+	# Their strength as our watchers reckon it (standing.gd estimate: how well
+	# we know them and our cunning), the same reckoning the Standing page shows.
+	# Too little known of them: unknown, as the Standing card says it.
+	var truth:=WarLoop.ratio(civ_id)
+	var est:=preload("res://scripts/standing.gd").estimate(civ_id,"strength_ratio",truth,true)
+	var unknown:=bool(est.get("unknown",false))
+	return {"civ_id":civ_id,"name":WarLoop._name(civ_id),"strength":1.0 if unknown else float(est.value),"strength_unknown":unknown,"strength_exact":not unknown and bool(est.exact),
+		"strength_low":float(est.low),"strength_high":float(est.high),"dread":WarLoop._dread(civ_id),"band":band,"bands":bands.get(civ_id,[])}
 
 
 ## The war leader's measure of their strength against ours, as the odds:
 ## {raw (ours over theirs), odds (stronger over weaker), ours}.
+## {"unknown": true} too when we know too little of them to say.
 static func odds(entry:Dictionary)->Dictionary:
+	if bool(entry.get("strength_unknown",false)): return {"raw":1.0,"odds":1.0,"ours":true,"unknown":true}
 	var theirs:=maxf(0.01,float(entry.get("strength",1.0)))
 	var raw:=1.0/theirs
 	return {"raw":raw,"odds":maxf(raw,1.0/raw),"ours":raw>=1.0}
 
-## "about 2 to 1 for us": their strength against ours in words.
+## "about 2 to 1 for us": their strength against ours in words (our
+## watchers' reckoning, with its band when we do not know them well).
 static func odds_words(entry:Dictionary)->String:
+	if bool(entry.get("strength_unknown",false)): return "unknown: we know too little of them to say how strong they are"
 	var o:=odds(entry)
-	return WarOdds.words(float(o.odds),bool(o.ours))
+	var words:=WarOdds.words(float(o.odds),bool(o.ours))
+	if entry.has("strength_exact") and not bool(entry.strength_exact):
+		words+=" by our watchers' reckoning (theirs somewhere between %.1f and %.1f times ours)" % [float(entry.get("strength_low",1.0)),float(entry.get("strength_high",1.0))]
+	return words
 
 
 ## Our bands at or bound for their towns: {civ_id: [{army_id, name, troops,

@@ -135,7 +135,9 @@ static func need(type:String,civ_id:String)->float:
 static func temper(civ_id:String,needed:float)->float:
 	var p:=Hall._personality(civ_id)
 	var proud:=String(ForeignDiplomacy.leader(civ_id).get("temperament",""))=="Proud guardian"
-	return clampf(1.0+0.3*needed-0.4*(float(p.assertiveness)-0.5)+0.2*(float(p.empathy)-0.5)-(0.1 if proud else 0.0),0.7,1.35)
+	# A persuasive people is paid more freely (standing.gd deal_temper).
+	var Standing:=preload("res://scripts/standing.gd")
+	return clampf(1.0+0.3*needed-0.4*(float(p.assertiveness)-0.5)+0.2*(float(p.empathy)-0.5)-(0.1 if proud else 0.0)+Standing.deal_temper(Standing.art_of("player","persuasion")),0.7,1.35)
 
 ## How much of a loan their stores could repay, by the repayment rule itself
 ## (envoy_requests.daily): when it falls due, traders bring what they owe if
@@ -521,6 +523,9 @@ static func odds(audience:Dictionary,over:float)->float:
 	var d:=deal_of(audience)
 	var needed:=float(d.get("need",0.0)) if not d.is_empty() else (0.6 if Hall._hungry(civ) else 0.0)
 	var chance:=0.45+opinion*0.3+trust*0.15-(float(p.assertiveness)-0.5)*0.5+needed*0.25-over*0.4
+	# A persuasive people's counter is taken more often (standing.gd counter_edge).
+	var Standing:=preload("res://scripts/standing.gd")
+	chance+=Standing.counter_edge(Standing.art_of("player","persuasion"))
 	return clampf(chance,0.1,0.9)
 
 ## The seeded roll for one counter or bargain on one audience.

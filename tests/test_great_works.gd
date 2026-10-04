@@ -447,12 +447,13 @@ func test_every_standing_work_is_splendid_whatever_its_purpose()->void:
 	# The simulation reads that very share: allure's works term and Splendor.
 	assert_float(float(Culture.allure_report(false).works)).is_equal_approx(float(renown.share),.00001)
 	var splendid:Dictionary=Standing.strengths().splendor
-	assert_float(float(splendid.value)-plain).is_equal_approx(float(renown.share)*Standing.SPLENDOR_WORKS,.002)
+	# Splendor reads the renown against the age (standing.gd works_splendor).
+	assert_float(float(splendid.value)-plain).is_equal_approx(Standing.works_splendor(float(renown.points)),.002)
 	assert_str(String(splendid.why)).contains("one great work standing")
 	print("SPLENDOR: ",splendid.why)
 	# And the screens say the same numbers.
 	var sentence:=preload("res://scripts/hud/great_works_atlas.gd").renown_sentence(renown)
-	assert_str(sentence).contains("+%d Splendor" % roundi(float(renown.share)*Standing.SPLENDOR_WORKS*100.0))
+	assert_str(sentence).contains("+%d Splendor" % roundi(Standing.works_splendor(float(renown.points))*100.0))
 	assert_str(preload("res://scripts/hud/great_works_atlas.gd").renown_tip(renown)).contains(String(renown.breakdown[0].text))
 
 func test_renown_follows_size_outcome_and_repair_and_welcome_adds_on_top()->void:

@@ -548,7 +548,8 @@ static func relation_cell(people:Dictionary)->Dictionary:
 	var answer:=load("res://scripts/world_answer.gd") as GDScript
 	var civ_id:=String(people.get("civ_id",""))
 	var bowed:Dictionary=answer.call("tributary",civ_id) if answer!=null and civ_id!="" else {}
-	var arming:Dictionary=answer.call("arming",civ_id) if answer!=null and civ_id!="" else {}
+	# Only what our watchers have heard of (world_answer heard_of_arming).
+	var arming:Dictionary=answer.call("heard_of_arming",civ_id) if answer!=null and civ_id!="" else {}
 	if not arming.is_empty():
 		word="Arming against us";tone="danger";order=0
 		tip="Gathering every spear against us: they march in about %d days." % maxi(0,int(arming.get("march",0))-int(GameState.elapsed_days))

@@ -104,9 +104,10 @@ func test_the_levy_leaves_every_town_its_lean_buffer()->void:
 ## standing, feasts and the court's words ask store_gate of the old days, so
 ## envy raids, feasts and great works still come to a people with normal stores.
 func test_store_readings_count_the_lean_stores()->void:
-	var Standing:=preload("res://scripts/standing.gd")
-	assert_float(Standing.WEALTH_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(90.0),0.0001)
-	assert_float(Standing.ENDURANCE_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(120.0),0.0001)
+	# Standing reads stores against the age (standing_scale.gd STORES): a
+	# people whose planners keep their usual reserve reads typical.
+	var Scale:=preload("res://scripts/standing_scale.gd")
+	assert_float(float(Scale.anchors(Scale.STORES,600.0)[1])).is_equal_approx(GovernmentPeopleSystem.RESERVE_TARGET_DAYS,0.0001)
 	assert_float(preload("res://scripts/economy_system.gd").FEAST_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(60.0),0.0001)
 	assert_float(preload("res://scripts/civilization_strategy.gd").GOODWILL_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(90.0),0.0001)
 	assert_float(preload("res://scripts/civilization_controller.gd").DEFENSE_FOOD_DAYS).is_equal_approx(FoodCare.store_gate(30.0),0.0001)

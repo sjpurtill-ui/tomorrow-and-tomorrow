@@ -1004,15 +1004,18 @@ static func learn_odds(p:Dictionary)->float:
 
 static func message_odds(civ_id:String,kind:String)->float:
 	## Their ruler's answer to a message their own man carries home: heed a
-	## warning, bow to a threat, take an offer of peace, meet a demand.
+	## warning, bow to a threat, take an offer of peace, meet a demand. A
+	## persuasive people's words are heeded more (standing.gd message_edge).
+	var Standing:=preload("res://scripts/standing.gd")
+	var said:=Standing.message_edge(Standing.art_of("player","persuasion"))
 	var t:=_temper(civ_id)
 	var a:=float(t.a); var r:=float(t.r); var e:=float(t.e); var d:=float(t.d); var g:=float(t.grudge); var D:=float(t.dread); var R:=float(t.ratio)
 	match kind:
-		"warning": return snappedf(clampf(0.30+D*0.35+e*0.15+d*0.10-a*0.25-g*0.15-(R-1.0)*0.1,0.05,0.9),0.0001)
-		"threat": return snappedf(clampf(0.20+D*0.45+(1.0-r)*0.15-a*0.25-g*0.15-(R-1.0)*0.15-(0.1 if String(t.trait) in ["bluffer","grudge"] else 0.0),0.03,0.85),0.0001)
-		"peace": return snappedf(clampf(0.25+e*0.25+float(t.opinion)*0.25+float(t.trust)*0.15+0.10-g*0.25-a*0.10-(0.1 if bool(t.at_war) else 0.0),0.05,0.9),0.0001)
-		"demand": return snappedf(clampf(0.15+D*0.45+(1.0-a)*0.15-g*0.20-(R-1.0)*0.15+(0.05 if String(t.trait)=="ledger" else 0.0),0.03,0.8),0.0001)
-	return 0.3
+		"warning": return snappedf(clampf(0.30+D*0.35+e*0.15+d*0.10-a*0.25-g*0.15-(R-1.0)*0.1+said,0.05,0.9),0.0001)
+		"threat": return snappedf(clampf(0.20+D*0.45+(1.0-r)*0.15-a*0.25-g*0.15-(R-1.0)*0.15-(0.1 if String(t.trait) in ["bluffer","grudge"] else 0.0)+said,0.03,0.85),0.0001)
+		"peace": return snappedf(clampf(0.25+e*0.25+float(t.opinion)*0.25+float(t.trust)*0.15+0.10-g*0.25-a*0.10-(0.1 if bool(t.at_war) else 0.0)+said,0.05,0.9),0.0001)
+		"demand": return snappedf(clampf(0.15+D*0.45+(1.0-a)*0.15-g*0.20-(R-1.0)*0.15+(0.05 if String(t.trait)=="ledger" else 0.0)+said,0.03,0.8),0.0001)
+	return clampf(0.3+said,0.05,0.9)
 
 static func fate_odds(p:Dictionary)->Dictionary:
 	var civ_id:=String(p.civ_id)

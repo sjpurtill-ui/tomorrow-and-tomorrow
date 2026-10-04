@@ -147,7 +147,7 @@ static func renown_sentence(renown:Dictionary)->String:
 	if points<=0.0 and share<=0.0:return "None of them is yet admired by other peoples."
 	var standing:=int(renown.get("standing",0))
 	var what:="lesser monuments and remains" if standing==0 else ("one standing work" if standing==1 else "%d standing works" % standing)
-	return "Other peoples admire us for them: %.0f allure from %s. That gives +%d of the %d our works can add to how alluring our culture is, and +%d Splendor." % [points,what,roundi(share*100.0),roundi(float(renown.get("cap",.25))*100.0),roundi(share*STANDING.SPLENDOR_WORKS*100.0)]
+	return "Other peoples admire us for them: %.0f allure from %s. That gives +%d of the %d our works can add to how alluring our culture is, and +%d Splendor." % [points,what,roundi(share*100.0),roundi(float(renown.get("cap",.25))*100.0),roundi(STANDING.works_splendor(points)*100.0)]
 
 ## Every source of our works' allure, and the rule that turns it into renown.
 static func renown_tip(renown:Dictionary)->String:
@@ -158,7 +158,9 @@ static func renown_tip(renown:Dictionary)->String:
 	if lines.is_empty():lines.append("No work of ours stands yet.")
 	var outcome:Dictionary=rules.get("OUTCOME_ALLURE",{})
 	lines.append("Every standing work counts, whatever it was built for: its size (ambition and era) x how it turned out (a triumph x%.2f, flawed x%.2f) x its repair. A dedication adds allure that fades over %d years; enshrined objects draw pilgrims." % [float(outcome.get("triumph",1.0)),float(outcome.get("flawed",1.0)),roundi(float(rules.get("SPIKE_YEARS",5.0)))])
-	lines.append("The first works count most: %.0f allure gives 63%% of the %d at most (+%d now). Works built to welcome strangers or carry our name add +%d on top. Splendor weighs the total x%.1f." % [float(rules.get("RENOWN_SCALE",30.0)),roundi(float(renown.get("cap",.25))*100.0),roundi(float(renown.get("monument",0.0))*100.0),roundi(float(renown.get("purpose",0.0))*100.0),STANDING.SPLENDOR_WORKS])
+	var Scale:=preload("res://scripts/standing_scale.gd")
+	var age:Array=Scale.anchors(Scale.WORKS,float(WorldSimulation.state.elapsed_days)/365.0)
+	lines.append("The first works count most: %.0f allure gives 63%% of the %d at most (+%d now). Works built to welcome strangers or carry our name add +%d on top. Splendor reads the total allure against the peoples of our age (a typical people's works: about %d, the best-documented %d) and gives it a little over half its weight." % [float(rules.get("RENOWN_SCALE",30.0)),roundi(float(renown.get("cap",.25))*100.0),roundi(float(renown.get("monument",0.0))*100.0),roundi(float(renown.get("purpose",0.0))*100.0),maxi(0,roundi(float(age[1])-1.0)),maxi(0,roundi(float(age[2])-1.0))])
 	return "\n".join(lines)
 
 ## Allure one work of ours commands now (its share of renown's breakdown).

@@ -81,6 +81,8 @@ class OddsBar extends Control:
 	## raw: ours over theirs (war_odds.of "raw"); words: the odds said.
 	var raw:=1.0
 	var words:=""
+	## Too little known of them to split the bar (war_ledger_model odds).
+	var unknown:=false
 
 	func _ready()->void:
 		custom_minimum_size=Vector2(0,30);mouse_filter=Control.MOUSE_FILTER_PASS
@@ -88,6 +90,7 @@ class OddsBar extends Control:
 	func set_odds(odds:Dictionary,said:String)->void:
 		visible=not odds.is_empty()
 		raw=float(odds.get("raw",1.0)) if not odds.is_empty() else 1.0
+		unknown=bool(odds.get("unknown",false))
 		words=said
 		tooltip_text="The war leader's reckoning by the combat engine: our share of the strength on the left, theirs on the right."
 		queue_redraw()
@@ -95,8 +98,10 @@ class OddsBar extends Control:
 	func _draw()->void:
 		var bar:=Rect2(Vector2(0,2),Vector2(size.x,12))
 		var ours:=clampf(raw/(1.0+raw),0.03,0.97)
-		draw_rect(bar,Color(Strips.THEIRS,0.9))
-		draw_rect(Rect2(bar.position,Vector2(bar.size.x*ours,bar.size.y)),Color(Strips.OURS,0.95))
+		if unknown: draw_rect(bar,T.PAPER_SUNK)
+		else:
+			draw_rect(bar,Color(Strips.THEIRS,0.9))
+			draw_rect(Rect2(bar.position,Vector2(bar.size.x*ours,bar.size.y)),Color(Strips.OURS,0.95))
 		draw_line(Vector2(bar.size.x*0.5,0),Vector2(bar.size.x*0.5,bar.end.y+2),T.INK,1.4)
 		draw_rect(bar,T.INK,false,1.0)
 		var font:=T.font("ui_strong")

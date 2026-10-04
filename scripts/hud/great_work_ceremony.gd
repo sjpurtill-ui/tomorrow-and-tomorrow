@@ -377,8 +377,11 @@ static func dedication_words(spike:float,before:Dictionary,after:Dictionary)->St
 	var gw:=load("res://scripts/great_works.gd") as GDScript
 	var years:=roundi(float(gw.get_script_constant_map().get("SPIKE_YEARS",5.0))) if gw!=null else 5
 	var gain:=maxf(0.0,float(after.get("share",0.0))-float(before.get("share",0.0)))
-	var splendor:=float(preload("res://scripts/standing.gd").SPLENDOR_WORKS)
-	return "Other peoples will talk of this dedication for %d years: it adds %.0f allure, fading to nothing by then. Now that is +%d to how alluring our culture is and +%d Splendor (our works give +%d and +%d in all)." % [years,spike,roundi(gain*100.0),roundi(gain*splendor*100.0),roundi(float(after.get("share",0.0))*100.0),roundi(float(after.get("share",0.0))*splendor*100.0)]
+	# Splendor reads the works' renown against the age (standing.gd works_splendor).
+	var Standing:=preload("res://scripts/standing.gd")
+	var now:=Standing.works_splendor(float(after.get("points",0.0)))
+	var then:=Standing.works_splendor(float(before.get("points",0.0)))
+	return "Other peoples will talk of this dedication for %d years: it adds %.0f allure, fading to nothing by then. Now that is +%d to how alluring our culture is and +%d Splendor (our works give +%d and +%d in all)." % [years,spike,roundi(gain*100.0),roundi(maxf(0.0,now-then)*100.0),roundi(float(after.get("share",0.0))*100.0),roundi(now*100.0)]
 
 func close()->void:
 	if is_queued_for_deletion():return

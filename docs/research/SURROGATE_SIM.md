@@ -110,6 +110,60 @@ The surrogate reads P2 from the game: `TERRITORY_SLOPE`, `CARER_CROWDING` (crowd
 
 Truth: six 15-year runs, the five path runs plus `avg_balanced` (the probe's average site, between good and poor), recorded on the P2 branch one engine at a time (103–121 s each). A fitted `harvest_mult` (1.1, best on both sites) stands in for what the engine's harvest gets that the surrogate leaves out (founding traditions, progression and season modifiers, the gathering lever, seed coverage); the re-planning rate is held at 1. `check.py --strict` passes: 6 runs, five known gaps (food days; the first years' food work on growth, war and the average site; the learning path's line mix, production 21 against 15 of 144).
 
+### Standing against the age (2026-10-03)
+
+`tools/sim/standing.py` mirrors `scripts/standing.gd`'s nine strengths on the
+age's yardstick (`scripts/standing_scale.gd`; tables and weights read from the
+game), and `tools/sim/standing_check.py` reads every path through it (about
+3 minutes on 12 processes). The surrogate has no other peoples, covert ledger
+or envoys' business, so the arts read their own inputs from a scenario
+posture (`model.py Scenario.posture`); their costs are simulated: people
+abroad (`away`, no hands at home), work shifted to scouts or administrators
+(`shift`), and gifts from the stores (`gifts`). Stand-ins: the watch's drill
+(about 0.6) is read as readiness x 1.5 (the engine's home army reads 0.91-0.97
+at year 75); water is read as typical.
+
+Year 300 (2 seeds), points of 100 (50 a typical people of the age):
+
+| Scenario | Might | Endur. | Wealth | Reach | Persu. | Splen. | Genius | Cunning | Order |
+|---|---|---|---|---|---|---|---|---|---|
+| path_balanced | 41 | 55 | 66 | 49 | 43 | 66 | 47 | 47 | 51 |
+| path_war | 93 | 54 | 65 | 47 | 43 | 64 | 47 | 50 | 54 |
+| path_learning | 34 | 53 | 64 | 45 | 43 | 65 | 65 (91 at 25) | 47 | 47 |
+| path_building | 37 | 59 | 63 | 47 | 43 | 71 | 47 | 44 | 47 |
+| arts_cunning | 35 | 53 | 64 | 45 | 43 | 64 | 46 | 73 | 48 |
+| arts_persuasion | 42 | 56 | 65 | 49 | 83 | 65 | 47 | 47 | 60 |
+| lean_order / lean_reach | 33 / 35 | 54 / 53 | 64 / 64 | 44 / 79 | 43 | 64 | 47 | 46 | 70 / 48 |
+| lean_stores / lean_hold | 36 / 41 | 55 / 68 | 70 / 70 | 56 / 57 | 43 | 62 / 72 | 47 | 47 / 45 | 62 / 48 |
+
+No strength reaches 97 on the balanced path or on a path that does not lean
+toward it; each lean lifts its own. Two remain below 70 on every path: Wealth
+on the making path (goods a head are held at the barter ceiling, the known
+gap above) and Endurance (past 70 it needs 100 days and more in store; the
+surrogate's planners hold about 60, where the god's own stores reached 248 in
+a played world and read 78).
+
+The arts in the raid world (`leaders.py`, the cautious-caring temper, which
+raises works and is raided for them; neighbours at Wealth 0.45 and an envy
+floor of 0.2 so the raids are many; 600 years, 4 seeds; envy on standing.gd's
+weights, plenty 0.6 and plenty past theirs 0.6): with no posture, 167 raids,
+81 seen coming and repelled, 2.47 million rations taken, 0.49 dead in 1,000
+a year, 22,651 people. Cunning (chief scout 0.85, two to three agents abroad,
+scouts +5 points of the work): 116 of 170 seen and repelled, 1.60 million
+taken (-35%), 0.45 dead, at 22,050 people (-3%: the hands on scouting).
+Persuasion (envoy 0.85, treaties, gifts 0.3 rations a head a year,
+administrators +3 points): 138 raids (-17%), 2.26 million taken, 0.42 dead,
+at 1.28 million rations given, 23,396 people. The deals, heeded messages,
+holding pacts, newcomers and softer grudges it also buys are not in the
+surrogate.
+
+Truth: the seven runs were re-recorded on this branch, one engine at a time
+(78-198 s each), since standing.gd's pride now centres on the typical people
+and `built_fabric.gd` (a watched file) states its Splendor and Might lines in
+the new readings. Against the old truth the engine's 15-year path differs
+only in holding together (0.872 against 0.881 at year 15, pride no longer
+lifting every people); `check.py --strict` passes (score 43.1, re-recorded again after the review fixes to consequence_engine.gd).
+
 ### Crises and the age table's background (2026-10-03)
 
 The surrogate now has the crises (`crisis.py`): a seeded mirror of `crisis_unattended.gd` on the hazards and tolls of `crisis_system.gd`. Each sub-step rolls each crisis type at the chance of an onset over its days, in the engine's order (hunger, dry season, cold year, sickness and new pestilence, flood, fire). Two onsets never open within `ONSET_GAP` days, and two at most run at once. Deaths come at the turn (40 in 100 of the toll) and at the end, off the cohorts by the cause's own death weights, never below the shock floor. The silent official's answers apply: tending or keeping the sick apart, rationing, carrying water, children kept apart, the roots. So do the side effects: sick leave, rations on the food demand, spoiled stores and lost roofs, immunity and the people's own custom of keeping the sick apart, and echoes of a bad sickness. Strangers' sickness is left out (the surrogate has no foreign contacts), as are the dry season's water work and timber. `"crises": false` in the params turns them off.

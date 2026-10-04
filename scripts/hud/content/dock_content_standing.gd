@@ -17,8 +17,13 @@ const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
 var memo:=Memo.new()
 
 ## The page's own view state, kept across the daily rebuilds: which people's
-## rose is laid over ours.
-var view_state:Dictionary={"compare":""}
+## rose is laid over ours (a capture may choose one: --capture-compare=<id>).
+var view_state:Dictionary={"compare":_capture_compare()}
+
+static func _capture_compare()->String:
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--capture-compare="): return argument.trim_prefix("--capture-compare=")
+	return ""
 
 func meta()->Dictionary:
 	return {"eyebrow":"Our name among the peoples","title":"Standing","subtabs":["Standing"]}
@@ -78,7 +83,7 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 		var id:=String(row[0])
 		var value:=float((our[id] as Dictionary).value)
 		var entry:={"id":id,"name":String(row[1]),"means":String(row[2]),"value":value,"why":String((our[id] as Dictionary).why),
-			"section":String(row[3]),"sub":int(row[4]),"section_name":String(row[5]),"cost":String(row[6])}
+			"section":String(row[3]),"sub":int(row[4]),"section_name":String(row[5]),"cost":String(row[6]),"parts":_parts_words(our[id] as Dictionary)}
 		if year_ago.has(id): entry["change"]=roundf(value*100.0)-float(year_ago[id])
 		strengths.append(entry)
 	var peoples:Array=[]
@@ -89,7 +94,7 @@ func board_data(our:Dictionary,seen:Array)->Dictionary:
 	if not found: view_state["compare"]=""
 	var home:=_home(our,seen)
 	return {"type":"standing","people_name":_our_name(),"posture":posture,"renown":Standing.renown(our),"strengths":strengths,"year_ago":year_ago,
-		"peoples":peoples,"home":home,"warnings":_warnings(peoples,posture,our),"view_state":view_state,
+		"peoples":peoples,"home":home,"warnings":_warnings(peoples,posture,our),"view_state":view_state,"arts":Standing.arts_at_work(),
 		"on_raise":func(section:String,sub:int)->void: hud.section_requested.emit(section,sub),
 		"on_court":func(civ_id:String)->void: court({"civ_id":civ_id}).call(),
 		"on_scouts":func()->void: if is_instance_valid(terrain) and terrain.has_method("_open_scout_dispatch_panel"): terrain.call("_open_scout_dispatch_panel"),
@@ -109,7 +114,9 @@ static func _year_ago()->Dictionary:
 	var today:=int(WorldSimulation.state.elapsed_days)
 	var chosen:Dictionary={}
 	for row:Dictionary in rows:
-		if int(row.get("day",0))<=today-330 and row.has("standing_might"): chosen=row
+		# Only readings against the age (standing_scale.gd): the old absolute
+		# ones are not compared with them.
+		if int(row.get("day",0))<=today-330 and row.has("standing_might") and int(row.get("standing_scale",1))>=2: chosen=row
 	if chosen.is_empty(): return {}
 	var result:Dictionary={}
 	for row:Array in Standing.STRENGTHS:
@@ -142,19 +149,50 @@ func _people(v:Dictionary,our:Dictionary)->Dictionary:
 	return {"civ_id":civ_id,"name":String(v.civ_name),"accent":identity.get("accent",Tokens.GOLD),"emblem":Identity.emblem(civ_id),
 		"relation":_relation_words(civ_id,relation),"ruler":_with_path(_ruler_words(character),civ_id),"headline":Standing.view_words(v),
 		"views":views,"envy":float(v.envy),"contempt":float(v.contempt),"envy_why":String((v.why as Dictionary).get("envy","")),"contempt_why":String((v.why as Dictionary).get("contempt","")),
-		"strength":_strength_words(float(v.strength_ratio)),"ratio":float(v.strength_ratio),
-		"consequences":Standing.consequences(civ_id,v),"memories":memories,
-		"comparable":comparable(civ_id),"theirs":Standing.their_strengths(civ_id) if String(view_state.get("compare",""))==civ_id else {}}
+		"strength":_estimated_strength_words(civ_id,float(v.strength_ratio)),"ratio":float(v.strength_ratio),
+		"consequences":Standing.consequences(civ_id,v),"memories":memories,"known_words":_known_words(civ_id),
+		"comparable":comparable(civ_id),"theirs":Standing.their_strengths(civ_id) if comparable(civ_id) else {}}
 
-## A people's strengths as travellers tell them (Standing.their_strengths).
+## A people's strengths as we know them (Standing.their_strengths: their own
+## month's reading through our estimate).
 func their_strengths(civ_id:String)->Dictionary:
 	return Standing.their_strengths(civ_id)
 
-## Whether a people's strengths can be laid over ours: exactly when
-## Standing.their_strengths would give them (a people simulated in its own
-## scope), without reckoning them.
+## Whether a people's strengths can be laid over ours: a people the world
+## simulates, that we know well enough to say anything of (certainty at least
+## Standing.UNKNOWN_BELOW).
 static func comparable(civ_id:String)->bool:
-	return civ_id!="" and WorldSimulation.actors.has(civ_id)
+	return civ_id!="" and WorldSimulation.actors.has(civ_id) and Standing.certainty(civ_id)>=Standing.UNKNOWN_BELOW
+
+## How well we know them, in words, with the band our estimates carry.
+static func _known_words(civ_id:String)->String:
+	var sure:=Standing.certainty(civ_id)
+	if sure<Standing.UNKNOWN_BELOW: return "We know too little of them to say how strong they are."
+	var band:=roundi(Standing.ESTIMATE_WIDEST*(1.0-sure)*100.0)
+	if band<3: return "We know them well: their strengths as our watchers have them, close to the truth."
+	return "We know them %s: our watchers' estimates of them run %d points either way, right %d times in 100 (envoys, scouts, agents among them and our cunning make them surer)." % ["fairly well" if sure>=0.5 else ("a little" if sure>=0.25 else "hardly at all"),band,roundi(Standing.estimate_right_odds(sure)*100.0)]
+
+## Their fighting strength against ours as our watchers reckon it: the
+## engine's ratio seen through our estimate of them.
+static func _estimated_strength_words(civ_id:String,ratio:float)->String:
+	var est:=Standing.estimate(civ_id,"strength_ratio",1.0/maxf(0.01,ratio),true)
+	if bool(est.get("unknown",false)): return "We cannot say how strong they are in a fight"
+	var words:=_strength_words(1.0/maxf(0.01,float(est.value)))
+	if bool(est.exact): return words
+	return "%s, by our watchers' reckoning (theirs somewhere between %.1f and %.1f times ours)" % [words,float(est.low),float(est.high)]
+
+## A strength's parts as the Standing page's tooltip says them: "food 98%,
+## materials 63%, goods 45%".
+static func _parts_words(entry:Dictionary)->String:
+	var bits:PackedStringArray=[]
+	for part in entry.get("parts",[]):
+		if part is Dictionary: bits.append("%s %d%%" % [String(PART_NAMES.get(String((part as Dictionary).id),String((part as Dictionary).id))),roundi(float((part as Dictionary).score)*100.0)])
+	return ", ".join(bits)
+
+const PART_NAMES:={"ready":"ready to fight","known":"practices known","scholars":"at research","envoy":"who speaks for us","openness":"openness","familiarity":"familiarity","treaties":"treaties kept",
+	"gifts":"gifts given","abroad":"envoys abroad","scout":"chief scout","eyes":"scouts and watch","agents":"agents abroad","caught":"spies caught","intel":"what we know of them",
+	"food":"food stores","materials":"materials","goods":"made goods","works":"great works","culture":"culture","beauty":"fine works","legitimacy":"trust in the chiefs",
+	"cohesion":"holding together","administration":"administrators","steward":"the steward","water":"water","walls":"walls","health":"health","logistics":"carrying","met":"peoples met"}
 
 static func _relation_words(civ_id:String,relation:Dictionary)->String:
 	var parts:PackedStringArray=[]
