@@ -162,7 +162,12 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	assert_object(overview.find_child("HandsAnswer",true,false)).is_not_null()
 	assert_object(overview.find_child("WorkshopLines",true,false)).is_null()
 	assert_object(overview.find_child("Recipe_improvised",true,false)).is_null()
-	assert_str(String((overview.find_child("HandsAnswer",true,false) as Label).text)).contains("makers, most")
+	# The headline in plain words, the day's flow chart under it.
+	var said:=String((overview.find_child("HandsAnswer",true,false) as Label).text)
+	assert_bool(said.begins_with("Our ") or said.begins_with("No one")).override_failure_message(said).is_true()
+	var chart:Control=overview.find_child("Flow",true,false)
+	assert_object(chart).is_not_null()
+	assert_bool((chart.model.get("benches",[]) as Array).is_empty()).is_false()
 	var legend:=""
 	for label in overview.find_child("HandsLegend",true,false).find_children("*","Label",true,false):legend+=(label as Label).text+" | "
 	assert_str(legend).contains("Homes and barter").contains("Workshop lines").contains("Arms")
@@ -171,6 +176,9 @@ func test_provider_screen_drives_existing_production_actions()->void:
 	assert_object(arms.find_child("SeeWarriors",true,false)).is_not_null()
 	var civilian:Control=auto_free(Queue.new());add_child(civilian);civilian.setup(provider.tab(1).blocks[0])
 	assert_object(civilian.find_child("GoodsAnswer",true,false)).is_not_null()
+	assert_object(civilian.find_child("Jar",true,false)).is_not_null()
+	assert_object(civilian.find_child("Pile",true,false)).is_not_null()
+	assert_object(arms.find_child("ArmsRack",true,false)).is_not_null()
 	assert_object(civilian.find_child("ArmsAnswer",true,false)).is_null()
 
 func test_the_workshop_note_is_said_the_way_a_person_says_it()->void:
@@ -188,3 +196,26 @@ func test_staff_plan_is_said_plainly_when_present()->void:
 	var panel:Control=auto_free(Queue.new());add_child(panel)
 	panel.setup({"mode":"military","owner":"Mahun of the High Camp · Quartermaster","managed":true,"capacity":1,"context":CONTEXT,"lines":[line]})
 	assert_str((panel.find_child("Output",true,false) as Control).tooltip_text).contains(text)
+
+## The flow chart draws the engine's day: a fuller ribbon is wider, a dry one
+## says what is missing, and the military page leaves the household benches out.
+func test_flow_chart_widths_and_dry_ribbons()->void:
+	var Flow=preload("res://scripts/hud/production_flow.gd")
+	var model:={"materials":[{"resource":"Timber","name":"Timber","amount":300.0,"trend":0.1},{"resource":"Flint","name":"Flint","amount":0.0,"trend":0.0}],
+		"benches":[{"id":"goods","kind":"basket","name":"Household benches","hands":19.0,"per_day":8.0,"stalled":""},{"id":"arms","kind":"knapping","name":"Arms bench","hands":0.0,"per_day":0.0,"stalled":"","wanted":3}],
+		"outputs":[{"id":"homes","kind":"homes","name":"For the homes","per_day":6.0,"unit":"goods"},{"id":"barter","kind":"barter","name":"For barter","per_day":2.0,"unit":"goods"},{"id":"watch","kind":"watch","name":"Arms for the watch","per_day":0.0,"unit":"sets"}],
+		"links":[{"from":"Timber","to":"goods","per_day":1.28},{"from":"Flint","to":"arms","per_day":0.0,"dry":true,"words":"no flint: arms stalled"},
+			{"from":"goods","to":"homes","per_day":6.0},{"from":"goods","to":"barter","per_day":2.0},{"from":"arms","to":"watch","per_day":0.0,"dry":true,"words":""}]}
+	var chart:Control=auto_free(Flow.new());add_child(chart)
+	chart.size=Vector2(800,320);chart.set_model(model,"all");chart._layout()
+	var widths:={}
+	var dry_words:=""
+	for ribbon:Dictionary in chart._ribbons:
+		widths[String(ribbon.link.to)]=float(ribbon.width)
+		if bool(ribbon.dry) and String(ribbon.link.get("words",""))!="":dry_words=chart._ribbon_tip(ribbon)
+	assert_float(float(widths.homes)).is_greater(float(widths.barter))
+	assert_str(dry_words).is_equal("No flint: arms stalled.")
+	chart.set_model(model,"military");chart._layout()
+	assert_bool(chart._nodes.has("goods")).is_false()
+	assert_bool(chart._nodes.has("Flint")).is_true()
+	assert_bool(chart._nodes.has("Timber")).is_false()

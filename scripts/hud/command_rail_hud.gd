@@ -44,8 +44,6 @@ var city_selector:OptionButton
 var city_selector_signature:String=""
 var terrain:Node
 
-var action_feedback:PanelContainer
-var feedback_sequence:=0
 var active_section:String=""
 var dismissed_alert_ids:Array=[]
 
@@ -201,8 +199,6 @@ func _layout()->void:
 		# The War screen's strip stands there while it is open: below it.
 		army_alerts.position=Vector2(Tokens.DOCK_X,64.0+(_war_layout("STRIP_HEIGHT")+12.0 if war_open() else 0.0))
 		army_alerts.visible=not ((dock and dock.visible) or (detail_dock and detail_dock.visible))
-	if action_feedback:
-		action_feedback.position=Vector2(maxf(Tokens.DOCK_X,view.x-action_feedback.size.x-16),maxf(124,view.y-action_feedback.size.y-112))
 
 func _work_queue_width(view_width:float)->float:
 	return clampf(view_width*.65,720.0,980.0)
@@ -1655,26 +1651,11 @@ func _refresh_city_selector()->void:
 		city_selector.set_item_metadata(index,String(city.id))
 		if String(city.id)==GameState.selected_player_settlement_id: city_selector.select(index)
 
-func show_action_feedback(message:String)->void:
+func show_action_feedback(message:String,category:String="war")->void:
 	if message.is_empty():return
-	if action_feedback==null:
-		action_feedback=PanelContainer.new();action_feedback.name="ActionFeedback";action_feedback.z_index=100;action_feedback.mouse_filter=Control.MOUSE_FILTER_IGNORE
-		var style:=Tokens.paper_panel_style(true,Tokens.RADIUS_CARD);style.border_color=Tokens.GOLD
-		for edge in ["left","right","top","bottom"]:style.set("content_margin_"+edge,12.0)
-		action_feedback.add_theme_stylebox_override("panel",style);add_child(action_feedback)
-		var label:=Label.new();label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.add_theme_font_size_override("font_size",14);label.mouse_filter=Control.MOUSE_FILTER_IGNORE;action_feedback.add_child(label)
-		action_feedback.resized.connect(_layout)
-	# Give the wrapping label its width BEFORE assigning text. Starting from
-	# zero width caches a thousands-of-pixels minimum height in the container.
-	var width:=minf(520,get_viewport().get_visible_rect().size.x-Tokens.DOCK_X-16)
-	var feedback_label:=action_feedback.get_child(0) as Label
-	feedback_label.custom_minimum_size.x=maxf(1,width-24)
-	feedback_label.size.x=maxf(1,width-24)
-	action_feedback.get_child(0).text=message
-	action_feedback.size=Vector2(width,0)
-	action_feedback.show();feedback_sequence+=1;var sequence:=feedback_sequence
-	_layout.call_deferred()
-	get_tree().create_timer(9.0).timeout.connect(func():if is_instance_valid(action_feedback) and sequence==feedback_sequence:action_feedback.hide())
+	# Notifications (codex/notifications): told in the one stack at the top
+	# right (hud/notification_stack.gd), no longer a slip at the lower right.
+	preload("res://scripts/hud/notification_model.gd").push({"category":category,"tier":"notable","text":message})
 
 func _approved_rail_style(active:bool,hover:bool=false)->StyleBoxFlat:
 	## Paper rail entries: a warm wash when lit and a 2 px gold tab on the left.

@@ -28,7 +28,7 @@ func after_deployment()->void:
 	var before:Dictionary=army.position.duplicate()
 	await mouse(terrain.camera.unproject_position(Vector3(water.x,terrain._height_at(water.x,water.y),water.y)),MOUSE_BUTTON_RIGHT)
 	assert(army.position==before and army.status=="stationed")
-	assert("WATER" in terrain.travel_status_label.text.to_upper());assert(hud.action_feedback.visible);await capture("field-water-blocked")
+	var told:Array=preload("res://scripts/hud/notification_model.gd").pending+preload("res://scripts/hud/notification_model.gd").history;assert(told.any(func(n:Dictionary)->bool:return "WATER" in String(n.get("text","")).to_upper() and String(n.get("category",""))=="war"));await capture("field-water-blocked")
 	# Actual provision processing reduces stored force condition and speed.
 	var full_speed:=MilitaryCampaign._field_army_speed(army)
 	for day in 30:MilitaryCampaign.record_daily_provisions(100,0)
