@@ -377,6 +377,11 @@ func _dress()->void:
 	var outfit:=String(look.get("outfit","tunic"))
 	preload("res://scripts/hud/court_walk_clearance.gd").configure(player,skeleton,variant,outfit)
 	if outfit in Wardrobe.OUTFITS and outfit!=_wardrobe_outfit:_load_wardrobe(outfit)
+	if outfit=="tunic":
+		for part:MeshInstance3D in _parts:
+			if part.name!=&"tunic_body":continue
+			if not part.has_meta(&"tunic_source_mesh"):part.set_meta(&"tunic_source_mesh",part.mesh)
+			part.mesh=preload("res://scripts/hud/court_tunic_fit.gd").fitted(part.get_meta(&"tunic_source_mesh"),_base_height)
 	for body in _parts:
 		if String(body.name)=="Body":
 			var skin_mesh:Mesh=_wardrobe_skin if outfit in Wardrobe.OUTFITS and _wardrobe_skin!=null else _plain_skin

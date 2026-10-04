@@ -8,6 +8,7 @@ extends "res://tools/court_acting_capture.gd"
 func _ready()->void:
 	out_dir=ProjectSettings.globalize_path("res://reports/court_progression_poses_no_ink/" if "no-ink" in OS.get_cmdline_user_args() else "res://reports/court_progression_poses/")
 	var source_walk:="source-walk" in OS.get_cmdline_user_args()
+	if "legacy-coverage" in OS.get_cmdline_user_args():out_dir=ProjectSettings.globalize_path("res://reports/court_tunic_coverage/")
 	if source_walk:out_dir=ProjectSettings.globalize_path("res://reports/court_progression_poses_source_walk/")
 	var selected:=PackedStringArray()
 	for argument:String in OS.get_cmdline_user_args():
@@ -21,7 +22,7 @@ func _ready()->void:
 	for outfit:String in ["medieval","courtcoat","formal","business","hide","tunic","robe"]:
 		if not selected.is_empty() and not outfit in selected:continue
 		var poses:Array=["sit","sit_talk","talk_both","walk_in","walk_out","walk_in_0","walk_out_0","kneel","sit_cross"]
-		if outfit in ["hide","tunic","robe"]:poses=["walk_in","walk_out","walk_in_0","walk_out_0"]
+		if outfit in ["hide","tunic","robe"] and not "legacy-coverage" in OS.get_cmdline_user_args():poses=["walk_in","walk_out","walk_in_0","walk_out_0"]
 		if "collar-only" in OS.get_cmdline_user_args():poses=[]
 		for pose:String in poses:
 			var row_variants:=variants.duplicate()
