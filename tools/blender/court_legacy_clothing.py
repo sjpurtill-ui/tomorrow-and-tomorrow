@@ -22,6 +22,7 @@ HERE=os.path.dirname(os.path.abspath(__file__))
 ROOT=os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0,HERE)
 import cf_body
+import cf_dress
 from court_era_wardrobe import Bundle, gl
 
 CHANNELS={"hide":1,"tunic":2,"robe":3}
@@ -35,6 +36,8 @@ class LegacyBundle(Bundle):
         super().__init__(path)
         arms=[i for i,n in enumerate(self.names) if n.split('.')[0] in ('upper_arm','forearm','hand','thumb','index','fingers')]
         self.trunk_mask=np.sum(self.w*np.isin(self.j,arms),axis=1)<.15
+        head=[i for i,n in enumerate(self.names) if n.split('.')[0] in ('head','neck','jaw')]
+        self.below_neck=np.sum(self.w*np.isin(self.j,head),axis=1)<.20
         torso=np.flatnonzero(self.trunk_mask)
         self.trunk_kd=KDTree(len(torso))
         for i in torso:self.trunk_kd.insert(Vector(self.p[i]),int(i))
@@ -121,7 +124,7 @@ def skirt(b,f,kind,hem,ease,start,trim=False):
     for half,(a0,a1) in enumerate(((-math.pi+.008,-.008),(.008,math.pi-.008))):
         points=[];joints=[];values=[]
         steps=33
-        band_top=hem+.032*k
+        band_top=hem+(0. if kind=='hide' else .032*k)
         heights=sorted(set(np.linspace(start,hem,22).tolist()+[band_top]),reverse=True)
         rows=len(heights)
         for height in heights:
@@ -139,14 +142,33 @@ def skirt(b,f,kind,hem,ease,start,trim=False):
                 x=math.sin(a)*(rx+ease+flare+pleat)
                 depth=(fr if math.cos(a)>=0 else bk)+ease-.008*k*fall+pleat
                 z=-cy+math.cos(a)*depth
-                points.append((x,height,z))
+                # Turn the lower vent corners back toward their own facing.
+                # A hip-wide rim rigidly attached to the shin protrudes as a
+                # pointed ribbon when the knee bends. Only the front/back
+                # corners below the knee change; the upper contact envelope
+                # and lateral fullness stay exactly as authored.
+                tuck=float(smooth((f.z_knee+.025*k-height)/(.17*k)))*abs(math.cos(a))**8
+                if tuck>1e-6:
+                    sign=1 if half==1 else -1
+                    candidates=np.flatnonzero(b.trunk_mask&(b.p[:,0]*sign>0)&(np.abs(b.p[:,1]-height)<.023*k))
+                    if len(candidates):
+                        delta=b.p[candidates]-np.array((x,height,z))
+                        nearest=candidates[int(np.argmin(np.sum(delta*delta,axis=1)))]
+                        target=b.p[nearest]+b.n[nearest]*.011*k
+                        x=x*(1-tuck)+target[0]*tuck
+                        z=z*(1-tuck)+target[2]*tuck
+                cloth_height=height
+                if kind=='hide':
+                    edge=float(hide_hem(f,hem)(np.array([[x,-z,hem]]))[0])
+                    cloth_height+=(edge-hem)*fall**3
+                points.append((x,cloth_height,z))
                 weight=np.zeros(len(b.names))
                 # A single continuous waist anchor avoids nearest-vertex
                 # jumps between hips and opposite thighs around the belt.
                 weight[b.names.index('hips')]=1.
                 own='L' if half==1 else 'R'
-                follow=float(smooth((start-height)/(.15*k)))
-                shin=float(smooth((f.z_knee+.025*k-height)/(.16*k)))
+                follow=float(smooth((start-cloth_height)/(.15*k)))
+                shin=float(smooth((f.z_knee+.025*k-cloth_height)/(.16*k)))
                 weight*=1-follow
                 weight[b.names.index('thigh.'+own)]+=follow*(1-shin)
                 weight[b.names.index('shin.'+own)]+=follow*shin
@@ -207,7 +229,9 @@ def garment(b,f,kind):
     # independently weighted strip hovering over the deformed body.
     skirt(b,f,kind,hem,ease,start,True)
     b.finish_group(group,kind+'_trim')
-    for name in PARTS[kind][2:]:b.copy_piece(name)
+    for name in PARTS[kind][2:]:
+        if name=='robe_mantle':supported_mantle(b,f)
+        else:b.copy_piece(name)
     # The open skirt must never erase the legs behind its vents. Only the
     # matched upper shell and original shoes provide fixed body coverage.
     cover=mask&(lower>.018*k)&(neck>.012*k)
@@ -220,13 +244,74 @@ def garment(b,f,kind):
     return cover
 
 
+def hide_hem(f,hem):
+    k=f.H/1.72
+    return cf_dress._hem(hem,amp=.012,jag=.038*k,count=6,tilt=.030*k,seed=.4)
+
+
+def supported_mantle(b,f):
+    """Keep the original mantle silhouette, with a body-matched shoulder lining."""
+    k=f.H/1.72;start=len(b.doc['meshes'])
+    b.copy_piece('robe_mantle')
+    p=b.p+b.n*(.029*k);y=p[:,1]
+    back=np.degrees(np.abs(np.arctan2(p[:,0],-p[:,2]-.020)))
+    reach=np.interp(y,[f.z_chest-.02,f.z_shoulder-.10*k,f.z_shoulder-.02*k,f.z_shoulder+.030*k],
+                    [79.,92.,150.,172.])
+    mask=(b.p[:,1]>f.z_chest-.10*k)&(b.p[:,1]<f.z_shoulder+.13*k)&b.below_neck
+    neck=np.maximum(f.z_shoulder+.055*k-y,np.abs(p[:,0])-.075*k)
+    b.shell('robe_mantle_lining','CLOTH_B',mask,np.full(len(y),.029*k),
+            limits=[y-f.z_chest+.035*k,neck,reach-back])
+    b.finish_group(start,'robe_mantle')
+
+
+def hide(b,f):
+    """The original asymmetric wrap, fur cape, cord and foot-wrap vocabulary."""
+    k=f.H/1.72;y=b.p[:,1];start=f.z_hip+.045*k
+    hem=f.z_knee+(.07 if not f.p['female'] else -.06)*k
+    ease=.017*k
+    waist=1-smooth(np.abs(y-(f.z_waist-.012*k))/(.075*k))
+    offsets=ease-(ease-.009*k)*waist
+    p=b.p+b.n*offsets[:,None]
+    top=f.z_chest+.050*k+.30*np.clip(p[:,0],-.20,.25)+.25*np.maximum(p[:,0]-.04,0)
+    fields=[p[:,1]-f.z_hip,top-p[:,1]]
+    group=len(b.doc['meshes'])
+    mask=b.trunk_mask&(y>f.z_hip-.06*k)&(y<f.z_shoulder+.03*k)
+    b.shell('hide_upper','CLOTH_A',mask,offsets,limits=fields)
+    lining_p=b.p+b.n*(.011*k)
+    edge=hide_hem(f,hem)(np.column_stack((lining_p[:,0],-lining_p[:,2],lining_p[:,1])))
+    facing=b.trunk_mask&(y<start+.04*k)&(y>hem-.10*k)
+    b.shell('hide_facing','CLOTH_A',facing,np.full(len(y),.011*k),
+            limits=[start+.022*k-lining_p[:,1],lining_p[:,1]-edge])
+    skirt(b,f,'hide',hem,ease,start)
+    b.finish_group(group,'hide_wrap')
+    group=len(b.doc['meshes'])
+    b.copy_piece('hide_cape')
+    cape_p=b.p+b.n*(.032*k);cy=cape_p[:,1]
+    slit=np.maximum(np.abs(cape_p[:,0])-(.030+.50*(f.z_shoulder+.05-cy)),.010-cape_p[:,2])
+    neck=np.maximum(f.z_shoulder+.046*k-cy,np.abs(cape_p[:,0])-.075*k)
+    cape_mask=(y>f.z_chest-.10*k)&(y<f.z_shoulder+.13*k)&b.below_neck
+    limits=[cy-f.z_chest+.027*k,slit,neck]
+    b.shell('hide_cape_lining','CLOTH_B',cape_mask,np.full(len(y),.032*k),limits=limits)
+    b.finish_group(group,'hide_cape')
+    b.copy_piece('hide_cord');b.copy_piece('hide_footwraps')
+    cover=mask&(fields[0]>.02*k)&(fields[1]>.02*k)
+    cover|=facing&(lining_p[:,1]>edge+.02*k)&(y<start+.006*k)
+    cape_cover=cape_mask.copy()
+    for field in limits:cape_cover&=field>.018*k
+    cover|=cape_cover
+    boundary=b.faces[np.any(~cover[b.faces],axis=1)];cover[np.unique(boundary)]=False
+    original=b.array(b.attrs['COLOR_0'])
+    cover|=(y<f.z_ankle+.06*k)&(original[:,CHANNELS['hide']]>0)
+    return cover
+
+
 def build(variant,kinds,out):
     source=os.path.join(ROOT,'assets','court_figures','court_figure_'+variant+'.glb')
     b=LegacyBundle(source);f=cf_body.Frame(cf_body.params(variant))
     masks={}
     for kind in kinds:
-        if kind not in ('tunic','robe'):raise ValueError('Hide requires its own silhouette review before replacement')
-        masks[kind]=garment(b,f,kind)
+        if kind not in CHANNELS:raise ValueError('Unknown legacy outfit '+kind)
+        masks[kind]=hide(b,f) if kind=='hide' else garment(b,f,kind)
     b.body_copy_masks(masks)
     path=os.path.join(out,'court_legacy_'+variant+'.glb');b.write(path)
     record={'file':os.path.basename(path),'outfits':kinds,'parts':{kind:PARTS[kind] for kind in kinds},
