@@ -41,25 +41,32 @@ def check(root,complete=False):
         names=[n['name'] for n in bundle.doc['nodes'] if 'mesh' in n]
         expected=['LegacyBody']+[name for parts in record['parts'].values() for name in parts]
         assert sorted(names)==sorted(expected),(variant,names,expected)
-        # Preserved fastenings/footwear and the original cape/mantle silhouette
-        # must remain exact. The latter may append a supported shoulder lining.
+        # Fastenings/footwear are exact. A cape retains all source attributes
+        # and its original lower triangles, with one supported shoulder cap.
         preserved={'hide_cape','hide_cord','hide_footwraps','tunic_belt','tunic_shoes',
                    'robe_sash','robe_mantle','robe_mantle_edge','robe_shoes'}
         for name in preserved.intersection(names):
             a,b=source.mesh(name),bundle.mesh(name)
-            expected_count=len(a['primitives'])+(1 if name in ('hide_cape','robe_mantle') else 0)
-            assert len(b['primitives'])==expected_count,(variant,name,'surface count')
+            cape=name in ('hide_cape','robe_mantle','robe_mantle_edge')
+            supported=name in ('hide_cape','robe_mantle')
+            assert len(b['primitives'])==len(a['primitives'])+int(supported)+int(cape),(variant,name,'surface count')
+            height=source.values(old['primitives'][0]['attributes']['POSITION'])[:,1].max()
+            if cape:assert .70*height<record['cape_join_y']<.80*height,(variant,'cape join out of shoulder region')
             for ap,bp in zip(a['primitives'],b['primitives']):
                 assert ap.get('material')==bp.get('material')
                 for key,index in ap['attributes'].items():
                     assert np.array_equal(source.values(index),bundle.values(bp['attributes'][key])),(variant,name,key)
-                assert np.array_equal(source.values(ap['indices']),bundle.values(bp['indices']))
-            if name in ('hide_cape','robe_mantle'):
+                faces=source.values(ap['indices']).reshape(-1,3)
+                if cape:
+                    points=source.values(ap['attributes']['POSITION'])
+                    faces=faces[np.max(points[faces,1],axis=1)<=record['cape_join_y']]
+                assert np.array_equal(faces,bundle.values(bp['indices']).reshape(-1,3)),(variant,name,'lower drape triangles')
+            if supported:
                 attrs=b['primitives'][-1]['attributes']
                 joints=bundle.values(attrs['JOINTS_0']);weights=bundle.values(attrs['WEIGHTS_0'])
                 joint_names=[bundle.doc['nodes'][i]['name'].split('.')[0] for i in bundle.doc['skins'][0]['joints']]
                 head=[i for i,n in enumerate(joint_names) if n in ('head','neck','jaw')]
-                assert (np.sum(weights*np.isin(joints,head),axis=1)<.20001).all(),(variant,name,'lining includes face/neck')
+                assert (np.sum(weights*np.isin(joints,head),axis=1)<.20001).all(),(variant,name,'cap includes face/neck')
         triangles=0
         for kind in record['outfits']:
             for name in record['parts'][kind]:
