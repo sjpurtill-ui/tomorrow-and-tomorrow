@@ -22,7 +22,7 @@ const RES:=512
 const SLOTS:=8
 const CITY_SLOTS:=4
 ## Four camera-local home tiles supplement the retained founding ground.
-## Their fixed grid never stretches as population or settlement extent grows.
+## Grid scale follows zoom, independently of population or city extent.
 const TILE_KM:=0.512
 const TILE_PAD_KM:=0.032
 const MAX_TILE_CACHE:=12
@@ -58,6 +58,7 @@ static var slot_noise_offsets:PackedVector2Array=PackedVector2Array([Vector2.ZER
 static var _tile_cache:Dictionary={}
 static var _tile_inputs:Dictionary={}
 static var _tile_view:=Vector2i(2147483647,2147483647)
+static var _tile_level:=-1
 static var _tile_revision:=0
 static var _home_revision:=0
 static var _home_paths:Array[Dictionary]=[]
@@ -106,6 +107,7 @@ static func clear()->void:
 	_home_args.clear();_tile_cache.clear();_tile_inputs.clear()
 	_home_paths.clear();_home_hearth=Vector2.ZERO;_home_has_hearth=false
 	_tile_view=Vector2i(2147483647,2147483647);_tile_revision=0;_home_revision=0
+	_tile_level=-1
 	tile_builds=0;tile_cache_hits=0
 	for slot in SLOTS:
 		slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot]=Vector4(1,0,0,0);slot_reports[slot]={};slot_halos[slot]=Vector4.ZERO
@@ -150,8 +152,9 @@ static func request(key:String,plan:Dictionary,plots:Array[Dictionary],routes:Ar
 ## Paints the nearest remembered place within `reach` km of `target` that is
 ## not painted yet (at most one per call; cheap when there is nothing to do).
 ## The map calls it on settled frames at settlement zoom.
-static func serve(target:Vector2,reach:float)->void:
-	if _serve_home_tile(target):return
+static func serve(target:Vector2,reach:float,view:=Rect2())->void:
+	if not view.has_area():view=Rect2(target-Vector2.ONE*reach,Vector2.ONE*reach*2.0)
+	if _serve_home_tile(target,view):return
 	if _requests.is_empty() or _served_at.distance_to(target)<reach*0.25:return
 	var best:="";var nearest:=INF
 	for key:String in _requests:
@@ -260,21 +263,24 @@ static func _in_rect(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictio
 
 ## Installs at most one tile per settled frame. Four resident layers and twelve
 ## CPU image pairs bound memory independently of the city's total land area.
-static func _serve_home_tile(target:Vector2)->bool:
+static func _serve_home_tile(target:Vector2,view:Rect2)->bool:
 	if _home_args.is_empty():return false
 	var center:Vector3=_home_args[3]
 	var local:=target-Vector2(center.x,center.z)
-	var cell:=Vector2i(floori(local.x/TILE_KM-0.5),floori(local.y/TILE_KM-0.5))
-	if cell!=_tile_view or _tile_revision!=_home_revision:
-		_tile_view=cell;_tile_revision=_home_revision;_tile_inputs.clear()
+	var layout:=preload("res://scripts/settlement_ground_view.gd").tile_layout(Rect2(view.position-Vector2(center.x,center.z),view.size))
+	var cell:Vector2i=layout.cell
+	var side:float=layout.side
+	var pad:float=layout.pad
+	if cell!=_tile_view or int(layout.level)!=_tile_level or _tile_revision!=_home_revision:
+		_tile_view=cell;_tile_level=int(layout.level);_tile_revision=_home_revision;_tile_inputs.clear()
 		var plots:Array[Dictionary]=[];plots.assign(_home_args[1])
 		var routes:Array[Dictionary]=[];routes.assign(_home_args[2])
 		for y in 2:
 			for x in 2:
 				var coordinate:=cell+Vector2i(x,y)
-				var rect:=Rect2(Vector2(coordinate)*TILE_KM,Vector2.ONE*TILE_KM).grow(TILE_PAD_KM)
+				var rect:=Rect2(Vector2(coordinate)*side,Vector2.ONE*side).grow(pad)
 				# The founding square keeps its original detailed presentation.
-				var inner:=rect.grow(-TILE_PAD_KM)
+				var inner:=rect.grow(-pad)
 				var core:=slot_rect(0)
 				var world_inner:=Rect2(inner.position+Vector2(center.x,center.z),inner.size)
 				if core.encloses(world_inner):continue
@@ -282,13 +288,18 @@ static func _serve_home_tile(target:Vector2)->bool:
 				if args.plots.is_empty() and args.routes.is_empty() and args.plan.get("buildings",[]).is_empty() and args.plan.get("_ground_paths",[]).is_empty():continue
 				args["rect"]=rect;args["center"]=center
 				args["signature"]=_paint_key(args.plan,args.plots,args.routes,center,rect)
-				_tile_inputs["home_tile:%d:%d" % [coordinate.x,coordinate.y]]=args
-		for slot in range(CITY_SLOTS,SLOTS):
-			if not _tile_inputs.has(slot_keys[slot]):
-				slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot].y=0.0
-		_apply_all()
+				_tile_inputs["home_tile:%d:%d:%d" % [_tile_level,coordinate.x,coordinate.y]]=args
 	var wanted:Array=_tile_inputs.keys()
 	wanted.sort_custom(func(a:String,b:String)->bool:return (_tile_inputs[a].rect as Rect2).get_center().distance_squared_to(local)<(_tile_inputs[b].rect as Rect2).get_center().distance_squared_to(local))
+	for key:String in wanted:
+		var args:Dictionary=_tile_inputs[key]
+		var slot:=slot_keys.find(key)
+		if slot>=CITY_SLOTS and slot_signatures[slot]==int(args.signature):continue
+		if not _tile_cache.has(int(args.signature)):
+			# Keep the preceding view resident until the new set is ready.
+			# Raster work remains limited to one image pair per service call.
+			_paint(CITY_SLOTS,args.plan,args.plots,args.routes,center,args.rect,true)
+			return true
 	for key:String in wanted:
 		var args:Dictionary=_tile_inputs[key]
 		var slot:=slot_keys.find(key)
@@ -299,7 +310,12 @@ static func _serve_home_tile(target:Vector2)->bool:
 		if slot<CITY_SLOTS:continue
 		slot_keys[slot]=key
 		_paint(slot,args.plan,args.plots,args.routes,center,args.rect)
-		return true
+	var cleared:=false
+	for slot in range(CITY_SLOTS,SLOTS):
+		if slot_keys[slot]!="" and not _tile_inputs.has(slot_keys[slot]):
+			slot_keys[slot]="";slot_signatures[slot]=0;slot_frames[slot].y=0.0
+			cleared=true
+	if cleared:_apply_all()
 	return false
 
 static var _home_args:Array=[]
@@ -360,14 +376,14 @@ static func _paint_rect(plan:Dictionary,plots:Array[Dictionary],routes:Array[Dic
 	var corner:=mid-Vector2(side,side)*0.5
 	return Rect2(corner,Vector2.ONE*side)
 
-static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,frame:=Rect2())->void:
+static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary],center:Vector3,frame:=Rect2(),cache_only:=false)->void:
 	var buildings:Array=plan.get("buildings",[])
 	var works:Array[Dictionary]=[]
 	if slot==0:works=_works_near(center)
 	var bearings:=_approach_bearings(Vector2(center.x,center.z))
 	var key:=_paint_key(plan,plots,routes,center,frame)
-	if key==slot_signatures[slot] and ground_layers!=null and slot_frames[slot].y>0.0:return
-	slot_signatures[slot]=key
+	if not cache_only and key==slot_signatures[slot] and ground_layers!=null and slot_frames[slot].y>0.0:return
+	if not cache_only:slot_signatures[slot]=key
 	var began:=Time.get_ticks_usec()
 	var base_frame:=_paint_rect(plan,plots,routes,works)
 	var side:=base_frame.size.x
@@ -375,12 +391,14 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	var corner:=base_frame.position
 	if frame.has_area():side=frame.size.x;corner=frame.position
 	if frame.has_area() and _tile_cache.has(key):
+		if cache_only:return
 		var cached:Dictionary=_tile_cache[key]
 		_tile_cache.erase(key);_tile_cache[key]=cached
 		_store(slot,cached.ground,cached.fields)
 		slot_origins[slot]=cached.origin;slot_frames[slot]=cached.frame;slot_halos[slot]=Vector4.ZERO
 		slot_noise_offsets[slot]=frame.position*1000.0
 		slot_centers[slot]=Vector2(center.x,center.z)+frame.get_center();slot_reports[slot]=cached.report.duplicate()
+		slot_reports[slot]["slot"]=slot
 		tile_cache_hits+=1;_apply_all();return
 	var image:=Image.create_empty(RES,RES,false,Image.FORMAT_RGBA8)
 	image.fill(Color(0,0,0,1))
@@ -559,12 +577,18 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 	var world:=Vector2(center.x,center.z)+corner
 	var hi:=Vector2(floorf(world.x/64.0)*64.0,floorf(world.y/64.0)*64.0)
 	var lo:=world-hi
+	var paint_report:={"fields":field_count,"gardens":gardens,"size_m":roundi(side*1000.0),"texel_m":snappedf(side*1000.0/RES,0.01),"stamps":int(painter.stamps),"build_usec":Time.get_ticks_usec()-began,"slot":slot}
+	if frame.has_area():
+		tile_builds+=1
+		_tile_cache[key]={"ground":image,"fields":worked,"origin":Vector4(hi.x,hi.y,lo.x,lo.y),"frame":Vector4(side,1.0,side/18.0,0.0),"report":paint_report}
+		while _tile_cache.size()>MAX_TILE_CACHE:_tile_cache.erase(_tile_cache.keys()[0])
+		if cache_only:return
 	_store(slot,image,worked)
 	slot_centers[slot]=Vector2(center.x,center.z)
 	slot_origins[slot]=Vector4(hi.x,hi.y,lo.x,lo.y)
 	slot_frames[slot]=Vector4(side,1.0,0.0,0.0)
 	slot_noise_offsets[slot]=corner*1000.0 if slot==0 or frame.has_area() else Vector2.ZERO
-	if frame.has_area():slot_frames[slot].z=TILE_PAD_KM;slot_centers[slot]=Vector2(center.x,center.z)+frame.get_center()
+	if frame.has_area():slot_frames[slot].z=side/18.0;slot_centers[slot]=Vector2(center.x,center.z)+frame.get_center()
 	# The cultivated halo: wider for a bigger, longer-farmed place; mostly
 	# pasture and clearings where nobody farms yet.
 	var farmed:=field_count>0 or float(shares.get("farm",0.0))>0.0
@@ -574,7 +598,7 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 		if entry is Dictionary and String(entry.get("id","")) in ["fruit_tree_grafting","terraced_orchards","orchard","nut_orchards","citrus_orchards"]:orchards=1.0;break
 	slot_halos[slot]=Vector4(halo_km,1.0 if slot==0 else 0.85,0.65 if farmed else 0.2,orchards if slot==0 else 0.0)
 	if frame.has_area():slot_halos[slot]=Vector4.ZERO
-	slot_reports[slot]={"fields":field_count,"gardens":gardens,"size_m":roundi(side*1000.0),"texel_m":snappedf(side*1000.0/RES,0.01),"stamps":int(painter.stamps),"build_usec":Time.get_ticks_usec()-began,"slot":slot}
+	slot_reports[slot]=paint_report
 	if slot==0:
 		if texture==null:texture=ImageTexture.create_from_image(image)
 		else:texture.update(image)
@@ -582,10 +606,6 @@ static func _paint(slot:int,plan:Dictionary,plots:Array[Dictionary],routes:Array
 		else:fields_texture.update(worked)
 		origin_hi=hi;origin_lo=lo;size_km=side;strength=1.0;signature=key
 		report=slot_reports[0]
-	if frame.has_area():
-		tile_builds+=1
-		_tile_cache[key]={"ground":image,"fields":worked,"origin":slot_origins[slot],"frame":slot_frames[slot],"report":slot_reports[slot].duplicate()}
-		while _tile_cache.size()>MAX_TILE_CACHE:_tile_cache.erase(_tile_cache.keys()[0])
 	_apply_all()
 
 ## Writes one slot's images into the shared texture arrays (created blank on
