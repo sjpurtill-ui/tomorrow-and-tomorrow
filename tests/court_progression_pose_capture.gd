@@ -11,7 +11,7 @@ func _ready()->void:
 	await _frames(3)
 	var variants:=["male_adult","female_adult","female_old","male_old"]
 	for outfit:String in ["medieval","business"]:
-		for pose:String in ["sit","sit_talk","talk_both","walk_in"]:
+		for pose:String in ["sit","sit_talk","talk_both","walk_in","kneel","sit_cross"]:
 			for yaw in [-20,70]:
 				_clear();await _frames(3)
 				for i in variants.size():
@@ -22,8 +22,11 @@ func _ready()->void:
 					f.player.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 					Acting.of(f).active=false
 					f.position=Vector3((float(i)-1.5)*1.10,0,0);f.rotation_degrees.y=float(yaw)
-					figures.append(f);f.play(pose,0.0,0.0)
-				_step_all(0.95 if pose=="talk_both" else 0.55)
+					figures.append(f)
+					if pose in ["kneel","sit_cross"]:
+						f.play("stand",0.0,0.0);Acting.play(f,pose,{"blend":0.0})
+					else:f.play(pose,0.0,0.0)
+				_step_all(1.33 if pose in ["kneel","sit_cross"] else (0.95 if pose=="talk_both" else 0.55))
 				_frame_row(4.6,2.05)
 				_title("TEST wardrobe deformation: %s / %s / %d degrees" % [outfit,pose,yaw])
 				for i in figures.size():_label(variants[i].replace("_"," "),figures[i].position+Vector3(0,-.18,.2),16)
@@ -41,5 +44,5 @@ func _ready()->void:
 			camera.position=head+Vector3(.08,.06,1.1);camera.look_at(head,Vector3.UP)
 			_title("TEST seam closeup: %s / %s / seated speech" % [outfit,variant])
 			await _shot("%s_%s_seated_close.png" % [outfit,variant])
-	print("COURT_PROGRESSION_POSES captured 20 views; inspect pixels before assessing quality")
+	print("COURT_PROGRESSION_POSES captured 28 views; inspect pixels before assessing quality")
 	get_tree().quit()
