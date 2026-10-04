@@ -6,6 +6,12 @@ const EarlySettlementGround = preload("res://scripts/early_settlement_ground.gd"
 ## Early-town layouts by town centre: [saved-fabric bytes, plan]. Each town
 ## keeps its own, so redrawing one town never discards another's layout.
 var organic_town_plans: Dictionary = {}
+const SettlementVisualKeys=preload("res://scripts/settlement_visual_keys.gd")
+var settlement_patches
+var settlement_patch_input_revision:=""
+var settlement_layout_builds:=0
+var settlement_patch_max_zoom:=820.0
+var settlement_patch_source_token:=0
 
 
 const ArmyFrontVisualScript := preload("res://scripts/army_front_visual.gd")
@@ -913,7 +919,7 @@ func _capture_preview_if_requested() -> void:
 	if largest_plots.size()>8: largest_plots.resize(8)
 	var morphology_debug:Dictionary={"plots":GameState.settlement_plots.size(),"routes":GameState.settlement_routes.size(),"route_hierarchy":route_hierarchy_counts,"fabric_generations":fabric_generations,"morphology_eras":morphology_eras,"land_uses":land_use_counts,"statuses":status_counts,"largest_plots":largest_plots,"nuclei":GameState.settlement_nuclei,"revision":GameState.morphology_revision,"founded_at":GameState.settlement_founded_at,"camera_target":camera_target,"lod":rendered_settlement_lod,"architecture":_settlement_architecture_profile(),"architecture_signature":rendered_architecture_signature,"meshes":[]}
 	if settlement_land_use_root:
-		for child in settlement_land_use_root.get_children():
+		for child in settlement_land_use_root.find_children("*","MeshInstance3D",true,false):
 			if child is MeshInstance3D and (child as MeshInstance3D).mesh:
 				morphology_debug.meshes.append({"name":child.name,"aabb":str((child as MeshInstance3D).mesh.get_aabb())})
 	print("MORPHOLOGY RENDER ",JSON.stringify(morphology_debug))
@@ -990,6 +996,8 @@ func _process(delta: float) -> void:
 	_sync_coast_mask()
 	_advance_terrain_patch()
 	stamp=trace.mark("frame_terrain_patch",stamp)
+	_process_settlement_visual_jobs()
+	stamp=trace.mark("frame_settlement_patches",stamp)
 	# Scale visibility follows the camera every frame it moves; otherwise only
 	# state changes matter, which ten checks a second keep up with.
 	scale_lod_elapsed+=maxf(0.0,delta)
@@ -3862,14 +3870,7 @@ func _update_scale_lod() -> void:
 		var stage_max_zoom:=_settlement_stage_landscape_max_zoom(stage_profile)
 		settlement_land_use_root.visible=camera.size<=stage_max_zoom
 		if settlement_land_use_root.visible:
-			for morphology_child in settlement_land_use_root.get_children():
-				var is_stage_surface:=String(morphology_child.name) in ["PersistentUrbanSystems","PersistentMetropolitanMobility","PersistentUrbanOpenSpace","PersistentUrbanMassing"]
-				# Below this scale authoritative plots, roofs, yards and scars take over.
-				# The aggregate strategic mesh crossfades in shader and its route/massing
-				# proxies retire completely before they can cover close inspection.
-				morphology_child.visible=(camera.size>=0.28 and camera.size<=stage_max_zoom) if is_stage_surface else camera.size<=820.0
-				if String(morphology_child.name)=="PersistentUrbanMassing": morphology_child.visible=morphology_child.visible and camera.size<=80.0
-				if String(morphology_child.name)=="PersistentDistrictClipmap": morphology_child.visible=camera.size<=SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM+0.001
+			_update_settlement_patch_visibility(settlement_land_use_root,stage_max_zoom)
 	if settlement_border_root:
 		settlement_border_root.visible=camera.size>=0.34 and camera.size<=2600.0
 	if settlement_network_marker_root:
@@ -4807,7 +4808,9 @@ func _refresh_settlement_footprint(force := false) -> void:
 	var stage_progress:float=_settlement_visual_stage_progress(GameState.settlement_morphology,settlement_classification)
 	var view_signature:="%s:%s:%d" % [_settlement_morphology_view_signature(morphology_lod),_settlement_defense_visual_signature(defense_snapshot),roundi(stage_progress*8.0)]
 	var morphology_visual_signature:=_settlement_morphology_visual_signature()
-	if not force and rendered_morphology_visual_signature==morphology_visual_signature and rendered_settlement_lod == morphology_lod and rendered_architecture_signature==architecture_signature and rendered_settlement_view_signature==view_signature:
+	var changed_morphology:=rendered_morphology_visual_signature!=morphology_visual_signature
+	var input_revision:="%d:%s:%s:%s:%d:%d:%d" % [GameState.morphology_revision,morphology_visual_signature,architecture_signature,view_signature,int(GameState.elapsed_days/365.0),morphology_lod,_settlement_patch_state_token()]
+	if not force and settlement_patch_input_revision==input_revision:
 		return
 	# A changed layout is computed now and drawn at the next refresh (the next
 	# day at the latest), so the two never share a frame.
@@ -4818,13 +4821,15 @@ func _refresh_settlement_footprint(force := false) -> void:
 	rendered_settlement_lod = morphology_lod
 	rendered_architecture_signature=architecture_signature
 	rendered_settlement_view_signature=view_signature
+	settlement_patch_input_revision=input_revision
 	footprint_population = roundi(_settlement_model().primary_population_exact())
-	if settlement_land_use_root:
-		settlement_land_use_root.queue_free()
-	settlement_land_use_root = Node3D.new()
-	settlement_land_use_root.name = "PersistentSettlementMorphology"
-	add_child(settlement_land_use_root)
-	_rebuild_close_vegetation(center)
+	if not is_instance_valid(settlement_land_use_root):
+		settlement_land_use_root = Node3D.new()
+		settlement_land_use_root.name = "PersistentSettlementMorphology"
+		add_child(settlement_land_use_root)
+	if settlement_patches==null:
+		settlement_patches=preload("res://scripts/settlement_patch_renderer.gd").new(settlement_land_use_root)
+	if changed_morphology or force:_rebuild_close_vegetation(center)
 	var expansion_profile:=_settlement_expansion_visual_profile({
 		"classification":settlement_classification,
 		"population":footprint_population,
@@ -4832,18 +4837,128 @@ func _refresh_settlement_footprint(force := false) -> void:
 	})
 	var render_routes:Array[Dictionary]=GameState.settlement_routes
 	if morphology_lod==0: render_routes=_settlement_routes_in_current_detail_view(render_routes,center)
-	_create_persistent_settlement_routes(center, render_routes, settlement_land_use_root)
 	var render_plots:Array[Dictionary]=_settlement_model().plots_for_lod(morphology_lod)
 	if morphology_lod==0: render_plots=_settlement_plots_in_current_detail_view(render_plots,center)
-	_create_plot_fabric(center, render_plots, morphology_lod, settlement_land_use_root)
+	_request_settlement_visual_patches(center,render_plots,render_routes,morphology_lod,expansion_profile,defense_snapshot)
 	# The worn ground of a lived place, painted into the land (settlement_grounds.gd).
 	_paint_settlement_grounds(center)
 	# Plot fabric supplies the remembered street-by-street settlement. Mature urban
 	# systems also need a bounded, stage-specific silhouette that remains legible
 	# after billions of residents have collapsed into aggregate simulation records.
-	_create_settlement_stage_landscape(center,expansion_profile,GameState.settlement_plots,morphology_lod,settlement_land_use_root,defense_snapshot)
+	# The stage layer is retained separately and queued alongside changed parcels.
 	# Resource accessibility is logistical data, not evidence of a built road.
 	# Recorded settlement routes above own the visible path network.
+
+func _request_settlement_visual_patches(center:Vector3,plots:Array[Dictionary],routes:Array[Dictionary],lod:int,profile:Dictionary,defense:Dictionary)->void:
+	settlement_patch_max_zoom=_settlement_stage_landscape_max_zoom(profile)
+	var plan:Dictionary={"buildings":[],"replaced":{}}
+	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
+		plan=_organic_town_plan(center,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
+	var records:Array[Dictionary]=[]
+	var groups:Dictionary={}
+	for plot:Dictionary in plots:
+		var key:=SettlementVisualKeys.patch_key(plot,center)
+		if not groups.has(key):groups[key]=[]
+		groups[key].append(plot)
+	var organic:=_organic_town_enabled()
+	var architecture:=_settlement_architecture_signature(_settlement_architecture_profile())
+	var crafts:=EarlySettlementGround.known_crafts()
+	var frontage_keys:Dictionary={}
+	var inherited_frontages:Dictionary={}
+	for plot:Dictionary in GameState.settlement_plots:
+		if int(plot.get("id",0))<=OrganicTownVisual.MAX_PLOTS and EarlySettlementVisual.supports(plot):inherited_frontages[int(plot.get("frontage_route_id",-1))]=true
+	for route:Dictionary in GameState.settlement_routes:
+		frontage_keys[int(route.get("id",0))]=hash([SettlementVisualKeys.route(route),roundi(float(route.get("traffic",0.0))*5.0)])
+	for key:String in groups:
+		var patch_plots:Array[Dictionary]=[];patch_plots.assign(groups[key])
+		var patch_plan:=SettlementVisualKeys.plan_for(plan,patch_plots)
+		# Crossing the settlement-wide kit budget must not repaint its inherited
+		# quarters. Their own recorded kit keeps owning their yards and ground.
+		var patch_organic:=EarlySettlementVisual.enabled(patch_plots)
+		var signatures:Array=[]
+		var detail_ids:Dictionary={};var density_ids:Dictionary={}
+		for plot:Dictionary in patch_plots:
+			var id:=int(plot.get("id",0))
+			var uses_kit:bool=patch_plan.replaced.has(id)
+			signatures.append([SettlementVisualKeys.appearance(plot),frontage_keys.get(int(plot.get("frontage_route_id",-1)),0),SettlementVisualKeys.age(plot,GameState.elapsed_days,uses_kit),SettlementVisualKeys.knowledge(plot,uses_kit)])
+			detail_ids[id]=_settlement_plot_has_detail(plot,id,plots.size(),lod)
+			density_ids[id]=_settlement_plot_has_aggregate_density(plot,id,plots.size(),lod)
+		var sites:Array=[]
+		for record:Dictionary in patch_plan.buildings:sites.append([record.get("id"),record.position,record.angle,record.get("variant"),record.get("early_kind")])
+		# ID-based thinning uses the full view count, never a chunk's smaller count.
+		var detail_stride:=maxi(1,ceili(float(plots.size())/maxi(1,_settlement_detail_plot_budget(lod))))
+		var density_stride:=maxi(1,ceili(float(plots.size())/(384 if lod<=1 else SETTLEMENT_AGGREGATE_DENSITY_BUDGET)))
+		var signature:=hash([center,lod,patch_organic,signatures,sites,architecture,detail_stride,density_stride])
+		var context:={"plan":patch_plan.duplicate(true),"total_plots":plots.size(),"shared_props":false,"organic":patch_organic,"detail_ids":detail_ids,"density_ids":density_ids}
+		var priority:=Vector2(patch_plots[0].get("centroid",Vector2.ZERO)).distance_squared_to(Vector2(camera_target.x-center.x,camera_target.z-center.z))
+		records.append({"key":key,"signature":signature,"priority":priority,"build":_build_settlement_plot_patch.bind(center,patch_plots.duplicate(true),lod,context)})
+	for route:Dictionary in routes:
+		var key:="route:%s" % str(route.get("id",0))
+		var inherited:=inherited_frontages.has(int(route.get("id",-2)))
+		var priority:=INF
+		var target:=Vector2(camera_target.x-center.x,camera_target.z-center.z)
+		for point:Vector2 in route.get("points",PackedVector2Array()):priority=minf(priority,point.distance_squared_to(target))
+		var context:={"organic":organic,"inherited_frontages":{int(route.get("id",0)):true} if inherited else {}}
+		records.append({"key":key,"signature":hash([center,SettlementVisualKeys.route(route),organic,inherited,architecture]),"priority":priority,"build":_build_settlement_route_patch.bind(center,route.duplicate(true),context)})
+	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
+		var prop_keys:Array=[]
+		for plot:Dictionary in GameState.settlement_plots:prop_keys.append(SettlementVisualKeys.appearance(plot))
+		records.append({"key":"props","signature":hash([center,prop_keys,crafts,SettlementVisualKeys.placement(GameState.settlement_plots,GameState.settlement_routes)]),"priority":1.0,"build":_build_settlement_prop_patch.bind(center,plan.duplicate(true),GameState.settlement_plots.duplicate(true),GameState.settlement_routes.duplicate(true))})
+	# Strategic silhouettes and defenses keep their own bounded batches. A local
+	# repair cannot replace unrelated parcel roots, even when its summary changes.
+	var population_bucket:=roundi(log(maxf(1.0,float(footprint_population)))/log(1.045))
+	var stage_key:=hash([center,profile,population_bucket,rendered_morphology_visual_signature,architecture,_settlement_defense_visual_signature(defense),lod,organic])
+	records.append({"key":"stage","signature":stage_key,"priority":-3.0,"build":_build_settlement_stage_patch.bind(center,profile,GameState.settlement_plots.duplicate(true),lod,defense)})
+	settlement_patches.request(records)
+	settlement_patch_source_token=_settlement_patch_state_token()
+
+func _settlement_patch_state_token()->int:
+	# Deferred builders still call existing read-only map helpers. Never stamp an
+	# old snapshot's signature onto geometry built against a newer city's state.
+	return hash([GameState.world_seed,GameState.resource_settlement_id,GameState.morphology_revision,int(GameState.elapsed_days/365.0),GameState.known_discoveries,GameState.societal_values])
+
+func _build_settlement_plot_patch(parent:Node3D,center:Vector3,plots:Array[Dictionary],lod:int,context:Dictionary)->void:
+	_create_plot_fabric(center,plots,lod,parent,context)
+
+func _build_settlement_route_patch(parent:Node3D,center:Vector3,route:Dictionary,context:Dictionary)->void:
+	var routes:Array[Dictionary]=[route]
+	_create_persistent_settlement_routes(center,routes,parent,context)
+
+func _build_settlement_prop_patch(parent:Node3D,center:Vector3,plan:Dictionary,plots:Array[Dictionary],routes:Array[Dictionary])->void:
+	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
+	EarlySettlementGround.render(plan,plots,routes,center,samples.height_at,samples.land_at,parent,false)
+
+func _build_settlement_stage_patch(parent:Node3D,center:Vector3,profile:Dictionary,plots:Array[Dictionary],lod:int,defense:Dictionary)->void:
+	_create_settlement_stage_landscape(center,profile,plots,lod,parent,defense)
+
+func _process_settlement_visual_jobs()->void:
+	if settlement_patches==null:return
+	if not settlement_patches.pending.is_empty() and settlement_patch_source_token!=_settlement_patch_state_token():
+		_refresh_settlement_footprint()
+		# Layout priming can defer the new request until the next frame. Its old
+		# installed geometry remains visible, but stale pending work must wait.
+		if settlement_patch_source_token!=_settlement_patch_state_token():return
+	settlement_patches.process(2000 if _camera_in_motion() else 4000,2)
+	if int(settlement_patches.last_jobs)>0 and camera!=null:
+		rendered_settlement_aerial_lod=-1.0
+		_update_settlement_surface_lod_materials()
+		_update_settlement_patch_visibility(settlement_land_use_root,settlement_patch_max_zoom)
+
+func settlement_patch_stats()->Dictionary:
+	var result:Dictionary=settlement_patches.stats() if settlement_patches!=null else {"pending":0,"installed":0,"builds":0,"keys":{}}
+	result["layout_builds"]=settlement_layout_builds
+	return result
+
+func _update_settlement_patch_visibility(parent:Node,stage_max_zoom:float)->void:
+	for child in parent.get_children():
+		if child.has_meta("settlement_patch"):
+			_update_settlement_patch_visibility(child,stage_max_zoom)
+			continue
+		if not child is Node3D:continue
+		var is_stage:=String(child.name) in ["PersistentUrbanSystems","PersistentMetropolitanMobility","PersistentUrbanOpenSpace","PersistentUrbanMassing"]
+		child.visible=(camera.size>=0.28 and camera.size<=stage_max_zoom) if is_stage else camera.size<=820.0
+		if String(child.name)=="PersistentUrbanMassing":child.visible=child.visible and camera.size<=80.0
+		if String(child.name)=="PersistentDistrictClipmap":child.visible=camera.size<=SETTLEMENT_DISTRICT_DETAIL_MAX_ZOOM+0.001
 
 func _refresh_undertaking_visuals(force:bool=false)->void:
 	var visual=preload("res://scripts/undertaking_map_visual.gd")
@@ -10490,14 +10605,15 @@ func _organic_town_enabled() -> bool:
 ## The early-town layout for the current city, built against the full saved
 ## fabric (never a camera-culled subset). Returns {} on a miss when not computing.
 func _organic_town_plan(center: Vector3, land: Callable, compute := true) -> Dictionary:
-	var state := var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes])
+	var state := hash([GameState.world_seed,center,SettlementVisualKeys.placement(GameState.settlement_plots,GameState.settlement_routes)])
 	var entry: Array = organic_town_plans.get(center, [])
-	if not entry.is_empty() and entry[0] == state: return entry[1]
+	if not entry.is_empty() and entry[0] == state:return SettlementVisualKeys.refresh_plan(entry[1],GameState.settlement_plots)
 	if not compute: return {}
 	var plan := EarlySettlementVisual.layout(GameState.settlement_plots, GameState.settlement_routes, land)
 	EarlySettlementVisual.remember_layout(plan, GameState.settlement_plots)
+	settlement_layout_builds+=1
 	if organic_town_plans.size() >= 64: organic_town_plans.clear()
-	organic_town_plans[center] = [var_to_bytes([GameState.world_seed, center, GameState.settlement_plots, GameState.settlement_routes]), plan]
+	organic_town_plans[center] = [hash([GameState.world_seed,center,SettlementVisualKeys.placement(GameState.settlement_plots,GameState.settlement_routes)]),plan]
 	return plan
 
 ## The home settlement's paths, yards and worn grass, rasterized from the
@@ -10518,21 +10634,22 @@ func _prime_organic_town_plan(center: Vector3) -> bool:
 	_organic_town_plan(center, samples.land_at)
 	return true
 
-func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D) -> void:
+func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, parent: Node3D, patch_context:Dictionary={}) -> void:
 	if plots.is_empty():
 		return
 	var samples:=preload("res://scripts/settlement_surface_samples.gd").new(_close_surface_height_at,func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)))
 	var organic_plan: Dictionary = {"buildings": [], "replaced": {}}
-	var organic_town := _organic_town_enabled()
+	var organic_town := bool(patch_context.get("organic",_organic_town_enabled()))
 	var ptrace=preload("res://scripts/performance_trace.gd")
 	var pstamp:int=ptrace.start()
-	if EarlySettlementVisual.has_kit(GameState.settlement_plots):
-		organic_plan = _organic_town_plan(center, samples.land_at)
+	if patch_context.has("plan") or EarlySettlementVisual.has_kit(GameState.settlement_plots):
+		organic_plan = patch_context.plan if patch_context.has("plan") else _organic_town_plan(center, samples.land_at)
 		pstamp=ptrace.mark("plot_fabric_layout",pstamp)
 		EarlySettlementVisual.render(organic_plan, center, samples.height_at, parent)
 		pstamp=ptrace.mark("plot_fabric_kit_render",pstamp)
 	if organic_town:
-		EarlySettlementGround.render(organic_plan, GameState.settlement_plots, GameState.settlement_routes, center, samples.height_at, samples.land_at, parent)
+		if bool(patch_context.get("shared_props",true)):
+			EarlySettlementGround.render(organic_plan, GameState.settlement_plots, GameState.settlement_routes, center, samples.height_at, samples.land_at, parent)
 		pstamp=ptrace.mark("plot_fabric_ground_render",pstamp)
 		# Keep genuine cultivated fields and later unsupported forms, but never
 		# paint the household/service parcel polygons over the new working ground.
@@ -10576,14 +10693,15 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			continue
 		var uses_kit: bool = organic_plan.replaced.has(int(plot.get("id", -1)))
 		var ground_lift := 0.0002 if organic_town or uses_kit else 0.0018
-		var plot_has_detail:=_settlement_plot_has_detail(plot,plot_index,plots.size(),lod)
+		var plot_has_detail:=bool(patch_context.detail_ids.get(int(plot.get("id",0)),false)) if patch_context.has("detail_ids") else _settlement_plot_has_detail(plot,plot_index,plots.size(),lod)
 		var plot_color := _settlement_plot_color(plot)
 		var status := String(plot.get("status", "active"))
 		var land_use := String(plot.get("land_use", "vacant"))
 		# Occupied plots remain the source of close aerial fabric. The retired photo
 		# atlas must not leave a hole where actual homes and workshops should resolve.
 		var ground_inset:=1.0 if land_use in ["field","water","waste"] else 0.76
-		if not organic_town and not uses_kit and _settlement_plot_has_aggregate_density(plot,plot_index,plots.size(),lod):
+		var has_density:=bool(patch_context.density_ids.get(int(plot.get("id",0)),false)) if patch_context.has("density_ids") else _settlement_plot_has_aggregate_density(plot,plot_index,plots.size(),lod)
+		if not organic_town and not uses_kit and has_density:
 			# Middle zoom needs a coherent inhabited footprint, not one dark pixel per
 			# roof. Feathered stains are centred on authoritative occupied plots and
 			# overlap only where the persistent fabric is actually dense.
@@ -10710,12 +10828,13 @@ func _settlement_route_join_offset(points:PackedVector2Array,index:int,width:flo
 	return bisector*width/maxf(0.5,bisector.dot(first))
 
 
-func _create_persistent_settlement_routes(center: Vector3, routes: Array[Dictionary], parent: Node3D) -> void:
-	var early_town := _organic_town_enabled()
+func _create_persistent_settlement_routes(center: Vector3, routes: Array[Dictionary], parent: Node3D,patch_context:Dictionary={}) -> void:
+	var early_town := bool(patch_context.get("organic",_organic_town_enabled()))
 	if early_town: return # The new neighborhood ground owns human-scale routes.
-	var inherited_frontages: Dictionary = {}
-	for plot in GameState.settlement_plots:
-		if int(plot.get("id", 0)) <= OrganicTownVisual.MAX_PLOTS and EarlySettlementVisual.supports(plot): inherited_frontages[int(plot.get("frontage_route_id", -1))] = true
+	var inherited_frontages: Dictionary = patch_context.get("inherited_frontages",{})
+	if not patch_context.has("inherited_frontages"):
+		for plot in GameState.settlement_plots:
+			if int(plot.get("id", 0)) <= OrganicTownVisual.MAX_PLOTS and EarlySettlementVisual.supports(plot): inherited_frontages[int(plot.get("frontage_route_id", -1))] = true
 	var surface := SurfaceTool.new()
 	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var segment_count := 0
