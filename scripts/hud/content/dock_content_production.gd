@@ -11,6 +11,8 @@ const P:=preload("res://scripts/persistent_production.gd")
 const EraWords:=preload("res://scripts/hud/era_words.gd")
 ## Stock target a line started from a card keeps; changed on its row.
 const START_TARGET:=10
+## A store the benches use that would run out sooner than this is said on All.
+const RUNS_OUT_DAYS:=90.0
 const STORE_RESOURCES:=["Timber","Fiber Plants","Stone","Clay","Copper Ore"]
 ## Actions the screen shows by itself changing; only their errors need a note.
 const QUIET_ACTIONS:=["hands","move","move_to","target","pause"]
@@ -29,17 +31,26 @@ func tab(sub:int)->Dictionary:
 	var mode:=String(["all","civilian","military"][clampi(sub,0,2)])
 	var block:={"type":"production_queue","mode":mode,"on_open":func(section:String,page:int)->void:
 		if is_instance_valid(hud):hud.section_requested.emit(section,page)}
+	# Every page leads with the flow chart: materials into the benches, out to
+	# what the makers make (flow_model). Military needs the towns' arms too.
+	var cards:=household_cards()
 	if mode!="military":
-		block.households=household_cards()
+		block.households=cards
+	var snapshot:=MilitaryCampaign.production_lines_snapshot()
+	var pool:=P.hands(MilitaryCampaign)
+	block.flow=flow_model(cards,snapshot.get("lines",[]),pool)
 	if mode=="civilian":
+		# Goods to spare and their worth in rations, priced in the realm's own
+		# scope (pricing inside a town's scope would leave its prices behind).
+		var spare:=0.0
+		for card:Dictionary in cards:spare+=float(card.get("spare",0.0))
+		block.spare_worth=preload("res://scripts/civilian_goods.gd").worth_in_rations(spare)
 		block.techniques=_technique_list()
 		block.carts=_carts()
 	if mode!="civilian":
-		var snapshot:=MilitaryCampaign.production_lines_snapshot()
 		var stock:=Logistics.rows(MilitaryCampaign,snapshot)
-		var pool:=P.hands(MilitaryCampaign)
 		if mode=="all":
-			block.overview=overview(block.households,stock,pool,snapshot)
+			block.overview=overview(block.households,stock,pool,snapshot,block.flow)
 			return {"blocks":[block]}
 		var lines:Array=with_staff_plans(snapshot.lines)
 		var context:=line_context(snapshot)
@@ -59,7 +70,7 @@ func tab(sub:int)->Dictionary:
 ## and at most two things that need the god (each with the page that
 ## answers it). Every number is the engine's (persistent_production.gd
 ## hands, civilian_goods.gd, weapons_stock.gd, equipment_logistics.gd).
-static func overview(cards:Array,stock:Array,pool:Dictionary,snapshot:Dictionary)->Dictionary:
+static func overview(cards:Array,stock:Array,pool:Dictionary,snapshot:Dictionary,flow:Dictionary={})->Dictionary:
 	var Goods:=preload("res://scripts/civilian_goods.gd")
 	var Arms:=preload("res://scripts/weapons_stock.gd")
 	var Queue:=preload("res://scripts/hud/production_queue.gd")
@@ -67,6 +78,12 @@ static func overview(cards:Array,stock:Array,pool:Dictionary,snapshot:Dictionary
 	var made:=0.0
 	for card:Dictionary in cards:made+=float(card.get("made",0.0))
 	var attention:Array=[]
+	# A store the benches draw on that the week's trend would empty soon.
+	var soonest:Dictionary={}
+	for material:Dictionary in flow.get("materials",[]):
+		if material.has("days_left") and float(material.days_left)<RUNS_OUT_DAYS and (soonest.is_empty() or float(material.days_left)<float(soonest.days_left)):soonest=material
+	if not soonest.is_empty():
+		attention.append({"text":"%s runs out in %s" % [String(soonest.name),Plain.span_text(float(soonest.days_left))],"sub":"%s in store, falling about %s a day" % [Plain.number(float(soonest.amount)),Plain.number(-float(soonest.trend))],"tone":"red" if float(soonest.days_left)<30.0 else "amber","page":1})
 	for row:Dictionary in stock:
 		var deficit:=int(row.get("deficit",0))
 		if deficit<=0:continue
@@ -93,7 +110,7 @@ static func arms_reading()->Dictionary:
 	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
 	return {"held":Arms.weapons_held(),"issued":Arms.weapons_issued(),"watch":roundi(Arms.watch()),"wanted":Arms.arms_wanted(),
 		"made":float(report.get("arms_made",0.0)),"hands":Goods.arms_hands(WorldSimulation.state),"cost":Arms.cost_per_fighter(),
-		"share":Arms.ARMS_SHARE,"war_share":Arms.WAR_SHARE}
+		"share":Arms.ARMS_SHARE,"war_share":Arms.WAR_SHARE,"item":String(Arms.made_kit().get("item","spear"))}
 
 ## Carts in store, and whether the people know how to make them (they are
 ## made on the workshop lines).
@@ -336,10 +353,152 @@ static func _household_card()->Dictionary:
 	for resource:String in goods.BASKET:
 		var amount:=float(GameState.resource_stockpiles.get(resource,0.0))
 		if amount>0.0:basket.append({"resource":resource,"name":ResourceSystem.display_name(resource),"amount":amount})
-	return {"stock":goods.stock(),"spare":goods.spare(),"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
+	var spare:=goods.spare()
+	return {"stock":goods.stock(),"spare":spare,"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
 		"worn":float(report.get("worn",0.0)) if current else goods.stock()*goods.daily_wear(),"reason":String(report.get("reason","")) if current else "","basket":basket,
 		# Goods the learners took today (research_600_catalog.gd learning_goods).
-		"learners":float(report.get("learners",0.0)) if current else 0.0}
+		"learners":float(report.get("learners",0.0)) if current else 0.0,
+		# Today's materials in and goods out (civilian_goods.gd advance), for the flow chart.
+		"for_barter":float(report.get("for_barter",0.0)) if current else 0.0,"inputs":(report.get("inputs",{}) as Dictionary).duplicate() if current else {},
+		"arms_made":float(report.get("arms_made",0.0)) if current else 0.0,"arms_hands":float(report.get("arms_hands",0.0)) if current else 0.0,
+		"arms_inputs":(report.get("arms_inputs",{}) as Dictionary).duplicate() if current else {},"workers":float(report.get("workers",0.0)) if current else 0.0}
+
+## THE FLOW CHART (hud/production_flow.gd): what the makers' hands make today,
+## from what, and what it does for us. Every number is the engine's:
+##   materials  the stores (GameState.resource_stockpiles) with the week's
+##              trend (equipment_logistics.gd material_trend); `days_left`
+##              when the trend would empty a store the benches draw on;
+##   benches    the household benches (civilian_goods.gd: makers, goods made
+##              today), the arms bench (weapons_stock.gd: hands on arms, sets
+##              made) and the workshop lines (persistent_production.gd);
+##   outputs    goods for the homes, goods for barter, arms for the watch and
+##              each line's product;
+##   links      a day's flow along each ribbon. Materials in are the day's
+##              draws (report inputs, scaled to one day by what was made: the
+##              basket's RAW_PER_UNIT a good, the arms age's materials a set).
+##              A `dry` link is a material a bench wants and cannot get, with
+##              its words ("no flint: arms stalled").
+static func flow_model(cards:Array,lines:Array,hands:Dictionary)->Dictionary:
+	var Goods:=preload("res://scripts/civilian_goods.gd")
+	var Arms:=preload("res://scripts/weapons_stock.gd")
+	var goods_in:={};var arms_in:={}
+	var made:=0.0;var barter:=0.0;var arms_made:=0.0;var arms_hands:=0.0;var workers:=0.0
+	var reasons:={}
+	for card:Dictionary in cards:
+		var card_made:=float(card.get("made",0.0))
+		made+=card_made;barter+=float(card.get("for_barter",0.0))
+		workers+=float(card.get("workers",0.0))
+		_scaled_into(goods_in,card.get("inputs",{}),card_made*Goods.RAW_PER_UNIT)
+		var sets:=float(card.get("arms_made",0.0))
+		arms_made+=sets;arms_hands+=float(card.get("arms_hands",0.0))
+		var age:Dictionary=Arms.set_age()
+		var raw:=0.0
+		for item:String in age.materials:raw+=float(age.materials[item])
+		_scaled_into(arms_in,card.get("arms_inputs",{}),sets*raw)
+		var reason:=String(card.get("reason",""))
+		if reason!="":reasons[reason]=int(reasons.get(reason,0))+1
+	var links:Array=[]
+	var resources:Array[String]=[]
+	for item:String in goods_in:
+		if float(goods_in[item])>0.0001:links.append({"from":item,"to":"goods","per_day":float(goods_in[item])});_add_unique(resources,item)
+	# A town whose makers have no raw materials: the basket runs dry there.
+	if int(reasons.get("Needs timber, fiber, clay, stone or flint",0))>0 and made<0.01:
+		for item:String in Goods.BASKET:
+			links.append({"from":item,"to":"goods","per_day":0.0,"dry":true,"words":"no %s: goods stalled" % ResourceSystem.display_name(item).to_lower()});_add_unique(resources,item)
+	for item:String in arms_in:
+		if float(arms_in[item])>0.0001:links.append({"from":item,"to":"arms","per_day":float(arms_in[item])});_add_unique(resources,item)
+	var wanted:=Arms.arms_wanted()
+	var arms_stalled:=""
+	if wanted>0 and arms_made<0.001:
+		var kit:=Arms.arms_age()
+		if kit.is_empty():arms_stalled="no weapon our makers make arms our fighters"
+		else:
+			var age:Dictionary=kit.age
+			var short:Array[String]=[]
+			if String(age.id)=="stone":
+				var raw:=0.0
+				for item:String in Arms.STONE_BASKET:raw+=Arms._usable(item)
+				if raw<Arms._raw_per_set(age):short.assign(Arms.STONE_BASKET)
+			else:
+				for item:String in age.materials:
+					if Arms._usable(item)<float(age.materials[item]):short.append(item)
+			for item:String in short:
+				links.append({"from":item,"to":"arms","per_day":0.0,"dry":true,"words":"no %s: arms stalled" % ResourceSystem.display_name(item).to_lower()});_add_unique(resources,item)
+			if short.is_empty():arms_stalled="no makers free for arms"
+	# The workshop lines: what each working line draws and makes a day.
+	var outputs:Array=[
+		{"id":"homes","kind":"homes","name":"For the homes","per_day":maxf(0.0,made-barter),"unit":"goods"},
+		{"id":"barter","kind":"barter","name":"For barter","per_day":barter,"unit":"goods"}]
+	links.append({"from":"goods","to":"homes","per_day":maxf(0.0,made-barter)})
+	links.append({"from":"goods","to":"barter","per_day":barter})
+	var show_arms:=wanted>0 or arms_made>0.0001
+	if show_arms:
+		outputs.append({"id":"watch","kind":"watch","name":"Arms for the watch","per_day":arms_made,"unit":"sets"})
+		links.append({"from":"arms","to":"watch","per_day":arms_made,"dry":arms_made<0.001 and wanted>0,"words":""})
+	var line_hands:=float(hands.get("lines",0))
+	var line_out:=0.0
+	var line_count:=0
+	for line:Dictionary in lines:
+		if bool(line.get("paused",false)):continue
+		line_count+=1
+		var item:=String(line.get("item",""))
+		var per_day:=float(line.get("output_per_day",0.0))
+		var wants:=int(line.get("target_stock",0))<=0 or int(line.get("stock",0))<int(line.get("target_stock",0))
+		line_out+=per_day
+		var out_id:="line:%d" % int(line.get("id",0))
+		outputs.append({"id":out_id,"kind":"gear","item":item,"name":P.product_name(item),"per_day":per_day,"unit":"","stock":int(line.get("stock",0)),"target":int(line.get("target_stock",0))})
+		links.append({"from":"lines","to":out_id,"per_day":per_day})
+		for input:Dictionary in line.get("materials_status",[]):
+			var resource:=String(input.get("resource",""))
+			if resource.is_empty():continue
+			_add_unique(resources,resource)
+			var short:=wants and float(input.get("stored",0.0))<float(input.get("per_item",0.0))
+			links.append({"from":resource,"to":"lines","per_day":float(input.get("per_day",0.0)) if not short else 0.0,"dry":short,
+				"words":("no %s: %s stalled" % [ResourceSystem.display_name(resource).to_lower(),P.product_name(item).to_lower()]) if short else ""})
+	var benches:Array=[{"id":"goods","kind":_goods_bench(),"name":"Household benches","hands":maxf(0.0,float(hands.get("total",0))-line_hands-arms_hands),"per_day":made,"unit":"goods",
+		"stalled":"" if made>=0.01 or int(reasons.get("Stock target met",0))+int(reasons.get("Homes and the market are full",0))>0 else _plain_reason(reasons)}]
+	if show_arms:benches.append({"id":"arms","kind":"anvil" if String(Arms.set_age().id)!="stone" else "knapping","name":"Arms bench","hands":arms_hands,"per_day":arms_made,"unit":"sets","stalled":arms_stalled,"wanted":wanted})
+	if line_count>0:benches.append({"id":"lines","kind":"bench","name":"Workshop lines","hands":line_hands,"per_day":line_out,"unit":"","stalled":""})
+	var materials:Array=[]
+	for item:String in resources:
+		var amount:=float(GameState.resource_stockpiles.get(item,0.0))
+		var trend:Dictionary=Logistics.material_trend(item)
+		var per_day:=float(trend.get("per_day",0.0))
+		var row:={"resource":item,"name":ResourceSystem.display_name(item),"amount":amount,"trend":per_day,"trend_days":int(trend.get("days",0))}
+		if per_day<-0.0001 and amount>0.0:row.days_left=amount/-per_day
+		materials.append(row)
+	materials.sort_custom(func(a:Dictionary,b:Dictionary)->bool:return _material_used(links,String(a.resource))>_material_used(links,String(b.resource)))
+	return {"materials":materials,"benches":benches,"outputs":outputs,"links":links,"makers":int(hands.get("total",0)),"goods":made,"barter":barter,"arms":arms_made,"wanted":wanted}
+
+static func _scaled_into(total:Dictionary,inputs:Dictionary,day_amount:float)->void:
+	var drawn:=0.0
+	for item:String in inputs:drawn+=maxf(0.0,float(inputs[item]))
+	if drawn<=0.0 or day_amount<=0.0:return
+	for item:String in inputs:total[item]=float(total.get(item,0.0))+maxf(0.0,float(inputs[item]))*day_amount/drawn
+
+static func _add_unique(list:Array[String],item:String)->void:
+	if item not in list:list.append(item)
+
+static func _material_used(links:Array,item:String)->float:
+	var used:=0.0
+	for link:Dictionary in links:
+		if String(link.from)==item:used+=float(link.per_day)+(0.0001 if bool(link.get("dry",false)) else 0.0)
+	return used
+
+## The household bench as the people's era makes it: an anvil once metal is
+## worked, a kiln once clay is fired, a basket once baskets are woven, and
+## knapping before all of them.
+static func _goods_bench()->String:
+	var known:Array=GameState.known_discoveries
+	if String(preload("res://scripts/weapons_stock.gd").set_age().id)!="stone":return "anvil"
+	if "pit_firing" in known or "clay_tempering" in known:return "kiln"
+	if "basketry" in known:return "basket"
+	return "knapping"
+
+static func _plain_reason(reasons:Dictionary)->String:
+	for reason:String in ["Needs timber, fiber, clay, stone or flint","No craftspeople assigned","Needs a settled workplace"]:
+		if reasons.has(reason):return {"Needs timber, fiber, clay, stone or flint":"no raw materials","No craftspeople assigned":"no makers at work","Needs a settled workplace":"no settled place to work"}[reason]
+	return ""
 
 ## Household goods as dock rows (used by tests and older reports).
 static func _household_rows()->Array:

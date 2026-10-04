@@ -25,6 +25,8 @@ const Icons:=preload("res://scripts/resource_icons.gd")
 const LineRow:=preload("res://scripts/hud/production_line_row.gd")
 const Picker:=preload("res://scripts/hud/production_picker.gd")
 const Names:=preload("res://scripts/era_names.gd")
+const Flow:=preload("res://scripts/hud/production_flow.gd")
+const Pictures:=preload("res://scripts/hud/production_pictures.gd")
 const PICKER_WIDTH:=300.0
 const LINES_MIN_WIDTH:=560.0
 var data:Dictionary
@@ -39,6 +41,8 @@ var _header:Dictionary={}
 var _overview_box:VBoxContainer
 var _arms:Dictionary={}
 var _civilian:Dictionary={}
+var _flow:Control
+var _barter:Dictionary={}
 
 func setup(block:Dictionary)->void:
 	theme=T.control_theme();name="IllustratedProductionQueue"
@@ -48,12 +52,16 @@ func setup(block:Dictionary)->void:
 	var mode:=String(data.get("mode","military"))
 	match mode:
 		"all":
+			_build_all_head()
+			_build_flow()
 			_overview_box=VBoxContainer.new();_overview_box.name="Overview";_overview_box.add_theme_constant_override("separation",10);add_child(_overview_box)
 		"civilian":
 			_build_civilian_head()
+			_build_flow()
 			_build_households(self,true)
 		_:
 			if data.has("arms"):_build_arms()
+			_build_flow()
 			_build_header()
 			_build_stock()
 			var columns:=HFlowContainer.new();columns.name="Columns";columns.add_theme_constant_override("h_separation",16);columns.add_theme_constant_override("v_separation",16);add_child(columns)
@@ -383,71 +391,86 @@ func _room_note()->String:
 
 # --- Household goods and techniques -----------------------------------------------
 
+## Each town's household store as a jar that fills, with what it gains a
+## day and, in red, what holds its makers back. Goods to spare follow as a
+## pile with their worth, then the crafts the makers know.
 func _build_households(parent:Node,full:bool)->void:
-	var box:=VBoxContainer.new();box.name="Households";box.add_theme_constant_override("separation",6);parent.add_child(box)
-	var head:=Label.new();head.text="HOUSEHOLD STORES BY TOWN";T.text(head,"kicker",T.GOLD_TEXT);box.add_child(head)
-	head.tooltip_text="Tools, baskets, pots and fittings. Households make and wear them out; they are not workshop lines."
-	head.mouse_filter=Control.MOUSE_FILTER_PASS
+	var box:=VBoxContainer.new();box.name="Households";box.add_theme_constant_override("separation",8);parent.add_child(box)
+	var head:=_kicker(box,"THE HOMES' STORES, TOWN BY TOWN","Tools, baskets, pots and fittings. Households wear them out; the makers make them good. A full jar is a town whose homes have all they want.")
+	head.name="HouseholdsHead"
 	var cities:Array=data.get("households",[])
 	if cities.is_empty():
 		var none:=Label.new();none.text="No settlement makes household goods yet.";T.text(none,"small",T.INK_MUTED);box.add_child(none)
+	var jars:=HFlowContainer.new();jars.name="Jars";jars.add_theme_constant_override("h_separation",10);jars.add_theme_constant_override("v_separation",10);box.add_child(jars)
 	for city:Dictionary in cities:
-		var row:=HBoxContainer.new();row.name="Household_"+String(city.get("id",""));row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_PASS;box.add_child(row)
-		var icon:=TextureRect.new();icon.texture=Icons.material_texture("Civilian Goods",44);icon.custom_minimum_size=Vector2(22,22)
-		icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(icon)
-		var place:=Label.new();place.name="Place";place.text=String(city.get("city",""));T.text(place,"small",T.INK);place.custom_minimum_size.x=140;place.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(place)
-		var bar:=W.OutputBar.new(220);bar.name="Coverage";row.add_child(bar)
-		var net:=Label.new();net.name="Net";T.text(net,"kicker",T.INK_MUTED);net.custom_minimum_size.x=70;net.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(net)
-		if full:
-			# What households can work with, as marks and amounts (filled in _apply).
-			var basket:=HBoxContainer.new();basket.name="Basket";basket.add_theme_constant_override("separation",4);basket.mouse_filter=Control.MOUSE_FILTER_PASS;row.add_child(basket)
-			basket.tooltip_text="Materials at hand for the makers: any mix of timber, fiber, clay, stone or flint."
-		# What holds this town's makers back, said under the row when anything does.
-		var lack:=Label.new();lack.name="Lack_"+String(city.get("id",""));T.text(lack,"small",T.AMBER_TEXT);lack.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lack.visible=false;box.add_child(lack)
-		row.set_meta("lack",lack)
-		_household_rows[String(city.get("id",""))]=row
+		var card:=PanelContainer.new();card.name="Household_"+String(city.get("id",""));card.mouse_filter=Control.MOUSE_FILTER_PASS;card.custom_minimum_size.x=196
+		card.add_theme_stylebox_override("panel",_jar_card_style(false));jars.add_child(card)
+		var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);row.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(row)
+		var jar:=Pictures.TownJar.new();jar.name="Jar";jar.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(jar)
+		var words:=VBoxContainer.new();words.add_theme_constant_override("separation",0);words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_IGNORE;row.add_child(words)
+		var place:=Label.new();place.name="Place";place.text=String(city.get("city",""));T.text(place,"body",T.INK);place.add_theme_font_override("font",T.font("ui_strong"));place.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(place)
+		var stocked:=Label.new();stocked.name="Coverage";T.text(stocked,"small",T.INK);stocked.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(stocked)
+		var net:=Label.new();net.name="Net";T.text(net,"small",T.INK_MUTED);net.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(net)
+		var lack:=Label.new();lack.name="Lack_"+String(city.get("id",""));T.text(lack,"small",T.RED_TEXT);lack.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;lack.custom_minimum_size.x=120;lack.visible=false;lack.mouse_filter=Control.MOUSE_FILTER_IGNORE;words.add_child(lack)
+		card.set_meta("lack",lack)
+		_household_rows[String(city.get("id",""))]=card
 	if not full:return
+	# Goods to spare: what can change hands, as a pile with its worth.
+	var spare_box:=HBoxContainer.new();spare_box.name="Barter";spare_box.add_theme_constant_override("separation",14);spare_box.mouse_filter=Control.MOUSE_FILTER_PASS;box.add_child(spare_box)
+	var pile:=Pictures.BarterPile.new();pile.name="Pile";spare_box.add_child(pile)
+	var spare_words:=VBoxContainer.new();spare_words.add_theme_constant_override("separation",2);spare_words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;spare_words.size_flags_vertical=Control.SIZE_SHRINK_CENTER;spare_box.add_child(spare_words)
+	_kicker(spare_words,"GOODS TO SPARE","Goods beyond what the homes want, what the learners will take and what is kept back: what can change hands.")
+	_barter.answer=_answer_label(spare_words,"SpareAnswer")
+	_barter.sub=_small(spare_words,"SpareSub")
+	_barter.pile=pile;_barter.box=spare_box
 	var techniques:Array=data.get("techniques",[])
 	if techniques.is_empty():return
-	var gap:=Control.new();gap.custom_minimum_size.y=8;box.add_child(gap)
+	var gap:=Control.new();gap.custom_minimum_size.y=4;box.add_child(gap)
 	var tech_head:=Label.new();tech_head.text="CRAFTS THE MAKERS KNOW";T.text(tech_head,"kicker",T.GOLD_TEXT);box.add_child(tech_head)
 	var flow:=HFlowContainer.new();flow.name="Techniques";flow.add_theme_constant_override("h_separation",8);flow.add_theme_constant_override("v_separation",6);box.add_child(flow)
 	for technique:Dictionary in techniques:
 		var chip:=W.Chip.new();chip.name="Technique_"+String(technique.get("id",""));flow.add_child(chip)
 		_technique_chips[String(technique.get("id",""))]=chip
 
+static func _jar_card_style(short:bool)->StyleBoxFlat:
+	var style:=T.flat(T.PAPER_RAISED,T.DANGER_BORDER if short else T.RULE,1,T.RADIUS_CARD)
+	style.content_margin_left=8;style.content_margin_right=10;style.content_margin_top=6;style.content_margin_bottom=6
+	return style
+
 func _apply_households()->void:
+	var spare:=0.0;var worth:=0.0;var for_barter:=0.0
 	for city:Dictionary in data.get("households",[]):
-		var row:HBoxContainer=_household_rows.get(String(city.get("id","")))
-		if row==null:continue
+		spare+=float(city.get("spare",0.0));for_barter+=float(city.get("for_barter",0.0))
+		var card:PanelContainer=_household_rows.get(String(city.get("id","")))
+		if card==null:continue
 		var story:=household_story(city)
 		var tone:=String(story.tone)
 		var coverage:=clampf(float(city.get("coverage",0.0)),0.0,1.0)
-		var look:={"good":"good","warn":"warn","bad":"bad"}.get(tone,"idle") as String
-		if coverage>=.98:look="idle"
-		var tip:="\n".join(PackedStringArray([String(story.progress_text),String(story.pace),String(story.eta),String(story.held),String(story.materials)]))
-		(row.get_node("Coverage") as W.OutputBar).set_reading(coverage,look,"%d%% stocked" % roundi(coverage*100.0),tip)
+		var tip:="\n".join(PackedStringArray([String(city.get("city","")),String(story.progress_text),String(story.pace),String(story.eta),String(story.held),String(story.materials)]))
+		(card.find_child("Jar",true,false) as Pictures.TownJar).set_fill(coverage,"good" if coverage>=.98 else tone)
+		(card.find_child("Coverage",true,false) as Label).text="%d%% stocked" % roundi(coverage*100.0)
 		var change:=float(city.get("made",0.0))-float(city.get("worn",0.0))-float(city.get("learners",0.0))
-		var net:=row.get_node("Net") as Label
+		var net:=card.find_child("Net",true,false) as Label
 		# A full store wears and is made good again: "full", not a red loss.
 		net.text="full" if coverage>=.98 else ("+" if change>=0.0 else "−")+Plain.number(absf(change))+" a day"
 		net.add_theme_color_override("font_color",T.INK_MUTED if coverage>=.98 else (T.GREEN_TEXT if change>0.0 else (T.RED_TEXT if change<0.0 else T.INK_MUTED)))
-		row.tooltip_text=tip
-		var lack:Label=row.get_meta("lack") if row.has_meta("lack") else null
+		card.tooltip_text=tip
+		var lack:Label=card.get_meta("lack") if card.has_meta("lack") else null
 		if lack!=null:
 			lack.visible=tone!="good" and coverage<.98
 			lack.text=String(story.held)
 			lack.add_theme_color_override("font_color",T.RED_TEXT if tone=="bad" else T.AMBER_TEXT)
-		var basket:=row.get_node_or_null("Basket")
-		if basket!=null:
-			(basket as Control).tooltip_text="Materials at hand for the makers. "+String(story.materials)
-			for child:Node in basket.get_children():basket.remove_child(child);child.queue_free()
-			for material:Dictionary in city.get("basket",[]):
-				if not material.has("resource"):continue
-				var mark:=TextureRect.new();mark.texture=Icons.material_texture(String(material.resource),36);mark.custom_minimum_size=Vector2(18,18)
-				mark.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;mark.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;mark.size_flags_vertical=Control.SIZE_SHRINK_CENTER;mark.mouse_filter=Control.MOUSE_FILTER_IGNORE;basket.add_child(mark)
-				var amount:=Label.new();amount.text=Plain.number(float(material.amount));T.text(amount,"kicker",T.BODY);amount.mouse_filter=Control.MOUSE_FILTER_IGNORE;basket.add_child(amount)
-				var gap:=Control.new();gap.custom_minimum_size.x=6;gap.mouse_filter=Control.MOUSE_FILTER_IGNORE;basket.add_child(gap)
+		card.add_theme_stylebox_override("panel",_jar_card_style(tone=="bad" and coverage<.98))
+	worth=float(data.get("spare_worth",0.0))
+	if not _barter.is_empty():
+		var pile:Pictures.BarterPile=_barter.pile
+		pile.set_spare(spare)
+		var answer:Label=_barter.answer
+		answer.text=("%s goods to spare, worth %s rations" % [_grouped(spare),_grouped(worth)]) if spare>=0.5 else "No goods to spare yet"
+		var sub:Label=_barter.sub
+		sub.text=("The makers add about %s a day for barter." % Plain.number(for_barter)) if for_barter>=0.01 else "Barter goods come once the homes are full."
+		sub.tooltip_text="The makers make for barter once the homes are stocked, and only from materials the builders' stores can spare."
+		(_barter.box as Control).tooltip_text="Each bundle is %s goods. Worth is at the people's own prices, counted in rations of food." % Plain.number(pile.per)
 	var coverage:=float((data.get("households",[{}]) as Array)[0].get("coverage",0.0)) if not (data.get("households",[]) as Array).is_empty() else 0.0
 	for technique:Dictionary in data.get("techniques",[]):
 		var chip:W.Chip=_technique_chips.get(String(technique.get("id","")))
@@ -498,8 +521,9 @@ func _build_footer()->void:
 		button.disabled=not data.get(key) is Callable
 
 func _apply()->void:
+	if _flow!=null:_flow.set_model(data.get("flow",{}),String(data.get("mode","military")))
 	match String(data.get("mode","military")):
-		"all":_apply_overview()
+		"all":_apply_all_head();_apply_overview()
 		"civilian":_apply_civilian();_apply_households()
 		_:
 			_apply_arms();_apply_header();_apply_stock();_apply_lines()
@@ -528,10 +552,60 @@ static func _tone_color(tone:String)->Color:
 
 # --- All: the overview ----------------------------------------------------------------
 
-## How the makers' hands split (one labelled bar), what they make a day, who
-## runs the workshops, and at most two things that need the god, each with a
-## button to the page that answers it. Rebuilt whole on each refresh: it is
-## a handful of labels.
+## The page's headline in big plain words: what the makers turn out a day,
+## and the one thing that needs the god now (with the page that answers it).
+func _build_all_head()->void:
+	var box:=VBoxContainer.new();box.name="AllHead";box.add_theme_constant_override("separation",4);add_child(box)
+	_header.headline=_headline(box,"HandsAnswer")
+	var needs:=HBoxContainer.new();needs.name="NeedsYouNow";needs.add_theme_constant_override("separation",10);box.add_child(needs)
+	var words:=Label.new();words.name="NeedsYouText";T.text(words,"body",T.RED_TEXT);words.add_theme_font_override("font",T.font("ui_strong"))
+	words.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;words.size_flags_horizontal=Control.SIZE_EXPAND_FILL;words.mouse_filter=Control.MOUSE_FILTER_PASS;needs.add_child(words)
+	var go:=W.text_button("Open","");go.name="NeedsYouGo";needs.add_child(go)
+	go.pressed.connect(func()->void:_open(int(go.get_meta("page",1))))
+	_header.needs=needs;_header.needs_text=words;_header.needs_go=go
+
+func _apply_all_head()->void:
+	if not _header.has("headline"):return
+	var o:Dictionary=data.get("overview",{})
+	var makers:=int(o.get("hands_total",0))
+	var goods:=float(o.get("goods_made",0.0));var arms:=float(o.get("arms_made",0.0))
+	var made:PackedStringArray=[]
+	if goods>=0.01:made.append("%s goods" % Plain.number(goods))
+	if arms>=0.01:made.append("%s %s of arms" % [Plain.number(arms),"set" if is_equal_approx(arms,1.0) else "sets"])
+	var headline:Label=_header.headline
+	if makers<=0:headline.text="No one is making anything yet"
+	elif made.is_empty():headline.text="Our %d makers made nothing today" % makers
+	else:headline.text="Our %d %s turn out %s a day" % [makers,"maker" if makers==1 else "makers"," and ".join(made)]
+	headline.tooltip_text="Makers are the people on Crafting. Goods are tools, baskets, pots and fittings; a set of arms arms one fighter."
+	var items:Array=o.get("attention",[])
+	var words:Label=_header.needs_text
+	var go:Button=_header.needs_go
+	if items.is_empty():
+		words.text="Nothing needs you now: the homes are stocked."
+		words.tooltip_text="The homes are stocked and the bands have their gear."
+		words.add_theme_color_override("font_color",T.GREEN_TEXT);go.visible=false
+	else:
+		var first:Dictionary=items[0]
+		words.text="Needs you: "+String(first.text)
+		words.tooltip_text=_cap(String(first.get("sub","")))
+		words.add_theme_color_override("font_color",_tone_color(String(first.get("tone","amber"))))
+		var page:=int(first.get("page",2))
+		go.visible=true;go.set_meta("page",page);go.text="Civilian" if page==1 else "Military";go.tooltip_text="Open the %s page." % go.text
+
+## The chart of the day's work (production_flow.gd), on every page.
+func _build_flow()->void:
+	_flow=Flow.new();_flow.name="Flow";_flow.size_flags_horizontal=Control.SIZE_EXPAND_FILL;add_child(_flow)
+
+## Big plain words, in the chronicle's voice.
+func _headline(parent:Node,node_name:String)->Label:
+	var label:=Label.new();label.name=node_name
+	label.add_theme_font_override("font",T.voice_font());label.add_theme_font_size_override("font_size",28);label.add_theme_color_override("font_color",T.INK)
+	label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;label.mouse_filter=Control.MOUSE_FILTER_PASS;parent.add_child(label)
+	return label
+
+## Under the chart: the makers as a crowd of figures coloured by what they
+## make, who runs the workshops, and the other things that need the god.
+## Rebuilt whole on each refresh: it is a handful of labels.
 func _apply_overview()->void:
 	if _overview_box==null:return
 	for child in _overview_box.get_children():_overview_box.remove_child(child);child.queue_free()
@@ -539,32 +613,28 @@ func _apply_overview()->void:
 	var homes:=maxf(0.0,float(o.get("hands_total",0))-float(o.get("hands_lines",0)))
 	var lines:=float(o.get("hands_lines",0))
 	var arms:=float(o.get("hands_arms",0.0))
-	_kicker(_overview_box,"THE MAKERS' HANDS","Craftspeople: those making for the homes and for barter, those on the workshop lines, and those making arms while the watch lacks them.")
-	var answer:=_answer_label(_overview_box,"HandsAnswer")
-	var most:="for the homes"
-	if lines>homes and lines>=arms:most="on workshop lines"
-	elif arms>homes and arms>lines:most="on arms"
-	answer.text="%s makers, most %s" % [Plain.number(homes+lines+arms),most]
-	var bar:=SplitBar.new();bar.name="HandsBar";bar.parts=[["Homes and barter",homes,T.GREEN],["Workshop lines",lines,T.GOLD],["Arms",arms,T.RED]];bar.custom_minimum_size=Vector2(0,12)
-	bar.tooltip_text="Homes and barter %s · workshop lines %s · arms %s" % [Plain.number(homes),Plain.number(lines),Plain.number(arms)]
-	_overview_box.add_child(bar)
+	homes=maxf(0.0,homes-arms)
+	_kicker(_overview_box,"THE MAKERS","Craftspeople: those making for the homes and for barter, those on the workshop lines, and those making arms while the watch lacks them.")
+	var parts:=[["Homes and barter",homes,T.GREEN],["Workshop lines",lines,T.GOLD],["Arms",arms,T.RED]]
+	var crowd:=Pictures.MakersRow.new();crowd.name="HandsBar";crowd.set_parts(parts)
+	crowd.tooltip_text="Homes and barter %s · workshop lines %s · arms %s" % [Plain.number(homes),Plain.number(lines),Plain.number(arms)]+("
+Each figure is %d makers." % crowd.each if crowd.each>1 else "")
+	_overview_box.add_child(crowd)
 	var legend:=HFlowContainer.new();legend.name="HandsLegend";legend.add_theme_constant_override("h_separation",16);_overview_box.add_child(legend)
-	for part:Array in bar.parts:
+	for part:Array in parts:
 		var key:=HBoxContainer.new();key.add_theme_constant_override("separation",6);legend.add_child(key)
 		var swatch:=ColorRect.new();swatch.color=part[2];swatch.custom_minimum_size=Vector2(12,12);swatch.size_flags_vertical=Control.SIZE_SHRINK_CENTER;key.add_child(swatch)
 		var word:=Label.new();word.text="%s %s" % [String(part[0]),Plain.number(float(part[1]))];T.text(word,"small",T.INK);key.add_child(word)
-	var made:=_small(_overview_box,"MadeToday",T.INK)
-	var arms_made:=float(o.get("arms_made",0.0))
-	made.text="They make %s goods a day%s." % [Plain.number(float(o.get("goods_made",0.0))),(" and %s sets of arms" % Plain.number(arms_made)) if arms_made>=0.01 else ""]
+	if crowd.each>1:
+		var scale:=Label.new();scale.text="Each figure is %d makers." % crowd.each;T.text(scale,"small",T.INK_MUTED);legend.add_child(scale)
 	var run:=_small(_overview_box,"RunBy")
 	var person:=Plain.officer(String(o.get("owner","")))
 	run.text="Workshop lines: %d of %d in use, %s." % [int(o.get("lines",0)),int(o.get("capacity",0)),("run by %s" % Names.given_of(String(person.name))) if bool(o.get("managed",true)) and not person.is_empty() else "you choose what they make"]
 	run.tooltip_text=plain_status(String(o.get("status","")))
-	_kicker(_overview_box,"NEEDS YOU")
-	var items:Array=(o.get("attention",[]) as Array).slice(0,2)
-	if items.is_empty():
-		var calm:=_small(_overview_box,"Calm",T.GREEN_TEXT)
-		calm.text="Nothing now: the homes are stocked and the bands have their gear."
+	# The first is the headline's; the next two are listed here.
+	var items:Array=(o.get("attention",[]) as Array).slice(1,3)
+	if items.is_empty():return
+	_kicker(_overview_box,"ALSO NEEDS YOU")
 	for index in items.size():
 		var item:Dictionary=items[index]
 		var row:=HBoxContainer.new();row.name="Attention%d" % index;row.add_theme_constant_override("separation",10);_overview_box.add_child(row)
@@ -575,8 +645,16 @@ func _apply_overview()->void:
 		var page:=int(item.get("page",2))
 		var go:=W.text_button("Civilian" if page==1 else "Military","Open the %s page." % ("Civilian" if page==1 else "Military"));go.size_flags_vertical=Control.SIZE_SHRINK_CENTER;row.add_child(go)
 		go.pressed.connect(func()->void:_open(page))
-	if (o.get("attention",[]) as Array).size()>2:
-		var more:=_small(_overview_box,"More");more.text="And %d more on the other pages." % ((o.get("attention",[]) as Array).size()-2)
+	if (o.get("attention",[]) as Array).size()>3:
+		var more:=_small(_overview_box,"More");more.text="And %d more on the other pages." % ((o.get("attention",[]) as Array).size()-3)
+
+## A large count as a person reads it: 13,078.
+static func _grouped(value:float)->String:
+	if absf(value)<1000.0:return Plain.number(value)
+	var digits:=str(roundi(absf(value)))
+	var out:=""
+	while digits.length()>3:out=","+digits.right(3)+out;digits=digits.left(digits.length()-3)
+	return ("-" if value<0.0 else "")+digits+out
 
 static func _cap(text:String)->String:
 	return text.substr(0,1).to_upper()+text.substr(1)
@@ -604,12 +682,14 @@ func _build_arms()->void:
 	var box:=VBoxContainer.new();box.name="ArmsForTheWatch";box.add_theme_constant_override("separation",4);add_child(box)
 	_kicker(box,"ARMS FOR THE WATCH","Arms the makers make, one set a fighter, kept in store until the watch takes them up.")
 	var top:=HBoxContainer.new();top.add_theme_constant_override("separation",10);box.add_child(top)
-	var answer:=_answer_label(top,"ArmsAnswer");answer.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	var answer:=_headline(top,"ArmsAnswer");answer.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	var go:=W.text_button("Warriors","Open the Warriors screen: how armed each band is.");go.name="SeeWarriors";go.size_flags_vertical=Control.SIZE_SHRINK_CENTER;top.add_child(go)
 	go.pressed.connect(func()->void:
 		var open:Variant=data.get("on_open")
 		if open is Callable:(open as Callable).call("military",0))
 	_arms.answer=answer
+	# The rack: sets carried by the watch, sets in store, sets still wanted.
+	var rack:=Pictures.ArmsRack.new();rack.name="ArmsRack";box.add_child(rack);_arms.rack=rack
 	_arms.held=_small(box,"ArmsHeld",T.INK)
 	_arms.making=_small(box,"ArmsMaking")
 	_arms.cost=_small(box,"ArmsCost")
@@ -622,8 +702,12 @@ func _apply_arms()->void:
 	var answer:Label=_arms.answer
 	answer.text=("The watch: %d of %d armed" % [issued,watch]) if watch>0 else "No watch to arm yet"
 	answer.add_theme_color_override("font_color",T.INK if wanted<=0 else T.AMBER_TEXT)
+	var rack:Pictures.ArmsRack=_arms.rack
+	rack.set_rack(issued,held,wanted,String(a.get("item","")))
+	rack.tooltip_text="Gold: %d carried by the watch. Ink: %d in store. Red: %d still wanted.%s" % [issued,held,wanted,("
+Each mark is %d sets." % rack.each) if rack.each>1 else ""]
 	var line:Label=_arms.held
-	line.text="%d %s in store; %s." % [held,"set" if held==1 else "sets",("%d more wanted" % wanted) if wanted>0 else "none wanted"]
+	line.text="%d carried · %d %s in store · %s" % [issued,held,"set" if held==1 else "sets",("%d more wanted" % wanted) if wanted>0 else "none wanted"]
 	var making:Label=_arms.making
 	making.visible=wanted>0 or made>=0.01
 	making.text="%s makers on arms, making %s a day." % [Plain.number(hands),Plain.number(made)]
@@ -640,36 +724,22 @@ func _apply_arms()->void:
 func _build_civilian_head()->void:
 	var box:=VBoxContainer.new();box.name="CivilianHead";box.add_theme_constant_override("separation",4);add_child(box)
 	_kicker(box,"WHAT THE MAKERS MAKE","Tools, baskets, pots and fittings for the homes, and goods to barter.")
-	_civilian.answer=_answer_label(box,"GoodsAnswer")
+	_civilian.answer=_headline(box,"GoodsAnswer")
 	_civilian.carts=_small(box,"Carts")
 
 func _apply_civilian()->void:
 	if _civilian.is_empty():return
-	var made:=0.0;var worn:=0.0
-	for city:Dictionary in data.get("households",[]):made+=float(city.get("made",0.0));worn+=float(city.get("worn",0.0))
+	var made:=0.0;var worn:=0.0;var barter:=0.0
+	for city:Dictionary in data.get("households",[]):made+=float(city.get("made",0.0));worn+=float(city.get("worn",0.0));barter+=float(city.get("for_barter",0.0))
 	var answer:Label=_civilian.answer
-	answer.text="%s goods a day for the homes and for barter" % Plain.number(made) if made>=0.01 else "Nothing made today"
+	if made<0.01:answer.text="Nothing made today"
+	elif barter>=0.01:answer.text="%s goods a day: %s for the homes, %s for barter" % [Plain.number(made),Plain.number(made-barter),Plain.number(barter)]
+	else:answer.text="%s goods a day, all for the homes" % Plain.number(made)
 	answer.tooltip_text="Made today in every town, about %s a day wear out." % Plain.number(worn)
 	var carts:Dictionary=data.get("carts",{})
 	var line:Label=_civilian.carts
 	line.visible=int(carts.get("count",0))>0 or bool(carts.get("known",false))
 	line.text="Carts in store: %d. They are made on the workshop lines (Military)." % int(carts.get("count",0))
-
-## Parts of one whole side by side, each its colour (the makers' hands on
-## the All page).
-class SplitBar extends Control:
-	const T:=preload("res://scripts/hud/hud_tokens.gd")
-	var parts:Array=[]
-	func _ready()->void:mouse_filter=Control.MOUSE_FILTER_PASS
-	func _draw()->void:
-		var total:=0.0
-		for part:Array in parts:total+=maxf(0.0,float(part[1]))
-		draw_rect(Rect2(Vector2.ZERO,size),T.PAPER_SUNK)
-		var x:=0.0
-		for part:Array in parts:
-			var width:=size.x*maxf(0.0,float(part[1]))/maxf(0.001,total)
-			if width>0.5:draw_rect(Rect2(x,0.0,width,size.y),part[2]);x+=width
-		draw_rect(Rect2(Vector2.ZERO,size),T.RULE,false,1.0)
 
 # --- Helpers shared with panels that extend this script (keep as they are) --------------
 func _button(parent:Node,label:String,callback:Variant,tip:String,active:bool=false)->void:
