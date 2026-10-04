@@ -500,7 +500,7 @@ class Service extends RefCounted:
 	func look_at(fig:Node3D,target:Variant=null,weight:Variant=1.0,stage:Object=null)->void:
 		if target is Dictionary:
 			var st:Object=weight if weight is Object else stage
-			Self.look_toward(fig,Self.resolve(fig,(target as Dictionary).get("target",null),st),float((target as Dictionary).get("weight",0.8)))
+			Self.look_toward(fig,Self.resolve(fig,(target as Dictionary).get("target",null),st),float((target as Dictionary).get("weight",0.8)),-1.0 if bool(target.get("hold",false)) else float(target.get("dur",1.0)))
 		else:Self.look_toward(fig,Self.resolve(fig,target,stage),float(weight) if not weight is Object else 1.0)
 	## From the stage a mood is a beat's (it passes and the person's own returns):
 	## a plain vector lasts a moment; a beat's args carry its face and time.
@@ -600,9 +600,15 @@ static func play(fig:Node3D,clip:String,opts:={})->float:
 	return a.act(clip,opts) if a!=null else 0.0
 
 ## (look_at on the stage's hook; here it may not shadow Node3D.look_at)
-static func look_toward(fig:Node3D,target:Variant,weight:=1.0)->void:
+static func look_toward(fig:Node3D,target:Variant,weight:=1.0,seconds:=-1.0)->void:
 	var a=of(fig)
-	if a!=null:a.look(target,weight)
+	if a!=null:a.look(target,weight,seconds)
+
+## Conversation focus sits below a brief directed glance. A new speaker takes
+## ownership immediately; an old glance's expiry cannot clear the new focus.
+static func attend(fig:Node3D,target:Variant,seconds:=3.0,weight:=0.8)->void:
+	var a=of(fig)
+	if a!=null:a.attend_to(target,seconds,weight)
 
 ## mood: {joy, fear, anger, scorn, awe, tired} (0..1 each), or one of the
 ## figure's mood words (warm, neutral, afraid, defiant, grieved).
@@ -776,6 +782,10 @@ var _tremble:=0.0
 
 # looking
 var _look_kind:=0                    # 0 none, 1 point, 2 node, 3 figure
+var _look_until:=-1.0
+var _attention_target:Variant
+var _attention_until:=-1.0
+var _attention_weight:=0.8
 var _look_point:=Vector3.ZERO
 var _look_node:Node3D
 var _look_weight:=1.0
@@ -1085,8 +1095,9 @@ func _weights_for(meta:Dictionary,opts:Dictionary)->PackedFloat32Array:
 		for b in idx:w[b]=gw
 	return w
 
-func look(target:Variant,weight:=1.0)->void:
+func look(target:Variant,weight:=1.0,seconds:=-1.0)->void:
 	_look_weight=clampf(weight,0.0,1.0)
+	_look_until=_clock+maxf(seconds,0.0) if seconds>=0.0 else -1.0
 	if target==null:
 		_look_kind=0;_look_node=null
 	elif target is Vector3:
@@ -1094,6 +1105,20 @@ func look(target:Variant,weight:=1.0)->void:
 	elif target is Node3D:
 		_look_node=target
 		_look_kind=3 if (target as Node3D).has_method(&"head_top") else 2
+
+func attend_to(target:Variant,seconds:float,weight:float)->void:
+	look(null)
+	_attention_target=target
+	_attention_until=_clock+maxf(seconds,0.0)
+	_attention_weight=clampf(weight,0.0,1.0)
+	# The old figure modifier is a fallback, not another permanent claim.
+	if fig.has_method(&"look_at_point"):fig.call(&"look_at_point",null,0.2)
+
+func attention_locked()->bool:
+	return _a!=null and not _a.done() and (_owns_movement(_a) or _a.hold or not String(clip_meta(_a.clip).get("prop","")).is_empty())
+
+func ambient_busy()->bool:
+	return hushed or speaking or _walking() or (_a!=null and not _a.done()) or _g>=0
 
 func feel(mood:Dictionary)->void:
 	if mood.has("vector") or mood.has("face") or mood.has("dur"):
@@ -1701,6 +1726,9 @@ func _viseme(shape:int,amount:float)->void:
 ## Head, neck and chest turn toward what they attend to, on a spring.
 func _look(dt:float,walking:bool)->void:
 	if b_head<0 or b_neck<0:return
+	if (_look_until>=0.0 and _clock>=_look_until) or (_look_kind in [2,3] and (not is_instance_valid(_look_node) or not _look_node.is_visible_in_tree())):look(null)
+	if _attention_until>=0.0 and _clock>=_attention_until:_attention_target=null
+	if _attention_target is Object and (not is_instance_valid(_attention_target) or not (_attention_target as Node3D).is_visible_in_tree()):_attention_target=null
 	var target:=Vector3.ZERO
 	var want:=0.0
 	var have:=false
@@ -1712,6 +1740,11 @@ func _look(dt:float,walking:bool)->void:
 			if is_instance_valid(_look_node):target=(_look_node.call(&"head_top") as Vector3)-Vector3(0.0,0.10*_look_node.global_transform.basis.get_scale().y,0.0);have=true
 	if have:
 		want=_look_weight
+	elif _attention_target!=null:
+		if _attention_target is Vector3:target=_attention_target
+		elif (_attention_target as Node3D).has_method(&"head_top"):target=(_attention_target as Node3D).call(&"head_top")-Vector3.UP*0.10
+		else:target=(_attention_target as Node3D).global_position
+		have=true;want=_attention_weight
 	elif bool(fig.get(&"_gaze_on")) and fig.get(&"gaze") is Node3D:
 		# the stage's own gaze point (court_figure_3d look_at_point), as strongly as it asks
 		target=(fig.get(&"gaze") as Node3D).global_position;have=true;want=_gaze_weight()
@@ -1725,7 +1758,7 @@ func _look(dt:float,walking:bool)->void:
 	# a reaction that moves the head has it: idle glances stop, a look asked
 	# for keeps only a little pull (a talking gesture keeps the look whole)
 	var taken:=_head_taken()
-	if taken>0.0:want*=1.0-taken*(1.0 if _look_kind==0 and not bool(fig.get(&"_gaze_on")) else 0.7)
+	if taken>0.0:want*=1.0-taken*(1.0 if _look_kind==0 and _attention_target==null and not bool(fig.get(&"_gaze_on")) else 0.7)
 	_look_w=lerpf(_look_w,want,1.0-exp(-dt*(9.0 if taken>0.0 else 4.0)))
 	if not have or _look_w<0.01:
 		look_yaw=0.0;return

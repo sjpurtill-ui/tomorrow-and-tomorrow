@@ -179,6 +179,10 @@ var _focus_key:=""
 var _shot_name:="wide"
 var _beat_sets:Array=[]
 var _pending_greetings:Dictionary={}
+var _attention_epoch:=0
+var _attention_tween:Tween
+var _attention_ends:=0.0
+var _attention_pending:Dictionary={}
 ## What the engine says about the hall now (the Court fills it): era, season,
 ## stores_days, hungry, sick, at_war, love, dread, mood, offer.
 var facts:Dictionary={}
@@ -1080,6 +1084,11 @@ func event(kind:String,data:Dictionary={})->void:
 					later.append(moved)
 			all=later
 	_last_beats=all
+	# A later speaker may take the room before this event's last glance.
+	# Cancel only its attention, never its physical or adjudicated actions.
+	if not kind in ["execution","divine","order","command","direction"]:
+		for beat:Dictionary in all:
+			if String(beat.get("act",""))=="look_at":beat["attention_epoch"]=_attention_epoch
 	_event_weight=_weight_of(kind,data)
 	var span:=0.0
 	for beat in all:
@@ -1391,7 +1400,9 @@ func start_ambient()->void:
 		for spec in specs:
 			if not spec is Dictionary:continue
 			var item:=(spec as Dictionary).duplicate()
-			if bool(item.get("hold",false)):_ambient_beat(item)
+			if bool(item.get("hold",false)):
+				if not _ambient_beat(item):
+					item["next"]=now+1.0;_ambient.append(item)
 			else:
 				item["next"]=now+float(item.get("start",0.0))+1.0
 				_ambient.append(item)
@@ -1435,17 +1446,32 @@ func _ambient_tick()->void:
 	if not is_visible_in_tree():return
 	var now:=_now()
 	if now<_hush_until:return
+	var played:=false
+	var finished:Array=[]
 	for item:Dictionary in _ambient:
 		if now<float(item.next):continue
-		_ambient_beat(item)
+		var fired:=not played and _ambient_beat(item)
+		played=played or fired
+		if bool(item.get("hold",false)):
+			if fired:finished.append(item)
+			else:item["next"]=now+_ambient_rng.randf_range(0.5,1.5)
+			continue
 		var every:Array=item.get("every",[8.0,14.0])
 		item["next"]=now+_ambient_rng.randf_range(float(every[0]),float(every[1] if every.size()>1 else every[0]))
+	for item:Dictionary in finished:_ambient.erase(item)
 
-func _ambient_beat(item:Dictionary)->void:
-	if not has_figure(String(item.get("who",""))) or director==null:return
+func _ambient_beat(item:Dictionary)->bool:
+	var f:=figure(String(item.get("who","")))
+	if f==null or director==null or f.leaving or f._arriving() or executing():return false
+	if _now()<_hush_until:return false
+	if f.body3d!=null and acting!=null:
+		var actor=Acting.of(f.body3d)
+		if actor!=null and actor.ambient_busy():return false
 	var lowered:Variant=director.call("lower",[{"t":0.0,"who":String(item.who),"act":String(item.act),"args":item.get("args",{})}]) if director.has_method("lower") else []
 	if lowered is Array:
 		for beat in lowered:_beat(beat)
+		return not lowered.is_empty()
+	return false
 
 ## Plays a set of beats [{t, who, act, args}] on one tween, in time order.
 func run_beats(beats:Array)->void:
@@ -1467,6 +1493,7 @@ func run_beats(beats:Array)->void:
 ## One beat of the director's, as the stage plays it (K's acting first where
 ## it has the act; else the figures' own clips, moods and gaze).
 func _beat(beat:Dictionary)->void:
+	if beat.has("attention_epoch") and int(beat.attention_epoch)!=_attention_epoch:return
 	var who:=String(beat.get("who",""))
 	var f:=figure(who)
 	var body:Node3D=f.body3d if f!=null and not f.leaving else null
@@ -1605,6 +1632,10 @@ func _props_after(f:Figure,act:String)->void:
 ## acting holds everyone's idle business; the room's own loops wait too.
 func hush(seconds:float,dim:=false)->void:
 	_hush_until=maxf(_hush_until,_now()+seconds)
+	# Idle timers wait for room life to resume; overdue gestures never catch up
+	# together on the first frame after a sentence or dramatic pause.
+	for item:Dictionary in _ambient:
+		item["next"]=maxf(float(item.get("next",0.0)),_hush_until+_ambient_rng.randf_range(0.3,2.2))
 	if dim and is_inside_tree() and not Motion.reduced():
 		for child in bubble_layer.get_children():
 			var old:=child as Control
@@ -1620,7 +1651,7 @@ func hush(seconds:float,dim:=false)->void:
 		if f!=null and f.body3d!=null and not f.leaving:acting.call("hush",f.body3d,true)
 	if _hush_tween and _hush_tween.is_valid():_hush_tween.kill()
 	if not is_inside_tree():return
-	_hush_tween=create_tween();_hush_tween.tween_interval(maxf(seconds,0.2))
+	_hush_tween=create_tween();_hush_tween.tween_interval(maxf(_hush_until-_now(),0.2))
 	_hush_tween.tween_callback(func()->void:
 		for key in cast_order:
 			var other:=figure(key)
@@ -2046,10 +2077,8 @@ func god_says(text:String,animate:=true,ref:=-1)->Label:
 		old.age+=1
 		if old.age>=2 or old.get_rect().intersects(band):_drop(old,animate)
 		else:old.fade_to(.4,animate)
-	for key in cast_order:
-		var f:=figure(key)
-		if f!=null and not f.leaving:f.look_up()
-	event("god",{"text":text,"seconds":reveal_time(text),"tone":_tone_of(text)})
+	_focus_conversation("god",reveal_time(text)+0.8)
+	event("god",{"text":text,"seconds":reveal_time(text),"tone":_tone_of(text),"attention_staged":true})
 	if animate:
 		_god.descend()
 		_rays.modulate.a=0.0
@@ -2140,12 +2169,54 @@ func _turn_to(key:String,talk_time:=1.5)->void:
 	var speaker:=figure(key)
 	if speaker==null:return
 	_show_plates()
-	for other_key in cast_order:
+	# The voice starts now. Faces catch it a fraction later, nearest first.
+	speaker.speak(talk_time,_talks%3==0 and talk_time>2.2)
+	_focus_conversation(key,talk_time+0.8)
+
+func _focus_conversation(key:String,seconds:float)->void:
+	_attention_epoch+=1
+	_attention_ends=_now()+seconds
+	if _attention_tween and _attention_tween.is_valid():_attention_tween.kill()
+	if not is_inside_tree():
+		_attention_pending={"key":key,"seconds":seconds,"epoch":_attention_epoch}
+		if not tree_entered.is_connected(_focus_entered):tree_entered.connect(_focus_entered,CONNECT_ONE_SHOT|CONNECT_DEFERRED)
+		return
+	var speaker:=figure(key if key!="god" else MAIN)
+	var origin:=speaker.body3d.global_position if speaker!=null and speaker.body3d!=null else Vector3.ZERO
+	var listeners:Array[String]=[]
+	for other_key:String in cast_order:
 		var f:=figure(other_key)
-		if f==null or f.leaving:continue
-		# Long words come with both hands now and then.
-		if other_key==key:f.speak(talk_time,_talks%3==0 and talk_time>2.2)
-		else:f.listen_to(speaker)
+		if other_key!=key and f!=null and not f.leaving:listeners.append(other_key)
+	listeners.sort_custom(func(a:String,b:String)->bool:
+		var fa:=figure(a);var fb:=figure(b)
+		var da:=fa.body3d.global_position.distance_squared_to(origin) if fa.body3d!=null else fa.home.distance_squared_to(Vector2.ZERO)
+		var db:=fb.body3d.global_position.distance_squared_to(origin) if fb.body3d!=null else fb.home.distance_squared_to(Vector2.ZERO)
+		return da<db if not is_equal_approx(da,db) else a<b)
+	_attention_tween=create_tween()
+	var at:=0.0
+	for i in listeners.size():
+		var delay:=0.0 if Motion.reduced() else 0.06+0.035*minf(i,10)+float(posmod(hash(audience_key+listeners[i]),37))*0.001
+		delay=maxf(delay,at)
+		if delay>at:_attention_tween.tween_interval(delay-at)
+		_attention_tween.tween_callback(_attend_after.bind(listeners[i],key,_attention_epoch))
+		at=delay
+	if listeners.is_empty():_attention_tween.kill()
+
+func _focus_entered()->void:
+	var pending:=_attention_pending
+	_attention_pending={}
+	if not pending.is_empty() and int(pending.epoch)==_attention_epoch:_focus_conversation(String(pending.key),float(pending.seconds))
+
+func _attend_after(listener:String,speaker_key:String,epoch:int)->void:
+	if epoch!=_attention_epoch:return
+	var f:=figure(listener)
+	if f==null or f.leaving:return
+	var left:=maxf(0.0,_attention_ends-_now())
+	if left<=0.0:return
+	if speaker_key=="god":f.look_up(left)
+	else:
+		var speaker:=figure(speaker_key)
+		if speaker!=null and not speaker.leaving:f.listen_to(speaker,left)
 
 func _age_bubbles(fresh:Bubble,animate:bool)->void:
 	## The line before stays faintly; the one before that goes, and so does
@@ -2985,9 +3056,10 @@ class Figure extends Control:
 	func speak(seconds:=1.5,both_hands:=false)->void:
 		if leaving:return
 		if body3d!=null:
+			if _attention_locked():return
 			if _act and _act.is_valid():_act.kill()
 			var stage:=_stage.get_ref() as Control if _stage!=null else null
-			if stage!=null:body3d.look_at_point(stage.god_point(),0.5)
+			if stage!=null:_attend(stage.god_point(),seconds+0.8)
 			_light(1.06)
 			# Their face can answer on the way in; their feet still have to walk.
 			if _arriving():return
@@ -3007,12 +3079,13 @@ class Figure extends Control:
 
 	## Someone else speaks: they look at them, half turned toward them,
 	## still in their own stance.
-	func listen_to(speaker:Figure)->void:
+	func listen_to(speaker:Figure,seconds:=3.0)->void:
 		if leaving:return
 		if body3d==null or speaker==null or speaker.body3d==null:
 			listen_toward(speaker.home.x if speaker!=null else home.x);return
+		if _attention_locked():return
 		if _act and _act.is_valid():_act.kill()
-		body3d.look_at_point(speaker.body3d.head_top()+Vector3(0.0,-0.10*speaker.body3d.scale.y,0.0),0.45)
+		_attend(speaker.body3d,seconds)
 		_light(0.95)
 		if _arriving():return
 		var toward:=clampf((speaker.home.x-home.x)/maxf(size.x*3.0,1.0)*90.0,-55.0,55.0)
@@ -3037,13 +3110,14 @@ class Figure extends Control:
 		_pose(deg_to_rad(1.6)*side,4.0*side,1.0,Color(.90,.89,.87))
 
 	## The god speaks: every face lifts toward the voice.
-	func look_up()->void:
+	func look_up(seconds:=3.0)->void:
 		if leaving:return
 		if body3d!=null:
+			if _attention_locked():return
 			if _act and _act.is_valid():_act.kill()
 			# Every face lifts to the god's voice, from where they stand.
 			var stage:=_stage.get_ref() as Control if _stage!=null else null
-			if stage!=null:body3d.look_at_point(stage.god_point(true),0.5)
+			if stage!=null:_attend(stage.god_point(true),seconds)
 			_light(1.03)
 			if _arriving():return
 			body3d.face(rest_yaw*.5,0.45)
@@ -3055,6 +3129,13 @@ class Figure extends Control:
 		_bob=create_tween().set_trans(Tween.TRANS_SINE)
 		_bob.tween_property(rig,"position:y",-4.0,.3).set_ease(Tween.EASE_OUT)
 		_bob.tween_property(rig,"position:y",0.0,.5).set_ease(Tween.EASE_IN_OUT)
+
+	func _attention_locked()->bool:
+		return Self.acting!=null and body3d!=null and Self.Acting.of(body3d)!=null and Self.Acting.of(body3d).attention_locked()
+
+	func _attend(target:Variant,seconds:float)->void:
+		if Self.acting!=null:Self.Acting.attend(body3d,target,seconds)
+		else:body3d.look_at_point(target.head_top() if target is Node3D else target,0.45)
 
 	## Walk in from the side: a few steps, into place.
 	func enter_from(side:float,distance:float,delay:float=0.0)->void:

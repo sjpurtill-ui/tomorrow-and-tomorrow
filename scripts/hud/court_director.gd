@@ -1008,7 +1008,10 @@ static func _god_speaks(ctx:Dictionary,out:Array)->void:
 	for m:Dictionary in order:
 		if String(m.key)==sleeper or String(m.key)==dozing:continue
 		if String(m.kind)=="scribe":continue
-		_beat(out,0.05+step*0.07+rng.randf()*0.08,String(m.key),"look_up",{},"action")
+		var look_at:=0.05+step*0.07+rng.randf()*0.08
+		# The live stage owns its conversation focus; standalone directors keep
+		# their original ripple. Consume the same draw for the other reactions.
+		if not bool(event.get("attention_staged",false)):_beat(out,look_at,String(m.key),"look_up",{},"action")
 		step+=1
 	for dog:Dictionary in _of_kind(ctx,["dog"]):_beat(out,0.2,String(dog.key),"perk_up",{},"action")
 	for scribe:Dictionary in _of_kind(ctx,["scribe"]):_beat(out,0.3,String(scribe.key),_writing_act(ctx.facts,scribe),{},"action")
@@ -3573,10 +3576,10 @@ static func lower(list:Array)->Array:
 			if args.has(extra):play[extra]=args[extra]
 		out.append({"t":t,"who":who,"act":"play","args":play})
 		match String(p.look):
-			"god","god_up":out.append({"t":t,"who":who,"act":"look_at","args":{"target":String(p.look),"weight":0.8,"beat":act}})
+			"god","god_up":out.append({"t":t,"who":who,"act":"look_at","args":{"target":String(p.look),"weight":0.8,"beat":act,"dur":float(p.dur),"hold":bool(p.hold)}})
 			"at":
-				if String(p.at)!="":out.append({"t":t,"who":who,"act":"look_at","args":{"target":String(p.at),"weight":0.8,"beat":act}})
-			"away":out.append({"t":t,"who":who,"act":"look_at","args":{"target":"away","weight":0.6,"beat":act}})
+				if String(p.at)!="":out.append({"t":t,"who":who,"act":"look_at","args":{"target":String(p.at),"weight":0.8,"beat":act,"dur":float(p.dur),"hold":bool(p.hold)}})
+			"away":out.append({"t":t,"who":who,"act":"look_at","args":{"target":"away","weight":0.6,"beat":act,"dur":float(p.dur),"hold":bool(p.hold)}})
 	return out
 
 # =============================================================================
