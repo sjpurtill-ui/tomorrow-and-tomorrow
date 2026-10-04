@@ -52,7 +52,9 @@ float sg_noise(vec2 p) {
 int settlement_ground_slot(vec2 surface_position_km, vec2 surface_origin_km, out vec2 local_m) {
 	local_m = vec2(-1.0);
 	for (int index = 0; index < 8; index++) {
-		int s = index < 4 ? index+4 : index-4;
+		// Keep the founding square's finer paint wherever it remains valid.
+		// Frontier tiles follow, then foreign places: 0, 4, 5, 6, 7, 1, 2, 3.
+		int s = index == 0 ? 0 : (index < 5 ? index+3 : index-4);
 		if (sg_frames[s].y <= 0.0) { continue; }
 		vec2 cells = surface_origin_km-sg_origins[s].xy;
 		vec2 m = (surface_position_km+cells-sg_origins[s].zw)*1000.0;
