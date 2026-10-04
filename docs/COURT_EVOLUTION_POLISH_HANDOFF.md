@@ -67,6 +67,10 @@ checkpoints; the evidence below concerns this subsequent quality pass.
   Modern architecture closes all eight building families with flat/parapet roofs;
   a separate normal-based ink outline prevents thin roof undersides blackening
   their tops. See `CITY_EVOLUTION_VISUAL_QA.md` for precise scope and evidence.
+- Roof materials also follow recorded construction. Stone walls alone no longer
+  produce fired tiles, and building age alone no longer produces chimneys. Old
+  records use conservative fallbacks; supported tiles and installed chimneys
+  remain available. No construction records or capabilities are granted.
 
 The retained execution set is unchanged: club, fire, dogs and beheading. Previous
 shortest-turn, foot-speed and storm-out corrections remain in the branch. This
@@ -110,8 +114,12 @@ distinct 200-year room designs are a court feature, not sixteen city styles.
   report51. This includes the forced crowded-offer regression and repeated
   constrained placement. Shadow worker **10/10** tests and four-chapter GPU
   comparison pass; see `COURT_SHADOW_QUALITY_HANDOFF.md`.
-- Focused city/architecture tests: **29/29**, no errors or failures; report44,
-  `artifacts/court-evolution-city-combined-tests.log`.
+- Final combined city/architecture/provenance tests: **35/35**, no errors,
+  failures, skips or orphans; report52,
+  `artifacts/court-evolution-city-final-tests.log`. Worker before/after captures
+  also cover all sixteen dates with unchanged plot/capacity/fallback counts.
+  The corrected slab footprints allow the existing placement solver to fit a
+  few more preindustrial visual representatives without changing capacity.
 - Final architecture worker meshes: **192/192 chair arrivals/departures plus
   16/16 door-to-petitioner routes**, **15/15 imported room tests**, and all sixteen
   raw GLB validations pass. Latest bundle: 141,344 triangles, 13,599,776 bytes;
