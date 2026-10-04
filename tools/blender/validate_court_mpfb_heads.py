@@ -194,6 +194,15 @@ def _edge_counts(faces):
                    for face in faces for a, b in ((0, 1), (1, 2), (2, 0)))
 
 
+def _directed_edge_balance(faces):
+    balance = Counter()
+    for face in faces:
+        for a, b in ((0, 1), (1, 2), (2, 0)):
+            left, right = int(face[a]), int(face[b])
+            balance[tuple(sorted((left, right)))] += 1 if left < right else -1
+    return balance
+
+
 def _new_cut_edges(old_faces, kept_faces):
     previous = {edge for edge, count in _edge_counts(old_faces).items() if count == 1}
     return {edge for edge, count in _edge_counts(kept_faces).items() if count == 1} - previous
@@ -227,7 +236,7 @@ def check_graft(before, after, body, variant):
     oa, na = primitive_arrays(before, old), primitive_arrays(after, new)
     scale, origin = _frame(before, old, variant)
     cut = float(extra["mpfb_cut_y"])
-    assert abs((cut - origin[1]) / scale + .028) <= .003, "graft cut is outside the agreed neck interval"
+    assert abs((cut - origin[1]) / scale) <= .002, "graft cut is outside the agreed chin-level neck interval"
     start = extra["mpfb_head_start"]
     assert isinstance(start, int) and start == extra["mpfb_original_vertex_count"], "retained count/head start mismatch"
     mapping_index = extra["mpfb_original_indices"]
@@ -266,6 +275,10 @@ def check_graft(before, after, body, variant):
     assert np.all((qy[cross] > -.080) & (qy[cross] < .040)), "connecting triangles leave the neck"
     inverse_mapping = {int(old_index): index for index, old_index in enumerate(mapping)}
     cross_edges = _edge_counts(cross)
+    all_edges = _edge_counts(new_faces)
+    winding = _directed_edge_balance(new_faces)
+    for edge in cross_edges:
+        assert all_edges[edge] == 2 and winding[edge] == 0, "neck edge has inconsistent winding/incidence: " + str(edge)
     for a, b in cut_edges:
         edge = tuple(sorted((inverse_mapping[a], inverse_mapping[b])))
         assert cross_edges[edge] == 1, "original cut edge not attached exactly once: " + str((a, b))
