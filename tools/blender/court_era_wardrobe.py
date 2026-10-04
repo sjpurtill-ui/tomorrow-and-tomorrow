@@ -276,15 +276,16 @@ def build(variant, out):
         # Shoulders rise above the neck base in the source body. Restrict the
         # cut to the neck column, so a flat seam never slices their domes.
         neck_limit=np.maximum(f.z_shoulder+.050*k-eased[:,1],np.abs(eased[:,0])-.092*k)
+        neck_trim=np.minimum(eased[:,1]-f.z_shoulder-k*(.030+.020*(eased[:,0]/(.091*k))**2),.091*k-np.abs(eased[:,0]))
         if kind == "medieval":
-            b.shell(kind + "_doublet", "CLOTH_A", top, np.full(len(y), ease), limits=tailored_sleeves+[neck_limit])
+            b.shell(kind + "_doublet", "CLOTH_A", top, np.full(len(y), ease), limits=tailored_sleeves+[neck_limit,-neck_trim])
         else:
-            b.shell(kind + "_jacket", "CLOTH_A", top, np.full(len(y), ease), limits=tailored_sleeves+[neck_limit])
+            b.shell(kind + "_jacket", "CLOTH_A", top, np.full(len(y), ease), limits=tailored_sleeves+[neck_limit,-neck_trim])
             slope=.072*k/(f.z_shoulder-shirt_bottom)
             planes=[(np.array((0,0,1)), -.025*k), (np.array((0,1,0)), -shirt_bottom),
                     (np.array((1,slope,0)), -slope*shirt_bottom), (np.array((-1,slope,0)), -slope*shirt_bottom),
-                    (np.array((0,-1,0)), f.z_shoulder+.012*k)]
-            b.shell(kind + "_shirt", "CLOTH_B", top, np.full(len(y), ease+.004*k), planes=planes)
+                    (np.array((0,-1,0)), f.z_shoulder+.050*k)]
+            b.shell(kind + "_shirt", "CLOTH_B", top, np.full(len(y), ease+.004*k), planes=planes, limits=[neck_limit])
         # Medieval surcoat and early-modern skirts/tails are real open panels.
         # Splits allow the two thighs to articulate independently when seated.
         if kind != "business":
@@ -348,9 +349,11 @@ def build(variant, out):
             b.shell(kind + "_cuff_" + side, "CLOTH_C" if kind in ("medieval", "courtcoat") else "CLOTH_B",
                     cuff_mask, np.full(len(y),ease),
                     planes=[(axis,-float(wrist@axis)+.008*k+width),(-axis,float(wrist@axis)-.008*k)])
-        neck_center=gl(f.neck)+np.array((0,.037*k,0))
-        band(b,kind+"_collar","CLOTH_C" if kind=="medieval" else "CLOTH_B",neck_center,np.array((0.,1.,0.)),
-             .050*k+ease+.002*k,.052*k+ease+.002*k,.034*k if f.p.get("child") else .041*k)
+        # This collar is sewn into the shell: matching clipping fields and
+        # identical interpolated skinning leave no overlapping independent
+        # rings to fold through one another during seated speech.
+        b.shell(kind+"_collar","CLOTH_C" if kind=="medieval" else "CLOTH_B",
+                top,np.full(len(y),ease),limits=[neck_limit,neck_trim])
         if kind == "medieval":
             # Follow the delivered waist and its skinning, including stooped
             # bodies. A two-ring fixed oval floated behind a seated torso.
