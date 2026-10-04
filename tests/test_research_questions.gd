@@ -105,22 +105,29 @@ func _board(records:Array,width:int)->Node:
 	board.position=Vector2.ZERO;board.size=Vector2(width,0)
 	return board
 
-func test_the_lead_question_has_a_painting_and_the_rest_keep_field_order()->void:
+func test_lanes_keep_field_order_and_cards_keep_their_line_places()->void:
 	var records:=_records()
-	var order:=Board.question_order(records)
-	var lead:Dictionary=order.lead
-	assert_bool(Board.has_painting(lead)).is_true()
-	for record:Dictionary in records:
-		if Board.has_painting(record):assert_float(float(record.progress)).is_less_equal(float(lead.progress))
+	var lanes:=Board.lanes_of({"investigations":records,"fields":[]})
 	var fields:Array=preload("res://scripts/hud/research_visuals.gd").NAMES.keys()
 	var last:=-1
-	for record:Dictionary in order.rest:
-		var index:=fields.find(String(record.dynamic))
+	for lane:Dictionary in lanes:
+		var index:=fields.find(String(lane.id))
 		if index<0:index=fields.size()
-		assert_int(index).is_greater_equal(last);last=index
-	assert_int(order.rest.size()).is_equal(records.size()-1)
+		assert_int(index).is_greater(last);last=index
+	var cards:=0
+	for lane:Dictionary in lanes:cards+=(lane.slots as Array).size()
+	assert_int(cards).is_equal(records.size())
+	# A card's place is its line of study: the order of the lines in its field,
+	# never its progress, so evidence building never trades places.
+	var two:Array=[
+		{"id":"b","name":"Zeta","dynamic":"health","channels":["health::Injury safety"],"progress":0.9},
+		{"id":"a","name":"Alpha","dynamic":"health","channels":["health::General health"],"progress":0.1}]
+	var slots:Array=(Board.lanes_of({"investigations":two,"fields":[]})[0] as Dictionary).slots
+	assert_str(String(slots[0].key)).is_equal("health::General health")
+	two[1]["progress"]=0.95;two[0]["progress"]=0.05
+	assert_str(String((Board.lanes_of({"investigations":two,"fields":[]})[0] as Dictionary).slots[0].key)).is_equal("health::General health")
 
-func test_every_card_names_its_field_in_full()->void:
+func test_every_lane_names_its_field_in_full()->void:
 	assert_str(Board.field_name({"dynamic":"production"})).is_equal("Craft & industry")
 	assert_str(Board.field_name({"dynamic":"","subcategory":"Stored reserve"})).is_equal("Stored reserve")
 	assert_str(Board.field_name({"name":"No field at all"})).is_empty()
@@ -130,41 +137,64 @@ func test_every_card_names_its_field_in_full()->void:
 		for i in 5:await get_tree().process_frame
 		var cards:Array=board.find_children("Question_*","",true,false)
 		assert_int(cards.size()).is_equal(records.size())
-		for card:Control in cards:
-			var label:Label=card.find_child("FieldLabel",true,false)
-			if card.name=="Question_bare":
-				assert_object(label).is_null()
-				continue
+		for lane:Control in board.find_children("Lane_*","",true,false):
+			var label:Label=lane.find_child("FieldLabel",true,false)
 			assert_object(label).is_not_null()
 			assert_str(label.text.strip_edges()).is_not_empty()
 			var needed:=label.get_theme_font("font").get_string_size(label.text,HORIZONTAL_ALIGNMENT_LEFT,-1,label.get_theme_font_size("font_size")).x
 			assert_float(label.size.x+1.0).is_greater_equal(needed)
 			assert_int(label.get_theme_font_size("font_size")).is_greater_equal(12)
 
-func test_cards_are_as_tall_as_their_words_and_fit_the_board()->void:
-	for width:int in [1120,600]:
+func test_cards_are_one_size_and_fit_the_board()->void:
+	for width:int in [1120,600,480]:
 		var board:=_board(_records(),width)
 		for i in 5:await get_tree().process_frame
 		var cards:Array=board.find_children("Question_*","",true,false)
 		assert_int(cards.size()).is_equal(5)
 		for card:Control in cards:
-			assert_float(card.size.y).is_less_equal(card.get_combined_minimum_size().y+1.0)
+			assert_float(card.size.y).is_equal_approx(Board.CARD_HEIGHT,1.0)
 			assert_float(card.get_global_rect().end.x).is_less_equal(float(width)+1.0)
-		var lead:Control=board.find_child("BeingLearned",true,false).find_child("Question_mouths_against_store",false,false)
-		assert_object(lead).is_not_null()
-		assert_float(lead.size.x).is_greater(float(width)*0.9)
-		assert_int(board.projects_grid.columns).is_equal(2 if width>=Board.WIDE else 1)
-		assert_bool(board.lead_row.vertical).is_equal(width<Board.WIDE)
+		for grid:GridContainer in board.lane_grids:assert_int(grid.columns).is_equal(2 if width>=Board.TWO_CARDS else 1)
 
-func test_a_shared_holdup_is_written_out_once()->void:
+func test_cards_hold_still_while_the_evidence_builds()->void:
+	var records:=_records()
+	var block:={"fields":[],"investigations":records,"on_tree":func()->void:pass,"on_work":func()->void:pass,"on_domain":func(_d:String)->void:pass}
+	var viewport:SubViewport=auto_free(SubViewport.new());viewport.size=Vector2i(900,2000);add_child(viewport)
+	var board=Board.new();viewport.add_child(board)
+	board.setup(block);board.position=Vector2.ZERO;board.size=Vector2(900,0)
+	for i in 4:await get_tree().process_frame
+	var places:={}
+	for card:Control in board.find_children("Question_*","",true,false):places[card.name]=[card,card.global_position,card.size]
+	# A day's evidence, people and clocks: the same cards, in the same places.
+	var next:Array=[]
+	for record:Dictionary in records:
+		var day:=record.duplicate();day["progress"]=minf(1.0,float(record.progress)+0.31);day["research_workforce"]=7.5;day["estimated_days"]=40;day["bottleneck"]="VALIDATION — repeated"
+		next.append(day)
+	var later:=block.duplicate();later["investigations"]=next
+	assert_bool(board.update_block(later)).is_true()
+	for i in 4:await get_tree().process_frame
+	for name:String in places:
+		var card:Control=board.find_child(name,true,false)
+		assert_object(card).is_same(places[name][0])
+		assert_vector(card.global_position).is_equal(places[name][1])
+		assert_vector(card.size).is_equal(places[name][2])
+	# A new question on the same line takes the same card.
+	next[0]["channels"]=["production::Craft capacity"]
+	var swapped:Array=next.duplicate(true)
+	swapped[0]["id"]="pottery_kiln_test";swapped[0]["name"]="A new question"
+	var lanes_before:=Board.lanes_of({"investigations":next,"fields":[]})
+	var lanes_after:=Board.lanes_of({"investigations":swapped,"fields":[]})
+	assert_array(Board._plan({"investigations":swapped,"fields":[]}).shape).is_equal(Board._plan({"investigations":next,"fields":[]}).shape)
+	assert_int(lanes_before.size()).is_equal(lanes_after.size())
+
+func test_a_holdup_is_named_on_its_card_and_explained_on_hover()->void:
 	var board:=_board(_records(),1120)
 	for i in 3:await get_tree().process_frame
 	var sentence:=preload("res://scripts/hud/research_visuals.gd").plain_bottleneck(WORKFORCE)
-	var written:=0;var named:=0
-	for label:Node in board.find_children("*","Label",true,false):
-		if (label as Label).text==sentence:written+=1
-		if (label as Label).text=="Thin team":named+=1
-	assert_int(written).is_equal(1)
+	var named:=0
+	for label:Node in board.find_children("Holdup","Label",true,false):
+		if (label as Label).text.to_lower().begins_with("a thin team"):named+=1
 	assert_int(named).is_equal(4)
 	for card:Control in board.find_children("Question_*","",true,false):
 		assert_str(card.tooltip_text).contains("Click to review")
+		if card.name!="Question_turbidity_judging":assert_str(card.tooltip_text).contains(sentence.left(1).to_lower()+sentence.substr(1))
