@@ -40,3 +40,10 @@ all seven old-female standing samples and all seven cross-sit samples; at
 Further skirt narrowing cannot repair those original pose contacts. A bounded
 runtime hand clearance fit is being coordinated separately. Full seven-body,
 robe and hide expansion has deliberately not begun before two-body acceptance.
+
+The fifth iteration partitions the green panel and gold hem on one shared
+vertex grid and skinning field, with no overlapping raised trim sheet. The
+fuller standing silhouette is restored. `reports/legacy_candidate_v5/` has 58
+views of onset, release and walking; PID48640 exited 0 without engine/script
+errors. This remains a HELD two-body checkpoint pending the separate pose fit
+and independent visual acceptance. Geometry is frozen for that calibration.
