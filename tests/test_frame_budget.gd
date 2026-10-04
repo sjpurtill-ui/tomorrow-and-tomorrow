@@ -67,7 +67,7 @@ func test_a_day_is_spread_over_its_calendar_span()->void:
 	assert_int(T.paced_budget_usec(100000.0,0,1.0,3.0,1.0/60.0,4000)).is_equal(roundi(125000.0/12.0)-4000)
 
 ## When the pace asked for needs more simulation a second than 30 frames can
-## spare, the frame grows only as far as that pace needs, and never past 20
+## spare, the frame grows only as far as that pace needs, and never past 15
 ## frames a second (the fastest speed is 6 days a second).
 func test_the_frame_grows_only_as_far_as_the_pace_needs()->void:
 	var T=terrain.get_script()
@@ -77,7 +77,7 @@ func test_the_frame_grows_only_as_far_as_the_pace_needs()->void:
 	# 100 ms days at 6 a second need 60% of each second; with 15 ms of map and
 	# drawing a frame, a 37.5 ms frame gives the rest to the days.
 	assert_int(T.catch_up_frame_usec(100000.0,6.0,15000.0)).is_equal(37500)
-	# A pace that needs more never costs more than 20 frames a second.
+	# A pace that needs more never drops below 15 frames a second.
 	assert_int(T.catch_up_frame_usec(400000.0,6.0,15000.0)).is_equal(terrain.DAY_FRAME_LONGEST_USEC)
 	# Behind the calendar at that pace, the day takes that frame's spare.
 	terrain.game_speed=5.0;terrain.calendar_bank_days=0.5;terrain._frame_sim_usec=0
@@ -86,3 +86,13 @@ func test_the_frame_grows_only_as_far_as_the_pace_needs()->void:
 	# At a day a second the same day is carried in 30 frames, as before.
 	terrain.game_speed=4.0
 	assert_int(terrain._day_step_budget_usec()).is_equal(terrain.DAY_FRAME_TARGET_USEC-15000)
+
+## At the fastest speed an open side panel redraws less often, so its
+## rebuilds take less time from the days; slower speeds keep the usual pace.
+func test_side_panels_refresh_less_often_at_fastest()->void:
+	terrain.game_speed=5.0
+	assert_float(terrain.live_report_refresh_interval()).is_equal(terrain.LIVE_REPORT_REFRESH_FASTEST_SECONDS)
+	terrain.game_speed=4.0
+	assert_float(terrain.live_report_refresh_interval()).is_equal(terrain.LIVE_REPORT_REFRESH_INTERVAL_SECONDS)
+	terrain.game_speed=0.0
+	assert_float(terrain.live_report_refresh_interval()).is_equal(terrain.LIVE_REPORT_REFRESH_INTERVAL_SECONDS)
