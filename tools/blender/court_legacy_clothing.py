@@ -329,7 +329,11 @@ def hide(b,f):
     fields=[p[:,1]-f.z_hip,top-p[:,1]]
     group=len(b.doc['meshes'])
     mask=b.trunk_mask&(y>f.z_hip-.06*k)&(y<f.z_shoulder+.03*k)
-    b.shell('hide_upper','CLOTH_A',mask,offsets,limits=fields)
+    # Skinning blends the armpit into the upper arm before the visible trunk
+    # ends. Include that small torso-side seam instead of deleting whole
+    # triangles merely because their arm influence exceeds the trunk mask.
+    underarm=(y>f.z_chest-.080*k)&(y<f.z_shoulder)&(np.abs(b.p[:,0])<f.p['chest_w']+.018*k)
+    b.shell('hide_upper','CLOTH_A',mask|underarm,offsets,limits=fields)
     lining_p=b.p+b.n*(.011*k)
     edge=hide_hem(f,hem)(np.column_stack((lining_p[:,0],-lining_p[:,2],lining_p[:,1])))
     facing=b.trunk_mask&(y<start+.04*k)&(y>hem-.10*k)
