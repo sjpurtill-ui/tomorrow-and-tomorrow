@@ -151,7 +151,9 @@ func _people(v:Dictionary,our:Dictionary)->Dictionary:
 		"views":views,"envy":float(v.envy),"contempt":float(v.contempt),"envy_why":String((v.why as Dictionary).get("envy","")),"contempt_why":String((v.why as Dictionary).get("contempt","")),
 		"strength":_estimated_strength_words(civ_id,float(v.strength_ratio)),"ratio":float(v.strength_ratio),
 		"consequences":Standing.consequences(civ_id,v),"memories":memories,"known_words":_known_words(civ_id),
-		"comparable":comparable(civ_id),"theirs":Standing.their_strengths(civ_id) if comparable(civ_id) else {}}
+		"comparable":comparable(civ_id),"theirs":Standing.their_strengths(civ_id) if comparable(civ_id) else {},
+		# Spies between us: cunning against cunning, as we reckon theirs.
+		"spies":Standing.spies_words(civ_id)}
 
 ## A people's strengths as we know them (Standing.their_strengths: their own
 ## month's reading through our estimate).

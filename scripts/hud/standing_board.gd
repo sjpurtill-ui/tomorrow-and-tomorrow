@@ -557,7 +557,7 @@ func _fill_arts()->void:
 		title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 		Kit.label(head,"%d%%" % roundi(float(pair[2])*100.0),"value",Color(0,0,0,0),false)
 		var meter:=Meter.new();meter.set_value(float(pair[2]),T.TEAL if String(pair[0])=="cunning" else T.GOLD);column.add_child(meter)
-		Kit.label(column,"Half is a typical people of our age; each effect below is the engine's own, the same for every people.","note")
+		Kit.label(column,"Half is a typical people of our age; each effect below is the engine's own, the same for every people."+(" Between spies, their cunning counts against ours by the same rule." if String(pair[0])=="cunning" else ""),"note")
 		for row:Dictionary in at_work.get(String(pair[0]),[]):
 			var line:=HBoxContainer.new();line.add_theme_constant_override("separation",8);line.mouse_filter=Control.MOUSE_FILTER_PASS;column.add_child(line)
 			var dot:=ColorRect.new();dot.custom_minimum_size=Vector2(6,6);dot.color=T.INK_MUTED;dot.size_flags_vertical=Control.SIZE_SHRINK_CENTER;dot.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_child(dot)
@@ -652,6 +652,15 @@ func _people_card(p:Dictionary)->Control:
 	strength.tooltip_text="Fighting strength: everyone who can defend the homes, and warriors trained and ready counted three times over."
 	strength.mouse_filter=Control.MOUSE_FILTER_PASS
 	refs.strength=strength
+	# Spies between us: the covert odds, cunning against cunning (standing.gd spies_words).
+	var spies:Dictionary=p.get("spies",{})
+	refs.spies=null
+	if not spies.is_empty():
+		var tone:=String(spies.get("tone","calm"))
+		var line:=Kit.label(column,String(spies.words)+".","note",_tone_color(tone) if tone!="calm" else Color(0,0,0,0))
+		line.tooltip_text=String(spies.get("detail",""))
+		line.mouse_filter=Control.MOUSE_FILTER_PASS
+		refs.spies=line
 	for pair:Array in [["envy","Envy",Standing.ENVY_RAID_FLOOR],["contempt","Contempt",Standing.CONTEMPT_FLOOR]]:
 		var amount:=float(p.get(String(pair[0]),0.0))
 		if amount<=float(pair[2]): continue
@@ -694,7 +703,7 @@ static func _people_card_shape(p:Dictionary)->Array:
 	for c:Dictionary in p.get("consequences",[]):doings.append(String(c.tone))
 	var memories:Array=[]
 	for memory:Dictionary in p.get("memories",[]):memories.append(String(memory.tone))
-	return [String(p.civ_id),p.get("accent",T.GOLD),p.get("emblem"),String(p.name),String(p.get("ruler",""))!="",views,
+	return [String(p.civ_id),p.get("accent",T.GOLD),p.get("emblem"),String(p.name),String(p.get("ruler",""))!="",views,String((p.get("spies",{}) as Dictionary).get("tone","")),
 		float(p.get("envy",0.0))>Standing.ENVY_RAID_FLOOR,float(p.get("contempt",0.0))>Standing.CONTEMPT_FLOOR,doings,memories]
 
 ## A people's card takes the day's feelings and words in place.
@@ -705,6 +714,10 @@ func _fill_people_card(refs:Dictionary,p:Dictionary)->void:
 	var views:Array=p.get("views",[])
 	for index in mini(views.size(),(refs.feelings as Array).size()):_fill_feeling(refs.feelings[index],views[index])
 	_put(refs.strength,String(p.strength)+".")
+	if refs.get("spies")!=null:
+		var spies:Dictionary=p.get("spies",{})
+		_put(refs.spies,String(spies.get("words",""))+".")
+		(refs.spies as Label).tooltip_text=String(spies.get("detail",""))
 	for badge:Array in refs.badges:
 		_put(badge[2],"%s %d%%" % [String(badge[1]),roundi(float(p.get(String(badge[0]),0.0))*100.0)])
 		_put(badge[3],String(p.get(String(badge[0])+"_why","")))

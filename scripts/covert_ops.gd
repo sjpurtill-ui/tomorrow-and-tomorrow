@@ -472,31 +472,36 @@ static func odds(kind:String,civ_id:String,city_id:String,cover:String,agent:Dic
 	# killer's reach (office_levers.gd intrigue edge).
 	var edge:=OfficeLevers.intrigue_edge("ChiefScout")
 	var kill_edge:=OfficeLevers.intrigue_edge("Marshal")
-	# Our cunning (standing.gd covert_edge): every operation's odds of success
-	# up, and of being caught down, by cunning past the typical.
+	# Cunning against cunning (standing.gd covert_edge, catch_edge): our
+	# cunning against theirs moves every operation's odds of success, and
+	# theirs against ours its odds of being caught or traced. The same rule
+	# their spies meet among us (_catch_chance).
 	var Standing:=preload("res://scripts/standing.gd")
-	var art:=Standing.covert_edge(Standing.art_of("player","cunning"))
+	var ours:=Standing.art_of("player","cunning")
+	var theirs:=Standing.art_of(civ_id,"cunning")
+	var art:=Standing.covert_edge(ours,theirs)
+	var watched:=Standing.catch_edge(theirs,ours)
 	var days:=travel_days(civ_id,city_id)
 	var report_days:=days+_rng("rep:%s:%s" % [civ_id,city_id]).randi_range(RUNNER_DAYS_MIN,RUNNER_DAYS_MAX)
-	var out:={"access":access,"days":days,"report_days":report_days,"kills_max":0,"wary":wary,"know":know,"tier":tier,"cunning":art}
+	var out:={"access":access,"days":days,"report_days":report_days,"kills_max":0,"wary":wary,"know":know,"tier":tier,"cunning":art,"watched":watched,"our_cunning":ours,"their_cunning":theirs}
 	match kind:
 		"watch":
 			# Getting eyes on them and getting word home: cover and stealth
 			# against their guard; the networks of a later people help.
 			out["success"]=clampf(access*0.5+stealth*0.3+edge*0.4+float(tier)*0.04-wary*0.35+art,0.2,0.95)
-			out["caught"]=clampf((wary*0.4+(1.0-stealth)*0.25)*(1.0-edge*2.0)-art,0.02,0.5)
+			out["caught"]=clampf((wary*0.4+(1.0-stealth)*0.25)*(1.0-edge*2.0)+watched,0.02,0.5)
 		"plant":
 			out["success"]=clampf(access*0.4+stealth*0.35+edge*0.4+float(tier)*0.05-wary*0.4+art,0.15,0.9)
 			# A standing source is found in time; wary people find it sooner.
-			out["caught"]=clampf(0.08+wary*0.25+(1.0-stealth)*0.15-edge-art,0.03,0.6)
+			out["caught"]=clampf(0.08+wary*0.25+(1.0-stealth)*0.15-edge+watched,0.03,0.6)
 		"steal":
 			out["success"]=clampf(access*0.35+stealth*0.3+know*0.2+edge*0.3+float(tier)*0.05-wary*0.3+art,0.12,0.85)
-			out["caught"]=clampf(0.12+wary*0.3+(1.0-stealth)*0.2-edge-art,0.04,0.65)
+			out["caught"]=clampf(0.12+wary*0.3+(1.0-stealth)*0.2-edge+watched,0.04,0.65)
 		"sabotage":
 			# Reaching the stores or the well and getting away: stealth and
 			# nerve against their guard.
 			out["success"]=clampf(access*0.35+stealth*0.35+nerve*0.2+edge*0.2-wary*0.3+art,0.15,0.9)
-			out["caught"]=clampf(0.15+wary*0.35+(1.0-stealth)*0.2-edge*0.5-art,0.05,0.7)
+			out["caught"]=clampf(0.15+wary*0.35+(1.0-stealth)*0.2-edge*0.5+watched,0.05,0.7)
 		"assassinate":
 			# Getting close enough to strike, then the strike itself. A people
 			# wary of us guards its leaders; our knowledge of their hall helps.
@@ -507,7 +512,7 @@ static func odds(kind:String,civ_id:String,city_id:String,cover:String,agent:Dic
 			out["kills_max"]=STRIKE_KILL_CAP
 			# Whether it is traced to us: a struck hall knows an envoy came
 			# from us; a quiet poisoning less so. A caught agent may talk.
-			out["trace"]=clampf((0.35 if cover=="envoy" else 0.18)+wary*0.3-stealth*0.2-art*0.5,0.05,0.9)
+			out["trace"]=clampf((0.35 if cover=="envoy" else 0.18)+wary*0.3-stealth*0.2+watched*0.5,0.05,0.9)
 			# The assassin's own fate: an envoy-cover strike in the open hall
 			# almost never comes home; a quiet strike has a slim chance.
 			out["escape"]=clampf(stealth*0.3+nerve*0.15+(0.0 if cover=="envoy" else 0.15)-reach*0.0,0.02,0.45)
@@ -1052,9 +1057,9 @@ static func _catch_incoming(day:int)->void:
 		if day<int(sp.arrive_day): continue
 		(s.incoming as Array).erase(spy)
 		var rng:=_rng(String(sp.seed)+":catch")
-		# Our watch catches some, by our security, the Pathfinder's hand and
-		# the share we keep on the watch.
-		if rng.randf()<_catch_chance():
+		# Our watch catches some, by our security, the Pathfinder's hand, the
+		# share we keep on the watch, and our cunning against theirs.
+		if rng.randf()<_catch_chance(String(sp.civ_id)):
 			# A person, held under guard: named, with what they know
 			# (captured_agents.gd). The god brings them in from the notice.
 			var held:Dictionary=_captives().call("take",sp,day)
@@ -1073,15 +1078,17 @@ static func _catch_incoming(day:int)->void:
 		else:
 			_stat("theirs_watched")
 
-static func _catch_chance()->float:
-	## Our security against a slipped-in agent: the Pathfinder's hand, the
-	## share of our people on the watch, and our cohesion.
+static func _catch_chance(sender:String="")->float:
+	## Our security against a slipped-in agent of `sender`'s: the Pathfinder's
+	## hand, the share of our people on the watch, our cohesion, and our
+	## cunning against theirs (standing.gd catch_edge: the same rule our own
+	## agents meet among them; a sender not named counts as typical).
 	var edge:=OfficeLevers.intrigue_edge("ChiefScout")
 	var watch:=clampf(float(GameState.population_allocations.get("Defense",0))/maxf(1.0,float(GameState.population_exact)*0.08),0.0,1.0)
 	var cohesion:=clampf(float(GameState.simulation_metrics.get("cohesion",0.5)),0.0,1.0)
-	# And our cunning (standing.gd catch_edge).
 	var Standing:=preload("res://scripts/standing.gd")
-	return clampf(0.25+edge*2.0+watch*0.3+cohesion*0.2+Standing.catch_edge(Standing.art_of("player","cunning")),0.1,0.9)
+	var theirs:=Standing.art_of(sender,"cunning") if sender!="" else 0.5
+	return clampf(0.25+edge*2.0+watch*0.3+cohesion*0.2+Standing.catch_edge(Standing.art_of("player","cunning"),theirs),0.1,0.9)
 
 static func set_caught_fate(index:int,fate:String)->void:
 	var caught:Array=state().caught

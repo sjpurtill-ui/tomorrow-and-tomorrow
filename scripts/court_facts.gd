@@ -150,7 +150,9 @@ static func _standing(out:Dictionary)->void:
 		var feelings:={}
 		for row:Array in Standing.VIEWS: feelings[String(row[0])]=roundi(float(v.get(String(row[0]),0.0))*100.0)
 		peoples.append({"name":String(v.civ_name),"headline":Standing.view_words(v),"feelings":feelings,"envy":roundi(float(v.envy)*100.0),"contempt":roundi(float(v.contempt)*100.0),
-			"strength":String(preload("res://scripts/hud/content/dock_content_standing.gd")._estimated_strength_words(String(v.civ_id),float(v.strength_ratio))),"does":does})
+			"strength":String(preload("res://scripts/hud/content/dock_content_standing.gd")._estimated_strength_words(String(v.civ_id),float(v.strength_ratio))),"does":does,
+			# The covert odds between us, cunning against cunning (standing.gd).
+			"spies":String(Standing.spies_words(String(v.civ_id)).get("words",""))})
 	out["standing"]={"peoples":peoples,"posture":String(Standing.posture().words)}
 
 # --------------------------------------------------------------------------
