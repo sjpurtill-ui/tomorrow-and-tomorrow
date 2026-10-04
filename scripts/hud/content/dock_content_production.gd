@@ -316,8 +316,9 @@ static func _group(item:String)->String:
 	if MilitaryCampaign.CONSUMABLE_KNOWLEDGE.has(item):return "Ammunition"
 	return "Weapons and gear"
 
-## One card of household goods per city, read inside that city's resources.
-func household_cards()->Array:
+## One card of household goods per city, read inside that city's resources
+## (the Wealth page sums them too, so both screens say the same).
+static func household_cards()->Array:
 	var cards:Array=[]
 	for city:Dictionary in GameState.player_settlements:
 		var card:Dictionary=SettlementModel.with_city_resources(String(city.id),func()->Dictionary:
@@ -335,7 +336,7 @@ static func _household_card()->Dictionary:
 	for resource:String in goods.BASKET:
 		var amount:=float(GameState.resource_stockpiles.get(resource,0.0))
 		if amount>0.0:basket.append({"resource":resource,"name":ResourceSystem.display_name(resource),"amount":amount})
-	return {"stock":goods.stock(),"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
+	return {"stock":goods.stock(),"spare":goods.spare(),"target":goods.target(),"coverage":goods.coverage(),"made":float(report.get("made",0.0)) if current else 0.0,
 		"worn":float(report.get("worn",0.0)) if current else goods.stock()*goods.daily_wear(),"reason":String(report.get("reason","")) if current else "","basket":basket,
 		# Goods the learners took today (research_600_catalog.gd learning_goods).
 		"learners":float(report.get("learners",0.0)) if current else 0.0}

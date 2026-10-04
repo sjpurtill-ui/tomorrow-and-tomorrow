@@ -620,7 +620,7 @@ func _apply_arms()->void:
 	var watch:=int(a.get("watch",0));var issued:=int(a.get("issued",0));var held:=int(a.get("held",0));var wanted:=int(a.get("wanted",0))
 	var made:=float(a.get("made",0.0));var hands:=float(a.get("hands",0.0))
 	var answer:Label=_arms.answer
-	answer.text=("%d of the watch's %d carry arms" % [issued,watch]) if watch>0 else "No watch to arm yet"
+	answer.text=("The watch: %d of %d armed" % [issued,watch]) if watch>0 else "No watch to arm yet"
 	answer.add_theme_color_override("font_color",T.INK if wanted<=0 else T.AMBER_TEXT)
 	var line:Label=_arms.held
 	line.text="%d %s in store; %s." % [held,"set" if held==1 else "sets",("%d more wanted" % wanted) if wanted>0 else "none wanted"]

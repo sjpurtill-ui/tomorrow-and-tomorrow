@@ -98,6 +98,15 @@ func _fill()->void:
 	_put(_refs.flow,Words.flow_sentence(flow))
 	_put(_refs.lean,String(data.get("lean","")))
 	if _refs.has("plan"):_put(_refs.plan,String(data.food_plan))
+	# The day's flow stays on the page; why the store is worth what it is and
+	# why this many hands are on food sit behind it, in its tooltip.
+	var why:PackedStringArray=[]
+	for key:String in ["lean","plan"]:
+		if _refs.has(key):
+			(_refs[key] as Control).visible=false
+			if String((_refs[key] as Label).text)!="":why.append(String((_refs[key] as Label).text))
+	(_refs.flow as Control).mouse_filter=Control.MOUSE_FILTER_PASS
+	(_refs.flow as Control).tooltip_text="\n\n".join(why)
 	var water:Dictionary=Words.water(data.water)
 	_fill_reading(_refs.water,String(water.headline),"",String(water.cause),String(water.tone))
 	var forecast:Dictionary=data.forecast90

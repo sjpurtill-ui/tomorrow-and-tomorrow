@@ -97,7 +97,7 @@ func refresh(force:=false)->void:
 	_rebuild("levy",levy_box,str([String(purse.levy),Purse.unit_word(),Purse.LEVELS.map(func(l:String)->int:return roundi(float(Purse.quote(l).per_season))),snappedf(float((forecast.quote as Dictionary).evasion),0.01)]),force,func()->void:_build_levy(String(purse.levy)))
 	_rebuild("lines",lines_box,str([purse.lines,int(purse.unpaid_months),purse.last_army,forecast.lines,Purse.market_open()]),force,func()->void:_build_lines(forecast,purse))
 	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
-	_rebuild("goods",goods_box,str([snappedf(float(report.get("made",0.0)),0.1),roundi(Goods.stock()),roundi(Goods.spare()),roundi(Arms.watch()),String(WorldSimulation.state.economy_stage),snappedf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.01),roundi(Goods.worth_in_rations(1.0)*10.0)]),force,func()->void:_build_goods())
+	_rebuild("goods",goods_box,str([int(WorldSimulation.state.elapsed_days),GameState.player_settlements.size(),snappedf(float(report.get("made",0.0)),0.1),roundi(Goods.stock()),roundi(Goods.spare()),roundi(Arms.watch()),String(WorldSimulation.state.economy_stage),snappedf(float(WorldSimulation.state.economy_metrics.get("market_access",0.0)),0.01),roundi(Goods.worth_in_rations(1.0)*10.0)]),force,func()->void:_build_goods())
 	var e:=Business.state()
 	_rebuild("business",business_box,str([Business.rung(),snappedf(Business.share(),0.001),snappedf(float(e.get("target",0.0)),0.001),Business.stance(),snappedf(Business.factor(),0.001),int(e.get("boom_months",0)),Business.bust_left(),Business.choices(),Business.next_needs(),Purse.unit_word(),stances_open]),force,func()->void:_build_business())
 	var parts:Variant=WorldSimulation.state.economy_metrics.get("social_pressure_parts",{})
@@ -366,11 +366,18 @@ func _build_goods()->void:
 	_clear(goods_box)
 	var report:Dictionary=WorldSimulation.state.civilian_goods.get("report",{})
 	var made:=float(report.get("made",0.0))
+	var stock:=Goods.stock()
+	var spare:=Goods.spare()
+	# Every town's makers, as the Production screen counts them.
+	var cards:Array=preload("res://scripts/hud/content/dock_content_production.gd").household_cards()
+	if not cards.is_empty():
+		made=0.0;stock=0.0;spare=0.0
+		for card:Dictionary in cards:made+=float(card.get("made",0.0));stock+=float(card.get("stock",0.0));spare+=float(card.get("spare",0.0))
 	var answer:=_answer("%s goods a day, worth %s rations" % [_amount(made),_amount(Goods.worth_in_rations(made))],17);answer.name="GoodsMade"
 	var buys:=Goods.buys(maxf(made,0.0),["Food","Timber"])
 	answer.tooltip_text="Makers make for the homes first, then for barter. Each makes about %s a day now: more with the crafts the people know, and as well as people work.\nA day's goods buy %s rations or %s timber at our own prices." % [_amount(Goods.goods_per_maker_day()),_amount(float(buys.Food)),_amount(float(buys.Timber))]
 	goods_box.add_child(answer)
-	var held:=_line("%s goods held; %s beyond the homes' use can change hands." % [EraWords.grouped(roundi(Goods.stock())),EraWords.grouped(roundi(Goods.spare()))],13,T.INK_MUTED,true);held.name="GoodsHeld"
+	var held:=_line("%s goods held; %s beyond the homes' use can change hands." % [EraWords.grouped(roundi(stock)),EraWords.grouped(roundi(spare))],13,T.INK_MUTED,true);held.name="GoodsHeld"
 	held.tooltip_text="Goods held in the homes and kept for barter. With other peoples, goods also buy arms, and bring families who come to work: see the Trade page."
 	goods_box.add_child(held)
 	if String(report.get("reason",""))!="" and made<=0.001:
