@@ -3940,10 +3940,11 @@ func _update_scale_lod() -> void:
 	var foliage_fade:=_close_vegetation_lod_strength()
 	if foliage_fade>0.001 and settler_marker and not _camera_in_motion():
 		_rebuild_close_vegetation(GameState.settlement_founded_at if "Hearth Circle" in GameState.settlement_completed else settler_marker.position)
-	# The worn ground of other towns and seen foreign cities, painted once the
-	# camera settles near them (settlement_grounds.gd; one at most per frame).
-	if camera.size<=4.0 and not _camera_in_motion():
-		preload("res://scripts/settlement_grounds.gd").serve(Vector2(camera_target.x,camera_target.z),maxf(camera.size*1.2,0.6))
+	# Stream a bounded ground footprint with the actual camera aspect and tilt.
+	# Coarser zoom levels keep fields continuous beyond the original centre.
+	if not _camera_in_motion():
+		var ground_view:=preload("res://scripts/settlement_ground_view.gd").camera_rect(camera,camera_target)
+		preload("res://scripts/settlement_grounds.gd").serve(Vector2(camera_target.x,camera_target.z),maxf(camera.size*1.2,0.6),ground_view)
 	if close_vegetation_root:
 		close_vegetation_root.visible=foliage_fade>0.001
 		if not is_equal_approx(foliage_fade,close_vegetation_fade):

@@ -21,13 +21,14 @@ func _build(data:Dictionary)->void:
 
 func _serve(at:Vector2)->void:
 	var home:=GameState.settlement_founded_at
-	for pass_index in 5:Ground.serve(Vector2(home.x,home.z)+at,.6)
+	var world:=Vector2(home.x,home.z)+at
+	for pass_index in 5:Ground.serve(world,.6,Rect2(world-Vector2.ONE*.128,Vector2.ONE*.256))
 
 func _tile_at(local:Vector2)->int:
 	var home:=GameState.settlement_founded_at
 	var world:=Vector2(home.x,home.z)+local
 	for slot in range(Ground.CITY_SLOTS,Ground.SLOTS):
-		if Ground.slot_frames[slot].y>0.0 and Ground.slot_rect(slot).grow(-Ground.TILE_PAD_KM).has_point(world):return slot
+		if Ground.slot_frames[slot].y>0.0 and Ground.slot_rect(slot).grow(-Ground.slot_frames[slot].z).has_point(world):return slot
 	return -1
 
 func _pixel(slot:int,local:Vector2,fields:=false)->Color:
@@ -148,3 +149,31 @@ func test_field_tracks_are_derived_before_cropping_hearth_and_route_context()->v
 	left=Ground._in_rect({},plots,routes,Rect2(0,0,.512,.512).grow(.032))
 	assert_array(left.plots).is_empty()
 	assert_array(left.plan._ground_paths).has_size(1)
+
+
+func test_wide_view_uses_four_coarser_tiles_without_changing_the_founding_core()->void:
+	var data:=_data()
+	var field:=_plot(500,Vector2(4,0),"field")
+	field.polygon=PackedVector2Array([Vector2(1.8,-1.2),Vector2(6.2,-1.2),Vector2(6.2,1.2),Vector2(1.8,1.2)])
+	data.plots.append(field)
+	_build(data);_serve(Vector2(2.05,.04))
+	var original_core:=Ground.slot_signatures[0]
+	var original_origin:=Ground.slot_origins[0]
+	var old_keys:=Ground.slot_keys.duplicate()
+	var world:=Vector2(GameState.settlement_founded_at.x,GameState.settlement_founded_at.z)
+	var view:=Rect2(world+Vector2(2,-1),Vector2(4,2))
+	# The previous complete view remains installed while replacement raster
+	# work is spread across service calls, rather than going bare for frames.
+	Ground.serve(view.get_center(),3.0,view)
+	assert_array(Array(Ground.slot_keys)).is_equal(Array(old_keys))
+	for pass_index in 5:Ground.serve(view.get_center(),3.0,view)
+	for corner:Vector2 in [Vector2(2,-1),Vector2(6,-1),Vector2(6,1),Vector2(2,1)]:
+		var slot:=_tile_at(corner)
+		assert_int(slot).is_greater_equal(Ground.CITY_SLOTS)
+		if slot>=Ground.CITY_SLOTS:assert_float(_pixel(slot,corner,true).r).is_greater(.9)
+	assert_int(Ground.slot_signatures[0]).is_equal(original_core)
+	assert_vector(Ground.slot_origins[0]).is_equal(original_origin)
+	assert_int(Ground._tile_cache.size()).is_less_equal(Ground.MAX_TILE_CACHE)
+	var builds:=Ground.tile_builds
+	for pass_index in 5:Ground.serve(view.get_center(),3.0,view)
+	assert_int(Ground.tile_builds).is_equal(builds)
