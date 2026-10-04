@@ -46,14 +46,12 @@ var _founding:Dictionary={}
 var _strength:Dictionary={}
 var _towns:Array=[]
 
-## The "New towns" switch (auto_founding.gd): whether our leaders found new
-## towns on their own, in plain words, one click either way.
+## How the seat grows (one_seat.gd): one seat that spreads outward into
+## districts, then a county, a state and a country, with the numbers that
+## take it to its next stage. No people founds separate towns.
 func founding_block()->Dictionary:
-	var state:=AutoFounding.dock()
-	state["options"]=[
-		{"id":"leaders","label":"Our leaders found them","tip":String(state.leaders_tip),"on_press":_set_founding.bind(true)},
-		{"id":"ruler","label":"Only when I order","tip":String(state.ruler_tip),"on_press":_set_founding.bind(false)}]
-	return state
+	var OneSeat:=preload("res://scripts/one_seat.gd")
+	return {"title":"How our seat grows","words":OneSeat.stage_words()+" "+OneSeat.NO_NEW_TOWNS,"options":[],"on":false}
 
 func _set_founding(enabled:bool)->void:
 	AutoFounding.set_on(enabled)

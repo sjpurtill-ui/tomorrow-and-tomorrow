@@ -1231,6 +1231,10 @@ func settlement_convoy_quote(destination:Vector2,duration_days:float,review_cach
 	_ensure_primary_settlement_record()
 	if "Hearth Circle" not in WorldSimulation.state.settlement_completed:
 		return {"ok":false,"reason":"A permanent first settlement must exist before another can be founded."}
+	# One seat for every people (one_seat.gd): it grows outward, it sends no
+	# settlers away. A people that lost its seat may still move its refugees.
+	if preload("res://scripts/one_seat.gd").has_seat():
+		return {"ok":false,"reason":preload("res://scripts/one_seat.gd").NO_NEW_TOWNS,"one_seat":true}
 	if bool(WorldSimulation.state.settlement_convoy.get("active",false)):
 		return {"ok":false,"reason":"A settlement convoy is already underway."}
 	if WorldSimulation.state.player_settlements.size()>=MAX_PLAYER_SETTLEMENTS:

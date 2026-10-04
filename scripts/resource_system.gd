@@ -651,7 +651,12 @@ func _ensure_surface_supply(resource:String,field:Dictionary,context:Dictionary,
 ## search for new timber, stone and fibre once the fronts they work run low:
 ## one more ring for every 6 carriers at work (_next_surface_front).
 func surface_search_rings()->int:
-	return clampi(1+int(WorldSimulation.state.effective_workers("Logistics")/SURFACE_SEARCH_CARRIERS),1,MAX_SURFACE_FRONT_RING)
+	return clampi(1+int(WorldSimulation.state.effective_workers("Logistics")/SURFACE_SEARCH_CARRIERS),1,max_surface_front_ring())
+
+## The farthest ring the carriers may search: the seat's reach, which grows
+## with its people (one_seat.gd reach_rings; at least MAX_SURFACE_FRONT_RING).
+func max_surface_front_ring()->int:
+	return maxi(MAX_SURFACE_FRONT_RING,preload("res://scripts/one_seat.gd").reach_rings())
 
 
 ## The people's wood, for the screens and the court: {timber in store,
@@ -671,7 +676,7 @@ func woodland_outlook()->Dictionary:
 	var at_work:=WorldSimulation.state.effective_workers("Logistics")
 	var share:=at_work/raw if raw>0.0 else 1.0
 	var next:=0
-	if rings<MAX_SURFACE_FRONT_RING:next=ceili(SURFACE_SEARCH_CARRIERS*float(rings)/maxf(0.05,share)-0.0001)
+	if rings<max_surface_front_ring():next=ceili(SURFACE_SEARCH_CARRIERS*float(rings)/maxf(0.05,share)-0.0001)
 	return {"timber":float(WorldSimulation.state.resource_stockpiles.get("Timber",0.0)),"stands_known":known,"stands_working":working,
 		"reach_km":SURFACE_FRONT_SPACING_KM*rings,"next_km":SURFACE_FRONT_SPACING_KM*(rings+1) if next>0 else 0.0,"carriers_for_next":next}
 
