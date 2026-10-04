@@ -205,7 +205,8 @@ static func _seat_at(court:Node3D,at:Vector2)->Node3D:
 	return null
 
 static func seat_exit(court:Node3D,mark:Node3D,metadata:="seat_exit")->Variant:
-	var exit:Variant=mark.get_meta(metadata,null)
+	if not mark.has_meta(metadata):return null
+	var exit:Variant=mark.get_meta(metadata)
 	if exit is String:return _mark_xz(court,exit)
 	if exit is Vector3:return Vector2(exit.x,exit.z)
 	if exit is Array and exit.size()>=3:return Vector2(float(exit[0]),float(exit[2]))
