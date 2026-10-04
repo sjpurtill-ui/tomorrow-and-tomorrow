@@ -5335,9 +5335,7 @@ func _settlement_stage_visual_layout(profile:Dictionary,population:int,plots:Arr
 	# The extent is physical aggregate land cover, not one object per resident. Plot
 	# geometry wins when it has spread farther; population supplies a stable fallback
 	# for late-game abstraction where plot records are intentionally bounded.
-	var stage:=clampi(int(profile.get("stage",0)),0,6)
-	var density_people_km2:float=float([350.0,500.0,750.0,1050.0,2200.0,3600.0,4600.0][stage])
-	var population_radius:=sqrt(maxf(1.0,float(population))/(PI*density_people_km2))
+	var population_radius:=preload("res://scripts/settlement_visual_extent.gd").radius(population)
 	var plot_radius:=0.0
 	for plot in plots:
 		var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
@@ -10021,7 +10019,7 @@ func _append_roof_wall_skirt(surface:SurfaceTool,center:Vector3,local_center:Vec
 		sides+=1
 	return sides
 
-func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,plot:Dictionary,center:Vector3,lod:int=0)->Dictionary:
+func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,plot:Dictionary,center:Vector3,lod:int=0,validate_placement:=false)->Dictionary:
 	var polygon:PackedVector2Array=plot.get("polygon",PackedVector2Array())
 	if polygon.size()<3: return {"roofs":0,"walls":0}
 	var plot_center:=Vector2(plot.get("centroid",Vector2.ZERO))
@@ -10042,6 +10040,9 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 	var defensive_depth:=clampf(float(architecture.get("defensive_depth",0.5)),0.0,1.0)
 	var terrain_conformity:=clampf(float(architecture.get("terrain_conformity",0.5)),0.0,1.0)
 	var route_id:=int(plot.get("frontage_route_id",-1))
+	if validate_placement and not GameState.settlement_routes.any(func(route:Dictionary)->bool:
+		return int(route.get("id",-2))==route_id and bool(route.get("active",true)) and (route.get("points",PackedVector2Array()) as PackedVector2Array).size()>=2):
+		return {"roofs":0,"walls":0}
 	var route_maturity:=0.0
 	for route in GameState.settlement_routes:
 		if int(route.get("id",-2))!=route_id: continue
@@ -10090,6 +10091,7 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 	var lod_coverage_scale:=clampf(sqrt(float(source_mass_count)/float(maxi(1,mass_count)))*0.86,1.0,2.35) if lod>=1 else 1.0
 	var appended:=0
 	var walls_appended:=0
+	var placed_envelopes:Array[PackedVector2Array]=[]
 	for mass_index in mass_count:
 		var mass_roof_plan:=roof_plan
 		if emergency_camp:
@@ -10158,6 +10160,18 @@ func _append_satellite_roof_fabric(surface:SurfaceTool,wall_surface:SurfaceTool,
 		elif fabric_generation>=10 and use in ["civic","sacred"]:
 			half_width*=rng.randf_range(1.18,1.38)
 			half_depth*=rng.randf_range(1.08,1.24)
+		if validate_placement:
+			# Include eave skew, round covers, repair patches and the small camp
+			# shadow in the envelope, not just the center of the candidate mass.
+			var radius:=sqrt(half_width*half_depth)*.91 if mass_roof_plan in ["round_thatch","round_light_shelter"] else 0.0
+			var right:=side_axis*(maxf(half_width,radius)*1.1+.0005)
+			var forward:=depth_axis*(maxf(half_depth,radius)*1.1+.0005)
+			var legal:=preload("res://scripts/settlement_fallback_placement.gd").place(local_center,plot_center,right,forward,polygon,GameState.settlement_routes,
+				func(point:Vector2)->bool:return _settlement_stage_land_at(point+Vector2(center.x,center.z)),
+				func(point:Vector2)->float:return _close_surface_height_at(point.x+center.x,point.y+center.z),placed_envelopes)
+			if legal.is_empty():continue
+			local_center=legal.position;half_width*=float(legal.scale);half_depth*=float(legal.scale)
+			placed_envelopes.append(legal.footprint)
 		# Portable covers remain a terrain-draped symbol. Durable fabric receives a
 		# real wall skirt below the roof, so oblique aerial views communicate storeys
 		# and density without spawning one authored building node per household.
@@ -10508,7 +10522,9 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 		pstamp=ptrace.mark("plot_fabric_ground_render",pstamp)
 		# Keep genuine cultivated fields and later unsupported forms, but never
 		# paint the household/service parcel polygons over the new working ground.
-		plots = plots.filter(func(plot: Dictionary) -> bool: return not EarlySettlementGround.handles(plot))
+		plots = plots.filter(func(plot: Dictionary) -> bool:
+			return not EarlySettlementGround.handles(plot) or (
+				int(plot.get("id",0))>OrganicTownVisual.MAX_PLOTS and EarlySettlementVisual.supports(plot)))
 		if plots.is_empty(): return
 	var ground_surface := SurfaceTool.new()
 	ground_surface.begin(Mesh.PRIMITIVE_TRIANGLES)
@@ -10637,8 +10653,10 @@ func _create_plot_fabric(center: Vector3, plots: Array[Dictionary], lod: int, pa
 			if status == "under_construction" and float(plot.get("construction_progress", 0.0)) < 0.26:
 				continue
 			var mass_counts: Dictionary = {"roofs": 0, "walls": 0}
-			if not EarlySettlementVisual.supports(plot) and not uses_kit:
-				mass_counts = _append_satellite_roof_fabric(roof_surface,wall_surface,plot,center,lod)
+			# Overbudget parcels still need roofs. A failed placement within the
+			# kit budget stays rejected: fallback must not bypass its land/road checks.
+			if not uses_kit and (not EarlySettlementVisual.supports(plot) or int(plot.get("id",0))>OrganicTownVisual.MAX_PLOTS):
+				mass_counts = _append_satellite_roof_fabric(roof_surface,wall_surface,plot,center,lod,EarlySettlementVisual.supports(plot))
 			roof_count+=int(mass_counts.get("roofs",0))
 			wall_count+=int(mass_counts.get("walls",0))
 		if lod == 0 and status in ["damaged", "ruin"] and land_use!="temporary_encampment":
