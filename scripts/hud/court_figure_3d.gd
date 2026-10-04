@@ -387,6 +387,7 @@ func _dress()->void:
 	var skin:=Color(look.get("skin",Color("bd8659")))
 	var hair_colour:=readable_hair(Color(look.get("hair_colour",Color("2b2018"))))
 	var lit:=bool(look.get("lit",false))
+	var merging:=lit and Merge.enabled and skeleton!=null
 	var colours:={
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
 		"EYES":Color("120a06"),"EYE_WHITE":Color("e9dfcb"),"EYE_SHINE":Color("fffdf6"),
@@ -401,7 +402,13 @@ func _dress()->void:
 		var shown:=part in FACE_PARTS or part==hair or part==beard or (part.begins_with(outfit+"_") and not part in hidden_pieces) or part==String(PROPS.get(stance,"-"))
 		if part=="prop_stool" and (floor_seated or seat_height>=0.0):shown=false
 		mesh_node.visible=shown
-		if (not shown and not part in CARRIED.values()) or mesh_node.mesh==null:continue
+		# The source parts retain geometry, skin and morphs for later redressing,
+		# but only the merged pieces draw them. Hidden shader materials still
+		# reserve instance-uniform buffer space (16 slots per mesh on GL).
+		if (merging and not part.begins_with("prop_")) or (not shown and not part in CARRIED.values()):
+			_release_draw_materials(mesh_node)
+			continue
+		if mesh_node.mesh==null:continue
 		# In a lit court they cast shadows (not the paint on the skin).
 		# (hair and beards neither: their shade on the brow reads as a dark band)
 		var shadows:=lit and not part in NO_SHADOW and not part.begins_with("hair_") and not part.begins_with("beard_")
@@ -416,8 +423,12 @@ func _dress()->void:
 			var cover:=int(OUTFITS.get(outfit,0)) if part=="Body" else 0
 			mesh_node.set_surface_override_material(surface,material(slot,colours.get(slot,Color("8a7a66")),cover,lit,inked))
 		if part=="Body":_paint_face(mesh_node,beard)
-	if lit and Merge.enabled and skeleton!=null:_merge_parts(colours,int(OUTFITS.get(outfit,0)),beard)
+	if merging:_merge_parts(colours,int(OUTFITS.get(outfit,0)),beard)
 	else:_unmerge()
+
+func _release_draw_materials(node:MeshInstance3D)->void:
+	for surface in node.get_surface_override_material_count():
+		if node.get_surface_override_material(surface)!=null:node.set_surface_override_material(surface,null)
 
 func _load_wardrobe(outfit:String)->void:
 	if skeleton==null:return
@@ -479,7 +490,9 @@ func _merge_parts(colours:Dictionary,cover:int,beard:String)->void:
 	for group in ["Body","Rest","Hair","Eyes"]:
 		var node:=_merged.get(group) as MeshInstance3D
 		if not made.has(group):
-			if node!=null:node.visible=false
+			if node!=null:
+				node.visible=false
+				_release_draw_materials(node)
 			continue
 		if node==null:
 			node=MeshInstance3D.new();node.name=group
@@ -530,7 +543,9 @@ func _vanish_for_gore()->void:
 ## Back to the parts as they are (no lit court: the studio, the flat stage).
 func _unmerge()->void:
 	for node in _merged.values():
-		if is_instance_valid(node):(node as MeshInstance3D).visible=false
+		if is_instance_valid(node):
+			(node as MeshInstance3D).visible=false
+			_release_draw_materials(node)
 	_meshes=_parts.duplicate()
 
 ## Their own painted face (court_figure_face.gdshaderinc): years, freckles,
