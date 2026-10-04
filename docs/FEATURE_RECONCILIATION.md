@@ -1,3 +1,19 @@
+## October 4, 2026 — MPFB authoring dependency
+
+Setup documentation on `codex/court-face-richness`, based on synchronized main `7c214eb6`, records the locally enabled MPFB 2.0.17 and five newly installed CC0 anatomy/expression packs. Blender generation and GLB export retain a 53-bone rig and 67 facial/speech targets. See `docs/MPFB_SETUP.md` for sources, local paths and limits. Tool installation and the verification model stay local; no imported head is wired into the player court. This delivery changes documentation only and is pushed/verified before canonical fast-forward.
+
+## October 4, 2026 — nasal and ear geometry
+
+Integrated runtime source `473fa8990a47dca94804601f25cfc07602bef276` from `codex/court-face-richness`, on main base `304ad0cb`. Local skinned refinement restores a projecting bridge/tip/alar form and shallow nasal recesses, and sculpts ear rims, bowls, inner folds and lobes. All21 original/legacy/era body assets carry the same head, identities and expressions. The generator reproduces the refinement after export; rig, clip, garment and nonface source data are preserved. The previous surface-only pass had not addressed the missing shapes.
+
+Final103 court tests and8 ear-helper tests pass. Independent validation passes all21 assets and7 head comparisons with no added open/nonmanifold edges; private rendered front/profile/expression checks pass. `docs/COURT_ANATOMY_HANDOFF.md` records exact checks, source worker commits, increased geometry budget and remaining stylized proportions. Main is pushed and freshly verified before canonical fast-forward; player/editor sessions remain open and local generated evidence is excluded.
+
+## October 4, 2026 — court face depth, eye detail and expression normals
+
+Canonical base `dd4bd733`; integrated runtime source `4e98252b132c607f4e23fbbb0c89c7489dd94c6e` from `codex/court-face-richness`, with source normal worker `34a81041` cherry-picked as `937017c5`. Continuous skin shading and restrained surface relief make cheeks, lids and lips read with the room's light; irises/whites/glints gain detail, brow intersections are cleared, and authored expression normals are retained. Body-variant reuse no longer dereferences a freed acting controller; fallback pupils/glints have explicit draw order. No geometry assets, rig, clip, identity, simulation or save-schema changes.
+
+Combined court acceptance passes 102/102; final fallback checks pass 9/9 (103 distinct). Private GPU sheets, close-ups and 21 expression/gaze states pass in merged and unmerged modes. Details, limitations and failure-to-fix evidence are in `docs/COURT_FACE_RICHNESS_HANDOFF.md`. Both main refs reconciled without source conflicts; verified remote delivery precedes canonical fast-forward. Existing canonical files are preserved and the running player session is not restarted.
+
 ## October 4, 2026 — court and city visual evolution integrated
 
 User-authorized integration of `codex/court-presence` source `7516b33f9d13e37237687ac5d881fa8decb508bb` onto canonical base `ec537b74fa82253806dc3cb5ee2ce9bd718ba81d`. Both main refs already occur in the delivery ancestry, so no runtime conflict resolution changes the tested source. Includes the prerequisite16-room chronological court, era wardrobes/etiquette, movement/clothing, bounded city presentation/life and final camera/lighting/sound work. Existing four-method execution scope and state authorities remain intact. All30 new GLBs are tracked; original body/rig assets unchanged. Fresh combined court/city checks pass487/487 and all four raw clothing/room validators pass. Details and additional city checks are in `docs/INTEGRATION_STATUS.md`; earlier visual evidence remains applicable to identical runtime/assets. Verified main push precedes canonical fast-forward; unrelated local files are preserved. No player restart is performed, and the launcher imports the new assets on the next normal start.

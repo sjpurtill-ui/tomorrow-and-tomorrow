@@ -145,6 +145,9 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 	if _materials.size()>=MATERIAL_LIMIT:_materials.erase(_materials.keys()[0])
 	var made:=ShaderMaterial.new()
 	made.shader=shader_for(lit,"read" if slot in STENCIL_READ else ("write" if slot in STENCIL_WRITE else ("card" if slot=="HAIR_CARD" else "")))
+	# Separate fallback surfaces share one sort origin. Order their transparent
+	# stencil readers explicitly so the iris cannot paint over its pupil/glint.
+	if slot in STENCIL_READ:made.render_priority=STENCIL_READ.find(slot)+1
 	made.set_shader_parameter("albedo",colour)
 	made.set_shader_parameter("cover_channel",cover)
 	made.set_shader_parameter("key_dir",key_dir)
@@ -172,9 +175,9 @@ static func material(slot:String,colour:Color,cover:=0,lit:=false,inked:=true)->
 		# hair breaks into strokes where it meets the skin (stubble all over)
 		if slot in ["HAIR","STUBBLE"]:made.set_shader_parameter("stipple",1.0)
 		if lit:
-			made.set_shader_parameter("fill",0.22 if slot=="SKIN" else 0.16)
+			made.set_shader_parameter("fill",0.14 if slot=="SKIN" else 0.16)
 			if slot=="SKIN":made.set_shader_parameter("grain",0.025)
-		if inked and not slot in ["BROW","STUBBLE","HAIR_CARD"]:made.next_pass=_ink(cover,slot=="HAIR")
+		if inked and not slot in ["BROW","STUBBLE","HAIR_CARD"]:made.next_pass=_ink(cover,slot=="HAIR",slot=="SKIN")
 	_materials[key]=made
 	return made
 
@@ -204,12 +207,13 @@ static func readable_hair(colour:Color)->Color:
 	if colour.v>=0.20:return colour
 	return Color.from_hsv(colour.h,colour.s*0.85,lerpf(colour.v,0.20,0.6))
 
-static func _ink(cover:int,stippled:=false)->ShaderMaterial:
-	var key:="%d|%d" % [cover,int(stippled)]
+static func _ink(cover:int,stippled:=false,skin:=false)->ShaderMaterial:
+	var key:="%d|%d|%d" % [cover,int(stippled),int(skin)]
 	if not _inks.has(key):
 		var ink:=ShaderMaterial.new();ink.shader=INK
 		ink.set_shader_parameter("cover_channel",cover)
 		ink.set_shader_parameter("stipple",1.0 if stippled else 0.0)
+		ink.set_shader_parameter("skin",skin)
 		_inks[key]=ink
 	return _inks[key]
 
@@ -398,7 +402,7 @@ func _dress()->void:
 	var merging:=lit and Merge.enabled and skeleton!=null
 	var colours:={
 		"SKIN":skin,"HAIR":hair_colour,"BROW":hair_colour.darkened(0.22),
-		"EYES":Color("120a06"),"EYE_WHITE":Color("e9dfcb"),"EYE_SHINE":Color("fffdf6"),
+		"EYES":skin.darkened(0.68).lerp(Color("271b18"),0.45),"EYE_WHITE":Color("e9dfcb"),"EYE_SHINE":Color("fffdf6"),
 		"IRIS":Color(look.get("eye_colour",Color("5a3a22"))),"PUPIL":Color("140d08"),
 		"MOUTH":Color("2a0d0a").lerp(skin.darkened(0.7),0.35),"HAIR_CARD":hair_colour,"LEATHER":Color(look.get("leather",Color("5b3b24"))),
 		"STUBBLE":skin.lerp(hair_colour,0.42).darkened(0.08),"WOOD":Color("6b4a2e"),"CLAY":Color("a0603a"),

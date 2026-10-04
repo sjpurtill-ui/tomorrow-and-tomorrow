@@ -8,10 +8,13 @@ uniform vec3 ink : source_color = vec3(0.165, 0.133, 0.090);
 uniform float width_px = 1.7;
 uniform int cover_channel = 0;
 uniform float stipple = 0.0;
+uniform bool skin = false;
 
 varying float v_cover;
 varying float v_edge;
 varying vec2 v_rest;
+varying vec2 v_face;
+varying float v_head;
 
 float hash3(vec3 p) {
 	p = fract(p * 0.3183099 + vec3(0.1, 0.2, 0.3));
@@ -30,6 +33,8 @@ float noise3(vec3 x) {
 void vertex() {
 	v_edge = COLOR.g;
 	v_rest = UV;
+	v_face = vec2(UV.x, 1.0 - UV.y);
+	v_head = 1.0 - UV2.y;
 	v_cover = cover_channel == 1 ? COLOR.g : (cover_channel == 2 ? COLOR.b : (cover_channel == 3 ? COLOR.a : 0.0));
 	vec3 view_position = (MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	vec4 clip = PROJECTION_MATRIX * vec4(view_position, 1.0);
@@ -52,6 +57,9 @@ void vertex() {
 
 void fragment() {
 	if (v_cover > 0.5) {
+		discard;
+	}
+	if (skin && v_head > 0.5 && abs(v_face.x) < 0.055 && v_face.y > 0.065 && v_face.y < 0.165) {
 		discard;
 	}
 	// no ink round the strokes where hair thins out over the skin

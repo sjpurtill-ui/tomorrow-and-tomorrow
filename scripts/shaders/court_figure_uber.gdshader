@@ -151,8 +151,31 @@ void fragment() {
 	bool flat_colour = pc.x > 0.5;
 	bool skin = pc.y > 0.5;
 	vec3 base = albedo * mix(1.0, v_ao, 0.8);
+	if (s == 16) {
+		// The upper lid shades the sclera; its corners turn into the socket.
+		float upper_lid = smoothstep(0.30, 1.0, v_rest.y);
+		float corners = smoothstep(0.25, 0.50, abs(v_rest.x - 0.5));
+		base *= 0.98 - upper_lid * 0.30 - corners * 0.15;
+	} else if (s == 13) {
+		vec2 iris = (v_rest - 0.5) * 2.0;
+		float radius = length(iris);
+		float angle = atan(iris.y, iris.x);
+		// Radial fibres, an amber inner ring and the dark outer limbus.
+		// Fade the fibres when the iris is only a few pixels across.
+		float detail = 1.0 - smoothstep(0.045, 0.18, fwidth(radius));
+		float fibres = sin(angle * 47.0 + sin(angle * 11.0) * 1.8 + radius * 14.0);
+		base *= (1.04 + fibres * 0.16 * detail) * (1.0 - 0.48 * smoothstep(0.77, 1.0, radius));
+		base = mix(base, base * vec3(1.22, 1.08, 0.78), face_ell(vec2(radius - 0.49, 0.0), vec2(0.15, 1.0)) * 0.35);
+	} else if (s == 15) {
+		// A small corneal glint rather than a white button over the pupil.
+		if (length(v_rest - 0.5) > 0.34) { discard; }
+	} else if (s == 3) {
+		float strokes = noise3(vec3(v_rest.x * 75.0, v_rest.y * 6.0, 4.1));
+		base *= 0.92 + 0.16 * strokes;
+	}
 	if (skin) {
 		base = paint_face(base, v_face, v_face2, face_a, face_b, slot_depth(albedo));
+		NORMAL = face_normal(VERTEX, normalize(NORMAL), v_face, v_face2, face_a.x);
 	}
 	if (pb.w > 0.0) {
 		base *= (0.94 + 0.12 * v_card) * (0.90 + 0.20 * noise3(vec3(v_face.x * 30.0 + v_card * 9.0, v_face.y * 2.0, 1.7)));
@@ -190,14 +213,15 @@ void fragment() {
 	vec3 shade = skin ? mix(skin_shade, vec3(0.50, 0.56, 0.74), 0.55 * depth) : other_shade;
 	vec3 glow = base * shade * pb.y * dim;
 	float facing = clamp(dot(normalize(NORMAL), VIEW), 0.0, 1.0);
-	glow += base * key_color * front_fill * smoothstep(0.15, 0.85, facing) * dim;
+	float face_fill = skin ? 0.55 : (flat_colour ? 0.55 : 1.0);
+	glow += base * key_color * front_fill * face_fill * smoothstep(0.15, 0.85, facing) * dim;
 	float fres = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
 	// deep skin takes a cool rim from the sky, so its features part from each other
 	vec3 rim = skin ? mix(rim_color, vec3(0.62, 0.76, 1.0), depth) : rim_color;
 	glow += rim * (pa.y + 0.22 * depth) * fres * 0.35;
 	// the fire's light from the floor, under the chin, the nose and the brows
 	vec3 n_world = normalize((INV_VIEW_MATRIX * vec4(NORMAL, 0.0)).xyz);
-	glow += base * bounce_color * bounce * (skin ? 2.0 : 0.8) * smoothstep(0.10, -0.60, n_world.y) * dim;
+	glow += base * bounce_color * bounce * (skin ? 0.85 : 0.8) * (1.0 - smoothstep(-0.60, 0.10, n_world.y)) * dim;
 	// the catch of light in the eye shines of itself; the whites a little
 	glow += albedo * pc.z * dim;
 	if (pa.w > 0.0) {
@@ -234,9 +258,9 @@ void light() {
 		float lit = smoothstep(-0.02, pa.x, ndl);
 		float half_lit = smoothstep(-0.42, -0.18, ndl) * 0.30;
 		if (skin) {
-			// skin in four planes of tone, so a head turns in the light
-			// (the deepest plane keeps a fifth of the light: skin is never a hole)
-			lit = 0.20 + 0.22 * smoothstep(-0.30, -0.22, ndl) + 0.30 * smoothstep(0.08, 0.16, ndl) + 0.28 * smoothstep(0.48, 0.56, ndl);
+			// Continuous form: the cheek, socket and jaw keep their curvature
+			// as they turn. Cloth retains the court's painted bands.
+			lit = 0.10 + 0.90 * smoothstep(-0.35, 0.95, ndl);
 			half_lit = 0.0;
 		}
 		float att = LIGHT_IS_DIRECTIONAL ? mix(1.0, ATTENUATION, shadow_amount) : ATTENUATION;
@@ -253,8 +277,8 @@ void light() {
 			lc = mix(lc, vec3(l), 0.40 * depth);
 			float wrap = smoothstep(-0.45, 0.15, ndl) * (1.0 - lit);
 			DIFFUSE_LIGHT += lc * vec3(0.55, 0.20, 0.12) * wrap * att * (1.0 - depth) * 0.55 / PI;
-			float sp = pow(clamp(dot(reflect(-LIGHT, NORMAL), VIEW), 0.0, 1.0), 9.0) * att;
-			SPECULAR_LIGHT += vec3(0.80, 0.88, 1.0) * l * sp * 0.12 * depth;
+			float sp = pow(clamp(dot(NORMAL, normalize(LIGHT + VIEW)), 0.0, 1.0), 24.0) * att;
+			SPECULAR_LIGHT += mix(LIGHT_COLOR, vec3(l), 0.65) * sp * (0.018 + 0.045 * depth);
 			term = skin_terminator;
 		}
 		DIFFUSE_LIGHT += lc * (tint * tone + term * edge * 0.30) / PI;
