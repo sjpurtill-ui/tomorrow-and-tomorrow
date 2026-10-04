@@ -15,7 +15,7 @@ const HARD_YEAR_DEATHS:=1.4
 ## read either are the same.
 static func current_plan(id:String,personality:Dictionary={})->Dictionary:
 	var state:=WorldSimulation.state
-	var situation:={"food_days":float(state.simulation_metrics.get("food_days",30)),"food_intake_ratio":float(state.simulation_metrics.get("food_intake_ratio",1)),"at_war":false}
+	var situation:={"food_days":float(state.simulation_metrics.get("food_days",30)),"food_intake_ratio":float(state.simulation_metrics.get("food_intake_ratio",1)),"at_war":false,"year":float(state.elapsed_days)/365.0}
 	for metric:String in ["food_consumption","army_provisions_required","army_provision_delivery_ratio"]:
 		if state.simulation_metrics.has(metric):situation[metric]=state.simulation_metrics[metric]
 	var met:=0
@@ -449,8 +449,9 @@ static func military_orders(id:String,plan:Dictionary={})->void:
 ## leaders' daily split keeps the watch its path weighs (work_paths.gd WORK:
 ## the war path +12; watch_path_share, the leaders' own choice before any
 ## hold). The ruler holds the watch at its temper's share of the people
-## (`target`: recruit_share, more at war) only where that is more than the
-## path keeps, and lets the hold go once the path asks as much, so after a
+## (`target`: recruit_share, civilization_strategy.gd watch_share: the age's
+## typical share for an even temper at peace, twice at war) only where that
+## is more than the path keeps, and lets the hold go once the path asks as much, so after a
 ## war the watch falls back to what the path keeps, both ways and never past
 ## it. A hungry people at peace holds what it has: hunger_stand_down sends
 ## the surplus home. Small swings (under 2, or 2 in 100) move nobody.

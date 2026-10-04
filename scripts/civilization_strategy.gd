@@ -47,7 +47,7 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 	if hungry:training="suspended"
 	elif war:training="maintain" if risk<.65 else "regular"
 	return {"personality":p,"goals":goals,"ambition":ambition,"research_weights":weights,"training":training,"at_war":war,"hungry":hungry,"food_shortage":constraints.food_shortage,"delivery_shortage":constraints.delivery_shortage,
-		"recruit_share":clampf(.025+assertive*.055+discipline*.035+risk*.02-empathy*.02+(.08 if war else 0),.02,.22),
+		"recruit_share":watch_share(p,float(situation.get("year",0.0)),war),
 		"capacity_share":clampf(.3+assertive*.45+discipline*.25+(.2 if war else 0),.15,1),"deploy_share":.35+assertive*.25+risk*.2,
 		# Boldness settles sooner, farther and oftener, but sends thinner rations:
 		# a bold ruler's new town may go hungry before its first harvest; a
@@ -57,6 +57,37 @@ static func preferences(personality:Dictionary,situation:Dictionary)->Dictionary
 		"war_opinion":-.85+assertive*.35+risk*.2-empathy*.15,"war_food":FoodCare.store_gate(30+(1-risk)*50),
 		"trade_opinion":.25-empathy*.35-open*.15,"peace_food":FoodCare.store_gate(12+empathy*18+(1-risk)*12),
 		"offensive":assertive*.55+risk*.45>empathy*.3+(1-risk)*.35+.15}
+
+## A RULER'S WATCH: the share of the whole people a computer ruler holds
+## under arms (civilization_controller.gd interim_watch; the watch is the
+## army, watch_military.gd), read against the age as the Standing page reads
+## Might (standing_scale.gd DEFENSE_SHARE: the benchmarks' share of the able
+## on watch or under arms, x ABLE_SHARE of the people able). At peace an even
+## temper keeps the age's typical share (4 in 100 of the able before year
+## 100, about 2.4 in 100 of the whole people); the boldest and hardest twice
+## it (the age's high), the most caring and cautious half (its low). At war,
+## or gathering every spear against the god's people (world_answer.gd), twice
+## that, never past the age's most. Pre-modern peoples kept a few in 100
+## under arms in peace and 3-7 in war (army_levy_law.gd, war_loop.gd
+## MOBILIZE_MIN/MAX); 6-10 in 100 of the whole people in peace, as rulers held
+## before 2026-10-03 (.025 + .055 assertiveness... of the people, +.08 at
+## war), is the age's most, not its peace. The hold is a floor: the leaders'
+## own split (the path, the neighbours' pressure: GovernmentPeopleSystem
+## neighbour_threat) keeps more when it asks more, by the same rules as the
+## god's leaders.
+const WATCH_LEAN:={"assertiveness":.055,"discipline":.035,"risk_tolerance":.02,"empathy":-.02}
+const WATCH_AT_WAR:=2.0
+static func watch_share(p:Dictionary,year:float,war:bool)->float:
+	var Scale:=preload("res://scripts/standing_scale.gd")
+	var lean:=0.0
+	var span:=0.0
+	for axis:String in WATCH_LEAN:
+		lean+=float(WATCH_LEAN[axis])*(clampf(float(p.get(axis,.5)),0.0,1.0)-.5)
+		span+=absf(float(WATCH_LEAN[axis]))*.5
+	lean=clampf(lean/maxf(.0001,span),-1.0,1.0)
+	var band:=Scale.anchors(Scale.DEFENSE_SHARE,maxf(0.0,year))
+	var of_able:=clampf(float(band[1])*pow(2.0,lean)*(WATCH_AT_WAR if war else 1.0),float(band[0]),float(band[3]))
+	return of_able/100.0*Scale.ABLE_SHARE
 
 ## A ruler's research emphasis, in the steps the player's own screen uses (0 to
 ## 12 a field). Emphasis is only a set of shares, so no budget is carried over:
