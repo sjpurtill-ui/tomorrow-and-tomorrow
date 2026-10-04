@@ -51,5 +51,15 @@ standing samples across the two bodies (standing speech has none). This is why
 walking alone cannot certify a replacement garment. Original all-body baseline
 contains1,029 poses. Generated evidence stays in ignored reports and artifacts.
 
+`--bare-hands` additionally compares those hand triangles with the unchanged
+body's hip/leg triangles at the same poses. This isolates an inherited pose
+intrusion from garment fit. At seven samples each through stand and cross-sit,
+the old-female body has crossings in7/7 and7/7; the male adult in2/7 and6/7.
+At cross-sit0.633s there are41male and119old-female crossings. These are actual
+segment/triangle crossings, excluding tangency, not a distance threshold.
+Narrowing a garment inside the bare thigh cannot provide an acceptable remedy.
+Source body positions are still exact; provider preservation tests establish
+unchanged weights/rig/morphs. No pose or production changes are made here.
+
 No GPU process, simulation state, source body/rig or animation edits. Save
 compatibility unchanged. New diagnostic files only; no shared production conflict.

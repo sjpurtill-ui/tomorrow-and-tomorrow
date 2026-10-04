@@ -36,16 +36,20 @@ func _ready()->void:
 			for vertex in bs.v.size():Audit._add_vertex(bp,body,f.skeleton,bs,vertex)
 			Audit._finish(bp)
 			var hand_vertices:Dictionary={};var hand_triangles:=PackedInt32Array()
+			var leg_vertices:Dictionary={};var leg_triangles:=PackedInt32Array()
 			for vertex in bs.v.size():
-				var hand_weight:=0.0
+				var hand_weight:=0.0;var leg_weight:=0.0
 				for j in 4:
 					var bind:int=bs.b[vertex*4+j];var bone:=body.skin.get_bind_bone(bind)
 					var name:=String(f.skeleton.get_bone_name(bone)) if bone>=0 else String(body.skin.get_bind_name(bind))
 					if name.get_slice(".",0) in ["hand","thumb","index","fingers"]:hand_weight+=bs.w[vertex*4+j]
+					if name.get_slice(".",0) in ["hips","thigh","shin","foot","toe"]:leg_weight+=bs.w[vertex*4+j]
 				if hand_weight>.6:hand_vertices[vertex]=true
+				if leg_weight>.5 and bs.v[vertex].y<=f._base_height*.62:leg_vertices[vertex]=true
 			for index in range(0,bs.i.size(),3):
 				var a:int=bs.i[index];var b:int=bs.i[index+1];var c:int=bs.i[index+2]
 				if hand_vertices.has(a) and hand_vertices.has(b) and hand_vertices.has(c):hand_triangles.append_array([a,b,c])
+				if leg_vertices.has(a) and leg_vertices.has(b) and leg_vertices.has(c):leg_triangles.append_array([a,b,c])
 			var hidden:=[];var newly_hidden:=[];var mismatches:=0
 			for vertex in bs.v.size():
 				var key:=_key(bs.v[vertex]);var current:=_mask(bs.c[vertex],outfit)
@@ -64,7 +68,7 @@ func _ready()->void:
 						if maxf(surface.v[a].y,maxf(surface.v[b].y,surface.v[c].y))<=f._base_height*.62:lower_triangles.append_array([a,b,c])
 				metadata.append({"name":part.name,"rest":_vectors(Audit._skin(probe,Audit._pose(f.skeleton,true))),"triangles":surface.i,"lower_triangles":lower_triangles})
 			file.store_line(JSON.stringify({"kind":"mesh","variant":variant,"outfit":outfit,"height":f._base_height,
-				"body_triangles":bs.i,"hand_triangles":hand_triangles,"hidden":hidden,"newly_hidden":newly_hidden,"body_position_mismatches":mismatches,"pieces":metadata}))
+				"body_triangles":bs.i,"hand_triangles":hand_triangles,"leg_triangles":leg_triangles,"hidden":hidden,"newly_hidden":newly_hidden,"body_position_mismatches":mismatches,"pieces":metadata}))
 			for clip:String in clips:
 				Audit._reset(f,acting)
 				if clip.begins_with("kneel") or clip.begins_with("sit_cross"):

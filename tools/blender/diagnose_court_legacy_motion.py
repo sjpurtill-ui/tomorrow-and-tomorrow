@@ -42,16 +42,19 @@ def records(path):
         for line in stream:yield json.loads(line)
 
 
-def inspect(path, coverage=False, hands=False):
-    meshes = {}; reports = []; groups = defaultdict(lambda: {"poses": 0, "large_strained_edges": 0, "visible_uncovered_samples": 0, "hand_crossing_poses": 0})
+def inspect(path, coverage=False, hands=False, bare_hands=False):
+    meshes = {}; reports = []; groups = defaultdict(lambda: {"poses": 0, "large_strained_edges": 0, "visible_uncovered_samples": 0, "hand_crossing_poses": 0, "bare_body_hand_crossing_poses":0})
     for record in records(path):
         key = (record["variant"], record["outfit"])
         if record["kind"] == "mesh":
             assert record["body_position_mismatches"] == 0, "Replacement changed original body geometry"
             record["body_triangles"] = np.array(record["body_triangles"]).reshape(-1, 3)
-            if hands:
+            if hands or bare_hands:
                 record["hand_faces"] = np.array(record["hand_triangles"]).reshape(-1,3)
                 record["hand_edges"] = edges(record["hand_faces"])
+            if bare_hands:
+                record["leg_faces"] = np.array(record["leg_triangles"]).reshape(-1,3)
+                record["leg_edges"] = edges(record["leg_faces"])
             for piece in record["pieces"]:
                 piece["faces"] = np.array(piece["triangles"]).reshape(-1, 3)
                 piece["edges"] = edges(piece["faces"])
@@ -64,6 +67,13 @@ def inspect(path, coverage=False, hands=False):
         meta = meshes[key]; group = " ".join((*key, record["clip"]))
         groups[group]["poses"] += 1
         detail = {"pose": group, "time": record["time"], "pieces": []}
+        if bare_hands:
+            body = np.array(record["body"])
+            body_hits = intersections(body[meta["hand_edges"]],body[meta["leg_faces"]])
+            body_hits += intersections(body[meta["leg_edges"]],body[meta["hand_faces"]])
+            if body_hits:
+                detail["bare_body_hand_crossings"]={"count":len(body_hits),"first":body_hits[0]}
+                groups[group]["bare_body_hand_crossing_poses"] += 1
         shell = []
         if hands:
             body = np.array(record["body"]); hits = []
@@ -98,12 +108,13 @@ def inspect(path, coverage=False, hands=False):
         if hands and hits:
             detail["hand_crossings"] = {"count":len(hits),"first":hits[0]}
             groups[group]["hand_crossing_poses"] += 1
-        if detail["pieces"] or detail.get("visible_uncovered_samples") or detail.get("hand_crossings"): reports.append(detail)
-    result = {"groups": dict(groups), "flagged_poses": reports, "coverage_enabled": coverage, "hands_enabled":hands}
+        if detail["pieces"] or detail.get("visible_uncovered_samples") or detail.get("hand_crossings") or detail.get("bare_body_hand_crossings"): reports.append(detail)
+    result = {"groups": dict(groups), "flagged_poses": reports, "coverage_enabled": coverage, "hands_enabled":hands, "bare_hands_enabled":bare_hands}
     output = Path(path).with_suffix(".diagnosis.json"); output.write_text(json.dumps(result, indent=2), encoding="utf-8")
     print(json.dumps({"poses": sum(v["poses"] for v in groups.values()), "groups": dict(groups), "report": str(output)}))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(); parser.add_argument("poses"); parser.add_argument("--coverage", action="store_true"); parser.add_argument("--hands",action="store_true")
-    args = parser.parse_args(); inspect(args.poses, args.coverage, args.hands)
+    parser.add_argument("--bare-hands",action="store_true")
+    args = parser.parse_args(); inspect(args.poses, args.coverage, args.hands,args.bare_hands)
