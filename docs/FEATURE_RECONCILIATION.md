@@ -1,3 +1,26 @@
+## October 4, 2026 — engraved folio navigation and status bar
+
+Source `31dffe90daa213c7562903f5ed484d50d91fa925` on `codex/hud-chrome`
+implements the user's approved Shakespearean folio artwork: twenty original
+emblems, parchment navigation with a recessed ledger drawer, and framed status
+readings. The original transparent PNGs use mipmapped atlas regions; a night
+shader reverses neutral ink while retaining gold. Labels, shortcuts, hover
+details, era wording, data and warning-priority rules remain functional.
+
+Integration `35442ec7` combines the source with canonical/origin main
+`22c48498fdc6f0ab41d367e52c051b8c388b2277`, retaining the concurrent one-seat
+and day-cost work. The only terrain edit is the military travel-line offset;
+other neighboring UI offsets use the shared rail/header tokens. All80 cases
+across seven HUD/dock/war suites pass on the combined source. Private GPU
+captures check light/dark at three sizes, warning/focus and closed drawer states,
+and the real terrain HUD in a disposable paused world. No engine/script errors.
+
+`docs/HUD_FOLIO_HANDOFF.md` records source ownership, tests, artwork provenance,
+reproduction and limits. No save or simulation schema changes. Generated test
+captures and existing import churn are excluded; player/editor sessions remain
+running. Delivery publishes to origin/main and verifies the remote commit before
+fast-forwarding the canonical checkout; the new UI loads on its next normal run.
+
 ## October 4, 2026 — MPFB anatomy in the court
 
 Source `a0914eedcb156836bbfbeedf8ab51e913a7eaa53` from

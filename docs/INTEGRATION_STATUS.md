@@ -1,3 +1,18 @@
+## October 4 — engraved folio HUD: INTEGRATED
+
+User-approved original icon family and parchment chrome from `31dffe90`
+(`codex/hud-chrome`), combined with canonical/origin main `22c48498` by
+integration commit `35442ec7`. Twenty emblems cover navigation, ledgers, menu
+and status readings; light/dark presentation and compact scrolling are checked.
+The rail/header tokens also position docks, notices and military overlays.
+
+Combined validation:80/80 cases across seven suites; private light/dark GPU
+captures at1920×1080,1280×720,1138×640, warning/focus/closed-drawer states,
+and a real-terrain disposable-world capture with clean engine logs. Source
+PNG hashes and all20 atlas bounds reviewed. See `docs/HUD_FOLIO_HANDOFF.md`.
+No save/schema changes or player restart. Remote-first delivery preserves
+unrelated canonical local files; previews and generated caches stay local.
+
 ## October 4 — native MPFB court heads: INTEGRATED
 
 Runtime source `a0914eedcb156836bbfbeedf8ab51e913a7eaa53` on
