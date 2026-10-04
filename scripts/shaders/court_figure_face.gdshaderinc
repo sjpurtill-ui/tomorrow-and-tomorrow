@@ -8,6 +8,10 @@
 // their Body by court_figure_3d.gd. The paint is colour only: the lights of
 // the place still shade it.
 
+// Native MPFB brow UVs and alpha preserve individual hairs at the edges.
+uniform sampler2D brow_mask : filter_linear_mipmap, repeat_disable;
+uniform sampler2D teeth_mask : source_color, filter_linear_mipmap, repeat_disable;
+
 float face_ell(vec2 d, vec2 r) {
 	return 1.0 - smoothstep(0.0, 1.0, length(d / r));
 }
@@ -28,6 +32,9 @@ float face_hash(vec2 p) {
 // tangents on these untextured, skinned meshes. This adds soft lid/lip/cheek
 // form without moving the skin through the eye and mouth decals.
 vec3 face_normal(vec3 position, vec3 normal, vec2 F, vec2 G, float age) {
+	// Imported heads have actual eyelids, lips and cheek planes. Their second
+	// UV channel marks native anatomy, so the old painted relief is redundant.
+	if (G.y > 1.5) { return normal; }
 	float ax = abs(F.x);
 	float relief = 0.0016 * (1.0 - 0.2 * age) * face_ell(vec2(ax - 0.043, F.y - 0.108), vec2(0.026, 0.023));
 	relief += 0.00028 * face_ell(vec2(ax - 0.035, F.y - 0.123), vec2(0.023, 0.006));

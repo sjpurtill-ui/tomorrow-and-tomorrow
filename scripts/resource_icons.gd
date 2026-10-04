@@ -323,6 +323,10 @@ static func _moment_glyph(kind:String,c:Color)->Array:
 		"court": return [_ring(28,30,13,2.4,c),_t(28,20,23,33,33,33,hi),_c(28,31,3,Color(1,0.9,0.6,0.95))]
 		"hearth_count": return [_s(15,16,15,40,2.4,c),_s(21,16,21,40,2.4,c),_s(27,16,27,40,2.4,c),_s(33,16,33,40,2.4,c),_s(11,34,39,22,2.2,hi)]
 		"work": return [_rr(28,36,13,6,1,c),_rr(28,26,9,5,1,hi),_rr(28,18,5,4,1,c)]
+		# The Research board's inputs (inquiry_board.gd): a young people's
+		# sprout, and learning running ahead of the calendar.
+		"sprout": return [_s(28,44,28,24,2.6,c),_t(28,26,14,17,22,30,hi),_t(28,22,42,13,34,27,hi),_s(12,45,44,45,1.8,dim)]
+		"ahead": return [_s(10,40,46,40,1.8,dim),_s(12,31,36,31,3.2,c),_t(46,31,34,22,34,40,hi),_s(14,22,14,40,1.6,dim),_s(20,25,20,40,1.6,dim)]
 		# The troubles a year is remembered by (chronicle_annals.gd glyph_of).
 		# A hard sun over cracked ground.
 		"drought":

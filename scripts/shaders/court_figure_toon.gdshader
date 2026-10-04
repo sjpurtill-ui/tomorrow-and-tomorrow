@@ -31,6 +31,8 @@ uniform float stipple = 0.0;
 uniform bool face_paint = false;
 uniform float card = 0.0;
 uniform bool skin = false;
+uniform bool brow = false;
+uniform bool teeth = false;
 instance uniform vec4 face_a = vec4(0.0);
 instance uniform vec4 face_b = vec4(0.0);
 // Per figure: the speaker a little in the light, listeners a little back.
@@ -82,6 +84,7 @@ float skin_depth() {
 }
 
 void fragment() {
+	if (brow && texture(brow_mask, v_rest).a < 0.32) { discard; }
 	if (v_cover > 0.5) {
 		discard;
 	}
@@ -99,6 +102,7 @@ void fragment() {
 		}
 	}
 	vec3 base = albedo * mix(1.0, v_ao, ao_amount);
+	if (teeth) { base *= texture(teeth_mask, v_rest).rgb; }
 	if (face_paint) {
 		base = paint_face(base, v_face, v_face2, face_a, face_b, skin_depth());
 		NORMAL = face_normal(VERTEX, normalize(NORMAL), v_face, v_face2, face_a.x);

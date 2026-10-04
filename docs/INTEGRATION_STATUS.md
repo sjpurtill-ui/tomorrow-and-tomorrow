@@ -1,3 +1,32 @@
+## October 4 — native MPFB court heads: INTEGRATED
+
+Runtime source `a0914eedcb156836bbfbeedf8ab51e913a7eaa53` on
+`codex/court-face-richness`, including initial head adapter `807ac662`.
+Both main refs at `9b41e8114e470a265818afca1f7e948f026c5d5f` are merged in
+the isolated integration worktree, preserving the concurrent production,
+notification and simulation-speed changes without source conflicts.
+
+All seven body variants and all21 original/legacy/era GLBs now have MPFB noses,
+nostrils, eyelids, lips, cheeks and folded ears. Identity, expression, speech,
+gaze and blinking remain animated on the existing game rig. Native eyebrow
+transparency and enamel/gum textures work in merged and fallback rendering.
+Constrained neck blending removes the jagged graft edge while preserving
+original body data, garments and clips. Existing saves remain compatible;
+this feature changes no simulation or adjudication state.
+
+Combined acceptance:129/129 cases across12 suites,21/21 raw assets and7 matching
+heads,6,531 individual morph poses and7 combined speech poses without a neck
+triangle falling below10% of rest area. Final import and private GPU front,
+profile and expression captures pass. `docs/COURT_MPFB_HANDOFF.md` records
+reproduction, evidence, source licensing, fallback review and remaining style
+limits. Existing hair keeps its illustrated mesh style; this is no FPS benchmark.
+
+Delivery pushes and freshly verifies origin/main before canonical fast-forward.
+The4681 existing canonical local files have no overlap with this change and
+are preserved. Generated imports, previews, test overrides and authoring installs
+remain local. No player/editor session is stopped; the next normal canonical
+launch imports and loads the published assets.
+
 ## October 4 — MPFB authoring setup: READY LOCALLY
 
 Blender 5.2 has MPFB 2.0.17 enabled with system assets and newly installed CC0 nose, ear, cheek, expression and speech packs. `docs/MPFB_SETUP.md` records provenance and verification. A generated human exports 52 facial targets plus 15 speech shapes with a GameEngine rig. This is local authoring setup and a disposable verification model; replacing the court heads remains unfinished. Only setup documentation is delivered through Git; no runtime, save or player-session change.

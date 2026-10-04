@@ -20,6 +20,7 @@ const Plain:=preload("res://scripts/hud/home_plain.gd")
 const ARTIFACT_COLOR:=Color("#b98a5e")
 const Memo:=preload("res://scripts/hud/content/dock_memo.gd")
 const Borders:=preload("res://scripts/nation_borders.gd")
+const Visits:=preload("res://scripts/scholar_visits.gd")
 ## Costly parts of the pages, kept while what they are made from holds.
 var memo:=Memo.new()
 
@@ -86,7 +87,9 @@ func tab(sub:int)->Dictionary:
 	match sub:
 		1: return {"kpis":kpis,"brief":brief,"blocks":_technology_blocks()}
 		2: return {"kpis":kpis,"brief":brief,"blocks":_established_blocks()}
-	return {"kpis":[kpis[0],kpis[1],kpis[3]],"blocks":[_discovery_board(investigations),_artifact_study_block()]}
+	# The board opens with its own reading of the pace and what limits it
+	# (inquiry_board.gd), so the page keeps its height for the lanes.
+	return {"kpis":[],"blocks":[_discovery_board(investigations),_artifact_study_block()]}
 
 func _attention_blocks()->Array:
 	var latest:=_latest_discovery_block()
@@ -452,7 +455,140 @@ func _discovery_board(investigations:Array)->Dictionary:
 		for record:Dictionary in investigations:
 			if String(record.get("dynamic",""))==id:count+=1
 		fields.append({"id":id,"goal":String(DOMAIN_GOALS[id]).trim_prefix("Aims at "),"weight":weight,"share":float(weight)/maxf(1,total),"active":count,"on_open":open_domain.bind(id),"on_more":terrain._change_research_domain_allocation.bind(id,1),"on_less":terrain._change_research_domain_allocation.bind(id,-1)})
-	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"choices":DiscoverySystem.team_choices(),"on_choose":_choose_team_question,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("Who does the work",_research_work_report),"on_domain":open_domain}
+	return {"type":"inquiry_board","fields":fields,"investigations":investigations,"choices":DiscoverySystem.team_choices(),"pace":learning_pace(investigations),"waiting":_waiting_lines(),"on_choose":_choose_team_question,"on_tree":func():open_expanded_tab(1),"on_work":func():_open_report("Who does the work",_research_work_report),"on_domain":open_domain}
+
+## How fast the people learn and what limits it, every number the engine's
+## own: the learners and their teams' work (Research600.team_capacity) against
+## the learners a people of our age can spare (the sustainable share), the
+## goods they are fed (DiscoverySystem.role_effect), a young people's extra
+## work (Research600.founding_work), the lead over the calendar, the support of
+## food, tools, order and schooling (research_capacity_for), scholars' pay,
+## gifted scholars, teachers abroad and visiting, builders' craft on building
+## questions, artifact study, the offices over each field and the price of the
+## questions under way (their years ahead and work).
+static func learning_pace(records:Array)->Dictionary:
+	var effect:Dictionary=DiscoverySystem.role_effect("Knowledge",1.0)
+	var teams:Dictionary=DiscoverySystem.research_teams()
+	var state=WorldSimulation.state
+	var learners:=float(effect.get("learners",0.0))
+	var able:=maxf(1.0,float(state.able_population()))
+	var sustainable:=float(effect.get("sustainable_share",0.0))
+	var typical:=sustainable*able
+	var typical_work:=Research600.team_capacity(typical)
+	var goods_factor:=float(effect.get("goods_factor",1.0))
+	var work:=float(teams.work)*goods_factor
+	var capacity:Dictionary=DiscoverySystem.research_capacity_for("knowledge","")
+	var day:=int(state.elapsed_days)
+	var year:=float(effect.get("learning_year",float(state.elapsed_days)/365.0))
+	# The questions under way: their price (years ahead, work), offices,
+	# materials, visiting teachers and the proofs a year their clocks add up to.
+	var proofs:=0.0
+	var factors:=0.0
+	var offices:=0.0
+	var counted:=0
+	var earliest:=INF
+	var furthest:=0.0
+	var thin:=0
+	var lacking:Array=[]
+	var taught:Array=[]
+	for record:Dictionary in records:
+		var days:=float(record.get("estimated_days",0.0))
+		# Its evidence a year at today's pace (estimated_days is the rest of
+		# the evidence at that pace): together, the questions proven a year.
+		if days>0.0:proofs+=365.0*(1.0-clampf(float(record.get("progress",0.0)),0.0,1.0))/days
+		factors+=maxf(1.0,float(record.get("work_factor",1.0)))
+		offices+=float(record.get("leader_factor",1.0))
+		counted+=1
+		var ahead:=float(record.get("years_ahead",0.0))
+		earliest=minf(earliest,ahead);furthest=maxf(furthest,ahead)
+		if String(record.get("bottleneck","")).begins_with("RESEARCH WORKFORCE"):thin+=1
+		if float(record.get("material_evidence",1.0))<0.78:lacking.append(String(record.get("name","")))
+		if Visits.bonus(String(record.get("id","")),day)>1.0:taught.append(String(record.get("name","")))
+	# Gifted scholars (geniuses.gd): grown, living, their gift learning.
+	var gifted:Array=[]
+	for g:Dictionary in WorldSimulation.figures.geniuses:
+		if String(g.get("status",""))!="adult":continue
+		var person:Dictionary=WorldSimulation.figures.by_id(String(g.get("figure_id","")))
+		if person.is_empty() or String(person.get("status",""))!="living":continue
+		if String((person.get("genius",{}) as Dictionary).get("layer",""))=="Knowledge":gifted.append(String(person.get("name","")))
+	return {
+		"learners":learners,"heads":maxf(0.0,float(state.workers_at("Knowledge"))),"able":able,
+		"teams":int(teams.count),"teams_at_work":int(teams.placed),"on_lines":float(teams.on_lines),
+		"work":work,"typical":typical,"typical_work":typical_work,"sustainable":sustainable,
+		"ratio":work/typical_work if typical_work>0.0 else 0.0,
+		"goods_need":float(effect.get("goods_a_day",0.0)),"goods_cover":float(effect.get("goods_cover",1.0)),"goods_factor":goods_factor,
+		"goods_held":float(effect.get("goods_held",0.0)),"goods_per_learner":float(effect.get("goods_per_learner",0.0)),
+		"lead":float(effect.get("lead_years",0.0)),"lead_rate":float(effect.get("lead_rate",0.0)),"year":year,
+		"founding":Research600.founding_work(year),"founding_words":DiscoverySystem.founding_words(),
+		"support":float(capacity.get("support_multiplier",1.0)),"education":float(capacity.get("education",0.0)),"food_security":float(state.food_security),
+		"pay":preload("res://scripts/realm_purse.gd").scholars_factor(),
+		"gifted":gifted,"gifted_lift":preload("res://scripts/geniuses.gd").bonus(state,"Knowledge"),
+		"abroad":Visits.absent(state,day),"taught":taught,
+		"craft":preload("res://scripts/built_fabric.gd").research_multiplier("infrastructure"),
+		"studying":preload("res://scripts/society_exchange.gd").studying(),
+		"questions":counted,"proofs":proofs,"work_factor":factors/float(counted) if counted>0 else 1.0,
+		"offices":offices/float(counted) if counted>0 else 1.0,
+		"earliest":earliest if counted>0 else 0.0,"furthest":furthest,"thin":thin,"lacking":lacking,
+	}
+
+## Each followed line with no question under way, and why it waits
+## (DiscoverySystem.line_wait_reason, read through the same engine calls):
+## {channel: {domain, line, kind, name, years, factor, lacks, missing, reason}}.
+## Kind is "turn" (a question of its age waits for a free team), "ahead" (its
+## next question is ahead of its age, so nearer work goes first) or "gate"
+## (nothing in reach: earlier knowledge, a material or a place it lacks). Kept
+## while what it is made from holds (a month at most, as its years ahead move).
+func _waiting_lines()->Dictionary:
+	var state=WorldSimulation.state
+	return memo.take("waiting",[state.known_discoveries.size(),state.active_investigations.hash(),state.research_subcategory_allocations.hash(),int(state.elapsed_days)/30,state.resource_deposits.size()],func()->Dictionary:return waiting_lines())
+
+static func waiting_lines()->Dictionary:
+	var state=WorldSimulation.state
+	var today:=int(floor(state.elapsed_days))
+	var waiting:Dictionary={}
+	var trees:Dictionary={}
+	DiscoverySystem.begin_research_scan()
+	for domain_variant in state.research_subcategory_allocations:
+		var domain:=String(domain_variant)
+		var lines:Dictionary=state.research_subcategory_allocations[domain_variant]
+		for line_variant in lines:
+			var line:=String(line_variant)
+			var channel:String=DiscoverySystem._channel_key(domain,line)
+			if int(lines[line_variant])<=0 or String(state.active_investigations.get(channel,""))!="":continue
+			var info:={"domain":domain,"line":line,"kind":"gate","name":"","years":0.0,"factor":1.0,"lacks":[],"missing":[]}
+			var next:Dictionary=DiscoverySystem._best_candidate_for_channel(channel,today)
+			if DiscoverySystem._channel_has_candidate(channel,today):
+				info.kind="turn";info.name=String(next.get("name",""))
+			elif not next.is_empty():
+				info.kind="ahead";info.name=String(next.get("name",""))
+				info.years=DiscoverySystem.research_years_ahead(next);info.factor=DiscoverySystem.research_early_factor(next)
+			else:
+				if not trees.has(domain):trees[domain]=DiscoverySystem.technology_tree(domain)
+				var rows:Array=trees[domain]
+				var frontier:Dictionary=DiscoverySystem.technology_frontier(rows)
+				var best:Dictionary={}
+				for row:Dictionary in rows:
+					if String(row.get("subcategory",""))!=line or not (frontier.next as Dictionary).has(String(row.id)):continue
+					if best.is_empty() or float(row.get("earliest_year",0.0))<float(best.get("earliest_year",0.0)):best=row
+				info.name=String(best.get("name",""))
+				info.missing=(best.get("missing",[]) as Array).duplicate()
+				info.lacks=materials_lacking(info.missing)
+			info["reason"]=DiscoverySystem.line_wait_reason(domain,line,trees.get(domain,[]))
+			waiting[channel]=info
+	DiscoverySystem.end_research_scan()
+	return waiting
+
+## The materials named in a question's unmet conditions: "Knowledge of Stone"
+## (a design condition) and "Copper Ore: surveyed access…" (a resource gate).
+static func materials_lacking(missing:Array)->Array:
+	var found:Array=[]
+	for reason:Variant in missing:
+		var text:=String(reason).strip_edges()
+		var material:=""
+		if text.begins_with("Knowledge of "):material=text.trim_prefix("Knowledge of ")
+		elif ": " in text and " access" in text:material=text.get_slice(": ",0)
+		if not material.is_empty() and not found.has(material):found.append(material)
+	return found
 
 ## A free team's choice from the board: keep the question it took, or send it
 ## to another until that one is proven.

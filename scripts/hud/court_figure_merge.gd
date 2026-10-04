@@ -16,7 +16,7 @@ extends RefCounted
 ## Merged meshes are kept for the same look (a cache), so a person seen again
 ## is made at once. Presentation only.
 
-const SLOTS:=["SKIN","HAIR","HAIR_CARD","BROW","MOUTH","STUBBLE","CLOTH_A","CLOTH_B","CLOTH_C","LEATHER","WOOD","CLAY","EYES","IRIS","PUPIL","EYE_SHINE","EYE_WHITE"]
+const SLOTS:=["SKIN","HAIR","HAIR_CARD","BROW","MOUTH","STUBBLE","CLOTH_A","CLOTH_B","CLOTH_C","LEATHER","WOOD","CLAY","EYES","IRIS","PUPIL","EYE_SHINE","EYE_WHITE","TEETH"]
 const UBER:=preload("res://scripts/shaders/court_figure_uber.gdshader")
 const UBER_INK:=preload("res://scripts/shaders/court_figure_uber_ink.gdshader")
 ## Slots drawn with an inked edge (the rest are hair, decals and the eyes).
@@ -28,6 +28,18 @@ static var enabled:=true
 static var _cache:Dictionary={}
 static var _order:Array=[]
 static var _stencil:Dictionary={}
+static var _brow_mask:Texture2D
+static var _teeth_mask:Texture2D
+
+# Load after import, when a figure first needs its material. Autoload parsing
+# also runs during the editor's first import of a newly cloned checkout.
+static func brow_mask()->Texture2D:
+	if _brow_mask==null:_brow_mask=load("res://assets/court_figures/mpfb_source/eyebrow001.png")
+	return _brow_mask
+
+static func teeth_mask()->Texture2D:
+	if _teeth_mask==null:_teeth_mask=load("res://assets/court_figures/mpfb_source/teeth.png")
+	return _teeth_mask
 
 ## The merged meshes for these parts: {group: ArrayMesh}. groups: {name:
 ## [[MeshInstance3D, surface, slot], ...]}; face: the person's face_* weights.
@@ -150,7 +162,7 @@ static func _arrays(parts:Array,face:Dictionary,names:Array)->Dictionary:
 			var white:=PackedColorArray();white.resize(count);white.fill(Color(1,0,0,0));C.append_array(white)
 		# The source eye decals have no UVs. Coordinates made from each
 		# resting eye travel with gaze/blink morphs instead of swimming over it.
-		if String(p[2]) in ["EYE_WHITE","IRIS","PUPIL","EYE_SHINE","BROW"]:
+		if String(p[2]) in ["EYE_WHITE","IRIS","PUPIL","EYE_SHINE"]:
 			UV.append_array(_feature_uv(v0))
 		else:
 			UV.append_array(_or_zero2(arr[Mesh.ARRAY_TEX_UV],count))
@@ -258,6 +270,8 @@ static func material(colours:Dictionary,cover:int,key_dir:Vector3,stencil:="")->
 	made.set_shader_parameter("slot_c",c)
 	made.set_shader_parameter("cover_channel",cover)
 	made.set_shader_parameter("key_dir",key_dir)
+	made.set_shader_parameter("brow_mask",brow_mask())
+	made.set_shader_parameter("teeth_mask",teeth_mask())
 	if stencil.is_empty():
 		var ink:=ShaderMaterial.new();ink.shader=UBER_INK
 		var mask:=0
@@ -271,6 +285,7 @@ static func material(colours:Dictionary,cover:int,key_dir:Vector3,stencil:="")->
 static func _params(slot:String)->Array:
 	match slot:
 		"SKIN":return [Vector4(0.34,0.10,0.0,0.0),Vector4(0.025,0.14,0.0,0.0),Vector4(0.0,1.0,0.0,0.0)]
+		"TEETH":return [Vector4(0.28,0.0,0.0,0.0),Vector4(0.0,0.08,0.0,0.0),Vector4.ZERO]
 		"HAIR":return [Vector4(0.30,0.22,0.24,0.22),Vector4(0.05,0.16,1.0,0.0),Vector4.ZERO]
 		"HAIR_CARD":return [Vector4(0.30,0.30,0.0,0.18),Vector4(0.0,0.16,0.0,1.0),Vector4.ZERO]
 		"STUBBLE":return [Vector4(0.10,0.14,0.0,0.0),Vector4(0.35,0.16,1.0,0.0),Vector4.ZERO]
