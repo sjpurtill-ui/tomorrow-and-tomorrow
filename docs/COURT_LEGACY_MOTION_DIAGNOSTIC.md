@@ -110,3 +110,20 @@ without fitting or changing that clip. One such sample traced the gold-looking
 male-old shoulder oval in the block pose to `tunic_trim`, with the original skin
 behind it; it was not a skin breakthrough. The seven-body replacement walking
 sweep on asset checkpoint63140339 completed all1,344 samples with zero crossings.
+
+Final independent CPU check uses all seven replacement bodies on asset follow-up
+1c7d7cc0 and the visually selected ordinary-pose profiles. All2,016 samples
+(seven bodies × three legacy outfits × standing/descent/held ×32 phases) have
+zero hand crossings through the bare body. Cloth crossings remain380/2,016:
+standing29/672, descent159/672, held192/672. These include resting palms and
+inner-hand garment edges; they are not a zero-cloth-collision result. The final
+renderer review covered428 views across all seven outfits, including the
+old-male2.33/2.5s standing phases, with readable wrists/palms/fingers.
+
+A second deterministic ambient identity adds336 samples. Standing and descent
+have no bare-body crossings; two held knee-rest contacts measure approximately
+0.414mm and0.054mm. Retain the natural resting hands instead of raising them to
+erase these submillimetre contacts. All sampled negative-flex source keys remain
+6.3–7.8 degrees short of a straight elbow. This does not certify all possible
+procedural moods or every continuously interpolated frame. No rig, source body,
+source animation, simulation, or save changes are part of this diagnostic work.
