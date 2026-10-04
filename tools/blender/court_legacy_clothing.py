@@ -354,9 +354,9 @@ def hide(b,f):
     b.copy_piece('hide_cord');b.copy_piece('hide_footwraps')
     cover=mask&(fields[0]>.02*k)&(fields[1]>.02*k)
     cover|=facing&(lining_p[:,1]>edge+.02*k)&(y<start+.006*k)
-    cape_cover=cape_mask.copy()
-    for field in limits:cape_cover&=field>.018*k
-    cover|=cape_cover
+    # CourtStage deliberately omits this cape for some people. Only the
+    # always-present wrap and footwear may mask their body; the matched cape
+    # sits outside real shoulder skin when it is worn.
     boundary=b.faces[np.any(~cover[b.faces],axis=1)];cover[np.unique(boundary)]=False
     original=b.array(b.attrs['COLOR_0'])
     cover|=(y<f.z_ankle+.06*k)&(original[:,CHANNELS['hide']]>0)
