@@ -2274,10 +2274,9 @@ func _place_caption()->void:
 		_caption.position.y=round(high)
 	_caption.home_y=_caption.position.y
 
-## Bubbles never lie over one another: the god's line keeps the top centre
-## and the caption its band; a speech bubble, a mutter or a noise steps down
-## below whatever it would cover (toward its speaker's side if going down
-## would cover the face the camera is on), its tail still to the speaker.
+## The god's line keeps the top centre and the caption its band. Speech,
+## mutters and noises take the nearest free position, keeping both the
+## speaker and camera subject clear and retaining the tail when possible.
 func _clear_of_others(bubble:Control)->void:
 	if not is_instance_valid(bubble) or bubble==_god or bubble==_caption:return
 	var others:Array[Rect2]=[]

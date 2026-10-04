@@ -6,6 +6,10 @@ player build. Branch `codex/court-evolution-polish`, worktree
 Base `ad0c8220e8716a6a96ba76b24b36f0e550799b2b` combines the earlier interiors
 checkpoint `b0ee8709b8a731c2c786421f1fc715c12b26aa0d` with integrated main
 `17f1524c3e7b6d0a02c1ef3690d72a4e7e5b7454`.
+During final review the worker branch also merged current integrated main
+`ec537b74fa82253806dc3cb5ee2ce9bd718ba81d` without conflicts (worker merge
+`e5c5a8b8`). This brings in the intervening standing/covert work; the canonical
+checkout was not changed by this task.
 
 This branch includes the preceding court era presentation, wardrobe and interior
 deliveries. Review it as a combined change against current main; do not apply the
@@ -52,6 +56,11 @@ checkpoints; the evidence below concerns this subsequent quality pass.
   garment parts no longer retain render allocations after merged meshes own the
   visible figure. Shader-backed meshes fall from 24 to 6 per merged business
   figure, without increasing renderer limits or replacing the acting library.
+- Court-only shadow cascades now retain detail behind a seated speaker at both
+  quality levels. Straight window-sill edge error fell from 6.40px RMS to 0.82px
+  high / 0.76px low in the same-camera comparison, with retained contrast. The
+  outdoor camp and medieval/modern wider views were also reviewed. This costs
+  four/two shadow passes instead of two/one; the automatic downgrade remains.
 - City population thresholds no longer shrink the visible settlement extent.
   Supported parcels beyond the detailed geometry budget can retain bounded roof
   proxies, subject to full-footprint road, parcel, land, slope and overlap checks.
@@ -96,6 +105,11 @@ distinct 200-year room designs are a court feature, not sixteen city styles.
   sizes with an assertion that the active speech bubble clears its speaker.
   The reserved-offer regression first failed at x666 against a usable width580;
   the subsequent bounds correction is covered separately.
+- The corrected offer bounds and stage behavior pass **41/41** with no errors,
+  failures, skips or orphans; `artifacts/court-evolution-offer-bounds-fixed.log`,
+  report51. This includes the forced crowded-offer regression and repeated
+  constrained placement. Shadow worker **10/10** tests and four-chapter GPU
+  comparison pass; see `COURT_SHADOW_QUALITY_HANDOFF.md`.
 - Focused city/architecture tests: **29/29**, no errors or failures; report44,
   `artifacts/court-evolution-city-combined-tests.log`.
 - Final architecture worker meshes: **192/192 chair arrivals/departures plus
