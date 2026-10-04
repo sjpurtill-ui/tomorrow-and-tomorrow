@@ -161,6 +161,11 @@ def equipment(b,info,chapter,desks):
             box(b,n,(x,y+.20,z-.08),(.43,.12,.14),"SOCKET")
             for row in range(3):
                 for col in range(8):box(b,n,(x-.15+col*.043,y+.15,z+.03+row*.05),(.025,.016,.022),"PAPER",bevel=0)
+            if i<2:
+                # These two clerks sit behind their desks; keys face the typist.
+                mesh,_=b.bm(n);pivot=K.B((x,y,z))
+                bmesh.ops.transform(mesh,matrix=Matrix.Translation(pivot) @ Matrix.Rotation(math.pi,4,'Z') @ Matrix.Translation(-pivot),verts=mesh.verts)
+                mesh.normal_update()
             gate(info,"typewriter",n)
         if chapter==14:
             n="Computer_%d"%i;box(b,n,(x,y+.09,z),(.43,.18,.37),"STONE_BLOCK")
