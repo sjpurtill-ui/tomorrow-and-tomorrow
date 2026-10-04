@@ -618,8 +618,7 @@ func test_each_person_wears_their_peoples_look()->void:
 		keys[Stage._look_key(other)]=true
 	assert_int(keys.size()).is_greater_equal(10)
 	# Their dress is the dress of the age their people have reached.
-	var tier:int=Stage._era_tier(EarlyArt.owner(ours))
-	if tier!=2:assert_str(String(look.outfit)).is_equal(String(Stage.ERA_DRESS[clampi(tier,0,3)]))
+	assert_str(String(look.outfit)).is_equal(String(Stage.Presentation.for_owner(EarlyArt.owner(ours)).outfit))
 
 
 func test_the_room_acts_out_what_is_said()->void:
@@ -683,8 +682,8 @@ func test_they_walk_in_and_walk_out_as_people_do()->void:
 	stage.settle()
 	assert_float(f.walk).is_equal(0.0)
 	assert_str(String(f.body3d.clip)).is_equal(f.body3d.rest_clip())
-	# Taking their leave: a bow first, then they are gone and still.
-	stage.conclude(0.0,"bow")
+	# Explicit reverence still bows in every period, then leaves and rests.
+	stage.conclude(0.0,"bow","reverence")
 	await await_idle_frame()
 	var main:Stage.Figure=stage.figure(Stage.MAIN)
 	assert_bool(main.leaving).is_true()

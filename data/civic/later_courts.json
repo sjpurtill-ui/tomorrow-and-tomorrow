@@ -1,0 +1,86 @@
+{
+ "schema": "later_courts/1",
+ "notes": "Known institutions, not calendar dates, extend the existing civic stages. Generic ministerial and executive councils are compatible with hereditary, appointed and representative governments; their selection does not grant rights or change office ownership.",
+ "tracks": {
+  "throne": ["personal_rule_ministers", "grand_palace_court", "sovereignty_doctrine", "one_party_state", "emergency_decree_rule"],
+  "assembly": ["realm_bill_of_rights", "fixed_term_estates", "federal_written_constitution", "single_national_assembly", "constitutional_court", "proportional_representation"]
+ },
+ "stages": [
+  {
+   "id": "privy_state_council", "rank": 12, "track": "throne", "presentation_period": "early_modern",
+   "name": "Council of state", "place_name": "The state council chamber",
+   "place_line": "a council table, the secretaries' desks and the seal of the realm",
+   "requires": [
+    {"any": ["secretaries_of_state", "specialized_royal_councils", "personal_rule_ministers"]},
+    {"any": ["privy_council_minutes", "provincial_intendants", "grand_palace_court", "treasury_commission_board"]}
+   ],
+   "scene": "chancery", "banner": "233f5b", "seats": 9,
+   "council_word": "THE COUNCIL OF STATE", "settlement_word": "PROVINCIAL GOVERNORS",
+   "attendants": [{"role": "minister", "count": 2, "label": "secretaries of state"}, {"role": "scribe", "count": 3, "label": "council clerks"}, {"role": "guard", "count": 2, "label": "chamber guards"}, {"role": "petitioner", "count": 2, "label": "petitioners on the audience list"}],
+   "address_mode": "stage", "address": ["Your Divine Majesty", "Sovereign Above", "Guardian of the Realm"],
+   "protocol": {"posture": "a measured bow, then a place at the council table", "herald": true, "petitions": "written memorials through the secretaries", "audience": "by an ordered audience list",
+    "line": "A secretary announces each visitor; they incline to the god, speak when recognized, and wait while the council records the reply. Rank and the ruler's authority remain in force."},
+   "law": "Existing courts and the realm's decrees remain authoritative; the secretaries register decisions and refer petitions to the responsible office.",
+   "seat_of_rule": "A formal council chamber with a long table, secretaries' desks and cupboards of registered correspondence.",
+   "civic_buildings": ["secretariat", "provincial administration", "council archive"],
+   "titles": {"Steward": "First Secretary", "Quartermaster": "Secretary of Supply", "Marshal": "Secretary for War", "Scholar": "Secretary of Learning", "ChiefScout": "Director of Posts", "Envoy": "Secretary for Foreign Affairs", "HighPriest": "Keeper of the Divine Rites", "Justice": "Chief Justice", "Treasurer": "Treasury Commissioner", "Settlement": "Provincial Governor"}
+  },
+  {
+   "id": "parliamentary_council", "rank": 13, "track": "assembly", "presentation_period": "early_modern",
+   "name": "Council with a representative chamber", "place_name": "The council and chamber",
+   "place_line": "an ordered council table, a clerk's desk and benches for the chamber",
+   "requires": [
+    {"any": ["realm_bill_of_rights", "federal_written_constitution", "single_national_assembly"]},
+    {"any": ["cabinet_first_minister", "fixed_term_estates", "appropriated_annual_budget", "constituent_convention"]}
+   ],
+   "scene": "estates_hall", "banner": "2d5063", "seats": 9,
+   "council_word": "THE COUNCIL AND CHAMBER", "settlement_word": "LOCAL COUNCILS",
+   "attendants": [{"role": "minister", "count": 2, "label": "councillors"}, {"role": "scribe", "count": 2, "label": "clerks of the chamber"}, {"role": "delegate", "count": 6, "label": "members of the chamber"}, {"role": "petitioner", "count": 2, "label": "petitioners"}],
+   "address_mode": "stage", "address": ["Guardian of the Realm", "Divine Patron", "Protector of the People"],
+   "protocol": {"posture": "stand to address the council, then sit", "herald": false, "petitions": "entered by the clerk", "audience": "in an ordered sitting",
+    "line": "The clerk calls the business; speakers acknowledge the god and wait to be recognized. Decisions and objections enter the record, within the chamber's actual powers."},
+   "law": "The chamber hears petitions, records objections and works within the realm's charter and budget rules.",
+   "seat_of_rule": "A council table adjoining the representative chamber, with records kept by a permanent clerk.",
+   "civic_buildings": ["chamber offices", "council archive", "public petition office"],
+   "titles": {"Steward": "First Minister", "Quartermaster": "Commissioner of Supply", "Marshal": "Minister for War", "Scholar": "Minister of Learning", "ChiefScout": "Postmaster General", "Envoy": "Secretary for Foreign Affairs", "HighPriest": "Keeper of the Divine Rites", "Justice": "Chief Justice", "Treasurer": "Treasury Minister", "Settlement": "Council Leader"}
+  },
+  {
+   "id": "ministerial_cabinet", "rank": 14, "track": "any", "presentation_period": "industrial",
+   "name": "Ministerial administration", "place_name": "The ministerial council room",
+   "place_line": "departmental files, an agenda at every place and a council table",
+   "requires": [
+    {"any": ["single_minister_departments", "competitive_civil_service"]},
+    {"any": ["appointed_department_prefects", "factory_inspectorate", "independent_audit_office", "career_diplomatic_service"]}
+   ],
+   "scene": "council_house", "banner": "344253", "seats": 9,
+   "council_word": "THE MINISTERIAL COUNCIL", "settlement_word": "LOCAL ADMINISTRATIONS",
+   "attendants": [{"role": "minister", "count": 3, "label": "department heads"}, {"role": "scribe", "count": 3, "label": "civil service clerks"}, {"role": "guard", "count": 1, "label": "door attendant"}, {"role": "petitioner", "count": 2, "label": "scheduled visitors"}],
+   "address_mode": "stage", "address": ["Divine Patron", "Guardian of the Realm", "Your Divine Presence"],
+   "protocol": {"posture": "a respectful nod, then seated business", "herald": false, "petitions": "registered by the responsible department", "audience": "by appointment or council agenda",
+    "line": "Officials acknowledge the god with a respectful nod and take their places. A secretary keeps minutes, departments report in turn, and deference follows the people's existing form of rule."},
+   "law": "Departments issue instructions under the realm's standing law; ministers answer for their portfolios before the council.",
+   "seat_of_rule": "An administrative council room with departmental papers, a secretariat and a public reception desk.",
+   "civic_buildings": ["department offices", "civil service registry", "administrative archive"],
+   "titles": {"Steward": "Chief Minister", "Quartermaster": "Minister of Supply", "Marshal": "Minister of Defence", "Scholar": "Minister of Education", "ChiefScout": "Director of Communications", "Envoy": "Foreign Minister", "HighPriest": "Keeper of the Divine Rites", "Justice": "Minister of Justice", "Treasurer": "Finance Minister", "Settlement": "Local Administrator"}
+  },
+  {
+   "id": "executive_council", "rank": 15, "track": "any", "presentation_period": "modern",
+   "name": "Executive administration", "place_name": "The executive council room",
+   "place_line": "a working conference table, briefing folders and an ordered public reception",
+   "requires": [
+    {"any": ["national_income_accounts", "online_government_services", "digital_identity_register"]},
+    {"any": ["labor_ministry", "unified_defence_ministry", "central_five_year_plan", "welfare_state", "ombudsman_network"]}
+   ],
+   "scene": "council_house", "banner": "314556", "seats": 9,
+   "council_word": "THE EXECUTIVE COUNCIL", "settlement_word": "LOCAL ADMINISTRATIONS",
+   "attendants": [{"role": "minister", "count": 3, "label": "executive officials"}, {"role": "scribe", "count": 3, "label": "administrative staff"}, {"role": "guard", "count": 1, "label": "security attendant"}, {"role": "petitioner", "count": 2, "label": "scheduled visitors"}],
+   "address_mode": "stage", "address": ["Divine Patron", "Your Divine Presence", "Guardian of Our People"],
+   "protocol": {"posture": "a respectful nod, then seated business", "herald": false, "petitions": "registered and assigned to an office", "audience": "by scheduled meeting or public reception",
+    "line": "Officials greet the god with a restrained nod, then work through a recorded agenda. Briefings, petitions and disagreements go to the responsible office; exceptional ceremonies still observe the people's reverence for the god."},
+   "law": "Ministries apply the realm's law; responsibility for each decision is recorded by the council and the appropriate department.",
+   "seat_of_rule": "A working executive conference room with a secretariat, briefing folders and scheduled public reception.",
+   "civic_buildings": ["executive offices", "public administration centre", "departmental registry"],
+   "titles": {"Steward": "Chief Minister", "Quartermaster": "Minister of Supply", "Marshal": "Defence Minister", "Scholar": "Minister of Education and Research", "ChiefScout": "Director of Communications", "Envoy": "Foreign Minister", "HighPriest": "Keeper of the Divine Rites", "Justice": "Justice Minister", "Treasurer": "Finance Minister", "Settlement": "Local Administrator"}
+  }
+ ]
+}

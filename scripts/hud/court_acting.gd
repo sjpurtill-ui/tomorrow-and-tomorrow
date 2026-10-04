@@ -106,7 +106,7 @@ const ACT_MAP:={
 	"snore":["clip","doze"],"snatch_up":["clip","snatch_up"],"jerk_head":["gesture","jerk_head"],"sniff_disdain":["clip","sniff_disdain"],
 	"brush_sleeve":["clip","brush_sleeve"],"bow_curt":["clip","bow_shallow",1.0,"speed"],"startle":["gesture","jolt"],"appraise":["clip","stroke_chin"],
 	"rub_hands_greedy":["clip","rub_hands_greedy"],"stare_down":["gesture","straighten"],"blink_first":["face",""],"breath":["gesture","settle",0.6],
-	"swat_miss":["clip","swat_fly"],"scribble":["clip","scribble"],"shake_hand":["clip","shake_hand"],"scratch_out":["clip","scribble"],
+	"swat_miss":["clip","swat_fly"],"scribble":["clip","scribble"],"review_brief":["clip","stroke_chin"],"shake_hand":["clip","shake_hand"],"scratch_out":["clip","scribble"],
 	"stomach_growl":["clip","rub_belly"],"floor_creak":["gesture","freeze"],"swallow_loud":["gesture","gulp"],"stifle_cough":["clip","stifle_cough"],
 	"bubble":["face",""],"giggle":["clip","laugh_stifled"],
 	# round 4: a child's words (anyone can take them; a child does them its own way)

@@ -32,9 +32,9 @@ const Figure3D:=preload("res://scripts/hud/court_figure_3d.gd")
 const Studio:=preload("res://scripts/hud/court_figure_studio.gd")
 const Looks:=preload("res://scripts/people_appearance.gd")
 const EarlyArt:=preload("res://scripts/hud/early_civ_art.gd")
+const Presentation:=preload("res://scripts/hud/court_presentation.gd")
 const Acting:=preload("res://scripts/hud/court_acting.gd")
 const DivineRegard:=preload("res://scripts/divine_regard.gd")
-const Voice:=preload("res://scripts/character_voice.gd")
 const CourtSet:=preload("res://scripts/hud/court_set_3d.gd")
 const FigureLook:=preload("res://scripts/hud/court_figure_look.gd")
 const Paths:=preload("res://scripts/hud/court_paths.gd")
@@ -85,9 +85,6 @@ const CAMERA_PITCH:=-12.0
 const FIGURE_FILL:=0.95
 ## Room under the feet for the name plate when the figures are modelled.
 const FOOT_ROOM:=40.0
-## The dress of each age of a people (Voice.era_tier): hides, then woven
-## tunics, then robes for those of rank and later for all.
-const ERA_DRESS:=["hide","tunic","tunic","robe"]
 const HIGH_TITLES:=["chief","king","queen","ruler","lord","lady","elder","priest","speaker","steward","envoy","high","prince","headman","headwoman"]
 
 const FIGURE_SHADER:="""
@@ -181,6 +178,7 @@ var _focus_key:=""
 ## The shot the stage last asked for ("wide", "push_in", "two_shot", ...).
 var _shot_name:="wide"
 var _beat_sets:Array=[]
+var _pending_greetings:Dictionary={}
 ## What the engine says about the hall now (the Court fills it): era, season,
 ## stores_days, hungry, sick, at_war, love, dread, mood, offer.
 var facts:Dictionary={}
@@ -219,8 +217,7 @@ static func figure_picture(person:Dictionary,screen_registry:Dictionary)->Dictio
 ## colours, three dyes), their sex and age, and their people's era for their
 ## dress. The same person always looks the same; on one screen (the
 ## registry) no two people are dressed and coloured alike.
-static var _era_cache:Dictionary={}
-static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictionary:
+static func figure_look(person:Dictionary,screen_registry:Dictionary={},presentation:Dictionary={})->Dictionary:
 	var owner:=EarlyArt.owner(person)
 	var seed_value:=int(person.get("appearance_world_seed",GameState.world_seed if GameState!=null else 0))
 	var people:Dictionary=Looks.profile(owner,seed_value)
@@ -234,9 +231,9 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictio
 	var high:=false
 	for word:String in HIGH_TITLES:
 		if title.contains(word):high=true;break
-	var tier:=_era_tier(owner)
-	var outfit:=String(ERA_DRESS[clampi(tier,0,ERA_DRESS.size()-1)])
-	if tier==2 and (high or band=="old"):outfit="robe"
+	var era:=Presentation.for_owner(owner) if presentation.is_empty() else presentation
+	var outfit:=String(era.get("outfit","hide"))
+	var tailored:=outfit in ["courtcoat","formal","business"]
 	# Skin within the people's range, hair of their colours, greying with age.
 	var skins:Array=people.get("skin",["bd8659","9f6a43","7d4e2f"])
 	var t:=float((h>>3)%97)/96.0
@@ -267,6 +264,10 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictio
 	var order:Array=[[0,1,2],[1,2,0],[2,0,1],[0,2,1],[1,0,2],[2,1,0]][(h>>11)%6]
 	var cloth:Array=[]
 	for i in 3:cloth.append(Color(String(dyes[int(order[i])%dyes.size()])))
+	if tailored:
+		# A fitted coat, a light shirt, and the people's dye in its trim/tie.
+		cloth[0]=Color("29303b").lerp(cloth[0],0.24 if outfit=="courtcoat" else 0.10)
+		cloth[1]=Color("e9e3d4")
 	var without:Array=[]
 	if outfit=="hide":
 		# Hides are hides: the dye shows as a stain and in the cord.
@@ -278,6 +279,9 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictio
 	if band=="old":stances=["sit","staff","clasped","folded","sit"]
 	elif band=="young":stances=["stand","hip","crouch","belt","stand"]
 	if high:stances=["staff","clasped","folded","stand"]
+	if not bool(era.get("rustic_props",true)):
+		stances=["stand","hip","folded","clasped","belt"]
+		if band=="old":stances=["sit","clasped","folded","sit"]
 	# A family face: the people share a look, and each person differs within it.
 	var face:={}
 	var family_seed:=absi(String(people.get("family","stoneweft")).hash())
@@ -290,7 +294,8 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictio
 	if years>=46:face["aged"]=clampf(float(years-46)/24.0,0.0,1.0)
 	var look:={"variant":"%s_%s" % [sex,band],"outfit":outfit,"hair":String(styles[(h>>7)%styles.size()]),"beard":beard,
 		"skin":skin,"hair_colour":hair_colour,"cloth":cloth,"leather":Color("5b3b24").lerp(cloth[1],0.15),"without":without,
-		"stance":String(stances[(h>>19)%stances.size()]),"face":face,"mood":"neutral","seed":h}
+		"stance":String(stances[(h>>19)%stances.size()]),"face":face,"mood":"neutral","seed":h,
+		"presentation_period":String(era.get("period","early"))}
 	# Their years when the game knows them (a child gets a child's body, J's
 	# FigureLook; without them the figure reads its age from the face).
 	var known:Variant=person.get("age",null)
@@ -299,14 +304,16 @@ static func figure_look(person:Dictionary,screen_registry:Dictionary={})->Dictio
 	# Two people on one screen are never dressed and coloured alike.
 	if screen_registry!=null:
 		var taken:Dictionary=screen_registry.get("_look_of",{})
-		if taken.has(identity):return taken[identity]
+		# A court can be reopened after discovery without changing the person.
+		var dressed_identity:=identity+"|"+outfit+"|"+String(era.get("stage_id",""))
+		if taken.has(dressed_identity):return taken[dressed_identity]
 		var used:Dictionary=screen_registry.get("_looks",{})
 		var turn:=0
 		while used.has(_look_key(look)) and turn<6:
 			turn+=1
 			look.hair=String(styles[((h>>7)+turn)%styles.size()])
-			look.cloth=[cloth[turn%3],cloth[(turn+1)%3],cloth[(turn+2)%3]]
-		used[_look_key(look)]=true;taken[identity]=look
+			look.cloth=[(cloth[0] as Color).lightened(0.025*turn),cloth[1],cloth[2]] if tailored else [cloth[turn%3],cloth[(turn+1)%3],cloth[(turn+2)%3]]
+		used[_look_key(look)]=true;taken[dressed_identity]=look
 		screen_registry["_looks"]=used;screen_registry["_look_of"]=taken
 	return look
 
@@ -321,14 +328,6 @@ static func _age_years(person:Dictionary,h:int)->int:
 		"old","oldest","elder","aged":return 66
 		"adult","grown":return 35
 	return 24+(h>>17)%30
-
-static func _era_tier(owner:String)->int:
-	var day:=int(GameState.elapsed_days) if GameState!=null else 0
-	var key:="%s|%d" % [owner,day]
-	if not _era_cache.has(key):
-		if _era_cache.size()>32:_era_cache.clear()
-		_era_cache[key]=Voice.era_tier(Voice.era_tags(owner))
-	return int(_era_cache[key])
 
 ## A small picture of a person (rosters, the history, the envoy channel),
 ## read through the same seam as the figures: a still of their modelled
@@ -393,6 +392,7 @@ func _ready()->void:
 ## the people know an instrument and the acting can play it; otherwise the
 ## music plays off to one side and nobody is stood up for it.
 func add_musician()->void:
+	if not bool(presentation_for().get("rustic_props",true)):return
 	if _sound==null or not _sound.has_method("music_state") or extras.has("musician") or court_set==null:return
 	var key:=String((_sound.call("music_state") as Dictionary).get("key",""))
 	if key.is_empty() or sound==null:return
@@ -696,6 +696,7 @@ func key_for_name(person_name:String)->String:
 ## enter: they walk in rather than already standing there.
 func add_figure(key:String,person:Dictionary,role:String,name_text:String="",title_text:String="",enter:=false,accent:=BUBBLE_RULE)->Figure:
 	if has_figure(key):return figure(key)
+	presentation_for(EarlyArt.owner(person))
 	var f:=Figure.new();f.key=key;f.person=person;f.role=role;f.name="Figure_"+node_key(key);f.accent=accent
 	var picture:=figure_picture(person,registry)
 	f.painting.texture=picture.texture;f.painting.flip=bool(picture.flip)
@@ -760,9 +761,18 @@ func _spread_stance(f:Figure,own:String)->String:
 	return stance
 
 ## Gives a figure its modelled body in the hall (and its shade on the floor).
+func presentation_for(owner:String="player")->Dictionary:
+	var profiles:Dictionary=facts.get("presentations",{})
+	if profiles.has(owner):return profiles[owner]
+	if owner=="player" and facts.get("presentation",{}) is Dictionary and not (facts.get("presentation",{}) as Dictionary).is_empty():return facts.presentation
+	var profile:=Presentation.for_owner(owner)
+	profiles[owner]=profile;facts["presentations"]=profiles
+	return profile
+
 func _embody(f:Figure)->void:
 	var body:=Figure3D.new();body.name="Body_"+node_key(f.key)
-	var look:=figure_look(f.person,registry).duplicate()
+	var profile:=presentation_for(EarlyArt.owner(f.person))
+	var look:=figure_look(f.person,registry,profile).duplicate()
 	# The one before the god, and an envoy's company, stand.
 	if f.role in [MAIN,"attendant"] and String(look.get("stance","")) in ["sit","crouch"]:look.stance="clasped"
 	if f.role==MAIN and String(look.get("stance",""))=="bowl" and layout_kind=="home":look.stance="clasped"
@@ -781,6 +791,7 @@ func _embody(f:Figure)->void:
 	# their hands clasped before them.
 	if f.role==MAIN:look["keep_stance"]=true
 	look=FigureLook.vary(look)
+	if not bool(profile.get("rustic_props",true)) and String(look.get("stance","stand")) in ["staff","bowl","crouch"]:look.stance="stand"
 	if seat<0.0 or String(look.get("stance",""))!="sit":look["stance"]=FigureLook.room_stance(look,_room_stances)
 	if not body.setup(look):
 		body.free();return
@@ -929,7 +940,7 @@ func _acting_stance(f:Figure,seat:float)->void:
 	if acting==null or f.body3d==null:return
 	var want:=""
 	if f.role=="attendant" and String(f.body3d.stance)=="staff" and Acting.has_clip("stance_guard"):want="guard"
-	elif f.role=="crowd" and not _warming and seat<0.0 and String(facts.get("season",""))=="winter" and Acting.has_clip("stance_fire") and _near_fire(f):want="fire"
+	elif f.role=="crowd" and bool(presentation_for().get("rustic_props",true)) and not _warming and seat<0.0 and String(facts.get("season",""))=="winter" and Acting.has_clip("stance_fire") and _near_fire(f):want="fire"
 	if want.is_empty() and f.role=="crowd" and String(f.body3d.look.get("variant",""))=="child" and seat<0.0 and Acting.has_clip("stance_fidget"):want="fidget"
 	if want.is_empty():return
 	if want=="fire":_warming=true
@@ -1252,7 +1263,7 @@ func add_extra(entry:Dictionary)->void:
 	if key.is_empty() or extras.has(key):return
 	extras[key]=entry.duplicate()
 	if String(entry.get("role",""))!="crowd":return
-	var person:={"name":String(entry.get("name","someone")),"person_id":0,"sex":String(entry.get("sex","")),"age":int(entry.get("age",30))}
+	var person:={"name":String(entry.get("name","someone")),"person_id":0,"sex":String(entry.get("sex","")),"age":int(entry.get("age",30)),"appearance_civ_id":String(entry.get("people","player"))}
 	var f:=add_figure(key,person,"crowd")
 	# Given a seat (a log, a bench), they sit on it, whatever they hold:
 	# nobody stands in a bench. The director hears they sit.
@@ -1455,6 +1466,9 @@ func _beat(beat:Dictionary)->void:
 			if String(args.get("glyph",""))!="":glyph(who,String(args.glyph))
 		"play":
 			if body==null:return
+			if bool(args.get("routine",false)) and (_arrivals.has(who) or f._arriving()):
+				_pending_greetings[who]=beat.duplicate(true)
+				return
 			if _moved(f,args):return
 			_props_after(f,String(args.get("beat",args.get("clip",""))))
 			if acting!=null and acting.has_method("play"):
@@ -1719,6 +1733,12 @@ func subject_of(words:String,about:="")->String:
 	return ""
 
 ## They walk in from the side (the threshold) once the stage has a size.
+func _arrival_greeting(who:String)->void:
+	if not _pending_greetings.has(who):return
+	var beat:Dictionary=_pending_greetings[who]
+	_pending_greetings.erase(who)
+	_beat(beat)
+
 func arrive(keys:Array)->void:
 	for key in keys:
 		event("enter",{"who":String(key)})
@@ -1798,6 +1818,7 @@ func conclude(delay:float=1.4,style:="bow",reaction:="")->void:
 			f.leave(-1.0,maxf(size.x*.4,f.size.x*2.0) if f.body3d==null else f.home.x+f.size.x,delay+5.2,"storm")
 			index+=1
 			continue
+		if own=="bow" and not reaction in ["awe","reverence","dread","fear"]:own=String(presentation_for(EarlyArt.owner(f.person)).get("routine_departure","bow"))
 		var distance:=maxf(size.x*.4,f.size.x*2.0)
 		if f.body3d!=null:distance=f.home.x+f.size.x
 		f.leave(-1.0,distance,delay+index*(FILE_GAP if f.spot!=null else 0.2),own)
@@ -2616,6 +2637,10 @@ class Figure extends Control:
 			"storm":
 				_move.tween_callback(func()->void:_acted("storm_walk","walk_in",0.25,{"loop":true}))
 				pace=_pace_of("storm_walk",float(Self.Figure3D.WALK_SPEED.walk_in)*1.2*float(body3d.body_height)/Self.Figure3D.REFERENCE_HEIGHT)
+			"nod","bow_small":
+				_move.tween_callback(func()->void:body3d.face(rest_yaw*.2,0.25);_acted(style,"stand",0.2))
+				_move.tween_interval(_length_of(style,0.9 if style=="nod" else 1.3))
+				_move.tween_callback(func()->void:_clip("walk_out",0.3,0.0))
 			_:
 				_move.tween_callback(func()->void:body3d.face(rest_yaw*.2,0.25);_clip("bow",0.3,0.0))
 				_move.tween_interval(2.35)
@@ -2752,6 +2777,8 @@ class Figure extends Control:
 		if body3d==null or leaving:return
 		body3d.face(rest_yaw,0.35)
 		_clip(rest_clip,0.45)
+		var stage:Control=_stage.get_ref() as Control if _stage!=null else null
+		if stage!=null and stage.has_method("_arrival_greeting"):stage.call("_arrival_greeting",key)
 
 	func _later(seconds:float,what:Callable)->void:
 		## One thing after a while (it replaces whatever was waiting).
@@ -3108,6 +3135,11 @@ class Figure extends Control:
 			"storm":
 				_move.tween_callback(func()->void:body3d.face(82.0*side,0.2);_clip("walk_in",0.25,0.0))
 				pace*=float(Self.Figure3D.WALK_SPEED.walk_in)*1.2
+			"nod","bow_small":
+				_move.tween_callback(func()->void:body3d.face(rest_yaw*.2,0.25);_acted(style,"stand",0.2))
+				_move.tween_interval(_length_of(style,0.9 if style=="nod" else 1.3))
+				_move.tween_callback(func()->void:body3d.face(82.0*side,0.3);_clip("walk_out",0.3,0.0))
+				pace*=float(Self.Figure3D.WALK_SPEED.walk_out)
 			_:
 				_move.tween_callback(func()->void:body3d.face(rest_yaw*.2,0.25);_clip("bow",0.3,0.0))
 				_move.tween_interval(2.35)
