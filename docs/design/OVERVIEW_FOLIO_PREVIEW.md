@@ -1,4 +1,11 @@
-# Overview folio — held for visual approval
+# Overview folio — approved and integrated
+
+The user approved the individual-painting revision. Runtime
+`62dbf2ed6b9a050aa29075fc7f84841399777558` was pushed to origin/main,
+verified with a fresh remote query, and fast-forwarded into the canonical
+checkout on October 4, 2026. Main is synchronized (0/0), and all 4,723
+pre-existing local files retained their hashes. The records below describe
+the previews that led to approval; their historical hold is now resolved.
 
 ## Current revision: individual town paintings
 
@@ -19,11 +26,11 @@ directory; earlier atlas files are retained as prior preview material.
 The ten Overview regression cases pass again (report 23), including the leader
 actions after the layout change. Private GPU captures check the larger artwork
 in both page themes and at compact width. This revision starts from `62a2cbeb`
-on the same isolated `codex/overview-folio` branch. It is still HELD for review.
+on the same isolated `codex/overview-folio` branch. This revision is approved.
 
 ## Initial preview record
 
-Status: HELD. The user requested a replacement for the Overview's diagram-like
+Original status: HELD. The user requested a replacement for the Overview's diagram-like
 town and repeated meters, with a rendered example before integration.
 
 Base: `8938da235ed115ab5942704aa773d66a8e616537`.

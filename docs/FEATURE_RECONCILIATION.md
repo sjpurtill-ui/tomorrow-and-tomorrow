@@ -1,3 +1,19 @@
+## October 4, 2026 — User-approved Overview paintings and typography
+
+Integrated runtime `62dbf2ed6b9a050aa29075fc7f84841399777558` replaces the
+Overview town diagram with four individual paintings selected by architecture
+tier, and repeated meters with large values and condition notes. The user
+approved the final enlarged painting treatment. Leader and work controls,
+history, row navigation, reported foreign-town comparisons and live readings
+retain their existing data and actions. No simulation or save-format changes.
+
+Remote main was pushed and verified before the canonical checkout advanced;
+main is synchronized (0/0), with all 4,723 pre-existing local files preserved.
+Ten Overview regression cases pass. Light, dark and compact private GPU
+captures passed and exited cleanly. The scenes are representative artwork,
+not exact settlement maps. Generated evidence stays local. This delivery
+does not include the separate Builders preview.
+
 ## October 4, 2026 — Every current Great Work has authored construction and dedication
 
 Integrated delivery `df7cbfd3232412df33295fedbd95987f4a8df617` is verified on

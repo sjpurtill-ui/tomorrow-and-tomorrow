@@ -1,3 +1,26 @@
+## October 4 — Approved Overview paintings and readings: INTEGRATED
+
+Runtime `62dbf2ed6b9a050aa29075fc7f84841399777558` was pushed to origin/main,
+verified by a fresh remote query, then fast-forwarded into the canonical
+checkout. Main is synchronized (0/0); all 4,723 pre-existing local files
+retained their hashes. Both origin/main and canonical main were merged into
+the task branch before delivery and were already ancestors of the approved work.
+
+The user approved the larger individual town paintings after reviewing the
+rendered Overview. Four transparent paintings follow the architecture tier;
+large serif values and condition notes replace repeated meters. Optional
+comparisons retain scouted words and report age. Existing leader, work,
+navigation, history and live-refresh behavior remain intact. Simulation
+ownership and save schemas are unchanged. Art is representative, not an exact
+map of the settlement. Trade chrome and the persistent top bar are unchanged.
+
+Validation: 10/10 Overview regression cases (report 23), successful Godot
+import, and private GPU captures in light, dark and compact layouts, all exit 0.
+There were no runtime changes after those approved captures. Test processes
+exited; no player or editor was restarted. Generated captures, imports and
+test userdata remain local. The separate Builders preview is excluded.
+See `docs/design/OVERVIEW_FOLIO_PREVIEW.md` for reproduction and evidence.
+
 ## October 4 — Complete Great Work catalog: INTEGRATED
 
 Delivery `df7cbfd3232412df33295fedbd95987f4a8df617` was pushed to origin/main,
