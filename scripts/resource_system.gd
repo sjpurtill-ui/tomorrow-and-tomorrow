@@ -1558,10 +1558,19 @@ func _foreign_holds()->Array:
 				continue
 			var place:Dictionary=places[id]
 			holds.append({"center":Vector2(float(place.get("x",0.0)),float(place.get("z",0.0))),"reach":float(borders.estimated_radius(float(region.get("population",800.0))))})
+	# Their country beyond their towns, where it outweighs ours (realm_reach.gd,
+	# the borders' own rule). Read in our own scope, where "ours" is the player.
+	if us=="player":
+		var Realm:=preload("res://scripts/realm_reach.gd")
+		var others:=Realm.others()
+		if not others.is_empty(): holds.append({"realms":others,"own":Realm.ours()})
 	return holds
 
 static func _in_holds(point:Vector2,holds:Array)->bool:
 	for hold:Dictionary in holds:
+		if hold.has("realms"):
+			if preload("res://scripts/realm_reach.gd").held_by_other(point,hold.realms,hold.own):return true
+			continue
 		if hold.has("boundary"):
 			if Geometry2D.is_point_in_polygon(point,hold.boundary):return true
 		elif (hold.center as Vector2).distance_to(point)<=float(hold.reach):return true
