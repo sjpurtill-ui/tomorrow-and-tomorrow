@@ -108,9 +108,15 @@ class OddsBar extends Control:
 		draw_string(font,Vector2(2,size.y-2),"Ours",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Strips.OURS.darkened(0.25))
 		var tw:=font.get_string_size("Theirs",HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
 		draw_string(font,Vector2(size.x-tw-2,size.y-2),"Theirs",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Strips.THEIRS.darkened(0.2))
-		if words!="":
-			var ww:=font.get_string_size(words,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
-			draw_string(font,Vector2((size.x-ww)*0.5,size.y-2),words,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK)
+		# The odds in the middle, between the two side words: unknown says
+		# so in two words; a reading too long for the room is cut at its
+		# first clause (the whole sentence is in the tooltip).
+		var said:="strength unknown" if unknown else words
+		var room:=size.x-font.get_string_size("Ours",HORIZONTAL_ALIGNMENT_LEFT,-1,12).x-tw-20.0
+		if font.get_string_size(said,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x>room:said=said.get_slice(" by ",0).get_slice(" (",0)
+		if said!="" and font.get_string_size(said,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x<=room:
+			var ww:=font.get_string_size(said,HORIZONTAL_ALIGNMENT_LEFT,-1,12).x
+			draw_string(font,Vector2((size.x-ww)*0.5,size.y-2),said,HORIZONTAL_ALIGNMENT_LEFT,-1,12,T.INK)
 
 
 ## A general's skills as HOI4 shows a leader's: a glyph and five pips each,

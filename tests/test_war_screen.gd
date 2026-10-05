@@ -90,8 +90,8 @@ func test_the_war_screen_shows_the_army_our_enemies_and_our_leaders()->void:
 	board.setup({})
 	for id in ["few","some","many","war","all"]:assert_object(board.find_child("Level_%s" % id,true,false)).is_not_null()
 	assert_object(board.find_child("Strength",true,false)).is_not_null()
-	# Top to bottom: the manpower, the home guard, the offensive troops.
-	var order:=["ManpowerCard","GuardCard","OffenseCard","Enemies","Leaders"].map(func(n:String)->int:return (board.find_child(n,true,false) as Control).get_index() if board.find_child(n,true,false).get_parent()==board else (board.find_child(n,true,false).get_parent() as Control).get_index())
+	# Top to bottom: the forces, the towns, the bands.
+	var order:=["ForcesCard","TownsCard","BandsCard","Enemies","Leaders"].map(func(n:String)->int:return (board.find_child(n,true,false) as Control).get_index() if board.find_child(n,true,false).get_parent()==board else (board.find_child(n,true,false).get_parent() as Control).get_index())
 	for i in order.size()-1:assert_int(int(order[i])).is_less(int(order[i+1]))
 	for name in ["WatchMore","WatchLess","GuardMore","GuardLess","People"]:assert_object(board.find_child(name,true,false)).is_not_null()
 	var row:Node=board.find_child("Enemy_%s" % civ_id,true,false)
@@ -390,3 +390,29 @@ func test_a_people_arming_against_us_leads_its_card_with_the_march()->void:
 	assert_bool(bool(said.danger)).is_true()
 	assert_str(String(said.text)).contains("Gathering every spear")
 	assert_str(String(said.text)).contains("%d days" % left)
+
+func test_where_every_soldier_stands_adds_up_to_everyone_under_arms()->void:
+	var Allocation:=preload("res://scripts/hud/war_allocation_model.gd")
+	WorldSimulation.state.population_allocations["Defense"]=10
+	MilitaryCampaign.home_army=MilitaryCampaign.simulator.create_formation_force("The watch",[{"id":1,"unit":"levy","weapon":"improvised","count":10,"equipment":10,"training":0.5}],1,1)
+	WAR.blood_feud(civ_id,10,"the killing of their envoy Qira")
+	var made:Dictionary=MilitaryCampaign.create_field_army(4,"")
+	if not made.has("error"):
+		var index:int=MilitaryCampaign._field_army_index(int(made.army.army_id))
+		MilitaryCampaign.field_armies[index]["council"]={"civ":civ_id,"act":"burn"}
+	var f:=Allocation.read(MilitaryCampaign)
+	var sum:=0
+	for part:Dictionary in f.parts:sum+=int(part.men)
+	assert_int(sum).is_equal(int(f.total))
+	assert_int(int(f.total)).is_equal(int(MilitaryCampaign.personnel_ledger().total))
+	if not made.has("error"):
+		var ids:=(f.parts as Array).map(func(p:Dictionary)->String:return String(p.id))
+		assert_array(ids).contains(["front:"+civ_id])
+	# Each town's guard against its need; the board draws the bar and legend.
+	assert_bool((f.towns as Array).all(func(t:Dictionary)->bool:return int(t.need)>=preload("res://scripts/watch_military.gd").GUARD_MIN)).is_true()
+	var board:VBoxContainer=auto_free(Board.new())
+	add_child(board)
+	board.setup({})
+	assert_object(board.find_child("Allocation",true,false)).is_not_null()
+	assert_object(board.find_child("Legend",true,false)).is_not_null()
+	assert_object(board.find_child("Readiness",true,false)).is_not_null()
