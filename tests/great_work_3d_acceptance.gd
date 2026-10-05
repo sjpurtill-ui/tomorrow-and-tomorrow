@@ -61,7 +61,7 @@ func _run() -> void:
 		{"id":"11-future-dedication", "era":"future", "ceremony":true, "mode":"illumination"},
 		{"id":"12-narrow-dedication", "era":"middle", "ceremony":true, "mode":"unveiling", "narrow":true, "dark":true}]
 	for spec: Dictionary in cases:
-		if not only_case.is_empty() and only_case != spec.id: continue
+		if not only_case.is_empty() and String(spec.id) not in only_case.split(","): continue
 		await _prepare(spec)
 		if work.is_empty(): continue
 		if bool(spec.get("ceremony", false)): await _ceremony_case(spec)

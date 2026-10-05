@@ -20,6 +20,7 @@ var capture := false
 var strict := false
 var inventory_only := false
 var variants := false
+var six_cast := false
 var only_group := "all"
 var only_design := ""
 var out := "res://artifacts/great-work-catalog"
@@ -44,6 +45,7 @@ func _run() -> void:
 	strict = args.has("--require-authored")
 	inventory_only = args.has("--inventory-only")
 	variants = args.has("--variants")
+	six_cast = args.has("--six-cast")
 	for arg in args:
 		if arg.begins_with("--out="): out = arg.trim_prefix("--out=")
 		if arg.begins_with("--group="): only_group = arg.trim_prefix("--group=")
@@ -65,6 +67,7 @@ func _run() -> void:
 	report["failures"] = failures
 	report["requires_authored"] = strict
 	report["inventory_only"] = inventory_only
+	report["six_cast"] = six_cast
 	report["display"] = DisplayServer.get_name()
 	report["engine"] = Engine.get_version_info().string
 	var filename := "capture.json" if capture else "functional.json"
@@ -100,7 +103,7 @@ func _inventory() -> void:
 		_check(design.valid and design.design_id == spec.design_id and design.construction_labels.size() == 4,String(spec.design_id)+" has a valid presentation identity and four named construction phases")
 		seen[spec.design_id] = true
 		report.catalog.append(spec.duplicate())
-	if not only_design.is_empty(): specs = specs.filter(func(s:Dictionary)->bool:return String(s.design_id) == only_design)
+	if not only_design.is_empty(): specs = specs.filter(func(s:Dictionary)->bool:return String(s.design_id) in only_design.split(","))
 	_check(not specs.is_empty(),"At least one selected catalog entry exists")
 
 func _purpose(form: String) -> String:
@@ -261,12 +264,22 @@ func _setup_people() -> void:
 	var fixture := Fixture.new()
 	fixture._setup_world()
 	var city: Dictionary = fixture.city
+	# Optional maximum-cast fixture adds two actual seeded actors through the
+	# same world helper; all four envoys still resolve through CharacterVoice.
+	if six_cast:
+		fixture._stock_actor("rival_c",600)
+		fixture._stock_actor("rival_d",550)
+		CivilizationSystem.civilizations.append(fixture._civ("rival_c","Third Assembly",300,.3,Vector2(-30,0)))
+		CivilizationSystem.civilizations.append(fixture._civ("rival_d","Fourth Assembly",300,.3,Vector2(0,-30)))
 	fixture.free()
 	var id := Concept.make_id("ring","bind_tribes","modest","stone",0,"matrixpeople")
 	var commissioned := GW.commission(String(city.id),{"id":id,"name":"Prepared Builder Commission"},"modest","player",func(_point:Vector2)->float:return 0.0,func(_point:Vector2)->bool:return true)
 	var work := U.find(city,String(commissioned.get("id","")))
 	_check(not work.is_empty(),"One actual commission supplies the catalog fixture's recorded builder")
 	context = {"key":"catalog","architect":work.get("architect",{}),"official":GovernmentPeopleSystem.officeholder("Steward"),"attendees":[{"civ_id":"rival_a","name":"Kel Adun"},{"civ_id":"rival_b","name":"Qingshan"}]}
+	if six_cast:
+		context.attendees.append({"civ_id":"rival_c","name":"Third Assembly"})
+		context.attendees.append({"civ_id":"rival_d","name":"Fourth Assembly"})
 	_disable_simulation()
 
 func _capabilities(spec: Dictionary) -> void:
@@ -305,6 +318,7 @@ func _ceremony(spec: Dictionary) -> void:
 	detail.text = "Tier %d / year %d · %s · ritual %s · %s / %s / %s" % [spec.tier,TIER_YEARS[int(spec.tier)],String(diagnostics.get("mode","")),String(diagnostics.get("ritual_id","BASELINE")),String(diagnostics.get("prop","")),String(diagnostics.get("action","")),String(diagnostics.get("formation",""))]
 	detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_check(int(diagnostics.cast_count) >= 2 and int(diagnostics.cast_count) <= 6 and int(diagnostics.body_count) == int(diagnostics.cast_count),String(spec.design_id)+" mounts its bounded recorded court cast")
+	if six_cast: _check(int(diagnostics.cast_count) == 6,String(spec.design_id)+" exercises the maximum six-person gathering")
 	_check(int(diagnostics.mesh_count) > 0 and not diagnostics.committed and not diagnostics.viewport_active,String(spec.design_id)+" presents and settles a real completed monument")
 	if strict:
 		_check(String(diagnostics.get("design_id","")) == String(spec.design_id),String(spec.design_id)+" dedication retains the authored work identity")
