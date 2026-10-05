@@ -32,6 +32,7 @@ const RequestAI:=preload("res://scripts/envoy_request_ai.gd")
 const OrderReader:=preload("res://scripts/order_reader.gd")
 const CourtFacts:=preload("res://scripts/court_facts.gd")
 const CourtAnswers:=preload("res://scripts/court_answers.gd")
+const DedicationWords:=preload("res://scripts/hud/great_work_dedication_words.gd")
 const DIVINE_SPOKEN:=["terrify","penance","bless","raise_up"]
 const HALL_PATH:="res://scripts/audience_hall.gd"
 const LIVES_SCENES:=["mourning","callback","omen","aim","upkeep"]
@@ -3699,20 +3700,19 @@ const CLOSING_WORK:={
 	"settled":["Already settled? Then I'll get back to the stone, {address}.","Good. One less question between me and the crown, {address}."],
 }
 const DEDICATE_NARRATION:={
-	"triumph":"Drums roll across {city}. The last scaffold falls away, and {work} stands in open light, greater than the drawings promised.",
-	"success":"Drums roll across {city}. The scaffolds are down; {work} stands in open light, and the crowd goes quiet.",
-	"flawed":"Drums roll across {city}. The scaffolds are down. {work} stands, a little crooked in places, and the crowd cheers anyway.",
+	"triumph":"The assembly gathers in {city} before {work}, completed with exceptional success.",
+	"success":"The assembly gathers in {city}. {work} stands complete before them.",
+	"flawed":"The assembly gathers in {city} before {work}. Its construction was imperfect, but the work stands complete.",
 }
 const DEDICATE_ARCHITECT:={
-	"triumph":["{oath} I drew it, {address}, and it still surprised me. Look at the light on it.","Every crack I feared never came, {address}. It stands better than I dreamed, and I dream large."],
-	"success":["It stands, {address}. Every stone where I promised it would be, and one or two where I didn't.","I've built it, {address}. Now it belongs to everyone who'll ever stand in its shadow."],
-	"flawed":["It isn't what I drew, {address}. It's what the ground and the seasons let us build, and it's still ours.","{oath} There's a lean in the east wall I'll dream about for years, {address}. But it stands."],
+	"triumph":["{oath} Look at {work_detail}, {address}. We have made something exceptional, and I am proud of it.","See {work_detail}, {address}. We raised it {purpose_vow}; today I can take pride in the making."],
+	"success":["It stands, {address}. Look at {work_detail}. We raised it {purpose_vow}.","{oath} There is {work_detail}, {address}. The making is done; its life among the people begins."],
+	"flawed":["Look at {work_detail}, {address}. The making fell short of our hopes. Its purpose remains: {purpose_vow}.","{oath} I will not call it perfect, {address}. But there stands {work_detail}, and the work is ours."],
 }
 const DEDICATE_OFFICIAL:=[
-	"{oath} Today nobody will ask me about the stores, {address}. Today they'll just look up.",
-	"I argued against it, {address}. I was wrong, and I'll say so to anyone who asks.",
-	"Every people we know will hear of {work} before the season turns, {address}.",
-	"Look at their faces, {address}. That's what it was for.",
+	"{oath} Let us remember why it was raised, {address}: {purpose_vow}.",
+	"We gather before {work}, {address}. May we prove worthy of its purpose: {purpose_vow}.",
+	"Look at {work_detail}, {address}. Now comes our part: to care for what has been made.",
 ]
 const DEDICATE_ENVOY_GIFT:=[
 	"{civ} sends {gift} to honour {work}, and my own astonishment for free, {address}.",
@@ -3720,14 +3720,14 @@ const DEDICATE_ENVOY_GIFT:=[
 	"Accept {gift} from {civ}, {address}, and my envy, which is heavier.",
 ]
 const DEDICATE_ENVOY_PLAIN:=[
-	"{civ} has nothing like it, {address}, and I'll be honest about that when I get home, mostly.",
-	"{oath} I'll need a week to describe this properly to our people, {address}, and they'll still not believe me.",
-	"We came to be polite, {address}. We'll leave having seen something.",
+	"I shall remember {work_detail}, {address}, when I speak of this visit.",
+	"{oath} Let me look a little longer at {work_detail}, {address}.",
+	"We have seen {work} with our own eyes, {address}. I am glad to have stood here.",
 ]
 const NAMED_REACT:=[
-	"{name}. {oath} It fits the stone, {address}.",
-	"{name}. They'll say it in three languages by spring, {address}.",
-	"{name}. Good. Now it can't be anyone else's, {address}.",
+	"{name}. {oath} It fits the work, {address}.",
+	"{name}. I will remember that name, {address}.",
+	"{name}. A name to carry its purpose, {address}.",
 ]
 
 func _work_speaker_persona(audience:Dictionary)->Dictionary:
@@ -4037,6 +4037,7 @@ func _ceremony_cast(ctx:Dictionary)->Array[Dictionary]:
 func _ceremony_scene(ctx:Dictionary,member:Dictionary)->Dictionary:
 	## A small scene record so the offline bank machinery (_say) can be reused.
 	var tokens:={"work":String(ctx.get("title","")),"city":String(ctx.get("city_name",""))}
+	tokens.merge(DedicationWords.subjects(ctx))
 	if not String(member.get("gift","")).is_empty(): tokens["gift"]=String(member.gift)
 	if ctx.has("name"): tokens["name"]=String(ctx.name)
 	return {"id":"ceremony:"+String(ctx.get("key","")),"audience":{"lines":[]},"kind":"ceremony","origin":"court","envoy":member,"officials":[],
@@ -4107,7 +4108,7 @@ func ceremony_speeches(ctx:Dictionary)->void:
 	if config.is_empty() or _ceremony_cast(ctx).is_empty():
 		ceremony_ready.emit.call_deferred(key,fallback)
 		return
-	_ceremony_request(key,ctx,config,fallback,"Open the dedication: the master builder speaks first (what it cost, what it means), then the court official, then EACH foreign envoy in turn, in their own dialect, one or two sentences each; envoys mention their gift exactly as given if they brought one. Awe, rivalry and pride should leak through. 3 to 7 lines.")
+	_ceremony_request(key,ctx,config,fallback,"Open the dedication: the master builder speaks first about this work and its recorded outcome, then the court official, then EACH foreign envoy in turn, in their own dialect, one or two sentences each; envoys mention their gift exactly as given if they brought one. Use the work subject and purpose. Invent no costs, defects, past disputes, capabilities or benefits. The ritual facts say whether the dedication has happened: never announce an unperformed action. Awe, rivalry and pride should leak through. 3 to 7 lines.")
 
 ## Reactions once the ruler names the work: emits ceremony_ready(ctx.key+":named", lines).
 func ceremony_named(ctx:Dictionary,title:String)->void:
@@ -4131,7 +4132,8 @@ func _ceremony_request(key:String,ctx:Dictionary,config:Dictionary,fallback:Arra
 	for member in cast:
 		keys.append(String(member.key))
 		cast_lines.append("- %s = %s%s" % [String(member.key),CV.brief(member.persona),(" | brings %s" % String(member.gift)) if not String(member.get("gift","")).is_empty() else ""])
-	var facts:=ctx.duplicate(true)
+	var facts:={"work_subject":DedicationWords.subjects(ctx),"ritual":ctx.get("ritual",{})}
+	facts.merge(ctx.duplicate(true))
 	facts.erase("official")
 	facts.erase("key")
 	var prompt:="SCENE: The DEDICATION of a great work before the people and foreign envoys.\n\nFACTS YOU MAY USE (nothing else is true): %s\n\nCAST (speaker_key = character; use no one else):\n%s\n\nNOW: %s mood_shift 0." % [JSON.stringify(facts).substr(0,2400),"\n".join(cast_lines),instruction]
