@@ -51,10 +51,20 @@ requires the final `GREAT_WORK_3D_ACCEPTANCE` summary, no failures or engine/scr
 errors, and confirmed process exit. Captures run only on the private desktop.
 Generated images, logs, imports and test userdata remain local.
 
-Base: `9984106042088ef8f499128d5dfa740602f8116a`. The preliminary base-mode run
-passed 116/120 checks: the four old ceremony layouts exceeded the viewport, and
+Base: `9984106042088ef8f499128d5dfa740602f8116a`. The final base-mode fixture run
+passed 125/129 checks: the four old ceremony layouts exceeded the viewport, and
 the old ruin plate emitted polygon triangulation errors. Both findings were
-reported to their runtime owners. The final fixture adds explicit ceremony-mode
-coverage and real-gift checks; final acceptance is pending runtime integration.
+reported to their runtime owners. Real daily crews and real-gift checks passed;
+strict 3D acceptance is pending runtime integration.
 This delivery owns only this document
 and the two new probe files; no runtime or save-format changes.
+
+The first combined private GPU run used model `2284ad86`, Atlas `15e95fed`
+and ceremony `580067c0`. It passed 219/239 checks across all twelve cases and
+saved eighteen images. All twenty failures were ceremony viewport/essential
+control bounds, in all four dedication fixtures. Geometry, four capability-led
+ceremony modes, real transfers, retained models, idle rendering and pause
+contracts passed. The engine log was clean; the probe exited 1 for these
+assertions. This is a held visual checkpoint, not final acceptance. The owner
+is correcting the actual GPU layout. Its evidence is local under
+`artifacts/great-work-combined-gpu` and `artifacts/great-work-combined-gpu.log`.
