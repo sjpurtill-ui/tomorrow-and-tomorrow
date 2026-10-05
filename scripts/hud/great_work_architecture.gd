@@ -210,8 +210,10 @@ class Builder extends RefCounted:
 			box(side*3.6,4.2,1,4.7,2,8,tone)
 			p(Vector3(side*3.6,6.2,0),Vector3(4.2,12,5),tone,"taper")
 		p(Vector3(0,17,0),Vector3(13,13,8),tone,"taper")
-		beam(Vector3(-7,28,0),Vector3(-10,18,1),3.1,tone)
-		beam(Vector3(7,28,0),Vector3(10,33,0),3.1,tone)
+		parts.back().feature="torso"
+		# Anchor inside the narrower upper cross-section, not its ground width.
+		beam(Vector3(-4.7,27,0),Vector3(-10,18,1),3.1,tone);parts.back().feature="left_arm"
+		beam(Vector3(4.7,27,0),Vector3(10,33,0),3.1,tone);parts.back().feature="right_arm"
 		p(Vector3(0,30,0),Vector3(7,8,6),trim,"taper")
 		box(0,34,3,2.2,1.2,.6,tone.darkened(.2),0,false)
 		box(0,38,0,8,1.2,7,accent)
@@ -260,7 +262,7 @@ class Builder extends RefCounted:
 		for x in [-25,25]:
 			for side in [-1,1]:box(x,0,side*5.8,1.2,4.5,11,WOOD,side*.2)
 			for z in [-15,15]:box(x,0,z,5,6,5,tone);box(x,6,z,7,.6,7,trim)
-		box(0,.61,0,100,.12,18,Color("697d7a"),0,false)
+		p(Vector3(0,.61,0),Vector3(100,.12,18),Color("697d7a"),"water",0,false)
 	func archive()->void:
 		# Three closed repositories and an open reading court, never a hall alias.
 		hall_shell(-20,-4,14,38,8);hall_shell(20,-4,14,38,8)
