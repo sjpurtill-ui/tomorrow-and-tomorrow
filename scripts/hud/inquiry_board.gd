@@ -206,8 +206,8 @@ static func pace_words(pace:Dictionary)->Dictionary:
 	var cover:=float(pace.get("goods_cover",1.0))
 	var given:=need*cover
 	var short:=cover<0.995 and need>0.0
-	chips.append({"kind":"goods","icon":["moment","hearth_count"],"value":("%s of %s a day" % [_amount(given),_amount(need)]) if short else "%s a day" % _amount(need),
-		"label":"goods: %s short" % _amount(need-given) if short else "goods, all given","tone":"bad" if short else "plain",
+	chips.append({"kind":"goods","icon":["moment","hearth_count"],"value":"%s goods a day" % _amount(need),
+		"label":"only %s given, %s short" % [_amount(given),_amount(need-given)] if short else "fully supplied","tone":"bad" if short else "plain",
 		"tip":"Learners use goods: tallies, writing stuff and tools. Each uses %s a day: one for each %d days of learning, and the same again for every %d years our learning runs ahead of the calendar.\nThey ask %s a day; the stores give %s and hold %s. Short of goods, learning slows, to half its pace with none: it goes at %d in 100 now. More makers make more goods." % [_amount(float(pace.get("goods_per_learner",0.0)),2),roundi(Catalog.LEARNER_DAYS_PER_GOOD),roundi(Catalog.LEAD_GOODS_YEARS),_amount(need),_amount(given),_amount(float(pace.get("goods_held",0.0))),roundi(float(pace.get("goods_factor",1.0))*100.0)]})
 	# The lead over the calendar, and how it moves.
 	var lead:=float(pace.get("lead",0.0))
