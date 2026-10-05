@@ -1,3 +1,28 @@
+## October 4, 2026 — Every current Great Work has authored construction and dedication
+
+Runtime `b77f4b73` on `codex/great-works-complete` extends `01ce6be5` with
+18 distinct conceived forms, 12 separately authored legacy monuments and
+12 independent purpose treatments. Recorded materials, construction tiers,
+ambition and tokens determine stable designs. Each work has its own physical
+rite, assembly formation and captions inside the capability-appropriate
+offering, unveiling, ribbon or illumination ceremony. The colossus was
+re-sculpted after user feedback as a human guardian without the block crown.
+Concurrent year-name and approved Trade changes through `a7877e0d` are merged.
+
+Final combined tests: 99/99 in twelve suites. The catalog's 2678 structural
+checks and 1298 full GPU checks cover all 30 identities, four construction
+fractions, all allowed material/tier/ambition variants, all purposes and
+six-person ceremonies. Focused final captures verify the guardian redesign,
+crossing clearance and committed wording. The existing real-engine experience
+probe passes 252 checks for actual completion, gifts and pause behavior.
+See `docs/GREAT_WORK_CATALOG_ACCEPTANCE.md` for exact evidence and limits.
+
+Construction, rewards, ledger authority and save format are unchanged. Idle
+views retain geometry and stop rendering. All intentional task files are
+delivered by the remote-first integration process; generated captures,
+imports and test userdata remain local. Existing canonical local work is
+preserved and the running player is not restarted.
+
 ## October 4, 2026 — User-approved Trade folio and persistent top bar
 
 Delivered integration `445c44fa` combines the approved runtime `0bb4b393` with

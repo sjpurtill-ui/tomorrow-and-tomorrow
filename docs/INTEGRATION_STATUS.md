@@ -1,3 +1,28 @@
+## October 4 — Complete Great Work catalog: INTEGRATION VALIDATED
+
+Prepared on `codex/great-works-complete` from `01ce6be5`, with concurrent main
+through `a7877e0d` merged. Runtime `b77f4b73` gives all 18 conceived forms and
+12 legacy works explicit authored architecture, staged construction labels
+and individual dedication props/actions. All 12 purposes have physical
+emblems, gestures and truthful captions. The colossus was rebuilt after visual
+feedback as a draped human guardian with a face, shaped limbs, hands and staff.
+
+Every current identity has been visually inspected at four construction
+fractions and in its dedication scene, including maximum six-person casts.
+Final combined regression: 99/99 cases in twelve suites, clean log and exit 0.
+Catalog structure: 2678/2678; full catalog GPU: 1298/1298; actual-engine
+experience: 252/252. Final focused captures supersede the earlier colossus
+and bridge/gate images. Source/evidence details and reproduction commands:
+`docs/GREAT_WORK_CATALOG_HANDOFF.md` and `docs/GREAT_WORK_CATALOG_ACCEPTANCE.md`.
+
+Models retain their saved identity, material and tier. Batched geometry and
+40 visible courses keep unchanged inspections cached; idle views stop drawing.
+Dedication still uses the existing ledger, people and one-time gift path.
+No save-schema, economy, odds or population changes. Remote main is verified
+before the canonical fast-forward; the pre-existing 4,705-file local inventory
+is hash-checked. Generated evidence stays local. The running player remains
+open and loads these scripts on its next normal canonical launch.
+
 ## October 4 — Approved Trade folio and persistent bar: INTEGRATED
 
 User approval covers the final rendered example at runtime `0bb4b393`.
